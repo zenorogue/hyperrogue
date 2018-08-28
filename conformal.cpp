@@ -95,7 +95,7 @@ namespace polygonal {
   pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
 
   void drawBoundary(int color) {
-    queuereset(mdDisk, PPR_CIRCLE);
+    queuereset(mdDisk, PPR::CIRCLE);
 
     for(int r=0; r<=2000; r++) {
       cld z = exp(cld(0, 2*M_PI * r / 2000.0));
@@ -107,8 +107,8 @@ namespace polygonal {
       curvepoint(h);
       }
     
-    queuecurve(color, 0, PPR_CIRCLE);
-    queuereset(pmodel, PPR_CIRCLE);
+    queuecurve(color, 0, PPR::CIRCLE);
+    queuereset(pmodel, PPR::CIRCLE);
     }
 
   }

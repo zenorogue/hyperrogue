@@ -338,7 +338,7 @@ void drawMobileArrow(int i) {
   double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
   double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
   
-  queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), shArrow, col, PPR_MOBILE_ARROW);
+  queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), shArrow, col, PPR::MOBILE_ARROW);
   }
 
 bool nofps = false;

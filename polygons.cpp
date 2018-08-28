@@ -722,7 +722,7 @@ void drawpolyline(polytodraw& p) {
     return;
     }
   
-  if(spherespecial && p.prio == PPR_MOBILE_ARROW) {
+  if(spherespecial && p.prio == PPR::MOBILE_ARROW) {
     if(spherephase == 0) return;
     dynamicval<int> ss(spherespecial, 0);
     drawpolyline(p);
@@ -1127,30 +1127,32 @@ void drawqueue() {
   
 #else
   
-  int qp[PPR_MAX], qp0[PPR_MAX];
-  for(int a=0; a<PPR_MAX; a++) qp[a] = 0;
+  int PMAX = int(PPR::MAX);
+  int qp[PMAX], qp0[PMAX];
+  for(int a=0; a<PMAX; a++) qp[a] = 0;
   
   for(int i = 0; i<siz; i++) {
-    if(ptds[i].prio < 0 || ptds[i].prio >= PPR_MAX) {
-      printf("Illegal priority %d of kind %d\n", ptds[i].prio, ptds[i].kind);
-      ptds[i].prio = PPR(rand() % PPR_MAX);
+    int pd = ptds[i].prio - PPR::ZERO;
+    if(pd < 0 || pd >= PMAX) {
+      printf("Illegal priority %d of kind %d\n", pd, ptds[i].kind);
+      ptds[i].prio = PPR(rand() % int(PPR::MAX));
       }
-    qp[ptds[i].prio]++;
+    qp[pd]++;
     }
   
   int total = 0;
-  for(int a=0; a<PPR_MAX; a++) {
+  for(int a=0; a<PMAX; a++) {
     int b = qp[a];
     qp0[a] = qp[a] = total; total += b;
     }
   
   ptds2.resize(siz);
   
-  for(int i = 0; i<siz; i++) ptds2[qp[ptds[i].prio]++] = &ptds[i];
+  for(int i = 0; i<siz; i++) ptds2[qp[int(ptds[i].prio)]++] = &ptds[i];
   
-  for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
-    PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
-  sort(&ptds2[qp0[p]], &ptds2[qp[p]], 
+  for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
+    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
+  sort(&ptds2[qp0[int(p)]], &ptds2[qp[int(p)]], 
     [] (polytodraw* p1, polytodraw* p2) {
       return xintval(p1->u.poly.V * xpush0(.1))
         < xintval(p2->u.poly.V * xpush0(.1));
@@ -1200,9 +1202,9 @@ void drawqueue() {
     stereo::set_projection(0);
 
     #ifndef STLSORT
-    for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
-      PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
-        reverse(&ptds2[qp0[p]], &ptds2[qp[p]]);
+    for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
+      PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
+        reverse(&ptds2[qp0[int(p)]], &ptds2[qp[int(p)]]);
     #endif
     for(int i=siz-1; i>=0; i--) {
       GET_PTD(i);
@@ -1220,9 +1222,9 @@ void drawqueue() {
         }
       }
     #ifndef STLSORT
-    for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
-      PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
-        reverse(&ptds2[qp0[p]], &ptds2[qp[p]]);
+    for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
+      PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
+        reverse(&ptds2[qp0[int(p)]], &ptds2[qp[int(p)]]);
     #endif
     spherespecial *= -1;
     spherephase = 1;
@@ -1609,7 +1611,7 @@ void buildpolys() {
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
   hpc.clear();
 
-  bshape(shMovestar, PPR_MOVESTAR);
+  bshape(shMovestar, PPR::MOVESTAR);
   for(int i=0; i<=8; i++) {
     hpcpush(xspinpush0(M_PI * i/4, crossf));
     if(i != 8) hpcpush(xspinpush0(M_PI * i/4 + M_PI/8, crossf/4));
@@ -1707,12 +1709,12 @@ void buildpolys() {
 
     validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0);
 
-    bshape(shSemiFloorSide[k], PPR_LAKEWALL);
+    bshape(shSemiFloorSide[k], PPR::LAKEWALL);
     for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, floorrad0) * C0);
     chasmifyPoly(dlow, dhi, k);
     }
   
-  bshape(shCircleFloor, PPR_FLOOR);
+  bshape(shCircleFloor, PPR::FLOOR);
   for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*gp::scale*.9) * C0);
   
   for(int i=0; i<3; i++) for(int j=0; j<3; j++) shadowmulmatrix[i][j] =
@@ -1721,51 +1723,51 @@ void buildpolys() {
     0;
   
   for(int d=0; d<2; d++) {
-    bshape(shSemiFloor[d], PPR_FLOOR);
+    bshape(shSemiFloor[d], PPR::FLOOR);
     for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0) * C0);
     }
 
   // todo not shexf
   
-  bshape(shBigCarpet1, PPR_GFLOORa);  
+  bshape(shBigCarpet1, PPR::GFLOORa);  
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*2.1) * C0);  
 
-  bshape(shBigCarpet2, PPR_GFLOORb);
+  bshape(shBigCarpet2, PPR::GFLOORb);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*1.9) * C0);
 
-  bshape(shBigCarpet3, PPR_GFLOORc);
+  bshape(shBigCarpet3, PPR::GFLOORc);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*12*3, -zhexf*1.7) * C0);
 
-  bshape(shBFloor[0], PPR_BFLOOR);
+  bshape(shBFloor[0], PPR::BFLOOR);
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
 
-  bshape(shBFloor[1], PPR_BFLOOR);
+  bshape(shBFloor[1], PPR::BFLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
   
-  bshape(shMineMark[0], PPR_MINEMARK);
+  bshape(shMineMark[0], PPR::MINEMARK);
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
 
-  bshape(shMineMark[1], PPR_MINEMARK);
+  bshape(shMineMark[1], PPR::MINEMARK);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
   
   for(int d=0; d<2; d++) {
-    bshape(shSemiBFloor[d], PPR_BFLOOR);
+    bshape(shSemiBFloor[d], PPR::BFLOOR);
     for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0*.1) * C0);
     }
 
   // walls etc
   
-  bshape(shGiantStar[1], PPR_GFLOORa);
+  bshape(shGiantStar[1], PPR::GFLOORa);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, -zhexf*2.4) * C0);
 
-  bshape(shGiantStar[0], PPR_GFLOORa);
+  bshape(shGiantStar[0], PPR::GFLOORa);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(t*S14, -zhexf*2.4) * C0);
     hpcpush(ddi(t*S14+S7, zhexf*1.5) * C0);
     }
   hpcpush(ddi(0, -zhexf*2.4) * C0);
   
-  bshape(shMirror, PPR_WALL);
+  bshape(shMirror, PPR::WALL);
   if(nonbitrunc) {
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, floorrad1*7/8 * gp::scale) * C0);
     }
@@ -1775,7 +1777,7 @@ void buildpolys() {
 
   if(binarytiling) {
     for(int i=0; i<2; i++) {
-      bshape(shWall[i], PPR_WALL);
+      bshape(shWall[i], PPR::WALL);
       horopoint(log(2)/8, .1);
       horopoint(log(2)/8, -.1);
       horopoint(-log(2)/8, 0);
@@ -1783,13 +1785,13 @@ void buildpolys() {
     }
 
   else {
-    bshape(shWall[0], PPR_WALL);
+    bshape(shWall[0], PPR::WALL);
     for(int t=0; t<=S6; t++) {
       hpcpush(ddi(S7 + t*S14, floorrad0 * goldbf) * C0);
       if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad0 * goldbf/4) * C0);
       }
     
-    bshape(shWall[1], PPR_WALL);
+    bshape(shWall[1], PPR::WALL);
     if(S7 == 6 || S7 == 4) {
       for(int t=0; t<=S6; t++) {
         hpcpush(ddi(S7 + t*S14, floorrad1 * goldbf) * C0);
@@ -1800,19 +1802,19 @@ void buildpolys() {
       for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, floorrad1 * goldbf) * C0);
     }
 
-  bshape(shCross, PPR_WALL);
+  bshape(shCross, PPR::WALL);
   for(int i=0; i<=84; i+=7)
     hpcpush(xspinpush0(2*M_PI*i/84, zhexf * (i%3 ? 0.8 : 0.3)));
 
 // items
   
-  bshape(shGem[0], PPR_ITEM);
+  bshape(shGem[0], PPR::ITEM);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, zhexf*.4) * C0);
     if(t != S6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
     }
   
-  bshape(shGem[1], PPR_ITEM);
+  bshape(shGem[1], PPR::ITEM);
   if(S7 == 6) {
     for(int t=0; t<=S6; t++) {
       hpcpush(ddi(S7 + t*S14, zhexf*.4) * C0);
@@ -1822,20 +1824,20 @@ void buildpolys() {
   else 
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, zhexf*.5) * C0);
 
-  bshape(shStar, PPR_ITEM);
+  bshape(shStar, PPR::ITEM);
   for(int t=0; t<=S84; t+=S6) {
     hpcpush(ddi(t, zhexf*.2) * C0);
     if(t != S84) hpcpush(ddi(t+3,   zhexf*.6) * C0);
     }
 
-  bshape(shDaisy, PPR_ITEM);
+  bshape(shDaisy, PPR::ITEM);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(t*S14, zhexf*.8*3/4) * C0);
     if(t != S6) hpcpush(ddi(t*S14+S7, zhexf*-.5*3/4) * C0);
     }
   hpcpush(ddi(0, zhexf*.6) * C0);
 
-  bshape(shTriangle, PPR_ITEM);
+  bshape(shTriangle, PPR::ITEM);
   for(int t=0; t<=S3; t++) {
     hpcpush(ddi(t*S28, zhexf*.5) * C0);
     }
@@ -1847,15 +1849,15 @@ void buildpolys() {
   
   if(a38 && gp::on) disksize /= 2;
 
-  bshape(shDisk, PPR_ITEM);
+  bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .2) * C0);
 
-  bshape(shDiskT, PPR_ITEM);
+  bshape(shDiskT, PPR::ITEM);
   for(int i=0; i<=S84; i+=S28)
     hpcpush(ddi(i, disksize * .2) * C0);
 
-  bshape(shDiskS, PPR_ITEM);
+  bshape(shDiskS, PPR::ITEM);
   for(int i=0; i<=S84; i+=S21) {
     hpcpush(ddi(i, disksize * .2) * C0);
     if(i != S84) {
@@ -1864,43 +1866,43 @@ void buildpolys() {
       }
     }
 
-  bshape(shDiskM, PPR_ITEM);
+  bshape(shDiskM, PPR::ITEM);
   for(int i=0; i<=S84; i+=S3) {
     hpcpush(ddi(i, disksize * .1) * C0);
     }
 
-  bshape(shDiskSq, PPR_ITEM);
+  bshape(shDiskSq, PPR::ITEM);
   for(int i=0; i<=S84; i+=S21) {
     hpcpush(ddi(i, disksize * .15) * C0);
     }
 
-  bshape(shEgg, PPR_ITEM);
+  bshape(shEgg, PPR::ITEM);
 
   RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*.15, cos(i*2*M_PI/S84)*.11));
   
-  bshape(shRing, PPR_ITEM);
+  bshape(shRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * .30) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shSpikedRing, PPR_ITEM);
+  bshape(shSpikedRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * (int(i)&1?.35:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shTargetRing, PPR_ITEM);
+  bshape(shTargetRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shSpearRing, PPR_ITEM);
+  bshape(shSpearRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i) {
@@ -1913,7 +1915,7 @@ void buildpolys() {
   hpcpush(ddi(0, disksize * .25) * C0);
   
   /* three nice spikes
-  bshape(shLoveRing, PPR_ITEM);
+  bshape(shLoveRing, PPR::ITEM);
   for(int i=0; i<=S84; i+=3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--) {
@@ -1927,7 +1929,7 @@ void buildpolys() {
   hpcpush(ddi(0, disksize * .25) * C0);
   */
   
-  bshape(shLoveRing, PPR_ITEM);
+  bshape(shLoveRing, PPR::ITEM);
   RING(i) hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i) {
     double j = i*3;
@@ -1944,43 +1946,43 @@ void buildpolys() {
   
   auto dmod = [] (ld a, ld b) { return a - int(a/b)*b; };
   
-  bshape(shSawRing, PPR_ITEM);
+  bshape(shSawRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * (.3 + (int(i) & 3) * .02)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shGearRing, PPR_ITEM);
+  bshape(shGearRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * ((dmod(i, 6)<3)?.3:.36)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shPeaceRing, PPR_ITEM);
+  bshape(shPeaceRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * (dmod(i, S28) < S7?.36 : .3)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shHeptaRing, PPR_ITEM);
+  bshape(shHeptaRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, disksize * (dmod(i, S12) < S3?.4 : .27)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
-  bshape(shCompass1, PPR_ITEM);
+  bshape(shCompass1, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, xcrossf * .35) * C0);
   
-  bshape(shCompass2, PPR_ITEMa);
+  bshape(shCompass2, PPR::ITEMa);
   RING(i)
     hpcpush(ddi(i, xcrossf * .3) * C0);
   
-  bshape(shCompass3, PPR_ITEMb);
+  bshape(shCompass3, PPR::ITEMb);
   hpcpush(ddi(0, xcrossf * .29) * C0);
   hpcpush(ddi(S21, xcrossf * .04) * C0);
   hpcpush(ddi(-S21, xcrossf * .04) * C0);
@@ -1992,14 +1994,14 @@ void buildpolys() {
   hpcpush(ddi(21, -xcrossf/5) * ddi(0, xcrossf) * C0);
   hpcpush(ddi(21, xcrossf/5) * ddi(0, xcrossf) * C0); */
   
-  bshape(shILeaf[0], PPR_ONTENTACLE);
+  bshape(shILeaf[0], PPR::ONTENTACLE);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, zhexf*.7) * C0);
     if(t != S6)
       hpcpush(ddi(S14 + t*S14, zhexf*.15) * C0);
     }
 
-  bshape(shILeaf[1], PPR_ONTENTACLE);
+  bshape(shILeaf[1], PPR::ONTENTACLE);
   if(S3 == 3) 
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, zhexf*.8) * C0);
   else {
@@ -2010,30 +2012,30 @@ void buildpolys() {
       }
     }
 
-  bshape(shSlime, PPR_MONSTER_BODY);
+  bshape(shSlime, PPR::MONSTER_BODY);
   PRING(i)
     hpcpush(ddi(i, xcrossf * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
 
-  bshape(shJelly, PPR_MONSTER_BODY);
+  bshape(shJelly, PPR::MONSTER_BODY);
   PRING(i)
     hpcpush(ddi(i, xcrossf * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
 
-  bshape(shHeptaMarker, PPR_HEPTAMARK);
+  bshape(shHeptaMarker, PPR::HEPTAMARK);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
   
-  bshape(shSnowball, PPR_ITEM);
+  bshape(shSnowball, PPR::ITEM);
   for(int t=0; t<=S7*4; t++) hpcpush(ddi(t*S3, zhexf*.1) * C0);
   
-  bshape(shRose, PPR_ITEM);
+  bshape(shRose, PPR::ITEM);
   PRING(t)
     hpcpush(xspinpush0(M_PI * t / (S42+.0), xcrossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
 
-  bshape(shThorns, PPR_THORNS);
+  bshape(shThorns, PPR::THORNS);
   for(int t=0; t<=60; t++) 
     hpcpush(xspinpush0(M_PI * t / 30.0, xcrossf * ((t&1) ? 0.3 : 0.6)));
     
   for(int i=0; i<16; i++) {
-    bshape(shParticle[i], PPR_PARTICLE);
+    bshape(shParticle[i], PPR::PARTICLE);
     for(int t=0; t<6; t++) 
       hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150., (0.03 + hrand(100) * 0.0003) * goldbf));
     hpc.push_back(hpc[last->s]);
@@ -2056,116 +2058,116 @@ void buildpolys() {
   shMFloor2.configure(floorrad0*6/8, floorrad1*6/8);
   shMFloor3.configure(floorrad0*5/8, floorrad1*5/8);
   shMFloor4.configure(floorrad0*4/8, floorrad1*4/8);
-  shBigTriangle.configure(triangleside, 0); shBigTriangle.prio = PPR_FLOOR_TOWER;
+  shBigTriangle.configure(triangleside, 0); shBigTriangle.prio = PPR::FLOOR_TOWER;
   shBigHepta.configure(0, (nonbitrunc ? tessf : xcrossf) * .97);
   shTriheptaFloor.configure(trihepta0, trihepta1);
-  shDragonFloor.prio = PPR_FLOOR_DRAGON;
-  shPowerFloor.prio = PPR_FLOOR_DRAGON;
+  shDragonFloor.prio = PPR::FLOOR_DRAGON;
+  shPowerFloor.prio = PPR::FLOOR_DRAGON;
   for(int i=0; i<3; i++) shRedRockFloor[i].scale = .9 - .1 * i;
   generate_floorshapes();
   
-  bshape(shHalfFloor[0], PPR_FLOOR, scalef*spzoom6, 329);
-  bshape(shHalfFloor[1], PPR_FLOOR, scalef*spzoom6, 327);
-  bshape(shHalfFloor[2], PPR_FLOOR, scalef*spzoom6, 331);
-  bshape(shHalfMirror[0], PPR_WALL, scalef*spzoom6, 330);
-  bshape(shHalfMirror[1], PPR_WALL, scalef*spzoom6, 328);
-  bshape(shHalfMirror[2], PPR_WALL, scalef*spzoom6, 332);
+  bshape(shHalfFloor[0], PPR::FLOOR, scalef*spzoom6, 329);
+  bshape(shHalfFloor[1], PPR::FLOOR, scalef*spzoom6, 327);
+  bshape(shHalfFloor[2], PPR::FLOOR, scalef*spzoom6, 331);
+  bshape(shHalfMirror[0], PPR::WALL, scalef*spzoom6, 330);
+  bshape(shHalfMirror[1], PPR::WALL, scalef*spzoom6, 328);
+  bshape(shHalfMirror[2], PPR::WALL, scalef*spzoom6, 332);
   
-  bshape(shAsymmetric, PPR_TEXT, scalef, 374);
+  bshape(shAsymmetric, PPR::TEXT, scalef, 374);
   
-  bshape(shTriheptaSpecial[2], PPR_FLOOR,  scalef, 32);
-  bshape(shTriheptaSpecial[3], PPR_FLOOR,  scalef, 33);
-  bshape(shTriheptaSpecial[4], PPR_FLOOR,  scalef, 34);
-  bshape(shTriheptaSpecial[5], PPR_FLOOR,  scalef, 35);
-  bshape(shTriheptaSpecial[6], PPR_FLOOR,  scalef, 36);
-  bshape(shTriheptaSpecial[7], PPR_FLOOR,  scalef, 37);
-  bshape(shTriheptaSpecial[12], PPR_FLOOR,  scalef, 373);
-  bshape(shTriheptaSpecial[9], PPR_FLOOR,  scalef, 38);
-  bshape(shTriheptaSpecial[10], PPR_FLOOR,  scalef, 39);
-  bshape(shTriheptaSpecial[11], PPR_FLOOR,  scalef, 372);
-  bshape(shSemiFloorShadow, PPR_FLOOR, scalef, 263);
+  bshape(shTriheptaSpecial[2], PPR::FLOOR,  scalef, 32);
+  bshape(shTriheptaSpecial[3], PPR::FLOOR,  scalef, 33);
+  bshape(shTriheptaSpecial[4], PPR::FLOOR,  scalef, 34);
+  bshape(shTriheptaSpecial[5], PPR::FLOOR,  scalef, 35);
+  bshape(shTriheptaSpecial[6], PPR::FLOOR,  scalef, 36);
+  bshape(shTriheptaSpecial[7], PPR::FLOOR,  scalef, 37);
+  bshape(shTriheptaSpecial[12], PPR::FLOOR,  scalef, 373);
+  bshape(shTriheptaSpecial[9], PPR::FLOOR,  scalef, 38);
+  bshape(shTriheptaSpecial[10], PPR::FLOOR,  scalef, 39);
+  bshape(shTriheptaSpecial[11], PPR::FLOOR,  scalef, 372);
+  bshape(shSemiFloorShadow, PPR::FLOOR, scalef, 263);
 
-  bshape(shMercuryBridge[0], PPR_FLOOR,  scalef*spzoom6, 365);
-  bshape(shMercuryBridge[1], PPR_FLOOR,  scalef*spzoomd7, 366);
-  bshape(shWindArrow, PPR_HEPTAMARK,  scalef, 367);
+  bshape(shMercuryBridge[0], PPR::FLOOR,  scalef*spzoom6, 365);
+  bshape(shMercuryBridge[1], PPR::FLOOR,  scalef*spzoomd7, 366);
+  bshape(shWindArrow, PPR::HEPTAMARK,  scalef, 367);
 
-  bshape(shPalaceGate, PPR_STRUCT1, scalef, 47);
-  bshape(shSemiFeatherFloor[0], PPR_FLOOR,  scalef*spzoom6, 48);
-  bshape(shSemiFeatherFloor[1], PPR_FLOOR,  scalef*spzoom6, 49);
+  bshape(shPalaceGate, PPR::STRUCT1, scalef, 47);
+  bshape(shSemiFeatherFloor[0], PPR::FLOOR,  scalef*spzoom6, 48);
+  bshape(shSemiFeatherFloor[1], PPR::FLOOR,  scalef*spzoom6, 49);
 
-  bshape(shSwitchDisk, PPR_FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
+  bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
 
-  bshape(shZebra[0], PPR_FLOOR,  scalef, 162);
-  bshape(shZebra[1], PPR_FLOOR,  scalef, 163);
-  bshape(shZebra[2], PPR_FLOOR,  scalef, 164);
-  bshape(shZebra[3], PPR_FLOOR,  scalef, 165);
-  bshape(shZebra[4], PPR_FLOOR,  1, 166); // for nonbitrunc
-  bshape(shEmeraldFloor[0], PPR_FLOOR,  scalef, 167); // 4
-  bshape(shEmeraldFloor[1], PPR_FLOOR,  scalef, 168); // 12
-  bshape(shEmeraldFloor[2], PPR_FLOOR,  scalef, 169); // 16
-  bshape(shEmeraldFloor[3], PPR_FLOOR,  scalef, 170); // 20
-  bshape(shEmeraldFloor[4], PPR_FLOOR,  scalef, 171); // 28
-  bshape(shEmeraldFloor[5], PPR_FLOOR,  scalef, 172); // 36
-  bshape(shTower[0], PPR_FLOOR_TOWER,  scalef, 196); // 4
-  bshape(shTower[1], PPR_FLOOR_TOWER,  scalef, 197); // 5
-  bshape(shTower[2], PPR_FLOOR_TOWER,  scalef, 198); // 6
-  bshape(shTower[3], PPR_FLOOR_TOWER,  scalef, 199); // 8
-  bshape(shTower[4], PPR_FLOOR_TOWER,  scalef, 200); // 9
-  bshape(shTower[5], PPR_FLOOR_TOWER,  scalef, 201); // 10
-  bshape(shTower[6], PPR_FLOOR_TOWER,  scalef, 202); // 10
-  bshape(shTower[7], PPR_FLOOR_TOWER,  1, 203); // nonbitrunc 7
-  bshape(shTower[8], PPR_FLOOR_TOWER,  1, 204); // nonbitrunc 11
-  bshape(shTower[9], PPR_FLOOR_TOWER,  1, 205); // nonbitrunc 15
-  bshape(shTower[10], PPR_FLOOR_TOWER,  scalef, 206);  // Euclidean
+  bshape(shZebra[0], PPR::FLOOR,  scalef, 162);
+  bshape(shZebra[1], PPR::FLOOR,  scalef, 163);
+  bshape(shZebra[2], PPR::FLOOR,  scalef, 164);
+  bshape(shZebra[3], PPR::FLOOR,  scalef, 165);
+  bshape(shZebra[4], PPR::FLOOR,  1, 166); // for nonbitrunc
+  bshape(shEmeraldFloor[0], PPR::FLOOR,  scalef, 167); // 4
+  bshape(shEmeraldFloor[1], PPR::FLOOR,  scalef, 168); // 12
+  bshape(shEmeraldFloor[2], PPR::FLOOR,  scalef, 169); // 16
+  bshape(shEmeraldFloor[3], PPR::FLOOR,  scalef, 170); // 20
+  bshape(shEmeraldFloor[4], PPR::FLOOR,  scalef, 171); // 28
+  bshape(shEmeraldFloor[5], PPR::FLOOR,  scalef, 172); // 36
+  bshape(shTower[0], PPR::FLOOR_TOWER,  scalef, 196); // 4
+  bshape(shTower[1], PPR::FLOOR_TOWER,  scalef, 197); // 5
+  bshape(shTower[2], PPR::FLOOR_TOWER,  scalef, 198); // 6
+  bshape(shTower[3], PPR::FLOOR_TOWER,  scalef, 199); // 8
+  bshape(shTower[4], PPR::FLOOR_TOWER,  scalef, 200); // 9
+  bshape(shTower[5], PPR::FLOOR_TOWER,  scalef, 201); // 10
+  bshape(shTower[6], PPR::FLOOR_TOWER,  scalef, 202); // 10
+  bshape(shTower[7], PPR::FLOOR_TOWER,  1, 203); // nonbitrunc 7
+  bshape(shTower[8], PPR::FLOOR_TOWER,  1, 204); // nonbitrunc 11
+  bshape(shTower[9], PPR::FLOOR_TOWER,  1, 205); // nonbitrunc 15
+  bshape(shTower[10], PPR::FLOOR_TOWER,  scalef, 206);  // Euclidean
   
   // structures & walls
-  bshape(shBoatOuter, PPR_STRUCT0, scalef, 154);
-  bshape(shBoatInner, PPR_STRUCT1, scalef, 155);
-  bshape(shSolidBranch, PPR_STRUCT0, scalef, 235);
-  bshape(shWeakBranch, PPR_STRUCT0, scalef, 236);
-  bshape(shFan, PPR_WALL, scalef, 59);
+  bshape(shBoatOuter, PPR::STRUCT0, scalef, 154);
+  bshape(shBoatInner, PPR::STRUCT1, scalef, 155);
+  bshape(shSolidBranch, PPR::STRUCT0, scalef, 235);
+  bshape(shWeakBranch, PPR::STRUCT0, scalef, 236);
+  bshape(shFan, PPR::WALL, scalef, 59);
 
   // items:
-  bshape(shElementalShard, PPR_ITEM, scalef, 60);
-  bshape(shNecro, PPR_ITEM, scalef, 61);
-  bshape(shFigurine, PPR_ITEM, scalef, 62);
-  bshape(shStatue, PPR_ITEM, scalef, 63);
-  bshape(shBook, PPR_ITEM, scalef, 64);
-  bshape(shBookCover, PPR_ITEMa, scalef, 65);
-  bshape(shGrail, PPR_ITEM, scalef, 66);
-  bshape(shGun, PPR_ITEM, scalef, 67);
-  bshape(shKey, PPR_ITEM, scalef, 68);
-  bshape(shPirateX, PPR_ITEM, scalef, 124);
-  bshape(shTreat, PPR_ITEM, scalef, 253);
+  bshape(shElementalShard, PPR::ITEM, scalef, 60);
+  bshape(shNecro, PPR::ITEM, scalef, 61);
+  bshape(shFigurine, PPR::ITEM, scalef, 62);
+  bshape(shStatue, PPR::ITEM, scalef, 63);
+  bshape(shBook, PPR::ITEM, scalef, 64);
+  bshape(shBookCover, PPR::ITEMa, scalef, 65);
+  bshape(shGrail, PPR::ITEM, scalef, 66);
+  bshape(shGun, PPR::ITEM, scalef, 67);
+  bshape(shKey, PPR::ITEM, scalef, 68);
+  bshape(shPirateX, PPR::ITEM, scalef, 124);
+  bshape(shTreat, PPR::ITEM, scalef, 253);
 
   // first layer monsters
-  bshape(shTentacleX, PPR_TENTACLE0);
+  bshape(shTentacleX, PPR::TENTACLE0);
   drawTentacle(shTentacleX, xcrossf * .25, xcrossf * .1, 10);
-  bshape(shIBranch, PPR_TENTACLE1);
+  bshape(shIBranch, PPR::TENTACLE1);
   drawTentacle(shIBranch, xcrossf * .1, xcrossf * .2, 5);
-  bshape(shTentacle, PPR_TENTACLE1);
+  bshape(shTentacle, PPR::TENTACLE1);
   drawTentacle(shTentacle, xcrossf * .2, xcrossf * .1, 10);
-  copyshape(shJoint, shDisk, PPR_ONTENTACLE);
-  bshape(shTentHead, PPR_ONTENTACLE, scalef, 79);
-  bshape(shWormHead, PPR_ONTENTACLE, scalef, 80);
+  copyshape(shJoint, shDisk, PPR::ONTENTACLE);
+  bshape(shTentHead, PPR::ONTENTACLE, scalef, 79);
+  bshape(shWormHead, PPR::ONTENTACLE, scalef, 80);
   
-  bshape(shWormSegment, PPR_TENTACLE1);
+  bshape(shWormSegment, PPR::TENTACLE1);
   RING(i)
    hpcpush(ddi(i, .20 * scalef) * C0);
-  bshape(shSmallWormSegment, PPR_TENTACLE1);
+  bshape(shSmallWormSegment, PPR::TENTACLE1);
   RING(i)
     hpcpush(ddi(i, .16 * scalef) * C0);
-  bshape(shWormTail, PPR_TENTACLE1, scalef, 383);
-  bshape(shSmallWormTail, PPR_TENTACLE1, scalef, 384);
+  bshape(shWormTail, PPR::TENTACLE1, scalef, 383);
+  bshape(shSmallWormTail, PPR::TENTACLE1, scalef, 384);
 
-  if(nonbitrunc) bshape(shDragonSegment, PPR_TENTACLE1, gp::scale * irr::scale, 233);
-  else bshape(shDragonSegment, PPR_TENTACLE1, scalef, 234);
-  bshape(shDragonWings, PPR_ONTENTACLE, scalef, 237);
-  bshape(shDragonLegs, PPR_TENTACLE0, scalef, 238);
-  if(nonbitrunc) bshape(shDragonTail, PPR_TENTACLE1, gp::scale * irr::scale, 239);
-  else bshape(shDragonTail, PPR_TENTACLE1, scalef, 240);
-  bshape(shDragonNostril, PPR_ONTENTACLE_EYES, scalef, 241);
-  bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
+  if(nonbitrunc) bshape(shDragonSegment, PPR::TENTACLE1, gp::scale * irr::scale, 233);
+  else bshape(shDragonSegment, PPR::TENTACLE1, scalef, 234);
+  bshape(shDragonWings, PPR::ONTENTACLE, scalef, 237);
+  bshape(shDragonLegs, PPR::TENTACLE0, scalef, 238);
+  if(nonbitrunc) bshape(shDragonTail, PPR::TENTACLE1, gp::scale * irr::scale, 239);
+  else bshape(shDragonTail, PPR::TENTACLE1, scalef, 240);
+  bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalef, 241);
+  bshape(shDragonHead, PPR::ONTENTACLE, scalef, 242);
   
   ld krsc = 1;
   if(sphere) krsc *= 1.4;
@@ -2173,50 +2175,50 @@ void buildpolys() {
   
   if(nonbitrunc && !gp::on && !irr::on && !euclid4) {
     tentacle_length = 1.52;
-    bshape(shSeaTentacle, PPR_TENTACLE1, 1, 245);
+    bshape(shSeaTentacle, PPR::TENTACLE1, 1, 245);
     }
   else if(gp::on || irr::on) {
     tentacle_length = 0.566256 * 1.6 * gp::scale * irr::scale * krsc;
-    bshape(shSeaTentacle, PPR_TENTACLE1, 1.6 * gp::scale * irr::scale * krsc, 246);  
+    bshape(shSeaTentacle, PPR::TENTACLE1, 1.6 * gp::scale * irr::scale * krsc, 246);  
     }
   else {
     tentacle_length = 0.566256 * gp::scale * irr::scale;
-    bshape(shSeaTentacle, PPR_TENTACLE1, gp::scale * irr::scale, 246);  
+    bshape(shSeaTentacle, PPR::TENTACLE1, gp::scale * irr::scale, 246);  
     }
   ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale * irr::scale * krsc;
   if(euclid4 && nonbitrunc) ksc *= .5;
-  bshape(shKrakenHead, PPR_ONTENTACLE, ksc, 247);
-  bshape(shKrakenEye, PPR_ONTENTACLE_EYES, ksc, 248);
-  bshape(shKrakenEye2, PPR_ONTENTACLE_EYES2, ksc, 249);
+  bshape(shKrakenHead, PPR::ONTENTACLE, ksc, 247);
+  bshape(shKrakenEye, PPR::ONTENTACLE_EYES, ksc, 248);
+  bshape(shKrakenEye2, PPR::ONTENTACLE_EYES2, ksc, 249);
 
   // monsters
-  bshape(shGhost, PPR_MONSTER_BODY, scalef, 69);
-  bshape(shGargoyleWings, PPR_MONSTER_CLOAK, scalef, 70);
-  bshape(shGargoyleBody, PPR_MONSTER_BODY, scalef, 71);
-  bshape(shDogStripes, PPR_MONSTER_ARMOR1, scalef, 72);
-  bshape(shWolf, PPR_MONSTER_BODY, scalef, 73);
-  bshape(shWolf1, PPR_MONSTER_EYE0, scalef, 74);
-  bshape(shWolf2, PPR_MONSTER_EYE0, scalef, 75);
-  bshape(shWolf3, PPR_MONSTER_EYE0, scalef, 76);
-  bshape(shFoxTail1, PPR_MONSTER_BODY, scalef, 363);
-  bshape(shFoxTail2, PPR_MONSTER_BODY, scalef, 364);
-  bshape(shHawk, PPR_MONSTER_BODY, scalef, 77);
-  bshape(shEagle, PPR_MONSTER_BODY, scalef, 78);
-  bshape(shWaterElemental, PPR_MONSTER_BODY, scalef, 81);
-  bshape(shMouse, PPR_MONSTER_BODY, scalef, 82);
-  bshape(shMouseLegs, PPR_MONSTER_LEG, scalef, 83);
-  bshape(shMouseEyes, PPR_MONSTER_EYE0, scalef, 84);
+  bshape(shGhost, PPR::MONSTER_BODY, scalef, 69);
+  bshape(shGargoyleWings, PPR::MONSTER_CLOAK, scalef, 70);
+  bshape(shGargoyleBody, PPR::MONSTER_BODY, scalef, 71);
+  bshape(shDogStripes, PPR::MONSTER_ARMOR1, scalef, 72);
+  bshape(shWolf, PPR::MONSTER_BODY, scalef, 73);
+  bshape(shWolf1, PPR::MONSTER_EYE0, scalef, 74);
+  bshape(shWolf2, PPR::MONSTER_EYE0, scalef, 75);
+  bshape(shWolf3, PPR::MONSTER_EYE0, scalef, 76);
+  bshape(shFoxTail1, PPR::MONSTER_BODY, scalef, 363);
+  bshape(shFoxTail2, PPR::MONSTER_BODY, scalef, 364);
+  bshape(shHawk, PPR::MONSTER_BODY, scalef, 77);
+  bshape(shEagle, PPR::MONSTER_BODY, scalef, 78);
+  bshape(shWaterElemental, PPR::MONSTER_BODY, scalef, 81);
+  bshape(shMouse, PPR::MONSTER_BODY, scalef, 82);
+  bshape(shMouseLegs, PPR::MONSTER_LEG, scalef, 83);
+  bshape(shMouseEyes, PPR::MONSTER_EYE0, scalef, 84);
 
-  bshape(shHumanFoot, PPR_MONSTER_FOOT, scalef, 259);
-  bshape(shHumanLeg, PPR_MONSTER_LEG, scalef, 260);
-  bshape(shHumanGroin, PPR_MONSTER_GROIN, scalef, 261);
-  bshape(shHumanNeck, PPR_MONSTER_NECK, scalef, 262);
-  bshape(shSkeletalFoot, PPR_MONSTER_FOOT, scalef, 264);
-  bshape(shYetiFoot, PPR_MONSTER_FOOT, scalef, 276);
+  bshape(shHumanFoot, PPR::MONSTER_FOOT, scalef, 259);
+  bshape(shHumanLeg, PPR::MONSTER_LEG, scalef, 260);
+  bshape(shHumanGroin, PPR::MONSTER_GROIN, scalef, 261);
+  bshape(shHumanNeck, PPR::MONSTER_NECK, scalef, 262);
+  bshape(shSkeletalFoot, PPR::MONSTER_FOOT, scalef, 264);
+  bshape(shYetiFoot, PPR::MONSTER_FOOT, scalef, 276);
 
   for(int i=0; i<5; i++)
     for(int j=0; j<4; j++)
-      bshape(shReptile[i][j], j >= 2 ? PPR_LIZEYE : j == 1 ? PPR_FLOORa : PPR_FLOOR_DRAGON, scalef * gsca(euclid, 1.16), 277+i*4+j);
+      bshape(shReptile[i][j], j >= 2 ? PPR::LIZEYE : j == 1 ? PPR::FLOORa : PPR::FLOOR_DRAGON, scalef * gsca(euclid, 1.16), 277+i*4+j);
     
   shift(shReptile[1][2], 0.316534, -0.136547, 1.057752);
   shift(shReptile[1][3], 0.340722, -0.059946, 1.058152);
@@ -2230,157 +2232,157 @@ void buildpolys() {
   shift(shReptile[4][2], 0.05, 0, 1.00124921972503929);
   shift(shReptile[4][3], -0.05, 0, 1.00124921972503929);
 
-  bshape(shReptileBody, PPR_MONSTER_BODY, scalef, 297);
-  bshape(shReptileHead, PPR_MONSTER_HEAD, scalef, 298);
-  bshape(shReptileFrontFoot, PPR_MONSTER_FOOT, scalef, 299);
-  bshape(shReptileRearFoot, PPR_MONSTER_FOOT, scalef, 300);
-  bshape(shReptileFrontLeg, PPR_MONSTER_LEG, scalef, 301);
-  bshape(shReptileRearLeg, PPR_MONSTER_LEG, scalef, 302);
-  bshape(shReptileTail, PPR_MONSTER_BODY, scalef, 303);
-  bshape(shReptileEye, PPR_MONSTER_EYE0, scalef, 304);  
-  bshape(shDodeca, PPR_ITEM, scalef, 305);  
+  bshape(shReptileBody, PPR::MONSTER_BODY, scalef, 297);
+  bshape(shReptileHead, PPR::MONSTER_HEAD, scalef, 298);
+  bshape(shReptileFrontFoot, PPR::MONSTER_FOOT, scalef, 299);
+  bshape(shReptileRearFoot, PPR::MONSTER_FOOT, scalef, 300);
+  bshape(shReptileFrontLeg, PPR::MONSTER_LEG, scalef, 301);
+  bshape(shReptileRearLeg, PPR::MONSTER_LEG, scalef, 302);
+  bshape(shReptileTail, PPR::MONSTER_BODY, scalef, 303);
+  bshape(shReptileEye, PPR::MONSTER_EYE0, scalef, 304);  
+  bshape(shDodeca, PPR::ITEM, scalef, 305);  
   
-  bshape(shTerraArmor1, PPR_MONSTER_BODY, scalef, 349);
-  bshape(shTerraArmor2, PPR_MONSTER_BODY, scalef, 350);
-  bshape(shTerraArmor3, PPR_MONSTER_BODY, scalef, 351);
-  bshape(shTerraHead, PPR_MONSTER_HEAD, scalef, 352);
-  bshape(shTerraFace, PPR_MONSTER_FACE, scalef, 353);
-  bshape(shJiangShi, PPR_MONSTER_BODY, scalef, 355);
-  bshape(shJiangShiDress, PPR_MONSTER_BODY, scalef, 356);
-  bshape(shJiangShiCap1, PPR_MONSTER_HAT0, scalef, 357);
-  bshape(shJiangShiCap2, PPR_MONSTER_HAT1, scalef, 358);
+  bshape(shTerraArmor1, PPR::MONSTER_BODY, scalef, 349);
+  bshape(shTerraArmor2, PPR::MONSTER_BODY, scalef, 350);
+  bshape(shTerraArmor3, PPR::MONSTER_BODY, scalef, 351);
+  bshape(shTerraHead, PPR::MONSTER_HEAD, scalef, 352);
+  bshape(shTerraFace, PPR::MONSTER_FACE, scalef, 353);
+  bshape(shJiangShi, PPR::MONSTER_BODY, scalef, 355);
+  bshape(shJiangShiDress, PPR::MONSTER_BODY, scalef, 356);
+  bshape(shJiangShiCap1, PPR::MONSTER_HAT0, scalef, 357);
+  bshape(shJiangShiCap2, PPR::MONSTER_HAT1, scalef, 358);
 
-  bshape(shPBody, PPR_MONSTER_BODY, scalef, 85);
-  bshape(shYeti, PPR_MONSTER_BODY, scalef, 86);
-  bshape(shPSword, PPR_MONSTER_WPN, scalef, 90);
-  bshape(shFerocityM, PPR_MONSTER_WPN, scalef, 361);
-  bshape(shFerocityF, PPR_MONSTER_WPN, scalef, 362);
-  bshape(shPKnife, PPR_MONSTER_WPN, scalef, 91);
-  bshape(shPirateHook, PPR_MONSTER_WPN, scalef, 92);
-  bshape(shSabre, PPR_MONSTER_WPN, scalef, 93);
-  bshape(shHedgehogBlade, PPR_MONSTER_WPN, scalef, 94);
-  bshape(shHedgehogBladePlayer, PPR_MONSTER_WPN, scalef, 95);
-  bshape(shFemaleBody, PPR_MONSTER_BODY, scalef, 96);
-  bshape(shFemaleDress, PPR_MONSTER_ARMOR0, scalef, 97);
-  bshape(shDemon, PPR_MONSTER_HAIR, scalef, 98);
+  bshape(shPBody, PPR::MONSTER_BODY, scalef, 85);
+  bshape(shYeti, PPR::MONSTER_BODY, scalef, 86);
+  bshape(shPSword, PPR::MONSTER_WPN, scalef, 90);
+  bshape(shFerocityM, PPR::MONSTER_WPN, scalef, 361);
+  bshape(shFerocityF, PPR::MONSTER_WPN, scalef, 362);
+  bshape(shPKnife, PPR::MONSTER_WPN, scalef, 91);
+  bshape(shPirateHook, PPR::MONSTER_WPN, scalef, 92);
+  bshape(shSabre, PPR::MONSTER_WPN, scalef, 93);
+  bshape(shHedgehogBlade, PPR::MONSTER_WPN, scalef, 94);
+  bshape(shHedgehogBladePlayer, PPR::MONSTER_WPN, scalef, 95);
+  bshape(shFemaleBody, PPR::MONSTER_BODY, scalef, 96);
+  bshape(shFemaleDress, PPR::MONSTER_ARMOR0, scalef, 97);
+  bshape(shDemon, PPR::MONSTER_HAIR, scalef, 98);
 
-  bshape(shTrylobite, PPR_MONSTER_BODY, scalef, 99);
-  bshape(shTrylobiteHead, PPR_MONSTER_HEAD, scalef, 100);
-  bshape(shTrylobiteBody, PPR_MONSTER_BODY, scalef, 308);
-  bshape(shTrylobiteFrontClaw, PPR_MONSTER_FOOT, scalef, 309);
-  bshape(shTrylobiteRearClaw, PPR_MONSTER_FOOT, scalef, 310);
-  bshape(shTrylobiteFrontLeg, PPR_MONSTER_LEG, scalef, 311);
-  bshape(shTrylobiteRearLeg, PPR_MONSTER_LEG, scalef, 312);
+  bshape(shTrylobite, PPR::MONSTER_BODY, scalef, 99);
+  bshape(shTrylobiteHead, PPR::MONSTER_HEAD, scalef, 100);
+  bshape(shTrylobiteBody, PPR::MONSTER_BODY, scalef, 308);
+  bshape(shTrylobiteFrontClaw, PPR::MONSTER_FOOT, scalef, 309);
+  bshape(shTrylobiteRearClaw, PPR::MONSTER_FOOT, scalef, 310);
+  bshape(shTrylobiteFrontLeg, PPR::MONSTER_LEG, scalef, 311);
+  bshape(shTrylobiteRearLeg, PPR::MONSTER_LEG, scalef, 312);
 
-  bshape(shBullBody, PPR_MONSTER_BODY, scalef, 315);
-  bshape(shBullHorn, PPR_MONSTER_HEAD, scalef, 316);
-  bshape(shBullRearHoof, PPR_MONSTER_FOOT, scalef, 317);
-  bshape(shBullFrontHoof, PPR_MONSTER_FOOT, scalef, 318);
-  bshape(shBullHead, PPR_MONSTER_HEAD, scalef, 319);
+  bshape(shBullBody, PPR::MONSTER_BODY, scalef, 315);
+  bshape(shBullHorn, PPR::MONSTER_HEAD, scalef, 316);
+  bshape(shBullRearHoof, PPR::MONSTER_FOOT, scalef, 317);
+  bshape(shBullFrontHoof, PPR::MONSTER_FOOT, scalef, 318);
+  bshape(shBullHead, PPR::MONSTER_HEAD, scalef, 319);
 
-  bshape(shButterflyBody, PPR_MONSTER_BODY, scalef, 320);
-  bshape(shButterflyWing, PPR_MONSTER_BODY, scalef, 321);
+  bshape(shButterflyBody, PPR::MONSTER_BODY, scalef, 320);
+  bshape(shButterflyWing, PPR::MONSTER_BODY, scalef, 321);
 
-  bshape(shGadflyBody, PPR_MONSTER_BODY, scalef * 1.5, 322);
-  bshape(shGadflyWing, PPR_MONSTER_BODY, scalef * 1.5, 323);
-  bshape(shGadflyEye, PPR_MONSTER_BODY, scalef * 1.5, 324);
+  bshape(shGadflyBody, PPR::MONSTER_BODY, scalef * 1.5, 322);
+  bshape(shGadflyWing, PPR::MONSTER_BODY, scalef * 1.5, 323);
+  bshape(shGadflyEye, PPR::MONSTER_BODY, scalef * 1.5, 324);
 
-  bshape(shGoatHead, PPR_MONSTER_HAIR, scalef, 101);
-  bshape(shRatHead, PPR_MONSTER_HEAD, scalef, 102);
-  bshape(shRatEyes, PPR_MONSTER_EYE0, scalef, 103);  
-  bshape(shRatTail, PPR_MONSTER_LEG, scalef, 104);
-  bshape(shRatCape1, PPR_MONSTER_HOODCLOAK2, scalef, 105);
-  bshape(shRatCape2, PPR_MONSTER_HOODCLOAK1, scalef, 106);
-  bshape(shKnightArmor, PPR_MONSTER_ARMOR0, scalef, 107);
-  bshape(shWightCloak, PPR_MONSTER_CLOAK, scalef, 108);
-  bshape(shKnightCloak, PPR_MONSTER_CLOAK, scalef, 109);
-  bshape(shPrincessDress, PPR_MONSTER_ARMOR1, scalef, 110);
-  bshape(shWizardCape1, PPR_MONSTER_HOODCLOAK1, 1, 111);
-  bshape(shWizardCape2, PPR_MONSTER_HOODCLOAK2, 1, 112);
-  bshape(shPrinceDress, PPR_MONSTER_ARMOR0, scalef, 113);
-  bshape(shArmor, PPR_MONSTER_HAT0, scalef, 114);
-  bshape(shTurban1, PPR_MONSTER_HAT0, scalef, 115);
-  bshape(shTurban2, PPR_MONSTER_HAT1, scalef, 116);
-  bshape(shWizardHat1, PPR_MONSTER_HAT0, 1, 117);
-  bshape(shWizardHat2, PPR_MONSTER_HAT1, 1, 118);
-  bshape(shWestHat1, PPR_MONSTER_HAT0, scalef, 119);
-  bshape(shWestHat2, PPR_MONSTER_HAT1, scalef, 120);
-  bshape(shGunInHand, PPR_MONSTER_WPN, scalef, 121);
-  bshape(shVikingHelmet, PPR_MONSTER_HAT0, scalef, 122);
-  bshape(shRaiderHelmet, PPR_MONSTER_HAT0, scalef, 375);
-  bshape(shRaiderArmor, PPR_MONSTER_BODY, scalef, 380);
-  bshape(shRaiderBody, PPR_MONSTER_BODY, scalef, 381);
-  bshape(shRaiderShirt, PPR_MONSTER_BODY, scalef, 382);
-  bshape(shHood, PPR_MONSTER_HAT0, scalef, 123);
-  bshape(shPirateHood, PPR_MONSTER_HAT0, scalef, 125);
-  bshape(shEyepatch, PPR_MONSTER_HAT1, scalef, 126);
-  bshape(shPHead, PPR_MONSTER_HEAD, scalef, 127);
-  shGolemhead = shDisk; shGolemhead.prio = PPR_MONSTER_HEAD;
-  bshape(shFemaleHair, PPR_MONSTER_HAIR, scalef, 128);
-  bshape(shWitchHair, PPR_MONSTER_HAIR, scalef, 129);
-  bshape(shBeautyHair, PPR_MONSTER_HAIR, scalef, 130);
-  bshape(shFlowerHair, PPR_MONSTER_HAT0, scalef, 131);
-  bshape(shSuspenders, PPR_MONSTER_ARMOR1, scalef, 132);
-  bshape(shFlowerHand, PPR_MONSTER_WPN, scalef, 133);
-  bshape(shPFace, PPR_MONSTER_FACE, scalef, 134);
-  bshape(shEyes, PPR_MONSTER_EYE0, scalef, 135);
-  bshape(shShark, PPR_MONSTER_BODY, scalef, 136);
-  bshape(shBugBody, PPR_MONSTER_BODY, scalef, 137);
-  bshape(shBugArmor, PPR_MONSTER_ARMOR0, scalef, 138);
-  bshape(shBugLeg, PPR_MONSTER_BODY, scalef, 306);
-  bshape(shBugAntenna, PPR_MONSTER_BODY, scalef, 307);
-  bshape(shCatBody, PPR_MONSTER_BODY, scalef, 139);
-  bshape(shCatLegs, PPR_MONSTER_LEG, scalef, 140);
-  bshape(shFamiliarHead, PPR_MONSTER_HEAD, scalef, 141);
-  bshape(shFamiliarEye, PPR_MONSTER_EYE1, scalef, 142);
-  bshape(shCatHead, PPR_MONSTER_HEAD, scalef, 143);
-  bshape(shWolfBody, PPR_MONSTER_BODY, WOLF, 144);
-  bshape(shWolfHead, PPR_MONSTER_HEAD, WOLF, 145);
-  bshape(shWolfLegs, PPR_MONSTER_LEG, WOLF, 146);
-  bshape(shWolfEyes, PPR_MONSTER_EYE0, WOLF, 147);
-  bshape(shWitchDress, PPR_MONSTER_ARMOR0, scalef, 148);
-  bshape(shPickAxe, PPR_MONSTER_WPN, scalef, 149);
-  bshape(shPike, PPR_MONSTER_WPN, scalef, 150);
-  bshape(shFlailBall, PPR_MONSTER_WPN, scalef, 151);
-  bshape(shFlailTrunk, PPR_MONSTER_WPN, scalef, 152);
-  bshape(shFlailChain, PPR_MONSTER_SUBWPN, scalef, 153);
-  bshape(shHammerHead, PPR_MONSTER_WPN, scalef, 376);
+  bshape(shGoatHead, PPR::MONSTER_HAIR, scalef, 101);
+  bshape(shRatHead, PPR::MONSTER_HEAD, scalef, 102);
+  bshape(shRatEyes, PPR::MONSTER_EYE0, scalef, 103);  
+  bshape(shRatTail, PPR::MONSTER_LEG, scalef, 104);
+  bshape(shRatCape1, PPR::MONSTER_HOODCLOAK2, scalef, 105);
+  bshape(shRatCape2, PPR::MONSTER_HOODCLOAK1, scalef, 106);
+  bshape(shKnightArmor, PPR::MONSTER_ARMOR0, scalef, 107);
+  bshape(shWightCloak, PPR::MONSTER_CLOAK, scalef, 108);
+  bshape(shKnightCloak, PPR::MONSTER_CLOAK, scalef, 109);
+  bshape(shPrincessDress, PPR::MONSTER_ARMOR1, scalef, 110);
+  bshape(shWizardCape1, PPR::MONSTER_HOODCLOAK1, 1, 111);
+  bshape(shWizardCape2, PPR::MONSTER_HOODCLOAK2, 1, 112);
+  bshape(shPrinceDress, PPR::MONSTER_ARMOR0, scalef, 113);
+  bshape(shArmor, PPR::MONSTER_HAT0, scalef, 114);
+  bshape(shTurban1, PPR::MONSTER_HAT0, scalef, 115);
+  bshape(shTurban2, PPR::MONSTER_HAT1, scalef, 116);
+  bshape(shWizardHat1, PPR::MONSTER_HAT0, 1, 117);
+  bshape(shWizardHat2, PPR::MONSTER_HAT1, 1, 118);
+  bshape(shWestHat1, PPR::MONSTER_HAT0, scalef, 119);
+  bshape(shWestHat2, PPR::MONSTER_HAT1, scalef, 120);
+  bshape(shGunInHand, PPR::MONSTER_WPN, scalef, 121);
+  bshape(shVikingHelmet, PPR::MONSTER_HAT0, scalef, 122);
+  bshape(shRaiderHelmet, PPR::MONSTER_HAT0, scalef, 375);
+  bshape(shRaiderArmor, PPR::MONSTER_BODY, scalef, 380);
+  bshape(shRaiderBody, PPR::MONSTER_BODY, scalef, 381);
+  bshape(shRaiderShirt, PPR::MONSTER_BODY, scalef, 382);
+  bshape(shHood, PPR::MONSTER_HAT0, scalef, 123);
+  bshape(shPirateHood, PPR::MONSTER_HAT0, scalef, 125);
+  bshape(shEyepatch, PPR::MONSTER_HAT1, scalef, 126);
+  bshape(shPHead, PPR::MONSTER_HEAD, scalef, 127);
+  shGolemhead = shDisk; shGolemhead.prio = PPR::MONSTER_HEAD;
+  bshape(shFemaleHair, PPR::MONSTER_HAIR, scalef, 128);
+  bshape(shWitchHair, PPR::MONSTER_HAIR, scalef, 129);
+  bshape(shBeautyHair, PPR::MONSTER_HAIR, scalef, 130);
+  bshape(shFlowerHair, PPR::MONSTER_HAT0, scalef, 131);
+  bshape(shSuspenders, PPR::MONSTER_ARMOR1, scalef, 132);
+  bshape(shFlowerHand, PPR::MONSTER_WPN, scalef, 133);
+  bshape(shPFace, PPR::MONSTER_FACE, scalef, 134);
+  bshape(shEyes, PPR::MONSTER_EYE0, scalef, 135);
+  bshape(shShark, PPR::MONSTER_BODY, scalef, 136);
+  bshape(shBugBody, PPR::MONSTER_BODY, scalef, 137);
+  bshape(shBugArmor, PPR::MONSTER_ARMOR0, scalef, 138);
+  bshape(shBugLeg, PPR::MONSTER_BODY, scalef, 306);
+  bshape(shBugAntenna, PPR::MONSTER_BODY, scalef, 307);
+  bshape(shCatBody, PPR::MONSTER_BODY, scalef, 139);
+  bshape(shCatLegs, PPR::MONSTER_LEG, scalef, 140);
+  bshape(shFamiliarHead, PPR::MONSTER_HEAD, scalef, 141);
+  bshape(shFamiliarEye, PPR::MONSTER_EYE1, scalef, 142);
+  bshape(shCatHead, PPR::MONSTER_HEAD, scalef, 143);
+  bshape(shWolfBody, PPR::MONSTER_BODY, WOLF, 144);
+  bshape(shWolfHead, PPR::MONSTER_HEAD, WOLF, 145);
+  bshape(shWolfLegs, PPR::MONSTER_LEG, WOLF, 146);
+  bshape(shWolfEyes, PPR::MONSTER_EYE0, WOLF, 147);
+  bshape(shWitchDress, PPR::MONSTER_ARMOR0, scalef, 148);
+  bshape(shPickAxe, PPR::MONSTER_WPN, scalef, 149);
+  bshape(shPike, PPR::MONSTER_WPN, scalef, 150);
+  bshape(shFlailBall, PPR::MONSTER_WPN, scalef, 151);
+  bshape(shFlailTrunk, PPR::MONSTER_WPN, scalef, 152);
+  bshape(shFlailChain, PPR::MONSTER_SUBWPN, scalef, 153);
+  bshape(shHammerHead, PPR::MONSTER_WPN, scalef, 376);
   // bshape(shScratch, 17, scalef, 156);
-  bshape(shSkeletonBody, PPR_MONSTER_BODY, scalef, 157);
-  bshape(shSkull, PPR_MONSTER_HEAD, scalef, 158);
-  bshape(shSkullEyes, PPR_MONSTER_EYE0, scalef, 159);
-  bshape(shFishTail, PPR_MONSTER_LEG, scalef, 160);
-  bshape(shFatBody, PPR_MONSTER_BODY, scalef, 161);
-  bshape(shAztecHead, PPR_MONSTER_HEAD, scalef, 179);
-  bshape(shAztecCap, PPR_MONSTER_HAT0, scalef, 180); // 1 114 5 [000000]
-  bshape(shBatWings, PPR_MONSTER_LEG, scalef, 254);
-  bshape(shBatBody, PPR_MONSTER_BODY, scalef, 255);
-  bshape(shBatMouth, PPR_MONSTER_EYE0, scalef, 256);
-  bshape(shBatFang, PPR_MONSTER_EYE1, scalef, 257);
-  bshape(shBatEye, PPR_MONSTER_EYE0, scalef, 258);
+  bshape(shSkeletonBody, PPR::MONSTER_BODY, scalef, 157);
+  bshape(shSkull, PPR::MONSTER_HEAD, scalef, 158);
+  bshape(shSkullEyes, PPR::MONSTER_EYE0, scalef, 159);
+  bshape(shFishTail, PPR::MONSTER_LEG, scalef, 160);
+  bshape(shFatBody, PPR::MONSTER_BODY, scalef, 161);
+  bshape(shAztecHead, PPR::MONSTER_HEAD, scalef, 179);
+  bshape(shAztecCap, PPR::MONSTER_HAT0, scalef, 180); // 1 114 5 [000000]
+  bshape(shBatWings, PPR::MONSTER_LEG, scalef, 254);
+  bshape(shBatBody, PPR::MONSTER_BODY, scalef, 255);
+  bshape(shBatMouth, PPR::MONSTER_EYE0, scalef, 256);
+  bshape(shBatFang, PPR::MONSTER_EYE1, scalef, 257);
+  bshape(shBatEye, PPR::MONSTER_EYE0, scalef, 258);
   
-  bshape(shDogBody, PPR_MONSTER_BODY, scalef, 265);
-  bshape(shDogHead, PPR_MONSTER_HEAD, scalef, 266);
-  bshape(shDogTorso, PPR_MONSTER_BODY, scalef, 267);
-  bshape(shDogFrontPaw, PPR_MONSTER_FOOT, scalef, 268);
-  bshape(shDogRearPaw, PPR_MONSTER_FOOT, scalef, 269);
-  bshape(shDogFrontLeg, PPR_MONSTER_LEG, scalef, 270);
-  bshape(shDogRearLeg, PPR_MONSTER_LEG, scalef, 271);
+  bshape(shDogBody, PPR::MONSTER_BODY, scalef, 265);
+  bshape(shDogHead, PPR::MONSTER_HEAD, scalef, 266);
+  bshape(shDogTorso, PPR::MONSTER_BODY, scalef, 267);
+  bshape(shDogFrontPaw, PPR::MONSTER_FOOT, scalef, 268);
+  bshape(shDogRearPaw, PPR::MONSTER_FOOT, scalef, 269);
+  bshape(shDogFrontLeg, PPR::MONSTER_LEG, scalef, 270);
+  bshape(shDogRearLeg, PPR::MONSTER_LEG, scalef, 271);
 
-  bshape(shWolfFrontPaw, PPR_MONSTER_FOOT, scalef, 272);
-  bshape(shWolfRearPaw, PPR_MONSTER_FOOT, scalef, 273);
-  bshape(shWolfFrontLeg, PPR_MONSTER_LEG, scalef, 274);
-  bshape(shWolfRearLeg, PPR_MONSTER_LEG, scalef, 275);
+  bshape(shWolfFrontPaw, PPR::MONSTER_FOOT, scalef, 272);
+  bshape(shWolfRearPaw, PPR::MONSTER_FOOT, scalef, 273);
+  bshape(shWolfFrontLeg, PPR::MONSTER_LEG, scalef, 274);
+  bshape(shWolfRearLeg, PPR::MONSTER_LEG, scalef, 275);
   
   // missiles
-  bshape(shKnife, PPR_MISSILE, scalef, 87);
-  bshape(shTrapArrow, PPR_MISSILE, scalef, 354);
-  bshape(shTongue, PPR_MISSILE, scalef, 88);
-  bshape(shFlailMissile, PPR_MISSILE, scalef, 89);
+  bshape(shKnife, PPR::MISSILE, scalef, 87);
+  bshape(shTrapArrow, PPR::MISSILE, scalef, 354);
+  bshape(shTongue, PPR::MISSILE, scalef, 88);
+  bshape(shFlailMissile, PPR::MISSILE, scalef, 89);
 
   for(int u=0; u<=2; u+=2) {
   
-    PPR sh = u ? PPR_ITEM : PPR_MONSTER_LEG;
+    PPR sh = u ? PPR::ITEM : PPR::MONSTER_LEG;
     int uz = u?2:1;
     
     PPR sh1 = PPR(sh + 1);
@@ -2416,17 +2418,17 @@ void buildpolys() {
     }
 
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
-    copyshape(shTortoise[v][4+z], shTortoise[v][2+z], PPR(shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM)));
+    copyshape(shTortoise[v][4+z], shTortoise[v][2+z], PPR(shTortoise[v][2+z].prio + (PPR::CARRIED-PPR::ITEM)));
 
-  if(nonbitrunc) bshape(shMagicSword, PPR_MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 243);
-  else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
+  if(nonbitrunc) bshape(shMagicSword, PPR::MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 243);
+  else bshape(shMagicSword, PPR::MAGICSWORD, 1, 244);
 
-  if(nonbitrunc) bshape(shMagicShovel, PPR_MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 333);
-  else bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
+  if(nonbitrunc) bshape(shMagicShovel, PPR::MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 333);
+  else bshape(shMagicShovel, PPR::MAGICSWORD, 1, 333);
   
   bshape(shBead0, PPR(20), 1, 250);
   bshape(shBead1, PPR(20), 1, 251);
-  bshape(shArrow, PPR_ARROW, 1, 252);
+  bshape(shArrow, PPR::ARROW, 1, 252);
   
   bshapeend();
 
@@ -2483,7 +2485,7 @@ void initShape(int sg, int id) {
   }
 
 void queuepolyat(const transmatrix& V, const hpcshape& h, int col, PPR prio) {
-  if(prio == PPR_DEFAULT) prio = h.prio;
+  if(prio == PPR::DEFAULT) prio = h.prio;
 
   polytodraw& ptd = nextptd();
   ptd.kind = pkPoly;
@@ -2587,7 +2589,7 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame,
   ptd.u.chr.size = size;
   ptd.col = darkened(col);
   ptd.u.chr.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
-  ptd.prio = PPR_TEXT;
+  ptd.prio = PPR::TEXT;
   }
 
 void queuechr(int x, int y, int shift, int size, char chr, int col, int frame, int align) {
@@ -2602,10 +2604,10 @@ void queuechr(int x, int y, int shift, int size, char chr, int col, int frame, i
   ptd.u.chr.align = align;
   ptd.col = col;
   ptd.u.chr.frame = frame ? (poly_outline & ~ 255) : 0;
-  ptd.prio = PPR_TEXT;
+  ptd.prio = PPR::TEXT;
   }
 
-void queuecircle(int x, int y, int size, int color, PPR prio = PPR_CIRCLE) {
+void queuecircle(int x, int y, int size, int color, PPR prio = PPR::CIRCLE) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkCircle;
   ptd.u.cir.x = x;
@@ -2654,7 +2656,7 @@ void queuecircle(const transmatrix& V, double size, int col) {
   }
 
 void queuemarkerat(const transmatrix& V, int col) {
-  queuepolyat(V, shTriangle, col, PPR_LINE);
+  queuepolyat(V, shTriangle, col, PPR::LINE);
   }
 
 long double polydata[] = {

@@ -3214,7 +3214,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           ShadowV(view, shPHead);
           }
         else if(peace::on) {
-          queuepolyat(mmscale(view, 1.15), shDisk, col, PPR_MISSILE);
+          queuepolyat(mmscale(view, 1.15), shDisk, col, PPR::MISSILE);
           ShadowV(view, shPHead);
           }
         else {

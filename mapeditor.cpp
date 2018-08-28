@@ -936,7 +936,7 @@ namespace mapeditor {
       PRING(d) {
         curvepoint(d2 * xspinpush0(M_PI*d/S42, u/20.));
         }
-      queuecurve((u%5==0) ? gridcolor : lightgrid, 0, PPR_LINE);
+      queuecurve((u%5==0) ? gridcolor : lightgrid, 0, PPR::LINE);
       }
     queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4 + vid.linequality);
     }
@@ -1172,7 +1172,7 @@ namespace mapeditor {
       drawItemType(eItem(id), drawcell, Id, iinf[id].color, 0, false);
       }
     else {
-      draw_qfi(drawcell, Id, 0, PPR_FLOOR);
+      draw_qfi(drawcell, Id, 0, PPR::FLOOR);
       }
 
     sortquickqueue();
@@ -1689,7 +1689,7 @@ namespace mapeditor {
       pts.push_back(Ctr * xspinpush0(M_PI*j*2/circp, radius));
     for(int j=0; j<circp; j++) curvepoint(pts[j]);
     curvepoint(pts[0]);
-    queuecurve(texture::config.paint_color, 0, PPR_LINE);
+    queuecurve(texture::config.paint_color, 0, PPR::LINE);
     }
 #endif
 
@@ -1746,7 +1746,7 @@ namespace mapeditor {
                 queue_hcircle(M2 * ml, hdist(lstart, mouseh));
                 break;
               case 'l':
-                queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR_LINE);
+                queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
                 break;
               default:
                 queue_hcircle(M2 * mh, texture::penwidth);

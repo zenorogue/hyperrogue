@@ -1054,11 +1054,11 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
   if(vertex_shape == 0) ;
   else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
-    queuepolyat(V, sh, 0x80, PPR_MONSTER_SHADOW); 
+    queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
-    if(info) queuelink(info, PPR_MONSTER_HEAD);
-    queuepolyat(V1 = mscale(V, geom3::BODY), sh, cp.color1, PPR_MONSTER_HEAD);
-    if(info) queuelink(NULL, PPR_MONSTER_HEAD);
+    if(info) queuelink(info, PPR::MONSTER_HEAD);
+    queuepolyat(V1 = mscale(V, geom3::BODY), sh, cp.color1, PPR::MONSTER_HEAD);
+    if(info) queuelink(NULL, PPR::MONSTER_HEAD);
     }
   else {
     if(info) queuelink(info, sh.prio);
@@ -1175,12 +1175,12 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
             hyperpoint l2 = T*tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
             queueline(l1, l2, col, vid.linequality);
             l1 = l2;
-            lastptd().prio = PPR_STRUCT0;
+            lastptd().prio = PPR::STRUCT0;
             }
           }
         else {
           queueline(h1, h2, col, 2 + vid.linequality);
-          lastptd().prio = PPR_STRUCT0;
+          lastptd().prio = PPR::STRUCT0;
           }
         }
       else {
@@ -1210,7 +1210,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
             storeline(ei->prec, T*h1, T*h2);
           }
         queuetable(multidraw ? V : ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
-          PPR_STRUCT0);
+          PPR::STRUCT0);
         }
       }
 /*
@@ -1233,9 +1233,9 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     hyperpoint h = tC0(V * m->at);
     transmatrix V2 = rgpushxto0(h) * ypush(nonbitrunc ? .3 : .2);
     if(doshow && !behindsphere(V2)) {
-      if(vd.info) queuelink(vd.info, PPR_TEXT);
+      if(vd.info) queuelink(vd.info, PPR::TEXT);
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
-      if(vd.info) queuelink(NULL, PPR_TEXT);
+      if(vd.info) queuelink(NULL, PPR::TEXT);
       }
     }
 
@@ -1343,7 +1343,7 @@ bool rogueviz_hud() {
     transmatrix V = atscreenpos(x, y, vid.radius/8);
     
     poly_outline = t->color | 0xFF;
-    queuepolyat(V, shTriangle, 0, PPR_MONSTER_HEAD);
+    queuepolyat(V, shTriangle, 0, PPR::MONSTER_HEAD);
     
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, forecolor, 0, 16);
@@ -1366,7 +1366,7 @@ void drawExtra() {
       bool draw = true;
       for(int i=0; i<isize(named); i++) if(named[i] == c) draw = false;
       if(draw && gmatrix.count(c))
-        queuepolyat(it->second, shDisk, dftcolor, PPR_LINE);
+        queuepolyat(it->second, shDisk, dftcolor, PPR::LINE);
       }
     
     for(int i=0; i<isize(named); i++) if(gmatrix.count(named[i])) {

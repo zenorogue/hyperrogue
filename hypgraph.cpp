@@ -846,7 +846,7 @@ void addball(ld a, ld b, ld c) {
   }
 
 void ballgeometry() {
-  queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
+  queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
   for(int i=0; i<60; i++)
     addball(i * M_PI/30, 10, 0);
   for(double d=10; d>=-10; d-=.2)
@@ -858,8 +858,8 @@ void ballgeometry() {
   addball(0, 0, -geom3::camera);
   addball(0, -10, 0);
   addball(0, 0, -geom3::camera);
-  queuecurve(darkena(0xFF, 0, 0x80), 0, PPR_CIRCLE);
-  queuereset(pmodel, PPR_CIRCLE);
+  queuecurve(darkena(0xFF, 0, 0x80), 0, PPR::CIRCLE);
+  queuereset(pmodel, PPR::CIRCLE);
   }
 
 void resetview() {

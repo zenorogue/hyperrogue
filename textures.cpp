@@ -326,13 +326,13 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
   auto si = getpatterninfo0(c);
 
   if(config.tstate == tsAdjusting) {
-    draw_floorshape(c, V, shFullFloor, 0, PPR_LINE);
+    draw_floorshape(c, V, shFullFloor, 0, PPR::LINE);
     lastptd().u.poly.outline = slave_color;
     
     curvepoint(V * C0);
     for(int i=0; i<c->type; i++) 
       curvepoint(V * get_corner_position(c, i)), curvepoint(V * C0);
-    queuecurve(slave_color, 0, PPR_LINE);
+    queuecurve(slave_color, 0, PPR::LINE);
 
     return false;
     }
@@ -344,7 +344,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     qfi.spin = applyPatterndir(c, si);
 
     if(grid_color) {
-      draw_floorshape(c, V, shFullFloor, 0, PPR_FLOOR);
+      draw_floorshape(c, V, shFullFloor, 0, PPR::FLOOR);
       lastptd().u.poly.outline = grid_color;
       }
       
