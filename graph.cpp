@@ -566,7 +566,7 @@ bool drawstar(cell *c) {
   }
 
 bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
-  return c && c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgItem;
+  return c && c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == sg;
   }
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {

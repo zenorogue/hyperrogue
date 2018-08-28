@@ -1706,7 +1706,8 @@ namespace mapeditor {
     return false;
   #else
   
-    if(c && c == drawcell && editingShape(group, id) && prio == PPR_DEFAULT)
+    // floors handled separately
+    if(c && c == drawcell && editingShape(group, id) && group != sgFloor)
       drawtrans = V;
 
     usershape *us = usershapes[group][id];
