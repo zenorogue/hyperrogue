@@ -962,6 +962,37 @@ namespace mapeditor {
     0x804000FF
     };
 #endif
+
+  bool area_in_pi = false;
+
+  ld compute_area(hpcshape& sh) {
+    ld area = 0;
+    for(int i=sh.s; i<sh.e-1; i++) {
+      hyperpoint h1 = hpc[i];
+      hyperpoint h2 = hpc[i+1];
+      if(euclid)
+        area += (h2[1] + h1[1]) * (h2[0] - h1[0]) / 2;
+      else {
+        hyperpoint rh2 = gpushxto0(h1) * h2;
+        hyperpoint rh1 = gpushxto0(h2) * h1;
+        // ld a1 = atan2(h1[1], h1[0]);
+        // ld a2 = atan2(h2[1], h2[0]);
+        ld b1 = atan2(rh1[1], rh1[0]);
+        ld b2 = atan2(rh2[1], rh2[0]);
+        // C0 -> H1 -> H2 -> C0
+        // at C0: (a1-a2)
+        // at H1: (rh2 - a1 - M_PI)
+        // at H2: (a2+M_PI - rh1)
+        // total: rh2 - rh1
+        // ld z = 180 / M_PI;
+        ld x = b2 - b1 + M_PI;
+        while(x > M_PI) x -= 2 * M_PI;
+        while(x < -M_PI) x += 2 * M_PI;
+        area += x;
+        }
+      }
+    return area;
+    }
     
   void showDrawEditor() {
     cmode = sm::DRAW;
@@ -1106,6 +1137,13 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("r: %1", fts4(hdist0(mh))), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) * 360 / 2 / M_PI)), 0xC0C0C0, 16);
       }
+
+    if(us) {
+      auto& sh = us->d[dslayer].sh;
+      if(sh.e >= sh.s + 3)
+        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts4(compute_area(sh) / M_PI) + "π" : fts4(compute_area(sh))), 'w', 16);
+      }
+
     
     displayFunctionKeys();
     
@@ -1418,6 +1456,8 @@ namespace mapeditor {
          mousekey = newmousekey;
        }
     
+    if(uni == 'w') area_in_pi = !area_in_pi;
+
     if(uni == 'r') {
       pushScreen(patterns::showPattern);
       if(drawplayer) 
