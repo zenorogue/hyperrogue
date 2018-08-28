@@ -4734,7 +4734,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(vid.grid) {
       dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
-      if(GOLDBERG) vid.linewidth *= gp::scale * 2;
+      vid.linewidth *= scalefactor;
 
       // sphere: 0.3948
       // sphere heptagonal: 0.5739
@@ -5082,8 +5082,7 @@ void drawFlashes() {
       kill = tim > 300;
       int partcol = darkena(f.color, 0, max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
-      ld gps = GOLDBERG ? gp::scale * 1.6 : 1;
-      queuepoly(V * spin(f.angle) * xpush(f.spd * tim * gps / 50000.), shParticle[f.size], partcol);
+      queuepoly(V * spin(f.angle) * xpush(f.spd * tim * scalefactor / 50000.), shParticle[f.size], partcol);
       }
     
     else if(f.size == 1000) {

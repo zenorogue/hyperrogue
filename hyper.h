@@ -2745,7 +2745,6 @@ namespace irr {
   extern ld density;
   extern ld quality;
   extern int cellcount;
-  extern ld scale;
   extern int place_attempts;
   extern int rearrange_max_attempts;
   extern int rearrange_less;
@@ -3073,6 +3072,9 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0,
 void queuelink(const string *link, PPR prio);
 
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
+
+extern ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
+
 unsigned char& part(int& col, int i);
 unsigned char& part(unsigned& col, int i);
 
@@ -3331,7 +3333,6 @@ namespace gp {
   typedef pair<int, int> loc;
   void compute_geometry();
   void extend_map(cell *c, int d);  
-  extern ld scale;
   extern loc param;
   extern loc eudir(int dir);
   extern int area;

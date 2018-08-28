@@ -2,7 +2,6 @@ namespace hr { namespace gp {
   loc param(1, 0);
 
   hyperpoint next;
-  ld scale;
   ld alpha;
   int area;
   
@@ -582,9 +581,11 @@ namespace hr { namespace gp {
       int y = param.second;
       area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
       next = hpxyz(x+y/2., -y * sqrt(3) / 2, 0);
-      scale = 1 / hypot2(next);
+      ld scale = 1 / hypot2(next);
       crossf *= scale;
       hepvdist *= scale;
+      hexhexdist *= scale;
+      hexvdist *= scale;
       rhexf *= scale;
 //    spin = spintox(next);
 //    ispin = rspintox(next);
@@ -600,7 +601,6 @@ namespace hr { namespace gp {
         Xprintf("scale = " LDF "\n", scale);
       }
     else {
-      scale = 1;
       alpha = 0;
       }
     }

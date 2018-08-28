@@ -506,18 +506,17 @@ bool step(int delta) {
   return false;
   }
 
-ld scale;
-
 void compute_geometry() {
   if(IRREGULAR) {
-    scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
+    ld scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
     crossf *= scale;
     hepvdist *= scale;
     rhexf *= scale;
+    hexhexdist *= scale;
+    hexvdist *= scale;
     base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
     if(base_distlimit > 25) base_distlimit = 25;
     }
-  else scale = 1;
   }
 
 bool draw_cell_schematics(cell *c, transmatrix V) {

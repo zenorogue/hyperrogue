@@ -34,6 +34,8 @@ ld hexshift;
 ld hcrossf7 = 0.620672;
 ld hexf7 = 0.378077;
 
+ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
+
 // the distance between two hexagon centers
 
 void precalc() {
@@ -161,10 +163,32 @@ void precalc() {
     hexhexdist, hexvdist);  
   
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
-  
+
   gp::compute_geometry();  
   irr::compute_geometry();
-  if(archimedean) arcm::current.compute_geometry();
+  if(archimedean) {
+    arcm::current.compute_geometry();
+    crossf = hcrossf7 * arcm::current.scale();
+    hexvdist = arcm::current.scale() * .5;
+    rhexf = arcm::current.scale() * .5;
+    }
+  if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
+
+  scalefactor = crossf / hcrossf7;
+  orbsize = crossf;
+
+  zhexf = BITRUNCATED ? hexf : crossf* .55;
+
+  floorrad0 = hexvdist* 0.92;
+  floorrad1 = rhexf * 0.94;
+  
+  if(euclid4) {
+    if(!BITRUNCATED)
+      floorrad0 = floorrad1 = rhexf * .94;
+    else
+      floorrad0 = hexvdist * .9,
+      floorrad1 = rhexf * .8;
+    }
   }
 
 transmatrix xspinpush(ld dir, ld dist) {
@@ -243,7 +267,7 @@ namespace geom3 {
   
   ld actual_wall_height() {
       if(GOLDBERG && gp_autoscale_heights) 
-        return wall_height * min<ld>(4 * gp::scale, 1);
+        return wall_height * min<ld>(4 / hypot2(gp::next), 1);
       return wall_height;
       }
   
