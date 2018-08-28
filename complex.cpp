@@ -3199,14 +3199,14 @@ namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(sphere && STDVAR)
-        for(int l=0; l<cw.at->type; l++) v.push_back(getId(cw+l+wstep));
-      else
+      if(NONSTDVAR && !sphere)
         for(int l=0; l<S7; l++) {
           heptspin hs(cw.at->master, cw.spin);
           hs = hs + l + wstep;
           v.push_back(getId(cellwalker(hs.at->c7, hs.spin)));
           }
+      else
+        for(int l=0; l<cw.at->type; l++) v.push_back(getId(cw+l+wstep));
       }
     
     int N = isize(samples);
