@@ -62,7 +62,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.cdata = NULL;
   h.alt = NULL;
   h.distance = 0;
-  isnonbitrunc = nonbitrunc;
+  mvar = variation;
   if(binarytiling) {
     #if DEBUG_BINARY_TILING
     binary::xcode.clear();
@@ -73,7 +73,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     h.zebraval = 0,
     h.c7 = newCell(6, origin);
     }
-  else if(irr::on)
+  else if(IRREGULAR)
     irr::link_start(origin);
   else
     h.c7 = newCell(S7, origin);
@@ -94,10 +94,10 @@ vector<int> siblings;
   
 struct hrmap_spherical : hrmap {
   heptagon *dodecahedron[12];
-  bool isnonbitrunc;
+  eVariation mvar;
 
   hrmap_spherical() {
-    isnonbitrunc = nonbitrunc;
+    mvar = variation;
     for(int i=0; i<spherecells(); i++) {
       heptagon& h = *(dodecahedron[i] = new heptagon);
       h.s = hsOrigin;
@@ -109,7 +109,7 @@ struct hrmap_spherical : hrmap {
       h.cdata = NULL;
       h.c.fullclear();
       h.fieldval = i;
-      if(!irr::on) h.c7 = newCell(S7, &h);
+      if(!IRREGULAR) h.c7 = newCell(S7, &h);
       }
     if(S7 == 5)
       siblings = {1, 0, 10, 4, 3, 8, 9, 11, 5, 6, 2, 7};
@@ -177,7 +177,7 @@ struct hrmap_spherical : hrmap {
         }
       }
 
-    if(irr::on) {
+    if(IRREGULAR) {
       irr::link_start(dodecahedron[0]);
       for(int i=0; i<spherecells(); i++)
         for(int j=0; j<S7; j++)
@@ -188,7 +188,7 @@ struct hrmap_spherical : hrmap {
   heptagon *getOrigin() { return dodecahedron[0]; }
 
   ~hrmap_spherical() {
-    dynamicval<bool> ph(nonbitrunc, isnonbitrunc);
+    dynamicval<eVariation> ph(variation, mvar);
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
     for(int i=0; i<spherecells(); i++) delete dodecahedron[i];
     }    
@@ -353,10 +353,10 @@ int euclid_getvec(int dx, int dy) {
 template<class T> void build_euclidean_moves(cell *c, int vec, const T& builder) {
   int x, y;
   tie(x,y) = vec_to_pair(vec);
-  c->type = a4 ? (nonbitrunc || ((x^y^1) & 1) ? 4 : 8) : 6;
+  c->type = a4 ? (PURE || ((x^y^1) & 1) ? 4 : 8) : 6;
 
   if(c->type == 4) {
-    int m = nonbitrunc ? 1 : 2;
+    int m = PURE ? 1 : 2;
     builder(euclid_getvec(+1,+0), 0, 2 * m);        
     builder(euclid_getvec(+0,+1), 1, 3 * m);
     builder(euclid_getvec(-1,+0), 2, 0 * m);
@@ -723,7 +723,7 @@ struct hrmap_quotient : hrmap {
         h->fieldval = S7*i;
         h->rval0 = h->rval1 = 0; h->cdata = NULL;
         h->distance = 0;
-        if(!irr::on) h->c7 = newCell(S7, h);
+        if(!IRREGULAR) h->c7 = newCell(S7, h);
         }
       for(int j=0; j<S7; j++) {
         int co = connections[i*S7+j];
@@ -744,7 +744,7 @@ struct hrmap_quotient : hrmap {
         allh[i]->move[j]->alt = createStep(allh[i]->alt, j); */
       }    
     
-    if(irr::on) {
+    if(IRREGULAR) {
       irr::link_start(allh[0]);
       for(int i=0; i<TOT; i++)
         for(int j=0; j<S7; j++)
@@ -786,24 +786,24 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->move(d)) return c->move(d);
-  else if(irr::on) {
+  else if(IRREGULAR) {
     irr::link_cell(c, d);
     }
-  else if(nonbitrunc && gp::on) {
+  else if(GOLDBERG) {
     gp::extend_map(c, d);
     if(!c->move(d)) {
       printf("extend failed to create for %p/%d\n", c, d);
       exit(1);
       }
     }
-  else if(nonbitrunc && archimedean) {
+  else if(PURE && archimedean) {
     if(arcm::id_of(c->master) <= arcm::current.N * 2) {
       heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
       c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
       }
     else c->c.connect(d, c, d, false);
     }
-  else if(nonbitrunc || archimedean) {
+  else if(PURE || archimedean) {
     heptagon *h2 = createStep(c->master, d);
     c->c.connect(d, h2->c7,c->master->c.spin(d),false);
     }
@@ -906,12 +906,12 @@ void clearcell(cell *c) {
 heptagon deletion_marker;
 
 template<class T> void subcell(cell *c, const T& t) {
-  if(gp::on) {
+  if(GOLDBERG) {
     forCellEx(c2, c) if(c2->move(0) == c && c2 != c2->master->c7) {
       subcell(c2, t);
       }
     }
-  else if(!nonbitrunc && !archimedean && !binarytiling)
+  else if(BITRUNCATED && !archimedean && !binarytiling)
     forCellEx(c2, c) t(c2);
   t(c);
   }
@@ -921,7 +921,7 @@ void clearHexes(heptagon *at) {
     delete at->cdata;
     at->cdata = NULL;
     }
-  if(irr::on) irr::clear_links(at);
+  if(IRREGULAR) irr::clear_links(at);
   else if(at->c7) subcell(at->c7, clearcell);
   }
 
@@ -980,7 +980,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->move(i);
     if(c2) {
-      if(!masterless && !nonbitrunc && c == c->master->c7) verifycell(c2);
+      if(!masterless && BITRUNCATED && c == c->master->c7) verifycell(c2);
       if(c2->move(c->c.spin(i)) && c2->move(c->c.spin(i)) != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->c.spin(i), c2->type);
         exit(1);
@@ -990,7 +990,7 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
-  if(gp::on || irr::on || archimedean) return;
+  if(GOLDBERG || IRREGULAR || archimedean) return;
   for(int i=0; i<S7; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
     }
@@ -1036,9 +1036,9 @@ int celldist(cell *c) {
   if(masterless)
     return eudist(decodeId(c->master));
   if(sphere) return celldistance(c, currentmap->gamestart());
-  if(irr::on) return irr::celldist(c, false);
+  if(IRREGULAR) return irr::celldist(c, false);
   if(binarytiling || archimedean || ctof(c)) return c->master->distance;
-  if(gp::on) return gp::compute_dist(c, celldist);
+  if(GOLDBERG) return gp::compute_dist(c, celldist);
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -1065,9 +1065,9 @@ int celldistAlt(cell *c) {
     return celldist(c) - 3;
     }
   if(!c->master->alt) return 0;
-  if(irr::on) return irr::celldist(c, true);
+  if(IRREGULAR) return irr::celldist(c, true);
   if(ctof(c)) return c->master->alt->distance;
-  if(gp::on) return gp::compute_dist(c, celldistAlt);
+  if(GOLDBERG) return gp::compute_dist(c, celldistAlt);
   int dx[MAX_S3]; dx[0] = 0;
   for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;
@@ -1425,14 +1425,14 @@ map<pair<cell*, cell*>, int> saved_distances;
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
-  if((masterless) && (euclid6 || (euclid4 && nonbitrunc))) {
+  if((masterless) && (euclid6 || (euclid4 && PURE))) {
     if(!torus)
       return eudist(decodeId(c1->master) - decodeId(c2->master));
     else if(torus && torusconfig::torus_mode == 0) 
       return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
     }
   
-  if(geometry == gFieldQuotient && !gp::on)
+  if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
 
   if(sphere || quotient || torus) {
@@ -1450,7 +1450,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on || masterless || irr::on || archimedean || binarytiling) {
+  if(NONSTDVAR || masterless || archimedean || binarytiling) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
@@ -1495,7 +1495,7 @@ int celldistance(cell *c1, cell *c2) {
       if(ac == xtgt) return d;
       ac = chosenDown(ac, 1, 1, celldist);
       if(ac == tgt) return d+2;
-      if(!nonbitrunc) {
+      if(BITRUNCATED) {
         ac = chosenDown(ac, 1, 1, celldist);
         if(ac == tgt) {
           if(chosenDown(ac0, 1, 0, celldist) ==

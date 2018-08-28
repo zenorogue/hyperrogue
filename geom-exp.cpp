@@ -73,15 +73,15 @@ void showQuotientConfig() {
     else if(uni == 'p')
       nextPrime(gxcur);
     else if(uni == 'x' || uni == '\n') {
-      targetgeometry = gxcur.base; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gxcur.base);
       enableFieldChange();
-      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gFieldQuotient);
       start_game();
       }
     else if(uni == 'c') {
-      targetgeometry = gEuclid; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gEuclid);
       fieldpattern::quotient_field_changed = false;
-      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gFieldQuotient);
       start_game();
       }
     else if(doexiton(sym, uni))
@@ -188,23 +188,23 @@ void showTorusConfig() {
     else if(uni == 't')
       torus_bitrunc = !torus_bitrunc;
     else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) {
-      targetgeometry = gNormal; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gNormal);
       torusconfig::torus_mode = torusconfig::newmode;
       torusconfig::qty = torusconfig::newqty;
       torusconfig::dy = torusconfig::newdy;
       torusconfig::sdx = torusconfig::newsdx;
       torusconfig::sdy = torusconfig::newsdy;
       torusconfig::activate();
-      if((square && torus_bitrunc) != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
-      targetgeometry = gTorus; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gTorus);
+      set_variation((torus_bitrunc || !square) ? eVariation::bitruncated : eVariation::pure);
       start_game();
       }
     else if(uni == 'c') {
-      targetgeometry = gEuclid; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gEuclid);
       torusconfig::torus_mode = torusconfig::tmSingle;
       torusconfig::qty = torusconfig::def_qty;
       torusconfig::dy = torusconfig::def_dy;
-      targetgeometry = gTorus; stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gTorus);
       start_game();
       }
     else if(uni == 'z') editScale();
@@ -218,7 +218,7 @@ void showTorusConfig() {
   dialog::display();
   }
 
-string bitruncnames[2] = {" (b)", " (n)"};
+string bitruncnames[5] = {" (b)", " (n)", " (g)", " (i)", " (d)"};
 
 void validity_info() {
   int vccolors[4] = {0xFF0000, 0xFF8000, 0xFFFF00, 0x00FF00};
@@ -260,10 +260,10 @@ void showEuclideanMenu() {
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
     int tq = ginf[geometry].quotientstyle;
-    int nom = (nonbitrunc ? tv : tv+ts) * ((tq & qNONORIENTABLE) ? 2 : 4);
+    int nom = (BITRUNCATED ? tv+ts : tv) * ((tq & qNONORIENTABLE) ? 2 : 4);
     int denom = (2*ts + 2*tv - ts * tv);
     
-    if(gp::on) {
+    if(GOLDBERG) {
       denom *= 2;
       nom = nom / tv * (2*tv + ts * (gp::area-1));
       if(nom % 2 == 0) nom /= 2, denom /= 2;
@@ -290,11 +290,8 @@ void showEuclideanMenu() {
       dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
     else if(archimedean)
       dialog::addSelItem(XLAT("variations"), XLAT("Not implemented."), 'v');
-    else {
-      dialog::addBoolItem(XLAT("variations"), nonbitrunc, 'v');
-      dialog::lastItem().value = gp::operation_name();
-      }
-    
+    else
+      dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
   
     dialog::addBreak(25);
     validity_info();    
@@ -303,8 +300,8 @@ void showEuclideanMenu() {
     int worldsize;
     
     int gar = 
-      gp::on ? gp::area - 1 :
-      nonbitrunc ? 0 :
+      GOLDBERG ? gp::area - 1 :
+      PURE ? 0 :
       2;    
     
     switch(geometry) {
@@ -389,11 +386,11 @@ void showEuclideanMenu() {
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       if(uni >= 'a' && uni < 'a'+gGUARD) {
-        targetgeometry = eGeometry(uni - 'a');
+        eGeometry targetgeometry = eGeometry(uni - 'a');
         if(targetgeometry == gArchimedean)
           pushScreen(arcm::show);
         else {
-          stop_game_and_switch_mode(geometry == targetgeometry ? rg::nothing : rg::geometry);
+          set_geometry(targetgeometry);
           start_game();
           }
         }
@@ -410,12 +407,12 @@ void showEuclideanMenu() {
             #endif
             };
           }
+        else if(euclid4) {
+          set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
+          start_game();
+          }
         else // if(S3 == 3) 
           gp::configure();
-        /* else {
-          stop_game_and_switch_mode(rg::bitrunc);
-          start_game();
-          } */
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
       else if(uni == '3') { viewdists = !viewdists; if(viewdists) popScreenAll(); }
@@ -438,7 +435,7 @@ void showEuclideanMenu() {
           torusconfig::newsdx = torusconfig::sdx,
           torusconfig::newsdy = torusconfig::sdy,
           torusconfig::newmode = torusconfig::torus_mode,
-          torus_bitrunc = nonbitrunc,
+          torus_bitrunc = PURE,
           pushScreen(showTorusConfig);
         else if(geometry == gFieldQuotient) 
           pushScreen(showQuotientConfig);
@@ -450,7 +447,7 @@ void showEuclideanMenu() {
   else {
     dialog::init(XLAT("experiment with geometry"));
   
-    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(bitruncnames[nonbitrunc]), '5');
+    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(bitruncnames[int(variation)]), '5');
     dialog::addBreak(50);
     
     generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_geom_exp; });
@@ -552,9 +549,7 @@ int read_geom_args() {
 
     fgeomextras[current_extra].current_prime_id = b;
     enableFieldChange();
-    if(geometry != gFieldQuotient) {
-      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
-      }
+    set_geometry(gFieldQuotient);
     }
   else if(argis("-cs")) {
     shift(); cheat();
@@ -586,19 +581,17 @@ int read_geom_args() {
       torusconfig::dy = torusconfig::sdy;
     torusconfig::activate();
     }
-  TOGGLE('7', nonbitrunc, stop_game_and_switch_mode(rg::bitrunc))
+  TOGGLE('7', PURE, set_variation(PURE ? eVariation::bitruncated : eVariation::pure))
   else if(argis("-geo")) { 
     PHASEFROM(2);
-    shift(); targetgeometry = (eGeometry) argi();
-    if(targetgeometry != geometry)
-      stop_game_and_switch_mode(rg::geometry);
+    shift(); 
+    set_geometry((eGeometry) argi());
     }
   else if(argis("-gp")) {
     PHASEFROM(2);
-    stop_game_and_switch_mode(rg::nothing);
     shift(); gp::param.first = argi();
     shift(); gp::param.second = argi();
-    stop_game_and_switch_mode(rg::gp);
+    set_variation(eVariation::goldberg);
     }
   else if(argis("-fi")) {
     fieldpattern::info();

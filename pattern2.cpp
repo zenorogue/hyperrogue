@@ -5,7 +5,7 @@
 namespace hr {
 
 int gp_threecolor() {
-  if(!gp::on) return 0;
+  if(!GOLDBERG) return 0;
   if(S3 == 3 && (gp::param.first - gp::param.second) % 3 == 0) return 2;
   return 1;
   }
@@ -38,14 +38,14 @@ bool ishept(cell *c) {
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else if(gp::on) return c->master->c7 != c && !pseudohept(c->move(0));
+  else if(GOLDBERG) return c->master->c7 != c && !pseudohept(c->move(0));
   else return c->type != S6;
   }
 
 bool ishex2(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else if(gp::on) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
+  else if(GOLDBERG) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
   else return c->type != S6;
   }
 
@@ -140,7 +140,7 @@ int land50(cell *c) {
 
 int polara50(cell *c) {
   if(sphere || euclid || S7>7 || S6>6) return 0;
-  else if(gp::on || irr::on) return polara50(fiftyval(c->master->c7));
+  else if(NONSTDVAR) return polara50(fiftyval(c->master->c7));
   else if(ctof(c)) return polara50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
@@ -153,7 +153,7 @@ int polara50(cell *c) {
 int polarb50(cell *c) {
   if(euclid) return true;
   if(sphere || euclid || S7>7 || S6>6) return true;
-  else if(gp::on || irr::on) return polarb50(fiftyval(c->master->c7));
+  else if(NONSTDVAR) return polarb50(fiftyval(c->master->c7));
   else if(ctof(c)) return polarb50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
@@ -238,7 +238,7 @@ int fiftyval200(cell *c) {
 // zebraval
 
 int dir_bitrunc457(cell *c) {
-  if(gp::on) return c->master->zebraval / 10;
+  if(GOLDBERG) return c->master->zebraval / 10;
   int wset = 0;
   int has1 = 0;
   for(int i=0; i<4; i++) {
@@ -259,7 +259,7 @@ int val46(cell *c);
 
 int zebra40(cell *c) {
   if(euclid) return eupattern(c);
-  else if(irr::on) return c->master->zebraval/10;
+  else if(IRREGULAR) return c->master->zebraval/10;
   else if(a46) {
     int v = val46(c);
     if(v<4) return v;
@@ -267,7 +267,7 @@ int zebra40(cell *c) {
     }
   else if(ctof(c)) return (c->master->zebraval/10);
   else if(a4) {
-    if(gp::on) return zebra40(c->master->c7);
+    if(GOLDBERG) return zebra40(c->master->c7);
     int ws = dir_bitrunc457(c);
     if(ws < 0) return -ws;
     int tot = 0; 
@@ -341,8 +341,8 @@ pair<int, bool> fieldval(cell *c) {
 int fieldval_uniq(cell *c) {
   if(sphere) {
     if(archimedean) return c->master->fiftyval;
-    else if(irr::on) return irr::cellindex[c];
-    else if(gp::on) return (get_code(gp::get_local_info(c)) << 8) | (c->master->fieldval / S7);
+    else if(IRREGULAR) return irr::cellindex[c];
+    else if(GOLDBERG) return (get_code(gp::get_local_info(c)) << 8) | (c->master->fieldval / S7);
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
@@ -354,7 +354,7 @@ int fieldval_uniq(cell *c) {
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
   else if(binarytiling || archimedean) return 0;
-  else if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
+  else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
@@ -364,7 +364,7 @@ int fieldval_uniq(cell *c) {
   }
 
 int fieldval_uniq_rand(cell *c, int randval) {
-  if(sphere || torus || euclid || gp::on || irr::on) 
+  if(sphere || torus || euclid || NONSTDVAR) 
     // we do not care in these cases
     return fieldval_uniq(c);
   if(ctof(c)) return currfp.gmul(c->master->fieldval, randval)/7;
@@ -433,7 +433,7 @@ int getHemisphere(heptagon *h, int which) {
 
 int getHemisphere(cell *c, int which) {
   if(torus) return 0;
-  if(which == 0 && gp::on && has_nice_dual()) {
+  if(which == 0 && GOLDBERG && has_nice_dual()) {
     set<cell*> visited;
     vector<cell*> q;
     vector<int> type;
@@ -465,7 +465,7 @@ int getHemisphere(cell *c, int which) {
     return getHemisphere(c->master, which);
   else {
     int score = 0;
-    if(gp::on) {
+    if(GOLDBERG) {
       auto li = gp::get_local_info(c);
       gp::be_in_triangle(li);
       auto corner = gp::corners * gp::loctoh_ort(li.relative);
@@ -479,7 +479,7 @@ int getHemisphere(cell *c, int which) {
       if(score == 0 && error < -.001) score--;
       return score;
       }
-    else if(irr::on) {
+    else if(IRREGULAR) {
       auto m = irr::get_masters(c);
       for(int i=0; i<3; i++)
         score += getHemisphere(m[i], which);
@@ -635,11 +635,11 @@ namespace patterns {
         si.id = (c->master->fiftyval >> 1) & 3;
       else
         si.id = 0;
-      if(nonbitrunc && gp_threecolor() != 2)
+      if(!BITRUNCATED && gp_threecolor() != 2)
         si.id *= 4;
       else 
         si.id += 4;
-      si.dir = (pat == PAT_COLORING && !nonbitrunc ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
+      si.dir = (pat == PAT_COLORING && BITRUNCATED ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
       si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
@@ -649,14 +649,14 @@ namespace patterns {
       }
     else {
       int sp = c->c.spin(0);
-      if(gp::on) {
+      if(GOLDBERG) {
         sp = gp::last_dir(c);
         sp ^= int(ishex2(c));
         }
-      if(geometry == gBolza2 && (!gp::on || gp_threecolor() == 2)) {
+      if(geometry == gBolza2 && (!GOLDBERG || gp_threecolor() == 2)) {
         patterninfo si0;
         patterninfo si1;
-        if(gp::on) {
+        if(GOLDBERG) {
           auto li = gp::get_local_info(c);
           val38(c->master->c7, si0, 0, PAT_COLORING);
           val38(c->master->move(li.last_dir)->c7, si1, 0, PAT_COLORING);
@@ -672,7 +672,7 @@ namespace patterns {
         }
       else 
         si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
-      if(gp::on && pseudohept(c)) si.id = 4;
+      if(GOLDBERG && pseudohept(c)) si.id = 4;
       bool dock = false;
       for(int i=0; i<c->type; i+=2) {
         int fiv = createMov(c, i)->master->fiftyval;
@@ -685,13 +685,13 @@ namespace patterns {
       if(symRotation) si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
-      if(gp::on && pat == PAT_COLORING) 
+      if(GOLDBERG && pat == PAT_COLORING) 
         for(int i=0; i<c->type; i++) {
           cell *c2 = createMov(c, i);
           int id2 = 4;
           if(!pseudohept(c2)) {
             int sp2 = c2->c.spin(0);
-            if(gp::on) {
+            if(GOLDBERG) {
               sp2 = gp::last_dir(c2);
               sp2 ^= int(ishex2(c2));
               }
@@ -733,7 +733,7 @@ namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(irr::on || archimedean || binarytiling) si.symmetries = 1;
+    if(IRREGULAR || archimedean || binarytiling) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere) valSibling(c, si, sub, pat);
@@ -745,7 +745,7 @@ namespace patterns {
 
   void val_warped(cell *c, patterninfo& si) {
     int u = ishept(c)?1:0;
-    if(S3 != 3 || S7 != 7 || gp::on || irr::on) {
+    if(S3 != 3 || S7 != 7 || NONSTDVAR) {
       si.id = u;
       si.dir = 1;
       return;
@@ -815,7 +815,7 @@ namespace patterns {
     val_all(c, si, 0, 0);
     
     // get id:
-    if((gp::on? (S3==3) : !weirdhyperbolic) && isWarped(c)) 
+    if((GOLDBERG? (S3==3) : !weirdhyperbolic) && isWarped(c)) 
       val_warped(c, si);
     else {
       si.id = pseudohept(c) ? 1 : 0;
@@ -827,13 +827,13 @@ namespace patterns {
         if(subpattern_flags & SPF_FULLSYM) 
           si.symmetries = 1;
         }      
-      if(sphere && !(nonbitrunc) && !(S7 == 3))
+      if(sphere && BITRUNCATED && !(S7 == 3))
         si.symmetries = ctof(c) ? 1 : 2;
       if(sphere && (sub & SPF_EXTRASYM)) {
         si.symmetries = ctof(c) ? 1 : 2;
         }
       if(a38)
-        si.symmetries = (ctof(c) && !nonbitrunc) ? 1 : 2;
+        si.symmetries = (ctof(c) && BITRUNCATED) ? 1 : 2;
       if(a457) {
         si.symmetries = ctof(c) ? 1 : 2;
         if(!ctof(c)) si.dir = 0;
@@ -843,7 +843,7 @@ namespace patterns {
         }
       }
     
-    if(gp::on && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
+    if(GOLDBERG && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
     }
   
   ePattern whichPattern = PAT_NONE;
@@ -917,7 +917,7 @@ namespace patterns {
       si.id = zebra40(c); // 4 to 43
       int t4 = si.id>>2, tcdir = 0;
       
-      if(nonbitrunc) tcdir = si.id^1;
+      if(PURE) tcdir = si.id^1;
       
       else if(t4 == 10) tcdir = si.id-20;
       else if(t4 >= 4 && t4 < 7) tcdir = 40 + (si.id&3);
@@ -972,11 +972,11 @@ namespace patterns {
       int look_for = -1;
       int shft = 0;
       if(inr(si.id, 0, 4)) {
-        look_for = si.id + (nonbitrunc ? 4 : 60);
+        look_for = si.id + (PURE ? 4 : 60);
         if(symRotation) si.symmetries = 1;
         }
-      else if(inr(si.id, 4, 32)) look_for = si.id + (nonbitrunc ? 28 : 168);
-      else if(inr(si.id, 32, 60)) look_for = si.id + (nonbitrunc ? -28 : 112);
+      else if(inr(si.id, 4, 32)) look_for = si.id + (PURE ? 28 : 168);
+      else if(inr(si.id, 32, 60)) look_for = si.id + (PURE ? -28 : 112);
       else if(inr(si.id, 60, 88)) look_for = si.id - 56, shft = si.reflect ? 1 : 5;
       else if(inr(si.id, 88, 116)) look_for = si.id - 84, shft = 3;
       else if(inr(si.id, 116, 144)) look_for = si.id + 56;
@@ -1020,7 +1020,7 @@ namespace patterns {
       if(euclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
-      else if(nonbitrunc && !archimedean && !gp::on && !irr::on)
+      else if(PURE && !archimedean)
         // use the actual field codes
         si.id = fieldpattern::fieldval(c).first;
       else          
@@ -1037,7 +1037,7 @@ namespace patterns {
       val_all(c, si, sub, pat);
       }
     
-    else if(gp::on) {
+    else if(GOLDBERG) {
       bool football = (pat == PAT_COLORING && (sub & SPF_FOOTBALL)) || pat == 0;
       if(football) val_nopattern(c, si, sub);
       else val_threecolors(c, si, sub);
@@ -1065,18 +1065,18 @@ namespace patterns {
   }
 
 bool geosupport_chessboard() {
-  return archimedean ? arcm::current.support_chessboard() : (nonbitrunc && S3 == 4);
+  return archimedean ? arcm::current.support_chessboard() : (VALENCE % 2 == 0);
   }
 
 int geosupport_threecolor() {
-  if(irr::on) return 0;
-  if(!nonbitrunc && S3 == 3) {
+  if(IRREGULAR) return 0;
+  if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
     }
   if((S7 % 2 == 0) && (S3 == 3))
     return 2;
-  if(a46 && nonbitrunc)
+  if(a46 && PURE)
     return 1;
   if(archimedean) return arcm::current.support_threecolor();
   return 0;
@@ -1084,11 +1084,11 @@ int geosupport_threecolor() {
 
 int geosupport_football() {
   // always works in bitrunc geometries
-  if(!nonbitrunc) return 2;
+  if(BITRUNCATED) return 2;
 
   if(archimedean) return arcm::current.support_football();
 
-  if(irr::on) return irr::bitruncations_performed ? 2 : 1;
+  if(IRREGULAR) return irr::bitruncations_performed ? 2 : 1;
   
   // always works in patterns supporting three-color
   int tc = max(geosupport_threecolor(), gp_threecolor());
@@ -1097,13 +1097,13 @@ int geosupport_football() {
   if(S3 == 3 && S7 == 7) return 1;
   // nice chessboard pattern, but not the actual Graveyard
   if(S3 == 4 && !(S7&1)) return 1;
-  if(S3 == 4 && gp::on) return 1;
+  if(S3 == 4 && GOLDBERG) return 1;
   return 0;
   }
 
 int pattern_threecolor(cell *c) {
   if(archimedean) return arcm::threecolor(arcm::id_of(c->master));
-  if(irr::on || binarytiling) return !pseudohept(c);
+  if(IRREGULAR || binarytiling) return !pseudohept(c);
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
     int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
@@ -1116,12 +1116,12 @@ int pattern_threecolor(cell *c) {
       return pattern_threecolor(createStep(c->master, fix7(li.last_dir+1))->c7);
     }
   if(a38) {
-    // if(gp::on && gp_threecolor() == 2 && gp::pseudohept_val(c) == 0) return 0;
+    // if(GOLDBERG && gp_threecolor() == 2 && gp::pseudohept_val(c) == 0) return 0;
     patterns::patterninfo si;
-    patterns::val38(c, si, nonbitrunc ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
+    patterns::val38(c, si, !BITRUNCATED ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
     }
-  if(a4 && gp::on) {
+  if(a4 && GOLDBERG) {
     patterns::patterninfo si;
     auto li = gp::get_local_info(c);
     if(S7 & 1) return (li.relative.first&1) + (li.relative.second&1)*2;
@@ -1137,14 +1137,14 @@ int pattern_threecolor(cell *c) {
     if(li.relative.second & 1) i ^= i2;
     return i;
     }
-  if(a46 && !nonbitrunc) {
+  if(a46 && BITRUNCATED) {
     patterns::patterninfo si;
     patterns::val46(c, si, 0, patterns::PAT_COLORING);
     int i = si.id;
     return i >> 2;
     }
   if(euclid) {
-    if(a4 && nonbitrunc) return eupattern4(c);
+    if(a4 && PURE) return eupattern4(c);
     return eupattern(c) % 3;
     }
   if(S7 == 4 && S3 == 3) {
@@ -1160,7 +1160,7 @@ int pattern_threecolor(cell *c) {
         }
       return sp;
       }
-    if(nonbitrunc) 
+    if(PURE)
       return codesN[c->master->fiftyval];
     if(ctof(c))
       return 0;
@@ -1172,7 +1172,7 @@ int pattern_threecolor(cell *c) {
         return 2 - (c->c.spin(i)&1);
       }
     }
-  if(stdhyperbolic && nonbitrunc) {
+  if(stdhyperbolic && PURE) {
     int z = zebra40(c);
     if(z == 5 || z == 8 || z == 15) return 0;
     if(c->land == laSnakeNest) {
@@ -1182,16 +1182,16 @@ int pattern_threecolor(cell *c) {
       }
     return 1;
     }
-  if(a46 && nonbitrunc) {
+  if(a46 && !BITRUNCATED) {
     patterns::patterninfo si;
     patterns::val46(c, si, 0, patterns::PAT_COLORING);
     return si.id;
     }
-  if(S7 == 5 && nonbitrunc && S3 == 3) {
+  if(S7 == 5 && PURE && S3 == 3) {
     const int codes[12] = {1, 2, 0, 3, 2, 0, 0, 1, 3, 1, 2, 3};
     return codes[c->master->fiftyval];
     }
-  if(S7 == 3 && nonbitrunc)
+  if(S7 == 3 && PURE)
     return c->master->fiftyval;
   if(gp_threecolor() && (S7&1))
     return gp::pseudohept_val(c) > 0;
@@ -1202,12 +1202,12 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
-  if(irr::on) return irr::pseudohept(c);
+  if(IRREGULAR) return irr::pseudohept(c);
   if(binarytiling) return c->type & c->master->distance & 1;
   if(archimedean) return arcm::pseudohept(arcm::id_of(c->master));
-  if(gp::on && gp_threecolor() == 2)
+  if(GOLDBERG && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
-  if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
+  if(GOLDBERG && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
     return gp::pseudohept_val(c) == 0;
   return pattern_threecolor(c) == 0;
   }
@@ -1215,9 +1215,9 @@ bool pseudohept(cell *c) {
 // while Krakens movement is usually restricted to non-pseudohept cells,
 // there is one special case when this does not work (because non-pseudohept cells have varying degrees)
 bool kraken_pseudohept(cell *c) {
-  if(!euclid && S3 == 4 && gp::on && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
+  if(!euclid && S3 == 4 && GOLDBERG && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
     return ishept(c);
-  else if(irr::on)
+  else if(IRREGULAR)
     return c->type != 6;
   else if(archimedean)
     return c->type == isize(arcm::current.triangles[0]);
@@ -1230,7 +1230,7 @@ bool kraken_pseudohept(cell *c) {
 bool warptype(cell *c) {
   if(geosupport_chessboard()) 
     return chessvalue(c);
-  else if(gp::on || irr::on)
+  else if(NONSTDVAR)
     return pseudohept(c);
   else
     return pattern_threecolor(c) == 0;
@@ -1549,7 +1549,7 @@ namespace patterns {
     
     if((euclid && whichPattern == PAT_COLORING) ||
       (a38 && whichPattern == PAT_COLORING) ||
-      (a4 && nonbitrunc && whichPattern == PAT_COLORING && !a46))
+      (a4 && !BITRUNCATED && whichPattern == PAT_COLORING && !a46))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
     if(euclid && whichPattern == PAT_COLORING)
@@ -1558,7 +1558,7 @@ namespace patterns {
     if(a46 && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
 
-    if(a46 && whichPattern == PAT_COLORING && !nonbitrunc)
+    if(a46 && whichPattern == PAT_COLORING && BITRUNCATED)
       dialog::addBoolItem(XLAT("edit both bitrunc colors"), subpattern_flags & SPF_TWOCOL, '5');
 
     if(
@@ -1572,10 +1572,10 @@ namespace patterns {
       dialog::addBoolItem(XLAT("symmetry 0-2"), subpattern_flags & SPF_SYM02, '2');
       dialog::addBoolItem(XLAT("symmetry 0-3"), subpattern_flags & SPF_SYM03, '3');
       }
-    if(euclid && among(whichPattern, PAT_COLORING, 0) && !archimedean)
+    if(euclid && among(whichPattern, PAT_COLORING, PAT_TYPES) && !archimedean)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
-    if(archimedean && arcm::current.have_symmetry && whichPattern == 0)
+    if(archimedean && arcm::current.have_symmetry && whichPattern == PAT_TYPES)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
     if(whichPattern == PAT_SINGLETYPE) {
@@ -1586,15 +1586,15 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("full symmetry"), subpattern_flags & SPF_FULLSYM, '!');
 
-    if(a38 && nonbitrunc && whichPattern == 0) {
+    if(a38 && PURE && whichPattern == PAT_TYPES) {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if(a46 && nonbitrunc && whichPattern == PAT_COLORING) {
+    if(a46 && PURE && whichPattern == PAT_COLORING) {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if((whichPattern == PAT_COLORING) || (whichPattern == 0 && archimedean)) {
+    if((whichPattern == PAT_COLORING) || (whichPattern == PAT_TYPES && archimedean)) {
       dialog::addBoolItem(XLAT("alternate coloring"), subpattern_flags & SPF_ALTERNATE, '\'');
       dialog::addBoolItem(XLAT("football pattern"), subpattern_flags & SPF_FOOTBALL, '*');
       }
@@ -1692,7 +1692,7 @@ namespace patterns {
   
   struct changeable_pattern_geometry {
     eGeometry geo;
-    bool nonbitru;
+    eVariation var;
     ePattern whichPattern;
     int subpattern_flags;
     };
@@ -1704,85 +1704,85 @@ namespace patterns {
   
   vector<changeable_pattern> cpatterns = {
     {"football", {
-      {gNormal, false, PAT_TYPES, 0}, 
-      {gSphere, false, PAT_TYPES, 0}, 
-      {gEuclid, false, PAT_TYPES, SPF_EXTRASYM}, 
-      {gOctagon, false, PAT_TYPES, 0}, 
-      {gOctagon, true, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
-      {g45, false, PAT_TYPES, 0}, 
-      {g46, false, PAT_TYPES, SPF_EXTRASYM}, 
-      {g47, false, PAT_TYPES, 0},
-      {gSmallSphere, false, PAT_TYPES, 0},
-      {gSmallSphere, true, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
-      {gTinySphere, false, PAT_TYPES, SPF_EXTRASYM},
-      {gEuclidSquare, false, PAT_TYPES, SPF_EXTRASYM},
+      {gNormal, eVariation::bitruncated, PAT_TYPES, 0}, 
+      {gSphere, eVariation::bitruncated, PAT_TYPES, 0}, 
+      {gEuclid, eVariation::bitruncated, PAT_TYPES, SPF_EXTRASYM}, 
+      {gOctagon, eVariation::bitruncated, PAT_TYPES, 0}, 
+      {gOctagon, eVariation::pure, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
+      {g45, eVariation::bitruncated, PAT_TYPES, 0}, 
+      {g46, eVariation::bitruncated, PAT_TYPES, SPF_EXTRASYM}, 
+      {g47, eVariation::bitruncated, PAT_TYPES, 0},
+      {gSmallSphere, eVariation::bitruncated, PAT_TYPES, 0},
+      {gSmallSphere, eVariation::pure, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
+      {gTinySphere, eVariation::bitruncated, PAT_TYPES, SPF_EXTRASYM},
+      {gEuclidSquare, eVariation::bitruncated, PAT_TYPES, SPF_EXTRASYM},
       }},
     {"three colors", {
-      {gEuclid, false, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM},
-      {gSmallSphere, false, PAT_COLORING, 0},
-      {gSmallSphere, false, PAT_COLORING, SPF_ALTERNATE},
-      {gSmallSphere, true, PAT_COLORING, 0},
-      {gOctagon, false, PAT_COLORING, SPF_ROT | SPF_EXTRASYM},
-      {gOctagon, false, PAT_COLORING, SPF_ROT | SPF_EXTRASYM | SPF_ALTERNATE},
-      {gOctagon, true, PAT_COLORING, 0},
-      {gEuclidSquare, false, PAT_COLORING, SPF_SYM03 | SPF_EXTRASYM},
-      {gEuclidSquare, false, PAT_COLORING, SPF_SYM03 | SPF_EXTRASYM | SPF_ALTERNATE},
-      {g46, false, PAT_COLORING, SPF_SYM0123},
-      {g46, false, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM | SPF_ALTERNATE}
+      {gEuclid, eVariation::bitruncated, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM},
+      {gSmallSphere, eVariation::bitruncated, PAT_COLORING, 0},
+      {gSmallSphere, eVariation::bitruncated, PAT_COLORING, SPF_ALTERNATE},
+      {gSmallSphere, eVariation::pure, PAT_COLORING, 0},
+      {gOctagon, eVariation::bitruncated, PAT_COLORING, SPF_ROT | SPF_EXTRASYM},
+      {gOctagon, eVariation::bitruncated, PAT_COLORING, SPF_ROT | SPF_EXTRASYM | SPF_ALTERNATE},
+      {gOctagon, eVariation::pure, PAT_COLORING, 0},
+      {gEuclidSquare, eVariation::bitruncated, PAT_COLORING, SPF_SYM03 | SPF_EXTRASYM},
+      {gEuclidSquare, eVariation::bitruncated, PAT_COLORING, SPF_SYM03 | SPF_EXTRASYM | SPF_ALTERNATE},
+      {g46, eVariation::bitruncated, PAT_COLORING, SPF_SYM0123},
+      {g46, eVariation::bitruncated, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM | SPF_ALTERNATE}
       }},
     {"chessboard", {
-      {gEuclidSquare, true, PAT_CHESS, SPF_EXTRASYM}, 
-      {g45, true, PAT_CHESS, 0}, 
-      {g46, true, PAT_CHESS, 0}, 
-      {g47, true, PAT_CHESS, 0}
+      {gEuclidSquare, eVariation::pure, PAT_CHESS, SPF_EXTRASYM}, 
+      {g45, eVariation::pure, PAT_CHESS, 0}, 
+      {g46, eVariation::pure, PAT_CHESS, 0}, 
+      {g47, eVariation::pure, PAT_CHESS, 0}
       }},
     {"single type", {
-      {gNormal, true, PAT_SINGLETYPE, 0}, 
-      {gSphere, true, PAT_SINGLETYPE, 0}, 
-      {gEuclid, false, PAT_SINGLETYPE, 0}, 
-      {gOctagon, true, PAT_SINGLETYPE, 0}, 
-      {g45, true, PAT_SINGLETYPE, 0}, 
-      {g46, true, PAT_SINGLETYPE, 0}, 
-      {g47, true, PAT_SINGLETYPE, 0},
-      {gSmallSphere, true, PAT_SINGLETYPE, 0},
-      {gTinySphere, true, PAT_SINGLETYPE, 0},
-      {gEuclidSquare, true, PAT_SINGLETYPE, 0},
+      {gNormal, eVariation::pure, PAT_SINGLETYPE, 0}, 
+      {gSphere, eVariation::pure, PAT_SINGLETYPE, 0}, 
+      {gEuclid, eVariation::bitruncated, PAT_SINGLETYPE, 0}, 
+      {gOctagon, eVariation::pure, PAT_SINGLETYPE, 0}, 
+      {g45, eVariation::pure, PAT_SINGLETYPE, 0}, 
+      {g46, eVariation::pure, PAT_SINGLETYPE, 0}, 
+      {g47, eVariation::pure, PAT_SINGLETYPE, 0},
+      {gSmallSphere, eVariation::pure, PAT_SINGLETYPE, 0},
+      {gTinySphere, eVariation::pure, PAT_SINGLETYPE, 0},
+      {gEuclidSquare, eVariation::pure, PAT_SINGLETYPE, 0},
       }},
     {"single type+symmetry", {
-      {gNormal, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
-      {gSphere, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
-      {gEuclid, false, PAT_SINGLETYPE, SPF_EXTRASYM}, 
-      {gOctagon, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
-      {g45, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
-      {g46, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
-      {g47, true, PAT_SINGLETYPE, SPF_EXTRASYM},
-      {gSmallSphere, true, PAT_SINGLETYPE, SPF_EXTRASYM},
-      {gTinySphere, true, PAT_SINGLETYPE, SPF_EXTRASYM},
-      {gEuclidSquare, true, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gNormal, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {gSphere, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {gEuclid, eVariation::bitruncated, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {gOctagon, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {g45, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {g46, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {g47, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gSmallSphere, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gTinySphere, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gEuclidSquare, eVariation::pure, PAT_SINGLETYPE, SPF_EXTRASYM},
       }},
     {"odd/even", {
-      {gNormal, false, PAT_SINGLETYPE, SPF_TWOCOL}, 
-      {gSphere, false, PAT_SINGLETYPE, SPF_TWOCOL}, 
-      {g45, true, PAT_SINGLETYPE, SPF_TWOCOL}, 
-      {g47, true, PAT_SINGLETYPE, SPF_TWOCOL}
+      {gNormal, eVariation::bitruncated, PAT_SINGLETYPE, SPF_TWOCOL}, 
+      {gSphere, eVariation::bitruncated, PAT_SINGLETYPE, SPF_TWOCOL}, 
+      {g45, eVariation::pure, PAT_SINGLETYPE, SPF_TWOCOL}, 
+      {g47, eVariation::pure, PAT_SINGLETYPE, SPF_TWOCOL}
       }},
     {"large picture", {
-      {gNormal, false, PAT_PALACE, SPF_SYM0123},
-      {gNormal, true, PAT_PALACE, SPF_SYM0123},
-      {gSphere, false, PAT_FIELD, 0},
-      {gSphere, true, PAT_FIELD, 0},
-      {gElliptic, false, PAT_FIELD, 0},
-      {gElliptic, true, PAT_FIELD, 0},
-      {gEuclid, false, PAT_PALACE, 0}
+      {gNormal, eVariation::bitruncated, PAT_PALACE, SPF_SYM0123},
+      {gNormal, eVariation::pure, PAT_PALACE, SPF_SYM0123},
+      {gSphere, eVariation::bitruncated, PAT_FIELD, 0},
+      {gSphere, eVariation::pure, PAT_FIELD, 0},
+      {gElliptic, eVariation::bitruncated, PAT_FIELD, 0},
+      {gElliptic, eVariation::pure, PAT_FIELD, 0},
+      {gEuclid, eVariation::bitruncated, PAT_PALACE, 0}
       }},
     {"periodic patterns", {
-      {gNormal, false, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
-      {gNormal, false, PAT_PALACE, SPF_SYM0123 | SPF_ROT},
-      {gNormal, false, PAT_EMERALD, SPF_SYM0123 | SPF_ROT},
-      {g46, true, PAT_COLORING, SPF_SYM0123 | SPF_CHANGEROT},
-      {g45, true, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
-      {g47, true, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
-      {gOctagon, true, PAT_COLORING, SPF_DOCKS},
+      {gNormal, eVariation::bitruncated, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
+      {gNormal, eVariation::bitruncated, PAT_PALACE, SPF_SYM0123 | SPF_ROT},
+      {gNormal, eVariation::bitruncated, PAT_EMERALD, SPF_SYM0123 | SPF_ROT},
+      {g46, eVariation::pure, PAT_COLORING, SPF_SYM0123 | SPF_CHANGEROT},
+      {g45, eVariation::pure, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
+      {g47, eVariation::pure, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
+      {gOctagon, eVariation::pure, PAT_COLORING, SPF_DOCKS},
       }}
     };
   
@@ -1807,7 +1807,7 @@ namespace patterns {
       for(int j=0; j<isize(cpatterns[cgroup].geometries); j++) {
         auto &g = cpatterns[cgroup].geometries[j];
         string s = XLAT(ginf[g.geo].name);
-        s += bitruncnames[g.nonbitru];
+        s += bitruncnames[int(g.var)];
         if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
         if(g.subpattern_flags & SPF_DOCKS) s += " (Docks)";
         if(cgroup == cpZebra) {
@@ -1815,17 +1815,17 @@ namespace patterns {
           else if(g.whichPattern == PAT_EMERALD) s += " (Emerald)";
           else s += " (Zebra)";
           }
-        dialog::addBoolItem(s, geometry == g.geo && nonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
+        dialog::addBoolItem(s, geometry == g.geo && variation == g.var && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
     bool have_goldberg = (S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid);
     bool have_variations = (among(cgroup, cpSingle, cpSingleSym) && !euclid);
-    if(!(S7&1) && !nonbitrunc) have_goldberg = false; // always start from non-bitruncated
+    if(!(S7&1) && BITRUNCATED) have_goldberg = false; // always start from pure
     if(have_goldberg) {
-      dialog::addBoolItem(XLAT("Goldberg"), gp::on, 'G');
+      dialog::addBoolItem(XLAT("Goldberg"), GOLDBERG, 'G');
       dialog::lastItem().value = gp::operation_name();
       }
     if(have_variations) {
-      dialog::addBoolItem(XLAT("variations"), gp::on, 'G');
+      dialog::addBoolItem(XLAT("variations"), GOLDBERG, 'G');
       dialog::lastItem().value = gp::operation_name();
       }
     else dialog::addBreak(100);
@@ -1840,9 +1840,8 @@ namespace patterns {
         cgroup = cpatterntype(uni - '0');
       else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + isize(cpatterns[cgroup].geometries)) {
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
-        if(g.geo != geometry) { targetgeometry = g.geo; stop_game_and_switch_mode(rg::geometry); }
-        if(gp::on) stop_game_and_switch_mode(rg::gp);
-        if(g.nonbitru != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);;
+        if(g.geo != geometry) set_geometry(g.geo);
+        if(g.var != variation) set_variation(g.var);
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
         bool not_restarted = game_active;
@@ -1874,8 +1873,9 @@ namespace patterns {
     for(int i=0; i<isize(cpatterns); i++)
       for(int j=0; j<isize(cpatterns[i].geometries); j++) {
         auto &g = cpatterns[i].geometries[j];
-        bool xnonbitrunc = gp::on ? gp_threecolor() : nonbitrunc;
-        if(geometry == g.geo && xnonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
+        eVariation xvar = variation;
+        if(GOLDBERG && gp_threecolor()) xvar = eVariation::pure;
+        if(geometry == g.geo && xvar == g.var && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
           cgroup = cpatterntype(i);
         }
     old_cgroup = cgroup;
@@ -1887,11 +1887,11 @@ namespace patterns {
     }  
 
   int subcode(cell *c, const patterninfo& si) {
-    if(irr::on)
+    if(IRREGULAR)
       return irr::cellindex[c] << 8;
     else if(archimedean)
       return arcm::id_of(c->master) << 8;
-    else if(!gp::on) return 0;
+    else if(!GOLDBERG) return 0;
     else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
     else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
     }  
@@ -2089,7 +2089,6 @@ namespace linepatterns {
         if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
             queuelinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
-            // V*xspinpush0((nonbitrunc?M_PI:0) -2*M_PI*i/S7
         break;
         }
         
@@ -2121,13 +2120,13 @@ namespace linepatterns {
         break;
       
       case patVine: {
-        if(gp::on) {
+        if(GOLDBERG) {
           if(c->master->c7 != c) if(gmatrix.count(c->move(0)))
             queuelinef(tC0(V), gmatrix[c->move(0)]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
-        else if(irr::on) {
+        else if(IRREGULAR) {
           if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
             queuelinef(tC0(V), gmatrix[c->master->c7]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
@@ -2146,7 +2145,7 @@ namespace linepatterns {
         }
       
       case patPower: {
-        if(gp::on) {
+        if(GOLDBERG) {
           for(int i=0; i<S7; i++) if(c->move(i) && c->move(i)->master != c->master && gmatrix.count(c->move(i)))
             queuelinef(tC0(V), gmatrix[c->move(i)]*C0, 
               col,
@@ -2200,7 +2199,7 @@ namespace linepatterns {
     dialog::init(XLAT("line patterns"));
     
     for(numpat=0; patterns[numpat].lpname; numpat++)
-      dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && gp::on ? XLAT("Goldberg") + (patterns[numpat].id == patVine ? " " : ""): XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
+      dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && GOLDBERG ? XLAT("Goldberg") + (patterns[numpat].id == patVine ? " " : ""): XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
   
     dialog::addBreak(50);
     dialog::addBack();

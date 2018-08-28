@@ -275,8 +275,7 @@ hint hints[] = {
         resetModes();
         stop_game();
         specialland = laHalloween;
-        targetgeometry = gSphere;
-        restart_game(rg::geometry);
+        set_geometry(gSphere);
         vid.alpha = 999;
         vid.scale = 998;
         }

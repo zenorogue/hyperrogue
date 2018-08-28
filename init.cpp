@@ -39,7 +39,7 @@ void initAll() {
   initgraph();
 #if CAP_SAVE
   loadsave();
-  if(irr::on) irr::auto_creator();
+  if(IRREGULAR) irr::auto_creator();
 #endif
   start_game();
   

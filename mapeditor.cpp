@@ -112,10 +112,9 @@ namespace mapstream {
     int32_t i = VERNUM; save(i);
     save(patterns::whichPattern);
     save(geometry);
-    char nbtype = nonbitrunc;
-    if(gp::on) nbtype = 2;
+    char nbtype = char(variation);
     save(nbtype);
-    if(gp::on) {
+    if(GOLDBERG) {
       save(gp::param.first);
       save(gp::param.second);
       }
@@ -211,9 +210,8 @@ namespace mapstream {
       load(geometry);
       char nbtype;
       load(nbtype);
-      nonbitrunc = !!nbtype;
-      gp::on = nbtype == 2;
-      if(gp::on) {
+      variation = eVariation(nbtype);
+      if(GOLDBERG) {
         load(gp::param.first);
         load(gp::param.second);
         }
@@ -690,7 +688,7 @@ namespace mapeditor {
     if(painttype == 4 && radius) {
       if(where.at->type != copysource.at->type) return;
       if(where.spin<0) where.spin=0;
-      if(!nonbitrunc && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
+      if(BITRUNCATED && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
         where += 1;
       }
     if(painttype != 4) copysource.at = NULL;
@@ -1376,8 +1374,8 @@ namespace mapeditor {
       int nt;
       hr::ignore(fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags));
       patterns::whichPattern = patterns::ePattern(wp);
-      if(tg != geometry) { targetgeometry = eGeometry(tg); stop_game_and_switch_mode(rg::geometry); }
-      if(bool(nt) != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      set_geometry(eGeometry(tg));
+      set_variation(eVariation(nt));
       start_game();
       }
 
@@ -1422,7 +1420,7 @@ namespace mapeditor {
     fprintf(f, "HyperRogue saved picture\n");
     fprintf(f, "%x\n", VERNUM_HEX);
     if(VERNUM_HEX >= 0xA0A0)
-      fprintf(f, "%d %d %d %d\n", geometry, nonbitrunc, patterns::whichPattern, patterns::subpattern_flags);
+      fprintf(f, "%d %d %d %d\n", geometry, int(variation), patterns::whichPattern, patterns::subpattern_flags);
     for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
       usershape *us = usp.second;
       if(!us) continue;

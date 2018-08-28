@@ -77,11 +77,11 @@ vector<string> achievementsReceived;
 bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == rg::global) return false;
-  if(nonbitrunc != (flags == rg::bitrunc)) return true;
-  if(gp::on) return true;
-  if(irr::on) return true;
+  if(CHANGED_VARIATION != (flags == rg::special_variation)) return true;
+  if(GOLDBERG) return true;
+  if(IRREGULAR) return true;
 
-  if((geometry != gNormal) != (flags == rg::geometry)) return true;
+  if((geometry != gNormal) != (flags == rg::special_geometry)) return true;
   
   if(shmup::on != (flags == rg::shmup)) return true;
 #if CAP_DAILY
@@ -146,10 +146,10 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
   int q = items[it];
   
   if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic)) 
-    achievement_gain("HALLOWEEN1", rg::geometry);
+    achievement_gain("HALLOWEEN1", rg::special_geometry);
 
   if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic)) 
-    achievement_gain("HALLOWEEN2", rg::geometry);
+    achievement_gain("HALLOWEEN2", rg::special_geometry);
 
   if(q == 1) {
     if(it == itDiamond) achievement_gain("DIAMOND1");
@@ -217,7 +217,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
   // 32
   if(it == itHolyGrail) {
-    if(q == 1) achievement_gain("GRAIL2"), achievement_gain("GRAILH", rg::bitrunc);
+    if(q == 1) achievement_gain("GRAIL2"), achievement_gain("GRAILH", rg::special_variation);
     if(q == 3) achievement_gain("GRAIL3");
     if(q == 8) achievement_gain("GRAIL4");
     }
@@ -459,7 +459,7 @@ void achievement_count(const string& s, int current, int prev) {
   if(s == "LIGHTNING" && current-prev >= 10)
     achievement_gain("LIGHTNING3");
   if(s == "MIRAGE" && current >= 35 && geometry == gEuclid)
-    achievement_gain("MIRAGE", rg::geometry);
+    achievement_gain("MIRAGE", rg::special_geometry);
   if(s == "ORB" && current >= 10)
     achievement_gain("ORB3");
   if(s == "BUG" && current >= 1000)
@@ -493,7 +493,7 @@ void achievement_score(int cat, int number) {
       return;
     }
   else if(geometry) return;
-  if(nonbitrunc) return;
+  if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
   if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) return;
   if(yendor::on && cat != LB_YENDOR_CHALLENGE) return;
@@ -597,7 +597,7 @@ void achievement_final(bool really_final) {
   int specialcode = 0;
   if(shmup::on) specialcode++;
   if(chaosmode) specialcode+=2;
-  if(nonbitrunc) specialcode+=4;
+  if(PURE) specialcode+=4;
   if(numplayers() > 1) specialcode+=8;
   if(inv::on) specialcode+=16;
   
@@ -608,8 +608,7 @@ void achievement_final(bool really_final) {
     }
 
   if(geometry) return;
-  if(gp::on) return;
-  if(irr::on) return;
+  if(NONSTDVAR) return;
   
   // determine the correct leaderboard ID for 'total score'
   // or return if no leaderboard for the current mode
@@ -684,7 +683,7 @@ void achievement_victory(bool hyper) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(geometry) return;
-  if(nonbitrunc) return;
+  if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
   if(hyper && shmup::on) return;
   if(yendor::on) return;

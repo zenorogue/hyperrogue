@@ -1231,7 +1231,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     
     hyperpoint h = tC0(V * m->at);
-    transmatrix V2 = rgpushxto0(h) * ypush(nonbitrunc ? .3 : .2);
+    transmatrix V2 = rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
       if(vd.info) queuelink(vd.info, PPR::TEXT);
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
@@ -1800,7 +1800,7 @@ using namespace tour;
 
 string cname() {
   if(euclid) return "coord-6.txt";
-  if(nonbitrunc) return "coord-7.txt";
+  if(PURE) return "coord-7.txt";
   return "coord-67.txt";
   }
 

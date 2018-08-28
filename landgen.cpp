@@ -210,14 +210,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       else {
 
         if(d == 9) {
-          cell *c2 = (gp::on || irr::on) ? c->master->c7 : c;
+          cell *c2 = (GOLDBERG || IRREGULAR) ? c->master->c7 : c;
           if(cdist50(c2) == 3 && polarb50(c2) == 1)
             c->wall = waPalace;
           }
       
         if(d == 8 && sphere) {
           int gs = getHemisphere(c,0);
-          if(gp::on || irr::on) {
+          if(NONSTDVAR) {
             int v = 1;
             forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
               v = 2;
@@ -230,7 +230,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(gs == 1)
             c->wall = waPalace;
           if(gs == 3)
-            c->wall = nonbitrunc ? waOpenGate : waClosedGate;
+            c->wall = PURE ? waOpenGate : waClosedGate;
           if(gs == 4 && hrand(100) < 40)
             c->wall = waClosePlate;
           if(gs == 6)
@@ -247,10 +247,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge;
           
           bool pgate = false;
-          if(nonbitrunc) {
+          if(PURE) {
             int i = fiftyval049(c->master->c7);
             if(i >= 8 && i <= 14 && !polarb50(c->master->c7)) pgate = true;
-            if(gp::on) {
+            if(GOLDBERG) {
               bool good = false;
               forCellEx(c2, c) {
                 int i2 = fiftyval049(c2->master->c7);
@@ -273,7 +273,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               }
             }
           else if(cdist50(c) == 3 && polarb50(c) == 1 && !ishept(c)) {
-            if(gp::on) ; 
+            if(GOLDBERG) ; 
             else {
               int q = 0, s = 0;
               if(!ishept(c)) for(int i=0; i<c->type; i++)
@@ -294,9 +294,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               }
             }
           else if(c->wall == waPalace) ;
-          else if((hrand(100) < (lookingForPrincess ? (nonbitrunc ? 11 : 7) : 5) && cdist50(c)) ||
+          else if((hrand(100) < (lookingForPrincess ? (PURE ? 11 : 7) : 5) && cdist50(c)) ||
             (cdist50(c) == 0 && polarb50(c) && hrand(100) < 60)) {
-            c->wall = hrand(100) < (lookingForPrincess ? (nonbitrunc ? 25 : 30):50) ? waClosePlate : waOpenPlate;
+            c->wall = hrand(100) < (lookingForPrincess ? (PURE ? 25 : 30):50) ? waClosePlate : waOpenPlate;
             }
           else if(hrand(100) < (lookingForPrincess ? 3 : 5))
             c->wall = waTrapdoor;
@@ -311,9 +311,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
   
         if(princess::generating) {
           // no Opening Plates nearby
-          if(d <= 7 && c->wall == waOpenPlate && !nonbitrunc)
+          if(d <= 7 && c->wall == waOpenPlate && BITRUNCATED)
             c->wall = waNone;
-          if(d <= 7 && c->wall == waClosePlate && nonbitrunc)
+          if(d <= 7 && c->wall == waClosePlate && PURE)
             c->wall = waOpenPlate;
           // no monsters nearby
           if(d>0) c->monst = moNone;
@@ -407,7 +407,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(a4)
           c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
-        else if(nonbitrunc) {
+        else if(!BITRUNCATED) {
           if(polarb50(c)) 
             c->wall = waCavewall;
           else c->wall = waCavefloor;
@@ -426,7 +426,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         c->monst = moSeep;
     
       ONEMPTY {
-        if(hrand(nonbitrunc?400:1000) < PT(100 + 2 * (kills[moMiner] + kills[moLancer] + kills[moFlailer]), 200) && notDippingFor(itEmerald)) {
+        if(hrand(PURE?400:1000) < PT(100 + 2 * (kills[moMiner] + kills[moLancer] + kills[moFlailer]), 200) && notDippingFor(itEmerald)) {
           // do not destroy walls!
           bool ok = true;
           for(int i=0; i<c->type; i++) if(c->move(i)->wall == waCavewall) ok = false;
@@ -469,7 +469,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           v = RANDPAT ? 24 : 1;
         else if(sphere) {
           int gs = getHemisphere(c, 0);
-          if(gp::on) {
+          if(GOLDBERG) {
             v = 6;
             if(gs == 0) v = 24;
             forCellEx(c2, c) if(getHemisphere(c2, 0) * gs < 0)
@@ -588,7 +588,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else if(v == 25 || v == 59 || v == 27 || v == 57)
               c->wall = waVineHalfB;
             else c->wall = waNone;
-            if((gp::on || irr::on) && cellHalfvine(c)) {
+            if(NONSTDVAR && cellHalfvine(c)) {
               c->wall = waNone;
               forCellCM(c2, c) if(emeraldval(c2) == (v^1))
                 c->wall = waVinePlant;
@@ -1060,14 +1060,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHalloween:
       if(d == 9) {
-        if(gp::on) {
+        if(GOLDBERG) {
           int fv = c->master->fiftyval;
           if(fv == 1 || fv == 4 || fv == 10) 
             c->wall = waChasm;
           if(c == c->master->c7 && fv == 3)
             c->item = itTreat;
           }
-        else if(nonbitrunc && !euclid) {
+        else if(!BITRUNCATED && !euclid) {
           int fv = c->master->fiftyval;
           if(fv == 1 || fv == 4 || fv == 2) 
             c->wall = waChasm;
@@ -1146,7 +1146,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laStorms: {
-      bool randstorm = hyperbolic_not37 || gp::on || irr::on || (quotient && geometry != gZebraQuotient);
+      bool randstorm = hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient);
       if(d == 9) {
       
         if(torus) {
@@ -1177,7 +1177,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             if(ctof(c)) {
               int id = c->master->fiftyval;
               if(id == 1) c->wall = waCharged;
-              if(id == (elliptic && !nonbitrunc ? 3 : 9)) c->wall = waGrounded;
+              if(id == (elliptic && BITRUNCATED ? 3 : 9)) c->wall = waGrounded;
               }
             }
           else if(S7 == 4) {
@@ -1200,7 +1200,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
         else if(randstorm) ;
-        else if(nonbitrunc) {
+        else if(PURE) {
           int i = zebra40(c);
           if((i == 5 || i == 8) && hrand(100) < 20) c->wall = hrand(2) ? waCharged : waGrounded;
           else if(i == 15) c->wall = waSandstone;
@@ -1359,7 +1359,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laHell:      
       if(d == 9) {
-        if(hrand(1000) < (nonbitrunc ? 16 : 36) && celldist(c) >= 3) {
+        if(hrand(1000) < (PURE ? 16 : 36) && celldist(c) >= 3) {
           for(int i=0; i<c->type; i++) {
             cell *c2 = createMov(c, i);
             setdist(c2, d+1, c);
@@ -1411,7 +1411,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(d == 9) {
-        if(hrand(2000) < (chaosmode ? 1000 : (nonbitrunc && !gp::on) ?200:2) && !safety) 
+        if(hrand(2000) < (chaosmode ? 1000 : PURE ?200:2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
@@ -1631,14 +1631,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waNone)
         buildPrizeMirror(c, 1000);    
       ONEMPTY {
-        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(nonbitrunc && S3==4)) {
+        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(!BITRUNCATED && S3==4)) {
           int i = -1;
           for(int t=0; t<c->type; t++) if(c->move(t)->mpdist > c->mpdist && !pseudohept(c->move(t)))
             i = t;
           if(i != -1 && !peace::on) 
             generateSnake(c, i, 1);
           }
-        else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (nonbitrunc?hrand(10)<3:!ishept(c)) && !c->monst)
+        else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (PURE?hrand(10)<3:!ishept(c)) && !c->monst)
           c->monst = moRedTroll,
           c->mondir = NODIR;
         }
@@ -1674,7 +1674,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(hrand(1000) < 150 && celldist(c) >= 3 && !pseudohept(c)) 
             c->wall = waSmallTree;
           int q = 0;
-          if(!nonbitrunc && !chaosmode && !weirdhyperbolic) for(int i=0; i<c->type; i++) 
+          if(BITRUNCATED && !chaosmode && !weirdhyperbolic) for(int i=0; i<c->type; i++) 
             if(c->move(i) && !isWarped(c->move(i)->land) && c->move(i)->land != laCrossroads4) 
               q++;
           if(q == 1) c->wall = waWarpGate;
@@ -1683,7 +1683,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->land == laWarpSea) {
           c->wall = waSea;
           int q = 0;
-          if(!nonbitrunc && !chaosmode) for(int i=0; i<c->type; i++) 
+          if(BITRUNCATED && !chaosmode) for(int i=0; i<c->type; i++) 
             if(c->move(i) && !isWarped(c->move(i)->land)) q++;
           if(q == 1) c->wall = waWarpGate;
           }      
@@ -1809,7 +1809,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                 }
               else if(items[itHunting] < 10) {
                 vector<cell*> next;
-                forCellEx(c2, c) if(c2->mpdist > 7 && (nonbitrunc || !ctof(c2))) next.push_back(c2);
+                forCellEx(c2, c) if(c2->mpdist > 7 && (!BITRUNCATED || !ctof(c2))) next.push_back(c2);
                 if(isize(next)) {
                   c->item = itHunting;
                   cell *c3 = next[hrand(isize(next))];
@@ -1855,7 +1855,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           forCellEx(c2, c)
             if(c2->landparam % TEMPLE_EACH == 0 && !pseudohept(c2)) q++;
           placecolumn = q == 2;
-          if(placecolumn && weirdhyperbolic && nonbitrunc && hrand(100) >= 50)
+          if(placecolumn && weirdhyperbolic && !BITRUNCATED && hrand(100) >= 50)
             placecolumn = false;
           if(placecolumn) {
             placecolumn = false;
@@ -2118,7 +2118,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else
             si.id = (zebra40(c)&2) ? 0 : zebra40(c) == 4 ? 8 : 1;
           c->wall = waSea;
-          if(among(si.id, 0, 4, 16, nonbitrunc ? -1 : 24))
+          if(among(si.id, 0, 4, 16, PURE ? -1 : 24))
             c->wall = waDock;
           if(si.id == 8 && hrand(100) < 75) {
             c->wall = waBoat;
@@ -2200,7 +2200,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laCrossroads5:
       if(c->wall == waTower) c->land = laCamelot;
       ONEMPTY {
-        if(nonbitrunc && c->land == laCrossroads5 && hrand(100) < 60)
+        if(!BITRUNCATED && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
         else if(!inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && mirror::build(c)) ;
         else if(hyperstonesUnlocked() && hrand(8000) < 100 && mirror::build(c)) ;
@@ -2482,7 +2482,7 @@ void setdist(cell *c, int d, cell *from) {
       placeLocalOrbs(c);
     }
 
-  if(nonbitrunc && c->wall == waMirrorWall && c->land == laMirror)
+  if(PURE && c->wall == waMirrorWall && c->land == laMirror)
     c->land = laMirrorWall; // , c->item = itPirate; // not really a proper bugfix
 
   if(d == 7) playSeenSound(c);

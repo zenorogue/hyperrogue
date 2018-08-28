@@ -78,7 +78,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard, fixdistance);
   if(binarytiling || archimedean) return h;
   if(parent->c7) {
-    if(irr::on)
+    if(IRREGULAR)
       irr::link_next(parent, d);
     else
       h->c7 = newCell(S7, h);
@@ -104,7 +104,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   if(pard == 0) {
     h->dm4 = parent->dm4+1;
     if(fixdistance != COMPUTE) h->distance = fixdistance;
-    else if(S3 == 4 && !nonbitrunc) {
+    else if(S3 == 4 && BITRUNCATED) {
       h->distance = parent->distance + 2;
       if(h->c.spin(0) == 2 || (h->c.spin(0) == 3 && S7 <= 5))
         h->distance = min<short>(h->distance, createStep(h->move(0), 0)->distance + 3);
@@ -128,7 +128,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
           );
       }
     else if(parent->s == hsOrigin) h->distance = parent->distance + gp::dist_2();
-    else if(S3 == 4 && gp::on && h->c.spin(0) == S7-2 && h->move(0)->c.spin(0) >= S7-2 && h->move(0)->move(0)->s != hsOrigin) {
+    else if(S3 == 4 && GOLDBERG && h->c.spin(0) == S7-2 && h->move(0)->c.spin(0) >= S7-2 && h->move(0)->move(0)->s != hsOrigin) {
       heptspin hs(h, 0);
       hs += wstep;
       int d1 = hs.at->distance;
@@ -138,7 +138,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       int d0 = hs.at->distance;
       h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(-1,1)));
       }
-    else if(S3 == 4 && gp::on && h->c.spin(0) == S7-1 && among(h->move(0)->c.spin(0), S7-2, S7-3) && h->move(0)->move(0)->s != hsOrigin) {
+    else if(S3 == 4 && GOLDBERG && h->c.spin(0) == S7-1 && among(h->move(0)->c.spin(0), S7-2, S7-3) && h->move(0)->move(0)->s != hsOrigin) {
       heptspin hs(h, 0);
       hs += wstep;
       int d0 = hs.at->distance;
@@ -148,11 +148,11 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       int d1 = hs.at->distance;
       h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
       }
-    else if(S3 == 4 && gp::on && h->c.spin(0) >= 2 && h->c.spin(0) <= S7-2) {
+    else if(S3 == 4 && GOLDBERG && h->c.spin(0) >= 2 && h->c.spin(0) <= S7-2) {
       h->distance = parent->distance + gp::dist_2();
       }
     else if(h->c.spin(0) == S7-2) {
-      if(!gp::on)
+      if(!GOLDBERG)
         h->distance = parent->distance + gp::dist_1();
       else {
         int d0 = parent->distance;
@@ -162,7 +162,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         }
       }
     else if(h->c.spin(0) == S7-3 && h->move(0)->s == hsB) {
-      if(!gp::on) {
+      if(!GOLDBERG) {
         h->distance = createStep(h->move(0), (h->c.spin(0)+2)%S7)->distance + gp::dist_3();
         }
       else {
@@ -172,7 +172,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
         }
       }
-    else if(h->c.spin(0) == S7-1 && S3 == 4 && gp::on) {
+    else if(h->c.spin(0) == S7-1 && S3 == 4 && GOLDBERG) {
       h->distance = parent->distance + gp::dist_1();
       }
     else h->distance = parent->distance + gp::dist_2();

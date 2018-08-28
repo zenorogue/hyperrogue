@@ -47,7 +47,7 @@ int euclidAlt(short x, short y) {
   if(specialland == laTemple || specialland == laClearing) {
     if(euclid6)
       return max(int(x), x+y);
-    else if(nonbitrunc)
+    else if(PURE)
       return x + abs(y);
     else
       return max(x, y);
@@ -60,7 +60,7 @@ int euclidAlt(short x, short y) {
           max(int(x+y), int(y)) + 3),
           max(int(x), int(-y)) + 3
           );
-    else if(nonbitrunc)
+    else if(PURE)
       return 3 - min(abs(x-y), abs(x+y));
     else
       return 3 - min(abs(x), abs(y));
@@ -107,7 +107,7 @@ void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
   for(int i=0; i<S7; i++) preventbarriers(h->c7->move(i));
-  if(gp::on)
+  if(GOLDBERG)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
@@ -165,7 +165,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   if(weirdhyperbolic) {
     if(c->bardir == NOBARRIERS) return NULL;
     forCellEx(c1, c) if(c1->bardir == NOBARRIERS) return NULL;
-    if(irr::on)
+    if(IRREGULAR)
       for(int i=0; i<S7; i++)
         if(createStep(c->master, i)->c7->bardir != NODIR)
           return NULL;
@@ -623,7 +623,7 @@ void buildEquidistant(cell *c) {
   if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5 && chance) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonbitrunc?25:5) && items[itBone] >= 10 && chance) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (PURE?25:5) && items[itBone] >= 10 && chance) 
     buildAnotherEquidistant(c);
   }
 
@@ -755,7 +755,7 @@ void setLandSphere(cell *c) {
       c->land = laElementalWall, c->barleft = laEEarth, c->barright = laEFire;
     else if(y < 0) 
       c->land = laElementalWall, c->barleft = laEAir, c->barright = laEWater;
-    if(c->land == laElementalWall && (c->type != 6 || gp::on))
+    if(c->land == laElementalWall && (c->type != 6 || GOLDBERG))
       c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
     }
   if(!torus)
@@ -766,7 +766,7 @@ void setLandSphere(cell *c) {
     else if(x == 0 || (specialland == laCrossroads3 && getHemisphere(c, 2) == 0)) 
       setland(c, laBarrier), c->wall = waBarrier;
     else setland(c, specialland);
-    if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1 && !gp::on)
+    if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1 && !GOLDBERG)
       c->wall = waBigTree;        
     }
   if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean || specialland == laMountain) {
@@ -970,7 +970,7 @@ int wallchance(cell *c, bool deepOcean) {
     l == laHaunted ? 0 :
     (l == laGraveyard && !deepOcean) ? 0 :
     // (l == laGraveyard && items[itBone] >= 10) ? 120 :
-    l == laOcean ? (deepOcean ? (nonbitrunc ? 250 : 2000) : 0) :
+    l == laOcean ? (deepOcean ? (PURE ? 250 : 2000) : 0) :
     l == laDragon ? 120 :
     50;
   }
@@ -981,8 +981,8 @@ bool horo_ok() {
   }
 
 bool gp_wall_test() {
-  if(gp::on) return hrand(gp::dist_3()) == 0;
-  if(irr::on) return hrand(irr::cellcount * 3) < isize(irr::cells_of_heptagon);
+  if(GOLDBERG) return hrand(gp::dist_3()) == 0;
+  if(IRREGULAR) return hrand(irr::cellcount * 3) < isize(irr::cells_of_heptagon);
   return true;
   }
   
@@ -1018,7 +1018,7 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(celldist(c) < 3 && !gp::on) {
+  if(celldist(c) < 3 && !GOLDBERG) {
     if(top_land && c == cwt.at->master->move(3)->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
@@ -1059,7 +1059,7 @@ void buildBigStuff(cell *c, cell *from) {
   
   else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
   
-  else if(c->land == laCrossroads2 && !nonbitrunc)
+  else if(c->land == laCrossroads2 && BITRUNCATED)
     buildCrossroads2(c);
   
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid) {
@@ -1119,16 +1119,14 @@ void buildBigStuff(cell *c, cell *from) {
       if(h) clearing::bpdata[h].root = NULL;
       }
     
-    bool alts_okay = (S3 == 3 || (nonbitrunc && !gp::on));
-
-    if(alts_okay && c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
+    if(stdhyperbolic && c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }
 
     if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && horo_ok() && 
       (quickfind(laWhirlpool) || (
-        hrand(2000) < (nonbitrunc ? 500 : 1000) && !tactic::on && !yendor::on)))
+        hrand(2000) < (PURE ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
@@ -1235,7 +1233,7 @@ void moreBigStuff(cell *c) {
             }
           if(q == 1) buildCamelotWall(c);
           // towers of Camelot
-          if(q == 0 && !nonbitrunc) {
+          if(q == 0 && BITRUNCATED) {
             c->monst = moKnight;
             c->wall = waTower;
             forCellEx(c2, c) {
@@ -1260,7 +1258,7 @@ void moreBigStuff(cell *c) {
         }
       if(d == 1) {
         // roughly as many knights as table cells
-        if(hrand(nonbitrunc ? 2618 : 1720) < 1000) 
+        if(hrand(PURE ? 2618 : 1720) < 1000) 
           c->monst = moKnight;
         if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
         for(int i=0; i<c->type; i++) 
@@ -1294,7 +1292,7 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if(weirdhyperbolic && nonbitrunc) {
+        if(weirdhyperbolic && !BITRUNCATED) {
           if(hrand(100) < 50) c->wall = waColumn;
           }
         else if(pseudohept(c)) 

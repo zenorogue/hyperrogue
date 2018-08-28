@@ -441,7 +441,7 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
 #endif
 
-  dialog::addBoolItem(XLAT("experiment with geometry"), geometry || nonbitrunc || viewdists, 'e');
+  dialog::addBoolItem(XLAT("experiment with geometry"), geometry || CHANGED_VARIATION || viewdists, 'e');
   dialog::addBoolItem(XLAT(SHMUPTITLE), (shmup::on || multi::players > 1), 's');
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
@@ -771,8 +771,7 @@ void showStartMenu() {
       if(!sphere) {
         stop_game();
         specialland = laHalloween;
-        targetgeometry = gSphere;
-        restart_game(rg::geometry);
+        set_geometry(gSphere);
         vid.alpha = 999;
         vid.scale = 998;
         }
@@ -826,7 +825,7 @@ void setAppropriateOverview() {
     pushScreen(yendor::showMenu);
   else if(peace::on)
     pushScreen(peace::showMenu);
-  else if((geometry != gNormal || gp::on || irr::on) && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4)) {
+  else if((geometry != gNormal || NONSTDVAR) && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4)) {
     runGeometryExperiments();
     }
   else {

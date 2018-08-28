@@ -239,7 +239,7 @@ void initConfig() {
   addsaver(hardcore, "mode-hardcore", false);
   addsaver(chaosmode, "mode-chaos");
   addsaver(inv::on, "mode-Orb Strategy");
-  addsaver(nonbitrunc, "mode-heptagonal", false);
+  addsaverenum(variation, "mode-variation", eVariation::bitruncated);
   addsaver(peace::on, "mode-peace");
   addsaver(peace::otherpuzzles, "mode-peace-submode");
   addsaverenum(specialland, "land for special modes");
@@ -257,14 +257,12 @@ void initConfig() {
   addsaver(vid.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
   
-  addsaver(gp::on, "goldberg", false);
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
   addsaver(gp::param.second, "goldberg-y", gp::param.second);
   
   addsaver(nohud, "no-hud", false);
   addsaver(nofps, "no-fps", false);
   
-  addsaver(irr::on, "irregular", false);
   addsaver(irr::density, "irregular-density", 2);
   addsaver(irr::cellcount, "irregular-cellcount", 150);
   addsaver(irr::quality, "irregular-quality", .2);
@@ -288,7 +286,7 @@ void initConfig() {
   }
 
 bool inSpecialMode() {
-  return chaosmode || nonbitrunc || peace::on || 
+  return chaosmode || !BITRUNCATED || peace::on || 
   #if CAP_TOUR
     tour::on ||
   #endif
@@ -306,7 +304,7 @@ bool have_current_settings() {
   if(tour::on) modecount += 10;
 #endif
   if(chaosmode) modecount += 10;
-  if(nonbitrunc) modecount += 10;
+  if(!BITRUNCATED) modecount += 10;
   if(peace::on) modecount += 10;
   if(yendor::on) modecount += 10;
   if(tactic::on) modecount += 10;
@@ -329,8 +327,7 @@ void resetModes(char leave) {
   if(shmup::on != (leave == rg::shmup)) stop_game_and_switch_mode(rg::shmup);
   if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
   if(chaosmode != (leave == rg::chaos)) stop_game_and_switch_mode(rg::chaos);
-  if(gp::on != (leave == rg::gp)) stop_game_and_switch_mode(rg::gp);
-  if(nonbitrunc != (leave == rg::bitrunc)) stop_game_and_switch_mode(rg::bitrunc);
+
   if(peace::on != (leave == rg::peace)) stop_game_and_switch_mode(rg::peace);
 #if CAP_TOUR
   if(tour::on != (leave == rg::tour)) stop_game_and_switch_mode(rg::tour);
@@ -346,10 +343,8 @@ void resetModes(char leave) {
     firstland = laIce; specialland = laIce; stop_game_and_switch_mode();
     }
 
-  if(geometry != gNormal && leave != rg::geometry) { 
-    targetgeometry = gNormal;
-    stop_game_and_switch_mode(rg::geometry); 
-    }
+  set_geometry(gNormal);
+  set_variation(eVariation::bitruncated);
   
   pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
   vid.xposition = vid.yposition = 0;
@@ -443,7 +438,7 @@ void loadOldConfig(FILE *f) {
 
   shmup::loadConfig(f);
 
-  aa = rug::renderonce; bb = rug::rendernogl; cc = nonbitrunc; dd = chaosmode; 
+  aa = rug::renderonce; bb = rug::rendernogl; dd = chaosmode; 
   int ee = vid.steamscore;
   #if CAP_RUG
   double rs = 2/rug::model_distance;
@@ -451,7 +446,8 @@ void loadOldConfig(FILE *f) {
   double rs = 0;
   #endif
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
-  rug::renderonce = aa; rug::rendernogl = bb; nonbitrunc = cc; chaosmode = dd; vid.steamscore = ee;
+  rug::renderonce = aa; rug::rendernogl = bb; 
+  chaosmode = dd; vid.steamscore = ee;
   #if CAP_RUG
   rug::model_distance = 2/rs;
   #endif

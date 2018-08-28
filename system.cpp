@@ -35,7 +35,7 @@ bool verless(string v, string cmp) {
 bool do_use_special_land() {
   return
     !safety &&
-    (peace::on || tactic::on || geometry || gp::on || irr::on || randomPatternsMode || yendor::on);
+    (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on);
   }
 
 hookset<bool()> *hooks_welcome_message;
@@ -569,7 +569,10 @@ void applyBoxes() {
   applyBoxBool(survivalist);
   if(loadingHi) applyBoxI(itLotus);
   else applyBoxNum(truelotus, "lotus/escape");
-  applyBoxBool(nonbitrunc, "heptagons only"); 
+  
+  int v = int(variation);
+  applyBoxNum(v, "variation"); 
+  variation = eVariation(v);
   applyBoxI(itRose);
   applyBoxOrb(itOrbBeauty);
   applyBoxI(itCoral);
@@ -690,11 +693,12 @@ void applyBoxes() {
   applyBoxM(moCrusher);
   applyBoxM(moMonk);
   
-  applyBoxBool(gp::on);
+  bool v2 = false;
+  applyBoxBool(v2); if(loading && v2) variation = eVariation::goldberg;
   applyBox(gp::param.first);
   applyBox(gp::param.second);
   
-  applyBoxBool(irr::on);
+  v2 = false; applyBoxBool(v2); if(loading && v2) variation = eVariation::irregular;
   applyBox(irr::cellcount);
 
   list_invorb();
@@ -719,13 +723,14 @@ void loadBoxHigh() {
   dynamicval<eGeometry> sp2(geometry, (eGeometry) savebox[116]);
   dynamicval<bool> sp3(shmup::on, savebox[119]);
   dynamicval<bool> sp4(chaosmode, savebox[196]);
-  dynamicval<bool> sp5(nonbitrunc, savebox[186]);
-  dynamicval<bool> sp6(gp::on, savebox[341]);
+  dynamicval<eVariation> sp5(variation, (eVariation) savebox[186]);
   dynamicval<int> sp7(gp::param.first, savebox[342]);
   dynamicval<int> sp8(gp::param.second, savebox[343]);
 
   if(savebox[238]) geometry = gSphere;
   if(savebox[239]) geometry = gElliptic;
+  if(savebox[341]) variation = eVariation::goldberg;
+  if(savebox[344]) variation = eVariation::irregular;
 
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
@@ -857,8 +862,8 @@ void saveStats(bool emergency = false) {
   fprintf(f, "Total enemies killed: %d\n", tkills());
   fprintf(f, "cells generated: %d\n", cellcount);
   if(pureHardcore()) fprintf(f, "Pure hardcore mode\n");
-  if(nonbitrunc) fprintf(f, "Heptagons only mode\n");
   if(geometry) fprintf(f, "Geometry: %s\n", ginf[geometry].name);
+  if(CHANGED_VARIATION) fprintf(f, "Variation: %s\n", gp::operation_name().c_str());
   if(chaosmode) fprintf(f, "Chaos mode\n");
   if(shmup::on) fprintf(f, "Shoot-em up mode\n");
   if(inv::on) fprintf(f, "Inventory mode\n");
@@ -1028,8 +1033,8 @@ namespace gamestack {
     heptspin viewctr;
     transmatrix View;
     eGeometry geometry;
+    eVariation variation;
     bool shmup;
-    bool hepta;
     };
 
   vector<gamedata> gd;
@@ -1048,7 +1053,7 @@ namespace gamestack {
     gdn.View = View;
     gdn.geometry = geometry;
     gdn.shmup = shmup::on;
-    gdn.hepta = nonbitrunc;
+    gdn.variation = variation;
     gdn.ctover = centerover;
     gd.push_back(gdn);
     }
@@ -1060,7 +1065,7 @@ namespace gamestack {
     viewctr = gdn.viewctr;
     View = gdn.View;
     geometry = gdn.geometry;
-    nonbitrunc = gdn.hepta;
+    variation = gdn.variation;
     if(shmup::on) shmup::clearMonsters();
     shmup::on = gdn.shmup;
     resetGeometry();
@@ -1127,6 +1132,37 @@ void push_game() {
   game_active = false;
   }
 
+void set_geometry(eGeometry target) {
+  if(geometry != target) {
+    stop_game();
+    ors::reset();
+    geometry = target;
+  
+    if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
+    if(euclid6) variation = eVariation::bitruncated;
+    if(IRREGULAR) variation = eVariation::bitruncated;
+    if(GOLDBERG && gp::param == gp::loc(1,1) && S3 == 3) {
+      variation = eVariation::bitruncated;
+      }
+    if(GOLDBERG && nonorientable) {
+      if(gp::param.second && gp::param.second != gp::param.first)
+        gp::param.second = 0;
+      }
+    if(geometry == gBinaryTiling) variation = eVariation::pure;
+   
+    need_reset_geometry = true; 
+    }
+  }
+
+void set_variation(eVariation target) {
+  if(variation != target) {
+    stop_game();
+    if(euclid6 || binarytiling) geometry = gNormal;
+    variation = target;
+    need_reset_geometry = true;
+    }
+  }
+
 void switch_game_mode(char switchWhat) {
   DEBB(DF_INIT, (debugfile,"switch_game_mode\n"));
   switch(switchWhat) {
@@ -1156,7 +1192,8 @@ void switch_game_mode(char switchWhat) {
     case rg::tour:
       geometry = gNormal;
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
-      chaosmode = nonbitrunc = randomPatternsMode = irr::on = gp::on = false;
+      chaosmode = randomPatternsMode = false;
+      variation = eVariation::bitruncated;
       gp::param = gp::loc(1, 1);
       shmup::on = false;
       need_reset_geometry = true;    
@@ -1164,33 +1201,6 @@ void switch_game_mode(char switchWhat) {
       break;
 #endif
 
-    case rg::bitrunc:
-    case rg::gp:
-      if(euclid6 || binarytiling) geometry = gNormal;
-      nonbitrunc = !nonbitrunc; irr::on = false;
-      gp::on = (switchWhat == rg::gp && !gp::on);
-      need_reset_geometry = true;
-      break;
-
-    case rg::geometry:
-      ors::reset();
-      if(geometry == targetgeometry) geometry = gNormal;
-      else geometry = targetgeometry;
-      if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
-      if(nonbitrunc && euclid6) nonbitrunc = false;
-      if(irr::on) irr::on = false;
-      if(gp::on && gp::param == gp::loc(1,1) && S3 == 3) {
-        gp::on = false; nonbitrunc = false;
-        }
-      if(gp::on && nonorientable) {
-        if(gp::param.second && gp::param.second != gp::param.first)
-          gp::param.second = 0;
-        }
-      if(geometry == gBinaryTiling) nonbitrunc = true, gp::on = irr::on = false;
-  
-      need_reset_geometry = true; 
-      break;
-    
     case rg::yendor:
       yendor::on = !yendor::on;
       tactic::on = false;

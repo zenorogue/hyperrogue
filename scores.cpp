@@ -36,9 +36,14 @@ int modediff(score *S) {
   if(S->box[238]) g = gSphere;
   if(S->box[239]) g = gElliptic;
   if(max(S->box[197], 1) != multi::players) diff += 8;
-  if(S->box[186] != nonbitrunc || S->box[341] != gp::on)
-    diff += 16;
-  if(S->box[341] && gp::on && (S->box[342] != gp::param.first || S->box[343] != gp::param.second))
+  
+  eVariation savevar = 
+    S->box[341] ? eVariation::goldberg :
+    S->box[344] ? eVariation::irregular :
+    eVariation(S->box[186]);
+
+  if(variation != savevar) diff += 16;
+  if(GOLDBERG && savevar == eVariation::goldberg && (S->box[342] != gp::param.first || S->box[343] != gp::param.second))
     diff += 16;
   if(S->box[196] != chaosmode) diff += 32;
   if(S->box[119] != shmup::on) diff += 64;

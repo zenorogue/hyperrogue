@@ -356,22 +356,26 @@ void drawStats() {
       int d = celldistance(ac[i], cwt.at);
       if(d >= 0 && d < 64) qty[d]++;
       }
-    if(geometry == gNormal && !gp::on)
-      for(int i=nonbitrunc?6:8; i<=15; i++) 
-        qty[i] = 
-          nonbitrunc ?
-            3*qty[i-1] - qty[i-2]
-          : qty[i-1] + qty[i-2] + qty[i-3] - qty[i-4];
+
+    if(geometry == gNormal && BITRUNCATED)
+      for(int i=8; i<=15; i++) 
+        qty[i] = qty[i-1] + qty[i-2] + qty[i-3] - qty[i-4];
+
+    if(geometry == gNormal && PURE)
+      for(int i=6; i<=15; i++) 
+        qty[i] = 3*qty[i-1] - qty[i-2];
+
     if(geometry == gEuclid)
       for(int i=8; i<=15; i++) qty[i] = 6*i;
     for(int i=0; i<64; i++) if(qty[i])
       dialog::addInfo(its(qty[i]), distcolors[i&7]);
-    if(geometry == gNormal && !nonbitrunc) {
+
+    if(geometry == gNormal && BITRUNCATED) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
       dialog::addInfo("a(d) ~ 1.72208ᵈ", forecolor);
       }
-    if(geometry == gNormal && nonbitrunc && !gp::on) {
+    if(geometry == gNormal && PURE) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
       dialog::addInfo("a(d) ~ 2.61803ᵈ", forecolor);

@@ -679,7 +679,7 @@ void generateSnake(cell *c, int i, int color) {
   c->hitpoints = color;
   int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->move(i)));
   preventbarriers(c);
-  int len = nonbitrunc ? 2 : ROCKSNAKELENGTH;
+  int len = BITRUNCATED ? ROCKSNAKELENGTH : 2;
   cell *c2 = c;
   vector<cell*> rocksnake;
   while(--len) {
@@ -703,7 +703,7 @@ void generateSnake(cell *c, int i, int color) {
       i = goodsteps[hrand(isize(goodsteps))];
       }
     }
-  if(isize(rocksnake) < ROCKSNAKELENGTH/2 && !nonbitrunc) {
+  if(isize(rocksnake) < ROCKSNAKELENGTH/2 && BITRUNCATED) {
     for(int i=0; i<isize(rocksnake); i++) 
       rocksnake[i]->monst = moNone;
     }

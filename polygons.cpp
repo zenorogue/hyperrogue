@@ -93,7 +93,7 @@ bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
 
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  ld threshold = (sphere ? (ISMOBWEB || gp::on || irr::on ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
+  ld threshold = (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
   if(/*vid.usingGL && */!first && intval(hpc.back(), h) > threshold) {
     hyperpoint md = mid(hpc.back(), h);
     hpcpush(md);
@@ -1402,12 +1402,12 @@ hyperpoint hpxd(ld d, ld x, ld y, ld z) {
 double scalef;
 
 hyperpoint hpxyzsc(double x, double y, double z) {
-  if(nonbitrunc) return hpxd(scalef, x, y, z);
+  if(!BITRUNCATED) return hpxd(scalef, x, y, z);
   else return hpxyz(x,y,z);
   }
 
 hyperpoint turtlevertex(int u, double x, double y, double z) {
-  ld scale = nonbitrunc ? scalef : 1;
+  ld scale = BITRUNCATED ? 1 : scalef;
   if(u) scale /= 2;
   return hpxd(scale, x, y, z);
   }
@@ -1488,7 +1488,7 @@ void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (nonbitrunc && !archimedean ? crossf / hcrossf : 1), shzoomy = 1.6 * (nonbitrunc && !archimedean ? crossf / hcrossf : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * (!BITRUNCATED && !archimedean ? crossf / hcrossf : 1), shzoomy = 1.6 * (!BITRUNCATED && !archimedean ? crossf / hcrossf : 1);
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {
@@ -1618,7 +1618,7 @@ void buildpolys() {
     }
   
   // scales
-  scalef = nonbitrunc ? crossf / hcrossf7 : hcrossf / hcrossf7;
+  scalef = BITRUNCATED ? hcrossf / hcrossf7 : crossf / hcrossf7;
   
   ld xcrossf = crossf;
 
@@ -1627,10 +1627,10 @@ void buildpolys() {
   double spzoom6 = sphere ? 1.2375 : 1;
   double spzoom7 = sphere ? .8 : 1;
 
-  double spzoomd7 = (nonbitrunc && sphere) ? 1 : spzoom7;
+  double spzoomd7 = (!BITRUNCATED && sphere) ? 1 : spzoom7;
   
   double fac80 = a45 ? 1.4 : a46 ? 1.2 : (a38) ? .7 : .8;
-  double fac94 = euclid ? .8 : a4 ? (nonbitrunc ? 1.1 : .9) : .94;
+  double fac94 = euclid ? .8 : a4 ? (BITRUNCATED ? .9 : 1.1) : .94;
   
   if(euclid) fac80 = fac94 = .9;
   
@@ -1641,11 +1641,11 @@ void buildpolys() {
     fac80 *= 1.2, fac94 *= .94;
 
   // procedural floors
-  double zhexf = nonbitrunc ? crossf* .55 : hexf;
+  double zhexf = BITRUNCATED ? hexf : crossf* .55;
   
   double p = -.006;
   
-  int td = ((nonbitrunc || euclid) && !(S7&1)) ? S42+S6 : 0;
+  int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;
   
   double trihepta0 = scalef*spzoom6*(.2776+p) * gsca(a4, 1.3, a46, .975, a47, .85, a38, .9) * bscale6;
   double trihepta1 = (sphere ? .54 : scalef*spzoom6*(.5273-2*p)) * gsca(a4, .8, a46, 1.075, sphere4, 1.3) * bscale7;
@@ -1658,7 +1658,7 @@ void buildpolys() {
 
   if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
 
-  if(nonbitrunc) {
+  if(!BITRUNCATED) {
     ld hedge = hdist(xspinpush0(M_PI/S7, rhexf), xspinpush0(-M_PI/S7, rhexf));
     
     trihepta1 = hdist0(xpush(tessf) * xspinpush0(2*M_PI*2/S7, tessf)) / 2 * .98;
@@ -1671,16 +1671,16 @@ void buildpolys() {
   double floorrad1 = rhexf / gp::scale *0.94;
   
   ld goldbf = 1;
-  if(gp::on) goldbf = gp::scale * 1.6;
-  if(irr::on) goldbf = irr::scale * 1.6;
-  if(gp::on) floorrad1 /= 1.6;
+  if(GOLDBERG) goldbf = gp::scale * 1.6;
+  if(IRREGULAR) goldbf = irr::scale * 1.6;
+  if(GOLDBERG) floorrad1 /= 1.6;
   
   double triangleside = hcrossf*.94;
-  if(nonbitrunc)
+  if(!BITRUNCATED)
     triangleside = tessf * .94;
   
   if(euclid4) {
-    if(nonbitrunc)
+    if(!BITRUNCATED)
       floorrad0 = floorrad1 = rhexf * .94;
     else
       floorrad0 = hexvdist * .9,
@@ -1768,7 +1768,7 @@ void buildpolys() {
   hpcpush(ddi(0, -zhexf*2.4) * C0);
   
   bshape(shMirror, PPR::WALL);
-  if(nonbitrunc) {
+  if(PURE) {
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, floorrad1*7/8 * gp::scale) * C0);
     }
   else {
@@ -1843,11 +1843,11 @@ void buildpolys() {
     }
   
   double disksize = xcrossf;
-  if(nonbitrunc && a38) disksize *= 2;
+  if(PURE && a38) disksize *= 2;
   else if(a38) disksize *= 1.5;
-  else if(nonbitrunc && S6 == 8) disksize *= 1.5;
+  else if(!BITRUNCATED && S6 == 8) disksize *= 1.5;
   
-  if(a38 && gp::on) disksize /= 2;
+  if(a38 && GOLDBERG) disksize /= 2;
 
   bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=S3)
@@ -2045,9 +2045,9 @@ void buildpolys() {
   
   if(a38) spzoom6 *= .9;
   
-  if(a4 && !nonbitrunc) spzoom6 *= 1.9, spzoom7 *= .9, spzoomd7 *= .9;
-  if(a46 && !nonbitrunc) spzoom6 *= .9;
-  if(a47 && !nonbitrunc) spzoom6 *= .85;
+  if(a4 && BITRUNCATED) spzoom6 *= 1.9, spzoom7 *= .9, spzoomd7 *= .9;
+  if(a46 && BITRUNCATED) spzoom6 *= .9;
+  if(a47 && BITRUNCATED) spzoom6 *= .85;
   
   if(archimedean)
     shFullFloor.configure(arcm::current.scale()/2, arcm::current.scale()/2);
@@ -2059,7 +2059,7 @@ void buildpolys() {
   shMFloor3.configure(floorrad0*5/8, floorrad1*5/8);
   shMFloor4.configure(floorrad0*4/8, floorrad1*4/8);
   shBigTriangle.configure(triangleside, 0); shBigTriangle.prio = PPR::FLOOR_TOWER;
-  shBigHepta.configure(0, (nonbitrunc ? tessf : xcrossf) * .97);
+  shBigHepta.configure(0, (!BITRUNCATED ? tessf : xcrossf) * .97);
   shTriheptaFloor.configure(trihepta0, trihepta1);
   shDragonFloor.prio = PPR::FLOOR_DRAGON;
   shPowerFloor.prio = PPR::FLOOR_DRAGON;
@@ -2101,7 +2101,7 @@ void buildpolys() {
   bshape(shZebra[1], PPR::FLOOR,  scalef, 163);
   bshape(shZebra[2], PPR::FLOOR,  scalef, 164);
   bshape(shZebra[3], PPR::FLOOR,  scalef, 165);
-  bshape(shZebra[4], PPR::FLOOR,  1, 166); // for nonbitrunc
+  bshape(shZebra[4], PPR::FLOOR,  1, 166); // for pure
   bshape(shEmeraldFloor[0], PPR::FLOOR,  scalef, 167); // 4
   bshape(shEmeraldFloor[1], PPR::FLOOR,  scalef, 168); // 12
   bshape(shEmeraldFloor[2], PPR::FLOOR,  scalef, 169); // 16
@@ -2115,9 +2115,9 @@ void buildpolys() {
   bshape(shTower[4], PPR::FLOOR_TOWER,  scalef, 200); // 9
   bshape(shTower[5], PPR::FLOOR_TOWER,  scalef, 201); // 10
   bshape(shTower[6], PPR::FLOOR_TOWER,  scalef, 202); // 10
-  bshape(shTower[7], PPR::FLOOR_TOWER,  1, 203); // nonbitrunc 7
-  bshape(shTower[8], PPR::FLOOR_TOWER,  1, 204); // nonbitrunc 11
-  bshape(shTower[9], PPR::FLOOR_TOWER,  1, 205); // nonbitrunc 15
+  bshape(shTower[7], PPR::FLOOR_TOWER,  1, 203); // pure 7
+  bshape(shTower[8], PPR::FLOOR_TOWER,  1, 204); // pure 11
+  bshape(shTower[9], PPR::FLOOR_TOWER,  1, 205); // pure 15
   bshape(shTower[10], PPR::FLOOR_TOWER,  scalef, 206);  // Euclidean
   
   // structures & walls
@@ -2160,11 +2160,11 @@ void buildpolys() {
   bshape(shWormTail, PPR::TENTACLE1, scalef, 383);
   bshape(shSmallWormTail, PPR::TENTACLE1, scalef, 384);
 
-  if(nonbitrunc) bshape(shDragonSegment, PPR::TENTACLE1, gp::scale * irr::scale, 233);
+  if(!BITRUNCATED) bshape(shDragonSegment, PPR::TENTACLE1, gp::scale * irr::scale, 233);
   else bshape(shDragonSegment, PPR::TENTACLE1, scalef, 234);
   bshape(shDragonWings, PPR::ONTENTACLE, scalef, 237);
   bshape(shDragonLegs, PPR::TENTACLE0, scalef, 238);
-  if(nonbitrunc) bshape(shDragonTail, PPR::TENTACLE1, gp::scale * irr::scale, 239);
+  if(!BITRUNCATED) bshape(shDragonTail, PPR::TENTACLE1, gp::scale * irr::scale, 239);
   else bshape(shDragonTail, PPR::TENTACLE1, scalef, 240);
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalef, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalef, 242);
@@ -2173,11 +2173,11 @@ void buildpolys() {
   if(sphere) krsc *= 1.4;
   if(S7 ==8) krsc *= 1.3;
   
-  if(nonbitrunc && !gp::on && !irr::on && !euclid4) {
+  if(PURE && !euclid4) {
     tentacle_length = 1.52;
     bshape(shSeaTentacle, PPR::TENTACLE1, 1, 245);
     }
-  else if(gp::on || irr::on) {
+  else if(NONSTDVAR) {
     tentacle_length = 0.566256 * 1.6 * gp::scale * irr::scale * krsc;
     bshape(shSeaTentacle, PPR::TENTACLE1, 1.6 * gp::scale * irr::scale * krsc, 246);  
     }
@@ -2185,8 +2185,8 @@ void buildpolys() {
     tentacle_length = 0.566256 * gp::scale * irr::scale;
     bshape(shSeaTentacle, PPR::TENTACLE1, gp::scale * irr::scale, 246);  
     }
-  ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale * irr::scale * krsc;
-  if(euclid4 && nonbitrunc) ksc *= .5;
+  ld ksc = (!BITRUNCATED ? 1.8 : 1.5) * gp::scale * irr::scale * krsc;
+  if(euclid4 && PURE) ksc *= .5;
   bshape(shKrakenHead, PPR::ONTENTACLE, ksc, 247);
   bshape(shKrakenEye, PPR::ONTENTACLE_EYES, ksc, 248);
   bshape(shKrakenEye2, PPR::ONTENTACLE_EYES2, ksc, 249);
@@ -2420,10 +2420,10 @@ void buildpolys() {
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
     copyshape(shTortoise[v][4+z], shTortoise[v][2+z], PPR(shTortoise[v][2+z].prio + (PPR::CARRIED-PPR::ITEM)));
 
-  if(nonbitrunc) bshape(shMagicSword, PPR::MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 243);
+  if(!BITRUNCATED) bshape(shMagicSword, PPR::MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 243);
   else bshape(shMagicSword, PPR::MAGICSWORD, 1, 244);
 
-  if(nonbitrunc) bshape(shMagicShovel, PPR::MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 333);
+  if(!BITRUNCATED) bshape(shMagicShovel, PPR::MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 333);
   else bshape(shMagicShovel, PPR::MAGICSWORD, 1, 333);
   
   bshape(shBead0, PPR(20), 1, 250);

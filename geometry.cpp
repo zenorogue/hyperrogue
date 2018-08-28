@@ -52,7 +52,7 @@ void precalc() {
     // dynamicval<eGeometry> g(geometry, gNormal);
     // precalc(); }
     // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
-    if(a4 && nonbitrunc) {
+    if(a4 && !BITRUNCATED) {
       crossf = .5;
       hexf = .5;
       hcrossf = crossf * sqrt(2) / 2;
@@ -62,7 +62,7 @@ void precalc() {
       rhexf = crossf * sqrt(2) / 2;
       tessf = crossf;
       }
-    else if(a4) {
+    else if(a4 && BITRUNCATED) {
       ld s2 = sqrt(2);
       ld xx = 1 - s2 / 2;
       crossf = .5;
@@ -121,7 +121,7 @@ void precalc() {
   else {
     hcrossf = hdist(xpush0(tessf), xspinpush0(2*M_PI/S7, tessf)) / 2;
     }
-  crossf = nonbitrunc ? tessf : hcrossf;
+  crossf = BITRUNCATED ? hcrossf : tessf;
   
   fmin = 0, fmax = tessf;
   for(int p=0; p<100; p++) {
@@ -134,9 +134,9 @@ void precalc() {
     }
   hexf = fmin;
   
-  rhexf = nonbitrunc ? hcrossf : hexf;
+  rhexf = BITRUNCATED ? hexf : hcrossf;
   
-  if(!euclid && !nonbitrunc && !(S7&1))
+  if(!euclid && BITRUNCATED && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
 
   finish:
@@ -160,7 +160,7 @@ void precalc() {
   printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist);  
   
-  base_distlimit = ginf[geometry].distlimit[nonbitrunc];
+  base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
   
   gp::compute_geometry();  
   irr::compute_geometry();
@@ -242,7 +242,7 @@ namespace geom3 {
   string invalid;
   
   ld actual_wall_height() {
-      if(gp::on && gp_autoscale_heights) 
+      if(GOLDBERG && gp_autoscale_heights) 
         return wall_height * min<ld>(4 * gp::scale, 1);
       return wall_height;
       }

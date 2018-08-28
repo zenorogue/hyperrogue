@@ -389,7 +389,7 @@ void texture_config::mark_triangles() {
       }
   }
 
-static const auto current_texture_parameters = tie(geometry, nonbitrunc, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
+static const auto current_texture_parameters = tie(geometry, variation, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
 
 void texture_config::clear_texture_map() {
   texture_map.clear();
@@ -773,7 +773,8 @@ patterns::patterninfo si_save;
 
 saverlist texturesavers;
 
-bool target_nonbitru;
+eVariation targetvariation;
+eGeometry targetgeometry;
 
 string csymbol;
 
@@ -794,7 +795,7 @@ void init_textureconfig() {
   addsaver(vid.yposition, "Y position", 0);
   addsaver(vid.xposition, "X position", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
-  addsaverenum(target_nonbitru, "bitruncated", false);
+  addsaverenum(targetvariation, "bitruncated", eVariation::bitruncated);
   // ... geometry parameters
 
   addsaverenum(patterns::whichPattern, "pattern", patterns::PAT_TYPES);
@@ -843,7 +844,7 @@ bool texture_config::save() {
     }
 
   targetgeometry = geometry;
-  target_nonbitru = nonbitrunc;
+  targetvariation = variation;
 
   cell *ctr = euclid ? centerover.at : viewctr.at->c7;
   si_save = patterns::getpatterninfo0(ctr);
@@ -887,13 +888,13 @@ bool texture_config::load() {
           return false;
           }
         }
-      stop_game_and_switch_mode(rg::geometry);
+      set_geometry(targetgeometry);
       start_game();
       return config.load();
       }
     
-    if(nonbitrunc != target_nonbitru) {
-      stop_game_and_switch_mode(rg::bitrunc);
+    if(variation != targetvariation) {
+      set_variation(targetvariation);
       start_game();
       return config.load();
       }
@@ -1472,7 +1473,7 @@ void texture_config::true_remap() {
       
       auto& mi2 = texture_map[si.id];
       mi2 = mi;
-      if(gp::on || irr::on) pshift += si.dir;
+      if(GOLDBERG || IRREGULAR) pshift += si.dir;
       mapTexture(c, mi2, si, ggmatrix(c), pshift);
       mapTexture2(mi2);
       mi2.tvertices = move(new_tvertices);

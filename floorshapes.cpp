@@ -106,7 +106,7 @@ int nsym0;
 void generate_matrices_scale(ld scale, int noft) {
   mesher ohex = msh(gNormal, 6, 0.329036, 0.566256, 0.620672, 0, 1);
   mesher ohept = msh(gNormal, 7, hexf7, hcrossf7, hcrossf7, M_PI/7, 1);
-  if(nonbitrunc) {
+  if(!BITRUNCATED) {
     mesher nall = msh(geometry, S7, rhexf, tessf, tessf, -M_PI, scale);
     bool use = geosupport_football() < 2;
     if(use && noft == 1) {
@@ -281,23 +281,23 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
-    if(!gp::on && !irr::on && !archimedean) {
+    if(STDVAR && !archimedean) {
 
       // standard and binary
       ld hexside = fsh.rad0, heptside = fsh.rad1;
       
       for(int k=0; k<SIDEPARS; k++) sizeto(fsh.side[k], id);
       
-      int td = ((nonbitrunc || euclid) && !(S7&1)) ? S42+S6 : 0;
+      int td = ((PURE || euclid) && !(S7&1)) ? S42+S6 : 0;
       if(&fsh == &shBigHepta) td += S6;
     
       int b = 0;
-      if(S3 == 4 && !nonbitrunc) b += S14;
+      if(S3 == 4 && BITRUNCATED) b += S14;
   
       if(id == 1)
         bshape_regular(fsh, 1, S7, td, heptside);
       
-      else if(nonbitrunc) {
+      else if(PURE) {
         if(&fsh == &shTriheptaFloor)
           bshape_regular(fsh, 0, S7/2, 0, hexside);
         else if(&fsh == &shBigTriangle)
@@ -407,9 +407,9 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     sizeto(fsh.b, id);
     sizeto(fsh.shadow, id);
     
-    if(!gp::on && !irr::on && !binarytiling && !archimedean) {
+    if(STDVAR && !binarytiling && !archimedean) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
-      if(nonbitrunc && geosupport_football() < 2 && fsh.shapeid2) {
+      if(PURE && geosupport_football() < 2 && fsh.shapeid2) {
         if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
         if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
         }
@@ -418,7 +418,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid1, hept_matrices);
         }
       generate_matrices_scale(fsh.scale * SHADMUL, fsh.noftype);
-      if(nonbitrunc && geosupport_football() < 2 && fsh.shapeid2) {
+      if(PURE && geosupport_football() < 2 && fsh.shapeid2) {
         if(id == 0) bshape2(fsh.shadow[0], fsh.prio, fsh.shapeid2, hept_matrices);
         if(id == 1) bshape2(fsh.shadow[1], fsh.prio, fsh.shapeid2, hept_matrices);
         }
@@ -470,7 +470,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
 void generate_floorshapes() {
 
-  if(irr::on) {
+  if(IRREGULAR) {
     printf("generating irregular floorshapes...\n");
     cell model;
 
@@ -489,7 +489,7 @@ void generate_floorshapes() {
     printf("done\n");
     }
     
-  else if(gp::on) { /* will be generated on the fly */ }
+  else if(GOLDBERG) { /* will be generated on the fly */ }
   
   else if(archimedean) {
     heptagon master;
@@ -497,7 +497,7 @@ void generate_floorshapes() {
     model.master = &master;
     arcm::parent_index_of(&master) = 0;
     auto &ac = arcm::current;
-    for(int i=0; i<2*ac.N + (nonbitrunc ? 0 : 2); i++) {
+    for(int i=0; i<2*ac.N + (PURE ? 0 : 2); i++) {
       arcm::id_of(&master) = i;
       model.type = isize(ac.triangles[i]);
       if(geosupport_football() == 2)
@@ -606,11 +606,11 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
 
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, PPR prio = PPR::DEFAULT) {
   if(!c) queuepolyat(V, shv[0], col, prio);
-  else if(gp::on) {
+  else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);
     queuepolyat(V, shv[id], col, prio);
     }
-  else if(irr::on) {
+  else if(IRREGULAR) {
     int id = irr::cellindex[c];
     if(id < 0 || id >= isize(shv)) {
       return;
@@ -620,9 +620,9 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
   else if(archimedean) {
     queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
-  else if((euclid || gp::on) && ishex1(c)) 
+  else if((euclid || GOLDBERG) && ishex1(c)) 
     queuepolyat(V * pispin, shv[0], col, prio);
-  else if(!(S7&1) && nonbitrunc) {
+  else if(!(S7&1) && PURE) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
     transmatrix D = applyPatterndir(c, si);    

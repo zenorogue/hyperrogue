@@ -4,10 +4,8 @@
 
 namespace hr {
 
-eGeometry geometry, targetgeometry;
-
-// for the pure heptagonal grid
-bool nonbitrunc = false;
+eGeometry geometry;
+eVariation variation;
 
 // hyperbolic points and matrices
 

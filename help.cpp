@@ -226,7 +226,7 @@ string other_land() {
   }
 
 string other_geometry_land() {
-  if(gp::on || S7 != 7 || nonbitrunc) return other_geometry();
+  if(S7 != 7 || !BITRUNCATED) return other_geometry();
   else return other_land();
   }
 
@@ -394,10 +394,10 @@ string generateHelpForItem(eItem it) {
       }
     }
   
-  if(it == itOrb37 && (gp::on || S7 != 7 || nonbitrunc))
+  if(it == itOrb37 && (S7 != 7 || !BITRUNCATED))
     help += "\n\n" + other_geometry() + forbidden_unmarked();
 
-  if(it == itOrbLava && (gp::on || S7 != 7 || nonbitrunc))
+  if(it == itOrbLava && (S7 != 7 || !BITRUNCATED))
     help += "\n\n" + other_geometry() + forbidden_unmarked();
   
   if(among(it, itOrbSide2, itOrbSide3) && !among(S7, 6, 7))
@@ -441,7 +441,7 @@ string generateHelpForWall(eWall w) {
   if(w == waMineMine || w == waMineUnknown || w == waMineOpen)
     addMinefieldExplanation(s);
   if(isThumper(w)) s += pushtext(w);
-  if((w == waClosePlate || w == waOpenPlate) && nonbitrunc) 
+  if((w == waClosePlate || w == waOpenPlate) && PURE) 
     s += "\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)";
   return s;
   }
@@ -523,7 +523,7 @@ string generateHelpForMonster(eMonster m) {
   if(among(m, moHexDemon, moHexSnake, moHexSnakeTail))
     s += "\n\n" + other_geometry_land() + forbidden_marked();
 
-  if(among(m, moKrakenT, moKrakenH) && (gp::on || S7 != 7 || nonbitrunc))
+  if(among(m, moKrakenT, moKrakenH) && (S7 != 7 || !BITRUNCATED))
     s += "\n\n" + other_geometry() + XLAT("Forbidden cells are marked with a different color.");
 
   return s;
@@ -897,7 +897,7 @@ void describeMouseover() {
     if(isWarped(c)) {
       appendHelp(string("\n\n") + XLAT(warpdesc));
 
-      if(gp::on || S7 != 7 || nonbitrunc) if(c->item != itOrb37)
+      if(S7 != 7 || !BITRUNCATED) if(c->item != itOrb37)
         help += "\n\n" + other_geometry() + forbidden_unmarked();
       }
     }

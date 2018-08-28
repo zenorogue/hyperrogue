@@ -158,8 +158,8 @@ void drawSpeed(const transmatrix& V) {
   }
 
 int ctof(cell *c) {
-  if(irr::on) return irr::ctof(c);
-  if(nonbitrunc && !gp::on) return 1;
+  if(IRREGULAR) return irr::ctof(c);
+  if(PURE) return 1;
   // if(euclid) return 0;
   if(!c) return 1;
   if(binarytiling) return c->type == 7;
@@ -239,7 +239,7 @@ ld displayspin(cell *c, int d) {
     auto& t1 = arcm::current.get_triangle(c->master, d-1);
     return -(t1.first + M_PI / c->type);
     }
-  else if(irr::on) {
+  else if(IRREGULAR) {
     auto id = irr::cellindex[c];
     auto& vs = irr::cells[id];
     if(d < 0 || d >= c->type) return 0;
@@ -259,8 +259,8 @@ ld displayspin(cell *c, int d) {
 
 double hexshiftat(cell *c) {
   if(binarytiling) return 0;
-  if(ctof(c) && S7==6 && S3 == 4 && !nonbitrunc) return hexshift + 2*M_PI/S7;
-  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && !nonbitrunc) return hexshift + 2*M_PI/S7;
+  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) return hexshift + 2*M_PI/S7;
+  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) return hexshift + 2*M_PI/S7;
   if(hexshift && ctof(c)) return hexshift;
   return 0;
   }
@@ -299,17 +299,17 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int& ang = angle[multi::cpid];
       ang %= S42;
       
-      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (irr::on ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
+      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
       
 #if CAP_QUEUE
       if(!masterless) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
-        if(nonbitrunc && !gp::on && !irr::on && a%3 != ang%3) continue;
+        if(PURE && a%3 != ang%3) continue;
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*xspinpush0(dda * M_PI / S42, nonbitrunc ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/S42, nonbitrunc ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*xspinpush0(dda * M_PI / S42, (!BITRUNCATED) ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/S42, (!BITRUNCATED) ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
@@ -2111,7 +2111,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * pispin;
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
-    else if(gp::on || irr::on) {
+    else if(NONSTDVAR) {
       transmatrix T = calc_relative_matrix(c->move(c->mondir), c, c->mondir);
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
       }
@@ -2121,7 +2121,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       }
       
       // if(ctof(c) && !masterless) Vb = Vb * xpush(hexhexdist - hcrossf);
-      // return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+      // return (!BITRUNCATED) ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
     return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
     }
 
@@ -2392,7 +2392,7 @@ int countMinesAround(cell *c) {
   }
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
-  if(gp::on || irr::on || binarytiling) return Id;
+  if(NONSTDVAR || binarytiling) return Id;
   transmatrix V = ddspin(c, si.dir, M_PI);
   if(si.reflect) V = V * Mirror;
   return V * iddspin(c, 0, M_PI);
@@ -2419,7 +2419,7 @@ void set_towerfloor(cell *c, cellfunction *cf = coastvalEdge) {
     if(i == 9) j = 4;
     if(i == 10) j = 5;
     if(i == 13) j = 6;
-    if(nonbitrunc) {
+    if(PURE) {
       if(i == 7) j = 7;
       if(i == 11) j = 8;
       if(i == 15) j = 9;
@@ -2442,7 +2442,7 @@ void set_zebrafloor(cell *c) {
   auto si = patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
   
   int j;
-  if(nonbitrunc) j = 4;
+  if(PURE) j = 4;
   else if(si.id >=4 && si.id < 16) j = 2;
   else if(si.id >= 16 && si.id < 28) j = 1;
   else if(si.id >= 28 && si.id < 40) j = 3;
@@ -2464,7 +2464,7 @@ void set_reptile_floor(cell *c, const transmatrix& V, int col, bool nodetails = 
   int j;
 
   if(!wmescher) j = 4;
-  else if(nonbitrunc) j = 0;
+  else if(!BITRUNCATED) j = 0;
   else if(si.id < 4) j = 0;
   else if(si.id >=4 && si.id < 16) j = 1;
   else if(si.id >= 16 && si.id < 28) j = 2;
@@ -2523,7 +2523,7 @@ void draw_reptile(cell *c, const transmatrix &V, int col) {
   }      
 
 void set_emeraldfloor(cell *c) {
-  if(!masterless && !nonbitrunc) {
+  if(!masterless && BITRUNCATED) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_EMERALD, patterns::SPF_SYM0123);
   
     int j = -1;
@@ -3096,13 +3096,13 @@ bool noAdjacentChasms(cell *c) {
 
 // does the current geometry allow nice duals
 bool has_nice_dual() {
-  if(irr::on) return irr::bitruncations_performed > 0;
+  if(IRREGULAR) return irr::bitruncations_performed > 0;
   if(archimedean) return geosupport_football() >= 2;
   if(binarytiling) return false;
-  if(!nonbitrunc) return true;
-  if((S7 & 1) == 0) return true;
-  if(!gp::on) return false;
+  if(BITRUNCATED) return true;
   if(a4) return false;
+  if((S7 & 1) == 0) return true;
+  if(PURE) return false;
   return (gp::param.first + gp::param.second * 2) % 3 == 0;
   }
 
@@ -3112,7 +3112,7 @@ bool is_nice_dual(cell *c) {
   }
 
 bool use_swapped_duals() {
-  return (masterless && !a4) || gp::on;
+  return (masterless && !a4) || GOLDBERG;
   }
 
 void floorShadow(cell *c, const transmatrix& V, int col) {
@@ -3199,7 +3199,7 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   
   transmatrix V2 = V * ddspin(c, i);
  
-  if(gp::on || irr::on || binarytiling || archimedean) {
+  if(binarytiling || archimedean || NONSTDVAR) {
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
@@ -3785,7 +3785,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       auto si = patterns::getpatterninfo0(c);
 #endif
         
-      bool eoh = euclid || nonbitrunc;
+      bool eoh = euclid || !BITRUNCATED;
 
       if(drawing_usershape_on(c, mapeditor::sgFloor))
         mapeditor::drawtrans = V * applyPatterndir(c, si);
@@ -3834,7 +3834,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           onleft = !onleft;
         if(c->type == 6 && d != -1 && c->move(d)->barleft == laMirror)
           onleft = !onleft;
-        if(nonbitrunc) onleft = !onleft;
+        if(PURE) onleft = !onleft;
         
         if(d == -1) {
           for(d=0; d<c->type; d++)
@@ -4061,7 +4061,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laSwitch:
           set_floor(shSwitchFloor);
-          if(ctof(c) && !gp::on && !irr::on && !archimedean && !binarytiling) for(int i=0; i<c->type; i++)
+          if(ctof(c) && STDVAR && !archimedean && !binarytiling) for(int i=0; i<c->type; i++)
             queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
           break;
 
@@ -4252,7 +4252,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(pseudohept(c) && (
         c->land == laRedRock || 
         vid.darkhepta ||
-        (c->land == laClearing && nonbitrunc))) {
+        (c->land == laClearing && !BITRUNCATED))) {
         queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
@@ -4673,7 +4673,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          calcAirdir(c2); // printf("airdir = %d\n", airdir);
          transmatrix V0 = ddspin(c, i, M_PI);
          
-         double ph = ticks / (nonbitrunc?150:75.0) + airdir * M_PI / (S21+.0);
+         double ph = ticks / (PURE?150:75.0) + airdir * M_PI / (S21+.0);
          
          int aircol = 0x8080FF00 | int(32 + 32 * -cos(ph));
          
@@ -4718,7 +4718,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
         transmatrix V0 = spin(hdir);
         
-        double ldist = nonbitrunc ? crossf : c->type == 6 ? .2840 : 0.3399;
+        double ldist = PURE ? crossf : c->type == 6 ? .2840 : 0.3399;
  
         poly_outline = OUTLINE_TRANS;
         queuepoly((*Vdp)*V0*xpush(ldist*(2*ph1-1)), shDisk, aircol);
@@ -4734,7 +4734,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(vid.grid) {
       dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
-      if(gp::on) vid.linewidth *= gp::scale * 2;
+      if(GOLDBERG) vid.linewidth *= gp::scale * 2;
 
       // sphere: 0.3948
       // sphere heptagonal: 0.5739
@@ -5082,7 +5082,7 @@ void drawFlashes() {
       kill = tim > 300;
       int partcol = darkena(f.color, 0, max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
-      ld gps = gp::on ? gp::scale * 1.6 : 1;
+      ld gps = GOLDBERG ? gp::scale * 1.6 : 1;
       queuepoly(V * spin(f.angle) * xpush(f.spd * tim * gps / 50000.), shParticle[f.size], partcol);
       }
     
@@ -5206,7 +5206,7 @@ void drawthemap() {
   mmspatial = vid.monmode == 4 || vid.monmode == 5;
 
   DEBB(DF_GRAPH, (debugfile,"draw the map\n"));
-  fanframe = ticks / (nonbitrunc ? 1000. : 500. ); // (nonbitrunc ? 300 : 150.0) / M_PI;
+  fanframe = ticks / (PURE ? 1000. : 500. );
   
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";

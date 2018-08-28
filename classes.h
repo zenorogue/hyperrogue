@@ -203,6 +203,8 @@ enum eGeometry {
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
 
+enum class eVariation { bitruncated, pure, goldberg, irregular, dual };  
+
 struct geometryinfo {
   const char* name;
   const char* shortname;
@@ -226,6 +228,7 @@ static const int SEE_ALL = 50;
 static const int FORBIDDEN = -1;
 
 extern eGeometry geometry;
+extern eVariation variation;
 
 extern geometryinfo ginf[gGUARD];
 

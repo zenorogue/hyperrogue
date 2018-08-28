@@ -386,7 +386,7 @@ struct fpattern {
       dists[at] = i;
       for(int q=0; q<S7; q++) {
         dists[at] = i;
-        if(nonbitrunc)
+        if(PURE) // todo-variation: PURE here?
           indist[i+1].push_back(connections[at]);
         else {
           indist[i+2].push_back(connections[at]);
@@ -400,7 +400,7 @@ struct fpattern {
   
   void analyze() {
 
-    DEBB(DF_FIELD, (debugfile, "nonbitrunc = %d\n", nonbitrunc));
+    DEBB(DF_FIELD, (debugfile, "variation = %d\n", int(variation)));
     int N = connections.size();
     
     markers.resize(N);
@@ -515,7 +515,7 @@ struct fpattern {
         W = mmul(Wall, W);
         }
       }
-    dijkstra(nonbitrunc ? distriver : distflower, indist);
+    dijkstra(PURE ? distriver : distflower, indist);
     
     W = matrices[riverid];
     for(int i=0; i<wallorder; i++) {
@@ -537,7 +537,7 @@ struct fpattern {
       SETDIST(W, 1, itGold)
       W = mmul(W, Wall);
       }
-    int riverdist = dijkstra(nonbitrunc ? distflower : distriver, indist);
+    int riverdist = dijkstra(PURE ? distflower : distriver, indist);
     DEBB(DF_FIELD, (debugfile, "river dist = %d\n", riverdist));
     
     for(int i=0; i<isize(currfp.matrices); i++)
@@ -546,7 +546,7 @@ struct fpattern {
         break;
         }
     
-    if(!nonbitrunc) {
+    if(!PURE) {
       W = matrices[riverid];
       for(int i=0; i<wallorder; i++) {
         SETDIST(W, 0, itStatue)

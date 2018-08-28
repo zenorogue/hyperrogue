@@ -864,7 +864,7 @@ int modecode() {
   else if(pureHardcore()) xcode ++;
   
   if(euclid) xcode += 6;
-  else if(nonbitrunc) xcode += 3;
+  else if(!BITRUNCATED) xcode += 3;
   
   if(sphere) {
     xcode += 9;
@@ -894,14 +894,14 @@ int modecode() {
   // randompattern never records its scores
   // no specifics of the advanced configuration of torus/fieldquotient currently recorded
   
-  if(gp::on) { 
+  if(GOLDBERG) { 
     mct += (1 << 19);
     auto loc = gp::human_representation(gp::param);
     mct += loc.first << 21; // 4 bits
     mct += loc.second << 25; // 4 bits
     }
   
-  if(irr::on) {
+  if(IRREGULAR) {
     mct += (1 << 20);
     mct += irr::density_code() << 21; // 8 bits
     }

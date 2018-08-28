@@ -12,19 +12,19 @@ bool checkBarriersFront(cellwalker bb, int q, bool cross) {
   if(bb.at->mpdist < BARLEV) return false;
   if(bb.at->mpdist == BUGLEV) return false;
   if(bb.at->bardir != NODIR) return false;
-  if(bb.spin == (nonbitrunc ? 3 : 0)) {q--; if(!q) return true; }
+  if(bb.spin == (PURE ? 3 : 0)) {q--; if(!q) return true; }
 
   if(!cross) for(int i=0; i<7; i++) {
     cellwalker bb2 = bb + i + wstep;
     if(bb2.at->bardir != NODIR) return false; 
-    if(!nonbitrunc) { 
+    if(!PURE) { 
       bb2 = bb2 + 4 + wstep;
       if(bb2.at->bardir != NODIR) return false;
       }
     }
 
   bb += wstep;
-  if(!nonbitrunc) { bb = bb + 3 + wstep + 3 + wstep; }
+  if(!PURE) { bb = bb + 3 + wstep + 3 + wstep; }
   return checkBarriersBack(bb, q);
   }
 
@@ -50,19 +50,19 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
   if(!cross) for(int i=0; i<7; i++) {
     cellwalker bb2 = bb + i + wstep;
     if(bb2.at->bardir != NODIR) return false;
-    if(!nonbitrunc) {
+    if(!PURE) {
       bb2 = bb2 + 4 + wstep;
       if(bb2.at->bardir != NODIR) return false;
       }
     }
 
-  bb = bb + 3 + wstep + (nonbitrunc ? 5 : 4) + wstep + 3;
+  bb = bb + 3 + wstep + (PURE ? 5 : 4) + wstep + 3;
   return checkBarriersFront(bb, q);
   }
 
 // warp coasts use a different algorithm when has_nice_dual() is on
 bool warped_version(eLand l1, eLand l2) {
-  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || ((AS3==4) && !nonbitrunc);
+  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || (VALENCE == 3);
   }
 
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
@@ -94,7 +94,7 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
   if(warped_version(l1, l2)) {
     bb = bb + wstep + (2*dir) + wstep + dir;
     }
-  else if(AS3==4) {
+  else if(VALENCE > 3) {
     bb = bb + dir + wstep + dir;
     dir = -dir;
     swap(l1, l2);
@@ -155,7 +155,7 @@ void setland(cell *c, eLand l) {
 
 void extendcheck(cell *c) {
   return;
-  if(!nonbitrunc && c->landparam == 0 && c->barleft != NOWALLSEP) {
+  if(BITRUNCATED && c->landparam == 0 && c->barleft != NOWALLSEP) {
     raiseBuggyGeneration(c, "extend error");
     }
   }
@@ -173,7 +173,7 @@ void extendBarrierFront(cell *c) {
   cellwalker bb(c, c->bardir); setbarrier(bb.at);
   bb += wstep;
   
-  if(!nonbitrunc) {
+  if(BITRUNCATED) {
     bb.at->barleft = c->barleft;
     bb.at->barright = c->barright;
     setbarrier(bb.at);
@@ -209,7 +209,7 @@ void extendBarrierFront(cell *c) {
   extendBarrier(bb.at);
   
   for(int a=-3; a<=3; a++) if(a) {
-    bb.at = c; bb.spin = c->bardir; bb += (nonbitrunc?-a:a); bb += wstep; 
+    bb.at = c; bb.spin = c->bardir; bb += (PURE?-a:a); bb += wstep; 
     setland(bb.at, a > 0 ? c->barright : c->barleft);
     }
   }
@@ -221,8 +221,8 @@ void extendBarrierBack(cell *c) {
   extendcheck(c);
 
   cellwalker bb(c, c->bardir); setbarrier(bb.at);
-  bb = bb + 3 + wstep + (nonbitrunc?5:4); 
-  setland(bb.at, nonbitrunc ? c->barleft : c->barright); 
+  bb = bb + 3 + wstep + (PURE?5:4); 
+  setland(bb.at, PURE ? c->barleft : c->barright); 
   bb = bb + wstep + 3;
   bb.at->bardir = bb.spin;
   bb.at->barleft = c->barright;
@@ -233,7 +233,7 @@ void extendBarrierBack(cell *c) {
 //printf("[D heat %d]\n", (ht^11));
 
   // needed for CR2 to work
-  if(!nonbitrunc) { 
+  if(BITRUNCATED) { 
     auto bb2 = bb + wstep;
     bb2.at->barleft = c->barright;
     bb2.at->barright = c->barleft;
@@ -257,7 +257,7 @@ void extendNowall(cell *c) {
     cw += wstep;
     setland(cw.at, c->barright);
     }
-  else if(AS3 == 4) {
+  else if(VALENCE > 3) {
     auto cw2 = cw + wstep;
     setland(cw2.at, c->barright);
     cw2.at->barleft = NOWALLSEP_USED;
@@ -270,7 +270,7 @@ void extendNowall(cell *c) {
     if(warpv) {
       cw0 = cw + (2*i) + wstep;
       }
-    else if(AS3==4) {
+    else if(VALENCE > 3) {
       cw0 = cw + i + wstep + i; 
       }
     else {
@@ -279,7 +279,7 @@ void extendNowall(cell *c) {
       }
     if(cw0.at->barleft != NOWALLSEP_USED) {
       cw0.at->barleft = NOWALLSEP;
-      if(AS3 == 4 && nonbitrunc) {
+      if(VALENCE > 3) {
         cw0.at->barright = c->barright;
         cw0.at->bardir = cw0.spin;
         setland(cw0.at, c->land);
@@ -304,7 +304,7 @@ void extendNowall(cell *c) {
 bool gotit = false;
 
 void extendCR5(cell *c) {
-  if(nonbitrunc) return;
+  if(!BITRUNCATED) return;
 // if(c->barright == laCrossroads5) extendCR5(c);
   eLand forbidden = c->barleft;
   eLand forbidden2 = laNone;
@@ -366,14 +366,14 @@ void extendBarrier(cell *c) {
   
   if(firstmirror && c->barleft == laMirror && hrand(100) < 60) {
     cellwalker cw(c, c->bardir);
-    if(!nonbitrunc) cw += wstep;
+    if(BITRUNCATED) cw += wstep;
     if(cw.at->land != laMirrorWall)
       if(buildBarrier6(cw, 1)) return;
     }
     
-  if(firstmirror && (nonbitrunc?c->barleft == laMirror : c->barright == laMirror) && hrand(100) < 60) {
+  if(firstmirror && (PURE?c->barleft == laMirror : c->barright == laMirror) && hrand(100) < 60) {
     cellwalker cw(c, c->bardir);
-    if(nonbitrunc) {
+    if(PURE) {
       cw = cw - 3 + wstep - 3;
       }
     else {
@@ -388,7 +388,7 @@ void extendBarrier(cell *c) {
     ) {
     
     cellwalker cw(c, c->bardir);
-    if(nonbitrunc) {
+    if(PURE) {
       cw += wstep;
       if(isbar4(cw.at)) {
         cw = cw + wstep + 3 + wstep - 1 + wstep;
@@ -451,7 +451,7 @@ bool buildBarrier6(cellwalker cw, int type) {
   
   if(buggyGeneration) return true;
 
-  if(!nonbitrunc) {
+  if(BITRUNCATED) {
     b[0] = cw + wstep;
     b[1] = cw + 1 + wstep + 3 + wstep;
     b[2] = cw + 4 + wstep;
@@ -481,18 +481,18 @@ bool buildBarrier6(cellwalker cw, int type) {
     }
    
   if(type == 1) {  
-    if(!(nonbitrunc?checkBarriersFront:checkBarriersBack)(b[1], 6, true)) return false;
-    if(!(nonbitrunc?checkBarriersFront:checkBarriersBack)(b[2], 6, true)) return false;
+    if(!(PURE?checkBarriersFront:checkBarriersBack)(b[1], 6, true)) return false;
+    if(!(PURE?checkBarriersFront:checkBarriersBack)(b[2], 6, true)) return false;
     }
   else {
-    if(!(nonbitrunc?checkBarriersFront:checkBarriersBack)(b[0], 6, true)) return false;
-    if(!(nonbitrunc?checkBarriersFront:checkBarriersBack)(b[3], 6, true)) return false;
+    if(!(PURE?checkBarriersFront:checkBarriersBack)(b[0], 6, true)) return false;
+    if(!(PURE?checkBarriersFront:checkBarriersBack)(b[3], 6, true)) return false;
     }
   
   for(int d=0; d<4; d++) {
     b[d].at->bardir = b[d].spin;
     
-    if(nonbitrunc) {
+    if(PURE) {
       b[0].at->barleft = laMirrored, b[0].at->barright = laMirrored2;
       b[1].at->barleft = laMirror, b[1].at->barright = laMirrored;
       b[2].at->barleft = laMirrored2, b[2].at->barright = laMirrored;
@@ -505,17 +505,17 @@ bool buildBarrier6(cellwalker cw, int type) {
       b[3].at->barleft = laMirrored2, b[3].at->barright = laMirrored;
       }
   
-    (nonbitrunc?extendBarrierFront:extendBarrierBack)(b[d].at);
+    (PURE?extendBarrierFront:extendBarrierBack)(b[d].at);
     }  
 
-  if(nonbitrunc && false) {
+  if(PURE && false) {
     for(int z=0; z<4; z++)
       b[z].at->item = eItem(1+z+4*type);
     for(int a=0; a<4; a++) 
       extendBarrierBack((b[a]+wstep).at);
     }
 
-  if(!nonbitrunc) {
+  if(BITRUNCATED) {
     setland((cw+1).cpeek(), laMirrorWall);
     setland((cw+2).cpeek(), laMirrored);
     setland((cw+3).cpeek(), laMirrorWall2);
@@ -565,9 +565,9 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   cellwalker cd(c, d);
   
   cellwalker b1 = cd;
-  cellwalker b2 = nonbitrunc ? cd + wstep : cd + wstep + 3 + wstep + 3 + wstep;  
-  cellwalker b3 = nonbitrunc ? cd - 1 + wstep + 3 : cd + wstep + 4 + wstep + 4;
-  cellwalker b4 = nonbitrunc ? cd + 1 + wstep - 3 : cd + wstep - 4 + wstep - 4;
+  cellwalker b2 = PURE ? cd + wstep : cd + wstep + 3 + wstep + 3 + wstep;  
+  cellwalker b3 = PURE ? cd - 1 + wstep + 3 : cd + wstep + 4 + wstep + 4;
+  cellwalker b4 = PURE ? cd + 1 + wstep - 3 : cd + wstep - 4 + wstep - 4;
   
   if(mode == 0) {
     if(!((checkBarriersBack(b1) && checkBarriersBack(b2)))) return false;
@@ -598,16 +598,16 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   c= b4.at; d=b4.spin;
   c->bardir = d, c->barleft = ll, c->barright = xr; extendBarrierFront(c);
   
-  if(!nonbitrunc) for(int a=-3; a<=3; a++) if(a) {
+  if(BITRUNCATED) for(int a=-3; a<=3; a++) if(a) {
     setland((b1+a).cpeek(), a > 0 ? lr : ll);
     setland((b2+a).cpeek(), a > 0 ? xr : xl);
     setland((b3+a).cpeek(), a > 0 ? lr : xl);
     setland((b4+a).cpeek(), a > 0 ? xr : ll);
     }
   
-  if(nonbitrunc) setbarrier(b1.at), setbarrier(b2.at), setbarrier(b3.at), setbarrier(b4.at);
+  if(PURE) setbarrier(b1.at), setbarrier(b2.at), setbarrier(b3.at), setbarrier(b4.at);
 
-  if(!nonbitrunc) {
+  if(BITRUNCATED) {
     cell *cp;
     cp = (b1+wstep).at;
     cp->barleft = ll; cp->barright = lr; setbarrier(cp);
@@ -746,11 +746,11 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
   for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
 
   for(int i=0; i<c->type; i++) {
-    int d = forced_dir != NODIR ? forced_dir : (AS3>3 && nonbitrunc && !gp::on) ? (2+(i&1)) : ds[i];
-/*    if(warpv && gp::on) {
+    int d = forced_dir != NODIR ? forced_dir : (VALENCE>3) ? (2+(i&1)) : ds[i];
+/*    if(warpv && GOLDBERG) {
       d = hrand(c->type); */
     if(warpv && c->move(d) && c->move(d)->mpdist < c->mpdist) continue;
-    if(gp::on && a4 && c->move(d) && c->move(d)->mpdist <= c->mpdist) continue;
+    if(GOLDBERG && a4 && c->move(d) && c->move(d)->mpdist <= c->mpdist) continue;
 /*      }
     else 
       d = (S3>3 && !warpv) ? (2+(i&1)) : dtab[i]; */

@@ -1,7 +1,5 @@
 namespace hr { namespace irr {
 
-bool on;
-
 ld density = 2;
 ld quality = .2;
 int place_attempts = 10;
@@ -511,7 +509,7 @@ bool step(int delta) {
 ld scale;
 
 void compute_geometry() {
-  if(irr::on) {
+  if(IRREGULAR) {
     scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
     crossf *= scale;
     hepvdist *= scale;
@@ -805,9 +803,7 @@ void start_game_on_created_map() {
   for(hrmap *& hm : allmaps) if(hm == base) hm = NULL;
   stop_game();
   geometry = orig_geometry;
-  irr::on = true;
-  nonbitrunc = true;
-  gp::on = false;
+  variation = eVariation::irregular;
   need_reset_geometry = true;
   gridmaking = false;
   start_game();
@@ -981,8 +977,7 @@ void visual_creator() {
       break;
     }
 
-  nonbitrunc = true;
-  gp::on = false;
+  variation = eVariation::pure;
   need_reset_geometry = true;
   start_game();
   if(base) delete base;
@@ -995,7 +990,7 @@ void visual_creator() {
   }
 
 void auto_creator() {
-  irr::on = false;
+  variation = eVariation::pure;
   int cc = cellcount;
   bitruncations_requested = bitruncations_performed;
   visual_creator();

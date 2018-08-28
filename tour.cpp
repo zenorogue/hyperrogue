@@ -150,19 +150,28 @@ bool handleKeyTour(int sym, int uni) {
         }
       }
     
-    if(geometry || nonbitrunc) {
+    if(geometry || CHANGED_VARIATION) {
       return_geometry();
       return true;
       }
 
     presentation(pmGeometry);
 
-    if(sym == '1') targetgeometry = gSphere, vid.alpha = 1, vid.scale = .5;
-    if(sym == '2') targetgeometry = gEuclid, vid.alpha = 1, vid.scale = .5;
-
     firstland = specialland = cwt.at->land;
     push_game();
-    switch_game_mode(sym == '3' ? rg::bitrunc : rg::geometry);
+    switch(sym) {
+      case '3': 
+        set_variation(eVariation::pure);
+        break;
+      case '1':
+        set_geometry(gSphere);
+        vid.alpha = 1, vid.scale = .5;
+        break;
+      case '2':
+        set_geometry(gEuclid);
+        vid.alpha = 1, vid.scale = .5;
+        break;
+      }      
     start_game();
     presentation(pmGeometryStart);
     string x;
@@ -284,7 +293,7 @@ namespace ss {
     dialog::display();
     keyhandler = [] (int sym, int uni) {
       if(uni >= 'a' && uni < 'a' + sssize) {
-        if(geometry || nonbitrunc) {
+        if(geometry || CHANGED_VARIATION) {
           pop_game();
           presentation(pmGeometryReset);
           }

@@ -419,7 +419,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
   if(torus && (torusconfig::tmflags() & torusconfig::TF_KLEIN))
     return make_pair(cell_to_pair(c).second * 2 + ctof(c), 0);
   int id = 0, dir = 0;
-  if(gp::on) {
+  if(GOLDBERG) {
     gp::local_info li = gp::get_local_info(c);
     id = (li.relative.first & 15) + (li.relative.second & 15) * 16 + fix6(li.total_dir) * 256;
     // ld = li.last_dir;

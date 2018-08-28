@@ -84,8 +84,8 @@ void addMessage(string s, char spamtype = 0);
 #define S3 ginf[geometry].vertex
 #define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling)
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on || binarytiling || archimedean) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling && !archimedean)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || archimedean) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
 
 #define binarytiling (geometry == gBinaryTiling)
 #define archimedean (geometry == gArchimedean)
@@ -119,7 +119,6 @@ void addMessage(string s, char spamtype = 0);
 #define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
 #define smallsphere (S7 < 5)
 #define bigsphere (S7 == 5)
-#define ap4 (a4 && nonbitrunc)
 #define euclid4 (masterless && a4)
 #define euclid6 (masterless && !a4)
 
@@ -133,6 +132,18 @@ void addMessage(string s, char spamtype = 0);
 #define S84 (S7*S6*2)
 #define MAX_S3 4
 #define MAX_S84 240
+
+#define GOLDBERG (variation == eVariation::goldberg)
+#define IRREGULAR (variation == eVariation::irregular)
+#define PURE (variation == eVariation::pure)
+#define BITRUNCATED (variation == eVariation::bitruncated)
+
+#define CHANGED_VARIATION (!BITRUNCATED)
+
+#define STDVAR (PURE || BITRUNCATED)
+#define NONSTDVAR (!STDVAR)
+
+#define VALENCE (BITRUNCATED ? 3 : AS3)
 
 #define NUMWITCH 7
 
@@ -620,9 +631,6 @@ namespace rg {
   static const char chaos = 'C';
   static const char tactic = 't';
   static const char tour = 'T';
-  static const char geometry = 'g'; // change targetgeometry first
-  static const char bitrunc = '7';
-  static const char gp = 'w';       // change gp::param first
   static const char yendor = 'y';
   static const char shmup = 's';
   static const char randpattern = 'r';
@@ -634,6 +642,10 @@ namespace rg {
   static const char global = 'x'; 
   // wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead
   static const char multi = 'm';
+  // wrongmode only -- mark achievements for special geometries
+  static const char special_geometry = 'g';
+  // wrongmode only -- mark achievements for special variations
+  static const char special_variation = '7';
   }
 
 int landMultiplier(eLand l);
@@ -1721,7 +1733,6 @@ void checkStunKill(cell *dest);
 void clearMessages();
 
 void resetGeometry();
-extern bool nonbitrunc;
 
 namespace svg {
   void circle(int x, int y, int size, int col);
@@ -2718,20 +2729,19 @@ struct hrmap {
 
 struct hrmap_hyperbolic : hrmap {
   heptagon *origin;
-  bool isnonbitrunc;
+  eVariation mvar;
   hrmap_hyperbolic();
   heptagon *getOrigin() { return origin; }
   ~hrmap_hyperbolic() {
     DEBMEM ( verifycells(origin); )
     // printf("Deleting hyperbolic map: %p\n", this);
-    dynamicval<bool> ph(nonbitrunc, isnonbitrunc);
+    dynamicval<eVariation> ph(variation, mvar);
     clearfrom(origin);
     }
   void verify() { verifycells(origin); }
   };
 
 namespace irr { 
-  extern bool on;
   extern ld density;
   extern ld quality;
   extern int cellcount;
@@ -2988,7 +2998,7 @@ namespace texture {
 
     int recolor(int col);
   
-    typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
+    typedef tuple<eGeometry, eVariation, char, int, eModel, ld, ld> texture_parameters; 
     texture_parameters orig_texture_parameters;
     
     map<int, textureinfo> texture_map, texture_map_orig;
@@ -3082,7 +3092,7 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V);
 transmatrix applyspin(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
 
-extern string bitruncnames[2];
+extern string bitruncnames[5];
 extern bool need_mouseh;
 
 extern int whateveri, whateveri2;
@@ -3220,7 +3230,6 @@ extern int sagephase;
 extern int lastsize;
 extern int noiseuntil;
 hyperpoint xpush0(ld x);
-extern eGeometry targetgeometry;
 transmatrix xspinpush(ld alpha, ld x);
 hyperpoint xspinpush0(ld alpha, ld x);
 
@@ -3320,7 +3329,6 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, st
 
 namespace gp {
   typedef pair<int, int> loc;
-  extern bool on;
   void compute_geometry();
   void extend_map(cell *c, int d);  
   extern ld scale;
@@ -3421,7 +3429,7 @@ template<class T> struct saverenum : supersaver {
   bool dosave() { return val != dft; }
   void reset() { val = dft; }
   saverenum<T>(T& v) : val(v) { }
-  string save() { return its(val); }
+  string save() { return its(int(val)); }
   void load(const string& s) { val = (T) atoi(s.c_str()); }
   };
 
@@ -3736,6 +3744,10 @@ void switch_game_mode(char switchWhat);
 void stop_game_and_switch_mode(char switchWhat = rg::nothing); // stop_game + switch_game_mode
 void restart_game(char switchWhat = rg::nothing); // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
 
+// these work as stop_game_and_switch_mode
+void set_variation(eVariation);
+void set_geometry(eGeometry);
+
 void generate_floorshapes();
 void drawArrowTraps();
 void drawBlizzards();
@@ -3872,7 +3884,7 @@ extern void switchHardcore();
 
 extern bool using_perspective;
 
-void generateAlts(heptagon *h, int levs = irr::on ? 1 : S3-3, bool link_cdata = true);
+void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
 
 namespace ors {
   extern int mode;

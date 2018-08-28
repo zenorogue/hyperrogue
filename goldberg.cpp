@@ -1,5 +1,4 @@
 namespace hr { namespace gp {
-  bool on;
   loc param(1, 0);
 
   hyperpoint next;
@@ -578,7 +577,7 @@ namespace hr { namespace gp {
   
   void compute_geometry() {
     center_locs.clear();
-    if(on) {
+    if(GOLDBERG) {
       int x = param.first;
       int y = param.second;
       area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
@@ -626,11 +625,12 @@ namespace hr { namespace gp {
     }
   
   string operation_name() {
-    if(!gp::on) {
-      if(irr::on) return XLAT("irregular");
-      else if(nonbitrunc) return XLAT("OFF");
-      else return XLAT("bitruncated");
-      }
+    if(IRREGULAR) 
+      return XLAT("irregular");
+    else if(PURE)
+      return XLAT("OFF");
+    else if(BITRUNCATED)
+      return XLAT("bitruncated");
     else if(param == loc(1, 0))
       return XLAT("OFF");
     else if(param == loc(1, 1) && S3 == 3)
@@ -657,18 +657,15 @@ namespace hr { namespace gp {
     auto g = screens;
     if(xy.first == 0 && xy.second == 0) xy.first = 1;
     if(xy.first == 1 && xy.second == 0) {
-      if(irr::on) stop_game_and_switch_mode(rg::bitrunc);
-      if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
-      if(!nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      stop_game(); set_variation(eVariation::pure);
       }
     else if(xy.first == 1 && xy.second == 1 && S3 == 3) {
-      if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
-      if(nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      stop_game(); set_variation(eVariation::bitruncated);
       }
     else {
-      if(nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      if(param != xy) need_reset_geometry = true;
       param = xy;
-      stop_game_and_switch_mode(rg::gp);
+      stop_game(); set_variation(eVariation::goldberg);
       }
     start_game();
     screens = g;
@@ -702,13 +699,13 @@ namespace hr { namespace gp {
       }
 #endif    
     if(min_quality == 0 && min_quality_chess == 0) {
-      dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !irr::on, 'a');
+      dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !IRREGULAR, 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
     
     if(min_quality_chess == 0)
-      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && !nonbitrunc, 'b');  
-    dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(nonbitrunc ? "OFF" : "ON");
+      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && BITRUNCATED, 'b');  
+    dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(BITRUNCATED ? "ON" : "OFF");
 
     if(min_quality == 0 || min_quality_chess) {
       dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), param == loc(2,0), 'c');
@@ -720,7 +717,7 @@ namespace hr { namespace gp {
       dialog::lastItem().value = "GP(3,0)";
       }
     else {
-      dialog::addBoolItem(XLAT("rectified"), param == loc(1,1) && nonbitrunc, 'd');
+      dialog::addBoolItem(XLAT("rectified"), param == loc(1,1) && GOLDBERG, 'd');
       dialog::lastItem().value = "GP(1,1)";
       }
 
@@ -736,13 +733,13 @@ namespace hr { namespace gp {
     else if((config.first-config.second)%2 && min_quality_chess)
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 2"));
     else    
-      dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !irr::on, 'f');
+      dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !IRREGULAR, 'f');
       
     if(irr::supports(geometry)) {
-      dialog::addBoolItem(XLAT("irregular"), irr::on, 'i');
+      dialog::addBoolItem(XLAT("irregular"), IRREGULAR, 'i');
       dialog::add_action([=] () { 
         if(min_quality && !irr::bitruncations_requested) irr::bitruncations_requested++;
-        if(!irr::on) irr::visual_creator(); 
+        if(!IRREGULAR) irr::visual_creator(); 
         });
       }
     
@@ -757,8 +754,11 @@ namespace hr { namespace gp {
         whirl_set(loc(1, 0));
       else if(uni == 'b') {
         if(S3 == 4) {
-          if(nonbitrunc || gp::on)
-            restart_game(rg::bitrunc);
+          if(!BITRUNCATED) {
+            stop_game();
+            set_variation(eVariation::bitruncated);
+            start_game();
+            }
           }
         else 
           whirl_set(loc(1, 1));
@@ -783,8 +783,8 @@ namespace hr { namespace gp {
     }
   
   loc univ_param() {
-    if(on) return param;
-    else if(nonbitrunc) return loc(1,0);
+    if(GOLDBERG) return param;
+    else if(PURE) return loc(1,0);
     else return loc(1,1);
     }
   
@@ -864,14 +864,14 @@ namespace hr { namespace gp {
     }
   
   array<heptagon*, 3> get_masters(cell *c) {
-    if(gp::on) {
+    if(GOLDBERG) {
       auto li = get_local_info(c);
       be_in_triangle(li);      
       auto cm = c->master;
       int i = li.last_dir;
       return make_array(cm, createStep(cm, i), createStep(cm, fix7(i+1)));
       }
-    else if(irr::on)
+    else if(IRREGULAR)
       return irr::get_masters(c);
     else
       return make_array(c->move(0)->master, c->move(2)->master, c->move(4)->master);

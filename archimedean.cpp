@@ -673,14 +673,14 @@ void draw() {
     int id = id_of(h);
     int S = isize(current.triangles[id]);
 
-    if(!nonbitrunc || id < 2*current.N) {
+    if(BITRUNCATED || id < 2*current.N) {
       if(!dodrawcell(h->c7)) continue;
       drawcell(h->c7, V, 0, false);
       }
 
     for(int i=0; i<S; i++) {
       h->cmove(i);
-      if(nonbitrunc && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
+      if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
       enqueue(h->move(i), V * adjcell_matrix(h, i));
       }
     idx++;
@@ -786,9 +786,7 @@ int readArgs() {
       printf("error: %s\n", at.errormsg.c_str());
       }
     else {
-      targetgeometry = gArchimedean;
-      if(targetgeometry != geometry)
-        stop_game_and_switch_mode(rg::geometry);
+      set_geometry(gArchimedean);
       current = at;
       showstartmenu = false;
       }
@@ -805,16 +803,13 @@ auto hook =
 #endif
 
 int archimedean_tiling::support_threecolor() {
-  // if(nonbitrunc) 
   return (isize(faces) == 3 && invert[0] && invert[1] && invert[2] && faces[0] % 2 == 0 && faces[1] % 2 == 0 && faces[2] % 2 == 0) ? 2 :
     tilegroup[N*2] > 1 ? 1 :
     0;
-  // for(int i: faces) if(faces[i] % 2) return tilegroup[N*2] > 1 ? 1 : 0;
   return 2;
   }
 
 int archimedean_tiling::support_football() {
-  // if(!nonbitrunc) return 2;
   return 
     have_ph ? 1 :
     (isize(faces) == 3 && invert[0] && invert[1] && invert[2] && faces[1] % 2 == 0 && faces[2] % 2 == 0) ? 2 :
@@ -840,7 +835,7 @@ bool linespattern(cell *c) {
 int threecolor(int id) {
   if(current.have_ph)
     return !pseudohept(id);
-  else if(nonbitrunc)
+  else if(PURE)
     return current.tilegroup[id];
   else {
     if(current.support_threecolor() == 2) return id < current.N * 2 ? (id&1) : 2;
@@ -961,8 +956,8 @@ bool symbol_editing;
 
 void enable(archimedean_tiling& arct) {
   stop_game();
-  if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
-  nonbitrunc = true; need_reset_geometry = true; gp::on = false; irr::on = false;
+  set_geometry(gArchimedean);
+  set_variation(eVariation::pure);
   patterns::whichPattern = patterns::PAT_NONE;
 #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)

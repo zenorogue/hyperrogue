@@ -664,7 +664,7 @@ bool rlyehComplete() {
   }
 
 bool lchance(eLand l) { 
-  if(tactic::on || yendor::on || ((geometry || gp::on) && specialland == laElementalWall)) return true;
+  if(tactic::on || yendor::on || ((geometry || GOLDBERG) && specialland == laElementalWall)) return true;
   if(chaosmode) return hrand(100) < 25;
   return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1); 
   }
@@ -1118,7 +1118,7 @@ land_validity_t& land_validity(eLand l) {
     if(weirdhyperbolic)
       return simplified_walls;
     // works nice on a big non-tetrahedron-based sphere
-    if(sphere && S3 != 3 && gp::on)
+    if(sphere && S3 != 3 && GOLDBERG)
       return special_geo3;
     }
   
@@ -1131,14 +1131,14 @@ land_validity_t& land_validity(eLand l) {
     return pattern_not_implemented_random;
   
   // not enough space
-  if(l == laStorms && nonbitrunc && elliptic) 
+  if(l == laStorms && (old_daily_id < 35 ? !BITRUNCATED : PURE) && elliptic) 
     return not_enough_space;
 
   if(l == laStorms && S7 == 3) 
     return not_enough_space;
   
   // mirrors do not work in gp
-  if(among(l, laMirror, laMirrorOld) && (gp::on && old_daily_id < 33))
+  if(among(l, laMirror, laMirrorOld) && (GOLDBERG && old_daily_id < 33))
     return dont_work;
   
   if(binarytiling && among(l, laMirror, laMirrorOld))
@@ -1148,11 +1148,11 @@ land_validity_t& land_validity(eLand l) {
     return pattern_incompatibility;
 
   // available only in non-standard geometries
-  if(l == laMirrorOld && !geometry && !gp::on && !irr::on)
+  if(l == laMirrorOld && !geometry && STDVAR)
     return better_version_exists;
   
   // available only in standard geometry
-  if(l == laMirror && (geometry || gp::on || irr::on))
+  if(l == laMirror && (geometry || NONSTDVAR))
     return not_implemented; 
   
   // Halloween needs bounded world (can be big bounded)
@@ -1181,16 +1181,16 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWhirlpool && a4)
     return dont_work;
 
-  if(isWarped(l) && a4 && gp::on)
+  if(isWarped(l) && a4 && GOLDBERG)
     return dont_work;
   
-  if((isWarped(l) || l == laDual) && irr::on && !irr::bitruncations_performed)
+  if((isWarped(l) || l == laDual) && IRREGULAR && !irr::bitruncations_performed)
     return dont_work;
   
-  if(irr::on && among(l, laPrairie, laMirror, laMirrorOld))
+  if(IRREGULAR && among(l, laPrairie, laMirror, laMirrorOld))
     return dont_work;
 
-  if(irr::on && among(laBlizzard, laVolcano) && !sphere)
+  if(IRREGULAR && among(laBlizzard, laVolcano) && !sphere)
     return dont_work;
 
   // equidistant-based lands
@@ -1218,7 +1218,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laPrincessQuest && tactic::on)
     return not_in_ptm;
     
-  if(l == laPrincessQuest && (!stdeuc || gp::on))
+  if(l == laPrincessQuest && (!stdeuc || NONSTDVAR))
     return not_implemented;
 
   // works correctly only in some geometries
@@ -1226,12 +1226,12 @@ land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   if(l == laClearing)
-    if(!(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on || irr::on)
+    if(!(stdeuc || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
     if(!bounded)
       return not_implemented;
 
   // does not work in non-bitrunc a4
-  if(l == laOvergrown && a4 && nonbitrunc)
+  if(l == laOvergrown && a4 && !BITRUNCATED)
     return some0;
 
   // does not work in bounded either
@@ -1256,7 +1256,7 @@ land_validity_t& land_validity(eLand l) {
     return not_enough_space;
   
   // ... and it works in gp only partially
-  if((l == laBlizzard || l == laVolcano) && gp::on && (old_daily_id < 33 || !sphere))
+  if((l == laBlizzard || l == laVolcano) && GOLDBERG && (old_daily_id < 33 || !sphere))
     return partially_implemented;
 
   // Kraken does not really work on odd-sided cells;
@@ -1271,8 +1271,8 @@ land_validity_t& land_validity(eLand l) {
     if(geometry == gZebraQuotient)
       return pattern_compatibility;
     if(stdeuc) ;
-    else if(S7 == 4 && !nonbitrunc) return special_geo;
-    else if(bigsphere && nonbitrunc && !elliptic) return special_geo;
+    else if(S7 == 4 && BITRUNCATED) return special_geo;
+    else if(bigsphere && !BITRUNCATED && !elliptic) return special_geo;
     else return dont_work;
     }
     
@@ -1322,11 +1322,11 @@ land_validity_t& land_validity(eLand l) {
     else if(quotient) return pattern_incompatibility;
     }
 
-  if(among(l, laEmerald, laCamelot, laDryForest) && (AS3 != 3) && nonbitrunc)
+  if(among(l, laEmerald, laCamelot, laDryForest) && VALENCE != 3)
     return hedgehogs;  
 
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
-  if(l == laWineyard && (gp::on || sphere) && !randomPatternsMode)
+  if(l == laWineyard && (NONSTDVAR || sphere) && !randomPatternsMode)
     return pattern_not_implemented_random;
   
   if(l == laTrollheim && quotient == qFIELD)
@@ -1338,7 +1338,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
   
-  if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || irr::on || (quotient && geometry != gZebraQuotient)))
+  if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && geometry != gZebraQuotient)))
     return bad_graphics;
 
   if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded && !randomPatternsMode)
@@ -1364,15 +1364,15 @@ land_validity_t& land_validity(eLand l) {
   if(l == laZebra && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
   
-  if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46) && !randomPatternsMode)
+  if(l == laZebra && !(stdeuc || (a4 && !BITRUNCATED) || a46) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
     return inaccurate; // because it is not accurate
 
   if(l == laPrairie) {
-    if(gp::on) return not_implemented;
-    else if(stdeuc || (bigsphere && !nonbitrunc && !elliptic) || (geometry == gFieldQuotient)) ;
+    if(GOLDBERG) return not_implemented;
+    else if(stdeuc || (bigsphere && BITRUNCATED && !elliptic) || (geometry == gFieldQuotient)) ;
     else if(!bounded) return not_implemented;
     else return unbounded_only;
     }
@@ -1403,7 +1403,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laDual && geosupport_threecolor() == 2)
     return specially_designed;
   
-  if(l == laDual && !geometry && !gp::on)
+  if(l == laDual && !geometry && !GOLDBERG)
     return hyperbolic_37 ? not_in_full_game3 : not_in_full_game;
   
   if(l == laSnakeNest) {
@@ -1413,7 +1413,7 @@ land_validity_t& land_validity(eLand l) {
     }
   
   if(l == laDocks && !randomPatternsMode) {
-    if(a38 && !gp::on) return specially_designed;
+    if(a38 && !GOLDBERG) return specially_designed;
     if(a38) return pattern_not_implemented_weird;
     return pattern_not_implemented_exclude;
     }
@@ -1431,7 +1431,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
   
-  if(l == laIce && !gp::on && !irr::on && hyperbolic_37 && !quotient && !archimedean && !binarytiling)
+  if(l == laIce && STDVAR && hyperbolic_37 && !quotient && !archimedean && !binarytiling)
     return full_game;
 
   return ok;

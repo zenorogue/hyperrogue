@@ -40,7 +40,7 @@ void slow_delete_cell(cell *c) {
 
 void delete_heptagon(heptagon *h2) {
   cell *c = h2->c7;
-  if(!nonbitrunc) {
+  if(BITRUNCATED) {
     for(int i=0; i<c->type; i++)
       if(c->move(i))
         slow_delete_cell(c->move(i));
@@ -84,7 +84,7 @@ bool unsafeLand(cell *c) {
   }
 
 void save_memory() {
-  if(quotient || !hyperbolic) return;
+  if(quotient || !hyperbolic || NONSTDVAR) return;
   if(!memory_saving_mode) return;
   if(unsafeLand(cwt.at)) return;
   int d = celldist(cwt.at);

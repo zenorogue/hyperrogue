@@ -2183,7 +2183,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
       if(c2 && c2->item == itCompass) toomany = true;
-      if(c2 && !nonbitrunc) for(int j=0; j<c2->type; j++)
+      if(c2 && BITRUNCATED) for(int j=0; j<c2->type; j++)
         if(c2->move(j) && c2->move(j)->item == itCompass)
           toomany = true;
       }
@@ -3187,10 +3187,10 @@ void toggleGates(cell *c, eWall type, int rad) {
 void toggleGates(cell *ct, eWall type) {
   playSound(ct, "click");
   numgates = 0;
-  if(type == waClosePlate && nonbitrunc && !gp::on)
+  if(type == waClosePlate && PURE)
     toggleGates(ct, type, 2);
   else
-    toggleGates(ct, type, (gp::on && !sphere && !a4) ? gp::dist_3() : 3);
+    toggleGates(ct, type, (GOLDBERG && !sphere && !a4) ? gp::dist_3() : 3);
   if(numgates && type == waClosePlate)
     playSound(ct, "closegate");
   if(numgates && type == waOpenPlate)
@@ -4300,7 +4300,7 @@ void moveWorm(cell *c) {
         addMessage(XLAT("The sandworm explodes!"));
       playSound(NULL, "explosion");
       if(geometry == gZebraQuotient)
-        achievement_gain("ZEBRAWORM", rg::geometry);
+        achievement_gain("ZEBRAWORM", rg::special_geometry);
       }
     return;
     }
@@ -6936,11 +6936,11 @@ ld circlesizeD[10000];
 int lastsize;
 
 bool sizes_known() {
-  return euclid || (geometry == gNormal && !gp::on && !irr::on);
+  return euclid || (geometry == gNormal && STDVAR);
   }
 
 void computeSizes() {
-  lastsize = nonbitrunc ? 44 : 76;
+  lastsize = PURE ? 44 : 76;
 
   circlesize[0] = 1;
   
@@ -6948,7 +6948,7 @@ void computeSizes() {
     for(int i=1; i<100; i++) circlesize[i] = 6 * i;
     }
   
-  else if(!nonbitrunc) {
+  else if(BITRUNCATED) {
     circlesize[1] = 1*7;
     circlesize[2] = 2*7;
     circlesize[3] = 4*7;

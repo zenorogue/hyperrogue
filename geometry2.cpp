@@ -20,12 +20,12 @@ void fixelliptic(hyperpoint& h) {
   }
 
 transmatrix master_relative(cell *c, bool get_inverse) {
-  if(irr::on) {
+  if(IRREGULAR) {
     int id = irr::cellindex[c];
     ld alpha = 2 * M_PI / S7 * irr::periodmap[c->master].base.spin;
     return get_inverse ? irr::cells[id].rpusher * spin(-alpha-master_to_c7_angle()): spin(alpha + master_to_c7_angle()) * irr::cells[id].pusher;
     }
-  else if(gp::on) {
+  else if(GOLDBERG) {
     if(c == c->master->c7) {
       return spin((get_inverse?-1:1) * master_to_c7_angle());
       }
@@ -36,7 +36,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       return T;
       }
     }
-  else if(!nonbitrunc && !euclid) {
+  else if(BITRUNCATED && !euclid) {
     for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
       return (get_inverse?invhexmove:hexmove)[d];
     return Id;
@@ -196,11 +196,11 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(gp::on && c != c->master->c7) {
+  if(GOLDBERG && c != c->master->c7) {
     auto li = gp::get_local_info(c);
     where = gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
     }
-  else if(!nonbitrunc) for(int d=0; d<S7; d++) if(h2->c7->move(d) == c)
+  else if(BITRUNCATED) for(int d=0; d<S7; d++) if(h2->c7->move(d) == c)
     where = hexmove[d];
   // always add to last!
   while(h1 != h2) {
@@ -278,7 +278,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       at = bestV * at;
       }
     else {
-      if(tohex && !nonbitrunc) for(int d=0; d<S7; d++) {
+      if(tohex && BITRUNCATED) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->c.spin(d)*2*M_PI/S6) * invhexmove[d];
         double newz = check(V2 *at) [2];
@@ -343,12 +343,12 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
   }
 
 double cellgfxdist(cell *c, int i) {
-  if(gp::on || irr::on) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
-  return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+  if(NONSTDVAR) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
+  return !BITRUNCATED ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
   }
 
 transmatrix cellrelmatrix(cell *c, int i) {
-  if(gp::on) return calc_relative_matrix(c->move(i), c, i);
+  if(NONSTDVAR) return calc_relative_matrix(c->move(i), c, i);
   double d = cellgfxdist(c, i);
   return ddspin(c, i) * xpush(d) * iddspin(c->move(i), c->c.spin(i), euclid ? 0 : M_PI);
   }
@@ -356,7 +356,7 @@ transmatrix cellrelmatrix(cell *c, int i) {
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 hyperpoint randomPointIn(int t) {
-  if(irr::on || gp::on || archimedean) {
+  if(NONSTDVAR || archimedean) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
     return xspinpush0(2 * M_PI * randd(), asinh(randd() / 20));
@@ -364,7 +364,7 @@ hyperpoint randomPointIn(int t) {
   while(true) {
     hyperpoint h = xspinpush0(2*M_PI*(randd()-.5)/t, asinh(randd()));
     double d =
-      nonbitrunc ? tessf : t == 6 ? hexhexdist : crossf;
+      PURE ? tessf : t == 6 ? hexhexdist : crossf;
     if(hdist0(h) < hdist0(xpush(-d) * h))
       return spin(2*M_PI/t * (rand() % t)) * h;
     }
@@ -375,8 +375,8 @@ hyperpoint get_horopoint(ld y, ld x) {
   }
 
 hyperpoint get_corner_position(cell *c, int cid, ld cf) {
-  if(gp::on) return gp::get_corner_position(c, cid, cf);
-  if(irr::on) {
+  if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
+  if(IRREGULAR) {
     auto& vs = irr::cells[irr::cellindex[c]];
     return mid_at_actual(vs.vertices[cid], 3/cf);
     }
@@ -400,10 +400,10 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     auto& t = ac.get_triangle(c->master, cid-1);
     return xspinpush0(-t.first, t.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
     }
-  if(nonbitrunc) {
+  if(PURE) {
     return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
     }
-  if(!nonbitrunc) {
+  if(BITRUNCATED) {
     if(!ishept(c))
       return ddspin(c,cid,M_PI/S6) * xpush0(hexvdist * 3 / cf);
     else
@@ -413,14 +413,14 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   }
 
 hyperpoint nearcorner(cell *c, int i) {
-  if(gp::on) {
+  if(GOLDBERG) {
     cellwalker cw(c, i);
     cw += wstep;
     transmatrix cwm = calc_relative_matrix(cw.at, c, i);
     if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
     return cwm * C0;
     }
-  if(irr::on) {
+  if(IRREGULAR) {
     auto& vs = irr::cells[irr::cellindex[c]];
     hyperpoint nc = vs.jpoints[vs.neid[i]];
     return mid_at(C0, nc, .94);
@@ -454,7 +454,7 @@ hyperpoint nearcorner(cell *c, int i) {
   }
 
 hyperpoint farcorner(cell *c, int i, int which) {
-  if(gp::on) {
+  if(GOLDBERG) {
     cellwalker cw(c, i);
     int hint = cw.spin;
     cw += wstep;
@@ -467,7 +467,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     if(which == 1)
       return cwm * get_corner_position(li1, (cw-1).spin);          
     }
-  if(irr::on) {
+  if(IRREGULAR) {
     auto& vs = irr::cells[irr::cellindex[c]];
     int neid = vs.neid[i];
     int spin = vs.spin[i];
@@ -500,8 +500,8 @@ hyperpoint midcorner(cell *c, int i, ld v) {
 
 hyperpoint get_warp_corner(cell *c, int cid) {
   // midcorner(c, cid, .5) but sometimes easier versions exist
-  if(gp::on) return gp::get_corner_position(c, cid, 2);
-  if(irr::on || archimedean) return midcorner(c, cid, .5);
+  if(GOLDBERG) return gp::get_corner_position(c, cid, 2);
+  if(IRREGULAR || archimedean) return midcorner(c, cid, .5);
   return ddspin(c,cid,M_PI/S7) * xpush0(tessf/2);
   }
   

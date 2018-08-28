@@ -499,15 +499,15 @@ bool confusingGeometry() {
   }
 
 ld master_to_c7_angle() {
-  return (nonbitrunc && !binarytiling && !archimedean) ? M_PI + gp::alpha : 0;
+  return (!BITRUNCATED && !binarytiling && !archimedean) ? M_PI + gp::alpha : 0;
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
-  if(irr::on)
+  if(IRREGULAR)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
   if(archimedean) return V * spin(-arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
   if(binarytiling) return V;
-  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
+  return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
@@ -589,11 +589,11 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
   
   bool draw = c->pathdist < PINFD;
   
-  if(gp::on) {
+  if(GOLDBERG) {
     gp::drawrec(c, actualV(hs, V1));
     }
   
-  else if(irr::on) {
+  else if(IRREGULAR) {
     auto& hi = irr::periodmap[hs.at];
     transmatrix V0 = actualV(hs, V1);
     auto& vc = irr::cells_of_heptagon[hi.base.at];
@@ -609,7 +609,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
       drawcell(c, V2, 0, hs.mirrored);
       }
     
-    if(!nonbitrunc) for(int d=0; d<S7; d++) {
+    if(BITRUNCATED) for(int d=0; d<S7; d++) {
       int ds = hs.at->c.fix(hs.spin + d);
       // createMov(c, ds);
       if(c->move(ds) && c->c.spin(ds) == 0 && dodrawcell(c->move(ds))) {
