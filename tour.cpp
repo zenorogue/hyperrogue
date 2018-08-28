@@ -617,10 +617,10 @@ slide default_slides[] = {
       setCanvas(mode, 't');
       if(mode == 1) 
         patterns::displaycodes = true,
-        patterns::whichPattern = 'z';
+        patterns::whichPattern = patterns::PAT_ZEBRA;
       if(mode == 3) 
         patterns::displaycodes = false,
-        patterns::whichPattern = 0;
+        patterns::whichPattern = patterns::PAT_NONE;
       SHOWLAND ( l == laCanvas );
       }
     },

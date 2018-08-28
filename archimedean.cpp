@@ -963,12 +963,12 @@ void enable(archimedean_tiling& arct) {
   stop_game();
   if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
   nonbitrunc = true; need_reset_geometry = true; gp::on = false; irr::on = false;
-  patterns::whichPattern = 0;
+  patterns::whichPattern = patterns::PAT_NONE;
 #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)
     patterns::whichPattern = patterns::PAT_COLORING;
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball)
-    patterns::whichPattern = 0, patterns::subpattern_flags = patterns::SPF_FOOTBALL;
+    patterns::whichPattern = patterns::PAT_TYPES, patterns::subpattern_flags = patterns::SPF_FOOTBALL;
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess)
     patterns::whichPattern = patterns::PAT_CHESS;
 #endif

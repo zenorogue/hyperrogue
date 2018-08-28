@@ -797,7 +797,7 @@ void init_textureconfig() {
   addsaverenum(target_nonbitru, "bitruncated", false);
   // ... geometry parameters
 
-  addsaver(patterns::whichPattern, "pattern", 0);
+  addsaverenum(patterns::whichPattern, "pattern", patterns::PAT_TYPES);
   addsaver(patterns::subpattern_flags, "pattern flags", 0);
 
   addsaver(si_save.id, "center type", 1);
@@ -873,7 +873,7 @@ bool texture_config::load() {
   polygonal::solve();
   
   if(1) {
-    dynamicval<char> d1(patterns::whichPattern, patterns::whichPattern);
+    dynamicval<patterns::ePattern> d1(patterns::whichPattern, patterns::whichPattern);
     dynamicval<int> d2(patterns::subpattern_flags, patterns::subpattern_flags);
 
     if(targetgeometry != geometry) {

@@ -846,7 +846,7 @@ namespace patterns {
     if(gp::on && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
     }
   
-  char whichPattern = 0;
+  ePattern whichPattern = PAT_NONE;
 
   int subpattern_flags;
  
@@ -874,7 +874,7 @@ namespace patterns {
     applyAlt(si, sub, PAT_COLORING);
     }
   
-  patterninfo getpatterninfo(cell *c, char pat, int sub) {
+  patterninfo getpatterninfo(cell *c, ePattern pat, int sub) {
     bool symRotation = sub & SPF_ROT;
     // bool sym0 = sub & (SPF_SYM01 | SPF_SYM02 | SPF_SYM03);
     
@@ -1502,10 +1502,12 @@ namespace patterns {
   void showPattern() {
     cmode = sm::SIDE | sm::MAYDARK;
     {
-    dynamicval<bool> dc(displaycodes, true);
+    dynamicval<bool> dc(displaycodes, whichPattern);
     gamescreen(0);
     }
     dialog::init();
+
+    dialog::addBoolItem(XLAT("cell types"), (whichPattern == PAT_TYPES), PAT_TYPES);
     
     if(stdhyperbolic || a4)
       dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == PAT_ZEBRA), PAT_ZEBRA);
@@ -1618,9 +1620,9 @@ namespace patterns {
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       
-      if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING, PAT_CHESS, PAT_SINGLETYPE)) {
-        if(whichPattern == uni) whichPattern = 0;
-        else whichPattern = uni;
+      if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING, PAT_CHESS, PAT_SINGLETYPE, PAT_TYPES)) {
+        if(whichPattern == uni) whichPattern = PAT_NONE;
+        else whichPattern = ePattern(uni);
         #if CAP_EDIT
         mapeditor::modelcell.clear();
         #endif
@@ -1691,7 +1693,7 @@ namespace patterns {
   struct changeable_pattern_geometry {
     eGeometry geo;
     bool nonbitru;
-    char whichPattern;
+    ePattern whichPattern;
     int subpattern_flags;
     };
   
@@ -1702,18 +1704,18 @@ namespace patterns {
   
   vector<changeable_pattern> cpatterns = {
     {"football", {
-      {gNormal, false, 0, 0}, 
-      {gSphere, false, 0, 0}, 
-      {gEuclid, false, 0, SPF_EXTRASYM}, 
-      {gOctagon, false, 0, 0}, 
+      {gNormal, false, PAT_TYPES, 0}, 
+      {gSphere, false, PAT_TYPES, 0}, 
+      {gEuclid, false, PAT_TYPES, SPF_EXTRASYM}, 
+      {gOctagon, false, PAT_TYPES, 0}, 
       {gOctagon, true, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
-      {g45, false, 0, 0}, 
-      {g46, false, 0, SPF_EXTRASYM}, 
-      {g47, false, 0, 0},
-      {gSmallSphere, false, 0, 0},
+      {g45, false, PAT_TYPES, 0}, 
+      {g46, false, PAT_TYPES, SPF_EXTRASYM}, 
+      {g47, false, PAT_TYPES, 0},
+      {gSmallSphere, false, PAT_TYPES, 0},
       {gSmallSphere, true, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
-      {gTinySphere, false, 0, SPF_EXTRASYM},
-      {gEuclidSquare, false, 0, SPF_EXTRASYM},
+      {gTinySphere, false, PAT_TYPES, SPF_EXTRASYM},
+      {gEuclidSquare, false, PAT_TYPES, SPF_EXTRASYM},
       }},
     {"three colors", {
       {gEuclid, false, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM},
@@ -2236,13 +2238,13 @@ int read_pattern_args() {
     const char *c = argcs();
     using namespace patterns;
     subpattern_flags = 0;
-    whichPattern = 0;
+    whichPattern = PAT_NONE;
     while(*c) { 
       if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
       else if(*c == '@') subpattern_flags ^= 1 << 10; 
       else if(*c == '-') subpattern_flags ^= 1 << 11; 
       else if(*c == '~') subpattern_flags ^= 1 << 12; 
-      else whichPattern = *c;
+      else whichPattern = ePattern(*c);
       c++; 
       }
     }

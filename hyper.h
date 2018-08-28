@@ -1025,19 +1025,23 @@ namespace patterns {
   extern char whichShape;
   extern int canvasback;
 
-  extern char whichPattern;
   extern cpatterntype cgroup, old_cgroup;
   
-  static const char PAT_WARP = 0;
-  static const char PAT_ZEBRA = 'z';
-  static const char PAT_EMERALD = 'f';
-  static const char PAT_PALACE = 'p';
-  static const char PAT_FIELD = 'F';
-  static const char PAT_DOWN = 'H';
-  static const char PAT_COLORING = 'C';
-  static const char PAT_SIBLING = 'S';
-  static const char PAT_CHESS = 'c';
-  static const char PAT_SINGLETYPE = 't';
+  enum ePattern {
+    PAT_NONE = 0,
+    PAT_TYPES = 'T',
+    PAT_ZEBRA = 'z',
+    PAT_EMERALD = 'f',
+    PAT_PALACE = 'p',
+    PAT_FIELD = 'F',
+    PAT_DOWN = 'H',
+    PAT_COLORING = 'C',
+    PAT_SIBLING = 'S',
+    PAT_CHESS = 'c',
+    PAT_SINGLETYPE = 't'
+    };
+
+  extern ePattern whichPattern;
 
   extern int subpattern_flags;
   
@@ -1068,7 +1072,7 @@ namespace patterns {
     int symmetries;
     };
     
-  patterninfo getpatterninfo(cell *c, char pat, int sub);
+  patterninfo getpatterninfo(cell *c, ePattern pat, int sub);
 
   inline patterninfo getpatterninfo0(cell *c) {
     return getpatterninfo(c, whichPattern, subpattern_flags);

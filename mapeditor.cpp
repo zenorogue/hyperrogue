@@ -1335,7 +1335,7 @@ namespace mapeditor {
       int tg, wp;
       int nt;
       hr::ignore(fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags));
-      patterns::whichPattern = wp;
+      patterns::whichPattern = patterns::ePattern(wp);
       if(tg != geometry) { targetgeometry = eGeometry(tg); stop_game_and_switch_mode(rg::geometry); }
       if(bool(nt) != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       start_game();
@@ -1348,7 +1348,7 @@ namespace mapeditor {
       if(siz < 0 || siz > 1000) break;
       
       if(i >= 4) {
-        if(i < 8) patterns::whichPattern = "xxxxfpzH"[i];
+        if(i < 8) patterns::whichPattern = patterns::ePattern("xxxxfpzH"[i]);
         patterns::subpattern_flags = 0;
         i = 3;
         }

@@ -2446,7 +2446,7 @@ void set_zebrafloor(cell *c) {
     set_floor(shFloor); return;
     }
   
-  auto si = patterns::getpatterninfo(c, 'z', patterns::SPF_SYM0123);
+  auto si = patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
   
   int j;
   if(nonbitrunc) j = 4;
@@ -2531,7 +2531,7 @@ void draw_reptile(cell *c, const transmatrix &V, int col) {
 
 void set_emeraldfloor(cell *c) {
   if(!masterless && !nonbitrunc) {
-    auto si = patterns::getpatterninfo(c, 'f', patterns::SPF_SYM0123);
+    auto si = patterns::getpatterninfo(c, patterns::PAT_EMERALD, patterns::SPF_SYM0123);
   
     int j = -1;
 
@@ -3142,7 +3142,7 @@ void set_maywarp_floor(cell *c) {
       set_floor(shTriheptaFloor);
       return;
       }
-    auto si = patterns::getpatterninfo(c, 0, 0);
+    auto si = patterns::getpatterninfo(c, patterns::PAT_TYPES, 0);
     if(si.id == 0 || si.id == 1)
       set_floor(shTriheptaFloor);
     else if(si.id >= 14)
