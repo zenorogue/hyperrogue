@@ -925,14 +925,15 @@ namespace mapeditor {
   void drawGrid() {
     unsigned lightgrid = gridcolor;
     lightgrid -= (lightgrid & 0xFF) / 2;
+
+    transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
+
     for(int d=0; d<S84; d++) {
-      transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
       unsigned col = (d % (S84/drawcell->type) == 0) ? gridcolor : lightgrid;
       queueline(d2 * C0, d2 * xspinpush0(M_PI*d/S42, 1), col, 4 + vid.linequality);
       }
     for(int u=2; u<=20; u++) {
       PRING(d) {
-        transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
         curvepoint(d2 * xspinpush0(M_PI*d/S42, u/20.));
         }
       queuecurve((u%5==0) ? gridcolor : lightgrid, 0, PPR_LINE);
@@ -1130,7 +1131,8 @@ namespace mapeditor {
 #endif
 
     if(!mouseout()) {
-      hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter)) * mouseh;
+      transmatrix T = inverse(drawtrans * rgpushxto0(ccenter));
+      hyperpoint mh = spintox(gpushxto0(ccenter) * coldcenter) * T * mouseh;
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])), 0xC0C0C0, 16);
