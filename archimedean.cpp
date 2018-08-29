@@ -1151,6 +1151,7 @@ string archimedean_tiling::world_size() {
     denom = denom / g * f;
     }
   int anom = 0, adenom = 1;
+  if(BITRUNCATED) anom = 1, adenom = 1;
   for(int f: faces) {
     int g = gcd(adenom, f);
     anom = (anom * f + adenom) / g;

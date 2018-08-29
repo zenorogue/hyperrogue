@@ -334,9 +334,38 @@ void showEuclideanMenu() {
         worldsize = denom ? nom/denom : 0;
         break;
       }
+    
+    string spf = its(ts);
+    if(archimedean) {
+      spf = "";
+      for(int i: arcm::current.faces) {
+        if(spf != "") spf += ",";
+        spf += its(i);
+        }
+      if(BITRUNCATED) spf = "[" + spf + "]," + its(arcm::current.N * 2) + "," + its(arcm::current.N * 2);
+      }
+    else if(binarytiling)
+      spf = "6,[6,7],7";
+    else if(BITRUNCATED && !euclid6)
+      spf = spf + "," + its(S6) + "," + its(S6);
+    else if(IRREGULAR && irr::bitruncations_performed)
+      spf = "[4..8],6,6";
+    else if(IRREGULAR)
+      spf = "[4..8]^3";
+    else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(1, 1))
+      spf = spf + ",4," + spf + ",4";
+    else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(2, 0))
+      spf = spf + ",4,4,4";
+    else if(GOLDBERG && S3 == 4)
+      spf = "[" + spf + ",4],4,4,4";
+    else if(GOLDBERG && S3 == 3)
+      spf = "[" + spf + ",6],6,6";
+    else {
+      string spf0 = spf;
+      for(int z=1; z<S3; z++) spf = spf + "," + spf0;
+      }
   
-    dialog::addSelItem(XLAT("sides per face"), archimedean ? "?" : its(ts), 0);
-    dialog::addSelItem(XLAT("faces per vertex"), archimedean ? "?" : its(tv), 0);
+    dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
   
     string qstring = "none";
     if(tq & qZEBRA) qstring = "zebra";
@@ -351,7 +380,15 @@ void showEuclideanMenu() {
   
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
     
+    if(hyperbolic && IRREGULAR) {
+      nom = isize(irr::cells);
+      // both Klein Quartic and Bolza2 are double the Zebra quotiennt
+      denom = -2;
+      if(!quotient) worldsize = nom / denom;
+      }
+    
     dialog::addSelItem(XLAT("size of the world"), 
+      binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
       archimedean ? arcm::current.world_size() :
       (archimedean && sphere) ? its(isize(currentmap->allcells())) :
       worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)) + " exp(∞)": 
