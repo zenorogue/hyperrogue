@@ -214,6 +214,7 @@ struct geometryinfo {
   eGeometryClass cclass;
   int xcode;
   std::array<int,2> distlimit; // bitrunc, non-bitrunc
+  eVariation default_variation;
   };
 
 static const int qSMALL = 1;

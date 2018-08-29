@@ -1661,27 +1661,27 @@ vector<eLand> randlands = {
 static const int qNONOR = qNONORIENTABLE;
 
 geometryinfo ginf[gGUARD] = {
-  {"standard",            "HR",       7, 3, 0,      gcHyperbolic,       0, {{7, 5}}},
-  {"Euclidean",           "euclid",   6, 3, 0,      gcEuclid,           0, {{7, FORBIDDEN}}},
-  {"spherical",           "sphere",   5, 3, 0,      gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
-  {"elliptic",            "elliptic", 5, 3, qNONOR, gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
-  {"Zebra quotient",      "Zebra",    7, 3, qSMALL | qZEBRA, gcHyperbolic, 0x00400, {{7, 5}}},
-  {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, 0x00200, {{7, 5}}},
-  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     0x00600, {{7, FORBIDDEN}}},
-  {"octagons",            "oct",      8, 3, 0,      gcHyperbolic, 0x08000, {{6, 4}}},
-  {"four pentagons",      "4x5",      5, 4, 0,      gcHyperbolic, 0x08200, {{6, 4}}},
-  {"four hexagons",       "4x6",      6, 4, 0,      gcHyperbolic, 0x08400, {{5, 3}}},
-  {"four heptagons",      "4x7",      7, 4, 0,      gcHyperbolic, 0x08600, {{4, 3}}},
-  {"cube",                "3x4",      4, 3, 0,      gcSphere,     0x10000, {{SEE_ALL, SEE_ALL}}},
-  {"tetrahedron",         "3x3",      3, 3, 0,      gcSphere,     0x10200, {{SEE_ALL, SEE_ALL}}},
-  {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     0x10400, {{7, 7}}},
-  {"cube/elliptic",       "e3x4",     4, 3, qNONOR, gcSphere,     0x10600, {{SEE_ALL, SEE_ALL}}},
-  {"Klein Quartic",       "Klein",    7, 3, qSMALL,          gcHyperbolic, 0x18000, {{7, 5}}},
-  {"Bolza Surface",       "Bolza",    8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18200, {{6, 4}}},
-  {"Bolza Surface x2",    "Bolza2",   8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18400, {{6, 4}}},
-  {"minimal quotient",    "minimal",  7, 3, qSMALL | qNONOR, gcHyperbolic, 0x18600, {{7, 5}}},
-  {"binary tiling",       "binary",   7, 3, 0,     gcHyperbolic,        0, {{7, 5}}},
-  {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}}
+  {"standard",            "HR",       7, 3, 0,      gcHyperbolic,       0, {{7, 5}}, eVariation::bitruncated},
+  {"Euclidean",           "euclid",   6, 3, 0,      gcEuclid,           0, {{7, FORBIDDEN}}, eVariation::bitruncated},
+  {"spherical",           "sphere",   5, 3, 0,      gcSphere,           0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
+  {"elliptic",            "elliptic", 5, 3, qNONOR, gcSphere,           0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
+  {"Zebra quotient",      "Zebra",    7, 3, qSMALL | qZEBRA, gcHyperbolic, 0x00400, {{7, 5}}, eVariation::bitruncated},
+  {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, 0x00200, {{7, 5}}, eVariation::bitruncated},
+  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     0x00600, {{7, FORBIDDEN}}, eVariation::bitruncated},
+  {"octagons",            "oct",      8, 3, 0,      gcHyperbolic, 0x08000, {{6, 4}}, eVariation::bitruncated},
+  {"four pentagons",      "4x5",      5, 4, 0,      gcHyperbolic, 0x08200, {{6, 4}}, eVariation::bitruncated},
+  {"four hexagons",       "4x6",      6, 4, 0,      gcHyperbolic, 0x08400, {{5, 3}}, eVariation::bitruncated},
+  {"four heptagons",      "4x7",      7, 4, 0,      gcHyperbolic, 0x08600, {{4, 3}}, eVariation::bitruncated},
+  {"cube",                "3x4",      4, 3, 0,      gcSphere,     0x10000, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
+  {"tetrahedron",         "3x3",      3, 3, 0,      gcSphere,     0x10200, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
+  {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     0x10400, {{7, 7}}, eVariation::bitruncated},
+  {"cube/elliptic",       "e3x4",     4, 3, qNONOR, gcSphere,     0x10600, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
+  {"Klein Quartic",       "Klein",    7, 3, qSMALL,          gcHyperbolic, 0x18000, {{7, 5}}, eVariation::bitruncated},
+  {"Bolza Surface",       "Bolza",    8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18200, {{6, 4}}, eVariation::bitruncated},
+  {"Bolza Surface x2",    "Bolza2",   8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18400, {{6, 4}}, eVariation::bitruncated},
+  {"minimal quotient",    "minimal",  7, 3, qSMALL | qNONOR, gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
+  {"binary tiling",       "binary",   7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
+  {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure}
   };
 
 }

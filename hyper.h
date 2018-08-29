@@ -138,7 +138,7 @@ void addMessage(string s, char spamtype = 0);
 #define PURE (variation == eVariation::pure)
 #define BITRUNCATED (variation == eVariation::bitruncated)
 
-#define CHANGED_VARIATION (!BITRUNCATED)
+#define CHANGED_VARIATION (variation != ginf[geometry].default_variation)
 
 #define STDVAR (PURE || BITRUNCATED)
 #define NONSTDVAR (!STDVAR)
