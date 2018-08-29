@@ -1065,11 +1065,13 @@ namespace patterns {
   }
 
 bool geosupport_chessboard() {
-  return archimedean ? arcm::current.support_chessboard() : (VALENCE % 2 == 0);
+  return (archimedean && PURE) ? arcm::current.support_chessboard() : (VALENCE % 2 == 0);
   }
 
 int geosupport_threecolor() {
   if(IRREGULAR) return 0;
+  if(archimedean && PURE) return arcm::current.support_threecolor();
+  if(archimedean && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
   if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
@@ -1078,7 +1080,6 @@ int geosupport_threecolor() {
     return 2;
   if(a46 && PURE)
     return 1;
-  if(archimedean) return arcm::current.support_threecolor();
   return 0;
   }
 
@@ -1102,7 +1103,12 @@ int geosupport_football() {
   }
 
 int pattern_threecolor(cell *c) {
-  if(archimedean) return arcm::threecolor(arcm::id_of(c->master));
+  if(archimedean) {
+    if(PURE)
+      return arcm::threecolor(arcm::id_of(c->master));
+    else /* if(BITRUNCATED) */
+      return c->master->rval1;
+    }
   if(IRREGULAR || binarytiling) return !pseudohept(c);
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);

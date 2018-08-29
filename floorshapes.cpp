@@ -497,10 +497,12 @@ void generate_floorshapes() {
     model.master = &master;
     arcm::parent_index_of(&master) = 0;
     auto &ac = arcm::current;
-    for(int i=0; i<2*ac.N + (PURE ? 0 : 2); i++) {
+    for(int i=0; i<2*ac.N + 2; i++) {
       arcm::id_of(&master) = i;
       model.type = isize(ac.triangles[i]);
-      if(geosupport_football() == 2)
+      if(BITRUNCATED)
+        generate_floorshapes_for(i, &model, !arcm::pseudohept(i), arcm::pseudohept(i) ? 0 : 1^(i&1));
+      else if(geosupport_football() == 2)
         generate_floorshapes_for(i, &model, !arcm::pseudohept(i), i >= 4 ? 1 : 0);
       else
         generate_floorshapes_for(i, &model, 0, 0);

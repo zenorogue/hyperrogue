@@ -61,6 +61,7 @@ struct archimedean_tiling {
   pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
 
   int support_threecolor();
+  int support_threecolor_bitruncated();
   int support_football();
   bool support_chessboard();
   void regroup();
@@ -521,6 +522,14 @@ heptagon *build_child(heptspin p, pair<int, int> adj) {
   else
     h->fieldval = -100;
   h->fiftyval = isize(archimedean_gmatrix);
+  if(p.at->s == hsOrigin)
+    h->rval1 = 1 + (p.spin % 2);
+  else {
+    if(p.spin % 2 == 0)
+      h->rval1 = p.at->move(0)->rval1;
+    else
+      h->rval1 = 3 - p.at->move(0)->rval1 - p.at->rval1;
+    }
   heptspin hs(h, 0);
   return h;
   }
@@ -809,6 +818,10 @@ int archimedean_tiling::support_threecolor() {
   return 2;
   }
 
+int archimedean_tiling::support_threecolor_bitruncated() {
+  return N % 2 == 0 ? 2 : 0;
+  }
+
 int archimedean_tiling::support_football() {
   return 
     have_ph ? 1 :
@@ -821,7 +834,11 @@ bool archimedean_tiling::support_chessboard() {
   }
 
 bool pseudohept(int id) {
-  return current.flags[id] & arcm::sfPH;
+  if(PURE) 
+    return current.flags[id] & arcm::sfPH;
+  if(BITRUNCATED)
+    return id < current.N * 2;
+  return false;
   }
 
 bool chessvalue(cell *c) {
@@ -1086,6 +1103,14 @@ void show() {
         firstland = specialland = laCanvas;
         patterns::whichCanvas = 'B';
         restart_game();
+        });
+      }
+
+    if(archimedean) {    
+      dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');
+      dialog::add_action([] () {
+        set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
+        start_game();
         });
       }
     }

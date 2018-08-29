@@ -396,9 +396,18 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     }
   if(archimedean) {
     auto &ac = arcm::current;
-    if(arcm::id_of(c->master) >= ac.N*2) return C0;
-    auto& t = ac.get_triangle(c->master, cid-1);
-    return xspinpush0(-t.first, t.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+    if(PURE) {
+      if(arcm::id_of(c->master) >= ac.N*2) return C0;
+      auto& t = ac.get_triangle(c->master, cid-1);
+      return xspinpush0(-t.first, t.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      }
+    if(BITRUNCATED) {
+      auto& t0 = ac.get_triangle(c->master, cid-1);
+      auto& t1 = ac.get_triangle(c->master, cid);
+      hyperpoint h0 = xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      hyperpoint h1 = xspinpush0(-t1.first, t1.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      return mid3(C0, h0, h1);
+      }
     }
   if(PURE) {
     return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
@@ -426,11 +435,18 @@ hyperpoint nearcorner(cell *c, int i) {
     return mid_at(C0, nc, .94);
     }
   if(archimedean) {
-    auto &ac = arcm::current;
-    auto& t = ac.get_triangle(c->master, i-1);
-    int id = arcm::id_of(c->master);
-    int id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
-    return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2] + (ac.real_faces == 0 ? 2 * M_PI / (ac.N == 2 ? 2.1 : ac.N) : 0));
+    if(PURE) { 
+      auto &ac = arcm::current;
+      auto& t = ac.get_triangle(c->master, i-1);
+      int id = arcm::id_of(c->master);
+      int id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
+      return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2] + (ac.real_faces == 0 ? 2 * M_PI / (ac.N == 2 ? 2.1 : ac.N) : 0));
+      }
+    if(BITRUNCATED) {
+      auto &ac = arcm::current;
+      auto& t = ac.get_triangle(c->master, i);
+      return xspinpush0(-t.first, t.second);
+      }
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
@@ -481,12 +497,27 @@ hyperpoint farcorner(cell *c, int i, int which) {
   if(binarytiling)
     return nearcorner(c, (i+which) % c->type); // lazy
   if(archimedean) {
-    auto &ac = arcm::current;
-    auto& t = ac.get_triangle(c->master, i-1);
-    int id = arcm::id_of(c->master);
-    auto id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
-    int n1 = isize(ac.adjacent[id1]);
-    return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
+    if(PURE) {
+      auto &ac = arcm::current;
+      auto& t = ac.get_triangle(c->master, i-1);
+      int id = arcm::id_of(c->master);
+      auto id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
+      int n1 = isize(ac.adjacent[id1]);
+      return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
+      }
+    if(BITRUNCATED) {
+      auto &ac = arcm::current;
+      auto adj = ac.get_adj(c->master, i);
+      heptagon h; cell cx; cx.master = &h;
+      arcm::id_of(&h) = adj.first;
+      arcm::parent_index_of(&h) = adj.second;
+
+      auto& t1 = arcm::current.get_triangle(c->master, i);
+    
+      auto& t2 = arcm::current.get_triangle(adj);
+      
+      return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -1 : 2);
+      }
     }
   
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);

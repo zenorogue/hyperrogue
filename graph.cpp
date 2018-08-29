@@ -236,8 +236,14 @@ void drawLightning(const transmatrix& V) {
 
 ld displayspin(cell *c, int d) {
   if(archimedean) {
-    auto& t1 = arcm::current.get_triangle(c->master, d-1);
-    return -(t1.first + M_PI / c->type);
+    if(PURE) {
+      auto& t1 = arcm::current.get_triangle(c->master, d-1);
+      return -(t1.first + M_PI / c->type);
+      }
+    else { /* BITRUNCATED */
+      auto& t1 = arcm::current.get_triangle(c->master, d);
+      return -t1.first;
+      }
     }
   else if(IRREGULAR) {
     auto id = irr::cellindex[c];
