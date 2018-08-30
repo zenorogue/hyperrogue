@@ -969,6 +969,9 @@ vector<pair<string, int> > samples = {
   
   /* interesting symmetry variants */
   {"(3,3,3,3,3,3) (0,1)(2,3)(4,5)", cEucRegular},
+  {"(3,3H,3,3,3L,3L,3L) (0 4)(1 2)(3)(5)(6)", cHyperRegular},
+  {"(3,3H,3,3,3L,3L,3L) (0 4)(1 2)(3)[5 6]", cHyperRegular},
+  {"(3,3H,3,3L,3,3L,3L) [0 4](1 2)[3 5](6)", cHyperRegular},
 
   /* with digons */
   {"(2,3,3,3,3,3) (2,3)(4,5)", cWeird},
