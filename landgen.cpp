@@ -1441,7 +1441,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laKraken:
       if(d == 9) c->wall = waSea;
 
-      if(d == 8 && c->land == laKraken && pseudohept(c) && hrand(1000) <= 2) {
+      if(d == 8 && c->land == laKraken && kraken_pseudohept(c) && hrand(1000) <= 2) {
         c->wall = waNone;
         forCellEx(c2, c) c2->wall = waNone;
         }

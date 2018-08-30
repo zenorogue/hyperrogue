@@ -1233,11 +1233,11 @@ bool kraken_pseudohept(cell *c) {
   else if(IRREGULAR)
     return c->type != 6;
   else if(archimedean && PURE)
-    return c->type == isize(arcm::current.triangles[0]);
+    return c->type != isize(arcm::current.triangles[0]);
   else if(archimedean && BITRUNCATED)
     return pseudohept(c);
   else if(archimedean && DUAL)
-    return true;
+    return false;
   else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
