@@ -1112,7 +1112,7 @@ int geosupport_football() {
 int pattern_threecolor(cell *c) {
   if(archimedean) {
     if(PURE)
-      return arcm::threecolor(arcm::id_of(c->master));
+      return arcm::threecolor(c);
     else /* if(BITRUNCATED) */
       return c->master->rval1;
     }
@@ -1217,7 +1217,7 @@ int pattern_threecolor(cell *c) {
 bool pseudohept(cell *c) {
   if(IRREGULAR) return irr::pseudohept(c);
   if(binarytiling) return c->type & c->master->distance & 1;
-  if(archimedean) return arcm::pseudohept(arcm::id_of(c->master));
+  if(archimedean) return arcm::pseudohept(c);
   if(GOLDBERG && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(GOLDBERG && gp_threecolor() == 1 && (S7&1) && (S3 == 3))

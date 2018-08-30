@@ -503,9 +503,9 @@ void generate_floorshapes() {
       if(DUAL) model.type /= 2, arcm::parent_index_of(&master) = !(i&1);
       
       if(BITRUNCATED)
-        generate_floorshapes_for(i, &model, !arcm::pseudohept(i), arcm::pseudohept(i) ? 0 : 1^(i&1));
+        generate_floorshapes_for(i, &model, !arcm::pseudohept(&model), arcm::pseudohept(&model) ? 0 : 1^(i&1));
       else if(geosupport_football() == 2)
-        generate_floorshapes_for(i, &model, !arcm::pseudohept(i), i >= 4 ? 1 : 0);
+        generate_floorshapes_for(i, &model, !arcm::pseudohept(&model), i >= 4 ? 1 : 0);
       else
         generate_floorshapes_for(i, &model, 0, 0);
       }

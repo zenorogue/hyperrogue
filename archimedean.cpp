@@ -539,6 +539,7 @@ heptagon *build_child(heptspin p, pair<int, int> adj) {
     else
       h->rval1 = 3 - p.at->move(0)->rval1 - p.at->rval1;
     }
+  h->rval0 = hrand(256);
   heptspin hs(h, 0);
   return h;
   }
@@ -848,7 +849,10 @@ bool archimedean_tiling::support_chessboard() {
   return N % 2 == 0;
   }
 
-bool pseudohept(int id) {
+bool pseudohept(cell *c) {
+  if(DUAL)
+    return !(c->master->rval0 & 3);
+  int id = id_of(c->master);
   if(PURE) 
     return current.flags[id] & arcm::sfPH;
   if(BITRUNCATED)
@@ -866,12 +870,13 @@ bool linespattern(cell *c) {
   return current.flags[id_of(c->master)] & arcm::sfLINE;
   }
 
-int threecolor(int id) {
+int threecolor(cell *c) {
   if(current.have_ph)
-    return !pseudohept(id);
+    return !arcm::pseudohept(c);
   else if(PURE)
-    return current.tilegroup[id];
+    return current.tilegroup[id_of(c->master)];
   else {
+    int id = id_of(c->master);
     if(current.support_threecolor() == 2) return id < current.N * 2 ? (id&1) : 2;
     return current.tilegroup[id];
     }
