@@ -1008,15 +1008,27 @@ void enable(archimedean_tiling& arct) {
   if(!archimedean) set_variation(eVariation::pure);
   set_geometry(gArchimedean);
   patterns::whichPattern = patterns::PAT_NONE;
-#if CAP_TEXTURE
-  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)
-    patterns::whichPattern = patterns::PAT_COLORING;
-  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball)
-    patterns::whichPattern = patterns::PAT_TYPES, patterns::subpattern_flags = patterns::SPF_FOOTBALL;
-  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess)
-    patterns::whichPattern = patterns::PAT_CHESS;
-#endif
   current = arct;
+#if CAP_TEXTURE
+  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree) {
+    patterns::whichPattern = patterns::PAT_COLORING;
+    if(geosupport_threecolor() < 2) {
+      if(arct.support_threecolor() == 2) set_variation(eVariation::pure);
+      else if(arct.support_threecolor_bitruncated() == 2) set_variation(eVariation::bitruncated);
+      }
+    }
+  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball) {
+    patterns::whichPattern = patterns::PAT_TYPES, patterns::subpattern_flags = patterns::SPF_FOOTBALL;
+    if(geosupport_football() < 2) set_variation(eVariation::bitruncated);
+    }
+  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess) {
+    patterns::whichPattern = patterns::PAT_CHESS;
+    if(!geosupport_chessboard()) {
+      if(arct.support_chessboard()) set_variation(eVariation::pure);
+      else if(arct.support_threecolor_bitruncated() == 2) set_variation(eVariation::dual);
+      }
+    }
+#endif
   need_reset_geometry = true;
   start_game();
   }
@@ -1058,13 +1070,6 @@ void show() {
     dialog::addBreak(100);
     if(edited.errors)
       dialog::addInfo(edited.errormsg, 0xFF0000);
-#if CAP_TEXTURE
-    else if(texture::config.tstate == texture::tsActive &&
-      ((texture::cgroup == cpThree && edited.support_threecolor() < 2) ||
-       (texture::cgroup == cpFootball && edited.support_football() < 2) ||
-       (texture::cgroup == cpChess && !edited.support_chessboard())))
-      dialog::addInfo(XLAT("Pattern incompatible."), 0xC0C000);
-#endif    
     else
       dialog::addInfo(XLAT("OK"), 0x00FF00);
     
@@ -1091,15 +1096,26 @@ void show() {
     int shown = 0;
     while(nextpos < isize(tilings) && shown < 10) {
       auto &ps = tilings[nextpos++];
+      bool valid = true;
+      string suffix = "";
 #if CAP_TEXTURE
-      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree && ps.support_threecolor() < 2)
-        continue;
-      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball && ps.support_football() < 2)
-        continue;
-      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess && !ps.support_chessboard())
-        continue;
+      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree) {
+        valid = false;
+        if(ps.support_threecolor() == 2) valid = true, suffix += bitruncnames[int(eVariation::pure)];
+        if(ps.support_threecolor_bitruncated() == 2) valid = true, suffix += bitruncnames[int(eVariation::bitruncated)];
+        }
+      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball) {
+        if(ps.support_football() == 2) suffix += bitruncnames[int(eVariation::pure)];
+        suffix += bitruncnames[int(eVariation::bitruncated)];
+        }
+      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess && !ps.support_chessboard()) {
+        valid = false;
+        if(ps.support_chessboard()) valid = true, suffix += bitruncnames[int(eVariation::pure)];
+        if(ps.support_threecolor_bitruncated() == 2) valid = true, suffix += bitruncnames[int(eVariation::dual)];
+        }
 #endif
-      dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°", 'a' + shown);
+      if(!valid) continue;
+      dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°" + suffix, 'a' + shown);
       dialog::lastItem().color = ps.coloring;
       dialog::add_action([&] () { enable(ps); });
       shown++;

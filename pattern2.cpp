@@ -1907,7 +1907,7 @@ namespace patterns {
     if(IRREGULAR)
       return irr::cellindex[c] << 8;
     else if(archimedean)
-      return arcm::id_of(c->master) << 8;
+      return (arcm::id_of(c->master) << 8) + (arcm::parent_index_of(c->master) << 16);
     else if(!GOLDBERG) return 0;
     else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
     else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);

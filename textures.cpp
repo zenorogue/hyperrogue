@@ -292,9 +292,14 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   mi.M = T * applyPatterndir(c, si);
   mi.triangles.clear();
   
+  transmatrix iv = inverse(applyPatterndir(c, si));
+
+  int sd = si.dir;
+  if((NONSTDVAR) || binarytiling) sd = 0;
+  
   for(int i=0; i<c->type; i++) {
-    hyperpoint h1 = get_corner_position(c, (i + shift) % c->type);
-    hyperpoint h2 = get_corner_position(c, (i + shift + 1) % c->type);
+    hyperpoint h1 = iv * get_corner_position(c, (i + sd + shift) % c->type);
+    hyperpoint h2 = iv * get_corner_position(c, (i + sd + shift + 1) % c->type);
     mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
     }
   }
