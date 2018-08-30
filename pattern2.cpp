@@ -1559,7 +1559,7 @@ namespace patterns {
       dialog::addBoolItem(XLAT("siblings"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
     
     if(euclid)
-      dialog::addBoolItem(XLAT("torus pattern"), (whichPattern == PAT_FIELD), PAT_FIELD);
+      dialog::addBoolItem(XLAT("torus"), (whichPattern == PAT_FIELD), PAT_FIELD);
     else if(sphere)
       dialog::addBoolItem(XLAT("single cells"), (whichPattern == PAT_FIELD), PAT_FIELD);
     else
@@ -1627,7 +1627,7 @@ namespace patterns {
 
     if((whichPattern == PAT_COLORING) || (whichPattern == PAT_TYPES && archimedean)) {
       dialog::addBoolItem(XLAT("alternate coloring"), subpattern_flags & SPF_ALTERNATE, '\'');
-      dialog::addBoolItem(XLAT("football pattern"), subpattern_flags & SPF_FOOTBALL, '*');
+      dialog::addBoolItem(XLAT("football"), subpattern_flags & SPF_FOOTBALL, '*');
       }
     
     if(a38 && whichPattern == PAT_COLORING)

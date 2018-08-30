@@ -7382,3 +7382,20 @@ S(" (arbitrary)", " (libovolné)") // arbitrary edge length
 S("previous page", "předchozí stránka")
 S("Defined pattern.", "Vzor definován.")
 
+// graphics editor
+S(" (r = complex tesselations)", " (r = komplexní dláždění)")
+S("area: %1", "plocha: %1")
+
+// short codes for variations
+S(" (d)", " (d)") // dual
+S(" (g)", " (g)") // Goldberg
+S(" (i)", " (i)") // irregular
+
+// pattern types
+S("cell types", "typy políček")
+S("siblings", "sourozenci") // a pattern on the sphere
+S("rotate the color groups", "rotace barevných skupin")
+S("full symmetry", "úplná symetrie")
+S("alternate coloring", "alternativní zbarvení")
+S("display full floors", "zobrazuj úplné podlahy")
+S("remove complete classification", "odstraň úplnou klasifikaci")

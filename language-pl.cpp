@@ -7136,3 +7136,21 @@ S("edge length", "długość krawędzi")
 S(" (arbitrary)", " (dowolna)") // arbitrary edge length
 S("previous page", "poprzednia strona")
 S("Defined pattern.", "Wzór zdefiniowany.")
+
+// graphics editor
+S(" (r = complex tesselations)", " (r = złożone parkietaże)")
+S("area: %1", "pole: %1")
+
+// short codes for variations
+S(" (d)", " (d)") // dual
+S(" (g)", " (g)") // Goldberg
+S(" (i)", " (i)") // irregular
+
+// pattern types
+S("cell types", "typy pól")
+S("siblings", "bliźniaki") // a pattern on the sphere
+S("rotate the color groups", "obróć kolory")
+S("full symmetry", "pełna symetria")
+S("alternate coloring", "kolorowanie alternatywne")
+S("display full floors", "pokazuj pełne podłogi")
+S("remove complete classification", "usuń pełną klasyfikację")
