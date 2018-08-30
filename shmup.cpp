@@ -3189,6 +3189,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
     switch(m->type) {
       case moPlayer: 
+        playerfound = true;
         cpid = m->pid; 
         drawPlayerEffects(view, c, true);
         if(m->inBoat) m->footphase = 0;

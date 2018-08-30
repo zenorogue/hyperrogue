@@ -3936,7 +3936,7 @@ heptagon* encodeId(int id);
 
 void virtualRebaseSimple(heptagon*& base, transmatrix& at);
 
-extern bool game_active;
+extern bool game_active, playerfound;
 
 }
 
