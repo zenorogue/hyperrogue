@@ -832,7 +832,7 @@ int archimedean_tiling::support_threecolor() {
   }
 
 int archimedean_tiling::support_threecolor_bitruncated() {
-  for(int i: current.faces) if(i % 2) return 0;
+  for(int i: faces) if(i % 2) return 0;
   return 2;
   }
 
@@ -1117,32 +1117,52 @@ void show() {
       if(spos < 0) spos = 0;
       });
     
+    auto setcanvas = [] (char c) {
+      return [c] () {
+        stop_game();
+        firstland = specialland = laCanvas;
+        patterns::whichCanvas = c;
+        start_game();
+        };
+      };
+    
     if(archimedean) {
       dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
       dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts6(current.edgelength), 0);
 
       dialog::addItem(XLAT("color by symmetries"), 't');
-      dialog::add_action([] () {
-        firstland = specialland = laCanvas;
-        patterns::whichCanvas = 'A';
-        restart_game();
-        });
+      dialog::add_action(setcanvas('A'));
       }
-    else dialog::addBreak(100);
+    else {
+      dialog::addBreak(100);
+      dialog::addBreak(100);
+      dialog::addBreak(100);
+      }
 
     if(true) {
       dialog::addItem(XLAT("color by sides"), 'u');
-      dialog::add_action([] () {
-        firstland = specialland = laCanvas;
-        patterns::whichCanvas = 'B';
-        restart_game();
-        });
+      dialog::add_action(setcanvas('B'));
       }
+    
+    if(geosupport_threecolor() == 2) {
+      dialog::addItem(XLAT("three colors"), 'w');
+      dialog::add_action(setcanvas('T'));
+      }
+    else if(geosupport_football() == 2) {
+      dialog::addItem(XLAT("football"), 'w');
+      dialog::add_action(setcanvas('F'));
+      }
+    else if(geosupport_chessboard()) {
+      dialog::addItem(XLAT("chessboard"), 'w');
+      dialog::add_action(setcanvas('c'));
+      }
+    else dialog::addBreak(100);
 
     if(archimedean) {    
       dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');
       dialog::add_action(next_variation);
       }
+    else dialog::addBreak(100);
     }
 
   dialog::addHelp();
