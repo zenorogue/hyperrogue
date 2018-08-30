@@ -293,15 +293,13 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
   
-    double esh = masterless ? M_PI - M_PI*3/S84 + 2.5 * M_PI/S42: 0;
-    
     if(shmup::on) {
 #if CAP_POLY
       if(items[itOrbSword])
-        queuepoly(V*spin(esh+shmup::pc[multi::cpid]->swordangle), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sin(ticks / 200.0)));
+        queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sin(ticks / 200.0)));
   
       if(items[itOrbSword2])
-        queuepoly(V*spin(esh+shmup::pc[multi::cpid]->swordangle+M_PI), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sin(ticks / 200.0)));
+        queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle+M_PI), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sin(ticks / 200.0)));
 #endif
       }                  
     
@@ -309,10 +307,10 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int& ang = angle[multi::cpid];
       ang %= S42;
       
-      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
+      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * ddspin(c,0,M_PI); // (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
       
 #if CAP_QUEUE
-      if(!masterless) for(int a=0; a<S42; a++) {
+      if(!euclid) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
         if(PURE && a%3 != ang%3) continue;
@@ -325,10 +323,10 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
 
 #if CAP_POLY
       if(items[itOrbSword])
-        queuepoly(Vnow*spin(esh+M_PI+(-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
+        queuepoly(Vnow*spin(M_PI+(-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
   
       if(items[itOrbSword2])
-        queuepoly(Vnow*spin(esh+(-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
+        queuepoly(Vnow*spin((-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
 #endif
       }
     }
