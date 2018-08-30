@@ -1141,6 +1141,7 @@ namespace mirror {
   // we go by heptagons in Archimedean, 
   bool equal(heptspin h1, heptspin h2, int lev) {
     if(h1.at->degree() != h2.at->degree()) return false;
+    if(arcm::is_vertex(h1.at) != arcm::is_vertex(h2.at)) return false;
     if(lev) for(int i=0; i<h1.at->degree(); i++) {
       heptspin h11 = h1 + i + wstep;
       heptspin h21 = h2 + i + wstep;

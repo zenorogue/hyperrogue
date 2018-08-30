@@ -1205,6 +1205,10 @@ int degree(heptagon *h) {
   return isize(current.adjacent[id_of(h)]);
   }
 
+bool is_vertex(heptagon *h) {
+  return id_of(h) >= 2 * current.N;
+  }
+
 int valence() {
   if(PURE) return arcm::current.N;
   if(BITRUNCATED) return 3;
