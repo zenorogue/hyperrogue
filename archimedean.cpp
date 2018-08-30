@@ -279,7 +279,7 @@ void archimedean_tiling::regroup() {
   flags.clear();
   flags.resize(M);
   for(int i=0; i<M; i++)
-  for(int j=0; j<2*N; j++) {
+  for(int j=0; j<M; j++) {
     if(tilegroup[i] == tilegroup[j]) {
       flags[i] |= nflags[j/2];
       if(j%2 == 1 && (nflags[j/2] & sfSEMILINE))
@@ -288,12 +288,7 @@ void archimedean_tiling::regroup() {
     }
   
   if(!have_ph) {
-    if(true) {
-      for(int i=0; i<M; i++) if(tilegroup[i] == 0) flags[i] |= sfPH;
-      }
-    else {
-      for(int z=2*N; z<2*N+2; z++) flags[z] |= sfPH;
-      }
+    for(int i=0; i<M; i++) if(tilegroup[i] == 0) flags[i] |= sfPH;
     }
   
   SDEBUG( for(int i=0; i<M; i+=(have_symmetry?1:2)) {
@@ -746,18 +741,20 @@ void archimedean_tiling::parse() {
   faces.clear(); nflags.clear();
   have_line = false;
   have_ph = false;
+  int nflags0;
+  auto nfback = [this, &nflags0] () -> int& { if(nflags.empty()) return nflags0; else return nflags.back(); };
   while(true) {
     if(peek() == ')' || (peek() == '(' && isize(faces)) || peek() == 0) break;
     else if((peek() == 'L') && faces.size()) {
-      if(!nflags.empty()) nflags.back() |= sfLINE;
+      if(!nflags.empty()) nfback() |= sfLINE;
       have_line = true, at++;
       }
     else if((peek() == 'l') && faces.size()) {
-      if(!nflags.empty()) nflags.back() |= sfSEMILINE;
+      if(!nflags.empty()) nfback() |= sfSEMILINE;
       have_line = true, at++;
       }
     else if((peek() == 'H' || peek() == 'h') && faces.size()) {
-      if(!nflags.empty()) nflags.back() |= sfPH;
+      if(!nflags.empty()) nfback() |= sfPH;
       have_ph = true, at++;
       }
     else if(isnumber()) faces.push_back(read_number()), nflags.push_back(0);
@@ -765,10 +762,11 @@ void archimedean_tiling::parse() {
       at++;
       int rep = read_number();
       if(rep == 0) nflags.pop_back(), faces.pop_back();
-      for(int i=1; i<rep; i++) nflags.push_back(nflags.back()), faces.push_back(faces.back());
+      for(int i=1; i<rep; i++) nflags.push_back(nfback()), faces.push_back(faces.back());
       }
     else at++;
     }
+  nflags.push_back(nflags0);
   repetition = 1;
   N = isize(faces);
   invert.clear(); invert.resize(N, true);
