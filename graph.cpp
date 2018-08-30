@@ -3216,6 +3216,8 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   transmatrix V2 = V * ddspin(c, i);
  
   if(binarytiling || archimedean || NONSTDVAR) {
+    if(archimedean && !PURE)
+      i = (i + arcm::parent_index_of(c->master)/DUALMUL + MODFIXER) % c->type;
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
