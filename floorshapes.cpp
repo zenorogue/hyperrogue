@@ -551,7 +551,7 @@ namespace gp {
   int get_plainshape_id(cell *c) {
     int siid, sidir;
     if(geosupport_threecolor() == 2) {
-      auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
+      auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, patterns::SPF_NO_SUBCODES);
       siid = si.id>>2;
       // if(siid == 2) si.dir++;
       // if(siid != pattern_threecolor(c)) printf("threecolor mismatch\n");

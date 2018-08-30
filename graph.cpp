@@ -3478,6 +3478,10 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
 
 bool just_gmatrix;
 
+int colorhash(int i) {
+  return (i * 0x471211 + i*i*0x124159 + i*i*i*0x982165) & 0xFFFFFF;
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
 #if CAP_TEXTURE
@@ -3793,7 +3797,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     poly_outline = OUTLINE_DEFAULT;    
     if(!wmascii) {
-      int gc;
     
       // floor
       
@@ -3821,8 +3824,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 
 #if CAP_EDIT
-      else if(mapeditor::haveUserShape(mapeditor::sgFloor, gc = si.id + patterns::subcode(c, si))) {
-        qfi.usershape = gc;
+      else if(mapeditor::haveUserShape(mapeditor::sgFloor, si.id)) {
+        qfi.usershape = si.id;
         qfi.spin = applyPatterndir(c, si);
         }
 
@@ -4232,8 +4235,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           si.dir += si.symmetries;
           }
         
-        string label = its(si.id);
-        queuestr(V, .5, label, 0xFF000000 + forecolor);
+        string label = its(si.id & 255);
+        int col = forecolor ^ colorhash(si.id >> 8);
+        queuestr(V, .5, label, 0xFF000000 + col);
         }
 #endif
 
@@ -4806,7 +4810,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
       
-      else if(isGravityLand(cwt.at->land)) {
+      else if(isGravityLand(cwt.at->land) && cwt.at->land != laMountain) {
         if(cwt.at->land == laDungeon) rev = true;
         if(conformal::do_rotate >= 1)
         if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
@@ -4816,7 +4820,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       else if(c->master->alt && cwt.at->master->alt &&
-        (cwt.at->land == laMountain || 
+        ((cwt.at->land == laMountain && conformal::do_rotate >= 1)|| 
         (conformal::do_rotate >= 2 && 
           (cwt.at->land == laTemple || cwt.at->land == laWhirlpool || 
           (cheater && (cwt.at->land == laClearing || cwt.at->land == laCaribbean ||

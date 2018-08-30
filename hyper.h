@@ -1074,6 +1074,7 @@ namespace patterns {
   static const int SPF_FOOTBALL = 256;
   static const int SPF_FULLSYM = 512;
   static const int SPF_DOCKS = 1024;
+  static const int SPF_NO_SUBCODES = 2048;
 
   static const int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
   

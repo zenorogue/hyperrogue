@@ -541,7 +541,7 @@ namespace mapeditor {
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
     auto si = patterns::getpatterninfo0(drawcell);
-    return si.id + patterns::subcode(drawcell, si);
+    return si.id;
     }
 
   bool editingShape(eShapegroup group, int id) {

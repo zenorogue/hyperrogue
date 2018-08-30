@@ -342,7 +342,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     return false;
     }
   try {
-    auto& mi = texture_map.at(si.id + patterns::subcode(c, si));    
+    auto& mi = texture_map.at(si.id);
     
     set_floor(shFullFloor);
     qfi.tinf = &mi;
@@ -420,8 +420,6 @@ void texture_config::perform_mapping() {
     
     // int sgn = sphere ? -1 : 1;
     
-    si.id += patterns::subcode(c, si);
-
     if(!texture_map.count(si.id)) 
       replace = true;
     else if(hdist0(p.second*sphereflip * C0) < hdist0(texture_map[si.id].M * sphereflip * C0))
@@ -1452,10 +1450,8 @@ void texture_config::true_remap() {
   missing_cells_known.clear();
   for(cell *c: dcal) {
     auto si = patterns::getpatterninfo0(c);
-    int oldid = si.id;
+    int oldid = patterns::getpatterninfo(c, patterns::whichPattern, patterns::subpattern_flags | patterns::SPF_NO_SUBCODES).id;
     
-    si.id += patterns::subcode(c, si);
-
     if(texture_map.count(si.id)) continue;
     
     int pshift = 0;

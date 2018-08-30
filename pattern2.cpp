@@ -875,6 +875,18 @@ namespace patterns {
     }
   
   patterninfo getpatterninfo(cell *c, ePattern pat, int sub) {
+    if(!(sub & SPF_NO_SUBCODES)) {
+      auto si = getpatterninfo(c, pat, sub | SPF_NO_SUBCODES);
+      if(IRREGULAR)
+        si.id += irr::cellindex[c] << 8;
+      else if(archimedean)
+        si.id += (arcm::id_of(c->master) << 8) + (arcm::parent_index_of(c->master) << 16);
+      else if(GOLDBERG) {
+        if(c == c->master->c7) si.id += (fixdir(si.dir, c) << 8);
+        else si.id += (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
+        }
+      return si;
+      }
     bool symRotation = sub & SPF_ROT;
     // bool sym0 = sub & (SPF_SYM01 | SPF_SYM02 | SPF_SYM03);
     
@@ -1555,6 +1567,8 @@ namespace patterns {
     
     dialog::addBoolItem(XLAT("single type"), (whichPattern == PAT_SINGLETYPE), PAT_SINGLETYPE);
 
+    dialog::addBreak(50);
+
     if(
       (whichPattern == PAT_EMERALD && (stdhyperbolic || a38)) ||
       (whichPattern == PAT_PALACE && stdhyperbolic) ||
@@ -1618,6 +1632,11 @@ namespace patterns {
     
     if(a38 && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("Docks pattern"), subpattern_flags & SPF_DOCKS, '@');
+
+    if(whichPattern && (IRREGULAR || GOLDBERG || archimedean))
+      dialog::addBoolItem(XLAT("remove complete classification"), subpattern_flags & SPF_NO_SUBCODES, '#');
+    
+    dialog::addBreak(50);
     
     dialog::addBoolItem(XLAT("display pattern codes (full)"), displaycodes, 'd');
 
@@ -1675,6 +1694,11 @@ namespace patterns {
 
       else if(uni == '@') {
         subpattern_flags ^= SPF_DOCKS;
+        REMAP_TEXTURE;
+        }
+
+      else if(uni == '#') {
+        subpattern_flags ^= SPF_NO_SUBCODES;
         REMAP_TEXTURE;
         }
 
@@ -1901,17 +1925,7 @@ namespace patterns {
   void pushChangeablePatterns() {
     pushScreen(showChangeablePatterns);
     computeCgroup(); 
-    }  
-
-  int subcode(cell *c, const patterninfo& si) {
-    if(IRREGULAR)
-      return irr::cellindex[c] << 8;
-    else if(archimedean)
-      return (arcm::id_of(c->master) << 8) + (arcm::parent_index_of(c->master) << 16);
-    else if(!GOLDBERG) return 0;
-    else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
-    else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
-    }  
+    }
   }
 
 bool is_master(cell *c) { 
