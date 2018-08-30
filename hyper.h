@@ -827,6 +827,7 @@ namespace shmup {
     monster() { 
       dead = false; inBoat = false; parent = NULL; nextshot = 0; 
       stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
+      swordangle = 0;
       }
   
     void store();
