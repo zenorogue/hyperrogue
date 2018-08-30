@@ -1204,6 +1204,19 @@ string archimedean_tiling::world_size() {
 int degree(heptagon *h) {
   return isize(current.adjacent[id_of(h)]);
   }
+
+int valence() {
+  if(PURE) return arcm::current.N;
+  if(BITRUNCATED) return 3;
+  // in DUAL, usually valence would depend on the vertex.
+  // 3 is the most interesting, as it allows us to kill hedgehog warriors
+  int total = 0;
+  for(int i: current.faces) {
+    if(i == 3) return 3;
+    total += i;
+    }
+  return total / isize(current.faces);
+  }
  
   }
 

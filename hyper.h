@@ -106,8 +106,6 @@ void addMessage(string s, char spamtype = 0);
 #define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
 #define sphere_narcm (sphere && !archimedean)
 
-#define AS3 (archimedean?arcm::current.N : S3)
-
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)
 #define a46 (S3 == 4 && S7 == 6)
@@ -138,13 +136,14 @@ void addMessage(string s, char spamtype = 0);
 #define PURE (variation == eVariation::pure)
 #define BITRUNCATED (variation == eVariation::bitruncated)
 #define DUAL (variation == eVariation::dual)
+#define DUALMUL (DUAL ? 2 : 1)
 
 #define CHANGED_VARIATION (variation != ginf[geometry].default_variation)
 
 #define STDVAR (PURE || BITRUNCATED)
 #define NONSTDVAR (!STDVAR)
 
-#define VALENCE (BITRUNCATED ? 3 : AS3)
+#define VALENCE (BITRUNCATED ? 3 : archimedean ? arcm::valence() : S3)
 
 #define NUMWITCH 7
 
