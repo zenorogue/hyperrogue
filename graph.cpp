@@ -240,6 +240,10 @@ ld displayspin(cell *c, int d) {
       auto& t1 = arcm::current.get_triangle(c->master, d-1);
       return -(t1.first + M_PI / c->type);
       }
+    else if(DUAL) {
+      auto& t1 = arcm::current.get_triangle(c->master, 2*d);
+      return -t1.first;
+      }
     else { /* BITRUNCATED */
       auto& t1 = arcm::current.get_triangle(c->master, d);
       return -t1.first;

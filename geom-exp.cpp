@@ -288,8 +288,6 @@ void showEuclideanMenu() {
       dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
     else if(binarytiling)
       dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
-    else if(archimedean)
-      dialog::addSelItem(XLAT("variations"), XLAT("Not implemented."), 'v');
     else
       dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
   
@@ -343,6 +341,7 @@ void showEuclideanMenu() {
         spf += its(i);
         }
       if(BITRUNCATED) spf = "[" + spf + "]," + its(arcm::current.N * 2) + "," + its(arcm::current.N * 2);
+      if(DUAL) spf = its(arcm::current.N) + "^[" + spf + "]";
       }
     else if(binarytiling)
       spf = "6,[6,7],7";
@@ -434,7 +433,8 @@ void showEuclideanMenu() {
       else if(uni == 'z') 
         showquotients = !showquotients;
       else if(uni == 'v') {
-        if(euclid6 || archimedean) ;
+        if(euclid6) ;
+        else if(archimedean) arcm::next_variation();
         else if(binarytiling) {
           dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
           dialog::reaction = [] () {

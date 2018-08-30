@@ -500,6 +500,8 @@ void generate_floorshapes() {
     for(int i=0; i<2*ac.N + 2; i++) {
       arcm::id_of(&master) = i;
       model.type = isize(ac.triangles[i]);
+      if(DUAL) model.type /= 2, arcm::parent_index_of(&master) = !(i&1);
+      
       if(BITRUNCATED)
         generate_floorshapes_for(i, &model, !arcm::pseudohept(i), arcm::pseudohept(i) ? 0 : 1^(i&1));
       else if(geosupport_football() == 2)

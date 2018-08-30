@@ -408,6 +408,10 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
       hyperpoint h1 = xspinpush0(-t1.first, t1.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
       return mid3(C0, h0, h1);
       }
+    if(DUAL) {
+      auto& t0 = ac.get_triangle(c->master, 2*cid-1);
+      return xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      }
     }
   if(PURE) {
     return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
@@ -445,6 +449,11 @@ hyperpoint nearcorner(cell *c, int i) {
     if(BITRUNCATED) {
       auto &ac = arcm::current;
       auto& t = ac.get_triangle(c->master, i);
+      return xspinpush0(-t.first, t.second);
+      }
+    if(DUAL) {
+      auto &ac = arcm::current;
+      auto& t = ac.get_triangle(c->master, i * 2);
       return xspinpush0(-t.first, t.second);
       }
     }
@@ -505,9 +514,10 @@ hyperpoint farcorner(cell *c, int i, int which) {
       int n1 = isize(ac.adjacent[id1]);
       return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
       }
-    if(BITRUNCATED) {
+    if(BITRUNCATED || DUAL) {
+      int mul = DUAL ? 2 : 1;
       auto &ac = arcm::current;
-      auto adj = ac.get_adj(c->master, i);
+      auto adj = ac.get_adj(c->master, i * mul);
       heptagon h; cell cx; cx.master = &h;
       arcm::id_of(&h) = adj.first;
       arcm::parent_index_of(&h) = adj.second;
@@ -516,7 +526,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     
       auto& t2 = arcm::current.get_triangle(adj);
       
-      return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -1 : 2);
+      return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -mul : 2*mul);
       }
     }
   

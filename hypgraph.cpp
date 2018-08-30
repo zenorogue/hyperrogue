@@ -807,11 +807,12 @@ void optimizeview() {
   if(binarytiling || archimedean) {
     turn = -1, best = View[2][2];
     for(int i=0; i<viewctr.at->c7->type; i++) {
-      heptagon *h2 = createStep(viewctr.at, i);
+      int i1 = i * (DUAL ? 2 : 1);
+      heptagon *h2 = createStep(viewctr.at, i1);
       transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.at) : arcm::relative_matrix(h2, viewctr.at);
       hyperpoint H = View * tC0(T);
       ld quality = euclid ? hdist0(H) : H[2];
-      if(quality < best) best = quality, turn = i, TB = T;
+      if(quality < best) best = quality, turn = i1, TB = T;
       }
     if(turn >= 0) {
       View = View * TB;

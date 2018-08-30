@@ -1148,6 +1148,8 @@ void set_geometry(eGeometry target) {
       if(gp::param.second && gp::param.second != gp::param.first)
         gp::param.second = 0;
       }
+    if(DUAL && geometry != gArchimedean) 
+      variation = ginf[geometry].default_variation;
     if(geometry == gBinaryTiling) variation = eVariation::pure;
    
     need_reset_geometry = true; 

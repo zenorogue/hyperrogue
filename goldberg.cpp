@@ -627,6 +627,8 @@ namespace hr { namespace gp {
   string operation_name() {
     if(IRREGULAR) 
       return XLAT("irregular");
+    else if(DUAL)
+      return XLAT("dual");
     else if(PURE)
       return XLAT("OFF");
     else if(BITRUNCATED)

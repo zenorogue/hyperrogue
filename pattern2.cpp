@@ -1065,13 +1065,17 @@ namespace patterns {
   }
 
 bool geosupport_chessboard() {
-  return (archimedean && PURE) ? arcm::current.support_chessboard() : (VALENCE % 2 == 0);
+  return 
+    (archimedean && PURE) ? arcm::current.support_chessboard() : 
+    (archimedean && DUAL) ? arcm::current.support_threecolor_bitruncated() :
+    (VALENCE % 2 == 0);
   }
 
 int geosupport_threecolor() {
   if(IRREGULAR) return 0;
   if(archimedean && PURE) return arcm::current.support_threecolor();
   if(archimedean && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
+  if(archimedean && DUAL) return 0; // it sometimes does support threecolor, but it can be obtained in other ways then
   if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
@@ -1086,8 +1090,11 @@ int geosupport_threecolor() {
 int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
+  
+  if(archimedean && DUAL) return false;
+  // it sometimes does support football, but it can be obtained in other ways then
 
-  if(archimedean) return arcm::current.support_football();
+  if(archimedean /* PURE */) return arcm::current.support_football();
 
   if(IRREGULAR) return irr::bitruncations_performed ? 2 : 1;
   
@@ -1225,8 +1232,12 @@ bool kraken_pseudohept(cell *c) {
     return ishept(c);
   else if(IRREGULAR)
     return c->type != 6;
-  else if(archimedean)
+  else if(archimedean && PURE)
     return c->type == isize(arcm::current.triangles[0]);
+  else if(archimedean && BITRUNCATED)
+    return pseudohept(c);
+  else if(archimedean && DUAL)
+    return true;
   else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
@@ -1868,12 +1879,12 @@ namespace patterns {
       return;
       }
     if(archimedean) {
-      if(whichPattern == PAT_COLORING) {
+      if(whichPattern == PAT_COLORING && geosupport_threecolor()) {
         if(subpattern_flags & SPF_FOOTBALL) cgroup = cpFootball;
         else cgroup = cpThree;
         }
-      else if(whichPattern == PAT_CHESS && arcm::current.support_chessboard()) cgroup = cpChess;
-      else if(whichPattern == 0 && (subpattern_flags & SPF_FOOTBALL) && arcm::current.support_football()) cgroup = cpFootball;
+      else if(whichPattern == PAT_CHESS && geosupport_chessboard()) cgroup = cpChess;
+      else if(whichPattern == PAT_TYPES && (subpattern_flags & SPF_FOOTBALL) && geosupport_football()) cgroup = cpFootball;
       return;
       }
     for(int i=0; i<isize(cpatterns); i++)

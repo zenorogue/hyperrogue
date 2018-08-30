@@ -3199,7 +3199,7 @@ namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(NONSTDVAR && !sphere)
+      if(NONSTDVAR && !sphere && !archimedean)
         for(int l=0; l<S7; l++) {
           heptspin hs(cw.at->master, cw.spin);
           hs = hs + l + wstep;

@@ -137,6 +137,7 @@ void addMessage(string s, char spamtype = 0);
 #define IRREGULAR (variation == eVariation::irregular)
 #define PURE (variation == eVariation::pure)
 #define BITRUNCATED (variation == eVariation::bitruncated)
+#define DUAL (variation == eVariation::dual)
 
 #define CHANGED_VARIATION (variation != ginf[geometry].default_variation)
 
@@ -530,7 +531,9 @@ struct cell : gcell {
   // do not add any fields after connection_table (see tailored_alloc)
   };
 
-int heptagon::degree() { if(archimedean) return c7->type; else return S7; }
+namespace arcm { int degree(heptagon *h); }
+
+int heptagon::degree() { if(archimedean) return arcm::degree(this); else return S7; }
 
 typedef walker<heptagon> heptspin;
 typedef walker<cell> cellwalker;

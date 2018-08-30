@@ -423,7 +423,8 @@ struct hrmap_archimedean : hrmap {
   heptagon *getOrigin() { return origin; }
 
   hrmap_archimedean() {
-    int N0 = isize(current.adjacent[0]);
+    int id = DUAL ? current.N * 2 : 0;;
+    int N0 = isize(current.adjacent[id]);
     origin = tailored_alloc<heptagon> (N0);
     origin->s = hsOrigin;
     origin->emeraldval = 0;
@@ -435,9 +436,9 @@ struct hrmap_archimedean : hrmap {
     origin->alt = NULL;
     origin->distance = 0;
 
-    parent_index_of(origin) = 0;
-    id_of(origin) = 0;
-    origin->c7 = newCell(N0, origin);
+    parent_index_of(origin) = DUAL ? 1 : 0;
+    id_of(origin) = id;
+    origin->c7 = newCell(DUAL ? N0/2 : N0, origin);
     
     heptagon *alt = NULL;
     
@@ -458,20 +459,28 @@ struct hrmap_archimedean : hrmap {
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
   
-    if(current.real_faces == 0) {
-      create_adjacent(origin, 0);
+    if(current.real_faces == 0 && DUAL) {
+      heptspin hs(origin, 0);
+      heptagon *hnew = build_child(hs, current.get_adj(hs));
+      for(int s=1; s<2*current.N; s++)
+        origin->c.connect(s, hnew, s, false);
+      }
+    else if(current.real_faces == 0) {
+      create_adjacent(origin, 0); 
+      heptagon *o0 = origin->move(0);
       create_adjacent(origin, 1);
+      heptagon *o1 = origin->move(1);
       for(int s=1; s<2*current.N; s+=2)
-        origin->move(0)->c.connect(s, origin->move(1), 2*current.N-s, false);
+        o0->c.connect(s, o1, 2*current.N-s, false);
       for(int s=2; s<2*current.N; s+=2) {
-        heptspin hs(origin->move(0), s);
+        heptspin hs(o0, s);
         heptagon *hnew = build_child(hs, current.get_adj(hs));
         // no need to specify archimedean_gmatrix and altmap
-        hnew->c.connect(1, heptspin(origin->move(1), 2*current.N-s));
+        hnew->c.connect(1, heptspin(o1, 2*current.N-s));
         }
-      origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
+      o1->c.connect(1, o0, 2*current.N-1, false);
       }
-    else if(origin->c7->type == 2) {
+    else if(origin->degree() == 2) {
       create_adjacent(origin, 0);
       create_adjacent(origin, 1);
       origin->move(0)->c.connect(1, origin->move(1), 2*current.N-1, false);
@@ -508,9 +517,9 @@ heptagon *build_child(heptspin p, pair<int, int> adj) {
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;
   int nei = neighbors_of(h);
-  h->c7 = newCell(nei, h);
+  h->c7 = newCell(DUAL ? nei/2 : nei, h);
   h->distance = p.at->distance + 1;
-  if(adj.first < 2*current.N) {
+  if(adj.first < 2*current.N && !DUAL) {
     int s = 0;
     heptspin hs(p);
     while(id_of(hs.at->move(0)) >= 2 * current.N) {
@@ -607,7 +616,7 @@ void create_adjacent(heptagon *h, int d) {
   
   for(auto& p: altmap[alt]) if(intval(p.second * C0, T * C0) < 1e-4) {
     SDEBUG( printf("cell found: %p\n", p.first); )
-    for(int d2=0; d2<p.first->c7->type; d2++) {
+    for(int d2=0; d2<p.first->degree(); d2++) {
       heptspin hs(p.first, d2);
       auto& t2 = current.get_triangle(p.first, d2);
       transmatrix T1 = T * spin(M_PI + t2.first);
@@ -682,12 +691,13 @@ void draw() {
     int id = id_of(h);
     int S = isize(current.triangles[id]);
 
-    if(BITRUNCATED || id < 2*current.N) {
+    if(id < 2*current.N ? !DUAL : !PURE) {
       if(!dodrawcell(h->c7)) continue;
       drawcell(h->c7, V, 0, false);
       }
 
     for(int i=0; i<S; i++) {
+      if(DUAL && (i&1)) continue;
       h->cmove(i);
       if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
       enqueue(h->move(i), V * adjcell_matrix(h, i));
@@ -701,10 +711,12 @@ transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
     return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
   transmatrix gm = Id, where = Id;
   while(h1 != h2) {
-    for(int i=0; i<neighbors_of(h1); i++) if(h1->move(i) == h2) {
-      return gm * adjcell_matrix(h1, i) * where;
+    for(int i=0; i<neighbors_of(h1); i++) {
+      if(h1->move(i) == h2) {
+        return gm * adjcell_matrix(h1, i) * where;
+        }
       }
-    else if(h1->distance > h2->distance) {
+    if(h1->distance > h2->distance) {
       gm = gm * adjcell_matrix(h1, 0);
       h1 = h1->move(0);
       }
@@ -789,6 +801,7 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-symbol")) {
+    PHASE(2);
     archimedean_tiling at;
     shift(); at.parse(args());
     if(at.errors) {
@@ -801,6 +814,7 @@ int readArgs() {
       }
     }
   else if(argis("-dgeom")) debug_geometry = true;
+  else if(argis("-dual")) { PHASE(2); set_variation(eVariation::dual); }
   else return 1;
   return 0;
   }
@@ -819,7 +833,8 @@ int archimedean_tiling::support_threecolor() {
   }
 
 int archimedean_tiling::support_threecolor_bitruncated() {
-  return N % 2 == 0 ? 2 : 0;
+  for(int i: current.faces) if(i % 2) return 0;
+  return 2;
   }
 
 int archimedean_tiling::support_football() {
@@ -842,6 +857,8 @@ bool pseudohept(int id) {
   }
 
 bool chessvalue(cell *c) {
+  if(DUAL)
+    return c->master->rval1 - 1;
   return c->master->fieldval & 1;
   }
 
@@ -971,10 +988,19 @@ archimedean_tiling edited;
 
 bool symbol_editing;
 
+void next_variation() {
+  set_variation(
+    PURE ? eVariation::dual :
+    DUAL ? eVariation::bitruncated : 
+    eVariation::pure);
+  need_reset_geometry = true;
+  start_game();
+  }
+
 void enable(archimedean_tiling& arct) {
   stop_game();
+  if(!archimedean) set_variation(eVariation::pure);
   set_geometry(gArchimedean);
-  set_variation(eVariation::pure);
   patterns::whichPattern = patterns::PAT_NONE;
 #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)
@@ -985,6 +1011,7 @@ void enable(archimedean_tiling& arct) {
     patterns::whichPattern = patterns::PAT_CHESS;
 #endif
   current = arct;
+  need_reset_geometry = true;
   start_game();
   }
 
@@ -1108,10 +1135,7 @@ void show() {
 
     if(archimedean) {    
       dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');
-      dialog::add_action([] () {
-        set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
-        start_game();
-        });
+      dialog::add_action(next_variation);
       }
     }
 
@@ -1151,8 +1175,8 @@ string archimedean_tiling::world_size() {
     denom = denom / g * f;
     }
   int anom = 0, adenom = 1;
-  if(BITRUNCATED) anom = 1, adenom = 1;
-  for(int f: faces) {
+  if(BITRUNCATED || DUAL) anom = 1, adenom = 1;
+  if(!DUAL) for(int f: faces) {
     int g = gcd(adenom, f);
     anom = (anom * f + adenom) / g;
     adenom = adenom / g * f;
@@ -1172,6 +1196,10 @@ string archimedean_tiling::world_size() {
   return s;
   }
 
+int degree(heptagon *h) {
+  return isize(current.adjacent[id_of(h)]);
+  }
+ 
   }
 
 }
