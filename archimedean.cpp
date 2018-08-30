@@ -800,7 +800,7 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-symbol")) {
-    PHASE(2);
+    PHASEFROM(2);
     archimedean_tiling at;
     shift(); at.parse(args());
     if(at.errors) {
@@ -808,12 +808,13 @@ int readArgs() {
       }
     else {
       set_geometry(gArchimedean);
+      need_reset_geometry = true;
       current = at;
       showstartmenu = false;
       }
     }
   else if(argis("-dgeom")) debug_geometry = true;
-  else if(argis("-dual")) { PHASE(2); set_variation(eVariation::dual); }
+  else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }
   else return 1;
   return 0;
   }
