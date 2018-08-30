@@ -538,6 +538,10 @@ int heptagon::degree() { if(archimedean) return arcm::degree(this); else return 
 typedef walker<heptagon> heptspin;
 typedef walker<cell> cellwalker;
 
+static const struct cth_t { cth_t() {}} cth;
+heptspin operator+ (cellwalker cw, cth_t) { return heptspin(cw.at->master, cw.spin * DUALMUL, cw.mirrored); }
+cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, hs.spin / DUALMUL, hs.mirrored); }
+
 #define BUGCOLORS 3
 
 // land completion for shared unlocking

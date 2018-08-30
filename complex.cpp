@@ -1155,7 +1155,7 @@ namespace mirror {
       heptspin hs1 = hs + i;
       if(lev == 0) {
         if(hs1.at != hs0.at && equal(hs1, hs0, 3)) {
-          createMirror(cellwalker(hs1.at->c7, hs1.spin, hs1.mirrored), cpid);
+          createMirror(hs1 + cth, cpid);
           result++;
           }
         }
@@ -1165,7 +1165,7 @@ namespace mirror {
     }
 
   void create_archimedean(cellwalker cw, int cpid, bool mirrored) {
-    heptspin hs(cw.at->master, cw.spin, cw.mirrored);
+    heptspin hs = cw + cth;
     heptspin hsx = hs;
     if(mirrored) hsx += wmirror;
     if(create_archimedean_rec(hsx, cpid, hs, 2)) return;
@@ -1185,9 +1185,7 @@ namespace mirror {
     
     if(GOLDBERG) {
       for(int i=0; i<cw.at->type; i++) {
-        heptspin hs(cw.at->master, cw.spin, cw.mirrored);
-        hs = hs + i + wstep + i - (gp::param.first == gp::param.second ? 1 : 0);
-        createMirror(cellwalker(hs.at->c7, hs.spin, hs.mirrored), cpid);
+        createMirror(cw + cth + i + wstep + i - (gp::param.first == gp::param.second ? 1 : 0) + cth, cpid);
         }
       return;
       }
@@ -1206,17 +1204,13 @@ namespace mirror {
       }
     if(GOLDBERG && !(S7 & 1)) {
       for(int i=0; i<cw.at->type; i++) {
-        heptspin hs(cw.at->master, cw.spin, cw.mirrored);
-        hs = hs + i + wstep + 1 + wstep + 1 + (S7/2) - i + 1;
-        createMirror(cellwalker(hs.at->c7, hs.spin, hs.mirrored), cpid);
+        createMirror(cw + cth + i + wstep + 1 + wstep + 1 + (S7/2) - i + 1 + cth, cpid);
         }
       return;
       }
     if(GOLDBERG && (S7 & 1)) {
       for(int i=0; i<cw.at->type; i++) {
-        heptspin hs(cw.at->master, cw.spin, cw.mirrored);
-        hs = hs + i + wstep + (S7/2) + wstep - 2 + wstep + (S7/2) - i;
-        createMirror(cellwalker(hs.at->c7, hs.spin, hs.mirrored), cpid);
+        createMirror(cw + cth + i + wstep + (S7/2) + wstep - 2 + wstep + (S7/2) - i + cth, cpid);
         }
       return;
       }
@@ -3201,9 +3195,7 @@ namespace windmap {
       auto &v = neighbors.back();
       if(NONSTDVAR && !sphere && !archimedean)
         for(int l=0; l<S7; l++) {
-          heptspin hs(cw.at->master, cw.spin);
-          hs = hs + l + wstep;
-          v.push_back(getId(cellwalker(hs.at->c7, hs.spin)));
+          v.push_back(getId(cw + cth + l + wstep + cth));
           }
       else
         for(int l=0; l<cw.at->type; l++) v.push_back(getId(cw+l+wstep));

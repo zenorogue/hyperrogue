@@ -1259,7 +1259,7 @@ cdata *getHeptagonCdata(heptagon *h) {
   cdata mydata = *getHeptagonCdata(h->move(0));
 
   for(int di=3; di<5; di++) {
-    heptspin hs; hs.at = h; hs.spin = di;
+    heptspin hs(h, di, false);
     int signum = +1;
     while(true) {
       heptspin hstab[15];

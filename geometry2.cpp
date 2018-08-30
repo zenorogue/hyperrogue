@@ -515,7 +515,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
       return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
       }
     if(BITRUNCATED || DUAL) {
-      int mul = DUAL ? 2 : 1;
+      int mul = DUALMUL;
       auto &ac = arcm::current;
       auto adj = ac.get_adj(c->master, i * mul);
       heptagon h; cell cx; cx.master = &h;

@@ -438,7 +438,7 @@ struct hrmap_archimedean : hrmap {
 
     parent_index_of(origin) = DUAL ? 1 : 0;
     id_of(origin) = id;
-    origin->c7 = newCell(DUAL ? N0/2 : N0, origin);
+    origin->c7 = newCell(N0/DUALMUL, origin);
     
     heptagon *alt = NULL;
     
@@ -517,7 +517,7 @@ heptagon *build_child(heptspin p, pair<int, int> adj) {
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;
   int nei = neighbors_of(h);
-  h->c7 = newCell(DUAL ? nei/2 : nei, h);
+  h->c7 = newCell(nei/DUALMUL, h);
   h->distance = p.at->distance + 1;
   if(adj.first < 2*current.N && !DUAL) {
     int s = 0;
