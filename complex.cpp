@@ -10,6 +10,7 @@ namespace hr {
 namespace whirlwind {
 
   int fzebra3(cell *c) {
+    if(archimedean) return 0;
     if(euclid) {
       if(torus) return 0;
       int x, y;

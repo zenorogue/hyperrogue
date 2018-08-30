@@ -1189,15 +1189,23 @@ land_validity_t& land_validity(eLand l) {
   
   if(IRREGULAR && among(l, laPrairie, laMirror, laMirrorOld))
     return dont_work;
+    
+  if(archimedean && l == laPrairie) return dont_work;
 
-  if(IRREGULAR && among(laBlizzard, laVolcano) && !sphere)
+  if((IRREGULAR || archimedean) && among(l, laBlizzard, laVolcano) && !sphere)
     return dont_work;
 
+  if(archimedean && DUAL && l == laCrossroads4)
+    return not_implemented;
+  
   // equidistant-based lands
   if(isEquidLand(l)) {
     // no equidistants supported in chaos mode
     if(chaosmode) 
       return not_in_chaos;
+    // the algorithm fails in Archimedean DUAL
+    if(archimedean && DUAL)
+      return not_implemented;
     // no equidistants supported in these geometries (big sphere is OK though)
     if(quotient || elliptic || smallsphere || torus) 
       return unbounded_only_except_bigsphere;
@@ -1245,6 +1253,7 @@ land_validity_t& land_validity(eLand l) {
         return special_chaos;
       return not_in_chaos;
       }
+    if(archimedean) return not_implemented;
     if(bounded) return unbounded_only;
     }
   

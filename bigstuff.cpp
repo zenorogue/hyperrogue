@@ -453,7 +453,17 @@ bool checkInTree(cell *c, int maxv) {
   return false;
   }
 
+int loopval = 0;
+
+struct loopchecker {
+  loopchecker() { loopval++; }
+  ~loopchecker() { loopval--; }
+  };
+
 void buildEquidistant(cell *c) {
+  loopchecker lc;
+  // sometimes crashes in Archimedean
+  if(loopval > 100) { c->landparam = 0; return; }
   if(!c) return;
   if(c->landparam) return;
   /* if(weirdhyperbolic) {

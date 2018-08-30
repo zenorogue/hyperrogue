@@ -2611,13 +2611,19 @@ bool drawstaratvec(double dx, double dy) {
   }
 
 int reptilecolor(cell *c) {
-  int i = zebra40(c);
+  int i;
   
-  if(!masterless) {
-    if(i >= 4 && i < 16) i = 0; 
-    else if(i >= 16 && i < 28) i = 1;
-    else if(i >= 28 && i < 40) i = 2;
-    else i = 3;
+  if(archimedean)
+    i = c->master->rval0 & 3;
+  else {
+    int i = zebra40(c);
+    
+    if(!masterless) {
+      if(i >= 4 && i < 16) i = 0; 
+      else if(i >= 16 && i < 28) i = 1;
+      else if(i >= 28 && i < 40) i = 2;
+      else i = 3;
+      }
     }
 
   int fcoltab[4] = {0xe3bb97, 0xc2d1b0, 0xebe5cb, 0xA0A0A0};

@@ -190,7 +190,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(hyperbolic_not37 || torus || S7 < 5) {
+      if(hyperbolic_not37 || torus || S7 < 5 || archimedean) {
         if(d == 9) {
           int i = hrand(100);
           if(i < 10) 
@@ -210,7 +210,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       else {
 
         if(d == 9) {
-          cell *c2 = (GOLDBERG || IRREGULAR) ? c->master->c7 : c;
+          cell *c2 = NONSTDVAR ? c->master->c7 : c;
           if(cdist50(c2) == 3 && polarb50(c2) == 1)
             c->wall = waPalace;
           }
@@ -405,7 +405,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
-        else if(a4)
+        else if(a4 || archimedean)
           c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
         else if(!BITRUNCATED) {
           if(polarb50(c)) 
@@ -550,8 +550,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(y&1) c->wall = waTrapdoor;
           else c->wall = waNone;
           }
+        else 
+          if(archimedean) c->wall = hrand(2) ? waTrapdoor : waNone;
         else
-        c->wall = (randomPatternsMode ? RANDPAT : (zebra40(c)&2)) ? waTrapdoor : waNone;
+          c->wall = (randomPatternsMode ? RANDPAT : (zebra40(c)&2)) ? waTrapdoor : waNone;
         }
       ONEMPTY {
         if(c->wall == waNone && hrand(2500) < PT(100 + 2 * (kills[moOrangeDog]), 300) && notDippingFor(itZebra))
@@ -617,9 +619,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->item = itDodeca;
           }
         else {
-          int i = zebra40(c);
+          int i = archimedean ? hrand(50) : zebra40(c);
           if(i < 40) {
-            int cd = getCdata(c, 3);
+            int cd = hyperbolic_37 ? getCdata(c, 3) : hrand(16);
             cd &= 15;
             if(cd >= 4 && cd < 12) c->wall = waChasm;
             else {
@@ -1109,7 +1111,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 9) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? waNone : waSaloon;
-        else if(cdist50(c) <= 2) c->wall = waSaloon;
+        else if(hyperbolic_37 ? cdist50(c) <= 2 : hrand(100) < 20) c->wall = waSaloon;
         }
       ONEMPTY {
         if(hrand(25000) < 2 + (2 * items[itBounty] + yendor::hardness()) + (items[itRevolver] ? 150:0))
@@ -1129,6 +1131,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(S7 == 4 && celldistance(c, currentmap->gamestart()) == 2 && ctof(c))
             c->wall = waChasm;
           }
+        else if(archimedean) ;
         else if(!euclid && zebra3(c) == 0) c->wall = waFan;
         else if(pseudohept(c) && hrand(2000) < 150 && !reptilecheat)
           c->wall = waChasm;
@@ -2116,7 +2119,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(a38) 
             patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
           else
-            si.id = (zebra40(c)&2) ? 0 : zebra40(c) == 4 ? 8 : 1;
+            si.id = archimedean ? (hrand(6)*4) : (zebra40(c)&2) ? 0 : zebra40(c) == 4 ? 8 : 1;
           c->wall = waSea;
           if(among(si.id, 0, 4, 16, PURE ? -1 : 24))
             c->wall = waDock;
