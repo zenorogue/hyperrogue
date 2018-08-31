@@ -4736,11 +4736,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(hdir1 < hdir0-M_PI) hdir1 += 2 * M_PI;
         if(hdir1 >= hdir0+M_PI) hdir1 -= 2 * M_PI;
         
-        int hdir = (hdir1*ph1+hdir0*(1-ph1));
+        ld hdir = (hdir1*ph1+hdir0*(1-ph1));
  
         transmatrix V0 = spin(hdir);
         
-        double ldist = PURE ? crossf : c->type == 6 ? .2840 : 0.3399;
+        double ldist = 
+          cellgfxdist(c, whirlwind::dfrom[i]) * (1-ph1)/2 + 
+          cellgfxdist(c, whirlwind::dto[i]) * ph1/2; 
+        // PURE ? crossf : c->type == 6 ? .2840 : 0.3399;
  
         poly_outline = OUTLINE_TRANS;
         queuepoly((*Vdp)*V0*xpush(ldist*(2*ph1-1)), shDisk, aircol);
