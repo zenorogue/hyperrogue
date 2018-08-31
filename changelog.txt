@@ -2558,7 +2558,6 @@ non-game:
 - shift+f2 to shift+f4 can now disable HUD, FPS, and the map
 - fixed several instances when PTM score would not be recorded when changing modes
 
-
 2018.07.30 09:22 Update 10.4n
 - Docks and Snake Nest no longer appear in Strange Challenge bounded geometries (SC#21 scores removed)
 - irregular grids (available in 'variations' in geometry experiments -- work in progress)
@@ -2654,3 +2653,27 @@ Bugfixes:
 * another 3666 variant
 * pressing Backspace while the Archimedean symbol is already deleted does nothing instead of leaving the menu
 * Hypersian Rug mode works with Archimedean tilings
+
+2018.08.30 19:17 Update 10.4t
+
+Bugfixes:
+* Camelot a bit more frequent in Crossroads IV
+* fixed Crossroads IV appearing inside Mountain (and probably other horocyclic lands)
+* space message no longer always appears in shmup
+* fixed Orb of the Sword in shmup
+* fixed a graphical issue with water next to chasm (the water tile looked as if it was a floor)
+
+Archimedean tilings/geometry experiments:
+* dual and bitruncated versions
+* new interesting symmetry variants for 3^7
+* fixed some lands in Archimedean tilings
+* an option to enable 'chessboard', 'three colors' and 'football' colorings when available
+* 'faces per vertex' and 'size of the world' now display correct values in all geometries
+* Windy Plains wind bubbles now animate correctly in all geometries
+
+Vector graphics editor:
+* fixed floor editing
+* more detailed pattern selection in Goldberg/irregular/Archimedean tilings, in the graphics/map editor
+* the editor now displays the area of the currently drawn shape
+* fixed angle measurement and grid display (it was supposed to measure angles relative to the previous grid center)
+
