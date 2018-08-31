@@ -2614,7 +2614,7 @@ int reptilecolor(cell *c) {
   if(archimedean)
     i = c->master->rval0 & 3;
   else {
-    int i = zebra40(c);
+    i = zebra40(c);
     
     if(!masterless) {
       if(i >= 4 && i < 16) i = 0; 
