@@ -1095,7 +1095,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !binarytiling && 
-    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && horo_ok() && 
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
