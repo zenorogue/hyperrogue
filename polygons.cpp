@@ -1901,7 +1901,7 @@ void buildpolys() {
   bshape(shCompass3, PPR::ITEMb);
   hpcpush(ddi(0, orbsize * .29) * C0);
   hpcpush(ddi(S21, orbsize * .04) * C0);
-  hpcpush(ddi(-S21, orbsize * 04) * C0);
+  hpcpush(ddi(-S21, orbsize * .04) * C0);
   hpcpush(ddi(0, orbsize * .29) * C0);
   
   bshape(shILeaf[0], PPR::ONTENTACLE);
