@@ -4580,6 +4580,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       // wall between lake and chasm -- no Escher here
       if(chasmg == 1) forCellIdEx(c2, i, c) if(chasmgraph(c2) == 2) {
+        dynamicval<qfloorinfo> qfib(qfi, qfi);
+        set_floor(shFullFloor);
         placeSidewall(c, i, SIDE_LAKE, V, 0x202030FF);
         placeSidewall(c, i, SIDE_LTOB, V, 0x181820FF);
         placeSidewall(c, i, SIDE_BTOI, V, 0x101010FF);
