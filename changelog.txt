@@ -2662,6 +2662,7 @@ Bugfixes:
 * space message no longer always appears in shmup
 * fixed Orb of the Sword in shmup
 * fixed a graphical issue with water next to chasm (the water tile looked as if it was a floor)
+* fixed the camera in Mountain
 
 Archimedean tilings/geometry experiments:
 * dual and bitruncated versions
