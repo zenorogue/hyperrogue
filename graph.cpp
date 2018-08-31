@@ -574,7 +574,11 @@ bool drawstar(cell *c) {
   }
 
 bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
+#if CAP_EDIT
   return c && c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == sg;
+#else
+  return false;
+#endif
   }
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {
@@ -3772,8 +3776,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     int flooralpha = 255;
 
+#if CAP_EDIT
     if((cmode & sm::DRAW) && mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgFloor)
       flooralpha = 0xC0;
+#endif
 
     if(c->wall == waMagma) fd = 0;
     
@@ -3800,14 +3806,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
       // floor
       
-#if CAP_EDIT
-      auto si = patterns::getpatterninfo0(c);
-#endif
-        
       bool eoh = euclid || !BITRUNCATED;
 
+#if CAP_EDIT
+      auto si = patterns::getpatterninfo0(c);
       if(drawing_usershape_on(c, mapeditor::sgFloor))
         mapeditor::drawtrans = V * applyPatterndir(c, si);
+#endif
         
       if(c->wall == waChasm) {
         zcol = 0;
