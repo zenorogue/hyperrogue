@@ -2654,7 +2654,7 @@ Bugfixes:
 * pressing Backspace while the Archimedean symbol is already deleted does nothing instead of leaving the menu
 * Hypersian Rug mode works with Archimedean tilings
 
-2018.08.30 19:17 Update 10.4t
+2018.08.31 19:27 Update 10.4t
 
 Bugfixes:
 * Camelot a bit more frequent in Crossroads IV

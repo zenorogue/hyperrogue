@@ -1034,6 +1034,15 @@ void enable(archimedean_tiling& arct) {
   start_game();
   }
 
+function<void()> setcanvas(char c) {
+  return [c] () {
+    stop_game();
+    firstland = specialland = laCanvas;
+    patterns::whichCanvas = c;
+    start_game();
+    };
+  };
+
 void show() {
   if(lastsample < isize(samples)) {
     string s = samples[lastsample].first;
@@ -1133,15 +1142,6 @@ void show() {
       spos -= 10;
       if(spos < 0) spos = 0;
       });
-    
-    auto setcanvas = [] (char c) {
-      return [c] () {
-        stop_game();
-        firstland = specialland = laCanvas;
-        patterns::whichCanvas = c;
-        start_game();
-        };
-      };
     
     if(archimedean) {
       dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
