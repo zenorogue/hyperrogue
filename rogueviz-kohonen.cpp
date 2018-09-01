@@ -237,7 +237,7 @@ void distribute_neurons() {
     w.drawn_samples++;
     }
   
-  ld rad = .25 * scalef;
+  ld rad = .25 * scalefactor;
   
   for(auto p: sample_vdata_id) {
     int id = p.second;
