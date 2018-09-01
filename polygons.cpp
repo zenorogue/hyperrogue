@@ -1127,7 +1127,7 @@ void drawqueue() {
   
 #else
   
-  int PMAX = int(PPR::MAX);
+  constexpr int PMAX = int(PPR::MAX);
   int qp[PMAX], qp0[PMAX];
   for(int a=0; a<PMAX; a++) qp[a] = 0;
   
