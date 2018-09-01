@@ -485,7 +485,7 @@ struct hrmap_archimedean : hrmap {
     base_distlimit = 0;
     celllister cl(origin->c7, 1000, 200, NULL);
     base_distlimit = cl.dists.back();
-    if(sphere) base_distlimit = 15;
+    if(sphere) base_distlimit = SEE_ALL;
     }
 
   ~hrmap_archimedean() {
