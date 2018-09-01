@@ -401,7 +401,7 @@ void bantar_frame() {
   
   map<int, map<int, vector<polytodraw>>> xptds;
   for(int i=0; i<4; i++) for(auto& p: subscr[i])
-    xptds[p.prio][i].push_back(p);
+    xptds[int(p.prio)][i].push_back(p);
   
   for(auto& sm: xptds) for(auto& sm2: sm.second) {
     int i = sm2.first;
