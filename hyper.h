@@ -538,8 +538,8 @@ typedef walker<heptagon> heptspin;
 typedef walker<cell> cellwalker;
 
 static const struct cth_t { cth_t() {}} cth;
-heptspin operator+ (cellwalker cw, cth_t) { return heptspin(cw.at->master, cw.spin * DUALMUL, cw.mirrored); }
-cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, hs.spin / DUALMUL, hs.mirrored); }
+inline heptspin operator+ (cellwalker cw, cth_t) { return heptspin(cw.at->master, cw.spin * DUALMUL, cw.mirrored); }
+inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, hs.spin / DUALMUL, hs.mirrored); }
 
 #define BUGCOLORS 3
 
@@ -1862,9 +1862,9 @@ enum class PPR {
   DEFAULT = -1
   };
 
-PPR operator + (PPR x, int y) { return PPR(int(x) + y); }
-PPR operator - (PPR x, int y) { return PPR(int(x) - y); }
-int operator - (PPR x, PPR y) { return int(x) - int(y); }
+inline PPR operator + (PPR x, int y) { return PPR(int(x) + y); }
+inline PPR operator - (PPR x, int y) { return PPR(int(x) - y); }
+inline int operator - (PPR x, PPR y) { return int(x) - int(y); }
 
 namespace mapeditor {
   bool drawUserShape(const transmatrix& V, eShapegroup group, int id, int color, cell *c, PPR prio = PPR::DEFAULT);
