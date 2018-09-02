@@ -145,16 +145,18 @@ void initweb() {
   if(showstartmenu) pushScreen(showDemo);
   }
 
+#if CAP_ORIENTATION
 transmatrix getOrientation() {
   ld alpha, beta, gamma;
   alpha = EM_ASM_DOUBLE({ return rotation_alpha; });
   beta = EM_ASM_DOUBLE({ return rotation_beta; });
   gamma = EM_ASM_DOUBLE({ return rotation_gamma; });
   return 
-    rotmatrix(0, 1, alpha * M_PI / 180) *
-    rotmatrix(1, 2, beta * M_PI / 180) *
-    rotmatrix(0, 2, gamma * M_PI / 180);
+    rotmatrix(alpha * M_PI / 180, 0, 1) *
+    rotmatrix(beta * M_PI / 180, 1, 2) *
+    rotmatrix(gamma * M_PI / 180, 0, 2);
   }
+#endif
 
 void emscripten_get_commandline() {
 #ifdef EMSCRIPTEN_FIXED_ARG
