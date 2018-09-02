@@ -1512,6 +1512,8 @@ void actDraw() {
     renderlate--;
     prepareTexture();
     }
+  // do not display button
+  else playerfound = true;
   stereo::set_viewport(0);
   physics();
   drawRugScene();
