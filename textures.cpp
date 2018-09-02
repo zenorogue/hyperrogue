@@ -81,7 +81,6 @@ bool texture_data::loadTextureGL() {
   
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, twidth, 0,
     ISWEB ? GL_RGBA : GL_BGRA, GL_UNSIGNED_BYTE, 
-    GL_BGRA, GL_UNSIGNED_BYTE, 
     &texture_pixels[0] );
 
   if(ISWEB) for(auto& p: texture_pixels) swap(part(p, 0), part(p, 2));
