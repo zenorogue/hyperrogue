@@ -282,7 +282,7 @@ struct gcell {
   eItem item;
   eLand barleft, barright;
   bool ligon;
-  unsigned char pathdist, cpdist, mpdist;
+  signed char pathdist, cpdist, mpdist;
   
   unsigned char mondir, bardir, stuntime, hitpoints;
   unsigned char landflags;
