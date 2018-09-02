@@ -2292,6 +2292,18 @@ int read_pattern_args() {
     shift(); linepatterns::patterns[id].color = arghex();
     }
 
+  else if(argis("-noplayer")) mapeditor::drawplayer = !mapeditor::drawplayer;
+  else if(argis("-canvas")) {
+    PHASEFROM(2);
+    stop_game();
+    firstland = specialland = laCanvas;
+    shift();
+    if(args() == "i") canvas_invisible = !canvas_invisible;
+    else if(args().size() == 1) patterns::whichCanvas = args()[0];
+    else patterns::canvasback = arghex();
+    stop_game_and_switch_mode(rg::nothing);
+    }
+
   else return 1;
   return 0;
   }

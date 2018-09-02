@@ -1869,17 +1869,6 @@ int read_editor_args() {
   else if(argis("-pic")) { shift(); picfile = args(); }
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
-  else if(argis("-noplayer")) mapeditor::drawplayer = !mapeditor::drawplayer;
-  else if(argis("-canvas")) {
-    PHASEFROM(2);
-    stop_game();
-    firstland = specialland = laCanvas;
-    shift();
-    if(args() == "i") canvas_invisible = !canvas_invisible;
-    else if(args().size() == 1) patterns::whichCanvas = args()[0];
-    else patterns::canvasback = arghex();
-    stop_game_and_switch_mode(rg::nothing);
-    }
   else return 1;
   return 0;
   }
