@@ -286,7 +286,7 @@ namespace collatz {
     virtualRebase(vd.m, true);
     vd.cp = perturb(dftcolor);
     vd.data = 0;
-    addedge(0, 0, 0, false, collatz::collatz1);
+    addedge(0, 0, 1, false, collatz::collatz1);
     vd.name = "1";
     storeall();
     }
@@ -1121,7 +1121,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       
       if(kind == kSAG) {
         if(ei->weight2 > maxweight) maxweight = ei->weight2;
-        ld gamma = log(alpha / 256) / log(.5);
+        ld gamma = log(alpha / 255.) / log(.5);
         alpha = int(pow(ei->weight2 / maxweight, gamma) * 255);
         }
       if(hilite || hiliteclick) alpha = (alpha + 256) / 2;
@@ -1254,7 +1254,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       virtualRebase(vdn.m, true);
       vdn.cp = perturb(cp);
       vdn.data = 0;
-      addedge(i, i0, 0, false, collatz::collatz1);
+      addedge(i, i0, 1, false, collatz::collatz1);
       vdn.m->store();
       int carry = 0;
       string s2 = s;
@@ -1277,7 +1277,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         virtualRebase(vdn.m, true);
         vdn.cp = perturb(cp);
         vdn.data = 0;
-        addedge(i, i0+1, 0, false, collatz::collatz2);
+        addedge(i, i0+1, 1, false, collatz::collatz2);
         vdn.m->store();
         int carry = -1;
         string s2 = s;
