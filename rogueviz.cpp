@@ -2022,6 +2022,23 @@ slide rvslides[] = {
           }
         }
       }},
+    {"Pentagonal Exploration", 62, LEGAL_NONE | QUICKGEO,
+     "Pentagonal Exploration explained at: http://www.roguetemple.com/z/sims/snub/\n\n"
+     "Move the mouse nearer and further away from the X.\n\n"
+     "Press 3 4 5 6 7 8 9 shift+4 shift+5 shift+6 to change the geometry.",
+     
+    [] (presmode mode) {
+      if(mode == 1) {
+        pentagonal::run_snub(5, 3);
+        }
+      if(mode == 3) {
+        printf("stopping\n");
+        set_geometry(gNormal);
+        set_variation(eVariation::bitruncated);
+        rug::close();
+        start_game();
+        }
+      }},
   {"THE END", 99, LEGAL_ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
@@ -2118,4 +2135,5 @@ auto hooks  =
 #include "rogueviz-staircase.cpp"
 #include "rogueviz-banachtarski.cpp"
 #include "rogueviz-video.cpp"
+#include "rogueviz-pentagonal.cpp"
 

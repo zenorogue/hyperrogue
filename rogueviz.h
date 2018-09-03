@@ -96,5 +96,9 @@ namespace rogueviz {
     extern bool bmap;
     extern void init_bantar_map();
     }
+  
+  namespace pentagonal {
+    void run_snub(int v, int w);
+    }
 }
 
