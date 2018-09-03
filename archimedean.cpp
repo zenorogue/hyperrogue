@@ -10,68 +10,6 @@ static const int sfCHESS = 4;
 static const int sfTHREE = 8;
 static const int sfSEMILINE = 16;
 
-struct archimedean_tiling {
-
-  int coloring;
-
-  string symbol;
-  
-  vector<int> faces;
-  vector<int> adj;
-  vector<bool> invert;
-  vector<int> nflags;
-
-  bool have_ph, have_line, have_symmetry;
-  int real_faces;
-  int real_face_type;
-
-  int repetition;
-  int N;
-
-  ld euclidean_angle_sum;
-
-  vector<int> flags;
-
-  vector<vector<pair<int, int>>> adjacent;
-  vector<vector<pair<ld, ld>>> triangles;
-  
-  void make_match(int a, int i, int b, int j);
-  void prepare();
-  void compute_geometry();
-  
-  void parse();
-  void parse(string s) { symbol = s; parse(); }
-
-  ld edgelength;
-  
-  vector<ld> inradius, circumradius, alphas;
-  
-  int matches[30][30];
-  int periods[30];
-  int tilegroup[30], groupoffset[30], tilegroups;
-
-  int errors;
-  string errormsg;
-
-  pair<int, int>& get_adj(heptagon *h, int cid);
-  pair<int, int>& get_adj(heptspin hs) { return get_adj(hs.at, hs.spin); }
-  pair<ld, ld>& get_triangle(heptagon *h, int cid);
-  pair<ld, ld>& get_triangle(heptspin hs) { return get_triangle(hs.at, hs.spin); }
-  pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
-  pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
-
-  int support_threecolor();
-  int support_threecolor_bitruncated();
-  int support_football();
-  bool support_chessboard();
-  void regroup();
-  string world_size();
-  
-  eGeometryClass get_class();
-  
-  ld scale();
-  };
-
 archimedean_tiling current;
 
 // id of vertex in the archimedean tiling
