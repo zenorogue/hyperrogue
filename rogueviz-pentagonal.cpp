@@ -241,8 +241,8 @@ void create_model() {
       testplane[2] = tester * tria[(i+1)%5];
       hyperpoint f = facingdir(testplane);
       // printf("%lf ", f[0]);
-      if(f[0] > -1e-6 || isnan(f[0])) good1++;
-      if(f[0] < +1e-6 || isnan(f[0])) good2++;
+      if(f[0] > -1e-6 || std::isnan(f[0])) good1++;
+      if(f[0] < +1e-6 || std::isnan(f[0])) good2++;
       }
     // printf("\n");
     if(good1 == 5 || good2 == 5) {ctr = h; break; }
