@@ -1097,8 +1097,12 @@ void initgraph() {
   vid.xscr = vid.xres = inf->current_w;
   vid.yscr = vid.yres = inf->current_h;
 #endif
-  
+
+#ifdef CUSTOM_CAPTION  
+  SDL_WM_SetCaption(CUSTOM_CAPTION, CUSTOM_CAPTION);
+#else
   SDL_WM_SetCaption("HyperRogue " VER, "HyperRogue " VER);
+#endif
 #endif
   
   preparesort();
