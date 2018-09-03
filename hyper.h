@@ -1225,6 +1225,7 @@ extern eGeometry gwhere;
 extern bool no_fog;
 extern ld lowrug, hirug, ruggospeed;
 extern GLuint alternate_texture;
+extern bool invert_depth;
 #endif
   }
 

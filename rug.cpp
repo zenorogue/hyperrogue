@@ -1264,6 +1264,8 @@ ld lowrug = 1e-2, hirug = 1e3;
 
 GLuint alternate_texture;
 
+bool invert_depth;
+
 void drawRugScene() {
   glbuf->use_as_texture();
   if(alternate_texture)
@@ -1274,16 +1276,16 @@ void drawRugScene() {
   else
     glhr::colorClear(backcolor << 8 | 0xFF);
 #ifdef GLES_ONLY
-  glClearDepthf(1.0f);
+  glClearDepthf(invert_depth ? -1.0f : 1.0f);
 #else
-  glClearDepth(1.0f);
+  glClearDepth(invert_depth ? -1.0f : 1.0f);
 #endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
   glhr::switch_mode(glhr::gmLightFog);
   glhr::set_depthtest(true);
-  glDepthFunc(GL_LESS);
+  glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
   
   for(int ed=stereo::active() && stereo::mode != stereo::sODS ? -1 : 0; ed < 2; ed += 2) {
     use_precompute = false;
