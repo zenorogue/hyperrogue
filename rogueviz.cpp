@@ -1875,7 +1875,7 @@ slide rvslides[] = {
          setColor(patPalace, 0xFFD50000);
         }
       },
-  {"Collatz conjecture", 51, LEGAL_UNLIMITED,
+  {"Collatz conjecture", 51, LEGAL_UNLIMITED | QUICKGEO,
     "The following slide is a visualization of the Collatz conjecture. "
     "Press '5' for a spiral rendering of the Collatz conjecture visualization.\n\n"
     "Note that this, and many other RogueViz visualizations, have "
@@ -1901,7 +1901,7 @@ slide rvslides[] = {
       })
     },
 
-  {"Roguelikes", 63, LEGAL_UNLIMITED,
+  {"Roguelikes", 63, LEGAL_UNLIMITED | QUICKGEO,
     "A visualization of roguelikes, based on discussion on /r/reddit. "
     "See: http://www.roguetemple.com/z/hyper/reddit.php",
     roguevizslide('0', [] () {
@@ -1922,7 +1922,7 @@ slide rvslides[] = {
       rogueviz::sag::loadsnake(RVPATH "roguelikes/" + cname());
       })    
     },
-  {"Programming languages of GitHub", 64, LEGAL_UNLIMITED,
+  {"Programming languages of GitHub", 64, LEGAL_UNLIMITED | QUICKGEO,
     "A visualization of programming languages.",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
@@ -1943,7 +1943,7 @@ slide rvslides[] = {
       if(euclid) rogueviz::legend.clear();
       })
     },
-    {"Boardgames", 62, LEGAL_UNLIMITED,
+    {"Boardgames", 62, LEGAL_UNLIMITED | QUICKGEO,
         "A visualization of board games, based on discussions on Reddit.",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
@@ -1963,7 +1963,7 @@ slide rvslides[] = {
       rogueviz::sag::loadsnake(RVPATH "boardgames/" + cname());
       })
         },
-    {"Tree of Life", 61, LEGAL_UNLIMITED,
+    {"Tree of Life", 61, LEGAL_UNLIMITED | QUICKGEO,
       "Not described.",
 
     roguevizslide('0', [] () {
@@ -1979,7 +1979,7 @@ slide rvslides[] = {
 
       rogueviz::tree::read(RVPATH "treeoflife/tol.txt");
       })},
-    {"Spiral Staircase", 62, LEGAL_NONE,
+    {"Spiral Staircase", 62, LEGAL_NONE | QUICKGEO,
      "Spiral Staircase Demo. Press '5' to change the curvature or other parameters.",
      
     [] (presmode mode) {
@@ -2036,13 +2036,14 @@ int rvtour_hooks =
 #if CAP_TOUR
     dialog::addBreak(100);
     dialog::addBigItem(XLAT("RogueViz"), 'r');
-    dialog::addInfo(XLAT("see the visualizations"));
-#endif
     dialog::add_action([] () {
       tour::slides = rogueviz::rvtour::rvslides;
       popScreenAll();
       tour::start();
+      printf("tour start\n");
       });
+    dialog::addInfo(XLAT("see the visualizations"));
+#endif
     }) +
   addHook(hooks_slide, 100, [] (int mode) {
     if(currentslide == 0 && slides == default_slides) {
