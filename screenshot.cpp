@@ -15,13 +15,13 @@ namespace svg {
   FILE *f;
   bool in = false;
   
-  ld cta(int col) {
+  ld cta(color_t col) {
     // col >>= 24;
     col &= 0xFF;
     return col / 255.0;
     }
   
-  bool invisible(int col) { return (col & 0xFF) == 0; }
+  bool invisible(color_t col) { return (col & 0xFF) == 0; }
   
   ld gamma = .5;
   
@@ -71,7 +71,7 @@ namespace svg {
     return buf;
     }
   
-  void circle(int x, int y, int size, int col) {
+  void circle(int x, int y, int size, color_t col) {
     int ba = (backcolor << 8) + 0xFF;
     if(!invisible(col)) {
       if(vid.stretch == 1)
@@ -83,19 +83,19 @@ namespace svg {
       }
     }
   
-  const string *link;
+  string link;
   
   void startstring() {
-    if(link) fprintf(f, "<a xlink:href=\"%s\" xlink:show=\"replace\">", link->c_str());
+    if(link != "") fprintf(f, "<a xlink:href=\"%s\" xlink:show=\"replace\">", link.c_str());
     }
 
   void stopstring() {
-    if(link) fprintf(f, "</a>");
+    if(link != "") fprintf(f, "</a>");
     }
 
   string font = "Times";
   
-  void text(int x, int y, int size, const string& str, bool frame, int col, int align) {
+  void text(int x, int y, int size, const string& str, bool frame, color_t col, int align) {
 
     double dfc = (x - vid.xcenter) * (x - vid.xcenter) + 
       (y - vid.ycenter) * (y - vid.ycenter);
@@ -136,7 +136,7 @@ namespace svg {
       }
     }
   
-  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double linewidth) {
+  void polygon(int *polyx, int *polyy, int polyi, color_t col, int outline, double linewidth) {
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
@@ -297,7 +297,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     if(fade < 255) 
       for(int y=0; y<vid.yres; y++)
       for(int x=0; x<vid.xres; x++) {
-        int& p = qpixel(s, x, y);
+        color_t& p = qpixel(s, x, y);
         for(int i=0; i<3; i++) {
           part(p,i) = (part(p,i) * fade + 127) / 255;
           }

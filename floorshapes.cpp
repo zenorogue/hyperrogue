@@ -608,7 +608,7 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.usershape = -1;
   }
 
-void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, PPR prio = PPR::DEFAULT) {
+void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
   if(!c) queuepolyat(V, shv[0], col, prio);
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);
@@ -640,11 +640,11 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
     queuepolyat(V, shv[ctof(c)], col, prio);
   }
 
-void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, int col, PPR prio = PPR::DEFAULT) {
+void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio = PPR::DEFAULT) {
   draw_shapevec(c, V, fsh.b, col, prio);
   }
 
-void draw_qfi(cell *c, const transmatrix& V, int col, PPR prio = PPR::DEFAULT, vector<hpcshape> floorshape::* tab = &floorshape::b) {
+void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio = PPR::DEFAULT, vector<hpcshape> floorshape::* tab = &floorshape::b) {
   if(qfi.shape)
     queuepolyat(V * qfi.spin, *qfi.shape, col, prio);
   else if(qfi.usershape >= 0) {
@@ -653,10 +653,9 @@ void draw_qfi(cell *c, const transmatrix& V, int col, PPR prio = PPR::DEFAULT, v
   else if(!qfi.fshape) ;
 #if CAP_TEXTURE
   else if(qfi.tinf) {
-    queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == PPR::DEFAULT ? PPR::FLOOR : prio);
-    lastptd().u.poly.tinf = qfi.tinf;
-    if(true) 
-      lastptd().u.poly.flags = POLY_INVERSE;
+    auto& poly = queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == PPR::DEFAULT ? PPR::FLOOR : prio);
+    poly.tinf = qfi.tinf;
+    poly.flags = POLY_INVERSE;
     }
 #endif
   else draw_shapevec(c, V, (qfi.fshape->*tab), col, prio);

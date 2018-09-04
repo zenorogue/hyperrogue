@@ -288,11 +288,6 @@ ld alphaof(hyperpoint h) {
   return atan2(h[1], h[0]);
   }
 
-struct bantar_special {
-  polytodraw *actual;
-  ld xpos, ypos;
-  };
-
 #define ForInfos for(auto& cci: infos) 
 
 void bantar_frame() {
@@ -308,7 +303,7 @@ void bantar_frame() {
   calcparam();
   stereo::set_projection(0);
   
-  vector<polytodraw> subscr[4];
+  vector<unique_ptr<drawqueueitem>> subscr[4];
   
   compute_graphical_distance();
 
@@ -399,14 +394,14 @@ void bantar_frame() {
     subscr[i] = move(ptds);
     }
   
-  map<int, map<int, vector<polytodraw>>> xptds;
+  map<int, map<int, vector<unique_ptr<drawqueueitem>>>> xptds;
   for(int i=0; i<4; i++) for(auto& p: subscr[i])
-    xptds[int(p.prio)][i].push_back(p);
+    xptds[int(p->prio)][i].push_back(move(p));
   
   for(auto& sm: xptds) for(auto& sm2: sm.second) {
     int i = sm2.first;
     ptds.clear();
-    for(auto& p: sm2.second) ptds.push_back(p);
+    for(auto& p: sm2.second) ptds.push_back(move(p));
 
     vid.scale = .5;
     vid.xposition = (!(i&2)) ? xdst : -xdst;

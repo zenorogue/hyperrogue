@@ -1056,14 +1056,14 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
-    if(info) queuelink(info, PPR::MONSTER_HEAD);
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
     queuepolyat(V1 = mscale(V, geom3::BODY), sh, cp.color1, PPR::MONSTER_HEAD);
-    if(info) queuelink(NULL, PPR::MONSTER_HEAD);
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
     }
   else {
-    if(info) queuelink(info, sh.prio);
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
     queuepoly(V1 = V, sh, cp.color1);
-    if(info) queuelink(NULL, sh.prio);
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
     }
   if(cp.shade == 't') queuepoly(V1, shDiskT, cp.color2);
   if(cp.shade == 's') queuepoly(V1, shDiskS, cp.color2);
@@ -1116,7 +1116,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
       
-      int col = ei->type->color;
+      color_t col = ei->type->color;
       auto& alpha = part(col, 0);
       
       if(kind == kSAG) {
@@ -1173,14 +1173,12 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           hyperpoint l1 = T*tC0(spiral::at(1+ei->i));
           for(int z=1; z<=prec; z++) {
             hyperpoint l2 = T*tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
-            queueline(l1, l2, col, vid.linequality);
+            queueline(l1, l2, col, vid.linequality).prio = PPR::STRUCT0;
             l1 = l2;
-            lastptd().prio = PPR::STRUCT0;
             }
           }
         else {
-          queueline(h1, h2, col, 2 + vid.linequality);
-          lastptd().prio = PPR::STRUCT0;
+          queueline(h1, h2, col, 2 + vid.linequality).prio = PPR::STRUCT0;
           }
         }
       else {
@@ -1233,9 +1231,10 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     hyperpoint h = tC0(V * m->at);
     transmatrix V2 = rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
-      if(vd.info) queuelink(vd.info, PPR::TEXT);
+      auto info = vd.info;
+      if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
-      if(vd.info) queuelink(NULL, PPR::TEXT);
+      if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
       }
     }
 

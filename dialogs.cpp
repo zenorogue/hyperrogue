@@ -48,11 +48,11 @@ namespace dialog {
     
     void stopzoom() { zoomoff = true; }
 
-    bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
+    bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
       return hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
       }
   
-    bool displayfr_highlight(int x, int y, int b, int size, const string &s, int color, int align, int hicolor) {
+    bool displayfr_highlight(int x, int y, int b, int size, const string &s, color_t color, int align, int hicolor) {
       bool clicked = hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
       if(clicked) hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, hicolor, align);
       return clicked;
@@ -174,7 +174,7 @@ namespace dialog {
     items.push_back(it);
     }
 
-  void addInfo(string body, int color) {
+  void addInfo(string body, color_t color) {
     item it;
     it.type = diInfo;
     it.body = body;
@@ -218,7 +218,7 @@ namespace dialog {
     return items.size()-1;
     }
   
-  void addTitle(string body, int color, int scale) {
+  void addTitle(string body, color_t color, int scale) {
     item it;
     it.type = diTitle;
     it.body = body;
@@ -227,7 +227,7 @@ namespace dialog {
     items.push_back(it);
     }
 
-  void init(string title, int color, int scale, int brk) { 
+  void init(string title, color_t color, int scale, int brk) { 
     init();
     addTitle(title, color, scale);
     addBreak(brk);
@@ -456,17 +456,17 @@ namespace dialog {
       }
     }
 
-  unsigned int colorhistory[10] = {
+  color_t colorhistory[10] = {
     0x202020FF, 0x800000FF, 0x008000FF, 0x000080FF, 
     0x404040FF, 0xC0C0C0FF, 0x804000FF, 0xC0C000FF,
     0x408040FF, 0xFFD500FF
     }, lch;
   
-  unsigned int *palette;
+  color_t *palette;
   
   int colorp = 0;
   
-  unsigned int *colorPointer;
+  color_t *colorPointer;
   
   bool handleKeyColor(int sym, int uni) {
     unsigned& color = *colorPointer;
@@ -524,7 +524,7 @@ namespace dialog {
       dcenter = vid.xres - dwidth / 2;
       }
 
-    int color = *colorPointer;
+    color_t color = *colorPointer;
     
     int ash = 8;
     
@@ -554,7 +554,7 @@ namespace dialog {
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
       
-      int col = ((i==colorp) && !mousing) ? 0xFFD500 : forecolor;
+      color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : forecolor;
 
       displayColorButton(dcenter - dwidth/4, y, "(", 0, 16, 0, col);
       string rgt = ") "; rgt += "ABGR" [i];

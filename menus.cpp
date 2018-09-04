@@ -73,7 +73,7 @@ void showOverview() {
     eLand l = landlist[lstart + i];
     int xr = vid.xres / 64;
     int i0 = 56 + vid.fsize + i * vf;
-    int col;
+    color_t col;
     if(landUnlocked(l)) col = linf[l].color; else col = 0x404040;
     if(l == curland)
       displayfrZ(1, i0, 1, vf-4, "*", forecolor, 0);

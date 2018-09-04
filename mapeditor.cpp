@@ -898,7 +898,7 @@ namespace mapeditor {
       
   int dslayer;
   bool coloring;
-  unsigned int colortouse = 0xC0C0C0FFu;
+  color_t colortouse = 0xC0C0C0FFu;
   // fake key sent to change the color
   static const int COLORKEY = (-10000); 
 
@@ -1180,20 +1180,20 @@ namespace mapeditor {
     initShape(sg, id);
     
     for(int i=0; i<isize(ptds); i++) { 
-      auto& ptd = ptds[i];
-      if(ptd.kind != pkPoly) continue;
+      auto pp = dynamic_cast<dqi_poly*> (&*ptds[i]);
+      if(!pp) continue;
+      auto& ptd = *pp;
       
-      auto& p = ptd.u.poly;
-      int cnt = p.cnt;
+      int cnt = ptd.cnt;
       
       usershapelayer *dsCur = &usershapes[sg][id]->d[layer];
       dsCur->list.clear();
-      dsCur->color = ptd.col;
+      dsCur->color = ptd.color;
       dsCur->sym = false;
       dsCur->rots = 1;
       
       for(auto& v: symmetriesAt)
-        if(v[0] == p.offset) {
+        if(v[0] == ptd.offset) {
           dsCur->rots = v[1];
           dsCur->sym = v[2] == 2;
           }
@@ -1201,7 +1201,7 @@ namespace mapeditor {
       int d = dsCur->rots * (dsCur->sym ? 2 : 1);
       
       for(int i=0; i < cnt/d; i++)
-        dsCur->list.push_back(p.V * glhr::gltopoint((*p.tab)[i+p.offset]));
+        dsCur->list.push_back(ptd.V * glhr::gltopoint((*ptd.tab)[i+ptd.offset]));
       
       layer++;      
       if(layer == USERLAYERS) break;
@@ -1699,7 +1699,7 @@ namespace mapeditor {
   #endif
     }
 
-  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, int color, cell *c, PPR prio) {
+  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio) {
   #if !CAP_EDIT
     return false;
   #else

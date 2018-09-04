@@ -163,7 +163,7 @@ bool graphglyph() {
   return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
   }
 
-bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty, int flags, int id) {
+bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int qty, int flags, int id) {
     
   bool b =
     mousex >= cx && mousex < cx+buttonsize && mousey >= cy-buttonsize/2 && mousey <= cy-buttonsize/2+buttonsize;
@@ -244,7 +244,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
 void displayglyph2(int cx, int cy, int buttonsize, int i) {
       
   char glyph = i < ittypes ? iinf[i].glyph : minf[i-ittypes].glyph;
-  int color = i < ittypes ? iinf[i].color : minf[i-ittypes].color;
+  color_t color = i < ittypes ? iinf[i].color : minf[i-ittypes].color;
   int imp = glyphflags(i);
 
   if(displayglyph(cx, cy, buttonsize, glyph, color, ikmerge(i), imp, i)) {
@@ -310,12 +310,12 @@ void drawMobileArrow(int i) {
   transmatrix T;
   if(!compute_relamatrix(c, cwt.at, i, T)) return;
 
-  // int col = getcs().uicolor;
+  // color_t col = getcs().uicolor;
   // col -= (col & 0xFF) >> 1;
   
   bool invalid = !legalmoves[dir];
   
-  int col = cellcolor(c);
+  color_t col = cellcolor(c);
   if(col == OUTLINE_NONE) col = 0xC0C0C0FF;
   col -= (col & 0xFF) >> 1;
   if(invalid) col -= (col & 0xFF) >> 1;

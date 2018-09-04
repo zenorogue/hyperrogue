@@ -65,24 +65,16 @@ TTF_Font *font[256];
 #if CAP_SDL
 SDL_Surface *s, *s_screen;
 
-int qpixel_pixel_outside;
+color_t qpixel_pixel_outside;
 
-int& qpixel(SDL_Surface *surf, int x, int y) {
+color_t& qpixel(SDL_Surface *surf, int x, int y) {
   if(x<0 || y<0 || x >= surf->w || y >= surf->h) return qpixel_pixel_outside;
   char *p = (char*) surf->pixels;
   p += y * surf->pitch;
-  int *pi = (int*) (p);
+  color_t *pi = (color_t*) (p);
   return pi[x];
   }
 
-int qpixel3(SDL_Surface *surf, int x, int y) {
-  if(x<0 || y<0 || x >= surf->w || y >= surf->h) return qpixel_pixel_outside;
-  char *p = (char*) surf->pixels;
-  p += y * surf->pitch;
-  p += x;
-  int *pi = (int*) (p);
-  return pi[0];
-  }
 #endif
 
 #if CAP_SDLTTF
@@ -266,7 +258,7 @@ bool model_needs_depth() {
   return pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere;
   }
 
-void setGLProjection(int col) {
+void setGLProjection(color_t col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
   GLERR("pre_setGLProjection");
 
@@ -499,7 +491,7 @@ namespace glhr { void texture_vertices(GLfloat *f, int qty, int stride = 2) {
 GLfloat otver[24];
 vector<glhr::textured_vertex> tver(4);
 
-bool gl_print(int x, int y, int shift, int size, const char *s, int color, int align) {
+bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, int align) {
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
 
@@ -594,7 +586,7 @@ void gdpush(int t) {
   graphdata.push_back(t);
   }
 
-bool displaychr(int x, int y, int shift, int size, char chr, int col) {
+bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
   gdpush(2); gdpush(x); gdpush(y); gdpush(8);
   gdpush(col); gdpush(size); gdpush(0);
   gdpush(1); gdpush(chr); 
@@ -621,7 +613,7 @@ void gdpush_utf8(const string& s) {
   graphdata[g] = q;
   }
 
-bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
+bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
   gdpush(2); gdpush(x); gdpush(y); gdpush(align);
   gdpush(color); gdpush(size); gdpush(b);
   gdpush_utf8(s);
@@ -633,16 +625,16 @@ bool displayfr(int x, int y, int b, int size, const string &s, int color, int al
     my >= -size*3/4 && my <= +size*3/4;
   }
 
-bool displaystr(int x, int y, int shift, int size, const string &s, int color, int align) {
+bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
   return displayfr(x,y,0,size,s,color,align);
   }
 
-bool displaystr(int x, int y, int shift, int size, char const *s, int color, int align) {
+bool displaystr(int x, int y, int shift, int size, char const *s, color_t color, int align) {
   return displayfr(x,y,0,size,s,color,align);
   }
 
 #else
-bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align) {
+bool displaystr(int x, int y, int shift, int size, const char *str, color_t color, int align) {
 
   if(strlen(str) == 0) return false;
 
@@ -687,7 +679,7 @@ bool displaystr(int x, int y, int shift, int size, const char *str, int color, i
     SDL_Surface* txt2 = SDL_DisplayFormat(txt);
     SDL_LockSurface(txt2);
     SDL_LockSurface(s);
-    int c0 = qpixel(txt2, 0, 0);
+    color_t c0 = qpixel(txt2, 0, 0);
     for(int yy=0; yy<rect.h; yy++)
     for(int xx=0; xx<rect.w; xx++) if(qpixel(txt2, xx, yy) != c0)
       qpixel(s, rect.x+xx-shift, rect.y+yy) |= color & 0xFF0000,
@@ -705,11 +697,11 @@ bool displaystr(int x, int y, int shift, int size, const char *str, int color, i
 #endif
   }
                   
-bool displaystr(int x, int y, int shift, int size, const string &s, int color, int align) {
+bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
   return displaystr(x, y, shift, size, s.c_str(), color, align);
   }
 
-bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, int color, int align, int p) {
+bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t color, int align, int p) {
   if(b) {
     displaystr(x-b, y, 0, size, s, p, align);
     displaystr(x+b, y, 0, size, s, p, align);
@@ -726,11 +718,11 @@ bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, int col
   return displaystr(x, y, 0, size, s, color, align);
   }
 
-bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
+bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
   return displayfrSP(x, y, 0, b, size, s, color, align, poly_outline>>8);
   }
 
-bool displaychr(int x, int y, int shift, int size, char chr, int col) {
+bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
 
   char buf[2];
   buf[0] = chr; buf[1] = 0;
@@ -738,7 +730,7 @@ bool displaychr(int x, int y, int shift, int size, char chr, int col) {
   }
 #endif
 
-bool displaynum(int x, int y, int shift, int size, int col, int val, string title) {
+bool displaynum(int x, int y, int shift, int size, color_t col, int val, string title) {
   char buf[64];
   sprintf(buf, "%d", val);
   bool b1 = displayfr(x-8, y, 1, size, buf, col, 16);
@@ -803,7 +795,7 @@ void addMessage(string s, char spamtype) {
   addMessageToLog(m, msgs);
   }
 
-int colormix(int a, int b, int c) {
+color_t colormix(color_t a, color_t b, color_t c) {
   for(int p=0; p<3; p++)
     part(a, p) = part(a,p) + (part(b,p) - part(a,p)) * part(c,p) / 255;
   return a;
@@ -825,7 +817,7 @@ ld realradius() {
   return vradius;
   }
 
-void drawmessage(const string& s, int& y, int col) {
+void drawmessage(const string& s, int& y, color_t col) {
   int rrad = (int) realradius();
   int space;
   if(y > vid.ycenter + rrad * vid.stretch)
@@ -879,7 +871,7 @@ void drawmessages() {
     for(int j=isize(msgs)-1; j>=0; j--) {
       int age = msgs[j].flashout * (t - msgs[j].stamp);
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
-      int col = gradient(forecolor, backcolor, 0, age, 256*vid.flashtime);
+      color_t col = gradient(forecolor, backcolor, 0, age, 256*vid.flashtime);
       drawmessage(fullmsg(msgs[j]), y, col);
       }
     }
@@ -894,19 +886,18 @@ void drawmessages() {
     }
   }
 
-int gradient(int c0, int c1, ld v0, ld v, ld v1) {
+color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   int vv = int(256 * ((v-v0) / (v1-v0)));
-  int c = 0;
+  color_t c = 0;
   for(int a=0; a<3; a++) {
-    int p0 = (c0 >> (8*a)) & 255;
-    int p1 = (c1 >> (8*a)) & 255;
-    int p = (p0*(256-vv) + p1*vv + 127) >> 8;
-    c |= p << (8*a);
+    int p0 = part(c0, a);
+    int p1 = part(c1, a);
+    part(c, a) = (p0*(256-vv) + p1*vv + 127) >> 8;
     }
   return c;
   }
 
-void drawCircle(int x, int y, int size, int color) {
+void drawCircle(int x, int y, int size, color_t color) {
   if(size < 0) size = -size;
   #if CAP_GL
   if(vid.usingGL) {
@@ -961,7 +952,7 @@ void displaymm(char c, int x, int y, int rad, int size, const string& title, int
     }
   }  
 
-bool displayButtonS(int x, int y, const string& name, int col, int align, int size) {
+bool displayButtonS(int x, int y, const string& name, color_t col, int align, int size) {
   if(displaystr(x, y, 0, size, name, col, align)) {
     displaystr(x, y, 0, size, name, 0xFFFF00, align);
     return true;
@@ -969,7 +960,7 @@ bool displayButtonS(int x, int y, const string& name, int col, int align, int si
   else return false;
   }
 
-void displayColorButton(int x, int y, const string& name, int key, int align, int rad, int color, int color2) {
+void displayColorButton(int x, int y, const string& name, int key, int align, int rad, color_t color, color_t color2) {
   if(displayfr(x, y, rad, vid.fsize, name, color, align)) {
     if(color2) displayfr(x, y, rad, vid.fsize, name, color2, align);
     getcstat = key;

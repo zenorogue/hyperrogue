@@ -49,7 +49,7 @@ template<class T, class U> void scale_colorarray(int origdim, int targetdim, con
   
   while(tx < targetdim) {
     int fv = min(omissing, tmissing);
-    int c = src(ox);
+    color_t c = src(ox);
     for(int p=0; p<4; p++) 
       partials[p] += part(c, p) * fv;
     omissing -= fv; tmissing -= fv;
@@ -57,7 +57,7 @@ template<class T, class U> void scale_colorarray(int origdim, int targetdim, con
       ox++; omissing = targetdim; 
       }
     if(tmissing == 0) {
-      int target;
+      color_t target;
       for(int p=0; p<4; p++) {
         part(target, p) = partials[p] / origdim;
         partials[p] = 0;
@@ -151,7 +151,7 @@ bool texture_data::readtexture(string tn) {
   // read png
   vector<png_bytep> row_pointers(ty);
 
-  vector<int> origpixels(ty * tx);
+  vector<color_t> origpixels(ty * tx);
 
   for(int y = 0; y < ty; y++) 
     row_pointers[y] = (png_bytep) & origpixels[y * tx];
@@ -163,7 +163,7 @@ bool texture_data::readtexture(string tn) {
     swap(part(origpixels[i], 0), part(origpixels[i], 2));
     
   auto pix = [&] (int x, int y) { 
-    if(x<0 || y<0 || x >= tx || y >= ty) return 0;
+    if(x<0 || y<0 || x >= tx || y >= ty) return (color_t) 0;
     return origpixels[y*tx + x];
     };
   
@@ -316,7 +316,7 @@ void texture_config::mapTexture2(textureinfo& mi) {
     mapTextureTriangle(mi, t.v, t.tv);
   }
   
-int texture_config::recolor(int col) {
+int texture_config::recolor(color_t col) {
   if(color_alpha == 0) return col;
   for(int i=1; i<4; i++)
     part(col, i) = color_alpha + ((255-color_alpha) * part(col,i) + 127) / 255;
@@ -329,15 +329,15 @@ bool using_aura() {
   return texture_aura && config.tstate == texture::tsActive;
   }
 
-bool texture_config::apply(cell *c, const transmatrix &V, int col) {
+bool texture_config::apply(cell *c, const transmatrix &V, color_t col) {
   if(config.tstate == tsOff || !correctly_mapped) return false;
 
   using namespace patterns;
   auto si = getpatterninfo0(c);
 
   if(config.tstate == tsAdjusting) {
+    dynamicval<color_t> d(poly_outline, slave_color);
     draw_floorshape(c, V, shFullFloor, 0, PPR::LINE);
-    lastptd().u.poly.outline = slave_color;
     
     curvepoint(V * C0);
     for(int i=0; i<c->type; i++) 
@@ -354,8 +354,8 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     qfi.spin = applyPatterndir(c, si);
 
     if(grid_color) {
+      dynamicval<color_t> d(poly_outline, grid_color);
       draw_floorshape(c, V, shFullFloor, 0, PPR::FLOOR);
-      lastptd().u.poly.outline = grid_color;
       }
       
     if(using_aura()) {
@@ -472,8 +472,8 @@ void texture_config::finish_mapping() {
 
 void texture_config::saveFullTexture(string tn) {
   addMessage(XLAT("Saving full texture to %1...", tn));
-  dynamicval<unsigned> dd(grid_color, 0);
-  dynamicval<unsigned> dm(mesh_color, 0);
+  dynamicval<color_t> dd(grid_color, 0);
+  dynamicval<color_t> dm(mesh_color, 0);
   dynamicval<ld> dx(vid.xposition, 0);
   dynamicval<ld> dy(vid.yposition, 0);
   dynamicval<ld> dvs(vid.scale, (pmodel == mdDisk && !euclid) ? 1 : vid.scale);
@@ -1339,7 +1339,7 @@ void texture_data::undoLock() {
   undos.emplace_back(nullptr, 1);
   }
 
-void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int col, int lev) {
+void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, color_t col, int lev) {
   
   int d2 = texture_distance(p[0], p[1]), d1 = texture_distance(p[0], p[2]), d0 = texture_distance(p[1], p[2]);
   
@@ -1363,7 +1363,7 @@ void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int c
   filltriangle(make_array(v[c], v[b], v3), make_array(p[c], p[b], p3), col, lev+1);
   }
 
-void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hyperpoint, 2>& h, const array<point, 2>& p, int col, int lev) {
+void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hyperpoint, 2>& h, const array<point, 2>& p, color_t col, int lev) {
   ld newangle = (angles[0] + angles[1]) / 2;
   hyperpoint nh = A * xspinpush0(newangle, penwidth);
   auto np = ptc(nh);
@@ -1377,7 +1377,7 @@ void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hype
     }
   }
 
-void fillcircle(hyperpoint h, int col) {
+void fillcircle(hyperpoint h, color_t col) {
   transmatrix A = rgpushxto0(h);
   
   ld step = M_PI * 2/3;
@@ -1396,7 +1396,7 @@ void fillcircle(hyperpoint h, int col) {
 
 bool texturesym = false;
 
-void actDrawPixel(cell *c, hyperpoint h, int col) {
+void actDrawPixel(cell *c, hyperpoint h, color_t col) {
   try {
     transmatrix M = gmatrix.at(c);
     auto si = patterns::getpatterninfo0(c);
@@ -1411,13 +1411,13 @@ void actDrawPixel(cell *c, hyperpoint h, int col) {
   catch(out_of_range&) {}
   }
   
-void drawPixel(cell *c, hyperpoint h, int col) {
+void drawPixel(cell *c, hyperpoint h, color_t col) {
   config.data.pixels_to_draw.emplace_back(c, h, col);
   }
 
 cell *where;
 
-void drawPixel(hyperpoint h, int col) {
+void drawPixel(hyperpoint h, color_t col) {
   try {
     again:
     transmatrix g0 = gmatrix[where];
@@ -1439,7 +1439,7 @@ void drawPixel(hyperpoint h, int col) {
   catch(out_of_range&) {}
   }
 
-void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
+void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps) {
   if(steps > 0 && hdist(h1, h2) > penwidth / 3) {
     hyperpoint h3 = mid(h1, h2);
     drawLine(h1, h3, col, steps-1);

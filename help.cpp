@@ -177,7 +177,7 @@ string princedesc() {
     return XLAT("Apparently a princess is kept locked somewhere, but you won't ever find her in this hyperbolic palace. ");
   }
 
-string helptitle(string s, int col) {
+string helptitle(string s, color_t col) {
   return "@" + its(col) + "\t" + s + "\n";
   }
 

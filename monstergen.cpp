@@ -674,9 +674,9 @@ void wandering() {
     }
   }
 
-void generateSnake(cell *c, int i, int color) {
+void generateSnake(cell *c, int i, int snakecolor) {
   c->monst = moHexSnake;
-  c->hitpoints = color;
+  c->hitpoints = snakecolor;
   int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->move(i)));
   preventbarriers(c);
   int len = BITRUNCATED ? ROCKSNAKELENGTH : 2;
@@ -691,7 +691,7 @@ void generateSnake(cell *c, int i, int color) {
     cell *c3 = c2->move(i);
     if(c3->monst || c3->bardir != NODIR || c3->wall) break;
     c2 = c3;
-    c2->monst = moHexSnakeTail; c2->hitpoints = color;
+    c2->monst = moHexSnakeTail; c2->hitpoints = snakecolor;
     i = (j + (c2->type%4 == 0 ? c2->type/2 : (len%2 ? 2 : c2->type - 2))) % c2->type;
     createMov(c2, i);
     if(!inpair(c2->move(i), cpair)) {

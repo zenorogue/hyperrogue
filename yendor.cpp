@@ -702,7 +702,7 @@ namespace tactic {
       eLand l = landlist[i1];
 
       int i0 = 56 + i * vf;
-      int col;
+      color_t col;
       
       int ch = chances(l);
 

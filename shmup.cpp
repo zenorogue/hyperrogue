@@ -3202,7 +3202,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
         break;
       case moBullet: {
-        int col;
+        color_t col;
         cpid = m->pid;
         if(m->parenttype == moPlayer)
           col = getcs().swordcolor;
@@ -3249,7 +3249,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
       default:
         if(m->inBoat) m->footphase = 0;
-        int col = minf[m->type].color;
+        color_t col = minf[m->type].color;
         if(m->type == moMimic) 
           col = mirrorcolor(det(view) < 0);
         if(m->type == moSlime) {

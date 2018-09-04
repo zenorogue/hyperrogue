@@ -1,10 +1,12 @@
 namespace hr {
 
+typedef unsigned color_t;
+
 static const int motypes = 162;
 
 struct monstertype {
   char  glyph;
-  int   color;
+  color_t color;
   const char *name;
   const char *help;
   };
@@ -77,7 +79,7 @@ static const int ittypes = 130;
 
 struct itemtype {
   char  glyph;
-  int   color;
+  color_t color;
   const char *name;
   const char *help;
   };
@@ -126,7 +128,7 @@ static const int walltypes = 109;
 
 struct walltype {
   char  glyph;
-  int   color;
+  color_t color;
   const char *name;
   const char *help;
   };
@@ -169,7 +171,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
 static const int landtypes = 85;
 
 struct landtype {
-  int color;
+  color_t color;
   const char *name;
   const char *help;
   };

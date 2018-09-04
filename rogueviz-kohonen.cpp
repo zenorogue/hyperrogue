@@ -6,7 +6,7 @@
 
 namespace rogueviz { namespace kohonen {
 
-int cols;
+int columns;
 
 typedef vector<double> kohvec;
 
@@ -28,7 +28,7 @@ struct neuron {
   cell *where;
   double udist;
   int lpbak;
-  int col;
+  color_t col;
   int allsamples, drawn_samples, csample, bestsample, max_group_here;
   neuron() { drawn_samples = allsamples = bestsample = 0; max_group_here = max_group; }
   };
@@ -41,7 +41,7 @@ vector<neuron> net;
 
 int neuronId(neuron& n) { return &n - &(net[0]); }
 
-void alloc(kohvec& k) { k.resize(cols); }
+void alloc(kohvec& k) { k.resize(columns); }
 
 bool neurons_indexed = false;
 
@@ -53,7 +53,7 @@ vector<neuron*> whowon;
 
 void normalize() {
   alloc(weights);
-  for(int k=0; k<cols; k++) {
+  for(int k=0; k<columns; k++) {
     double sum = 0, sqsum = 0;
     for(sample& s: data)
       sum += s.val[k],
@@ -65,7 +65,7 @@ void normalize() {
 
 double vnorm(kohvec& a, kohvec& b) {
   double diff = 0;
-  for(int k=0; k<cols; k++) diff += sqr((a[k]-b[k]) * weights[k]);
+  for(int k=0; k<columns; k++) diff += sqr((a[k]-b[k]) * weights[k]);
   return diff;
   }
 
@@ -82,7 +82,7 @@ void loadsamples(const string& fname) {
     fprintf(stderr, "Could not load samples: %s\n", fname.c_str());
     return;
     }
-  if(fscanf(f, "%d", &cols) != 1) { 
+  if(fscanf(f, "%d", &columns) != 1) { 
     printf("Bad format: %s\n", fname.c_str());
     fclose(f); return; 
     }
@@ -92,7 +92,7 @@ void loadsamples(const string& fname) {
     bool shown = false;
     alloc(s.val);
     if(feof(f)) break;
-    for(int i=0; i<cols; i++)
+    for(int i=0; i<columns; i++)
       if(fscanf(f, "%lf", &s.val[i]) != 1) { goto bigbreak; }
     fgetc(f);
     while(true) {
@@ -109,8 +109,8 @@ void loadsamples(const string& fname) {
   fclose(f);
   samples = isize(data);
   normalize();
-  colnames.resize(cols);
-  for(int i=0; i<cols; i++) colnames[i] = "Column " + its(i);
+  colnames.resize(columns);
+  for(int i=0; i<columns; i++) colnames[i] = "Column " + its(i);
   uninit(0); sominit(1);
   }
                   
@@ -184,8 +184,9 @@ void coloring() {
           }
         }
 
-      for(int i=0; i<cells; i++) 
-        part(net[i].where->landparam, pid) = part(vdata[net[i].bestsample].cp.color1, pid+1);
+      for(int i=0; i<cells; i++) {
+        part(net[i].where->landparam_color, pid) = part(vdata[net[i].bestsample].cp.color1, pid+1);
+        }
       }
 
     else {
@@ -220,7 +221,7 @@ void coloring() {
       if(maxl-minl < 1e-3) maxl = minl+1e-3;
       
       for(int i=0; i<cells; i++) 
-        part(net[i].where->landparam, pid) = (255 * (listing[i] - minl)) / (maxl - minl);
+        part(net[i].where->landparam_color, pid) = (255 * (listing[i] - minl)) / (maxl - minl);
       }
     }
   }
@@ -534,7 +535,7 @@ void step() {
 //  nu *= exp(-t*(double)maxdist/perdist);
 //  nu *= exp(-t/t2);
     nu *= exp(-sqr(d/sigma));
-    for(int k=0; k<cols; k++)
+    for(int k=0; k<columns; k++)
       n2.net[k] += nu * (irisdata[id][k] - n2.net[k]);
     } */
     
@@ -555,7 +556,7 @@ void step() {
     else
       nu *= *(it++);
 
-    for(int k=0; k<cols; k++)
+    for(int k=0; k<columns; k++)
       n2->net[k] += nu * (data[id].val[k] - n2->net[k]);
     }
   
@@ -659,7 +660,7 @@ void sominit(int initto) {
       net[i].where->land = laCanvas;
       alloc(net[i].net);
   
-      for(int k=0; k<cols; k++)
+      for(int k=0; k<columns; k++)
       for(int z=0; z<initdiv; z++)
         net[i].net[k] += data[hrand(samples)].val[k] / initdiv;
       }
@@ -720,7 +721,7 @@ void describe_cell(cell *c) {
   neuron *n = getNeuronSlow(c);
   if(!n) return;
   help += "cell number: " + its(neuronId(*n)) + " (" + its(n->allsamples) + ")\n";
-  help += "parameters:"; for(int k=0; k<cols; k++) help += " " + fts(n->net[k]); 
+  help += "parameters:"; for(int k=0; k<columns; k++) help += " " + fts(n->net[k]); 
   help += ", u-matrix = " + fts(n->udist);
   help += "\n";
   vector<pair<double, int>> v;
@@ -731,7 +732,7 @@ void describe_cell(cell *c) {
   for(int i=0; i<isize(v) && i<20; i++) {
     int s = v[i].second;
     help += "sample "+its(s)+":"; 
-    for(int k=0; k<cols; k++) help += " " + fts(data[s].val[k]); 
+    for(int k=0; k<columns; k++) help += " " + fts(data[s].val[k]); 
     help += " "; help += data[s].name; help += "\n";
     }
   }
@@ -740,7 +741,7 @@ namespace levelline {
 
   struct levelline {
     int column, qty;
-    unsigned int color;
+    color_t color;
     vector<double> values;
     bool modified;
     };
@@ -751,7 +752,7 @@ namespace levelline {
   
   void create() {
     int xlalpha = part(default_edgetype.color, 0);
-    for(int i=0; i<cols; i++) {
+    for(int i=0; i<columns; i++) {
       levellines.emplace_back();
       levelline& lv = levellines.back();
       lv.column = i;    
@@ -874,7 +875,7 @@ void ksave(const string& fname) {
     }
   fprintf(f, "%d %d\n", cells, t);
   for(neuron& n: net) {
-    for(int k=0; k<cols; k++)
+    for(int k=0; k<columns; k++)
       fprintf(f, "%.9lf ", n.net[k]);
     fprintf(f, "\n");
     }
@@ -899,7 +900,7 @@ void kload(const string& fname) {
     exit(1);
     }
   for(neuron& n: net) {
-    for(int k=0; k<cols; k++) if(fscanf(f, "%lf", &n.net[k]) != 1) return;
+    for(int k=0; k<columns; k++) if(fscanf(f, "%lf", &n.net[k]) != 1) return;
     }
   fclose(f);
   analyze();
@@ -913,7 +914,7 @@ void ksavew(const string& fname) {
     return;
     }
   printf("Saving the network to %s...\n", fname.c_str());
-  for(int i=0; i<cols; i++)
+  for(int i=0; i<columns; i++)
     fprintf(f, "%s=%.9lf\n", colnames[i].c_str(), weights[i]);
   fclose(f);
   }
@@ -925,7 +926,7 @@ void kloadw(const string& fname) {
     fprintf(stderr, "Could not load the weights\n");
     return;
     }
-  for(int i=0; i<cols; i++) {
+  for(int i=0; i<columns; i++) {
     string s1, s2;
     char kind = 0;
     while(true) {
@@ -1122,12 +1123,12 @@ void klistsamples(const string& fname_samples, bool best, bool colorformat) {
           fprintf(f, "%s;+#%d\n", data[id].name.c_str(), neu);
           }
         else {
-          for(int k=0; k<cols; k++)
+          for(int k=0; k<columns; k++)
             fprintf(f, "%.4lf ", data[id].val[k]);
           fprintf(f, "!%s\n", data[id].name.c_str());
           }
         };
-      if(!colorformat) fprintf(f, "%d\n", cols);
+      if(!colorformat) fprintf(f, "%d\n", columns);
       if(best)
         for(int n=0; n<cells; n++) {
           if(!net[n].allsamples && !net[n].drawn_samples) { if(!colorformat) fprintf(f, "\n"); continue; }
@@ -1188,7 +1189,7 @@ bool handleMenu(int sym, int uni) {
   if(uni >= '1' && uni <= '3') {
     int i = uni - '1';
     whattodraw[i]++;
-    if(whattodraw[i] == cols) whattodraw[i] = -5;
+    if(whattodraw[i] == columns) whattodraw[i] = -5;
     coloring();
     return true;
     }

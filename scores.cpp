@@ -202,7 +202,7 @@ void show() {
       for(int i=0; i<POSSCORE; i++) S.box[i] = savebox[i];
       S.box[0] = S.box[65];
       }
-    int col = cur ? 0xFFD500 : 0xC0C0C0;
+    color_t col = cur ? 0xFFD500 : 0xC0C0C0;
     
 
     rank++;

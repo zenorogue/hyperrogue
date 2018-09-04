@@ -32,9 +32,9 @@ namespace rogueviz {
     };
   
   struct colorpair {
-    int color1, color2;
+    color_t color1, color2;
     char shade;
-    colorpair(int col = 0xC0C0C0FF) { shade = 0; color1 = col; }
+    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = col; }
     };
   
   struct vertexdata {

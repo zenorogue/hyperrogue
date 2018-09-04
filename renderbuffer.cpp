@@ -184,7 +184,7 @@ renderbuffer::~renderbuffer() {
 #endif
   }
 
-void renderbuffer::clear(int col) {
+void renderbuffer::clear(color_t col) {
   #if CAP_GL
   if(FramebufferName) {
     setGLProjection(0);

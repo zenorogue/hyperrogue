@@ -544,7 +544,7 @@ namespace hr { namespace inv {
         eLand pl = getPrizeLand();
         eOrbLandRelation olr = getOLR(which, pl);
         
-        int col = 0;
+        color_t col = 0;
         const char *fmsg = NULL;
         if(olr == olrDangerous) 
           col = 0xC00000,

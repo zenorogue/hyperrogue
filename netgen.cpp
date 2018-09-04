@@ -213,13 +213,13 @@ namespace hr { namespace netgen {
   // Simple graphical functions
   //============================
   
-  void blackline(vec v1, vec v2, int col = 0x000000FF) {
+  void blackline(vec v1, vec v2, color_t col = 0x000000FF) {
 #if CAP_SDLGFX==1
     aalineColor(s, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
 #endif
     }
   
-  void drawtriangle(vec v1, vec v2, vec v3, int col) {
+  void drawtriangle(vec v1, vec v2, vec v3, color_t col) {
 #if CAP_SDLGFX==1
     polyx[0] = int(v1.x);
     polyx[1] = int(v2.x);
@@ -231,7 +231,7 @@ namespace hr { namespace netgen {
 #endif
     }
     
-  void blackcircle(vec v, int r, int col = 0x000000FF) {
+  void blackcircle(vec v, int r, color_t col = 0x000000FF) {
 #if CAP_SDLGFX
     aacircleColor(s, int(v.x), int(v.y), r, col);
 #endif
@@ -257,7 +257,7 @@ namespace hr { namespace netgen {
   
   SDL_Surface *net, *hqsurface;
   
-  int& hqpixel(hyperpoint h) {
+  color_t& hqpixel(hyperpoint h) {
     int hx, hy, hs;
     getcoord0(h, hx, hy, hs);
     return qpixel(hqsurface, hx, hy);
@@ -388,7 +388,7 @@ namespace hr { namespace netgen {
                 "!@#$%^&*+=~:;<>?/|\"., [{(\\]})" [(pateks++) % 85];
             }
           
-          int col = 0xFFFFFFFF;
+          color_t col = 0xFFFFFFFF;
           int p = patek[i][e];
           col -= 0x8000 * (p&1); p /= 2;
           col -= 0x800000 * (p&1); p /= 2;
@@ -520,7 +520,7 @@ namespace hr { namespace netgen {
           if(i == bei && e == bee) cedist = norm(v3-mousepos);
           }
 
-        int col = 
+        color_t col = 
           i == bei && e == bee ? 0x40FF40FF:
           i == nei[bei][bee] && nei[i][e] == bei ? 0x40FF40FF :
           nei[i][e] == glued[i] ? 0x303030FF :
@@ -640,7 +640,7 @@ namespace hr { namespace netgen {
         int t = ct[i];
         int ofs = t == 7 ? 0 : 5;
         for(int e=0; e<t; e++) {
-          int col = 
+          color_t col = 
             nei[i][e] == glued[i] && glued[i] >= 0 ? 0x303030 :
             nei[i][e] >= 0 && glued[nei[i][e]] == i ? 0x303030 :
             nei[i][e] >= 0 ? 0x808080 : 

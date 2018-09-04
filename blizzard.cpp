@@ -135,7 +135,7 @@ void drawBlizzards() {
       } */
 
     forCellIdEx(c2, i, bc.c) if(bc.c == mouseover || c2 == mouseover) {
-      int col = 0x00C00080;
+      color_t col = 0x00C00080;
       if(c2 == mouseover)
         col ^= 0xC0C00000;
       if(isPlayerOn(c2))

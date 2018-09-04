@@ -300,7 +300,7 @@ void id_modelview() {
 
 #endif
 
-void color2(int color, ld part) {
+void color2(color_t color, ld part) {
   unsigned char *c = (unsigned char*) (&color);
   GLfloat cols[4];
   for(int i=0; i<4; i++) cols[i] = c[3-i] / 255.0 * part;
@@ -312,7 +312,7 @@ void color2(int color, ld part) {
   #endif
   }
 
-void colorClear(int color) {
+void colorClear(color_t color) {
   unsigned char *c = (unsigned char*) (&color);
   glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
   }

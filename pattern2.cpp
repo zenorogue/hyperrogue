@@ -1327,12 +1327,12 @@ namespace patterns {
     if(whichCanvas == 'r')
       return hrand(0xFFFFFF + 1);
     if(whichCanvas == 'e') {
-      static unsigned int fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
+      static color_t fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
       int fv = emeraldval(c);
       return fcol[fv&3];
       }
     if(whichCanvas == 'a') {
-      static unsigned int fcol8[8] = { 
+      static color_t fcol8[8] = { 
         0x800000,
         0x503000,
         0x206000,
@@ -1344,32 +1344,32 @@ namespace patterns {
         };
         
       if(c->wall == waNone) {
-        int col = fcol8[land50(c)];
+        color_t col = fcol8[land50(c)];
         if(polara50(c)) col += 0x181818;
         return col;
         }
       }
     if(whichCanvas == 'b') {
-      static unsigned int fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
+      static color_t fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
       return fcol[polara50(c) + 2 * polarb50(c)];
       }
     if(whichCanvas == 'z') {
-      static unsigned int fcol[4] = { 0xC0C0C0, 0xE0E0E0, 0x404040, 0x606060 };
+      static color_t fcol[4] = { 0xC0C0C0, 0xE0E0E0, 0x404040, 0x606060 };
       int fv = zebra40(c);
       return fcol[fv&3];
       }
     if(whichCanvas == 't') {
-      static unsigned int fcol[4] = { 0x804040, 0x408040, 0x404080, 0x808040 };
+      static color_t fcol[4] = { 0x804040, 0x408040, 0x404080, 0x808040 };
       int fv = zebra40(c);
       if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
       return fcol[fv&3];
       }
     if(whichCanvas == 'x') {
-      static unsigned int fcol[4] = { 0xC0C0C0, 0x800000, 0x008000, 0x000080 };
+      static color_t fcol[4] = { 0xC0C0C0, 0x800000, 0x008000, 0x000080 };
       return fcol[zebra3(c)];
       }
     if(whichCanvas == 'w') {
-      static unsigned int fcol[2] = { 0x303030, 0xC0C0C0 };
+      static color_t fcol[2] = { 0x303030, 0xC0C0C0 };
       return fcol[randpattern(c, subcanvas) ? 1 : 0];
       }
     if(whichCanvas == 'l') {
@@ -1935,16 +1935,16 @@ bool is_master(cell *c) {
 
 namespace linepatterns {
 
-  int lessalpha(int col, int m) {
+  color_t lessalpha(color_t col, int m) {
     part(col, 0) /= m;
     return col;
     }
   
-  int lessalphaif(int col, bool b) {
+  color_t lessalphaif(color_t col, bool b) {
     return b?lessalpha(col, 4):col;
     }
     
-  int lessalphaif(int col, bool b1, bool b2) {
+  color_t lessalphaif(color_t col, bool b1, bool b2) {
     if(b1) col = lessalpha(col, 2);
     if(b2) col = lessalpha(col, 2);
     return col;
@@ -1953,7 +1953,7 @@ namespace linepatterns {
   struct {
     int id;
     const char *lpname;
-    unsigned int color;
+    color_t color;
     } patterns[] = {
 
     {patTriNet, "triangle grid: not rings", 0xFFFFFF00},
@@ -1987,17 +1987,17 @@ namespace linepatterns {
     return false;
     }
 
-  void setColor(ePattern id, int col) {
+  void setColor(ePattern id, color_t col) {
     for(int k=0; patterns[k].lpname; k++)
       if(patterns[k].id == id) patterns[k].color = col;
     }
   
-  void switchAlpha(ePattern id, int col) {
+  void switchAlpha(ePattern id, color_t col) {
     for(int k=0; patterns[k].lpname; k++)
       if(patterns[k].id == id) patterns[k].color ^= col;
     }
   
-  void queuelinef(const hyperpoint& h1, const hyperpoint& h2, int col, int par) {
+  void queuelinef(const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) {
     if(!elliptic)
       queueline(h1, h2, col, par);
     else {
@@ -2012,7 +2012,7 @@ namespace linepatterns {
       }
     }
   
-  void drawPattern(int id, int col, cell *c, const transmatrix& V) {
+  void drawPattern(int id, color_t col, cell *c, const transmatrix& V) {
 
     switch(id) {
 
@@ -2212,7 +2212,7 @@ namespace linepatterns {
       transmatrix& V = it->second;
       
       for(int k=0; patterns[k].lpname; k++) {
-        int col = patterns[k].color;
+        color_t col = patterns[k].color;
         if(!(col & 255)) continue;
         int id = patterns[k].id;
         

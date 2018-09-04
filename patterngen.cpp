@@ -14,7 +14,7 @@ int style = 3;
 struct state50 {
   bool polarity1;
   bool polarity2;
-  int color, color2, wc2;
+  color_t color, color2, wc2;
   };
 
 void progress(cell *c, state50 s);
@@ -173,7 +173,7 @@ void patternFiftyAt(cell *c) {
   int sgn = s.polarity2 ? 1 : -1;
   int sgn1 = s.polarity1 ? 1 : -1;
 
-  int col2 = s.color2, sw = s.wc2;
+  color_t col2 = s.color2, sw = s.wc2;
   
   while(col2 != 7-s.color) {
     sw += (s.polarity1?1:-1); sw %= 7;

@@ -44,6 +44,7 @@ using std::out_of_range;
 using std::get;
 using std::move;
 using std::make_tuple;
+using std::unique_ptr;
 
 using std::abs;
 using std::isfinite;
@@ -299,6 +300,7 @@ struct gcell {
   // improved tracking in Trollheim
   union { 
     int32_t landpar; 
+    unsigned int landpar_color;
     float heat; 
     char bytes[4]; 
     struct fieldinfo { 
@@ -324,6 +326,7 @@ struct gcell {
   };
 
 #define landparam LHU.landpar
+#define landparam_color LHU.landpar_color
 
 #define fval LHU.fi.fieldval
 
@@ -724,7 +727,7 @@ void activateActiv(cell *c, bool msg);
 
 struct charstyle {
   int charid;
-  unsigned skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor;
+  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor;
   };
 
 string csname(charstyle& cs);
@@ -892,8 +895,8 @@ void resetmusic();
 
 void drawFlash(cell* c);
 void drawBigFlash(cell* c);
-void drawParticle(cell *c, int col, int maxspeed = 100);
-void drawParticles(cell *c, int col, int qty, int maxspeed = 100);
+void drawParticle(cell *c, color_t col, int maxspeed = 100);
+void drawParticles(cell *c, color_t col, int qty, int maxspeed = 100);
 void drawFireParticles(cell *c, int qty, int maxspeed = 100);
 int firecolor(int phase);
 
@@ -904,18 +907,20 @@ void movepckeydir(int);
 
 void centerpc(ld aspd);
 
+typedef color_t color_t;
+
 void displayButton(int x, int y, const string& name, int key, int align, int rad = 0);
-void displayColorButton(int x, int y, const string& name, int key, int align, int rad, int color, int color2 = 0);
+void displayColorButton(int x, int y, const string& name, int key, int align, int rad, color_t color, color_t color2 = 0);
 inline string ONOFF(bool b) { return XLAT(b ? "ON" : "OFF"); }
 int darkened(int c);
 extern int getcstat;
-bool displaychr(int x, int y, int shift, int size, char chr, int col);
-bool displayfr(int x, int y, int b, int size, const string &s, int color, int align);
-bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, int color, int align, int p);
+bool displaychr(int x, int y, int shift, int size, char chr, color_t col);
+bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align);
+bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t color, int align, int p);
 
 bool outofmap(hyperpoint h);
 void applymodel(hyperpoint H, hyperpoint& Hscr);
-void drawCircle(int x, int y, int size, int color);
+void drawCircle(int x, int y, int size, color_t color);
 void fixcolor(int& col);
 ld displayspin(cell *c, int d);
 hyperpoint gethyper(ld x, ld y);
@@ -923,14 +928,14 @@ void resetview(); extern heptspin viewctr; extern cellwalker centerover;
 void drawthemap();
 void drawfullmap();
 extern function<void()> wrap_drawfullmap;
-bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align);
-bool displaystr(int x, int y, int shift, int size, const string& str, int color, int align);
+bool displaystr(int x, int y, int shift, int size, const char *str, color_t color, int align);
+bool displaystr(int x, int y, int shift, int size, const string& str, color_t color, int align);
 
 extern int darken, inmirrorcount;
 void calcparam();
 
 #if CAP_SDL
-int& qpixel(SDL_Surface *surf, int x, int y);
+color_t& qpixel(SDL_Surface *surf, int x, int y);
 void setvideomode();
 void saveHighQualityShot(const char *fname = NULL, const char *caption = NULL, int fade = 255);
 #endif
@@ -1288,9 +1293,9 @@ void selectEyeGL(int ed);
 void selectEyeMask(int ed);
 extern int ticks;
 
-extern unsigned backcolor, bordcolor, forecolor;
+extern color_t backcolor, bordcolor, forecolor;
 
-void setGLProjection(int col = backcolor);
+void setGLProjection(color_t col = backcolor);
 
 // passable flags
 
@@ -1658,7 +1663,7 @@ namespace dialog {
     string value;
     string keycaption;
     int key;
-    int color, colorv, colork, colors, colorc;
+    color_t color, colorv, colork, colors, colorc;
     int scale;
     double param;
     int position;
@@ -1682,7 +1687,7 @@ namespace dialog {
   extern reaction_t reaction, extra_options;
 
   item& lastItem();
-  extern unsigned int *palette;
+  extern color_t *palette;
 
   string keyname(int k);
   
@@ -1691,15 +1696,15 @@ namespace dialog {
   void addBoolItem(string body, bool value, int key);
   void addBigItem(string body, int key);
   void addColorItem(string body, int value, int key);
-  void openColorDialog(unsigned int& col, unsigned int *pal = palette);
+  void openColorDialog(color_t& col, color_t *pal = palette);
   void addHelp(string body);
-  void addInfo(string body, int color = 0xC0C0C0);
+  void addInfo(string body, color_t color = 0xC0C0C0);
   void addItem(string body, int key);
   int addBreak(int val);  
-  void addTitle(string body, int color, int scale);
+  void addTitle(string body, color_t color, int scale);
   
   void init();
-  void init(string title, int color = 0xE8E8E8, int scale = 150, int brk = 60);
+  void init(string title, color_t color = 0xE8E8E8, int scale = 150, int brk = 60);
   void display();
 
   void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help);
@@ -1709,8 +1714,8 @@ namespace dialog {
   void handleNavigation(int &sym, int &uni);
   
   namespace zoom {
-    bool displayfr(int x, int y, int b, int size, const string &s, int color, int align);
-    bool displayfr_highlight(int x, int y, int b, int size, const string &s, int color, int align, int hicolor = 0xFFFF00);
+    bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align);
+    bool displayfr_highlight(int x, int y, int b, int size, const string &s, color_t color, int align, int hicolor = 0xFFFF00);
     }
 
   bool editingDetail();
@@ -1721,7 +1726,7 @@ namespace dialog {
   extern bool sidedialog;
   extern int dialogflags;
   extern int dcenter;
-  int displaycolor(unsigned col);
+  int displaycolor(color_t col);
 
   void openFileDialog(string& filename, string fcap, string ext, bool_reaction_t action);
   
@@ -1744,11 +1749,11 @@ void clearMessages();
 void resetGeometry();
 
 namespace svg {
-  void circle(int x, int y, int size, int col);
-  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double linewidth);
-  void text(int x, int y, int size, const string& str, bool frame, int col, int align);
+  void circle(int x, int y, int size, color_t col);
+  void polygon(int *polyx, int *polyy, int polyi, color_t col, int outline, double linewidth);
+  void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
   extern bool in;
-  extern const string *link;
+  extern string link;
   void render(const char *fname = NULL, const function<void()>& what = drawfullmap);
   }
 
@@ -1770,7 +1775,7 @@ extern bool ivoryz;
 #define SHADOW_SL   0x18
 #define SHADOW_MON  0x30
 
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, double footphase);
+bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase);
 
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);
 
@@ -1868,7 +1873,7 @@ inline PPR operator - (PPR x, int y) { return PPR(int(x) - y); }
 inline int operator - (PPR x, PPR y) { return int(x) - int(y); }
 
 namespace mapeditor {
-  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, int color, cell *c, PPR prio = PPR::DEFAULT);
+  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio = PPR::DEFAULT);
   }
 
 void ShadowV(const transmatrix& V, const struct hpcshape& bp, PPR prio = PPR::MONSTER_SHADOW);
@@ -1970,7 +1975,7 @@ void setcameraangle(bool b);
 
 #define MODELCOUNT ((int) mdGUARD)
 
-void drawShape(pair<ld,ld>* coords, int qty, int color);
+void drawShape(pair<ld,ld>* coords, int qty, color_t color);
 
 extern eModel pmodel;
 
@@ -2149,10 +2154,10 @@ namespace linepatterns {
     };
   
   void clearAll();
-  void setColor(ePattern id, int col);
+  void setColor(ePattern id, color_t col);
   void drawAll();
   void showMenu();
-  void switchAlpha(ePattern id, int col);
+  void switchAlpha(ePattern id, color_t col);
   };
 
 transmatrix ddspin(cell *c, int d, ld bonus = 0);
@@ -2371,7 +2376,7 @@ bool inmirror(eLand l);
 bool inmirror(cell *c);
 bool inmirror(const cellwalker& cw);
 
-void queuemarkerat(const transmatrix& V, int col);
+void queuemarkerat(const transmatrix& V, color_t col);
 
 void check_total_victory();
 void applyBoxNum(int& i, string name = "");
@@ -2380,7 +2385,7 @@ extern int hinttoshow;
 bool isShmupLifeOrb(eItem it);
 int orbcharges(eItem it);
 
-int gradient(int c0, int c1, ld v0, ld v, ld v1);
+color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1);
 
 struct hint {
   time_t last;
@@ -2405,10 +2410,10 @@ extern bool longclick;
 extern bool useRangedOrb;
 #endif
 
-void addaura(const hyperpoint& h, int col, int fd);
-void addauraspecial(const hyperpoint& h, int col, int dir);
+void addaura(const hyperpoint& h, color_t col, int fd);
+void addauraspecial(const hyperpoint& h, color_t col, int dir);
 
-void drawBug(const cellwalker& cw, int col);
+void drawBug(const cellwalker& cw, color_t col);
 
 void mainloop();
 void mainloopiter();
@@ -2525,60 +2530,60 @@ struct textureinfo {
   int current_type, symmetries;
   };
 
-struct qpoly {
-      transmatrix V;
-      const vector<glvertex> *tab;
-      int offset, cnt;
-      int outline;
-      double linewidth;
-      int flags;
-      textureinfo *tinf;
-      };
-
-struct qline {
-      hyperpoint H1, H2;
-      int prf;
-      double width;
-      };
-      
-#define MAXQCHR 64
-
-struct qchr {
-      char str[MAXQCHR];
-      int x, y, shift, size, frame;
-      int align;
-      };
-      
-struct qcir {
-      int x, y, size;
-      bool boundary;
-      };
-
-// set a link for SVG
-struct qlink {
-       const string *link;
-       };
-       
-enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel, pkSpecial, pkLink };
-
-union polyunion {
-  qpoly  poly;
-  qline  line;
-  qchr   chr;
-  qcir   cir;
-  double dvalue;
-  qlink  link;
-  polyunion() {}
-  };
-
-struct polytodraw {
-  eKind kind;
+struct drawqueueitem {
   PPR prio;
-  int col;
-  polyunion u;
-  polytodraw() {}
+  color_t color;
+  virtual void draw() = 0;
+  virtual void draw_back() {}
+  virtual void draw_pre() {}
+  virtual ~drawqueueitem() {}
+  void draw_darker();
   };
 
+struct dqi_poly : drawqueueitem {
+  transmatrix V;
+  const vector<glvertex> *tab;
+  int offset, cnt;
+  int outline;
+  double linewidth;
+  int flags;
+  textureinfo *tinf;
+  void draw();
+  void gldraw();
+  void draw_back();
+  };
+
+struct dqi_line : drawqueueitem {
+  hyperpoint H1, H2;
+  int prf;
+  double width;
+  void draw();
+  void draw_back();
+  };
+      
+struct dqi_string : drawqueueitem {
+  string str;
+  int x, y, shift, size, frame;
+  int align;
+  void draw();
+  };
+
+struct dqi_circle : drawqueueitem {
+  int x, y, size;
+  void draw();
+  };
+
+struct dqi_boundary_circle : dqi_circle {
+  int x, y, size;
+  void draw_pre();
+  };
+
+struct dqi_action : drawqueueitem {
+  reaction_t action;
+  dqi_action(const reaction_t& a) : action(a) {}
+  void draw() { action(); }
+  };
+  
 extern int emeraldtable[100][7];
 
 // extern cell *cwpeek(cellwalker cw, int dir);
@@ -2952,7 +2957,7 @@ int emeraldval(cell *c);
 int inpair(cell *c, int colorpair);
 int snake_pair(cell *c);
 
-extern const unsigned int nestcolors[8];
+extern const color_t nestcolors[8];
 
 #if CAP_TEXTURE
 namespace texture {
@@ -2967,13 +2972,13 @@ namespace texture {
     
     texture_data() { textureid = 0; twidth = 2048; }
   
-    vector<unsigned> texture_pixels;
+    vector<color_t> texture_pixels;
   
-    unsigned& get_texture_pixel(int x, int y) {
+    color_t& get_texture_pixel(int x, int y) {
       return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
       }
     
-    vector<pair<unsigned*, unsigned>> undos;
+    vector<pair<color_t*, color_t>> undos;
     vector<tuple<cell*, hyperpoint, int> > pixels_to_draw;
   
     bool loadTextureGL();
@@ -2989,22 +2994,22 @@ namespace texture {
   struct texture_config {
     string texturename;
     string configname;
-    unsigned paint_color;
+    color_t paint_color;
     eTextureState tstate;
     eTextureState tstate_max;
   
     transmatrix itt;
     
-    unsigned grid_color;
-    unsigned mesh_color;
-    unsigned master_color;
-    unsigned slave_color;
+    color_t grid_color;
+    color_t mesh_color;
+    color_t master_color;
+    color_t slave_color;
     
     int color_alpha;
     
     int gsplits;
 
-    int recolor(int col);
+    int recolor(color_t col);
   
     typedef tuple<eGeometry, eVariation, char, int, eModel, ld, ld> texture_parameters; 
     texture_parameters orig_texture_parameters;
@@ -3016,7 +3021,7 @@ namespace texture {
     string texture_tuner;
     vector<hyperpoint*> tuned_vertices;
   
-    bool apply(cell *c, const transmatrix &V, int col);
+    bool apply(cell *c, const transmatrix &V, color_t col);
     void mark_triangles();
   
     void clear_texture_map();
@@ -3062,11 +3067,11 @@ namespace texture {
   
   void showMenu();
   
-  void drawPixel(cell *c, hyperpoint h, int col);
+  void drawPixel(cell *c, hyperpoint h, color_t col);
   extern cell *where;
   // compute 'c' automatically, based on the hint in 'where'
-  void drawPixel(hyperpoint h, int col);
-  void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps = 10);
+  void drawPixel(hyperpoint h, color_t col);
+  void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps = 10);
   
   extern bool texturesym;
 
@@ -3077,15 +3082,17 @@ namespace texture {
   }
 #endif
 
-void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, PPR prio = PPR::LINE);
-void queuelink(const string *link, PPR prio);
+dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int prf = 0, PPR prio = PPR::LINE);
+
+dqi_action& queueaction(PPR prio, const reaction_t& action);
+void queuereset(eModel m, PPR prio);
+
 
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
 extern ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
 
-unsigned char& part(int& col, int i);
-unsigned char& part(unsigned& col, int i);
+unsigned char& part(color_t& col, int i);
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
 
@@ -3172,7 +3179,7 @@ struct renderbuffer {
   renderbuffer(int x, int y, bool gl);
   ~renderbuffer();
   void enable();
-  void clear(int col);
+  void clear(color_t col);
   };
 
 struct resetbuffer {
@@ -3283,7 +3290,7 @@ extern void initializeCLI();
 
 static const int max_vec = (1<<14);
 
-string helptitle(string s, int col);
+string helptitle(string s, color_t col);
 pair<int, int> cell_to_pair(cell *c);
 extern bool nohud, nofps, nomap;
 
@@ -3296,7 +3303,7 @@ ld hypot3(const hyperpoint& h);
 
 extern const hyperpoint Hypc;
 ld det(const transmatrix& T);
-void queuechr(const hyperpoint& h, int size, char chr, int col, int frame = 0);
+void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame = 0);
 
 string fts(float x);
 bool model_needs_depth();
@@ -3494,7 +3501,7 @@ template<> struct saver<ld> : dsaver<ld> {
   };
 
 #endif
-extern vector<polytodraw> ptds;
+extern vector<unique_ptr<drawqueueitem>> ptds;
 extern ld intval(const hyperpoint &h1, const hyperpoint &h2);
 extern ld intvalxy(const hyperpoint &h1, const hyperpoint &h2);
 transmatrix euscalezoom(hyperpoint h);
@@ -3520,7 +3527,7 @@ namespace glhr {
   
   void set_depthtest(bool b);
   glmatrix translate(ld x, ld y, ld z);
-  void color2(int color, ld part = 1);
+  void color2(color_t color, ld part = 1);
   void be_textured();
   void set_modelview(const glmatrix& m);  
   hyperpoint gltopoint(const glvertex& t);
@@ -3563,10 +3570,9 @@ namespace glhr {
   void prepare(vector<ct_vertex>& v);
   }
 
-void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev);
-polytodraw& lastptd();
-void queuepolyat(const transmatrix& V, const hpcshape& h, int col, PPR prio);
-void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, PPR prio);
+void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, int lev);
+dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio);
+dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, color_t linecol, color_t fillcol, PPR prio);
 
 struct floorshape;
 
@@ -3593,9 +3599,9 @@ int fix6(int a);
 int fix7(int a);
 int fixdir(int a, cell *c);
 cell *newCell(int type, heptagon *master);
-extern int qpixel_pixel_outside;
+extern color_t qpixel_pixel_outside;
 
-void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 0, int align = 8);
+void queuechr(int x, int y, int shift, int size, char chr, color_t col, int frame = 0, int align = 8);
 
 int zebra3(cell *c);
 int geosupport_threecolor();
@@ -3717,11 +3723,11 @@ namespace gp {
 
 extern bool debug_geometry;
 
-void queuepoly(const transmatrix& V, const hpcshape& h, int col);
-void queuepolyat(const transmatrix& V, const hpcshape& h, int col, PPR prio);
+dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col);
+dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio);
 
-void queuestr(const hyperpoint& h, int size, const string& chr, int col, int frame = 0);
-void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 0);
+void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame = 0);
+void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame = 0);
 
 extern bool just_gmatrix;
 void drawrec(const heptspin& hs, hstate s, const transmatrix& V);
@@ -3868,12 +3874,12 @@ namespace geom3 {
   extern ld BODY;
   }
 
-void queuestr(const transmatrix& V, double size, const string& chr, int col, int frame = 0, int align = 8);
-void queuestr(int x, int y, int shift, int size, string str, int col, int frame = 0, int align = 8);
+void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame = 0, int align = 8);
+void queuestr(int x, int y, int shift, int size, string str, color_t col, int frame = 0, int align = 8);
 
 ld frac(ld x);
 
-extern int poly_outline;
+extern color_t poly_outline;
 
 extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM;
 

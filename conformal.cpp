@@ -130,7 +130,7 @@ namespace spiral {
   
   bool displayhelp = true;
   
-  int& bandpixel(int x, int y) {
+  color_t& bandpixel(int x, int y) {
     int i = 0;
     while(i < isize(band) && x >= band[i]->w)
       x -= band[i]->w, i++;
