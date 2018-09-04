@@ -354,6 +354,58 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
 #endif
 
 #if CAP_GL
+
+void glapplymatrix(const transmatrix& V);
+
+#if MINIMIZE_GL_CALLS
+color_t triangle_color, line_color, text_color;
+vector<glvertex> triangle_vertices;
+vector<glvertex> line_vertices;
+#endif
+
+int shapes_merged;
+
+/* vector<glhr::textured_vertex> text_vertices;
+int texts_merged; */
+
+void glflush() {
+  #if MINIMIZE_GL_CALLS
+  if(isize(triangle_vertices)) {
+    // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
+    if(triangle_color) {
+      glhr::be_nontextured();
+      glapplymatrix(Id);
+      glhr::current_vertices = NULL;
+      glhr::vertices(triangle_vertices);
+      glhr::color2(triangle_color);
+      glDrawArrays(GL_TRIANGLES, 0, isize(triangle_vertices));
+      }
+    triangle_vertices.clear();
+    }
+  if(isize(line_vertices)) {
+    if(line_color) {
+      glhr::be_nontextured();
+      glapplymatrix(Id);
+      glhr::current_vertices = NULL;
+      glhr::vertices(line_vertices);
+      glhr::color2(line_color);
+      glDrawArrays(GL_LINES, 0, isize(line_vertices));
+      }
+    line_vertices.clear();
+    }
+  shapes_merged = 0;
+  #endif
+/*  if(isize(text_vertices)) {
+    printf("%08X | %d texts, %d vertices\n", text_color, isize(text_vertices));
+    glhr::color2(text_color);
+    glhr::set_depthtest(false);
+    glhr::set_modelview(glhr::translate(x-ed*shift-vid.xcenter,y-vid.ycenter, stereo::scrdist_text));
+    glBindTexture(GL_TEXTURE_2D, f.textures[tabid]);
+
+    texts_merged = 0;
+    } */
+  }
+
 void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
@@ -372,17 +424,35 @@ void glapplymatrix(const transmatrix& V) {
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
-#ifndef MINIMIZE_GL_CALLS
-#ifdef EMSCRIPTEN
-#define MINIMIZE_GL_CALLS 1
-#else  
-#define MINIMIZE_GL_CALLS 0
-#endif
-#endif
-
 void dqi_poly::gldraw() {
   auto& v = *tab;
 
+#if MINIMIZE_GL_CALLS  
+  if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & POLY_INVERSE)))) {
+    if(color != triangle_color || outline != line_color) {
+      glflush();
+      triangle_color = color;
+      line_color = outline;
+      }
+    shapes_merged++;
+
+    if((flags & POLY_CCONVEX) && !(flags & POLY_VCONVEX)) {
+      vector<glvertex> v2(cnt+1);
+      for(int i=0; i<cnt+1; i++) v2[i] = glhr::pointtogl( V * glhr::gltopoint( v[offset+i-1] ) );
+      if(color) for(int i=0; i<cnt; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i]), triangle_vertices.push_back(v2[i+1]);
+      for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i]), line_vertices.push_back(v2[i+1]);
+      }
+    else {
+      vector<glvertex> v2(cnt);
+      for(int i=0; i<cnt; i++) v2[i] = glhr::pointtogl( V * glhr::gltopoint( v[offset+i] ) );
+      if(color) for(int i=2; i<cnt-1; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i-1]), triangle_vertices.push_back(v2[i]);
+      for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i-1]), line_vertices.push_back(v2[i]);
+      }
+    return;
+    }
+  else glflush();
+#endif
+  
   if(tinf) {
     #if CAP_TEXTURE
     glhr::be_textured();
@@ -413,17 +483,7 @@ void dqi_poly::gldraw() {
     if(using_perspective) glapplymatrix(V);
 
     if(draw) {
-      if((flags & POLY_VCONVEX) && MINIMIZE_GL_CALLS) {
-        glhr::vertices(v);
-        glhr::color2(color);
-        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset, cnt);
-        }
-      else if((flags & POLY_CCONVEX) && MINIMIZE_GL_CALLS) {
-        glhr::vertices(v);
-        glhr::color2(color);
-        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset-1, cnt+1);
-        }
-      else {
+      if(true) {
         glEnable(GL_STENCIL_TEST);
   
         glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
@@ -1108,11 +1168,22 @@ void sort_drawqueue() {
   
   int siz = isize(ptds);
 
-  for(int i = 0; i<siz; i++) {
-    int pd = ptds[i]->prio - PPR::ZERO;
+  #if MINIMIZE_GL_CALLS  
+  unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
+  for(auto& p: ptds) subqueue[p->outline_group()].push_back(move(p));
+  ptds.clear();
+  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
+  subqueue.clear();
+  for(auto& p: ptds) subqueue[p->color].push_back(move(p));
+  ptds.clear();
+  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
+  #endif
+    
+  for(auto& p: ptds) {
+    int pd = p->prio - PPR::ZERO;
     if(pd < 0 || pd >= PMAX) {
       printf("Illegal priority %d\n", pd);
-      ptds[i]->prio = PPR(rand() % int(PPR::MAX));
+      p->prio = PPR(rand() % int(PPR::MAX));
       }
     qp[pd]++;
     }
@@ -1199,6 +1270,7 @@ void drawqueue() {
     reverse_side_priorities();
     for(int i=ptds.size()-1; i>=0; i--) 
       ptds[i]->draw_back();
+    glflush();
     reverse_side_priorities();
     spherespecial *= -1;
     spherephase = 1;
@@ -1206,6 +1278,7 @@ void drawqueue() {
     }
   
   for(auto& ptd: ptds) ptd->draw();
+  glflush();
   
 #if CAP_GL
   if(vid.usingGL) 

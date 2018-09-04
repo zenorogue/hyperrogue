@@ -2538,6 +2538,7 @@ struct drawqueueitem {
   virtual void draw_pre() {}
   virtual ~drawqueueitem() {}
   void draw_darker();
+  virtual color_t outline_group() = 0;
   };
 
 struct dqi_poly : drawqueueitem {
@@ -2551,6 +2552,7 @@ struct dqi_poly : drawqueueitem {
   void draw();
   void gldraw();
   void draw_back();
+  virtual color_t outline_group() { return outline; }
   };
 
 struct dqi_line : drawqueueitem {
@@ -2559,6 +2561,7 @@ struct dqi_line : drawqueueitem {
   double width;
   void draw();
   void draw_back();
+  virtual color_t outline_group() { return color; }
   };
       
 struct dqi_string : drawqueueitem {
@@ -2566,11 +2569,13 @@ struct dqi_string : drawqueueitem {
   int x, y, shift, size, frame;
   int align;
   void draw();
+  virtual color_t outline_group() { return 1; }
   };
 
 struct dqi_circle : drawqueueitem {
   int x, y, size;
   void draw();
+  virtual color_t outline_group() { return 2; }
   };
 
 struct dqi_boundary_circle : dqi_circle {
@@ -2582,6 +2587,7 @@ struct dqi_action : drawqueueitem {
   reaction_t action;
   dqi_action(const reaction_t& a) : action(a) {}
   void draw() { action(); }
+  virtual color_t outline_group() { return 2; }
   };
   
 extern int emeraldtable[100][7];

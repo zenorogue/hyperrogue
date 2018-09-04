@@ -901,6 +901,7 @@ void drawCircle(int x, int y, int size, color_t color) {
   if(size < 0) size = -size;
   #if CAP_GL
   if(vid.usingGL) {
+    glflush();
     glhr::be_nontextured();
     glhr::id_modelview();
     glcoords.clear();

@@ -2352,6 +2352,7 @@ void drawaura() {
         );
       }
     }
+  glflush();
   glhr::switch_mode(glhr::gmVarColored);
   glhr::id_modelview();
   glhr::prepare(auravertices);
@@ -5788,6 +5789,7 @@ void drawscreen() {
 
   // SDL_UnlockSurface(s);
 
+  glflush();
   DEBT("swapbuffers");
 #if CAP_SDL
 #if CAP_GL

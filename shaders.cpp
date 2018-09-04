@@ -287,14 +287,31 @@ template<class... T> string stringbuilder(bool i, const string& s, T... t) {
   else return stringbuilder(t...); 
   }
 
+glmatrix current_matrix;
+
+bool operator == (const glmatrix& m1, const glmatrix& m2) {
+  for(int i=0; i<4; i++) 
+    for(int j=0; j<4; j++)
+      if(m1[i][j] != m2[i][j]) return false;
+  return true;
+  }
+
 void set_modelview(const glmatrix& modelview) {
   glmatrix mvp = modelview * projection;
+  #if MINIMIZE_GL_CALLS
+  if(mvp == current_matrix) return;
+  current_matrix = mvp;
+  #endif
   glUniformMatrix4fv(current->uMVP, 1, 0, mvp.as_array());
   // glmatrix nm = modelview;
   // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
   }
 
 void id_modelview() {
+  #if MINIMIZE_GL_CALLS
+  if(projection == current_matrix) return;
+  current_matrix = projection;
+  #endif
   glUniformMatrix4fv(current->uMVP, 1, 0, projection.as_array());
   }
 
@@ -406,6 +423,7 @@ void switch_mode(eMode m) {
   mode = m;
   GLERR("after_switch_mode");
   current_vertices = NULL;
+  current_matrix[0][0] = -1e8; // invalid
   id_modelview();
   }
 

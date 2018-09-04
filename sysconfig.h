@@ -416,3 +416,12 @@ union SDL_Event;
 #if ISWINDOWS
 #undef hyper  // avoid "hyper" typedef in <_mingw.h>
 #endif
+
+#ifndef MINIMIZE_GL_CALLS
+#ifdef EMSCRIPTEN
+#define MINIMIZE_GL_CALLS 1
+#else  
+#define MINIMIZE_GL_CALLS 0
+#endif
+#endif
+

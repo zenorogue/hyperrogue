@@ -508,12 +508,6 @@ void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
 
-#if ISWEB
-  if(playermoved && vid.sspeed > -4.99 && !outoffocus) {
-    centerpc((ticks - lastt) / 1000.0 * exp(vid.sspeed));
-    }
-  if(!outoffocus) drawscreen();
-#else
   if(timetowait > 0)
     SDL_Delay(timetowait);
   else {
@@ -521,8 +515,10 @@ void mainloopiter() {
     if(cmode & sm::CENTER) {
       if(playermoved && vid.sspeed > -4.99 && !outoffocus)
         centerpc((ticks - lastt) / 1000.0 * exp(vid.sspeed));
+#if CAP_SDLJOY
       if(panjoyx || panjoyy) 
         checkpanjoy((ticks - lastt) / 1000.0);
+#endif
       }
     tortoise::updateVals(ticks - lastt);
     frames++;
@@ -531,7 +527,6 @@ void mainloopiter() {
       }
     lastt = ticks;
     }      
-#endif
 
   Uint8 *keystate = SDL_GetKeyState(NULL);
   rightclick = keystate[SDLK_RCTRL];
