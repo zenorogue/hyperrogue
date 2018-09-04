@@ -303,8 +303,9 @@ bool frame() {
     clearMessages();
     nohelp = true;
     playerfound = true;
+    return true;
     }
-  return true;
+  return false;
   }
 
 bool handleKey(int sym, int uni) {
