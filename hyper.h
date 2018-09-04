@@ -1750,7 +1750,7 @@ void resetGeometry();
 
 namespace svg {
   void circle(int x, int y, int size, color_t col);
-  void polygon(int *polyx, int *polyy, int polyi, color_t col, int outline, double linewidth);
+  void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth);
   void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
   extern bool in;
   extern string link;
@@ -2544,7 +2544,7 @@ struct dqi_poly : drawqueueitem {
   transmatrix V;
   const vector<glvertex> *tab;
   int offset, cnt;
-  int outline;
+  color_t outline;
   double linewidth;
   int flags;
   textureinfo *tinf;

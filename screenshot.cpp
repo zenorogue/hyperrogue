@@ -136,7 +136,7 @@ namespace svg {
       }
     }
   
-  void polygon(int *polyx, int *polyy, int polyi, color_t col, int outline, double linewidth) {
+  void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth) {
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
