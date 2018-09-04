@@ -323,69 +323,67 @@ inline int next_p2 (int a )
 
 #if CAP_GLFONT
 
+#define CHARS (128+NUMEXTRA)
+
 struct glfont_t {
-  GLuint * textures;                                  // Holds The Texture Id's   
+  GLuint texture;                                     // Holds The Texture Id
 //GLuint list_base;                                   // Holds The First Display List ID  
-  int widths[128+NUMEXTRA];
-  int heights[128+NUMEXTRA];
-  float tx[128+NUMEXTRA];
-  float ty[128+NUMEXTRA];
+  int widths[CHARS];
+  int heights[CHARS];
+  float tx0[CHARS], tx1[CHARS], ty0[CHARS], ty1[CHARS];
   };
 
 glfont_t *glfont[256];
 
+#if CAP_TABFONT
+typedef int texturepixel;
+#else
+typedef Uint16 texturepixel;
+#endif
+
+#define FONTTEXTURESIZE 2048
+
+int curx = 0, cury = 0, theight = 0;
+texturepixel fontdata[FONTTEXTURESIZE][FONTTEXTURESIZE];
+
 void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 #if CAP_TABFONT
+  if(ch < 32) return;
   int otwidth, otheight, tpix[3000], tpixindex = 0;
   loadCompressedChar(otwidth, otheight, tpix);
 #else
+  if(!txt) return;
   int otwidth = txt->w;
   int otheight = txt->h;
 #endif
   
-  int twidth = next_p2( otwidth );
-  int theight = next_p2( otheight );
-
+  if(otwidth+curx > FONTTEXTURESIZE) curx = 0, cury += theight, theight = 0;
+  
+  theight = max(theight, otheight);
+  
+  for(int j=0; j<otheight;j++) for(int i=0; i<otwidth; i++) {
+    fontdata[j+cury][i+curx] = 
 #if CAP_TABFONT
-  std::vector<int> expanded_data(twidth * theight);
+    (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
 #else
-  std::vector<Uint16> expanded_data(twidth * theight);
-#endif
-
-  for(int j=0; j <theight;j++) for(int i=0; i < twidth; i++) {
-#if CAP_TABFONT
-    expanded_data[(i+j*twidth)] = (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
-#else
-    expanded_data[(i+j*twidth)] = 
-        ((i>=txt->w || j>=txt->h) ? 0 : ((qpixel(txt, i, j)>>24)&0xFF) * 0x100) | 0x00FF;
+    ((i>=txt->w || j>=txt->h) ? 0 : ((qpixel(txt, i, j)>>24)&0xFF) * 0x100) | 0x00FF;
 #endif
     }
   
   f.widths[ch] = otwidth;
   f.heights[ch] = otheight;
 
-  glBindTexture( GL_TEXTURE_2D, f.textures[ch]);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
- 
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0,
-#if CAP_TABFONT
-    GL_RGBA, GL_UNSIGNED_BYTE, 
-#else
-    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
-#endif
-    expanded_data.data() );
- 
-  float x=(float)otwidth / (float)twidth;
-  float y=(float)otheight / (float)theight;
-  f.tx[ch] = x;
-  f.ty[ch] = y;
+  f.tx0[ch] = (float) curx / (float) FONTTEXTURESIZE;
+  f.tx1[ch] = (float) (curx+otwidth) / (float) FONTTEXTURESIZE;
+  f.ty0[ch] = (float) cury;
+  f.ty1[ch] = (float) (cury+otheight);
+  curx += otwidth;
   }
   
 void init_glfont(int size) {
   if(glfont[size]) return;
   DEBB(DF_INIT, (debugfile,"init GL font: %d\n", size));
-
+  
 #if !CAP_TABFONT
   loadfont(size);
   if(!font[size]) return;
@@ -395,11 +393,8 @@ void init_glfont(int size) {
   
   glfont_t& f(*(glfont[size]));
 
-  f.textures = new GLuint[128+NUMEXTRA];
 //f.list_base = glGenLists(128);
-  glGenTextures( 128+NUMEXTRA, f.textures );
-  if(0) for(int i=0; i<128+NUMEXTRA; i++)
-    printf("texture %d = %d\n", i, f.textures[i]);
+  glGenTextures(1, &f.texture );
 
 #if !CAP_TABFONT
   char str[2]; str[1] = 0;
@@ -410,11 +405,9 @@ void init_glfont(int size) {
   
 //  glListBase(0);
 
-#if CAP_TABFONT
-  resetTabFont();
-#endif
-
-  for(int ch=1;ch<128+NUMEXTRA;ch++) {
+  curx = 0, cury = 0, theight = 0;
+  
+  for(int ch=1;ch<CHARS;ch++) {
   
     if(ch<32) continue;
 
@@ -439,6 +432,23 @@ void init_glfont(int size) {
 #endif
     }
 
+  glBindTexture( GL_TEXTURE_2D, f.texture);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  
+  printf("for size %d, texture height is %d\n", size, cury + theight);
+  theight = next_p2(cury + theight);
+  
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, FONTTEXTURESIZE, theight, 0,
+#if CAP_TABFONT
+    GL_RGBA, GL_UNSIGNED_BYTE, 
+#else
+    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
+#endif
+    fontdata);
+
+  for(int ch=0; ch<CHARS; ch++) f.ty0[ch] /= theight, f.ty1[ch] /= theight;
+ 
 #if CAP_CREATEFONT
   printf("#define NUMEXTRA %d\n", NUMEXTRA);
 #define DEMACRO(x) #x
@@ -488,8 +498,18 @@ namespace glhr { void texture_vertices(GLfloat *f, int qty, int stride = 2) {
   }
  }
 
-GLfloat otver[24];
-vector<glhr::textured_vertex> tver(4);
+vector<glhr::textured_vertex> tver;
+
+glhr::textured_vertex charvertex(int x1, int y1, ld tx, ld ty) {
+  glhr::textured_vertex res;
+  res.coords[0] = x1;
+  res.coords[1] = y1;
+  res.coords[2] = 0;
+  res.texture[0] = tx;
+  res.texture[1] = ty;
+  res.texture[2] = 0;
+  return res;
+  }
 
 bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, int align) {
   int gsiz = size;
@@ -504,10 +524,6 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 
   glfont_t& f(*glfont[gsiz]);
   
-  glhr::be_textured();
-
-  glhr::color2((color << 8) | 0xFF);
-
   int tsize = 0;
   
   for(int i=0; s[i];) {
@@ -520,43 +536,42 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 
   bool clicked = (mousex >= x && mousey <= y && mousex <= x+tsize && mousey >= y-ysiz);
   
-  glhr::set_depthtest(false);
+  color_t icolor = (color << 8) | 0xFF;
+  if(icolor != text_color || f.texture != text_texture || shift != text_shift || shapes_merged) {
+    glflush();
+    text_color = icolor;
+    text_texture = f.texture;
+    text_shift = shift;
+    }
+  texts_merged++;
+  
+  auto& tver = text_vertices;
+
+  glBindTexture(GL_TEXTURE_2D, f.texture);
 
   for(int i=0; s[i];) {
   
     int tabid = getnext(s,i);
-    float fx=f.tx[tabid];
-    float fy=f.ty[tabid];
     int wi = f.widths[tabid] * size/gsiz;
     int hi = f.heights[tabid] * size/gsiz;
 
     GLERR("pre-print");
-
-    for(int ed = (stereo::active() && shift)?-1:0; ed<2; ed+=2) {
-      glhr::set_modelview(glhr::translate(x-ed*shift-vid.xcenter,y-vid.ycenter, stereo::scrdist_text));
-      stereo::set_mask(ed);
-      glBindTexture(GL_TEXTURE_2D, f.textures[tabid]);
-
-      tver[0].coords[1] = -hi;
-      tver[3].coords[1] = -hi;
-      tver[2].coords[0] = wi;
-      tver[3].coords[0] = wi;
-      tver[1].texture[1] = fy;
-      tver[2].texture[1] = fy;
-      tver[2].texture[0] = fx;
-      tver[3].texture[0] = fx;
+  
+    glhr::textured_vertex t00 = charvertex(x,    y-hi, f.tx0[tabid], f.ty0[tabid]);
+    glhr::textured_vertex t01 = charvertex(x,    y,    f.tx0[tabid], f.ty1[tabid]);
+    glhr::textured_vertex t11 = charvertex(x+wi, y,    f.tx1[tabid], f.ty1[tabid]);
+    glhr::textured_vertex t10 = charvertex(x+wi, y-hi, f.tx1[tabid], f.ty0[tabid]);
+    
+    tver.push_back(t00);
+    tver.push_back(t01);
+    tver.push_back(t10);
+    tver.push_back(t10);
+    tver.push_back(t01);
+    tver.push_back(t11);
       
-      glhr::prepare(tver);
-      glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-      }
-    
-    if(stereo::active() && shift) stereo::set_mask(0);
-    
-    GLERR("print");
-    
-    x += wi;    
+    x += wi;
     }
- 
+  
   return clicked;
   }
 

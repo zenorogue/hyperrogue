@@ -1233,7 +1233,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
-      queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
+      queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, (svg::in || ISWEB) ? 0 : 1);
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
       }
     }

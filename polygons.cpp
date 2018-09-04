@@ -358,15 +358,18 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
 void glapplymatrix(const transmatrix& V);
 
 #if MINIMIZE_GL_CALLS
-color_t triangle_color, line_color, text_color;
+color_t triangle_color, line_color;
 vector<glvertex> triangle_vertices;
 vector<glvertex> line_vertices;
 #endif
 
+color_t text_color;
+int text_shift;
+GLuint text_texture;
+int texts_merged;
 int shapes_merged;
 
-/* vector<glhr::textured_vertex> text_vertices;
-int texts_merged; */
+vector<glhr::textured_vertex> text_vertices;
 
 void glflush() {
   #if MINIMIZE_GL_CALLS
@@ -395,15 +398,29 @@ void glflush() {
     }
   shapes_merged = 0;
   #endif
-/*  if(isize(text_vertices)) {
-    printf("%08X | %d texts, %d vertices\n", text_color, isize(text_vertices));
+
+  if(isize(text_vertices)) {
+    // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
+    glhr::be_textured();
+    glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);
     glhr::set_depthtest(false);
-    glhr::set_modelview(glhr::translate(x-ed*shift-vid.xcenter,y-vid.ycenter, stereo::scrdist_text));
-    glBindTexture(GL_TEXTURE_2D, f.textures[tabid]);
+    for(int ed = (stereo::active() && text_shift)?-1:0; ed<2; ed+=2) {
+      glhr::set_modelview(glhr::translate(-ed*text_shift-vid.xcenter,-vid.ycenter, stereo::scrdist_text));
+      stereo::set_mask(ed);
+  
+      glhr::current_vertices = NULL;
+      glhr::prepare(text_vertices);
+      glDrawArrays(GL_TRIANGLES, 0, isize(text_vertices));
+      
+      GLERR("print");
+      }
 
+    if(stereo::active() && text_shift) stereo::set_mask(0);
+ 
     texts_merged = 0;
-    } */
+    text_vertices.clear();
+    }
   }
 
 void glapplymatrix(const transmatrix& V) {
@@ -429,7 +446,7 @@ void dqi_poly::gldraw() {
 
 #if MINIMIZE_GL_CALLS  
   if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & POLY_INVERSE)))) {
-    if(color != triangle_color || outline != line_color) {
+    if(color != triangle_color || outline != line_color || texts_merged) {
       glflush();
       triangle_color = color;
       line_color = outline;
@@ -475,7 +492,7 @@ void dqi_poly::gldraw() {
     offset = 0;
     #endif
     }
-  
+
   for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
     if(ed) stereo::set_projection(ed), stereo::set_viewport(ed);
     bool draw = color;

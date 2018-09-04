@@ -113,6 +113,7 @@ unsigned char fonttable[] = {
 255
 };
 
+#undef NUMEXTRA
 #define NUMEXTRA 7
 
 unsigned char *ftv = fonttable;
