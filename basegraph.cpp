@@ -402,6 +402,10 @@ void init_glfont(int size) {
   SDL_Color white;
   white.r = white.g = white.b = 255;
 #endif
+
+#if CAP_TABFONT
+  resetTabFont();
+#endif
   
 //  glListBase(0);
 
@@ -436,7 +440,6 @@ void init_glfont(int size) {
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
   
-  printf("for size %d, texture height is %d\n", size, cury + theight);
   theight = next_p2(cury + theight);
   
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, FONTTEXTURESIZE, theight, 0,

@@ -1126,7 +1126,9 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
       if(hilite || hiliteclick) alpha = (alpha + 256) / 2;
       
-      if(svg::in && alpha < 16) continue;
+      if((svg::in || ISWEB) && alpha < 16) continue;
+      
+      if(ISWEB) alpha |= 15;
 
       transmatrix gm1 = 
         multidraw ? V * memo_relative_matrix(vd1.m->base, c) :
