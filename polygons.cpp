@@ -1245,7 +1245,7 @@ void drawqueue() {
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
     PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
   sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
-    [] (unique_ptr<drawqueueitem>& p1, unique_ptr<drawqueueitem>& p2) {
+    [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
       auto ap1 = (dqi_poly&) *p1;
       auto ap2 = (dqi_poly&) *p2;
       return xintval(ap1.V * xpush0(.1))
