@@ -4026,5 +4026,9 @@ extern bool game_active, playerfound;
 
 string bygen(reaction_t h);
 
+#if CAP_URL
+void open_url(string s);
+#endif
+
 }
 

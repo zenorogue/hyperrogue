@@ -12,6 +12,7 @@
 #define CAP_SHMUP 0
 #define CAP_RUG 1
 #define CAP_INV 0
+#define CAP_URL 1
 #define GLES_ONLY
 
 #ifndef CAP_ORIENTATION
@@ -42,6 +43,12 @@ namespace hr {
 namespace hr {
 
 // -- demo --
+
+void open_url(string s) {
+  EM_ASM_({
+    window.open(Pointer_stringify($0));
+    }, s.c_str());
+  }
 
 bool demoanim;
 
