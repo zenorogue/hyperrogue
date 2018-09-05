@@ -1041,11 +1041,17 @@ void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2
 
 hpcshape *vshapes[4] = { &shDisk, &shDisk, &shHeptaMarker, &shSnowball };
 
+color_t darken_a(color_t c) {
+  for(int p=0; p<3; p++)
+  for(int i=0; i<darken; i++) part(c, i+1) = (part(c, i+1) + part(backcolor, i)) >> 1;
+  return c;
+  }
+
 void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
   else
-    poly_outline = 0x000000FF;
+    poly_outline = (bordcolor << 8) | 0xFF;
     
   transmatrix V1;
   
@@ -1057,18 +1063,18 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
-    queuepolyat(V1 = mscale(V, geom3::BODY), sh, cp.color1, PPR::MONSTER_HEAD);
+    queuepolyat(V1 = mscale(V, geom3::BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
     }
   else {
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
-    queuepoly(V1 = V, sh, cp.color1);
+    queuepoly(V1 = V, sh, darken_a(cp.color1));
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
     }
-  if(cp.shade == 't') queuepoly(V1, shDiskT, cp.color2);
-  if(cp.shade == 's') queuepoly(V1, shDiskS, cp.color2);
-  if(cp.shade == 'q') queuepoly(V1, shDiskSq, cp.color2);
-  if(cp.shade == 'm') queuepoly(V1, shDiskM, cp.color2);
+  if(cp.shade == 't') queuepoly(V1, shDiskT, darken_a(cp.color2));
+  if(cp.shade == 's') queuepoly(V1, shDiskS, darken_a(cp.color2));
+  if(cp.shade == 'q') queuepoly(V1, shDiskSq, darken_a(cp.color2));
+  if(cp.shade == 'm') queuepoly(V1, shDiskM, darken_a(cp.color2));
   }
 
 unordered_map<pair<edgeinfo*, int>, int> drawn_edges;
@@ -1134,6 +1140,8 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         else if(alpha >= 32) alpha |= 3;
         else if(alpha >= 16) alpha |= 1;
         }
+      
+      alpha >>= darken;
 
       transmatrix gm1 = 
         multidraw ? V * memo_relative_matrix(vd1.m->base, c) :
