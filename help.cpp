@@ -928,8 +928,13 @@ void showHelp() {
     dialog::addHelp(help);
     }
   
-  for(auto& he: help_extensions)
-    dialog::addItem(he.text, he.key);
+  for(auto& he: help_extensions) {
+    if(he.subtext != "")
+      dialog::addSelItem(he.text, he.subtext, he.key);
+    else
+      dialog::addItem(he.text, he.key);
+    dialog::lastItem().color = he.color;
+    }
   
   dialog::display();
   
