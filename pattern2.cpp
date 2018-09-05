@@ -1525,7 +1525,7 @@ namespace patterns {
 #if CAP_TEXTURE
 #define REMAP_TEXTURE texture::config.remap()
 #else
-#define REMAP_TEXTURE
+#define REMAP_TEXTURE (void)0
 #endif
   
   void showPattern() {
