@@ -20,6 +20,8 @@ const char* COLORBAR = "###";
 
 namespace dialog {
 
+  color_t dialogcolor = 0xC0C0C0;
+
   void addBack() {
     addItem(XLAT("go back"), SDLK_ESCAPE);
     }
@@ -113,7 +115,7 @@ namespace dialog {
   void addSlider(double d1, double d2, double d3, int key) {
     item it;
     it.type = diSlider;
-    it.color = 0xC0C0C0;
+    it.color = dialogcolor;
     it.scale = 100;
     it.key = key;
     it.param = (d2-d1) / (d3-d1);
@@ -127,7 +129,7 @@ namespace dialog {
     it.value = value;
     it.keycaption = keyname(key);
     it.key = key;
-    it.color = 0xC0C0C0;
+    it.color = dialogcolor;
     it.colork = 0x808080;
     it.colorv = 0x80A040;
     it.colorc = 0xFFD500;
@@ -189,7 +191,7 @@ namespace dialog {
     it.body = body;
     it.keycaption = keyname(key);
     it.key = key;
-    it.color = 0xC0C0C0;
+    it.color = dialogcolor;
     it.colork = 0x808080;
     it.colors = 0xFFD500;
     it.colorc = 0xFF8000;
@@ -258,7 +260,7 @@ namespace dialog {
         }
       if(str[i] == 10 || i == isize(str)) ls = i, last = i+1;
       if(ls) {
-        if(!measure) displayfr(xo, y, 2, siz, str.substr(prev, ls-prev), 0xC0C0C0, 0);
+        if(!measure) displayfr(xo, y, 2, siz, str.substr(prev, ls-prev), dialogcolor, 0);
         if(ls == prev) y += siz/2;
         else y += siz;
         lastspace = last;
@@ -812,15 +814,15 @@ namespace dialog {
   void displayPageButtons(int i, bool pages) {
     int i0 = vid.yres - vid.fsize;
     int xr = vid.xres / 80;
-    if(pages) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
+    if(pages) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
       getcstat = '1';
-    if(pages) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
+    if(pages) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
       getcstat = '2';
-    if(pages) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
+    if(pages) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
       getcstat = '3';
-    if(i&1) if(displayfrZH(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), 0xC0C0C0, 8))
+    if(i&1) if(displayfrZH(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), dialogcolor, 8))
       getcstat = '0';
-    if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), 0xC0C0C0, 8))
+    if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), dialogcolor, 8))
       getcstat = SDLK_F1;
     }
   
@@ -874,10 +876,10 @@ namespace dialog {
   
   //-- choose file dialog--
 
-  #define CDIR 0xC0C0C0
+  #define CDIR dialogcolor
   #define CFILE forecolor
   
-  bool filecmp(const pair<string,int> &f1, const pair<string,int> &f2) {
+  bool filecmp(const pair<string,color_t> &f1, const pair<string,color_t> &f2) {
     if(f1.first == "../") return true;
     if(f2.first == "../") return false;
     if(f1.second != f2.second)
@@ -1025,12 +1027,12 @@ namespace dialog {
     return true;
     }
     
-  vector<pair<string, int> > v;  
+  vector<pair<string, color_t> > v;  
 
-  void vpush(int i, const char *name) {
+  void vpush(color_t color, const char *name) {
     string s = XLATN(name);
     if(!hasInfix(s)) return;
-    dialog::v.push_back(make_pair(s, i));
+    dialog::v.push_back(make_pair(s, color));
     }
   
   };

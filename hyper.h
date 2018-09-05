@@ -1654,6 +1654,7 @@ extern bool timerghost;
 
 namespace dialog {
   extern string highlight_text;
+  extern color_t dialogcolor;
 
   enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diSlider, diBigItem};
 
@@ -1698,7 +1699,7 @@ namespace dialog {
   void addColorItem(string body, int value, int key);
   void openColorDialog(color_t& col, color_t *pal = palette);
   void addHelp(string body);
-  void addInfo(string body, color_t color = 0xC0C0C0);
+  void addInfo(string body, color_t color = dialogcolor);
   void addItem(string body, int key);
   int addBreak(int val);  
   void addTitle(string body, color_t color, int scale);
@@ -1734,8 +1735,8 @@ namespace dialog {
   bool hasInfix(const string &s);
   bool editInfix(int uni);
 
-  void vpush(int i, const char *name);
-  extern vector<pair<string, int> > v;  
+  void vpush(color_t, const char *name);
+  extern vector<pair<string, color_t> > v;  
   
   void addHelp();
   void addBack();

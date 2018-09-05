@@ -232,6 +232,7 @@ void initConfig() {
   addsaver(backcolor, "color:background");
   addsaver(forecolor, "color:foreground");
   addsaver(bordcolor, "color:borders");
+  addsaver(dialog::dialogcolor, "color:dialog");
 
   // modes
     
@@ -1439,6 +1440,9 @@ int read_config_args() {
     }
   else if(argis("-fore")) {
     PHASEFROM(2); shift(); forecolor = arghex();
+    }
+  else if(argis("-dialog")) {
+    PHASEFROM(2); shift(); dialog::dialogcolor = arghex();
     }
   else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
   else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }

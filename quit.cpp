@@ -392,7 +392,7 @@ void showMission() {
     dialog::addInfo(XLAT("you have cheated %1 times", its(cheater)), 0xFF2020);
     }
   else {
-    dialog::addInfo(timeline(), 0xC0C0C0);
+    dialog::addInfo(timeline(), dialog::dialogcolor);
     }
   
   dialog::addBreak(100);
