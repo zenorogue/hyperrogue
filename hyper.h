@@ -2734,7 +2734,7 @@ cell *createMovR(cell *c, int d);
 
 bool ishept(cell *c);
 int cdist50(cell *c);
-int polarb50(cell *c);
+bool polarb50(cell *c);
 
 bool isGravityLand(eLand l);
 bool isWarped(eLand l);
@@ -2952,7 +2952,7 @@ void sdltogl(SDL_Surface *txt, struct glfont_t& f, int ch);
 void showStartMenu();
 
 bool polara50(int x);
-int polara50(cell *c);
+bool polara50(cell *c);
 int fiftyval049(cell *c);
 
 namespace fieldpattern {

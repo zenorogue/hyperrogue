@@ -138,19 +138,19 @@ int land50(cell *c) {
     }
   }
 
-int polara50(cell *c) {
-  if(sphere || euclid || S7>7 || S6>6) return 0;
+bool polara50(cell *c) {
+  if(sphere || euclid || S7>7 || S6>6) return false;
   else if(NONSTDVAR) return polara50(fiftyval(c->master->c7));
   else if(ctof(c)) return polara50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
       if(cdist50(ar[i]->fiftyval) < 3) return polara50(ar[i]->fiftyval);
-    return 0;
+    return false;
     }
   }
 
-int polarb50(cell *c) {
+bool polarb50(cell *c) {
   if(euclid) return true;
   if(sphere || euclid || S7>7 || S6>6) return true;
   else if(NONSTDVAR) return polarb50(fiftyval(c->master->c7));
@@ -159,7 +159,7 @@ int polarb50(cell *c) {
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
       if(cdist50(ar[i]->fiftyval) < 3) return polarb50(ar[i]->fiftyval);
-    return 0;
+    return false;
     }
   }
 
@@ -189,7 +189,8 @@ int fiftyval049(cell *c) {
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
-    int pa = polara50(c), pb = polarb50(c);
+    bool pa = polara50(c);
+    bool pb = polarb50(c);
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
       if(polara50(ar[i]->fiftyval) == pa && polarb50(ar[i]->fiftyval) == pb)
@@ -2089,7 +2090,7 @@ namespace linepatterns {
         break;
       
       case patPalace: {
-        int a = polarb50(c);
+        bool a = polarb50(c);
         if(pseudohept(c)) for(int i=0; i<7; i++) {
             cell *c1 = createMov(c, (i+3) % 7);
             cell *c2 = createMov(c, (i+4) % 7);
