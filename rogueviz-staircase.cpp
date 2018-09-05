@@ -104,9 +104,14 @@ void make_texture() {
 
 int savetex;
 
+#if ISWEB
+int prec = 1;
+int maxr = 100;
+#else
 int prec = 4;
 
 int maxr = 1000;
+#endif
 
 bool on;
 
@@ -208,7 +213,9 @@ void showMenu() {
   dialog::addItem(XLAT("disable menu"), SDLK_ESCAPE);
   dialog::addBoolItem(XLAT("low quality"), prec == 1, '1');
   dialog::addBoolItem(XLAT("medium quality"), prec == 2, '2');
+#if !ISWEB
   dialog::addBoolItem(XLAT("high quality"), prec == 4, '3');
+#endif
   dialog::addItem(XLAT("take me back"), 'q');
 
   dialog::display();
@@ -273,10 +280,12 @@ void showMenu() {
       prec = 2, maxr = 300;
       make_staircase();
       }
+#if !ISWEB
     else if(uni == '3') {
       prec = 4, maxr = 1000;
       make_staircase();
       }
+#endif
     else if(uni == 'q') {
       ctick = 0;
       rug::close();
