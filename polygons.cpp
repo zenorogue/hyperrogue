@@ -267,7 +267,7 @@ void addpoint(const hyperpoint& H) {
         }
       else {
         poly_flags |= POLY_NOTINFRONT;
-        tofix.push_back(make_pair(glcoords.size(), H));
+        tofix.emplace_back(isize(glcoords), H);
         add1(H);
         return;
         }
