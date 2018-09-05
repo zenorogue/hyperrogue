@@ -949,6 +949,7 @@ void dqi_poly::draw() {
   
   #if CAP_GL
     if(vid.usingGL) {
+      poly_flags &= ~(POLY_VCONVEX | POLY_CCONVEX);
       // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = stereo::scrdist;
       if(tinf && (poly_flags & POLY_INVERSE)) {
         return; 
