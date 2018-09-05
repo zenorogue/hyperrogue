@@ -4218,6 +4218,9 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at);
 
 extern bool game_active, playerfound;
 
+extern bool twopoint_do_flips;
+extern int twopoint_sphere_flips;
+
 string bygen(reaction_t h);
 
 #if CAP_URL
