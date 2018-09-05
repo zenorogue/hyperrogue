@@ -508,6 +508,10 @@ void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
 
+#if ISWEB
+  timetowait = 0;
+#endif
+
   if(timetowait > 0)
     SDL_Delay(timetowait);
   else {
