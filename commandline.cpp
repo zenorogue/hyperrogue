@@ -129,6 +129,12 @@ int arg::readCommon() {
   else if(argis("--draw")) {
     PHASE(3); drawscreen();
     }
+  else if(argis("--rotate")) {
+    PHASE(3); 
+    shift(); ld a = argf();
+    shift(); ld b = argf();
+    View = View * spin(M_PI * 2 * a / b);
+    }
   else if(argis("--exit")) {
     PHASE(3); printf("Success.\n");
     exit(0);
