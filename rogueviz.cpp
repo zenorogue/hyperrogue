@@ -441,9 +441,9 @@ namespace tree {
     }
     
   void read(string fn) {
-    tree_edge = add_edgetype("tree edge");
     fname = fn;
     init(); kind = kTree;
+    tree_edge = add_edgetype("tree edge");
     printf("Reading the tree of life...\n");
     FILE *f = fopen(fname.c_str(), "rt");
     if(!f) { printf("Failed to open tree file: %s\n", fname.c_str()); exit(1); }
@@ -473,7 +473,7 @@ namespace tree {
       vd.cp = dftcolor; 
       
       if(tol[i].parent >= 0) 
-        addedge(i, tol[i].parent, 0, true, tree_edge);
+        addedge(i, tol[i].parent, 1, true, tree_edge);
       }
     
     for(int i=0; i<isize(vdata); i++) {
