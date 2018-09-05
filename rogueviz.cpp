@@ -961,6 +961,73 @@ bool edgecmp(edgeinfo *e1, edgeinfo *e2) {
   return e1->weight > e2->weight;
   }
 
+bool which_weight = false;
+
+void rogueviz_help(int id, int pagenumber) {
+
+  vertexdata& vd = vdata[id];
+  int noedges = isize(vd.edges);
+  help = helptitle(vd.name, vd.cp.color1 >> 8);
+
+  if(vd.info) {
+    #if CAP_URL
+    help_extension hex;
+    hex.key = 'L';
+    hex.text = "open link";
+    hex.subtext = *vd.info;
+    hex.action = [&vd] () { open_url(*vd.info); };
+    help_extensions.push_back(hex);
+    #else
+    help += "\n\nlink: " + *vd.info;
+    #endif
+    }
+  
+  vector<edgeinfo*> alledges;
+  
+  for(int j=0; j<isize(vd.edges); j++) 
+    alledges.push_back(vd.edges[j].second);
+  
+  sort(alledges.begin(), alledges.end(), edgecmp);
+
+  for(int i=0; i<10 && i+pagenumber < noedges; i++) {
+    help_extension hex;
+    hex.key = 'a' + i;
+
+    edgeinfo *ei = alledges[pagenumber + i];
+    if(ei->weight < ei->type->visible_from) continue;
+    int k = ei->i ^ ei->j ^ id;
+    hex.text = vdata[k].name;
+    hex.color = vdata[k].cp.color1 >> 8;
+    if(kind == kSAG) {
+      if(which_weight)
+        hex.subtext = fts(ei->weight2);
+      else
+        hex.subtext = fts(ei->weight);
+      }
+
+    hex.action = [k] () { help_extensions.clear(); rogueviz_help(k, 0); };
+    help_extensions.push_back(hex);
+    }
+
+  if(noedges > pagenumber + 10) {
+    help_extension hex;
+    hex.key = 'z';
+    hex.text = "next page";
+    hex.subtext = its(pagenumber+10) + "/" + its(noedges) + " edges";
+    hex.action = [id, pagenumber] () { help_extensions.clear(); rogueviz_help(id, pagenumber + 10); };
+    help_extensions.push_back(hex);
+    }
+  
+  if(kind == kSAG && noedges) {
+    help_extension hex;
+    hex.key = 'w';
+    hex.text = "displayed weight";
+    hex.subtext = which_weight ? "attraction force" : "weight from the data";
+    hex.action = [id, pagenumber] () { which_weight = !which_weight; help_extensions.clear(); rogueviz_help(id, pagenumber); };
+    help_extensions.push_back(hex);
+    }
+  }
+
 bool describe_monster(shmup::monster *m, string& out) {
 
   if(m->type != moRogueviz) return false;
@@ -974,25 +1041,7 @@ bool describe_monster(shmup::monster *m, string& out) {
       o += " " + its(snakedist(vd.snakeid, vd.edges[i]->snakeid));
     } */
   
-  vector<edgeinfo*> alledges;
-  
-  for(int j=0; j<isize(vd.edges); j++) 
-    alledges.push_back(vd.edges[j].second);
-  
-  sort(alledges.begin(), alledges.end(), edgecmp);
-    
-  hr::help = "Edges: ";
-
-  if(vd.info) hr::help = (*vd.info) + "\n" + help;
-
-  for(int j=0; j<isize(alledges); j++) {
-    edgeinfo *ei = alledges[j];
-    if(ei->weight < ei->type->visible_from) continue;
-    int k = ei->i ^ ei->j ^ i;
-    help += vdata[k].name;
-    if(kind == kSAG)
-      help += "/" + fts(ei->weight)+":" + fts(ei->weight2) + " ";
-    }
+  help = bygen([i] () { rogueviz_help(i, 0); });
   
   if(out == XLATN("Canvas")) out = o;
   else out = out + ", " + o;
