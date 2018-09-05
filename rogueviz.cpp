@@ -1113,12 +1113,12 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     poly_outline = p; 
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
     queuepolyat(V1 = mscale(V, geom3::BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
     }
   else {
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
     queuepoly(V1 = V, sh, darken_a(cp.color1));
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
     }
   if(cp.shade == 't') queuepoly(V1, shDiskT, darken_a(cp.color2));
   if(cp.shade == 's') queuepoly(V1, shDiskS, darken_a(cp.color2));
@@ -1298,7 +1298,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, (svg::in || ISWEB) ? 0 : 1);
-      if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = ""; });
+      if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
       }
     }
 
