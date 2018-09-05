@@ -122,7 +122,7 @@ void resetTabFont() {
   ftv = fonttable;
   }
   
-void loadCompressedChar(int &otwidth, int &otheight, int *tpix) {
+void loadCompressedChar(int &otwidth, int &otheight, unsigned char *tpix) {
   if(*ftv == 255) {
     fprintf(stderr, "There is something wrong with the font table\n");
     exit(1);
@@ -139,7 +139,7 @@ void loadCompressedChar(int &otwidth, int &otheight, int *tpix) {
       while(q--) *(tpix++) = x;
       }
     else {
-      *(tpix++) = (x << 24) | 0xFFFFFF;
+      *(tpix++) = x;
       left--;
       }
     }

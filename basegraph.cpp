@@ -335,11 +335,7 @@ struct glfont_t {
 
 glfont_t *glfont[256];
 
-#if CAP_TABFONT
-typedef int texturepixel;
-#else
 typedef Uint16 texturepixel;
-#endif
 
 #define FONTTEXTURESIZE 2048
 
@@ -349,7 +345,8 @@ texturepixel fontdata[FONTTEXTURESIZE][FONTTEXTURESIZE];
 void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 #if CAP_TABFONT
   if(ch < 32) return;
-  int otwidth, otheight, tpix[3000], tpixindex = 0;
+  int otwidth, otheight, tpixindex = 0;
+  unsigned char tpix[3000];
   loadCompressedChar(otwidth, otheight, tpix);
 #else
   if(!txt) return;
@@ -364,7 +361,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   for(int j=0; j<otheight;j++) for(int i=0; i<otwidth; i++) {
     fontdata[j+cury][i+curx] = 
 #if CAP_TABFONT
-    (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
+    (i>=otwidth || j>=otheight) ? 0 : (tpix[tpixindex++] * 0x100) | 0xFF;
 #else
     ((i>=txt->w || j>=txt->h) ? 0 : ((qpixel(txt, i, j)>>24)&0xFF) * 0x100) | 0x00FF;
 #endif
@@ -442,12 +439,8 @@ void init_glfont(int size) {
   
   theight = next_p2(cury + theight);
   
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, FONTTEXTURESIZE, theight, 0,
-#if CAP_TABFONT
-    GL_RGBA, GL_UNSIGNED_BYTE, 
-#else
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, FONTTEXTURESIZE, theight, 0,
     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
-#endif
     fontdata);
 
   for(int ch=0; ch<CHARS; ch++) f.ty0[ch] /= theight, f.ty1[ch] /= theight;
