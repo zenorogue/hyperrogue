@@ -963,6 +963,7 @@ void dqi_poly::draw() {
         tab = &glcoords;
         offset = 0;
         cnt = isize(glcoords);
+        flags = poly_flags;
         gldraw();
         swap(tinf->tvertices, tv);
         }
@@ -972,6 +973,7 @@ void dqi_poly::draw() {
         offset = 0;
         cnt = isize(glcoords);
         if(nofill) color = 0, tinf = NULL;
+        flags = poly_flags;
         gldraw();
         }
       continue;
