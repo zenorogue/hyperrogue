@@ -1552,7 +1552,10 @@ void init() {
   addMessage("RogueViz enabled");
   }
 
+int search_for = -1;
+
 void close() { 
+  search_for = -1;
   for(int i=0; i<isize(vdata); i++)
     if(vdata[i].m) vdata[i].m->dead = true;
   vdata.clear();
@@ -1806,6 +1809,50 @@ void configure_edge_display() {
   dialog::display();
   }
 
+void search_marker() {
+  if(search_for >= 0 && search_for < isize(vdata)) {
+    auto& vd = vdata[search_for];
+    auto& m = vd.m;
+    if(!m) return;
+    hyperpoint H = ggmatrix(m->base) * tC0(m->at);
+    queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sin(ticks / 150.)));
+    addauraspecial(H, iinf[itOrbYendor].color, 0);
+    }
+  }
+
+void showVertexSearch() {
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  gamescreen(0); search_for = -1;
+
+  dialog::init(XLAT("vertex search"));
+  dialog::v.clear();
+  if(dialog::infix != "") mouseovers = dialog::infix;
+  
+  for(int i=0; i<isize(vdata); i++) if(vdata[i].name != "") dialog::vpush(i, vdata[i].name.c_str());
+  
+  for(int i=0; i<9; i++) {
+    if(i < isize(dialog::v)) {
+      int id = dialog::v[i].second;
+      dialog::addItem(dialog::v[i].first, '1'+i);
+      dialog::add_action([id] () { 
+        search_for = id; 
+        popScreenAll(); 
+        });
+      }
+    else dialog::addBreak(100);
+    }
+
+  dialog::addSelItem("matching items", its(isize(dialog::v)), 0);
+  dialog::display();
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);    
+    if(dialog::editInfix(uni)) ;
+    else if(doexiton(sym, uni)) popScreen();
+    };
+
+  }
+
 void showMenu() {
   if(staircase::on) { staircase::showMenu(); return; }
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
@@ -1823,6 +1870,9 @@ void showMenu() {
     dialog::addSelItem(XLAT("edge types"), its(isize(edgetypes)), 'g');
   dialog::addBoolItem(XLAT("vertices in 3D"), rog3, 'v');
   dialog::addSelItem(XLAT("vertex shape"), its(vertex_shape), 'w');
+
+  dialog::addItem(XLAT("vertex search"), '/');
+  dialog::add_action([] () { pushScreen(showVertexSearch); });
   
   if(kind == kKohonen)
     kohonen::showMenu();
@@ -2190,6 +2240,7 @@ auto hooks  =
     return rogueviz::on;
     }) +
   addHook(hooks_default_help, 100, default_help) +
+  addHook(hooks_markers, 100, search_marker) +
  0;
 
 };
