@@ -15,7 +15,7 @@ int detaillevel = 0;
 
 hookset<bool(int sym, int uni)> *hooks_handleKey;
 hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
-purehookset hooks_frame;
+purehookset hooks_frame, hooks_markers;
 
 #define WOLNIEJ 1
 #define BTOFF 0x404040
@@ -4973,6 +4973,7 @@ void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
   
+  callhooks(hooks_markers);
   viewmat();
   
   for(cell *c1: crush_now) 
