@@ -197,6 +197,9 @@ void emscripten_get_commandline() {
         i += 2;
         next += strtol(s2.c_str(), NULL, 16);
         }
+      else if(s[i] == '&') { 
+        arg::argument.push_back(next); break; 
+        }
       else next += s[i];
       }
     printf("Arguments:"); for(string s: arg::argument) printf(" %s", s.c_str()); printf("\n");
