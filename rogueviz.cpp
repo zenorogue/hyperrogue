@@ -1373,7 +1373,7 @@ vector<cell*> named;
 bool rogueviz_hud() {
   if(!rogueviz::on) return false;
   if(cmode & sm::DRAW) return false;
-  if(legend.empty()) return true;
+  if(legend.empty() && isize(edgetypes) < 2) return true;
 
   initquickqueue();
   int qet = isize(edgetypes);
