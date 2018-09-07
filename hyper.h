@@ -2550,6 +2550,7 @@ struct dqi_poly : drawqueueitem {
   double linewidth;
   int flags;
   textureinfo *tinf;
+  hyperpoint intester;
   void draw();
   void gldraw();
   void draw_back();
@@ -3598,6 +3599,7 @@ struct hpcshape {
   int s, e;
   PPR prio;
   int flags;
+  hyperpoint intester;
   };
 
 extern hpcshape shFullCross[2];

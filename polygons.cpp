@@ -16,8 +16,6 @@ ld xcross(ld x1, ld y1, ld x2, ld y2) {
   return x1 + (x2 - x1) * y1 / (y1 - y2);
   }
 
-hyperpoint intester;
-
 // draw the lines
 static const int POLY_DRAWLINES = 1;
 // draw the area
@@ -61,6 +59,9 @@ static const int POLY_NOTINFRONT = (1<<16);
 
 // points moved to the outline cross the image, disable
 static const int POLY_NIF_ERROR = (1<<17);
+
+// new system of side checking 
+static const int POLY_BADCENTERIN = (1<<18);
 
 vector<hyperpoint> hpc;
 
@@ -892,6 +893,15 @@ void dqi_poly::draw() {
         outline = (flags & POLY_CENTERIN) ? 0x00FF00FF : 0xFF0000FF;
         addpoint(hscr); */
         }
+      
+      /*
+      if(poly_flags & POLY_BADCENTERIN) {
+        glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+        glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
+        glcoords.push_back(make_array<GLfloat>(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
+        glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
+        glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+        } */
       }
     
     else {
@@ -1072,6 +1082,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev) {
   ptd.outline = col;
   ptd.flags = POLY_ISSIDE;
   ptd.tinf = NULL;
+  ptd.intester = C0;
   ptd.draw();
   }
 
@@ -1090,6 +1101,7 @@ void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, i
   ptd.outline = linecol;
   ptd.flags = POLY_ISSIDE;
   ptd.tinf = NULL;
+  ptd.intester = C0;
   ptd.draw();
   }
   
@@ -1191,7 +1203,7 @@ void sort_drawqueue() {
   
   int siz = isize(ptds);
 
-  #if MINIMIZE_GL_CALLS  
+  #if MINIMIZE_GL_CALLS
   unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
   for(auto& p: ptds) subqueue[p->outline_group()].push_back(move(p));
   ptds.clear();
@@ -1486,15 +1498,35 @@ void finishshape() {
   if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
 
-  for(int i=last->s; i<last->e-1; i++) {
-    ld x1 = hpc[i][0] - intester[0], y1 = hpc[i][1] - intester[1], x2 = hpc[i+1][0] - intester[0], y2 = hpc[i+1][1] - intester[1];
-    if(asign(y1, y2)) {
-      ld x = xcross(x1, y1, x2, y2);
-      if(abs(x) < 1e-6 && !(last->flags & POLY_ISSIDE)) {
-        printf("close call, x = %lf\n", x);
-        }
-      if(x < 0) last->flags ^= POLY_CENTERIN;
+  for(int s=0; s<4; s++) {
+    last->intester = C0;
+    if(s == 0) {
+      for(int i=last->s; i<last->e-1; i++)  
+      for(int j=0; j<3; j++)
+        last->intester[j] += hpc[i][j];
+      last->intester = mid(last->intester, last->intester);
       }
+    
+    if(s == 2)
+      last->intester = hpxy(.5, .2);
+
+    if(s == 3)
+      last->intester = hpxy(.2, .2518);
+
+    last->flags &=~ POLY_BADCENTERIN;
+    
+    for(int i=last->s; i<last->e-1; i++) {
+      ld x1 = hpc[i][0] - last->intester[0], y1 = hpc[i][1] - last->intester[1], x2 = hpc[i+1][0] - last->intester[0], y2 = hpc[i+1][1] - last->intester[1];
+      if(asign(y1, y2)) {
+        ld x = xcross(x1, y1, x2, y2);
+        if(abs(x) < 1e-3 && !(last->flags & POLY_ISSIDE)) {
+          printf("close call [%d], x = %lf\n", s, x);
+          last->flags |= POLY_BADCENTERIN;
+          }
+        if(x < 0) last->flags ^= POLY_CENTERIN;
+        }
+      }
+    if(!(last->flags & POLY_BADCENTERIN)) break;
     }
   
   bool allplus = true, allminus = true;
@@ -1664,8 +1696,6 @@ ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 
 void buildpolys() {
  
-  intester = hpxy(1e-3, 1.3e-3);
-
   symmetriesAt.clear();
   allshapes.clear();
   geom3::compute();
@@ -2517,6 +2547,7 @@ dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR 
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
   ptd.tinf = NULL;
+  ptd.intester = h.intester;
   return ptd;
   }
 
@@ -2535,8 +2566,9 @@ dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, c
   ptd.color = fillcol;
   ptd.outline = linecol;
   ptd.linewidth = vid.linewidth;
-  ptd.flags = 0;
+  ptd.flags = POLY_ISSIDE;
   ptd.tinf = NULL;
+  ptd.intester = C0;
   return ptd;
   }
 
