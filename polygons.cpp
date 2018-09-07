@@ -960,22 +960,25 @@ void dqi_poly::draw() {
         for(int i=0; i<cnt; i++)
           tv.push_back(tinf->tvertices[offset+i]);
         swap(tinf->tvertices, tv);
-        V = Id;
-        tab = &glcoords;
-        offset = 0;
-        cnt = isize(glcoords);
-        flags = poly_flags;
-        gldraw();
+        dqi_poly npoly = (*this);
+        npoly.V = Id;
+        npoly.tab = &glcoords;
+        npoly.offset = 0;
+        npoly.cnt = isize(glcoords);
+        npoly.flags = poly_flags;
+        npoly.gldraw();
         swap(tinf->tvertices, tv);
         }
       else {
-        V = Id;
-        tab = &glcoords;
-        offset = 0;
-        cnt = isize(glcoords);
-        if(nofill) color = 0, tinf = NULL;
-        flags = poly_flags;
-        gldraw();
+        dqi_poly npoly = (*this);
+        npoly.V = Id;
+        npoly.tab = &glcoords;
+        npoly.offset = 0;
+        npoly.cnt = isize(glcoords);
+        npoly.flags = poly_flags;
+        npoly.gldraw();
+        if(nofill) npoly.color = 0, npoly.tinf = NULL;
+        npoly.gldraw();
         }
       continue;
       }
