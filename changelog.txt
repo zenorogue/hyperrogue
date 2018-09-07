@@ -2678,3 +2678,24 @@ Vector graphics editor:
 * the editor now displays the area of the currently drawn shape
 * fixed angle measurement and grid display (it was supposed to measure angles relative to the previous grid center)
 
+2018.09.07 16:19 Update 10.4u
+
+* fixed some glitches in spherical projections
+
+Web demo:
+* greatly improved the efficiency
+* CUSTOM_CAPTION can be configured (used in pentagonal exploration)
+* better text on white background
+
+RogueViz:
+* draw legend if there are multiple edge types even if no standard legend is present
+* fixed help in RogueViz kohonen
+* load/save compressed data in RogueViz kohonen
+* vertex search feature in RogueViz
+* fixed some bugs with drawing edges
+* rogueviz:: greatly improved vertex help
+* fixed bugs with white background
+* open URLs from Emscripten
+* commandline option to rotate
+* Pentagonal Exploration added
+* fixed some bugs in the RogueViz Presentation
