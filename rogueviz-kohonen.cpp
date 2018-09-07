@@ -69,7 +69,7 @@ double vnorm(kohvec& a, kohvec& b) {
   return diff;
   }
 
-void sominit(int);
+void sominit(int, bool load_compressed = false);
 void uninit(int);
 
 bool noshow = false;
@@ -497,8 +497,6 @@ int krad;
 
 double ttpower = 1;
 
-void sominit(int);
-
 void step() {
 
   if(t == 0) return;
@@ -627,11 +625,11 @@ void showbestsamples() {
 
 int kohrestrict = 1000000;
   
-void sominit(int initto) {
+void sominit(int initto, bool load_compressed) {
 
   if(inited < 1 && initto >= 1) {
     inited = 1;
-    if(!samples) {
+    if(!samples && !load_compressed) {
       fprintf(stderr, "Error: SOM without samples\n");
       exit(1);
       }
@@ -660,6 +658,7 @@ void sominit(int initto) {
       net[i].where->land = laCanvas;
       alloc(net[i].net);
   
+      if(samples)
       for(int k=0; k<columns; k++)
       for(int z=0; z<initdiv; z++)
         net[i].net[k] += data[hrand(samples)].val[k] / initdiv;
@@ -1204,6 +1203,125 @@ bool handleMenu(int sym, int uni) {
   return false;
   }
 
+  void saveFloat(float x) { mapstream::save(x); }
+  float loadFloat() { float x; mapstream::load(x); return x; }
+
+void save_compressed(string name) {
+  // save everything in compressed form
+  mapstream::f = fopen(name.c_str(), "wb");
+  if(!mapstream::f) {
+    printf("failed to open for save_compressed: %s\n", name.c_str());
+    return;
+    }
+  // save columns
+  mapstream::save(columns);
+  for(int i=0; i<columns; i++) mapstream::saveString(colnames[i]);
+  for(int i=0; i<columns; i++) saveFloat(weights[i]);
+  // save neurons
+  int N = isize(net);
+  mapstream::save(N);
+  for(int i=0; i<N; i++)
+    for(int j=0; j<columns; j++) saveFloat(net[i].net[j]);
+  // save shown samples
+  map<int, int> saved_id;
+  int ss = isize(sample_vdata_id);
+  mapstream::save(ss);
+  int index = 0;
+  for(auto p: sample_vdata_id) {
+    int i = p.first;
+    for(int j=0; j<columns; j++) saveFloat(data[i].val[j]);
+    mapstream::saveString(data[i].name);
+    int id = p.second;
+    saved_id[id] = index++;
+    auto& vd = vdata[id];
+    mapstream::save(vd.cp);
+    }
+  // save edge types
+  int qet = isize(edgetypes);
+  mapstream::save(qet);
+  for(auto&et: edgetypes) {
+    mapstream::saveString(et->name);
+    saveFloat(et->visible_from);
+    mapstream::save(et->color);
+    }
+  // save edge infos
+  int qei = isize(edgeinfos);
+  mapstream::save(qei);
+  for(auto& ei: edgeinfos) {
+    for(int x=0; x<isize(edgetypes); x++)
+      if(ei->type == &*edgetypes[x]) mapstream::saveChar(x);
+    mapstream::save(saved_id[ei->i]);
+    mapstream::save(saved_id[ei->j]);
+    saveFloat(ei->weight);
+    }
+  fclose(mapstream::f);
+  }
+
+void load_compressed(string name) {
+  // save everything in compressed form
+  mapstream::f = fopen(name.c_str(), "rb");
+  if(!mapstream::f) {
+    printf("failed to open for load_compressed: %s\n", name.c_str());
+    return;
+    }
+  // load columns
+  mapstream::load(columns);
+  colnames.resize(columns);
+  for(int i=0; i<columns; i++) colnames[i] = mapstream::loadString();
+  alloc(weights);
+  for(int i=0; i<columns; i++) weights[i] = loadFloat();
+  samples = 0; sominit(1, true);
+  // load neurons
+  int N = mapstream::loadInt();
+  if(cells != N) {
+    fprintf(stderr, "Error: bad number of cells (N=%d c=%d)\n", N, cells);
+    exit(1);
+    }
+  for(neuron& n: net)
+    for(int k=0; k<columns; k++) 
+      n.net[k] = loadFloat();
+  // load data
+  samples = mapstream::loadInt();
+  data.resize(samples);
+  int id = 0;
+  for(auto& d: data) {
+    alloc(d.val);
+    for(int j=0; j<columns; j++) {
+      float x;
+      mapstream::load(x);
+      d.val[j] = x;
+      }
+    d.name = mapstream::loadString();
+    int i = vdata.size();
+    sample_vdata_id[id] = i;
+    vdata.emplace_back();
+    auto& v = vdata.back();
+    v.name = data[i].name;
+    mapstream::load(v.cp);
+    createViz(i, cwt.at, Id);
+    v.m->store();
+    id++;
+    }
+  // load edge types
+  int qet = mapstream::loadInt();
+  for(int i=0; i<qet; i++) {
+    auto et = add_edgetype(mapstream::loadString());
+    et->visible_from = loadFloat();
+    mapstream::load(et->color);
+    }
+  // load edge infos
+  int qei = mapstream::loadInt();
+  for(int i=0; i<qei; i++) {
+    auto t = edgetypes[mapstream::loadChar()];
+    int ei = mapstream::loadInt();
+    int ej = mapstream::loadInt();
+    float w = loadFloat();
+    addedge(ei, ej, w, true, &*t);
+    }
+  fclose(mapstream::f);
+  analyze();
+  }
+
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
@@ -1366,6 +1484,14 @@ int readArgs() {
   else if(argis("-less-edges")) {
     shift(); double d = argf();
     for(auto t: edgetypes) t->visible_from *= d;
+    }
+  else if(argis("-som-save-compressed")) {
+    shift(); 
+    save_compressed(args());
+    }
+  else if(argis("-som-load-compressed")) {
+    shift(); 
+    load_compressed(args());
     }
 
   else return 1;

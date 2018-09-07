@@ -74,36 +74,44 @@ namespace mapeditor {
 #endif
   }
 
-#if CAP_EDIT
 namespace mapstream {
+  FILE *f;
+
+  void savePoint(const hyperpoint& h) {
+    for(int i=0; i<3; i++) { double x = h[i]; save(x); }
+    }
+
+  hyperpoint loadPoint() {
+    hyperpoint h;
+    for(int i=0; i<3; i++) { double x; load(x); h[i] = x; }
+    return h;
+    }  
+  
+  void saveString(const string& s) {
+    saveChar(isize(s));
+    for(char c: s) saveChar(c);
+    }
+
+  string loadString() {
+    string s;
+    int l = loadChar();
+    for(int i=0; i<l; i++) s += loadChar();
+    return s;
+    }
+  }
+
+namespace mapstream {
+#if CAP_EDIT
   std::map<cell*, int> cellids;
   vector<cell*> cellbyid;
   vector<char> relspin;
   
-  FILE *f;
   
   void addToQueue(cell* c) {
     if(cellids.count(c)) return;
     int numcells = isize(cellbyid);
     cellbyid.push_back(c);
     cellids[c] = numcells;
-    }
-  
-  void saveChar(char c) { fwrite(&c, 1, 1, f); }
-  template<class T> void save(T& c) { fwrite(&c, sizeof(T), 1, f); }
-
-  char loadChar() { char c; int i=fread(&c, 1, 1, f); if(i!=1) return 0; else return c; }
-  template<class T> int load(T& c) { return fread(&c, sizeof(T), 1, f); }
-  int32_t loadInt() { int i; if(load(i) < 1) return -1; else return i; }
-  
-  void savePoint(const hyperpoint& h) {
-    for(int i=0; i<3; i++) { double x = h[i]; save(x); }
-    }
-  
-  hyperpoint loadPoint() {
-    hyperpoint h;
-    for(int i=0; i<3; i++) { double x; load(x); h[i] = x; }
-    return h;
     }
   
   bool saveMap(const char *fname) {
@@ -131,12 +139,7 @@ namespace mapstream {
         save(fgeomextras[current_extra].current_prime_id);
         }
       }
-    if(geometry == gArchimedean) {
-      const string& symbol = arcm::current.symbol;
-      char size = isize(symbol);
-      save(size);
-      for(int i=0; i<size; i++) save(symbol[i]);
-      }
+    if(geometry == gArchimedean) saveString(arcm::current.symbol);
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
@@ -231,10 +234,7 @@ namespace mapstream {
         }
       if(geometry == gArchimedean) {
         string& symbol = arcm::current.symbol;
-        char size;
-        load(size);
-        symbol.resize(size);
-        for(int i=0; i<size; i++) load(symbol[i]);
+        symbol = loadString();
         arcm::current.parse();
         if(arcm::current.errors > 0) {
           printf("Errors! %s\n", arcm::current.errormsg.c_str());
@@ -356,8 +356,8 @@ namespace mapstream {
     return true;
     }
   
-  }
 #endif
+  }
 
 namespace mapeditor {
 

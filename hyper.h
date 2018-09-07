@@ -4030,5 +4030,18 @@ string bygen(reaction_t h);
 void open_url(string s);
 #endif
 
+namespace mapstream {
+  extern FILE *f;
+
+  inline void saveChar(char c) { fwrite(&c, 1, 1, f); }
+  template<class T> void save(T& c) { fwrite(&c, sizeof(T), 1, f); }
+
+  inline char loadChar() { char c; int i=fread(&c, 1, 1, f); if(i!=1) return 0; else return c; }
+  template<class T> int load(T& c) { return fread(&c, sizeof(T), 1, f); }
+  inline int32_t loadInt() { int i; if(load(i) < 1) return -1; else return i; }
+  void saveString(const string& s);
+  string loadString();
+  }
+
 }
 
