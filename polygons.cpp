@@ -1505,6 +1505,8 @@ void finishshape() {
 
     if(s == 3)
       last->intester = hpxy(.2, .2518);
+    // prevent zeros
+    last->intester = rgpushxto0(hpxy(1.4e-8, 1.7e-8)) * last->intester;
 
     last->flags &=~ (POLY_BADCENTERIN | POLY_CENTERIN);
     
