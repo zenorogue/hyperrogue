@@ -1506,14 +1506,14 @@ void finishshape() {
     if(s == 3)
       last->intester = hpxy(.2, .2518);
 
-    last->flags &=~ POLY_BADCENTERIN;
+    last->flags &=~ (POLY_BADCENTERIN | POLY_CENTERIN);
     
     for(int i=last->s; i<last->e-1; i++) {
       ld x1 = hpc[i][0] - last->intester[0], y1 = hpc[i][1] - last->intester[1], x2 = hpc[i+1][0] - last->intester[0], y2 = hpc[i+1][1] - last->intester[1];
       if(asign(y1, y2)) {
         ld x = xcross(x1, y1, x2, y2);
         if(abs(x) < 1e-3 && !(last->flags & POLY_ISSIDE)) {
-          printf("close call [%d], x = %lf\n", s, x);
+          if(s >= 2) printf("close call [%d], x = %lf\n", s, x);
           last->flags |= POLY_BADCENTERIN;
           }
         if(x < 0) last->flags ^= POLY_CENTERIN;
