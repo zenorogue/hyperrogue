@@ -4043,5 +4043,7 @@ namespace mapstream {
   string loadString();
   }
 
+void appendHelp(string s);
+
 }
 

@@ -719,10 +719,11 @@ void describe_cell(cell *c) {
   if(kind != kKohonen) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
-  help += "cell number: " + its(neuronId(*n)) + " (" + its(n->allsamples) + ")\n";
-  help += "parameters:"; for(int k=0; k<columns; k++) help += " " + fts(n->net[k]); 
-  help += ", u-matrix = " + fts(n->udist);
-  help += "\n";
+  string h;
+  h += "cell number: " + its(neuronId(*n)) + " (" + its(n->allsamples) + ")\n";
+  h += "parameters:"; for(int k=0; k<columns; k++) h += " " + fts(n->net[k]); 
+  h += ", u-matrix = " + fts(n->udist);
+  h += "\n";
   vector<pair<double, int>> v;
   for(int s=0; s<samples; s++) if(whowon[s] == n) v.emplace_back(vnorm(n->net, data[s].val), s);
   for(int i=1; i<isize(v); i++) swap(v[i], v[rand() % (i+1)]);
@@ -730,10 +731,11 @@ void describe_cell(cell *c) {
   
   for(int i=0; i<isize(v) && i<20; i++) {
     int s = v[i].second;
-    help += "sample "+its(s)+":"; 
-    for(int k=0; k<columns; k++) help += " " + fts(data[s].val[k]); 
-    help += " "; help += data[s].name; help += "\n";
+    h += "sample "+its(s)+":"; 
+    for(int k=0; k<columns; k++) h += " " + fts(data[s].val[k]); 
+    h += " "; h += data[s].name; h += "\n";
     }
+  appendHelp(h);
   }
 
 namespace levelline {
