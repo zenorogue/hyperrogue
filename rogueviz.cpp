@@ -29,6 +29,8 @@
 
 namespace rogueviz {
 
+const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
+
 using namespace hr;
 
 edgetype default_edgetype = { .1, DEFAULT_COLOR, "default" };
@@ -1166,7 +1168,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
     if(hilite) ghilite = true;
     
-    bool multidraw = quotient || elliptic || torus;
+    bool multidraw = quotient || torus;
         
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
@@ -1193,14 +1195,17 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       alpha >>= darken;
 
       transmatrix gm1 = 
-        multidraw ? V * memo_relative_matrix(vd1.m->base, c) :
+        (multidraw || elliptic) ? V * memo_relative_matrix(vd1.m->base, c) :
         ggmatrix(vd1.m->base);
       transmatrix gm2 = 
-        multidraw ? V * memo_relative_matrix(vd2.m->base, c) :
+        (multidraw || elliptic) ? V * memo_relative_matrix(vd2.m->base, c) :
         ggmatrix(vd2.m->base);
                 
       hyperpoint h1 = gm1 * vd1.m->at * C0;
       hyperpoint h2 = gm2 * vd2.m->at * C0;
+      
+      if(elliptic && intval(h1, h2) > intval(h1, centralsym * h2))
+        h2 = centralsym * h2;
       
       if(multidraw) {
         int code = int(h1[0]) + int(h1[1]) * 12789117 + int(h2[0]) * 126081253 + int(h2[1]) * 126891531;
@@ -1272,6 +1277,9 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
             storeline(ei->prec, T*h1, T*h2);
           }
         queuetable(multidraw ? V : ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
+          PPR::STRUCT0);
+        if(elliptic)
+        queuetable(centralsym * ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
           PPR::STRUCT0);
         }
       }
