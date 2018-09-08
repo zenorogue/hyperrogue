@@ -39,6 +39,7 @@ void init();
 
 bool showlabels = false;
 bool specialmark = false;
+bool edge_legend = false;
 
 bool rog3 = false;
 int vertex_shape = 1;
@@ -1381,13 +1382,15 @@ vector<cell*> named;
 bool rogueviz_hud() {
   if(!rogueviz::on) return false;
   if(cmode & sm::DRAW) return false;
-  if(legend.empty() && isize(edgetypes) < 2) return true;
+
+  int qet = isize(edgetypes);
+  if(qet == 1 || !edge_legend) qet = 0;
+
+  int legit = qet + isize(legend);
+  
+  if(legit == 0) return true;
 
   initquickqueue();
-  int qet = isize(edgetypes);
-  if(qet == 1) qet = 0;
-  
-  int legit = qet + isize(legend);
   
   int rad = vid.radius/10;
   ld x = vid.xres - rad;
@@ -1747,6 +1750,9 @@ int readArgs() {
     }
   else if(argis("-nolegend")) {
     legend.clear();
+    }
+  else if(argis("-edgelegend")) {
+    edge_legend = true;
     }
   else if(argis("-rvshape")) {
     shift(); vertex_shape = argi() & 3;
