@@ -160,12 +160,10 @@ void addMessage(string s, char spamtype = 0);
 typedef double ld;
 #define LDF "%lf"
 #define PLDF "lf"
-#define ASINH asinh
 #else
 typedef long double ld;
 #define LDF "%Lf"
 #define PLDF "Lf"
-#define ASINH asinhl
 #endif
 
 #define DEBMEM(x) // { x fflush(stdout); }
@@ -1669,16 +1667,26 @@ namespace dialog {
     double param;
     int position;
     };
+  
+  struct scaler {
+    ld (*direct) (ld);
+    ld (*inverse) (ld);
+    bool positive;
+    };
+  
+  static inline ld identity_f(ld x) { return x; };
+  
+  const static scaler identity = {identity_f, identity_f, false};
+  const static scaler logarithmic = {log, exp, true};
+  const static scaler asinhic = {asinh, sinh, false};
  
   struct numberEditor {
     ld *editwhat;
     string s;
     ld vmin, vmax, step, dft;
     string title, help;
-    ld (*scale) (ld);
-    ld (*inverse_scale) (ld);
+    scaler sc;
     int *intval; ld intbuf;
-    bool positive;
     };
   
   extern numberEditor ne;
@@ -1710,8 +1718,8 @@ namespace dialog {
 
   void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help);
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help);
-  void scaleLog();
-  void scaleSinh();
+  inline void scaleLog() { ne.sc = logarithmic; }
+  inline void scaleSinh() { ne.sc = asinhic; }
   void handleNavigation(int &sym, int &uni);
   
   namespace zoom {

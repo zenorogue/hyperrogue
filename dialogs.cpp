@@ -588,19 +588,6 @@ namespace dialog {
     return ne.editwhat == &geom3::highdetail || ne.editwhat == &geom3::middetail;
     }
   
-  ld identity(ld x) { return x; }
-  
-  void scaleSinh() {
-    ne.scale = ASINH;
-    ne.inverse_scale = sinh;
-    }
-  
-  void scaleLog() {
-    ne.scale = log;
-    ne.inverse_scale = exp;
-    ne.positive = true;
-    }
-  
   int ldtoint(ld x) {
     if(x > 0) return int(x+.5);
     else return int(x-.5);
@@ -622,7 +609,7 @@ namespace dialog {
       if(kind == 's') {
         ld x;
         sscanf(ne.s.c_str(), LDF, &x);
-        if(ne.positive && x <= 0) return;
+        if(ne.sc.positive && x <= 0) return;
         *ne.editwhat = x;
         }
       if(kind == 'v') ne.s = disp(*ne.editwhat);
@@ -717,7 +704,7 @@ namespace dialog {
     gamescreen(numberdark);
     init(ne.title);
     addInfo(ne.s);
-    addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
+    addSlider(ne.sc.direct(ne.vmin), ne.sc.direct(*ne.editwhat), ne.sc.direct(ne.vmax), 500);
     addBreak(100);
 #if ISMOBILE==0
     addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
@@ -743,7 +730,7 @@ namespace dialog {
     
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || (uni == '.' && !ne.intval) || (uni == '-' && !ne.positive)) {
+      if((uni >= '0' && uni <= '9') || (uni == '.' && !ne.intval) || (uni == '-' && !ne.sc.positive)) {
         ne.s += uni;
         affect('s');
         }
@@ -757,14 +744,14 @@ namespace dialog {
         if(ne.intval && abs(shiftmul) < .6)
           (*ne.editwhat)++;
         else
-          *ne.editwhat = ne.inverse_scale(ne.scale(*ne.editwhat) + shiftmul * ne.step);
+          *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) + shiftmul * ne.step);
         affect('v');
         }
       else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
         if(ne.intval && abs(shiftmul) < .6)
           (*ne.editwhat)--;
         else
-          *ne.editwhat = ne.inverse_scale(ne.scale(*ne.editwhat) - shiftmul * ne.step);
+          *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) - shiftmul * ne.step);
         affect('v');
         }
   #endif
@@ -780,7 +767,7 @@ namespace dialog {
           sl = vid.xres/4, sr = vid.xres*3/4;
         ld d = (mousex - sl + .0) / (sr-sl);
         *ne.editwhat = 
-          ne.inverse_scale(d * (ne.scale(ne.vmax) - ne.scale(ne.vmin)) + ne.scale(ne.vmin));
+          ne.sc.inverse(d * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
         affect('v');
         }
       else if(doexiton(sym, uni)) popScreen();
@@ -845,9 +832,8 @@ namespace dialog {
     ne.dft = dft;
     ne.title = title;
     ne.help = help;
-    ne.scale = ne.inverse_scale = identity;
+    ne.sc = identity;
     ne.intval = NULL;
-    ne.positive = false;
     dialogflags = (cmode & sm::A3);
     if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
     cmode |= sm::NUMBER;
