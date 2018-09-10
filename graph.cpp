@@ -5046,9 +5046,9 @@ void drawMarkers() {
 #if CAP_MODEL
     m = netgen::mode == 0;
 #endif
-    if(centerover.at && !playermoved && m && !conformal::on)
-      queuecircleat(centerover.at, .70 - .06 * sin(ticks/200.0), 
-        darkena(int(175 + 25 * sin(ticks / 200.0)), 0, 0xFF));
+    if(centerover.at && !playermoved && m && !anims::any_animation())
+      queuecircleat(centerover.at, .70 - .06 * sintick(200), 
+        darkena(int(175 + 25 * sintick(200)), 0, 0xFF));
 
     if(multi::players > 1 || multi::alwaysuse) for(int i=0; i<numplayers(); i++) {
       multi::cpid = i;
@@ -5636,12 +5636,14 @@ void gamescreen(int _darken) {
   
   if(conformal::includeHistory) conformal::restore();
 
+  anims::apply();
 #if CAP_RUG
   if(rug::rugged) {
     rug::actDraw();
     } else
 #endif
   wrap_drawfullmap();
+  anims::rollback();
 
   if(conformal::includeHistory) conformal::restoreBack();
 

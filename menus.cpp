@@ -350,7 +350,7 @@ void showDisplayMode() {
 
   dialog::addBoolItem(XLAT("models of hyperbolic geometry"), pmodel, 'a');
 
-  dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'A');
+  dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'A');
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   showAllConfig();
@@ -393,7 +393,7 @@ void showDisplayMode() {
     else if(uni == 'a')
       pushScreen(conformal::model_menu);
     else if(uni == 'A')
-      pushScreen(conformal::history_menu);
+      pushScreen(anims::show);
   
   #if CAP_MODEL
     else if(xuni == 'n') 

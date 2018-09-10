@@ -76,6 +76,10 @@
 #define CAP_FILES 1
 #endif
 
+#ifndef CAP_ANIMATIONS
+#define CAP_ANIMATIONS (!CAP_MINI)
+#endif
+
 #ifndef CAP_INV
 #define CAP_INV 1
 #endif

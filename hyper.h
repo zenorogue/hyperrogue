@@ -4089,5 +4089,16 @@ void curvepoint(const hyperpoint& H1);
 dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
 ld cos_auto(ld x);
 
+namespace anims {
+  void apply();
+  void rollback();
+  void show();
+  bool any_on();
+  bool any_animation();
+  bool center_music();
+  }
+
+extern int animation_lcm;
+extern ld animation_factor;
 }
 

@@ -337,5 +337,400 @@ int png_read_args() {
 
 auto ah_png = addHook(hooks_args, 0, png_read_args);
 #endif
+
+#endif
+
+#if CAP_ANIMATIONS
+namespace anims {
+
+enum eMovementAnimation {
+  maNone, maTranslation, maRotation, maCircle, maParabolic
+  };
+
+eMovementAnimation ma;
+
+ld shift_angle, movement_angle;
+ld period = 10000;
+int noframes = 30;
+ld cycle_length = 2 * M_PI;
+ld parabolic_length = 1;
+
+int lastticks, bak_turncount;
+
+ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
+ld rug_angle;
+
+heptspin rotation_center_h;
+cellwalker rotation_center_c;
+transmatrix rotation_center_View;
+
+color_t circle_display_color = 0x00FF00FF;
+
+ld circle_radius = acosh(2.), circle_spins = 1;
+
+void moved() {
+  optimizeview();
+  if(cheater || autocheat) 
+    setdist(masterless ? centerover.at : viewctr.at->c7, 7 - getDistLimit() - genrange_bonus, NULL);
+  playermoved = false;
+  }
+
+struct animatable_parameter {
+  ld& value;
+  dialog::scaler sc;
+  ld values[2];
+  bool need_reset;
+  animatable_parameter(ld& val, bool r = false) : value(val), sc(dialog::identity), need_reset(r) {}
+  animatable_parameter(ld& val, dialog::scaler s) : value(val), sc(s), need_reset(false) {}
+  };
+
+vector<animatable_parameter> animatable_parameters = {
+  animatable_parameter(vid.scale, dialog::asinhic),
+  animatable_parameter(vid.alpha, dialog::asinhic),
+  animatable_parameter(vid.linewidth),
+  animatable_parameter(vid.xposition),
+  animatable_parameter(vid.yposition),
+  animatable_parameter(vid.ballangle),
+  animatable_parameter(vid.yshift),
+  animatable_parameter(polygonal::STAR),
+  animatable_parameter(stereo::ipd),
+  animatable_parameter(stereo::lr_eyewidth),
+  animatable_parameter(stereo::anaglyph_eyewidth),
+  animatable_parameter(stereo::fov),
+  animatable_parameter(vid.euclid_to_sphere),
+  animatable_parameter(vid.twopoint_param),
+  animatable_parameter(vid.stretch),
+  animatable_parameter(vid.binary_width, true),
+  animatable_parameter(geom3::depth, false),
+  animatable_parameter(geom3::camera, true),
+  animatable_parameter(geom3::wall_height, true),
+  animatable_parameter(vid.ballproj),
+  animatable_parameter(surface::dini_b),
+  animatable_parameter(surface::hyper_b),
+  };
+
+ld anim_param = 0;
+int paramstate = 0;
+
+bool needs_highqual;
+
+void apply() {
+  int t = ticks - lastticks;
+  lastticks = ticks;
+  switch(ma) {
+    case maTranslation:
+      if(conformal::on) {
+        conformal::phase = (isize(conformal::v) - 1) * ticks * 1. / period;
+        conformal::movetophase();        
+        }
+      else {
+        View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * xpush(cycle_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
+          spin(-movement_angle * M_PI / 180) * View;
+        moved();
+        }
+      break;
+    case maRotation:
+      View = spin(2 * M_PI * t / period) * View;
+      break;
+    case maParabolic:
+      View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * binary::parabolic(parabolic_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
+        spin(-movement_angle * M_PI / 180) * View;
+      moved();
+      break;
+    case maCircle: {
+      if(masterless) centerover = rotation_center_c;
+      else viewctr = rotation_center_h;
+      ld alpha = circle_spins * 2 * M_PI * ticks / period;
+      View = spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * rotation_center_View;
+      moved();
+      break;
+      }
+    default: 
+      break;
+    }
+  if(env_ocean) {
+    turncount += env_ocean * ticks * tidalsize / period;
+    calcTidalPhase();
+    for(auto& p: gmatrix) if(p.first->land == laOcean) checkTide(p.first);
+    turncount -= ticks * tidalsize / period;
+    }
+  if(env_volcano) {
+    bak_turncount = turncount;
+    turncount += env_volcano * ticks * 64 / period;
+    for(auto& p: gmatrix) if(p.first->land == laVolcano) checkTide(p.first);
+    }
+  if(rug::rugged) {
+    if(rug_rotation1) {
+      rug::apply_rotation(rotmatrix(rug_angle * M_PI / 180, 1, 2));
+      rug::apply_rotation(rotmatrix(rug_rotation1 * 2 * M_PI * t / period, 0, 2));
+      rug::apply_rotation(rotmatrix(-rug_angle * M_PI / 180, 1, 2));
+      }
+    if(rug_rotation2) {
+      rug::apply_rotation(rug::currentrot * rotmatrix(rug_rotation2 * 2 * M_PI * t / period, 0, 1) * inverse(rug::currentrot));
+      }
+    }
+  if(ballangle_rotation)
+    vid.ballangle += ballangle_rotation * 360 * t / period;
+  if(paramstate == 2 && anim_param) {
+    ld phase = (1 + sin(anim_param * 2 * M_PI * ticks / period)) / 2;
+    for(auto& ap: animatable_parameters) if(ap.values[0] != ap.values[1]) {
+      ap.value = ap.sc.inverse(ap.sc.direct(ap.values[0]) * phase + ap.sc.direct(ap.values[1]) * (1-phase));
+      if(ap.need_reset) {
+        if(!inHighQual) needs_highqual = true;
+        else need_reset_geometry = true;
+        }
+      if(&ap.value == &surface::hyper_b) run_shape(surface::dsHyperlike);
+      if(&ap.value == &surface::dini_b) {
+        if(!inHighQual) needs_highqual = true;
+        else surface::run_shape(surface::dsDini);
+        }
+      }
+    if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
+    calcparam();
+    }
+  }
+
+void rollback() {
+  if(env_volcano) {
+    turncount = bak_turncount;
+    }
+  }
+
+#if CAP_FILES
+string animfile = "animations/animation-%04d.png";
+
+bool record_animation() {
+  for(int i=0; i<noframes; i++) {
+    ticks = i * period / noframes;
+    
+    char buf[1000];
+    snprintf(buf, 1000, animfile.c_str(), i);
+    saveHighQualityShot(buf);
+    }
+  return true;
+  }
+#endif
+
+void display_animation() {
+  if(ma == maCircle && (circle_display_color & 0xFF)) {
+    for(int s=0; s<10; s++) {
+      for(int z=0; z<100; z++) curvepoint(ggmatrix(rotation_center_c.at) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      queuecurve(circle_display_color, 0, PPR::LINE);
+      }
+    if(sphere) for(int s=0; s<10; s++) {
+      for(int z=0; z<100; z++) curvepoint(centralsym * ggmatrix(rotation_center_c.at) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      queuecurve(circle_display_color, 0, PPR::LINE);
+      }
+    }
+  }
+
+void next_paramstate() {
+  if(paramstate == 2) {
+    for(auto& ap: animatable_parameters)  ap.values[0] = ap.values[1];
+    paramstate--;
+    }
+  for(auto& ap: animatable_parameters) 
+    ap.values[paramstate] = ap.value;
+  paramstate++;
+  }
+
+void animator(string caption, ld& param, char key) {
+  dialog::addBoolItem(caption, param, key);
+  if(param) dialog::lastItem().value = fts(param);
+  dialog::add_action([&param, caption] () { 
+    if(param == 0) {
+      param = 1;
+      dialog::editNumber(param, 0, 10, 1, 1, caption, ""); 
+      }
+    else param = 0;
+    });
+  }
+
+ld animation_period;
+
+void show() {
+  cmode = sm::SIDE; needs_highqual = false;
+  animation_lcm = 1;
+  gamescreen(0);
+  animation_period = 2 * M_PI * animation_lcm / animation_factor;
+  dialog::init(XLAT("animations"), iinf[itPalace].color, 150, 100);
+  dialog::addSelItem("period", fts(period)+ " ms", 'p');
+  dialog::add_action([] () { dialog::editNumber(period, 0, 10000, 1000, 200, "period", ""); });
+  if(animation_lcm > 1) {
+    dialog::addSelItem("game animation period", fts(animation_period)+ " ms", 'G');
+    dialog::add_action([] () {
+      dialog::editNumber(animation_period, 0, 10000, 1000, 1000, "game animation period", ""); 
+      dialog::reaction = [] () { animation_factor = 2 * M_PI * animation_lcm / animation_period; };
+      dialog::extra_options = [] () {
+        dialog::addItem("default", 'D');
+        dialog::add_action([] () {
+          animation_factor = 1;
+          popScreen();
+          });
+        };
+      });
+    }
+  dialog::addBoolItem("no movement", ma == maNone, '0');
+  dialog::add_action([] () { ma = maNone; });
+  dialog::addBoolItem("translation", ma == maTranslation, '1');
+  dialog::add_action([] () { ma = maTranslation; });
+  dialog::addBoolItem("rotation", ma == maRotation, '2');
+  dialog::add_action([] () { ma = maRotation; });
+  if(hyperbolic) {
+    dialog::addBoolItem("parabolic", ma == maParabolic, '3');
+    dialog::add_action([] () { ma = maParabolic; });
+    }
+  dialog::addBoolItem("circle", ma == maCircle, '4');
+  dialog::add_action([] () { ma = maCircle; 
+    rotation_center_h = viewctr;
+    rotation_center_c = centerover;
+    rotation_center_View = View;
+    });
+  switch(ma) {
+    case maCircle: {
+      animator("circle spins", circle_spins, 's');
+      dialog::addSelItem("circle radius", fts(circle_radius), 'c');
+      dialog::add_action([] () { 
+        dialog::editNumber(circle_radius, 0, 10, 0.1, acosh(1.), "circle radius", ""); 
+        dialog::extra_options = [] () {
+          if(hyperbolic) {
+            // area = 2pi (cosh(r)-1) 
+            dialog::addSelItem("double spin", fts(acosh(2.)), 'a');
+            dialog::add_action([] () { circle_radius = acosh(2.); });
+            dialog::addSelItem("triple spin", fts(acosh(3.)), 'b');
+            dialog::add_action([] () { circle_radius = acosh(3.); });
+            }
+          if(sphere) {
+            dialog::addSelItem("double spin", fts(acos(1/2.)), 'a');
+            dialog::add_action([] () { circle_radius = acos(1/2.); });
+            dialog::addSelItem("triple spin", fts(acos(1/3.)), 'b');
+            dialog::add_action([] () { circle_radius = acos(1/3.); });
+            }
+          };
+        });
+      dialog::addColorItem("draw the circle", circle_display_color, 'd');
+      dialog::add_action([] () {
+        dialog::openColorDialog(circle_display_color, NULL);
+        });
+      dialog::addBreak(100);
+      }
+    case maTranslation: 
+    case maParabolic: {
+      if(ma == maTranslation && conformal::on)
+        dialog::addBreak(300);
+      else if(ma == maTranslation) {
+        dialog::addSelItem("cycle length", fts(cycle_length), 'c');
+        dialog::add_action([] () { 
+          dialog::editNumber(cycle_length, 0, 10, 0.1, 2*M_PI, "shift", ""); 
+          dialog::extra_options = [] () {
+            dialog::addSelItem("full circle", fts(2 * M_PI), 'a');
+            dialog::add_action([] () { cycle_length = 2 * M_PI; });
+            dialog::addSelItem("Zebra period", fts(2.898149445355172), 'b');
+            dialog::add_action([] () { cycle_length = 2.898149445355172; });
+            dialog::addSelItem("Bolza period", fts(2 * tessf), 'c');
+            dialog::add_action([] () { cycle_length = 2 * tessf; printf("tessf = %lf\n", double(tessf)); });
+            };
+          });
+        }
+      else {
+        dialog::addSelItem("cells to go", fts(parabolic_length), 'c');
+        dialog::add_action([] () { 
+          dialog::editNumber(parabolic_length, 0, 10, 1, 1, "cells to go", ""); 
+          });
+        }
+      dialog::addSelItem("shift", fts(shift_angle) + "°", 's');
+      dialog::add_action([] () { 
+        dialog::editNumber(shift_angle, 0, 90, 15, 0, "shift", ""); 
+        });
+      dialog::addSelItem("movement angle", fts(movement_angle) + "°", 'm');
+      dialog::add_action([] () { 
+        dialog::editNumber(movement_angle, 0, 360, 15, 0, "movement angle", ""); 
+        });
+      break;
+      }
+    default: {
+      dialog::addBreak(300);
+      }
+    }
+  animator("Ocean", env_ocean, 'o');
+  animator("Volcanic Wasteland", env_volcano, 'v');
+
+  #if CAP_RUG
+  if(rug::rugged) {
+    animator("rotate the Rug", rug_rotation1, 'r');
+    if(rug_rotation1) { 
+      dialog::addSelItem("Rug angle", fts(rug_angle) + "°", 'a');
+      dialog::add_action([] () { 
+        dialog::editNumber(rug_angle, 0, 360, 15, 0, "Rug angle", ""); 
+        });
+      }
+    else dialog::addBreak(100);
+    animator("rotate the Rug (2)", rug_rotation2, 'r');
+    dialog::addBoolItem("rotate the Rug (2)", rug_rotation2, 'u');
+    animator("move the Rug", rug::ruggo, 'M');
+    }
+  #endif
+  if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
+    animator("3D rotation", ballangle_rotation, 'r');
+  
+  animator("animate parameter change", anim_param, 'P');
+  dialog::addSelItem("choose parameters to animate", its(paramstate), 'C');
+  dialog::add_action(next_paramstate);
+
+  dialog::addBoolItem("history", (conformal::on || conformal::includeHistory), 'h');
+  dialog::add_action([] () { pushScreen(conformal::history_menu); });
+
+  #if CAP_FILES  
+  if(needs_highqual) 
+    dialog::addInfo("some parameters will only change in recorded animation");
+  else
+    dialog::addBreak(100);
+  dialog::addSelItem("frames to record", its(noframes), 'n');
+  dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, "frames to record", ""); });
+  dialog::addSelItem("record to a file", animfile, 'R');
+  dialog::add_action([] () { 
+    dialog::openFileDialog(animfile, XLAT("record to a file"), ".png", record_animation);
+    });
+  #endif
+  dialog::addBack();
+  dialog::display();
+  }
+
+int readArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-animmenu")) {
+    PHASE(3); pushScreen(show);
+    }
+  else if(argis("-animparam")) {
+    PHASE(3); next_paramstate();
+    if(paramstate >= 2) anim_param = 1;
+    }
+  else return 1;
+  return 0;
+  }
+
+auto animhook = addHook(hooks_args, 100, readArgs)
+  + addHook(hooks_frame, 100, display_animation)
+  + 0;
+
+bool any_animation() {
+  if(conformal::on) return true;
+  if(ma) return true;
+  if(ballangle_rotation || rug_rotation1 || rug_rotation2) return true;
+  if(paramstate == 2) return true;
+  return false;
+  }
+
+bool any_on() {
+  return any_animation() || conformal::includeHistory;
+  }
+
+bool center_music() {
+  return among(ma, maParabolic, maTranslation);
+  }
+
+}
 #endif
 }
