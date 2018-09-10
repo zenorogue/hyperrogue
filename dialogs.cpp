@@ -446,13 +446,13 @@ namespace dialog {
           highlight_text = items[i].body;
       uni = sym = 0;
       }
-    if(key_actions.count(sym)) {
-      key_actions[sym]();
+    if(key_actions.count(uni)) {
+      key_actions[uni]();
       sym = uni = 0;
       return;
       }
-    if(key_actions.count(uni)) {
-      key_actions[uni]();
+    if(key_actions.count(sym)) {
+      key_actions[sym]();
       sym = uni = 0;
       return;
       }
