@@ -709,12 +709,56 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-animmenu")) {
-    PHASE(3); pushScreen(show);
+    PHASE(3); showstartmenu = false; pushScreen(show);
     }
   else if(argis("-animparam")) {
-    PHASE(3); next_paramstate();
+    PHASE(2); next_paramstate();
     if(paramstate >= 2) anim_param = 1;
     }
+  else if(argis("-animperiod")) {
+    PHASE(2); shift(); period = argf();
+    }
+  else if(argis("-animrecord")) {
+    PHASE(3); shift(); noframes = argi();
+    shift(); animfile = args(); record_animation();
+    }
+  else if(argis("-animcircle")) {
+    PHASE(3); start_game();
+    ma = maCircle; 
+    rotation_center_h = viewctr;
+    rotation_center_c = cwt.at;
+    rotation_center_View = View;
+    shift(); circle_spins = argf();
+    shift(); circle_radius = argf();
+    }
+  else if(argis("-animmove")) {
+    ma = maTranslation; 
+    shift(); cycle_length = argf();
+    shift(); shift_angle = argf();
+    shift(); movement_angle = argf();
+    }
+  else if(argis("-animpar")) {
+    ma = maParabolic; 
+    shift(); parabolic_length = argf();
+    shift(); shift_angle = argf();
+    shift(); movement_angle = argf();
+    }
+  else if(argis("-animrot")) {
+    ma = maRotation;
+    }
+  else if(argis("-animrug")) {
+    shift(); rug_rotation1 = argf();
+    shift(); rug_angle = argf();
+    shift(); rug_rotation2 = argf();
+    }
+  else if(argis("-animenv")) {
+    shift(); env_ocean = argf();
+    shift(); env_volcano = argf();
+    }
+  else if(argis("-animball")) {
+    shift(); ballangle_rotation = argf();
+    }
+
   else return 1;
   return 0;
   }
