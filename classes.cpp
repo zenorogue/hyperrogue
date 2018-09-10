@@ -1667,7 +1667,7 @@ geometryinfo ginf[gGUARD] = {
   {"elliptic",            "elliptic", 5, 3, qNONOR, gcSphere,           0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   {"Zebra quotient",      "Zebra",    7, 3, qSMALL | qZEBRA, gcHyperbolic, 0x00400, {{7, 5}}, eVariation::bitruncated},
   {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, 0x00200, {{7, 5}}, eVariation::bitruncated},
-  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     0x00600, {{7, FORBIDDEN}}, eVariation::bitruncated},
+  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     0x00600, {{7, 7}}, eVariation::bitruncated},
   {"octagons",            "oct",      8, 3, 0,      gcHyperbolic, 0x08000, {{6, 4}}, eVariation::bitruncated},
   {"four pentagons",      "4x5",      5, 4, 0,      gcHyperbolic, 0x08200, {{6, 4}}, eVariation::bitruncated},
   {"four hexagons",       "4x6",      6, 4, 0,      gcHyperbolic, 0x08400, {{5, 3}}, eVariation::bitruncated},
