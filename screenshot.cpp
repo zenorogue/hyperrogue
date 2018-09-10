@@ -284,8 +284,11 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     glbuf.clear(numi==1 ? backcolor : i ? 0xFFFFFF : 0);
     
     #if CAP_RUG
-    if(rug::rugged)
+    if(rug::rugged) {
+      if(!rug::renderonce) rug::prepareTexture();
+      glbuf.enable();
       rug::drawRugScene();
+      }
     else
     #endif
       drawfullmap();
@@ -510,7 +513,9 @@ bool record_animation() {
     
     char buf[1000];
     snprintf(buf, 1000, animfile.c_str(), i);
+    apply();
     saveHighQualityShot(buf);
+    rollback();
     }
   return true;
   }
