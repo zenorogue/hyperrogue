@@ -937,7 +937,7 @@ namespace dialog {
     keyhandler = handleKeyFile;
     }
   
-  void handleKeyFile(int uni, int sym) {
+  void handleKeyFile(int sym, int uni) {
     string& s(*cfileptr);
     int i = isize(s) - (editext?0:4);
     
