@@ -1781,10 +1781,7 @@ double chainAngle(cell *c, transmatrix& V, cell *c2, double dft, const transmatr
   if(!gmatrix0.count(c2)) return dft;
   hyperpoint h = C0;
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
-  if(inmirrorcount)
-    h = inverse(V) * Vwhere * inverse(gmatrix0[c]) * gmatrix0[c2] * h;
-  else
-    h = inverse(V) * gmatrix0[c2] * h;
+  h = inverse(V) * Vwhere * calc_relative_matrix(c2, c, C0) * h;
   return atan2(h[1], h[0]);
   }
 
@@ -1797,10 +1794,7 @@ bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, ld bonus, const tr
     }
   hyperpoint h = C0;
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
-  if(inmirrorcount)
-    h = inverse(V) * Vwhere * inverse(gmatrix0[c]) * gmatrix0[c2] * h;
-  else
-    h = inverse(V) * gmatrix0[c2] * h;
+  h = inverse(V) * Vwhere * calc_relative_matrix(c2, c, C0) * h;
   length = hdist0(h);
   V = V * rspintox(h);
   return true;  
