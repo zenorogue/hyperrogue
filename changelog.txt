@@ -2699,3 +2699,12 @@ RogueViz:
 * commandline option to rotate
 * Pentagonal Exploration added
 * fixed some bugs in the RogueViz Presentation
+
+2018.09.10 18:47 Update 10.4v
+
+* animation system
+* fixed the animation of snakelike creatures in quotient geometries
+* fixed keyboard movement in non-orientable geometries
+* fixed the sight range on non-bitruncated tori
+* fixed texts disappearing when scale is set to less than 0
+* number editor and command line parameters now accept expressions
