@@ -1382,6 +1382,7 @@ namespace patterns {
         if(col[j] > 120) col[j] = 240 - col[j];
         if(col[j] < -120) col[j] = -240 - col[j];
         }
+      if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + 8) / 17 * 17;
       return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
     if(whichCanvas == 'd') {
@@ -1397,6 +1398,7 @@ namespace patterns {
       col[0] /= 8;
       col[1] /= 8;
       col[2] /= 8;
+      if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + 1) / 2 * 2;
       return (0x101010 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
     if(whichCanvas == 'h') {
