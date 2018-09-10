@@ -627,8 +627,8 @@ void show() {
             dialog::add_action([] () { cycle_length = 2 * M_PI; });
             dialog::addSelItem("Zebra period", fts(2.898149445355172), 'b');
             dialog::add_action([] () { cycle_length = 2.898149445355172; });
-            dialog::addSelItem("Bolza period", fts(2 * tessf), 'c');
-            dialog::add_action([] () { cycle_length = 2 * tessf; printf("tessf = %lf\n", double(tessf)); });
+            dialog::addSelItem("Bolza period", fts(2 * 1.528571), 'c');
+            dialog::add_action([] () { cycle_length = 2 * 1.528571; });
             };
           });
         }
@@ -667,7 +667,15 @@ void show() {
     else dialog::addBreak(100);
     animator("rotate the Rug (2)", rug_rotation2, 'r');
     dialog::addBoolItem("rotate the Rug (2)", rug_rotation2, 'u');
-    animator("move the Rug", rug::ruggo, 'M');
+    animator(XLAT("automatic move speed"), rug::ruggo, 'M');
+    dialog::add_action([] () { 
+      dialog::editNumber(rug::ruggo, 0, 10, 1, 1, XLAT("automatic move speed"), XLAT("Move automatically without pressing any keys."));
+      if(among(rug::gwhere, gSphere, gElliptic)) 
+        dialog::extra_options = [] () {
+          dialog::addItem(XLAT("synchronize"), 'S');
+          dialog::add_action([] () { rug::ruggo = 2 * M_PI * 1000 / period; popScreen(); });
+          };
+      });
     }
   #endif
   if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
