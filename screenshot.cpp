@@ -542,7 +542,18 @@ void animator(string caption, ld& param, char key) {
   dialog::add_action([&param, caption] () { 
     if(param == 0) {
       param = 1;
-      dialog::editNumber(param, 0, 10, 1, 1, caption, ""); 
+      string s = 
+        XLAT(
+          "The value of 1 means that the period of this animation equals the period set in the animation menu. "
+          "Larger values correspond to faster animations.");
+        
+      if(&param == &anim_param)
+        s = XLAT(
+          "Most graphical parameters with real values can have their values changed during the animation. "
+          "To achieve this effect, 'choose parameters to animate', change the parameters to their final values "
+          "in the animation, and 'choose parameters to animate' again.\n\n") + s;
+      
+      dialog::editNumber(param, 0, 10, 1, 1, caption, s); 
       }
     else param = 0;
     });
@@ -556,12 +567,17 @@ void show() {
   gamescreen(0);
   animation_period = 2 * M_PI * animation_lcm / animation_factor;
   dialog::init(XLAT("animations"), iinf[itPalace].color, 150, 100);
-  dialog::addSelItem("period", fts(period)+ " ms", 'p');
-  dialog::add_action([] () { dialog::editNumber(period, 0, 10000, 1000, 200, "period", ""); });
+  dialog::addSelItem(XLAT("period"), fts(period)+ " ms", 'p');
+  dialog::add_action([] () { dialog::editNumber(period, 0, 10000, 1000, 200, XLAT("period"), 
+    XLAT("This is the period of the whole animation, though in some settings the animation can have a different period or be aperiodic. "
+      "Changing the value will make the whole animation slower or faster."
+    )); });
   if(animation_lcm > 1) {
-    dialog::addSelItem("game animation period", fts(animation_period)+ " ms", 'G');
+    dialog::addSelItem(XLAT("game animation period"), fts(animation_period)+ " ms", 'G');
     dialog::add_action([] () {
-      dialog::editNumber(animation_period, 0, 10000, 1000, 1000, "game animation period", ""); 
+      dialog::editNumber(animation_period, 0, 10000, 1000, 1000, XLAT("game animation period"), 
+        XLAT("Least common multiple of the animation periods of all the game objects on screen, such as rotating items.")
+        );
       dialog::reaction = [] () { animation_factor = 2 * M_PI * animation_lcm / animation_period; };
       dialog::extra_options = [] () {
         dialog::addItem("default", 'D');
@@ -572,17 +588,17 @@ void show() {
         };
       });
     }
-  dialog::addBoolItem("no movement", ma == maNone, '0');
+  dialog::addBoolItem(XLAT("no movement"), ma == maNone, '0');
   dialog::add_action([] () { ma = maNone; });
-  dialog::addBoolItem("translation", ma == maTranslation, '1');
+  dialog::addBoolItem(XLAT("translation"), ma == maTranslation, '1');
   dialog::add_action([] () { ma = maTranslation; });
-  dialog::addBoolItem("rotation", ma == maRotation, '2');
+  dialog::addBoolItem(XLAT("rotation"), ma == maRotation, '2');
   dialog::add_action([] () { ma = maRotation; });
   if(hyperbolic) {
-    dialog::addBoolItem("parabolic", ma == maParabolic, '3');
+    dialog::addBoolItem(XLAT("parabolic"), ma == maParabolic, '3');
     dialog::add_action([] () { ma = maParabolic; });
     }
-  dialog::addBoolItem("circle", ma == maCircle, '4');
+  dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
   dialog::add_action([] () { ma = maCircle; 
     rotation_center_h = viewctr;
     rotation_center_c = centerover;
@@ -590,27 +606,27 @@ void show() {
     });
   switch(ma) {
     case maCircle: {
-      animator("circle spins", circle_spins, 's');
-      dialog::addSelItem("circle radius", fts(circle_radius), 'c');
+      animator(XLAT("circle spins"), circle_spins, 's');
+      dialog::addSelItem(XLAT("circle radius"), fts(circle_radius), 'c');
       dialog::add_action([] () { 
-        dialog::editNumber(circle_radius, 0, 10, 0.1, acosh(1.), "circle radius", ""); 
+        dialog::editNumber(circle_radius, 0, 10, 0.1, acosh(1.), XLAT("circle radius"), ""); 
         dialog::extra_options = [] () {
           if(hyperbolic) {
             // area = 2pi (cosh(r)-1) 
-            dialog::addSelItem("double spin", fts(acosh(2.)), 'a');
+            dialog::addSelItem(XLAT("double spin"), fts(acosh(2.)), 'a');
             dialog::add_action([] () { circle_radius = acosh(2.); });
-            dialog::addSelItem("triple spin", fts(acosh(3.)), 'b');
+            dialog::addSelItem(XLAT("triple spin"), fts(acosh(3.)), 'b');
             dialog::add_action([] () { circle_radius = acosh(3.); });
             }
           if(sphere) {
-            dialog::addSelItem("double spin", fts(acos(1/2.)), 'a');
+            dialog::addSelItem(XLAT("double spin"), fts(acos(1/2.)), 'a');
             dialog::add_action([] () { circle_radius = acos(1/2.); });
-            dialog::addSelItem("triple spin", fts(acos(1/3.)), 'b');
+            dialog::addSelItem(XLAT("triple spin"), fts(acos(1/3.)), 'b');
             dialog::add_action([] () { circle_radius = acos(1/3.); });
             }
           };
         });
-      dialog::addColorItem("draw the circle", circle_display_color, 'd');
+      dialog::addColorItem(XLAT("draw the circle"), circle_display_color, 'd');
       dialog::add_action([] () {
         dialog::openColorDialog(circle_display_color, NULL);
         });
@@ -621,32 +637,32 @@ void show() {
       if(ma == maTranslation && conformal::on)
         dialog::addBreak(300);
       else if(ma == maTranslation) {
-        dialog::addSelItem("cycle length", fts(cycle_length), 'c');
+        dialog::addSelItem(XLAT("cycle length"), fts(cycle_length), 'c');
         dialog::add_action([] () { 
           dialog::editNumber(cycle_length, 0, 10, 0.1, 2*M_PI, "shift", ""); 
           dialog::extra_options = [] () {
-            dialog::addSelItem("full circle", fts(2 * M_PI), 'a');
+            dialog::addSelItem(XLAT("full circle"), fts(2 * M_PI), 'a');
             dialog::add_action([] () { cycle_length = 2 * M_PI; });
-            dialog::addSelItem("Zebra period", fts(2.898149445355172), 'b');
+            dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172), 'b');
             dialog::add_action([] () { cycle_length = 2.898149445355172; });
-            dialog::addSelItem("Bolza period", fts(2 * 1.528571), 'c');
+            dialog::addSelItem(XLAT("Bolza period"), fts(2 * 1.528571), 'c');
             dialog::add_action([] () { cycle_length = 2 * 1.528571; });
             };
           });
         }
       else {
-        dialog::addSelItem("cells to go", fts(parabolic_length), 'c');
+        dialog::addSelItem(XLAT("cells to go"), fts(parabolic_length), 'c');
         dialog::add_action([] () { 
           dialog::editNumber(parabolic_length, 0, 10, 1, 1, "cells to go", ""); 
           });
         }
-      dialog::addSelItem("shift", fts(shift_angle) + "°", 's');
+      dialog::addSelItem(XLAT("shift"), fts(shift_angle) + "°", 's');
       dialog::add_action([] () { 
-        dialog::editNumber(shift_angle, 0, 90, 15, 0, "shift", ""); 
+        dialog::editNumber(shift_angle, 0, 90, 15, 0, XLAT("shift"), ""); 
         });
-      dialog::addSelItem("movement angle", fts(movement_angle) + "°", 'm');
+      dialog::addSelItem(XLAT("movement angle"), fts(movement_angle) + "°", 'm');
       dialog::add_action([] () { 
-        dialog::editNumber(movement_angle, 0, 360, 15, 0, "movement angle", ""); 
+        dialog::editNumber(movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
         });
       break;
       }
@@ -654,21 +670,20 @@ void show() {
       dialog::addBreak(300);
       }
     }
-  animator("Ocean", env_ocean, 'o');
-  animator("Volcanic Wasteland", env_volcano, 'v');
+  animator(XLATN("Ocean"), env_ocean, 'o');
+  animator(XLATN("Volcanic Wasteland"), env_volcano, 'v');
 
   #if CAP_RUG
   if(rug::rugged) {
-    animator("rotate the Rug", rug_rotation1, 'r');
+    animator(XLAT("screen-relative rotation"), rug_rotation1, 'r');
     if(rug_rotation1) { 
-      dialog::addSelItem("Rug angle", fts(rug_angle) + "°", 'a');
+      dialog::addSelItem(XLAT("angle"), fts(rug_angle) + "°", 'a');
       dialog::add_action([] () { 
         dialog::editNumber(rug_angle, 0, 360, 15, 0, "Rug angle", ""); 
         });
       }
     else dialog::addBreak(100);
-    animator("rotate the Rug (2)", rug_rotation2, 'r');
-    dialog::addBoolItem("rotate the Rug (2)", rug_rotation2, 'u');
+    animator(XLAT("model-relative rotation"), rug_rotation2, 'r');
     animator(XLAT("automatic move speed"), rug::ruggo, 'M');
     dialog::add_action([] () { 
       dialog::editNumber(rug::ruggo, 0, 10, 1, 1, XLAT("automatic move speed"), XLAT("Move automatically without pressing any keys."));
@@ -681,23 +696,23 @@ void show() {
     }
   #endif
   if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
-    animator("3D rotation", ballangle_rotation, 'r');
+    animator(XLAT("3D rotation"), ballangle_rotation, 'r');
   
-  animator("animate parameter change", anim_param, 'P');
-  dialog::addSelItem("choose parameters to animate", its(paramstate), 'C');
+  animator(XLAT("animate parameter change"), anim_param, 'P');
+  dialog::addSelItem(XLAT("choose parameters to animate"), its(paramstate), 'C');
   dialog::add_action(next_paramstate);
 
-  dialog::addBoolItem("history", (conformal::on || conformal::includeHistory), 'h');
+  dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
   dialog::add_action([] () { pushScreen(conformal::history_menu); });
 
   #if CAP_FILES  
   if(needs_highqual) 
-    dialog::addInfo("some parameters will only change in recorded animation");
+    dialog::addInfo(XLAT("some parameters will only change in recorded animation"));
   else
     dialog::addBreak(100);
-  dialog::addSelItem("frames to record", its(noframes), 'n');
-  dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, "frames to record", ""); });
-  dialog::addSelItem("record to a file", animfile, 'R');
+  dialog::addSelItem(XLAT("frames to record"), its(noframes), 'n');
+  dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, XLAT("frames to record"), ""); });
+  dialog::addSelItem(XLAT("record to a file"), animfile, 'R');
   dialog::add_action([] () { 
     dialog::openFileDialog(animfile, XLAT("record to a file"), ".png", record_animation);
     });
