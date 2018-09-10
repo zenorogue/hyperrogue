@@ -91,7 +91,7 @@ void drawBlizzards() {
     bc.inid = 0;
     }
   
-  double at = (ticks % 250) / 250.0;
+  double at = fractick(40);
 
   for(int i=0; i<blizzard_N; i++) {
     auto& bc = *bcells[i];
@@ -216,8 +216,7 @@ void drawArrowTraps() {
       queueline(tC0(t0), tC0(t1), 0xFF0000FF, 4 + vid.linequality, PPR::ITEM);
       if((c->wparam & 7) == 3 && !shmup::on) {
 //        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR::ITEM);
-        int tt = ticks % 401;
-        if(tt < 0) tt += 401;
+        int tt = int(fractick(64) * 401);
         
         for(int u=0; u<2; u++) {
           transmatrix& tu = u ? t0 : t1;
