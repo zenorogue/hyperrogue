@@ -66,7 +66,7 @@ movedir vectodir(const hyperpoint& P) {
 
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T;
-    if(compute_relamatrix(cwt.at->modmove(cwt.spin + i), cwt.at, i, T)) {
+    if(compute_relamatrix((cwt+i).peek(), cwt.at, i, T)) {
       dirdist[i] = intval(U * T * C0, Centered * P);
       }
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
