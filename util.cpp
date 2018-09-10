@@ -145,4 +145,72 @@ struct indenter {
 
 void doindent() { for(int i=0; i<current_indentation; i++) printf(" "); }
 
+struct exp_parser {
+  string s;
+  int at;
+  exp_parser() { at = 0; }
+
+  bool ok() { return at == isize(s); }
+  char next() { if(at == isize(s) || at == -1) return 0; else return s[at]; }
+  
+  bool eat(const char *c) {
+    int orig_at = at;
+    while(*c && *c == next()) at++, c++;
+    if(*c == 0) return true;
+    else at = orig_at;
+    return false;
+    }
+
+  ld parse(int prio = 0) {
+    ld res;
+    if(eat("sin(")) res = sin(parsepar());
+    else if(eat("cos(")) res = cos(parsepar());
+    else if(eat("sinh(")) res = sinh(parsepar());
+    else if(eat("cosh(")) res = cosh(parsepar());
+    else if(eat("asin(")) res = asin(parsepar());
+    else if(eat("acos(")) res = acos(parsepar());
+    else if(eat("asinh(")) res = asinh(parsepar());
+    else if(eat("acosh(")) res = acosh(parsepar());
+    else if(eat("exp(")) res = exp(parsepar());
+    else if(eat("log(")) res = log(parsepar());
+    else if(next() == '(') at++, res = parsepar();
+    else {
+      string number;
+      while(true) {
+        char c = next();
+        if((c >= '0' && c <= '9') || among(c, 'e', 'p', '.'))
+          number += c, at++;
+        else break;
+        }
+      if(number == "e") res = exp(1);
+      else if(number == "p" || number == "pi") res = M_PI;
+      else if(number == "") at = -1;
+      else if(number[0] >= 'a' && number[0] <= 'z') at = -1;
+      else { std::stringstream ss; res = 0; ss << number; ss >> res; }
+      }
+    while(true) {
+      if(next() == '+' && prio == 0) at++, res = res + parse(1);
+      else if(next() == '-' && prio == 0) at++, res = res - parse(1);
+      else if(next() == '*' && prio <= 1) at++, res = res * parse(2);
+      else if(next() == '/' && prio <= 1) at++, res = res / parse(2);
+      else if(next() == '^') at++, res = pow(res, parse(3));
+      else break;
+      }
+    return res;
+    }
+
+  ld parsepar() {
+    ld res = parse();
+    if(next() != ')') { at = -1; return res; }
+    at++;
+    return res;
+    }  
+  };
+
+ld parseld(const string& s) {
+  exp_parser ep;
+  ep.s = s;
+  return ep.parse();
+  }
+
 }

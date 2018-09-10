@@ -4100,5 +4100,6 @@ namespace anims {
 
 extern int animation_lcm;
 extern ld animation_factor;
+ld parseld(const string& s);
 }
 
