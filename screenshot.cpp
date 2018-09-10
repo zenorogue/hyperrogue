@@ -424,6 +424,11 @@ void apply() {
         conformal::movetophase();        
         }
       else {
+        if(inmirror(centerover.at) || (hyperbolic && !quotient &&
+          centerover.at->land != cwt.at->land && among(centerover.at->land, laHaunted, laIvoryTower, laDungeon, laEndorian) && centerover.at->landparam >= 10
+          ) ) {
+          fullcenter(); View = spin(rand() % 1000) * View;
+          }
         View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * xpush(cycle_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
           spin(-movement_angle * M_PI / 180) * View;
         moved();
