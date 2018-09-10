@@ -198,6 +198,24 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   return R;
   }
 
+// identity matrix
+const static transmatrix Id = {{{1,0,0}, {0,1,0}, {0,0,1}}};
+
+// mirror image
+const static transmatrix Mirror = {{{1,0,0}, {0,-1,0}, {0,0,1}}};
+
+// mirror image
+const static transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
+
+// mirror image
+const static transmatrix MirrorZ = {{{1,0,0}, {0,1,0}, {0,0,-1}}};
+
+// rotate by PI
+const static transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
+
+// central symmetry
+const static transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
+
 #define hpxyz hyperpoint
 
 namespace hyperpoint_vec {
@@ -874,6 +892,8 @@ namespace shmup {
   void turn(int);
   extern monster *lmousetarget;
   void virtualRebase(shmup::monster *m, bool tohex);
+
+  extern monster *pc[MAXPLAYER];
   }
 
 transmatrix& ggmatrix(cell *c);
@@ -1229,6 +1249,7 @@ extern bool no_fog;
 extern ld lowrug, hirug, ruggospeed;
 extern GLuint alternate_texture;
 extern bool invert_depth;
+extern ld ruggo;
 #endif
   }
 
@@ -2906,7 +2927,6 @@ extern ld backbrightness;
 void initcells();
 void precalc();
 extern const hyperpoint C0;
-extern const transmatrix Id;
 
 extern long long circlesize[100], disksize[100];
 extern ld circlesizeD[10000];
@@ -3340,6 +3360,8 @@ namespace surface {
   enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere };
   extern eShape sh;
   void show_surfaces();
+  void run_shape(eShape);
+  extern ld hyper_b, dini_b;
   
   }
 #endif
@@ -3426,8 +3448,6 @@ struct supersaver {
 typedef vector<shared_ptr<supersaver>> saverlist;
 
 extern saverlist savers;
-
-extern const transmatrix Mirror;
 
 extern string ftssmart(ld x);
 
@@ -3893,6 +3913,7 @@ namespace gamestack {
 
 namespace geom3 {
   extern ld BODY;
+  extern ld depth, camera, wall_height;
   }
 
 void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame = 0, int align = 8);
@@ -3946,6 +3967,7 @@ void horopoint(ld y, ld x);
 
 namespace binary {
   heptagon *createStep(heptagon *parent, int d);
+  transmatrix parabolic(ld u);
   }
 
 namespace arcm {
@@ -4054,6 +4076,17 @@ namespace mapstream {
   }
 
 void appendHelp(string s);
+
+transmatrix rspintox(const hyperpoint& H);
+
+extern bool playermoved;
+
+extern int tidalsize;
+extern void calcTidalPhase();
+
+void curvepoint(const hyperpoint& H1);
+dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
+ld cos_auto(ld x);
 
 }
 

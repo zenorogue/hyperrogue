@@ -231,24 +231,6 @@ hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
 // matrices represent isometries of the hyperbolic plane
 // (just like isometries of the sphere are represented by rotation matrices)
 
-// identity matrix
-const transmatrix Id = {{{1,0,0}, {0,1,0}, {0,0,1}}};
-
-// mirror image
-const transmatrix Mirror = {{{1,0,0}, {0,-1,0}, {0,0,1}}};
-
-// mirror image
-const transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
-
-// mirror image
-const transmatrix MirrorZ = {{{1,0,0}, {0,1,0}, {0,0,-1}}};
-
-// rotate by PI
-const transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
-
-// central symmetry
-const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
-
 // rotate by alpha degrees
 transmatrix spin(ld alpha) {
   transmatrix T = Id;
