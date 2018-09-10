@@ -752,6 +752,7 @@ int readArgs() {
     rotation_center_View = View;
     shift(); circle_spins = argf();
     shift(); circle_radius = argf();
+    shift(); circle_display_color = arghex();
     }
   else if(argis("-animmove")) {
     ma = maTranslation; 
