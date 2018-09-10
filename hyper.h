@@ -916,7 +916,8 @@ void drawBigFlash(cell* c);
 void drawParticle(cell *c, color_t col, int maxspeed = 100);
 void drawParticles(cell *c, color_t col, int qty, int maxspeed = 100);
 void drawFireParticles(cell *c, int qty, int maxspeed = 100);
-int firecolor(int phase);
+
+int firecolor(int phase = 0, int mul = 1);
 
 void drawLightning();
 void drawSafety();

@@ -108,16 +108,16 @@ int firegradient(double p) {
   return gradient(0xFFFF00, 0xFF0000, 0, p, 1);
   }
   
-int firecolor(int phase) {
-  return gradient(0xFFFF00, 0xFF0000, -1, sin((phase + ticks)/100.0), 1);
+int firecolor(int phase, int mul) {
+  return gradient(0xFFFF00, 0xFF0000, -1, sintick(100*mul, phase/200./M_PI), 1);
   }
 
 int watercolor(int phase) {
-  return 0x0080C0FF + 256 * int(63 * sin((ticks + phase) / 50.));
+  return 0x0080C0FF + 256 * int(63 * sintick(50, phase/100./M_PI));
   }
 
 int aircolor(int phase) {
-  return 0x8080FF00 | int(32 + 32 * sin(ticks/200.0 + 2 * phase * M_PI / (S21+.0)));
+  return 0x8080FF00 | int(32 + 32 * sintick(200, phase * 1. / S21));
   }
 
 int fghostcolor(cell *c) {
@@ -130,7 +130,7 @@ int fghostcolor(cell *c) {
   }
 
 int weakfirecolor(int phase) {
-  return gradient(0xFF8000, 0xFF0000, -1, sin((phase + ticks)/500.0), 1);
+  return gradient(0xFF8000, 0xFF0000, -1, sintick(500, phase/1000./M_PI), 1);
   }
 
 color_t fc(int ph, color_t col, int z) {
@@ -142,7 +142,7 @@ color_t fc(int ph, color_t col, int z) {
     col = 
       shmup::on ?
         (col &~0XFF) | (int((col&0xFF) * .25))
-      : (col &~0XFF) | (int((col&0xFF) * (100+100*sin(ticks / 500.)))/200);
+      : (col &~0XFF) | (int((col&0xFF) * (100+100*sintick(500)))/200);
   return col;
   }
 
@@ -523,7 +523,7 @@ void otherbodyparts(const transmatrix& V, color_t col, eMonster who, double foot
 #define VAHEAD mmscale(V, geom3::AHEAD)
 
 #define VFISH V
-#define VBIRD  mmscale(V, geom3::BIRD + .05 * sin((int) (size_t(where)) + ticks / 1000.))
+#define VBIRD  mmscale(V, geom3::BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.))
 #define VGHOST  mmscale(V, geom3::GHOST)
 
 #define VSLIMEEYE  mscale(V, geom3::FLATEYE)
@@ -3842,7 +3842,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
           transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
-          draw_floorshape(c, Vdepth, shFullFloor, darkena(firecolor(ticks / 10), 0, 0xDF), PPR::LAKEBOTTOM);
+          draw_floorshape(c, Vdepth, shFullFloor, darkena(firecolor(0, 10), 0, 0xDF), PPR::LAKEBOTTOM);
           }
         }
 
