@@ -5699,7 +5699,7 @@ void normalscreen() {
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
   keyhandler = handleKeyNormal;
 
-  if(!playerfound)
+  if(!playerfound && !anims::any_on())
     displayButton(vid.xcenter, vid.ycenter, XLAT(mousing ? "find the player" : "press SPACE to find the player"), ' ', 8);
 
   describeMouseover();
