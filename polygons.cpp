@@ -407,6 +407,9 @@ void glflush() {
     glhr::color2(text_color);
     glhr::set_depthtest(false);
     for(int ed = (stereo::active() && text_shift)?-1:0; ed<2; ed+=2) {
+      if(vid.scale < 0)
+      glhr::set_modelview(glhr::translate(-ed*text_shift-vid.xcenter,-vid.ycenter, stereo::scrdist_text) * glhr::scale(-1,-1,-1));
+      else
       glhr::set_modelview(glhr::translate(-ed*text_shift-vid.xcenter,-vid.ycenter, stereo::scrdist_text));
       stereo::set_mask(ed);
   

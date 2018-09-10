@@ -5419,6 +5419,8 @@ void calcparam() {
   DEBB(DF_GRAPH, (debugfile,"calc param\n"));
   vid.xcenter = vid.xres / 2;
   vid.ycenter = vid.yres / 2;
+
+  if(vid.scale > -1e-2 && vid.scale < 1e-2) vid.scale = 1;
   
   int realradius = min(vid.xcenter, vid.ycenter);
   
