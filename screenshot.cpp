@@ -502,7 +502,7 @@ void rollback() {
   }
 
 #if CAP_FILES
-string animfile = "animations/animation-%04d.png";
+string animfile = "animation-%04d.png";
 
 bool record_animation() {
   for(int i=0; i<noframes; i++) {

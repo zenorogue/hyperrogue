@@ -273,6 +273,15 @@ void initConfig() {
   addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
   
   addsaver(vid.linequality, "line quality", 0);
+  
+  addsaver(anims::animfile, "animation file format");
+  addsaver(anims::period, "animation period");
+  addsaver(anims::noframes, "animation frames");
+  addsaver(anims::cycle_length, "animation cycle length");
+  addsaver(anims::parabolic_length, "animation parabolic length");
+  addsaver(anims::rug_angle, "animation rug angle");
+  addsaver(anims::circle_radius, "animation circle radius");
+  addsaver(anims::circle_spins, "animation circle spins");
 
 #if CAP_TEXTURE  
   addsaver(texture::texture_aura, "texture-aura", false);

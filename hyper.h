@@ -4096,6 +4096,11 @@ namespace anims {
   bool any_on();
   bool any_animation();
   bool center_music();
+  
+  extern string animfile;
+  
+  extern int noframes;
+  extern ld period, cycle_length, parabolic_length, rug_angle, circle_radius, circle_spins;
   }
 
 extern int animation_lcm;
