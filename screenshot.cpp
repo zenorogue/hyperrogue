@@ -514,10 +514,12 @@ bool record_animation() {
 void display_animation() {
   if(ma == maCircle && (circle_display_color & 0xFF)) {
     for(int s=0; s<10; s++) {
+      if(s == 0) curvepoint(ggmatrix(rotation_center_c.at) * xpush0(circle_radius - .1));
       for(int z=0; z<100; z++) curvepoint(ggmatrix(rotation_center_c.at) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
       queuecurve(circle_display_color, 0, PPR::LINE);
       }
     if(sphere) for(int s=0; s<10; s++) {
+      if(s == 0) curvepoint(centralsym * ggmatrix(rotation_center_c.at) * xpush0(circle_radius - .1));
       for(int z=0; z<100; z++) curvepoint(centralsym * ggmatrix(rotation_center_c.at) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
       queuecurve(circle_display_color, 0, PPR::LINE);
       }
