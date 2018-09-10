@@ -689,7 +689,7 @@ void viewmat() {
   }
 
 #if CAP_COMMANDLINE
-auto hook = 
+auto floor_hook = 
   addHook(hooks_args, 100, [] () {
     using namespace arg;             
     if(argis("-floordebug")) { floorshape_debug = true; return 0; }
