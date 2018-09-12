@@ -554,7 +554,8 @@ namespace mapeditor {
     int cdir = where.first.spin;
     saveUndo(c);
     switch(painttype) {
-      case 0:
+      case 0: {
+        eMonster last = c->monst;
         c->monst = eMonster(paintwhat);
         c->hitpoints = 3;
         c->stuntime = 0;
@@ -569,12 +570,21 @@ namespace mapeditor {
           mirror::createMirror(cellwalker(c, cdir, true), 0);
           c->monst = moMimic;
           }
+
+        if(c->monst ==moTortoise && last == moTortoise) {
+          cell *c1 = c;
+          for(int i=0; i<100; i++) c1 = c1->cmove(hrand(c1->type));
+          tortoise::emap[c] = c1;
+          }
         break;
-      case 1:
+        }
+      case 1: {
+        eItem last = c->item;
         c->item = eItem(paintwhat);
         if(c->item == itBabyTortoise)
-          tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
+          tortoise::babymap[c] = getBits(c) ^ (last == itBabyTortoise ? tortoise::getRandomBits() : 0);
         break;
+        }
       case 2: {
         eLand last = c->land;
         c->land = eLand(paintwhat);
