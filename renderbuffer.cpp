@@ -120,7 +120,7 @@ SDL_Surface *renderbuffer::render() {
     GLERR("readPixels");
     for(int iy=0; iy<y/2; iy++)
     for(int ix=0; ix<x; ix++)
-      swap(qpixel(srf,ix,iy), qpixel(srf,ix,vid.yres-1-iy));
+      swap(qpixel(srf,ix,iy), qpixel(srf,ix,y-1-iy));
     }
   return srf;
   }
