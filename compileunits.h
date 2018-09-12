@@ -33,6 +33,7 @@
 #include "archimedean.cpp"
 #include "language.cpp"
 #include "cell.cpp"
+#include "expansion.cpp"
 #include "goldberg.cpp"
 #include "irregular.cpp"
 #include "pattern2.cpp"

@@ -4106,5 +4106,69 @@ namespace anims {
 extern int animation_lcm;
 extern ld animation_factor;
 ld parseld(const string& s);
+pair<int, int> vec_to_pair(int vec);
+
+struct bignum {
+  static const int BASE = 1000000000;
+  static const long long BASE2 = BASE * (long long)BASE;
+  vector<int> digits;
+  bignum() {}
+  bignum(int i) : digits() { digits.push_back(i); }
+  void be(int i) { digits.resize(1); digits[0] = i; }
+  bignum& operator +=(const bignum& b);
+  string get_str(int max_length);
+  ld approx() {
+    if(digits.empty()) return 0;
+    return digits.back() * pow(BASE, isize(digits) - 1);
+    }
+  
+  int approx_int() {
+    if(isize(digits) > 1) return BASE;
+    if(digits.empty()) return 0;
+    return digits[0];
+    }
+  
+  long long approx_ll() {
+    if(isize(digits) > 2) return BASE2;
+    if(digits.empty()) return 0;
+    if(isize(digits) == 1) return digits[0];
+    return digits[0] + digits[1] * (long long) BASE;
+    }
+  };
+
+struct expansion_analyzer {
+  vector<int> gettype(cell *c);
+  int N;
+  vector<cell*> samples;  
+  map<vector<int>, int> codeid;  
+  vector<vector<int> > children;  
+  int rootid, diskid;
+  int coefficients_known;
+  vector<int> coef;
+  int valid_from, tested_to;
+  ld growth;
+  
+  int sample_id(cell *c);
+  void preliminary_grouping();
+  void reduce_grouping();
+  vector<vector<bignum>> descendants;
+  bignum& get_descendants(int level);
+  bignum& get_descendants(int level, int type);
+  void find_coefficients();
+  void reset();
+  
+  expansion_analyzer() { reset(); }
+
+  string approximate_descendants(int d, int max_length);
+  void view_distances_dialog();
+  ld get_growth();
+
+  private:
+  bool verify(int id);
+  int valid(int v, int step);
+  };
+
+extern expansion_analyzer expansion;
+
 }
 

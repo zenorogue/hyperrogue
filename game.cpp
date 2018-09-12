@@ -6931,44 +6931,6 @@ void roundTableMessage(cell *c2) {
     }
   }
 
-long long circlesize[100], disksize[100];
-ld circlesizeD[10000];
-int lastsize;
-
-bool sizes_known() {
-  return euclid || (geometry == gNormal && STDVAR);
-  }
-
-void computeSizes() {
-  lastsize = PURE ? 44 : 76;
-
-  circlesize[0] = 1;
-  
-  if(euclid) {
-    for(int i=1; i<100; i++) circlesize[i] = 6 * i;
-    }
-  
-  else if(BITRUNCATED) {
-    circlesize[1] = 1*7;
-    circlesize[2] = 2*7;
-    circlesize[3] = 4*7;
-    circlesize[4] = 7*7;
-    for(int i=5; i<100; i++) 
-      circlesize[i] = circlesize[i-1] + circlesize[i-2] + circlesize[i-3] - circlesize[i-4];
-    }
-  else {
-    // actually these are each second Fibonacci number
-    circlesize[1] = 1*7;
-    circlesize[2] = 3*7;
-    for(int i=3; i<100; i++) 
-      circlesize[i] = 3*circlesize[i-1] - circlesize[i-2];
-    }
-    
-  disksize[0] = 0;
-  for(int i=1; i<100; i++) 
-    disksize[i] = disksize[i-1] + circlesize[i-1];
-  }
-
 void knightFlavorMessage(cell *c2) {
 
   if(!euclid && !c2->master->alt) {
@@ -6980,8 +6942,6 @@ void knightFlavorMessage(cell *c2) {
     addMessage(XLAT("\"The Knights of the Horocyclic Table salute you!\""));
     return;
     }
-
-  computeSizes();
 
   bool grailfound = grailWasFound(c2);
   int rad = roundTableRadius(c2);
@@ -7016,14 +6976,11 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid == 7 && items[itSpice] < 10 && !peace::on) {
     addMessage(XLAT("\"Train in the Desert first!\""));
     }
-  else if(msgid == 8 && sizes_known()) {
-    if(rad <= lastsize)
-      addMessage(XLAT("\"Our Table seats %1 Knights!\"", llts(circlesize[rad])));
-    else
-      addMessage(XLAT("\"By now, you should have your own formula, you know?\""));
+  else if(msgid == 8 && sizes_known() && !tactic::on) {
+    addMessage(XLAT("\"Our Table seats %1 Knights!\"", expansion.get_descendants(rad).get_str(100)));
     }
-  else if(msgid == 9 && rad <= lastsize && sizes_known()) {
-      addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", llts(disksize[rad])));
+  else if(msgid == 9 && sizes_known() && !tactic::on) {
+    addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", expansion.get_descendants(rad-1, expansion.diskid).get_str(100)));
     }
   else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool] && !peace::on) {
     addMessage(XLAT("\"Have you tried to take a boat and go into the Ocean? Try it!\""));

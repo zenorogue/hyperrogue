@@ -1267,6 +1267,7 @@ void start_game() {
   game_active = true;
   if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
   initcells();
+  expansion.reset();
 
   if(randomPatternsMode) {
     for(int i=0; i<landtypes; i++) {

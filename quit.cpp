@@ -31,25 +31,6 @@ void noaction() {}
 
 function<void()> cancel = noaction;
 
-string circlesizestr(int r) {
-  computeSizes();
-  string s;
-  int last = lastsize;
-  if(r <= last)
-    return llts(circlesize[r]);
-  else {
-    double d = log(circlesize[last]) + (log(circlesize[last]) - log(circlesize[last-1]))*(r-last);
-    int dlost = 0;
-    while(d > 10 * log(10)) d -= log(10), dlost++;
-    char buf[300]; sprintf(buf, "%.0f", exp(d)); 
-    string ss = XLAT("about ") + buf;
-    while(dlost % 9) dlost--, ss += '0';
-    for(int r = 0; r < 50 && dlost; r++) dlost -= 9, ss += " 000000000";
-    if(dlost) ss += XLAT(" (%1 more digits)", its(dlost));
-    return ss;
-    }
-  }
-
 hint hints[] = {
 
   {
@@ -246,13 +227,13 @@ hint hints[] = {
     0,
     []() { return !canmove && sizes_known() && celldist(cwt.at) >= 50; },
     []() {
-      int c = celldist(cwt.at);
-      string s = circlesizestr(c);
+      int d = celldist(cwt.at);
+      string s = expansion.approximate_descendants(d, 10000);
       dialog::addHelp(XLAT(
         "You are %1 cells away from the starting point, or "
         "the place where you used an Orb of Safety last time. "
         "There are %2 such cells.\n",
-        its(c), s
+        its(d), s
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("expansion"), 'z');

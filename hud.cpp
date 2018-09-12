@@ -346,46 +346,8 @@ bool nofps = false;
 void drawStats() {
   if(nohud || stereo::mode == stereo::sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
-  if(viewdists && sidescreen) {
-    distcolors[0] = forecolor;
-    dialog::init("");
-    int qty[64];
-    vector<cell*>& ac = currentmap->allcells();
-    for(int i=0; i<64; i++) qty[i] = 0;
-    for(int i=0; i<isize(ac); i++) {
-      int d = celldistance(ac[i], cwt.at);
-      if(d >= 0 && d < 64) qty[d]++;
-      }
-
-    if(geometry == gNormal && BITRUNCATED)
-      for(int i=8; i<=15; i++) 
-        qty[i] = qty[i-1] + qty[i-2] + qty[i-3] - qty[i-4];
-
-    if(geometry == gNormal && PURE)
-      for(int i=6; i<=15; i++) 
-        qty[i] = 3*qty[i-1] - qty[i-2];
-
-    if(geometry == gEuclid)
-      for(int i=8; i<=15; i++) qty[i] = 6*i;
-    for(int i=0; i<64; i++) if(qty[i])
-      dialog::addInfo(its(qty[i]), distcolors[i&7]);
-
-    if(geometry == gNormal && BITRUNCATED) {
-      dialog::addBreak(200);
-      dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
-      dialog::addInfo("a(d) ~ 1.72208ᵈ", forecolor);
-      }
-    if(geometry == gNormal && PURE) {
-      dialog::addBreak(200);
-      dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
-      dialog::addInfo("a(d) ~ 2.61803ᵈ", forecolor);
-      }
-    if(geometry == gEuclid) {
-      dialog::addBreak(300);
-      dialog::addInfo("a(d) = 6d", forecolor);
-      }
-    dialog::display();
-    }
+  if(viewdists && sidescreen) 
+    expansion.view_distances_dialog();
   if(sidescreen) return;
 
   {

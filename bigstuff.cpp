@@ -1268,7 +1268,7 @@ void moreBigStuff(cell *c) {
         }
       if(d == 1) {
         // roughly as many knights as table cells
-        if(hrand(PURE ? 2618 : 1720) < 1000) 
+        if(hrand(1000000) < 1000000 / expansion.get_growth())
           c->monst = moKnight;
         if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
         for(int i=0; i<c->type; i++) 
