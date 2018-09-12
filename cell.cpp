@@ -1014,6 +1014,8 @@ void verifycells(heptagon *at) {
 int eudist(int sx, int sy) {
   int z0 = abs(sx);
   int z1 = abs(sy);
+  if(a4 && BITRUNCATED)
+    return (z0 == z1 && z0 > 0) ? z0+1: max(z0, z1);
   if(a4) return z0 + z1;
   int z2 = abs(sx+sy);
   return max(max(z0,z1), z2);
