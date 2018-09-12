@@ -1597,6 +1597,10 @@ void fixparam() {
     }
   }
 
+#ifndef CAP_RVSLIDES
+#define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
+#endif
+
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
@@ -1745,9 +1749,11 @@ int readArgs() {
   else if(argis("-lq")) {
     shift(); linequality = argf();
     }
+#if CAP_RVSLIDES
   else if(argis("-rvpres")) {
     tour::slides = rvtour::rvslides;
     }
+#endif
   else if(argis("-nolegend")) {
     legend.clear();
     }
@@ -1921,6 +1927,7 @@ void showMenu() {
     };
   }
 
+#if CAP_RVSLIDES
 namespace rvtour {
 
 using namespace tour;
@@ -2208,6 +2215,7 @@ int rvtour_hooks =
   0;
 
 }
+#endif
 
 bool default_help() {
   if(!rogueviz::on) return false;
@@ -2236,6 +2244,8 @@ auto hooks  =
   addHook(hooks_frame, 0, drawExtra) +
 #if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) +
+#endif
+#if CAP_RVSLIDES
   addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); }) +
 #endif
   addHook(clearmemory, 0, close) +
