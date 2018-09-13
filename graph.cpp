@@ -3668,11 +3668,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int cd = 
         among(expansion_method, 1, 2) ? celldistance(c, cwt.at) :
         (cwt.at == currentmap->gamestart() && numplayers() == 1 && !binarytiling) ? celldist(c) : 
-        (c->cpdist < INF) ? c->cpdist : 
+        (c->cpdist < INFD) ? c->cpdist : 
         celldistance(c, cwt.at);
       string label = its(cd);
     
-      if(c->cpdist < INF && show_ea_types) {
+      if(c->cpdist < INFD && show_ea_types) {
         int t = type_in_quick(expansion, c, [] (cell *c) { return c->cpdist; });
         if(t >= 0)
           label = label + ":" + its(t);
