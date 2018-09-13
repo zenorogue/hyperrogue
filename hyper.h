@@ -2160,6 +2160,7 @@ namespace sm {
   static const int TORUSCONFIG = 8192;
   static const int MAYDARK = 16384;
   static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
+  static const int EXPANSION = (1<<16);
   };
 
 namespace linepatterns {
@@ -4116,6 +4117,7 @@ struct bignum {
   bignum(int i) : digits() { digits.push_back(i); }
   void be(int i) { digits.resize(1); digits[0] = i; }
   bignum& operator +=(const bignum& b);
+  void addmul(const bignum& b, int factor);
   string get_str(int max_length);
   ld approx() {
     if(digits.empty()) return 0;

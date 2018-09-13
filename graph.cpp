@@ -3665,8 +3665,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(viewdists && !behindsphere(V)) {
-      int cd = (cwt.at == currentmap->gamestart() && numplayers() == 1) ? celldist(c) : celldistance(c, cwt.at);
+      int cd = 
+        among(expansion_method, 1, 2) ? celldistance(c, cwt.at) :
+        (cwt.at == currentmap->gamestart() && numplayers() == 1 && !binarytiling) ? celldist(c) : 
+        (c->cpdist < INF) ? c->cpdist : 
+        celldistance(c, cwt.at);
       string label = its(cd);
+    
+      if(c->cpdist < INF && show_ea_types) {
+        int t = type_in_quick(expansion, c, [] (cell *c) { return c->cpdist; });
+        if(t >= 0)
+          label = label + ":" + its(t);
+        }
+
       // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
       int dc = distcolors[cd&7];
       wcol = gradient(wcol, dc, 0, .4, 1);

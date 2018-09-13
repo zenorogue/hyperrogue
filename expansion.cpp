@@ -24,6 +24,39 @@ bignum& bignum::operator +=(const bignum& b) {
   return *this;
   }
 
+void bignum::addmul(const bignum& b, int factor) {
+  int K = isize(b.digits);
+  if(K > isize(digits)) digits.resize(K);
+  int carry = 0;
+  for(int i=0; i<K || (carry > 0 && carry < -1); i++) {
+    if(i >= isize(digits)) digits.push_back(0);
+    long long l = digits[i];
+    l += carry;
+    if(i < K) l += b.digits[i] * factor;
+    carry = 0;
+    if(l >= BASE) carry = l / BASE;
+    if(l < 0) carry = -(BASE-1-l) / BASE;
+    l -= carry * BASE;
+    digits[i] = l;
+    }
+  if(carry < 0) digits.back() -= BASE;
+  }
+
+void operator ++(bignum &b, int) {
+  int i = 0;
+  while(true) {
+    if(isize(b.digits) == i) { b.digits.push_back(1); break; }
+    else if(b.digits[i] == bignum::BASE-1) {
+      b.digits[i] = 0;
+      i++;
+      }
+    else {
+      b.digits[i]++;
+      break;
+      }      
+    }
+  }
+
 string bignum::get_str(int max_length) {
   if(digits.empty()) return "0";
   string ret = its(digits.back());
@@ -41,6 +74,12 @@ string bignum::get_str(int max_length) {
   return ret;
   }
 
+void canonicize(vector<int>& t) {
+  for(int i=2; i<isize(t); i++)
+    if((t[i] & 3) == 1 && (t[i-1] & 3) != 1)
+      std::rotate(t.begin()+1, t.begin()+i, t.end());
+  }
+
 vector<int> expansion_analyzer::gettype(cell *c) {
   vector<int> res;
   res.push_back(subtype(c) * 4 + 2);
@@ -49,6 +88,7 @@ vector<int> expansion_analyzer::gettype(cell *c) {
     cell *c1 = c->cmove(i);
     res.push_back(subtype(c1) * 4 + celldist(c1) - d);
     }
+  canonicize(res);
   return res;
   }
 
@@ -80,9 +120,14 @@ void expansion_analyzer::preliminary_grouping() {
     }
   N = isize(samples);
   rootid = 0;
+  diskid = N;
+  children.push_back(children[rootid]);
+  children[diskid].push_back(diskid);
+  N++;
   }
 
 void expansion_analyzer::reduce_grouping() {
+  int old_N = N;
   vector<int> grouping;
   grouping.resize(N);
   int nogroups = 1;
@@ -115,10 +160,9 @@ void expansion_analyzer::reduce_grouping() {
   for(auto& p: codeid) p.second = grouping[p.second];
   N = nogroups;
   rootid = grouping[rootid];
-  diskid = N;
-  children.push_back(children[rootid]);
-  children[diskid].push_back(diskid);
-  N++;
+  diskid = grouping[diskid];
+  printf("%d -> %d\n", old_N, N);
+  for(int g=0; g<old_N; g++) if(grouping[g] != g) descendants.clear();
   }
 
 template<class T> int size_upto(vector<T>& v, int s) {
@@ -242,6 +286,65 @@ void expansion_analyzer::reset() {
   descendants.clear();
   }
 
+template<class T> int type_in(expansion_analyzer& ea, cell *c, const T& f) {
+  if(!ea.N) ea.preliminary_grouping(), ea.reduce_grouping();
+  vector<int> res;
+  res.push_back(subtype(c) * 4 + 2);
+  int d = f(c);
+  for(int i=0; i<c->type; i++) {
+    cell *c1 = c->cmove(i);
+    res.push_back(subtype(c1) * 4 + f(c1) - d);
+    }
+  
+  canonicize(res);
+  if(ea.codeid.count(res)) return ea.codeid[res];
+  int ret = ea.N++;
+  ea.codeid[res] = ret;
+  
+  vector<int> rec(MAX_EDGE, -1);
+  
+  ea.children.emplace_back();
+  for(int k=0; k<c->type; k++) {
+    cell *c1 = c->cmove(k);
+    if(f(c1) != d+1) continue;
+    cell *c2 = c->cmove((k+1) % c->type);
+    if(f(c2) != d+1) continue;
+    auto ti = rec[k] = type_in(ea, c1, f);
+    // note: ea.children[ret].push_back(type_in(...)) would not work because of invalidation
+    ea.children[ret].push_back(ti);
+    }
+
+  /*
+  printf("extra type created: [%d, d=%d]", ret, d); for(auto i: ea.children[ret]) printf(" %d", i); printf("\n");
+  printf("  list:");
+  for(int k=0; k<c->type; k++) {
+    cell *c1 = c->cmove(k);
+    printf(" %d/%d/%d", k, rec[k], f(c1) - d);
+    }
+  printf("\n");
+  */
+
+  return ret;
+  }
+
+bool show_ea_types;
+
+template<class T> int type_in_quick(expansion_analyzer& ea, cell *c, const T& f) {
+  vector<int> res;
+  res.push_back(subtype(c) * 4 + 2);
+  int d = f(c);
+  for(int i=0; i<c->type; i++) {
+    cell *c1 = c->cmove(i);
+    int dd = f(c1) - d;
+    if(dd < -1 || dd > 1) return -1;
+    res.push_back(subtype(c1) * 4 + dd);
+    }
+  
+  canonicize(res);
+  if(ea.codeid.count(res)) return ea.codeid[res];
+  return -1;
+  }
+
 bool sizes_known() {
   if(bounded) return false;
   // Castle Anthrax is infinite
@@ -265,42 +368,99 @@ string expansion_analyzer::approximate_descendants(int d, int max_length) {
   return XLAT("about ") + fts(pow(10, log_10 - more_digits)) + "E" + its(more_digits);
   }
 
+int expansion_method=4, nopage;
+
+string expansion_methods[5] = { "celllister", "celllister/verify", "celldistance", "expansion_analyzer", "automatic" };
+
+template<class T> int type_in_reduced(expansion_analyzer& ea, cell *c, const T& f) {
+  int a = ea.N;
+  int t = type_in(ea, c, f);
+  if(expansion.N != a) {
+    expansion.reduce_grouping();
+    t = type_in(ea, c, f);
+    }
+  return t;
+  }
+
 void expansion_analyzer::view_distances_dialog() {
   distcolors[0] = forecolor;
   dialog::init("");
-  long long qty[64];
-  vector<cell*>& ac = currentmap->allcells();
-  for(int i=0; i<64; i++) qty[i] = 0;
-  for(int i=0; i<isize(ac); i++) {
-    int d = celldistance(ac[i], cwt.at);
-    if(d >= 0 && d < 64) qty[d]++;
+  cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
+  
+  int maxlen = bounded ? 128 : 16 + 8 * nopage;
+  vector<bignum> qty(maxlen);
+  
+  int aem = expansion_method;
+  if(aem == 4) aem = (bounded || !sizes_known()) ? 0 : 3;
+  int errors = 0;
+  
+  // method 0: celllister
+  switch(aem) {
+    case 0: {
+      celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
+      for(int d: cl.dists)
+        if(d >= 0 && d < maxlen) qty[d]++;
+      break;
+      }
+    case 1: {
+      celllister cl(cwt.at, gamerange(), 100000, NULL);
+      for(int i=0; i<isize(cl.lst); i++) {
+        int d = cl.dists[i];
+        if(d >= 0 && d < maxlen) qty[d]++;
+        if(expansion_method == 1 && celldistance(cwt.at, cl.lst[d]) != d)
+          errors++;
+        }
+      break;
+      }
+    case 2: {
+      celllister cl(cwt.at, gamerange(), 100000, NULL);
+      for(cell *c: cl.lst) {
+        int d = celldistance(cwt.at, c);
+        if(d >= 0 && d < maxlen) qty[d]++;
+        }
+      break;
+      }
+    case 3: {
+      int t = type_in_reduced(expansion, cwt.at, [] (cell *c) { return celldistance(cwt.at, c); });
+      for(int r=0; r<maxlen; r++)
+        qty[r] = expansion.get_descendants(r, t);
+        
+      /* not implemented */
+      break;
+      }
     }
   
-  if(sizes_known()) {
+  if(sizes_known() && aem < 3) {
     find_coefficients();
-    if(gamerange() >= valid_from && coefficients_known == 2) {
-      for(int i=gamerange()+1; i<64; i++) {
-        qty[i] = 0;
-        for(int j=0; j<isize(coef); j++)
-          qty[i] += qty[i-1-j] * coef[j];
-        }
+    if(gamerange()+1 >= valid_from && coefficients_known == 2) {
+      for(int i=gamerange()+1; i<maxlen; i++)
+        for(int j=0; j<isize(coef); j++) {
+          qty[i].addmul(qty[i-1-j], coef[j]);
+          printf("[%d] after adding %s x %d:\n", i, qty[i-1-j].get_str(100).c_str(), coef[j]);
+          printf("  %s\n", qty[i].get_str(100).c_str());
+          }
       }
     }
 
-  for(int i=0; i<(bounded ? 64 : 16); i++) if(qty[i])
-    dialog::addInfo(its(qty[i]), distcolors[i&7]);
+  for(int i=8 * nopage; i<maxlen; i++) if(!qty[i].digits.empty())
+    dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i&7]);
   
+  if(errors)
+    dialog::addInfo(its(errors) + " ERRORS!");
+  else
+    dialog::addBreak(100);
+
   if(binarytiling) {
-    dialog::addBreak(300);
+    dialog::addBreak(200);
     dialog::addInfo("a(d) ~ 2ᵈ");
     }
   else if(sizes_known()) {
     if(euclid) {
-      dialog::addBreak(300);
+      dialog::addBreak(200);
       dialog::addInfo("a(d) = " + its(get_descendants(10).approx_int() - get_descendants(9).approx_int()) + "d", forecolor);
       }
     else {
-      dialog::addBreak(200);
+      dialog::addBreak(100);
       
       if(coefficients_known == 2) {
         string fmt = "a(d+" + its(isize(coef)) + ") = ";
@@ -318,17 +478,40 @@ void expansion_analyzer::view_distances_dialog() {
           fmt += ")";
           first = false;
           }
+        fmt += " (d>" + its(valid_from-1) + ")";
         dialog::addHelp(fmt);
         }
       else dialog::addBreak(100);
       
       char buf[20];
       snprintf(buf, 20, "%.8lf", (double) get_growth());
-      dialog::addInfo("a(d) ~ " + string(buf) + "ᵈ", forecolor);
+      dialog::addInfo("a(d) = Θ(" + string(buf) + "...ᵈ)", forecolor);
       }
     }
+  
+  dialog::addItem(expansion_methods[expansion_method], 'M');
+  if(!bounded) dialog::addItem("next page", 'N');
+  if(nopage) dialog::addItem("previous page", 'J');
   dialog::display();
   }
+
+bool expansion_handleKey(int sym, int uni) {
+  if(cmode & sm::EXPANSION) {
+    if(uni == 'M') {
+      expansion_method++;
+      expansion_method %= 5;
+      }
+    else if(uni == 'R') expansion_method = 4;
+    else if(uni == 'N') nopage++;
+    else if(uni == 'J' && nopage > 0) nopage--;
+    else if(uni == 'S') show_ea_types = !show_ea_types;
+    else return false;
+    return true;
+    }
+  return false;
+  }
+
+int expansion_hook = addHook(hooks_handleKey, 0, expansion_handleKey);
 
 #if !CAP_MINI
 void compute_coefficients() {
