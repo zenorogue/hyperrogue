@@ -5175,7 +5175,7 @@ bool allowIncreasedSight() {
   if(tour::on) return true;
 #endif
   if(randomPatternsMode) return true;
-  if(quotient || !hyperbolic) return true;
+  if(quotient || !hyperbolic || archimedean) return true;
   return false;
   }
 
@@ -5185,6 +5185,7 @@ bool allowChangeRange() {
   if(tour::on) return true;
 #endif
   if(sightrange_bonus >= 0) return true;
+  if(archimedean) return true;
   return false;
   }
 

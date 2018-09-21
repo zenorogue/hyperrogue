@@ -708,12 +708,13 @@ void showGraphConfig() {
         };
       dialog::extra_options = [] () {
         if(allowChangeRange()) {
-          dialog::addSelItem("generation range bonus", its(genrange_bonus), 'o');
+          dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'o');
           dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
-          dialog::addSelItem("game range bonus", its(gamerange_bonus), 'O');
+          dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'O');
           dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
           }
-        else dialog::addInfo("note: enable the cheat mode for additional options");
+        if(!allowChangeRange() || !allowIncreasedSight()) 
+          dialog::addInfo(XLAT("note: enable the cheat mode for additional options"));
         };
       }
   
