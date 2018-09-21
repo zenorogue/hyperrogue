@@ -649,11 +649,10 @@ cell *randomDown(cell *c) {
   }
 
 // which=1 => right, which=-1 => left
-// set which=1,bonus=1 to get right neighbor on level
 
 typedef int cellfunction(cell*);
 
-cell *chosenDown(cell *c, int which, int bonus, cellfunction* cf) {
+int chosenDownId(cell *c, int which, cellfunction* cf) {
   int d = (*cf)(c)-1;
   for(int i=0; i<c->type; i++) {
     if(!c->move(i)) createMov(c, i);
@@ -663,12 +662,20 @@ cell *chosenDown(cell *c, int which, int bonus, cellfunction* cf) {
       int i2 = (i+which+S42)%c->type;
       createMov(c, i2);
       if((*cf)(c->move(i2)) == d)
-        return createMovR(c, i2+bonus);
-      else return createMovR(c, i+bonus);
+        return i2;
+      else return i;
       }
     }
-  // printf("nothing down here\n");
-  return NULL;
+  
+  return -1;
+  }
+
+// set which=1,bonus=1 to get right neighbor on level
+
+cell *chosenDown(cell *c, int which, int bonus, cellfunction* cf) {
+  int id = chosenDownId(c, which, cf);
+  if(id == -1) return NULL;
+  return createMovR(c, id + bonus);
   }
 
 int edgeDepth(cell *c) {
