@@ -452,7 +452,8 @@ void showEuclideanMenu() {
           gp::configure();
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
-      else if(uni == '3') { viewdists = !viewdists; if(viewdists) popScreenAll(); }
+      else if(uni == '3' && !viewdists) { enable_viewdists(); popScreenAll(); }
+      else if(uni == '3' && viewdists) { viewdists = false; }
       else if(uni == '1' && !euclid) {
         if(sphere) {
           if(vid.alpha < 10) { vid.alpha = 999; vid.scale = 998; }

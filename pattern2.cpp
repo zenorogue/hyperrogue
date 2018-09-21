@@ -1952,14 +1952,10 @@ namespace linepatterns {
     return col;
     }
     
-  struct {
-    int id;
-    const char *lpname;
-    color_t color;
-    } patterns[] = {
+  linepattern patterns[] = {
 
-    {patTriNet, "triangle grid: not rings", 0xFFFFFF00},
-    {patTriRings, "triangle grid: rings", 0xFFFFFF00},
+    {patDual, "dual grid", 0xFFFFFF00},
+
     {patHepta, "heptagonal grid", 0x0000C000},
     {patRhomb, "rhombic tesselation", 0x0000C000},
     {patTrihepta, "triheptagonal tesselation", 0x0000C000},
@@ -1977,6 +1973,11 @@ namespace linepatterns {
     {patPalace, "firewall lines: Palace", 0xFFD50000},
     {patPower, "firewall lines: Power", 0xFFFF0000},
     {patHorocycles, "horocycles", 0xd060d000},
+
+    {patTriRings, "triangle grid: rings", 0xFFFFFF00},
+    {patTriTree, "triangle grid: tree edges", 0xFFFFFF00},
+    {patTriOther, "triangle grid: other edges", 0xFFFFFF00},
+
     {0, NULL, 0}
     };
 
@@ -2066,8 +2067,8 @@ namespace linepatterns {
                     col, 1 + vid.linequality);
         break;
       
-      case patTriNet:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
+      case patDual:
+        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) {
           queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;
@@ -2075,10 +2076,24 @@ namespace linepatterns {
       case patTriRings:
         forCellIdEx(c2, i, c) {
           if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
-          if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
+          if(c2 > c) if(gmatrix.count(c2) && curr_dist(c) == curr_dist(c2)) 
             queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;
+
+      case patTriTree: {
+        cell *parent = chosenDown(c, -1, 0, curr_dist);
+        if(gmatrix.count(parent)) 
+          queuelinef(tC0(V), gmatrix[parent]*C0, col, 2 + vid.linequality);
+        break;
+        }
+      
+      case patTriOther: {
+        cell *parent = chosenDown(c, -1, 0, curr_dist);
+        forCellEx(c2, c) if(gmatrix.count(c2) && curr_dist(c2) < curr_dist(c) && c2 != parent)
+          queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+        break;
+        }
 
       case patHepta:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 

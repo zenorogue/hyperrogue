@@ -3343,8 +3343,6 @@ int shallow(cell *c) {
   return 7;
   }
 
-bool viewdists = false;
-
 bool allemptynear(cell *c) {
   if(c->wall) return false;
   forCellEx(c2, c) if(c2->wall) return false;
@@ -3663,30 +3661,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       string label = its(c->landparam);
       queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
       }
-    
-    if(viewdists && !behindsphere(V)) {
-      int cd = 
-        among(expansion_method, 1, 2) ? celldistance(c, cwt.at) :
-        (cwt.at == currentmap->gamestart() && numplayers() == 1 && !binarytiling) ? celldist(c) : 
-        (c->cpdist < INFD) ? c->cpdist : 
-        celldistance(c, cwt.at);
-      string label = its(cd);
-    
-      if(c->cpdist < INFD && show_ea_types) {
-        int t = type_in_quick(expansion, c, [] (cell *c) { return c->cpdist; });
-        if(t >= 0)
-          label = label + ":" + its(t);
-        }
+ 
+    if(viewdists) do_viewdist(c, V, wcol, fcol);
 
-      // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
-      int dc = distcolors[cd&7];
-      wcol = gradient(wcol, dc, 0, .4, 1);
-      fcol = gradient(fcol, dc, 0, .4, 1);
-      /* queuepolyat(V, shFloor[ct6], darkena(gradient(0, distcolors[cd&7], 0, .25, 1), fd, 0xC0),
-        PPR::TEXT); */
-      queuestr(V, (cd > 9 ? .6 : 1) * .2, label, 0xFF000000 + distcolors[cd&7], 1);
-      }
-    
     if(cmode & sm::TORUSCONFIG) {
       using namespace torusconfig;
       string label;

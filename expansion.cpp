@@ -327,8 +327,6 @@ template<class T> int type_in(expansion_analyzer& ea, cell *c, const T& f) {
   return ret;
   }
 
-bool show_ea_types;
-
 template<class T> int type_in_quick(expansion_analyzer& ea, cell *c, const T& f) {
   vector<int> res;
   res.push_back(subtype(c) * 4 + 2);
@@ -368,9 +366,35 @@ string expansion_analyzer::approximate_descendants(int d, int max_length) {
   return XLAT("about ") + fts(pow(10, log_10 - more_digits)) + "E" + its(more_digits);
   }
 
-int expansion_method=4, nopage;
+enum eDistanceFrom { dfPlayer, dfStart, dfWorld };
+string dfnames[3] = { "player", "start", "land" };
 
-string expansion_methods[5] = { "celllister", "celllister/verify", "celldistance", "expansion_analyzer", "automatic" };
+eDistanceFrom distance_from = dfPlayer;
+
+enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug };
+string ncnames[4] = { "NO", "distance", "type", "debug" };
+eNumberCoding number_coding = ncDistance;
+
+bool mod_allowed() {
+  return cheater || autocheat || archimedean || tour::on;
+  }
+
+int curr_dist(cell *c) {
+  switch(distance_from) {
+    case dfPlayer:
+      return c->cpdist < INFD ? c->cpdist : celldistance(cwt.at, c);
+    case dfStart:
+      return celldist(c);
+    case dfWorld:
+      if(!mod_allowed() && !among(c->land, laOcean, laIvoryTower, laEndorian, laDungeon, laTemple, laWhirlpool))
+        return 0;
+      if(c->master->alt) return celldistAlt(c);
+      return inmirror(c) ? (c->landparam & 255) : c->landparam;
+    }
+  return 0;    
+  }
+
+int position;
 
 template<class T> int type_in_reduced(expansion_analyzer& ea, cell *c, const T& f) {
   int a = ea.N;
@@ -382,75 +406,167 @@ template<class T> int type_in_reduced(expansion_analyzer& ea, cell *c, const T& 
   return t;
   }
 
+bool viewdists = false, use_color_codes = true, use_analyzer = true;
+
+int first_distance = 0, scrolltime = 0;
+bool scrolling_distances = false;
+
+color_t distribute_color(int id) {
+  color_t v = 0xFFFFFF;
+  for(int z=0; z<24; z++) if(id & (1<<z)) part(v, (id%3)) &=~ 1<<(7-(z/3));
+  return v; 
+  }
+
+void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
+  if(behindsphere(V)) return;
+
+  int cd = (use_color_codes || number_coding == ncDistance || number_coding == ncDebug) ? curr_dist(c) : 0;
+  
+  if(use_color_codes) {
+    int dc = distcolors[cd&7];
+    wcol = gradient(wcol, dc, 0, .4, 1);
+    fcol = gradient(fcol, dc, 0, .4, 1);
+    }
+  
+  string label = "";
+  int dc;
+ 
+  switch(number_coding) {
+    case ncDistance: { 
+      label = its(cd);
+      dc = distcolors[cd&7];
+      break;
+      }
+    case ncType: {
+      int t = type_in_quick(expansion, c, curr_dist);
+      if(t >= 0) label = its(t), dc = distribute_color(t);
+      break;
+      }
+    case ncDebug: {
+      int d = celldistance(c, distance_from == dfPlayer ? cwt.at : currentmap->gamestart());
+      dc = (d != cd) ? 0xFF0000 : 0x00FF00;
+      label = its(d);
+      }
+    case ncNone: ;
+    }
+
+  // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
+  /* queuepolyat(V, shFloor[ct6], darkena(gradient(0, distcolors[cd&7], 0, .25, 1), fd, 0xC0),
+    PPR::TEXT); */
+  if(label != "")
+    queuestr(V, (isize(label) > 1 ? .6 : 1), label, 0xFF000000 + dc, 1);
+  }
+
+void viewdist_configure_dialog() {
+  dialog::init("");
+  cmode |= sm::SIDE | sm::MAYDARK | sm::EXPANSION;
+  gamescreen(0);
+  
+  dialog::addSelItem("which distance", dfnames[distance_from], 'c');
+  dialog::add_action([] () { distance_from = mod_allowed() ? eDistanceFrom(2 - distance_from) : eDistanceFrom((distance_from + 1) % 3); });
+             
+  dialog::addSelItem("number codes", ncnames[number_coding], 'n');
+  dialog::add_action([] () { number_coding = eNumberCoding((number_coding + 1) % (mod_allowed() ? 4 : 2)); });
+
+  dialog::addBoolItem("color codes", use_color_codes, 'u');
+  dialog::add_action([] () { use_color_codes = !use_color_codes; });
+
+  dialog::addBoolItem("use analyzer", use_analyzer, 'a');
+  dialog::add_action([] () { use_analyzer = !use_analyzer; });
+
+  dialog::addSelItem("display distances from", its(first_distance), 'd');
+  dialog::add_action([] () { 
+    scrolling_distances = false;
+    dialog::editNumber(first_distance, 0, 3000, 0, 1, "display distances from", "");
+    });
+  
+  auto& cp = linepatterns::patterns;
+  using namespace linepatterns;
+  for(int numpat=0; cp[numpat].lpname; numpat++) {
+    auto &pn = cp[numpat];
+    if(among(pn.id, patTriTree, patTriRings, patTriOther)) {
+      dialog::addColorItem(XLAT(pn.lpname), pn.color, '1'+numpat);
+      dialog::add_action([&pn] () {
+        dialog::openColorDialog(pn.color, NULL);
+        dialog::dialogflags |= sm::MAYDARK | sm::SIDE | sm::EXPANSION;
+        });
+      }
+    }
+  
+  if(!mod_allowed()) 
+    dialog::addInfo(XLAT("note: enable the cheat mode for additional options"));
+  else 
+    dialog::addBreak(100);
+  
+  if(distance_from)
+    dialog::addInfo("numbers show the descendants of current player position");
+  else
+    dialog::addBreak(100);
+
+  dialog::addBack();  
+  dialog::display();
+  }
+
+bool is_descendant(cell *c) {
+  if(c == cwt.at) return true;
+  if(curr_dist(c) < curr_dist(cwt.at)) return false;
+  return is_descendant(chosenDown(c, -1, 0, curr_dist));
+  }
+
+const int scrollspeed = 100;
+    
 void expansion_analyzer::view_distances_dialog() {
+  static int lastticks;
+  if(scrolling_distances && !bounded) {
+    scrolltime += SDL_GetTicks() - lastticks;
+    first_distance += scrolltime / scrollspeed;
+    scrolltime %= scrollspeed;
+    }
+  lastticks = SDL_GetTicks();
+  
   distcolors[0] = forecolor;
   dialog::init("");
   cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
   
-  int maxlen = bounded ? 128 : 16 + 8 * nopage;
+  int maxlen = bounded ? 128 : 16 + first_distance;
   vector<bignum> qty(maxlen);
   
-  int aem = expansion_method;
-  if(aem == 4) aem = (bounded || !sizes_known()) ? 0 : 3;
-  int errors = 0;
+  bool really_use_analyzer = use_analyzer && sizes_known();
   
-  // method 0: celllister
-  switch(aem) {
-    case 0: {
+  if(really_use_analyzer) {
+    int t = type_in_reduced(expansion, cwt.at, curr_dist);
+    for(int r=0; r<maxlen; r++)
+      qty[r] = expansion.get_descendants(r, t);
+    }
+  else {
+    if(distance_from == dfPlayer) {
       celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
       for(int d: cl.dists)
         if(d >= 0 && d < maxlen) qty[d]++;
-      break;
       }
-    case 1: {
-      celllister cl(cwt.at, gamerange(), 100000, NULL);
-      for(int i=0; i<isize(cl.lst); i++) {
-        int d = cl.dists[i];
-        if(d >= 0 && d < maxlen) qty[d]++;
-        if(expansion_method == 1 && celldistance(cwt.at, cl.lst[d]) != d)
-          errors++;
+    else {
+      celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
+      for(cell *c: cl.lst) if(is_descendant(c)) qty[curr_dist(c)]++;
+      }
+    if(sizes_known()) {
+      find_coefficients();
+      if(gamerange()+1 >= valid_from && coefficients_known == 2) {
+        for(int i=gamerange()+1; i<maxlen; i++)
+          for(int j=0; j<isize(coef); j++) {
+            qty[i].addmul(qty[i-1-j], coef[j]);
+            }
         }
-      break;
-      }
-    case 2: {
-      celllister cl(cwt.at, gamerange(), 100000, NULL);
-      for(cell *c: cl.lst) {
-        int d = celldistance(cwt.at, c);
-        if(d >= 0 && d < maxlen) qty[d]++;
-        }
-      break;
-      }
-    case 3: {
-      int t = type_in_reduced(expansion, cwt.at, [] (cell *c) { return celldistance(cwt.at, c); });
-      for(int r=0; r<maxlen; r++)
-        qty[r] = expansion.get_descendants(r, t);
-        
-      /* not implemented */
-      break;
       }
     }
   
-  if(sizes_known() && aem < 3) {
-    find_coefficients();
-    if(gamerange()+1 >= valid_from && coefficients_known == 2) {
-      for(int i=gamerange()+1; i<maxlen; i++)
-        for(int j=0; j<isize(coef); j++) {
-          qty[i].addmul(qty[i-1-j], coef[j]);
-          printf("[%d] after adding %s x %d:\n", i, qty[i-1-j].get_str(100).c_str(), coef[j]);
-          printf("  %s\n", qty[i].get_str(100).c_str());
-          }
-      }
-    }
+  dialog::addBreak(100 - 100 * scrolltime / scrollspeed);
 
-  for(int i=8 * nopage; i<maxlen; i++) if(!qty[i].digits.empty())
+  for(int i=first_distance; i<maxlen; i++) if(!qty[i].digits.empty())
     dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i&7]);
   
-  if(errors)
-    dialog::addInfo(its(errors) + " ERRORS!");
-  else
-    dialog::addBreak(100);
+  dialog::addBreak(100 * scrolltime / scrollspeed);
 
-  if(binarytiling) {
+  if(binarytiling){
     dialog::addBreak(200);
     dialog::addInfo("a(d) ~ 2ᵈ");
     }
@@ -489,22 +605,26 @@ void expansion_analyzer::view_distances_dialog() {
       }
     }
   
-  dialog::addItem(expansion_methods[expansion_method], 'M');
-  if(!bounded) dialog::addItem("next page", 'N');
-  if(nopage) dialog::addItem("previous page", 'J');
+  dialog::addItem("scroll", 'S');
+  dialog::addItem("configure", 'C');
   dialog::display();
   }
 
+void enable_viewdists() {
+  first_distance = 0;
+  scrolltime = 0;
+  viewdists = true;
+  if(!mod_allowed()) {
+    number_coding = ncDistance;
+    distance_from = dfPlayer;
+    }
+  }
+
 bool expansion_handleKey(int sym, int uni) {
-  if(cmode & sm::EXPANSION) {
-    if(uni == 'M') {
-      expansion_method++;
-      expansion_method %= 5;
-      }
-    else if(uni == 'R') expansion_method = 4;
-    else if(uni == 'N') nopage++;
-    else if(uni == 'J' && nopage > 0) nopage--;
-    else if(uni == 'S') show_ea_types = !show_ea_types;
+  if((cmode & sm::EXPANSION) && (cmode & sm::NORMAL)) {
+    if(uni == 'S') scrolling_distances = !scrolling_distances;
+    else if(uni == 'C') pushScreen(viewdist_configure_dialog);
+    else if(sym == SDLK_ESCAPE) first_distance = 0, viewdists = false;
     else return false;
     return true;
     }

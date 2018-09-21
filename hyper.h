@@ -2170,7 +2170,7 @@ namespace linepatterns {
     patPalace,
     patZebraTriangles,
     patZebraLines,
-    patTriNet,
+    patTriTree,
     patTriRings,
     patHepta,
     patRhomb,
@@ -2182,7 +2182,9 @@ namespace linepatterns {
     patTrihepta,
     patBigTriangles,
     patBigRings,
-    patHorocycles
+    patHorocycles,
+    patTriOther,
+    patDual
     };
   
   void clearAll();
@@ -2190,6 +2192,14 @@ namespace linepatterns {
   void drawAll();
   void showMenu();
   void switchAlpha(ePattern id, color_t col);
+
+  struct linepattern {
+    int id;
+    const char *lpname;
+    color_t color;
+    };
+
+  extern linepattern patterns[];
   };
 
 transmatrix ddspin(cell *c, int d, ld bonus = 0);
