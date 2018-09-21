@@ -1952,7 +1952,7 @@ namespace linepatterns {
     return col;
     }
     
-  linepattern patterns[] = {
+  vector<linepattern> patterns = {
 
     {patDual, "dual grid", 0xFFFFFF00},
 
@@ -1978,26 +1978,25 @@ namespace linepatterns {
     {patTriTree, "triangle grid: tree edges", 0xFFFFFF00},
     {patTriOther, "triangle grid: other edges", 0xFFFFFF00},
 
-    {0, NULL, 0}
     };
 
   void clearAll() {
-    for(int k=0; patterns[k].lpname; k++) patterns[k].color &= ~255;
+    for(auto& lp: patterns) lp.color &= ~255;
     }
 
   bool any() {
-    for(int k=0; patterns[k].lpname; k++) if(patterns[k].color & 255) return true;
+    for(auto& lp: patterns) if(lp.color & 255) return true;
     return false;
     }
 
   void setColor(ePattern id, color_t col) {
-    for(int k=0; patterns[k].lpname; k++)
-      if(patterns[k].id == id) patterns[k].color = col;
+    for(auto& lp: patterns)
+      if(lp.id == id) lp.color = col;
     }
   
   void switchAlpha(ePattern id, color_t col) {
-    for(int k=0; patterns[k].lpname; k++)
-      if(patterns[k].id == id) patterns[k].color ^= col;
+    for(auto& lp: patterns)
+      if(lp.id == id) lp.color ^= col;
     }
   
   void queuelinef(const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) {
@@ -2228,12 +2227,10 @@ namespace linepatterns {
       cell *c = it->first;
       transmatrix& V = it->second;
       
-      for(int k=0; patterns[k].lpname; k++) {
-        color_t col = patterns[k].color;
-        if(!(col & 255)) continue;
-        int id = patterns[k].id;
-        
-        drawPattern(id, col, c, V);
+      for(auto& lp: patterns) {
+        color_t col = lp.color;
+        if(!(col & 255)) continue;        
+        drawPattern(lp.id, col, c, V);
         }
       }
     }
@@ -2245,9 +2242,17 @@ namespace linepatterns {
     gamescreen(0);
 
     dialog::init(XLAT("line patterns"));
-    
-    for(numpat=0; patterns[numpat].lpname; numpat++)
-      dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && GOLDBERG ? XLAT("Goldberg") + (patterns[numpat].id == patVine ? " " : ""): XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
+
+    int id = 0;    
+    for(auto& lp: patterns) {
+      string name = XLAT(lp.lpname);
+      if(GOLDBERG && among(lp.id, patVine, patPower)) name = XLAT("Goldberg");
+      dialog::addColorItem(name, lp.color, 'a'+(id++));
+      dialog::add_action([&lp] () { 
+        dialog::openColorDialog(lp.color, NULL);
+        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+        });
+      }
   
     dialog::addBreak(50);
     dialog::addBack();
@@ -2256,15 +2261,6 @@ namespace linepatterns {
     dialog::addInfo("change the alpha parameter to show the lines");
   
     dialog::display();
-    
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni < 'a' + numpat) {
-        dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
-        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
-        }
-      else if(doexiton(sym,uni)) popScreen();
-      }; 
     }
     
   };
@@ -2300,13 +2296,19 @@ int read_pattern_args() {
 
   else if(argis("-pal")) {
     PHASEFROM(2); cheat();
-    shift(); int id = argi();
-    shift(); linepatterns::patterns[id].color |= argi();
+    shift(); string ss = args();
+    shift(); 
+    for(auto& lp: linepatterns::patterns)
+      if(appears(lp.lpname, ss))
+        lp.color |= argi();
     }
   else if(argis("-palrgba")) {
     PHASEFROM(2); cheat();
-    shift(); int id = argi();
-    shift(); linepatterns::patterns[id].color = arghex();
+    shift(); string ss = args();
+    shift(); 
+    for(auto& lp: linepatterns::patterns)
+      if(appears(lp.lpname, ss))
+        lp.color = arghex();
     }
 
   else if(argis("-noplayer")) mapeditor::drawplayer = !mapeditor::drawplayer;

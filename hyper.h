@@ -2199,7 +2199,7 @@ namespace linepatterns {
     color_t color;
     };
 
-  extern linepattern patterns[];
+  extern vector<linepattern> patterns;
   };
 
 transmatrix ddspin(cell *c, int d, ld bonus = 0);

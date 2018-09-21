@@ -480,14 +480,13 @@ void viewdist_configure_dialog() {
     dialog::editNumber(first_distance, 0, 3000, 0, 1, "display distances from", "");
     });
   
-  auto& cp = linepatterns::patterns;
-  using namespace linepatterns;
-  for(int numpat=0; cp[numpat].lpname; numpat++) {
-    auto &pn = cp[numpat];
-    if(among(pn.id, patTriTree, patTriRings, patTriOther)) {
-      dialog::addColorItem(XLAT(pn.lpname), pn.color, '1'+numpat);
-      dialog::add_action([&pn] () {
-        dialog::openColorDialog(pn.color, NULL);
+  for(auto& lp: linepatterns::patterns) {
+    using namespace linepatterns;
+    int id = 0;
+    if(among(lp.id, patTriTree, patTriRings, patTriOther)) {
+      dialog::addColorItem(XLAT(lp.lpname), lp.color, '1'+(id++));
+      dialog::add_action([&lp] () {
+        dialog::openColorDialog(lp.color, NULL);
         dialog::dialogflags |= sm::MAYDARK | sm::SIDE | sm::EXPANSION;
         });
       }
