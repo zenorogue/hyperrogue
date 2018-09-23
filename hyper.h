@@ -2982,6 +2982,7 @@ double hdist0(const hyperpoint& mh);
 extern bool fading;
 extern ld fadeout;
 int itemclass(eItem i);
+int monsterclass(eMonster m);
 
 extern purehookset hooks_drawmap;
 extern hookset<bool(eLand&)> *hooks_music;

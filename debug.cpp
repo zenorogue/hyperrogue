@@ -511,6 +511,13 @@ int read_cheat_args() {
     shift(); eMonster m = readMonster(args());
     shift(); kills[m] += argi();
     }
+  else if(argis("-killeach")) {
+    PHASEFROM(2); start_game();
+    shift(); int q = argi(); cheat();
+    for(int m=0; m<motypes; m++)
+      if(monsterclass(eMonster(m)) == 0)
+        kills[m] = q;
+    }
   else if(argis("-each")) {
     PHASEFROM(2); start_game();
     shift(); int q = argi(); autocheat = true;
