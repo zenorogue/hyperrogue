@@ -373,8 +373,19 @@ ld circle_radius = acosh(2.), circle_spins = 1;
 
 void moved() {
   optimizeview();
-  if(cheater || autocheat) 
+  if(cheater || autocheat) {
+    if(hyperbolic && memory_saving_mode && cwt.at != centerover.at && !quotient) {
+      if(isNeighbor(cwt.at, centerover.at)) {
+        cwt.spin = neighborId(centerover.at, cwt.at);
+        flipplayer = true;
+        }
+      animateMovement(cwt.at, centerover.at, LAYER_SMALL, NODIR);
+      cwt.at = centerover.at;
+      save_memory();
+      return;
+      }
     setdist(masterless ? centerover.at : viewctr.at->c7, 7 - getDistLimit() - genrange_bonus, NULL);
+    }
   playermoved = false;
   }
 
@@ -417,20 +428,38 @@ int paramstate = 0;
 
 bool needs_highqual;
 
+void reflect_view() {
+  if(centerover.at) {
+    transmatrix T = Id;
+    cell *mbase = centerover.at;
+    cell *c = centerover.at;
+    if(shmup::reflect(c, mbase, T))
+      View = inverse(T) * View;
+    }
+  }
+
 void apply() {
   int t = ticks - lastticks;
   lastticks = ticks;
+
   switch(ma) {
     case maTranslation:
       if(conformal::on) {
         conformal::phase = (isize(conformal::v) - 1) * ticks * 1. / period;
         conformal::movetophase();        
         }
-      else {
-        if(inmirror(centerover.at) || (hyperbolic && !quotient &&
-          centerover.at->land != cwt.at->land && among(centerover.at->land, laHaunted, laIvoryTower, laDungeon, laEndorian) && centerover.at->landparam >= 10
+      else if(centerover.at) {
+        reflect_view();
+        if((hyperbolic && !quotient && 
+          (centerover.at->land != cwt.at->land || memory_saving_mode) && among(centerover.at->land, laHaunted, laIvoryTower, laDungeon, laEndorian) && centerover.at->landparam >= 10
           ) ) {
-          fullcenter(); View = spin(rand() % 1000) * View;
+          if(memory_saving_mode) {
+            activateSafety(laIce);
+            return;
+            }
+          else {
+            fullcenter(); View = spin(rand() % 1000) * View;
+            }
           }
         View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * xpush(cycle_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
           spin(-movement_angle * M_PI / 180) * View;
@@ -441,6 +470,7 @@ void apply() {
       View = spin(2 * M_PI * t / period) * View;
       break;
     case maParabolic:
+      reflect_view();
       View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * binary::parabolic(parabolic_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
         spin(-movement_angle * M_PI / 180) * View;
       moved();

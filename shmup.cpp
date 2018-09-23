@@ -1430,8 +1430,6 @@ bool noncrashable(monster *m, monster *by) {
 
 int bulltime[MAXPLAYER];
 
-void reflect(cell*& c2, monster *m, transmatrix& nat);
-
 // set to P_MIRRORWALL to allow the PCs to go through mirrors
 static const int reflectflag = P_MIRRORWALL;
 
@@ -1583,7 +1581,7 @@ void movePlayer(monster *m, int delta) {
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
     c2 = m->findbase(nat);
-    if(reflectflag & P_MIRRORWALL) reflect(c2, m, nat);
+    if(reflectflag & P_MIRRORWALL) reflect(c2, m->base, nat);
     
     // don't have several players in one spot
     // also don't let them run too far from each other!
@@ -1866,23 +1864,27 @@ bool reflectmatrix(transmatrix& M, cell *c1, cell *c2, bool onlypos) {
   return true;
   }
 
-void reflect(cell*& c2, monster *m, transmatrix& nat) {
-  if(c2 != m->base && c2->wall == waMirrorWall && inmirror(c2)) {
-    if(reflectmatrix(nat, m->base, c2, false))
-      c2 = m->base;
+int reflect(cell*& c2, cell*& mbase, transmatrix& nat) {
+  int reflections = 0;
+  if(c2 != mbase && c2->wall == waMirrorWall && inmirror(c2)) {
+    if(reflectmatrix(nat, mbase, c2, false)) {
+      c2 = mbase;
+      reflections++;
+      }
     }
 
-  if(c2 == m->base && inmirror(c2)) {
+  if(c2 == mbase && inmirror(c2)) {
     forCellEx(c3, c2) if(c3->land == laMirrorWall) {
-      cell *c1 = m->base;
-      m->base = c3;
-      reflect(c3, m, nat);
-      m->base = c1;
+      cell *c1 = mbase;
+      mbase = c3;
+      reflect(c3, mbase, nat);
+      mbase = c1;
       c2 = c3;
+      reflections++;
       }
     }
   
-  if(c2 == m->base && c2->wall == waMirrorWall && c2->land == laMirrorWall) {
+  if(c2 == mbase && c2->wall == waMirrorWall && c2->land == laMirrorWall) {
     int d = mirror::mirrordir(c2);
     if(d != -1) {
       for(int k=0; k<7; k++) {
@@ -1890,6 +1892,7 @@ void reflect(cell*& c2, monster *m, transmatrix& nat) {
         cell *cb = createMovR(c2, d+k);
         if(ca->land == laMirror && inmirror(cb)) {
           reflectmatrix(nat, ca, cb, true);
+          reflections++;
           break;
           }
         }
@@ -1901,11 +1904,12 @@ void reflect(cell*& c2, monster *m, transmatrix& nat) {
         if(cb->land != laMirrorWall || cc->land != laMirrorWall) continue;
         cell *ca = createMovR(c2, k);
         cell *cd = createMovR(c2, k+3);
-        reflectmatrix(nat, cc, ca, true);
-        for(int limit=0; limit<10 && reflectmatrix(nat, cb, cd, true) && reflectmatrix(nat, cc, ca, true); limit++);
+        if(reflectmatrix(nat, cc, ca, true)) reflections++;
+        for(int limit=0; limit<10 && reflectmatrix(nat, cb, cd, true) && (reflections++, reflectmatrix(nat, cc, ca, true)); limit++) reflections+=2;
         }
       } 
     }
+  return reflections;
   }
 
 void moveMimic(monster *m) {
@@ -1918,7 +1922,7 @@ void moveMimic(monster *m) {
   nat = nat * spin(playerturn[cpid]) * xpush(playergo[cpid]);
 
   cell *c2 = m->findbase(nat);
-  reflect(c2, m, nat);
+  reflect(c2, m->base, nat);
   if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR | P_MIRRORWALL))
     killMonster(m, moNone);
   else {
@@ -2105,7 +2109,7 @@ void moveBullet(monster *m, int delta) {
     awakenMimics(m, c2);
     }
   
-  reflect(c2, m, nat);
+  reflect(c2, m->base, nat);
   
   bool godragon = m->type == moFireball && isDragon(c2->monst);
   
@@ -2585,7 +2589,7 @@ void moveMonster(monster *m, int delta) {
   if(crashintomon) { igo++; goto igo_retry; }
 
   cell *c2 = m->findbase(nat);
-  if(reflectflag & P_MIRRORWALL) reflect(c2, m, nat);
+  if(reflectflag & P_MIRRORWALL) reflect(c2, m->base, nat);
 
   if(m->type == moButterfly && !passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
     igo++; goto igo_retry;

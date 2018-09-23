@@ -798,6 +798,10 @@ void centerpc(ld aspd) {
 
 void optimizeview() {
   
+  if(centerover.at && inmirror(centerover.at)) {
+    anims::reflect_view();
+    }
+  
   DEBB(DF_GRAPH, (debugfile,"optimize view\n"));
   int turn = 0;
   ld best = INF;

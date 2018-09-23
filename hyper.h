@@ -894,6 +894,7 @@ namespace shmup {
   void virtualRebase(shmup::monster *m, bool tohex);
 
   extern monster *pc[MAXPLAYER];
+  int reflect(cell*& c2, cell*& mbase, transmatrix& nat);
   }
 
 transmatrix& ggmatrix(cell *c);
