@@ -750,4 +750,98 @@ auto ea_hook = addHook(hooks_args, 100, readArgs);
 
 expansion_analyzer expansion;
 
+int sibling_limit = 0;
+
+void set_sibling_limit() {
+  if(IRREGULAR) sibling_limit = 3;
+  auto p = gp::univ_param();
+  sibling_limit = 2 * p.first + p.second;
+  }
+
+bool in_segment(cell *left, cell *mid, cell *right) {
+  while(true) {
+    if(mid == left) return true;
+    if(left == right) return false;
+    int v = chosenDownId(left, 1, celldist);
+    if(S3 == 3) left = (cellwalker(left, v) + 1).cpeek();
+    else left = (cellwalker(left, v) + wstep - 1).cpeek();
+    }
+  }
+
+int sibling_distance(cell *a, cell *b, int limit) {
+  int counting = 0;
+  while(true) {
+    if(a == b) return counting;
+    if(limit == 0) return INF;
+    counting++; limit--;
+    a = chosenDown(a, 1, 1, celldist);
+    }
+  }
+
+int hyperbolic_celldistance(cell *c1, cell *c2) {  
+  int found_distance = INF;
+  
+  int d = 0, d1 = celldist(c1), d2 = celldist(c2), sl_used = 0;
+
+  cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
+  while(true) {
+  
+    if(a45 && BITRUNCATED) {
+      // some cells in this tiling have three parents,
+      // making the usual algorithm fail
+      if(d2 == d1+1) {
+        swap(d1, d2); swap(cl1, cl2); swap(c1, c2); swap(cr1, cr2);
+        }
+      auto short_distances = [cl1, cr1, d, &found_distance] (cell *c) {
+        celllister cl(c, 4, 1000, cl1);
+        if(cl.listed(cl1)) found_distance = min(found_distance, d + cl.getdist(cl1));
+        if(cl.listed(cr1)) found_distance = min(found_distance, d + cl.getdist(cr1));
+        };
+      
+      if(d1 <= d2+1) {
+        short_distances(cl2);
+        if(cl2 != cr2) short_distances(cr2);
+        }
+      }
+    
+    if(d >= found_distance) {
+      if(sl_used == sibling_limit && IRREGULAR) { 
+        printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++;
+        }
+      return found_distance;
+      }
+
+    if(d1 == d2) {
+      if(cl1 == c1 && in_segment(cl2, c1, cr2)) return d;
+      if(cl2 == c2 && in_segment(cl1, c2, cr1)) return d;
+      if(VALENCE == 3) {
+        int dx = min(sibling_distance(cr1, cl2, sibling_limit), sibling_distance(cr2, cl1, sibling_limit));
+        if(d + dx <= found_distance) {
+          found_distance = d + dx;
+          sl_used = dx;
+          }
+        }
+      else {
+        if(cl1 == cr2 || cr1 == cl2) found_distance = d;
+        }
+      }    
+    
+    if(d >= found_distance) {
+      if(sl_used == sibling_limit) { printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++; }
+      return found_distance;
+      }
+
+    if(d1 >= d2) {
+      cl1 = chosenDown(cl1, -1, 0, celldist);
+      cr1 = chosenDown(cr1,  1, 0, celldist);
+      d++; d1--;
+      }
+    if(d1 < d2) {
+      cl2 = chosenDown(cl2, -1, 0, celldist);
+      cr2 = chosenDown(cr2,  1, 0, celldist);
+      d++; d2--;
+      }
+    }
+  }
+
 }

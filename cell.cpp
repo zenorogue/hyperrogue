@@ -1436,7 +1436,6 @@ int heptdistance(cell *c1, cell *c2) {
 map<pair<cell*, cell*>, int> saved_distances;
 
 int celldistance(cell *c1, cell *c2) {
-  int d = 0;
   
   if((masterless) && (euclid6 || (euclid4 && PURE))) {
     if(!torus)
@@ -1463,7 +1462,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(NONSTDVAR || masterless || archimedean || binarytiling) {
+  if(masterless || archimedean) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
@@ -1481,70 +1480,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  int d1 = celldist(c1), d2 = celldist(c2);
-
-  cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
-  while(true) {
-  
-  if(weirdhyperbolic) {
-      if(cl1 == cl2) return d;
-      if(cl1 == cr2) return d;
-      if(cr1 == cl2) return d;
-      if(cr1 == cr2) return d;
-          
-      if(isNeighbor(cl1, cl2)) return d+1;
-      if(isNeighbor(cl1, cr2)) return d+1;
-      if(isNeighbor(cr1, cl2)) return d+1;
-      if(isNeighbor(cr1, cr2)) return d+1;
-      }
-    
-    if(d1 == d2) for(int u=0; u<2; u++) {
-      cell *ac0 = u ? cr1 : cr2, *ac = ac0;
-      cell *tgt = u ? cl2 : cl1;
-      cell *xtgt = u ? cr2 : cr1;
-      if(ac == tgt) return d;
-      ac = chosenDown(ac, 1, 1, celldist);
-      if(ac == tgt) return d+1; 
-      if(ac == xtgt) return d;
-      ac = chosenDown(ac, 1, 1, celldist);
-      if(ac == tgt) return d+2;
-      if(BITRUNCATED) {
-        ac = chosenDown(ac, 1, 1, celldist);
-        if(ac == tgt) {
-          if(chosenDown(ac0, 1, 0, celldist) ==
-            chosenDown(tgt, -1, 0, celldist))
-              return d+2; 
-          return d+3;
-          }
-        }
-      }  
-    
-    if(weirdhyperbolic) {
-      forCellEx(c, cl2) if(isNeighbor(c, cr1)) return d+2;
-      forCellEx(c, cl1) if(isNeighbor(c, cr2)) return d+2;
-
-      forCellEx(ca, cl2) forCellEx(cb, cr1) if(isNeighbor(ca, cb)) return d+3;
-      forCellEx(ca, cl1) forCellEx(cb, cr2) if(isNeighbor(ca, cb)) return d+3;
-
-      forCellEx(ca, cl2) forCellEx(cb, cr1) forCellEx(cc, cb) if(isNeighbor(ca, cc)) return d+4;
-      forCellEx(ca, cl1) forCellEx(cb, cr2) forCellEx(cc, cb) if(isNeighbor(ca, cc)) return d+4;
-      }
-
-    if(d1 >= d2) {
-      cl1 = chosenDown(cl1, -1, 0, celldist);
-//    cl1->item = eItem(rand() % 10);
-      cr1 = chosenDown(cr1,  1, 0, celldist);
-//    cr1->item = eItem(rand() % 10);
-      d++; d1--;
-      }
-    if(d1 < d2) {
-      cl2 = chosenDown(cl2, -1, 0, celldist);
-//    cl2->item = eItem(rand() % 10);
-      cr2 = chosenDown(cr2,  1, 0, celldist);
-//    cr2->item = eItem(rand() % 10);
-      d++; d2--;
-      }
-    }
+  return hyperbolic_celldistance(c1, c2);
   }
 
 void clearCellMemory() {

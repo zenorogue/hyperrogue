@@ -189,6 +189,8 @@ void precalc() {
       floorrad0 = hexvdist * .9,
       floorrad1 = rhexf * .8;
     }
+  
+  set_sibling_limit();
   }
 
 transmatrix xspinpush(ld dir, ld dist) {

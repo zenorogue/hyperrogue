@@ -2208,6 +2208,7 @@ bool doexiton(int sym, int uni);
 void switchFullscreen();
 string turnstring(int i);
 int celldistance(cell *c1, cell *c2);
+int hyperbolic_celldistance(cell *c1, cell *c2);
 bool behindsphere(const transmatrix& V);
 extern hyperpoint pirateCoords;
 
@@ -3432,6 +3433,7 @@ namespace gp {
   int solve_triangle(int dmain, int d0, int d1, loc at);
 
   array<heptagon*, 3> get_masters(cell *c);
+  loc univ_param();
   }
 
 int get_sightrange();
@@ -4198,6 +4200,8 @@ struct expansion_analyzer {
   };
 
 extern expansion_analyzer expansion;
+
+int chosenDownId(cell *c, int which, cellfunction* cf);
 
 }
 
