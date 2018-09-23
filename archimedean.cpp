@@ -673,8 +673,8 @@ void archimedean_tiling::parse() {
   int at = 0;
   
   auto peek = [&] () { if(at == isize(symbol)) return char(0); else return symbol[at]; };
-  auto isnumber = [&] () { char p = peek(); return p >= '0' && p <= '9'; };
-  auto read_number = [&] () { int result = 0; while(isnumber()) result = 10 * result + peek() - '0', at++; return result; };
+  auto is_number = [&] () { char p = peek(); return p >= '0' && p <= '9'; };
+  auto read_number = [&] () { int result = 0; while(is_number()) result = 10 * result + peek() - '0', at++; return result; };
   
   faces.clear(); nflags.clear();
   have_line = false;
@@ -695,7 +695,7 @@ void archimedean_tiling::parse() {
       if(!nflags.empty()) nfback() |= sfPH;
       have_ph = true, at++;
       }
-    else if(isnumber()) faces.push_back(read_number()), nflags.push_back(0);
+    else if(is_number()) faces.push_back(read_number()), nflags.push_back(0);
     else if(peek() == '^' && !faces.empty()) {
       at++;
       int rep = read_number();
@@ -712,13 +712,13 @@ void archimedean_tiling::parse() {
   while(peek() != 0) {
     if(peek() == '^') at++, repetition = read_number();
     else if(peek() == '(') { 
-      at++; int a = read_number(); while(!isnumber() && !among(peek(), '(', '[', ')',']', 0)) at++;
-      if(isnumber()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = false; }
+      at++; int a = read_number(); while(!is_number() && !among(peek(), '(', '[', ')',']', 0)) at++;
+      if(is_number()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = false; }
       else { invert[a] = false; }
       }
     else if(peek() == '[') { 
-      at++; int a = read_number(); while(!isnumber() && !among(peek(), '(', '[', ')',']', 0)) at++;
-      if(isnumber()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = true; }
+      at++; int a = read_number(); while(!is_number() && !among(peek(), '(', '[', ')',']', 0)) at++;
+      if(is_number()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = true; }
       else { invert[a] = true; }
       }
     else at++;
