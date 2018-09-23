@@ -199,7 +199,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
     cell *c = bf.at;
     
     if(cdist50(c) != 0) return NULL;
-    if(polarb50(c) != 1) return NULL;
+    if(!polarb50(c)) return NULL;
     }
   
   heptagon *alt = tailored_alloc<heptagon> (S7);

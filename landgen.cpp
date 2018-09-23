@@ -211,7 +211,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
         if(d == 9) {
           cell *c2 = NONSTDVAR ? c->master->c7 : c;
-          if(cdist50(c2) == 3 && polarb50(c2) == 1)
+          if(cdist50(c2) == 3 && polarb50(c2))
             c->wall = waPalace;
           }
       
@@ -272,12 +272,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                 break;
               }
             }
-          else if(cdist50(c) == 3 && polarb50(c) == 1 && !ishept(c)) {
+          else if(cdist50(c) == 3 && polarb50(c) && !ishept(c)) {
             if(GOLDBERG) ; 
             else {
               int q = 0, s = 0;
               if(!ishept(c)) for(int i=0; i<c->type; i++)
-                if(cdist50(c->move(i)) == 3 && polarb50(c->move(i)) == 1 && !ishept(c->move(i)))
+                if(cdist50(c->move(i)) == 3 && polarb50(c->move(i)) && !ishept(c->move(i)))
                   q++, s += i;
               if(q == 1 && c->move(s)->land == laPalace) {
                 switch(princess::generating ? 0 : hrand(2)) {
