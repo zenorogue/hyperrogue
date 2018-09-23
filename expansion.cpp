@@ -486,9 +486,6 @@ void viewdist_configure_dialog() {
   dialog::addBoolItem("color codes", use_color_codes, 'u');
   dialog::add_action([] () { use_color_codes = !use_color_codes; });
 
-  dialog::addBoolItem("use analyzer", use_analyzer, 'a');
-  dialog::add_action([] () { use_analyzer = !use_analyzer; });
-
   dialog::addSelItem("display distances from", its(first_distance), 'd');
   dialog::add_action([] () { 
     scrolling_distances = false;
@@ -641,9 +638,10 @@ void enable_viewdists() {
   }
 
 bool expansion_handleKey(int sym, int uni) {
-  if(cmode & sm::NORMAL) {
-    if(uni == 'S') scrolling_distances = !scrolling_distances;
+  if((cmode & sm::NORMAL) && viewdists) {
+    if(uni == 'S' && (cmode & sm::EXPANSION)) scrolling_distances = !scrolling_distances;
     else if(uni == 'C') pushScreen(viewdist_configure_dialog);
+    else if(uni == 'A' && (cmode & sm::EXPANSION)) use_analyzer = !use_analyzer;
     else if(sym == SDLK_ESCAPE) first_distance = 0, viewdists = false;
     else return false;
     return true;
