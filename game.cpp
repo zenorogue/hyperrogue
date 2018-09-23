@@ -155,12 +155,20 @@ void shrand(int i) {
 
 int hrandpos() { return hrngen() & HRANDMAX; }
 
+// using our own implementations rather than ones from <random>,
+// to make sure that they return the same values on different compilers
+
 int hrand(int i) { 
-  return hrngen() % i;
+  unsigned d = hrngen() - hrngen.min();
+  long long m = (long long) (hrngen.max() - hrngen.min()) + 1;
+  m /= i;
+  d /= m;
+  if(d < (unsigned) i) return d;
+  return hrand(i);
   }
 
 ld hrandf() { 
-  return (hrngen() & HRANDMAX) / (HRANDMAX + 1.0);
+  return (hrngen() - hrngen.min()) / (hrngen.max() + 1.0 - hrngen.min());
   }
 
 int hrandstate() {
