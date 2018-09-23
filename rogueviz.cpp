@@ -1695,7 +1695,8 @@ int readArgs() {
   else if(argis("-net")) {
     PHASE(3);
     init(); kind = kFullNet;
-    linepatterns::setColor(linepatterns::patTriNet, 0x30);
+    linepatterns::setColor(linepatterns::patTriTree, 0x30);
+    linepatterns::setColor(linepatterns::patTriOther, 0x10);
     linepatterns::setColor(linepatterns::patTriRings, 0xFF);
     }
 
