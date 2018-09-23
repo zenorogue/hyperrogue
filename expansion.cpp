@@ -452,7 +452,9 @@ void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
       break;
       }
     case ncDebug: {
-      int d = celldistance(c, distance_from == dfPlayer ? cwt.at : currentmap->gamestart());
+      int d = 
+        distance_from == dfStart && cwt.at == currentmap->gamestart() && c->cpdist < INFD ? c->cpdist : 
+        celldistance(c, distance_from == dfPlayer ? cwt.at : currentmap->gamestart());
       dc = (d != cd) ? 0xFF0000 : 0x00FF00;
       label = its(d);
       }
@@ -491,6 +493,9 @@ void viewdist_configure_dialog() {
     scrolling_distances = false;
     dialog::editNumber(first_distance, 0, 3000, 0, 1, "display distances from", "");
     });
+
+  dialog::addItem("disable", 'x');
+  dialog::add_action([] () { viewdists = false; });
   
   int id = 0;
   for(auto& lp: linepatterns::patterns) {
@@ -669,17 +674,18 @@ int readArgs() {
   else if(argis("-vap")) { 
     PHASEFROM(2); 
     start_game();
+    shift(); int radius = argi();
     while(true) {
-      string s = expansion.approximate_descendants(10000, 100);
+      string s = expansion.approximate_descendants(radius, 100);
       printf("s = %s\n", s.c_str());
-      if(isize(expansion.descendants) >= 10000) break;
+      if(isize(expansion.descendants) >= radius) break;
       }
     }
   else if(argis("-csizes")) { 
     PHASEFROM(2); 
     start_game();
     expansion.get_growth();
-    for(int i=0; i<30; i++)
+    shift(); for(int i=0; i<argi(); i++)
       printf("%s / %s\n", expansion.get_descendants(i).get_str(1000).c_str(), expansion.get_descendants(i, expansion.diskid).get_str(1000).c_str());  
     }
   else if(argis("-csolve")) { 
@@ -688,9 +694,19 @@ int readArgs() {
     printf("preliminary_grouping...\n");
     expansion.preliminary_grouping();
     printf("N = %d\n", expansion.N);
+    for(int i=0; i<expansion.N; i++) {
+      printf("%d:", i);
+      for(int c: expansion.children[i]) printf(" %d", c);
+      printf("\n");
+      }
     printf("reduce_grouping...\n");
     expansion.reduce_grouping();
     printf("N = %d\n", expansion.N);
+    for(int i=0; i<expansion.N; i++) {
+      printf("%d:", i);
+      for(int c: expansion.children[i]) printf(" %d", c);
+      printf("\n");
+      }
     printf("growth = %lf\n", (double) expansion.get_growth());
     expansion.find_coefficients();      
     if(expansion.coefficients_known == 2) {
@@ -717,6 +733,13 @@ int readArgs() {
         compute_coefficients();
         }
       }
+    }
+
+  else if(argis("-expansion")) {
+    cheat(); viewdists = true;
+    shift(); distance_from = (eDistanceFrom) argi();
+    shift(); number_coding = (eNumberCoding) argi();
+    shift(); use_color_codes = argi() & 1; use_analyzer = argi() & 2; show_distance_lists = argi() & 4;
     }
   else return 1;
   return 0;
