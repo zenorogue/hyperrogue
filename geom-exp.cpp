@@ -452,7 +452,7 @@ void showEuclideanMenu() {
           gp::configure();
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
-      else if(uni == '3' && !viewdists) { enable_viewdists(); popScreenAll(); }
+      else if(uni == '3' && !viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
       else if(uni == '3' && viewdists) { viewdists = false; }
       else if(uni == '1' && !euclid) {
         if(sphere) {

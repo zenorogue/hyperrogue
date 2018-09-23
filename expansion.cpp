@@ -485,18 +485,12 @@ void viewdist_configure_dialog() {
   dialog::addBoolItem("use analyzer", use_analyzer, 'a');
   dialog::add_action([] () { use_analyzer = !use_analyzer; });
 
-  dialog::addBoolItem("show distance lists", show_distance_lists, 'l');
-  dialog::add_action([] () { show_distance_lists = !show_distance_lists; });
-
   dialog::addSelItem("display distances from", its(first_distance), 'd');
   dialog::add_action([] () { 
     scrolling_distances = false;
     dialog::editNumber(first_distance, 0, 3000, 0, 1, "display distances from", "");
     });
 
-  dialog::addItem("disable", 'x');
-  dialog::add_action([] () { viewdists = false; });
-  
   int id = 0;
   for(auto& lp: linepatterns::patterns) {
     using namespace linepatterns;
@@ -513,13 +507,18 @@ void viewdist_configure_dialog() {
     dialog::addInfo(XLAT("note: enable the cheat mode for additional options"));
   else 
     dialog::addBreak(100);
-  
-  if(distance_from)
-    dialog::addInfo("numbers show the descendants of current player position");
-  else
-    dialog::addBreak(100);
 
-  dialog::addBack();  
+  dialog::addBreak(100);
+
+  dialog::addItem("disable", 'x');
+  dialog::add_action([] () { viewdists = false; popScreen(); });
+  
+  dialog::addItem("move the player", 'm');
+  dialog::add_action([] () { show_distance_lists = false; popScreenAll(); });
+  
+  dialog::addItem(distance_from ? "show number of descendants by distance" : "show number of cells by distance", 'l');
+  dialog::add_action([] () { show_distance_lists = true; popScreenAll(); });
+
   dialog::display();
   }
 
