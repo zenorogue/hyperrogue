@@ -601,20 +601,18 @@ namespace dialog {
 
   void affect(char kind) {
 
-    if(ne.intval) {
-      if(kind == 's') sscanf(ne.s.c_str(), "%d", ne.intval), *ne.editwhat = *ne.intval;
-      if(kind == 'v') *ne.intval = ldtoint(*ne.editwhat), ne.s = its(*ne.intval);
+    if(kind == 's') {
+      exp_parser ep;
+      ep.s = ne.s;
+      ld x = ep.parse();
+      if(!ep.ok()) return;
+      if(ne.sc.positive && x <= 0) return;
+      *ne.editwhat = x;
+      if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
       }
-    else {
-      if(kind == 's') {
-        exp_parser ep;
-        ep.s = ne.s;
-        ld x = ep.parse();
-        if(!ep.ok()) return;
-        if(ne.sc.positive && x <= 0) return;
-        *ne.editwhat = x;
-        }
-      if(kind == 'v') ne.s = disp(*ne.editwhat);
+    if(kind == 'v') {
+      if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
+      ne.s = disp(*ne.editwhat);
       }
     
     if(reaction) reaction();
@@ -732,7 +730,7 @@ namespace dialog {
     
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || (uni == '.' && !ne.intval) || among(uni, '+', '-', '*', '/', '^', '(', ')') || (uni >= 'a' && uni <= 'z')) {
+      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')') || (uni >= 'a' && uni <= 'z')) {
         ne.s += uni;
         affect('s');
         }
