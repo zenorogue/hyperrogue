@@ -172,7 +172,7 @@ namespace yendor {
       if(true) {
         int t = -1;
         bignum full_id;
-        bool onlychild;
+        bool onlychild = true;
 
         cellwalker ycw(yendor, hrand(yendor->type));
         ycw--; if(S3 == 3) ycw--;
@@ -202,7 +202,7 @@ namespace yendor {
           if(ycw.at->land == laEndorian) {
             // follow the branch in Yendorian
             int bestval = -2000;
-            int best, qbest;
+            int best = 0, qbest = 0;
             for(int d=0; d<ycw.at->type; d++) {
               setdist(ycw.at, 7, ycw.peek());
               cell *c1 = (ycw+d).cpeek();

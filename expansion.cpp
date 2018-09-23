@@ -442,7 +442,7 @@ void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
     }
   
   string label = "";
-  int dc;
+  int dc = 0xFFD500;
  
   switch(number_coding) {
     case ncDistance: { 
