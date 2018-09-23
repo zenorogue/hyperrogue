@@ -474,7 +474,7 @@ void viewdist_configure_dialog() {
   gamescreen(0);
   
   dialog::addSelItem("which distance", dfnames[distance_from], 'c');
-  dialog::add_action([] () { distance_from = mod_allowed() ? eDistanceFrom(2 - distance_from) : eDistanceFrom((distance_from + 1) % 3); });
+  dialog::add_action([] () { distance_from = mod_allowed() ? eDistanceFrom((distance_from + 1) % 3) : eDistanceFrom(2 - distance_from); });
              
   dialog::addSelItem("number codes", ncnames[number_coding], 'n');
   dialog::add_action([] () { number_coding = eNumberCoding((number_coding + 1) % (mod_allowed() ? 4 : 2)); });
