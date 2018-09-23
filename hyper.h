@@ -4129,18 +4129,35 @@ struct bignum {
   bignum& operator +=(const bignum& b);
   void addmul(const bignum& b, int factor);
   string get_str(int max_length);
-  ld approx() {
-    if(digits.empty()) return 0;
-    return digits.back() * pow(BASE, isize(digits) - 1);
+  
+  bool operator < (const bignum&) const;
+
+  ld leading() const {
+    switch(isize(digits)) {
+      case 0:
+        return 0;
+      case 1:
+        return digits.back();
+      default:
+        return digits.back() + ld(digits[isize(digits)-2]) / BASE;
+      }
+    }
+
+  ld approx() const {
+    return leading() * pow(BASE, isize(digits) - 1);
     }
   
-  int approx_int() {
+  ld operator / (const bignum& b) const {
+    return leading() / b.leading() * pow(BASE, isize(digits) - isize(b.digits));
+    }
+  
+  int approx_int() const {
     if(isize(digits) > 1) return BASE;
     if(digits.empty()) return 0;
     return digits[0];
     }
   
-  long long approx_ll() {
+  long long approx_ll() const {
     if(isize(digits) > 2) return BASE2;
     if(digits.empty()) return 0;
     if(isize(digits) == 1) return digits[0];

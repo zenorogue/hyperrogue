@@ -659,10 +659,12 @@ int chosenDownId(cell *c, int which, cellfunction* cf) {
     if(c->move(i)->mpdist > BARLEV && cf == coastvalEdge) setdist(c->move(i), BARLEV, c);
     
     if((*cf)(c->move(i)) == d) {
+      again:
       int i2 = (i+which+S42)%c->type;
       createMov(c, i2);
-      if((*cf)(c->move(i2)) == d)
-        return i2;
+      if((*cf)(c->move(i2)) == d) {
+        i = i2; goto again;
+        }
       else return i;
       }
     }
@@ -1069,6 +1071,11 @@ void buildBigStuff(cell *c, cell *from) {
   
   else if(weirdhyperbolic && specialland == laCrossroads4 && /*pseudohept(c) &&*/ hrand(I10000 /4) < wallchance(c, deepOcean) && gp_wall_test()) {
     buildBarrierNowall(c, getNewLand(c->land));
+    }
+  
+  else if(weirdhyperbolic && yendor::on && yendor::nexttostart) {
+    if(buildBarrierNowall(c, yendor::nexttostart))
+      yendor::nexttostart = laNone;
     }
   
   else if(weirdhyperbolic && specialland == laElementalWall && hrand(I10000) < 1000 && gp_wall_test()) 

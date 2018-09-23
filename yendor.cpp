@@ -111,6 +111,7 @@ namespace yendor {
   yendorlevel& clev() { return levels[challenge]; }
   
   eLand changeland(int i, eLand l) {
+    if(l == laIvoryTower) return laNone;
     if((clev().flags & YF_START_ANY) && i < 20 && l != clev().l) return clev().l;
     if((clev().flags & YF_END) && i > 80 && l == clev().l) return laIce;
     return laNone;
@@ -164,77 +165,93 @@ namespace yendor {
       nyi.path[0] = yendor;
       nyi.howfar = 0;
       
-      if(euclid) {
-        int di = hrand(6);
-        int dj = (di+1) % 6;
-        int qty = hrand(YDIST-1);
-        int tot = 0;
-        for(int i=0; i<YDIST-1; i++) {
-          tot += qty;
-          if(tot >= YDIST-1) { 
-            tot -= YDIST-1;
-            nyi.path[i+1] = createMov(nyi.path[i], di);
-            }
-          else
-            nyi.path[i+1] = createMov(nyi.path[i], dj);
-          }
-        }
-      
-      else {
-        bool endorian_change = true;
-        bool in_endorian = false;
-        cellwalker lig(yendor, hrand(yendor->type));  
-        for(int i=0; i<YDIST-1; i++) {
-          if(lig.at->land == laEndorian)
-            in_endorian = true;
-          else if(!isTechnicalLand(lig.at->land))
-            in_endorian = false;
-          nyi.path[i] = lig.at;
-          
-          lig += wstep;
-          if(inmirror(lig)) lig = mirror::reflect(lig);
-          lig += 3;
-          if(lig.at->type == 7) {
-            if(in_endorian && endorian_change && i >= YDIST - 20) {
-              // make the last leg a bit more difficult
-              lig += (hrand(2)*3-1);
-              endorian_change = false;
-              }
-            else
-              lig += hrand(2);
-            }
-          }
-        nyi.path[YDIST-1] = lig.at;
-        }
-      
       generating = true;
-  
-      for(int i=1; i<YDIST-1; i++) {
-        cell *c = nyi.path[i];
-        cell *prev = nyi.path[i-1];
-              
-        setdist(c, 10, prev);
-        setdist(c, 9, prev);
-        setdist(c, 8, prev);
-        setdist(c, 7, prev);
-  
-        if(challenge && i+BARLEV-7 < YDIST-5 && !euclid) {
-          cell *c2 = nyi.path[i+BARLEV-7];
-          if(c2->land == laIvoryTower) continue;
-          eLand ycl = changeland(i, c2->land);
-          if(ishept(c2) && ycl) {
-            int bd = 2 + hrand(2) * 3;
-//          printf("barrier at %d\n", i);
-            buildBarrier(c2, bd, ycl);
-            if(c2->bardir != NODIR && c2->bardir != NOBARRIERS) 
-              extendBarrier(c2);
+
+      if(true) {
+        int t = -1;
+        bignum full_id;
+        bool onlychild;
+
+        cellwalker ycw(yendor, hrand(yendor->type));
+        ycw--; if(S3 == 3) ycw--;
+        setdist(nyi.path[0], 7, NULL);
+
+        for(int i=0; i<YDIST-1; i++) {
+          
+          if(i > BARLEV-6) {
+            setdist(nyi.path[i+7-BARLEV], 7, nyi.path[i+6-BARLEV]);
+            if(challenge && !euclid) {
+              if(ycw.at->land == laIvoryTower) continue;
+              eLand ycl = changeland(i, ycw.at->land);
+              if(ycl) {
+                if(weirdhyperbolic) {
+                  buildBarrierNowall(ycw.at, ycl);
+                  }
+                else if(hyperbolic && ishept(ycw.at)) {
+                  int bd = 2 + hrand(2) * 3;
+                  buildBarrier(ycw.at, bd, ycl);
+                  if(ycw.at->bardir != NODIR && ycw.at->bardir != NOBARRIERS) 
+                    extendBarrier(ycw.at);
+                  }
+                }
+              }  
             }
+
+          if(ycw.at->land == laEndorian) {
+            // follow the branch in Yendorian
+            int bestval = -2000;
+            int best, qbest;
+            for(int d=0; d<ycw.at->type; d++) {
+              setdist(ycw.at, 7, ycw.peek());
+              cell *c1 = (ycw+d).cpeek();
+              int val = d * (ycw.at->type - d);
+              if(c1->wall == waTrunk) val += (i < YDIST-20 ? 1000 : -1000);
+              if(val > bestval) qbest = 0, bestval = val;
+              if(val == bestval) if(hrand(++qbest) == 0) best = d;
+              }
+            ycw += best;
+            }
+          
+          else if(sizes_known()) { 
+            if(i == 0) {
+              t = type_in(expansion, yendor, [yendor] (cell *c) { return celldistance(yendor, c); });
+              bignum b = expansion.get_descendants(YDIST-1, t);
+              full_id = hrand(b);
+              }
+            if(i == 1) 
+              onlychild = true;
+            if(!onlychild) ycw++;
+            if(S3 == 3) ycw++;
+
+            onlychild = false;
+
+            for(int tch: expansion.children[t]) {
+              ycw++;
+              if(i == 1)
+                tch = type_in(expansion, ycw.cpeek(), [yendor] (cell *c) { return celldistance(yendor, c); });
+              auto& sub_id = expansion.get_descendants(YDIST-i-2, tch);
+              if(full_id < sub_id) { t = tch; break; }
+              
+              full_id.addmul(sub_id, -1);
+              onlychild = true;
+              }
+            }
+          
+          else {
+            // stupid
+            ycw += rev;
+            }
+
+          if(inmirror(ycw)) ycw = mirror::reflect(ycw);
+          ycw += wstep;
+          nyi.path[i+1] = ycw.at;
           }
         }
       
       nyi.found = false;
       nyi.foundOrb = false;
   
+      setdist(nyi.path[YDIST-1], 7, nyi.path[YDIST-2]);
       cell *key = nyi.path[YDIST-1];
   
       generating = false;

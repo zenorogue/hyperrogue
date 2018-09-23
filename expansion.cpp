@@ -24,11 +24,20 @@ bignum& bignum::operator +=(const bignum& b) {
   return *this;
   }
 
+bool bignum::operator < (const bignum& b) const {
+  if(isize(digits) != isize(b.digits))
+    return isize(digits) < isize(b.digits);
+  for(int i = isize(digits)-1; i>=0; i--)
+    if(digits[i] != b.digits[i])
+      return digits[i] < b.digits[i];
+  return false;
+  }
+
 void bignum::addmul(const bignum& b, int factor) {
   int K = isize(b.digits);
   if(K > isize(digits)) digits.resize(K);
   int carry = 0;
-  for(int i=0; i<K || (carry > 0 && carry < -1); i++) {
+  for(int i=0; i<K || (carry > 0 && carry < -1) || (carry == -1 && i < isize(digits)); i++) {
     if(i >= isize(digits)) digits.push_back(0);
     long long l = digits[i];
     l += carry;
@@ -40,6 +49,18 @@ void bignum::addmul(const bignum& b, int factor) {
     digits[i] = l;
     }
   if(carry < 0) digits.back() -= BASE;
+  while(isize(digits) && digits.back() == 0) digits.pop_back();
+  }
+
+bignum hrand(bignum b) {
+  bignum res;
+  int d = isize(b.digits);
+  while(true) {
+    res.digits.resize(d);
+    for(int i=0; i<d-1; i++) res.digits[i] = hrand(bignum::BASE);
+    res.digits.back() = hrand(b.digits.back() + 1);
+    if(res < b) return res;
+    }  
   }
 
 void operator ++(bignum &b, int) {
@@ -170,7 +191,6 @@ void expansion_analyzer::reduce_grouping() {
   N = nogroups;
   rootid = grouping[rootid];
   diskid = grouping[diskid];
-  printf("%d -> %d\n", old_N, N);
   for(int g=0; g<old_N; g++) if(grouping[g] != g) descendants.clear();
   }
 
