@@ -469,9 +469,9 @@ void viewdist_configure_dialog() {
     dialog::editNumber(first_distance, 0, 3000, 0, 1, "display distances from", "");
     });
   
+  int id = 0;
   for(auto& lp: linepatterns::patterns) {
     using namespace linepatterns;
-    int id = 0;
     if(among(lp.id, patTriTree, patTriRings, patTriOther)) {
       dialog::addColorItem(XLAT(lp.lpname), lp.color, '1'+(id++));
       dialog::add_action([&lp] () {
