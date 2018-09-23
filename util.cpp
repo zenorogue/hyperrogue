@@ -184,6 +184,7 @@ struct exp_parser {
         }
       if(number == "e") res = exp(1);
       else if(number == "p" || number == "pi") res = M_PI;
+      else if(number == "" && next() == '-') res = 0, prio = 0;
       else if(number == "") at = -1;
       else if(number[0] >= 'a' && number[0] <= 'z') at = -1;
       else { std::stringstream ss; res = 0; ss << number; ss >> res; }
