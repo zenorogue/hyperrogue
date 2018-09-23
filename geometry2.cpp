@@ -125,12 +125,13 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       for(int d=0; d<S7; d++) if(h2->move(d)) {
         int sp = h2->c.spin(d);
         transmatrix S = heptmove[sp] * spin(2*M_PI*d/S7);
+        if(h2->c.mirror(d)) S = heptmove[sp] * Mirror * spin(2*M_PI*d/S7);
         if(h2->move(d) == h1) {
           transmatrix T1 = gm * S * where;
           auto curdist = hdist(tC0(T1), point_hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
-        for(int e=0; e<S7; e++) if(h2->move(d)->move(e) == h1) {
+        if(geometry != gMinimal) for(int e=0; e<S7; e++) if(h2->move(d)->move(e) == h1) {
           int sp2 = h2->move(d)->c.spin(e);
           transmatrix T1 = gm * heptmove[sp2] * spin(2*M_PI*e/S7) * S * where;
           auto curdist = hdist(tC0(T1), point_hint);

@@ -1899,8 +1899,8 @@ void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint);
   
 void flameHalfvine(cell *c, int val) {
   if(itemBurns(c->item)) {
+    addMessage(XLAT("%The1 burns!", c->item));
     c->item = itNone;
-    addMessage(XLAT("%The1 burns!", c->item)), c->item = itNone;
     }
   c->wall = waPartialFire;
   c->wparam = val;
