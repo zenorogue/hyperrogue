@@ -1507,6 +1507,12 @@ int read_config_args() {
   else if(argis("-stretch")) {
     PHASEFROM(2); shift(); vid.stretch = argf();
     }
+  else if(argis("-msm")) {
+    PHASEFROM(2); memory_saving_mode = true;
+    }
+  else if(argis("-msmoff")) {
+    PHASEFROM(2); memory_saving_mode = false;
+    }
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('f', vid.full, switchFullscreen())
   else return 1;
