@@ -660,7 +660,7 @@ int chosenDownId(cell *c, int which, cellfunction* cf) {
     
     if((*cf)(c->move(i)) == d) {
       again:
-      int i2 = (i+which+S42)%c->type;
+      int i2 = (i+which+MODFIXER)%c->type;
       createMov(c, i2);
       if((*cf)(c->move(i2)) == d) {
         i = i2; goto again;
