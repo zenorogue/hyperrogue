@@ -2708,3 +2708,19 @@ RogueViz:
 * fixed the sight range on non-bitruncated tori
 * fixed texts disappearing when scale is set to less than 0
 * number editor and command line parameters now accept expressions
+
+2018.09.24 00:16 Update 10.4x
+
+* improved understanding of paths and circumferences, in all hyperbolic geometries (except Archimedean)
+* * big numbers given by the Knights of Camelot and during the 'game over' screen are now computed precisely even for big radii, and also in more geometries
+* * the expansion screen ('size of the world' in geometry experiments) now has many new features
+* * the Key to Orb of Yendor can now be generated on any cell in distance 100, not only cells connected with 'bull lines' (key generation was buggy in some geometries)
+* * fixed some bugs / improved efficiency of distance computations in some geometries                                                                               
+* fixed graphical/movement glitches in the minimal quotient space
+* GP(2,1) and similar geometries allowed land boundaries to cross, this is fixed
+* parsing expressions allowed for integers too; unary minus is allowed
+* command line options -pal and -palrgba now accept the pattern name; -msm and -msmoff to control memory saving mode; -killeach to kill a number of each enemy monster type
+* enabled sightrange increase in Archimedean, also translation of sightrange and better note about additional options
+* creating [Baby] Tortoises in the map editor now creates 'local' ones at first, and random ones on another click
+* when you scroll into a mirror wall, the view is reflected
+* if the memory saving and cheat modes are on, translate animation will move the PC together with the view, thus saving memory
