@@ -67,6 +67,7 @@ bool warped_version(eLand l1, eLand l2) {
 
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
   if(bb.at->mpdist < BARLEV && l1 == l2) return false;
+  if(bb.cpeek()->bardir != NODIR && l1 == l2) return false;
   if(bb.at->bardir != NODIR && l1 == l2) return false;
   // if(bb.at->move(dir) && bb.at->move(dir)->bardir != NODIR && l1 == laNone) return false;
   // if(bb.at->move(dir) && bb.at->move(dir)->mpdist < BARLEV && l1 == laNone) return false;
