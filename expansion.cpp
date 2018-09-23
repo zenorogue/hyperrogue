@@ -100,24 +100,33 @@ int expansion_analyzer::sample_id(cell *c) {
   samples.push_back(c);
   return cit;
   }
+
+template<class T, class U> vector<int> get_children_codes(cell *c, const T& distfun, const U& typefun) {
+  vector<int> res;
+  int d = distfun(c);
+  cellwalker cw(c, 0);
+  if(d > 0) {
+    forCellCM(c2, c) if(celldist(cw.peek()) < d) break; else cw++;
+    }
+  for(int k=0; k<c->type; k++) {
+    cell *c1 = cw.cpeek();
+    cw++;
+    if(distfun(c1) != d+1) continue;
+    cell *c2 = cw.cpeek();
+    if(distfun(c2) != d+1) continue;
+    res.push_back(typefun(c1));
+    }
+  return res;
+  }
   
 void expansion_analyzer::preliminary_grouping() {
   samples.clear();
   codeid.clear();
   children.clear();
   sample_id(currentmap->gamestart());
-  for(int i=0; i<isize(samples); i++) {
-    children.emplace_back();
-    auto c = samples[i];
-    int d = celldist(c);
-    for(int k=0; k<c->type; k++) {
-      cell *c1 = c->cmove(k);
-      if(celldist(c1) != d+1) continue;
-      cell *c2 = c->cmove((k+1) % c->type);
-      if(celldist(c2) != d+1) continue;
-      children.back().push_back(sample_id(c1));
-      }
-    }
+  // queue for, do not change to range-based for
+  for(int i=0; i<isize(samples); i++) 
+    children.push_back(get_children_codes(samples[i], celldist, [this] (cell *c) { return sample_id(c); }));
   N = isize(samples);
   rootid = 0;
   diskid = N;
@@ -138,7 +147,7 @@ void expansion_analyzer::reduce_grouping() {
       childgroups[i].second = i;
       for(int j: children[i])
         childgroups[i].first.push_back(grouping[j]);
-      sort(childgroups[i].first.begin(), childgroups[i].first.end());
+      // sort(childgroups[i].first.begin(), childgroups[i].first.end());
       }
     sort(childgroups.begin(), childgroups.end());
     int newgroups = 0;
@@ -301,28 +310,8 @@ template<class T> int type_in(expansion_analyzer& ea, cell *c, const T& f) {
   int ret = ea.N++;
   ea.codeid[res] = ret;
   
-  vector<int> rec(MAX_EDGE, -1);
-  
   ea.children.emplace_back();
-  for(int k=0; k<c->type; k++) {
-    cell *c1 = c->cmove(k);
-    if(f(c1) != d+1) continue;
-    cell *c2 = c->cmove((k+1) % c->type);
-    if(f(c2) != d+1) continue;
-    auto ti = rec[k] = type_in(ea, c1, f);
-    // note: ea.children[ret].push_back(type_in(...)) would not work because of invalidation
-    ea.children[ret].push_back(ti);
-    }
-
-  /*
-  printf("extra type created: [%d, d=%d]", ret, d); for(auto i: ea.children[ret]) printf(" %d", i); printf("\n");
-  printf("  list:");
-  for(int k=0; k<c->type; k++) {
-    cell *c1 = c->cmove(k);
-    printf(" %d/%d/%d", k, rec[k], f(c1) - d);
-    }
-  printf("\n");
-  */
+  ea.children[ret] = get_children_codes(c, f, [&ea, &f] (cell *c1) { return type_in(ea, c1, f); });
 
   return ret;
   }
