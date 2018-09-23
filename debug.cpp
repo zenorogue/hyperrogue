@@ -331,6 +331,7 @@ void debugScreen() {
     dialog::addBreak(50);
     dialog::addSelItem("cpdist", its(mouseover->cpdist), 0);
     dialog::addSelItem("celldist", its(celldist(mouseover)), 0);
+    dialog::addSelItem("celldistance", its(celldistance(cwt.at, mouseover)), 0);
     dialog::addSelItem("pathdist", its(mouseover->pathdist), 0);
     dialog::addSelItem("celldistAlt", mouseover->master->alt ? its(celldistAlt(mouseover)) : "--", 0);
     dialog::addSelItem("temporary", its(mouseover->listindex), 0);
