@@ -166,6 +166,8 @@ namespace yendor {
       nyi.howfar = 0;
       
       generating = true;
+      
+      int turns = 0;
 
       if(true) {
         int t = -1;
@@ -212,19 +214,37 @@ namespace yendor {
             ycw += best;
             }
           
-          else if(sizes_known()) { 
+          else if(binarytiling) {
+            // make it challenging
+            vector<int> ds;
+            for(int d=0; d<ycw.at->type; d++) {
+              if(celldist((ycw+d).cpeek()) < celldist(ycw.at))
+                ds.push_back(d);
+              }
+            if(isize(ds)) ycw += ds[hrand(isize(ds))];
+            }
+          
+          else if(trees_known()) { 
             if(i == 0) {
               t = type_in(expansion, yendor, [yendor] (cell *c) { return celldistance(yendor, c); });
               bignum b = expansion.get_descendants(YDIST-1, t);
               full_id = hrand(b);
               }
+            
+            #if DEBUG_YENDORGEN
+            printf("#%3d t%d %s / %s\n", i, t, full_id.get_str(100).c_str(), expansion.get_descendants(YDIST-1-i, t).get_str(100).c_str());
+            for(int tch: expansion.children[t]) {
+              printf("     t%d %s\n", tch, expansion.get_descendants(YDIST-2-i, t).get_str(100).c_str());
+              }
+            #endif
+
             if(i == 1) 
               onlychild = true;
             if(!onlychild) ycw++;
-            if(S3 == 3) ycw++;
+            if(VALENCE == 3) ycw++;
 
             onlychild = false;
-
+            
             for(int tch: expansion.children[t]) {
               ycw++;
               if(i == 1)
@@ -240,6 +260,18 @@ namespace yendor {
           else {
             // stupid
             ycw += rev;
+            // well, make it a bit more clever on bitruncated a4 grids
+            if(a4 && BITRUNCATED && S7 <= 5) {
+              if(ycw.at->type == 8 && ycw.cpeek()->type != 8)
+                ycw++;
+              if(hrand(100) < 10) {
+                if(euclid ? (turns&1) : (hrand(100) < 50)) 
+                  ycw+=2;
+                else
+                  ycw-=2;
+                turns++;
+                }
+              }
             }
 
           if(inmirror(ycw)) ycw = mirror::reflect(ycw);

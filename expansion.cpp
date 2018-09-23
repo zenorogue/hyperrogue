@@ -361,6 +361,10 @@ bool sizes_known() {
   return true;  
   }
 
+bool trees_known() {
+  return sizes_known() && !(BITRUNCATED && a4 && S7 <= 5);
+  }
+
 string expansion_analyzer::approximate_descendants(int d, int max_length) {
   auto t = SDL_GetTicks();
   while(isize(descendants) <= d && SDL_GetTicks() < t + 100)
