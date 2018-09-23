@@ -346,7 +346,7 @@ bool nofps = false;
 void drawStats() {
   if(nohud || stereo::mode == stereo::sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
-  if(viewdists && sidescreen) 
+  if(viewdists && show_distance_lists) 
     expansion.view_distances_dialog();
   if(sidescreen) return;
 

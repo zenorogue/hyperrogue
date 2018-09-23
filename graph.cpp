@@ -5676,7 +5676,7 @@ void normalscreen() {
 
   if(!outofmap(mouseh)) getcstat = '-';
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
-  if(viewdists) cmode |= sm::SIDE;
+  if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
   if(nomenukey || ISMOBILE)
     ;

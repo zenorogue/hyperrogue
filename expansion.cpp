@@ -415,7 +415,7 @@ template<class T> int type_in_reduced(expansion_analyzer& ea, cell *c, const T& 
   return t;
   }
 
-bool viewdists = false, use_color_codes = true, use_analyzer = true;
+bool viewdists = false, use_color_codes = true, use_analyzer = true, show_distance_lists = true;
 
 int first_distance = 0, scrolltime = 0;
 bool scrolling_distances = false;
@@ -482,6 +482,9 @@ void viewdist_configure_dialog() {
 
   dialog::addBoolItem("use analyzer", use_analyzer, 'a');
   dialog::add_action([] () { use_analyzer = !use_analyzer; });
+
+  dialog::addBoolItem("show distance lists", show_distance_lists, 'l');
+  dialog::add_action([] () { show_distance_lists = !show_distance_lists; });
 
   dialog::addSelItem("display distances from", its(first_distance), 'd');
   dialog::add_action([] () { 
@@ -626,10 +629,11 @@ void enable_viewdists() {
     number_coding = ncDistance;
     distance_from = dfPlayer;
     }
+  show_distance_lists = true;
   }
 
 bool expansion_handleKey(int sym, int uni) {
-  if((cmode & sm::EXPANSION) && (cmode & sm::NORMAL)) {
+  if(cmode & sm::NORMAL) {
     if(uni == 'S') scrolling_distances = !scrolling_distances;
     else if(uni == 'C') pushScreen(viewdist_configure_dialog);
     else if(sym == SDLK_ESCAPE) first_distance = 0, viewdists = false;
