@@ -2664,13 +2664,13 @@ void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int
   
 void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame, int align) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss;  getcoord0(V * xpush0(.5), xs, ys, ss); 
+  int xs, ys, ss;  getcoord0(V * xpush0(.5 * scalefactor), xs, ys, ss); 
   queuestr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), chr, col, frame, align);
   }
   
 void queuecircle(const transmatrix& V, double size, color_t col) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss; getcoord0(V * xpush0(.5), xs, ys, ss);  
+  int xs, ys, ss; getcoord0(V * xpush0(.5 * scalefactor), xs, ys, ss);  
   queuecircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), col);
   }
 
