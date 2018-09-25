@@ -55,6 +55,8 @@ eVizkind kind;
 
 bool on;
 
+vector<shared_ptr<edgetype>> edgetypes;
+
 edgetype *add_edgetype(const string& name) {
   auto e = make_shared<edgetype> (default_edgetype);
   e->name = name;

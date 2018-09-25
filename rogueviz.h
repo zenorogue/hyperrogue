@@ -19,7 +19,7 @@ namespace rogueviz {
 
   extern edgetype default_edgetype;
   
-  vector<shared_ptr<edgetype>> edgetypes;
+  extern vector<shared_ptr<edgetype>> edgetypes;
     
   struct edgeinfo {
     int i, j;
