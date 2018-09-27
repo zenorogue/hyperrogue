@@ -731,7 +731,7 @@ void compute_coefficients() {
     }
   }
 
-int readArgs() {
+int expansion_readArgs() {
   using namespace arg;
            
   if(0) ;
@@ -805,11 +805,16 @@ int readArgs() {
     shift(); number_coding = (eNumberCoding) argi();
     shift(); use_color_codes = argi() & 1; use_analyzer = argi() & 2; show_distance_lists = argi() & 4;
     }
+
+  else if(argis("-expansion-off")) {
+    viewdists = false;
+    }
+
   else return 1;
   return 0;
   }
 
-auto ea_hook = addHook(hooks_args, 100, readArgs);
+auto ea_hook = addHook(hooks_args, 100, expansion_readArgs);
 #endif
 
 expansion_analyzer expansion;
