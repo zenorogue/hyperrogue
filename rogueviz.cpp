@@ -50,7 +50,6 @@ string fname;
 // const char *fname;
 // const char *cfname;
 
-enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKohonen };
 eVizkind kind;
 
 bool on;

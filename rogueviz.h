@@ -3,6 +3,9 @@
 namespace rogueviz {
   using namespace hr;
 
+  enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKohonen };
+  extern eVizkind kind;
+
   extern bool on;
   void drawExtra();
   void close();
