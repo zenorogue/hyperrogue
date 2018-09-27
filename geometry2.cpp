@@ -289,6 +289,11 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
           newbase = c;
           }
         }
+      if(newbase) {
+        base = newbase;
+        at = bestV * at;
+        }
+      else at = master_relative(base, true) * at;
       if(tohex && GOLDBERG) {
         while(true) {
           newbase = NULL;
@@ -306,11 +311,6 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
           at = bestV * at;
           }
         }
-      if(newbase) {
-        base = newbase;
-        at = bestV * at;
-        }
-      else at = master_relative(base, true) * at;
       break;
       }
     }
