@@ -373,7 +373,7 @@ namespace anygraph {
     while(true) {
       int i = readLabel(f), j = readLabel(f);
       if(i == -1 || j == -1) break;
-      addedge(i, j, 0, subdiv, any);
+      addedge(i, j, 1, subdiv, any);
       qlink++;
       }
     fclose(f);
