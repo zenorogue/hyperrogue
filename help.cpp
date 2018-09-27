@@ -901,6 +901,9 @@ void describeMouseover() {
         help += "\n\n" + other_geometry() + forbidden_unmarked();
       }
     }
+  else {
+    shmup::addShmupHelp(out);
+    }
     
   callhooks(hooks_mouseover, c);
   
