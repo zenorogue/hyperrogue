@@ -1108,6 +1108,9 @@ void buildBigStuff(cell *c, cell *from) {
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
       createAlternateMap(c, 2, hsA);
 
+    if(c->land == laCanvas && horo_ok() && ctof(c) && !c->master->alt)
+      createAlternateMap(c, 2, hsA);
+
     if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && !weirdhyperbolic &&
       (princess::forceMouse ? canReachPlayer(from, moMouse) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
@@ -1165,6 +1168,9 @@ void moreBigStuff(cell *c) {
     int d = celldistAlt(c);
     if(d <= PRADIUS1) generateAlts(c->master);
     }
+
+  if(c->land == laCanvas && c->master->alt) 
+    generateAlts(c->master);
 
   if(c->land == laStorms)
     if(!eubinary && !quotient && !sphere) {
