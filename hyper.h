@@ -551,7 +551,7 @@ struct cell : gcell {
   // do not add any fields after connection_table (see tailored_alloc)
   };
 
-namespace arcm { int degree(heptagon *h); }
+namespace arcm { int degree(heptagon *h); int valence(); }
 
 int heptagon::degree() { if(archimedean) return arcm::degree(this); else return S7; }
 
@@ -4150,6 +4150,10 @@ struct bignum {
 
   ld approx() const {
     return leading() * pow(BASE, isize(digits) - 1);
+    }
+  
+  ld log_approx() const {
+    return log(leading()) * log(BASE) * (isize(digits) - 1);
     }
   
   ld operator / (const bignum& b) const {
