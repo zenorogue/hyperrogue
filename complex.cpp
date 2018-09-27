@@ -3590,8 +3590,10 @@ namespace dungeon {
               c4 = c2->move(i);
             }
           rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
-          c2 = chosenDown(c2, 1, 0); // if(!c2) break;
-          c3 = chosenDown(c3, -1, 0);
+          if(c2) generate_around(c2);
+          if(c3) generate_around(c3);
+          c2 = ts::left_parent(c2, coastvalEdge);
+          c3 = ts::right_parent(c3, coastvalEdge);
           if(!c2) { towerError(c); return; }
           if(!c3) { towerError(c); return; }
           }
@@ -3604,19 +3606,22 @@ namespace dungeon {
       else if(!rdepths[2] && !rdepths[4] && !rdepths[1]) {
         c2 = c;
         c3 = c;
-        cell *c4 = chosenDown(c, 1, 1);
-        cell *c5 = chosenDown(c, -1, -1);
+        generate_around(c);
+        cell *c4 = ts::left_of(c, coastvalEdge);
+        cell *c5 = ts::right_of(c, coastvalEdge);
         for(int i=0; i<3; i++) {
           if(coastvalEdge(c2) == 0) break;
-          if(c2 && c4 && c4->landflags == 3 && c2->landflags != 3 && c4 == chosenDown(c2, 1, 1)) 
+          for(cell *cx: {c2, c3, c4, c5}) if(cx) generate_around(cx);
+
+          if(c2 && c4 && c4->landflags == 3 && c2->landflags != 3 && c4 == ts::left_of(c2, coastvalEdge))
             c->wall = waLadder;
-          if(c3 && c5 && c5->landflags == 3 && c3->landflags != 3 && c5 == chosenDown(c3, -1, -1)) 
+          if(c3 && c5 && c5->landflags == 3 && c3->landflags != 3 && c5 == ts::right_of(c3, coastvalEdge))
             c->wall = waLadder;
           buildEquidistant(c4); buildEquidistant(c5);
-          if(c2) c2 = chosenDown(c2,  1, 0);
-          if(c3) c3 = chosenDown(c3, -1, 0);
-          if(c4) c4 = chosenDown(c4,  1, 0);
-          if(c5) c5 = chosenDown(c5, -1, 0);
+          if(c2) c2 = ts::left_parent(c2, coastvalEdge);
+          if(c3) c3 = ts::right_parent(c3, coastvalEdge);
+          if(c4) c4 = ts::left_parent(c4, coastvalEdge);
+          if(c5) c5 = ts::right_parent(c5, coastvalEdge);
           }
         }
       }
@@ -3645,8 +3650,10 @@ namespace dungeon {
         rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
         if((c2&&c2->landflags == 1) || (c3&&c3->landflags == 1) || (c4&&c4->landflags == 1))
           switchcount++;
-        c2 = chosenDown(c2, 1, 0); // if(!c2) break;
-        c3 = chosenDown(c3, -1, 0);
+        generate_around(c2);
+        generate_around(c3);
+        c2 = ts::left_parent(c2, coastvalEdge);
+        c3 = ts::right_parent(c3, coastvalEdge);
         if(!c2) { towerError(c); return 0; }
         if(!c3) { towerError(c); return 0; }
         }
@@ -3696,8 +3703,9 @@ namespace dungeon {
       int df = dungeonFlags(c);
       
       if(df&1) {
-        int df1 = dungeonFlags(chosenDown(c,1,1));
-        int df2 = dungeonFlags(chosenDown(c,-1,-1));
+        generate_around(c);
+        int df1 = dungeonFlags(ts::left_of(c, coastvalEdge));
+        int df2 = dungeonFlags(ts::right_of(c, coastvalEdge));
         
         c->wparam = 0;
         if(hrand(100) < (c->landparam % 5 == 0 ? 80 : 20)) {
@@ -3725,10 +3733,10 @@ namespace dungeon {
         if(q) downs[hrand(q)]->wall = waLadder;
         */
         cell *c2 = 
-          c->wparam == 1 ? chosenDown(c, 1, 2) :
-          c->wparam == 2 ? chosenDown(c, -1, -2) :
-          c->wparam == 3 ? chosenDown(c, 1, 3) :
-          c->wparam == 4 ? chosenDown(c, -1, -3) :
+          c->wparam == 1 ? ts::add(c, 1, 2, coastvalEdge) :
+          c->wparam == 2 ? ts::add(c, -1, -2, coastvalEdge) :
+          c->wparam == 3 ? ts::add(c, 1, 3, coastvalEdge) :
+          c->wparam == 4 ? ts::add(c, -1, -3, coastvalEdge) :
           NULL;
         
         if(c2) {

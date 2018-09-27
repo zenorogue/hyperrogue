@@ -518,6 +518,7 @@ struct heptagon {
   heptagon () { heptacount++; }
   ~heptagon () { heptacount--; }
   heptagon *cmove(int d) { return createStep(this, d); }
+  heptagon *cmodmove(int d) { return createStep(this, c.fix(d)); }
   inline int degree(); 
 
   // prevent accidental copying
@@ -541,6 +542,7 @@ struct cell : gcell {
   cell*& move(int d) { return c.move(d); }
   cell*& modmove(int d) { return c.modmove(d); }
   cell* cmove(int d) { return createMov(this, d); }
+  cell* cmodmove(int d) { return createMov(this, c.fix(d)); }
   cell() {}
 
   // prevent accidental copying
@@ -643,8 +645,6 @@ int numplayers();
 void removeIvy(cell *c);
 bool cellEdgeUnstable(cell *c, flagtype flags = 0);
 int coastvalEdge(cell *c);
-typedef int cellfunction(cell*);
-int towerval(cell *c, cellfunction* cf = &coastvalEdge);
 #define HRANDMAX 0x7FFFFFFF
 int hrandpos(); // 0 to HRANDMAX
 
@@ -1064,6 +1064,8 @@ extern string mouseovers;
 
 extern struct SDL_Surface *s;
 
+typedef function<int(cell*)> cellfunction;
+
 namespace patterns {
   extern char whichShape;
   extern int canvasback;
@@ -1128,7 +1130,7 @@ namespace patterns {
   void showPattern();
   void val38(cell *c, patterninfo &si, int sub, int pat);
 
-  int downdir(cell *c, cellfunction *cf = coastvalEdge);
+  int downdir(cell *c, const cellfunction& cf = coastvalEdge);
   }
 
 namespace mapeditor { 
@@ -1372,7 +1374,6 @@ extern bool buggyGeneration;
 int buildIvy(cell *c, int children, int minleaf);
 int celldistAltRelative(cell *c);
 int roundTableRadius(cell *c);
-cell *chosenDown(cell *c, int which, int bonus, cellfunction* cf = &coastvalEdge);
 eLand pickLandRPM(eLand old);
 bool bearsCamelot(eLand l);
 
@@ -4203,7 +4204,26 @@ struct expansion_analyzer {
 
 extern expansion_analyzer expansion;
 
-int chosenDownId(cell *c, int which, cellfunction* cf);
+int towerval(cell *c, const cellfunction& cf);
+
+int parent_id(cell *c, int which, const cellfunction& cf);
+
+extern int sibling_limit;
+extern void set_sibling_limit();
+int type_in_reduced(expansion_analyzer& ea, cell *c, const function<int(cell*)>& f);
+
+namespace ts {
+  cell *verified_add(cell *c, int which, int bonus, const cellfunction& cf);
+  cell *add(cell *c, int which, int bonus, const cellfunction& cf);
+  
+  inline cell *left_parent(cell *c, const cellfunction& cf) { return verified_add(c, 1, 0, cf); }
+  inline cell *right_parent(cell *c, const cellfunction& cf) { return verified_add(c, -1, 0, cf); }
+  cell *left_of(cell *c, const cellfunction& cf);
+  cell *right_of(cell *c, const cellfunction& cf);
+  cell *child_number(cell *c, int id, const cellfunction& cf);
+  }
+
+void generate_around(cell *c);
 
 }
 

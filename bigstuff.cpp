@@ -648,38 +648,6 @@ cell *randomDown(cell *c) {
   return tab[hrand(q)];
   }
 
-// which=1 => right, which=-1 => left
-
-typedef int cellfunction(cell*);
-
-int chosenDownId(cell *c, int which, cellfunction* cf) {
-  int d = (*cf)(c)-1;
-  for(int i=0; i<c->type; i++) {
-    if(!c->move(i)) createMov(c, i);
-    if(c->move(i)->mpdist > BARLEV && cf == coastvalEdge) setdist(c->move(i), BARLEV, c);
-    
-    if((*cf)(c->move(i)) == d) {
-      again:
-      int i2 = (i+which+MODFIXER)%c->type;
-      createMov(c, i2);
-      if((*cf)(c->move(i2)) == d) {
-        i = i2; goto again;
-        }
-      else return i;
-      }
-    }
-  
-  return -1;
-  }
-
-// set which=1,bonus=1 to get right neighbor on level
-
-cell *chosenDown(cell *c, int which, int bonus, cellfunction* cf) {
-  int id = chosenDownId(c, which, cf);
-  if(id == -1) return NULL;
-  return createMovR(c, id + bonus);
-  }
-
 int edgeDepth(cell *c) {
   if(c->land == laIvoryTower || c->land == laEndorian || c->land == laDungeon) 
     return coastvalEdge(c);
@@ -698,28 +666,12 @@ int getHauntedDepth(cell *c) {
   return -100;
   }
 
-int towerval(cell *c, cellfunction* cf) {
-  // if(c->land != laEdge) return 0;
-  cell *cp1 = chosenDown(c, 1, 1, cf);
-  if(!cp1) return 0;
-  /* cell *cp2 = chosenDown(cp1, 1, 1);
-  if(!cp2) return 0;
-  cell *cm1 = chosenDown(c, -1, -1);
-  if(!cm1) return 0;
-  cell *cm2 = chosenDown(cm1, -1, -1);
-  if(!cm2) return 0; */
-
-  /* return 
-    (c->type-6) 
-    + 2*(cp1->type-6) + 4*(cp2->type-6) 
-    + 8*(cm1->type-6) +16*(cm2->type-6); */
-  
+int towerval(cell *c, const cellfunction& cf) {
+  cell *cp1 = ts::left_of(c, cf);
+  if(!cp1) return 0;  
   int under = 0;
-  int cfc = (*cf)(c);
-  for(int i=0; i<c->type; i++) {
-    if(c->move(i) && (*cf)(c->move(i)) < cfc)
-      under++;
-    }
+  int cfc = cf(c);
+  forCellEx(c2, c) if(cf(c2) < cfc) under++;
   return (c->type-6) + 2*(cp1->type-6) + 4*under;
   }
 

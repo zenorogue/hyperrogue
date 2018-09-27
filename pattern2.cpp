@@ -543,10 +543,8 @@ namespace patterns {
       }
     }
   
-  int downdir(cell *c, cellfunction *cf) {
-    cell *c2 = chosenDown(c, 1, 1, cf);
-    if(!c2) return 0;
-    return neighborId(c, c2);
+  int downdir(cell *c, const cellfunction& cf) {
+    return parent_id(c, 1, cf) + 1;
     }
 
   void applySym0123(int& i, int sub) {
@@ -1025,8 +1023,8 @@ namespace patterns {
       }
     
     else if(pat == PAT_DOWN) {
-      si.id = towerval(c);
-      si.dir = downdir(c);
+      si.id = towerval(c, coastvalEdge);
+      si.dir = downdir(c, coastvalEdge);
       }
     
     else if(pat == PAT_FIELD) {
@@ -2082,14 +2080,14 @@ namespace linepatterns {
         break;
 
       case patTriTree: {
-        cell *parent = chosenDown(c, -1, 0, curr_dist);
+        cell *parent = ts::right_parent(c, curr_dist);
         if(gmatrix.count(parent)) 
           queuelinef(tC0(V), gmatrix[parent]*C0, col, 2 + vid.linequality);
         break;
         }
       
       case patTriOther: {
-        cell *parent = chosenDown(c, -1, 0, curr_dist);
+        cell *parent = ts::right_parent(c, curr_dist);
         forCellEx(c2, c) if(gmatrix.count(c2) && curr_dist(c2) < curr_dist(c) && c2 != parent)
           queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
         break;

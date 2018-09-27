@@ -315,7 +315,7 @@ void expansion_analyzer::reset() {
   descendants.clear();
   }
 
-template<class T> int type_in(expansion_analyzer& ea, cell *c, const T& f) {
+int type_in(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   if(!ea.N) ea.preliminary_grouping(), ea.reduce_grouping();
   vector<int> res;
   res.push_back(subtype(c) * 4 + 2);
@@ -336,7 +336,7 @@ template<class T> int type_in(expansion_analyzer& ea, cell *c, const T& f) {
   return ret;
   }
 
-template<class T> int type_in_quick(expansion_analyzer& ea, cell *c, const T& f) {
+int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   vector<int> res;
   res.push_back(subtype(c) * 4 + 2);
   int d = f(c);
@@ -409,7 +409,7 @@ int curr_dist(cell *c) {
 
 int position;
 
-template<class T> int type_in_reduced(expansion_analyzer& ea, cell *c, const T& f) {
+int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   int a = ea.N;
   int t = type_in(ea, c, f);
   if(expansion.N != a) {
@@ -417,6 +417,69 @@ template<class T> int type_in_reduced(expansion_analyzer& ea, cell *c, const T& 
     t = type_in(ea, c, f);
     }
   return t;
+  }
+
+// which=1 => right, which=-1 => left
+
+int parent_id(cell *c, int which, const cellfunction& cf) {
+  int d = cf(c)-1;
+  for(int i=0; i<c->type; i++) {
+    
+    if(cf(c->cmove(i)) == d) {
+      again:
+      int i2 = c->c.fix(i+which);
+      if(cf(c->cmove(i2)) == d) {
+        i = i2; goto again;
+        }
+      else return i;
+      }
+    }
+  
+  return -1;
+  }
+
+// set which=1,bonus=1 to get right neighbor on level
+
+void generate_around(cell *c) {
+  forCellCM(c2, c) if(c2->mpdist > BARLEV) setdist(c2, BARLEV, c);
+  }
+  
+namespace ts {
+  cell *verified_add(cell *c, int which, int bonus, const cellfunction& cf) {
+    int id = parent_id(c, which, cf);
+    if(id == -1) return NULL;
+    return c->cmodmove(id + bonus);
+    }
+
+  cell *verified_add_gen(cell *c, int which, int bonus, const cellfunction& cf) {
+    return verified_add(c, which, bonus, cf);
+    }
+  
+  cell *add(cell *c, int which, int bonus, const cellfunction& cf) {
+    int pid = parent_id(c, which, cf);
+    if(pid == -1) pid = 0;
+    return c->cmodmove(pid + bonus);
+    }
+  
+  cell *left_of(cell *c, const cellfunction& cf) {
+    int pid = parent_id(c, 1, cf);
+    if(pid == -1) return c;
+    if(VALENCE == 3) return c->cmodmove(pid+1);
+    else return (cellwalker(c, pid) + wstep - 1).cpeek();
+    }
+
+  cell *right_of(cell *c, const cellfunction& cf) {
+    int pid = parent_id(c, -1, cf);
+    if(pid == -1) return c;
+    if(VALENCE == 3) return c->cmodmove(pid-1);
+    else return (cellwalker(c, pid) + wstep + 1).cpeek();
+    }
+
+  cell *child_number(cell *c, int id, const cellfunction& cf) { 
+    int pid = parent_id(c, 1, cf);
+    if(pid == -1) return c->cmove(id);
+    return c->cmodmove(pid + (VALENCE == 3 ? 2 : 1) + id);
+    }
   }
 
 bool viewdists = false, use_color_codes = true, use_analyzer = true, show_distance_lists = true;
@@ -526,7 +589,7 @@ void viewdist_configure_dialog() {
 bool is_descendant(cell *c) {
   if(c == cwt.at) return true;
   if(curr_dist(c) < curr_dist(cwt.at)) return false;
-  return is_descendant(chosenDown(c, -1, 0, curr_dist));
+  return is_descendant(ts::right_parent(c, curr_dist));
   }
 
 const int scrollspeed = 100;
@@ -763,9 +826,7 @@ bool in_segment(cell *left, cell *mid, cell *right) {
   while(true) {
     if(mid == left) return true;
     if(left == right) return false;
-    int v = chosenDownId(left, 1, celldist);
-    if(S3 == 3) left = (cellwalker(left, v) + 1).cpeek();
-    else left = (cellwalker(left, v) + wstep - 1).cpeek();
+    left = ts::right_of(left, celldist);
     }
   }
 
@@ -775,7 +836,7 @@ int sibling_distance(cell *a, cell *b, int limit) {
     if(a == b) return counting;
     if(limit == 0) return INF;
     counting++; limit--;
-    a = chosenDown(a, 1, 1, celldist);
+    a = ts::right_of(a, celldist);
     }
   }
 
@@ -828,18 +889,20 @@ int hyperbolic_celldistance(cell *c1, cell *c2) {
       }    
     
     if(d >= found_distance) {
-      if(sl_used == sibling_limit) { printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++; }
+      if(sl_used == sibling_limit && IRREGULAR) { 
+        printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++; 
+        }
       return found_distance;
       }
 
     if(d1 >= d2) {
-      cl1 = chosenDown(cl1, -1, 0, celldist);
-      cr1 = chosenDown(cr1,  1, 0, celldist);
+      cl1 = ts::left_parent(cl1, celldist);
+      cr1 = ts::right_parent(cr1, celldist);
       d++; d1--;
       }
     if(d1 < d2) {
-      cl2 = chosenDown(cl2, -1, 0, celldist);
-      cr2 = chosenDown(cr2,  1, 0, celldist);
+      cl2 = ts::left_parent(cl2, celldist);
+      cr2 = ts::right_parent(cr2, celldist);
       d++; d2--;
       }
     }

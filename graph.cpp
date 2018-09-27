@@ -2424,11 +2424,11 @@ transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   return V * iddspin(c, 0, M_PI);
   }
 
-transmatrix applyDowndir(cell *c, cellfunction *cf) {
+transmatrix applyDowndir(cell *c, const cellfunction& cf) {
   return ddspin(c, patterns::downdir(c, cf), M_PI);
   }
 
-void set_towerfloor(cell *c, cellfunction *cf = coastvalEdge) {
+void set_towerfloor(cell *c, const cellfunction& cf = coastvalEdge) {
   if(weirdhyperbolic || sphere) {
     set_floor(shFloor);
     return;
@@ -2436,7 +2436,7 @@ void set_towerfloor(cell *c, cellfunction *cf = coastvalEdge) {
   int j = -1;
 
   if(masterless) j = 10;
-  else if((*cf)(c) > 1) { 
+  else if(cf(c) > 1) { 
     int i = towerval(c, cf);
     if(i == 4) j = 0;
     if(i == 5) j = 1;
@@ -4007,7 +4007,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       //   queuepoly(Vf, shLeafFloor[ct6], darkena(fcol, fd, 0xFF));
 
       /* else if(c->land == laPrairie && prairie::isriver(c))
-        set_towerfloor(Vf, c, darkena(fcol, fd, 0xFF), 
+        
+          set_towerfloor(Vf, c, darkena(fcol, fd, 0xFF), 
           prairie::isleft(c) ? river::towerleft : river::towerright); */
       
       else switch(c->land) {
