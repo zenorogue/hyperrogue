@@ -514,7 +514,7 @@ void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
       break;
       }
     case ncType: {
-      int t = type_in_quick(expansion, c, curr_dist);
+      int t = type_in_reduced(expansion, c, curr_dist);
       if(t >= 0) label = its(t), dc = distribute_color(t);
       break;
       }
@@ -552,7 +552,7 @@ void viewdist_configure_dialog() {
   dialog::addSelItem("display distances from", its(first_distance), 'd');
   dialog::add_action([] () { 
     scrolling_distances = false;
-    dialog::editNumber(first_distance, 0, 3000, 0, 1, "display distances from", "");
+    dialog::editNumber(first_distance, 0, 3000, 1, 0, "display distances from", "");
     });
 
   int id = 0;
