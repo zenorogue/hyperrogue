@@ -130,8 +130,14 @@ int whateveri, whateveri2;
 
 purehookset hooks_tests;
 
+string simplify(const string& s) {
+  string res;
+  for(char c: s) if(isalnum(c)) res += c;
+  return res;
+  }
+
 bool appears(const string& haystack, const string& needle) {
-  return haystack.find(needle) != string::npos;
+  return simplify(haystack).find(simplify(needle)) != string::npos;
   }
 
 /* indenter */
