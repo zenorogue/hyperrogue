@@ -289,6 +289,23 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
           newbase = c;
           }
         }
+      if(tohex && GOLDBERG) {
+        while(true) {
+          newbase = NULL;
+          forCellCM(c2, base) {
+            transmatrix V2 = calc_relative_matrix(base, c2, C0);
+            double newz = check(V2 * at) [2];
+            if(newz < currz) {
+              currz = newz;
+              bestV = V2;
+              newbase = c2;
+              }
+            }
+          if(!newbase) break;
+          base = newbase;
+          at = bestV * at;
+          }
+        }
       if(newbase) {
         base = newbase;
         at = bestV * at;
