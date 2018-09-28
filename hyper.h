@@ -4228,6 +4228,7 @@ namespace ts {
   }
 
 void generate_around(cell *c);
+int euclidAlt(short x, short y);
 
 }
 

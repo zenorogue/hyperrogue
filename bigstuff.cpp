@@ -44,7 +44,7 @@ int celldistAltRelative(cell *c) {
   }
 
 int euclidAlt(short x, short y) {
-  if(specialland == laTemple || specialland == laClearing) {
+  if(among(specialland, laTemple, laClearing, laCanvas)) {
     if(euclid6)
       return max(int(x), x+y);
     else if(PURE)
@@ -1169,7 +1169,7 @@ void moreBigStuff(cell *c) {
     if(d <= PRADIUS1) generateAlts(c->master);
     }
 
-  if(c->land == laCanvas && c->master->alt) 
+  if(c->land == laCanvas && !eubinary && c->master->alt) 
     generateAlts(c->master);
 
   if(c->land == laStorms)

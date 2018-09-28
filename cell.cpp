@@ -1063,9 +1063,6 @@ int celldist(cell *c) {
 
 #define ALTDIST_ERROR 90000
 
-// defined in 'game'
-int euclidAlt(short x, short y);
-
 int celldistAlt(cell *c) {
   if(masterless) {
     if(torus) return celldist(c);

@@ -416,7 +416,7 @@ int curr_dist(cell *c) {
     case dfWorld:
       if(!mod_allowed() && !among(c->land, laOcean, laIvoryTower, laEndorian, laDungeon, laTemple, laWhirlpool, laCanvas))
         return 0;
-      if(c->master->alt) return celldistAlt(c);
+      if(eubinary || c->master->alt) return celldistAlt(c);
       return inmirror(c) ? (c->landparam & 255) : c->landparam;
     }
   return 0;    
