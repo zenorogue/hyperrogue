@@ -672,6 +672,7 @@ void expansion_analyzer::view_distances_dialog() {
     else {
       dialog::addBreak(100);
       
+      find_coefficients();
       if(coefficients_known == 2) {
         string fmt = "a(d+" + its(isize(coef)) + ") = ";
         bool first = true;
