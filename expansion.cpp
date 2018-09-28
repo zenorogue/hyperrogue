@@ -180,8 +180,23 @@ void expansion_analyzer::reduce_grouping() {
     nogroups = newgroups;
     }
   
-  vector<int> groupsample(nogroups);
+  vector<int> groupsample(nogroups, -1);
+  for(int i=0; i<N; i++) {
+    int& g = groupsample[grouping[i]];
+    if(g == -1) g = i;
+    }
+  
+  vector<int> reorder(nogroups);
+  for(int i=0; i<nogroups; i++) reorder[i] = i;
+  sort(reorder.begin(), reorder.end(), [&] (int i, int j) { return groupsample[i] < groupsample[j]; });
+
+  vector<int> inv_reorder(nogroups);
+  for(int i=0; i<nogroups; i++) inv_reorder[reorder[i]] = i;
+
+  for(int i=0; i<N; i++) grouping[i] = inv_reorder[grouping[i]];
+
   for(int i=0; i<N; i++) groupsample[grouping[i]] = i;
+  
   vector<vector<int>> newchildren(nogroups);
   for(int i=0; i<nogroups; i++) 
     for(int j: children[groupsample[i]])
