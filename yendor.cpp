@@ -218,7 +218,7 @@ namespace yendor {
             // make it challenging
             vector<int> ds;
             for(int d=0; d<ycw.at->type; d++) {
-              if(celldist((ycw+d).cpeek()) < celldist(ycw.at))
+              if(celldistAlt((ycw+d).cpeek()) < celldistAlt(ycw.at))
                 ds.push_back(d);
               }
             if(isize(ds)) ycw += ds[hrand(isize(ds))];

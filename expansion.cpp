@@ -107,7 +107,9 @@ vector<int> expansion_analyzer::gettype(cell *c) {
   int d = celldist(c);
   for(int i=0; i<c->type; i++) {
     cell *c1 = c->cmove(i);
-    res.push_back(subtype(c1) * 4 + celldist(c1) - d);
+    int bonus = 0;
+    if(binarytiling) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
+    res.push_back(bonus + subtype(c1) * 4 + celldist(c1) - d);
     }
   canonicize(res);
   return res;
@@ -337,7 +339,9 @@ int type_in(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   int d = f(c);
   for(int i=0; i<c->type; i++) {
     cell *c1 = c->cmove(i);
-    res.push_back(subtype(c1) * 4 + f(c1) - d);
+    int bonus = 0;
+    if(binarytiling) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
+    res.push_back(bonus + subtype(c1) * 4 + f(c1) - d);
     }
   
   canonicize(res);
@@ -660,11 +664,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   dialog::addBreak(100 * scrolltime / scrollspeed);
 
-  if(binarytiling){
-    dialog::addBreak(200);
-    dialog::addInfo("a(d) ~ 2ᵈ");
-    }
-  else if(sizes_known()) {
+  if(sizes_known() || binarytiling) {
     if(euclid) {
       dialog::addBreak(200);
       dialog::addInfo("a(d) = " + its(get_descendants(10).approx_int() - get_descendants(9).approx_int()) + "d", forecolor);
@@ -843,11 +843,16 @@ void set_sibling_limit() {
   sibling_limit = 2 * p.first + p.second;
   }
 
+int celldist0(cell *c) {
+  if(binarytiling) return celldistAlt(c);
+  else return celldist(c);
+  }
+
 bool in_segment(cell *left, cell *mid, cell *right) {
   while(true) {
     if(mid == left) return true;
     if(left == right) return false;
-    left = ts::right_of(left, celldist);
+    left = ts::right_of(left, celldist0);
     }
   }
 
@@ -857,14 +862,14 @@ int sibling_distance(cell *a, cell *b, int limit) {
     if(a == b) return counting;
     if(limit == 0) return INF;
     counting++; limit--;
-    a = ts::right_of(a, celldist);
+    a = ts::right_of(a, celldist0);
     }
   }
 
 int hyperbolic_celldistance(cell *c1, cell *c2) {  
   int found_distance = INF;
   
-  int d = 0, d1 = celldist(c1), d2 = celldist(c2), sl_used = 0;
+  int d = 0, d1 = celldist0(c1), d2 = celldist0(c2), sl_used = 0;
 
   cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
   while(true) {
@@ -917,13 +922,13 @@ int hyperbolic_celldistance(cell *c1, cell *c2) {
       }
 
     if(d1 >= d2) {
-      cl1 = ts::left_parent(cl1, celldist);
-      cr1 = ts::right_parent(cr1, celldist);
+      cl1 = ts::left_parent(cl1, celldist0);
+      cr1 = ts::right_parent(cr1, celldist0);
       d++; d1--;
       }
     if(d1 < d2) {
-      cl2 = ts::left_parent(cl2, celldist);
-      cr2 = ts::right_parent(cr2, celldist);
+      cl2 = ts::left_parent(cl2, celldist0);
+      cr2 = ts::right_parent(cr2, celldist0);
       d++; d2--;
       }
     }

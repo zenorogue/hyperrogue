@@ -262,7 +262,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
     transmatrix bestV;
     
-    for(int d=0; d<S7; d++) {
+    if(!binarytiling) for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
@@ -294,7 +294,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
         at = bestV * at;
         }
       else at = master_relative(base, true) * at;
-      if(tohex && GOLDBERG) {
+      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR))) {
         while(true) {
           newbase = NULL;
           forCellCM(c2, base) {

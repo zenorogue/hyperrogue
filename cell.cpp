@@ -1048,9 +1048,9 @@ int celldist(cell *c) {
     return torusmap()->dists[decodeId(c->master)];
   if(masterless)
     return eudist(decodeId(c->master));
-  if(sphere) return celldistance(c, currentmap->gamestart());
+  if(sphere || binarytiling) return celldistance(c, currentmap->gamestart());
   if(IRREGULAR) return irr::celldist(c, false);
-  if(binarytiling || archimedean || ctof(c)) return c->master->distance;
+  if(archimedean || ctof(c)) return c->master->distance;
   if(GOLDBERG) return gp::compute_dist(c, celldist);
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
@@ -1070,7 +1070,7 @@ int celldistAlt(cell *c) {
     tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);
     }
-  if(binarytiling) return celldist(c) + (specialland == laCamelot && !tactic::on? 30 : 0);
+  if(binarytiling) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
