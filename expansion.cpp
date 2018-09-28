@@ -839,8 +839,11 @@ int sibling_limit = 0;
 
 void set_sibling_limit() {
   if(IRREGULAR) sibling_limit = 3;
-  auto p = gp::univ_param();
-  sibling_limit = 2 * p.first + p.second;
+  else if(binarytiling) sibling_limit = 3;
+  else {
+    auto p = gp::univ_param();
+    sibling_limit = 2 * p.first + p.second;
+    }
   }
 
 int celldist0(cell *c) {
