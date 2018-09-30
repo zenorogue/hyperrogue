@@ -1492,6 +1492,11 @@ int read_config_args() {
   else if(argis("-alpha")) { 
     PHASEFROM(2); shift(); vid.alpha = argf();
     }
+#if CAP_TRANS
+  else if(argis("-lang")) { 
+    PHASEFROM(2); shift(); vid.language = argi();
+    }
+#endif
   else if(argis("-r")) { 
     PHASEFROM(2);
     shift(); 
