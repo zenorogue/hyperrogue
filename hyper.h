@@ -2298,10 +2298,6 @@ extern hookset<eLand(eLand)> *hooks_nextland;
 extern hookset<bool()> *hooks_welcome_message, *hooks_default_help;
 extern hookset<void(cell*)> *hooks_mouseover;
 
-// hooks to extend HyperRogue with an external program
-// start compilation from another file which defines EXTRA_..., includes
-// hyper.cpp, then defines the necessary functions
-
 extern ld shiftmul;
 void initcs(charstyle &cs);
 charstyle& getcs(int id = multi::cpid);
