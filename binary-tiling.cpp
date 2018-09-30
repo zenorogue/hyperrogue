@@ -203,5 +203,16 @@ namespace binary {
       }
     return gm * where;
     }
+
+auto bt_config = addHook(hooks_args, 0, [] () {
+  using namespace arg;
+  if(argis("-btwidth")) {
+    shift(); vid.binary_width = argf();
+    need_reset_geometry = true;
+    return 0;
+    }
+  return 1;
+  });
+
   }
 }
