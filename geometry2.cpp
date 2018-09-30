@@ -322,7 +322,8 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
   }
 
 void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
-  virtualRebase(base, h, tohex, [] (const hyperpoint& h) { return h; });
+  // we perform fixing in check, so that it works with larger range
+  virtualRebase(base, h, tohex, [] (const hyperpoint& h) { return hyperbolic ? hpxy(h[0], h[1]) :h; });
   }
 
 // works only in geometries similar to the standard one, and only on heptagons
