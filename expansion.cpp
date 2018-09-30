@@ -696,7 +696,7 @@ void expansion_analyzer::view_distances_dialog() {
       
       char buf[20];
       snprintf(buf, 20, "%.8lf", (double) get_growth());
-      dialog::addInfo((ISWEB ? "a(d) = Theta(" : "a(d) = Θ(") + string(buf) + "...ᵈ)", forecolor);
+      dialog::addInfo("Θ(" + string(buf) + "...ᵈ)", forecolor);
       }
     }
   
