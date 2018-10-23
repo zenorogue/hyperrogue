@@ -341,7 +341,7 @@ void setVidParam() {
   vid.xres = vid.yres = TEXTURESIZE;
   vid.scrsize = HTEXTURESIZE;
   vid.radius = vid.scrsize * vid.scale; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
-  vid.alpha = 1; 
+  // vid.alpha = 1; 
   }
 
 void buildTorusRug() {
