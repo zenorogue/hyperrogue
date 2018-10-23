@@ -556,7 +556,7 @@ namespace dialog {
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
       
-      color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : forecolor;
+      color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : dialogcolor;
 
       displayColorButton(dcenter - dwidth/4, y, "(", 0, 16, 0, col);
       string rgt = ") "; rgt += "ABGR" [i];
