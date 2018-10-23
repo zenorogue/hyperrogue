@@ -192,7 +192,31 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     return;
     }
 
+  if(pmodel == mdHyperboloidFlat) {
+    H[2] += vid.alpha;
+    H[0] /= H[2];
+    H[1] /= H[2];
+    H[2] = 1 - vid.alpha;
+
+    ld ball = -vid.ballangle * M_PI / 180;
+    ld cb = cos(ball), sb = sin(ball);
+
+    ret[0] = H[0] / 3;
+    ret[1] = (1 - H[2]) / 3 * cb - H[1] / 3 * sb;
+    ret[2] = -(-H[1] / 3 * cb - (1 - H[2]) / 3 * sb);
+
+    ghcheck(ret,H);
+    return;
+    }
+
   if(pmodel == mdHyperboloid) {
+    ld& tz = conformal::top_z;
+    if(H[2] > tz) {
+      ld scale = sqrt(tz*tz-1) / hypot(H[0], H[1]);
+      H[0] *= scale;
+      H[1] *= scale;
+      H[2] = tz;
+      }
 
     ld ball = -vid.ballangle * M_PI / 180;
     ld cb = cos(ball), sb = sin(ball);

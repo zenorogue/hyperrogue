@@ -5562,15 +5562,43 @@ void drawfullmap() {
     if(pmodel == mdBall) ballgeometry();
     }
   
-  if(pmodel == mdHyperboloid) {
+  if(pmodel == mdHyperboloid && hyperbolic) {
 #if CAP_QUEUE
-    color_t col = darkena(0x80, 0, 0x80);
-    queueline(hpxyz(0,0,1), hpxyz(0,0,-vid.alpha), col, 0, PPR::CIRCLE);
-    queueline(xpush0(+4), hpxyz(0,0,0), col, 0, PPR::CIRCLE);
-    queueline(xpush0(+4), hpxyz(0,0,-vid.alpha), col, 0, PPR::CIRCLE);
-    queueline(xpush0(-4), hpxyz(0,0,0), col, 0, PPR::CIRCLE);
-    queueline(xpush0(-4), hpxyz(0,0,-vid.alpha), col, 0, PPR::CIRCLE);
-    queueline(hpxyz(-1,0,0), hpxyz(1,0,0), col, 0, PPR::CIRCLE);
+    curvepoint(hpxyz(0,0,1));
+    curvepoint(hpxyz(0,0,-vid.alpha));
+    queuecurve(ringcolor, 0, PPR::CIRCLE);
+    
+    ld& tz = conformal::top_z;
+    ld z = acosh(tz);
+
+    hyperpoint a = xpush0(z);
+    ld ball = -vid.ballangle * M_PI / 180;
+    ld cb = cos(ball), sb = sin(ball);
+    
+    a[1] = sb * a[2] / -cb;
+    a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
+
+    curvepoint(hpxyz(0,0,-vid.alpha));
+    curvepoint(a);
+    curvepoint(hpxyz(0,0,0));
+    a[0] = -a[0];
+    curvepoint(a);
+    curvepoint(hpxyz(0,0,-vid.alpha));
+    queuecurve(ringcolor, 0, PPR::CIRCLE);
+
+    curvepoint(hpxyz(-1,0,0));
+    curvepoint(hpxyz(1,0,0));
+    queuecurve(ringcolor, 0, PPR::CIRCLE);
+
+    a[1] = sb * tz / -cb;
+    a[0] = sqrt(tz * tz - a[1] * a[1]);
+    a[2] = tz - vid.alpha;
+
+    curvepoint(a);
+    curvepoint(hpxyz(0,0,-vid.alpha));
+    a[0] = -a[0];
+    curvepoint(a);
+    queuecurve(ringcolor, 0, PPR::CIRCLE);
 #endif
     }
   

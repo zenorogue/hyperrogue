@@ -183,10 +183,27 @@ bool knowgood;
 hyperpoint goodpoint;
 vector<pair<int, hyperpoint>> tofix;
 
+bool two_sided_model() {
+  if(pmodel == mdHyperboloid) return !euclid;
+  // if(pmodel == mdHemisphere) return true;
+  if(pmodel == mdDisk) return sphere;
+  return false;
+  }
+
 bool correct_side(const hyperpoint& H) {
-  double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-  double horizon = curnorm / vid.alpha;
-  return (spherespecial>0) ^ (H[2] <= -horizon);
+  if(pmodel == mdDisk && sphere) {
+    double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
+    double horizon = curnorm / vid.alpha;
+    return (spherespecial>0) ^ (H[2] <= -horizon);
+    }
+  if(pmodel == mdHyperboloid && hyperbolic) {
+    ld ball = -vid.ballangle * M_PI / 180;
+    ld cb = cos(ball), sb = sin(ball);
+    return (spherespecial > 0) ^ (
+      sb * H[2] > -cb * H[1]
+      );
+    }
+  return true;
   }
 
 void fixpoint(array<float, 3>& hscr, hyperpoint H) {
@@ -215,7 +232,7 @@ void addpoint(const hyperpoint& H) {
         poly_flags |= POLY_INFRONT, last_infront = false;
         if(!knowgood || (spherespecial > 0 ? H[2]>goodpoint[2] : H[2]<goodpoint[2])) goodpoint = H, knowgood = true;
         } 
-      else if(poly_flags & POLY_ISSIDE) {
+      else if(sphere && (poly_flags & POLY_ISSIDE)) {
         double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
         double horizon = curnorm / vid.alpha;
         poly_flags |= POLY_NOTINFRONT;
@@ -810,12 +827,12 @@ void dqi_poly::draw() {
     return;
     }
   
-  if(spherespecial && prio == PPR::MOBILE_ARROW) {
+  /* if(spherespecial && prio == PPR::MOBILE_ARROW) {
     if(spherephase == 0) return;
     dynamicval<int> ss(spherespecial, 0);
     draw();
     return;
-    }
+    } */
 
 #if CAP_GL
   if(vid.usingGL && using_perspective) {
@@ -867,7 +884,7 @@ void dqi_poly::draw() {
 
   if(poly_flags & POLY_NIF_ERROR) return;
   
-  if(spherespecial == 1 && (poly_flags & POLY_INFRONT) && (poly_flags & POLY_NOTINFRONT) && vid.alpha <= 1) {
+  if(spherespecial == 1 && sphere && (poly_flags & POLY_INFRONT) && (poly_flags & POLY_NOTINFRONT) && vid.alpha <= 1) {
     bool around_center = false;
     for(int i=0; i<isize(glcoords)-1; i++) {
       double x1 = glcoords[i][0];
@@ -882,7 +899,7 @@ void dqi_poly::draw() {
     if(around_center) return;
     }
     
-  if((spherespecial > 0 || (sphere && equi)) && !(poly_flags & POLY_ISSIDE)) {
+  if(sphere && (spherespecial > 0 || equi) && !(poly_flags & POLY_ISSIDE)) {
   
     if(!tinf) {
     
@@ -1314,7 +1331,14 @@ void drawqueue() {
   stereo::set_projection(0);
   
   // on the sphere, parts on the back are drawn first
-  if(sphere && pmodel == 0) {
+  if(two_sided_model()) {
+  
+    if(pmodel == mdHyperboloid) {
+      dynamicval dv(pmodel, mdHyperboloidFlat);
+      for(auto& ptd: ptds) 
+        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+          ptd->draw();
+      }
 
     // in SVG, draw boundary circle first
     if(svg::in) for(auto& ptd: ptds) ptd->draw_pre();
@@ -1324,7 +1348,9 @@ void drawqueue() {
 
     reverse_side_priorities();
     for(int i=ptds.size()-1; i>=0; i--) 
-      ptds[i]->draw_back();
+      if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+        ptds[i]->draw_back();
+    
     glflush();
     reverse_side_priorities();
     spherespecial *= -1;
@@ -1332,9 +1358,12 @@ void drawqueue() {
     stereo::set_projection(0);
     }
   
-  for(auto& ptd: ptds) ptd->draw();
+  for(auto& ptd: ptds) {
+    dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
+    ptd->draw();
+    }
   glflush();
-  
+
 #if CAP_GL
   if(vid.usingGL) 
     stereo::set_projection(0), stereo::set_mask(0), stereo::set_viewport(0);

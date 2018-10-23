@@ -297,6 +297,7 @@ namespace conformal {
   ld model_orientation, halfplane_scale;
   ld ocos, osin;
   bool model_straight;
+  ld top_z = 5;
 
   bool autoband = false;
   bool autobandhistory = false;
@@ -658,6 +659,9 @@ namespace conformal {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
       }    
     
+    if(pmodel == mdHyperboloid)
+      dialog::addSelItem(XLAT("topz"), fts3(top_z), 'l');
+    
     if(pmodel == mdHemisphere && euclid) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
       }
@@ -710,6 +714,8 @@ namespace conformal {
 #endif
       else if(uni == 'l' && model_has_orientation())
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
+      else if(uni == 'l' && pmodel == mdHyperboloid) 
+        dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("topz"), "");
       else if(uni == 'b' && pmodel == mdHalfplane)
         dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
       else if(uni == 's') {

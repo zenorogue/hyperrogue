@@ -1265,7 +1265,7 @@ enum eModel {
   mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
   mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
   mdFisheye,
-  mdGUARD, mdUnchanged };
+  mdGUARD, mdUnchanged, mdHyperboloidFlat };
 
 namespace conformal {
   extern bool on;
@@ -1280,6 +1280,7 @@ namespace conformal {
   extern ld halfplane_scale;
   extern ld ocos, osin;
   extern bool model_straight;
+  extern ld top_z;
   
   // screen coordinates to logical coordinates: apply_orientation(x,y)
   // logical coordinates back to screen coordinates: apply_orientation(y,x)
