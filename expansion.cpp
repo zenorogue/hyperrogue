@@ -613,7 +613,9 @@ bool is_descendant(cell *c) {
   }
 
 const int scrollspeed = 100;
-    
+
+bool not_only_descendants = false;
+
 void expansion_analyzer::view_distances_dialog() {
   static int lastticks;
   if(scrolling_distances && !bounded) {
@@ -645,9 +647,9 @@ void expansion_analyzer::view_distances_dialog() {
       }
     else {
       celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
-      for(cell *c: cl.lst) if(is_descendant(c)) qty[curr_dist(c)]++;
+      for(cell *c: cl.lst) if((not_only_descendants || is_descendant(c)) && curr_dist(c) < maxlen) qty[curr_dist(c)]++;
       }
-    if(sizes_known()) {
+    if(sizes_known() && !not_only_descendants) {
       find_coefficients();
       if(gamerange()+1 >= valid_from && coefficients_known == 2) {
         for(int i=gamerange()+1; i<maxlen; i++)
@@ -821,6 +823,7 @@ int expansion_readArgs() {
     shift(); distance_from = (eDistanceFrom) argi();
     shift(); number_coding = (eNumberCoding) argi();
     shift(); use_color_codes = argi() & 1; use_analyzer = argi() & 2; show_distance_lists = argi() & 4;
+    not_only_descendants = argi() & 8;
     }
 
   else if(argis("-expansion-off")) {
