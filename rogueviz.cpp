@@ -2276,4 +2276,4 @@ auto hooks  =
 #include "rogueviz-banachtarski.cpp"
 #include "rogueviz-video.cpp"
 #include "rogueviz-pentagonal.cpp"
-
+#include "rogueviz-graph.cpp"

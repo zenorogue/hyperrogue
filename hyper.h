@@ -4239,5 +4239,33 @@ namespace ts {
 void generate_around(cell *c);
 int euclidAlt(short x, short y);
 
+struct exp_parser {
+  string s;
+  int at;
+  exp_parser() { at = 0; }
+  
+  map<string, ld> extra_params;
+
+  bool ok() { return at == isize(s); }
+  char next() { if(at == isize(s) || at == -1) return 0; else return s[at]; }
+  
+  bool eat(const char *c) {
+    int orig_at = at;
+    while(*c && *c == next()) at++, c++;
+    if(*c == 0) return true;
+    else at = orig_at;
+    return false;
+    }
+
+  ld parse(int prio = 0);
+
+  ld parsepar() {
+    ld res = parse();
+    if(next() != ')') { at = -1; return res; }
+    at++;
+    return res;
+    }  
+  };
+
 }
 
