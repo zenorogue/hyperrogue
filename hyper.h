@@ -49,6 +49,7 @@ using std::unique_ptr;
 using std::abs;
 using std::isfinite;
 using std::isnan;
+using std::isinf;
 using std::log;
 using std::exp;
 using std::sin;
