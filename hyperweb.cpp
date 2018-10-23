@@ -80,8 +80,8 @@ void showDemo() {
   dialog::init(XLAT("HyperRogue %1: online demo", VER), 0xC00000, 200, 100);
   dialog::addBreak(50);
 
-  dialog::addItem(XLAT("play"), 'f');
-  dialog::addItem(XLAT("tutorial"), 'T');
+  dialog::addItem(XLAT("play the game"), 'f');
+  dialog::addItem(XLAT("learn about hyperbolic geometry"), 'T');
   dialog::addHelp(); dialog::lastItem().keycaption += " / F1";
   // dialog::addItem(XLAT("toggle high detail"), 'a');
   dialog::addBreak(100);
@@ -135,8 +135,8 @@ EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fulls
     setvideomode();
     }
   else {
-    vid.xres = vid.xres = 800;
-    vid.yres = vid.yres = 600;
+    vid.xres = vid.xscr = 800;
+    vid.yres = vid.yscr = 600;
     vid.full = true;
     printf("reset to %d x %d\n", vid.xres, vid.yres);
     setvideomode();
@@ -145,7 +145,6 @@ EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fulls
   }
 
 void initweb() {
-  rug::renderonce = true;
   // toggleanim(false);
   emscripten_set_fullscreenchange_callback(0, NULL, false, fsc_callback);
   printf("showstartmenu = %d\n", showstartmenu);
