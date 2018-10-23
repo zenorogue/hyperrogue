@@ -1213,20 +1213,29 @@ purehookset hook_drawqueue;
 constexpr int PMAX = int(PPR::MAX);
 int qp[PMAX], qp0[PMAX];
 
-void drawqueueitem::draw_darker() {
-  unsigned c = color;
+void darken_color(color_t& color) {
   int alpha = color & 255;
   if(vid.alpha <= 1) {
     color = 0;
     }
   else if(alpha == 255)
-    color = (gradient(backcolor, c>>8, 0, backbrightness, 1)<<8) | 0xFF;
+    color = (gradient(backcolor, color>>8, 0, backbrightness, 1)<<8) | 0xFF;
   else color = color - alpha + int(backbrightness * alpha);
+  }
+
+void drawqueueitem::draw_darker() {
+  color_t c = color;
+  darken_color(color);
   draw();
   color = c;
   }
 
-void dqi_poly::draw_back() { draw_darker(); }
+void dqi_poly::draw_back() { 
+  color_t c = outline;
+  darken_color(outline);
+  drawqueueitem::draw_darker();
+  outline = c;
+  }
 
 void dqi_line::draw_back() { draw_darker(); }
 
@@ -1242,11 +1251,11 @@ void sort_drawqueue() {
 
   #if MINIMIZE_GL_CALLS
   unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
-  for(auto& p: ptds) subqueue[p->outline_group()].push_back(move(p));
+  for(auto& p: ptds) subqueue[p->prio == PPR::CIRCLE ? 0 : p->outline_group()].push_back(move(p));
   ptds.clear();
   for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
   subqueue.clear();
-  for(auto& p: ptds) subqueue[p->color].push_back(move(p));
+  for(auto& p: ptds) subqueue[p->prio == PPR::CIRCLE ? 0 : p->color].push_back(move(p));
   ptds.clear();
   for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
   #endif
