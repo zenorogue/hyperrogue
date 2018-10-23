@@ -1275,7 +1275,18 @@ namespace conformal {
   extern bool includeHistory;
   extern ld rotation;
   extern int do_rotate;
-  extern bool lower_halfplane;
+  extern ld model_orientation;
+  extern ld halfplane_scale;
+  extern ld ocos, osin;
+  extern bool model_straight;
+  
+  // screen coordinates to logical coordinates: apply_orientation(x,y)
+  // logical coordinates back to screen coordinates: apply_orientation(y,x)
+  template<class A>
+  void apply_orientation(A& x, A& y) { if(!model_straight) tie(x,y) = make_pair(x*ocos + y*osin, y*ocos - x*osin); }
+  
+  void configure();
+  
   extern bool autoband;
   extern bool autobandhistory;
   extern bool dospiral;
@@ -1299,6 +1310,7 @@ namespace conformal {
 
   void progress_screen();
   void progress(string str);
+  bool model_has_orientation();
   }
   
 namespace polygonal {

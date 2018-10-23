@@ -5470,8 +5470,9 @@ void drawfullmap() {
   ptds.clear();
 
   if(pmodel == mdTwoPoint) {
-    queuechr(xpush0(+vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
-    queuechr(xpush0(-vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
+    ld a = -conformal::model_orientation * M_PI / 180;
+    queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
+    queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
     }
   
   /*
@@ -5493,11 +5494,14 @@ void drawfullmap() {
       ld x = sin(a * vid.twopoint_param * b / 90);
       ld y = 0;
       ld z = -sqrt(1 - x*x);
+      conformal::apply_orientation(y, x);
       hyperpoint h1;
       applymodel(hpxyz(x,y,z), h1);
       
+      conformal::apply_orientation(h1[0], h1[1]);      
       h1[1] = abs(h1[1]) * b;
-      curvepoint(h1 * vid.radius);
+      conformal::apply_orientation(h1[1], h1[0]);
+      curvepoint(h1);
       }
 
     queuecurve(ringcolor, 0, PPR::CIRCLE);

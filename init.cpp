@@ -300,8 +300,8 @@ void mobile_draw(MOBPAR_FORMAL) {
 
 //  if(debfile) fprintf(debfile, "d1\n"), fflush(debfile);
   frames++;
-  if(conformal::on) conformal::apply();
-
+  conformal::configure();
+  
   if(ticks > lastt) tortoise::updateVals(ticks - lastt);
 
   if(clicked && !lclicked) touchedAt = ticks;  

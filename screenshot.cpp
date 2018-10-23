@@ -421,6 +421,7 @@ vector<animatable_parameter> animatable_parameters = {
   animatable_parameter(vid.ballproj),
   animatable_parameter(surface::dini_b),
   animatable_parameter(surface::hyper_b),
+  animatable_parameter(conformal::halfplane_scale),
   };
 
 ld anim_param = 0;
@@ -507,8 +508,12 @@ void apply() {
       rug::apply_rotation(rug::currentrot * rotmatrix(rug_rotation2 * 2 * M_PI * t / period, 0, 1) * inverse(rug::currentrot));
       }
     }
-  if(ballangle_rotation)
-    vid.ballangle += ballangle_rotation * 360 * t / period;
+  if(ballangle_rotation) {
+    if(conformal::model_has_orientation())
+      conformal::model_orientation += ballangle_rotation * 360 * t / period;
+    else
+      vid.ballangle += ballangle_rotation * 360 * t / period;
+    }
   if(paramstate == 2 && anim_param) {
     ld phase = (1 + sin(anim_param * 2 * M_PI * ticks / period)) / 2;
     for(auto& ap: animatable_parameters) if(ap.values[0] != ap.values[1]) {
@@ -540,6 +545,10 @@ string animfile = "animation-%04d.png";
 bool record_animation() {
   for(int i=0; i<noframes; i++) {
     ticks = i * period / noframes;
+    if(conformal::on) {
+      conformal::phase = isize(conformal::v) * i * 1. / noframes;
+      conformal::movetophase();
+      }
     
     char buf[1000];
     snprintf(buf, 1000, animfile.c_str(), i);
@@ -735,7 +744,9 @@ void show() {
       });
     }
   #endif
-  if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
+  if(conformal::model_has_orientation())
+    animator(XLAT("model rotation"), ballangle_rotation, 'r');
+  else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, 'r');
   
   animator(XLAT("animate parameter change"), anim_param, 'P');

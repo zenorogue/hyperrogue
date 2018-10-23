@@ -97,12 +97,18 @@ namespace polygonal {
   void drawBoundary(int color) {
     queuereset(mdDisk, PPR::CIRCLE);
 
+    ld C, S;
+    auto& ho = conformal::model_orientation;
+    if(ho == 0) C = 1, S = 0;
+    else if(ho == 180) C = -1, S = 0;
+    else C = cos(ho * M_PI/180), S = sin(ho * M_PI / 180);
+
     for(int r=0; r<=2000; r++) {
       cld z = exp(cld(0, 2*M_PI * r / 2000.0));
       pair<xld,xld> z2 = compute(real(z), imag(z), deg);
       hyperpoint h;
-      h[0] = z2.first * vid.radius;
-      h[1] = z2.second * vid.radius;
+      h[0] = (z2.first * C - z2.second * S) * vid.radius;
+      h[1] = (z2.second * C + z2.first * S) * vid.radius;
       h[2] = stereo::scrdist;
       curvepoint(h);
       }
@@ -288,7 +294,10 @@ namespace conformal {
   int bandsegment = 16000;
   ld rotation = 0;
   int do_rotate = 1;
-  bool lower_halfplane;
+  ld model_orientation, halfplane_scale;
+  ld ocos, osin;
+  bool model_straight;
+
   bool autoband = false;
   bool autobandhistory = false;
   bool dospiral = true;
@@ -400,6 +409,13 @@ namespace conformal {
     while(phase < - extra_line_steps) phase += (siz + 2 * extra_line_steps-1);
     
     movetophase();
+    }
+
+  void configure() {
+    ocos = cos(model_orientation * M_PI / 180);
+    osin = sin(model_orientation * M_PI / 180);
+    model_straight = (ocos > 1 - 1e-9);
+    if(conformal::on) conformal::apply();
     }
   
   ld measureLength() {
@@ -580,6 +596,11 @@ namespace conformal {
     return true;
     }    
   
+  bool model_has_orientation() {
+    return
+      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint) || mdBandAny();
+    }
+  
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
@@ -608,6 +629,9 @@ namespace conformal {
     if(pmodel == mdDisk || pmodel == mdBall || pmodel == mdHyperboloid) {
       dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'p');
       }
+                                  
+    if(model_has_orientation())
+      dialog::addSelItem(XLAT("model orientation"), fts(model_orientation), 'l');
     
     if(pmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
@@ -617,8 +641,9 @@ namespace conformal {
       dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
       }
 
-    if(pmodel == mdHalfplane)
-      dialog::addBoolItem(XLAT("lower half-plane"), lower_halfplane, 'l');
+    if(pmodel == mdHalfplane) {
+      dialog::addSelItem(XLAT("half-plane scale"), fts(halfplane_scale), 'b');
+      }
 
     if(pmodel == mdBall)
       dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
@@ -638,7 +663,7 @@ namespace conformal {
       }
       
     if(pmodel == mdTwoPoint) {
-      dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'l');
+      dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'b');
       }
 
     dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');
@@ -679,14 +704,14 @@ namespace conformal {
         editScale();
       else if(uni == 'p')
         projectionDialog();
-      else if(uni == 'b') 
-        config_camera_rotation();
 #if CAP_RUG
       else if(uni == 'u')
         pushScreen(rug::show);
 #endif
-      else if(uni == 'l' && pmodel == mdHalfplane)
-        lower_halfplane = !lower_halfplane;
+      else if(uni == 'l' && model_has_orientation())
+        dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
+      else if(uni == 'b' && pmodel == mdHalfplane)
+        dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
       else if(uni == 's') {
        dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
           "Vertical stretch factor."
@@ -720,7 +745,7 @@ namespace conformal {
           );
         dialog::scaleLog();
         }
-      else if(uni == 'l' && pmodel == mdTwoPoint)  {
+      else if(uni == 'b' && pmodel == mdTwoPoint)  {
         dialog::editNumber(vid.twopoint_param, 0, 10, .1, 1, XLAT("parameter"), 
           "This model maps the world so that the distances from two points "
           "are kept. This parameter gives the distance from the two points to "
@@ -728,6 +753,8 @@ namespace conformal {
           );
         dialog::scaleLog();
         }
+      else if(uni == 'b') 
+        config_camera_rotation();
       else if(uni == 'x' && pmodel == mdBall) 
         dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
           "This parameter affects the ball model the same way as the projection parameter affects the disk model.");

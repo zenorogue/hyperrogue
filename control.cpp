@@ -485,9 +485,9 @@ void mainloopiter() {
   #endif
 
   optimizeview();
-
-  if(conformal::on) conformal::apply();
   
+  conformal::configure();
+
   ticks = SDL_GetTicks();
   callhooks(hooks_fixticks);
     

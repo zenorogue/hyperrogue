@@ -208,7 +208,8 @@ void initConfig() {
   addsaver(conformal::bandsegment, "band segment");
   addsaver(conformal::rotation, "conformal rotation");
   addsaver(conformal::do_rotate, "conformal rotation mode", 1);
-  addsaver(conformal::lower_halfplane, "lower halfplane", false);
+  addsaver(conformal::model_orientation, "model orientation", 0);
+  addsaver(conformal::halfplane_scale, "halfplane scale", 1);
   addsaver(conformal::autoband, "automatic band");
   addsaver(conformal::autobandhistory, "automatic band history");
   addsaver(conformal::dospiral, "do spiral");
@@ -1485,6 +1486,11 @@ int read_config_args() {
 
   else if(argis("-PM")) { 
     PHASEFROM(2); shift(); pmodel = eModel(argi());
+    }
+  else if(argis("-hp")) { 
+    PHASEFROM(2); 
+    shift(); conformal::model_orientation = argf();
+    shift(); conformal::halfplane_scale = argf();
     }
   else if(argis("-zoom")) { 
     PHASEFROM(2); shift(); vid.scale = argf();

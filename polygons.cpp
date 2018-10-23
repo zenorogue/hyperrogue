@@ -584,14 +584,24 @@ void fixMercator(bool tinf) {
   else
     mercator_period = 2 * vid.radius;
   
+  if(!conformal::model_straight)
+    for(auto& g: glcoords)
+      conformal::apply_orientation(g[0], g[1]);
+    
   if(pmodel == mdSinusoidal)
     for(int i = 0; i<isize(glcoords); i++) 
       glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
-    
+
   ld hperiod = mercator_period / 2;
-  
+    
   mercator_coord = 0;
-  ld cmin = -vid.xcenter, cmax = vid.xres - vid.xcenter, dmin = -vid.ycenter, dmax = vid.yres - vid.ycenter;
+  
+  auto dist = [] (ld a, ld b) { return max(b, a-b); };
+  
+  ld chypot = hypot(dist(vid.xres, vid.xcenter), dist(vid.yres, vid.ycenter));
+  
+  ld cmin = -chypot/2, cmax = chypot/2, dmin = -chypot, dmax = chypot;
+
   if(mercator_coord)
     swap(cmin, dmin), swap(cmax, dmax);
   if(pmodel == mdSinusoidal)
@@ -638,6 +648,9 @@ void fixMercator(bool tinf) {
     if(pmodel == mdSinusoidal)
       for(int i = 0; i<isize(glcoords); i++) 
         glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);    
+    if(!conformal::model_straight)
+      for(auto& g: glcoords)
+        conformal::apply_orientation(g[1], g[0]);
     }
   else {
     if(tinf) { 
@@ -671,6 +684,9 @@ void fixMercator(bool tinf) {
       auto& v = glcoords[isize(glcoords)-u][1-mercator_coord];
       v = v < 0 ? dmin : dmax;
       }
+    if(!conformal::model_straight)
+      for(auto& g: glcoords)
+        conformal::apply_orientation(g[1], g[0]);
     /* printf("cycling %d -> %d\n", base, qglcoords);
     for(int a=0; a<qglcoords; a++)
       printf("[%3d] %10.5lf %10.5lf\n", a, glcoords[a][0], glcoords[a][1]); */
@@ -761,10 +777,14 @@ void dqi_poly::draw() {
           // (which corresponds to the segment between the antipodes of foci)
           // if yes, switch cpha to the opposite
           hyperpoint h2 = V * glhr::gltopoint((*tab)[offset+(i+1)%cnt]);
-          if(h1[1] * h2[1] > 0) continue;
-          ld c1 = h1[1], c2 = -h2[1];
+          
+          hyperpoint ah1 = h1, ah2 = h2;
+          conformal::apply_orientation(ah1[0], ah1[1]);
+          conformal::apply_orientation(ah2[0], ah2[1]);
+          if(ah1[1] * ah2[1] > 0) continue;
+          ld c1 = ah1[1], c2 = -ah2[1];
           if(c1 < 0) c1 = -c1, c2 = -c2;
-          hyperpoint h = h1 * c1 + h2 * c2;
+          hyperpoint h = ah1 * c1 + ah2 * c2;
           h /= hypot3(h);
           if(h[2] < 0 && abs(h[0]) < sin(vid.twopoint_param)) cpha = 1-cpha, pha = 2;
           }
@@ -936,9 +956,13 @@ void dqi_poly::draw() {
   
     if(l || lastl) { 
       for(int i=0; i<isize(glcoords); i++) {
-        if(pmodel == mdSinusoidal)
-          mercator_period = 2 * vid.radius * cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
-        glcoords[i][mercator_coord] += mercator_period * (l - lastl);
+        if(pmodel == mdSinusoidal) {
+          ld y = glcoords[i][1], x = glcoords[i][0];
+          conformal::apply_orientation(x, y);
+          mercator_period = 2 * vid.radius * cos(y / vid.radius / vid.stretch * M_PI);
+          }
+        glcoords[i][mercator_coord] += conformal::ocos * mercator_period * (l - lastl);
+        glcoords[i][1-mercator_coord] += conformal::osin * mercator_period * (l - lastl);
         }
       lastl = l;
       }

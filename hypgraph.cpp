@@ -268,7 +268,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         apply_depth(ret, y * zf / M_PI);
       }
     else {
-      ld x, y, yf, zf;
+      conformal::apply_orientation(H[0], H[1]);
+      
+      ld x, y, yf, zf=0;
       y = asin_auto(H[1]);
       x = asin_auto_clamp(H[0] / cos_auto(y));
       if(sphere) {
@@ -331,9 +333,11 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           printf("unknown model\n");
           }
         }
-      ret = hpxyz(x / M_PI, y * yf / M_PI, 0);
+      ld yzf = y * zf; y *= yf;
+      conformal::apply_orientation(y, x);
+      ret = hpxyz(x / M_PI, y / M_PI, 0);
       if(zlev_used && stereo::active()) 
-        apply_depth(ret, y * zf / M_PI);
+        apply_depth(ret, yzf / M_PI);
       }
     ghcheck(ret, H);
     return;
@@ -365,7 +369,12 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   tz = H[2]+vid.alpha;
 
   if(pmodel == mdPolygonal || pmodel == mdPolynomial) {
+
+    conformal::apply_orientation(H[0], H[1]);
+
     pair<long double, long double> p = polygonal::compute(H[0]/tz, H[1]/tz);
+
+    conformal::apply_orientation(p.second, p.first);
     ret[0] = p.first;
     ret[1] = p.second;
     ret[2] = 0;
@@ -379,21 +388,25 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ld x0, y0;  
     x0 = H[0] / tz;
     y0 = H[1] / tz;
-    if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
+    
+    conformal::apply_orientation(x0, y0);
+
     y0 += 1;
     double rad = x0*x0 + y0*y0;
-    y0 /= rad;
-    x0 /= rad;
-    y0 -= .5;
-  
-    if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
+    y0 /= -rad;
+    x0 /= -rad;
+    y0 += .5;
     
-    ret[0] = x0;
+    conformal::apply_orientation(y0, x0);
+    
+    auto& ps = conformal::halfplane_scale;
+    x0 *= ps, y0 *= ps;
+    
+    ret[0] = -conformal::osin + x0;
     if(wmspatial || mmspatial) {
-      if(conformal::lower_halfplane) y0 /= zlev;
-      else y0 *= zlev;
+      y0 = y0 * pow(zlev, conformal::ocos);
       }
-    ret[1] = (conformal::lower_halfplane?-1:1) - y0;
+    ret[1] = conformal::ocos + y0;
     ret[2] = 0;
     if(zlev != 1 && stereo::active()) 
       apply_depth(ret, -y0 * geom3::factor_to_lev(zlev));
