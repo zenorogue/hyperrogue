@@ -446,6 +446,7 @@ int parent_id(cell *c, int which, const cellfunction& cf) {
     
     if(cf(c->cmove(i)) == d) {
       again:
+      if(!which) return i;
       int i2 = c->c.fix(i+which);
       if(cf(c->cmove(i2)) == d) {
         i = i2; goto again;
