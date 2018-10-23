@@ -1215,7 +1215,7 @@ int qp[PMAX], qp0[PMAX];
 
 void darken_color(color_t& color) {
   int alpha = color & 255;
-  if(vid.alpha <= 1) {
+  if(sphere && pmodel == mdDisk && vid.alpha <= 1) {
     color = 0;
     }
   else if(alpha == 255)
