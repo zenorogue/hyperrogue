@@ -1446,6 +1446,9 @@ int read_config_args() {
   else if(argis("-back")) {
     PHASEFROM(2); shift(); backcolor = arghex();
     }
+  else if(argis("-ring")) {
+    PHASEFROM(2); shift(); ringcolor = arghex();
+    }
   else if(argis("-borders")) {
     PHASEFROM(2); shift(); bordcolor = arghex();
     }
@@ -1486,6 +1489,14 @@ int read_config_args() {
 
   else if(argis("-PM")) { 
     PHASEFROM(2); shift(); pmodel = eModel(argi());
+    }
+  else if(argis("-ballangle")) { 
+    PHASEFROM(2); 
+    shift(); vid.ballangle = argf();
+    }
+  else if(argis("-topz")) { 
+    PHASEFROM(2); 
+    shift(); conformal::top_z = argf();
     }
   else if(argis("-hp")) { 
     PHASEFROM(2); 
