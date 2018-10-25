@@ -1227,31 +1227,28 @@ purehookset hook_drawqueue;
 constexpr int PMAX = int(PPR::MAX);
 int qp[PMAX], qp0[PMAX];
 
-void darken_color(color_t& color) {
+color_t darken_color(color_t& color, bool outline) {
   int alpha = color & 255;
-  if(sphere && pmodel == mdDisk && vid.alpha <= 1) {
-    color = 0;
+  if(sphere && pmodel == mdDisk && vid.alpha <= 1)
+    return 0;
+  else {
+    if(outline && alpha < 255) 
+      return color - alpha + int(backbrightness * alpha);
+    else
+      return (gradient(backcolor, color>>8, 0, backbrightness, 1)<<8) | 0xFF;
     }
-  else if(alpha == 255)
-    color = (gradient(backcolor, color>>8, 0, backbrightness, 1)<<8) | 0xFF;
-  else color = color - alpha + int(backbrightness * alpha);
-  }
-
-void drawqueueitem::draw_darker() {
-  color_t c = color;
-  darken_color(color);
-  draw();
-  color = c;
   }
 
 void dqi_poly::draw_back() { 
-  color_t c = outline;
-  darken_color(outline);
-  drawqueueitem::draw_darker();
-  outline = c;
+  dynamicval<color_t> dvo(outline, darken_color(outline, true));
+  dynamicval<color_t> dvc(color, darken_color(color, false));
+  draw();
   }
 
-void dqi_line::draw_back() { draw_darker(); }
+void dqi_line::draw_back() { 
+  dynamicval<color_t> dvc(color, darken_color(color, true));
+  draw();
+  }
 
 void dqi_boundary_circle::draw_pre() {
   draw(), color = 0;
