@@ -440,14 +440,19 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     x0 /= -rad;
     y0 += .5;
     
-    conformal::apply_orientation(y0, x0);
+    conformal::apply_orientation(x0, y0);
     
     auto& ps = conformal::halfplane_scale;
     x0 *= ps, y0 *= ps;
     
-    ret[0] = -conformal::osin + x0;
-    if(wmspatial || mmspatial) {
-      y0 = y0 * pow(zlev, conformal::ocos);
+    ret[0] = -conformal::osin - x0;
+    if((wmspatial || mmspatial) && zlev) {
+      if(conformal::ocos)
+        y0 = y0 * pow(zlev, conformal::ocos);
+      if(conformal::ocos && conformal::osin)
+        y0 += x0 * conformal::osin * (pow(zlev, conformal::ocos) - 1) / conformal::ocos;
+      else if(conformal::osin)
+        y0 += x0 * conformal::osin * log(zlev);
       }
     ret[1] = conformal::ocos + y0;
     ret[2] = 0;
