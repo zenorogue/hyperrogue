@@ -599,7 +599,7 @@ namespace conformal {
   
   bool model_has_orientation() {
     return
-      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint) || mdBandAny();
+      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted) || mdBandAny();
     }
   
   void model_menu() {

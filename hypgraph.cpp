@@ -410,6 +410,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ld x0, y0;  
     x0 = H[0] / tz;
     y0 = H[1] / tz;
+    conformal::apply_orientation(x0, y0);
     ld r = hypot(x0, y0);
     ld c = x0 / r;
     ld s = y0 / r;
@@ -421,6 +422,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[0] = ret[0] / r2;
       ret[1] = -ret[1] / r2;
       }
+    conformal::apply_orientation(ret[1], ret[0]);
     ghcheck(ret,H);
     return;
     }
