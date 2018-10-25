@@ -41,6 +41,9 @@
 #include "flags.cpp"
 #include "yendor.cpp"
 #include "complex.cpp"
+#if CAP_COMPLEX2
+#include "complex2.cpp"
+#endif
 #include "savemem.cpp"
 #include "game.cpp"
 #include "orbgen.cpp"

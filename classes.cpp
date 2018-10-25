@@ -778,6 +778,8 @@ monstertype minf[motypes] = {
   "for a long time. This attack can destroy other Raiders if it hits them."},
   { '@', 0xC00000, "Red Jelly", jellydesc}, 
   { '@', 0x0000C0, "Blue Jelly", jellydesc}, 
+  { 'B', 0xE07000, "Brown Bug", NODESCYET},
+  { 'B', 0xE07060, "Acid Bird", NODESCYET},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -1237,6 +1239,9 @@ itemtype iinf[ittypes] = {
   { 'o', 0xFFFF80, "Orb of Magnetism", NODESCYET},
   { 'o', 0x202020, "Orb of Slaying",
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
+    },
+  { '*', 0x20C0C0, "Brownie",
+    "Tasty cookie."
     },
   // { '*', 0x26619C, "Lapis Lazuli", NODESCYET},
   };

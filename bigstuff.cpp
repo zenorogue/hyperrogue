@@ -121,7 +121,7 @@ bool grailWasFound(cell *c) {
 void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
-  for(int i=0; i<S7; i++) preventbarriers(h->c7->move(i));
+  forCellEx(c2, h->c7) preventbarriers(c2);
   if(GOLDBERG)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
@@ -448,7 +448,7 @@ int coastval(cell *c, eLand base) {
     }
   else {
     if(c->land == laOceanWall || c->land == laCaribbean || c->land == laWhirlpool ||
-      c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken || c->land == laDocks)
+      c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken || c->land == laDocks || c->land == laBrownian)
       return 30;
     if(c->land  != laOcean && !isGravityLand(c->land) && c->land != laHaunted) {
       return 0;
@@ -1185,6 +1185,12 @@ void buildCamelotWall(cell *c) {
     }
   }
 
+bool no_barriers_in_radius(cell *c, int rad) {
+  celllister cl(c, 2, 1000000, NULL);
+  for(cell *c: cl.lst) if(c->bardir != NODIR) return false;
+  return true;
+  }
+
 void buildCamelot(cell *c) {
   int d = celldistAltRelative(c);
   if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
@@ -1273,6 +1279,9 @@ void moreBigStuff(cell *c) {
   if(c->land == laCanvas && !eubinary && c->master->alt && !quotient) 
     generateAlts(c->master);
 
+  if(c->land == laOcean && !generatingEquidistant && hrand(10000) < 10 && no_barriers_in_radius(c, 2))
+    brownian::init(c);
+
   if(c->land == laStorms)
     if(!eubinary && !quotient && !sphere) {
       if(c->master->alt && c->master->alt->distance <= 2) {
@@ -1348,7 +1357,7 @@ void moreBigStuff(cell *c) {
       }
     }
 
-  if(c->land == laOcean || c->land == laWhirlpool) if(!(binarytiling && specialland != laWhirlpool)) {
+  if(among(c->land, laOcean, laWhirlpool, laBrownian)) if(!(binarytiling && specialland != laWhirlpool)) {
     bool fullwhirlpool = false;
     if(tactic::on && specialland == laWhirlpool)
       fullwhirlpool = true;

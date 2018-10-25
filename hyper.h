@@ -4601,7 +4601,7 @@ struct exp_parser {
 
   };
 
-#ifdef CAP_COMPLEX2
+#if CAP_COMPLEX2
 namespace brownian {
   const int level = 5;
   void init(cell *c);

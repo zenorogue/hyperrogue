@@ -131,6 +131,8 @@ void initgame() {
   
   cwt.at = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.at->land = firstland;
+
+  if(firstland == laBrownian) brownian::init(cwt.at);
   
   chaosAchieved = false;
 

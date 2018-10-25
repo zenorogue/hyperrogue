@@ -127,10 +127,9 @@ bool isMetalBeast(eMonster m) {
   }
 
 bool isStunnable(eMonster m) {
-  return m == moPalace || m == moFatGuard || m == moSkeleton || isPrincess(m) ||
-    isMetalBeast(m) || m == moTortoise || isDragon(m) ||
-    m == moReptile || m == moTerraWarrior || m == moSalamander ||
-    m == moVizier;
+  return 
+    isMetalBeast(m) || isDragon(m) || isPrincess(m) ||
+    among(m, moPalace, moFatGuard, moSkeleton, moTortoise, moReptile, moTerraWarrior, moSalamander, moVizier, moBrownBug);
   }
 
 bool hasHitpoints(eMonster m) {
@@ -338,7 +337,12 @@ int snakelevel(eWall w) {
   return 0;
   }
 
-int snakelevel(cell *c) { return snakelevel(c->wall); }
+int snakelevel(cell *c) { 
+#if CAP_COMPLEX2
+  if(c->land == laBrownian && among(c->wall, waNone, waMineMine, waFire)) return min(c->landparam / brownian::level, 3);
+#endif
+  return snakelevel(c->wall); 
+  }
 
 bool isWall(cell *w) {
   if(w->wall == waNone || isAlchAny(w) || 
@@ -365,7 +369,8 @@ bool isWall(cell *w) {
 bool isAngryBird(eMonster m) {
   return m == moEagle || m == moAlbatross || m == moBomberbird || m == moGargoyle ||
     m == moWindCrow || m == moSparrowhawk || 
-    m == moVampire || m == moBat || m == moButterfly || m == moGadfly;
+    m == moVampire || m == moBat || m == moButterfly || m == moGadfly ||
+    m == moAcidBird;
   }
 
 bool isBird(eMonster m) {
@@ -407,6 +412,7 @@ bool normalMover(eMonster m) {
     m == moHunterGuard || m == moHunterChanging ||
     m == moIceGolem || 
     m == moSwitch1 || m == moSwitch2 || m == moCrusher || m == moPair || 
+    m == moBrownBug ||
     isMagneticPole(m) || 
     slowMover(m);
   }

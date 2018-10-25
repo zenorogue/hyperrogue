@@ -101,36 +101,9 @@ eMonster genRuinMonster(cell *c) {
   return m;
   }
 
-void start_brownian(cell *c, int d) {
-  while(true) {
-    if(c->wall == waBrownian) c->wall = waNone;
-    c->landparam++;
-    // snakepile(c, moRedTroll);
-    // c->wall = waSea;
-    c->bardir = NOBARRIERS; 
-    if(d == 0) {
-      if(c->mpdist >= BARLEV) {
-        c->wall = waBrownian;
-        return;
-        }
-      start_brownian(c, 1);
-      d = 1;
-      continue;
-      }
-    int q = 0;
-    cell *good = NULL;
-    forCellCM(c2, c)
-      if(c2->mpdist > 7 && (c2->land == laBrownian || c2->land == laNone)) {
-        q++;
-        if(q==1 || hrand(q) == 0) good = c2;
-        }
-    if(!q) break;
-    d++; if(d == 7) d = 0;
-    c = good;
-    }
-  }
-
 // the giant switch generating most of the lands...
+
+void gen_brownian(cell *c);
 
 void giantLandSwitch(cell *c, int d, cell *from) {
   switch(c->land) {
@@ -2183,8 +2156,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laBrownian:
-      if(c->wall == waBrownian || (d == 9 && hrand(10000) < 5))
-        start_brownian(c, 0);
+      brownian::build(c, d);
       break;
     
     case laMirrored:
@@ -2405,6 +2377,7 @@ void setdist(cell *c, int d, cell *from) {
     if(c->land == laClearing && !tactic::on) setland(c, laOvergrown);
     if(c->land == laWhirlpool && !tactic::on && !yendor::on) setland(c, laOcean);
     if(c->land == laCamelot && !tactic::on) setland(c, laCrossroads);
+    if(c->land == laBrownian && !tactic::on && !chaosmode) setland(c, laOcean);
 
 #if CAP_DAILY
     if(!daily::on) {

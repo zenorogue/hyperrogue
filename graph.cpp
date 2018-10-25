@@ -1252,7 +1252,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     queuepoly(VFISH, shShark, darkena(col, 0, 0xFF));
   else if(m == moEagle || m == moParrot || m == moBomberbird || m == moAlbatross || 
     m == moTameBomberbird || m == moWindCrow || m == moTameBomberbirdMoved ||
-    m == moSandBird) {
+    m == moSandBird || m == moAcidBird) {
     ShadowV(V, shEagle);
     queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
     }
@@ -1695,7 +1695,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       queuepolyat(VBODY * spin(M_PI), shTentacle, 0x000000C0, PPR::TENTACLE1);
     queuepolyat(VBODY, shDisk, darkena(col, 0, 0xFF), PPR::MONSTER_BODY);
     }
-  else if(isMetalBeast(m)) {
+  else if(isMetalBeast(m) || m == moBrownBug) {
     ShadowV(V, shTrylobite);
     if(!mmspatial)
       queuepoly(VABODY, shTrylobite, darkena(col, 1, 0xC0));
@@ -2852,6 +2852,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         // gradient(0xFF8000, 0xFFF000, 2*level, c->landparam, 3*level-1) :
         0xC00000;
       break;
+      }
 #endif
       
     case laVolcano: {
@@ -3503,6 +3504,7 @@ int getfd(cell *c) {
     case laPalace:
     case laCA:
     case laDual:
+    case laBrownian:
       return 1;
     
     case laTrollheim:
@@ -4307,6 +4309,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case laIvoryTower: case laDungeon: 
           set_towerfloor(c);
           break;
+        
+        case laBrownian:
+          if(among(c->wall, waSea, waBoat))
+            set_floor(shCloudFloor);
+          else
+            set_floor(shFloor);
+          break;
 
         default: 
           set_floor(shFloor);
@@ -4524,7 +4533,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waFrozenLake: case waLake: case waCamelotMoat:
         case waSea: case waOpenGate: case waBubble: case waDock:
-        case waNone: case waSulphur: case waMercury:
+        case waSulphur: case waMercury:
+          break;
+        
+        case waNone: 
+          if(c->land == laBrownian) goto wa_default;
           break;
         
         case waRose: {

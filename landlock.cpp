@@ -232,6 +232,8 @@ int isNative(eLand l, eMonster m) {
 eItem treasureType(eLand l) {
   switch(l) {
     case laBrownian: 
+      return itBrownian;
+      
     case laIce: return itDiamond;
     case laJungle: return itRuby;
     case laCaves: return itGold;

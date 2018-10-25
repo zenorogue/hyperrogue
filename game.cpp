@@ -376,6 +376,7 @@ int* killtable[] = {
     &kills[moSalamander], &kills[moLavaWolf],
     &kills[moSwitch1], &kills[moSwitch2],
     &kills[moMonk], &kills[moCrusher], &kills[moHexDemon], &kills[moAltDemon], &kills[moPair],
+    &kills[moBrownBug], &kills[moAcidBird],
     NULL
     };
 
@@ -1694,6 +1695,19 @@ bool earthWall(cell *c) {
   }
 
 bool snakepile(cell *c, eMonster m) {
+  if(c->land == laBrownian) {
+    if(c->wall == waNone) {
+      #if CAP_COMPLEX2
+      c->landparam += brownian::level;
+      #endif
+      return true;
+      }
+    if(c->wall == waSea || c->wall == waBoat) {
+      c->wall = waNone;
+      c->landparam++;
+      return true;
+      }
+    }
   if(c->item && c->wall != waRed3) c->item = itNone;
   if(c->wall == waRed1 || c->wall == waOpenGate) c->wall = waRed2;
   else if(c->wall == waRed2) c->wall = waRed3;
@@ -1821,11 +1835,12 @@ void explodeMine(cell *c) {
   drawFireParticles(c, 30, 150);
   
   c->wall = waMineOpen;
+  brownian::dissolve_brownian(c, 2);
   makeflame(c, 20, false);
   
-  for(int i=0; i<c->type; i++) if(c->move(i)) {
-    cell *c2 = c->move(i);
+  forCellEx(c2, c) {
     destroyTrapsOn(c2);
+    brownian::dissolve_brownian(c2, 1);
     if(c2->wall == waRed2 || c2->wall == waRed3)
       c2->wall = waRed1;
     else if(c2->wall == waDeadTroll || c2->wall == waDeadTroll2 || c2->wall == waPetrified || c2->wall == waGargoyle) {
@@ -1875,9 +1890,9 @@ void stunMonster(cell *c2) {
     c2->monst == moHedge ? 1 :
     c2->monst == moFlailer ? 1 :
     c2->monst == moSalamander ? 6 :
+    c2->monst == moBrownBug ? 3 :
     3);
-  if(c2->monst != moSkeleton && !isMetalBeast(c2->monst) && c2->monst != moTortoise &&
-    c2->monst != moReptile && c2->monst != moSalamander) {
+  if(!isMetalBeast(c2->monst) && !among(c2->monst, moSkeleton, moReptile, moSalamander, moTortoise, moBrownBug)) {
     c2->hitpoints--;
     if(c2->monst == moPrincess)
       playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
@@ -2077,9 +2092,11 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     playSound(c, "splash" + pick12());
     destroyHalfvine(c);
     minerEffect(c);
+    brownian::dissolve_brownian(c, 1);
     for(int i=0; i<c->type; i++) if(passable(c->move(i), c, P_MONSTER | P_MIRROR | P_CLIMBUP | P_CLIMBDOWN)) {
       destroyHalfvine(c->move(i));
       minerEffect(c->move(i));
+      brownian::dissolve_brownian(c->move(i), 1);
       if(c->move(i)->monst == moSlime || c->move(i)->monst == moSlimeNextTurn)
         killMonster(c->move(i), who);
       }
@@ -2107,6 +2124,13 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moVineBeast) 
     petrify(c, waVinePlant, m), pcount = 0;
   if(isBird(m)) moveEffect(c, c, moDeadBird, -1);
+  if(m == moAcidBird) {
+    playSound(c, "die-bomberbird");
+    pcount = 64;
+    #if CAP_COMPLEX2
+    brownian::dissolve(c, 1);
+    #endif
+    }
   if(m == moBomberbird || m == moTameBomberbird) {
     pcount = 0;
     playSound(c, "die-bomberbird");
@@ -2147,6 +2171,10 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moRedTroll) {
     playSound(c, "die-troll");
     if(doesFall(c)) fallingFloorAnimation(c, waRed1, m), pcount = 0;
+    else if(snakepile(c, m)) pcount = 0;
+    }
+  if(m == moBrownBug) {
+    if(doesFall(c)) ;
     else if(snakepile(c, m)) pcount = 0;
     }
   if(m == moDarkTroll) {
@@ -2467,6 +2495,11 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
 
 void pushMonster(cell *ct, cell *cf, int direction_hint) {
   moveMonster(ct, cf, direction_hint);
+  if(ct->monst == moBrownBug) {
+    int t = snakelevel(ct) - snakelevel(cf);
+    if(t > 0)
+      ct->stuntime = min(ct->stuntime + 2 * t, 7);
+    }
   }
 
 bool destroyHalfvine(cell *c, eWall newwall, int tval) {
@@ -3579,6 +3612,8 @@ void moveMonster(cell *ct, cell *cf, int direction_hint) {
     if(isMetalBeast(m)) ct->stuntime += 2;
     if(m == moTortoise) ct->stuntime += 3;
     if(m == moDraugr && ct->land != laBurial && ct->land != laHalloween) ct->stuntime += 2;
+    if(m == moBrownBug && snakelevel(ct) < snakelevel(cf)) ct->stuntime += 2;
+    if(m == moBrownBug && snakelevel(ct) < snakelevel(cf) - 1) ct->stuntime += 2;
     }
   
   if(isWitch(m) && ct->item == itOrbLife && passable(cf, NULL, P_MIRROR)) {
@@ -3811,8 +3846,11 @@ int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   if(m == moHunterChanging && c2->pathdist > c1->pathdist) return 1600;
   
   if((mf & MF_PATHDIST) && !pathlock) printf("using MF_PATHDIST without path\n"); 
+  
+  int bonus = 0;
+  if(m == moBrownBug && snakelevel(c2) < snakelevel(c1)) bonus = -10;
 
-  if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500; // good move
+  if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500 + bonus; // good move
   
   // prefer straight direction when wandering
   int dd = angledist(c1, c1->mondir, d);
@@ -5181,9 +5219,7 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     val = 
     (m == moPrincessArmed && isPrincess(c2->monst)) ? 14000 : // jealousy!
     isActiveEnemy(c2,m) ? 12000 :
-    (c2->monst == moSkeleton || c2->monst == moMetalBeast || 
-     c2->monst == moReptile || c2->monst == moTortoise ||
-     c2->monst == moSalamander || c2->monst == moTerraWarrior) ? -400 :
+    among(c2->monst, moSkeleton, moMetalBeast, moReptile, moTortoise, moSalamander, moTerraWarrior, moBrownBug) ? -400 :
     isIvy(c2) ? 8000 :
     isInactiveEnemy(c2,m) ? 1000 :
     -500;
