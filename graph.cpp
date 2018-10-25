@@ -5572,8 +5572,8 @@ void drawfullmap() {
     ld z = acosh(tz);
 
     hyperpoint a = xpush0(z);
-    ld ball = -vid.ballangle * M_PI / 180;
-    ld cb = cos(ball), sb = sin(ball);
+    ld cb = conformal::cos_ball;
+    ld sb = conformal::sin_ball;
     
     a[1] = sb * a[2] / -cb;
     a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);

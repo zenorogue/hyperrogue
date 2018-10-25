@@ -1279,6 +1279,7 @@ namespace conformal {
   extern ld model_orientation;
   extern ld halfplane_scale;
   extern ld ocos, osin;
+  extern ld cos_ball, sin_ball;
   extern bool model_straight;
   extern ld top_z;
   
@@ -1286,6 +1287,8 @@ namespace conformal {
   // logical coordinates back to screen coordinates: apply_orientation(y,x)
   template<class A>
   void apply_orientation(A& x, A& y) { if(!model_straight) tie(x,y) = make_pair(x*ocos + y*osin, y*ocos - x*osin); }
+  template<class A>
+  void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
   
   void configure();
   

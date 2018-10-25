@@ -78,14 +78,14 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   ld tzh = vid.ballproj + H[2];
   ld ax = H[0] / tzh;
   ld ay = H[1] / tzh;
-  ld ball = vid.ballangle * M_PI / 180;
   
   ld ca = cos(alpha), sa = sin(alpha);
-  ld cb = cos(ball), sb = sin(ball);
-  
+
   ret[0] = ax * ca;
-  ret[1] = ay * cb + ax * sa * sb;
-  ret[2] = ax * sa * cb - ay * sb;
+  ret[1] = ay;
+  ret[2] = ax * sa;
+  
+  conformal::apply_ball(ret[2], ret[1]);
   }
 
 void apply_depth(hyperpoint &f, ld z) {
@@ -154,7 +154,6 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     }
   
   if(pmodel == mdHemisphere) {
-    ld ball = vid.ballangle * M_PI / 180;
     using namespace hyperpoint_vec;
     
     switch(cgclass) {
@@ -186,7 +185,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       }
     
-    ret = rotmatrix(M_PI/2 + ball, 1, 2) * ret;
+    swap(ret[1], ret[2]);
+    
+    conformal::apply_ball(ret[2], ret[1]);
     
     ghcheck(ret, H);
     return;
@@ -198,13 +199,11 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     H[1] /= H[2];
     H[2] = 1 - vid.alpha;
 
-    ld ball = -vid.ballangle * M_PI / 180;
-    ld cb = cos(ball), sb = sin(ball);
-
     ret[0] = H[0] / 3;
-    ret[1] = (1 - H[2]) / 3 * cb - H[1] / 3 * sb;
-    ret[2] = -(-H[1] / 3 * cb - (1 - H[2]) / 3 * sb);
-
+    ret[1] = (1 - H[2]) / 3;
+    ret[2] = H[1] / 3;
+    
+    conformal::apply_ball(ret[2], ret[1]);
     ghcheck(ret,H);
     return;
     }
@@ -218,13 +217,11 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       H[2] = tz;
       }
 
-    ld ball = -vid.ballangle * M_PI / 180;
-    ld cb = cos(ball), sb = sin(ball);
-
     ret[0] = H[0] / 3;
-    ret[1] = (1 - H[2]) / 3 * cb - H[1] / 3 * sb;
-    ret[2] = -(-H[1] / 3 * cb - (1 - H[2]) / 3 * sb);
-
+    ret[1] = (1 - H[2]) / 3;
+    ret[2] = H[1] / 3;
+    
+    conformal::apply_ball(ret[2], ret[1]);
     ghcheck(ret,H);
     return;
     }

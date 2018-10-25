@@ -255,7 +255,7 @@ void stereo::set_viewport(int ed) {
   }    
 
 bool model_needs_depth() {
-  return pmodel == mdBall || pmodel == mdHemisphere;
+  return pmodel == mdBall;
   }
 
 void setGLProjection(color_t col) {

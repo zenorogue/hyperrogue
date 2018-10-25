@@ -187,23 +187,29 @@ bool two_sided_model() {
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
+  if(pmodel == mdHemisphere) return !euclid;
   return false;
   }
 
-bool correct_side(const hyperpoint& H) {
+int get_side(const hyperpoint& H) {
   if(pmodel == mdDisk && sphere) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / vid.alpha;
-    return (spherespecial>0) ^ (H[2] <= -horizon);
+    return (H[2] <= -horizon) ? -1 : 1;
+    ;
     }
-  if(pmodel == mdHyperboloid && hyperbolic) {
-    ld ball = -vid.ballangle * M_PI / 180;
-    ld cb = cos(ball), sb = sin(ball);
-    return (spherespecial > 0) ^ (
-      sb * H[2] > -cb * H[1]
-      );
+  if(pmodel == mdHyperboloid && hyperbolic)
+    return (conformal::sin_ball * H[2] > -conformal::cos_ball * H[1]) ? -1 : 1;
+  if(pmodel == mdHemisphere || pmodel == mdHyperboloid) {
+    hyperpoint res;
+    applymodel(H, res);
+    return res[2] < 0 ? -1 : 1;
     }
-  return true;
+  return 0;
+  }
+
+bool correct_side(const hyperpoint& H) {
+  return get_side(H) == spherespecial;
   }
 
 void fixpoint(array<float, 3>& hscr, hyperpoint H) {

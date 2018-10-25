@@ -296,6 +296,7 @@ namespace conformal {
   int do_rotate = 1;
   ld model_orientation, halfplane_scale;
   ld ocos, osin;
+  ld cos_ball, sin_ball;
   bool model_straight;
   ld top_z = 5;
 
@@ -413,6 +414,8 @@ namespace conformal {
     }
 
   void configure() {
+    ld ball = -vid.ballangle * M_PI / 180;
+    cos_ball = cos(ball), sin_ball = sin(ball);
     ocos = cos(model_orientation * M_PI / 180);
     osin = sin(model_orientation * M_PI / 180);
     model_straight = (ocos > 1 - 1e-9);
