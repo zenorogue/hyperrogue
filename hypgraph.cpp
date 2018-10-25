@@ -421,8 +421,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ld r2 = sqhypot2(ret);
       ret[0] = ret[0] / r2;
       ret[1] = -ret[1] / r2;
+      conformal::apply_orientation(ret[1], ret[0]);
       }
-    conformal::apply_orientation(ret[1], ret[0]);
+    else conformal::apply_orientation(ret[0], ret[1]);
     ghcheck(ret,H);
     return;
     }
