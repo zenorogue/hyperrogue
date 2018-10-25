@@ -187,7 +187,7 @@ bool two_sided_model() {
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
-  if(pmodel == mdHemisphere) return !euclid;
+  if(pmodel == mdHemisphere) return true;
   return false;
   }
 
@@ -200,7 +200,9 @@ int get_side(const hyperpoint& H) {
     }
   if(pmodel == mdHyperboloid && hyperbolic)
     return (conformal::sin_ball * H[2] > -conformal::cos_ball * H[1]) ? -1 : 1;
-  if(pmodel == mdHemisphere || pmodel == mdHyperboloid) {
+  if(pmodel == mdHyperboloid && sphere)
+    return (conformal::sin_ball * H[2] > conformal::cos_ball * H[1]) ? -1 : 1;
+  if(pmodel == mdHemisphere) {
     hyperpoint res;
     applymodel(H, res);
     return res[2] < 0 ? -1 : 1;
@@ -959,7 +961,7 @@ void dqi_poly::draw() {
     if(around_center) return;
     }
     
-  if(((sphere && (spherespecial > 0 || equi)) || (pmodel == mdJoukowsky && hyperbolic) || (pmodel == mdDisk && hyperbolic && vid.alpha <= -1)) && !(poly_flags & POLY_ISSIDE)) {
+  if(((sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) || (pmodel == mdJoukowsky && hyperbolic) || (pmodel == mdDisk && hyperbolic && vid.alpha <= -1)) && !(poly_flags & POLY_ISSIDE)) {
   
     if(!tinf) 
       compute_side_by_centerin(this, nofill);
@@ -1353,7 +1355,7 @@ void drawqueue() {
   // on the sphere, parts on the back are drawn first
   if(two_sided_model()) {
   
-    if(pmodel == mdHyperboloid) {
+    if(pmodel == mdHyperboloid && hyperbolic) {
       dynamicval dv(pmodel, mdHyperboloidFlat);
       for(auto& ptd: ptds) 
         if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
