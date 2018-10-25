@@ -406,6 +406,25 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     return;
     }
   
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
+    ld x0, y0;  
+    x0 = H[0] / tz;
+    y0 = H[1] / tz;
+    ld r = hypot(x0, y0);
+    ld c = x0 / r;
+    ld s = y0 / r;
+    ret[0] = (r + 1/r) * c / 2;
+    ret[1] = (r - 1/r) * s / 2;
+    ret[2] = 0;
+    if(pmodel == mdJoukowskyInverted) {
+      ld r2 = sqhypot2(ret);
+      ret[0] = ret[0] / r2;
+      ret[1] = -ret[1] / r2;
+      }
+    ghcheck(ret,H);
+    return;
+    }
+    
   if(pmodel == mdHalfplane) {
     // Poincare to half-plane
     

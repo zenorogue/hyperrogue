@@ -195,7 +195,7 @@ void eyewidth_translate(int ed) {
 void stereo::set_projection(int ed) {
   DEBB(DF_GRAPH, (debugfile,"stereo::set_projection\n"));
   
-  start_projection(ed, pmodel == mdDisk && !spherespecial);
+  start_projection(ed, pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1));
 
   if(!using_perspective) {
     glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(stereo::scrdist) + 30000));

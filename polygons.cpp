@@ -722,6 +722,60 @@ ld glhypot2(glvertex a, glvertex b) {
   return (a[0]-b[0]) * (a[0]-b[0]) + (a[1]-b[1]) * (a[1]-b[1]) + (a[2]-b[2]) * (a[2]-b[2]);
   }
 
+void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
+
+  hyperpoint hscr;
+  hyperpoint h1 = p->V * p->intester;
+  if(is_behind(h1)) {
+    if(sphere) {
+      for(int i=0; i<3; i++) h1[i] = -h1[i];
+      poly_flags &= ~POLY_CENTERIN;
+      }
+    else
+      nofill = true; 
+    }
+  applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius * vid.stretch;
+  for(int i=0; i<isize(glcoords)-1; i++) {
+    double x1 = glcoords[i][0] - hscr[0];
+    double y1 = glcoords[i][1] - hscr[1];
+    double x2 = glcoords[i+1][0] - hscr[0];
+    double y2 = glcoords[i+1][1] - hscr[1];
+    if(asign(y1, y2)) {
+      ld x = xcross(x1, y1, x2, y2);
+      if(x < -1e-6) poly_flags ^= POLY_CENTERIN;
+      else if (x < 1e-6) nofill = true;
+      }
+    }
+  
+  poly_flags &= ~POLY_INVERSE;
+  if(poly_flags & POLY_CENTERIN) {
+    poly_flags |= POLY_INVERSE;
+    /* nofill = true;
+    outline = (flags & POLY_CENTERIN) ? 0x00FF00FF : 0xFF0000FF;
+    addpoint(hscr); */
+    }
+  
+  /*
+  if(poly_flags & POLY_BADCENTERIN) {
+    glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+    glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
+    glcoords.push_back(make_array<GLfloat>(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
+    glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
+    glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+    } */
+  }
+
+void compute_side_by_area() {
+
+  double rarea = 0;
+  for(int i=0; i<isize(glcoords)-1; i++) 
+    rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
+  rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
+
+  if(rarea>0)
+    poly_flags ^= POLY_INVERSE;
+  }
+
 void dqi_poly::draw() {
 
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
@@ -899,67 +953,21 @@ void dqi_poly::draw() {
     if(around_center) return;
     }
     
-  if(sphere && (spherespecial > 0 || equi) && !(poly_flags & POLY_ISSIDE)) {
+  if(((sphere && (spherespecial > 0 || equi)) || (pmodel == mdJoukowsky && hyperbolic) || (pmodel == mdDisk && hyperbolic && vid.alpha <= -1)) && !(poly_flags & POLY_ISSIDE)) {
   
-    if(!tinf) {
-    
-      hyperpoint hscr;
-      hyperpoint h1 = V * intester;
-      if(is_behind(h1)) {
-        if(sphere) {
-          for(int i=0; i<3; i++) h1[i] = -h1[i];
-          poly_flags &= ~POLY_CENTERIN;
-          }
-        else
-          nofill = true; 
-        }
-      applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius * vid.stretch;
-      for(int i=0; i<isize(glcoords)-1; i++) {
-        double x1 = glcoords[i][0] - hscr[0];
-        double y1 = glcoords[i][1] - hscr[1];
-        double x2 = glcoords[i+1][0] - hscr[0];
-        double y2 = glcoords[i+1][1] - hscr[1];
-        if(asign(y1, y2)) {
-          ld x = xcross(x1, y1, x2, y2);
-          if(x < -1e-6) poly_flags ^= POLY_CENTERIN;
-          else if (x < 1e-6) nofill = true;
-          }
-        }
-      
-      poly_flags &= ~POLY_INVERSE;
-      if(poly_flags & POLY_CENTERIN) {
-        poly_flags |= POLY_INVERSE;
-        /* nofill = true;
-        outline = (flags & POLY_CENTERIN) ? 0x00FF00FF : 0xFF0000FF;
-        addpoint(hscr); */
-        }
-      
-      /*
-      if(poly_flags & POLY_BADCENTERIN) {
-        glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
-        glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
-        glcoords.push_back(make_array<GLfloat>(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
-        glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
-        glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
-        } */
-      }
-    
+    if(!tinf) 
+      compute_side_by_centerin(this, nofill);
+        
     else {
-
-      double rarea = 0;
-      for(int i=0; i<isize(glcoords)-1; i++) 
-        rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
-      rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
-  
-      if(d < 0) poly_flags ^= POLY_INVERSE;
-      
-      if(rarea>0)
-        poly_flags ^= POLY_INVERSE;
+      if(d < 0) poly_flags ^= POLY_INVERSE;  
+      compute_side_by_area();
       }
     
     if(poly_flags & POLY_INVERSE) {
       if(curradius < vid.alpha - 1e-6) return;
+      if(!sphere) return;
       }
+    
     }
   else poly_flags &=~ POLY_INVERSE;
   

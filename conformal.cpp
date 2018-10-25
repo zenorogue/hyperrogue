@@ -578,7 +578,7 @@ namespace conformal {
     "azimuthal equidistant", "azimuthal equi-area", 
     "ball model", "Minkowski hyperboloid", "hemisphere",
     "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant",
-    "fisheye"
+    "fisheye", "Joukovsky", "Joukovsky/inversion"
     };
   
   string get_model_name(eModel pm) {
