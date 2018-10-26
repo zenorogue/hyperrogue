@@ -422,12 +422,16 @@ vector<animatable_parameter> animatable_parameters = {
   animatable_parameter(surface::dini_b),
   animatable_parameter(surface::hyper_b),
   animatable_parameter(conformal::halfplane_scale),
+  animatable_parameter(conformal::model_transition),
+  animatable_parameter(conformal::top_z, dialog::logarithmic),
   };
 
 ld anim_param = 0;
 int paramstate = 0;
 
 bool needs_highqual;
+
+bool joukowsky_anim;
 
 void reflect_view() {
   if(centerover.at) {
@@ -530,6 +534,15 @@ void apply() {
       }
     if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
     calcparam();
+    }
+  if(joukowsky_anim) {
+    ld t = ticks / period;
+    t = t - floor(t);
+    conformal::model_transition = t / 1.1;
+    vid.scale = (1 - conformal::model_transition) / 2.;
+    calcparam();
+    printf("scale = %lf tr = %lf t = %lf\n", vid.scale, conformal::model_transition, t);
+    printf("radius = %lf\n", vid.radius);
     }
   }
 
@@ -646,6 +659,10 @@ void show() {
   if(hyperbolic) {
     dialog::addBoolItem(XLAT("parabolic"), ma == maParabolic, '3');
     dialog::add_action([] () { ma = maParabolic; });
+    }
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
+    dialog::addBoolItem(XLAT("joukowsky_anim"), joukowsky_anim, 'j');
+    dialog::add_action([] () { joukowsky_anim = !joukowsky_anim; });
     }
   dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
   dialog::add_action([] () { ma = maCircle; 
@@ -826,6 +843,9 @@ int readArgs() {
     }
   else if(argis("-animball")) {
     shift(); ballangle_rotation = argf();
+    }
+  else if(argis("-animj")) {
+    shift(); joukowsky_anim = true;
     }
 
   else return 1;

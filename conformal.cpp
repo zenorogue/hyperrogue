@@ -299,6 +299,7 @@ namespace conformal {
   ld cos_ball, sin_ball;
   bool model_straight;
   ld top_z = 5;
+  ld model_transition = 1;
 
   bool autoband = false;
   bool autobandhistory = false;
@@ -605,6 +606,10 @@ namespace conformal {
       among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted) || mdBandAny();
     }
   
+  bool model_has_transition() {
+    return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand);
+    }
+  
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
@@ -665,6 +670,9 @@ namespace conformal {
     if(pmodel == mdHyperboloid)
       dialog::addSelItem(XLAT("topz"), fts3(top_z), 'l');
     
+    if(model_has_transition())
+      dialog::addSelItem(XLAT("model transition"), fts3(model_transition), 't');
+    
     if(pmodel == mdHemisphere && euclid) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
       }
@@ -719,6 +727,8 @@ namespace conformal {
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
       else if(uni == 'l' && pmodel == mdHyperboloid) 
         dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("topz"), "");
+      else if(uni == 't')
+        dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), "");
       else if(uni == 'b' && pmodel == mdHalfplane)
         dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
       else if(uni == 's') {

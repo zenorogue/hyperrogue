@@ -267,6 +267,39 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     if(zlev_used) H /= zlev;
     }
   
+  if(pmodel == mdBand && conformal::model_transition != 1) {
+    ld& mt = conformal::model_transition;
+
+    ld x0, y0;  
+    x0 = H[0] / tz;
+    y0 = H[1] / tz;
+    
+    conformal::apply_orientation(x0, y0);
+
+    x0 += 1;
+    double rad = x0*x0 + y0*y0;
+    y0 /= rad;
+    x0 /= rad;
+    x0 -= .5;
+    
+    ld phi = atan2(y0, x0);
+    ld r = hypot(x0, y0);
+    
+    r = pow(r, 1 - mt);
+    phi *= (1 - mt);
+    ret[0] = r * cos(phi);
+    ret[1] = r * sin(phi);
+    ret[2] = 0;
+    
+    ret[0] -= pow(0.5, 1-mt);
+    ret[0] /= -(1-mt) * M_PI / 2;
+    ret[1] /= (1-mt) * M_PI / 2;
+    
+    conformal::apply_orientation(ret[1], ret[0]);
+    ghcheck(ret,H);
+    return;
+    }
+  
   if(pmodel == mdTwoPoint || mdBandAny() || pmodel == mdSinusoidal) {
     // map to plane
     if(false) {
@@ -411,16 +444,32 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ld r = hypot(x0, y0);
     ld c = x0 / r;
     ld s = y0 / r;
-    ret[0] = (r + 1/r) * c / 2;
-    ret[1] = (r - 1/r) * s / 2;
+    ld& mt = conformal::model_transition;
+    ld a = 1 - .5 * mt, b = .5 * mt;
+    swap(a, b);
+    
+    ret[0] = (a * r + b/r) * c / 2;
+    ret[1] = (a * r - b/r) * s / 2;
     ret[2] = 0;
+    
     if(pmodel == mdJoukowskyInverted) {
       ld r2 = sqhypot2(ret);
       ret[0] = ret[0] / r2;
       ret[1] = -ret[1] / r2;
       conformal::apply_orientation(ret[1], ret[0]);
+      
+      /*
+
+      ret[0] += 1;
+      ld alpha = atan2(ret[1], ret[0]);
+      ld mod = hypot(ret[0], ret[1]);
+      // ret[0] = cos(alpha/2) * sqrt(mod);
+      // ret[1] = sin(alpha/2) * sqrt(mod);
+      ret[0] = alpha;
+      ret[1] = log(mod); */
       }
     else conformal::apply_orientation(ret[0], ret[1]);
+
     ghcheck(ret,H);
     return;
     }

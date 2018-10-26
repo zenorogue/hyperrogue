@@ -1281,6 +1281,7 @@ namespace conformal {
   extern ld ocos, osin;
   extern ld cos_ball, sin_ball;
   extern bool model_straight;
+  extern ld model_transition;
   extern ld top_z;
   
   // screen coordinates to logical coordinates: apply_orientation(x,y)
