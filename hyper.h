@@ -2469,8 +2469,8 @@ extern bool longclick;
 extern bool useRangedOrb;
 #endif
 
-void addaura(const hyperpoint& h, color_t col, int fd);
-void addauraspecial(const hyperpoint& h, color_t col, int dir);
+void addaura(hyperpoint h, color_t col, int fd);
+void addauraspecial(hyperpoint h, color_t col, int dir);
 
 void drawBug(const cellwalker& cw, color_t col);
 

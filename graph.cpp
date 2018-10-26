@@ -2220,6 +2220,8 @@ array<array<int,4>,AURA+1> aurac;
 bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
   if(sphere && mdAzimuthalEqui()) return true;
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && conformal::model_transition < 1) 
+    return true;
   return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
   }
   
@@ -2235,15 +2237,27 @@ void clearaura() {
   auramemo = 128 * 128 / vid.aurastr;
   }
 
-void addauraspecial(const hyperpoint& h, color_t col, int dir) {
+void apply_joukowsky_aura(hyperpoint& h) {
+  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && conformal::model_transition < 1;
+  if(joukowsky)  {
+    hyperpoint ret;
+    applymodel(h, ret);
+    h = ret;
+    }
+  }
+
+void addauraspecial(hyperpoint h, color_t col, int dir) {
   if(!haveaura()) return;
+  apply_joukowsky_aura(h);
   int r = int(2*AURA + dir + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
   auraspecials.emplace_back(r, col);
   }
 
-void addaura(const hyperpoint& h, color_t col, int fd) {
+void addaura(hyperpoint h, color_t col, int fd) {
   if(!haveaura()) return;
-  int r = int(2*AURA + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
+  apply_joukowsky_aura(h);
+
+  int r = int(2*AURA + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
   aurac[r][3] += auramemo << fd;
   col = darkened(col);
   aurac[r][0] += (col>>16)&255;
@@ -2346,13 +2360,33 @@ void drawaura() {
     }
   facs[10] = 10;
   cmul[1] = cmul[0];
+  
+  bool inversion = vid.alpha <= -1 || pmodel == mdJoukowsky;
+  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && conformal::model_transition < 1;
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
-    float rad0 = vid.alpha > -1 ? rad * facs[z] : rad / facs[z];
+    float rad0 = inversion ? rad / facs[z] : rad * facs[z];
     int rm = r % AURA;
-    cx[r][z][0] = rad0 * sin(rr);
-    cx[r][z][1] = rad0 * cos(rr) * vid.stretch;
+    ld c = cos(rr);
+    ld s = sin(rr);
+
+    if(joukowsky) {
+      ld c1 = c, s1 = s;
+      conformal::apply_orientation(c1, s1);
+
+      ld& mt = conformal::model_transition;
+      ld mt2 = 1 - mt;
+
+      ld m = sqrt(c1*c1 + s1*s1 / mt2 / mt2);
+      m *= 2;
+      if(inversion) rad0 /= m;
+      else rad0 *= m;
+      }
+
+    cx[r][z][0] = rad0 * c;
+    cx[r][z][1] = rad0 * s * vid.stretch;
+    
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
     }
