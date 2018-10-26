@@ -713,6 +713,10 @@ namespace conformal {
         pmodel = eModel(13);
       else if(uni == '%') 
         pmodel = eModel(14);
+      else if(uni == '^') 
+        pmodel = eModel(15);
+      else if(uni == '&') 
+        pmodel = eModel(16);
       else if(uni == '6')
         vid.alpha = 1, vid.scale = 1;
       else if(uni == 'z')
