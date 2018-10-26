@@ -1002,7 +1002,7 @@ struct videopar {
   
   // paramaters calculated from the above
   int xcenter, ycenter;
-  int radius;
+  ld radius;
   int scrsize;
   
   bool grid;

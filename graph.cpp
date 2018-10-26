@@ -5452,7 +5452,7 @@ void calcparam() {
 
   if(vid.scale > -1e-2 && vid.scale < 1e-2) vid.scale = 1;
   
-  int realradius = min(vid.xcenter, vid.ycenter);
+  ld realradius = min(vid.xcenter, vid.ycenter);
   
   vid.scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
