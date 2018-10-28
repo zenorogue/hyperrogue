@@ -538,11 +538,14 @@ void apply() {
   if(joukowsky_anim) {
     ld t = ticks / period;
     t = t - floor(t);
-    conformal::model_transition = t / 1.1;
-    vid.scale = (1 - conformal::model_transition) / 2.;
+    if(pmodel == mdBand) {
+      conformal::model_transition = t * 4 - 1;
+      }
+    else {
+      conformal::model_transition = t / 1.1;
+      vid.scale = (1 - conformal::model_transition) / 2.;
+      }
     calcparam();
-    printf("scale = %lf tr = %lf t = %lf\n", vid.scale, conformal::model_transition, t);
-    printf("radius = %lf\n", vid.radius);
     }
   }
 
