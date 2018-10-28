@@ -561,6 +561,8 @@ string animfile = "animation-%04d.png";
 bool record_animation() {
   for(int i=0; i<noframes; i++) {
     ticks = i * period / noframes;
+    apply();
+    conformal::configure();
     if(conformal::on) {
       conformal::phase = isize(conformal::v) * i * 1. / noframes;
       conformal::movetophase();
@@ -568,7 +570,6 @@ bool record_animation() {
     
     char buf[1000];
     snprintf(buf, 1000, animfile.c_str(), i);
-    apply();
     saveHighQualityShot(buf);
     rollback();
     }
