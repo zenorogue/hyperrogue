@@ -283,7 +283,7 @@ void create_model() {
 
 hyperpoint err = hpxyz(500,0,0);
 
-bool iserror(hyperpoint h) { return sqhypot2(h) > 10000 || isnan(h[0]) || isnan(h[1]) || isnan(h[2]) || isinf(h[0]) || isinf(h[1]) || isinf(h[2]); }
+bool iserror(hyperpoint h) { return sqhypot2(h) > 10000 || std::isnan(h[0]) || std::isnan(h[1]) || std::isnan(h[2]) || std::isinf(h[0]) || std::isinf(h[1]) || std::isinf(h[2]); }
 
 hyperpoint find_point(ld t) {
   exp_parser ep;
