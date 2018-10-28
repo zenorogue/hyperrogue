@@ -2709,7 +2709,7 @@ RogueViz:
 * fixed texts disappearing when scale is set to less than 0
 * number editor and command line parameters now accept expressions
 
-2018.09.24 00:16 Update 10.4x
+2018.09.24 00:16 Update 10.4w
 
 * improved understanding of paths and circumferences, in all hyperbolic geometries (except Archimedean)
 * * big numbers given by the Knights of Camelot and during the 'game over' screen are now computed precisely even for big radii, and also in more geometries
@@ -2724,3 +2724,23 @@ RogueViz:
 * creating [Baby] Tortoises in the map editor now creates 'local' ones at first, and random ones on another click
 * when you scroll into a mirror wall, the view is reflected
 * if the memory saving and cheat modes are on, translate animation will move the PC together with the view, thus saving memory
+
+2018.10.28 03:09 Update 10.4x
+
+* fixed the crash when starting the Halloween minigame, and also when starting Wild West
+
+Improvements to models/projections of hyperbolic geometry:
+* Added Joukowsky transformation and Joukowsky+inversion
+* added 'model orientation' parameter for 2D models which have an orientation
+* Joukowsky, Joukowsky+inversion, and band model now have 'transition' parameter, to make a transition from a more standard projection (with other interesting projections on the way)
+* hemisphere and hyperboloid models are now rendered more nicely (using the same algorithm as is used for the sphere in orthogonal projection)
+* fixed darkening of the other side
+
+Other bugfixes and improvements:
+* improved line width in SVG output
+* commandline option to record animation, new conformal parameters, and outer circle color (-ring), -btwidth, set translation
+* improved animation when scaling
+* color dialog no longer invisible on white background
+* rug no longer always renders in Poincare
+* graph drawing in RogueViz
+* some extra chars supported in the browser version; some other minor web improvements
