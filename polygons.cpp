@@ -63,6 +63,9 @@ static const int POLY_NIF_ERROR = (1<<17);
 // new system of side checking 
 static const int POLY_BADCENTERIN = (1<<18);
 
+// precise width calculation
+static const int POLY_PRECISE_WIDE = (1<<19);
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -582,18 +585,29 @@ void dqi_poly::gldraw() {
   }
 #endif
 
-double linewidthat(const hyperpoint& h, double linewidth, int flags) {
-  if((vid.antialias & AA_LINEWIDTH) && hyperbolic && !(flags & POLY_FORCEWIDE)) {
+double linewidthat(const hyperpoint& h) {
+  if(!(vid.antialias & AA_LINEWIDTH)) return 1;
+  else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1) {
     double dz = h[2];
-    if(dz < 1 || abs(dz-stereo::scrdist) < 1e-6) return vid.linewidth;
+    if(dz < 1 || abs(dz-stereo::scrdist) < 1e-6) return 1;
     else {
       double dx = sqrt(dz * dz - 1);
       double dfc = dx/(dz+1);
       dfc = 1 - dfc*dfc;
-      return max(dfc, linewidth) * vid.linewidth;
+      return dfc;
       }
     }
-  return vid.linewidth;
+  else if(svg::in) {
+    using namespace hyperpoint_vec;
+    hyperpoint h0 = h / zlevel(h);
+    transmatrix T = rgpushxto0(h0);
+    hyperpoint h1, h2, h3;
+    applymodel(h0, h1);
+    applymodel(T * xpush0(.01), h2);
+    applymodel(T * ypush(.01) * C0, h3);
+    return sqrt(hypot2(h2-h1) * hypot2(h3-h1) / .0001);
+    }
+  return 1;
   }
 
 // -radius to +3radius
@@ -784,6 +798,21 @@ void compute_side_by_area() {
     poly_flags ^= POLY_INVERSE;
   }
 
+ld get_width(dqi_poly* p) {
+  if(p->flags & POLY_PRECISE_WIDE) {
+    ld maxwidth = 0;
+    for(int i=0; i<p->cnt; i++) {
+      hyperpoint h1 = p->V * glhr::gltopoint((*p->tab)[p->offset+i]);
+      maxwidth = max(maxwidth, linewidthat(h1));
+      }
+    return maxwidth * p->linewidth;
+    }
+  else if(p->flags & POLY_FORCEWIDE)
+    return p->linewidth;
+  else
+    return linewidthat(tC0(p->V)) * p->linewidth;
+  }
+
 void dqi_poly::draw() {
 
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
@@ -898,7 +927,7 @@ void dqi_poly::draw() {
 
 #if CAP_GL
   if(vid.usingGL && using_perspective) {
-    glLineWidth(linewidthat(tC0(V), linewidth, flags));
+    glLineWidth(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();
     return;
@@ -1024,7 +1053,7 @@ void dqi_poly::draw() {
       if(tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
-      glLineWidth(linewidthat(tC0(V), linewidth, flags));
+      glLineWidth(get_width(this));
       dqi_poly npoly = (*this);
       npoly.V = Id;
       npoly.tab = &glcoords;
@@ -1052,7 +1081,7 @@ void dqi_poly::draw() {
       coords_to_poly();
       color_t col = color;
       if(poly_flags & POLY_INVERSE) col = 0;
-      svg::polygon(polyx, polyy, polyi, col, outline, linewidth);
+      svg::polygon(polyx, polyy, polyi, col, outline, get_width(this));
       continue;
       }
   #endif
@@ -1087,8 +1116,6 @@ void dqi_poly::draw() {
   
     if(stereo::active()) filledPolygonColorI(aux, polyxr, polyy, polyi, color);
     
-    // part(outline, 0) = part(outline, 0) * linewidthat(tC0(V), minwidth);
-
     ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
     if(stereo::active()) aapolylineColor(aux, polyxr, polyy, polyi, outline);
     
@@ -1121,7 +1148,7 @@ void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
   else prettypoint(h2);
   }
 
-void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev) {
+void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags) {
   prettylinepoints.clear();
   prettypoint(h1);
   prettylinesub(h1, h2, lev);
@@ -1133,7 +1160,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev) {
   ptd.linewidth = vid.linewidth;
   ptd.color = 0;
   ptd.outline = col;
-  ptd.flags = POLY_ISSIDE;
+  ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE | flags;
   ptd.tinf = NULL;
   ptd.intester = C0;
   ptd.draw();
@@ -1152,7 +1179,7 @@ void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, i
   ptd.linewidth = vid.linewidth;
   ptd.color = fillcol;
   ptd.outline = linecol;
-  ptd.flags = POLY_ISSIDE;
+  ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE;
   ptd.tinf = NULL;
   ptd.intester = C0;
   ptd.draw();
@@ -1168,7 +1195,7 @@ void queuereset(eModel m, PPR prio) {
 
 void dqi_line::draw() {
   dynamicval<ld> d(vid.linewidth, width); 
-  prettyline(H1, H2, color, prf);
+  prettyline(H1, H2, color, prf, 0);
   }
 
 void dqi_string::draw() {
@@ -2639,7 +2666,7 @@ dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, c
   ptd.color = fillcol;
   ptd.outline = linecol;
   ptd.linewidth = vid.linewidth;
-  ptd.flags = POLY_ISSIDE;
+  ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE;
   ptd.tinf = NULL;
   ptd.intester = C0;
   return ptd;
@@ -2674,7 +2701,7 @@ dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int
   ptd.H1 = H1;
   ptd.H2 = H2;
   ptd.prf = prf;
-  ptd.width = (linewidthat(H1, vid.linewidth, 0) + linewidthat(H2, vid.linewidth, 0)) / 2;
+  ptd.width = vid.linewidth;
   ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
   
   return ptd;

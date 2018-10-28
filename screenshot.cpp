@@ -140,26 +140,7 @@ namespace svg {
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
-    double dfc;
-    if(!pmodel && hyperbolic) {
-      int avgx = 0, avgy = 0;
-      for(int i=0; i<polyi; i++) 
-        avgx += polyx[i],
-        avgy += polyy[i];
-      avgx /= polyi;
-      avgy /= polyi;
-      dfc = pow(avgx - vid.xcenter, 2) + 
-        pow((avgy - vid.ycenter) / vid.stretch, 2);
-      dfc /= vid.radius;
-      dfc /= vid.radius;
-      // 0 = center, 1 = edge
-      dfc = 1 - dfc;
-      
-      if(dfc < 0) dfc = 1;
-      dfc = max<double>(dfc, 1) * linewidth;
-      }
-    else dfc = .8 * linewidth;
-    
+
     startstring();
     for(int i=0; i<polyi; i++) {
       if(i == 0)
@@ -169,7 +150,7 @@ namespace svg {
       fprintf(f, "%s %s", coord(polyx[i]), coord(polyy[i]));
       }
     
-    fprintf(f, "\" %s/>", stylestr(col, outline, (hyperbolic ? vid.radius : vid.scrsize) *dfc/256));
+    fprintf(f, "\" %s/>", stylestr(col, outline, (hyperbolic ? vid.radius : vid.scrsize) * linewidth/256));
     stopstring();
     fprintf(f, "\n");
     }

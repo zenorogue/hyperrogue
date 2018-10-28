@@ -646,7 +646,7 @@ namespace hr { namespace netgen {
             nei[i][e] >= 0 ? 0x808080 : 
             0xC0C0C0;
     
-          prettyline(hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t), (col << 8) + 0xFF, 3);
+          prettyline(hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t), (col << 8) + 0xFF, 3, 0);
           }
         }
       }
