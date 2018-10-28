@@ -2373,7 +2373,10 @@ void drawaura() {
 
     if(joukowsky) {
       ld c1 = c, s1 = s;
-      conformal::apply_orientation(c1, s1);
+      if(inversion)
+        conformal::apply_orientation(s1, c1);
+      else        
+        conformal::apply_orientation(c1, s1);
 
       ld& mt = conformal::model_transition;
       ld mt2 = 1 - mt;
