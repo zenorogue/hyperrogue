@@ -851,6 +851,12 @@ int readArgs() {
   else if(argis("-animj")) {
     shift(); joukowsky_anim = true;
     }
+  else if(argis("-animrec")) {
+    PHASE(3);
+    shift(); noframes = argi();
+    shift(); animfile = args();
+    record_animation();
+    }
 
   else return 1;
   return 0;
