@@ -772,6 +772,7 @@ void showStartMenu() {
         stop_game();
         specialland = laHalloween;
         set_geometry(gSphere);
+        start_game();
         vid.alpha = 999;
         vid.scale = 998;
         }
