@@ -3152,13 +3152,9 @@ bool makeEmpty(cell *c) {
   c->item = itNone;
   
   if(c->land == laWildWest) {
-    for(int i=0; i<c->type; i++) {
-      cell *c2 = c->move(i);
-      if(c2) for(int j=0; j<c->type; j++) {
-        cell *c3 = c2->move(j);
-        if(c3) c3->wall = waNone;
-        }
-      }
+    forCellEx(c2, c)
+    forCellEx(c3, c2)
+      c3->wall = waNone;
     }
   
   return true;
