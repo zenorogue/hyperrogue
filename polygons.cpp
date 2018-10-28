@@ -1383,7 +1383,7 @@ void drawqueue() {
   if(two_sided_model()) {
   
     if(pmodel == mdHyperboloid && hyperbolic) {
-      dynamicval dv(pmodel, mdHyperboloidFlat);
+      dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
       for(auto& ptd: ptds) 
         if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
           ptd->draw();
