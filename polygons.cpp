@@ -585,6 +585,15 @@ void dqi_poly::gldraw() {
   }
 #endif
 
+double scale_at(const transmatrix& T) {
+  using namespace hyperpoint_vec;
+  hyperpoint h1, h2, h3;
+  applymodel(tC0(T), h1);
+  applymodel(T * xpush0(.01), h2);
+  applymodel(T * ypush(.01) * C0, h3);
+  return sqrt(hypot2(h2-h1) * hypot2(h3-h1) / .0001);
+  }
+
 double linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1) {
@@ -601,11 +610,7 @@ double linewidthat(const hyperpoint& h) {
     using namespace hyperpoint_vec;
     hyperpoint h0 = h / zlevel(h);
     transmatrix T = rgpushxto0(h0);
-    hyperpoint h1, h2, h3;
-    applymodel(h0, h1);
-    applymodel(T * xpush0(.01), h2);
-    applymodel(T * ypush(.01) * C0, h3);
-    return sqrt(hypot2(h2-h1) * hypot2(h3-h1) / .0001);
+    return scale_at(T);
     }
   return 1;
   }
