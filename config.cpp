@@ -560,6 +560,50 @@ void loadNewConfig(FILE *f) {
   allconfigs.clear();
   }
 
+void loadConfig() {
+ 
+  DEBB(DF_INIT, (debugfile,"load config\n"));
+  vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
+  FILE *f = fopen(conffile, "rt");
+  if(f) {
+    int err;
+    int fs;
+    err=fscanf(f, "%d%d%d%d", &vid.xres, &vid.yres, &fs, &vid.fsize);
+    if(!err) 
+      loadNewConfig(f);
+    else {
+      vid.full = fs;
+      loadOldConfig(f);
+      }
+  
+    fclose(f);
+    DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
+    }
+
+  polygonal::solve();
+  precalc();
+  }
+#endif
+
+void showAllConfig() {
+  dialog::addBreak(50);
+  dialog::addBack();
+#if CAP_CONFIG
+  dialog::addItem(XLAT("save the current config"), 's');
+  if(getcstat == 's')
+    mouseovers = XLAT("Config file: %1", conffile);
+#endif
+  }
+
+void handleAllConfig(int sym, int uni) {
+  if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
+
+  else if(uni == ' ' || sym == SDLK_ESCAPE) popScreen();
+#if CAP_CONFIG
+  else if(uni == 's') saveConfig();
+#endif  
+  }
+
 void edit_sightrange() {
   if(vid.use_smart_range == 0) {
     dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
@@ -613,50 +657,6 @@ void menuitem_sightrange(char c) {
   dialog::add_action(edit_sightrange);
   }
   
-void loadConfig() {
- 
-  DEBB(DF_INIT, (debugfile,"load config\n"));
-  vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
-  FILE *f = fopen(conffile, "rt");
-  if(f) {
-    int err;
-    int fs;
-    err=fscanf(f, "%d%d%d%d", &vid.xres, &vid.yres, &fs, &vid.fsize);
-    if(!err) 
-      loadNewConfig(f);
-    else {
-      vid.full = fs;
-      loadOldConfig(f);
-      }
-  
-    fclose(f);
-    DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
-    }
-
-  polygonal::solve();
-  precalc();
-  }
-#endif
-
-void showAllConfig() {
-  dialog::addBreak(50);
-  dialog::addBack();
-#if CAP_CONFIG
-  dialog::addItem(XLAT("save the current config"), 's');
-  if(getcstat == 's')
-    mouseovers = XLAT("Config file: %1", conffile);
-#endif
-  }
-
-void handleAllConfig(int sym, int uni) {
-  if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
-
-  else if(uni == ' ' || sym == SDLK_ESCAPE) popScreen();
-#if CAP_CONFIG
-  else if(uni == 's') saveConfig();
-#endif  
-  }
-
 void showGraphConfig() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
