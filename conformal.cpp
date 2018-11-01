@@ -691,7 +691,9 @@ namespace conformal {
     dialog::addItem(XLAT("hypersian rug mode"), 'u');
 #endif
     dialog::addBack();
+
     dialog::display();
+    mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/models.php");
     
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
