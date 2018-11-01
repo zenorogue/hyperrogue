@@ -3697,7 +3697,7 @@ S("render now (length: %1)", "рисуется сейчас (длина: %1)")
 S("Enable cheat mode or GAME OVER to use this", "Доступно только в конце игры и в режиме обманщика")
  
 // remember to note it's in English
-S("see http://www.roguetemple.com/z/hyper/conformal.php", "смотри http://www.roguetemple.com/z/hyper/conformal.php (по-английски))")
+S("see http://www.roguetemple.com/z/hyper/models.php", "смотри http://www.roguetemple.com/z/hyper/models.php (по-английски))")
  
 // Yendorian Forest
 // ----------------

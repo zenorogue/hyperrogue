@@ -560,19 +560,19 @@ void viewdist_configure_dialog() {
   cmode |= sm::SIDE | sm::MAYDARK | sm::EXPANSION;
   gamescreen(0);
   
-  dialog::addSelItem("which distance", dfnames[distance_from], 'c');
+  dialog::addSelItem(XLAT("which distance"), XLAT(dfnames[distance_from]), 'c');
   dialog::add_action([] () { distance_from = mod_allowed() ? eDistanceFrom((distance_from + 1) % 3) : eDistanceFrom(2 - distance_from); });
              
-  dialog::addSelItem("number codes", ncnames[number_coding], 'n');
+  dialog::addSelItem(XLAT("number codes"), XLAT(ncnames[number_coding]), 'n');
   dialog::add_action([] () { number_coding = eNumberCoding((number_coding + 1) % (mod_allowed() ? 4 : 2)); });
 
-  dialog::addBoolItem("color codes", use_color_codes, 'u');
+  dialog::addBoolItem(XLAT("color codes"), use_color_codes, 'u');
   dialog::add_action([] () { use_color_codes = !use_color_codes; });
 
-  dialog::addSelItem("display distances from", its(first_distance), 'd');
+  dialog::addSelItem(XLAT("display distances from"), its(first_distance), 'd');
   dialog::add_action([] () { 
     scrolling_distances = false;
-    dialog::editNumber(first_distance, 0, 3000, 1, 0, "display distances from", "");
+    dialog::editNumber(first_distance, 0, 3000, 1, 0, XLAT("display distances from"), "");
     });
 
   int id = 0;
@@ -587,20 +587,22 @@ void viewdist_configure_dialog() {
       }
     }
   
-  if(!mod_allowed()) 
-    dialog::addInfo(XLAT("note: enable the cheat mode for additional options"));
+  if(!mod_allowed()) {
+    dialog::addItem(XLAT("enable the cheat mode for additional options"), 'C');
+    dialog::add_action(enable_cheat);
+    }
   else 
     dialog::addBreak(100);
 
   dialog::addBreak(100);
 
-  dialog::addItem("disable", 'x');
+  dialog::addItem(XLAT("disable"), 'x');
   dialog::add_action([] () { viewdists = false; popScreen(); });
   
-  dialog::addItem("move the player", 'm');
+  dialog::addItem(XLAT("move the player"), 'm');
   dialog::add_action([] () { show_distance_lists = false; popScreenAll(); });
   
-  dialog::addItem(distance_from ? "show number of descendants by distance" : "show number of cells by distance", 'l');
+  dialog::addItem(XLAT(distance_from ? "show number of descendants by distance" : "show number of cells by distance"), 'l');
   dialog::add_action([] () { show_distance_lists = true; popScreenAll(); });
 
   dialog::display();
@@ -703,8 +705,8 @@ void expansion_analyzer::view_distances_dialog() {
       }
     }
   
-  dialog::addItem("scroll", 'S');
-  dialog::addItem("configure", 'C');
+  dialog::addItem(XLAT("scroll"), 'S');
+  dialog::addItem(XLAT("configure"), 'C');
   dialog::display();
   }
 

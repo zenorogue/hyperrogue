@@ -3557,7 +3557,7 @@ S("render now (length: %1)", "rysuj teraz (długość: %1)")
 S("Enable cheat mode or GAME OVER to use this", "Dostępne tylko po końcu gry albo w trybie oszusta")
 
 // remember to note it's in English
-S("see http://www.roguetemple.com/z/hyper/conformal.php", "patrz http://www.roguetemple.com/z/hyper/conformal.php (po angielsku)")
+S("see http://www.roguetemple.com/z/hyper/models.php", "patrz http://www.roguetemple.com/z/hyper/models.php (po angielsku)")
 
 // Yendorian Forest
 // ----------------
@@ -6968,7 +6968,7 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 // 10.4p
 
 // in the sight range dialog
-S("note: enable the cheat mode for additional options", "uwaga: włącz tryb oszusta, by tu były dodatkowe opcje")
+S("enable the cheat mode for additional options", "włącz tryb oszusta, by tu były dodatkowe opcje")
 
 // steal a baby tortoise with Orb of Space
 S("No, that would be heartless!", "Nie, to by było bez serca!")
@@ -7154,3 +7154,68 @@ S("full symmetry", "pełna symetria")
 S("alternate coloring", "kolorowanie alternatywne")
 S("display full floors", "pokazuj pełne podłogi")
 S("remove complete classification", "usuń pełną klasyfikację")
+
+// animations
+S("animations/history", "animacje/historia")
+S("animations", "animacje")
+S("period", "okres")
+S("game animation period", "okres animacji gry")
+S("no movement animation", "brak animacji ruchu")
+S("translation", "przesunięcie")
+S("parabolic", "izometria paraboliczna")
+S("circle", "ruch po kole")
+S("animate parameter change", "animacja zmiany parametrów")
+S("choose parameters to animate", "wybierz parametry do animacji")
+S("frames to record", "liczba kratek do nagrania")
+S("record to a file", "nagraj do pliku")
+
+// improved worldsize demo dialog
+S("which distance", "która odległość")
+S("start", "start")
+S("land", "kraina")
+
+S("number codes", "liczby")
+S("distance", "odległość")
+S("type", "typ")
+S("debug", "debug")
+
+S("color codes", "kolory")
+S("display distances from", "pokazuj odległości od")
+S("disable", "wyłącz")
+S("move the player", "ruch gracza")
+S("show number of cells by distance", "pokaż liczbę pól w każdej odległości")
+S("show number of descendants by distance", "pokaż liczbę potomków w każdej odległości")
+
+S("triangle grid: tree edges", "siatka trójkątna: krawędzie drzewa")
+S("triangle grid: other edges", "siatka trójkątna: inne krawędzie")
+S("dual grid", "siatka dualna")
+S("horocycles", "horocykle")
+S("configure", "konfiguracja")
+S("scroll", "przewijanie")
+
+// improved sight range dialog
+S("minimum visible cell in pixels", "najmniejszy rozmiar rysowanego pola w pikselach")
+S("draw range based on distance", "zakres rysowania na podstawie odległości")
+S("draw based on size in the projection (no generation)",
+  "rysuj na podstawie rozmiaru w projekcji (bez generacji)")
+S("draw based on size in the projection (generation)",
+  "rysuj na podstawie rozmiaru w projekcji (z generacją)")
+S("cells drawn", "liczba narysowanych pól")
+S("limit on cells drawn", "ograniczenie na liczbę narysowanych pól")
+S("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.",
+  "To ograniczenie istnieje by uchronić silnik przed zawieszeniem się w przypadku, gdyby zgodnie z obecnymi opcjami było za dużo pól do narysowania.")
+S("generation range bonus", "bonus do zasięgu generacji")
+S("game range bonus", "bonus do zasięgu gry")
+
+// new options for models
+
+S("Joukowsky transform", "odwzorowanie Żukowskiego")
+S("Joukowsky+inversion", "Żukowski + inwersja")
+
+S("maximum z coordinate to show", "największa rysowana wartość z")
+
+S("model transition", "przejście między modelami")
+S("You can change this parameter for a transition from another model to this one.",
+  "Możesz zmienić ten parametr, by obejrzeć przejście z innego modelu do tego.")
+
+S("model orientation", "orientacja modelu")

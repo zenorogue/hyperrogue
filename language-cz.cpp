@@ -3642,7 +3642,7 @@ S("render now (length: %1)", "renderovat hned (délka: %1)")
 S("Enable cheat mode or GAME OVER to use this", "Dostupné pouze v cheat módu nebo po skončení hry")
 
 // remember to note it's in English
-S("see http://www.roguetemple.com/z/hyper/conformal.php", "viz http://www.roguetemple.com/z/hyper/conformal.php (anglicky)")
+S("see http://www.roguetemple.com/z/hyper/models.php", "viz http://www.roguetemple.com/z/hyper/models.php (anglicky)")
 
 // Yendorian Forest
 // ----------------
@@ -7212,7 +7212,7 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 // 10.4p
 
 // in the sight range dialog
-S("note: enable the cheat mode for additional options", "poznámka: pro další možnosti zapni cheat mód")
+S("enable the cheat mode for additional options", "pro další možnosti zapni cheat mód")
 
 // steal a baby tortoise with Orb of Space
 S("No, that would be heartless!", "Ne, to by bylo bezcitné!")
@@ -7399,3 +7399,70 @@ S("full symmetry", "úplná symetrie")
 S("alternate coloring", "alternativní zbarvení")
 S("display full floors", "zobrazuj úplné podlahy")
 S("remove complete classification", "odstraň úplnou klasifikaci")
+
+// 10.4y
+
+// animations
+S("animations/history", "animace/historie")
+S("animations", "animace")
+S("period", "perioda")
+S("game animation period", "perioda herní animace")
+S("no movement animation", "bez animace pohybu")
+S("translation", "posunutí")
+S("parabolic", "parabolická izometrie")
+S("circle", "pohyb po kruhu")
+S("animate parameter change", "animace změny parametrů")
+S("choose parameters to animate", "vyber si parametry pro animaci")
+S("frames to record", "snímky pro nahrání")
+S("record to a file", "nahraj do souboru")
+
+// improved worldsize demo dialog
+S("which distance", "která vzdálenost")
+S("start", "start")
+S("land", "kraj")
+
+S("number codes", "číselné kódy")
+S("distance", "vzdálenost")
+S("type", "typ")
+S("debug", "debug")
+
+S("color codes", "barevné kódy")
+S("display distances from", "zobrazuj vzdálenosti od")
+S("disable", "vyřaď")
+S("move the player", "pohyb hráčem")
+S("show number of cells by distance", "ukaž počet buněk podle vzdálenosti")
+S("show number of descendants by distance", "ukaž počet potomků podle vzdálenosti")
+
+S("triangle grid: tree edges", "trojúhelníková mřížka: stromové hrany")
+S("triangle grid: other edges", "trojúhelníková mřížka: jiné hrany")
+S("dual grid", "duální síť")
+S("horocycles", "horocykly")
+S("configure", "konfigurace")
+S("scroll", "posouvání")
+
+// improved sight range dialog
+S("minimum visible cell in pixels", "nejmenší viditelné políčko v pixelech")
+S("draw range based on distance", "rozsah vykreslování založený na vzdálenosti")
+S("draw based on size in the projection (no generation)",
+  "vykreslování na základě velikosti v projekci (bez generování)")
+S("draw based on size in the projection (generation)",
+  "vykreslování na základě velikosti v projekci (s generováním)")
+S("cells drawn", "počet vykreslených políček")
+S("limit on cells drawn", "hranice vykreslených políček")
+S("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.",
+  "Tato hranice existuje proto, aby hra nezamrzla, když by aktuální možnosti požadovaly vykreslení příliš velkého počtu políček.")
+S("generation range bonus", "bonus generačního rozsahu")
+S("game range bonus", "bonus herního rozsahu")
+
+// new options for models
+
+S("Joukowsky transform", "Žukovského transformace")
+S("Joukowsky+inversion", "Žukovský + inverze")
+
+S("maximum z coordinate to show", "maximální zobrazená souřadnice z")
+
+S("model transition", "přechod mezi modely")
+S("You can change this parameter for a transition from another model to this one.",
+  "Tento parametr je možné změnit pro přechod z jiného modelu do tohoto.")
+
+S("model orientation", "orientace modelu")

@@ -3408,7 +3408,7 @@ S("spiral on rendering", "Spirale beim Rendering")
 S("render now (length: %1)", "rendere jetzt (Länge: %1)")
 S("Enable cheat mode or GAME OVER to use this", "Aktivere den Cheat-Modus oder GAME OVER um diese Funktion zu nutzen")
 
-S("see http://www.roguetemple.com/z/hyper/conformal.php", "siehe http://www.roguetemple.com/z/hyper/conformal.php (in Englisch)")
+S("see http://www.roguetemple.com/z/hyper/models.php", "siehe http://www.roguetemple.com/z/hyper/models.php (in Englisch)")
 
 
 // Yendorian Forest

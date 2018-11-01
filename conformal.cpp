@@ -582,7 +582,7 @@ namespace conformal {
     "azimuthal equidistant", "azimuthal equi-area", 
     "ball model", "Minkowski hyperboloid", "hemisphere",
     "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant",
-    "fisheye", "Joukovsky", "Joukovsky/inversion"
+    "fisheye", "Joukowsky transform", "Joukowsky+inversion"
     };
   
   string get_model_name(eModel pm) {
@@ -668,7 +668,7 @@ namespace conformal {
       }    
     
     if(pmodel == mdHyperboloid)
-      dialog::addSelItem(XLAT("topz"), fts3(top_z), 'l');
+      dialog::addSelItem(XLAT("maximum z coordinate to show"), fts3(top_z), 'l');
     
     if(model_has_transition())
       dialog::addSelItem(XLAT("model transition"), fts3(model_transition), 't');
@@ -732,9 +732,11 @@ namespace conformal {
       else if(uni == 'l' && model_has_orientation())
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
       else if(uni == 'l' && pmodel == mdHyperboloid) 
-        dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("topz"), "");
+        dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
       else if(uni == 't')
-        dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), "");
+        dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
+          "You can change this parameter for a transition from another model to this one."
+          );
       else if(uni == 'b' && pmodel == mdHalfplane)
         dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
       else if(uni == 's') {

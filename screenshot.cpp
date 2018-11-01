@@ -635,7 +635,7 @@ void show() {
         };
       });
     }
-  dialog::addBoolItem(XLAT("no movement"), ma == maNone, '0');
+  dialog::addBoolItem(XLAT("no movement animation"), ma == maNone, '0');
   dialog::add_action([] () { ma = maNone; });
   dialog::addBoolItem(XLAT("translation"), ma == maTranslation, '1');
   dialog::add_action([] () { ma = maTranslation; });
