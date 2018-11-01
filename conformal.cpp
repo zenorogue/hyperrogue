@@ -95,7 +95,7 @@ namespace polygonal {
   pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
 
   void drawBoundary(int color) {
-    queuereset(mdDisk, PPR::CIRCLE);
+    queuereset(mdUnchanged, PPR::CIRCLE);
 
     ld C, S;
     auto& ho = conformal::model_orientation;
