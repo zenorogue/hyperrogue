@@ -759,13 +759,13 @@ slide default_slides[] = {
 #endif
       }
     },
-  {"Conformal square model", 46, LEGAL_HYPERBOLIC,
+/*{"Conformal square model", 46, LEGAL_HYPERBOLIC,
     "The world can be mapped conformally to a square too.",
     [] (presmode mode) {
       if(mode == 1) pmodel = mdPolygonal, polygonal::solve();
       if(mode == 3) pmodel = mdDisk;
       }
-    },
+    }, */
 #if !ISWEB
   {"Shoot'em up mode", 52, LEGAL_NONE | USE_SLIDE_NAME,
     "In the shoot'em up mode, space and time is continuous. "
