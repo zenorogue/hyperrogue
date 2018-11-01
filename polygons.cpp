@@ -954,7 +954,7 @@ void dqi_poly::draw() {
   last_infront = false;
   
   addpoly(V, *tab, offset, cnt);
-  if(!(sphere && vid.alpha < .9)) for(int i=1; i<isize(glcoords); i++) {
+  if(!(sphere && vid.alpha < .9)) if(pmodel != mdJoukowsky) for(int i=1; i<isize(glcoords); i++) {
     ld dx = glcoords[i][0] - glcoords[i-1][0];
     ld dy = glcoords[i][1] - glcoords[i-1][1];
     if(dx > vid.xres * 2 || dy > vid.yres * 2) return;
