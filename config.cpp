@@ -624,7 +624,7 @@ void edit_sightrange() {
       dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'n');
       dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
       }
-    if(allowChangeRange()) {
+    if(allowChangeRange() && allowIncreasedSight()) {
       dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'g');
       dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
       }
