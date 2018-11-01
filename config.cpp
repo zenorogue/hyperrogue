@@ -605,7 +605,7 @@ void edit_sightrange() {
     };
   }
 
-void menuitem_sightrange(char c = 'r') {
+void menuitem_sightrange(char c) {
   if(vid.use_smart_range)
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(vid.smart_range_detail), c);
   else

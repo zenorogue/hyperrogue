@@ -4296,5 +4296,7 @@ namespace brownian {
 void enable_cheat();
 
 extern int cells_drawn;
+
+void menuitem_sightrange(char c = 'r');
 }
 
