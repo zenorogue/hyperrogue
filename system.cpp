@@ -293,7 +293,11 @@ void initgame() {
   if(quotient || sphere)
     for(cell *c: currentmap->allcells()) setdist(c, 8, NULL);
 
-  if(!cheater) gamerange_bonus = genrange_bonus = 0;
+  if(!cheater) {
+    gamerange_bonus = genrange_bonus = 0;
+    if(vid.use_smart_range == 2) vid.use_smart_range = 1;
+    }
+  if(!allowIncreasedSight()) vid.use_smart_range = 0;
   }
 
 bool havesave = true;

@@ -626,9 +626,34 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
+bool in_smart_range(const transmatrix& T) {
+  hyperpoint h1, h2, h3;
+  applymodel(tC0(T), h1);
+  ld x = vid.xcenter + vid.radius * h1[0];
+  ld y = vid.ycenter + vid.radius * h1[1] * vid.stretch;
+  if(x > vid.xres * 2) return false;
+  if(x < -vid.xres) return false;
+  if(y > vid.yres * 2) return false;
+  if(y < -vid.yres) return false;
+  ld epsilon = 0.01;
+  applymodel(T * xpush0(epsilon), h2);
+  ld x1 = vid.radius * abs(h2[0] - h1[0]) / epsilon;
+  ld y1 = vid.radius * abs(h2[1] - h1[1]) * vid.stretch / epsilon;
+  applymodel(T * ypush(epsilon) * C0, h3);
+  ld x2 = vid.radius * abs(h3[0] - h1[0]) / epsilon;
+  ld y2 = vid.radius * abs(h3[1] - h1[1]) * vid.stretch / epsilon;
+  ld scale = sqrt(hypot(x1, y1) * hypot(x2, y2)) * scalefactor * hcrossf7;
+  return 
+    scale > vid.smart_range_detail && 
+    x - 2 * max(x1, x2) < vid.xres && 
+    x + 2 * max(x1, x2) > 0 &&
+    y - 2 * max(y1, y2) < vid.yres &&
+    y + 2 * max(y1, y2) > 0;
+  }
+
 // in hyperbolic quotient geometries, relying on pathdist is not sufficient
 bool in_qrange(const transmatrix& V) {
-  if(!quotient || !hyperbolic) return true;
+  if(!quotient || !hyperbolic || vid.use_smart_range) return true;
   return V[2][2] < cosh(crossf * get_sightrange_ambush());
   }
 
@@ -688,7 +713,7 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   }
 
-void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
+void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
 
   // calc_relative_matrix(cwt.c, hs.at);
     
@@ -699,6 +724,14 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
   
   bool draw = c->pathdist < PINFD;
   
+  if(cells_drawn > vid.cells_drawn_limit || reclev >= 100 || std::isinf(V[2][2]) || std::isnan(V[2][2]))
+    draw = false;
+  else if(vid.use_smart_range) {
+    draw = reclev < 2 ? true : in_smart_range(V);
+    if(draw && vid.use_smart_range == 2) 
+      setdist(c, 7, NULL);
+    }
+    
   if(GOLDBERG) {
     gp::drawrec(c, actualV(hs, V1));
     }
@@ -734,7 +767,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;
-    drawrec(hs2, s2, V * heptmove[d]);
+    drawrec(hs2, s2, V * heptmove[d], reclev+1);
     }
   
   }
@@ -838,19 +871,31 @@ void drawEuclidean() {
     // Mat[2][0] = x*x/10;
     // Mat[2][1] = y*y/10;
     // Mat = Mat * xpush(x-30) * ypush(y-30);
-
-    int cx, cy, shift;
-    getcoord0(tC0(Mat), cx, cy, shift);
-    if(cx >= 0 && cy >= 0 && cx < vid.xres && cy < vid.yres) {
-      if(dx < mindx) mindx = dx;
-      if(dy < mindy) mindy = dy;
-      if(dx > maxdx) maxdx = dx;
-      if(dy > maxdy) maxdy = dy;
-      }
-    if(cx >= -cellrad && cy >= -cellrad && cx < vid.xres+cellrad && cy < vid.yres+cellrad)
-      if(dodrawcell(cw.at)) {
-        drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
+    
+    if(vid.use_smart_range) {
+      if(in_smart_range(Mat)) {
+        if(dx < mindx) mindx = dx;
+        if(dy < mindy) mindy = dy;
+        if(dx > maxdx) maxdx = dx;
+        if(dy > maxdy) maxdy = dy;
+        if(dodrawcell(cw.at))
+          drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
         }
+      }
+    else {
+      int cx, cy, shift;
+      getcoord0(tC0(Mat), cx, cy, shift);
+      if(cx >= 0 && cy >= 0 && cx < vid.xres && cy < vid.yres) {
+        if(dx < mindx) mindx = dx;
+        if(dy < mindy) mindy = dy;
+        if(dx > maxdx) maxdx = dx;
+        if(dy > maxdy) maxdy = dy;
+        }
+      if(cx >= -cellrad && cy >= -cellrad && cx < vid.xres+cellrad && cy < vid.yres+cellrad)
+        if(dodrawcell(cw.at)) {
+          drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
+          }
+      }
     }
   }
 
@@ -996,6 +1041,8 @@ void panning(hyperpoint hf, hyperpoint ht) {
     rgpushxto0(hf) * rgpushxto0(gpushxto0(hf) * ht) * gpushxto0(hf) * View;
   playermoved = false;
   }
+
+int cells_drawn;
 
 void fullcenter() {
   if(playerfound && false) centerpc(INF);

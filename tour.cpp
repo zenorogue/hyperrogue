@@ -588,11 +588,12 @@ slide default_slides[] = {
     "The next slide shows another model, called the Poincaré upper half-plane model. In this model, "
     "horocycles centered at one specific ideal point are drawn as straight lines.",
     [] (presmode mode) {
+      static int smart;
       if(mode == 1) 
-        pmodel = mdHalfplane;
+        pmodel = mdHalfplane, smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 2) 
         conformal::rotation = cwt.at->land == laDungeon ? 0 : 2;
-      if(mode == 3) pmodel = mdDisk, conformal::rotation = 0;
+      if(mode == 3) pmodel = mdDisk, conformal::rotation = 0, vid.use_smart_range = smart;
       }
     },
   {"Curvature", 29, LEGAL_ANY,
@@ -739,13 +740,16 @@ slide default_slides[] = {
     "If you want, press '5' to see it rendered as a spiral, although it takes lots of time and "
     "memory.",
     [] (presmode mode) {
-      if(mode == 1) pmodel = mdBand, conformal::create(), conformal::rotation = 0;
+      static int smart;
+      if(mode == 1) pmodel = mdBand, conformal::create(), conformal::rotation = 0,
+        smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 3) {
         conformal::clear(), pmodel = mdDisk;
         resetview();
         drawthemap();
         centerpc(INF);
         conformal::includeHistory = false;
+        vid.use_smart_range = smart;
         }
 #if CAP_SDL
       slidecommand = "render spiral";

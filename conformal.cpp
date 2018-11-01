@@ -682,6 +682,8 @@ namespace conformal {
       }
 
     dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');
+
+    menuitem_sightrange('R');
       
     dialog::addBreak(100);
     dialog::addItem(XLAT("history mode"), 'a');

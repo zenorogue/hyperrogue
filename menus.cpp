@@ -406,6 +406,28 @@ void showDisplayMode() {
     };
   }
 
+void enable_cheat() {
+  if(tactic::on && gold()) {
+    addMessage(XLAT("Not available in the pure tactics mode!"));
+    }
+  else if(daily::on) {
+    addMessage(XLAT("Not available in the daily challenge!"));
+    }
+  else if(!cheater) {
+    cheater++;
+    addMessage(XLAT("You activate your demonic powers!"));
+#if ISMOBILE==0
+    addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
+#endif
+    popScreen();
+    }
+  else {
+    popScreen();
+    firstland = princess::challenge ? laPalace : laIce;
+    restart_game();
+    }
+  }
+  
 // -- game modes -- 
 
 void switchHardcore() {
@@ -484,27 +506,8 @@ void showChangeMode() {
       pushScreen(daily::showMenu);
     #endif
     
-    else if(uni == 'c') {
-      if(tactic::on && gold()) {
-        addMessage(XLAT("Not available in the pure tactics mode!"));
-        }
-      else if(daily::on) {
-        addMessage(XLAT("Not available in the daily challenge!"));
-        }
-      else if(!cheater) {
-        cheater++;
-        addMessage(XLAT("You activate your demonic powers!"));
-  #if ISMOBILE==0
-        addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
-  #endif
-        popScreen();
-        }
-      else {
-        popScreen();
-        firstland = princess::challenge ? laPalace : laIce;
-        restart_game();
-        }
-      }
+    else if(uni == 'c') 
+      enable_cheat();
     
     else if(xuni == 'e') 
       runGeometryExperiments();

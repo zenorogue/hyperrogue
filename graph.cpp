@@ -3353,7 +3353,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
 
 bool dodrawcell(cell *c) {
   // do not display out of range cells, unless on torus
-  if(c->pathdist == PINFD && geometry != gTorus)
+  if(c->pathdist == PINFD && geometry != gTorus && vid.use_smart_range == 0)
     return false;
   // do not display not fully generated cells, unless a cheater
   if(c->mpdist > 7 && !cheater && !autocheat) return false;
@@ -3535,6 +3535,8 @@ int colorhash(color_t i) {
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
+  cells_drawn++;
+
 #if CAP_TEXTURE
   if(texture::saving) {
     texture::config.apply(c, V, 0xFFFFFFFF);
@@ -3564,7 +3566,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(callhandlers(false, hooks_drawcell, c, V)) return;
   
   ld dist0 = hdist0(tC0(V)) - 1e-6;
-  if(dist0 < geom3::highdetail) detaillevel = 2;
+  if(vid.use_smart_range) detaillevel = 2;
+  else if(dist0 < geom3::highdetail) detaillevel = 2;
   else if(dist0 < geom3::middetail) detaillevel = 1;
   else detaillevel = 0;
 
@@ -5245,6 +5248,7 @@ void drawthemap() {
   callhooks(hooks_drawmap);
 
   frameid++;
+  cells_drawn = 0;
   
   wavephase = (-(ticks / 100)) & 7;
 
@@ -5316,7 +5320,7 @@ void drawthemap() {
   else if(archimedean)
     arcm::draw();
   else
-    drawrec(viewctr, hsOrigin, cview());
+    drawrec(viewctr, hsOrigin, cview(), 0);
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();

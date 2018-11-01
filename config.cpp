@@ -290,6 +290,10 @@ void initConfig() {
   addsaver(texture::texture_aura, "texture-aura", false);
 #endif
 
+  addsaver(vid.use_smart_range, "smart-range", 0);
+  addsaver(vid.smart_range_detail, "smart-range-detail", 8);
+  addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
+
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
@@ -555,6 +559,59 @@ void loadNewConfig(FILE *f) {
     }
   allconfigs.clear();
   }
+
+void edit_sightrange() {
+  if(vid.use_smart_range == 0) {
+    dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
+      XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
+      "the sight range makes HyperRogue work faster, but also makes "
+      "the game effectively harder."));
+    dialog::reaction = [] () { 
+      doOvergenerate();
+      };
+    }
+  else {
+    dialog::editNumber(vid.smart_range_detail, 1, 50, 1, 8, XLAT("minimum visible cell in pixels"), "");
+    }  
+  dialog::extra_options = [] () {
+    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'd');
+    dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
+    if(allowIncreasedSight()) {
+      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'n');
+      dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
+      }
+    if(allowChangeRange()) {
+      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'g');
+      dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
+      }
+    if(vid.use_smart_range == 0 && allowChangeRange()) {
+      dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'o');
+      dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
+      dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'O');
+      dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
+      }      
+    if(!allowChangeRange() || !allowIncreasedSight()) {
+      dialog::addItem(XLAT("enable the cheat mode for additional options"), 'C');
+      dialog::add_action(enable_cheat);
+      }
+    dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), 'c');
+    dialog::add_action([] () { 
+      popScreen();
+      dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"), 
+        XLAT("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.")
+        );
+      dialog::scaleLog();
+      });
+    };
+  }
+
+void menuitem_sightrange(char c = 'r') {
+  if(vid.use_smart_range)
+    dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(vid.smart_range_detail), c);
+  else
+    dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
+  dialog::add_action(edit_sightrange);
+  }
   
 void loadConfig() {
  
@@ -663,8 +720,8 @@ void showGraphConfig() {
 
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
 
-  dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), 'r');
-
+  menuitem_sightrange();
+  
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
 
   dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
@@ -700,26 +757,6 @@ void showGraphConfig() {
     if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
       XLAT("movement animation speed"),
       XLAT("+5 = move instantly"));
-  
-    if(xuni == 'r') {
-      dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
-        XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
-        "the sight range makes HyperRogue work faster, but also makes "
-        "the game effectively harder."));
-      dialog::reaction = [] () { 
-        doOvergenerate();
-        };
-      dialog::extra_options = [] () {
-        if(allowChangeRange()) {
-          dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'o');
-          dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
-          dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'O');
-          dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
-          }
-        if(!allowChangeRange() || !allowIncreasedSight()) 
-          dialog::addInfo(XLAT("note: enable the cheat mode for additional options"));
-        };
-      }
   
     if(xuni == 'k') {
       glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
@@ -1177,10 +1214,12 @@ void show3D() {
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 
-  dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
-  dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
+  if(vid.use_smart_range == 0) {
+    dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
+    dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
+    dialog::addBreak(50);
+    }
   
-  dialog::addBreak(50);
   dialog::addSelItem(XLAT("Camera level above the plane"), fts3(camera), 'c');
   dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
 

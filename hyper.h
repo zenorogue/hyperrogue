@@ -1047,6 +1047,10 @@ struct videopar {
   bool skipstart;       // skip the start menu
   int quickmouse;       // quick mouse on the map
   int timeformat;       // time format used in the message log
+  
+  int use_smart_range;  // 0 = distance-based, 1 = model-based, 2 = model-based and generate
+  ld smart_range_detail;// minimum visible cell for modes 1 and 2
+  int cells_drawn_limit;
   };
 
 extern videopar vid;
@@ -3798,7 +3802,7 @@ void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int
 void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame = 0);
 
 extern bool just_gmatrix;
-void drawrec(const heptspin& hs, hstate s, const transmatrix& V);
+void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev = 0);
 
 bool haveLeaderboard(int id);
 int get_currentscore(int id);
@@ -4272,5 +4276,25 @@ struct exp_parser {
     }  
   };
 
+#ifdef CAP_COMPLEX2
+namespace brownian {
+  const int level = 5;
+  void init(cell *c);
+  void build(cell *c, int d);
+  void explosion(cell *c, int x);
+  };
+#else
+namespace brownian {
+  inline void dissolve_brownian(cell*, int) {};
+  inline void build(cell *c, int d) {}
+  inline void init(cell *c) {}
+  }
+#endif
+
+#define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety)
+
+void enable_cheat();
+
+extern int cells_drawn;
 }
 
