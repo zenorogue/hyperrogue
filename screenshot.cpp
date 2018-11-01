@@ -54,7 +54,7 @@ namespace svg {
     static char buf[600];
     // printf("fill = %08X stroke = %08x\n", fill, stroke);
   
-    if(stroke == 0xFF00FF) {
+    if(stroke == 0xFF00FF && false) {
       stroke = 0x000000FF;
       
       if(fill == 0x332a22ff) fill = 0x000000FF;
@@ -159,7 +159,7 @@ namespace svg {
 
     dynamicval<videopar> v(vid, vid);
     dynamicval<bool> v2(in, true);
-    dynamicval<int> v5(ringcolor, 0x808080FF);
+    // dynamicval<int> v5(ringcolor, 0x808080FF);
     
     vid.usingGL = false;
     vid.xres = vid.yres = svgsize ? svgsize : min(1 << (get_sightrange()+7), 16384);
