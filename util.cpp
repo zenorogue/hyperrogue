@@ -151,8 +151,9 @@ struct indenter {
 
 void doindent() { for(int i=0; i<current_indentation; i++) printf(" "); }
 
-ld exp_parser::parse(int prio) {
-  ld res;
+cld exp_parser::parse(int prio) {
+  cld res;
+  while(next() == ' ') at++;
   if(eat("sin(")) res = sin(parsepar());
   else if(eat("cos(")) res = cos(parsepar());
   else if(eat("sinh(")) res = sinh(parsepar());
@@ -167,7 +168,27 @@ ld exp_parser::parse(int prio) {
   else if(eat("tanh(")) res = tanh(parsepar());
   else if(eat("atan(")) res = atan(parsepar());
   else if(eat("atanh(")) res = atanh(parsepar());
-  else if(next() == '(') at++, res = parsepar();
+  else if(eat("abs(")) res = abs(parsepar());
+  else if(eat("re(")) res = real(parsepar());
+  else if(eat("im(")) res = imag(parsepar());
+  else if(eat("conj(")) res = std::conj(parsepar());
+  else if(eat("let(")) {
+    string name;
+    while(true) {
+      char c = next();
+      if((c >= '0' && c <= '9') || c == '.' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
+        name += c, at++;
+      else break;
+      }
+    if(next() != '=') { at = -1; return 0; }
+    at++;
+    cld val = parse(0);
+    if(next() != ',') { at = -1; return 0; }
+    at++;
+    dynamicval<cld> d(extra_params[name], val);
+    return parsepar();
+    }
+  else if(next() == '(') at++, res = parsepar(); 
   else {
     string number;
     while(true) {
@@ -177,6 +198,7 @@ ld exp_parser::parse(int prio) {
       else break;
       }
     if(number == "e") res = exp(1);
+    else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "" && next() == '-') res = 0, prio = 0;
     else if(number == "") at = -1;
@@ -198,7 +220,7 @@ ld exp_parser::parse(int prio) {
 ld parseld(const string& s) {
   exp_parser ep;
   ep.s = s;
-  return ep.parse();
+  return real(ep.parse());
   }
 
 }

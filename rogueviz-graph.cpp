@@ -285,6 +285,12 @@ hyperpoint err = hpxyz(500,0,0);
 
 bool iserror(hyperpoint h) { return sqhypot2(h) > 10000 || std::isnan(h[0]) || std::isnan(h[1]) || std::isnan(h[2]) || std::isinf(h[0]) || std::isinf(h[1]) || std::isinf(h[2]); }
 
+hyperpoint xy_to_point(ld x, ld y) {
+  if(sphere && hypot(x, y) > 1)
+    return err;
+  return hpxy(x, y);
+  }
+  
 hyperpoint find_point(ld t) {
   exp_parser ep;
   auto &dict = ep.extra_params;
@@ -298,17 +304,18 @@ hyperpoint find_point(ld t) {
     ep.at = 0;
     while(!among(ep.next(), '=', -1)) varname += ep.next(), ep.at++;
     ep.at++;
-    ld x = ep.parse();
+    cld x = ep.parse();
     if(!ep.ok()) return err;
     dict[varname] = x;
     }
   if(!dict.count("y") && dict.count("r"))
-    return xspinpush0(dict["phi"], dict["r"]);
-  if(dict.count("z"))
-    return hpxyz(dict["x"], dict["y"], dict["z"]);
-  if(sphere && hypot(dict["x"], dict["y"]) > 1)
-    return err;
-  return hpxy(dict["x"], dict["y"]);   
+    return xspinpush0(real(dict["phi"]), real(dict["r"]));
+  if(dict.count("z") && dict.count("x"))
+    return hpxyz(real(dict["x"]), real(dict["y"]), real(dict["z"]));
+  if(dict.count("z")) {
+   return xy_to_point(real(dict["z"]), imag(dict["z"]));
+   }
+  return xy_to_point(real(dict["x"]), real(dict["y"]));
   }
 
 hyperpoint gcurvestart = err;

@@ -605,7 +605,7 @@ namespace dialog {
     if(kind == 's') {
       exp_parser ep;
       ep.s = ne.s;
-      ld x = ep.parse();
+      ld x = real(ep.parse());
       if(!ep.ok()) return;
       if(ne.sc.positive && x <= 0) return;
       *ne.editwhat = x;

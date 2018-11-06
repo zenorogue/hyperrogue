@@ -13,7 +13,7 @@ namespace polygonal {
 
   typedef long double xld;
 
-  typedef complex<xld> cld;
+  typedef complex<xld> cxld;
 
   int SI = 4;
   ld  STAR = 0;
@@ -23,13 +23,13 @@ namespace polygonal {
   precise matrix[MSI][MSI];
   precise ans[MSI];
   
-  cld coef[MSI];
+  cxld coef[MSI];
   ld coefr[MSI], coefi[MSI]; 
   int maxcoef, coefid;
   
   void solve() {
     if(pmodel == mdPolynomial) {
-      for(int i=0; i<MSI; i++) coef[i] = cld(coefr[i], coefi[i]);
+      for(int i=0; i<MSI; i++) coef[i] = cxld(coefr[i], coefi[i]);
       return;
       } 
     if(pmodel != mdPolygonal) return;
@@ -74,15 +74,15 @@ namespace polygonal {
       y /= r;
       }
     if(pmodel == mdPolynomial) {
-      cld z(x,y);
-      cld res (0,0);
+      cxld z(x,y);
+      cxld res (0,0);
       for(int i=maxcoef; i>=0; i--) { res += coef[i]; if(i) res *= z; }
       return make_pair(real(res), imag(res));    
       }
       
-    cld z(x, y);
-    cld res (0,0);
-    cld zp = 1; for(int i=0; i<SI; i++) zp *= z;
+    cxld z(x, y);
+    cxld res (0,0);
+    cxld zp = 1; for(int i=0; i<SI; i++) zp *= z;
 
     for(int i=prec; i>0; i--) { 
       res += ans[i]; 
@@ -104,7 +104,7 @@ namespace polygonal {
     else C = cos(ho * M_PI/180), S = sin(ho * M_PI / 180);
 
     for(int r=0; r<=2000; r++) {
-      cld z = exp(cld(0, 2*M_PI * r / 2000.0));
+      cxld z = exp(cxld(0, 2*M_PI * r / 2000.0));
       pair<xld,xld> z2 = compute(real(z), imag(z), deg);
       hyperpoint h;
       h[0] = (z2.first * C - z2.second * S) * vid.radius;
@@ -123,7 +123,7 @@ namespace polygonal {
 namespace spiral {
 
   typedef long double ld;
-  typedef complex<long double> cld;
+  typedef complex<long double> cxld;
 
   int shiftx, shifty, velx, vely;
 
@@ -154,9 +154,9 @@ namespace spiral {
 
     ld k = -2*M_PI*M_PI / log(2.6180339);
 
-//   cld mnoznik = cld(0, M_PI) / cld(k, M_PI);
+//   cxld mnoznik = cxld(0, M_PI) / cxld(k, M_PI);
 
-    cld factor = cld(0, -CY/2/M_PI/M_PI) * cld(k, M_PI);
+    cxld factor = cxld(0, -CY/2/M_PI/M_PI) * cxld(k, M_PI);
     
     Yshift = CY * k / M_PI;
     
@@ -167,8 +167,8 @@ namespace spiral {
     
     for(int y=0; y<SY; y++)
     for(int x=0; x<SX; x++) {
-      cld z(x-xc, y-yc);
-      cld z1 = log(z);
+      cxld z(x-xc, y-yc);
+      cxld z1 = log(z);
 
       z1 = z1 * factor;
 

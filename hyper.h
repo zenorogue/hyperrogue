@@ -167,6 +167,8 @@ typedef long double ld;
 #define PLDF "Lf"
 #endif
 
+typedef complex<ld> cld;
+
 #define DEBMEM(x) // { x fflush(stdout); }
 
 #define DEBSM(x) 
@@ -4260,7 +4262,7 @@ struct exp_parser {
   int at;
   exp_parser() { at = 0; }
   
-  map<string, ld> extra_params;
+  map<string, cld> extra_params;
 
   bool ok() { return at == isize(s); }
   char next() { if(at == isize(s) || at == -1) return 0; else return s[at]; }
@@ -4273,14 +4275,15 @@ struct exp_parser {
     return false;
     }
 
-  ld parse(int prio = 0);
+  cld parse(int prio = 0);
 
-  ld parsepar() {
-    ld res = parse();
+  cld parsepar() {
+    cld res = parse();
     if(next() != ')') { at = -1; return res; }
     at++;
     return res;
-    }  
+    }
+
   };
 
 #ifdef CAP_COMPLEX2
