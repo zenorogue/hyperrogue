@@ -20,6 +20,53 @@ void camrotate(ld& hx, ld& hy) {
   hx = ux / uz, hy = uy / uz;
   }
 
+hyperpoint perspective_to_space(hyperpoint h, ld alpha = vid.alpha, eGeometryClass geo = ginf[geometry].cclass);
+
+hyperpoint dhp(ld x, ld y, ld z) { return hpxyz(x, y, z); }
+
+hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
+  ld hx = h[0], hy = h[1];
+  
+  if(gc == gcEuclid)
+    return hpxy(hx * (1 + alpha), hy * (1 + alpha));
+    
+  ld hr = hx*hx+hy*hy;
+  
+  if(hr > .9999 && gc == gcHyperbolic) return Hypc;
+  
+  ld A, B, C;
+  
+  ld curv = gc == gcSphere ? 1 : -1;
+  
+  A = 1+curv*hr;
+  B = 2*hr*vid.alpha*-curv;
+  C = 1 - curv*hr*vid.alpha*vid.alpha;
+  
+  B /= A; C /= A;
+  
+  ld rootsign = 1;
+  if(gc == gcSphere && vid.alpha > 1) rootsign = -1;
+  
+  ld hz = B / 2 + rootsign * sqrt(C + B*B/4);
+  
+  hyperpoint H;
+  H[0] = hx * (hz+vid.alpha);
+  H[1] = hy * (hz+vid.alpha);
+  H[2] = hz;
+  
+  return H;  
+  }
+
+hyperpoint space_to_perspective(hyperpoint z, ld alpha = vid.alpha);
+
+hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
+  ld s = 1 / (alpha + z[2]);
+  z[0] *= s;
+  z[1] *= s;
+  z[2] = 0;
+  return z;
+  }
+
 hyperpoint gethyper(ld x, ld y) {
 
   ld hx = (x - vid.xcenter) / vid.radius;
@@ -32,45 +79,7 @@ hyperpoint gethyper(ld x, ld y) {
   
   if(vid.camera_angle) camrotate(hx, hy);
   
-  if(euclid)
-    return hpxy(hx * (1 + vid.alpha), hy * (1 + vid.alpha));
-    
-  ld hr = hx*hx+hy*hy;
-  
-  if(hr > .9999 && !sphere) return Hypc;
-  
-  // hz*hz-(hx/(hz+alpha))^2 - (hy/(hz+alpha))^2 =
-  
-  // hz*hz-hr*(hz+alpha)^2 == 1
-  // hz*hz - hr*hr*hz*Hz
-  
-  
-  ld A, B, C;
-  
-  ld curv = sphere ? 1 : -1;
-  
-  A = 1+curv*hr;
-  B = 2*hr*vid.alpha*-curv;
-  C = 1 - curv*hr*vid.alpha*vid.alpha;
-  
-  // Az^2 - Bz = C
-  B /= A; C /= A;
-  
-  // z^2 - Bz = C
-  // z^2 - Bz + (B^2/4) = C + (B^2/4)
-  // z = (B/2) + sqrt(C + B^2/4)
-  
-  ld rootsign = 1;
-  if(sphere && vid.alpha > 1) rootsign = -1;
-  
-  ld hz = B / 2 + rootsign * sqrt(C + B*B/4);
-  
-  hyperpoint H;
-  H[0] = hx * (hz+vid.alpha);
-  H[1] = hy * (hz+vid.alpha);
-  H[2] = hz;
-  
-  return H;
+  return perspective_to_space(hpxyz(hx, hy, 0));
   }
 
 void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
@@ -100,416 +109,417 @@ void apply_depth(hyperpoint &f, ld z) {
     }
   }
 
-bool hypot_zlev(bool zlev_used, ld& d, ld zlev, ld& df, ld& zf, ld &z) {
-  if(!zlev_used) {
+bool hypot_zlev(ld zlev, ld& d, ld& df, ld& zf) {
+  if(zlev == 1) {
     df = 1; zf = 0;
     return false;
     }
   else {
     // (0,0,1) -> (0, sin z, cos z) -> (sin d cos z, sin z, cos d cos z)
     ld z = geom3::factor_to_lev(zlev);
+    
     ld tz = sin_auto(z);
     ld td = sin_auto(abs(d)) * cos_auto(z);
     ld h = hypot(td, tz);
+    zf = tz / h, df = td / h;
+
     if(d > 0)
       d = hypot_auto(d, z);
     else
       d = -hypot_auto(d, z);
-    zf = tz / h, df = td / h;
     return true;
     }
-  }
-
-bool hypot_zlev(bool zlev_used, ld& d, ld zlev, ld& df, ld& zf) {
-  ld z;
-  return hypot_zlev(zlev_used, d, zlev, df, zf, z);
   }
 
 int twopoint_sphere_flips;
 bool twopoint_do_flips;
 
-void applymodel(hyperpoint H, hyperpoint& ret) {
-  
-  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[2];
-  if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
-  
-  if(pmodel == mdUnchanged) { 
-    for(int i=0; i<3; i++) ret[i] = H[i] / vid.radius;
-    return; 
-    }
-  
-  if(pmodel == mdBall) {
-    ld zlev = zlevel(H);
-    using namespace hyperpoint_vec;
-    H = H / zlev;
-    
-    ld zl = geom3::depth-geom3::factor_to_lev(zlev);
-    double alpha = atan2(H[1], H[0]);
-    double d = hdist0(H);
-
-    ballmodel(ret, alpha, d, zl);
-    ghcheck(ret,H);
-    
-    return;
-    }
-  
-  if(pmodel == mdHemisphere) {
-    using namespace hyperpoint_vec;
-    
-    switch(cgclass) {
-      case gcHyperbolic: {
-        ld zl = zlevel(H);
-        ret = H / H[2];
-        ret[2] = sqrt(1 - sqhypot2(ret));
-        ret = ret * (1 + (zl - 1) * ret[2]);
-        break;
-        }
-        
-      case gcEuclid: {
-        // stereographic projection to a sphere
-        auto hd = hdist0(H) / vid.euclid_to_sphere;
-        if(hd == 0) ret = hpxyz(0, 0, -1);
-        else {
-          ld x = 2 * hd / (1 + hd * hd);
-          ld y = x / hd;
-          ret = H * x / hd / vid.euclid_to_sphere;
-          ret[2] = (1 - y);
-          ret = ret * (1 + (H[2]-1) * y / vid.euclid_to_sphere);
-          }
-        break;
-        }
-      
-      case gcSphere: {
-        ret = H;
-        break;
-        }
-      }
-    
-    swap(ret[1], ret[2]);
-    
-    conformal::apply_ball(ret[2], ret[1]);
-    
-    ghcheck(ret, H);
-    return;
-    }
-
-  if(pmodel == mdHyperboloidFlat) {
-    H[2] += vid.alpha;
-    H[0] /= H[2];
-    H[1] /= H[2];
-    H[2] = 1 - vid.alpha;
-
-    ret[0] = H[0] / 3;
-    ret[1] = (1 - H[2]) / 3;
-    ret[2] = H[1] / 3;
-    
-    conformal::apply_ball(ret[2], ret[1]);
-    ghcheck(ret,H);
-    return;
-    }
-
-  if(pmodel == mdHyperboloid) {
-    ld& tz = conformal::top_z;
-    if(H[2] > tz) {
-      ld scale = sqrt(tz*tz-1) / hypot(H[0], H[1]);
-      H[0] *= scale;
-      H[1] *= scale;
-      H[2] = tz;
-      }
-
-    ret[0] = H[0] / 3;
-    ret[1] = (1 - H[2]) / 3;
-    ret[2] = H[1] / 3;
-    
-    conformal::apply_ball(ret[2], ret[1]);
-    ghcheck(ret,H);
-    return;
-    }
-  
-  if(pmodel == mdDisk) {
-  
-    if(!vid.camera_angle) {
-      ret[0] = H[0] / tz;
-      ret[1] = H[1] / tz;
-      ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / tz / 2;
-      }
-    else {
-      ld tx = H[0];
-      ld ty = H[1];
-      ld cam = vid.camera_angle * M_PI / 180;
-      GLfloat cc = cos(cam);
-      GLfloat ss = sin(cam);
-      ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
-      ret[0] = ux / uz;
-      ret[1] = uy / uz;
-      ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / uz / 2;
-      }
-    return;
-    }
-
-  if(pmodel == mdFisheye) {
-    ret[0] = H[0] / tz;
-    ret[1] = H[1] / tz;
-    ld hypot = sqrt(1 + ret[0]*ret[0] + ret[1]*ret[1]);
-    ret[0] /= hypot;
-    ret[1] /= hypot;
-    ghcheck(ret, H);
-    return;
-    }
-
-  ld zlev = 1;
-  bool zlev_used = false;
+ld find_zlev(hyperpoint& H) {
 
   if(wmspatial || mmspatial) {
-    zlev = zlevel(H);
+    ld zlev = zlevel(H);
     using namespace hyperpoint_vec;
-    zlev_used = !((zlev > 1-1e-6 && zlev < 1+1e-6));
-    if(zlev_used) H /= zlev;
-    }
+    if(zlev > 1-1e-6 && zlev < 1+1e-6) return 1;
+    H /= zlev;
+    return zlev;
+    }  
   
-  if(pmodel == mdBand && conformal::model_transition != 1) {
-    ld& mt = conformal::model_transition;
+  return 1;
+  }
 
-    ld x0, y0;  
-    x0 = H[0] / tz;
-    y0 = H[1] / tz;
-    
-    conformal::apply_orientation(x0, y0);
+ld get_tz(hyperpoint H) {
+  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[2];
+  if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
+  return tz;
+  }
 
-    x0 += 1;
-    double rad = x0*x0 + y0*y0;
-    y0 /= rad;
-    x0 /= rad;
-    x0 -= .5;
-    
-    ld phi = atan2(y0, x0);
-    ld r = hypot(x0, y0);
-    
-    r = pow(r, 1 - mt);
-    phi *= (1 - mt);
-    ret[0] = r * cos(phi);
-    ret[1] = r * sin(phi);
-    ret[2] = 0;
-    
-    ret[0] -= pow(0.5, 1-mt);
-    ret[0] /= -(1-mt) * M_PI / 2;
-    ret[1] /= (1-mt) * M_PI / 2;
-    
-    conformal::apply_orientation(ret[1], ret[0]);
-    ghcheck(ret,H);
-    return;
-    }
+ld atan2(hyperpoint h) {
+  return atan2(h[1], h[0]);
+  }
+
+template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
+  ld zlev = find_zlev(H);
+  conformal::apply_orientation(H[0], H[1]);
   
-  if(pmodel == mdTwoPoint || mdBandAny() || pmodel == mdSinusoidal) {
-    // map to plane
-    if(false) {
-      auto p = vid.twopoint_param;
-      ld dleft = hdist(H, xpush0(-p));
-      ld dright = hdist(H, xpush0(p));
-      ld yf = 1, zf = 0;
-      if(zlev_used) {
-        ld y_orig = asin_auto(H[1]);
-        ld z;
-        hypot_zlev(true, y_orig, zlev, yf, zf, z);
-        dleft = hypot_auto(dleft, z);
-        dright = hypot_auto(dright, z);
-        }
-      ld x = (dright*dright-dleft*dleft) / 4 / p;
-      ld y = sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
-      x = -x;
-      ret = hpxyz(x/M_PI, y*(H[1]<0?-1:1)*yf/M_PI, 0);
-      if(zlev_used && stereo::active()) 
-        apply_depth(ret, y * zf / M_PI);
+  ld x, y, yf, zf=0;
+  y = asin_auto(H[1]);
+  x = asin_auto_clamp(H[0] / cos_auto(y));
+  if(sphere) {
+    if(H[2] < 0 && x > 0) x = M_PI - x;
+    else if(H[2] < 0 && x <= 0) x = -M_PI - x;
+    }
+  hypot_zlev(zlev, y, yf, zf);
+  
+  f(x, y);
+  
+  ld yzf = y * zf; y *= yf;
+  conformal::apply_orientation(y, x);
+  ret = hpxyz(x / M_PI, y / M_PI, 0);
+  if(zlev != 1 && stereo::active()) 
+    apply_depth(ret, yzf / M_PI);
+  return;
+  }
+
+void band_conformal(ld& x, ld& y) {
+  switch(cgclass) {
+    case gcSphere:
+      y = atanh(sin(y));
+      x *= 2; y *= 2;
+      break;
+    case gcHyperbolic:
+      y = 2 * atan(tanh(y/2));
+      x *= 2; y *= 2;
+      break;
+    case gcEuclid:
+      // y = y;
+      y *= 2; x *= 2;
+      break;
+    }
+  }
+
+void make_twopoint(ld& x, ld& y) {
+  auto p = vid.twopoint_param;
+  ld dleft = hypot_auto(x-p, y);
+  ld dright = hypot_auto(x+p, y);
+  if(sphere) {
+    int tss = twopoint_sphere_flips;
+    if(tss&1) { tss--; 
+      dleft = 2*M_PI - 2*p - dleft;
+      dright = 2*M_PI - 2*p - dright;
+      swap(dleft, dright);
+      y = -y;
       }
-    else {
+    while(tss) { tss -= 2;
+      dleft = 2*M_PI - 4*p + dleft;
+      dright = 2*M_PI - 4*p + dright;
+      }
+    }
+  x = (dright*dright-dleft*dleft) / 4 / p;
+  y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
+  }
+
+void applymodel(hyperpoint H, hyperpoint& ret) {
+  
+  using namespace hyperpoint_vec;
+  
+  switch(pmodel) {
+    case mdUnchanged:
+      ret = H / vid.radius;
+      return; 
+    
+    case mdBall: {
+      ld zlev = find_zlev(H);
+      
+      ld zl = geom3::depth-geom3::factor_to_lev(zlev);
+  
+      ballmodel(ret, atan2(H), hdist0(H), zl);
+      break;      
+      }
+    
+    case mdDisk: {
+      ld tz = get_tz(H);
+      if(!vid.camera_angle) {
+        ret[0] = H[0] / tz;
+        ret[1] = H[1] / tz;
+        ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / tz / 2;
+        }
+      else {
+        ld tx = H[0];
+        ld ty = H[1];
+        ld cam = vid.camera_angle * M_PI / 180;
+        GLfloat cc = cos(cam);
+        GLfloat ss = sin(cam);
+        ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
+        ret[0] = ux / uz;
+        ret[1] = uy / uz;
+        ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / uz / 2;
+        }
+      return;
+      }
+    
+    case mdHalfplane: {
+      // Poincare to half-plane
+      
+      ld zlev = find_zlev(H);
+      H = space_to_perspective(H);
+      
+      conformal::apply_orientation(H[0], H[1]);
+  
+      H[1] += 1;
+      double rad = sqhypot2(H);
+      H /= -rad;
+      H[1] += .5;
+      
       conformal::apply_orientation(H[0], H[1]);
       
-      ld x, y, yf, zf=0;
-      y = asin_auto(H[1]);
-      x = asin_auto_clamp(H[0] / cos_auto(y));
-      if(sphere) {
-        if(H[2] < 0 && x > 0) x = M_PI - x;
-        else if(H[2] < 0 && x <= 0) x = -M_PI - x;
-        }
-      hypot_zlev(zlev_used, y, zlev, yf, zf);
+      H *= conformal::halfplane_scale;
       
-      switch(pmodel) {
-        case mdTwoPoint: {
-          auto p = vid.twopoint_param;
-          ld dleft = hypot_auto(x-p, y);
-          ld dright = hypot_auto(x+p, y);
-          if(sphere) {
-            int tss = twopoint_sphere_flips;
-            if(tss&1) { tss--; 
-              dleft = 2*M_PI - 2*p - dleft;
-              dright = 2*M_PI - 2*p - dright;
-              swap(dleft, dright);
-              y = -y;
-              }
-            while(tss) { tss -= 2;
-              dleft = 2*M_PI - 4*p + dleft;
-              dright = 2*M_PI - 4*p + dright;
-              }
-            }
-          x = (dright*dright-dleft*dleft) / 4 / p;
-          y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
+      ret[0] = -conformal::osin - H[0];
+      if(zlev != 1) {
+        if(abs(conformal::ocos) > 1e-5)
+          H[1] = H[1] * pow(zlev, conformal::ocos);
+        if(abs(conformal::ocos) > 1e-5 && conformal::osin)
+          H[1] += H[0] * conformal::osin * (pow(zlev, conformal::ocos) - 1) / conformal::ocos;
+        else if(conformal::osin)
+          H[1] += H[0] * conformal::osin * log(zlev);
+        }
+      ret[1] = conformal::ocos + H[1];
+      ret[2] = 0;
+      if(zlev != 1 && stereo::active()) 
+        apply_depth(ret, -H[1] * geom3::factor_to_lev(zlev));
+      break;
+      }
+    
+    case mdHemisphere: {
+  
+      switch(cgclass) {
+        case gcHyperbolic: {
+          ld zl = zlevel(H);
+          ret = H / H[2];
+          ret[2] = sqrt(1 - sqhypot2(ret));
+          ret = ret * (1 + (zl - 1) * ret[2]);
           break;
           }
-        case mdBand: {
-          switch(cgclass) {
-            case gcSphere:
-              y = atanh(sin(y));
-              x *= 2; y *= 2;
-              break;
-            case gcHyperbolic:
-              y = 2 * atan(tanh(y/2));
-              x *= 2; y *= 2;
-              break;
-            case gcEuclid:
-              // y = y;
-              y *= 2; x *= 2;
-              break;
+          
+        case gcEuclid: {
+          // stereographic projection to a sphere
+          auto hd = hdist0(H) / vid.euclid_to_sphere;
+          if(hd == 0) ret = hpxyz(0, 0, -1);
+          else {
+            ld x = 2 * hd / (1 + hd * hd);
+            ld y = x / hd;
+            ret = H * x / hd / vid.euclid_to_sphere;
+            ret[2] = (1 - y);
+            ret = ret * (1 + (H[2]-1) * y / vid.euclid_to_sphere);
             }
           break;
           }
-        case mdBandEquiarea: {
-          y = sin_auto(y);
+        
+        case gcSphere: {
+          ret = H;
           break;
-          }
-        case mdSinusoidal: {
-          x *= cos_auto(y);
-          break;
-          }
-        case mdBandEquidistant: {
-          break;
-          }
-        default: {
-          printf("unknown model\n");
           }
         }
-      ld yzf = y * zf; y *= yf;
-      conformal::apply_orientation(y, x);
-      ret = hpxyz(x / M_PI, y / M_PI, 0);
-      if(zlev_used && stereo::active()) 
-        apply_depth(ret, yzf / M_PI);
-      }
-    ghcheck(ret, H);
-    return;
-    }
-
-  if(mdAzimuthalEqui()) {
-    ld rad = sqrt(H[0] * H[0] + H[1] * H[1]);
-    if(rad == 0) rad = 1;
-    ld d = hdist0(H);
-    ld yf, zf;
-    hypot_zlev(zlev_used, d, zlev, yf, zf);
-    
-    // 4 pi / 2pi = M_PI 
-    
-    if(pmodel == 6 && sphere)
-      d = sqrt(2*(1 - cos(d))) * M_PI / 2;
-    else if(pmodel == 6 && !euclid)
-      d = sqrt(2*(cosh(d) - 1)) / 1.5;
-    ret[0] = d * yf * H[0] / rad / M_PI;
-    ret[1] = d * yf * H[1] / rad / M_PI;
-    ret[2] = 0; 
-    if(zlev_used && stereo::active()) 
-      apply_depth(ret, d * zf / M_PI);
-    ghcheck(ret,H);
-
-    return;
-    }
-  
-  tz = H[2]+vid.alpha;
-
-  if(pmodel == mdPolygonal || pmodel == mdPolynomial) {
-
-    conformal::apply_orientation(H[0], H[1]);
-
-    pair<long double, long double> p = polygonal::compute(H[0]/tz, H[1]/tz);
-
-    conformal::apply_orientation(p.second, p.first);
-    ret[0] = p.first;
-    ret[1] = p.second;
-    ret[2] = 0;
-    ghcheck(ret,H);
-    return;
-    }
-  
-  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
-    ld x0, y0;  
-    x0 = H[0] / tz;
-    y0 = H[1] / tz;
-    conformal::apply_orientation(x0, y0);
-    ld r = hypot(x0, y0);
-    ld c = x0 / r;
-    ld s = y0 / r;
-    ld& mt = conformal::model_transition;
-    ld a = 1 - .5 * mt, b = .5 * mt;
-    swap(a, b);
-    
-    ret[0] = (a * r + b/r) * c / 2;
-    ret[1] = (a * r - b/r) * s / 2;
-    ret[2] = 0;
-    
-    if(pmodel == mdJoukowskyInverted) {
-      ld r2 = sqhypot2(ret);
-      ret[0] = ret[0] / r2;
-      ret[1] = -ret[1] / r2;
-      conformal::apply_orientation(ret[1], ret[0]);
       
-      /*
-
-      ret[0] += 1;
-      ld alpha = atan2(ret[1], ret[0]);
-      ld mod = hypot(ret[0], ret[1]);
-      // ret[0] = cos(alpha/2) * sqrt(mod);
-      // ret[1] = sin(alpha/2) * sqrt(mod);
-      ret[0] = alpha;
-      ret[1] = log(mod); */
+      swap(ret[1], ret[2]);
+      
+      conformal::apply_ball(ret[2], ret[1]);
+      
+      break;
       }
-    else conformal::apply_orientation(ret[0], ret[1]);
-
-    ghcheck(ret,H);
-    return;
-    }
     
-  if(pmodel == mdHalfplane) {
-    // Poincare to half-plane
+    case mdHyperboloidFlat: 
+    case mdHyperboloid: {
     
-    ld x0, y0;  
-    x0 = H[0] / tz;
-    y0 = H[1] / tz;
-    
-    conformal::apply_orientation(x0, y0);
-
-    y0 += 1;
-    double rad = x0*x0 + y0*y0;
-    y0 /= -rad;
-    x0 /= -rad;
-    y0 += .5;
-    
-    conformal::apply_orientation(x0, y0);
-    
-    auto& ps = conformal::halfplane_scale;
-    x0 *= ps, y0 *= ps;
-    
-    ret[0] = -conformal::osin - x0;
-    if((wmspatial || mmspatial) && zlev) {
-      if(conformal::ocos)
-        y0 = y0 * pow(zlev, conformal::ocos);
-      if(conformal::ocos && conformal::osin)
-        y0 += x0 * conformal::osin * (pow(zlev, conformal::ocos) - 1) / conformal::ocos;
-      else if(conformal::osin)
-        y0 += x0 * conformal::osin * log(zlev);
+      if(pmodel == mdHyperboloid) {
+        ld& topz = conformal::top_z;
+        if(H[2] > topz) {
+          ld scale = sqrt(topz*topz-1) / hypot2(H);
+          H *= scale;
+          H[2] = topz;
+          }
+        }
+      else {
+        H = space_to_perspective(H, vid.alpha);
+        H[2] = 1 - vid.alpha;
+        }
+  
+      ret[0] = H[0] / 3;
+      ret[1] = (1 - H[2]) / 3;
+      ret[2] = H[1] / 3;
+      
+      conformal::apply_ball(ret[2], ret[1]);
+      break;
       }
-    ret[1] = conformal::ocos + y0;
-    ret[2] = 0;
-    if(zlev != 1 && stereo::active()) 
-      apply_depth(ret, -y0 * geom3::factor_to_lev(zlev));
-    ghcheck(ret,H);
-    return;
+    
+    case mdFisheye: {
+      ld zlev = find_zlev(H);
+      H = space_to_perspective(H);
+      H[2] = zlev;
+      ret = H / sqrt(1 + sqhypot3(H));
+      break;
+      }
+    
+    case mdJoukowsky: 
+    case mdJoukowskyInverted: {
+      conformal::apply_orientation(H[0], H[1]);
+      // with equal speed skiprope: conformal::apply_orientation(H[1], H[0]);
+  
+      if(vid.skiprope) {
+        static ld last_skiprope = 0;
+        static transmatrix lastmatrix;
+        if(vid.skiprope != last_skiprope) {
+          hyperpoint r = hpxyz(0, 0, 1);
+          hyperpoint h = perspective_to_space(r, 1, gcSphere);
+          hyperpoint h1 = rotmatrix(-vid.skiprope * M_PI / 180, 1, 2) * h;
+          hyperpoint ret = space_to_perspective(h1, 1) / 2;
+          typedef complex<ld> cld;
+          const cld c1(1, 0);
+          const cld c2(2, 0);
+          const cld c4(4, 0);
+          cld w(ret[0], ret[1]);
+          cld z = sqrt(c4*w*w-c1) + c2*w;
+          if(abs(z) > 1) z = c1 / z;
+          hyperpoint zr = hpxyz(real(z), imag(z), 0);
+          
+          hyperpoint inhyp = perspective_to_space(zr, 1, gcHyperbolic);
+          last_skiprope = vid.skiprope;
+          lastmatrix = rgpushxto0(inhyp);
+          }
+        H = lastmatrix * H;
+        }
+  
+      H = space_to_perspective(H);
+      ld r = hypot2(H);
+      ld c = H[0] / r;
+      ld s = H[1] / r;
+      ld& mt = conformal::model_transition;
+      ld a = 1 - .5 * mt, b = .5 * mt;
+      swap(a, b);
+      
+      ret[0] = (a * r + b/r) * c / 2;
+      ret[1] = (a * r - b/r) * s / 2;
+      ret[2] = 0;
+
+      if(vid.skiprope) {
+        hyperpoint h = perspective_to_space(ret * 2, 1, gcSphere);
+        h = rotmatrix(vid.skiprope * M_PI / 180, 1, 2) * h;
+        ret = space_to_perspective(h, 1) / 2;
+        }
+      
+      if(pmodel == mdJoukowskyInverted) {
+        ld r2 = sqhypot2(ret);
+        ret[0] = ret[0] / r2;
+        ret[1] = -ret[1] / r2;
+        conformal::apply_orientation(ret[1], ret[0]);
+        
+        /*
+  
+        ret[0] += 1;
+        ld alpha = atan2(ret[1], ret[0]);
+        ld mod = hypot(ret[0], ret[1]);
+        // ret[0] = cos(alpha/2) * sqrt(mod);
+        // ret[1] = sin(alpha/2) * sqrt(mod);
+        ret[0] = alpha;
+        ret[1] = log(mod); */
+        }
+      else conformal::apply_orientation(ret[0], ret[1]);
+  
+      break;
+      }
+    
+    case mdPolygonal: case mdPolynomial: {
+    
+      H = space_to_perspective(H);
+
+      conformal::apply_orientation(H[0], H[1]);
+  
+      pair<long double, long double> p = polygonal::compute(H[0], H[1]);
+  
+      conformal::apply_orientation(p.second, p.first);
+      ret[0] = p.first;
+      ret[1] = p.second;
+      ret[2] = 0;
+      break;
+      }  
+      
+    case mdBand: 
+      if(conformal::model_transition != 1) {
+        ld& mt = conformal::model_transition;
+        
+        H = space_to_perspective(H);
+        
+        conformal::apply_orientation(H[0], H[1]);
+    
+        H[0] += 1;
+        double rad = H[0]*H[0] + H[1]*H[1];
+        H[1] /= rad;
+        H[0] /= rad;
+        H[0] -= .5;
+        
+        ld phi = atan2(H);
+        ld r = hypot2(H);
+        
+        r = pow(r, 1 - mt);
+        phi *= (1 - mt);
+        ret[0] = r * cos(phi);
+        ret[1] = r * sin(phi);
+        ret[2] = 0;
+        
+        ret[0] -= pow(0.5, 1-mt);
+        ret[0] /= -(1-mt) * M_PI / 2;
+        ret[1] /= (1-mt) * M_PI / 2;
+        
+        conformal::apply_orientation(ret[1], ret[0]);
+        }
+      else 
+        makeband(H, ret, band_conformal);
+      break;
+      
+    case mdTwoPoint: 
+      makeband(H, ret, make_twopoint);
+      break;
+    
+    case mdBandEquiarea: 
+      makeband(H, ret, [] (ld& x, ld& y) { y = sin_auto(y); });
+      break;
+    
+    case mdBandEquidistant:
+      makeband(H, ret, [] (ld& x, ld& y) { });
+      break;
+    
+    case mdSinusoidal: 
+      makeband(H, ret, [] (ld& x, ld& y) { x *= cos_auto(y); });
+      break;
+    
+    case mdEquidistant: case mdEquiarea: {
+      ld zlev = find_zlev(H);
+
+      ld rad = hypot2(H);
+      if(rad == 0) rad = 1;
+      ld d = hdist0(H);
+      ld df, zf;
+      hypot_zlev(zlev, d, df, zf);
+      
+      // 4 pi / 2pi = M_PI 
+      
+      if(pmodel == mdEquiarea && sphere)
+        d = sqrt(2*(1 - cos(d))) * M_PI / 2;
+      else if(pmodel == mdEquiarea && hyperbolic)
+        d = sqrt(2*(cosh(d) - 1)) / 1.5;
+
+      ret = H * (d * df / rad / M_PI);
+      ret[2] = 0; 
+      if(zlev != 1 && stereo::active()) 
+        apply_depth(ret, d * zf / M_PI);
+      
+      break;
+      }
+    
+    case mdGUARD: break;
     }
+
+  ghcheck(ret,H);
   }
 
 // game-related graphics

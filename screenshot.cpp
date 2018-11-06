@@ -338,6 +338,7 @@ ld period = 10000;
 int noframes = 30;
 ld cycle_length = 2 * M_PI;
 ld parabolic_length = 1;
+ld skiprope_rotation;
 
 int lastticks, bak_turncount;
 
@@ -493,6 +494,8 @@ void apply() {
       rug::apply_rotation(rug::currentrot * rotmatrix(rug_rotation2 * 2 * M_PI * t / period, 0, 1) * inverse(rug::currentrot));
       }
     }
+  vid.skiprope += skiprope_rotation * t * 2 * M_PI / period;
+
   if(ballangle_rotation) {
     if(conformal::model_has_orientation())
       conformal::model_orientation += ballangle_rotation * 360 * t / period;
