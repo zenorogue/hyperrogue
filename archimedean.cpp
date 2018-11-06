@@ -626,7 +626,9 @@ void draw() {
     int S = isize(current.triangles[id]);
 
     if(id < 2*current.N ? !DUAL : !PURE) {
-      if(!dodrawcell(h->c7)) continue;
+      if(vid.use_smart_range == 0 && !dodrawcell(h->c7)) continue;
+      if(vid.use_smart_range && idx > 50 && !in_smart_range(V)) continue;
+      if(vid.use_smart_range == 2) setdist(h->c7, 7, h->c7);
       drawcell(h->c7, V, 0, false);
       }
 

@@ -4300,5 +4300,7 @@ void enable_cheat();
 extern int cells_drawn;
 
 void menuitem_sightrange(char c = 'r');
+
+bool in_smart_range(const transmatrix& T);
 }
 

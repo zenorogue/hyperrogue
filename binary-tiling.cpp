@@ -152,31 +152,35 @@ namespace binary {
     return transmatrix {{{-u*u/8+1, u/2, u*u/8}, {-u/2, 1, u/2}, {-u*u/8, u/2, u*u/8+1}}};
     }
 
-  void draw_rec(cell *c, int dirs, const transmatrix& V) {
-    if(!dodrawcell(c)) return;
+  void draw_rec(cell *c, int dirs, const transmatrix& V, int reclev) {
+
+    if(vid.use_smart_range == 0 && !dodrawcell(c)) return;
+    if(vid.use_smart_range && reclev >= 2 && !in_smart_range(V)) return;
+    if(vid.use_smart_range == 2) setdist(c, 7, c);
+
     drawcell(c, V, 0, false);
     // 1: up
     if(dirs & 1)
-      draw_rec(createMov(c, bd_up), 7, V * xpush(-log(2)));
+      draw_rec(createMov(c, bd_up), 7, V * xpush(-log(2)), reclev+1);
     // right
     if(dirs & 2)
-      draw_rec(createMov(c, bd_right), 2, V * parabolic(1));
+      draw_rec(createMov(c, bd_right), 2, V * parabolic(1), reclev+1);
     // left
     if(dirs & 4)
-      draw_rec(createMov(c, bd_left), 4, V * parabolic(-1));
+      draw_rec(createMov(c, bd_left), 4, V * parabolic(-1), reclev+1);
     // down
     if((dirs & 8) && c->type == 6)
-      draw_rec(createMov(c, bd_down), dirs & 62, V * xpush(log(2)));
+      draw_rec(createMov(c, bd_down), dirs & 62, V * xpush(log(2)), reclev+1);
     // down_left
     if((dirs & 16) && c->type == 7)
-      draw_rec(createMov(c, bd_down_left), dirs & 28, V * parabolic(-1) * xpush(log(2)));
+      draw_rec(createMov(c, bd_down_left), dirs & 28, V * parabolic(-1) * xpush(log(2)), reclev+1);
     // down_right
     if((dirs & 32) && c->type == 7)
-      draw_rec(createMov(c, bd_down_right), dirs & 42, V * parabolic(1) * xpush(log(2)));
+      draw_rec(createMov(c, bd_down_right), dirs & 42, V * parabolic(1) * xpush(log(2)), reclev+1);
     }
 
   void draw() {
-    draw_rec(viewctr.at->c7, 63, cview());
+    draw_rec(viewctr.at->c7, 63, cview(), 0);
     }
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
