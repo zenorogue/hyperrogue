@@ -2277,3 +2277,4 @@ auto hooks  =
 #include "rogueviz-video.cpp"
 #include "rogueviz-pentagonal.cpp"
 #include "rogueviz-graph.cpp"
+#include "rogueviz-fundamental.cpp"
