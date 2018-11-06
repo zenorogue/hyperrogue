@@ -1562,6 +1562,9 @@ int read_config_args() {
     PHASEFROM(2); shift(); vid.language = argi();
     }
 #endif
+  else if(argis("-vlq")) { 
+    PHASEFROM(2); shift(); vid.linequality = argi();
+    }
   else if(argis("-r")) { 
     PHASEFROM(2);
     shift(); 
