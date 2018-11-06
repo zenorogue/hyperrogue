@@ -596,6 +596,7 @@ namespace dialog {
   string disp(ld x) { if(ne.intval) return its(ldtoint(x)); else if(ne.vmax-ne.vmin < 1) return fts4(x); else return fts(x); }
 
   reaction_t reaction;
+  reaction_t reaction_final;
   
   reaction_t extra_options;
 
@@ -770,7 +771,7 @@ namespace dialog {
           ne.sc.inverse(d * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
         affect('v');
         }
-      else if(doexiton(sym, uni)) popScreen();
+      else if(doexiton(sym, uni)) { popScreen(); if(reaction_final) reaction_final(); }
       };
     }  
 
@@ -839,6 +840,7 @@ namespace dialog {
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
     reaction = reaction_t();
+    reaction_final = reaction_t();
     extra_options = reaction_t();
     numberdark = 0;
     }
@@ -1021,6 +1023,79 @@ namespace dialog {
     dialog::v.push_back(make_pair(s, color));
     }
   
+  int editpos = 0;
+  string *edited_string;
+
+  string view_edited_string() {
+    string cs = *edited_string;
+    if(editpos < 0) editpos = 0;
+    if(editpos > isize(cs)) editpos = isize(cs);
+    cs.insert(editpos, "°");
+    return cs;
+    }    
+  
+  void start_editing(string& s) {
+    edited_string = &s;
+    editpos = isize(s);
+    }
+
+  bool handle_edit_string(int sym, int uni) {
+    auto& es = *edited_string;
+    if(sym == SDLK_LEFT) editpos--;
+    else if(sym == SDLK_RIGHT) editpos++;
+    else if(uni == 8) {
+      if(editpos == 0) return true;
+      es.replace(editpos-1, 1, "");
+      editpos--;
+      }
+    else if(uni >= 32 && uni < 128) {
+      es.insert(editpos, 1, uni);
+      editpos++;
+      }
+    else return false;
+    return true;
+    }
+  
+  void string_edit_dialog() {
+    cmode = sm::NUMBER | dialogflags;
+    gamescreen(numberdark);
+    init(ne.title);
+    addInfo(view_edited_string());
+    addBreak(100);
+    dialog::addBack();
+    addBreak(100);
+    
+    if(ne.help != "") {
+      addHelp(ne.help);
+      }
+
+    if(extra_options) extra_options();
+    
+    display();
+    
+    keyhandler = [] (int sym, int uni) {
+      handleNavigation(sym, uni);
+      if(handle_edit_string(sym, uni)) ;
+      else if(doexiton(sym, uni)) {
+        popScreen();
+        if(reaction_final) reaction_final();
+        }
+      };
+    }  
+
+  void edit_string(string& s, string title, string help) {
+    start_editing(s);
+    ne.title = title;
+    ne.help = help;
+    dialogflags = (cmode & sm::A3);
+    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
+    cmode |= sm::NUMBER;
+    pushScreen(string_edit_dialog);
+    reaction = reaction_t();
+    extra_options = reaction_t();
+    numberdark = 0;
+    }
+
   };
 
 }

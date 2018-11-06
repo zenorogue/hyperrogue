@@ -1741,7 +1741,7 @@ namespace dialog {
 
   extern vector<item> items;
   
-  extern reaction_t reaction, extra_options;
+  extern reaction_t reaction, extra_options, reaction_final;
 
   item& lastItem();
   extern color_t *palette;
@@ -1797,6 +1797,11 @@ namespace dialog {
   void addHelp();
   void addBack();
   void add_action(reaction_t action);
+  
+  string view_edited_string();
+  void start_editing(string& s);
+  bool handle_edit_string(int sym, int uni);
+  void edit_string(string& s, string title, string help);
   }
 
 void checkStunKill(cell *dest);

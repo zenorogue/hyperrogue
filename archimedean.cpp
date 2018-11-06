@@ -929,8 +929,6 @@ vector<archimedean_tiling> tilings;
 
 int spos = 0;
 
-int editpos = 0;
-
 archimedean_tiling edited;
 
 bool symbol_editing;
@@ -1008,11 +1006,7 @@ void show() {
   dialog::init(XLAT("Archimedean tilings"));
   
   if(symbol_editing) {
-    string cs = edited.symbol;
-    if(editpos < 0) editpos = 0;
-    if(editpos > isize(cs)) editpos = isize(cs);
-    cs.insert(editpos, "°");
-    dialog::addSelItem("edit", cs, '/');
+    dialog::addSelItem("edit", dialog::view_edited_string(), '/');
     dialog::add_action([] () { 
       symbol_editing = false;
       if(!edited.errors) enable(edited);
@@ -1038,7 +1032,7 @@ void show() {
     dialog::add_action([] () { 
       symbol_editing = true;
       edited = current;
-      editpos = isize(current.symbol);
+      dialog::start_editing(edited.symbol);
       edited.parse();
       });
     dialog::addBreak(100);
@@ -1128,19 +1122,8 @@ void show() {
 
   keyhandler = [] (int sym, int uni) {
     if(symbol_editing && sym == SDLK_RETURN) sym = uni = '/';
-    if(sym == SDLK_LEFT) editpos--;
-    if(sym == SDLK_RIGHT) editpos++;
     dialog::handleNavigation(sym, uni);
-    if(symbol_editing && uni == 8) {
-      if(editpos == 0) return;
-      edited.symbol.replace(editpos-1, 1, "");
-      editpos--;
-      edited.parse(edited.symbol);
-      return;
-      }
-    if(symbol_editing && uni >= 32 && uni < 128) {
-      edited.symbol.insert(editpos, 1, uni);
-      editpos++;
+    if(symbol_editing && dialog::handle_edit_string(sym, uni)) {
       edited.parse(edited.symbol);
       return;
       }

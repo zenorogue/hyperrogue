@@ -350,7 +350,7 @@ void draw_to(ld t0, hyperpoint h0, ld t1, hyperpoint h1, int small = 0, int big 
   draw_to(t2, h2, t1, h1, small, big+1);
   }
 
-int editpos = -1, editwhich = -1;
+int editwhich = -1;
 
 void show_graph() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -358,15 +358,11 @@ void show_graph() {
   dialog::init(XLAT("graph"));
   for(int i=0; i<isize(formula); i++) {
     if(editwhich == i) {
-      string cs = formula[i];
-      if(editpos < 0) editpos = 0;
-      if(editpos > isize(cs)) editpos = isize(cs);
-      cs.insert(editpos, "°");
-      dialog::addItem(cs, '1'+i);
+      dialog::addItem(dialog::view_edited_string(), '1'+i);
       }
     else {
       dialog::addItem(formula[i], editwhich == -1 ? '1'+i : 0);
-      dialog::add_action([i] () { editwhich = i; editpos = isize(formula[i]); });
+      dialog::add_action([i] () { editwhich = i; dialog::start_editing(formula[i]); });
       }
     }
 
@@ -375,20 +371,7 @@ void show_graph() {
 
   keyhandler = [] (int sym, int uni) {
     if(editwhich >= 0) {
-      string& edited = formula[editwhich];
-      if(sym == SDLK_LEFT) editpos--;
-      else if(sym == SDLK_RIGHT) editpos++;
-      else if(uni == 8) {
-        if(editpos == 0) return;
-        edited.replace(editpos-1, 1, "");
-        editpos--;
-        return;
-        }
-      else if(uni >= 32 && uni < 128) {
-        edited.insert(editpos, 1, uni);
-        editpos++;
-        return;
-        }
+      if(dialog::handle_edit_string(sym, uni)) ;
       else if(doexiton(sym, uni))
         editwhich = -1;
       }
