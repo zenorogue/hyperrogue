@@ -472,7 +472,9 @@ template<class T> struct walker {
     return at == x.at && spin == x.spin && mirrored == x.mirrored;
     }
 
-
+  bool operator < (const walker<T>& cw2) const {
+    return tie(at, spin, mirrored) < tie(cw2.at, cw2.spin, cw2.mirrored);
+    }
 
   walker<T>& operator ++ (int) { return (*this) += 1; }
   walker<T>& operator -- (int) { return (*this) -= 1; }
@@ -1269,11 +1271,13 @@ extern ld ruggo;
 #define HASLINEVIEW
 
 enum eModel {
-  mdDisk, mdHalfplane, mdBand, mdPolygonal, mdPolynomial,
+  mdDisk, mdHalfplane, mdBand, mdPolygonal, mdFormula,
   mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
   mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
-  mdGUARD, mdUnchanged, mdHyperboloidFlat };
+  mdRotatedHyperboles,
+  mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial
+  };
 
 namespace conformal {
   extern bool on;
@@ -1325,6 +1329,9 @@ namespace conformal {
   void progress_screen();
   void progress(string str);
   bool model_has_orientation();
+
+  extern string formula;
+  extern eModel basic_model;
   }
   
 namespace polygonal {

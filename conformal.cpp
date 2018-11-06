@@ -258,6 +258,9 @@ bool isbad(ld z) { return !isfinite(z) || fabs(z) > 1e6; }
 
 namespace conformal {
 
+  string formula = "z^2";
+  eModel basic_model;
+
   void handleKeyC(int sym, int uni);
   
   int lastprogress;
@@ -578,11 +581,11 @@ namespace conformal {
 #endif
 
   const char *modelnames[MODELCOUNT] = {
-    "disk", "half-plane", "band", "polygonal", "polynomial",
+    "disk", "half-plane", "band", "polygonal", "formula",
     "azimuthal equidistant", "azimuthal equi-area", 
     "ball model", "Minkowski hyperboloid", "hemisphere",
     "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant",
-    "fisheye", "Joukowsky transform", "Joukowsky+inversion"
+    "fisheye", "Joukowsky transform", "Joukowsky+inversion", "rotated hyperboles"
     };
   
   string get_model_name(eModel pm) {
@@ -610,14 +613,34 @@ namespace conformal {
     return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand);
     }
   
+  int editpos = 0;
+
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models of hyperbolic geometry"));
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
-      if(model_available(m))
+      if(model_available(m)) {
         dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()" [m]);
+        dialog::add_action([m] () {
+          if(m == mdFormula) {
+            if(pmodel != m) basic_model = pmodel;
+            dialog::edit_string(formula, "formula", "");
+            dialog::reaction_final = [] () {
+              pmodel = mdFormula;
+              };
+            return;
+            }
+          pmodel = m;
+          polygonal::solve();
+          vid.alpha = 1; vid.scale = 1;
+          if(pmodel == mdBand && sphere)
+            vid.scale = .3;
+          if(pmodel == mdDisk && sphere)
+            vid.scale = .4;
+          });
+        }
       }
     
     dialog::addBreak(100);
@@ -701,32 +724,7 @@ namespace conformal {
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       
-      if(uni >= '0' && uni <= '9') {
-        pmodel = eModel(uni - '0');
-        polygonal::solve();
-        vid.alpha = 1; vid.scale = 1;
-        if(pmodel == mdBand && sphere)
-          vid.scale = .3;
-        if(pmodel == mdDisk && sphere)
-          vid.scale = .4;
-        }
-      else if(uni == '!') 
-        pmodel = eModel(10);
-      else if(uni == '@') 
-        pmodel = eModel(11);
-      else if(uni == '#') 
-        pmodel = eModel(12);
-      else if(uni == '$') 
-        pmodel = eModel(13);
-      else if(uni == '%') 
-        pmodel = eModel(14);
-      else if(uni == '^') 
-        pmodel = eModel(15);
-      else if(uni == '&') 
-        pmodel = eModel(16);
-      else if(uni == '6')
-        vid.alpha = 1, vid.scale = 1;
-      else if(uni == 'z')
+      if(uni == 'z')
         editScale();
       else if(uni == 'p')
         projectionDialog();

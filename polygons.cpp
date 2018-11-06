@@ -191,6 +191,7 @@ bool two_sided_model() {
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
   if(pmodel == mdHemisphere) return true;
+  if(pmodel == mdRotatedHyperboles) return true;
   return false;
   }
 
@@ -201,6 +202,8 @@ int get_side(const hyperpoint& H) {
     return (H[2] <= -horizon) ? -1 : 1;
     ;
     }
+  if(pmodel == mdRotatedHyperboles)
+    return H[1] > 0 ? -1 : 1;
   if(pmodel == mdHyperboloid && hyperbolic)
     return (conformal::sin_ball * H[2] > -conformal::cos_ball * H[1]) ? -1 : 1;
   if(pmodel == mdHyperboloid && sphere)

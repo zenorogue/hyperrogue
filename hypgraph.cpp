@@ -516,6 +516,43 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
       }
     
+    case mdRotatedHyperboles: {
+      // ld zlev =  <- not implemented
+      find_zlev(H); // + geom3::depth;
+      conformal::apply_orientation(H[0], H[1]);
+      
+      ld y = asin_auto(H[1]);
+      ld x = asin_auto_clamp(H[0] / cos_auto(y));
+      // ld z = zlev == 1 ? 0 : geom3::factor_to_lev(zlev);
+      
+      ld factor = geom3::lev_to_factor(y + geom3::depth);
+      
+      ret[0] = sinh(x) * factor;
+      ret[1] = cosh(x) * factor;
+      ret[2] = 0;
+      
+      ret[0] = atan(ret[0]);
+      ret[1] = atan(ret[1]);
+
+      break;
+      }
+    
+    case mdFormula: {
+      dynamicval<eModel> m(pmodel, conformal::basic_model);
+      applymodel(H, ret);
+      exp_parser ep;
+      ep.extra_params["z"] = cld(ret[0], ret[1]);
+      ep.extra_params["cx"] = ret[0];
+      ep.extra_params["cy"] = ret[1];
+      ep.extra_params["cz"] = ret[2];
+      ep.s = conformal::formula;
+      cld res = ep.parse();
+      ret[0] = real(res);
+      ret[1] = imag(res);
+      ret[2] = 0;
+      break;
+      }
+    
     case mdGUARD: break;
     }
 

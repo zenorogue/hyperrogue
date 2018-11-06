@@ -295,6 +295,9 @@ void initConfig() {
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   
   addsaver(vid.skiprope, "mobius", 0);
+  
+  addsaver(conformal::formula, "formula");
+  addsaverenum(conformal::basic_model, "basic model");
 
 #if CAP_SHMUP  
   shmup::initConfig();
