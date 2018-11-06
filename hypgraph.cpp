@@ -884,6 +884,7 @@ void drawEuclidean() {
     
     if(vid.use_smart_range) {
       if(in_smart_range(Mat)) {
+        if(vid.use_smart_range == 2) setdist(cw.at, 7, cw.at);
         if(dx < mindx) mindx = dx;
         if(dy < mindy) mindy = dy;
         if(dx > maxdx) maxdx = dx;
