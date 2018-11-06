@@ -2744,3 +2744,13 @@ Other bugfixes and improvements:
 * rug no longer always renders in Poincare
 * graph drawing in RogueViz
 * some extra chars supported in the browser version; some other minor web improvements
+
+2018.11.01 19:09 Update 10.4y
+
+* In the "view range" setting, you can now choose to not draw all cells in the given range, but based on their visibility (i.e., being on screen and not too small). 
+  Especially useful with non-azimuthal hyperbolic projections -- e.g. band and halfplane models will automatically adjust to the visible region, instead of drawing tiles
+  which are offscreen/too small and/or not drawing other tiles which are far but still well visible.
+* various text improvements, and translation update
+* link displayed in the model menu
+* fixed drawing of the boundary of polygonal
+* in svg screenshot, disabled weird recoloring and ringcolor changing
