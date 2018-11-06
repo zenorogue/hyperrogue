@@ -672,6 +672,9 @@ namespace conformal {
     
     if(model_has_transition())
       dialog::addSelItem(XLAT("model transition"), fts3(model_transition), 't');
+
+    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted))
+      dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope), 'S');
     
     if(pmodel == mdHemisphere && euclid) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
@@ -739,6 +742,8 @@ namespace conformal {
         dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
           "You can change this parameter for a transition from another model to this one."
           );
+      else if(uni == 'S')
+        dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
       else if(uni == 'b' && pmodel == mdHalfplane)
         dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
       else if(uni == 's') {

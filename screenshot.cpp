@@ -652,6 +652,9 @@ void show() {
     dialog::addBoolItem(XLAT("joukowsky_anim"), joukowsky_anim, 'j');
     dialog::add_action([] () { joukowsky_anim = !joukowsky_anim; });
     }
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
+    animator(XLAT("Möbius transformations"), skiprope_rotation, 'S');
+    }
   dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
   dialog::add_action([] () { ma = maCircle; 
     rotation_center_h = viewctr;

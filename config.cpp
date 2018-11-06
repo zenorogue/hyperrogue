@@ -293,6 +293,8 @@ void initConfig() {
   addsaver(vid.use_smart_range, "smart-range", 0);
   addsaver(vid.smart_range_detail, "smart-range-detail", 8);
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
+  
+  addsaver(vid.skiprope, "mobius", 0);
 
 #if CAP_SHMUP  
   shmup::initConfig();
