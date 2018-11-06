@@ -560,6 +560,15 @@ int read_cheat_args() {
     PHASEFROM(2); cheat();
     shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi();
     }
+  else if(argis("-smart")) {
+    PHASEFROM(2); cheat();
+    vid.use_smart_range = 2;
+    shift(); vid.smart_range_detail = argf();
+    }
+  else if(argis("-smartlimit")) {
+    PHASEFROM(2); 
+    shift(); vid.cells_drawn_limit = argi();
+    }
   else if(argis("-quantum")) {
     cheat();
     quantum = true;
