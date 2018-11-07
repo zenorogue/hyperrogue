@@ -1533,35 +1533,6 @@ int read_config_args() {
     dont_face_pc = true;
     }
 
-  else if(argis("-PM")) { 
-    PHASEFROM(2); shift(); pmodel = eModel(argi());
-    }
-  else if(argis("-ballangle")) { 
-    PHASEFROM(2); 
-    shift(); vid.ballangle = argf();
-    }
-  else if(argis("-topz")) { 
-    PHASEFROM(2); 
-    shift(); conformal::top_z = argf();
-    }
-  else if(argis("-hp")) { 
-    PHASEFROM(2); 
-    shift(); conformal::halfplane_scale = argf();
-    }
-  else if(argis("-mori")) { 
-    PHASEFROM(2); 
-    shift(); conformal::model_orientation = argf();
-    }
-  else if(argis("-mtrans")) { 
-    PHASEFROM(2); 
-    shift(); conformal::model_transition = argf();
-    }
-  else if(argis("-zoom")) { 
-    PHASEFROM(2); shift(); vid.scale = argf();
-    }
-  else if(argis("-alpha")) { 
-    PHASEFROM(2); shift(); vid.alpha = argf();
-    }
 #if CAP_TRANS
   else if(argis("-lang")) { 
     PHASEFROM(2); shift(); vid.language = argi();
@@ -1579,12 +1550,6 @@ int read_config_args() {
     if(clHeight) vid.yres = clHeight;
     if(clFont) vid.fsize = clFont;
     }    
-  else if(argis("-els")) {
-    shift(); conformal::extra_line_steps = argf();
-    }
-  else if(argis("-stretch")) {
-    PHASEFROM(2); shift(); vid.stretch = argf();
-    }
   else if(argis("-msm")) {
     PHASEFROM(2); memory_saving_mode = true;
     }

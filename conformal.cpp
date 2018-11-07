@@ -979,6 +979,54 @@ namespace conformal {
 #endif
     }
 
+
+  int readArgs() {
+    using namespace arg;
+             
+    if(0) ;
+    else if(argis("-els")) {
+      shift(); conformal::extra_line_steps = argf();
+      }
+    else if(argis("-stretch")) {
+      PHASEFROM(2); shift(); vid.stretch = argf();
+      }
+    else if(argis("-PM")) { 
+      PHASEFROM(2); shift(); pmodel = eModel(argi());
+      if(pmodel == mdFormula) {
+        shift(); basic_model = eModel(argi());
+        shift(); formula = args();
+        }
+      }
+    else if(argis("-ballangle")) { 
+      PHASEFROM(2); 
+      shift(); vid.ballangle = argf();
+      }
+    else if(argis("-topz")) { 
+      PHASEFROM(2); 
+      shift(); conformal::top_z = argf();
+      }
+    else if(argis("-hp")) { 
+      PHASEFROM(2); 
+      shift(); conformal::halfplane_scale = argf();
+      }
+    else if(argis("-mori")) { 
+      PHASEFROM(2); 
+      shift(); conformal::model_orientation = argf();
+      }
+    else if(argis("-mtrans")) { 
+      PHASEFROM(2); 
+      shift(); conformal::model_transition = argf();
+      }
+    else if(argis("-zoom")) { 
+      PHASEFROM(2); shift(); vid.scale = argf();
+      }
+    else if(argis("-alpha")) { 
+      PHASEFROM(2); shift(); vid.alpha = argf();
+      }
+    else return 1;
+    return 0;
+    }
+  
   auto hooks = addHook(clearmemory, 0, [] () {
     conformal::renderAutoband();
     conformal::on = false;
@@ -986,7 +1034,7 @@ namespace conformal {
     conformal::findhistory.clear();
     conformal::movehistory.clear();
     conformal::includeHistory = false;
-    });
+    }) + addHook(hooks_args, 100, readArgs);
 
   }
 
