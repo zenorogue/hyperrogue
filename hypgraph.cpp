@@ -218,6 +218,13 @@ void make_twopoint(ld& x, ld& y) {
   y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
   }
 
+hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
+  using namespace hyperpoint_vec;
+  h = perspective_to_space(h * scale, 1, gcSphere);
+  h = rotmatrix(angle * M_PI / 180, 1, 2) * h;
+  return space_to_perspective(h, 1) / scale;
+  }
+
 void applymodel(hyperpoint H, hyperpoint& ret) {
   
   using namespace hyperpoint_vec;
@@ -369,11 +376,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         static ld last_skiprope = 0;
         static transmatrix lastmatrix;
         if(vid.skiprope != last_skiprope) {
-          hyperpoint r = hpxyz(0, 0, 1);
-          hyperpoint h = perspective_to_space(r, 1, gcSphere);
-          hyperpoint h1 = rotmatrix(-vid.skiprope * M_PI / 180, 1, 2) * h;
-          hyperpoint ret = space_to_perspective(h1, 1) / 2;
-          typedef complex<ld> cld;
+          ret = mobius(C0, -vid.skiprope, 2);
           const cld c1(1, 0);
           const cld c2(2, 0);
           const cld c4(4, 0);
@@ -401,11 +404,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[1] = (a * r - b/r) * s / 2;
       ret[2] = 0;
 
-      if(vid.skiprope) {
-        hyperpoint h = perspective_to_space(ret * 2, 1, gcSphere);
-        h = rotmatrix(vid.skiprope * M_PI / 180, 1, 2) * h;
-        ret = space_to_perspective(h, 1) / 2;
-        }
+      if(vid.skiprope) 
+        ret = mobius(ret, vid.skiprope, 2);
       
       if(pmodel == mdJoukowskyInverted) {
         ld r2 = sqhypot2(ret);
