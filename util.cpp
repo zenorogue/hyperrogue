@@ -203,6 +203,8 @@ cld exp_parser::parse(int prio) {
     else if(number == "" && next() == '-') res = 0, prio = 0;
     else if(number == "") at = -1;
     else if(extra_params.count(number)) res = extra_params[number];
+    else if(number == "s") res = ticks / 1000.;
+    else if(number == "ms") res = ticks;
     else if(number[0] >= 'a' && number[0] <= 'z') at = -1;
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
@@ -225,6 +227,6 @@ ld parseld(const string& s) {
 
 string parser_help() {
   return XLAT("Functions available: %1", 
-    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), e, i, pi");
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), e, i, pi, s, ms");
   }
 }
