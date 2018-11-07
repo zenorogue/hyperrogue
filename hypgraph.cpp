@@ -545,6 +545,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ep.extra_params["cx"] = ret[0];
       ep.extra_params["cy"] = ret[1];
       ep.extra_params["cz"] = ret[2];
+      ep.extra_params["ux"] = H[0];
+      ep.extra_params["uy"] = H[1];
+      ep.extra_params["uz"] = H[2];
       ep.s = conformal::formula;
       cld res = ep.parse();
       ret[0] = real(res);

@@ -630,7 +630,7 @@ namespace conformal {
               XLAT(
               "This lets you specify the projection as a formula f. "
               "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
-              "the point z is mapped to f(z). For 3D models (or 2D models if you prefer) you can also use parameters cx, cy, cz."
+              "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
               ) + "\n\n" + parser_help()
               );
             dialog::reaction_final = [] () {
