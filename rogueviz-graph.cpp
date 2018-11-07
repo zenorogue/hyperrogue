@@ -296,6 +296,7 @@ hyperpoint find_point(ld t) {
   auto &dict = ep.extra_params;
   dict["t"] = t;
   dict["s"] = ticks / 1000.;
+  dict["ms"] = ticks;
   dict["phi"] = t * 2 * M_PI;
   dict["x"] = tan(t * M_PI - M_PI/2);
   for(auto& ff: formula) {
