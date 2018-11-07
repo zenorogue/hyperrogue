@@ -626,7 +626,13 @@ namespace conformal {
         dialog::add_action([m] () {
           if(m == mdFormula) {
             if(pmodel != m) basic_model = pmodel;
-            dialog::edit_string(formula, "formula", "");
+            dialog::edit_string(formula, "formula", 
+              XLAT(
+              "This lets you specify the projection as a formula f. "
+              "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
+              "the point z is mapped to f(z). For 3D models (or 2D models if you prefer) you can also use parameters cx, cy, cz."
+              ) + "\n\n" + parser_help()
+              );
             dialog::reaction_final = [] () {
               pmodel = mdFormula;
               };

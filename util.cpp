@@ -223,4 +223,8 @@ ld parseld(const string& s) {
   return real(ep.parse());
   }
 
+string parser_help() {
+  return XLAT("Functions available: %1", 
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), e, i, pi");
+  }
 }

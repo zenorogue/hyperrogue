@@ -4321,5 +4321,6 @@ bool in_smart_range(const transmatrix& T);
 void curvepoint(const hyperpoint& H1);
 dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
 
+string parser_help();
 }
 
