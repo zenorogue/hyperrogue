@@ -1140,6 +1140,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     c.flags |= POLY_FORCE_INVERTED;
   if(pmodel == mdJoukowsky)
     c.flags |= POLY_FORCE_INVERTED;
+  c.flags |= POLY_ALWAYS_IN;
   }
 
 color_t periodcolor = 0x00FF0080;
