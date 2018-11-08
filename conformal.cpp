@@ -609,6 +609,20 @@ namespace conformal {
               "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
               ) + "\n\n" + parser_help()
               );
+            dialog::extra_options = [] () {
+              initquickqueue();
+              queuereset(mdUnchanged, PPR::LINE);              
+              for(int a=-1; a<=1; a++) {
+                curvepoint(hpxyz(-M_PI/2 * vid.radius, a*vid.radius, 0));
+                curvepoint(hpxyz(+M_PI/2 * vid.radius, a*vid.radius, 0));
+                queuecurve(forecolor, 0, PPR::LINE);
+                curvepoint(hpxyz(a*vid.radius, -M_PI/2*vid.radius, 0));
+                curvepoint(hpxyz(a*vid.radius, +M_PI/2*vid.radius, 0));
+                queuecurve(forecolor, 0, PPR::LINE);
+                }
+              queuereset(pmodel, PPR::LINE);
+              quickqueue();
+              };
             dialog::reaction_final = [] () {
               pmodel = mdFormula;
               };
