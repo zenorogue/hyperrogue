@@ -2425,12 +2425,12 @@ bool bugsNearby(cell *c, int dist = 2) {
   return false;
   }
 
-int minecolors[8] = {
+colortable minecolors = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
   0x60, 0x600000, 0x00C0C0, 0x000000
   };
 
-int distcolors[8] = {
+colortable distcolors = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
   0xA0A000, 0xA000A0, 0x00A0A0, 0xFFD500
   };
@@ -2689,7 +2689,7 @@ ld wavefun(ld x) {
   else return 0; */
   }
 
-const unsigned int nestcolors[8] = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
+colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
 
 void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 
@@ -4525,7 +4525,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case waMineOpen: {
           int mines = countMinesAround(c);
           if(mines)
-            queuepoly(V, shMineMark[ct6], (minecolors[mines] << 8) | 0xFF);
+            queuepoly(V, shMineMark[ct6], darkena(minecolors[mines], 0, 0xFF));
           break;
           }
       

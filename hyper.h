@@ -2372,13 +2372,20 @@ int textwidth(int siz, const string &str);
 extern bool gtouched, mousepressed, mousemoved, actonrelease;
 extern bool inslider;
 
+struct colortable: vector<color_t> {
+  color_t& operator [] (int i) { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }
+  const color_t& operator [] (int i) const { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }
+  colortable(std::initializer_list<color_t> v) : vector(v) {}
+  colortable() : vector({0}) {}
+  };
+
 extern bool outoffocus;
 extern int frames;
 extern transmatrix playerV;
 extern bool didsomething;
 extern void drawStats();
 extern int calcfps();
-extern int distcolors[8];
+extern colortable distcolors, minecolors;
 
 extern eItem orbToTarget;
 extern eMonster monsterToSummon;
@@ -3043,7 +3050,7 @@ int emeraldval(cell *c);
 int inpair(cell *c, int colorpair);
 int snake_pair(cell *c);
 
-extern const color_t nestcolors[8];
+extern colortable nestcolors;
 
 #if CAP_TEXTURE
 namespace texture {

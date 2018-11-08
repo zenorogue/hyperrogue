@@ -1264,6 +1264,48 @@ bool warptype(cell *c) {
     return pattern_threecolor(c) == 0;
   }
 
+map<char, colortable> colortables = {
+  {'A', {
+    0xF04040, 0x40F040, 0x4040F0,
+    0xD0D000, 0xD000D0, 0x00D0D0,
+    0xC0C0C0, 0x404040, 0x808080,
+    0xF08040, 0xF04080, 0x40F080,
+    0x4080F0, 0x8040F0, 0x80F040,
+    0xFFD500 }},
+  {'B', {
+    // trying to get colors as in Wikipedia [ https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons#k-uniform_tilings ]
+    0, 0, 0xFFFFFF, 0xFFFF00, 
+    0xFF0000, 0xC000C0 /* unknown5 */, 0x00FF00, 0x00C0C0 /* unknown7 */, 0xFF8000, 
+    0xFFFF80, 0xC040C0, 0xFFD500, 0x000080,
+    0x404040, 0x606060, 0x808080
+    }},
+  {'a', {0x800000, 0x503000, 0x206000, 0x007010, 0x004040, 0x001070, 0x200060, 0x500030}},
+  {'e', {0x404040, 0x800000, 0x008000, 0x000080 }},
+  {'b', {0x404040, 0x800000, 0x008000, 0x000080 }},
+  {'z', {0xC0C0C0, 0xE0E0E0, 0x404040, 0x606060 }},
+  {'x', {0xC0C0C0, 0x800000, 0x008000, 0x000080 }},
+  {'t', {0x804040, 0x408040, 0x404080, 0x808040 }},
+  {'c', {0x202020, 0xC0C0C0}},
+  {'F', {0xC0C0C0, 0x202020}},
+  {'w', {0x303030, 0xC0C0C0}}
+  };
+
+color_t random_landscape(cell *c, int mul, int div, int step) {
+  int col[4];
+  for(int j=0; j<4; j++) {
+    col[j] = getCdata(c, j);
+    col[j] *= mul;
+    col[j] %= 240;
+    if(col[j] > 120) col[j] = 240 - col[j];
+    if(col[j] < -120) col[j] = -240 - col[j];
+    }
+  col[0] /= div;
+  col[1] /= div;
+  col[2] /= div;
+  if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + step/2) / step * step;
+  return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16));
+  }
+
 namespace patterns {
   int canvasback = linf[laCanvas].color >> 2;
   int subcanvas;
@@ -1272,158 +1314,77 @@ namespace patterns {
   char whichCanvas = 0;
 
   int generateCanvas(cell *c) {
-    if(whichCanvas == 'A' && archimedean) {
-      int gcolors[16] = {
-        0xF04040, 0x40F040, 0x4040F0,
-        0xD0D000, 0xD000D0, 0x00D0D0,
-        0xC0C0C0, 0x404040, 0x808080,
-        0xF08040, 0xF04080, 0x40F080,
-        0x4080F0, 0x8040F0, 0x80F040,
-        0xFFD500 };
-      return gcolors[arcm::current.tilegroup[arcm::id_of(c->master)] & 15];
-      }
-    if(whichCanvas == 'B') {
-      int gcolors[16] = {
-        // trying to get colors as in Wikipedia [ https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons#k-uniform_tilings ]
-        0, 0, 0xFFFFFF, 0xFFFF00, 
-        0xFF0000, 0xC000C0 /* unknown5 */, 0x00FF00, 0x00C0C0 /* unknown7 */, 0xFF8000, 
-        0xFFFF80, 0xC040C0, 0xFFD500, 0x000080,
-        0x404040, 0x606060, 0x808080
-        };
-      return gcolors[c->type & 15];
-      }
-    if(whichCanvas == 'C' && hyperbolic) {
-      using namespace fieldpattern;
-      int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      if(z < currfp.circrad) return 0x00C000;
-      int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
-      if(z2 < currfp.disthep[currfp.otherpole] - currfp.circrad)
-        return 0x3000;
-      return 0x6000;
-      }
-    if(whichCanvas == 'D' && hyperbolic) {
-      using namespace fieldpattern;
-      int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
-      }
-    if(whichCanvas == 'N' && hyperbolic) {
-      using namespace fieldpattern;
-      int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
-      if(z < z2) return 0x00C000;
-      if(z > z2) return 0xC00000;
-      return 0xCCCC00;
-      }
-    if(whichCanvas == 'M') {
-      int cd = celldist(c);
-      return gradient(0, canvasback, 0, min(1.8/(1+cd), 1.), 1);
-      }
-    if(whichCanvas == 'S' && hyperbolic) {
-      return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
-      }
-    if(whichCanvas == 'g')
-      return canvasback;
-    if(whichCanvas == 'r')
-      return hrand(0xFFFFFF + 1);
-    if(whichCanvas == 'e') {
-      static color_t fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
-      int fv = emeraldval(c);
-      return fcol[fv&3];
-      }
-    if(whichCanvas == 'a') {
-      static color_t fcol8[8] = { 
-        0x800000,
-        0x503000,
-        0x206000,
-        0x007010,
-        0x004040,
-        0x001070,
-        0x200060,
-        0x500030
-        };
-        
-      if(c->wall == waNone) {
-        color_t col = fcol8[land50(c)];
+    switch(whichCanvas) {
+      case 'A':
+        if(archimedean) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
+      case 'B':
+        return colortables['B'][c->type & 15];
+      case 'C': {
+        if(!hyperbolic) return canvasback;
+        using namespace fieldpattern;
+        int z = currfp.getdist(fieldval(c), make_pair(0,false));
+        if(z < currfp.circrad) return 0x00C000;
+        int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
+        if(z2 < currfp.disthep[currfp.otherpole] - currfp.circrad)
+          return 0x3000;
+        return 0x6000;
+        }
+      case 'D': {
+        if(!hyperbolic) return canvasback;
+        using namespace fieldpattern;
+        int z = currfp.getdist(fieldval(c), make_pair(0,false));
+        return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
+        }
+      case 'N': {
+        if(!hyperbolic) return canvasback;
+        using namespace fieldpattern;
+        int z = currfp.getdist(fieldval(c), make_pair(0,false));
+        int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
+        if(z < z2) return 0x00C000;
+        if(z > z2) return 0xC00000;
+        return 0xCCCC00;
+        }
+      case 'M':
+        return gradient(0, canvasback, 0, min(1.8/(1+celldist(c)), 1.), 1);
+      case 'S': 
+        if(!hyperbolic) return canvasback;
+        return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
+      case 'g':
+        return canvasback;
+      case 'r':
+        return hrand(0xFFFFFF + 1);
+      case 'e':
+        return colortables['e'][emeraldval(c)];
+      case 'a': {
+        color_t col = colortables['a'][land50(c)];
         if(polara50(c)) col += 0x181818;
         return col;
         }
-      }
-    if(whichCanvas == 'b') {
-      static color_t fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
-      return fcol[polara50(c) + 2 * polarb50(c)];
-      }
-    if(whichCanvas == 'z') {
-      static color_t fcol[4] = { 0xC0C0C0, 0xE0E0E0, 0x404040, 0x606060 };
-      int fv = zebra40(c);
-      return fcol[fv&3];
-      }
-    if(whichCanvas == 't') {
-      static color_t fcol[4] = { 0x804040, 0x408040, 0x404080, 0x808040 };
-      int fv = zebra40(c);
-      if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
-      return fcol[fv&3];
-      }
-    if(whichCanvas == 'x') {
-      static color_t fcol[4] = { 0xC0C0C0, 0x800000, 0x008000, 0x000080 };
-      return fcol[zebra3(c)];
-      }
-    if(whichCanvas == 'w') {
-      static color_t fcol[2] = { 0x303030, 0xC0C0C0 };
-      return fcol[randpattern(c, subcanvas) ? 1 : 0];
-      }
-    if(whichCanvas == 'l') {
-      int col[4];
-      bool err = false;
-      for(int j=0; j<4; j++) {
-        col[j] = getCdata(c, j);
-        col[j] *= 3;
-        col[j] %= 240;
-        if(col[j] > 120) col[j] = 240 - col[j];
-        if(col[j] < -120) col[j] = -240 - col[j];
+      case 'b':
+        return colortables['b'][polara50(c) + 2 * polarb50(c)];
+      case 'z':
+        return colortables['z'][zebra40(c)];
+      case 't': {
+        int fv = zebra40(c);
+        if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
+        return colortables['t'][fv];
         }
-      if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + 8) / 17 * 17;
-      return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      }
-    if(whichCanvas == 'd') {
-      int col[4];
-      bool err = false;
-      for(int j=0; j<4; j++) {
-        col[j] = getCdata(c, j);
-        col[j] *= 6;
-        col[j] %= 240;
-        if(col[j] > 120) col[j] = 240 - col[j];
-        if(col[j] < -120) col[j] = -240 - col[j];
-        }
-      col[0] /= 8;
-      col[1] /= 8;
-      col[2] /= 8;
-      if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + 1) / 2 * 2;
-      return (0x101010 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      }
-    if(whichCanvas == 'h') {
-      int col[4];
-      bool err = false;
-      for(int j=0; j<4; j++) {
-        col[j] = getCdata(c, j);
-        col[j] *= 6;
-        col[j] %= 240;
-        if(col[j] > 120) col[j] = 240 - col[j];
-        if(col[j] < -120) col[j] = -240 - col[j];
-        }
-      col[0] /= 4;
-      col[1] /= 4;
-      col[2] /= 4;
-      return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      }
-    if(whichCanvas == 'c') {
-      return chessvalue(c) ? 0xC0C0C0 : 0x202020;
-      }
-    if(whichCanvas == 'F') {
-      return pseudohept(c) ? 0x202020 : 0xC0C0C0;
-      }
-    if(whichCanvas == 'T') {
-      int fv = pattern_threecolor(c);
-      return nestcolors[fv&7];
+      case 'x':
+        return colortables['x'][zebra3(c)];
+      case 'w':
+        return colortables['w'][randpattern(c, subcanvas) ? 1 : 0];
+      case 'l': 
+        return random_landscape(c, 3, 1, 17);
+      case 'd':
+        return random_landscape(c, 6, 8, 2);
+      case 'h':
+        return random_landscape(c, 6, 4, 4);      
+      case 'c':
+        return colortables['c'][chessvalue(c)];
+      case 'F':
+        return colortables['F'][pseudohept(c)];
+      case 'T':
+        return nestcolors[pattern_threecolor(c)];
       }
     return canvasback;
     }
@@ -2311,6 +2272,20 @@ int read_pattern_args() {
     }
 
   else if(argis("-noplayer")) mapeditor::drawplayer = !mapeditor::drawplayer;
+  else if(argis("-pcol")) {
+    shift();
+    colortable *ct = &(colortables[patterns::whichCanvas]);
+    if(args()[0] > '9') {
+      char c = args()[0];
+      if(c == 't') ct = &nestcolors;
+      else if(c == 'd') ct = &distcolors;
+      else if(c == 'm') ct = &minecolors;
+      else ct = &(colortables[patterns::whichCanvas]);
+      shift();
+      }
+    int d = argi();
+    shift(); (*ct)[d] = arghex();
+    }
   else if(argis("-canvas")) {
     PHASEFROM(2);
     stop_game();

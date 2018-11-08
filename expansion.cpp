@@ -519,7 +519,7 @@ void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
   int cd = (use_color_codes || number_coding == ncDistance || number_coding == ncDebug) ? curr_dist(c) : 0;
   
   if(use_color_codes) {
-    int dc = distcolors[cd&7];
+    int dc = distcolors[cd];
     wcol = gradient(wcol, dc, 0, .4, 1);
     fcol = gradient(fcol, dc, 0, .4, 1);
     }
@@ -530,7 +530,7 @@ void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
   switch(number_coding) {
     case ncDistance: { 
       label = its(cd);
-      dc = distcolors[cd&7];
+      dc = distcolors[cd];
       break;
       }
     case ncType: {
@@ -627,7 +627,7 @@ void expansion_analyzer::view_distances_dialog() {
     }
   lastticks = SDL_GetTicks();
   
-  distcolors[0] = forecolor;
+  dynamicval<color_t> dv(distcolors[0], forecolor);
   dialog::init("");
   cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
   
@@ -665,7 +665,7 @@ void expansion_analyzer::view_distances_dialog() {
   dialog::addBreak(100 - 100 * scrolltime / scrollspeed);
 
   for(int i=first_distance; i<maxlen; i++) if(!qty[i].digits.empty())
-    dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i&7]);
+    dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i]);
   
   dialog::addBreak(100 * scrolltime / scrollspeed);
 
