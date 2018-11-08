@@ -4326,5 +4326,7 @@ dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
 bool haveaura();
 
 string parser_help();
+
+static const ld degree = M_PI / 180;
 }
 

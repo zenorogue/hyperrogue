@@ -993,7 +993,7 @@ namespace mapeditor {
         // at H1: (rh2 - a1 - M_PI)
         // at H2: (a2+M_PI - rh1)
         // total: rh2 - rh1
-        // ld z = 180 / M_PI;
+        // ld z = degree;
         ld x = b2 - b1 + M_PI;
         while(x > M_PI) x -= 2 * M_PI;
         while(x < -M_PI) x += 2 * M_PI;
@@ -1145,7 +1145,7 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("r: %1", fts4(hdist0(mh))), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) * 360 / 2 / M_PI)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) / degree)), 0xC0C0C0, 16);
       }
 
     if(us) {

@@ -374,7 +374,7 @@ namespace conformal {
     hyperpoint next = calc_relative_matrix(v[ph+1]->base, v[ph]->base, C0) * 
       v[ph+1]->at * C0;
   
-    View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
+    View = spin(rotation * degree) * xpush(-(phase-ph) * hdist(now, next)) * View;
     playermoved = false;
     centerover.at = v[ph]->base;
     compute_graphical_distance();
@@ -394,10 +394,10 @@ namespace conformal {
     }
 
   void configure() {
-    ld ball = -vid.ballangle * M_PI / 180;
+    ld ball = -vid.ballangle * degree;
     cos_ball = cos(ball), sin_ball = sin(ball);
-    ocos = cos(model_orientation * M_PI / 180);
-    osin = sin(model_orientation * M_PI / 180);
+    ocos = cos(model_orientation * degree);
+    osin = sin(model_orientation * degree);
     model_straight = (ocos > 1 - 1e-9);
     if(conformal::on) conformal::apply();
     }
@@ -741,7 +741,7 @@ namespace conformal {
             // cos(phi) * cos(phi) = 1/K
             if(sphere && vid.stretch >= 1) {
               ld phi = acos(sqrt(1/vid.stretch));
-              dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi * 180 / M_PI)));
+              dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
               }
             else if(hyperbolic && abs(vid.stretch) <= 1 && abs(vid.stretch) >= 1e-9) {
               ld phi = acosh(abs(sqrt(1/vid.stretch)));

@@ -170,7 +170,7 @@ void run_snub(int v, int w) {
       hyperpoint f1 = facingdir(hts);
       
       ld scalar = (f|f1);
-      ld alpha = (M_PI - acos(scalar)) * 180 / M_PI;
+      ld alpha = (M_PI - acos(scalar)) / degree;
       sideangles.emplace_back(alpha, T);
       }
     }

@@ -4891,7 +4891,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         downspin = atan2(VC0[1], VC0[0]);
         downspin -= M_PI/2;
         if(rev) downspin += M_PI;
-        downspin += M_PI/180 * conformal::rotation;
+        downspin += conformal::rotation * degree;
         while(downspin < -M_PI) downspin += 2*M_PI;
         while(downspin > +M_PI) downspin -= 2*M_PI;
         downspin = downspin * min(spd, (double)1);
@@ -5487,7 +5487,7 @@ void calcparam() {
   vid.xcenter += vid.scrsize * vid.xposition;
   vid.ycenter += vid.scrsize * vid.yposition;
 
-  stereo::tanfov = tan(stereo::fov * M_PI / 360);
+  stereo::tanfov = tan(stereo::fov * degree / 2);
   
   if(pmodel) 
     stereo::scrdist = vid.xres / 2 / stereo::tanfov;

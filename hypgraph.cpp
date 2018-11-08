@@ -13,7 +13,7 @@ void ghcheck(hyperpoint &ret, const hyperpoint &H) {
   }
 
 void camrotate(ld& hx, ld& hy) {
-  ld cam = vid.camera_angle * M_PI / 180;
+  ld cam = vid.camera_angle * degree;
   GLfloat cc = cos(cam);
   GLfloat ss = sin(cam);
   ld ux = hx, uy = hy * cc + ss, uz = cc - ss * hy;
@@ -221,7 +221,7 @@ void make_twopoint(ld& x, ld& y) {
 hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
   using namespace hyperpoint_vec;
   h = perspective_to_space(h * scale, 1, gcSphere);
-  h = rotmatrix(angle * M_PI / 180, 1, 2) * h;
+  h = rotmatrix(angle * degree, 1, 2) * h;
   return space_to_perspective(h, 1) / scale;
   }
 
@@ -253,7 +253,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       else {
         ld tx = H[0];
         ld ty = H[1];
-        ld cam = vid.camera_angle * M_PI / 180;
+        ld cam = vid.camera_angle * degree;
         GLfloat cc = cos(cam);
         GLfloat ss = sin(cam);
         ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
@@ -1134,7 +1134,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     queuecircle(vid.xcenter, vid.ycenter, r * vid.radius, linecol, prio, fillcol);
     return;
     }  
-  for(int i=0; i<360; i++) curvepoint(xspinpush0(i * 2 * M_PI / 360, 10));
+  for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, 10));
   auto& c = queuecurve(linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1)
     c.flags |= POLY_FORCE_INVERTED;
@@ -1148,7 +1148,7 @@ void draw_model_elements() {
     circle_around_center(M_PI/2, ringcolor, 0, PPR::CIRCLE);    
 
   if(pmodel == mdTwoPoint) {
-    ld a = -conformal::model_orientation * M_PI / 180;
+    ld a = -conformal::model_orientation * degree;
     queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
     queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
     }

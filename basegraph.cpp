@@ -158,7 +158,7 @@ bool cameraangle_on;
 void setcameraangle(bool b) {
   if(cameraangle_on != b) {
     cameraangle_on = b;
-    ld cam = vid.camera_angle * M_PI / 180;
+    ld cam = vid.camera_angle * degree;
 
     GLfloat cc = cos(cam);
     GLfloat ss = sin(cam * (b?1:-1));

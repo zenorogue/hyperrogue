@@ -1050,7 +1050,7 @@ void dqi_poly::draw() {
         // we should fill the other side
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
-          ld a = i * M_PI / 180 + h;
+          ld a = i * degree + h;
           glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * vid.stretch * cos(a), stereo::scrdist));
           }
         poly_flags ^= POLY_INVERSE;

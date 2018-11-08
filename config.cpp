@@ -1071,7 +1071,7 @@ string explain3D(ld *param) {
         "the center of your vision and a faraway location is 1/cosh(c) = %4).",
         fts3(camera),
         fts3(depth),
-        fts3(atan(1/cosh(camera))*2*180/M_PI),
+        fts3(atan(1/cosh(camera))*2/degree),
         fts3(1/cosh(camera)));
   if(param == &depth)
     return

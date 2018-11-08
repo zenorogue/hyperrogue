@@ -356,7 +356,7 @@ namespace anygraph {
       coords.push_back(make_pair(r, alpha));
       if(err < 2) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
   
-      transmatrix h = spin(alpha * 2 * M_PI / 360) * xpush(r);
+      transmatrix h = spin(alpha * degree) * xpush(r);
       
       createViz(id, currentmap->gamestart(), h);
       }

@@ -158,9 +158,9 @@ transmatrix getOrientation() {
   beta = EM_ASM_DOUBLE({ return rotation_beta; });
   gamma = EM_ASM_DOUBLE({ return rotation_gamma; });
   return 
-    rotmatrix(alpha * M_PI / 180, 0, 1) *
-    rotmatrix(beta * M_PI / 180, 1, 2) *
-    rotmatrix(gamma * M_PI / 180, 0, 2);
+    rotmatrix(alpha * degree, 0, 1) *
+    rotmatrix(beta * degree, 1, 2) *
+    rotmatrix(gamma * degree, 0, 2);
   }
 #endif
 
