@@ -1938,6 +1938,10 @@ namespace linepatterns {
     {patTriTree, "triangle grid: tree edges", 0xFFFFFF00},
     {patTriOther, "triangle grid: other edges", 0xFFFFFF00},
 
+    {patCircles, "circles", 0xFFFFFF00},
+    {patRadii, "radii", 0xFFFFFF00},
+    {patMeridians, "meridians", 0xFFFFFF00},
+    {patParallels, "parallels", 0xFFFFFF00},
     };
 
   void clearAll() {
@@ -2191,6 +2195,46 @@ namespace linepatterns {
         color_t col = lp.color;
         if(!(col & 255)) continue;        
         drawPattern(lp.id, col, c, V);
+        }
+      }
+    
+    transmatrix V = gmatrix[cwt.at];
+    for(auto& lp: patterns) {
+      color_t col = lp.color;  
+      if(!(col & 255)) continue;        
+      if(lp.id == patCircles) 
+        for(int i=15; i<=180; i+=15) {
+          for(int j=0; j<360; j+=15) {
+            for(int k=0; k<=15; k++) 
+              curvepoint(xspinpush0((j+k) * degree, i * degree));
+            queuecurve(col, 0, PPR::LINE).V=V;
+            }
+          }
+      if(lp.id == patRadii)
+        for(int i=0; i<360; i+=15) {
+          for(int j=0; j<180; j+=15) {
+            for(int k=0; k<=15; k++)
+              curvepoint(xspinpush0(i * degree, (j+k) * degree));
+            queuecurve(col, 0, PPR::LINE).V=V;
+            }
+          }
+      if(lp.id == patMeridians) {
+        for(int j=-180; j<=180; j+=15) {
+          for(int i=-90; i<90; i+=15) {
+            for(int k=0; k<=15; k++)
+              curvepoint(V * xpush(j * degree) * ypush0((i+k) * degree));
+            queuecurve(col, 0, PPR::LINE).V=V;
+            }
+          }
+        }
+      if(lp.id == patParallels) {
+        for(int i=-90; i<=90; i += 15) {
+          for(int j=-180; j<180; j+=15) {
+            for(int k=0; k<=15; k++) 
+              curvepoint(V * xpush((j+k) * degree) * ypush0(i * degree));
+            queuecurve(col, 0, PPR::LINE).V=V;
+            }
+          }
         }
       }
     }

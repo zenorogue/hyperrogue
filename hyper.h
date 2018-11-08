@@ -2225,7 +2225,11 @@ namespace linepatterns {
     patBigRings,
     patHorocycles,
     patTriOther,
-    patDual
+    patDual,
+    patMeridians,
+    patParallels,
+    patCircles,
+    patRadii
     };
   
   void clearAll();
