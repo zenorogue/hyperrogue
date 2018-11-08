@@ -93,30 +93,6 @@ namespace polygonal {
     }
 
   pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
-
-  void drawBoundary(int color) {
-    queuereset(mdUnchanged, PPR::CIRCLE);
-
-    ld C, S;
-    auto& ho = conformal::model_orientation;
-    if(ho == 0) C = 1, S = 0;
-    else if(ho == 180) C = -1, S = 0;
-    else C = cos(ho * M_PI/180), S = sin(ho * M_PI / 180);
-
-    for(int r=0; r<=2000; r++) {
-      cxld z = exp(cxld(0, 2*M_PI * r / 2000.0));
-      pair<xld,xld> z2 = compute(real(z), imag(z), deg);
-      hyperpoint h;
-      h[0] = (z2.first * C - z2.second * S) * vid.radius;
-      h[1] = (z2.second * C + z2.first * S) * vid.radius;
-      h[2] = stereo::scrdist;
-      curvepoint(h);
-      }
-    
-    queuecurve(color, 0, PPR::CIRCLE);
-    queuereset(pmodel, PPR::CIRCLE);
-    }
-
   }
 
 #if CAP_SDL

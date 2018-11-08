@@ -71,15 +71,14 @@ namespace svg {
     return buf;
     }
   
-  void circle(int x, int y, int size, color_t col) {
-    int ba = (backcolor << 8) + 0xFF;
-    if(!invisible(col)) {
+  void circle(int x, int y, int size, color_t col, color_t fillcol) {
+    if(!invisible(col) && !invisible(fillcol)) {
       if(vid.stretch == 1)
         fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
-          coord(x), coord(y), coord(size), stylestr(ba, col));
+          coord(x), coord(y), coord(size), stylestr(fillcol, col));
       else
         fprintf(f, "<ellipse cx='%s' cy='%s' rx='%s' ry='%s' %s/>\n",
-          coord(x), coord(y), coord(size), coord(size*vid.stretch), stylestr(ba, col));
+          coord(x), coord(y), coord(size), coord(size*vid.stretch), stylestr(fillcol, col));
       }
     }
   
@@ -222,6 +221,8 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
 #endif
 
 hookset<void(renderbuffer*)> *hooks_hqshot;
+
+color_t fillmodel;
 
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
@@ -424,6 +425,7 @@ void reflect_view() {
       View = inverse(T) * View;
     }
   }
+
 
 void apply() {
   int t = ticks - lastticks;

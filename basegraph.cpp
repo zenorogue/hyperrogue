@@ -908,7 +908,7 @@ color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   return c;
   }
 
-void drawCircle(int x, int y, int size, color_t color) {
+void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
   if(size < 0) size = -size;
   #if CAP_GL
   if(vid.usingGL) {
@@ -916,7 +916,6 @@ void drawCircle(int x, int y, int size, color_t color) {
     glhr::be_nontextured();
     glhr::id_modelview();
     glcoords.clear();
-    glhr::color2(color);
     x -= vid.xcenter; y -= vid.ycenter;
     int pts = size * 4;
     if(pts > 1500) pts = 1500;
@@ -927,7 +926,14 @@ void drawCircle(int x, int y, int size, color_t color) {
       }
     glhr::vertices(glcoords);
     glhr::set_depthtest(false);
-    glDrawArrays(GL_LINE_LOOP, 0, pts);
+    if(fillcolor) {
+      glhr::color2(fillcolor);
+      glDrawArrays(GL_TRIANGLE_FAN, 0, pts);
+      }
+    if(color) { 
+      glhr::color2(color);
+      glDrawArrays(GL_LINE_LOOP, 0, pts);
+      }
     return;
     }
   #endif
@@ -935,10 +941,14 @@ void drawCircle(int x, int y, int size, color_t color) {
 #if CAP_XGD
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
 #elif CAP_SDLGFX
-  if(vid.stretch == 1)
-    ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
-  else
-    ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (s, x, y, size, size * vid.stretch, color);
+  if(vid.stretch == 1) {
+    if(fillcolor) filledCircleColor(s, x, y, size, fillcolor);
+    if(color) ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
+    }
+  else {
+    if(fillcolor) filledEllipseColor(s, x, y, size, size * vid.stretch, fillcolor);
+    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (s, x, y, size, size * vid.stretch, color);
+    }
 #elif CAP_SDL
   int pts = size * 4;
   if(pts > 1500) pts = 1500;

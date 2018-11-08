@@ -66,6 +66,9 @@ static const int POLY_BADCENTERIN = (1<<18);
 // precise width calculation
 static const int POLY_PRECISE_WIDE = (1<<19);
 
+// force inverted
+static const int POLY_FORCE_INVERTED = (1<<20);
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -549,7 +552,7 @@ void dqi_poly::gldraw() {
         glhr::color2(color);
         glhr::set_depthtest(model_needs_depth());
   
-        if(flags & POLY_INVERSE) {
+        if(flags & (POLY_INVERSE | POLY_FORCE_INVERTED)) {
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
           glStencilFunc( GL_NOTEQUAL, 1, 1);
           GLfloat xx = vid.xres;
@@ -574,6 +577,11 @@ void dqi_poly::gldraw() {
           }
         
         glDisable(GL_STENCIL_TEST);
+        }
+      else {
+        glhr::color2(color);
+        glhr::set_depthtest(model_needs_depth());
+        glDrawArrays(GL_TRIANGLE_FAN, offset, cnt);
         }
       }
     
@@ -1222,12 +1230,11 @@ void dqi_string::draw() {
 void dqi_circle::draw() {
   #if ISMOBILE==0
   if(svg::in) {
-    if(!color) return;
-    svg::circle(x, y, size, color);
+    svg::circle(x, y, size, color, fillcolor);
     }
   else
   #endif
-  drawCircle(x, y, size, color);
+  drawCircle(x, y, size, color, fillcolor);
   }
         
 void initquickqueue() {
@@ -1285,10 +1292,6 @@ void dqi_poly::draw_back() {
 void dqi_line::draw_back() { 
   dynamicval<color_t> dvc(color, darken_color(color, true));
   draw();
-  }
-
-void dqi_boundary_circle::draw_pre() {
-  draw(), color = 0;
   }
 
 void sort_drawqueue() {
@@ -1387,6 +1390,9 @@ void drawqueue() {
   spherephase = 0;
   stereo::set_projection(0);
   
+  for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
+    ptd->draw();
+    
   // on the sphere, parts on the back are drawn first
   if(two_sided_model()) {
   
@@ -1397,9 +1403,6 @@ void drawqueue() {
           ptd->draw();
       }
 
-    // in SVG, draw boundary circle first
-    if(svg::in) for(auto& ptd: ptds) ptd->draw_pre();
-    
     spherespecial = sphereflipped() ? 1 : -1;
     stereo::set_projection(0);
 
@@ -1415,7 +1418,7 @@ void drawqueue() {
     stereo::set_projection(0);
     }
   
-  for(auto& ptd: ptds) {
+  for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
     dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
     ptd->draw();
     }
@@ -2739,12 +2742,13 @@ void queuechr(int x, int y, int shift, int size, char chr, color_t col, int fram
   ptd.frame = frame ? (poly_outline & ~ 255) : 0;
   }
 
-void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, bool boundary = false) {
-  auto& ptd = boundary ? (dqi_circle&) queuea<dqi_boundary_circle>(prio) : queuea<dqi_circle>(prio);
+void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, color_t fillcolor = 0) {
+  auto& ptd = queuea<dqi_circle>(prio);
   ptd.x = x;
   ptd.y = y;
   ptd.size = size;
   ptd.color = color;
+  ptd.fillcolor = fillcolor;
   }
 
 void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {

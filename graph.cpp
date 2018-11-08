@@ -5504,103 +5504,36 @@ function<void()> wrap_drawfullmap = drawfullmap;
 
 bool force_sphere_outline = false;
 
-void drawfullmap() {
+void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio) {
+  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && vid.alpha <= -1)) {
+    hyperpoint ret;
+    applymodel(xpush0(radius), ret);
+    ld r = hypot2(ret);
+    queuecircle(vid.xcenter, vid.ycenter, r * vid.radius, linecol, prio, fillcol);
+    return;
+    }  
+  for(int i=0; i<360; i++) curvepoint(xspinpush0(i * 2 * M_PI / 360, 10));
+  auto& c = queuecurve(linecol, fillcol, prio);
+  if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1)
+    c.flags |= POLY_FORCE_INVERTED;
+  if(pmodel == mdJoukowsky)
+    c.flags |= POLY_FORCE_INVERTED;
+  }
 
-  DEBB(DF_GRAPH, (debugfile,"draw full map\n"));
-    
-  ptds.clear();
+void draw_model_elements() {
+
+  if(elliptic || (vid.grid && sphere))
+    circle_around_center(M_PI/2, ringcolor, 0, PPR::CIRCLE);    
 
   if(pmodel == mdTwoPoint) {
     ld a = -conformal::model_orientation * M_PI / 180;
-    queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
-    queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
-    }
-  
-  /*
-  if(conformal::on) {
-    char ch = 'A';
-    for(auto& v: conformal::v) {
-      queuepoly(ggmatrix(v->base) * v->at, shTriangle, 0x306090C0);
-      queuechr(ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
-      }      
-    }
-  */
-  
-  if(!twopoint_do_flips && !stereo::active() && sphere && pmodel == mdTwoPoint) {
-    queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
-
-    for(int b=-1; b<=1; b+=2)
-    for(ld a=-90; a<=90+1e-6; a+=pow(.5, vid.linequality)) {
-      using namespace hyperpoint_vec;
-      ld x = sin(a * vid.twopoint_param * b / 90);
-      ld y = 0;
-      ld z = -sqrt(1 - x*x);
-      conformal::apply_orientation(y, x);
-      hyperpoint h1;
-      applymodel(hpxyz(x,y,z), h1);
-      
-      conformal::apply_orientation(h1[0], h1[1]);      
-      h1[1] = abs(h1[1]) * b;
-      conformal::apply_orientation(h1[1], h1[0]);
-      curvepoint(h1);
-      }
-
-    queuecurve(ringcolor, 0, PPR::CIRCLE);
-    queuereset(pmodel, PPR::CIRCLE);
-    }
-  
-  if(!stereo::active() && sphere && pmodel == mdSinusoidal) {
-    queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
-    
-    for(ld a=-45; a<45+1e-6; a+=pow(.5, vid.linequality)) {
-      curvepoint(hpxyz(cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
-      }
-    for(ld a=45; a>=-45-1e-6; a-=pow(.5, vid.linequality)) {
-      curvepoint(hpxyz(-cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
-      }
-    queuecurve(ringcolor, 0, PPR::CIRCLE);
-
-    queuereset(pmodel, PPR::CIRCLE);
+    queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
+    queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
     }
 
-  if(!stereo::active() && vid.grid) {
-    ld rad = 0;
-    if(pmodel == mdBand && hyperbolic) rad = vid.radius;
-    if(pmodel == mdBandEquidistant && sphere) rad = vid.radius / 2;
-    if(pmodel == mdBandEquiarea && sphere) rad = vid.radius / M_PI;
-    
-    if(rad) {
-      queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
-      curvepoint(hpxyz(-vid.xcenter, -rad, 0));
-      curvepoint(hpxyz(vid.xres-vid.xcenter, -rad, 0));
-      queuecurve(ringcolor, 0, PPR::CIRCLE);
-      curvepoint(hpxyz(-vid.xcenter, rad, 0));
-      curvepoint(hpxyz(vid.xres-vid.xcenter, rad, 0));
-      queuecurve(ringcolor, 0, PPR::CIRCLE);
-      queuereset(pmodel, PPR::CIRCLE);
-      }
-    }
-  
-  if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdAzimuthalEqui()))) {
-    double rad = vid.radius;
-    bool isbnd = true;
-    if(sphere) {
-      if(mdAzimuthalEqui())
-        ;
-      else if(!vid.grid && !elliptic && !force_sphere_outline)
-        rad = 0; 
-      else if(vid.alpha <= 0)
-        ;
-      else if(vid.alpha <= 1 && (vid.grid || elliptic)) // mark the equator
-        rad = rad * 1 / vid.alpha, isbnd = false;
-      else if(vid.grid || force_sphere_outline) // mark the edge
-        rad /= sqrt(vid.alpha*vid.alpha - 1);
-      }
-    if(rad && !haveaura()) {
-      queuecircle(vid.xcenter, vid.ycenter, rad, ringcolor, 
-        vid.usingGL ? PPR::CIRCLE : PPR::OUTCIRCLE, isbnd);
-      }
-    if(pmodel == mdBall) ballgeometry();
+  if(pmodel == mdBall) {
+    queuecircle(vid.xcenter, vid.ycenter, vid.radius, ringcolor, PPR::OUTCIRCLE, fillmodel);
+    ballgeometry();
     }
   
   if(pmodel == mdHyperboloid && hyperbolic) {
@@ -5643,8 +5576,138 @@ void drawfullmap() {
 #endif
     }
   
-  if(pmodel == mdPolygonal || pmodel == mdPolynomial) 
-    polygonal::drawBoundary(darkena(0xFF, 0, 0xFF));
+  }
+
+void draw_boundary(int w) {
+
+  if(w == 1) return;
+
+  color_t lc = ringcolor;
+  color_t fc = fillmodel;
+  PPR p = PPR::OUTCIRCLE;
+
+  if(haveaura()) lc = 0;
+  if(lc == 0 && fc == 0) return;
+
+  switch(pmodel) {
+  
+    case mdSinusoidal: {
+      if(stereo::active() || !sphere) return;
+      queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
+      
+      for(ld a=-45; a<45+1e-6; a+=pow(.5, vid.linequality)) {
+        curvepoint(hpxyz(cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
+        }
+      for(ld a=45; a>=-45-1e-6; a-=pow(.5, vid.linequality)) {
+        curvepoint(hpxyz(-cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
+        }
+      queuecurve(lc, fc, p);
+      return;
+      }
+    
+    case mdTwoPoint: {
+      if(twopoint_do_flips || stereo::active() || !sphere) return;
+      queuereset(vid.usingGL ? mdDisk : mdUnchanged, p);
+  
+      for(int b=-1; b<=1; b+=2)
+      for(ld a=-90; a<=90+1e-6; a+=pow(.5, vid.linequality)) {
+        using namespace hyperpoint_vec;
+        ld x = sin(a * vid.twopoint_param * b / 90);
+        ld y = 0;
+        ld z = -sqrt(1 - x*x);
+        conformal::apply_orientation(y, x);
+        hyperpoint h1;
+        applymodel(hpxyz(x,y,z), h1);
+        
+        conformal::apply_orientation(h1[0], h1[1]);      
+        h1[1] = abs(h1[1]) * b;
+        conformal::apply_orientation(h1[1], h1[0]);
+        curvepoint(h1);
+        }
+  
+      queuecurve(lc, fc, p);
+      queuereset(pmodel, p);
+      return;
+      }
+    
+    case mdBand: case mdBandEquidistant: case mdBandEquiarea: {
+      ld rad = 0;
+      if(pmodel == mdBand && hyperbolic) rad = vid.radius;
+      if(pmodel == mdBandEquidistant && sphere) rad = vid.radius / 2;
+      if(pmodel == mdBandEquiarea && sphere) rad = vid.radius / M_PI;
+      
+      if(rad) {
+        queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
+        curvepoint(hpxyz(-vid.xcenter, -rad, 0));
+        curvepoint(hpxyz(vid.xres-vid.xcenter, -rad, 0));
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
+        curvepoint(hpxyz(-vid.xcenter, rad, 0));
+        curvepoint(hpxyz(vid.xres-vid.xcenter, rad, 0));
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
+        queuereset(pmodel, PPR::CIRCLE);
+        return;
+        }
+      }
+    
+    default: break;
+    }
+
+  /*
+  if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdAzimuthalEqui()))) {
+    double rad = vid.radius;
+    bool isbnd = true;
+    if(sphere) {
+      if(mdAzimuthalEqui())
+        ;
+      else if(!vid.grid && !elliptic && !force_sphere_outline)
+        rad = 0; 
+      else if(vid.alpha <= 0)
+        ;
+      else if(vid.grid || force_sphere_outline) // mark the edge
+        rad /= sqrt(vid.alpha*vid.alpha - 1);
+      }
+    if(rad)
+      queuecircle(vid.xcenter, vid.ycenter, rad, lc, p, fc);
+    return;
+    }
+  */
+  
+  if(sphere) return;
+  circle_around_center(hyperbolic ? 20 : exp(10), lc, fc, p);
+  
+  /*
+    if(pmodel == mdPolygonal || pmodel == mdPolynomial) 
+    polygonal::drawBoundary(darkena(0xFF, 0, 0xFF));  
+  */
+  }
+
+
+void drawfullmap() {
+
+  DEBB(DF_GRAPH, (debugfile,"draw full map\n"));
+    
+  ptds.clear();
+
+  
+  /*
+  if(conformal::on) {
+    char ch = 'A';
+    for(auto& v: conformal::v) {
+      queuepoly(ggmatrix(v->base) * v->at, shTriangle, 0x306090C0);
+      queuechr(ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
+      }      
+    }
+  */
+  
+  draw_boundary(0);
+  draw_boundary(1);
+  
+  draw_model_elements();
+  
+  if(fillmodel) {
+    for(int i=0; i<360; i++) curvepoint(xspinpush0(i * 2 * M_PI / 360, 10));
+    auto m = queuecurve(ringcolor, fillmodel, PPR::OUTCIRCLE);
+    }
   
   /* if(vid.wallmode < 2 && !euclid && !patterns::whichShape) {
     int ls = isize(lines);

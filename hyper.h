@@ -945,7 +945,7 @@ bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t
 
 bool outofmap(hyperpoint h);
 void applymodel(hyperpoint H, hyperpoint& Hscr);
-void drawCircle(int x, int y, int size, color_t color);
+void drawCircle(int x, int y, int size, color_t color, color_t fillcolor = 0);
 void fixcolor(int& col);
 ld displayspin(cell *c, int d);
 hyperpoint gethyper(ld x, ld y);
@@ -1820,7 +1820,7 @@ void clearMessages();
 void resetGeometry();
 
 namespace svg {
-  void circle(int x, int y, int size, color_t col);
+  void circle(int x, int y, int size, color_t col, color_t fillcolor);
   void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth);
   void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
   extern bool in;
@@ -2660,14 +2660,9 @@ struct dqi_string : drawqueueitem {
   };
 
 struct dqi_circle : drawqueueitem {
-  int x, y, size;
+  int x, y, size, fillcolor;
   void draw();
   virtual color_t outline_group() { return 2; }
-  };
-
-struct dqi_boundary_circle : dqi_circle {
-  int x, y, size;
-  void draw_pre();
   };
 
 struct dqi_action : drawqueueitem {

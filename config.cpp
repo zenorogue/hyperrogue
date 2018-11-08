@@ -1492,6 +1492,9 @@ int read_config_args() {
   else if(argis("-back")) {
     PHASEFROM(2); shift(); backcolor = arghex();
     }
+  else if(argis("-fillmodel")) {
+    PHASEFROM(2); shift(); fillmodel = arghex();
+    }
   else if(argis("-ring")) {
     PHASEFROM(2); shift(); ringcolor = arghex();
     }
@@ -1516,6 +1519,11 @@ int read_config_args() {
   else if(argis("-vsync_off")) {
     vsync_off = true;
     if(curphase == 3) setvideomode();
+    }
+  else if(argis("-aura")) {
+    PHASEFROM(2);
+    shift(); vid.aurastr = argi();
+    shift(); vid.aurasmoothen = argi();
     }
   else if(argis("-nofps")) {
     nofps = true;
