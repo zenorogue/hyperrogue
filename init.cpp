@@ -23,6 +23,7 @@ int startseed = 0;
 eLand firstland0;
 
 void initAll() {
+  init_floorcolors();
   showstartmenu = true;
   ca::init();
 #if CAP_COMMANDLINE

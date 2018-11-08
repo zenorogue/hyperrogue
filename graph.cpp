@@ -2691,6 +2691,53 @@ ld wavefun(ld x) {
 
 colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
 
+color_t floorcolors[landtypes];
+
+void init_floorcolors() {
+  for(int i=0; i<landtypes; i++)
+    floorcolors[i] = linf[i].color;
+
+  floorcolors[laDesert] = 0xEDC9AF;
+  floorcolors[laKraken] = 0x20A020;
+  floorcolors[laDocks] = 0x202020;
+  floorcolors[laCA] = 0x404040;
+  floorcolors[laMotion] = 0xF0F000;
+  floorcolors[laGraveyard] = 0x107010;
+  floorcolors[laWineyard] = 0x006000;
+  floorcolors[laLivefjord] = 0x306030;
+    
+  floorcolors[laMinefield] = 0x80A080; 
+  floorcolors[laCaribbean] = 0x006000;
+
+  floorcolors[laAlchemist] = 0x202020;
+
+  floorcolors[laRlyeh] = 0x004080;
+  floorcolors[laHell] = 0xC00000;
+  floorcolors[laCrossroads] = 0xFF0000;
+  floorcolors[laJungle] = 0x008000;
+
+  floorcolors[laZebra] = 0xE0E0E0;
+
+  floorcolors[laCaves] = 0x202020;
+  floorcolors[laEmerald] = 0x202020;
+  floorcolors[laDeadCaves] = 0x202020;
+
+  floorcolors[laPalace] = 0x806020;
+  
+  floorcolors[laHunting] = 0x40E0D0 / 2;
+
+  floorcolors[laBlizzard] = 0x5050C0;
+  floorcolors[laCocytus] = 0x80C0FF;
+  floorcolors[laIce] = 0x8080FF;
+  floorcolors[laCamelot] = 0xA0A0A0;
+
+  floorcolors[laOvergrown] = 0x00C020;
+  floorcolors[laClearing] = 0x60E080;
+  floorcolors[laHaunted] = 0x609F60;
+
+  floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;
+  }
+
 void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 
   wcol = fcol = winf[c->wall].color;
@@ -2735,29 +2782,33 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
     case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
-      fcol = linf[c->land].color; break;
+    case laDesert: case laKraken: case laDocks: case laCA:
+    case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
+    case laRlyeh: case laHell: case laCrossroads: case laJungle:
+    case laAlchemist: 
+      fcol = floorcolors[c->land]; break;
     
     case laRuins:
       fcol = pseudohept(c) ? 0xC0E0C0 : 0x40A040;
       break;
     
     case laDual:
-      fcol = linf[c->land].color;
+      fcol = floorcolors[c->land];
       if(c->landparam == 2) fcol = 0x40FF00;
       if(c->landparam == 3) fcol = 0xC0FF00;
       break;
 
-    case laDesert: fcol = 0xEDC9AF; break;
-    case laKraken: fcol = 0x20A020; break;
-    case laDocks: fcol = 0x202020; break;
-    case laCA: fcol = 0x404040; break;
-    case laMotion: fcol = 0xF0F000; break;
-    case laGraveyard: fcol = 0x107010; break;
-    case laWineyard: fcol = 0x006000; break;
-    case laLivefjord: fcol = 0x306030; break;
-    
-    case laBrownian:
-      fcol = wcol = gradient(0x002000, 0xFFFFFF, 0, c->landparam, 20);
+#if CAP_COMPLEX2    
+    case laBrownian: {
+      using brownian::level;
+      fcol = wcol = 
+        c->landparam == 0 ? 0x0000F0 : 
+        c->landparam < level ? gradient(0x002000, 0xFFFFFF, 1, c->landparam, level-1) :
+        c->landparam < 2 * level ? 0xFFFF80 :
+        // gradient(0xFFFF80, 0xFFFF00, 2*level, c->landparam, 2*level-1) :
+        c->landparam < 3 * level ? 0xFF8000 :
+        // gradient(0xFF8000, 0xFFF000, 2*level, c->landparam, 3*level-1) :
+        0xC00000;
       break;
       
     case laVolcano: {
@@ -2781,25 +2832,20 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       }
 
     case laMinefield: 
-      fcol = 0x80A080; 
+      fcol = floorcolors[c->land];
       if(c->wall == waMineMine && ((cmode & sm::MAP) || !canmove))
         fcol = wcol = 0xFF4040;
       break;
       
     case laCaribbean: 
       if(c->wall != waCIsland && c->wall != waCIsland2)
-        fcol = 0x006000;
+        fcol = floorcolors[c->land];
       break;
 
-    case laAlchemist: 
-      fcol = 0x202020;
-      break;
     case laReptile:
       fcol = reptilecolor(c);
       break;
-    case laCrossroads:
-      fcol = (stereo::in_anaglyph() ? 0xFF3030 : 0xFF0000);
-      break;
+
     case laCaves: case laEmerald: case laDeadCaves:
       fcol = 0x202020;
       if(c->land == laEmerald) 
@@ -2808,11 +2854,9 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         if(c->wall == waCavewall) wcol = 0xC0FFC0;
         }
       break;
-    case laJungle:
-      fcol = (stereo::in_anaglyph() ? 0x408040 : 0x008000);
-      break;
     case laMirror: case laMirrorWall: case laMirrorOld:
-      fcol = 0x808080;
+      if(c->land == laMirrorWall) fcol = floorcolors[laMirror];
+      else fcol = floorcolors[c->land];
       break;
     case laDryForest:
       fcol = gradient(0x008000, 0x800000, 0, c->landparam, 10);
@@ -2823,17 +2867,11 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       else fcol = 0;
       if(c->wall == waPlatform) wcol = 0xF0F0A0;
       break;
-    case laRlyeh:
-      fcol = (stereo::in_anaglyph() ? 0x4080C0 : 0x004080);
-      break;
-    case laHell:
-      fcol = (stereo::in_anaglyph() ? 0xC03030 : 0xC00000);
-      break;
     case laCanvas:
       fcol = c->landparam;
       break;
     case laPalace:
-      fcol = 0x806020;
+      fcol = floorcolors[c->land];
       if(c->wall == waClosedGate || c->wall == waOpenGate)
         fcol = wcol;
       break;
@@ -2841,7 +2879,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       fcol = (linf[c->barleft].color>>1) + (linf[c->barright].color>>1);
       break;
     case laZebra:
-      fcol = 0xE0E0E0;
+      fcol = floorcolors[c->land];
       if(c->wall == waTrapdoor) fcol = 0x808080;
       break;
     case laHive:
@@ -2861,7 +2899,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       else if(c->wall == waSmallTree) wcol = 0x905000;
       break;
     case laOvergrown: case laClearing:
-      fcol = (c->land == laOvergrown/* || (celldistAlt(c)&1)*/) ? 0x00C020 : 0x60E080;
+      fcol = floorcolors[c->land];
       if(c->wall == waSmallTree) wcol = 0x008060;
       else if(c->wall == waBigTree) wcol = 0x0080C0;
       break;
@@ -2888,9 +2926,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       break;
 
     case laHunting:
-      // fcol = pseudohept(c) ? 0x205050 : 0x306060;
-      fcol = 0x40E0D0;
-      fcol /= 2;
+      fcol = floorcolors[c->land];
       if(pseudohept(c)) fcol = fcol * 3/4;
       break;
   
@@ -2955,7 +2991,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       else 
   #endif
       if(d < 0) {
-        fcol = 0xA0A0A0;
+        fcol = floorcolors[c->land];
         }
       else {
         // a nice floor pattern
@@ -2975,11 +3011,12 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     case laIce: case laCocytus: case laBlizzard:
       if(isIcyWall(c)) {
         float h = HEAT(c);
-        bool showcoc = c->land == laCocytus && chaosmode && !wmescher;
+        eLand l = c->land;
+        if(l == laCocytus && (!chaosmode || !wmescher)) l = laIce;
         
-        color_t colorN04 = showcoc ? 0x4080FF : 0x4040FF;
+        color_t colorN04 = l == laCocytus ? 0x4080FF : 0x4040FF;
         color_t colorN10 = 0x0000FF;
-        color_t color0 = c->land == laBlizzard ? 0x5050C0 : showcoc ? 0x80C0FF : 0x8080FF;
+        color_t color0 = floorcolors[c->land];
         color_t color02 = 0xFFFFFF;
         color_t color06 = 0xFF0000;
         color_t color08 = 0xFFFF00;
@@ -3035,7 +3072,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->item)
           itcolor = 1;
         if(c->item) itcolor |= 2;
-        fcol = 0x609F60 + 0x202020 * itcolor;
+        fcol = floorcolors[laHaunted] + 0x202020 * itcolor;
     
         forCellEx(c2, c) if(c2->monst == moFriendlyGhost)
           fcol = gradient(fcol, fghostcolor(c2), 0, .25, 1);

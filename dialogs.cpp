@@ -472,27 +472,27 @@ namespace dialog {
   
   bool handleKeyColor(int sym, int uni) {
     unsigned& color = *colorPointer;
+    int shift = colorAlpha ? 0 : 8;
 
     if(uni >= 'A' && uni <= 'D') {
       int x = (mousex - (dcenter-dwidth/4)) * 510 / dwidth;
       if(x < 0) x = 0;
       if(x > 255) x = 255;
-      unsigned char* pts = (unsigned char*) &color;
-      pts[uni - 'A'] = x;
+      part(color, uni - 'A') = x;
       }
     else if(uni == ' ' || uni == '\n' || uni == '\r') {
       bool inHistory = false;
-      for(int i=0; i<10; i++) if(colorhistory[i] == (unsigned) color)
+      for(int i=0; i<10; i++) if(colorhistory[i] == (color << shift))
         inHistory = true;
-      if(!inHistory) { colorhistory[lch] = color; lch++; lch %= 10; }
+      if(!inHistory) { colorhistory[lch] = (color << shift); lch++; lch %= 10; }
       if(reaction) reaction();
       popScreen();
       }
     else if(uni >= '0' && uni <= '9') {
-      color = colorhistory[uni - '0'];
+      color = colorhistory[uni - '0'] >> shift;
       }
     else if(palette && uni >= 'a' && uni < 'a'+(int) palette[0]) {
-      color = palette[1 + uni - 'a'];
+      color = palette[1 + uni - 'a'] >> shift;
       }
     else if(sym == SDLK_DOWN || sym == SDLK_KP2) {
       colorp = (colorp-1) & 3;
@@ -513,6 +513,8 @@ namespace dialog {
       }
     return false;
     }
+  
+  bool colorAlpha;
   
   void drawColorDialog() {
     cmode = sm::NUMBER | dialogflags;
@@ -555,19 +557,20 @@ namespace dialog {
 
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
+      if(i == 3 && !colorAlpha) continue;
       
       color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : dialogcolor;
 
       displayColorButton(dcenter - dwidth/4, y, "(", 0, 16, 0, col);
-      string rgt = ") "; rgt += "ABGR" [i];
+      string rgt = ") "; rgt += "ABGR" [i+(colorAlpha?0:1)];
       displayColorButton(dcenter + dwidth/4, y, rgt, 0, 0, 0, col);
-      displayColorButton(dcenter - dwidth/4 + dwidth * ((color >> (8*i)) & 0xFF) / 510, y, "#", 0, 8, 0, col);
+      displayColorButton(dcenter - dwidth/4 + dwidth * part(color, i) / 510, y, "#", 0, 8, 0, col);
       
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
         getcstat = 'A' + i, inslider = true;
       }
     
-    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> ash);
+    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
 
     if(extra_options) extra_options();
     
@@ -576,6 +579,7 @@ namespace dialog {
   
   void openColorDialog(unsigned int& col, unsigned int *pal) {
     colorPointer = &col; palette = pal;
+    colorAlpha = true;
     dialogflags = 0;
     pushScreen(drawColorDialog);
     reaction = reaction_t();

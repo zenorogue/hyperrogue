@@ -346,17 +346,6 @@ void handleKeyNormal(int sym, int uni) {
 
   if(uni == sym && DEFAULTNOR(sym)) {
     gmodekeys(sym, uni);
-    if(sym == '8') {
-      backcolor = backcolor ^ 0xFFFFFF;
-      bordcolor = bordcolor ^ 0xFFFFFF;
-      forecolor = forecolor ^ 0xFFFFFF;
-      printf("back = %x\n", backcolor);
-      }
-    if(sym == '9') {
-      pmodel = eModel(8 - pmodel);
-      // vid.yshift = 1 - vid.yshift;
-      // vid.drawmousecircle = true;
-      }
     if(sym == 'm' && canmove && (centerover == cwt ? mouseover : centerover.at))
       performMarkCommand(mouseover);
     }

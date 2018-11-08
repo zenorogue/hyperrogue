@@ -17,6 +17,8 @@ videopar vid;
 #define ANDROID_SETTINGS ;
 #endif
 
+extern color_t floorcolors[landtypes];
+
 charstyle& getcs(int id) {
   if(multi::players>1 && id >= 0 && id < multi::players)
     return multi::scs[id];
@@ -113,6 +115,11 @@ void loadcs(FILE *f, charstyle& cs, int xvernum) {
   if(xvernum >= 8990) hr::ignore(fscanf(f, "%x", &cs.uicolor));
   }
 #endif
+
+void savecolortable(colortable& ct, string name) {
+  for(int i=0; i<isize(ct); i++)
+    addsaver(ct[i], "color:" + name + ":" + its(i));
+  }
 
 void initConfig() {
   
@@ -235,7 +242,23 @@ void initConfig() {
   addsaver(backcolor, "color:background");
   addsaver(forecolor, "color:foreground");
   addsaver(bordcolor, "color:borders");
+  addsaver(ringcolor, "color:ring");
+  addsaver(modelcolor, "color:model");
+  addsaver(periodcolor, "color:period");
   addsaver(dialog::dialogcolor, "color:dialog");
+  for(auto& p: colortables)
+    savecolortable(p.second, s0+"canvas"+p.first);
+  savecolortable(distcolors, "distance");
+  savecolortable(minecolors, "mines");
+  
+  for(int i=0; i<motypes; i++)
+    addsaver(minf[i].color, "color:monster:" + its(i));
+  for(int i=0; i<ittypes; i++)
+    addsaver(iinf[i].color, "color:item:" + its(i));
+  for(int i=0; i<landtypes; i++)
+    addsaver(floorcolors[i], "color:land:" + its(i));
+  for(int i=0; i<walltypes; i++)
+    addsaver(winf[i].color, "color:wall:" + its(i));
 
   // modes
     
@@ -727,11 +750,10 @@ void showGraphConfig() {
 
   menuitem_sightrange();
   
-  dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
-
-  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
-  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 'x');
+  dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'C');
   
+  dialog::addItem(XLAT("customize colors and aura"), 'c');
+
   showAllConfig();
   dialog::display();
 
@@ -742,10 +764,12 @@ void showGraphConfig() {
     
     char xuni = uni | 96;
   
-    if((uni >= 32 && uni < 64) || uni == 'L') xuni = uni;
+    if((uni >= 32 && uni < 64) || uni == 'L' || uni == 'C') xuni = uni;
     
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
+    
+    if(xuni == 'c') pushScreen(show_color_dialog);
         
     if(xuni == 'j') {
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
@@ -805,7 +829,7 @@ void showGraphConfig() {
       dialog::reaction = [] () { resetGeometry(); };
       }
   
-    if(xuni == 'c') {
+    if(xuni == 'C') {
       dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
       // we need to check the moves
       dialog::reaction = checkmove;
@@ -825,11 +849,6 @@ void showGraphConfig() {
   
     if(xuni =='p') 
       vid.backeffects = !vid.backeffects;
-  
-    if(xuni =='z') 
-      dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), "");
-    else if(xuni =='x') 
-      dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), "");
   
     handleAllConfig(sym, xuni);
     };
@@ -1388,6 +1407,117 @@ void showCustomizeChar() {
     else if(uni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
     else if(uni == 'u') switchcolor(cs.uicolor, eyecolors);
     else if(doexiton(sym, uni)) popScreen();
+    };
+  }
+
+void refresh_canvas() {
+  manual_celllister cl;
+  cl.add(cwt.at);
+    
+  int at = 0;
+  while(at < isize(cl.lst)) {
+    cell *c2 = cl.lst[at];
+    c2->landparam = patterns::generateCanvas(c2);
+    at++;
+    
+    forCellEx(c3, c2) cl.add(c3);
+    }
+  }
+
+void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
+  cmode = sm::SIDE;
+  gamescreen(0);
+  dialog::init(XLAT("Customize colors and aura"));
+  
+  for(int i=0; i<isize(ct); i++) {
+    dialog::addColorItem(its(i), ct[i] << 8, 'a'+i);
+    dialog::add_action([i, &ct, r] () { dialog::openColorDialog(ct[i]); dialog::reaction = r; dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+    }
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+void show_color_dialog() {
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  gamescreen(0);
+  dialog::init(XLAT("Customize colors and aura"));
+
+  dialog::addColorItem(XLAT("background"), backcolor << 8, 'b');
+  dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("foreground"), forecolor << 8, 'f');
+  dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("borders"), bordcolor << 8, 'o');
+  dialog::add_action([] () { dialog::openColorDialog(bordcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("projection boundary"), ringcolor, 'r');
+  dialog::add_action([] () { dialog::openColorDialog(ringcolor); dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("projection content"), modelcolor, 'c');
+  dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
+  dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("dialogs"), dialog::dialogcolor << 8, 'd');
+  dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addBreak(50);
+  if(specialland == laCanvas && colortables.count(patterns::whichCanvas)) {
+    dialog::addItem(XLAT("pattern colors"), 'P');
+    dialog::add_action([] () { pushScreen([] () { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas); });});
+    }
+ 
+  if(cwt.at->land == laMinefield) {
+    dialog::addItem(XLAT("minefield colors"), 'm');
+    dialog::add_action([] () { pushScreen([] () { edit_color_table(minecolors); });});
+    }
+  
+  if(viewdists) {
+    dialog::addItem(XLAT("distance colors"), 'd');
+    dialog::add_action([] () { pushScreen([] () { edit_color_table(distcolors); });});
+    }
+
+  dialog::addInfo(XLAT("colors of some game objects can be edited by clicking them."));
+  
+  dialog::addBreak(50);
+
+  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'a');
+  dialog::add_action([] () { dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), ""); });
+
+  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 's');
+  dialog::add_action([] () { dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), ""); });  
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  
+  getcstat = '-';
+
+  keyhandler = [] (int sym, int uni) {
+    if(uni == '-') {
+      cell *c = mouseover;
+      if(!c) return;
+      else if(c == cwt.at) {
+        pushScreen(showCustomizeChar);
+        return;
+        }
+      else if(c->monst) 
+        dialog::openColorDialog(minf[c->monst].color);
+      else if(c->item) 
+        dialog::openColorDialog(iinf[c->item].color);
+      else if(c->wall) 
+        dialog::openColorDialog(winf[c->wall].color);
+      else 
+        dialog::openColorDialog(floorcolors[c->land]);
+      dialog::colorAlpha = false;
+      dialog::dialogflags |= sm::SIDE;
+      return;
+      }
+    else dialog::handleNavigation(sym, uni);
+    if(doexiton(sym, uni)) popScreen();
     };
   }
 

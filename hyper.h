@@ -1763,6 +1763,7 @@ namespace dialog {
   void addBigItem(string body, int key);
   void addColorItem(string body, int value, int key);
   void openColorDialog(color_t& col, color_t *pal = palette);
+  extern bool colorAlpha;
   void addHelp(string body);
   void addInfo(string body, color_t color = dialogcolor);
   void addItem(string body, int key);
@@ -4329,5 +4330,7 @@ bool haveaura();
 string parser_help();
 
 static const ld degree = M_PI / 180;
+
+void show_color_dialog();
 }
 
