@@ -43,16 +43,21 @@ transmatrix rel(cellwalker cw) {
   return calc_relative_matrix(cw.cpeek(), cw.at, cw.spin);
   }
 
+ld label_dist = .3;
+
 transmatrix labelpos(hyperpoint h1, hyperpoint h2) {
   hyperpoint h = mid(h1, h2);
   transmatrix T = rgpushxto0(h);
   hyperpoint hx = inverse(T) * h2;
   ld alpha = atan2(-hx[1], hx[0]);
-  return T * xspinpush(alpha + M_PI/2, .3);
+  return T * xspinpush(alpha + M_PI/2, label_dist);
   }
  
+ld widthfactor = 5;
+ld label_scale = 1;
+
 void fundamental_marker() {
-  if(!funmode || !quotient) return;
+  if(!funmode || !(quotient || torus || elliptic)) return;
   same.clear();
   gm.clear();
   
@@ -145,7 +150,7 @@ void fundamental_marker() {
     cw = next_corner[cw];
     }
   
-  vid.linewidth *= 5;
+  vid.linewidth *= widthfactor;
 
   for(int ci=0; ci<corners; ci++) {
 
@@ -195,18 +200,18 @@ void fundamental_marker() {
     
       int mc = (mirrored ? color1 : color2) >> 8;
       if(hdist(corner(cw), corner(next_corner[cw])) > 1e-3) {
-        queuestr(labelpos(corner(cw), corner(next_corner[cw])), 1/scalefactor, its(id), mc);
+        queuestr(labelpos(corner(cw), corner(next_corner[cw])), label_scale/scalefactor, its(id), mc);
         if(mirrored)
-          queuestr(labelpos(corner(cw1), corner(next_corner[cw1])), 1/scalefactor, its(id), mc);
+          queuestr(labelpos(corner(cw1), corner(next_corner[cw1])), label_scale/scalefactor, its(id), mc);
         else
-          queuestr(labelpos(corner(prev_corner[cw1]), corner(cw1)), 1/scalefactor, its(id), mc);
+          queuestr(labelpos(corner(prev_corner[cw1]), corner(cw1)), label_scale/scalefactor, its(id), mc);
         id++;
         }      
       }
     cw = next_corner[cw];
     }
 
-  vid.linewidth /= 5;
+  vid.linewidth /= widthfactor;
   }
 
 int readArgs() {
@@ -217,6 +222,9 @@ int readArgs() {
     shift(); funmode = argi();
     shift(); color1 = arghex();
     shift(); color2 = arghex();
+    shift(); widthfactor = argf();
+    shift(); label_scale = argf();
+    shift(); label_dist = argf();
     }
   else return 1;
   return 0;
