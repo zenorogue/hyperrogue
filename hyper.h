@@ -2300,7 +2300,7 @@ string generateHelpForItem(eItem it);
 bool graphglyph();
 extern bool hiliteclick;
 extern int antialiaslines;
-extern int ringcolor;
+extern color_t ringcolor, periodcolor, modelcolor;
 
 #include <functional>
 
@@ -3336,6 +3336,7 @@ extern int sagephase;
 extern int lastsize;
 extern int noiseuntil;
 hyperpoint xpush0(ld x);
+hyperpoint ypush0(ld x);
 transmatrix xspinpush(ld alpha, ld x);
 hyperpoint xspinpush0(ld alpha, ld x);
 

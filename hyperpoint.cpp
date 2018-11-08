@@ -293,6 +293,14 @@ inline hyperpoint xpush0(ld x) {
   return h;
   }
 
+inline hyperpoint ypush0(ld x) { 
+  hyperpoint h;
+  if(euclid) return hpxy(x, 0);
+  else if(sphere) h[0] = 0, h[1] = sin(x), h[2] = cos(x);
+  else h[0] = 0, h[1] = sinh(x), h[2] = cosh(x);
+  return h;
+  }
+
 inline hyperpoint xspinpush0(ld alpha, ld x) { 
   // return spin(alpha)*xpush0(x);
   ld s;

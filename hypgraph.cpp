@@ -1142,62 +1142,100 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     c.flags |= POLY_FORCE_INVERTED;
   }
 
+color_t periodcolor = 0x00FF0080;
+color_t ringcolor = darkena(0xFF, 0, 0xFF);
+color_t modelcolor = 0;
+
 void draw_model_elements() {
 
-  if(elliptic || (vid.grid && sphere))
-    circle_around_center(M_PI/2, ringcolor, 0, PPR::CIRCLE);    
+  switch(pmodel) {
 
-  if(pmodel == mdTwoPoint) {
-    ld a = -conformal::model_orientation * degree;
-    queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
-    queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
-    }
-
-  if(pmodel == mdBall) {
-    queuecircle(vid.xcenter, vid.ycenter, vid.radius, ringcolor, PPR::OUTCIRCLE, fillmodel);
-    ballgeometry();
-    }
-  
-  if(pmodel == mdHyperboloid && hyperbolic) {
+    case mdTwoPoint: {
+      ld a = -conformal::model_orientation * degree;
+      queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
+      queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
+      return;
+      }
+    
+    case mdBall: {
+      queuecircle(vid.xcenter, vid.ycenter, vid.radius, ringcolor, PPR::OUTCIRCLE, modelcolor);
+      ballgeometry();
+      return;
+      }
+    
+    case mdHyperboloid: {
+      if(hyperbolic) {
 #if CAP_QUEUE
-    curvepoint(hpxyz(0,0,1));
-    curvepoint(hpxyz(0,0,-vid.alpha));
-    queuecurve(ringcolor, 0, PPR::CIRCLE);
+        curvepoint(hpxyz(0,0,1));
+        curvepoint(hpxyz(0,0,-vid.alpha));
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
+        
+        ld& tz = conformal::top_z;
+        ld z = acosh(tz);
     
-    ld& tz = conformal::top_z;
-    ld z = acosh(tz);
-
-    hyperpoint a = xpush0(z);
-    ld cb = conformal::cos_ball;
-    ld sb = conformal::sin_ball;
+        hyperpoint a = xpush0(z);
+        ld cb = conformal::cos_ball;
+        ld sb = conformal::sin_ball;
+        
+        a[1] = sb * a[2] / -cb;
+        a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
     
-    a[1] = sb * a[2] / -cb;
-    a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
-
-    curvepoint(hpxyz(0,0,-vid.alpha));
-    curvepoint(a);
-    curvepoint(hpxyz(0,0,0));
-    a[0] = -a[0];
-    curvepoint(a);
-    curvepoint(hpxyz(0,0,-vid.alpha));
-    queuecurve(ringcolor, 0, PPR::CIRCLE);
-
-    curvepoint(hpxyz(-1,0,0));
-    curvepoint(hpxyz(1,0,0));
-    queuecurve(ringcolor, 0, PPR::CIRCLE);
-
-    a[1] = sb * tz / -cb;
-    a[0] = sqrt(tz * tz - a[1] * a[1]);
-    a[2] = tz - vid.alpha;
-
-    curvepoint(a);
-    curvepoint(hpxyz(0,0,-vid.alpha));
-    a[0] = -a[0];
-    curvepoint(a);
-    queuecurve(ringcolor, 0, PPR::CIRCLE);
+        curvepoint(hpxyz(0,0,-vid.alpha));
+        curvepoint(a);
+        curvepoint(hpxyz(0,0,0));
+        a[0] = -a[0];
+        curvepoint(a);
+        curvepoint(hpxyz(0,0,-vid.alpha));
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
+    
+        curvepoint(hpxyz(-1,0,0));
+        curvepoint(hpxyz(1,0,0));
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
+    
+        a[1] = sb * tz / -cb;
+        a[0] = sqrt(tz * tz - a[1] * a[1]);
+        a[2] = tz - vid.alpha;
+    
+        curvepoint(a);
+        curvepoint(hpxyz(0,0,-vid.alpha));
+        a[0] = -a[0];
+        curvepoint(a);
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
 #endif
+        }
+      return;
+      }
+
+    default: break;
     }
+  }
+ 
+void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
+
+  using namespace hyperpoint_vec;
+  hyperpoint H;
+  applymodel(X, H);
+  H *= vid.radius;
+  ld mul = hypot(vid.xres, vid.yres) / hypot2(H);
+  ld m = style == 1 ? -mul : -1;
   
+  queuereset(mdUnchanged, p);
+  curvepoint(H + spin(M_PI/2) * H * mul);
+  curvepoint(H - spin(M_PI/2) * H * mul);
+  curvepoint(m * H - spin(M_PI/2) * H * mul);
+  curvepoint(m * H + spin(M_PI/2) * H * mul);
+  curvepoint(H + spin(M_PI/2) * H * mul);
+
+  queuecurve(lc, fc, p).flags |= POLY_ALWAYS_IN;
+  queuereset(pmodel, p);
+  /*
+  for(int i=0; i<1; i++) {
+    hyperpoint h = spin(i * 45 * degree) * X;
+    hyperpoint res;
+    applymodel(h, res);
+    if(hypot2(res) < 1000 && !std::isnan(res[0]) && !std::isnan(res[1]))
+      queuechr(h, 16, 'X', 0xFF0000 + i * 0x20);
+    } */
   }
 
 void draw_boundary(int w) {
@@ -1205,28 +1243,19 @@ void draw_boundary(int w) {
   if(w == 1) return;
 
   color_t lc = ringcolor;
-  color_t fc = fillmodel;
+  color_t fc = modelcolor;
   PPR p = PPR::OUTCIRCLE;
 
   if(haveaura()) lc = 0;
   if(lc == 0 && fc == 0) return;
+  
+  ld fakeinf = sphere ? M_PI-1e-5 : hyperbolic ? 10 : exp(10);
 
+  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal))
+    circle_around_center(M_PI/2, periodcolor, 0, PPR::CIRCLE);
+  
   switch(pmodel) {
   
-    case mdSinusoidal: {
-      if(stereo::active() || !sphere) return;
-      queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
-      
-      for(ld a=-45; a<45+1e-6; a+=pow(.5, vid.linequality)) {
-        curvepoint(hpxyz(cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
-        }
-      for(ld a=45; a>=-45-1e-6; a-=pow(.5, vid.linequality)) {
-        curvepoint(hpxyz(-cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
-        }
-      queuecurve(lc, fc, p);
-      return;
-      }
-    
     case mdTwoPoint: {
       if(twopoint_do_flips || stereo::active() || !sphere) return;
       queuereset(vid.usingGL ? mdDisk : mdUnchanged, p);
@@ -1252,25 +1281,37 @@ void draw_boundary(int w) {
       return;
       }
     
-    case mdBand: case mdBandEquidistant: case mdBandEquiarea: {
-      ld rad = 0;
-      if(pmodel == mdBand && hyperbolic) rad = vid.radius;
-      if(pmodel == mdBandEquidistant && sphere) rad = vid.radius / 2;
-      if(pmodel == mdBandEquiarea && sphere) rad = vid.radius / M_PI;
-      
-      if(rad) {
-        queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
-        curvepoint(hpxyz(-vid.xcenter, -rad, 0));
-        curvepoint(hpxyz(vid.xres-vid.xcenter, -rad, 0));
-        queuecurve(ringcolor, 0, PPR::CIRCLE);
-        curvepoint(hpxyz(-vid.xcenter, rad, 0));
-        curvepoint(hpxyz(vid.xres-vid.xcenter, rad, 0));
-        queuecurve(ringcolor, 0, PPR::CIRCLE);
-        queuereset(pmodel, PPR::CIRCLE);
-        return;
+    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: {
+      bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);
+      transmatrix T = spin(-conformal::model_orientation * degree);
+      ld right = M_PI/2 - 1e-5;
+      if(bndband) 
+        queuestraight(T * ypush0(hyperbolic ? 10 : right), 2, lc, fc, p);
+      ld xperiod = elliptic ? fakeinf/2 : fakeinf;
+      if(sphere && !bndband) {
+        queuestraight(T * xpush0(xperiod), 2, periodcolor, 0, PPR::CIRCLE);
         }
+      if(sphere && bndband) {
+        ld adegree = degree-1e-6;
+        for(ld a=-90; a<90+1e-6; a+=pow(.5, vid.linequality)) {
+          curvepoint(T * xpush(xperiod) * ypush0(a * adegree));
+          }
+        for(ld a=-90; a<90+1e-6; a+=pow(.5, vid.linequality)) {
+          curvepoint(T * xpush(-xperiod) * ypush0(-a * adegree));
+          }
+        curvepoint(T * xpush(xperiod) * ypush0(-90 * adegree));
+        queuecurve(periodcolor, 0, PPR::CIRCLE);
+        }
+      return;
       }
     
+    case mdHalfplane: 
+      if(hyperbolic) {
+        queuestraight(xspinpush0(-conformal::model_orientation * degree - M_PI/2, fakeinf), 1, lc, fc, p);
+        return;
+        }
+      break;
+
     default: break;
     }
 
@@ -1294,8 +1335,8 @@ void draw_boundary(int w) {
     }
   */
   
-  if(sphere) return;
-  circle_around_center(hyperbolic ? 20 : exp(10), lc, fc, p);
+  if(sphere && !among(pmodel, mdEquidistant, mdEquiarea)) return;
+  circle_around_center(fakeinf, lc, fc, p);
   
   /*
     if(pmodel == mdPolygonal || pmodel == mdPolynomial) 

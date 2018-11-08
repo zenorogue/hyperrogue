@@ -69,6 +69,9 @@ static const int POLY_PRECISE_WIDE = (1<<19);
 // force inverted
 static const int POLY_FORCE_INVERTED = (1<<20);
 
+// always draw this
+static const int POLY_ALWAYS_IN = (1<<21);
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -481,9 +484,9 @@ void glapplymatrix(const transmatrix& V) {
 
 void dqi_poly::gldraw() {
   auto& v = *tab;
-
+  
 #if MINIMIZE_GL_CALLS  
-  if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & POLY_INVERSE)))) {
+  if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE || POLY_FORCE_INVERTED))))) {
     if(color != triangle_color || outline != line_color || texts_merged) {
       glflush();
       triangle_color = color;
@@ -965,7 +968,7 @@ void dqi_poly::draw() {
   last_infront = false;
   
   addpoly(V, *tab, offset, cnt);
-  if(!(sphere && vid.alpha < .9)) if(pmodel != mdJoukowsky) for(int i=1; i<isize(glcoords); i++) {
+  if(!(sphere && vid.alpha < .9)) if(pmodel != mdJoukowsky) if(!(flags & POLY_ALWAYS_IN)) for(int i=1; i<isize(glcoords); i++) {
     ld dx = glcoords[i][0] - glcoords[i-1][0];
     ld dy = glcoords[i][1] - glcoords[i-1][1];
     if(dx > vid.xres * 2 || dy > vid.yres * 2) return;

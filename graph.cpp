@@ -5498,8 +5498,6 @@ void calcparam() {
   callhooks(hooks_calcparam);
   }
 
-int ringcolor = darkena(0xFF, 0, 0xFF);
-
 function<void()> wrap_drawfullmap = drawfullmap;
 
 bool force_sphere_outline = false;
@@ -5525,11 +5523,6 @@ void drawfullmap() {
   draw_boundary(1);
   
   draw_model_elements();
-  
-  if(fillmodel) {
-    for(int i=0; i<360; i++) curvepoint(xspinpush0(i * 2 * M_PI / 360, 10));
-    auto m = queuecurve(ringcolor, fillmodel, PPR::OUTCIRCLE);
-    }
   
   /* if(vid.wallmode < 2 && !euclid && !patterns::whichShape) {
     int ls = isize(lines);

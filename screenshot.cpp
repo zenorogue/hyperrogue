@@ -222,8 +222,6 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
 
 hookset<void(renderbuffer*)> *hooks_hqshot;
 
-color_t fillmodel;
-
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
   resetbuffer rb;

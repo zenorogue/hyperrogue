@@ -1493,10 +1493,13 @@ int read_config_args() {
     PHASEFROM(2); shift(); backcolor = arghex();
     }
   else if(argis("-fillmodel")) {
-    PHASEFROM(2); shift(); fillmodel = arghex();
+    PHASEFROM(2); shift(); modelcolor = arghex();
     }
   else if(argis("-ring")) {
     PHASEFROM(2); shift(); ringcolor = arghex();
+    }
+  else if(argis("-period")) {
+    PHASEFROM(2); shift(); periodcolor = arghex();
     }
   else if(argis("-borders")) {
     PHASEFROM(2); shift(); bordcolor = arghex();
