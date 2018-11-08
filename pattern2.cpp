@@ -2185,7 +2185,11 @@ namespace linepatterns {
       }
     }  
 
+  ld width = 1;
+
   void drawAll() {
+  
+    vid.linewidth *= width;
 
     if(any()) for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
       cell *c = it->first;
@@ -2237,6 +2241,8 @@ namespace linepatterns {
           }
         }
       }
+
+    vid.linewidth /= width;
     }
   
   int numpat = 0;
@@ -2260,6 +2266,11 @@ namespace linepatterns {
   
     dialog::addBreak(50);
     dialog::addBack();
+
+    dialog::addSelItem("line width", fts(width), 'W');
+    dialog::add_action([] () { 
+      dialog::editNumber(width, 0, 10, 1, 1, XLAT("line width"), "");
+      });
     
     dialog::addBreak(50);
     dialog::addInfo("change the alpha parameter to show the lines");

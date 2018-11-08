@@ -2245,6 +2245,7 @@ namespace linepatterns {
     };
 
   extern vector<linepattern> patterns;
+  extern ld width;
   };
 
 transmatrix ddspin(cell *c, int d, ld bonus = 0);
