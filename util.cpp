@@ -176,7 +176,7 @@ cld exp_parser::parse(int prio) {
     string name;
     while(true) {
       char c = next();
-      if((c >= '0' && c <= '9') || c == '.' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
+      if((c >= '0' && c <= '9') || (c == '.' && next(1) != '.') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
         name += c, at++;
       else break;
       }
@@ -193,14 +193,14 @@ cld exp_parser::parse(int prio) {
     string number;
     while(true) {
       char c = next();
-      if((c >= '0' && c <= '9') || c == '.' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
+      if((c >= '0' && c <= '9') || (c == '.' && next(1) != '.') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
         number += c, at++;
       else break;
       }
     if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
-    else if(number == "" && next() == '-') res = 0, prio = 0;
+    else if(number == "" && next() == '-') { at++; res = -parse(prio); }
     else if(number == "") at = -1;
     else if(extra_params.count(number)) res = extra_params[number];
     else if(number == "s") res = ticks / 1000.;
@@ -209,11 +209,23 @@ cld exp_parser::parse(int prio) {
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
   while(true) {
-    if(next() == '+' && prio == 0) at++, res = res + parse(1);
-    else if(next() == '-' && prio == 0) at++, res = res - parse(1);
-    else if(next() == '*' && prio <= 1) at++, res = res * parse(2);
-    else if(next() == '/' && prio <= 1) at++, res = res / parse(2);
-    else if(next() == '^') at++, res = pow(res, parse(3));
+    if(next() == '.' && next(1) == '.' && prio == 0) {
+      vector<cld> rest = { res };
+      while(next() == '.' && next(1) == '.') {
+        at += 2; rest.push_back(parse(10));
+        }
+      ld v = ticks * (isize(rest)-1.) / anims::period;
+      int vf = v;
+      v -= vf;
+      vf %= (isize(rest)-1);
+      res = rest[vf] + (rest[vf+1] - rest[vf]) * v;
+      return res;
+      }
+    else if(next() == '+' && prio <= 10) at++, res = res + parse(20);
+    else if(next() == '-' && prio <= 10) at++, res = res - parse(20);
+    else if(next() == '*' && prio <= 20) at++, res = res * parse(30);
+    else if(next() == '/' && prio <= 20) at++, res = res / parse(30);
+    else if(next() == '^') at++, res = pow(res, parse(40));
     else break;
     }
   return res;

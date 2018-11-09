@@ -242,7 +242,7 @@ namespace mapstream {
         }
       }
     
-    resetGeometry();
+    need_reset_geometry = true;
 
     initcells();
     if(shmup::on) shmup::init();

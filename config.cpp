@@ -639,9 +639,9 @@ void edit_sightrange() {
       XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
       "the sight range makes HyperRogue work faster, but also makes "
       "the game effectively harder."));
-    dialog::reaction = [] () { 
-      doOvergenerate();
-      };
+    dialog::reaction = doOvergenerate;
+    dialog::bound_low(1-getDistLimit());
+    dialog::bound_up(allowIncreasedSight() ? gp::dist_2() * 5 : 0);
     }
   else {
     dialog::editNumber(vid.smart_range_detail, 1, 50, 1, 8, XLAT("minimum visible cell in pixels"), "");
@@ -775,7 +775,7 @@ void showGraphConfig() {
     if(xuni == 'j') {
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
         XLAT("Whatever."));
-      dialog::reaction = resetGeometry;
+      dialog::reaction = delayed_geo_reset;
       }
   
     if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
@@ -827,7 +827,7 @@ void showGraphConfig() {
     if(xuni == 'L') {
       dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
         XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
-      dialog::reaction = [] () { resetGeometry(); };
+      dialog::reaction = delayed_geo_reset;
       }
   
     if(xuni == 'C') {
@@ -837,15 +837,17 @@ void showGraphConfig() {
       }
 
   #if CAP_FRAMELIMIT    
-    if(xuni == 'l') 
+    if(xuni == 'l') {
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
+      dialog::bound_low(5);
+      }
   #endif
       
     if(xuni =='b') {
       dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
-      #if !ISMOBILE
-        dialog::reaction = [] () { setfsize = true; if(fontscale < 25) fontscale = 25; do_setfsize(); };
-      #endif
+      const int minfontscale = ISMOBILE ? 50 : 25;
+      dialog::reaction = [] () { setfsize = true; do_setfsize(); };
+      dialog::bound_low(minfontscale);
       }
   
     if(xuni =='p') 
@@ -962,9 +964,27 @@ void showBasicConfig() {
 
     if(CAP_AUDIO && xuni == 'b') {
       dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
+      dialog::reaction = [] () {
+        #if CAP_SDLAUDIO
+        Mix_VolumeMusic(musicvolume);
+        #endif
+        #if ISANDROID
+        settingsChanged = true;
+        #endif
+        };
+      dialog::bound_low(0);
+      dialog::bound_up(MIX_MAX_VOLUME);
       }
+
     if(CAP_AUDIO && xuni == 'e') {
       dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
+      dialog::reaction = [] () {
+        #if ISANDROID
+        settingsChanged = true;
+        #endif
+        };
+      dialog::bound_low(0);
+      dialog::bound_up(MIX_MAX_VOLUME);
       }
     
     if(CAP_TRANS && xuni == 'l')
@@ -1282,20 +1302,31 @@ void show3D() {
     using namespace geom3;
     dialog::handleNavigation(sym, uni);
     
-    if(uni == 'n') 
+    if(uni == 'n') {
       dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
-    else if(uni == 'm') 
+      dialog::reaction = [] () {
+        if(highdetail > middetail) middetail = highdetail;
+        };
+      }
+    else if(uni == 'm') {
       dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
+      dialog::reaction = [] () {
+        if(highdetail > middetail) highdetail = middetail;
+        };
+      }
     else if(uni == 'c') 
       tc_camera = ticks,
-      dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), "");
+      dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), ""),
+      dialog::reaction = delayed_geo_reset;
     else if(uni == 'g') 
       tc_depth = ticks,
-      dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), "");
+      dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
+      dialog::reaction = delayed_geo_reset;
     else if(uni == 'a') 
       projectionDialog();
     else if(uni == 'w') {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
+      dialog::reaction = delayed_geo_reset;
       dialog::extra_options = [] () {
         dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'o');
         dialog::add_action([] () {
@@ -1308,13 +1339,17 @@ void show3D() {
         };
       }
     else if(uni == 'l') 
-      dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
+      dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), ""),
+      dialog::reaction = delayed_geo_reset;
     else if(uni == 'k') 
-      dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), "");
+      dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), ""),
+      dialog::reaction = delayed_geo_reset;
     else if(uni == 'r') 
-      dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), "");
-    else if(uni == 'h') 
-      dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), "");
+      dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
+      dialog::reaction = delayed_geo_reset;
+    else if(uni == 'h')
+      dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
+      dialog::reaction = delayed_geo_reset;
 
     else if(uni == 'e')
       pushScreen(showStereo);

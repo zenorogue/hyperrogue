@@ -785,12 +785,19 @@ namespace conformal {
       else if(uni == 'x' && pmodel == mdBall) 
         dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
           "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
-      else if(sym == 'x' && pmodel == mdPolygonal)
+      else if(sym == 'x' && pmodel == mdPolygonal) {
         dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
-      else if(sym == 'y' && pmodel == mdPolygonal)
+        dialog::reaction = polygonal::solve;
+        }        
+      else if(sym == 'y' && pmodel == mdPolygonal) {
         dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
-      else if(sym == 'n' && pmodel == mdPolygonal)
+        dialog::reaction = polygonal::solve;
+        }
+      else if(sym == 'n' && pmodel == mdPolygonal) {
         dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
+        dialog::reaction = polygonal::solve;
+        dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
+        }
       else if(sym == 'x' && pmodel == mdPolynomial)  {
         polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
         int ci = polygonal::coefid + 1;
@@ -801,8 +808,10 @@ namespace conformal {
         int ci = polygonal::coefid + 1;
         dialog::editNumber(polygonal::coefi[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
         }
-      else if(sym == 'n' && pmodel == mdPolynomial)
+      else if(sym == 'n' && pmodel == mdPolynomial) {
         dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
+        dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
+        }
       else if(sym == 'r') {
         if(rotation < 0) rotation = 0;
         dialog::editNumber(rotation, 0, 360, 90, 0, XLAT("rotation"), 
@@ -886,10 +895,14 @@ namespace conformal {
       pushScreen(model_menu);
     else if(sym == 'a') 
       dialog::editNumber(lvspeed, -5, 5, .1, 1, XLAT("animation speed"), "");
-    else if(sym == 'd') 
+    else if(sym == 'd') {
       dialog::editNumber(bandhalf, 5, 1000, 5, 200, XLAT("band width"), "");
-    else if(sym == 's') 
+      dialog::bound_low(5);
+      }
+    else if(sym == 's') {
       dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
+      dialog::bound_low(500);
+      }
     else if(sym == 'p') 
       dialog::editNumber(extra_line_steps, 0, 5, 1, 1, XLAT("extend the ends"), 
         "0 = start at the game start, endat the end position; "

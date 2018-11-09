@@ -527,15 +527,15 @@ int read_cheat_args() {
     }
   else if(argis("-we")) {    
     PHASEFROM(2);
-    shift_arg_formula(whatever); resetGeometry();
+    shift_arg_formula(whatever, delayed_geo_reset);
     }
   else if(argis("-wei")) {    
     PHASEFROM(2);
-    shift(); whateveri = argi(); resetGeometry();
+    shift(); whateveri = argi(); delayed_geo_reset();
     }
   else if(argis("-wei2")) {
     PHASEFROM(2);
-    shift(); whateveri2 = argi(); resetGeometry();
+    shift(); whateveri2 = argi(); delayed_geo_reset();
     }
   else if(argis("-W3")) {
     shift(); top_land = readland(args()); cheat();

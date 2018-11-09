@@ -370,45 +370,46 @@ void moved() {
   playermoved = false;
   }
 
-struct animatable_parameter {
-  ld& value;
-  dialog::scaler sc;
-  ld values[2];
-  bool need_reset;
-  animatable_parameter(ld& val, bool r = false) : value(val), sc(dialog::identity), need_reset(r) {}
-  animatable_parameter(ld& val, dialog::scaler s) : value(val), sc(s), need_reset(false) {}
+struct animated_parameter {
+  ld *value;
+  ld last;
+  string formula;
+  reaction_t reaction;
   };
 
-vector<animatable_parameter> animatable_parameters = {
-  animatable_parameter(vid.scale, dialog::asinhic),
-  animatable_parameter(vid.alpha, dialog::asinhic),
-  animatable_parameter(vid.linewidth),
-  animatable_parameter(vid.xposition),
-  animatable_parameter(vid.yposition),
-  animatable_parameter(vid.ballangle),
-  animatable_parameter(vid.yshift),
-  animatable_parameter(polygonal::STAR),
-  animatable_parameter(stereo::ipd),
-  animatable_parameter(stereo::lr_eyewidth),
-  animatable_parameter(stereo::anaglyph_eyewidth),
-  animatable_parameter(stereo::fov),
-  animatable_parameter(vid.euclid_to_sphere),
-  animatable_parameter(vid.twopoint_param),
-  animatable_parameter(vid.stretch),
-  animatable_parameter(vid.binary_width, true),
-  animatable_parameter(geom3::depth, false),
-  animatable_parameter(geom3::camera, true),
-  animatable_parameter(geom3::wall_height, true),
-  animatable_parameter(vid.ballproj),
-  animatable_parameter(surface::dini_b),
-  animatable_parameter(surface::hyper_b),
-  animatable_parameter(conformal::halfplane_scale),
-  animatable_parameter(conformal::model_transition),
-  animatable_parameter(conformal::top_z, dialog::logarithmic),
-  };
+vector<animated_parameter> aps;
 
-ld anim_param = 0;
-int paramstate = 0;
+void deanimate(ld &x) {
+  for(int i=0; i<isize(aps); i++) 
+    if(aps[i].value == &x)
+      aps.erase(aps.begin() + (i--));
+  }
+
+void get_parameter_animation(ld &x, string &s) {
+  for(auto &ap: aps)
+    if(ap.value == &x && ap.last == x)
+      s = ap.formula;
+  }
+
+void animate_parameter(ld &x, string f, const reaction_t& r) {
+  deanimate(x);
+  aps.emplace_back(animated_parameter{&x, x, f, r});
+  }
+
+int ap_changes;
+
+void apply_animated_parameters() {
+  ap_changes = 0;
+  for(auto &ap: aps) {
+    if(*ap.value != ap.last) continue;
+    *ap.value = parseld(ap.formula);
+    if(*ap.value != ap.last) {
+      if(ap.reaction) ap.reaction();
+      ap_changes++;
+      ap.last = *ap.value;
+      }
+    }
+  }
 
 bool needs_highqual;
 
@@ -502,23 +503,6 @@ void apply() {
     else
       vid.ballangle += ballangle_rotation * 360 * t / period;
     }
-  if(paramstate == 2 && anim_param) {
-    ld phase = (1 + sin(anim_param * 2 * M_PI * ticks / period)) / 2;
-    for(auto& ap: animatable_parameters) if(ap.values[0] != ap.values[1]) {
-      ap.value = ap.sc.inverse(ap.sc.direct(ap.values[0]) * phase + ap.sc.direct(ap.values[1]) * (1-phase));
-      if(ap.need_reset) {
-        if(!inHighQual) needs_highqual = true;
-        else need_reset_geometry = true;
-        }
-      if(&ap.value == &surface::hyper_b) run_shape(surface::dsHyperlike);
-      if(&ap.value == &surface::dini_b) {
-        if(!inHighQual) needs_highqual = true;
-        else surface::run_shape(surface::dsDini);
-        }
-      }
-    if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
-    calcparam();
-    }
   if(joukowsky_anim) {
     ld t = ticks / period;
     t = t - floor(t);
@@ -529,8 +513,10 @@ void apply() {
       conformal::model_transition = t / 1.1;
       vid.scale = (1 - conformal::model_transition) / 2.;
       }
-    calcparam();
     }
+  apply_animated_parameters();
+  if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
+  calcparam();
   }
 
 void rollback() {
@@ -576,16 +562,6 @@ void display_animation() {
     }
   }
 
-void next_paramstate() {
-  if(paramstate == 2) {
-    for(auto& ap: animatable_parameters)  ap.values[0] = ap.values[1];
-    paramstate--;
-    }
-  for(auto& ap: animatable_parameters) 
-    ap.values[paramstate] = ap.value;
-  paramstate++;
-  }
-
 void animator(string caption, ld& param, char key) {
   dialog::addBoolItem(caption, param, key);
   if(param) dialog::lastItem().value = fts(param);
@@ -596,13 +572,7 @@ void animator(string caption, ld& param, char key) {
         XLAT(
           "The value of 1 means that the period of this animation equals the period set in the animation menu. "
           "Larger values correspond to faster animations.");
-        
-      if(&param == &anim_param)
-        s = XLAT(
-          "Most graphical parameters with real values can have their values changed during the animation. "
-          "To achieve this effect, 'choose parameters to animate', change the parameters to their final values "
-          "in the animation, and 'choose parameters to animate' again.\n\n") + s;
-      
+
       dialog::editNumber(param, 0, 10, 1, 1, caption, s); 
       }
     else param = 0;
@@ -757,9 +727,10 @@ void show() {
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, 'r');
   
+  /*
   animator(XLAT("animate parameter change"), anim_param, 'P');
   dialog::addSelItem(XLAT("choose parameters to animate"), its(paramstate), 'C');
-  dialog::add_action(next_paramstate);
+  dialog::add_action(next_paramstate); */
 
   dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
   dialog::add_action([] () { pushScreen(conformal::history_menu); });
@@ -786,10 +757,6 @@ int readArgs() {
   if(0) ;
   else if(argis("-animmenu")) {
     PHASE(3); showstartmenu = false; pushScreen(show);
-    }
-  else if(argis("-animparam")) {
-    PHASE(2); next_paramstate();
-    if(paramstate >= 2) anim_param = 1;
     }
   else if(argis("-animperiod")) {
     PHASE(2); shift_arg_formula(period);
@@ -857,7 +824,7 @@ bool any_animation() {
   if(conformal::on) return true;
   if(ma) return true;
   if(ballangle_rotation || rug_rotation1 || rug_rotation2) return true;
-  if(paramstate == 2) return true;
+  if(ap_changes) return true;
   return false;
   }
 

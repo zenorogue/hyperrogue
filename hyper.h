@@ -1735,6 +1735,7 @@ namespace dialog {
     string title, help;
     scaler sc;
     int *intval; ld intbuf;
+    bool animatable;
     };
   
   extern numberEditor ne;
@@ -1769,6 +1770,9 @@ namespace dialog {
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help);
   inline void scaleLog() { ne.sc = logarithmic; }
   inline void scaleSinh() { ne.sc = asinhic; }
+  void bound_low(ld val);
+  void bound_up(ld val);
+
   void handleNavigation(int &sym, int &uni);
   
   namespace zoom {
@@ -2053,6 +2057,11 @@ int darkena(int c, int lev, int a);
 extern cell *shpos[MAXPLAYER][SHSIZE];
 extern int cshpos;
 
+namespace anims {
+  void animate_parameter(ld &x, string f, const reaction_t& r);
+  void deanimate(ld &x);
+  void get_parameter_animation(ld &x, string& f);
+  }
 
 namespace arg {
 #if CAP_COMMANDLINE
@@ -2068,7 +2077,7 @@ namespace arg {
   bool argis(const string& s);
   unsigned arghex();
 
-  inline void shift_arg_formula(ld& x) { shift(); x = argf(); }  
+  inline void shift_arg_formula(ld& x, const reaction_t& r = reaction_t()) { shift(); x = argf(); anims::animate_parameter(x, args(), r); }
   
   void init(int _argc, char **_argv);
   
@@ -4276,7 +4285,7 @@ struct exp_parser {
   map<string, cld> extra_params;
 
   bool ok() { return at == isize(s); }
-  char next() { if(at == isize(s) || at == -1) return 0; else return s[at]; }
+  char next(int step=0) { if(at >= isize(s)-step || at == -1) return 0; else return s[at+step]; }
   
   bool eat(const char *c) {
     int orig_at = at;
@@ -4341,6 +4350,8 @@ struct bandfixer {
   dynamicval<ld> bw;
   bandfixer(transmatrix& T) : bw(band_shift, band_shift) { fix_the_band(T); }
   };
+
+inline void delayed_geo_reset() { need_reset_geometry = true; }
 
 }
 

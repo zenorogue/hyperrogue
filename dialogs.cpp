@@ -603,105 +603,49 @@ namespace dialog {
   reaction_t reaction_final;
   
   reaction_t extra_options;
-
-  void affect(char kind) {
-
-    if(kind == 's') {
-      exp_parser ep;
-      ep.s = ne.s;
-      ld x = real(ep.parse());
-      if(!ep.ok()) return;
-      if(ne.sc.positive && x <= 0) return;
-      *ne.editwhat = x;
-      if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
-      }
-    if(kind == 'v') {
-      if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
-      ne.s = disp(*ne.editwhat);
-      }
-    
+  
+  void apply_slider() {
+    if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
     if(reaction) reaction();
-
-#if CAP_AUDIO
-    if(ne.intval == &musicvolume) {
-      if(musicvolume < 0) 
-        *ne.editwhat = musicvolume = 0, affect('v');
-      else if(musicvolume > MIX_MAX_VOLUME) 
-        *ne.editwhat = musicvolume = MIX_MAX_VOLUME, affect('v');
-#if CAP_SDLAUDIO
-      else Mix_VolumeMusic(musicvolume);
-#endif
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      }
-
-    if(ne.intval == &effvolume) {
-      if(effvolume < 0) 
-        *ne.editwhat = effvolume = 0, affect('v');
-      else if(effvolume > MIX_MAX_VOLUME) 
-        *ne.editwhat = effvolume = MIX_MAX_VOLUME, affect('v');
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      }
-#endif
-
-    if(ne.intval == &vid.framelimit && vid.framelimit < 5) 
-      *ne.editwhat = vid.framelimit = 5, affect('v');
-
-#if ISMOBILE==1
-    if(ne.intval == &fontscale && fontscale < 50) 
-      *ne.editwhat = fontscale = 50, affect('v');
-#endif
-
-    // if(ne.editwhat == &whatever) resetGeometry();
-
-    if(ne.intval == &sightrange_bonus && sightrange_bonus < 1-getDistLimit()) 
-      *ne.editwhat = sightrange_bonus = 1-getDistLimit(), affect('v');
-    
-    int msr = allowIncreasedSight() ? gp::dist_2() * 5 : 0;
-
-    if(ne.intval == &sightrange_bonus && sightrange_bonus > msr) 
-      *ne.editwhat = sightrange_bonus = msr, affect('v');
-    
-    if(ne.intval == &conformal::bandhalf && conformal::bandhalf < 5) 
-      *ne.editwhat = *ne.intval = 5, affect('v');
-    
-    if(ne.intval == &conformal::bandsegment && conformal::bandsegment < 500) 
-      *ne.editwhat = *ne.intval = 500, affect('v');
-
-    if(ne.intval == &polygonal::coefid && polygonal::coefid < 0) 
-      *ne.editwhat = *ne.intval = 0, affect('v');
-      
-    if(ne.intval == &polygonal::coefid && polygonal::coefid >= polygonal::MSI) 
-      *ne.editwhat = *ne.intval = polygonal::MSI-1, affect('v');
-      
-    if(ne.intval == &polygonal::deg && polygonal::deg < 0) 
-      *ne.editwhat = *ne.intval = polygonal::MSI-1, affect('v');
-      
-    if(ne.intval == &polygonal::deg && polygonal::deg >= polygonal::MSI) 
-      *ne.editwhat = *ne.intval = polygonal::MSI-1, affect('v');
-      
-    if(ne.intval == &polygonal::SI) polygonal::solve();
-    if(ne.editwhat == &polygonal::STAR) polygonal::solve();
-    
-    polygonal::solve();
-    
-    if(ne.editwhat == &geom3::highdetail && geom3::highdetail > geom3::middetail)
-      geom3::middetail = geom3::highdetail;
-    
-    if(ne.editwhat == &geom3::middetail && geom3::highdetail > geom3::middetail)
-      geom3::highdetail = geom3::middetail;
-    
-    if(cmode & sm::A3) {
-      buildpolys();
-  #if CAP_GL
-      resetGL();
-  #endif
-     }
+    if(ne.intval) *ne.editwhat = *ne.intval;
+    ne.s = disp(*ne.editwhat);
+    anims::deanimate(*ne.editwhat);
     }
   
+  void apply_edit() {
+    exp_parser ep;
+    ep.s = ne.s;
+    ld x = real(ep.parse());
+    if(!ep.ok()) return;
+    if(ne.sc.positive && x <= 0) return;
+    *ne.editwhat = x;
+    if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
+    if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);    
+    if(reaction) reaction();
+    }
+
+  void bound_low(ld val) {
+    auto r = reaction;
+    reaction = [r, val] () {
+      if(*ne.editwhat < val) {
+        *ne.editwhat = val;
+        if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
+        }
+      if(r) r();
+      };
+    }
+
+  void bound_up(ld val) {
+    auto r = reaction;
+    reaction = [r, val] () {
+      if(*ne.editwhat > val) {
+        *ne.editwhat = val;
+        if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
+        }
+      if(r) r();
+      };
+    }
+
   int numberdark;
 
   void drawNumberDialog() {
@@ -737,12 +681,12 @@ namespace dialog {
       handleNavigation(sym, uni);
       if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')') || (uni >= 'a' && uni <= 'z')) {
         ne.s += uni;
-        affect('s');
+        apply_edit();
         }
       else if(uni == '\b' || uni == '\t') {
         ne.s = ne.s. substr(0, isize(ne.s)-1);
         sscanf(ne.s.c_str(), LDF, ne.editwhat);
-        affect('s');
+        apply_edit();
         }
   #if !ISMOBILE
       else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
@@ -750,19 +694,19 @@ namespace dialog {
           (*ne.editwhat)++;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) + shiftmul * ne.step);
-        affect('v');
+        apply_slider();
         }
       else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
         if(ne.intval && abs(shiftmul) < .6)
           (*ne.editwhat)--;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) - shiftmul * ne.step);
-        affect('v');
+        apply_slider();
         }
   #endif
       else if(sym == SDLK_HOME) {
         *ne.editwhat = ne.dft;
-        affect('v');
+        apply_slider();
         }
       else if(uni == 500) {
         int sl, sr;
@@ -773,7 +717,7 @@ namespace dialog {
         ld d = (mousex - sl + .0) / (sr-sl);
         *ne.editwhat = 
           ne.sc.inverse(d * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
-        affect('v');
+        apply_slider();
         }
       else if(doexiton(sym, uni)) { popScreen(); if(reaction_final) reaction_final(); }
       };
@@ -847,11 +791,14 @@ namespace dialog {
     reaction_final = reaction_t();
     extra_options = reaction_t();
     numberdark = 0;
+    ne.animatable = true;
+    anims::get_parameter_animation(x, ne.s);
     }
 
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
     editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
+    ne.animatable = false;
     }
   
   void helpToEdit(int& x, int vmin, int vmax, int step, int dft) {

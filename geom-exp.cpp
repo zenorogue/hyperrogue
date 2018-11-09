@@ -438,7 +438,7 @@ void showEuclideanMenu() {
         else if(binarytiling) {
           dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
           dialog::reaction = [] () {
-            resetGeometry(); 
+            need_reset_geometry = true;
             #if CAP_TEXTURE
             texture::config.remap();
             #endif
