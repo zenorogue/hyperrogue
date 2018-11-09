@@ -172,6 +172,8 @@ cld exp_parser::parse(int prio) {
   else if(eat("re(")) res = real(parsepar());
   else if(eat("im(")) res = imag(parsepar());
   else if(eat("conj(")) res = std::conj(parsepar());
+  else if(eat("floor(")) res = floor(real(parsepar()));
+  else if(eat("frac(")) { res = parsepar(); res = res - floor(real(res)); }
   else if(eat("let(")) {
     string name;
     while(true) {
@@ -240,6 +242,6 @@ ld parseld(const string& s) {
 
 string parser_help() {
   return XLAT("Functions available: %1", 
-    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), e, i, pi, s, ms");
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), e, i, pi, s, ms, floor, frac");
   }
 }
