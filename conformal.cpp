@@ -556,24 +556,6 @@ namespace conformal {
     }
 #endif
 
-  const char *modelnames[MODELCOUNT] = {
-    "disk", "half-plane", "band", "polygonal", "formula",
-    "azimuthal equidistant", "azimuthal equi-area", 
-    "ball model", "Minkowski hyperboloid", "hemisphere",
-    "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant",
-    "fisheye", "Joukowsky transform", "Joukowsky+inversion", "rotated hyperboles"
-    };
-  
-  string get_model_name(eModel pm) {
-    return XLAT(
-      pm == mdBand && sphere ? "Mercator" : 
-      pm == mdHalfplane && euclid ? "inversion" : 
-      pm == mdHemisphere && !hyperbolic ? "sphere" :
-      pm == mdHyperboloid && euclid ? "plane" :
-      pm == mdHyperboloid && sphere ? "sphere" :
-      modelnames[pm]);
-    }
-  
   bool model_available(eModel pm) {
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
@@ -590,6 +572,16 @@ namespace conformal {
     }
   
   int editpos = 0;
+  
+  string get_model_name(eModel m) {
+    if(sphere) 
+      return models[m].name_spherical;
+    if(euclid) 
+      return models[m].name_euclidean;
+    if(hyperbolic) 
+      return models[m].name_hyperbolic;
+    return "?";
+    }
 
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;

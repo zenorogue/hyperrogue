@@ -1270,15 +1270,6 @@ extern ld ruggo;
 
 #define HASLINEVIEW
 
-enum eModel {
-  mdDisk, mdHalfplane, mdBand, mdPolygonal, mdFormula,
-  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
-  mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
-  mdFisheye, mdJoukowsky, mdJoukowskyInverted,
-  mdRotatedHyperboles,
-  mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial
-  };
-
 namespace conformal {
   extern bool on;
   extern vector<pair<cell*, eMonster> > killhistory;

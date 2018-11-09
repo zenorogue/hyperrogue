@@ -1684,4 +1684,34 @@ geometryinfo ginf[gGUARD] = {
   {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure}
   };
 
+#define X3(x) x, x, x
+
+const modelinfo models[int(mdPolynomial)+1] = {
+  {X3("disk"), mf::azimuthal | mf::conformal},
+  {"half-plane", "inversion", "half-plane", mf::conformal},
+  {"band", "band", "Mercator", mf::band | mf::conformal},
+  {X3("polygonal"), mf::conformal},
+  {X3("formula"), 0},
+  {X3("azimuthal equidistant"), mf::azimuthal | mf::equidistant | mf::euc_boring},  
+  {X3("azimuthal equi-area"), mf::azimuthal | mf::equiarea | mf::euc_boring},
+  {X3("ball model"), mf::conformal | mf::azimuthal | mf::space},
+  {"Minkowski hyperboloid", "plane", "sphere", mf::conformal | mf::space | mf::euc_boring},
+  {"hemisphere", "sphere", "sphere", mf::conformal | mf::space},
+  {X3("band equidistant"), mf::band | mf::equidistant | mf::euc_boring},
+  {X3("band equi-area"), mf::band | mf::equiarea | mf::euc_boring},
+  {X3("sinusoidal"), mf::quasiband | mf::equiarea | mf::euc_boring},
+  {X3("two-point equidistant"), mf::equidistant | mf::euc_boring},
+  {X3("fisheye"), 0},
+  {X3("Joukowsky transform"), mf::hyper_only | mf::conformal},
+  {X3("Joukowsky+inversion"), mf::hyper_only | mf::conformal},
+  {X3("rotated hyperboles"), mf::hyper_only},  
+  {X3("spiral"), mf::hyper_or_torus | mf::quasiband},
+  {X3(""), 0},
+  {X3(""), 0},
+  {X3(""), 0},
+  {X3("polynomial"), mf::conformal}
+  };
+
+#undef X3
+
 }

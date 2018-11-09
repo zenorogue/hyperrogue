@@ -247,4 +247,45 @@ enum cpatterntype {
   
 struct landtacinfo { eLand l; int tries, multiplier; };
 
+enum eModel {
+  mdDisk, mdHalfplane, mdBand, mdPolygonal, mdFormula,
+  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
+  mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
+  mdFisheye, mdJoukowsky, mdJoukowskyInverted,
+  mdRotatedHyperboles, mdSpiral,
+  mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial
+  };
+
+typedef unsigned long long flagtype;
+
+namespace mf {
+  static const flagtype azimuthal = 1;
+  static const flagtype band = 2 + 512;
+  static const flagtype equiarea = 4;
+  static const flagtype equidistant = 8;
+  static const flagtype conformal = 16;
+  static const flagtype euc_boring = 32;
+  static const flagtype space = 64;
+  static const flagtype hyper_only = 128;
+  static const flagtype hyper_or_torus = 256;
+  static const flagtype quasiband = 512;
+  };
+  
+struct modelinfo {
+  const char *name_hyperbolic;
+  const char *name_euclidean;
+  const char *name_spherical;  
+  
+  flagtype flags;
+
+  int is_azimuthal;
+  int is_band;
+  int is_equiarea;
+  int is_equidistant;
+  int is_conformal;
+  const char* name;
+  };
+
+extern const modelinfo models[int(mdPolynomial)+1];
+
 }
