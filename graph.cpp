@@ -1060,7 +1060,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     queuepoly(VBODY, girl ? shFemaleBody : shPBody, facecolor);
 
     if(m == moPrincessArmed) 
-      queuepoly(VBODY, vid.cs.charid < 2 ? shSabre : shPSword, 0xFFFFFFFF);
+      queuepoly(VBODY * Mirror, vid.cs.charid < 2 ? shSabre : shPSword, 0xFFFFFFFF);
     
     if((m == moFalsePrincess || m == moRoseBeauty) && where && where->cpdist == 1)
       queuepoly(VBODY, shPKnife, 0xFFFFFFFF);
