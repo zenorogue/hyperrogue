@@ -2625,6 +2625,7 @@ struct drawqueueitem {
   };
 
 struct dqi_poly : drawqueueitem {
+  ld band_shift;
   transmatrix V;
   const vector<glvertex> *tab;
   int offset, cnt;
@@ -2640,6 +2641,7 @@ struct dqi_poly : drawqueueitem {
   };
 
 struct dqi_line : drawqueueitem {
+  ld band_shift;
   hyperpoint H1, H2;
   int prf;
   double width;
@@ -4328,5 +4330,15 @@ string parser_help();
 static const ld degree = M_PI / 180;
 
 void show_color_dialog();
+
+extern ld band_shift;
+
+void fix_the_band(transmatrix& T);
+
+struct bandfixer {
+  dynamicval<ld> bw;
+  bandfixer(transmatrix& T) : bw(band_shift, band_shift) { fix_the_band(T); }
+  };
+
 }
 

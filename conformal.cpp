@@ -400,6 +400,8 @@ namespace conformal {
     osin = sin(model_orientation * degree);
     model_straight = (ocos > 1 - 1e-9);
     if(conformal::on) conformal::apply();
+    
+    band_shift = 0;
     }
   
   ld measureLength() {

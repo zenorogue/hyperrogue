@@ -163,7 +163,7 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   
   ld x, y, yf, zf=0;
   y = asin_auto(H[1]);
-  x = asin_auto_clamp(H[0] / cos_auto(y));
+  x = asin_auto_clamp(H[0] / cos_auto(y)) + band_shift;
   if(sphere) {
     if(H[2] < 0 && x > 0) x = M_PI - x;
     else if(H[2] < 0 && x <= 0) x = -M_PI - x;
@@ -774,7 +774,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
   
   bool draw = c->pathdist < PINFD;
   
-  if(cells_drawn > vid.cells_drawn_limit || reclev >= 100 || std::isinf(V[2][2]) || std::isnan(V[2][2]))
+  if(cells_drawn > vid.cells_drawn_limit || reclev >= 10000 || std::isinf(V[2][2]) || std::isnan(V[2][2]) || V[2][2] > 1e8)
     draw = false;
   else if(vid.use_smart_range) {
     draw = reclev < 2 ? true : in_smart_range(V);
@@ -817,7 +817,9 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;
-    drawrec(hs2, s2, V * heptmove[d], reclev+1);
+    transmatrix Vd = V * heptmove[d];
+    bandfixer bf(Vd);
+    drawrec(hs2, s2, Vd, reclev+1);
     }
   
   }
@@ -1343,6 +1345,23 @@ void draw_boundary(int w) {
     if(pmodel == mdPolygonal || pmodel == mdPolynomial) 
     polygonal::drawBoundary(darkena(0xFF, 0, 0xFF));  
   */
+  }
+
+ld band_shift = 0;
+void fix_the_band(transmatrix& T) {
+  if((models[pmodel].flags & mf::quasiband) && T[2][2] > 1e6) {
+    hyperpoint H = tC0(T);
+    find_zlev(H);
+    conformal::apply_orientation(H[0], H[1]);
+    
+    ld y = asin_auto(H[1]);
+    ld x = asin_auto_clamp(H[0] / cos_auto(y));
+    band_shift += x;
+    // printf("fixing with shift = %lf\n", x);
+    T = xpush(-x) * T;
+    fixmatrix(T);
+    // todo orientation
+    }
   }
 
 }

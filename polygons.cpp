@@ -834,6 +834,7 @@ ld get_width(dqi_poly* p) {
 
 void dqi_poly::draw() {
 
+  dynamicval<ld> bs(hr::band_shift, band_shift);
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
     bool any = false;
     for(int i=0; i<cnt; i++) {
@@ -1173,6 +1174,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags) {
   prettylinesub(h1, h2, lev);
   dqi_poly ptd;
   ptd.V = Id;
+  ptd.band_shift = band_shift;
   ptd.tab = &prettylinepoints;
   ptd.offset = 0;
   ptd.cnt = isize(prettylinepoints);
@@ -1192,6 +1194,7 @@ void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, i
     prettylinesub(t[i], t[(i+1)%3], lev);
   dqi_poly ptd;
   ptd.V = Id;
+  ptd.band_shift = band_shift;
   ptd.tab = &prettylinepoints;
   ptd.offset = 0;
   ptd.cnt = isize(prettylinepoints);
@@ -1214,6 +1217,7 @@ void queuereset(eModel m, PPR prio) {
 
 void dqi_line::draw() {
   dynamicval<ld> d(vid.linewidth, width); 
+  dynamicval<ld> bs(hr::band_shift, band_shift);
   prettyline(H1, H2, color, prf, 0);
   }
 
@@ -2639,6 +2643,7 @@ dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR 
   auto& ptd = queuea<dqi_poly> (prio);
 
   ptd.V = V;
+  ptd.band_shift = band_shift;
   ptd.offset = h.s;
   ptd.cnt = h.e-h.s;
   ptd.tab = &ourshape;
@@ -2674,6 +2679,7 @@ dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, c
   auto& ptd = queuea<dqi_poly> (prio);
 
   ptd.V = V;
+  ptd.band_shift = band_shift;
   ptd.tab = &f;
   ptd.offset = 0;
   ptd.cnt = cnt;
@@ -2714,6 +2720,7 @@ dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int
 
   ptd.H1 = H1;
   ptd.H2 = H2;
+  ptd.band_shift = band_shift;
   ptd.prf = prf;
   ptd.width = vid.linewidth;
   ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
