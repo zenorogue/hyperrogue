@@ -161,7 +161,7 @@ namespace svg {
     // dynamicval<int> v5(ringcolor, 0x808080FF);
     
     vid.usingGL = false;
-    vid.xres = vid.yres = svgsize ? svgsize : min(1 << (get_sightrange()+7), 16384);
+    vid.xres = vid.yres = svgsize ? svgsize : vid.use_smart_range ? pngres*divby : min(1 << (get_sightrange()+7), 16384);
     calcparam();
     dynamicval<bool> v6(inHighQual, true); 
     darken = 0;

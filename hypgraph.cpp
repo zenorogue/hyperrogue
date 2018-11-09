@@ -706,6 +706,7 @@ bool in_smart_range(const transmatrix& T) {
   ld x2 = vid.radius * abs(h3[0] - h1[0]) / epsilon;
   ld y2 = vid.radius * abs(h3[1] - h1[1]) * vid.stretch / epsilon;
   ld scale = sqrt(hypot(x1, y1) * hypot(x2, y2)) * scalefactor * hcrossf7;
+  if(svg::in) scale /= svg::divby;
   return 
     scale > vid.smart_range_detail && 
     x - 2 * max(x1, x2) < vid.xres && 
