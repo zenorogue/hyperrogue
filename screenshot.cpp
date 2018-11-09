@@ -579,6 +579,25 @@ void animator(string caption, ld& param, char key) {
     });
   }
 
+ld a, b;
+
+void list_animated_parameters() {
+  dialog::addHelp(XLAT(
+    "Most parameters can be animated simply by using '..' in their editing dialog. "
+    "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
+    "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
+    "parameters 'a' and 'b' exist for this purpose. "
+    "See the list below for parameters which are currently animated (or changed)."));
+  dialog::addBreak(50);
+  for(auto& ap: aps) {
+    string what = "?";
+    for(auto& p: params) if(&p.second == ap.value) what = p.first;
+    dialog::addInfo(what + " = " + ap.formula);
+    }
+  dialog::addBreak(50);
+  dialog::addHelp(parser_help());
+  }
+
 ld animation_period;
 
 void show() {
@@ -727,10 +746,17 @@ void show() {
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, 'r');
   
-  /*
-  animator(XLAT("animate parameter change"), anim_param, 'P');
-  dialog::addSelItem(XLAT("choose parameters to animate"), its(paramstate), 'C');
-  dialog::add_action(next_paramstate); */
+  dialog::addSelItem(XLAT("animate parameters"), fts(a), 'a');
+  dialog::add_action([] () {
+    dialog::editNumber(a, -100, 100, 1, 0, XLAT("animate parameters"), "");
+    dialog::extra_options = list_animated_parameters;
+    });
+
+  dialog::addSelItem(XLAT("animate parameters"), fts(b), 'b');
+  dialog::add_action([] () {
+    dialog::editNumber(b, -100, 100, 1, 0, XLAT("animate parameters"), "");
+    dialog::extra_options = list_animated_parameters;
+    });
 
   dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
   dialog::add_action([] () { pushScreen(conformal::history_menu); });

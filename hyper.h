@@ -2061,6 +2061,7 @@ namespace anims {
   void animate_parameter(ld &x, string f, const reaction_t& r);
   void deanimate(ld &x);
   void get_parameter_animation(ld &x, string& f);
+  extern ld a, b;
   }
 
 namespace arg {
@@ -4352,6 +4353,8 @@ struct bandfixer {
   };
 
 inline void delayed_geo_reset() { need_reset_geometry = true; }
+
+extern unordered_map<string, ld&> params;
 
 }
 

@@ -202,9 +202,10 @@ cld exp_parser::parse(int prio) {
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "" && next() == '-') { at++; res = -parse(prio); }
     else if(number == "") at = -1;
-    else if(extra_params.count(number)) res = extra_params[number];
     else if(number == "s") res = ticks / 1000.;
     else if(number == "ms") res = ticks;
+    else if(extra_params.count(number)) res = extra_params[number];
+    else if(params.count(number)) res = params.at(number);
     else if(number[0] >= 'a' && number[0] <= 'z') at = -1;
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
