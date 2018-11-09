@@ -392,6 +392,8 @@ namespace conformal {
     
     movetophase();
     }
+  
+  ld spiral_angle, cos_spiral, sin_spiral;
 
   void configure() {
     ld ball = -vid.ballangle * degree;
@@ -400,6 +402,9 @@ namespace conformal {
     osin = sin(model_orientation * degree);
     model_straight = (ocos > 1 - 1e-9);
     if(conformal::on) conformal::apply();
+    
+    ld b = spiral_angle * degree;
+    cos_spiral = cos(b), sin_spiral = sin(b);
     
     band_shift = 0;
     }
@@ -566,7 +571,7 @@ namespace conformal {
   
   bool model_has_orientation() {
     return
-      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted) || mdBandAny();
+      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral) || mdBandAny();
     }
   
   bool model_has_transition() {
@@ -686,7 +691,7 @@ namespace conformal {
     if(model_has_transition())
       dialog::addSelItem(XLAT("model transition"), fts3(model_transition), 't');
 
-    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted))
+    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral))
       dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope), 'S');
     
     if(pmodel == mdHemisphere && euclid) {
@@ -1000,6 +1005,14 @@ namespace conformal {
     else if(argis("-mtrans")) { 
       PHASEFROM(2); 
       shift(); conformal::model_transition = argf();
+      }
+    else if(argis("-sang")) { 
+      PHASEFROM(2); 
+      shift(); conformal::spiral_angle = argf();
+      }
+    else if(argis("-mob")) { 
+      PHASEFROM(2); 
+      shift(); vid.skiprope = argf();
       }
     else if(argis("-zoom")) { 
       PHASEFROM(2); shift(); vid.scale = argf();

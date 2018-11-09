@@ -556,6 +556,19 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
       }
     
+    case mdSpiral: {
+      makeband(H, ret, band_conformal);
+
+      cld z(ret[0], ret[1]);
+      z = z * cld(conformal::cos_spiral, conformal::sin_spiral) * M_PI * conformal::cos_spiral;
+      z = exp(z);
+      ret[0] = real(z);
+      ret[1] = imag(z);
+
+      if(vid.skiprope) 
+        ret = mobius(ret, vid.skiprope, 1);
+      }
+    
     case mdGUARD: break;
     }
 
