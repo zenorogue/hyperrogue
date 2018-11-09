@@ -222,9 +222,9 @@ int readArgs() {
     shift(); funmode = argi();
     shift(); color1 = arghex();
     shift(); color2 = arghex();
-    shift(); widthfactor = argf();
-    shift(); label_scale = argf();
-    shift(); label_dist = argf();
+    shift_arg_formula(widthfactor);
+    shift_arg_formula(label_scale);
+    shift_arg_formula(label_dist);
     }
   else return 1;
   return 0;

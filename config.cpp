@@ -1642,7 +1642,7 @@ int read_config_args() {
     PHASEFROM(2); shift(); dialog::dialogcolor = arghex();
     }
   else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
-  else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
+  else if(argis("-lw")) { PHASEFROM(2); shift_arg_formula(vid.linewidth); }
   else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
   else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
 

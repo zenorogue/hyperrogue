@@ -1523,7 +1523,7 @@ int textureArgs() {
     }
 
   else if(argis("-txp")) {
-    shift(); config.gsplits = argf();
+    shift(); config.gsplits = argi();
     }
 
   else if(argis("-txc")) {

@@ -527,15 +527,15 @@ int read_cheat_args() {
     }
   else if(argis("-we")) {    
     PHASEFROM(2);
-    shift(); whatever = argf(); resetGeometry();
+    shift_arg_formula(whatever); resetGeometry();
     }
   else if(argis("-wei")) {    
     PHASEFROM(2);
-    shift(); whateveri = argf(); resetGeometry();
+    shift(); whateveri = argi(); resetGeometry();
     }
   else if(argis("-wei2")) {
     PHASEFROM(2);
-    shift(); whateveri2 = argf(); resetGeometry();
+    shift(); whateveri2 = argi(); resetGeometry();
     }
   else if(argis("-W3")) {
     shift(); top_land = readland(args()); cheat();
@@ -563,7 +563,7 @@ int read_cheat_args() {
   else if(argis("-smart")) {
     PHASEFROM(2); cheat();
     vid.use_smart_range = 2;
-    shift(); vid.smart_range_detail = argf();
+    shift_arg_formula(vid.smart_range_detail);
     }
   else if(argis("-smartlimit")) {
     PHASEFROM(2); 

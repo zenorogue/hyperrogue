@@ -1877,7 +1877,7 @@ int rugArgs() {
            
   if(0) ;
   else if(argis("-rugmodelscale")) {
-    shift(); modelscale = argf();
+    shift_arg_formula(modelscale);
     }
 
   else if(argis("-ruggeo")) {
@@ -1893,7 +1893,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugdist")) {
-    shift(); model_distance = argf();
+    shift_arg_formula(model_distance);
     }
 
   else if(argis("-ruglate")) {
@@ -1906,7 +1906,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugauto")) {
-    shift(); ruggo = argf();
+    shift_arg_formula(ruggo);
     }
 
   else if(argis("-rugorth")) {
@@ -1914,7 +1914,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugerr")) {
-    shift(); err_zero = argf();
+    shift_arg_formula(err_zero);
     }
 
   else if(argis("-rugtsize")) {
@@ -1940,7 +1940,7 @@ int rugArgs() {
     }
 
   else if(argis("-anticusp")) {
-    shift(); anticusp_factor = argf();
+    shift_arg_formula(anticusp_factor);
     }
 
   else return 1;

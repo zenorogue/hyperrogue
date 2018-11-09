@@ -1353,10 +1353,10 @@ int readArgs() {
     shift(); qpct = argi();
     }
   else if(argis("-sompower")) {
-    shift(); ttpower = argf();
+    shift_arg_formula(ttpower);
     }
   else if(argis("-somparam")) {
-    shift(); (gaussian ? distmul : dispersion_end_at) = argf();
+    shift_arg_formula((gaussian ? distmul : dispersion_end_at));
     if(dispersion_end_at <= 1) {
       fprintf(stderr, "Dispersion parameter illegal\n");
       dispersion_end_at = 1.5;
@@ -1372,7 +1372,7 @@ int readArgs() {
     }
   else if(argis("-somlearn")) {
     // this one can be changed at any moment
-    shift(); learning_factor = argf();
+    shift_arg_formula(learning_factor);
     }
 
   else if(argis("-somrun")) {

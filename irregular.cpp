@@ -1012,7 +1012,7 @@ int readArgs() {
     }
   else if(argis("-irrdens")) {
     PHASE(2);
-    shift(); density = argf();
+    shift_arg_formula(density);
     }
   else if(argis("-irrload")) {
     PHASE(3);

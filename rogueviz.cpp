@@ -1624,16 +1624,16 @@ int readArgs() {
 
 // (1) configure edge weights
   else if(argis("-edgepower")) {
-    shift(); sag::edgepower = argf();
-    shift(); sag::edgemul = argf();
+    shift_arg_formula(sag::edgepower);
+    shift_arg_formula(sag::edgemul);
     }
 // (1) configure temperature (high, low)
   else if(argis("-sagtemp")) {
-    shift(); sag::hightemp = argf();
-    shift(); sag::lowtemp = argf();
+    shift(); sag::hightemp = argi();
+    shift(); sag::lowtemp = argi();
     }
   else if(argis("-sagmin")) {
-    shift(); default_edgetype.visible_from = argf();
+    shift_arg_formula(default_edgetype.visible_from);
     }
 // (2) read the edge data
   else if(argis("-sagpar")) {
@@ -1743,13 +1743,13 @@ int readArgs() {
     shift(); part(default_edgetype.color, 0) = 255 * pow(.5, argf());
     }
   else if(argis("-cshift")) {
-    shift(); collatz::cshift = argf();
+    shift_arg_formula(collatz::cshift);
     }
   else if(argis("-rvwarp")) {
     patterns::whichShape = '8';
     }
   else if(argis("-lq")) {
-    shift(); linequality = argf();
+    shift_arg_formula(linequality);
     }
 #if CAP_RVSLIDES
   else if(argis("-rvpres")) {

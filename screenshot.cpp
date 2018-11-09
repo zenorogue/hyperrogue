@@ -192,7 +192,7 @@ int read_args() {
     // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
     }
   else if(argis("-svggamma")) {
-    shift(); svg::gamma = argf();
+    shift_arg_formula(svg::gamma);
     }
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
@@ -792,7 +792,7 @@ int readArgs() {
     if(paramstate >= 2) anim_param = 1;
     }
   else if(argis("-animperiod")) {
-    PHASE(2); shift(); period = argf();
+    PHASE(2); shift_arg_formula(period);
     }
   else if(argis("-animrecord")) {
     PHASE(3); shift(); noframes = argi();
@@ -804,36 +804,36 @@ int readArgs() {
     rotation_center_h = viewctr;
     rotation_center_c = cwt.at;
     rotation_center_View = View;
-    shift(); circle_spins = argf();
-    shift(); circle_radius = argf();
+    shift_arg_formula(circle_spins);
+    shift_arg_formula(circle_radius);
     shift(); circle_display_color = arghex();
     }
   else if(argis("-animmove")) {
     ma = maTranslation; 
-    shift(); cycle_length = argf();
-    shift(); shift_angle = argf();
-    shift(); movement_angle = argf();
+    shift_arg_formula(cycle_length);
+    shift_arg_formula(shift_angle);
+    shift_arg_formula(movement_angle);
     }
   else if(argis("-animpar")) {
     ma = maParabolic; 
-    shift(); parabolic_length = argf();
-    shift(); shift_angle = argf();
-    shift(); movement_angle = argf();
+    shift_arg_formula(parabolic_length);
+    shift_arg_formula(shift_angle);
+    shift_arg_formula(movement_angle);
     }
   else if(argis("-animrot")) {
     ma = maRotation;
     }
   else if(argis("-animrug")) {
-    shift(); rug_rotation1 = argf();
-    shift(); rug_angle = argf();
-    shift(); rug_rotation2 = argf();
+    shift_arg_formula(rug_rotation1);
+    shift_arg_formula(rug_angle);
+    shift_arg_formula(rug_rotation2);
     }
   else if(argis("-animenv")) {
-    shift(); env_ocean = argf();
-    shift(); env_volcano = argf();
+    shift_arg_formula(env_ocean);
+    shift_arg_formula(env_volcano);
     }
   else if(argis("-animball")) {
-    shift(); ballangle_rotation = argf();
+    shift_arg_formula(ballangle_rotation);
     }
   else if(argis("-animj")) {
     shift(); joukowsky_anim = true;

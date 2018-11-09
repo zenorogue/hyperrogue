@@ -2067,6 +2067,8 @@ namespace arg {
   ld argf();
   bool argis(const string& s);
   unsigned arghex();
+
+  inline void shift_arg_formula(ld& x) { shift(); x = argf(); }  
   
   void init(int _argc, char **_argv);
   
