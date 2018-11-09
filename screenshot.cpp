@@ -72,7 +72,7 @@ namespace svg {
     }
   
   void circle(int x, int y, int size, color_t col, color_t fillcol) {
-    if(!invisible(col) && !invisible(fillcol)) {
+    if(!invisible(col) || !invisible(fillcol)) {
       if(vid.stretch == 1)
         fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
           coord(x), coord(y), coord(size), stylestr(fillcol, col));
