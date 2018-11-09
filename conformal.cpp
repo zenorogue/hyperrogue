@@ -746,7 +746,7 @@ namespace conformal {
         dialog::extra_options = [] () {
           dialog::addBreak(100);
           if(sphere && pmodel == mdBandEquiarea) {
-            dialog::addBoolItem("Gall-Peters", vid.stretch == 2, 'o');
+            dialog::addBoolItem("Gall-Peters", vid.stretch == 2, 'O');
             dialog::add_action([] { vid.stretch = 2; dialog::ne.s = "2"; });
             }
           if(pmodel == mdBandEquiarea) {
@@ -822,11 +822,11 @@ namespace conformal {
         dialog::dialogflags |= sm::CENTER;
         dialog::extra_options = [] () {
           dialog::addBreak(100);
-          dialog::addBoolItem("line animation only", conformal::do_rotate == 0, 'n');
+          dialog::addBoolItem("line animation only", conformal::do_rotate == 0, 'N');
           dialog::add_action([] () { conformal::do_rotate = 0; });
-          dialog::addBoolItem("gravity lands", conformal::do_rotate == 1, 'g');
+          dialog::addBoolItem("gravity lands", conformal::do_rotate == 1, 'G');
           dialog::add_action([] () { conformal::do_rotate = 1; });
-          dialog::addBoolItem("all directional lands", conformal::do_rotate == 2, 'd');
+          dialog::addBoolItem("all directional lands", conformal::do_rotate == 2, 'D');
           dialog::add_action([] () { conformal::do_rotate = 2; });
           };
         }

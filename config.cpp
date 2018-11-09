@@ -647,27 +647,27 @@ void edit_sightrange() {
     dialog::editNumber(vid.smart_range_detail, 1, 50, 1, 8, XLAT("minimum visible cell in pixels"), "");
     }  
   dialog::extra_options = [] () {
-    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'd');
+    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
     dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
     if(allowIncreasedSight()) {
-      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'n');
+      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
       dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
       }
     if(allowChangeRange() && allowIncreasedSight()) {
-      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'g');
+      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
       dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
       }
     if(vid.use_smart_range == 0 && allowChangeRange()) {
-      dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'o');
+      dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
       dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
-      dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'O');
+      dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
       dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
       }      
     if(!allowChangeRange() || !allowIncreasedSight()) {
-      dialog::addItem(XLAT("enable the cheat mode for additional options"), 'C');
+      dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
       dialog::add_action(enable_cheat);
       }
-    dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), 'c');
+    dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), 'C');
     dialog::add_action([] () { 
       popScreen();
       dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"), 
@@ -819,7 +819,7 @@ void showGraphConfig() {
     if(xuni == 'w' && vid.usingGL) {
       dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
       dialog::extra_options = [] () {
-        dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
+        dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
         dialog::add_action([] () { vid.antialias ^= AA_LINEWIDTH; });
         };
       }
@@ -1080,11 +1080,11 @@ void projectionDialog() {
     "for more models."));
   dialog::extra_options = [] () {
     dialog::addBreak(100);
-    dialog::addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'p');
+    dialog::addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'P');
     dialog::add_action([] () { *dialog::ne.editwhat = 1; vid.scale = 1; dialog::ne.s = "1"; });
-    dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'k');
+    dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'K');
     dialog::add_action([] () { *dialog::ne.editwhat = 0; vid.scale = 1; dialog::ne.s = "0"; });
-    dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'o');
+    dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'O');
     dialog::add_action([] () { double d = exp(shiftmul/10); vid.alpha *= d; vid.scale *= d; dialog::ne.s = dialog::disp(vid.alpha); });
     };
   }
@@ -1328,7 +1328,7 @@ void show3D() {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::reaction = delayed_geo_reset;
       dialog::extra_options = [] () {
-        dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'o');
+        dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'O');
         dialog::add_action([] () {
           geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
           buildpolys();

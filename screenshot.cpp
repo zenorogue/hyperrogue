@@ -659,15 +659,15 @@ void show() {
         dialog::extra_options = [] () {
           if(hyperbolic) {
             // area = 2pi (cosh(r)-1) 
-            dialog::addSelItem(XLAT("double spin"), fts(acosh(2.)), 'a');
+            dialog::addSelItem(XLAT("double spin"), fts(acosh(2.)), 'A');
             dialog::add_action([] () { circle_radius = acosh(2.); });
-            dialog::addSelItem(XLAT("triple spin"), fts(acosh(3.)), 'b');
+            dialog::addSelItem(XLAT("triple spin"), fts(acosh(3.)), 'B');
             dialog::add_action([] () { circle_radius = acosh(3.); });
             }
           if(sphere) {
-            dialog::addSelItem(XLAT("double spin"), fts(acos(1/2.)), 'a');
+            dialog::addSelItem(XLAT("double spin"), fts(acos(1/2.)), 'A');
             dialog::add_action([] () { circle_radius = acos(1/2.); });
-            dialog::addSelItem(XLAT("triple spin"), fts(acos(1/3.)), 'b');
+            dialog::addSelItem(XLAT("triple spin"), fts(acos(1/3.)), 'B');
             dialog::add_action([] () { circle_radius = acos(1/3.); });
             }
           };
@@ -687,11 +687,11 @@ void show() {
         dialog::add_action([] () { 
           dialog::editNumber(cycle_length, 0, 10, 0.1, 2*M_PI, "shift", ""); 
           dialog::extra_options = [] () {
-            dialog::addSelItem(XLAT("full circle"), fts(2 * M_PI), 'a');
+            dialog::addSelItem(XLAT("full circle"), fts(2 * M_PI), 'A');
             dialog::add_action([] () { cycle_length = 2 * M_PI; });
-            dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172), 'b');
+            dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172), 'B');
             dialog::add_action([] () { cycle_length = 2.898149445355172; });
-            dialog::addSelItem(XLAT("Bolza period"), fts(2 * 1.528571), 'c');
+            dialog::addSelItem(XLAT("Bolza period"), fts(2 * 1.528571), 'C');
             dialog::add_action([] () { cycle_length = 2 * 1.528571; });
             };
           });
