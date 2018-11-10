@@ -604,15 +604,6 @@ void create_adjacent(heptagon *h, int d) {
   connect_digons_too(hi, heptspin(hnew, 0));
   }
 
-set<heptagon*> visited;
-queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
-
-void enqueue(heptagon *h, const transmatrix& T) {
-  if(visited.count(h)) { return; }
-  visited.insert(h);
-  drawqueue.emplace(h, T, band_shift);
-  }
-
 pair<ld, ld>& archimedean_tiling::get_triangle(heptagon *h, int cid) {
   return triangles[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
   }
@@ -641,23 +632,21 @@ transmatrix adjcell_matrix(heptagon *h, int d) {
   }
 
 void draw() {
-  visited.clear();
-  enqueue(viewctr.at, cview());
-  int idx = 0;
+  dq::visited.clear();
+  dq::enqueue(viewctr.at, cview());
   
-  while(!drawqueue.empty()) {
-    auto p = drawqueue.front();
-    drawqueue.pop();
+  while(!dq::drawqueue.empty()) {
+    auto& p = dq::drawqueue.front();
     heptagon *h = get<0>(p);
     transmatrix V = get<1>(p);
     dynamicval<ld> b(band_shift, get<2>(p));
+    dq::drawqueue.pop();
+
     int id = id_of(h);
     int S = isize(current.triangles[id]);
 
     if(id < 2*current.N ? !DUAL : !PURE) {
-      if(vid.use_smart_range == 0 && !dodrawcell(h->c7)) continue;
-      if(vid.use_smart_range && idx > 50 && !in_smart_range(V)) continue;
-      if(vid.use_smart_range == 2) setdist(h->c7, 7, h->c7);
+      if(!do_draw(h->c7, V)) continue;
       drawcell(h->c7, V, 0, false);
       }
 
@@ -667,9 +656,8 @@ void draw() {
       if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
       transmatrix V1 = V * adjcell_matrix(h, i);
       bandfixer bf(V1);
-      enqueue(h->move(i), V1);
+      dq::enqueue(h->move(i), V1);
       }
-    idx++;
     }
   }
 

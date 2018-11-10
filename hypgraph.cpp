@@ -690,8 +690,11 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   }
 
 bool in_smart_range(const transmatrix& T) {
+  if(std::isnan(T[2][2]) || std::isinf(T[2][2]) || T[2][2] > 1e8) return false;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
+  if(std::isnan(h1[0]) || std::isnan(h1[1])) return false;
+  if(std::isinf(h1[0]) || std::isinf(h1[1])) return false;
   ld x = vid.xcenter + vid.radius * h1[0];
   ld y = vid.ycenter + vid.radius * h1[1] * vid.stretch;
   if(x > vid.xres * 2) return false;
@@ -715,13 +718,6 @@ bool in_smart_range(const transmatrix& T) {
     y + 2 * max(y1, y2) > 0;
   }
 
-// in hyperbolic quotient geometries, relying on pathdist is not sufficient
-bool in_qrange(const transmatrix& V) {
-  if(!quotient || !hyperbolic || vid.use_smart_range) return true;
-  return in_smart_range(V);
-  // return V[2][2] < cosh(crossf * get_sightrange_ambush());
-  }
-
 namespace gp {
 
 /*
@@ -741,7 +737,7 @@ void drawrec(cell *c, const transmatrix& V) {
   gp::local_info draw_li;
 
   void drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) {
-    if(dodrawcell(c)) {
+    if(do_draw(c, V)) {
       /* auto li = get_local_info(c);
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
@@ -749,8 +745,7 @@ void drawrec(cell *c, const transmatrix& V) {
       draw_li.relative = at;
       draw_li.total_dir = fixg6(dir);
       transmatrix V1 = V * Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
-      if(in_qrange(V1))
-        drawcell(c, V1, 0, false);
+      drawcell(c, V1, 0, false);
       }
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
@@ -765,7 +760,7 @@ void drawrec(cell *c, const transmatrix& V) {
     draw_li.relative = loc(0,0);
     draw_li.total_dir = 0;
     draw_li.last_dir = -1;
-    if(dodrawcell(c))
+    if(do_draw(c, V))
       drawcell(c, V, 0, false);
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
@@ -780,23 +775,14 @@ void drawrec(cell *c, const transmatrix& V) {
 
 void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
 
-  // calc_relative_matrix(cwt.c, hs.at);
-    
+  // calc_relative_matrix(cwt.c, hs.at);    
   cell *c = hs.at->c7;
   
   transmatrix V10;
   const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
   
-  bool draw = c->pathdist < PINFD;
+  bool draw = false;
   
-  if(cells_drawn > vid.cells_drawn_limit || reclev >= 10000 || std::isinf(V[2][2]) || std::isnan(V[2][2]) || V[2][2] > 1e8)
-    draw = false;
-  else if(vid.use_smart_range) {
-    draw = reclev < 2 ? true : in_smart_range(V);
-    if(draw && vid.use_smart_range == 2) 
-      setdist(c, 7, NULL);
-    }
-    
   if(GOLDBERG) {
     gp::drawrec(c, actualV(hs, V1));
     }
@@ -805,27 +791,30 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
     auto& hi = irr::periodmap[hs.at];
     transmatrix V0 = actualV(hs, V1);
     auto& vc = irr::cells_of_heptagon[hi.base.at];
-    for(int i=0; i<isize(vc); i++)
-      if(dodrawcell(hi.subcells[i]) && in_qrange(V0 * irr::cells[vc[i]].pusher))
+    for(int i=0; i<isize(vc); i++) {
+      cell *c = hi.subcells[i];
+      transmatrix V1 = V0 * irr::cells[vc[i]].pusher;
+      if(do_draw(c, V1))
         draw = true,
         drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher, 0, false);
+      }
     }
   
   else {
-    if(dodrawcell(c)) {
+    if(do_draw(c, V1)) {
       transmatrix V2 = actualV(hs, V1);
-      if(in_qrange(V2))
-        drawcell(c, V2, 0, hs.mirrored);
-      else draw = false;
+      drawcell(c, V2, 0, hs.mirrored);
+      draw = true;
       }
-    
+
     if(BITRUNCATED) for(int d=0; d<S7; d++) {
       int ds = hs.at->c.fix(hs.spin + d);
       // createMov(c, ds);
-      if(c->move(ds) && c->c.spin(ds) == 0 && dodrawcell(c->move(ds))) {
+      if(c->move(ds) && c->c.spin(ds) == 0) {
         transmatrix V2 = V1 * hexmove[d];
-        if(in_qrange(V2))
-        drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
+        if(do_draw(c->move(ds), V2))
+          draw = true,
+          drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
         }
       }
     }
@@ -928,10 +917,8 @@ void drawEuclidean() {
       if(locald < centerd) centerd = locald, centerover = cw, View = Mat;
       }
 
-    if(i < 30 || in_smart_range(Mat)) {
-      if(vid.use_smart_range == 2) setdist(cw.at, 7, cw.at);
-      if(dodrawcell(cw.at))
-        drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
+    if(do_draw(cw.at, Mat)) {
+      drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
       for(int x=-1; x<=+1; x++)
       for(int y=-1; y<=+1; y++) {
         auto p = at + pair_to_vec(x, y);
@@ -1351,6 +1338,39 @@ void fix_the_band(transmatrix& T) {
     fixmatrix(T);
     // todo orientation
     }
+  }
+
+namespace dq {
+  set<heptagon*> visited;
+  queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
+
+  void enqueue(heptagon *h, const transmatrix& T) {
+    if(!h || visited.count(h)) { return; }
+    visited.insert(h);
+    drawqueue.emplace(h, T, band_shift);
+    }  
+
+  }
+
+bool do_draw(cell *c) {
+  // do not display out of range cells, unless on torus
+  if(c->pathdist == PINFD && geometry != gTorus && vid.use_smart_range == 0)
+    return false;
+  // do not display not fully generated cells, unless a cheater
+  if(c->mpdist > 7 && !cheater && !autocheat) return false;
+  // in the Yendor Challenge, scrolling back is forbidden
+  if(c->cpdist > 7 && yendor::on && !cheater && !autocheat) return false;
+
+  return true;
+  }  
+
+bool do_draw(cell *c, const transmatrix& T) {
+  if(!do_draw(c)) return false;
+  if(cells_drawn > vid.cells_drawn_limit) return false;
+  bool usr = vid.use_smart_range || quotient || torus;
+  if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
+  if(vid.use_smart_range == 2) setdist(c, 7, c);
+  return true; 
   }
 
 }

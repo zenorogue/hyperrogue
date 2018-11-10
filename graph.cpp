@@ -3388,18 +3388,6 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
     }
   }
 
-bool dodrawcell(cell *c) {
-  // do not display out of range cells, unless on torus
-  if(c->pathdist == PINFD && geometry != gTorus && vid.use_smart_range == 0)
-    return false;
-  // do not display not fully generated cells, unless a cheater
-  if(c->mpdist > 7 && !cheater && !autocheat) return false;
-  // in the Yendor Challenge, scrolling back is forbidden
-  if(c->cpdist > 7 && yendor::on && !cheater && !autocheat) return false;
-
-  return true;
-  }
-
 // 1 : (floor, water); 2 : (water, bottom); 4 : (bottom, inf)
 
 int shallow(cell *c) {

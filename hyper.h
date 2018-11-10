@@ -4356,5 +4356,14 @@ inline void delayed_geo_reset() { need_reset_geometry = true; }
 
 extern unordered_map<string, ld&> params;
 
+namespace dq {
+  extern set<heptagon*> visited;
+  extern queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
+
+  void enqueue(heptagon *h, const transmatrix& T);
+  }
+
+bool do_draw(cell *c, const transmatrix& T);
+
 }
 

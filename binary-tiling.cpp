@@ -152,39 +152,34 @@ namespace binary {
     return transmatrix {{{-u*u/8+1, u/2, u*u/8}, {-u/2, 1, u/2}, {-u*u/8, u/2, u*u/8+1}}};
     }
 
-  void draw_rec(cell *c, int dirs, const transmatrix& V, int reclev) {
-
-    transmatrix V1 = V;
-    bandfixer bf(V1);
-
-    if(vid.use_smart_range == 0 && !dodrawcell(c)) return;
-    if(vid.use_smart_range && reclev >= 2 && !in_smart_range(V1)) return;
-    if(vid.use_smart_range == 2) setdist(c, 7, c);
-
-    drawcell(c, V1, 0, false);
-    // 1: up
-    if(dirs & 1)
-      draw_rec(createMov(c, bd_up), 7, V1 * xpush(-log(2)), reclev+1);
-    // right
-    if(dirs & 2)
-      draw_rec(createMov(c, bd_right), 2, V1 * parabolic(1), reclev+1);
-    // left
-    if(dirs & 4)
-      draw_rec(createMov(c, bd_left), 4, V1 * parabolic(-1), reclev+1);
-    // down
-    if((dirs & 8) && c->type == 6)
-      draw_rec(createMov(c, bd_down), dirs & 62, V1 * xpush(log(2)), reclev+1);
-    // down_left
-    if((dirs & 16) && c->type == 7)
-      draw_rec(createMov(c, bd_down_left), dirs & 28, V1 * parabolic(-1) * xpush(log(2)), reclev+1);
-    // down_right
-    if((dirs & 32) && c->type == 7)
-      draw_rec(createMov(c, bd_down_right), dirs & 42, V1 * parabolic(1) * xpush(log(2)), reclev+1);
-    }
-
   void draw() {
-    draw_rec(viewctr.at->c7, 63, cview(), 0);
-    }
+    dq::visited.clear();
+    dq::enqueue(viewctr.at, cview());
+    
+    while(!dq::drawqueue.empty()) {
+      auto& p = dq::drawqueue.front();
+      heptagon *h = get<0>(p);
+      transmatrix V = get<1>(p);
+      dynamicval<ld> b(band_shift, get<2>(p));
+      bandfixer bf(V);
+      dq::drawqueue.pop();
+      
+      cell *c = h->c7;
+      if(!do_draw(c, V)) continue;
+      drawcell(c, V, 0, false);
+
+      dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
+      dq::enqueue(h->move(bd_right), V * parabolic(1));
+      dq::enqueue(h->move(bd_left), V * parabolic(-1));
+      if(c->type == 6)
+        dq::enqueue(h->move(bd_down), V * xpush(log(2)));
+    // down_left
+      if(c->type == 7) {
+        dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
+        dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
+        }
+      }
+    }  
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
     if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
