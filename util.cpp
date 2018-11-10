@@ -206,6 +206,9 @@ cld exp_parser::parse(int prio) {
     else if(number == "") at = -1;
     else if(number == "s") res = ticks / 1000.;
     else if(number == "ms") res = ticks;
+    else if(number == "mousex") res = mousex;
+    else if(number == "mousey") res = mousey;
+    else if(number == "mousez") res = cld(mousex - vid.xcenter, mousey - vid.ycenter) / cld(vid.radius, 0);
     else if(extra_params.count(number)) res = extra_params[number];
     else if(params.count(number)) res = params.at(number);
     else if(number[0] >= 'a' && number[0] <= 'z') at = -1;
@@ -242,6 +245,6 @@ ld parseld(const string& s) {
 
 string parser_help() {
   return XLAT("Functions available: %1", 
-    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), e, i, pi, s, ms, floor, frac");
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez");
   }
 }
