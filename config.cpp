@@ -1809,6 +1809,9 @@ unordered_map<string, ld&> params = {
   {"mobius", vid.skiprope},
   {"a", anims::a},
   {"b", anims::b},
+  {"sang", conformal::spiral_angle},
+  {"spiralx", conformal::spiral_x},
+  {"spiraly", conformal::spiral_y},
   };
 
 }

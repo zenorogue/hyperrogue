@@ -1286,6 +1286,7 @@ namespace conformal {
   extern bool model_straight;
   extern ld model_transition;
   extern ld top_z;
+  extern ld spiral_angle, spiral_x, spiral_y;
   
   // screen coordinates to logical coordinates: apply_orientation(x,y)
   // logical coordinates back to screen coordinates: apply_orientation(y,x)

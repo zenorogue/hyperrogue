@@ -820,7 +820,7 @@ namespace conformal {
       dialog::add_action([](){
         dialog::editNumber(spiral_x, -20, 20, 1, 10, XLAT("spiral period: x"), "");
         });
-      dialog::addSelItem(XLAT("spiral period: y"), fts(spiral_x), 'y');
+      dialog::addSelItem(XLAT("spiral period: y"), fts(spiral_y), 'y');
       dialog::add_action([](){
         dialog::editNumber(spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
         });
@@ -1092,6 +1092,11 @@ namespace conformal {
     else if(argis("-sang")) { 
       PHASEFROM(2); 
       shift_arg_formula(conformal::spiral_angle);
+      }
+    else if(argis("-sxy")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(conformal::spiral_x);
+      shift_arg_formula(conformal::spiral_y);
       }
     else if(argis("-mob")) { 
       PHASEFROM(2); 
