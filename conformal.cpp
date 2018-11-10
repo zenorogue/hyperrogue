@@ -393,7 +393,10 @@ namespace conformal {
     movetophase();
     }
   
-  ld spiral_angle, cos_spiral, sin_spiral;
+  ld spiral_angle, spiral_x = 10, spiral_y = 7;
+  int spiral_id = 7;
+  
+  cld spiral_multiplier;
 
   void configure() {
     ld ball = -vid.ballangle * degree;
@@ -403,8 +406,16 @@ namespace conformal {
     model_straight = (ocos > 1 - 1e-9);
     if(conformal::on) conformal::apply();
     
-    ld b = spiral_angle * degree;
-    cos_spiral = cos(b), sin_spiral = sin(b);
+    if(hyperbolic) {
+      ld b = spiral_angle * degree;
+      ld cos_spiral = cos(b);
+      ld sin_spiral = sin(b);
+      spiral_multiplier = cld(cos_spiral, sin_spiral) * M_PI * cos_spiral;
+      }
+    if(euclid) {
+      hyperpoint h = tC0(eumove(spiral_x, spiral_y));
+      spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
+      }
     
     band_shift = 0;
     }
@@ -590,6 +601,33 @@ namespace conformal {
     return "?";
     }
 
+  vector<pair<int, int> > torus_zeros;
+
+  void match_torus_period() {
+    torus_zeros.clear();
+    for(int y=0; y<=200; y++)
+    for(int x=-200; x<=200; x++) {
+      if(y == 0 && x <= 0) continue;
+      auto zero = vec_to_cellwalker(euclid_getvec(x, y));
+      if(zero.at == currentmap->gamestart() && !zero.mirrored)
+        torus_zeros.emplace_back(x, y);      
+      }
+    sort(torus_zeros.begin(), torus_zeros.end(), [] (const pair<int,int> p1, const pair<int, int> p2) {
+      ld d1 = hdist0(tC0(eumove(p1.first, p1.second)));
+      ld d2 = hdist0(tC0(eumove(p2.first, p2.second)));
+      if(d1 < d2 - 1e-6) return true;
+      if(d1 > d2 + 1e-6) return false;
+      return p1 < p2;
+      });
+    if(spiral_id > isize(torus_zeros)) spiral_id = 0;
+    dialog::editNumber(spiral_id, 0, isize(torus_zeros)-1, 1, 10, XLAT("match the period of the torus"), "");
+    dialog::reaction = [] () {
+      tie(spiral_x, spiral_y) = torus_zeros[spiral_id];
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(isize(torus_zeros)-1);
+    }
+  
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
@@ -768,6 +806,28 @@ namespace conformal {
           );
         dialog::scaleLog();
         });
+      }
+    
+    if(pmodel == mdSpiral && hyperbolic) {
+      dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle), 'x');
+      dialog::add_action([](){
+        dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
+        });
+      }
+
+    if(pmodel == mdSpiral && euclid) {
+      dialog::addSelItem(XLAT("spiral period: x"), fts(spiral_x), 'x');
+      dialog::add_action([](){
+        dialog::editNumber(spiral_x, -20, 20, 1, 10, XLAT("spiral period: x"), "");
+        });
+      dialog::addSelItem(XLAT("spiral period: y"), fts(spiral_x), 'y');
+      dialog::add_action([](){
+        dialog::editNumber(spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
+        });
+      if(torus) {
+        dialog::addSelItem(XLAT("match the period of the torus"), its(spiral_id), 'n');
+        dialog::add_action(match_torus_period);
+        }
       }
 
     dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');

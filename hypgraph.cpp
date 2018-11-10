@@ -557,10 +557,10 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdSpiral: {
-      makeband(H, ret, band_conformal);
-
-      cld z(ret[0], ret[1]);
-      z = z * cld(conformal::cos_spiral, conformal::sin_spiral) * M_PI * conformal::cos_spiral;
+      cld z;
+      if(hyperbolic) makeband(H, ret, band_conformal);
+      else ret = H;
+      z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
       z = exp(z);
       ret[0] = real(z);
       ret[1] = imag(z);
@@ -1372,6 +1372,13 @@ bool do_draw(cell *c) {
 
 bool do_draw(cell *c, const transmatrix& T) {
   if(!do_draw(c)) return false;
+  if(euclid && pmodel == mdSpiral) {
+    hyperpoint h = tC0(T);
+    cld z(h[0], h[1]);
+    z = z * conformal::spiral_multiplier;
+    ld iz = imag(z) + 1.14279e-2; // make it never fall exactly on PI
+    if(iz < -M_PI || iz >= M_PI) return false;
+    }
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient || torus;
   if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
