@@ -577,12 +577,12 @@ void create_adjacent(heptagon *h, int d) {
   }
 
 set<heptagon*> visited;
-queue<pair<heptagon*, transmatrix>> drawqueue;
+queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
 
 void enqueue(heptagon *h, const transmatrix& T) {
   if(visited.count(h)) { return; }
   visited.insert(h);
-  drawqueue.emplace(h, T);
+  drawqueue.emplace(h, T, band_shift);
   }
 
 pair<ld, ld>& archimedean_tiling::get_triangle(heptagon *h, int cid) {
@@ -620,8 +620,9 @@ void draw() {
   while(!drawqueue.empty()) {
     auto p = drawqueue.front();
     drawqueue.pop();
-    heptagon *h = p.first;
-    transmatrix V = p.second;
+    heptagon *h = get<0>(p);
+    transmatrix V = get<1>(p);
+    dynamicval<ld> b(band_shift, get<2>(p));
     int id = id_of(h);
     int S = isize(current.triangles[id]);
 
@@ -636,7 +637,9 @@ void draw() {
       if(DUAL && (i&1)) continue;
       h->cmove(i);
       if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
-      enqueue(h->move(i), V * adjcell_matrix(h, i));
+      transmatrix V1 = V * adjcell_matrix(h, i);
+      bandfixer bf(V1);
+      enqueue(h->move(i), V1);
       }
     idx++;
     }
