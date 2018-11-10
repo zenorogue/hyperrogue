@@ -7219,3 +7219,68 @@ S("You can change this parameter for a transition from another model to this one
   "Możesz zmienić ten parametr, by obejrzeć przejście z innego modelu do tego.")
 
 S("model orientation", "orientacja modelu")
+
+// 10.4z
+
+S("left-handed", "leworęczn%y0")
+
+// formula features
+
+S(
+  "This lets you specify the projection as a formula f. "
+  "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
+  "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz.",
+  
+  "Tu możesz zdefiniować własną projekcję podając wzór f. "
+  "Wzór może zależeć od zmiennej 'z', będącej liczbą zespoloną odpowiadającą współrzędnym x,y w obecnie ustawionym modelu; "
+  "punkt z będzie przekształcony w f(z). Możesz też używać współrzędnych podstawowych ux, uy, uz.")
+
+S("Functions available: %1", "Dostępne funkcje: %1")
+
+S("animate parameters", "animacja parametrów")
+
+S(
+  "Most parameters can be animated simply by using '..' in their editing dialog. "
+  "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
+  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
+  "parameters 'a' and 'b' exist for this purpose. "
+  "See the list below for parameters which are currently animated (or changed).",
+  
+  "Większość parametrów może być animowana w prosty sposób, przez wpisanie '..' w ich pole edycji. "
+  "Przykładowo, wartość parametru ustawiona na 0..1 będzie rosła liniowa od 0 do 1. "
+  "Możesz też używać funkcji (np. cos(0..2*pi)) lub odnosić się do innych parametrów; "
+  "parametry 'a' i 'b' istnieją w tym celu. Poniżej lista parametrów obecnie "
+  "animowanych (lub zmienionych).")
+
+// color edit dialog
+
+S("customize colors and aura", "Dostosuj kolory i aurę")
+
+S("background", "tło")
+S("foreground", "pierwszy plan")
+S("projection boundary", "brzeg modelu")
+S("projection background", "tło modelu")
+S("projection period", "okres modelu")
+S("dialogs", "dialogi")
+S("canvas colors", "kolory płótna")
+S("minefield colors", "kolory pola minowego")
+S("distance colors", "kolory odległości")
+
+// extra conformal models
+
+S("rotated hyperboles", "obrócone hiperbole")
+S("spiral", "spirala")
+
+S("spiral angle", "kąt spirali")
+S("spiral period: x", "okres spirali: x")
+S("spiral period: y", "okres spirali: y")
+S("match the period of the torus", "dopasuj do okresu torusa")
+
+// extra patterns
+
+S("circles", "koła")
+S("radii", "promienie")
+S("meridians", "południki")
+S("parallels", "równoleżniki")
+S("seven-coloring", "siedmiokolorowanie")
+

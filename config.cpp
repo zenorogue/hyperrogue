@@ -1468,7 +1468,7 @@ void refresh_canvas() {
 void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
   cmode = sm::SIDE;
   gamescreen(0);
-  dialog::init(XLAT("Customize colors and aura"));
+  dialog::init(XLAT("customize colors and aura"));
   
   for(int i=0; i<isize(ct); i++) {
     dialog::addColorItem(its(i), ct[i] << 8, 'a'+i);
@@ -1482,7 +1482,7 @@ void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
 void show_color_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   gamescreen(0);
-  dialog::init(XLAT("Customize colors and aura"));
+  dialog::init(XLAT("customize colors and aura"));
 
   dialog::addColorItem(XLAT("background"), backcolor << 8, 'b');
   dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
@@ -1496,7 +1496,7 @@ void show_color_dialog() {
   dialog::addColorItem(XLAT("projection boundary"), ringcolor, 'r');
   dialog::add_action([] () { dialog::openColorDialog(ringcolor); dialog::dialogflags |= sm::SIDE; });
 
-  dialog::addColorItem(XLAT("projection content"), modelcolor, 'c');
+  dialog::addColorItem(XLAT("projection background"), modelcolor, 'c');
   dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
