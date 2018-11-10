@@ -82,6 +82,7 @@ void addsaver(charstyle& cs, string s) {
   addsaver(cs.swordcolor, s + ".swordcolor");
   addsaver(cs.dresscolor2, s + ".dresscolor2");
   addsaver(cs.uicolor, s + ".uicolor");
+  addsaver(cs.lefthanded, s + ".lefthanded");
   }
   
 // R:239, G:208, B:207 
@@ -102,6 +103,7 @@ void initcs(charstyle &cs) {
   cs.swordcolor = 0xD0D0D0FF;
   cs.dresscolor2= 0x8080FFC0;
   cs.uicolor    = 0xFF0000FF;
+  cs.lefthanded = false;
   }
 
 #if CAP_CONFIG
@@ -1408,6 +1410,8 @@ void showCustomizeChar() {
   if(!shmup::on && multi::players == 1) dialog::addSelItem(XLAT("save whom"), XLAT1(minf[moPrincess].name), 'p');
   
   if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(shmup::cpid+1), 'a');
+
+  dialog::addBoolItem(XLAT("left-handed"), cs.lefthanded, 'l');
   
   dialog::addBreak(50);
   dialog::addBack();
@@ -1442,6 +1446,7 @@ void showCustomizeChar() {
     else if(uni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
     else if(uni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
     else if(uni == 'u') switchcolor(cs.uicolor, eyecolors);
+    else if(uni == 'l') cs.lefthanded = !cs.lefthanded;
     else if(doexiton(sym, uni)) popScreen();
     };
   }

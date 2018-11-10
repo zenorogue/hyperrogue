@@ -749,6 +749,7 @@ void activateActiv(cell *c, bool msg);
 struct charstyle {
   int charid;
   color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor;
+  bool lefthanded;
   };
 
 string csname(charstyle& cs);

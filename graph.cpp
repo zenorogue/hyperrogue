@@ -894,27 +894,29 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       if(items[itOrbSide1] && !shmup::on)
         queuepoly(VBODY * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       
+      transmatrix VWPN = cs.lefthanded ? VBODY * Mirror : VBODY;
+      
       if(peace::on) ;
       else if(items[itOrbThorns])
-        queuepoly(VBODY, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
+        queuepoly(VWPN, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
       else if(!shmup::on && items[itOrbDiscord])
-        queuepoly(VBODY, cs.charid >= 2 ? shSabre : shPSword, watercolor(0));
+        queuepoly(VWPN, cs.charid >= 2 ? shSabre : shPSword, watercolor(0));
       else if(items[itRevolver])
-        queuepoly(VBODY, shGunInHand, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VWPN, shGunInHand, fc(314, cs.swordcolor, 3)); // 3 not colored
       else if(items[itOrbSlaying]) {
-        queuepoly(VBODY, shFlailTrunk, fc(314, cs.swordcolor, 3));
-        queuepoly(VBODY, shHammerHead, fc(314, cs.swordcolor, 3));
+        queuepoly(VWPN, shFlailTrunk, fc(314, cs.swordcolor, 3));
+        queuepoly(VWPN, shHammerHead, fc(314, cs.swordcolor, 3));
         }
       else if(!shmup::on)
-        queuepoly(VBODY, cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VWPN, cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       else if(shmup::curtime >= shmup::getPlayer()->nextshot)
-        queuepoly(VBODY, shPKnife, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VWPN, shPKnife, fc(314, cs.swordcolor, 3)); // 3 not colored
       
       if(items[itOrbBeauty]) {
         if(cs.charid&1)
           queuepoly(VHEAD, shFlowerHair, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
         else
-          queuepoly(VBODY, shFlowerHand, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
+          queuepoly(VWPN, shFlowerHand, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
         }
       
       if(where && where->land == laWildWest) {
