@@ -898,19 +898,25 @@ void drawEuclidean() {
   //   mindx, mindy, maxdx, maxdy);
   int pvec = cellwalker_to_vec(centerover);
   
-  set<int> visited = {0};
-  vector<int> dfs = {0};
+  typedef pair<int, int> euspot;
+  
+  const euspot zero = {0,0};
+  
+  set<euspot> visited = {zero};
+  vector<euspot> dfs = {zero};
 
   ld centerd = matrixnorm(View);
   auto View0 = View;
   
   for(int i=0; i<isize(dfs); i++) {
-    int at = dfs[i];
-
-    cellwalker cw = vec_to_cellwalker(pvec + at);
+    int dx, dy;
+    tie(dx, dy) = dfs[i];
+    
+    cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
     if(!cw.at) continue;
-    auto p = vec_to_pair(at);
-    transmatrix Mat = View0 * eumove(p.first,p.second);
+    transmatrix Mat = View0 * eumove(dx, dy);
+    torusconfig::torus_cx = dx;
+    torusconfig::torus_cy = dy;
 
     if(true) {
       ld locald = matrixnorm(Mat);
@@ -921,9 +927,9 @@ void drawEuclidean() {
       drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
       for(int x=-1; x<=+1; x++)
       for(int y=-1; y<=+1; y++) {
-        auto p = at + pair_to_vec(x, y);
+        euspot p(dx+x, dy+y);
         if(!visited.count(p)) visited.insert(p), dfs.push_back(p);
-        }        
+        }
       }
     }
   }
