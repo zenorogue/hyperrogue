@@ -1009,8 +1009,15 @@ void dqi_poly::draw() {
       }
     if(around_center) return;
     }
+  
+  bool can_have_inverse = false;  
+  if(sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) can_have_inverse = true;
+  if(pmodel == mdJoukowsky) can_have_inverse = true;
+  if(pmodel == mdJoukowskyInverted && vid.skiprope) can_have_inverse = true;
+  if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) can_have_inverse = true;
+  if(pmodel == mdSpiral && vid.skiprope) can_have_inverse = true;
     
-  if(((sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) || (pmodel == mdJoukowsky && hyperbolic) || (pmodel == mdDisk && hyperbolic && vid.alpha <= -1)) && !(poly_flags & POLY_ISSIDE)) {
+  if(can_have_inverse && !(poly_flags & POLY_ISSIDE)) {
   
     if(!tinf) 
       compute_side_by_centerin(this, nofill);
