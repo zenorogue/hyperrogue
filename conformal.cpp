@@ -657,49 +657,117 @@ namespace conformal {
       dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'p');
       }
                                   
-    if(model_has_orientation())
+    if(model_has_orientation()) {
       dialog::addSelItem(XLAT("model orientation"), fts(model_orientation), 'l');
+      dialog::add_action([] () {
+        dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
+        });
+      }
     
     if(pmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
         fts4(polygonal::coefr[polygonal::coefid]), 'x');
+      dialog::add_action([] () {
+        polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
+        int ci = polygonal::coefid + 1;
+        dialog::editNumber(polygonal::coefr[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
+        });
       dialog::addSelItem(XLAT("coefficient (imaginary)"), 
         fts4(polygonal::coefi[polygonal::coefid]), 'y');
+      dialog::add_action([] () {
+        polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
+        int ci = polygonal::coefid + 1;
+        dialog::editNumber(polygonal::coefi[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
+        });
       dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
+      dialog::add_action([] () {
+        dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
+        dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
+        });
       }
 
     if(pmodel == mdHalfplane) {
       dialog::addSelItem(XLAT("half-plane scale"), fts(halfplane_scale), 'b');
+      dialog::add_action([] () {
+        dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
+        });
       }
 
-    if(pmodel == mdBall)
+    if(pmodel == mdBall) {
       dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
+      dialog::add_action([] () {
+        dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
+          "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
+        });
+      }
 
     if(pmodel == mdPolygonal) {
       dialog::addSelItem(XLAT("polygon sides"), its(polygonal::SI), 'x');
+      dialog::add_action([] () {
+        dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
+        dialog::reaction = polygonal::solve;
+        });
       dialog::addSelItem(XLAT("star factor"), fts(polygonal::STAR), 'y');
+      dialog::add_action([]() {
+        dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
+        dialog::reaction = polygonal::solve;
+        });
       dialog::addSelItem(XLAT("degree of the approximation"), its(polygonal::deg), 'n');
+      dialog::add_action([](){
+        dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
+        dialog::reaction = polygonal::solve;
+        dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
+        });
       }
     
     if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere) {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
-      }    
+      dialog::add_action(config_camera_rotation);
+      }
     
-    if(pmodel == mdHyperboloid)
+    if(pmodel == mdHyperboloid) {
       dialog::addSelItem(XLAT("maximum z coordinate to show"), fts3(top_z), 'l');
+      dialog::add_action([](){
+        dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
+        });
+      }
     
-    if(model_has_transition())
+    if(model_has_transition()) {
       dialog::addSelItem(XLAT("model transition"), fts3(model_transition), 't');
+      dialog::add_action([]() {
+        dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
+          "You can change this parameter for a transition from another model to this one."
+          );
+        });
+      }
 
-    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral))
+    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral)) {
       dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope), 'S');
+      dialog::add_action([](){
+        dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
+        });
+      }
     
     if(pmodel == mdHemisphere && euclid) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
+      dialog::add_action([] () {
+        dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
+          "Stereographic projection to a sphere. Choose the radius of the sphere."
+          );
+        dialog::scaleLog();
+        });
       }
       
     if(pmodel == mdTwoPoint) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'b');
+      dialog::add_action([](){
+        dialog::editNumber(vid.twopoint_param, 0, 10, .1, 1, XLAT("parameter"), 
+          "This model maps the world so that the distances from two points "
+          "are kept. This parameter gives the distance from the two points to "
+          "the center."
+          );
+        dialog::scaleLog();
+        });
       }
 
     dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');
@@ -727,20 +795,8 @@ namespace conformal {
       else if(uni == 'u')
         pushScreen(rug::show);
 #endif
-      else if(uni == 'l' && model_has_orientation())
-        dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
-      else if(uni == 'l' && pmodel == mdHyperboloid) 
-        dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
-      else if(uni == 't')
-        dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
-          "You can change this parameter for a transition from another model to this one."
-          );
-      else if(uni == 'S')
-        dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
-      else if(uni == 'b' && pmodel == mdHalfplane)
-        dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
       else if(uni == 's') {
-       dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
+        dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
           "Vertical stretch factor."
           );
         dialog::extra_options = [] () {
@@ -766,52 +822,6 @@ namespace conformal {
         }
       else if(uni == 'a')
         pushScreen(history_menu);
-      else if(uni == 'l' && pmodel == mdHemisphere && euclid)  {
-        dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
-          "Stereographic projection to a sphere. Choose the radius of the sphere."
-          );
-        dialog::scaleLog();
-        }
-      else if(uni == 'b' && pmodel == mdTwoPoint)  {
-        dialog::editNumber(vid.twopoint_param, 0, 10, .1, 1, XLAT("parameter"), 
-          "This model maps the world so that the distances from two points "
-          "are kept. This parameter gives the distance from the two points to "
-          "the center."
-          );
-        dialog::scaleLog();
-        }
-      else if(uni == 'b') 
-        config_camera_rotation();
-      else if(uni == 'x' && pmodel == mdBall) 
-        dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
-          "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
-      else if(sym == 'x' && pmodel == mdPolygonal) {
-        dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
-        dialog::reaction = polygonal::solve;
-        }        
-      else if(sym == 'y' && pmodel == mdPolygonal) {
-        dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
-        dialog::reaction = polygonal::solve;
-        }
-      else if(sym == 'n' && pmodel == mdPolygonal) {
-        dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
-        dialog::reaction = polygonal::solve;
-        dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
-        }
-      else if(sym == 'x' && pmodel == mdPolynomial)  {
-        polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
-        int ci = polygonal::coefid + 1;
-        dialog::editNumber(polygonal::coefr[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
-        }
-      else if(sym == 'y' && pmodel == mdPolynomial) {
-        polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
-        int ci = polygonal::coefid + 1;
-        dialog::editNumber(polygonal::coefi[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
-        }
-      else if(sym == 'n' && pmodel == mdPolynomial) {
-        dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
-        dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
-        }
       else if(sym == 'r') {
         if(rotation < 0) rotation = 0;
         dialog::editNumber(rotation, 0, 360, 90, 0, XLAT("rotation"), 
