@@ -7308,6 +7308,8 @@ bool monsterPushable(cell *c2) {
   return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier);
   }  
 
+bool got_survivalist;
+
 bool movepcto(int d, int subdir, bool checkonly) {
   if(d >= 0 && !checkonly && subdir != 1 && subdir != -1) printf("subdir = %d\n", subdir);
   global_pushto = NULL;
@@ -7905,8 +7907,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
     achievement_gain("WHIRL1");
     }
 
-  if(items[itLotus] >= 25 && !isHaunted(cwt.at->land) && survivalist) {
-    survivalist = false;
+  if(items[itLotus] >= 25 && !isHaunted(cwt.at->land) && survivalist && !got_survivalist) {
+    got_survivalist = true;
     achievement_gain("SURVIVAL");
     }
 
