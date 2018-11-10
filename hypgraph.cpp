@@ -905,63 +905,35 @@ void drawEuclidean() {
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
   //   mindx, mindy, maxdx, maxdy);
   int pvec = cellwalker_to_vec(centerover);
-    
-  int minsx = mindx-1, maxsx=maxdx+1, minsy=mindy-1, maxsy=maxdy+1;
-  mindx=maxdx=mindy=maxdy=0;
   
-  transmatrix View0 = View;
-  
-  ld cellrad = vid.radius / (1 + vid.alpha);
-  
-  ld centerd = matrixnorm(View0);
-  
-  for(int dx=minsx; dx<=maxsx; dx++)
-  for(int dy=minsy; dy<=maxsy; dy++) {
-    torusconfig::torus_cx = dx;
-    torusconfig::torus_cy = dy;
-    cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
-    transmatrix Mat = eumove(dx,dy);
-    
-    if(!cw.at) continue;
+  set<int> visited = {0};
+  vector<int> dfs = {0};
 
-    Mat = View0 * Mat;
-    
+  ld centerd = matrixnorm(View);
+  auto View0 = View;
+  
+  for(int i=0; i<isize(dfs); i++) {
+    int at = dfs[i];
+
+    cellwalker cw = vec_to_cellwalker(pvec + at);
+    if(!cw.at) continue;
+    auto p = vec_to_pair(at);
+    transmatrix Mat = View0 * eumove(p.first,p.second);
+
     if(true) {
       ld locald = matrixnorm(Mat);
-      if(locald < centerd) centerd = locald, centerover = cw, View = View0 * eumove(dx, dy);
+      if(locald < centerd) centerd = locald, centerover = cw, View = Mat;
       }
-    
-    // Mat[0][0] = -1;
-    // Mat[1][1] = -1;
-    
-    // Mat[2][0] = x*x/10;
-    // Mat[2][1] = y*y/10;
-    // Mat = Mat * xpush(x-30) * ypush(y-30);
-    
-    if(vid.use_smart_range) {
-      if(in_smart_range(Mat)) {
-        if(vid.use_smart_range == 2) setdist(cw.at, 7, cw.at);
-        if(dx < mindx) mindx = dx;
-        if(dy < mindy) mindy = dy;
-        if(dx > maxdx) maxdx = dx;
-        if(dy > maxdy) maxdy = dy;
-        if(dodrawcell(cw.at))
-          drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
-        }
-      }
-    else {
-      int cx, cy, shift;
-      getcoord0(tC0(Mat), cx, cy, shift);
-      if(cx >= 0 && cy >= 0 && cx < vid.xres && cy < vid.yres) {
-        if(dx < mindx) mindx = dx;
-        if(dy < mindy) mindy = dy;
-        if(dx > maxdx) maxdx = dx;
-        if(dy > maxdy) maxdy = dy;
-        }
-      if(cx >= -cellrad && cy >= -cellrad && cx < vid.xres+cellrad && cy < vid.yres+cellrad)
-        if(dodrawcell(cw.at)) {
-          drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
-          }
+
+    if(i < 30 || in_smart_range(Mat)) {
+      if(vid.use_smart_range == 2) setdist(cw.at, 7, cw.at);
+      if(dodrawcell(cw.at))
+        drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
+      for(int x=-1; x<=+1; x++)
+      for(int y=-1; y<=+1; y++) {
+        auto p = at + pair_to_vec(x, y);
+        if(!visited.count(p)) visited.insert(p), dfs.push_back(p);
+        }        
       }
     }
   }
