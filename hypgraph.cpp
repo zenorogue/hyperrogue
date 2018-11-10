@@ -718,7 +718,8 @@ bool in_smart_range(const transmatrix& T) {
 // in hyperbolic quotient geometries, relying on pathdist is not sufficient
 bool in_qrange(const transmatrix& V) {
   if(!quotient || !hyperbolic || vid.use_smart_range) return true;
-  return V[2][2] < cosh(crossf * get_sightrange_ambush());
+  return in_smart_range(V);
+  // return V[2][2] < cosh(crossf * get_sightrange_ambush());
   }
 
 namespace gp {
@@ -813,7 +814,9 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
   else {
     if(dodrawcell(c)) {
       transmatrix V2 = actualV(hs, V1);
-      drawcell(c, V2, 0, hs.mirrored);
+      if(in_qrange(V2))
+        drawcell(c, V2, 0, hs.mirrored);
+      else draw = false;
       }
     
     if(BITRUNCATED) for(int d=0; d<S7; d++) {
@@ -827,7 +830,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
       }
     }
 
-  if(draw && in_qrange(V)) for(int d=0; d<S7; d++) {
+  if(draw) for(int d=0; d<S7; d++) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;
