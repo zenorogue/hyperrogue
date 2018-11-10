@@ -1287,7 +1287,8 @@ map<char, colortable> colortables = {
   {'t', {0x804040, 0x408040, 0x404080, 0x808040 }},
   {'c', {0x202020, 0xC0C0C0}},
   {'F', {0xC0C0C0, 0x202020}},
-  {'w', {0x303030, 0xC0C0C0}}
+  {'w', {0x303030, 0xC0C0C0}},
+  {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
   };
 
 color_t random_landscape(cell *c, int mul, int div, int step) {
@@ -1312,6 +1313,12 @@ namespace patterns {
   bool displaycodes;
   char whichShape = 0;
   char whichCanvas = 0;
+  
+  int sevenval(cell *c) {
+    if(!euclid) return 0;
+    auto p = vec_to_pair(cell_to_vec(c));
+    return gmod(p.first - p.second * 2, 7);
+    }
 
   int generateCanvas(cell *c) {
     switch(whichCanvas) {
@@ -1385,6 +1392,8 @@ namespace patterns {
         return colortables['F'][pseudohept(c)];
       case 'T':
         return nestcolors[pattern_threecolor(c)];
+      case 'v':
+        return colortables['v'][sevenval(c)];
       }
     return canvasback;
     }
@@ -1408,6 +1417,9 @@ namespace patterns {
       dialog::addItem(XLAT("chessboard"), 'c');
 
     dialog::addItem(XLAT("nice coloring"), 'T');
+
+    if(euclid6)
+      dialog::addItem(XLAT("seven-coloring"), 'v');
 
     if(stdhyperbolic) {      
       dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
@@ -1981,8 +1993,18 @@ namespace linepatterns {
   void drawPattern(int id, color_t col, cell *c, const transmatrix& V) {
 
     switch(id) {
-
+    
       case patZebraTriangles:
+        if(euclid) {
+          if(patterns::sevenval(c)) break;
+          queueline(tC0(V), V * tC0(eumove(-1, +3)), col, 3 + vid.linequality);
+          queueline(tC0(V), V * tC0(eumove(-3, +2)), col, 3 + vid.linequality);
+          queueline(tC0(V), V * tC0(eumove(-2, -1)), col, 3 + vid.linequality);
+          queueline(tC0(V), V * tC0(eumove(+1, -3)), col, 3 + vid.linequality);
+          queueline(tC0(V), V * tC0(eumove(+3, -2)), col, 3 + vid.linequality);
+          queueline(tC0(V), V * tC0(eumove(+2, +1)), col, 3 + vid.linequality);
+          break;
+          }
         if(zebra40(c) / 4 == 10) {
           bool all = true;
           hyperpoint tri[3];
