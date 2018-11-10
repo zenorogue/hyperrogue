@@ -70,7 +70,7 @@ namespace arg {
   int argi() { return atoi(argcs()); }
   unsigned arghex() { return strtoll(argcs(), NULL, 16); }
   ld argf() { return parseld(args()); }
-  bool argis(const string& s) { return args() == s; }
+  bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
   
   void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); shift(); }
  
@@ -105,37 +105,37 @@ int arg::readCommon() {
     debugfile = stderr;
     shift(); debugflags = argi();
     }
-  else if(argis("--run")) {
+  else if(argis("-run")) {
     PHASE(3); 
     start_game();
     mainloop(); quitmainloop = false;
     }
-  else if(argis("--msg")) {
+  else if(argis("-msg")) {
     shift(); addMessage(args());
     printf("%s\n", args().c_str());
     }
-  else if(argis("--msg0")) {
+  else if(argis("-msg0")) {
     clearMessages();
     }
 #if CAP_TOUR
-  else if(argis("--tour")) {
+  else if(argis("-tour")) {
     PHASEFROM(2); start_game(); tour::start();
     }
-  else if(argis("--presentation")) {
+  else if(argis("-presentation")) {
     PHASEFROM(2); tour::texts = false;
     start_game(); tour::start();
     }
 #endif
-  else if(argis("--draw")) {
+  else if(argis("-draw")) {
     PHASE(3); drawscreen();
     }
-  else if(argis("--rotate")) {
+  else if(argis("-rotate")) {
     PHASE(3); 
     shift(); ld a = argf();
     shift(); ld b = argf();
     View = View * spin(M_PI * 2 * a / b);
     }
-  else if(argis("--exit")) {
+  else if(argis("-exit")) {
     PHASE(3); printf("Success.\n");
     exit(0);
     }
@@ -148,7 +148,7 @@ int arg::readCommon() {
     }
 
 // informational
-  else if(argis("--version") || argis("-v")) {
+  else if(argis("-version") || argis("-v")) {
     printf("HyperRogue version " VER "\n");
     exit(0);
     }
@@ -182,7 +182,8 @@ int arg::readCommon() {
     printf("\n");
     exit(0);
     }
-  else if(argis("--help") || argis("-h")) {
+  else if(argis("")) {}
+  else if(argis("-help") || argis("-h")) {
     printf("Press F1 while playing to get ingame options.\n\n");
     printf("HyperRogue accepts the following command line options:\n");
     printf("  -c FILE        - use the specified configuration file\n");
