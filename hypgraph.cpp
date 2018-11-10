@@ -1300,11 +1300,12 @@ void draw_boundary(int w) {
     case mdSpiral: {
       using namespace hyperpoint_vec;
       if(euclid) return;
-      if(p == PPR::CIRCLE) p = PPR::OUTCIRCLE;
+      // if(p == PPR::CIRCLE) p = PPR::OUTCIRCLE;
       auto& sm = conformal::spiral_multiplier;
+      ld u = hypot(1, imag(sm) / real(sm));
       if(real(sm)) {
         queuereset(mdUnchanged, p);
-        for(ld a=-10; a<=10; a+=0.1) {
+        for(ld a=-10; a<=10; a+=0.01 / (1 << vid.linequality) / u) {
           cld z = exp(cld(a, a * imag(sm) / real(sm) + M_PI));
           hyperpoint ret = hpxyz(real(z), imag(z), 0);
           if(vid.skiprope) 
