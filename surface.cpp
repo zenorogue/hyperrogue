@@ -808,6 +808,9 @@ int surface_args() {
     run_shape(dsHyperboloid);
     }
 
+  else if(argis("-d:surface")) 
+    launch_dialog(show_surfaces);
+
   else return 1;
   return 0;
   }

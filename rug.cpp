@@ -1943,6 +1943,9 @@ int rugArgs() {
     shift_arg_formula(anticusp_factor);
     }
 
+  else if(argis("-d:rug")) 
+    launch_dialog(show);
+
   else return 1;
   return 0;
   }

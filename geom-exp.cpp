@@ -93,8 +93,18 @@ void showQuotientConfig() {
 
 bool torus_bitrunc;
 
+void prepare_torusconfig() {
+  torusconfig::newdy = torusconfig::dy;
+  torusconfig::newqty = torusconfig::qty;
+  torusconfig::newsdx = torusconfig::sdx;
+  torusconfig::newsdy = torusconfig::sdy;
+  torusconfig::newmode = torusconfig::torus_mode;
+  torus_bitrunc = PURE;
+  }
+
 void showTorusConfig() {
-  cmode = sm::SIDE | sm::TORUSCONFIG;
+  cmode = sm::SIDE;
+  if(torus) cmode |= sm::TORUSCONFIG;
   gamescreen(2);
   
   dialog::init(XLAT("advanced configuration"));
@@ -468,12 +478,7 @@ void showEuclideanMenu() {
         ewhichscreen ^= 3;
       else if(uni == '4') {
         if(torus) 
-          torusconfig::newdy = torusconfig::dy,
-          torusconfig::newqty = torusconfig::qty,
-          torusconfig::newsdx = torusconfig::sdx,
-          torusconfig::newsdy = torusconfig::sdy,
-          torusconfig::newmode = torusconfig::torus_mode,
-          torus_bitrunc = PURE,
+          prepare_torusconfig(),
           pushScreen(showTorusConfig);
         else if(geometry == gFieldQuotient) 
           pushScreen(showQuotientConfig);
@@ -639,6 +644,14 @@ int read_geom_args() {
     cheat();
     shift(); currfp.qpaths.push_back(args());
     }
+  else if(argis("-d:quotient")) 
+    launch_dialog(showQuotientConfig);
+  else if(argis("-d:torus")) {
+    launch_dialog(showTorusConfig);
+    prepare_torusconfig();
+    }
+  else if(argis("-d:geom")) 
+    launch_dialog(showEuclideanMenu);
   else return 1;
   return 0;
   }

@@ -1655,12 +1655,10 @@ void selectLanguageScreen() {
 
 #if CAP_COMMANDLINE
 
-int read_config_args() {
+int read_color_args() {
   using namespace arg;
 
-  if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
-// change the configuration from the command line
-  else if(argis("-back")) {
+  if(argis("-back")) {
     PHASEFROM(2); shift(); backcolor = arghex();
     }
   else if(argis("-fillmodel")) {
@@ -1681,6 +1679,17 @@ int read_config_args() {
   else if(argis("-dialog")) {
     PHASEFROM(2); shift(); dialog::dialogcolor = arghex();
     }
+  else if(argis("-d:color"))
+    launch_dialog(show_color_dialog);
+  else return 1;
+  return 0;
+  }
+
+int read_config_args() {
+  using namespace arg;
+
+  if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
+// change the configuration from the command line
   else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
   else if(argis("-lw")) { PHASEFROM(2); shift_arg_formula(vid.linewidth); }
   else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
@@ -1740,6 +1749,24 @@ int read_config_args() {
     }
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('f', vid.full, switchFullscreen())
+  else if(argis("-d:sight")) {
+    PHASEFROM(2); launch_dialog(); edit_sightrange();
+    }
+  else if(argis("-d:char")) {
+    PHASEFROM(2); launch_dialog(showCustomizeChar);
+    }
+  else if(argis("-d:3")) {
+    PHASEFROM(2); launch_dialog(show3D);
+    }
+  else if(argis("-d:stereo")) {
+    PHASEFROM(2); launch_dialog(showStereo);
+    }
+  else if(argis("-d:basic")) {
+    PHASEFROM(2); launch_dialog(showBasicConfig);
+    }
+  else if(argis("-d:graph")) {
+    PHASEFROM(2); launch_dialog(showGraphConfig);
+    }
   else return 1;
   return 0;
   }
@@ -1764,7 +1791,7 @@ int read_gamemode_args() {
   return 0;
   }
 
-auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args);
+auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
 
 unordered_map<string, ld&> params = {

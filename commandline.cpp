@@ -79,7 +79,19 @@ namespace arg {
     exit(1);
     }
 
+  bool dialog_launched = false;
+  
+  void launch_dialog(const reaction_t& r) {
+    if(!dialog_launched) {
+      popScreenAll();
+      showstartmenu = false;
+      dialog_launched = true;
+      }
+    if(r) pushScreen(r);
+    }
+
   }
+
 
 int arg::readCommon() {
 

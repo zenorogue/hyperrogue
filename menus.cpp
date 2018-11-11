@@ -901,4 +901,33 @@ void showMessageLog() {
     else if(doexiton(sym, uni)) popScreen();
     };
   }
+
+#if CAP_COMMANDLINE
+
+int read_menu_args() {
+  using namespace arg;
+
+  if(argis("-d:over")) {
+    PHASEFROM(2); launch_dialog(showOverview);
+    }
+  else if(argis("-d:main")) {
+    PHASEFROM(2); launch_dialog(showMainMenu);
+    }
+  else if(argis("-d:display")) {
+    PHASEFROM(2); launch_dialog(showDisplayMode);
+    }
+  else if(argis("-d:mode")) {
+    PHASEFROM(2); launch_dialog(showChangeMode);
+    }
+  else if(argis("-d:shmup")) {
+    PHASEFROM(2); launch_dialog(shmup::showShmupConfig);
+    }
+  else return 1;
+  return 0;
+  }
+
+auto ah_menu = addHook(hooks_args, 0, read_menu_args);
+
+#endif
+
 }

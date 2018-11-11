@@ -754,6 +754,8 @@ void archimedean_tiling::parse() {
   }
 
 #if CAP_COMMANDLINE  
+void show();
+
 int readArgs() {
   using namespace arg;
            
@@ -774,6 +776,8 @@ int readArgs() {
     }
   else if(argis("-dgeom")) debug_geometry = true;
   else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }
+  else if(argis("-d:arcm")) 
+    launch_dialog(show);
   else return 1;
   return 0;
   }

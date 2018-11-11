@@ -2084,6 +2084,8 @@ namespace arg {
   
   void init(int _argc, char **_argv);
   
+  void launch_dialog(const reaction_t& r = reaction_t());
+  
   extern int curphase;
   
   void phaseerror(int x);

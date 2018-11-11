@@ -628,6 +628,34 @@ namespace conformal {
     dialog::bound_up(isize(torus_zeros)-1);
     }
   
+  void edit_formula() {
+    if(pmodel != mdFormula) basic_model = pmodel;
+    dialog::edit_string(formula, "formula", 
+      XLAT(
+      "This lets you specify the projection as a formula f. "
+      "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
+      "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
+      ) + "\n\n" + parser_help()
+      );
+    dialog::extra_options = [] () {
+      initquickqueue();
+      queuereset(mdUnchanged, PPR::LINE);              
+      for(int a=-1; a<=1; a++) {
+        curvepoint(hpxyz(-M_PI/2 * vid.radius, a*vid.radius, 0));
+        curvepoint(hpxyz(+M_PI/2 * vid.radius, a*vid.radius, 0));
+        queuecurve(forecolor, 0, PPR::LINE);
+        curvepoint(hpxyz(a*vid.radius, -M_PI/2*vid.radius, 0));
+        curvepoint(hpxyz(a*vid.radius, +M_PI/2*vid.radius, 0));
+        queuecurve(forecolor, 0, PPR::LINE);
+        }
+      queuereset(pmodel, PPR::LINE);
+      quickqueue();
+      };
+    dialog::reaction_final = [] () {
+      pmodel = mdFormula;
+      };
+    }
+  
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
@@ -638,31 +666,7 @@ namespace conformal {
         dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()" [m]);
         dialog::add_action([m] () {
           if(m == mdFormula) {
-            if(pmodel != m) basic_model = pmodel;
-            dialog::edit_string(formula, "formula", 
-              XLAT(
-              "This lets you specify the projection as a formula f. "
-              "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
-              "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
-              ) + "\n\n" + parser_help()
-              );
-            dialog::extra_options = [] () {
-              initquickqueue();
-              queuereset(mdUnchanged, PPR::LINE);              
-              for(int a=-1; a<=1; a++) {
-                curvepoint(hpxyz(-M_PI/2 * vid.radius, a*vid.radius, 0));
-                curvepoint(hpxyz(+M_PI/2 * vid.radius, a*vid.radius, 0));
-                queuecurve(forecolor, 0, PPR::LINE);
-                curvepoint(hpxyz(a*vid.radius, -M_PI/2*vid.radius, 0));
-                curvepoint(hpxyz(a*vid.radius, +M_PI/2*vid.radius, 0));
-                queuecurve(forecolor, 0, PPR::LINE);
-                }
-              queuereset(pmodel, PPR::LINE);
-              quickqueue();
-              };
-            dialog::reaction_final = [] () {
-              pmodel = mdFormula;
-              };
+            edit_formula();
             return;
             }
           pmodel = m;
@@ -1107,6 +1111,16 @@ namespace conformal {
       }
     else if(argis("-alpha")) { 
       PHASEFROM(2); shift_arg_formula(vid.alpha);
+      }
+    else if(argis("-d:model")) 
+      launch_dialog(model_menu);
+    else if(argis("-d:formula")) {
+      launch_dialog();
+      edit_formula();
+      }
+    else if(argis("-d:match")) {
+      launch_dialog(match_torus_period);
+      edit_formula();
       }
     else return 1;
     return 0;

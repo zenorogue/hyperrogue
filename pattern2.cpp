@@ -2374,6 +2374,15 @@ int read_pattern_args() {
     stop_game_and_switch_mode(rg::nothing);
     }
 
+  else if(argis("-d:line")) 
+    launch_dialog(linepatterns::showMenu);
+
+  else if(argis("-d:reg"))
+    launch_dialog(patterns::showPrePattern);
+
+  else if(argis("-d:pattern"))
+    launch_dialog(patterns::showPattern);
+
   else return 1;
   return 0;
   }
