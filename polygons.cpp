@@ -486,7 +486,7 @@ void dqi_poly::gldraw() {
   auto& v = *tab;
   
 #if MINIMIZE_GL_CALLS  
-  if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE || POLY_FORCE_INVERTED))))) {
+  if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
     if(color != triangle_color || outline != line_color || texts_merged) {
       glflush();
       triangle_color = color;
