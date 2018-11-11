@@ -7466,3 +7466,67 @@ S("You can change this parameter for a transition from another model to this one
   "Tento parametr je možné změnit pro přechod z jiného modelu do tohoto.")
 
 S("model orientation", "orientace modelu")
+
+// 10.4z
+
+S("left-handed", "levoruk%ý0")
+
+// formula features
+
+S(
+  "This lets you specify the projection as a formula f. "
+  "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
+  "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz.",
+  
+  "Toto umožòuje specifikovat projekci ve formì vzorce f. "
+  "Vzorec má pøístup k hodnotì 'z', což je komplexní èíslo odpovídající souøadnicím [x,y] v právì vybraném modelu; "
+  "bod z je zobrazen na f(z). Lze také použít jeho základní souøadnice ux, uy, uz.")
+
+S("Functions available: %1", "Dostupné funkce: %1")
+
+S("animate parameters", "animace parametrù")
+
+S(
+  "Most parameters can be animated simply by using '..' in their editing dialog. "
+  "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
+  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
+  "parameters 'a' and 'b' exist for this purpose. "
+  "See the list below for parameters which are currently animated (or changed).",
+  
+  "Vìtšinu parametrù lze animovat jen tím, že v jejich editaèním dialogu napíšeš '..'. "
+  "Tak napøíklad hodnota parametru nastaveného na 0..1 poroste lineárnì od 0 do 1. "
+  "Lze také použít funkce (napø. cos(0..2*pi) a odkazovat na jiné parametry; "
+  "za tímto úèelem existují parametry 'a' a 'b'. "
+  "Viz níže uvedený seznam parametrù, které jsou v souèasné dobì animovány (nebo zmìnìny).")
+
+// color edit dialog
+
+S("customize colors and aura", "Uprav barvy a auru")
+
+S("background", "pozadí")
+S("foreground", "popøedí")
+S("projection boundary", "hranice projekce")
+S("projection background", "pozadí projekce")
+S("projection period", "perioda projekce")
+S("dialogs", "dialogy")
+S("canvas colors", "barvy plátna")
+S("minefield colors", "barvy minového pole")
+S("distance colors", "barvy vzdálenosti")
+
+// extra conformal models
+
+S("rotated hyperboles", "otoèené hyperboly")
+S("spiral", "spirála")
+
+S("spiral angle", "úhel spirály")
+S("spiral period: x", "perioda spirály: x")
+S("spiral period: y", "perioda spirály: y")
+S("match the period of the torus", "sladìná s periodou torusu")
+
+// extra patterns
+
+S("circles", "kruhy")
+S("radii", "polomìry")
+S("meridians", "poledníky")
+S("parallels", "rovnobìžky")
+S("seven-coloring", "sedmibarva")
