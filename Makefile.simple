@@ -94,6 +94,7 @@ endif
 ifeq (${TOOLCHAIN},mingw)
   CXXFLAGS_EARLY += -std=c++11 -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
+  CXXFLAGS_EARLY += -Wno-unused-parameter
 endif
 
 

@@ -34,6 +34,7 @@ endif MAC
 
 if MINGW
 nodist_hyperrogue_SOURCES = hyper.res
+hyperrogue_CPPFLAGS += -march=native -DWINDOWS
 windres_prefix = ${host_cpu}-w64-mingw32-
 endif MINGW
 
