@@ -393,7 +393,7 @@ namespace conformal {
     movetophase();
     }
   
-  ld spiral_angle, spiral_x = 10, spiral_y = 7;
+  ld spiral_angle = 70, spiral_x = 10, spiral_y = 7;
   int spiral_id = 7;
   
   cld spiral_multiplier;
