@@ -964,6 +964,7 @@ void showBasicConfig() {
   
     if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
 
+    #if CAP_AUDIO
     if(CAP_AUDIO && xuni == 'b') {
       dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
       dialog::reaction = [] () {
@@ -988,6 +989,7 @@ void showBasicConfig() {
       dialog::bound_low(0);
       dialog::bound_up(MIX_MAX_VOLUME);
       }
+    #endif
     
     if(CAP_TRANS && xuni == 'l')
       pushScreen(selectLanguageScreen); 
