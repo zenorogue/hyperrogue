@@ -1111,7 +1111,7 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   }
 
 void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio) {
-  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && vid.alpha <= -1)) {
+  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) && vid.camera_angle == 0) {
     hyperpoint ret;
     applymodel(xpush0(radius), ret);
     ld r = hypot2(ret);
