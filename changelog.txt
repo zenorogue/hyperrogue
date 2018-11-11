@@ -2754,3 +2754,38 @@ Other bugfixes and improvements:
 * link displayed in the model menu
 * fixed drawing of the boundary of polygonal
 * in svg screenshot, disabled weird recoloring and ringcolor changing
+
+2018.11.11 12:11 Update 10.4z
+
+User interface:
+- A new menu where you can customize colors. You can customize colors of most interface elements 
+  (background, projection background, projection boundary...) as well as the colors of most
+  single-colored game entities (useful e.g. for colorblind players).
+- A new simple but powerful approach to animations. Simply set the value of parameter to "0..1"
+  and it will animate linearly from 0 to 1. You can also use functions (cos(0..2*pi)), multiple
+  steps ("0..1..0") or refer to other parameters (set scale to "(1+projection)/2").
+- Player character can be set to be left-handed. Also the Princess is now left-handed.
+
+Projections:
+- spiral projection (for hyperbolic and Euclidean geometry)
+- 'rotated hyperboles' (2D version of the 3D model used by HyperRogue)
+- polynomial model replaced with one where you specify the formula used
+- projection-based range now works correctly in Archimedean, binary, and Euclidean tilings
+- Möbius transformations in spiral and Joukowsky projections
+
+Patterns:
+- Added seven-coloring in the Euclidean mode. 'Zebra triangles' line pattern used on the torus shows the big triangles.
+- line width configurable in line patterns
+- added new line patterns: circles, radii, meridians, and parallels
+
+Commandline arguments:
+- most important dialogs can be launched from command line
+- Previously some arguments used - while some used --; now both forms are accepted for all arguments
+- empty arguments are ignored in the web version
+- some new arguments for the recently added features
+
+Other:
+- made Archimedean tilings more stable
+- help for Haunted Woods no longer shows the special conduct as failed when you succeed
+- added the sunflower spirals and fundamental domains to RogueViz
+- improved SVG output
