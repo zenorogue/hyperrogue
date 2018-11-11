@@ -7228,11 +7228,11 @@ S("left-handed", "leworęczn%y0")
 
 S(
   "This lets you specify the projection as a formula f. "
-  "The formula has access to the value 'z', which is a complex number corresponding to the x,y coordinates in the currently selected model; "
+  "The formula has access to the value 'z', which is a complex number corresponding to the (x,y) coordinates in the currently selected model; "
   "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz.",
   
   "Tu możesz zdefiniować własną projekcję podając wzór f. "
-  "Wzór może zależeć od zmiennej 'z', będącej liczbą zespoloną odpowiadającą współrzędnym x,y w obecnie ustawionym modelu; "
+  "Wzór może zależeć od zmiennej 'z', będącej liczbą zespoloną odpowiadającą współrzędnym (x,y) w obecnie ustawionym modelu; "
   "punkt z będzie przekształcony w f(z). Możesz też używać współrzędnych podstawowych ux, uy, uz.")
 
 S("Functions available: %1", "Dostępne funkcje: %1")
