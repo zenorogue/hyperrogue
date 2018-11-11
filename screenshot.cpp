@@ -544,6 +544,7 @@ bool record_animation() {
     saveHighQualityShot(buf);
     rollback();
     }
+  lastticks = ticks = SDL_GetTicks();
   return true;
   }
 #endif
