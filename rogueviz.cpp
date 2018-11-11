@@ -2278,3 +2278,4 @@ auto hooks  =
 #include "rogueviz-pentagonal.cpp"
 #include "rogueviz-graph.cpp"
 #include "rogueviz-fundamental.cpp"
+#include "rogueviz-sunflower.cpp"
