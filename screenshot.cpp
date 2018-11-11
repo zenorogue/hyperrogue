@@ -529,6 +529,7 @@ void rollback() {
 string animfile = "animation-%04d.png";
 
 bool record_animation() {
+  lastticks = 0;
   for(int i=0; i<noframes; i++) {
     ticks = i * period / noframes;
     apply();
