@@ -1391,12 +1391,11 @@ void draw_boundary(int w) {
         for(ld a=-10; a<=10; a+=0.01 / (1 << vid.linequality) / u) {
           cld z = exp(cld(a, a * imag(sm) / real(sm) + M_PI));
           hyperpoint ret = hpxyz(real(z), imag(z), 0);
-          if(vid.skiprope) 
-            ret = mobius(ret, vid.skiprope, 1);
+          ret = mobius(ret, vid.skiprope, 1);
           ret *= vid.radius;
           curvepoint(ret);
           }
-        queuecurve(ringcolor, 0, p);
+        queuecurve(ringcolor, 0, p).flags |= POLY_ALWAYS_IN;
         queuereset(pmodel, p);
         }
       return;
