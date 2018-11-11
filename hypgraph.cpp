@@ -1267,6 +1267,7 @@ void draw_boundary(int w) {
       }
     
     case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: {
+      if(pmodel == mdBand && conformal::model_transition != 1) return;
       bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);
       transmatrix T = spin(-conformal::model_orientation * degree);
       ld right = M_PI/2 - 1e-5;
