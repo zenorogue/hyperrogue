@@ -1293,7 +1293,7 @@ color_t darken_color(color_t& color, bool outline) {
     if(outline && alpha < 255) 
       return color - alpha + int(backbrightness * alpha);
     else
-      return (gradient(backcolor, color>>8, 0, backbrightness, 1)<<8) | 0xFF;
+      return (gradient(modelcolor>>8, color>>8, 0, backbrightness, 1)<<8) | 0xFF;
     }
   }
 

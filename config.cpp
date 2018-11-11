@@ -1285,9 +1285,6 @@ void show3D() {
   dialog::addBreak(50);
   dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
   
-  if(sphere)
-    dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
-
   dialog::addBreak(50);
   if(!(wmspatial || mmspatial))
     dialog::addInfo(XLAT("set 3D monsters or walls in basic config first"));
@@ -1367,9 +1364,6 @@ void show3D() {
         );
     else if(uni == 'b') 
       config_camera_rotation();
-    else if(uni == 'i') 
-      dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
-        "brightness behind the sphere");
     else if(uni == 'M') 
       pushScreen(conformal::model_menu);  
     else if(doexiton(sym, uni)) 
@@ -1498,6 +1492,9 @@ void show_color_dialog() {
 
   dialog::addColorItem(XLAT("projection background"), modelcolor, 'c');
   dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
+
+  dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
+  dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), "brightness behind the sphere"); });
 
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
   dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::dialogflags |= sm::SIDE; });
