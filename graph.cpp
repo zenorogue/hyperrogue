@@ -2800,7 +2800,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       if(c->landparam == 3) fcol = 0xC0FF00;
       break;
 
-#if CAP_COMPLEX2    
+#if CAP_COMPLEX2
     case laBrownian: {
       using brownian::level;
       fcol = wcol = 
@@ -2812,6 +2812,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         // gradient(0xFF8000, 0xFFF000, 2*level, c->landparam, 3*level-1) :
         0xC00000;
       break;
+#endif
       
     case laVolcano: {
       int id = lavatide(c, -1)/4;
