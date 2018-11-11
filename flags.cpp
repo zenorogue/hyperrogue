@@ -84,7 +84,7 @@ bool isMimic(eMonster m) {
   }
 
 int mirrorcolor(bool mirrored) {
-  return mirrored ? 0x8080FF : 0xFF80C0;
+  return winf[mirrored ? waMirror : waCloud].color;
   }
 
 bool isMimic(cell *c) { 

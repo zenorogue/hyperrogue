@@ -3014,7 +3014,6 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       if(isIcyWall(c)) {
         float h = HEAT(c);
         eLand l = c->land;
-        if(l == laCocytus && (!chaosmode || !wmescher)) l = laIce;
         
         color_t colorN04 = l == laCocytus ? 0x4080FF : 0x4040FF;
         color_t colorN10 = 0x0000FF;
