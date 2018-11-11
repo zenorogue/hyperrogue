@@ -1297,6 +1297,88 @@ void draw_boundary(int w) {
         }
       break;
     
+    case mdHemisphere: {
+      if(hyperbolic) {
+        queuereset(mdUnchanged, p);
+        for(int i=0; i<=360; i++) {
+          ld s = sin(i * degree);
+          curvepoint(hpxyz(vid.radius * cos(i * degree), vid.radius * s * (conformal::cos_ball * s >= 0 - 1e-6 ? 1 : abs(conformal::sin_ball)), 0));
+          }
+        queuecurve(lc, fc, p);
+        queuereset(pmodel, p);
+        p = PPR::CIRCLE; fc = 0;
+        queuereset(mdUnchanged, p);
+  
+        for(int i=0; i<=360; i++) {
+          ld s = sin(i * degree);
+          curvepoint(hpxyz(vid.radius * cos(i * degree), vid.radius * s * conformal::sin_ball, 0));
+          }
+        queuecurve(lc, fc, p);
+        queuereset(pmodel, p);
+        }
+      if(euclid || sphere) {
+        queuereset(mdUnchanged, p);  
+        for(int i=0; i<=360; i++) {
+          curvepoint(hpxyz(vid.radius * cos(i * degree), vid.radius * sin(i * degree), 0));
+          }
+        queuecurve(lc, fc, p);
+        queuereset(pmodel, p);
+        }
+      return;
+      }
+    
+    case mdHyperboloid: {
+      if(hyperbolic) {
+        ld& tz = conformal::top_z;
+        ld mz = acosh(tz);
+        ld cb = conformal::cos_ball;
+        ld sb = conformal::sin_ball;
+        
+        if(abs(sb) <= abs(cb) + 1e-5) {
+          ld step = .01 / (1 << vid.linequality);        
+    
+          hyperpoint a;
+  
+          for(ld t=-1; t<=1; t += step) {
+  
+            a = xpush0(t * mz);
+            
+            if(t != 0) {
+              a[1] = sb * a[2] / -cb;
+              ld v = -1 + a[2] * a[2] - a[1] * a[1];
+              if(v < 0) continue;
+              a[0] = sqrt(v);
+              if(t < 0) a[0] = -a[0];
+              }
+            
+            curvepoint(a);
+            }
+          
+          if((sb > 0) ^ (cb < 0)) {
+            ld alpha = M_PI - atan2(a[0], -a[1]);
+            
+            for(ld t=-1; t<=1; t += step)
+              curvepoint(xspinpush0(-M_PI/2 - t * alpha, mz));
+            }
+          else {
+            ld alpha = - atan2(a[0], -a[1]);
+            
+            for(ld t=-1; t<=1; t += step)
+              curvepoint(xspinpush0(+M_PI/2 - t * alpha, mz));
+            }
+          
+          queuecurve(lc, fc, p);
+          fc = 0; p = PPR::CIRCLE;
+          }
+
+        for(ld t=0; t<=360; t ++)
+          curvepoint(xspinpush0(t * degree, mz));
+
+        queuecurve(lc, fc, p);
+        }
+      return;
+      }
+
     case mdSpiral: {
       using namespace hyperpoint_vec;
       if(euclid) return;
@@ -1322,33 +1404,14 @@ void draw_boundary(int w) {
     default: break;
     }
 
-  /*
-  if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdAzimuthalEqui()))) {
-    double rad = vid.radius;
-    bool isbnd = true;
-    if(sphere) {
-      if(mdAzimuthalEqui())
-        ;
-      else if(!vid.grid && !elliptic && !force_sphere_outline)
-        rad = 0; 
-      else if(vid.alpha <= 0)
-        ;
-      else if(vid.grid || force_sphere_outline) // mark the edge
-        rad /= sqrt(vid.alpha*vid.alpha - 1);
-      }
-    if(rad)
-      queuecircle(vid.xcenter, vid.ycenter, rad, lc, p, fc);
+  if(sphere && pmodel == mdDisk && vid.alpha > 1) {
+    double rad = vid.radius / sqrt(vid.alpha*vid.alpha - 1);
+    queuecircle(vid.xcenter, vid.ycenter, rad, lc, p, fc);
     return;
     }
-  */
-  
+
   if(sphere && !among(pmodel, mdEquidistant, mdEquiarea)) return;
   circle_around_center(fakeinf, lc, fc, p);
-  
-  /*
-    if(pmodel == mdPolygonal || pmodel == mdPolynomial) 
-    polygonal::drawBoundary(darkena(0xFF, 0, 0xFF));  
-  */
   }
 
 ld band_shift = 0;
