@@ -375,9 +375,46 @@ void show() {
   dialog::display();
   
   }
-  }
+
+vector<display_data> player_displays;
+bool in_subscreen;
 
 void prepare_subscreens() {
+  int N = multi::players;
+  if(N > 1) {
+    player_displays.resize(N, *current_display);
+    int qrows[10] = {1, 1, 1, 1, 2, 2, 2, 3, 3, 3};
+    int rows = qrows[N];
+    int cols = (N + rows - 1) / rows;
+    for(int i=0; i<N; i++) {
+      auto& pd = player_displays[i];
+      pd.xmin = (i % cols) * 1. / cols;
+      pd.xmax = ((i % cols) + 1.) / cols;
+      pd.ymin = (i / cols) * 1. / rows;
+      pd.ymax = ((i / cols) + 1.) / rows;
+      }
+    }
+  else {
+    player_displays.clear();
+    }
+  }
+
+}
+
+bool subscreen_split(reaction_t what) {
+  using namespace racing;
+  if(in_subscreen) return false;
+  if(!player_displays.empty()) {
+    in_subscreen = true;
+    int& p = current_player;
+    for(p = 0; p < multi::players; p++) {
+      dynamicval<display_data*> c(current_display, &player_displays[p]);
+      what();
+      }
+    in_subscreen = false;
+    return true;
+    }
+  return false;
   }
 
 }

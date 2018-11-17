@@ -5689,7 +5689,11 @@ void gamescreen(int _darken) {
     current_display->set_viewport(0);
     compute_graphical_distance();
     gamescreen(_darken);
-    })) return;
+    })) {
+    current_display->set_projection(0, false);
+    current_display->set_viewport(0);    
+    return;
+    }
 
   if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;
