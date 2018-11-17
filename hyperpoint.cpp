@@ -176,7 +176,7 @@ ld sqhypot3(const hyperpoint& h) {
 ld zlevel(const hyperpoint &h) {
   if(euclid) return h[2];
   else if(sphere) return sqrt(intval(h, Hypc));
-  else return sqrt(-intval(h, Hypc));
+  else return (h[2] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
 
 // display a hyperbolic point
