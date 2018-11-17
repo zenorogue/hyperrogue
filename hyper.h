@@ -4675,5 +4675,25 @@ extern bool showquotients;
 
 bool do_draw(cell *c, const transmatrix& T);
 
+#if CAP_RACING
+namespace racing {
+  extern bool on, player_relative;
+  void generate_track();
+  void show();
+  void prepare_subscreens();
+  extern vector<cell*> track;
+  extern map<cell*, pair<int, int> > trackstage;
+  extern int current_player;
+  }
+
+bool subscreen_split(reaction_t for_each_subscreen);
+
+#else
+
+namespace racing { static const bool on = false; }
+inline bool subscreen_split(reaction_t for_each_subscreen) { return false; }
+#endif
+
+
 }
 

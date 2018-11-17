@@ -1002,6 +1002,13 @@ void centerpc(ld aspd) {
   
   if(geometry == gCrystal)
     crystal::centerrug(aspd);
+    
+  #if CAP_RACING
+  if(racing::on) {
+    racing::set_view();   
+    return;
+    }
+  #endif
   
   if(ors::mode == 2 && vid.sspeed < 5) return;
   if(vid.sspeed >= 4.99) aspd = 1000;
@@ -1049,6 +1056,8 @@ void centerpc(ld aspd) {
   }
 
 void optimizeview() {
+
+  subscreen_split(optimizeview);
   
   if(centerover.at && inmirror(centerover.at)) {
     anims::reflect_view();

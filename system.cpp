@@ -175,6 +175,10 @@ void initgame() {
   
   yendor::init(2);
   
+  #if CAP_RACING
+  if(racing::on) racing::generate_track();
+  #endif
+  
   clear_euland(specialland);
 
   if(euclid && specialland == laPrincessQuest) {
@@ -1301,6 +1305,9 @@ void start_game() {
   resetmusic();
 #if CAP_TEXTURE
   texture::config.remap();
+#endif
+#if CAP_RACING
+  racing::prepare_subscreens();
 #endif
   }
 

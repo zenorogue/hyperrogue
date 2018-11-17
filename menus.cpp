@@ -857,6 +857,11 @@ named_functionality get_o_key() {
       });
 #endif
 
+  #if CAP_RACING
+  if(racing::on)
+    return named_dialog(XLAT("racing mode"), racing::show);
+  #endif
+  
   if(viewdists)
     return named_functionality(XLAT("geometry experiments"), runGeometryExperiments);
 

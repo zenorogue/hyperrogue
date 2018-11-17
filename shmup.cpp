@@ -1259,7 +1259,9 @@ void killThePlayer(eMonster m) {
 
 monster *playerCrash(monster *who, hyperpoint where) {
   if(who->isVirtual) return NULL;
-  for(int j=0; j<players; j++) if(pc[j]!=who) {
+  // in the racing mode, neither crashing nor getting too far away is a problem
+  if(racing::on) return NULL;
+  for(int j=0; j<players; j++) if(pc[j] && pc[j]!=who) {
     if(pc[j]->isVirtual) continue;
     double d = intval(pc[j]->pat*C0, where);
     if(d < 0.1 * SCALE2 || d > 100) return pc[j];
@@ -1493,6 +1495,10 @@ static const int reflectflag = P_MIRRORWALL;
 void movePlayer(monster *m, int delta) {
 
   cpid = m->pid;
+
+  #if CAP_RACING
+  if(racing::on && cpid != racing::current_player) return;
+  #endif
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
   
@@ -1562,6 +1568,13 @@ void movePlayer(monster *m, int delta) {
   // if(mturn > 1) mturn = 1;
   // if(mturn < -1) mturn = -1;
   
+  #if CAP_RACING
+  if(racing::on) {
+    if(abs(mdy) > abs(mgo)) mgo = -mdy;
+    if(abs(mdx) > abs(mturn)) mturn = -mdx;
+    mdx = mdy = 0;
+    }
+  #endif
   
   playerturn[cpid] = mturn * delta / 150.0;
 
@@ -1611,7 +1624,15 @@ void movePlayer(monster *m, int delta) {
   if(mgo < -1) mgo = -1;
   if(!canmove) mgo = 0;
   
-  playergo[cpid] = mgo * SCALE * delta / 600;
+  if(racing::on) {
+    m->vel += mgo * delta / 600;
+    playergo[cpid] = m->vel * SCALE * delta / 600;
+    printf("vel = %lf go = %lf\n", m->vel, playergo[cpid]);
+    }
+  
+  else {    
+    playergo[cpid] = mgo * SCALE * delta / 600;
+    }
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
 
@@ -2935,8 +2956,11 @@ hookset<bool(int)> *hooks_turn;
 
 void turn(int delta) {
 
+  if(subscreen_split( [delta] () { turn(delta); })) return;
+
   if(callhandlers(false, hooks_turn, delta)) return;
   if(!shmup::on) return;
+
   timetowait = 0;
 
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;

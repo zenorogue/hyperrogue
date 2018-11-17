@@ -257,6 +257,10 @@
 #define CAP_COMPLEX2 CAP_BONUS
 #endif
 
+#ifndef CAP_RACING
+#define CAP_RACING CAP_BONUS
+#endif
+
 #if ISMOBILE
 #define EXTRALICENSE "\n\nHyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/"
 #undef XEXTRALICENSE

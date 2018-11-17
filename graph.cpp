@@ -5135,6 +5135,18 @@ void drawMarkers() {
         }
       }
   
+    #if CAP_RACING
+    if(racing::on && racing::player_relative) {
+      using namespace racing;
+      cell *goal = NULL;
+      for(cell *c: track) if(inscreenrange(c)) goal = c;
+      hyperpoint H = tC0(ggmatrix(goal));
+      queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+      queuestr(H, vid.fsize, its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
+      addauraspecial(H, 0x10100, 0);
+      }
+    #endif
+        
     if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON) {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
@@ -5670,6 +5682,14 @@ void drawfullmap() {
   }
 
 void gamescreen(int _darken) {
+
+  if(subscreen_split([=] () {
+    calcparam();
+    current_display->set_projection(0, false);
+    current_display->set_viewport(0);
+    compute_graphical_distance();
+    gamescreen(_darken);
+    })) return;
 
   if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;

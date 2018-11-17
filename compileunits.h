@@ -80,6 +80,11 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "geom-exp.cpp"
 #include "quit.cpp"
 #include "shmup.cpp"
+
+#if CAP_RACING
+#include "racing.cpp"
+#endif
+
 #include "conformal.cpp"
 #include "rug.cpp"
 #include "control.cpp"
