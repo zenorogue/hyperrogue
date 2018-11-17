@@ -27,6 +27,10 @@
 
 #include "rogueviz.h"
 
+namespace hr { 
+extern hpcshape shEagle;
+}
+
 namespace rogueviz {
 
 const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
@@ -1128,6 +1132,7 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
   if(cp.shade == 's') queuepoly(V1, shDiskS, darken_a(cp.color2));
   if(cp.shade == 'q') queuepoly(V1, shDiskSq, darken_a(cp.color2));
   if(cp.shade == 'm') queuepoly(V1, shDiskM, darken_a(cp.color2));
+  if(cp.shade == 'b') queuepoly(V1, shEagle, darken_a(cp.color2));
   }
 
 unordered_map<pair<edgeinfo*, int>, int> drawn_edges;
@@ -2285,3 +2290,4 @@ auto hooks  =
 #include "rogueviz-graph.cpp"
 #include "rogueviz-fundamental.cpp"
 #include "rogueviz-sunflower.cpp"
+#include "rogueviz-flocking.cpp"

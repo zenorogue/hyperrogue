@@ -3,7 +3,7 @@
 namespace rogueviz {
   using namespace hr;
 
-  enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKohonen };
+  enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKohonen, kFlocking };
   extern eVizkind kind;
 
   extern bool on;
