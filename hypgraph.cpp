@@ -69,8 +69,8 @@ hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
 
 hyperpoint gethyper(ld x, ld y) {
 
-  ld hx = (x - vid.xcenter) / vid.radius;
-  ld hy = (y - vid.ycenter) / vid.radius / vid.stretch;
+  ld hx = (x - current_display->xcenter) / current_display->radius;
+  ld hy = (y - current_display->ycenter) / current_display->radius / vid.stretch;
   
   if(pmodel) {
     ghx = hx, ghy = hy;
@@ -101,11 +101,11 @@ void apply_depth(hyperpoint &f, ld z) {
   if(vid.usingGL)
     f[2] = z;
   else {
-    z = z * vid.radius;
-    ld mul = stereo::scrdist / (stereo::scrdist + z);
+    z = z * current_display->radius;
+    ld mul = current_display->scrdist / (current_display->scrdist + z);
     f[0] = f[0] * mul;
     f[1] = f[1] * mul;
-    f[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius + stereo::ipd * mul / 2;
+    f[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius + vid.ipd * mul / 2;
     }
   }
 
@@ -175,7 +175,7 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   ld yzf = y * zf; y *= yf;
   conformal::apply_orientation(y, x);
   ret = hpxyz(x / M_PI, y / M_PI, 0);
-  if(zlev != 1 && stereo::active()) 
+  if(zlev != 1 && current_display->stereo_active()) 
     apply_depth(ret, yzf / M_PI);
   return;
   }
@@ -231,7 +231,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   
   switch(pmodel) {
     case mdUnchanged:
-      ret = H / vid.radius;
+      ret = H / current_display->radius;
       return; 
     
     case mdBall: {
@@ -248,7 +248,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       if(!vid.camera_angle) {
         ret[0] = H[0] / tz;
         ret[1] = H[1] / tz;
-        ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / tz / 2;
+        ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / tz / 2;
         }
       else {
         ld tx = H[0];
@@ -259,7 +259,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
         ret[0] = ux / uz;
         ret[1] = uy / uz;
-        ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / uz / 2;
+        ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / uz / 2;
         }
       return;
       }
@@ -292,7 +292,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       ret[1] = conformal::ocos + H[1];
       ret[2] = 0;
-      if(zlev != 1 && stereo::active()) 
+      if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, -H[1] * geom3::factor_to_lev(zlev));
       break;
       }
@@ -510,7 +510,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
       ret = H * (d * df / rad / M_PI);
       ret[2] = 0; 
-      if(zlev != 1 && stereo::active()) 
+      if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, d * zf / M_PI);
       
       break;
@@ -577,10 +577,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
 // game-related graphics
 
-transmatrix View; // current rotation, relative to viewctr
-transmatrix cwtV = Id; // player-relative view
 transmatrix sphereflip; // on the sphere, flip
-heptspin viewctr; // heptagon and rotation where the view is centered at
 bool playerfound; // has player been found in the last drawing?
 
 #define eurad crossf
@@ -695,19 +692,19 @@ bool in_smart_range(const transmatrix& T) {
   applymodel(tC0(T), h1);
   if(std::isnan(h1[0]) || std::isnan(h1[1])) return false;
   if(std::isinf(h1[0]) || std::isinf(h1[1])) return false;
-  ld x = vid.xcenter + vid.radius * h1[0];
-  ld y = vid.ycenter + vid.radius * h1[1] * vid.stretch;
+  ld x = current_display->xcenter + current_display->radius * h1[0];
+  ld y = current_display->ycenter + current_display->radius * h1[1] * vid.stretch;
   if(x > vid.xres * 2) return false;
   if(x < -vid.xres) return false;
   if(y > vid.yres * 2) return false;
   if(y < -vid.yres) return false;
   ld epsilon = 0.01;
   applymodel(T * xpush0(epsilon), h2);
-  ld x1 = vid.radius * abs(h2[0] - h1[0]) / epsilon;
-  ld y1 = vid.radius * abs(h2[1] - h1[1]) * vid.stretch / epsilon;
+  ld x1 = current_display->radius * abs(h2[0] - h1[0]) / epsilon;
+  ld y1 = current_display->radius * abs(h2[1] - h1[1]) * vid.stretch / epsilon;
   applymodel(T * ypush(epsilon) * C0, h3);
-  ld x2 = vid.radius * abs(h3[0] - h1[0]) / epsilon;
-  ld y2 = vid.radius * abs(h3[1] - h1[1]) * vid.stretch / epsilon;
+  ld x2 = current_display->radius * abs(h3[0] - h1[0]) / epsilon;
+  ld y2 = current_display->radius * abs(h3[1] - h1[1]) * vid.stretch / epsilon;
   ld scale = sqrt(hypot(x1, y1) * hypot(x2, y2)) * scalefactor * hcrossf7;
   if(svg::in) scale /= svg::divby;
   return 
@@ -1036,7 +1033,7 @@ void optimizeview() {
 void addball(ld a, ld b, ld c) {
   hyperpoint h;
   ballmodel(h, a, b, c);
-  for(int i=0; i<3; i++) h[i] *= vid.radius;
+  for(int i=0; i<3; i++) h[i] *= current_display->radius;
   curvepoint(h);
   }
 
@@ -1093,19 +1090,19 @@ void fullcenter() {
 
 transmatrix screenpos(ld x, ld y) {
   transmatrix V = Id;
-  V[0][2] += (x - vid.xcenter) / vid.radius * (1+vid.alpha);
-  V[1][2] += (y - vid.ycenter) / vid.radius * (1+vid.alpha);
+  V[0][2] += (x - current_display->xcenter) / current_display->radius * (1+vid.alpha);
+  V[1][2] += (y - current_display->ycenter) / current_display->radius * (1+vid.alpha);
   return V;
   }
 
 transmatrix atscreenpos(ld x, ld y, ld size) {
   transmatrix V = Id;
 
-  V[0][2] += (x - vid.xcenter);
-  V[1][2] += (y - vid.ycenter);
+  V[0][2] += (x - current_display->xcenter);
+  V[1][2] += (y - current_display->ycenter);
   V[0][0] = size * 2 * hcrossf / crossf;
   V[1][1] = size * 2 * hcrossf / crossf;
-  V[2][2] = stereo::scrdist;
+  V[2][2] = current_display->scrdist;
 
   return V;
   }
@@ -1115,7 +1112,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     hyperpoint ret;
     applymodel(xpush0(radius), ret);
     ld r = hypot2(ret);
-    queuecircle(vid.xcenter, vid.ycenter, r * vid.radius, linecol, prio, fillcol);
+    queuecircle(current_display->xcenter, current_display->ycenter, r * current_display->radius, linecol, prio, fillcol);
     return;
     }  
   for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, 10));
@@ -1143,7 +1140,7 @@ void draw_model_elements() {
       }
     
     case mdBall: {
-      queuecircle(vid.xcenter, vid.ycenter, vid.radius, ringcolor, PPR::OUTCIRCLE, modelcolor);
+      queuecircle(current_display->xcenter, current_display->ycenter, current_display->radius, ringcolor, PPR::OUTCIRCLE, modelcolor);
       ballgeometry();
       return;
       }
@@ -1200,7 +1197,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
   using namespace hyperpoint_vec;
   hyperpoint H;
   applymodel(X, H);
-  H *= vid.radius;
+  H *= current_display->radius;
   ld mul = hypot(vid.xres, vid.yres) / hypot2(H);
   ld m = style == 1 ? -mul : -1;
   
@@ -1242,7 +1239,7 @@ void draw_boundary(int w) {
   switch(pmodel) {
   
     case mdTwoPoint: {
-      if(twopoint_do_flips || stereo::active() || !sphere) return;
+      if(twopoint_do_flips || current_display->stereo_active() || !sphere) return;
       queuereset(vid.usingGL ? mdDisk : mdUnchanged, p);
   
       for(int b=-1; b<=1; b+=2)
@@ -1303,7 +1300,7 @@ void draw_boundary(int w) {
         queuereset(mdUnchanged, p);
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(hpxyz(vid.radius * cos(i * degree), vid.radius * s * (conformal::cos_ball * s >= 0 - 1e-6 ? 1 : abs(conformal::sin_ball)), 0));
+          curvepoint(hpxyz(current_display->radius * cos(i * degree), current_display->radius * s * (conformal::cos_ball * s >= 0 - 1e-6 ? 1 : abs(conformal::sin_ball)), 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1312,7 +1309,7 @@ void draw_boundary(int w) {
   
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(hpxyz(vid.radius * cos(i * degree), vid.radius * s * conformal::sin_ball, 0));
+          curvepoint(hpxyz(current_display->radius * cos(i * degree), current_display->radius * s * conformal::sin_ball, 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1320,7 +1317,7 @@ void draw_boundary(int w) {
       if(euclid || sphere) {
         queuereset(mdUnchanged, p);  
         for(int i=0; i<=360; i++) {
-          curvepoint(hpxyz(vid.radius * cos(i * degree), vid.radius * sin(i * degree), 0));
+          curvepoint(hpxyz(current_display->radius * cos(i * degree), current_display->radius * sin(i * degree), 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1392,7 +1389,7 @@ void draw_boundary(int w) {
           cld z = exp(cld(a, a * imag(sm) / real(sm) + M_PI));
           hyperpoint ret = hpxyz(real(z), imag(z), 0);
           ret = mobius(ret, vid.skiprope, 1);
-          ret *= vid.radius;
+          ret *= current_display->radius;
           curvepoint(ret);
           }
         queuecurve(ringcolor, 0, p).flags |= POLY_ALWAYS_IN;
@@ -1405,8 +1402,8 @@ void draw_boundary(int w) {
     }
 
   if(sphere && pmodel == mdDisk && vid.alpha > 1) {
-    double rad = vid.radius / sqrt(vid.alpha*vid.alpha - 1);
-    queuecircle(vid.xcenter, vid.ycenter, rad, lc, p, fc);
+    double rad = current_display->radius / sqrt(vid.alpha*vid.alpha - 1);
+    queuecircle(current_display->xcenter, current_display->ycenter, rad, lc, p, fc);
     return;
     }
 

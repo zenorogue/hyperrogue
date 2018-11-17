@@ -344,18 +344,18 @@ void drawMobileArrow(int i) {
 bool nofps = false;
 
 void drawStats() {
-  if(nohud || stereo::mode == stereo::sLR) return;
+  if(nohud || vid.stereo_mode == sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
   if(viewdists && show_distance_lists) 
     expansion.view_distances_dialog();
-  if(sidescreen) return;
+  if(current_display->sidescreen) return;
 
   {
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<videopar> v(vid, vid);
   vid.alpha = vid.scale = 1;
   calcparam(); 
-  stereo::set_projection(0, false);
+  current_display->set_projection(0, false);
 
   if(haveMobileCompass()) {
     initquickqueue();
@@ -476,7 +476,7 @@ void drawStats() {
       }
     }
   }
-  calcparam(); stereo::set_projection(0, false);
+  calcparam(); current_display->set_projection(0, false);
   
   string s0;
   if(!peace::on) {

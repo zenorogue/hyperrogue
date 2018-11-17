@@ -158,8 +158,8 @@ void handleclick(MOBPAR_FORMAL) {
         }
 
       else if(getcstat != SDLK_F1 && getcstat != 'i' && getcstat != 't') {
-        int px = mousex < vid.xcenter ? 0 : 1;
-        int py = mousey < vid.ycenter ? 0 : 1;
+        int px = mousex < current_display->xcenter ? 0 : 1;
+        int py = mousey < current_display->ycenter ? 0 : 1;
         
         if(isize(screens) == 1) {
           if(px == 0 && py == 1) {
@@ -296,7 +296,7 @@ void mobile_draw(MOBPAR_FORMAL) {
 
   inmenu = isize(screens) > 1;
 
-  if(!inmenu && stereo::mode == stereo::sLR && ors::mode)
+  if(!inmenu && vid.stereo_mode == sLR && ors::mode)
     mousex = vid.xres/2, mousey = vid.yres/2, mouseh = sphereflip * C0;
 
 //  if(debfile) fprintf(debfile, "d1\n"), fflush(debfile);
@@ -341,7 +341,7 @@ void mobile_draw(MOBPAR_FORMAL) {
 
   bool normal_reaction = !inmenu;
 
-  if(normal_reaction && stereo::mode == stereo::sLR) {
+  if(normal_reaction && vid.stereo_mode == sLR) {
     normal_reaction = false;
     if(lclicked && !clicked) {
       if(rug::rugged)

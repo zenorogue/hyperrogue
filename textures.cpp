@@ -224,8 +224,8 @@ void texture_data::saveRawTexture(string tn) {
 hyperpoint texture_config::texture_coordinates(hyperpoint h) {
   hyperpoint inmodel;
   applymodel(h, inmodel);
-  inmodel[0] *= vid.radius * 1. / vid.scrsize;
-  inmodel[1] *= vid.radius * vid.stretch / vid.scrsize;
+  inmodel[0] *= current_display->radius * 1. / current_display->scrsize;
+  inmodel[1] *= current_display->radius * vid.stretch / current_display->scrsize;
   inmodel[2] = 1;
   inmodel = itt * inmodel;
   inmodel[0] = (inmodel[0] + 1) / 2;
@@ -488,7 +488,7 @@ void texture_config::saveFullTexture(string tn) {
   
   drawscreen();
   if(data.readtexture(tn) && data.loadTextureGL()) {
-    itt = Id; // xyscale(Id, vid.scrsize * 1. / vid.radius);
+    itt = Id; // xyscale(Id, current_display->scrsize * 1. / current_display->radius);
     perform_mapping();
     finish_mapping();
     }
@@ -511,10 +511,10 @@ void texture_config::drawRawTexture() {
     inmodel = itt * inmodel;
     rtver[i].texture[0] = (inmodel[0]+1)/2;
     rtver[i].texture[1] = (inmodel[1]+1)/2;
-    rtver[i].coords[0] = x * vid.scrsize;
-    rtver[i].coords[1] = y * vid.scrsize;
+    rtver[i].coords[0] = x * current_display->scrsize;
+    rtver[i].coords[1] = y * current_display->scrsize;
     }
-  glhr::set_modelview(glhr::translate(0, 0, stereo::scrdist));
+  glhr::set_modelview(glhr::translate(0, 0, current_display->scrdist));
   glhr::prepare(rtver);
   glhr::set_depthtest(false);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -617,8 +617,8 @@ ld magic_quality() {
   for(auto& p: amp) {
     hyperpoint inmodel;
     applymodel(ggmatrix(p.c) * p.cell_relative, inmodel);
-    inmodel[0] *= vid.radius * 1. / vid.scrsize;
-    inmodel[1] *= vid.radius * 1. / vid.scrsize;
+    inmodel[0] *= current_display->radius * 1. / current_display->scrsize;
+    inmodel[1] *= current_display->radius * 1. / current_display->scrsize;
     q += intvalxy(inmodel, p.texture_coords);
     }
   return q;
@@ -657,7 +657,7 @@ eTexturePanstate panstate;
 void mousemovement() {
   static hyperpoint lastmouse;
   
-  hyperpoint mouseeu = hpxyz((mousex - vid.xcenter + .0) / vid.scrsize, (mousey - vid.ycenter + .0) / vid.scrsize, 1);
+  hyperpoint mouseeu = hpxyz((mousex - current_display->xcenter + .0) / current_display->scrsize, (mousey - current_display->ycenter + .0) / current_display->scrsize, 1);
   bool nonzero = mouseeu[0] || mouseeu[1];
 
   switch(panstate) {
@@ -986,7 +986,7 @@ void showMagicMenu() {
   dialog::display();
 
   if(holdmouse) {
-    hyperpoint mouseeu = hpxyz((mousex - vid.xcenter + .0) / vid.scrsize, (mousey - vid.ycenter + .0) / vid.scrsize, 1);
+    hyperpoint mouseeu = hpxyz((mousex - current_display->xcenter + .0) / current_display->scrsize, (mousey - current_display->ycenter + .0) / current_display->scrsize, 1);
     if(newmove) {
       magicmapper_point newpoint;
       newpoint.c = mouseover;
@@ -1007,13 +1007,13 @@ void showMagicMenu() {
       /*
       hyperpoint inmodel;
       applymodel(h, inmodel);
-      inmodel[0] *= vid.radius * 1. / vid.scrsize;
-      inmodel[1] *= vid.radius * 1. / vid.scrsize;
+      inmodel[0] *= current_display->radius * 1. / current_display->scrsize;
+      inmodel[1] *= current_display->radius * 1. / current_display->scrsize;
       */
 
       queuechr(
-        vid.xcenter + vid.scrsize * am.texture_coords[0], 
-        vid.ycenter + vid.scrsize * am.texture_coords[1],
+        current_display->xcenter + current_display->scrsize * am.texture_coords[0], 
+        current_display->ycenter + current_display->scrsize * am.texture_coords[1],
         0, vid.fsize, letter, 0x00C000, 1);
       
       letter++;

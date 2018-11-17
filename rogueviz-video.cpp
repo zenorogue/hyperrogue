@@ -175,7 +175,7 @@ string its05(int i) { char buf[64]; sprintf(buf, "%05d", i); return buf; }
 void staircase_video(int from, int num, int step) {
   resetbuffer rb;
   renderbuffer rbuf(TSIZE, TSIZE, true);
-  stereo::mode = stereo::sODS;
+  vid.stereo_mode = sODS;
 
   for(int i=from; i<num; i+=step) { 
     ld t = i * 1. / num;
@@ -191,9 +191,9 @@ void staircase_video(int from, int num, int step) {
     rbuf.enable();
     dynamicval<int> vx(vid.xres, TSIZE);
     dynamicval<int> vy(vid.yres, TSIZE);
-    dynamicval<int> vxc(vid.xcenter, TSIZE/2);
-    dynamicval<int> vyc(vid.ycenter, TSIZE/2);
-    stereo::set_viewport(0);
+    dynamicval<int> vxc(current_display->xcenter, TSIZE/2);
+    dynamicval<int> vyc(current_display->ycenter, TSIZE/2);
+    current_display->set_viewport(0);
     printf("draw scene\n");
     rug::drawRugScene();
     
@@ -223,7 +223,7 @@ void bantar_record() {
 
     rbuf.enable();
     vid.xres = vid.yres = TSIZE;
-    stereo::set_viewport(0);
+    current_display->set_viewport(0);
     banachtarski::bantar_frame();
     
     IMAGESAVE(rbuf.render(), ("bantar/" + its05(fr) + IMAGEEXT).c_str());

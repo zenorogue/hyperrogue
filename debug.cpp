@@ -477,7 +477,7 @@ int read_cheat_args() {
     }
   else if(argis("-SM")) {
     PHASEFROM(2);
-    shift(); stereo::mode = stereo::eStereo(argi());
+    shift(); vid.stereo_mode = eStereo(argi());
     }
 #if CAP_INV
   else if(argis("-IU")) {

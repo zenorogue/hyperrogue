@@ -38,7 +38,6 @@ movedir mousedest;
 ld shiftmul = 1;
 
 cell *mouseover, *mouseover2, *lmouseover;
-cellwalker centerover;
 ld modist, modist2, centdist;
 
 int lastt;
@@ -278,8 +277,8 @@ void handlePanning(int sym, int uni) {
     if(isGravityLand(cwt.at->land)) playermoved = false;
 
   if(sym == PSEUDOKEY_WHEELUP) {
-    ld jx = (mousex - vid.xcenter - .0) / vid.radius / 10;
-    ld jy = (mousey - vid.ycenter - .0) / vid.radius / 10;
+    ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
+    ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
     playermoved = false;
     View = gpushxto0(hpxy(jx, jy)) * View;
     sym = 1;
@@ -392,7 +391,7 @@ void handleKeyNormal(int sym, int uni) {
     else quitmainloop = true;
     }
   
-  if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
+  if(uni == 'o' && DEFAULTNOR(sym)) get_o_key().second();
 #if CAP_INV
   if(uni == 'i' && DEFAULTNOR(sym) && inv::on) 
     pushScreen(inv::show);
@@ -766,8 +765,8 @@ void handle_event(SDL_Event& ev) {
       if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
         fix_mouseh();
         if(anyctrl) {
-          vid.xposition += (mousex - lmousex) * 1. / vid.scrsize,
-          vid.yposition += (mousey - lmousey) * 1. / vid.scrsize;
+          vid.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
+          vid.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
         else if(mouseh[2] < 50 && mouseoh[2] < 50) {
           panning(mouseoh, mouseh);
@@ -777,8 +776,8 @@ void handle_event(SDL_Event& ev) {
 #ifdef SIMULATE_JOYSTICK
       // pretend that both joysticks are present
       stick = panstick = (SDL_Joystick*) (&vid);
-      panjoyx = 20 * (mousex - vid.xcenter);
-      panjoyy = 20 * (mousey - vid.ycenter);
+      panjoyx = 20 * (mousex - current_display->xcenter);
+      panjoyy = 20 * (mousey - current_display->ycenter);
       checkjoy();
 #endif
 
@@ -831,18 +830,18 @@ void displayabutton(int px, int py, string s, int col) {
   // TMP
   int siz = vid.yres > vid.xres ? vid.fsize*2 : vid.fsize * 3/2;
   int rad = (int) realradius();
-  if(stereo::mode == stereo::sLR) rad = 99999;
+  if(vid.stereo_mode == sLR) rad = 99999;
   int vrx = min(rad, vid.xres/2 - 40);
-  int vry = min(rad, min(vid.ycenter, vid.yres - vid.ycenter) - 20);
-  int x = vid.xcenter + px * vrx;
-  int y = vid.ycenter + py * (vry - siz/2);
+  int vry = min(rad, min(current_display->ycenter, vid.yres - current_display->ycenter) - 20);
+  int x = current_display->xcenter + px * vrx;
+  int y = current_display->ycenter + py * (vry - siz/2);
   int vrr = int(hypot(vrx, vry) * sqrt(2.));
   if(gtouched && !mouseover
-    && abs(mousex - vid.xcenter) < vrr
-    && abs(mousey - vid.ycenter) < vrr
-    && hypot(mousex-vid.xcenter, mousey-vid.ycenter) > vrr
-    && px == (mousex > vid.xcenter ? 1 : -1)
-    && py == (mousey > vid.ycenter ? 1 : -1)
+    && abs(mousex - current_display->xcenter) < vrr
+    && abs(mousey - current_display->ycenter) < vrr
+    && hypot(mousex-current_display->xcenter, mousey-current_display->ycenter) > vrr
+    && px == (mousex > current_display->xcenter ? 1 : -1)
+    && py == (mousey > current_display->ycenter ? 1 : -1)
     ) col = 0xFF0000;
   if(displayfr(x, y, 0, siz, s, col, 8+8*px))
     buttonclicked = true;
@@ -969,7 +968,7 @@ void show() {
     if(!sphere) set_geometry(gSphere);
     mode = 0; fullcenter();
     mode = 2; sensitivity = 1;
-    stereo::mode = stereo::sLR; stereo::ipd = 0.2;
+    vid.stereo_mode = sLR; vid.ipd = 0.2;
     vid.alpha = 0; vid.scale = 1;
     });
 

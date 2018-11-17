@@ -2288,8 +2288,8 @@ vector<glhr::colored_vertex> auravertices;
 
 void drawaura() {
   if(!haveaura()) return;
-  if(stereo::mode) return;
-  double rad = vid.radius;
+  if(vid.stereo_mode) return;
+  double rad = current_display->radius;
   if(sphere && !mdAzimuthalEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
@@ -2312,8 +2312,8 @@ void drawaura() {
     for(int y=0; y<vid.yres; y++)
     for(int x=0; x<vid.xres; x++) {
 
-      ld hx = (x * 1. - vid.xcenter) / rad;
-      ld hy = (y * 1. - vid.ycenter) / rad / vid.stretch;
+      ld hx = (x * 1. - current_display->xcenter) / rad;
+      ld hy = (y * 1. - current_display->ycenter) / rad / vid.stretch;
   
       if(vid.camera_angle) camrotate(hx, hy);
       
@@ -5004,7 +5004,7 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id) {
 void queuecircleat(cell *c, double rad, color_t col) {
   if(!c) return;
   if(!gmatrix.count(c)) return;
-  if(stereo::mode || sphere) {
+  if(vid.stereo_mode || sphere) {
     dynamicval<color_t> p(poly_outline, col);
     queuepolyat(gmatrix[c] * spintick(100), shGem[1], 0, PPR::LINE);
     return;
@@ -5044,7 +5044,7 @@ void drawMarkers() {
 
   if(!inHighQual) {
 
-  bool ok = !ISPANDORA || mousepressed;
+    bool ok = !ISPANDORA || mousepressed;
      
     if(G(dragon::target) && haveMount()) {
       queuechr(Gm0(dragon::target), 2*vid.fsize, 'X', 
@@ -5054,30 +5054,30 @@ void drawMarkers() {
     /* for(int i=0; i<12; i++) if(c->type == 5 && c->master == &dodecahedron[i])
       queuechr(xc, yc, sc, 4*vid.fsize, 'A'+i, iinf[itOrbDomination].color); */
     
-    {
-    using namespace yendor;
-    if(yii < isize(yi) && !yi[yii].found) {
-      cell *keycell = NULL;
-      int i;
-      for(i=0; i<YDIST; i++) 
-        if(yi[yii].path[i]->cpdist <= get_sightrange_ambush()) {
-          keycell = yi[yii].path[i];
-          break;
+    if(1) {
+      using namespace yendor;
+      if(yii < isize(yi) && !yi[yii].found) {
+        cell *keycell = NULL;
+        int i;
+        for(i=0; i<YDIST; i++) 
+          if(yi[yii].path[i]->cpdist <= get_sightrange_ambush()) {
+            keycell = yi[yii].path[i];
+            break;
+            }
+        if(keycell) {
+          for(; i<YDIST; i++) {
+            cell *c = yi[yii].path[i];
+            if(inscreenrange(c))
+              keycell = c;
+            }
+          hyperpoint H = tC0(ggmatrix(keycell));
+          queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sintick(150)));
+          queuestr(H, vid.fsize, its(celldistance(cwt.at, yi[yii].key())), 0x10101 * int(128 - 100 * sintick(150)));
+          addauraspecial(H, iinf[itOrbYendor].color, 0);
           }
-      if(keycell) {
-        for(; i<YDIST; i++) {
-          cell *c = yi[yii].path[i];
-          if(inscreenrange(c))
-            keycell = c;
-          }
-        hyperpoint H = tC0(ggmatrix(keycell));
-        queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sintick(150)));
-        queuestr(H, vid.fsize, its(celldistance(cwt.at, yi[yii].key())), 0x10101 * int(128 - 100 * sintick(150)));
-        addauraspecial(H, iinf[itOrbYendor].color, 0);
         }
       }
-    }
-    
+  
     if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON) {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
@@ -5480,20 +5480,23 @@ bool dronemode;
 purehookset hooks_calcparam;
 
 void calcparam() {
+
+  auto cd = current_display;
+  
   DEBB(DF_GRAPH, (debugfile,"calc param\n"));
-  vid.xcenter = vid.xres / 2;
-  vid.ycenter = vid.yres / 2;
+  cd->xcenter = vid.xres * (cd->xmax + cd->xmin) / 2;
+  cd->ycenter = vid.yres * (cd->ymax + cd->ymin) / 2;
 
   if(vid.scale > -1e-2 && vid.scale < 1e-2) vid.scale = 1;
   
-  ld realradius = min(vid.xcenter, vid.ycenter);
+  ld realradius = min(vid.xres * (cd->xmax - cd->xmin) / 2, vid.yres * (cd->ymax - cd->ymin) / 2);
   
-  vid.scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
+  cd->scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
   sidescreen = false;
   
   if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual) {
-    vid.ycenter = vid.yres - vid.scrsize - vid.fsize;
+    cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
     }
   else {
     if(vid.xres >= vid.yres * 5/4-16 && (cmode & sm::SIDE))
@@ -5503,24 +5506,24 @@ void calcparam() {
       sidescreen = true;
 #endif
 
-    if(sidescreen) vid.xcenter = vid.yres/2;
+    if(sidescreen) cd->xcenter = vid.yres/2;
     }
 
-  vid.radius = vid.scale * vid.scrsize;  
-  realradius = min(realradius, vid.radius);
+  cd->radius = vid.scale * cd->scrsize;  
+  realradius = min(realradius, cd->radius);
   
-  if(dronemode) { vid.ycenter -= vid.radius; vid.ycenter += vid.fsize/2; vid.ycenter += vid.fsize/2; vid.radius *= 2; }
+  if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }
   
-  vid.xcenter += vid.scrsize * vid.xposition;
-  vid.ycenter += vid.scrsize * vid.yposition;
+  cd->xcenter += cd->scrsize * vid.xposition;
+  cd->ycenter += cd->scrsize * vid.yposition;
 
-  stereo::tanfov = tan(stereo::fov * degree / 2);
+  cd->tanfov = tan(vid.fov * degree / 2);
   
   if(pmodel) 
-    stereo::scrdist = vid.xres / 2 / stereo::tanfov;
+    cd->scrdist = vid.xres / 2 / cd->tanfov;
   else 
-    stereo::scrdist = vid.radius;
-  stereo::scrdist_text = stereo::scrdist;
+    cd->scrdist = cd->radius;
+  cd->scrdist_text = cd->scrdist;
 
   callhooks(hooks_calcparam);
   }
@@ -5615,7 +5618,7 @@ void gamescreen(int _darken) {
   
   buttonclicked = false;
   
-  if((cmode & sm::NORMAL) && stereo::mode != stereo::sLR) {
+  if((cmode & sm::NORMAL) && vid.stereo_mode != sLR) {
     if(andmode == 0 && shmup::on) {
       using namespace shmupballs;
       calc();
@@ -5668,7 +5671,7 @@ void normalscreen() {
   keyhandler = handleKeyNormal;
 
   if(!playerfound && !anims::any_on())
-    displayButton(vid.xcenter, vid.ycenter, XLAT(mousing ? "find the player" : "press SPACE to find the player"), ' ', 8);
+    displayButton(current_display->xcenter, current_display->ycenter, XLAT(mousing ? "find the player" : "press SPACE to find the player"), ' ', 8);
 
   describeMouseover();
   }
@@ -5754,12 +5757,12 @@ void drawscreen() {
     
     for(int p=0; p<numplayers(); p++) if(multi::playerActive(p))
       displayfr(vid.xres * (p+.5) / numplayers(),
-        vid.ycenter - vid.radius * 3/4, 2,
+        current_display->ycenter - current_display->radius * 3/4, 2,
         vid.fsize, 
         XLAT(minetexts[mines[p]]), minecolors[mines[p]], 8);
 
     if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield) {
-      displayfr(vid.xres/2, vid.ycenter - vid.radius * 3/4 - vid.fsize*3/2, 2,
+      displayfr(vid.xres/2, current_display->ycenter - current_display->radius * 3/4 - vid.fsize*3/2, 2,
         vid.fsize, 
         XLAT("WARNING: you are entering a minefield!"), 
         col, 8);
@@ -5822,7 +5825,6 @@ void resetGeometry() {
 //=== animation
 
 map<cell*, animation> animations[ANIMLAYERS];
-unordered_map<cell*, transmatrix> gmatrix, gmatrix0;
 
 int revhint(cell *c, int hint) {
   if(hint >= 0 && hint < c->type) return c->c.spin(hint);

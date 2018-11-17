@@ -222,7 +222,7 @@ void showMainMenu() {
   else
     q = "game over screen";
   dialog::addItem(XLAT(q), SDLK_ESCAPE);
-  dialog::addItem(XLAT("world overview"), 'o');    
+  dialog::addItem(get_o_key().first, 'o');    
 
   if(inv::on)
     dialog::addItem(XLAT("inventory"), 'i');    
@@ -272,7 +272,7 @@ void showMainMenu() {
       }
     else if(sym == 'o') {
       clearMessages();
-      setAppropriateOverview();
+      get_o_key().second();
       }
 #if CAP_INV
     else if(sym == 'i') {
@@ -813,29 +813,40 @@ void showStartMenu() {
  
 // -- overview --
 
-void setAppropriateOverview() {
-  clearMessages();
-  if(daily::on) {
+hookset<named_functionality()> *hooks_o_key;
+
+named_functionality get_o_key() {
+
+  if(hooks_o_key) for(auto& h: *hooks_o_key) {
+    auto res = h.second();
+    if(res.first != "") return res;
+    }
+  
 #if CAP_DAILY
-    achievement_final(false);
-    pushScreen(daily::showMenu);
+  if(daily::on) 
+    return named_functionality(XLAT("Strange Challenge"), [] () {
+      achievement_final(false);
+      pushScreen(daily::showMenu);
+      });
 #endif
-    }
-  else if(viewdists)
-    runGeometryExperiments();
-  else if(tactic::on)
-    pushScreen(tactic::showMenu);
-  else if(yendor::on)
-    pushScreen(yendor::showMenu);
-  else if(peace::on)
-    pushScreen(peace::showMenu);
-  else if((geometry != gNormal || NONSTDVAR) && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4)) {
-    runGeometryExperiments();
-    }
-  else {
-    dialog::infix = "";
-    pushScreen(showOverview);
-    }
+
+  if(viewdists)
+    return named_functionality(XLAT("geometry experiments"), runGeometryExperiments);
+
+  if(tactic::on)
+    return named_dialog(XLAT("Pure Tactics mode"), tactic::showMenu);
+    
+  if(yendor::on)
+    return named_dialog(XLAT("Yendor Challenge"), yendor::showMenu);
+
+  if(peace::on)
+    return named_dialog(XLAT("peaceful mode"), peace::showMenu);
+
+  if((geometry != gNormal || NONSTDVAR) && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4))
+    return named_functionality(XLAT("geometry experiments"), runGeometryExperiments);
+
+  dialog::infix = "";
+  return named_dialog(XLAT("world overview"), showOverview);
   }
 
 int messagelogpos;

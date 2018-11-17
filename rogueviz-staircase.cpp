@@ -117,8 +117,8 @@ bool on;
 
 void make_staircase() {
 
-  // stereo::mode = stereo::sODS;
-  // stereo::set_viewport(0);
+  // vid.stereo_mode = current_display->sODS;
+  // current_display->set_viewport(0);
   rug::no_fog = true;
 
   printf("scurvature = %lf progress = %lf strafe=%lf,%lf\n", scurvature, progress, strafex, strafey);
@@ -137,7 +137,7 @@ void make_staircase() {
     acurvature = scurvature;
     }
   rug::ruggospeed = acurvature;
-  stereo::ipd = 0.15 * acurvature;
+  vid.ipd = 0.15 * acurvature;
   if(!rug::rugged || !staircase::on) {
     staircase::on = true;
     rug::reopen();

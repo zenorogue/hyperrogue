@@ -200,8 +200,8 @@ void create_model() {
 
   int v = global_v;
   rug::clear_model(); 
-  ld x = (mousex - vid.xcenter + .0) / vid.xres;
-  ld y = (mousey - vid.ycenter + .0) / vid.yres;
+  ld x = (mousex - current_display->xcenter + .0) / vid.xres;
+  ld y = (mousey - current_display->ycenter + .0) / vid.yres;
   
   ld alpha = atan2(y, x);
   ld h = hypot(x, y);
@@ -299,7 +299,7 @@ bool frame() {
   if(snubon && rug::rugged) {
     create_model();
     nomenukey = true;
-    displaychr(vid.xcenter, vid.ycenter, 0, 10, 'X', 0xFFFFFF);
+    displaychr(current_display->xcenter, current_display->ycenter, 0, 10, 'X', 0xFFFFFF);
     clearMessages();
     nohelp = true;
     playerfound = true;
@@ -325,8 +325,8 @@ bool handleKey(int sym, int uni) {
       return true;
       }
     if(uni == 's' && rug::rugged) {
-      stereo::fov += 30;
-      if(stereo::fov >= 180) stereo::fov = 60;
+      vid.fov += 30;
+      if(vid.fov >= 180) vid.fov = 60;
       }
     if(uni == 'i' && rug::rugged) {
       rug::invert_depth = !rug::invert_depth;

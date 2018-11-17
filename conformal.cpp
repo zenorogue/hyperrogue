@@ -471,9 +471,9 @@ namespace conformal {
       
       renderbuffer glbuf(bandfull, bandfull, vid.usingGL);
       vid.xres = vid.yres = bandfull;
-      glbuf.enable(); vid.radius = bandhalf;  
+      glbuf.enable(); current_display->radius = bandhalf;  
       calcparam();
-      stereo::set_viewport(0);
+      current_display->set_viewport(0);
       
       ld xpos = 0;
       
@@ -505,7 +505,7 @@ namespace conformal {
   
           progress(s0 + buf + " ("+its(j+bonus)+"/"+its(siz+bonus+bonus-1)+")"); */
   
-          // calcparam(); vid.radius = bandhalf;
+          // calcparam(); current_display->radius = bandhalf;
           phase = j; movetophase();
       
           glbuf.clear(backcolor);
@@ -515,7 +515,7 @@ namespace conformal {
             hyperpoint last = ggmatrix(last_base) * last_relative;
             hyperpoint hscr;
             applymodel(last, hscr);
-            ld bwidth = -vid.radius * hscr[0];
+            ld bwidth = -current_display->radius * hscr[0];
             printf("bwidth = %lf/%lf\n", bwidth, len);
   
             drawsegment:
@@ -563,7 +563,7 @@ namespace conformal {
       }
 
     rbuf.reset();
-    stereo::set_viewport(0);
+    current_display->set_viewport(0);
 
     if(includeHistory) restoreBack();
     
@@ -641,11 +641,11 @@ namespace conformal {
       initquickqueue();
       queuereset(mdUnchanged, PPR::LINE);              
       for(int a=-1; a<=1; a++) {
-        curvepoint(hpxyz(-M_PI/2 * vid.radius, a*vid.radius, 0));
-        curvepoint(hpxyz(+M_PI/2 * vid.radius, a*vid.radius, 0));
+        curvepoint(hpxyz(-M_PI/2 * current_display->radius, a*current_display->radius, 0));
+        curvepoint(hpxyz(+M_PI/2 * current_display->radius, a*current_display->radius, 0));
         queuecurve(forecolor, 0, PPR::LINE);
-        curvepoint(hpxyz(a*vid.radius, -M_PI/2*vid.radius, 0));
-        curvepoint(hpxyz(a*vid.radius, +M_PI/2*vid.radius, 0));
+        curvepoint(hpxyz(a*current_display->radius, -M_PI/2*current_display->radius, 0));
+        curvepoint(hpxyz(a*current_display->radius, +M_PI/2*current_display->radius, 0));
         queuecurve(forecolor, 0, PPR::LINE);
         }
       queuereset(pmodel, PPR::LINE);

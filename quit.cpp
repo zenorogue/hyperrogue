@@ -114,7 +114,7 @@ hint hints[] = {
       dialog::addItem(XLAT("world overview"), 'z');
       },
     []() {
-      setAppropriateOverview();
+      pushScreen(showOverview);
       }},
   {
     0,
@@ -468,7 +468,7 @@ void handleKeyQuit(int sym, int uni) {
   else if(uni == 'z') hints[hinttoshow].action();
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
-  else if(uni == 'o') setAppropriateOverview();
+  else if(uni == 'o') get_o_key().second();
 #if CAP_INV
   else if(uni == 'i' && inv::on) 
     pushScreen(inv::show);

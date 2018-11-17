@@ -339,8 +339,8 @@ void calcLengths() {
 
 void setVidParam() {
   vid.xres = vid.yres = TEXTURESIZE;
-  vid.scrsize = HTEXTURESIZE;
-  vid.radius = vid.scrsize * vid.scale; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
+  current_display->scrsize = HTEXTURESIZE;
+  current_display->radius = current_display->scrsize * vid.scale; current_display->xcenter = HTEXTURESIZE; current_display->ycenter = HTEXTURESIZE;
   // vid.alpha = 1; 
   }
 
@@ -452,7 +452,7 @@ void buildTorusRug() {
     applymodel(tC0(eumove(x, y)), onscreen);
     // take point (1,0)
     // apply eumove(1,0)
-    // multiply by vid.radius (= HTEXTURESIZE * rugzoom)
+    // multiply by current_display->radius (= HTEXTURESIZE * rugzoom)
     // add 1, divide by texturesize
     r->x1 = onscreen[0];
     r->y1 = onscreen[1];
@@ -523,13 +523,13 @@ void buildTorusRug() {
   for(auto p: points)
     maxz = max(maxz, max(abs(p->x1), abs(p->y1)));
   
-  // maxz * rugzoom * vid.radius == vid.radius
+  // maxz * rugzoom * current_display->radius == current_display->radius
   
   vid.scale = 1 / maxz;
   
   for(auto p: points)
-    p->x1 = (vid.xcenter + vid.radius * vid.scale * p->x1)/ vid.xres,
-    p->y1 = (vid.ycenter - vid.radius * vid.scale * p->y1)/ vid.yres;
+    p->x1 = (current_display->xcenter + current_display->radius * vid.scale * p->x1)/ vid.xres,
+    p->y1 = (current_display->ycenter - current_display->radius * vid.scale * p->y1)/ vid.yres;
   
   qvalid = 0;
   for(auto p: points) if(!p->glue) qvalid++;
@@ -1085,7 +1085,7 @@ ld raddif(ld a, ld b) {
 
 bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   USING_NATIVE_GEOMETRY;
-  ld tanalpha = tan_auto(stereo::ipd/2);
+  ld tanalpha = tan_auto(vid.ipd/2);
   if(eye) tanalpha = -tanalpha;
   if(!sphere) tanalpha = -tanalpha;
   
@@ -1114,7 +1114,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
     
     ld phi = atan2(y, x) - atan2(y0, x0) + M_PI;
       
-    ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(stereo::ipd/2));
+    ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(vid.ipd/2));
     if(euclid || hyperbolic) phi -= M_PI;
     if(hyperbolic) delta = -delta;
     
@@ -1143,7 +1143,7 @@ void drawTriangle(triangle& t) {
   dt++;
 
 #if CAP_ODS
-  if(stereo::mode == stereo::sODS) {
+  if(vid.stereo_mode == current_display->sODS) {
     hyperpoint pts[3];
     for(int i=0; i<3; i++)
       pts[i] = t.m[i]->getglue()->flat;    
@@ -1231,12 +1231,12 @@ void prepareTexture() {
   videopar svid = vid;
   
   setVidParam();
-  dynamicval<stereo::eStereo> d(stereo::mode, stereo::sOFF);
+  dynamicval<eStereo> d(vid.stereo_mode, sOFF);
   
   glbuf->enable();
-  stereo::set_viewport(0);
-  stereo::set_projection(0, true);
-  stereo::set_mask(0);
+  current_display->set_viewport(0);
+  current_display->set_projection(0, true);
+  current_display->set_mask(0);
   glbuf->clear(0);
 
   ptds.clear();
@@ -1287,23 +1287,23 @@ void drawRugScene() {
   glhr::set_depthtest(true);
   glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
   
-  for(int ed=stereo::active() && stereo::mode != stereo::sODS ? -1 : 0; ed < 2; ed += 2) {
+  for(int ed=current_display->stereo_active() && vid.stereo_mode != sODS ? -1 : 0; ed < 2; ed += 2) {
     use_precompute = false;
     ct_array.clear();
-    stereo::set_mask(ed), stereo::set_viewport(ed);
-    if(ed == 1 && stereo::mode == stereo::sAnaglyph)
+    current_display->set_mask(ed), current_display->set_viewport(ed);
+    if(ed == 1 && vid.stereo_mode == sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
     
     start_projection(ed, true);
     eyewidth_translate(ed);
 
-    if(stereo::mode == stereo::sODS) {
+    if(vid.stereo_mode == sODS) {
       glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 100)); // 2*M_PI));
       }
-    else if(rug_perspective || stereo::active()) {
+    else if(rug_perspective || current_display->stereo_active()) {
 
-      xview = stereo::tanfov;
-      yview = stereo::tanfov * vid.yres / vid.xres;
+      xview = current_display->tanfov;
+      yview = current_display->tanfov * vid.yres / vid.xres;
       
       glhr::projection_multiply(glhr::frustum(xview, yview, lowrug, hirug));
       xview = -xview; yview = -yview;
@@ -1312,19 +1312,19 @@ void drawRugScene() {
         glhr::projection_multiply(glhr::translate(0, 0, -model_distance));
       if(ed) {
         if(gwhere == gEuclid)
-          glhr::projection_multiply(glhr::translate(stereo::ipd*ed/2, 0, 0));
+          glhr::projection_multiply(glhr::translate(vid.ipd*ed/2, 0, 0));
         else {
           use_precompute = true;
           for(auto p: points) {
             p->precompute = p->flat;
-            push_point(p->precompute, 0, stereo::ipd*ed/2);
+            push_point(p->precompute, 0, vid.ipd*ed/2);
             }
           }
         }
       }
     else {
-      xview = stereo::tanfov * model_distance;
-      yview = stereo::tanfov * model_distance * vid.yres / vid.xres;
+      xview = current_display->tanfov * model_distance;
+      yview = current_display->tanfov * model_distance * vid.yres / vid.xres;
       // glOrtho(-xview, xview, yview, -yview, -1000, 1000);
 
       glhr::projection_multiply(glhr::ortho(xview, yview, -1000));
@@ -1345,13 +1345,13 @@ void drawRugScene() {
     glhr::prepare(ct_array);
     glDrawArrays(GL_TRIANGLES, 0, isize(ct_array));
 
-    stereo::set_mask(0);
+    current_display->set_mask(0);
     }
 
   glEnable(GL_BLEND);
 
-  stereo::set_mask(0), stereo::set_viewport(0);
-  stereo::set_projection(0, true);
+  current_display->set_mask(0), current_display->set_viewport(0);
+  current_display->set_projection(0, true);
   
   if(rug_failure) {
     rug::close();
@@ -1516,7 +1516,7 @@ void actDraw() {
     }
   // do not display button
   else playerfound = true;
-  stereo::set_viewport(0);
+  current_display->set_viewport(0);
   physics();
   drawRugScene();
   
@@ -1637,8 +1637,8 @@ static const ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
 hyperpoint gethyper(ld x, ld y) {
-  double mx = (x - vid.xcenter)/vid.xres * 2 * xview;
-  double my = (vid.ycenter - y)/vid.yres * 2 * yview;
+  double mx = (x - current_display->xcenter)/vid.xres * 2 * xview;
+  double my = (current_display->ycenter - y)/vid.yres * 2 * yview;
   radar_distance = RADAR_INF;
   
   double rx1=0, ry1=0;

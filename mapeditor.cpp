@@ -23,12 +23,12 @@ namespace mapeditor {
      // mx = xb + ssiz*xpos + mrx * scale
      // mx = xb + ssiz*xpos' + mrx * scale' 
      
-     ld mrx = (.0 + mousex - vid.xcenter) / vid.scale;
-     ld mry = (.0 + mousey - vid.ycenter) / vid.scale;
+     ld mrx = (.0 + mousex - current_display->xcenter) / vid.scale;
+     ld mry = (.0 + mousey - current_display->ycenter) / vid.scale;
      
      if(vid.xres > vid.yres) {      
-       vid.xposition += (vid.scale - vid.scale*z) * mrx / vid.scrsize;
-       vid.yposition += (vid.scale - vid.scale*z) * mry / vid.scrsize;
+       vid.xposition += (vid.scale - vid.scale*z) * mrx / current_display->scrsize;
+       vid.yposition += (vid.scale - vid.scale*z) * mry / current_display->scrsize;
        }
 
      vid.scale *= z;

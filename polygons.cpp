@@ -238,12 +238,12 @@ void fixpoint(array<float, 3>& hscr, hyperpoint H) {
     }
   hyperpoint Hscr;
   applymodel(good, Hscr); 
-  hscr = make_array<GLfloat>(Hscr[0]*vid.radius, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius); 
+  hscr = make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*current_display->radius); 
   }
 
 void addpoint(const hyperpoint& H) {
   if(true) {
-    ld z = vid.radius;
+    ld z = current_display->radius;
     // if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
@@ -284,11 +284,11 @@ void coords_to_poly() {
   polyi = isize(glcoords);
   for(int i=0; i<polyi; i++) {
     // printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
-    if(!stereo::active()) glcoords[i][2] = 0;
+    if(!current_display->stereo_active()) glcoords[i][2] = 0;
 
-    polyx[i]  = vid.xcenter + glcoords[i][0] - glcoords[i][2]; 
-    polyxr[i] = vid.xcenter + glcoords[i][0] + glcoords[i][2]; 
-    polyy[i]  = vid.ycenter + glcoords[i][1];
+    polyx[i]  = current_display->xcenter + glcoords[i][0] - glcoords[i][2]; 
+    polyxr[i] = current_display->xcenter + glcoords[i][0] + glcoords[i][2]; 
+    polyy[i]  = current_display->ycenter + glcoords[i][1];
     }
   }
 
@@ -335,11 +335,11 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     /*
     hyperpoint Hscr;
     applymodel(goodpoint, Hscr); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius+10, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius, Hscr[1]*vid.radius*vid.stretch+10, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius-10, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius, Hscr[1]*vid.radius*vid.stretch-10, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius+10, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius));  */
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch+10, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius-10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch-10, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius));  */
     }
   }
 
@@ -439,17 +439,17 @@ void glflush() {
 
   if(isize(text_vertices)) {
     // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
-    stereo::set_projection(0, false);
+    current_display->set_projection(0, false);
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);
     glhr::set_depthtest(false);
-    for(int ed = (stereo::active() && text_shift)?-1:0; ed<2; ed+=2) {
+    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
       if(vid.scale < 0)
-      glhr::set_modelview(glhr::translate(-ed*text_shift-vid.xcenter,-vid.ycenter, stereo::scrdist_text) * glhr::scale(-1,-1,-1));
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text) * glhr::scale(-1,-1,-1));
       else
-      glhr::set_modelview(glhr::translate(-ed*text_shift-vid.xcenter,-vid.ycenter, stereo::scrdist_text));
-      stereo::set_mask(ed);
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text));
+      current_display->set_mask(ed);
   
       glhr::current_vertices = NULL;
       glhr::prepare(text_vertices);
@@ -458,7 +458,7 @@ void glflush() {
       GLERR("print");
       }
 
-    if(stereo::active() && text_shift) stereo::set_mask(0);
+    if(current_display->stereo_active() && text_shift) current_display->set_mask(0);
  
     texts_merged = 0;
     text_vertices.clear();
@@ -491,7 +491,7 @@ void dqi_poly::gldraw() {
   auto& v = *tab;
   
 #if MINIMIZE_GL_CALLS  
-  if(stereo::active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
+  if(current_display->stereo_active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
     if(color != triangle_color || outline != line_color || texts_merged) {
       glflush();
       triangle_color = color;
@@ -539,8 +539,8 @@ void dqi_poly::gldraw() {
     #endif
     }
 
-  for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
-    if(ed) stereo::set_projection(ed, true), stereo::set_viewport(ed);
+  for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
+    if(ed) current_display->set_projection(ed, true), current_display->set_viewport(ed);
     bool draw = color;
     
     if(shaderside_projection) {
@@ -559,7 +559,7 @@ void dqi_poly::gldraw() {
         glhr::color2(0xFFFFFFFF);
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset, cnt);
         
-        stereo::set_mask(ed);
+        current_display->set_mask(ed);
         glhr::color2(color);
         glhr::set_depthtest(model_needs_depth());
   
@@ -568,7 +568,7 @@ void dqi_poly::gldraw() {
           glStencilFunc( GL_NOTEQUAL, 1, 1);
           GLfloat xx = vid.xres;
           GLfloat yy = vid.yres;
-          GLfloat dist = shaderside_projection ? stereo::scrdist : 0;
+          GLfloat dist = shaderside_projection ? current_display->scrdist : 0;
           vector<glvertex> scr = {
             make_array<GLfloat>(-xx, -yy, dist), 
             make_array<GLfloat>(+xx, -yy, dist), 
@@ -603,7 +603,7 @@ void dqi_poly::gldraw() {
       }
     }
   
-  if(stereo::active()) stereo::set_projection(0, true), stereo::set_viewport(0), stereo::set_mask(0);
+  if(current_display->stereo_active()) current_display->set_projection(0, true), current_display->set_viewport(0), current_display->set_mask(0);
   }
 #endif
 
@@ -620,7 +620,7 @@ double linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1) {
     double dz = h[2];
-    if(dz < 1 || abs(dz-stereo::scrdist) < 1e-6) return 1;
+    if(dz < 1 || abs(dz-current_display->scrdist) < 1e-6) return 1;
     else {
       double dx = sqrt(dz * dz - 1);
       double dfc = dx/(dz+1);
@@ -646,9 +646,9 @@ ld mercator_period;
 void fixMercator(bool tinf) {
 
   if(pmodel == mdBand)
-    mercator_period = 4 * vid.radius;
+    mercator_period = 4 * current_display->radius;
   else
-    mercator_period = 2 * vid.radius;
+    mercator_period = 2 * current_display->radius;
   
   if(!conformal::model_straight)
     for(auto& g: glcoords)
@@ -656,7 +656,7 @@ void fixMercator(bool tinf) {
     
   if(pmodel == mdSinusoidal)
     for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
+      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);
 
   ld hperiod = mercator_period / 2;
     
@@ -664,18 +664,18 @@ void fixMercator(bool tinf) {
   
   auto dist = [] (ld a, ld b) { return max(b, a-b); };
   
-  ld chypot = hypot(dist(vid.xres, vid.xcenter), dist(vid.yres, vid.ycenter));
+  ld chypot = hypot(dist(vid.xres, current_display->xcenter), dist(vid.yres, current_display->ycenter));
   
   ld cmin = -chypot/2, cmax = chypot/2, dmin = -chypot, dmax = chypot;
 
   if(mercator_coord)
     swap(cmin, dmin), swap(cmax, dmax);
   if(pmodel == mdSinusoidal)
-    dmin = -vid.stretch * vid.radius / 2, dmax = vid.stretch * vid.radius / 2;
+    dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
   if(pmodel == mdBandEquidistant)
-    dmin = -vid.stretch * vid.radius / 2, dmax = vid.stretch * vid.radius / 2;
+    dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
   if(pmodel == mdBandEquiarea)
-    dmin = -vid.stretch * vid.radius / M_PI, dmax = vid.stretch * vid.radius / M_PI;
+    dmin = -vid.stretch * current_display->radius / M_PI, dmax = vid.stretch * current_display->radius / M_PI;
 
   for(int i = 0; i<isize(glcoords); i++) {
     while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
@@ -713,7 +713,7 @@ void fixMercator(bool tinf) {
       mercator_loop_max++, maxcoord += mercator_period;
     if(pmodel == mdSinusoidal)
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);    
+        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);    
     if(!conformal::model_straight)
       for(auto& g: glcoords)
         conformal::apply_orientation(g[1], g[0]);
@@ -743,7 +743,7 @@ void fixMercator(bool tinf) {
       }
     if(pmodel == mdSinusoidal)
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
+        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
@@ -783,7 +783,7 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
     else
       nofill = true; 
     }
-  applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius * vid.stretch;
+  applymodel(h1, hscr); hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * vid.stretch;
   for(int i=0; i<isize(glcoords)-1; i++) {
     double x1 = glcoords[i][0] - hscr[0];
     double y1 = glcoords[i][1] - hscr[1];
@@ -877,7 +877,7 @@ void dqi_poly::draw() {
           twopoint_sphere_flips = j;
           hyperpoint h2; applymodel(h1, h2);
           using namespace hyperpoint_vec;
-          glvertex h = glhr::pointtogl(h2 * vid.radius); h[1] *= vid.stretch;
+          glvertex h = glhr::pointtogl(h2 * current_display->radius); h[1] *= vid.stretch;
           if(i == 0)
             phases[j].push_back(h);
           else {
@@ -907,7 +907,7 @@ void dqi_poly::draw() {
 
           hyperpoint h1 = V * glhr::gltopoint((*tab)[offset+i]);
           hyperpoint mh1; applymodel(h1, mh1); mh1[1] *= vid.stretch;
-          phases[cpha].push_back(glhr::pointtogl(mh1 * vid.radius));
+          phases[cpha].push_back(glhr::pointtogl(mh1 * current_display->radius));
 
           // check if the i-th edge intersects the boundary of the ellipse
           // (which corresponds to the segment between the antipodes of foci)
@@ -1056,7 +1056,7 @@ void dqi_poly::draw() {
         if(pmodel == mdSinusoidal) {
           ld y = glcoords[i][1], x = glcoords[i][0];
           conformal::apply_orientation(x, y);
-          mercator_period = 2 * vid.radius * cos(y / vid.radius / vid.stretch * M_PI);
+          mercator_period = 2 * current_display->radius * cos(y / current_display->radius / vid.stretch * M_PI);
           }
         glcoords[i][mercator_coord] += conformal::ocos * mercator_period * (l - lastl);
         glcoords[i][1-mercator_coord] += conformal::osin * mercator_period * (l - lastl);
@@ -1070,7 +1070,7 @@ void dqi_poly::draw() {
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
           ld a = i * degree + h;
-          glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * vid.stretch * cos(a), stereo::scrdist));
+          glcoords.push_back(make_array<GLfloat>(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), current_display->scrdist));
           }
         poly_flags ^= POLY_INVERSE;
         }
@@ -1084,7 +1084,7 @@ void dqi_poly::draw() {
   #if CAP_GL
     if(vid.usingGL) {
       poly_flags &= ~(POLY_VCONVEX | POLY_CCONVEX);
-      // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = stereo::scrdist;
+      // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = current_display->scrdist;
       if(tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
@@ -1149,10 +1149,10 @@ void dqi_poly::draw() {
     else  
       filledPolygonColorI(s, polyx, polyy, polyi, color);
   
-    if(stereo::active()) filledPolygonColorI(aux, polyxr, polyy, polyi, color);
+    if(current_display->stereo_active()) filledPolygonColorI(aux, polyxr, polyy, polyi, color);
     
     ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
-    if(stereo::active()) aapolylineColor(aux, polyxr, polyy, polyi, outline);
+    if(current_display->stereo_active()) aapolylineColor(aux, polyxr, polyy, polyi, outline);
     
     if(vid.xres >= 2000 || fatborder) {
       int xmi = 3000, xma = -3000;
@@ -1227,7 +1227,7 @@ int curvestart = 0;
 bool keep_curvedata = false;
 
 void queuereset(eModel m, PPR prio) {
-  queueaction(prio, [m] () { pmodel = m; stereo::set_projection(0, true); });
+  queueaction(prio, [m] () { pmodel = m; current_display->set_projection(0, true); });
   }
 
 void dqi_line::draw() {
@@ -1274,7 +1274,7 @@ void sortquickqueue() {
   }
 
 void quickqueue() {
-  spherespecial = 0; stereo::set_projection(0, true);
+  spherespecial = 0; current_display->set_projection(0, true);
   int siz = isize(ptds);
   setcameraangle(false);
   for(int i=0; i<siz; i++) ptds[i]->draw();
@@ -1392,7 +1392,7 @@ void drawqueue() {
   profile_stop(3);
 
 #if CAP_SDL
-  if(stereo::active() && !vid.usingGL) {
+  if(current_display->stereo_active() && !vid.usingGL) {
 
     if(aux && (aux->w != s->w || aux->h != s->h))
       SDL_FreeSurface(aux);
@@ -1410,7 +1410,7 @@ void drawqueue() {
 
   spherespecial = 0;
   spherephase = 0;
-  stereo::set_projection(0, true);
+  current_display->set_projection(0, true);
   
   for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
     ptd->draw();
@@ -1426,7 +1426,7 @@ void drawqueue() {
       }
 
     spherespecial = sphereflipped() ? 1 : -1;
-    stereo::set_projection(0, true);
+    current_display->set_projection(0, true);
 
     reverse_side_priorities();
     for(int i=ptds.size()-1; i>=0; i--) 
@@ -1437,7 +1437,7 @@ void drawqueue() {
     reverse_side_priorities();
     spherespecial *= -1;
     spherephase = 1;
-    stereo::set_projection(0, true);
+    current_display->set_projection(0, true);
     }
   
   for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
@@ -1448,11 +1448,11 @@ void drawqueue() {
 
 #if CAP_GL
   if(vid.usingGL) 
-    stereo::set_projection(0, true), stereo::set_mask(0), stereo::set_viewport(0);
+    current_display->set_projection(0, true), current_display->set_mask(0), current_display->set_viewport(0);
 #endif
 
 #if CAP_SDL
-  if(stereo::mode == stereo::sAnaglyph && !vid.usingGL) {
+  if(vid.stereo_mode == sAnaglyph && !vid.usingGL) {
     int qty = s->w * s->h;
     int *a = (int*) s->pixels;
     int *b = (int*) aux->pixels;
@@ -1464,7 +1464,7 @@ void drawqueue() {
     SDL_UnlockSurface(aux);
     }
 
-  if(stereo::mode == stereo::sLR && !vid.usingGL) {
+  if(vid.stereo_mode == sLR && !vid.usingGL) {
     SDL_LockSurface(aux);
     for(int y=0; y<vid.yres; y++)
     for(int x=vid.xres/2; x<vid.xres; x++)
@@ -2779,10 +2779,10 @@ void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, 
 void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   hyperpoint hscr;
   applymodel(h, hscr);
-  xc = vid.xcenter + vid.radius * hscr[0];
-  yc = vid.ycenter + vid.radius * vid.stretch * hscr[1];
+  xc = current_display->xcenter + current_display->radius * hscr[0];
+  yc = current_display->ycenter + current_display->radius * vid.stretch * hscr[1];
   sc = 0;
-  // EYETODO sc = vid.eye * vid.radius * hscr[2];
+  // EYETODO sc = vid.eye * current_display->radius * hscr[2];
   }
 
 void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame) {

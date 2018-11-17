@@ -96,10 +96,10 @@ namespace svg {
   
   void text(int x, int y, int size, const string& str, bool frame, color_t col, int align) {
 
-    double dfc = (x - vid.xcenter) * (x - vid.xcenter) + 
-      (y - vid.ycenter) * (y - vid.ycenter);
-    dfc /= vid.radius;
-    dfc /= vid.radius;
+    double dfc = (x - current_display->xcenter) * (x - current_display->xcenter) + 
+      (y - current_display->ycenter) * (y - current_display->ycenter);
+    dfc /= current_display->radius;
+    dfc /= current_display->radius;
     // 0 = center, 1 = edge
     dfc = 1 - dfc;
     
@@ -149,7 +149,7 @@ namespace svg {
       fprintf(f, "%s %s", coord(polyx[i]), coord(polyy[i]));
       }
     
-    fprintf(f, "\" %s/>", stylestr(col, outline, (hyperbolic ? vid.radius : vid.scrsize) * linewidth/256));
+    fprintf(f, "\" %s/>", stylestr(col, outline, (hyperbolic ? current_display->radius : current_display->scrsize) * linewidth/256));
     stopstring();
     fprintf(f, "\n");
     }
@@ -252,7 +252,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
   renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
   glbuf.enable();
-  stereo::set_viewport(0);
+  current_display->set_viewport(0);
 
   // printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
 

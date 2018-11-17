@@ -278,11 +278,11 @@ void initConfig() {
   addsaver(viewdists, "expansion mode");
   addsaver(backbrightness, "brightness behind sphere");
 
-  addsaver(stereo::ipd, "interpupilar-distance", 0.05);
-  addsaver(stereo::lr_eyewidth, "eyewidth-lr", 0.5);
-  addsaver(stereo::anaglyph_eyewidth, "eyewidth-anaglyph", 0.1);
-  addsaver(stereo::fov, "field-of-vision", 90);
-  addsaverenum(stereo::mode, "stereo-mode");
+  addsaver(vid.ipd, "interpupilar-distance", 0.05);
+  addsaver(vid.lr_eyewidth, "eyewidth-lr", 0.5);
+  addsaver(vid.anaglyph_eyewidth, "eyewidth-anaglyph", 0.1);
+  addsaver(vid.fov, "field-of-vision", 90);
+  addsaverenum(vid.stereo_mode, "stereo-mode");
   addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
   addsaver(vid.stretch, "stretch", 1);
@@ -1181,22 +1181,22 @@ void showStereo() {
 
   string modenames[4] = { "OFF", "anaglyph", "side-by-side", "ODS" };
   
-  dialog::addSelItem(XLAT("stereo mode"), XLAT(modenames[stereo::mode]), 'm');
-  dialog::addSelItem(XLAT("pupillary distance"), fts3(stereo::ipd), 'e');
+  dialog::addSelItem(XLAT("stereo mode"), XLAT(modenames[vid.stereo_mode]), 'm');
+  dialog::addSelItem(XLAT("pupillary distance"), fts3(vid.ipd), 'e');
   
-  switch(stereo::mode) {
-    case stereo::sAnaglyph:
-      dialog::addSelItem(XLAT("distance between images"), fts(stereo::anaglyph_eyewidth), 'd');
+  switch(vid.stereo_mode) {
+    case sAnaglyph:
+      dialog::addSelItem(XLAT("distance between images"), fts(vid.anaglyph_eyewidth), 'd');
       break;
-    case stereo::sLR:
-      dialog::addSelItem(XLAT("distance between images"), fts(stereo::lr_eyewidth), 'd');
+    case sLR:
+      dialog::addSelItem(XLAT("distance between images"), fts(vid.lr_eyewidth), 'd');
       break;
     default:
       dialog::addBreak(100);
       break;
     }
 
-  dialog::addSelItem(XLAT("field of view"), fts(stereo::fov) + "°", 'f');
+  dialog::addSelItem(XLAT("field of view"), fts(vid.fov) + "°", 'f');
 
   dialog::addBack();
   dialog::display();
@@ -1216,26 +1216,26 @@ void showStereo() {
         ) + "\n\n";
 
     if(uni == 'm')
-      { stereo::mode = stereo::eStereo((1 + stereo::mode) % (CAP_ODS ? 4 : 3)); return; }
+      { vid.stereo_mode = eStereo((1 + vid.stereo_mode) % (CAP_ODS ? 4 : 3)); return; }
     
     else if(uni == 'e') 
-      dialog::editNumber(stereo::ipd, -10, 10, 0.01, 0, XLAT("pupillary distance"),
+      dialog::editNumber(vid.ipd, -10, 10, 0.01, 0, XLAT("pupillary distance"),
         help3 + 
         XLAT("The distance between your eyes in the represented 3D object. This is given in absolute units.")
         );
       
-    else if(uni == 'd' && stereo::mode == stereo::sAnaglyph)
-      dialog::editNumber(stereo::anaglyph_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
+    else if(uni == 'd' && vid.stereo_mode == sAnaglyph)
+      dialog::editNumber(vid.anaglyph_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
         help3 +
         XLAT("The distance between your eyes. 1 is the width of the screen."));
 
-    else if(uni == 'd' && stereo::mode == stereo::sLR)
-      dialog::editNumber(stereo::lr_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
+    else if(uni == 'd' && vid.stereo_mode == sLR)
+      dialog::editNumber(vid.lr_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
         help3 +
         XLAT("The distance between your eyes. 1 is the width of the screen."));
       
     else if(uni == 'f')
-      dialog::editNumber(stereo::fov, 1, 170, 1, 45, "field of view", 
+      dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
         help3 + XLAT(
           "Horizontal field of view, in angles. "
           "This affects the Hypersian Rug mode (even when stereo is OFF) "
@@ -1823,10 +1823,10 @@ unordered_map<string, ld&> params = {
   {"mtrans", conformal::model_transition},
   {"hp", conformal::halfplane_scale},
   {"back", backbrightness},
-  {"ipd", stereo::ipd},
-  {"lr", stereo::lr_eyewidth},
-  {"anaglyph", stereo::anaglyph_eyewidth},
-  {"fov", stereo::fov},
+  {"ipd", vid.ipd},
+  {"lr", vid.lr_eyewidth},
+  {"anaglyph", vid.anaglyph_eyewidth},
+  {"fov", vid.fov},
   {"ets", vid.euclid_to_sphere},
   {"stretch", vid.stretch},
   {"twopoint", vid.twopoint_param},

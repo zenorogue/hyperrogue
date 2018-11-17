@@ -206,8 +206,8 @@ void create_model() {
 
   int v = global_v;
   rug::clear_model(); 
-  ld x = (mousex - vid.xcenter + .0) / vid.xres;
-  ld y = (mousey - vid.ycenter + .0) / vid.yres;
+  ld x = (mousex - current_display->xcenter + .0) / vid.xres;
+  ld y = (mousey - current_display->ycenter + .0) / vid.yres;
   
   ld alpha = atan2(y, x);
   ld h = hypot(x, y);

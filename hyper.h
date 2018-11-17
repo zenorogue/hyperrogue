@@ -950,7 +950,7 @@ void drawCircle(int x, int y, int size, color_t color, color_t fillcolor = 0);
 void fixcolor(int& col);
 ld displayspin(cell *c, int d);
 hyperpoint gethyper(ld x, ld y);
-void resetview(); extern heptspin viewctr; extern cellwalker centerover;
+void resetview(); 
 void drawthemap();
 void drawfullmap();
 extern function<void()> wrap_drawfullmap;
@@ -985,6 +985,8 @@ extern reaction_t help_delegate;
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
+enum eStereo { sOFF, sAnaglyph, sLR, sODS };
+
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
   ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width;
@@ -1004,11 +1006,6 @@ struct videopar {
   int xscr, yscr;
   
   ld xposition, yposition;
-  
-  // paramaters calculated from the above
-  int xcenter, ycenter;
-  ld radius;
-  int scrsize;
   
   bool grid;
   int particles;
@@ -1058,6 +1055,11 @@ struct videopar {
   int cells_drawn_limit;
   
   ld skiprope;
+
+  eStereo stereo_mode;
+  ld ipd;
+  ld lr_eyewidth, anaglyph_eyewidth;
+  ld fov;
   };
 
 extern videopar vid;
@@ -1068,8 +1070,43 @@ template<class T> void pushScreen(const T& x) { screens.push_back(x); }
 inline void popScreen() { screens.pop_back(); }
 inline void popScreenAll() { while(isize(screens)>1) popScreen(); }
 
-extern transmatrix View; // current rotation, relative to viewctr
-extern transmatrix cwtV; // player-relative view
+struct display_data {
+  transmatrix view_matrix; // current rotation, relative to viewctr
+  transmatrix player_matrix; // player-relative view
+  heptspin view_center;
+  cellwalker precise_center;
+  unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
+  ld xmin, ymin, xmax, ymax;
+  display_data() { xmin = ymin = 0; xmax = ymax = 1; }
+
+  // paramaters calculated from the above
+  int xcenter, ycenter;
+  ld radius;
+  int scrsize;  
+  bool sidescreen;
+
+  ld tanfov;
+
+  GLfloat scrdist, scrdist_text;
+
+  ld eyewidth();
+  bool stereo_active();
+  bool in_anaglyph();
+
+  void set_viewport(int ed);
+  void set_projection(int ed, bool apply_models);
+  void set_mask(int ed);
+  };
+
+extern display_data default_display;
+extern display_data *current_display;
+
+#define View (current_display->view_matrix)
+#define cwtV (current_display->player_matrix)
+#define viewctr (current_display->view_center)
+#define centerover (current_display->precise_center)
+#define gmatrix (current_display->cellmatrices)
+#define gmatrix0 (current_display->old_cellmatrices)
 
 extern cell *mouseover, *mouseover2, *lmouseover;
 extern string mouseovers;
@@ -1866,7 +1903,6 @@ struct animation {
 #define LAYER_BOAT  2 // mark that a boat has moved
 
 extern map<cell*, animation> animations[ANIMLAYERS];
-extern unordered_map<cell*, transmatrix> gmatrix, gmatrix0;
 
 void animateAttack(cell *src, cell *tgt, int layer, int direction_hint);
 
@@ -2375,7 +2411,6 @@ void buildHelpText();
 void buildCredits();
 void setAppropriateOverview();
 bool quitsaves();
-extern bool sidescreen;
 
 extern const char* COLORBAR;
 
@@ -3292,25 +3327,6 @@ struct resetbuffer {
   void reset();
   };
 
-namespace stereo {
-  enum eStereo { sOFF, sAnaglyph, sLR, sODS };
-
-  extern eStereo mode;
-  extern ld ipd;
-  extern ld lr_eyewidth, anaglyph_eyewidth;
-  extern ld fov, tanfov;
-
-  extern GLfloat scrdist, scrdist_text;
-
-  ld eyewidth();
-  bool active();
-  bool in_anaglyph();
-
-  void set_viewport(int ed);
-  void set_projection(int ed, bool apply_models);
-  void set_mask(int ed);
-  }
-
 double randd();
 
 #if CAP_ORIENTATION
@@ -3649,7 +3665,7 @@ namespace glhr {
     colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
       coords[0] = x;
       coords[1] = y;
-      coords[2] = stereo::scrdist;
+      coords[2] = current_display->scrdist;
       color[0] = r;
       color[1] = g;
       color[2] = b;
@@ -4371,6 +4387,13 @@ namespace dq {
 
   void enqueue(heptagon *h, const transmatrix& T);
   }
+
+typedef pair<string, reaction_t> named_functionality;
+inline named_functionality named_dialog(string x, reaction_t dialog) { return named_functionality(x, [dialog] () { pushScreen(dialog); }); }
+
+extern hookset<named_functionality()> *hooks_o_key;
+
+named_functionality get_o_key();
 
 bool do_draw(cell *c, const transmatrix& T);
 

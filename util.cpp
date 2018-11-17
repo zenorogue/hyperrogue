@@ -208,7 +208,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "ms") res = ticks;
     else if(number == "mousex") res = mousex;
     else if(number == "mousey") res = mousey;
-    else if(number == "mousez") res = cld(mousex - vid.xcenter, mousey - vid.ycenter) / cld(vid.radius, 0);
+    else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
     else if(extra_params.count(number)) res = extra_params[number];
     else if(params.count(number)) res = params.at(number);
     else if(number[0] >= 'a' && number[0] <= 'z') at = -1;

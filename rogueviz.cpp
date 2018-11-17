@@ -1393,16 +1393,16 @@ bool rogueviz_hud() {
 
   initquickqueue();
   
-  int rad = vid.radius/10;
+  int rad = current_display->radius/10;
   ld x = vid.xres - rad;
 
   for(int i=0; i<isize(legend); i++) {
     int k = legend[i];
     vertexdata& vd = vdata[k];
     
-    ld y = (vid.radius * (i+.5)) / legit * 2 - vid.radius + vid.yres/2;
+    ld y = (current_display->radius * (i+.5)) / legit * 2 - current_display->radius + vid.yres/2;
 
-    transmatrix V = atscreenpos(x, y, vid.radius/4);
+    transmatrix V = atscreenpos(x, y, current_display->radius/4);
     
     poly_outline = OUTLINE_NONE;
     queuedisk(V, vd.cp, true, NULL);
@@ -1413,9 +1413,9 @@ bool rogueviz_hud() {
   for(int i=0; i<qet; i++) {
     auto t = edgetypes[i];
         
-    ld y = (vid.radius * (i+isize(legend)+.5)) / legit * 2 - vid.radius + vid.yres/2;
+    ld y = (current_display->radius * (i+isize(legend)+.5)) / legit * 2 - current_display->radius + vid.yres/2;
 
-    transmatrix V = atscreenpos(x, y, vid.radius/8);
+    transmatrix V = atscreenpos(x, y, current_display->radius/8);
     
     poly_outline = t->color | 0xFF;
     queuepolyat(V, shTriangle, 0, PPR::MONSTER_HEAD);
@@ -1594,7 +1594,7 @@ void fixparam() {
   if(!legend.empty() && !nohud) {
     if((svg::in || inHighQual) && pngformat == 0)
       vid.xres = vid.xres * 22/16;
-    vid.xcenter = vid.ycenter;
+    current_display->xcenter = current_display->ycenter;
     }
   }
 
@@ -2242,6 +2242,11 @@ bool default_help() {
   return true;
   }
 
+named_functionality o_key() {
+  if(rogueviz::on) return named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu);
+  return named_functionality();
+  }
+
 auto hooks  = 
   addHook(hooks_frame, 0, drawExtra) +
 #if CAP_COMMANDLINE
@@ -2257,6 +2262,7 @@ auto hooks  =
   addHook(shmup::hooks_describe, 100, describe_monster) +
   addHook(shmup::hooks_turn, 100, turn) + 
   addHook(shmup::hooks_kill, 100, activate) +
+  addHook(hooks_o_key, 100, o_key) +
   addHook(hooks_mainmenu, 100, [] () {
     dialog::addItem(XLAT("rogueviz menu"), 'u'); 
     dialog::add_action([] () { pushScreen(rogueviz::showMenu); });

@@ -3,6 +3,9 @@
 
 namespace hr {
 
+display_data default_display;
+display_data *current_display = &default_display;
+
 unsigned backcolor = 0;
 unsigned bordcolor = 0;
 unsigned forecolor = 0xFFFFFF;
@@ -27,15 +30,15 @@ namespace stereo {
   GLfloat scrdist, scrdist_text;
   }
 
-bool stereo::in_anaglyph() { return stereo::mode == stereo::sAnaglyph; }
-bool stereo::active() { return stereo::mode != sOFF; }
+bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
+bool display_data::stereo_active() { return vid.stereo_mode != sOFF; }
 
-ld stereo::eyewidth() { 
-  switch(stereo::mode) {
-    case stereo::sAnaglyph:
-      return stereo::anaglyph_eyewidth;
-    case stereo::sLR:
-      return stereo::lr_eyewidth;
+ld display_data::eyewidth() { 
+  switch(vid.stereo_mode) {
+    case sAnaglyph:
+      return vid.anaglyph_eyewidth;
+    case sLR:
+      return vid.lr_eyewidth;
     default:
       return 0;
     }
@@ -176,24 +179,31 @@ void setcameraangle(bool b) {
 
 bool shaderside_projection;
 
+int subscreen;
+
 void start_projection(int ed, bool perspective) {
   glhr::new_projection();
   shaderside_projection = perspective;
 
-  if(ed && stereo::mode == stereo::sLR) {
+  auto cd = current_display;
+  
+  if(subscreen)
+    glhr::projection_multiply(glhr::scale(1/(cd->xmax-cd->ymin), 1/(cd->ymax-cd->ymin), 1));
+
+  if(ed && vid.stereo_mode == sLR) {
     glhr::projection_multiply(glhr::translate(ed, 0, 0));
     glhr::projection_multiply(glhr::scale(2, 1, 1));
     }      
 
-  glhr::projection_multiply(glhr::translate((vid.xcenter*2.)/vid.xres - 1, 1 - (vid.ycenter*2.)/vid.yres, 0));
+  glhr::projection_multiply(glhr::translate((current_display->xcenter*2.)/vid.xres - 1, 1 - (current_display->ycenter*2.)/vid.yres, 0));
   }
 
 void eyewidth_translate(int ed) {
-  if(ed) glhr::projection_multiply(glhr::translate(-ed * stereo::eyewidth(), 0, 0));
+  if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
-void stereo::set_projection(int ed, bool apply_models) {
-  DEBB(DF_GRAPH, (debugfile,"stereo::set_projection\n"));
+void display_data::set_projection(int ed, bool apply_models) {
+  DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
@@ -205,7 +215,7 @@ void stereo::set_projection(int ed, bool apply_models) {
   start_projection(ed, shaderside_projection);
 
   if(!shaderside_projection) {
-    glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(stereo::scrdist) + 30000));
+    glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(current_display->scrdist) + 30000));
     if(ed) {
       glhr::glmatrix m = glhr::id;
       m[2][0] -= ed;
@@ -228,20 +238,28 @@ void stereo::set_projection(int ed, bool apply_models) {
 
     glhr::projection_multiply(glhr::frustum(vid.xres * 1. / vid.yres, 1));
 
-    GLfloat sc = vid.radius / (vid.yres/2.);
+    GLfloat sc = current_display->radius / (vid.yres/2.);
 
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
     
-    if(ed) glhr::projection_multiply(glhr::translate(stereo::ipd * ed/2, 0, 0));
+    if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
   
-    stereo::scrdist_text = vid.yres * sc / 2;
+    current_display->scrdist_text = vid.yres * sc / 2;
+    
+    if(glhr::new_shader_projection == glhr::shader_projection::band) {
+      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI,1));
+      glhr::glmatrix s = glhr::id;
+      for(int a=0; a<2; a++)
+        conformal::apply_orientation(s[a][1], s[a][0]);
+      glhr::projection_multiply(s);
+      }
     }
   
   cameraangle_on = false;
   }
 
-void stereo::set_mask(int ed) { 
-  if(ed == 0 || stereo::mode != stereo::sAnaglyph) {    
+void display_data::set_mask(int ed) { 
+  if(ed == 0 || vid.stereo_mode != sAnaglyph) {
     glColorMask( GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE );
     }
   else if(ed == 1) {
@@ -252,14 +270,20 @@ void stereo::set_mask(int ed) {
     }
   }
 
-void stereo::set_viewport(int ed) {
-  if(ed == 0 || stereo::mode != stereo::sLR)
-    glViewport(0, 0, vid.xres, vid.yres);
-  else if(ed == 1)
-    glViewport(0, 0, vid.xres/2, vid.yres);
-  else if(ed == -1)
-    glViewport(vid.xres/2, 0, vid.xres/2, vid.yres);
-  }    
+void display_data::set_viewport(int ed) {  
+  ld xmin = vid.xres * current_display->xmin;
+  ld xmax = vid.xres * current_display->xmax;
+  ld ymin = vid.yres * current_display->ymin;
+  ld ymax = vid.yres * current_display->ymax;
+  
+  ld xsize = xmax - xmin, ysize = ymax - ymin;
+  
+  if(ed == 0 || vid.stereo_mode != sLR) ;
+  else if(ed == 1) xsize /= 2;
+  else if(ed == -1) xsize /= 2, xmin += xsize;
+    
+  glViewport(xmin, ymin, xsize, ysize);
+  }
 
 bool model_needs_depth() {
   return pmodel == mdBall;
@@ -315,7 +339,7 @@ void setGLProjection(color_t col) {
   
   GLERR("setGLProjection");
   
-  stereo::set_projection(0, true);
+  current_display->set_projection(0, true);
   
   GLERR("after set_projection");
   }
@@ -822,7 +846,7 @@ color_t colormix(color_t a, color_t b, color_t c) {
 int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 
 ld realradius() {
-  ld vradius = vid.radius;
+  ld vradius = current_display->radius;
   if(sphere) {
     if(sphereflipped()) 
       vradius /= sqrt(vid.alpha*vid.alpha - 1);
@@ -830,7 +854,7 @@ ld realradius() {
       vradius = 1e12; // use the following
     }
   if(euclid)
-    vradius = vid.radius * get_sightrange() / (1 + vid.alpha) / 2.5;
+    vradius = current_display->radius * get_sightrange() / (1 + vid.alpha) / 2.5;
   vradius = min<ld>(vradius, min(vid.xres, vid.yres) / 2);
   return vradius;
   }
@@ -838,14 +862,14 @@ ld realradius() {
 void drawmessage(const string& s, int& y, color_t col) {
   int rrad = (int) realradius();
   int space;
-  if(y > vid.ycenter + rrad * vid.stretch)
+  if(y > current_display->ycenter + rrad * vid.stretch)
     space = vid.xres;
-  else if(y > vid.ycenter)
-    space = vid.xcenter - rhypot(rrad, (y-vid.ycenter) / vid.stretch);
-  else if(y > vid.ycenter - vid.fsize)
-    space = vid.xcenter - rrad;
-  else if(y > vid.ycenter - vid.fsize - rrad * vid.stretch)
-    space = vid.xcenter - rhypot(rrad, (vid.ycenter-vid.fsize-y) / vid.stretch);
+  else if(y > current_display->ycenter)
+    space = current_display->xcenter - rhypot(rrad, (y-current_display->ycenter) / vid.stretch);
+  else if(y > current_display->ycenter - vid.fsize)
+    space = current_display->xcenter - rrad;
+  else if(y > current_display->ycenter - vid.fsize - rrad * vid.stretch)
+    space = current_display->xcenter - rhypot(rrad, (current_display->ycenter-vid.fsize-y) / vid.stretch);
   else
     space = vid.xres;
 
@@ -923,13 +947,13 @@ void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
     glhr::be_nontextured();
     glhr::id_modelview();
     glcoords.clear();
-    x -= vid.xcenter; y -= vid.ycenter;
+    x -= current_display->xcenter; y -= current_display->ycenter;
     int pts = size * 4;
     if(pts > 1500) pts = 1500;
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
       float rr = (M_PI * 2 * r) / pts;
-      glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * vid.stretch * cos(rr), stereo::scrdist));
+      glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * vid.stretch * cos(rr), current_display->scrdist));
       }
     glhr::vertices(glcoords);
     glhr::set_depthtest(false);
@@ -997,7 +1021,7 @@ void displayColorButton(int x, int y, const string& name, int key, int align, in
   }
 
 ld textscale() { 
-  return vid.fsize / (vid.radius * crossf) * (1+vid.alpha) * 2;
+  return vid.fsize / (current_display->radius * crossf) * (1+vid.alpha) * 2;
   }
   
 // bool notgl = false;

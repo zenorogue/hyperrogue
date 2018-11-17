@@ -245,7 +245,7 @@ namespace dialog {
     int lastspace = 0;
     
     int xs, xo;
-    if(sidescreen)
+    if(current_display->sidescreen)
       xs = dwidth - vid.fsize*2, xo = vid.yres + vid.fsize;
     else
       xs = vid.xres * 618/1000, xo = vid.xres * 186/1000;
@@ -314,7 +314,7 @@ namespace dialog {
     dcenter = vid.xres/2;
     dwidth = vid.xres;
 
-    if(sidescreen) {
+    if(current_display->sidescreen) {
       dwidth = vid.xres - vid.yres;
       dcenter = vid.xres - dwidth / 2;
       }
@@ -382,7 +382,7 @@ namespace dialog {
       else if(I.type == diSlider) {
         bool xthis = (mousey >= top && mousey < tothei);
         int sl, sr;
-        if(sidescreen)
+        if(current_display->sidescreen)
           sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
         else
           sl = vid.xres/4, sr = vid.xres*3/4;
@@ -523,7 +523,7 @@ namespace dialog {
     dcenter = vid.xres/2;
     dwidth = vid.xres;
 
-    if(sidescreen) {
+    if(current_display->sidescreen) {
       dwidth = vid.xres - vid.yres;
       dcenter = vid.xres - dwidth / 2;
       }
@@ -710,7 +710,7 @@ namespace dialog {
         }
       else if(uni == 500) {
         int sl, sr;
-        if(sidescreen)
+        if(current_display->sidescreen)
           sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
         else
           sl = vid.xres/4, sr = vid.xres*3/4;

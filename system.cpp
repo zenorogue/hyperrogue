@@ -1034,9 +1034,7 @@ namespace gamestack {
   struct gamedata {
     hrmap *hmap;
     cellwalker cwt;
-    cellwalker ctover;
-    heptspin viewctr;
-    transmatrix View;
+    display_data d;
     eGeometry geometry;
     eVariation variation;
     bool shmup;
@@ -1054,12 +1052,10 @@ namespace gamestack {
     gamedata gdn;
     gdn.hmap = currentmap;
     gdn.cwt = cwt;
-    gdn.viewctr = viewctr;
-    gdn.View = View;
     gdn.geometry = geometry;
     gdn.shmup = shmup::on;
     gdn.variation = variation;
-    gdn.ctover = centerover;
+    gdn.d = *current_display;
     gd.push_back(gdn);
     }
     
@@ -1067,15 +1063,13 @@ namespace gamestack {
     gamedata& gdn = gd[isize(gd)-1];
     currentmap = gdn.hmap;
     cwt = gdn.cwt;
-    viewctr = gdn.viewctr;
-    View = gdn.View;
     geometry = gdn.geometry;
     variation = gdn.variation;
     if(shmup::on) shmup::clearMonsters();
     shmup::on = gdn.shmup;
     resetGeometry();
     gd.pop_back();
-    centerover = gdn.ctover;
+    *current_display = gdn.d;
     bfs();
     }
   

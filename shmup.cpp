@@ -16,9 +16,9 @@ namespace shmupballs {
   void calc() {      
     int rr = int(realradius());
     rad = int(rr * (vid.mobilecompasssize ? vid.mobilecompasssize : 14) / 100);
-    xmove = max(vid.xcenter - rr - rad, rad);
-    xfire = min(vid.xcenter + rr + rad, vid.xres - rad);
-    yb = vid.ycenter + rr - rad;
+    xmove = max(current_display->xcenter - rr - rad, rad);
+    xfire = min(current_display->xcenter + rr + rad, vid.xres - rad);
+    yb = current_display->ycenter + rr - rad;
     }
   }
 
@@ -675,7 +675,7 @@ void handleInput(int delta) {
   if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
 
   if(actionspressed[55] && !lactionpressed[55]) 
-    setAppropriateOverview();
+    get_o_key().second();
   
   if(actionspressed[56] && !lactionpressed[56]) 
     showMissionScreen();

@@ -475,8 +475,8 @@ namespace hr { namespace inv {
             dialog::addSelItem(XLAT1(iinf[o].name), its(remaining[i]), c);
           else {
             auto pos = orbcoord[oc++];
-            ld px = vid.xcenter + 2*rad*pos.first + rad*pos.second;
-            ld py = vid.ycenter + pos.second * rad3;
+            ld px = current_display->xcenter + 2*rad*pos.first + rad*pos.second;
+            ld py = current_display->ycenter + pos.second * rad3;
             int icol = iinf[o].color;
             if(!remaining[i]) icol = gradient(icol, 0, 0, .5, 1);
             bool gg = graphglyph();
