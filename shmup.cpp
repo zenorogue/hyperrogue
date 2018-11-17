@@ -503,9 +503,9 @@ void initConfig() {
   t[(int)'y'] = 16 + pcCenter;
 
   t[(int)'i'] = 32 + 4;
-  t[(int)'k'] = 32 + 5;
-  t[(int)'j'] = 32 + 6;
-  t[(int)'l'] = 32 + 7;
+  t[(int)'l'] = 32 + 5;
+  t[(int)'k'] = 32 + 6;
+  t[(int)'j'] = 32 + 7;
   t[(int)';'] = 32 + 8;
   t[(int)'\''] = 32 + 9;
   t[(int)'p'] = 32 + 10;
