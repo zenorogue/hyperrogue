@@ -3307,7 +3307,7 @@ namespace stereo {
   bool in_anaglyph();
 
   void set_viewport(int ed);
-  void set_projection(int ed);
+  void set_projection(int ed, bool apply_models);
   void set_mask(int ed);
   }
 
@@ -3630,10 +3630,15 @@ namespace glhr {
     const GLfloat* as_array() const { return a[0]; }
     };
   
+  enum class shader_projection { standard, band, MAX };
+  
+  extern shader_projection new_shader_projection;
+  
   void set_depthtest(bool b);
   glmatrix translate(ld x, ld y, ld z);
   void color2(color_t color, ld part = 1);
-  void be_textured();
+  void be_nontextured(shader_projection sp = new_shader_projection);
+  void be_textured(shader_projection sp = new_shader_projection);
   void set_modelview(const glmatrix& m);  
   hyperpoint gltopoint(const glvertex& t);
   glvertex pointtogl(const hyperpoint& t);
@@ -4010,7 +4015,7 @@ extern ld hexshift;
 extern bool noshadow, bright, nohelp, dont_face_pc;
 extern void switchHardcore();
 
-extern bool using_perspective;
+extern bool shaderside_projection;
 
 void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
 

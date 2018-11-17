@@ -1235,7 +1235,7 @@ void prepareTexture() {
   
   glbuf->enable();
   stereo::set_viewport(0);
-  stereo::set_projection(0);
+  stereo::set_projection(0, true);
   stereo::set_mask(0);
   glbuf->clear(0);
 
@@ -1283,7 +1283,7 @@ void drawRugScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
-  glhr::switch_mode(glhr::gmLightFog);
+  glhr::switch_mode(glhr::gmLightFog, glhr::shader_projection::standard);
   glhr::set_depthtest(true);
   glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
   
@@ -1351,7 +1351,7 @@ void drawRugScene() {
   glEnable(GL_BLEND);
 
   stereo::set_mask(0), stereo::set_viewport(0);
-  stereo::set_projection(0);
+  stereo::set_projection(0, true);
   
   if(rug_failure) {
     rug::close();

@@ -174,11 +174,11 @@ void setcameraangle(bool b) {
     }
   }
 
-bool using_perspective;
+bool shaderside_projection;
 
 void start_projection(int ed, bool perspective) {
   glhr::new_projection();
-  using_perspective = perspective;
+  shaderside_projection = perspective;
 
   if(ed && stereo::mode == stereo::sLR) {
     glhr::projection_multiply(glhr::translate(ed, 0, 0));
@@ -192,12 +192,19 @@ void eyewidth_translate(int ed) {
   if(ed) glhr::projection_multiply(glhr::translate(-ed * stereo::eyewidth(), 0, 0));
   }
 
-void stereo::set_projection(int ed) {
+void stereo::set_projection(int ed, bool apply_models) {
   DEBB(DF_GRAPH, (debugfile,"stereo::set_projection\n"));
   
-  start_projection(ed, pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1));
+  shaderside_projection = false;
+  glhr::new_shader_projection = glhr::shader_projection::standard;
+  if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1))
+    shaderside_projection = true;
+  if(pmodel == mdBand && hyperbolic && apply_models && !inHighQual)
+    shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
+  
+  start_projection(ed, shaderside_projection);
 
-  if(!using_perspective) {
+  if(!shaderside_projection) {
     glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(stereo::scrdist) + 30000));
     if(ed) {
       glhr::glmatrix m = glhr::id;
@@ -308,7 +315,7 @@ void setGLProjection(color_t col) {
   
   GLERR("setGLProjection");
   
-  stereo::set_projection(0);
+  stereo::set_projection(0, true);
   
   GLERR("after set_projection");
   }

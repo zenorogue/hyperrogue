@@ -42,7 +42,9 @@ flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG |
 
 eMode mode;
 
-void switch_mode(eMode m);
+shader_projection current_shader_projection, new_shader_projection;
+
+void switch_mode(eMode m, shader_projection sp);
 
 void display(const glmatrix& m) {
   for(int i=0; i<4; i++) {
@@ -200,7 +202,7 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uColor, tTexture;
+  GLint uMVP, uFog, uColor, tTexture, uMV, uProjection;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -247,6 +249,8 @@ struct GLprogram {
     // glBindAttribLocation(_program, GLKVertexAttribPosition, "position"); ??
     // glBindAttribLocation(_program, GLKVertexAttribNormal, "normal"); ??
   
+    uMV = glGetUniformLocation(_program, "uMV");
+    uProjection = glGetUniformLocation(_program, "uP");
     uMVP = glGetUniformLocation(_program, "uMVP");
     uFog = glGetUniformLocation(_program, "uFog");
     uColor = glGetUniformLocation(_program, "uColor");
@@ -274,7 +278,7 @@ struct GLprogram {
   
   };
 
-GLprogram *programs[gmMAX];
+GLprogram *programs[gmMAX][int(shader_projection::MAX)];
 
 string stringbuilder() { return ""; }
 
@@ -287,7 +291,7 @@ template<class... T> string stringbuilder(bool i, const string& s, T... t) {
   else return stringbuilder(t...); 
   }
 
-glmatrix current_matrix;
+glmatrix current_matrix, current_modelview, current_projection;
 
 bool operator == (const glmatrix& m1, const glmatrix& m2) {
   for(int i=0; i<4; i++) 
@@ -296,18 +300,35 @@ bool operator == (const glmatrix& m1, const glmatrix& m2) {
   return true;
   }
 
+bool operator != (const glmatrix& m1, const glmatrix& m2) {
+  return !(m1 == m2);
+  }
+
 void set_modelview(const glmatrix& modelview) {
-  glmatrix mvp = modelview * projection;
-  #if MINIMIZE_GL_CALLS
-  if(mvp == current_matrix) return;
-  current_matrix = mvp;
-  #endif
-  glUniformMatrix4fv(current->uMVP, 1, 0, mvp.as_array());
+  if(current_shader_projection != shader_projection::standard) {
+    if(modelview != current_modelview) {
+      current_modelview = modelview;
+      glUniformMatrix4fv(current->uMV, 1, 0, modelview.as_array());
+      }
+    if(projection != current_projection) {
+      current_projection = projection;
+      glUniformMatrix4fv(current->uProjection, 1, 0, projection.as_array());
+      }
+    }
+  else {
+    glmatrix mvp = modelview * projection;
+    #if MINIMIZE_GL_CALLS
+    if(mvp == current_matrix) return;
+    current_matrix = mvp;
+    #endif
+    glUniformMatrix4fv(current->uMVP, 1, 0, mvp.as_array());
+    }
   // glmatrix nm = modelview;
   // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
   }
 
 void id_modelview() {
+  if(current_shader_projection != shader_projection::standard) { set_modelview(id); return; }
   #if MINIMIZE_GL_CALLS
   if(projection == current_matrix) return;
   current_matrix = projection;
@@ -334,14 +355,14 @@ void colorClear(color_t color) {
   glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
   }
 
-void be_nontextured() { switch_mode(gmColored); }
-void be_textured() { switch_mode(gmTextured); }
+void be_nontextured(shader_projection sp) { switch_mode(gmColored, sp); }
+void be_textured(shader_projection sp) { switch_mode(gmTextured, sp); }
 
-void switch_mode(eMode m) {
-  if(m == mode) return;
+void switch_mode(eMode m, shader_projection sp) {
+  if(m == mode && current_shader_projection == sp) return;
   GLERR("pre_switch_mode");
   #if CAP_SHADER
-  programs[m]->enable();
+  programs[m][int(sp)]->enable();
   GLERR("after_enable");
   #endif
   flagtype newflags = flags[m] &~ flags[mode];
@@ -421,9 +442,12 @@ void switch_mode(eMode m) {
 #endif
     }
   mode = m;
+  current_shader_projection = sp;
   GLERR("after_switch_mode");
   current_vertices = NULL;
   current_matrix[0][0] = -1e8; // invalid
+  current_modelview[0][0] = -1e8;
+  current_projection[0][0] = -1e8;
   id_modelview();
   }
 
@@ -452,14 +476,20 @@ void init() {
   #if CAP_SHADER
   projection = id;
       
-  for(int i=0; i<4; i++) {
+  for(int i=0; i<gmMAX; i++) 
+  for(int j=0; j<int(shader_projection::MAX); j++) {
     flagtype f = flags[i];
     
     bool texture = f & GF_TEXTURE;
     bool lfog    = f & GF_LIGHTFOG;
     bool varcol  = f & GF_VARCOLOR;
     
-    programs[i] = new GLprogram(stringbuilder(
+    shader_projection sp = shader_projection(j);
+    
+    bool mps = j != 0;
+    bool band = (sp == shader_projection::band);
+    
+    programs[i][j] = new GLprogram(stringbuilder(
 
       1,       "attribute mediump vec4 aPosition;",
       texture, "attribute mediump vec2 aTexture;",
@@ -469,16 +499,41 @@ void init() {
       1,       "varying mediump vec4 vColor;",
       texture, "varying mediump vec2 vTexCoord;", 
       
-      1,       "uniform mediump mat4 uMVP;",
+      !mps,    "uniform mediump mat4 uMVP;",
+      mps,     "uniform mediump mat4 uMV;",
+      mps,     "uniform mediump mat4 uP;",
       1,       "uniform mediump float uFog;",
       !varcol, "uniform mediump vec4 uColor;",
+
+      1,       "float sinh(float x) {",
+      1,       "  return (exp(x) - exp(-x)) / 2.0;",
+      1,       "  }",
+
+      1,       "float cosh(float x) {",
+      1,       "  return (exp(x) + exp(-x)) / 2.0;",
+      1,       "  }",
+      
+      1,       "float tanh(float x) {",
+      1,       "  return sinh(x) / cosh(x);",
+      1,       "  }",
+      
+      1,       "float asinh(float x) {",
+      1,       "  return log(sqrt(1.0 + x*x) + x);",
+      1,       "  }",
       
       1,       "void main() {",  
       texture,   "vTexCoord = aTexture;",
       varcol,    "vColor = aColor;",
       !varcol,   "vColor = uColor;",
       lfog,      "vColor = vColor * clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
-      1,         "gl_Position = uMVP * aPosition;",
+      !mps,      "gl_Position = uMVP * aPosition;",
+      mps&&!band,"gl_Position = uP * (uMV * aPosition);",
+      band,      "vec4 t = uMV * aPosition;",
+      band,      "float ty = asinh(t.y);",
+      band,      "float tx = asinh(t.x / cosh(ty));",
+      band,      "ty = 2.0 * atan(tanh(ty/2.0));",
+      band,      "t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;",
+      band,      "gl_Position = uP * t;",
       1,         "}"), 
       
       stringbuilder(
@@ -490,15 +545,15 @@ void init() {
       texture,   "gl_FragColor = vColor * texture2D(tTexture, vTexCoord);",
       !texture,  "gl_FragColor = vColor;",
       1,         "}"
-      ));    
+      ));
     }
   
-  switch_mode(gmColored);
-  programs[gmColored]->enable();
+  switch_mode(gmColored, shader_projection::standard);
+  programs[gmColored][0]->enable();
   #endif
 
   #if !CAP_SHADER
-  switch_mode(gmColored);
+  switch_mode(gmColored, 0);
   #endif
 
   #if CAP_SHADER

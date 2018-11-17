@@ -355,7 +355,7 @@ void drawStats() {
   dynamicval<videopar> v(vid, vid);
   vid.alpha = vid.scale = 1;
   calcparam(); 
-  stereo::set_projection(0);
+  stereo::set_projection(0, false);
 
   if(haveMobileCompass()) {
     initquickqueue();
@@ -476,7 +476,7 @@ void drawStats() {
       }
     }
   }
-  calcparam(); stereo::set_projection(0);
+  calcparam(); stereo::set_projection(0, false);
   
   string s0;
   if(!peace::on) {

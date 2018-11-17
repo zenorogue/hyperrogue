@@ -439,6 +439,7 @@ void glflush() {
 
   if(isize(text_vertices)) {
     // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
+    stereo::set_projection(0, false);
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);
@@ -478,6 +479,10 @@ void glapplymatrix(const transmatrix& V) {
   mat[15] = 1;  
   
   if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
+  
+  if(conformal::model_has_orientation())
+    for(int a=0; a<4; a++) 
+      conformal::apply_orientation(mat[a*4], mat[a*4+1]);
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
@@ -535,10 +540,13 @@ void dqi_poly::gldraw() {
     }
 
   for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
-    if(ed) stereo::set_projection(ed), stereo::set_viewport(ed);
+    if(ed) stereo::set_projection(ed, true), stereo::set_viewport(ed);
     bool draw = color;
     
-    if(using_perspective) glapplymatrix(V);
+    if(shaderside_projection) {
+      if(glhr::current_shader_projection == glhr::shader_projection::band && V[2][2] > 1e8) continue;
+      glapplymatrix(V);
+      }
 
     if(draw) {
       if(true) {
@@ -560,7 +568,7 @@ void dqi_poly::gldraw() {
           glStencilFunc( GL_NOTEQUAL, 1, 1);
           GLfloat xx = vid.xres;
           GLfloat yy = vid.yres;
-          GLfloat dist = using_perspective ? stereo::scrdist : 0;
+          GLfloat dist = shaderside_projection ? stereo::scrdist : 0;
           vector<glvertex> scr = {
             make_array<GLfloat>(-xx, -yy, dist), 
             make_array<GLfloat>(+xx, -yy, dist), 
@@ -571,7 +579,7 @@ void dqi_poly::gldraw() {
           glhr::id_modelview();
           glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
           glhr::vertices(v);
-          if(using_perspective) glapplymatrix(V);
+          if(shaderside_projection) glapplymatrix(V);
           }
         else { 
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
@@ -595,7 +603,7 @@ void dqi_poly::gldraw() {
       }
     }
   
-  if(stereo::active()) stereo::set_projection(0), stereo::set_viewport(0), stereo::set_mask(0);
+  if(stereo::active()) stereo::set_projection(0, true), stereo::set_viewport(0), stereo::set_mask(0);
   }
 #endif
 
@@ -946,7 +954,7 @@ void dqi_poly::draw() {
     } */
 
 #if CAP_GL
-  if(vid.usingGL && using_perspective) {
+  if(vid.usingGL && shaderside_projection) {
     glLineWidth(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();
@@ -1219,7 +1227,7 @@ int curvestart = 0;
 bool keep_curvedata = false;
 
 void queuereset(eModel m, PPR prio) {
-  queueaction(prio, [m] () { pmodel = m; stereo::set_projection(0); });
+  queueaction(prio, [m] () { pmodel = m; stereo::set_projection(0, true); });
   }
 
 void dqi_line::draw() {
@@ -1266,7 +1274,7 @@ void sortquickqueue() {
   }
 
 void quickqueue() {
-  spherespecial = 0; stereo::set_projection(0);
+  spherespecial = 0; stereo::set_projection(0, true);
   int siz = isize(ptds);
   setcameraangle(false);
   for(int i=0; i<siz; i++) ptds[i]->draw();
@@ -1402,7 +1410,7 @@ void drawqueue() {
 
   spherespecial = 0;
   spherephase = 0;
-  stereo::set_projection(0);
+  stereo::set_projection(0, true);
   
   for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
     ptd->draw();
@@ -1418,7 +1426,7 @@ void drawqueue() {
       }
 
     spherespecial = sphereflipped() ? 1 : -1;
-    stereo::set_projection(0);
+    stereo::set_projection(0, true);
 
     reverse_side_priorities();
     for(int i=ptds.size()-1; i>=0; i--) 
@@ -1429,7 +1437,7 @@ void drawqueue() {
     reverse_side_priorities();
     spherespecial *= -1;
     spherephase = 1;
-    stereo::set_projection(0);
+    stereo::set_projection(0, true);
     }
   
   for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
@@ -1440,7 +1448,7 @@ void drawqueue() {
 
 #if CAP_GL
   if(vid.usingGL) 
-    stereo::set_projection(0), stereo::set_mask(0), stereo::set_viewport(0);
+    stereo::set_projection(0, true), stereo::set_mask(0), stereo::set_viewport(0);
 #endif
 
 #if CAP_SDL
