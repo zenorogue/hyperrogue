@@ -97,6 +97,12 @@ void initgame() {
   DEBB(DF_INIT, (debugfile,"initGame\n"));
   callhooks(hooks_initgame); 
 
+  if(!safety) multi::players = vid.scfg.players;
+  if(multi::players < 1 || multi::players > MAXPLAYER)
+    multi::players = 1;
+  multi::whereto[0].d = MD_UNDECIDED;
+  multi::cpid = 0;
+
   yendor::init(1);
   
   if(safety && safetyseed) {
@@ -160,6 +166,8 @@ void initgame() {
 
   yendor::lastchallenge = yendor::challenge;
   
+  if(shmup::on) shmup::init();
+  
   yendor::init(2);
   
   clear_euland(specialland);
@@ -180,14 +188,6 @@ void initgame() {
     
   for(int i=0; i<numplayers(); i++) sword::angle[i] = PURE ? 10 : 11;
 
-  if(!safety) multi::players = vid.scfg.players;
-  if(multi::players < 1 || multi::players > MAXPLAYER)
-    multi::players = 1;
-  multi::whereto[0].d = MD_UNDECIDED;
-  multi::cpid = 0;
-
-  if(shmup::on) shmup::init();
-  
   #if CAP_DAILY
   daily::split();
   #endif

@@ -1197,7 +1197,8 @@ void shootBullet(monster *m) {
   }
 
 void killThePlayer(eMonster m) {
-  pc[cpid]->dead = true;
+  if(cpid >= 0 && cpid < MAXPLAYER && pc[cpid])
+    pc[cpid]->dead = true;
   }
 
 monster *playerCrash(monster *who, hyperpoint where) {
@@ -3293,13 +3294,16 @@ void clearMemory() {
   nextmove = 0;
   nextdragon = 0;
   visibleAt = 0;
+  for(int i=0; i<MAXPLAYER; i++) pc[i] = NULL;
   }
 
 cell *playerpos(int i) {
+  if(!pc[i]) return NULL;
   return pc[i]->base;
   }
 
 bool playerInBoat(int i) {
+  if(!pc[i]) return false;
   return pc[i]->inBoat;
   }
 
