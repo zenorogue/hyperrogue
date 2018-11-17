@@ -5484,12 +5484,18 @@ void calcparam() {
   auto cd = current_display;
   
   DEBB(DF_GRAPH, (debugfile,"calc param\n"));
-  cd->xcenter = vid.xres * (cd->xmax + cd->xmin) / 2;
-  cd->ycenter = vid.yres * (cd->ymax + cd->ymin) / 2;
+  cd->xtop = vid.xres * cd->xmin;
+  cd->ytop = vid.yres * cd->ymin;
+  
+  cd->xsize = vid.xres * (cd->xmax - cd->xmin);
+  cd->ysize = vid.yres * (cd->ymax - cd->ymin);
+
+  cd->xcenter = cd->xtop + cd->xsize / 2;
+  cd->ycenter = cd->ytop + cd->ysize / 2;
 
   if(vid.scale > -1e-2 && vid.scale < 1e-2) vid.scale = 1;
   
-  ld realradius = min(vid.xres * (cd->xmax - cd->xmin) / 2, vid.yres * (cd->ymax - cd->ymin) / 2);
+  ld realradius = min(cd->xsize / 2, cd->ysize / 2);
   
   cd->scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 

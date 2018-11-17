@@ -1076,7 +1076,8 @@ struct display_data {
   heptspin view_center;
   cellwalker precise_center;
   unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
-  ld xmin, ymin, xmax, ymax;
+  ld xmin, ymin, xmax, ymax; // relative
+  ld xtop, ytop, xsize, ysize; // in pixels
   display_data() { xmin = ymin = 0; xmax = ymax = 1; }
 
   // paramaters calculated from the above

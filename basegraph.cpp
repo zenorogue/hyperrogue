@@ -179,23 +179,20 @@ void setcameraangle(bool b) {
 
 bool shaderside_projection;
 
-int subscreen;
-
 void start_projection(int ed, bool perspective) {
   glhr::new_projection();
   shaderside_projection = perspective;
 
   auto cd = current_display;
   
-  if(subscreen)
-    glhr::projection_multiply(glhr::scale(1/(cd->xmax-cd->ymin), 1/(cd->ymax-cd->ymin), 1));
-
   if(ed && vid.stereo_mode == sLR) {
     glhr::projection_multiply(glhr::translate(ed, 0, 0));
     glhr::projection_multiply(glhr::scale(2, 1, 1));
     }      
 
-  glhr::projection_multiply(glhr::translate((current_display->xcenter*2.)/vid.xres - 1, 1 - (current_display->ycenter*2.)/vid.yres, 0));
+  ld tx = (cd->xcenter-cd->xtop)*2./cd->xsize - 1;
+  ld ty = (cd->ycenter-cd->ytop)*2./cd->ysize - 1;
+  glhr::projection_multiply(glhr::translate(tx, -ty, 0));
   }
 
 void eyewidth_translate(int ed) {
@@ -214,8 +211,10 @@ void display_data::set_projection(int ed, bool apply_models) {
   
   start_projection(ed, shaderside_projection);
 
+  auto cd = current_display;
+
   if(!shaderside_projection) {
-    glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(current_display->scrdist) + 30000));
+    glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
     if(ed) {
       glhr::glmatrix m = glhr::id;
       m[2][0] -= ed;
@@ -236,15 +235,15 @@ void display_data::set_projection(int ed, bool apply_models) {
 
     eyewidth_translate(ed);
 
-    glhr::projection_multiply(glhr::frustum(vid.xres * 1. / vid.yres, 1));
+    glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
 
-    GLfloat sc = current_display->radius / (vid.yres/2.);
+    GLfloat sc = current_display->radius / (cd->ysize/2.);
 
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
     
     if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
   
-    current_display->scrdist_text = vid.yres * sc / 2;
+    current_display->scrdist_text = cd->ysize * sc / 2;
     
     if(glhr::new_shader_projection == glhr::shader_projection::band) {
       glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI,1));
