@@ -223,20 +223,6 @@ namespace flocking {
       for(auto p: lines) queueline(get<0>(p), get<1>(p), get<2>(p), 0);
     }
 
-  bool akh(int sym, int uni) {
-    if(uni == '7') {
-      for(int a=0; a<200; a++) {
-        drawthemap();
-        for(int b=0; b<40; b++) turn(1);
-        char buf[2000];
-        snprintf(buf, 1000, "animations/flock/flock%d-%03d.png", int(geometry), a);
-        saveHighQualityShot(buf);
-        }
-      }
-    else return false;
-    return true;
-    }
-  
   void show() {
     cmode = sm::SIDE;
     gamescreen(0);
@@ -332,7 +318,6 @@ namespace flocking {
     addHook(hooks_args, 100, readArgs) +
     addHook(shmup::hooks_turn, 100, turn) + 
     addHook(hooks_frame, 100, flock_marker) +
-    addHook(hooks_handleKey, 120, akh) +
     addHook(hooks_o_key, 80, o_key) +
     0;
   #endif
