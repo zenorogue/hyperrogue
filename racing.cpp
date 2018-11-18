@@ -11,6 +11,7 @@ namespace racing {
 
 bool on;
 bool player_relative = false;
+bool track_ready;
 
 static const int LENGTH = 250;
 static const int TWIDTH = 6;
@@ -76,13 +77,28 @@ void generate_track() {
       }
     }
 
-  while(goal != s) {
-    track.push_back(goal);
-    forCellEx(c2, goal) if(celldist(c2) < celldist(goal)) { goal = c2; break; }
+  if(euclid) {
+    using namespace hyperpoint_vec;
+    track.push_back(s);
+    hyperpoint h = tC0(calc_relative_matrix(goal, s, C0)) - C0;
+    cell *x = s;
+    hyperpoint h1 = C0; 
+    for(int i=0; i<=1000; i++) {
+      h1 += h / 1000.;
+      virtualRebase(x, h1,  true);
+      if(x != track.back()) track.push_back(x);
+      }
     }
-
-  track.push_back(s);
-  reverse(track.begin(), track.end());
+  
+  else {
+    while(goal != s) {
+      track.push_back(goal);
+      forCellEx(c2, goal) if(celldist(c2) < celldist(goal)) { goal = c2; break; }
+      }
+  
+    track.push_back(s);
+    reverse(track.begin(), track.end());
+    }
   
   
   /*
@@ -196,6 +212,8 @@ void generate_track() {
     if(i >= 5) c->item = itBone;
     }
   */
+
+  track_ready = true;
   }
 
 vector<tuple<int, cell*, transmatrix, ld> > history;
@@ -315,6 +333,11 @@ bool akh(int sym, int uni) {
 #if CAP_COMMANDLINE
 auto hook = 
   addHook(hooks_args, 100, readArgs)
++ addHook(clearmemory, 0, []() {
+    track_ready = false;
+    track.clear();
+    trackstage.clear();
+    })
 // + addHook(hooks_handleKey, 120, akh);
   ;
 #endif

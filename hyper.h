@@ -4677,7 +4677,7 @@ bool do_draw(cell *c, const transmatrix& T);
 
 #if CAP_RACING
 namespace racing {
-  extern bool on, player_relative;
+  extern bool on, player_relative, track_ready;
   void generate_track();
   void show();
   void prepare_subscreens();

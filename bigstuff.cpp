@@ -817,6 +817,12 @@ eLand getEuclidLand(int c) {
   }
 
 void setLandEuclid(cell *c) {
+  #if CAP_RACING
+  if(racing::track_ready) {
+    setland(c, laMemory);
+    return;
+    }
+  #endif
   setland(c, specialland);
   if(specialland == laCrossroads4 || chaosmode) {
     int x, y;
