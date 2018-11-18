@@ -107,7 +107,8 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
     return t;
     }
   
-  if(euclid) return inverse(gmatrix0[c1]) * gmatrix0[c2];
+  if(euclid) 
+    return eumove(cell_to_vec(c2) - cell_to_vec(c1));
 
   heptagon *h1 = c1->master;
   transmatrix gm = master_relative(c1, true);
