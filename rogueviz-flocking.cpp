@@ -111,6 +111,8 @@ namespace flocking {
       monsat[m->base].push_back(m);
       }
     
+    for(cell *c: currentmap->allcells()) ggmatrix(c);
+    
     lines.clear();
 
     for(int i=0; i<N; i++) {
@@ -184,6 +186,7 @@ namespace flocking {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       m->rebasePat(pats[i]);
+      virtualRebase(m, true);
       m->vel = vels[i];
       }
     shmup::fixStorage();
