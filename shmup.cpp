@@ -1556,9 +1556,15 @@ void movePlayer(monster *m, int delta) {
   else
 #endif
     keyresult[cpid] = itNone;
-    
+
   if(actionspressed[b+pcCenter]) {
-    centerplayer = cpid; centerpc(100); playermoved = true; 
+    if(!racing::on) {
+      centerplayer = cpid; centerpc(100); playermoved = true; 
+      }
+    #if CAP_RACING
+    if(racing::on) 
+      racing::player_relative = !racing::player_relative;
+    #endif
     }
   
   transmatrix nat = m->pat;
@@ -1573,6 +1579,7 @@ void movePlayer(monster *m, int delta) {
     if(abs(mdy) > abs(mgo)) mgo = -mdy;
     if(abs(mdx) > abs(mturn)) mturn = -mdx;
     mdx = mdy = 0;
+    facemouse = shotkey = dropgreen = false;
     }
   #endif
   

@@ -383,43 +383,84 @@ vector<eLand> race_lands = {
   laRuins,
   };
 
-void show() {
-  dialog::init(XLAT("Racing"));
+vector<string> playercmds_race = {
+  "forward", "backward", "turn left", "turn right",
+  "forward", "backward", "turn left", "turn right",
+  "", "", "",
+  "", "change camera", "", ""
+  };
 
-  dialog::addBoolItem(XLAT("player relative"), player_relative, 'r');
-  dialog::add_action([] () { 
-    player_relative = !player_relative; 
-    if(pmodel == mdBand || pmodel == mdHalfplane)
-      pmodel = mdDisk;
-    });
+struct race_configurer {
 
-  dialog::addSelItem(XLAT("projection"), conformal::get_model_name(pmodel), 'm');
-  dialog::add_action([] () { 
-    switch(pmodel) {
-      case mdDisk:
-        pmodel = mdBand;
-        conformal::model_orientation = race_angle;
-        break;
-      case mdBand:
-        pmodel = mdHalfplane;
-        conformal::model_orientation = race_angle + 90;
-        break;
-      default:
-        pmodel = mdDisk;
-      }
-    });
-
-  dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'm');
-  dialog::add_action([] () { 
-    dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
-    int q = conformal::model_orientation - race_angle;
-    dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
-    });
-
-  dialog::addBack();
-  dialog::display();
+  int playercfg;
   
-  }
+  race_configurer() { playercfg = multi::players; }
+  
+  void operator() () {
+  
+    gamescreen(1);
+  
+    dialog::init(XLAT("Racing"));
+  
+    dialog::addBoolItem(XLAT("player relative"), player_relative, 'r');
+    dialog::add_action([] () { 
+      player_relative = !player_relative; 
+      if(pmodel == mdBand || pmodel == mdHalfplane)
+        pmodel = mdDisk;
+      });
+  
+    dialog::addSelItem(XLAT("projection"), conformal::get_model_name(pmodel), 'm');
+    dialog::add_action([] () { 
+      switch(pmodel) {
+        case mdDisk:
+          pmodel = mdBand;
+          conformal::model_orientation = race_angle;
+          break;
+        case mdBand:
+          pmodel = mdHalfplane;
+          conformal::model_orientation = race_angle + 90;
+          break;
+        default:
+          pmodel = mdDisk;
+        }
+      });
+  
+    dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
+    dialog::add_action([] () { 
+      dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
+      int q = conformal::model_orientation - race_angle;
+      dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
+      });
+  
+    dialog::addItem(shmup::player_count_name(playercfg), 'n');
+    dialog::add_action([this] () { 
+      playercfg = playercfg == 1 ? 2 : 1;
+      });
+  
+    dialog::addItem(XLAT("configure player 1"), '1');
+    dialog::add_action([] () {
+      pushScreen(shmup::key_configurer(1, playercmds_race));
+      });
+  
+    if(playercfg >= 2) {
+      dialog::addItem(XLAT("configure player 2"), '2');
+      dialog::add_action([] () {
+        pushScreen(shmup::key_configurer(2, playercmds_race));
+        });
+      }
+    else dialog::addBreak(100);
+  
+    dialog::addBack();
+    dialog::display();
+    
+    }
+  };
+
+auto hooks1 = 
+  addHook(hooks_o_key, 90, [] { 
+    if(racing::on) return named_dialog("race mode", race_configurer());
+    else return named_functionality();
+    });
 
 vector<display_data> player_displays;
 bool in_subscreen;
