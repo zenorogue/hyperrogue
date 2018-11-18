@@ -16,16 +16,7 @@
 
 // press 'o' when flocking active to change the parameters.
 
-namespace hr {
-  hyperpoint nearcorner(cell *c, int i);
-  extern bool showquotients;
-  }
-
 namespace rogueviz {
-
-inline ld atan2(hyperpoint h) {
-  return std::atan2(h[1], h[0]);
-  }
 
 namespace flocking {
 
