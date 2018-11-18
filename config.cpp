@@ -325,6 +325,8 @@ void initConfig() {
   addsaver(conformal::formula, "formula");
   addsaverenum(conformal::basic_model, "basic model");
 
+  addsaver(vid.consider_shader_projection, "shader-projection", true);
+
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif

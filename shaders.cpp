@@ -521,6 +521,10 @@ void init() {
       1,       "  return log(sqrt(1.0 + x*x) + x);",
       1,       "  }",
       
+      1,       "float zlevel(vec4 h) {",
+      1,       "  return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]);",
+      1,       "  }",
+
       1,       "void main() {",  
       texture,   "vTexCoord = aTexture;",
       varcol,    "vColor = aColor;",
@@ -529,6 +533,10 @@ void init() {
       !mps,      "gl_Position = uMVP * aPosition;",
       mps&&!band,"gl_Position = uP * (uMV * aPosition);",
       band,      "vec4 t = uMV * aPosition;",
+  
+      band,      "float zlev = zlevel(t);",
+      band,      "t /= zlev;",
+
       band,      "float ty = asinh(t.y);",
       band,      "float tx = asinh(t.x / cosh(ty));",
       band,      "ty = 2.0 * atan(tanh(ty/2.0));",

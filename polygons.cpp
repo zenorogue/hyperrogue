@@ -475,7 +475,7 @@ void glapplymatrix(const transmatrix& V) {
     }
   mat[12] = 0;
   mat[13] = 0;
-  mat[14] = GLfloat(vid.alpha);
+  mat[14] = (glhr::current_shader_projection == glhr::shader_projection::standard) ? GLfloat(vid.alpha) : 0;
   mat[15] = 1;  
   
   if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;

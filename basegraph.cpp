@@ -204,10 +204,12 @@ void display_data::set_projection(int ed, bool apply_models) {
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
-  if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1))
-    shaderside_projection = true;
-  if(pmodel == mdBand && hyperbolic && apply_models && !inHighQual)
-    shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
+  if(vid.consider_shader_projection) {
+    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1))
+      shaderside_projection = true;
+    if(pmodel == mdBand && hyperbolic && apply_models && !inHighQual)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
+    }
   
   start_projection(ed, shaderside_projection);
 

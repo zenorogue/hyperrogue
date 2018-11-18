@@ -1056,6 +1056,7 @@ struct videopar {
   ld ipd;
   ld lr_eyewidth, anaglyph_eyewidth;
   ld fov;
+  bool consider_shader_projection;
   };
 
 extern videopar vid;

@@ -836,6 +836,11 @@ namespace conformal {
 
     dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');
 
+    dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
+    if(vid.consider_shader_projection && !shaderside_projection)
+      dialog::lastItem().value = XLAT("N/A");
+    dialog::add_action([] { vid.consider_shader_projection = !vid.consider_shader_projection; });
+
     menuitem_sightrange('R');
       
     dialog::addBreak(100);
