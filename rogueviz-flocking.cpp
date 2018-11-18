@@ -85,7 +85,12 @@ namespace flocking {
     printf("done\n");
     }
   
+  int precision = 10;
+  
   void simulate(int delta) {
+    while(delta > precision && delta < 100 * precision) { 
+      simulate(precision); delta -= precision; 
+      }      
     ld d = delta / 1000.;
     using namespace hyperpoint_vec;
     int N = isize(vdata);
@@ -296,6 +301,11 @@ namespace flocking {
     dialog::addSelItem("number of boids", its(N), 'n');
     dialog::add_action([]() {
       dialog::editNumber(N, 0, 1000, 1, 20, "", "");
+      });
+
+    dialog::addSelItem("precision", its(precision), 'p');
+    dialog::add_action([]() {
+      dialog::editNumber(N, 0, 1000, 1, 10, "", "smaller number = more precise simulation");
       });
 
     dialog::addSelItem("change geometry", XLAT(ginf[geometry].name), 'g');
