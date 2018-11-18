@@ -18,6 +18,7 @@
 
 namespace hr {
   hyperpoint nearcorner(cell *c, int i);
+  extern bool showquotients;
   }
 
 namespace rogueviz {
@@ -299,6 +300,7 @@ namespace flocking {
       });
 
     dialog::addSelItem("change geometry", XLAT(ginf[geometry].name), 'g');
+    hr::showquotients = true;
     dialog::add_action(runGeometryExperiments);
 
     dialog::addBoolItem("draw forces", draw_lines, 'l');
