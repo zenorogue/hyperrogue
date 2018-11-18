@@ -1571,14 +1571,22 @@ void movePlayer(monster *m, int delta) {
   m->footphase += playergo[cpid];
 
   if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
+  
+  int steps = 1 + abs(int(playergo[cpid] / (.2 * scalefactor)));
+  
+  playergo[cpid] /= steps;
+  
+  nextstep:
+
+  transmatrix nat1 = nat;
     
   for(int igo=0; igo<IGO && !go; igo++) {
   
     go = true;
     
     if(playergo[cpid]) 
-      nat = nat * spin(igospan[igo]) * xpush(playergo[cpid]) * spin(-igospan[igo]);
-
+      nat = nat1 * spin(igospan[igo]) * xpush(playergo[cpid]) * spin(-igospan[igo]);
+    
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
     c2 = m->findbase(nat);
@@ -1807,6 +1815,16 @@ void movePlayer(monster *m, int delta) {
         c3->wall = waNone;
       
       else if(isWall(c3)) break;
+      }
+    }
+
+  if(go) {
+    // printf("#%3d: at %s\n", steps, display(nat * C0));
+    steps--;
+    if(steps > 0) {
+      nat0 = nat;
+      go = false;
+      goto nextstep;
       }
     }
   
