@@ -18,6 +18,8 @@ bool holdmouse;
 int getcstat, lgetcstat; ld getcshift; bool inslider;
 
 function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
+function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;};
+
 
 // is the player using mouse? (used for auto-cross)
 bool mousing = true;
@@ -613,30 +615,7 @@ void handle_event(SDL_Event& ev) {
         }
       }
     
-    bool shmupconf = cmode & sm::SHMUPCONFIG;
-
-    if(ev.type == SDL_JOYBUTTONDOWN && shmupconf && vid.scfg.setwhat) {
-      int joyid = ev.jbutton.which;
-      int button = ev.jbutton.button;
-      if(joyid < 8 && button < 32)
-         vid.scfg.joyaction[joyid][button] = vid.scfg.setwhat;
-      vid.scfg.setwhat = 0;
-      }
-
-    else if(ev.type == SDL_JOYHATMOTION && shmupconf && vid.scfg.setwhat) {
-      int joyid = ev.jhat.which;
-      int hat = ev.jhat.hat;
-      int dir = 4;
-      if(ev.jhat.value == SDL_HAT_UP) dir = 0;
-      if(ev.jhat.value == SDL_HAT_RIGHT) dir = 1;
-      if(ev.jhat.value == SDL_HAT_DOWN) dir = 2;
-      if(ev.jhat.value == SDL_HAT_LEFT) dir = 3;
-      printf("%d %d %d\n", joyid, hat, dir);
-      if(joyid < 8 && hat < 4 && dir < 4) {
-        vid.scfg.hataction[joyid][hat][dir] = vid.scfg.setwhat;
-        vid.scfg.setwhat = 0;
-        }
-      }
+    if(joyhandler && joyhandler(ev)) ;
 
     else if(ev.type == SDL_JOYHATMOTION && !normal) {
       if(ev.jhat.value == SDL_HAT_UP) sym = SDLK_UP;

@@ -5720,6 +5720,9 @@ void drawscreen() {
 
   cmode = 0;
   keyhandler = [] (int sym, int uni) { return false; };
+  #if CAP_SDL
+  joyhandler = [] (SDL_Event& ev) { return false; };
+  #endif
   if(!isize(screens)) pushScreen(normalscreen);
   screens.back()();
 

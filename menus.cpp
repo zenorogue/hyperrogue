@@ -557,8 +557,7 @@ void showChangeMode() {
   #if ISMOBILE==1
       restart_game(rg::shmup);
   #else
-      multi::shmupcfg = shmup::on;
-      pushScreen(shmup::showShmupConfig);
+      shmup::configure();
   #endif
       }
     else if(xuni == 'h' && !shmup::on) 
@@ -762,10 +761,8 @@ void showStartMenu() {
       clearMessages();
       welcomeMessage();
       stampbase = ticks;
-      if(uni == 's') {
-        multi::shmupcfg = shmup::on;
-        pushScreen(multi::showShmupConfig);
-        }
+      if(uni == 's') 
+        shmup::configure();
       }
     else if(uni == 'Z') {
       popScreenAll();
@@ -931,7 +928,7 @@ int read_menu_args() {
     PHASEFROM(2); launch_dialog(showChangeMode);
     }
   else if(argis("-d:shmup")) {
-    PHASEFROM(2); launch_dialog(shmup::showShmupConfig);
+    PHASEFROM(2); launch_dialog(); shmup::configure();
     }
   else return 1;
   return 0;

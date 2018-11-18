@@ -97,7 +97,6 @@ void initgame() {
   DEBB(DF_INIT, (debugfile,"initGame\n"));
   callhooks(hooks_initgame); 
 
-  if(!safety) multi::players = vid.scfg.players;
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
   multi::whereto[0].d = MD_UNDECIDED;

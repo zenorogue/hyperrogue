@@ -766,7 +766,6 @@ void loadcs(FILE *f, charstyle& cs, int vernum);
 
 namespace multi {
 
-  extern bool shmupcfg;
   extern bool alwaysuse;
   void recall();
   extern cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
@@ -786,9 +785,6 @@ namespace multi {
   extern int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
 
   struct config {
-    int players;
-    int subconfig;
-    int setwhat;
     char keyaction[512];
     char joyaction[MAXJOY][MAXBUTTON];
     char axeaction[MAXJOY][MAXAXE];
@@ -807,7 +803,7 @@ namespace multi {
   cell *multiPlayerTarget(int i);
   void checklastmove();
   void leaveGame(int i);
-  void showShmupConfig();
+  void configure();
   }
 
 template<class T> class hookset : public map<int, function<T>> {};
@@ -2474,6 +2470,9 @@ extern bool leftclick;
 void clearMemory();
 
 extern function <void(int sym, int uni)> keyhandler;
+#if CAP_SDL
+extern function <bool(SDL_Event &ev)> joyhandler;
+#endif
 void gmodekeys(int sym, int uni);
 
 void switchGL();

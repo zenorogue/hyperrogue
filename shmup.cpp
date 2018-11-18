@@ -69,7 +69,7 @@ namespace multi {
   static const int CMDS = 15;
   static const int CMDS_PAN = 11;
 
-  const char* playercmds_shmup[15] = {
+  vector<string> playercmds_shmup = {
     "forward", "backward", "turn left", "turn right",
     "move up", "move right", "move down", "move left", 
     "throw a knife", "face the pointer", "throw at the pointer", 
@@ -77,7 +77,7 @@ namespace multi {
     "Orb power (target: facing)"
     };
   
-  const char* playercmds_turn[15] = {
+  vector<string> playercmds_turn = {
     "move up-right", "move up-left", "move down-right", "move down-left", 
     "move up", "move right", "move down", "move left", 
     "stay in place (left + right)", "cancel move", "leave the game", 
@@ -85,7 +85,7 @@ namespace multi {
     ""
     };
   
-  const char* pancmds[11] = {
+  vector<string> pancmds = {
     "pan up", "pan right", "pan down", "pan left",
     "rotate left", "rotate right", "home",
     "world overview", "review your quest", "inventory", "main menu"
@@ -93,7 +93,7 @@ namespace multi {
 
 #define SHMUPAXES_BASE 4
 #define SHMUPAXES ((SHMUPAXES_BASE) + 4 * (MAXPLAYER))
-#define SHMUPAXES_CUR ((SHMUPAXES_BASE) + 4 * vid.scfg.players)
+#define SHMUPAXES_CUR ((SHMUPAXES_BASE) + 4 * playercfg)
 
 const char* axemodes[SHMUPAXES] = {
   "do nothing", 
@@ -131,9 +131,6 @@ const char* axemodes[SHMUPAXES] = {
   };
 
 int centerplayer = -1;
-
-int shmupnumkeys;
-const char** shmupcmdtable;
 
 char* axeconfigs[24]; int numaxeconfigs;
 int* dzconfigs[24];
@@ -178,28 +175,112 @@ void resetScores() {
     multi::treasures[i] = multi::kills[i] = multi::deaths[i] = 0;
   }
  
-bool shmupcfg;
-
 bool configdead;
 
 void handleConfig(int sym, int uni);
 
-void showShmupConfig() {
-#if CAP_SDL
-  cmode = sm::SHMUPCONFIG;
+string player_count_name(int p) {
+  return XLAT(
+    p == 2 ? "two players" : 
+    p == 3 ? "three players" : 
+    p == 4 ? "four players" : 
+    p == 5 ? "five players" : 
+    p == 6 ? "six players" : 
+    p == 7 ? "seven players" : 
+    "one player");
+  }
 
-  int sc = vid.scfg.subconfig;
+struct key_configurer {
 
-  if(sc == 1 || sc == 2 || sc == 4 || sc == 5 || sc == 6 || sc == 7 || sc == 8) {
-    shmupnumkeys = CMDS;
-    shmupcmdtable = shmup::on ? playercmds_shmup : playercmds_turn;
+  int sc;
+  vector<string>& shmupcmdtable;
+  int setwhat;
+
+  key_configurer(int sc, vector<string>& sct) : sc(sc), shmupcmdtable(sct), setwhat(0) {}
+
+  void operator() () {
+      
+    dialog::init(
+      XLAT(sc == 1 ? "configure player 1" :
+      sc == 2 ? "configure player 2" :
+      sc == 3 ? "configure panning" :
+      sc == 4 ? "configure player 3" :
+      sc == 5 ? "configure player 4" :
+      sc == 6 ? "configure player 5" :
+      sc == 7 ? "configure player 6" :
+      sc == 8 ? "configure player 7" : ""
+      ));
+  
+    getcstat = ' ';
+    
+    for(int i=0; i<isize(shmupcmdtable); i++) if(shmupcmdtable[i][0])
+      dialog::addSelItem(XLAT(shmupcmdtable[i]), listkeys(16*sc+i),
+        setwhat ? (setwhat>1 && i == (setwhat&15) ? '?' : 0) : 'a'+i);
+      else dialog::addBreak(100);
+  
+    if(setwhat == 1)
+      dialog::addItem(XLAT("press a key to unassign"), 0);
+    else if(setwhat)
+      dialog::addItem(XLAT("press a key for '%1'", XLAT(shmupcmdtable[setwhat&15])), 0);
+    else
+      dialog::addItem(XLAT("unassign a key"), 'z');
+    
+    dialog::display();
+  
+    keyhandler = [this] (int sym, int uni) {
+      if(!setwhat) dialog::handleNavigation(sym, uni);
+      if(sym) {
+        if(setwhat) {
+          vid.scfg.keyaction[sym] = setwhat;
+          setwhat = 0;
+          }
+        else if(uni >= 'a' && uni < 'a' + isize(shmupcmdtable) && shmupcmdtable[uni-'a'][0])
+          setwhat = 16*sc+uni - 'a';
+        else if(uni == 'z')
+          setwhat = 1;
+        else if(doexiton(sym, uni))
+          popScreen();
+        }
+      };
+    
+    joyhandler = [this] (SDL_Event& ev) { 
+      if(ev.type == SDL_JOYBUTTONDOWN && setwhat) {
+        int joyid = ev.jbutton.which;
+        int button = ev.jbutton.button;
+        if(joyid < 8 && button < 32)
+           vid.scfg.joyaction[joyid][button] = setwhat;
+        setwhat = 0;
+        return true;
+        }
+  
+      else if(ev.type == SDL_JOYHATMOTION && setwhat) {
+        int joyid = ev.jhat.which;
+        int hat = ev.jhat.hat;
+        int dir = 4;
+        if(ev.jhat.value == SDL_HAT_UP) dir = 0;
+        if(ev.jhat.value == SDL_HAT_RIGHT) dir = 1;
+        if(ev.jhat.value == SDL_HAT_DOWN) dir = 2;
+        if(ev.jhat.value == SDL_HAT_LEFT) dir = 3;
+        printf("%d %d %d\n", joyid, hat, dir);
+        if(joyid < 8 && hat < 4 && dir < 4) {
+          vid.scfg.hataction[joyid][hat][dir] = setwhat;
+          setwhat = 0;
+          return true;
+          }
+        }
+      return false;
+      };
     }
-  else if(sc == 3) {
-    shmupnumkeys = CMDS_PAN;
-    shmupcmdtable = pancmds;
-    }
+  };
+
 #if CAP_SDLJOY
-  else if(sc == SCJOY) {
+struct joy_configurer {
+
+  bool shmupcfg, racecfg;
+  int playercfg;
+  joy_configurer(int playercfg) : playercfg(playercfg) {}
+
+  void operator() () {
     dialog::init();
     getcstat = ' ';
     numaxeconfigs = 0;
@@ -227,231 +308,201 @@ void showShmupConfig() {
     
     dialog::addBoolItem(XLAT("Configure dead zones"), (configdead), 'z');
     dialog::display();
+
+    keyhandler = [this] (int sym, int uni) { 
+      dialog::handleNavigation(sym, uni);
+      if(sym) {
+        char xuni = uni | 96;
+        if(xuni >= 'a' && xuni < 'a' + numaxeconfigs) {
+          if(configdead) {
+            int& dz = (*dzconfigs[xuni - 'a']);
+            dz += int(shiftmul * 100);
+            if(dz < 0) dz = 0;
+            if(dz > 65000) dz = 65000;
+            }
+          else {
+            int v = (*axeconfigs[xuni - 'a']);
+            v += (shiftmul>0?1:-1);
+            v += SHMUPAXES_CUR;
+            v %= SHMUPAXES_CUR;
+            (*axeconfigs[xuni - 'a']) = v;
+            }
+          }
+        else if(xuni == 'z')
+          configdead = !configdead;
+        else if(doexiton(sym, uni))
+          popScreen();
+        }
+      };
     }
+  };
 #endif
-  else if(sc == 0) {
 
+struct shmup_configurer {
+
+  bool shmupcfg;
+  int playercfg;
+  
+  shmup_configurer() { shmupcfg = shmup::on; players = multi::players; }
+  
+  void operator()() {
+  #if CAP_SDL
+    cmode = sm::SHMUPCONFIG;
     dialog::init(SHMUPTITLE);
-
-    dialog::addItem(XLAT(
-        vid.scfg.players == 2 ? "two players" : 
-        vid.scfg.players == 3 ? "three players" : 
-        vid.scfg.players == 4 ? "four players" : 
-        vid.scfg.players == 5 ? "five players" : 
-        vid.scfg.players == 6 ? "six players" : 
-        vid.scfg.players == 7 ? "seven players" : 
-        "one player"), 'n');
-
+  
+    dialog::addItem(player_count_name(playercfg), 'n');
+  
     dialog::addItem(XLAT(shmupcfg ? "shoot'em up mode" : "turn-based mode"), 's');
     
-    dialog::addItem(XLAT(shmup::on == shmupcfg && players == vid.scfg.players ?
+    dialog::addItem(XLAT(shmup::on == shmupcfg && players == playercfg ?
           "continue playing"
         : "start a new game"), '0');
-
-    if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1)
+  
+    if(shmupcfg || multi::alwaysuse || playercfg > 1)
       dialog::addItem(XLAT("configure player 1") + dsc(0), '1');
     else
       dialog::addBreak(100);
-    if(vid.scfg.players > 1)
+    if(playercfg > 1)
       dialog::addItem(XLAT("configure player 2") + dsc(1), '2');
-    else if(vid.scfg.players == 1 && !shmupcfg)
+    else if(playercfg == 1 && !shmupcfg)
       dialog::addSelItem(XLAT("input"), XLAT(multi::alwaysuse ? "config" : "default"), 'a');
     else
       dialog::addBreak(100);
-    if(vid.scfg.players > 2)
+    if(playercfg > 2)
       dialog::addItem(XLAT("configure player 3") + dsc(2), '3');
-#if CAP_SDLJOY
-    else if(vid.scfg.players == 1 && !shmupcfg && !shmupcfg && !multi::alwaysuse)
+  #if CAP_SDLJOY
+    else if(playercfg == 1 && !shmupcfg && !shmupcfg && !multi::alwaysuse)
       dialog::addItem(XLAT("old style joystick configuration"), 'b');
-#endif
+  #endif
     else dialog::addBreak(100);
-    if(vid.scfg.players > 3)
+    if(playercfg > 3)
       dialog::addItem(XLAT("configure player 4") + dsc(3), '4');
     else dialog::addBreak(100);
       
-    if(vid.scfg.players > 4)
+    if(playercfg > 4)
       dialog::addItem(XLAT("configure player 5") + dsc(4), '5');
     else dialog::addBreak(100);
-
-    if(vid.scfg.players > 5)
+  
+    if(playercfg > 5)
       dialog::addItem(XLAT("configure player 6") + dsc(5), '6');
     else dialog::addBreak(100);
-
-    if(vid.scfg.players > 6)
+  
+    if(playercfg > 6)
       dialog::addItem(XLAT("configure player 7") + dsc(6), '7');
     else dialog::addBreak(100);
       
-    if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1)
+    if(shmupcfg || multi::alwaysuse || playercfg > 1)
       dialog::addItem(XLAT("configure panning and general keys"), 'p');
     else dialog::addBreak(100);
-
-#if CAP_SDLJOY
+  
+  #if CAP_SDLJOY
     if(numsticks > 0) {
-      if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1) 
+      if(shmupcfg || multi::alwaysuse || playercfg > 1) 
         dialog::addItem(XLAT("configure joystick axes"), 'j');
       else dialog::addBreak(100);
       }
-#endif
-
+  #endif
+  
     if(multi::players > 1) 
       dialog::addItem(XLAT("reset per-player statistics"), 'r');
     else dialog::addBreak(100);
     
     dialog::addBreak(50);
-
-#if CAP_CONFIG
+  
+  #if CAP_CONFIG
     dialog::addItem(XLAT("save the configuration"), 'c');
-#endif
-
+  #endif
+  
     dialog::addHelp();
-
+  
     dialog::addBack();
     dialog::display();
-    }
-  
-  if(sc >= 1 && sc <= MAXPLAYER + 1) {
-
-    dialog::init(
-      XLAT(sc == 1 ? "configure player 1" :
-      sc == 2 ? "configure player 2" :
-      sc == 3 ? "configure panning" :
-      sc == 4 ? "configure player 3" :
-      sc == 5 ? "configure player 4" :
-      sc == 6 ? "configure player 5" :
-      sc == 7 ? "configure player 6" :
-      sc == 8 ? "configure player 7" : ""
-      ));
-
-    getcstat = ' ';
-
-    for(int i=0; i<shmupnumkeys; i++) if(shmupcmdtable[i][0])
-      dialog::addSelItem(XLAT(shmupcmdtable[i]), listkeys(16*sc+i),
-        vid.scfg.setwhat ? (vid.scfg.setwhat>1 && i == (vid.scfg.setwhat&15) ? '?' : 0) : 'a'+i);
-      else dialog::addBreak(100);
-
-    if(vid.scfg.setwhat == 1)
-      dialog::addItem(XLAT("press a key to unassign"), 0);
-    else if(vid.scfg.setwhat)
-      dialog::addItem(XLAT("press a key for '%1'", XLAT(shmupcmdtable[vid.scfg.setwhat&15])), 0);
-    else
-      dialog::addItem(XLAT("unassign a key"), 'z');
     
-    dialog::display();
+    keyhandler = [this] (int sym, int uni) { return handleConfig(sym, uni); };
+  #endif
     }
-  
-  keyhandler = handleConfig;
-#endif
-  }
 
-void handleConfig(int sym, int uni) {
-#if CAP_SDL
-  if(!vid.scfg.setwhat) dialog::handleNavigation(sym, uni);
-  int sc = vid.scfg.subconfig;
-  if(sc == 0) {
-    if(uni == '1') vid.scfg.subconfig = 1;
-    else if(uni == '2') vid.scfg.subconfig = 2;
-    else if(uni == 'p') vid.scfg.subconfig = 3;
-    else if(uni == '3') vid.scfg.subconfig = 4;
-    else if(uni == '4') vid.scfg.subconfig = 5;
-    else if(uni == '5') vid.scfg.subconfig = 6;
-    else if(uni == '6') vid.scfg.subconfig = 7;
-    else if(uni == '7') vid.scfg.subconfig = 8;
-#if CAP_SDLJOY
-    else if(uni == 'j') vid.scfg.subconfig = SCJOY;
-#endif
+  void handleConfig(int sym, int uni) {
+    auto& cmdlist = shmupcfg ? playercmds_shmup : playercmds_turn;
+    
+    #if CAP_SDL
+    if(uni == '1') pushScreen(key_configurer(1, cmdlist));
+    else if(uni == '2') pushScreen(key_configurer(2, cmdlist));
+    else if(uni == 'p') pushScreen(key_configurer(3, pancmds));
+    else if(uni == '3') pushScreen(key_configurer(4, cmdlist));
+    else if(uni == '4') pushScreen(key_configurer(5, cmdlist));
+    else if(uni == '5') pushScreen(key_configurer(6, cmdlist));
+    else if(uni == '6') pushScreen(key_configurer(7, cmdlist));
+    else if(uni == '7') pushScreen(key_configurer(8, cmdlist));
+  #if CAP_SDLJOY
+    else if(uni == 'j') pushScreen(joy_configurer(playercfg));
+  #endif
     else if(uni == 'a') multi::alwaysuse = !multi::alwaysuse;
-#if CAP_SDLJOY
+  #if CAP_SDLJOY
     else if(uni == 'b') pushScreen(showJoyConfig);
-#endif
+  #endif
     else if(uni == 'r') 
       for(int i=0; i<MAXPLAYER; i++) 
         kills[i] = deaths[i] = treasures[i] = 0;
     else if(uni == 's' || uni == 't') 
       shmupcfg = !shmupcfg;
-#if CAP_CONFIG
+  #if CAP_CONFIG
     else if(uni == 'c')
       hr::saveConfig();
-#endif
+  #endif
     else if(uni == 'n' || uni == 'N') {
-      vid.scfg.players += shiftmul > 0 ? 1 : -1;
-      vid.scfg.players %= MAXPLAYER;
-      if(vid.scfg.players <= 0) vid.scfg.players += MAXPLAYER;
+      playercfg += shiftmul > 0 ? 1 : -1;
+      playercfg %= MAXPLAYER;
+      if(playercfg <= 0) playercfg += MAXPLAYER;
       }
     else if(sym == SDLK_F1 || uni == '?' || uni == 'h') {
       gotoHelp("");
 
-      help = 
-      XLAT(
-"Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
-"on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
-"throwing knives, and you have three extra lives. There are no allies, so all Orbs "
-"related to allies give you extra lives instead (up to 5). Some other rules have been "
-"adapted too.\n\n");
-
-help += XLAT(
-"Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
-"for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
-"faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
-
-help += XLAT(
-"Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
-"by pressing a designated key (useful when about to get killed or lost). The following "
-"Orbs work to bring such players back: ");
-
-help += XLATN(iinf[itOrbLife].name); help += ", ";
-help += XLATN(iinf[itOrbFriend].name); help += ", ";
-help += XLATN(iinf[itOrbUndeath].name); help += ", ";
-help += XLATN(iinf[itOrbTeleport].name); help += ", ";
-help += XLATN(iinf[itOrbSafety].name); help += "\n\n";
-
-help += XLAT("This menu can be also used to configure keys.\n\n");
-        
+      help = XLAT(
+        "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
+        "on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
+        "throwing knives, and you have three extra lives. There are no allies, so all Orbs "
+        "related to allies give you extra lives instead (up to 5). Some other rules have been "
+        "adapted too.\n\n");
+  
+      help += XLAT(
+        "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
+        "for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
+        "faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
+  
+      help += XLAT(
+        "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
+        "by pressing a designated key (useful when about to get killed or lost). The following "
+        "Orbs work to bring such players back: ");
+  
+      help += XLATN(iinf[itOrbLife].name); help += ", ";
+      help += XLATN(iinf[itOrbFriend].name); help += ", ";
+      help += XLATN(iinf[itOrbUndeath].name); help += ", ";
+      help += XLATN(iinf[itOrbTeleport].name); help += ", ";
+      help += XLATN(iinf[itOrbSafety].name); help += "\n\n";
+      
+      help += XLAT("This menu can be also used to configure keys.\n\n");          
       }
     else if(doexiton(sym, uni)) {
       popScreen();
-      if(shmup::on != shmupcfg) { restart_game(rg::shmup); resetScores(); }
-      else if(vid.scfg.players != players) { restart_game(); resetScores(); }
-      }
-    }
-  else if(sc == SCJOY) {
-    if(sym) {
-      char xuni = uni | 96;
-      if(xuni >= 'a' && xuni < 'a' + numaxeconfigs) {
-        if(configdead) {
-          int& dz = (*dzconfigs[xuni - 'a']);
-          dz += int(shiftmul * 100);
-          if(dz < 0) dz = 0;
-          if(dz > 65000) dz = 65000;
-          }
-        else {
-          int v = (*axeconfigs[xuni - 'a']);
-          v += (shiftmul>0?1:-1);
-          v += SHMUPAXES_CUR;
-          v %= SHMUPAXES_CUR;
-          (*axeconfigs[xuni - 'a']) = v;
-          }
+      if(shmup::on != shmupcfg) { 
+        stop_game(); 
+        switch_game_mode(rg::shmup); 
+        resetScores(); 
         }
-      else if(xuni == 'z')
-        configdead = !configdead;
-      else if(doexiton(sym, uni))
-        vid.scfg.subconfig = 0;
-      }
-    }
-  else {
-    if(sym) {
-      if(vid.scfg.setwhat) {
-        vid.scfg.keyaction[sym] = vid.scfg.setwhat;
-        vid.scfg.setwhat = 0;
+      if(playercfg != players) { 
+        stop_game(); 
+        players = playercfg;
+        resetScores();
         }
-      else if(uni >= 'a' && uni < 'a' + shmupnumkeys && shmupcmdtable[uni-'a'][0])
-        vid.scfg.setwhat = 16*sc+uni - 'a';
-      else if(uni == 'z')
-        vid.scfg.setwhat = 1;
-      else if(uni || sym == SDLK_F10)
-        vid.scfg.subconfig = 0;
+      start_game();
       }
+    #endif
     }
-#endif
+  };
+
+void configure() {
+  pushScreen(shmup_configurer());
   }
 
 #define NUMACT 128
@@ -479,7 +530,6 @@ bool notremapped(int sym) {
   }
 
 void initConfig() {
-  vid.scfg.players = 1;
   
   char* t = vid.scfg.keyaction;
   
@@ -577,7 +627,7 @@ void initConfig() {
   multi::scs[5].uicolor = 0x00C0C0FF;
   multi::scs[6].uicolor = 0xC0C0C0FF;
   
-  addsaver(vid.scfg.players, "mode-number of players");
+  addsaver(multi::players, "mode-number of players");
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<512; i++)
@@ -606,9 +656,9 @@ void scanchar(FILE *f, char& c) {
   
 void loadConfig(FILE *f) {
   int xvernum;
-  int err = fscanf(f, "%d %d", &xvernum, &vid.scfg.players);
-  if(vid.scfg.players < 1 || vid.scfg.players > MAXPLAYER)
-    vid.scfg.players = 1;
+  int err = fscanf(f, "%d %d", &xvernum, &multi::players);
+  if(multi::players < 1 || multi::players > MAXPLAYER)
+    multi::players = 1;
   if(err != 2) return;
   if(xvernum >= 8990) { int b=alwaysuse; err=fscanf(f, " %d", &b); alwaysuse = b; }
   for(int i=0; i<512; i++) scanchar(f, vid.scfg.keyaction[i]);

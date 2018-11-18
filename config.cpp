@@ -364,7 +364,7 @@ bool have_current_settings() {
     return true;
   if(pmodel != mdDisk || vid.monmode != DEFAULT_MONMODE || vid.wallmode != DEFAULT_WALLMODE)
     return true;
-  if(firstland != laIce || vid.scfg.players != 1 || rug::rugged)
+  if(firstland != laIce || multi::players != 1 || rug::rugged)
     return true;
   if(modecount > 1)
     return true;
@@ -384,8 +384,8 @@ void resetModes(char leave) {
   if(yendor::on != (leave == rg::yendor)) stop_game_and_switch_mode(rg::yendor);
   if(tactic::on != (leave == rg::tactic)) stop_game_and_switch_mode(rg::tactic);
   if(randomPatternsMode != (leave == rg::randpattern)) stop_game_and_switch_mode(rg::randpattern);
-  if(vid.scfg.players != 1) {
-    vid.scfg.players = 1; stop_game_and_switch_mode();
+  if(multi::players != 1) {
+    stop_game_and_switch_mode(); multi::players = 1;
     }
   if(firstland != laIce || specialland != laIce) {
     stop_game();
@@ -997,10 +997,8 @@ void showBasicConfig() {
     if(xuni == 'g') pushScreen(showCustomizeChar);
   
 #if CAP_SHMUP
-    if(xuni == 'p') {
-      pushScreen(shmup::showShmupConfig);
-      multi::shmupcfg = shmup::on;
-      }
+    if(xuni == 'p') 
+      shmup::configure();
 #endif
     
     if(uni == 'r') vid.revcontrol = !vid.revcontrol;
@@ -1777,8 +1775,8 @@ int read_gamemode_args() {
 
   if(argis("-P")) { 
     PHASE(2); shift(); 
-    vid.scfg.players = argi();
     stop_game_and_switch_mode(rg::nothing);
+    multi::players = argi();
     }
   TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
   TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
