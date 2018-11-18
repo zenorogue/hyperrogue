@@ -530,8 +530,10 @@ string animfile = "animation-%04d.png";
 
 bool record_animation() {
   lastticks = 0;
+  ticks = 0;
   for(int i=0; i<noframes; i++) {
-    ticks = i * period / noframes;
+    int newticks = i * period / noframes;
+    while(ticks < newticks) shmup::turn(1), ticks++;
     apply();
     conformal::configure();
     if(conformal::on) {
