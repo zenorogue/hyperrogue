@@ -1,6 +1,11 @@
 // flocking simulations
 // Copyright (C) 2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
+// based on Flocking by Daniel Shiffman (which in turn implements Boids by Craig Reynold)
+// https://processing.org/examples/flocking.html
+
+// Our implementation simplifies some equations a bit.
+
 // example parameters: 
 
 // flocking on a torus:
@@ -9,7 +14,7 @@
 // flocking on the Zebra quotient:
 //    -geo 4 -flocking 10 -rvshape 3 -zoom .9
 
-// press 'o' when flocking active to change the parameters
+// press 'o' when flocking active to change the parameters.
 
 namespace hr {
   hyperpoint nearcorner(cell *c, int i);
@@ -159,15 +164,11 @@ namespace flocking {
           }
         }
       
+      // a bit simpler rules than original
+      
       if(sep_count) velvec += sep * (d * sep_factor / sep_count);
       if(align_count) velvec += align * (d * align_factor / align_count);
       if(coh_count) velvec += coh * (d * coh_factor / coh_count);
-      
-      if(i == 0) {
-        printf("%s\n", display(velvec));
-        // lines.emplace_back(gmatrix[m->base] * m->at * C0, gmatrix[m->base] * m->at * (C0 + velvec));
-        // lines.emplace_back(gmatrix[m->base] * m->at * C0, gmatrix[m->base] * m->at * (C0 + sep / hypot2(sep)));
-        }
       
       vels[i] = hypot2(velvec);
       ld alpha = -atan2(velvec);
