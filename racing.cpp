@@ -165,41 +165,63 @@ void generate_track() {
   // for(cell *c:track) if(c->land != laMirror) c->bardir = NOBARRIERS;
   for(cell *c:track) setdist(c, 0, NULL);
   
-  manual_celllister cl;
-
-  for(int i=0; i<isize(track); i++) {    
-    trackstage[track[i]] = {0, i};
-    cl.add(track[i]);
-    }
+  if(1) {
+    manual_celllister cl;
   
-  int win = isize(track) - 10;
-  
-  for(int i=0; i<isize(cl.lst); i++) {
-    cell *c = cl.lst[i];
-    auto p = trackstage[c];
-    forCellEx(c2, c) if(!trackstage.count(c2)) {
-      trackstage[c2] = {p.first+1, p.second};
-      cl.add(c2);
+    for(int i=0; i<isize(track); i++) {    
+      trackstage[track[i]] = {0, i};
+      cl.add(track[i]);
       }
-    c->item = itNone;
-    if(c->wall == waMirror || c->wall == waCloud) c->wall = waNone;
-    if(!isIvy(c))
-      c->monst = moNone;
-    if(inmirror(c->land))
-      ;      
-    else if(p.first == TWIDTH)
-      c->wall = waBarrier,
-      c->land = laBarrier;
-    else if(p.first > TWIDTH)
-      c->land = laMemory,
-      c->wall = waChasm;
-    if(p.second >= win && p.first < TWIDTH) c->wall = hrand(2) ? waMirror : waCloud;
+    
+    int win = isize(track) - 10;
+    
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      auto p = trackstage[c];
+      forCellEx(c2, c) if(!trackstage.count(c2)) {
+        trackstage[c2] = {p.first+1, p.second};
+        cl.add(c2);
+        }
+      c->item = itNone;
+      if(c->wall == waMirror || c->wall == waCloud) c->wall = waNone;
+      if(!isIvy(c))
+        c->monst = moNone;
+      if(inmirror(c->land))
+        ;      
+      else if(p.first == TWIDTH)
+        c->wall = waBarrier,
+        c->land = laBarrier;
+      else if(p.first > TWIDTH)
+        c->land = laMemory,
+        c->wall = waChasm;
+      if(p.second >= win && p.first < TWIDTH) c->wall = hrand(2) ? waMirror : waCloud;
+      }
     }
   
   int byat[256];
   for(int a=0; a<16; a++) byat[a] = 0;
   for(auto s: trackstage) byat[s.second.first]++;
   for(int a=0; a<16; a++) printf("%d: %d\n", a, byat[a]);
+  
+  if(1) {
+    manual_celllister cl;
+    cl.add(s);
+    bool goal = false;
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      forCellEx(c2, c) {
+        if(among(c2->wall, waCloud, waMirror)) goal = true;
+        if(c2->wall == waIcewall || passable(c2, c, P_ISPLAYER))
+          cl.add(c2);
+        }
+      }
+    if(!goal) {
+      printf("error: goal unreachable\n");
+      stop_game();
+      start_game();
+      return;    
+      }
+    }
   
   /*
   for(cell *c: track) {
