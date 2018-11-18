@@ -2277,6 +2277,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laMemory:
       c->wall = waChasm;
       if(d == 7 && !c->monst && hrand(2000) < 4)
+      #if CAP_RACING
+      if(!racing::on)
+      #endif
         c->monst = moGhost;
       break;
     }
