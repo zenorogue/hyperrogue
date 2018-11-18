@@ -4177,7 +4177,14 @@ extern void calcTidalPhase();
 
 void curvepoint(const hyperpoint& H1);
 dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
+
 ld cos_auto(ld x);
+ld sin_auto(ld x);
+ld tan_auto(ld x);
+ld asin_auto(ld x);
+ld atan_auto(ld x);
+ld atan2_auto(ld x);
+ld atan2(hyperpoint h);
 
 namespace anims {
   void apply();
@@ -4395,6 +4402,9 @@ inline named_functionality named_dialog(string x, reaction_t dialog) { return na
 extern hookset<named_functionality()> *hooks_o_key;
 
 named_functionality get_o_key();
+
+hyperpoint nearcorner(cell *c, int i);
+extern bool showquotients;
 
 bool do_draw(cell *c, const transmatrix& T);
 
