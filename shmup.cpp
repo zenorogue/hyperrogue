@@ -1625,6 +1625,8 @@ void movePlayer(monster *m, int delta) {
   if(!canmove) mgo = 0;
   
   if(racing::on) {
+    // braking is more efficient
+    if(m->vel * mgo < 0) mgo *= 3;
     m->vel += mgo * delta / 600;
     playergo[cpid] = m->vel * SCALE * delta / 600;
     printf("vel = %lf go = %lf\n", m->vel, playergo[cpid]);
@@ -1895,6 +1897,10 @@ void movePlayer(monster *m, int delta) {
       goto nextstep;
       }
     }
+
+  #if CAP_RACING  
+  if(!go && racing::on) m->vel = 0;
+  #endif
   
   if(shotkey && canmove && curtime >= m->nextshot) {
 
