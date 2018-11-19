@@ -2,9 +2,9 @@
 // It is quite chaotic.
 
 // version numbers
-#define VER "10.4z"
-#define VERNUM 10426
-#define VERNUM_HEX 0xA0CA
+#define VER "10.5"
+#define VERNUM 10500
+#define VERNUM_HEX 0xA500
 
 #include <stdarg.h>
 

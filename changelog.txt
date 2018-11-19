@@ -2789,3 +2789,12 @@ Other:
 - help for Haunted Woods no longer shows the special conduct as failed when you succeed
 - added the sunflower spirals and fundamental domains to RogueViz
 - improved SVG output
+
+2018.11.19 20:59 Update 10.5
+
+- Goldberg geometries did not work correctly -- this is fixed
+- fixed a crash when jumping on an Orb of Safety
+- fixed some bugs related to the shmup mode: no longer crashes in combination with Yendor Challenge; keys are named correctly; fixed the ijkl default keys for the second player;
+  fixed some bugs which sometimes caused us to go through walls
+- fixed some cases where the record feature would not record anything
+- half-plane and band models are now computed on the GPU side (and thus these models are now rendered at high fps -- will be important in the upcoming racing mode) (in 2D only for now)
