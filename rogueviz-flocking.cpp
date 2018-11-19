@@ -24,6 +24,9 @@ namespace flocking {
   
   bool draw_lines = false;
   
+  int follow = 0;
+  string follow_names[3] = {"nothing", "specific boid", "center of mass"};
+  
   map<cell*, map<cell*, transmatrix>> relmatrices;
 
   ld ini_speed = .5;
@@ -182,11 +185,30 @@ namespace flocking {
       m->vel = vels[i];
       }
     shmup::fixStorage();
+    
     }
 
   bool turn(int delta) {
     if(!on) return false;
     if(kind == kFlocking) simulate(delta), timetowait = 0;
+
+    if(follow == 1) {
+      // follow bird0
+      View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
+      optimizeview();
+      playermoved = false;
+      }
+
+    if(follow == 2) {
+      using namespace hyperpoint_vec;
+      hyperpoint h = Hypc;
+      for(int i=0; i<N; i++) h += tC0(vdata[i].m->pat);
+      h = normalize(h);
+      View = gpushxto0(h) * View;
+      optimizeview();
+      playermoved = false;
+      }
+
     return false;
     // shmup::pc[0]->rebase();
     }
@@ -296,6 +318,9 @@ namespace flocking {
 
     dialog::addBoolItem("draw forces", draw_lines, 'l');
     dialog::add_action([] () { draw_lines = !draw_lines; });
+  
+    dialog::addSelItem("follow", follow_names[follow], 'f');
+    dialog::add_action([] () { follow++; follow %= 3; });
   
     dialog::addBreak(100);
 
