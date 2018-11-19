@@ -7530,3 +7530,8 @@ S("radii", "polomìry")
 S("meridians", "poledníky")
 S("parallels", "rovnobìžky")
 S("seven-coloring", "sedmibarva")
+
+S("half-plane scale", "polorovinové měřítko")
+S("use GPU to compute projections", "použít GPU k výpočtu projekcí")
+S("N/A", "nedostupné")
+S(" (2D only)", " (pouze 2D)")

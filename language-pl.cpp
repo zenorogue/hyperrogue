@@ -7284,3 +7284,7 @@ S("meridians", "po≈Çudniki")
 S("parallels", "r√≥wnole≈ºniki")
 S("seven-coloring", "siedmiokolorowanie")
 
+S("half-plane scale", "skala pÛ≥p≥aszczyzny")
+S("use GPU to compute projections", "obliczanie projekcji przy uøyciu GPU")
+S("N/A", "niedostÍpne")
+S(" (2D only)", " (tylko 2D)")

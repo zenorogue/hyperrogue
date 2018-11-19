@@ -731,7 +731,7 @@ namespace conformal {
     if(pmodel == mdHalfplane) {
       dialog::addSelItem(XLAT("half-plane scale"), fts(halfplane_scale), 'b');
       dialog::add_action([] () {
-        dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("halfplane scale"), "");
+        dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("half-plane scale"), "");
         });
       }
 
@@ -839,6 +839,8 @@ namespace conformal {
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
     if(vid.consider_shader_projection && !shaderside_projection)
       dialog::lastItem().value = XLAT("N/A");
+    if(vid.consider_shader_projection && shaderside_projection && pmodel)
+      dialog::lastItem().value += XLAT(" (2D only)");
     dialog::add_action([] { vid.consider_shader_projection = !vid.consider_shader_projection; });
 
     menuitem_sightrange('R');
