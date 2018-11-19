@@ -191,21 +191,24 @@ namespace flocking {
   bool turn(int delta) {
     if(!on) return false;
     if(kind == kFlocking) simulate(delta), timetowait = 0;
+    
+    if(follow) {
 
-    if(follow == 1) {
-      // follow bird0
-      View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
-      optimizeview();
-      playermoved = false;
-      }
+      if(follow == 1) 
+        View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
 
-    if(follow == 2) {
-      using namespace hyperpoint_vec;
-      hyperpoint h = Hypc;
-      for(int i=0; i<N; i++) h += tC0(vdata[i].m->pat);
-      h = normalize(h);
-      View = gpushxto0(h) * View;
+      if(follow == 2) {
+        using namespace hyperpoint_vec;
+        hyperpoint h = Hypc;
+        for(int i=0; i<N; i++) h += tC0(vdata[i].m->pat);
+        h = normalize(h);
+        View = gpushxto0(h) * View;
+        }
+
       optimizeview();
+      centerover.at = viewctr.at->c7;
+      compute_graphical_distance();
+      gmatrix.clear();
       playermoved = false;
       }
 
