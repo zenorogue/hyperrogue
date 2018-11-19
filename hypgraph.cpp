@@ -733,7 +733,8 @@ void drawrec(cell *c, const transmatrix& V) {
   
   gp::local_info draw_li;
 
-  void drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) {
+  bool drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) { 
+    bool res = false;
     if(do_draw(c, V)) {
       /* auto li = get_local_info(c);
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
@@ -743,30 +744,34 @@ void drawrec(cell *c, const transmatrix& V) {
       draw_li.total_dir = fixg6(dir);
       transmatrix V1 = V * Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
       drawcell(c, V1, 0, false);
+      res = true;
       }
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
       if(!c2) continue;
       if(c2->move(0) != c) continue;
       if(c2 == c2->master->c7) continue;
-      drawrec(c2, V, at + eudir(dir+i), dir + i + SG3, maindir);
+      res |= drawrec(c2, V, at + eudir(dir+i), dir + i + SG3, maindir);
       }
+    return res;
     }
   
-  void drawrec(cell *c, const transmatrix& V) {
+  bool drawrec(cell *c, const transmatrix& V) {
     draw_li.relative = loc(0,0);
     draw_li.total_dir = 0;
     draw_li.last_dir = -1;
+    bool res = false;
     if(do_draw(c, V))
-      drawcell(c, V, 0, false);
+      drawcell(c, V, 0, false), res = true;
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
       if(!c2) continue;
       if(c2->move(0) != c) continue;
       if(c2 == c2->master->c7) continue;
       draw_li.last_dir = i;
-      drawrec(c2, V, gp::loc(1,0), SG3, i);
+      res |= drawrec(c2, V, gp::loc(1,0), SG3, i);
       }
+    return res;
     }
   }
 
@@ -781,7 +786,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
   bool draw = false;
   
   if(GOLDBERG) {
-    gp::drawrec(c, actualV(hs, V1));
+    draw = gp::drawrec(c, actualV(hs, V1));
     }
   
   else if(IRREGULAR) {
