@@ -1496,6 +1496,7 @@ hpcshape
   shCross, shGiantStar[2], shLake, shMirror,
   shHalfFloor[3], shHalfMirror[3],
   shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
+  shTinyBird, shTinyShark,
   shEgg,
   shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
   shSpearRing, shLoveRing,
@@ -2366,6 +2367,7 @@ void buildpolys() {
   bshape(shFoxTail2, PPR::MONSTER_BODY, scalefactor, 364);
   bshape(shHawk, PPR::MONSTER_BODY, scalefactor, 77);
   bshape(shEagle, PPR::MONSTER_BODY, scalefactor, 78);
+  bshape(shTinyBird, PPR::MONSTER_BODY, scalefactor / 2, 78);
   bshape(shWaterElemental, PPR::MONSTER_BODY, scalefactor, 81);
   bshape(shMouse, PPR::MONSTER_BODY, scalefactor, 82);
   bshape(shMouseLegs, PPR::MONSTER_LEG, scalefactor, 83);
@@ -2489,6 +2491,7 @@ void buildpolys() {
   bshape(shPFace, PPR::MONSTER_FACE, scalefactor, 134);
   bshape(shEyes, PPR::MONSTER_EYE0, scalefactor, 135);
   bshape(shShark, PPR::MONSTER_BODY, scalefactor, 136);
+  bshape(shTinyShark, PPR::MONSTER_BODY, scalefactor / 2, 136);
   bshape(shBugBody, PPR::MONSTER_BODY, scalefactor, 137);
   bshape(shBugArmor, PPR::MONSTER_ARMOR0, scalefactor, 138);
   bshape(shBugLeg, PPR::MONSTER_BODY, scalefactor, 306);

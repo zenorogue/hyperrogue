@@ -4014,7 +4014,7 @@ ld frac(ld x);
 
 extern color_t poly_outline;
 
-extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM;
+extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM, shTinyBird, shTinyShark;
 
 extern std::mt19937 hrngen;
 
