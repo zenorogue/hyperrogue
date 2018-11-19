@@ -597,10 +597,16 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
     flipplayer = true;
     }
   countLocalTreasure();
-
+  
   sword::reset();
   stabbingAttack(c1, dest, moPlayer, bonuskill);
   playerMoveEffects(c1, dest);
+
+  // do not apply movecost later, when from no longer exists
+  if(cwt.at->item == itOrbSafety) {
+    movecost(from, dest, 2);
+    from = NULL;
+    }
   if(cwt.at->item != itOrbYendor && cwt.at->item != itHolyGrail)
     collectItem(cwt.at, true);
 
@@ -609,8 +615,8 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   for(int i=9; i>=0; i--)
     setdist(cwt.at, i, NULL);
   
-  movecost(from, dest, 2);
-    
+  if(from) movecost(from, dest, 2);
+
   createNoise(1);
 
   if(shmup::on)
