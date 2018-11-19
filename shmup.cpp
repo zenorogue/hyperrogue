@@ -343,7 +343,7 @@ struct shmup_configurer {
   bool shmupcfg;
   int playercfg;
   
-  shmup_configurer() { shmupcfg = shmup::on; players = multi::players; }
+  shmup_configurer() { shmupcfg = shmup::on; playercfg = multi::players; }
   
   void operator()() {
   #if CAP_SDL
