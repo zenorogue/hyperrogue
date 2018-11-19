@@ -488,6 +488,7 @@ void init() {
     
     bool mps = j != 0;
     bool band = (sp == shader_projection::band);
+    bool hp = (sp == shader_projection::halfplane);
     
     programs[i][j] = new GLprogram(stringbuilder(
 
@@ -532,16 +533,21 @@ void init() {
       lfog,      "vColor = vColor * clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
       !mps,      "gl_Position = uMVP * aPosition;",
       mps&&!band,"gl_Position = uP * (uMV * aPosition);",
-      band,      "vec4 t = uMV * aPosition;",
-  
-      band,      "float zlev = zlevel(t);",
-      band,      "t /= zlev;",
+
+      band||hp,  "vec4 t = uMV * aPosition;",  
+      band||hp,  "float zlev = zlevel(t);",
+      band||hp,  "t /= zlev;",
 
       band,      "float ty = asinh(t.y);",
       band,      "float tx = asinh(t.x / cosh(ty));",
       band,      "ty = 2.0 * atan(tanh(ty/2.0));",
       band,      "t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;",
-      band,      "gl_Position = uP * t;",
+      
+      hp,        "t.x /= t.z; t.y /= t.z; t.y = t.y + 1.0; ",
+      hp,        "float rads = t.x * t.x + t.y * t.y; ",
+      hp,        "t.x /= -rads; t.y /= -rads; t.z = 1.0; t[3] = 1.0;",
+      
+      band || hp,"gl_Position = uP * t;",
       1,         "}"), 
       
       stringbuilder(

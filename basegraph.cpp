@@ -199,6 +199,13 @@ void eyewidth_translate(int ed) {
   if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
+glhr::glmatrix model_orientation_gl() {
+  glhr::glmatrix s = glhr::id;
+  for(int a=0; a<2; a++)
+    conformal::apply_orientation(s[a][1], s[a][0]);
+  return s;
+  }
+
 void display_data::set_projection(int ed, bool apply_models) {
   DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
   
@@ -207,8 +214,10 @@ void display_data::set_projection(int ed, bool apply_models) {
   if(vid.consider_shader_projection) {
     if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1))
       shaderside_projection = true;
-    if(pmodel == mdBand && hyperbolic && apply_models && !inHighQual)
+    if(pmodel == mdBand && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
+    if(pmodel == mdHalfplane && hyperbolic && apply_models)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
     }
   
   start_projection(ed, shaderside_projection);
@@ -249,11 +258,16 @@ void display_data::set_projection(int ed, bool apply_models) {
     
     if(glhr::new_shader_projection == glhr::shader_projection::band) {
       glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI,1));
-      glhr::glmatrix s = glhr::id;
-      for(int a=0; a<2; a++)
-        conformal::apply_orientation(s[a][1], s[a][0]);
-      glhr::projection_multiply(s);
+      glhr::projection_multiply(model_orientation_gl());
       }
+
+    if(glhr::new_shader_projection == glhr::shader_projection::halfplane) {
+      glhr::projection_multiply(glhr::translate(0, 1, 0));      
+      glhr::projection_multiply(glhr::scale(-1, 1, 1));
+      glhr::projection_multiply(glhr::scale(conformal::halfplane_scale, conformal::halfplane_scale, 1));
+      glhr::projection_multiply(model_orientation_gl());
+      glhr::projection_multiply(glhr::translate(0, 0.5, 0));
+      }      
     }
   
   cameraangle_on = false;
