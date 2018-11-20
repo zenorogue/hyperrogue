@@ -7,7 +7,7 @@
 </a>
 </p>
 <p align="left">
-<b>Current version: 10.4m</b>
+<b>Current version: 11.0a</b>
 </p>
 
 A puzzle roguelike in the hyperbolic plane. See the [HyperRogue website](http://roguetemple.com/z/hyper.php) for detailed and most up-to-date information.
