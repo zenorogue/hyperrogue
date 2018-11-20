@@ -286,18 +286,16 @@ void display_data::set_mask(int ed) {
   }
 
 void display_data::set_viewport(int ed) {  
-  ld xmin = vid.xres * current_display->xmin;
-  ld xmax = vid.xres * current_display->xmax;
-  ld ymin = vid.yres * current_display->ymin;
-  ld ymax = vid.yres * current_display->ymax;
-  
-  ld xsize = xmax - xmin, ysize = ymax - ymin;
+  ld xtop = current_display->xtop;
+  ld ytop = current_display->ytop;
+  ld xsize = current_display->xsize;
+  ld ysize = current_display->ysize;
   
   if(ed == 0 || vid.stereo_mode != sLR) ;
   else if(ed == 1) xsize /= 2;
-  else if(ed == -1) xsize /= 2, xmin += xsize;
+  else if(ed == -1) xsize /= 2, xtop += xsize;
     
-  glViewport(xmin, ymin, xsize, ysize);
+  glViewport(xtop, ytop, xsize, ysize);
   }
 
 bool model_needs_depth() {

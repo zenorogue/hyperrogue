@@ -337,17 +337,20 @@ void calcLengths() {
       edge.len = hdist(p->h, edge.target->h) * modelscale;
   }
 
-void setVidParam() {
-  vid.xres = vid.yres = TEXTURESIZE;
-  current_display->scrsize = HTEXTURESIZE;
-  current_display->radius = current_display->scrsize * vid.scale; current_display->xcenter = HTEXTURESIZE; current_display->ycenter = HTEXTURESIZE;
-  // vid.alpha = 1; 
+void calcparam_rug() {
+  auto cd = current_display;
+
+  cd->xtop = cd->ytop = 0;
+  cd->xsize = cd->ysize = TEXTURESIZE;
+  cd->xcenter = cd->ycenter = cd->scrsize = HTEXTURESIZE;
+  
+  cd->radius = cd->scrsize * vid.scale;
   }
 
 void buildTorusRug() {
   using namespace torusconfig;
 
-  setVidParam();
+  calcparam_rug();
 
   struct toruspoint {
     int x,y;
@@ -1228,10 +1231,8 @@ renderbuffer *glbuf;
 void prepareTexture() {
   resetbuffer rb;
   
-  videopar svid = vid;
-  
-  setVidParam();
   dynamicval<eStereo> d(vid.stereo_mode, sOFF);
+  calcparam_rug();
   
   glbuf->enable();
   current_display->set_viewport(0);
@@ -1252,7 +1253,7 @@ void prepareTexture() {
       queueline(V * xspinpush0(i*M_PI/32, finger_range), V * xspinpush0((i+1)*M_PI/32, finger_range), 0xFFFFFFFF, vid.linequality);
     }
   drawqueue();
-  vid = svid;
+  calcparam();
   rb.reset();
   }
 
@@ -1684,10 +1685,9 @@ hyperpoint gethyper(ld x, ld y) {
   
   double px = rx1 * TEXTURESIZE, py = (1-ry1) * TEXTURESIZE;
 
-  videopar svid = vid;
-  setVidParam();
+  calcparam_rug();
   hyperpoint h = hr::gethyper(px, py);
-  vid = svid;
+  calcparam();
 
   return h;
   }
