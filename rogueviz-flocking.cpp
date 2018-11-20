@@ -45,6 +45,14 @@ namespace flocking {
   
   vector<tuple<hyperpoint, hyperpoint, color_t> > lines;
   
+  // parameters of each boid
+  // m->base: the cell it is currently on
+  // m->vel: velocity
+  // m->at: determines the position and speed:
+  //        m->at * (0, 0, 1) is the current position (in Minkowski hyperboloid coordinates relative to m->base)
+  //        m->at * (m->vel, 0, 0) is the current velocity vector (tangent to the Minkowski hyperboloid)
+  // m->pat: like m->at but relative to the screen
+
   void init() {
     if(!bounded) {
       addMessage("Flocking simulation needs a bounded space.");
@@ -57,6 +65,8 @@ namespace flocking {
     const auto v = currentmap->allcells();
     
     printf("computing relmatrices...\n");
+    // relmatrices[c1][c2] is the matrix we have to multiply by to 
+    // change from c1-relative coordinates to c2-relative coordinates
     for(cell* c1: v) {
       manual_celllister cl;
       cl.add(c1);
@@ -73,6 +83,7 @@ namespace flocking {
     printf("setting up...\n");
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
+      // set initial base and at to random cell and random position there 
       createViz(i, v[hrand(isize(v))], spin(hrand(100)) * xpush(hrand(100) / 200.));
       vd.name = its(i+1);
       vd.cp = dftcolor;
@@ -113,12 +124,14 @@ namespace flocking {
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
-      hyperpoint velvec = hpxyz(m->vel, 0, 0);
       
       transmatrix I = inverse(m->at);
       
-      // if(i == 0) display(I);
-
+      // we do all the computations here in the frame of reference
+      // where m is at (0,0,1) and its velocity is (m->vel,0,0)
+      
+      hyperpoint velvec = hpxyz(m->vel, 0, 0);
+      
       hyperpoint sep = hpxyz(0, 0, 0);
       int sep_count = 0;
 
@@ -134,26 +147,40 @@ namespace flocking {
         for(auto m2: monsat[p.first]) if(m != m2) {
           ld vel2 = m2->vel;
           transmatrix at2 = I * p.second * m2->at;
+
+          // at2 is like m2->at but relative to m->at
+          
+          // m2's position relative to m (tC0 means *(0,0,1))
           hyperpoint ac = tC0(at2);
+          
+          // distance and azimuth to m2
           ld di = hdist0(ac);
           ld alpha = -atan2(ac);
 
           color_t col = 0;
             
           if(di < align_range) {
+            // we need to transfer m2's velocity vector to m's position
+            // this is done by applying an isometry which sends m2 to m1
+            // and maps the straight line on which m1 and m2 are to itself
             align += gpushxto0(ac) * at2 * hpxyz(vel2, 0, 0);
             align_count++;
-            col = 0xFF00FF;
+            col |= 0xFF00FF;
             }
           
           if(di < check_range) {
+            // azimuthal equidistant projection of ac
+            // (thus the cohesion force pushes us towards the
+            // average of azimuthal equidistant projections)
             coh += spin(alpha) * hpxyz(di, 0, 0);
             coh_count++;
+            col |= 0xFFFF;
             }
           
           if(di < sep_range) {
-            sep -= spin(alpha) * hpxyz(1 / di, 0, 0), sep_count++;
-            col = 0xFF0000FF;
+            sep -= spin(alpha) * hpxyz(1 / di, 0, 0);
+            sep_count++;
+            col |= 0xFF0000FF;
             }
           
           if(col && draw_lines)
@@ -167,6 +194,7 @@ namespace flocking {
       if(align_count) velvec += align * (d * align_factor / align_count);
       if(coh_count) velvec += coh * (d * coh_factor / coh_count);
       
+      // hypot2 is the length of a vector in R^2
       vels[i] = hypot2(velvec);
       ld alpha = -atan2(velvec);
 
@@ -180,6 +208,7 @@ namespace flocking {
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
+      // these two functions compute new base and at, based on pats[i]
       m->rebasePat(pats[i]);
       virtualRebase(m, true);
       m->vel = vels[i];
@@ -198,6 +227,10 @@ namespace flocking {
         View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
 
       if(follow == 2) {
+        // we take the average in R^3 of all the boid positions of the Minkowski hyperboloid
+        // (in quotient spaces, the representants closest to the current view
+        // are taken), and normalize the result to project it back to the hyperboloid
+        // (the same method is commonly used on the sphere AFAIK)
         using namespace hyperpoint_vec;
         hyperpoint h = Hypc;
         for(int i=0; i<N; i++) h += tC0(vdata[i].m->pat);
@@ -263,10 +296,12 @@ namespace flocking {
     dialog::add_action([]() {
       dialog::editNumber(sep_factor, 0, 2, .1, 1.5, "", "");
       });
+    
+    string rangehelp = "Increasing this parameter may also require increasing the 'check range' parameter.";
   
     dialog::addSelItem("separation range", fts(sep_range), 'S');
-    dialog::add_action([]() {
-      dialog::editNumber(sep_range, 0, 2, .1, .5, "", "");
+    dialog::add_action([rangehelp]() {
+      dialog::editNumber(sep_range, 0, 2, .1, .5, "", rangehelp);
       });
   
     dialog::addSelItem("alignment factor", fts(align_factor), 'a');
@@ -275,8 +310,8 @@ namespace flocking {
       });
   
     dialog::addSelItem("alignment range", fts(align_range), 'A');
-    dialog::add_action([]() {
-      dialog::editNumber(align_range, 0, 2, .1, .5, "", "");
+    dialog::add_action([rangehelp]() {
+      dialog::editNumber(align_range, 0, 2, .1, .5, "", rangehelp);
       });
   
     dialog::addSelItem("cohesion factor", fts(coh_factor), 'c');
@@ -285,8 +320,8 @@ namespace flocking {
       });
   
     dialog::addSelItem("cohesion range", fts(coh_range), 'C');
-    dialog::add_action([]() {
-      dialog::editNumber(coh_range, 0, 2, .1, .5, "", "");
+    dialog::add_action([rangehelp]() {
+      dialog::editNumber(coh_range, 0, 2, .1, .5, "", rangehelp);
       });
   
     dialog::addSelItem("check range", fts(check_range), 't');
@@ -301,7 +336,9 @@ namespace flocking {
         "Value used in the algorithm: "
         "only other boids in cells whose centers are at most 'check range' from the center of the current cell are considered. "
         "Should be more than the other ranges by at least double the cell radius (in the current geometry, double the radius is " + fts(radius*2) + "); "
-        "but too large values slow the simulation down."
+        "but too large values slow the simulation down.\n\n"
+        "Restart the simulation to apply the changes to this parameter. In quotient spaces, the simulation may not work correctly when the same cell is in range check_range "
+        "in multiple directions."
         );
       });
   
