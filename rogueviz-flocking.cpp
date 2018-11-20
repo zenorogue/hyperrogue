@@ -268,6 +268,15 @@ namespace flocking {
     else if(argis("-sepf")) {
       shift(); sep_factor = argf();
       }
+    else if(argis("-cohr")) {
+      shift(); coh_range = argf();
+      }
+    else if(argis("-alignr")) {
+      shift(); align_range = argf();
+      }
+    else if(argis("-sepr")) {
+      shift(); sep_range = argf();
+      }
     else return 1;
     return 0;
     }
