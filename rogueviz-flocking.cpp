@@ -277,6 +277,9 @@ namespace flocking {
     else if(argis("-sepr")) {
       shift(); sep_range = argf();
       }
+    else if(argis("-flockfollow")) {
+      shift(); follow = argi();
+      }
     else return 1;
     return 0;
     }
