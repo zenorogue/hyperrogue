@@ -39,7 +39,7 @@ namespace flocking {
   ld align_range = .5;
   
   ld coh_factor = 1;
-  ld coh_range = .5;
+  ld coh_range = 2.5;
   
   ld check_range = 2.5;
   
@@ -168,7 +168,7 @@ namespace flocking {
             col |= 0xFF00FF;
             }
           
-          if(di < check_range) {
+          if(di < coh_range) {
             // azimuthal equidistant projection of ac
             // (thus the cohesion force pushes us towards the
             // average of azimuthal equidistant projections)
