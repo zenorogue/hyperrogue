@@ -2798,3 +2798,6 @@ Other:
   fixed some bugs which sometimes caused us to go through walls
 - fixed some cases where the record feature would not record anything
 - half-plane and band models are now computed on the GPU side (and thus these models are now rendered at high fps -- will be important in the upcoming racing mode) (in 2D only for now)
+
+2019.11.20 17:59 Update 10.5a
+- fix a bug with Hypersian Rug rendering
