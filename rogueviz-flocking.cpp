@@ -165,7 +165,7 @@ namespace flocking {
             // and maps the straight line on which m1 and m2 are to itself
             align += gpushxto0(ac) * at2 * hpxyz(vel2, 0, 0);
             align_count++;
-            col |= 0xFF00FF;
+            col |= 0xFF0040;
             }
           
           if(di < coh_range) {
@@ -174,13 +174,13 @@ namespace flocking {
             // average of azimuthal equidistant projections)
             coh += spin(alpha) * hpxyz(di, 0, 0);
             coh_count++;
-            col |= 0xFFFF;
+            col |= 0xFF40;
             }
           
           if(di < sep_range) {
             sep -= spin(alpha) * hpxyz(1 / di, 0, 0);
             sep_count++;
-            col |= 0xFF0000FF;
+            col |= 0xFF000040;
             }
           
           if(col && draw_lines)
