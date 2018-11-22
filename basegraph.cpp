@@ -257,15 +257,15 @@ void display_data::set_projection(int ed, bool apply_models) {
     current_display->scrdist_text = cd->ysize * sc / 2;
     
     if(glhr::new_shader_projection == glhr::shader_projection::band) {
-      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI,1));
       glhr::projection_multiply(model_orientation_gl());
+      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI,1));
       }
 
     if(glhr::new_shader_projection == glhr::shader_projection::halfplane) {
+      glhr::projection_multiply(model_orientation_gl());
       glhr::projection_multiply(glhr::translate(0, 1, 0));      
       glhr::projection_multiply(glhr::scale(-1, 1, 1));
       glhr::projection_multiply(glhr::scale(conformal::halfplane_scale, conformal::halfplane_scale, 1));
-      glhr::projection_multiply(model_orientation_gl());
       glhr::projection_multiply(glhr::translate(0, 0.5, 0));
       }      
     }
