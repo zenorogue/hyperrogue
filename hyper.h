@@ -3480,7 +3480,7 @@ namespace gp {
   extern int last_dir(cell *c);
   extern void configure();
   extern ld alpha;
-  extern transmatrix Tf[8][32][32][6];
+  extern transmatrix Tf[MAX_EDGE][32][32][6];
 
   loc operator+(loc e1, loc e2);
   loc operator-(loc e1, loc e2);

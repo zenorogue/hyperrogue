@@ -1683,6 +1683,9 @@ geometryinfo ginf[gGUARD] = {
   {"binary tiling",       "binary",   7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
   {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
   {"Macbeath surface",    "Macbeath", 7, 3, qSMALL,          gcHyperbolic, 0x18800, {{7, 5}}, eVariation::bitruncated},
+  {"Bring's Surface",     "Bring",    5, 4, qSMALL,          gcHyperbolic, 0x18A00, {{6, 4}}, eVariation::bitruncated},
+  {"Schmutz's M(3)",      "M3",      12, 3, qSMALL,          gcHyperbolic, 0x18C00, {{4, 2}}, eVariation::bitruncated},
+  {"Schmutz's M(4)",      "M4",      12, 3, qSMALL,          gcHyperbolic, 0x18E00, {{4, 2}}, eVariation::bitruncated},
   };
 
 #define X3(x) x, x, x

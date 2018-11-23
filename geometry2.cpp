@@ -145,7 +145,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       int sp = h2->c.spin(d);
       return gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
       }
-    if(geometry == gFieldQuotient) {
+    if(among(geometry, gFieldQuotient, gBring, gMacbeath)) {
       int bestdist = 1000, bestd = 0;
       for(int d=0; d<S7; d++) {
         int dist = celldistance(h2->move(d)->c7, c1);

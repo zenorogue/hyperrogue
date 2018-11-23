@@ -525,7 +525,7 @@ namespace hr { namespace gp {
     return normalize(spin(2*M_PI*sp/S7) * cornmul(T, corner));
     }
   
-  transmatrix Tf[8][32][32][6];
+  transmatrix Tf[MAX_EDGE][32][32][6];
   
   transmatrix corners;
   
@@ -594,6 +594,8 @@ namespace hr { namespace gp {
         base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
       else
         base_distlimit = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
+      if(S7 == 12)
+        base_distlimit = 2 * param.first + 2 * param.second + 1;
       if(base_distlimit > SEE_ALL)
         base_distlimit = SEE_ALL;
       prepare_matrices();
