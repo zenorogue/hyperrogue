@@ -282,12 +282,22 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
     dialog::addBreak(50);
 
+    char letter = 'a';
     for(int i=0; i<gGUARD; i++) {
       bool on = geometry == i;
       dynamicval<eGeometry> cg(geometry, eGeometry(i));
       if(!!(quotient || elliptic || torus) != showquotients) continue;
-      dialog::addBoolItem(XLAT(ginf[i].name), on, 'a'+i);
+      dialog::addBoolItem(XLAT(ginf[i].name), on, letter++);
       dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
+      dialog::add_action([i] {
+        eGeometry targetgeometry = eGeometry(i);
+        if(targetgeometry == gArchimedean)
+          pushScreen(arcm::show);
+        else {
+          set_geometry(targetgeometry);
+          start_game();
+          }
+        });
       }
     
     dialog::addBreak(50);
@@ -328,6 +338,10 @@ void showEuclideanMenu() {
       
       case gKleinQuartic:
         worldsize = 24 + 28 * gar;
+        break;
+      
+      case gMacbeath:
+        worldsize = (12 + 14 * gar) * 6;
         break;
       
       case gBolza:
@@ -431,16 +445,7 @@ void showEuclideanMenu() {
   
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni < 'a'+gGUARD) {
-        eGeometry targetgeometry = eGeometry(uni - 'a');
-        if(targetgeometry == gArchimedean)
-          pushScreen(arcm::show);
-        else {
-          set_geometry(targetgeometry);
-          start_game();
-          }
-        }
-      else if(uni == 'z') 
+      if(uni == 'z') 
         showquotients = !showquotients;
       else if(uni == 'v') {
         if(euclid6) ;

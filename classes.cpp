@@ -1681,7 +1681,8 @@ geometryinfo ginf[gGUARD] = {
   {"Bolza Surface x2",    "Bolza2",   8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18400, {{6, 4}}, eVariation::bitruncated},
   {"minimal quotient",    "minimal",  7, 3, qSMALL | qNONOR, gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
   {"binary tiling",       "binary",   7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
-  {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure}
+  {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
+  {"Macbeath surface",    "Macbeath", 7, 3, qSMALL,          gcHyperbolic, 0x18800, {{7, 5}}, eVariation::bitruncated},
   };
 
 #define X3(x) x, x, x
