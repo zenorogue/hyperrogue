@@ -735,14 +735,14 @@ void drawrec(cell *c, const transmatrix& V) {
 
   bool drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) { 
     bool res = false;
-    if(do_draw(c, V)) {
+    transmatrix V1 = V * Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
+    if(do_draw(c, V1)) {
       /* auto li = get_local_info(c);
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
       draw_li.relative = at;
       draw_li.total_dir = fixg6(dir);
-      transmatrix V1 = V * Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
       drawcell(c, V1, 0, false);
       res = true;
       }
@@ -775,61 +775,70 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   }
 
-void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int reclev) {
+vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 
-  // calc_relative_matrix(cwt.c, hs.at);    
-  cell *c = hs.at->c7;
-  
-  transmatrix V10;
-  const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
-  
-  bool draw = false;
-  
-  if(GOLDBERG) {
-    draw = gp::drawrec(c, actualV(hs, V1));
-    }
-  
-  else if(IRREGULAR) {
-    auto& hi = irr::periodmap[hs.at];
-    transmatrix V0 = actualV(hs, V1);
-    auto& vc = irr::cells_of_heptagon[hi.base.at];
-    for(int i=0; i<isize(vc); i++) {
-      cell *c = hi.subcells[i];
-      transmatrix V1 = V0 * irr::cells[vc[i]].pusher;
-      if(do_draw(c, V1))
-        draw = true,
-        drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher, 0, false);
-      }
-    }
-  
-  else {
-    if(do_draw(c, V1)) {
-      transmatrix V2 = actualV(hs, V1);
-      drawcell(c, V2, 0, hs.mirrored);
-      draw = true;
-      }
+void drawStandard() {
+  drawn_cells.clear();
+  drawn_cells.emplace_back(viewctr, hsOrigin, cview(), band_shift);
+  for(int i=0; i<isize(drawn_cells); i++) {
+    const auto& dc = drawn_cells[i];
+    auto& hs = get<0>(dc);
+    auto& s = get<1>(dc);
+    auto& V = get<2>(dc);
+    dynamicval<ld> bs(band_shift, get<3>(dc));
 
-    if(BITRUNCATED) for(int d=0; d<S7; d++) {
-      int ds = hs.at->c.fix(hs.spin + d);
-      // createMov(c, ds);
-      if(c->move(ds) && c->c.spin(ds) == 0) {
-        transmatrix V2 = V1 * hexmove[d];
-        if(do_draw(c->move(ds), V2))
+    cell *c = hs.at->c7;
+    
+    transmatrix V10;
+    const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
+    
+    bool draw = false;
+    
+    if(GOLDBERG) {
+      draw = gp::drawrec(c, actualV(hs, V1));
+      }
+    
+    else if(IRREGULAR) {
+      auto& hi = irr::periodmap[hs.at];
+      transmatrix V0 = actualV(hs, V1);
+      auto& vc = irr::cells_of_heptagon[hi.base.at];
+      for(int i=0; i<isize(vc); i++) {
+        cell *c = hi.subcells[i];
+        transmatrix V1 = V0 * irr::cells[vc[i]].pusher;
+        if(do_draw(c, V1))
           draw = true,
-          drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
+          drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher, 0, false);
         }
       }
-    }
-
-  if(draw) for(int d=0; d<S7; d++) {
-    hstate s2 = transition(s, d);
-    if(s2 == hsError) continue;
-    heptspin hs2 = hs + d + wstep;
-    transmatrix Vd = V * heptmove[d];
-    bandfixer bf(Vd);
-    drawrec(hs2, s2, Vd, reclev+1);
-    }
+    
+    else {
+      if(do_draw(c, V1)) {
+        transmatrix V2 = actualV(hs, V1);
+        drawcell(c, V2, 0, hs.mirrored);
+        draw = true;
+        }
   
+      if(BITRUNCATED) for(int d=0; d<S7; d++) {
+        int ds = hs.at->c.fix(hs.spin + d);
+        // createMov(c, ds);
+        if(c->move(ds) && c->c.spin(ds) == 0) {
+          transmatrix V2 = V1 * hexmove[d];
+          if(do_draw(c->move(ds), V2))
+            draw = true,
+            drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
+          }
+        }
+      }
+  
+    if(draw) for(int d=0; d<S7; d++) {
+      hstate s2 = transition(s, d);
+      if(s2 == hsError) continue;
+      heptspin hs2 = hs + d + wstep;
+      transmatrix Vd = V * heptmove[d];
+      bandfixer bf(Vd);
+      drawn_cells.emplace_back(hs2, s2, Vd, band_shift);
+      }
+    }
   }
 
 int mindx=-7, mindy=-7, maxdx=7, maxdy=7;

@@ -61,7 +61,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       auto bak = gp::draw_li;
       swap(gmatrix, gmatrix0);
       just_gmatrix = true;
-      drawrec(viewctr, hsOrigin, Id);
+      drawStandard();
       just_gmatrix = false;
       swap(gmatrix, gmatrix0);
       gp::draw_li = bak;
