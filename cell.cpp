@@ -811,9 +811,16 @@ struct hrmap_quotient : hrmap {
         h->c.setspin(rv(j), rv(co%S7), swapped);
         }
       }
+
+    vector<heptagon*> by_dist;
+    by_dist.push_back(allh[0]);
+    for(int i=0; i<TOT; i++) {
+      if(i >= isize(by_dist)) { printf("too fast\n"); exit(1); }
+      for(int a=0; a<S7; a++) if(by_dist[i]->move(a)->alt == NULL) by_dist.push_back(by_dist[i]->move(a));
+      generateAlts(by_dist[i], 0, false);
+      }
   
     for(int i=0; i<TOT; i++) {
-      generateAlts(allh[i], geometry == gMacbeath ? 5 : geometry == gBolza2 ? 3 : S3-3, false);
       allh[i]->emeraldval = allh[i]->alt->emeraldval;
       allh[i]->zebraval = allh[i]->alt->zebraval;
       allh[i]->fiftyval = allh[i]->alt->fiftyval;
