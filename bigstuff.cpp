@@ -965,6 +965,7 @@ int wallchance(cell *c, bool deepOcean) {
     (l == laMirror && !yendor::generating) ? 6000 :
     l == laTerracotta ? 250 :
     (tactic::on && !tactic::trailer) ? 0 :
+    racing::on ? 0 :
     l == laCaribbean ? 500 :
     (l == laWarpSea || l == laWarpCoast) ? 500 :
     l == laStorms ? 250 :
@@ -1038,10 +1039,10 @@ void buildBigStuff(cell *c, cell *from) {
   else if((archimedean || pseudohept(c)) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
-  else if((archimedean || pseudohept(c)) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on &&
+  else if((archimedean || pseudohept(c)) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on &&
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if((archimedean || pseudohept(c)) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
+  else if((archimedean || pseudohept(c)) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on && !isCrossroads(c->land) && 
     gold() >= R200 && !weirdhyperbolic && !c->master->alt &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
@@ -1093,7 +1094,7 @@ void buildBigStuff(cell *c, cell *from) {
       
   if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !binarytiling && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
-    items[itEmerald] >= U5 && !tactic::on))) {
+    items[itEmerald] >= U5 && !tactic::on && !racing::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
     if(alt) {
@@ -1109,19 +1110,19 @@ void buildBigStuff(cell *c, cell *from) {
     if(c->land == laRlyeh && ctof(c) && horo_ok() && 
       (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
       items[itStatue] >= U5 && !randomPatternsMode && 
-      !tactic::on && !yendor::on)))
+      !tactic::on && !yendor::on && !racing::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laJungle && ctof(c) && 
       (quickfind(laMountain) || (hrand(I2000) < 100 && horo_ok() && 
-      !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
+      !randomPatternsMode && !tactic::on && !yendor::on && !racing::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laOvergrown && ctof(c) && horo_ok() &&
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       isLandIngame(laClearing) &&
-      !tactic::on && !yendor::on))) {
+      !tactic::on && !yendor::on && !racing::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) clearing::bpdata[h].root = NULL;
       }
@@ -1133,7 +1134,7 @@ void buildBigStuff(cell *c, cell *from) {
 
     if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && horo_ok() && 
       (quickfind(laWhirlpool) || (
-        hrand(2000) < (PURE ? 500 : 1000) && !tactic::on && !yendor::on)))
+        hrand(2000) < (PURE ? 500 : 1000) && !tactic::on && !racing::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
@@ -1146,7 +1147,7 @@ void buildBigStuff(cell *c, cell *from) {
       (princess::forceMouse ? canReachPlayer(from, moMouse) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
-      (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on) {
+      (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on && !racing::on) {
       createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
       celllister cl(c, 5, 1000000, NULL);
       for(cell *c: cl.lst) if(c->master->alt) generateAlts(c->master);

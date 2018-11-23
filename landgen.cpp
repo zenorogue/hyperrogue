@@ -788,7 +788,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else c2->mondir = NODIR;
             }
           }
-        if(!c->monst && !tactic::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
+        if(!c->monst && !tactic::on && !racing::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
           }
@@ -956,7 +956,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             forCellEx(c2, cc[i]) if(c2->wall == waArrowTrap) ok = false;
             }
           if(ok) {
-            for(int i=1; i<4; i++) 
+            if(!racing::on) for(int i=1; i<4; i++) 
               cc[i]->wall = waArrowTrap,
               cc[i]->wparam = 0;
             for(int i=0; i<5; i++) 
@@ -965,7 +965,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             cc[4]->wall = waStone;
             }
           }
-        if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone) {
+        if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
           c->wall = waTerraWarrior;
           c->landparam = randterra ? 0 : 3 + hrand(3);
           if(hrand(100) < items[itTerra]-10)
@@ -1759,7 +1759,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laHunting:
-      if(d == 7 && c->land == laHunting) {
+      if(d == 7 && c->land == laHunting && !racing::on) {
         if(hrand(1000) < 20) {
           if(openplains(c)) {
             if(hrand(2) == 0) {

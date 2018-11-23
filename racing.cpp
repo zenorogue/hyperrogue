@@ -19,14 +19,21 @@ static const int TWIDTH = 6;
 vector<cell*> track;
 map<cell*, pair<int, int> > trackstage;
 
+bool bad(cell *c2, cell *c) {
+  if(!passable(c2, c, P_ISPLAYER)) return true;
+  if((c2->land == laCrossroads) ^ (c->land == laCrossroads)) return true;
+  return false;
+  }
+
 int trackval(cell *c) {
   int v = celldist(c);
   int bonus = 0;
+  if(c->land != laCrossroads)
   forCellEx(c2, c) {
     int d = celldist(c2) - v;
-    if(d < 0 && !passable(c2, c, P_ISPLAYER))
+    if(d < 0 && bad(c2, c))
       bonus += 2;
-    if(d == 0 && !passable(c2, c, P_ISPLAYER))
+    if(d == 0 && bad(c2, c))
       bonus ++;
     }
   return v + bonus;
@@ -71,7 +78,7 @@ void generate_track() {
       break;
       }
     setdist(c, 4, parent[c]);
-    forCellEx(c1, c) if(passable(c, c1, P_ISPLAYER) && !parent.count(c1)) {
+    forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
       parent[c1] = c;
       cellbydist[trackval(c1)].push_back(c1);
       }
@@ -289,7 +296,6 @@ int readArgs() {
     stop_game();
     shmup::on = true;
     racing::on = true;
-    tactic::on = true;
     timerghost = false;
     }
   else return 1;
@@ -365,7 +371,9 @@ auto hook =
 #endif
 
 vector<eLand> race_lands = {
-  laIce, laDesert, 
+  laHunting,
+  laIce, 
+  laDesert, 
   
   laCrossroads, /* need editing */
   laCaves,      /* need fixing */
@@ -378,7 +386,6 @@ vector<eLand> race_lands = {
   laElementalWall,
   laWildWest,
   laDragon,
-  laHunting,
   laTerracotta, /* disable traps and warriors */
   laRuins,
   };

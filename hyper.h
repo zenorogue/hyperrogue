@@ -4684,6 +4684,7 @@ namespace racing {
   extern vector<cell*> track;
   extern map<cell*, pair<int, int> > trackstage;
   extern int current_player;
+  extern vector<eLand> race_lands;
   }
 
 bool subscreen_split(reaction_t for_each_subscreen);

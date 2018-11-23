@@ -667,7 +667,7 @@ bool rlyehComplete() {
   }
 
 bool lchance(eLand l) { 
-  if(tactic::on || yendor::on || ((geometry || GOLDBERG) && specialland == laElementalWall)) return true;
+  if(tactic::on || yendor::on || racing::on || ((geometry || GOLDBERG) && specialland == laElementalWall)) return true;
   if(chaosmode) return hrand(100) < 25;
   return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1); 
   }
@@ -724,8 +724,8 @@ hookset<eLand(eLand)> *hooks_nextland;
 
 eLand getNewLand(eLand old) {
 
-  if(old == laMirror && !chaosmode && hrand(10) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 5 : 2)) return laMirrored;
-  if(old == laTerracotta && !chaosmode && hrand(5) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 2 : 1) && !weirdhyperbolic) return laTerracotta;
+  if(old == laMirror && !chaosmode && hrand(10) >= ((tactic::on || racing::on) ? 0 : markOrb(itOrbLuck) ? 5 : 2)) return laMirrored;
+  if(old == laTerracotta && !chaosmode && hrand(5) >= ((tactic::on || racing::on) ? 0 : markOrb(itOrbLuck) ? 2 : 1) && !weirdhyperbolic) return laTerracotta;
     
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
@@ -763,6 +763,15 @@ eLand getNewLand(eLand old) {
   if(old == laEAir   && lchance(old)) return hrand(2) ? laEWater : laEFire;
   if(old == laEWater && lchance(old)) return hrand(2) ? laEEarth : laEAir;
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
+  
+  if(racing::on && old != laElementalWall) {
+    eLand l = old;
+    using racing::race_lands;
+    while(l == old) l = race_lands[hrand(isize(race_lands))];
+    if(l == laElementalWall) l = randomElementalLand();
+    if(l == laMirror) l = laCrossroads;
+    return l;
+    }
 
   if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
   if(weirdhyperbolic && specialland != old && specialland != laCrossroads4 && !chaosmode && old != laBarrier) return specialland;

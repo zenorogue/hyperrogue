@@ -7215,7 +7215,7 @@ namespace orbbull {
 static constexpr bool randterra = false;
 
 void terracotta(cell *c) {
-  if(c->wall == waTerraWarrior && !c->monst) {
+  if(c->wall == waTerraWarrior && !c->monst && !racing::on) {
     bool live = false;
     if(randterra) {
       c->landparam++;
