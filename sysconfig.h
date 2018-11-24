@@ -420,6 +420,7 @@ extern "C" {
 #if CAP_SAVE
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 #if CAP_TIMEOFDAY

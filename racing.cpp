@@ -47,12 +47,69 @@ struct ghostmoment {
 struct ghost {
   charstyle cs;
   int result;
+  time_t timestamp;
   vector<ghostmoment> history;
   };
 
 map<pair<string, int>, map<eLand, vector<ghost> > > race_ghosts;
 
 array<vector<ghostmoment>, MAXPLAYER> current_history;
+
+string ghost_prefix = "default";
+
+string ghost_filename(string seed, int mcode) {
+  if(ghost_prefix == "default") {
+    #ifdef FHS
+    if(getenv("HOME")) {
+      string s = getenv("HOME");
+      mkdir((s + "/.hyperrogue").c_str(), 0755);
+      mkdir((s + "/.hyperrogue/racing").c_str(), 0755);
+      ghost_prefix = s + "/.hyperrogue/racing/";
+      }
+    #else
+    mkdir("racing", 0755);
+    ghost_prefix = "racing/";
+    #endif
+    }
+  return ghost_prefix + seed + "-" + itsh(mcode) + ".data";
+  }
+
+void hread(hstream& hs, ghostmoment& m) {
+  hread(hs, m.step, m.where_id, m.footphase);
+  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+    hread(hs, m.T[i][j]);
+  }
+
+void hwrite(hstream& hs, const ghostmoment& m) {
+  hwrite(hs, m.step, m.where_id, m.footphase);
+  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+    hwrite(hs, m.T[i][j]);
+  }
+
+void hread(hstream& hs, ghost& gh) {
+  hread(hs, gh.cs, gh.result, gh.timestamp, gh.history);
+  }
+
+void hwrite(hstream& hs, const ghost& gh) {
+  hwrite(hs, gh.cs, gh.result, gh.timestamp, gh.history);
+  }
+
+bool read_ghosts(string seed, int mcode) {
+  fhstream f;
+  f.f = fopen(ghost_filename(seed, mcode).c_str(), "rb");
+  if(!f.f) return false;
+  f.get<int> ();
+  hread(f, race_ghosts[{seed, mcode}]);
+  return true;
+  }
+
+void write_ghosts(string seed, int mcode) {
+  fhstream f;
+  f.f = fopen(ghost_filename(seed, mcode).c_str(), "wb");
+  if(!f.f) throw hstream_exception(); // ("failed to write the ghost file");
+  hwrite(f, (const int&) VERNUM_HEX);
+  hwrite(f, race_ghosts[{seed, mcode}]);
+  }
 
 void fix_cave(cell *c) {
   int v = 0;
@@ -101,6 +158,9 @@ race_cellinfo& get_info(cell *c) {
   }
 
 void generate_track() {
+
+  if(race_ghosts[{track_code, modecode()}].empty())
+    read_ghosts(track_code, modecode());
 
   track.clear();
 
@@ -593,7 +653,11 @@ struct race_configurer {
     else dialog::addBreak(100);
   
     dialog::addItem(XLAT("select the track and start!"), 's');
-    dialog::add_action([] () { pushScreen(track_chooser); });
+    dialog::add_action([] () { 
+      if(race_ghosts[{track_code, modecode()}].empty())
+        read_ghosts(track_code, modecode());
+      pushScreen(track_chooser); 
+      });
 
     dialog::addBack();
     dialog::display();
@@ -634,10 +698,14 @@ void race_won() {
   if(!race_finish_tick[current_player]) {
     race_finish_tick[current_player] = ticks;
     charstyle gcs = getcs();
-    for(color_t *x: {&gcs.skincolor, &gcs.haircolor, &gcs.dresscolor, &gcs.swordcolor, &gcs.dresscolor2})
-      part(*x, 0) >>= 1;
-
-    race_ghosts[{track_code, modecode()}] [specialland].emplace_back(ghost{gcs, ticks - race_start_tick, current_history[current_player]});
+    for(color_t *x: {&gcs.skincolor, &gcs.haircolor, &gcs.dresscolor, &gcs.swordcolor, &gcs.dresscolor2}) {
+      for(int a=1; a<4; a++)
+        part(*x, a) = (part(*x, a) + part(gcs.uicolor, a)) / 2;
+      part(*x, 0) >>= 2;
+      }
+      
+    race_ghosts[{track_code, modecode()}] [specialland].emplace_back(ghost{gcs, ticks - race_start_tick, time(NULL), current_history[current_player]});
+    write_ghosts(track_code, modecode());
     }
   }
 
