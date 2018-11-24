@@ -250,7 +250,7 @@
 #endif
 
 #ifndef CAP_BONUS
-#define CAP_BONUS 0
+#define CAP_BONUS 1
 #endif
 
 #ifndef CAP_COMPLEX2
