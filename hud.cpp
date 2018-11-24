@@ -343,6 +343,22 @@ void drawMobileArrow(int i) {
 
 bool nofps = false;
 
+string racetimeformat(int t) {
+  string times = "";
+  int digits = 0;
+  bool minus = (t < 0);
+  if(t < 0) t = -t;
+  while(t || digits < 6) {
+    int mby = (digits == 5 ? 6 : 10);
+    times = char('0'+(t%mby)) + times;
+    t /= mby; digits++;
+    if(digits == 3) times = "." + times;
+    if(digits == 5) times = ":" + times;
+    }
+  if(minus) times = "-" + times;
+  return times;
+  }
+
 void drawStats() {
   if(nohud || vid.stereo_mode == sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
@@ -373,7 +389,8 @@ void drawStats() {
     quickqueue();
     }
   
-  if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
+  if(racing::on) ;
+  else if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;
     for(int i=0; i<glyphs; i++) if(ikappear(i) && (glyphflags(i) & GLYPH_INSQUARE))
@@ -482,7 +499,27 @@ void drawStats() {
   calcparam(); current_display->set_projection(0, false);
   
   string s0;
-  if(!peace::on) {
+  if(racing::on) {
+    #if CAP_RACING
+    color_t col;
+    if(ticks >= racing::race_start_tick)
+      col = 0x00FF00;
+    else if(ticks >= racing::race_start_tick - 2000)
+      col = 0xFFFF00;
+    else
+      col = 0xFF0000;
+    for(int i=0; i<multi::players; i++) if(racing::race_finish_tick[i])
+      col = 0xFFFFFF;
+    
+    dynamicval<int> x(vid.fsize, vid.fsize*2);
+    if(displayButtonS(vid.xres - 8, vid.fsize, racetimeformat(ticks - racing::race_start_tick), col, 16, vid.fsize));
+    for(int i=0; i<multi::players; i++) if(racing::race_finish_tick[i]) {
+      multi::cpid = i;
+      if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), racetimeformat(racing::race_finish_tick[i] - racing::race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize));
+      }
+    #endif
+    }
+  else if(!peace::on) {
     if(displayButtonS(vid.xres - 8, vid.fsize, XLAT("score: %1", its(gold())), forecolor, 16, vid.fsize)) {
       mouseovers = XLAT("Your total wealth"),
       instat = true,

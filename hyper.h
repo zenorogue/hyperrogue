@@ -4685,6 +4685,8 @@ namespace racing {
   extern map<cell*, pair<int, int> > trackstage;
   extern int current_player;
   extern vector<eLand> race_lands;
+  extern string track_code;
+  extern int race_start_tick, race_finish_tick[MAXPLAYER];
   }
 
 bool subscreen_split(reaction_t for_each_subscreen);

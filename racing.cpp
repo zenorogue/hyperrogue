@@ -19,6 +19,21 @@ static const int TWIDTH = 6;
 vector<cell*> track;
 map<cell*, pair<int, int> > trackstage;
 
+string track_code = "OFFICIAL";
+
+int race_start_tick, race_finish_tick[MAXPLAYER];
+
+struct ghostmoment {
+  int step;
+  cell *where;
+  transmatrix T;
+  ld footphase;
+  };
+
+map<string, map<int, vector<ghostmoment> > > race_ghosts;
+
+vector<ghostmoment> current_history[MAXPLAYER];
+
 void fix_cave(cell *c) {
   int v = 0;
   // if(c->wall == waCavewall) v++;
@@ -290,9 +305,10 @@ void generate_track() {
   */
 
   track_ready = true;
+  
+  race_start_tick = 0;
+  for(int i=0; i<MAXPLAYER; i++) race_finish_tick[i] = 0;
   }
-
-vector<tuple<int, cell*, transmatrix, ld> > history;
 
 bool inrec = false;
 
@@ -302,12 +318,14 @@ int current_player;
 
 void set_view() {
 
+  if(race_start_tick == 0) race_start_tick = ticks + 5000;
+
   if(subscreen_split(set_view)) return;
 
   shmup::monster *who = shmup::pc[current_player];
   
   safety = true;
-  if(!inrec) history.emplace_back(ticks, who->base, who->at, who->footphase);
+  if(!inrec) current_history[current_player].emplace_back(ghostmoment{ticks - race_start_tick, who->base, who->at, who->footphase});
 
   transmatrix at = ggmatrix(who->base) * who->at;
   

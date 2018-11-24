@@ -1580,6 +1580,7 @@ void movePlayer(monster *m, int delta) {
     if(abs(mdx) > abs(mturn)) mturn = -mdx;
     mdx = mdy = 0;
     facemouse = shotkey = dropgreen = false;
+    if(ticks < racing::race_start_tick) mgo = 0;
     }
   #endif
   
@@ -1791,6 +1792,8 @@ void movePlayer(monster *m, int delta) {
         mirror::createHere(cw, cpid);
         mirror::breakMirror(cw, cpid);
         awakenMimics(m, c2);
+        if(racing::on && !racing::race_finish_tick[racing::current_player])
+          racing::race_finish_tick[racing::current_player] = ticks;
         }
       if(c2->wall == waGlass && items[itOrbAether]) {
         items[itOrbAether] = 0;
