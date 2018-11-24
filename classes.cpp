@@ -1682,11 +1682,14 @@ geometryinfo ginf[gGUARD] = {
   {"minimal quotient",    "minimal",  7, 3, qSMALL | qNONOR, gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
   {"binary tiling",       "binary",   7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
   {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}, eVariation::pure},
-  {"Macbeath surface",    "Macbeath", 7, 3, qSMALL,          gcHyperbolic, 0x18800, {{7, 5}}, eVariation::bitruncated},
-  {"Bring's Surface",     "Bring",    5, 4, qSMALL,          gcHyperbolic, 0x18A00, {{6, 4}}, eVariation::bitruncated},
-  {"Schmutz's M(3)",      "M3",      12, 3, qSMALL,          gcHyperbolic, 0x18C00, {{4, 2}}, eVariation::bitruncated},
-  {"Schmutz's M(4)",      "M4",      12, 3, qSMALL,          gcHyperbolic, 0x18E00, {{4, 2}}, eVariation::bitruncated},
+  {"Macbeath surface",    "Macbeath", 7, 3, qSMALL,          gcHyperbolic, 0x20000, {{7, 5}}, eVariation::bitruncated},
+  {"Bring's Surface",     "Bring",    5, 4, qSMALL,          gcHyperbolic, 0x20200, {{6, 4}}, eVariation::bitruncated},
+  {"Schmutz's M(3)",      "M3",      12, 3, qSMALL,          gcHyperbolic, 0x20400, {{4, 2}}, eVariation::bitruncated},
+  {"Schmutz's M(4)",      "M4",      12, 3, qSMALL,          gcHyperbolic, 0x20600, {{4, 2}}, eVariation::bitruncated},
   };
+
+// remember to match the following mask when specifying codes for extra geometries: 0x78600
+// (other bits are used for other information)
 
 #define X3(x) x, x, x
 
