@@ -989,9 +989,15 @@ namespace dialog {
     edited_string = &s;
     editpos = isize(s);
     }
+  
+  string editchecker(int sym, int uni) {
+    if(uni >= 32 && uni < 127) return string("") + char(uni);
+    return "";
+    }
 
-  bool handle_edit_string(int sym, int uni) {
+  bool handle_edit_string(int sym, int uni, function<string(int, int)> checker) {
     auto& es = *edited_string;
+    string u2;
     if(sym == SDLK_LEFT) editpos--;
     else if(sym == SDLK_RIGHT) editpos++;
     else if(uni == 8) {
@@ -999,9 +1005,11 @@ namespace dialog {
       es.replace(editpos-1, 1, "");
       editpos--;
       }
-    else if(uni >= 32 && uni < 128) {
-      es.insert(editpos, 1, uni);
-      editpos++;
+    else if((u2 = checker(sym, uni)) != "") {
+      for(char c: u2) {
+        es.insert(editpos, 1, c);
+        editpos ++;
+        }
       }
     else return false;
     return true;

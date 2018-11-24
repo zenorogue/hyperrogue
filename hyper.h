@@ -1842,7 +1842,8 @@ namespace dialog {
   
   string view_edited_string();
   void start_editing(string& s);
-  bool handle_edit_string(int sym, int uni);
+  string editchecker(int sym, int uni);
+  bool handle_edit_string(int sym, int uni, function<string(int, int)> checker = editchecker);
   void edit_string(string& s, string title, string help);
   }
 
