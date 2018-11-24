@@ -5347,7 +5347,7 @@ void drawthemap() {
   else if(archimedean)
     arcm::draw();
   else
-    drawrec(viewctr, hsOrigin, cview(), 0);
+    drawStandard();
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
