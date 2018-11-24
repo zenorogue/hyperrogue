@@ -1100,7 +1100,12 @@ void load_edges(const string& fname_edges, string edgename, int pick = 0) {
   distribute_neurons();
   int i = 0;
   for(auto p: edgedata2)
-    addedge(p.first, p.second, 1 / (i+++.5), true, t);
+    if(p.first >= 0 && p.second >= 0)
+      addedge(p.first, p.second, 1 / (i+++.5), true, t);
+    else {
+      printf("error reading graph\n");
+      exit(1);
+      }
   }
 
 void random_edges(int q) {
