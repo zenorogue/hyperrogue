@@ -1192,6 +1192,7 @@ void switch_game_mode(char switchWhat) {
       peace::on = !peace::on;
       tactic::on = yendor::on = princess::challenge = 
       randomPatternsMode = inv::on = false;
+      racing::on = false;
       break;
     
     case rg::inv:
@@ -1199,6 +1200,7 @@ void switch_game_mode(char switchWhat) {
       if(tactic::on) firstland = laIce;
       tactic::on = yendor::on = princess::challenge = 
       randomPatternsMode = peace::on = false;
+      racing::on = false;
       break;
 
     case rg::chaos:
@@ -1207,6 +1209,7 @@ void switch_game_mode(char switchWhat) {
       need_reset_geometry = true;
       chaosmode = !chaosmode;
       if(bounded) set_geometry(gNormal);
+      racing::on = false;
       break;
 
 #if CAP_TOUR
@@ -1219,6 +1222,7 @@ void switch_game_mode(char switchWhat) {
       shmup::on = false;
       need_reset_geometry = true;    
       tour::on = !tour::on;
+      racing::on = false;
       break;
 #endif
 
@@ -1230,7 +1234,18 @@ void switch_game_mode(char switchWhat) {
       princess::challenge = false;
       randomPatternsMode = false;
       chaosmode = false;
+      racing::on = false;
       if(!yendor::on) firstland = laIce;
+      break;
+    
+    case rg::racing:
+      racing::on = !racing::on;
+      shmup::on = racing::on;
+      peace::on = false;
+      tour::on = false;
+      inv::on = false;
+      chaosmode = false;
+      princess::challenge = false;
       break;
 
     case rg::tactic:
@@ -1240,6 +1255,7 @@ void switch_game_mode(char switchWhat) {
       inv::on = false;
       randomPatternsMode = false;
       princess::challenge = false;
+      racing::on = false;
       chaosmode = false;
       if(!tactic::on) firstland = laIce;
       break;
@@ -1247,6 +1263,7 @@ void switch_game_mode(char switchWhat) {
     case rg::shmup:
       shmup::on = !shmup::on;
       princess::challenge = false;
+      if(!shmup::on) racing::on = false;
       break;
     
     case rg::randpattern:
@@ -1266,6 +1283,7 @@ void switch_game_mode(char switchWhat) {
       yendor::on = false;
       chaosmode = false;
       inv::on = false;
+      racing::on = false;
       break;
     
 #if CAP_DAILY

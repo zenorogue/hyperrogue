@@ -13,9 +13,12 @@ bool on;
 bool player_relative = false;
 bool track_ready;
 
-static const int LENGTH = 50;
+static const int LENGTH = 250;
 static const int TWIDTH = 6;
 static const int DROP = 1;
+
+int ghosts_to_show = 5;
+int ghosts_to_save = 10;
 
 struct race_cellinfo {
   cell *c;
@@ -95,8 +98,9 @@ void hwrite(hstream& hs, const ghost& gh) {
   }
 
 bool read_ghosts(string seed, int mcode) {
-  fhstream f;
-  f.f = fopen(ghost_filename(seed, mcode).c_str(), "rb");
+  string fname = ghost_filename(seed, mcode);
+  println(hlog, "trying to read ghosts from: ", fname);
+  fhstream f(fname, "rb");
   if(!f.f) return false;
   f.get<int> ();
   hread(f, race_ghosts[{seed, mcode}]);
@@ -446,9 +450,7 @@ int readArgs() {
   else if(argis("-racing")) {
     PHASEFROM(2);
     stop_game();
-    shmup::on = true;
-    racing::on = true;
-    timerghost = false;
+    switch_game_mode(rg::racing);
     }
   else return 1;
   return 0;
@@ -580,10 +582,7 @@ void track_chooser(string new_track) {
     dialog::addSelItem(XLAT1(linf[l].name), s, let++);
     dialog::add_action([l, new_track] () {
       stop_game();
-      specialland = l;
-      racing::on = true;
-      shmup::on = true;
-      track_code = new_track;
+      if(!racing::on) switch_game_mode(rg::racing);
       start_game();
       popScreenAll();
       });
@@ -626,6 +625,27 @@ struct race_configurer {
   
     dialog::init(XLAT("Racing"));
   
+    dialog::addSelItem("track name", editing_track ? dialog::view_edited_string() : new_track, '/');
+    dialog::add_action([this] () { 
+      editing_track = !editing_track;
+      if(editing_track) dialog::start_editing(new_track);
+      });
+    dialog::addItem("play the official track", 'o');
+    dialog::add_action([this] () { new_track = "OFFICIAL"; });
+    dialog::addItem("play a random track", 'r');
+    dialog::add_action([this] () { new_track = random_track_name(); });
+  
+    dialog::addItem(XLAT("select the track and start!"), 's');
+    dialog::add_action([this] () { 
+      if(race_ghosts[{new_track, modecode()}].empty())
+        read_ghosts(new_track, modecode());
+      else
+        println(hlog, "known ghosts: ", isize(race_ghosts[{new_track, modecode()}]));
+      pushScreen([this] () { track_chooser(new_track); }); 
+      });
+    
+    dialog::addBreak(100);
+
     dialog::addBoolItem(XLAT("player relative"), player_relative, 'p');
     dialog::add_action([] () { 
       player_relative = !player_relative; 
@@ -674,22 +694,23 @@ struct race_configurer {
       }
     else dialog::addBreak(100);
     
-    dialog::addSelItem("track name", editing_track ? dialog::view_edited_string() : new_track, '/');
-    dialog::add_action([this] () { 
-      editing_track = !editing_track;
-      if(editing_track) dialog::start_editing(new_track);
-      });
-    dialog::addItem("play the official track", 'o');
-    dialog::add_action([this] () { new_track = "OFFICIAL"; });
-    dialog::addItem("play a random track", 'r');
-    dialog::add_action([this] () { new_track = random_track_name(); });
-  
-    dialog::addItem(XLAT("select the track and start!"), 's');
-    dialog::add_action([this] () { 
-      if(race_ghosts[{new_track, modecode()}].empty())
-        read_ghosts(new_track, modecode());
-      pushScreen([this] () { track_chooser(new_track); }); 
-      });
+    dialog::addBreak(100);
+    
+    dialog::addSelItem(XLAT("best scores to show as ghosts"), its(ghosts_to_show), 'g');
+    dialog::add_action([]() { dialog::editNumber(ghosts_to_show, 0, 100, 1, 5, "best scores to show as ghosts", ""); });
+
+    dialog::addSelItem(XLAT("best scores to save"), its(ghosts_to_save), 'b');
+    dialog::add_action([]() { dialog::editNumber(ghosts_to_save, 0, 100, 1, 10, "best scores to save", ""); });
+    
+    
+    if(racing::on) {
+      dialog::addItem(XLAT("disable the racing mode"), 'x');
+      dialog::add_action([] () { 
+        stop_game();
+        switch_game_mode(rg::racing);
+        start_game();
+        });
+      }
 
     dialog::addBack();
     dialog::display();
@@ -706,9 +727,13 @@ struct race_configurer {
     }
   };
 
+void configure_race() { 
+  pushScreen(race_configurer());
+  }
+
 auto hooks1 = 
   addHook(hooks_o_key, 90, [] { 
-    if(racing::on) return named_dialog("race mode", race_configurer());
+    if(racing::on) return named_dialog(XLAT("racing menu"), race_configurer());
     else return named_functionality();
     });
 
@@ -745,12 +770,19 @@ void race_won() {
       part(*x, 0) >>= 2;
       }
       
-    race_ghosts[{track_code, modecode()}] [specialland].emplace_back(ghost{gcs, ticks - race_start_tick, time(NULL), current_history[current_player]});
-    write_ghosts(track_code, modecode());
+    auto &subtrack = race_ghosts[{track_code, modecode()}] [specialland];
+
+    subtrack.emplace_back(ghost{gcs, ticks - race_start_tick, time(NULL), current_history[current_player]});
+    sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result > g2.result; });
+    if(isize(subtrack) > ghosts_to_save && ghosts_to_save > 0) 
+      subtrack.resize(ghosts_to_save);
+    if(ghosts_to_save > 0)
+      write_ghosts(track_code, modecode());
     }
   }
 
 void markers() {
+  if(!racing::on) return;
   if(racing::player_relative) {
     using namespace racing;
     cell *goal = NULL;
@@ -760,7 +792,10 @@ void markers() {
     queuestr(H, vid.fsize, its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
     addauraspecial(H, 0x10100, 0);
     }
+  int ghosts_left = ghosts_to_show;
   for(auto& ghost: race_ghosts[{track_code, modecode()}][specialland]) {
+    if(!ghosts_left) break;
+    ghosts_left--;
     auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
     if(p == ghost.history.end()) p--;
     cell *w = rti[p->where_id].c;

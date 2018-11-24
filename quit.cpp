@@ -299,6 +299,7 @@ void showMission() {
     tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
 #endif
     (cheater && !autocheat)? XLAT("It is a shame to cheat!") : 
+    racing::on ? "racing mode" :
     showoff ? XLAT("Showoff mode") :
     (canmove && princess::challenge) ? XLAT("%1 Challenge", moPrincess) :
     canmove ? XLAT("Quest status") : 
@@ -307,9 +308,9 @@ void showMission() {
     );
   keyhandler = handleKeyQuit;
 
-  if(!peace::on)
+  if(!peace::on && !racing::on)
     dialog::addInfo(XLAT("Your score: %1", its(gold())));
-  if(!peace::on)
+  if(!peace::on && !racing::on)
     dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
 #if CAP_TOUR
@@ -326,6 +327,7 @@ void showMission() {
     else if(tour::on)
       ;
 #endif
+    else if(racing::on) ;
     else if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
     else if(gold() < R30)
@@ -354,6 +356,7 @@ void showMission() {
   else if(tour::on) ;
 #endif
   else if(peace::on) ;
+  else if(racing::on) ;
   else if(tkills() < R100)
     dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
   else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
@@ -375,7 +378,7 @@ void showMission() {
   if(cheater && !autocheat) {
     dialog::addInfo(XLAT("you have cheated %1 times", its(cheater)), 0xFF2020);
     }
-  else {
+  else if(!racing::on) {
     dialog::addInfo(timeline(), dialog::dialogcolor);
     }
   
@@ -439,6 +442,8 @@ void showMission() {
     dialog::addItem(XLAT("restart"), SDLK_F5);
     if(inv::on && items[itInventory])
       dialog::addItem(XLAT("inventory"), 'i');
+    if(racing::on)
+      dialog::addItem(XLAT("racing menu"), 'o');
     #if ISMOBILE==0
     dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
     #endif

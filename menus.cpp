@@ -494,6 +494,9 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
   dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
   dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
+#if CAP_RACING
+  dialog::addBoolItem(XLAT("racing mode"), racing::on, 'R');
+#endif
 #if CAP_DAILY
   dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
 #endif
@@ -539,6 +542,10 @@ void showChangeMode() {
       }
     else if(xuni == 'p')
       pushScreen(peace::showMenu);
+    #if CAP_RACING
+    else if(xuni == 'R')
+      racing::configure_race();
+    #endif
     else if(xuni == 'i') dialog::do_if_confirmed([] {
       restart_game(rg::inv);
       });

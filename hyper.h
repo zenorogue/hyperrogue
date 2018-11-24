@@ -676,6 +676,7 @@ namespace rg {
   static const char princess = 'p';
   static const char daily = 'd';
   static const char daily_off = 'D';
+  static const char racing = 'R';
   
   // wrongmode only -- marks 'global' achievements not related to the current mode
   static const char global = 'x'; 
@@ -4680,7 +4681,7 @@ ld sintick(int period, ld phase = 0);
 namespace racing {
   extern bool on, player_relative, track_ready;
   void generate_track();
-  void show();
+  void configure_race();
   void prepare_subscreens();
   extern vector<cell*> track;
   extern int current_player;
