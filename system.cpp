@@ -35,7 +35,7 @@ bool verless(string v, string cmp) {
 bool do_use_special_land() {
   return
     !safety &&
-    (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on);
+    (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on || racing::on);
   }
 
 hookset<bool()> *hooks_welcome_message;
@@ -112,6 +112,8 @@ void initgame() {
     shrand(safetyseed);
     firstland = safetyland;
     }
+  
+  if(racing::on) racing::apply_seed();
   
   bool use_special_land = do_use_special_land();
     

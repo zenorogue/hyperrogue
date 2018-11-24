@@ -13,26 +13,46 @@ bool on;
 bool player_relative = false;
 bool track_ready;
 
-static const int LENGTH = 250;
+static const int LENGTH = 50;
 static const int TWIDTH = 6;
+static const int DROP = 1;
 
+struct race_cellinfo {
+  cell *c;
+  int from_track;
+  int completion;
+  };  
+
+vector<race_cellinfo> rti;
 vector<cell*> track;
-map<cell*, pair<int, int> > trackstage;
+map<cell*, int> rti_id;
 
 string track_code = "OFFICIAL";
+
+void apply_seed() {
+  int s = 0;
+  for(char c: track_code) s = 713 * s + c;
+  shrand(s);
+  }
 
 int race_start_tick, race_finish_tick[MAXPLAYER];
 
 struct ghostmoment {
   int step;
-  cell *where;
+  int where_id;
   transmatrix T;
   ld footphase;
   };
 
-map<string, map<int, vector<ghostmoment> > > race_ghosts;
+struct ghost {
+  charstyle cs;
+  int result;
+  vector<ghostmoment> history;
+  };
 
-vector<ghostmoment> current_history[MAXPLAYER];
+map<pair<string, int>, map<eLand, vector<ghost> > > race_ghosts;
+
+array<vector<ghostmoment>, MAXPLAYER> current_history;
 
 void fix_cave(cell *c) {
   int v = 0;
@@ -69,6 +89,15 @@ int trackval(cell *c) {
       bonus ++;
     }
   return v + bonus;
+  }
+
+void tie_info(cell *c, int from_track, int comp) {
+  rti_id[c] = isize(rti);
+  rti.emplace_back(race_cellinfo{c, from_track, comp});
+  }
+
+race_cellinfo& get_info(cell *c) {
+  return rti[rti_id.at(c)];
   }
 
 void generate_track() {
@@ -211,18 +240,18 @@ void generate_track() {
   if(1) {
     manual_celllister cl;
   
-    for(int i=0; i<isize(track); i++) {    
-      trackstage[track[i]] = {0, i};
+    for(int i=0; i<isize(track); i++) {
+      tie_info(track[i], 0, i);
       cl.add(track[i]);
       }
     
-    int win = isize(track) - 10;
+    int win = isize(track) - DROP;
     
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
-      auto p = trackstage[c];
-      forCellEx(c2, c) if(!trackstage.count(c2)) {
-        trackstage[c2] = {p.first+1, p.second};
+      auto p = get_info(c);
+      forCellEx(c2, c) if(!rti_id.count(c2)) {
+        tie_info(c2, p.from_track+1, p.completion);
         cl.add(c2);
         }
       c->item = itNone;
@@ -232,17 +261,17 @@ void generate_track() {
       if(c->monst == moIvyHead) c->monst = moIvyWait;
       if(inmirror(c->land))
         ;      
-      else if(p.first == TWIDTH) {
+      else if(p.from_track == TWIDTH) {
         killMonster(c, moNone, 0);
         c->wall = waBarrier;
         c->land = laBarrier;
         }
-      else if(p.first > TWIDTH) {
+      else if(p.from_track > TWIDTH) {
         killMonster(c, moNone, 0);
         c->land = laMemory;
         c->wall = waChasm;
         }
-      if(p.second >= win && p.first < TWIDTH) {
+      if(p.completion >= win && p.from_track < TWIDTH) {
         c->wall = hrand(2) ? waMirror : waCloud;
         killMonster(c, moNone, 0);
         }
@@ -252,7 +281,7 @@ void generate_track() {
   for(int i=0; i<motypes; i++) kills[i] = 0;
   int byat[256];
   for(int a=0; a<16; a++) byat[a] = 0;
-  for(auto s: trackstage) byat[s.second.first]++;
+  for(const auto s: rti) byat[s.from_track]++;
   for(int a=0; a<16; a++) printf("%d: %d\n", a, byat[a]);
   
   if(s->land == laCaves) {
@@ -260,11 +289,11 @@ void generate_track() {
     while(true) {
       unsigned hashval = 7;
       int id = 0;
-      for(auto s: trackstage) {
-        fix_cave(s.first);
-        if(s.first->wall == waCavewall) 
+      for(auto s: rti) {
+        fix_cave(s.c);
+        if(s.c->wall == waCavewall) 
           hashval = (3+2*(id++)) * hashval + 1;
-        if(s.first->wall == waCavefloor) 
+        if(s.c->wall == waCavefloor) 
           hashval = (3+2*(id++)) * hashval + 2;
         }
       printf("hashval = %x id = %d\n", hashval, id);
@@ -324,15 +353,14 @@ void set_view() {
 
   shmup::monster *who = shmup::pc[current_player];
   
-  safety = true;
-  if(!inrec) current_history[current_player].emplace_back(ghostmoment{ticks - race_start_tick, who->base, who->at, who->footphase});
+  if(!inrec) current_history[current_player].emplace_back(ghostmoment{ticks - race_start_tick, rti_id[who->base], who->at, who->footphase});
 
   transmatrix at = ggmatrix(who->base) * who->at;
   
   if(racing::player_relative)
     View = spin(race_angle * degree) * inverse(at) * View;
   else {
-    int z = racing::trackstage[who->base].second;
+    int z = get_info(who->base).completion;
     int steps = euclid ? 1000 : 20;
     cell *c1 = racing::track[max(z-steps, 0)];
     cell *c2 = racing::track[min(z+steps, isize(racing::track)-1)];
@@ -428,7 +456,9 @@ auto hook =
 + addHook(clearmemory, 0, []() {
     track_ready = false;
     track.clear();
-    trackstage.clear();
+    rti.clear();
+    rti_id.clear();
+    for(auto &ch: current_history) ch.clear();
     })
 // + addHook(hooks_handleKey, 120, akh);
   ;
@@ -460,6 +490,47 @@ vector<string> playercmds_race = {
   "", "", "",
   "", "change camera", "", ""
   };
+
+string racetimeformat(int t) {
+  string times = "";
+  int digits = 0;
+  bool minus = (t < 0);
+  if(t < 0) t = -t;
+  while(t || digits < 6) {
+    int mby = (digits == 5 ? 6 : 10);
+    times = char('0'+(t%mby)) + times;
+    t /= mby; digits++;
+    if(digits == 3) times = "." + times;
+    if(digits == 5) times = ":" + times;
+    }
+  if(minus) times = "-" + times;
+  return times;
+  }
+
+void track_chooser() {
+  dialog::init(XLAT("Racing"));
+
+  char let = 'a';
+  for(eLand l: race_lands) {
+    auto& gh = race_ghosts[{track_code, modecode()}] [l];
+    const int LOST = 3600000;
+    int best = LOST;
+    for(auto& gc: gh) best = min(best, gc.result);
+    string s = (best == LOST) ? "" : racetimeformat(best);
+    dialog::addSelItem(XLAT1(linf[l].name), s, let++);
+    dialog::add_action([l] () {
+      stop_game();
+      specialland = l;
+      racing::on = true;
+      shmup::on = true;
+      start_game();
+      popScreenAll();
+      });
+    }
+  
+  dialog::addBack();
+  dialog::display();
+  }
 
 struct race_configurer {
 
@@ -521,6 +592,9 @@ struct race_configurer {
       }
     else dialog::addBreak(100);
   
+    dialog::addItem(XLAT("select the track and start!"), 's');
+    dialog::add_action([] () { pushScreen(track_chooser); });
+
     dialog::addBack();
     dialog::display();
     
@@ -556,6 +630,41 @@ void prepare_subscreens() {
     }
   }
 
+void race_won() {
+  if(!race_finish_tick[current_player]) {
+    race_finish_tick[current_player] = ticks;
+    charstyle gcs = getcs();
+    for(color_t *x: {&gcs.skincolor, &gcs.haircolor, &gcs.dresscolor, &gcs.swordcolor, &gcs.dresscolor2})
+      part(*x, 0) >>= 1;
+
+    race_ghosts[{track_code, modecode()}] [specialland].emplace_back(ghost{gcs, ticks - race_start_tick, current_history[current_player]});
+    }
+  }
+
+void markers() {
+  if(racing::player_relative) {
+    using namespace racing;
+    cell *goal = NULL;
+    for(cell *c: track) if(inscreenrange(c)) goal = c;
+    hyperpoint H = tC0(ggmatrix(goal));
+    queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+    queuestr(H, vid.fsize, its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
+    addauraspecial(H, 0x10100, 0);
+    }
+  for(auto& ghost: race_ghosts[{track_code, modecode()}][specialland]) {
+    auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
+    if(p == ghost.history.end()) p--;
+    cell *w = rti[p->where_id].c;
+    if(!gmatrix.count(w)) continue;
+    dynamicval<charstyle> x(getcs(), ghost.cs);
+    drawMonsterType(moPlayer, w, gmatrix[w] * p->T, 0, p->footphase);
+    }
+  }
+
+int get_percentage(int i) {
+  return min(get_info(shmup::pc[i]->base).completion * 100 / (isize(track) - DROP), 100);
+  }
+  
 }
 
 bool subscreen_split(reaction_t what) {

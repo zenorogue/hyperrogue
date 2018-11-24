@@ -33,7 +33,7 @@ ld fractick(int period, ld phase = 0) {
   return t;
   }
   
-ld sintick(int period, ld phase = 0) {
+ld sintick(int period, ld phase) {
   return sin(ptick(period, phase));
   }
 
@@ -5136,15 +5136,7 @@ void drawMarkers() {
       }
   
     #if CAP_RACING
-    if(racing::on && racing::player_relative) {
-      using namespace racing;
-      cell *goal = NULL;
-      for(cell *c: track) if(inscreenrange(c)) goal = c;
-      hyperpoint H = tC0(ggmatrix(goal));
-      queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
-      queuestr(H, vid.fsize, its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
-      addauraspecial(H, 0x10100, 0);
-      }
+    racing::markers();
     #endif
         
     if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON) {

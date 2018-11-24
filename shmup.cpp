@@ -1792,8 +1792,9 @@ void movePlayer(monster *m, int delta) {
         mirror::createHere(cw, cpid);
         mirror::breakMirror(cw, cpid);
         awakenMimics(m, c2);
-        if(racing::on && !racing::race_finish_tick[racing::current_player])
-          racing::race_finish_tick[racing::current_player] = ticks;
+        #if CAP_RACING
+        if(racing::on) racing::race_won();
+        #endif
         }
       if(c2->wall == waGlass && items[itOrbAether]) {
         items[itOrbAether] = 0;
@@ -3225,6 +3226,7 @@ void init() {
     else
       pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
     pc[i]->base = cwt.at;
+    pc[i]->vel = 0;
     pc[i]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord ||
       firstland == laWhirlpool);
     pc[i]->store();

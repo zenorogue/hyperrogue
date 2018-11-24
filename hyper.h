@@ -4674,6 +4674,7 @@ hyperpoint nearcorner(cell *c, int i);
 extern bool showquotients;
 
 bool do_draw(cell *c, const transmatrix& T);
+ld sintick(int period, ld phase = 0);
 
 #if CAP_RACING
 namespace racing {
@@ -4682,11 +4683,13 @@ namespace racing {
   void show();
   void prepare_subscreens();
   extern vector<cell*> track;
-  extern map<cell*, pair<int, int> > trackstage;
   extern int current_player;
   extern vector<eLand> race_lands;
   extern string track_code;
   extern int race_start_tick, race_finish_tick[MAXPLAYER];
+  void race_won();
+  void apply_seed();
+  string racetimeformat(int t);
   }
 
 bool subscreen_split(reaction_t for_each_subscreen);
