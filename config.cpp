@@ -26,6 +26,9 @@ charstyle& getcs(int id) {
     return vid.cs;
   }
 
+void hread(hstream& hs, charstyle& cs) { hread_raw(hs, cs); }
+void hwrite(hstream& hs, const charstyle& cs) { hwrite_raw(hs, cs); }
+
 string csnameid(int id) {
   if(id == 0) return XLAT("male");
   if(id == 1) return XLAT("female");

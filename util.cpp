@@ -140,17 +140,6 @@ bool appears(const string& haystack, const string& needle) {
   return simplify(haystack).find(simplify(needle)) != string::npos;
   }
 
-/* indenter */
-
-int current_indentation;
-
-struct indenter {
-  indenter() { current_indentation += 2; }
-  ~indenter() { current_indentation -= 2; }
-  };
-
-void doindent() { for(int i=0; i<current_indentation; i++) printf(" "); }
-
 cld exp_parser::parse(int prio) {
   cld res;
   while(next() == ' ') at++;
@@ -247,4 +236,6 @@ string parser_help() {
   return XLAT("Functions available: %1", 
     "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez");
   }
+
+logger hlog;
 }

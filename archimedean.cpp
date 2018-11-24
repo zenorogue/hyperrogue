@@ -2,7 +2,7 @@ namespace hr {
 
 namespace arcm {
 
-#define SDEBUG(x) if(debug_geometry) { doindent(); x; fflush(stdout); }
+#define SDEBUG(x) if(debug_geometry) { x; fflush(stdout); }
 
 static const int sfPH = 1;
 static const int sfLINE = 2;
@@ -563,16 +563,16 @@ void create_adjacent(heptagon *h, int d) {
   if(euclid) 
     alt = encodeId(pair_to_vec(int(T[0][2]), int(T[1][2])));
     
-  SDEBUG( printf("look for: %p / %s\n", alt, display(T * C0)); )
+  SDEBUG( println(hlog, "look for: ", alt, " / ", T * C0); )
 
   for(auto& p2: altmap[alt]) if(intval(p2.second * C0, T * C0) < 1e-4) {
-    SDEBUG( printf("cell found: %p\n", p2.first); )
+    SDEBUG( println(hlog, "cell found: ", p2.first); )
     for(int d2=0; d2<p2.first->degree(); d2++) {
       heptspin hs(p2.first, d2);
       auto& t2 = current.get_triangle(p2.first, d2);
       transmatrix T1 = T * spin(M_PI + t2.first);
-      SDEBUG( printf("compare: %s", display(T1 * xpush0(1)));  )
-      SDEBUG( printf(":: %s\n", display(p2.second * xpush0(1)));  )
+      SDEBUG( print(hlog, "compare: ", T1 * xpush0(1));  )
+      SDEBUG( println(hlog, ":: ", p2.second * xpush0(1));  )
       if(intval(T1 * xpush0(1), p2.second * xpush0(1)) < 1e-4) {
       
         // T1 = p2.second
@@ -591,7 +591,7 @@ void create_adjacent(heptagon *h, int d) {
         return;
         }
       }
-    SDEBUG( printf("but rotation not found\n"));
+    SDEBUG( println(hlog, "but rotation not found"));
     }
   
   auto& t2 = current.get_triangle(current.get_adj(hi));
@@ -765,7 +765,7 @@ int readArgs() {
     archimedean_tiling at;
     shift(); at.parse(args());
     if(at.errors) {
-      printf("error: %s\n", at.errormsg.c_str());
+      println(hlog, "error: ", at.errormsg);
       }
     else {
       set_geometry(gArchimedean);
@@ -1012,7 +1012,7 @@ void show() {
     archimedean_tiling tested;
     tested.parse(s);
     if(tested.errors) {
-      printf("WARNING: %d errors on %s '%s'\n", tested.errors, s.c_str(), tested.errormsg.c_str());
+      println(hlog, "WARNING: ", tested.errors, " errors on ", s, " '", tested.errormsg, "'");
       }
     else {
       tested.coloring = col;

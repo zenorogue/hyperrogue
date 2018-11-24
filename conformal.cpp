@@ -348,13 +348,6 @@ namespace conformal {
     
     llv = ticks;
     phase = 0;
-
-    if(0)
-      for(int j=0; j<=Q; j++) {
-        hyperpoint cur = v[j]->at * C0;
-        printf("%4d/%3d. %p [%3d] %s\n", j, Q, v[j]->base, celldist(v[j]->base), display(cur));
-        }
-
     }
   
   void movetophase() {
@@ -516,7 +509,7 @@ namespace conformal {
             hyperpoint hscr;
             applymodel(last, hscr);
             ld bwidth = -current_display->radius * hscr[0];
-            printf("bwidth = %lf/%lf\n", bwidth, len);
+            print(hlog, "bwidth = ", bwidth, "/", len);
   
             drawsegment:
             SDL_Surface *gr = glbuf.render();

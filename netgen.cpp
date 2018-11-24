@@ -360,8 +360,7 @@ namespace hr { namespace netgen {
         
         if(0) if((i==0 && e == 0) || (i == zeroi && e == zeroe)) {
           for(int ofs=0; ofs<t; ofs++) {
-            printf("OFS %d: %s", ofs, display(hvec(i, (e+ofs)%t)));
-            printf(" %s\n", display(hvec(i, (e+1+ofs)%t)));
+            println(hlog, "OFS ", ofs, hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t));
             }
           }
 
@@ -410,7 +409,7 @@ namespace hr { namespace netgen {
         }
       }
     
-    printf("pateks = %d\n", pateks);
+    println(hlog, "pateks = ", pateks);
         
     IMAGESAVE(net, "papermodel-all" IMAGEEXT);
     IMAGESAVE(hqsurface, "papermodel-source" IMAGEEXT);

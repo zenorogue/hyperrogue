@@ -179,13 +179,6 @@ ld zlevel(const hyperpoint &h) {
   else return (h[2] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
 
-// display a hyperbolic point
-char *display(const hyperpoint& H) { 
-  static char buf[100];
-  sprintf(buf, "%8.4f:%8.4f:%8.4f", double(H[0]), double(H[1]), double(H[2]));
-  return buf;
-  }
-
 ld hypot_auto(ld x, ld y) {
   switch(cgclass) {
     case gcEuclid:
@@ -434,23 +427,6 @@ void fixmatrix(transmatrix& T) {
 
 // show the matrix on screen
 
-void display(const transmatrix& T) {
-  for(int y=0; y<3; y++) {
-    for(int x=0; x<3; x++) printf("%10.7f", double(T[y][x]));
-    printf(" -> %10.7f\n", double(squar(T[y][0]) + squar(T[y][1]) + sig(2) * squar(T[y][2])));
-    // printf("\n");
-    }
-  
-  for(int x=0; x<3; x++) printf("%10.7f", double(squar(T[0][x]) + squar(T[1][x]) + sig(2) * squar(T[2][x])));
-  printf("\n");
-  
-  for(int x=0; x<3; x++) {
-    int y = (x+1) % 3;
-    printf("%10.7f", double(T[0][x]*T[0][y] + T[1][x]*T[1][y] + sig(2) * T[2][x]*T[2][y]));
-    }
-  printf("\n\n");
-  }
-
 ld det(const transmatrix& T) {
   ld det = 0;
   for(int i=0; i<3; i++) 
@@ -461,8 +437,7 @@ ld det(const transmatrix& T) {
   }
 
 void inverse_error(const transmatrix& T) {
-  printf("Warning: inverting a singular matrix\n");
-  display(T);
+  println(hlog, "Warning: inverting a singular matrix: ", T);
   }
 
 transmatrix inverse(const transmatrix& T) {

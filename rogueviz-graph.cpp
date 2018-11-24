@@ -183,7 +183,7 @@ void run_snub(int v, int w) {
   
   xts0 = tC0(ts[0]);
   
-  printf("original %s\n", display(xts0));
+  println(hlog, "original ", xts0);
   
   cor = rel * gmatrix[cc] * C0;
 

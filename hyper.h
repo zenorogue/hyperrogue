@@ -3059,9 +3059,7 @@ extern transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 // heptspin hsstep(const heptspin &hs, int spin);
 
 extern void fixmatrix(transmatrix&);
-void display(const transmatrix& T);
 transmatrix rgpushxto0(const hyperpoint& H);
-char *display(const hyperpoint& H);
 
 string its(int i);
 
@@ -3868,18 +3866,6 @@ bool score_loaded(int id);
 int score_default(int id);
 void handle_event(SDL_Event& ev);
 
-#ifndef XPRINTF
-#ifdef __GNUC__
-__attribute__((__format__ (__printf__, 1, 2)))
-#endif
-inline void Xprintf(const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    va_end(ap);
-}
-#endif
-
 void pop_game();
 void push_game();
 void start_game();
@@ -4153,18 +4139,174 @@ string bygen(reaction_t h);
 void open_url(string s);
 #endif
 
-namespace mapstream {
-  extern FILE *f;
+// HyperRogue streams
 
-  inline void saveChar(char c) { fwrite(&c, 1, 1, f); }
-  template<class T> void save(T& c) { fwrite(&c, sizeof(T), 1, f); }
+struct hstream {
+  virtual void write_char(char c) = 0;
+  virtual void write_chars(const char* c, size_t q) { while(q--) write_char(*(c++)); }
+  virtual char read_char() = 0;
+  virtual void read_chars(char* c, size_t q) { while(q--) *(c++) = read_char(); }
 
-  inline char loadChar() { char c; int i=fread(&c, 1, 1, f); if(i!=1) return 0; else return c; }
-  template<class T> int load(T& c) { return fread(&c, sizeof(T), 1, f); }
-  inline int32_t loadInt() { int i; if(load(i) < 1) return -1; else return i; }
-  void saveString(const string& s);
-  string loadString();
+  template<class T> void write(const T& t) { hwrite(*this, t); }
+  template<class T> void read(T& t) { hread(*this, t); }
+  template<class T> T get() { T t; hread(*this, t); return t; }
+  template<class T> T get_raw() { T t; hread_raw(*this, t); return t; }
+  };
+
+template<class T> void hwrite_raw(hstream& hs, const T& c) { hs.write_chars((char*) &c, sizeof(T)); }
+template<class T> void hread_raw(hstream& hs, T& c) { hs.read_chars((char*) &c, sizeof(T)); }
+
+template<class T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value>::type> void hwrite(hstream& hs, const T& c) { hwrite_raw(hs, c); }
+template<class T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value>::type> void hread(hstream& hs, T& c) { hread_raw(hs, c); }
+
+inline void hwrite(hstream& hs, const string& s) { hs.write_char(isize(s)); for(char c: s) hs.write_char(c); }  
+inline void hread(hstream& hs, string& s) { s = ""; int l = (unsigned char) hs.read_char(); for(int i=0; i<l; i++) s += hs.read_char(); }
+inline void hwrite(hstream& hs, const ld& h) { double d = h; hs.write_chars((char*) &d, sizeof(double)); }
+inline void hread(hstream& hs, ld& h) { double d; hs.read_chars((char*) &d, sizeof(double)); h = d; }
+  
+template<class T, size_t X> void hwrite(hstream& hs, const array<T, X>& a) { for(auto &ae: a) hwrite(hs, ae); }
+template<class T, size_t X> void hread(hstream& hs, array<T, X>& a) { for(auto &ae: a) hread(hs, ae); }
+
+template<class T> void hwrite(hstream& hs, const vector<T>& a) { hwrite<int>(hs, isize(a)); for(auto &ae: a) hwrite(hs, ae); }
+template<class T> void hread(hstream& hs, vector<T>& a) { a.resize(hs.get<int>()); for(auto &ae: a) hread(hs, ae); }
+
+template<class T, class U> void hwrite(hstream& hs, const map<T,U>& a) { 
+  hwrite<int>(hs, isize(a)); for(auto &ae: a) hwrite(hs, ae.first, ae.second);
   }
+template<class T, class U> void hread(hstream& hs, map<T,U>& a) { 
+  a.clear();
+  int N = hs.get<int>();
+  for(int i=0; i<N; i++) {
+    T key; hread(hs, key);
+    hread(hs, a[key]);
+    }
+  }
+
+template<class C, class C1, class... CS> void hwrite(hstream& hs, const C& c, const C1& c1, const CS&... cs) { hwrite(hs, c); hwrite(hs, c1, cs...); }
+template<class C, class C1, class... CS> void hread(hstream& hs, C& c, C1& c1, CS&... cs) { hread(hs, c); hread(hs, c1, cs...); }
+
+struct hstream_exception : std::exception { hstream_exception() {} };
+
+struct fhstream : hstream {
+  FILE *f;
+  virtual void write_char(char c) { write_chars(&c, 1); }
+  virtual void write_chars(char* c, size_t i) { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
+  virtual void read_chars(char* c, size_t i) { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
+  virtual char read_char() { char c; read_chars(&c, 1); return c; }
+  fhstream() { f = NULL; }
+  fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); }
+  ~fhstream() { if(f) fclose(f); }
+  };
+
+struct shstream : hstream { 
+  string s;
+  int pos;
+  shstream() { pos = 0; }
+  virtual void write_char(char c) { s += c; }
+  virtual char read_char() { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
+  };
+
+inline void print(hstream& hs) {}
+
+template<class... CS> string sprint(const CS&... cs) { shstream hs; print(hs, cs...); return hs.s; }
+
+template<class C, class C1, class... CS> void print(hstream& hs, const C& c, const C1& c1, const CS&... cs) { print(hs, c); print(hs, c1, cs...); }
+
+template<class... CS> void println(hstream& hs, const CS&... cs) { print(hs, cs...); hs.write_char('\n'); }
+
+// copied from: https://stackoverflow.com/questions/16387354/template-tuple-calling-a-function-on-each-element
+
+namespace detail
+{
+    template<int... Is>
+    struct seq { };
+
+    template<int N, int... Is>
+    struct gen_seq : gen_seq<N - 1, N - 1, Is...> { };
+
+    template<int... Is>
+    struct gen_seq<0, Is...> : seq<Is...> { };
+
+    template<typename T, typename F, int... Is>
+    void for_each(T&& t, F f, seq<Is...>)
+    {
+        auto l = { (f(std::get<Is>(t)), 0)... }; ignore(l);
+    }
+}
+
+template<typename... Ts, typename F>
+void for_each_in_tuple(std::tuple<Ts...> const& t, F f)
+{
+    detail::for_each(t, f, detail::gen_seq<sizeof...(Ts)>());
+}
+
+inline void print(hstream& hs, const string& s) { hs.write_chars(s.c_str(), isize(s)); }
+inline void print(hstream& hs, int i) { print(hs, its(i)); }
+inline void print(hstream& hs, ld x) { print(hs, fts(x)); }
+
+struct comma_printer {
+  bool first;
+  hstream& hs;
+  template<class T> void operator() (const T& t) { if(first) first = false; else print(hs, ","); print(hs, t); }
+  comma_printer(hstream& hs) : first(true), hs(hs) {}
+  };
+
+template<class T, size_t X> void print(hstream& hs, const array<T, X>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
+template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
+
+inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, 3>&)h); }
+inline void print(hstream& hs, const transmatrix T) { 
+  print(hs, "("); comma_printer c(hs);
+  for(int i=0; i<3; i++)
+  for(int j=0; j<3; j++) c(T[i][j]);
+  print(hs, ")"); }
+
+template<class T, class U> void print(hstream& hs, const pair<T, U> & t) { print(hs, "(", t.first, ",", t.second, ")"); }
+
+template<class... T> void print(hstream& hs, const tuple<T...> & t) { 
+  print(hs, "(");
+  comma_printer p(hs);
+  for_each_in_tuple(t, p);
+  print(hs, ")");
+  }
+
+#ifndef SPECIAL_LOGGER
+inline void special_log(char c) { putchar(c); }
+#endif
+
+struct logger : hstream {
+  int indentation;
+  virtual void write_char(char c) { special_log(c); if(c == 10) for(int i=0; i<indentation; i++) special_log(' '); }
+  virtual char read_char() { throw hstream_exception(); }
+  };
+
+extern logger hlog;
+
+#ifdef __GNUC__
+__attribute__((__format__ (__printf__, 1, 2)))
+#endif
+inline string format(const char *fmt, ...) {
+  char buf[1000];
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buf, 1000, fmt, ap);
+  va_end(ap);
+  return buf;
+  }
+
+inline void print(hstream& hs, heptagon* h) { print(hs, format("H%p", h)); }
+inline void print(hstream& hs, cell* h) { print(hs, format("C%p", h)); }
+
+inline void print(hstream& hs, cellwalker cw) { 
+  if(cw.at) print(hs, "[", cw.at, "/", cw.at->type, ":", cw.spin, ":", cw.mirrored, "]");
+  else print(hs, "[NULL]");
+  }
+
+struct indenter {
+  dynamicval<int> ind;
+  
+  indenter(int i = 2) : ind(hlog.indentation, hlog.indentation + (i)) {}
+  };
 
 void appendHelp(string s);
 

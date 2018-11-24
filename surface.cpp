@@ -283,40 +283,41 @@ transmatrix create_M_matrix(hyperpoint zero, hyperpoint v1) {
   
   transmatrix M = build_matrix(v1, v2, Hypc);
   
-  display(M);
+  println(hlog, M);
 
-  printf("M matrix test: %lf %lf %lf %lf\n", hypot3(T*M*unit_vector[0]), hypot3(T*M*unit_vector[1]), hypot3(T*M*(unit_vector[0]+unit_vector[1])),
-    ((T*M*unit_vector[0]) | (T*M*unit_vector[1])));
+  println(hlog, "M matrix test: ", 
+    make_tuple(hypot3(T*M*unit_vector[0]), hypot3(T*M*unit_vector[1]), hypot3(T*M*(unit_vector[0]+unit_vector[1])),
+    ((T*M*unit_vector[0]) | (T*M*unit_vector[1]))));
     
   return M;
   }
 
 dexp_origin at_zero(hyperpoint zero, transmatrix start) {
 
-  printf("zero = %s\n", display(zero));
+  println(hlog, "zero = ", zero);
 
-  printf("curvature at zero = %lf\n", compute_curvature(zero));
-  printf("curvature at X1 = %lf\n", compute_curvature(zero + hpxyz(.3, 0, 0)));
-  printf("curvature at X2 = %lf\n", compute_curvature(zero + hpxyz(0, .3, 0)));
-  printf("curvature at X3 = %lf\n", compute_curvature(zero + hpxyz(.4, .3, 0)));
+  println(hlog, "curvature at zero = ", compute_curvature(zero));
+  println(hlog, "curvature at X1 = ", compute_curvature(zero + hpxyz(.3, 0, 0)));
+  println(hlog, "curvature at X2 = ", compute_curvature(zero + hpxyz(0, .3, 0)));
+  println(hlog, "curvature at X3 = ", compute_curvature(zero + hpxyz(.4, .3, 0)));
   
   return {start, create_M_matrix(zero, unit_vector[0]), zero};
   }
 
 dexp_origin at_other(dexp_origin& o1, hyperpoint h) {
-  printf("\n\nmapping %s...\n", display(h));
-  display(o1.H); display(o1.M);
+  println(hlog, "\n\nmapping ", h, "...");
+  println(hlog, o1.H, o1.M);
   auto dd = map_to_surface(h, o1);
   
   hyperpoint newzero = dd.params;
-  printf("error = %lf\n", dd.remaining_distance);
+  println(hlog, "error = ", dd.remaining_distance);
 
   transmatrix Spin = spintox(o1.H * h);
   transmatrix T = pushxto0(Spin * o1.H * h) * Spin;
   
-  printf("h is = %s\n", display(h));
-  printf("T*c0 is = %s\n", display(T * C0));
-  printf("T*h is = %s\n", display(T * o1.H * h));
+  println(hlog, "h is = ", h);
+  println(hlog, "T*c0 is = ", T * C0);
+  println(hlog, "T*h is = ", T * o1.H * h);
   
   return {T * o1.H, create_M_matrix(newzero, dd.cont), newzero};
   }
@@ -388,7 +389,7 @@ void draw_kuen_map() {
         px = 0xFF000000 + (((int)(n*255/nmax)) * (kuen_branch(v,u) == 1 ? 0x10101 : 0x10001));
         }
       }
-    printf("nmax = %lf\n", nmax);
+    println(hlog, "nmax = ", nmax);
     }
 
   for(auto p: rug::points) {
@@ -635,7 +636,7 @@ void run_shape(eShape s) {
       rug::qvalid++;
       }
     
-    printf("minx = %lf maxx = %lf\n", minx, maxx);
+    println(hlog, "minx = ", minx, " maxx = ", maxx);
   
     ld shift = -(minx + maxx) / 2;
     for(auto p: rug::points) if(p->valid)

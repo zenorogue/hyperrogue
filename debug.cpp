@@ -336,7 +336,7 @@ void debugScreen() {
     dialog::addSelItem("celldistAlt", eubinary ? its(celldistAlt(mouseover)) : "--", 0);
     dialog::addSelItem("temporary", its(mouseover->listindex), 0);
     if(GOLDBERG)
-      dialog::addSelItem("whirl", gp::disp(gp::get_local_info(mouseover).relative), 0);
+      dialog::addSelItem("whirl", sprint(gp::get_local_info(mouseover).relative), 0);
     if(archimedean)
       dialog::addSelItem("ID", its(arcm::id_of(mouseover->master)), 0);
     dialog::addBreak(50);

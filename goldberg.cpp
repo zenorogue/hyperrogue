@@ -133,22 +133,6 @@ namespace hr { namespace gp {
     return goldberg_map[c.second&31][c.first&31];
     }
 
-  const char *disp(loc at) { 
-    static char bufs[16][16];
-    static int bufid;
-    bufid++; bufid %= 16;
-    snprintf(bufs[bufid], 16, "[%2d,%2d]", at.first, at.second);
-    return bufs[bufid];
-    }
-
-  const char *dcw(cellwalker cw) { 
-    static char bufs[16][32];
-    static int bufid;
-    bufid++; bufid %= 16;
-    snprintf(bufs[bufid], 32, "[%p/%2d:%d:%d]", cw.at, cw.at?cw.at->type:-1, cw.spin, cw.mirrored);
-    return bufs[bufid];
-    }
-
   int spawn;
 
   cell*& peek(cellwalker cw) {
@@ -177,7 +161,7 @@ namespace hr { namespace gp {
       if(peek(wcw)) {
         auto wcw1 = get_localwalk(wc1, dir1);
         if(wcw + wstep != wcw1) {
-          WHD( Xprintf("%s : %s / %s (pull error from %s :: %s)\n", disp(at1), dcw(wcw+wstep), dcw(wcw1), disp(at), dcw(wcw)); )
+          WHD( println(hlog, at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
           exit(1);
           }
         }
@@ -185,7 +169,7 @@ namespace hr { namespace gp {
       }
     if(peek(wcw)) {
       set_localwalk(wc1, dir1, wcw + wstep);
-      WHD( Xprintf("%s : %s (pulled from %s :: %s)\n", disp(at1), dcw(wcw + wstep), disp(at), dcw(wcw)); )
+      WHD( println(hlog, at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
       return true;
       }
     return false;
@@ -195,12 +179,12 @@ namespace hr { namespace gp {
     auto& wc = get_mapping(at);
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    WHD( Xprintf("  md:%02d s:%d", wc.mindir, wc.cw.spin); )
-    WHD( Xprintf("  connection %s/%d %s=%s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), dcw(wcw), disp(at+eudir(dir)), dir1); )
+    WHD( print(hlog, format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
+    WHD( print(hlog, "  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1); )
     if(!wc1.cw.at) {
       wc1.start = wc.start;
       if(peek(wcw)) {
-        WHD( Xprintf("(pulled) "); )
+        WHD( print(hlog, "(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
         }
       else {
@@ -208,17 +192,17 @@ namespace hr { namespace gp {
         wcw.at->c.setspin(wcw.spin, 0, false);
         set_localwalk(wc1, dir1, wcw + wstep);
         spawn++;
-        WHD( Xprintf("(created) "); )
+        WHD( print(hlog, "(created) "); )
         }
       }
     WHD( Xprintf("%s ", dcw(wc1.cw+dir1)); )
     auto wcw1 = get_localwalk(wc1, dir1);
     if(peek(wcw)) {
       if(wcw+wstep != wcw1) {
-        WHD( Xprintf("FAIL: %s / %s\n", dcw(wcw), dcw(wcw1)); exit(1); )
+        WHD( println(hlog, "FAIL: ", wcw, " / ", wcw1); exit(1); )
         }
       else {
-        WHD(Xprintf("(was there)\n");)
+        WHD( println(hlog, "(was there)\n");)
         }
       }
     else {
@@ -226,7 +210,7 @@ namespace hr { namespace gp {
       peek(wcw) = wcw1.at;
       wcw.at->c.setspin(wcw.spin, wcw1.spin, wcw.mirrored != wcw1.mirrored);
       if(wcw+wstep != wcw1) {
-        Xprintf("assertion failed\n");
+        println(hlog, "assertion failed");
         exit(1);
         }
       }
@@ -241,7 +225,7 @@ namespace hr { namespace gp {
     auto& ac0 = get_mapping(at);
     ac0.cw = cellwalker(hs.at->c7, hs.spin, hs.mirrored);
     ac0.start = at;
-    WHD( Xprintf("%s : %s\n", disp(at), dcw(ac0.cw)); )
+    WHD( println(hlog, at, " : ", dcw(ac0.cw)); )
     return ac0;
     }
 
@@ -249,7 +233,7 @@ namespace hr { namespace gp {
     WHD( Xprintf("EXTEND %p %d\n", c, d); )
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
-        WHD( Xprintf("%p direction 0 corresponds to %p direction %d\n", c, c->move(0), c->c.spin(0)); )
+        WHD( println(hlog, c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spinm(0)); )
         d = c->c.spin(0);
         c = c->move(0);
         }
@@ -335,11 +319,11 @@ namespace hr { namespace gp {
     for(int i=0; i<S3; i++) {
       loc start = vc[i];
       loc end = vc[(i+1)%S3];
-      WHD( Xprintf("from %s to %s\n", disp(start), disp(end)); )
+      WHD( println(hlog, "from ", start, " to ", end); )
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
         int dx1 = dx + SG2*i;
-        WHD( Xprintf("%s %d .. %s %d\n", disp(at), dx1, disp(at + eudir(dx1)), fixg6(dx1+SG3)); )
+        WHD( println(make_pair(hlog, at), " .. ", make_pair(at + eudir(dx1), fixg6(dx1+SG3))); )
         conn(at, dx1);        
         if(forward) get_mapping(at).rdir = fixg6(dx1);
         else get_mapping(at+eudir(dx1)).rdir = fixg6(dx1+SG3);
@@ -383,7 +367,7 @@ namespace hr { namespace gp {
       for(int k=0; k<SG6; k++)
         if(start + eudir(k+SG2*i) == end)
           build(start, k, true);                         
-      if(start != end) { Xprintf("assertion failed: start %s == end %s\n", disp(start), disp(end)); exit(1); }
+      if(start != end) { println(hlog, "assertion failed: start ", start, " == end ", end); exit(1); }
       }
 
     // now we can fill the interior of our big equilateral triangle
@@ -395,7 +379,7 @@ namespace hr { namespace gp {
       int dx = wc.rdir;
       auto at1 = at + eudir(dx);
       auto& wc1 = get_mapping(at1);
-      WHD( Xprintf("%s (%d) %s (%d)\n", disp(at), dx, disp(at1), wc1.rdir); )
+      WHD( println(make_pair(at, dx), " ", make_pair(at1, wc1.rdir)); )
       int df = wc1.rdir - dx;
       if(df < 0) df += SG6;
       if(df == SG3) break;
@@ -423,7 +407,7 @@ namespace hr { namespace gp {
           break;
           }
         default:
-          Xprintf("case unhandled %d\n", df);
+          println(hlog, "case unhandled ", df);
           exit(1);
         }
       else switch(df) {
@@ -469,7 +453,7 @@ namespace hr { namespace gp {
         }
       }
 
-    WHD( Xprintf("DONE\n\n"); )    
+    WHD( println(hlog, "DONE"); println(hlog); )
     }
   
   hyperpoint loctoh_ort(loc at) {
@@ -600,7 +584,7 @@ namespace hr { namespace gp {
         base_distlimit = SEE_ALL;
       prepare_matrices();
       if(debug_geometry)
-        Xprintf("scale = " LDF "\n", scale);
+        println(hlog, "scale = ", scale);
       }
     else {
       alpha = 0;
@@ -833,7 +817,7 @@ namespace hr { namespace gp {
           found = true, centerloc = c;
         }
       if(!found && !quotient) {
-        Xprintf("Warning: centerloc not found: %d,%d,%d\n", dmain, d0, d1);
+        println(hlog, "Warning: centerloc not found: ", make_tuple(dmain, d0, d1));
         }
       center_locs[rel] = centerloc;
       }
@@ -859,7 +843,7 @@ namespace hr { namespace gp {
           found = true, centerloc = c;
         }
       if(!found && !quotient) {
-        Xprintf("Warning: centerloc not found: %d,%d,%d,%d\n", dmain, d0, d1, dx);
+        println(hlog, "Warning: centerloc not found: ", make_tuple(dmain, d0, d1, dx));
         }
       center_locs[rel] = centerloc;
       }

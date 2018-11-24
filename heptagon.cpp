@@ -52,17 +52,6 @@ hstate transition(hstate s, int dir) {
   return hsError;
   }
 
-/*
-int indent = 0;
-
-struct indenter {
-  indenter() { indent += 2; }
-  ~indenter() { indent -= 2; }
-  };
-
-template<class... T> auto iprintf(T... t) { for(int i=0; i<indent; i++) putchar(' '); return printf(t...); }
-*/
-
 #define COMPUTE -1000000
 
 // create a new heptagon

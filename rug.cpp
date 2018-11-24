@@ -95,7 +95,7 @@ transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
 
 hyperpoint azeq_to_hyperboloid(hyperpoint h) {
   if(abs(h[2])>1e-4) {
-    Xprintf("Error: h[2] = %lf\n", h[2]);
+    println(hlog, "Error: h[2] = ", h[2]);
     rug_failure = true;
     }
   if(euclid) {
@@ -415,7 +415,7 @@ void buildTorusRug() {
   
   ld xfactor = 0, yfactor = 0;
   
-  Xprintf("factor = %lf\n", factor);
+  println(hlog, "factor = ", factor);
   if(factor <= 2.05) factor = 2.2;
   factor -= 1;
         
@@ -439,10 +439,10 @@ void buildTorusRug() {
                                     
     ld xscale = hypot(xfactor * xh[0] * 2 * M_PI, yfactor * xh[1] * 2 * M_PI);
     ld yscale = hypot(xfactor * yh[0] * 2 * M_PI, yfactor * yh[1] * 2 * M_PI);
-    printf("xh = %s\n", display(xh));
-    printf("yh = %s\n", display(yh));
-    printf("factor = %lf %lf (%lf)\n", double(xfactor), double(yfactor), factor);
-    printf("scales = %fl %lf\n", double(xscale), double(yscale));
+    println(hlog, "xh = ", xh);
+    println(hlog, "yh = ", yh);
+    println(hlog, "factor = ", make_tuple(xfactor, yfactor, factor));
+    println(hlog, "scales = ", make_tuple(xscale, yscale));
     
     modelscale = xscale / crossf;
     }
@@ -536,7 +536,7 @@ void buildTorusRug() {
   
   qvalid = 0;
   for(auto p: points) if(!p->glue) qvalid++;
-  Xprintf("qvalid = %d\n", qvalid);
+  println(hlog, "qvalid = ", qvalid);
 
   if(rug_perspective)
     push_all_points(2, -model_distance);  
@@ -558,11 +558,11 @@ void verify() {
       ratios.push_back(l0 / l);
       }
     
-  Xprintf("%s", "Length verification:\n");
+  println(hlog, "Length verification:");
   sort(ratios.begin(), ratios.end());
   for(int i=0; i<isize(ratios); i += isize(ratios) / 10)
-    Xprintf("%lf\n", ratios[i]);
-  Xprintf("%s", "\n");
+    println(hlog, ratios[i]);
+  println(hlog);
   }
 
 void comp(cell*& minimum, cell *next) {
@@ -618,7 +618,7 @@ void buildRug() {
     catch(out_of_range&) {}
     }
 
-  Xprintf("vertices = %d triangles=  %d\n", isize(points), isize(triangles));
+  println(hlog, "vertices = ", isize(points), " triangles= ", isize(triangles));
 
   if(subdivide_first) 
     for(int i=0; i<20 && subdivide_further(); i++)
@@ -821,17 +821,17 @@ void subdivide() {
   // if(euclid && gwhere == gEuclid) return;
   if(!subdivide_further()) {
     if(euclid && !bounded && gwhere == gEuclid) {
-      Xprintf("%s", "Euclidean -- full precision\n");
+      println(hlog, "Euclidean -- full precision");
       stop = true; 
       }
     else {
       err_zero_current /= 2;
-      Xprintf("increasing precision to %lg\n", err_zero_current);
+      println(hlog, "increasing precision to ", err_zero_current);
       for(auto p: points) enqueue(p);
       }
     return; 
     }
-  Xprintf("subdivide (%d,%d)\n", N, isize(triangles));
+  println(hlog, "subdivide ", make_pair(N, isize(triangles)));
   need_mouseh = true;  
   divides++;
   vector<triangle> otriangles = triangles;
@@ -866,8 +866,7 @@ void subdivide() {
     
   calcLengths();
 
-  Xprintf("result (%d,%d)\n", isize(points), isize(triangles));
-
+  println(hlog, "result ", make_tuple(isize(points), isize(triangles)));
   }
 
 ld slow_modeldist(const hyperpoint& h1, const hyperpoint& h2) {
@@ -953,7 +952,7 @@ int detect_cusps() {
     max_edge_length = max(max_edge_length, e.len);
   anticusp_dist = anticusp_factor * max_edge_length;
   
-  int stats[3] = {0,0,0};
+  array<int, 3> stats = {0,0,0};
 
   map<bincode, vector<rugpoint*> > code_to_point;
   for(auto p: points) if(p->valid)
@@ -983,7 +982,7 @@ int detect_cusps() {
 
   printf("cusp stats: %d/%d/%d | %d/%d/%d\n", stats[0], stats[1], stats[2], stats2[0], stats2[1], stats2[2]); */
 
-  Xprintf("cusp stats: %d/%d/%d\n", stats[0], stats[1], stats[2]);
+  println(hlog, "cusp stats: ", stats);
   return stats[2];
   }
   
@@ -1014,7 +1013,7 @@ void addNewPoints() {
       enqueue(&m);
       }
     }
-  if(qvalid != oqvalid) { Xprintf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, isize(points), dist, dt, queueiter); }
+  if(qvalid != oqvalid) { println(hlog, "adding new points ", make_tuple(oqvalid, qvalid, isize(points), dist, dt, queueiter)); }
   }
 
 void physics() {

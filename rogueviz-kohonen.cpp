@@ -1210,122 +1210,110 @@ bool handleMenu(int sym, int uni) {
   return false;
   }
 
-  void saveFloat(float x) { mapstream::save(x); }
-  float loadFloat() { float x; mapstream::load(x); return x; }
-
 void save_compressed(string name) {
   // save everything in compressed form
-  mapstream::f = fopen(name.c_str(), "wb");
-  if(!mapstream::f) {
+  fhstream f(name, "wb");
+  if(!f.f) {
     printf("failed to open for save_compressed: %s\n", name.c_str());
     return;
     }
   // save columns
-  mapstream::save(columns);
-  for(int i=0; i<columns; i++) mapstream::saveString(colnames[i]);
-  for(int i=0; i<columns; i++) saveFloat(weights[i]);
+  f.write(columns);
+  for(int i=0; i<columns; i++) f.write(colnames[i]);
+  for(int i=0; i<columns; i++) hwrite_raw<float>(f, weights[i]);
   // save neurons
-  int N = isize(net);
-  mapstream::save(N);
-  for(int i=0; i<N; i++)
-    for(int j=0; j<columns; j++) saveFloat(net[i].net[j]);
+  f.write<int>(isize(net));
+  for(int i=0; i<isize(net); i++)
+    for(int j=0; j<columns; j++) hwrite_raw<float>(f, net[i].net[j]);
   // save shown samples
   map<int, int> saved_id;
-  int ss = isize(sample_vdata_id);
-  mapstream::save(ss);
+  f.write<int>(isize(sample_vdata_id));
   int index = 0;
   for(auto p: sample_vdata_id) {
     int i = p.first;
-    for(int j=0; j<columns; j++) saveFloat(data[i].val[j]);
-    mapstream::saveString(data[i].name);
+    for(int j=0; j<columns; j++) hwrite_raw<float>(f, data[i].val[j]);
+    f.write(data[i].name);
     int id = p.second;
     saved_id[id] = index++;
     auto& vd = vdata[id];
-    mapstream::save(vd.cp);
+    hwrite_raw(f, vd.cp);
     }
   // save edge types
-  int qet = isize(edgetypes);
-  mapstream::save(qet);
+  f.write<int>(isize(edgetypes));
   for(auto&et: edgetypes) {
-    mapstream::saveString(et->name);
-    saveFloat(et->visible_from);
-    mapstream::save(et->color);
+    f.write(et->name);
+    hwrite_raw<float>(f, et->visible_from);
+    f.write(et->color);
     }
   // save edge infos
-  int qei = isize(edgeinfos);
-  mapstream::save(qei);
+  f.write<int>(isize(edgeinfos));
   for(auto& ei: edgeinfos) {
     for(int x=0; x<isize(edgetypes); x++)
-      if(ei->type == &*edgetypes[x]) mapstream::saveChar(x);
-    mapstream::save(saved_id[ei->i]);
-    mapstream::save(saved_id[ei->j]);
-    saveFloat(ei->weight);
+      if(ei->type == &*edgetypes[x]) f.write_char(x);
+    f.write(saved_id[ei->i]);
+    f.write(saved_id[ei->j]);
+    hwrite_raw<float>(f, ei->weight);
     }
-  fclose(mapstream::f);
   }
 
 void load_compressed(string name) {
   // save everything in compressed form
-  mapstream::f = fopen(name.c_str(), "rb");
-  if(!mapstream::f) {
+  fhstream f(name, "rb");
+  if(!f.f) {
     printf("failed to open for load_compressed: %s\n", name.c_str());
     return;
     }
   // load columns
-  mapstream::load(columns);
+  f.read(columns);
   colnames.resize(columns);
-  for(int i=0; i<columns; i++) colnames[i] = mapstream::loadString();
+  for(int i=0; i<columns; i++) f.read(colnames[i]);
   alloc(weights);
-  for(int i=0; i<columns; i++) weights[i] = loadFloat();
+  for(int i=0; i<columns; i++) weights[i] = f.get_raw<float>();
   samples = 0; sominit(1, true);
   // load neurons
-  int N = mapstream::loadInt();
+  int N = f.get<int>();
   if(cells != N) {
     fprintf(stderr, "Error: bad number of cells (N=%d c=%d)\n", N, cells);
     exit(1);
     }
   for(neuron& n: net)
     for(int k=0; k<columns; k++) 
-      n.net[k] = loadFloat();
+      n.net[k] = f.get_raw<float>();
   // load data
-  samples = mapstream::loadInt();
+  samples = f.get<int>();
   data.resize(samples);
   int id = 0;
   for(auto& d: data) {
     alloc(d.val);
-    for(int j=0; j<columns; j++) {
-      float x;
-      mapstream::load(x);
-      d.val[j] = x;
-      }
-    d.name = mapstream::loadString();
+    for(int j=0; j<columns; j++)
+      d.val[j] = f.get_raw<float>();
+    f.read(d.name);
     int i = vdata.size();
     sample_vdata_id[id] = i;
     vdata.emplace_back();
     auto& v = vdata.back();
     v.name = data[i].name;
-    mapstream::load(v.cp);
+    hread_raw(f, v.cp);
     createViz(i, cwt.at, Id);
     v.m->store();
     id++;
     }
   // load edge types
-  int qet = mapstream::loadInt();
+  int qet = f.get<int>();
   for(int i=0; i<qet; i++) {
-    auto et = add_edgetype(mapstream::loadString());
-    et->visible_from = loadFloat();
-    mapstream::load(et->color);
+    auto et = add_edgetype(f.get<string>());
+    et->visible_from = f.get_raw<float>();
+    f.read(et->color);
     }
   // load edge infos
-  int qei = mapstream::loadInt();
+  int qei = f.get<int>();
   for(int i=0; i<qei; i++) {
-    auto t = edgetypes[mapstream::loadChar()];
-    int ei = mapstream::loadInt();
-    int ej = mapstream::loadInt();
-    float w = loadFloat();
+    auto t = edgetypes[f.read_char()];
+    int ei = f.get<int>();
+    int ej = f.get<int>();
+    float w = f.get_raw<float>();
     addedge(ei, ej, w, true, &*t);
     }
-  fclose(mapstream::f);
   analyze();
   }
 

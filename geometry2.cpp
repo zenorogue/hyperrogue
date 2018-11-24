@@ -220,8 +220,8 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
       gm = gm * invheptmove[sp];
       }
     }
-  printf("OK\n");
-  display(gm * where);
+  println(hlog, "OK");
+  println(hlog, gm * where);
   return gm * where;
   }
 

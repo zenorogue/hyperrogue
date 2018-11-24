@@ -173,11 +173,11 @@ void run_snub(int v, int w) {
   for(auto p: sideangles) sav.push_back(p.first);
   sort(sav.begin(), sav.end());
   
-  printf("sideangles "); for(int i=0; i<3; i++) printf("%lf ", double(sav[i])); printf("\n");
+  println(hlog, "sideangles ", sav);
   
   xts0 = tC0(ts[0]);
   
-  printf("original %s\n", display(xts0));
+  println(hlog, "original ", xts0);
   
   cor = rel * gmatrix[cc] * C0;
 

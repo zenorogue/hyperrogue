@@ -33,21 +33,18 @@
 
 char android_log_buf[1000000];
 int android_log_bufpos = 0;
-#define XPRINTF
-#pragma clang diagnostic ignored "-Wformat-security"
-template<class...T>
-// __attribute__((__format__ (__printf__, 1, 2)))
-void Xprintf(const char *fmt, T... t) { 
-  snprintf(android_log_buf+android_log_bufpos, 1000000-android_log_bufpos, fmt, t...); 
-  int last_cr = 0;
-  int i;
-  for(i=0; android_log_buf[i]; i++) if(android_log_buf[i] == 10) {
-    android_log_buf[i] = 0;
-    __android_log_print(ANDROID_LOG_VERBOSE, "RUG", "%s", android_log_buf+last_cr); 
-    last_cr = i+1;
+
+#define SPECIAL_LOGGER
+
+void special_log(char c) {
+  if(c == 10 || android_log_bufpos == 999999) {
+    android_log_buf[android_log_bufpos] = 0;
+    __android_log_print(ANDROID_LOG_VERBOSE, "HRLOG", "%s", android_log_buf); 
+    android_log_bufpos = 0;
     }
-  android_log_bufpos = 0;
-  while(i > last_cr) android_log_buf[android_log_bufpos++] = android_log_buf[last_cr++];
+  else {
+    android_log_buf[android_log_bufpos++] = c;
+    }
   }
 
 #include <jni.h>

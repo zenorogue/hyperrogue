@@ -75,33 +75,8 @@ namespace mapeditor {
   }
 
 namespace mapstream {
-  FILE *f;
-
-  void savePoint(const hyperpoint& h) {
-    for(int i=0; i<3; i++) { double x = h[i]; save(x); }
-    }
-
-  hyperpoint loadPoint() {
-    hyperpoint h;
-    for(int i=0; i<3; i++) { double x; load(x); h[i] = x; }
-    return h;
-    }  
-  
-  void saveString(const string& s) {
-    saveChar(isize(s));
-    for(char c: s) saveChar(c);
-    }
-
-  string loadString() {
-    string s;
-    int l = loadChar();
-    for(int i=0; i<l; i++) s += loadChar();
-    return s;
-    }
-  }
-
-namespace mapstream {
 #if CAP_EDIT
+
   std::map<cell*, int> cellids;
   vector<cell*> cellbyid;
   vector<char> relspin;
@@ -115,31 +90,31 @@ namespace mapstream {
     }
   
   bool saveMap(const char *fname) {
-    f = fopen(fname, "wb");
-    if(!f) return false;
-    int32_t i = VERNUM; save(i);
-    save(patterns::whichPattern);
-    save(geometry);
+    fhstream f(fname, "wb");
+    if(!f.f) return false;
+    int32_t i = VERNUM; f.write(i);
+    f.write(patterns::whichPattern);
+    f.write(geometry);
     char nbtype = char(variation);
-    save(nbtype);
+    f.write(nbtype);
     if(GOLDBERG) {
-      save(gp::param.first);
-      save(gp::param.second);
+      f.write(gp::param.first);
+      f.write(gp::param.second);
       }
     if(geometry == gTorus) {
-      save(torusconfig::qty);
-      save(torusconfig::dx);
-      save(torusconfig::dy);
+      f.write(torusconfig::qty);
+      f.write(torusconfig::dx);
+      f.write(torusconfig::dy);
       }
     if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
-      save(quotient_field_changed);
+      f.write(quotient_field_changed);
       if(quotient_field_changed) {
-        save(current_extra);
-        save(fgeomextras[current_extra].current_prime_id);
+        f.write(current_extra);
+        f.write(fgeomextras[current_extra].current_prime_id);
         }
       }
-    if(geometry == gArchimedean) saveString(arcm::current.symbol);
+    if(geometry == gArchimedean) f.write(arcm::current.symbol);
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
@@ -147,32 +122,32 @@ namespace mapstream {
         for(int j=0; j<c->type; j++) if(c->move(j) && cellids.count(c->move(j)) && 
           cellids[c->move(j)] < i) {
           int32_t i = cellids[c->move(j)];
-          save(i);
-          saveChar(c->c.spin(j));
-          saveChar(j);
+          f.write(i);
+          f.write_char(c->c.spin(j));
+          f.write_char(j);
           break;
           }
         }
-      saveChar(c->land);
-      saveChar(c->mondir);
-      saveChar(c->monst);
-      saveChar(c->wall);
-      // saveChar(c->barleft);
-      // saveChar(c->barright);
-      saveChar(c->item);
-      saveChar(c->mpdist);
-      // saveChar(c->bardir);
-      save(c->wparam); save(c->landparam);
-      saveChar(c->stuntime); saveChar(c->hitpoints);
+      f.write_char(c->land);
+      f.write_char(c->mondir);
+      f.write_char(c->monst);
+      f.write_char(c->wall);
+      // f.write_char(c->barleft);
+      // f.write_char(c->barright);
+      f.write_char(c->item);
+      f.write_char(c->mpdist);
+      // f.write_char(c->bardir);
+      f.write(c->wparam); f.write(c->landparam);
+      f.write_char(c->stuntime); f.write_char(c->hitpoints);
       for(int j=0; j<c->type; j++) {
         cell *c2 = c->move(j);
         if(c2 && c2->land != laNone) addToQueue(c2);
         }
       }
     printf("cells saved = %d\n", isize(cellbyid));
-    int32_t n = -1; save(n);
+    int32_t n = -1; f.write(n);
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
-    save(id);
+    f.write(id);
 
     for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
       usershape *us = usp.second;
@@ -180,16 +155,15 @@ namespace mapstream {
       
       for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
-        save(i); save(usp.first); save(l); save(ds.sym); save(ds.rots); save(ds.color);
-        n = isize(ds.list); save(n);
-        savePoint(ds.shift);
-        savePoint(ds.spin);
-        for(int i=0; i<isize(ds.list); i++) savePoint(ds.list[i]);
+        f.write(i); f.write(usp.first); f.write(l); f.write(ds.sym); f.write(ds.rots); f.write(ds.color);
+        n = isize(ds.list); f.write(n);
+        f.write(ds.shift);
+        f.write(ds.spin);
+        for(int i=0; i<isize(ds.list); i++) f.write(ds.list[i]);
         }
       }
-    n = -1; save(n);
+    n = -1; f.write(n);
 
-    fclose(f);
     cellids.clear();
     cellbyid.clear();
     return true;
@@ -203,38 +177,38 @@ namespace mapstream {
     }
   
   bool loadMap(const string& fname) {
-    f = fopen(fname.c_str(), "rb");
-    if(!f) return false;
+    fhstream f(fname, "rb");
+    if(!f.f) return false;
     clearMemory();
-    int vernum = loadInt();
-    if(vernum >= 7400) load(patterns::whichPattern);
+    int vernum = f.get<int>();
+    if(vernum >= 7400) f.read(patterns::whichPattern);
     
     if(vernum >= 10203) {
-      load(geometry);
+      f.read(geometry);
       char nbtype;
-      load(nbtype);
+      f.read(nbtype);
       variation = eVariation(nbtype);
       if(GOLDBERG) {
-        load(gp::param.first);
-        load(gp::param.second);
+        f.read(gp::param.first);
+        f.read(gp::param.second);
         }
       if(geometry == gTorus) {
-        load(torusconfig::qty);
-        load(torusconfig::dx);
-        load(torusconfig::dy);
+        f.read(torusconfig::qty);
+        f.read(torusconfig::dx);
+        f.read(torusconfig::dy);
         }
       if(geometry == gFieldQuotient) {
         using namespace fieldpattern;
-        load(quotient_field_changed);
+        f.read(quotient_field_changed);
         if(quotient_field_changed) {
-          load(current_extra);
-          load(fgeomextras[current_extra].current_prime_id);
+          f.read(current_extra);
+          f.read(fgeomextras[current_extra].current_prime_id);
           enableFieldChange();
           }
         }
       if(geometry == gArchimedean) {
         string& symbol = arcm::current.symbol;
-        symbol = loadString();
+        symbol = f.get<string>();
         arcm::current.parse();
         if(arcm::current.errors > 0) {
           printf("Errors! %s\n", arcm::current.errormsg.c_str());
@@ -256,48 +230,48 @@ namespace mapstream {
         rspin = 0;
         }
       else {
-        int32_t parent = loadInt();
+        int32_t parent = f.get<int>();
         
         if(parent<0 || parent >= isize(cellbyid)) break;
-        int dir = loadChar();
+        int dir = f.read_char();
         cell *c2 = cellbyid[parent];
         dir  = fixspin(dir, relspin[parent], c2->type);
         c = createMov(c2, dir);
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
         // spinval becomes xspinval
-        rspin = (c2->c.spin(dir) - loadChar() + MODFIXER) % c->type;
+        rspin = (c2->c.spin(dir) - f.read_char() + MODFIXER) % c->type;
         }
       
       cellbyid.push_back(c);
       relspin.push_back(rspin);
-      c->land = (eLand) loadChar();
-      c->mondir = fixspin(rspin, loadChar(), c->type);
-      c->monst = (eMonster) loadChar();
-      c->wall = (eWall) loadChar();
-      // c->barleft = (eLand) loadChar();
-      // c->barright = (eLand) loadChar();
-      c->item = (eItem) loadChar();
-      c->mpdist = loadChar();
+      c->land = (eLand) f.read_char();
+      c->mondir = fixspin(rspin, f.read_char(), c->type);
+      c->monst = (eMonster) f.read_char();
+      c->wall = (eWall) f.read_char();
+      // c->barleft = (eLand) f.read_char();
+      // c->barright = (eLand) f.read_char();
+      c->item = (eItem) f.read_char();
+      c->mpdist = f.read_char();
       c->bardir = NOBARRIERS;
-      // fixspin(rspin, loadChar(), c->type);
+      // fixspin(rspin, f.read_char(), c->type);
       if(vernum < 7400) {
         short z;
-        load(z);
+        f.read(z);
         c->wparam = z;
         }
-      else load(c->wparam);
-      load(c->landparam);
+      else f.read(c->wparam);
+      f.read(c->landparam);
       // backward compatibility
       if(vernum < 7400 && !isIcyLand(c->land)) c->landparam = HEAT(c);
-      c->stuntime = loadChar();
-      c->hitpoints = loadChar();
+      c->stuntime = f.read_char();
+      c->hitpoints = f.read_char();
 
       if(patterns::whichPattern)
         mapeditor::modelcell[patterns::getpatterninfo0(c).id] = c;
       }
     
-    int32_t whereami = loadInt();
+    int32_t whereami = f.get<int>();
     if(whereami >= 0 && whereami < isize(cellbyid))
       cwt.at = cellbyid[whereami];
     else cwt.at = currentmap->gamestart();
@@ -330,24 +304,24 @@ namespace mapstream {
     cheater = 1;
     
     if(vernum >= 7400) while(true) {
-      int i = loadInt();
+      int i = f.get<int>();
       if(i == -1) break;
-      int j = loadInt(), l = loadInt();
+      int j = f.get<int>(), l = f.get<int>();
       if(i<0 || i >= mapeditor::USERSHAPEGROUPS) break;
       if(l<0 || l >= USERLAYERS) break;
 
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
       
-      load(ds.sym); load(ds.rots); load(ds.color);
+      f.read(ds.sym); f.read(ds.rots); f.read(ds.color);
       ds.list.clear();
-      int siz = loadInt();
+      int siz = f.get<int>();
       
-      ds.shift = loadPoint();
-      ds.spin = loadPoint();
+      ds.shift = f.get<hyperpoint>();
+      ds.spin = f.get<hyperpoint>();
       
       for(int i=0; i<siz; i++)
-        ds.list.push_back(loadPoint());
+        ds.list.push_back(f.get<hyperpoint>());
       }
 
     buildpolys();
