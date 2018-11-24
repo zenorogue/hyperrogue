@@ -1636,7 +1636,6 @@ void movePlayer(monster *m, int delta) {
     if(m->vel * mgo < 0) mgo *= 3;
     m->vel += mgo * delta / 600;
     playergo[cpid] = m->vel * SCALE * delta / 600;
-    printf("vel = %lf go = %lf\n", m->vel, playergo[cpid]);
     }
   
   else {    

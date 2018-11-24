@@ -4459,6 +4459,7 @@ void removeIvy(cell *c) {
 
 void moveivy() {
   if(isize(ivies) == 0) return;
+  if(racing::on) return;
   pathdata pd(moIvyRoot);
   for(int i=0; i<isize(ivies); i++) {
     cell *c = ivies[i];

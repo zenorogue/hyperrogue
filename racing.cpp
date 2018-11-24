@@ -19,7 +19,24 @@ static const int TWIDTH = 6;
 vector<cell*> track;
 map<cell*, pair<int, int> > trackstage;
 
+void fix_cave(cell *c) {
+  int v = 0;
+  // if(c->wall == waCavewall) v++;
+  // if(c->wall == waCavefloor) v--;
+  forCellEx(c2, c) {
+    if(c2->wall == waCavewall) v++;
+    if(c2->wall == waCavefloor) v--;
+    }
+  else v--;
+  if(v>0 && c->wall == waCavefloor) c->wall = waCavewall;
+  if(v<0 && c->wall == waCavewall) c->wall = waCavefloor;
+  }
+
 bool bad(cell *c2, cell *c) {
+  if(c2->land == laCaves) {
+    forCellEx(c3, c2) fix_cave(c3);
+    fix_cave(c2);
+    }
   if(!passable(c2, c, P_ISPLAYER)) return true;
   if((c2->land == laCrossroads) ^ (c->land == laCrossroads)) return true;
   return false;
@@ -58,9 +75,13 @@ void generate_track() {
   cellbydist[0].push_back(s);
   
   cell *goal;
+  
+  int traversed = 0;
 
   while(true) {
+    traversed++;
     if(cellbydist.empty()) {
+      printf("reset after traversing %d\n", traversed);
       stop_game();
       start_game();
       return;
@@ -193,23 +214,49 @@ void generate_track() {
       if(c->wall == waMirror || c->wall == waCloud) c->wall = waNone;
       if(!isIvy(c))
         c->monst = moNone;
+      if(c->monst == moIvyHead) c->monst = moIvyWait;
       if(inmirror(c->land))
         ;      
-      else if(p.first == TWIDTH)
-        c->wall = waBarrier,
+      else if(p.first == TWIDTH) {
+        killMonster(c, moNone, 0);
+        c->wall = waBarrier;
         c->land = laBarrier;
-      else if(p.first > TWIDTH)
-        c->land = laMemory,
+        }
+      else if(p.first > TWIDTH) {
+        killMonster(c, moNone, 0);
+        c->land = laMemory;
         c->wall = waChasm;
-      if(p.second >= win && p.first < TWIDTH) c->wall = hrand(2) ? waMirror : waCloud;
+        }
+      if(p.second >= win && p.first < TWIDTH) {
+        c->wall = hrand(2) ? waMirror : waCloud;
+        killMonster(c, moNone, 0);
+        }
       }
     }
   
+  for(int i=0; i<motypes; i++) kills[i] = 0;
   int byat[256];
   for(int a=0; a<16; a++) byat[a] = 0;
   for(auto s: trackstage) byat[s.second.first]++;
   for(int a=0; a<16; a++) printf("%d: %d\n", a, byat[a]);
   
+  if(s->land == laCaves) {
+    set<unsigned> hash;
+    while(true) {
+      unsigned hashval = 7;
+      int id = 0;
+      for(auto s: trackstage) {
+        fix_cave(s.first);
+        if(s.first->wall == waCavewall) 
+          hashval = (3+2*(id++)) * hashval + 1;
+        if(s.first->wall == waCavefloor) 
+          hashval = (3+2*(id++)) * hashval + 2;
+        }
+      printf("hashval = %x id = %d\n", hashval, id);
+      if(hash.count(hashval)) break;
+      hash.insert(hashval);
+      }
+    }
   if(1) {
     manual_celllister cl;
     cl.add(s);
@@ -260,7 +307,6 @@ void set_view() {
   shmup::monster *who = shmup::pc[current_player];
   
   safety = true;
-  printf("%d\n", ticks);
   if(!inrec) history.emplace_back(ticks, who->base, who->at, who->footphase);
 
   transmatrix at = ggmatrix(who->base) * who->at;
@@ -375,9 +421,9 @@ vector<eLand> race_lands = {
   laIce, 
   laDesert, 
   
-  laCrossroads, /* need editing */
-  laCaves,      /* need fixing */
-  laJungle,     /* need pacifying Ivy */
+  laCrossroads,
+  laCaves,
+  laJungle,
   laMirror,
   laHell,
   laDryForest,
@@ -386,7 +432,7 @@ vector<eLand> race_lands = {
   laElementalWall,
   laWildWest,
   laDragon,
-  laTerracotta, /* disable traps and warriors */
+  laTerracotta,
   laRuins,
   };
 
