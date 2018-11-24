@@ -567,22 +567,23 @@ string racetimeformat(int t) {
   return times;
   }
 
-void track_chooser() {
+void track_chooser(string new_track) {
   dialog::init(XLAT("Racing"));
 
   char let = 'a';
   for(eLand l: race_lands) {
-    auto& gh = race_ghosts[{track_code, modecode()}] [l];
+    auto& gh = race_ghosts[{new_track, modecode()}] [l];
     const int LOST = 3600000;
     int best = LOST;
     for(auto& gc: gh) best = min(best, gc.result);
     string s = (best == LOST) ? "" : racetimeformat(best);
     dialog::addSelItem(XLAT1(linf[l].name), s, let++);
-    dialog::add_action([l] () {
+    dialog::add_action([l, new_track] () {
       stop_game();
       specialland = l;
       racing::on = true;
       shmup::on = true;
+      track_code = new_track;
       start_game();
       popScreenAll();
       });
@@ -595,16 +596,37 @@ void track_chooser() {
 struct race_configurer {
 
   int playercfg;
+  bool editing_track;
+  string new_track;
   
-  race_configurer() { playercfg = multi::players; }
+  race_configurer() { editing_track = false; new_track = track_code; playercfg = multi::players; }
   
+  static string random_track_name() {
+    string s = "";
+    for(int a = 0; a < 4; a++)  {
+      int u = rand() % 2;
+      if(u == 0)
+        s += "AEIOUY" [ rand() % 6];
+      s += "BCDFGHJKLMNPRSTVWZ" [ rand() % 18];
+      if(u == 1)
+        s += "AEIOUY" [ rand() % 6];
+      }
+    return s;
+    }
+  
+  static string racecheck(int sym, int uni) {
+    if(uni >= 'A' && uni <= 'Z') return string("") + char(uni);
+    if(uni >= 'a' && uni <= 'z') return string("") + char(uni - 32);
+    return "";
+    }
+
   void operator() () {
   
     gamescreen(1);
   
     dialog::init(XLAT("Racing"));
   
-    dialog::addBoolItem(XLAT("player relative"), player_relative, 'r');
+    dialog::addBoolItem(XLAT("player relative"), player_relative, 'p');
     dialog::add_action([] () { 
       player_relative = !player_relative; 
       if(pmodel == mdBand || pmodel == mdHalfplane)
@@ -629,7 +651,7 @@ struct race_configurer {
   
     dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
     dialog::add_action([] () { 
-      dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
+      dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("race angle"), "");
       int q = conformal::model_orientation - race_angle;
       dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
       });
@@ -651,16 +673,35 @@ struct race_configurer {
         });
       }
     else dialog::addBreak(100);
+    
+    dialog::addSelItem("track name", editing_track ? dialog::view_edited_string() : new_track, '/');
+    dialog::add_action([this] () { 
+      editing_track = !editing_track;
+      if(editing_track) dialog::start_editing(new_track);
+      });
+    dialog::addItem("play the official track", 'o');
+    dialog::add_action([this] () { new_track = "OFFICIAL"; });
+    dialog::addItem("play a random track", 'r');
+    dialog::add_action([this] () { new_track = random_track_name(); });
   
     dialog::addItem(XLAT("select the track and start!"), 's');
-    dialog::add_action([] () { 
-      if(race_ghosts[{track_code, modecode()}].empty())
-        read_ghosts(track_code, modecode());
-      pushScreen(track_chooser); 
+    dialog::add_action([this] () { 
+      if(race_ghosts[{new_track, modecode()}].empty())
+        read_ghosts(new_track, modecode());
+      pushScreen([this] () { track_chooser(new_track); }); 
       });
 
     dialog::addBack();
     dialog::display();
+
+    keyhandler = [this] (int sym, int uni) {
+      if(editing_track) {
+        if(sym == SDLK_RETURN) sym = uni = '/';
+        if(dialog::handle_edit_string(sym, uni, racecheck)) return;
+        }
+      dialog::handleNavigation(sym, uni);
+      if(doexiton(sym, uni)) { if(editing_track) editing_track = false; else popScreen(); }
+      };
     
     }
   };
