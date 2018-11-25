@@ -32,8 +32,10 @@ map<cell*, int> rti_id;
 
 string track_code = "OFFICIAL";
 
+int race_try;
+
 void apply_seed() {
-  int s = 0;
+  int s = race_try;
   for(char c: track_code) s = 713 * s + c;
   shrand(s);
   }
@@ -161,6 +163,8 @@ race_cellinfo& get_info(cell *c) {
   return rti[rti_id.at(c)];
   }
 
+ld start_line_width;
+
 void generate_track() {
 
   if(race_ghosts[{track_code, modecode()}].empty())
@@ -175,6 +179,12 @@ void generate_track() {
   */
   
   cell *s = currentmap->gamestart();  
+
+  if(specialland == laCrossroads) {
+    celllister cl(s, TWIDTH, 1000000, NULL);
+    for(cell *c: cl.lst) c->bardir = NOBARRIERS;
+    }                              
+
   setdist(s, 6, NULL);
   makeEmpty(s);
   
@@ -185,12 +195,13 @@ void generate_track() {
   cell *goal;
   
   int traversed = 0;
-
+  
   while(true) {
     traversed++;
     if(cellbydist.empty()) {
       printf("reset after traversing %d\n", traversed);
       stop_game();
+      race_try++;
       start_game();
       return;
       }
@@ -342,7 +353,6 @@ void generate_track() {
       }
     }
   
-  for(int i=0; i<motypes; i++) kills[i] = 0;
   int byat[256];
   for(int a=0; a<16; a++) byat[a] = 0;
   for(const auto s: rti) byat[s.from_track]++;
@@ -365,6 +375,46 @@ void generate_track() {
       hash.insert(hashval);
       }
     }
+  
+  for(cell *sc: track) {
+    straight = calc_relative_matrix(sc, track[0], C0);
+    if(straight[2][2] > 1e8) break;
+    }
+  straight = rspintox(straight * C0);
+  
+  ld& a = start_line_width;
+  for(a=0; a<10; a += .1) {
+    hyperpoint h = straight * parabolic1(a) * C0;
+    cell *at = s;
+    virtualRebase(at, h,  true);
+    if(!rti_id.count(at) || get_info(at).from_track >= TWIDTH) break;
+    }
+  
+  for(ld cleaner=0; cleaner<a*.75; cleaner += .2) for(int dir=-1; dir<=1; dir+=2) {
+    transmatrix T = straight * parabolic1(cleaner * dir);
+    cell *at = s;
+    virtualRebase(at, T,  true);
+    for(ld u=0; u<50; u++) {
+      if(at->wall != waBarrier)
+        makeEmpty(at);
+      killMonster(at, moNone, 0);
+      T = T * xpush(.1);
+      virtualRebase(at, T,  true);      
+      }
+    }
+
+  for(auto s: rti) if(s.c->monst == moIvyDead) s.c->monst = moNone;
+  
+  for(int i=0; i<motypes; i++) kills[i] = 0;
+
+  for(int i=0; i<multi::players; i++) {
+    auto who = shmup::pc[i];
+    // this is intentionally not hrand
+    who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 20000) * spin(rand() % 360);
+    who->base = s;
+    virtualRebase(who, true);
+    }
+
   if(1) {
     manual_celllister cl;
     cl.add(s);
@@ -380,6 +430,7 @@ void generate_track() {
     if(!goal) {
       printf("error: goal unreachable\n");
       stop_game();
+      race_try++;
       start_game();
       return;    
       }
@@ -708,6 +759,7 @@ struct race_configurer {
       dialog::add_action([] () { 
         stop_game();
         switch_game_mode(rg::racing);
+        race_try = 0;
         start_game();
         });
       }
@@ -802,6 +854,12 @@ void markers() {
     if(!gmatrix.count(w)) continue;
     dynamicval<charstyle> x(getcs(), ghost.cs);
     drawMonsterType(moPlayer, w, gmatrix[w] * p->T, 0, p->footphase);
+    }
+  
+  if(gmatrix.count(track[0])) {
+    for(ld z=-start_line_width; z<=start_line_width; z+=0.1) 
+      curvepoint(ggmatrix(track[0]) * straight * parabolic1(z) * C0);
+    queuecurve(0xFFFFFFFF, 0, PPR::BFLOOR);
     }
   }
 
