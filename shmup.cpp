@@ -1580,7 +1580,7 @@ void movePlayer(monster *m, int delta) {
     if(abs(mdx) > abs(mturn)) mturn = -mdx;
     mdx = mdy = 0;
     facemouse = shotkey = dropgreen = false;
-    if(ticks < racing::race_start_tick) mgo = 0;
+    if(ticks < racing::race_start_tick || !racing::race_start_tick) mgo = 0;
     }
   #endif
   

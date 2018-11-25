@@ -32,6 +32,8 @@ map<cell*, int> rti_id;
 
 string track_code = "OFFICIAL";
 
+transmatrix straight;
+
 int race_try;
 
 void apply_seed() {
