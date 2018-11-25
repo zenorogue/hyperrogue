@@ -579,22 +579,21 @@ auto hook =
 
 vector<eLand> race_lands = {
   laHunting,
-  laIce, 
-  laDesert, 
-  
   laCrossroads,
-  laCaves,
   laJungle,
+  laDesert, 
+  laRedRock,
+  laDragon,
   laMirror,
-  laHell,
+  laRuins,
+  laCaves,
+  laWildWest,
+  laIce, 
+  laHell,  
+  laTerracotta,
+  laElementalWall,
   laDryForest,
   laDeadCaves,
-  laRedRock,
-  laElementalWall,
-  laWildWest,
-  laDragon,
-  laTerracotta,
-  laRuins,
   };
 
 vector<string> playercmds_race = {
