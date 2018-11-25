@@ -412,7 +412,7 @@ void generate_track() {
   for(int i=0; i<multi::players; i++) {
     auto who = shmup::pc[i];
     // this is intentionally not hrand
-    who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 20000) * spin(rand() % 360);
+    who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 40000) * spin(rand() % 360);
     who->base = s;
     virtualRebase(who, true);
     }
