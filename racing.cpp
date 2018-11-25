@@ -635,6 +635,8 @@ void track_chooser(string new_track) {
     dialog::add_action([l, new_track] () {
       stop_game();
       if(!racing::on) switch_game_mode(rg::racing);
+      track_code = new_track;
+      specialland = l;
       start_game();
       popScreenAll();
       });
