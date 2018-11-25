@@ -148,8 +148,7 @@ namespace binary {
     }
   
   transmatrix parabolic(ld u) {
-    u = u * vid.binary_width / log(2);
-    return transmatrix {{{-u*u/8+1, u/2, u*u/8}, {-u/2, 1, u/2}, {-u*u/8, u/2, u*u/8+1}}};
+    return parabolic1(u * vid.binary_width / log(2) / 2);
     }
 
   void draw() {
