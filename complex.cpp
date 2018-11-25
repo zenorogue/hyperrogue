@@ -1884,6 +1884,7 @@ namespace heat {
 
   void processheat(double rate = 1) {
     if(markOrb(itOrbSpeed)) rate /= 2;
+    if(racing::on) return;
     int oldmelt = kills[0];    
     
     vector<cell*> offscreen2;
