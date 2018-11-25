@@ -3154,7 +3154,8 @@ bool makeEmpty(cell *c) {
   if(c->land == laWildWest) {
     forCellEx(c2, c)
     forCellEx(c3, c2)
-      c3->wall = waNone;
+      if(c3->wall != waBarrier)
+        c3->wall = waNone;
     }
   
   return true;
