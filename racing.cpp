@@ -44,11 +44,19 @@ void apply_seed() {
 
 int race_start_tick, race_finish_tick[MAXPLAYER];
 
+typedef unsigned char uchar;
+
+uchar frac_to_uchar(ld x) { return uchar(x * 256); }
+uchar angle_to_uchar(ld x) { return frac_to_uchar(x / 2 / M_PI); }
+
+ld uchar_to_frac(uchar x) { return x / 256.; }
+transmatrix spin_uchar(uchar x) { return spin(uchar_to_frac(x) * 2 * M_PI); }
+
+static const ld distance_multiplier = 4;
+
 struct ghostmoment {
-  int step;
-  int where_id;
-  transmatrix T;
-  ld footphase;
+  int step, where_id;
+  uchar alpha, distance, beta, footphase;
   };
 
 struct ghost {
@@ -82,15 +90,11 @@ string ghost_filename(string seed, int mcode) {
   }
 
 void hread(hstream& hs, ghostmoment& m) {
-  hread(hs, m.step, m.where_id, m.footphase);
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-    hread(hs, m.T[i][j]);
+  hread(hs, m.step, m.where_id, m.alpha, m.distance, m.beta, m.footphase);
   }
 
 void hwrite(hstream& hs, const ghostmoment& m) {
-  hwrite(hs, m.step, m.where_id, m.footphase);
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-    hwrite(hs, m.T[i][j]);
+  hwrite(hs, m.step, m.where_id, m.alpha, m.distance, m.beta, m.footphase);
   }
 
 void hread(hstream& hs, ghost& gh) {
@@ -470,7 +474,18 @@ void set_view() {
 
   shmup::monster *who = shmup::pc[current_player];
   
-  if(!inrec) current_history[current_player].emplace_back(ghostmoment{ticks - race_start_tick, rti_id[who->base], who->at, who->footphase});
+  if(!inrec) {
+    const transmatrix T = who->at;
+    ld alpha = -atan2(T * C0);
+    ld distance = hdist0(T * C0);
+    ld beta = -atan2(xpush(-distance) * spin(-alpha) * T * Cx1);
+    current_history[current_player].emplace_back(ghostmoment{ticks - race_start_tick, rti_id[who->base], 
+      angle_to_uchar(alpha),
+      frac_to_uchar(distance / distance_multiplier),
+      angle_to_uchar(beta),
+      frac_to_uchar(who->footphase)
+      });
+    }
 
   transmatrix at = ggmatrix(who->base) * who->at;
   
@@ -856,7 +871,10 @@ void markers() {
     cell *w = rti[p->where_id].c;
     if(!gmatrix.count(w)) continue;
     dynamicval<charstyle> x(getcs(), ghost.cs);
-    drawMonsterType(moPlayer, w, gmatrix[w] * p->T, 0, p->footphase);
+    
+    transmatrix T = spin_uchar(p->alpha) * xpush(uchar_to_frac(p->distance) * distance_multiplier) * spin_uchar(p->beta);
+
+    drawMonsterType(moPlayer, w, gmatrix[w] * T, 0, uchar_to_frac(p->footphase));
     }
   
   if(gmatrix.count(track[0])) {
