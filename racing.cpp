@@ -867,7 +867,7 @@ void markers() {
     if(!ghosts_left) break;
     ghosts_left--;
     auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
-    if(p == ghost.history.end()) p--;
+    if(p == ghost.history.end()) p--, p->footphase = 0;
     cell *w = rti[p->where_id].c;
     if(!gmatrix.count(w)) continue;
     dynamicval<charstyle> x(getcs(), ghost.cs);
