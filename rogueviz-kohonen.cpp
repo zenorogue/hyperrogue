@@ -645,9 +645,20 @@ void sominit(int initto, bool load_compressed) {
       allcells = cl.lst;
       }
     else allcells = currentmap->allcells();
-    
+        
     if(isize(allcells) > kohrestrict) {
-      sort(allcells.begin(), allcells.end(), [] (cell *c1, cell *c2) { return hdist0(tC0(ggmatrix(c1))) < hdist0(tC0(ggmatrix(c2))); });
+      map<cell*, int> clindex;
+      for(int i=0; i<isize(allcells); i++) clindex[allcells[i]] = i;
+      sort(allcells.begin(), allcells.end(), [&clindex] (cell *c1, cell *c2) { 
+        return make_pair(hdist0(tC0(ggmatrix(c1))), clindex[c1]) < 
+               make_pair(hdist0(tC0(ggmatrix(c2))), clindex[c2]); 
+        });
+      int at = kohrestrict;
+      ld dist = hdist0(tC0(ggmatrix(allcells[at-1])));
+      while(at < isize(allcells) && hdist0(tC0(ggmatrix(allcells[at]))) < dist + 1e-6) at++;
+      int at1 = kohrestrict;
+      while(at1 > 0 && hdist0(tC0(ggmatrix(allcells[at1-1]))) > dist - 1e-6) at1--;
+      printf("Cells numbered [%d,%d) are in the same distance\n", at1, at);
       allcells.resize(kohrestrict);
       }
   
