@@ -5473,8 +5473,6 @@ void drawmovestar(double dx, double dy) {
 
 // old style joystick control
 
-bool sidescreen;
-
 bool dronemode;
 
 purehookset hooks_calcparam;
@@ -5499,20 +5497,20 @@ void calcparam() {
   
   cd->scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
-  sidescreen = false;
+  current_display->sidescreen = false;
   
   if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual) {
     cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
     }
   else {
     if(vid.xres >= vid.yres * 5/4-16 && (cmode & sm::SIDE))
-      sidescreen = true;
+      current_display->sidescreen = true;
 #if CAP_TOUR
     if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN))
-      sidescreen = true;
+      current_display->sidescreen = true;
 #endif
 
-    if(sidescreen) cd->xcenter = vid.yres/2;
+    if(current_display->sidescreen) cd->xcenter = vid.yres/2;
     }
 
   cd->radius = vid.scale * cd->scrsize;  
@@ -5599,7 +5597,7 @@ void gamescreen(int _darken) {
     _darken += 2;
     }
   
-  if((cmode & sm::MAYDARK) && !sidescreen) {
+  if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;
     }
 
