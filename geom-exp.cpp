@@ -354,11 +354,6 @@ void showEuclideanMenu() {
   
     int worldsize;
     
-    int gar = 
-      GOLDBERG ? gp::area - 1 :
-      PURE ? 0 :
-      2;
-      
     int euler;
     if(euclid) euler = 0;
     else if(sphere && nonorientable) euler = 1;
