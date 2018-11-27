@@ -532,6 +532,7 @@ void showChangeMode() {
       }
   #endif
     else if(uni == 'C') {
+      chaosUnlocked = chaosUnlocked || autocheat;
       if(chaosUnlocked) restart_game(rg::chaos);
       if(!chaosUnlocked) help_nochaos();
       }
