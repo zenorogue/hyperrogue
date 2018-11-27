@@ -253,7 +253,11 @@ namespace torusconfig {
     {"rectangle (hex)", TF_WEIRD | TF_HEX},
     {"Klein bottle (squares)", TF_SIMPLE | TF_KLEIN | TF_SQUARE},
     {"Klein bottle (hex)", TF_WEIRD | TF_KLEIN | TF_HEX},
-    };    
+    {"cylinder (squares)", TF_SIMPLE | TF_CYL },
+    {"cylinder (hex)", TF_SIMPLE | TF_CYL | TF_HEX},
+    {"Möbius band (squares)", TF_SIMPLE | TF_CYL | TF_KLEIN},
+    {"Möbius band (hex)", TF_SIMPLE | TF_CYL | TF_HEX | TF_KLEIN},
+    };
   
   eTorusMode torus_mode, newmode;
   flagtype tmflags() { return tmodes[torus_mode].flags; }
@@ -342,11 +346,19 @@ namespace torusconfig {
       ginf[gTorus].vertex = 3, ginf[gTorus].sides = 6;
     else
       ginf[gTorus].vertex = 4, ginf[gTorus].sides = 4;
+    if(tmflags() & TF_KLEIN)
+      ginf[gTorus].quotientstyle |= qNONOR;
+    else 
+      ginf[gTorus].quotientstyle &= ~qNONOR;
+    if(tmflags() & TF_CYL)
+      ginf[gTorus].quotientstyle &= ~qFULLTORUS;
+    else
+      ginf[gTorus].quotientstyle |= qFULLTORUS;
     }
   }
 
 int euclid_getvec(int dx, int dy) {
-  if(torus) return torusconfig::getvec(dx, dy);
+  if(euwrap) return torusconfig::getvec(dx, dy);
   else return pair_to_vec(dx, dy);
   }
 
@@ -438,7 +450,7 @@ hrmap_torus *torusmap() {
 struct hrmap_euclidean : hrmap {
 
   cell *gamestart() {
-    return euclideanAtCreate(0);
+    return *(euclideanAtCreate(0).first);
     }
 
   struct euclideanSlab {
@@ -462,12 +474,25 @@ struct hrmap_euclidean : hrmap {
       euclidean[y][x] = NULL;
     }
   
-  cell*& at(int vec) {
+  euc_pointer at(int vec) {
     auto p = vec_to_pair(vec);
     int x = p.first, y = p.second;
+    bool mobius = false;
+    if(euwrap) {
+      int zx = torusconfig::sdx;
+      int zy = torusconfig::sdy;
+      
+      int periods = gdiv(x * zx + y * zy, zx * zx + zy * zy);
+      
+      if(nonorientable) mobius = (periods&1) ? S6 : 0, periods &=~ 1;
+      y -= zy * periods;
+      x -= zx * periods;      
+      
+      if(mobius) x -= zx, y -= zy, y = -y;
+      }
     euclideanSlab*& slab = euclidean[(y>>8)&(slabs-1)][(x>>8)&(slabs-1)];
     if(!slab) slab = new hrmap_euclidean::euclideanSlab;
-    return slab->a[y&255][x&255];
+    return make_pair(&(slab->a[y&255][x&255]), mobius);
     }
   
   map<int, struct cdata> eucdata;
@@ -483,8 +508,10 @@ struct hrmap_euclidean : hrmap {
   };
 
 cellwalker vec_to_cellwalker(int vec) {
-  if(!torus) 
-    return cellwalker(euclideanAtCreate(vec), 0, false);
+  if(!fulltorus) {
+    auto p = euclideanAtCreate(vec);
+    return cellwalker(*p.first, 0, p.second);
+    }
   else {
     hrmap_torus *cur = torusmap();
     if(!cur) return cellwalker(NULL, 0);
@@ -495,13 +522,23 @@ cellwalker vec_to_cellwalker(int vec) {
 
 int cellwalker_to_vec(cellwalker cw) {
   int id = decodeId(cw.at->master);
-  if(!torus) return id;
+  if(!fulltorus) {
+    if(nonorientable) {
+      auto ep = euclideanAt(id);
+      if(ep.second != cw.mirrored) {
+        int x, y;
+        tie(x, y) = vec_to_pair(id);
+        return pair_to_vec(x + torusconfig::sdx, torusconfig::sdy - y);
+        }
+      }
+    return id;
+    }
   return torusconfig::id_to_vec(id, cw.mirrored);
   }
 
 int cell_to_vec(cell *c) {
   int id = decodeId(c->master);
-  if(!torus) return id;
+  if(!fulltorus) return id;
   return torusconfig::id_to_vec(id, false);
   }
 
@@ -919,7 +956,10 @@ cell *createMov(cell *c, int d) {
     for(int dx=-1; dx<=1; dx++)
     for(int dy=-1; dy<=1; dy++)
       euclideanAtCreate(id + pair_to_vec(dx, dy));
-    if(!c->move(d)) { printf("fail!\n"); }
+    if(!c->move(d)) { 
+      println(hlog, "id = ", id, " vec_to_pair(id) = ", vec_to_pair(id), ": failed to create move ", d, " in Euclidean\n");
+      exit(0);
+      }
     }
   
   if(c->move(d)) return c->move(d);
@@ -992,28 +1032,36 @@ cell *getMovR(cell *c, int d) {
   return c->move(d);
   }
 
-void eumerge(cell* c1, cell *c2, int s1, int s2) {
+void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
   if(!c2) return;
-  c1->move(s1) = c2; c1->c.setspin(s1, s2, false);
-  c2->move(s2) = c1; c2->c.setspin(s2, s1, false);
+  c1->move(s1) = c2; c1->c.setspin(s1, s2, mirror);
+  c2->move(s2) = c1; c2->c.setspin(s2, s1, mirror);
   }
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
-cell*& euclideanAt(int vec) {
-  if(torus) { printf("euclideanAt called\n"); exit(1); }
+euc_pointer euclideanAt(int vec) {
+  if(fulltorus) { printf("euclideanAt called\n"); exit(1); }
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   return euc->at(vec);
   }
 
-cell*& euclideanAtCreate(int vec) {
-  cell*& c = euclideanAt(vec);
+euc_pointer euclideanAtCreate(int vec) {
+  euc_pointer ep = euclideanAt(vec);
+  cell*& c = *ep.first;
   if(!c) {
     c = newCell(8, encodeId(vec));
-    euclideanAt(vec) = c;
-    build_euclidean_moves(c, vec, [c,vec] (int delta, int d, int d2) { eumerge(c, euclideanAt(vec + delta), d, d2); });
+    // euclideanAt(vec) = c;
+    build_euclidean_moves(c, vec, [ep, c,vec] (int delta, int d, int d2) { 
+      euc_pointer ep2 = euclideanAt(vec + delta);
+      cell* c2 = *ep2.first;
+      if(!c2) return;
+      if(ep.second) d = c->c.fix(-d);
+      if(ep2.second) d2 = c2->c.fix(-d2);
+      eumerge(c, d, c2, d2, ep.second != ep2.second);
+      });
     }
-  return c;
+  return ep;
   }
 
 // initializer (also inits origin from heptagon.cpp)
@@ -1021,7 +1069,7 @@ void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
   if(archimedean) currentmap = arcm::new_map();
-  else if(torus) currentmap = new hrmap_torus;
+  else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
@@ -1181,10 +1229,10 @@ int compdist(int dx[]) {
   }
 
 int celldist(cell *c) {
-  if(torus) 
+  if(fulltorus) 
     return torusmap()->dists[decodeId(c->master)];
   if(masterless)
-    return eudist(decodeId(c->master));
+    return eudist(decodeId(c->master)); // fix cylinder
   if(sphere || binarytiling) return celldistance(c, currentmap->gamestart());
   if(IRREGULAR) return irr::celldist(c, false);
   if(archimedean || ctof(c)) return c->master->distance;
@@ -1202,7 +1250,7 @@ int celldist(cell *c) {
 
 int celldistAlt(cell *c) {
   if(masterless) {
-    if(torus) return celldist(c);
+    if(fulltorus) return celldist(c); // fix cylinder
     int x, y;
     tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);
@@ -1460,7 +1508,7 @@ cdata *getHeptagonCdata(heptagon *h) {
 
 cdata *getEuclidCdata(int h) {
 
-  if(torus) {
+  if(euwrap) { // fix cylinder?
     static cdata xx;
     return &xx;
     }
@@ -1572,16 +1620,16 @@ map<pair<cell*, cell*>, int> saved_distances;
 int celldistance(cell *c1, cell *c2) {
   
   if((masterless) && (euclid6 || (euclid4 && PURE))) {
-    if(!torus)
-      return eudist(decodeId(c1->master) - decodeId(c2->master));
-    else if(torus && torusconfig::torus_mode == 0) 
+    if(!euwrap)
+      return eudist(decodeId(c1->master) - decodeId(c2->master)); // fix cylinder
+    else if(euwrap && torusconfig::torus_mode == 0) 
       return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
     }
   
   if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
 
-  if(sphere || quotient || torus) {
+  if(sphere || quotient || fulltorus) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

@@ -2156,7 +2156,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
   else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
-    isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || torus || dont_face_pc))) {
+    isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || euwrap || dont_face_pc))) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
@@ -3577,7 +3577,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     transmatrix& gm = gmatrix[c];
     orig = 
       gm[2][2] == 0 ? true : 
-      torus ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
+      euwrap ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
       sphereflipped() ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
       fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8;
 

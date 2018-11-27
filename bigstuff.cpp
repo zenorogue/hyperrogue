@@ -729,7 +729,7 @@ void setLandSphere(cell *c) {
     if(c->land == laElementalWall && (c->type != 6 || GOLDBERG))
       c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
     }
-  if(!torus)
+  if(!euwrap)
   if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3 || specialland == laTerracotta) {
     int x = getHemisphere(c, 1);
     if(x == 0 && specialland == laTerracotta)
@@ -782,6 +782,10 @@ eLand switchable(eLand nearland, eLand farland, int c) {
   }
 
 eLand getEuclidLand(int c) {
+  if(nonorientable) {
+    c = -c;
+    if(c < 5) return laCrossroads;
+    }
   auto& la = get_euland(c);
   if(la) return la;
   if(get_euland(c-2) && !get_euland(c-1)) getEuclidLand(c-1);

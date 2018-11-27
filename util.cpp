@@ -82,6 +82,10 @@ int gmod(int i, int j) {
   return i;
   }
 
+int gdiv(int i, int j) {
+  return (i - gmod(i, j)) / j;
+  }
+
 ld frac(ld x) {
   x -= int(x);
   if(x < 0) x++;

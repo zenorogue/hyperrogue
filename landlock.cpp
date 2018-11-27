@@ -1207,7 +1207,7 @@ land_validity_t& land_validity(eLand l) {
     if(archimedean && DUAL)
       return not_implemented;
     // no equidistants supported in these geometries (big sphere is OK though)
-    if(quotient || elliptic || smallsphere || torus) 
+    if(quotient || elliptic || smallsphere || euwrap)
       return unbounded_only_except_bigsphere;
     // Yendorian only implemented in standard
     if(l == laEndorian && geometry)
@@ -1390,7 +1390,7 @@ land_validity_t& land_validity(eLand l) {
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
-  if(euclid && !torus && (l == laCrossroads || l == laCrossroads4))
+  if(euclid && !euwrap && (l == laCrossroads || l == laCrossroads4)) // fix cylinder
     return full_game; 
   
   // highlight Zebra-based lands on Zebra Quotient!
@@ -1427,7 +1427,7 @@ land_validity_t& land_validity(eLand l) {
     return pattern_not_implemented_exclude;
     }
   
-  if(l == laStorms && torus) 
+  if(l == laStorms && fulltorus) 
     return interesting;
   
   if(l == laMagnetic || l == laBrownian)

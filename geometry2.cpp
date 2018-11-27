@@ -81,7 +81,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
   if(binarytiling) return binary::relative_matrix(c2->master, c1->master);
   if(archimedean) return arcm::relative_matrix(c2->master, c1->master);
   
-  if(torus) {
+  if(euwrap) {
     transmatrix t = Id;
     if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
     int mirrors = 0;
@@ -182,7 +182,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[2][2] == 0) {
-    if(torus && centerover.at) 
+    if(euwrap && centerover.at) 
       t = calc_relative_matrix(c, centerover.at, C0);
     else if(euclid) {
       if(!centerover.at) centerover = cwt;
@@ -229,7 +229,7 @@ template<class T, class U>
 void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   if(euclid || sphere) {
     again:
-    if(torus) for(int i=0; i<6; i++) {
+    if(euwrap) for(int i=0; i<6; i++) {
       auto newat = eumovedir(3+i) * at;
       if(hdist0(check(newat)) < hdist0(check(at))) {
         at = newat;

@@ -12,7 +12,7 @@ namespace whirlwind {
   int fzebra3(cell *c) {
     if(archimedean) return 0;
     if(euclid) {
-      if(torus) return 0;
+      if(fulltorus) return 0;
       int x, y;
       tie(x,y) = cell_to_pair(c);
       return 1+((((signed short)(y)+int(50000))/3)%3);
@@ -543,7 +543,7 @@ namespace princess {
 
   int dist(cell *c) {
     if(c->land != laPalace && c->land != laDungeon) return OUT_OF_PALACE;
-    else if(quotient || sphere || torus) return OUT_OF_PRISON;
+    else if(quotient || sphere || fulltorus) return OUT_OF_PRISON;
     else if(euclid) return celldistAlt(c);
     else if(!c->master->alt) return OUT_OF_PRISON;
     else return celldistAlt(c);
@@ -826,7 +826,7 @@ namespace clearing {
     if(quotient) return;
     
     if(euclid) {
-      if(torus) return;
+      if(euwrap) return; // fix cylinder
       if(pseudohept(c)) return;
       c->monst = moMutant;
       
@@ -2795,7 +2795,7 @@ namespace prairie {
     c->LHU.fi.walldist = 8;
     c->LHU.fi.walldist2 = 8;
     
-    if(torus) {
+    if(euwrap) { // fix cylinder
       c->LHU.fi.rval = 0;
       }
     else if(euclid) {
@@ -3540,7 +3540,7 @@ namespace dungeon {
       */
     
     if(euclid) {
-      if(torus) return;
+      if(euwrap) return;
       int x, y;
       tie(x, y) = cell_to_pair(c);
       string tab6[] = {

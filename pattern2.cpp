@@ -80,7 +80,7 @@ unsigned bitmajority(unsigned a, unsigned b, unsigned c) {
   }
 
 int eufifty(cell *c) {
-  if(torus) {
+  if(fulltorus) {
     if(c->land == laWildWest) return cell_to_vec(c) % 37;
     else return cell_to_vec(c) % 27;
     }
@@ -347,7 +347,7 @@ int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(torus) {
+  else if(fulltorus) {
     return decodeId(c->master);
     }
   else if(euclid) {
@@ -365,7 +365,7 @@ int fieldval_uniq(cell *c) {
   }
 
 int fieldval_uniq_rand(cell *c, int randval) {
-  if(sphere || torus || euclid || NONSTDVAR) 
+  if(sphere || euclid || NONSTDVAR) 
     // we do not care in these cases
     return fieldval_uniq(c);
   if(ctof(c)) return currfp.gmul(c->master->fieldval, randval)/7;
@@ -433,7 +433,7 @@ int getHemisphere(heptagon *h, int which) {
   }
 
 int getHemisphere(cell *c, int which) {
-  if(torus) return 0;
+  if(euwrap) return 0;
   if(which == 0 && GOLDBERG && has_nice_dual()) {
     set<cell*> visited;
     vector<cell*> q;

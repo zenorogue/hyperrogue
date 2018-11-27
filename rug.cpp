@@ -575,7 +575,7 @@ void buildRug() {
 
   need_mouseh = true;
   good_shape = false;
-  if(torus) {
+  if(euwrap) {
     good_shape = true;
     buildTorusRug();
     return;
@@ -812,7 +812,7 @@ int divides = 0;
 bool stop = false;
 
 bool subdivide_further() {
-  if(torus) return false;
+  if(euwrap) return false;
   return isize(points) * 4 < vertex_limit;
   }
 
@@ -991,7 +991,7 @@ void addNewPoints() {
   if(anticusp_factor && detect_cusps())
     return;
 
-  if(torus || qvalid == isize(points)) {
+  if(euwrap || qvalid == isize(points)) {
     subdivide();
     return;
     }

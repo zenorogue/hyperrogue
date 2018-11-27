@@ -816,7 +816,7 @@ void describeMouseover() {
       
     if(euclid && cheater) {
       out += " ("+its(cell_to_vec(c))+")";
-      if(!torus || torusconfig::torus_mode != torusconfig::tmSingle) {
+      if(!fulltorus || torusconfig::torus_mode != torusconfig::tmSingle) {
         int x, y;
         tie(x,y) = cell_to_pair(c);
         out += " ("+its(short(x))+","+its(short(y))+")";

@@ -201,7 +201,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
 enum eGeometry {
   gNormal, gEuclid, gSphere, gElliptic, gZebraQuotient, gFieldQuotient, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, 
   gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gArchimedean, 
-  gMacbeath, gBring, gSchmutzM2, gSchmutzM3,
+  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, 
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
@@ -223,9 +223,10 @@ struct geometryinfo {
 static const int qSMALL = 1;
 static const int qFIELD = 2;
 static const int qNONORIENTABLE = 4;
-static const int qTORUS = 8;
+static const int qEUWRAP = 8;
 static const int qDOCKS = 16;
 static const int qZEBRA = 32;
+static const int qFULLTORUS = 64;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;

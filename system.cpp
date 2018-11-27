@@ -172,7 +172,7 @@ void initgame() {
   clear_euland(specialland);
 
   if(euclid && specialland == laPrincessQuest) {
-    cell *c = euclideanAtCreate(pair_to_vec(EPX, EPY));
+    cell *c = *euclideanAtCreate(pair_to_vec(EPX, EPY)).first;
     princess::generating = true;
     c->land = laPalace;
     setdist(c, 7 - getDistLimit() - genrange_bonus, NULL);

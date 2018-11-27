@@ -116,6 +116,8 @@ void showTorusConfig() {
   bool single = (mode.flags & torusconfig::TF_SINGLE);
   bool square = (mode.flags & torusconfig::TF_SQUARE);
   bool simple = (mode.flags & torusconfig::TF_SIMPLE);
+  bool cyl = (mode.flags & torusconfig::TF_CYL);
+  bool klein  = (mode.flags & torusconfig::TF_KLEIN);
   
   if(single) {
     dialog::addSelItem(XLAT("number of cells (n)"), its(torusconfig::newqty), 'n');
@@ -123,6 +125,10 @@ void showTorusConfig() {
       dialog::addSelItem(XLAT("cell bottom-right from 0 (d)"), its(torusconfig::newdy), 'd');
     else
       dialog::addSelItem(XLAT("cell below 0 (d)"), its(torusconfig::newdy), 'd');
+    }
+  else if(cyl) {
+    dialog::addSelItem(XLAT("period (x)"), its(torusconfig::newsdx), 'x');
+    dialog::addSelItem(XLAT("period (y)"), its(torusconfig::newsdy), 'y');
     }
   else {
     if(torusconfig::newsdx < 1) torusconfig::newsdx = 1;
@@ -136,6 +142,7 @@ void showTorusConfig() {
   
   int valid = 2;
 
+  int adx = torusconfig::newsdx, ady = torusconfig::newsdy;
   if(single) {  
     if(square) {
       dialog::addInfo("this mode has bad patterns", 0x808080), valid = 1;
@@ -147,6 +154,33 @@ void showTorusConfig() {
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "n", "3"), 0x808080), valid = 1;
       if((torusconfig::newdy + 999999) % 3 != 2)
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "d+1", "3"), 0x808080), valid = 1;
+      }
+    }
+  else if(cyl) {
+    if(torusconfig::sdx == 0 && torusconfig::sdy == 0) 
+      dialog::addInfo(XLAT("period cannot be 0"), 0x800000), valid = 0;
+    else if(square) {
+      if(torusconfig::newsdy & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
+      if(torusconfig::newsdx & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
+      if(!torus_bitrunc && valid == 1)
+        dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;      
+      if(klein && abs(adx) != abs(ady) && adx != 0 && ady != 0)
+        dialog::addInfo("Möbius band requires a symmetric period", 0x800000), valid = 0;
+
+      if(klein && ady)
+        dialog::addInfo("not implemented", 0x800000), valid = 0;
+      }
+    else {
+      if(torusconfig::newsdy % 3)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "3"), 0x808080), valid = 1;
+      if(torusconfig::newsdx % 3)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
+      if(klein && adx != 0 && ady != 0 && adx != -ady)
+        dialog::addInfo("Möbius band requires a symmetric period", 0x800000), valid = 0;
+      if(klein)
+        dialog::addInfo("not implemented", 0x800000), valid = 0;
       }
     }
   else {
@@ -286,7 +320,7 @@ void showEuclideanMenu() {
     for(int i=0; i<gGUARD; i++) {
       bool on = geometry == i;
       dynamicval<eGeometry> cg(geometry, eGeometry(i));
-      if(!!(quotient || elliptic || torus) != showquotients) continue;
+      if(!!(quotient || elliptic || euwrap) != showquotients) continue;
       dialog::addBoolItem(XLAT(ginf[i].name), on, letter++);
       dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
       dialog::add_action([i] {
@@ -397,7 +431,9 @@ void showEuclideanMenu() {
   
     else if((tq & qNONORIENTABLE) && sphere) qstring = "elliptic";
   
-    else if(tq & qTORUS) qstring = "torus";
+    else if(tq & qFULLTORUS) qstring = "torus";
+
+    else if(tq & qEUWRAP) qstring = "cylinder";
     
     else if(tq & qSMALL) qstring = ginf[geometry].shortname;
   
@@ -437,7 +473,7 @@ void showEuclideanMenu() {
       dialog::addBoolItem(XLAT("stereographic/orthogonal"), vid.alpha>10, '1');
     else
       dialog::addBoolItem(XLAT("Poincaré/Klein"), vid.alpha>.5, '1');
-    if(torus || geometry == gFieldQuotient)
+    if(euwrap || geometry == gFieldQuotient)
       dialog::addItem(XLAT("advanced parameters"), '4');  
     dialog::addHelp();
     dialog::addBack();
@@ -482,7 +518,7 @@ void showEuclideanMenu() {
       else if(uni == '5')
         ewhichscreen ^= 3;
       else if(uni == '4') {
-        if(torus) 
+        if(euwrap) 
           prepare_torusconfig(),
           pushScreen(showTorusConfig);
         else if(geometry == gFieldQuotient) 

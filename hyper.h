@@ -100,10 +100,11 @@ void addMessage(string s, char spamtype = 0);
 #define nonorientable (ginf[geometry].quotientstyle & qNONORIENTABLE)
 #define elliptic (sphere && nonorientable)
 #define quotient (ginf[geometry].quotientstyle & (qSMALL | qFIELD | qDOCKS | qZEBRA))
-#define torus (ginf[geometry].quotientstyle & qTORUS)
+#define euwrap (ginf[geometry].quotientstyle & qEUWRAP)
+#define fulltorus (ginf[geometry].quotientstyle & qFULLTORUS)
 #define doall (ginf[geometry].quotientstyle)
-#define smallbounded (sphere || (quotient & qSMALL) || torus)
-#define bounded (sphere || quotient || torus)
+#define smallbounded (sphere || (quotient & qSMALL) || fulltorus)
+#define bounded (sphere || quotient || fulltorus)
 
 #define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
 #define sphere_narcm (sphere && !archimedean)
@@ -3393,7 +3394,9 @@ string llts(long long i);
 void clearMemoRPM();
 extern int randompattern[landtypes];
 extern int pair_to_vec(int x, int y);
-cell*& euclideanAtCreate(int vec);
+typedef pair<cell**, bool> euc_pointer;
+euc_pointer euclideanAt(int vec);
+euc_pointer euclideanAtCreate(int vec);
 bool isCyclic(eLand l);
 bool generateAll(eLand l);
 void extendcheck(cell *c);
@@ -3791,7 +3794,11 @@ namespace torusconfig {
     tmStraight, 
     tmStraightHex,
     tmKlein,
-    tmKleinHex
+    tmKleinHex,
+    tmCylinder,
+    tmCylinderHex,
+    tmMobius,
+    tmMobiusHex,
     };
   
   extern eTorusMode torus_mode;
@@ -3810,7 +3817,8 @@ namespace torusconfig {
     TF_WEIRD  = 4,
     TF_HEX    = 16,
     TF_SQUARE = 32,
-    TF_KLEIN = 256
+    TF_CYL    = 64,
+    TF_KLEIN = 256,
     };
 
   flagtype tmflags();

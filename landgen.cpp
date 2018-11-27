@@ -190,7 +190,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(hyperbolic_not37 || torus || S7 < 5 || archimedean) {
+      if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean) {
         if(d == 9) {
           int i = hrand(100);
           if(i < 10) 
@@ -391,7 +391,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d==8) {
         if(randomPatternsMode)
           c->wall = RANDPAT3(0) ? waCavewall : waCavefloor;
-        else if(torus) {
+        else if(fulltorus) {
           c->wall = waCavefloor;
           }
         else if(euclid) {
@@ -482,7 +482,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(archimedean && arcm::current.have_line)
           v = arcm::linespattern(c) ? 24 : 16;
-        else if(torus || hyperbolic_not37 || quotient || archimedean) {
+        else if(fulltorus || hyperbolic_not37 || quotient || archimedean) {
           v = hrand(100) < 25 ? 24 : 16;
           }
         else if(euclid) {
@@ -541,7 +541,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laZebra:
       if(d==8) {
-        if(torus) ;
+        if(fulltorus) ;
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;        
         else if(euclid && !archimedean) {
@@ -565,7 +565,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laWineyard:
       if(d==8) {
-        if(torus) ;
+        if(fulltorus) ;
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
         else if(euclid && !archimedean) {
@@ -1099,7 +1099,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(quotient && zebra40(c) == 5) {
           c->wall = waChasm;
           }
-        if(torus) {
+        if(fulltorus) {
           int i = hrand(100);
           if(i == 0) c->item = itTreat;
           else if(i < 5) c->wall = waChasm;
@@ -1152,7 +1152,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       bool randstorm = hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient);
       if(d == 9) {
       
-        if(torus) {
+        if(fulltorus) {
           int pid = decodeId(c->master);
           if(pid == torusconfig::qty/3) c->wall = waCharged;
           if(pid == torusconfig::qty*2/3) c->wall = waGrounded;
@@ -2413,7 +2413,7 @@ void setdist(cell *c, int d, cell *from) {
 #else
     if(true) {
 #endif
-      if(sphere || torus) setLandSphere(c);
+      if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       if(weirdhyperbolic) setLandWeird(c);
       if(quotient) { setland(c, specialland); setLandQuotient(c); }

@@ -665,7 +665,7 @@ ld spherity(const transmatrix& V) {
   }
 
 bool confusingGeometry() {
-  return elliptic || quotient || torus;
+  return elliptic || quotient || euwrap;
   }
 
 ld master_to_c7_angle() {
@@ -1476,7 +1476,7 @@ bool do_draw(cell *c, const transmatrix& T) {
     if(iz < -M_PI || iz >= M_PI) return false;
     }
   if(cells_drawn > vid.cells_drawn_limit) return false;
-  bool usr = vid.use_smart_range || quotient || torus;
+  bool usr = vid.use_smart_range || quotient || euwrap;
   if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
   if(vid.use_smart_range == 2) setdist(c, 7, c);
   return true; 

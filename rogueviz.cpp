@@ -166,7 +166,7 @@ void notimpl() {
 hyperpoint where(int i, cell *base) {
   auto m = vdata[i].m;
   if(m->base == base) return tC0(m->at);
-  else if(quotient || elliptic || torus) {
+  else if(confusingGeometry()) {
     return calc_relative_matrix(m->base, base, C0) * tC0(m->at);
     }
   else {
@@ -177,7 +177,7 @@ hyperpoint where(int i, cell *base) {
 
 void addedge(int i, int j, edgeinfo *ei) {
   cell *base = 
-    (quotient || elliptic || torus) ? vdata[i].m->base : currentmap->gamestart();
+    confusingGeometry() ? vdata[i].m->base : currentmap->gamestart();
   hyperpoint hi = where(i, base);
   hyperpoint hj = where(j, base);
   double d = hdist(hi, hj);
@@ -1172,7 +1172,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
     if(hilite) ghilite = true;
     
-    bool multidraw = quotient || torus;
+    bool multidraw = quotient || euwrap;
         
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
