@@ -1180,7 +1180,7 @@ void switch_game_mode(char switchWhat) {
       break;
 
     case rg::chaos:
-      if(euclid || sphere || quotient)
+      if(sphere || quotient || fulltorus || (euwrap && torusconfig::sdy))
         geometry = gNormal;
       if(tactic::on) firstland = laIce;
       yendor::on = tactic::on = princess::challenge = false;

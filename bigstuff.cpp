@@ -761,7 +761,12 @@ void clear_euland(eLand first) {
   }
 
 eLand switchable(eLand nearland, eLand farland, int c) {
-  if(specialland == laCrossroads4) {
+  if(chaosmode) {
+    if(hrand(6) == 0)
+      return getNewLand(nearland);
+    return nearland;
+    }
+  else if(specialland == laCrossroads4) {
     if(hrand(15) == 0)
       return getNewLand(nearland);
     return nearland;
