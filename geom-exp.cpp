@@ -104,7 +104,7 @@ void prepare_torusconfig() {
 
 void showTorusConfig() {
   cmode = sm::SIDE;
-  if(torus) cmode |= sm::TORUSCONFIG;
+  if(euclid) cmode |= sm::TORUSCONFIG;
   gamescreen(2);
   
   dialog::init(XLAT("advanced configuration"));
