@@ -197,9 +197,9 @@ void showTorusConfig() {
         dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
       }
     else if(simple) {
-      if(torusconfig::newsdx & 1)
+      if(torusconfig::newsdx % 3)
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
-      if(torusconfig::newsdy & 1)
+      if(torusconfig::newsdy % 3)
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "3"), 0x808080), valid = 1;
       }
     else {
