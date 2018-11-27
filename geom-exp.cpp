@@ -111,7 +111,11 @@ void showTorusConfig() {
   
   auto& mode = torusconfig::tmodes[torusconfig::newmode];
   
-  dialog::addSelItem(XLAT("mode"), XLAT(mode.name), 'm');
+  for(int i=0; i<isize(torusconfig::tmodes); i++) {
+    char let = "0123456789!@#" [i];
+    dialog::addBoolItem(torusconfig::tmodes[i].name, torusconfig::newmode == i, let);
+    dialog::add_action([i] () { torusconfig::newmode = torusconfig::eTorusMode(i); });
+    }
   
   bool single = (mode.flags & torusconfig::TF_SINGLE);
   bool square = (mode.flags & torusconfig::TF_SQUARE);
@@ -216,12 +220,7 @@ void showTorusConfig() {
   dialog::addItem("default", 'c');
 
   keyhandler = [=] (int sym, int uni) {
-    if(uni == 'm') {
-      int i = torusconfig::newmode + 1;
-      if(i >= isize(torusconfig::tmodes)) i = 0;
-      torusconfig::newmode = torusconfig::eTorusMode(i);
-      }
-    else if(uni == 'n' && single)
+    if(uni == 'n' && single)
       dialog::editNumber(torusconfig::newqty, 0, 1000, 3, torusconfig::def_qty, XLAT("number of cells (n)"), "");
     else if(uni == 'd' && single)
       dialog::editNumber(torusconfig::newdy, -1000, 1000, 3, -torusconfig::def_dy, XLAT("cell below 0 (d)"), "");
