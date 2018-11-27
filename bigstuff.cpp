@@ -801,6 +801,11 @@ eLand getEuclidLand(int c) {
 
 void setLandEuclid(cell *c) {
   setland(c, specialland);
+  if(specialland == laCrossroads4 || chaosmode) {
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
+    c->land = getEuclidLand(y);
+    }
   if(specialland == laCrossroads) {
     int x, y;
     tie(x,y) = cell_to_pair(c);
@@ -813,11 +818,6 @@ void setLandEuclid(cell *c) {
       setland(c, laMercuryRiver);
       c->wall = waMercury;
       }
-    }
-  if(specialland == laCrossroads4) {
-    int x, y;
-    tie(x,y) = cell_to_pair(c);
-    c->land = getEuclidLand(y);
     }
   if(specialland == laWhirlpool) {
     c->land = laOcean;
