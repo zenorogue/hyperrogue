@@ -559,7 +559,10 @@ namespace hr { namespace gp {
     if(GOLDBERG) {
       int x = param.first;
       int y = param.second;
-      area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
+      if(S3 == 3)
+        area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
+      else
+        area = x * x + y * y;
       next = hpxyz(x+y/2., -y * sqrt(3) / 2, 0);
       ld scale = 1 / hypot2(next);
       crossf *= scale;

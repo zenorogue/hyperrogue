@@ -1390,8 +1390,14 @@ land_validity_t& land_validity(eLand l) {
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
-  if(euclid && !euwrap && (l == laCrossroads || l == laCrossroads4)) // fix cylinder
+  if(euclid && !euwrap && (l == laCrossroads || l == laCrossroads4))
     return full_game; 
+
+  if(euclid && euwrap && !fulltorus && l == laCrossroads && torusconfig::sdy == -2 * torusconfig::sdx)
+    return full_game;
+  
+  if(euclid && euwrap && !fulltorus && l == laCrossroads4 && torusconfig::sdy == 0)
+    return full_game;
   
   // highlight Zebra-based lands on Zebra Quotient!
   if((l == laZebra || l == laWhirlwind || l == laStorms || l == laWarpCoast || l == laWarpSea) && geometry == gZebraQuotient)

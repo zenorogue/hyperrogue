@@ -204,6 +204,14 @@ void showTorusConfig() {
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 0;
       }
     }
+  if(cyl) {
+    if(!(square && klein)) {
+      dialog::addBoolItem(XLAT("set y=-2x for Crossroads"), ady == -2 * adx, 'C');
+      dialog::add_action([] () { torusconfig::newsdy = -2 * torusconfig::newsdx; });
+      }
+    dialog::addBoolItem(XLAT("set y=0 for Crossroads IV and Chaos Mode"), ady == 0, 'D');
+    dialog::add_action([] () { torusconfig::newsdy = 0; });
+    }
   
   dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
 
@@ -215,6 +223,7 @@ void showTorusConfig() {
   dialog::addItem("default", 'c');
 
   keyhandler = [=] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
     if(uni == 'n' && single)
       dialog::editNumber(torusconfig::newqty, 0, 1000, 3, torusconfig::def_qty, XLAT("number of cells (n)"), "");
     else if(uni == 'd' && single)
@@ -298,14 +307,14 @@ void showEuclideanMenu() {
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
     int tq = ginf[geometry].quotientstyle;
-    int nom = (BITRUNCATED ? tv+ts : tv) * ((tq & qNONORIENTABLE) ? 2 : 4);
+    int nom = (BITRUNCATED ? tv+ts : tv) * 4;
     int denom = (2*ts + 2*tv - ts * tv);
     
-    if(GOLDBERG) {
-      denom *= 2;
-      nom = nom / tv * (2*tv + ts * (gp::area-1));
-      if(nom % 2 == 0) nom /= 2, denom /= 2;
-      }
+    if(GOLDBERG && S3)
+      nom = 2 * (2*tv + ts * (gp::area-1));
+
+    if(GOLDBERG && S3 == 4)
+      nom = 2 * (2*tv + 2 * ts * (gp::area-1));
     
     dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
     dialog::addBreak(50);
@@ -348,43 +357,70 @@ void showEuclideanMenu() {
     int gar = 
       GOLDBERG ? gp::area - 1 :
       PURE ? 0 :
-      2;    
-    
-    switch(geometry) {
-      case gTorus: 
-        worldsize = torusconfig::qty;
+      2;
+      
+    int euler;
+    if(euclid) euler = 0;
+    else if(sphere && nonorientable) euler = 1;
+    else if(sphere) euler = 2;
+    else if(!bounded) euler = -2;
+    else switch(geometry) {
+      case gFieldQuotient:
+        worldsize = isize(currentmap->allcells());
+        euler = 2 * worldsize * denom / nom;
+        break;
+      
+      case gMinimal:
+        euler = -1;
         break;
       
       case gZebraQuotient:
-        worldsize = 12 + 14 * gar;
-        break;
-      
-      case gFieldQuotient:
-        worldsize = isize(currfp.matrices) / ts;
-        worldsize = worldsize * (2*tv + ts * gar) / tv / 2;
+      case gBolza:
+        euler = -2;
         break;
       
       case gKleinQuartic:
-        worldsize = 24 + 28 * gar;
+      case gSchmutzM2:
+      case gBolza2:
+        euler = -4;
+        break;
+      
+      case gSchmutzM3:
+      case gBring:
+        euler = -6;
         break;
       
       case gMacbeath:
-        worldsize = (12 + 14 * gar) * 6;
+        euler = -12;
         break;
       
-      case gBolza:
-        worldsize = 3 * (2*tv + ts * gar) / tv;
-        break;
-      
-      case gBolza2:
-        worldsize = 6 * (2*tv + ts * gar) / tv;
-        break;
-      
-      default:
-        worldsize = denom ? nom/denom : 0;
+      default: 
+        println(hlog, "warning: Euler characteristics unknown");
         break;
       }
     
+    nom *= euler;
+    denom *= 2;
+          
+    int g = gcd(nom, denom);
+    if(g) {
+      nom /= g;
+      denom /= g;
+      }
+    
+    if(fulltorus) {
+      using namespace torusconfig;
+      auto& mode = tmodes[torus_mode];
+      if(mode.flags & TF_SINGLE)
+        worldsize = qty;
+      else
+        worldsize = sdx * sdy;
+      }
+    else worldsize = denom ? nom / denom : 0;
+    
+    if(euler < 0 && !bounded)
+      worldsize = -worldsize;
+
     string spf = its(ts);
     if(archimedean) {
       spf = "";
@@ -444,10 +480,20 @@ void showEuclideanMenu() {
       binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
       archimedean ? arcm::current.world_size() :
       (archimedean && sphere) ? its(isize(currentmap->allcells())) :
-      worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)) + " exp(∞)": 
-      worldsize == 0 ? "∞" :
+      worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
+      (euwrap && !fulltorus) ? "∞" :
+      worldsize == 0 ? "∞²" :
       its(worldsize),
       '3');
+
+    if(bounded) {
+      dialog::addSelItem(XLAT("Euler characteristics"), its(euler), 0);
+      if(nonorientable)
+        dialog::addSelItem(XLAT("demigenus"), its(2-euler), 0);
+      else
+        dialog::addSelItem(XLAT("genus"), its((2-euler)/2), 0);
+      }
+    else dialog::addBreak(200);
     
     switch(ginf[geometry].cclass) {
       case 0:

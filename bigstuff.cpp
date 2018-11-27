@@ -787,10 +787,7 @@ eLand switchable(eLand nearland, eLand farland, int c) {
   }
 
 eLand getEuclidLand(int c) {
-  if(nonorientable) {
-    c = -c;
-    if(c < 5) return laCrossroads;
-    }
+  if(nonorientable && c < 0) c = -c;
   auto& la = get_euland(c);
   if(la) return la;
   if(get_euland(c-2) && !get_euland(c-1)) getEuclidLand(c-1);
