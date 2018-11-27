@@ -134,6 +134,12 @@ void addMessage(string s, char spamtype = 0);
 #define MAX_S3 4
 #define MAX_S84 240
 
+#define eurad crossf
+
+#define SG6 (S3==3?6:4)
+#define SG3 (S3==3?3:2)
+#define SG2 (S3==3?2:1)
+
 #define GOLDBERG (variation == eVariation::goldberg)
 #define IRREGULAR (variation == eVariation::irregular)
 #define PURE (variation == eVariation::pure)
@@ -2860,7 +2866,7 @@ namespace princess {
 #define GRAIL_FOUND 0x4000
 #define GRAIL_RADIUS_MASK 0x3FFF
 
-int eudist(short sx, short sy);
+int eudist(int sx, int sy);
 
 heptagon *createStep(heptagon *h, int d);
 

@@ -225,6 +225,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   if(euclid || sphere) {
     again:
     if(euwrap) for(int i=0; i<6; i++) {
+      // fix cylinder and square grid
       auto newat = eumovedir(3+i) * at;
       if(hdist0(check(newat)) < hdist0(check(at))) {
         at = newat;

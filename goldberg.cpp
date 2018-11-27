@@ -55,10 +55,6 @@ namespace hr { namespace gp {
       }
     }
   
-#define SG6 (S3==3?6:4)
-#define SG3 (S3==3?3:2)
-#define SG2 (S3==3?2:1)
-
   int fixg6(int x) { return (x + MODFIXER) % SG6; }
   
 #define WHD(x) // x

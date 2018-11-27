@@ -580,8 +580,6 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 transmatrix sphereflip; // on the sphere, flip
 bool playerfound; // has player been found in the last drawing?
 
-#define eurad crossf
-
 double q3 = sqrt(double(3));
 
 bool outofmap(hyperpoint h) {
@@ -935,7 +933,7 @@ void drawEuclidean() {
       }
 
     if(do_draw(cw.at, Mat)) {
-      drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
+      drawcell(cw.at, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat, cw.spin, cw.mirrored);
       for(int x=-1; x<=+1; x++)
       for(int y=-1; y<=+1; y++) {
         euspot p(dx+x, dy+y);

@@ -355,6 +355,105 @@ namespace torusconfig {
     else
       ginf[gTorus].quotientstyle |= qFULLTORUS;
     }
+
+  int dscalar(gp::loc e1, gp::loc e2) {
+    return 2 * (e1.first * e2.first + e1.second*e2.second) + (S3 == 3 ? e1.first*e2.second + e2.first * e1.second : 0);
+    }
+    
+  gp::loc sdxy() { return gp::loc(sdx, sdy); }
+  
+  int mobius_dir_basic() {
+    int dscalars[6];
+    for(int a=0; a<SG6; a++)
+      dscalars[a] = dscalar(gp::eudir(a), sdxy());
+    for(int a=0; a<SG6; a++)
+    for(int b=0; b<SG6; b++)
+      if(a != b && dscalars[a] == dscalars[b]) {
+        return (a + b) % SG6;
+      }
+    return -1;
+    }
+  
+  bool mobius_symmetric(bool square, int dx, int dy) {
+    dynamicval<eGeometry> g(geometry, square ? gEuclidSquare : gEuclid);
+    dynamicval<int> gx(sdx, dx);
+    dynamicval<int> gy(sdy, dy);
+    return mobius_dir_basic() != -1;
+    }
+
+  void mobius_flip(int&x, int& y) {
+  
+    int d = mobius_dir_basic();
+    int a, b;
+    if(d == 0) a = 1, b = SG6-1;
+    else a = 0, b = d;
+    auto p1 = gp::eudir(a);
+    auto p2 = gp::eudir(b);
+
+    // x = sdx * s + px * t
+    // y = sdy * s + py * t
+    // py * x = py * sdx * s + px * py * t
+    // px * y = px * sdy * s + px + py * t
+    // py * x - px * y = py * sdx * s - px * sdy * s
+    // s = (py * x - px * y) / (py * sdx - px * sdy)
+    
+    int det = p1.second * sdx - p1.first * sdy;
+    int smul = p1.second * x - p1.first * y;
+    int tmul = sdx * y - sdy * x;
+    
+    x = (tmul * p2.first + smul * sdx) / det;
+    y = (tmul * p2.second + smul * sdy) / det;
+    
+    // println(hlog, make_pair(ox,oy), " [", d, "] ", make_pair(x,y), " p1 = ", p1, " p2 = ", p2, " det = ", det, " smul = ", smul, " tmul = ", tmul);
+    }
+
+  int mobius_dir(cell *c) {
+    if(c->type == 8) return mobius_dir_basic() * 2;
+    else return mobius_dir_basic();
+    }
+  
+  bool be_canonical(int& x, int& y) {
+    using namespace torusconfig;
+    
+    int periods = gdiv(dscalar(gp::loc(x,y), sdxy()), dscalar(sdxy(), sdxy()));
+    
+    y -= sdy * periods;
+    x -= sdx * periods;      
+    
+    bool b = false;
+
+    if(nonorientable && (periods & 1)) {
+      mobius_flip(x, y);
+      b = true;
+      }
+    
+    return b;
+    }
+  
+  int cyldist(int id1, int id2) {
+  
+    int x1, y1, x2, y2;
+    tie(x1, y1) = vec_to_pair(id1);
+    tie(x2, y2) = vec_to_pair(id2);
+    be_canonical(x1, y1);
+    be_canonical(x2, y2);
+    
+    int dist = 1000000000;
+    
+    for(int a1=-1; a1<=1; a1++) 
+    for(int a2=-1; a2<=1; a2++) {
+      int ax1 = x1 + sdx * a1;
+      int ay1 = y1 + sdy * a1;
+      if(nonorientable && a1) mobius_flip(ax1, ay1);
+      int ax2 = x2 + sdx * a2;
+      int ay2 = y2 + sdy * a2;
+      if(nonorientable && a2) mobius_flip(ax2, ay2);
+      dist = min(dist, eudist(ax1 - ax2, ay1 - ay2));
+      
+      }
+    
+    return dist;
+    }
   }
 
 int euclid_getvec(int dx, int dy) {
@@ -478,18 +577,8 @@ struct hrmap_euclidean : hrmap {
     auto p = vec_to_pair(vec);
     int x = p.first, y = p.second;
     bool mobius = false;
-    if(euwrap) {
-      int zx = torusconfig::sdx;
-      int zy = torusconfig::sdy;
-      
-      int periods = gdiv(x * zx + y * zy, zx * zx + zy * zy);
-      
-      if(nonorientable) mobius = (periods&1) ? S6 : 0, periods &=~ 1;
-      y -= zy * periods;
-      x -= zx * periods;      
-      
-      if(mobius) x -= zx, y -= zy, y = -y;
-      }
+    if(euwrap) 
+      mobius = torusconfig::be_canonical(x, y);
     euclideanSlab*& slab = euclidean[(y>>8)&(slabs-1)][(x>>8)&(slabs-1)];
     if(!slab) slab = new hrmap_euclidean::euclideanSlab;
     return make_pair(&(slab->a[y&255][x&255]), mobius);
@@ -510,7 +599,10 @@ struct hrmap_euclidean : hrmap {
 cellwalker vec_to_cellwalker(int vec) {
   if(!fulltorus) {
     auto p = euclideanAtCreate(vec);
-    return cellwalker(*p.first, 0, p.second);
+    if(p.second)
+      return cellwalker(*p.first, torusconfig::mobius_dir(*p.first), true);
+    else
+      return cellwalker(*p.first, 0, false);
     }
   else {
     hrmap_torus *cur = torusmap();
@@ -528,7 +620,10 @@ int cellwalker_to_vec(cellwalker cw) {
       if(ep.second != cw.mirrored) {
         int x, y;
         tie(x, y) = vec_to_pair(id);
-        return pair_to_vec(x + torusconfig::sdx, torusconfig::sdy - y);
+        x += torusconfig::sdx;
+        y += torusconfig::sdy;
+        torusconfig::mobius_flip(x, y);
+        return pair_to_vec(x, y);
         }
       }
     return id;
@@ -1050,15 +1145,21 @@ euc_pointer euclideanAtCreate(int vec) {
   euc_pointer ep = euclideanAt(vec);
   cell*& c = *ep.first;
   if(!c) {
+    if(euwrap) {
+      int x, y;
+      tie(x, y) = vec_to_pair(vec);
+      torusconfig::be_canonical(x, y);
+      vec = pair_to_vec(x, y);
+      }
     c = newCell(8, encodeId(vec));
     // euclideanAt(vec) = c;
     build_euclidean_moves(c, vec, [ep, c,vec] (int delta, int d, int d2) { 
       euc_pointer ep2 = euclideanAt(vec + delta);
       cell* c2 = *ep2.first;
       if(!c2) return;
-      if(ep.second) d = c->c.fix(-d);
-      if(ep2.second) d2 = c2->c.fix(-d2);
-      eumerge(c, d, c2, d2, ep.second != ep2.second);
+      // if(ep.second) d = c->c.fix(torusconfig::mobius_dir(c) - d);
+      if(ep2.second) d2 = c2->c.fix(torusconfig::mobius_dir(c2) - d2);
+      eumerge(c, d, c2, d2, ep2.second);
       });
     }
   return ep;
@@ -1231,8 +1332,10 @@ int compdist(int dx[]) {
 int celldist(cell *c) {
   if(fulltorus) 
     return torusmap()->dists[decodeId(c->master)];
+  if(euwrap)
+    return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
-    return eudist(decodeId(c->master)); // fix cylinder
+    return eudist(decodeId(c->master));
   if(sphere || binarytiling) return celldistance(c, currentmap->gamestart());
   if(IRREGULAR) return irr::celldist(c, false);
   if(archimedean || ctof(c)) return c->master->distance;
@@ -1250,7 +1353,7 @@ int celldist(cell *c) {
 
 int celldistAlt(cell *c) {
   if(masterless) {
-    if(fulltorus) return celldist(c); // fix cylinder
+    if(fulltorus) return celldist(c);
     int x, y;
     tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);
@@ -1624,6 +1727,8 @@ int celldistance(cell *c1, cell *c2) {
       return eudist(decodeId(c1->master) - decodeId(c2->master)); // fix cylinder
     else if(euwrap && torusconfig::torus_mode == 0) 
       return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
+    else if(euwrap && !fulltorus)
+      return torusconfig::cyldist(decodeId(c1->master), decodeId(c2->master));
     }
   
   if(geometry == gFieldQuotient && !GOLDBERG)
