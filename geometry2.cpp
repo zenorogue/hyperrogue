@@ -83,27 +83,22 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
   
   if(euwrap) {
     transmatrix t = Id;
-    if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
-    int mirrors = 0;
-    approach:
+    // if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
     int d = celldistance(c2, c1);
-    forCellIdEx(c3, i, c2) {
-      if(celldistance(c3, c1) < d) {
-        if(whateveri) printf(" %d [%p,%d]", i, c3, celldistance(c3, c1));
-        if(c2->type < 8)
-          t = eumovedir(i+(euclid6?3:2)) * t;
-        else if(i&1)
-          t = eumovedir(2+i/2) * eumovedir(2+(i+1)/2) * t;
-        else
-          t = eumovedir(2+i/2) * t;
-        if(c2->c.mirror(i)) mirrors++;
-        c2 = c3;
-        goto approach;
+    while(d) {
+      forCellIdEx(cc, i, c1) {
+        int d1 = celldistance(cc, c2);
+        if(d1 < d) {
+          t = t * cellrelmatrix(c1, i);
+          c1 = cc;
+          d = d1;
+          goto again;
+          }
         }
+      printf("ERROR not reached\n");
+      break;
+      again: ;
       }
-    if(d != 0) printf("ERROR not reached\n");
-    if(mirrors&1) t = Mirror * t * Mirror;
-    if(whateveri) printf(" => %p\n", c1);
     return t;
     }
   
