@@ -596,7 +596,7 @@ namespace conformal {
 
   vector<pair<int, int> > torus_zeros;
 
-  void match_torus_period() { // fix cylinder
+  void match_torus_period() {
     torus_zeros.clear();
     for(int y=0; y<=200; y++)
     for(int x=-200; x<=200; x++) {
@@ -822,7 +822,7 @@ namespace conformal {
         dialog::editNumber(spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
         });
       if(euwrap) {
-        dialog::addSelItem(XLAT("match the period of the torus"), its(spiral_id), 'n');
+        dialog::addSelItem(XLAT("match the period"), its(spiral_id), 'n');
         dialog::add_action(match_torus_period);
         }
       }
