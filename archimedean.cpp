@@ -243,6 +243,7 @@ eGeometryClass archimedean_tiling::get_class() {
 
 void archimedean_tiling::compute_geometry() {
   ginf[gArchimedean].cclass = get_class();
+  set_flag(ginf[gArchimedean].flags, qBOUNDED, get_class() == gcSphere);
   
   SDEBUG( printf("euclidean_angle_sum = %f\n", float(euclidean_angle_sum)); )
   

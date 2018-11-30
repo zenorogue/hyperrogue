@@ -97,14 +97,14 @@ void addMessage(string s, char spamtype = 0);
 #define euclid (cgclass == gcEuclid)
 #define sphere (cgclass == gcSphere)
 #define hyperbolic (cgclass == gcHyperbolic)
-#define nonorientable (ginf[geometry].quotientstyle & qNONORIENTABLE)
+#define nonorientable (ginf[geometry].flags & qNONORIENTABLE)
 #define elliptic (sphere && nonorientable)
-#define quotient (ginf[geometry].quotientstyle & (qSMALL | qFIELD | qDOCKS | qZEBRA))
-#define euwrap (ginf[geometry].quotientstyle & qEUWRAP)
-#define fulltorus (ginf[geometry].quotientstyle & qFULLTORUS)
-#define doall (ginf[geometry].quotientstyle)
-#define smallbounded (sphere || (quotient & qSMALL) || fulltorus)
-#define bounded (sphere || quotient || fulltorus)
+#define quotient (ginf[geometry].flags & qANYQ)
+#define euwrap (quotient && euclid)
+#define fulltorus (bounded && euclid)
+#define doall (bounded)
+#define smallbounded (ginf[geometry].flags & qSMALL)
+#define bounded (ginf[geometry].flags & qBOUNDED)
 
 #define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
 #define sphere_narcm (sphere && !archimedean)
@@ -118,8 +118,8 @@ void addMessage(string s, char spamtype = 0);
 #define a38 (S3 == 3 && S7 == 8)
 #define sphere4 (sphere && S7 == 4)
 #define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
-#define smallsphere (S7 < 5)
-#define bigsphere (S7 == 5)
+#define smallsphere (sphere_narcm && S7 < 5)
+#define bigsphere (sphere_narcm && S7 == 5)
 #define euclid4 (masterless && a4)
 #define euclid6 (masterless && !a4)
 
@@ -645,8 +645,6 @@ void achievement_pump();
 extern vector<string> achievementsReceived;
 
 // game forward declarations
-typedef unsigned long long flagtype;
-#define Flag(i) (flagtype(1ull<<i))
 
 bool mirrorkill(cell *c);
 bool isNeighbor(cell *c1, cell *c2);

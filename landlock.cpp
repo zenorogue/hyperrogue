@@ -1122,6 +1122,13 @@ land_validity_t& land_validity(eLand l) {
       return special_geo3;
     }
   
+  // not enough space
+  if(l == laStorms && (old_daily_id < 35 ? !BITRUNCATED : PURE) && elliptic) 
+    return not_enough_space;
+
+  if(l == laStorms && S7 == 3) 
+    return not_enough_space;
+  
   // does not agree with the pattern
   if(l == laStorms && quotient && geometry != gZebraQuotient) 
     return pattern_not_implemented_random;
@@ -1129,13 +1136,6 @@ land_validity_t& land_validity(eLand l) {
   // pattern not implemented
   if(l == laStorms && S7 == 8) 
     return pattern_not_implemented_random;
-  
-  // not enough space
-  if(l == laStorms && (old_daily_id < 35 ? !BITRUNCATED : PURE) && elliptic) 
-    return not_enough_space;
-
-  if(l == laStorms && S7 == 3) 
-    return not_enough_space;
   
   // mirrors do not work in gp
   if(among(l, laMirror, laMirrorOld) && (GOLDBERG && old_daily_id < 33))
@@ -1207,7 +1207,7 @@ land_validity_t& land_validity(eLand l) {
     if(archimedean && DUAL)
       return not_implemented;
     // no equidistants supported in these geometries (big sphere is OK though)
-    if(quotient || elliptic || smallsphere || euwrap)
+    if(bounded && !bigsphere)
       return unbounded_only_except_bigsphere;
     // Yendorian only implemented in standard
     if(l == laEndorian && geometry)
@@ -1324,9 +1324,13 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWarpCoast && quotient && geometry != gZebraQuotient && !randomPatternsMode) 
     return pattern_incompatibility;
   
+  if(among(l, laEmerald, laCamelot, laDryForest) && VALENCE != 3 && old_daily_id >= 65)
+    return hedgehogs;  
+
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
   if((l == laPower || l == laEmerald || l == laPalace || l == laWildWest) && !randomPatternsMode) {
     if(euclid || bigsphere) ;
+    else if(old_daily_id <= 65 && a45) ;
     else if(!hyperbolic_37) return l == laWildWest ? some0 : pattern_not_implemented_random;
     else if(quotient) return pattern_incompatibility;
     }
@@ -1346,9 +1350,22 @@ land_validity_t& land_validity(eLand l) {
   
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
-  
-  if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && geometry != gZebraQuotient)))
-    return bad_graphics;
+
+  if(l == laReptile) {
+    if(old_daily_id <= 64) {
+      if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && !euwrap && geometry != gZebraQuotient)))
+        return bad_graphics;
+      }
+    else {  
+      bool reptile_good = false;
+      if(hyperbolic_37 && BITRUNCATED) reptile_good = true;
+      if(euclid6) reptile_good = true;
+      if(quotient && geometry != gZebraQuotient && !euwrap)
+        reptile_good = false;
+      if(!reptile_good)
+        return bad_graphics;
+      }
+    }
 
   if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded && !randomPatternsMode)
     return no_fractal_landscapes;

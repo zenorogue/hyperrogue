@@ -306,7 +306,7 @@ void showEuclideanMenu() {
     dialog::init(XLAT("experiment with geometry"));
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
-    int tq = ginf[geometry].quotientstyle;
+    flagtype gf = ginf[geometry].flags;
     int nom = (BITRUNCATED ? tv+ts : tv) * 4;
     int denom = (2*ts + 2*tv - ts * tv);
     
@@ -450,20 +450,20 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
   
     string qstring = "none";
-    if(tq & qZEBRA) qstring = "zebra";
-  
-    else if(tq & qFIELD) qstring = "field";
-  
-    else if((tq & qNONORIENTABLE) && sphere) qstring = "elliptic";
-  
-    else if(tq & qFULLTORUS) qstring = "torus";
 
-    else if(tq & qEUWRAP) qstring = "cylinder";
+    if(gf & qZEBRA) qstring = "zebra";  
+    else if(gf & qFIELD) qstring = "field";
+  
+    else if((gf & qNONORIENTABLE) && sphere) qstring = "elliptic";
+  
+    else if(bounded && euclid) qstring = "torus";
+
+    else if(quotient && euclid) qstring = "cylinder";
     
-    else if(tq & qSMALL) qstring = ginf[geometry].shortname;
+    else if(smallbounded) qstring = ginf[geometry].shortname;
   
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
-    
+
     if(hyperbolic && IRREGULAR) {
       nom = isize(irr::cells);
       // both Klein Quartic and Bolza2 are double the Zebra quotiennt

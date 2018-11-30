@@ -346,14 +346,11 @@ namespace torusconfig {
       ginf[gTorus].vertex = 3, ginf[gTorus].sides = 6;
     else
       ginf[gTorus].vertex = 4, ginf[gTorus].sides = 4;
-    if(tmflags() & TF_KLEIN)
-      ginf[gTorus].quotientstyle |= qNONOR;
-    else 
-      ginf[gTorus].quotientstyle &= ~qNONOR;
-    if(tmflags() & TF_CYL)
-      ginf[gTorus].quotientstyle &= ~qFULLTORUS;
-    else
-      ginf[gTorus].quotientstyle |= qFULLTORUS;
+
+    flagtype& flags = ginf[gTorus].flags;
+    
+    set_flag(flags, qNONORIENTABLE, tmflags() & TF_KLEIN);
+    set_flag(flags, qBOUNDED, !(tmflags() & TF_CYL));
     }
 
   int dscalar(gp::loc e1, gp::loc e2) {
@@ -1738,7 +1735,7 @@ int celldistance(cell *c1, cell *c2) {
   if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
 
-  if(sphere || quotient || fulltorus) {
+  if(bounded) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
@@ -1753,7 +1750,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(masterless || archimedean) {
+  if(masterless || archimedean || quotient) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

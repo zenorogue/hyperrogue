@@ -663,7 +663,7 @@ ld spherity(const transmatrix& V) {
   }
 
 bool confusingGeometry() {
-  return elliptic || quotient || euwrap;
+  return quotient;
   }
 
 ld master_to_c7_angle() {

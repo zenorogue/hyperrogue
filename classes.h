@@ -2,6 +2,14 @@ namespace hr {
 
 typedef unsigned color_t;
 
+typedef unsigned long long flagtype;
+#define Flag(i) (flagtype(1ull<<i))
+
+static inline void set_flag(flagtype& f, flagtype which, bool b) {
+  if(b) f |= which;
+  else f &= ~which;
+  }
+
 static const int motypes = 162;
 
 struct monstertype {
@@ -213,20 +221,21 @@ struct geometryinfo {
   const char* shortname;
   int sides;
   int vertex;
-  int quotientstyle;
+  flagtype flags;
   eGeometryClass cclass;
   int xcode;
   std::array<int,2> distlimit; // bitrunc, non-bitrunc
   eVariation default_variation;
   };
 
-static const int qSMALL = 1;
-static const int qFIELD = 2;
-static const int qNONORIENTABLE = 4;
-static const int qEUWRAP = 8;
-static const int qDOCKS = 16;
-static const int qZEBRA = 32;
-static const int qFULLTORUS = 64;
+static const flagtype qBOUNDED         = 1;
+static const flagtype qANYQ            = 2;
+static const flagtype qNONORIENTABLE   = 4;
+static const flagtype qSMALL           = 8;
+
+static const flagtype qFIELD           = 16;
+static const flagtype qDOCKS           = 32;
+static const flagtype qZEBRA           = 64;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
