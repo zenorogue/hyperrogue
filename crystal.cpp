@@ -14,6 +14,15 @@ const int MAXDIM = 7;
 typedef array<int, MAXDIM> coord;
 static const coord c0 = {};
 
+typedef array<ld, MAXDIM> ldcoord;
+static const ldcoord ldc0 = {};
+
+ldcoord told(coord c) { ldcoord a; for(int i=0; i<MAXDIM; i++) a[i] = c[i]; return a; }
+
+ldcoord operator + (ldcoord a, ldcoord b) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[i] = a[i] + b[i]; return r; }
+ldcoord operator * (ldcoord a, int v) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[i] = a[i] * v; return r; }
+ldcoord operator / (ldcoord a, int v) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[i] = a[i] / v; return r; }
+
 int tocode(int cname) { return (1 << (cname >> 1)); }
 
 void resize2(vector<vector<int>>& v, int a, int b, int z) {
@@ -22,8 +31,8 @@ void resize2(vector<vector<int>>& v, int a, int b, int z) {
   for(auto& w: v) w.resize(b, z);
   }
 
-const int FULLSTEP = 16;
-const int HALFSTEP = 8;
+const int FULLSTEP = 2;
+const int HALFSTEP = 1;
 
 struct crystal_structure {
   int dir;
@@ -286,23 +295,21 @@ heptagon *get_heptagon_at(coord c, int deg) {
   h->c7 = newCell(deg, h);
   h->distance = 0;
   for(int i=0; i<cs.dim; i++) h->distance += abs(c[i]);
+  h->distance /= 2;
   hcoords[h] = c;
   // for(int i=0; i<6; i++) crystalstep(h, i);
   return h;
   }
 
-coord get_coord(cell *c) {
+ldcoord get_coord(cell *c) {
   if(c->master->c7 != c) {
-    coord res = c0;
-    for(int i=0; i<c->type; i+=2) {
-      coord co = hcoords[c->move(i)->master];
-      for(int d=0; d<cs.dim; d++) res[d] += co[d];
-      }
-    for(int d=0; d<cs.dim; d++) res[d] = (2 * res[d] + c->type/2) / c->type;
-    return res;
+    ldcoord res = ldc0;
+    for(int i=0; i<c->type; i+=2)
+      res = res + told(hcoords[c->cmove(i)->master]);
+    return res * 2 / c->type;
     }
   else
-    return hcoords[c->master];
+    return told(hcoords[c->master]);
   }
 
 struct hrmap_crystal : hrmap {
@@ -348,7 +355,7 @@ void create_step(heptagon *h, int d) {
     }
   else {
     auto coc = add(add(co, lw, HALFSTEP), lw+1, HALFSTEP);
-    auto hc = get_heptagon_at(coc, HALFSTEP);
+    auto hc = get_heptagon_at(coc, 8);
     for(int a=0; a<8; a+=2) {
       hc->c.connect(a, heptspin(h, lw.spin));
       if(h->modmove(lw.spin-1)) {
@@ -366,41 +373,12 @@ array<array<int,2>, MAX_EDGE> distlimit_table = {{
   {6, 4}, {5, 3}, {4, 3}, {4, 3}, {3, 2}, {3, 2}, {3, 2}, {3, 2}, {3, 2}
   }};
 
-int readArgs() {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-crystal")) {
-    stop_game();
-    geometry = gCrystal; variation = eVariation::pure;
-    shift(); int N = argi();
-    ginf[gCrystal].sides = N;
-    ginf[gCrystal].vertex = 4;
-    if(N < MAX_EDGE)
-      ginf[gCrystal].distlimit = distlimit_table[N];
-    add_bitruncation = false;
-    }
-  else if(argis("-crystalb")) {
-    stop_game();
-    geometry = gCrystal; variation = eVariation::bitruncated;
-    ginf[gCrystal].sides = 8;
-    ginf[gCrystal].vertex = 3;
-    ginf[gCrystal].distlimit = {7, 5};
-    add_bitruncation = true;
-    }
-  else if(argis("-cview")) {
-    view_coordinates = true;
-    }
-  else return 1;
-  return 0;
-  }
-
 color_t colorize(cell *c) {
-  coord co = get_coord(c);
+  ldcoord co = get_coord(c);
   color_t res;
   res = 0;
   for(int i=0; i<3; i++)
-    res |= ((i == 2 && S7 == 5) ? (co[i] ? 255 : 0) : (128 + co[i] * 3)) << (8*i);
+    res |= ((int)(((i == 2 && S7 == 5) ? (128 + co[i] * 50) : (128 + co[i] * 50)))) << (8*i);
   return res;
   }
 
@@ -450,6 +428,129 @@ int distance(cell *c1, cell *c2) {
     for(int a=0; a<cs.dim; a++) result += abs(co1[a] - co2[a]);
     return result / FULLSTEP;
     }
+  }
+
+ld crug_rotation[MAXDIM][MAXDIM];
+
+int ho = 1;
+
+void init_rotation() {
+  for(int i=0; i<MAXDIM; i++)
+  for(int j=0; j<MAXDIM; j++)
+    crug_rotation[i][j] = i == j ? 1/2. : 0;
+
+  if(ho & 1) {
+    for(int i=cs.dim-1; i>=1; i--) {
+      ld c = cos(M_PI / 2 / (i+1));
+      ld s = sin(M_PI / 2 / (i+1));
+      for(int j=0; j<cs.dim; j++)
+        tie(crug_rotation[j][0], crug_rotation[j][i]) =
+          make_pair(
+             crug_rotation[j][0] * s + crug_rotation[j][i] * c,
+            -crug_rotation[j][i] * s + crug_rotation[j][0] * c
+            );
+      }
+    }
+  }
+
+void next_home_orientation() {
+  ho++;
+  init_rotation();
+  }
+
+hyperpoint coord_to_flat(ldcoord co) {
+  hyperpoint res = hpxyz(0, 0, 0);
+  for(int a=0; a<MAXDIM; a++)
+    for(int b=0; b<3; b++)
+      res[b] += crug_rotation[b][a] * co[a];
+  return res;
+  }
+
+void switch_z_coordinate() {
+  for(int i=0; i<cs.dim; i++) {
+    ld tmp = crug_rotation[i][2];
+    for(int u=2; u<cs.dim-1; u++) crug_rotation[i][u] = crug_rotation[i][u+1];
+    crug_rotation[i][cs.dim-1] = tmp;
+    }
+  }
+
+void apply_rotation(const transmatrix t) {
+  for(int i=0; i<MAXDIM; i++) {
+    hyperpoint h;
+    for(int j=0; j<3; j++) h[j] = crug_rotation[i][j];
+    h = t * h;
+    for(int j=0; j<3; j++) crug_rotation[i][j] = h[j];
+    }
+  }
+
+void build_rugdata() {
+  using namespace rug;
+  rug::clear_model(); 
+  rug::good_shape = true;  
+  rug::vertex_limit = 0;
+  for(const auto& gp: gmatrix) {
+            
+    cell *c = gp.first;
+    const transmatrix& V = gp.second;
+    
+    rugpoint *v = addRugpoint(tC0(V), 0);
+    auto co = get_coord(c);
+    v->flat = coord_to_flat(co);
+    v->valid = true;
+    
+    rugpoint *p[MAX_EDGE];
+    
+    for(int i=0; i<c->type; i++) {
+      p[i] = addRugpoint(V * get_corner_position(c, i), 0);
+      p[i]->valid = true;
+      if(VALENCE == 4)
+        p[i]->flat = coord_to_flat((get_coord(c->cmove(i)) + get_coord(c->cmodmove(i-1))) / 2);
+      else
+        p[i]->flat = coord_to_flat((get_coord(c->cmove(i)) + get_coord(c->cmodmove(i-1)) + co) / 3);
+      }
+
+    for(int i=0; i<c->type; i++) addTriangle(v, p[i], p[(i+1) % c->type]);
+    }
+  }
+
+int readArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-crystal")) {
+    PHASE(2);
+    stop_game();
+    geometry = gCrystal; variation = eVariation::pure;
+    shift(); int N = argi();
+    ginf[gCrystal].sides = N;
+    ginf[gCrystal].vertex = 4;
+    if(N < MAX_EDGE)
+      ginf[gCrystal].distlimit = distlimit_table[N];
+    add_bitruncation = false;
+    }
+  else if(argis("-crystalb")) {
+    PHASE(2);
+    stop_game();
+    geometry = gCrystal; variation = eVariation::bitruncated;
+    ginf[gCrystal].sides = 8;
+    ginf[gCrystal].vertex = 3;
+    ginf[gCrystal].distlimit = {7, 5};
+    add_bitruncation = true;
+    }
+  else if(argis("-cview")) {
+    view_coordinates = true;
+    }
+  else if(argis("-crug")) {
+    PHASE(3);
+    if(rug::rugged) rug::close();
+    calcparam();
+    rug::reopen();
+    init_rotation();
+    surface::sh = surface::dsCrystal;
+    rug::good_shape = true;
+    }
+  else return 1;
+  return 0;
   }
 
 auto crystalhook = addHook(hooks_args, 100, readArgs)

@@ -14,6 +14,8 @@ bool rug_failure = false;
 
 namespace rug {
 
+bool in_crystal() { return surface::sh == surface::dsCrystal; }
+
 bool computed = false;
 
 vector<rugpoint*> points;
@@ -1018,6 +1020,11 @@ void addNewPoints() {
 
 void physics() {
 
+  if(in_crystal()) {
+    crystal::build_rugdata();
+    return;
+    }
+
   if(good_shape) return;
 
   auto t = SDL_GetTicks();
@@ -1442,7 +1449,8 @@ ld protractor = 0;
 
 void apply_rotation(const transmatrix& t) {
   if(!rug_perspective) currentrot = t * currentrot;
-  for(auto p: points) p->flat = t * p->flat;
+  if(in_crystal()) crystal::apply_rotation(t);
+  else for(auto p: points) p->flat = t * p->flat;
   }
 
 void move_forward(ld distance) {
@@ -1468,11 +1476,17 @@ bool handlekeys(int sym, int uni) {
     return true;
     }
   else if(uni == '2') {
-    apply_rotation(rotmatrix(M_PI, 0, 2));
+    if(in_crystal())
+      crystal::switch_z_coordinate();
+    else
+      apply_rotation(rotmatrix(M_PI, 0, 2));
     return true;
     }
   else if(uni == '3') {
-    apply_rotation(rotmatrix(M_PI/2, 0, 2));
+    if(in_crystal())
+      crystal::next_home_orientation();
+    else
+      apply_rotation(rotmatrix(M_PI/2, 0, 2));
     return true;
     }
 #if !CAP_HOLDKEYS
@@ -1598,8 +1612,12 @@ void actDraw() {
     if(finger_center)
       perform_finger();
     else {
-      if(keystate[SDLK_HOME]) qm++, t = inverse(currentrot);
-      if(keystate[SDLK_END]) qm++, t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
+      if(keystate[SDLK_HOME] && !in_crystal()) qm++, t = inverse(currentrot);
+      if(keystate[SDLK_END]) {
+        qm++;
+        if(in_crystal()) t = t * rotmatrix(alpha, 0, 1);
+        else t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
+        }
       if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 1, 2);
       if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
       if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);

@@ -3447,7 +3447,7 @@ extern int ewhichscreen;
 #if CAP_SURFACE
 namespace surface {
 
-  enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere };
+  enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere, dsCrystal };
   extern eShape sh;
   void show_surfaces();
   void run_shape(eShape);
@@ -4141,6 +4141,10 @@ namespace crystal {
   int distance(cell *c1, cell *c2);
   hrmap *new_map();
   void create_step(heptagon *h, int d);
+  void build_rugdata();
+  void apply_rotation(const transmatrix t);
+  void switch_z_coordinate();
+  void next_home_orientation();
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);
