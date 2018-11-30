@@ -778,7 +778,11 @@ vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 void drawStandard() {
   drawn_cells.clear();
   drawn_cells.emplace_back(viewctr, hsOrigin, cview(), band_shift);
-  for(int i=0; i<isize(drawn_cells); i++) {
+  for(int i=0; i<isize(drawn_cells); i++) {    
+    // prevent reallocation due to insertion
+    if(drawn_cells.capacity() < drawn_cells.size() + 16)
+      drawn_cells.reserve(min<size_t>(2 * drawn_cells.size(), 128));
+
     const auto& dc = drawn_cells[i];
     auto& hs = get<0>(dc);
     auto& s = get<1>(dc);
