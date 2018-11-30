@@ -341,6 +341,8 @@ struct fpattern {
     DEBB(DF_FIELD, (debugfile, "Built.\n"));
     }
   
+  static const int MAXDIST = 120;
+  
   vector<char> disthep;
   vector<char> disthex;
   
@@ -351,7 +353,7 @@ struct fpattern {
   
   int getdist(pair<int,bool> a, vector<char>& dists) {
     if(!a.second) return dists[a.first];
-    int m = 60;
+    int m = MAXDIST;
     int ma = dists[a.first];
     int mb = dists[connections[btspin(a.first, 3)]];
     int mc = dists[connections[btspin(a.first, 4)]];
@@ -373,12 +375,12 @@ struct fpattern {
    
   int maxdist, otherpole, circrad, wallid, wallorder, riverid;
 
-  int dijkstra(vector<char>& dists, vector<int> indist[64]) {
+  int dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
     int N = connections.size();
     dists.resize(N);
-    for(int i=0; i<N; i++) dists[i] = 60;
+    for(int i=0; i<N; i++) dists[i] = MAXDIST-1;
     int maxd = 0;
-    for(int i=0; i<64; i++) while(!indist[i].empty()) {
+    for(int i=0; i<MAXDIST; i++) while(!indist[i].empty()) {
       int at = indist[i].back();
       indist[i].pop_back();
       if(dists[at] <= i) continue;
@@ -405,7 +407,7 @@ struct fpattern {
     
     markers.resize(N);
     
-    vector<int> indist[64];
+    vector<int> indist[MAXDIST];
 
     indist[0].push_back(0);
     int md0 = dijkstra(disthep, indist);
