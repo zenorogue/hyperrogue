@@ -88,7 +88,7 @@ void precalc() {
     goto finish;
     }
 
-  fmin = 0, fmax = 3;
+  fmin = 0, fmax = hyperbolic ? 10 : 3;
   
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
