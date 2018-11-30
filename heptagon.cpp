@@ -74,7 +74,8 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     h->rval0 = h->rval1 = 0;
     h->emeraldval = emerald_heptagon(parent->emeraldval, d);
     h->zebraval = zebra_heptagon(parent->zebraval, d);
-    h->fieldval = currfp.connections[fieldpattern::btspin(parent->fieldval, d)];
+    if(&currfp != &fieldpattern::fp_invalid)
+      h->fieldval = currfp.connections[fieldpattern::btspin(parent->fieldval, d)];
     if(a38) 
       h->fiftyval = fifty_38(parent->fiftyval, d);  
     else if(parent->s == hsOrigin)

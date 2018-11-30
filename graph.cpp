@@ -5823,7 +5823,7 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 
 void resetGeometry() {
   precalc();
-  if(hyperbolic) currfp.analyze();
+  if(hyperbolic && &currfp != &fieldpattern::fp_invalid) currfp.analyze();
 #if CAP_GL
   resetGL();
 #endif

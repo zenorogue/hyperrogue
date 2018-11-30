@@ -721,7 +721,9 @@ fpattern& getcurrfp() {
     return fp;
     }
   if(sphere || euclid) return fp_invalid;
-  return fp43;
+  if(S7 == 7 && S3 == 3)
+    return fp43;
+  return fp_invalid;
   }
 
 // extra information for field quotient extra configuration
