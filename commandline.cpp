@@ -159,6 +159,23 @@ int arg::readCommon() {
     showstartmenu = false;
     }
 
+  else if(argis("-viz")) {
+    PHASE(3);
+    showstartmenu = false;
+    start_game();
+    popScreenAll();
+    clearMessages();
+    nohud = true;
+    mapeditor::drawplayer = false;
+    }
+
+  else if(argis("-vizhr")) {
+    PHASE(3);
+    showstartmenu = false;
+    popScreenAll();
+    clearMessages();
+    }
+
 // informational
   else if(argis("-version") || argis("-v")) {
     printf("HyperRogue version " VER "\n");

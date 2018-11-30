@@ -554,15 +554,20 @@ int read_cheat_args() {
     }
   else if(argis("-sr")) {    
     PHASEFROM(2);
-    shift(); sightrange_bonus = argi();
+    shift(); sightrange_bonus = argi(); vid.use_smart_range = 0;
     }
   else if(argis("-srx")) {    
     PHASEFROM(2); cheat();
-    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi();
+    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi(); vid.use_smart_range = 0;
     }
   else if(argis("-smart")) {
     PHASEFROM(2); cheat();
     vid.use_smart_range = 2;
+    shift_arg_formula(vid.smart_range_detail);
+    }
+  else if(argis("-smartn")) {
+    PHASEFROM(2);
+    vid.use_smart_range = 1;
     shift_arg_formula(vid.smart_range_detail);
     }
   else if(argis("-smartlimit")) {
