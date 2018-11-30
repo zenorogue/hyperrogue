@@ -2792,11 +2792,14 @@ void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame) {
   int xc, yc, sc; getcoord0(h, xc, yc, sc);
   queuechr(xc, yc, sc, size, chr, col, frame);
   }
+
+ld scale_in_pixels(const transmatrix& V) {
+  return scale_at(V) * scalefactor * current_display->radius / 2.5;
+  }
   
 void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss; getcoord0(V * xpush0(.5), xs, ys, ss);
-  queuechr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * scalefactor * size), chr, col, frame);
+  queuechr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame);
   }
   
 void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame) {
@@ -2806,14 +2809,15 @@ void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int
   
 void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame, int align) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss;  getcoord0(V * xpush0(.5 * scalefactor), xs, ys, ss); 
-  queuestr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), chr, col, frame, align);
+  // int xs, ys, ss;  getcoord0(V * xpush0(.01), xs, ys, ss); 
+  
+  queuestr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame, align);
   }
   
 void queuecircle(const transmatrix& V, double size, color_t col) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss; getcoord0(V * xpush0(.5 * scalefactor), xs, ys, ss);  
-  queuecircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), col);
+  int xs, ys, ss; getcoord0(V * xpush0(.01), xs, ys, ss);  
+  queuecircle(xc, yc, scale_in_pixels(V) * size, col);
   }
 
 void queuemarkerat(const transmatrix& V, color_t col) {
