@@ -375,6 +375,7 @@ int readArgs() {
     geometry = gCrystal; variation = eVariation::pure;
     shift(); int N = argi();
     ginf[gCrystal].sides = N;
+    ginf[gCrystal].vertex = 4;
     if(N < MAX_EDGE)
       ginf[gCrystal].distlimit = distlimit_table[N];
     add_bitruncation = false;
@@ -383,6 +384,8 @@ int readArgs() {
     stop_game();
     geometry = gCrystal; variation = eVariation::bitruncated;
     ginf[gCrystal].sides = 8;
+    ginf[gCrystal].vertex = 3;
+    ginf[gCrystal].distlimit = {7, 5};
     add_bitruncation = true;
     }
   else if(argis("-cview")) {
