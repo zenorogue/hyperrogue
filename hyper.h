@@ -4697,7 +4697,7 @@ bool subscreen_split(reaction_t for_each_subscreen);
 
 #else
 
-namespace racing { static const bool on = false; }
+namespace racing { static bool on = false; }
 inline bool subscreen_split(reaction_t for_each_subscreen) { return false; }
 #endif
 

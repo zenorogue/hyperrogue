@@ -763,7 +763,8 @@ eLand getNewLand(eLand old) {
   if(old == laEAir   && lchance(old)) return hrand(2) ? laEWater : laEFire;
   if(old == laEWater && lchance(old)) return hrand(2) ? laEEarth : laEAir;
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
-  
+
+  #if CAP_RACING  
   if(racing::on && old != laElementalWall) {
     eLand l = old;
     using racing::race_lands;
@@ -772,6 +773,7 @@ eLand getNewLand(eLand old) {
     if(l == laMirror) l = laCrossroads;
     return l;
     }
+  #endif
 
   if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
   if(weirdhyperbolic && specialland != old && specialland != laCrossroads4 && !chaosmode && old != laBarrier) return specialland;

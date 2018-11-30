@@ -112,8 +112,10 @@ void initgame() {
     shrand(safetyseed);
     firstland = safetyland;
     }
-  
+
+  #if CAP_RACING  
   if(racing::on) racing::apply_seed();
+  #endif
   
   bool use_special_land = do_use_special_land();
     
@@ -1237,7 +1239,8 @@ void switch_game_mode(char switchWhat) {
       racing::on = false;
       if(!yendor::on) firstland = laIce;
       break;
-    
+
+#if CAP_RACING    
     case rg::racing:
       racing::on = !racing::on;
       shmup::on = racing::on;
@@ -1247,6 +1250,7 @@ void switch_game_mode(char switchWhat) {
       chaosmode = false;
       princess::challenge = false;
       break;
+#endif
 
     case rg::tactic:
       tactic::on = !tactic::on;
