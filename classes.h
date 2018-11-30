@@ -235,7 +235,7 @@ static const int FORBIDDEN = -1;
 extern eGeometry geometry;
 extern eVariation variation;
 
-extern geometryinfo ginf[gGUARD];
+extern std::vector<geometryinfo> ginf;
 
 extern monstertype minf[motypes];
 extern itemtype iinf[ittypes];

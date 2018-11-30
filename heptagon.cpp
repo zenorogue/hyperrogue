@@ -198,8 +198,12 @@ extern int hrand(int);
 // a structure used to walk on the heptagonal tesselation
 // (remembers not only the heptagon, but also direction)
 
+hookset<void(heptagon*, int)> *hooks_createStep;
+
 heptagon *createStep(heptagon *h, int d) {
   d = h->c.fix(d);
+  if(!h->move(d))
+    callhooks(hooks_createStep, h, d);
   if(!h->move(d) && binarytiling) 
     return binary::createStep(h, d);
   if(!h->move(d) && archimedean) {

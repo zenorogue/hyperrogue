@@ -1165,11 +1165,15 @@ euc_pointer euclideanAtCreate(int vec) {
   return ep;
   }
 
+hookset<hrmap*()> *hooks_newmap;
+
 // initializer (also inits origin from heptagon.cpp)
 void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
-  if(archimedean) currentmap = arcm::new_map();
+  hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
+  if(res) currentmap = res;  
+  else if(archimedean) currentmap = arcm::new_map();
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;

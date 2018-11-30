@@ -1660,7 +1660,7 @@ vector<eLand> randlands = {
 
 static const int qNONOR = qNONORIENTABLE;
 
-geometryinfo ginf[gGUARD] = {
+vector<geometryinfo> ginf = {
   {"standard",            "HR",       7, 3, 0,      gcHyperbolic,       0, {{7, 5}}, eVariation::bitruncated},
   {"Euclidean",           "euclid",   6, 3, 0,      gcEuclid,           0, {{7, FORBIDDEN}}, eVariation::bitruncated},
   {"spherical",           "sphere",   5, 3, 0,      gcSphere,           0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
