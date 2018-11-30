@@ -20,8 +20,6 @@ ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
 int base_distlimit;
 
-hyperpoint Crad[MAX_S84];
-
 transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
@@ -143,8 +141,6 @@ void precalc() {
 
   finish:
   
-  for(int i=0; i<S42; i++)
-    Crad[i] = xspinpush0(2*M_PI*i/S42, .4);
   for(int d=0; d<S7; d++)
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
     
