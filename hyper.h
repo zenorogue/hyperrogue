@@ -4135,6 +4135,13 @@ namespace arcm {
   int fix(heptagon *h, int spin);
   }
 
+namespace crystal {
+  color_t colorize(cell *c);
+  int distance(cell *c1, cell *c2);
+  hrmap *new_map();
+  void create_step(heptagon *h, int d);
+  }
+
 hyperpoint get_warp_corner(cell *c, int cid);
 hyperpoint get_corner_position(cell *c, int cid, ld cf = 3);
 

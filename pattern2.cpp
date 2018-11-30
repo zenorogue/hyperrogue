@@ -1343,6 +1343,8 @@ namespace patterns {
         int z = currfp.getdist(fieldval(c), make_pair(0,false));
         return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
         }
+      case 'K':
+        return crystal::colorize(c);
       case 'N': {
         if(!hyperbolic) return canvasback;
         using namespace fieldpattern;
@@ -1445,6 +1447,9 @@ namespace patterns {
     
     if(archimedean)
       dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
+
+    if(geometry == gCrystal)
+      dialog::addSelItem(XLAT("Crystal coordinates"), "Crystal", 'K');
 
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 

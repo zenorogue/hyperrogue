@@ -31,6 +31,7 @@
 #include "heptagon.cpp"
 #include "binary-tiling.cpp"
 #include "archimedean.cpp"
+#include "crystal.cpp"
 #include "language.cpp"
 #include "cell.cpp"
 #include "expansion.cpp"

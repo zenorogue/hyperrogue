@@ -205,13 +205,15 @@ heptagon *createStep(heptagon *h, int d) {
   d = h->c.fix(d);
   if(!h->move(d))
     callhooks(hooks_createStep, h, d);
+  if(!h->move(d) && geometry == gCrystal) 
+    crystal::create_step(h, d);
   if(!h->move(d) && binarytiling) 
     return binary::createStep(h, d);
   if(!h->move(d) && archimedean) {
     arcm::create_adjacent(h, d); 
     return h->move(d);
     }
-  if(!h->move(0) && h->s != hsOrigin && !binarytiling) {
+  if(!h->move(0) && h->s != hsOrigin && !binarytiling && (geometry != gCrystal)) {
     // cheating: 
     int pard=0;
     if(S3 == 3) 

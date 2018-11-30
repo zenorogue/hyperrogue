@@ -1170,6 +1170,7 @@ void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
+  else if(geometry == gCrystal) currentmap = crystal::new_map();
   else if(archimedean) currentmap = arcm::new_map();
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
@@ -1333,6 +1334,8 @@ int compdist(int dx[]) {
 int celldist(cell *c) {
   if(fulltorus) 
     return torusmap()->dists[decodeId(c->master)];
+  if(geometry == gCrystal)
+    return crystal::distance(c, currentmap->gamestart());
   if(euwrap)
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
@@ -1734,6 +1737,9 @@ int celldistance(cell *c1, cell *c2) {
   
   if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
+  
+  if(geometry == gCrystal)
+    return crystal::distance(c1, c2);
 
   if(bounded) {
     

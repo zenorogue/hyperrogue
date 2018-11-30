@@ -1693,6 +1693,7 @@ vector<geometryinfo> ginf = {
   {"Bring's Surface",     "Bring",    5, 4, qsSMALL,   gcHyperbolic, 0x20200, {{6, 4}}, eVariation::bitruncated},
   {"Schmutz's M(3)",      "M3",      12, 3, qsSMALL,   gcHyperbolic, 0x20400, {{4, 2}}, eVariation::bitruncated},
   {"Schmutz's M(4)",      "M4",      12, 3, qsSMALL,   gcHyperbolic, 0x20600, {{4, 2}}, eVariation::bitruncated},
+  {"Crystal",             "Crystal",  8, 4, qANYQ,     gcHyperbolic,     0x28000, {{3, 2}}, eVariation::pure},
   };
 
 // remember to match the following mask when specifying codes for extra geometries: 0x78600
