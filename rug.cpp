@@ -1140,7 +1140,7 @@ void drawTriangle(triangle& t) {
   using namespace hyperpoint_vec;  
   for(int i: {0,1,2}) {
     if(!t.m[i]->valid) return;
-    if(t.m[i]->dist >= get_sightrange()+.51) return;
+    // if(t.m[i]->dist >= get_sightrange()+.51) return;
     }
   dt++;
 
