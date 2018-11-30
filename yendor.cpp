@@ -903,7 +903,7 @@ int modecodetable[42][6] = {
 
 int modecode() {
 #if CAP_SAVE
-  if(anticheat::tampered || cheater) return 6;
+  if(anticheat::tampered || cheater || geometry >= gGUARD) return 6;
 #endif
 
   // compute the old code
