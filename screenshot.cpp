@@ -267,6 +267,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     if(rug::rugged) {
       if(!rug::renderonce) rug::prepareTexture();
       glbuf.enable();
+      if(rug::in_crystal()) rug::physics();
       rug::drawRugScene();
       }
     else

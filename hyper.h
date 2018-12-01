@@ -1298,6 +1298,9 @@ namespace rug {
   rugpoint *addRugpoint(hyperpoint h, double dist);
   void buildRug();
 
+  bool in_crystal();
+  void physics();
+
 extern renderbuffer *glbuf; 
 extern eGeometry gwhere;
 extern bool no_fog;
