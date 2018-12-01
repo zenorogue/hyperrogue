@@ -692,10 +692,12 @@ bool in_smart_range(const transmatrix& T) {
   if(std::isinf(h1[0]) || std::isinf(h1[1])) return false;
   ld x = current_display->xcenter + current_display->radius * h1[0];
   ld y = current_display->ycenter + current_display->radius * h1[1] * vid.stretch;
-  if(x > vid.xres * 2) return false;
-  if(x < -vid.xres) return false;
-  if(y > vid.yres * 2) return false;
-  if(y < -vid.yres) return false;
+
+  if(x > current_display->xtop + current_display->xsize * 2)return false;
+  if(x < current_display->xtop - current_display->xsize * 1) return false;
+  if(y > current_display->ytop + current_display->ysize * 2)return false;
+  if(y < current_display->ytop - current_display->ysize * 1) return false;
+
   ld epsilon = 0.01;
   applymodel(T * xpush0(epsilon), h2);
   ld x1 = current_display->radius * abs(h2[0] - h1[0]) / epsilon;
@@ -707,10 +709,10 @@ bool in_smart_range(const transmatrix& T) {
   if(svg::in) scale /= svg::divby;
   return 
     scale > vid.smart_range_detail && 
-    x - 2 * max(x1, x2) < vid.xres && 
-    x + 2 * max(x1, x2) > 0 &&
-    y - 2 * max(y1, y2) < vid.yres &&
-    y + 2 * max(y1, y2) > 0;
+    x - 2 * max(x1, x2) < current_display->xtop + current_display->xsize && 
+    x + 2 * max(x1, x2) > current_display->xtop &&
+    y - 2 * max(y1, y2) < current_display->ytop + current_display->ysize &&
+    y + 2 * max(y1, y2) > current_display->ytop;
   }
 
 namespace gp {
