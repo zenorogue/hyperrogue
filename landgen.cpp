@@ -2375,7 +2375,7 @@ void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean) {
+  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && geometry != gCrystal) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {
@@ -2413,7 +2413,8 @@ void setdist(cell *c, int d, cell *from) {
 #else
     if(true) {
 #endif
-      if(sphere || fulltorus) setLandSphere(c);
+      if(geometry == gCrystal) crystal::set_land(c);
+      else if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }
       else if(weirdhyperbolic) setLandWeird(c);

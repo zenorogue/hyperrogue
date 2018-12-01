@@ -114,7 +114,9 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
 //bool hsol = false;
 //transmatrix sol;
 
+  int steps = 0;
   while(h1 != h2) {
+    steps++; if(steps > 100) { println(hlog, "not found"); return Id; }
     if(smallbounded && quotient) {
       transmatrix T;
       ld bestdist = 1e9;

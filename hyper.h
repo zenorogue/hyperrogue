@@ -91,7 +91,7 @@ void addMessage(string s, char spamtype = 0);
 
 #define binarytiling (geometry == gBinaryTiling)
 #define archimedean (geometry == gArchimedean)
-#define eubinary (euclid || binarytiling)
+#define eubinary (euclid || binarytiling || geometry == gCrystal)
 
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
@@ -3392,6 +3392,7 @@ hyperpoint xspinpush0(ld alpha, ld x);
 extern FILE *debugfile;
 extern int debugflags;
 int gmod(int i, int j);
+int gdiv(int i, int j);
 extern walltype winf[walltypes];
 extern vector<landtacinfo> land_tac;
 string llts(long long i);
@@ -4139,13 +4140,16 @@ namespace arcm {
 namespace crystal {
   extern bool add_bitruncation;
   color_t colorize(cell *c);
-  int distance(cell *c1, cell *c2);
+  int precise_distance(cell *c1, cell *c2);
   hrmap *new_map();
   void create_step(heptagon *h, int d);
   void build_rugdata();
   void apply_rotation(const transmatrix t);
   void switch_z_coordinate();
   void next_home_orientation();
+  void set_land(cell *c);
+  int dist_alt(cell *c);
+  int dist_relative(cell *c);
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);
