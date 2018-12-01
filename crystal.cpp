@@ -400,7 +400,7 @@ color_t colorize(cell *c) {
   color_t res;
   res = 0;
   for(int i=0; i<3; i++)
-    res |= ((int)(((i == 2 && S7 == 5) ? (128 + co[i] * 50) : (128 + co[i] * 50)))) << (8*i);
+    res |= ((int)(((i == 2 && S7 == 5) ? (128 + co[i] * 50) : (255&int(128 + co[i] * 50))))) << (8*i);
   return res;
   }
 
