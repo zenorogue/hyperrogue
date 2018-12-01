@@ -36,6 +36,7 @@ int roundTableRadius(cell *c) {
   }
 
 int celldistAltRelative(cell *c) {
+  if(geometry == gCrystal) return crystal::dist_relative(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
@@ -1166,6 +1167,74 @@ void buildCamelotWall(cell *c) {
     }
   }
 
+void buildCamelot(cell *c) {
+  int d = celldistAltRelative(c);
+  if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
+    if(!eubinary) generateAlts(c->master);
+    preventbarriers(c);
+    if(d == 10) {
+      if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
+      else {
+        if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
+        int q = 0;
+        if(weirdhyperbolic) {
+          for(int t=0; t<c->type; t++) createMov(c, t);
+          q = hrand(100);
+          if(q < 10) q = 0;
+          else if(q < 50) q = 1;
+          }
+        else {
+          for(int t=0; t<c->type; t++) {
+            createMov(c, t);
+            if(celldistAltRelative(c->move(t)) == 10 && !pseudohept(c->move(t))) q++;
+            }
+          }
+        if(q == 1) buildCamelotWall(c);
+        // towers of Camelot
+        if(q == 0 && BITRUNCATED) {
+          c->monst = moKnight;
+          c->wall = waTower;
+          forCellEx(c2, c) {
+            int cr = celldistAltRelative(c2);
+            if(cr == 9) ;
+            else {
+              buildCamelotWall(c2);
+              if(!ctof(c2))
+                c2->wall = waTower, c2->wparam = 1;
+              }
+            }
+          for(int i=0; i<c->type; i++) if(celldistAltRelative(c->move(i)) < d)
+            c->mondir = i;
+          }
+        }
+      }
+    if(d == 0) c->wall = waRoundTable;
+    if(celldistAlt(c) == 0 && !tactic::on) c->item = itHolyGrail;
+    if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5) {
+      eMonster m[3] = { moHedge, moLancer, moFlailer };
+      c->monst = m[hrand(3)];
+      }
+    if(d == 1) {
+      // roughly as many knights as table cells
+      if(hrand(1000000) < 1000000 / expansion.get_growth())
+        c->monst = moKnight;
+      if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
+      for(int i=0; i<c->type; i++) 
+        if(c->move(i) && celldistAltRelative(c->move(i)) < d)
+          c->mondir = (i+3) % 6;
+      }
+    if(tactic::on && d >= 2 && d <= 8 && hrand(1000) < 10)
+      c->item = itOrbSafety;
+    if(d == 5 && tactic::on)
+      c->item = itGreenStone;
+    if(d <= 10) c->land = laCamelot;
+    if(d > 10 && !eubinary && !tactic::on) {
+      setland(c, eLand(c->master->alt->alt->fiftyval));
+      if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
+      }
+    }
+  }
+
 void moreBigStuff(cell *c) {
 
   if(quotient) return;
@@ -1175,7 +1244,7 @@ void moreBigStuff(cell *c) {
     if(d <= PRADIUS1) generateAlts(c->master);
     }
 
-  if(c->land == laCanvas && !eubinary && c->master->alt) 
+  if(c->land == laCanvas && !eubinary && c->master->alt && !quotient) 
     generateAlts(c->master);
 
   if(c->land == laStorms)
@@ -1197,73 +1266,8 @@ void moreBigStuff(cell *c) {
       }        
 
   if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
-  if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) {
-    int d = celldistAltRelative(c);
-    if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
-      if(!eubinary) generateAlts(c->master);
-      preventbarriers(c);
-      if(d == 10) {
-        if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
-        else {
-          if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
-          int q = 0;
-          if(weirdhyperbolic) {
-            for(int t=0; t<c->type; t++) createMov(c, t);
-            q = hrand(100);
-            if(q < 10) q = 0;
-            else if(q < 50) q = 1;
-            }
-          else {
-            for(int t=0; t<c->type; t++) {
-              createMov(c, t);
-              if(celldistAltRelative(c->move(t)) == 10 && !pseudohept(c->move(t))) q++;
-              }
-            }
-          if(q == 1) buildCamelotWall(c);
-          // towers of Camelot
-          if(q == 0 && BITRUNCATED) {
-            c->monst = moKnight;
-            c->wall = waTower;
-            forCellEx(c2, c) {
-              int cr = celldistAltRelative(c2);
-              if(cr == 9) ;
-              else {
-                buildCamelotWall(c2);
-                if(!ctof(c2))
-                  c2->wall = waTower, c2->wparam = 1;
-                }
-              }
-            for(int i=0; i<c->type; i++) if(celldistAltRelative(c->move(i)) < d)
-              c->mondir = i;
-            }
-          }
-        }
-      if(d == 0) c->wall = waRoundTable;
-      if(celldistAlt(c) == 0 && !tactic::on) c->item = itHolyGrail;
-      if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5) {
-        eMonster m[3] = { moHedge, moLancer, moFlailer };
-        c->monst = m[hrand(3)];
-        }
-      if(d == 1) {
-        // roughly as many knights as table cells
-        if(hrand(1000000) < 1000000 / expansion.get_growth())
-          c->monst = moKnight;
-        if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
-        for(int i=0; i<c->type; i++) 
-          if(c->move(i) && celldistAltRelative(c->move(i)) < d)
-            c->mondir = (i+3) % 6;
-        }
-      if(tactic::on && d >= 2 && d <= 8 && hrand(1000) < 10)
-        c->item = itOrbSafety;
-      if(d == 5 && tactic::on)
-        c->item = itGreenStone;
-      if(d <= 10) c->land = laCamelot;
-      if(d > 10 && !eubinary && !tactic::on) {
-        setland(c, eLand(c->master->alt->alt->fiftyval));
-        if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
-        }
-      }
-    }
+  if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) 
+    buildCamelot(c);
   
   if(chaosmode && c->land == laTemple) {
     for(int i=0; i<c->type; i++)

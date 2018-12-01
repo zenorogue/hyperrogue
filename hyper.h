@@ -2756,6 +2756,7 @@ bool checkInTree(cell *c, int maxv);
 cell *findcompass(cell *c);
 int edgeDepth(cell *c);
 int compassDist(cell *c);
+void buildCamelot(cell *c);
 
 #define HAUNTED_RADIUS getDistLimit()
 #define UNKNOWN 65535

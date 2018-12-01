@@ -1334,13 +1334,11 @@ int compdist(int dx[]) {
 int celldist(cell *c) {
   if(fulltorus) 
     return torusmap()->dists[decodeId(c->master)];
-  if(geometry == gCrystal)
-    return crystal::distance(c, currentmap->gamestart());
   if(euwrap)
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
     return eudist(decodeId(c->master));
-  if(sphere || binarytiling) return celldistance(c, currentmap->gamestart());
+  if(sphere || binarytiling || geometry == gCrystal) return celldistance(c, currentmap->gamestart());
   if(IRREGULAR) return irr::celldist(c, false);
   if(archimedean || ctof(c)) return c->master->distance;
   if(GOLDBERG) return gp::compute_dist(c, celldist);
@@ -1363,6 +1361,8 @@ int celldistAlt(cell *c) {
     return euclidAlt(x, y);
     }
   if(binarytiling) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
+  if(geometry == gCrystal) 
+    return crystal::dist_alt(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
@@ -1738,9 +1738,6 @@ int celldistance(cell *c1, cell *c2) {
   if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
   
-  if(geometry == gCrystal)
-    return crystal::distance(c1, c2);
-
   if(bounded) {
     
     if(saved_distances.count(make_pair(c1,c2)))
