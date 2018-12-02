@@ -5219,7 +5219,7 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     if(d == 2 && c->cpdist > 2) d = 4;
     val -= d;
     }
-  if(!euclid && c->monst == moKnight && c2->master->alt) {
+  if(c->monst == moKnight && (eubinary || c2->master->alt)) {
     val -= celldistAlt(c2);
     // don't go to external towers
     if(c2->wall == waTower && c2->wparam == 1 && !c2->monst)
@@ -6332,7 +6332,7 @@ void movecost(cell* from, cell *to, int phase) {
 
 bool cantGetGrimoire(cell *c2, bool verbose = true) {
   if(chaosmode) return false;
-  if(!euclid && !c2->master->alt) return false;
+  if(!eubinary && !c2->master->alt) return false;
   if(c2->item == itGrimoire && items[itGrimoire] > celldistAlt(c2)/-TEMPLE_EACH) {
     if(verbose)
       addMessage(XLAT("You already have this Grimoire! Seek new tomes in the inner circles."));
@@ -6938,7 +6938,7 @@ void roundTableMessage(cell *c2) {
 
 void knightFlavorMessage(cell *c2) {
 
-  if(!euclid && !c2->master->alt) {
+  if(!eubinary && !c2->master->alt) {
     addMessage(XLAT("\"I am lost...\""));
     return;
     }
