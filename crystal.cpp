@@ -18,8 +18,8 @@ typedef array<ld, MAXDIM> ldcoord;
 static const ldcoord ldc0 = {};
 
 ldcoord told(coord c) { ldcoord a; for(int i=0; i<MAXDIM; i++) a[i] = c[i]; return a; }
-coord roundcoord(ldcoord c) { coord a; for(int i=0; i<MAXDIM; i++) a[i] = floor(c[i] + .5); return a; }
-// coord roundcoord_modulo(ldcoord c) { coord a; for(int i=0; i<MAXDIM; i++) a[i] = (floor(c[i] + .5) * 61 / 4) % 61; return a; }
+// strange number to prevent weird acting in case of precision errors
+coord roundcoord(ldcoord c) { coord a; for(int i=0; i<MAXDIM; i++) a[i] = floor(c[i] + .5136); return a; }
 
 ldcoord operator + (ldcoord a, ldcoord b) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[i] = a[i] + b[i]; return r; }
 ldcoord operator - (ldcoord a, ldcoord b) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[i] = a[i] - b[i]; return r; }
@@ -408,6 +408,11 @@ bool crystal_cell(cell *c, transmatrix V) {
 
   if(geometry != gCrystal) return false;
 
+  if(view_coordinates && cheater) {
+    int d = dist_alt(c);
+    queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
+    }
+
   if(view_coordinates && cheater) for(int i=0; i<S7; i++) {
     
     if(c->master->c7 == c) {    
@@ -536,6 +541,94 @@ int dist_relative(cell *c) {
     }
   }
 
+struct ddbuilder {
+  map<coord, int> data;
+  static const int Modval = 64;
+  int Xmod, cycle;
+  int zeroshift;
+  int coordid;
+  
+  coord long_representant(cell *c) {
+    auto co = roundcoord(get_coord(c) * Modval/4);
+    for(int s=0; s<coordid; s++) co[s] = gmod(co[s], Modval);
+    for(int s=coordid+1; s<cs.dim; s++) {
+      int v = gdiv(co[s], Modval);
+      co[s] -= v * Modval;
+      co[coordid] += v * Modval;
+      }
+    return co;
+    }
+  
+  int get_level(cell *c) {
+    coord co = long_representant(c);
+    int cycles = gdiv(co[coordid], Xmod);
+    co[coordid] -= cycles * Xmod;
+    return data[co] + cycle * cycles;
+    }
+
+  void build(int cid) {
+    coordid = cid;
+    map<coord, int> full_data;
+    manual_celllister cl;
+    
+    for(int i=0; i<(1<<cid); i++) {
+      auto co = c0; 
+      for(int j=0; j<cid; j++) co[j] = ((i>>j)&1) * 2;
+      cell *cc = get_heptagon_at(co, cs.dir)->c7;
+      cl.add(cc);
+      }
+    
+    map<coord, int> stepat;
+  
+    int steps = 0, nextstep = isize(cl.lst);
+    
+    cycle = 0;
+    int incycle = 0;
+    int needcycle = 16 + nextstep;
+    int elongcycle = 0;
+    
+    Xmod = Modval;
+    
+    int modmul = 1;
+    
+    for(int i=0; i<isize(cl.lst); i++) {
+      if(incycle > needcycle * modmul) break;
+      if(i == nextstep) steps++, nextstep = isize(cl.lst);
+      cell *c = cl.lst[i];
+  
+      auto co = long_representant(c);
+      if(co[coordid] < -Modval) continue;
+      if(full_data.count(co)) continue;
+      full_data[co] = steps;
+      
+      auto co1 = co; co1[coordid] -= Xmod;
+      auto co2 = co; co2[coordid] = gmod(co2[coordid], Xmod);
+  
+      if(full_data.count(co1)) {
+        int ncycle = steps - full_data[co1];
+        if(ncycle != cycle) incycle = 1, cycle = ncycle;
+        else incycle++;
+        int dd = gdiv(co[coordid], Xmod);
+        // println(hlog, co, " set data at ", co2, " from ", data[co2], " to ", steps - dd * cycle, " at step ", steps);
+        data[co2] = steps - dd * cycle;
+        elongcycle++;
+        if(elongcycle > 2 * needcycle * modmul) Xmod += Modval, elongcycle = 0, modmul++;
+        }
+      else incycle = 0, needcycle++, elongcycle = 0;
+      forCellCM(c1, c) cl.add(c1);
+      }
+    
+    zeroshift = 0;
+    zeroshift = -get_level(cl.lst[0]);
+
+    println(hlog, "cycle found: ", cycle, " Xmod = ", Xmod, " on list: ", isize(cl.lst), " zeroshift: ", zeroshift);
+    }
+  
+  };
+
+ddbuilder ddb;
+
+
 int dist_alt(cell *c) {
   if(specialland == laCamelot && camelot_center) {
     if(PURE && !add_bitruncation) 
@@ -543,7 +636,10 @@ int dist_alt(cell *c) {
     if(c == camelot_center) return 0;
     return 1 + int(space_distance(camelot_center, c));
     }
-  return 1;
+  else {
+    if(ddb.data.empty()) ddb.build(1);
+    return ddb.get_level(c);
+    }
   }
 
 ld crug_rotation[MAXDIM][MAXDIM];
@@ -654,7 +750,27 @@ void set_land(cell *c) {
     setland(c, laCrossroads);
     buildCamelot(c);
     }
+
+  if(specialland == laTerracotta) {
+    int v = dist_alt(c);
+    if(((v&15) == 8) && hrand(100) < 90)
+       c->wall = waMercury;
+    }
+
+  if(among(specialland, laOcean, laIvoryTower, laDungeon)) {
+    int v = dist_alt(c);
+    if(v == 0)
+      c->land = laCrossroads4;
+    else if(v > 0)
+      c->landparam = v;
+    else
+      c->landparam = -v;
+    }
   
+  if(specialland == laWarpCoast) {
+    if(gmod(cv, 240) >= 120)
+      c->land = laWarpSea;
+    }
   }
 
 int readArgs() {
