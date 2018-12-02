@@ -4154,6 +4154,7 @@ namespace crystal {
   int dist_alt(cell *c);
   int dist_relative(cell *c);
   void show();
+  void init_rotation();
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);

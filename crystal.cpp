@@ -858,6 +858,12 @@ void show() {
   dialog::addBreak(50);
   dialog::addBoolItem("view coordinates in the cheat mode", view_coordinates, 'v');
   dialog::add_action([]() { view_coordinates = !view_coordinates; });
+  if(geometry == gCrystal) {
+    dialog::addBoolItem("3D display", rug::rugged, 'r');
+    dialog::add_action([]() { pushScreen(rug::show); });
+    }
+  else
+    dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
   }

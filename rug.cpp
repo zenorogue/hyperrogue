@@ -1396,6 +1396,13 @@ void init_model() {
   qvalid = 0; dt = 0; queueiter = 0;
   err_zero_current = err_zero;
   
+  if(geometry == gCrystal && surface::sh == surface::dsNone) {
+    surface::sh = surface::dsCrystal;
+    crystal::init_rotation();
+    good_shape = true;
+    return;
+    }
+  
   try {
     buildRug();
     while(good_shape && subdivide_further()) subdivide();
