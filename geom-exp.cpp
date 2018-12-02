@@ -477,6 +477,7 @@ void showEuclideanMenu() {
       binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
       archimedean ? arcm::current.world_size() :
       (archimedean && sphere) ? its(isize(currentmap->allcells())) :
+      geometry == gCrystal ? "∞^" + its(ts/2) :
       worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
       (euwrap && !fulltorus) ? "∞" :
       worldsize == 0 ? "∞²" :
