@@ -1213,6 +1213,8 @@ void buildCamelot(cell *c) {
     if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5) {
       eMonster m[3] = { moHedge, moLancer, moFlailer };
       c->monst = m[hrand(3)];
+      if(c->monst == moHedge && VALENCE > 3)
+        c->monst = moPyroCultist;
       }
     if(d == 1) {
       // roughly as many knights as table cells
