@@ -1136,7 +1136,7 @@ void set_geometry(eGeometry target) {
     ors::reset();
     geometry = target;
   
-    if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
+    if(chaosmode && bounded) chaosmode = false;
     if(euclid6) variation = eVariation::bitruncated;
     if(IRREGULAR) variation = eVariation::bitruncated;
     if(GOLDBERG && gp::param == gp::loc(1,1) && S3 == 3) {
