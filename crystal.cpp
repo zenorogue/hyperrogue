@@ -6,7 +6,10 @@ namespace hr {
 
 namespace crystal {
 
-bool add_bitruncation = false;
+bool pure() {
+  return PURE && ginf[gCrystal].vertex == 4;
+  }
+
 bool view_coordinates = false;
 
 const int MAXDIM = 7;
@@ -391,7 +394,7 @@ void create_step(heptagon *h, int d) {
 
   auto lw = m->makewalker(co, d);
 
-  if(!add_bitruncation) {
+  if(ginf[gCrystal].vertex == 4) {
     auto c1 = add(co, lw, FULLSTEP);
     auto lw1 = lw+wstep;
     
@@ -453,15 +456,8 @@ bool crystal_cell(cell *c, transmatrix V) {
       
       int coordcolors[MAXDIM] = {0x4040D0, 0x40D040, 0xD04040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
     
-      queuestr(T, 0.3, its(co[cx>>1] / (add_bitruncation ? HALFSTEP : FULLSTEP)), coordcolors[cx>>1], 1);
-      }
-
-    if(PURE) {
-      cellwalker cw(c, i);
-      cellwalker cw2 = cw;
-      for(int i=0; i<(add_bitruncation?3:4); i++) cw2 = cw2 + wstep + 1;
-      if(cw2 != cw) { printf("crystal valence error\n"); cw.at->item = itGold; }
-      }
+      queuestr(T, 0.3, its(co[cx>>1] / (ginf[gCrystal].vertex == 3 ? HALFSTEP : FULLSTEP)), coordcolors[cx>>1], 1);
+      }                                 
     }
   return false;
   }
@@ -469,7 +465,7 @@ bool crystal_cell(cell *c, transmatrix V) {
 int precise_distance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
   auto m = crystal_map();
-  if(PURE && !add_bitruncation) {
+  if(pure()) {
     coord co1 = m->hcoords[c1->master];
     coord co2 = m->hcoords[c2->master];
     int result = 0;
@@ -549,7 +545,7 @@ int dist_relative(cell *c) {
       cc = cc->cmove(hrand(cc->type));
     }
 
-  if(PURE && !add_bitruncation) 
+  if(pure()) 
     return precise_distance(c, cc) - r;
 
   ld sdmul = (r+5) / space_distance(cc, start);
@@ -658,7 +654,7 @@ void hrmap_crystal::prepare_east() {
 int dist_alt(cell *c) {
   auto m = crystal_map();
   if(specialland == laCamelot && m->camelot_center) {
-    if(PURE && !add_bitruncation) 
+    if(pure()) 
       return precise_distance(c, m->camelot_center);
     if(c == m->camelot_center) return 0;
     return 1 + int(4 * space_distance(m->camelot_center, c));

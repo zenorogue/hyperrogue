@@ -1158,9 +1158,9 @@ void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
     if(euclid6 || binarytiling) geometry = gNormal;
-    if(target == eVariation::bitruncated && geometry == gCrystal && ginf[gCrystal].sides == 8 && !crystal::add_bitruncation) {
-      crystal::add_bitruncation = true;
-      ginf[gCrystal].vertex = 3;
+    auto& cd = ginf[gCrystal];
+    if(target == eVariation::bitruncated && geometry == gCrystal && cd.sides == 8 && cd.vertex == 4) {
+      cd.vertex = 3;
       target = eVariation::pure;
       }
     variation = target;
