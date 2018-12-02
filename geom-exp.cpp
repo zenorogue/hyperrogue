@@ -328,7 +328,9 @@ void showEuclideanMenu() {
       dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
       dialog::add_action([i] {
         eGeometry targetgeometry = eGeometry(i);
-        if(targetgeometry == gArchimedean)
+        if(targetgeometry == gCrystal)
+          pushScreen(crystal::show);
+        else if(targetgeometry == gArchimedean)
           pushScreen(arcm::show);
         else {
           set_geometry(targetgeometry);

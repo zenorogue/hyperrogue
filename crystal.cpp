@@ -804,29 +804,23 @@ void set_land(cell *c) {
     }
   }
 
+void set_crystal(int sides) {
+  stop_game();
+  set_geometry(gCrystal);
+  set_variation(eVariation::pure);
+  ginf[gCrystal].sides = sides;
+  ginf[gCrystal].vertex = 4;
+  if(sides < MAX_EDGE)
+    ginf[gCrystal].distlimit = distlimit_table[sides];
+  }
+
 int readArgs() {
   using namespace arg;
            
   if(0) ;
   else if(argis("-crystal")) {
-    PHASE(2);
-    stop_game();
-    geometry = gCrystal; variation = eVariation::pure;
-    shift(); int N = argi();
-    ginf[gCrystal].sides = N;
-    ginf[gCrystal].vertex = 4;
-    if(N < MAX_EDGE)
-      ginf[gCrystal].distlimit = distlimit_table[N];
-    add_bitruncation = false;
-    }
-  else if(argis("-crystalb")) {
-    PHASE(2);
-    stop_game();
-    geometry = gCrystal; variation = eVariation::bitruncated;
-    ginf[gCrystal].sides = 8;
-    ginf[gCrystal].vertex = 3;
-    ginf[gCrystal].distlimit = {7, 5};
-    add_bitruncation = true;
+    PHASEFROM(2);
+    shift(); set_crystal(argi());
     }
   else if(argis("-cview")) {
     view_coordinates = true;
@@ -846,6 +840,26 @@ int readArgs() {
 
 hrmap *new_map() {
   return new hrmap_crystal;
+  }
+
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);  
+  dialog::init(XLAT("multi-dimensional"));
+  for(int i=5; i<=14; i++) {
+    string s;
+    if(i % 2) s = its(i/2) + ".5D";
+    else s = its(i/2) + "D";
+    dialog::addBoolItem(s, geometry == gCrystal && ginf[gCrystal].sides == i && ginf[gCrystal].vertex == 4, 'a' + i - 5);
+    dialog::add_action([i]() { set_crystal(i); start_game(); });
+    }
+  dialog::addBoolItem("4D double bitruncated", ginf[gCrystal].vertex == 3, 'D');
+  dialog::add_action([]() { set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated); });
+  dialog::addBreak(50);
+  dialog::addBoolItem("view coordinates in the cheat mode", view_coordinates, 'v');
+  dialog::add_action([]() { view_coordinates = !view_coordinates; });
+  dialog::addBack();
+  dialog::display();
   }
 
 auto crystalhook = addHook(hooks_args, 100, readArgs)
