@@ -272,112 +272,134 @@ coord add(coord c, lwalker a, int val) {
   return c;
   }
   
-map<heptagon*, coord> hcoords;
-map<coord, heptagon*> heptagon_at;
-map<int, eLand> landmemo;
-unordered_map<cell*, unordered_map<cell*, int>> distmemo;
-map<cell*, ldcoord> sgc;
-
-crystal_structure cs;
-
 coord add(coord c, int cname, int val) {
   int dim = (cname>>1);
   c[dim] = (c[dim] + (cname&1?val:-val));
   return c;
   }
 
-lwalker makewalker(crystal_structure& cs, coord c, int d) {
-  lwalker a(cs);
-  a.id = 0;
-  for(int i=0; i<cs.dim; i++) if(c[i] & FULLSTEP) a.id += (1<<i);
-  a.spin = d;
-  return a;
+ld hypot2(crystal_structure& cs, ldcoord co1, ldcoord co2) {
+  int result = 0;
+  for(int a=0; a<cs.dim; a++) result += (co1[a] - co2[a]) * (co1[a] - co2[a]);
+  return result;
   }
 
 void crystalstep(heptagon *h, int d);
 
-heptagon *get_heptagon_at(coord c, int deg) {
-  if(heptagon_at.count(c)) return heptagon_at[c];
-  heptagon*& h = heptagon_at[c];
-  h = tailored_alloc<heptagon> (deg);
-  h->alt = NULL;
-  h->cdata = NULL;
-  h->c7 = newCell(deg, h);
-  h->distance = 0;
-  for(int i=0; i<cs.dim; i++) h->distance += abs(c[i]);
-  h->distance /= 2;
-  hcoords[h] = c;
-  // for(int i=0; i<6; i++) crystalstep(h, i);
-  return h;
-  }
+static const int Modval = 64;
 
-ldcoord get_coord(cell *c) {
-  auto b = sgc.emplace(c, ldc0);
-  ldcoord& res = b.first->second;
-  if(b.second) {
-    if(c->master->c7 != c) {
-      for(int i=0; i<c->type; i+=2)
-        res = res + told(hcoords[c->cmove(i)->master]);
-      res = res * 2 / c->type;
-      }
-    else
-      res = told(hcoords[c->master]);
-    }
-  return res;
-  }
+struct east_structure {
+  map<coord, int> data;
+  int Xmod, cycle;
+  int zeroshift;
+  int coordid;
+  };
 
 struct hrmap_crystal : hrmap {
   heptagon *getOrigin() { return get_heptagon_at(c0, S7); }
 
+  map<heptagon*, coord> hcoords;
+  map<coord, heptagon*> heptagon_at;
+  map<int, eLand> landmemo;
+  unordered_map<cell*, unordered_map<cell*, int>> distmemo;
+  map<cell*, ldcoord> sgc;
+  cell *camelot_center;
+  
+  crystal_structure cs;
+  east_structure east;   
+
+  lwalker makewalker(coord c, int d) {
+    lwalker a(cs);
+    a.id = 0;
+    for(int i=0; i<cs.dim; i++) if(c[i] & FULLSTEP) a.id += (1<<i);
+    a.spin = d;
+    return a;
+    }
+  
   hrmap_crystal() {
     cs.build();
     }
 
   ~hrmap_crystal() {
-    hcoords.clear();
-    heptagon_at.clear();
-    distmemo.clear();
-    landmemo.clear();
-    sgc.clear();
+    clearfrom(getOrigin());
     }
   
-  void verify() { }
-  };
- 
-hrmap *new_map() {
-  return new hrmap_crystal;
-  }
+  heptagon *get_heptagon_at(coord c, int deg) {
+    if(heptagon_at.count(c)) return heptagon_at[c];
+    heptagon*& h = heptagon_at[c];
+    h = tailored_alloc<heptagon> (deg);
+    h->alt = NULL;
+    h->cdata = NULL;
+    h->c7 = newCell(deg, h);
+    h->distance = 0;
+    for(int i=0; i<cs.dim; i++) h->distance += abs(c[i]);
+    h->distance /= 2;
+    hcoords[h] = c;
+    // for(int i=0; i<6; i++) crystalstep(h, i);
+    return h;
+    }
+  
+  ldcoord get_coord(cell *c) {
+    auto b = sgc.emplace(c, ldc0);
+    ldcoord& res = b.first->second;
+    if(b.second) {
+      if(c->master->c7 != c) {
+        for(int i=0; i<c->type; i+=2)
+          res = res + told(hcoords[c->cmove(i)->master]);
+        res = res * 2 / c->type;
+        }
+      else
+        res = told(hcoords[c->master]);
+      }
+    return res;
+    }
+  
+  coord long_representant(cell *c);  
 
-bool is_bi(coord co) {
+  int get_east(cell *c);
+
+  void build_east(int cid);
+  
+  void verify() { }
+  
+  void prepare_east();
+  };
+
+hrmap_crystal *crystal_map() {
+  return (hrmap_crystal*) currentmap;
+  } 
+
+bool is_bi(crystal_structure& cs, coord co) {
   for(int i=0; i<cs.dim; i++) if(co[i] & HALFSTEP) return true;
   return false;
   }
 
 void create_step(heptagon *h, int d) {
+  auto m = crystal_map();
   if(geometry != gCrystal) return;
-  if(!hcoords.count(h)) {
+  if(!m->hcoords.count(h)) {
     printf("not found\n");
     return;
     }
-  auto co = hcoords[h];
+  auto co = m->hcoords[h];
   
-  if(is_bi(co)) {
+  if(is_bi(m->cs, co)) {
     heptspin hs(h, d);
     (hs + 1 + wstep + 1).cpeek();
     return;
     }
 
-  auto lw = makewalker(cs, co, d);
+  auto lw = m->makewalker(co, d);
 
   if(!add_bitruncation) {
     auto c1 = add(co, lw, FULLSTEP);
     auto lw1 = lw+wstep;
     
-    h->c.connect(d, heptspin(get_heptagon_at(c1, S7), lw1.spin));
+    h->c.connect(d, heptspin(m->get_heptagon_at(c1, S7), lw1.spin));
     }
   else {
     auto coc = add(add(co, lw, HALFSTEP), lw+1, HALFSTEP);
-    auto hc = get_heptagon_at(coc, 8);
+    auto hc = m->get_heptagon_at(coc, 8);
     for(int a=0; a<8; a+=2) {
       hc->c.connect(a, heptspin(h, lw.spin));
       if(h->modmove(lw.spin-1)) {
@@ -385,7 +407,7 @@ void create_step(heptagon *h, int d) {
         }
       co = add(co, lw, FULLSTEP);
       lw = lw + wstep + (-1);
-      h = get_heptagon_at(co, S7);
+      h = m->get_heptagon_at(co, S7);
       }
     }
   }
@@ -396,7 +418,8 @@ array<array<int,2>, MAX_EDGE> distlimit_table = {{
   }};
 
 color_t colorize(cell *c) {
-  ldcoord co = get_coord(c);
+  auto m = crystal_map();
+  ldcoord co = m->get_coord(c);
   color_t res;
   res = 0;
   for(int i=0; i<3; i++)
@@ -415,16 +438,18 @@ bool crystal_cell(cell *c, transmatrix V) {
 
   if(view_coordinates && cheater) for(int i=0; i<S7; i++) {
     
+    auto m = crystal_map();
+
     if(c->master->c7 == c) {    
       transmatrix V1 = cellrelmatrix(c, i);
       ld dist = hdist0(V1 * C0);
       ld alpha = -atan2(V1 * C0);
       transmatrix T = V * spin(alpha) * xpush(dist*.3);
 
-      auto co = hcoords[c->master];
+      auto co = m->hcoords[c->master];
       int our_id = 0;
       for(int a=0; a<MAXDIM; a++) if(co[a] & FULLSTEP) our_id += (1<<a);
-      int cx = cs.cmap[our_id][i];
+      int cx = m->cs.cmap[our_id][i];
       
       int coordcolors[MAXDIM] = {0x4040D0, 0x40D040, 0xD04040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
     
@@ -441,21 +466,18 @@ bool crystal_cell(cell *c, transmatrix V) {
   return false;
   }
 
-ld hypot2(ldcoord co1, ldcoord co2) {
-  int result = 0;
-  for(int a=0; a<cs.dim; a++) result += (co1[a] - co2[a]) * (co1[a] - co2[a]);
-  return result;
-  }
-
 int precise_distance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
+  auto m = crystal_map();
   if(PURE && !add_bitruncation) {
-    coord co1 = hcoords[c1->master];
-    coord co2 = hcoords[c2->master];
+    coord co1 = m->hcoords[c1->master];
+    coord co2 = m->hcoords[c2->master];
     int result = 0;
-    for(int a=0; a<cs.dim; a++) result += abs(co1[a] - co2[a]);
+    for(int a=0; a<m->cs.dim; a++) result += abs(co1[a] - co2[a]);
     return result / FULLSTEP;
     }
+  
+  auto& distmemo = m->distmemo;
   
   if(c2 == currentmap->gamestart()) swap(c1, c2);
   else if(isize(distmemo[c2]) > isize(distmemo[c1])) swap(c1, c2);
@@ -471,8 +493,8 @@ int precise_distance(cell *c1, cell *c2) {
   if(zmin+1 < zmax-1) println(hlog, "zmin < zmax");
   if(zmin+1 == zmax-1) return distmemo[c1][c2] = zmin+1;
 
-  ldcoord co1 = get_coord(c1);
-  ldcoord co2 = get_coord(c2) - co1;
+  ldcoord co1 = m->get_coord(c1);
+  ldcoord co2 = m->get_coord(c2) - co1;
   
   // draw a cylinder from co1 to co2, and find the solution by going through that cylinder
   
@@ -494,11 +516,11 @@ int precise_distance(cell *c1, cell *c2) {
         return distmemo[c1][c2] = distmemo[c2][c1] = 1 + steps;
         }
 
-      auto h = get_coord(c3) - co1;
+      auto h = m->get_coord(c3) - co1;
       ld dot = (h|mul);
       if(dot > mmax + 2.5) continue;
 
-      for(int k=0; k<cs.dim; k++) if(abs(h[k] - dot * mul[k]) > 4.1) goto next3;
+      for(int k=0; k<m->cs.dim; k++) if(abs(h[k] - dot * mul[k]) > 4.1) goto next3;
       cl.add(c3);
       next3: ;
       }
@@ -508,137 +530,142 @@ int precise_distance(cell *c1, cell *c2) {
   return 999999;
   }
 
-cell *camelot_center;
-
 ld space_distance(cell *c1, cell *c2) {
-  ldcoord co1 = get_coord(c1);
-  ldcoord co2 = get_coord(c2);
-  return sqrt(hypot2(co1, co2));
+  auto m = crystal_map();
+  ldcoord co1 = m->get_coord(c1);
+  ldcoord co2 = m->get_coord(c2);
+  return sqrt(hypot2(m->cs, co1, co2));
   }
 
 int dist_relative(cell *c) {
+  auto m = crystal_map();
+  auto& cc = m->camelot_center;
   int r = roundTableRadius(NULL);
-  cell *start = currentmap->gamestart();
-  if(!camelot_center) {
+  cell *start = m->gamestart();
+  if(!cc) {
     printf("Finding Camelot center...");
-    camelot_center = start;
-    while(precise_distance(camelot_center, start) < r + 5)
-      camelot_center = camelot_center->cmove(hrand(camelot_center->type));
+    cc = start;
+    while(precise_distance(cc, start) < r + 5)
+      cc = cc->cmove(hrand(cc->type));
     }
 
   if(PURE && !add_bitruncation) 
-    return precise_distance(c, camelot_center) - r;
+    return precise_distance(c, cc) - r;
 
-  ld sdmul = (r+5) / space_distance(camelot_center, start);
-  ld dis = space_distance(camelot_center, c) * sdmul;
+  ld sdmul = (r+5) / space_distance(cc, start);
+  ld dis = space_distance(cc, c) * sdmul;
   println(hlog, "dis = ", dis);
   if(dis < r) 
     return int(dis) - r;
   else {
-    forCellCM(c1, c) if(space_distance(camelot_center, c1) * sdmul < r)
+    forCellCM(c1, c) if(space_distance(cc, c1) * sdmul < r)
       return 0;
     return int(dis) + 1 - r;
     }
   }
 
-struct ddbuilder {
-  map<coord, int> data;
-  static const int Modval = 64;
-  int Xmod, cycle;
-  int zeroshift;
-  int coordid;
+coord hrmap_crystal::long_representant(cell *c) {
+  auto& coordid = east.coordid;
+  auto co = roundcoord(get_coord(c) * Modval/4);
+  for(int s=0; s<coordid; s++) co[s] = gmod(co[s], Modval);
+  for(int s=coordid+1; s<cs.dim; s++) {
+    int v = gdiv(co[s], Modval);
+    co[s] -= v * Modval;
+    co[coordid] += v * Modval;
+    }
+  return co;
+  }
+
+int hrmap_crystal::get_east(cell *c) {
+  auto& coordid = east.coordid;
+  auto& Xmod = east.Xmod;
+  auto& data = east.data;
+  auto& cycle = east.cycle;
+
+  coord co = long_representant(c);
+  int cycles = gdiv(co[coordid], Xmod);
+  co[coordid] -= cycles * Xmod;
+  return data[co] + cycle * cycles;
+  }
+
+void hrmap_crystal::build_east(int cid) {
+  auto& coordid = east.coordid;
+  auto& Xmod = east.Xmod;
+  auto& data = east.data;
+  auto& cycle = east.cycle;
   
-  coord long_representant(cell *c) {
-    auto co = roundcoord(get_coord(c) * Modval/4);
-    for(int s=0; s<coordid; s++) co[s] = gmod(co[s], Modval);
-    for(int s=coordid+1; s<cs.dim; s++) {
-      int v = gdiv(co[s], Modval);
-      co[s] -= v * Modval;
-      co[coordid] += v * Modval;
-      }
-    return co;
+  coordid = cid;
+  map<coord, int> full_data;
+  manual_celllister cl;
+  
+  for(int i=0; i<(1<<cid); i++) {
+    auto co = c0; 
+    for(int j=0; j<cid; j++) co[j] = ((i>>j)&1) * 2;
+    cell *cc = get_heptagon_at(co, cs.dir)->c7;
+    cl.add(cc);
     }
   
-  int get_level(cell *c) {
-    coord co = long_representant(c);
-    int cycles = gdiv(co[coordid], Xmod);
-    co[coordid] -= cycles * Xmod;
-    return data[co] + cycle * cycles;
-    }
+  map<coord, int> stepat;
 
-  void build(int cid) {
-    coordid = cid;
-    map<coord, int> full_data;
-    manual_celllister cl;
-    
-    for(int i=0; i<(1<<cid); i++) {
-      auto co = c0; 
-      for(int j=0; j<cid; j++) co[j] = ((i>>j)&1) * 2;
-      cell *cc = get_heptagon_at(co, cs.dir)->c7;
-      cl.add(cc);
-      }
-    
-    map<coord, int> stepat;
+  int steps = 0, nextstep = isize(cl.lst);
   
-    int steps = 0, nextstep = isize(cl.lst);
-    
-    cycle = 0;
-    int incycle = 0;
-    int needcycle = 16 + nextstep;
-    int elongcycle = 0;
-    
-    Xmod = Modval;
-    
-    int modmul = 1;
-    
-    for(int i=0; i<isize(cl.lst); i++) {
-      if(incycle > needcycle * modmul) break;
-      if(i == nextstep) steps++, nextstep = isize(cl.lst);
-      cell *c = cl.lst[i];
+  cycle = 0;
+  int incycle = 0;
+  int needcycle = 16 + nextstep;
+  int elongcycle = 0;
   
-      auto co = long_representant(c);
-      if(co[coordid] < -Modval) continue;
-      if(full_data.count(co)) continue;
-      full_data[co] = steps;
-      
-      auto co1 = co; co1[coordid] -= Xmod;
-      auto co2 = co; co2[coordid] = gmod(co2[coordid], Xmod);
+  Xmod = Modval;
   
-      if(full_data.count(co1)) {
-        int ncycle = steps - full_data[co1];
-        if(ncycle != cycle) incycle = 1, cycle = ncycle;
-        else incycle++;
-        int dd = gdiv(co[coordid], Xmod);
-        // println(hlog, co, " set data at ", co2, " from ", data[co2], " to ", steps - dd * cycle, " at step ", steps);
-        data[co2] = steps - dd * cycle;
-        elongcycle++;
-        if(elongcycle > 2 * needcycle * modmul) Xmod += Modval, elongcycle = 0, modmul++;
-        }
-      else incycle = 0, needcycle++, elongcycle = 0;
-      forCellCM(c1, c) cl.add(c1);
-      }
-    
-    zeroshift = 0;
-    zeroshift = -get_level(cl.lst[0]);
+  int modmul = 1;
+  
+  for(int i=0; i<isize(cl.lst); i++) {
+    if(incycle > needcycle * modmul) break;
+    if(i == nextstep) steps++, nextstep = isize(cl.lst);
+    cell *c = cl.lst[i];
 
-    println(hlog, "cycle found: ", cycle, " Xmod = ", Xmod, " on list: ", isize(cl.lst), " zeroshift: ", zeroshift);
+    auto co = long_representant(c);
+    if(co[coordid] < -Modval) continue;
+    if(full_data.count(co)) continue;
+    full_data[co] = steps;
+    
+    auto co1 = co; co1[coordid] -= Xmod;
+    auto co2 = co; co2[coordid] = gmod(co2[coordid], Xmod);
+
+    if(full_data.count(co1)) {
+      int ncycle = steps - full_data[co1];
+      if(ncycle != cycle) incycle = 1, cycle = ncycle;
+      else incycle++;
+      int dd = gdiv(co[coordid], Xmod);
+      // println(hlog, co, " set data at ", co2, " from ", data[co2], " to ", steps - dd * cycle, " at step ", steps);
+      data[co2] = steps - dd * cycle;
+      elongcycle++;
+      if(elongcycle > 2 * needcycle * modmul) Xmod += Modval, elongcycle = 0, modmul++;
+      }
+    else incycle = 0, needcycle++, elongcycle = 0;
+    forCellCM(c1, c) cl.add(c1);
     }
   
-  };
+  east.zeroshift = 0;
+  east.zeroshift = -get_east(cl.lst[0]);
 
-ddbuilder ddb;
-
+  println(hlog, "cycle found: ", cycle, " Xmod = ", Xmod, " on list: ", isize(cl.lst), " zeroshift: ", east.zeroshift);
+  }
+  
+void hrmap_crystal::prepare_east() {
+  if(east.data.empty()) build_east(1);
+  }
 
 int dist_alt(cell *c) {
-  if(specialland == laCamelot && camelot_center) {
+  auto m = crystal_map();
+  if(specialland == laCamelot && m->camelot_center) {
     if(PURE && !add_bitruncation) 
-      return precise_distance(c, camelot_center);
-    if(c == camelot_center) return 0;
-    return 1 + int(space_distance(camelot_center, c));
+      return precise_distance(c, m->camelot_center);
+    if(c == m->camelot_center) return 0;
+    return 1 + int(4 * space_distance(m->camelot_center, c));
     }
   else {
-    if(ddb.data.empty()) ddb.build(1);
-    return ddb.get_level(c);
+    m->prepare_east();
+    return m->get_east(c);
     }
   }
 
@@ -650,6 +677,8 @@ void init_rotation() {
   for(int i=0; i<MAXDIM; i++)
   for(int j=0; j<MAXDIM; j++)
     crug_rotation[i][j] = i == j ? 1/2. : 0;
+  
+  auto& cs = crystal_map()->cs;
 
   if(ho & 1) {
     for(int i=cs.dim-1; i>=1; i--) {
@@ -679,6 +708,7 @@ hyperpoint coord_to_flat(ldcoord co) {
   }
 
 void switch_z_coordinate() {
+  auto& cs = crystal_map()->cs;
   for(int i=0; i<cs.dim; i++) {
     ld tmp = crug_rotation[i][2];
     for(int u=2; u<cs.dim-1; u++) crug_rotation[i][u] = crug_rotation[i][u+1];
@@ -700,13 +730,15 @@ void build_rugdata() {
   rug::clear_model(); 
   rug::good_shape = true;  
   rug::vertex_limit = 0;
+  auto m = crystal_map();
+  
   for(const auto& gp: gmatrix) {
             
     cell *c = gp.first;
     const transmatrix& V = gp.second;
     
     rugpoint *v = addRugpoint(tC0(V), 0);
-    auto co = get_coord(c);
+    auto co = m->get_coord(c);
     v->flat = coord_to_flat(co);
     v->valid = true;
     
@@ -716,9 +748,9 @@ void build_rugdata() {
       p[i] = addRugpoint(V * get_corner_position(c, i), 0);
       p[i]->valid = true;
       if(VALENCE == 4)
-        p[i]->flat = coord_to_flat((get_coord(c->cmove(i)) + get_coord(c->cmodmove(i-1))) / 2);
+        p[i]->flat = coord_to_flat((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1))) / 2);
       else
-        p[i]->flat = coord_to_flat((get_coord(c->cmove(i)) + get_coord(c->cmodmove(i-1)) + co) / 3);
+        p[i]->flat = coord_to_flat((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1)) + co) / 3);
       }
 
     for(int i=0; i<c->type; i++) addTriangle(v, p[i], p[(i+1) % c->type]);
@@ -726,6 +758,8 @@ void build_rugdata() {
   }
 
 eLand getCLand(int x) {
+  auto& landmemo = crystal_map()->landmemo;
+     
   if(landmemo.count(x)) return landmemo[x]; 
   if(x > 0) return landmemo[x] = getNewLand(landmemo[x-1]);
   if(x < 0) return landmemo[x] = getNewLand(landmemo[x+1]);
@@ -734,8 +768,9 @@ eLand getCLand(int x) {
 
 void set_land(cell *c) {
   setland(c, specialland); 
+  auto m = crystal_map();
 
-  auto co = get_coord(c);
+  auto co = m->get_coord(c);
   auto co1 = roundcoord(co * 60);
   int cv = co1[0];
 
@@ -811,6 +846,10 @@ int readArgs() {
     }
   else return 1;
   return 0;
+  }
+
+hrmap *new_map() {
+  return new hrmap_crystal;
   }
 
 auto crystalhook = addHook(hooks_args, 100, readArgs)
