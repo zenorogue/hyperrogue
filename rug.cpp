@@ -196,8 +196,19 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->valid = false;
 
   using namespace hyperpoint_vec;
-
-  if(sphere) {
+  
+  if(euwrap && !bounded) {
+    hyperpoint h1 = eumove(torusconfig::sdx, torusconfig::sdy) * C0;
+    println(hlog, "h1 = ", h1);
+    h1 /= sqhypot2(h1);
+    if(nonorientable) h1 /= 2;
+    println(hlog, "-> h1 = ", h1);
+    m->valid = good_shape = true;
+    ld d = h1[0] * h[1] - h1[1] * h[0]; 
+    ld a = h[0] * h1[0] + h[1] * h1[1];
+    m->flat = hpxyz(cos(a * 2 * M_PI), sin(a * 2 * M_PI), d * 2 * M_PI);
+    }
+  else if(sphere) {
     m->valid = good_shape = true;
     ld scale;
     if(gwhere == gEuclid) {
@@ -577,7 +588,7 @@ void buildRug() {
 
   need_mouseh = true;
   good_shape = false;
-  if(euwrap) {
+  if(fulltorus) {
     good_shape = true;
     buildTorusRug();
     return;
@@ -594,10 +605,17 @@ void buildRug() {
     cell *c = p.first;
     rugpoint *v = p.second;
     
-    if(archimedean) {
+    if(archimedean || euwrap) {
       rugpoint *p[MAX_EDGE+1];
       for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(ggmatrix(c) * get_corner_position(c, j), v->dist);
       for(int j=0; j<c->type; j++) addTriangle(v, p[j], p[(j+1) % c->type]);
+      
+      if(euwrap && nonorientable) {
+        transmatrix T = ggmatrix(c) * eumove(torusconfig::sdx, torusconfig::sdy);
+        rugpoint *Tv = addRugpoint(T * C0, 0);
+        for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(T * get_corner_position(c, j), v->dist);
+        for(int j=0; j<c->type; j++) addTriangle(Tv, p[j], p[(j+1) % c->type]);
+        }
       }
     
     else for(int j=0; j<c->type; j++) try {
