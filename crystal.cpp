@@ -439,6 +439,8 @@ color_t colorize(cell *c) {
   return res;
   }
 
+colortable coordcolors = {0x4040D0, 0x40D040, 0xD04040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
+      
 bool crystal_cell(cell *c, transmatrix V) {
 
   if(geometry != gCrystal) return false;
@@ -448,24 +450,25 @@ bool crystal_cell(cell *c, transmatrix V) {
     queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
     }
 
-  if(view_coordinates && cheater) for(int i=0; i<S7; i++) {
+  if(view_coordinates && cheater) {
     
     auto m = crystal_map();
-
-    if(c->master->c7 == c) {    
-      transmatrix V1 = cellrelmatrix(c, i);
-      ld dist = hdist0(V1 * C0);
-      ld alpha = -atan2(V1 * C0);
-      transmatrix T = V * spin(alpha) * xpush(dist*.3);
-
-      auto co = m->hcoords[c->master];
-      int our_id = 0;
-      for(int a=0; a<MAXDIM; a++) if(co[a] & FULLSTEP) our_id += (1<<a);
-      int cx = m->cs.cmap[our_id][i];
-      
-      int coordcolors[MAXDIM] = {0x4040D0, 0x40D040, 0xD04040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
     
-      queuestr(T, 0.3, its(co[cx>>1] / (ginf[gCrystal].vertex == 3 ? HALFSTEP : FULLSTEP)), coordcolors[cx>>1], 1);
+    bool bitr = ginf[gCrystal].vertex == 3;
+
+    if(c->master->c7 == c && !is_bi(m->cs, m->hcoords[c->master])) {
+    
+      ld dist = cellgfxdist(c, 0);
+
+      for(int i=0; i<S7; i++)  {
+        transmatrix T = V * spin(-master_to_c7_angle() - 2 * M_PI * i / S7 + (bitr ? M_PI/8 : 0)) * xpush(dist*.3);
+        
+        auto co = m->hcoords[c->master];
+        auto lw = m->makewalker(co, i);
+        int cx = m->cs.cmap[lw.id][i];
+        
+        queuestr(T, 0.3, its(co[cx>>1] / FULLSTEP), coordcolors[cx>>1], 1);
+        }
       }                                 
     }
   return false;
