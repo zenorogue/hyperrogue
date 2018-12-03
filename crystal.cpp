@@ -6,6 +6,15 @@ namespace hr {
 
 namespace crystal {
 
+// Crystal can be bitruncated either by changing variation to bitruncated.
+// In case of the 4D Crystal, the standard HyperRogue bitruncation becomes
+// confused by having both the original and new vertices of degree 8.
+// Hence Crystal implements its own bitruncation, which is selected/checked
+// by setting ginf[gCrystal].vertex to 3. Additionally, this lets us double
+// bitruncate.
+
+// Function pure() checks for both kinds of bitruncation (or any other variations).
+
 bool pure() {
   return PURE && ginf[gCrystal].vertex == 4;
   }
@@ -39,8 +48,15 @@ void resize2(vector<vector<int>>& v, int a, int b, int z) {
   for(auto& w: v) w.resize(b, z);
   }
 
+// in the "pure" form, the adjacent vertices are internaly spaced by 2...
 const int FULLSTEP = 2;
+
+// ... to make space for the additional vertices which are added in the bitruncated version
 const int HALFSTEP = 1;
+
+// with variations, the connections of the vertex at coordinate v+FULLSTEP mirror the connections
+// of the vertex at coordinate v. Therefore, the period of our construction is actually 2*FULLSTEP.
+const int PERIOD = 2 * FULLSTEP;
 
 struct crystal_structure {
   int dir;
@@ -526,9 +542,9 @@ int precise_distance(cell *c1, cell *c2) {
 
       auto h = m->get_coord(c3) - co1;
       ld dot = (h|mul);
-      if(dot > mmax + 2.5) continue;
+      if(dot > mmax + PERIOD/2 + .1) continue;
 
-      for(int k=0; k<m->cs.dim; k++) if(abs(h[k] - dot * mul[k]) > 4.1) goto next3;
+      for(int k=0; k<m->cs.dim; k++) if(abs(h[k] - dot * mul[k]) > PERIOD + .1) goto next3;
       cl.add(c3);
       next3: ;
       }
@@ -584,7 +600,7 @@ int dist_relative(cell *c) {
 
 coord hrmap_crystal::long_representant(cell *c) {
   auto& coordid = east.coordid;
-  auto co = roundcoord(get_coord(c) * Modval/4);
+  auto co = roundcoord(get_coord(c) * Modval/PERIOD);
   for(int s=0; s<coordid; s++) co[s] = gmod(co[s], Modval);
   for(int s=coordid+1; s<cs.dim; s++) {
     int v = gdiv(co[s], Modval);
@@ -984,7 +1000,7 @@ string get_table_volume() {
     bignum res;
     manual_celllister cl;
     cl.add(m->gamestart());
-    ld rad2 = pow(roundTableRadius(NULL) / m->camelot_mul / 4, 2) + 1e-4;
+    ld rad2 = pow(roundTableRadius(NULL) / m->camelot_mul / PERIOD, 2) + 1e-4;
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
       ld mincoord = 9, maxcoord = -9;
@@ -994,9 +1010,9 @@ string get_table_volume() {
         if(co[i] > maxcoord) maxcoord = co[i];
         }
       static const ld eps = 1e-4;
-      if(mincoord >= 0-eps && maxcoord < 4-eps) {
+      if(mincoord >= 0-eps && maxcoord < PERIOD-eps) {
         ld my_rad2 = rad2;
-        auto cshift = (co - m->camelot_coord) / 4;
+        auto cshift = (co - m->camelot_coord) / PERIOD;
         auto sd = &shift_data_zero;
         for(int i=0; i<m->cs.dim; i++) {
           if(i == m->cs.dim-1 && (m->cs.dir&1)) {
