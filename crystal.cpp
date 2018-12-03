@@ -901,15 +901,6 @@ int readArgs() {
   else if(argis("-cprob")) {
     PHASEFROM(2); shift_arg_formula(compass_probability);
     }
-  else if(argis("-crug")) {
-    PHASE(3);
-    if(rug::rugged) rug::close();
-    calcparam();
-    rug::reopen();
-    init_rotation();
-    surface::sh = surface::dsCrystal;
-    rug::good_shape = true;
-    }
   else if(argis("-test:crt")) {
     test_crt();
     }
