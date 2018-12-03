@@ -242,7 +242,10 @@ string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
    
-   help += XLAT(iinf[it].help);
+   if(it == itCompass && geometry == gCrystal)
+     help += crystal::compass_help();
+   else
+     help += XLAT(iinf[it].help);
    
    if(it == itSavedPrincess || it == itOrbLove) if(!inv::on)
      help += princessReviveHelp();

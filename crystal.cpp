@@ -898,6 +898,9 @@ int readArgs() {
   else if(argis("-cview")) {
     view_coordinates = true;
     }
+  else if(argis("-cprob")) {
+    PHASEFROM(2); shift_arg_formula(compass_probability);
+    }
   else if(argis("-crug")) {
     PHASE(3);
     if(rug::rugged) rug::close();
@@ -918,6 +921,15 @@ hrmap *new_map() {
   return new hrmap_crystal;
   }
 
+string compass_help() {
+  return XLAT(
+    "Lands in this geometry are usually built on North-South or West-East axis. "
+    "Compasses always point North, and all the cardinal directions to the right from compass North are East (this is not "
+    "true in general, but it is true for the cells where compasses are generated). "
+    "North is the first coordinate, while East is the sum of other coordinates."
+    );
+  }
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
@@ -934,6 +946,8 @@ void show() {
   dialog::addBreak(50);
   dialog::addBoolItem("view coordinates in the cheat mode", view_coordinates, 'v');
   dialog::add_action([]() { view_coordinates = !view_coordinates; });
+  dialog::addSelItem(XLAT("compass probability"), fts(compass_probability), 'p');
+  dialog::add_action([]() { dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); });
   if(geometry == gCrystal) {
     dialog::addBoolItem("3D display", rug::rugged, 'r');
     dialog::add_action([]() { pushScreen(rug::show); });

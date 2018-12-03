@@ -4160,6 +4160,7 @@ namespace crystal {
   string get_table_boundary();
   bool pure();
   ld compass_angle();
+  string compass_help();
   void may_place_compass(cell *c);
   }
 
