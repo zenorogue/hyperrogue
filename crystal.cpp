@@ -217,8 +217,8 @@ struct crystal_structure {
   void remove_half_dimension() {
     dir--;
     for(int i=0; i<(1<<dim); i++) {
-      int take_what = dir;
-      if(i >= (1<<(dim-1))) take_what = dir-1;
+      int take_what = dir-1;
+      if(i >= (1<<(dim-1))) take_what = dir;
       next[i][prev[i][take_what]] = next[i][take_what],
       prev[i][next[i][take_what]] = prev[i][take_what],
       next[i].resize(dir),
@@ -560,7 +560,7 @@ int dist_relative(cell *c) {
       
     m->camelot_coord = m->get_coord(m->camelot_center);
     if(m->cs.dir % 2)
-      m->camelot_coord[m->cs.dim-1] = 2;
+      m->camelot_coord[m->cs.dim-1] = 1;
     
     m->camelot_mul = 1;
     m->camelot_mul *= (r+5) / space_distance_camelot(start);
