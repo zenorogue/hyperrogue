@@ -3149,7 +3149,9 @@ bool makeEmpty(cell *c) {
     ;
   else
     c->wall = waNone;
-  c->item = itNone;
+    
+  if(c->item != itCompass)
+    c->item = itNone;
   
   if(c->land == laWildWest) {
     forCellEx(c2, c)

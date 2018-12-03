@@ -40,6 +40,8 @@ ldcoord operator / (ldcoord a, ld v) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[
 
 ld operator | (ldcoord a, ldcoord b) { ld r=0; for(int i=0; i<MAXDIM; i++) r += a[i] * b[i]; return r; }
 
+ld compass_probability = 1;
+
 int tocode(int cname) { return (1 << (cname >> 1)); }
 
 void resize2(vector<vector<int>>& v, int a, int b, int z) {
@@ -455,7 +457,12 @@ color_t colorize(cell *c) {
   return res;
   }
 
-colortable coordcolors = {0x4040D0, 0x40D040, 0xD04040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
+colortable coordcolors = {0xD04040, 0x4040D0, 0x40D040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
+
+ld compass_angle() {
+  bool bitr = ginf[gCrystal].vertex == 3;
+  return (bitr ? M_PI/8 : 0) - master_to_c7_angle();
+  }
       
 bool crystal_cell(cell *c, transmatrix V) {
 
@@ -470,14 +477,12 @@ bool crystal_cell(cell *c, transmatrix V) {
     
     auto m = crystal_map();
     
-    bool bitr = ginf[gCrystal].vertex == 3;
-
     if(c->master->c7 == c && !is_bi(m->cs, m->hcoords[c->master])) {
     
       ld dist = cellgfxdist(c, 0);
 
       for(int i=0; i<S7; i++)  {
-        transmatrix T = V * spin(-master_to_c7_angle() - 2 * M_PI * i / S7 + (bitr ? M_PI/8 : 0)) * xpush(dist*.3);
+        transmatrix T = V * spin(compass_angle() - 2 * M_PI * i / S7) * xpush(dist*.3);
         
         auto co = m->hcoords[c->master];
         auto lw = m->makewalker(co, i);
@@ -1050,6 +1055,17 @@ string get_table_boundary() {
     return (compute_volume(s/2, r) - compute_volume(s/2, r-1)).get_str(100);
   else
     return (compute_volume(s/2, r) - compute_volume(s/2, r-2)).get_str(100);
+  }
+
+void may_place_compass(cell *c) {
+  if(c != c->master->c7) return;
+  auto m = crystal_map();
+  auto co = m->hcoords[c->master];
+  for(int i=0; i<m->cs.dim; i++) 
+    if(co[i] % PERIOD)
+      return;
+  if(hrandf() < compass_probability)
+    c->item = itCompass;
   }
 
 }

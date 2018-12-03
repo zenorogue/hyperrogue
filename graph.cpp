@@ -666,22 +666,26 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     }
   
   else if(it == itCompass) {
-    cell *c1 = c ? findcompass(c) : NULL;
     transmatrix V2;
-    if(c1) {
-      transmatrix P = ggmatrix(c1);
-      hyperpoint P1 = tC0(P);
-      
-      if(isPlayerOn(c)) {
-        queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
-  //      queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
-        queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
-        addauraspecial(P1, 0x0000FF, 0);
+    if(geometry == gCrystal)
+      V2 = V * spin(crystal::compass_angle() + M_PI);
+    else {
+      cell *c1 = c ? findcompass(c) : NULL;
+      if(c1) {
+        transmatrix P = ggmatrix(c1);
+        hyperpoint P1 = tC0(P);
+        
+        if(isPlayerOn(c)) {
+          queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+    //      queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
+          queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
+          addauraspecial(P1, 0x0000FF, 0);
+          }
+        
+        V2 = V * rspintox(inverse(V) * P1);
         }
-      
-      V2 = V * rspintox(inverse(V) * P1);
+      else V2 = V;
       }
-    else V2 = V;
     if(c) V2 = V2 * spin(M_PI * sintick(100) / 30);
     queuepoly(V2, shCompass1, 0xFF8080FF);
     queuepoly(V2, shCompass2, 0xFFFFFFFF);

@@ -4159,6 +4159,8 @@ namespace crystal {
   string get_table_volume();
   string get_table_boundary();
   bool pure();
+  ld compass_angle();
+  void may_place_compass(cell *c);
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);
