@@ -6936,6 +6936,15 @@ void roundTableMessage(cell *c2) {
     }
   }
 
+bool in_full_game() {
+  if(chaosmode) return true;
+  if(geometry == gEuclid && isCrossroads(specialland)) return true;
+  if(weirdhyperbolic && specialland == laCrossroads4) return true;
+  if(geometry == gCrystal && specialland == laCrossroads) return true;
+  if(geometry == gNormal && !NONSTDVAR) return true;
+  return false;
+  }
+
 void knightFlavorMessage(cell *c2) {
 
   if(!eubinary && !c2->master->alt) {
@@ -6966,37 +6975,55 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid  == 2 && !tooeasy) {
     addMessage(XLAT("\"The Holy Grail is in the center of the Round Table.\""));
     }
-  else if(msgid == 3 && !peace::on) {
+  else if(msgid == 3 && geometry == gCrystal) {
+    if(crystal::pure())
+      addMessage(XLAT("\"Each piece of the Round Table is exactly %1 steps away from the Holy Grail.\"", its(roundTableRadius(c2))));
+    else
+      addMessage(XLAT("\"According to Merlin, the Round Table is a perfect Euclidean sphere in %1 dimensions.\"", its(ginf[gCrystal].sides/2)));
+    }
+  else if(msgid == 3 && !peace::on && in_full_game()) {
     addMessage(XLAT("\"I enjoy watching the hyperbug battles.\""));
     }
-  else if(msgid == 4) {
+  else if(msgid == 4 && in_full_game()) {
     addMessage(XLAT("\"Have you visited a temple in R'Lyeh?\""));
     }
-  else if(msgid == 5) {
+  else if(msgid == 5 && in_full_game()) {
     addMessage(XLAT("\"Nice castle, eh?\""));
     }
-  else if(msgid == 6 && items[itSpice] < 10 && !peace::on) {
+  else if(msgid == 6 && items[itSpice] < 10 && !peace::on && in_full_game()) {
     addMessage(XLAT("\"The Red Rock Valley is dangerous, but beautiful.\""));
     }
-  else if(msgid == 7 && items[itSpice] < 10 && !peace::on) {
+  else if(msgid == 7 && items[itSpice] < 10 && !peace::on && in_full_game()) {
     addMessage(XLAT("\"Train in the Desert first!\""));
     }
   else if(msgid == 8 && sizes_known() && !tactic::on) {
-    addMessage(XLAT("\"Our Table seats %1 Knights!\"", expansion.get_descendants(rad).get_str(100)));
+    string s = "";
+    if(geometry == gCrystal)
+      s = crystal::get_table_boundary();
+    else if(!quotient)
+      s = expansion.get_descendants(rad).get_str(100);
+    if(s == "") { msgid++; goto retry; }
+    addMessage(XLAT("\"Our Table seats %1 Knights!\"", s));
     }
   else if(msgid == 9 && sizes_known() && !tactic::on) {
-    addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", expansion.get_descendants(rad-1, expansion.diskid).get_str(100)));
+    string s = "";
+    if(geometry == gCrystal)
+      s = crystal::get_table_volume();
+    else if(!quotient)
+      s = expansion.get_descendants(rad-1, expansion.diskid).get_str(100);
+    if(s == "") { msgid++; goto retry; }
+    addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", s));
     }
-  else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool] && !peace::on) {
+  else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool] && !peace::on && in_full_game()) {
     addMessage(XLAT("\"Have you tried to take a boat and go into the Ocean? Try it!\""));
     }
-  else if(msgid == 11 && !princess::saved) {
+  else if(msgid == 11 && !princess::saved && in_full_game()) {
     addMessage(XLAT("\"When I visited the Palace, a mouse wanted me to go somewhere.\""));
     }
-  else if(msgid == 12 && !princess::saved) {
+  else if(msgid == 12 && !princess::saved && in_full_game()) {
     addMessage(XLAT("\"I wonder what was there...\""));
     }
-  else if(msgid == 13 && !peace::on) {
+  else if(msgid == 13 && !peace::on && in_full_game()) {
     addMessage(XLAT("\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\""));
     }
   else if(msgid == 14) {

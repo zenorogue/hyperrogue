@@ -4156,6 +4156,9 @@ namespace crystal {
   int dist_relative(cell *c);
   void show();
   void init_rotation();
+  string get_table_volume();
+  string get_table_boundary();
+  bool pure();
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);
@@ -4431,6 +4434,9 @@ struct bignum {
     if(isize(digits) == 1) return digits[0];
     return digits[0] + digits[1] * (long long) BASE;
     }
+  
+  friend inline bignum operator +(bignum a, const bignum& b) { a.addmul(b, 1); return a; }
+  friend inline bignum operator -(bignum a, const bignum& b) { a.addmul(b, -1); return a; }
   };
 
 struct expansion_analyzer {

@@ -281,7 +281,7 @@ coord add(coord c, int cname, int val) {
   return c;
   }
 
-ld hypot2(crystal_structure& cs, ldcoord co1, ldcoord co2) {
+ld sqhypot2(crystal_structure& cs, ldcoord co1, ldcoord co2) {
   int result = 0;
   for(int a=0; a<cs.dim; a++) result += (co1[a] - co2[a]) * (co1[a] - co2[a]);
   return result;
@@ -307,6 +307,8 @@ struct hrmap_crystal : hrmap {
   unordered_map<cell*, unordered_map<cell*, int>> distmemo;
   map<cell*, ldcoord> sgc;
   cell *camelot_center;
+  ldcoord camelot_coord;
+  ld camelot_mul;
   
   crystal_structure cs;
   east_structure east;   
@@ -321,6 +323,7 @@ struct hrmap_crystal : hrmap {
   
   hrmap_crystal() {
     cs.build();
+    camelot_center = NULL;
     }
 
   ~hrmap_crystal() {
@@ -536,7 +539,12 @@ ld space_distance(cell *c1, cell *c2) {
   auto m = crystal_map();
   ldcoord co1 = m->get_coord(c1);
   ldcoord co2 = m->get_coord(c2);
-  return sqrt(hypot2(m->cs, co1, co2));
+  return sqrt(sqhypot2(m->cs, co1, co2));
+  }
+
+ld space_distance_camelot(cell *c) {
+  auto m = crystal_map();
+  return m->camelot_mul * sqrt(sqhypot2(m->cs, m->get_coord(c), m->camelot_coord));
   }
 
 int dist_relative(cell *c) {
@@ -549,18 +557,23 @@ int dist_relative(cell *c) {
     cc = start;
     while(precise_distance(cc, start) < r + 5)
       cc = cc->cmove(hrand(cc->type));
+      
+    m->camelot_coord = m->get_coord(m->camelot_center);
+    if(m->cs.dir % 2)
+      m->camelot_coord[m->cs.dim-1] = 2;
+    
+    m->camelot_mul = 1;
+    m->camelot_mul *= (r+5) / space_distance_camelot(start);
     }
 
   if(pure()) 
     return precise_distance(c, cc) - r;
 
-  ld sdmul = (r+5) / space_distance(cc, start);
-  ld dis = space_distance(cc, c) * sdmul;
-  println(hlog, "dis = ", dis);
+  ld dis = space_distance_camelot(c);
   if(dis < r) 
     return int(dis) - r;
   else {
-    forCellCM(c1, c) if(space_distance(cc, c1) * sdmul < r)
+    forCellCM(c1, c) if(space_distance_camelot(c1) < r)
       return 0;
     return int(dis) + 1 - r;
     }
@@ -663,7 +676,7 @@ int dist_alt(cell *c) {
     if(pure()) 
       return precise_distance(c, m->camelot_center);
     if(c == m->camelot_center) return 0;
-    return 1 + int(4 * space_distance(m->camelot_center, c));
+    return 1 + int(2 * space_distance_camelot(c));
     }
   else {
     m->prepare_east();
@@ -876,6 +889,110 @@ void show() {
 
 auto crystalhook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_drawcell, 100, crystal_cell);
+
+map<pair<int, int>, bignum> volume_memo;
+
+bignum& compute_volume(int dim, int rad) {
+  auto p = make_pair(dim, rad);
+  int is = volume_memo.count(p);
+  auto& m = volume_memo[p];
+  if(is) return m;
+  if(dim == 0) { m = 1; return m; }
+  m = compute_volume(dim-1, rad);
+  for(int r=0; r<rad; r++) 
+    m.addmul(compute_volume(dim-1, r), 2);
+  return m;
+  }
+
+// shift_data_zero.children[x1].children[x2]....children[xk].result[r2]
+// is the number of grid points in distance at most sqrt(r2) from (x1,x2,...,xk)
+
+struct eps_comparer {
+  bool operator() (ld a, ld b) const { return a < b-1e-6; }
+  };
+
+struct shift_data {
+  shift_data *parent;
+  ld shift;
+  map<ld, shift_data, eps_comparer> children;
+  map<ld, bignum, eps_comparer> result;
+  
+  shift_data() { parent = NULL; }
+  
+  bignum& compute(ld rad2) {
+    if(result.count(rad2)) return result[rad2];
+    // println(hlog, "compute ", format("%p", this), " [shift=", shift, "], r2 = ", rad2);
+    // indenter i(2);
+    auto& b = result[rad2];
+    if(!parent) {
+      if(rad2 >= 0) b = 1;
+      }
+    else if(rad2 >= 0) {
+      for(int x = -2-sqrt(rad2); x <= sqrt(rad2)+2; x++) {
+        ld ax = x - shift;
+        if(ax*ax <= rad2) 
+          b.addmul(parent->compute(rad2 - (ax*ax)), 1);
+        }
+      }
+    // println(hlog, "result = ", b.get_str(100));
+    return b;
+    }
+  };
+
+shift_data shift_data_zero;
+
+string get_table_volume() {
+  if(!pure()) {
+    auto m = crystal_map();
+    m->prepare_east();
+    bignum res;
+    manual_celllister cl;
+    cl.add(m->gamestart());
+    ld rad2 = pow(roundTableRadius(NULL) / m->camelot_mul / 4, 2) + 1e-4;
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      ld mincoord = 9, maxcoord = -9;
+      auto co = m->get_coord(c);
+      for(int i=0; i<m->cs.dim; i++) {
+        if(co[i] < mincoord) mincoord = co[i];
+        if(co[i] > maxcoord) maxcoord = co[i];
+        }
+      static const ld eps = 1e-4;
+      if(mincoord >= 0-eps && maxcoord < 4-eps) {
+        auto cshift = (co - m->camelot_coord) / 4;
+        auto sd = &shift_data_zero;
+        for(int i=0; i<m->cs.dim; i++) {
+          ld val = cshift[i] - floor(cshift[i]);
+          if(!sd->children.count(val)) {
+            sd->children[val].parent = sd;
+            sd->children[val].shift = val;
+            }
+          sd = &sd->children[val];
+          }
+        res.addmul(sd->compute(rad2), 1);
+        }
+      if(mincoord < -2 || maxcoord > 6) continue;
+      forCellCM(c2, c) cl.add(c2);
+      }
+    return res.get_str(100);
+    }
+  int s = ginf[gCrystal].sides;
+  int r = roundTableRadius(NULL);
+  if(s % 2 == 0)
+    return compute_volume(s/2, r-1).get_str(100);
+  else
+    return (compute_volume(s/2, r-1) + compute_volume(s/2, r-2)).get_str(100);
+  }
+
+string get_table_boundary() {
+  if(!pure()) return "";
+  int r = roundTableRadius(NULL);
+  int s = ginf[gCrystal].sides;
+  if(s % 2 == 0)
+    return (compute_volume(s/2, r) - compute_volume(s/2, r-1)).get_str(100);
+  else
+    return (compute_volume(s/2, r) - compute_volume(s/2, r-2)).get_str(100);
+  }
 
 }
 
