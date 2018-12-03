@@ -553,7 +553,7 @@ int dist_relative(cell *c) {
   int r = roundTableRadius(NULL);
   cell *start = m->gamestart();
   if(!cc) {
-    printf("Finding Camelot center...");
+    println(hlog, "Finding Camelot center...");
     cc = start;
     while(precise_distance(cc, start) < r + 5)
       cc = cc->cmove(hrand(cc->type));
@@ -944,7 +944,6 @@ shift_data shift_data_zero;
 string get_table_volume() {
   if(!pure()) {
     auto m = crystal_map();
-    m->prepare_east();
     bignum res;
     manual_celllister cl;
     cl.add(m->gamestart());
@@ -959,17 +958,23 @@ string get_table_volume() {
         }
       static const ld eps = 1e-4;
       if(mincoord >= 0-eps && maxcoord < 4-eps) {
+        ld my_rad2 = rad2;
         auto cshift = (co - m->camelot_coord) / 4;
         auto sd = &shift_data_zero;
         for(int i=0; i<m->cs.dim; i++) {
-          ld val = cshift[i] - floor(cshift[i]);
-          if(!sd->children.count(val)) {
-            sd->children[val].parent = sd;
-            sd->children[val].shift = val;
+          if(i == m->cs.dim-1 && (m->cs.dir&1)) {
+            my_rad2 -= pow(cshift[i] / m->camelot_mul, 2);
             }
-          sd = &sd->children[val];
+          else {
+            ld val = cshift[i] - floor(cshift[i]);
+            if(!sd->children.count(val)) {
+              sd->children[val].parent = sd;
+              sd->children[val].shift = val;
+              }
+            sd = &sd->children[val];
+            }
           }
-        res.addmul(sd->compute(rad2), 1);
+        res.addmul(sd->compute(my_rad2), 1);
         }
       if(mincoord < -2 || maxcoord > 6) continue;
       forCellCM(c2, c) cl.add(c2);
