@@ -833,6 +833,36 @@ void set_crystal(int sides) {
     ginf[gCrystal].distlimit = distlimit_table[sides];
   }
 
+void test_crt() {
+  start_game();
+  auto m = crystal_map();
+  manual_celllister cl;
+  cl.add(m->camelot_center);
+  for(int i=0; i<isize(cl.lst); i++)
+    forCellCM(c1, cl.lst[i]) {
+      setdist(c1, 7, m->gamestart());
+      if(c1->land == laCamelot && c1->wall == waNone)
+        cl.add(c1);
+      }
+  println(hlog, "actual = ", isize(cl.lst), " algorithm = ", get_table_volume());
+  if(its(isize(cl.lst)) != get_table_volume()) exit(1);
+  }
+
+void unit_test_tables() {
+  stop_game();
+  specialland = laCamelot;
+  set_crystal(5);
+  test_crt();
+  set_crystal(6);
+  test_crt();
+  set_crystal(5); set_variation(eVariation::bitruncated);
+  test_crt();
+  set_crystal(6); set_variation(eVariation::bitruncated);
+  test_crt();
+  set_crystal(6); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated);
+  test_crt();
+  }
+
 int readArgs() {
   using namespace arg;
            
@@ -852,6 +882,9 @@ int readArgs() {
     init_rotation();
     surface::sh = surface::dsCrystal;
     rug::good_shape = true;
+    }
+  else if(argis("-test:crt")) {
+    test_crt();
     }
   else return 1;
   return 0;
@@ -888,7 +921,8 @@ void show() {
   }
 
 auto crystalhook = addHook(hooks_args, 100, readArgs)
-  + addHook(hooks_drawcell, 100, crystal_cell);
+  + addHook(hooks_drawcell, 100, crystal_cell)
+  + addHook(hooks_tests, 200, unit_test_tables);
 
 map<pair<int, int>, bignum> volume_memo;
 
