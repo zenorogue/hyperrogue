@@ -850,6 +850,12 @@ namespace hr { namespace gp {
     return dmain + length(centerloc-at) - length(centerloc);
     }
   
+  hyperpoint get_master_coordinates(cell *c) {
+    auto li = get_local_info(c);
+    be_in_triangle(li);
+    return corners * loctoh_ort(li.relative);
+    }
+  
   array<heptagon*, 3> get_masters(cell *c) {
     if(GOLDBERG) {
       auto li = get_local_info(c);

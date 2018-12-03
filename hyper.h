@@ -3515,6 +3515,7 @@ namespace gp {
   int solve_triangle(int dmain, int d0, int d1, loc at);
 
   array<heptagon*, 3> get_masters(cell *c);
+  hyperpoint get_master_coordinates(cell *c);
   loc univ_param();
   }
 

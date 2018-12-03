@@ -346,10 +346,16 @@ struct hrmap_crystal : hrmap {
     auto b = sgc.emplace(c, ldc0);
     ldcoord& res = b.first->second;
     if(b.second) {
-      if(c->master->c7 != c) {
+      if(BITRUNCATED && c->master->c7 != c) {
         for(int i=0; i<c->type; i+=2)
           res = res + told(hcoords[c->cmove(i)->master]);
         res = res * 2 / c->type;
+        }
+      else if(GOLDBERG && c->master->c7 != c) {
+        auto m = gp::get_masters(c);
+        auto H = gp::get_master_coordinates(c);
+        for(int i=0; i<cs.dim; i++)
+          res = res + told(hcoords[m[i]]) * H[i];
         }
       else
         res = told(hcoords[c->master]);
