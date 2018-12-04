@@ -1783,6 +1783,49 @@ int celldistance(cell *c1, cell *c2) {
   return hyperbolic_celldistance(c1, c2);
   }
 
+vector<cell*> build_shortest_path(cell *c1, cell *c2) {
+  if(geometry == gCrystal) return crystal::build_shortest_path(c1, c2);
+  vector<cell*> p;
+  if(euclid) {
+    using namespace hyperpoint_vec;
+    p.push_back(c1);
+    hyperpoint h = tC0(calc_relative_matrix(c2, c1, C0)) - C0;
+    cell *x = c1;
+    hyperpoint h1 = C0; 
+    int d = celldistance(c1, c2);
+    for(int i=0; i<=d * 10; i++) {
+      h1 += h / d / 10.;
+      virtualRebase(x, h1,  true);
+      if(x != p.back()) p.push_back(x);
+      }
+    if(isize(p) != d + 1)
+      println(hlog, "warning: path size ", isize(p), " should be ", d+1);
+    }
+  else if(c2 == currentmap->gamestart()) {
+    while(c1 != c2) {
+      p.push_back(c1);
+      forCellCM(c, c1) if(celldist(c) < celldist(c1)) { c1 = c; goto next1; }
+      println(hlog, "could not build_shortest_path"); exit(1);
+      next1: ;
+      }
+    p.push_back(c1);
+    }
+  else if(c1 == currentmap->gamestart()) {
+    p = build_shortest_path(c2, c1);
+    reverse(p.begin(), p.end());
+    }
+  else {
+    while(c1 != c2) {
+      p.push_back(c1);
+      forCellCM(c, c1) if(celldistance(c, c2) < celldistance(c1, c2)) { c1 = c; goto next; }
+      println(hlog, "could not build_shortest_path"); exit(1);
+      next: ;
+      }
+    p.push_back(c1);
+    }
+  return p;
+  }
+
 void clearCellMemory() {
   for(int i=0; i<isize(allmaps); i++) 
     if(allmaps[i])

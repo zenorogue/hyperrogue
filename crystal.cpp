@@ -538,6 +538,59 @@ bool crystal_cell(cell *c, transmatrix V) {
   return false;
   }
 
+vector<cell*> build_shortest_path(cell *c1, cell *c2) {
+  auto m = crystal_map();
+  ldcoord co1 = m->get_coord(c1);
+  ldcoord co2 = m->get_coord(c2) - co1;
+  
+  // draw a cylinder from co1 to co2, and find the solution by going through that cylinder
+  
+  ldcoord mul = co2 / sqrt(co2|co2);
+  
+  ld mmax = (co2|mul);
+  
+  vector<cell*> p;  
+  vector<int> parent_id;
+  
+  manual_celllister cl;
+  cl.add(c2);
+  parent_id.push_back(-1);
+  
+  int steps = 0;
+  int nextsteps = 1;
+  
+  for(int i=0; i<isize(cl.lst); i++) {
+    if(i == nextsteps) steps++, nextsteps = isize(cl.lst);
+    cell *c = cl.lst[i];
+    forCellCM(c3, c) if(!cl.listed(c3)) {
+      if(c3 == c1) { 
+        p.push_back(c1);
+        while(c3 != c2) {
+          while(i) {
+            p.push_back(c3);
+            i = parent_id[i];
+            c3 = cl.lst[i];
+            }
+          }
+        p.push_back(c3);
+        return p;
+        }
+
+      auto h = m->get_coord(c3) - co1;
+      ld dot = (h|mul);
+      if(dot > mmax + PERIOD/2 + .1) continue;
+
+      for(int k=0; k<m->cs.dim; k++) if(abs(h[k] - dot * mul[k]) > PERIOD + .1) goto next3;
+      cl.add(c3);
+      parent_id.push_back(i);
+      next3: ;
+      }
+    }
+  
+  println(hlog, "Error: path not found");
+  return p;
+  }
+
 int precise_distance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
   auto m = crystal_map();
