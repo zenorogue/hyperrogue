@@ -320,7 +320,10 @@ transmatrix ypush(ld alpha) {
   }
 
 transmatrix parabolic1(ld u) {
-  return transmatrix {{{-u*u/2+1, u, u*u/2}, {-u, 1, u}, {-u*u/2, u, u*u/2+1}}};
+  if(euclid)
+    return ypush(u);
+  else
+    return transmatrix {{{-u*u/2+1, u, u*u/2}, {-u, 1, u}, {-u*u/2, u, u*u/2+1}}};
   }
 
 // rotate the hyperbolic plane around C0 such that H[1] == 0 and H[0] >= 0
