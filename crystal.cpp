@@ -305,8 +305,6 @@ ld sqhypot2(crystal_structure& cs, ldcoord co1, ldcoord co2) {
   return result;
   }
 
-void crystalstep(heptagon *h, int d);
-
 static const int Modval = 64;
 
 struct east_structure {
