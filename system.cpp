@@ -1185,12 +1185,11 @@ void switch_game_mode(char switchWhat) {
       break;
 
     case rg::chaos:
-      if(sphere || quotient || fulltorus || (euwrap && torusconfig::sdy))
-        geometry = gNormal;
       if(tactic::on) firstland = laIce;
       yendor::on = tactic::on = princess::challenge = false;
       need_reset_geometry = true;
       chaosmode = !chaosmode;
+      if(bounded) set_geometry(gNormal);
       break;
 
 #if CAP_TOUR
