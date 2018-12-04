@@ -100,7 +100,6 @@ hookset<void()> *hooks_initgame;
 
 // initialize the game
 void initgame() {
-  restart:
   DEBB(DF_INIT, (debugfile,"initGame\n"));
   callhooks(hooks_initgame); 
 
@@ -109,8 +108,6 @@ void initgame() {
   multi::whereto[0].d = MD_UNDECIDED;
   multi::cpid = 0;
   
-  gamegen_failure = false;
-
   yendor::init(1);
   
   if(safety && safetyseed) {
@@ -188,10 +185,7 @@ void initgame() {
   if(racing::on) racing::generate_track();
   #endif
   
-  if(gamegen_failure) {
-    stop_game();
-    goto restart;
-    }
+  if(gamegen_failure) return;
   
   clear_euland(specialland);
 
@@ -1315,7 +1309,9 @@ void switch_game_mode(char switchWhat) {
 void start_game() {
   if(game_active) return;
   DEBB(DF_INIT, (debugfile,"start_game\n"));
+  restart:
   game_active = true;
+  gamegen_failure = false;
   if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
   initcells();
   expansion.reset();
@@ -1333,6 +1329,10 @@ void start_game() {
     }
 
   initgame();
+  if(gamegen_failure) {
+    stop_game();
+    goto restart;
+    }
   canmove = true;
   restartGraph();
   resetmusic();
