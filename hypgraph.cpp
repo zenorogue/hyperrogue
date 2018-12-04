@@ -684,8 +684,16 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
+bool invalid_point(const hyperpoint h) {
+  return std::isnan(h[2]) || h[2] > 1e8 || std::isinf(h[2]);
+  }
+
+bool invalid_point(const transmatrix T) {
+  return std::isnan(T[2][2]) || T[2][2] > 1e8 || std::isinf(T[2][2]);
+  }
+
 bool in_smart_range(const transmatrix& T) {
-  if(std::isnan(T[2][2]) || std::isinf(T[2][2]) || T[2][2] > 1e8) return false;
+  if(invalid_point(T)) return false;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
   if(std::isnan(h1[0]) || std::isnan(h1[1])) return false;

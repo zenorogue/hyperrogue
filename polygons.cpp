@@ -2789,6 +2789,7 @@ void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   }
 
 void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame) {
+  if(invalid_point(h)) return;
   int xc, yc, sc; getcoord0(h, xc, yc, sc);
   queuechr(xc, yc, sc, size, chr, col, frame);
   }
@@ -2798,16 +2799,19 @@ ld scale_in_pixels(const transmatrix& V) {
   }
   
 void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame) {
+  if(invalid_point(V)) return;
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   queuechr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame);
   }
   
 void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame) {
+  if(invalid_point(h)) return;
   int xc, yc, sc; getcoord0(h, xc, yc, sc);
   queuestr(xc, yc, sc, size, chr, col, frame);
   }
   
 void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame, int align) {
+  if(invalid_point(V)) return;
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   // int xs, ys, ss;  getcoord0(V * xpush0(.01), xs, ys, ss); 
   
@@ -2815,6 +2819,7 @@ void queuestr(const transmatrix& V, double size, const string& chr, color_t col,
   }
   
 void queuecircle(const transmatrix& V, double size, color_t col) {
+  if(invalid_point(V)) return;
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   int xs, ys, ss; getcoord0(V * xpush0(.01), xs, ys, ss);  
   queuecircle(xc, yc, scale_in_pixels(V) * size, col);
