@@ -37,6 +37,7 @@ int roundTableRadius(cell *c) {
 
 int celldistAltRelative(cell *c) {
   if(geometry == gCrystal) return crystal::dist_relative(c);
+  if(euwrap) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
@@ -69,6 +70,19 @@ int euclidAlt(short x, short y) {
   else if(specialland == laPrincessQuest)
     return eudist(x-EPX, y-EPY);
   else return eudist(x-(a4 ? 21 : 20), y-10);
+  }
+
+int cylinder_alt(cell *c) {
+  if(specialland == laPrincessQuest)
+    return celldistance(c, vec_to_cellwalker(pair_to_vec(EPX, EPY)).at);
+  if(specialland == laCamelot)
+    return celldistance(c, vec_to_cellwalker(pair_to_vec(21, 10)).at);
+  
+  using namespace torusconfig;
+  int maxmul = 0;
+  for(int d = 0; d < SG6; d++)
+    maxmul = max(maxmul, dcross(sdxy(), gp::eudir(d)));
+  return 5-abs(gdiv(dcross(sdxy(), cell_to_pair(c)), maxmul));
   }
 
 const int NOCOMPASS = 1000000;
@@ -829,6 +843,7 @@ void setLandEuclid(cell *c) {
     int x, y;
     tie(x,y) = cell_to_pair(c);
     y += 10;
+    if(euwrap) y = -celldistAlt(c);
     if(y == 0) 
       { setland(c, laBarrier); if(ishept(c)) c->land = laRlyeh; }
     else if(y<0) setland(c, laRlyeh);
@@ -838,6 +853,7 @@ void setLandEuclid(cell *c) {
     int x, y;
     tie(x,y) = cell_to_pair(c); y = -5 - y;
     if(specialland == laDungeon) y = -10 - y;
+    if(euwrap) y = -celldistAlt(c);
     if(y == 0) 
       {setland(c, laBarrier); if(ishept(c)) setland(c, laAlchemist); }
     else if(y<0) setland(c, laAlchemist);
@@ -1239,6 +1255,10 @@ void buildCamelot(cell *c) {
 
 void moreBigStuff(cell *c) {
 
+  if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
+  if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) 
+    buildCamelot(c);
+  
   if(quotient) return;
   
   if(c->land == laPalace && !eubinary && c->master->alt) {
@@ -1267,10 +1287,6 @@ void moreBigStuff(cell *c) {
         }
       }        
 
-  if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
-  if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) 
-    buildCamelot(c);
-  
   if(chaosmode && c->land == laTemple) {
     for(int i=0; i<c->type; i++)
       if(pseudohept(c) && c->move(i) && c->move(i)->land != laTemple)

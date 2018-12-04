@@ -357,6 +357,10 @@ namespace torusconfig {
     return 2 * (e1.first * e2.first + e1.second*e2.second) + (S3 == 3 ? e1.first*e2.second + e2.first * e1.second : 0);
     }
     
+  int dcross(gp::loc e1, gp::loc e2) {
+    return e1.first * e2.second - e1.second*e2.first;
+    }
+    
   gp::loc sdxy() { return gp::loc(sdx, sdy); }
   
   int mobius_dir_basic() {
@@ -1356,6 +1360,7 @@ int celldist(cell *c) {
 int celldistAlt(cell *c) {
   if(masterless) {
     if(fulltorus) return celldist(c);
+    if(euwrap) return cylinder_alt(c);
     int x, y;
     tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);

@@ -4500,6 +4500,7 @@ namespace ts {
 
 void generate_around(cell *c);
 int euclidAlt(short x, short y);
+int cylinder_alt(cell *c);
 
 struct exp_parser {
   string s;
