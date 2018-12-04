@@ -13,8 +13,9 @@ bool on;
 bool player_relative = false;
 bool track_ready;
 
+int TWIDTH;
+
 static const int LENGTH = 250;
-static const int TWIDTH = 6;
 static const int DROP = 1;
 
 int ghosts_to_show = 5;
@@ -172,6 +173,8 @@ race_cellinfo& get_info(cell *c) {
 ld start_line_width;
 
 void generate_track() {
+
+  TWIDTH = getDistLimit() - 1;  
 
   if(race_ghosts[{track_code, modecode()}].empty())
     read_ghosts(track_code, modecode());
