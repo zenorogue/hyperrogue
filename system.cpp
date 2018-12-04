@@ -22,6 +22,8 @@ bool timerstopped;
 int savecount;
 bool showoff = false, doCross = false;
 
+bool gamegen_failure;
+
 eLand top_land;
 
 bool verless(string v, string cmp) {
@@ -98,6 +100,7 @@ hookset<void()> *hooks_initgame;
 
 // initialize the game
 void initgame() {
+  restart:
   DEBB(DF_INIT, (debugfile,"initGame\n"));
   callhooks(hooks_initgame); 
 
@@ -105,6 +108,8 @@ void initgame() {
     multi::players = 1;
   multi::whereto[0].d = MD_UNDECIDED;
   multi::cpid = 0;
+  
+  gamegen_failure = false;
 
   yendor::init(1);
   
@@ -182,6 +187,11 @@ void initgame() {
   #if CAP_RACING
   if(racing::on) racing::generate_track();
   #endif
+  
+  if(gamegen_failure) {
+    stop_game();
+    goto restart;
+    }
   
   clear_euland(specialland);
 

@@ -206,9 +206,8 @@ void generate_track() {
     traversed++;
     if(cellbydist.empty()) {
       printf("reset after traversing %d\n", traversed);
-      stop_game();
       race_try++;
-      start_game();
+      gamegen_failure = true;
       return;
       }
     auto it = cellbydist.end();
@@ -435,9 +434,8 @@ void generate_track() {
       }
     if(!goal) {
       printf("error: goal unreachable\n");
-      stop_game();
+      gamegen_failure = true;
       race_try++;
-      start_game();
       return;    
       }
     }
