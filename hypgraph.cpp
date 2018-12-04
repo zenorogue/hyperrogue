@@ -956,6 +956,10 @@ void spinEdge(ld aspd) {
   }
 
 void centerpc(ld aspd) { 
+  
+  if(geometry == gCrystal)
+    crystal::centerrug(aspd);
+  
   if(ors::mode == 2 && vid.sspeed < 5) return;
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBB(DF_GRAPH, (debugfile,"center pc\n"));

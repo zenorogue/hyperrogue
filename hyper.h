@@ -4164,6 +4164,7 @@ namespace crystal {
   ld compass_angle();
   string compass_help();
   void may_place_compass(cell *c);
+  void centerrug(ld aspd);
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);

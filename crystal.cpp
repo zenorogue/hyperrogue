@@ -755,6 +755,8 @@ ld crug_rotation[MAXDIM][MAXDIM];
 
 int ho = 1;
 
+ldcoord rug_center;
+
 void init_rotation() {
   for(int i=0; i<MAXDIM; i++)
   for(int j=0; j<MAXDIM; j++)
@@ -783,6 +785,7 @@ void next_home_orientation() {
 
 hyperpoint coord_to_flat(ldcoord co) {
   hyperpoint res = hpxyz(0, 0, 0);
+  co = co - rug_center;
   for(int a=0; a<MAXDIM; a++)
     for(int b=0; b<3; b++)
       res[b] += crug_rotation[b][a] * co[a];
@@ -807,6 +810,22 @@ void apply_rotation(const transmatrix t) {
     }
   }
 
+void centerrug(ld aspd) {
+  if(vid.sspeed >= 4.99) aspd = 1000;
+  
+  auto m = crystal_map();
+  ldcoord at = m->get_coord(cwt.at) - rug_center;
+  
+  ld R = sqrt(at|at);
+  
+  if(R < 1e-9) rug_center = m->get_coord(cwt.at);  
+  else {
+    aspd *= (2+3*R*R);
+    if(aspd > R) aspd = R;  
+    rug_center = rug_center + at * aspd / R;
+    }
+  }
+  
 void build_rugdata() {
   using namespace rug;
   rug::clear_model(); 
