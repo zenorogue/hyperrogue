@@ -114,9 +114,14 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
 //bool hsol = false;
 //transmatrix sol;
 
+  set<heptagon*> visited;
+  map<ld, vector<pair<heptagon*, transmatrix>>> hbdist;
+
   int steps = 0;
   while(h1 != h2) {
-    steps++; if(steps > 100) { println(hlog, "not found"); return Id; }
+    steps++; if(steps > 10000) {
+      println(hlog, "not found"); return Id; 
+      }
     if(smallbounded && quotient) {
       transmatrix T;
       ld bestdist = 1e9;
@@ -142,15 +147,30 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       int sp = h2->c.spin(d);
       return gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
       }
-    if(among(geometry, gFieldQuotient, gBring, gMacbeath, gCrystal)) {
-      int bestdist = 1000, bestd = 0;
+    if(among(geometry, gFieldQuotient, gBring, gMacbeath)) {
+      int bestdist = 1000000, bestd = 0;
       for(int d=0; d<S7; d++) {
-        int dist = celldistance(h2->cmove(d)->c7, c1);
+        int dist = geometry == celldistance(h2->cmove(d)->c7, c1);
         if(dist < bestdist) bestdist = dist, bestd = d;
         }
       int sp = h2->c.spin(bestd);
       where = heptmove[sp] * spin(2*M_PI*bestd/S7) * where;
       h2 = h2->move(bestd);
+      }
+    else if(geometry == gCrystal) {
+      for(int d3=0; d3<S7; d3++) {
+        auto h3 = h2->cmove(d3);
+        if(visited.count(h3)) continue;
+        visited.insert(h3);
+        int sp3 = h2->c.spin(d3);
+        transmatrix where3 = heptmove[sp3] * spin(2*M_PI*d3/S7) * where;
+        ld dist = crystal::space_distance(h3->c7, c1);
+        hbdist[dist].emplace_back(h3, where3);
+        }
+      auto &bestv = hbdist.begin()->second;
+      tie(h2, where) = bestv.back();
+      bestv.pop_back();
+      if(bestv.empty()) hbdist.erase(hbdist.begin());
       }
     else if(h1->distance < h2->distance) {
       int sp = h2->c.spin(0);
