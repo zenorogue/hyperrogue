@@ -875,7 +875,6 @@ void set_land(cell *c) {
     auto& l = m->landmemo4[cx];
     if(l == laNone) l = getNewLand(laBarrier);
     setland(c, l);
-    println(hlog, "l = ", dnameof(l));
     }
 
   else if(specialland == laCrossroads4) {

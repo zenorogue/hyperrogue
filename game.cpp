@@ -2186,7 +2186,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moPirate && isOnCIsland(c) && c->item == itNone && (
       eubinary ||
       (c->master->alt && celldistAlt(c) <= 2-getDistLimit()) ||
-      isHaunted(c->land))) {
+      isHaunted(c->land)) && geometry != gCrystal) {
     bool toomany = false;
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);

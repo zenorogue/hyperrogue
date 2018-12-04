@@ -1524,7 +1524,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waCTree && hrand(5000) < 100 + items[itPirate] + yendor::hardness())
         c->monst = moParrot;    
       ONEMPTY {
-        if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on)
+        if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on && geometry != gCrystal)
           c->item = itCompass;
         if(hrand(16000) < 40 + (items[itPirate] + yendor::hardness()))
           c->monst = moPirate;
