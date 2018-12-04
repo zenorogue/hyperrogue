@@ -147,12 +147,22 @@ bool bad(cell *c2, cell *c) {
   return false;
   }
 
+int rcelldist(cell *c) {
+  if(geometry == gCrystal) return crystal::space_distance(c, currentmap->gamestart());
+  else return celldist(c);
+  }
+
+int pcelldist(cell *c) {
+  if(geometry == gCrystal) return crystal::precise_distance(c, currentmap->gamestart());
+  else return celldist(c);
+  }
+
 int trackval(cell *c) {
-  int v = celldist(c);
+  int v = rcelldist(c);
   int bonus = 0;
   if(c->land != laCrossroads)
   forCellEx(c2, c) {
-    int d = celldist(c2) - v;
+    int d = rcelldist(c2) - v;
     if(d < 0 && bad(c2, c))
       bonus += 2;
     if(d == 0 && bad(c2, c))
@@ -248,7 +258,7 @@ void generate_track() {
   else {
     while(goal != s) {
       track.push_back(goal);
-      forCellEx(c2, goal) if(celldist(c2) < celldist(goal)) { goal = c2; break; }
+      forCellCM(c2, goal) if(pcelldist(c2) < pcelldist(goal)) { goal = c2; break; }
       }
   
     track.push_back(s);
@@ -860,7 +870,9 @@ void markers() {
     for(cell *c: track) if(inscreenrange(c)) goal = c;
     hyperpoint H = tC0(ggmatrix(goal));
     queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
-    queuestr(H, vid.fsize, its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
+    queuestr(H, vid.fsize, 
+      (geometry == gCrystal && !crystal::pure()) ? fts(crystal::space_distance(cwt.at, track.back())) :
+      its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
     addauraspecial(H, 0x10100, 0);
     }
   int ghosts_left = ghosts_to_show;
