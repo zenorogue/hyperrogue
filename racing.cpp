@@ -479,7 +479,7 @@ void set_view() {
 
   transmatrix at = ggmatrix(who->base) * who->at;
   
-  if(racing::player_relative)
+  if(racing::player_relative || quotient)
     View = spin(race_angle * degree) * inverse(at) * View;
   else {
     int z = get_info(who->base).completion;
@@ -711,6 +711,8 @@ struct race_configurer {
       if(pmodel == mdBand || pmodel == mdHalfplane)
         pmodel = mdDisk;
       });
+    if(quotient)
+      dialog::lastItem().value = XLAT("N/A");
   
     dialog::addSelItem(XLAT("projection"), conformal::get_model_name(pmodel), 'm');
     dialog::add_action([] () { 
