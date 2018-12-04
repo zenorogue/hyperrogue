@@ -6942,7 +6942,7 @@ bool in_full_game() {
   if(chaosmode) return true;
   if(geometry == gEuclid && isCrossroads(specialland)) return true;
   if(weirdhyperbolic && specialland == laCrossroads4) return true;
-  if(geometry == gCrystal && specialland == laCrossroads) return true;
+  if(geometry == gCrystal && isCrossroads(specialland)) return true;
   if(geometry == gNormal && !NONSTDVAR) return true;
   return false;
   }

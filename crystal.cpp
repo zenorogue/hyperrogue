@@ -361,6 +361,7 @@ struct hrmap_crystal : hrmap {
   map<heptagon*, coord> hcoords;
   map<coord, heptagon*> heptagon_at;
   map<int, eLand> landmemo;
+  map<coord, eLand> landmemo4;
   unordered_map<cell*, unordered_map<cell*, int>> distmemo;
   map<cell*, ldcoord> sgc;
   cell *camelot_center;
@@ -854,11 +855,31 @@ void set_land(cell *c) {
   auto co1 = roundcoord(co * 60);
   int cv = co1[0];
 
-  if(specialland == laCrossroads) {
+  if(chaosmode) {
+    setland(c, getCLand(gdiv(cv, 60)));
+    }
+  
+  else if(specialland == laCrossroads) {
     eLand l1 = getCLand(gdiv(cv, 360));
     eLand l2 = getCLand(gdiv(cv+59, 360));
     if(l1 != l2) setland(c, laBarrier);
     else setland(c, l1);
+    }
+
+  else if(specialland == laCrossroads2) {
+    setland(c, getCLand(dist_alt(c)/4));
+    }
+
+  else if(specialland == laCrossroads3) {
+    coord cx = roundcoord(co / 8);
+    auto& l = m->landmemo4[cx];
+    if(l == laNone) l = getNewLand(laBarrier);
+    setland(c, l);
+    println(hlog, "l = ", dnameof(l));
+    }
+
+  else if(specialland == laCrossroads4) {
+    setland(c, getCLand(gdiv(cv, 360)));
     }
   
   if(specialland == laCamelot) {
@@ -872,7 +893,7 @@ void set_land(cell *c) {
        c->wall = waMercury;
     }
 
-  if(among(specialland, laOcean, laIvoryTower, laDungeon)) {
+  if(among(specialland, laOcean, laIvoryTower, laDungeon, laEndorian)) {
     int v = dist_alt(c);
     if(v == 0)
       c->land = laCrossroads4;

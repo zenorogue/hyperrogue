@@ -762,7 +762,7 @@ eLand getNewLand(eLand old) {
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
 
   if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
-  if(weirdhyperbolic && specialland != old && specialland != laCrossroads4 && !chaosmode) return specialland;
+  if(weirdhyperbolic && specialland != old && specialland != laCrossroads4 && !chaosmode && old != laBarrier) return specialland;
 
   if(yendor::on && (yendor::clev().flags & YF_WALLS)) {
     if(old != yendor::clev().l) return yendor::clev().l;
@@ -1101,6 +1101,11 @@ land_validity_t& land_validity(eLand l) {
     if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
     // horocycles not implemented
     if(isCyclic(l)) return not_implemented;
+    }
+  
+  if(geometry == gCrystal) {
+    if(l == laCamelot) return interesting;
+    if(isCrossroads(l)) return full_game;
     }
 
   // Random Pattern allowed only in some specific lands
