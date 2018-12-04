@@ -840,10 +840,14 @@ named_functionality get_o_key() {
   if(peace::on)
     return named_dialog(XLAT("peaceful mode"), peace::showMenu);
 
-  if((geometry != gNormal || NONSTDVAR) && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4))
+  dialog::infix = "";
+
+  if(in_full_game())
+    return named_dialog(XLAT("world overview"), showOverview);
+  
+  if(geometry != gNormal || NONSTDVAR)
     return named_functionality(XLAT("geometry experiments"), runGeometryExperiments);
 
-  dialog::infix = "";
   return named_dialog(XLAT("world overview"), showOverview);
   }
 
