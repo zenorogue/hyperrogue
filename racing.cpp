@@ -441,7 +441,7 @@ void generate_track() {
       cell *c = cl.lst[i];
       forCellEx(c2, c) {
         if(among(c2->wall, waCloud, waMirror)) goal = true;
-        if(c2->wall == waIcewall || passable(c2, c, P_ISPLAYER))
+        if(passable(c2, c, P_ISPLAYER))
           cl.add(c2);
         }
       }
