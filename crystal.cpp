@@ -882,6 +882,10 @@ void set_land(cell *c) {
     setland(c, getCLand(gdiv(cv, 360)));
     }
   
+  else if(specialland == laElementalWall) {
+    setland(c, eLand(laEFire + ((co1[0] / 240)&1?0:2) + ((co1[1] / 240)&1?0:1)));
+    }
+  
   if(specialland == laCamelot) {
     setland(c, laCrossroads);
     buildCamelot(c);
