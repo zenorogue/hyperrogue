@@ -4147,6 +4147,7 @@ namespace crystal {
   extern bool view_coordinates;
   color_t colorize(cell *c);
   int precise_distance(cell *c1, cell *c2);
+  ld space_distance(cell *c1, cell *c2);
   hrmap *new_map();
   void create_step(heptagon *h, int d);
   void build_rugdata();

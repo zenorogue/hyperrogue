@@ -1713,6 +1713,7 @@ cell *heptatdir(cell *c, int d) {
 int heptdistance(heptagon *h1, heptagon *h2) {
   // very rough distance
   int d = 0;
+  if(geometry == gCrystal) return crystal::space_distance(h1->c7, h2->c7);
   while(true) {
     if(h1 == h2) return d;
     for(int i=0; i<S7; i++) if(h1->move(i) == h2) return d + 1;
@@ -1723,6 +1724,7 @@ int heptdistance(heptagon *h1, heptagon *h2) {
   }
 
 int heptdistance(cell *c1, cell *c2) {
+  if(geometry == gCrystal) return crystal::space_distance(c1, c2);
   if(!hyperbolic || quotient) return celldistance(c1, c2);
   else return heptdistance(c1->master, c2->master);
   }
@@ -1757,6 +1759,8 @@ int celldistance(cell *c1, cell *c2) {
 
     return 64;
     }
+  
+  if(geometry == gCrystal) return crystal::precise_distance(c1, c2);
   
   if(masterless || archimedean || quotient) {
     
