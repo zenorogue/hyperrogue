@@ -242,28 +242,7 @@ void generate_track() {
       }
     }
 
-  if(euclid) {
-    using namespace hyperpoint_vec;
-    track.push_back(s);
-    hyperpoint h = tC0(calc_relative_matrix(goal, s, C0)) - C0;
-    cell *x = s;
-    hyperpoint h1 = C0; 
-    for(int i=0; i<=1000; i++) {
-      h1 += h / 1000.;
-      virtualRebase(x, h1,  true);
-      if(x != track.back()) track.push_back(x);
-      }
-    }
-  
-  else {
-    while(goal != s) {
-      track.push_back(goal);
-      forCellCM(c2, goal) if(pcelldist(c2) < pcelldist(goal)) { goal = c2; break; }
-      }
-  
-    track.push_back(s);
-    reverse(track.begin(), track.end());
-    }
+  track = build_shortest_path(s, goal);
   
   
   /*
