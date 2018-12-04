@@ -314,6 +314,9 @@ void initConfig() {
   addsaver(anims::rug_angle, "animation rug angle");
   addsaver(anims::circle_radius, "animation circle radius");
   addsaver(anims::circle_spins, "animation circle spins");
+  
+  addsaver(crystal::compass_probability, "compass-probability");
+  addsaver(crystal::view_coordinates, "crystal-coordinates");
 
 #if CAP_TEXTURE  
   addsaver(texture::texture_aura, "texture-aura", false);
@@ -1522,6 +1525,11 @@ void show_color_dialog() {
     dialog::addItem(XLAT("distance colors"), 'd');
     dialog::add_action([] () { pushScreen([] () { edit_color_table(distcolors); });});
     }
+  
+  if(geometry == gCrystal && cheater) {
+    dialog::addItem(XLAT("crystal coordinate colors"), 'C');
+    dialog::add_action([] () { crystal::view_coordinates = true; pushScreen([] () { edit_color_table(crystal::coordcolors); });});
+    }
 
   dialog::addInfo(XLAT("colors of some game objects can be edited by clicking them."));
   
@@ -1846,6 +1854,7 @@ unordered_map<string, ld&> params = {
   {"sang", conformal::spiral_angle},
   {"spiralx", conformal::spiral_x},
   {"spiraly", conformal::spiral_y},
+  {"cprob", crystal::compass_probability}
   };
 
 }

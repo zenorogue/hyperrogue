@@ -4142,7 +4142,9 @@ namespace arcm {
   }
 
 namespace crystal {
-  extern bool add_bitruncation;
+  extern colortable coordcolors;
+  extern ld compass_probability;
+  extern bool view_coordinates;
   color_t colorize(cell *c);
   int precise_distance(cell *c1, cell *c2);
   hrmap *new_map();

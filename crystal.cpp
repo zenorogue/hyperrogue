@@ -457,7 +457,7 @@ color_t colorize(cell *c) {
   return res;
   }
 
-colortable coordcolors = {0xD04040, 0x4040D0, 0x40D040, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
+colortable coordcolors = {0xD04040, 0x40D040, 0x4040D0, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
 
 ld compass_angle() {
   bool bitr = ginf[gCrystal].vertex == 3;
@@ -903,6 +903,12 @@ int readArgs() {
     }
   else if(argis("-test:crt")) {
     test_crt();
+    }
+  else if(argis("-d:crystal"))
+    launch_dialog(show);
+  else if(argis("-cvcol")) {
+    shift(); int d = argi();
+    shift(); coordcolors[d] = arghex();
     }
   else return 1;
   return 0;
