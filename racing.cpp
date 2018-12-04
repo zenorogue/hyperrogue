@@ -693,15 +693,19 @@ struct race_configurer {
     dialog::add_action([this] () { new_track = "OFFICIAL"; });
     dialog::addItem("play a random track", 'r');
     dialog::add_action([this] () { new_track = random_track_name(); });
-  
-    dialog::addItem(XLAT("select the track and start!"), 's');
-    dialog::add_action([this] () { 
-      if(race_ghosts[{new_track, modecode()}].empty())
-        read_ghosts(new_track, modecode());
-      else
-        println(hlog, "known ghosts: ", isize(race_ghosts[{new_track, modecode()}]));
-      pushScreen([this] () { track_chooser(new_track); }); 
-      });
+    
+    if(bounded)
+      dialog::addInfo("Racing available only in unbounded worlds.", 0xFF0000);
+    else {
+      dialog::addItem(XLAT("select the track and start!"), 's');
+      dialog::add_action([this] () { 
+        if(race_ghosts[{new_track, modecode()}].empty())
+          read_ghosts(new_track, modecode());
+        else
+          println(hlog, "known ghosts: ", isize(race_ghosts[{new_track, modecode()}]));
+        pushScreen([this] () { track_chooser(new_track); }); 
+        });
+      }
     
     dialog::addBreak(100);
 

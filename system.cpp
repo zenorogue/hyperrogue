@@ -1159,6 +1159,9 @@ void set_geometry(eGeometry target) {
     geometry = target;
   
     if(chaosmode && bounded) chaosmode = false;
+    #if CAP_RACING
+    if(bounded) racing::on = false;
+    #endif
     if(euclid6) variation = eVariation::bitruncated;
     if(IRREGULAR) variation = eVariation::bitruncated;
     if(GOLDBERG && gp::param == gp::loc(1,1) && S3 == 3) {
@@ -1253,6 +1256,7 @@ void switch_game_mode(char switchWhat) {
       inv::on = false;
       chaosmode = false;
       princess::challenge = false;
+      if(bounded) set_geometry(gNormal);
       break;
 #endif
 
