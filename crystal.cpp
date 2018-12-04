@@ -20,6 +20,7 @@ bool pure() {
   }
 
 bool view_coordinates = false;
+bool view_east = false;
 
 const int MAXDIM = 7;
 
@@ -510,7 +511,7 @@ bool crystal_cell(cell *c, transmatrix V) {
 
   if(geometry != gCrystal) return false;
 
-  if(view_coordinates && cheater) {
+  if(view_east && cheater) {
     int d = dist_alt(c);
     queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
     }
@@ -958,6 +959,9 @@ int readArgs() {
     }
   else if(argis("-cview")) {
     view_coordinates = true;
+    }
+  else if(argis("-ceast")) {
+    view_east = true;
     }
   else if(argis("-cprob")) {
     PHASEFROM(2); shift_arg_formula(compass_probability);
