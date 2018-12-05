@@ -412,19 +412,10 @@ slide default_slides[] = {
 #endif
     [] (presmode mode) {
 #if CAP_RUG
-      static int wm, mm;
-      if(mode == 1) {
+      if(mode == 1)
         rug::init();
-        wm = vid.wallmode;
-        mm = vid.monmode;
-        vid.wallmode = 3;
-        vid.monmode = 2;
-        }
-      if(mode == 3) {
+      if(mode == 3) 
         rug::close();
-        vid.wallmode = wm;
-        vid.monmode = mm;
-        }
       slidecommand = "switch renderer";
       if(mode == 4) {
         rug::close();

@@ -24,6 +24,14 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha = vid.alpha, eGeometryCla
 
 hyperpoint dhp(ld x, ld y, ld z) { return hpxyz(x, y, z); }
 
+bool non_spatial_model() {
+  if(among(pmodel, mdRotatedHyperboles, mdJoukowsky, mdJoukowskyInverted, mdPolygonal, mdPolynomial))
+    return true;
+  if(pmodel == mdSpiral && euclid)
+    return true;
+  return vid.consider_shader_projection && shaderside_projection && pmodel;  
+  }
+
 hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   ld hx = h[0], hy = h[1];
   
@@ -136,7 +144,7 @@ bool twopoint_do_flips;
 
 ld find_zlev(hyperpoint& H) {
 
-  if(wmspatial || mmspatial) {
+  if(spatial_graphics) {
     ld zlev = zlevel(H);
     using namespace hyperpoint_vec;
     if(zlev > 1-1e-6 && zlev < 1+1e-6) return 1;

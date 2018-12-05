@@ -1294,10 +1294,18 @@ void show3D() {
   dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
   
   dialog::addBreak(50);
-  if(!(wmspatial || mmspatial))
+  if(rug::rugged) {
+    dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
+    dialog::add_action([] () { rug::spatial_rug = !rug::spatial_rug; });
+    }
+  if(rug::rugged && !rug::spatial_rug)
+    dialog::addBreak(100);
+  else if(non_spatial_model())
+    dialog::addInfo(XLAT("no 3D effects available in this projection"), 0xC00000);
+  else if(!spatial_graphics)
     dialog::addInfo(XLAT("set 3D monsters or walls in basic config first"));
   else if(invalid != "")
-    dialog::addInfo(XLAT("error: "+invalid));
+    dialog::addInfo(XLAT("error: "+invalid), 0xC00000);
   else
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);

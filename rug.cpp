@@ -28,6 +28,7 @@ struct rug_exception { };
 bool fast_euclidean = true;
 bool good_shape;
 bool subdivide_first = false;
+bool spatial_rug = false;
 
 bool subdivide_further();
 void subdivide();
@@ -1791,6 +1792,8 @@ void show() {
     }
   dialog::addSelItem(XLAT("automatic move speed"), fts(ruggo), 'G');
   dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');
+  dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), spatial_rug, 'S');
+  dialog::add_action([] () { spatial_rug = !spatial_rug; });
 
 #if CAP_SURFACE  
   if(hyperbolic) {

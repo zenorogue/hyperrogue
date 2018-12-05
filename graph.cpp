@@ -8,6 +8,7 @@ namespace hr {
 
 int inmirrorcount = 0;
 
+bool spatial_graphics;
 bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 bool mmspatial, mmhigh, mmmon, mmitem;
 
@@ -5301,6 +5302,13 @@ void drawthemap() {
   mmmon = vid.monmode >= 2;
   mmhigh = vid.monmode == 3 || vid.monmode == 5;
   mmspatial = vid.monmode == 4 || vid.monmode == 5;
+  
+  spatial_graphics = wmspatial || mmspatial;
+  if(rug::rugged && !rug::spatial_rug) spatial_graphics = false;
+  if(non_spatial_model())
+    spatial_graphics = false;
+  
+  if(!spatial_graphics) wmspatial = mmspatial = false;
 
   DEBB(DF_GRAPH, (debugfile,"draw the map\n"));
   

@@ -949,6 +949,7 @@ void applymodel(hyperpoint H, hyperpoint& Hscr);
 void drawCircle(int x, int y, int size, color_t color, color_t fillcolor = 0);
 void fixcolor(int& col);
 ld displayspin(cell *c, int d);
+bool non_spatial_model();
 hyperpoint gethyper(ld x, ld y);
 void resetview(); 
 void drawthemap();
@@ -1208,6 +1209,7 @@ struct renderbuffer;
 
 namespace rug {
   extern bool rugged;
+  extern bool spatial_rug;
   extern bool computed;
   extern bool renderonce;
   extern bool rendernogl;
@@ -2019,6 +2021,7 @@ bool playerInBoat(int i);
 extern int lowfar;
 extern bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 extern bool mmspatial, mmhigh, mmmon, mmitem;
+extern bool spatial_graphics;
 extern int maxreclevel, reclevel;
 
 string explain3D(ld *param);
