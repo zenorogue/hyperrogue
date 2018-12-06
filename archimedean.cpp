@@ -1177,12 +1177,14 @@ string archimedean_tiling::world_size() {
     }
   anom *= 2 * denom, adenom *= nom;
   int g = gcd(anom, adenom);
-  anom /= g; adenom /= g;
+  if(g != 0) {
+    anom /= g; adenom /= g;
+    }
   if(adenom < 0) anom = -anom, adenom = -adenom;
   string s;
   bool hyp = (anom < 0);
   if(hyp) anom = -anom;
-  if(adenom > 1) 
+  if(adenom != 1) 
     s += its(anom) + "/" + its(adenom);
   else
     s += its(anom);
