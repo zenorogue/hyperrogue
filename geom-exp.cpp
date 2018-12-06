@@ -356,7 +356,7 @@ void showEuclideanMenu() {
   
     int worldsize;
     
-    int euler;
+    int euler = 0;
     if(euclid) euler = 0;
     else if(sphere && nonorientable) euler = 1;
     else if(sphere) euler = 2;
