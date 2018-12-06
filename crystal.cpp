@@ -836,6 +836,11 @@ void next_home_orientation() {
   init_rotation();
   }
 
+void flip_z() {
+  for(int i=0; i<MAXDIM; i++)
+    crug_rotation[i][2] *= -1;
+  }
+
 hyperpoint coord_to_flat(ldcoord co) {
   hyperpoint res = hpxyz(0, 0, 0);
   co = co - rug_center;

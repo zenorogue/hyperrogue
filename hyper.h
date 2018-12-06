@@ -2487,6 +2487,9 @@ extern function <bool(SDL_Event &ev)> joyhandler;
 #endif
 void gmodekeys(int sym, int uni);
 
+// check for a plain number key
+bool numberkey(int sym, int uni, char number);
+
 void switchGL();
 void switchFullscreen();
 extern int cmode;
@@ -4157,6 +4160,7 @@ namespace crystal {
   void apply_rotation(const transmatrix t);
   void switch_z_coordinate();
   void next_home_orientation();
+  void flip_z();
   void set_land(cell *c);
   int dist_alt(cell *c);
   int dist_relative(cell *c);

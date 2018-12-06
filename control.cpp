@@ -345,9 +345,9 @@ void handleKeyNormal(int sym, int uni) {
     }
 #endif
 
-  if(uni == sym && DEFAULTNOR(sym)) {
+  if(DEFAULTNOR(sym)) {
     gmodekeys(sym, uni);
-    if(sym == 'm' && canmove && (centerover == cwt ? mouseover : centerover.at))
+    if(uni == 'm' && canmove && (centerover == cwt ? mouseover : centerover.at))
       performMarkCommand(mouseover);
     }
   
@@ -827,18 +827,22 @@ void displayabutton(int px, int py, string s, int col) {
   }
 #endif
 
+bool numberkey(int sym, int uni, char number) {
+  return uni == number && !(sym >= SDLK_KP0 && sym <= SDLK_KP9);
+  }
+
 void gmodekeys(int sym, int uni) {
   #if CAP_RUG
   if(rug::rugged) rug::handlekeys(sym, uni);
   #endif
-  if(uni == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
-  if(uni == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
-  if(uni == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-  if(uni == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-  if(uni == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
-  if(uni == '6') vid.grid = !vid.grid;
-  if(uni == '7') { vid.darkhepta = !vid.darkhepta; }
-  if(uni == '%' && sym == '5') { 
+  if(numberkey(sym, uni, '1') && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
+  if(numberkey(sym, uni, '2') && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
+  if(numberkey(sym, uni, '3') && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(numberkey(sym, uni, '4') && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(numberkey(sym, uni, '5')) { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
+  if(numberkey(sym, uni, '6')) vid.grid = !vid.grid;
+  if(numberkey(sym, uni, '7')) { vid.darkhepta = !vid.darkhepta; }
+  if(uni == '%') { 
     if(vid.wallmode == 0) vid.wallmode = 6;
     vid.wallmode--;
     }

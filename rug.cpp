@@ -1485,7 +1485,7 @@ void move_forward(ld distance) {
 #define CAP_HOLDKEYS CAP_SDL // && !ISWEB)
 
 bool handlekeys(int sym, int uni) {
-  if(uni == '1') {
+  if(numberkey(sym, uni, '1')) {
     ld bdist = 1e12;
     if(finger_center) 
       finger_center = NULL;
@@ -1499,35 +1499,39 @@ bool handlekeys(int sym, int uni) {
     if(renderonce) renderlate+=10;
     return true;
     }
-  else if(uni == '2') {
+  else if(numberkey(sym, uni, '2')) {
     if(in_crystal())
       crystal::switch_z_coordinate();
     else
       apply_rotation(rotmatrix(M_PI, 0, 2));
     return true;
     }
-  else if(uni == '3') {
+  else if(numberkey(sym, uni, '3')) {
     if(in_crystal())
-      crystal::next_home_orientation();
+      crystal::flip_z();
     else
       apply_rotation(rotmatrix(M_PI/2, 0, 2));
     return true;
     }
+  else if(sym == SDLK_HOME && in_crystal()) {
+    crystal::next_home_orientation();
+    return true;
+    }
 #if !CAP_HOLDKEYS
-  else if(uni == SDLK_PAGEUP || uni == '[') {
+  else if(sym == SDLK_PAGEUP || uni == '[') {
     move_forward(.1);
     return true;
     }
-  else if(uni == SDLK_PAGEDOWN || uni == ']') {
+  else if(sym == SDLK_PAGEDOWN || uni == ']') {
     move_forward(-.1);
     return true;
     }
-  else if(uni == SDLK_HOME)  { apply_rotation(rotmatrix(.1, 0, 1)); return true; }
-  else if(uni == SDLK_END)   { apply_rotation(rotmatrix(.1, 1, 0)); return true; }
-  else if(uni == SDLK_DOWN)  { apply_rotation(rotmatrix(.1, 2, 1)); return true; }
-  else if(uni == SDLK_UP)    { apply_rotation(rotmatrix(.1, 1, 2)); return true; }
-  else if(uni == SDLK_LEFT)  { apply_rotation(rotmatrix(.1, 2, 0)); return true; }
-  else if(uni == SDLK_RIGHT) { apply_rotation(rotmatrix(.1, 0, 2)); return true; }
+  else if(sym == SDLK_HOME)  { apply_rotation(rotmatrix(.1, 0, 1)); return true; }
+  else if(sym == SDLK_END)   { apply_rotation(rotmatrix(.1, 1, 0)); return true; }
+  else if(sym == SDLK_DOWN)  { apply_rotation(rotmatrix(.1, 2, 1)); return true; }
+  else if(sym == SDLK_UP)    { apply_rotation(rotmatrix(.1, 1, 2)); return true; }
+  else if(sym == SDLK_LEFT)  { apply_rotation(rotmatrix(.1, 2, 0)); return true; }
+  else if(sym == SDLK_RIGHT) { apply_rotation(rotmatrix(.1, 0, 2)); return true; }
 #endif
   else return false;
   }
