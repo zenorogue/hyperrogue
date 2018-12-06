@@ -4697,7 +4697,18 @@ bool subscreen_split(reaction_t for_each_subscreen);
 
 #else
 
-namespace racing { static bool on = false; }
+// static bool on = false: emits a warning
+// static const bool on = false: no warning, but does not allow assignment
+
+struct always_false {
+  operator bool() const { return false; };
+  void operator = (bool b) const {};
+  };
+
+namespace racing { 
+  static const always_false on; 
+  }
+
 inline bool subscreen_split(reaction_t for_each_subscreen) { return false; }
 #endif
 
