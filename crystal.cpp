@@ -935,7 +935,7 @@ void set_land(cell *c) {
   else if(specialland == laCrossroads) {
     eLand l1 = getCLand(gdiv(cv, 360));
     eLand l2 = getCLand(gdiv(cv+59, 360));
-    if(l1 != l2) setland(c, laBarrier);
+    if(l1 != l2 && hrand(100) < 75) setland(c, laBarrier);
     else setland(c, l1);
     }
 
