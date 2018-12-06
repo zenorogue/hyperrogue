@@ -248,21 +248,21 @@ void showMainMenu() {
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    if(sym == SDLK_F1 || sym == 'h') gotoHelp("@");
-    else if(sym == 'c' && cheater) pushScreen(showCheatMenu);
-    else if(sym == 'b') pushScreen(showBasicConfig);
-    else if(sym == 'g') pushScreen(showGraphConfig);
-    else if(sym == 'd') pushScreen(showDisplayMode);
-    else if(sym == 'm') pushScreen(showChangeMode);
+    if(sym == SDLK_F1 || uni == 'h') gotoHelp("@");
+    else if(uni == 'c' && cheater) pushScreen(showCheatMenu);
+    else if(uni == 'b') pushScreen(showBasicConfig);
+    else if(uni == 'g') pushScreen(showGraphConfig);
+    else if(uni == 'd') pushScreen(showDisplayMode);
+    else if(uni == 'm') pushScreen(showChangeMode);
     else if(uni == 'R')
       popScreenAll(), pushScreen(showStartMenu);
   #if CAP_SAVE
-    else if(sym == 't') scores::load();
+    else if(uni == 't') scores::load();
   #endif
     else if(uni == 'r' || sym == SDLK_F5) {
       restart_game();
       }
-    else if(sym == 'q' || sym == SDLK_F10) {
+    else if(uni == 'q' || sym == SDLK_F10) {
 #if ISMOBILE
       extern void openURL();
       openURL();
@@ -270,12 +270,12 @@ void showMainMenu() {
       quitmainloop = true;
 #endif
       }
-    else if(sym == 'o') {
+    else if(uni == 'o') {
       clearMessages();
       get_o_key().second();
       }
 #if CAP_INV
-    else if(sym == 'i') {
+    else if(uni == 'i') {
       clearMessages();
       pushScreen(inv::show);
       }
@@ -284,7 +284,7 @@ void showMainMenu() {
       showMissionScreen();
   #if ISMOBILE==1
   #ifdef HAVE_ACHIEVEMENTS
-    else if(sym == '3') {
+    else if(NUMBERKEY == '3') {
       achievement_final(false);
       pushScreen(leader::showMenu);
       }
@@ -791,7 +791,7 @@ void showStartMenu() {
       pushScreen(daily::showMenu);
       }
 #endif
-    else if(sym == 'm') {
+    else if(uni == 'm') {
       popScreen();
       pushScreen(showMainMenu);
       }
@@ -799,7 +799,7 @@ void showStartMenu() {
       quitmainloop = true;
     else if(sym == SDLK_F1)
       gotoHelp("@");
-    else if(sym == SDLK_ESCAPE || sym == ' ') {
+    else if(sym == SDLK_ESCAPE || uni == ' ') {
       popScreen();
       timerstart = time(NULL);
       stampbase = ticks;
@@ -905,10 +905,10 @@ void showMessageLog() {
   keyhandler = [lines] (int sym, int uni) {
     if(uni == PSEUDOKEY_WHEELDOWN) messagelogpos++;
     else if(uni == PSEUDOKEY_WHEELUP) messagelogpos--;
-    else if(uni == SDLK_DOWN || uni == SDLK_KP2) messagelogpos++;
-    else if(uni == SDLK_UP || uni == SDLK_KP8) messagelogpos--;
-    else if(uni == SDLK_PAGEUP || uni == SDLK_KP9) messagelogpos -= lines;
-    else if(uni == SDLK_PAGEDOWN || uni == SDLK_KP3) messagelogpos -= lines;
+    else if(DKEY == SDLK_DOWN) messagelogpos++;
+    else if(DKEY == SDLK_UP) messagelogpos--;
+    else if(DKEY == SDLK_PAGEUP) messagelogpos -= lines;
+    else if(DKEY == SDLK_PAGEDOWN) messagelogpos -= lines;
     else if(uni == 'c') gamelog.clear();
     else if(uni == 't') { timeformat++; timeformat %= 5; }
     else if(doexiton(sym, uni)) popScreen();

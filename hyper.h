@@ -976,7 +976,7 @@ extern hyperpoint mouseh;
 extern hyperpoint ccenter;
 extern ld crad;
 
-extern bool mousepressed, anyshiftclick;
+extern bool mousepressed, anyshiftclick, numlock_on;
 extern string help;
 
 typedef function<void()> reaction_t;
@@ -2488,7 +2488,12 @@ extern function <bool(SDL_Event &ev)> joyhandler;
 void gmodekeys(int sym, int uni);
 
 // check for a plain number key
-bool numberkey(int sym, int uni, char number);
+#define NUMBERKEY (interpret_as_direction(sym, uni) ? 0 : uni)
+#define DKEY (get_direction_key(sym, uni))
+#define DIRECTIONKEY (interpret_as_direction(sym, uni) ? uni : 0)
+
+bool interpret_as_direction(int sym, int uni);
+int get_direction_key(int sym, int uni);
 
 void switchGL();
 void switchFullscreen();

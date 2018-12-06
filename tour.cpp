@@ -114,27 +114,27 @@ bool handleKeyTour(int sym, int uni) {
     if(inhelp) slidehelp();
     return true;
     }
-  if(sym == '1' || sym == '2') { // || sym == '3') 
+  if(NUMBERKEY == '1' || NUMBERKEY == '2') {
     int legal = slides[currentslide].flags & 7;
 
     if(legal == LEGAL_NONE || legal == LEGAL_HYPERBOLIC) {
       addMessage(XLAT("You cannot change geometry in this slide."));
       return true;
       }
-    if(legal == LEGAL_UNLIMITED && sym == '1') {
+    if(legal == LEGAL_UNLIMITED && NUMBERKEY == '1') {
       addMessage(XLAT("This does not work in bounded geometries."));
       return true;
       }
-    if(legal == LEGAL_NONEUC && sym == '2') {
+    if(legal == LEGAL_NONEUC && NUMBERKEY == '2') {
       addMessage(XLAT("This does not work in Euclidean geometry."));
       return true;
       }
-    if(legal == LEGAL_HYPERBOLIC && sym != '3') {
+    if(legal == LEGAL_HYPERBOLIC && NUMBERKEY != '3') {
       addMessage(XLAT("This works only in hyperbolic geometry."));
       return true;
       }
     
-    if(sym == '2') {
+    if(NUMBERKEY == '2') {
       dynamicval<eGeometry> g(geometry, gEuclid);
       if(cwt.at->land != laCanvas && !land_validity(cwt.at->land).quality_level) {
         addMessage(XLAT("This land has no Euclidean version."));
@@ -142,7 +142,7 @@ bool handleKeyTour(int sym, int uni) {
         }
       }
     
-    if(sym == '1') {
+    if(NUMBERKEY == '1') {
       dynamicval<eGeometry> g(geometry, gSphere);
       if(cwt.at->land != laCanvas && !land_validity(cwt.at->land).quality_level) {
         addMessage(XLAT("This land has no spherical version."));
@@ -159,7 +159,7 @@ bool handleKeyTour(int sym, int uni) {
 
     firstland = specialland = cwt.at->land;
     push_game();
-    switch(sym) {
+    switch(NUMBERKEY) {
       case '3': 
         set_variation(eVariation::pure);
         break;
@@ -176,12 +176,12 @@ bool handleKeyTour(int sym, int uni) {
     presentation(pmGeometryStart);
     string x;
     if(slides[currentslide].flags & USE_SLIDE_NAME) {
-      if(sym == '1') x = XLAT("Spherical version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
-      if(sym == '2') x = XLAT("Euclidean version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
+      if(NUMBERKEY == '1') x = XLAT("Spherical version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
+      if(NUMBERKEY == '2') x = XLAT("Euclidean version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
       }
     else {
-      if(sym == '1') x = XLAT("Spherical version of %the1. ", cwt.at->land);
-      if(sym == '2') x = XLAT("Euclidean version of %the1. ", cwt.at->land);
+      if(NUMBERKEY == '1') x = XLAT("Spherical version of %the1. ", cwt.at->land);
+      if(NUMBERKEY == '2') x = XLAT("Euclidean version of %the1. ", cwt.at->land);
       }
     if(mousing)
       addMessage(x + XLAT("Click again to go back to your game."));
@@ -189,12 +189,12 @@ bool handleKeyTour(int sym, int uni) {
       addMessage(x + XLAT("Press %1 again to go back to your game.", dialog::keyname(sym)));
     return true;
     }
-  if(sym == '3' && sphere) {
+  if(NUMBERKEY == '3' && sphere) {
     if(vid.alpha < 2) vid.scale = 400, vid.alpha = 400; else vid.scale = .5, vid.alpha = 1;
     addMessage(XLAT("Changed the projection."));
     return true;
     }
-  if(sym == '4') {
+  if(NUMBERKEY == '4') {
     popScreenAll();
     if(items[itOrbTeleport]) goto give_aether;
     items[itOrbTeleport] = 1;
@@ -217,11 +217,11 @@ bool handleKeyTour(int sym, int uni) {
       ));
     return true;
     }
-  if(sym == '5') {
+  if(NUMBERKEY == '5') {
     presentation(pmKey);
     return true;
     }
-  if(sym == '6') {
+  if(NUMBERKEY == '6') {
     sickmode = !sickmode;
     static ld spd;
     if(sickmode == true) {
@@ -234,17 +234,17 @@ bool handleKeyTour(int sym, int uni) {
       }
     return true;
     }
-  if(sym == '7') {
+  if(NUMBERKEY == '7') {
     texts = !texts;
     if(texts) slidehelp();
     else addMessage("Help texts disabled.");
     return true;
     }
-  if(sym == '8') {
+  if(NUMBERKEY == '8') {
     conformal::includeHistory = !conformal::includeHistory;
     return true;
     }
-  if(sym == '9') {
+  if(NUMBERKEY == '9') {
     pushScreen(ss::showMenu);
     return true;
     }

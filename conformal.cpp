@@ -209,15 +209,16 @@ namespace spiral {
           goto breakloop;
 
         case SDL_KEYDOWN: {
-          int key = event.key.keysym.sym;
-          // int uni = event.key.keysym.unicode;      
-          if(key == SDLK_RIGHT) velx++;
-          if(key == SDLK_LEFT) velx--;
-          if(key == SDLK_UP) vely++;
-          if(key == SDLK_DOWN) vely--;
-          if(key == SDLK_ESCAPE) goto breakloop;
-          if(key == 'h') displayhelp = !displayhelp;
-          if(key == 's') dosave = true;
+          int sym = event.key.keysym.sym;
+          int uni = event.key.keysym.unicode;
+          numlock_on = event.key.keysym.mod & KMOD_NUM;
+          if(DKEY == SDLK_RIGHT) velx++;
+          if(DKEY == SDLK_LEFT) velx--;
+          if(DKEY == SDLK_UP) vely++;
+          if(DKEY == SDLK_DOWN) vely--;
+          if(sym == SDLK_ESCAPE) goto breakloop;
+          if(uni == 'h') displayhelp = !displayhelp;
+          if(uni == 's') dosave = true;
           }
         }
       }
@@ -886,7 +887,7 @@ namespace conformal {
         }
       else if(uni == 'a')
         pushScreen(history_menu);
-      else if(sym == 'r') {
+      else if(uni == 'r') {
         if(rotation < 0) rotation = 0;
         dialog::editNumber(rotation, 0, 360, 90, 0, XLAT("rotation"), 
           "This controls the automatic rotation of the world. "
@@ -967,23 +968,23 @@ namespace conformal {
       autoband = !autoband;
     else if(uni == 'm') 
       pushScreen(model_menu);
-    else if(sym == 'a') 
+    else if(uni == 'a') 
       dialog::editNumber(lvspeed, -5, 5, .1, 1, XLAT("animation speed"), "");
-    else if(sym == 'd') {
+    else if(uni == 'd') {
       dialog::editNumber(bandhalf, 5, 1000, 5, 200, XLAT("band width"), "");
       dialog::bound_low(5);
       }
-    else if(sym == 's') {
+    else if(uni == 's') {
       dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
       dialog::bound_low(500);
       }
-    else if(sym == 'p') 
+    else if(uni == 'p') 
       dialog::editNumber(extra_line_steps, 0, 5, 1, 1, XLAT("extend the ends"), 
         "0 = start at the game start, endat the end position; "
         "larger numbers give extra space at the ends."
         );
-    else if(sym == 'g') { dospiral = !dospiral; }
-    else if(sym == 'i') { 
+    else if(uni == 'g') { dospiral = !dospiral; }
+    else if(uni == 'i') { 
       if(canmove && !cheater) {
         addMessage("Enable cheat mode or GAME OVER to use this");
         return;
@@ -994,7 +995,7 @@ namespace conformal {
 #if CAP_SDL
     else if(uni == 'f' && band_renderable_now()) createImage(dospiral);
 #endif
-    else if(sym == 'j') { 
+    else if(uni == 'j') { 
       autobandhistory = !autobandhistory; 
       }
     else if(doexiton(sym, uni)) popScreen();

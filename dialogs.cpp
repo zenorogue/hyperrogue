@@ -400,26 +400,26 @@ namespace dialog {
     }
   
   void handleNavigation(int &sym, int &uni) {
-    if(uni == '\n' || uni == '\r' || sym == SDLK_KP5)
+    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5)
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           if(items[i].body == highlight_text) {
             uni = sym = items[i].key;
             return;
             }
-    if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) {
+    if(DKEY == SDLK_PAGEDOWN) {
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i]))
           highlight_text = items[i].body;
       }
-    if(sym == SDLK_PAGEUP || sym == SDLK_KP9) {
+    if(DKEY == SDLK_PAGEUP) {
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i])) {
           highlight_text = items[i].body;
           break;
           }
       }    
-    if(sym == SDLK_UP || sym == SDLK_KP8) {
+    if(DKEY == SDLK_UP) {
       string last = "";
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
@@ -434,7 +434,7 @@ namespace dialog {
           }
       highlight_text = last;
       }
-    if(sym == SDLK_DOWN || sym == SDLK_KP2) {
+    if(DKEY == SDLK_DOWN) {
       int state = 0;
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
@@ -494,17 +494,17 @@ namespace dialog {
     else if(palette && uni >= 'a' && uni < 'a'+(int) palette[0]) {
       color = palette[1 + uni - 'a'] >> shift;
       }
-    else if(sym == SDLK_DOWN || sym == SDLK_KP2) {
+    else if(DKEY == SDLK_DOWN) {
       colorp = (colorp-1) & 3;
       }
-    else if(sym == SDLK_UP || sym == SDLK_KP8) {
+    else if(DKEY == SDLK_UP) {
       colorp = (colorp+1) & 3;
       }
-    else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
+    else if(DKEY == SDLK_LEFT) {
       unsigned char* pts = (unsigned char*) &color;
       pts[colorp] -= abs(shiftmul) < .6 ? 1 : 17;
       }
-    else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
+    else if(DKEY == SDLK_RIGHT) {
       unsigned char* pts = (unsigned char*) &color;
       pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
       }
@@ -689,14 +689,14 @@ namespace dialog {
         apply_edit();
         }
   #if !ISMOBILE
-      else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
+      else if(DKEY == SDLK_RIGHT) {
         if(ne.intval && abs(shiftmul) < .6)
           (*ne.editwhat)++;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) + shiftmul * ne.step);
         apply_slider();
         }
-      else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
+      else if(DKEY == SDLK_LEFT) {
         if(ne.intval && abs(shiftmul) < .6)
           (*ne.editwhat)--;
         else
@@ -998,8 +998,8 @@ namespace dialog {
   bool handle_edit_string(int sym, int uni, function<string(int, int)> checker) {
     auto& es = *edited_string;
     string u2;
-    if(sym == SDLK_LEFT) editpos--;
-    else if(sym == SDLK_RIGHT) editpos++;
+    if(DKEY == SDLK_LEFT) editpos--;
+    else if(DKEY == SDLK_RIGHT) editpos++;
     else if(uni == 8) {
       if(editpos == 0) return true;
       es.replace(editpos-1, 1, "");

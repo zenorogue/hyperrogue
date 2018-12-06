@@ -1485,7 +1485,7 @@ void move_forward(ld distance) {
 #define CAP_HOLDKEYS CAP_SDL // && !ISWEB)
 
 bool handlekeys(int sym, int uni) {
-  if(numberkey(sym, uni, '1')) {
+  if(NUMBERKEY == '1') {
     ld bdist = 1e12;
     if(finger_center) 
       finger_center = NULL;
@@ -1499,14 +1499,14 @@ bool handlekeys(int sym, int uni) {
     if(renderonce) renderlate+=10;
     return true;
     }
-  else if(numberkey(sym, uni, '2')) {
+  else if(NUMBERKEY == '2') {
     if(in_crystal())
       crystal::switch_z_coordinate();
     else
       apply_rotation(rotmatrix(M_PI, 0, 2));
     return true;
     }
-  else if(numberkey(sym, uni, '3')) {
+  else if(NUMBERKEY == '3') {
     if(in_crystal())
       crystal::flip_z();
     else

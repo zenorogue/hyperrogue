@@ -10,7 +10,7 @@ int mousex, mousey;
 hyperpoint mouseh, mouseoh;
 
 bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick,
-  forcetarget, lshiftclick, lctrlclick;
+  forcetarget, lshiftclick, lctrlclick, numlock_on;
 bool gtouched;
 
 bool holdmouse;
@@ -642,6 +642,7 @@ void handle_event(SDL_Event& ev) {
       uni = ev.key.keysym.unicode;
       if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) shiftmul = -1;
       if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) shiftmul /= 10;
+      numlock_on = ev.key.keysym.mod & KMOD_NUM;
       if(sym == SDLK_RETURN && (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))) {
         sym = 0; uni = 0;
         switchFullscreen();
@@ -827,21 +828,36 @@ void displayabutton(int px, int py, string s, int col) {
   }
 #endif
 
-bool numberkey(int sym, int uni, char number) {
-  return uni == number && !(sym >= SDLK_KP0 && sym <= SDLK_KP9);
+bool interpret_as_direction(int sym, int uni) {
+  return (sym >= SDLK_KP0 && sym <= SDLK_KP9 && !numlock_on);
+  }
+
+int get_direction_key(int sym, int uni) {
+  if(interpret_as_direction(sym, uni)) {
+    if(sym == SDLK_KP1) return SDLK_END;
+    if(sym == SDLK_KP2) return SDLK_DOWN;
+    if(sym == SDLK_KP3) return SDLK_PAGEDOWN;
+    if(sym == SDLK_KP4) return SDLK_LEFT;
+    if(sym == SDLK_KP6) return SDLK_RIGHT;
+    if(sym == SDLK_KP7) return SDLK_HOME;
+    if(sym == SDLK_KP8) return SDLK_UP;
+    if(sym == SDLK_KP8) return SDLK_PAGEUP;
+    return 0;
+    }
+  return sym;
   }
 
 void gmodekeys(int sym, int uni) {
   #if CAP_RUG
   if(rug::rugged) rug::handlekeys(sym, uni);
   #endif
-  if(numberkey(sym, uni, '1') && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
-  if(numberkey(sym, uni, '2') && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
-  if(numberkey(sym, uni, '3') && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-  if(numberkey(sym, uni, '4') && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-  if(numberkey(sym, uni, '5')) { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
-  if(numberkey(sym, uni, '6')) vid.grid = !vid.grid;
-  if(numberkey(sym, uni, '7')) { vid.darkhepta = !vid.darkhepta; }
+  if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
+  if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
+  if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
+  if(NUMBERKEY == '6') vid.grid = !vid.grid;
+  if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; }
   if(uni == '%') { 
     if(vid.wallmode == 0) vid.wallmode = 6;
     vid.wallmode--;

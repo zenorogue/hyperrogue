@@ -230,11 +230,11 @@ void show() {
   displayButton(xr*50, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 8);
 
   keyhandler = [] (int sym, int uni) {
-    if(sym == SDLK_LEFT || sym == SDLK_KP4 || sym == 'h' || sym == 'a') {
+    if(DKEY == SDLK_LEFT || uni == 'h' || uni == 'a') {
       scorerev = false;
       if(curcol > 0) curcol--;
       }
-    else if(sym == SDLK_RIGHT || sym == SDLK_KP6 || sym == 'l' || sym == 'd') {
+    else if(DKEY == SDLK_RIGHT || uni == 'l' || uni == 'd') {
       scorerev = false;
       if(curcol < POSSCORE) curcol++;
       }
@@ -242,16 +242,16 @@ void show() {
       scorerev = false;
       curcol = sym - 1000;
       }
-    else if(sym == 't') { dialog::infix = ""; pushScreen(showPickScores); }
-    else if(sym == SDLK_UP || sym == 'k' || sym == 'w')
+    else if(uni == 't') { dialog::infix = ""; pushScreen(showPickScores); }
+    else if(DKEY == SDLK_UP || uni == 'k' || uni == 'w')
       scorefrom -= 5;
-    else if(sym == SDLK_DOWN || sym == 'j' || sym == 'x')
+    else if(DKEY == SDLK_DOWN || uni == 'j' || uni == 'x')
       scorefrom += 5;
     else if(sym == PSEUDOKEY_WHEELUP)
       scorefrom--;
     else if(sym == PSEUDOKEY_WHEELDOWN)
       scorefrom++;
-    else if(sym == 's') {
+    else if(uni == 's') {
       if(scorerev) reverse(scores.begin(), scores.end());
       else {
         scorerev = true;

@@ -95,30 +95,30 @@ void showDemo() {
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
-    else if(sym == 'a') {
+    if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
+    else if(uni == 'a') {
       toggleanim(!demoanim);
       popScreen();
       }
-    else if(sym == 'f') {
+    else if(uni == 'f') {
       firstland = laIce;
       restart_game(tactic::on ? rg::tactic : rg::nothing);
       }
 #if CAP_TOUR
-    else if(sym == 'T') {
+    else if(uni == 'T') {
       firstland = laIce;
       if(!tour::on) tour::start();
       }
 #endif
-    else if(sym == 't') {
+    else if(uni == 't') {
       firstland = laTemple;
       restart_game(tactic::on ? rg::tactic : rg::nothing);
       }
-    else if(sym == 'l') {
+    else if(uni == 'l') {
       firstland = laStorms;
       restart_game(tactic::on ? rg::tactic : rg::nothing);
       }
-    else if(sym == 'b') {
+    else if(uni == 'b') {
       firstland = laBurial;
       restart_game(tactic::on ? rg::tactic : rg::nothing);
       items[itOrbSword] = 60;
