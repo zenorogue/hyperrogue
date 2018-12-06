@@ -205,7 +205,17 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     m->valid = good_shape = true;
     ld d = h1[0] * h[1] - h1[1] * h[0]; 
     ld a = h[0] * h1[0] + h[1] * h1[1];
-    m->flat = hpxyz(d * 2 * M_PI, sin(a * 2 * M_PI), cos(a * 2 * M_PI));
+
+    // m->flat = modelscale * hpxyz(d * 2 * M_PI, sin(a * 2 * M_PI), cos(a * 2 * M_PI));
+
+    USING_NATIVE_GEOMETRY;
+    hyperpoint hpoint = ypush(modelscale) * xpush0(modelscale * d * 2 * M_PI);
+    ld hpdist = hdist0(hpoint);
+    ld z = hypot2(hpoint);
+    if(z==0) z = 1;
+    hpoint = hpoint * hpdist / z;
+    
+    m->flat = hpxyz(hpoint[0], hpoint[1] * sin(a*2*M_PI), hpoint[1]*cos(a*2*M_PI));
     }
   else if(sphere) {
     m->valid = good_shape = true;
