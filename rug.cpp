@@ -200,14 +200,12 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   
   if(euwrap && !bounded) {
     hyperpoint h1 = eumove(torusconfig::sdx, torusconfig::sdy) * C0;
-    println(hlog, "h1 = ", h1);
     h1 /= sqhypot2(h1);
     if(nonorientable) h1 /= 2;
-    println(hlog, "-> h1 = ", h1);
     m->valid = good_shape = true;
     ld d = h1[0] * h[1] - h1[1] * h[0]; 
     ld a = h[0] * h1[0] + h[1] * h1[1];
-    m->flat = hpxyz(cos(a * 2 * M_PI), sin(a * 2 * M_PI), d * 2 * M_PI);
+    m->flat = hpxyz(d * 2 * M_PI, sin(a * 2 * M_PI), cos(a * 2 * M_PI));
     }
   else if(sphere) {
     m->valid = good_shape = true;
@@ -833,7 +831,7 @@ int divides = 0;
 bool stop = false;
 
 bool subdivide_further() {
-  if(euwrap) return false;
+  if(fulltorus) return false;
   return isize(points) * 4 < vertex_limit;
   }
 
