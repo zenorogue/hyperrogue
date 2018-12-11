@@ -2799,5 +2799,21 @@ Other:
 - fixed some cases where the record feature would not record anything
 - half-plane and band models are now computed on the GPU side (and thus these models are now rendered at high fps -- will be important in the upcoming racing mode) (in 2D only for now)
 
-2019.11.20 17:59 Update 10.5a
+2018.11.20 17:59 Update 10.5a
 - fix a bug with Hypersian Rug rendering
+
+2018.12.11 22:37 Update 10.5b
+
+Bugfixes and minor features:
+- you can no longer see mines by changing the color
+- mouse now works in the color menu
+- numpad now works as directions with numlock off and numbers with numlock on
+- fixed crashes when entering some symbols in Archimedean
+- surface 3D graphics are now automatically disabled in rug (won't work correctly with quotient rugs anyway) and in pmodels which do not support it
+- Hedgehog Warriors are replaced by Fire Cultists in non-3-valent Camelot
+- fixed in_smart_range adjusting to the screen resolution rather than the current texture
+
+Geometry experiments -- new quotient spaces:
+- "torus/Klein bottle" now includes infinite cylinder and infinite Mobius band
+- Macbeath surface, Bring's surface, Schmutz's M(2), Schmutz's M(3)
+- "multidimensional" -- (not yet documented)
