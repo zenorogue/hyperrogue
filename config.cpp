@@ -1491,6 +1491,7 @@ void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
 
 void show_color_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  getcstat = '-';
   gamescreen(0);
   dialog::init(XLAT("customize colors and aura"));
 
@@ -1552,8 +1553,6 @@ void show_color_dialog() {
   dialog::addBreak(50);
   dialog::addBack();
   dialog::display();
-  
-  getcstat = '-';
 
   keyhandler = [] (int sym, int uni) {
     if(uni == '-') {
