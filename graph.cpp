@@ -2749,6 +2749,9 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 
   wcol = fcol = winf[c->wall].color;
 
+  if(c->wall == waMineMine)
+    wcol = fcol = winf[waMineUnknown].color;
+
   // water colors
   if(isWateryOrBoat(c) || c->wall == waReptileBridge) {
     if(c->land == laOcean)

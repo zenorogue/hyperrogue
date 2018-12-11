@@ -1567,7 +1567,7 @@ void show_color_dialog() {
       else if(c->item) 
         dialog::openColorDialog(iinf[c->item].color);
       else if(c->wall) 
-        dialog::openColorDialog(winf[c->wall].color);
+        dialog::openColorDialog(winf[c->wall == waMineMine ? waMineUnknown : c->wall].color);
       else 
         dialog::openColorDialog(floorcolors[c->land]);
       dialog::colorAlpha = false;
