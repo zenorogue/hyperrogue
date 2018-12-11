@@ -1073,6 +1073,22 @@ string compass_help() {
     );
   }
 
+string make_help() {
+  return XLAT(
+    "This geometry essentially lets you play in a d-dimensional grid. Pick three "
+    "dimensions and '3D display' to see how it works -- we are essentially playing on a periodic surface in "
+    "three dimensions, made of hexagons; each hexagon connects to six other hexagons, in each of the 6 "
+    "possible directions. Normally, the game visualizes this from the point of view of a creature living inside "
+    "the surface (regularized and smoothened somewhat), assuming that light rays are also restricted to the surface -- "
+    "this will look exactly like the {2d,4} tiling, except that the light rays may thus "
+    "sometimes make a loop, causing you to see images of yourself in some directions (in other words, "
+    "the d-dimensional grid is a quotient of the hyperbolic plane). The same construction works in other dimensions. "
+    "Half dimensions are interpreted in the following way: the extra dimension only has two 'levels', for example 2.5D "
+    "has a top plane and a bottom plane.\n\n"
+    "You may also bitruncate this geometry -- which makes it work better with the rules of HyperRogue, but a bit harder to understand."
+    );
+  }
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
@@ -1098,6 +1114,8 @@ void show() {
   else
     dialog::addBreak(100);
   dialog::addBack();
+  dialog::addHelp();
+  dialog::add_action([] { gotoHelp(make_help()); });
   dialog::display();
   }
 
