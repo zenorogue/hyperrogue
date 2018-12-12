@@ -981,7 +981,7 @@ int detect_cusps() {
     max_edge_length = max(max_edge_length, e.len);
   anticusp_dist = anticusp_factor * max_edge_length;
   
-  array<int, 3> stats = {0,0,0};
+  array<int, 3> stats = {{0,0,0}};
 
   map<bincode, vector<rugpoint*> > code_to_point;
   for(auto p: points) if(p->valid)

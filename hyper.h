@@ -4334,7 +4334,8 @@ inline void special_log(char c) { putchar(c); }
 
 struct logger : hstream {
   int indentation;
-  bool doindent = false;
+  bool doindent;
+  logger() { doindent = false; }
   virtual void write_char(char c) { if(doindent) { doindent = false; for(int i=0; i<indentation; i++) special_log(' '); } special_log(c); if(c == 10) doindent = true; }
   virtual char read_char() { throw hstream_exception(); }
   };

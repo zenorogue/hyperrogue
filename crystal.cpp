@@ -147,7 +147,9 @@ struct crystal_structure {
     next_insert(a, prev[a][at], val);
     }
   
-  int errors = 0;
+  int errors;
+  
+  crystal_structure() { errors = 0; }
   
   bool may_next_insert(int a, int at, int val) {
     if(isize(next[a]) != dir) {
@@ -407,9 +409,12 @@ struct hrmap_crystal : hrmap {
     }
   
   ldcoord get_coord(cell *c) {
-    auto b = sgc.emplace(c, ldc0);
-    ldcoord& res = b.first->second;
-    if(b.second) {
+    // in C++14?
+    // auto b = sgc.emplace(c, ldc0);
+    // ldcoord& res = b.first->second;
+    if(sgc.count(c)) return sgc[c];
+    ldcoord& res = (sgc[c] = ldc0);
+    { // if(b.second) {
       if(BITRUNCATED && c->master->c7 != c) {
         for(int i=0; i<c->type; i+=2)
           res = res + told(hcoords[c->cmove(i)->master]);
@@ -486,8 +491,8 @@ void create_step(heptagon *h, int d) {
   }
 
 array<array<int,2>, MAX_EDGE> distlimit_table = {{
-  {SEE_ALL,SEE_ALL}, {SEE_ALL,SEE_ALL}, {SEE_ALL,SEE_ALL}, {SEE_ALL,SEE_ALL}, {15, 10}, 
-  {6, 4}, {5, 3}, {4, 3}, {4, 3}, {3, 2}, {3, 2}, {3, 2}, {3, 2}, {3, 2}
+  {{SEE_ALL,SEE_ALL}}, {{SEE_ALL,SEE_ALL}}, {{SEE_ALL,SEE_ALL}}, {{SEE_ALL,SEE_ALL}}, {{15, 10}}, 
+  {{6, 4}}, {{5, 3}}, {{4, 3}}, {{4, 3}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}
   }};
 
 color_t colorize(cell *c) {
