@@ -1001,6 +1001,7 @@ void set_crystal(int sides) {
   set_variation(eVariation::pure);
   ginf[gCrystal].sides = sides;
   ginf[gCrystal].vertex = 4;
+  need_reset_geometry = true;
   if(sides < MAX_EDGE)
     ginf[gCrystal].distlimit = distlimit_table[sides];
   }
