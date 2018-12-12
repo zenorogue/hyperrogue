@@ -1107,7 +1107,7 @@ void show() {
     dialog::add_action([i]() { set_crystal(i); start_game(); });
     }
   dialog::addBoolItem("4D double bitruncated", ginf[gCrystal].vertex == 3, 'D');
-  dialog::add_action([]() { set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated); });
+  dialog::add_action([]() { set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated); start_game(); });
   dialog::addBreak(50);
   dialog::addBoolItem("view coordinates in the cheat mode", view_coordinates, 'v');
   dialog::add_action([]() { view_coordinates = !view_coordinates; });
