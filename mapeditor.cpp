@@ -307,6 +307,7 @@ namespace mapstream {
       int i = f.get<int>();
       if(i == -1) break;
       int j = f.get<int>(), l = f.get<int>();
+      if(i >= 4) i = 3;
       if(i<0 || i >= mapeditor::USERSHAPEGROUPS) break;
       if(l<0 || l >= USERLAYERS) break;
 
