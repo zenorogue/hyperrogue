@@ -1817,13 +1817,8 @@ namespace hive {
     if(chaosmode && getDistLimit() <= 5) radius = 4;
     if(getDistLimit() <= 3) radius = 3;
 
-    for(int i=2; i<radius; i++) {
-      if(bf.at->type == 6)
-        bf += 3;
-      else
-        bf += 3 + hrand(2);
-      bf += wstep;
-      }
+    for(int i=(chaosmode?0:2); i<radius; i++) 
+      bf += revstep;
     cell *citycenter = bf.at;
     buginfo.clear();
     
