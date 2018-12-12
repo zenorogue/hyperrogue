@@ -1124,7 +1124,7 @@ namespace patterns {
 
   extern cpatterntype cgroup, old_cgroup;
   
-  enum ePattern {
+  enum ePattern : char {
     PAT_NONE = 0,
     PAT_TYPES = 'T',
     PAT_ZEBRA = 'z',
