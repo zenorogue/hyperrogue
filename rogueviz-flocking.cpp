@@ -290,7 +290,7 @@ namespace flocking {
     }
 
   void show() {
-    cmode = sm::SIDE;
+    cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(0);
     dialog::init(XLAT("flocking"), iinf[itPalace].color, 150, 0);
     

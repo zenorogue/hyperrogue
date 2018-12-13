@@ -103,7 +103,7 @@ void prepare_torusconfig() {
   }
 
 void showTorusConfig() {
-  cmode = sm::SIDE;
+  cmode = sm::SIDE | sm::MAYDARK;
   if(euclid) cmode |= sm::TORUSCONFIG;
   gamescreen(2);
   
@@ -279,7 +279,7 @@ void validity_info() {
 bool showquotients;
 
 void showEuclideanMenu() {
-  cmode = sm::SIDE;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
   if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
   for(int i=0; i<landtypes; i++)

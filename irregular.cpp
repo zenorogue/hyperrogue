@@ -879,7 +879,7 @@ string irrhelp =
   "For technical reasons, the density cannot be too small.";
 
 void show_gridmaker() {
-  cmode = sm::SIDE;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
   dialog::init(XLAT("irregular grid"));
   dialog::addSelItem(XLAT("density"), fts(density), 'd');

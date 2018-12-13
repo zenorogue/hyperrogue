@@ -201,7 +201,7 @@ void check() {
   }
 
 void showMenu() {
-  cmode = sm::SIDE;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("Spiral Staircase"), iinf[itPalace].color, 150, 0);
 

@@ -846,7 +846,7 @@ namespace levelline {
   void show() {
     if(levellines.size() == 0) create();
     gamescreen(0);
-    cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : 0;
+    cmode = sm::SIDE | sm::MAYDARK;
     dialog::init("level lines");
     char nx = 'a';
     for(auto &l : levellines) {

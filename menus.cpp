@@ -306,7 +306,7 @@ void editScale() {
   }
 
 void showDisplayMode() {
-  cmode = sm::SIDE;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
 
   dialog::init(XLAT("special display modes"));
