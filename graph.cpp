@@ -5518,7 +5518,7 @@ void calcparam() {
     cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
     }
   else {
-    if(vid.xres >= vid.yres * 5/4-16 && (cmode & sm::SIDE))
+    if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE))
       current_display->sidescreen = true;
 #if CAP_TOUR
     if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN))
