@@ -1872,7 +1872,7 @@ namespace shot {
   }
 
 namespace svg {
-  void circle(int x, int y, int size, color_t col, color_t fillcolor);
+  void circle(int x, int y, int size, color_t col, color_t fillcolor, double linewidth);
   void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth);
   void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
   extern bool in;
@@ -2737,6 +2737,7 @@ struct dqi_string : drawqueueitem {
 
 struct dqi_circle : drawqueueitem {
   int x, y, size, fillcolor;
+  double linewidth;
   void draw();
   virtual color_t outline_group() { return 2; }
   };

@@ -74,10 +74,10 @@ namespace svg {
     return buf;
     }
   
-  void circle(int x, int y, int size, color_t col, color_t fillcol) {
+  void circle(int x, int y, int size, color_t col, color_t fillcol, double linewidth) {
     if(!invisible(col) || !invisible(fillcol)) {
       if(vid.stretch == 1)
-        println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col), "/>");
+        println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col, linewidth), "/>");
       else
         println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*vid.stretch), "' ", stylestr(fillcol, col), "/>");
       }

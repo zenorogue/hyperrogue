@@ -1252,7 +1252,7 @@ void dqi_string::draw() {
 void dqi_circle::draw() {
   #if ISMOBILE==0
   if(svg::in) {
-    svg::circle(x, y, size, color, fillcolor);
+    svg::circle(x, y, size, color, fillcolor, linewidth);
     }
   else
   #endif
@@ -2777,6 +2777,7 @@ void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, 
   ptd.size = size;
   ptd.color = color;
   ptd.fillcolor = fillcolor;
+  ptd.linewidth = vid.linewidth;
   }
 
 void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
