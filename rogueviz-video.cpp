@@ -12,7 +12,6 @@ namespace rogueviz {
 
 void rvvideo(const string &fname) {
   if(kind == kCollatz) {
-    pngformat = 2;
     sightrange_bonus = 3;
     genrange_bonus = 3;
     dronemode = true; vid.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
@@ -146,8 +145,10 @@ struct storydata { int s; int e; const char *text; } story[] = {
       if(i == 0) drawthemap();
       shmup::turn(100);
       printf("%s\n", buf);
-      pngres = 1080;
-      saveHighQualityShot(buf, caption, fade);
+      shot::shoty = 1080; shot::shotx = 1920;
+      shot::caption = caption;
+      shot::fade = fade;
+      shot::take(buf);
       }
   
     return;
@@ -162,7 +163,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
     if(i == 0) drawthemap();
     centerpc(100);
     printf("%s\n", buf);
-    saveHighQualityShot(buf);
+    shot::take(buf);
     }
   }
 

@@ -964,7 +964,6 @@ void calcparam();
 #if CAP_SDL
 color_t& qpixel(SDL_Surface *surf, int x, int y);
 void setvideomode();
-void saveHighQualityShot(const char *fname = NULL, const char *caption = NULL, int fade = 255);
 #endif
 
 #if CAP_CONFIG
@@ -1862,13 +1861,22 @@ void clearMessages();
 
 void resetGeometry();
 
+namespace shot {
+  extern int shotx, shoty, shotformat;
+  extern bool make_svg;
+  extern ld gamma;
+  void menu();
+  void default_screenshot_content();
+  void take(string fname, const function<void()>& what = default_screenshot_content);
+  }
+
 namespace svg {
   void circle(int x, int y, int size, color_t col, color_t fillcolor);
   void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth);
   void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
   extern bool in;
   extern string link;
-  void render(const char *fname = NULL, const function<void()>& what = drawfullmap);
+  void render(const string& fname, const function<void()>& what = shot::default_screenshot_content);
   }
 
 extern int sightrange_bonus, genrange_bonus, gamerange_bonus;
@@ -2227,9 +2235,6 @@ namespace tour {
 
 extern bool doCross;
 void optimizeview();
-
-extern int pngres;
-extern int pngformat;
 
 extern bool noGUI;
 extern bool dronemode;

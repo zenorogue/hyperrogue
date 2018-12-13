@@ -23,11 +23,9 @@ namespace svg {
   
   bool invisible(color_t col) { return (col & 0xFF) == 0; }
   
-  ld gamma = .5;
-  
   void fixgamma(unsigned int& color) {
     unsigned char *c = (unsigned char*) (&color);
-    for(int i=1; i<4; i++) c[i] = 255 * pow(float(c[i] / 255.0), float(gamma));
+    for(int i=1; i<4; i++) c[i] = 255 * pow(float(c[i] / 255.0), float(shot::gamma));
     }
   
   int svgsize;
@@ -154,37 +152,23 @@ namespace svg {
     fprintf(f, "\n");
     }
   
-  void render(const char *fname, const function<void()>& what) {
-
-    dynamicval<videopar> v(vid, vid);
+  void render(const string& fname, const function<void()>& what) {
     dynamicval<bool> v2(in, true);
-    // dynamicval<int> v5(ringcolor, 0x808080FF);
+    dynamicval<bool> v3(vid.usingGL, false);
     
-    vid.usingGL = false;
-    vid.xres = vid.yres = svgsize ? svgsize : vid.use_smart_range ? pngres*divby : min(1 << (get_sightrange()+7), 16384);
-    calcparam();
-    dynamicval<bool> v6(inHighQual, true); 
-    darken = 0;
-    
-    time_t timer;
-    timer = time(NULL);
-
-    char buf[128]; strftime(buf, 128, "svgshot-%y%m%d-%H%M%S.svg", localtime(&timer));
-    if(!fname) fname = buf;
-
-    f = fopen(fname, "wt");
+    f = fopen(fname.c_str(), "wt");
     fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"%s\" height=\"%s\">\n", coord(vid.xres), coord(vid.yres));
     what();
     fprintf(f, "</svg>\n");
     fclose(f);
-    addMessage(XLAT("Saved the SVG shot to %1 (sightrange %2)", fname, its(get_sightrange())));
     }
-
+  
 #if CAP_COMMANDLINE
 int read_args() {
   using namespace arg;
   if(argis("-svgsize")) {
-    shift(); sscanf(argcs(), "%d/%d", &svg::svgsize, &svg::divby);
+    shift(); sscanf(argcs(), "%d/%d", &shot::shoty, &svg::divby);
+    if(shot::shotformat == -1) shot::shotformat = 0;
     }
   else if(argis("-svgfont")) {
     shift(); svg::font = args();
@@ -192,7 +176,7 @@ int read_args() {
     // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
     }
   else if(argis("-svggamma")) {
-    shift_arg_formula(svg::gamma);
+    shift_arg_formula(shot::gamma);
     }
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
@@ -208,10 +192,6 @@ auto ah = addHook(hooks_args, 0, read_args);
   }
 #endif
 
-#if CAP_SDL
-int pngres = 2000;
-int pngformat = 0;
-
 #if CAP_PNG
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
   SDL_Surface *s2 = SDL_PNGFormatAlpha(s);
@@ -220,85 +200,143 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
   }
 #endif
 
-hookset<void(renderbuffer*)> *hooks_hqshot;
+#if CAP_SHOT
+namespace shot {
 
-void saveHighQualityShot(const char *fname, const char *caption, int fade) {
+purehookset hooks_hqshot;
 
-  resetbuffer rb;
+int shotx = 2000, shoty = 2000;
+bool make_svg = false;
+bool transparent = true;
+ld gamma = 1;
+int shotformat = -1;
+string caption;
+ld fade = 1;
 
-  // int maxrange = getDistLimit() * 3/2;
+void set_shotx() {
+  if(shotformat == -1) return;
+  shotx = shoty;
+  if(shotformat == 1) shotx = shotx * 4/3;
+  if(shotformat == 2) shotx = shotx * 16/9;
+  if(shotformat == 3) {
+    shotx = shotx * 22/16;
+    while(shotx & 15) shotx++;
+    }
+  }
 
-  // dynamicval<int> v3(sightrange, (cheater && sightrange < maxrange) ? maxrange : sightrange);
+#if CAP_SDL
+int shot_aa = 1;
+#endif
+
+void default_screenshot_content() {
+  #if CAP_RUG
+  if(rug::rugged) {
+    if(rug::in_crystal()) rug::physics();
+    rug::drawRugScene();
+    }
+  else
+  #endif
+    drawfullmap();
+
+  if(caption != "")
+    displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
+  callhooks(hooks_hqshot);
+  drawStats();    
+  }
+
+#if CAP_PNG
+void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
+  if(gamma == 1 && shot_aa == 1) {
+    IMAGESAVE(sdark, fname.c_str());
+    return;
+    }
+
+  SDL_Surface *sout = SDL_CreateRGBSurface(SDL_SWSURFACE,shotx,shoty,32,0xFF<<16,0xFF<<8,0xFF, (sdark == sbright) ? 0 : (0xFF<<24));
+  for(int y=0; y<shoty; y++)
+  for(int x=0; x<shotx; x++) {
+    int val[2][4];
+    for(int a=0; a<2; a++) for(int b=0; b<3; b++) val[a][b] = 0;
+    for(int ax=0; ax<shot_aa; ax++) for(int ay=0; ay<shot_aa; ay++)
+    for(int b=0; b<2; b++) for(int p=0; p<3; p++)
+      val[b][p] += part(qpixel((b?sbright:sdark), x*shot_aa+ax, y*shot_aa+ay), p);
+    
+    int transparent = 0;
+    int maxval = 255 * 3 * shot_aa * shot_aa;
+    
+    for(int p=0; p<3; p++) transparent += val[1][p] - val[0][p];
+    
+    color_t& pix = qpixel(sout, x, y);
+    pix = 0;
+    part(pix, 3) = 255 - (255 * transparent + (maxval/2)) / maxval;
+    
+    if(transparent < maxval) for(int p=0; p<3; p++) {
+      ld v = (val[0][p] * 3. / maxval) / (1 - transparent * 1. / maxval);
+      v = pow(v, gamma) * fade;
+      v *= 255;
+      if(v > 255) v = 255;
+      part(pix, p) = v;
+      }
+    }
+  IMAGESAVE(sout, fname.c_str());
+  }
+#endif
+
+void take(string fname, const function<void()>& what) {
 
   if(cheater) doOvergenerate();
-
-  time_t timer;
-  timer = time(NULL);
+  
+  int multiplier = make_svg ? svg::divby : shot_aa;
 
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
-  dynamicval<bool> v6(auraNOGL, fname ? true : false);
-  
-  vid.xres = vid.yres = pngres;
-  if(pngformat == 1) vid.xres = vid.yres * 4/3;
-  if(pngformat == 2) vid.xres = vid.yres * 16/9;
-  if(pngformat == 3) {
-    vid.xres = vid.yres * 22/16;
-    while(vid.xres & 15) vid.xres++;
-    }
-  
-  // if(vid.pmodel == 0) vid.scale = 0.99;
-  calcparam();
-
-  renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
-  glbuf.enable();
-  current_display->set_viewport(0);
-
-  // printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
-
+  dynamicval<bool> v6(auraNOGL, true);
+  vid.smart_range_detail *= multiplier;
   darken = 0;
   
-  int numi = (fname?1:2);
-
-  for(int i=0; i<numi; i++) {
-    glbuf.clear(numi==1 ? backcolor : i ? 0xFFFFFF : 0);
-    
-    #if CAP_RUG
-    if(rug::rugged) {
-      if(!rug::renderonce) rug::prepareTexture();
-      glbuf.enable();
-      if(rug::in_crystal()) rug::physics();
-      rug::drawRugScene();
-      }
-    else
+  set_shotx();
+  vid.xres = shotx * multiplier;
+  vid.yres = shoty * multiplier;
+  calcparam();
+  
+  if(make_svg) {
+    #if CAP_SVG
+    svg::render(fname, what);
     #endif
-      drawfullmap();
-    
-    drawStats();
-    
-    callhooks(hooks_hqshot, &glbuf);
-
-    if(fade < 255) 
-      for(int y=0; y<vid.yres; y++)
-      for(int x=0; x<vid.xres; x++) {
-        color_t& p = qpixel(s, x, y);
-        for(int i=0; i<3; i++) {
-          part(p,i) = (part(p,i) * fade + 127) / 255;
-          }
-        }
-
-    if(caption)
-      displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
-
-    char buf[128]; strftime(buf, 128, "bigshota-%y%m%d-%H%M%S" IMAGEEXT, localtime(&timer));
-    buf[7] += i;
-    if(!fname) fname = buf;
-    IMAGESAVE(glbuf.render(), fname);
-    
-    if(i == 0) addMessage(XLAT("Saved the high quality shot to %1", fname));
     }
   
-  rb.reset();
+  else {  
+    #if CAP_PNG
+    resetbuffer rb;
+
+    renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
+    glbuf.enable();
+    current_display->set_viewport(0);
+
+    dynamicval v8(backcolor, transparent ? 0xFF000000 : backcolor);
+    #if CAP_RUG
+    if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+    #endif
+    glbuf.clear(backcolor);
+    what();
+    
+    SDL_Surface *sdark = glbuf.render();
+
+    if(transparent) {
+      renderbuffer glbuf1(vid.xres, vid.yres, vid.usingGL);
+      backcolor = 0xFFFFFFFF;
+      #if CAP_RUG
+      if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+      #endif
+      glbuf1.enable();
+      glbuf1.clear(backcolor);
+      current_display->set_viewport(0);
+      what();
+      
+      postprocess(fname, sdark, glbuf1.render());
+      }
+    else postprocess(fname, sdark, sdark);
+    #endif
+    }  
   }
 
 #if CAP_COMMANDLINE
@@ -307,13 +345,14 @@ int png_read_args() {
   if(argis("-pngshot")) {
     PHASE(3); shift(); start_game();
     printf("saving PNG screenshot to %s\n", argcs());
-    saveHighQualityShot(argcs());
+    make_svg = false;
+    shot::take(argcs());
     }
   else if(argis("-pngsize")) {
-    shift(); pngres = argi();
+    shift(); shoty = argi(); if(shotformat == -1) shotformat = 0;
     }
   else if(argis("-pngformat")) {
-    shift(); pngformat = argi();
+    shift(); shotformat = argi();
     }
   else return 1;
   return 0;
@@ -322,6 +361,61 @@ int png_read_args() {
 auto ah_png = addHook(hooks_args, 0, png_read_args);
 #endif
 
+void menu() {
+  cmode = sm::SIDE; 
+  gamescreen(0);
+  if(!CAP_SVG) make_svg = false;
+  if(!CAP_PNG) make_svg = true;
+  dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
+  dialog::addSelItem(XLAT("format"), make_svg ? "SVG" : "PNG", 'f');
+  dialog::add_action([] { make_svg = !make_svg; });
+  dialog::addSelItem(XLAT("pixels (X)"), its(shotx), 'x');
+  dialog::add_action([] { shotformat = -1; dialog::editNumber(shotx, 500, 8000, 100, 2000, XLAT("pixels (X)"), ""); });
+  dialog::addSelItem(XLAT("pixels (Y)"), its(shoty), 'y');
+  dialog::add_action([] { shotformat = -1; dialog::editNumber(shoty, 500, 8000, 100, 2000, XLAT("pixels (Y)"), ""); });
+  if(make_svg) {
+    using namespace svg;
+    dialog::addSelItem(XLAT("precision"), "1/"+its(divby), 'p');
+    dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
+    }
+  else {
+    dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
+    dialog::add_action([] { shot_aa *= 2; if(shot_aa > 16) shot_aa = 1; });
+    }
+  dialog::addBoolItem(XLAT("transparent"), transparent, 't');
+  dialog::add_action([] { transparent = !transparent; });
+
+  dialog::addSelItem(XLAT("gamma"), fts(gamma), 'g');
+  dialog::add_action([] { dialog::editNumber(gamma, 0, 2, .1, .5, XLAT("gamma"), "higher value = darker"); });
+
+  dialog::addSelItem(XLAT("brightness"), fts(fade), 'b');
+  dialog::add_action([] { dialog::editNumber(fade, 0, 2, .1, 1, XLAT("brightness"), "higher value = lighter"); });
+
+  dialog::addBoolItem(XLAT("show the HUD"), nohud, 'h');
+  dialog::add_action([] { nohud = !nohud; });
+
+  dialog::addItem(XLAT("customize colors and aura"), 'c');
+  dialog::add_action([] { pushScreen(show_color_dialog); });
+
+  menuitem_sightrange('r');
+
+  dialog::addBreak(100);
+  
+  dialog::addItem(XLAT("take screenshot"), 'z');
+  dialog::add_action([] () { 
+    static string pngfile = "hqshot.png";
+    static string svgfile = "svgshot.svg";
+    string& file = make_svg ? svgfile : pngfile;
+    dialog::openFileDialog(file, XLAT("screenshot"), make_svg ? ".svg" : ".png", [&file] () {
+      shot::take(file);
+      return true;
+      });
+    });
+  dialog::addBack();
+  dialog::display();
+  }
+
+}
 #endif
 
 #if CAP_ANIMATIONS
@@ -544,7 +638,7 @@ bool record_animation() {
     
     char buf[1000];
     snprintf(buf, 1000, animfile.c_str(), i);
-    saveHighQualityShot(buf);
+    shot::take(buf);
     rollback();
     }
   lastticks = ticks = SDL_GetTicks();
@@ -747,9 +841,9 @@ void show() {
     }
   #endif
   if(conformal::model_has_orientation())
-    animator(XLAT("model rotation"), ballangle_rotation, 'r');
+    animator(XLAT("model rotation"), ballangle_rotation, 'R');
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
-    animator(XLAT("3D rotation"), ballangle_rotation, 'r');
+    animator(XLAT("3D rotation"), ballangle_rotation, '3');
   
   dialog::addSelItem(XLAT("animate parameters"), fts(a), 'a');
   dialog::add_action([] () {
@@ -766,7 +860,10 @@ void show() {
   dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
   dialog::add_action([] () { pushScreen(conformal::history_menu); });
 
-  #if CAP_FILES  
+  #if CAP_SHOT
+  dialog::addItem(XLAT("shot settings"), 's');
+  dialog::add_action([] () { pushScreen(shot::menu); });
+
   if(needs_highqual) 
     dialog::addInfo(XLAT("some parameters will only change in recorded animation"));
   else
@@ -775,7 +872,7 @@ void show() {
   dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, XLAT("frames to record"), ""); });
   dialog::addSelItem(XLAT("record to a file"), animfile, 'R');
   dialog::add_action([] () { 
-    dialog::openFileDialog(animfile, XLAT("record to a file"), ".png", record_animation);
+    dialog::openFileDialog(animfile, XLAT("record to a file"), shot::make_svg ? ".svg" : ".png", record_animation);
     });
   #endif
   dialog::addBack();

@@ -319,6 +319,10 @@ void handleKeyNormal(int sym, int uni) {
       sym = 0;
     }
 
+  #if ISMOBILE  
+  if(uni == 'A' && !cheater) pushScreen(shot::menu);
+  #endif
+
   if(DEFAULTNOR(sym)) handlePanning(sym, uni);
   
 #ifdef SCALETUNER

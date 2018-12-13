@@ -460,11 +460,10 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
     displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
     displayButton(8, vid.yres-8-fs*7, XLAT("F5 = restart"), SDLK_F5, 0);
+    #if CAP_SHOT
     displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
+    #endif
     displayButton(8, vid.yres-8-fs*5, XLAT("F7 = player on/off"), SDLK_F7, 0);
-#if CAP_SVG
-    displayButton(8, vid.yres-8-fs*4, XLAT("F8 = SVG shot"), SDLK_F8, 0);
-#endif
     displayButton(8, vid.yres-8-fs*3, XLAT("SPACE = map/graphics"), ' ', 0);
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
@@ -644,30 +643,6 @@ namespace mapeditor {
       }
     }
 
-  #if CAP_SDL
-  void saveHighQualityShotX() {
-    static string hqfile = "hqshot.png";
-    if(anyshiftclick) 
-      saveHighQualityShot();
-    else
-      dialog::openFileDialog(hqfile, XLAT("F6 = HQ shot"), ".png", [] () {
-        saveHighQualityShot(hqfile.c_str());
-        return true;
-        });
-    }
-  
-  void saveSvgShotX() {
-    static string hqfile = "svgshot.svg";
-    if(anyshiftclick) 
-      svg::render();
-    else
-      dialog::openFileDialog(hqfile, XLAT("F8 = SVG shot"), ".svg", [] () {
-        svg::render(hqfile.c_str());
-        return true;
-        });
-    }
-  #endif
-  
   void editAt(cellwalker where, manual_celllister& cl) {
 
     if(painttype == 4 && radius) {
@@ -836,14 +811,9 @@ namespace mapeditor {
           return false;
           }
         });
-#if CAP_SDL
+#if CAP_SHOT
     else if(sym == SDLK_F6) {
-      saveHighQualityShotX();
-      }
-#endif
-#if CAP_SVG
-    else if(sym == SDLK_F8) {
-      saveSvgShotX();
+      pushScreen(shot::menu);
       }
 #endif
     else if(sym == SDLK_F7) {
@@ -1486,18 +1456,12 @@ namespace mapeditor {
       drawplayer = !drawplayer;
       }
 
-#if CAP_SDL    
-    if(sym == SDLK_F6) {
-      saveHighQualityShotX();
+#if CAP_SHOT
+    else if(sym == SDLK_F6) {
+      pushScreen(shot::menu);
       }
 #endif
 
-#if CAP_SVG    
-    if(sym == SDLK_F8) {
-      saveSvgShotX();
-      }
-#endif
-    
     if(sym == SDLK_ESCAPE) popScreen();
 
     if(sym == SDLK_F1) {

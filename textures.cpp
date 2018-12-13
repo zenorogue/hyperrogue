@@ -482,8 +482,10 @@ void texture_config::saveFullTexture(string tn) {
   texture::saving = true;
   drawscreen();
 
-  dynamicval<int> dv(pngres, data.twidth);
-  saveHighQualityShot(tn.c_str());
+  dynamicval<int> dvx(shot::shotx, data.twidth);
+  dynamicval<int> dvy(shot::shoty, data.twidth);
+  dynamicval<int> dvf(shot::shotformat, -1);
+  shot::take(tn.c_str());
   texture::saving = false;
   
   drawscreen();

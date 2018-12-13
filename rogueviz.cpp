@@ -1592,14 +1592,6 @@ bool turn(int delta) {
   // shmup::pc[0]->rebase();
   }
 
-void fixparam() {
-  if(!legend.empty() && !nohud) {
-    if((svg::in || inHighQual) && pngformat == 0)
-      vid.xres = vid.xres * 22/16;
-    current_display->xcenter = current_display->ycenter;
-    }
-  }
-
 #ifndef CAP_RVSLIDES
 #define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
 #endif
@@ -2259,7 +2251,6 @@ auto hooks  =
 #endif
   addHook(clearmemory, 0, close) +
   addHook(hooks_prestats, 100, rogueviz_hud) +
-  addHook(hooks_calcparam, 100, fixparam) +
   addHook(shmup::hooks_draw, 100, drawVertex) +
   addHook(shmup::hooks_describe, 100, describe_monster) +
   addHook(shmup::hooks_turn, 100, turn) + 

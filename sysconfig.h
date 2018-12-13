@@ -134,6 +134,10 @@
 #define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif
 
+#ifndef CAP_SHOT
+#define CAP_SHOT (CAP_FILES && (CAP_SVG || CAP_PNG))
+#endif
+
 #ifndef CAP_ODS
 #define CAP_ODS 0
 #endif
