@@ -166,6 +166,8 @@ namespace svg {
     #endif
 
     println(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\">");
+    if(!shot::transparent)
+      println(f, "<rect width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\" ", stylestr((backcolor << 8) | 0xFF, 0, 0));
     what();
     println(f, "</svg>");
     
