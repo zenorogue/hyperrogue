@@ -122,7 +122,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
     steps++; if(steps > 10000) {
       println(hlog, "not found"); return Id; 
       }
-    if(smallbounded && quotient) {
+    if(bounded) {
       transmatrix T;
       ld bestdist = 1e9;
       for(int d=0; d<S7; d++) if(h2->move(d)) {
@@ -150,7 +150,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
     if(among(geometry, gFieldQuotient, gBring, gMacbeath)) {
       int bestdist = 1000000, bestd = 0;
       for(int d=0; d<S7; d++) {
-        int dist = geometry == celldistance(h2->cmove(d)->c7, c1);
+        int dist = celldistance(h2->cmove(d)->c7, c1);
         if(dist < bestdist) bestdist = dist, bestd = d;
         }
       int sp = h2->c.spin(bestd);
