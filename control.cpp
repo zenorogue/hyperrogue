@@ -225,6 +225,12 @@ bool doexiton(int sym, int uni) {
   if(sym == SDLK_ESCAPE) return true;
   if(sym == SDLK_F10) return true;
   if(sym == PSEUDOKEY_RELEASE) return false;
+  if(sym == SDLK_LSHIFT) return false;
+  if(sym == SDLK_RSHIFT) return false;
+  if(sym == SDLK_LCTRL) return false;
+  if(sym == SDLK_RCTRL) return false;
+  if(sym == SDLK_LALT) return false;
+  if(sym == SDLK_RALT) return false;
   if(uni != 0) return true;
   return false;
   }
