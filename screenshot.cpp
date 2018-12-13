@@ -419,6 +419,18 @@ void menu() {
 
   dialog::addBreak(100);
   
+#if CAP_RUG
+  if(make_svg && rug::rugged)
+    dialog::addInfo("SVG screenshot do not work in this 3D mode", 0xFF0000);
+  else
+#endif
+#if CAP_TEXTURE
+  if(make_svg && texture::config.tstate == texture::tsActive)
+    dialog::addInfo("SVG screenshot do not work with textures", 0xFF0000);
+  else
+#endif
+   dialog::addBreak(100);
+  
   dialog::addItem(XLAT("take screenshot"), 'z');
   dialog::add_action([] () { 
     #if ISWEB
