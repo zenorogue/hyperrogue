@@ -4308,6 +4308,8 @@ inline void print(hstream& hs, const string& s) { hs.write_chars(s.c_str(), isiz
 inline void print(hstream& hs, int i) { print(hs, its(i)); }
 inline void print(hstream& hs, ld x) { print(hs, fts(x)); }
 
+template<class T> void print(hstream& hs, const walker<T>& w) { print(hs, "[", w.at, "/", w.spin, "/", w.mirrored, "]"); }
+
 struct comma_printer {
   bool first;
   hstream& hs;
