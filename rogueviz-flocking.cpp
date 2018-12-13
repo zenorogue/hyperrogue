@@ -256,6 +256,7 @@ namespace flocking {
   // options before reading
     if(0) ;
     else if(argis("-flocking")) {
+      PHASEFROM(2);
       shift(); N = argi();
       init();
       }
