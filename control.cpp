@@ -316,12 +316,10 @@ void handleKeyNormal(int sym, int uni) {
 
   if(cheater && sym < 256 && sym > 0) {
     if(applyCheat(uni, mouseover))
-      sym = 0;
+      uni = sym = 0;
     }
 
-  #if ISMOBILE  
-  if(uni == 'A' && !cheater) pushScreen(shot::menu);
-  #endif
+  if(uni == 'A') { pushScreen(shot::menu); uni = sym = 0; }
 
   if(DEFAULTNOR(sym)) handlePanning(sym, uni);
   

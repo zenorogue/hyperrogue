@@ -1864,7 +1864,8 @@ void resetGeometry();
 namespace shot {
   extern int shotx, shoty, shotformat;
   extern bool make_svg;
-  extern ld gamma;
+  extern ld gamma, fade;
+  extern string caption;
   void menu();
   void default_screenshot_content();
   void take(string fname, const function<void()>& what = default_screenshot_content);

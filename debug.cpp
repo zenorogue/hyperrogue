@@ -169,6 +169,11 @@ bool applyCheat(char u, cell *c = NULL) {
     pushScreen(mapeditor::showDrawEditor);
     return true;
     }
+#elif CAP_SHOT
+  if(u == 'A') {
+    pushScreen(shot::menu);
+    return true;
+    }
 #endif
   if(u == 'T') {
     items[randomTreasure2(10)] += 10;

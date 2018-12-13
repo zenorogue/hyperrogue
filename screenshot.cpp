@@ -12,7 +12,12 @@ namespace svg {
 #if ISMOBILE==0
 // svg renderer
 namespace svg {
-  FILE *f;
+  #if ISWEB
+  shstream f;
+  #else
+  fhstream f;
+  #endif
+  
   bool in = false;
   
   ld cta(color_t col) {
@@ -72,22 +77,20 @@ namespace svg {
   void circle(int x, int y, int size, color_t col, color_t fillcol) {
     if(!invisible(col) || !invisible(fillcol)) {
       if(vid.stretch == 1)
-        fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
-          coord(x), coord(y), coord(size), stylestr(fillcol, col));
+        println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col), "/>");
       else
-        fprintf(f, "<ellipse cx='%s' cy='%s' rx='%s' ry='%s' %s/>\n",
-          coord(x), coord(y), coord(size), coord(size*vid.stretch), stylestr(fillcol, col));
+        println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*vid.stretch), "' ", stylestr(fillcol, col), "/>");
       }
     }
   
   string link;
   
   void startstring() {
-    if(link != "") fprintf(f, "<a xlink:href=\"%s\" xlink:show=\"replace\">", link.c_str());
+    if(link != "") print(f, "<a xlink:href=\"", link, "\" xlink:show=\"replace\">");
     }
 
   void stopstring() {
-    if(link != "") fprintf(f, "</a>");
+    if(link != "") print(f, "</a>");
     }
 
   string font = "Times";
@@ -119,17 +122,17 @@ namespace svg {
           str2 += "\\#";
         else str2 += str[i];
       if(uselatex) str2 = string("\\myfont{")+coord(size)+"}{" + str2 + "}";  
-      fprintf(f, "<text x='%s' y='%s' text-anchor='%s' ",
-        coord(x), coord(y+size*.4), 
-        align == 8 ? "middle" :
+      
+      print(f, "<text x='", coord(x), "' y='", coord(y+size*.4), "' text-anchor='", align == 8 ? "middle" :
         align < 8 ? "start" :
-        "end");
+        "end", "' ");
       if(!uselatex)
-        fprintf(f, "font-family='%s' font-size='%s' ", font.c_str(), coord(size));      
-      fprintf(f, "%s>%s</text>",
-        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc/40), str2.c_str());
+        print(f, "font-family='", font, "' font-size='", coord(size), "' ");
+      print(f, 
+        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc/40), 
+        ">", str2, "</text>");
       stopstring();
-      fprintf(f, "\n");
+      println(f);
       }
     }
   
@@ -141,26 +144,41 @@ namespace svg {
     startstring();
     for(int i=0; i<polyi; i++) {
       if(i == 0)
-        fprintf(f, "<path d=\"M ");
+        print(f, "<path d=\"M ");
       else
-        fprintf(f, " L ");
-      fprintf(f, "%s %s", coord(polyx[i]), coord(polyy[i]));
+        print(f, " L ");
+      print(f, coord(polyx[i]), " ", coord(polyy[i]));
       }
     
-    fprintf(f, "\" %s/>", stylestr(col, outline, (hyperbolic ? current_display->radius : current_display->scrsize) * linewidth/256));
+    print(f, "\" ", stylestr(col, outline, (hyperbolic ? current_display->radius : current_display->scrsize) * linewidth/256), "/>");
     stopstring();
-    fprintf(f, "\n");
+    println(f);
     }
   
   void render(const string& fname, const function<void()>& what) {
     dynamicval<bool> v2(in, true);
     dynamicval<bool> v3(vid.usingGL, false);
     
-    f = fopen(fname.c_str(), "wt");
-    fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"%s\" height=\"%s\">\n", coord(vid.xres), coord(vid.yres));
+    #if ISWEB
+    f.s = "";
+    #else
+    f.f = fopen(fname.c_str(), "wt");
+    #endif
+
+    println(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\">");
     what();
-    fprintf(f, "</svg>\n");
-    fclose(f);
+    println(f, "</svg>");
+    
+    #if ISWEB
+    EM_ASM_({
+      var x=window.open();
+      x.document.open();
+      x.document.write(Pointer_stringify($0));
+      x.document.close();
+      }, f.s.c_str());
+    #else
+    fclose(f.f);
+    #endif
     }
   
 #if CAP_COMMANDLINE
@@ -312,7 +330,7 @@ void take(string fname, const function<void()>& what) {
     glbuf.enable();
     current_display->set_viewport(0);
 
-    dynamicval v8(backcolor, transparent ? 0xFF000000 : backcolor);
+    dynamicval<color_t> v8(backcolor, transparent ? 0xFF000000 : backcolor);
     #if CAP_RUG
     if(rug::rugged && !rug::renderonce) rug::prepareTexture();
     #endif
@@ -403,6 +421,9 @@ void menu() {
   
   dialog::addItem(XLAT("take screenshot"), 'z');
   dialog::add_action([] () { 
+    #if ISWEB
+    shot::take("new window");
+    #else
     static string pngfile = "hqshot.png";
     static string svgfile = "svgshot.svg";
     string& file = make_svg ? svgfile : pngfile;
@@ -410,6 +431,7 @@ void menu() {
       shot::take(file);
       return true;
       });
+    #endif
     });
   dialog::addBack();
   dialog::display();
