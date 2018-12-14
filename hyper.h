@@ -1859,17 +1859,17 @@ namespace dialog {
   
   void confirm_dialog(const string& text, const reaction_t& act);
   
-  void cheat_if_confirmed(const reaction_t& act) {
-    if(needConfirmationEvenIfSaved()) pushScreen([act] () { confirm_dialog("This will enable the cheat mode, making this game ineligible for scoring. Are you sure?", act); });
+  inline void cheat_if_confirmed(const reaction_t& act) {
+    if(needConfirmationEvenIfSaved()) pushScreen([act] () { confirm_dialog(XLAT("This will enable the cheat mode, making this game ineligible for scoring. Are you sure?"), act); });
     else act();
     }
 
-  void do_if_confirmed(const reaction_t& act) {
-    if(needConfirmation()) pushScreen([act] () { confirm_dialog("This will end your current game and start a new one. Are you sure?", act); });
+  inline void do_if_confirmed(const reaction_t& act) {
+    if(needConfirmationEvenIfSaved()) pushScreen([act] () { confirm_dialog(XLAT("This will end your current game and start a new one. Are you sure?"), act); });
     else act();
     }
 
-  reaction_t add_confirmation(const reaction_t& act) {
+  inline reaction_t add_confirmation(const reaction_t& act) {
     return [act] { do_if_confirmed(act); };
     }
   }
