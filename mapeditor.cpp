@@ -105,6 +105,7 @@ namespace mapstream {
       f.write(torusconfig::qty);
       f.write(torusconfig::dx);
       f.write(torusconfig::dy);
+      f.write(torusconfig::torus_mode);
       }
     if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
@@ -113,6 +114,11 @@ namespace mapstream {
         f.write(current_extra);
         f.write(fgeomextras[current_extra].current_prime_id);
         }
+      }
+    if(geometry == gCrystal) {
+      f.write(ginf[gCrystal].sides);
+      if(ginf[gCrystal].sides == 8)
+        f.write(ginf[gCrystal].vertices);
       }
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
@@ -181,7 +187,12 @@ namespace mapstream {
     if(!f.f) return false;
     clearMemory();
     int vernum = f.get<int>();
-    if(vernum >= 7400) f.read(patterns::whichPattern);
+    if(vernum >= 10420 && vernum < 10503) {
+      int i;
+      f.read(i);
+      patterns::whichPattern = patterns::ePattern(i);
+      }
+    else if(vernum >= 7400) f.read(patterns::whichPattern);
     
     if(vernum >= 10203) {
       f.read(geometry);
@@ -196,6 +207,23 @@ namespace mapstream {
         f.read(torusconfig::qty);
         f.read(torusconfig::dx);
         f.read(torusconfig::dy);
+        if(vernum >= 10504)
+          f.read(torusconfig::torus_mode);
+
+        }
+      if(geometry == gCrystal && vernum >= 10504) {
+        int sides;
+        f.read(sides);
+        set_crystal(sides);
+        if(sides == 8) {
+          int vertices;
+          eVariation v = variation;
+          f.read(vertices);          
+          if(vertices == 3) {
+            set_variation(eVariation::bitruncated);
+            set_variation(v);
+            }
+          }
         }
       if(geometry == gFieldQuotient) {
         using namespace fieldpattern;
