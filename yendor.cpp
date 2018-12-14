@@ -955,12 +955,24 @@ int modecode() {
     mct += irr::density_code() << 21; // 8 bits
     }
   
+  if(DUAL) {
+    mct += (1 << 19);
+    mct += (1 << 20);
+    }
+  
   // 32 bits [29..61) for geometry specifics
   if(torus) {
-    mct += ll(torusconfig::dx) << 29;
-    mct += ll(torusconfig::dy) << 37;
-    mct += ll(torusconfig::qty) << 45;
-    mct += ll(torusconfig::torusmode) << 53;
+    mct += ll(torusconfig::torusmode) << 29;
+    auto& mode = torusconfig::tmodes[torusconfig::torusmode];
+    bool single = (mode.flags & torusconfig::TF_SINGLE);
+    if(single) {
+      mct += ll(torusconfig::qty) << 37;
+      mct += ll(torusconfig::dy) << 45;
+      }
+    else {
+      mct += ll(torusconfig::sdx) << 37;
+      mct += ll(torusconfig::sdy) << 45;
+      }
     }
   
   if(geometry == gQuotient) {

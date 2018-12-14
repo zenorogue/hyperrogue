@@ -105,6 +105,8 @@ namespace mapstream {
       f.write(torusconfig::qty);
       f.write(torusconfig::dx);
       f.write(torusconfig::dy);
+      f.write(torusconfig::sdx);
+      f.write(torusconfig::sdy);
       f.write(torusconfig::torus_mode);
       }
     if(geometry == gFieldQuotient) {
@@ -207,9 +209,12 @@ namespace mapstream {
         f.read(torusconfig::qty);
         f.read(torusconfig::dx);
         f.read(torusconfig::dy);
-        if(vernum >= 10504)
+        if(vernum >= 10504) {
+          f.read(torusconfig::sdx);
+          f.read(torusconfig::sdy);
           f.read(torusconfig::torus_mode);
-
+          }
+        torusconfig::activate();
         }
       if(geometry == gCrystal && vernum >= 10504) {
         int sides;
