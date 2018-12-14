@@ -1098,23 +1098,23 @@ string make_help() {
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
-  dialog::init(XLAT("multi-dimensional"));
+  dialog::init(XLAT("dimensional crystal"));
   for(int i=5; i<=14; i++) {
     string s;
     if(i % 2) s = its(i/2) + ".5D";
     else s = its(i/2) + "D";
     dialog::addBoolItem(s, geometry == gCrystal && ginf[gCrystal].sides == i && ginf[gCrystal].vertex == 4, 'a' + i - 5);
-    dialog::add_action([i]() { set_crystal(i); start_game(); });
+    dialog::add_action(dialog::add_confirmation([i]() { set_crystal(i); start_game(); }));
     }
-  dialog::addBoolItem("4D double bitruncated", ginf[gCrystal].vertex == 3, 'D');
-  dialog::add_action([]() { set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated); start_game(); });
+  dialog::addBoolItem(XLAT("4D double bitruncated"), ginf[gCrystal].vertex == 3, 'D');
+  dialog::add_action(dialog::add_confirmation([]() { set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated); start_game(); }));
   dialog::addBreak(50);
-  dialog::addBoolItem("view coordinates in the cheat mode", view_coordinates, 'v');
+  dialog::addBoolItem(XLAT("view coordinates in the cheat mode"), view_coordinates, 'v');
   dialog::add_action([]() { view_coordinates = !view_coordinates; });
   dialog::addSelItem(XLAT("compass probability"), fts(compass_probability), 'p');
   dialog::add_action([]() { dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); });
   if(geometry == gCrystal) {
-    dialog::addBoolItem("3D display", rug::rugged, 'r');
+    dialog::addBoolItem(XLAT("3D display"), rug::rugged, 'r');
     dialog::add_action([]() { pushScreen(rug::show); });
     }
   else

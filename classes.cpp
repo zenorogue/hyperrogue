@@ -1689,11 +1689,11 @@ vector<geometryinfo> ginf = {
   {"minimal quotient",    "minimal",  7, 3, qsSMALLN,  gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
   {"binary tiling",       "binary",   7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"Archimedean",         "A",        7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
-  {"Macbeath surface",    "Macbeath", 7, 3, qsSMALL,   gcHyperbolic, 0x20000, {{7, 5}}, eVariation::bitruncated},
+  {"Macbeath Surface",    "Macbeath", 7, 3, qsSMALL,   gcHyperbolic, 0x20000, {{7, 5}}, eVariation::bitruncated},
   {"Bring's Surface",     "Bring",    5, 4, qsSMALL,   gcHyperbolic, 0x20200, {{6, 4}}, eVariation::bitruncated},
   {"Schmutz's M(3)",      "M3",      12, 3, qsSMALL,   gcHyperbolic, 0x20400, {{4, 2}}, eVariation::bitruncated},
   {"Schmutz's M(4)",      "M4",      12, 3, qsSMALL,   gcHyperbolic, 0x20600, {{4, 2}}, eVariation::bitruncated},
-  {"more dimensions",     "Crystal",  6, 4, qANYQ,     gcHyperbolic, 0x28000, {{5, 3}}, eVariation::pure},
+  {"dimensional crystal", "Crystal",  6, 4, qANYQ,     gcHyperbolic, 0x28000, {{5, 3}}, eVariation::pure},
   };
 
 // remember to match the following mask when specifying codes for extra geometries: 0x78600

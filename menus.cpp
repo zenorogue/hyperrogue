@@ -254,22 +254,23 @@ void showMainMenu() {
     else if(uni == 'g') pushScreen(showGraphConfig);
     else if(uni == 'd') pushScreen(showDisplayMode);
     else if(uni == 'm') pushScreen(showChangeMode);
-    else if(uni == 'R')
+    else if(uni == 'R') dialog::do_if_confirmed([] {
       popScreenAll(), pushScreen(showStartMenu);
+      });
   #if CAP_SAVE
     else if(uni == 't') scores::load();
   #endif
-    else if(uni == 'r' || sym == SDLK_F5) {
+    else if(uni == 'r' || sym == SDLK_F5) dialog::do_if_confirmed([] {
       restart_game();
-      }
-    else if(uni == 'q' || sym == SDLK_F10) {
+      });
+    else if(uni == 'q' || sym == SDLK_F10) dialog::do_if_confirmed([] {
 #if ISMOBILE
       extern void openURL();
       openURL();
 #else
       quitmainloop = true;
 #endif
-      }
+      });
     else if(uni == 'o') {
       clearMessages();
       get_o_key().second();
@@ -413,14 +414,14 @@ void enable_cheat() {
   else if(daily::on) {
     addMessage(XLAT("Not available in the daily challenge!"));
     }
-  else if(!cheater) {
+  else if(!cheater) dialog::cheat_if_confirmed([] {
     cheater++;
     addMessage(XLAT("You activate your demonic powers!"));
 #if ISMOBILE==0
     addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
 #endif
     popScreen();
-    }
+    });
   else {
     popScreen();
     firstland = princess::challenge ? laPalace : laIce;
@@ -523,35 +524,38 @@ void showChangeMode() {
       }
     else if(xuni == 'p')
       pushScreen(peace::showMenu);
-    else if(xuni == 'i') {
+    else if(xuni == 'i') dialog::do_if_confirmed([] {
       restart_game(rg::inv);
-      }
+      });
   #if CAP_TOUR
-    else if(uni == 'T') {
+    else if(uni == 'T') dialog::do_if_confirmed([] {
       tour::start();
-      }
+      });
   #endif
     else if(uni == 'C') {
       chaosUnlocked = chaosUnlocked || autocheat;
-      if(chaosUnlocked) restart_game(rg::chaos);
+      if(chaosUnlocked) dialog::do_if_confirmed([] { restart_game(rg::chaos); });
       if(!chaosUnlocked) help_nochaos();
       }
     else if(xuni == 'P') {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
       else
-        restart_game(rg::princess);
+        dialog::do_if_confirmed([] { restart_game(rg::princess); });
       }
   #if CAP_EDIT
     else if(xuni == 'm') {
       if(tactic::on) 
         addMessage(XLAT("Not available in the pure tactics mode!"));
-      else {
+      else if(daily::on) {
+        addMessage(XLAT("Not available in the daily challenge!"));
+        }
+      else dialog::cheat_if_confirmed([] {
         cheater++;
         pushScreen(mapeditor::showMapEditor);
         lastexplore = turncount;
         addMessage(XLAT("You activate your terraforming powers!"));
-        }
+        });
       }
   #endif
     else if(xuni == 's') {
@@ -564,8 +568,11 @@ void showChangeMode() {
     else if(xuni == 'h' && !shmup::on) 
       switchHardcore();
     else if(xuni == 'r') {
-      firstland = laIce;
-      restart_game(rg::randpattern);
+      dialog::do_if_confirmed([] { 
+        stop_game();
+        firstland = laIce;
+        restart_game(rg::randpattern); 
+        });
       }
     else if(doexiton(sym, uni))
       popScreen();

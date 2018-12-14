@@ -1058,6 +1058,20 @@ namespace dialog {
     numberdark = 0;
     }
 
+  void confirm_dialog(const string& text, const reaction_t& act) {
+    gamescreen(1);
+    dialog::addBreak(250);
+    dialog::init(XLAT("WARNING"), 0xFF0000, 150, 100);
+    dialog::addInfo(text);
+    dialog::addItem(XLAT("YES"), 'y');
+    auto yes = [act] () { popScreen(); act(); };
+    dialog::add_action(yes);
+    dialog::add_key_action(SDLK_RETURN, yes);
+    dialog::addItem(XLAT("NO"), 'n');
+    dialog::add_action([] () { popScreen(); });
+    dialog::display();
+    }
+
   };
 
 }

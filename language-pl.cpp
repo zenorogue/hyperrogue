@@ -7254,7 +7254,7 @@ S(
 
 // color edit dialog
 
-S("customize colors and aura", "Dostosuj kolory i aurę")
+S("customize colors and aura", "dostosuj kolory i aurę")
 
 S("background", "tło")
 S("foreground", "pierwszy plan")
@@ -7288,3 +7288,109 @@ S("half-plane scale", "skala półpłaszczyzny")
 S("use GPU to compute projections", "obliczanie projekcji przy użyciu GPU")
 S("N/A", "niedostępne")
 S(" (2D only)", " (tylko 2D)")
+
+// 10.5d
+
+// this line was missing...
+S("geometry experiments", "eksperymenty z geometrią")
+
+S("cylinder (squares)", "walec (kwadraty)")
+S("cylinder (hex)", "walec (heksy)")
+S("Möbius band (squares)", "wstęga Möbiusa (kwadraty)")
+S("Möbius band (hex)", "wstęga Möbiusa (heksy)")
+
+S("Macbeath Surface", "powierzchnia Macbeatha")
+S("Bring's Surface", "powierzchnia Bringa")
+S("Schmutz's M(3)", "M(3) Schmutza")
+S("Schmutz's M(4)", "M(4) Schmutza")
+
+S("dimensional crystal", "wielowymiarowy kryształ")
+
+S(
+    "This geometry essentially lets you play in a d-dimensional grid. Pick three "
+    "dimensions and '3D display' to see how it works -- we are essentially playing on a periodic surface in "
+    "three dimensions, made of hexagons; each hexagon connects to six other hexagons, in each of the 6 "
+    "possible directions. Normally, the game visualizes this from the point of view of a creature living inside "
+    "the surface (regularized and smoothened somewhat), assuming that light rays are also restricted to the surface -- "
+    "this will look exactly like the {2d,4} tiling, except that the light rays may thus "
+    "sometimes make a loop, causing you to see images of yourself in some directions (in other words, "
+    "the d-dimensional grid is a quotient of the hyperbolic plane tiling). The same construction works in other dimensions. "
+    "Half dimensions are interpreted in the following way: the extra dimension only has two 'levels', for example 2.5D "
+    "has a top plane and a bottom plane.\n\n"
+    "You may also bitruncate this geometry -- which makes it work better with the rules of HyperRogue, but a bit harder to understand.",
+    
+    "Ta geometria pozwala Ci grać na d-wymiarowej siatce. Wybierz 3 wymiary i "
+    "'tryb 3D' by zobaczyć, jak to działa -- gramy na okresowej powierzchni w "
+    "trzech wymiarach, złożonej z sześciokątów; każdy sześciokąt łączy się "
+    "z 6 innymi sześciokątami, w 6 kierunkach. Normalnie gra przedstawia "
+    "sytuację z punktu widzenia istoty żyjącej na tej powierzchni (wyregulowanej i "
+    "wygładzonej), przy założeniu, że promienie świetlne również są ograniczone "
+    "do powierzchni -- w związku z czym sytuacja wygląda jak parkietaż {2d,4}, "
+    "poza tym, że promienie świetlne czasami zataczają pętlę, w związku z czym "
+    "w niektórych kierunkach widzisz obrazy samego siebie (innymi słowami, "
+    "siatka d-wymiarowa jest przestrzenią ilorazową parkietażu hiperbolicznego). "
+    "Ta sama konstrukcja działa też w innych wymiarach. Pół-wymiary są "
+    "interpretowane w sposób następujący: dodatkowy wymiar ma 2 'poziomy', na przykład "
+    "2.5D ma górną i dolną płaszczyznę.\n\n"
+    "Można przyciąć (bitruncate) tą geometrię -- powoduje to, że lepiej ona współgra z regułami "
+    "HyperRogue, ale jest trochę trudniejsza do zrozumienia.")
+
+S("4D double bitruncated", "4 wymiary, podwójna bitrunkacja")
+S("view coordinates in the cheat mode", "pokazuj współrzędne w trybie oszustwa")
+S("compass probability", "prawdopodobieństwo kompasu")
+S("3D display", "tryb 3D")
+
+S("\"Each piece of the Round Table is exactly %1 steps away from the Holy Grail.\"",
+  "\"Każdy fragment stołu jest dokładnie %1 kroków od Świętego Graala.\"")
+
+S("\"According to Merlin, the Round Table is a perfect Euclidean sphere in %1 dimensions.\"",
+  "\"Merlin mówi, że Okrągły Stół jest dokładną Euklidesową sferą w %1 wymiarach.")
+
+S(
+  "Lands in this geometry are usually built on North-South or West-East axis. "
+  "Compasses always point North, and all the cardinal directions to the right from compass North are East (this is not "
+  "true in general, but it is true for the cells where compasses are generated). "
+  "North is the first coordinate, while East is the sum of other coordinates.",
+  
+  "Krainy w tej geometrii są zwykle budowane na osi Północ-Południe lub Wschód-Zachód. "
+  "Kompasy zawsze wskazują Północ, i wszystkie główne kierunki na prawo od Północy kompasu są zachodnie "
+  "(to nie jest zawsze prawda, ale jest to prawda na polach z kompasami). "
+  "Północ jest pierwszą współrzędną, a Wschód jest sumą pozostałych.")
+
+S("crystal coordinate colors", "kolory współrzędnych kryształu")
+
+S("3D monsters/walls on the surface", "potwory/ściany 3D na powierzchni")
+S("no 3D effects available in this projection", "ta projekcja nie ma efektów 3D")
+
+// new screenshot menu
+
+S("screenshots", "zrzuty ekranu")
+S("format", "format")
+S("pixels (X)", "piksele (X)")
+S("pixels (Y)", "piksele (Y)")
+S("supersampling", "supersampling")
+S("transparent", "przezroczysość")
+S("gamma", "współczynnik gamma")
+S("higher value = darker", "wyższa wartość = ciemniej")
+S("brightness", "jasność")
+S("higher value = lighter", "wyższa wartość = jaśniej")
+S("show the HUD", "pokazuj HUD")
+S("SVG screenshots do not work in this 3D mode", "zrzuty ekranu w formacie SVG nie działają w tym trybie 3D")
+S("SVG screenshots do not work with textures", "zrzuty ekranu w formacie SVG nie działają z teksturami")
+S("take screenshot", "zrób zrzut ekranu")
+S("screenshot", "zrzut ekranu")
+S("shot settings", "ustawienia zrzutów ekranu")
+
+// new warnings
+
+S("WARNING", "UWAGA")
+S("YES", "TAK")
+S("NO", "NIE")
+
+S("Are you sure you want to hit %the1?", "Czy na pewno chcesz uderzyć %a1?")
+S("This will exit HyperRogue without saving your current game. Are you sure?",
+  "To spowoduje wyjście z HyperRogue bez zapisania Twojej obecnej gry. Czy na pewno?")
+S("This will end your current game and start a new one. Are you sure?",
+  "To zakończy Twoją obecną grę i zacznie nową. Czy na pewno?")
+S("This will enable the cheat mode, making this game ineligible for scoring. Are you sure?",
+  "To uruchomi tryb oszusta. Wyniki przestaną się liczyć. Czy na pewno?")

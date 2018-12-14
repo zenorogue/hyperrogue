@@ -72,18 +72,18 @@ void showQuotientConfig() {
       gxcur.current_prime_id = uni - 'A';
     else if(uni == 'p')
       nextPrime(gxcur);
-    else if(uni == 'x' || uni == '\n') {
+    else if(uni == 'x' || uni == '\n') dialog::do_if_confirmed([&gxcur] {
       set_geometry(gxcur.base);
       enableFieldChange();
       set_geometry(gFieldQuotient);
       start_game();
-      }
-    else if(uni == 'c') {
+      });
+    else if(uni == 'c') dialog::do_if_confirmed([] {
       set_geometry(gEuclid);
       fieldpattern::quotient_field_changed = false;
       set_geometry(gFieldQuotient);
       start_game();
-      }
+      });
     else if(doexiton(sym, uni))
       popScreen();
     };
@@ -234,7 +234,7 @@ void showTorusConfig() {
       dialog::editNumber(torusconfig::newsdy, 0, 1000, square ? 2 : simple ? 3 : 2, 12, XLAT("height (y)"), "");
     else if(uni == 't')
       torus_bitrunc = !torus_bitrunc;
-    else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) {
+    else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) dialog::do_if_confirmed([square] {
       set_geometry(gNormal);
       torusconfig::torus_mode = torusconfig::newmode;
       torusconfig::qty = torusconfig::newqty;
@@ -245,15 +245,15 @@ void showTorusConfig() {
       set_geometry(gTorus);
       set_variation((torus_bitrunc || !square) ? eVariation::bitruncated : eVariation::pure);
       start_game();
-      }
-    else if(uni == 'c') {
+      });
+    else if(uni == 'c') dialog::do_if_confirmed([] {
       set_geometry(gEuclid);
       torusconfig::torus_mode = torusconfig::tmSingle;
       torusconfig::qty = torusconfig::def_qty;
       torusconfig::dy = torusconfig::def_dy;
       set_geometry(gTorus);
       start_game();
-      }
+      });
     else if(uni == 'z') editScale();
 #if CAP_RUG
     else if(uni == 'u') rug::select();
@@ -332,10 +332,10 @@ void showEuclideanMenu() {
           pushScreen(crystal::show);
         else if(targetgeometry == gArchimedean)
           pushScreen(arcm::show);
-        else {
+        else dialog::do_if_confirmed([targetgeometry] () {
           set_geometry(targetgeometry);
           start_game();
-          }
+          });
         });
       }
     
@@ -533,10 +533,10 @@ void showEuclideanMenu() {
             #endif
             };
           }
-        else if(euclid4) {
+        else if(euclid4) dialog::do_if_confirmed([] {
           set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
           start_game();
-          }
+          });
         else // if(S3 == 3) 
           gp::configure();
         }
@@ -622,18 +622,18 @@ void showEuclideanMenu() {
         if(eupage * euperpage >= isize(landlist)) eupage = 0;
         }
       else if(uni == '1') {
-        if(chaosUnlocked) {
+        if(chaosUnlocked) dialog::do_if_confirmed([] {
           stop_game_and_switch_mode(rg::chaos);
           start_game();
-          }
+          });
         }
       else if(lid >= 0 && lid < isize(landlist)) {
         eLand nland = landlist[lid];
-        if(landvisited[nland]) {
+        if(landvisited[nland]) dialog::do_if_confirmed([nland] {
           stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
           firstland = specialland = nland;
           start_game();
-          }
+          });
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
       else if(doexiton(sym, uni)) popScreen();

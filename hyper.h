@@ -1727,6 +1727,8 @@ bool minesafe();
 bool hasSafeOrb(cell *c);
 void placeWater(cell *c, cell *c2);
 bool againstCurrent(cell *w, cell *from);
+bool needConfirmation();
+bool needConfirmationEvenIfSaved();
 
 #define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse && !(rug::rugged && rug::renderonce))
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
@@ -1854,6 +1856,22 @@ namespace dialog {
   string editchecker(int sym, int uni);
   bool handle_edit_string(int sym, int uni, function<string(int, int)> checker = editchecker);
   void edit_string(string& s, string title, string help);
+  
+  void confirm_dialog(const string& text, const reaction_t& act);
+  
+  void cheat_if_confirmed(const reaction_t& act) {
+    if(needConfirmationEvenIfSaved()) pushScreen([act] () { confirm_dialog("This will enable the cheat mode, making this game ineligible for scoring. Are you sure?", act); });
+    else act();
+    }
+
+  void do_if_confirmed(const reaction_t& act) {
+    if(needConfirmation()) pushScreen([act] () { confirm_dialog("This will end your current game and start a new one. Are you sure?", act); });
+    else act();
+    }
+
+  reaction_t add_confirmation(const reaction_t& act) {
+    return [act] { do_if_confirmed(act); };
+    }
   }
 
 void checkStunKill(cell *dest);
@@ -2527,8 +2545,6 @@ void handlePanning(int sym, int uni);
 #if ISMOBILE==1
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
-
-bool needConfirmation();
 
 namespace mirror {
   cellwalker reflect(const cellwalker& cw);

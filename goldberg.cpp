@@ -724,10 +724,10 @@ namespace hr { namespace gp {
       
     if(irr::supports(geometry)) {
       dialog::addBoolItem(XLAT("irregular"), IRREGULAR, 'i');
-      dialog::add_action([=] () { 
+      dialog::add_action(dialog::add_confirmation([=] () { 
         if(min_quality && !irr::bitruncations_requested) irr::bitruncations_requested++;
         if(!IRREGULAR) irr::visual_creator(); 
-        });
+        }));
       }
     
     dialog::addBreak(100);
@@ -737,9 +737,10 @@ namespace hr { namespace gp {
 
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni == 'a') 
+      if(uni == 'a') dialog::do_if_confirmed([] {
         whirl_set(loc(1, 0));
-      else if(uni == 'b') {
+        });
+      else if(uni == 'b') dialog::do_if_confirmed([] {
         if(S3 == 4) {
           if(!BITRUNCATED) {
             stop_game();
@@ -749,13 +750,16 @@ namespace hr { namespace gp {
           }
         else 
           whirl_set(loc(1, 1));
-        }
-      else if(uni == 'c')
+        });
+      else if(uni == 'c') dialog::do_if_confirmed([] {
         whirl_set(loc(2, 0));
-      else if(uni == 'd')
+        });
+      else if(uni == 'd') dialog::do_if_confirmed([] {
         whirl_set(S3 == 3 ? loc(3, 0) : loc(1,1));
-      else if(uni == 'f')
+        });
+      else if(uni == 'f') dialog::do_if_confirmed([] {
         whirl_set(config);
+        });
       else if(uni == 'x')
         dialog::editNumber(config.first, 0, 8, 1, 1, "x", helptext());
       else if(uni == 'y')

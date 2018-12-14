@@ -7501,7 +7501,7 @@ S(
 
 // color edit dialog
 
-S("customize colors and aura", "Uprav barvy a auru")
+S("customize colors and aura", "uprav barvy a auru")
 
 S("background", "pozadí")
 S("foreground", "popøedí")
@@ -7535,3 +7535,109 @@ S("half-plane scale", "polorovinové měřítko")
 S("use GPU to compute projections", "použít GPU k výpočtu projekcí")
 S("N/A", "nedostupné")
 S(" (2D only)", " (pouze 2D)")
+
+// 10.5d
+
+// this line was missing...
+S("geometry experiments", "experimenty s geometrií")
+
+S("cylinder (squares)", "válec (čtverce)")
+S("cylinder (hex)", "válec (hexy)")
+S("Möbius band (squares)", "Möbiův pásek (čtverce)")
+S("Möbius band (hex)", "Möbiův pásek (hexy)")
+
+S("Macbeath Surface", "Macbeathova plocha")
+S("Bring's Surface", "Bringova plocha")
+S("Schmutz's M(3)", "Schmutzův M(3)")
+S("Schmutz's M(4)", "Schmutzův M(4)")
+
+S("dimensional crystal", "dimenzionální krystal")
+
+S(
+    "This geometry essentially lets you play in a d-dimensional grid. Pick three "
+    "dimensions and '3D display' to see how it works -- we are essentially playing on a periodic surface in "
+    "three dimensions, made of hexagons; each hexagon connects to six other hexagons, in each of the 6 "
+    "possible directions. Normally, the game visualizes this from the point of view of a creature living inside "
+    "the surface (regularized and smoothened somewhat), assuming that light rays are also restricted to the surface -- "
+    "this will look exactly like the {2d,4} tiling, except that the light rays may thus "
+    "sometimes make a loop, causing you to see images of yourself in some directions (in other words, "
+    "the d-dimensional grid is a quotient of the hyperbolic plane tiling). The same construction works in other dimensions. "
+    "Half dimensions are interpreted in the following way: the extra dimension only has two 'levels', for example 2.5D "
+    "has a top plane and a bottom plane.\n\n"
+    "You may also bitruncate this geometry -- which makes it work better with the rules of HyperRogue, but a bit harder to understand.",
+    
+    "Tato geometrie ti v podstatě umožňuje hrát na d-rozměrné mřížce. Vyber si tři rozměry "
+    "a '3D zobrazení', abyste viděli, jak to funguje -- v podstatě hrajeme na periodickém "
+    "povrchu ve třech rozměrech tvořeném šestiúhelníky; každý šestiúhelník je spojený se "
+    "šesti dalšími šestiúhelníky v každém z šesti možných směrů. Hra to normálně vizualizuje "
+    "z pohledu tvora žijícího uvnitř tohoto povrchu (poněkud regularizovaného a vyhlazeného) "
+    "za předpokladu, že i světelné paprsky se mohou šířit pouze po tomto povrchu -- bude to "
+    "vypadat přesně jako dláždění {2d,4}, až na to, že světelné paprsky mohou tím pádem někdy "
+    "udělat okruh a ty v některých směrech můžeš vidět sám sebe (jinými slovy, d-rozměrná "
+    "mřížka je kvocientem dláždění hyperbolické roviny). Stejná konstrukce funguje i "
+    "v jiných rozměrech. "
+    "Poločíselné rozměry se interpretují následovně: přebytečný rozměr má pouze dvě "
+    "'úrovně' -- například 2.5D má horní rovinu a dolní rovinu.\n\n"
+    "Tuto geometrii je také možné dvojseříznout -- bude pak lépe fungovat v rámci pravidel "
+    "HyperRogue, ale bude o něco obtížnější jí porozumět.")
+
+S("4D double bitruncated", "4D dvojitě dvojseříznutý")
+S("view coordinates in the cheat mode", "zobraz souřadnice v cheat módu")
+S("compass probability", "pravděpodobnost kompasu")
+S("3D display", "3D zobrazení")
+
+S("\"Each piece of the Round Table is exactly %1 steps away from the Holy Grail.\"",
+  "\"Každý kousek Kulatého stolu je přesně %1 kroků od Svatého grálu.\"")
+
+S("\"According to Merlin, the Round Table is a perfect Euclidean sphere in %1 dimensions.\"",
+  "\"Merlin říká, že Kulatý stůl je dokonalá eukleidovská sféra v %1 rozměrech.")
+
+S(
+  "Lands in this geometry are usually built on North-South or West-East axis. "
+  "Compasses always point North, and all the cardinal directions to the right from compass North are East (this is not "
+  "true in general, but it is true for the cells where compasses are generated). "
+  "North is the first coordinate, while East is the sum of other coordinates.",
+  
+  "Země v této geometrii se obvykle budují na ose sever-jih nebo západ-východ. Kompasy "
+  "vždy ukazují na sever a všechny kardinální směry napravo od kompasového severu jsou "
+  "východ (toto neplatí obecně, ale platí to pro políčka, na kterých se generují kompasy). "
+  "Sever je první souřadnice, zatímco východ je součet zbývajících souřadnic.")
+
+S("crystal coordinate colors", "barvy souřadných krystalů")
+
+S("3D monsters/walls on the surface", "3D netvoři/stěny na povrchu")
+S("no 3D effects available in this projection", "v této projekci nejsou k dispozici 3D efekty")
+
+// new screenshot menu
+
+S("screenshots", "snímky obrazovky")
+S("format", "formát")
+S("pixels (X)", "pixely (X)")
+S("pixels (Y)", "pixely (Y)")
+S("supersampling", "supersampling")
+S("transparent", "průsvitnost")
+S("gamma", "gamma")
+S("higher value = darker", "vyšší hodnota = tmavší")
+S("brightness", "jas")
+S("higher value = lighter", "vyšší hodnota = světlejší")
+S("show the HUD", "zobrazuj HUD")
+S("SVG screenshots do not work in this 3D mode", "SVG snímky obrazovky v tomto 3D módu nefungují")
+S("SVG screenshots do not work with textures", "SVG snímky obrazovky nefungují s texturami")
+S("take screenshot", "pořiď snímek obrazovky")
+S("screenshot", "snímek obrazovky")
+S("shot settings", "nastavení snímků obrazovky")
+
+// new warnings
+
+S("WARNING", "VAROVÁNÍ")
+S("YES", "ANO")
+S("NO", "NE")
+
+S("Are you sure you want to hit %the1?", "Víš jistě, že chceš udeřit %a1?")
+S("This will exit HyperRogue without saving your current game. Are you sure?",
+  "Tímto ukončíš HyperRogue bez uložení aktuální hry. Víš jistě, že to chceš udělat?")
+S("This will end your current game and start a new one. Are you sure?",
+  "Tímto ukončíš současnou hru a začneš novou. Víš to jistě?")
+S("This will enable the cheat mode, making this game ineligible for scoring. Are you sure?",
+  "Tímto aktivuješ cheat mód a tuto hru nebude možné skórovat. Víš to jistě?")
+

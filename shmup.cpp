@@ -485,17 +485,21 @@ struct shmup_configurer {
       }
     else if(doexiton(sym, uni)) {
       popScreen();
-      if(shmup::on != shmupcfg) { 
-        stop_game(); 
-        switch_game_mode(rg::shmup); 
-        resetScores(); 
-        }
-      if(playercfg != players) { 
-        stop_game(); 
-        players = playercfg;
-        resetScores();
-        }
-      start_game();
+      auto sc = shmupcfg;
+      auto pc = playercfg;
+      if(shmup::on != sc || pc != players) dialog::do_if_confirmed([sc, pc] {
+        if(shmup::on != sc) { 
+          stop_game(); 
+          switch_game_mode(rg::shmup); 
+          resetScores(); 
+          }
+        if(pc != players) { 
+          stop_game(); 
+          players = pc;
+          resetScores();
+          }
+        start_game();
+        });
       }
     #endif
     }

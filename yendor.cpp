@@ -557,10 +557,10 @@ namespace yendor {
       dialog::handleNavigation(sym, uni);
       int new_challenge = char_to_yendor(uni);
       if(new_challenge && new_challenge < YENDORLEVELS) {
-        if(levelUnlocked(new_challenge) || autocheat) {
+        if(levelUnlocked(new_challenge) || autocheat) dialog::do_if_confirmed([new_challenge] {
           challenge = new_challenge;
           restart_game(yendor::on ? rg::nothing : rg::yendor);
-          }
+          });
         else 
           addMessage("Collect 10 treasures in various lands to unlock the challenges there");
         }
@@ -800,11 +800,11 @@ namespace tactic {
       }
      
     keyhandler = [] (int sym, int uni) {
-      if(uni >= 1000 && uni < 1000 + isize(landlist)) {
+      if(uni >= 1000 && uni < 1000 + isize(landlist)) dialog::do_if_confirmed([uni] {
         stop_game();
         specialland = landlist[uni - 1000];
         restart_game(tactic::on ? rg::nothing : rg::tactic);
-        }
+        });
       else if(uni == '0') {
         if(tactic::on) {
           stop_game();          
@@ -1119,11 +1119,11 @@ namespace peace {
       dialog::handleNavigation(sym, uni);
       
       if(uni == '1') otherpuzzles = !otherpuzzles;
-      else if(uni >= 'a' && uni < 'a' + qty) {
+      else if(uni >= 'a' && uni < 'a' + qty) dialog::do_if_confirmed([uni] {
         stop_game();
         specialland = levellist[uni - 'a'];
         restart_game(peace::on ? 0 : rg::peace);
-        }
+        });
       else if(uni == '2') { hint = !hint; popScreen(); }
       else if(uni == '0') {
         firstland = laIce;

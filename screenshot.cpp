@@ -423,12 +423,12 @@ void menu() {
   
 #if CAP_RUG
   if(make_svg && rug::rugged)
-    dialog::addInfo("SVG screenshot do not work in this 3D mode", 0xFF0000);
+    dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
   else
 #endif
 #if CAP_TEXTURE
   if(make_svg && texture::config.tstate == texture::tsActive)
-    dialog::addInfo("SVG screenshot do not work with textures", 0xFF0000);
+    dialog::addInfo("SVG screenshots do not work with textures", 0xFF0000);
   else
 #endif
    dialog::addBreak(100);

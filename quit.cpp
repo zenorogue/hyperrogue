@@ -5,8 +5,12 @@ namespace hr {
 
 bool quitsaves() { return (items[itOrbSafety] && havesave && !archimedean); }
 
+bool needConfirmationEvenIfSaved() {
+  return canmove && (gold() >= 30 || tkills() >= 50) && !cheater;
+  }
+
 bool needConfirmation() {
-  return canmove && (gold() >= 30 || tkills() >= 50) && !cheater && !quitsaves();
+  return needConfirmationEvenIfSaved() && !quitsaves();
   }
 
 int getgametime() {
@@ -458,11 +462,20 @@ void handleKeyQuit(int sym, int uni) {
     sym = 0;
 #endif
 
-  if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) quitmainloop = true;
-  else if(uni == 'r' || sym == SDLK_F5) {
+  if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) {
+    if(needConfirmation()) pushScreen([] { 
+      dialog::confirm_dialog(
+        XLAT("This will exit HyperRogue without saving your current game. Are you sure?"),
+        [] { 
+        quitmainloop = true; 
+        });
+      });
+    else quitmainloop = true;
+    }
+  else if(uni == 'r' || sym == SDLK_F5) dialog::do_if_confirmed([] {
     restart_game(rg::nothing);
     msgs.clear();
-    }
+    });
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
   else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
