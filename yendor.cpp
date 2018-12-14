@@ -955,6 +955,31 @@ int modecode() {
     mct += irr::density_code() << 21; // 8 bits
     }
   
+  // 32 bits [29..61) for geometry specifics
+  if(torus) {
+    mct += ll(torusconfig::dx) << 29;
+    mct += ll(torusconfig::dy) << 37;
+    mct += ll(torusconfig::qty) << 45;
+    mct += ll(torusconfig::torusmode) << 53;
+    }
+  
+  if(geometry == gQuotient) {
+    mct += ll(current_extra) << 29;
+    mct += ll(fgeomextras[current_extra].current_prime_id) << 37;
+    }
+  
+  if(geometry == gCrystal) {
+    mct += ll(ginf[geometry].sides) << 29;
+    mct += ll(ginf[geometry].vertices) << 37;
+    }
+  
+  if(geometry == gArchimedean) {
+    unsigned res = 7;
+    for(char c: arcm::current.symbol) res = res * 157 + c;
+    mct += ll(res) << 29;
+    if(PURE) mct ^= (1<<29);
+    }
+  
   return mct;
   }
 

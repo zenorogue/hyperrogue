@@ -1472,7 +1472,7 @@ bool isAlchAny(eWall w);
 bool isAlchAny(cell *c);
 
 #define YDIST 101
-#define MODECODES 255
+#define MODECODES (1ll<<61)
   
 extern cellwalker cwt; // player character position
 
@@ -1481,7 +1481,7 @@ extern array<int, motypes> kills;
 
 extern int explore[10], exploreland[10][landtypes], landcount[landtypes];
 
-typedef int modecode_t;
+typedef flagtype modecode_t;
 extern map<modecode_t, array<int, ittypes> > hiitems;
 
 extern eLand firstland, specialland;
@@ -3832,7 +3832,7 @@ enum eOrbLandRelation {
 namespace torusconfig {
   extern int sdx, sdy;
   
-  enum eTorusMode { 
+  enum eTorusMode : char { 
     tmSingleHex, 
     tmSingle, 
     tmSlantedHex, 
