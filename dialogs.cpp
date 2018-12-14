@@ -1062,7 +1062,7 @@ namespace dialog {
     gamescreen(1);
     dialog::addBreak(250);
     dialog::init(XLAT("WARNING"), 0xFF0000, 150, 100);
-    dialog::addInfo(text);
+    dialog::addHelp(text);
     dialog::addItem(XLAT("YES"), 'y');
     auto yes = [act] () { popScreen(); act(); };
     dialog::add_action(yes);
