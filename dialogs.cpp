@@ -80,10 +80,13 @@ namespace dialog {
   
   map<int, reaction_t> key_actions;
   
-  void add_action(reaction_t action) {
-    int& key = lastItem().key;
+  void add_key_action(int key, const reaction_t& action) {
     while(key_actions.count(key)) key++;
     key_actions[key] = action;
+    }
+
+  void add_action(const reaction_t& action) {
+    add_key_action(lastItem().key, action);
     }
   
   void handler(int sym, int uni) {

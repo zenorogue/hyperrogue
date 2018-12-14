@@ -1276,7 +1276,7 @@ bool monstersnear(stalemate1& sm) {
       // Krakens just destroy boats
       if(c2->monst == moKrakenT && onboat(sm)) {
         if(krakensafe(c)) continue;
-        else if(warningprotection() && res == 0) m = moWarning;
+        else if(warningprotection(XLAT("This move appears dangerous -- are you sure?")) && res == 0) m = moWarning;
         else continue;
         }
       // they cannot attack through vines
@@ -5016,32 +5016,54 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
     }
   }
 
-void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
-  int numsh = 0, numflail = 0, numlance = 0, numslash = 0;
-  
-  int backdir = neighborId(mt, mf);
-  
+template<class T> void do_swords(cell *mf, cell *mt, eMonster who, const T& f) {
   for(int bb=0; bb<2; bb++) if(who == moPlayer && sword::orbcount(bb)) {
-    int numbb = 0;
     cell *sf = sword::pos(mf, sword::angle[multi::cpid] + (bb?S21:0));
     cell *st = sword::pos(mt, sword::shift(mf, mt, sword::angle[multi::cpid]) + (bb?S21:0));
-    if(swordAttack(mt, who, st, bb)) numbb++;
+    f(st, bb);
     if(sf != st && !isNeighbor(sf,st)) {
       // also attack the in-transit cell
       if(S3 == 3) {
-        forCellEx(sb, sf) if(isNeighbor(sb, st) && sb != mf && sb != mt)
-          if(swordAttack(mt, who, sb, bb)) numbb++;
+        forCellEx(sb, sf) if(isNeighbor(sb, st) && sb != mf && sb != mt) f(sb, bb);
         }
       else {
-        forCellEx(sb, mf) if(isNeighbor(sb, st) && sb != mt)
-          if(swordAttack(mt, who, sb, bb)) numbb++;
-        forCellEx(sb, mt) if(isNeighbor(sb, sf) && sb != mf)
-          if(swordAttack(mt, who, sb, bb)) numbb++;
+        forCellEx(sb, mf) if(isNeighbor(sb, st) && sb != mt) f(sb, bb);
+        forCellEx(sb, mt) if(isNeighbor(sb, sf) && sb != mf) f(sb, bb);
         }
       }
-    achievement_count("SLASH", numbb, 0);
-    numslash += numbb;
     }
+  }
+
+eMonster do_we_stab_a_friend(cell *mf, cell *mt, eMonster who) {
+  eMonster m = moNone;
+  do_swords(mf, mt, who, [&] (cell *c, int bb) { 
+    if(!peace::on && canAttack(mt, who, c, c->monst, AF_SWORD) && c->monst && isFriendly(c)) m = c->monst;
+    });
+
+  for(int t=0; t<mf->type; t++) {
+    cell *c = mf->move(t);
+    if(!c) continue;
+    
+    bool stabthere = false;
+    if(logical_adjacent(mt, who, c)) stabthere = true;
+    
+    if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB) && isFriendly(c)) 
+      return c->monst;
+    }
+  
+  return m;
+  }
+
+void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
+  int numsh = 0, numflail = 0, numlance = 0, numslash = 0, numbb[2];
+  
+  numbb[0] = numbb[1] = 0;
+
+  int backdir = neighborId(mt, mf);
+  
+  do_swords(mf, mt, who, [&] (cell *c, int bb) { if(swordAttack(mt, who, c, bb)) numbb[bb]++, numslash++; });
+  
+  for(int bb=0; bb<2; bb++) achievement_count("SLASH", numbb[bb], 0);
 
   if(peace::on) return;
   
@@ -7340,6 +7362,52 @@ bool monsterPushable(cell *c2) {
 
 bool got_survivalist;
 
+bool should_switchplace(cell *c1, cell *c2) {
+  if(isPrincess(c2->monst) || among(c2->monst, moGolem, moIllusion, moMouse, moFriendlyGhost))
+    return true;
+  
+  if(peace::on) return c2->monst && !isMultitile(c2->monst);
+  return false;
+  }
+
+bool warningprotection_hit(eMonster m) {
+  if(m && warningprotection(XLAT("Are you sure you want to hit %the1?", m)))
+    return true;
+  return false;
+  }
+
+bool switchplace_prevent(cell *c1, cell *c2, bool checkonly) {
+  if(!should_switchplace(c1, c2)) return false;
+  if(c1->monst && c1->monst != moFriendlyIvy) {
+    if(!checkonly) addMessage(XLAT("There is no room for %the1!", c2->monst));
+    return true;
+    }
+  if(passable(c1, c2, P_ISFRIEND | (c2->monst == moTameBomberbird ? P_FLYING : 0))) return false;
+  if(warningprotection_hit(c2->monst)) return true;
+  return false;
+  }
+
+void handle_switchplaces(cell *c1, cell *c2, bool& switchplaces) {
+  if(should_switchplace(c1, c2)) {
+    bool pswitch = false;
+    if(c2->monst == moMouse)
+      princess::mouseSqueak(c2);
+    else if(isPrincess(c2->monst)) {
+      princess::line(c2);
+      princess::move(c1, c2);
+      }
+    else  
+      pswitch = true;
+    c1->hitpoints = c2->hitpoints;
+    c1->stuntime = c2->stuntime;
+    placeGolem(c1, c2, c2->monst);
+    if(cwt.at->monst != moNone && pswitch)
+      addMessage(XLAT("You switch places with %the1.", c2->monst));
+    c2->monst = moNone;
+    switchplaces = true;
+    }
+  }  
+
 bool movepcto(int d, int subdir, bool checkonly) {
   if(d >= 0 && !checkonly && subdir != 1 && subdir != -1) printf("subdir = %d\n", subdir);
   global_pushto = NULL;
@@ -7661,9 +7729,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
         return false;
         }
 
+      if(c2->monst == moTameBomberbird && warningprotection_hit(moTameBomberbird)) return false;
+      
       if(checkonly) return true;
-      
-      
+
       /* if(c2->monst == moTortoise) {
         printf("seek=%d get=%d <%x/%x> item=%d\n", 
           tortoise::seeking, 
@@ -7737,10 +7806,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return false;
       }
     else {
-      if(mineMarked(c2) && !minesafe() && !checkonly && warningprotection()) {
-        addMessage("Are you sure you want to step there?");
+      if(mineMarked(c2) && !minesafe() && !checkonly && warningprotection(XLAT("Are you sure you want to step there?")))
         return false;
-        }
       if(monstersnear(c2, NULL, moPlayer, NULL, cwt.at)) {
         if(checkonly) return false;
 
@@ -7780,6 +7847,11 @@ bool movepcto(int d, int subdir, bool checkonly) {
           wouldkill("%The1 would kill you there!");
         return false;
         }
+
+      if(switchplace_prevent(cwt.at, c2, checkonly)) return false;
+      if(!checkonly && warningprotection_hit(do_we_stab_a_friend(cwt.at, c2, moPlayer)))
+        return false;
+      
       if(checkonly) return true;
       boatjump:
       statuejump:
@@ -7804,28 +7876,28 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(makeflame(cwt.at, 10, false)) markOrb(itOrbFire);
         }
 
-      {
-      bool haveIvy = false;
-      forCellEx(c3, cwt.at) if(c3->monst == moFriendlyIvy) haveIvy = true;
-        
-      bool killIvy = haveIvy;
-        
-      if(items[itOrbNature]) {
-        if(c2->monst != moFriendlyIvy && strictlyAgainstGravity(c2, cwt.at, false, MF_IVY)) {
-          invismove = false;
+      if(1) {
+        bool haveIvy = false;
+        forCellEx(c3, cwt.at) if(c3->monst == moFriendlyIvy) haveIvy = true;
+          
+        bool killIvy = haveIvy;
+          
+        if(items[itOrbNature]) {
+          if(c2->monst != moFriendlyIvy && strictlyAgainstGravity(c2, cwt.at, false, MF_IVY)) {
+            invismove = false;
+            }
+          else if(cwt.at->monst) invismove = false;
+          else if(haveIvy || !cellEdgeUnstable(cwt.at, MF_IVY)) {
+            cwt.at->monst  = moFriendlyIvy;
+            cwt.at->mondir = neighborId(cwt.at, c2);
+            invismove = false;
+            markOrb(itOrbNature);
+            killIvy = false;
+            }
           }
-        else if(cwt.at->monst) invismove = false;
-        else if(haveIvy || !cellEdgeUnstable(cwt.at, MF_IVY)) {
-          cwt.at->monst  = moFriendlyIvy;
-          cwt.at->mondir = neighborId(cwt.at, c2);
-          invismove = false;
-          markOrb(itOrbNature);
-          killIvy = false;
-          }
+        
+        if(killIvy) killFriendlyIvy();
         }
-      
-      if(killIvy) killFriendlyIvy();
-      }
 
       if(items[itOrbDigging]) {
         invismove = false;
@@ -7848,34 +7920,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       
       movecost(cwt.at, c2, 2);
 
-      {
-      bool pushpast = false;
-      pushpast = 
-        c2->monst == moGolem || c2->monst == moIllusion || isPrincess(c2->monst) || c2->monst == moMouse ||
-        c2->monst == moFriendlyGhost;
-      
-      if(peace::on) pushpast |= c2->monst && !isMultitile(c2->monst);
-      
-      if(pushpast) {
-        bool pswitch = false;
-        if(c2->monst == moMouse)
-          princess::mouseSqueak(c2);
-        else if(isPrincess(c2->monst)) {
-          princess::line(c2);
-          princess::move(cwt.at, c2);
-          }
-        else  
-          pswitch = true;
-        cwt.at->hitpoints = c2->hitpoints;
-        cwt.at->stuntime = c2->stuntime;
-        placeGolem(cwt.at, c2, c2->monst);
-        if(cwt.at->monst != moNone && pswitch)
-          addMessage(XLAT("You switch places with %the1.", c2->monst));
-        c2->monst = moNone;
-        switchplaces = true;
-        }
-      }
-      
+      handle_switchplaces(cwt.at, c2, switchplaces);
+            
       mountjump:
       lastmovetype = lmMove; lastmove = cwt.at;
 
@@ -8087,11 +8133,27 @@ bool minesafe() {
   return items[itOrbAether];
   }
 
-bool warningprotection() {
+bool warningprotection(const string& s) {
   if(hardcore) return false;
   if(multi::activePlayers() > 1) return false;
   if(items[itWarning]) return false;
-  items[itWarning] = 1;
+  pushScreen([s] () {
+    gamescreen(1);
+    dialog::addBreak(250);
+    dialog::init(XLAT("WARNING"), 0xFF0000, 150, 100);
+    dialog::addBreak(500);
+    dialog::addInfo(s);
+    dialog::addBreak(500);
+    dialog::addItem(XLAT("YES"), 'y');
+    dialog::lastItem().scale = 200;
+    auto yes = [] () { items[itWarning] = 1; popScreen(); };
+    dialog::add_action(yes);
+    dialog::add_key_action(SDLK_RETURN, yes);
+    dialog::addItem(XLAT("NO"), 'n');
+    dialog::lastItem().scale = 200;
+    dialog::add_action([] () { items[itWarning] = 0; popScreen(); });
+    dialog::display();
+    });
   return true;
   }
 

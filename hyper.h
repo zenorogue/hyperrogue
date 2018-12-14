@@ -1721,7 +1721,7 @@ void killThePlayer(eMonster m, int id, flagtype flags);
 bool attackJustStuns(cell *c2, flagtype flags);
 
 bool isTargetOrAdjacent(cell *c);
-bool warningprotection();
+bool warningprotection(const string& s);
 bool mineMarked(cell *c);
 bool minesafe();
 bool hasSafeOrb(cell *c);
@@ -1846,7 +1846,8 @@ namespace dialog {
   
   void addHelp();
   void addBack();
-  void add_action(reaction_t action);
+  void add_action(const reaction_t& action);
+  void add_key_action(int key, const reaction_t& action);
   
   string view_edited_string();
   void start_editing(string& s);
