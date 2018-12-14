@@ -2816,4 +2816,19 @@ Bugfixes and minor features:
 Geometry experiments -- new quotient spaces:
 - "torus/Klein bottle" now includes infinite cylinder and infinite Mobius band
 - Macbeath surface, Bring's surface, Schmutz's M(2), Schmutz's M(3)
-- "multidimensional" -- (not yet documented)
+- "dimensional crystal" -- a surface in e.g. 4-dimensional Euclidean geometry, represented in hyperbolic way
+
+2018-12-12 03:17 Update 10.5c:
+- fix crashes related to multi-dimensional
+- fix some format incompatibilities in save level feature -- does this fix the problem? (sunflower.lev now loads the map correctly, although some graphics seem to be not rotated correctly)
+- fix hives not appearing in the Chaos mode
+
+2018-12-14 18:25 Update 10.5d:
+- screenshots are more configurable now
+- web:: 'take screenshot' feature now creates a SVG file and opens it in a new window
+- added sm::MAYDARK to some dialogs; sidescreen now requires screen ratio strictly greater than 4:3
+- svg:: circles now have better linewidth
+- web:: SHIFT/CTRL/ALT keys no longer disable menus
+- text improvements, PL/CZ translation update
+- warnings when hitting an ally; harder to miss now
+- warnings when trying to finish a running game
