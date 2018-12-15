@@ -302,8 +302,8 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
   // text is drawn with 'textured'  
   glhr::be_textured();
   glhr::set_depthtest(false);
-  stereo::set_viewport(0);
-  stereo::set_mask(0);
+  current_display->set_viewport(0);
+  current_display->set_mask(0);
   glhr::new_projection();
   glhr::projection_multiply(glhr::translate(-1,-1,0));
   glhr::projection_multiply(glhr::ortho(vid.xres/2, vid.yres/2, 1));
