@@ -306,7 +306,9 @@ void initConfig() {
   
   addsaver(vid.linequality, "line quality", 0);
   
+  #if CAP_FILES && CAP_SHOT
   addsaver(anims::animfile, "animation file format");
+  #endif
   addsaver(anims::period, "animation period");
   addsaver(anims::noframes, "animation frames");
   addsaver(anims::cycle_length, "animation cycle length");

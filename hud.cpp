@@ -352,8 +352,11 @@ void drawStats() {
 
   {
   dynamicval<eModel> pm(pmodel, mdDisk);
-  dynamicval<videopar> v(vid, vid);
-  vid.alpha = vid.scale = 1;
+  // dynamicval<videopar> v(vid, vid);
+  // vid.alpha = vid.scale = 1;
+  dynamicval<ld> va(vid.alpha, 1);
+  dynamicval<ld> vs(vid.scale, 1);
+
   calcparam(); 
   current_display->set_projection(0, false);
 

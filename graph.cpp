@@ -5607,11 +5607,6 @@ void drawfullmap() {
 
 void gamescreen(int _darken) {
 
-  if(ISMOBILE && (cmode & sm::SIDE)) {
-    cmode ^= sm::SIDE;
-    _darken += 2;
-    }
-  
   if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;
     }
