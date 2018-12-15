@@ -120,7 +120,7 @@ namespace mapstream {
     if(geometry == gCrystal) {
       f.write(ginf[gCrystal].sides);
       if(ginf[gCrystal].sides == 8)
-        f.write(ginf[gCrystal].vertices);
+        f.write(ginf[gCrystal].vertex);
       }
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
@@ -219,7 +219,7 @@ namespace mapstream {
       if(geometry == gCrystal && vernum >= 10504) {
         int sides;
         f.read(sides);
-        set_crystal(sides);
+        crystal::set_crystal(sides);
         if(sides == 8) {
           int vertices;
           eVariation v = variation;

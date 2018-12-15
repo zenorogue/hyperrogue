@@ -960,10 +960,12 @@ int modecode() {
     mct += (1 << 20);
     }
   
+  typedef long long ll;
+  
   // 32 bits [29..61) for geometry specifics
-  if(torus) {
-    mct += ll(torusconfig::torusmode) << 29;
-    auto& mode = torusconfig::tmodes[torusconfig::torusmode];
+  if(euwrap) {
+    mct += ll(torusconfig::torus_mode) << 29;
+    auto& mode = torusconfig::tmodes[torusconfig::torus_mode];
     bool single = (mode.flags & torusconfig::TF_SINGLE);
     if(single) {
       mct += ll(torusconfig::qty) << 37;
@@ -975,14 +977,15 @@ int modecode() {
       }
     }
   
-  if(geometry == gQuotient) {
+  if(geometry == gFieldQuotient) {
+    using namespace fieldpattern;
     mct += ll(current_extra) << 29;
     mct += ll(fgeomextras[current_extra].current_prime_id) << 37;
     }
   
   if(geometry == gCrystal) {
     mct += ll(ginf[geometry].sides) << 29;
-    mct += ll(ginf[geometry].vertices) << 37;
+    mct += ll(ginf[geometry].vertex) << 37;
     }
   
   if(geometry == gArchimedean) {
