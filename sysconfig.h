@@ -323,6 +323,7 @@
 #define SDLK_DELETE (123052)
 #define SDLK_KP_ENTER (123054)
 #define SDLK_BACKSPACE (123055)
+#define FAKE_SDL
 typedef int SDL_Event;
 typedef unsigned int Uint32;
 #endif

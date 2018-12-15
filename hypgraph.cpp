@@ -1270,7 +1270,9 @@ void draw_boundary(int w) {
   
   ld fakeinf = sphere ? M_PI-1e-5 : hyperbolic ? 10 : exp(10);
   
+  #if CAP_SVG
   dynamicval<ld> dw(vid.linewidth, vid.linewidth * (svg::in ? svg::divby : 1));
+  #endif
 
   if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal))
     circle_around_center(M_PI/2, periodcolor, 0, PPR::CIRCLE);

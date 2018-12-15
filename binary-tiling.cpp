@@ -205,6 +205,7 @@ namespace binary {
     return gm * where;
     }
 
+#if CAP_COMMANDLINE
 auto bt_config = addHook(hooks_args, 0, [] () {
   using namespace arg;
   if(argis("-btwidth")) {
@@ -213,6 +214,7 @@ auto bt_config = addHook(hooks_args, 0, [] () {
     }
   return 1;
   });
+#endif
 
   }
 }

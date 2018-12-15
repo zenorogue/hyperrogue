@@ -1036,6 +1036,7 @@ void unit_test_tables() {
   test_crt();
   }
 
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
            
@@ -1065,6 +1066,7 @@ int readArgs() {
   else return 1;
   return 0;
   }
+#endif
 
 hrmap *new_map() {
   return new hrmap_crystal;
@@ -1125,7 +1127,10 @@ void show() {
   dialog::display();
   }
 
-auto crystalhook = addHook(hooks_args, 100, readArgs)
+auto crystalhook = 
+#if CAP_COMMANDLINE
+    addHook(hooks_args, 100, readArgs)
+#endif
   + addHook(hooks_drawcell, 100, crystal_cell)
   + addHook(hooks_tests, 200, unit_test_tables);
 

@@ -242,7 +242,8 @@ struct key_configurer {
           popScreen();
         }
       };
-    
+
+#if CAP_SDLJOY    
     joyhandler = [this] (SDL_Event& ev) { 
       if(ev.type == SDL_JOYBUTTONDOWN && setwhat) {
         int joyid = ev.jbutton.which;
@@ -270,6 +271,7 @@ struct key_configurer {
         }
       return false;
       };
+#endif
     }
   };
 

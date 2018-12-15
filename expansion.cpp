@@ -752,6 +752,7 @@ void compute_coefficients() {
     }
   }
 
+#if CAP_COMMANDLINE
 int expansion_readArgs() {
   using namespace arg;
            
@@ -837,6 +838,7 @@ int expansion_readArgs() {
   }
 
 auto ea_hook = addHook(hooks_args, 100, expansion_readArgs);
+#endif
 #endif
 
 expansion_analyzer expansion;

@@ -915,6 +915,7 @@ void show() {
   dialog::display();
   }
 
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
            
@@ -979,10 +980,13 @@ int readArgs() {
   else return 1;
   return 0;
   }
+#endif
 
-auto animhook = addHook(hooks_args, 100, readArgs)
-  + addHook(hooks_frame, 100, display_animation)
-  + 0;
+auto animhook = addHook(hooks_frame, 100, display_animation)
+  #if CAP_COMMANDLINE
+  + addHook(hooks_args, 100, readArgs)
+  #endif
+  ;
 
 bool any_animation() {
   if(conformal::on) return true;

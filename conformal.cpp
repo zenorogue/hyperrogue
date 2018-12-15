@@ -1056,7 +1056,7 @@ namespace conformal {
 #endif
     }
 
-
+  #if CAP_COMMANDLINE
   int readArgs() {
     using namespace arg;
              
@@ -1126,7 +1126,10 @@ namespace conformal {
     else return 1;
     return 0;
     }
-  
+
+  auto hookArg = addHook(hooks_args, 100, readArgs);
+  #endif  
+
   auto hooks = addHook(clearmemory, 0, [] () {
     conformal::renderAutoband();
     conformal::on = false;
@@ -1134,7 +1137,7 @@ namespace conformal {
     conformal::findhistory.clear();
     conformal::movehistory.clear();
     conformal::includeHistory = false;
-    }) + addHook(hooks_args, 100, readArgs);
+    });
 
   }
 

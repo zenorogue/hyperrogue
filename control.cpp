@@ -225,12 +225,14 @@ bool doexiton(int sym, int uni) {
   if(sym == SDLK_ESCAPE) return true;
   if(sym == SDLK_F10) return true;
   if(sym == PSEUDOKEY_RELEASE) return false;
+  #ifndef FAKE_SDL
   if(sym == SDLK_LSHIFT) return false;
   if(sym == SDLK_RSHIFT) return false;
   if(sym == SDLK_LCTRL) return false;
   if(sym == SDLK_RCTRL) return false;
   if(sym == SDLK_LALT) return false;
   if(sym == SDLK_RALT) return false;
+  #endif
   if(uni != 0) return true;
   return false;
   }
@@ -837,11 +839,16 @@ void displayabutton(int px, int py, string s, int col) {
 #endif
 
 bool interpret_as_direction(int sym, int uni) {
+  #ifdef FAKE_SDL
+  return false;
+  #else
   return (sym >= SDLK_KP0 && sym <= SDLK_KP9 && !numlock_on);
+  #endif
   }
 
 int get_direction_key(int sym, int uni) {
   if(interpret_as_direction(sym, uni)) {
+    #ifndef FAKE_SDL
     if(sym == SDLK_KP1) return SDLK_END;
     if(sym == SDLK_KP2) return SDLK_DOWN;
     if(sym == SDLK_KP3) return SDLK_PAGEDOWN;
@@ -850,6 +857,7 @@ int get_direction_key(int sym, int uni) {
     if(sym == SDLK_KP7) return SDLK_HOME;
     if(sym == SDLK_KP8) return SDLK_UP;
     if(sym == SDLK_KP8) return SDLK_PAGEUP;
+    #endif
     return 0;
     }
   return sym;
