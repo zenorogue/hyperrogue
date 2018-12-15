@@ -1154,7 +1154,7 @@ euc_pointer euclideanAtCreate(int vec) {
       }
     c = newCell(8, encodeId(vec));
     // euclideanAt(vec) = c;
-    build_euclidean_moves(c, vec, [ep, c,vec] (int delta, int d, int d2) { 
+    build_euclidean_moves(c, vec, [c,vec] (int delta, int d, int d2) { 
       euc_pointer ep2 = euclideanAt(vec + delta);
       cell* c2 = *ep2.first;
       if(!c2) return;
