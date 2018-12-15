@@ -318,6 +318,7 @@ void initConfig() {
   addsaver(crystal::compass_probability, "compass-probability");
   addsaver(crystal::view_coordinates, "crystal-coordinates");
   
+  #if CAP_SHOT
   addsaver(shot::shotx, "shotx");
   addsaver(shot::shoty, "shoty");
   addsaver(shot::make_svg, "shotsvg");
@@ -325,6 +326,7 @@ void initConfig() {
   addsaver(shot::gamma, "shotgamma");
   addsaver(shot::caption, "shotcaption");
   addsaver(shot::fade, "shotfade");
+  #endif
 
 #if CAP_TEXTURE  
   addsaver(texture::texture_aura, "texture-aura", false);
@@ -1870,8 +1872,10 @@ unordered_map<string, ld&> params = {
   {"spiralx", conformal::spiral_x},
   {"spiraly", conformal::spiral_y},
   {"cprob", crystal::compass_probability},
+  #if CAP_SHOT
   {"gamma", shot::gamma},
-  {"fade", shot::fade}
+  {"fade", shot::fade},
+  #endif
   };
 
 }

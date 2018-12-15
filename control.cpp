@@ -327,7 +327,9 @@ void handleKeyNormal(int sym, int uni) {
       uni = sym = 0;
     }
 
+  #if CAP_SHOT
   if(uni == 'A') { pushScreen(shot::menu); uni = sym = 0; }
+  #endif
 
   if(DEFAULTNOR(sym)) handlePanning(sym, uni);
   

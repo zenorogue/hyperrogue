@@ -656,7 +656,7 @@ void rollback() {
     }
   }
 
-#if CAP_FILES
+#if CAP_FILES && CAP_SHOT
 string animfile = "animation-%04d.png";
 
 bool record_animation() {
@@ -896,7 +896,7 @@ void show() {
   dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
   dialog::add_action([] () { pushScreen(conformal::history_menu); });
 
-  #if CAP_SHOT
+  #if CAP_FILES && CAP_SHOT
   dialog::addItem(XLAT("shot settings"), 's');
   dialog::add_action([] () { pushScreen(shot::menu); });
 
