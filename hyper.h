@@ -4273,7 +4273,7 @@ struct hstream_exception : std::exception { hstream_exception() {} };
 struct fhstream : hstream {
   FILE *f;
   virtual void write_char(char c) { write_chars(&c, 1); }
-  virtual void write_chars(char* c, size_t i) { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
+  virtual void write_chars(const char* c, size_t i) { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
   virtual void read_chars(char* c, size_t i) { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
   virtual char read_char() { char c; read_chars(&c, 1); return c; }
   fhstream() { f = NULL; }
