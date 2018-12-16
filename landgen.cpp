@@ -105,6 +105,83 @@ eMonster genRuinMonster(cell *c) {
 
 void gen_brownian(cell *c);
 
+void createArrowTrapAt(cell *c, eLand land) {
+  cellwalker cw(c, hrand(c->type));
+  cell* cc[5];
+  cc[2] = c;
+  cellwalker cw2 = cw;
+  cw += wstep; cc[3] = cw.at; cw += revstep; cc[4] = cw.at;
+  cw2 += revstep; cc[1] = cw2.at; cw2 += revstep; cc[0] = cw2.at;
+  bool ok = true;
+  for(int i=0; i<5; i++) {
+    if(cc[i]->land != laNone && cc[i]->land != land) ok = false;
+    if(cc[i]->bardir != NODIR) ok = false;
+    }
+  for(int i=1; i<4; i++) {
+    forCellEx(c2, cc[i]) if(!among(c2->wall, waNone, waStone)) ok = false;
+    }
+  if(ok) {
+    if(!racing::on) for(int i=1; i<4; i++) 
+      cc[i]->wall = waArrowTrap,
+      cc[i]->wparam = 0;
+    for(int i=0; i<5; i++) 
+      cc[i]->bardir = NOBARRIERS;
+    cc[0]->wall = waStone;
+    cc[4]->wall = waStone;
+    }
+  }
+
+void build_pool(cell *c, bool with_boat) {
+  bool vacant = true;
+  if(c->monst || !among(c->wall, waNone, waSea, waBoat)) vacant = false;
+  forCellCM(c1, c) if(!among(c1->land, laNone, laVariant) || c1->monst || !among(c1->wall, waNone, waSea, waBoat)) vacant = false;
+  if(vacant) {
+    c->wall = waSea;
+    forCellEx(c1, c) if(c1->wall != waBoat) c1->wall = waSea;
+    if(with_boat) c->move(hrand(c->type))->wall = waBoat;
+    }  
+  }
+
+struct variant_feature {
+  color_t color_change;
+  int rate_change;
+  void (*build)(cell*);
+  };
+
+#define VF [] (cell *c)
+
+const array<variant_feature, 21> variant_features {{
+  variant_feature{(color_t)(-0x202020), 5, VF {
+    if(hrand(1500) < 20) c->wall = waFreshGrave;
+    if(hrand(20000) < 10 + items[itVarTreasure])
+      c->monst = moNecromancer;
+    }},
+  {0x000010, 5, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moLancer; } },
+  {0x100008,15, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moMonk; } },
+  {0x080010, 5, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moCrusher; } },
+  {0x181418, 5, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moSkeleton, c->hitpoints = 3; } },
+  {0x180000, 5, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moPyroCultist; } },
+  {0x00000C, 2, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moFlailer; } },
+  {0x1C0800, 1, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure] && VALENCE == 3) c->monst = moHedge; } },
+  {0x001000,-1, VF { if(hrand(1500) < 30) createArrowTrapAt(c, laVariant); } },
+  {0x001400,-1, VF { if(hrand(1500) < 50 && c->wall == waNone) c->wall = waTrapdoor; } },
+  {0x001018,-1, VF { if(hrand(1500) < 30) build_pool(c, true); } },
+  {0x040C00,-1, VF { if(c->wall == waNone && !c->monst && !c->monst && hrand(1500) < 10) c->wall = waThumperOff; } },
+  {0x080C00,-1, VF { if(hrand(1500) < 20 && !c->monst && !c->wall) c->wall = waFireTrap; } },
+  {0x0C0C00, 0, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waExplosiveBarrel; } },
+  {0x061004, 0, VF { 
+    if(c->wall == waNone && !c->monst && pseudohept(c) && hrand(30000) < 25 + items[itVarTreasure]) 
+      if(buildIvy(c, 0, c->type) && !peace::on) c->item = itVarTreasure;
+    }},
+  {0x000C08, 0, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waSmallTree; }},
+  {0x100C10, 1, VF { if(c->wall == waNone && hrand(10000) < 10 + items[itVarTreasure]) c->monst = moSleepBull, c->hitpoints = 3; }},
+  {0x00140C, 0, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waBigTree; }},
+  {0x000C28, 1, VF { if(hrand(500) < 10) build_pool(c, false); } },
+  {0x100C00, 2, VF { if(c->wall == waNone && !c->monst && hrand(40000) < 25 + items[itVarTreasure]) c->monst = moVariantWarrior; }},
+  {0x100808, 1, VF { if(c->wall == waNone && !c->monst && hrand(50000) < 25 + items[itVarTreasure]) c->monst = moRatling; }}
+  }};
+#undef VF
+
 void giantLandSwitch(cell *c, int d, cell *from) {
   switch(c->land) {
 
@@ -940,31 +1017,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laTerracotta: 
       if(d == 9) {
-        if(hrand(500) < 15) {
-          cellwalker cw(c, hrand(c->type));
-          cell* cc[5];
-          cc[2] = c;
-          cellwalker cw2 = cw;
-          cw += wstep; cc[3] = cw.at; cw += revstep; cc[4] = cw.at;
-          cw2 += revstep; cc[1] = cw2.at; cw2 += revstep; cc[0] = cw2.at;
-          bool ok = true;
-          for(int i=0; i<5; i++) {
-            if(cc[i]->land != laNone && cc[i]->land != laTerracotta) ok = false;
-            if(cc[i]->bardir != NODIR) ok = false;
-            }
-          for(int i=1; i<4; i++) {
-            forCellEx(c2, cc[i]) if(c2->wall == waArrowTrap) ok = false;
-            }
-          if(ok) {
-            if(!racing::on) for(int i=1; i<4; i++) 
-              cc[i]->wall = waArrowTrap,
-              cc[i]->wparam = 0;
-            for(int i=0; i<5; i++) 
-              cc[i]->bardir = NOBARRIERS;
-            cc[0]->wall = waStone;
-            cc[4]->wall = waStone;
-            }
-          }
+        if(hrand(500) < 15) 
+          createArrowTrapAt(c, laTerracotta);
         if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
           c->wall = waTerraWarrior;
           c->landparam = randterra ? 0 : 3 + hrand(3);
@@ -2234,6 +2288,24 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }      
       break;
     
+    case laVariant: {
+      int b = getBits(c);
+      if(d == 9) {
+        int treasure_rate = 2;
+        for(int i=0; i<21; i++) if((b>>i) & 1) {
+          treasure_rate += variant_features[i].rate_change;
+          variant_features[i].build(c);
+          }
+        if(hrand(2000 - PT(kills[moVariantWarrior] * 5, 250)) < treasure_rate && !c->wall && !c->monst) 
+          c->item = itVarTreasure;
+        }
+      if(d == 7 && c->wall == waTrapdoor) {
+        forCellEx(c1, c) if(among(c1->wall, waSea, waBoat))
+          c->wall = waNone;
+        }
+      break;
+      }
+            
     case laNone:
     case laBarrier:
     case laOceanWall:

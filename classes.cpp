@@ -780,6 +780,7 @@ monstertype minf[motypes] = {
   { '@', 0x0000C0, "Blue Jelly", jellydesc}, 
   { 'B', 0xE07000, "Brown Bug", NODESCYET},
   { 'B', 0xE07060, "Acid Bird", NODESCYET},
+  { 'W', 0xA04060, "Variant Warrior", NODESCYET},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -1243,6 +1244,8 @@ itemtype iinf[ittypes] = {
   { '*', 0x20C0C0, "Brownie",
     "Tasty cookie."
     },
+  { '*', 0x20C0C0, "West Treasure", NODESCYET},
+  { '*', 0xC020C0, "Variant Treasure", NODESCYET}
   // { '*', 0x26619C, "Lapis Lazuli", NODESCYET},
   };
 
@@ -1424,7 +1427,9 @@ walltype winf[walltypes] = {
   { '=', 0x804000, "dock", "A dock."},
   { '^', 0xFF8000, "burning dock", "A burning dock."},
   { '#', 0xE04030, "ruin wall", ruindesc},
-  { '#', 0xA04060, "Brownian generator", NODESC}
+  { '#', 0xA04060, "Brownian generator", NODESC},
+  { '^', 0xC05000, "fire trap", NODESC},
+  { '^', 0xFD692F, "Explosive Barrel", NODESC},
   };
 
 // --- land types ---
@@ -1621,7 +1626,9 @@ const landtype linf[landtypes] = {
     "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
     " option was on."
     },
-  { 0xA04060, "Brownian", NODESCYET}
+  { 0xA04060, "Brownian", NODESCYET},
+  { 0xA04060, "West Wall", NODESCYET},
+  { 0xA04060, "Variant", NODESCYET}
   };
 
 vector<landtacinfo> land_tac = {

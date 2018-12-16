@@ -1302,6 +1302,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     }
   else if(m == moTerraWarrior)
     drawTerraWarrior(V, 7, (where ? where->hitpoints : 7), footphase);
+  else if(m == moVariantWarrior) {
+    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    ShadowV(V, shPBody);
+    queuepoly(VBS, shPBody, darkena(0xFFD500, 0, 0xF0));
+    if(!peace::on) queuepoly(VBS, shPSword, 0xFFFF00FF);
+    queuepoly(VHEAD, shHood, 0x008000FF);
+    }
   else if(m == moDesertman) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shPBody);
@@ -2684,7 +2691,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
       poly_outline = OUTLINE_DEFAULT;
       queuepoly(fixrot * spin(-d * M_PI/4), shArrow, col);
 
-      if((c->type & 1) && (isStunnable(c->monst) || c->wall == waThumperOn)) {
+      if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));
         int sd = md.subdir;
         queuepoly(inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2), shArrow, col);
@@ -2829,6 +2836,19 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
     case laAlchemist: 
       fcol = floorcolors[c->land]; break;
+    
+    case laVariant: {
+      int b = getBits(c);
+      fcol = 0x404040;
+      for(int a=0; a<21; a++)
+        if((b >> a) & 1)
+          fcol += variant_features[a].color_change;
+      if(c->wall == waAncientGrave)
+        wcol = 0x080808;
+      else if(c->wall == waFreshGrave)
+        wcol = 0x202020;
+      break;
+      }
     
     case laRuins:
       fcol = pseudohept(c) ? 0xC0E0C0 : 0x40A040;
@@ -3134,7 +3154,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
   switch(c->wall) {
     case waSulphur: case waSulphurC: case waPlatform: case waMercury: case waDock:
     case waAncientGrave: case waFreshGrave: case waThumperOn: case waThumperOff: case waBonfireOff:
-    case waRoundTable:
+    case waRoundTable: case waExplosiveBarrel:
       // floors become fcol
       fcol = wcol;
       break;
@@ -4525,7 +4545,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waClosePlate: case waOpenPlate: {
           transmatrix V2 = V;
-          if(wmescher && geosupport_football() == 2 && pseudohept(c)) V2 = V * spin(M_PI / c->type);
+          if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
           draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
           draw_floorshape(c, V2, shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
           break;
@@ -4584,6 +4604,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(c->wparam >= 1)
             queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           if(isCentralTrap(c)) arrowtraps.push_back(c);
+          break;
+      
+        case waFireTrap:
+          draw_floorshape(c, V, shMFloor, darkena(0xC00000, 0, 0xFF));
+          draw_floorshape(c, V, shMFloor2, darkena(0x600000, 0, 0xFF));
+          if(c->wparam >= 1)
+            queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           break;
       
         case waGiantRug:
@@ -4650,6 +4677,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             poly_outline = OUTLINE_DEFAULT;
             }
           
+          else if(c->wall == waExplosiveBarrel) {
+           const int layers = 2 << detaillevel;
+           for(int z=1; z<=layers; z++) {
+             double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
+             queuepolyat(xyzscale(V, zg, zg), shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::REDWALLm+z));
+             }
+           }
+          
           else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
             auto V2 = V;
             if(hasTimeout(c)) V2 = V2 * spintick(c->land == laPower ? 5000 : 500);
@@ -4666,6 +4701,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     else {
       if(c->wall == waArrowTrap)
+        asciicol = trapcol[c->wparam & 3];
+      if(c->wall == waFireTrap)
         asciicol = trapcol[c->wparam & 3];
       if(c->wall == waTerraWarrior)
         asciicol = terracol[c->landparam & 7];

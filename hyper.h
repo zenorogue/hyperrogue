@@ -1726,7 +1726,7 @@ namespace sword {
   }
 
 void killThePlayer(eMonster m, int id, flagtype flags);
-bool attackJustStuns(cell *c2, flagtype flags);
+bool attackJustStuns(cell *c2, flagtype flags, eMonster attacker);
 
 bool isTargetOrAdjacent(cell *c);
 bool warningprotection(const string& s);
@@ -2079,6 +2079,8 @@ extern eGlyphsortorder glyphsortorder;
 
 void explodeMine(cell *c);
 bool mayExplodeMine(cell *c, eMonster who);
+void explosion(cell *c, int power, int central);
+void explodeBarrel(cell *c);
 
 int gravityLevel(cell *c);
 void fullcenter();

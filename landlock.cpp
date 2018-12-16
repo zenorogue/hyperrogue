@@ -223,6 +223,12 @@ int isNative(eLand l, eMonster m) {
       return among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 :
         m == moSkeleton ? 1 : 0;
       
+    case laVariant:
+      return 
+        m == moVariantWarrior ? 2 :
+        among(m, moMonk, moCrusher, moSkeleton, moHedge, moLancer, moFlailer, moCultist, moPyroCultist, moNecromancer, moGhost, moZombie, moRatling) ? 1 :
+        isIvy(m) ? 1 : 0;       
+      
     case laMagnetic:
       return isMagneticPole(m) ? 2 : 0;
     }
@@ -326,6 +332,8 @@ eItem treasureType(eLand l) {
     case laRuins: return itRuins;
     case laSwitch: return itSwitch;
     case laMagnetic: return itMagnet;
+    case laVariant: return itVarTreasure;
+    case laWestWall: return itWest;
     
     case laCA: return itNone;
     }

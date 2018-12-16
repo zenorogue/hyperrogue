@@ -10,7 +10,7 @@ static inline void set_flag(flagtype& f, flagtype which, bool b) {
   else f &= ~which;
   }
 
-static const int motypes = 164;
+static const int motypes = 165;
 
 struct monstertype {
   char  glyph;
@@ -67,7 +67,7 @@ enum eMonster {
   moNorthPole, moSouthPole,
   moPair, moHexDemon, moAltDemon, moMonk, moCrusher,
   moSwitch1, moSwitch2,
-  moBrownBug, moAcidBird,
+  moBrownBug, moAcidBird, moVariantWarrior,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball, moCrushball,
   // temporary
@@ -84,7 +84,7 @@ struct genderswitch_t {
 
 #define NUM_GS 6
 
-static const int ittypes = 131;
+static const int ittypes = 133;
 
 struct itemtype {
   char  glyph;
@@ -131,10 +131,10 @@ enum eItem {
   itOrbLava, itOrbMorph, itGlowCrystal, itSnake,
   itDock, itRuins, itMagnet, itSwitch,
   itOrbPhasing, itOrbMagnetism, itOrbSlaying,
-  itBrownian
+  itBrownian, itWest, itVarTreasure
   };
 
-static const int walltypes = 109;
+static const int walltypes = 111;
 
 struct walltype {
   char  glyph;
@@ -175,10 +175,11 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waTempBridgeBlocked,
   waTerraWarrior, waBubble,
   waArrowTrap, waMercury, waMagma,
-  waDock, waBurningDock, waRuinWall, waBrownian
+  waDock, waBurningDock, waRuinWall, waBrownian,
+  waFireTrap, waExplosiveBarrel
   };
 
-static const int landtypes = 85;
+static const int landtypes = 87;
 
 struct landtype {
   color_t color;
@@ -205,7 +206,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laMirrorOld,
   laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
   laDual, laSnakeNest, laDocks, laRuins, laMagnetic,
-  laSwitch, laMemory, laBrownian
+  laSwitch, laMemory, laBrownian, laWestWall, laVariant
   };
 
 enum eGeometry {

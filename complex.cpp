@@ -2084,6 +2084,10 @@ namespace heat {
             newfires.emplace_back(c2, 12);
           else if(cellHalfvine(c2) && last && last->wall == c2->wall)
             newfires.emplace_back(c2, 12);
+          else if(c2->wall == waExplosiveBarrel)
+            newfires.emplace_back(c2, 12);
+          else if(c2->wall == waFireTrap)
+            newfires.emplace_back(c2, 12);
           // both halfvines have to be near fire at once
           last = c2;
           }
@@ -2108,13 +2112,26 @@ namespace heat {
           }
         if(c->wparam == 4) c->wparam = 0;
         }
+
+      if(c->wall == waFireTrap && c->wparam && !shmup::on) {
+        c->wparam++;
+        if(c->wparam == 3) {
+          c->wall = waNone;
+          explosion(c, 5, 10);
+          }
+        }
       }
 
    for(int i=0; i<isize(newfires); i++) {
       cell* c = newfires[i].first;
       int qty = newfires[i].second;
       qty /= 2;
-      if(c->wall == waBonfireOff) activateActiv(c, false);
+      if(c->wall == waExplosiveBarrel) explodeBarrel(c);
+      else if(c->wall == waFireTrap) {
+        if(c->wparam == 0) c->wparam = 1;
+        continue;
+        }
+      else if(c->wall == waBonfireOff) activateActiv(c, false);
       else if(cellHalfvine(c)) destroyHalfvine(c, waPartialFire, 6);
       else makeflame(c, qty, false);
       if(c->wparam < qty) c->wparam = qty;

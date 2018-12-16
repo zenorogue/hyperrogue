@@ -360,10 +360,14 @@ bool isWall(cell *w) {
     w->wall == waSmallBush || w->wall == waBigBush ||
     w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor ||
     w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap || w->wall == waMagma ||
-    w->wall == waDock) 
+    w->wall == waDock || w->wall == waFireTrap) 
     return false;
   if(isWatery(w) || isChasmy(w) || isFire(w)) return false;
   return true;
+  }
+
+bool isPushable(eWall w) {
+  return w == waThumperOn || w == waExplosiveBarrel;
   }
 
 bool isAngryBird(eMonster m) {
@@ -412,7 +416,7 @@ bool normalMover(eMonster m) {
     m == moHunterGuard || m == moHunterChanging ||
     m == moIceGolem || 
     m == moSwitch1 || m == moSwitch2 || m == moCrusher || m == moPair || 
-    m == moBrownBug ||
+    m == moBrownBug || m == moVariantWarrior ||
     isMagneticPole(m) || 
     slowMover(m);
   }
@@ -742,7 +746,7 @@ bool hornStuns(cell *c) {
     m == moButterfly || m == moGreater || m == moGreaterM || m == moDraugr ||
     m == moHedge || m == moFlailer || m == moVizier || m == moReptile || m == moSalamander || 
     m == moPair || m == moAltDemon || m == moHexDemon || m == moMonk || m == moCrusher ||
-    attackJustStuns(c, AF_NORMAL);
+    attackJustStuns(c, AF_NORMAL, moNone);
   }
 
 // generate all the world first in the quotient geometry

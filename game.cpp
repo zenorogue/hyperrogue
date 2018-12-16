@@ -971,6 +971,10 @@ bool logical_adjacent(cell *c1, eMonster m1, cell *c2) {
   return true;
   }
 
+bool arrow_stuns(eMonster m) {
+  return among(m, moCrusher, moMonk, moAltDemon, moHexDemon, moGreater, moGreaterM, moHedge);
+  }
+
 bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
 
   // cannot eat worms
@@ -984,12 +988,14 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   
   if(m2 == moPlayer && peace::on) return false;
   
-  if((flags & AF_MUSTKILL) && attackJustStuns(c2, flags))
+  if((flags & AF_MUSTKILL) && attackJustStuns(c2, flags, m1))
     return false;
   
   if((flags & AF_ONLY_FRIEND) && m2 != moPlayer && !isFriendly(c2)) return false;
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
   if((flags & AF_ONLY_ENEMY) && (m2 == moPlayer || isFriendlyOrBug(c2))) return false;
+  
+  if(m1 == moArrowTrap && arrow_stuns(m2)) return true;
   
   if(among(m2, moAltDemon, moHexDemon, moPair, moCrusher, moNorthPole, moSouthPole, moMonk) && !(flags & (AF_EAT | AF_MAGIC | AF_BULL | AF_CRUSH)))
     return false;
@@ -1435,10 +1441,11 @@ bool monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *come
     comefrom->wall = w;
     c->wall = waBigStatue;
     }
-  else if(who == moPlayer && c->wall == waThumperOn) {
+  else if(who == moPlayer && isPushable(c->wall)) {
+    eWall w = c->wall;
     c->wall = waNone;
     b = monstersnear2();
-    c->wall = waThumperOn;
+    c->wall = w;
     }
   else {
     b = monstersnear2();
@@ -1532,6 +1539,12 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waBarrowDig || c->wall == waBarrowWall ||
     c->wall == waMirrorWall)
     return;
+  if(c->wall == waFireTrap) {
+    if(c->wparam == 0) c->wparam = 1;
+    return;
+    }
+  if(c->wall == waExplosiveBarrel) 
+    explodeBarrel(c);
   destroyTrapsOn(c);
   // these walls block further spilling
   if(c->wall == waCavewall || cellUnstable(c) || c->wall == waSulphur ||
@@ -1788,6 +1801,10 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
     if(checkonly) return true;
     c->wall = waLake, HEAT(c) += 1;
     }
+  else if(c->wall == waFireTrap) {
+    if(checkonly) return true;
+    if(c->wparam == 0) c->wparam = 1;
+    }
   else if(c->wall == waFrozenLake) {
     if(checkonly) return true;
     drawParticles(c, MELTCOLOR, 8, 8);
@@ -1827,16 +1844,12 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
   return true;
   }
 
-void explodeMine(cell *c) {
-  if(c->wall != waMineMine)
-    return;
-  
+void explosion(cell *c, int power, int central) {
   playSound(c, "explosion");
   drawFireParticles(c, 30, 150);
   
-  c->wall = waMineOpen;
   brownian::dissolve_brownian(c, 2);
-  makeflame(c, 20, false);
+  makeflame(c, central, false);
   
   forCellEx(c2, c) {
     destroyTrapsOn(c2);
@@ -1845,7 +1858,7 @@ void explodeMine(cell *c) {
       c2->wall = waRed1;
     else if(c2->wall == waDeadTroll || c2->wall == waDeadTroll2 || c2->wall == waPetrified || c2->wall == waGargoyle) {
       c2->wall = waNone;
-      makeflame(c2, 10, false);
+      makeflame(c2, power/2, false);
       }
     else if(c2->wall == waPetrifiedBridge || c2->wall == waGargoyleBridge) {
       placeWater(c, c);
@@ -1853,7 +1866,7 @@ void explodeMine(cell *c) {
     else if(c2->wall == waPalace || c2->wall == waOpenGate || c2->wall == waClosedGate ||
       c2->wall == waSandstone || c2->wall == waMetal || c2->wall == waSaloon || c2->wall == waRuinWall) {
       c2->wall = waNone;
-      makeflame(c2, 10, false);
+      makeflame(c2, power/2, false);
       }
     else if(c2->wall == waTower)
       c2->wall = waRubble;
@@ -1861,8 +1874,30 @@ void explodeMine(cell *c) {
       c2->wall = waBarrowDig;
     else if(c2->wall == waBarrowDig)
       c2->wall = waNone;
-    else makeflame(c2, 20, false);
+    else if(c2->wall == waFireTrap) {
+      if(c2->wparam == 0)
+        c2->wparam = 1;
+      }
+    else if(c2->wall == waExplosiveBarrel)
+      explodeBarrel(c2);
+    else makeflame(c2, power, false);
     }
+  }
+
+void explodeMine(cell *c) {
+  if(c->wall != waMineMine)
+    return;
+  
+  c->wall = waMineOpen;
+  explosion(c, 20, 20);
+  }
+
+void explodeBarrel(cell *c) {
+  if(c->wall != waExplosiveBarrel)
+    return;
+  
+  c->wall = waNone;  
+  explosion(c, 20, 20);
   }
 
 bool mayExplodeMine(cell *c, eMonster who) {
@@ -1872,7 +1907,7 @@ bool mayExplodeMine(cell *c, eMonster who) {
   return true;
   }
 
-void stunMonster(cell *c2) {
+void stunMonster(cell *c2, eMonster killer, flagtype flags) {
   int newtime = (
     c2->monst == moFatGuard ? 2 : 
     c2->monst == moSkeleton && c2->land != laPalace && c2->land != laHalloween ? 7 :
@@ -1892,6 +1927,7 @@ void stunMonster(cell *c2) {
     c2->monst == moSalamander ? 6 :
     c2->monst == moBrownBug ? 3 :
     3);
+  if(killer == moArrowTrap) newtime = min(newtime + 3, 7);
   if(!isMetalBeast(c2->monst) && !among(c2->monst, moSkeleton, moReptile, moSalamander, moTortoise, moBrownBug)) {
     c2->hitpoints--;
     if(c2->monst == moPrincess)
@@ -1902,9 +1938,11 @@ void stunMonster(cell *c2) {
   checkStunKill(c2);
   }
 
-bool attackJustStuns(cell *c2, flagtype f) {
+bool attackJustStuns(cell *c2, flagtype f, eMonster attacker) {
   if(f & AF_HORNS)
     return hornStuns(c2);
+  else if(attacker == moArrowTrap && arrow_stuns(c2->monst))
+    return true;
   else if((f & AF_SWORD) && c2->monst == moSkeleton)
     return false;
   else if(f & (AF_CRUSH | AF_MAGIC | AF_FALL | AF_EAT | AF_GUN))
@@ -2427,7 +2465,7 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   
   int tkt = killtypes();
   
-  bool dostun = attackJustStuns(c, flags);
+  bool dostun = attackJustStuns(c, flags, killer);
   
   if((flags & AF_BULL) && c->monst == moVizier && c->hitpoints > 1) {
     dostun = true;
@@ -2439,7 +2477,7 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   
   if(flags & AF_MSG) fightmessage(m, killer, dostun, flags);
   if(dostun) 
-    stunMonster(c);
+    stunMonster(c, killer, flags);
   else 
     killMonster(c, killer, flags);
 
@@ -3323,6 +3361,9 @@ void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
   
   if(ct->wall == waArrowTrap && !ignoresPlates(m))
     activateArrowTrap(ct);
+
+  if(ct->wall == waFireTrap && !ignoresPlates(m) && ct->wparam == 0)
+    ct->wparam = 1;
     
   if(cf && isPrincess(m)) princess::move(ct, cf);
   
@@ -3405,6 +3446,9 @@ void playerMoveEffects(cell *c1, cell *c2) {
 
   if(c2->wall == waArrowTrap && c2->wparam == 0 && !markOrb(itOrbAether))
     activateArrowTrap(c2);
+  
+  if(c2->wall == waFireTrap && c2->wparam == 0 && !markOrb(itOrbAether))
+    c2->wparam = 1;
     
   princess::playernear(c2);
 
@@ -3451,6 +3495,10 @@ void beastcrash(cell *c, cell *beast) {
     c->wall = waThumperOn;
     c->wparam = 100;
     }  
+  else if(c->wall == waExplosiveBarrel) {
+    addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->wall));
+    explodeBarrel(c);
+    }
   else if(isBull(c->monst) || isSwitch(c->monst)) {
     addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->monst));
     if(c->monst == moSleepBull) c->monst = moRagingBull, c->stuntime = 3;
@@ -4031,6 +4079,10 @@ void beastAttack(cell *c, bool player) {
       playSound(c2, "click");
       c2->wall = waThumperOn;
       }
+    if(c2->wall == waExplosiveBarrel) {
+      playSound(c2, "click");
+      explodeBarrel(c2);
+      }
     if(c2->wall == waThumperOn) {
       cellwalker bull (c, d);
       int subdir = determinizeBullPush(bull);
@@ -4143,6 +4195,7 @@ void explodeAround(cell *c) {
         destroyHalfvine(c2); 
         c2->wall = waNone;
         }
+      if(c2->wall == waExplosiveBarrel) explodeBarrel(c2);
       if(c2->wall == waCavewall || c2->wall == waDeadTroll) c2->wall = waCavefloor;
       if(c2->wall == waDeadTroll2) c2->wall = waNone;
       if(c2->wall == waPetrified) c2->wall = waNone;
@@ -4482,7 +4535,7 @@ void moveivy() {
           if(isPlayerOn(c->move(j))) 
             killThePlayerAt(c->monst, c->move(j), 0);
           else {
-            if(attackJustStuns(c->move(j), 0))
+            if(attackJustStuns(c->move(j), 0, c->monst))
               addMessage(XLAT("The ivy attacks %the1!", c->move(j)->monst));
             else if(isNonliving(c->move(j)->monst))
               addMessage(XLAT("The ivy destroys %the1!", c->move(j)->monst));
@@ -7333,24 +7386,29 @@ void pushThumper(cell *th, cell *cto) {
   if(th->land == laAlchemist)
     th->wall = isAlch(cwt.at) ? cwt.at->wall : cto->wall;
   else th->wall = waNone;
+  int explode = 0;
+  if(cto->wall == waArrowTrap && w == waExplosiveBarrel ) explode = max<int>(cto->wparam, 1);
+  if(cto->wall == waFireTrap) explode = max<int>(cto->wparam, 1);
+  destroyTrapsOn(cto);
   if(cto->wall == waOpenPlate || cto->wall == waClosePlate) {
     toggleGates(cto, cto->wall);
-    addMessage(XLAT("%The1 destroys %the2!", waThumperOn, cto->wall));
+    addMessage(XLAT("%The1 destroys %the2!", w, cto->wall));
     }
   if(cellUnstable(cto) && cto->land == laMotion) {
-    addMessage(XLAT("%The1 falls!", waThumperOn));
+    addMessage(XLAT("%The1 falls!", w));
     doesFallSound(cto);
     }
   else if(cellUnstableOrChasm(cto)) {
-    addMessage(XLAT("%The1 fills the hole!", waThumperOn));
+    addMessage(XLAT("%The1 fills the hole!", w));
     cto->wall = waTempFloor;
     }
   else if(isWatery(cto)) {
-    addMessage(XLAT("%The1 fills the hole!", waThumperOn));
+    addMessage(XLAT("%The1 fills the hole!", w));
     cto->wall = waTempBridge;
     }
   else 
     cto->wall = w;
+  if(explode) cto->wall = waFireTrap, cto->wparam = explode;
   }
 
 bool canPushThumperOn(cell *tgt, cell *thumper, cell *player) {
@@ -7562,7 +7620,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return true;
       }
 
-    if(c2->wall == waThumperOn && !c2->monst && !nonAdjacentPlayer(c2, cwt.at)) {
+    if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at)) {
       int pushdir;
       cell *c3 = determinePush(cwt, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.at); }, pushdir);
       if(c3 == c2) {

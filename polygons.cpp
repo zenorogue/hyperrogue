@@ -1507,6 +1507,7 @@ hpcshape
   shBFloor[2],
   shWave[8][2],  
   shCircleFloor,
+  shBarrel,
   shWall[2], shMineMark[2], shFan,
   shZebra[5],
   shSwitchDisk,
@@ -1892,6 +1893,9 @@ void buildpolys() {
     chasmifyPoly(dlow, dhi, k);
     }
   
+  bshape(shBarrel, PPR::FLOOR);
+  for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.5) * C0);
+
   bshape(shCircleFloor, PPR::FLOOR);
   for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.9) * C0);
   
