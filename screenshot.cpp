@@ -1006,4 +1006,124 @@ bool center_music() {
 
 }
 #endif
+
+namespace startanims {
+
+int ticks_start = 0;
+
+void null_animation() {
+  gamescreen(2);  
+  }
+
+void joukowsky() {
+  dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
+  dynamicval<ld> dt(conformal::model_orientation, ticks / 25.);
+  dynamicval<int> dv(vid.use_smart_range, 2);
+  dynamicval<ld> ds(vid.scale, 1/4.);
+  conformal::configure();
+  dynamicval<color_t> dc(ringcolor, 0);  
+  gamescreen(2);
+  }
+
+void bandspin() {
+  dynamicval<eModel> dm(pmodel, mdBand);
+  dynamicval<ld> dt(conformal::model_orientation, ticks / 25.);
+  dynamicval<int> dv(vid.use_smart_range, 2);
+  conformal::configure();
+  gamescreen(2);
+  }
+
+void perspective() {
+  ld x = sin(ticks / 1500.);
+  x += 1;
+  x /= 2;
+  x *= 1.5;
+  x = tan(x);
+  dynamicval<ld> da(vid.alpha, x);
+  dynamicval<ld> ds(vid.scale, (1+x)/2);
+  calcparam();
+  gamescreen(2);
+  }
+
+void rug() {
+  dynamicval<bool> b(rug::rugged, true);
+  rug::physics();
+  rug::apply_rotation(rotmatrix(ticks / 3000., 1, 2));
+  gamescreen(2);
+  rug::apply_rotation(rotmatrix(-ticks / 3000., 1, 2));
+  }
+
+void spin_around() {
+  dynamicval<ld> da(vid.alpha, 999);
+  dynamicval<ld> ds(vid.scale, 500);
+  ld alpha = 2 * M_PI * ticks / 10000.;
+  ld circle_radius = acosh(2.);
+  dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
+  gamescreen(2);
+  }
+
+reaction_t add_to_frame;
+
+void draw_ghost(const transmatrix V) {
+  queuepoly(V, shMiniGhost, 0xFFFFFFC0);
+  queuepoly(V, shMiniEyes, 0xFF);
+  }
+
+void row_of_ghosts() {
+  dynamicval<reaction_t> r(add_to_frame, [] {
+    for(ld x=-5; x<=5; x+=0.2)
+      for(ld y=-5; y<=5; y+=0.2) {
+        ld ay = y + (ticks % 1000) / 1000.;
+        draw_ghost(xpush(x) * spin(M_PI/2) * xpush(ay));
+        }
+    });
+  dynamicval<bool> rd(mapeditor::drawplayer, false);
+  gamescreen(2);
+  }
+
+void army_of_ghosts() {
+  dynamicval<bool> rd(mapeditor::drawplayer, false);
+  dynamicval<reaction_t> r(add_to_frame, [] {
+    for(ld x=-3; x<=3; x+=0.5) {
+      int minv = int(cosh(x) * 3);
+      for(ld y=-minv; y<=minv; y+=0.5) {
+        ld ay = y + (ticks % 2000) / 2000.;
+        draw_ghost(spin(M_PI/2) * xpush(ay / cosh(x)) * spin(-M_PI/2) * xpush(x) * spin(M_PI/2));
+        }
+      }
+    });
+  gamescreen(2);
+  }
+
+void ghost_spiral() {
+  dynamicval<reaction_t> r(add_to_frame, [] {
+    ld t = (ticks - ticks_start - 2000) / 150000.;
+    for(ld i=3; i<=40; i++) {
+      draw_ghost(spin(t * i * 2 * M_PI) * xpush(asinh(15. / i)) * spin(M_PI/2));
+      }
+    });
+  gamescreen(2);
+  }
+
+// more start animations:
+// - fly a ghost around center, in Gans model
+// - triangle edges?
+
+reaction_t current = null_animation;
+
+void pick() {
+  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE) {
+    current = null_animation;
+    return;
+    }
+  vector<reaction_t> known = { null_animation, perspective, joukowsky, bandspin, rug, spin_around, row_of_ghosts, ghost_spiral, army_of_ghosts };
+  int id = rand() % 9;
+  current = known[id];
+  ticks_start = ticks;
+  if(id == 4) rug::init(), rug::rugged = false;
+  }
+
+auto sanimhook = addHook(hooks_frame, 100, []() { if(add_to_frame) add_to_frame(); });
+
+}
 }

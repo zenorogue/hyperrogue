@@ -2590,6 +2590,8 @@ extern bool useRangedOrb;
 
 void addaura(hyperpoint h, color_t col, int fd);
 void addauraspecial(hyperpoint h, color_t col, int dir);
+void drawaura();
+void clearaura();
 
 void drawBug(const cellwalker& cw, color_t col);
 
@@ -4427,6 +4429,11 @@ namespace anims {
   
   extern int noframes;
   extern ld period, cycle_length, parabolic_length, rug_angle, circle_radius, circle_spins;
+  }
+
+namespace startanims {
+  extern reaction_t current;  
+  void pick();
   }
 
 extern int animation_lcm;

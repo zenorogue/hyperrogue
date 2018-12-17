@@ -255,7 +255,7 @@ void showMainMenu() {
     else if(uni == 'd') pushScreen(showDisplayMode);
     else if(uni == 'm') pushScreen(showChangeMode);
     else if(uni == 'R') dialog::do_if_confirmed([] {
-      popScreenAll(), pushScreen(showStartMenu);
+      popScreenAll(), startanims::pick(), pushScreen(showStartMenu);
       });
   #if CAP_SAVE
     else if(uni == 't') scores::load();
@@ -602,7 +602,7 @@ void showStartMenu() {
       daily_mode = 20;
     }
   
-  gamescreen(2);
+  startanims::current();
 
   getcstat = ' ';
   
@@ -813,6 +813,7 @@ void showStartMenu() {
       clearMessages();
       welcomeMessage();
       }
+    else if(sym == SDLK_F5) startanims::pick();
     };
   }
  

@@ -65,8 +65,10 @@ int main(int argc, char **argv) {
   start_game();
 #endif
 #if !ISWEB
-  if(showstartmenu && !vid.skipstart)
+  if(showstartmenu && !vid.skipstart) {
+    startanims::pick();
     pushScreen(showStartMenu);
+    }
 #endif
   mainloop();
   finishAll();  

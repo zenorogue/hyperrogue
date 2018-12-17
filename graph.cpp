@@ -2412,6 +2412,7 @@ void drawaura() {
       }
     }
   glflush();
+  current_display->set_projection(0, false);
   glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
   glhr::id_modelview();
   glhr::prepare(auravertices);

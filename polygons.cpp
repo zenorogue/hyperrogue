@@ -1526,6 +1526,7 @@ hpcshape
   shWestHat1, shWestHat2, shGunInHand,
   shKnightArmor, shKnightCloak, shWightCloak,
   shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
+  shMiniGhost, shMiniEyes,
   shHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
   shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
@@ -2356,6 +2357,7 @@ void buildpolys() {
 
   // monsters
   bshape(shGhost, PPR::MONSTER_BODY, scalefactor, 69);
+  bshape(shMiniGhost, PPR::MONSTER_BODY, scalefactor/3, 69);
   bshape(shGargoyleWings, PPR::MONSTER_CLOAK, scalefactor, 70);
   bshape(shGargoyleBody, PPR::MONSTER_BODY, scalefactor, 71);
   bshape(shDogStripes, PPR::MONSTER_ARMOR1, scalefactor, 72);
@@ -2490,6 +2492,7 @@ void buildpolys() {
   bshape(shFlowerHand, PPR::MONSTER_WPN, scalefactor, 133);
   bshape(shPFace, PPR::MONSTER_FACE, scalefactor, 134);
   bshape(shEyes, PPR::MONSTER_EYE0, scalefactor, 135);
+  bshape(shMiniEyes, PPR::MONSTER_EYE0, scalefactor/3, 135);
   bshape(shShark, PPR::MONSTER_BODY, scalefactor, 136);
   bshape(shTinyShark, PPR::MONSTER_BODY, scalefactor / 2, 136);
   bshape(shBugBody, PPR::MONSTER_BODY, scalefactor, 137);
