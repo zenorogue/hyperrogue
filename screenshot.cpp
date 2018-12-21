@@ -1067,17 +1067,25 @@ void spin_around() {
 
 reaction_t add_to_frame;
 
-void draw_ghost(const transmatrix V) {
-  queuepoly(V, shMiniGhost, 0xFFFFFFC0);
-  queuepoly(V, shMiniEyes, 0xFF);
+void draw_ghost(const transmatrix V, int id) {
+  if(id % 13 == 0) {
+    queuepoly(V, shMiniGhost, 0xFFFF00C0);
+    queuepoly(V, shMiniEyes, 0xFF);
+    }
+  else {
+    queuepoly(V, shMiniGhost, 0xFFFFFFC0);
+    queuepoly(V, shMiniEyes, 0xFF);
+    }
   }
 
 void row_of_ghosts() {
   dynamicval<reaction_t> r(add_to_frame, [] {
-    for(ld x=-5; x<=5; x+=0.2)
-      for(ld y=-5; y<=5; y+=0.2) {
-        ld ay = y + (ticks % 1000) / 1000.;
-        draw_ghost(xpush(x) * spin(M_PI/2) * xpush(ay));
+    int t = ticks/400;
+    ld mod = (ticks-t*400)/400.;
+    for(int x=-25; x<=25; x++)
+      for(int y=-25; y<=25; y++) {
+        ld ay = (y + mod)/5.;
+        draw_ghost(xpush(x/5.) * spin(M_PI/2) * xpush(ay), int(y-t));
         }
     });
   dynamicval<bool> rd(mapeditor::drawplayer, false);
@@ -1087,11 +1095,22 @@ void row_of_ghosts() {
 void army_of_ghosts() {
   dynamicval<bool> rd(mapeditor::drawplayer, false);
   dynamicval<reaction_t> r(add_to_frame, [] {
-    for(ld x=-3; x<=3; x+=0.5) {
-      int minv = int(cosh(x) * 3);
-      for(ld y=-minv; y<=minv; y+=0.5) {
-        ld ay = y + (ticks % 2000) / 2000.;
-        draw_ghost(spin(M_PI/2) * xpush(ay / cosh(x)) * spin(-M_PI/2) * xpush(x) * spin(M_PI/2));
+    int tt = ticks - ticks_start + 1200;
+    int t = tt/400;
+    ld mod = (tt-t*400)/400.;
+    for(int x=-12; x<=12; x++) {
+      ld ax = x/4.;
+      transmatrix T = spin(-M_PI/2) * xpush(ax) * spin(M_PI/2);
+      for(int y=0;; y++) {
+        ld ay = (mod - y)/4.;
+        transmatrix U = spin(M_PI/2) * xpush(ay / cosh(ax)) * T;
+        if(!in_smart_range(U)) break;
+        draw_ghost(U, (-y - t));
+        if(y) {
+          ay = (mod + y)/4.;
+          transmatrix U = spin(M_PI/2) * xpush(ay / cosh(ax)) * T;
+          draw_ghost(U, (y - t));
+          }
         }
       }
     });
@@ -1102,7 +1121,24 @@ void ghost_spiral() {
   dynamicval<reaction_t> r(add_to_frame, [] {
     ld t = (ticks - ticks_start - 2000) / 150000.;
     for(ld i=3; i<=40; i++) {
-      draw_ghost(spin(t * i * 2 * M_PI) * xpush(asinh(15. / i)) * spin(M_PI/2));
+      draw_ghost(spin(t * i * 2 * M_PI) * xpush(asinh(15. / i)) * spin(M_PI/2), 1);
+      }
+    });
+  gamescreen(2);
+  }
+
+void fib_ghosts() {
+  dynamicval<bool> rd(mapeditor::drawplayer, false);
+  dynamicval<reaction_t> r(add_to_frame, [] {
+    ld phase = (ticks - ticks_start - 2000) / 1000.;
+    for(int i=0; i<=500; i++) {
+      ld step = M_PI * (3 - sqrt(5));
+      ld density = 0.01;
+      ld area = 1 + (i+.5) * density;
+      ld r = acosh(area);
+      ld length = sinh(r);
+      transmatrix T = spin(i * step + phase / length) * xpush(r) * spin(M_PI/2);
+      draw_ghost(T, i);
       }
     });
   gamescreen(2);
@@ -1119,8 +1155,8 @@ void pick() {
     current = null_animation;
     return;
     }
-  vector<reaction_t> known = { null_animation, perspective, joukowsky, bandspin, rug, spin_around, row_of_ghosts, ghost_spiral, army_of_ghosts };
-  int id = rand() % 9;
+  vector<reaction_t> known = { null_animation, perspective, joukowsky, bandspin, rug, spin_around, row_of_ghosts, ghost_spiral, army_of_ghosts, fib_ghosts };
+  int id = rand() % 10;
   current = known[id];
   ticks_start = ticks;
   if(id == 4) rug::init(), rug::rugged = false;
