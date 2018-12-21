@@ -14,15 +14,11 @@ bool isIcyLand(cell *c) {
   }
 
 bool isGravityLand(eLand l) {
-  return 
-    l == laIvoryTower || l == laEndorian ||
-    l == laMountain || l == laDungeon;
+  return among(l, laIvoryTower, laEndorian, laMountain, laDungeon, laWestWall);
   }
 
 bool isEquidLand(eLand l) {
-  return 
-    l == laIvoryTower || l == laEndorian || l == laDungeon ||
-    isHaunted(l) || l == laOcean;
+  return isHaunted(l) || among(l, laIvoryTower, laEndorian, laDungeon, laOcean, laWestWall);
   }
 
 // watery

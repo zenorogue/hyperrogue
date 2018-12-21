@@ -2083,6 +2083,7 @@ void explosion(cell *c, int power, int central);
 void explodeBarrel(cell *c);
 
 int gravityLevel(cell *c);
+int gravityLevelDiff(cell *c, cell *f);
 void fullcenter();
 void movecost(cell* from, cell *to, int phase); // 1 = pre-collect, 2 = post-collect, 3 = both
 void checkmove();

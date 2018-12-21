@@ -59,6 +59,7 @@ flagtype havewhat, hadwhat;
 #define HF_HEXD       Flag(28)
 #define HF_ALT        Flag(29)
 #define HF_MONK       Flag(30)
+#define HF_WESTWALL   Flag(31)
 
 
 bool seenSevenMines = false;
@@ -485,7 +486,7 @@ bool checkflags(flagtype flags, int x) {
 bool strictlyAgainstGravity(cell *w, cell *from, bool revdir, flagtype flags) {
   return
     cellEdgeUnstable(w, flags) && cellEdgeUnstable(from, flags) && 
-    !(shmup::on && from == w) && gravityLevel(w) != gravityLevel(from) + (revdir?1:-1);
+    !(shmup::on && from == w) && gravityLevelDiff(w, from) != (revdir?1:-1);
   }
 
 bool passable(cell *w, cell *from, flagtype flags) {
@@ -2566,6 +2567,19 @@ int gravityLevel(cell *c) {
   return 0;
   }
 
+int gravityLevelDiff(cell *c, cell *d) { 
+  if(c->land != laWestWall || d->land != laWestWall)
+    return gravityLevel(c) - gravityLevel(d);
+  int bonus = 0;
+  int id = parent_id(c, 1, coastvalEdge);
+  for(int a=0; a<3; a++)
+    if(c->modmove(id+a) == d) bonus++;
+  id = parent_id(c, -1, coastvalEdge);
+  for(int a=0; a<3; a++)
+    if(c->modmove(id-a) == d) bonus--;
+  return bonus;
+  }    
+
 bool canUnstable(eWall w, flagtype flags) {
   return w == waNone || w == waCanopy || w == waOpenPlate || w == waClosePlate ||
     w == waOpenGate || ((flags & MF_STUNNED) && (w == waLadder || w == waTrunk || w == waSolidBranch || w == waWeakBranch
@@ -2574,11 +2588,10 @@ bool canUnstable(eWall w, flagtype flags) {
 
 bool cellEdgeUnstable(cell *c, flagtype flags) {
   if(!isGravityLand(c->land) || !canUnstable(c->wall, flags)) return false;
-  int d = gravityLevel(c);
   for(int i=0; i<c->type; i++) if(c->move(i)) {
     if(isAnyIvy(c->move(i)->monst) && 
       c->land == laMountain && !(flags & MF_IVY)) return false;
-    if(gravityLevel(c->move(i)) == d-1) {
+    if(gravityLevelDiff(c, c->move(i)) == 1) {
       if(againstWind(c->move(i), c)) return false;
       if(!passable(c->move(i), NULL, P_MONSTER | P_DEADLY))
         return false;
@@ -2828,7 +2841,7 @@ void buildRosemap() {
 int getDistLimit() { return base_distlimit; }
 
 bool nogoSlow(cell *to, cell *from) {
-  if(cellEdgeUnstable(to) && gravityLevel(to) >= gravityLevel(from)) return true;
+  if(cellEdgeUnstable(to) && gravityLevelDiff(to, from) >= 0) return true;
   if(cellUnstable(to)) return true;
   return false;
   }
@@ -3080,6 +3093,7 @@ void bfs() {
         
         if(c2->land == laWhirlpool) havewhat |= HF_WHIRLPOOL;
         if(c2->land == laWhirlwind) havewhat |= HF_WHIRLWIND;
+        if(c2->land == laWestWall) havewhat |= HF_WESTWALL;
         if(c2->land == laPrairie) havewhat |= HF_RIVER;
 
         if(c2->wall == waRose) havewhat |= HF_ROSE;
@@ -3288,14 +3302,14 @@ void destroyTrapsAround(cell *c) {
 
 void destroyWeakBranch(cell *cf, cell *ct, eMonster who) {
   if(cf && ct && cf->wall == waWeakBranch && cellEdgeUnstable(ct) &&
-    gravityLevel(ct) >= gravityLevel(cf) && !ignoresPlates(who)) {
+    gravityLevelDiff(ct, cf) >= 0 && !ignoresPlates(who)) {
     cf->wall = waCanopy;
     if(!cellEdgeUnstable(cf)) { cf->wall = waWeakBranch; return; }
     playSound(cf, "trapdoor");
     drawParticles(cf, winf[waWeakBranch].color, 4);
     }
   if(cf && ct && cf->wall == waSmallBush && cellEdgeUnstable(ct) && 
-    gravityLevel(ct) >= gravityLevel(cf) && !ignoresPlates(who)) {
+    gravityLevelDiff(ct, cf) >= 0 && !ignoresPlates(who)) {
     cf->wall = waNone;
     if(!cellEdgeUnstable(cf)) { cf->wall = waSmallBush; return; }
     playSound(cf, "trapdoor");
@@ -4004,7 +4018,7 @@ int pickDownDirection(cell *c, flagtype mf) {
   int downs[MAX_EDGE], qdowns = 0;
   int bestdif = -100;
   forCellIdEx(c2, i, c) {
-    if(gravityLevel(c2) < gravityLevel(c) && passable_for(c->monst, c2, c, P_MIRROR) &&
+    if(gravityLevelDiff(c2, c) < 0 && passable_for(c->monst, c2, c, P_MIRROR) &&
       !isPlayerOn(c2)) {
       int cdif = i-c->mondir;
       if(cdif < 0) cdif += c->type;
@@ -4041,12 +4055,12 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
     pushdir = (push+wstep).spin;
     if(valid(push.at)) return push.at;
     }
-  if(gravityLevel(push.at) < gravityLevel(c2)) {
+  if(gravityLevelDiff(push.at, c2) < 0) {
     push = push + wstep + 1 + wstep;
-    if(gravityLevel(push.at) < gravityLevel(c2)) {
+    if(gravityLevelDiff(push.at, c2) < 0) {
       push = push + wstep - 2 + wstep;
       }
-    if(gravityLevel(push.at) < gravityLevel(c2)) {
+    if(gravityLevelDiff(push.at, c2) < 0) {
       push = push + wstep + 1 + wstep;
       }
     pushdir = (push+wstep).spin;
@@ -4651,7 +4665,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) 
       return;
     // in the gravity lands, eagles cannot ascend in their second move
-    if((mf & MF_ONLYEAGLE) && gravityLevel(c) < gravityLevel(from)) {
+    if((mf & MF_ONLYEAGLE) && gravityLevelDiff(c, from) < 0) {
       onpath(c, 0);
       return;
       }
@@ -6033,6 +6047,8 @@ void movemonsters() {
   if(havewhat & HF_WHIRLPOOL) whirlpool::move();
   DEBT("whirlwind");
   if(havewhat & HF_WHIRLWIND) whirlwind::move();
+  DEBT("westwall");
+  if(havewhat & HF_WESTWALL) westwall::move();
   DEBT("river");
   if(havewhat & HF_RIVER) prairie::move();
   /* DEBT("magnet");

@@ -664,7 +664,7 @@ cell *randomDown(cell *c) {
   }
 
 int edgeDepth(cell *c) {
-  if(c->land == laIvoryTower || c->land == laEndorian || c->land == laDungeon) 
+  if(c->land == laIvoryTower || c->land == laEndorian || c->land == laDungeon || c->land == laWestWall) 
     return coastvalEdge(c);
   else if(c->land != laBarrier) {
     for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->land == laBarrier)

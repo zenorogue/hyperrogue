@@ -2998,6 +2998,10 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
       break;
     
+    case laWestWall:
+      fcol = 0x10101 * (32 + (c->landparam&1) * 32) + 0x400000;
+      break;
+    
     case laDungeon: {
       int lp = c->landparam % 5;
         // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
@@ -4815,7 +4819,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
        }
 
     if(it) {
-      if((c->land == laWhirlwind || c->item == itBabyTortoise) && c->wall != waBoat) {
+      if((c->land == laWhirlwind || c->item == itBabyTortoise || c->land == laWestWall) && c->wall != waBoat) {
         double footphase = 0;
         Vboat = &(Vboat0 = *Vboat);
         applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
@@ -4966,7 +4970,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(!euclid) {
       bool usethis = false;
       double spd = 1;
-      bool rev = false;
+      int side = 0;
       
       if(binarytiling && conformal::do_rotate >= 2) {
         if(!straightDownSeek || c->master->distance < straightDownSeek->master->distance) {
@@ -4976,7 +4980,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       else if(isGravityLand(cwt.at->land) && cwt.at->land != laMountain) {
-        if(cwt.at->land == laDungeon) rev = true;
+        if(cwt.at->land == laDungeon) side = 2;
+        if(cwt.at->land == laWestWall) side = 1;
         if(conformal::do_rotate >= 1)
         if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
           usethis = true;
@@ -4995,7 +5000,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(!straightDownSeek || !straightDownSeek->master->alt || celldistAlt(c) < celldistAlt(straightDownSeek)) {
           usethis = true;
           spd = .5;
-          if(cwt.at->land == laMountain) rev = true;
+          if(cwt.at->land == laMountain) side = 2;
           }
         }
   
@@ -5010,8 +5015,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(usethis) {
         straightDownSeek = c;
         downspin = atan2(VC0[1], VC0[0]);
-        downspin -= M_PI/2;
-        if(rev) downspin += M_PI;
+        downspin += (side-1) * M_PI/2;
         downspin += conformal::rotation * degree;
         while(downspin < -M_PI) downspin += 2*M_PI;
         while(downspin > +M_PI) downspin -= 2*M_PI;

@@ -118,5 +118,70 @@ namespace brownian {
   
   }
 
+namespace westwall {
+
+  void switchTreasure(cell *c) {
+    c->item = itNone;
+    if(safety) return;
+    if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && notDippingFor(itWindstone)
+      && getGhostcount() < 2)
+      c->item = itWest;
+    else if(hrand(5000) < 20*PRIZEMUL)
+      placeLocalOrbs(c);
+    }
+
+  cell *where;
+  int dfrom[2], dto[2], qdirs;
+  
+  int gdist(int d, int e) { return dirdiff(d-e, where->type); }
+  
+  void build(vector<cell*>& whirlline, int d) {
+    again: 
+    cell *at = whirlline[isize(whirlline)-1];
+    cell *prev = whirlline[isize(whirlline)-2];
+    for(int i=0; i<at->type; i++) 
+      if(at->move(i) && coastvalEdge(at->move(i)) == d && at->move(i) != prev) {
+        whirlline.push_back(at->move(i));
+        goto again;
+        }
+    }
+  
+  void moveAt(cell *c, manual_celllister& cl) {
+    if(cl.listed(c)) return;
+    if(c->land != laWestWall) return;
+    vector<cell*> whirlline;
+    int d = coastvalEdge(c);
+    whirlline.push_back(c);
+    whirlline.push_back(ts::left_of(c, coastvalEdge));
+    build(whirlline, d);
+    reverse(whirlline.begin(), whirlline.end());
+    build(whirlline, d);
+    int z = isize(whirlline);
+    for(int i=0; i<z; i++) {
+      cl.add(whirlline[i]);
+      if(whirlline[i]->mpdist == BARLEV)
+        switchTreasure(whirlline[i]);
+      }
+    for(int i=0; i<z-1; i++) {
+      moveItem(whirlline[i], whirlline[i+1], true);
+      if(whirlline[i]->item)
+        animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT, NOHINT);
+      }
+    for(int i=0; i<z; i++) 
+      pickupMovedItems(whirlline[i]);
+    }
+  
+  void move() {
+    manual_celllister cl;
+    for(cell *c: dcal) moveAt(c, cl);
+    // Keys and Orbs of Yendor always move
+    using namespace yendor;
+    for(int i=0; i<isize(yi); i++) {
+      moveAt(yi[i].path[0], cl);
+      moveAt(yi[i].path[YDIST-1], cl);
+      }
+    }
+  }
+
 }
 #endif
