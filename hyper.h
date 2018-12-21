@@ -4596,7 +4596,9 @@ namespace brownian {
   }
 #endif
 
-#define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety)
+#define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety && !reptilecheat)
+
+extern bool reptilecheat;
 
 void enable_cheat();
 

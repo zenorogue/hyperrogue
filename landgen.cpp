@@ -598,7 +598,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
         }
-      if(d == 7 && c->wall == waVinePlant && hrand(100) < (randomPatternsMode ? 2 : 10) && !peace::on)
+      if(d == 7 && c->wall == waVinePlant && hrand(100) < (randomPatternsMode ? 2 : 10) && !peace::on && !reptilecheat)
         c->monst = moVineSpirit;
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moVineBeast] + kills[moVineSpirit]), 200) && notDippingFor(itWine))
@@ -723,7 +723,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laIce:
-      if(d == 9) {
+      if(d == 9 && !reptilecheat) {
         if(randomPatternsMode) c->wall = RANDPAT ? waIcewall : waNone;
         else if(hrand(100) < 5 && c->wall != waBarrier) {
           c->wall = waIcewall;
