@@ -198,6 +198,7 @@ bool two_sided_model() {
   if(pmodel == mdDisk) return sphere;
   if(pmodel == mdHemisphere) return true;
   if(pmodel == mdRotatedHyperboles) return true;
+  if(pmodel == mdSpiral && conformal::spiral_cone < 360) return true;
   return false;
   }
 
@@ -218,6 +219,9 @@ int get_side(const hyperpoint& H) {
     hyperpoint res;
     applymodel(H, res);
     return res[2] < 0 ? -1 : 1;
+    }
+  if(pmodel == mdSpiral && conformal::spiral_cone < 360) {    
+    return cone_side(H);
     }
   return 0;
   }

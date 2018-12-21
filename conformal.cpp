@@ -391,6 +391,10 @@ namespace conformal {
   int spiral_id = 7;
   
   cld spiral_multiplier;
+  ld right_spiral_multiplier = 1;
+  ld spiral_cone = 360;
+  ld spiral_cone_rad;
+  bool ring_not_spiral;
 
   void configure() {
     ld ball = -vid.ballangle * degree;
@@ -404,7 +408,15 @@ namespace conformal {
       ld b = spiral_angle * degree;
       ld cos_spiral = cos(b);
       ld sin_spiral = sin(b);
-      spiral_multiplier = cld(cos_spiral, sin_spiral) * M_PI * cos_spiral;
+      spiral_cone_rad = spiral_cone * degree;
+      ring_not_spiral = abs(cos_spiral) < 1e-3;
+      if(ring_not_spiral) {
+        cos_spiral = 0;
+        sin_spiral = 1;
+        spiral_multiplier = cld(0, right_spiral_multiplier * spiral_cone_rad / 2);
+        }
+      else
+        spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * cos_spiral / 2., 0);
       }
     if(euclid) {
       hyperpoint h = tC0(eumove(spiral_x, spiral_y));
@@ -756,7 +768,7 @@ namespace conformal {
         });
       }
     
-    if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere) {
+    if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360)) {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
       dialog::add_action(config_camera_rotation);
       }
@@ -810,6 +822,18 @@ namespace conformal {
       dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle), 'x');
       dialog::add_action([](){
         dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
+        });
+
+      if(ring_not_spiral) {
+        dialog::addSelItem(XLAT("spiral multiplier"), fts(right_spiral_multiplier), 'M');
+        dialog::add_action([](){
+          dialog::editNumber(right_spiral_multiplier, 0, 10, -.1, 1, XLAT("spiral multiplier"), "");
+          });
+        }
+
+      dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone), 'C');
+      dialog::add_action([](){
+        dialog::editNumber(spiral_cone, 0, 360, -45, 360, XLAT("spiral cone"), "");
         });
       }
 
@@ -1097,6 +1121,13 @@ namespace conformal {
     else if(argis("-sang")) { 
       PHASEFROM(2); 
       shift_arg_formula(conformal::spiral_angle);
+      if(conformal::spiral_angle == 90) {
+        shift_arg_formula(conformal::right_spiral_multiplier);
+        }        
+      }
+    else if(argis("-scone")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(conformal::spiral_cone);
       }
     else if(argis("-sxy")) { 
       PHASEFROM(2); 

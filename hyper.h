@@ -1331,6 +1331,7 @@ namespace conformal {
   extern ld model_transition;
   extern ld top_z;
   extern ld spiral_angle, spiral_x, spiral_y;
+  extern ld spiral_cone;
   
   // screen coordinates to logical coordinates: apply_orientation(x,y)
   // logical coordinates back to screen coordinates: apply_orientation(y,x)
@@ -4619,6 +4620,8 @@ static const ld degree = M_PI / 180;
 void show_color_dialog();
 
 extern ld band_shift;
+
+int cone_side(const hyperpoint H);
 
 void fix_the_band(transmatrix& T);
 

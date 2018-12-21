@@ -569,12 +569,26 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       if(hyperbolic) makeband(H, ret, band_conformal);
       else ret = H;
       z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
-      z = exp(z);
-      ret[0] = real(z);
-      ret[1] = imag(z);
+      
+      if(conformal::spiral_cone < 360) {
+        ld alpha = imag(z) * 360 / conformal::spiral_cone;
+        ld r = real(z);
+        r = exp(r);
+        
+        ret[0] = -sin(alpha) * r;
+        ret[1] = cos(alpha) * r;
+        ret[2] = (r-1) * sqrt( pow(360/conformal::spiral_cone, 2) - 1);
+        
+        conformal::apply_ball(ret[2], ret[1]);
+        }
+      else {      
+        z = exp(z);
+        ret[0] = real(z);
+        ret[1] = imag(z);
 
-      if(vid.skiprope) 
-        ret = mobius(ret, vid.skiprope, 1);
+        if(vid.skiprope) 
+          ret = mobius(ret, vid.skiprope, 1);
+        }
       }
     
     case mdGUARD: break;
@@ -1502,11 +1516,47 @@ bool do_draw(cell *c, const transmatrix& T) {
     ld iz = imag(z) + 1.14279e-2; // make it never fall exactly on PI
     if(iz < -M_PI || iz >= M_PI) return false;
     }
+  if(hyperbolic && pmodel == mdSpiral && conformal::ring_not_spiral) {
+    cld z;
+    hyperpoint H = tC0(T);
+    hyperpoint ret;
+    makeband(H, ret, band_conformal);
+    z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
+    if(imag(z) < -conformal::spiral_cone_rad/2-1e-5 || imag(z) >= conformal::spiral_cone_rad/2-1e-5) return false;
+    }
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient || euwrap;
   if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
   if(vid.use_smart_range == 2) setdist(c, 7, c);
   return true; 
+  }
+
+int cone_side(const hyperpoint H) {
+  hyperpoint ret;
+  if(hyperbolic) makeband(H, ret, band_conformal);
+  else ret = H;
+  cld z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
+  
+  auto zth = [&] (cld z) {
+    ld alpha = imag(z) * 360 / conformal::spiral_cone;
+    ld r = real(z);
+    r = exp(r);
+    
+    hyperpoint ret;
+      
+    ret[0] = -sin(alpha) * r;
+    ret[1] = cos(alpha) * r;
+    ret[2] = (r-1) * sqrt( pow(360/conformal::spiral_cone, 2) - 1);
+    
+    conformal::apply_ball(ret[2], ret[1]);
+    return ret;
+    };
+  
+  hyperpoint ret0 = zth(z);
+  hyperpoint ret1 = zth(z + cld(1e-3, 0));
+  hyperpoint ret2 = zth(z + cld(0, 1e-3));
+
+  return (ret1[1] - ret0[1]) * (ret2[0] - ret0[0]) < (ret2[1] - ret0[1]) * (ret1[0] - ret0[0]) ? 1 : -1;
   }
 
 }
