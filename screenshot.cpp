@@ -266,7 +266,7 @@ void default_screenshot_content() {
 
 #if CAP_PNG
 void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
-  if(gamma == 1 && shot_aa == 1) {
+  if(gamma == 1 && shot_aa == 1 && sdark == sbright) {
     IMAGESAVE(sdark, fname.c_str());
     return;
     }
