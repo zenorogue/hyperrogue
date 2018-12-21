@@ -374,6 +374,9 @@ int png_read_args() {
   else if(argis("-pngformat")) {
     shift(); shotformat = argi();
     }
+  else if(argis("-shott")) {
+    shift(); shot::transparent = argi();
+    }
   else return 1;
   return 0;
   }
