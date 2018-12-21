@@ -187,7 +187,7 @@ renderbuffer::~renderbuffer() {
 void renderbuffer::clear(color_t col) {
   #if CAP_GL
   if(FramebufferName) {
-    setGLProjection(0);
+    setGLProjection(col);
     return;
     }
   #endif
