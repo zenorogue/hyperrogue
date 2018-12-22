@@ -135,12 +135,17 @@ namespace westwall {
   
   int gdist(int d, int e) { return dirdiff(d-e, where->type); }
   
+  int coastvalEdge1(cell *c) {
+    if(c->land == laWestWall && !c->landparam) buildEquidistant(c);
+    return coastvalEdge(c);
+    }
+  
   void build(vector<cell*>& whirlline, int d) {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
     for(int i=0; i<at->type; i++) 
-      if(at->move(i) && coastvalEdge(at->move(i)) == d && at->move(i) != prev) {
+      if(at->move(i) && coastvalEdge1(at->move(i)) == d && at->move(i) != prev) {
         whirlline.push_back(at->move(i));
         goto again;
         }
@@ -152,7 +157,7 @@ namespace westwall {
     vector<cell*> whirlline;
     int d = coastvalEdge(c);
     whirlline.push_back(c);
-    whirlline.push_back(ts::left_of(c, coastvalEdge));
+    whirlline.push_back(ts::left_of(c, coastvalEdge1));
     build(whirlline, d);
     reverse(whirlline.begin(), whirlline.end());
     build(whirlline, d);
@@ -178,7 +183,12 @@ namespace westwall {
     using namespace yendor;
     for(int i=0; i<isize(yi); i++) {
       moveAt(yi[i].path[0], cl);
-      moveAt(yi[i].path[YDIST-1], cl);
+      // println(hlog, "coastval of actual key is ", coastvalEdge1(yi[i].actual_key()), " and item is ", dnameof(yi[i].actual_key()->item), "and mpdist is ", yi[i].actual_key()->mpdist);
+      moveAt(yi[i].actual_key(), cl);
+      if(yi[i].actualKey) {
+        yi[i].age++;
+        setdist(yi[i].actual_key(), 8, NULL);
+        }
       }
     }
   }

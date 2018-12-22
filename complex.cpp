@@ -153,7 +153,7 @@ namespace whirlwind {
     using namespace yendor;
     for(int i=0; i<isize(yi); i++) {
       moveAt(yi[i].path[0], cl);
-      moveAt(yi[i].path[YDIST-1], cl);
+      moveAt(yi[i].key(), cl);
       }
     }
   

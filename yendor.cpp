@@ -47,7 +47,7 @@ namespace yendor {
   int challenge; // id of the challenge
   int lastchallenge;
   
-  #define YENDORLEVELS 32
+  #define YENDORLEVELS 33
   
   map<modecode_t, array<int, YENDORLEVELS>> bestscore;
 
@@ -87,7 +87,8 @@ namespace yendor {
     {laTortoise,  YF_RECALL},
     {laCocytus,   YF_NEAR_FJORD},
     {laRuins,     YF_DEAD},
-    {laCaves,     YF_DEAD5}
+    {laCaves,     YF_DEAD5},
+    {laWestWall,  YF_START_CR},
     };
   
   int tscorelast;
@@ -122,10 +123,14 @@ namespace yendor {
 
   struct yendorinfo {
     cell *path[YDIST];
+    cell *actualKey;
     bool found;
     bool foundOrb;
     int howfar;
+    bignum age;
+    yendorinfo() { actualKey = NULL; }
     cell* key() { return path[YDIST-1]; }
+    cell *actual_key() { return actualKey ? actualKey : key(); }
     cell* orb() { return path[0]; }
     };
   
@@ -169,12 +174,16 @@ namespace yendor {
       
       int turns = 0;
 
+      bignum full_id_0;
+      
+      int odir = 0;
+
       if(true) {
         int t = -1;
         bignum full_id;
         bool onlychild = true;
 
-        cellwalker ycw(yendor, hrand(yendor->type));
+        cellwalker ycw(yendor, odir = hrand(yendor->type));
         ycw--; if(S3 == 3) ycw--;
         setdist(nyi.path[0], 7, NULL);
 
@@ -227,7 +236,7 @@ namespace yendor {
             if(i == 0) {
               t = type_in(expansion, yendor, [yendor] (cell *c) { return celldistance(yendor, c); });
               bignum b = expansion.get_descendants(YDIST-1, t);
-              full_id = hrand(b);
+              full_id_0 = full_id = hrand(b);
               }
             
             #if DEBUG_YENDORGEN
@@ -282,11 +291,19 @@ namespace yendor {
       nyi.found = false;
       nyi.foundOrb = false;
   
+      for(int i=1; i<YDIST; i++) {
+        setdist(nyi.path[i], 7, nyi.path[i-1]);
+        if(isEquidLand(nyi.path[i]->land)) {
+          // println(hlog, i, ": ", coastvalEdge(nyi.path[i]));
+          buildEquidistant(nyi.path[i]);
+          }
+        }
+
       setdist(nyi.path[YDIST-1], 7, nyi.path[YDIST-2]);
       cell *key = nyi.path[YDIST-1];
   
       generating = false;
-  
+        
       for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
 
       for(int i=-1; i<key->type; i++) {
@@ -314,7 +331,7 @@ namespace yendor {
           for(int i=0; i<c2->type; i++) 
             c2->move(i)->wall = waSea;
           }
-        if(isGravityLand(c2->land) && key->land == c2->land &&
+        if(isGravityLand(c2->land) && key->land == c2->land && c2->land != laWestWall &&
           c2->landparam < key->landparam && c2->wall != waTrunk)
             c2->wall = waPlatform;
         if(c2->land == laReptile && i >= 0)
@@ -323,10 +340,75 @@ namespace yendor {
           c2->wall = waNone;
         }
       key->item = itKey;
+      
+      bool split_found = false;
+
+      if(key->land == laWestWall && trees_known()) {
+
+        int t = type_in(expansion, yendor, [yendor] (cell *c) { return celldistance(yendor, c); });
+        int maxage = 10;
+        for(int i=0; i<min(items[itOrbYendor], 8); i++)
+          maxage *= 10;
+        
+        nyi.age = maxage - hrand(maxage/2);
+        bignum full_id = full_id_0 - nyi.age;
+        bool onlychild = true;
+
+        cellwalker ycw(yendor, odir);
+        ycw--; if(S3 == 3) ycw--;
+
+        for(int i=0; i<YDIST-1; i++) {          
+        
+          if(i == 1) onlychild = true;
+          if(!onlychild) ycw++;
+          if(VALENCE == 3) ycw++;
+
+          onlychild = false;
+          
+          for(int tch: expansion.children[t]) {
+            ycw++;
+            if(i == 1)
+              tch = type_in(expansion, ycw.cpeek(), [yendor] (cell *c) { return celldistance(yendor, c); });
+            auto& sub_id = expansion.get_descendants(YDIST-i-2, tch);
+            if(full_id < sub_id) { 
+              if(!split_found && !(full_id_0 < sub_id)) {
+                ycw.at->item = itRuby;
+                split_found = true;
+                setdist(ycw.at, 6, NULL);
+                auto tt = type_in(expansion, ycw.at, coastvalEdge);
+                // println(hlog, "at split, ydist-type: ", t, " coast-type: ", tt);
+                if(t != tt) {
+                  // try again!
+                  key->item = itNone;
+                  return check(yendor);
+                  }
+                }    
+              t = tch; 
+              break; 
+              }
+            
+            full_id.addmul(sub_id, -1);
+            if(!split_found) full_id_0.addmul(sub_id, -1);
+            onlychild = true;
+            }
+          
+          if(inmirror(ycw)) ycw = mirror::reflect(ycw);
+          ycw += wstep;
+          setdist(ycw.at, 8, ycw.peek());
+          buildEquidistant(ycw.at);
+          // println(hlog, "actual key #", i, ": ", ycw.at->landparam);
+          }
+
+        nyi.actualKey = ycw.at;
+        ycw.at->item = itKey;
+        key->item = itGold;
+        }
   
       yi.push_back(nyi);
       }
     addMessage(XLAT("You need to find the right Key to unlock this Orb of Yendor!"));
+    if(yi[byi].actualKey)
+      addMessage(XLAT("You feel that these directions are %1 turns old.", yi[byi].age.get_str(100)));
     if(yii != byi) {
       yii = byi;
       achievement_gain("YENDOR1");

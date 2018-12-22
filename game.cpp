@@ -6893,7 +6893,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     }
   else if(c2->item == itKey) {
     playSound(c2, "pickup-key");
-    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == c2)
+    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].actual_key() == c2)
       yendor::yi[i].found = true;
     items[itKey]++;
     }
@@ -8156,6 +8156,8 @@ void moveItem1(cell *from, cell *to, bool activateYendor) {
   if(from->item == itKey) {
     for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == from)
       yendor::yi[i].path[YDIST-1] = to;
+    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].actualKey == from)
+      yendor::yi[i].actualKey = to;
     }
   
   if(from->item == itBabyTortoise) {
