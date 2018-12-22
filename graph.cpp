@@ -2256,7 +2256,7 @@ void apply_joukowsky_aura(hyperpoint& h) {
 void addauraspecial(hyperpoint h, color_t col, int dir) {
   if(!haveaura()) return;
   apply_joukowsky_aura(h);
-  int r = int(2*AURA + dir + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
+  int r = int(2*AURA + dir + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
   auraspecials.emplace_back(r, col);
   }
 
