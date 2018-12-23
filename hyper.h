@@ -4698,6 +4698,7 @@ namespace racing {
   void race_won();
   void apply_seed();
   string racetimeformat(int t);
+  void add_debug(cell *c);
   }
 
 bool subscreen_split(reaction_t for_each_subscreen);

@@ -431,7 +431,7 @@ struct debugScreen {
       }
     dialog::addBack();
     dialog::display();
-  
+
     keyhandler = [this, what] (int sym, int uni) {
       handlePanning(sym, uni);
       dialog::handleNavigation(sym, uni);

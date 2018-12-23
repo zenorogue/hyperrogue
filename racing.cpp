@@ -887,6 +887,16 @@ int get_percentage(int i) {
   return min(get_info(shmup::pc[i]->base).completion * 100 / (isize(track) - DROP), 100);
   }
   
+void add_debug(cell *c) { 
+  if(racing::on && racing::rti_id[c]) {
+    auto& r = racing::get_info(c);
+    dialog::addSelItem("from_track", its(r.from_track), 0);
+    dialog::addSelItem("from_start", its(r.from_start), 0);
+    dialog::addSelItem("from_goal", its(r.from_goal), 0);
+    dialog::addSelItem("completion", its(r.completion), 0);
+    }
+  }
+
 }
 
 bool subscreen_split(reaction_t what) {
