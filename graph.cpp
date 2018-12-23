@@ -680,7 +680,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
           queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
     //      queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
           queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
-          addauraspecial(P1, 0x0000FF, 0);
+          addauraspecial(P1, 0xFF0000, 0);
           }
         
         V2 = V * rspintox(inverse(V) * P1);
@@ -2301,7 +2301,7 @@ void drawaura() {
   for(auto& p: auraspecials) {
     int r = p.first;
     aurac[r][3] = auramemo;
-    for(int k=0; k<3; k++) aurac[r][k] = (p.second >> (8*k)) & 255;
+    for(int k=0; k<3; k++) aurac[r][k] = (p.second >> (16-8*k)) & 255;
     }
 
 #if CAP_SDL || CAP_GL
