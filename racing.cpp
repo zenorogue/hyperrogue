@@ -996,7 +996,7 @@ void markers() {
     queuestr(H, vid.fsize, 
       (geometry == gCrystal && !crystal::pure()) ? fts(crystal::space_distance(cwt.at, track.back())) :
       its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
-    addauraspecial(H, 0x10100, 0);
+    addauraspecial(H, 0xFFD500, 0);
     }
   int ghosts_left = ghosts_to_show;
   for(auto& ghost: race_ghosts[{track_code, modecode()}][specialland]) {
