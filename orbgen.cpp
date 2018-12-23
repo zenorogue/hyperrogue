@@ -190,15 +190,15 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   
   if(it == itOrbSlaying && !among(l, 
     laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
-    laPrairie, laBull, laVolcano, laTerracotta, laRuins))
+    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant))
     return olrUseless;
   
-  // if(it == itOrbYendor && l == laWhirlpool) return olrUseless;
-  if(it == itOrbYendor && l == laWhirlwind) return olrUseless;
+  if(it == itOrbYendor && among(l, laWhirlwind, laWestWall)) return olrUseless;
   
   if(it == itOrbLife && (l == laKraken)) return olrUseless;
   
   if(l == laVolcano && it == itOrbSafety) return olrDangerous;
+  if(l == laVariant && it == itOrbSafety) return olrDangerous;
   if(l == laVolcano && itemBurns(it)) return olrBurns;
   
   if(it == itOrbAir && l == laAlchemist) return olrUseless;
@@ -444,7 +444,7 @@ int treasureForLocal() {
 void placeLocalOrbs(cell *c) {
   eLand l = c->land;
   if(l == laZebra && c->wall == waTrapdoor) return;
-  if(isGravityLand(l) && cellEdgeUnstable(c)) return;
+  if(isGravityLand(l) && l != laWestWall && cellEdgeUnstable(c)) return;
   if(isElemental(l)) l = laElementalWall;
   if(peace::on) return;
   if(daily::on) return;

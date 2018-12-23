@@ -783,6 +783,9 @@ eMonster summonedAt(cell *dest) {
     if(dest->land == laRuins) return moEarthElemental;
     if(dest->land == laSwitch) return passive_switch;
     if(dest->land == laSnakeNest) return moEarthElemental;
+    if(dest->land == laBrownian) return moAcidBird;
+    if(dest->land == laVariant) return moFireElemental;
+    if(dest->land == laWestWall) return moAirElemental;
     if(isHaunted(dest->land)) return moGhost;
     }
   return moNone;
