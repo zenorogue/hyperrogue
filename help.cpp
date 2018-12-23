@@ -375,15 +375,13 @@ string generateHelpForItem(eItem it) {
 #endif
   
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {
-    for(int i=0; i<ORBLINES; i++) {
-      const orbinfo& oi(orbinfos[i]);
+    for(auto& oi: orbinfos) {
       if(oi.orb == it && oi.is_native()) describeOrb(help, oi);
       }
     }
   
   if(itemclass(it) == IC_TREASURE) {
-    for(int i=0; i<ORBLINES; i++) {
-      const orbinfo& oi(orbinfos[i]);
+    for(auto& oi: orbinfos) {
       if(treasureType(oi.l) == it) {
         if(oi.gchance > 0) {
           help += XLAT("\n\nOrb unlocked: %1", oi.orb);

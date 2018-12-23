@@ -1,8 +1,6 @@
 // Hyperbolic Rogue -- orb generation routines
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#define ORBLINES 70
-
 namespace hr {
 // orbgen flags
 
@@ -49,7 +47,7 @@ struct orbinfo {
   bool is_native() const { using namespace orbgenflags; return flags & NATIVE; }
   };
 
-const orbinfo orbinfos[ORBLINES] = {
+const vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laGraveyard, 200, 200,itGreenStone}, // must be first so that it does not reduce 
   {orbgenflags::S_NATIVE, laJungle, 1200, 1500,itOrbLightning},
   {orbgenflags::S_NATIVE, laIce, 2000, 1500,itOrbFlash},
@@ -127,16 +125,16 @@ eItem nativeOrbType(eLand l) {
   if(inv::on && (l == laMirror || l == laMirrorOld || isCrossroads(l)))
     return itOrbMirror;
   if(l == laMirror || l == laMirrorOld) return itShard;
-  for(int i=0; i<ORBLINES; i++) 
-    if(orbinfos[i].l == l && orbinfos[i].is_native())
-      return orbinfos[i].orb;
+  for(auto& oi: orbinfos)
+    if(oi.l == l && oi.is_native())
+      return oi.orb;
   return itNone;
   }
 
 const orbinfo& getNativityOrbInfo(eItem orb) {
-  for(int i=0; i<ORBLINES; i++) 
-    if(orbinfos[i].orb == orb && orbinfos[i].is_native())
-      return orbinfos[i];
+  for(auto& oi: orbinfos)
+    if(oi.orb == orb && oi.is_native())
+      return oi;
   static orbinfo oi; 
   oi.l = laMirror;
   return oi;
@@ -398,8 +396,7 @@ void placePrizeOrb(cell *c) {
   if(l == laMinefield && hrand(100) >= 25) return;
   if(l == laElementalWall && hrand(100) >= 25) return;
 
-  for(int i=0; i<ORBLINES; i++) {
-    const orbinfo& oi(orbinfos[i]);
+  for(auto& oi: orbinfos) {
     if(!(oi.flags & orbgenflags::GLOBAL25)) continue;
 
     int mintreas = 25;
@@ -446,8 +443,7 @@ void placeLocalOrbs(cell *c) {
   if(peace::on) return;
   if(daily::on) return;
   
-  for(int i=0; i<ORBLINES; i++) {
-    const orbinfo& oi(orbinfos[i]);
+  for(auto& oi: orbinfos) {
     if(!(oi.flags & orbgenflags::LOCAL10)) continue;
     if(oi.l != l) continue;
     if(yendor::on && (oi.orb == itOrbSafety || oi.orb == itOrbYendor))
@@ -490,8 +486,7 @@ void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
 void placeCrossroadOrbs(cell *c) {  
   if(peace::on) return;
   if(daily::on) return;
-  for(int i=0; i<ORBLINES; i++) {
-    const orbinfo& oi(orbinfos[i]);
+  for(auto& oi: orbinfos) {
     if(!(oi.flags & orbgenflags::CROSS10)) continue;
     if(!oi.gchance) continue;
 
@@ -526,8 +521,7 @@ void placeCrossroadOrbs(cell *c) {
 
 void placeOceanOrbs(cell *c) {  
   if(peace::on) return;
-  for(int i=0; i<ORBLINES; i++) {
-    const orbinfo& oi(orbinfos[i]);
+  for(auto& oi: orbinfos) {
     if(!(oi.flags & orbgenflags::CROSS10)) continue;
     
     int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);

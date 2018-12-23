@@ -214,8 +214,7 @@ namespace hr { namespace inv {
     }
   
   void gainGuestOrbs() {
-    for(int k=0; k<ORBLINES; k++) {
-      auto& oi = orbinfos[k];
+    for(auto& oi: orbinfos) {
       if(oi.flags & orbgenflags::OSM_AT10) {
         eItem it = treasureType(oi.l);
         if(items[it] >= 10) {
