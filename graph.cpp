@@ -5311,6 +5311,7 @@ void drawthemap() {
   if(rug::rugged && !rug::spatial_rug) spatial_graphics = false;
   if(non_spatial_model())
     spatial_graphics = false;
+  if(pmodel == mdDisk && abs(vid.alpha) < 1e-6) spatial_graphics = false;
   
   if(!spatial_graphics) wmspatial = mmspatial = false;
 
