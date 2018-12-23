@@ -369,7 +369,7 @@ int* killtable[] = {
     &kills[moKrakenH], &kills[moDraugr],
     &kills[moBat], &kills[moReptile],
     &kills[moHerdBull], &kills[moSleepBull], &kills[moRagingBull],
-    &kills[moGadfly], &kills[moButterfly],
+    &kills[moButterfly],
     &kills[moNarciss], &kills[moMirrorSpirit],
     &kills[moHunterDog], &kills[moIceGolem], &kills[moVoidBeast],
     &kills[moJiangshi], &kills[moTerraWarrior],
