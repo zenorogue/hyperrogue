@@ -6887,6 +6887,7 @@ bool collectItem(cell *c2, bool telekinesis) {
 
   int pg = gold();
   bool dopickup = true;
+  bool had_choice = false;
   
   if(cannotPickupItem(c2, telekinesis))
     return false;
@@ -6928,6 +6929,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     else if(it == itOrbSpeed) playSound(c2, "pickup-speed");
     else if(it == itRevolver) playSound(c2, "pickup-key");
     else playSound(c2, "pickup-orb");
+    if(items[itOrbChoice]) items[itOrbChoice] = 0, had_choice = true;
     int oc = orbcharges(it);
     if(markOrb(itOrbBrown)) oc = oc * 6 / 5;
     if(!items[it]) items[it]++;
@@ -7098,9 +7100,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       c2->landparam &= ~1;
       }
 
-    if(items[itOrbChoice] && itemclass(c2->item) == IC_ORB)
-      items[itOrbChoice] = 0;
-    else
+    if(!had_choice)
       c2->item = itNone;
     }
 //    if(c2->land == laHive)
