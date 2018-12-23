@@ -17,7 +17,6 @@ bool nodisplay(eMonster m) {
 // returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear
 int isNative(eLand l, eMonster m) {
   switch(l) {
-    case laBrownian: ;
     case laIce: 
       return (m == moWolf || m == moWolfMoved || m == moYeti) ? 2 : 0;
 
@@ -229,6 +228,12 @@ int isNative(eLand l, eMonster m) {
         among(m, moMonk, moCrusher, moSkeleton, moHedge, moLancer, moFlailer, moCultist, moPyroCultist, moNecromancer, moGhost, moZombie, moRatling) ? 1 :
         isIvy(m) ? 1 : 0;       
       
+    case laWestWall:
+      return among(m, moWestHawk, moFallingDog) ? 2 : 0;
+
+    case laBrownian: 
+      return among(m, moBrownBug, moAcidBird) ? 2 : 0;
+      
     case laMagnetic:
       return isMagneticPole(m) ? 2 : 0;
     }
@@ -361,7 +366,7 @@ bool isCoastal(eLand l) {
   }
 
 bool isPureSealand(eLand l) {
-  return l == laCaribbean || l == laKraken;
+  return l == laCaribbean || l == laKraken || l == laBrownian;
   }
 
 bool isElemental(eLand l) {
@@ -431,6 +436,14 @@ bool landUnlockedRPM(eLand n) {
   return false;
   }
 
+int variant_unlock() {
+  return items[itRuins] + items[itEmerald] + items[itBone];
+  }
+
+int variant_unlock_value() {
+  return inv::on ? 75 : 30;
+  }
+
 bool landUnlocked(eLand l) {
   if(randomPatternsMode) {
     return landUnlockedRPM(l);
@@ -446,7 +459,6 @@ bool landUnlocked(eLand l) {
     case laWildWest: case laHalloween: 
       return false;
       
-    case laBrownian: 
     case laIce: case laJungle: case laCaves: case laDesert: 
     case laMotion: case laCrossroads:  case laAlchemist:
       return true;
@@ -577,6 +589,15 @@ bool landUnlocked(eLand l) {
     
     case laRuins:
       return kills[moSkeleton];
+
+    case laBrownian:
+      return gold() >= R30;
+    
+    case laWestWall:
+      return items[itFeather] >= 5 && items[itIvory] >= 5;
+    
+    case laVariant:
+      return variant_unlock() >= variant_unlock_value();
     
     case laMagnetic:
       return false; // not implemented
@@ -850,7 +871,10 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laPalace;
     if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
-    if(kills[moSkeleton]) tab[cnt++] = laRuins;
+    if(kills[moSkeleton]) {
+      tab[cnt++] = laRuins;
+      if(old == laVariant) LIKELY tab[cnt++] = laRuins;
+      }
     if(items[itFeather] >= U10) {
       tab[cnt++] = laZebra;
       if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;
@@ -863,6 +887,8 @@ eLand getNewLand(eLand old) {
     if(items[itElixir] >= U10) tab[cnt++] = laReptile;
     if(items[itElixir] >= U10) tab[cnt++] = laSwitch;
     if(items[itIvory] >= U10 && !generatingEquidistant) tab[cnt++] = laEndorian;
+    if(items[itIvory] >= U5 && !generatingEquidistant && items[itFeather] >= U5)
+      tab[cnt++] = laWestWall;
     
     if(items[itKraken] >= U10) tab[cnt++] = laBurial;
     }
@@ -889,8 +915,9 @@ eLand getNewLand(eLand old) {
       tab[cnt++] = laTemple;
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads;
-    if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier]) 
+    if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier])
       tab[cnt++] = laEmerald;
+    if(old == laVariant) LIKELY tab[cnt++] = laEmerald;      
     if(items[itWindstone] >= U5 && items[itDiamond] >= U5) {
       tab[cnt++] = laBlizzard;
       if(old == laIce || old == laCocytus || old == laWhirlwind) 
@@ -913,6 +940,16 @@ eLand getNewLand(eLand old) {
       }
     if(old == laRedRock) LIKELY tab[cnt++] = laDesert;
     if(old == laOvergrown) LIKELY tab[cnt++] = laJungle;
+
+    if(items[itIvory] >= U5 && !generatingEquidistant && items[itFeather] >= U5)
+      tab[cnt++] = laWestWall;
+    
+    if(variant_unlock() >= variant_unlock_value()) {
+      tab[cnt++] = laVariant;
+      if(old == laRuins) LIKELY tab[cnt++] = laVariant;
+      if(old == laGraveyard) LIKELY tab[cnt++] = laVariant;
+      if(old == laEmerald) LIKELY tab[cnt++] = laVariant;
+      }
     }
   
   if(gold() >= R90) {
@@ -932,6 +969,7 @@ eLand getNewLand(eLand old) {
   if(tkills() >= R100) {
     tab[cnt++] = laGraveyard;
     if(gold() >= R60) tab[cnt++] = laHive;
+    if(old == laVariant) LIKELY tab[cnt++] = laGraveyard;
     }
   
   if(killtypes() >= R20) {

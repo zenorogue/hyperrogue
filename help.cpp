@@ -548,6 +548,7 @@ string generateHelpForLand(eLand l) {
   #define ACCONLYF(z) s += XLAT("Accessible only from %the1 (until finished).\n", z);
   #define TREQ(z) { s += XLAT("Treasure required: %1 $$$.\n", its(z)); buteol(s, gold(), z); }
   #define TREQ2(z,x) { s += XLAT("Treasure required: %1 x %2.\n", its(z), x); buteol(s, items[x], z); }
+  #define TREQ3(z,x) { int now = 0; string t = ""; for(eItem i: x) { if(t!="") t += " + "; t += XLATN(iinf[i].name); now += items[i]; } s += XLAT("Treasure required: %1 x %2.\n", its(z), t); buteol(s, now, z); }
   
   if(l == laMirror || l == laMinefield || l == laPalace ||
     l == laOcean || l == laLivefjord || l == laZebra || l == laWarpCoast || l == laWarpSea ||
@@ -597,6 +598,16 @@ string generateHelpForLand(eLand l) {
 
   if(l == laBlizzard) TREQ2(U5, itDiamond)
   if(l == laBlizzard) TREQ2(U5, itWindstone)
+  
+  if(l == laWestWall) TREQ2(U5, itIvory)
+  if(l == laWestWall) TREQ2(U5, itFeather)
+  
+  if(l == laBrownian) TREQ(R30)
+  
+  if(l == laVariant) {
+    const auto lst = vector<eItem>{itRuins, itEmerald, itBone};
+    TREQ3(variant_unlock_value(), lst)
+    }
     
   if(l == laPrairie) TREQ(R90)
   if(l == laBull) TREQ(R90)

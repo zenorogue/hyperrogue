@@ -287,7 +287,8 @@ int itemclass(eItem i) {
     i == itGreenGrass || i == itBull ||
     i == itLavaLily || i == itHunting ||
     i == itBlizzard || i == itTerra || i == itGlowCrystal || i == itSnake ||
-    i == itDock || i == itRuins || i == itSwitch || i == itMagnet
+    i == itDock || i == itRuins || i == itSwitch || i == itMagnet || 
+    among(i, itWest, itVarTreasure, itBrownian)
     )
     return IC_TREASURE;
   if(i == itSavedPrincess || i == itStrongWind || i == itWarning || i == itBuggy || i == itBuggy2)
