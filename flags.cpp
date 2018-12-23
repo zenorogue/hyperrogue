@@ -370,7 +370,7 @@ bool isAngryBird(eMonster m) {
   return m == moEagle || m == moAlbatross || m == moBomberbird || m == moGargoyle ||
     m == moWindCrow || m == moSparrowhawk || 
     m == moVampire || m == moBat || m == moButterfly || m == moGadfly ||
-    m == moAcidBird;
+    m == moAcidBird || m == moWestHawk;
   }
 
 bool isBird(eMonster m) {
@@ -412,7 +412,7 @@ bool normalMover(eMonster m) {
     m == moHunterGuard || m == moHunterChanging ||
     m == moIceGolem || 
     m == moSwitch1 || m == moSwitch2 || m == moCrusher || m == moPair || 
-    m == moBrownBug || m == moVariantWarrior ||
+    m == moBrownBug || m == moVariantWarrior || m == moFallingDog ||
     isMagneticPole(m) || 
     slowMover(m);
   }

@@ -10,7 +10,7 @@ static inline void set_flag(flagtype& f, flagtype which, bool b) {
   else f &= ~which;
   }
 
-static const int motypes = 165;
+static const int motypes = 167;
 
 struct monstertype {
   char  glyph;
@@ -68,6 +68,7 @@ enum eMonster {
   moPair, moHexDemon, moAltDemon, moMonk, moCrusher,
   moSwitch1, moSwitch2,
   moBrownBug, moAcidBird, moVariantWarrior,
+  moFallingDog, moWestHawk, 
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball, moCrushball,
   // temporary

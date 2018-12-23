@@ -1157,10 +1157,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 9)
         westwall::switchTreasure(c);
       ONEMPTY {
-        if(hrand(4500) < items[itWest] + yendor::hardness())
-          c->monst = moWindCrow;
-        if(hrand(doCross?3000:30000) < items[itWest] + yendor::hardness() - 5)
-          c->monst = moAirElemental;
+        if(hrand(6000) < 5 + items[itWest] + yendor::hardness())
+          c->monst = hrand(100) < 20 ? moWestHawk : moFallingDog;
         }
       break;
     

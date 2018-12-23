@@ -1209,13 +1209,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       }
     queuepoly(VABODY, shBugArmor, darkena(col, 1, 0xFF));
     }
-  else if(m == moRunDog || m == moHunterDog || m == moHunterGuard || m == moHunterChanging) {
+  else if(among(m, moRunDog, moHunterDog, moHunterGuard, moHunterChanging, moFallingDog)) {
     if(!mmspatial && !footphase) 
       queuepoly(VABODY, shDogBody, darkena(col, 0, 0xFF));
     else {
       ShadowV(V, shDogTorso);
       queuepoly(VABODY, shDogTorso, darkena(col, 0, 0xFF));
-      animallegs(VALEGS, moRunDog, darkena(col, 0, 0xFF), footphase);
+      animallegs(VALEGS, moRunDog, m == moFallingDog ? 0xFFFFFFFF : darkena(col, 0, 0xFF), footphase);
       }
     queuepoly(VAHEAD, shDogHead, darkena(col, 0, 0xFF));
 
@@ -1256,7 +1256,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     ShadowV(V, shEagle);
     queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
     }
-  else if(m == moSparrowhawk) {
+  else if(m == moSparrowhawk || m == moWestHawk) {
     ShadowV(V, shHawk);
     queuepoly(VBIRD, shHawk, darkena(col, 0, 0xFF));
     }
