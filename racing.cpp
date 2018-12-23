@@ -742,7 +742,7 @@ string racetimeformat(int t) {
   bool minus = (t < 0);
   if(t < 0) t = -t;
   while(t || digits < 6) {
-    int mby = (digits == 5 ? 6 : 10);
+    int mby = (digits == 4 ? 6 : 10);
     times = char('0'+(t%mby)) + times;
     t /= mby; digits++;
     if(digits == 3) times = "." + times;
