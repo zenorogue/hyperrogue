@@ -1437,6 +1437,7 @@ void setGLProjection(color_t col = backcolor);
 
 bool passable(cell *w, cell *from, flagtype flags);
 
+bool anti_alchemy(cell *w, cell *from);
 bool isElemental(eLand l);
 int coastval(cell *c, eLand base);
 int getHauntedDepth(cell *c);
@@ -2081,6 +2082,9 @@ void explodeMine(cell *c);
 bool mayExplodeMine(cell *c, eMonster who);
 void explosion(cell *c, int power, int central);
 void explodeBarrel(cell *c);
+
+enum eGravity { gsNormal, gsLevitation, gsAnti };
+extern eGravity gravity_state, last_gravity_state;
 
 int gravityLevel(cell *c);
 int gravityLevelDiff(cell *c, cell *f);
@@ -4715,6 +4719,8 @@ namespace racing {
 inline bool subscreen_split(reaction_t for_each_subscreen) { return false; }
 #endif
 
+bool in_gravity_zone(cell *c);
+bool normal_gravity_at(cell *c);
 
 }
 

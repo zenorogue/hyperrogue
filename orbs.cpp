@@ -72,6 +72,7 @@ bool reduceOrbPower(eItem it, int cap) {
     items[it] -= multi::activePlayers();
     if(isHaunted(cwt.at->land)) survivalist = false;
     if(items[it] < 0) items[it] = 0;
+    if(items[it] > cap && markOrb(itOrbBrown)) cap = cap * 6 / 5;
     if(items[it] > cap && timerghost) items[it] = cap;
     if(items[it] == 0 && it == itOrbLove) 
       princess::bringBack();
@@ -143,6 +144,9 @@ void reduceOrbPowers() {
   reduceOrbPower(itOrbLava, 80);
   reduceOrbPower(itOrbMorph, 80);
   reduceOrbPower(itOrbSlaying, 120);
+  reduceOrbPower(itOrbGravity, 120);
+  reduceOrbPower(itOrbChoice, 120);
+  reduceOrbPower(itOrbBrown, 120);
 
   reduceOrbPower(itOrbSide1, 120);
   reduceOrbPower(itOrbSide2, 120);
@@ -1342,6 +1346,12 @@ int orbcharges(eItem it) {
     case itOrbInvis:
     case itOrbAether:
       return 30;
+    case itOrbGravity:
+      return 45;
+    case itOrbChoice:
+      return 60;
+    case itOrbBrown:
+      return 50;
     case itOrbWinter: // "pickup-winter"
        return inv::on ? 45 : 30;
        break;

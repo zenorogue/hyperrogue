@@ -1245,7 +1245,12 @@ itemtype iinf[ittypes] = {
     "Tasty cookie."
     },
   { '*', 0x20C0C0, "West Treasure", NODESCYET},
-  { '*', 0xC020C0, "Variant Treasure", NODESCYET}
+  { '*', 0xC020C0, "Variant Treasure", NODESCYET},
+  
+  { 'o', 0x703800, "Orb of Intensity", NODESCYET},  
+  { 'o', 0x80D080, "Orb of Gravity", NODESCYET},
+  { 'o', 0xD08080, "Orb of Choice", NODESCYET},
+
   // { '*', 0x26619C, "Lapis Lazuli", NODESCYET},
   };
 

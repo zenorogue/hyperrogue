@@ -157,7 +157,7 @@ namespace westwall {
     vector<cell*> whirlline;
     int d = coastvalEdge(c);
     whirlline.push_back(c);
-    whirlline.push_back(ts::left_of(c, coastvalEdge1));
+    whirlline.push_back(gravity_state == gsAnti ? ts::right_of(c, coastvalEdge1) : ts::left_of(c, coastvalEdge1));
     build(whirlline, d);
     reverse(whirlline.begin(), whirlline.end());
     build(whirlline, d);
@@ -178,6 +178,7 @@ namespace westwall {
   
   void move() {
     manual_celllister cl;
+    if(gravity_state == gsLevitation) return;
     for(cell *c: dcal) moveAt(c, cl);
     // Keys and Orbs of Yendor always move
     using namespace yendor;
@@ -186,7 +187,8 @@ namespace westwall {
       // println(hlog, "coastval of actual key is ", coastvalEdge1(yi[i].actual_key()), " and item is ", dnameof(yi[i].actual_key()->item), "and mpdist is ", yi[i].actual_key()->mpdist);
       moveAt(yi[i].actual_key(), cl);
       if(yi[i].actualKey) {
-        yi[i].age++;
+        if(gravity_state == gsAnti) yi[i].age--;
+        else yi[i].age++;
         setdist(yi[i].actual_key(), 8, NULL);
         }
       }

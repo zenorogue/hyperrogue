@@ -78,6 +78,21 @@ void operator ++(bignum &b, int) {
     }
   }
 
+void operator --(bignum &b, int) {
+  int i = 0;
+  while(true) {
+    if(isize(b.digits) == i) { b.digits.push_back(bignum::BASE-1); break; }
+    else if(b.digits[i] == 0) {
+      b.digits[i] = bignum::BASE-1;
+      i++;
+      }
+    else {
+      b.digits[i]--;
+      break;
+      }      
+    }
+  }
+
 string bignum::get_str(int max_length) {
   if(digits.empty()) return "0";
   string ret = its(digits.back());

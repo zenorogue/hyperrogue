@@ -196,7 +196,7 @@ void initcell(cell *c) {
 
 bool doesnotFall(cell *c) {
   if(c->wall == waChasm) return false;
-  else if(cellUnstable(c)) {
+  else if(cellUnstable(c) && !in_gravity_zone(c)) {
     fallingFloorAnimation(c);
     c->wall = waChasm;
     return false;
@@ -393,6 +393,68 @@ int killtypes() {
   return res;
   }
 
+eGravity gravity_state, last_gravity_state;
+
+bool bird_disruption(cell *c) {
+  return c->cpdist <= 5 && items[itOrbGravity];
+  }
+
+bool in_gravity_zone(cell *c) {
+  return gravity_state && c->cpdist <= 5;
+  }
+
+int gravity_zone_diff(cell *c) {
+  if(in_gravity_zone(c)) {
+    if(gravity_state == gsLevitation) return 0;
+    if(gravity_state == gsAnti) return -1;
+    }
+  return 1;
+  }
+
+bool isJWall(cell *c) {
+  return isWall(c) || c->monst == passive_switch; 
+  }
+
+eGravity get_static_gravity(cell *c) {
+  if(isGravityLand(c->land))
+    return gsLevitation;
+  if(among(c->wall, waArrowTrap, waFireTrap, waClosePlate, waOpenPlate, waTrapdoor))
+    return gsNormal;
+  forCellEx(c2, c) if(isJWall(c2))
+    return gsAnti;
+  if(isWatery(c) || isChasmy(c) || among(c->wall, waMagma, waMineUnknown, waMineMine, waMineOpen))
+    return gsLevitation;
+  return gsNormal;
+  }
+
+eGravity get_move_gravity(cell *c, cell *c2) {
+  if(isGravityLand(c->land) && isGravityLand(c2->land)) {
+    int d = gravityLevelDiff(c, c2);
+    if(d > 0) return gsNormal;
+    if(d == 0) return gsLevitation;
+    if(d < 0) return gsAnti;
+    return gsNormal;
+    }
+  else {
+    if(snakelevel(c) != snakelevel(c2)) {
+      int d = snakelevel(c2) - snakelevel(c);
+      if(d > 0) return gsAnti;
+      if(d == -3) return gsLevitation;
+      return gsNormal;
+      }
+    forCellEx(c3, c) if(isJWall(c3))
+      return gsAnti;
+    forCellEx(c3, c2) if(isJWall(c3))
+      return gsAnti;
+    if(isWatery(c2) && c->wall == waBoat && !againstCurrent(c2, c))
+      return gsNormal;
+    if(isWatery(c2) || isChasmy(c2) || among(c2->wall, waMagma, waMineUnknown, waMineMine, waMineOpen) || anti_alchemy(c2, c))
+      return gsLevitation;
+    return gsNormal;
+    }
+  }
+
+
 bool isWarped(cell *c) {
   return isWarped(c->land) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
   }
@@ -486,7 +548,13 @@ bool checkflags(flagtype flags, int x) {
 bool strictlyAgainstGravity(cell *w, cell *from, bool revdir, flagtype flags) {
   return
     cellEdgeUnstable(w, flags) && cellEdgeUnstable(from, flags) && 
-    !(shmup::on && from == w) && gravityLevelDiff(w, from) != (revdir?1:-1);
+    !(shmup::on && from == w) && gravityLevelDiff(from, w) != (revdir?-1:1) * gravity_zone_diff(from);
+  }
+
+bool anti_alchemy(cell *w, cell *from) {
+  bool alch1 = w->wall == waFloorA && from && from->wall == waFloorB && !w->item && !from->item;
+  alch1 |= w->wall == waFloorB && from && from->wall == waFloorA && !w->item && !from->item;
+  return alch1;
   }
 
 bool passable(cell *w, cell *from, flagtype flags) {
@@ -503,6 +571,10 @@ bool passable(cell *w, cell *from, flagtype flags) {
 
     if(from && !((flags & P_ISPLAYER) && pp->monst)) {
       int i = vrevdir ? incline(w, from) : incline(from, w);
+      if(in_gravity_zone(w)) {
+        if(gravity_state == gsLevitation) i = 0;
+        if(gravity_state == gsAnti && i > 1) i = 1;
+        }
       if(i < -1 && F(P_ROSE)) return false;
       if((i > 1) && !F(P_JUMP1 | P_JUMP2 | P_BULLET | P_FLYING | P_BLOW | P_CLIMBUP | P_AETHER | P_REPTILE))
         return false;
@@ -528,12 +600,12 @@ bool passable(cell *w, cell *from, flagtype flags) {
   if(!shmup::on && sword::at(w, flags & P_ISPLAYER) && !F(P_DEADLY | P_BULLET | P_ROSE))
     return false;
 
-  bool alch1 = w->wall == waFloorA && from && from->wall == waFloorB && !w->item && !from->item;
-  alch1 |= w->wall == waFloorB && from && from->wall == waFloorA && !w->item && !from->item;
+  bool alch1 = anti_alchemy(w, from);
   
   if(alch1) {
-    bool alchok = F(P_JUMP1 | P_JUMP2 | P_FLYING | P_TELE | P_BLOW | P_AETHER | P_BULLET) 
-      && !F(P_ROSE);
+    bool alchok = (in_gravity_zone(w) || in_gravity_zone(from));
+    alchok = alchok || (F(P_JUMP1 | P_JUMP2 | P_FLYING | P_TELE | P_BLOW | P_AETHER | P_BULLET) 
+      && !F(P_ROSE));
     if(!alchok) return false;
     }
 
@@ -590,16 +662,27 @@ bool passable(cell *w, cell *from, flagtype flags) {
   if(isThorny(w->wall) && F(P_BLOW | P_DEADLY)) return true;
 
   if(isFire(w) || w->wall == waMagma) {
-    if(!F(P_AETHER | P_WINTER | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY)) return false;
+    if(w->wall == waMagma && in_gravity_zone(w)) ;
+    else if(!F(P_AETHER | P_WINTER | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY)) return false;
+    }
+  
+  if(in_gravity_zone(w) && gravity_state == gsAnti && !isGravityLand(w->land) && (!from || !isGravityLand(from->land))) 
+  if(!F(P_AETHER | P_BLOW | P_JUMP1 | P_BULLET | P_FLYING)) {
+    bool next_to_wall = false;
+    forCellEx(c2, w) if(isJWall(c2)) next_to_wall = true;
+    if(from) forCellEx(c2, from) if(isJWall(c2)) next_to_wall = true;
+    if(!next_to_wall && (!from || incline(from, w) * (vrevdir?-1:1) <= 0)) return false;
     }
     
   if(isWatery(w)) {
-    if(from && from->wall == waBoat && F(P_USEBOAT) && 
+    if(in_gravity_zone(w)) ;
+    else if(from && from->wall == waBoat && F(P_USEBOAT) && 
       (!againstCurrent(w, from) || F(P_MARKWATER))) ;
     else if(!F(P_AETHER | P_FISH | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE)) return false;
     }
   if(isChasmy(w)) {
-    if(!F(P_AETHER | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE)) return false;  
+    if(in_gravity_zone(w)) ;
+    else if(!F(P_AETHER | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE)) return false;  
     }
 
   if(w->wall == waRoundTable && from && from->wall != waRoundTable && (flags & P_ISPLAYER)) return true;
@@ -843,8 +926,12 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
     return passable(w, from, extra | P_FLYING | P_ISFRIEND);
   if(m == moHexSnake)
     return !pseudohept(w) && passable(w, from, extra|P_WIND|P_FISH);
-  if(isBird(m))
-    return passable(w, from, extra | P_FLYING);
+  if(isBird(m)) {
+    if(bird_disruption(w) && (!from || bird_disruption(from)) && markOrb(itOrbGravity))
+      return passable(w, from, extra);
+    else 
+      return passable(w, from, extra | P_FLYING);
+    }
   if(m == moReptile)
     return passable(w, from, extra | P_REPTILE);
   if(isDragon(m))
@@ -2570,14 +2657,17 @@ int gravityLevel(cell *c) {
 int gravityLevelDiff(cell *c, cell *d) { 
   if(c->land != laWestWall || d->land != laWestWall)
     return gravityLevel(c) - gravityLevel(d);
-  int bonus = 0;
-  int id = parent_id(c, 1, coastvalEdge);
-  for(int a=0; a<3; a++)
-    if(c->modmove(id+a) == d) bonus++;
-  id = parent_id(c, -1, coastvalEdge);
-  for(int a=0; a<3; a++)
-    if(c->modmove(id-a) == d) bonus--;
-  return bonus;
+
+  int nid = neighborId(c, d);
+  int id1 = parent_id(c, 1, coastvalEdge) + 1;
+  int di1 = angledist(c->type, id1, nid);
+
+  int id2 = parent_id(c, -1, coastvalEdge) - 1;
+  int di2 = angledist(c->type, id2, nid);
+  
+  if(di1 < di2) return 1;
+  if(di1 > di2) return -1;
+  return 0;
   }    
 
 bool canUnstable(eWall w, flagtype flags) {
@@ -2591,7 +2681,7 @@ bool cellEdgeUnstable(cell *c, flagtype flags) {
   for(int i=0; i<c->type; i++) if(c->move(i)) {
     if(isAnyIvy(c->move(i)->monst) && 
       c->land == laMountain && !(flags & MF_IVY)) return false;
-    if(gravityLevelDiff(c, c->move(i)) == 1) {
+    if(gravityLevelDiff(c, c->move(i)) == gravity_zone_diff(c)) {
       if(againstWind(c->move(i), c)) return false;
       if(!passable(c->move(i), NULL, P_MONSTER | P_DEADLY))
         return false;
@@ -3363,20 +3453,20 @@ void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
   
   if(!isNonliving(m)) terracottaAround(ct);
  
-  if(ct->wall == waMineUnknown && !ct->item && !ignoresPlates(m)) 
+  if(ct->wall == waMineUnknown && !ct->item && !ignoresPlates(m) && normal_gravity_at(ct)) 
     ct->landparam |= 2; // mark as safe
 
-  if((ct->wall == waClosePlate || ct->wall == waOpenPlate) && !ignoresPlates(m))
+  if((ct->wall == waClosePlate || ct->wall == waOpenPlate) && !ignoresPlates(m) && normal_gravity_at(ct))
     toggleGates(ct, ct->wall);
-  if(m == moDeadBird && cf == ct && cellUnstable(cf)) {
+  if(m == moDeadBird && cf == ct && cellUnstable(cf) && normal_gravity_at(ct)) {
     fallingFloorAnimation(cf);
     cf->wall = waChasm;
     }
   
-  if(ct->wall == waArrowTrap && !ignoresPlates(m))
+  if(ct->wall == waArrowTrap && !ignoresPlates(m) && normal_gravity_at(ct))
     activateArrowTrap(ct);
 
-  if(ct->wall == waFireTrap && !ignoresPlates(m) && ct->wparam == 0)
+  if(ct->wall == waFireTrap && !ignoresPlates(m) && ct->wparam == 0 && normal_gravity_at(ct))
     ct->wparam = 1;
     
   if(cf && isPrincess(m)) princess::move(ct, cf);
@@ -3452,16 +3542,16 @@ void playerMoveEffects(cell *c1, cell *c2) {
   sword::angle[multi::cpid] = sword::shift(c1, c2, sword::angle[multi::cpid]);
   
   destroyWeakBranch(c1, c2, moPlayer);
-  
+
   uncoverMinesFull(c2);
   
-  if((c2->wall == waClosePlate || c2->wall == waOpenPlate) && !markOrb(itOrbAether))
+  if((c2->wall == waClosePlate || c2->wall == waOpenPlate) && normal_gravity_at(c2) && !markOrb(itOrbAether))
     toggleGates(c2, c2->wall);
 
-  if(c2->wall == waArrowTrap && c2->wparam == 0 && !markOrb(itOrbAether))
+  if(c2->wall == waArrowTrap && c2->wparam == 0 && normal_gravity_at(c2) && !markOrb(itOrbAether))
     activateArrowTrap(c2);
   
-  if(c2->wall == waFireTrap && c2->wparam == 0 && !markOrb(itOrbAether))
+  if(c2->wall == waFireTrap && c2->wparam == 0 && normal_gravity_at(c2) &&!markOrb(itOrbAether))
     c2->wparam = 1;
     
   princess::playernear(c2);
@@ -3718,7 +3808,7 @@ void moveMonster(cell *ct, cell *cf, int direction_hint) {
     ct->stuntime = 2;
   else if(inc == 3 && ct->monst == moReptile)
     ct->stuntime = 3;
-  else if(inc == -3 && !survivesFall(ct->monst)) {
+  else if(inc == -3 && !survivesFall(ct->monst) && !passable(cf, ct, P_MONSTER)) {
     addMessage(XLAT("%The1 falls!", ct->monst));
     fallMonster(ct, AF_FALL);
     }
@@ -4664,6 +4754,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     if(!ignoresSmell(c->monst) && againstRose(c, from)) return;
     if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) 
       return;
+    if((mf & MF_ONLYEAGLE) && bird_disruption(c) && markOrb(itOrbGravity)) return;
     // in the gravity lands, eagles cannot ascend in their second move
     if((mf & MF_ONLYEAGLE) && gravityLevelDiff(c, from) < 0) {
       onpath(c, 0);
@@ -4742,7 +4833,7 @@ void groupmove(eMonster movtype, flagtype mf) {
       groupmove2(c->move(t),c,t,movtype,mf);
       }
       
-    if(movtype == moEagle && c->monst == moNone && !isPlayerOn(c)) {
+    if(movtype == moEagle && c->monst == moNone && !isPlayerOn(c) && !bird_disruption(c)) {
       cell *c2 = whirlwind::jumpFromWhereTo(c, false);
       groupmove2(c2, c, NODIR, movtype, mf);
       }
@@ -5664,6 +5755,10 @@ bool saved_tortoise_on(cell *c) {
     !((tortoise::getb(c) ^ tortoise::babymap[c]) & tortoise::mask));
   }
 
+bool normal_gravity_at(cell *c) {
+  return !in_gravity_zone(c);
+  }
+
 void moverefresh(bool turn = true) {
   int dcs = isize(dcal);
   
@@ -5761,7 +5856,7 @@ void moverefresh(bool turn = true) {
     if(c->wall == waChasm) {
       if(c->land != laWhirlwind) c->item = itNone;
       
-      if(c->monst && !survivesChasm(c->monst) && c->monst != moReptile) {
+      if(c->monst && !survivesChasm(c->monst) && c->monst != moReptile && normal_gravity_at(c)) {
         if(c->monst != moRunDog && c->land == laMotion) 
           achievement_gain("FALLDEATH1");
         addMessage(XLAT("%The1 falls!", c->monst));
@@ -5814,7 +5909,7 @@ void moverefresh(bool turn = true) {
     else if(isWatery(c)) {
       if(c->monst == moLesser || c->monst == moLesserM || c->monst == moGreater || c->monst == moGreaterM)
         c->monst = moGreaterShark;
-      if(c->monst && !survivesWater(c->monst)) {
+      if(c->monst && !survivesWater(c->monst) && normal_gravity_at(c)) {
         playSound(c, "splash"+pick12());
         if(isNonliving(c->monst))
           addMessage(XLAT("%The1 sinks!", c->monst));
@@ -5828,7 +5923,7 @@ void moverefresh(bool turn = true) {
         }
       }
     else if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waMercury) {
-      if(c->monst && !survivesPoison(c->monst, c->wall)) {
+      if(c->monst && !survivesPoison(c->monst, c->wall) && normal_gravity_at(c)) {
         playSound(c, "splash"+pick12());
         if(isNonliving(c->monst))
           addMessage(XLAT("%The1 sinks!", c->monst));
@@ -5843,7 +5938,7 @@ void moverefresh(bool turn = true) {
       }
     else if(c->wall == waMagma) {
       if(c->monst == moSalamander) c->stuntime = max<int>(c->stuntime, 1);
-      else if(c->monst && !survivesPoison(c->monst, c->wall)) {
+      else if(c->monst && !survivesPoison(c->monst, c->wall) && normal_gravity_at(c)) {
         if(isNonliving(c->monst))
           addMessage(XLAT("%The1 is destroyed by lava!", c->monst));
         else 
@@ -6121,6 +6216,7 @@ bool checkNeedMove(bool checkonly, bool attacking) {
   else if(cwt.at->wall == waLake) {
     if(markOrb2(itOrbAether)) return false;
     if(markOrb2(itOrbFish)) return false;
+    if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
     if(checkonly) return true;
     flags |= AF_FALL;
     addMessage(XLAT("Ice below you is melting! RUN!"));
@@ -6128,11 +6224,13 @@ bool checkNeedMove(bool checkonly, bool attacking) {
   else if(!attacking && cellEdgeUnstable(cwt.at)) {
     if(markOrb2(itOrbAether)) return false;
     if(checkonly) return true;
+    if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
     addMessage(XLAT("Nothing to stand on here!"));
     }
   else if(cwt.at->wall == waSea || cwt.at->wall == waCamelotMoat) {
     if(markOrb(itOrbFish)) return false;
     if(markOrb2(itOrbAether)) return false;
+    if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
     if(checkonly) return true;
     addMessage(XLAT("You have to run away from the water!"));
     }
@@ -6148,11 +6246,13 @@ bool checkNeedMove(bool checkonly, bool attacking) {
     }
   else if(cwt.at->wall == waMagma && !markOrb(itOrbWinter) && !markOrb2(itOrbShield)) {
     if(markOrb2(itOrbAether)) return false;
+    if(in_gravity_zone(cwt.at) && passable(cwt.at, cwt.at, P_ISPLAYER)) return false;
     if(checkonly) return true;
     addMessage(XLAT("Run away from the magma!"));
     }
   else if(cwt.at->wall == waChasm) {
     if(markOrb2(itOrbAether)) return false;
+    if(in_gravity_zone(cwt.at) && passable(cwt.at, cwt.at, P_ISPLAYER)) return false;
     if(checkonly) return true;
     flags |= AF_FALL;
     addMessage(XLAT("The floor has collapsed! RUN!"));
@@ -6313,6 +6413,8 @@ bool hasSafeOrb(cell *c) {
   }
 
 void checkmove() {
+
+  dynamicval<eGravity> gs(gravity_state, gravity_state);
 
 #if CAP_INV
   if(inv::on) inv::compute();
@@ -6825,8 +6927,10 @@ bool collectItem(cell *c2, bool telekinesis) {
     else if(it == itOrbSpeed) playSound(c2, "pickup-speed");
     else if(it == itRevolver) playSound(c2, "pickup-key");
     else playSound(c2, "pickup-orb");
+    int oc = orbcharges(it);
+    if(markOrb(itOrbBrown)) oc = oc * 6 / 5;
     if(!items[it]) items[it]++;
-    items[it] += orbcharges(it);
+    items[it] += oc;
     }
   else if(c2->item == itOrbLife) {
     playSound(c2, "pickup-orb"); // TODO summon
@@ -6987,7 +7091,16 @@ bool collectItem(cell *c2, bool telekinesis) {
     eItem dummy = c2->item;
     conformal::findhistory.emplace_back(c2, dummy);
 #endif
-    c2->item = itNone;
+
+    if(c2->item == itBombEgg && c2->land == laMinefield) {
+      c2->landparam |= 2;
+      c2->landparam &= ~1;
+      }
+
+    if(items[itOrbChoice] && itemclass(c2->item) == IC_ORB)
+      items[itOrbChoice] = 0;
+    else
+      c2->item = itNone;
     }
 //    if(c2->land == laHive)
 //      c2->heat = 1;
@@ -7584,9 +7697,19 @@ bool movepcto(int d, int subdir, bool checkonly) {
     return false;
     }
 
+  gravity_state = gsNormal;
+  
   if(d >= 0) {
     cell *c2 = cwt.at->move(d);
     bool goodTortoise = c2->monst == moTortoise && tortoise::seek() && !tortoise::diff(tortoise::getb(c2)) && !c2->item;
+    
+    if(items[itOrbGravity]) {
+      if(c2->monst && !should_switchplace(cwt.at, c2))
+        gravity_state = get_static_gravity(cwt.at);
+      else
+        gravity_state = get_move_gravity(cwt.at, c2);
+      if(gravity_state) markOrb(itOrbGravity);
+      }
 
     if(againstRose(cwt.at, c2) && !scentResistant()) {
       if(checkonly) return false;
@@ -7676,7 +7799,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
 
       if(againstCurrent(c2, cwt.at) && !markOrb(itOrbWater)) {
-        if(markOrb(itOrbFish) || markOrb(itOrbAether)) goto escape;
+        if(markOrb(itOrbFish) || markOrb(itOrbAether) || gravity_state) goto escape;
         if(!checkonly)
           addMessage(XLAT("You cannot go against the current!"));
         return false;
@@ -7934,8 +8057,9 @@ bool movepcto(int d, int subdir, bool checkonly) {
         addMessage(XLAT("You would get hurt!", c2->wall));
       else if(cwt.at->wall == waTower && snakelevel(c2) == 0)
         addMessage(XLAT("You would get hurt!", c2->wall));
-      else if(cellEdgeUnstable(cwt.at) && cellEdgeUnstable(c2))
+      else if(cellEdgeUnstable(cwt.at) && cellEdgeUnstable(c2)) {
         addMessage(XLAT("Gravity does not allow this!"));
+        }
       else if(c2->wall == waChasm && c2->land == laDual)
         addMessage(XLAT("You cannot move there!"));
       else {
@@ -8084,6 +8208,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
       }
     }
   else {
+    if(items[itOrbGravity]) {
+      gravity_state = get_static_gravity(cwt.at);
+      if(gravity_state) markOrb(itOrbGravity);
+      }
     lastmovetype = lmSkip; lastmove = NULL;
     if(checkNeedMove(checkonly, false))
       return false;
@@ -8098,6 +8226,9 @@ bool movepcto(int d, int subdir, bool checkonly) {
       dropGreenStone(cwt.at);
     if(cellUnstable(cwt.at) && !markOrb(itOrbAether))
       doesFallSound(cwt.at);
+    
+    if(last_gravity_state && !gravity_state)
+      playerMoveEffects(cwt.at, cwt.at);
     }
 
   invisfish = false;
@@ -8110,6 +8241,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
      if(invisfish) invismove = true, markOrb(itOrbFish);
      }
   
+  last_gravity_state = gravity_state;
   if(multi::players == 1) monstersTurn();
 
   save_memory();

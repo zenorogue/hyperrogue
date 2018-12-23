@@ -524,7 +524,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 #define VAHEAD mmscale(V, geom3::AHEAD)
 
 #define VFISH V
-#define VBIRD  mmscale(V, geom3::BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.))
+#define VBIRD  ((where && bird_disruption(where)) ? V : mmscale(V, geom3::BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.)))
 #define VGHOST  mmscale(V, geom3::GHOST)
 
 #define VSLIMEEYE  mscale(V, geom3::FLATEYE)
@@ -781,7 +781,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
       isFriendOrb(it) ? shPeaceRing :
       isUtilityOrb(it) ? shGearRing :
       isDirectionalOrb(it) ? shSpearRing :
-      it == itOrb37 ? shHeptaRing :
+      among(it, itOrb37, itOrbGravity) ? shHeptaRing :
       shRing;
     queuepolyat(V * spinptick(1500), sh, col, prio);
     }
@@ -3626,6 +3626,76 @@ int colorhash(color_t i) {
   return (i * 0x471211 + i*i*0x124159 + i*i*i*0x982165) & 0xFFFFFF;
   }
 
+void draw_gravity_particles(cell *c, const transmatrix V) {
+  int u = (int)(size_t)(c);
+  u = ((u * 137) + (u % 1000) * 51) % 1000;
+  int tt = ticks + u;
+  ld r0 = (tt % 900) / 1100.;
+  ld r1 = (tt % 900 + 200) / 1100.;
+  
+  const color_t grav_normal_color = 0x808080FF;
+  const color_t antigrav_color = 0xF04040FF;
+  const color_t levitate_color = 0x40F040FF;
+  
+  ld lev = 2;
+  
+  if(spatial_graphics) {
+
+    switch(gravity_state) {
+      case gsNormal:
+        for(int i=0; i<6; i++) {
+          transmatrix T = V * spin(i*degree*60) * xpush(crossf/3);
+          queueline(mmscale(T, 1 + (1-r0) * (lev-1)) * C0, mmscale(T, 1 + (1-r1) * (lev - 1)) * C0, grav_normal_color);
+          }
+        break;
+      
+      case gsAnti:
+        for(int i=0; i<6; i++) {
+          transmatrix T = V * spin(i*degree*60) * xpush(crossf/3);
+          queueline(mmscale(T, 1 + r0 * (lev-1)) * C0, mmscale(T, 1 + r1 * (lev-1)) * C0, antigrav_color);
+          }
+        break;
+      
+      case gsLevitation:
+        for(int i=0; i<6; i++) {
+          transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(crossf/3);
+          transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(crossf/3);
+          queueline(mmscale(T0, (lev+1)/2) * C0, mmscale(T1, (lev+1)/2) * C0, levitate_color);
+          }
+        break;
+      }
+    }
+  
+  else {
+    switch(gravity_state) {
+      case gsNormal:
+        for(int i=0; i<6; i++) {
+          transmatrix T0 = V * spin(i*degree*60) * xpush(crossf/3 * (1-r0));
+          transmatrix T1 = V * spin(i*degree*60) * xpush(crossf/3 * (1-r1));
+          queueline(T0 * C0, T1 * C0, grav_normal_color);
+          }
+        break;
+      
+      case gsAnti:
+        for(int i=0; i<6; i++) {
+          transmatrix T0 = V * spin(i*degree*60) * xpush(crossf/3 * r0);
+          transmatrix T1 = V * spin(i*degree*60) * xpush(crossf/3 * r1);
+          queueline(T0 * C0, T1 * C0, antigrav_color);
+          }
+        break;
+      
+      case gsLevitation:
+        for(int i=0; i<6; i++) {
+          transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(crossf/3);
+          transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(crossf/3);
+          queueline(T0 * C0, T1 * C0, levitate_color);
+          }
+        break;
+      }
+    }
+  }
+
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4886,7 +4956,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           queuepoly(V * ddspin(c, i) * xpush(cellgfxdist(c, i)/2), shWindArrow, 0x8080FF80);
         }
       }
-
+    
+    if(items[itOrbGravity] && c->cpdist <= 5) 
+      draw_gravity_particles(c, V);
+    
     if(c->land == laWhirlwind) {
       whirlwind::calcdirs(c);
       
@@ -5527,6 +5600,7 @@ void drawthemap() {
   lmouseover = mouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
   if(!useRangedOrb && !(cmode & sm::MAP) && !(cmode & sm::DRAW) && DEFAULTCONTROL && !mouseout()) {
+    dynamicval<eGravity> gs(gravity_state, gravity_state);
     void calcMousedest();
     calcMousedest();
     cellwalker cw = cwt; bool f = flipplayer;
@@ -5886,7 +5960,7 @@ void drawscreen() {
       }
     }
 
-  if((minefieldNearby || tmines) && !items[itOrbAether] && darken == 0 && normal) {
+  if((minefieldNearby || tmines) && !items[itOrbAether] && !last_gravity_state && darken == 0 && normal) {
     string s;
     if(tmines > 7) tmines = 7;
     color_t col = minecolors[tmines];
