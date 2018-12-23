@@ -15,6 +15,8 @@ bool track_ready;
 
 int TWIDTH;
 
+ld race_advance = 0;
+
 static const int LENGTH = 250;
 static const int DROP = 1;
 
@@ -618,6 +620,7 @@ void set_view() {
     hyperpoint h = T * inverse(T1) * at * C0;
     ld y = asin_auto(h[1]);
     ld x = asin_auto(h[0] / cos_auto(y));
+    x += race_advance;
     // printf("%d %lf\n", z, x);
     transmatrix Z = T1 * inverse(T) * xpush(x);
     View = spin(race_angle * degree) * inverse(Z) * View;
@@ -850,13 +853,16 @@ struct race_configurer {
         case mdDisk:
           pmodel = mdBand;
           conformal::model_orientation = race_angle;
+          race_advance = 1;
           break;
         case mdBand:
           pmodel = mdHalfplane;
           conformal::model_orientation = race_angle + 90;
+          race_advance = 0.5;
           break;
         default:
           pmodel = mdDisk;
+          race_advance = 0;
         }
       });
   
@@ -865,6 +871,11 @@ struct race_configurer {
       dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("race angle"), "");
       int q = conformal::model_orientation - race_angle;
       dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
+      });
+
+    dialog::addSelItem(XLAT("race advance"), fts(race_advance), 'A');
+    dialog::add_action([] () { 
+      dialog::editNumber(race_advance, 0, 360, 0.1, 1, XLAT("race advance"), "");
       });
   
     dialog::addItem(shmup::player_count_name(playercfg), 'n');
