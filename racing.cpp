@@ -25,6 +25,7 @@ struct race_cellinfo {
   cell *c;
   int from_track;
   int completion;
+  int from_start, from_goal;
   };  
 
 vector<race_cellinfo> rti;
@@ -173,7 +174,7 @@ int trackval(cell *c) {
 
 void tie_info(cell *c, int from_track, int comp) {
   rti_id[c] = isize(rti);
-  rti.emplace_back(race_cellinfo{c, from_track, comp});
+  rti.emplace_back(race_cellinfo{c, from_track, comp, -1, -1});
   }
 
 race_cellinfo& get_info(cell *c) {
@@ -391,6 +392,7 @@ void generate_track() {
     transmatrix T = straight * parabolic1(cleaner * dir);
     cell *at = s;
     virtualRebase(at, T,  true);
+    get_info(at).from_start = 0;
     for(ld u=0; u<50; u++) {
       if(at->wall != waBarrier)
         makeEmpty(at);
@@ -432,6 +434,112 @@ void generate_track() {
       }
     }
   
+  if(1) {
+    map<cell*, pair<int, int> > cdists;
+    manual_celllister cl;
+    cl.add(s);
+    for(auto cc: rti) if(cc.from_start == 0) cl.add(cc.c);
+
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      forCellEx(c2, c) {
+        if(passable(c2, c, P_ISPLAYER) && !cl.listed(c2))
+          cl.add(c2), get_info(c2).from_start = get_info(c).from_start + 1;
+        }
+      }
+    
+    }
+
+  if(1) {
+    map<cell*, pair<int, int> > cdists;
+    manual_celllister cl;
+    for(auto cc: rti) if(among(cc.c->wall, waCloud, waMirror))
+      cc.from_goal = 0, cl.add(cc.c);
+
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      forCellEx(c2, c) {
+        if(passable(c2, c, P_ISPLAYER) && !cl.listed(c2))
+          cl.add(c2), get_info(c2).from_goal = get_info(c).from_goal + 1;
+        }
+      }
+    
+    }
+  
+  int total_track = get_info(s).from_goal;
+  
+  auto blockoff = [&total_track] (race_cellinfo& cc) {
+    if(cc.from_start < 1 || cc.from_goal < 1) return false;
+    int dif = cc.from_start + cc.from_goal - 2 * cc.from_track - total_track;
+    return dif > 3;
+    };
+
+  auto blockbound = [&blockoff] (cell *c) {
+    forCellEx(c2, c) if(passable(c2, c, P_ISPLAYER) && !blockoff(get_info(c2))) return true;
+    return false;
+    };
+  
+  vector<cell*> to_block;
+  
+  for(auto cc: rti) if(blockoff(cc)) to_block.push_back(cc.c);
+  
+  hrandom_shuffle(&to_block[0], isize(to_block));
+  
+  for(cell *c: to_block) switch(specialland) {
+    case laIce:
+      c->wall = waIcewall;
+      break;
+    
+    case laHell:
+      c->wall = waSulphur;
+      break;
+    
+    case laJungle: {
+      vector<int> dirs;
+      forCellIdEx(c2, i, c) if(among(c2->monst, moIvyRoot, moIvyWait)) dirs.push_back(i);
+      if(dirs.empty()) c->monst = moIvyRoot;
+      else c->monst = moIvyWait, c->mondir = dirs[hrand(isize(dirs))];
+      break;
+      }
+    
+    case laDeadCaves: 
+      if(blockbound(c)) c->wall = waDeadwall;
+      break;
+    
+    case laRedRock:
+      if(blockbound(c)) c->wall = waRed3;
+      break;
+        
+    case laDragon:
+      c->wall = waChasm;
+      break;
+
+    case laDryForest:
+      if(blockbound(c)) c->wall = waBigTree;
+      break;
+    
+    case laDesert:
+      if(blockbound(c)) c->wall = waDune;
+      break;
+
+    case laRuins:
+      if(blockbound(c)) c->wall = waRuinWall;
+      break;
+
+    case laElementalWall:
+      if(blockbound(c)) {
+        if(c->land == laEFire) c->wall = waEternalFire;
+        else if(c->land == laEWater) c->wall = waSea;
+        else if(c->land == laEAir) c->wall = waChasm;
+        else if(c->land == laEEarth) c->wall = waStone;
+        }
+      break;    
+  
+    default: break;
+    }
+
+  // for(cell *c: to_block) if(blockbound(c)) c->land = laOvergrown;
+
   /*
   for(cell *c: track) {
     int i = trackval(c) - celldist(c);

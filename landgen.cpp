@@ -182,6 +182,13 @@ const array<variant_feature, 21> variant_features {{
   }};
 #undef VF
 
+void place_elemental_wall(cell *c) {
+  if(c->land == laEFire) c->wall = waEternalFire;
+  else if(c->land == laEWater) c->wall = waSea;
+  else if(c->land == laEAir) c->wall = waChasm;
+  else if(c->land == laEEarth) c->wall = waStone;
+  }
+
 void giantLandSwitch(cell *c, int d, cell *from) {
   switch(c->land) {
 
@@ -2195,12 +2202,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laEFire:
     // but not case laElementalWall:
       if(d==8) {
-        if(hrand(c->land == laEAir ? 6 : 25) == 0) {
-          if(c->land == laEFire) c->wall = waEternalFire;
-          else if(c->land == laEWater) c->wall = waSea;
-          else if(c->land == laEAir) c->wall = waChasm;
-          else if(c->land == laEEarth) c->wall = waStone;
-          }
+        if(hrand(c->land == laEAir ? 6 : 25) == 0) 
+          place_elemental_wall(c);
         }
       ONEMPTY {
         eItem localshard = localshardof(c->land);
