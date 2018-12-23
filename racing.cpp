@@ -64,6 +64,7 @@ struct ghostmoment {
 struct ghost {
   charstyle cs;
   int result;
+  int checksum;
   time_t timestamp;
   vector<ghostmoment> history;
   };
@@ -100,11 +101,11 @@ void hwrite(hstream& hs, const ghostmoment& m) {
   }
 
 void hread(hstream& hs, ghost& gh) {
-  hread(hs, gh.cs, gh.result, gh.timestamp, gh.history);
+  hread(hs, gh.cs, gh.result, gh.timestamp, gh.checksum, gh.history);
   }
 
 void hwrite(hstream& hs, const ghost& gh) {
-  hwrite(hs, gh.cs, gh.result, gh.timestamp, gh.history);
+  hwrite(hs, gh.cs, gh.result, gh.timestamp, gh.checksum, gh.history);
   }
 
 bool read_ghosts(string seed, int mcode) {
@@ -180,6 +181,8 @@ void tie_info(cell *c, int from_track, int comp) {
 race_cellinfo& get_info(cell *c) {
   return rti[rti_id.at(c)];
   }
+
+int race_checksum;
 
 ld start_line_width;
 
@@ -553,6 +556,21 @@ void generate_track() {
   */
 
   track_ready = true;
+  race_checksum = hrand(1000000);
+  
+  auto& gh = race_ghosts[{track_code, modecode()}] [specialland];
+  int ngh = 0;
+  for(int i=0; i<isize(gh); i++) {
+    if(gh[i].checksum != race_checksum) {
+      println(hlog, "wrong checksum: %x, should be %x", gh[i].checksum, race_checksum);
+      }
+    else {
+      if(i != ngh)
+        gh[ngh] = move(gh[i]);
+      ngh++;
+      }
+    }
+  gh.resize(ngh);
   
   race_start_tick = 0;
   for(int i=0; i<MAXPLAYER; i++) race_finish_tick[i] = 0;
@@ -946,7 +964,7 @@ void race_won() {
       
     auto &subtrack = race_ghosts[{track_code, modecode()}] [specialland];
 
-    subtrack.emplace_back(ghost{gcs, ticks - race_start_tick, time(NULL), current_history[current_player]});
+    subtrack.emplace_back(ghost{gcs, ticks - race_start_tick, race_checksum, time(NULL), current_history[current_player]});
     sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result > g2.result; });
     if(isize(subtrack) > ghosts_to_save && ghosts_to_save > 0) 
       subtrack.resize(ghosts_to_save);
