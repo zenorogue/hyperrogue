@@ -2,9 +2,9 @@
 // It is quite chaotic.
 
 // version numbers
-#define VER "10.5d"
-#define VERNUM 10504
-#define VERNUM_HEX 0xA504
+#define VER "10.5e"
+#define VERNUM 10505
+#define VERNUM_HEX 0xA505
 
 #include <stdarg.h>
 
@@ -1205,6 +1205,7 @@ namespace mapeditor {
 
   bool haveUserShape(eShapegroup group, int id);  
   void draw_texture_ghosts(cell *c, const transmatrix& V);  
+  void map_settings();
   }
 
 struct renderbuffer;
@@ -1739,6 +1740,7 @@ bool needConfirmationEvenIfSaved();
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
 
 extern bool timerghost;
+extern bool gen_wandering;
 
 #define CAP_MENUSCALING (ISPANDORA || ISMOBILE)
 

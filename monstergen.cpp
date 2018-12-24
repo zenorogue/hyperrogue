@@ -7,6 +7,7 @@
 namespace hr {
 
 bool timerghost = true;
+bool gen_wandering = true;
 
 int buildIvy(cell *c, int children, int minleaf) {
   if(c->monst) return 0;
@@ -303,6 +304,8 @@ eItem wanderingTreasure(cell *c) {
 
 void wandering() {
   if(!canmove) return;
+  if(!gen_wandering) return;
+  
   pathdata pd(moYeti);
   int seepcount = getSeepcount();
   int ghostcount = getGhostcount();

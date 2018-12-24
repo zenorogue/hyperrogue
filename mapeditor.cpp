@@ -123,6 +123,27 @@ namespace mapstream {
         f.write(ginf[gCrystal].vertex);
       }
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
+    
+    // game settings
+    f.write(safety);
+    f.write(autocheat);
+    f.write(gen_wandering);
+    f.write(reptilecheat);
+    f.write(timerghost);
+    f.write(patterns::canvasback);
+    f.write(patterns::whichShape);
+    f.write(patterns::subpattern_flags);
+    f.write(patterns::whichCanvas);
+    f.write(patterns::displaycodes);
+    f.write(mapeditor::drawplayer);
+    
+    {
+    int i = ittypes; f.write(i);
+    for(int k=0; k<i; k++) f.write(items[k]);
+    i = motypes; f.write(i);
+    for(int k=0; k<i; k++) f.write(kills[k]); 
+    }
+    
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
@@ -248,11 +269,33 @@ namespace mapstream {
           }
         }
       }
-    
+      
     need_reset_geometry = true;
 
     initcells();
     if(shmup::on) shmup::init();
+    
+    if(vernum >= 10505) {
+      // game settings
+      f.read(safety);
+      bool b;
+      f.read(b); if(b) autocheat = true;
+      f.read(gen_wandering);
+      f.read(reptilecheat);
+      f.read(timerghost);
+      f.read(patterns::canvasback);
+      f.read(patterns::whichShape);
+      f.read(patterns::subpattern_flags);
+      f.read(patterns::whichCanvas);
+      f.read(patterns::displaycodes);
+      f.read(mapeditor::drawplayer);
+      
+      int i;
+      f.read(i); if(i > ittypes || i < 0) throw hstream_exception();
+      for(int k=0; k<i; k++) f.read(items[k]);
+      f.read(i); if(i > motypes || i < 0) throw hstream_exception();
+      for(int k=0; k<i; k++) f.read(kills[k]);    
+      }
 
     while(true) {
       cell *c;
@@ -526,6 +569,7 @@ namespace mapeditor {
     displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
 
     displayFunctionKeys();
+    displayButton(8, vid.yres-8-fs*4, XLAT("F8 = settings"), SDLK_F8, 0);
     
     keyhandler = handleKeyMap;
     }
@@ -853,6 +897,9 @@ namespace mapeditor {
 #endif
     else if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
+      }
+    else if(sym == SDLK_F8) {
+      pushScreen(map_settings);
       }
     else if(uni == 'c') {
       copysource = mouseover_cw(true);
@@ -1840,6 +1887,36 @@ namespace mapeditor {
   #endif
     }
 
+  void map_settings() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(1);
+  
+    dialog::init(XLAT("Map settings"));
+  
+    dialog::addBoolItem("disable wandering monsters", !gen_wandering, 'w');
+    dialog::add_action([] () { gen_wandering = !gen_wandering; });
+
+    if(gen_wandering) {
+      dialog::addBoolItem("disable ghost timer", !timerghost, 'g');
+      dialog::add_action([] () { timerghost = !timerghost; });
+      }
+    else dialog::addBreak(100);
+
+    dialog::addBoolItem("simple pattern generation", reptilecheat, 'p');
+    dialog::add_action([] () { reptilecheat = !reptilecheat; });
+    dialog::addInfo("(e.g. pure Reptile pattern)");
+
+    dialog::addBoolItem("safety generation", safety, 's');
+    dialog::add_action([] () { safety = !safety; });
+    dialog::addInfo("(no treasure, no dangers)");
+
+    dialog::addBoolItem("god mode", autocheat, 'G');
+    dialog::add_action([] () { autocheat = true; });
+    dialog::addInfo("(unlock all, allow cheats, normal character display)");
+    
+    dialog::addBack();
+    dialog::display();
+    }
   }
 
 #if CAP_EDIT

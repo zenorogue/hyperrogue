@@ -268,7 +268,10 @@ void initgame() {
     cheater = 0;
     if(autocheat) cheater = 1;
     hauntedWarning = false;
-    timerghost = true;
+    if(!autocheat) {
+      timerghost = true;
+      gen_wandering = true;
+      }
     truelotus = 0;
     survivalist = true;
     crystal::used_compass_inside = false;
