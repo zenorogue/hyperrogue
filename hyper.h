@@ -1321,6 +1321,7 @@ namespace conformal {
   extern vector<cell*> movehistory;
   extern set<cell*> inmovehistory, inkillhistory, infindhistory;
   extern bool includeHistory;
+  extern bool use_atan;
   extern ld rotation;
   extern int do_rotate;
   extern ld model_orientation;

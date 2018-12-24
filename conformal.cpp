@@ -389,6 +389,7 @@ namespace conformal {
   
   ld spiral_angle = 70, spiral_x = 10, spiral_y = 7;
   int spiral_id = 7;
+  bool use_atan = false;
   
   cld spiral_multiplier;
   ld right_spiral_multiplier = 1;
@@ -739,6 +740,11 @@ namespace conformal {
       dialog::add_action([] () {
         dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("half-plane scale"), "");
         });
+      }
+
+    if(pmodel == mdRotatedHyperboles) {
+      dialog::addBoolItem(XLAT("use atan to make it finite"), use_atan, 'x');
+      dialog::add_action([] () { use_atan = !use_atan; });
       }
 
     if(pmodel == mdBall) {

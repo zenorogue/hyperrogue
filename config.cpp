@@ -342,6 +342,7 @@ void initConfig() {
   
   addsaver(conformal::formula, "formula");
   addsaverenum(conformal::basic_model, "basic model");
+  addsaver(conformal::use_atan, "use_atan");
 
   addsaver(vid.consider_shader_projection, "shader-projection", true);
 

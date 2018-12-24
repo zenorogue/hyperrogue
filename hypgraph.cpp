@@ -539,8 +539,10 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[1] = cosh(x) * factor;
       ret[2] = 0;
       
-      ret[0] = atan(ret[0]);
-      ret[1] = atan(ret[1]);
+      if(conformal::use_atan) {
+        ret[0] = atan(ret[0]);
+        ret[1] = atan(ret[1]);
+        }
 
       break;
       }
