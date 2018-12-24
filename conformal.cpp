@@ -702,7 +702,7 @@ namespace conformal {
       dialog::addBreak(50);
       }
     
-    if(pmodel == mdDisk || pmodel == mdBall || pmodel == mdHyperboloid) {
+    if(among(pmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
       dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'p');
       }
                                   

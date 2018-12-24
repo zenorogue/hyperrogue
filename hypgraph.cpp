@@ -1184,6 +1184,11 @@ color_t modelcolor = 0;
 void draw_model_elements() {
 
   switch(pmodel) {
+  
+    case mdRotatedHyperboles: {
+      queuechr(current_display->xcenter, current_display->ycenter + current_display->radius * vid.alpha, 0, vid.fsize, 'X', ringcolor, 1, 8);
+      return;
+      }
 
     case mdTwoPoint: {
       ld a = -conformal::model_orientation * degree;
@@ -1283,6 +1288,7 @@ void draw_boundary(int w) {
 
   if(haveaura()) lc = 0;
   if(lc == 0 && fc == 0) return;
+  if(pmodel == mdRotatedHyperboles) return;
   
   ld fakeinf = sphere ? M_PI-1e-5 : hyperbolic ? 10 : exp(10);
   
