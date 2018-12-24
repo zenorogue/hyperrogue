@@ -123,7 +123,7 @@ namespace westwall {
   void switchTreasure(cell *c) {
     c->item = itNone;
     if(safety) return;
-    if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && notDippingFor(itWindstone)
+    if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && c->landparam >= 5 + items[itWest]
       && getGhostcount() < 2)
       c->item = itWest;
     else if(hrand(5000) < 20*PRIZEMUL)

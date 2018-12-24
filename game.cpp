@@ -3152,6 +3152,9 @@ void bfs() {
       
         if(c2->item == itTrollEgg && c2->cpdist == distlimit && !shmup::on && c2->landparam && turncount-c2->landparam > 650)
           c2->item = itNone;
+
+        if(c2->item == itWest && c2->cpdist == distlimit && items[itWest] >= c2->landparam + 4)
+          c2->item = itNone;
       
         if(c2->item == itMutant && c2->cpdist == distlimit && items[itMutant] >= c2->landparam) {
           c2->item = itNone;
