@@ -1431,14 +1431,23 @@ void drawqueue() {
 
     spherespecial = sphereflipped() ? 1 : -1;
     current_display->set_projection(0, true);
-
-    reverse_side_priorities();
-    for(int i=ptds.size()-1; i>=0; i--) 
-      if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-        ptds[i]->draw_back();
     
-    glflush();
-    reverse_side_priorities();
+    if(pmodel == mdRotatedHyperboles) {
+      for(auto& ptd: ptds)
+        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+          ptd->draw();
+      glflush();
+      }
+    else {
+      reverse_side_priorities();
+      for(int i=ptds.size()-1; i>=0; i--) 
+        if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+          ptds[i]->draw_back();
+      
+      glflush();
+      reverse_side_priorities();
+      }
+
     spherespecial *= -1;
     spherephase = 1;
     current_display->set_projection(0, true);
