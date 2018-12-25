@@ -778,9 +778,9 @@ monstertype minf[motypes] = {
   "for a long time. This attack can destroy other Raiders if it hits them."},
   { '@', 0xC00000, "Red Jelly", jellydesc}, 
   { '@', 0x0000C0, "Blue Jelly", jellydesc}, 
-  { 'B', 0xE07000, "Brown Bug", NODESCYET},
+  { 'B', 0xE07000, "Bronze Beast", NODESCYET},
   { 'B', 0xE07060, "Acid Bird", NODESCYET},
-  { 'W', 0xA04060, "Variant Warrior", NODESCYET},
+  { 'W', 0xA04060, "Mutant", NODESCYET},
   { 'W', 0xC04040, "Falling Dog", NODESCYET},
   { 'B', 0x40C040, "Western Hawk", NODESCYET},
   
@@ -1246,8 +1246,8 @@ itemtype iinf[ittypes] = {
   { '*', 0x20C0C0, "Brownie",
     "Tasty cookie."
     },
-  { '*', 0x20C0C0, "West Treasure", NODESCYET},
-  { '*', 0xC020C0, "Variant Treasure", NODESCYET},
+  { '$', 0xF0C0C0, "Meteorite", NODESCYET},
+  { '*', 0x30FF30, "Shining Gem", NODESCYET},
   
   { 'o', 0x703800, "Orb of Intensity", NODESCYET},  
   { 'o', 0x80D080, "Orb of Gravity", NODESCYET},
@@ -1633,9 +1633,9 @@ const landtype linf[landtypes] = {
     "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
     " option was on."
     },
-  { 0xA04060, "Brownian", NODESCYET},
-  { 0xA04060, "West Wall", NODESCYET},
-  { 0xA04060, "Variant", NODESCYET}
+  { 0x804000, "Brown Islands", NODESCYET},
+  { 0xA04060, "Free Fall", NODESCYET},
+  { 0x30FF30, "Irradiated Field", NODESCYET}
   };
 
 vector<landtacinfo> land_tac = {
