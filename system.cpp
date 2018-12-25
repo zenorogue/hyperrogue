@@ -64,14 +64,18 @@ void welcomeMessage() {
   else if(shmup::on) ; // welcome message given elsewhere
   else if(euclid)
     addMessage(XLAT("Welcome to the Euclidean mode!"));
-  else if(sphere && specialland == laHalloween)
+  else if(specialland == laHalloween && BITRUNCATED && among(geometry, gSphere, gElliptic))
     addMessage(XLAT("Welcome to Halloween!"));
   else if(elliptic)
     addMessage(XLAT("Good luck in the elliptic plane!"));
   else if(sphere)
     addMessage(XLAT("Welcome to Spherogue!"));
-  else 
-  addMessage(XLAT("Welcome to HyperRogue!"));
+  else if(PURE && geometry == gNormal && !cheater)
+    addMessage(XLAT("Welcome to the Heptagonal Mode!"));
+  else if(cheater || autocheat)
+    addMessage(XLAT("Welcome to HyperRogue! (cheat mode on)"));
+  else
+    addMessage(XLAT("Welcome to HyperRogue!"));
 
   if(do_use_special_land() || firstland != laIce) if(!daily::on) {
     auto lv = land_validity(specialland);
