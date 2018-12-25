@@ -7236,6 +7236,8 @@ void monstersTurn() {
     if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH)) {
       attackMonster(c, AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
       }
+    moveEffect(c, c, moDeadBird, -1);
+    destroyBoats(c, NULL, true);
     }
   
   crush_now = move(crush_next);
