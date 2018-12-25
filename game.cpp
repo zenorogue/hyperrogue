@@ -1760,6 +1760,9 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
     c->wall == waTower)
     return false;
   else if(c->wall == waBoat) {
+    if(isPlayerOn(c) && markOrb(itOrbWinter)) {
+      addMessage(XLAT("%the1 protects your boat!", itOrbWinter));
+      }
     if(checkonly) return true;
     if(c->cpdist <= 7)
       addMessage(XLAT("%The1 burns!", winf[c->wall].name));
