@@ -77,12 +77,12 @@ vector<string> achievementsReceived;
 bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == rg::global) return false;
-  if(CHANGED_VARIATION != (flags == rg::special_variation)) return true;
-  if(GOLDBERG) return true;
-  if(IRREGULAR) return true;
 
-  if((geometry != gNormal) != (flags == rg::special_geometry)) return true;
-  
+  if(flags != rg::special_geometry) {
+    if(!BITRUNCATED) return true;
+    if(geometry != gNormal) return true;
+    }
+
   if(shmup::on != (flags == rg::shmup)) return true;
 #if CAP_DAILY
   if(daily::on != (flags == rg::daily)) return true;
@@ -145,10 +145,10 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
   if(randomPatternsMode) return;
   int q = items[it];
   
-  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic)) 
+  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
     achievement_gain("HALLOWEEN1", rg::special_geometry);
 
-  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic)) 
+  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
     achievement_gain("HALLOWEEN2", rg::special_geometry);
 
   if(q == 1) {
@@ -217,7 +217,13 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
   // 32
   if(it == itHolyGrail) {
-    if(q == 1) achievement_gain("GRAIL2"), achievement_gain("GRAILH", rg::special_variation);
+    if(q == 1) achievement_gain("GRAIL2");
+    if(PURE && geometry == gNormal)
+      achievement_gain("GRAILH", rg::special_geometry);
+    if(PURE && geometry == gCrystal && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside)
+      achievement_gain("GRAIL4D", rg::special_geometry);
+    if(BITRUNCATED && geometry == gCrystal && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside)
+      achievement_gain("GRAIL4D2", rg::special_geometry);
     if(q == 3) achievement_gain("GRAIL3");
     if(q == 8) achievement_gain("GRAIL4");
     }

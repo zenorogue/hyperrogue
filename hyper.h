@@ -676,10 +676,8 @@ namespace rg {
   static const char global = 'x'; 
   // wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead
   static const char multi = 'm';
-  // wrongmode only -- mark achievements for special geometries
+  // wrongmode only -- mark achievements for special geometries/variations
   static const char special_geometry = 'g';
-  // wrongmode only -- mark achievements for special variations
-  static const char special_variation = '7';
   }
 
 int landMultiplier(eLand l);
