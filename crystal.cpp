@@ -1114,7 +1114,10 @@ void show() {
   dialog::addBoolItem(XLAT("view coordinates in the cheat mode"), view_coordinates, 'v');
   dialog::add_action([]() { view_coordinates = !view_coordinates; });
   dialog::addSelItem(XLAT("compass probability"), fts(compass_probability), 'p');
-  dialog::add_action([]() { dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); });
+  dialog::add_action([]() { 
+    dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); 
+    dialog::bound_low(0);
+    });
   if(geometry == gCrystal) {
     dialog::addBoolItem(XLAT("3D display"), rug::rugged, 'r');
     dialog::add_action([]() { pushScreen(rug::show); });

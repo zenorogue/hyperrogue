@@ -855,6 +855,7 @@ void showGraphConfig() {
   
     if(xuni == 'C') {
       dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
+      dialog::bound_low(0);
       // we need to check the moves
       dialog::reaction = checkmove;
       }
@@ -1031,13 +1032,17 @@ void showBasicConfig() {
   #if ISSTEAM
     if(xuni == 'x') vid.steamscore = vid.steamscore^1;
   #endif
-    if(xuni == 't') 
+    if(xuni == 't') {
       dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
         XLAT("How long should the messages stay on the screen."));
+      dialog::bound_low(0);
+      }
 
-    if(xuni == 'z') 
+    if(xuni == 'z') {
       dialog::editNumber(vid.msglimit, 0, 64, 1, 5, XLAT("limit messages shown"),
         XLAT("Maximum number of messages on screen."));
+      dialog::bound_low(0);
+      }
     
     if(xuni == 'i') { vid.shifttarget = vid.shifttarget^3; }
     
@@ -1076,13 +1081,19 @@ void showJoyConfig() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(uni == 'p') autojoy = !autojoy;
-    else if(uni == 'a') 
+    else if(uni == 'a') {
       dialog::editNumber(vid.joyvalue, 0, 32768, 100, 4800, XLAT("first joystick: movement threshold"), "");
-    else if(uni == 'b') 
+      dialog::bound_low(0);
+      }
+    else if(uni == 'b') {
       dialog::editNumber(vid.joyvalue2, 0, 32768, 100, 5600, XLAT("first joystick: execute movement threshold"), "");
-    else if(uni == 'c')
+      dialog::bound_low(0);
+      }
+    else if(uni == 'c') {
       dialog::editNumber(vid.joypanthreshold, 0, 32768, 100, 2500, XLAT("second joystick: pan threshold"), "");
-    else if(uni == 'd') 
+      dialog::bound_low(0);
+      }
+    else if(uni == 'd')
       dialog::editNumber(vid.joypanspeed, 0, 1e-2, 1e-5, 1e-4, XLAT("second joystick: panning speed"), "");
   
     else if(doexiton(sym, uni)) popScreen();
@@ -1253,13 +1264,15 @@ void showStereo() {
         help3 +
         XLAT("The distance between your eyes. 1 is the width of the screen."));
       
-    else if(uni == 'f')
+    else if(uni == 'f') {
       dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
         help3 + XLAT(
           "Horizontal field of view, in angles. "
           "This affects the Hypersian Rug mode (even when stereo is OFF) "
           "and non-disk models.")
           );
+      dialog::bound_low(1e-8);
+      }
 
     else if(doexiton(sym, uni)) popScreen();
     };
@@ -1524,7 +1537,7 @@ void show_color_dialog() {
   dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
 
   dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
-  dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), "brightness behind the sphere"); });
+  dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), "brightness behind the sphere"); dialog::bound_low(0); });
 
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
   dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::dialogflags |= sm::SIDE; });
@@ -1558,10 +1571,10 @@ void show_color_dialog() {
   dialog::addBreak(50);
 
   dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'a');
-  dialog::add_action([] () { dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), ""); });
+  dialog::add_action([] () { dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), ""); dialog::bound_low(0); });
 
   dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 's');
-  dialog::add_action([] () { dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), ""); });  
+  dialog::add_action([] () { dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), ""); dialog::bound_low(1); });  
 
   dialog::addBreak(50);
   dialog::addBack();
