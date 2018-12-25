@@ -668,8 +668,11 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
   
   else if(it == itCompass) {
     transmatrix V2;
-    if(geometry == gCrystal)
+    if(geometry == gCrystal) {
+      if(crystal::compass_probability <= 0) return true;
+      if(cwt.at->land == laCamelot && celldistAltRelative(cwt.at) < 0) crystal::used_compass_inside = true;
       V2 = V * spin(crystal::compass_angle() + M_PI);
+      }
     else {
       cell *c1 = c ? findcompass(c) : NULL;
       if(c1) {

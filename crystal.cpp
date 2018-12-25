@@ -22,6 +22,8 @@ bool pure() {
 bool view_coordinates = false;
 bool view_east = false;
 
+bool used_compass_inside;
+
 const int MAXDIM = 7;
 
 typedef array<int, MAXDIM> coord;

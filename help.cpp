@@ -710,6 +710,18 @@ string generateHelpForLand(eLand l) {
       );
     }
 
+  if(l == laCamelot && geometry == gCrystal) {
+    if(!crystal::used_compass_inside) s += XLAT("\nSpecial conduct (still valid)\n");
+    else s += XLAT("\nSpecial conduct failed:\n");
+    
+    s += XLAT(
+      "Do not use compases.\n\n");
+
+    s += XLAT("Crystal Camelot is an octahedron in 'pure' 3D crystal geometry (and a similar polytope in other pure crystals), "
+      "and an Euclidean ball in bitruncated/Goldberg crystals.");
+    }
+
+
   auto lv = land_validity(specialland);
   if(lv.flags & lv::display_in_help)
     s += "\n\n" + XLAT(lv.msg);

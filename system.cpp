@@ -267,6 +267,7 @@ void initgame() {
     timerghost = true;
     truelotus = 0;
     survivalist = true;
+    crystal::used_compass_inside = false;
     got_survivalist = false;
 #if CAP_INV
     if(inv::on) inv::init();
