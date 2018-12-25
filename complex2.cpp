@@ -115,6 +115,14 @@ namespace brownian {
         }
       }
     }
+
+  color_t get_color(int y) {
+     return
+        y < level ? gradient(0x603000, 0x804000, 1, y, level-1) :
+        y < 2 * level ? 0xA05000 :
+        y < 3 * level ? 0xC09050 :
+        0xE0D0A0;
+     }
   
   }
 

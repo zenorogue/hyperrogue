@@ -2864,13 +2864,14 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     case laBrownian: {
       using brownian::level;
       fcol = wcol = 
+        /*
         c->landparam == 0 ? 0x0000F0 : 
         c->landparam < level ? gradient(0x002000, 0xFFFFFF, 1, c->landparam, level-1) :
         c->landparam < 2 * level ? 0xFFFF80 :
-        // gradient(0xFFFF80, 0xFFFF00, 2*level, c->landparam, 2*level-1) :
         c->landparam < 3 * level ? 0xFF8000 :
-        // gradient(0xFF8000, 0xFFF000, 2*level, c->landparam, 3*level-1) :
-        0xC00000;
+        0xC00000; */
+       
+        c->landparam == 0 ? 0x0000F0 : brownian::get_color(c->landparam);
       break;
       }
 #endif
@@ -3543,6 +3544,8 @@ int getSnakelevColor(cell *c, int i, int last, int fd, color_t wcol) {
     col = 0xD0D0D0-i*0x101010;
   else if(c->land == laSnakeNest)
     return darkena(nestcolors[pattern_threecolor(c)] * (5 + i) / 4, 0, 0xFF);
+  else if(c->land == laBrownian)
+    col = brownian::get_color(c->landparam % brownian::level + (i+1) * brownian::level);
   else if(i == last-1)
     col = wcol;
   else
