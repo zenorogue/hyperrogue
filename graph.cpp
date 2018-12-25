@@ -3000,7 +3000,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       break;
     
     case laWestWall:
-      fcol = 0x10101 * (32 + (c->landparam&1) * 32) + 0x400000;
+      fcol = 0x10101 * ((c->landparam&1) * 32) + floorcolors[c->land];
       break;
     
     case laDungeon: {
@@ -4249,6 +4249,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laVolcano:
+        case laVariant:
           set_floor(shLavaFloor);
           break;
         
@@ -4403,7 +4404,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             set_towerfloor(c);
           break;
         
-        case laIvoryTower: case laDungeon: 
+        case laIvoryTower: case laDungeon: case laWestWall:
           set_towerfloor(c);
           break;
         
@@ -4411,7 +4412,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(among(c->wall, waSea, waBoat))
             set_floor(shCloudFloor);
           else
-            set_floor(shFloor);
+            set_floor(shTrollFloor);
           break;
 
         default: 
@@ -4430,6 +4431,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
         if(qfi.fshape == &shCloudFloor) 
           set_floor(shCloudSeabed);
+        else if(qfi.fshape == &shLavaFloor) 
+          set_floor(shLavaSeabed);
         else if(qfi.fshape == &shFloor)
           set_floor(shFullFloor);
         else if(qfi.fshape == &shCaveFloor)

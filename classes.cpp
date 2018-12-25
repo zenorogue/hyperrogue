@@ -782,7 +782,7 @@ monstertype minf[motypes] = {
   { 'B', 0xE07060, "Acid Bird", NODESCYET},
   { 'W', 0xA04060, "Mutant", NODESCYET},
   { 'W', 0xC04040, "Falling Dog", NODESCYET},
-  { 'B', 0x40C040, "Western Hawk", NODESCYET},
+  { 'B', 0xC0C040, "Western Hawk", NODESCYET},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -1634,7 +1634,7 @@ const landtype linf[landtypes] = {
     " option was on."
     },
   { 0x804000, "Brown Islands", NODESCYET},
-  { 0xA04060, "Free Fall", NODESCYET},
+  { 0x211F6F, "Free Fall", NODESCYET},
   { 0x30FF30, "Irradiated Field", NODESCYET}
   };
 
