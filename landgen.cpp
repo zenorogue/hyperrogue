@@ -2386,7 +2386,7 @@ void setdist(cell *c, int d, cell *from) {
       }
     }
 
-  if(d <= 3) lastexplore = shmup::on ? shmup::curtime : turncount;
+  if(d <= 10 - getDistLimit()) lastexplore = shmup::on ? shmup::curtime : turncount;
 
   if(buggyGeneration) {
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
