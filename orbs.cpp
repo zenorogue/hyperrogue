@@ -193,6 +193,7 @@ void flashCell(cell *c, eMonster killer, flagtype flags) {
   if(c->wall == waGiantRug)  c->wall = waNone;
   if(c->wall == waMirror)    c->wall = waNone;
   if(c->wall == waCloud)     c->wall = waNone;
+  if(c->wall == waExplosiveBarrel) explodeBarrel(c);
   if(c->wall == waRuinWall)  c->wall = waNone;
   if(c->wall == waDune)      c->wall = waNone;
   if(c->wall == waSaloon)    c->wall = waNone;
@@ -374,6 +375,7 @@ void castLightningBolt(cellwalker lig) {
     bool brk = false, spin = false;
     
     if(c->wall == waGargoyle)  brk = true;
+    if(c->wall == waExplosiveBarrel) explodeBarrel(c), brk = true;
     if(c->wall == waCavewall)  c->wall = waCavefloor, brk = true;
     if(c->wall == waDeadTroll) c->wall = waCavefloor, brk = true;
     if(c->wall == waDeadTroll2)c->wall = waNone, brk = true;
