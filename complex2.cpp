@@ -214,7 +214,7 @@ struct variant_feature {
 
 const array<variant_feature, 21> variant_features {{
   variant_feature{(color_t)(-0x202020), 5, moNecromancer, VF {
-    if(hrand(1500) < 20) c->wall = waFreshGrave;
+    if(c->wall == waNone && hrand(1500) < 20) c->wall = waFreshGrave;
     if(hrand(20000) < 10 + items[itVarTreasure])
       c->monst = moNecromancer;
     }},
