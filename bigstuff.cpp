@@ -1231,6 +1231,8 @@ void buildCamelot(cell *c) {
       c->monst = m[hrand(3)];
       if(c->monst == moHedge && VALENCE > 3)
         c->monst = moPyroCultist;
+      if(getDistLimit() <= 2 && c->monst == moLancer) c->monst = moGoblin;
+      if(getDistLimit() <= 3 && c->monst == moPyroCultist) c->monst = moCultist;
       }
     if(d == 1) {
       // roughly as many knights as table cells
