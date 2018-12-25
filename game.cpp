@@ -3741,10 +3741,15 @@ void moveMonster(cell *ct, cell *cf, int direction_hint) {
   // lancers pierce our friends :(
   if(m == moLancer) { 
     // printf("lancer stab?\n");
-    forCellEx(c3, ct) if(!logical_adjacent(cf, m, c3))
+    forCellEx(c3, ct) if(!logical_adjacent(cf, m, c3)) {
       if(canAttack(ct, moLancer, c3, c3->monst, AF_LANCE | AF_GETPLAYER)) {
         attackMonster(c3, AF_LANCE | AF_MSG | AF_GETPLAYER, m);
         }
+      // this looks the same as effect graphically as exploding right away,
+      // except that it does not kill the lancer
+      if(c3->wall == waExplosiveBarrel) 
+        c3->wall = waFireTrap, c3->wparam = 2;
+      }
     }
   
   if(m == moWitchFire) makeflame(cf, 10, false);
@@ -7483,6 +7488,7 @@ void monstersTurn() {
       }
     moveEffect(c, c, moDeadBird, -1);
     destroyBoats(c, NULL, true);
+    explodeBarrel(c);
     }
   
   crush_now = move(crush_next);
