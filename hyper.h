@@ -4723,5 +4723,7 @@ inline bool subscreen_split(reaction_t for_each_subscreen) { return false; }
 bool in_gravity_zone(cell *c);
 bool normal_gravity_at(cell *c);
 
+void build_pool(cell *c, bool with_boat);
+void createArrowTrapAt(cell *c, eLand land);
 }
 

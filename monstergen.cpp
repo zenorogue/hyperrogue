@@ -413,6 +413,20 @@ void wandering() {
       continue;
       }
     
+    else if(c->land == laBrownian && wchance(items[itBrownian], 75)) {
+      c->monst = moAcidBird;
+      continue;
+      }
+    
+    else if(c->land == laVariant && wchance(items[itVarTreasure], 50)) {
+      int i = hrand(21);
+      if(getBits(c) & (1>>i)) {
+        eMonster m = variant_features[i].wanderer;
+        if(m) c->monst = m, c->hitpoints = 3;
+        }
+      continue;
+      }
+    
     else if(c->wall == waSea && !c->monst) {
       if(c->land == laCaribbean && wchance(items[itPirate], 15) && canReachPlayer(c, moPirate)) {
         c->monst = moCShark;
