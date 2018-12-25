@@ -337,7 +337,7 @@ namespace hr { namespace inv {
     gainOrbs(itRuins, itOrbSlaying);
     
     gainOrbs(itWest, itOrbGravity);
-    gainOrbs(itVarTreasure, itOrbBrown);
+    gainOrbs(itVarTreasure, itOrbIntensity);
     gainLate(itVarTreasure, itOrbFire);
     gainLate(itVarTreasure, itOrbWinter);
     gainLate(itVarTreasure, itOrbPhasing);

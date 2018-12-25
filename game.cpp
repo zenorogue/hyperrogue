@@ -6939,7 +6939,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     else playSound(c2, "pickup-orb");
     if(items[itOrbChoice]) items[itOrbChoice] = 0, had_choice = true;
     int oc = orbcharges(it);
-    if(markOrb(itOrbBrown)) oc = oc * 6 / 5;
+    if(markOrb(itOrbIntensity)) oc = oc * 6 / 5;
     if(!items[it]) items[it]++;
     items[it] += oc;
     }

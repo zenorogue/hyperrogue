@@ -133,7 +133,7 @@ enum eItem {
   itDock, itRuins, itMagnet, itSwitch,
   itOrbPhasing, itOrbMagnetism, itOrbSlaying,
   itBrownian, itWest, itVarTreasure,
-  itOrbBrown, itOrbGravity, itOrbChoice
+  itOrbIntensity, itOrbGravity, itOrbChoice
   };
 
 static const int walltypes = 111;
