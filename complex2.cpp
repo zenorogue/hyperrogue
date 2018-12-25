@@ -103,13 +103,13 @@ namespace brownian {
       }
 
     ONEMPTY {
-      if(hrand(8000) < 50 && c->landparam >= 4 && c->landparam < 24)
+      if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) && c->landparam >= 4 && c->landparam < 24)
         c->item = itBrownian;
-      if(hrand(8000) < 30)
+      if(hrand(8000) < 15 + items[itBrownian])
         c->monst = moAcidBird;
-      else if(hrand(8000) < 30)
+      else if(hrand(8000) < 15)
         c->monst = moAlbatross;
-      else if(hrand(8000) < 30) {
+      else if(hrand(8000) < 15 + items[itBrownian]) {
         c->monst = moBrownBug;
         c->hitpoints = 3;
         }
