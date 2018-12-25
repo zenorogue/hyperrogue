@@ -5493,7 +5493,7 @@ void specialMoves() {
       bool shot = false;
       bool dont_approach = false;
       // smaller range on the sphere
-      int firerange = sphere ? 2 : 4;
+      int firerange = (sphere || getDistLimit() < 5) ? 2 : 4;
       for(int i=0; i<isize(targets); i++) {
         cell *t = targets[i];
         if(celldistance(c,t) <= firerange && makeflame(t, 20, true)) {
