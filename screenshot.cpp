@@ -880,7 +880,7 @@ void show() {
     }
   #endif
   if(conformal::model_has_orientation())
-    animator(XLAT("model rotation"), ballangle_rotation, 'R');
+    animator(XLAT("model rotation"), ballangle_rotation, 'I');
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, '3');
   
