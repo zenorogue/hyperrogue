@@ -4725,5 +4725,6 @@ bool normal_gravity_at(cell *c);
 
 void build_pool(cell *c, bool with_boat);
 void createArrowTrapAt(cell *c, eLand land);
+bool no_barriers_in_radius(cell *c, int rad);
 }
 

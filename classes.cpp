@@ -779,7 +779,11 @@ monstertype minf[motypes] = {
   { '@', 0xC00000, "Red Jelly", jellydesc}, 
   { '@', 0x0000C0, "Blue Jelly", jellydesc}, 
   { 'B', 0xE07000, "Bronze Beast", NODESCYET},
-  { 'B', 0xE07060, "Acid Bird", NODESCYET},
+  { 'B', 0xE07060, "Acid Gull", 
+    "Where did this strange bird come from?...\n\n"
+    "Acid Gulls dissolve the land on which they fall. "
+    
+    },
   { 'W', 0xA04060, "Mutant", NODESCYET},
   { 'W', 0xC04040, "Falling Dog", NODESCYET},
   { 'B', 0xC0C040, "Western Hawk", NODESCYET},
@@ -1243,7 +1247,7 @@ itemtype iinf[ittypes] = {
   { 'o', 0x202020, "Orb of Slaying",
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
     },
-  { '*', 0x20C0C0, "Brownie",
+  { '*', 0xFFA860, "Sphalerite",
     "Tasty cookie."
     },
   { '$', 0xF0C0C0, "Meteorite", NODESCYET},
@@ -1633,7 +1637,7 @@ const landtype linf[landtypes] = {
     "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
     " option was on."
     },
-  { 0x804000, "Brown Islands", NODESCYET},
+  { 0x804000, "Brown Island", NODESCYET},
   { 0x211F6F, "Free Fall", NODESCYET},
   { 0x30FF30, "Irradiated Field", NODESCYET}
   };

@@ -1,9 +1,8 @@
 // Hyperbolic Rogue
 
-// namespaces for complex features (whirlwind, whirlpool, elec, princess, clearing, 
-// mirror, hive, heat + livecaves, etc.)
+// namespaces for new complex lands for HR11
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
 #ifdef CAP_COMPLEX2
 
@@ -35,10 +34,10 @@ namespace brownian {
     c->landparam += val;
     }
 
-  void recurse(cell *c, bool fat) {
+  void recurse(cell *c, bool fat, int fatten_limit = 0) {
     while(true) {
       totalsteps++;
-      if(celldist(c) >= (fat ? 30 : 20) + celldist(cwt.at)) {
+      if(!fatten_limit && celldist(c) >= (fat ? 30 : ISMOBILE ? 12 : 20) + celldist(cwt.at)) {
         cell *c1 = c;
         while(true) {
           cell *c2 = ts::left_parent(c1, celldist);
@@ -56,7 +55,11 @@ namespace brownian {
       if(c->mpdist <= 7) { centersteps++; return; }
       // while(hrand(1000) < 1000 * chance) recurse(c);
       if(fat) recurse(c, false);
-      if(!fat && hrand(100000) == 0) recurse(c, true);
+      if(!fat && (fatten_limit == 1 || hrand(20000) == 0)) {
+        recurse(c, true);
+        fat = true;
+        }
+      if(fatten_limit) fatten_limit--;
       rise(c, fat ? 256 : 1);
       c = c->cmove(hrand(c->type));
       }
@@ -90,8 +93,40 @@ namespace brownian {
     }
   
   void init(cell *c) {
-    recurse(cwt.at, true);
-    recurse(cwt.at, true);
+    recurse(c, true);
+    recurse(c, true);
+    }
+
+  void init_further(cell *c) {
+    dynamicval<bool> be(generatingEquidistant, true);
+    int gdir = -1;
+    for(int i=0; i<c->type; i++) {
+      if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
+      }
+    if(gdir < 0) return;
+    
+    cellwalker cw(c, gdir); 
+    for(int i=0; i<4; i++) {
+      cw += revstep;
+      setdist(cw.at, BARLEV, cw.peek());
+      buildEquidistant(cw.at);
+      println(hlog, "from ", cw.peek(), " to ", cw.at, ", land = ", dnameof(cw.at->land), " lp = ", cw.at->landparam);
+      }
+
+    if(c->land != laOcean || !no_barriers_in_radius(cw.at, 2)) return;
+
+    println(hlog, "brownian::init ", cw.at, " in distance ", celldistance(cw.at, cwt.at));
+
+    recurse(cw.at, false, 50 + hrand(100));
+    recurse(cw.at, false, 50 + hrand(100));
+
+    cell *c2 = c;
+    while(c2->mpdist > 7) {      
+      forCellEx(c3, c2) if(c3->mpdist < c2->mpdist) { c2 = c3; goto next; }
+      break;
+      next: ;
+      }
+    if(!c2->monst && c2->wall != waBoat) c2->monst = moAcidBird;
     }
 
   void build(cell *c, int d) {
@@ -103,7 +138,7 @@ namespace brownian {
       }
 
     ONEMPTY {
-      if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) && c->landparam >= 4 && c->landparam < 24)
+      if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
         c->item = itBrownian;
       if(hrand(8000) < 15 + items[itBrownian])
         c->monst = moAcidBird;
