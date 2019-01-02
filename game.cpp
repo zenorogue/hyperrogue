@@ -2417,7 +2417,7 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   int ntk = tkills();
   int ntkt = killtypes();
     
-  if(tkt < 20 && ntkt >= 20) {
+  if(tkt < R20 && ntkt >= R20) {
     addMessage(XLAT("You hear a distant roar!"));
     playSound(NULL, "message-roar");
     }
