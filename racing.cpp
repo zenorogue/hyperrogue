@@ -87,7 +87,11 @@ string ghost_filename(string seed, int mcode) {
       ghost_prefix = s + "/.hyperrogue/racing/";
       }
     #else
+    #if WINDOWS
+    mkdir("racing");
+    #else
     mkdir("racing", 0755);
+    #endif
     ghost_prefix = "racing/";
     #endif
     }
