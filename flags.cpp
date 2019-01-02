@@ -589,7 +589,7 @@ bool isEmpathyOrb(eItem i) {
     i == itOrbAether || i == itOrbInvis || i == itOrbThorns ||
     i == itOrbWater || i == itOrbStone ||
     i == itOrbSide1 || i == itOrbSide2 || i == itOrbSide3 ||
-    i == itOrbSlaying;
+    i == itOrbSlaying || i == itOrbFish;
   }
 
 bool isUtilityOrb(eItem i) {
@@ -624,6 +624,7 @@ bool survivesWater(eMonster m) {
     isBird(m) || m == moWaterElemental || m == moAirElemental ||
     isWorm(m) || isIvy(m) || isDragon(m) || isKraken(m) ||
     m == moMutant || m == moFriendlyIvy || 
+    (isFriendly(m) && markOrb(itOrbFish)) ||
     m == moTortoise; // Tortoises and Ivies survive, but don't go through water
   }
 

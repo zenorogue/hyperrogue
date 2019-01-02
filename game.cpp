@@ -3048,7 +3048,7 @@ void bfs() {
             targets.push_back(c2);
             }
           else if(isFriendly(c2)) {
-            if(c2->monst != moMouse && !markEmpathy(itOrbInvis) &&
+            if(c2->monst != moMouse && !markEmpathy(itOrbInvis) && !(isWatery(c2) && markEmpathy(itOrbFish)) &&
               !c2->stuntime) targets.push_back(c2);
             if(c2->monst == moGolem) golems.push_back(c2);
             if(c2->monst == moFriendlyGhost) golems.push_back(c2);
