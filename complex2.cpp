@@ -224,23 +224,23 @@ const array<variant_feature, 21> variant_features {{
   {0x181418, 5, moSkeleton, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moSkeleton, c->hitpoints = 3; } },
   {0x180000, 5, moPyroCultist, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moPyroCultist; } },
   {0x00000C, 2, moFlailer, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moFlailer; } },
-  {0x1C0800, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure] && VALENCE == 3) c->monst = moHedge; } },
-  {0x001000,-1, moNone, VF { if(hrand(1500) < 30) createArrowTrapAt(c, laVariant); } },
-  {0x001400,-1, moNone, VF { if(hrand(1500) < 50 && c->wall == waNone) c->wall = waTrapdoor; } },
-  {0x001018,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
-  {0x040C00,-1, moNone, VF { if(c->wall == waNone && !c->monst && !c->monst && hrand(1500) < 10) c->wall = waThumperOff; } },
-  {0x080C00,-1, moNone, VF { if(hrand(1500) < 20 && !c->monst && !c->wall) c->wall = waFireTrap; } },
-  {0x0C0C00, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waExplosiveBarrel; } },
-  {0x061004, 0, moNone, VF { 
+  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure] && VALENCE == 3) c->monst = moHedge; } },
+  {0x000c00,-1, moNone, VF { if(hrand(1500) < 30) createArrowTrapAt(c, laVariant); } },
+  {0x001200,-1, moNone, VF { if(hrand(1500) < 50 && c->wall == waNone) c->wall = waTrapdoor; } },
+  {0x000c18,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
+  {0x040A00,-1, moNone, VF { if(c->wall == waNone && !c->monst && !c->monst && hrand(1500) < 10) c->wall = waThumperOff; } },
+  {0x080A00,-1, moNone, VF { if(hrand(1500) < 20 && !c->monst && !c->wall) c->wall = waFireTrap; } },
+  {0x0C0A00, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waExplosiveBarrel; } },
+  {0x060D04, 0, moNone, VF { 
     if(c->wall == waNone && !c->monst && pseudohept(c) && hrand(30000) < 25 + items[itVarTreasure]) 
       if(buildIvy(c, 0, c->type) && !peace::on) c->item = itVarTreasure;
     }},
-  {0x000C08, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waSmallTree; }},
-  {0x100C10, 1, moRagingBull, VF { if(c->wall == waNone && hrand(10000) < 10 + items[itVarTreasure]) c->monst = moSleepBull, c->hitpoints = 3; }},
-  {0x00140C, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waBigTree; }},
-  {0x000C28, 1, moNone, VF { if(hrand(500) < 10) build_pool(c, false); } },
-  {0x100C00, 2, moVariantWarrior, VF { if(c->wall == waNone && !c->monst && hrand(40000) < 25 + items[itVarTreasure]) c->monst = moVariantWarrior; }},
-  {0x100808, 1, moRatling, VF { if(c->wall == waNone && !c->monst && hrand(50000) < 25 + items[itVarTreasure]) c->monst = moRatling; }}
+  {0x000A08, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waSmallTree; }},
+  {0x100A10, 1, moRagingBull, VF { if(c->wall == waNone && hrand(10000) < 10 + items[itVarTreasure]) c->monst = moSleepBull, c->hitpoints = 3; }},
+  {0x00110C, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waBigTree; }},
+  {0x000A28, 1, moNone, VF { if(hrand(500) < 10) build_pool(c, false); } },
+  {0x100A00, 2, moVariantWarrior, VF { if(c->wall == waNone && !c->monst && hrand(40000) < 25 + items[itVarTreasure]) c->monst = moVariantWarrior; }},
+  {0x100708, 1, moRatling, VF { if(c->wall == waNone && !c->monst && hrand(50000) < 25 + items[itVarTreasure]) c->monst = moRatling; }}
   }};
 #undef VF
 
