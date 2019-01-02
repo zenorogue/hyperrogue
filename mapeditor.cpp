@@ -818,6 +818,8 @@ namespace mapeditor {
       paintwhat_str = "paint";
       dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
       }
+    else if(uni == 'G') 
+      push_debug_screen();
     else if(sym == SDLK_F5) {
       restart_game();
       }

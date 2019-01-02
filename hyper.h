@@ -2684,6 +2684,7 @@ double cellgfxdist(cell *c, int i);
 int ctof(cell *c);
 
 void modalDebug(cell *c);
+void push_debug_screen();
 int getDistLimit();
 
 void drawqueue();
@@ -4062,7 +4063,7 @@ ld frac(ld x);
 
 extern color_t poly_outline;
 
-extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM, shTinyBird, shTinyShark;
+extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM, shTinyBird, shTinyShark, shAsymmetric;
 
 extern std::mt19937 hrngen;
 

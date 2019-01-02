@@ -41,8 +41,6 @@ void describeCell(cell *c) {
 
 static int orbid = 0;
 
-void debugScreen();
-
 eItem nextOrb() {
   orbid++;
   eItem i = eItem(orbid % ittypes);
@@ -280,7 +278,7 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'G') {
-    pushScreen(debugScreen);
+    push_debug_screen();
     return true;
     }
   if(u == 'P'-64) 
@@ -308,58 +306,133 @@ vector<pair<cellwalker,int> > drawbugs;
 
 bool debugmode = false;
 
-void debugScreen() {
-  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : 0;
-  gamescreen(0);
-  dialog::init(XLAT("debug"));
-  
-  for(auto& p: drawbugs)
-    drawBug(p.first, p.second);
-  
-  if(mouseover) {
-    drawBug(cellwalker(mouseover, 0), 0x80808080);
-    char buf[200];
-    sprintf(buf, "%p", mouseover);
-    dialog::addSelItem("pointer", buf, 0);
-    dialog::addSelItem("mpdist", its(mouseover->mpdist), 0);
-    dialog::addSelItem("land", dnameof2(mouseover->land), 0);
-    dialog::addSelItem("land param (int)", its(mouseover->landparam), 0);
-    dialog::addSelItem("land param (hex)", itsh8(mouseover->landparam), 0);
-    dialog::addSelItem("land param (heat)", fts(HEAT(mouseover)), 0);
-    dialog::addSelItem("land flags", its(mouseover->landflags)+"/"+itsh2(mouseover->landflags), 0);
-    dialog::addSelItem("barrier dir", its(mouseover->bardir), 0);
-    dialog::addSelItem("barrier left", dnameof2(mouseover->barleft), 0);
-    dialog::addSelItem("barrier right", dnameof2(mouseover->barright), 0);
-    dialog::addBreak(50);
-    dialog::addSelItem("wall", dnameof2(mouseover->wall, mouseover->wparam), 0);
-    dialog::addSelItem("item", dnameof(mouseover->item), 0);
-    dialog::addBreak(50);
-    dialog::addSelItem("cpdist", its(mouseover->cpdist), 0);
-    dialog::addSelItem("celldist", its(celldist(mouseover)), 0);
-    dialog::addSelItem("celldistance", its(celldistance(cwt.at, mouseover)), 0);
-    dialog::addSelItem("pathdist", its(mouseover->pathdist), 0);
-    dialog::addSelItem("celldistAlt", eubinary ? its(celldistAlt(mouseover)) : "--", 0);
-    dialog::addSelItem("temporary", its(mouseover->listindex), 0);
-    if(GOLDBERG)
-      dialog::addSelItem("whirl", sprint(gp::get_local_info(mouseover).relative), 0);
-    if(archimedean)
-      dialog::addSelItem("ID", its(arcm::id_of(mouseover->master)), 0);
-    dialog::addBreak(50);
-    dialog::addSelItem("monster", dnameof2(mouseover->monst, mouseover->mondir), 0);
-    dialog::addSelItem("stuntime/hitpoints", its(mouseover->stuntime)+"/"+its(mouseover->hitpoints), 0);
-    }
-  dialog::display();
+template<class T> void bitfield_editor(int val, const T& setter, string help = "") {
+  static int v = val;
+  dialog::editNumber(v, 0, 100, 1, v, help, "");
+  dialog::reaction = [&setter] () { setter(v); };
+  }
 
-  keyhandler = [] (int sym, int uni) {
-    handlePanning(sym, uni);
-    dialog::handleNavigation(sym, uni);
-    if(applyCheat(uni, mouseover)) ;
-    else if(sym == PSEUDOKEY_WHEELUP || sym == PSEUDOKEY_WHEELDOWN) ;
-    else if(doexiton(sym, uni)) {
-      popScreen();
-      if(debugmode) quitmainloop = true;
+struct debugScreen {
+
+  cell *debugged_cell;
+  
+  bool show_debug_data;
+  
+  debugScreen() { debugged_cell = NULL; show_debug_data = false; }
+  
+  void operator () () {
+    cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+    gamescreen(0);
+    getcstat = '-';
+
+    dialog::init(XLAT(show_debug_data ? "debug values" : "internal details"));
+    
+    for(auto& p: drawbugs)
+      drawBug(p.first, p.second);
+    
+    cell *what = debugged_cell;
+    if(!what && current_display->sidescreen) what = mouseover;
+    
+    if(what) {
+      queuepoly(gmatrix[what], shAsymmetric, 0x80808080);
+      char buf[200];
+      sprintf(buf, "%p", what);
+      dialog::addSelItem("mpdist", its(what->mpdist), 'd');
+      dialog::add_action([what] () { 
+        bitfield_editor(what->mpdist, [what] (int i) { what->mpdist = 0; }, "generation level");        
+        });
+      dialog::addSelItem("land", dnameof2(what->land), 0);
+      dialog::addSelItem("land param (int)", its(what->landparam), 'p');
+      dialog::add_action([what] () { dialog::editNumber(what->landparam, 0, 100, 1, what->landparam, "landparam",
+        "Extra value that is important in some lands. The specific meaning depends on the land."); });
+      dialog::addSelItem("land param (hex)", itsh8(what->landparam), 0);
+      dialog::addSelItem("land param (heat)", fts(HEAT(what)), 't');
+      dialog::add_action([what] () { 
+        static double d = HEAT(what);
+        dialog::editNumber(d, -2, 2, 0.1, d, "landparam",
+          "Extra value that is important in some lands. The specific meaning depends on the land."); 
+        dialog::reaction = [what] () { HEAT(what) = d; };
+        });
+      dialog::addSelItem("land flags", its(what->landflags)+"/"+itsh2(what->landflags), 'f');
+      dialog::add_action([what] () { 
+        bitfield_editor(what->landflags, [what] (int i) { what->landflags = i; }, "Rarely used.");
+        });
+      dialog::addSelItem("barrier dir", its(what->bardir), 'b');
+      dialog::add_action([what] () {
+        bitfield_editor(what->bardir, [what] (int i) { what->bardir = i; });
+        });
+      dialog::addSelItem("barrier left", dnameof2(what->barleft), 0);
+      dialog::addSelItem("barrier right", dnameof2(what->barright), 0);
+      dialog::addBreak(50);
+      
+      if(show_debug_data) {
+        dialog::addSelItem("pointer", buf, 0);
+        dialog::addSelItem("cpdist", its(what->cpdist), 0);
+        dialog::addSelItem("celldist", its(celldist(what)), 0);
+        dialog::addSelItem("celldistance", its(celldistance(cwt.at, what)), 0);
+        dialog::addSelItem("pathdist", its(what->pathdist), 0);
+        dialog::addSelItem("celldistAlt", eubinary ? its(celldistAlt(what)) : "--", 0);
+        dialog::addSelItem("temporary", its(what->listindex), 0);
+        if(GOLDBERG)
+          dialog::addSelItem("whirl", sprint(gp::get_local_info(what).relative), 0);
+        #if CAP_RACING
+        if(racing::on) racing::add_debug(what);
+        #endif
+        }
+      else {
+        dialog::addSelItem("wall", dnameof2(what->wall, what->wparam), 'w');
+        dialog::add_action([what] () {
+          bitfield_editor(what->wparam, [what] (int i) { what->wparam = i; },
+          "wall parameter");
+          });
+        dialog::addSelItem("item", dnameof(what->item), 0);
+        if(archimedean)
+          dialog::addSelItem("ID", its(arcm::id_of(what->master)), 0);    
+        dialog::addBreak(50);
+        dialog::addSelItem("monster", dnameof2(what->monst, what->mondir), 'm');
+        dialog::add_action([what] () {
+          bitfield_editor(what->mondir, [what] (int i) { what->mondir = i; },
+          "monster direction");
+          });
+        dialog::addSelItem("stuntime", its(what->stuntime), 's');
+        dialog::add_action([what] () {
+          bitfield_editor(what->stuntime, [what] (int i) { what->stuntime = i; });
+          });
+        dialog::addSelItem("hitpoints", its(what->hitpoints), 'h');
+        dialog::add_action([what] () {
+          bitfield_editor(what->hitpoints, [what] (int i) { what->hitpoints = i; });
+          });
+        dialog::addBreak(50);
+        dialog::addBreak(50);
+        dialog::addItem("show debug data", 'x');
+        dialog::add_action([this] () { show_debug_data = true; });
+        if(!debugged_cell) dialog::addItem("click a cell to edit it", 0);
+        }
       }
-    };  
+    else {
+      dialog::addItem("click a cell to view its data", 0);
+      dialog::addBreak(1000);
+      }
+    dialog::addBack();
+    dialog::display();
+  
+    keyhandler = [this, what] (int sym, int uni) {
+      handlePanning(sym, uni);
+      dialog::handleNavigation(sym, uni);
+      if(applyCheat(uni, what)) ;
+      else if(sym == PSEUDOKEY_WHEELUP || sym == PSEUDOKEY_WHEELDOWN) ;
+      else if(sym == '-') debugged_cell = mouseover;
+      else if(doexiton(sym, uni)) {
+        popScreen();
+        if(debugmode) quitmainloop = true;
+        }
+      };  
+    }
+  };
+
+void push_debug_screen() {
+  debugScreen ds;
+  pushScreen(ds);
   }
 
 // -- cheat menu --
@@ -412,7 +485,7 @@ void modalDebug(cell *c) {
     fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", c);
     exit(1);
     }
-  pushScreen(debugScreen);
+  push_debug_screen();
   debugmode = true;
   mainloop();
   debugmode = false;
