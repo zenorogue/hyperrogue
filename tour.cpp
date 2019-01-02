@@ -248,6 +248,11 @@ bool handleKeyTour(int sym, int uni) {
     pushScreen(ss::showMenu);
     return true;
     }
+  if(NUMBERKEY == '0') {
+    tour::start();
+    pushScreen(showStartMenu);
+    return true;
+    }
   return false;
   }
 

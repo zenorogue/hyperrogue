@@ -427,6 +427,7 @@ void showMission() {
       dialog::addItem(XLAT("next slide"), SDLK_RETURN);
       dialog::addItem(XLAT("previous slide"), SDLK_BACKSPACE);
       dialog::addItem(XLAT("list of slides"), '9');
+      dialog::addItem(XLAT("exit the Tutorial"), '0');
       }
     else
       dialog::addBreak(200);
