@@ -697,7 +697,13 @@ void showStartMenu() {
     dialog::addBreak(100);
     dialog::addBigItem(XLAT1("use current/saved settings"), SDLK_ESCAPE);
     }
-
+  
+  if(have_current_graph_settings()) {
+    dialog::addBreak(100);
+    dialog::addBigItem(XLAT1("reset the graphics settings"), 'r');
+    dialog::add_action([] () { reset_graph_settings(); });
+    }
+  
   dialog::addBreak(100);
   dialog::addBigItem(XLAT("main menu"), 'm');
   dialog::addInfo(XLAT("more options"));

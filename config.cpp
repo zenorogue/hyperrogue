@@ -380,16 +380,33 @@ bool have_current_settings() {
   if(tactic::on) modecount += 10;
   if(randomPatternsMode) modecount += 10;
   if(geometry != gNormal) modecount += 10;
+
+  if(modecount > 1)
+    return true;
   
+  return false;
+  }
+
+bool have_current_graph_settings() {
   if(vid.xposition || vid.yposition || vid.alpha != 1 || vid.scale != 1)
     return true;
   if(pmodel != mdDisk || vid.monmode != DEFAULT_MONMODE || vid.wallmode != DEFAULT_WALLMODE)
     return true;
   if(firstland != laIce || multi::players != 1 || rug::rugged)
     return true;
-  if(modecount > 1)
-    return true;
+  
   return false;
+  }
+
+void reset_graph_settings() {
+  pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
+  vid.xposition = vid.yposition = 0;
+  #if CAP_RUG
+  if(rug::rugged) rug::close();
+  #endif
+
+  vid.monmode = DEFAULT_MONMODE;
+  vid.wallmode = DEFAULT_WALLMODE;
   }
 
 void resetModes(char leave) {
@@ -416,14 +433,6 @@ void resetModes(char leave) {
   set_geometry(gNormal);
   set_variation(eVariation::bitruncated);
   
-  pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
-  vid.xposition = vid.yposition = 0;
-  #if CAP_RUG
-  if(rug::rugged) rug::close();
-  #endif
-
-  vid.monmode = DEFAULT_MONMODE;
-  vid.wallmode = DEFAULT_WALLMODE;
   start_game();
   }
 
