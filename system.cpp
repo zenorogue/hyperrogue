@@ -1068,8 +1068,8 @@ namespace gamestack {
     if(shmup::on) shmup::clearMonsters();
     shmup::on = gdn.shmup;
     resetGeometry();
-    gd.pop_back();
     *current_display = gdn.d;
+    gd.pop_back();
     bfs();
     }
   
