@@ -338,13 +338,7 @@ namespace hr { namespace inv {
     
     gainOrbs(itWest, itOrbGravity);
     gainOrbs(itVarTreasure, itOrbIntensity);
-    gainLate(itVarTreasure, itOrbFire);
-    gainLate(itVarTreasure, itOrbWinter);
-    gainLate(itVarTreasure, itOrbPhasing);
-    gainLate(itVarTreasure, itOrbDash);
     gainOrbs(itBrownian, itOrbChoice);
-    gainLate(itBrownian, itOrbAir);
-    gainLate(itBrownian, itOrbDash);
 
 #if CAP_DAILY    
     daily::gifts();
