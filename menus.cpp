@@ -38,19 +38,26 @@ void showOverview() {
   
   generateLandList(isLandIngame);
   
+  bool not_in_game = false;
+  
   if(dialog::infix != "") {
-    vector<eLand> filtered;
-    for(eLand l: landlist) {
+    auto land_matches = [] (eLand l) {
       string s = dnameof(l);
       s += "@";
       s += dnameof(treasureType(l));
       s += "@";
       s += dnameof(nativeOrbType(l));
-      if(dialog::hasInfix(s))
-        filtered.push_back(l);
-      }
-    if(filtered.size()) 
+      return dialog::hasInfix(s);
+      };
+    
+    vector<eLand> filtered;
+    for(eLand l: landlist) if(land_matches(l)) filtered.push_back(l);
+    if(filtered.size())
       landlist = filtered;
+    else {
+      for(int i=0; i<landtypes; i++) if(land_matches(eLand(i))) filtered.push_back(eLand(i));
+      if(filtered.size()) landlist = filtered, not_in_game = true;
+      }
     }
   
   int nl = isize(landlist), nlm;
@@ -63,11 +70,16 @@ void showOverview() {
     }
   else nlm = nl;
   
-  int vf = min((vid.yres-64-vid.fsize*2) / nlm, vid.xres/40);
+  int vf = min((vid.yres-64-vid.fsize*2) / nlm + (not_in_game ? 1 : 0), vid.xres/40);
 
   eLand curland = getLandForList(cwt.at);
   
   getcstat = '0';
+  
+  if(not_in_game) {
+    int i0 = 56 + vid.fsize + nl * vf;
+    displayfrZ(64, i0, 1, vf-4, "(these lands are not in game)", forecolor, 0);
+    }
   
   for(int i=0; i<nl; i++) {
     eLand l = landlist[lstart + i];
