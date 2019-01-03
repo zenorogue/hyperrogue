@@ -31,6 +31,10 @@ bool isWatery(cell *c) {
   return c->wall == waCamelotMoat || c->wall == waSea || c->wall == waLake;
   }
 
+bool isBoat(cell *c) {
+  return among(c->wall, waBoat, waStrandedBoat);
+  }
+
 bool isChasmy(cell *c) {
   return c->wall == waChasm || c->wall == waSulphur || c->wall == waSulphurC || c->wall == waBubble ||
     c->wall == waMercury;
