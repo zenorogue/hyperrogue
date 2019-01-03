@@ -5164,6 +5164,20 @@ void drawMarkers() {
         drawParticles(mouseover, iinf[orbToTarget].color, 2);
         }
       }
+    if(items[itOrbAir] && mouseover->cpdist > 1) {
+      cell *c1 = mouseover;
+      for(int it=0; it<10; it++) {
+        int di;
+        cell *c2 = blowoff_destination(c1, di);
+        if(!c2) break;
+        transmatrix T1 = ggmatrix(c1);
+        transmatrix T2 = ggmatrix(c2);
+        transmatrix T = T1 * rspintox(inverse(T1)*T2*C0) * xpush(hdist(T1*C0, T2*C0) * fractick(50, 0));
+        color_t aircol = (orbToTarget == itOrbAir ? 0x8080FF40 : 0x8080FF20);
+        queuepoly(T, shDisk, aircol);
+        c1 = c2;
+        }
+      }
     }  
   }
 
