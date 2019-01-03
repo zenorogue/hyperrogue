@@ -1056,6 +1056,17 @@ string texturehelp =
   "(these probably work best with the 'large picture' setting in geometry selection). "
   "Again, tesselations can have their geometry changed.\n\n";
 
+void start_editor() {
+  addMessage("white");
+  if(config.data.whitetexture() && config.data.loadTextureGL()) {
+    config.tstate = config.tstate_max = tsActive;
+    config.perform_mapping();
+    config.finish_mapping();
+    mapeditor::initdraw(cwt.at);
+    pushScreen(mapeditor::showDrawEditor);
+    }
+  }
+
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);
@@ -1215,16 +1226,7 @@ void showMenu() {
       pushScreen(mapeditor::showDrawEditor);
       }
 
-    else if(uni == 'n' && config.tstate == tsOff) {
-      addMessage("white");
-      if(config.data.whitetexture() && config.data.loadTextureGL()) {
-        config.tstate = config.tstate_max = tsActive;
-        config.perform_mapping();
-        config.finish_mapping();
-        mapeditor::initdraw(cwt.at);
-        pushScreen(mapeditor::showDrawEditor);
-        }
-      }
+    else if(uni == 'n' && config.tstate == tsOff) start_editor();
 #endif
 
     else if(uni == 't' && config.tstate == tsOff) 

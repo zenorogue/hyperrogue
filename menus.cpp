@@ -755,18 +755,19 @@ void showStartMenu() {
 #if CAP_TEXTURE && CAP_EDIT
     else if(uni == 'T') {
       popScreenAll();
+      pushScreen(texture::showMenu);
       resetModes('c');
+      stop_game();
+      firstland = specialland = laCanvas;
+      cheater = true;
+      patterns::canvasback = 0xFFFFFF;
+      mapeditor::drawplayer = false;
+      start_game();
       clearMessages();
       welcomeMessage();
-      using namespace texture;
-      if(config.data.whitetexture() && config.data.loadTextureGL()) {
-        config.tstate = config.tstate_max = tsActive;
-        config.perform_mapping();
-        config.finish_mapping();
-        mapeditor::initdraw(cwt.at);
-        pushScreen(showMenu);
-        pushScreen(mapeditor::showDrawEditor);
-        }
+      calcparam();
+      drawthemap();
+      texture::start_editor();
       }
 #endif
     else if(uni == 'g') {

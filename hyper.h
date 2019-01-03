@@ -3268,6 +3268,7 @@ namespace texture {
   
   extern bool texture_aura;
   bool using_aura();
+  void start_editor();
   }
 #endif
 
