@@ -929,7 +929,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       
       transmatrix VWPN = cs.lefthanded ? VBS * Mirror : VBS;
       
-      if(peace::on) ;
+      if(peace::on || racing::on) ;
       else if(items[itOrbThorns])
         queuepoly(VWPN, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
       else if(!shmup::on && items[itOrbDiscord])
