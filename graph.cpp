@@ -3632,7 +3632,7 @@ int colorhash(color_t i) {
 void draw_gravity_particles(cell *c, const transmatrix V) {
   int u = (int)(size_t)(c);
   u = ((u * 137) + (u % 1000) * 51) % 1000;
-  int tt = ticks + u;
+  int tt = ticks + u; fractick(ticks, 900);
   ld r0 = (tt % 900) / 1100.;
   ld r1 = (tt % 900 + 200) / 1100.;
   
