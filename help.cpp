@@ -722,7 +722,7 @@ string generateHelpForLand(eLand l) {
     }
 
 
-  auto lv = land_validity(specialland);
+  auto lv = land_validity(l);
   if(lv.flags & lv::display_in_help)
     s += "\n\n" + XLAT(lv.msg);
   
