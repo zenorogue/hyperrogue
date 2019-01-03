@@ -3,7 +3,7 @@
 
 namespace hr {
 
-#define NUMLEADER 78
+#define NUMLEADER 82
 
 bool offlineMode = false;
 
@@ -62,7 +62,11 @@ const char* leadernames[NUMLEADER] = {
   "Lava Lilies", // 74
   "Turquoises", // 75
   "Chrysoberyls", // 76
-  "Tasty Jellies" // 77
+  "Tasty Jellies", // 77
+  "Sphalerites", // 78
+  "Shining Gems", // 79
+  "Meteorites", // 80
+  "Racing Official Track", // 81
   };
 
 #define LB_STATISTICS 62
@@ -213,6 +217,10 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     
     if(it == itRuins) achievement_gain("RUIN1");
     if(it == itSwitch) achievement_gain("JELLZ1");
+    
+    if(it == itBrownian) achievement_gain("BROWN1");
+    if(it == itVarTreasure) achievement_gain("RADIO1");
+    if(it == itWest) achievement_gain("FREEFALL1");
     }
 
   // 32
@@ -290,6 +298,10 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itRuins) achievement_gain("RUIN2");
     if(it == itSwitch) achievement_gain("JELLZ2");
+
+    if(it == itBrownian) achievement_gain("BROWN2");
+    if(it == itVarTreasure) achievement_gain("RADIO2");
+    if(it == itWest) achievement_gain("FREEFALL2");
     }
 
   if(q == (inv::on ? 50 : 25)) {
@@ -357,6 +369,10 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itRuins) achievement_gain("RUIN3");
     if(it == itSwitch) achievement_gain("JELLZ3");
+
+    if(it == itBrownian) achievement_gain("BROWN3");
+    if(it == itVarTreasure) achievement_gain("RADIO3");
+    if(it == itWest) achievement_gain("FREEFALL3");
     }
 
   if(q == 50 && !inv::on) {
@@ -421,6 +437,10 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itRuins) achievement_gain("RUIN4");
     if(it == itSwitch) achievement_gain("JELLZ4");
+
+    if(it == itBrownian) achievement_gain("BROWN4");
+    if(it == itVarTreasure) achievement_gain("RADIO4");
+    if(it == itWest) achievement_gain("FREEFALL4");
     }
   
   if(it == itOrbYendor) {
@@ -564,6 +584,10 @@ void improveItemScores() {
   
   improve_score(76, itRuins);
   improve_score(77, itSwitch);
+  
+  improve_score(78, itBrownian);
+  improve_score(79, itVarTreasure);
+  improve_score(80, itWest);
   }
 
 int next_stat_tick;

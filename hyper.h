@@ -159,7 +159,7 @@ void addMessage(string s, char spamtype = 0);
 
 #define LB_YENDOR_CHALLENGE 40
 #define LB_PURE_TACTICS 41
-#define NUMLEADER 78
+#define NUMLEADER 82
 #define LB_PURE_TACTICS_SHMUP 49
 #define LB_PURE_TACTICS_COOP 50
 

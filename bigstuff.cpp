@@ -1137,7 +1137,7 @@ void buildBigStuff(cell *c, cell *from) {
         hrand(2000) < (PURE ? 500 : 1000) && !tactic::on && !racing::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
     
-    if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && !weirdhyperbolic) 
+    if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient) 
       brownian::init_further(c);
 
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
