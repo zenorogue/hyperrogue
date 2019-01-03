@@ -326,7 +326,7 @@ bool havesave = true;
 
 #if CAP_SAVE
 #define MAXBOX 500
-#define POSSCORE 355 // update this when new boxes are added!
+#define POSSCORE 369 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -730,6 +730,20 @@ void applyBoxes() {
   list_invorb();
 
   applyBox(irr::bitruncations_performed);
+  
+  applyBoxI(itVarTreasure);
+  applyBoxI(itBrownian);
+  applyBoxI(itWest);
+  applyBoxM(moAcidBird);
+  applyBoxM(moBrownBug);
+  applyBoxM(moVariantWarrior);
+  applyBoxM(moWestHawk);
+  applyBoxM(moFallingDog);
+  applyBoxOrb(itOrbIntensity);
+  applyBoxOrb(itOrbChoice);
+  applyBoxOrb(itOrbGravity);
+  list_invorb();
+  
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }
