@@ -1203,8 +1203,8 @@ namespace mapeditor {
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor };
   static const int USERSHAPEGROUPS = 4;
 
-  bool haveUserShape(eShapegroup group, int id);
-  
+  bool haveUserShape(eShapegroup group, int id);  
+  void draw_texture_ghosts(cell *c, const transmatrix& V);  
   }
 
 struct renderbuffer;

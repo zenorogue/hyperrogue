@@ -1680,6 +1680,40 @@ namespace mapeditor {
     return usershapes[group].count(id) && usershapes[group][id];
   #endif
     }
+  
+  void draw_texture_ghosts(cell *c, const transmatrix& V) {
+    if(!c) return;
+    if(holdmouse && !lstartcell) return;
+    cell *ls = lstartcell ? lstartcell : lmouseover;     
+    if(!ls) return;
+     
+    auto sio = patterns::getpatterninfo0(ls);
+    auto sih = patterns::getpatterninfo0(c);
+    
+    if(sio.id == sih.id) {
+      if(c == ls)
+        textrans = inverse(V * applyPatterndir(ls, sio));
+      
+      transmatrix mh = textrans * rgpushxto0(mouseh);
+      transmatrix ml = textrans * rgpushxto0(lstart);
+      
+      for(int j=0; j<=texture::texturesym; j++)
+      for(int i=0; i<c->type; i += sih.symmetries) {
+        transmatrix M2 = V * applyPatterndir(c, sih) * spin(2*M_PI*i/c->type);
+        if(j) M2 = M2 * Mirror;
+        switch(holdmouse ? mousekey : 'd') {
+          case 'c':
+            queue_hcircle(M2 * ml, hdist(lstart, mouseh));
+            break;
+          case 'l':
+            queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
+            break;
+          default:
+            queue_hcircle(M2 * mh, texture::penwidth);
+          }                
+        }
+      }
+    }
 
   bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio) {
   #if !CAP_EDIT
@@ -1703,38 +1737,6 @@ namespace mapeditor {
       }
   
     if(cmode & sm::DRAW) {
-
-#if CAP_TEXTURE    
-      if(texture::config.tstate == texture::tsActive && lmouseover && !mouseout() && (lstartcell || !holdmouse) && c) {
-        cell *ls = lstartcell ? lstartcell : lmouseover;
-        auto sio = patterns::getpatterninfo0(ls);
-        auto sih = patterns::getpatterninfo0(c);
-        
-        if(sio.id == sih.id) {
-          if(c == ls)
-            textrans = inverse(V * applyPatterndir(ls, sio));
-          
-          transmatrix mh = textrans * rgpushxto0(mouseh);
-          transmatrix ml = textrans * rgpushxto0(lstart);
-          
-          for(int j=0; j<=texture::texturesym; j++)
-          for(int i=0; i<c->type; i += sih.symmetries) {
-            transmatrix M2 = V * applyPatterndir(c, sih) * spin(2*M_PI*i/c->type);
-            if(j) M2 = M2 * Mirror;
-            switch(holdmouse ? mousekey : 'd') {
-              case 'c':
-                queue_hcircle(M2 * ml, hdist(lstart, mouseh));
-                break;
-              case 'l':
-                queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
-                break;
-              default:
-                queue_hcircle(M2 * mh, texture::penwidth);
-              }                
-            }
-          }
-        }
-#endif
 
       if(mapeditor::editingShape(group, id)) {
   

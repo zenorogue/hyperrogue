@@ -3583,6 +3583,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     draw_qfi(c, V, 0xFFFFFFFF);
     return;
     }
+
+  if((cmode & sm::DRAW) && texture::config.tstate == texture::tsActive && !mouseout() && c) 
+    mapeditor::draw_texture_ghosts(c, V);
 #endif
  
   bool orig = false;
