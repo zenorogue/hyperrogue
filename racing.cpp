@@ -833,16 +833,6 @@ struct race_configurer {
   
     dialog::init(XLAT("Racing"));
   
-    dialog::addSelItem("track name", editing_track ? dialog::view_edited_string() : new_track, '/');
-    dialog::add_action([this] () { 
-      editing_track = !editing_track;
-      if(editing_track) dialog::start_editing(new_track);
-      });
-    dialog::addItem("play the official track", 'o');
-    dialog::add_action([this] () { new_track = "OFFICIAL"; });
-    dialog::addItem("play a random track", 'r');
-    dialog::add_action([this] () { new_track = random_track_name(); });
-    
     if(bounded)
       dialog::addInfo("Racing available only in unbounded worlds.", 0xFF0000);
     else {
@@ -916,6 +906,18 @@ struct race_configurer {
       }
     else dialog::addBreak(100);
     
+    dialog::addBreak(100);
+
+    dialog::addSelItem("track seed", editing_track ? dialog::view_edited_string() : new_track, '/');
+    dialog::add_action([this] () { 
+      editing_track = !editing_track;
+      if(editing_track) dialog::start_editing(new_track);
+      });
+    dialog::addItem("play the official seed", 'o');
+    dialog::add_action([this] () { new_track = "OFFICIAL"; });
+    dialog::addItem("play a random seed", 'r');
+    dialog::add_action([this] () { new_track = random_track_name(); });    
+
     dialog::addBreak(100);
     
     dialog::addSelItem(XLAT("best scores to show as ghosts"), its(ghosts_to_show), 'g');
