@@ -73,6 +73,8 @@ struct ghost {
 
 map<pair<string, int>, map<eLand, vector<ghost> > > race_ghosts;
 
+map<pair<string, int>, map<eLand, vector<ghost> > > official_race_ghosts;
+
 array<vector<ghostmoment>, MAXPLAYER> current_history;
 
 string ghost_prefix = "default";
@@ -114,7 +116,21 @@ void hwrite(hstream& hs, const ghost& gh) {
   hwrite(hs, gh.cs, gh.result, gh.timestamp, gh.checksum, gh.history);
   }
 
+
 bool read_ghosts(string seed, int mcode) {
+
+  if(seed == "OFFICIAL" && mcode == 2) {
+    fhstream f("vizier.data", "rb");
+    if(f.f) {
+      f.get<int>();
+      hread(f, official_race_ghosts[{seed, mcode}]);
+      for(auto& p: official_race_ghosts) 
+      for(auto& v: p.second)
+      for(auto& w: v.second)
+        w.cs.charid = -1, w.cs.uicolor = moVizier, w.cs.dresscolor = 0xC00000;
+      }
+    }
+  
   string fname = ghost_filename(seed, mcode);
   println(hlog, "trying to read ghosts from: ", fname);
   fhstream f(fname, "rb");
@@ -988,6 +1004,24 @@ void race_won() {
     }
   }
 
+void draw_ghost(ghost& ghost) {
+  auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
+  if(p == ghost.history.end()) p--, p->footphase = 0;
+  cell *w = rti[p->where_id].c;
+  if(!gmatrix.count(w)) return;
+  dynamicval<charstyle> x(getcs(), ghost.cs);
+  
+  transmatrix T = spin_uchar(p->alpha) * xpush(uchar_to_frac(p->distance) * distance_multiplier) * spin_uchar(p->beta);
+  
+  if(ghost.cs.charid == -1) {
+    dynamicval<bool> pc(peace::on, true);
+    drawMonsterType(eMonster(ghost.cs.uicolor), w, gmatrix[w] * T, ghost.cs.dresscolor, uchar_to_frac(p->footphase));
+    return;
+    }
+
+  drawMonsterType(moPlayer, w, gmatrix[w] * T, 0, uchar_to_frac(p->footphase));
+  }
+
 void markers() {
   if(!racing::on) return;
   if(racing::player_relative) {
@@ -1006,16 +1040,11 @@ void markers() {
   for(auto& ghost: race_ghosts[{track_code, modecode()}][specialland]) {
     if(!ghosts_left) break;
     ghosts_left--;
-    auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
-    if(p == ghost.history.end()) p--, p->footphase = 0;
-    cell *w = rti[p->where_id].c;
-    if(!gmatrix.count(w)) continue;
-    dynamicval<charstyle> x(getcs(), ghost.cs);
-    
-    transmatrix T = spin_uchar(p->alpha) * xpush(uchar_to_frac(p->distance) * distance_multiplier) * spin_uchar(p->beta);
-
-    drawMonsterType(moPlayer, w, gmatrix[w] * T, 0, uchar_to_frac(p->footphase));
+    draw_ghost(ghost);
     }
+  
+  for(auto& ghost: official_race_ghosts[{track_code, modecode()}][specialland])
+    draw_ghost(ghost);
   
   if(gmatrix.count(track[0])) {
     for(ld z=-start_line_width; z<=start_line_width; z+=0.1) 
