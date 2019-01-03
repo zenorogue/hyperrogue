@@ -827,8 +827,9 @@ bool sharkpassable(cell *w, cell *c) {
   }
 
 bool canPushStatueOn(cell *c) {
-  return passable(c, NULL, P_MONSTER) && c->wall != waBoat && !snakelevel(c) &&
-    !isWorm(c->monst) && !isReptile(c->wall) && !peace::on;
+  return passable(c, NULL, P_MONSTER) && !snakelevel(c) &&
+    !isWorm(c->monst) && !isReptile(c->wall) && !peace::on && 
+    !among(c->wall, waBoat, waFireTrap, waArrowTrap);
   }
 
 void moveBoat(cell *to, cell *from, int direction_hint) {
