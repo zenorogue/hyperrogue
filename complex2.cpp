@@ -157,12 +157,23 @@ namespace brownian {
       }
     }
 
+  colortable colors = { 0x603000, 0x804000, 0xA05000, 0xC09050, 0xE0D0A0 };
+
   color_t get_color(int y) {
      return
-        y < level ? gradient(0x603000, 0x804000, 1, y, level-1) :
-        y < 2 * level ? 0xA05000 :
-        y < 3 * level ? 0xC09050 :
-        0xE0D0A0;
+        y < level ? gradient(colors[0], colors[1], 1, y, level-1) :
+        y < 2 * level ? colors[2] :
+        y < 3 * level ? colors[3] :
+        colors[4];
+     }
+
+  color_t& get_color_edit(int y) {
+     return
+        y < level/2 ? colors[0] :
+        y < level ? colors[1] :
+        y < 2 * level ? colors[2] :
+        y < 3 * level ? colors[3] :
+        colors[4];
      }
   
   }
