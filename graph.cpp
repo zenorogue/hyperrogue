@@ -1252,11 +1252,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     queuepoly(VFISH, shShark, darkena(col, 0, 0xFF));
   else if(m == moEagle || m == moParrot || m == moBomberbird || m == moAlbatross || 
     m == moTameBomberbird || m == moWindCrow || m == moTameBomberbirdMoved ||
-    m == moSandBird) {
+    m == moSandBird || m == moAcidBird) {
     ShadowV(V, shEagle);
     queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
     }
-  else if(among(m, moSparrowhawk, moWestHawk, moAcidBird)) {
+  else if(among(m, moSparrowhawk, moWestHawk)) {
     ShadowV(V, shHawk);
     queuepoly(VBIRD, shHawk, darkena(col, 0, 0xFF));
     }
