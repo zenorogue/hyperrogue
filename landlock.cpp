@@ -1038,15 +1038,15 @@ vector<eLand> land_over = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
   laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
-  laOcean, laDocks, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
-  laIvoryTower, laEndorian, laDungeon, laMountain, 
+  laOcean, laDocks, laWarpCoast, laLivefjord, laKraken, laCaribbean, laBrownian, laWhirlpool, laRlyeh, laTemple,
+  laIvoryTower, laEndorian, laWestWall, laDungeon, laMountain, 
   laCrossroads2, 
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
   laRedRock, laVolcano,
   laDragon, laTortoise,
   laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 
   laBlizzard,
-  laRuins, laEmerald, laCamelot, 
+  laRuins, laEmerald, laVariant, laCamelot, 
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
@@ -1116,8 +1116,8 @@ namespace lv {
   land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};  
   land_validity_t not_in_ptm = {0, q0, "Does not work in pure tactics mode."};  
   land_validity_t technical = {0, q0 &~ lv::appears_in_geom_exp, "Technical."};  
-  land_validity_t full_game = {3, q3, "Full game."};  
-  land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};  
+  land_validity_t full_game = {3, q3 &~ lv::display_in_help, "Full game."};
+  land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};
   land_validity_t great_walls_missing = {1, q1 | one_and_half, "Mercury rivers not implemented (or could not work) in this geometry."};
   land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."}; 
   land_validity_t pattern_defined = {3, qm3, "Pattern defined."}; 
@@ -1148,6 +1148,10 @@ int old_daily_id = 1000000;
 land_validity_t& land_validity(eLand l) {
 
   using namespace lv;
+  
+  if(l == laBrownian) {
+    if(quotient || !hyperbolic || geometry == gCrystal) return dont_work;
+    }
   
   if(binarytiling) {
     if(among(l, laMountain, laTemple)) return lv::pattern_compatibility_sole;
@@ -1351,7 +1355,7 @@ land_validity_t& land_validity(eLand l) {
     }
     
   // needs standard/Euclidean (needs fractal landscape)
-  if(l == laTortoise && !stdeuc)
+  if(among(l, laTortoise, laVariant) && !stdeuc)
     return not_implemented;
   
   // technical lands do not count
@@ -1518,7 +1522,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laStorms && fulltorus) 
     return interesting;
   
-  if(l == laMagnetic || l == laBrownian)
+  if(l == laMagnetic)
     return land_not_implemented;
 
   if(shmup::on && among(l, laMirror, laMirrorOld) && among(geometry, gElliptic, gZebraQuotient, gKleinQuartic, gBolza, gBolza2, gMinimal))
