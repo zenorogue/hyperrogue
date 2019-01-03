@@ -2491,6 +2491,8 @@ void setdist(cell *c, int d, cell *from) {
     buildEquidistant(c);
     }
 
+  if(d < BARLEV) brownian::apply_futures(c);
+
   giantLandSwitch(c, d, from);
   
   if(d == 9) moreBigStuff(c);

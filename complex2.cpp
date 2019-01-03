@@ -29,40 +29,40 @@ namespace brownian {
       if(c1->land == laOcean) {
         c1->land = laBrownian;
         c1->landparam = 0;
+        c1->wall = waSea;
         }
       }
     c->landparam += val;
     }
 
-  void recurse(cell *c, bool fat, int fatten_limit = 0) {
+  void recurse(cell *c, bool fat, cell *fatten_close = NULL) {
     int dl = getDistLimit();
     while(true) {
       totalsteps++;
-      if(!fatten_limit && celldist(c) >= dl * (fat ? 4 : ISMOBILE ? 2 : 3) + celldist(cwt.at)) {
+      if(!fatten_close && celldist(c) >= dl * (fat ? 4 : ISMOBILE ? 2 : 3) + celldist(cwt.at)) {
         cell *c1 = c;
         while(true) {
           cell *c2 = ts::left_parent(c1, celldist);
           if(!c2 || c2->mpdist < BARLEV) break;
           setdist(c2, BARLEV, c1);
-          if(c2->land == laOcean) {
-            c2->land = laBrownian;
-            c2->landparam = 0;
-            }
           c1 = c2;
           }
         futures[c1].emplace_back(c, fat);
         return;
         }
-      if(c->mpdist <= 7) { centersteps++; return; }
+      if(c->mpdist <= 7 || !among(c->land, laNone, laOcean, laBrownian) || (c->land != laBrownian && c->bardir != NODIR)) {
+        centersteps++; return;
+        }
+      cell *c2 = c->cmove(hrand(c->type));
       // while(hrand(1000) < 1000 * chance) recurse(c);
       if(fat) recurse(c, false);
-      if(!fat && (fatten_limit == 1 || hrand(20000) == 0)) {
+      if(!fat && ((fatten_close && celldistance(c, fatten_close) >= dl * 2) || hrand(20000) == 0)) {
         recurse(c, true);
         fat = true;
+        fatten_close = NULL;
         }
-      if(fatten_limit) fatten_limit--;
       rise(c, fat ? 256 : 1);
-      c = c->cmove(hrand(c->type));
+      c = c2;
       }
     }
 
@@ -118,8 +118,8 @@ namespace brownian {
 
     println(hlog, "brownian::init ", cw.at, " in distance ", celldistance(cw.at, cwt.at));
 
-    recurse(cw.at, false, 50 + hrand(100));
-    recurse(cw.at, false, 50 + hrand(100));
+    recurse(cw.at, false, cw.at);
+    recurse(cw.at, false);
 
     cell *c2 = c;
     while(c2->mpdist > 7) {      
@@ -129,14 +129,19 @@ namespace brownian {
       }
     if(!c2->monst && c2->wall != waBoat) c2->monst = moAcidBird;
     }
-
-  void build(cell *c, int d) {
+  
+  void apply_futures(cell *c) {
     if(futures.count(c)) {
-      for(pair <cell*, bool> p: futures[c])
+      auto m = move(futures[c]);
+      futures.erase(c);
+      for(pair <cell*, bool> p: m)
         recurse(p.first, p.second);
       futures.erase(c);
       printf("centersteps = %d futures = %d totalsteps = %d\n", centersteps, isize(futures), totalsteps);
       }
+    }
+
+  void build(cell *c, int d) {
 
     ONEMPTY {
       if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
