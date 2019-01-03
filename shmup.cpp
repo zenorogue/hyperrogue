@@ -2976,6 +2976,16 @@ void turn(int delta) {
 
   if(callhandlers(false, hooks_turn, delta)) return;
   if(!shmup::on) return;
+  
+  if(!(cmode & sm::NORMAL)) {
+    #if CAP_RACING
+    if(racing::on) {
+      if(racing::race_start_tick) racing::race_start_tick += delta;
+      for(int& i: racing::race_finish_tick) if(i) i += delta;
+      }
+    #endif
+    return;
+    }
 
   timetowait = 0;
 
