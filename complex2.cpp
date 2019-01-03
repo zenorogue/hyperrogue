@@ -35,9 +35,10 @@ namespace brownian {
     }
 
   void recurse(cell *c, bool fat, int fatten_limit = 0) {
+    int dl = getDistLimit();
     while(true) {
       totalsteps++;
-      if(!fatten_limit && celldist(c) >= (fat ? 30 : ISMOBILE ? 12 : 20) + celldist(cwt.at)) {
+      if(!fatten_limit && celldist(c) >= dl * (fat ? 4 : ISMOBILE ? 2 : 3) + celldist(cwt.at)) {
         cell *c1 = c;
         while(true) {
           cell *c2 = ts::left_parent(c1, celldist);
