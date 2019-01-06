@@ -442,7 +442,7 @@ void bantar_anim() {
 
 bool bmap;
 
-bool bantar_stats() {
+void bantar_stats() {
   if(bmap) {
     vid.linewidth *= (inHighQual ? 10 : 2);
     for(auto p: parent) if(gmatrix.count(p.first) && gmatrix.count(p.second))
@@ -458,7 +458,6 @@ bool bantar_stats() {
     vid.linewidth /= (inHighQual ? 10 : 2);
     drawqueue();
     }
-  return false;
   }
 
 void init_bantar() {

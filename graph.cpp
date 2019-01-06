@@ -1840,9 +1840,9 @@ int taildist(cell *c) {
   }
 
 int last_wormsegment = -1;
-vector<vector< std::function<void()> > > wormsegments;
+vector<vector< function<void()> > > wormsegments;
 
-void add_segment(int d, const std::function<void()>& s) {
+void add_segment(int d, const function<void()>& s) {
   if(isize(wormsegments) <= d) wormsegments.resize(d+1);
   last_wormsegment = max(last_wormsegment, d);
   wormsegments[d].push_back(s);
@@ -5727,7 +5727,7 @@ void drawscreen() {
   mouseovers = " ";
 
   cmode = 0;
-  keyhandler = [] (int sym, int uni) { return false; };
+  keyhandler = [] (int sym, int uni) {};
   #if CAP_SDL
   joyhandler = [] (SDL_Event& ev) { return false; };
   #endif

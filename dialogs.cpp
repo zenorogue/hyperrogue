@@ -473,7 +473,7 @@ namespace dialog {
   
   color_t *colorPointer;
   
-  bool handleKeyColor(int sym, int uni) {
+  void handleKeyColor(int sym, int uni) {
     unsigned& color = *colorPointer;
     int shift = colorAlpha ? 0 : 8;
 
@@ -514,7 +514,6 @@ namespace dialog {
     else if(doexiton(sym, uni)) {
       popScreen();
       }
-    return false;
     }
   
   bool colorAlpha;
