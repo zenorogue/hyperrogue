@@ -77,7 +77,7 @@ if "%TRAVIS_STAGE%" == "before_build" (
   ) else if "%TRAVIS_BUILD_SYSTEM%" == "msvc" (
     cl -std:c++latest -W2 -WX -EHsc langen.cpp
     .\langen.exe > language-data.cpp
-    cl -std:c++latest -W2 -WX -wd4068 -wd4244 -EHsc -bigobj -I include ^
+    cl -std:c++latest -W2 -WX -wd4068 -wd4244 -EHsc -bigobj -I include -D_USE_MATH_DEFINES=1 ^
        -DWINDOWS=1 -DCAP_SDLGFX=0 -DCAP_PNG=0 -DCAP_SAVE=0 -DCAP_ROGUEVIZ=1 hyper.cpp ^
        opengl32.lib dll\glew32.lib dll\SDL.lib dll\SDL_mixer.lib dll\SDL_ttf.lib /Fe: hyperrogue.exe
   ) else (
