@@ -306,10 +306,13 @@ vector<pair<cellwalker,int> > drawbugs;
 
 bool debugmode = false;
 
+// static apparently does not work in old compilers
+int bitfield_v;
+
 template<class T> void bitfield_editor(int val, const T& setter, string help = "") {
-  static int v = val;
-  dialog::editNumber(v, 0, 100, 1, v, help, "");
-  dialog::reaction = [&setter] () { setter(v); };
+  bitfield_v = val;
+  dialog::editNumber(bitfield_v, 0, 100, 1, bitfield_v, help, "");
+  dialog::reaction = [&setter] () { setter(bitfield_v); };
   }
 
 struct debugScreen {
