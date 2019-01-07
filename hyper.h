@@ -2174,7 +2174,7 @@ namespace arg {
   int readLocal();
 
 // an useful macro
-#define PHASE(x) { if(arg::curphase > x) phaseerror(x); else if(arg::curphase < x) return 2; }
+#define PHASE(x) { if(arg::curphase > x) arg::phaseerror(x); else if(arg::curphase < x) return 2; }
 #define PHASEFROM(x) { if(arg::curphase < x) return 2; }
 
   inline void cheat() { autocheat = true; cheater++; timerghost = false; }
