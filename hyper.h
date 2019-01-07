@@ -7,6 +7,7 @@
 #define VERNUM_HEX 0xA504
 
 #include <stdarg.h>
+#include "hyper_function.h"
 
 namespace hr {
 
@@ -14,6 +15,8 @@ template<class T>
 void ignore(T&&) {
   // placate GCC's overzealous -Wunused-result
   }
+
+template<class Sig> using function = hyper_function<Sig>;
 
 // functions and types used from the standard library
 using std::vector;
@@ -24,7 +27,6 @@ using std::sort;
 using std::multimap;
 using std::set;
 using std::string;
-using std::function;
 using std::pair;
 using std::tuple;
 using std::shared_ptr;
@@ -4215,6 +4217,9 @@ heptagon* encodeId(int id);
 void virtualRebaseSimple(heptagon*& base, transmatrix& at);
 
 extern bool game_active, playerfound;
+
+extern bool twopoint_do_flips;
+extern int twopoint_sphere_flips;
 
 string bygen(reaction_t h);
 

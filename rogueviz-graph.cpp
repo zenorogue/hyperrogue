@@ -389,7 +389,7 @@ void show_graph() {
     };
   }
 
-bool frame() { 
+void frame() { 
   if(graphcolor) {
     hyperpoint h0 = find_point(0);
     hyperpoint h1 = find_point(1);
@@ -397,7 +397,6 @@ bool frame() {
     draw_to(0, h0, 1, h1);
     finish();
     }
-  return false;
   }
 
 #if CAP_COMMANDLINE  

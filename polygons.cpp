@@ -267,7 +267,7 @@ void addpoint(const hyperpoint& H) {
         }
       else {
         poly_flags |= POLY_NOTINFRONT;
-        tofix.push_back(make_pair(glcoords.size(), H));
+        tofix.emplace_back(isize(glcoords), H);
         add1(H);
         return;
         }
@@ -867,8 +867,6 @@ void dqi_poly::draw() {
   if(sphere && pmodel == mdTwoPoint && !in_twopoint) {
     #define MAX_PHASE 4
     vector<glvertex> phases[MAX_PHASE];
-    extern int twopoint_sphere_flips;
-    extern bool twopoint_do_flips;
     int pha;
     if(twopoint_do_flips) {
       for(int i=0; i<cnt; i++) {

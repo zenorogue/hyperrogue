@@ -822,11 +822,11 @@ void show() {
         dialog::add_action([] () { 
           dialog::editNumber(cycle_length, 0, 10, 0.1, 2*M_PI, "shift", ""); 
           dialog::extra_options = [] () {
-            dialog::addSelItem(XLAT("full circle"), fts(2 * M_PI), 'A');
+            dialog::addSelItem(XLAT("full circle"), fts(float(2 * M_PI)), 'A');
             dialog::add_action([] () { cycle_length = 2 * M_PI; });
-            dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172), 'B');
+            dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172f), 'B');
             dialog::add_action([] () { cycle_length = 2.898149445355172; });
-            dialog::addSelItem(XLAT("Bolza period"), fts(2 * 1.528571), 'C');
+            dialog::addSelItem(XLAT("Bolza period"), fts(2 * 1.528571f), 'C');
             dialog::add_action([] () { cycle_length = 2 * 1.528571; });
             };
           });
