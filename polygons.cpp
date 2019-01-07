@@ -1555,7 +1555,7 @@ hpcshape
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
   shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
-  shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders,
+  shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders, shTrophy,
   shBugBody, shBugArmor, shBugLeg, shBugAntenna,
   shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain, shHammerHead,
   shBook, shBookCover, shGrail,
@@ -2519,6 +2519,7 @@ void buildpolys() {
   bshape(shWitchHair, PPR::MONSTER_HAIR, scalefactor, 129);
   bshape(shBeautyHair, PPR::MONSTER_HAIR, scalefactor, 130);
   bshape(shFlowerHair, PPR::MONSTER_HAT0, scalefactor, 131);
+  bshape(shTrophy, PPR::MONSTER_WPN, scalefactor, 388);
   bshape(shSuspenders, PPR::MONSTER_ARMOR1, scalefactor, 132);
   bshape(shFlowerHand, PPR::MONSTER_WPN, scalefactor, 133);
   bshape(shPFace, PPR::MONSTER_FACE, scalefactor, 134);
@@ -3608,6 +3609,7 @@ NEWSHAPE, 385, 7, 1, 0.354675,0,
 
 NEWSHAPE, 386, 3, 1, 0.173768,0.275379, 0.340287,0.116342, 0.229291,-0.115277, 
 NEWSHAPE, 387, 7, 1, 0.315263,-0.310217, 0.085056,-0.287538, 
+NEWSHAPE, 388, 1, 1, 0.046590,0.284199, 0.028110,0.325611, 0.098711,0.333738, 0.088761,0.294314, 0.090351,0.227036, 0.092387,0.196322, 0.129546,0.192006, 0.168982,0.166667, 0.173088,0.117700, 0.022882,0.091527, 0.004586,0.133004, 0.022981,0.160866, 0.052990,0.184313, 0.085413,0.193910, 0.055297,0.184324, 
 
 NEWSHAPE
 };

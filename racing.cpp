@@ -36,6 +36,8 @@ vector<race_cellinfo> rti;
 vector<cell*> track;
 map<cell*, int> rti_id;
 
+int trophy[MAXPLAYER];
+
 string track_code = "OFFICIAL";
 
 transmatrix straight;
@@ -432,6 +434,8 @@ void generate_track() {
   for(auto s: rti) if(s.c->monst == moIvyDead) s.c->monst = moNone;
   
   for(int i=0; i<motypes; i++) kills[i] = 0;
+  
+  for(int i=0; i<multi::players; i++) trophy[i] = 0;
 
   for(int i=0; i<multi::players; i++) {
     auto who = shmup::pc[i];
@@ -992,6 +996,17 @@ void prepare_subscreens() {
 
 void race_won() {
   if(!race_finish_tick[current_player]) {
+    int result = ticks - race_start_tick;
+    int losers = 0;
+    int place = 1;
+    for(int i=0; i<multi::players; i++) if(race_finish_tick[i]) place++; else losers = 0;
+    for(auto& ghost: ghostset()[specialland]) if(ghost.result < result) place++; else losers++;
+    for(auto& ghost: oghostset()[specialland]) if(ghost.result < result) place++; else losers++;
+
+    if(place == 1 && losers) trophy[current_player] = 0xFFD500FF;
+    if(place == 2) trophy[current_player] = 0xFFFFC0FF;
+    if(place == 3) trophy[current_player] = 0x967444FF;
+    
     race_finish_tick[current_player] = ticks;
     charstyle gcs = getcs();
     for(color_t *x: {&gcs.skincolor, &gcs.haircolor, &gcs.dresscolor, &gcs.swordcolor, &gcs.dresscolor2}) {
