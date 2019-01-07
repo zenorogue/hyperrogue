@@ -1068,7 +1068,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     ShadowV(V, shPBody);
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(0xC0C0A0, 0, 0xC0), m, footphase);
     queuepoly(VBS, shPBody, darkena(0xC0C0A0, 0, 0xC0));
-    queuepoly(VBS, shPSword, darkena(0xFFFF00, 0, 0xFF));
+    if(!racing::on) 
+      queuepoly(VBS, shPSword, darkena(0xFFFF00, 0, 0xFF));
     queuepoly(VBS, shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
     color_t col;
     if(!eubinary && where && where->master->alt)

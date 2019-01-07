@@ -75,9 +75,13 @@ struct ghost {
   vector<ghostmoment> history;
   };
 
-map<pair<string, int>, map<eLand, vector<ghost> > > race_ghosts;
+using raceset = map<eLand, vector<ghost>>;
+map<pair<string, int>, raceset> race_ghosts;
 
-map<pair<string, int>, map<eLand, vector<ghost> > > official_race_ghosts;
+map<pair<string, int>, raceset> official_race_ghosts;
+
+raceset& ghostset() { return race_ghosts[make_pair(track_code, modecode())]; }
+raceset& oghostset() { return official_race_ghosts[make_pair(track_code, modecode())]; }
 
 array<vector<ghostmoment>, MAXPLAYER> current_history;
 
@@ -120,18 +124,53 @@ void hwrite(hstream& hs, const ghost& gh) {
   hwrite(hs, gh.cs, gh.result, gh.timestamp, gh.checksum, gh.history);
   }
 
-
 bool read_ghosts(string seed, int mcode) {
 
   if(seed == "OFFICIAL" && mcode == 2) {
+    auto &ors = oghostset();
+    raceset crs;
+    if(1) {
     fhstream f("vizier.data", "rb");
     if(f.f) {
       f.get<int>();
-      hread(f, official_race_ghosts[{seed, mcode}]);
-      for(auto& p: official_race_ghosts) 
-      for(auto& v: p.second)
-      for(auto& w: v.second)
+      hread(f, crs);
+      for(auto& p: crs) for(auto& w: p.second) {
         w.cs.charid = -1, w.cs.uicolor = moVizier, w.cs.dresscolor = 0xC00000;
+        ors[p.first].push_back(w);
+        }
+      }
+    }
+
+    if(1) {
+    fhstream f("hedgehog.data", "rb");
+    if(f.f) {
+      f.get<int>();
+      hread(f, crs);
+      for(auto& p: crs) for(auto& w: p.second) {
+        w.cs.charid = -1, w.cs.uicolor = moHedge, w.cs.dresscolor = 0x00C000;
+        ors[p.first].push_back(w);
+        }
+      }
+    }
+
+    if(1) {
+    fhstream f("knight.data", "rb");
+    if(f.f) {
+      f.get<int>();
+      hread(f, crs);
+      for(auto& p: crs) for(auto& w: p.second) {
+        w.cs.charid = -1, w.cs.uicolor = moKnight, w.cs.dresscolor = 0x0000D0;
+        ors[p.first].push_back(w);
+        }
+      }
+    }
+  
+    for(auto p: ors) {
+      println(hlog, linf[p.first].name);
+      auto& v = p.second;
+      sort(v.begin(), v.end(), [] (const ghost &g1, const ghost &g2) { return g1.result < g2.result; });
+      for(auto gh: v)
+        println(hlog, "  ", racetimeformat(gh.result), " : ", format("%08X", gh.checksum), " = ", minf[gh.cs.uicolor].name);
       }
     }
   
@@ -140,7 +179,7 @@ bool read_ghosts(string seed, int mcode) {
   fhstream f(fname, "rb");
   if(!f.f) return false;
   f.get<int> ();
-  hread(f, race_ghosts[{seed, mcode}]);
+  hread(f, ghostset());
   return true;
   }
 
@@ -149,8 +188,14 @@ void write_ghosts(string seed, int mcode) {
   f.f = fopen(ghost_filename(seed, mcode).c_str(), "wb");
   if(!f.f) throw hstream_exception(); // ("failed to write the ghost file");
   hwrite(f, (const int&) VERNUM_HEX);
-  hwrite(f, race_ghosts[{seed, mcode}]);
+  hwrite(f, ghostset());
   }
+
+transmatrix get_ghostmoment(ghostmoment& p) {
+  cell *w = rti[p.where_id].c;
+  transmatrix T = spin_uchar(p.alpha) * xpush(uchar_to_frac(p.distance) * distance_multiplier) * spin_uchar(p.beta);
+  return gmatrix[w] * T;
+  } 
 
 void fix_cave(cell *c) {
   int v = 0;
@@ -216,7 +261,7 @@ void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
 
-  if(race_ghosts[{track_code, modecode()}].empty())
+  if(ghostset().empty())
     read_ghosts(track_code, modecode());
 
   track.clear();
@@ -435,13 +480,25 @@ void generate_track() {
   
   for(int i=0; i<motypes; i++) kills[i] = 0;
   
+  vector<transmatrix> forbidden;
+  for(auto& ghost: ghostset()[specialland])
+    forbidden.push_back(get_ghostmoment(ghost.history[0]));
+  for(auto& ghost: oghostset()[specialland])
+    forbidden.push_back(get_ghostmoment(ghost.history[0]));
+
   for(int i=0; i<multi::players; i++) trophy[i] = 0;
 
   for(int i=0; i<multi::players; i++) {
     auto who = shmup::pc[i];
     // this is intentionally not hrand
-    who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 40000) * spin(rand() % 360);
-    who->base = s;
+    
+    for(int j=0; j<100; j++) {
+      who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 40000) * spin(rand() % 360);
+      who->base = s;
+      bool ok = true;
+      for(const transmatrix& t: forbidden) if(hdist(t*C0, who->at * C0) < 10. / (j+10)) ok = false;
+      if(ok) break;
+      }
     virtualRebase(who, true);
     }
 
@@ -586,11 +643,11 @@ void generate_track() {
   track_ready = true;
   race_checksum = hrand(1000000);
   
-  auto& gh = race_ghosts[{track_code, modecode()}] [specialland];
+  auto& gh = ghostset() [specialland];
   int ngh = 0;
   for(int i=0; i<isize(gh); i++) {
     if(gh[i].checksum != race_checksum) {
-      println(hlog, "wrong checksum: %x, should be %x", gh[i].checksum, race_checksum);
+      println(hlog, format("wrong checksum: %x, should be %x", gh[i].checksum, race_checksum));
       }
     else {
       if(i != ngh)
@@ -786,7 +843,7 @@ void track_chooser(string new_track) {
 
   char let = 'a';
   for(eLand l: race_lands) {
-    auto& gh = race_ghosts[{new_track, modecode()}] [l];
+    auto& gh = race_ghosts[make_pair(new_track, modecode())] [l];
     const int LOST = 3600000;
     int best = LOST;
     for(auto& gc: gh) best = min(best, gc.result);
@@ -844,10 +901,10 @@ struct race_configurer {
     else {
       dialog::addItem(XLAT("select the track and start!"), 's');
       dialog::add_action([this] () { 
-        if(race_ghosts[{new_track, modecode()}].empty())
+        if(race_ghosts[make_pair(new_track, modecode())].empty())
           read_ghosts(new_track, modecode());
         else
-          println(hlog, "known ghosts: ", isize(race_ghosts[{new_track, modecode()}]));
+          println(hlog, "known ghosts: ", isize(race_ghosts[make_pair(new_track, modecode())]));
         pushScreen([this] () { track_chooser(new_track); }); 
         });
       }
@@ -1015,10 +1072,10 @@ void race_won() {
       part(*x, 0) >>= 2;
       }
       
-    auto &subtrack = race_ghosts[{track_code, modecode()}] [specialland];
+    auto &subtrack = ghostset() [specialland];
 
-    subtrack.emplace_back(ghost{gcs, ticks - race_start_tick, race_checksum, time(NULL), current_history[current_player]});
-    sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result > g2.result; });
+    subtrack.emplace_back(ghost{gcs, result, race_checksum, time(NULL), current_history[current_player]});
+    sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result < g2.result; });
     if(isize(subtrack) > ghosts_to_save && ghosts_to_save > 0) 
       subtrack.resize(ghosts_to_save);
     if(ghosts_to_save > 0)
@@ -1063,13 +1120,13 @@ void markers() {
     addauraspecial(H, 0xFFD500, 0);
     }
   int ghosts_left = ghosts_to_show;
-  for(auto& ghost: race_ghosts[{track_code, modecode()}][specialland]) {
+  for(auto& ghost: ghostset()[specialland]) {
     if(!ghosts_left) break;
     ghosts_left--;
     draw_ghost(ghost);
     }
   
-  for(auto& ghost: official_race_ghosts[{track_code, modecode()}][specialland])
+  for(auto& ghost: oghostset()[specialland])
     draw_ghost(ghost);
   
   if(gmatrix.count(track[0])) {
