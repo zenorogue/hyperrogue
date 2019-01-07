@@ -275,14 +275,17 @@ void showMainMenu() {
     else if(uni == 'r' || sym == SDLK_F5) dialog::do_if_confirmed([] {
       restart_game();
       });
-    else if(uni == 'q' || sym == SDLK_F10) dialog::do_if_confirmed([] {
+    else if(uni == 'q' || sym == SDLK_F10) {
+      if(needConfirmation()) dialog::do_if_confirmed([] {
 #if ISMOBILE
-      extern void openURL();
-      openURL();
+        extern void openURL();
+        openURL();
 #else
-      quitmainloop = true;
+        quitmainloop = true;
 #endif
-      });
+        });
+      else quitmainloop = true;
+      }
     else if(uni == 'o') {
       clearMessages();
       get_o_key().second();
