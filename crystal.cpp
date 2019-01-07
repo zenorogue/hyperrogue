@@ -1034,7 +1034,7 @@ void unit_test_tables() {
   test_crt();
   set_crystal(6); set_variation(eVariation::bitruncated);
   test_crt();
-  set_crystal(6); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated);
+  set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated);
   test_crt();
   }
 
