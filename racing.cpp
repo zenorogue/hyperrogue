@@ -9,6 +9,8 @@ namespace hr {
 
 namespace racing {
 
+bool guiding = false;
+
 bool on;
 bool player_relative = false;
 bool track_ready;
@@ -887,6 +889,9 @@ struct race_configurer {
     dialog::add_action([] () { 
       dialog::editNumber(race_advance, 0, 360, 0.1, 1, XLAT("race advance"), "");
       });
+
+    dialog::addBoolItem(XLAT("guiding line"), guiding, 'g');
+    dialog::add_action([] () { guiding = !guiding; });
   
     dialog::addItem(shmup::player_count_name(playercfg), 'n');
     dialog::add_action([this] () { 
@@ -1013,19 +1018,23 @@ void draw_ghost(ghost& ghost) {
   if(!gmatrix.count(w)) return;
   dynamicval<charstyle> x(getcs(), ghost.cs);
   
-  transmatrix T = spin_uchar(p->alpha) * xpush(uchar_to_frac(p->distance) * distance_multiplier) * spin_uchar(p->beta);
-  
   if(ghost.cs.charid == -1) {
     dynamicval<bool> pc(peace::on, true);
-    drawMonsterType(eMonster(ghost.cs.uicolor), w, gmatrix[w] * T, ghost.cs.dresscolor, uchar_to_frac(p->footphase));
+    drawMonsterType(eMonster(ghost.cs.uicolor), w, get_ghostmoment(*p), ghost.cs.dresscolor, uchar_to_frac(p->footphase));
     return;
     }
 
-  drawMonsterType(moPlayer, w, gmatrix[w] * T, 0, uchar_to_frac(p->footphase));
+  drawMonsterType(moPlayer, w, get_ghostmoment(*p), 0, uchar_to_frac(p->footphase));
   }
 
 void markers() {
   if(!racing::on) return;
+  if(guiding) for(int i=0; i<multi::players; i++) {
+    shmup::monster *m = shmup::pc[i];
+    if(!m) continue;
+    for(int j=0; j<5; j++)
+      queueline(m->pat * xpush0(j), m->pat * xpush0(j+1), multi::scs[i].uicolor, 2);
+    }
   if(racing::player_relative) {
     using namespace racing;
     cell *goal = NULL;
