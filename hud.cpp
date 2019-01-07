@@ -497,16 +497,18 @@ void drawStats() {
       col = 0xFFFFFF;
     
     dynamicval<int> x(vid.fsize, vid.fsize*2);
-    if(displayButtonS(vid.xres - 8, vid.fsize, racetimeformat(ticks - race_start_tick), col, 16, vid.fsize));
+    if(displayButtonS(vid.xres - 8, vid.fsize, racetimeformat(ticks - race_start_tick), col, 16, vid.fsize)) getcstat = 'o';
 
     for(int i=0; i<multi::players; i++) {
       if(race_finish_tick[i]) {
         multi::cpid = i;
-        if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), racetimeformat(race_finish_tick[i] - race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize));
+        if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), racetimeformat(race_finish_tick[i] - race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize))
+          getcstat = 'o';
         }
       else {
         int comp = get_percentage(i);
-        if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), its(comp) + "%", (getcs().uicolor >> 8), 16, vid.fsize));
+        if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), its(comp) + "%", (getcs().uicolor >> 8), 16, vid.fsize))
+          getcstat = 'o';
         }
       }
     #endif
