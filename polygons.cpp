@@ -1415,7 +1415,8 @@ void drawqueue() {
   spherespecial = 0;
   spherephase = 0;
   current_display->set_projection(0, true);
-  
+  setcameraangle(true);
+    
   for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
     ptd->draw();
     
