@@ -1796,6 +1796,16 @@ int read_config_args() {
   else if(argis("-msm")) {
     PHASEFROM(2); memory_saving_mode = true;
     }
+  else if(argis("-yca")) {
+    PHASEFROM(2); 
+    shift_arg_formula(vid.yshift);
+    shift_arg_formula(vid.camera_angle);
+    }
+  else if(argis("-xy")) {
+    PHASEFROM(2); 
+    shift_arg_formula(vid.xposition);
+    shift_arg_formula(vid.yposition);
+    }
   else if(argis("-msmoff")) {
     PHASEFROM(2); memory_saving_mode = false;
     }
