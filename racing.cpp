@@ -688,7 +688,7 @@ void set_view() {
       });
     }
 
-  transmatrix at = ggmatrix(who->base) * who->at;
+  transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
   if(racing::player_relative || quotient)
     View = spin(race_angle * degree) * inverse(at) * View;
@@ -697,8 +697,8 @@ void set_view() {
     int steps = euclid ? 1000 : 20;
     cell *c1 = racing::track[max(z-steps, 0)];
     cell *c2 = racing::track[min(z+steps, isize(racing::track)-1)];
-    transmatrix T1 = ggmatrix(c1);
-    transmatrix T2 = ggmatrix(c2);
+    transmatrix T1 = ypush(-vid.yshift) * ggmatrix(c1);
+    transmatrix T2 = ypush(-vid.yshift) * ggmatrix(c2);
     transmatrix T = spintox(inverse(T1) * T2 * C0);
     hyperpoint h = T * inverse(T1) * at * C0;
     ld y = asin_auto(h[1]);
