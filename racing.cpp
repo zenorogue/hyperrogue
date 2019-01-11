@@ -884,6 +884,90 @@ void track_chooser(string new_track) {
   
   dialog::addBack();
   dialog::display();
+  
+  if(landmap.count(getcstat) && new_track == "OFFICIAL" && modecode() == 2)
+    displayScore(landmap[getcstat]);  
+  }
+
+void race_projection() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(1);
+  
+  dialog::init(XLAT("racing projections"));
+
+  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && !vid.camera_angle, '1');
+  dialog::add_action([] () {
+    pmodel = mdDisk;
+    race_advance = 0;
+    vid.yshift = 0;
+    vid.camera_angle = 0;
+    vid.xposition = 0;
+    vid.yposition = 0;
+    vid.scale = 1;
+    });
+  
+  dialog::addBoolItem(XLAT("band"), pmodel == mdBand, '2');
+  dialog::add_action([] () {
+    pmodel = mdBand;
+    conformal::model_orientation = race_angle;
+    race_advance = 1;
+    vid.yshift = 0;
+    vid.camera_angle = 0;
+    vid.xposition = 0;
+    vid.yposition = 0;
+    vid.scale = 1;
+    });
+  
+  dialog::addBoolItem(XLAT("half-plane"), pmodel == mdHalfplane, '3');
+  dialog::add_action([] () {
+    pmodel = mdHalfplane;
+    conformal::model_orientation = race_angle + 90;
+    race_advance = 0.5;
+    vid.yshift = 0;
+    vid.camera_angle = 0;
+    vid.xposition = 0;
+    vid.yposition = 0;
+    vid.scale = 1;
+    });
+
+  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && vid.camera_angle, '4');
+  dialog::add_action([] () {
+    pmodel = mdDisk;
+    race_advance = 0;
+    vid.yshift = -0.3;
+    vid.camera_angle = -45;
+    vid.scale = 2;
+    vid.xposition = 0;
+    vid.yposition = -1.2;
+    });
+  
+  if(pmodel == mdDisk) {    
+    dialog::addSelItem(XLAT("point of view"), player_relative ? "player" : "track", 'p');
+    if(quotient)
+      dialog::lastItem().value = XLAT("N/A");
+    dialog::add_action([] () { 
+      player_relative = !player_relative; 
+      if(pmodel == mdBand || pmodel == mdHalfplane)
+        pmodel = mdDisk;
+      set_view();
+      });
+    }
+  else dialog::addBreak(100);
+        
+  dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
+  dialog::add_action([] () { 
+    dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("race angle"), "");
+    int q = conformal::model_orientation - race_angle;
+    dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
+    });
+
+  dialog::addSelItem(XLAT("show more in front"), fts(race_advance), 'A');
+  dialog::add_action([] () {
+    dialog::editNumber(race_advance, 0, 360, 0.1, 1, XLAT("show more in front"), "");
+    });
+
+  dialog::addBack();
+  dialog::display();
   }
 
 struct race_configurer {
@@ -920,7 +1004,7 @@ struct race_configurer {
     dialog::init(XLAT("Racing"));
   
     if(bounded)
-      dialog::addInfo("Racing available only in unbounded worlds.", 0xFF0000);
+      dialog::addInfo(XLAT("Racing available only in unbounded worlds."), 0xFF0000);
     else {
       dialog::addItem(XLAT("select the track and start!"), 's');
       dialog::add_action([this] () { 
@@ -934,46 +1018,9 @@ struct race_configurer {
     
     dialog::addBreak(100);
 
-    dialog::addBoolItem(XLAT("player relative"), player_relative, 'p');
-    dialog::add_action([] () { 
-      player_relative = !player_relative; 
-      if(pmodel == mdBand || pmodel == mdHalfplane)
-        pmodel = mdDisk;
-      });
-    if(quotient)
-      dialog::lastItem().value = XLAT("N/A");
+    dialog::addItem(XLAT("configure the projection"), 'p');
+    dialog::add_action([] () { pushScreen(race_projection); });
   
-    dialog::addSelItem(XLAT("projection"), conformal::get_model_name(pmodel), 'm');
-    dialog::add_action([] () { 
-      switch(pmodel) {
-        case mdDisk:
-          pmodel = mdBand;
-          conformal::model_orientation = race_angle;
-          race_advance = 1;
-          break;
-        case mdBand:
-          pmodel = mdHalfplane;
-          conformal::model_orientation = race_angle + 90;
-          race_advance = 0.5;
-          break;
-        default:
-          pmodel = mdDisk;
-          race_advance = 0;
-        }
-      });
-  
-    dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
-    dialog::add_action([] () { 
-      dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("race angle"), "");
-      int q = conformal::model_orientation - race_angle;
-      dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
-      });
-
-    dialog::addSelItem(XLAT("race advance"), fts(race_advance), 'A');
-    dialog::add_action([] () { 
-      dialog::editNumber(race_advance, 0, 360, 0.1, 1, XLAT("race advance"), "");
-      });
-
     dialog::addBoolItem(XLAT("guiding line"), guiding, 'g');
     dialog::add_action([] () { guiding = !guiding; });
   

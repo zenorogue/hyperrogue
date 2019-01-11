@@ -784,7 +784,7 @@ monstertype minf[motypes] = {
     },
   { 'B', 0xE07060, "Acid Gull", 
     "Where did this strange bird come from?...\n\n"
-    "Acid Gulls dissolve the land on which they fall. "    
+    "Acid Gulls dissolve the land on which they fall when they die. "
     },
   { 'W', 0xA04060, "Mutant", 
     "These guys look a bit strange, but they have no special properties."
@@ -1252,8 +1252,8 @@ itemtype iinf[ittypes] = {
   { 'o', 0x202020, "Orb of Slaying",
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
     },
-  { '*', 0xFFA860, "Sphalerite",
-    "An orange gem."
+  { '*', 0xFFA860, "Tiger's Eye",
+    "A brown gem."
     },
   { '$', 0xF0C0C0, "Meteorite", 
     "These rocks falling from the sky have been captured to fall forever in the artificial gravity. Meteorite iron is believed to be a valuable material for magical weapons."},
@@ -1459,8 +1459,12 @@ walltype winf[walltypes] = {
   { '^', 0xFF8000, "burning dock", "A burning dock."},
   { '#', 0xE04030, "ruin wall", ruindesc},
   { '#', 0xA04060, "Brownian generator", NODESC},
-  { '^', 0xC05000, "fire trap", NODESC},
-  { '^', 0xFD692F, "Explosive Barrel", NODESC},
+  { '^', 0xC05000, "fire trap", 
+    "This trap will explode when stepped on, setting all the adjacent cells on fire. However, this happens on the next turn, "
+    "so you can safely escape if you are fast enough."},
+  { '^', 0xFD692F, "Explosive Barrel", 
+    "These barrels can be pushed, and they will explode if next to a fire, or under some attacks."
+    },
   };
 
 // --- land types ---

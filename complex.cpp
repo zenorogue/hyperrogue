@@ -712,6 +712,9 @@ namespace princess {
     else if(msgid == 73 && !inpalace) {
       addMessage(XLAT("\"Infinite trees are boring. I prefer other graphs.\"", m));
       }
+    else if(msgid == 74 && !inpalace) {
+      addMessage(XLAT("\"Did you know that the Cultists are relatives of the Desert Men?\"", m));
+      }
     else if(msgid == 80) {
       addMessage(XLAT("\"Are there Temples of Cthulhu in your world? Why not?\"", m));
       }    
