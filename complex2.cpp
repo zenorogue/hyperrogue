@@ -176,6 +176,12 @@ namespace brownian {
         colors[4];
      }
   
+  int hrc = addHook(hooks_removecells, 0, [] () {
+    vector<cell*> to_remove;
+    for(auto p: futures) if(is_cell_removed(p.first)) to_remove.push_back(p.first);
+    for(auto r: to_remove) futures.erase(r);
+    }) + addHook(clearmemory, 0, [] () { futures.clear(); });
+
   }
 
 namespace westwall {
