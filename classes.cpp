@@ -1694,6 +1694,7 @@ vector<geometryinfo> ginf = {
   {"Schmutz's M(3)",      "M3",      12, 3, qsSMALL,   gcHyperbolic, 0x20400, {{4, 2}}, eVariation::bitruncated},
   {"Schmutz's M(4)",      "M4",      12, 3, qsSMALL,   gcHyperbolic, 0x20600, {{4, 2}}, eVariation::bitruncated},
   {"dimensional crystal", "Crystal",  6, 4, qANYQ,     gcHyperbolic, 0x28000, {{5, 3}}, eVariation::pure},
+  {"octahedron",          "4x3",      3, 4, qsSMALLB,  gcSphere,     0x28200, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   };
 
 // remember to match the following mask when specifying codes for extra geometries: 0x78600

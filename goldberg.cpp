@@ -483,7 +483,7 @@ namespace hr { namespace gp {
   #define corner_coords (S3==3 ? corner_coords6 : corner_coords4)
   
   hyperpoint cornmul(const transmatrix& corners, const hyperpoint& c) {
-    if(sphere) {
+    if(sphere && S3 == 3) {
       ld cmin = c[0] * c[1] * c[2] * (6 - S7);
       return corners * hpxyz(c[0] + cmin, c[1] + cmin, c[2] + cmin);
       }

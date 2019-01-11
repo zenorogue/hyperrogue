@@ -84,6 +84,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
 int spherecells() {
   if(S7 == 5) return (elliptic?6:12);
   if(S7 == 4) return (elliptic?3:6);
+  if(S7 == 3 && S3 == 4) return (elliptic?4:8);
   if(S7 == 3) return 4;
   if(S7 == 2) return (elliptic?1:2);
   if(S7 == 1) return 1;
@@ -115,8 +116,35 @@ struct hrmap_spherical : hrmap {
       siblings = {1, 0, 10, 4, 3, 8, 9, 11, 5, 6, 2, 7};
     else
       siblings = {1, 0, 3, 2, 5, 4};
+    
+    if(S7 == 3 && S3 == 4) {
+      for(int i=0; i<8; i++) {
+        dodecahedron[i]->move(0) = dodecahedron[i^1];
+        dodecahedron[i]->c.setspin(0, 0, false);
+        dodecahedron[i]->move(1) = dodecahedron[i^2];
+        dodecahedron[i]->c.setspin(1, 1, false);
+        dodecahedron[i]->move(2) = dodecahedron[i^4];
+        dodecahedron[i]->c.setspin(2, 2, false);
+        }
+      for(int i=0; i<8; i++) {
+        int s = (i&1)+((i&2)>>1)+((i&4)>>2);
+        if((s&1) == 1) {
+          swap(dodecahedron[i]->move(1), dodecahedron[i]->move(2));
+          int a = dodecahedron[i]->c.spin(1);
+          int b = dodecahedron[i]->c.spin(2);
+          dodecahedron[i]->c.setspin(1, b, false);
+          dodecahedron[i]->c.setspin(2, a, false);
+          dodecahedron[i]->move(1)->c.setspin(b, 1, false);
+          dodecahedron[i]->move(2)->c.setspin(a, 2, false);
+          }
+        }
+      for(int i=0; i<8; i++)
+      for(int j=0; j<3; j++)
+        if(dodecahedron[i]->move(j)->move(dodecahedron[i]->c.spin(j)) != dodecahedron[i])
+          println(hlog, "8");
+      }
       
-    if(S7 == 4 && elliptic) {
+    else if(S7 == 4 && elliptic) {
       for(int i=0; i<3; i++) {
         int i1 = (i+1)%3;
         int i2 = (i+2)%3;
@@ -197,6 +225,7 @@ struct hrmap_spherical : hrmap {
     for(int i=0; i<spherecells(); i++) for(int k=0; k<S7; k++) {
       heptspin hs(dodecahedron[i], k, false);
       heptspin hs2 = hs + wstep + (S7-1) + wstep + (S7-1) + wstep + (S7-1);
+      if(S3 == 4) hs2 = hs2 + wstep + (S7-1);
       if(hs2.at != hs.at) printf("error %d,%d\n", i, k);
       }
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);

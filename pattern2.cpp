@@ -736,7 +736,7 @@ namespace patterns {
     if(IRREGULAR || archimedean || binarytiling) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
-    else if(sphere) valSibling(c, si, sub, pat);
+    else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
     else if(euclid4) valEuclid4(c, si, sub);
     else if(euclid) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);

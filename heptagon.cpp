@@ -26,8 +26,15 @@ hstate transition(hstate s, int dir) {
     if(S7 == 4) {
       if(s == hsOrigin) return dir == 0 ? hsB0 : hsB1;
       }
-    if(S7 == 3) {
+    if(S7 == 3 && S3 == 3) {
       if(s == hsOrigin) return hsB1;
+      }
+    if(S7 == 3 && S3 == 4) {
+      if(s == hsOrigin) return dir == 0 ? hsA0 : hsA1;
+      if(s == hsA0 && dir == 1) return hsB0;
+      if(s == hsA1 && dir == 1) return hsB1;
+      if(s == hsB0 && dir == 2) return hsC;
+      return hsError;
       }
     if(s == hsOrigin) return dir == 0 ? hsA0 : hsA1;
     if(s == hsA0 && dir == 2) return hsB0;
