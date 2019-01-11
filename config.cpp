@@ -347,6 +347,13 @@ void initConfig() {
   addsaver(conformal::use_atan, "use_atan");
 
   addsaver(vid.consider_shader_projection, "shader-projection", true);
+  
+  addsaver(racing::race_advance, "race_advance");
+  addsaver(racing::race_angle, "race_angle");
+  addsaver(racing::ghosts_to_show, "race_ghosts_to_show");
+  addsaver(racing::ghosts_to_save, "race_ghosts_to_save");
+  addsaver(racing::guiding, "race_guiding");
+  addsaver(racing::player_relative, "race_player_relative");
 
 #if CAP_SHMUP  
   shmup::initConfig();

@@ -4687,7 +4687,9 @@ ld sintick(int period, ld phase = 0);
 
 #if CAP_RACING
 namespace racing {
-  extern bool on, player_relative, track_ready;
+  extern bool on, player_relative, track_ready, guiding;
+  extern ld race_advance, race_angle;
+  extern int ghosts_to_show, ghosts_to_save;
   void generate_track();
   void configure_race();
   void prepare_subscreens();
