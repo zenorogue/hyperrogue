@@ -162,6 +162,7 @@ void addMessage(string s, char spamtype = 0);
 #define NUMLEADER 82
 #define LB_PURE_TACTICS_SHMUP 49
 #define LB_PURE_TACTICS_COOP 50
+#define LB_RACING 81
 
 #if ISMOBILE || ISWEB || ISPANDORA || 1
 typedef double ld;
@@ -4699,6 +4700,7 @@ namespace racing {
   void apply_seed();
   string racetimeformat(int t);
   void add_debug(cell *c);
+  void displayScore(eLand l);
   }
 
 bool subscreen_split(reaction_t for_each_subscreen);

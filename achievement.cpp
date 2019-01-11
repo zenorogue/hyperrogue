@@ -71,6 +71,7 @@ const char* leadernames[NUMLEADER] = {
 
 #define LB_STATISTICS 62
 #define LB_HALLOWEEN  63
+#define LB_RACING 81
 
 void upload_score(int id, int v);
 
@@ -87,7 +88,8 @@ bool wrongMode(char flags) {
     if(geometry != gNormal) return true;
     }
 
-  if(shmup::on != (flags == rg::shmup)) return true;
+  if(shmup::on != (flags == rg::shmup || flags == rg::racing)) return true;
+  if(racing::on != (flags == rg::racing)) return true;
 #if CAP_DAILY
   if(daily::on != (flags == rg::daily)) return true;
 #endif
@@ -521,10 +523,11 @@ void achievement_score(int cat, int number) {
   else if(geometry) return;
   if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
-  if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) return;
+  if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP && cat != LB_RACING) return;
   if(yendor::on && cat != LB_YENDOR_CHALLENGE) return;
   if(tactic::on && cat != LB_PURE_TACTICS && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) 
     return;
+  if(racing::on && cat != LB_RACING) return;
   upload_score(cat, number);
 #endif
   }

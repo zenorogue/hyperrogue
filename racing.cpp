@@ -15,6 +15,8 @@ bool on;
 bool player_relative = false;
 bool track_ready;
 
+bool official_race = false;
+
 int TWIDTH;
 
 ld race_advance = 0;
@@ -75,13 +77,21 @@ struct ghost {
   vector<ghostmoment> history;
   };
 
-using raceset = map<eLand, vector<ghost>>;
+typedef map<eLand, vector<ghost>> raceset;
 map<pair<string, int>, raceset> race_ghosts;
 
 map<pair<string, int>, raceset> official_race_ghosts;
 
 raceset& ghostset() { return race_ghosts[make_pair(track_code, modecode())]; }
 raceset& oghostset() { return official_race_ghosts[make_pair(track_code, modecode())]; }
+
+int get_score_in_land(eLand l) {
+  auto& gh = ghostset();
+  if(!gh.count(l)) return 0;
+  auto& v = gh[l];
+  if(!isize(v)) return 0;
+  return v[0].result;
+  }
 
 array<vector<ghostmoment>, MAXPLAYER> current_history;
 
@@ -172,6 +182,10 @@ bool read_ghosts(string seed, int mcode) {
       for(auto gh: v)
         println(hlog, "  ", racetimeformat(gh.result), " : ", format("%08X", gh.checksum), " = ", minf[gh.cs.uicolor].name);
       }
+    
+    fhstream f("officials.data", "wb");
+    hwrite(f, (const int&) VERNUM_HEX);
+    hwrite(f, ghostset());
     }
   
   string fname = ghost_filename(seed, mcode);
@@ -659,6 +673,12 @@ void generate_track() {
   
   race_start_tick = 0;
   for(int i=0; i<MAXPLAYER; i++) race_finish_tick[i] = 0;
+
+  official_race = (track_code == "OFFICIAL" && modecode() == 2);
+  if(official_race && race_checksum != oghostset() [specialland] [0].checksum) {
+    official_race = false;
+    addMessage(XLAT("Race did not generate correctly for some reason -- not ranked"));
+    }
   }
 
 bool inrec = false;
@@ -840,6 +860,8 @@ string racetimeformat(int t) {
 
 void track_chooser(string new_track) {
   dialog::init(XLAT("Racing"));
+  
+  map<char, eLand> landmap;
 
   char let = 'a';
   for(eLand l: race_lands) {
@@ -848,6 +870,7 @@ void track_chooser(string new_track) {
     int best = LOST;
     for(auto& gc: gh) best = min(best, gc.result);
     string s = (best == LOST) ? "" : racetimeformat(best);
+    landmap[let] = l;
     dialog::addSelItem(XLAT1(linf[l].name), s, let++);
     dialog::add_action([l, new_track] () {
       stop_game();
@@ -1051,6 +1074,40 @@ void prepare_subscreens() {
     }
   }
 
+map<string, map<eLand, int> > scoreboard;
+
+void uploadScore() {
+  int tscore = 0;
+  for(eLand l: race_lands) {
+    int i = get_score_in_land(l);
+    if(!i) continue;
+    int score = 60000000 / i; // 1000 points for minute, 2000 points for 30 sec
+    tscore += score;
+    }
+    
+  achievement_score(LB_RACING, tscore);
+  }
+
+void displayScore(eLand l) {
+  int vf = min((vid.yres-64) / 70, vid.xres/80);
+  int x = vid.xres / 4;
+
+  if(get_sync_status() == 1) {
+    displayfr(x, 56, 1, vf, "(syncing)", 0xC0C0C0, 0);
+    }
+  else {
+    vector<pair<int, string> > scores;
+    for(auto p: scoreboard) if(p.second.count(l)) scores.emplace_back(p.second[l], p.first);
+    sort(scores.begin(), scores.end());
+    int i = 0;
+    for(auto& sc: scores) {
+      int i0 = 56 + (i++) * vf;
+      displayfr(x, i0, 1, vf, racetimeformat(sc.first), 0xC0C0C0, 16);
+      displayfr(x+8, i0, 1, vf, sc.second, 0xC0C0C0, 0);
+      }
+    }
+  }
+
 void race_won() {
   if(!race_finish_tick[current_player]) {
     int result = ticks - race_start_tick;
@@ -1063,6 +1120,9 @@ void race_won() {
     if(place == 1 && losers) trophy[current_player] = 0xFFD500FF;
     if(place == 2) trophy[current_player] = 0xFFFFC0FF;
     if(place == 3) trophy[current_player] = 0x967444FF;
+    
+    if(place == 1 && losers && official_race)
+      achievement_gain("RACEWON", rg::racing);
     
     race_finish_tick[current_player] = ticks;
     charstyle gcs = getcs();
@@ -1080,6 +1140,8 @@ void race_won() {
       subtrack.resize(ghosts_to_save);
     if(ghosts_to_save > 0)
       write_ghosts(track_code, modecode());
+      
+    if(official_race) uploadScore();
     }
   }
 
