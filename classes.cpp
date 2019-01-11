@@ -789,7 +789,7 @@ monstertype minf[motypes] = {
   { 'W', 0xA04060, "Mutant", 
     "These guys look a bit strange, but they have no special properties."
     },
-  { 'W', 0xC04040, "Falling Dog", 
+  { 'W', 0x707080, "Falling Dog", 
     "Distant relatives of the Running Dogs."},
   { 'B', 0xC0C040, "Western Hawk", NODESCYET},
   
