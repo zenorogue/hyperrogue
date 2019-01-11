@@ -858,6 +858,8 @@ void race_projection() {
     vid.xposition = 0;
     vid.yposition = 0;
     vid.scale = 1;
+    vid.use_smart_range = 0;
+    vid.smart_range_detail = 3;
     });
   
   dialog::addBoolItem(XLAT("band"), pmodel == mdBand, '2');
@@ -870,6 +872,8 @@ void race_projection() {
     vid.xposition = 0;
     vid.yposition = 0;
     vid.scale = 1;
+    vid.use_smart_range = 1;
+    vid.smart_range_detail = 3;
     });
   
   dialog::addBoolItem(XLAT("half-plane"), pmodel == mdHalfplane, '3');
@@ -882,6 +886,8 @@ void race_projection() {
     vid.xposition = 0;
     vid.yposition = 0;
     vid.scale = 1;
+    vid.use_smart_range = 1;
+    vid.smart_range_detail = 3;
     });
 
   dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && vid.camera_angle, '4');
@@ -892,7 +898,9 @@ void race_projection() {
     vid.camera_angle = -45;
     vid.scale = 2;
     vid.xposition = 0;
-    vid.yposition = -1.2;
+    vid.yposition = -0.9;
+    vid.use_smart_range = 1;
+    vid.smart_range_detail = 3;
     });
   
   if(pmodel == mdDisk) {    
