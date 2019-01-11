@@ -2805,6 +2805,8 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         0x1010C0 + int(32 * sintick(500, (chaosmode ? c->CHAOSPARAM : c->landparam)*.75/M_PI));
     else if(c->land == laOceanWall)
       fcol = 0x2020FF;
+    else if(c->land == laVariant)
+      fcol = 0x002090 + 15 * sintick(300, 0);
     else if(c->land == laKraken) {
       fcol = 0x0000A0;
       int mafcol = (kraken_pseudohept(c) ? 64 : 8);
@@ -3536,6 +3538,10 @@ int getfd(cell *c) {
     case laDual:
     case laBrownian:
       return 1;
+    
+    case laVariant:
+      if(isWateryOrBoat(c)) return 1;
+      return 2;
     
     case laTrollheim:
     default:
