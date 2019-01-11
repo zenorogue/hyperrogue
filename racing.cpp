@@ -137,55 +137,9 @@ void hwrite(hstream& hs, const ghost& gh) {
 bool read_ghosts(string seed, int mcode) {
 
   if(seed == "OFFICIAL" && mcode == 2) {
-    auto &ors = oghostset();
-    raceset crs;
-    if(1) {
-    fhstream f("vizier.data", "rb");
-    if(f.f) {
-      f.get<int>();
-      hread(f, crs);
-      for(auto& p: crs) for(auto& w: p.second) {
-        w.cs.charid = -1, w.cs.uicolor = moVizier, w.cs.dresscolor = 0xC00000;
-        ors[p.first].push_back(w);
-        }
-      }
-    }
-
-    if(1) {
-    fhstream f("hedgehog.data", "rb");
-    if(f.f) {
-      f.get<int>();
-      hread(f, crs);
-      for(auto& p: crs) for(auto& w: p.second) {
-        w.cs.charid = -1, w.cs.uicolor = moHedge, w.cs.dresscolor = 0x00C000;
-        ors[p.first].push_back(w);
-        }
-      }
-    }
-
-    if(1) {
-    fhstream f("knight.data", "rb");
-    if(f.f) {
-      f.get<int>();
-      hread(f, crs);
-      for(auto& p: crs) for(auto& w: p.second) {
-        w.cs.charid = -1, w.cs.uicolor = moKnight, w.cs.dresscolor = 0x0000D0;
-        ors[p.first].push_back(w);
-        }
-      }
-    }
-  
-    for(auto p: ors) {
-      println(hlog, linf[p.first].name);
-      auto& v = p.second;
-      sort(v.begin(), v.end(), [] (const ghost &g1, const ghost &g2) { return g1.result < g2.result; });
-      for(auto gh: v)
-        println(hlog, "  ", racetimeformat(gh.result), " : ", format("%08X", gh.checksum), " = ", minf[gh.cs.uicolor].name);
-      }
-    
-    fhstream f("officials.data", "wb");
-    hwrite(f, (const int&) VERNUM_HEX);
-    hwrite(f, ghostset());
+    fhstream f("officials.data", "rb");
+    f.get<int>();
+    hread(f, oghostset());
     }
   
   string fname = ghost_filename(seed, mcode);
