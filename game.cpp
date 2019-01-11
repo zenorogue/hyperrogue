@@ -3442,6 +3442,7 @@ array<cell*, 5> traplimits(cell *c) {
 
 void activateArrowTrap(cell *c) {
   if(c->wall == waArrowTrap && c->wparam == 0) {
+    playSound(c, "click");
     c->wparam = shmup::on ? 2 : 1;
     forCellEx(c2, c) activateArrowTrap(c2);
     if(shmup::on) shmup::activateArrow(c);
@@ -3474,8 +3475,10 @@ void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
   if(ct->wall == waArrowTrap && !ignoresPlates(m) && normal_gravity_at(ct))
     activateArrowTrap(ct);
 
-  if(ct->wall == waFireTrap && !ignoresPlates(m) && ct->wparam == 0 && normal_gravity_at(ct))
+  if(ct->wall == waFireTrap && !ignoresPlates(m) && ct->wparam == 0 && normal_gravity_at(ct)) {
+    playSound(ct, "click");
     ct->wparam = 1;
+    }
     
   if(cf && isPrincess(m)) princess::move(ct, cf);
   
@@ -3559,8 +3562,10 @@ void playerMoveEffects(cell *c1, cell *c2) {
   if(c2->wall == waArrowTrap && c2->wparam == 0 && normal_gravity_at(c2) && !markOrb(itOrbAether))
     activateArrowTrap(c2);
   
-  if(c2->wall == waFireTrap && c2->wparam == 0 && normal_gravity_at(c2) &&!markOrb(itOrbAether))
+  if(c2->wall == waFireTrap && c2->wparam == 0 && normal_gravity_at(c2) &&!markOrb(itOrbAether)) {
+    playSound(c2, "click");
     c2->wparam = 1;
+    }
     
   princess::playernear(c2);
 
