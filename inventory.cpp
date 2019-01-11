@@ -57,6 +57,7 @@ namespace hr { namespace inv {
     if(orb == itOrbSummon) return 9;
     if(orb == itOrbEmpathy) return 9;
     if(orb == itOrbMatter) return 9;
+    if(orb == itOrbIntensity) return 8;
     if(orb == itOrbLuck) return 8;
     if(orb == itOrbSpace) return 7;
 
@@ -65,6 +66,7 @@ namespace hr { namespace inv {
     if(orb == itOrbLove) return 6;
     if(orb == itOrbRecall) return 6;
     if(orb == itOrbDigging) return 6;
+    if(orb == itOrbGravity) return 6;
     
     if(orb == itOrbTime) return 5;
     if(orb == itOrbAir) return 5;
