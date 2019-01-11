@@ -5184,6 +5184,8 @@ bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
     drawParticles(c, winf[c->wall].color, 16);
     c->wall = waNone;
     }
+  if(c->wall == waExplosiveBarrel)
+    explodeBarrel(c);
   if(!peace::on && canAttack(mt, who, c, m, AF_SWORD)) {
     markOrb(bb ? itOrbSword2: itOrbSword);
     int k = tkills();
@@ -5225,6 +5227,8 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
       mt->wall = waSmallTree;
     else if(mt->wall == waSmallTree)
       mt->wall = waNone;
+    else if(mt->wall == waExplosiveBarrel)
+      explodeBarrel(mt);
     }
   }
 
@@ -5298,6 +5302,9 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
     
     bool stabthere = false, away = true;
     if(logical_adjacent(mt, who, c)) stabthere = true, away = false;
+  
+    if(stabthere && c->wall == waExplosiveBarrel && markOrb(itOrbThorns))
+      explodeBarrel(c);
     
     if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB)) {
       if(c->monst != moHedge) { 
