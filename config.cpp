@@ -45,7 +45,7 @@ string csname(charstyle& cs) {
   }
 
 int playergender() {
-  return (getcs().charid&1) ? GEN_F : GEN_M; 
+  return (getcs().charid >= 0 && (getcs().charid&1)) ? GEN_F : GEN_M; 
   }
 int princessgender() {
   int g = playergender();
