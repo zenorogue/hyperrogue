@@ -2835,3 +2835,42 @@ Geometry experiments -- new quotient spaces:
 
 2019-02-08 10.5e:
 - This version imports some bugfixes/improvements from 11.0g.
+
+2019-01-11 17:00 Update 11.0:
+major new features
+- new game mode: Racing Mode
+- new land: Irradiated Fields
+- new land: Free Fall
+- new land: Brown Island
+
+features
+- improvements to the map editor: an option to disable wandering monsters; settings (reptilecheat, autocheat, safety etc) configurable; save items/kills and some other settings
+- background animations in the start menu; start menu options no longer reset the graphical options -- there is a separate entry for that
+- shmup mode can now be paused
+- new projections: conical spirals and bands
+- graphical display of the paths for Orb of Air; Orb of Air now affects boats, statues, thumpers, and barrels
+- added Crystal Camelot achievements
+- more natural humanoid movement animation
+- 'paint textures' in main menu works better; no more alpha on floors while editing textures; symmetry markers shown correctly again
+- when text search in overview matches nothing, it now displays lands not in game
+- shift+G cheat screen is now editable
+- easier to exit the Tutorial
+- improved welcome messages in special modes
+- octahedron geometry (good with the Goldberg-Coxeter variation)
+
+minor gameplay changes
+- Blue Raiders now can destroy boats
+- reduced the range of Fire Cultists to 2 if getDistLimit() < 4
+- Orb of Winter now protects your boat from destruction
+
+bugfixes
+- fix a crash on OSX after some scenes in the Tutorial
+- fixed help in lands
+- roar message now uses the correct number of kills instead of 20
+- Orb of Empathy works correctly with Orb of the Fish now
+- ghosts no longer appear without reason in Crystal and other low-distlimit geometries
+- gadfly kills no longer counted twice
+- fixes to the screenshot feature
+- no more pushing statues on arrow/fire traps
+
+>>>>>>> 4c3b754c... version 11.0
