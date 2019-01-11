@@ -1300,6 +1300,24 @@ void oceanCurrents(transmatrix& nat, monster *m, int delta) {
 bool airCurrents(transmatrix& nat, monster *m, int delta) {
   bool carried = false;
   cell *c = m->base;
+  if(c->land == laWestWall) {
+    cell *c2 = ts::left_of(c, westwall::coastvalEdge1);
+      
+    double spd = SCALE * delta / 900.;
+        
+    if(m->type == moVoidBeast) spd = -spd;
+    if(spd) {
+      transmatrix goal = gmatrix[c2];
+
+      // transmatrix t = spintox(H) * xpush(delta/300.) * rspintox(H);
+
+      hyperpoint H = inverse(m->pat) * goal * C0;
+      nat = nat * rspintox(H);
+      nat = nat * xpush(spd);
+      nat = nat * spintox(H);
+      carried = true; 
+      }
+    }
   if(c->land == laWhirlwind) {
     whirlwind::calcdirs(c);
     for(int i=0; i<whirlwind::qdirs; i++) {
@@ -1414,7 +1432,7 @@ bool swordKills(eMonster m) {
     m != moHedge && m != moMetalBeast && m != moMetalBeast2
     && m != moTortoise && m != moGreater && m != moRoseBeauty
     && m != moReptile && !isBull(m) && m != moButterfly &&
-    m != moSalamander && m != moTerraWarrior;
+    m != moSalamander && m != moTerraWarrior && m != moBrownBug;
   }
 
 bool hornKills(eMonster m) {
@@ -1424,10 +1442,10 @@ bool hornKills(eMonster m) {
     && m != moDraugr && m != moRoseBeauty
     && m != moReptile && !isBull(m) && m != moButterfly && !isBulletType(m)
     && m != moPalace && m != moFatGuard && m != moVizier &&
-    m != moSalamander && m != moTerraWarrior;
+    m != moSalamander && m != moTerraWarrior && m != moBrownBug;
   }
 
-queue<pair<int, cell*>> traplist;
+queue<pair<int, cell*>> traplist, firetraplist;
 
 void activateArrow(cell *c) {
   if(isCentralTrap(c))
@@ -1438,9 +1456,9 @@ monster arrowtrap_fakeparent;
 
 void doTraps() {
   while(true) { 
-    if(traplist.empty()) return;
+    if(traplist.empty()) break;
     auto t = traplist.front();
-    if(t.first > ticks) return;
+    if(t.first > ticks) break;
     int d = t.second->wparam;
     if(d == 2) {
       auto tl = traplimits(t.second);
@@ -1466,6 +1484,19 @@ void doTraps() {
       for(int i=1; i<4; i++) if(tl[i]) tl[i]->wparam = 0;
       }
     traplist.pop();
+    }
+
+  while(true) { 
+    if(firetraplist.empty()) break;
+    auto t = firetraplist.front();
+    if(t.first > ticks) return;
+    int d = t.second->wparam;
+    if(d == 2) {
+      t.second->wparam = 0;
+      t.second->wall = waNone;
+      explosion(t.second, 5, 10);
+      }
+    firetraplist.pop();
     }
   }
 
@@ -1722,7 +1753,7 @@ void movePlayer(monster *m, int delta) {
           m->inBoat = false;
           }
         }
-      else if(c2->wall == waThumperOn && !nonAdjacent(c2, m->base)) {
+      else if(isPushable(c2->wall) && !nonAdjacent(c2, m->base)) {
         int sd = dirfromto(c2, m->base);
         int subdir = 1;
         double bestd = 9999;
@@ -1817,7 +1848,12 @@ void movePlayer(monster *m, int delta) {
         toggleGates(c2, c2->wall);
 
       if(c2->wall == waArrowTrap && c2->wparam == 0 && !markOrb(itOrbAether))
-       activateArrowTrap(c2);
+        activateArrowTrap(c2);
+  
+      if(c2->wall == waFireTrap && c2->wparam == 0 && !markOrb(itOrbAether)) {
+        c2->wparam = 2;
+        firetraplist.emplace(ticks + 800, c2);
+        }
   
       if(c2->item == itOrbYendor && !peace::on) yendor::check(c2);
       collectItem(c2);
@@ -2231,6 +2267,8 @@ void moveBullet(monster *m, int delta) {
         }
       else if(isActivable(c2)) 
         activateActiv(c2, true);
+      else if(c2->wall == waExplosiveBarrel)
+        explodeBarrel(c2);
       }
     if(m->type == moCrushball && c2->wall == waRuinWall)
       c2->wall = waNone;
@@ -2292,10 +2330,10 @@ void moveBullet(monster *m, int delta) {
         }
       // multi-HP monsters
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
-        m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise ||
+        m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise || m2->type == moBrownBug || 
         m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
         m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
-        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander) 
+        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) 
           m2->hitpoints--;
         m->dead = true;
         if(m2->type == moVizier) ;
@@ -2729,6 +2767,11 @@ void moveMonster(monster *m, int delta) {
 
   if(c2 != m->base && c2->wall == waArrowTrap && c2->wparam == 0 && !ignoresPlates(m->type))
     activateArrowTrap(c2);
+
+  if(c2 != m->base && c2->wall == waFireTrap && c2->wparam == 0 && !ignoresPlates(m->type)) {
+    c2->wparam = 2;
+    firetraplist.emplace(ticks + 800, c2);
+    }
 
   if(c2 != m->base && mayExplodeMine(c2, m->type)) 
     killMonster(m, moNone);

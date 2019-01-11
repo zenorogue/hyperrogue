@@ -2659,6 +2659,8 @@ int gravityLevel(cell *c) {
 int gravityLevelDiff(cell *c, cell *d) { 
   if(c->land != laWestWall || d->land != laWestWall)
     return gravityLevel(c) - gravityLevel(d);
+  
+  if(shmup::on) return 0;
 
   int nid = neighborId(c, d);
   int id1 = parent_id(c, 1, coastvalEdge) + 1;
@@ -2680,6 +2682,7 @@ bool canUnstable(eWall w, flagtype flags) {
 
 bool cellEdgeUnstable(cell *c, flagtype flags) {
   if(!isGravityLand(c->land) || !canUnstable(c->wall, flags)) return false;
+  if(shmup::on && c->land == laWestWall) return false;
   for(int i=0; i<c->type; i++) if(c->move(i)) {
     if(isAnyIvy(c->move(i)->monst) && 
       c->land == laMountain && !(flags & MF_IVY)) return false;
