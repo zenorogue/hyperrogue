@@ -7555,11 +7555,13 @@ void pushThumper(cell *th, cell *cto) {
     }
   else if(cellUnstableOrChasm(cto)) {
     addMessage(XLAT("%The1 fills the hole!", w));
-    cto->wall = waTempFloor;
+    cto->wall = w == waThumperOn ? waTempFloor : waNone;
+    playSound(cto, "click");
     }
   else if(isWatery(cto)) {
     addMessage(XLAT("%The1 fills the hole!", w));
-    cto->wall = waTempBridge;
+    cto->wall = w == waThumperOn ? waTempBridge : waNone;
+    playSound(cto, "splash"+pick12());
     }
   else 
     cto->wall = w;
