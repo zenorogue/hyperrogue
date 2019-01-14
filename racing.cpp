@@ -1100,7 +1100,9 @@ void uploadScore() {
 void displayScore(eLand l) {
   int vf = min((vid.yres-64) / 70, vid.xres/80);
   int x = vid.xres / 4;
-
+  
+  set_priority_board(LB_RACING);
+  
   if(get_sync_status() == 1) {
     displayfr(x, 56, 1, vf, "(syncing)", 0xC0C0C0, 0);
     }
