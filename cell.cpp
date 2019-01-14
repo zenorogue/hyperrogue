@@ -99,7 +99,7 @@ struct hrmap_spherical : hrmap {
   hrmap_spherical() {
     mvar = variation;
     for(int i=0; i<spherecells(); i++) {
-      heptagon& h = *(dodecahedron[i] = new heptagon);
+      heptagon& h = *(dodecahedron[i] = tailored_alloc<heptagon> (S7));
       h.s = hsOrigin;
       h.emeraldval = i;
       h.zebraval = i;
@@ -190,7 +190,7 @@ struct hrmap_spherical : hrmap {
   ~hrmap_spherical() {
     dynamicval<eVariation> ph(variation, mvar);
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
-    for(int i=0; i<spherecells(); i++) delete dodecahedron[i];
+    for(int i=0; i<spherecells(); i++) tailored_delete(dodecahedron[i]);
     }    
 
   void verify() {
@@ -533,7 +533,7 @@ struct hrmap_torus : hrmap {
     }
   
   ~hrmap_torus() {
-    for(cell *c: all) delete c;
+    for(cell *c: all) tailored_delete(c);
     }
   };
 
@@ -561,7 +561,7 @@ struct hrmap_euclidean : hrmap {
       }
     ~euclideanSlab() {
       for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-        if(a[y][x]) delete a[y][x];
+        if(a[y][x]) tailored_delete(a[y][x]);
       }
     };
   
@@ -590,7 +590,7 @@ struct hrmap_euclidean : hrmap {
   ~hrmap_euclidean() {
     for(int y=0; y<slabs; y++) for(int x=0; x<slabs; x++)
       if(euclidean[y][x]) { 
-        delete euclidean[y][x];
+        tailored_delete(euclidean[y][x]);
         euclidean[y][x] = NULL;
         }
     eucdata.clear();
@@ -969,7 +969,7 @@ struct hrmap_quotient : hrmap {
     // printf("all cells = %d\n", TOT*(S7+S3)/S3);
     if(!TOT) exit(1);
     allh.resize(TOT);
-    for(int i=0; i<TOT; i++) allh[i] = new heptagon;
+    for(int i=0; i<TOT; i++) allh[i] = tailored_alloc<heptagon> (S7);
     // heptagon *oldorigin = origin;
     allh[0]->alt = base.origin;
   
@@ -1030,7 +1030,7 @@ struct hrmap_quotient : hrmap {
   ~hrmap_quotient() {
     for(int i=0; i<isize(allh); i++) {
       clearHexes(allh[i]);
-      delete allh[i];
+      tailored_delete(allh[i]);
       }
     }
   
@@ -1203,7 +1203,7 @@ void clearcell(cell *c) {
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
   DEBMEM ( printf("DEL %p\n", c); )
-  delete c;
+  tailored_delete(c);
   }
 
 heptagon deletion_marker;
@@ -1273,7 +1273,7 @@ void clearfrom(heptagon *at) {
       at->move(i) = NULL;
       }
     clearHexes(at);
-    delete at;
+    tailored_delete(at);
     }
 //printf("maxq = %d\n", maxq);
   }

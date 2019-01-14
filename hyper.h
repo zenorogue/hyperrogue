@@ -432,6 +432,10 @@ template<class T> T* tailored_alloc(int degree) {
   return result;
   }
 
+void inline tailored_delete(void *x) {
+  delete[] ((char*) (x));
+  }
+
 static const struct wstep_t { wstep_t() {} } wstep;
 static const struct wmirror_t { wmirror_t() {}} wmirror;
 static const struct rev_t { rev_t() {} } rev;
