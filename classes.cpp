@@ -1257,8 +1257,8 @@ itemtype iinf[ittypes] = {
     },
   { '$', 0xF0C0C0, "Meteorite", 
     "These rocks falling from the sky have been captured to fall forever in the artificial gravity. Meteorite iron is believed to be a valuable material for magical weapons."},
-  { '*', 0x30FF30, "Shining Gem", 
-    "Gems emiting benevolent magical radiation."},
+  { '*', 0x30FF30, "Torbernite", 
+    "Crystals emiting magical radiation."},
   
   { 'o', 0x703800, "Orb of Intensity", 
     "When you have this, initial and maximal charge amounts of all Orbs are increased by 20%."

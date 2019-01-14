@@ -7502,9 +7502,9 @@ N("Mutant", GEN_M, "Mutant", "Mutanci", "Mutanta", "Mutantem")
 S("These guys look a bit strange, but they have no special properties.",
   "Ci goście wyglądają trochę dziwnie, ale nie mają specjalnych własności.")
   
-N("Shining Gem", GEN_O, "Świecący Klejnot", "Świecące Klejnoty", "Święcący Klejnot", "Świecącym Klejnotem")
+N("Torbernite", GEN_O, "Torbernit", "Torbernity", "Torbernit", "Torbernitem")
 
-S("Gems emiting benevolent magical radiation.", "Te klejnoty emitują dobroczynne, magiczne promieniowanie.")
+S("Crystals emiting magical radiation.", "Te kryształy emitują magiczne promieniowanie.")
 
 N("fire trap", GEN_F, "ognista pułapka", "ogniste pułapki", "ognistą pułapkę", "ognistą pułapką")
 

@@ -63,8 +63,8 @@ const char* leadernames[NUMLEADER] = {
   "Turquoises", // 75
   "Chrysoberyls", // 76
   "Tasty Jellies", // 77
-  "Sphalerites", // 78
-  "Shining Gems", // 79
+  "Tiger's Eyes", // 78
+  "Torbernites", // 79
   "Meteorites", // 80
   "Racing Official Track", // 81
   };

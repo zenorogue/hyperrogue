@@ -7762,10 +7762,10 @@ N("Mutant", GEN_M, "Mutant", "Mutanti", "Mutanta", "Mutantem")
 
 S("These guys look a bit strange, but they have no special properties.",
   "Tihle chlapíci vypadají trošku podivně, ale nemají žádné speciální vlastnosti.")
-  
-N("Shining Gem", GEN_O, "Zářící drahokam", "Zářící drahokamy", "Zářící drahokam", "Zářícím drahokamem")
 
-S("Gems emiting benevolent magical radiation.", "Drahokamy vyzařující prospěšnou magickou radiaci.")
+N("Torbernite", GEN_O, "Torbernit", "Torbernity", "Torbernit", "Torbernitem")
+
+S("Crystals emiting magical radiation.", "Drahokamy vyzařující prospěšnou magickou radiaci.")
 
 N("fire trap", GEN_F, "ohnivá past", "ohnivé pasti", "ohnivou past", "ohnivou pastí")
 
