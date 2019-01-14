@@ -297,6 +297,7 @@ void showEuclideanMenu() {
   landvisited[laDual] = true;
   landvisited[laDocks] |= landvisited[laWarpCoast];
   landvisited[laSnakeNest] |= landvisited[laRedRock];
+  landvisited[laCamelot] |= hiitemsMax(treasureType(laCamelot)) >= 1;
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
