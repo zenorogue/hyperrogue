@@ -9,6 +9,8 @@ namespace hr {
 
 namespace racing {
 
+void set_race_configurer();
+
 bool guiding = false;
 
 bool on;
@@ -932,13 +934,13 @@ void race_projection() {
   dialog::display();
   }
 
-struct race_configurer {
-
   int playercfg;
   bool editing_track;
   string new_track;
   
-  race_configurer() { editing_track = false; new_track = track_code; playercfg = multi::players; }
+/* struct race_configurer { */
+
+  void set_race_configurer() { editing_track = false; new_track = track_code; playercfg = multi::players; }
   
   static string random_track_name() {
     string s = "";
@@ -959,7 +961,7 @@ struct race_configurer {
     return "";
     }
 
-  void operator() () {
+  void raceconfigurer() {
   
     gamescreen(1);
   
@@ -969,12 +971,14 @@ struct race_configurer {
       dialog::addInfo(XLAT("Racing available only in unbounded worlds."), 0xFF0000);
     else {
       dialog::addItem(XLAT("select the track and start!"), 's');
-      dialog::add_action([this] () { 
+      dialog::add_action([/*this*/] () { 
+        dynamicval<bool> so(shmup::on, true);
+        dynamicval<bool> ro(racing::on, true);
         if(race_ghosts[make_pair(new_track, modecode())].empty())
           read_ghosts(new_track, modecode());
         else
           println(hlog, "known ghosts: ", isize(race_ghosts[make_pair(new_track, modecode())]));
-        pushScreen([this] () { track_chooser(new_track); }); 
+        pushScreen([/*this*/] () { track_chooser(new_track); }); 
         });
       }
     
@@ -987,7 +991,7 @@ struct race_configurer {
     dialog::add_action([] () { guiding = !guiding; });
   
     dialog::addItem(shmup::player_count_name(playercfg), 'n');
-    dialog::add_action([this] () { 
+    dialog::add_action([/*this*/] () { 
       playercfg = playercfg == 1 ? 2 : 1;
       });
   
@@ -1007,14 +1011,14 @@ struct race_configurer {
     dialog::addBreak(100);
 
     dialog::addSelItem("track seed", editing_track ? dialog::view_edited_string() : new_track, '/');
-    dialog::add_action([this] () { 
+    dialog::add_action([/*this*/] () { 
       editing_track = !editing_track;
       if(editing_track) dialog::start_editing(new_track);
       });
     dialog::addItem("play the official seed", 'o');
-    dialog::add_action([this] () { new_track = "OFFICIAL"; });
+    dialog::add_action([/*this*/] () { new_track = "OFFICIAL"; });
     dialog::addItem("play a random seed", 'r');
-    dialog::add_action([this] () { new_track = random_track_name(); });    
+    dialog::add_action([/*this*/] () { new_track = random_track_name(); });    
 
     dialog::addBreak(100);
     
@@ -1038,7 +1042,7 @@ struct race_configurer {
     dialog::addBack();
     dialog::display();
 
-    keyhandler = [this] (int sym, int uni) {
+    keyhandler = [/*this*/] (int sym, int uni) {
       if(editing_track) {
         if(sym == SDLK_RETURN) sym = uni = '/';
         if(dialog::handle_edit_string(sym, uni, racecheck)) return;
@@ -1048,15 +1052,17 @@ struct race_configurer {
       };
     
     }
-  };
+/*  }; */
 
 void configure_race() { 
-  pushScreen(race_configurer());
+  set_race_configurer();
+
+  pushScreen(raceconfigurer);
   }
 
 auto hooks1 = 
   addHook(hooks_o_key, 90, [] { 
-    if(racing::on) return named_dialog(XLAT("racing menu"), race_configurer());
+    if(racing::on) return named_dialog(XLAT("racing menu"), raceconfigurer);
     else return named_functionality();
     });
 
