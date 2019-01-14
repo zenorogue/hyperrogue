@@ -613,20 +613,6 @@ void generate_track() {
   track_ready = true;
   race_checksum = hrand(1000000);
   
-  auto& gh = ghostset() [specialland];
-  int ngh = 0;
-  for(int i=0; i<isize(gh); i++) {
-    if(gh[i].checksum != race_checksum) {
-      println(hlog, format("wrong checksum: %x, should be %x", gh[i].checksum, race_checksum));
-      }
-    else {
-      if(i != ngh)
-        gh[ngh] = move(gh[i]);
-      ngh++;
-      }
-    }
-  gh.resize(ngh);
-  
   race_start_tick = 0;
   for(int i=0; i<MAXPLAYER; i++) race_finish_tick[i] = 0;
 
@@ -1156,6 +1142,19 @@ void race_won() {
       }
       
     auto &subtrack = ghostset() [specialland];
+
+    int ngh = 0;
+    for(int i=0; i<isize(subtrack); i++) {
+      if(subtrack[i].checksum != race_checksum) {
+        println(hlog, format("wrong checksum: %x, should be %x", subtrack[i].checksum, race_checksum));
+        }
+      else {
+        if(i != ngh)
+          subtrack[ngh] = move(subtrack[i]);
+        ngh++;
+        }
+      }
+    subtrack.resize(ngh);    
 
     subtrack.emplace_back(ghost{gcs, result, race_checksum, time(NULL), current_history[current_player]});
     sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result < g2.result; });
