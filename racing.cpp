@@ -815,16 +815,24 @@ string racetimeformat(int t) {
   }
 
 void track_chooser(string new_track) {
+  cmode = 0;
+  gamescreen(2);
   dialog::init(XLAT("Racing"));
   
   map<char, eLand> landmap;
+  
+  dynamicval<bool> so(shmup::on, true);
+  dynamicval<bool> ro(racing::on, true);
 
   char let = 'a';
   for(eLand l: race_lands) {
-    auto& gh = race_ghosts[make_pair(new_track, modecode())] [l];
+    auto& ghs = race_ghosts[make_pair(new_track, modecode())];
     const int LOST = 3600000;
     int best = LOST;
-    for(auto& gc: gh) best = min(best, gc.result);
+    if(ghs.count(l)) {
+      auto& gh = ghs[l];
+      for(auto& gc: gh) best = min(best, gc.result);
+      }
     string s = (best == LOST) ? "" : racetimeformat(best);
     landmap[let] = l;
     dialog::addSelItem(XLAT1(linf[l].name), s, let++);
