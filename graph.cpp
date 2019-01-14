@@ -3886,7 +3886,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     int flooralpha = 255;
 
-#if CAP_EDIT
+#if CAP_EDIT && CAP_TEXTURE
     if((cmode & sm::DRAW) && mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgFloor && texture::config.tstate != texture::tsActive)
       flooralpha = 0xC0;
 #endif

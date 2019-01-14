@@ -1793,7 +1793,8 @@ namespace mapeditor {
       
       transmatrix mh = textrans * rgpushxto0(mouseh);
       transmatrix ml = textrans * rgpushxto0(lstart);
-      
+
+#if CAP_TEXTURE      
       for(int j=0; j<=texture::texturesym; j++)
       for(int i=0; i<c->type; i += sih.symmetries) {
         transmatrix M2 = V * applyPatterndir(c, sih) * spin(2*M_PI*i/c->type);
@@ -1809,6 +1810,7 @@ namespace mapeditor {
             queue_hcircle(M2 * mh, texture::penwidth);
           }                
         }
+#endif
       }
     }
 
