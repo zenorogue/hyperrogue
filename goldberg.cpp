@@ -615,11 +615,11 @@ namespace hr { namespace gp {
     else if(DUAL)
       return XLAT("dual");
     else if(PURE)
-      return XLAT("OFF");
+      return XLAT("pure");
     else if(BITRUNCATED)
       return XLAT("bitruncated");
     else if(param == loc(1, 0))
-      return XLAT("OFF");
+      return XLAT("pure");
     else if(param == loc(1, 1) && S3 == 3)
       return XLAT("bitruncated");
     else if(param == loc(1, 1) && S3 == 4)
@@ -686,7 +686,7 @@ namespace hr { namespace gp {
       }
 #endif    
     if(min_quality == 0 && min_quality_chess == 0) {
-      dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !IRREGULAR, 'a');
+      dialog::addBoolItem(XLAT("pure"), param == loc(1,0) && !IRREGULAR, 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
     
