@@ -196,11 +196,6 @@ namespace westwall {
       placeLocalOrbs(c);
     }
 
-  cell *where;
-  int dfrom[2], dto[2], qdirs;
-  
-  int gdist(int d, int e) { return dirdiff(d-e, where->type); }
-  
   int coastvalEdge1(cell *c) {
     if(c->land == laWestWall && !c->landparam) buildEquidistant(c);
     return coastvalEdge(c);
