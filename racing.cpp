@@ -73,7 +73,7 @@ struct ghost {
   charstyle cs;
   int result;
   int checksum;
-  time_t timestamp;
+  long long timestamp;
   vector<ghostmoment> history;
   };
 
