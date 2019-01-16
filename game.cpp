@@ -3784,6 +3784,7 @@ void moveMonster(cell *ct, cell *cf, int direction_hint) {
     if(m == moDraugr && ct->land != laBurial && ct->land != laHalloween) ct->stuntime += 2;
     if(m == moBrownBug && snakelevel(ct) < snakelevel(cf)) ct->stuntime += 2;
     if(m == moBrownBug && snakelevel(ct) < snakelevel(cf) - 1) ct->stuntime += 2;
+    if(m == moBrownBug && isWatery(ct) && !isWatery(cf)) ct->stuntime += 2;
     }
   
   if(isWitch(m) && ct->item == itOrbLife && passable(cf, NULL, P_MIRROR)) {
