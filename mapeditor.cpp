@@ -947,7 +947,7 @@ namespace mapeditor {
     else if(sym == SDLK_F8) {
       pushScreen(map_settings);
       }
-    else if(uni == 'c') {
+    else if(uni == 'c' && mouseover) {
       copysource = mouseover_cw(true);
       painttype = 4;
       paintwhat_str = XLAT("copying");
