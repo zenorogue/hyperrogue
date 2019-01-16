@@ -1798,6 +1798,9 @@ bool earthWall(cell *c) {
   }
 
 bool snakepile(cell *c, eMonster m) {
+  if(c->wall == waSea && c->land == laOcean) {
+    c->land = laBrownian, c->landparam = 0;
+    }
   if(c->land == laBrownian) {
     if(c->wall == waNone) {
       #if CAP_COMPLEX2
@@ -1827,12 +1830,11 @@ bool snakepile(cell *c, eMonster m) {
     }
   else if(c->wall == waNone || isAlchAny(c) ||
     c->wall == waCIsland || c->wall == waCIsland2 ||
-    (c->wall == waSea && c->land == laOcean) ||
     c->wall == waOpenPlate || c->wall == waClosePlate ||
     c->wall == waMineUnknown || c->wall == waMineOpen || isReptile(c->wall)) {
     if(isReptile(c->wall)) kills[moReptile]++;
     c->wall = waRed1;
-    if(m == moDarkTroll) c->wall = waDeadfloor2;
+    if(among(m, moDarkTroll, moBrownBug)) c->wall = waDeadfloor2;
     }
   else if(c->wall == waDeadfloor)
     c->wall = waDeadfloor2; 
