@@ -1443,7 +1443,7 @@ namespace patterns {
     return canvasback;
     }
 
-  void showPrePattern() {
+  void showPrePatternP(bool instant) {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(0);
 
@@ -1502,7 +1502,7 @@ namespace patterns {
 
     dialog::display();
     
-    keyhandler = [] (int sym, int uni) {
+    keyhandler = [instant] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       if(uni == 'g') {
         static unsigned c = (canvasback << 8) | 0xFF;
@@ -1510,21 +1510,30 @@ namespace patterns {
           6, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF, unsigned(linf[laCanvas].color >> 2) << 8
           }; 
         dialog::openColorDialog(c, canvasbacks);
-        dialog::reaction = [] () {
-          stop_game();
-          whichCanvas = 'g';
-          canvasback = c >> 8;
-          firstland = specialland = laCanvas;
-          randomPatternsMode = false;
-          start_game();
+        dialog::reaction = [instant] () {
+          if(instant) {
+            stop_game();
+            whichCanvas = 'g';
+            canvasback = c >> 8;
+            firstland = specialland = laCanvas;
+            randomPatternsMode = false;
+            start_game();
+            }
+          else {
+            whichCanvas = 'g';
+            canvasback = c >> 8;
+            }
           };
         }
       else if(uni == 'i') {
-        stop_game();
-        canvas_invisible = !canvas_invisible;
-        firstland = specialland = laCanvas; 
-        randomPatternsMode = false;
-        start_game();
+        if(instant) {
+          stop_game();
+          canvas_invisible = !canvas_invisible;
+          firstland = specialland = laCanvas; 
+          randomPatternsMode = false;
+          start_game();
+          }
+        else canvas_invisible = !canvas_invisible;
         }
       
       else if(uni == 'f') {
@@ -1550,12 +1559,15 @@ namespace patterns {
         }
       
       else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
-        stop_game();
+        if(instant)
+          stop_game();
         whichCanvas = uni;
         subcanvas = rand();
-        firstland = specialland = laCanvas; 
-        randomPatternsMode = false;
-        start_game();
+        if(instant) {
+          firstland = specialland = laCanvas; 
+          randomPatternsMode = false;
+          start_game();
+          }
         if(uni == 'x' || uni == 'z' || uni == 't')
           whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;
         if(uni == 'e')
@@ -1568,6 +1580,10 @@ namespace patterns {
       else if(doexiton(sym, uni)) popScreen();
       };    
     }
+  
+  void showPrePattern() { showPrePatternP(true); }
+  void showPrePatternNoninstant() { showPrePatternP(false); }
+
 
 #if CAP_TEXTURE
 #define REMAP_TEXTURE texture::config.remap()

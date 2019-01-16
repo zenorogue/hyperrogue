@@ -1960,6 +1960,9 @@ namespace mapeditor {
     dialog::add_action([] () { autocheat = true; });
     dialog::addInfo("(unlock all, allow cheats, normal character display)");
     
+    dialog::addItem("change the pattern/color of new Canvas cells", 'c');
+    dialog::add_action([] () { pushScreen(patterns::showPrePatternNoninstant); });
+    
     dialog::addBack();
     dialog::display();
     }
