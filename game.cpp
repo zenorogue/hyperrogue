@@ -6505,6 +6505,9 @@ int ambushSize(cell *c, eItem what) {
   if(ambushval)
     return ambushval;
   switch(what) {
+    case itCompass:
+      return 0;
+    
     case itHunting:
       return min(min(qty, max(33-qty, 6)), 15);
     
