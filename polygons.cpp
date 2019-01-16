@@ -762,7 +762,12 @@ void fixMercator(bool tinf) {
   }
   
 unsigned char& part(color_t& col, int i) {
-  unsigned char* c = (unsigned char*) &col; return c[i];
+  unsigned char* c = (unsigned char*) &col;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  return c[sizeof(col) - 1 - i];
+#else
+  return c[i];
+#endif
   }
 
 bool in_twopoint = false;
