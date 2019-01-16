@@ -797,6 +797,8 @@ void describeMouseover() {
     
     if(isIcyLand(c)) 
       out += " (" + fts(heat::celsius(c)) + " °C)";
+    if(c->land == laBrownian && c->wall == waNone)
+      out += XLAT(" (level %1)", its(snakelevel(c)));
     if(c->land == laDryForest && c->landparam) 
       out += " (" + its(c->landparam)+"/10)";
     if(c->land == laOcean && chaosmode)

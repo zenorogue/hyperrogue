@@ -8084,9 +8084,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         addMessage(XLAT("Wrong color!"));
       else if(c2->wall == waRoundTable)
         addMessage(XLAT("It would be impolite to land on the table!"));
-      else if(cwt.at->wall == waRed3 && snakelevel(c2) == 0)
-        addMessage(XLAT("You would get hurt!", c2->wall));
-      else if(cwt.at->wall == waTower && snakelevel(c2) == 0)
+      else if(snakelevel(cwt.at) >= 3 && snakelevel(c2) == 0)
         addMessage(XLAT("You would get hurt!", c2->wall));
       else if(cellEdgeUnstable(cwt.at) && cellEdgeUnstable(c2)) {
         addMessage(XLAT("Gravity does not allow this!"));
