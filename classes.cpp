@@ -791,7 +791,9 @@ monstertype minf[motypes] = {
     },
   { 'W', 0x707080, "Falling Dog", 
     "Distant relatives of the Running Dogs."},
-  { 'B', 0xC0C040, "Western Hawk", NODESCYET},
+  { 'B', 0xC0C040, "Western Hawk", 
+    "Some readers misinterpreted the early maps of Free Fall, thinking that it is a land to the west from some wall. "
+    "The name Western Hawks remained." },
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
