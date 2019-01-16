@@ -309,10 +309,10 @@ bool debugmode = false;
 // static apparently does not work in old compilers
 int bitfield_v;
 
-template<class T> void bitfield_editor(int val, const T& setter, string help = "") {
+template<class T> void bitfield_editor(int val, T setter, string help = "") {
   bitfield_v = val;
   dialog::editNumber(bitfield_v, 0, 100, 1, bitfield_v, help, "");
-  dialog::reaction = [&setter] () { setter(bitfield_v); };
+  dialog::reaction = [setter] () { setter(bitfield_v); };
   }
 
 struct debugScreen {
