@@ -283,7 +283,11 @@ const array<variant_feature, 21> variant_features {{
   {0x000c18,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
   {0x040A00,-1, moNone, VF { if(c->wall == waNone && !c->monst && !c->monst && hrand(1500) < 10) c->wall = waThumperOff; } },
   {0x080A00,-1, moNone, VF { if(hrand(1500) < 20 && !c->monst && !c->wall) c->wall = waFireTrap; } },
-  {0x0C0A00, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waExplosiveBarrel; } },
+  {0x0C0A00, 0, moNone, VF { 
+    bool inyendor = yendor::on && specialland == laVariant && celldist(c) < 7;
+    int chance = inyendor ? 800 : 100;
+    if(c->wall == waNone && !c->monst && hrand(5000) < chance) c->wall = waExplosiveBarrel; 
+    } },
   {0x060D04, 0, moNone, VF { 
     if(c->wall == waNone && !c->monst && pseudohept(c) && hrand(30000) < 25 + items[itVarTreasure]) 
       if(buildIvy(c, 0, c->type) && !peace::on) c->item = itVarTreasure;

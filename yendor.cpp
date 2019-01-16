@@ -89,6 +89,7 @@ namespace yendor {
     {laRuins,     YF_DEAD},
     {laCaves,     YF_DEAD5},
     {laWestWall,  YF_START_CR},
+    // {laVariant,   YF_DEAD5}, (I do not think this works)
     };
   
   int tscorelast;

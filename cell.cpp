@@ -1590,6 +1590,7 @@ cdata *getHeptagonCdata(heptagon *h) {
     h->cdata = new cdata(orig_cdata);
     for(int& v: h->cdata->val) v = 0;
     h->cdata->bits = reptilecheat ? (1 << 21) - 1 : 0;
+    if(yendor::on && specialland == laVariant) h->cdata->bits |= (1 << 8) | (1 << 9) | (1 << 12);
     return h->cdata;
     }
   
