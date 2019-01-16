@@ -2301,7 +2301,7 @@ void livecaves() {
 /* evolver */
 
 namespace tortoise {
-  map<cell*, cell*> emap;
+  map<cell*, int> emap;
   map<cell*, int> babymap;
   int last;
   
@@ -2318,13 +2318,11 @@ namespace tortoise {
   const int numbits = (int) tfCOUNT;
   const int mask = (1<<numbits)-1;
 
-  cell *get(cell *where) {
+  int getb(cell *where) {
     if(emap.count(where)) return emap[where];
-    return where;
+    return getBits(where);
     }
 
-  int getb(cell *where) { return getBits(get(where)); }
-  
   int countBits(int c) {
     int bi = 0;
     for(int i=0; i<numbits; i++) if((c >> i)&1) bi++;

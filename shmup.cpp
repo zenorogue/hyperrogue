@@ -3340,7 +3340,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           c->stuntime = 1 + (m->stunoff - curtime-1)/300;
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
-        if(m->type == moTortoise) tortoise::emap[c] = m->torigin;
+        if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin);
         drawMonsterType(m->type, c, view, col, m->footphase);
         if(m->type == moTortoise) tortoise::emap.erase(c);
         break;

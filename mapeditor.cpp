@@ -160,10 +160,14 @@ namespace mapstream {
       f.write_char(c->land);
       f.write_char(c->mondir);
       f.write_char(c->monst);
+      if(c->monst == moTortoise)
+        f.write(tortoise::emap[c] = tortoise::getb(c));
       f.write_char(c->wall);
       // f.write_char(c->barleft);
       // f.write_char(c->barright);
       f.write_char(c->item);
+      if(c->item == itBabyTortoise)
+        f.write(tortoise::babymap[c]);
       f.write_char(c->mpdist);
       // f.write_char(c->bardir);
       f.write(c->wparam); f.write(c->landparam);
@@ -324,10 +328,14 @@ namespace mapstream {
       c->land = (eLand) f.read_char();
       c->mondir = fixspin(rspin, f.read_char(), c->type);
       c->monst = (eMonster) f.read_char();
+      if(c->monst == moTortoise && vernum >= 11001)
+        f.read(tortoise::emap[c]);
       c->wall = (eWall) f.read_char();
       // c->barleft = (eLand) f.read_char();
       // c->barright = (eLand) f.read_char();
       c->item = (eItem) f.read_char();
+      if(c->item == itBabyTortoise && vernum >= 11001)
+        f.read(tortoise::babymap[c]);
       c->mpdist = f.read_char();
       c->bardir = NOBARRIERS;
       // fixspin(rspin, f.read_char(), c->type);
@@ -625,7 +633,7 @@ namespace mapeditor {
         if(c->monst ==moTortoise && last == moTortoise) {
           cell *c1 = c;
           for(int i=0; i<100; i++) c1 = c1->cmove(hrand(c1->type));
-          tortoise::emap[c] = c1;
+          tortoise::emap[c] = tortoise::getRandomBits();
           }
         break;
         }

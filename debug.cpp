@@ -366,6 +366,19 @@ struct debugScreen {
         });
       dialog::addSelItem("barrier left", dnameof2(what->barleft), 0);
       dialog::addSelItem("barrier right", dnameof2(what->barright), 0);
+      if(what->item == itBabyTortoise) {
+        dialog::addSelItem("baby Tortoise flags", itsh(tortoise::babymap[what]), 'B');
+        dialog::add_action([what] () {
+          dialog::editNumber(tortoise::babymap[what], 0, (1<<21)-1, 1, getBits(what), "", "");
+          });
+        }
+      if(what->monst == moTortoise) {
+        dialog::addSelItem("adult Tortoise flags", itsh(tortoise::emap[what]), 'A');
+        dialog::add_action([what] () {
+          tortoise::emap[what] = tortoise::getb(what);
+          dialog::editNumber(tortoise::emap[what], 0, (1<<21)-1, 1, getBits(what), "", "");
+          });
+        }
       dialog::addBreak(50);
       
       if(show_debug_data) {

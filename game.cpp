@@ -3294,7 +3294,7 @@ void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
   if(cf && isPrincess(m)) princess::move(ct, cf);
   
   if(cf && m == moTortoise) {
-    tortoise::emap[ct] = tortoise::get(cf);
+    tortoise::emap[ct] = tortoise::getb(cf);
     tortoise::emap.erase(cf);
     }
   
