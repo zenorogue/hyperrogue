@@ -2484,7 +2484,7 @@ void setdist(cell *c, int d, cell *from) {
       placeCrossroadOrbs(c);
     else
       placeLocalOrbs(c);
-    if(geometry == gCrystal)
+    if(geometry == gCrystal && c->land != laMinefield)
       crystal::may_place_compass(c);
     }
 
