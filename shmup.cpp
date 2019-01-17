@@ -1634,7 +1634,7 @@ void movePlayer(monster *m, int delta) {
 #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
-  if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout()) {
+  if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout() && !racing::on) {
     // playermoved = true;
     hyperpoint h = inverse(m->pat) * mouseh;
     playerturn[cpid] = -atan2(h[1], h[0]);

@@ -148,7 +148,8 @@ bool read_ghosts(string seed, int mcode) {
   println(hlog, "trying to read ghosts from: ", fname);
   fhstream f(fname, "rb");
   if(!f.f) return false;
-  f.get<int> ();
+  int vernum = f.get<int> ();
+  if(vernum <= 0xA600) return true; // scores removed due to the possibility of cheating
   hread(f, ghostset());
   return true;
   }
