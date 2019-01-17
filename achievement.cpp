@@ -140,6 +140,7 @@ void improveItemScores();
 #include "private/hypersteam.cpp"
 #elif !ISANDROID && !ISIOS
 void achievement_init() {}
+string myname() { return "Rogue"; }
 void achievement_close() {}
 void achievement_gain(const char* s, char flags) {
   achievement_log(s, flags);

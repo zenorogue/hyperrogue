@@ -618,6 +618,9 @@ void achievement_init();
 // close the achievement system.
 void achievement_close();
 
+// get the user name
+string myname();
+
 // gain the achievement with the given name.
 // flags: 'e' - for Euclidean, 's' - for Shmup, '7' - for heptagonal
 // Only awarded if special modes are matched exactly.
