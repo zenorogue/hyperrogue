@@ -325,6 +325,9 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
     
   if(isHaunted(l) && it == itOrbLava)
     return olrUseless;
+  
+  if(l == laGraveyard && it == itOrbLava)
+    return olrUseless;
     
   if(l == laDryForest)
     if(it == itOrbFire || it == itOrbLightning || it == itOrbLava)
