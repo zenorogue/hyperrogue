@@ -405,7 +405,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
-        else if(a4 || archimedean)
+        else if(a4 || archimedean || geometry == gCrystal)
           c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
         else if(!BITRUNCATED) {
           if(polarb50(c)) 
