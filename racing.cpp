@@ -1066,7 +1066,7 @@ void configure_race() {
 
 auto hooks1 = 
   addHook(hooks_o_key, 90, [] { 
-    if(racing::on) return named_dialog(XLAT("racing menu"), raceconfigurer);
+    if(racing::on) { set_race_configurer();  return named_dialog(XLAT("racing menu"), raceconfigurer); }
     else return named_functionality();
     });
 
