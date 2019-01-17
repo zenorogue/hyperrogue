@@ -163,7 +163,7 @@ void write_ghosts(string seed, int mcode) {
   hwrite(f, ghostset());
   }
 
-transmatrix get_ghostmoment(ghostmoment& p) {
+transmatrix get_ghostmoment_matrix(ghostmoment& p) {
   cell *w = rti[p.where_id].c;
   transmatrix T = spin_uchar(p.alpha) * xpush(uchar_to_frac(p.distance) * distance_multiplier) * spin_uchar(p.beta);
   return gmatrix[w] * T;
@@ -454,9 +454,9 @@ void generate_track() {
   
   vector<transmatrix> forbidden;
   for(auto& ghost: ghostset()[specialland])
-    forbidden.push_back(get_ghostmoment(ghost.history[0]));
-  for(auto& ghost: oghostset()[specialland])
-    forbidden.push_back(get_ghostmoment(ghost.history[0]));
+    forbidden.push_back(get_ghostmoment_matrix(ghost.history[0]));
+  for(auto& ghost: oghostset()[specialland]) 
+    forbidden.push_back(get_ghostmoment_matrix(ghost.history[0]));
 
   for(int i=0; i<multi::players; i++) trophy[i] = 0;
 
@@ -1180,20 +1180,79 @@ void race_won() {
     }
   }
 
-void draw_ghost(ghost& ghost) {
-  auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
-  if(p == ghost.history.end()) p--, p->footphase = 0;
-  cell *w = rti[p->where_id].c;
-  if(!gmatrix.count(w)) return;
+void draw_ghost_at(ghost& ghost, cell *w, const transmatrix& V, ghostmoment& p) {
   dynamicval<charstyle> x(getcs(), ghost.cs);
-  
   if(ghost.cs.charid == -1) {
     dynamicval<bool> pc(peace::on, true);
-    drawMonsterType(eMonster(ghost.cs.uicolor), w, get_ghostmoment(*p), ghost.cs.dresscolor, uchar_to_frac(p->footphase));
+    drawMonsterType(eMonster(ghost.cs.uicolor), w, V, ghost.cs.dresscolor, uchar_to_frac(p.footphase));
     return;
     }
 
-  drawMonsterType(moPlayer, w, get_ghostmoment(*p), 0, uchar_to_frac(p->footphase));
+  drawMonsterType(moPlayer, w, V, 0, uchar_to_frac(p.footphase));
+  }
+
+bool ghost_finished(ghost& ghost) {
+  auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
+  return p == ghost.history.end();
+  }
+
+ghostmoment& get_ghostmoment(ghost& ghost) {
+  auto p = std::find_if(ghost.history.begin(), ghost.history.end(), [] (const ghostmoment gm) { return gm.step > ticks - race_start_tick;} );
+  if(p == ghost.history.end()) p--, p->footphase = 0;
+  return *p;
+  }
+
+void draw_ghost(ghost& ghost) {
+  auto& p = get_ghostmoment(ghost);
+  cell *w = rti[p.where_id].c;
+  if(!gmatrix.count(w)) return;
+  draw_ghost_at(ghost, w, get_ghostmoment_matrix(p), p);
+  }
+
+transmatrix racerel(ld rel) {
+  int bsize = vid.fsize * 2;
+  return atscreenpos(bsize, vid.yres - bsize - rel * (vid.yres - bsize*2) / 100, bsize) * spin(M_PI/2);
+  }
+
+int get_percentage(cell *c) {
+  return min(get_info(c).completion * 100 / (isize(track) - DROP), 100);
+  }
+  
+int get_percentage(int i) {
+  return get_percentage(shmup::pc[i]->base);
+  }
+  
+void draw_ghost_state(ghost& ghost) {
+  auto& p = get_ghostmoment(ghost);
+  cell *w = rti[p.where_id].c;
+  ld result = ghost_finished(ghost) ? 100 : get_percentage(w);
+  draw_ghost_at(ghost, w, racerel(result), p);
+  }
+
+void drawStats() {
+
+  if(!racing::on) return;
+  
+  initquickqueue();
+  
+  int bsize = vid.fsize * 2;
+  for(int y: {bsize, vid.yres - bsize}) {
+    curvepoint(atscreenpos(bsize, y, bsize) * C0);
+    curvepoint(atscreenpos(bsize/2, y, bsize) * C0);
+    curvepoint(atscreenpos(bsize*3/2, y, bsize) * C0);
+    curvepoint(atscreenpos(bsize, y, bsize) * C0);
+    }
+  queuecurve(0xFFFFFFFF, 0, PPR::ZERO);
+  
+  for(auto& ghost: ghostset()[specialland]) draw_ghost_state(ghost);
+  for(auto& ghost: oghostset()[specialland]) draw_ghost_state(ghost);
+  
+  for(int i=0; i<multi::players; i++) {
+    dynamicval<int> d(multi::cpid, i);
+    drawMonsterType(moPlayer, shmup::pc[i]->base, racerel(race_finish_tick[i] ? 100 : get_percentage(i)), 0xFFFFFFC0, shmup::pc[i]->footphase);    
+    }
+
+  quickqueue();
   }
 
 void markers() {
@@ -1233,10 +1292,6 @@ void markers() {
     }
   }
 
-int get_percentage(int i) {
-  return min(get_info(shmup::pc[i]->base).completion * 100 / (isize(track) - DROP), 100);
-  }
-  
 void add_debug(cell *c) { 
   if(racing::on && racing::rti_id[c]) {
     auto& r = racing::get_info(c);

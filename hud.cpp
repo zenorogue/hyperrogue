@@ -373,7 +373,8 @@ void drawStats() {
     quickqueue();
     }
   
-  if(racing::on) ;
+  if(racing::on) 
+    racing::drawStats();
   else if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;
