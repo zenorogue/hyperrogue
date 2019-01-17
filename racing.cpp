@@ -1142,6 +1142,11 @@ void race_won() {
     if(place == 1 && losers) trophy[current_player] = 0xFFD500FF;
     if(place == 2) trophy[current_player] = 0xFFFFC0FF;
     if(place == 3) trophy[current_player] = 0x967444FF;
+  
+    if(place + losers > 1)
+      addMessage(XLAT("Finished the race! Time: %1, place: %2 out of %3", racetimeformat(result), its(place), its(place+losers)));
+    else
+      addMessage(XLAT("Finished the race in time %1!", racetimeformat(result)));
     
     if(place == 1 && losers && official_race)
       achievement_gain("RACEWON", rg::racing);
