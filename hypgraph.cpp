@@ -981,6 +981,16 @@ void drawEuclidean() {
   }
 
 void spinEdge(ld aspd) { 
+
+  if(playerfound && vid.fixed_facing) {
+    hyperpoint H = gpushxto0(playerV * C0) * playerV * xpush0(5);
+    downspin = atan2(H[1], H[0]);
+    downspin += vid.fixed_facing_dir * degree;
+    if(flipplayer) downspin += M_PI;
+    while(downspin < -M_PI) downspin += 2*M_PI;
+    while(downspin > +M_PI) downspin -= 2*M_PI;
+    aspd = (1 + 2 * abs(downspin)) * aspd;
+    }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
   View = spin(downspin) * View;

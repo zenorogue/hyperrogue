@@ -175,6 +175,7 @@ void initConfig() {
 
   addsaver(vid.ballangle, "ball angle", 20);
   addsaver(vid.yshift, "Y shift", 0);
+  addsaver(vid.fixed_facing, "fixed facing", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaver(vid.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
@@ -1325,6 +1326,13 @@ void show3D() {
   dialog::addBreak(50);
   dialog::addSelItem(XLAT("Y shift"), fts3(vid.yshift), 'y');
   dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
+  dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
+  dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
+    if(vid.fixed_facing) {
+      dialog::editNumber(vid.fixed_facing_dir, 0, 360, 15, 90, "", "");
+      dialog::dialogflags |= sm::CENTER;
+      }
+    });
   dialog::addBreak(50);
   dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
   
@@ -1333,6 +1341,27 @@ void show3D() {
     dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
     dialog::add_action([] () { rug::spatial_rug = !rug::spatial_rug; });
     }
+  dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
+  dialog::add_action([] () { 
+    if(pmodel == mdDisk && vid.camera_angle) {
+      vid.yshift = 0;
+      vid.camera_angle = 0;
+      vid.xposition = 0;
+      vid.yposition = 0;
+      vid.scale = 1;      
+      vid.fixed_facing = false;
+      }
+    else {
+      vid.yshift = -0.3;
+      vid.camera_angle = -45;
+      vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
+      vid.xposition = 0;
+      vid.yposition = -0.9;
+      vid.fixed_facing = true;
+      vid.fixed_facing_dir = 90;
+      }
+    });
+
   if(rug::rugged && !rug::spatial_rug)
     dialog::addBreak(100);
   else if(non_spatial_model())
@@ -1810,6 +1839,15 @@ int read_config_args() {
     PHASEFROM(2); 
     shift_arg_formula(vid.xposition);
     shift_arg_formula(vid.yposition);
+    }
+  else if(argis("-fixdir")) {
+    PHASEFROM(2); 
+    vid.fixed_facing = true;
+    shift_arg_formula(vid.fixed_facing_dir);
+    }
+  else if(argis("-fixdiroff")) {
+    PHASEFROM(2); 
+    vid.fixed_facing = false;
     }
   else if(argis("-msmoff")) {
     PHASEFROM(2); memory_saving_mode = false;

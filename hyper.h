@@ -992,9 +992,10 @@ enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
-  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width;
+  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width, fixed_facing_dir;
   int mobilecompasssize;
   int aurastr, aurasmoothen;
+  bool fixed_facing;
   
   int linequality;
 
