@@ -1004,7 +1004,7 @@ void centerpc(ld aspd) {
     crystal::centerrug(aspd);
     
   #if CAP_RACING
-  if(racing::on) {
+  if(racing::on && !racing::standard_centering) {
     racing::set_view();   
     return;
     }

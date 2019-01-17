@@ -15,6 +15,7 @@ bool guiding = false;
 
 bool on;
 bool player_relative = false;
+bool standard_centering = false;
 bool track_ready;
 
 bool official_race = false;
@@ -904,8 +905,8 @@ void race_projection() {
     });
   
   if(pmodel == mdDisk) {    
-    dialog::addSelItem(XLAT("point of view"), player_relative ? "player" : "track", 'p');
-    if(quotient)
+    dialog::addSelItem(XLAT("point of view"), XLAT(player_relative ? "player" : "track"), 'p');
+    if(quotient || racing::standard_centering)
       dialog::lastItem().value = XLAT("N/A");
     dialog::add_action([] () { 
       player_relative = !player_relative; 
@@ -926,6 +927,11 @@ void race_projection() {
   dialog::addSelItem(XLAT("show more in front"), fts(race_advance), 'A');
   dialog::add_action([] () {
     dialog::editNumber(race_advance, 0, 360, 0.1, 1, XLAT("show more in front"), "");
+    });
+
+  dialog::addBoolItem(XLAT("do not use special centering for racing"), standard_centering, 'C');
+  dialog::add_action([] () {
+    standard_centering = !standard_centering;
     });
 
   dialog::addBack();
@@ -1197,7 +1203,7 @@ void markers() {
     for(int j=0; j<5; j++)
       queueline(m->pat * xpush0(j), m->pat * xpush0(j+1), multi::scs[i].uicolor, 2);
     }
-  if(racing::player_relative) {
+  if(racing::player_relative || racing::standard_centering) {
     using namespace racing;
     cell *goal = NULL;
     for(cell *c: track) if(inscreenrange(c)) goal = c;

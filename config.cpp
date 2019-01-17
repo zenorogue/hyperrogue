@@ -354,6 +354,7 @@ void initConfig() {
   addsaver(racing::ghosts_to_save, "race_ghosts_to_save");
   addsaver(racing::guiding, "race_guiding");
   addsaver(racing::player_relative, "race_player_relative");
+  addsaver(racing::standard_centering, "race_standard_centering");
 
 #if CAP_SHMUP  
   shmup::initConfig();
