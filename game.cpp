@@ -1552,6 +1552,8 @@ bool petrify(cell *c, eWall walltype, eMonster m) {
   if(walltype == waIcewall && !isIcyLand(c->land))
     return false;
   
+  if(c->land == laWestWall) return false;
+  
   if(isWateryOrBoat(c) && c->land == laWhirlpool) {
     c->wall = waSea;
     return false;
@@ -1801,6 +1803,7 @@ bool snakepile(cell *c, eMonster m) {
   if(c->wall == waSea && c->land == laOcean) {
     c->land = laBrownian, c->landparam = 0;
     }
+  if(c->land == laWestWall) return false;
   if(c->land == laBrownian) {
     if(c->wall == waNone) {
       #if CAP_COMPLEX2
