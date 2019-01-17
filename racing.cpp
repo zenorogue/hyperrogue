@@ -1020,7 +1020,7 @@ void race_projection() {
 
     dialog::addBreak(100);
     
-    dialog::addSelItem(XLAT("best scores to show as ghosts"), its(ghosts_to_show), 'g');
+    dialog::addSelItem(XLAT("best scores to show as ghosts"), its(ghosts_to_show), 'c');
     dialog::add_action([]() { dialog::editNumber(ghosts_to_show, 0, 100, 1, 5, "best scores to show as ghosts", ""); });
 
     dialog::addSelItem(XLAT("best scores to save"), its(ghosts_to_save), 'b');
