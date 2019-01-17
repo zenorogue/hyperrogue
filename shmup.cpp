@@ -3287,7 +3287,8 @@ void init() {
   
   if(!safety) {
     items[itOrbLife] = 3;
-    addMessage(XLAT("Welcome to the Shoot'em Up mode!"));
+    if(!racing::on) 
+      addMessage(XLAT("Welcome to the Shoot'em Up mode!"));
     // addMessage(XLAT("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move"));
     }
   else safety = false;
