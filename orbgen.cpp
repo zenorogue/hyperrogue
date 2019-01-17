@@ -126,6 +126,7 @@ const vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laBrownian, 900, 4200, itOrbChoice},
   {orbgenflags::S_GUEST, laBrownian, 1000, 0, itOrbAir},
   {orbgenflags::S_GUEST, laBrownian, 1000, 0, itOrbDash},
+  {orbgenflags::S_GUEST, laBrownian, 1000, 0, itOrbSafety},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 
