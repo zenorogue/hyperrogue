@@ -832,6 +832,8 @@ void track_chooser(string new_track) {
       if(!racing::on) switch_game_mode(rg::racing);
       track_code = new_track;
       specialland = l;
+      // because of an earlier issue, some races in the Official track start with race_try = 1
+      race_try = among(l, laCaves, laWildWest, laHell, laTerracotta, laElementalWall, laDryForest, laDeadCaves) ? 1 : 0;
       start_game();
       popScreenAll();
       });
