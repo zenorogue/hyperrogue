@@ -801,6 +801,8 @@ string racetimeformat(int t) {
   return times;
   }
 
+extern int playercfg;
+
 void track_chooser(string new_track) {
   cmode = 0;
   gamescreen(2);
@@ -825,6 +827,7 @@ void track_chooser(string new_track) {
     dialog::addSelItem(XLAT1(linf[l].name), s, let++);
     dialog::add_action([l, new_track] () {
       stop_game();
+      multi::players = playercfg;
       if(!racing::on) switch_game_mode(rg::racing);
       track_code = new_track;
       specialland = l;
