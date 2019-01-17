@@ -1433,7 +1433,7 @@ bool isShmupLifeOrb(eItem it) {
     it == itOrbLife || it == itOrbFriend ||
     it == itOrbNature || it == itOrbEmpathy ||
     it == itOrbUndeath || it == itOrbLove ||
-    it == itOrbDomination;  
+    it == itOrbDomination || it == itOrbGravity; 
   }
 
 void makelava(cell *c, int i) {
