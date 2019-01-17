@@ -918,7 +918,7 @@ void race_projection() {
         
   dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
   dialog::add_action([] () { 
-    dialog::editNumber(race_angle, 0, 360, 15, 0, XLAT("race angle"), "");
+    dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
     int q = conformal::model_orientation - race_angle;
     dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
     });
