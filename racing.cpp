@@ -896,7 +896,7 @@ void race_projection() {
     race_advance = 0;
     vid.yshift = -0.3;
     vid.camera_angle = -45;
-    vid.scale = 2;
+    vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
     vid.xposition = 0;
     vid.yposition = -0.9;
     vid.use_smart_range = 1;
