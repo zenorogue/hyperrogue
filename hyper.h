@@ -1822,6 +1822,7 @@ namespace dialog {
 
   void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help);
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help);
+  void use_hexeditor();
   inline void scaleLog() { ne.sc = logarithmic; }
   inline void scaleSinh() { ne.sc = asinhic; }
   void bound_low(ld val);
@@ -2287,6 +2288,7 @@ namespace sm {
   static const int MAYDARK = 16384;
   static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
   static const int EXPANSION = (1<<16);
+  static const int HEXEDIT = (1<<17);
   };
 
 namespace linepatterns {

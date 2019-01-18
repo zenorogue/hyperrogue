@@ -600,7 +600,10 @@ namespace dialog {
     else return int(x-.5);
     }
   
-  string disp(ld x) { if(ne.intval) return its(ldtoint(x)); else if(ne.vmax-ne.vmin < 1) return fts4(x); else return fts(x); }
+  string disp(ld x) { 
+    if(dialogflags & sm::HEXEDIT) return "0x" + itsh(x);
+    else if(ne.intval) return its(ldtoint(x)); 
+    else if(ne.vmax-ne.vmin < 1) return fts4(x); else return fts(x); }
 
   reaction_t reaction;
   reaction_t reaction_final;
@@ -613,6 +616,11 @@ namespace dialog {
     if(ne.intval) *ne.editwhat = *ne.intval;
     ne.s = disp(*ne.editwhat);
     anims::deanimate(*ne.editwhat);
+    }
+  
+  void use_hexeditor() {
+    dialogflags |= sm::HEXEDIT;
+    ne.s = disp(*ne.editwhat);
     }
   
   void apply_edit() {

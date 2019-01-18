@@ -221,6 +221,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "") at = -1;
     else if(number == "s") res = ticks / 1000.;
     else if(number == "ms") res = ticks;
+    else if(number[0] == '0' && number[1] == 'x') res = strtoll(number.c_str()+2, NULL, 16);
     else if(number == "mousex") res = mousex;
     else if(number == "mousey") res = mousey;
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
