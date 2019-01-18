@@ -1267,8 +1267,8 @@ itemtype iinf[ittypes] = {
     },
   { 'o', 0x80D080, "Orb of Gravity", 
     "This Orb lets you magically control gravity around you. In lands with unusual gravity, the options are: usual gravity (no change, except that it may disrupt birds), "
-    "anti-gravity (causes the direction of gravity to be reveresed), levitation (you can move in directions which are neither up nor down, "
-    "or between cells is one of them has a wall in a 'neutral' direction). In lands with standard gravity, levitation lets creatures to avoid traps, chasms, "
+    "anti-gravity (causes the direction of gravity to be reversed), levitation (you can move in directions which are neither up nor down, "
+    "or between cells if one of them has a wall in a 'neutral' direction). In lands with standard gravity, levitation lets creatures to avoid traps, chasms, "
     "and water, while anti-gravity makes it possible to move only when next to a wall (movement between cells without adjacent walls is not allowed). "
     "For each move, the gravity is based on what you do, and all enemies in the effective range are affected (for example, if you move next to a wall in a non-gravity land, "
     "anti-gravity kicks in and monsters will not be able to move in open space)."
@@ -1670,7 +1670,7 @@ const landtype linf[landtypes] = {
     "That was a long time ago. Now, the mountainous Brown Islands are inhabited by strange monsters. Good luck adventuring!\n\n"
     "Parts of the Brown Islands have different elevations, from 0 to 3. It is impossible to gain two or more levels, "
     "or to lose three levels, in a single move, (attacks are possible at any "
-    "difference, though). Killed Bronze Bugs rise the land by one level."
+    "difference, though). Killed Bronze Beasts rise the land by one level."
     },
   { 0x211F6F, "Free Fall", 
     "What on one side looks to be a normal (well, infinite) horizontal wall, on to the other side turns out to be the vertical wall"

@@ -367,16 +367,18 @@ struct debugScreen {
       dialog::addSelItem("barrier left", dnameof2(what->barleft), 0);
       dialog::addSelItem("barrier right", dnameof2(what->barright), 0);
       if(what->item == itBabyTortoise) {
-        dialog::addSelItem("baby Tortoise flags", itsh(tortoise::babymap[what]), 'B');
+        dialog::addSelItem(XLAT("baby Tortoise flags"), itsh(tortoise::babymap[what]), 'B');
         dialog::add_action([what] () {
           dialog::editNumber(tortoise::babymap[what], 0, (1<<21)-1, 1, getBits(what), "", "");
+          dialog::use_hexeditor();
           });
         }
       if(what->monst == moTortoise) {
-        dialog::addSelItem("adult Tortoise flags", itsh(tortoise::emap[what]), 'A');
+        dialog::addSelItem(XLAT("adult Tortoise flags"), itsh(tortoise::emap[what]), 'A');
         dialog::add_action([what] () {
           tortoise::emap[what] = tortoise::getb(what);
           dialog::editNumber(tortoise::emap[what], 0, (1<<21)-1, 1, getBits(what), "", "");
+          dialog::use_hexeditor();
           });
         }
       dialog::addBreak(50);
@@ -426,7 +428,7 @@ struct debugScreen {
         }
       }
     else {
-      dialog::addItem("click a cell to view its data", 0);
+      dialog::addItem(XLAT("click a cell to view its data"), 0);
       dialog::addBreak(1000);
       }
     dialog::addBack();

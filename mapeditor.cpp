@@ -1943,28 +1943,28 @@ namespace mapeditor {
   
     dialog::init(XLAT("Map settings"));
   
-    dialog::addBoolItem("disable wandering monsters", !gen_wandering, 'w');
+    dialog::addBoolItem(XLAT("disable wandering monsters"), !gen_wandering, 'w');
     dialog::add_action([] () { gen_wandering = !gen_wandering; });
 
     if(gen_wandering) {
-      dialog::addBoolItem("disable ghost timer", !timerghost, 'g');
+      dialog::addBoolItem(XLAT("disable ghost timer"), !timerghost, 'g');
       dialog::add_action([] () { timerghost = !timerghost; });
       }
     else dialog::addBreak(100);
 
-    dialog::addBoolItem("simple pattern generation", reptilecheat, 'p');
+    dialog::addBoolItem(XLAT("simple pattern generation"), reptilecheat, 'p');
     dialog::add_action([] () { reptilecheat = !reptilecheat; });
-    dialog::addInfo("(e.g. pure Reptile pattern)");
+    dialog::addInfo(XLAT("(e.g. pure Reptile pattern)"));
 
-    dialog::addBoolItem("safety generation", safety, 's');
+    dialog::addBoolItem(XLAT("safety generation"), safety, 's');
     dialog::add_action([] () { safety = !safety; });
-    dialog::addInfo("(no treasure, no dangers)");
+    dialog::addInfo(XLAT("(no treasure, no dangers)"));
 
-    dialog::addBoolItem("god mode", autocheat, 'G');
+    dialog::addBoolItem(XLAT("god mode"), autocheat, 'G');
     dialog::add_action([] () { autocheat = true; });
-    dialog::addInfo("(unlock all, allow cheats, normal character display)");
+    dialog::addInfo(XLAT("(unlock all, allow cheats, normal character display, cannot be turned off!)"));
     
-    dialog::addItem("change the pattern/color of new Canvas cells", 'c');
+    dialog::addItem(XLAT("change the pattern/color of new Canvas cells"), 'c');
     dialog::add_action([] () { pushScreen(patterns::showPrePatternNoninstant); });
     
     dialog::addBack();

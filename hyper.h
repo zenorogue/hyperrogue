@@ -2518,7 +2518,7 @@ void preparesort();
 #if ISMOBILE==1
 #define SHMUPTITLE "shoot'em up mode"
 #else
-#define SHMUPTITLE "shoot'em up and multiplayer"
+#define SHMUPTITLE "shoot'em up / multiplayer / input"
 #endif
 
 bool dodrawcell(cell *c);

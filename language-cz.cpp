@@ -7724,8 +7724,8 @@ S("These rocks falling from the sky have been captured to fall forever in the ar
 Orb("Gravity", "Gravitace")
 
 S("This Orb lets you magically control gravity around you. In lands with unusual gravity, the options are: usual gravity (no change, except that it may disrupt birds), "
-  "anti-gravity (causes the direction of gravity to be reveresed), levitation (you can move in directions which are neither up nor down, "
-  "or between cells is one of them has a wall in a 'neutral' direction). In lands with standard gravity, levitation lets creatures to avoid traps, chasms, "
+  "anti-gravity (causes the direction of gravity to be reversed), levitation (you can move in directions which are neither up nor down, "
+  "or between cells if one of them has a wall in a 'neutral' direction). In lands with standard gravity, levitation lets creatures to avoid traps, chasms, "
   "and water, while anti-gravity makes it possible to move only when next to a wall (movement between cells without adjacent walls is not allowed). "
   "For each move, the gravity is based on what you do, and all enemies in the effective range are affected (for example, if you move next to a wall in a non-gravity land, "
   "anti-gravity kicks in and monsters will not be able to move in open space).",

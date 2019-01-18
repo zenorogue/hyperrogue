@@ -1016,14 +1016,14 @@ void race_projection() {
     
     dialog::addBreak(100);
 
-    dialog::addSelItem("track seed", editing_track ? dialog::view_edited_string() : new_track, '/');
+    dialog::addSelItem(XLAT("track seed"), editing_track ? dialog::view_edited_string() : new_track, '/');
     dialog::add_action([/*this*/] () { 
       editing_track = !editing_track;
       if(editing_track) dialog::start_editing(new_track);
       });
-    dialog::addItem("play the official seed", 'o');
+    dialog::addItem(XLAT("play the official seed"), 'o');
     dialog::add_action([/*this*/] () { new_track = "OFFICIAL"; });
-    dialog::addItem("play a random seed", 'r');
+    dialog::addItem(XLAT("play a random seed"), 'r');
     dialog::add_action([/*this*/] () { new_track = random_track_name(); });    
 
     dialog::addBreak(100);

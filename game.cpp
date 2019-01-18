@@ -6175,6 +6175,7 @@ void movemonsters() {
   if(havewhat & HF_WHIRLWIND) whirlwind::move();
   DEBT("westwall");
   if(havewhat & HF_WESTWALL) westwall::move();
+  for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) return;
   DEBT("river");
   if(havewhat & HF_RIVER) prairie::move();
   /* DEBT("magnet");
@@ -6906,6 +6907,7 @@ bool doPickupItemsWithMagnetism(cell *c) {
 
 void pickupMovedItems(cell *c) {
   if(!c->item) return;
+  if(c->item == itOrbSafety) return;
   if(isPlayerOn(c)) collectItem(c, true);  
   if(items[itOrbMagnetism])
     forCellEx(c2, c)
@@ -7482,6 +7484,10 @@ void monstersTurn() {
   DEBT("mmo");
   int phase2 = (1 & items[itOrbSpeed]);
   if(!phase2) movemonsters();
+  for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) {
+    collectItem(playerpos(i), true);
+    return;
+    }
 
   if(playerInPower() && (phase2 || !items[itOrbSpeed]) && (havewhat & HF_FAST)) 
     moveNormals(moWitchSpeed);
