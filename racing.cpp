@@ -914,7 +914,8 @@ void race_projection() {
       player_relative = !player_relative; 
       if(pmodel == mdBand || pmodel == mdHalfplane)
         pmodel = mdDisk;
-      set_view();
+      if(racing::on)
+        set_view();
       });
     }
   else dialog::addBreak(100);
