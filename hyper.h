@@ -432,7 +432,8 @@ template<class T> T* tailored_alloc(int degree) {
   return result;
   }
 
-void inline tailored_delete(void *x) {
+template<class T> void tailored_delete(T* x) {
+  x->~T();  
   delete[] ((char*) (x));
   }
 
