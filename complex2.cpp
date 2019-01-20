@@ -10,7 +10,7 @@ namespace hr {
 
 namespace brownian {
 
-  map<cell*, vector<pair<cell*, bool >> > futures;
+  map<cell*, vector<pair<cell*, int >> > futures;
   int centersteps = 0;
   int totalsteps = 0;
   
@@ -34,12 +34,16 @@ namespace brownian {
       }
     c->landparam += val;
     }
+  
+  static const int FAT = (-100); // less than 0
 
-  void recurse(cell *c, bool fat, cell *fatten_close = NULL) {
+  void recurse(cell *c, int fatten_from) {
     int dl = getDistLimit();
     while(true) {
+      int cd = celldist(c);
+      bool fat = cd > fatten_from;
       totalsteps++;
-      if(!fatten_close && celldist(c) >= dl * (fat ? 4 : ISMOBILE ? 2 : 3) + celldist(cwt.at)) {
+      if(cd >= dl * (fat ? 4 : ISMOBILE ? 2 : 3) + celldist(cwt.at)) {
         cell *c1 = c;
         while(true) {
           cell *c2 = ts::left_parent(c1, celldist);
@@ -47,20 +51,20 @@ namespace brownian {
           setdist(c2, BARLEV, c1);
           c1 = c2;
           }
-        futures[c1].emplace_back(c, fat);
+        futures[c1].emplace_back(c, fatten_from);
         return;
         }
       if(c->mpdist <= 7 || !among(c->land, laNone, laOcean, laBrownian) || (c->land != laBrownian && c->bardir != NODIR)) {
         centersteps++; return;
         }
       cell *c2 = c->cmove(hrand(c->type));
+      int cd2 = celldist(c2);
       // while(hrand(1000) < 1000 * chance) recurse(c);
-      if(fat) recurse(c, false);
-      if(!fat && ((fatten_close && celldistance(c, fatten_close) >= dl * 2) || hrand(20000) == 0)) {
-        recurse(c, true);
-        fat = true;
-        fatten_close = NULL;
+      if(!fat && (cd2 > fatten_from || hrand(100000) == 0)) {
+        recurse(c, FAT);
+        fatten_from = FAT;
         }
+      else if(fat) recurse(c, cd + dl * 6);
       rise(c, fat ? 256 : 1);
       c = c2;
       }
@@ -94,11 +98,12 @@ namespace brownian {
     }
   
   void init(cell *c) {
-    recurse(c, true);
-    recurse(c, true);
+    recurse(c, FAT);
+    recurse(c, FAT);
     }
 
   void init_further(cell *c) {
+    int dl = getDistLimit();
     dynamicval<bool> be(generatingEquidistant, true);
     int gdir = -1;
     for(int i=0; i<c->type; i++) {
@@ -118,8 +123,8 @@ namespace brownian {
 
     println(hlog, "brownian::init ", cw.at, " in distance ", celldistance(cw.at, cwt.at));
 
-    recurse(cw.at, false, cw.at);
-    recurse(cw.at, false);
+    recurse(cw.at, celldist(c) + dl * 3);
+    recurse(cw.at, celldist(c) + dl * 3);
 
     cell *c2 = c;
     while(c2->mpdist > 7) {      
@@ -134,7 +139,7 @@ namespace brownian {
     if(futures.count(c)) {
       auto m = move(futures[c]);
       futures.erase(c);
-      for(pair <cell*, bool> p: m)
+      for(auto p: m)
         recurse(p.first, p.second);
       futures.erase(c);
       printf("centersteps = %d futures = %d totalsteps = %d\n", centersteps, isize(futures), totalsteps);
