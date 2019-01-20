@@ -7586,7 +7586,7 @@ S("configure TPP automatically", "automatycznie skonfiguruj TPP")
 S("Finished the race! Time: %1, place: %2 out of %3", "Dotar%łeś0 do mety! Czas: %1, miejsce: %2 z %3")
 S("Finished the race in time %1!", "Dotar%łeś0 do mety w czasie %1!")
 
-S("Welcome to HyperRogue! (cheat mode on)", "Witaj w HyperRogue! (tryb oszusta uruchomiony")
+S("Welcome to HyperRogue! (cheat mode on)", "Witaj w HyperRogue! (tryb oszusta uruchomiony)")
 S("Welcome to the Heptagonal Mode!", "Witaj w Trybie Siedmiokątów!")
 
 S("adult Tortoise flags", "flagi dorosłego Żółwia")
@@ -7599,7 +7599,7 @@ S("disable ghost timer", "wyłącz duchy czasowe")
 S("simple pattern generation", "proste generowanie wzorów")
 S("(e.g. pure Reptile pattern)", "np. czysty wzór w Jaszczurkach")
 S("safety generation", "generacja bezpieczna")
-S("(no treasure, no dangers)", "(bez skarbów i niebezpiezceństw")
+S("(no treasure, no dangers)", "(bez skarbów i niebezpieczeństw)")
 S("god mode", "tryb boga")
 
 S("(unlock all, allow cheats, normal character display, cannot be turned off!)",
