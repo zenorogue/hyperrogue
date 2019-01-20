@@ -2917,3 +2917,9 @@ Other:
 - options of TPP and fixed facing direction, not only in racing
 - Orb of Lava is now marked 'useless' in Graveyard
 
+2019-01-18 21:14 Update 11.0b:
+
+- number editor now accepts hex numbers, and uses hex as default when editing Tortoises
+- fixed crash on changing projection while not in race
+- fixed crash when Orb of Safety is blown into the player's position
+- text fixes, PL translation updated
