@@ -1042,6 +1042,7 @@ void race_projection() {
         stop_game();
         switch_game_mode(rg::racing);
         race_try = 0;
+        if(geometry == gNormal) specialland = firstland = laIce;
         start_game();
         });
       }
