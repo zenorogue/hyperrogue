@@ -2923,3 +2923,10 @@ Other:
 - fixed crash on changing projection while not in race
 - fixed crash when Orb of Safety is blown into the player's position
 - text fixes, PL translation updated
+
+2019-01-20 12:47 Update 11.0c:
+
+- baby creators of the Brown Island now mature after going 6 screens away from the place of their spawning (in other words, when you explore the boring (baby) part of the Brown Island, you will get to
+the interesting (adult) part quickly)
+- no more cheat mode after disabling the Racing mode (this was caused by not resetting the starting land back to Icy)
+- Czech translation updated, typos fixed in the Polish translation
