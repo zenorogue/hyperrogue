@@ -402,7 +402,7 @@ namespace yendor {
 
         nyi.actualKey = ycw.at;
         ycw.at->item = itKey;
-        key->item = itGold;
+        key->item = itNone;
         }
   
       yi.push_back(nyi);
