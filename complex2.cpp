@@ -98,11 +98,13 @@ namespace brownian {
     }
   
   void init(cell *c) {
+    if(!hyperbolic) return;
     recurse(c, FAT);
     recurse(c, FAT);
     }
 
   void init_further(cell *c) {
+    if(!hyperbolic) return;
     int dl = getDistLimit();
     dynamicval<bool> be(generatingEquidistant, true);
     int gdir = -1;
@@ -147,6 +149,8 @@ namespace brownian {
     }
 
   void build(cell *c, int d) {
+  
+    if(!hyperbolic) c->wall = waNone, c->landparam = 256;
 
     ONEMPTY {
       if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
