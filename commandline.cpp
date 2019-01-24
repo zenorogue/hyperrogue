@@ -142,7 +142,7 @@ int arg::readCommon() {
     PHASE(3); drawscreen();
     }
   else if(argis("-rotate")) {
-    PHASE(3); 
+    PHASE(3);  start_game();
     shift(); ld a = argf();
     shift(); ld b = argf();
     View = View * spin(M_PI * 2 * a / b);

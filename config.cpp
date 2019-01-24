@@ -1761,18 +1761,23 @@ int read_config_args() {
     shift(); vid.aurasmoothen = argi();
     }
   else if(argis("-nofps")) {
+    PHASEFROM(2);
     nofps = true;
     }
   else if(argis("-nohud")) {
+    PHASEFROM(2);
     nohud = true;
     }
   else if(argis("-nomenu")) {
+    PHASEFROM(2);
     nomenukey = true;
     }
   else if(argis("-nohelp")) {
+    PHASEFROM(2);
     nohelp = true;
     }
   else if(argis("-dont_face_pc")) {
+    PHASEFROM(2);
     dont_face_pc = true;
     }
 

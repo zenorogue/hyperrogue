@@ -305,6 +305,7 @@ bool operator != (const glmatrix& m1, const glmatrix& m2) {
   }
 
 void set_modelview(const glmatrix& modelview) {
+  if(!current) return;
   if(current_shader_projection != shader_projection::standard) {
     if(modelview != current_modelview) {
       current_modelview = modelview;
@@ -328,6 +329,7 @@ void set_modelview(const glmatrix& modelview) {
   }
 
 void id_modelview() {
+  if(!current) return;
   if(current_shader_projection != shader_projection::standard) { set_modelview(id); return; }
   #if MINIMIZE_GL_CALLS
   if(projection == current_matrix) return;
@@ -344,6 +346,7 @@ void color2(color_t color, ld part) {
   for(int i=0; i<4; i++) cols[i] = c[3-i] / 255.0 * part;
   #if CAP_SHADER
   // glUniform4fv(current->uFog, 4, cols);
+  if(!current) return;
   glUniform4f(current->uColor, cols[0], cols[1], cols[2], cols[3]);
   #else
   glColor4f(cols[0], cols[1], cols[2], cols[3]);

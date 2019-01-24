@@ -181,7 +181,7 @@ namespace svg {
       x.document.close();
       }, f.s.c_str());
     #else
-    fclose(f.f);
+    fclose(f.f); f.f = NULL;
     #endif
     }
   
@@ -203,7 +203,8 @@ int read_args() {
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
     printf("saving SVG screenshot to %s\n", argcs());
-    svg::render(argcs());
+    shot::make_svg = true;
+    shot::take(argcs());
     }
   else return 1;
   return 0;
@@ -321,6 +322,7 @@ void take(string fname, const function<void()>& what) {
   vid.xres = shotx * multiplier;
   vid.yres = shoty * multiplier;
   calcparam();
+  conformal::configure();
   
   if(make_svg) {
     #if CAP_SVG
@@ -377,6 +379,9 @@ int png_read_args() {
     }
   else if(argis("-pngformat")) {
     shift(); shotformat = argi();
+    }
+  else if(argis("-shotxy")) {
+    shift(); shotformat = -1; shotx = argi(); shift(); shoty = argi();
     }
   else if(argis("-shott")) {
     shift(); shot::transparent = argi();

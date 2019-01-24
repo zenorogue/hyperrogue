@@ -443,7 +443,7 @@ void glflush() {
 
   if(isize(text_vertices)) {
     // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
-    current_display->set_projection(0, false);
+    if(!svg::in) current_display->set_projection(0, false);
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);
@@ -462,7 +462,7 @@ void glflush() {
       GLERR("print");
       }
 
-    if(current_display->stereo_active() && text_shift) current_display->set_mask(0);
+    if(current_display->stereo_active() && text_shift && !svg::in) current_display->set_mask(0);
  
     texts_merged = 0;
     text_vertices.clear();
