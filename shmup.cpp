@@ -1769,20 +1769,11 @@ void movePlayer(monster *m, int delta) {
         }
       movecost(m->base, c2, 1);
 
-      bool nomine = (c2->wall == waMineMine || c2->wall == waMineUnknown)  && markOrb(itOrbAether);
-      
-      if(!nomine) {
-        uncoverMines(c2,
-          items[itBombEgg] < 20 ? 1 :
-          items[itBombEgg] < 30 ? 2 :
-          3, 0
-          );
-        if(c2->wall == waMineMine && !markOrb(itOrbWinter)) {
-          items[itOrbLife] = 0;
-          m->dead = true;
-          }
-        mayExplodeMine(c2, moPlayer);
+      if(c2->wall == waMineMine && !markOrb(itOrbAether) && !markOrb(itOrbWinter)) {
+        items[itOrbLife] = 0;
+        m->dead = true;
         }
+      uncoverMinesFull(c2);
       
       if(isWatery(c2) && isWatery(m->base) && m->inBoat)
         moveItem(m->base, c2, true);

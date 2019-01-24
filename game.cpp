@@ -3340,6 +3340,23 @@ void gainShard(cell *c2, const char *msg) {
   invismove = false;
   }
 
+void uncoverMinesFull(cell *c2) {
+  int mineradius = 
+    (items[itBombEgg] < 1 && !tactic::on) ? 0 :
+    items[itBombEgg] < 20 ? 1 :
+    items[itBombEgg] < 30 ? 2 :
+    3;
+  
+  bool nomine = !normal_gravity_at(c2);
+  if(!nomine && uncoverMines(c2, mineradius, 0, true) && markOrb(itOrbAether))
+    nomine = true;
+  
+  if(!nomine) {
+    uncoverMines(c2, mineradius, 0, false);
+    mayExplodeMine(c2, moPlayer);
+    }  
+  }
+
 void playerMoveEffects(cell *c1, cell *c2) {
 
   if(peace::on) items[itOrbSword] = c2->land == laBurial ? 100 : 0;
@@ -3347,18 +3364,8 @@ void playerMoveEffects(cell *c1, cell *c2) {
   sword::angle[multi::cpid] = sword::shift(c1, c2, sword::angle[multi::cpid]);
   
   destroyWeakBranch(c1, c2, moPlayer);
-
-  bool nomine = (c2->wall == waMineMine || c2->wall == waMineUnknown)  && markOrb(itOrbAether);
   
-  if(!nomine) {
-    uncoverMines(c2,
-      (items[itBombEgg] < 1 && !tactic::on) ? 0 :
-      items[itBombEgg] < 20 ? 1 :
-      items[itBombEgg] < 30 ? 2 :
-      3, 0
-      );
-    mayExplodeMine(c2, moPlayer);
-    }
+  uncoverMinesFull(c2);
   
   if((c2->wall == waClosePlate || c2->wall == waOpenPlate) && !markOrb(itOrbAether))
     toggleGates(c2, c2->wall);
@@ -7081,9 +7088,17 @@ void knightFlavorMessage(cell *c2) {
   msgid++;
   }
 
-void uncoverMines(cell *c, int lev, int dist) {
-  if(c->wall == waMineUnknown)
-    c->wall = waMineOpen;
+bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
+  bool b = false;
+  if(c->wall == waMineMine && just_checking) return true;
+  if(c->wall == waMineUnknown) {
+    if(just_checking)
+      return true;
+    else {
+      c->wall = waMineOpen;
+      b = true;
+      }
+    }
   
   bool minesNearby = false;
   bool nominesNearby = false;
@@ -7096,14 +7111,18 @@ void uncoverMines(cell *c, int lev, int dist) {
     }
 
   if(lev && (nominesNearby || mineopens) && !minesNearby) for(int i=0; i<c->type; i++)
-    if(c->move(i) && (c->move(i)->wall == waMineUnknown || c->move(i)->wall == waMineOpen))
-      uncoverMines(c->move(i), lev-1, dist+1);
+    if(c->move(i) && (c->move(i)->wall == waMineUnknown || c->move(i)->wall == waMineOpen)) {
+      b |= uncoverMines(c->move(i), lev-1, dist+1, just_checking);
+      if(b && just_checking) return true;
+      }
 
   if(minesNearby && !nominesNearby && dist == 0) {
     forCellEx(c2, c) 
       if(c2->wall == waMineMine && c2->land == laMinefield)
         c2->landparam |= 1;
     }
+  
+  return b;
   }
 
 namespace orbbull {
