@@ -32,7 +32,7 @@ namespace whirlwind {
     c->item = itNone;
     if(safety) return;
     if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && notDippingFor(itWindstone)
-      && getGhostcount() < 2)
+      && (!shmup::on || getGhostcount() < 2))
       c->item = itWindstone;
     else if(hrand(5000) < 20*PRIZEMUL)
       placeLocalOrbs(c);
