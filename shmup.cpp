@@ -3164,6 +3164,7 @@ void turn(int delta) {
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();
+        if(havewhat & HF_WESTWALL) westwall::move();
         buildRosemap();
         if(havewhat&HF_RIVER) prairie::move();
         }
