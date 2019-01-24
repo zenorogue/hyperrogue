@@ -348,6 +348,7 @@ void initConfig() {
 
   addsaver(vid.consider_shader_projection, "shader-projection", true);
   
+#if CAP_RACING
   addsaver(racing::race_advance, "race_advance");
   addsaver(racing::race_angle, "race_angle");
   addsaver(racing::ghosts_to_show, "race_ghosts_to_show");
@@ -355,6 +356,7 @@ void initConfig() {
   addsaver(racing::guiding, "race_guiding");
   addsaver(racing::player_relative, "race_player_relative");
   addsaver(racing::standard_centering, "race_standard_centering");
+#endif
 
 #if CAP_SHMUP  
   shmup::initConfig();

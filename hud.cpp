@@ -374,7 +374,11 @@ void drawStats() {
     }
   
   if(racing::on) 
+#if CAP_RACING
     racing::drawStats();
+#else
+    {}
+#endif
   else if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;

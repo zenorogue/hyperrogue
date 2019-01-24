@@ -931,8 +931,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       
       if(peace::on) ;
       else if(racing::on) {
+#if CAP_RACING
         if(racing::trophy[multi::cpid])
           queuepoly(VWPN, shTrophy, racing::trophy[multi::cpid]);
+#endif
         }
       else if(items[itOrbThorns])
         queuepoly(VWPN, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);

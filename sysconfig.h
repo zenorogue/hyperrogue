@@ -249,16 +249,12 @@
 #define CAP_SHMUP_GOOD (!ISMOBWEB)
 #endif
 
-#ifndef CAP_BONUS
-#define CAP_BONUS 1
-#endif
-
 #ifndef CAP_COMPLEX2
-#define CAP_COMPLEX2 CAP_BONUS
+#define CAP_COMPLEX2 1
 #endif
 
 #ifndef CAP_RACING
-#define CAP_RACING CAP_BONUS
+#define CAP_RACING (!ISMOBWEB)
 #endif
 
 #if ISMOBILE
