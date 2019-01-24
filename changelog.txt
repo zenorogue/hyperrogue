@@ -2930,3 +2930,13 @@ Other:
 the interesting (adult) part quickly)
 - no more cheat mode after disabling the Racing mode (this was caused by not resetting the starting land back to Icy)
 - Czech translation updated, typos fixed in the Polish translation
+
+2019-01-24 14:155 Version 11.0d:
+- fixed time measurement problem in Android (causing the camera to not move smoothly or sometimes even not move at all)
+- Android versions updated
+- no more Gold in Free Fall Yendor
+- fixed Free Fall (and Windy Plains) treasures in shmup mode
+- Graveyard no longer can be adjacent to Ruined City
+- fixed the issue with Orb of Aether always being marked as used due to Minefield uncovering (now it is only used if it actually prevents some Minefield cells from uncovering)
+- fixed Brown Islands crashing in Euclidean (that algorithm does not generate anything interesting in Euclidean though:)
+- fixed some issues with commandline arguments (svg shots made correctly now)
