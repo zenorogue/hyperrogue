@@ -343,7 +343,7 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_update
   mousex = _mousex;
   mousey = _mousey;
   clicked = _clicked;
-  ticks = _ticks;
+  // ticks = _ticks;
   uploadAll(MOBPAR_ACTUAL);
   UNLOCK
   // delref;

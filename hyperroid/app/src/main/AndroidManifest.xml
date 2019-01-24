@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.roguetemple.hyperroid"
-      android:versionCode="10504" android:versionName="10.5d"
+      android:versionCode="10505" android:versionName="10.5e"
       android:installLocation="auto">
 <!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />         -->
 <!--    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" /> -->
