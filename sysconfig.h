@@ -258,7 +258,7 @@
 #endif
 
 #if ISMOBILE
-#define EXTRALICENSE "\n\nHyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/"
+#define EXTRALICENSE "\n\nHyperRogue soundtrack under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/\nCrossroads, Graveyard, Land of Eternal Motion, Hall of Mirrors, Hell, R'Lyeh, Living Caves, Jungle, Desert, Icy Lands by Shawn Parrotte (http://www.shawnparrotte.com)\nCaribbean, Ivory Tower, Ocean, Palace by Will Savino (http://www.willsavino.net/)\n\n\n";
 #undef XEXTRALICENSE
 #endif
 
