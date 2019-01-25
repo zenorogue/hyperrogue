@@ -2343,7 +2343,7 @@ void drawaura() {
         double c1 = aurac[rm][2-c] / (aurac[rm][3]+.1);
         double c2 = aurac[rm+1][2-c] / (aurac[rm+1][3]+.1);
         const ld one = 1;
-        part(p, c) = int(255 * min(one, bak[2-c] + cmul * ((c1 + fr * (c2-c1) - bak[2-c])))); 
+        setpart(p, c, int(255 * min(one, bak[2-c] + cmul * ((c1 + fr * (c2-c1) - bak[2-c])))));
         }
       }
     SDL_UnlockSurface(s);

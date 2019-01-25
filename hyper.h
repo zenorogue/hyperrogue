@@ -3274,7 +3274,8 @@ extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
 extern ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
 
-unsigned char& part(color_t& col, int i);
+unsigned char part(color_t col, int i);
+void setpart(color_t& col, int i, unsigned char value);
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
 
@@ -3700,7 +3701,7 @@ namespace glhr {
   
   void set_depthtest(bool b);
   glmatrix translate(ld x, ld y, ld z);
-  void color2(color_t color, ld part = 1);
+  void color2(color_t color, ld scale = 1);
   void be_nontextured(shader_projection sp = new_shader_projection);
   void be_textured(shader_projection sp = new_shader_projection);
   void set_modelview(const glmatrix& m);  

@@ -185,7 +185,7 @@ void coloring() {
         }
 
       for(int i=0; i<cells; i++) {
-        part(net[i].where->landparam_color, pid) = part(vdata[net[i].bestsample].cp.color1, pid+1);
+        setpart(net[i].where->landparam_color, pid, part(vdata[net[i].bestsample].cp.color1, pid+1));
         }
       }
 
@@ -221,7 +221,7 @@ void coloring() {
       if(maxl-minl < 1e-3) maxl = minl+1e-3;
       
       for(int i=0; i<cells; i++) 
-        part(net[i].where->landparam_color, pid) = (255 * (listing[i] - minl)) / (maxl - minl);
+        setpart(net[i].where->landparam_color, pid, (255 * (listing[i] - minl)) / (maxl - minl));
       }
     }
   }
