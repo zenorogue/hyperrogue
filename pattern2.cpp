@@ -2335,7 +2335,7 @@ int read_pattern_args() {
       }
     }
 
-  else if(argis("-wsh")) { PHASE(3); start_game(); shift(); patterns::whichShape = args()[0]; }
+  else if(argis("-wsh")) { start_game(); shift(); patterns::whichShape = args()[0]; }
 
   else if(argis("-pal")) {
     PHASEFROM(2); cheat();
