@@ -864,9 +864,9 @@ void showGraphConfig() {
   
     if(xuni == 'C') {
       dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
-      dialog::bound_low(0);
       // we need to check the moves
       dialog::reaction = checkmove;
+      dialog::bound_low(0);
       }
 
   #if CAP_FRAMELIMIT    
