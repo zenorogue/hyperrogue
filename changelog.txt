@@ -2931,7 +2931,7 @@ the interesting (adult) part quickly)
 - no more cheat mode after disabling the Racing mode (this was caused by not resetting the starting land back to Icy)
 - Czech translation updated, typos fixed in the Polish translation
 
-2019-01-24 14:155 Version 11.0d:
+2019-01-24 14:15 Version 11.0d:
 - fixed time measurement problem in Android (causing the camera to not move smoothly or sometimes even not move at all)
 - Android versions updated
 - no more Gold in Free Fall Yendor
@@ -2940,3 +2940,14 @@ the interesting (adult) part quickly)
 - fixed the issue with Orb of Aether always being marked as used due to Minefield uncovering (now it is only used if it actually prevents some Minefield cells from uncovering)
 - fixed Brown Islands crashing in Euclidean (that algorithm does not generate anything interesting in Euclidean though:)
 - fixed some issues with commandline arguments (svg shots made correctly now)
+
+2019-01-28 22:32 Version 11.0e:
+ - the new lands are now available in the Pure Tactics Mode
+ - the "movement compass" config option was not clearly named -- it should be better now
+ - spherical geometry no longer crashes
+ - Free Fall no longer crashes in Euclidean
+ - Crystal Rug no longer displays invisible floors
+ - new predesigned pattern where you can give a formula to color cells according to the coordinates
+ - map editor save features now saves more data: multiplayer positions, rosewaves, turncount (ocean waves), mutant ivy phase
+ - the screen split in multiplayer mode was supposed to happen only in the racing mode -- fixed
+ - fixed a crash in the Ivory Tower Yendor Challenge
