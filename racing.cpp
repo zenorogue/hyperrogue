@@ -1315,6 +1315,7 @@ void add_debug(cell *c) {
 
 bool subscreen_split(reaction_t what) {
   using namespace racing;
+  if(!racing::on) return false;
   if(in_subscreen) return false;
   if(!player_displays.empty()) {
     in_subscreen = true;
