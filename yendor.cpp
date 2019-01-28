@@ -182,8 +182,7 @@ namespace yendor {
           
           if(i > BARLEV-6) {
             setdist(nyi.path[i+7-BARLEV], 7, nyi.path[i+6-BARLEV]);
-            if(challenge && !euclid) {
-              if(ycw.at->land == laIvoryTower) continue;
+            if(challenge && !euclid && ycw.at->land != laIvoryTower) {
               eLand ycl = changeland(i, ycw.at->land);
               if(ycl) {
                 if(weirdhyperbolic) {
