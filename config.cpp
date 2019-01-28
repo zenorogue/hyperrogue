@@ -783,7 +783,7 @@ void showGraphConfig() {
 
   menuitem_sightrange();
   
-  dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'C');
+  dialog::addSelItem(XLAT("move by clicking on compass"), its(vid.mobilecompasssize), 'C');
   
   dialog::addItem(XLAT("customize colors and aura"), 'c');
 
@@ -863,7 +863,7 @@ void showGraphConfig() {
       }
   
     if(xuni == 'C') {
-      dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
+      dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), XLAT("0 to disable"));
       // we need to check the moves
       dialog::reaction = checkmove;
       dialog::bound_low(0);
