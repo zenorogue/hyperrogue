@@ -396,7 +396,7 @@ template<class T> struct connection_table {
   T*& move(int i) { return move_table[i]; }
   unsigned char modspin(int i) { return spin(fix(i)); }
   void fullclear() { 
-    for(int i=0; i<MAX_EDGE; i++) move_table[i] = NULL;
+    for(int i=0; i<full()->degree(); i++) move_table[i] = NULL;
     }
   void connect(int d0, T* c1, int d1, bool m) {
     move(d0) = c1;
