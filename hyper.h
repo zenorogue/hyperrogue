@@ -4185,6 +4185,17 @@ namespace arcm {
   }
 
 namespace crystal {
+  static const int MAXDIM = 7;
+  typedef array<int, MAXDIM> coord;
+  static const coord c0 = {};
+  
+  typedef array<ld, MAXDIM> ldcoord;
+  static const ldcoord ldc0 = {};
+
+  heptagon *get_heptagon_at(coord c);
+  coord get_coord(heptagon *h);
+  ldcoord get_ldcoord(cell *c);
+  
   extern colortable coordcolors;
   extern ld compass_probability;
   extern bool view_coordinates;

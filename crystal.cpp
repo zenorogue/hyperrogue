@@ -24,14 +24,6 @@ bool view_east = false;
 
 bool used_compass_inside;
 
-const int MAXDIM = 7;
-
-typedef array<int, MAXDIM> coord;
-static const coord c0 = {};
-
-typedef array<ld, MAXDIM> ldcoord;
-static const ldcoord ldc0 = {};
-
 ldcoord told(coord c) { ldcoord a; for(int i=0; i<MAXDIM; i++) a[i] = c[i]; return a; }
 // strange number to prevent weird acting in case of precision errors
 coord roundcoord(ldcoord c) { coord a; for(int i=0; i<MAXDIM; i++) a[i] = floor(c[i] + .5136); return a; }
@@ -448,6 +440,10 @@ struct hrmap_crystal : hrmap {
 hrmap_crystal *crystal_map() {
   return (hrmap_crystal*) currentmap;
   } 
+
+heptagon *get_heptagon_at(coord c) { return crystal_map()->get_heptagon_at(c, S7); }
+coord get_coord(heptagon *h) { return crystal_map()->hcoords[h]; }
+ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
 
 bool is_bi(crystal_structure& cs, coord co) {
   for(int i=0; i<cs.dim; i++) if(co[i] & HALFSTEP) return true;
