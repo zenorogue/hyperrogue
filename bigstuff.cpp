@@ -720,12 +720,14 @@ void setLandQuotient(cell *c) {
     else
       c->land = specialland, c->landparam = d;
     }
+  if(specialland == laWestWall) c->land = laCrossroads4;
   }
 
 void setLandSphere(cell *c) {
   setland(c, specialland);
   if(specialland == laWarpCoast)
     setland(c, getHemisphere(c, 0) > 0 ? laWarpCoast : laWarpSea);
+  if(specialland == laWestWall) c->land = laCrossroads4;
   if(specialland == laClearing)
     c->land = laClearing;
   if(specialland == laElementalWall) {
@@ -856,6 +858,15 @@ void setLandEuclid(cell *c) {
       { setland(c, laBarrier); if(ishept(c)) c->land = laRlyeh; }
     else if(y<0) setland(c, laRlyeh);
     else c->landparam = y;
+    }
+  if(specialland == laWestWall) {
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
+    x = -5 - x;
+    if(x == 0) 
+      {setland(c, laBarrier); if(ishept(c)) setland(c, laMotion); }
+    else if(x<0) setland(c, laMotion);
+    else c->landparam = x;
     }
   if(specialland == laIvoryTower || specialland == laDungeon) {
     int x, y;
