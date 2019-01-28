@@ -897,6 +897,7 @@ void build_rugdata() {
   for(const auto& gp: gmatrix) {
             
     cell *c = gp.first;
+    if(c->wall == waInvisibleFloor) continue;
     const transmatrix& V = gp.second;
     
     rugpoint *v = addRugpoint(tC0(V), 0);
