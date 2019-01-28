@@ -196,6 +196,17 @@ namespace mapstream {
         }
       }
     n = -1; f.write(n);
+    
+    f.write(mutantphase);
+    f.write(rosewave);
+    f.write(rosephase);
+    f.write(turncount);
+    int rms = isize(rosemap); f.write(rms);
+    for(auto p: rosemap) f.write(cellids[p.first]), f.write(p.second);
+    f.write(multi::players);
+    if(multi::players > 1)
+      for(int i=0; i<multi::players; i++)
+        f.write(cellids[multi::player[i].at]);
 
     cellids.clear();
     cellbyid.clear();
@@ -376,7 +387,6 @@ namespace mapstream {
           }
       }
 
-    cellbyid.clear();
     relspin.clear();
 
     if(shmup::on) shmup::init();
@@ -408,7 +418,33 @@ namespace mapstream {
       for(int i=0; i<siz; i++)
         ds.list.push_back(f.get<hyperpoint>());
       }
+    
+    if(vernum >= 11005) {
+      f.read(mutantphase);
+      f.read(rosewave);
+      f.read(rosephase);
+      f.read(turncount);
+      int i; f.read(i);
+      if(i) havewhat |= HF_ROSE;
+      while(i--) { 
+        int cid; int val; f.read(cid); f.read(val); 
+        if(cid >= 0 && cid < isize(cellbyid)) rosemap[cellbyid[cid]] = val; 
+        }
+      f.read(multi::players);
+      if(multi::players > 1)
+        for(int i=0; i<multi::players; i++) {
+          auto& mp = multi::player[i];
+          int whereami = f.get<int>();
+          if(whereami >= 0 && whereami < isize(cellbyid))
+            mp.at = cellbyid[whereami];
+          else
+            mp.at = currentmap->gamestart();
+          mp.spin = 0,
+          mp.mirrored = false;
+          }
+      }
 
+    cellbyid.clear();
     buildpolys();
     bfs();
     restartGraph();
