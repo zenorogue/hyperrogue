@@ -1321,6 +1321,38 @@ namespace patterns {
     return gmod(p.first - p.second * 2, 7);
     }
 
+  string color_formula = "to01(rgb(x,y,z))";
+  
+  cld compute_map_function(cell *c, int p, const string& formula) {
+    exp_parser ep;
+    ep.extra_params["p"] = p;
+    switch(geometry) {
+      case gCrystal: {
+        crystal::ldcoord co = crystal::get_ldcoord(c);
+        for(int i=0; i<crystal::MAXDIM; i++)
+          ep.extra_params["x"+its(i)] = co[i];
+        break;
+        }
+    
+      default: {
+        hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
+        ep.extra_params["x"] = h[0];
+        ep.extra_params["y"] = h[1];
+        ep.extra_params["z"] = h[2];
+        if(euclid) {
+          int x, y;
+          tie(x,y) = cell_to_pair(c);
+          ep.extra_params["ex"] = x;
+          ep.extra_params["ey"] = y;
+          ep.extra_params["ez"] = -x-y;
+          }
+        break;
+        }
+      }
+    ep.s = formula;
+    return ep.parse();
+    }
+  
   int generateCanvas(cell *c) {
     switch(whichCanvas) {
       case 'A':
@@ -1397,6 +1429,16 @@ namespace patterns {
         return nestcolors[pattern_threecolor(c)];
       case 'v':
         return colortables['v'][sevenval(c)];
+      case 'f': {
+        color_t res;
+        for(int i=0; i<3; i++) {
+          ld v = real(compute_map_function(c, 1+i, color_formula));
+          if(v < 0) part(res, i) = 0;
+          else if(v > 1) part(res, i) = 255;
+          else part(res, i) = int(v * 255 + .5);
+          }
+        return res;
+        }
       }
     return canvasback;
     }
@@ -1453,6 +1495,8 @@ namespace patterns {
 
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
+    dialog::addSelItem(XLAT("formula"), "formula", 'f');
+
     dialog::addBreak(100);
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
 
@@ -1482,6 +1526,29 @@ namespace patterns {
         randomPatternsMode = false;
         start_game();
         }
+      
+      else if(uni == 'f') {
+        dialog::edit_string(color_formula, "formula", 
+          XLAT(
+          "This lets you specify the color pattern as a function of the cell. "
+          "Available parameters:\n\n"
+          "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
+          "ex, ey, ez (in Euclidean geometries)\n"
+          "x0, x1, x2... (crystal geometry only)\n"
+          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).")
+           + "\n\n" + parser_help()
+          );
+        dialog::reaction_final = [instant] () { 
+          if(instant) stop_game();
+          whichCanvas = 'f';
+          if(instant) {
+            firstland = specialland = laCanvas; 
+            randomPatternsMode = false;
+            start_game();
+            }
+          };
+        }
+      
       else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
         stop_game();
         whichCanvas = uni;

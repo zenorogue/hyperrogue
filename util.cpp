@@ -176,6 +176,19 @@ cld exp_parser::parse(int prio) {
     cld no = parsepar();
     return real(cond) > 0 ? yes : no;
     }  
+  else if(eat("rgb(")) {     
+    cld val0 = parse(0);
+    if(next() != ',') {at = -1; return 0; } at++;
+    cld val1 = parse(0);
+    if(next() != ',') {at = -1; return 0; } at++;
+    cld val2 = parsepar();
+    switch(int(real(extra_params["p"]) + .5)) {
+      case 1: return val0;
+      case 2: return val1;
+      case 3: return val2;
+      default: return 0;
+      }
+    }
   else if(eat("let(")) {
     string name;
     while(true) {
