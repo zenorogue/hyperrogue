@@ -1324,6 +1324,7 @@ auto cgm = addHook(clearmemory, 40, [] () {
   buggycells.clear();
   crush_next.clear(); 
   crush_now.clear();
+  rosemap.clear();
   }) + 
 addHook(hooks_removecells, 0, [] () {
   eliminate_if(crush_next, is_cell_removed);
