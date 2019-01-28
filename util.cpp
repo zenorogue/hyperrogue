@@ -167,6 +167,15 @@ cld exp_parser::parse(int prio) {
   else if(eat("conj(")) res = std::conj(parsepar());
   else if(eat("floor(")) res = floor(real(parsepar()));
   else if(eat("frac(")) { res = parsepar(); res = res - floor(real(res)); }
+  else if(eat("to01(")) { res = parsepar(); return atan(res) / M_PI + 0.5; }
+  else if(eat("ifp(")) {
+    cld cond = parse(0);
+    if(next() != ',') {at = -1; return 0; } at++;
+    cld yes = parse(0);
+    if(next() != ',') {at = -1; return 0; } at++;
+    cld no = parsepar();
+    return real(cond) > 0 ? yes : no;
+    }  
   else if(eat("let(")) {
     string name;
     while(true) {
@@ -238,7 +247,7 @@ ld parseld(const string& s) {
 
 string parser_help() {
   return XLAT("Functions available: %1", 
-    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez");
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, to01, ifp(a,v,w) [if positive]");
   }
 
 logger hlog;
