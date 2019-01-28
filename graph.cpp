@@ -3923,7 +3923,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(patterns::whichShape == '6')
         set_floor(shBigTriangle);
 
-      else if(patterns::whichShape == '9')
+      else if(among(patterns::whichShape, '9', '^'))
         set_floor(shFullFloor);
 #endif
 
@@ -4305,6 +4305,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR::LAKELEV);
         }
       else {
+        if(patterns::whichShape == '^') poly_outline = darkena(fcol, fd, flooralpha);
         draw_qfi(c, V, darkena(fcol, fd, flooralpha));
         }
       
