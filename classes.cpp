@@ -1715,7 +1715,11 @@ vector<landtacinfo> land_tac = {
   {laWildWest, 10, 1},
   {laDual, 10, 1},
   {laSnakeNest, 10, 1},
-  {laDocks, 10, 1}
+  {laDocks, 10, 1},
+  
+  {laBrownian, 10, 1},
+  {laVariant, 10, 1},
+  {laWestWall, 10, 1},
   };
 
 vector<eLand> randlands = {
