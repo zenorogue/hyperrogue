@@ -1916,7 +1916,7 @@ bool is_master(cell *c) {
 namespace linepatterns {
 
   color_t lessalpha(color_t col, int m) {
-    setpart(col, 0) = part(col, 0) / m;
+    setpart(col, 0) /= m;
     return col;
     }
   

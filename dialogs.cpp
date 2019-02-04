@@ -504,10 +504,10 @@ namespace dialog {
       colorp = (colorp+1) & 3;
       }
     else if(DKEY == SDLK_LEFT) {
-      setpart(color, colorp) = part(color, colorp) - abs(shiftmul) < .6 ? 1 : 17;
+      setpart(color, colorp) -= abs(shiftmul) < .6 ? 1 : 17;
       }
     else if(DKEY == SDLK_RIGHT) {
-      setpart(color, colorp) = part(color, colorp) + abs(shiftmul) < .6 ? 1 : 17;
+      setpart(color, colorp) += abs(shiftmul) < .6 ? 1 : 17;
       }
     else if(doexiton(sym, uni)) {
       popScreen();

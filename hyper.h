@@ -3286,6 +3286,18 @@ struct colorpartproxy {
       color_t mask = color_t(0xFF) << (8 * i_);
       col_ = (col_ & ~mask) | (color_t(value) << (8 * i_));
       }
+    void operator+=(unsigned char value) {
+      *this = part(col_, i_) + value;
+      }
+    void operator-=(unsigned char value) {
+      *this = part(col_, i_) - value;
+      }
+    void operator&=(unsigned char value) {
+      *this = part(col_, i_) & value;
+      }
+    void operator/=(int value) {
+      *this = part(col_, i_) / value;
+      }
 };
 
 inline colorpartproxy setpart(color_t& col, int i) {
