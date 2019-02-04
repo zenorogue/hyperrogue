@@ -82,7 +82,7 @@ void make_texture() {
       }
     ld hyp = hypot(bx-tw/16, by-tw/16) / (tw/16);
     if(hyp > 1) hyp = 1;
-    setpart(pix(0,x,y), p, 255 * (1 * hyp + (0.5 + h[p]/2) * (1-hyp)));
+    setpart(pix(0,x,y), p) = 255 * (1 * hyp + (0.5 + h[p]/2) * (1-hyp));
     }
   
   tdata.loadTextureGL();

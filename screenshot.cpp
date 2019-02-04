@@ -29,7 +29,7 @@ namespace svg {
   bool invisible(color_t col) { return (col & 0xFF) == 0; }
   
   void fixgamma(color_t& color) {
-    for(int i=1; i<4; i++) setpart(color, i, 255 * pow(float(part(color, i) / 255.0), float(shot::gamma)));
+    for(int i=1; i<4; i++) setpart(color, i) = 255 * pow(float(part(color, i) / 255.0), float(shot::gamma));
     }
   
   int svgsize;
@@ -286,14 +286,14 @@ void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
     
     color_t& pix = qpixel(sout, x, y);
     pix = 0;
-    setpart(pix, 3, 255 - (255 * transparent + (maxval/2)) / maxval);
+    setpart(pix, 3) = 255 - (255 * transparent + (maxval/2)) / maxval;
     
     if(transparent < maxval) for(int p=0; p<3; p++) {
       ld v = (val[0][p] * 3. / maxval) / (1 - transparent * 1. / maxval);
       v = pow(v, gamma) * fade;
       v *= 255;
       if(v > 255) v = 255;
-      setpart(pix, p, v);
+      setpart(pix, p) = v;
       }
     }
   IMAGESAVE(sout, fname.c_str());

@@ -1096,7 +1096,7 @@ hpcshape *vshapes[4] = { &shDisk, &shDisk, &shHeptaMarker, &shSnowball };
 
 color_t darken_a(color_t c) {
   for(int p=0; p<3; p++)
-  for(int i=0; i<darken; i++) setpart(c, i+1, (part(c, i+1) + part(backcolor, i)) >> 1);
+  for(int i=0; i<darken; i++) setpart(c, i+1) = (part(c, i+1) + part(backcolor, i)) >> 1;
   return c;
   }
 
@@ -1199,7 +1199,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
       
       alpha >>= darken;
-      setpart(col, 0, alpha);
+      setpart(col, 0) = alpha;
 
       transmatrix gm1 = 
         (multidraw || elliptic) ? V * memo_relative_matrix(vd1.m->base, c) :
@@ -1737,7 +1737,7 @@ int readArgs() {
     }
   else if(argis("-ggamma")) {
     // backward compatibility
-    shift(); setpart(default_edgetype.color, 0, 255 * pow(.5, argf()));
+    shift(); setpart(default_edgetype.color, 0) = 255 * pow(.5, argf());
     }
   else if(argis("-cshift")) {
     shift_arg_formula(collatz::cshift);
@@ -2041,7 +2041,7 @@ slide rvslides[] = {
       rogueviz::dftcolor = 0x282828FF;
 
       rogueviz::showlabels = true;
-      setpart(rogueviz::default_edgetype.color, 0, 181);
+      setpart(rogueviz::default_edgetype.color, 0) = 181;
       rogueviz::sag::edgepower = 1;
       rogueviz::sag::edgemul = 1;
       
@@ -2061,7 +2061,7 @@ slide rvslides[] = {
       rogueviz::dftcolor = 0x282828FF;
 
       rogueviz::showlabels = true;
-      setpart(rogueviz::default_edgetype.color, 0, 128);
+      setpart(rogueviz::default_edgetype.color, 0) = 128;
       rogueviz::sag::edgepower = .4;
       rogueviz::sag::edgemul = .02;
       
@@ -2082,7 +2082,7 @@ slide rvslides[] = {
       rogueviz::dftcolor = 0x282828FF;
 
       rogueviz::showlabels = true;
-      setpart(rogueviz::default_edgetype.color, 0, 157);
+      setpart(rogueviz::default_edgetype.color, 0) = 157;
       rogueviz::sag::edgepower = 1;
       rogueviz::sag::edgemul = 1;
       

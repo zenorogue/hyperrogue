@@ -385,7 +385,7 @@ void draw_kuen_map() {
         auto& px = qpixel(kuen_map, r, h);
         px |= 0xFF000000;
         for(int k=0; k<3; k++)
-          setpart(px, k, vv[k] > 0 ? 0xFF : 0);
+          setpart(px, k) = vv[k] > 0 ? 0xFF : 0;
         px = 0xFF000000 + (((int)(n*255/nmax)) * (kuen_branch(v,u) == 1 ? 0x10101 : 0x10001));
         }
       }

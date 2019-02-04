@@ -510,7 +510,7 @@ bool scrolling_distances = false;
 color_t distribute_color(int id) {
   color_t v = 0xFFFFFF;
   for(int z=0; z<24; z++) if(id & (1<<z))
-    setpart(v, z%3, part(v, z%3) & ~(1<<(7-(z/3))));
+    setpart(v, z%3) = part(v, z%3) & ~(1<<(7-(z/3)));
   return v; 
   }
 

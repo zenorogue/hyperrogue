@@ -851,7 +851,7 @@ void addMessage(string s, char spamtype) {
 
 color_t colormix(color_t a, color_t b, color_t c) {
   for(int p=0; p<3; p++)
-    setpart(a, p, part(a,p) + (part(b,p) - part(a,p)) * part(c,p) / 255);
+    setpart(a, p) = part(a,p) + (part(b,p) - part(a,p)) * part(c,p) / 255;
   return a;
   }
 
@@ -946,7 +946,7 @@ color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   for(int a=0; a<3; a++) {
     int p0 = part(c0, a);
     int p1 = part(c1, a);
-    setpart(c, a, (p0*(256-vv) + p1*vv + 127) >> 8);
+    setpart(c, a) = (p0*(256-vv) + p1*vv + 127) >> 8;
     }
   return c;
   }

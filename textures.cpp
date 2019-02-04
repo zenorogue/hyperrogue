@@ -59,7 +59,7 @@ template<class T, class U> void scale_colorarray(int origdim, int targetdim, con
     if(tmissing == 0) {
       color_t target = 0;
       for(int p=0; p<4; p++) {
-        setpart(target, p, partials[p] / origdim);
+        setpart(target, p) = partials[p] / origdim;
         partials[p] = 0;
         }
       dest(tx++, target);
@@ -71,8 +71,8 @@ template<class T, class U> void scale_colorarray(int origdim, int targetdim, con
 color_t swap_red_and_blue(color_t col) {
   unsigned char r = part(col, 0);
   unsigned char b = part(col, 2);
-  setpart(col, 0, b);
-  setpart(col, 2, r);
+  setpart(col, 0) = b;
+  setpart(col, 2) = r;
   return col;
   }
 
@@ -327,7 +327,7 @@ void texture_config::mapTexture2(textureinfo& mi) {
 int texture_config::recolor(color_t col) {
   if(color_alpha == 0) return col;
   for(int i=1; i<4; i++)
-    setpart(col, i, color_alpha + ((255-color_alpha) * part(col,i) + 127) / 255);
+    setpart(col, i) = color_alpha + ((255-color_alpha) * part(col,i) + 127) / 255;
   return col;
   }
 

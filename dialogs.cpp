@@ -481,7 +481,7 @@ namespace dialog {
       int x = (mousex - (dcenter-dwidth/4)) * 510 / dwidth;
       if(x < 0) x = 0;
       if(x > 255) x = 255;
-      setpart(color, uni - 'A', x);
+      setpart(color, uni - 'A') = x;
       }
     else if(uni == ' ' || uni == '\n' || uni == '\r') {
       bool inHistory = false;
@@ -504,10 +504,10 @@ namespace dialog {
       colorp = (colorp+1) & 3;
       }
     else if(DKEY == SDLK_LEFT) {
-      setpart(color, colorp, part(color, colorp) - abs(shiftmul) < .6 ? 1 : 17);
+      setpart(color, colorp) = part(color, colorp) - abs(shiftmul) < .6 ? 1 : 17;
       }
     else if(DKEY == SDLK_RIGHT) {
-      setpart(color, colorp, part(color, colorp) + abs(shiftmul) < .6 ? 1 : 17);
+      setpart(color, colorp) = part(color, colorp) + abs(shiftmul) < .6 ? 1 : 17;
       }
     else if(doexiton(sym, uni)) {
       popScreen();

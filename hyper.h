@@ -3274,8 +3274,23 @@ extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
 extern ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
 
-unsigned char part(color_t col, int i);
-void setpart(color_t& col, int i, unsigned char value);
+inline unsigned char part(color_t col, int i) {
+  return col >> (8 * i);
+  }
+
+struct colorpartproxy {
+    color_t& col_;
+    int i_;
+    explicit colorpartproxy(color_t& col, int i) : col_(col), i_(i) {}
+    void operator=(unsigned char value) {
+      color_t mask = color_t(0xFF) << (8 * i_);
+      col_ = (col_ & ~mask) | (color_t(value) << (8 * i_));
+      }
+};
+
+inline colorpartproxy setpart(color_t& col, int i) {
+  return colorpartproxy(col, i);
+  }
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
 

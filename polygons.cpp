@@ -384,7 +384,7 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
       for(int p=0; p<3; p++) {
         int alpha = part(c, 3) * part(col, 0);
         int v = part(pix, p);
-        setpart(pix, p, ((255*255 - alpha) * 255 * v + alpha * part(col, p+1) * part(c, p) + 255 * 255 * 255/2 + 1) / (255 * 255 * 255));
+        setpart(pix, p) = ((255*255 - alpha) * 255 * v + alpha * part(col, p+1) * part(c, p) + 255 * 255 * 255/2 + 1) / (255 * 255 * 255);
         }
       }
     }
@@ -761,15 +761,6 @@ void fixMercator(bool tinf) {
     
   }
   
-unsigned char part(color_t col, int i) {
-  return col >> (8 * i);
-  }
-
-void setpart(color_t& col, int i, unsigned char value) {
-  color_t mask = color_t(0xFF) << (8 * i);
-  col = (col & ~mask) | (color_t(value) << (8 * i));
-  }
-
 bool in_twopoint = false;
 
 ld glhypot2(glvertex a, glvertex b) { 
@@ -2679,12 +2670,12 @@ dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR 
     /* int r = (625 * part(col,3) + 375 * part(col,2)) / 1000;
     int g = (700 * part(col,3) + 300 * part(col,2)) / 1000;
     int b = (300 * part(col,2) + 700 * part(col,1)) / 1000; 
-    setpart(col,3, r);
-    setpart(col,2, g);
-    setpart(col,1, b); */
+    setpart(col,3) = r;
+    setpart(col,2) = g;
+    setpart(col,1) = b; */
     int gb = (part(col,2) * 2 + part(col,3) + 1)/3;
-    setpart(col, 2, gb);
-    setpart(col, 3, gb);
+    setpart(col, 2) = gb;
+    setpart(col, 3) = gb;
     }
   ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
   ptd.outline = poly_outline;
