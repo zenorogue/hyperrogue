@@ -445,11 +445,12 @@ int parent_id(cell *c, int which, const cellfunction& cf) {
   for(int i=0; i<c->type; i++) {
     
     if(cf(c->cmove(i)) == d) {
+      int steps = 0;
       again:
-      if(!which) return i;
+      if(!which || steps == c->type) return i;
       int i2 = c->c.fix(i+which);
       if(cf(c->cmove(i2)) == d) {
-        i = i2; goto again;
+        i = i2; steps++; goto again;
         }
       else return i;
       }
