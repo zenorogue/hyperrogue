@@ -496,7 +496,7 @@ ld circle_radius = acosh(2.), circle_spins = 1;
 void moved() {
   optimizeview();
   if(cheater || autocheat) {
-    if(hyperbolic && memory_saving_mode && cwt.at != centerover.at && !quotient) {
+    if(hyperbolic && memory_saving_mode && centerover.at && gmatrix.size() && cwt.at != centerover.at && !quotient) {
       if(isNeighbor(cwt.at, centerover.at)) {
         cwt.spin = neighborId(centerover.at, cwt.at);
         flipplayer = true;
