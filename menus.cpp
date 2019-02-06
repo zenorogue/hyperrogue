@@ -779,7 +779,6 @@ void showStartMenu() {
       clearMessages();
       welcomeMessage();
       pushScreen(showEuclideanMenu);
-      ewhichscreen = 2;
       }
     else if(uni == 'c' || uni == 'i' || uni == 's' || uni == 'C' || uni == '7') {
       if(uni == 'C' && !chaosUnlocked) {

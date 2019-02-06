@@ -3499,8 +3499,6 @@ transmatrix rpushxto0(const hyperpoint& H);
 transmatrix spintox(const hyperpoint& H);
 transmatrix ypush(ld alpha);
 
-extern int ewhichscreen;
-
 #if CAP_SURFACE
 namespace surface {
 

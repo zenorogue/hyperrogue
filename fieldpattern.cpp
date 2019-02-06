@@ -778,6 +778,7 @@ void enableFieldChange() {
   ginf[geometry].sides = ginf[gxcur.base].sides;
   ginf[geometry].vertex = ginf[gxcur.base].vertex;
   ginf[geometry].distlimit = ginf[gxcur.base].distlimit;
+  ginf[geometry].tiling_name = ginf[gxcur.base].tiling_name;
   fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
   }
 

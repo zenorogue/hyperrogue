@@ -371,15 +371,24 @@ namespace torusconfig {
   int tester = addHook(hooks_tests, 0, torus_test);
   
   void activate() {
-    if(tmflags() & TF_HEX)
-      ginf[gTorus].vertex = 3, ginf[gTorus].sides = 6;
-    else
-      ginf[gTorus].vertex = 4, ginf[gTorus].sides = 4;
+    auto& gi(ginf[gTorus]);
 
-    flagtype& flags = ginf[gTorus].flags;
+    if(tmflags() & TF_HEX)
+      gi.vertex = 3, gi.sides = 6, gi.tiling_name = "{6,3}";
+    else
+      gi.vertex = 4, gi.sides = 4, gi.tiling_name = "{4,4}";
+
+    flagtype& flags = gi.flags;
     
     set_flag(flags, qNONORIENTABLE, tmflags() & TF_KLEIN);
     set_flag(flags, qBOUNDED, !(tmflags() & TF_CYL));
+    
+    int i = 0;
+    if(tmflags() & TF_KLEIN) i++;
+    if(tmflags() & TF_CYL) i+=2;
+    
+    const char *quonames[4] = {"torus", "Klein bottle", "cylinder", "Möbius band"};
+    gi.quotient_name = quonames[i];
     }
 
   int dscalar(gp::loc e1, gp::loc e2) {

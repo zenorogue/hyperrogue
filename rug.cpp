@@ -1765,6 +1765,16 @@ string makehelp() {
      ;
   }
 
+string geometry_name(eGeometry g) {
+  switch(g) {
+    case gNormal: return XLAT("hyperbolic");
+    case gEuclid: return XLAT("Euclidean");
+    case gSphere: return XLAT("spherical");
+    case gElliptic: return XLAT("elliptic");
+    default: return XLAT("unknown");
+    }
+  }
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1789,7 +1799,7 @@ void show() {
   dialog::lastItem().value = XLAT(rug_perspective ? "perspective" : 
     gwhere == gEuclid ? "orthogonal" : "azimuthal equidistant");
   if(!rug::rugged)
-    dialog::addSelItem(XLAT("native geometry"), XLAT(gwhere ? ginf[gwhere].name : "hyperbolic"), 'n');
+    dialog::addSelItem(XLAT("native geometry"), geometry_name(gwhere), 'n');
   else
     dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts4(radar_distance), 'r');
   dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');

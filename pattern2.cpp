@@ -1910,7 +1910,7 @@ namespace patterns {
     if(cgroup != cpUnknown && cgroup < isize(cpatterns))
       for(int j=0; j<isize(cpatterns[cgroup].geometries); j++) {
         auto &g = cpatterns[cgroup].geometries[j];
-        string s = XLAT(ginf[g.geo].name);
+        string s = XLAT(ginf[g.geo].tiling_name);
         s += bitruncnames[int(g.var)];
         if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
         if(g.subpattern_flags & SPF_DOCKS) s += " (Docks)";

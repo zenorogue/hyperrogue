@@ -32,8 +32,6 @@ string euchelp =
   "* Halloween is specially designed for spherical geometry.\n"
   "* To see the difference, try Hunting Grounds in Euclidean -- it is impossible.\n";
 
-int ewhichscreen = 2;
-
 void showQuotientConfig() {
   using namespace fieldpattern;
   gamescreen(2);
@@ -41,7 +39,7 @@ void showQuotientConfig() {
   fgeomextra& gxcur = fgeomextras[current_extra];
   for(int i=0; i<isize(fgeomextras); i++) {
     auto& g = fgeomextras[i];
-    dialog::addBoolItem(XLAT(ginf[g.base].name), g.base == gxcur.base, 'a'+i);
+    dialog::addBoolItem(ginf[g.base].tiling_name, g.base == gxcur.base, 'a'+i);
     }
   nextPrimes(gxcur);
   for(int i=0; i<isize(gxcur.primes); i++) {
@@ -278,10 +276,14 @@ void validity_info() {
 
 bool showquotients;
 
-void showEuclideanMenu() {
+string validclasses[4] = {" (X)", " (½)", "", " (!)"};
+  
+void ge_land_selection() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
+
   if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
+
   for(int i=0; i<landtypes; i++)
     if(hiitemsMax(treasureType(eLand(i))) >= 25) landvisited[i] = true;
   landvisited[laCrossroads] = true;
@@ -299,348 +301,385 @@ void showEuclideanMenu() {
   landvisited[laSnakeNest] |= landvisited[laRedRock];
   landvisited[laCamelot] |= hiitemsMax(treasureType(laCamelot)) >= 1;
   landvisited[laCA] = true;
+
+  dialog::init(XLAT("experiment with geometry"));
+  
+  // dialog::addSelItem(XLAT("geometry"), XLAT(bitruncnames[int(variation)]), '5');
+  // dialog::addBreak(50);
+    
+  generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_geom_exp; });
+  stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
+  
+  for(int i=0; i<euperpage; i++) {
+    if(euperpage * eupage + i >= isize(landlist)) { dialog::addBreak(100); break; }
+    eLand l = landlist[euperpage * eupage + i];
+    char ch;
+    if(i < 26) ch = 'a' + i;
+    else ch = 'A' + (i-26);
+    string s = XLAT1(linf[l].name);
+
+    if(landvisited[l]) {
+      dialog::addBoolItem(s, l == specialland, ch);
+      }
+    else {
+      dialog::addSelItem(s, XLAT("(locked)"), ch);
+      }
+    
+    dialog::lastItem().color = linf[l].color;
+    dialog::lastItem().value += validclasses[land_validity(l).quality_level];
+    dialog::add_action([l] {
+      if(landvisited[l]) dialog::do_if_confirmed([l] {
+        stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
+        firstland = specialland = l;
+        start_game();
+        popScreen();
+        });
+      });
+    }
+  dialog::addBreak(50);
+  if(chaosUnlocked && !quotient && !euclid && !sphere) {
+    dialog::addItem(XLAT("Chaos mode"), '1');
+    dialog::add_action([] {
+      if(chaosUnlocked) dialog::do_if_confirmed([] {
+        stop_game_and_switch_mode(rg::chaos);
+        start_game();
+        });
+      });
+    }
+  dialog::addItem(XLAT("next page"), '-');
+
+  dialog::addBreak(25);
+  validity_info();    
+  dialog::addBreak(25);
+  
+  dialog::addBack();
+  dialog::display();
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    
+    if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
+      eupage++;
+      if(eupage * euperpage >= isize(landlist)) eupage = 0;
+      }
+    else if(doexiton(sym, uni)) popScreen();
+    };
+  }
+
+vector<eGeometry> tilinglist = {
+  gTinySphere, gSmallSphere, gSphere, gEuclid, gNormal, gOctagon,
+  gOctahedron, gEuclidSquare, g45, g46, g47,
+  gArchimedean, gBinaryTiling
+  };
+
+vector<eGeometry> quotientlist = {
+  gElliptic,
+  gZebraQuotient, gFieldQuotient, gTorus,
+  gSmallElliptic, 
+  gKleinQuartic, gBolza, gBolza2, gMinimal, 
+  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal  
+  };
+
+void ge_select_tiling(const vector<eGeometry>& lst) {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);  
+
+  dialog::init(XLAT("experiment with geometry"));
+
+  char letter = 'a';
+  for(eGeometry i: lst) {
+    bool on = geometry == i;
+    dynamicval<eGeometry> cg(geometry, eGeometry(i));
+    dialog::addBoolItem(XLAT(ginf[i].menu_displayed_name), on, letter++);
+    dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
+    dialog::add_action([i] {
+      eGeometry targetgeometry = eGeometry(i);
+      if(targetgeometry == gCrystal)
+        pushScreen(crystal::show);
+      else if(targetgeometry == gArchimedean)
+        pushScreen(arcm::show);
+      else dialog::do_if_confirmed([targetgeometry] () {
+        set_geometry(targetgeometry);
+        start_game();
+        if(euwrap) {
+          prepare_torusconfig();
+          pushScreen(showTorusConfig);
+          }
+        if(geometry == gFieldQuotient) {
+          pushScreen(showQuotientConfig);
+          }
+        });
+      });
+    }
+  
+  dialog::addBack();
+  dialog::display();
+  }
+
+string current_proj_name() {
+  if(pmodel != mdDisk)
+    return conformal::get_model_name(pmodel);
+  else if(hyperbolic && vid.alpha == 1)
+    return "Poincaré";
+  else if(hyperbolic && vid.alpha == 0)
+    return "Klein";
+  else if(hyperbolic && vid.alpha == -1)
+    return "inverted Poincaré";
+  else if(sphere && vid.alpha == 1)
+    return "stereographic";
+  else if(sphere && vid.alpha == 0)
+    return "gnomonic";
+  else 
+    return "generalized perspective";  
+  }
+
+void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
-  string validclasses[4] = {" (X)", " (½)", "", " (!)"};
-  
-  if(ewhichscreen == 2) {
-    dialog::init(XLAT("experiment with geometry"));
-    int ts = ginf[geometry].sides;
-    int tv = ginf[geometry].vertex;
-    flagtype gf = ginf[geometry].flags;
-    int nom = (BITRUNCATED ? tv+ts : tv) * 4;
-    int denom = (2*ts + 2*tv - ts * tv);
-    
-    if(GOLDBERG && S3)
-      nom = 2 * (2*tv + ts * (gp::area-1));
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);  
 
-    if(GOLDBERG && S3 == 4)
-      nom = 2 * (2*tv + 2 * ts * (gp::area-1));
-    
-    dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
-    dialog::addBreak(50);
-
-    char letter = 'a';
-    for(int i=0; i<gGUARD; i++) {
-      bool on = geometry == i;
-      dynamicval<eGeometry> cg(geometry, eGeometry(i));
-      if(!!(quotient || elliptic || euwrap) != showquotients) continue;
-      dialog::addBoolItem(XLAT(ginf[i].name), on, letter++);
-      dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
-      dialog::add_action([i] {
-        eGeometry targetgeometry = eGeometry(i);
-        if(targetgeometry == gCrystal)
-          pushScreen(crystal::show);
-        else if(targetgeometry == gArchimedean)
-          pushScreen(arcm::show);
-        else dialog::do_if_confirmed([targetgeometry] () {
-          set_geometry(targetgeometry);
-          start_game();
-          });
-        });
-      }
-    
-    dialog::addBreak(50);
-    dialog::addBoolItem(XLAT("show quotient spaces"), showquotients, 'z');
-    dialog::addBreak(50);
+  dialog::init(XLAT("experiment with geometry"));
   
-    if(ts == 6 && tv == 3)
-      dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
-    else if(binarytiling)
-      dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
+  dialog::addSelItem(XLAT("basic tiling"), XLAT(ginf[geometry].tiling_name), 't');
+  dialog::add_action([] { pushScreen([] { ge_select_tiling(tilinglist); }); });
+
+  int ts = ginf[geometry].sides;
+  int tv = ginf[geometry].vertex;
+  int nom = (BITRUNCATED ? tv+ts : tv) * 4;
+  int denom = (2*ts + 2*tv - ts * tv);
+  
+  if(GOLDBERG && S3)
+    nom = 2 * (2*tv + ts * (gp::area-1));
+
+  if(GOLDBERG && S3 == 4)
+    nom = 2 * (2*tv + 2 * ts * (gp::area-1));
+
+  int worldsize;
+    
+  int euler = 0;
+  if(euclid) euler = 0;
+  else if(sphere && nonorientable) euler = 1;
+  else if(sphere) euler = 2;
+  else if(!bounded) euler = -2;
+  else switch(geometry) {
+    case gFieldQuotient:
+      worldsize = isize(currentmap->allcells());
+      euler = 2 * worldsize * denom / nom;
+      break;
+    
+    case gMinimal:
+      euler = -1;
+      break;
+    
+    case gZebraQuotient:
+    case gBolza:
+      euler = -2;
+      break;
+    
+    case gKleinQuartic:
+    case gSchmutzM2:
+    case gBolza2:
+      euler = -4;
+      break;
+    
+    case gSchmutzM3:
+    case gBring:
+      euler = -6;
+      break;
+    
+    case gMacbeath:
+      euler = -12;
+      break;
+    
+    default: 
+      println(hlog, "warning: Euler characteristics unknown");
+      break;
+    }
+  
+  nom *= euler;
+  denom *= 2;
+        
+  int g = gcd(nom, denom);
+  if(g) {
+    nom /= g;
+    denom /= g;
+    }
+  
+  if(fulltorus) {
+    using namespace torusconfig;
+    auto& mode = tmodes[torus_mode];
+    if(mode.flags & TF_SINGLE)
+      worldsize = qty;
     else
-      dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
+      worldsize = sdx * sdy;
+    }
+  else worldsize = denom ? nom / denom : 0;
   
-    dialog::addBreak(25);
-    validity_info();    
-    dialog::addBreak(25);
-  
-    int worldsize;
-    
-    int euler = 0;
-    if(euclid) euler = 0;
-    else if(sphere && nonorientable) euler = 1;
-    else if(sphere) euler = 2;
-    else if(!bounded) euler = -2;
-    else switch(geometry) {
-      case gFieldQuotient:
-        worldsize = isize(currentmap->allcells());
-        euler = 2 * worldsize * denom / nom;
-        break;
-      
-      case gMinimal:
-        euler = -1;
-        break;
-      
-      case gZebraQuotient:
-      case gBolza:
-        euler = -2;
-        break;
-      
-      case gKleinQuartic:
-      case gSchmutzM2:
-      case gBolza2:
-        euler = -4;
-        break;
-      
-      case gSchmutzM3:
-      case gBring:
-        euler = -6;
-        break;
-      
-      case gMacbeath:
-        euler = -12;
-        break;
-      
-      default: 
-        println(hlog, "warning: Euler characteristics unknown");
-        break;
-      }
-    
-    nom *= euler;
-    denom *= 2;
-          
-    int g = gcd(nom, denom);
-    if(g) {
-      nom /= g;
-      denom /= g;
-      }
-    
-    if(fulltorus) {
-      using namespace torusconfig;
-      auto& mode = tmodes[torus_mode];
-      if(mode.flags & TF_SINGLE)
-        worldsize = qty;
-      else
-        worldsize = sdx * sdy;
-      }
-    else worldsize = denom ? nom / denom : 0;
-    
-    if(euler < 0 && !bounded)
-      worldsize = -worldsize;
+  if(euler < 0 && !bounded)
+    worldsize = -worldsize;
 
-    string spf = its(ts);
-    if(archimedean) {
-      spf = "";
-      for(int i: arcm::current.faces) {
-        if(spf != "") spf += ",";
-        spf += its(i);
-        }
-      if(BITRUNCATED) spf = "[" + spf + "]," + its(arcm::current.N * 2) + "," + its(arcm::current.N * 2);
-      if(DUAL) spf = its(arcm::current.N) + "^[" + spf + "]";
+  string spf = its(ts);
+  if(archimedean) {
+    spf = "";
+    for(int i: arcm::current.faces) {
+      if(spf != "") spf += ",";
+      spf += its(i);
       }
-    else if(binarytiling)
-      spf = "6,[6,7],7";
-    else if(BITRUNCATED && !euclid6)
-      spf = spf + "," + its(S6) + "," + its(S6);
-    else if(IRREGULAR && irr::bitruncations_performed)
-      spf = "[4..8],6,6";
-    else if(IRREGULAR)
-      spf = "[4..8]^3";
-    else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(1, 1))
-      spf = spf + ",4," + spf + ",4";
-    else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(2, 0))
-      spf = spf + ",4,4,4";
-    else if(GOLDBERG && S3 == 4)
-      spf = "[" + spf + ",4],4,4,4";
-    else if(GOLDBERG && S3 == 3)
-      spf = "[" + spf + ",6],6,6";
-    else {
-      string spf0 = spf;
-      for(int z=1; z<S3; z++) spf = spf + "," + spf0;
-      }
-  
-    dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
-  
-    string qstring = "none";
+    if(BITRUNCATED) spf = "[" + spf + "]," + its(arcm::current.N * 2) + "," + its(arcm::current.N * 2);
+    if(DUAL) spf = its(arcm::current.N) + "^[" + spf + "]";
+    }
+  else if(binarytiling)
+    spf = "6,[6,7],7";
+  else if(BITRUNCATED && !euclid6)
+    spf = spf + "," + its(S6) + "," + its(S6);
+  else if(IRREGULAR && irr::bitruncations_performed)
+    spf = "[4..8],6,6";
+  else if(IRREGULAR)
+    spf = "[4..8]^3";
+  else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(1, 1))
+    spf = spf + ",4," + spf + ",4";
+  else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(2, 0))
+    spf = spf + ",4,4,4";
+  else if(GOLDBERG && S3 == 4)
+    spf = "[" + spf + ",4],4,4,4";
+  else if(GOLDBERG && S3 == 3)
+    spf = "[" + spf + ",6],6,6";
+  else {
+    string spf0 = spf;
+    for(int z=1; z<S3; z++) spf = spf + "," + spf0;
+    }
 
-    if(gf & qZEBRA) qstring = "zebra";  
-    else if(gf & qFIELD) qstring = "field";
-  
-    else if((gf & qNONORIENTABLE) && sphere) qstring = "elliptic";
-  
-    else if(bounded && euclid) qstring = "torus";
+  string qstring = ginf[geometry].quotient_name;
 
-    else if(quotient && euclid) qstring = "cylinder";
-    
-    else if(smallbounded) qstring = ginf[geometry].shortname;
-  
-    dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
+  if(qstring == "none")
+    dialog::addBoolItem(XLAT("quotient space"), false, 'q');
+  else
+    dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 'q');
 
-    if(hyperbolic && IRREGULAR) {
-      nom = isize(irr::cells);
-      // both Klein Quartic and Bolza2 are double the Zebra quotiennt
-      denom = -2;
-      if(!quotient) worldsize = nom / denom;
-      }
-    
-    dialog::addSelItem(XLAT("size of the world"), 
-      binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
-      archimedean ? arcm::current.world_size() :
-      (archimedean && sphere) ? its(isize(currentmap->allcells())) :
-      geometry == gCrystal ? "∞^" + its(ts/2) :
-      worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
-      (euwrap && !fulltorus) ? "∞" :
-      worldsize == 0 ? "∞²" :
-      its(worldsize),
-      '3');
+  dialog::add_action([] { pushScreen([] { ge_select_tiling(quotientlist); }); });
 
-    if(bounded) {
-      dialog::addSelItem(XLAT("Euler characteristics"), its(euler), 0);
-      if(nonorientable)
-        dialog::addSelItem(XLAT("demigenus"), its(2-euler), 0);
-      else
-        dialog::addSelItem(XLAT("genus"), its((2-euler)/2), 0);
-      }
-    else dialog::addBreak(200);
-    
-    switch(ginf[geometry].cclass) {
-      case 0:
-        dialog::addSelItem(XLAT("Curvature"), XLAT("hyperbolic"), 0);
-        break;
-      
-      case 1: 
-        dialog::addSelItem(XLAT("Curvature"), XLAT("flat"), 0);
-        break;
-      
-      case 2:
-        dialog::addSelItem(XLAT("Curvature"), XLAT("spherical"), 0);
-        break;
-      }
-    
-    if(sphere) 
-      dialog::addBoolItem(XLAT("stereographic/orthogonal"), vid.alpha>10, '1');
-    else
-      dialog::addBoolItem(XLAT("Poincaré/Klein"), vid.alpha>.5, '1');
-    if(euwrap || geometry == gFieldQuotient)
-      dialog::addItem(XLAT("advanced parameters"), '4');  
-    dialog::addHelp();
-    dialog::addBack();
-    dialog::display();
+  if(hyperbolic && IRREGULAR) {
+    nom = isize(irr::cells);
+    // both Klein Quartic and Bolza2 are double the Zebra quotiennt
+    denom = -2;
+    if(!quotient) worldsize = nom / denom;
+    }
   
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni == 'z') 
-        showquotients = !showquotients;
-      else if(uni == 'v') {
-        if(euclid6) ;
-        else if(archimedean) arcm::next_variation();
-        else if(binarytiling) {
-          dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
-          dialog::reaction = [] () {
-            need_reset_geometry = true;
-            #if CAP_TEXTURE
-            texture::config.remap();
-            #endif
-            };
-          }
-        else if(euclid4) dialog::do_if_confirmed([] {
-          set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
-          start_game();
-          });
-        else // if(S3 == 3) 
-          gp::configure();
-        }
-      else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
-      else if(uni == '3' && !viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
-      else if(uni == '3' && viewdists) { viewdists = false; }
-      else if(uni == '1' && !euclid) {
-        if(sphere) {
-          if(vid.alpha < 10) { vid.alpha = 999; vid.scale = 998; }
-          else {vid.alpha = 1; vid.scale = .4; }
-          }
-        else {
-          if(vid.alpha > .5) { vid.alpha = 0; vid.scale = 1; }
-          else {vid.alpha = 1; vid.scale = 1; }
-          }
-        }
-      else if(uni == '5')
-        ewhichscreen ^= 3;
-      else if(uni == '4') {
-        if(euwrap) 
-          prepare_torusconfig(),
-          pushScreen(showTorusConfig);
-        else if(geometry == gFieldQuotient) 
-          pushScreen(showQuotientConfig);
-        }
-      else if(doexiton(sym, uni))
-        popScreen();
-      };
+  if(ts == 6 && tv == 3)
+    dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
+  else if(binarytiling) {
+    dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
+    dialog::add_action([] {
+      dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
+      dialog::reaction = [] () {
+        need_reset_geometry = true;
+        #if CAP_TEXTURE
+        texture::config.remap();
+        #endif
+        };
+      });
     }
   else {
-    dialog::init(XLAT("experiment with geometry"));
-  
-    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(bitruncnames[int(variation)]), '5');
-    dialog::addBreak(50);
-    
-    generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_geom_exp; });
-    stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
-    
-    for(int i=0; i<euperpage; i++) {
-      if(euperpage * eupage + i >= isize(landlist)) { dialog::addBreak(100); break; }
-      eLand l = landlist[euperpage * eupage + i];
-      char ch;
-      if(i < 26) ch = 'a' + i;
-      else ch = 'A' + (i-26);
-      string s = XLAT1(linf[l].name);
-
-      if(landvisited[l]) {
-        dialog::addBoolItem(s, l == specialland, ch);
-        }
-      else {
-        dialog::addSelItem(s, XLAT("(locked)"), ch);
-        }
-      
-      dialog::lastItem().color = linf[l].color;
-      dialog::lastItem().value += validclasses[land_validity(l).quality_level];
-      }
-    dialog::addBreak(50);
-    if(chaosUnlocked && !quotient && !euclid && !sphere)
-      dialog::addItem(XLAT("Chaos mode"), '1');
-    dialog::addItem(XLAT("next page"), '-');
-
-    dialog::addBreak(25);
-    validity_info();    
-    dialog::addBreak(25);
-    
-    dialog::addHelp();
-    dialog::addBack();
-    dialog::display();
-  
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      int lid;
-      if(uni >= 'a' && uni <= 'z') lid = uni - 'a';
-      else if(uni >= 'A' && uni <= 'Z') lid = 26 + uni - 'A';
-      else lid = -1;
-      
-      if(lid >= 0) lid += euperpage * eupage;
-      
-      if(uni == '5') 
-        ewhichscreen ^= 3;
-      else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
-        eupage++;
-        if(eupage * euperpage >= isize(landlist)) eupage = 0;
-        }
-      else if(uni == '1') {
-        if(chaosUnlocked) dialog::do_if_confirmed([] {
-          stop_game_and_switch_mode(rg::chaos);
-          start_game();
-          });
-        }
-      else if(lid >= 0 && lid < isize(landlist)) {
-        eLand nland = landlist[lid];
-        if(landvisited[nland]) dialog::do_if_confirmed([nland] {
-          stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
-          firstland = specialland = nland;
-          start_game();
-          });
-        }
-      else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
-      else if(doexiton(sym, uni)) popScreen();
-      };
+    dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
+    dialog::add_action([] {
+      if(euclid6) ;
+      else if(archimedean) arcm::next_variation();
+      else if(euclid4) dialog::do_if_confirmed([] {
+        set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
+        start_game();
+        });
+      else // if(S3 == 3) 
+        gp::configure();
+      });
     }
+
+        
   
+  if(euwrap || geometry == gFieldQuotient) {
+    dialog::addItem(XLAT("advanced parameters"), '4');
+    dialog::add_action([] {
+      if(archimedean)
+        pushScreen(arcm::show);
+      else if(geometry == gCrystal)
+        pushScreen(crystal::show);
+      else if(euwrap) 
+        prepare_torusconfig(),
+        pushScreen(showTorusConfig);
+      else if(geometry == gFieldQuotient) 
+        pushScreen(showQuotientConfig);
+      });
+    }
+  else dialog::addBreak(100);
+  
+  dialog::addBreak(50);
+  
+  dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
+  dialog::add_action([] { pushScreen(ge_land_selection); });
+  dialog::addBoolItem(XLAT("pattern"), specialland == laCanvas, 'p');
+  if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
+  dialog::add_action([] { pushScreen(patterns::showPrePattern); });
+  validity_info();
+  dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+  dialog::add_action([] { pushScreen(conformal::model_menu); });
+
+  dialog::addBreak(50);
+   
+  dialog::addItem(XLAT("take picture"), 's');
+  dialog::add_action([] { pushScreen(shot::menu); });
+  dialog::addHelp();
+  dialog::addBack();
+  
+  dialog::addBreak(150);
+
+  string fgname = XLAT(ginf[geometry].tiling_name);
+  if(qstring != "none") fgname += " " + XLAT(qstring);
+  if(!euclid6) fgname = gp::operation_name() + " " + fgname;
+  
+  dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
+  
+  dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
+  
+  dialog::addSelItem(XLAT("size of the world"), 
+    binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
+    archimedean ? arcm::current.world_size() :
+    (archimedean && sphere) ? its(isize(currentmap->allcells())) :
+    geometry == gCrystal ? "∞^" + its(ts/2) :
+    worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
+    (euwrap && !fulltorus) ? "∞" :
+    worldsize == 0 ? "∞²" :
+    its(worldsize),
+    '3');
+  
+  dialog::add_action([] {
+    if(!viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
+    else if(viewdists) viewdists = false;
+    });
+
+  if(bounded) {
+    dialog::addSelItem(XLAT("Euler characteristics"), its(euler), 0);
+    if(nonorientable)
+      dialog::addSelItem(XLAT("demigenus"), its(2-euler), 0);
+    else
+      dialog::addSelItem(XLAT("genus"), its((2-euler)/2), 0);
+    }
+  else dialog::addBreak(200);
+  
+  switch(ginf[geometry].cclass) {
+    case 0:
+      dialog::addSelItem(XLAT("Curvature"), XLAT("hyperbolic"), 0);
+      break;
+    
+    case 1: 
+      dialog::addSelItem(XLAT("Curvature"), XLAT("flat"), 0);
+      break;
+    
+    case 2:
+      dialog::addSelItem(XLAT("Curvature"), XLAT("spherical"), 0);
+      break;
+    }    
+    
+  dialog::display();
   }
 
 void runGeometryExperiments() {

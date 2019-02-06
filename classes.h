@@ -217,7 +217,9 @@ enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
 enum class eVariation { bitruncated, pure, goldberg, irregular, dual };  
 
 struct geometryinfo {
-  const char* name;
+  const char* tiling_name;
+  const char* quotient_name;
+  const char* menu_displayed_name;
   const char* shortname;
   int sides;
   int vertex;

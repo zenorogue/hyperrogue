@@ -874,8 +874,7 @@ void saveStats(bool emergency = false) {
   fprintf(f, "Total enemies killed: %d\n", tkills());
   fprintf(f, "cells generated: %d\n", cellcount);
   if(pureHardcore()) fprintf(f, "Pure hardcore mode\n");
-  if(geometry) fprintf(f, "Geometry: %s\n", ginf[geometry].name);
-  if(CHANGED_VARIATION) fprintf(f, "Variation: %s\n", gp::operation_name().c_str());
+  if(geometry) fprintf(f, "Geometry: %s/%s/%s\n", gp::operation_name().c_str(), ginf[geometry].tiling_name, ginf[geometry].quotient_name);
   if(chaosmode) fprintf(f, "Chaos mode\n");
   if(shmup::on) fprintf(f, "Shoot-em up mode\n");
   if(inv::on) fprintf(f, "Inventory mode\n");
@@ -1169,6 +1168,7 @@ void set_variation(eVariation target) {
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && geometry == gCrystal && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;
+      cd.tiling_name = "{8,3}";
       target = eVariation::pure;
       }
     variation = target;
