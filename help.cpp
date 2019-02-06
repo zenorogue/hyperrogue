@@ -420,10 +420,9 @@ string generateHelpForItem(eItem it) {
 void addMinefieldExplanation(string& s) {
 
   s += XLAT(
-    "\n\nOnce you collect 10 Bomberbird Eggs, "
+    "\n\nOnce you collect a Bomberbird Egg, "
     "stepping on a cell with no adjacent mines also reveals the adjacent cells. "
-    "Collecting even more Eggs will increase the radius. Additionally, collecting "
-    "25 Bomberbird Eggs will reveal adjacent cells even in your future games."
+    "Collecting even more Eggs will increase the radius."
     );
 
   s += "\n\n";
