@@ -2279,3 +2279,4 @@ auto hooks  =
 #include "rogueviz-fundamental.cpp"
 #include "rogueviz-sunflower.cpp"
 #include "rogueviz-flocking.cpp"
+#include "rogueviz-magiccube.cpp"
