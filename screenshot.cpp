@@ -9,6 +9,8 @@ namespace svg {
   }
 #endif
 
+bool hide_hud = true;
+
 #if ISMOBILE==0
 // svg renderer
 namespace svg {
@@ -310,6 +312,8 @@ void take(string fname, const function<void()>& what) {
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<bool> v6(auraNOGL, true);
+  dynamicval<bool> vn(nohud, nohud || hide_hud);
+
   vid.smart_range_detail *= multiplier;
   darken = 0;
   
@@ -414,8 +418,11 @@ void menu() {
   dialog::addSelItem(XLAT("brightness"), fts(fade), 'b');
   dialog::add_action([] { dialog::editNumber(fade, 0, 2, .1, 1, XLAT("brightness"), "higher value = lighter"); });
 
-  dialog::addBoolItem(XLAT("show the HUD"), nohud, 'h');
-  dialog::add_action([] { nohud = !nohud; });
+  dialog::addBoolItem(XLAT("disable the HUD"), hide_hud, 'h');
+  dialog::add_action([] { hide_hud = !hide_hud; });
+
+  dialog::addBoolItem(XLAT("hide the player"), !mapeditor::drawplayer, 'p');
+  dialog::add_action([] { mapeditor::drawplayer = !mapeditor::drawplayer; });
 
   dialog::addItem(XLAT("customize colors and aura"), 'c');
   dialog::add_action([] { pushScreen(show_color_dialog); });
