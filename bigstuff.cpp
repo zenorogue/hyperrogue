@@ -704,6 +704,7 @@ void setLandWeird(cell *c) {
   }
 
 void setLandQuotient(cell *c) {
+  setland(c, specialland);
   int fv = zebra40(c);
   if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
   if(specialland == laWarpCoast)
@@ -722,6 +723,7 @@ void setLandQuotient(cell *c) {
   }
 
 void setLandSphere(cell *c) {
+  setland(c, specialland);
   if(specialland == laWarpCoast)
     setland(c, getHemisphere(c, 0) > 0 ? laWarpCoast : laWarpSea);
   if(specialland == laClearing)
