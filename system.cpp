@@ -738,6 +738,7 @@ void loadBoxHigh() {
   dynamicval<eVariation> sp5(variation, (eVariation) savebox[186]);
   dynamicval<int> sp7(gp::param.first, savebox[342]);
   dynamicval<int> sp8(gp::param.second, savebox[343]);
+  dynamicval<bool> spinv(inv::on, savebox[306]);
 
   if(savebox[238]) geometry = gSphere;
   if(savebox[239]) geometry = gElliptic;
