@@ -2248,6 +2248,10 @@ void buildpolys() {
   
   shDragonFloor.prio = PPR::FLOOR_DRAGON;
   shPowerFloor.prio = PPR::FLOOR_DRAGON;
+  shMFloor.prio = PPR::FLOOR_DRAGON;
+  shMFloor2.prio = PPR::FLOOR_DRAGON;
+  shMFloor3.prio = PPR::FLOOR_DRAGON;
+  shMFloor4.prio = PPR::FLOOR_DRAGON;
   for(int i=0; i<3; i++) shRedRockFloor[i].scale = .9 - .1 * i;
   generate_floorshapes();
   
