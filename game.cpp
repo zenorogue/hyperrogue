@@ -7549,13 +7549,17 @@ void monstersTurn() {
 
 void pushThumper(cell *th, cell *cto) {
   eWall w = th->wall;
-  cto->wparam = th->wparam;
   if(th->land == laAlchemist)
     th->wall = isAlch(cwt.at) ? cwt.at->wall : cto->wall;
   else th->wall = waNone;
   int explode = 0;
   if(cto->wall == waArrowTrap && w == waExplosiveBarrel ) explode = max<int>(cto->wparam, 1);
-  if(cto->wall == waFireTrap) explode = max<int>(cto->wparam, 1);
+  if(cto->wall == waFireTrap) {
+    if(w == waExplosiveBarrel)
+      explode = max<int>(cto->wparam, 1);
+    if(w == waThumperOn)
+      explode = 2;
+    }
   destroyTrapsOn(cto);
   if(cto->wall == waOpenPlate || cto->wall == waClosePlate) {
     toggleGates(cto, cto->wall);
@@ -7578,6 +7582,8 @@ void pushThumper(cell *th, cell *cto) {
   else 
     cto->wall = w;
   if(explode) cto->wall = waFireTrap, cto->wparam = explode;
+  if(cto->wall == waThumperOn)
+    cto->wparam = th->wparam;
   }
 
 bool canPushThumperOn(cell *tgt, cell *thumper, cell *player) {
