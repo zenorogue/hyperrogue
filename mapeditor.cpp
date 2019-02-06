@@ -226,6 +226,8 @@ namespace mapstream {
     if(!f.f) return false;
     clearMemory();
     int vernum = f.get<int>();
+    if(vernum > 10505 && vernum < 11000) 
+      vernum = 11005;
     if(vernum >= 10420 && vernum < 10503) {
       int i;
       f.read(i);
