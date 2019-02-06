@@ -136,6 +136,7 @@ namespace mapstream {
     f.write(patterns::whichCanvas);
     f.write(patterns::displaycodes);
     f.write(mapeditor::drawplayer);
+    if(patterns::whichCanvas == 'f') f.write(patterns::color_formula);
     
     {
     int i = ittypes; f.write(i);
@@ -304,6 +305,7 @@ namespace mapstream {
       f.read(patterns::whichCanvas);
       f.read(patterns::displaycodes);
       f.read(mapeditor::drawplayer);
+      if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
       
       int i;
       f.read(i); if(i > ittypes || i < 0) throw hstream_exception();
