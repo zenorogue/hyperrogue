@@ -237,6 +237,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   
   using namespace hyperpoint_vec;
   
+  hyperpoint H_orig = H;
+  
   switch(pmodel) {
     case mdUnchanged:
       ret = H / current_display->radius;
@@ -596,7 +598,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdGUARD: break;
     }
 
-  ghcheck(ret,H);
+  ghcheck(ret,H_orig);
   }
 
 // game-related graphics
