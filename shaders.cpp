@@ -340,10 +340,10 @@ void id_modelview() {
 
 #endif
 
-void color2(color_t color, ld part) {
+void color2(color_t color, ld scale) {
   GLfloat cols[4];
   for(int i=0; i<4; i++)
-    cols[i] = (color >> ((3-i) * 8) & 0xff) / 255.0 * part;
+    cols[i] = part(color, 3-i) / 255.0 * scale;
   #if CAP_SHADER
   // glUniform4fv(current->uFog, 4, cols);
   if(!current) return;
@@ -354,12 +354,7 @@ void color2(color_t color, ld part) {
   }
 
 void colorClear(color_t color) {
-  unsigned char *c = (unsigned char*) (&color);
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  glClearColor(c[0] / 255.0, c[1] / 255.0, c[2]/255.0, c[3] / 255.0);
-#else
-  glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
-#endif
+  glClearColor(part(color, 3) / 255.0, part(color, 2) / 255.0, part(color, 1) / 255.0, part(color, 0) / 255.0);
 }
 
 void be_nontextured(shader_projection sp) { switch_mode(gmColored, sp); }

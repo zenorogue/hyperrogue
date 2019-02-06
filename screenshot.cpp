@@ -53,7 +53,7 @@ namespace svg {
       }
     }
   
-  char* stylestr(unsigned int fill, unsigned int stroke, ld width=1) {
+  char* stylestr(color_t fill, color_t stroke, ld width=1) {
     fixgamma(fill);
     fixgamma(stroke);
     static char buf[600];

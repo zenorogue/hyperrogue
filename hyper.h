@@ -3716,7 +3716,7 @@ namespace glhr {
   
   void set_depthtest(bool b);
   glmatrix translate(ld x, ld y, ld z);
-  void color2(color_t color, ld part = 1);
+  void color2(color_t color, ld scale = 1);
   void be_nontextured(shader_projection sp = new_shader_projection);
   void be_textured(shader_projection sp = new_shader_projection);
   void set_modelview(const glmatrix& m);  

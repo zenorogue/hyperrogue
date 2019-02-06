@@ -306,8 +306,7 @@ void setGLProjection(color_t col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
   GLERR("pre_setGLProjection");
 
-  unsigned char *c = (unsigned char*) (&col);
-  glClearColor(c[2] / 255.0, c[1] / 255.0, c[0]/255.0, 1);
+  glClearColor(part(col, 2) / 255.0, part(col, 1) / 255.0, part(col, 0) / 255.0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   GLERR("setGLProjection #1");
