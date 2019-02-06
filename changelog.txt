@@ -2951,3 +2951,18 @@ the interesting (adult) part quickly)
  - map editor save features now saves more data: multiplayer positions, rosewaves, turncount (ocean waves), mutant ivy phase
  - the screen split in multiplayer mode was supposed to happen only in the racing mode -- fixed
  - fixed a crash in the Ivory Tower Yendor Challenge
+
+2019-02-06 22:45 Version 11.0f:
+ - redone the 'Experiment with Geometry' menu
+ - fixed a bug with pushing thumpers into fire traps
+ - fixed inventory mode scores not recognized correctly
+ - fixed a freeze in spherical Dungeon
+ - fixed incorrect graphics when adding trapdoor in map editor
+ - fixed mouse position being interpreted incorrectly in some models
+ - fixed the obsolete description of Minefield auto-reveal radius
+ - fixed the "no HUD" option in the screenshot menu
+
+2019-02-06 22:45 Version 11.0g:
+ - formula pattern works in spherical
+ - no more Brown generation in PTM Ocean
+ - no more mobile compass by default in mobile
