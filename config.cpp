@@ -135,7 +135,7 @@ void initConfig() {
   addsaver(vid.timeformat, "message log time format", 0);
   addsaver(fontscale, "fontscale", 100);
 
-  addsaver(vid.mobilecompasssize, "mobile compass size", ISMOBILE || ISPANDORA ? 30 : 0);
+  addsaver(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
   addsaver(vid.axes, "movement help", 1);
   addsaver(vid.shifttarget, "shift-targetting", 2);
   addsaver(vid.steamscore, "scores to Steam", 1);
