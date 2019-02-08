@@ -58,8 +58,6 @@ void buildRedWall(cell *c, int gemchance) {
 
 bool reptilecheat = false;
 
-#define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety)
-
 bool blizzard_no_escape1(cell *c, manual_celllister &cl) {
   if(!cl.add(c)) return true;
   if(c->item == itOrbSafety)

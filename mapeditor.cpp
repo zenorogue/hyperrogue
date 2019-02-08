@@ -5,6 +5,9 @@ namespace hr {
 
 namespace mapeditor {
 
+  hyperpoint lstart;
+  cell *lstartcell;
+
   struct editwhat {
     double dist;
     int rotid, symid, pointid;
@@ -1526,9 +1529,6 @@ namespace mapeditor {
     addMessage(XLAT("Pictures saved to %1", picfile));
     return true;
     }
-
-  hyperpoint lstart;
-  cell *lstartcell;
 
   void drawHandleKey(int sym, int uni) {
 

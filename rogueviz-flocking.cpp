@@ -365,7 +365,7 @@ namespace flocking {
       dialog::editNumber(N, 0, 1000, 1, 10, "", "smaller number = more precise simulation");
       });
 
-    dialog::addSelItem("change geometry", XLAT(ginf[geometry].name), 'g');
+    dialog::addSelItem("change geometry", XLAT(ginf[geometry].shortname), 'g');
     hr::showquotients = true;
     dialog::add_action(runGeometryExperiments);
 
