@@ -1528,6 +1528,7 @@ bool do_draw(cell *c) {
   }  
 
 bool do_draw(cell *c, const transmatrix& T) {
+  if(just_gmatrix && sphere) return true;
   if(!do_draw(c)) return false;
   if(euclid && pmodel == mdSpiral) {
     hyperpoint h = tC0(T);
