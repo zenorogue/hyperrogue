@@ -13,18 +13,6 @@
 #define ISWINDOWS 1
 #endif
 
-#if ISSTEAM
-#define NOLICENSE
-#endif
-
-#ifndef USE_STDFUNCTION
-#define USE_STDFUNCTION ISSTEAM
-#endif
-
-#ifndef CAP_SHADER
-#define CAP_SHADER CAP_GL
-#endif
-
 // OS settings
 
 #ifndef ISMAC
@@ -51,6 +39,10 @@
 #define ISANDROID 0
 #endif
 
+#ifndef ISSTEAM
+#define ISSTEAM 0
+#endif
+
 #ifndef ISWEB
 #define ISWEB 0
 #endif
@@ -72,16 +64,28 @@
 
 #define CAP_FRAMELIMIT (!ISMOBWEB)
 
-#if ISMOBILE==1
+#if ISMOBILE
 #define EXTERNALFONT
 #endif
 
-#ifndef CAP_FILES
-#define CAP_FILES 1
+#ifndef NOLICENSE
+#define NOLICENSE ISSTEAM
+#endif
+
+#ifndef USE_STDFUNCTION
+#define USE_STDFUNCTION ISSTEAM
+#endif
+
+#ifndef CAP_SHADER
+#define CAP_SHADER CAP_GL
 #endif
 
 #ifndef CAP_ANIMATIONS
 #define CAP_ANIMATIONS (!CAP_MINI)
+#endif
+
+#ifndef CAP_FILES
+#define CAP_FILES 1
 #endif
 
 #ifndef CAP_INV
@@ -237,16 +241,12 @@
 #define CAP_SHMUP 1
 #endif
 
-#ifdef ISSTEAM
-#define CAP_ACHIEVE 1
-#endif
-
 #ifndef CAP_BITFIELD
 #define CAP_BITFIELD (!ISWEB)
 #endif
 
 #ifndef CAP_ACHIEVE
-#define CAP_ACHIEVE 0
+#define CAP_ACHIEVE ISSTEAM
 #endif
 
 #ifndef CAP_SHMUP_GOOD

@@ -160,9 +160,7 @@ hint hints[] = {
         "Try the Orb Strategy mode!")
         );
       dialog::addBreak(50);
-#ifdef INF
       dialog::addItem(XLAT("Orb Strategy mode"), 'z');
-#endif
       },
     []() {
 #if CAP_INV

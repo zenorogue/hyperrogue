@@ -1,10 +1,24 @@
 #pragma once
 
+#if USE_STDFUNCTION
+
+#include <functional>
+namespace hr {
+    using std::function;
+} // namespace hr
+
+#else
+
 #include <type_traits>
 #include <utility>
 
+namespace hr {
+
 template<class Sig>
 class hyper_function;
+
+template<class Sig>
+using function = hyper_function<Sig>;
 
 template<class R, class... Args>
 struct hyper_function_state_base {
@@ -59,3 +73,7 @@ public:
         return ptr_ != nullptr;
     }
 };
+
+} // namespace hr
+
+#endif
