@@ -625,8 +625,11 @@ void showEuclideanMenu() {
 
   dialog::addBreak(50);
    
+  #if CAP_SHOT
   dialog::addItem(XLAT("take picture"), 's');
   dialog::add_action([] { pushScreen(shot::menu); });
+  #endif
+
   dialog::addHelp();
   dialog::addBack();
   

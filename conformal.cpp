@@ -669,6 +669,7 @@ namespace conformal {
     dialog::init(XLAT("models of hyperbolic geometry"));
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
+      if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
         dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()" [m]);
         dialog::add_action([m] () {

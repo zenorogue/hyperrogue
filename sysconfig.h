@@ -17,6 +17,10 @@
 #define NOLICENSE
 #endif
 
+#ifndef USE_STDFUNCTION
+#define USE_STDFUNCTION ISSTEAM
+#endif
+
 #ifndef CAP_SHADER
 #define CAP_SHADER CAP_GL
 #endif

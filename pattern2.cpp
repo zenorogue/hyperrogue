@@ -1495,7 +1495,8 @@ namespace patterns {
 
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
-    dialog::addSelItem(XLAT("formula"), "formula", 'f');
+    if(!ISMOBILE)
+      dialog::addSelItem(XLAT("formula"), "formula", 'f');
 
     dialog::addBreak(100);
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
