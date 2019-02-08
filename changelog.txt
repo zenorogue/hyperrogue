@@ -2832,3 +2832,6 @@ Geometry experiments -- new quotient spaces:
 - text improvements, PL/CZ translation update
 - warnings when hitting an ally; harder to miss now
 - warnings when trying to finish a running game
+
+2019-02-08 10.5e:
+- This version imports some bugfixes/improvements from 11.0g.
