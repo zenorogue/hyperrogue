@@ -426,7 +426,7 @@ void addMinefieldExplanation(string& s) {
     );
 
   s += "\n\n";
-#if ISMOBILE==1
+#if ISMOBILE==0
   s += XLAT("Known mines may be marked by pressing 'm'. Your allies won't step on marked mines.");
 #else
   s += XLAT("Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.");
