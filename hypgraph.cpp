@@ -1519,8 +1519,8 @@ bool do_draw(cell *c) {
   // do not display out of range cells, unless on torus
   if(c->pathdist == PINFD && geometry != gTorus && vid.use_smart_range == 0)
     return false;
-  // do not display not fully generated cells, unless a cheater
-  if(c->mpdist > 7 && !cheater && !autocheat) return false;
+  // do not display not fully generated cells, unless changing range allowed
+  if(c->mpdist > 7 && !allowChangeRange()) return false;
   // in the Yendor Challenge, scrolling back is forbidden
   if(c->cpdist > 7 && yendor::on && !cheater && !autocheat) return false;
 
