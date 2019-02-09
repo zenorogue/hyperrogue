@@ -301,7 +301,7 @@ void initgame() {
   if(quotient || sphere)
     for(cell *c: currentmap->allcells()) setdist(c, 8, NULL);
 
-  if(!cheater) {
+  if(!allowChangeRange()) {
     gamerange_bonus = genrange_bonus = 0;
     if(vid.use_smart_range == 2) vid.use_smart_range = 1;
     }
