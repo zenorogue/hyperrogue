@@ -1500,7 +1500,8 @@ namespace patterns {
 
     dialog::addBreak(100);
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
-
+    
+    dialog::addBack();
     dialog::display();
     
     keyhandler = [instant] (int sym, int uni) {
