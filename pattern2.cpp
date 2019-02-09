@@ -1506,7 +1506,7 @@ namespace patterns {
     dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
 
-    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'l');
+    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'L');
     else dialog::addInfo("enable the cheat mode to use line patterns");
     
     dialog::addBack();
@@ -1550,7 +1550,7 @@ namespace patterns {
         if(whichShape == uni) whichShape = 0;
         else whichShape = uni;
         }
-      else if(uni == 'l' && (cheater || autocheat))
+      else if(uni == 'L' && (cheater || autocheat))
         pushScreen(linepatterns::showMenu);
 
       else if(uni == 'f') {
