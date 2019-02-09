@@ -1499,7 +1499,15 @@ namespace patterns {
       dialog::addSelItem(XLAT("formula"), "formula", 'f');
 
     dialog::addBreak(100);
+
+    dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
+    dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
+    dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
+    dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
+
+    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'l');
+    else dialog::addInfo("enable the cheat mode to use line patterns");
     
     dialog::addBack();
     dialog::display();
@@ -1538,6 +1546,13 @@ namespace patterns {
         else canvas_invisible = !canvas_invisible;
         }
       
+      else if(uni == '6' || uni == '7' || uni == '8' || uni == '9') {
+        if(whichShape == uni) whichShape = 0;
+        else whichShape = uni;
+        }
+      else if(uni == 'l' && (cheater || autocheat))
+        pushScreen(linepatterns::showMenu);
+
       else if(uni == 'f') {
         dialog::edit_string(color_formula, "formula", 
           XLAT(
@@ -1705,14 +1720,6 @@ namespace patterns {
     
     dialog::addBoolItem(XLAT("display pattern codes (full)"), displaycodes, 'd');
 
-    dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
-    dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
-    dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
-    dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
-
-    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'l');
-    else dialog::addInfo("enable the cheat mode to use line patterns");
-
     if(!needConfirmation()) dialog::addItem(XLAT("predesigned patterns"), 'r');
     else dialog::addInfo("start a new game to use predesigned patterns");
 
@@ -1767,15 +1774,8 @@ namespace patterns {
         REMAP_TEXTURE;
         }
 
-      else if(uni == '6' || uni == '7' || uni == '8' || uni == '9') {
-        if(whichShape == uni) whichShape = 0;
-        else whichShape = uni;
-        }
       else if(uni == 'd') displaycodes = !displaycodes;
       
-      else if(uni == 'l' && (cheater || autocheat))
-        pushScreen(linepatterns::showMenu);
-
       else if(uni == 'r' && !needConfirmation()) pushScreen(showPrePattern);
       
       else if(doexiton(sym, uni)) popScreen();
