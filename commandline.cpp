@@ -39,7 +39,7 @@ eMonster readMonster(const string& ss) {
 void initializeCLI() {
   printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
 
-#ifndef NOLICENSE
+#if !NOLICENSE
   printf("released under GNU General Public License version 2 and thus\n");
   printf("comes with absolutely no warranty; see COPYING for details\n");
 #endif

@@ -137,7 +137,7 @@ void buildCredits() {
   help += XLAT("game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n");
   if(lang() != 0)
     help += XLAT("add credits for your translation here");
-#ifndef NOLICENSE
+#if !NOLICENSE
   help += XLAT(
     "released under GNU General Public License version 2 and thus "
     "comes with absolutely no warranty; see COPYING for details\n\n"

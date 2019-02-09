@@ -7,9 +7,7 @@
 #define VERNUM_HEX 0xA505
 
 #include <stdarg.h>
-#if !ISSTEAM
 #include "hyper_function.h"
-#endif
 
 namespace hr {
 
@@ -17,12 +15,6 @@ template<class T>
 void ignore(T&&) {
   // placate GCC's overzealous -Wunused-result
   }
-
-#if USE_STDFUNCTION
-using std::function;
-#else
-template<class Sig> using function = hyper_function<Sig>;
-#endif
 
 // functions and types used from the standard library
 using std::vector;
