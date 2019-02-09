@@ -426,7 +426,7 @@ void menu() {
   dialog::addBoolItem(XLAT("disable the HUD"), hide_hud, 'h');
   dialog::add_action([] { hide_hud = !hide_hud; });
 
-  dialog::addBoolItem(XLAT("hide the player"), !mapeditor::drawplayer, 'p');
+  dialog::addBoolItem(XLAT("hide the player"), !mapeditor::drawplayer, 'H');
   dialog::add_action([] { mapeditor::drawplayer = !mapeditor::drawplayer; });
 
   dialog::addItem(XLAT("customize colors and aura"), 'c');
