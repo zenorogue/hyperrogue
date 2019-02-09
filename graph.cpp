@@ -3943,6 +3943,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         qfi.usershape = si.id;
         qfi.spin = applyPatterndir(c, si);
         }
+#endif
 
       else if(patterns::whichShape == '7')
         set_floor(shBigHepta);
@@ -3955,7 +3956,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       else if(among(patterns::whichShape, '9', '^'))
         set_floor(shFullFloor);
-#endif
 
 #if CAP_TEXTURE
       else if(texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
