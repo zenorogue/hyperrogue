@@ -99,7 +99,6 @@ ifeq (${TOOLCHAIN},gcc46)
   CXXFLAGS_EARLY += -std=c++0x
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
   CXXFLAGS_EARLY += -Wno-missing-field-initializers -Wno-unused-parameter
-  CXXFLAGS_EARLY += -DUSE_STDFUNCTION=1
 endif
 
 ifeq (${TOOLCHAIN},mingw)
