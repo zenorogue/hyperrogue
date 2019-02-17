@@ -2646,6 +2646,7 @@ bool allowChangeRange();
 
 static inline bool orbProtection(eItem it) { return false; } // not implemented
 
+#if CAP_FIELD
 namespace windmap {
   void create();
 
@@ -2655,6 +2656,7 @@ namespace windmap {
   int getId(cell *c);
   int at(cell *c);
   }
+#endif
 
 extern int wavephase;
 
@@ -3062,6 +3064,7 @@ struct celllister : manual_celllister {
 
 hrmap *newAltMap(heptagon *o);
 
+#if CAP_FIELD
 #define currfp fieldpattern::getcurrfp()
 namespace fieldpattern {
   struct fpattern& getcurrfp();
@@ -3070,6 +3073,7 @@ namespace fieldpattern {
 int currfp_gmul(int a, int b);
 int currfp_inverses(int i);
 int currfp_distwall(int i);
+#endif
 
 const char *dnameof(eMonster m);
 const char *dnameof(eLand l);
@@ -3915,6 +3919,7 @@ namespace torusconfig {
   flagtype tmflags();
   }
 
+#if CAP_FIELD
 namespace fieldpattern {
   extern int current_extra;
 
@@ -3934,6 +3939,7 @@ namespace fieldpattern {
   extern vector<fgeomextra> fgeomextras;
   extern void enableFieldChange();
   }
+#endif
 
 bool incompatible(eLand l1, eLand l2);
 eOrbLandRelation getOLR(eItem it, eLand l);

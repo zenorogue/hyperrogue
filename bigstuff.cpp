@@ -1087,6 +1087,7 @@ void buildBigStuff(cell *c, cell *from) {
   else if(c->land == laCrossroads2 && BITRUNCATED)
     buildCrossroads2(c);
   
+  #if CAP_FIELD
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid) {
     for(int bd=0; bd<7; bd++) {
       int fval2 = createStep(c->master, bd)->fieldval;
@@ -1097,6 +1098,7 @@ void buildBigStuff(cell *c, cell *from) {
         }
       }
     }
+  #endif
 
   else if(ctof(c) && c->land && hrand(I10000) < wallchance(c, deepOcean))
   {

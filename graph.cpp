@@ -2813,9 +2813,12 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
   // water colors
   if(isWateryOrBoat(c) || c->wall == waReptileBridge) {
     if(c->land == laOcean)
-      fcol = (c->landparam > 25 && !chaosmode) ? ( 
-        0x90 + 8 * sintick(1000, windmap::windcodes[windmap::getId(c)] / 256.)
-        ) : 
+      fcol = 
+        #if CAP_FIELD
+        (c->landparam > 25 && !chaosmode) ? ( 
+          0x90 + 8 * sintick(1000, windmap::windcodes[windmap::getId(c)] / 256.)
+          ) : 
+        #endif
         0x1010C0 + int(32 * sintick(500, (chaosmode ? c->CHAOSPARAM : c->landparam)*.75/M_PI));
     else if(c->land == laOceanWall)
       fcol = 0x2020FF;
@@ -2897,6 +2900,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       }
 #endif
       
+#if CAP_FIELD
     case laVolcano: {
       int id = lavatide(c, -1)/4;
       if(c->wall == waMagma) {
@@ -2916,6 +2920,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         } */
       break;
       }
+#endif
 
     case laMinefield: 
       fcol = floorcolors[c->land];
@@ -3061,6 +3066,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       break;
       }
     
+    #if CAP_FIELD
     case laPrairie:
       if(prairie::isriver(c)) {
         fcol = ((c->LHU.fi.rval & 1) ? 0x402000: 0x503000);
@@ -3071,6 +3077,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         // fcol += 0x1 * (511 / (1 + max((int) c->LHU.fi.walldist2, 1)));
         }
       break;
+    #endif
   
     case laCamelot: {
       int d = showoff ? 0 : ((eubinary||c->master->alt) ? celldistAltRelative(c) : 0);
@@ -6083,7 +6090,9 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 
 void resetGeometry() {
   precalc();
+#if CAP_FIELD
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid) currfp.analyze();
+#endif
 #if CAP_GL
   resetGL();
 #endif

@@ -741,6 +741,7 @@ bool againstWind(cell *cto, cell *cfrom) {
   if(!cfrom || !cto) return false;
   int dcto = airdist(cto), dcfrom = airdist(cfrom);
   if(dcto < dcfrom) return true;
+  #if CAP_FIELD
   if(cfrom->land == laBlizzard && !shmup::on && cto->land == laBlizzard && dcto == 3 && dcfrom == 3) {
     char vfrom = windmap::at(cfrom);
     char vto = windmap::at(cto);
@@ -748,6 +749,7 @@ bool againstWind(cell *cto, cell *cfrom) {
     if(z >= windmap::NOWINDBELOW && z < windmap::NOWINDFROM)
       return true;
     }
+  #endif
   whirlwind::calcdirs(cfrom);
   int d = neighborId(cfrom, cto);
   if(whirlwind::winddir(d) == -1) return true;
@@ -2805,10 +2807,12 @@ bool recalcTide;
 #define LANDDIST LHU.bytes[1]
 #define CHAOSPARAM LHU.bytes[2]
 
+#if CAP_FIELD
 int lavatide(cell *c, int t) {
   int tc = (shmup::on ? shmup::curtime/400 : turncount);
   return (windmap::at(c) + (tc+t)*4) & 255;
   }
+#endif
 
 void checkTide(cell *c) {
   if(c->land == laOcean) {
@@ -2841,6 +2845,7 @@ void checkTide(cell *c) {
     if(isFire(c) && t >= tidalphase)
       c->wall = waSea;
     }
+  #if CAP_FIELD
   if(c->land == laVolcano) {
     int id = lavatide(c, 0);
     if(id < 96) {
@@ -2856,6 +2861,7 @@ void checkTide(cell *c) {
       }
     else if(c->wall == waMagma) c->wall = waNone;
     }
+  #endif
   }
 
 void buildAirmap() {

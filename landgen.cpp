@@ -86,8 +86,12 @@ bool out_ruin(cell *c) {
     cd &= 31;
     return cd >= 16;
     }
+  #if CAP_FIELD
   else 
     return windmap::at(c) >= 128;
+  #else
+  else return false;
+  #endif
   }
 
 eMonster genRuinMonster(cell *c) {
@@ -154,6 +158,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laPrairie: // -------------------------------------------------------------
 
+    #if CAP_FIELD
       if(d == 7) {
         if(prairie::isriver(c)) {
           if(shmup::on) prairie::beaststogen.push_back(c); 
@@ -166,6 +171,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         prairie::generateTreasure(c);
         }
+    #endif
       break;
     
     case laDungeon: // -------------------------------------------------------------
@@ -947,6 +953,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laVolcano:
+      #if CAP_FIELD
       if(d == 9) {
         c->wall = waNone;
         if(hrand(20000) < (items[itLavaLily] + yendor::hardness()))
@@ -961,9 +968,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(8000) < (items[itLavaLily] + yendor::hardness()))
           c->monst = moLavaWolf;
         }
+      #endif
       break;
         
     case laBlizzard:
+      #if CAP_FIELD
       if(d == 9) {
         bool windless = true;
         int w = windmap::at(c);
@@ -987,7 +996,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       if((d == 7 || d == 6) && blizzard_no_escape(c))
         c->item = itOrbSafety, c->monst = moNone;
-
+      #endif
       break;
     
     case laTerracotta: 
@@ -2458,8 +2467,10 @@ void setdist(cell *c, int d, cell *from) {
       c->wall = waInvisibleFloor;
     }
 
+  #if CAP_FIELD
   if(d >= BARLEV-1 && c->land == laPrairie)
     prairie::spread(c, from);
+  #endif
 
   if(d < BARLEV && c->land == laPrairie && !c->landparam) {
     printf("d=%d/%d\n", d, BARLEV);

@@ -768,10 +768,12 @@ struct hrmap_quotient : hrmap {
 
     connections.clear();
     switch(geometry) {
+      #if CAP_FIELD
       case gFieldQuotient: {
         connections = currfp.connections;
         break;
         }
+      #endif
         
       case gZebraQuotient: {
         heptspin hs(base.origin);
@@ -1241,7 +1243,9 @@ void initcells() {
   
   allmaps.push_back(currentmap);
 
+  #if CAP_FIELD
   windmap::create();  
+  #endif
   
   // origin->emeraldval = 
   }
@@ -1822,8 +1826,10 @@ int celldistance(cell *c1, cell *c2) {
       return torusconfig::cyldist(decodeId(c1->master), decodeId(c2->master));
     }
   
+  #if CAP_FIELD
   if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
+  #endif
   
   if(bounded) {
     

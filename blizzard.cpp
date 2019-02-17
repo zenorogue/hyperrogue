@@ -43,6 +43,7 @@ blizzardcell* getbcell(cell *c) {
   }
 
 void drawBlizzards() {
+  #if CAP_POLY && CAP_FIELD
   poly_outline = OUTLINE_NONE;
   auto it = blizzardcells.begin();
   bcells.clear();
@@ -201,6 +202,7 @@ void drawBlizzards() {
 
   for(auto bc: bcells)
     bc->c->listindex = bc->tmp;
+  #endif
   }
        
 vector<cell*> arrowtraps;

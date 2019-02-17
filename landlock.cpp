@@ -1137,6 +1137,7 @@ namespace lv {
   land_validity_t sloppy_pattern = {1, q1 | one_and_half, "Somewhat sloppy pattern."};
   land_validity_t no_fractal_landscapes = {1, q1 | one_and_half, "Fractal landscapes not implemented in this geometry."};
   land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
+  land_validity_t disabled = {0, q0, "This land has been disabled with compilation flags."};
   }
 
 // old Daily Challenges should keep their validity forever
@@ -1149,6 +1150,11 @@ land_validity_t& land_validity(eLand l) {
 
   using namespace lv;
   
+  #if !CAP_FIELD
+  if(among(l, laPrairie, laBlizzard, laVolcano))
+    return disabled;
+  #endif
+
   if(l == laBrownian) {
     if(quotient || !hyperbolic || geometry == gCrystal) return dont_work;
     }

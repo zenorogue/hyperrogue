@@ -340,6 +340,7 @@ int zebra3(cell *c) {
     }
   }
 
+#if CAP_FIELD
 namespace fieldpattern {
 
 pair<int, bool> fieldval(cell *c) {
@@ -415,6 +416,7 @@ pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = s
   }
 
 }
+#endif
 
 int getHemisphere(heptagon *h, int which) {
   int id = h->fiftyval;
@@ -1063,6 +1065,7 @@ namespace patterns {
       si.dir = downdir(c, coastvalEdge);
       }
     
+    #if CAP_FIELD
     else if(pat == PAT_FIELD) {
       if(euclid)
         // use the torus ID
@@ -1075,6 +1078,7 @@ namespace patterns {
         si.id = windmap::getId(c); 
       // todo dir
       }
+    #endif
     
     else if(sphere && pat == PAT_SIBLING) {
       val_all(c, si, sub, pat);
@@ -1433,6 +1437,7 @@ namespace patterns {
         #endif
       case 'B':
         return colortables['B'][c->type & 15];
+      #if CAP_FIELD
       case 'C': {
         if(!hyperbolic) return canvasback;
         using namespace fieldpattern;
@@ -1458,11 +1463,14 @@ namespace patterns {
         if(z > z2) return 0xC00000;
         return 0xCCCC00;
         }
+      #endif
       case 'M':
         return gradient(0, canvasback, 0, min(1.8/(1+celldist(c)), 1.), 1);
+      #if CAP_FIELD
       case 'S': 
         if(!hyperbolic) return canvasback;
         return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
+      #endif
       case 'g':
         return canvasback;
       case 'r':
@@ -1552,12 +1560,14 @@ namespace patterns {
 
     dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
 
+    #if CAP_FIELD
     if(!sphere) {
       dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
       dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
       dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
       dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
       }
+    #endif
     
     if(archimedean)
       dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');

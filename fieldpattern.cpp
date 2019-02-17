@@ -1,6 +1,7 @@
 // Hyperbolic Rogue -- implementation of the quotient geometries based on fields
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+#if CAP_FIELD
 namespace hr {
 
 namespace fieldpattern {
@@ -791,3 +792,4 @@ int currfp_inverses(int i) { return currfp.inverses[i]; }
 int currfp_distwall(int i) { return currfp.distwall[i]; }
 
 }
+#endif

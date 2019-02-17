@@ -1063,11 +1063,13 @@ int modecode() {
       }
     }
   
+  #if CAP_FIELD
   if(geometry == gFieldQuotient) {
     using namespace fieldpattern;
     mct += ll(current_extra) << 29;
     mct += ll(fgeomextras[current_extra].current_prime_id) << 37;
     }
+  #endif
   
   #if CAP_CRYSTAL
   if(geometry == gCrystal) {

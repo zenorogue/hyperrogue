@@ -32,6 +32,7 @@ string euchelp =
   "* Halloween is specially designed for spherical geometry.\n"
   "* To see the difference, try Hunting Grounds in Euclidean -- it is impossible.\n";
 
+#if CAP_FIELD
 void showQuotientConfig() {
   using namespace fieldpattern;
   gamescreen(2);
@@ -88,6 +89,7 @@ void showQuotientConfig() {
   
   dialog::display();
   }
+#endif
 
 bool torus_bitrunc;
 
@@ -392,6 +394,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     dynamicval<eGeometry> cg(geometry, eGeometry(i));
     if(archimedean && !CAP_ARCM) continue;
     if(geometry == gCrystal && !CAP_CRYSTAL) continue;
+    if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     dialog::addBoolItem(XLAT(ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action([i] {
@@ -412,9 +415,11 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
           prepare_torusconfig();
           pushScreen(showTorusConfig);
           }
+        #if CAP_FIELD
         if(geometry == gFieldQuotient) {
           pushScreen(showQuotientConfig);
           }
+        #endif
         });
       });
     }
@@ -635,8 +640,10 @@ void showEuclideanMenu() {
       else if(euwrap) 
         prepare_torusconfig(),
         pushScreen(showTorusConfig);
+      #if CAP_FIELD
       else if(geometry == gFieldQuotient) 
         pushScreen(showQuotientConfig);
+      #endif
       });
     }
   else dialog::addBreak(100);
@@ -729,7 +736,9 @@ void runGeometryExperiments() {
 #if CAP_COMMANDLINE
 int read_geom_args() {
   using namespace arg;
-  if(argis("-qpar")) { 
+  if(0) ;
+  #if CAP_FIELD
+  else if(argis("-qpar")) { 
     int p;
     shift(); sscanf(argcs(), "%d,%d,%d", 
       &p, &quotientspace::rvadd, &quotientspace::rvdir
@@ -761,6 +770,7 @@ int read_geom_args() {
     cheat();
     currfp.findsubpath();
     }
+  #endif
   else if(argis("-tpar")) { 
     torusconfig::torus_mode = torusconfig::tmSingle;
     shift(); sscanf(argcs(), "%d,%d,%d", 
@@ -795,6 +805,7 @@ int read_geom_args() {
     set_variation(eVariation::goldberg);
     }
   #endif
+  #if CAP_FIELD
   else if(argis("-fi")) {
     fieldpattern::info();
     exit(0);
@@ -805,6 +816,7 @@ int read_geom_args() {
     }
   else if(argis("-d:quotient")) 
     launch_dialog(showQuotientConfig);
+  #endif
   else if(argis("-d:torus")) {
     launch_dialog(showTorusConfig);
     prepare_torusconfig();

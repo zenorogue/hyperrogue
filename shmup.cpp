@@ -1340,6 +1340,7 @@ bool airCurrents(transmatrix& nat, monster *m, int delta) {
         }
       }
     }
+  #if CAP_FIELD
   if(c->land == laBlizzard) {
     int wmc = windmap::at(c);
     forCellEx(c2, c) { 
@@ -1360,6 +1361,7 @@ bool airCurrents(transmatrix& nat, monster *m, int delta) {
         }
       }
     }
+  #endif
   return carried;
   }
 
@@ -2575,6 +2577,7 @@ void moveMonster(monster *m, int delta) {
       direct = true;
       directi = 0;
       }
+    #if CAP_FIELD
     else if(m->type == moHerdBull) {
       cell *cnext = prairie::next(c);
       if(cnext && gmatrix.count(cnext)) {
@@ -2584,6 +2587,7 @@ void moveMonster(monster *m, int delta) {
         }
       else m->dead = true;
       }
+    #endif
     else if(m->type == moButterfly) {
       int d = neighborId(m->base, m->torigin);
       cell *cnext = NULL;
