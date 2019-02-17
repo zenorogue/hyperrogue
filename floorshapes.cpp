@@ -1,5 +1,5 @@
 namespace hr {
-#if CAP_POLY
+#if CAP_SHAPES
 vector<plain_floorshape*> all_plain_floorshapes;
 vector<escher_floorshape*> all_escher_floorshapes;
 
@@ -590,8 +590,6 @@ namespace gp {
 #endif
 
 qfloorinfo qfi;
-
-int chasmg;
 
 void set_no_floor() {
   qfi.fshape = NULL;

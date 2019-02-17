@@ -6,6 +6,19 @@
 
 namespace hr {
 
+unsigned char& part(color_t& col, int i) {
+  unsigned char* c = (unsigned char*) &col;
+#if ISMOBILE
+  return c[i];
+#else
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  return c[sizeof(col) - 1 - i];
+#else
+  return c[i];
+#endif
+#endif
+  }
+
 ld signum(ld x) { return x<0?-1:x>0?1:0; }
 
 bool asign(ld y1, ld y2) {
@@ -89,10 +102,13 @@ color_t poly_outline;
 
 extern long double polydata[];
 
+#if CAP_SHAPES
 hpcshape *last = NULL;
+#endif
 
 vector<unique_ptr<drawqueueitem>> ptds;
 
+#if CAP_SHAPES
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
   ld threshold = (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
@@ -120,6 +136,7 @@ void chasmifyPoly(double fac, double fac2, int k) {
   hpc.push_back(hpc[last->s]);
   last->flags |= POLY_ISSIDE;
   }
+#endif
 
 #if CAP_GL
 color_t text_color;
@@ -187,7 +204,7 @@ void glflush() {
   }
 #endif
 
-#if CAP_POLY
+#if CAP_SHAPES
 void shift(hpcshape& sh, double dx, double dy, double dz) {
   hyperpoint H = hpxyz(dx, dy, dz);
   transmatrix m = rgpushxto0(H);
@@ -768,19 +785,6 @@ void fixMercator(bool tinf) {
     
   }
   
-unsigned char& part(color_t& col, int i) {
-  unsigned char* c = (unsigned char*) &col;
-#if ISMOBILE
-  return c[i];
-#else
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  return c[sizeof(col) - 1 - i];
-#else
-  return c[i];
-#endif
-#endif
-  }
-
 bool in_twopoint = false;
 
 ld glhypot2(glvertex a, glvertex b) { 
@@ -1506,6 +1510,7 @@ void drawqueue() {
     }
   }
 
+#if CAP_SHAPES
 hpcshape 
   shSemiFloorSide[SIDEPARS],
   shBFloor[2],
@@ -1600,9 +1605,11 @@ hpcshape
   shAsymmetric,
 
   shDodeca;
+#endif
 
 ld tentacle_length;
 
+#if CAP_SHAPES
 #define USERLAYERS 32
 
 struct usershapelayer {
@@ -2698,6 +2705,10 @@ void initShape(int sg, int id) {
       }
     }
   }
+#else
+
+void buildpolys() { }
+#endif
 
 template<class T, class... U> T& queuea(PPR prio, U... u) {
   ptds.push_back(unique_ptr<T>(new T (u...)));
@@ -2705,6 +2716,7 @@ template<class T, class... U> T& queuea(PPR prio, U... u) {
   return (T&) *ptds.back();
   }
 
+#if CAP_SHAPES
 dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
   if(prio == PPR::DEFAULT) prio = h.prio;
 
@@ -2737,6 +2749,7 @@ dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR 
   ptd.intester = h.intester;
   return ptd;
   }
+#endif
 
 void addfloats(vector<GLfloat>& v, hyperpoint h) {
   for(int i=0; i<3; i++) v.push_back(h[i]);
@@ -2760,6 +2773,7 @@ dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, c
   return ptd;
   }
 
+#if CAP_SHAPES
 dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col) {
   return queuepolyat(V,h,col,h.prio);
   }
@@ -2767,6 +2781,7 @@ dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col) {
 void queuepolyb(const transmatrix& V, const hpcshape& h, color_t col, int b) {
   queuepolyat(V,h,col,h.prio+b);
   }
+#endif
 
 void curvepoint(const hyperpoint& H1) {
   curvedata.push_back(glhr::pointtogl(H1));
@@ -2877,9 +2892,12 @@ void queuecircle(const transmatrix& V, double size, color_t col) {
   }
 
 void queuemarkerat(const transmatrix& V, color_t col) {
+#if CAP_SHAPES
   queuepolyat(V, shTriangle, col, PPR::LINE);
+#endif
   }
 
+#if CAP_SHAPES
 long double polydata[] = {
 // shStarFloor[0] (6x1)
 NEWSHAPE,   1,6,1, 0.267355,0.153145, 0.158858,0.062321, 0.357493,-0.060252,
@@ -3628,6 +3646,7 @@ NEWSHAPE, 388, 1, 1, 0.046590,0.284199, 0.028110,0.325611, 0.098711,0.333738, 0.
 
 NEWSHAPE
 };
+#endif
 
 #endif
 

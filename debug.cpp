@@ -337,7 +337,9 @@ struct debugScreen {
     if(!what && current_display->sidescreen) what = mouseover;
     
     if(what) {
+      #if CAP_SHAPES
       queuepoly(gmatrix[what], shAsymmetric, 0x80808080);
+      #endif
       char buf[200];
       sprintf(buf, "%p", what);
       dialog::addSelItem("mpdist", its(what->mpdist), 'd');

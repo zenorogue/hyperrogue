@@ -43,7 +43,7 @@ blizzardcell* getbcell(cell *c) {
   }
 
 void drawBlizzards() {
-  #if CAP_POLY && CAP_FIELD
+  #if CAP_SHAPES && CAP_FIELD
   poly_outline = OUTLINE_NONE;
   auto it = blizzardcells.begin();
   bcells.clear();
@@ -220,7 +220,7 @@ void drawArrowTraps() {
       #if CAP_QUEUE
       queueline(tC0(t0), tC0(t1), 0xFF0000FF, 4 + vid.linequality, PPR::ITEM);
       #endif
-      #if CAP_POLY
+      #if CAP_SHAPES
       if((c->wparam & 7) == 3 && !shmup::on) {
 //        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR::ITEM);
         int tt = int(fractick(64) * 401);

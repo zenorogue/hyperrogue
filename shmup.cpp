@@ -3316,7 +3316,7 @@ bool boatAt(cell *c) {
 hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
 
 bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, const transmatrix *Vdp) {
-  #if CAP_POLY
+  #if CAP_SHAPES
 
   pair<mit, mit> p = 
     monstersAt.equal_range(c);

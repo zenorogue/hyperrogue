@@ -2084,7 +2084,9 @@ namespace mapeditor {
   bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio = PPR::DEFAULT);
   }
 
+#if CAP_SHAPES
 void ShadowV(const transmatrix& V, const struct hpcshape& bp, PPR prio = PPR::MONSTER_SHADOW);
+#endif
 
 #define OUTLINE_NONE     0x000000FF
 #define OUTLINE_FRIEND   0x00FF00FF
@@ -2173,7 +2175,9 @@ namespace quotientspace {
 
 void killFriendlyIvy();
 
+#if CAP_SHAPES
 void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority);
+#endif
 
 extern bool viewdists;
 
@@ -3838,9 +3842,12 @@ namespace glhr {
   }
 
 void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, int lev);
+#if CAP_SHAPES
 dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio);
+#endif
 dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, color_t linecol, color_t fillcol, PPR prio);
 
+#if CAP_SHAPES
 struct floorshape;
 
 struct qfloorinfo {
@@ -3852,7 +3859,6 @@ struct qfloorinfo {
   };
 
 extern qfloorinfo qfi;
-extern int chasmg;
 
 struct hpcshape {
   int s, e;
@@ -3862,6 +3868,7 @@ struct hpcshape {
   };
 
 extern hpcshape shFullCross[2];
+#endif
 
 int fix6(int a);
 int fix7(int a);
@@ -4000,8 +4007,10 @@ namespace gp {
 
 extern bool debug_geometry;
 
+#if CAP_SHAPES
 dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col);
 dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio);
+#endif
 
 void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame = 0);
 void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame = 0);
@@ -4049,6 +4058,7 @@ void set_blizzard_frame(cell *c, int frameid);
 #define SIDE_WTS3 7
 #define SIDEPARS 8
 
+#if CAP_SHAPES
 struct floorshape {
   bool is_plain;
   int shapeid;
@@ -4081,6 +4091,7 @@ extern plain_floorshape
   shBigTriangle, shTriheptaFloor, shBigHepta;
 
 extern escher_floorshape shDragonFloor, shPowerFloor, shRedRockFloor[3];
+#endif
 
 #if ISMOBILE
 bool buttonclicked;
@@ -4151,7 +4162,9 @@ ld frac(ld x);
 
 extern color_t poly_outline;
 
+#if CAP_SHAPES
 extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM, shTinyBird, shTinyShark, shAsymmetric;
+#endif
 
 extern std::mt19937 hrngen;
 

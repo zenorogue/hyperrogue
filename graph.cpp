@@ -325,7 +325,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
     using namespace sword;
   
     if(shmup::on) {
-#if CAP_POLY
+#if CAP_SHAPES
       if(items[itOrbSword])
         queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
   
@@ -338,7 +338,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int& ang = angle[multi::cpid];
       ang %= S42;
 
-#if CAP_QUEUE || CAP_POLY      
+#if CAP_QUEUE || CAP_SHAPES
       transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * ddspin(c,0,M_PI); // (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
 #endif
       
@@ -354,7 +354,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         }
 #endif
 
-#if CAP_POLY
+#if CAP_SHAPES
       if(items[itOrbSword])
         queuepoly(Vnow*spin(M_PI+(-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
   
@@ -389,7 +389,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   }
 
 void drawStunStars(const transmatrix& V, int t) {
-#if CAP_POLY
+#if CAP_SHAPES
   for(int i=0; i<3*t; i++) {
     transmatrix V2 = V * spin(M_PI * 2 * i / (3*t) + ptick(200));
     queuepolyat(V2, shFlailBall, 0xFFFFFFFF, PPR::STUNSTARS);
@@ -402,7 +402,7 @@ namespace tortoise {
   // small is 0 or 2
   void draw(const transmatrix& V, int bits, int small, int stuntime) {
 
-#if CAP_POLY      
+#if CAP_SHAPES
     color_t eyecolor = getBit(bits, tfEyeHue) ? 0xFF0000 : 0xC0C0C0;
     color_t shellcolor = getBit(bits, tfShellHue) ? 0x00C040 : 0xA06000;
     color_t scutecolor = getBit(bits, tfScuteHue) ? 0x00C040 : 0xA06000;
@@ -464,7 +464,7 @@ double footfun(double d) {
 bool ivoryz;
                                  
 void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase) {
-#if CAP_POLY
+#if CAP_SHAPES
   footphase /= SCALE;
   
   bool dog = mo == moRunDog;
@@ -507,21 +507,20 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
 
 bool noshadow;
 
+#if CAP_SHAPES
 void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
-#if CAP_POLY
   if(mmspatial) { 
     if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
       return; // shadows break the depth testing
     dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
     queuepolyat(V, bp, SHADOW_MON, prio); 
     }
-#endif
   }
+#endif
 
 
+#if CAP_SHAPES
 transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, double footphase) {
-
-#if CAP_POLY
 
 #define VFOOT V
 #define VLEG mmscale(V, geom3::LEG)
@@ -600,10 +599,9 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
   
   return spin(rightfoot * wobble);
   
-#else
   return Id;
-#endif
   }
+#endif
 
 bool drawstar(cell *c) {
   for(int t=0; t<c->type; t++) 
@@ -622,7 +620,7 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
   }
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks, bool hidden) {
-#if !CAP_POLY
+#if !CAP_SHAPES
   return it;
 #else
   char xch = iinf[it].glyph;
@@ -806,8 +804,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
 #endif
   }
 
+#if CAP_SHAPES
 void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
-#if CAP_POLY
   ShadowV(V, shPBody);
   color_t col = linf[laTerracotta].color;
   int bcol = darkena(false ? 0xC0B23E : col, 0, 0xFF);
@@ -819,12 +817,12 @@ void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   if(hp >= 2) queuepoly(VBS, shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
   queuepoly(VHEAD, shTerraHead, darkena(t > 4 ? 0x202020 : t > 3 ? 0x504040 : col, 0, 0xFF));
   queuepoly(VHEAD, shPFace, bcol);
-#endif
   }
+#endif
 
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
 
-#if CAP_POLY
+#if CAP_SHAPES
   char xch = minf[m].glyph;
 
   if(m == moTortoise && where && where->stuntime >= 3)
@@ -1917,7 +1915,7 @@ void drawWormSegments() {
 bool dont_face_pc = false;
 
 bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
-  #if CAP_POLY
+  #if CAP_SHAPES
 
   bool darkhistory = conformal::includeHistory && conformal::inkillhistory.count(c);
   
@@ -2536,7 +2534,7 @@ transmatrix applyDowndir(cell *c, const cellfunction& cf) {
   return ddspin(c, patterns::downdir(c, cf), M_PI);
   }
 
-#if CAP_POLY
+#if CAP_SHAPES
 void set_towerfloor(cell *c, const cellfunction& cf = coastvalEdge) {
   if(weirdhyperbolic || sphere) {
     set_floor(shFloor);
@@ -2587,6 +2585,8 @@ void set_zebrafloor(cell *c) {
   }
 
 void set_maywarp_floor(cell *c);
+
+int chasmg;
 
 void set_reptile_floor(cell *c, const transmatrix& V, color_t col, bool nodetails = false) {
 
@@ -3333,7 +3333,9 @@ bool use_swapped_duals() {
   return (masterless && !a4) || GOLDBERG;
   }
 
-#if CAP_POLY
+int wavephase;
+
+#if CAP_SHAPES
 void floorShadow(cell *c, const transmatrix& V, color_t col) {
   if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
     return; // shadows break the depth testing
@@ -3365,8 +3367,6 @@ void set_maywarp_floor(cell *c) {
   else if(is_nice_dual(c)) set_floor(shBigTriangle);
   else set_floor(shFloor);
   }
-
-int wavephase;
 
 void escherSidewall(cell *c, int sidepar, const transmatrix& V, color_t col) {
   if(sidepar >= SIDE_SLEV && sidepar <= SIDE_SLEV+2) {
@@ -3460,7 +3460,7 @@ int gridcolor(cell *c1, cell *c2) {
   return Dark(0x202020);
   }
 
-#if CAP_POLY
+#if CAP_SHAPES
 void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority) {
 
   // since we might be changing priorities, we have to make sure that we are sorting correctly
@@ -3611,7 +3611,7 @@ int getSnakelevColor(cell *c, int i, int last, int fd, color_t wcol) {
   return darkena(col, fd, 0xFF);
   }
 
-#if CAP_POLY
+#if CAP_SHAPES
 void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int ct6, int fd) {
   zcol = wcol;
   color_t wcol0 = wcol;
@@ -3689,7 +3689,6 @@ int colorhash(color_t i) {
   return (i * 0x471211 + i*i*0x124159 + i*i*i*0x982165) & 0xFFFFFF;
   }
 
-#if CAP_POLY
 void draw_gravity_particles(cell *c, const transmatrix V) {
   int u = (int)(size_t)(c);
   u = ((u * 137) + (u % 1000) * 51) % 1000;
@@ -3758,7 +3757,6 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
       }
     }
   }
-#endif
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
@@ -3788,7 +3786,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
   if(just_gmatrix) return;
 
-  #if CAP_POLY
+  #if CAP_SHAPES
   set_floor(shFloor);
   #endif
   ivoryz = isGravityLand(c->land);
@@ -3813,7 +3811,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   buildAutomatonRule(c);
 #endif
 
-  #if CAP_POLY
+  #if CAP_SHAPES
   viewBuggyCells(c,V);
   #endif
   
@@ -3897,9 +3895,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuestr(V, (cd > 9 ? .6 : 1) * .2, label, 0xFF000000 + dc, 1);
       } */
     
+    #if CAP_SHAPES
     if(c->land == laNone && (cmode & sm::MAP)) {
       queuepoly(V, shTriangle, 0xFF0000FF);
       }
+    #endif
   
     char ch = winf[c->wall].glyph;
     color_t wcol, fcol, asciicol;
@@ -3957,8 +3957,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     asciicol = wcol;
     
+    #if CAP_SHAPES
     if(c->land == laNone && c->wall == waNone) 
       queuepoly(V, shTriangle, 0xFFFF0000);
+    #endif
 
     if(c->wall == waThumperOn) {
       ld ds = fractick(160);
@@ -4040,17 +4042,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     int ctype = c->type;
-    #if CAP_POLY
+    #if CAP_SHAPES
     int ct6 = ctof(c);
     #endif
 
     bool error = false;
     
+    #if CAP_SHAPES
     chasmg = chasmgraph(c);
+    #endif
     
     int fd = getfd(c);
     
-    #if CAP_POLY
+    #if CAP_SHAPES
     int flooralpha = 255;
     #endif
 
@@ -4070,10 +4074,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       (!wmspatial) ? &V : 
       sl ? &(Vd0= mscale(V, geom3::SLEV[sl])) : 
       highwall(c) ? &(Vd0= mscale(V, (1+geom3::WALL)/2)) :
+#if CAP_SHAPES
       (chasmg==1) ? &(Vd0 = mscale(V, geom3::LAKE)) :
+#endif
       &V;
     
-#if CAP_POLY
+#if CAP_SHAPES
     transmatrix Vf0;
     const transmatrix& Vf = (chasmg && wmspatial) ? (Vf0=mscale(V, geom3::BOTTOM)) : V;
 #endif
@@ -4091,7 +4097,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         mapeditor::drawtrans = V * applyPatterndir(c, si);
 #endif
         
-#if CAP_POLY
+#if CAP_SHAPES
       // floor
       bool eoh = euclid || !BITRUNCATED;
 
@@ -4873,7 +4879,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(!(it || c->monst || c->cpdist == 0)) error = true;
       }
     
-#if CAP_POLY
+#if CAP_SHAPES
     int sha = shallow(c);
 
     if(wmspatial && sha) {
@@ -4975,22 +4981,29 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     if(true) {
+      #if CAP_SHAPES
       int q = ptds.size();
+      #endif
       error |= drawMonster(V, ctype, c, moncol); 
+      #if CAP_SHAPES
       if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) 
         pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
           !isMultitile(c->monst), false);
+      #endif
       }
       
+    #if CAP_SHAPES
     if(!shmup::on && sword::at(c)) {
       queuepolyat(V, shDisk, 0xC0404040, PPR::SWORDMARK);
       }
+    #endif
 
 #if CAP_TEXTURE    
     if(!texture::using_aura()) 
 #endif 
       addaura(tC0(V), zcol, fd);
 
+    #if CAP_SHAPES
     int ad = airdist(c);
     if(ad == 1 || ad == 2) {
 
@@ -5013,8 +5026,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          }
        }
       }
+    #endif
 
-    #if CAP_POLY
+    #if CAP_SHAPES
     if(c->land == laBlizzard) {
       if(vid.backeffects) {
         if(c->cpdist <= getDistLimit())
@@ -5025,10 +5039,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           queuepoly(V * ddspin(c, i) * xpush(cellgfxdist(c, i)/2), shWindArrow, 0x8080FF80);
         }
       }
+    #endif
     
     if(items[itOrbGravity] && c->cpdist <= 5) 
       draw_gravity_particles(c, V);
     
+    #if CAP_SHAPES
     if(c->land == laWhirlwind) {
       whirlwind::calcdirs(c);
       
@@ -5255,7 +5271,7 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id) {
 void queuecircleat(cell *c, double rad, color_t col) {
   if(!c) return;
   if(!gmatrix.count(c)) return;
-  #if CAP_POLY
+  #if CAP_SHAPES
   if(vid.stereo_mode || sphere) {
     dynamicval<color_t> p(poly_outline, col);
     queuepolyat(gmatrix[c] * spintick(100), shGem[1], 0, PPR::LINE);
@@ -5291,7 +5307,7 @@ void drawMarkers() {
   if(!(cmode & sm::NORMAL)) return;
   
   callhooks(hooks_markers);
-  #if CAP_POLY
+  #if CAP_SHAPES
   viewmat();
   #endif
   
@@ -5382,7 +5398,7 @@ void drawMarkers() {
     #endif
 
     // process mouse
-    #if CAP_POLY
+    #if CAP_SHAPES
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
       if(multi::players == 1) {
         forCellIdAll(c2, d, cwt.at) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
@@ -5417,7 +5433,7 @@ void drawMarkers() {
       queuecircleat(mouseover, 0.6, darkena(iinf[orbToTarget].color, 0, 0xFF));
       }
     #endif
-    #if CAP_POLY
+    #if CAP_SHAPES
     if(orbToTarget && rand() % 200 < ticks - lastt) {
       if(orbToTarget == itOrbDragon)
         drawFireParticles(mouseover, 2);
@@ -5448,7 +5464,7 @@ void drawMarkers() {
   }
 
 void drawFlashes() {
-  #if CAP_QUEUE && CAP_POLY
+  #if CAP_QUEUE
   for(int k=0; k<isize(flashes); k++) {
     flashdata& f = flashes[k];
     transmatrix V;
@@ -5465,10 +5481,12 @@ void drawFlashes() {
     bool kill = tim > f.size;
     
     if(f.spd) {
+      #if CAP_SHAPES
       kill = tim > 300;
       int partcol = darkena(f.color, 0, max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
       queuepoly(V * spin(f.angle) * xpush(f.spd * tim * scalefactor / 50000.), shParticle[f.size], partcol);
+      #endif
       }
     
     else if(f.size == 1000) {
@@ -5766,7 +5784,7 @@ void drawmovestar(double dx, double dy) {
   
   if(0);
 
-#if CAP_POLY  
+#if CAP_SHAPES
   else if(vid.axes == 3)
     queuepoly(Centered, shMovestar, starcol);
 #endif
@@ -5868,7 +5886,7 @@ void drawfullmap() {
     }
   */
   
-  #if CAP_POLY && CAP_QUEUE
+  #if CAP_QUEUE
   draw_boundary(0);
   draw_boundary(1);
   
@@ -6246,7 +6264,7 @@ void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int di
   }
 
 void drawBug(const cellwalker& cw, color_t col) {
-#if CAP_POLY
+#if CAP_SHAPES
   initquickqueue();
   transmatrix V = ggmatrix(cw.at);
   if(cw.spin) V = V * ddspin(cw.at, cw.spin, M_PI);

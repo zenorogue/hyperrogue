@@ -1226,7 +1226,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     return;
     }  
   #endif
-  #if CAP_POLY && CAP_QUEUE
+  #if CAP_QUEUE
   for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, 10));
   auto& c = queuecurve(linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1)
@@ -1241,7 +1241,7 @@ color_t periodcolor = 0x00FF0080;
 color_t ringcolor = darkena(0xFF, 0, 0xFF);
 color_t modelcolor = 0;
 
-#if CAP_QUEUE && CAP_POLY
+#if CAP_QUEUE
 void draw_model_elements() {
 
   switch(pmodel) {

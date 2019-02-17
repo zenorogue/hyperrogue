@@ -301,7 +301,7 @@ bool nohud, nomenukey;
 
 hookset<bool()> *hooks_prestats;
 
-#if CAP_POLY
+#if CAP_SHAPES
 void drawMobileArrow(int i) {
 
   int dir = i;
@@ -372,7 +372,7 @@ void drawStats() {
       legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
       );
     #endif
-    #if CAP_POLY
+    #if CAP_SHAPES
     for(int i=0; i<cwt.at->type; i++) drawMobileArrow(i);
     #endif
     if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
