@@ -11,6 +11,11 @@
 
 namespace hr {
 
+struct always_false {
+  operator bool() const { return false; };
+  void operator = (bool b) const {};
+  };
+
 template<class T>
 void ignore(T&&) {
   // placate GCC's overzealous -Wunused-result
@@ -2273,6 +2278,10 @@ namespace tour {
 
   extern hookset<void(int)> *hooks_slide;
   };
+#else
+namespace tour {
+  static const always_false on;
+  }
 #endif
 
 extern bool doCross;

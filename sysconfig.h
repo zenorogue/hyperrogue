@@ -77,15 +77,15 @@
 #endif
 
 #ifndef CAP_ANIMATIONS
-#define CAP_ANIMATIONS (!CAP_MINI)
+#define CAP_ANIMATIONS (!ISMINI)
 #endif
 
 #ifndef CAP_FILES
-#define CAP_FILES 1
+#define CAP_FILES (!ISMINI)
 #endif
 
 #ifndef CAP_INV
-#define CAP_INV 1
+#define CAP_INV (!ISMINI)
 #endif
 
 #ifndef CAP_ANDROIDSHARE
@@ -197,7 +197,7 @@
 #define CAP_SDLAUDIO (CAP_SDL && CAP_AUDIO)
 
 #ifndef CAP_SVG
-#define CAP_SVG (!ISMOBILE)
+#define CAP_SVG (CAP_FILES && !ISMOBILE && !ISMINI)
 #endif
 
 #ifndef CAP_POLY
