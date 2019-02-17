@@ -454,31 +454,31 @@ namespace hr { namespace gp {
     }
   
   hyperpoint loctoh_ort(loc at) {
-    return hpxyz(at.first, at.second, 1);
+    return point3(at.first, at.second, 1);
     }
 
   hyperpoint corner_coords6[7] = {
-    hpxyz(2, -1, 0),
-    hpxyz(1, 1, 0),
-    hpxyz(-1, 2, 0),
-    hpxyz(-2, 1, 0),
-    hpxyz(-1, -1, 0),
-    hpxyz(1, -2, 0),
-    hpxyz(0, 0, 0) // center, not a corner
+    point3(2, -1, 0),
+    point3(1, 1, 0),
+    point3(-1, 2, 0),
+    point3(-2, 1, 0),
+    point3(-1, -1, 0),
+    point3(1, -2, 0),
+    point3(0, 0, 0) // center, not a corner
     };
 
   hyperpoint corner_coords4[7] = {
-    hpxyz(1.5, -1.5, 0),
-//    hpxyz(1, 0, 0),
-    hpxyz(1.5, 1.5, 0),
-//    hpxyz(0, 1, 0),
-    hpxyz(-1.5, 1.5, 0),
-//    hpxyz(-1, 0, 0),
-    hpxyz(-1.5, -1.5, 0),
-//    hpxyz(0, -1, 0),
-    hpxyz(0, 0, 0),
-    hpxyz(0, 0, 0),
-    hpxyz(0, 0, 0)
+    point3(1.5, -1.5, 0),
+//    point3(1, 0, 0),
+    point3(1.5, 1.5, 0),
+//    point3(0, 1, 0),
+    point3(-1.5, 1.5, 0),
+//    point3(-1, 0, 0),
+    point3(-1.5, -1.5, 0),
+//    point3(0, -1, 0),
+    point3(0, 0, 0),
+    point3(0, 0, 0),
+    point3(0, 0, 0)
     };
 
   #define corner_coords (S3==3 ? corner_coords6 : corner_coords4)
@@ -486,7 +486,7 @@ namespace hr { namespace gp {
   hyperpoint cornmul(const transmatrix& corners, const hyperpoint& c) {
     if(sphere && S3 == 3) {
       ld cmin = c[0] * c[1] * c[2] * (6 - S7);
-      return corners * hpxyz(c[0] + cmin, c[1] + cmin, c[2] + cmin);
+      return corners * point3(c[0] + cmin, c[1] + cmin, c[2] + cmin);
       }
     else return corners * c;
     }
@@ -564,7 +564,7 @@ namespace hr { namespace gp {
         area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
       else
         area = x * x + y * y;
-      next = hpxyz(x+y/2., -y * sqrt(3) / 2, 0);
+      next = point3(x+y/2., -y * sqrt(3) / 2, 0);
       ld scale = 1 / hypot2(next);
       crossf *= scale;
       hepvdist *= scale;

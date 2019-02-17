@@ -85,7 +85,7 @@ hyperpoint gethyper(ld x, ld y) {
   
   if(vid.camera_angle) camrotate(hx, hy);
   
-  return perspective_to_space(hpxyz(hx, hy, 0));
+  return perspective_to_space(hpxyz(hx, hy, 0 DC(,0)));
   }
 
 void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
@@ -171,8 +171,8 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   y = asin_auto(H[1]);
   x = asin_auto_clamp(H[0] / cos_auto(y)) + band_shift;
   if(sphere) {
-    if(H[2] < 0 && x > 0) x = M_PI - x;
-    else if(H[2] < 0 && x <= 0) x = -M_PI - x;
+    if(H[DIM] < 0 && x > 0) x = M_PI - x;
+    else if(H[DIM] < 0 && x <= 0) x = -M_PI - x;
     }
   hypot_zlev(zlev, y, yf, zf);
   
@@ -180,7 +180,7 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   
   ld yzf = y * zf; y *= yf;
   conformal::apply_orientation(y, x);
-  ret = hpxyz(x / M_PI, y / M_PI, 0);
+  ret = hpxyz(x / M_PI, y / M_PI, 0 DC(,0));
   if(zlev != 1 && current_display->stereo_active()) 
     apply_depth(ret, yzf / M_PI);
   return;
@@ -319,7 +319,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         case gcEuclid: {
           // stereographic projection to a sphere
           auto hd = hdist0(H) / vid.euclid_to_sphere;
-          if(hd == 0) ret = hpxyz(0, 0, -1);
+          if(hd == 0) ret = hpxyz(0, 0, -1 DC(,0));
           else {
             ld x = 2 * hd / (1 + hd * hd);
             ld y = x / hd;
@@ -391,7 +391,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           cld w(ret[0], ret[1]);
           cld z = sqrt(c4*w*w-c1) + c2*w;
           if(abs(z) > 1) z = c1 / z;
-          hyperpoint zr = hpxyz(real(z), imag(z), 0);
+          hyperpoint zr = hpxyz(real(z), imag(z), 0 DC(,0));
           
           hyperpoint inhyp = perspective_to_space(zr, 1, gcHyperbolic);
           last_skiprope = vid.skiprope;

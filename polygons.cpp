@@ -444,7 +444,7 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
     miny = min(miny, py[i]), maxy = max(maxy, py[i]);
   for(int mx=minx; mx<maxx; mx++)
   for(int my=miny; my<maxy; my++) {
-    hyperpoint h = isource * hpxyz(mx, my, 1);
+    hyperpoint h = isource * point3(mx, my, 1);
     if(h[0] >= -1e-7 && h[1] >= -1e-7 && h[2] >= -1e-7) {
       hyperpoint ht = target * h;
       int tw = texture::config.data.twidth;

@@ -845,7 +845,7 @@ void flip_z() {
   }
 
 hyperpoint coord_to_flat(ldcoord co) {
-  hyperpoint res = hpxyz(0, 0, 0);
+  hyperpoint res = Hypc;
   co = co - rug_center;
   for(int a=0; a<MAXDIM; a++)
     for(int b=0; b<3; b++)

@@ -204,7 +204,7 @@ int rearrange(bool total, ld minedge) {
   for(int i=0; i<isize(cells); i++) {
     auto& p1 = cells[i];
     using namespace hyperpoint_vec;
-    hyperpoint h = hpxyz(0, 0, 0);
+    hyperpoint h = Hypc;
     for(auto v: p1.vertices) h = h + v;
     
     bool changed = total;

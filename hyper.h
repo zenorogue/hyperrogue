@@ -189,22 +189,33 @@ typedef complex<ld> cld;
 
 #define DEBSM(x) 
 
-struct hyperpoint : array<ld, 3> {
+#define DIM 2
+#define MDIM (DIM+1)
+
+#if DIM == 2
+#define D3(x) // x
+#define DC(x,y) // x,y
+#else
+#define D3(x) x
+#define DC(x,y) x,y
+#endif
+
+struct hyperpoint : array<ld, MDIM> {
   hyperpoint() {}
-  hyperpoint(ld x, ld y, ld z) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; }
+  hyperpoint(ld x, ld y, ld z DC(, ld w)) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; D3((*this)[3] = w;) }
   };
 
 struct transmatrix {
-  ld tab[3][3];
+  ld tab[MDIM][MDIM];
   ld * operator [] (int i) { return tab[i]; }
   const ld * operator [] (int i) const { return tab[i]; }
   };
 
 inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
   hyperpoint z;
-  for(int i=0; i<3; i++) {
+  for(int i=0; i<MDIM; i++) {
     z[i] = 0;
-    for(int j=0; j<3; j++) z[i] += T[i][j] * H[j];
+    for(int j=0; j<MDIM; j++) z[i] += T[i][j] * H[j];
     }
   return z;
   }
@@ -212,50 +223,65 @@ inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
 inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   transmatrix R;
   // for(int i=0; i<3; i++) for(int j=0; j<3; j++) R[i][j] = 0;
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++) // for(int k=0; k<3; k++)
+  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) // for(int k=0; k<3; k++)
     R[i][j] = T[i][0] * U[0][j] + T[i][1] * U[1][j] + T[i][2] * U[2][j];
   return R;
   }
 
+constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
+  #if DIM==2
+  return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
+  #else
+  return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
+  #endif
+  }
+
+
 // identity matrix
-const static transmatrix Id = {{{1,0,0}, {0,1,0}, {0,0,1}}};
+const static transmatrix Id = diag(1,1,1,1);
 
 // mirror image
-const static transmatrix Mirror = {{{1,0,0}, {0,-1,0}, {0,0,1}}};
+const static transmatrix Mirror = diag(1,-1,1,1);
 
 // mirror image
-const static transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
+const static transmatrix MirrorX = diag(-1,1,1,1);
 
 // mirror image
-const static transmatrix MirrorZ = {{{1,0,0}, {0,1,0}, {0,0,-1}}};
+const static transmatrix MirrorZ = diag(1,1,-1,1);
 
 // rotate by PI
-const static transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
+const static transmatrix pispin = diag(-1,-1,1,1);
 
 // central symmetry
-const static transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
+const static transmatrix centralsym = diag(-1,-1,-1,-1);
 
 #define hpxyz hyperpoint
+
+#if DIM == 3
+hyperpoint point3(ld x, ld y, ld z) { return hpxyz(x,y,z,0); }
+#else
+#define point3 hpxyz
+#endif
 
 namespace hyperpoint_vec {
 
   inline hyperpoint& operator *= (hyperpoint& h, ld d) {
-    h[0] *= d; h[1] *= d; h[2] *= d;
+    for(int i=0; i<MDIM; i++) h[i] *= d;
     return h;
     }
   
   inline hyperpoint& operator /= (hyperpoint& h, ld d) { 
-    h[0] /= d; h[1] /= d; h[2] /= d;
+    for(int i=0; i<MDIM; i++) h[i] /= d;
     return h;
     }
   
   inline hyperpoint operator += (hyperpoint& h, hyperpoint h2) { 
-    for(int i: {0,1,2}) h[i] += h2[i];
+    for(int i=0; i<MDIM; i++) h[i] += h2[i];
     return h;
     }
 
   inline hyperpoint operator -= (hyperpoint& h, hyperpoint h2) { 
-    for(int i: {0,1,2}) h[i] -= h2[i];
+    for(int i=0; i<MDIM; i++) h[i] -= h2[i];
     return h;
     }
 
@@ -271,12 +297,13 @@ namespace hyperpoint_vec {
       h1[1] * h2[2] - h1[2] * h2[1],
       h1[2] * h2[0] - h1[0] * h2[2],
       h1[0] * h2[1] - h1[1] * h2[0]
+      DC(,0)
       );
     }
 
   // inner product (in R^3)
   inline ld operator | (hyperpoint h1, hyperpoint h2) {
-    return h1[0] * h2[0] + h1[1] * h2[1] + h1[2] * h2[2];
+    return h1[0] * h2[0] + h1[1] * h2[1] + h1[2] * h2[2] D3(+ h1[3] * h2[3]);
     }    
   }
 
