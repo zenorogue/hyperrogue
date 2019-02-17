@@ -1253,20 +1253,21 @@ void dqi_line::draw() {
   }
 
 void dqi_string::draw() {
-  #if ISMOBILE==0
-  if(svg::in) 
+  #if CAP_SVG
+  if(svg::in) {
     svg::text(x, y, size, str, frame, color, align);
-  else {
-    int fr = frame & 255;
-    displayfrSP(x, y, shift, fr, size, str, color, align, frame >> 8);
+    return;
     }
+  #elseif ISMOBILE==0
+  int fr = frame & 255;
+  displayfrSP(x, y, shift, fr, size, str, color, align, frame >> 8);
   #else
   displayfr(x, y, frame, size, str, color, align);
   #endif
   }
 
 void dqi_circle::draw() {
-  #if ISMOBILE==0
+  #if CAP_SVG
   if(svg::in) {
     svg::circle(x, y, size, color, fillcolor, linewidth);
     }

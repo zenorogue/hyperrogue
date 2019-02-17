@@ -66,7 +66,9 @@ int main(int argc, char **argv) {
 #endif
 #if !ISWEB
   if(showstartmenu && !vid.skipstart) {
+    #if CAP_STARTANIM
     startanims::pick();
+    #endif
     pushScreen(showStartMenu);
     }
 #endif

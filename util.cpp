@@ -231,6 +231,7 @@ cld exp_parser::parse(int prio) {
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
   while(true) {
+    #if CAP_ANIMATIONS
     if(next() == '.' && next(1) == '.' && prio == 0) {
       vector<cld> rest = { res };
       while(next() == '.' && next(1) == '.') {
@@ -243,7 +244,9 @@ cld exp_parser::parse(int prio) {
       res = rest[vf] + (rest[vf+1] - rest[vf]) * v;
       return res;
       }
-    else if(next() == '+' && prio <= 10) at++, res = res + parse(20);
+    else 
+    #endif
+    if(next() == '+' && prio <= 10) at++, res = res + parse(20);
     else if(next() == '-' && prio <= 10) at++, res = res - parse(20);
     else if(next() == '*' && prio <= 20) at++, res = res * parse(30);
     else if(next() == '/' && prio <= 20) at++, res = res / parse(30);

@@ -751,7 +751,7 @@ bool expansion_handleKey(int sym, int uni) {
 
 int expansion_hook = addHook(hooks_handleKey, 0, expansion_handleKey);
 
-#if !CAP_MINI
+#if !ISMINI
 void compute_coefficients() {
   printf("%s %s\n", gp::operation_name().c_str(), ginf[geometry].tiling_name);
   start_game();

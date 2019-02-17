@@ -467,6 +467,10 @@ union SDL_Event;
 #define CAP_BT CAP_GEOMETRY
 #endif
 
+#ifndef CAP_STARTANIM
+#define CAP_STARTANIM (!(ISMINI))
+#endif
+
 #ifndef CAP_FIELD
 #define CAP_FIELD (!(ISMINI))
 #endif

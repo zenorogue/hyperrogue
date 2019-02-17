@@ -267,7 +267,10 @@ void showMainMenu() {
     else if(uni == 'd') pushScreen(showDisplayMode);
     else if(uni == 'm') pushScreen(showChangeMode);
     else if(uni == 'R') dialog::do_if_confirmed([] {
-      popScreenAll(), startanims::pick(), pushScreen(showStartMenu);
+      #if CAP_STARTANIM
+      startanims::pick();
+      #endif
+      popScreenAll(), pushScreen(showStartMenu);
       });
   #if CAP_SAVE
     else if(uni == 't') scores::load();
@@ -408,8 +411,10 @@ void showDisplayMode() {
   #endif
     else if(uni == 'a')
       pushScreen(conformal::model_menu);
+  #if CAP_ANIMATIONS
     else if(uni == 'A')
       pushScreen(anims::show);
+  #endif
   
   #if CAP_MODEL
     else if(xuni == 'n') 
@@ -624,7 +629,9 @@ void showStartMenu() {
       daily_mode = 20;
     }
   
+  #if CAP_STARTANIM
   startanims::current();
+  #endif
 
   getcstat = ' ';
   
@@ -841,7 +848,9 @@ void showStartMenu() {
       clearMessages();
       welcomeMessage();
       }
+    #if CAP_STARTANIM
     else if(sym == SDLK_F5) startanims::pick();
+    #endif
     };
   }
  

@@ -1082,9 +1082,11 @@ void optimizeview() {
 
   subscreen_split(optimizeview);
   
+  #if CAP_ANIMATIONS
   if(centerover.at && inmirror(centerover.at)) {
     anims::reflect_view();
     }
+  #endif
   
   DEBB(DF_GRAPH, (debugfile,"optimize view\n"));
   int turn = 0;

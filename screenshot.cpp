@@ -3,15 +3,9 @@
 
 namespace hr {
 
-#if ISMOBILE==1
-namespace svg {
-  bool in = false;
-  }
-#endif
-
 bool hide_hud = true;
 
-#if ISMOBILE==0
+#if CAP_SVG
 // svg renderer
 namespace svg {
   #if ISWEB
@@ -184,8 +178,8 @@ namespace svg {
     fclose(f.f); f.f = NULL;
     #endif
     }
-  
-#if CAP_COMMANDLINE
+
+#if CAP_COMMANDLINE && CAP_SHOT
 int read_args() {
   using namespace arg;
   if(argis("-svgsize")) {
@@ -1081,6 +1075,7 @@ void spin_around() {
 
 reaction_t add_to_frame;
 
+#if CAP_STARTANIM
 void draw_ghost(const transmatrix V, int id) {
   if(id % 13 == 0) {
     queuepoly(V, shMiniGhost, 0xFFFF00C0);
@@ -1177,6 +1172,7 @@ void pick() {
   }
 
 auto sanimhook = addHook(hooks_frame, 100, []() { if(add_to_frame) add_to_frame(); });
+#endif
 
 }
 }

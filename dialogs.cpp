@@ -614,7 +614,9 @@ namespace dialog {
     if(reaction) reaction();
     if(ne.intval) *ne.editwhat = *ne.intval;
     ne.s = disp(*ne.editwhat);
+    #if CAP_ANIMATIONS
     anims::deanimate(*ne.editwhat);
+    #endif
     }
   
   void use_hexeditor() {
@@ -630,7 +632,9 @@ namespace dialog {
     if(ne.sc.positive && x <= 0) return;
     *ne.editwhat = x;
     if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
+    #if CAP_ANIMATIONS
     if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);    
+    #endif
     if(reaction) reaction();
     }
 
@@ -802,7 +806,9 @@ namespace dialog {
     extra_options = reaction_t();
     numberdark = 0;
     ne.animatable = true;
+    #if CAP_ANIMATIONS
     anims::get_parameter_animation(x, ne.s);
+    #endif
     }
 
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {

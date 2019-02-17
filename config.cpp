@@ -317,6 +317,7 @@ void initConfig() {
   #if CAP_FILES && CAP_SHOT
   addsaver(anims::animfile, "animation file format");
   #endif
+  #if CAP_ANIMATIONS
   addsaver(anims::period, "animation period");
   addsaver(anims::noframes, "animation frames");
   addsaver(anims::cycle_length, "animation cycle length");
@@ -324,6 +325,7 @@ void initConfig() {
   addsaver(anims::rug_angle, "animation rug angle");
   addsaver(anims::circle_radius, "animation circle radius");
   addsaver(anims::circle_spins, "animation circle spins");
+  #endif
   
   #if CAP_CRYSTAL
   addsaver(crystal::compass_probability, "compass-probability");
@@ -1962,15 +1964,17 @@ unordered_map<string, ld&> params = {
   {"stretch", vid.stretch},
   {"twopoint", vid.twopoint_param},
   {"bwidth", vid.binary_width},
+  #if CAP_ANIMATIONS
   {"aperiod", anims::period},
   {"acycle", anims::cycle_length},
   {"aparabolic", anims::parabolic_length},
   {"arugangle", anims::rug_angle},
   {"acradius", anims::circle_radius},
   {"acspins", anims::circle_spins},
-  {"mobius", vid.skiprope},
   {"a", anims::a},
   {"b", anims::b},
+  #endif
+  {"mobius", vid.skiprope},
   {"sang", conformal::spiral_angle},
   {"spiralx", conformal::spiral_x},
   {"spiraly", conformal::spiral_y},

@@ -1910,6 +1910,7 @@ void clearMessages();
 void resetGeometry();
 
 namespace shot {
+  #if CAP_SHOT
   extern int shotx, shoty, shotformat;
   extern bool make_svg;
   extern ld gamma, fade;
@@ -1918,16 +1919,25 @@ namespace shot {
   void menu();
   void default_screenshot_content();
   void take(string fname, const function<void()>& what = default_screenshot_content);
+  #endif
   }
 
+#if CAP_SVG
 namespace svg {
   void circle(int x, int y, int size, color_t col, color_t fillcolor, double linewidth);
   void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth);
   void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
   extern bool in;
   extern string link;
+  #if CAP_SHOT
   void render(const string& fname, const function<void()>& what = shot::default_screenshot_content);
+  #endif
   }
+#else
+namespace svg {
+  static const always_false in;
+  }
+#endif
 
 extern int sightrange_bonus, genrange_bonus, gamerange_bonus;
 
@@ -2168,12 +2178,14 @@ int darkena(int c, int lev, int a);
 extern cell *shpos[MAXPLAYER][SHSIZE];
 extern int cshpos;
 
+#if CAP_ANIMATIONS
 namespace anims {
   void animate_parameter(ld &x, string f, const reaction_t& r);
   void deanimate(ld &x);
   void get_parameter_animation(ld &x, string& f);
   extern ld a, b;
   }
+#endif
 
 namespace arg {
 #if CAP_COMMANDLINE
@@ -2189,7 +2201,11 @@ namespace arg {
   bool argis(const string& s);
   unsigned arghex();
 
-  inline void shift_arg_formula(ld& x, const reaction_t& r = reaction_t()) { shift(); x = argf(); anims::animate_parameter(x, args(), r); }
+  inline void shift_arg_formula(ld& x, const reaction_t& r = reaction_t()) { shift(); x = argf(); 
+    #if CAP_ANIMATIONS
+    anims::animate_parameter(x, args(), r); 
+    #endif
+    }
   
   void init(int _argc, char **_argv);
   
@@ -4487,6 +4503,7 @@ ld atan2_auto(ld x);
 ld atan2(hyperpoint h);
 
 namespace anims {
+  #if CAP_ANIMATIONS
   void apply();
   void rollback();
   void show();
@@ -4498,12 +4515,21 @@ namespace anims {
   
   extern int noframes;
   extern ld period, cycle_length, parabolic_length, rug_angle, circle_radius, circle_spins;
+  #else
+  static bool any_on() { return false; }
+  static void rollback() { }
+  static bool center_music() { return false; }
+  static bool any_animation() { return false; }
+  static void apply() { }
+  #endif
   }
 
+#if CAP_STARTANIM
 namespace startanims {
   extern reaction_t current;  
   void pick();
   }
+#endif
 
 extern int animation_lcm;
 extern ld animation_factor;
