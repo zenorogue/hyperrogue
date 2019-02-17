@@ -1,5 +1,5 @@
 namespace hr {
-
+#if CAP_POLY
 vector<plain_floorshape*> all_plain_floorshapes;
 vector<escher_floorshape*> all_escher_floorshapes;
 

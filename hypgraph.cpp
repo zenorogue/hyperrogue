@@ -22,8 +22,6 @@ void camrotate(ld& hx, ld& hy) {
 
 hyperpoint perspective_to_space(hyperpoint h, ld alpha = vid.alpha, eGeometryClass geo = ginf[geometry].cclass);
 
-hyperpoint dhp(ld x, ld y, ld z) { return hpxyz(x, y, z); }
-
 bool non_spatial_model() {
   if(among(pmodel, mdRotatedHyperboles, mdJoukowsky, mdJoukowskyInverted, mdPolygonal, mdPolynomial))
     return true;
@@ -1217,6 +1215,7 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   }
 
 void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio) {
+  #if CAP_QUEUE
   if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) && vid.camera_angle == 0) {
     hyperpoint ret;
     applymodel(xpush0(radius), ret);
@@ -1224,6 +1223,8 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     queuecircle(current_display->xcenter, current_display->ycenter, r * current_display->radius, linecol, prio, fillcol);
     return;
     }  
+  #endif
+  #if CAP_POLY && CAP_QUEUE
   for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, 10));
   auto& c = queuecurve(linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1)
@@ -1231,12 +1232,14 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
   if(pmodel == mdJoukowsky)
     c.flags |= POLY_FORCE_INVERTED;
   c.flags |= POLY_ALWAYS_IN;
+  #endif
   }
 
 color_t periodcolor = 0x00FF0080;
 color_t ringcolor = darkena(0xFF, 0, 0xFF);
 color_t modelcolor = 0;
 
+#if CAP_QUEUE && CAP_POLY
 void draw_model_elements() {
 
   switch(pmodel) {
@@ -1529,6 +1532,7 @@ void draw_boundary(int w) {
   if(sphere && !among(pmodel, mdEquidistant, mdEquiarea)) return;
   circle_around_center(fakeinf, lc, fc, p);
   }
+#endif
 
 ld band_shift = 0;
 void fix_the_band(transmatrix& T) {

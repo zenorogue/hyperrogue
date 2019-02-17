@@ -121,12 +121,80 @@ void chasmifyPoly(double fac, double fac2, int k) {
   last->flags |= POLY_ISSIDE;
   }
 
+#if CAP_GL
+color_t text_color;
+int text_shift;
+GLuint text_texture;
+int texts_merged;
+int shapes_merged;
+
+vector<glhr::textured_vertex> text_vertices;
+
+void glflush() {
+  #if MINIMIZE_GL_CALLS
+  if(isize(triangle_vertices)) {
+    // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
+    if(triangle_color) {
+      glhr::be_nontextured();
+      glapplymatrix(Id);
+      glhr::current_vertices = NULL;
+      glhr::vertices(triangle_vertices);
+      glhr::color2(triangle_color);
+      glDrawArrays(GL_TRIANGLES, 0, isize(triangle_vertices));
+      }
+    triangle_vertices.clear();
+    }
+  if(isize(line_vertices)) {
+    if(line_color) {
+      glhr::be_nontextured();
+      glapplymatrix(Id);
+      glhr::current_vertices = NULL;
+      glhr::vertices(line_vertices);
+      glhr::color2(line_color);
+      glDrawArrays(GL_LINES, 0, isize(line_vertices));
+      }
+    line_vertices.clear();
+    }
+  shapes_merged = 0;
+  #endif
+
+  if(isize(text_vertices)) {
+    // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
+    if(!svg::in) current_display->set_projection(0, false);
+    glhr::be_textured();
+    glBindTexture(GL_TEXTURE_2D, text_texture);
+    glhr::color2(text_color);
+    glhr::set_depthtest(false);
+    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
+      if(vid.scale < 0)
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text) * glhr::scale(-1,-1,-1));
+      else
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text));
+      current_display->set_mask(ed);
+  
+      glhr::current_vertices = NULL;
+      glhr::prepare(text_vertices);
+      glDrawArrays(GL_TRIANGLES, 0, isize(text_vertices));
+      
+      GLERR("print");
+      }
+
+    if(current_display->stereo_active() && text_shift && !svg::in) current_display->set_mask(0);
+ 
+    texts_merged = 0;
+    text_vertices.clear();
+    }
+  }
+#endif
+
+#if CAP_POLY
 void shift(hpcshape& sh, double dx, double dy, double dz) {
   hyperpoint H = hpxyz(dx, dy, dz);
   transmatrix m = rgpushxto0(H);
   for(int i=sh.s; i<sh.e; i++) 
     hpc[i] = m * hpc[i];
   }
+#endif
 
 #if ISMOBILE==0
 SDL_Surface *aux;
@@ -157,6 +225,8 @@ void extra_vertices() {
 
 #endif
 
+int spherespecial, spherephase;
+
 #if CAP_POLY
 int polyi;
 
@@ -167,8 +237,6 @@ int poly_flags;
 void add1(const hyperpoint& H) {
   glcoords.push_back(make_array<GLfloat>(H[0], H[1], H[2])); 
   }  
-
-int spherespecial, spherephase;
 
 bool is_behind(const hyperpoint& H) {
   return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && vid.alpha + H[2] <= BEHIND_LIMIT;
@@ -207,7 +275,6 @@ int get_side(const hyperpoint& H) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / vid.alpha;
     return (H[2] <= -horizon) ? -1 : 1;
-    ;
     }
   if(pmodel == mdRotatedHyperboles)
     return H[1] > 0 ? -1 : 1;
@@ -404,70 +471,6 @@ color_t triangle_color, line_color;
 vector<glvertex> triangle_vertices;
 vector<glvertex> line_vertices;
 #endif
-
-color_t text_color;
-int text_shift;
-GLuint text_texture;
-int texts_merged;
-int shapes_merged;
-
-vector<glhr::textured_vertex> text_vertices;
-
-void glflush() {
-  #if MINIMIZE_GL_CALLS
-  if(isize(triangle_vertices)) {
-    // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
-    if(triangle_color) {
-      glhr::be_nontextured();
-      glapplymatrix(Id);
-      glhr::current_vertices = NULL;
-      glhr::vertices(triangle_vertices);
-      glhr::color2(triangle_color);
-      glDrawArrays(GL_TRIANGLES, 0, isize(triangle_vertices));
-      }
-    triangle_vertices.clear();
-    }
-  if(isize(line_vertices)) {
-    if(line_color) {
-      glhr::be_nontextured();
-      glapplymatrix(Id);
-      glhr::current_vertices = NULL;
-      glhr::vertices(line_vertices);
-      glhr::color2(line_color);
-      glDrawArrays(GL_LINES, 0, isize(line_vertices));
-      }
-    line_vertices.clear();
-    }
-  shapes_merged = 0;
-  #endif
-
-  if(isize(text_vertices)) {
-    // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
-    if(!svg::in) current_display->set_projection(0, false);
-    glhr::be_textured();
-    glBindTexture(GL_TEXTURE_2D, text_texture);
-    glhr::color2(text_color);
-    glhr::set_depthtest(false);
-    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
-      if(vid.scale < 0)
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text) * glhr::scale(-1,-1,-1));
-      else
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text));
-      current_display->set_mask(ed);
-  
-      glhr::current_vertices = NULL;
-      glhr::prepare(text_vertices);
-      glDrawArrays(GL_TRIANGLES, 0, isize(text_vertices));
-      
-      GLERR("print");
-      }
-
-    if(current_display->stereo_active() && text_shift && !svg::in) current_display->set_mask(0);
- 
-    texts_merged = 0;
-    text_vertices.clear();
-    }
-  }
 
 void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];

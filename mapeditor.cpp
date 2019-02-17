@@ -186,6 +186,7 @@ namespace mapstream {
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     f.write(id);
 
+    #if CAP_POLY
     for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
       usershape *us = usp.second;
       if(!us) continue;
@@ -199,6 +200,7 @@ namespace mapstream {
         for(int i=0; i<isize(ds.list); i++) f.write(ds.list[i]);
         }
       }
+    #endif
     n = -1; f.write(n);
     
     f.write(mutantphase);
@@ -409,6 +411,7 @@ namespace mapstream {
     if(vernum >= 7400) while(true) {
       int i = f.get<int>();
       if(i == -1) break;
+      #if CAP_POLY
       int j = f.get<int>(), l = f.get<int>();
       if(i >= 4) i = 3;
       if(i<0 || i >= mapeditor::USERSHAPEGROUPS) break;
@@ -426,6 +429,9 @@ namespace mapstream {
       
       for(int i=0; i<siz; i++)
         ds.list.push_back(f.get<hyperpoint>());
+      #else
+      printf("cannot read shapes\n"); exit(1);
+      #endif
       }
     
     if(vernum >= 11005) {
@@ -994,6 +1000,7 @@ namespace mapeditor {
 
   transmatrix drawtrans, drawtransnew;
 
+  #if CAP_POLY
   void loadShape(int sg, int id, hpcshape& sh, int d, int layer) {
     usershapelayer *dsCur = &usershapes[sg][id]->d[layer];
     dsCur->list.clear();
@@ -1001,6 +1008,7 @@ namespace mapeditor {
     for(int i=sh.s; i < sh.s + (sh.e-sh.s)/d; i++)
       dsCur->list.push_back(hpc[i]);
     }
+  #endif
 
   void drawGhosts(cell *c, const transmatrix& V, int ct) {
     }
@@ -1084,6 +1092,7 @@ namespace mapeditor {
     }
     
   void showDrawEditor() {
+#if CAP_POLY
     cmode = sm::DRAW;
     gamescreen(0);
     drawGrid();
@@ -1238,10 +1247,14 @@ namespace mapeditor {
     displayFunctionKeys();
     
     keyhandler = drawHandleKey;
+#else
+    popScreen();
+#endif
     }
   
   bool rebuildPolys = false;
 
+#if CAP_POLY
   void loadShapes(int sg, int id) {
     delete usershapes[sg][id];
     usershapes[sg][id] = NULL;
@@ -1298,7 +1311,7 @@ namespace mapeditor {
       }
     rebuildPolys = true;
     }
-    
+
   void applyToShape(int sg, int id, int uni, hyperpoint mh) {
     bool haveshape = usershapes[sg][id];
     bool xnew = false;
@@ -1728,6 +1741,7 @@ namespace mapeditor {
     if(rebuildPolys)
       buildpolys(), rebuildPolys = false;
     }
+#endif    
 
   auto hooks = addHook(clearmemory, 0, [] () {
     if(mapeditor::painttype == 4) 
@@ -1772,6 +1786,7 @@ namespace mapeditor {
     }
 #endif
 
+#if CAP_POLY
   bool haveUserShape(eShapegroup group, int id) {
   #if !CAP_EDIT
     return false;
@@ -1779,7 +1794,9 @@ namespace mapeditor {
     return usershapes[group].count(id) && usershapes[group][id];
   #endif
     }
+#endif
   
+#if CAP_TEXTURE      
   void draw_texture_ghosts(cell *c, const transmatrix& V) {
     if(!c) return;
     if(holdmouse && !lstartcell) return;
@@ -1812,10 +1829,11 @@ namespace mapeditor {
             queue_hcircle(M2 * mh, texture::penwidth);
           }                
         }
-#endif
       }
     }
+#endif
 
+#if CAP_POLY
   bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio) {
   #if !CAP_EDIT
     return false;
@@ -1938,6 +1956,7 @@ namespace mapeditor {
     return us;
   #endif
     }
+#endif
 
   void map_settings() {
     cmode = sm::SIDE | sm::MAYDARK;
@@ -1986,7 +2005,9 @@ int read_editor_args() {
   if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
+  #if CAP_POLY
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
+  #endif
   else return 1;
   return 0;
   }

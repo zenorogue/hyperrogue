@@ -301,6 +301,7 @@ bool nohud, nomenukey;
 
 hookset<bool()> *hooks_prestats;
 
+#if CAP_POLY
 void drawMobileArrow(int i) {
 
   int dir = i;
@@ -340,6 +341,7 @@ void drawMobileArrow(int i) {
   
   queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), shArrow, col, PPR::MOBILE_ARROW);
   }
+#endif
 
 bool nofps = false;
 
@@ -364,11 +366,15 @@ void drawStats() {
     initquickqueue();
     using namespace shmupballs;
     calc();
+    #if CAP_QUEUE
     queuecircle(xmove, yb, rad, 0xFF0000FF);
     queuecircle(xmove, yb, rad*SKIPFAC, 
       legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
       );
+    #endif
+    #if CAP_POLY
     for(int i=0; i<cwt.at->type; i++) drawMobileArrow(i);
+    #endif
     if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
     quickqueue();
     }

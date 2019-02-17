@@ -644,6 +644,7 @@ namespace conformal {
       "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
       ) + "\n\n" + parser_help()
       );
+    #if CAP_POLY
     dialog::extra_options = [] () {
       initquickqueue();
       queuereset(mdUnchanged, PPR::LINE);              
@@ -658,6 +659,7 @@ namespace conformal {
       queuereset(pmodel, PPR::LINE);
       quickqueue();
       };
+    #endif
     dialog::reaction_final = [] () {
       pmodel = mdFormula;
       };

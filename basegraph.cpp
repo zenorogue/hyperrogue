@@ -953,7 +953,7 @@ color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
 
 void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
   if(size < 0) size = -size;
-  #if CAP_GL
+  #if CAP_GL && CAP_POLY
   if(vid.usingGL) {
     glflush();
     glhr::be_nontextured();
