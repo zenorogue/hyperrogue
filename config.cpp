@@ -1358,10 +1358,12 @@ void show3D() {
   dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
   
   dialog::addBreak(50);
+  #if CAP_RUG
   if(rug::rugged) {
     dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
     dialog::add_action([] () { rug::spatial_rug = !rug::spatial_rug; });
     }
+  #endif
   dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
   dialog::add_action([] () { 
     if(pmodel == mdDisk && vid.camera_angle) {
@@ -1383,8 +1385,11 @@ void show3D() {
       }
     });
 
-  if(rug::rugged && !rug::spatial_rug)
+  if(0);
+  #if CAP_RUG
+  else if(rug::rugged && !rug::spatial_rug)
     dialog::addBreak(100);
+  #endif
   else if(non_spatial_model())
     dialog::addInfo(XLAT("no 3D effects available in this projection"), 0xC00000);
   else if(!spatial_graphics)
@@ -1947,7 +1952,9 @@ unordered_map<string, ld&> params = {
   {"human_wall_ratio", geom3::human_wall_ratio},
   {"lake_top", geom3::lake_top},
   {"lake_bottom", geom3::lake_bottom},
+  #if CAP_RUG
   {"rug_model_distance", rug::model_distance},
+  #endif
   {"star", polygonal::STAR},
   {"lvspeed", conformal::lvspeed},
   {"rotation", conformal::rotation},

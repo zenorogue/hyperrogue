@@ -627,6 +627,7 @@ void apply() {
     turncount += env_volcano * ticks * 64 / period;
     for(auto& p: gmatrix) if(p.first->land == laVolcano) checkTide(p.first);
     }
+  #if CAP_RUG
   if(rug::rugged) {
     if(rug_rotation1) {
       rug::apply_rotation(rotmatrix(rug_angle * M_PI / 180, 1, 2));
@@ -637,6 +638,7 @@ void apply() {
       rug::apply_rotation(rug::currentrot * rotmatrix(rug_rotation2 * 2 * M_PI * t / period, 0, 1) * inverse(rug::currentrot));
       }
     }
+  #endif
   vid.skiprope += skiprope_rotation * t * 2 * M_PI / period;
 
   if(ballangle_rotation) {
@@ -1056,6 +1058,7 @@ void perspective() {
   gamescreen(2);
   }
 
+#if CAP_RUG
 void rug() {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
@@ -1063,6 +1066,7 @@ void rug() {
   gamescreen(2);
   rug::apply_rotation(rotmatrix(-ticks / 3000., 1, 2));
   }
+#endif
 
 void spin_around() {
   dynamicval<ld> da(vid.alpha, 999);

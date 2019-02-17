@@ -5596,7 +5596,9 @@ void drawthemap() {
   mmspatial = vid.monmode == 4 || vid.monmode == 5;
   
   spatial_graphics = wmspatial || mmspatial;
+  #if CAP_RUG
   if(rug::rugged && !rug::spatial_rug) spatial_graphics = false;
+  #endif
   if(non_spatial_model())
     spatial_graphics = false;
   if(pmodel == mdDisk && abs(vid.alpha) < 1e-6) spatial_graphics = false;
