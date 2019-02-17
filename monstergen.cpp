@@ -413,6 +413,7 @@ void wandering() {
       continue;
       }
     
+    #if CAP_COMPLEX2
     else if(c->land == laBrownian && wchance(items[itBrownian], 75)) {
       c->monst = moAcidBird;
       continue;
@@ -426,6 +427,7 @@ void wandering() {
         }
       continue;
       }
+    #endif
     
     else if(c->wall == waSea && !c->monst) {
       if(c->land == laCaribbean && wchance(items[itPirate], 15) && canReachPlayer(c, moPirate)) {

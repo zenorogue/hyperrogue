@@ -6179,8 +6179,10 @@ void movemonsters() {
   if(havewhat & HF_WHIRLPOOL) whirlpool::move();
   DEBT("whirlwind");
   if(havewhat & HF_WHIRLWIND) whirlwind::move();
+  #if CAP_COMPLEX2
   DEBT("westwall");
   if(havewhat & HF_WESTWALL) westwall::move();
+  #endif
   for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) return;
   DEBT("river");
   if(havewhat & HF_RIVER) prairie::move();

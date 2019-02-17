@@ -1300,6 +1300,7 @@ void oceanCurrents(transmatrix& nat, monster *m, int delta) {
 bool airCurrents(transmatrix& nat, monster *m, int delta) {
   bool carried = false;
   cell *c = m->base;
+  #if CAP_COMPLEX2
   if(c->land == laWestWall) {
     cell *c2 = ts::left_of(c, westwall::coastvalEdge1);
       
@@ -1318,6 +1319,7 @@ bool airCurrents(transmatrix& nat, monster *m, int delta) {
       carried = true; 
       }
     }
+  #endif
   if(c->land == laWhirlwind) {
     whirlwind::calcdirs(c);
     for(int i=0; i<whirlwind::qdirs; i++) {
@@ -3168,7 +3170,9 @@ void turn(int delta) {
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();
+        #if CAP_COMPLEX2
         if(havewhat & HF_WESTWALL) westwall::move();
+        #endif
         buildRosemap();
         if(havewhat&HF_RIVER) prairie::move();
         }

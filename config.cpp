@@ -257,7 +257,9 @@ void initConfig() {
     savecolortable(p.second, s0+"canvas"+p.first);
   savecolortable(distcolors, "distance");
   savecolortable(minecolors, "mines");
+  #if CAP_COMPLEX2
   savecolortable(brownian::colors, "color:brown");
+  #endif
   
   for(int i=0; i<motypes; i++)
     addsaver(minf[i].color, "color:monster:" + its(i));
@@ -1651,8 +1653,10 @@ void show_color_dialog() {
         dialog::openColorDialog(iinf[c->item].color);
       else if(c->wall) 
         dialog::openColorDialog(winf[c->wall == waMineMine ? waMineUnknown : c->wall].color);
+      #if CAP_COMPLEX2
       else if(c->land == laBrownian) 
         dialog::openColorDialog(brownian::get_color_edit(c->landparam));
+      #endif
       else 
         dialog::openColorDialog(floorcolors[c->land]);
       dialog::colorAlpha = false;

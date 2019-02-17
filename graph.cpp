@@ -2861,6 +2861,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     case laAlchemist: 
       fcol = floorcolors[c->land]; break;
     
+    #if CAP_COMPLEX2
     case laVariant: {
       int b = getBits(c);
       fcol = 0x404040;
@@ -2873,6 +2874,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         wcol = 0x202020;
       break;
       }
+    #endif
     
     case laRuins:
       fcol = pseudohept(c) ? 0xC0E0C0 : 0x40A040;
@@ -3586,8 +3588,10 @@ int getSnakelevColor(cell *c, int i, int last, int fd, color_t wcol) {
     col = 0xD0D0D0-i*0x101010;
   else if(c->land == laSnakeNest)
     return darkena(nestcolors[pattern_threecolor(c)] * (5 + i) / 4, 0, 0xFF);
+  #if CAP_COMPLEX2
   else if(c->land == laBrownian)
     col = brownian::get_color(c->landparam % brownian::level + (i+1) * brownian::level);
+  #endif
   else if(i == last-1)
     col = wcol;
   else

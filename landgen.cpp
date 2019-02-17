@@ -1131,12 +1131,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laWestWall:
+      #if CAP_COMPLEX2
       if(d == 9)
         westwall::switchTreasure(c);
       ONEMPTY {
         if(hrand(6000) < 5 + items[itWest] + yendor::hardness())
           c->monst = hrand(100) < 20 ? moWestHawk : moFallingDog;
         }
+      #endif
       break;
     
     case laWhirlwind:
@@ -2278,6 +2280,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laVariant: {
+      #if CAP_COMPLEX2
       int b = getBits(c);
       if(d == 9) {
         int treasure_rate = 2;
@@ -2293,6 +2296,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waNone;
         }
       break;
+      #endif
       }
             
     case laNone:
@@ -2513,7 +2517,9 @@ void setdist(cell *c, int d, cell *from) {
     buildEquidistant(c);
     }
 
+  #if CAP_COMPLEX2
   if(d < BARLEV) brownian::apply_futures(c);
+  #endif
 
   giantLandSwitch(c, d, from);
   
