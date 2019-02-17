@@ -1155,6 +1155,11 @@ land_validity_t& land_validity(eLand l) {
     return disabled;
   #endif
 
+  #if !CAP_COMPLEX2
+  if(among(l, laBrownian, laWestWall, laVariant))
+    return disabled;
+  #endif
+  
   if(l == laBrownian) {
     if(quotient || !hyperbolic || geometry == gCrystal) return dont_work;
     }
