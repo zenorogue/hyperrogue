@@ -20,11 +20,15 @@ void fixelliptic(hyperpoint& h) {
   }
 
 transmatrix master_relative(cell *c, bool get_inverse) {
-  if(IRREGULAR) {
+  if(0) ;
+  #if CAP_IRR  
+  else if(IRREGULAR) {
     int id = irr::cellindex[c];
     ld alpha = 2 * M_PI / S7 * irr::periodmap[c->master].base.spin;
     return get_inverse ? irr::cells[id].rpusher * spin(-alpha-master_to_c7_angle()): spin(alpha + master_to_c7_angle()) * irr::cells[id].pusher;
     }
+  #endif
+  #if CAP_GP
   else if(GOLDBERG) {
     if(c == c->master->c7) {
       return spin((get_inverse?-1:1) * master_to_c7_angle());
@@ -36,6 +40,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       return T;
       }
     }
+  #endif
   else if(BITRUNCATED && !euclid) {
     for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
       return (get_inverse?invhexmove:hexmove)[d];
@@ -51,20 +56,26 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
 
 // target, source, direction from source to target
 
+#if CAP_GP
 namespace gp { extern gp::local_info draw_li; }
+#endif
 
 transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
   if(sphere_narcm) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
       printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
+      #if CAP_GP
       auto bak = gp::draw_li;
+      #endif
       swap(gmatrix, gmatrix0);
       just_gmatrix = true;
       drawStandard();
       just_gmatrix = false;
       swap(gmatrix, gmatrix0);
+      #if CAP_GP
       gp::draw_li = bak;
+      #endif
       }
     if(gmatrix0.count(c2) && gmatrix0.count(c1)) {
       transmatrix T = inverse(gmatrix0[c1]) * gmatrix0[c2];
@@ -78,8 +89,12 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       }
     }
   
+  #if CAP_BT
   if(binarytiling) return binary::relative_matrix(c2->master, c1->master);
+  #endif
+  #if CAP_ARCM
   if(archimedean) return arcm::relative_matrix(c2->master, c1->master);
+  #endif
   
   if(euwrap) {
     transmatrix t = Id;
@@ -157,6 +172,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       where = heptmove[sp] * spin(2*M_PI*bestd/S7) * where;
       h2 = h2->move(bestd);
       }
+    #if CAP_CRYSTAL
     else if(geometry == gCrystal) {
       for(int d3=0; d3<S7; d3++) {
         auto h3 = h2->cmove(d3);
@@ -172,6 +188,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
       bestv.pop_back();
       if(bestv.empty()) hbdist.erase(hbdist.begin());
       }
+    #endif
     else if(h1->distance < h2->distance) {
       int sp = h2->c.spin(0);
       h2 = h2->move(0);
@@ -215,10 +232,13 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(GOLDBERG && c != c->master->c7) {
+  if(0);
+  #if CAP_GP
+  else if(GOLDBERG && c != c->master->c7) {
     auto li = gp::get_local_info(c);
     where = gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
     }
+  #endif
   else if(BITRUNCATED) for(int d=0; d<S7; d++) if(h2->c7->move(d) == c)
     where = hexmove[d];
   // always add to last!
@@ -415,16 +435,23 @@ hyperpoint randomPointIn(int t) {
     }
   }
 
+#if CAP_BT
 hyperpoint get_horopoint(ld y, ld x) {
   return xpush(-y) * binary::parabolic(x) * C0;
   }
+#endif
 
 hyperpoint get_corner_position(cell *c, int cid, ld cf) {
+  #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
+  #endif
+  #if CAP_IRR
   if(IRREGULAR) {
     auto& vs = irr::cells[irr::cellindex[c]];
     return mid_at_actual(vs.vertices[cid], 3/cf);
     }
+  #endif
+  #if CAP_BT
   if(binarytiling) {
     ld yx = log(2) / 2;
     ld yy = yx;
@@ -439,6 +466,8 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     vertices[6] = get_horopoint(-yy, 0);
     return mid_at_actual(vertices[cid], 3/cf);
     }
+  #endif
+  #if CAP_ARCM
   if(archimedean) {
     auto &ac = arcm::current;
     if(PURE) {
@@ -458,6 +487,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
       return xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
       }
     }
+  #endif
   if(PURE) {
     return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
     }
@@ -478,11 +508,14 @@ hyperpoint nearcorner(cell *c, int i) {
     if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
     return cwm * C0;
     }
+  #if CAP_IRR
   if(IRREGULAR) {
     auto& vs = irr::cells[irr::cellindex[c]];
     hyperpoint nc = vs.jpoints[vs.neid[i]];
     return mid_at(C0, nc, .94);
     }
+  #endif
+  #if CAP_ARCM
   if(archimedean) {
     if(PURE) { 
       auto &ac = arcm::current;
@@ -502,6 +535,8 @@ hyperpoint nearcorner(cell *c, int i) {
       return xspinpush0(-t.first, t.second);
       }
     }
+  #endif
+  #if CAP_BT
   if(binarytiling) {
     ld yx = log(2) / 2;
     ld yy = yx;
@@ -519,11 +554,13 @@ hyperpoint nearcorner(cell *c, int i) {
       neis[5] = get_horopoint(-yy*2, 0);
     return neis[i];
     }
+  #endif
   double d = cellgfxdist(c, i);
   return ddspin(c, i) * xpush0(d);
   }
 
 hyperpoint farcorner(cell *c, int i, int which) {
+  #if CAP_GP
   if(GOLDBERG) {
     cellwalker cw(c, i);
     int hint = cw.spin;
@@ -537,6 +574,8 @@ hyperpoint farcorner(cell *c, int i, int which) {
     if(which == 1)
       return cwm * get_corner_position(li1, (cw-1).spin);          
     }
+  #endif
+  #if CAP_IRR
   if(IRREGULAR) {
     auto& vs = irr::cells[irr::cellindex[c]];
     int neid = vs.neid[i];
@@ -548,8 +587,12 @@ hyperpoint farcorner(cell *c, int i, int which) {
     if(which == 0) return rel * vs2.vertices[(spin+2)%cor2];
     if(which == 1) return rel * vs2.vertices[(spin+cor2-1)%cor2];
     }
+  #endif
+  #if CAP_BT
   if(binarytiling)
     return nearcorner(c, (i+which) % c->type); // lazy
+  #endif
+  #if CAP_ARCM
   if(archimedean) {
     if(PURE) {
       auto &ac = arcm::current;
@@ -574,6 +617,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
       return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -mul : 2*mul);
       }
     }
+  #endif
   
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
   }
@@ -586,8 +630,12 @@ hyperpoint midcorner(cell *c, int i, ld v) {
 
 hyperpoint get_warp_corner(cell *c, int cid) {
   // midcorner(c, cid, .5) but sometimes easier versions exist
+  #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, 2);
+  #endif
+  #if CAP_IRR || CAP_ARCM
   if(IRREGULAR || archimedean) return midcorner(c, cid, .5);
+  #endif
   return ddspin(c,cid,M_PI/S7) * xpush0(tessf/2);
   }
   

@@ -3475,11 +3475,15 @@ void destroyBoats(cell *c) {
   }
 
 transmatrix master_relative(cell *c, bool get_inverse) {
-  if(IRREGULAR) {
+  if(0); 
+  #if CAP_IRR
+  else if(IRREGULAR) {
     int id = irr::cellindex[c];
     ld alpha = 2 * M_PI / S7 * irr::periodmap[c->master].base.spin;
     return get_inverse ? irr::cells[id].rpusher * spin(-alpha-master_to_c7_angle()): spin(alpha + master_to_c7_angle()) * irr::cells[id].pusher;
     }
+  #endif
+  #if CAP_GP
   else if(GOLDBERG) {
     if(c == c->master->c7) {
       return spin((get_inverse?-1:1) * master_to_c7_angle());
@@ -3491,6 +3495,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       return T;
       }
     }
+  #endif
   else if(BITRUNCATED && !euclid) {
     for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
       return (get_inverse?invhexmove:hexmove)[d];

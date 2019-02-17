@@ -2,7 +2,7 @@
 namespace hr {
 
 namespace binary {
-
+#if CAP_BT
   enum bindir {
     bd_right = 0,
     bd_up_right = 1,
@@ -215,6 +215,6 @@ auto bt_config = addHook(hooks_args, 0, [] () {
   return 1;
   });
 #endif
-
+#endif
   }
 }

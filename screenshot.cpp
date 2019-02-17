@@ -603,12 +603,14 @@ void apply() {
     case maRotation:
       View = spin(2 * M_PI * t / period) * View;
       break;
+    #if CAP_BT
     case maParabolic:
       reflect_view();
       View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * binary::parabolic(parabolic_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
         spin(-movement_angle * M_PI / 180) * View;
       moved();
       break;
+    #endif
     case maCircle: {
       if(masterless) centerover = rotation_center_c;
       else viewctr = rotation_center_h;

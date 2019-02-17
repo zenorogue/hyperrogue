@@ -6,6 +6,7 @@ namespace hr {
 
 namespace arcm {
 
+#if CAP_ARCM
 #define SDEBUG(x) if(debug_geometry) { x; fflush(stdout); }
 
 static const int sfPH = 1;
@@ -1213,6 +1214,7 @@ int valence() {
   return total / isize(current.faces);
   }
  
+#endif
   }
 
 }

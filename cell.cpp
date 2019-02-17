@@ -63,7 +63,9 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.alt = NULL;
   h.distance = 0;
   mvar = variation;
-  if(binarytiling) {
+  if(0);
+  #if CAP_BT
+  else if(binarytiling) {
     #if DEBUG_BINARY_TILING
     binary::xcode.clear();
     binary::rxcode.clear();
@@ -73,8 +75,11 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     h.zebraval = 0,
     h.c7 = newCell(6, origin);
     }
+  #endif
+  #if CAP_IRR
   else if(IRREGULAR)
     irr::link_start(origin);
+  #endif
   else
     h.c7 = newCell(S7, origin);
   }
@@ -205,12 +210,14 @@ struct hrmap_spherical : hrmap {
         }
       }
 
+    #if CAP_IRR
     if(IRREGULAR) {
       irr::link_start(dodecahedron[0]);
       for(int i=0; i<spherecells(); i++)
         for(int j=0; j<S7; j++)
           irr::may_link_next(dodecahedron[i], j);
       }
+    #endif
     }
 
   heptagon *getOrigin() { return dodecahedron[0]; }
@@ -1052,12 +1059,14 @@ struct hrmap_quotient : hrmap {
         allh[i]->move[j]->alt = createStep(allh[i]->alt, j); */
       }    
     
+    #if CAP_IRR
     if(IRREGULAR) {
       irr::link_start(allh[0]);
       for(int i=0; i<TOT; i++)
         for(int j=0; j<S7; j++)
           irr::may_link_next(allh[i], j);
       }
+    #endif
 
     celllister cl(gamestart(), 100, 100000000, NULL);
     celllist = cl.lst;
@@ -1097,9 +1106,12 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->move(d)) return c->move(d);
+  #if CAP_IRR
   else if(IRREGULAR) {
     irr::link_cell(c, d);
     }
+  #endif
+  #if CAP_GP
   else if(GOLDBERG) {
     gp::extend_map(c, d);
     if(!c->move(d)) {
@@ -1107,6 +1119,8 @@ cell *createMov(cell *c, int d) {
       exit(1);
       }
     }
+  #endif
+  #if CAP_ARCM
   else if(archimedean && PURE) {
     if(arcm::id_of(c->master) < arcm::current.N * 2) {
       heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
@@ -1125,6 +1139,7 @@ cell *createMov(cell *c, int d) {
       c->c.connect(d,c,d,false);
       }
     }
+  #endif
   else if(archimedean || PURE) {
     heptagon *h2 = createStep(c->master, d);
     c->c.connect(d, h2->c7,c->master->c.spin(d),false);
@@ -1212,8 +1227,12 @@ void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
+  #if CAP_CRYSTAL
   else if(geometry == gCrystal) currentmap = crystal::new_map();
+  #endif
+  #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
+  #endif
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
@@ -1262,7 +1281,10 @@ void clearHexes(heptagon *at) {
     delete at->cdata;
     at->cdata = NULL;
     }
-  if(IRREGULAR) irr::clear_links(at);
+  if(0);
+  #if CAP_IRR
+  else if(IRREGULAR) irr::clear_links(at);
+  #endif
   else if(at->c7) subcell(at->c7, clearcell);
   }
 
@@ -1381,9 +1403,13 @@ int celldist(cell *c) {
   if(masterless)
     return eudist(decodeId(c->master));
   if(sphere || binarytiling || geometry == gCrystal) return celldistance(c, currentmap->gamestart());
+  #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
+  #endif
   if(archimedean || ctof(c)) return c->master->distance;
+  #if CAP_GP
   if(GOLDBERG) return gp::compute_dist(c, celldist);
+  #endif
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -1403,16 +1429,24 @@ int celldistAlt(cell *c) {
     tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);
     }
+  #if CAP_BT
   if(binarytiling) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
+  #endif
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) 
     return crystal::dist_alt(c);
+  #endif
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
   if(!c->master->alt) return 0;
+  #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, true);
+  #endif
   if(ctof(c)) return c->master->alt->distance;
+  #if CAP_GP
   if(GOLDBERG) return gp::compute_dist(c, celldistAlt);
+  #endif
   int dx[MAX_S3]; dx[0] = 0;
   for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;
@@ -1755,7 +1789,9 @@ cell *heptatdir(cell *c, int d) {
 int heptdistance(heptagon *h1, heptagon *h2) {
   // very rough distance
   int d = 0;
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(h1->c7, h2->c7);
+  #endif
   while(true) {
     if(h1 == h2) return d;
     for(int i=0; i<S7; i++) if(h1->move(i) == h2) return d + 1;
@@ -1766,7 +1802,9 @@ int heptdistance(heptagon *h1, heptagon *h2) {
   }
 
 int heptdistance(cell *c1, cell *c2) {
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(c1, c2);
+  #endif
   if(!hyperbolic || quotient) return celldistance(c1, c2);
   else return heptdistance(c1->master, c2->master);
   }
@@ -1802,7 +1840,9 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::precise_distance(c1, c2);
+  #endif
   
   if(masterless || archimedean || quotient) {
     
@@ -1826,7 +1866,9 @@ int celldistance(cell *c1, cell *c2) {
   }
 
 vector<cell*> build_shortest_path(cell *c1, cell *c2) {
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::build_shortest_path(c1, c2);
+  #endif
   vector<cell*> p;
   if(euclid) {
     using namespace hyperpoint_vec;

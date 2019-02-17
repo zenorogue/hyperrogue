@@ -7264,12 +7264,14 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid  == 2 && !tooeasy) {
     addMessage(XLAT("\"The Holy Grail is in the center of the Round Table.\""));
     }
+  #if CAP_CRYSTAL
   else if(msgid == 3 && geometry == gCrystal) {
     if(crystal::pure())
       addMessage(XLAT("\"Each piece of the Round Table is exactly %1 steps away from the Holy Grail.\"", its(roundTableRadius(c2))));
     else
       addMessage(XLAT("\"According to Merlin, the Round Table is a perfect Euclidean sphere in %1 dimensions.\"", its(ginf[gCrystal].sides/2)));
     }
+  #endif
   else if(msgid == 3 && !peace::on && in_full_game()) {
     addMessage(XLAT("\"I enjoy watching the hyperbug battles.\""));
     }
@@ -7287,8 +7289,11 @@ void knightFlavorMessage(cell *c2) {
     }
   else if(msgid == 8 && sizes_known() && !tactic::on) {
     string s = "";
-    if(geometry == gCrystal)
+    if(0) ;
+    #if CAP_CRYSTAL
+    else if(geometry == gCrystal)
       s = crystal::get_table_boundary();
+    #endif
     else if(!quotient)
       s = expansion.get_descendants(rad).get_str(100);
     if(s == "") { msgid++; goto retry; }
@@ -7296,8 +7301,11 @@ void knightFlavorMessage(cell *c2) {
     }
   else if(msgid == 9 && sizes_known() && !tactic::on) {
     string s = "";
-    if(geometry == gCrystal)
+    if(0);
+    #if CAP_CRYSTAL
+    else if(geometry == gCrystal)
       s = crystal::get_table_volume();
+    #endif
     else if(!quotient)
       s = expansion.get_descendants(rad-1, expansion.diskid).get_str(100);
     if(s == "") { msgid++; goto retry; }

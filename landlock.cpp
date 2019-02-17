@@ -1161,16 +1161,20 @@ land_validity_t& land_validity(eLand l) {
     /* laCamelot, laCaribbean -> they are OK but not recommended */
     }
   
+  #if CAP_ARCM
   if(archimedean) {
     if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
     // horocycles not implemented
     if(isCyclic(l)) return not_implemented;
     }
+  #endif
   
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) {
     if(l == laCamelot) return interesting;
     if(isCrossroads(l)) return full_game;
     }
+  #endif
 
   // Random Pattern allowed only in some specific lands
   if(randomPatternsMode && !isRandland(l))
@@ -1253,11 +1257,13 @@ land_validity_t& land_validity(eLand l) {
   if(isWarped(l) && a4 && GOLDBERG)
     return dont_work;
   
+  #if CAP_IRR
   if((isWarped(l) || l == laDual) && IRREGULAR && !irr::bitruncations_performed)
     return dont_work;
   
   if(IRREGULAR && among(l, laPrairie, laMirror, laMirrorOld))
     return dont_work;
+  #endif
     
   if(archimedean && l == laPrairie) return dont_work;
 

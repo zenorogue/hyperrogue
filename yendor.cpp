@@ -1024,18 +1024,22 @@ int modecode() {
   // daily/Yendor/Tactics/standard are saved separately, but are using the same codes (Daily uses no code)
   // randompattern never records its scores
   // no specifics of the advanced configuration of torus/fieldquotient currently recorded
-  
+
+  #if CAP_GP  
   if(GOLDBERG) { 
     mct += (1 << 19);
     auto loc = gp::human_representation(gp::param);
     mct += loc.first << 21; // 4 bits
     mct += loc.second << 25; // 4 bits
     }
+  #endif
   
+  #if CAP_IRR
   if(IRREGULAR) {
     mct += (1 << 20);
     mct += irr::density_code() << 21; // 8 bits
     }
+  #endif
   
   if(DUAL) {
     mct += (1 << 19);
@@ -1065,17 +1069,21 @@ int modecode() {
     mct += ll(fgeomextras[current_extra].current_prime_id) << 37;
     }
   
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) {
     mct += ll(ginf[geometry].sides) << 29;
     mct += ll(ginf[geometry].vertex) << 37;
     }
+  #endif
   
+  #if CAP_ARCM
   if(geometry == gArchimedean) {
     unsigned res = 7;
     for(char c: arcm::current.symbol) res = res * 157 + c;
     mct += ll(res) << 29;
     if(PURE) mct ^= (1<<29);
     }
+  #endif
   
   return mct;
   }

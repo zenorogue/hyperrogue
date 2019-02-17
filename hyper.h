@@ -156,7 +156,11 @@ void addMessage(string s, char spamtype = 0);
 #define STDVAR (PURE || BITRUNCATED)
 #define NONSTDVAR (!STDVAR)
 
+#if CAP_ARCM
 #define VALENCE (BITRUNCATED ? 3 : archimedean ? arcm::valence() : S3)
+#else
+#define VALENCE (BITRUNCATED ? 3 : S3)
+#endif
 
 #define NUMWITCH 7
 
@@ -575,7 +579,12 @@ struct cell : gcell {
 
 namespace arcm { int degree(heptagon *h); int valence(); }
 
-int heptagon::degree() { if(archimedean) return arcm::degree(this); else return S7; }
+int heptagon::degree() { 
+  #if CAP_ARCM
+  if(archimedean) return arcm::degree(this); else 
+  #endif
+  return S7; 
+  }
 
 typedef walker<heptagon> heptspin;
 typedef walker<cell> cellwalker;
@@ -2974,6 +2983,7 @@ struct hrmap_hyperbolic : hrmap {
   };
 
 namespace irr { 
+  #if CAP_IRR
   extern ld density;
   extern ld quality;
   extern int cellcount;
@@ -2994,6 +3004,7 @@ namespace irr {
   unsigned char density_code();
   int celldist(cell *c, bool alts);
   extern int bitruncations_requested, bitruncations_performed;
+  #endif
   }
 
 extern hrmap *currentmap;
@@ -3549,21 +3560,22 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, st
 
 namespace gp {
   typedef pair<int, int> loc;
+
+  loc operator+(loc e1, loc e2);
+  loc operator-(loc e1, loc e2);
+  loc operator*(loc e1, loc e2);
+  extern loc eudir(int dir);
+
+  #if CAP_GP
   void compute_geometry();
   void extend_map(cell *c, int d);  
   extern loc param;
-  extern loc eudir(int dir);
   extern int area;
-  extern string operation_name();
   extern int pseudohept_val(cell *);
   extern int last_dir(cell *c);
   extern void configure();
   extern ld alpha;
   extern transmatrix Tf[MAX_EDGE][32][32][6];
-
-  loc operator+(loc e1, loc e2);
-  loc operator-(loc e1, loc e2);
-  loc operator*(loc e1, loc e2);
 
   struct local_info {
     int last_dir;
@@ -3579,13 +3591,14 @@ namespace gp {
 
   int compute_dist(cell *c, int master_function(cell*));
   
-  int dist_1(), dist_2(), dist_3();
-
   int solve_triangle(int dmain, int d0, int d1, loc at);
 
-  array<heptagon*, 3> get_masters(cell *c);
   hyperpoint get_master_coordinates(cell *c);
   loc univ_param();
+  #endif
+  int dist_1(), dist_2(), dist_3();
+  array<heptagon*, 3> get_masters(cell *c);
+  extern string operation_name();
   }
 
 int get_sightrange();
@@ -3927,7 +3940,9 @@ eOrbLandRelation getOLR(eItem it, eLand l);
 
 struct plainshape;
 void clear_plainshape(plainshape& gsh);
+#if CAP_GP
 void build_plainshape(plainshape& gsh, gp::local_info& li);
+#endif
 
 namespace gp {
   void clear_plainshapes();
@@ -4127,14 +4142,17 @@ bool saved_tortoise_on(cell *c);
 #define PRING(i) for(double i=0; i<=S84+1e-6; i+= pow(.5, vid.linequality))
 #define REVPRING(i) for(double i=S84; i>=-1e-6; i-=pow(.5, vid.linequality))
 
+#if CAP_BT
 void horopoint(ld y, ld x);
 
 namespace binary {
   heptagon *createStep(heptagon *parent, int d);
   transmatrix parabolic(ld u);
   }
+#endif
 
 namespace arcm {
+  #if CAP_ARCM
 
   struct archimedean_tiling {
   
@@ -4208,9 +4226,11 @@ namespace arcm {
   void draw();
   void create_adjacent(heptagon*, int);
   int fix(heptagon *h, int spin);
+  #endif
   }
 
 namespace crystal {
+  #if CAP_CRYSTAL
   static const int MAXDIM = 7;
   typedef array<int, MAXDIM> coord;
   static const coord c0 = {};
@@ -4248,6 +4268,7 @@ namespace crystal {
   void may_place_compass(cell *c);
   void centerrug(ld aspd);
   vector<cell*> build_shortest_path(cell *c1, cell *c2);
+  #endif
   }
 
 hyperpoint get_warp_corner(cell *c, int cid);

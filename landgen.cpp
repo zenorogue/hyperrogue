@@ -495,8 +495,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else
             v = 6;
           }
+        #if CAP_ARCM
         else if(archimedean && arcm::current.have_line)
           v = arcm::linespattern(c) ? 24 : 16;
+        #endif
         else if(fulltorus || hyperbolic_not37 || quotient || archimedean) {
           v = hrand(100) < 25 ? 24 : 16;
           }
@@ -557,16 +559,20 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laZebra:
       if(d==8) {
         if(fulltorus) ;
+        #if CAP_ARCM
         else if(archimedean && arcm::current.have_line)
-          c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;        
+          c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;
+        #endif
         else if(euclid && !archimedean) {
           int x,y;
           tie(x,y) = cell_to_pair(c);
           if(y&1) c->wall = waTrapdoor;
           else c->wall = waNone;
           }
+        #if CAP_ARCM
         else 
           if(archimedean) c->wall = hrand(2) ? waTrapdoor : waNone;
+        #endif
         else
           c->wall = (randomPatternsMode ? RANDPAT : (zebra40(c)&2)) ? waTrapdoor : waNone;
         }
@@ -581,8 +587,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laWineyard:
       if(d==8) {
         if(fulltorus) ;
+        #if CAP_ARCM
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
+        #endif
         else if(euclid && !archimedean) {
           int x,y;
           tie(x,y) = cell_to_pair(c);
@@ -2431,7 +2439,10 @@ void setdist(cell *c, int d, cell *from) {
 #else
     if(true) {
 #endif
-      if(geometry == gCrystal) crystal::set_land(c);
+      if(0);
+      #if CAP_CRYSTAL
+      else if(geometry == gCrystal) crystal::set_land(c);
+      #endif
       else if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }
@@ -2504,8 +2515,10 @@ void setdist(cell *c, int d, cell *from) {
       placeCrossroadOrbs(c);
     else
       placeLocalOrbs(c);
+    #if CAP_CRYSTAL
     if(geometry == gCrystal && c->land != laMinefield)
       crystal::may_place_compass(c);
+    #endif
     }
 
   if(PURE && c->wall == waMirrorWall && c->land == laMirror)

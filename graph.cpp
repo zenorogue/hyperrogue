@@ -180,7 +180,9 @@ void drawSpeed(const transmatrix& V) {
   }
 
 int ctof(cell *c) {
+  #if CAP_IRR
   if(IRREGULAR) return irr::ctof(c);
+  #endif
   if(PURE) return 1;
   // if(euclid) return 0;
   if(!c) return 1;
@@ -257,7 +259,9 @@ void drawLightning(const transmatrix& V) {
   }
 
 ld displayspin(cell *c, int d) {
-  if(archimedean) {
+  if(0);
+  #if CAP_ARCM
+  else if(archimedean) {
     if(PURE) {
       auto& t1 = arcm::current.get_triangle(c->master, d-1);
       return -(t1.first + M_PI / c->type);
@@ -271,6 +275,8 @@ ld displayspin(cell *c, int d) {
       return -t1.first;
       }
     }
+  #endif
+  #if CAP_IRR
   else if(IRREGULAR) {
     auto id = irr::cellindex[c];
     auto& vs = irr::cells[id];
@@ -278,11 +284,14 @@ ld displayspin(cell *c, int d) {
     auto& p = vs.jpoints[vs.neid[d]];
     return -atan2(p[1], p[0]);
     }
+  #endif
+  #if CAP_BT
   else if(binarytiling) {
     if(d == NODIR) return 0;
     if(d == c->type-1) d++;
     return -(d+2)*M_PI/4;
     }
+  #endif
   else if(masterless)
     return - d * 2 * M_PI / c->type;
   else
@@ -675,12 +684,15 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
   
   else if(it == itCompass) {
     transmatrix V2;
+    #if CAP_CRYSTAL
     if(geometry == gCrystal) {
       if(crystal::compass_probability <= 0) return true;
       if(cwt.at->land == laCamelot && celldistAltRelative(cwt.at) < 0) crystal::used_compass_inside = true;
       V2 = V * spin(crystal::compass_angle() + M_PI);
       }
-    else {
+    else
+    #endif
+    if(1) {
       cell *c1 = c ? findcompass(c) : NULL;
       if(c1) {
         transmatrix P = ggmatrix(c1);
@@ -3277,14 +3289,22 @@ bool noAdjacentChasms(cell *c) {
 
 // does the current geometry allow nice duals
 bool has_nice_dual() {
+  #if CAP_IRR
   if(IRREGULAR) return irr::bitruncations_performed > 0;
+  #endif
+  #if CAP_ARCM
   if(archimedean) return geosupport_football() >= 2;
+  #endif
   if(binarytiling) return false;
   if(BITRUNCATED) return true;
   if(a4) return false;
   if((S7 & 1) == 0) return true;
   if(PURE) return false;
+  #if CAP_GP
   return (gp::param.first + gp::param.second * 2) % 3 == 0;
+  #else
+  return false;
+  #endif
   }
 
 // does the current geometry allow nice duals
@@ -3381,8 +3401,10 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t co
   transmatrix V2 = V * ddspin(c, i);
  
   if(binarytiling || archimedean || NONSTDVAR) {
+    #if CAP_ARCM
     if(archimedean && !PURE)
       i = (i + arcm::parent_index_of(c->master)/DUALMUL + MODFIXER) % c->type;
+    #endif
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
@@ -5029,7 +5051,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int prec = sphere ? 3 : 1;
       prec += vid.linequality;
       
-      if(binarytiling) {
+      if(0);
+      #if CAP_BT
+      else if(binarytiling) {
         ld yx = log(2) / 2;
         ld yy = yx;
         ld xx = 1 / sqrt(2)/2;
@@ -5044,6 +5068,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         horizontal(yy, xx, -xx, 8, binary::bd_up);
         horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
         }
+      #endif
       else if(isWarped(c) && has_nice_dual()) {
         if(pseudohept(c)) for(int t=0; t<c->type; t++)
           queueline(V * get_warp_corner(c, t%c->type),
@@ -5058,18 +5083,23 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                     gridcolor(c, c->move(t)), prec);
         }
       }
+    #endif
 
     if(!euclid) {
       bool usethis = false;
       double spd = 1;
       int side = 0;
       
-      if(binarytiling && conformal::do_rotate >= 2) {
+      if(0);
+      
+      #if CAP_BT
+      else if(binarytiling && conformal::do_rotate >= 2) {
         if(!straightDownSeek || c->master->distance < straightDownSeek->master->distance) {
           usethis = true;
           spd = 1;
           }
         }
+      #endif
       
       else if(isGravityLand(cwt.at->land) && cwt.at->land != laMountain) {
         if(cwt.at->land == laDungeon) side = 2;
@@ -5560,10 +5590,14 @@ void drawthemap() {
   profile_start(1);
   if(masterless)
     drawEuclidean();
+  #if CAP_BT
   else if(binarytiling)
     binary::draw();
+  #endif
+  #if CAP_ARCM
   else if(archimedean)
     arcm::draw();
+  #endif
   else
     drawStandard();
   drawWormSegments();

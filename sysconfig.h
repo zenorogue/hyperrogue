@@ -443,3 +443,27 @@ union SDL_Event;
 #endif
 #endif
 
+#ifndef CAP_GEOMETRY
+#define CAP_GEOMETRY (!(ISMINI))
+#endif
+
+#ifndef CAP_IRR
+#define CAP_IRR CAP_GEOMETRY
+#endif
+
+#ifndef CAP_GP
+#define CAP_GP CAP_GEOMETRY
+#endif
+
+#ifndef CAP_ARCM
+#define CAP_ARCM CAP_GEOMETRY
+#endif
+
+#ifndef CAP_CRYSTAL
+#define CAP_CRYSTAL CAP_GEOMETRY
+#endif
+
+#ifndef CAP_BT
+#define CAP_BT CAP_GEOMETRY
+#endif
+

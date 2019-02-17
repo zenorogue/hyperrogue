@@ -261,7 +261,9 @@ namespace mapstream {
       if(geometry == gCrystal && vernum >= 10504) {
         int sides;
         f.read(sides);
+        #if CAP_CRYSTAL
         crystal::set_crystal(sides);
+        #endif
         if(sides == 8) {
           int vertices;
           eVariation v = variation;

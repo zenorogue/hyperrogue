@@ -1620,7 +1620,9 @@ transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist);
+  #if CAP_ARCM
   if(archimedean) tlength = arcm::current.scale();
+  #endif
   int max = int(20 * pow(2, vid.linequality));
   for(ld i=0; i<=max; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
@@ -1858,7 +1860,9 @@ void buildpolys() {
   symmetriesAt.clear();
   allshapes.clear();
   geom3::compute();
+  #if CAP_GP
   gp::clear_plainshapes();
+  #endif
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
@@ -1957,7 +1961,10 @@ void buildpolys() {
     for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*7/8) * C0);
     }
 
-  if(binarytiling) {
+  if(0);
+  
+  #if CAP_BT
+  else if(binarytiling) {
     for(int i=0; i<2; i++) {
       bshape(shWall[i], PPR::WALL);
       horopoint(log(2)/8, .1);
@@ -1965,6 +1972,7 @@ void buildpolys() {
       horopoint(-log(2)/8, 0);
       }
     }
+  #endif
 
   else {
     bshape(shWall[0], PPR::WALL);
@@ -2212,8 +2220,11 @@ void buildpolys() {
   
   // hand-drawn shapes
   
-  if(archimedean)
+  if(0);
+  #if CAP_ARCM
+  else if(archimedean)
     shFullFloor.configure(arcm::current.scale()/2, arcm::current.scale()/2);
+  #endif
   else
     shFullFloor.configure(hexvdist, rhexf);
   shFloor.configure(floorrad0, floorrad1);

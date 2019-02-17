@@ -74,15 +74,19 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard, fixdistance);
   if(binarytiling || archimedean) return h;
   if(parent->c7) {
+    #if CAP_IRR
     if(IRREGULAR)
       irr::link_next(parent, d);
     else
+    #endif
       h->c7 = newCell(S7, h);
     h->rval0 = h->rval1 = 0;
     h->emeraldval = emerald_heptagon(parent->emeraldval, d);
     h->zebraval = zebra_heptagon(parent->zebraval, d);
+    #if CAP_FIELD
     if(&currfp != &fieldpattern::fp_invalid)
       h->fieldval = currfp.connections[fieldpattern::btspin(parent->fieldval, d)];
+    #endif
     if(a38) 
       h->fiftyval = fifty_38(parent->fiftyval, d);  
     else if(parent->s == hsOrigin)
@@ -125,6 +129,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
           );
       }
     else if(parent->s == hsOrigin) h->distance = parent->distance + gp::dist_2();
+    #if CAP_GP
     else if(S3 == 4 && GOLDBERG && h->c.spin(0) == S7-2 && h->move(0)->c.spin(0) >= S7-2 && h->move(0)->move(0)->s != hsOrigin) {
       heptspin hs(h, 0);
       hs += wstep;
@@ -148,26 +153,28 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     else if(S3 == 4 && GOLDBERG && h->c.spin(0) >= 2 && h->c.spin(0) <= S7-2) {
       h->distance = parent->distance + gp::dist_2();
       }
+    #endif
     else if(h->c.spin(0) == S7-2) {
-      if(!GOLDBERG)
-        h->distance = parent->distance + gp::dist_1();
-      else {
+      #if CAP_GP
+      if(GOLDBERG) {
         int d0 = parent->distance;
         int d1 = createStep(parent, S7-1)->distance;
         int dm = createStep(parent, 0)->distance;
         h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
-        }
+        } else
+      #endif
+      h->distance = parent->distance + gp::dist_1();
       }
     else if(h->c.spin(0) == S7-3 && h->move(0)->s == hsB) {
-      if(!GOLDBERG) {
-        h->distance = createStep(h->move(0), (h->c.spin(0)+2)%S7)->distance + gp::dist_3();
-        }
-      else {
+      #if CAP_GP
+      if(GOLDBERG) {
         int d0 = parent->distance;
         int d1 = createStep(parent, S7-2)->distance;
         int dm = createStep(parent, S7-1)->distance;
         h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
-        }
+        } else
+      #endif
+      h->distance = createStep(h->move(0), (h->c.spin(0)+2)%S7)->distance + gp::dist_3();
       }
     else if(h->c.spin(0) == S7-1 && S3 == 4 && GOLDBERG) {
       h->distance = parent->distance + gp::dist_1();
@@ -212,14 +219,20 @@ heptagon *createStep(heptagon *h, int d) {
   d = h->c.fix(d);
   if(!h->move(d))
     callhooks(hooks_createStep, h, d);
+  #if CAP_CRYSTAL
   if(!h->move(d) && geometry == gCrystal) 
     crystal::create_step(h, d);
+  #endif
+  #if CAP_BT
   if(!h->move(d) && binarytiling) 
     return binary::createStep(h, d);
+  #endif
+  #if CAP_ARCM
   if(!h->move(d) && archimedean) {
     arcm::create_adjacent(h, d); 
     return h->move(d);
     }
+  #endif
   if(!h->move(0) && h->s != hsOrigin && !binarytiling && (geometry != gCrystal)) {
     // cheating: 
     int pard=0;

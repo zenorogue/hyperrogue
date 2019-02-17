@@ -5,7 +5,7 @@
 namespace hr {
 
 namespace crystal {
-
+#if CAP_CRYSTAL
 // Crystal can be bitruncated either by changing variation to bitruncated.
 // In case of the 4D Crystal, the standard HyperRogue bitruncation becomes
 // confused by having both the original and new vertices of degree 8.
@@ -1258,7 +1258,7 @@ void may_place_compass(cell *c) {
   if(hrandf() < compass_probability)
     c->item = itCompass;
   }
-
+#endif
 }
 
 }

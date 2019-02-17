@@ -391,8 +391,10 @@ struct debugScreen {
         dialog::addSelItem("pathdist", its(what->pathdist), 0);
         dialog::addSelItem("celldistAlt", eubinary ? its(celldistAlt(what)) : "--", 0);
         dialog::addSelItem("temporary", its(what->listindex), 0);
+        #if CAP_GP
         if(GOLDBERG)
           dialog::addSelItem("whirl", sprint(gp::get_local_info(what).relative), 0);
+        #endif
         #if CAP_RACING
         if(racing::on) racing::add_debug(what);
         #endif
@@ -404,8 +406,10 @@ struct debugScreen {
           "wall parameter");
           });
         dialog::addSelItem("item", dnameof(what->item), 0);
+        #if CAP_ARCM
         if(archimedean)
           dialog::addSelItem("ID", its(arcm::id_of(what->master)), 0);    
+        #endif
         dialog::addBreak(50);
         dialog::addSelItem("monster", dnameof2(what->monst, what->mondir), 'm');
         dialog::add_action([what] () {

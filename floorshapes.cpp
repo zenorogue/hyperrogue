@@ -196,6 +196,7 @@ void bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
   hpcpush(hpc[last->s]);
   }
 
+#if CAP_BT
 void horopoint(ld y, ld x) {
   hpcpush(get_horopoint(y, x));
   }
@@ -213,12 +214,14 @@ void horoline(ld y, ld x1, ld x2, cell &fc, int c) {
   for(int a=0; a<=16; a++)
     horopoint(y, x1 + (x2-x1) * a / 16., fc, c);
   }
+#endif
 
 void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
   
   fsh.b.resize(2);
   fsh.shadow.resize(2);
 
+  #if CAP_BT
   if(binarytiling) {
     bshape(fsh.b[id], fsh.prio);
     
@@ -251,6 +254,7 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
 
     return;
     }
+  #endif
   
   bshape(fsh.b[id], fsh.prio);
   for(int t=0; t<=sides; t++)
@@ -269,7 +273,9 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
     }
   }
 
+#if CAP_IRR
 namespace irr { void generate_floorshapes(); }
+#endif
 
 template<class T> void sizeto(T& t, int n) {
   if(isize(t) <= n) t.resize(n+1);
@@ -471,7 +477,9 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
 void generate_floorshapes() {
 
-  if(IRREGULAR) {
+  if(0);
+  #if CAP_IRR
+  else if(IRREGULAR) {
     printf("generating irregular floorshapes...\n");
     cell model;
 
@@ -489,9 +497,11 @@ void generate_floorshapes() {
 
     printf("done\n");
     }
+  #endif
     
   else if(GOLDBERG) { /* will be generated on the fly */ }
   
+  #if CAP_ARCM
   else if(archimedean) {
     heptagon master;
     cell model;
@@ -511,6 +521,7 @@ void generate_floorshapes() {
         generate_floorshapes_for(i, &model, 0, 0);
       }
     }
+  #endif
   
   else {
     cell model;
@@ -519,6 +530,7 @@ void generate_floorshapes() {
     }
   }
 
+#if CAP_GP
 namespace gp {
   int pshid[3][8][32][32][8];
   int nextid;
@@ -575,6 +587,7 @@ namespace gp {
     return id;
     }
   }
+#endif
 
 qfloorinfo qfi;
 
@@ -611,10 +624,13 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
 
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
   if(!c) queuepolyat(V, shv[0], col, prio);
+  #if CAP_GP
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);
     queuepolyat(V, shv[id], col, prio);
     }
+  #endif
+  #if CAP_IRR
   else if(IRREGULAR) {
     int id = irr::cellindex[c];
     if(id < 0 || id >= isize(shv)) {
@@ -622,9 +638,12 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, c
       }
     queuepolyat(V, shv[id], col, prio);
     }
+  #endif
+  #if CAP_ARCM
   else if(archimedean) {
     queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
+  #endif
   else if((euclid || GOLDBERG) && ishex1(c)) 
     queuepolyat(V * pispin, shv[0], col, prio);
   else if(!(S7&1) && PURE) {
@@ -697,5 +716,5 @@ auto floor_hook =
     else return 1;
     });
 #endif
-
+#endif
 }

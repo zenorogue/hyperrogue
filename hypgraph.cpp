@@ -693,20 +693,35 @@ bool confusingGeometry() {
   }
 
 ld master_to_c7_angle() {
-  return (!BITRUNCATED && !binarytiling && !archimedean) ? M_PI + gp::alpha : 0;
+  #if CAP_GP
+  auto alpha = gp::alpha;
+  #else
+  auto alpha = 0;
+  #endif  
+  return (!BITRUNCATED && !binarytiling && !archimedean) ? M_PI + alpha : 0;
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
+  #if CAP_IRR
   if(IRREGULAR)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
+  #endif
+  #if CAP_ARCM
   if(archimedean) return V * spin(-arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
+  #endif
+  #if CAP_BT
   if(binarytiling) return V;
+  #endif
   return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
+  #if CAP_BT
   if(binarytiling) return V;
+  #endif
+  #if CAP_ARCM
   if(archimedean) return V * spin(arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
+  #endif
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
@@ -748,6 +763,7 @@ bool in_smart_range(const transmatrix& T) {
     y + 2 * max(y1, y2) > current_display->ytop;
   }
 
+#if CAP_GP
 namespace gp {
 
 /*
@@ -807,6 +823,7 @@ void drawrec(cell *c, const transmatrix& V) {
     return res;
     }
   }
+#endif
 
 vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 
@@ -831,10 +848,15 @@ void drawStandard() {
     
     bool draw = false;
     
-    if(GOLDBERG) {
+    if(0) ;
+    
+    #if CAP_GP    
+    else if(GOLDBERG) {
       draw = gp::drawrec(c, actualV(hs, V1));
       }
+    #endif
     
+    #if CAP_IRR    
     else if(IRREGULAR) {
       auto& hi = irr::periodmap[hs.at];
       transmatrix V0 = actualV(hs, V1);
@@ -847,6 +869,7 @@ void drawStandard() {
           drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher, 0, false);
         }
       }
+    #endif
     
     else {
       if(do_draw(c, V1)) {
@@ -1000,8 +1023,10 @@ void spinEdge(ld aspd) {
 
 void centerpc(ld aspd) { 
   
+  #if CAP_CRYSTAL
   if(geometry == gCrystal)
     crystal::centerrug(aspd);
+  #endif
     
   #if CAP_RACING
   if(racing::on && !racing::standard_centering) {
@@ -1069,12 +1094,21 @@ void optimizeview() {
   
   transmatrix TB = Id;
   
-  if(binarytiling || archimedean) {
+  if(0) ;
+
+  #if CAP_BT || CAP_ARCM
+  else if(binarytiling || archimedean) {
     turn = -1, best = View[2][2];
     for(int i=0; i<viewctr.at->c7->type; i++) {
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
-      transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.at) : arcm::relative_matrix(h2, viewctr.at);
+      transmatrix T;
+      #if CAP_BT
+      if(binarytiling) T = binary::relative_matrix(h2, viewctr.at);
+      #endif
+      #if CAP_ARCM
+      if(archimedean)  T = arcm::relative_matrix(h2, viewctr.at);
+      #endif
       hyperpoint H = View * tC0(T);
       ld quality = euclid ? hdist0(H) : H[2];
       if(quality < best) best = quality, turn = i1, TB = T;
@@ -1085,6 +1119,7 @@ void optimizeview() {
       viewctr.at = createStep(viewctr.at, turn);
       }
     }
+  #endif
   
   else {
   

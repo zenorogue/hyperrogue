@@ -36,7 +36,9 @@ int roundTableRadius(cell *c) {
   }
 
 int celldistAltRelative(cell *c) {
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::dist_relative(c);
+  #endif
   if(euwrap) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
@@ -995,8 +997,12 @@ bool horo_ok() {
   }
 
 bool gp_wall_test() {
+  #if CAP_GP
   if(GOLDBERG) return hrand(gp::dist_3()) == 0;
+  #endif
+  #if CAP_IRR
   if(IRREGULAR) return hrand(irr::cellcount * 3) < isize(irr::cells_of_heptagon);
+  #endif
   return true;
   }
   

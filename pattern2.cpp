@@ -6,7 +6,9 @@ namespace hr {
 
 int gp_threecolor() {
   if(!GOLDBERG) return 0;
+  #if CAP_GP
   if(S3 == 3 && (gp::param.first - gp::param.second) % 3 == 0) return 2;
+  #endif
   return 1;
   }
 
@@ -38,21 +40,27 @@ bool ishept(cell *c) {
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
+  #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && !pseudohept(c->move(0));
+  #endif
   else return c->type != S6;
   }
 
 bool ishex2(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
+  #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
+  #endif
   else return c->type != S6;
   }
 
 int chessvalue(cell *c) {
+  #if CAP_ARCM
   if(archimedean) 
     return arcm::chessvalue(c);
   else
+  #endif
     return celldist(c) & 1;
   }
 
@@ -342,8 +350,12 @@ pair<int, bool> fieldval(cell *c) {
 int fieldval_uniq(cell *c) {
   if(sphere) {
     if(archimedean) return c->master->fiftyval;
+    #if CAP_IRR
     else if(IRREGULAR) return irr::cellindex[c];
+    #endif
+    #if CAP_GP
     else if(GOLDBERG) return (get_code(gp::get_local_info(c)) << 8) | (c->master->fieldval / S7);
+    #endif
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
@@ -467,7 +479,9 @@ int getHemisphere(cell *c, int which) {
     return getHemisphere(c->master, which);
   else {
     int score = 0;
-    if(GOLDBERG) {
+    if(0) ;
+    #if CAP_GP
+    else if(GOLDBERG) {
       auto li = gp::get_local_info(c);
       gp::be_in_triangle(li);
       auto corner = gp::corners * gp::loctoh_ort(li.relative);
@@ -481,12 +495,15 @@ int getHemisphere(cell *c, int which) {
       if(score == 0 && error < -.001) score--;
       return score;
       }
+    #endif
+    #if CAP_IRR
     else if(IRREGULAR) {
       auto m = irr::get_masters(c);
       for(int i=0; i<3; i++)
         score += getHemisphere(m[i], which);
       return score / 3;
       }
+    #endif
     else {
       for(int i=0; i<6; i+=2) 
         score += getHemisphere(c->move(i), which) * (c->c.mirror(i) ? -1 : 1);
@@ -649,22 +666,27 @@ namespace patterns {
       }
     else {
       int sp = c->c.spin(0);
+      #if CAP_GP
       if(GOLDBERG) {
         sp = gp::last_dir(c);
         sp ^= int(ishex2(c));
         }
+      #endif
       if(geometry == gBolza2 && (!GOLDBERG || gp_threecolor() == 2)) {
         patterninfo si0;
         patterninfo si1;
+        #if CAP_GP
         if(GOLDBERG) {
           auto li = gp::get_local_info(c);
           val38(c->master->c7, si0, 0, PAT_COLORING);
           val38(c->master->move(li.last_dir)->c7, si1, 0, PAT_COLORING);
           }
-        else {
+        else 
+        #endif
+        {
           val38(c->move(0), si0, 0, PAT_COLORING);
           val38(c->move(2), si1, 0, PAT_COLORING);
-          }
+          }          
         if((si0.id+1) % 3 == (si1.id) % 3)
           si.id = 8;
         else
@@ -672,7 +694,9 @@ namespace patterns {
         }
       else 
         si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
+      #if CAP_GP
       if(GOLDBERG && pseudohept(c)) si.id = 4;
+      #endif
       bool dock = false;
       for(int i=0; i<c->type; i+=2) {
         int fiv = createMov(c, i)->master->fiftyval;
@@ -685,6 +709,7 @@ namespace patterns {
       if(symRotation) si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
+      #if CAP_GP
       if(GOLDBERG && pat == PAT_COLORING) 
         for(int i=0; i<c->type; i++) {
           cell *c2 = createMov(c, i);
@@ -700,6 +725,7 @@ namespace patterns {
 //          printf("%p %2d : %d %d\n", c, si.id, i, id2);
           if((id2+4) % 12 == si.id) si.dir = i;
           }
+      #endif
       applyAlt(si, sub, pat);
       if(dock && (sub & SPF_DOCKS)) si.id += 16;
       }
@@ -877,14 +903,21 @@ namespace patterns {
   patterninfo getpatterninfo(cell *c, ePattern pat, int sub) {
     if(!(sub & SPF_NO_SUBCODES)) {
       auto si = getpatterninfo(c, pat, sub | SPF_NO_SUBCODES);
-      if(IRREGULAR)
+      if(1) ;
+      #if CAP_IRR
+      else if(IRREGULAR)
         si.id += irr::cellindex[c] << 8;
+      #endif
+      #if CAP_ARCM
       else if(archimedean)
         si.id += (arcm::id_of(c->master) << 8) + (arcm::parent_index_of(c->master) << 16);
+      #endif
+      #if CAP_GP
       else if(GOLDBERG) {
         if(c == c->master->c7) si.id += (fixdir(si.dir, c) << 8);
         else si.id += (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
         }
+      #endif
       return si;
       }
     bool symRotation = sub & SPF_ROT;
@@ -908,6 +941,7 @@ namespace patterns {
       return si;
       }
     
+    #if CAP_ARCM
     if(archimedean && pat == 0) {
       if(sub & SPF_FOOTBALL) {
         val_threecolors(c, si, sub);
@@ -923,6 +957,7 @@ namespace patterns {
         si.reflect = true;
       return si;
       }
+    #endif
 
     if(pat == PAT_ZEBRA && stdhyperbolic) {
 
@@ -1078,16 +1113,20 @@ namespace patterns {
 
 bool geosupport_chessboard() {
   return 
+#if CAP_ARCM
     (archimedean && PURE) ? arcm::current.support_chessboard() : 
     (archimedean && DUAL) ? arcm::current.support_threecolor_bitruncated() :
+#endif
     (VALENCE % 2 == 0);
   }
 
 int geosupport_threecolor() {
   if(IRREGULAR) return 0;
+  #if CAP_ARCM
   if(archimedean && PURE) return arcm::current.support_threecolor();
   if(archimedean && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
   if(archimedean && DUAL) return 0; // it sometimes does support threecolor, but it can be obtained in other ways then
+  #endif
   if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
@@ -1102,13 +1141,17 @@ int geosupport_threecolor() {
 int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
-  
+
+#if CAP_ARCM  
   if(archimedean && DUAL) return false;
   // it sometimes does support football, but it can be obtained in other ways then
 
   if(archimedean /* PURE */) return arcm::current.support_football();
+#endif
 
+#if CAP_IRR
   if(IRREGULAR) return irr::bitruncations_performed ? 2 : 1;
+#endif
   
   // always works in patterns supporting three-color
   int tc = max(geosupport_threecolor(), gp_threecolor());
@@ -1122,13 +1165,16 @@ int geosupport_football() {
   }
 
 int pattern_threecolor(cell *c) {
+  #if CAP_ARCM
   if(archimedean) {
     if(PURE)
       return arcm::threecolor(c);
     else /* if(BITRUNCATED) */
       return c->master->rval1;
     }
+  #endif
   if(IRREGULAR || binarytiling) return !pseudohept(c);
+  #if CAP_GP
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
     int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
@@ -1140,12 +1186,14 @@ int pattern_threecolor(cell *c) {
     else
       return pattern_threecolor(createStep(c->master, fix7(li.last_dir+1))->c7);
     }
+  #endif
   if(a38) {
     // if(GOLDBERG && gp_threecolor() == 2 && gp::pseudohept_val(c) == 0) return 0;
     patterns::patterninfo si;
     patterns::val38(c, si, !BITRUNCATED ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
     }
+  #if CAP_GP
   if(a4 && GOLDBERG) {
     patterns::patterninfo si;
     auto li = gp::get_local_info(c);
@@ -1162,6 +1210,7 @@ int pattern_threecolor(cell *c) {
     if(li.relative.second & 1) i ^= i2;
     return i;
     }
+  #endif
   if(a46 && BITRUNCATED) {
     patterns::patterninfo si;
     patterns::val46(c, si, 0, patterns::PAT_COLORING);
@@ -1174,6 +1223,7 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
+    #if CAP_GP
     if(gp_threecolor() == 2) {
       auto li = gp::get_local_info(c);
       int sp = (MODFIXER + li.relative.first + 2 * li.relative.second) % 3;
@@ -1185,6 +1235,7 @@ int pattern_threecolor(cell *c) {
         }
       return sp;
       }
+    #endif
     if(PURE)
       return codesN[c->master->fiftyval];
     if(ctof(c))
@@ -1218,8 +1269,10 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 3 && PURE)
     return c->master->fiftyval;
+  #if CAP_GP
   if(gp_threecolor() && (S7&1))
     return gp::pseudohept_val(c) > 0;
+  #endif
   return !ishept(c);
   }
   
@@ -1227,29 +1280,42 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
+  #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
+  #endif
   if(binarytiling) return c->type & c->master->distance & 1;
+  #if CAP_ARCM
   if(archimedean) return arcm::pseudohept(c);
+  #endif
+  #if CAP_GP
   if(GOLDBERG && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(GOLDBERG && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
     return gp::pseudohept_val(c) == 0;
+  #endif
   return pattern_threecolor(c) == 0;
   }
 
 // while Krakens movement is usually restricted to non-pseudohept cells,
 // there is one special case when this does not work (because non-pseudohept cells have varying degrees)
 bool kraken_pseudohept(cell *c) {
-  if(!euclid && S3 == 4 && GOLDBERG && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
+  if(0);
+  #if CAP_GP
+  else if(!euclid && S3 == 4 && GOLDBERG && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
     return ishept(c);
+  #endif
+  #if CAP_IRR
   else if(IRREGULAR)
     return c->type != 6;
+  #endif
+  #if CAP_ARCM
   else if(archimedean && PURE)
     return c->type != isize(arcm::current.triangles[0]);
   else if(archimedean && BITRUNCATED)
     return pseudohept(c);
   else if(archimedean && DUAL)
     return false;
+  #endif
   else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
@@ -1327,12 +1393,14 @@ namespace patterns {
     exp_parser ep;
     ep.extra_params["p"] = p;
     switch(geometry) {
+      #if CAP_CRYSTAL
       case gCrystal: {
         crystal::ldcoord co = crystal::get_ldcoord(c);
         for(int i=0; i<crystal::MAXDIM; i++)
           ep.extra_params["x"+its(i)] = co[i];
         break;
         }
+      #endif
     
       default: {
         hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
@@ -1355,8 +1423,14 @@ namespace patterns {
   
   int generateCanvas(cell *c) {
     switch(whichCanvas) {
+      #if CAP_CRYSTAL
+      case 'K':
+        return crystal::colorize(c);
+      #endif
       case 'A':
+        #if CAP_ARCM
         if(archimedean) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
+        #endif
       case 'B':
         return colortables['B'][c->type & 15];
       case 'C': {
@@ -1375,8 +1449,6 @@ namespace patterns {
         int z = currfp.getdist(fieldval(c), make_pair(0,false));
         return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
         }
-      case 'K':
-        return crystal::colorize(c);
       case 'N': {
         if(!hyperbolic) return canvasback;
         using namespace fieldpattern;
@@ -1686,8 +1758,10 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, PAT_TYPES) && !archimedean)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
+    #if CAP_ARCM
     if(archimedean && arcm::current.have_symmetry && whichPattern == PAT_TYPES)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
+    #endif
 
     if(whichPattern == PAT_SINGLETYPE) {
       dialog::addBoolItem(XLAT("odd/even"), subpattern_flags & SPF_TWOCOL, '5');
@@ -1954,8 +2028,10 @@ namespace patterns {
         start_game();
         if(not_restarted) REMAP_TEXTURE;
         }
+      #if CAP_GP
       else if(uni == 'G' && (have_goldberg || have_variations))
         gp::configure();
+      #endif
       else if(doexiton(sym, uni))
         popScreen();
       };

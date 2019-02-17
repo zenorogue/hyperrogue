@@ -160,14 +160,20 @@ void precalc() {
   
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
 
+  #if CAP_GP
   gp::compute_geometry();  
+  #endif
+  #if CAP_IRR
   irr::compute_geometry();
+  #endif
+  #if CAP_ARCM
   if(archimedean) {
     arcm::current.compute_geometry();
     crossf = hcrossf7 * arcm::current.scale();
     hexvdist = arcm::current.scale() * .5;
     rhexf = arcm::current.scale() * .5;
     }
+  #endif
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
 
   scalefactor = crossf / hcrossf7;
@@ -264,8 +270,10 @@ namespace geom3 {
   string invalid;
   
   ld actual_wall_height() {
+      #if CAP_GP
       if(GOLDBERG && gp_autoscale_heights) 
         return wall_height * min<ld>(4 / hypot2(gp::next), 1);
+      #endif
       return wall_height;
       }
   

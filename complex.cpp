@@ -1061,6 +1061,7 @@ namespace whirlpool {
 namespace mirror {
 
   bool build(cell *c) {
+    #if CAP_GP
     if(GOLDBERG) {
       if(c == c->master->c7) {
         c->wall = ((gp::param.second == 0 || gp::param.first == gp::param.second) && hrand(2)) ? waMirror : waCloud;
@@ -1068,10 +1069,13 @@ namespace mirror {
         }
       return false;
       }
+    #endif
+    #if CAP_ARCM
     if(archimedean) {
       c->wall = hrand(2) ? waMirror : waCloud;
       return true;
       }
+    #endif
     if(binarytiling || IRREGULAR) {
       // mirrors not supported
       if(is_mirrorland(c)) {
@@ -1142,6 +1146,7 @@ namespace mirror {
       }
     }
 
+  #if CAP_ARCM
   // we go by heptagons in Archimedean, 
   bool equal(heptspin h1, heptspin h2, int lev) {
     if(h1.at->degree() != h2.at->degree()) return false;
@@ -1177,23 +1182,28 @@ namespace mirror {
     if(create_archimedean_rec(hsx, cpid, hs, 3)) return;
     if(create_archimedean_rec(hsx, cpid, hs, 4)) return;
     }
+  #endif
   
   void createMirrors(cellwalker cw, int cpid) {
     
+    #if CAP_ARCM
     if(archimedean) {
       create_archimedean(cw, cpid, true);
       return;
       }
+    #endif
 
     cw.mirrored = !cw.mirrored;
     cell *c = cw.at;
     
+    #if CAP_GP
     if(GOLDBERG) {
       for(int i=0; i<cw.at->type; i++) {
         createMirror(cw + cth + i + wstep + i - (gp::param.first == gp::param.second ? 1 : 0) + cth, cpid);
         }
       return;
       }
+    #endif
     for(int i=0; i<cw.at->type; i++) {
       auto cws = cw + wstep;
       if(cws.at->type == c->type) 
@@ -1203,10 +1213,13 @@ namespace mirror {
     }
   
   void createMirages(cellwalker cw, int cpid) {
+    #if CAP_ARCM
     if(archimedean) {
       create_archimedean(cw, cpid, false);
       return;
       }
+    #endif
+    #if CAP_GP
     if(GOLDBERG && !(S7 & 1)) {
       for(int i=0; i<cw.at->type; i++) {
         createMirror(cw + cth + i + wstep + 1 + wstep + 1 + (S7/2) - i + 1 + cth, cpid);
@@ -1219,6 +1232,7 @@ namespace mirror {
         }
       return;
       }
+    #endif
     if(PURE && !(S7 & 1)) {
       for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep + 1 + wstep + 1 + (S7/2) - i, cpid);

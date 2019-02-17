@@ -1,14 +1,4 @@
 namespace hr { namespace gp {
-  loc param(1, 0);
-
-  hyperpoint next;
-  ld alpha;
-  int area;
-  
-  int length(loc p) {
-    return eudist(p.first, p.second);
-    }
-  
   loc operator+(loc e1, loc e2) {
     return make_pair(e1.first+e2.first, e1.second+e2.second);
     }
@@ -26,13 +16,6 @@ namespace hr { namespace gp {
     return loc(e1.first*i, e1.second*i);
     }
   
-  struct goldberg_mapping_t {
-    cellwalker cw;
-    signed char rdir;
-    signed char mindir;
-    loc start;
-    };
-
   loc eudir(int d) {
     if(S3 == 3) {
       d %= 6; if (d < 0) d += 6;
@@ -55,6 +38,24 @@ namespace hr { namespace gp {
       }
     }
   
+#if CAP_GP
+  loc param(1, 0);
+
+  hyperpoint next;
+  ld alpha;
+  int area;
+  
+  int length(loc p) {
+    return eudist(p.first, p.second);
+    }
+  
+  struct goldberg_mapping_t {
+    cellwalker cw;
+    signed char rdir;
+    signed char mindir;
+    loc start;
+    };
+
   int fixg6(int x) { return (x + MODFIXER) % SG6; }
   
 #define WHD(x) // x
@@ -609,31 +610,6 @@ namespace hr { namespace gp {
     return v;
     }
   
-  string operation_name() {
-    if(IRREGULAR) 
-      return XLAT("irregular");
-    else if(DUAL)
-      return XLAT("dual");
-    else if(PURE)
-      return XLAT("pure");
-    else if(BITRUNCATED)
-      return XLAT("bitruncated");
-    else if(param == loc(1, 0))
-      return XLAT("pure");
-    else if(param == loc(1, 1) && S3 == 3)
-      return XLAT("bitruncated");
-    else if(param == loc(1, 1) && S3 == 4)
-      return XLAT("rectified");
-    else if(param == loc(2, 0))
-      return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
-    else if(param == loc(3, 0) && S3 == 3)
-      return XLAT("2x bitruncated");
-    else {
-      auto p = human_representation(param);
-      return "GP(" + its(p.first) + "," + its(p.second) + ")";
-      }
-    }
-  
   void whirl_set(loc xy) {
     xy = internal_representation(xy);
     if(xy.second && xy.second != xy.first && nonorientable) {
@@ -860,20 +836,6 @@ namespace hr { namespace gp {
     return corners * loctoh_ort(li.relative);
     }
   
-  array<heptagon*, 3> get_masters(cell *c) {
-    if(GOLDBERG) {
-      auto li = get_local_info(c);
-      be_in_triangle(li);      
-      auto cm = c->master;
-      int i = li.last_dir;
-      return make_array(cm, createStep(cm, i), createStep(cm, fix7(i+1)));
-      }
-    else if(IRREGULAR)
-      return irr::get_masters(c);
-    else
-      return make_array(c->move(0)->master, c->move(2)->master, c->move(4)->master);
-    }
-  
   int compute_dist(cell *c, int master_function(cell*)) {
     auto li = get_local_info(c);
     be_in_triangle(li);
@@ -908,5 +870,61 @@ namespace hr { namespace gp {
   int dist_1() {
     return dist_3() - dist_2();
     }
+#else
+  int dist_1() { return 1; }
+  int dist_2() { return BITRUNCATED ? 2 : 1; }
+  int dist_3() { return BITRUNCATED ? 3 : 2; }  
+#endif
 
+  array<heptagon*, 3> get_masters(cell *c) {
+    if(0);
+    #if CAP_GP
+    else if(GOLDBERG) {
+      auto li = get_local_info(c);
+      be_in_triangle(li);      
+      auto cm = c->master;
+      int i = li.last_dir;
+      return make_array(cm, createStep(cm, i), createStep(cm, fix7(i+1)));
+      }
+    #endif
+    #if CAP_IRR
+    else if(IRREGULAR)
+      return irr::get_masters(c);
+    #endif
+    else
+      return make_array(c->move(0)->master, c->move(2)->master, c->move(4)->master);
+    }
+
+  string operation_name() {
+    if(0);
+    #if CAP_IRR
+    else if(IRREGULAR) 
+      return XLAT("irregular");
+    #endif
+    else if(DUAL)
+      return XLAT("dual");
+    else if(PURE)
+      return XLAT("pure");
+    else if(BITRUNCATED)
+      return XLAT("bitruncated");
+    #if CAP_GP
+    else if(param == loc(1, 0))
+      return XLAT("pure");
+    else if(param == loc(1, 1) && S3 == 3)
+      return XLAT("bitruncated");
+    else if(param == loc(1, 1) && S3 == 4)
+      return XLAT("rectified");
+    else if(param == loc(2, 0))
+      return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
+    else if(param == loc(3, 0) && S3 == 3)
+      return XLAT("2x bitruncated");
+    else {
+      auto p = human_representation(param);
+      return "GP(" + its(p.first) + "," + its(p.second) + ")";
+      }
+    #else
+    else return "UNSUPPORTED";
+    #endif
+    }
+    
   }}

@@ -390,14 +390,21 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
   for(eGeometry i: lst) {
     bool on = geometry == i;
     dynamicval<eGeometry> cg(geometry, eGeometry(i));
+    if(archimedean && !CAP_ARCM) continue;
+    if(geometry == gCrystal && !CAP_CRYSTAL) continue;
     dialog::addBoolItem(XLAT(ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action([i] {
       eGeometry targetgeometry = eGeometry(i);
-      if(targetgeometry == gCrystal)
+      if(0) ;
+      #if CAP_CRYSTAL
+      else if(targetgeometry == gCrystal)
         pushScreen(crystal::show);
+      #endif
+      #if CAP_ARCM
       else if(targetgeometry == gArchimedean)
         pushScreen(arcm::show);
+      #endif
       else dialog::do_if_confirmed([targetgeometry] () {
         set_geometry(targetgeometry);
         start_game();
@@ -449,11 +456,13 @@ void showEuclideanMenu() {
   int nom = (BITRUNCATED ? tv+ts : tv) * 4;
   int denom = (2*ts + 2*tv - ts * tv);
   
+  #if CAP_GP
   if(GOLDBERG && S3)
     nom = 2 * (2*tv + ts * (gp::area-1));
 
   if(GOLDBERG && S3 == 4)
     nom = 2 * (2*tv + 2 * ts * (gp::area-1));
+  #endif
 
   int worldsize;
     
@@ -520,7 +529,9 @@ void showEuclideanMenu() {
     worldsize = -worldsize;
 
   string spf = its(ts);
-  if(archimedean) {
+  if(0) ;
+  #if CAP_ARCM
+  else if(archimedean) {
     spf = "";
     for(int i: arcm::current.faces) {
       if(spf != "") spf += ",";
@@ -529,14 +540,20 @@ void showEuclideanMenu() {
     if(BITRUNCATED) spf = "[" + spf + "]," + its(arcm::current.N * 2) + "," + its(arcm::current.N * 2);
     if(DUAL) spf = its(arcm::current.N) + "^[" + spf + "]";
     }
+  #endif
+  #if CAP_BT
   else if(binarytiling)
     spf = "6,[6,7],7";
+  #endif
   else if(BITRUNCATED && !euclid6)
     spf = spf + "," + its(S6) + "," + its(S6);
+  #if CAP_IRR
   else if(IRREGULAR && irr::bitruncations_performed)
     spf = "[4..8],6,6";
   else if(IRREGULAR)
     spf = "[4..8]^3";
+  #endif
+  #if CAP_GP
   else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(1, 1))
     spf = spf + ",4," + spf + ",4";
   else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(2, 0))
@@ -545,6 +562,7 @@ void showEuclideanMenu() {
     spf = "[" + spf + ",4],4,4,4";
   else if(GOLDBERG && S3 == 3)
     spf = "[" + spf + ",6],6,6";
+  #endif
   else {
     string spf0 = spf;
     for(int z=1; z<S3; z++) spf = spf + "," + spf0;
@@ -559,12 +577,14 @@ void showEuclideanMenu() {
 
   dialog::add_action([] { pushScreen([] { ge_select_tiling(quotientlist); }); });
 
+  #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
     nom = isize(irr::cells);
     // both Klein Quartic and Bolza2 are double the Zebra quotiennt
     denom = -2;
     if(!quotient) worldsize = nom / denom;
     }
+  #endif
   
   if(ts == 6 && tv == 3)
     dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
@@ -584,13 +604,17 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {
       if(euclid6) ;
+      #if CAP_ARCM
       else if(archimedean) arcm::next_variation();
-      else if(euclid4) dialog::do_if_confirmed([] {
+      #endif
+      else if(euclid4 || !CAP_GP) dialog::do_if_confirmed([] {
         set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
         start_game();
         });
+      #if CAP_GP
       else // if(S3 == 3) 
         gp::configure();
+      #endif
       });
     }
 
@@ -599,10 +623,15 @@ void showEuclideanMenu() {
   if(euwrap || geometry == gFieldQuotient) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
-      if(archimedean)
+      if(0); 
+      #if CAP_ARCM
+      else if(archimedean)
         pushScreen(arcm::show);
+      #endif
+      #if CAP_CRYSTAL
       else if(geometry == gCrystal)
         pushScreen(crystal::show);
+      #endif
       else if(euwrap) 
         prepare_torusconfig(),
         pushScreen(showTorusConfig);
@@ -644,10 +673,16 @@ void showEuclideanMenu() {
   dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
   
   dialog::addSelItem(XLAT("size of the world"), 
+    #if CAP_BT
     binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
+    #endif
+    #if CAP_ARCM
     archimedean ? arcm::current.world_size() :
     (archimedean && sphere) ? its(isize(currentmap->allcells())) :
+    #endif
+    #if CAP_CRYSTAL
     geometry == gCrystal ? "∞^" + its(ts/2) :
+    #endif
     worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
     (euwrap && !fulltorus) ? "∞" :
     worldsize == 0 ? "∞²" :
@@ -752,12 +787,14 @@ int read_geom_args() {
     shift(); 
     set_geometry((eGeometry) argi());
     }
+  #if CAP_GP
   else if(argis("-gp")) {
     PHASEFROM(2);
     shift(); gp::param.first = argi();
     shift(); gp::param.second = argi();
     set_variation(eVariation::goldberg);
     }
+  #endif
   else if(argis("-fi")) {
     fieldpattern::info();
     exit(0);

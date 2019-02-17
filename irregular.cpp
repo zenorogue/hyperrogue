@@ -1,5 +1,6 @@
 namespace hr { namespace irr {
 
+#if CAP_IRR
 ld density = 2;
 ld quality = .2;
 int place_attempts = 10;
@@ -1064,6 +1065,7 @@ auto hook =
   addHook(hooks_drawcell, 100, draw_cell_schematics) +
   addHook(shmup::hooks_turn, 100, step);
 
+#endif
   }}
 
 /*

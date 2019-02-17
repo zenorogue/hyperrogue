@@ -816,6 +816,7 @@ int expansion_readArgs() {
       printf(", valid from %d to %d\n", expansion.valid_from, expansion.tested_to);
       }
     }
+  #if CAP_GP
   else if(argis("-csolve_tab")) {
     for(eGeometry geo: {gNormal, gOctagon, g45, g46, g47}) {
       set_geometry(geo);
@@ -836,6 +837,7 @@ int expansion_readArgs() {
         }
       }
     }
+  #endif
 
   else if(argis("-expansion")) {
     cheat(); viewdists = true;
@@ -862,12 +864,21 @@ expansion_analyzer expansion;
 int sibling_limit = 0;
 
 void set_sibling_limit() {
-  if(IRREGULAR) sibling_limit = 3;
+  if(0) ;
+  #if CAP_IRR
+  else if(IRREGULAR) sibling_limit = 3;
+  #endif
+  #if CAP_BT
   else if(binarytiling) sibling_limit = 3;
+  #endif
+  #if CAP_GP
   else {
     auto p = gp::univ_param();
     sibling_limit = 2 * p.first + p.second;
     }
+  #else
+  else sibling_limit = PURE ? 2 : 3;
+  #endif
   }
 
 int celldist0(cell *c) {

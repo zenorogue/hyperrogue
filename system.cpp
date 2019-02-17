@@ -288,7 +288,9 @@ void initgame() {
       }
     truelotus = 0;
     survivalist = true;
+    #if CAP_CRYSTAL
     crystal::used_compass_inside = false;
+    #endif
     got_survivalist = false;
 #if CAP_INV
     if(inv::on) inv::init();
@@ -1177,7 +1179,10 @@ void set_geometry(eGeometry target) {
     if(bounded) racing::on = false;
     #endif
     if(euclid6) variation = eVariation::bitruncated;
+    #if CAP_IRR
     if(IRREGULAR) variation = eVariation::bitruncated;
+    #endif
+    #if CAP_GP
     if(GOLDBERG && gp::param == gp::loc(1,1) && S3 == 3) {
       variation = eVariation::bitruncated;
       }
@@ -1185,9 +1190,12 @@ void set_geometry(eGeometry target) {
       if(gp::param.second && gp::param.second != gp::param.first)
         gp::param.second = 0;
       }
+    #endif
     if(DUAL && geometry != gArchimedean) 
       variation = ginf[geometry].default_variation;
+    #if CAP_BT
     if(geometry == gBinaryTiling) variation = eVariation::pure;
+    #endif
    
     need_reset_geometry = true; 
     }

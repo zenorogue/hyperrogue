@@ -293,18 +293,22 @@ void initConfig() {
   addsaver(vid.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
   
+  #if CAP_GP
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
   addsaver(gp::param.second, "goldberg-y", gp::param.second);
+  #endif
   
   addsaver(nohud, "no-hud", false);
   addsaver(nofps, "no-fps", false);
   
+  #if CAP_IRR
   addsaver(irr::density, "irregular-density", 2);
   addsaver(irr::cellcount, "irregular-cellcount", 150);
   addsaver(irr::quality, "irregular-quality", .2);
   addsaver(irr::place_attempts, "irregular-place", 10);
   addsaver(irr::rearrange_max_attempts, "irregular-rearrange-max", 50);
   addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
+  #endif
   
   addsaver(vid.linequality, "line quality", 0);
   
@@ -319,8 +323,10 @@ void initConfig() {
   addsaver(anims::circle_radius, "animation circle radius");
   addsaver(anims::circle_spins, "animation circle spins");
   
+  #if CAP_CRYSTAL
   addsaver(crystal::compass_probability, "compass-probability");
   addsaver(crystal::view_coordinates, "crystal-coordinates");
+  #endif
   
   #if CAP_SHOT
   addsaver(shot::shotx, "shotx");
@@ -1610,10 +1616,12 @@ void show_color_dialog() {
     dialog::add_action([] () { pushScreen([] () { edit_color_table(distcolors); });});
     }
   
+  #if CAP_CRYSTAL
   if(geometry == gCrystal && cheater) {
     dialog::addItem(XLAT("crystal coordinate colors"), 'C');
     dialog::add_action([] () { crystal::view_coordinates = true; pushScreen([] () { edit_color_table(crystal::coordcolors); });});
     }
+  #endif
 
   dialog::addInfo(XLAT("colors of some game objects can be edited by clicking them."));
   
@@ -1962,7 +1970,9 @@ unordered_map<string, ld&> params = {
   {"sang", conformal::spiral_angle},
   {"spiralx", conformal::spiral_x},
   {"spiraly", conformal::spiral_y},
+  #if CAP_CRYSTAL
   {"cprob", crystal::compass_probability},
+  #endif
   #if CAP_SHOT
   {"gamma", shot::gamma},
   {"fade", shot::fade},

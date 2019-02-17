@@ -243,9 +243,11 @@ string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
    
+   #if CAP_CRYSTAL
    if(it == itCompass && geometry == gCrystal)
      help += crystal::compass_help();
    else
+   #endif
      help += XLAT(iinf[it].help);
    
    if(it == itSavedPrincess || it == itOrbLove) if(!inv::on)
@@ -721,6 +723,7 @@ string generateHelpForLand(eLand l) {
       );
     }
 
+  #if CAP_CRYSTAL
   if(l == laCamelot && geometry == gCrystal) {
     if(!crystal::used_compass_inside) s += XLAT("\nSpecial conduct (still valid)\n");
     else s += XLAT("\nSpecial conduct failed:\n");
@@ -731,7 +734,7 @@ string generateHelpForLand(eLand l) {
     s += XLAT("Crystal Camelot is an octahedron in 'pure' 3D crystal geometry (and a similar polytope in other pure crystals), "
       "and an Euclidean ball in bitruncated/Goldberg crystals.");
     }
-
+  #endif
 
   auto lv = land_validity(l);
   if(lv.flags & lv::display_in_help)
@@ -816,6 +819,7 @@ void describeMouseover() {
           out += " (" + turnstring(t) + XLAT(" to submerge") + ")";
         }
       }
+    #if CAP_FIELD
     else if(c->land == laVolcano) {
       int id = lavatide(c, -1)/4;
       if(id < 96/4)
@@ -830,6 +834,7 @@ void describeMouseover() {
       if(c == cwt.at) windtotal = 0;
       out += " [" + its(windtotal) + "]";
       }
+    #endif
 
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
 
