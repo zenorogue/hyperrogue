@@ -250,11 +250,11 @@
 #endif
 
 #ifndef CAP_COMPLEX2
-#define CAP_COMPLEX2 1
+#define CAP_COMPLEX2 (!ISMINI)
 #endif
 
 #ifndef CAP_RACING
-#define CAP_RACING (!ISMOBWEB)
+#define CAP_RACING (!ISMOBWEB && !ISMINI)
 #endif
 
 #if ISMOBILE
