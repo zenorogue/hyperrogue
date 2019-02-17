@@ -100,6 +100,7 @@ array<vector<ghostmoment>, MAXPLAYER> current_history;
 
 string ghost_prefix = "default";
 
+#if CAP_FILES
 string ghost_filename(string seed, int mcode) {
   if(ghost_prefix == "default") {
     #ifdef FHS
@@ -162,6 +163,7 @@ void write_ghosts(string seed, int mcode) {
   hwrite(f, (const int&) VERNUM_HEX);
   hwrite(f, ghostset());
   }
+#endif
 
 transmatrix get_ghostmoment_matrix(ghostmoment& p) {
   cell *w = rti[p.where_id].c;
@@ -233,8 +235,10 @@ void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
 
+  #if CAP_FILES
   if(ghostset().empty())
     read_ghosts(track_code, modecode());
+  #endif
 
   track.clear();
 
@@ -981,10 +985,12 @@ void race_projection() {
       dialog::add_action([/*this*/] () { 
         dynamicval<bool> so(shmup::on, true);
         dynamicval<bool> ro(racing::on, true);
+        #if CAP_FILES
         if(race_ghosts[make_pair(new_track, modecode())].empty())
           read_ghosts(new_track, modecode());
         else
           println(hlog, "known ghosts: ", isize(race_ghosts[make_pair(new_track, modecode())]));
+        #endif
         pushScreen([/*this*/] () { track_chooser(new_track); }); 
         });
       }
