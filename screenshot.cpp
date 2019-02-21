@@ -301,8 +301,12 @@ void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
 void take(string fname, const function<void()>& what) {
 
   if(cheater) doOvergenerate();
-  
+
+  #if CAP_SVG  
   int multiplier = make_svg ? svg::divby : shot_aa;
+  #else
+  int multiplier = shot_aa;
+  #endif
 
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
@@ -400,9 +404,11 @@ void menu() {
   dialog::addSelItem(XLAT("pixels (Y)"), its(shoty), 'y');
   dialog::add_action([] { shotformat = -1; dialog::editNumber(shoty, 500, 8000, 100, 2000, XLAT("pixels (Y)"), ""); });
   if(make_svg) {
+    #if CAP_SVG
     using namespace svg;
     dialog::addSelItem(XLAT("precision"), "1/"+its(divby), 'p');
     dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
+    #endif
     }
   else {
     dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
