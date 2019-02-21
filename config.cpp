@@ -314,7 +314,7 @@ void initConfig() {
   
   addsaver(vid.linequality, "line quality", 0);
   
-  #if CAP_FILES && CAP_SHOT
+  #if CAP_FILES && CAP_SHOT && CAP_ANIMATIONS
   addsaver(anims::animfile, "animation file format");
   #endif
   #if CAP_ANIMATIONS
