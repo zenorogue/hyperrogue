@@ -4,8 +4,14 @@
 
 namespace hr {
 
+#if DIM == 3
+eGeometry geometry = gBinaryTiling;
+eVariation variation = eVariation::pure;
+#else
 eGeometry geometry;
 eVariation variation;
+#endif
+
 
 // hyperbolic points and matrices
 

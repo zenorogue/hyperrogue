@@ -3,6 +3,8 @@ namespace hr {
 
 namespace binary {
 #if CAP_BT
+
+#if DIM == 2
   enum bindir {
     bd_right = 0,
     bd_up_right = 1,
@@ -13,16 +15,20 @@ namespace binary {
     bd_down_left = 5, /* for cells of degree 7 */
     bd_down_right = 6 /* for cells of degree 7 */
     };
+#endif
   
   int type_of(heptagon *h) {
     return h->c7->type;
     }
-  
+
+#if DIM == 2  
   // 0 - central, -1 - left, +1 - right
   int mapside(heptagon *h) {
     return h->zebraval;
     }
+#endif
   
+#if DIM == 2
   #if DEBUG_BINARY_TILING
   map<heptagon*, long long> xcode;
   map<long long, heptagon*> rxcode;
@@ -40,6 +46,7 @@ namespace binary {
     breakhere();
     }
   #endif
+#endif
   
   void breakhere() {
     exit(1);
@@ -76,7 +83,12 @@ namespace binary {
     return h1;
     }
   
+#if DIM == 2
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
+#else
+  heptagon *build(heptagon *parent, int d, int d1, int delta) {
+    int t = 9; const int side = 0;
+#endif
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
     h->distance = parent->distance + delta;
     h->c7 = newCell(t, h);
@@ -93,6 +105,7 @@ namespace binary {
     return h;
     }
   
+  #if DIM == 2
   heptagon *createStep(heptagon *parent, int d) {
     auto h = parent;
     switch(d) {
@@ -146,10 +159,120 @@ namespace binary {
     breakhere();
     return NULL;
     }
+  #else
+  heptagon *createStep(heptagon *parent, int d) {
+    auto h = parent;
+    switch(d) {
+      case 0: case 1:
+      case 2: case 3:
+        return build(parent, d, 8, 1);
+      case 8:
+        return build(parent, 8, hrand(4), -1);
+      case 4:
+        parent->cmove(8);
+        if(parent->c.spin(8) & 1)
+          return path(h, 4, 5, {8, parent->c.spin(8) ^ 1});
+        else
+          return path(h, 4, 5, {8, 4, parent->c.spin(8) ^ 1});
+      case 5:
+        parent->cmove(8);
+        if(!(parent->c.spin(8) & 1))
+          return path(h, 5, 4, {8, parent->c.spin(8) ^ 1});
+        else
+          return path(h, 5, 4, {8, 5, parent->c.spin(8) ^ 1});
+      case 6:
+        parent->cmove(8);
+        if(parent->c.spin(8) & 2)
+          return path(h, 6, 7, {8, parent->c.spin(8) ^ 2});
+        else
+          return path(h, 6, 7, {8, 6, parent->c.spin(8) ^ 2});
+      case 7:
+        parent->cmove(8);
+        if(!(parent->c.spin(8) & 2))
+          return path(h, 7, 6, {8, parent->c.spin(8) ^ 2});
+        else
+          return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
+      }
+    printf("error: case not handled in binary tiling\n");
+    breakhere();
+    return NULL;
+    }
+  #endif
   
+  transmatrix tmatrix(heptagon *h, int dir) {
+    switch(dir) {
+      case 0:
+        return xpush(-log(2)) * parabolic(-1, -1);
+      case 1:
+        return xpush(-log(2)) * parabolic(1, -1);
+      case 2:
+        return xpush(-log(2)) * parabolic(-1, 1);
+      case 3:
+        return xpush(-log(2)) * parabolic(1, 1);
+      case 4:
+        return parabolic(-2, 0);
+      case 5:
+        return parabolic(+2, 0);
+      case 6:
+        return parabolic(0, -2);
+      case 7:
+        return parabolic(0, +2);
+      case 8:
+        h->cmove(8);
+        return inverse(tmatrix(h->move(8), h->c.spin(8)));
+      }
+    printf("error: case not handled in binary tiling tmatrix\n");
+    breakhere();
+    return Id;
+    }
+  
+  #if DIM == 3
+
+  void queuecube(const transmatrix& V, ld size, color_t linecolor, color_t facecolor) {
+    ld yy = log(2) / 2;
+    const int STEP=3;
+    const ld MUL = 1. / STEP;
+    auto at = [&] (ld x, ld y, ld z) { curvepoint(V * parabolic(size*x, size*y) * xpush(size*yy*z) * C0); };
+    for(int a:{-1,1}) {
+      for(ld t=-STEP; t<STEP; t++) at(a, 1,t*MUL);
+      for(ld t=-STEP; t<STEP; t++) at(a, -t*MUL,1);
+      for(ld t=-STEP; t<STEP; t++) at(a, -1,-t*MUL);
+      for(ld t=-STEP; t<STEP; t++) at(a, t*MUL,-1);
+      at(a, 1,-1);
+      queuecurve(linecolor, facecolor, PPR::LINE);
+
+      for(ld t=-STEP; t<STEP; t++) at(1,t*MUL,a);
+      for(ld t=-STEP; t<STEP; t++) at(-t*MUL,1,a);
+      for(ld t=-STEP; t<STEP; t++) at(-1,-t*MUL,a);
+      for(ld t=-STEP; t<STEP; t++) at(t*MUL,-1,a);
+      at(1,-1,a);
+      queuecurve(linecolor, facecolor, PPR::LINE);
+
+      for(ld t=-STEP; t<STEP; t++) at(1,a,t*MUL);
+      for(ld t=-STEP; t<STEP; t++) at(-t*MUL,a,1);
+      for(ld t=-STEP; t<STEP; t++) at(-1,a,-t*MUL);
+      for(ld t=-STEP; t<STEP; t++) at(t*MUL,a,-1);
+      at(1,a,-1);
+      queuecurve(linecolor, facecolor, PPR::LINE);
+      }
+    /*for(int a:{-1,1}) for(int b:{-1,1}) for(int c:{-1,1}) {
+      at(0,0,0); at(a,b,c);  queuecurve(linecolor, facecolor, PPR::LINE);
+      }*/
+    }
+  #endif
+
+  #if DIM==2
   transmatrix parabolic(ld u) {
     return parabolic1(u * vid.binary_width / log(2) / 2);
     }
+  #else
+  transmatrix parabolic(ld y, ld z) {
+    ld co = vid.binary_width / log(2) / 2;
+    return parabolic1(y * co, z * co);
+    }
+  #endif
+  
+  ld btrange = 20;
 
   void draw() {
     dq::visited.clear();
@@ -163,22 +286,33 @@ namespace binary {
       bandfixer bf(V);
       dq::drawqueue.pop();
       
+      
       cell *c = h->c7;
+      #if DIM==2
       if(!do_draw(c, V)) continue;
+      #endif
+      #if DIM==3
+      if(V[DIM][DIM] > btrange) continue;
+      setdist(c, 7, c);
+      #endif
       drawcell(c, V, 0, false);
 
+      #if DIM==2
       dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
       dq::enqueue(h->move(bd_right), V * parabolic(1));
       dq::enqueue(h->move(bd_left), V * parabolic(-1));
       if(c->type == 6)
         dq::enqueue(h->move(bd_down), V * xpush(log(2)));
-    // down_left
       if(c->type == 7) {
         dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
         dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
         }
+      #else
+      for(int i=0; i<9; i++)
+        dq::enqueue(h->move(i), V * tmatrix(h, i));
+      #endif
       }
-    }  
+    }
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
     if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
@@ -186,20 +320,28 @@ namespace binary {
     transmatrix gm = Id, where = Id;
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
+        #if DIM==2
         if(type_of(h2) == 6)
           h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
         else if(mapside(h2) == 1)
           h2 = hr::createStep(h2, bd_left), where = parabolic(+1) * where;
         else if(mapside(h2) == -1)
           h2 = hr::createStep(h2, bd_right), where = parabolic(-1) * where;
+        #else
+        h2 = hr::createStep(h2, 8), where = inverse(tmatrix(h2, 8)) * where;
+        #endif
         }
       else {
+        #if DIM==2
         if(type_of(h1) == 6)
           h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
         else if(mapside(h1) == 1)
           h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(-1);
         else if(mapside(h1) == -1)
           h1 = hr::createStep(h1, bd_right), gm = gm * parabolic(+1);
+        #else
+        h1 = hr::createStep(h1, 8), where = where * tmatrix(h1, 8);
+        #endif
         }
       }
     return gm * where;
@@ -212,9 +354,24 @@ auto bt_config = addHook(hooks_args, 0, [] () {
     shift_arg_formula(vid.binary_width, delayed_geo_reset);
     return 0;
     }
+  else if(argis("-btrange")) {
+    shift_arg_formula(btrange);
+    return 0;
+    }
   return 1;
   });
 #endif
 #endif
+
+int celldistance(cell *c1, cell *c2) {
+  int steps = 0;
+  while(c1 != c2) {
+    int d1 = celldistAlt(c1), d2 = celldistAlt(c2);
+    if(d1 >= d2) c1 = c1->cmove(8), steps++;
+    if(d2 >= d1) c2 = c2->cmove(8), steps++;
+    }
+  return steps;
+  }
+
   }
 }

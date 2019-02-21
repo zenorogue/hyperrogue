@@ -436,8 +436,8 @@ hyperpoint randomPointIn(int t) {
   }
 
 #if CAP_BT
-hyperpoint get_horopoint(ld y, ld x) {
-  return xpush(-y) * binary::parabolic(x) * C0;
+hyperpoint get_horopoint(ld y, ld x DC(,ld z)) {
+  return xpush(-y) * binary::parabolic(x,z) * C0;
   }
 #endif
 
@@ -453,6 +453,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   #endif
   #if CAP_BT
   if(binarytiling) {
+    #if DIM == 2
     ld yx = log(2) / 2;
     ld yy = yx;
     ld xx = 1 / sqrt(2)/2;
@@ -465,6 +466,10 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     vertices[5] = get_horopoint(-yy, -xx);
     vertices[6] = get_horopoint(-yy, 0);
     return mid_at_actual(vertices[cid], 3/cf);
+    #else
+    println(hlog, "get_corner_position called");
+    return C0;
+    #endif
     }
   #endif
   #if CAP_ARCM
@@ -538,6 +543,7 @@ hyperpoint nearcorner(cell *c, int i) {
   #endif
   #if CAP_BT
   if(binarytiling) {
+    #if DIM == 2
     ld yx = log(2) / 2;
     ld yy = yx;
     // ld xx = 1 / sqrt(2)/2;
@@ -553,6 +559,10 @@ hyperpoint nearcorner(cell *c, int i) {
     else
       neis[5] = get_horopoint(-yy*2, 0);
     return neis[i];
+    #else
+    println(hlog, "nearcorner called");
+    return Hypc;
+    #endif
     }
   #endif
   double d = cellgfxdist(c, i);

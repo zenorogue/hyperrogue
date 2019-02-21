@@ -73,7 +73,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     binary::rxcode[1<<16] = &h;
     #endif
     h.zebraval = 0,
-    h.c7 = newCell(6, origin);
+    h.c7 = newCell(DIM == 3 ? 9 : 6, origin);
     }
   #endif
   #if CAP_IRR
@@ -1867,7 +1867,10 @@ int celldistance(cell *c1, cell *c2) {
 
     return 64;
     }
-  
+
+  #if DIM == 3
+  if(binarytiling) return binary::celldistance(c1, c2);
+  #endif
   return hyperbolic_celldistance(c1, c2);
   }
 
