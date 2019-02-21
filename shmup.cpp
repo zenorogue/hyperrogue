@@ -845,11 +845,15 @@ void handleInput(int delta) {
       multi::mdx[i] = multi::mdx[i] * (1 - delta / 1000.) + mdx * delta / 2000.;
       multi::mdy[i] = multi::mdy[i] * (1 - delta / 1000.) + mdy * delta / 2000.;
   
+      #if DIM == 2
       if(mdx != 0 || mdy != 0) if(!multi::combo[i]) {
         cwtV = multi::whereis[i]; cwt = multi::player[i];
         flipplayer = multi::flipped[i];
         multi::whereto[i] = vectodir(hpxy(multi::mdx[i], multi::mdy[i]));
         }
+      #else
+      ignore(mdx); ignore(mdy);
+      #endif
       
       if(multi::actionspressed[b+pcFire] || 
         (multi::actionspressed[b+pcMoveLeft] && multi::actionspressed[b+pcMoveRight]))
@@ -1536,6 +1540,7 @@ void movePlayer(monster *m, int delta) {
   #endif
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
+  ignore(mdx); ignore(mdy);
   
   bool shotkey = false, dropgreen = false, facemouse = false;
   if(facemouse) {
@@ -1621,6 +1626,7 @@ void movePlayer(monster *m, int delta) {
   
   playerturn[cpid] = mturn * delta / 150.0;
 
+  #if DIM == 2
   double mdd = hypot(mdx, mdy);
   
   if(mdd > 1e-6) {
@@ -1634,6 +1640,7 @@ void movePlayer(monster *m, int delta) {
     playerturn[cpid] = -atan2(h[1], h[0]);
     mgo += mdd;
     }
+  #endif
 
 #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);

@@ -34,7 +34,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   ld hx = h[0], hy = h[1];
   
   if(gc == gcEuclid)
-    return hpxy(hx * (1 + alpha), hy * (1 + alpha));
+    return hpxy0(hx * (1 + alpha), hy * (1 + alpha));
     
   ld hr = hx*hx+hy*hy;
   
@@ -58,7 +58,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   hyperpoint H;
   H[0] = hx * (hz+vid.alpha);
   H[1] = hy * (hz+vid.alpha);
-  H[2] = hz;
+  H[DIM] = hz;
   
   return H;  
   }
@@ -66,10 +66,10 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
 hyperpoint space_to_perspective(hyperpoint z, ld alpha = vid.alpha);
 
 hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
-  ld s = 1 / (alpha + z[2]);
+  ld s = 1 / (alpha + z[DIM]);
   z[0] *= s;
   z[1] *= s;
-  z[2] = 0;
+  z[DIM] = 0;
   return z;
   }
 
@@ -90,7 +90,7 @@ hyperpoint gethyper(ld x, ld y) {
 
 void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   hyperpoint H = ypush(geom3::camera) * xpush(d) * ypush(zl) * C0;
-  ld tzh = vid.ballproj + H[2];
+  ld tzh = vid.ballproj + H[DIM];
   ld ax = H[0] / tzh;
   ld ay = H[1] / tzh;
   
@@ -232,6 +232,13 @@ hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
   }
 
 void applymodel(hyperpoint H, hyperpoint& ret) {
+
+  if(DIM == 3) { 
+    ret[0] = H[0]/H[2]; 
+    ret[1] = H[1]/H[2]; 
+    ret[2] = 1;
+    return; 
+    }
   
   using namespace hyperpoint_vec;
   
@@ -723,6 +730,10 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
+bool invis_point(const hyperpoint h) {
+  return h[2] < 0;
+  }
+
 bool invalid_point(const hyperpoint h) {
   return std::isnan(h[2]) || h[2] > 1e8 || std::isinf(h[2]);
   }
@@ -1040,7 +1051,7 @@ void centerpc(ld aspd) {
   ors::unrotate(cwtV); ors::unrotate(View);
   
   hyperpoint H = ypush(-vid.yshift) * sphereflip * tC0(cwtV);
-  ld R = H[0] == 0 && H[1] == 0 ? 0 : hdist0(H); // = sqrt(H[0] * H[0] + H[1] * H[1]);
+  ld R = zero2(H) ? 0 : hdist0(H); // = sqrt(H[0] * H[0] + H[1] * H[1]);
   if(R < 1e-9) {
     // either already centered or direction unknown
     /* if(playerfoundL && playerfoundR) {
@@ -1057,8 +1068,8 @@ void centerpc(ld aspd) {
     aspd *= (2+3*R*R);
     if(aspd > R) aspd = R;
     
-    View[0][2] -= cwtV[0][2] * aspd / R;
-    View[1][2] -= cwtV[1][2] * aspd / R;
+    for(int i=0; i<DIM; i++)
+      View[i][DIM] -= cwtV[i][DIM] * aspd / R;
         
     }
   
@@ -1098,7 +1109,7 @@ void optimizeview() {
 
   #if CAP_BT || CAP_ARCM
   else if(binarytiling || archimedean) {
-    turn = -1, best = View[2][2];
+    turn = -1, best = View[DIM][DIM];
     for(int i=0; i<viewctr.at->c7->type; i++) {
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
@@ -1110,7 +1121,7 @@ void optimizeview() {
       if(archimedean)  T = arcm::relative_matrix(h2, viewctr.at);
       #endif
       hyperpoint H = View * tC0(T);
-      ld quality = euclid ? hdist0(H) : H[2];
+      ld quality = euclid ? hdist0(H) : H[DIM];
       if(quality < best) best = quality, turn = i1, TB = T;
       }
     if(turn >= 0) {
@@ -1128,7 +1139,7 @@ void optimizeview() {
       ld trot = -i * M_PI * 2 / (S7+.0);
       transmatrix T = i < 0 ? Id : spin(trot) * xpush(tessf) * pispin;
       hyperpoint H = View * tC0(T);
-      if(H[2] < best) best = H[2], turn = i, TB = T;
+      if(H[DIM] < best) best = H[DIM], turn = i, TB = T;
       }
   
     if(turn >= 0) {
@@ -1267,8 +1278,8 @@ void draw_model_elements() {
     case mdHyperboloid: {
       if(hyperbolic) {
 #if CAP_QUEUE
-        curvepoint(hpxyz(0,0,1));
-        curvepoint(hpxyz(0,0,-vid.alpha));
+        curvepoint(point3(0,0,1));
+        curvepoint(point3(0,0,-vid.alpha));
         queuecurve(ringcolor, 0, PPR::CIRCLE);
         
         ld& tz = conformal::top_z;
@@ -1281,16 +1292,16 @@ void draw_model_elements() {
         a[1] = sb * a[2] / -cb;
         a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
     
-        curvepoint(hpxyz(0,0,-vid.alpha));
+        curvepoint(point3(0,0,-vid.alpha));
         curvepoint(a);
-        curvepoint(hpxyz(0,0,0));
+        curvepoint(point3(0,0,0));
         a[0] = -a[0];
         curvepoint(a);
-        curvepoint(hpxyz(0,0,-vid.alpha));
+        curvepoint(point3(0,0,-vid.alpha));
         queuecurve(ringcolor, 0, PPR::CIRCLE);
     
-        curvepoint(hpxyz(-1,0,0));
-        curvepoint(hpxyz(1,0,0));
+        curvepoint(point3(-1,0,0));
+        curvepoint(point3(1,0,0));
         queuecurve(ringcolor, 0, PPR::CIRCLE);
     
         a[1] = sb * tz / -cb;
@@ -1298,7 +1309,7 @@ void draw_model_elements() {
         a[2] = tz - vid.alpha;
     
         curvepoint(a);
-        curvepoint(hpxyz(0,0,-vid.alpha));
+        curvepoint(point3(0,0,-vid.alpha));
         a[0] = -a[0];
         curvepoint(a);
         queuecurve(ringcolor, 0, PPR::CIRCLE);
@@ -1374,7 +1385,7 @@ void draw_boundary(int w) {
         ld z = -sqrt(1 - x*x);
         conformal::apply_orientation(y, x);
         hyperpoint h1;
-        applymodel(hpxyz(x,y,z), h1);
+        applymodel(hpxyz(x,y,DC(0,) z), h1);
         
         conformal::apply_orientation(h1[0], h1[1]);      
         h1[1] = abs(h1[1]) * b;
@@ -1424,7 +1435,7 @@ void draw_boundary(int w) {
         queuereset(mdUnchanged, p);
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(hpxyz(current_display->radius * cos(i * degree), current_display->radius * s * (conformal::cos_ball * s >= 0 - 1e-6 ? 1 : abs(conformal::sin_ball)), 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (conformal::cos_ball * s >= 0 - 1e-6 ? 1 : abs(conformal::sin_ball)), 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1433,7 +1444,7 @@ void draw_boundary(int w) {
   
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(hpxyz(current_display->radius * cos(i * degree), current_display->radius * s * conformal::sin_ball, 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * conformal::sin_ball, 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1441,7 +1452,7 @@ void draw_boundary(int w) {
       if(euclid || sphere) {
         queuereset(mdUnchanged, p);  
         for(int i=0; i<=360; i++) {
-          curvepoint(hpxyz(current_display->radius * cos(i * degree), current_display->radius * sin(i * degree), 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * sin(i * degree), 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1511,7 +1522,7 @@ void draw_boundary(int w) {
         queuereset(mdUnchanged, p);
         for(ld a=-10; a<=10; a+=0.01 / (1 << vid.linequality) / u) {
           cld z = exp(cld(a, a * imag(sm) / real(sm) + M_PI));
-          hyperpoint ret = hpxyz(real(z), imag(z), 0);
+          hyperpoint ret = point2(real(z), imag(z));
           ret = mobius(ret, vid.skiprope, 1);
           ret *= current_display->radius;
           curvepoint(ret);

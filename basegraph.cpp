@@ -235,7 +235,7 @@ void display_data::set_projection(int ed, bool apply_models) {
     }
   else {
 
-    if(hyperbolic && vid.alpha > -1) {
+    if(hyperbolic && vid.alpha > -1 && DIM == 2) {
       // Because of the transformation from H3 to the Minkowski hyperboloid,
       // points with negative Z can be generated in some 3D settings.
       // This happens for points below the camera, but above the plane.
@@ -299,7 +299,7 @@ void display_data::set_viewport(int ed) {
   }
 
 bool model_needs_depth() {
-  return pmodel == mdBall;
+  return DIM == 3 || pmodel == mdBall;
   }
 
 void setGLProjection(color_t col) {

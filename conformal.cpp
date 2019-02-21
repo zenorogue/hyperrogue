@@ -644,16 +644,16 @@ namespace conformal {
       "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
       ) + "\n\n" + parser_help()
       );
-    #if CAP_POLY
+    #if CAP_QUEUE && CAP_CURVE
     dialog::extra_options = [] () {
       initquickqueue();
       queuereset(mdUnchanged, PPR::LINE);              
       for(int a=-1; a<=1; a++) {
-        curvepoint(hpxyz(-M_PI/2 * current_display->radius, a*current_display->radius, 0));
-        curvepoint(hpxyz(+M_PI/2 * current_display->radius, a*current_display->radius, 0));
+        curvepoint(point2(-M_PI/2 * current_display->radius, a*current_display->radius));
+        curvepoint(point2(+M_PI/2 * current_display->radius, a*current_display->radius));
         queuecurve(forecolor, 0, PPR::LINE);
-        curvepoint(hpxyz(a*current_display->radius, -M_PI/2*current_display->radius, 0));
-        curvepoint(hpxyz(a*current_display->radius, +M_PI/2*current_display->radius, 0));
+        curvepoint(point2(a*current_display->radius, -M_PI/2*current_display->radius));
+        curvepoint(point2(a*current_display->radius, +M_PI/2*current_display->radius));
         queuecurve(forecolor, 0, PPR::LINE);
         }
       queuereset(pmodel, PPR::LINE);

@@ -490,6 +490,9 @@ vector<glvertex> line_vertices;
 #endif
 
 void glapplymatrix(const transmatrix& V) {
+  #if DIM == 3
+  glhr::set_modelview(glhr::id);
+  #else
   GLfloat mat[16];
   int id = 0;
   
@@ -509,6 +512,7 @@ void glapplymatrix(const transmatrix& V) {
       conformal::apply_orientation(mat[a*4], mat[a*4+1]);
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
+  #endif
   }
 
 void dqi_poly::gldraw() {
@@ -632,12 +636,16 @@ void dqi_poly::gldraw() {
 #endif
 
 double scale_at(const transmatrix& T) {
+  #if DIM==3
+  return 1 / (tC0(T))[2];
+  #else
   using namespace hyperpoint_vec;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
   applymodel(T * xpush0(.01), h2);
   applymodel(T * ypush(.01) * C0, h3);
   return sqrt(hypot2(h2-h1) * hypot2(h3-h1) / .0001);
+  #endif
   }
 
 double linewidthat(const hyperpoint& h) {
@@ -1262,7 +1270,7 @@ void dqi_string::draw() {
     svg::text(x, y, size, str, frame, color, align);
     return;
     }
-  #elseif ISMOBILE==0
+  #elif ISMOBILE==0
   int fr = frame & 255;
   displayfrSP(x, y, shift, fr, size, str, color, align, frame >> 8);
   #else
@@ -2872,12 +2880,14 @@ void queuechr(const transmatrix& V, double size, char chr, color_t col, int fram
   
 void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame) {
   if(invalid_point(h)) return;
+  if(DIM == 3 && invis_point(h)) return;
   int xc, yc, sc; getcoord0(h, xc, yc, sc);
   queuestr(xc, yc, sc, size, chr, col, frame);
   }
   
 void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame, int align) {
   if(invalid_point(V)) return;
+  if(DIM == 3 && invis_point(tC0(V))) return;
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   // int xs, ys, ss;  getcoord0(V * xpush0(.01), xs, ys, ss); 
   
@@ -2886,6 +2896,7 @@ void queuestr(const transmatrix& V, double size, const string& chr, color_t col,
   
 void queuecircle(const transmatrix& V, double size, color_t col) {
   if(invalid_point(V)) return;
+  if(DIM == 3 && invis_point(tC0(V))) return;
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   int xs, ys, ss; getcoord0(V * xpush0(.01), xs, ys, ss);  
   queuecircle(xc, yc, scale_in_pixels(V) * size, col);

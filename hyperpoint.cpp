@@ -438,7 +438,7 @@ void fixmatrix(transmatrix& T) {
 // show the matrix on screen
 
 ld det(const transmatrix& T) {
-  #if DIM == 3
+  #if DIM == 2
   ld det = 0;
   for(int i=0; i<3; i++) 
     det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
@@ -472,7 +472,7 @@ void inverse_error(const transmatrix& T) {
 transmatrix inverse(const transmatrix& T) {
   profile_start(7);
   
-  #if DIM == 3
+  #if DIM == 2
   ld d = det(T);
   transmatrix T2;
   if(d == 0) {
@@ -493,8 +493,7 @@ transmatrix inverse(const transmatrix& T) {
       if(T1[b][a]) {
         if(b != a)
           for(int c=0; c<MDIM; c++) 
-            tie(T1[b][c], T1[a][c]) = make_pair(T1[a][c], T1[b][c]),
-            tie(T2[b][c], T2[a][c]) = make_pair(T2[a][c], T2[b][c]);            
+            swap(T1[b][c], T1[a][c]), swap(T2[b][c], T2[a][c]);
         break;
         }
     if(!T1[a][a]) { inverse_error(T); return Id; }
@@ -612,7 +611,7 @@ transmatrix mzscale(const transmatrix& t, double fac) {
   return res;
   }
 
-transmatrix pushone() { return euclid ? eupush(1, 0) : xpush(sphere?.5 : 1); }
+transmatrix pushone() { return xpush(sphere?.5 : 1); }
 
 bool operator == (hyperpoint h1, hyperpoint h2) {
   for(int i=0; i<MDIM; i++) if(h1[i] != h2[i]) return false;

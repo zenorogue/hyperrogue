@@ -189,7 +189,6 @@ typedef complex<ld> cld;
 
 #define DEBSM(x) 
 
-#define DIM 2
 #define MDIM (DIM+1)
 
 #if DIM == 2
@@ -224,7 +223,7 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   transmatrix R;
   // for(int i=0; i<3; i++) for(int j=0; j<3; j++) R[i][j] = 0;
   for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) // for(int k=0; k<3; k++)
-    R[i][j] = T[i][0] * U[0][j] + T[i][1] * U[1][j] + T[i][2] * U[2][j];
+    R[i][j] = T[i][0] * U[0][j] + T[i][1] * U[1][j] + T[i][2] * U[2][j] D3(+ T[i][3] * U[3][j]);
   return R;
   }
 
@@ -258,9 +257,11 @@ const static transmatrix centralsym = diag(-1,-1,-1,-1);
 #define hpxyz hyperpoint
 
 #if DIM == 3
-hyperpoint point3(ld x, ld y, ld z) { return hpxyz(x,y,z,0); }
+static hyperpoint point3(ld x, ld y, ld z) { return hpxyz(x,y,z,0); }
+static hyperpoint point2(ld x, ld y) { return hpxyz(x,y,0,0); }
 #else
 #define point3 hpxyz
+static hyperpoint point2(ld x, ld y) { return hpxyz(x,y,0); }
 #endif
 
 namespace hyperpoint_vec {
@@ -3381,7 +3382,7 @@ int fiftyval200(cell *c);
 // T * C0, optimized
 inline hyperpoint tC0(const transmatrix &T) {
   hyperpoint z;
-  z[0] = T[0][2]; z[1] = T[1][2]; z[2] = T[2][2];
+  for(int i=0; i<MDIM; i++) z[i] = T[i][DIM];
   return z;
   }
 
@@ -3572,13 +3573,19 @@ void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame = 
 string fts(float x);
 bool model_needs_depth();
 
-hyperpoint hpxy(ld x, ld y);
+hyperpoint hpxy(ld x, ld y DC(, ld z));
 ld sqhypot2(const hyperpoint& h);
 ld hypot2(const hyperpoint& h);
 transmatrix pushxto0(const hyperpoint& H);
 transmatrix rpushxto0(const hyperpoint& H);
 transmatrix spintox(const hyperpoint& H);
 transmatrix ypush(ld alpha);
+
+#if DIM == 3
+static hyperpoint hpxy0(ld x, ld y) { return hpxy(x, y, 0); }
+#else
+static hyperpoint hpxy0(ld x, ld y) { return hpxy(x, y); }
+#endif
 
 #if CAP_SURFACE
 namespace surface {
@@ -3772,7 +3779,7 @@ extern ld intval(const hyperpoint &h1, const hyperpoint &h2);
 extern ld intvalxy(const hyperpoint &h1, const hyperpoint &h2);
 transmatrix euscalezoom(hyperpoint h);
 transmatrix euaffine(hyperpoint h);
-transmatrix eupush(ld x, ld y);
+transmatrix eupush(ld x, ld y DC(, ld z));
 transmatrix eupush(hyperpoint h);
 transmatrix rspintox(const hyperpoint& H);
 transmatrix gpushxto0(const hyperpoint& H);
@@ -4206,10 +4213,11 @@ bool saved_tortoise_on(cell *c);
 
 #if CAP_BT
 void horopoint(ld y, ld x);
+hyperpoint get_horopoint(ld y, ld x DC(,ld z));
 
 namespace binary {
   heptagon *createStep(heptagon *parent, int d);
-  transmatrix parabolic(ld u);
+  transmatrix parabolic(ld u DC(, ld v));
   }
 #endif
 
@@ -4466,11 +4474,11 @@ struct comma_printer {
 template<class T, size_t X> void print(hstream& hs, const array<T, X>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 
-inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, 3>&)h); }
+inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MDIM>&)h); }
 inline void print(hstream& hs, const transmatrix T) { 
   print(hs, "("); comma_printer c(hs);
-  for(int i=0; i<3; i++)
-  for(int j=0; j<3; j++) c(T[i][j]);
+  for(int i=0; i<MDIM; i++)
+  for(int j=0; j<MDIM; j++) c(T[i][j]);
   print(hs, ")"); }
 
 template<class T, class U> void print(hstream& hs, const pair<T, U> & t) { print(hs, "(", t.first, ",", t.second, ")"); }
@@ -4740,6 +4748,7 @@ extern int cells_drawn;
 
 void menuitem_sightrange(char c = 'r');
 
+bool invis_point(const hyperpoint h);
 bool invalid_point(const hyperpoint h);
 bool invalid_point(const transmatrix T);
 bool in_smart_range(const transmatrix& T);

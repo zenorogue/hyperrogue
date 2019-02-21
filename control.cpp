@@ -177,6 +177,7 @@ void closeJoysticks() {
   }
 
 void checkjoy() {
+  #if DIM == 2
   DEBB(DF_GRAPH, (debugfile,"check joy\n"));
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
@@ -199,10 +200,11 @@ void checkjoy() {
     }
   
   joydir = vectodir(hpxy(jx, jy));
+  #endif
   }
 
 void checkpanjoy(double t) {
- 
+  #if DIM == 2
   if(shmup::on) return;
   
   if(vid.joypanspeed < 1e-7) return;
@@ -215,6 +217,7 @@ void checkpanjoy(double t) {
   
   playermoved = false;
   View = gpushxto0(hpxy(jx, jy)) * View;
+  #endif
   }
 
 #endif
@@ -245,27 +248,38 @@ void handlePanning(int sym, int uni) {
   if(rug::rugged) return;
 
 #if !ISPANDORA
+  if(sym == SDLK_END && DIM == 3) { 
+    View = cpush(2, -0.2*shiftmul) * View, didsomething = true, playermoved = false;
+    }
   if(sym == SDLK_RIGHT) { 
     if(conformal::on)
       conformal::lvspeed += 0.1 * shiftmul;
+    else if(DIM == 3)
+      View = cspin(0, 2, -0.2*shiftmul) * View, didsomething = true;
     else
       View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
   if(sym == SDLK_LEFT) {
     if(conformal::on)
       conformal::lvspeed -= 0.1 * shiftmul;
+    else if(DIM == 3)
+      View = cspin(0, 2, 0.2*shiftmul) * View, didsomething = true;
     else
       View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
   if(sym == SDLK_UP) {
     if(conformal::on)
       conformal::lvspeed += 0.1 * shiftmul;
+    else if(DIM == 3)
+      View = cspin(1, 2, 0.2*shiftmul) * View, didsomething = true;
     else
       View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
   if(sym == SDLK_DOWN) {
     if(conformal::on)
       conformal::lvspeed -= 0.1 * shiftmul;
+    else if(DIM == 3)
+      View = cspin(1, 2, -0.2*shiftmul) * View, didsomething = true;
     else
       View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
@@ -286,6 +300,7 @@ void handlePanning(int sym, int uni) {
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
     if(isGravityLand(cwt.at->land)) playermoved = false;
 
+  #if DIM == 2
   if(sym == PSEUDOKEY_WHEELUP) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
@@ -293,6 +308,7 @@ void handlePanning(int sym, int uni) {
     View = gpushxto0(hpxy(jx, jy)) * View;
     sym = 1;
     }
+  #endif
   }
 
 #ifdef SCALETUNER
@@ -760,7 +776,7 @@ void handle_event(SDL_Event& ev) {
           vid.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
           vid.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
-        else if(mouseh[2] < 50 && mouseoh[2] < 50) {
+        else if(mouseh[DIM] < 50 && mouseoh[DIM] < 50) {
           panning(mouseoh, mouseh);
           }
         }
@@ -892,6 +908,7 @@ bool haveMobileCompass() {
   }
   
 bool handleCompass() {
+#if DIM == 2
   if(!haveMobileCompass()) return false;
   
   using namespace shmupballs;
@@ -913,6 +930,9 @@ bool handleCompass() {
     }
 
   return false;
+#else
+  return false;
+#endif
   }
 
 // orientation sensitivity

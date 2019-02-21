@@ -3777,10 +3777,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(!inmirrorcount) {
     transmatrix& gm = gmatrix[c];
     orig = 
-      gm[2][2] == 0 ? true : 
-      euwrap ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
-      sphereflipped() ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
-      fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8;
+      gm[DIM][DIM] == 0 ? true : 
+      euwrap ? hypot(gm[0][DIM], gm[1][DIM]) >= hypot(V[0][DIM], V[1][DIM]) :
+      sphereflipped() ? fabs(gm[DIM][DIM]-1) <= fabs(V[DIM][DIM]-1) :
+      fabs(gm[DIM][DIM]-1) >= fabs(V[DIM][DIM]-1) - 1e-8;
 
     if(orig) gm = V;
     }
@@ -3853,7 +3853,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     if(!euclid) {
-      double dfc = euclid ? intval(VC0, C0) : VC0[2];
+      double dfc = euclid ? intval(VC0, C0) : VC0[DIM];
     
       if(dfc < centdist) {
         centdist = dfc;
@@ -5553,7 +5553,7 @@ purehookset hooks_drawmap;
 
 transmatrix cview() {
   sphereflip = Id;
-  if(sphereflipped()) sphereflip[2][2] = -1;
+  if(sphereflipped()) sphereflip[DIM][DIM] = -1;
   return ypush(vid.yshift) * sphereflip * View;
   }
 
@@ -5768,10 +5768,10 @@ void drawmovestar(double dx, double dy) {
   transmatrix Centered = Id;
 
   if(masterless) 
-    Centered = eupush(H[0], H[1]);
+    Centered = eupush(H);
   else if(R > 1e-9) Centered = rgpushxto0(H);
   
-  Centered = Centered * rgpushxto0(hpxy(dx*5, dy*5));
+  Centered = Centered * rgpushxto0(hpxy0(dx*5, dy*5));
   if(multi::cpid >= 0) multi::crosscenter[multi::cpid] = Centered;
   
   int rax = vid.axes;
