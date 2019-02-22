@@ -85,6 +85,9 @@ static const int POLY_FORCE_INVERTED = (1<<20);
 // always draw this
 static const int POLY_ALWAYS_IN = (1<<21);
 
+// made of TRIANGLES, not TRIANGLE_FAN
+static const int POLY_TRIANGLES = (1<<22);
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -580,7 +583,12 @@ void dqi_poly::gldraw() {
       }
 
     if(draw) {
-      if(true) {
+      if(flags & POLY_TRIANGLES) {
+        glhr::color2(color);
+        glhr::set_depthtest(model_needs_depth());
+        glDrawArrays(GL_TRIANGLES, offset, cnt);
+        }
+      else {
         glEnable(GL_STENCIL_TEST);
   
         glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
@@ -619,11 +627,6 @@ void dqi_poly::gldraw() {
           }
         
         glDisable(GL_STENCIL_TEST);
-        }
-      else {
-        glhr::color2(color);
-        glhr::set_depthtest(model_needs_depth());
-        glDrawArrays(GL_TRIANGLE_FAN, offset, cnt);
         }
       }
     
