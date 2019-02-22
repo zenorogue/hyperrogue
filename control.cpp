@@ -251,6 +251,9 @@ void handlePanning(int sym, int uni) {
   if(sym == SDLK_END && DIM == 3) { 
     View = cpush(2, -0.2*shiftmul) * View, didsomething = true, playermoved = false;
     }
+  if(sym == SDLK_HOME && DIM == 3) { 
+    View = cpush(2, 0.2*shiftmul) * View, didsomething = true, playermoved = false;
+    }
   if(sym == SDLK_RIGHT) { 
     if(conformal::on)
       conformal::lvspeed += 0.1 * shiftmul;
@@ -427,7 +430,7 @@ void handleKeyNormal(int sym, int uni) {
     pushScreen(inv::show);
 #endif
   
-  if((sym == SDLK_HOME || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
+  if(((sym == SDLK_HOME && DIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
     fullcenter();
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
