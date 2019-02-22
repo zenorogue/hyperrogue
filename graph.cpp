@@ -510,7 +510,7 @@ bool noshadow;
 #if CAP_SHAPES
 void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
   if(mmspatial) { 
-    if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
+    if(model_needs_depth() || noshadow) 
       return; // shadows break the depth testing
     dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
     queuepolyat(V, bp, SHADOW_MON, prio); 
@@ -3338,7 +3338,7 @@ int wavephase;
 
 #if CAP_SHAPES
 void floorShadow(cell *c, const transmatrix& V, color_t col) {
-  if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
+  if(model_needs_depth() || noshadow) 
     return; // shadows break the depth testing
   dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
   if(qfi.shape) {
