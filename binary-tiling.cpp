@@ -271,7 +271,7 @@ namespace binary {
     return hr::parabolic13(y * co, z * co);
     }
   
-  ld btrange = 20;
+  ld btrange = 3, btrange_cosh;
 
   void draw() {
     dq::visited.clear();
@@ -291,7 +291,7 @@ namespace binary {
       if(!do_draw(c, V)) continue;
       #endif
       #if DIM==3
-      if(V[DIM][DIM] > btrange) continue;
+      if(V[DIM][DIM] > btrange_cosh) continue;
       setdist(c, 7, c);
       #endif
       drawcell(c, V, 0, false);
@@ -354,7 +354,7 @@ auto bt_config = addHook(hooks_args, 0, [] () {
     return 0;
     }
   else if(argis("-btrange")) {
-    shift_arg_formula(btrange);
+    shift_arg_formula(btrange, delayed_geo_reset);
     return 0;
     }
   return 1;
