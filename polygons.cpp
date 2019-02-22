@@ -490,11 +490,15 @@ vector<glvertex> line_vertices;
 #endif
 
 void glapplymatrix(const transmatrix& V) {
-  #if DIM == 3
-  glhr::set_modelview(glhr::id);
-  #else
   GLfloat mat[16];
   int id = 0;
+  if(DIM == 3) {
+    for(int y=0; y<4; y++) {
+      for(int x=0; x<4; x++) mat[id++] = V[x][y];
+      }
+    glhr::set_modelview(glhr::as_glmatrix(mat));
+    return;
+    }
   
   for(int y=0; y<3; y++) {
     for(int x=0; x<3; x++) mat[id++] = V[x][y];
@@ -512,7 +516,6 @@ void glapplymatrix(const transmatrix& V) {
       conformal::apply_orientation(mat[a*4], mat[a*4+1]);
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
-  #endif
   }
 
 void dqi_poly::gldraw() {

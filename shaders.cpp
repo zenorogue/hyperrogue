@@ -491,6 +491,7 @@ void init() {
     bool mps = j != 0;
     bool band = (sp == shader_projection::band);
     bool hp = (sp == shader_projection::halfplane);
+    bool s3 = (sp == shader_projection::standard3);
     
     programs[i][j] = new GLprogram(stringbuilder(
 
@@ -521,9 +522,13 @@ void init() {
       1,       "  }",
       
       1,       "float asinh(float x) {",
-      1,       "  return log(sqrt(1.0 + x*x) + x);",
+      1,       "  return log(sqrt(x*x + 1.0) + x);",
       1,       "  }",
-      
+    
+      1,       "float acosh(float x) {",
+      1,       "  return log(sqrt(x*x - 1.0) + x);",
+      1,       "  }",
+    
       1,       "float zlevel(vec4 h) {",
       1,       "  return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]);",
       1,       "  }",
@@ -548,6 +553,10 @@ void init() {
       hp,        "t.x /= t.z; t.y /= t.z; t.y = t.y + 1.0; ",
       hp,        "float rads = t.x * t.x + t.y * t.y; ",
       hp,        "t.x /= -rads; t.y /= -rads; t.z = 1.0; t[3] = 1.0;",
+      
+      s3,        "vec4 t = uMV * aPosition;",
+      s3,        "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
+      s3,        "t[3] = 1.0;",
       
       band || hp,"gl_Position = uP * t;",
       1,         "}"), 

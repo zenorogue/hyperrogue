@@ -3797,7 +3797,7 @@ namespace glhr {
     const GLfloat* as_array() const { return a[0]; }
     };
   
-  enum class shader_projection { standard, band, halfplane, MAX };
+  enum class shader_projection { standard, band, halfplane, standard3, MAX };
   
   extern shader_projection new_shader_projection;
   

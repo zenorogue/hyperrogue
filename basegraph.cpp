@@ -212,19 +212,21 @@ void display_data::set_projection(int ed, bool apply_models) {
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
   if(vid.consider_shader_projection) {
-    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1))
+    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 2)
       shaderside_projection = true;
     if(pmodel == mdBand && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
     if(pmodel == mdHalfplane && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
+    if(DIM == 3)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standard3;
     }
   
   start_projection(ed, shaderside_projection);
 
   auto cd = current_display;
 
-  if(!shaderside_projection) {
+  if(!shaderside_projection && DIM != 3) {
     glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
     if(ed) {
       glhr::glmatrix m = glhr::id;
@@ -255,6 +257,10 @@ void display_data::set_projection(int ed, bool apply_models) {
     if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
   
     current_display->scrdist_text = cd->ysize * sc / 2;
+
+    if(glhr::new_shader_projection == glhr::shader_projection::standard3) {
+      glhr::fog_max(1/binary::btrange);
+      }
     
     if(glhr::new_shader_projection == glhr::shader_projection::band) {
       glhr::projection_multiply(model_orientation_gl());
