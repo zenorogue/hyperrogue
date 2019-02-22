@@ -1617,6 +1617,8 @@ hpcshape
   shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
   
   shAsymmetric,
+  
+  shBinaryWall[9],
 
   shDodeca;
 #endif
@@ -1879,6 +1881,43 @@ template<class... T> ld grot(bool geometry, ld factor, T... t) {
 ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
+
+void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2, int z2, int flags) {
+  hyperpoint h0 = point3(x0,y0,z0);
+  hyperpoint h1 = point3(x1,y1,z1);
+  hyperpoint h2 = point3(x2,y2,z2);
+  using namespace hyperpoint_vec;
+  hyperpoint h3 = h1 + h2 - h0;
+  bshape(sh, PPR::WALL);
+  ld yy = log(2) / 2;
+  const int STEP=10;
+  auto at = [&] (hyperpoint h) { 
+    hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+    hpcpush(res);
+    };
+  if(flags == 2) {
+    for(int y=0; y<STEP; y++)
+    for(int x=0; x<STEP; x++) {
+      int x1 = x + 1;
+      int y1 = y + 1;
+      at((h0 * (STEP-x -y ) + h1 * x  + h2 * y ) / STEP);
+      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
+      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
+      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
+      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
+      at((h0 * (STEP-x1-y1) + h1 * x1 + h2 * y1) / STEP);
+      last->flags |= POLY_TRIANGLES;
+      }
+    }
+  else {
+    int STP2 = ((flags == 1) ? 2 : 1) * STEP;
+    for(int t=0; t<STP2; t++) at((h0 * (STP2-t) + h1 * t) / STP2);
+    for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h3 * t) / STEP);
+    for(int t=0; t<STEP; t++) at((h3 * (STEP-t) + h2 * t) / STEP);
+    for(int t=0; t<STEP; t++) at((h2 * (STEP-t) + h0 * t) / STEP);
+    at(h0);
+    }
+  }
 
 void buildpolys() {
  
@@ -2399,6 +2438,18 @@ void buildpolys() {
   bshape(shDragonTail, PPR::TENTACLE1, scalefactor, 240); //239 alt
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor, 242);
+  
+  if(DIM == 3) {
+    make_wall(shBinaryWall[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
+    make_wall(shBinaryWall[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
+    make_wall(shBinaryWall[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
+    make_wall(shBinaryWall[3], 0,0,-1, +1,0,-1, 0,+1,-1, 2);
+    make_wall(shBinaryWall[4], -1,-1,-1, -1,1,-1, -1,-1,+1, 1);
+    make_wall(shBinaryWall[5], +1,-1,-1, +1,1,-1, +1,-1,+1, 1);
+    make_wall(shBinaryWall[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
+    make_wall(shBinaryWall[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
+    make_wall(shBinaryWall[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
+    }
   
   ld krsc = 1;
   if(sphere) krsc *= 1.4;

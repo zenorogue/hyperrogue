@@ -4586,7 +4586,28 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       char xch = winf[c->wall].glyph;
       
-      switch(c->wall) {
+      if(DIM == 3) {
+        if(isWall(c)) {
+
+          const int darkval[9] = {0,1,1,0,3,3,4,4,0};
+          int d = (asciicol & 0xF0F0F0) >> 3;
+          for(int a=0; a<9; a++)
+            if(c->move(a) && !isWall(c->move(a))) {
+              if(a < 4) {
+                if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+                dynamicval<color_t> p (poly_outline, 0);
+                queuepoly(V, shBinaryWall[a], darkena(asciicol - d * darkval[a], 0, 0xFF));
+                }
+              else {
+                queuepoly(V, shBinaryWall[a], darkena(asciicol - d * darkval[a], 0, 0xFF));
+                }
+              }
+          }
+        else if(c->wall == waNone) ;
+        else error = true;
+        }
+      
+      else switch(c->wall) {
       
         case waBigBush:
           if(detaillevel >= 2)
@@ -5079,11 +5100,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     #if CAP_QUEUE
     if(error) {
-      if(ch == '#')
-        binary::queuecube(V, 1, 0xFF, darkena(asciicol, 0, 0xFF));
-      else if(ch == '.') ;
-      else
-        queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
+      queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
     if(vid.grid) {
