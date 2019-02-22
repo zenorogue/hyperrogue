@@ -175,6 +175,7 @@ void precalc() {
     }
   #endif
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
+  if(binarytiling && DIM == 3) binary::build_tmatrix();
 
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;

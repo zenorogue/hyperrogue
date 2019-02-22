@@ -203,31 +203,28 @@ namespace binary {
     }
   #endif
   
-  transmatrix tmatrix(heptagon *h, int dir) {
-    switch(dir) {
-      case 0:
-        return xpush(-log(2)) * parabolic(-1, -1);
-      case 1:
-        return xpush(-log(2)) * parabolic(1, -1);
-      case 2:
-        return xpush(-log(2)) * parabolic(-1, 1);
-      case 3:
-        return xpush(-log(2)) * parabolic(1, 1);
-      case 4:
-        return parabolic(-2, 0);
-      case 5:
-        return parabolic(+2, 0);
-      case 6:
-        return parabolic(0, -2);
-      case 7:
-        return parabolic(0, +2);
-      case 8:
-        h->cmove(8);
-        return inverse(tmatrix(h->move(8), h->c.spin(8)));
-      }
-    printf("error: case not handled in binary tiling tmatrix\n");
-    breakhere();
-    return Id;
+  transmatrix direct_tmatrix[8];
+  transmatrix inverse_tmatrix[8];
+  
+  void build_tmatrix() {
+    direct_tmatrix[0] = xpush(-log(2)) * parabolic3(-1, -1);
+    direct_tmatrix[1] = xpush(-log(2)) * parabolic3(1, -1);
+    direct_tmatrix[2] = xpush(-log(2)) * parabolic3(-1, 1);
+    direct_tmatrix[3] = xpush(-log(2)) * parabolic3(1, 1);
+    direct_tmatrix[4] = parabolic3(-2, 0);
+    direct_tmatrix[5] = parabolic3(+2, 0);
+    direct_tmatrix[6] = parabolic3(0, -2);
+    direct_tmatrix[7] = parabolic3(0, +2);
+    for(int i=0; i<8; i++)
+      inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
+    btrange_cosh = cosh(btrange);
+    }
+  
+  const transmatrix& tmatrix(heptagon *h, int dir) {
+    if(dir == 8)
+      return inverse_tmatrix[h->c.spin(8)];
+    else
+      return direct_tmatrix[dir];
     }
   
   #if DIM == 3
