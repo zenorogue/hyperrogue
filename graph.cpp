@@ -658,6 +658,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
       poly_outline = OUTLINE_OTHER;
     }
   
+  transmatrix Vit = V;
+  if(DIM == 3 && c) Vit = V * cspin(0, 2, ptick(618, 0));
+
   if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
 
   if(!mmitem && it) return true;
@@ -668,18 +671,18 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     }
   
   else if(it == itStrongWind) {
-    queuepoly(V * spinptick(750), shFan, darkena(icol, 0, 255));
+    queuepoly(Vit * spinptick(750), shFan, darkena(icol, 0, 255));
     }
 
   else if(it == itWarning) {
-    queuepoly(V * spinptick(750), shTriangle, darkena(icol, 0, 255));
+    queuepoly(Vit * spinptick(750), shTriangle, darkena(icol, 0, 255));
     }
     
   else if(it == itBabyTortoise) {
     int bits = c ? tortoise::babymap[c] : tortoise::last;
     int over = c && c->monst == moTortoise;
-    tortoise::draw(V * spinptick(5000) * ypush(crossf*.15), bits, over ? 4 : 2, 0);
-    // queuepoly(V, shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
+    tortoise::draw(Vit * spinptick(5000) * ypush(crossf*.15), bits, over ? 4 : 2, 0);
+    // queuepoly(Vit, shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
     }
   
   else if(it == itCompass) {
@@ -718,27 +721,27 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     }
 
   else if(it == itPalace) {
-    transmatrix V2 = V * spin(ticks / 1500.);
+    transmatrix V2 = Vit * spin(ticks / 1500.);
     draw_floorshape(c, V2, shMFloor3, 0xFFD500FF);
     draw_floorshape(c, V2, shMFloor4, darkena(icol, 0, 0xFF));
     queuepoly(V2, shGem[ct6], 0xFFD500FF);
     xsh = NULL;
     }
   
-  else if(mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) ;
+  else if(mapeditor::drawUserShape(Vit, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) ;
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
-      queuepoly(V * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), shRose, darkena(icol, 0, hidden ? 0x30 : 0xA0));
+      queuepoly(Vit * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), shRose, darkena(icol, 0, hidden ? 0x30 : 0xA0));
     }
 
   else if(it == itBarrow && c) {
     for(int i = 0; i<c->landparam; i++)
-      queuepolyat(V * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spinptick(1500), *xsh, darkena(icol, 0, hidden ? 0x40 : 
+      queuepolyat(Vit * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spinptick(1500), *xsh, darkena(icol, 0, hidden ? 0x40 : 
         (highwall(c) && wmspatial) ? 0x60 : 0xFF),
         PPR::HIDDEN);
 
-//      queuepoly(V*spin(M_PI+(1-2*ang)*2*M_PI/S84), shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
+//      queuepoly(Vit*spin(M_PI+(1-2*ang)*2*M_PI/S84), shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
     }
     
   else if(xsh) {
@@ -749,10 +752,14 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     if(it == itLotus) icol = 0x101010;
     if(it == itSwitch) icol = minf[active_switch()].color;
     
-    transmatrix V2 = V * spinptick(1500);
+    transmatrix V2 = Vit * spinptick(1500);
   
-    if(xsh == &shBookCover && mmitem)
-      queuepoly(V2, shBook, 0x805020FF);
+    if(xsh == &shBookCover && mmitem) {
+      if(DIM == 3)
+        queuepoly(V2 * cpush(2, 1e-3), shBook, 0x805020FF);
+      else
+        queuepoly(V2, shBook, 0x805020FF);
+      }
     
     PPR pr = PPR::ITEM;
     int alpha = hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0;
@@ -761,7 +768,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     queuepolyat(V2, *xsh, darkena(icol, 0, alpha), pr);
 
     if(it == itZebra)
-      queuepolyat(V * spinptick(1500, .5/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR::ITEMb);
+      queuepolyat(Vit * spinptick(1500, .5/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR::ITEMb);
     }
   
   else if(xch == 'o' || it == itInventory) {
@@ -783,9 +790,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     color_t col = darkena(icol, 0, int(0x80 + 0x70 * sinptick(300)));
     
     if(it == itOrbFish)
-      queuepolyat(V * spinptick(1500), shFishTail, col, PPR::ITEM_BELOW);
+      queuepolyat(Vit * spinptick(1500), shFishTail, col, PPR::ITEM_BELOW);
 
-    queuepolyat(V, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
+    queuepolyat(Vit, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
     hpcshape& sh = 
       it == itOrbLove ? shLoveRing :
       isRangedOrb(it) ? shTargetRing :
@@ -795,7 +802,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
       isDirectionalOrb(it) ? shSpearRing :
       among(it, itOrb37, itOrbGravity) ? shHeptaRing :
       shRing;
-    queuepolyat(V * spinptick(1500), sh, col, prio);
+    queuepolyat(Vit * spinptick(1500), sh, col, prio);
     }
 
   else if(it) return true;
