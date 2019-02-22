@@ -220,7 +220,7 @@ SDL_Surface *aux;
 #if CAP_POLY
 #define POLYMAX 60000
 
-vector<array<GLfloat, 3>> glcoords, ourshape;
+vector<glvertex> glcoords, ourshape;
 
 void initPolyForGL() {
 
@@ -252,7 +252,7 @@ int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
 int poly_flags;
 
 void add1(const hyperpoint& H) {
-  glcoords.push_back(make_array<GLfloat>(H[0], H[1], H[2])); 
+  glcoords.push_back(glhr::pointtogl(H)); 
   }  
 
 bool is_behind(const hyperpoint& H) {
@@ -314,7 +314,7 @@ bool correct_side(const hyperpoint& H) {
   return get_side(H) == spherespecial;
   }
 
-void fixpoint(array<float, 3>& hscr, hyperpoint H) {
+void fixpoint(glvertex& hscr, hyperpoint H) {
   hyperpoint bad = H, good = goodpoint;
 
   for(int i=0; i<10; i++) {
@@ -326,7 +326,7 @@ void fixpoint(array<float, 3>& hscr, hyperpoint H) {
     }
   hyperpoint Hscr;
   applymodel(good, Hscr); 
-  hscr = make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*current_display->radius); 
+  hscr = glhr::makevertex(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*current_display->radius); 
   }
 
 void addpoint(const hyperpoint& H) {
@@ -598,10 +598,10 @@ void dqi_poly::gldraw() {
           GLfloat yy = vid.yres;
           GLfloat dist = shaderside_projection ? current_display->scrdist : 0;
           vector<glvertex> scr = {
-            make_array<GLfloat>(-xx, -yy, dist), 
-            make_array<GLfloat>(+xx, -yy, dist), 
-            make_array<GLfloat>(+xx, +yy, dist), 
-            make_array<GLfloat>(-xx, +yy, dist)
+            glhr::makevertex(-xx, -yy, dist), 
+            glhr::makevertex(+xx, -yy, dist), 
+            glhr::makevertex(+xx, +yy, dist), 
+            glhr::makevertex(-xx, +yy, dist)
             };
           glhr::vertices(scr);
           glhr::id_modelview();
@@ -834,11 +834,11 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
   
   /*
   if(poly_flags & POLY_BADCENTERIN) {
-    glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
-    glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
-    glcoords.push_back(make_array<GLfloat>(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
-    glcoords.push_back(make_array<GLfloat>(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
-    glcoords.push_back(make_array<GLfloat>(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
     } */
   }
 
@@ -949,7 +949,7 @@ void dqi_poly::draw() {
           ld c1 = ah1[1], c2 = -ah2[1];
           if(c1 < 0) c1 = -c1, c2 = -c2;
           hyperpoint h = ah1 * c1 + ah2 * c2;
-          h /= hypot3(h);
+          h /= hypot_d(h, 3);
           if(h[2] < 0 && abs(h[0]) < sin(vid.twopoint_param)) cpha = 1-cpha, pha = 2;
           }
         if(cpha == 1) pha = 0;
@@ -1098,7 +1098,7 @@ void dqi_poly::draw() {
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
           ld a = i * degree + h;
-          glcoords.push_back(make_array<GLfloat>(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), current_display->scrdist));
+          glcoords.push_back(glhr::makevertex(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), current_display->scrdist));
           }
         poly_flags ^= POLY_INVERSE;
         }

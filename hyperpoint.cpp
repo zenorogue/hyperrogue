@@ -124,27 +124,32 @@ ld atan2_auto(ld y, ld x) {
 // by points in 3D space (Minkowski space) such that x^2+y^2-z^2 == -1, z > 0
 // (this is analogous to representing a sphere with points such that x^2+y^2+z^2 == 1)
 
-hyperpoint hpxy(ld x, ld y DC(, ld z)) { 
-  return hpxyz(x,y,DC(z,) euclid ? 1 : sphere ? sqrt(1-x*x-y*y D3(-z*z)) : sqrt(1+x*x+y*y D3(+z*z)));
+hyperpoint hpxy(ld x, ld y) { 
+  return hpxyz(x,y,euclid ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
+  }
+
+hyperpoint hpxy3(ld x, ld y, ld z) { 
+  return hpxyz3(x,y,z, euclid ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
 // center of the pseudosphere
-const hyperpoint Hypc(0,0,0 DC(,0));
+const hyperpoint Hypc = hpxyz(0,0,0);
 
 // origin of the hyperbolic plane
-const hyperpoint C0(0,0 DC(,0) ,1);
+const hyperpoint C0 = hpxyz(0,0,1);
 
 // a point (I hope this number needs no comments ;) )
-const hyperpoint Cx1(1,0 DC(,0) ,1.41421356237);
+const hyperpoint Cx1 = hpxyz(1,0,1.41421356237);
 
 // this function returns approximate square of distance between two points
 // (in the spherical analogy, this would be the distance in the 3D space,
 // through the interior, not on the surface)
 // also used to verify whether a point h1 is on the hyperbolic plane by using Hypc for h2
 
-bool zero2(hyperpoint h) { return h[0] == 0 && h[1] == 0 D3(&& h[2] == 0); }
-
-bool zero3(hyperpoint h) { return h[0] == 0 && h[1] == 0 && h[2] == 0 D3(&& h[3] == 0); }
+bool zero_d(hyperpoint h, int d) { 
+  for(int i=0; i<d; i++) if(h[i]) return false;
+  return true;
+  }
 
 ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   ld res = 0;
@@ -157,28 +162,14 @@ ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   return res;
   }
 
-ld intvalxy(const hyperpoint &h1, const hyperpoint &h2) {
-  return squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) D3(+ squar(h1[2]-h2[2]));
-  }
-
-ld intvalxyz(const hyperpoint &h1, const hyperpoint &h2) {
-  return squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) + squar(h1[2]-h2[2]) D3(+ squar(h1[3]-h2[3]));
-  }
-
-ld sqhypot2(const hyperpoint& h) {
-  return h[0]*h[0]+h[1]*h[1] D3(+h[2]*h[2]);
+ld sqhypot_d(const hyperpoint& h, int d) {
+  ld sum = 0;
+  for(int i=0; i<d; i++) sum += h[i]*h[i];
+  return sum;
   }
   
-ld sqhypot3(const hyperpoint& h) {
-  return h[0]*h[0]+h[1]*h[1]+h[2]*h[2] D3(+h[3]*h[3]);
-  }
-  
-ld hypot2(const hyperpoint& h) {
-  return sqrt(sqhypot2(h));
-  }
-  
-ld hypot3(const hyperpoint& h) {
-  return sqrt(sqhypot3(h));
+ld hypot_d(const hyperpoint& h, int d) {
+  return sqrt(sqhypot_d(h, d));
   }
   
 ld zlevel(const hyperpoint &h) {
@@ -242,11 +233,18 @@ transmatrix cspin(int a, int b, ld alpha) {
 
 transmatrix spin(ld alpha) { return cspin(0, 1, alpha); }
 
-transmatrix eupush(ld x, ld y DC(, ld z)) {
+transmatrix eupush(ld x, ld y) {
   transmatrix T = Id;
   T[0][DIM] = x;
   T[1][DIM] = y;
-  D3( T[2][DIM] = z );
+  return T;
+  }
+
+transmatrix eupush3(ld x, ld y, ld z) {
+  transmatrix T = Id;
+  T[0][DIM] = x;
+  T[1][DIM] = y;
+  if(DIM == 3) T[2][DIM] = z;
   return T;
   }
 
@@ -305,16 +303,46 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
 // push alpha units vertically
 transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 
-transmatrix parabolic1(ld u DC(, ld v)) {
+transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
+  #if DIM==2
+  return transmatrix {{{a,b,c},{d,e,f},{g,h,i}}};
+  #else
+  return transmatrix {{{a,b,0,c},{d,e,0,f},{0,0,1,0},{g,h,0,i}}};
+  #endif
+  }
+
+transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld j, ld k, ld l, ld m, ld n, ld o, ld p) {
+  #if DIM==2
+  return transmatrix {{{a,b,d},{e,f,h},{m,n,p}}};
+  #else
+  return transmatrix {{{a,b,c,d},{e,f,g,h},{i,j,k,l},{m,n,o,p}}};
+  #endif
+  }
+
+transmatrix parabolic1(ld u) {
   if(euclid)
     return ypush(u);
   else {
-    ld diag = (u*u D3(+v*v))/2;
-    #if DIM==2
-    return transmatrix {{{-diag+1, u, diag}, {-u, 1, u}, {-diag, u, diag+1}}};
-    #else
-    return transmatrix {{{-diag+1, u, v, diag}, {-u, 1, 0, u}, {-v, 0, 1, v}, {-diag, u, v, diag+1}}};
-    #endif
+    ld diag = u*u/2;
+    return matrix3(
+      -diag+1, u, diag,
+      -u, 1, u,
+      -diag, u, diag+1
+      );
+    }
+  }
+
+transmatrix parabolic13(ld u, ld v) {
+  if(euclid)
+    return ypush(u);
+  else {
+    ld diag = (u*u+v*v)/2;
+    return matrix4(
+      -diag+1, u, v, diag,
+      -u, 1, 0, u,
+      -v, 0, 1, v,
+      -diag, u, v, diag+1
+      );
     }
   }
 
@@ -354,12 +382,11 @@ void set_column(transmatrix& T, int i, const hyperpoint& H) {
   }
 
 transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
-  transmatrix T;
+  transmatrix T = Id;
   for(int i=0; i<MDIM; i++)
     T[i][0] = h1[i],
     T[i][1] = h2[i],
-    T[i][2] = h3[i] 
-    DC(, T[i][3] = 0);
+    T[i][2] = h3[i];
   return T;
   }
 
@@ -390,10 +417,13 @@ transmatrix rpushxto0(const hyperpoint& H) {
   }
 
 transmatrix ggpushxto0(const hyperpoint& H, ld co) {
-  if(euclid) return eupush(co * H[0], co * H[1] DC(, co * H[2]));
+  if(euclid) {
+    using namespace hyperpoint_vec;
+    return eupush(co * H);
+    }
   transmatrix res = Id;
-  if(sqhypot2(H) < 1e-12) return res;
-  ld fac = (H[DIM]-1) / sqhypot2(H);
+  if(sqhypot_d(H, DIM) < 1e-12) return res;
+  ld fac = (H[DIM]-1) / sqhypot_d(H, DIM);
   for(int i=0; i<DIM; i++)
   for(int j=0; j<DIM; j++)
     res[i][j] += H[i] * H[j] * fac;
@@ -530,7 +560,7 @@ double hdist0(const hyperpoint& mh) {
       if(mh[DIM] < 1) return 0;
       return acosh(mh[DIM]);
     case gcEuclid: {
-      ld d = sqhypot2(mh);
+      ld d = sqhypot_d(mh, DIM);
       return d;
       }
     case gcSphere: {

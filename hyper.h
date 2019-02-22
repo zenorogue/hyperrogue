@@ -191,17 +191,12 @@ typedef complex<ld> cld;
 
 #define MDIM (DIM+1)
 
-#if DIM == 2
-#define D3(x) // x
-#define DC(x,y) // x,y
-#else
-#define D3(x) x
-#define DC(x,y) x,y
-#endif
-
 struct hyperpoint : array<ld, MDIM> {
   hyperpoint() {}
-  hyperpoint(ld x, ld y, ld z DC(, ld w)) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; D3((*this)[3] = w;) }
+  hyperpoint(ld x, ld y, ld z, ld w) { 
+    (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; 
+    if(DIM == 3) (*this)[3] = w;
+    }
   };
 
 struct transmatrix {
@@ -221,9 +216,11 @@ inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
 
 inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   transmatrix R;
-  // for(int i=0; i<3; i++) for(int j=0; j<3; j++) R[i][j] = 0;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) // for(int k=0; k<3; k++)
-    R[i][j] = T[i][0] * U[0][j] + T[i][1] * U[1][j] + T[i][2] * U[2][j] D3(+ T[i][3] * U[3][j]);
+  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) {
+    R[i][j] = 0;
+    for(int k=0; k<MDIM; k++)
+      R[i][j] += T[i][k] * U[k][j];
+    }
   return R;
   }
 
@@ -238,6 +235,9 @@ constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
 
 // identity matrix
 const static transmatrix Id = diag(1,1,1,1);
+
+// zero matrix
+const static transmatrix Zero = diag(0,0,0,0);
 
 // mirror image
 const static transmatrix Mirror = diag(1,-1,1,1);
@@ -254,14 +254,17 @@ const static transmatrix pispin = diag(-1,-1,1,1);
 // central symmetry
 const static transmatrix centralsym = diag(-1,-1,-1,-1);
 
-#define hpxyz hyperpoint
-
 #if DIM == 3
-static hyperpoint point3(ld x, ld y, ld z) { return hpxyz(x,y,z,0); }
-static hyperpoint point2(ld x, ld y) { return hpxyz(x,y,0,0); }
+inline hyperpoint hpxyz(ld x, ld y, ld z) { return hyperpoint(x,y,0,z); }
+inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return hyperpoint(x,y,z,w); }
+inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
+inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 #else
 #define point3 hpxyz
-static hyperpoint point2(ld x, ld y) { return hpxyz(x,y,0); }
+inline hyperpoint hpxyz(ld x, ld y, ld z) { return hyperpoint(x,y,z); }
+inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return hyperpoint(x,y,w); }
+inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0); }
+inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z); }
 #endif
 
 namespace hyperpoint_vec {
@@ -298,13 +301,14 @@ namespace hyperpoint_vec {
       h1[1] * h2[2] - h1[2] * h2[1],
       h1[2] * h2[0] - h1[0] * h2[2],
       h1[0] * h2[1] - h1[1] * h2[0]
-      DC(,0)
       );
     }
 
   // inner product (in R^3)
   inline ld operator | (hyperpoint h1, hyperpoint h2) {
-    return h1[0] * h2[0] + h1[1] * h2[1] + h1[2] * h2[2] D3(+ h1[3] * h2[3]);
+    ld sum = 0;
+    for(int i=0; i<MDIM; i++) sum += h1[i] * h2[i];
+    return sum;
     }    
   }
 
@@ -2778,9 +2782,10 @@ void drawqueue();
 typedef float GLfloat;
 #endif
 
+typedef array<GLfloat, 2> glvec2;
 typedef array<GLfloat, 3> glvec3;
 typedef array<GLfloat, 4> glvec4;
-typedef glvec3 glvertex;
+typedef glvec4 glvertex;
 
 struct texture_triangle {
   array<hyperpoint, 3> v;
@@ -3564,8 +3569,6 @@ template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1
 
 extern cell *lastmountpos[MAXPLAYER];
 
-ld hypot3(const hyperpoint& h);
-
 extern const hyperpoint Hypc;
 ld det(const transmatrix& T);
 void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame = 0);
@@ -3573,19 +3576,14 @@ void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame = 
 string fts(float x);
 bool model_needs_depth();
 
-hyperpoint hpxy(ld x, ld y DC(, ld z));
-ld sqhypot2(const hyperpoint& h);
-ld hypot2(const hyperpoint& h);
+hyperpoint hpxy(ld x, ld y);
+hyperpoint hpxy3(ld x, ld y, ld z);
+ld sqhypot_d(const hyperpoint& h, int d);
+ld hypot_d(const hyperpoint& h, int d);
 transmatrix pushxto0(const hyperpoint& H);
 transmatrix rpushxto0(const hyperpoint& H);
 transmatrix spintox(const hyperpoint& H);
 transmatrix ypush(ld alpha);
-
-#if DIM == 3
-static hyperpoint hpxy0(ld x, ld y) { return hpxy(x, y, 0); }
-#else
-static hyperpoint hpxy0(ld x, ld y) { return hpxy(x, y); }
-#endif
 
 #if CAP_SURFACE
 namespace surface {
@@ -3776,10 +3774,10 @@ template<> struct saver<ld> : dsaver<ld> {
 #endif
 extern vector<unique_ptr<drawqueueitem>> ptds;
 extern ld intval(const hyperpoint &h1, const hyperpoint &h2);
-extern ld intvalxy(const hyperpoint &h1, const hyperpoint &h2);
 transmatrix euscalezoom(hyperpoint h);
 transmatrix euaffine(hyperpoint h);
-transmatrix eupush(ld x, ld y DC(, ld z));
+transmatrix eupush(ld x, ld y);
+transmatrix eupush3(ld x, ld y, ld z);
 transmatrix eupush(hyperpoint h);
 transmatrix rspintox(const hyperpoint& H);
 transmatrix gpushxto0(const hyperpoint& H);
@@ -3789,6 +3787,7 @@ hyperpoint normalize(hyperpoint H);
 extern ld hrandf();
 
 namespace glhr {
+  static const int SHDIM = 4;
 
   struct glmatrix {
     GLfloat a[4][4];
@@ -3810,7 +3809,11 @@ namespace glhr {
   void set_modelview(const glmatrix& m);  
   hyperpoint gltopoint(const glvertex& t);
   glvertex pointtogl(const hyperpoint& t);
-
+  
+  inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
+    return glvertex({x,y,z,1});
+    }
+  
   struct colored_vertex {
     glvec3 coords;
     glvec4 color;
@@ -3826,14 +3829,14 @@ namespace glhr {
     };
   
   struct textured_vertex {
-    glvec3 coords;
-    glvec3 texture;
+    glvec4 coords;
+    glvec2 texture;
     };
   
   struct ct_vertex {
-    glvec3 coords;
+    glvec4 coords;
     glvec4 color;
-    glvec3 texture;
+    glvec2 texture;
     ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
       coords = pointtogl(h);
       texture[0] = x1;
@@ -4213,11 +4216,14 @@ bool saved_tortoise_on(cell *c);
 
 #if CAP_BT
 void horopoint(ld y, ld x);
-hyperpoint get_horopoint(ld y, ld x DC(,ld z));
+hyperpoint get_horopoint(ld y, ld x);
+hyperpoint get_horopoint3(ld y, ld x, ld z);
 
 namespace binary {
   heptagon *createStep(heptagon *parent, int d);
-  transmatrix parabolic(ld u DC(, ld v));
+  transmatrix parabolic(ld u);
+  transmatrix parabolic3(ld u, ld v);
+  extern ld btrange, btrange_cosh;
   }
 #endif
 

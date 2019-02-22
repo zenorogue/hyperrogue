@@ -529,9 +529,9 @@ namespace glhr { void texture_vertices(GLfloat *f, int qty, int stride = 2) {
   } 
  void oldvertices(GLfloat *f, int qty) {
   #if CAP_SHADER
-  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), f);
+  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);
   #else
-  glVertexPointer(3, GL_FLOAT, 0, f);
+  glVertexPointer(SHDIM, GL_FLOAT, 0, f);
   #endif
   // #endif
   }
@@ -544,9 +544,9 @@ glhr::textured_vertex charvertex(int x1, int y1, ld tx, ld ty) {
   res.coords[0] = x1;
   res.coords[1] = y1;
   res.coords[2] = 0;
+  res.coords[3] = 1;
   res.texture[0] = tx;
   res.texture[1] = ty;
-  res.texture[2] = 0;
   return res;
   }
 
@@ -965,7 +965,7 @@ void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
       float rr = (M_PI * 2 * r) / pts;
-      glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * vid.stretch * cos(rr), current_display->scrdist));
+      glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * vid.stretch * cos(rr), current_display->scrdist));
       }
     glhr::vertices(glcoords);
     glhr::set_depthtest(false);

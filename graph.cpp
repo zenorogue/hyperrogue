@@ -2286,6 +2286,7 @@ array<array<int,4>,AURA+1> aurac;
 
 bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
+  if(DIM == 3) return false;
   if(sphere && mdAzimuthalEqui()) return true;
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && conformal::model_transition < 1) 
     return true;
@@ -5779,7 +5780,7 @@ void drawmovestar(double dx, double dy) {
     Centered = eupush(H);
   else if(R > 1e-9) Centered = rgpushxto0(H);
   
-  Centered = Centered * rgpushxto0(hpxy0(dx*5, dy*5));
+  Centered = Centered * rgpushxto0(hpxy(dx*5, dy*5));
   if(multi::cpid >= 0) multi::crosscenter[multi::cpid] = Centered;
   
   int rax = vid.axes;

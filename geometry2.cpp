@@ -362,7 +362,11 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
 
 void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
   // we perform fixing in check, so that it works with larger range
-  virtualRebase(base, h, tohex, [] (const hyperpoint& h) { return hyperbolic ? hpxy(h[0], h[1] DC(,h[2])) :h; });
+  virtualRebase(base, h, tohex, [] (const hyperpoint& h) { 
+    if(hyperbolic && DIM == 2) return hpxy(h[0], h[1]);
+    if(hyperbolic && DIM == 3) return hpxy3(h[0], h[1], h[2]);
+    return h; 
+    });
   }
 
 // works only in geometries similar to the standard one, and only on heptagons
@@ -436,8 +440,8 @@ hyperpoint randomPointIn(int t) {
   }
 
 #if CAP_BT
-hyperpoint get_horopoint(ld y, ld x DC(,ld z)) {
-  return xpush(-y) * binary::parabolic(x,z) * C0;
+hyperpoint get_horopoint(ld y, ld x) {
+  return xpush(-y) * binary::parabolic(x) * C0;
   }
 #endif
 
