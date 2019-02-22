@@ -1366,7 +1366,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else {
           // int d0 = d % TEMPLE_EACH;
           // if(d0<0) d0=-d0;
-          if(hrand(100) < (peace::on ? 15 : 30)) //  && d0 != 1 && d0 != TEMPLE_EACH-1)
+          if(hrand(100) < (peace::on ? 15 : 30) && !(DIM == 3 && shmup::on))
             c->wall = waBigStatue;
           else if(hrand(20000) < -d)
             c->monst = hrand(3) ? moCultist : moPyroCultist;
