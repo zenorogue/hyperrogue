@@ -244,9 +244,11 @@ bool didsomething;
 
 typedef SDL_Event eventtype;
 
-void handlePanning(int sym, int uni) {
-  if(rug::rugged) return;
+bool smooth_movement = (DIM == 3);
 
+void handlePanning(int sym, int uni) {
+  if(rug::rugged || smooth_movement) return;
+  
 #if !ISPANDORA
   if(sym == SDLK_END && DIM == 3) { 
     View = cpush(2, -0.2*shiftmul) * View, didsomething = true, playermoved = false;
@@ -585,6 +587,37 @@ void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, (debugfile,"polling for events\n"));
   
+  if(smooth_movement && DEFAULTNOR) {
+    static int lastticks;
+    ld t = (ticks - lastticks) * shiftmul / 1000.;
+    lastticks = ticks;
+    Uint8 *keystate = SDL_GetKeyState(NULL);
+    if(keystate[SDLK_END] && DIM == 3 && DEFAULTNOR(SDLK_END))
+      View = cpush(2, -t) * View, didsomething = true, playermoved = false;
+    if(keystate[SDLK_HOME] && DIM == 3 && DEFAULTNOR(SDLK_HOME))
+      View = cpush(2, t) * View, didsomething = true, playermoved = false;
+    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT))
+      View = cspin(0, 2, -t) * View, didsomething = true;
+    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT))
+      View = cspin(0, 2, t) * View, didsomething = true;
+    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP))
+      View = cspin(1, 2, t) * View, didsomething = true;
+    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN))
+      View = cspin(1, 2, -t) * View, didsomething = true;
+    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
+      if(conformal::on)
+        conformal::rotation+=t;
+      else
+        View = spin(t) * View, didsomething = true;
+      }
+    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) {
+      if(conformal::on)
+        conformal::rotation-=t;
+      else
+        View = spin(-t) * View, didsomething = true;
+      }
+    }
+
   achievement_pump();  
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
