@@ -233,7 +233,7 @@ namespace binary {
     ld yy = log(2) / 2;
     const int STEP=3;
     const ld MUL = 1. / STEP;
-    auto at = [&] (ld x, ld y, ld z) { curvepoint(V * parabolic(size*x, size*y) * xpush(size*yy*z) * C0); };
+    auto at = [&] (ld x, ld y, ld z) { curvepoint(V * parabolic3(size*x, size*y) * xpush0(size*yy*z)); };
     for(int a:{-1,1}) {
       for(ld t=-STEP; t<STEP; t++) at(a, 1,t*MUL);
       for(ld t=-STEP; t<STEP; t++) at(a, -t*MUL,1);
