@@ -603,6 +603,7 @@ double hdist(const hyperpoint& h1, const hyperpoint& h2) {
   }
 
 hyperpoint mscale(const hyperpoint& t, double fac) {
+  if(DIM == 3) return cpush(2, fac) * t;
   hyperpoint res;
   for(int i=0; i<MDIM; i++) 
     res[i] = t[i] * fac;
@@ -610,6 +611,7 @@ hyperpoint mscale(const hyperpoint& t, double fac) {
   }
 
 transmatrix mscale(const transmatrix& t, double fac) {
+  if(DIM == 3) return t * cpush(2, fac);
   transmatrix res;
   for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
     res[i][j] = t[i][j] * fac;

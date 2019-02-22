@@ -250,9 +250,11 @@ namespace geom3 {
     }
   
   ld lev_to_factor(ld lev) { 
+    if(DIM == 3) return lev;
     return projection_to_factor(lev_to_projection(lev)); 
     }
   ld factor_to_lev(ld fac) { 
+    if(DIM == 3) return fac;
     return depth - projection_to_abslev(factor_to_projection(fac)); 
     }
   
@@ -326,6 +328,7 @@ namespace geom3 {
     else {
       INFDEEP = (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
       ld wh = actual_wall_height();
+      if(DIM == 3) wh = 0.5;
       WALL = lev_to_factor(wh);
       
       human_height = human_wall_ratio * wh;
