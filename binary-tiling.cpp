@@ -262,16 +262,14 @@ namespace binary {
     }
   #endif
 
-  #if DIM==2
   transmatrix parabolic(ld u) {
     return parabolic1(u * vid.binary_width / log(2) / 2);
     }
-  #else
-  transmatrix parabolic(ld y, ld z) {
+
+  transmatrix parabolic3(ld y, ld z) {
     ld co = vid.binary_width / log(2) / 2;
-    return parabolic1(y * co, z * co);
+    return hr::parabolic13(y * co, z * co);
     }
-  #endif
   
   ld btrange = 20;
 
