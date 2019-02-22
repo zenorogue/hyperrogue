@@ -328,7 +328,6 @@ namespace geom3 {
     else {
       INFDEEP = (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
       ld wh = actual_wall_height();
-      if(DIM == 3) wh = 0.5;
       WALL = lev_to_factor(wh);
       
       human_height = human_wall_ratio * wh;
