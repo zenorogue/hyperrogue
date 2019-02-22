@@ -87,7 +87,11 @@ namespace binary {
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
 #else
   heptagon *build(heptagon *parent, int d, int d1, int delta) {
-    int t = 9; const int side = 0;
+    int t = 9; 
+    int side = 0;
+    if(d < 4) side = (parent->zebraval * 2 + d) % 5;
+    if(d == 8) side = ((parent->zebraval-d1) * 3) % 5;
+    
 #endif
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
     h->distance = parent->distance + delta;
