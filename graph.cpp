@@ -4598,9 +4598,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           const int darkval[9] = {0,1,1,0,3,3,4,4,0};
           int d = (asciicol & 0xF0F0F0) >> 3;
-          for(int a=0; a<9; a++)
+          for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall(c->move(a))) {
-              if(a < 4) {
+              if(a < 4 && hyperbolic) {
                 if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 dynamicval<color_t> p (poly_outline, 0);
                 queuepoly(V, shBinaryWall[a], darkena(asciicol - d * darkval[a], 0, 0xFF));
@@ -5708,6 +5708,10 @@ void drawthemap() {
   #if CAP_ARCM
   else if(archimedean)
     arcm::draw();
+  #endif
+  #if MAXDIM == 4
+  else if(euclid && DIM == 3)
+    space::draw();
   #endif
   else
     drawStandard();

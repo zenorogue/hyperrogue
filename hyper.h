@@ -192,7 +192,7 @@ typedef complex<ld> cld;
 #if MAXDIM == 3
 #define DIM 2
 #else
-#define DIM (geometry == gBinary3 ? 3 : 2)
+#define DIM ((geometry == gBinary3 || geometry == gCubeTiling) ? 3 : 2)
 #endif
 #define MDIM (DIM+1)
 
@@ -4235,6 +4235,14 @@ namespace binary {
   transmatrix parabolic(ld u);
   transmatrix parabolic3(ld u, ld v);
   extern ld btrange, btrange_cosh;
+  }
+#endif
+
+#if MAXDIM == 4
+namespace space {
+  heptagon *createStep(heptagon *parent, int d);
+  hrmap* new_map();
+  void draw();
   }
 #endif
 

@@ -1107,9 +1107,9 @@ void optimizeview() {
   
   if(0) ;
 
-  #if CAP_BT || CAP_ARCM
-  else if(binarytiling || archimedean) {
-    turn = -1, best = View[DIM][DIM];
+  #if CAP_BT || CAP_ARCM || MAXDIM == 4
+  else if(binarytiling || archimedean || (euclid && DIM == 3)) {
+    turn = -1, best = hdist0(tC0(View));
     for(int i=0; i<viewctr.at->c7->type; i++) {
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
@@ -1117,11 +1117,14 @@ void optimizeview() {
       #if CAP_BT
       if(binarytiling) T = binary::relative_matrix(h2, viewctr.at);
       #endif
+      #if MAXDIM == 4
+      if(euclid && DIM == 3) T = space::relative_matrix(h2, viewctr.at);
+      #endif
       #if CAP_ARCM
       if(archimedean)  T = arcm::relative_matrix(h2, viewctr.at);
       #endif
       hyperpoint H = View * tC0(T);
-      ld quality = euclid ? hdist0(H) : H[DIM];
+      ld quality = hdist0(H);
       if(quality < best) best = quality, turn = i1, TB = T;
       }
     if(turn >= 0) {
@@ -1590,8 +1593,8 @@ bool do_draw(cell *c) {
 
 bool do_draw(cell *c, const transmatrix& T) {
   if(DIM == 3) {
-    if(hyperbolic && V[DIM][DIM] > btrange_cosh) return false;
-    if(euclid && hypot_d(tC0(T), 3)) return false;
+    if(hyperbolic && T[DIM][DIM] > binary::btrange_cosh) return false;
+    if(euclid && hypot_d(tC0(T), 3) > 10) return false;
     setdist(c, 7, c);
     return true;
     }

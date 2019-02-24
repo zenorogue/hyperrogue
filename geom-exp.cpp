@@ -371,7 +371,7 @@ void ge_land_selection() {
 vector<eGeometry> tilinglist = {
   gTinySphere, gSmallSphere, gSphere, gEuclid, gNormal, gOctagon,
   gOctahedron, gEuclidSquare, g45, g46, g47,
-  gArchimedean, gBinaryTiling, gBinary3
+  gArchimedean, gBinaryTiling, gBinary3, gCubeTiling
   };
 
 vector<eGeometry> quotientlist = {

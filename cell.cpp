@@ -1236,6 +1236,7 @@ void initcells() {
   else if(archimedean) currentmap = arcm::new_map();
   #endif
   else if(fulltorus) currentmap = new hrmap_torus;
+  else if(euclid && DIM == 3) currentmap = space::new_map();
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
@@ -1870,6 +1871,9 @@ int celldistance(cell *c1, cell *c2) {
 
   if(binarytiling && DIM == 3) 
     return binary::celldistance3(c1, c2);
+
+  if(euclid && DIM == 3) 
+    return space::celldistance(c1, c2);
 
   return hyperbolic_celldistance(c1, c2);
   }

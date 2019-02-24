@@ -2436,7 +2436,7 @@ void buildpolys() {
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor, 242);
   
-  if(DIM == 3) {
+  if(DIM == 3 && binarytiling) {
     make_wall(shBinaryWall[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
     make_wall(shBinaryWall[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
     make_wall(shBinaryWall[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
@@ -2446,6 +2446,22 @@ void buildpolys() {
     make_wall(shBinaryWall[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
     make_wall(shBinaryWall[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
     make_wall(shBinaryWall[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
+    }
+  
+  if(DIM == 3 && euclid) {
+    for(int w=0; w<6; w++) {
+      bshape(shBinaryWall[w], PPR::WALL);
+      for(int a=0; a<=4; a++) {
+        int t[3];
+        t[0] = (w&1) ? -1 : 1;
+        t[1] = among(a, 0, 3, 4) ? -1 : 1;
+        t[2] = among(a, 2, 3) ? -1 : 1;
+        int x = w/2;
+        int y = (x+2)%3;
+        int z = (y+2)%3;
+        hpcpush(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
+        }
+      }
     }
   
   ld krsc = 1;
