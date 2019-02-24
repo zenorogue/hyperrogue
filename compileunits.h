@@ -32,6 +32,7 @@
 #include "binary-tiling.cpp"
 #include "archimedean.cpp"
 #include "euclid.cpp"
+#include "sphere.cpp"
 #include "crystal.cpp"
 #include "language.cpp"
 #include "cell.cpp"
