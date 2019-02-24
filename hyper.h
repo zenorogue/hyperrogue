@@ -4239,7 +4239,7 @@ namespace binary {
 #endif
 
 #if MAXDIM == 4
-namespace space {
+namespace euclid3 {
   heptagon *createStep(heptagon *parent, int d);
   hrmap* new_map();
   void draw();

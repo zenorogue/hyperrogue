@@ -233,7 +233,7 @@ heptagon *createStep(heptagon *h, int d) {
   #endif
   #if MAXDIM == 4
   if(!h->move(d) && euclid && DIM == 3) 
-    return space::createStep(h, d);
+    return euclid3::createStep(h, d);
   #endif
   #if CAP_ARCM
   if(!h->move(d) && archimedean) {

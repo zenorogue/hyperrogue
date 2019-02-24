@@ -5711,7 +5711,7 @@ void drawthemap() {
   #endif
   #if MAXDIM == 4
   else if(euclid && DIM == 3)
-    space::draw();
+    euclid3::draw();
   #endif
   else
     drawStandard();
