@@ -94,7 +94,7 @@ void addMessage(string s, char spamtype = 0);
 #define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || archimedean) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
 
-#define binarytiling (geometry == gBinaryTiling)
+#define binarytiling (geometry == gBinaryTiling || geometry == gBinary3)
 #define archimedean (geometry == gArchimedean)
 #define eubinary (euclid || binarytiling || geometry == gCrystal)
 
@@ -189,18 +189,24 @@ typedef complex<ld> cld;
 
 #define DEBSM(x) 
 
+#if MAXDIM == 3
+#define DIM 2
+#else
+#define DIM (geometry == gBinary3 ? 3 : 2)
+#endif
 #define MDIM (DIM+1)
 
-struct hyperpoint : array<ld, MDIM> {
+struct hyperpoint : array<ld, MAXDIM> {
   hyperpoint() {}
+  
   hyperpoint(ld x, ld y, ld z, ld w) { 
     (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; 
-    if(DIM == 3) (*this)[3] = w;
+    if(MAXDIM == 4) (*this)[3] = w;
     }
   };
 
 struct transmatrix {
-  ld tab[MDIM][MDIM];
+  ld tab[MAXDIM][MAXDIM];
   ld * operator [] (int i) { return tab[i]; }
   const ld * operator [] (int i) const { return tab[i]; }
   };
@@ -225,7 +231,7 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   }
 
 constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
-  #if DIM==2
+  #if MAXDIM==3
   return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
   #else
   return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
@@ -254,18 +260,10 @@ const static transmatrix pispin = diag(-1,-1,1,1);
 // central symmetry
 const static transmatrix centralsym = diag(-1,-1,-1,-1);
 
-#if DIM == 3
-inline hyperpoint hpxyz(ld x, ld y, ld z) { return hyperpoint(x,y,0,z); }
-inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return hyperpoint(x,y,z,w); }
+inline hyperpoint hpxyz(ld x, ld y, ld z) { return DIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
+inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return DIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
 inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
 inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
-#else
-#define point3 hpxyz
-inline hyperpoint hpxyz(ld x, ld y, ld z) { return hyperpoint(x,y,z); }
-inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return hyperpoint(x,y,w); }
-inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0); }
-inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z); }
-#endif
 
 namespace hyperpoint_vec {
 
@@ -2785,7 +2783,14 @@ typedef float GLfloat;
 typedef array<GLfloat, 2> glvec2;
 typedef array<GLfloat, 3> glvec3;
 typedef array<GLfloat, 4> glvec4;
+
+#if MAXDIM == 4
+#define SHDIM 4
 typedef glvec4 glvertex;
+#else
+#define SHDIM 3
+typedef glvec3 glvertex;
+#endif
 
 struct texture_triangle {
   array<hyperpoint, 3> v;
@@ -3787,7 +3792,6 @@ hyperpoint normalize(hyperpoint H);
 extern ld hrandf();
 
 namespace glhr {
-  static const int SHDIM = 4;
 
   struct glmatrix {
     GLfloat a[4][4];
@@ -3811,11 +3815,15 @@ namespace glhr {
   glvertex pointtogl(const hyperpoint& t);
   
   inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
+    #if SHDIM == 3
+    return glvertex({x,y,z});
+    #else
     return glvertex({x,y,z,1});
+    #endif
     }
   
   struct colored_vertex {
-    glvec3 coords;
+    glvertex coords;
     glvec4 color;
     colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
       coords[0] = x;
@@ -3829,12 +3837,12 @@ namespace glhr {
     };
   
   struct textured_vertex {
-    glvec4 coords;
+    glvertex coords;
     glvec2 texture;
     };
   
   struct ct_vertex {
-    glvec4 coords;
+    glvertex coords;
     glvec4 color;
     glvec2 texture;
     ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
@@ -4221,6 +4229,9 @@ hyperpoint get_horopoint3(ld y, ld x, ld z);
 
 namespace binary {
   heptagon *createStep(heptagon *parent, int d);
+  #if MAXDIM == 4
+  heptagon *createStep3(heptagon *parent, int d);
+  #endif
   transmatrix parabolic(ld u);
   transmatrix parabolic3(ld u, ld v);
   extern ld btrange, btrange_cosh;
@@ -4480,7 +4491,7 @@ struct comma_printer {
 template<class T, size_t X> void print(hstream& hs, const array<T, X>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 
-inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MDIM>&)h); }
+inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MAXDIM>&)h); }
 inline void print(hstream& hs, const transmatrix T) { 
   print(hs, "("); comma_printer c(hs);
   for(int i=0; i<MDIM; i++)

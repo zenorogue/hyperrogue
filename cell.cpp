@@ -1868,9 +1868,9 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
 
-  #if DIM == 3
-  if(binarytiling) return binary::celldistance(c1, c2);
-  #endif
+  if(binarytiling && DIM == 3) 
+    return binary::celldistance3(c1, c2);
+
   return hyperbolic_celldistance(c1, c2);
   }
 

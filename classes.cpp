@@ -1757,11 +1757,7 @@ vector<geometryinfo> ginf = {
   {"{8,3}", "Bolza",    "Bolza Surface",                              "Bolza",    8, 3, qsDOCKS,   gcHyperbolic, 0x18200, {{6, 4}}, eVariation::bitruncated},
   {"{8,3}", "Bolza2",   "Bolza Surface x2",                           "Bolza2",   8, 3, qsDOCKS,   gcHyperbolic, 0x18400, {{6, 4}}, eVariation::bitruncated},
   {"{7,3}", "minimal",  "minimal quotient",                           "minimal",  7, 3, qsSMALLN,  gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
-#if DIM == 2
   {"binary","none",     "variant of the binary tiling",               "binary",   7, 3, 0,gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
-#else
-  {"binary","none",     "variant of the binary tiling",               "binary",   9, 3, 0,gcHyperbolic,       0, {{7, 3}}, eVariation::pure},
-#endif
   {"Arch",  "none",     "Archimedean",                                "A",        7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"{7,3}", "Macbeath", "Macbeath Surface",                           "Macbeath", 7, 3, qsSMALL,   gcHyperbolic, 0x20000, {{7, 5}}, eVariation::bitruncated},
   {"{5,4}", "Bring",    "Bring's Surface",                            "Bring",    5, 4, qsSMALL,   gcHyperbolic, 0x20200, {{6, 4}}, eVariation::bitruncated},
@@ -1769,6 +1765,7 @@ vector<geometryinfo> ginf = {
   {"{12,3}","M4",       "Schmutz's M(4)",                             "M4",      12, 3, qsSMALL,   gcHyperbolic, 0x20600, {{4, 2}}, eVariation::bitruncated},
   {"{6,4}", "Crystal",  "dimensional crystal",                        "Crystal",  6, 4, qANYQ,     gcHyperbolic, 0x28000, {{5, 3}}, eVariation::pure},
   {"{3,4}", "none",     "{3,4} (octahedron)",                         "4x3",      3, 4, qsSMALLB,  gcSphere,     0x28200, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
+  {"bin3",  "none",     "3D binary tiling",                           "binary3",  9, 3, 0,         gcHyperbolic,       0, {{7, 3}}, eVariation::pure},
   };
 
 // remember to match the following mask when specifying codes for extra geometries: 0x78600

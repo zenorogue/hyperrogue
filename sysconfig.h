@@ -443,7 +443,7 @@ union SDL_Event;
 #endif
 #endif
 
-#define DIM 3
+#define MAXDIM 4
 
 #ifndef CAP_GEOMETRY
 #define CAP_GEOMETRY (!(ISMINI))

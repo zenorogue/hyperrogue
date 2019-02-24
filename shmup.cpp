@@ -845,15 +845,13 @@ void handleInput(int delta) {
       multi::mdx[i] = multi::mdx[i] * (1 - delta / 1000.) + mdx * delta / 2000.;
       multi::mdy[i] = multi::mdy[i] * (1 - delta / 1000.) + mdy * delta / 2000.;
   
-      #if DIM == 2
-      if(mdx != 0 || mdy != 0) if(!multi::combo[i]) {
-        cwtV = multi::whereis[i]; cwt = multi::player[i];
-        flipplayer = multi::flipped[i];
-        multi::whereto[i] = vectodir(hpxy(multi::mdx[i], multi::mdy[i]));
+      if(DIM == 2) {
+        if(mdx != 0 || mdy != 0) if(!multi::combo[i]) {
+          cwtV = multi::whereis[i]; cwt = multi::player[i];
+          flipplayer = multi::flipped[i];
+          multi::whereto[i] = vectodir(hpxy(multi::mdx[i], multi::mdy[i]));
+          }
         }
-      #else
-      ignore(mdx); ignore(mdy);
-      #endif
       
       if(multi::actionspressed[b+pcFire] || 
         (multi::actionspressed[b+pcMoveLeft] && multi::actionspressed[b+pcMoveRight]))
@@ -1626,21 +1624,21 @@ void movePlayer(monster *m, int delta) {
   
   playerturn[cpid] = mturn * delta / 150.0;
 
-  #if DIM == 2
-  double mdd = hypot(mdx, mdy);
-  
-  if(mdd > 1e-6) {
-    hyperpoint jh = hpxy(mdx/100.0, mdy/100.0);
-    hyperpoint ctr = m->pat * C0;
-
-    if(sphere && vid.alpha > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
-
-    hyperpoint h = inverse(m->pat) * rgpushxto0(ctr) * jh;
+  if(DIM == 2) {
+    double mdd = hypot(mdx, mdy);
     
-    playerturn[cpid] = -atan2(h[1], h[0]);
-    mgo += mdd;
+    if(mdd > 1e-6) {
+      hyperpoint jh = hpxy(mdx/100.0, mdy/100.0);
+      hyperpoint ctr = m->pat * C0;
+  
+      if(sphere && vid.alpha > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
+  
+      hyperpoint h = inverse(m->pat) * rgpushxto0(ctr) * jh;
+      
+      playerturn[cpid] = -atan2(h[1], h[0]);
+      mgo += mdd;
+      }
     }
-  #endif
 
 #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);

@@ -177,7 +177,6 @@ void closeJoysticks() {
   }
 
 void checkjoy() {
-  #if DIM == 2
   DEBB(DF_GRAPH, (debugfile,"check joy\n"));
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
@@ -200,11 +199,9 @@ void checkjoy() {
     }
   
   joydir = vectodir(hpxy(jx, jy));
-  #endif
   }
 
 void checkpanjoy(double t) {
-  #if DIM == 2
   if(shmup::on) return;
   
   if(vid.joypanspeed < 1e-7) return;
@@ -217,7 +214,6 @@ void checkpanjoy(double t) {
   
   playermoved = false;
   View = gpushxto0(hpxy(jx, jy)) * View;
-  #endif
   }
 
 #endif
@@ -305,7 +301,6 @@ void handlePanning(int sym, int uni) {
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
     if(isGravityLand(cwt.at->land)) playermoved = false;
 
-  #if DIM == 2
   if(sym == PSEUDOKEY_WHEELUP) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
@@ -313,7 +308,6 @@ void handlePanning(int sym, int uni) {
     View = gpushxto0(hpxy(jx, jy)) * View;
     sym = 1;
     }
-  #endif
   }
 
 #ifdef SCALETUNER
@@ -587,7 +581,7 @@ void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, (debugfile,"polling for events\n"));
   
-  if(smooth_movement && DEFAULTNOR) {
+  if(smooth_movement) {
     static int lastticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
@@ -940,11 +934,11 @@ bool haveMobileCompass() {
 #else
   if(forcetarget) return false;
 #endif
+  if(DIM == 3) return false;
   return canmove && !shmup::on && vid.mobilecompasssize > 0 && isize(screens) == 1;
   }
   
 bool handleCompass() {
-#if DIM == 2
   if(!haveMobileCompass()) return false;
   
   using namespace shmupballs;
@@ -966,9 +960,6 @@ bool handleCompass() {
     }
 
   return false;
-#else
-  return false;
-#endif
   }
 
 // orientation sensitivity

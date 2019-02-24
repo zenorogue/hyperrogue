@@ -224,8 +224,12 @@ heptagon *createStep(heptagon *h, int d) {
     crystal::create_step(h, d);
   #endif
   #if CAP_BT
-  if(!h->move(d) && binarytiling) 
+  if(!h->move(d) && binarytiling && DIM == 2)
     return binary::createStep(h, d);
+  #endif
+  #if CAP_BT && MAXDIM == 4
+  if(!h->move(d) && binarytiling && DIM == 3) 
+    return binary::createStep3(h, d);
   #endif
   #if CAP_ARCM
   if(!h->move(d) && archimedean) {

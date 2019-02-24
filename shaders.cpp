@@ -599,14 +599,15 @@ void init() {
 
 hyperpoint gltopoint(const glvertex& t) {
   hyperpoint h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; h[3] = t[3];
-  // if(DIM == 3) h[3] = 0;
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
+  if(SHDIM == 4 && MAXDIM == 4) h[3] = t[3];
   return h;
   }
 
 glvertex pointtogl(const hyperpoint& t) {
   glvertex h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; h[3] = t[3];
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
+  if(SHDIM == 4) h[3] = (DIM == 3) ? t[3] : 1;
   return h;
   }
 

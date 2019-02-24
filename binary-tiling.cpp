@@ -4,7 +4,6 @@ namespace hr {
 namespace binary {
 #if CAP_BT
 
-#if DIM == 2
   enum bindir {
     bd_right = 0,
     bd_up_right = 1,
@@ -15,20 +14,16 @@ namespace binary {
     bd_down_left = 5, /* for cells of degree 7 */
     bd_down_right = 6 /* for cells of degree 7 */
     };
-#endif
   
   int type_of(heptagon *h) {
     return h->c7->type;
     }
 
-#if DIM == 2  
   // 0 - central, -1 - left, +1 - right
   int mapside(heptagon *h) {
     return h->zebraval;
     }
-#endif
   
-#if DIM == 2
   #if DEBUG_BINARY_TILING
   map<heptagon*, long long> xcode;
   map<long long, heptagon*> rxcode;
@@ -46,7 +41,6 @@ namespace binary {
     breakhere();
     }
   #endif
-#endif
   
   void breakhere() {
     exit(1);
@@ -83,16 +77,7 @@ namespace binary {
     return h1;
     }
   
-#if DIM == 2
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
-#else
-  heptagon *build(heptagon *parent, int d, int d1, int delta) {
-    int t = 9; 
-    int side = 0;
-    if(d < 4) side = (parent->zebraval * 2 + d) % 5;
-    if(d == 8) side = ((parent->zebraval-d1) * 3) % 5;
-    
-#endif
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
     h->distance = parent->distance + delta;
     h->c7 = newCell(t, h);
@@ -108,8 +93,16 @@ namespace binary {
     #endif
     return h;
     }
+
+  #if MAXDIM==4
+  heptagon *build3(heptagon *parent, int d, int d1, int delta) {
+    int side = 0;
+    if(d < 4) side = (parent->zebraval * 2 + d) % 5;
+    if(d == 8) side = ((parent->zebraval-d1) * 3) % 5;
+    return build(parent, d, d1, 9, side, delta);
+    }
+  #endif
   
-  #if DIM == 2
   heptagon *createStep(heptagon *parent, int d) {
     auto h = parent;
     switch(d) {
@@ -163,15 +156,16 @@ namespace binary {
     breakhere();
     return NULL;
     }
-  #else
-  heptagon *createStep(heptagon *parent, int d) {
+
+  #if MAXDIM==4
+  heptagon *createStep3(heptagon *parent, int d) {
     auto h = parent;
     switch(d) {
       case 0: case 1:
       case 2: case 3:
-        return build(parent, d, 8, 1);
+        return build3(parent, d, 8, 1);
       case 8:
-        return build(parent, 8, hrand(4), -1);
+        return build3(parent, 8, hrand(4), -1);
       case 4:
         parent->cmove(8);
         if(parent->c.spin(8) & 1)
@@ -227,7 +221,7 @@ namespace binary {
       return direct_tmatrix[dir];
     }
   
-  #if DIM == 3
+  #if MAXDIM == 4
 
   void queuecube(const transmatrix& V, ld size, color_t linecolor, color_t facecolor) {
     ld yy = log(2) / 2;
@@ -287,29 +281,28 @@ namespace binary {
       
       
       cell *c = h->c7;
-      #if DIM==2
-      if(!do_draw(c, V)) continue;
-      #endif
-      #if DIM==3
-      if(V[DIM][DIM] > btrange_cosh) continue;
-      setdist(c, 7, c);
-      #endif
+      if(DIM == 2 && !do_draw(c, V)) continue;
+      if(DIM == 3) {
+        if(V[DIM][DIM] > btrange_cosh) continue;
+        setdist(c, 7, c);
+        }
       drawcell(c, V, 0, false);
 
-      #if DIM==2
-      dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
-      dq::enqueue(h->move(bd_right), V * parabolic(1));
-      dq::enqueue(h->move(bd_left), V * parabolic(-1));
-      if(c->type == 6)
-        dq::enqueue(h->move(bd_down), V * xpush(log(2)));
-      if(c->type == 7) {
-        dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
-        dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
+      if(DIM == 2) {
+        dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
+        dq::enqueue(h->move(bd_right), V * parabolic(1));
+        dq::enqueue(h->move(bd_left), V * parabolic(-1));
+        if(c->type == 6)
+          dq::enqueue(h->move(bd_down), V * xpush(log(2)));
+        if(c->type == 7) {
+          dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
+          dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
+          }
         }
-      #else
-      for(int i=0; i<9; i++)
-        dq::enqueue(h->move(i), V * tmatrix(h, i));
-      #endif
+      else {
+        for(int i=0; i<9; i++)
+          dq::enqueue(h->move(i), V * tmatrix(h, i));
+        }
       }
     }
   
@@ -319,28 +312,28 @@ namespace binary {
     transmatrix gm = Id, where = Id;
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
-        #if DIM==2
-        if(type_of(h2) == 6)
-          h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
-        else if(mapside(h2) == 1)
-          h2 = hr::createStep(h2, bd_left), where = parabolic(+1) * where;
-        else if(mapside(h2) == -1)
-          h2 = hr::createStep(h2, bd_right), where = parabolic(-1) * where;
-        #else
-        h2 = hr::createStep(h2, 8), where = inverse(tmatrix(h2, 8)) * where;
-        #endif
+        if(DIM == 3)
+          h2 = hr::createStep(h2, 8), where = inverse(tmatrix(h2, 8)) * where;
+        else {
+          if(type_of(h2) == 6)
+            h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
+          else if(mapside(h2) == 1)
+            h2 = hr::createStep(h2, bd_left), where = parabolic(+1) * where;
+          else if(mapside(h2) == -1)
+            h2 = hr::createStep(h2, bd_right), where = parabolic(-1) * where;
+          }
         }
       else {
-        #if DIM==2
-        if(type_of(h1) == 6)
-          h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
-        else if(mapside(h1) == 1)
-          h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(-1);
-        else if(mapside(h1) == -1)
-          h1 = hr::createStep(h1, bd_right), gm = gm * parabolic(+1);
-        #else
-        h1 = hr::createStep(h1, 8), where = where * tmatrix(h1, 8);
-        #endif
+        if(DIM == 3)
+          h1 = hr::createStep(h1, 8), where = where * tmatrix(h1, 8);
+        else {
+          if(type_of(h1) == 6)
+            h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
+          else if(mapside(h1) == 1)
+            h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(-1);
+          else if(mapside(h1) == -1)
+            h1 = hr::createStep(h1, bd_right), gm = gm * parabolic(+1);
+          }
         }
       }
     return gm * where;
@@ -360,9 +353,8 @@ auto bt_config = addHook(hooks_args, 0, [] () {
   return 1;
   });
 #endif
-#endif
 
-int celldistance(cell *c1, cell *c2) {
+int celldistance3(cell *c1, cell *c2) {
   int steps = 0;
   while(c1 != c2) {
     int d1 = celldistAlt(c1), d2 = celldistAlt(c2);
@@ -371,6 +363,8 @@ int celldistance(cell *c1, cell *c2) {
     }
   return steps;
   }
+#endif
+
 
   }
 }

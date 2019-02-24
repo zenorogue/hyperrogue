@@ -642,16 +642,13 @@ void dqi_poly::gldraw() {
 #endif
 
 double scale_at(const transmatrix& T) {
-  #if DIM==3
-  return 1 / (tC0(T))[2];
-  #else
+  if(DIM == 3) return 1 / (tC0(T))[2];
   using namespace hyperpoint_vec;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
   applymodel(T * xpush0(.01), h2);
   applymodel(T * ypush(.01) * C0, h3);
-  return sqrt(hypot2(h2-h1) * hypot2(h3-h1) / .0001);
-  #endif
+  return sqrt(hypot_d(h2-h1, 2) * hypot_d(h3-h1, 2) / .0001);
   }
 
 double linewidthat(const hyperpoint& h) {

@@ -477,9 +477,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
 void generate_floorshapes() {
 
-  if(0);
-  
-  else if(binarytiling && DIM == 3) ;
+  if(DIM == 3) ;
   
   #if CAP_IRR
   else if(IRREGULAR) {
@@ -625,9 +623,7 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
 
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
   if(!c) queuepolyat(V, shv[0], col, prio);
-  #if CAP_BT
   else if(DIM == 3) ;
-  #endif
   #if CAP_GP
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);

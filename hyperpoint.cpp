@@ -4,13 +4,8 @@
 
 namespace hr {
 
-#if DIM == 3
-eGeometry geometry = gBinaryTiling;
-eVariation variation = eVariation::pure;
-#else
 eGeometry geometry;
 eVariation variation;
-#endif
 
 
 // hyperbolic points and matrices
@@ -304,7 +299,7 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
 transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 
 transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
-  #if DIM==2
+  #if MAXDIM==3
   return transmatrix {{{a,b,c},{d,e,f},{g,h,i}}};
   #else
   return transmatrix {{{a,b,0,c},{d,e,0,f},{0,0,1,0},{g,h,0,i}}};
@@ -312,7 +307,7 @@ transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
   }
 
 transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld j, ld k, ld l, ld m, ld n, ld o, ld p) {
-  #if DIM==2
+  #if MAXDIM==3
   return transmatrix {{{a,b,d},{e,f,h},{m,n,p}}};
   #else
   return transmatrix {{{a,b,c,d},{e,f,g,h},{i,j,k,l},{m,n,o,p}}};
@@ -368,12 +363,9 @@ transmatrix rspintoc(const hyperpoint& H, int t, int f) {
 
 // rotate the hyperbolic plane around C0 such that H[1] == 0 and H[0] >= 0
 transmatrix spintox(const hyperpoint& H) { 
-  #if DIM==2
-  return spintoc(H, 0, 1); 
-  #else
+  if(DIM == 2) return spintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return spintoc(T1*H, 0, 2) * T1;
-  #endif
   }
 
 void set_column(transmatrix& T, int i, const hyperpoint& H) {
@@ -392,12 +384,9 @@ transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
 
 // reverse of spintox(H)
 transmatrix rspintox(const hyperpoint& H) { 
-  #if DIM==2
-  return rspintoc(H, 0, 1); 
-  #else
+  if(DIM == 2) return rspintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
-  #endif
   }
 
 // for H such that H[1] == 0, this matrix pushes H to C0
@@ -474,31 +463,33 @@ void fixmatrix(transmatrix& T) {
 // show the matrix on screen
 
 ld det(const transmatrix& T) {
-  #if DIM == 2
-  ld det = 0;
-  for(int i=0; i<3; i++) 
-    det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
-  for(int i=0; i<3; i++) 
-    det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
-  #else
-  ld det = 1;
-  transmatrix M = T;
-  for(int a=0; a<MDIM; a++) {
-    for(int b=a; b<=DIM; b++)
-      if(M[b][a]) {
-        if(b != a)
-          for(int c=a; c<MDIM; c++) tie(M[b][c], M[a][c]) = make_pair(-M[a][c], M[b][c]);
-        break;
-        }
-    if(!M[a][a]) return 0;
-    for(int b=a+1; b<=DIM; b++) {
-      ld co = -M[b][a] / M[a][a];
-      for(int c=a; c<MDIM; c++) M[b][c] += M[a][c] * co;
-      }
-    det *= M[a][a];
+  if(DIM == 2) {
+    ld det = 0;
+    for(int i=0; i<3; i++) 
+      det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
+    for(int i=0; i<3; i++) 
+      det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
+    return det;
     }
-  #endif
-  return det;
+  else {
+    ld det = 1;
+    transmatrix M = T;
+    for(int a=0; a<MDIM; a++) {
+      for(int b=a; b<=DIM; b++)
+        if(M[b][a]) {
+          if(b != a)
+            for(int c=a; c<MDIM; c++) tie(M[b][c], M[a][c]) = make_pair(-M[a][c], M[b][c]);
+          break;
+          }
+      if(!M[a][a]) return 0;
+      for(int b=a+1; b<=DIM; b++) {
+        ld co = -M[b][a] / M[a][a];
+        for(int c=a; c<MDIM; c++) M[b][c] += M[a][c] * co;
+        }
+      det *= M[a][a];
+      }
+    return det;
+    }
   }
 
 void inverse_error(const transmatrix& T) {
@@ -506,51 +497,48 @@ void inverse_error(const transmatrix& T) {
   }
 
 transmatrix inverse(const transmatrix& T) {
-  profile_start(7);
-  
-  #if DIM == 2
-  ld d = det(T);
-  transmatrix T2;
-  if(d == 0) {
-    inverse_error(T); 
-    return Id;
+  if(DIM == 2) {
+    ld d = det(T);
+    transmatrix T2;
+    if(d == 0) {
+      inverse_error(T); 
+      return Id;
+      }
+    
+    for(int i=0; i<3; i++) 
+    for(int j=0; j<3; j++) 
+      T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / d;
+    return T2;
     }
+  else {
+    transmatrix T1 = T;
+    transmatrix T2 = Id;
   
-  for(int i=0; i<3; i++) 
-  for(int j=0; j<3; j++) 
-    T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / d;
-  
-  #else
-  transmatrix T1 = T;
-  transmatrix T2 = Id;
-
-  for(int a=0; a<MDIM; a++) {
-    for(int b=a; b<=DIM; b++)
-      if(T1[b][a]) {
-        if(b != a)
-          for(int c=0; c<MDIM; c++) 
-            swap(T1[b][c], T1[a][c]), swap(T2[b][c], T2[a][c]);
-        break;
+    for(int a=0; a<MDIM; a++) {
+      for(int b=a; b<=DIM; b++)
+        if(T1[b][a]) {
+          if(b != a)
+            for(int c=0; c<MDIM; c++) 
+              swap(T1[b][c], T1[a][c]), swap(T2[b][c], T2[a][c]);
+          break;
+          }
+      if(!T1[a][a]) { inverse_error(T); return Id; }
+      for(int b=a+1; b<=DIM; b++) {
+        ld co = -T1[b][a] / T1[a][a];
+        for(int c=0; c<MDIM; c++) T1[b][c] += T1[a][c] * co, T2[b][c] += T2[a][c] * co;
         }
-    if(!T1[a][a]) { inverse_error(T); return Id; }
-    for(int b=a+1; b<=DIM; b++) {
-      ld co = -T1[b][a] / T1[a][a];
-      for(int c=0; c<MDIM; c++) T1[b][c] += T1[a][c] * co, T2[b][c] += T2[a][c] * co;
       }
-    }
-  
-  for(int a=MDIM-1; a>=0; a--) {
-    for(int b=0; b<a; b++) {
-      ld co = -T1[b][a] / T1[a][a];
-      for(int c=0; c<MDIM; c++) T1[b][c] += T1[a][c] * co, T2[b][c] += T2[a][c] * co;
+    
+    for(int a=MDIM-1; a>=0; a--) {
+      for(int b=0; b<a; b++) {
+        ld co = -T1[b][a] / T1[a][a];
+        for(int c=0; c<MDIM; c++) T1[b][c] += T1[a][c] * co, T2[b][c] += T2[a][c] * co;
+        }
+      ld co = 1 / T1[a][a];
+      for(int c=0; c<MDIM; c++) T1[a][c] *= co, T2[a][c] *= co;
       }
-    ld co = 1 / T1[a][a];
-    for(int c=0; c<MDIM; c++) T1[a][c] *= co, T2[a][c] *= co;
+    return T2;
     }
-  #endif
-
-  profile_stop(7);
-  return T2;
   }
 
 // distance between mh and 0

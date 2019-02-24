@@ -5128,8 +5128,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       if(0);
       #if CAP_BT
-      else if(binarytiling) {
-        #if DIM == 2
+      else if(binarytiling && DIM == 2) {
         ld yx = log(2) / 2;
         ld yy = yx;
         ld xx = 1 / sqrt(2)/2;
@@ -5143,9 +5142,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
         horizontal(yy, xx, -xx, 8, binary::bd_up);
         horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
-        #else
+        }
+      #endif
+      #if CAP_BT && MAXDIM == 4
+      else if(binarytiling && DIM == 3) {
         binary::queuecube(V, 1, 0xC0C0C080, 0);
-        #endif
         }
       #endif
       else if(isWarped(c) && has_nice_dual()) {
