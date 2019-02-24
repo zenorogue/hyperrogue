@@ -33,6 +33,7 @@
 #include "archimedean.cpp"
 #include "euclid.cpp"
 #include "sphere.cpp"
+#include "quotient.cpp"
 #include "crystal.cpp"
 #include "language.cpp"
 #include "cell.cpp"
