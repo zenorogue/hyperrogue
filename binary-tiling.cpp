@@ -281,11 +281,7 @@ namespace binary {
       
       
       cell *c = h->c7;
-      if(DIM == 2 && !do_draw(c, V)) continue;
-      if(DIM == 3) {
-        if(V[DIM][DIM] > btrange_cosh) continue;
-        setdist(c, 7, c);
-        }
+      if(!do_draw(c, V)) continue;
       drawcell(c, V, 0, false);
 
       if(DIM == 2) {
