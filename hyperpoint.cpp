@@ -447,8 +447,8 @@ void fixmatrix(transmatrix& T) {
       
       for(int z=0; z<DIM; z++) T[z][x] -= dp * T[z][y];
       }
-    for(int x=0; x<DIM; x++) T[2][x] = 0;
-    T[2][2] = 1;
+    for(int x=0; x<DIM; x++) T[DIM][x] = 0;
+    T[DIM][DIM] = 1;
     }
   else for(int x=0; x<MDIM; x++) for(int y=0; y<=x; y++) {
     ld dp = 0;
@@ -548,8 +548,7 @@ double hdist0(const hyperpoint& mh) {
       if(mh[DIM] < 1) return 0;
       return acosh(mh[DIM]);
     case gcEuclid: {
-      ld d = sqhypot_d(mh, DIM);
-      return d;
+      return hypot_d(mh, DIM);
       }
     case gcSphere: {
       ld res = mh[DIM] >= 1 ? 0 : mh[DIM] <= -1 ? M_PI : acos(mh[DIM]);
