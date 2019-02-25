@@ -62,7 +62,7 @@ namespace gp { extern gp::local_info draw_li; }
 
 transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
-  if(sphere_narcm) {
+  if(sphere_narcm && DIM == 2) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
       printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
       #if CAP_GP
@@ -222,7 +222,7 @@ transmatrix &ggmatrix(cell *c) {
   if(t[2][2] == 0) {
     if(euwrap && centerover.at) 
       t = calc_relative_matrix(c, centerover.at, C0);
-    else if(euclid) {
+    else if(euclid && DIM == 2) {
       if(!centerover.at) centerover = cwt;
       t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
