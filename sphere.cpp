@@ -354,6 +354,40 @@ transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
   return vmatrix120[0] * inverse(vmatrix120[h1->zebraval]) * vmatrix120[h2->zebraval] * inverse(vmatrix120[0]);
   }
 
+void makewax(int x) {
+  auto m = (hrmap_spherical3*) currentmap;
+  for(int i=0; i<120; i++) m->cells[i]->c7->wall = waNone;
+  m->cells[70]->c7->wall = waDune;
+  int cols[16] = {0x202020, 0x2020A0, 0x20A020, 0x20A0A0, 0xA02020, 0xA020A0, 0xA0A020, 0xA0A0A0,
+    0x606060, 0x6060FF, 0x60FF60, 0x60FFFF, 0xFF6060, 0xFF60FF, 0xFFFF60, 0xFFFFFF };
+  if(x) for(int i=0; i<12; i++) {
+    m->cells[70]->c7->move(i)->wall = waWaxWall;
+    m->cells[70]->c7->move(i)->landparam = cols[i];
+    }
+  }
+
+#if CAP_COMMANDLINE  
+int readArgs() {
+  using namespace arg;
+           
+  if(argis("-wax1")) {
+    PHASE(3);
+    start_game();
+    makewax(1);
+    }
+  else if(argis("-wax0")) {
+    PHASE(3);
+    start_game();
+    makewax(0);
+    }
+  else return 1;
+  return 0;
+  }
+
+auto hook = 
+  addHook(hooks_args, 100, readArgs);
+#endif
+
 }
 
 }
