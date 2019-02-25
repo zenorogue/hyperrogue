@@ -515,13 +515,18 @@ transmatrix inverse(const transmatrix& T) {
     transmatrix T2 = Id;
   
     for(int a=0; a<MDIM; a++) {
-      for(int b=a; b<=DIM; b++)
-        if(T1[b][a]) {
-          if(b != a)
-            for(int c=0; c<MDIM; c++) 
-              swap(T1[b][c], T1[a][c]), swap(T2[b][c], T2[a][c]);
-          break;
-          }
+      int best = a;
+      
+      for(int b=a+1; b<MDIM; b++)
+        if(abs(T1[b][a]) > abs(T1[best][a]))
+          best = b;
+
+      int b = best;
+
+      if(b != a)
+        for(int c=0; c<MDIM; c++) 
+          swap(T1[b][c], T1[a][c]), swap(T2[b][c], T2[a][c]);
+
       if(!T1[a][a]) { inverse_error(T); return Id; }
       for(int b=a+1; b<=DIM; b++) {
         ld co = -T1[b][a] / T1[a][a];
@@ -575,7 +580,7 @@ ld circlelength(ld r) {
 
 // distance between two points
 double hdist(const hyperpoint& h1, const hyperpoint& h2) {
-  return hdist0(gpushxto0(h1) * h2);
+  // return hdist0(gpushxto0(h1) * h2);
   ld iv = intval(h1, h2);
   switch(cgclass) {
     case gcEuclid:
