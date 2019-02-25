@@ -1042,6 +1042,7 @@ void centerpc(ld aspd) {
   if(shmup::on && DIM == 3) {
     transmatrix at = cpush(2, -vid.yshift) * ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at;  
     View = inverse(at) * View;
+    return;
     }
     
   #if CAP_RACING
