@@ -76,6 +76,14 @@ namespace multi {
     "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
     "Orb power (target: facing)"
     };
+
+  vector<string> playercmds_shmup3 = {
+    "rotate up", "rotate down", "rotate left", "rotate right",
+    "move up", "move right", "move down", "move left", 
+    "throw a knife", "face the pointer", "throw at the pointer", 
+    "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
+    "Orb power (target: facing)"
+    };
   
   vector<string> playercmds_turn = {
     "move up-right", "move up-left", "move down-right", "move down-left", 
@@ -89,6 +97,13 @@ namespace multi {
     "pan up", "pan right", "pan down", "pan left",
     "rotate left", "rotate right", "home",
     "world overview", "review your quest", "inventory", "main menu"
+    };
+
+  vector<string> pancmds3 = {
+    "look up", "look right", "look down", "look left",
+    "rotate left", "rotate right", "home",
+    "world overview", "review your quest", "inventory", "main menu",
+    "scroll forward", "scroll backward"
     };
 
 #define SHMUPAXES_BASE 4
@@ -428,12 +443,12 @@ struct shmup_configurer {
     }
 
   void handleConfig(int sym, int uni) {
-    auto& cmdlist = shmupcfg ? playercmds_shmup : playercmds_turn;
+    auto& cmdlist = shmupcfg ? (DIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
     
     #if CAP_SDL
     if(uni == '1') pushScreen(key_configurer(1, cmdlist));
     else if(uni == '2') pushScreen(key_configurer(2, cmdlist));
-    else if(uni == 'p') pushScreen(key_configurer(3, pancmds));
+    else if(uni == 'p') pushScreen(key_configurer(3, DIM == 3 ? pancmds3 : pancmds));
     else if(uni == '3') pushScreen(key_configurer(4, cmdlist));
     else if(uni == '4') pushScreen(key_configurer(5, cmdlist));
     else if(uni == '5') pushScreen(key_configurer(6, cmdlist));
