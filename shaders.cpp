@@ -491,7 +491,11 @@ void init() {
     bool mps = j != 0;
     bool band = (sp == shader_projection::band);
     bool hp = (sp == shader_projection::halfplane);
-    bool s3 = (sp == shader_projection::standard3);
+    bool sh3 = (sp == shader_projection::standardH3);
+    bool sr3 = (sp == shader_projection::standardR3);
+    bool ss3 = (sp == shader_projection::standardS3);
+    
+    bool s3 = (sh3 || sr3 || ss3);
     
     programs[i][j] = new GLprogram(stringbuilder(
 
@@ -555,10 +559,12 @@ void init() {
       hp,        "t.x /= -rads; t.y /= -rads; t.z = 1.0; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
-      s3,        "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
-      s3,        "t[3] = 1.0;",
+      sh3,       "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
+      sr3,       "vColor.xyz = vColor.xyz * (1.0 - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / 7.);",
+      ss3,       "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / 1.6);",
+      sh3 || sr3,"t[3] = 1.0;",
       
-      band || hp,"gl_Position = uP * t;",
+      band || hp || s3,"gl_Position = uP * t;",
       1,         "}"), 
       
       stringbuilder(

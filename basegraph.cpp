@@ -218,8 +218,12 @@ void display_data::set_projection(int ed, bool apply_models) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
     if(pmodel == mdHalfplane && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
-    if(DIM == 3)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standard3;
+    if(DIM == 3 && hyperbolic)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3;
+    if(DIM == 3 && euclid)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3;
+    if(DIM == 3 && sphere)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardS3;
     }
   
   start_projection(ed, shaderside_projection);
@@ -258,7 +262,7 @@ void display_data::set_projection(int ed, bool apply_models) {
   
     current_display->scrdist_text = cd->ysize * sc / 2;
 
-    if(glhr::new_shader_projection == glhr::shader_projection::standard3) {
+    if(glhr::new_shader_projection == glhr::shader_projection::standardH3) {
       glhr::fog_max(1/binary::btrange);
       }
     

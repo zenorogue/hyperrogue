@@ -1594,7 +1594,7 @@ bool do_draw(cell *c) {
 bool do_draw(cell *c, const transmatrix& T) {
   if(DIM == 3) {
     if(hyperbolic && T[DIM][DIM] > binary::btrange_cosh) return false;
-    if(euclid && hypot_d(tC0(T), 3) > 10) return false;
+    if(euclid && hypot_d(tC0(T), 3) > 7) return false;
     setdist(c, 7, c);
     return true;
     }
