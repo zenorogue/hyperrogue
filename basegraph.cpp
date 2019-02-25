@@ -218,11 +218,11 @@ void display_data::set_projection(int ed, bool apply_models) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
     if(pmodel == mdHalfplane && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
-    if(DIM == 3 && hyperbolic)
+    if(DIM == 3 && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3;
-    if(DIM == 3 && euclid)
+    if(DIM == 3 && euclid && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3;
-    if(DIM == 3 && sphere) {
+    if(DIM == 3 && sphere && apply_models) {
       shaderside_projection = true;
       if(spherephase == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
       if(spherephase == 1) glhr::new_shader_projection = glhr::shader_projection::standardS31;
