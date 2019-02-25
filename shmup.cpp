@@ -379,6 +379,9 @@ struct shmup_configurer {
     else dialog::addBreak(100);
     if(playercfg > 3)
       dialog::addItem(XLAT("configure player 4") + dsc(3), '4');
+    else if(!shmup::on && !multi::alwaysuse) {
+      dialog::addBoolItem(XLAT("smooth scrolling"), smooth_scrolling, 'c');
+      }
     else dialog::addBreak(100);
       
     if(playercfg > 4)
@@ -443,6 +446,7 @@ struct shmup_configurer {
   #if CAP_SDLJOY
     else if(uni == 'b') pushScreen(showJoyConfig);
   #endif
+    else if(uni == 'c') smooth_scrolling = !smooth_scrolling;
     else if(uni == 'r') 
       for(int i=0; i<MAXPLAYER; i++) 
         kills[i] = deaths[i] = treasures[i] = 0;

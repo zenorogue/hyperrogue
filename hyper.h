@@ -1792,6 +1792,7 @@ bool needConfirmationEvenIfSaved();
 #define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse && !(rug::rugged && rug::renderonce))
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
 
+extern bool smooth_scrolling;
 extern bool timerghost;
 extern bool gen_wandering;
 
