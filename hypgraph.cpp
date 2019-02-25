@@ -707,6 +707,7 @@ ld master_to_c7_angle() {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
+  if(DIM == 3) return V;
   #if CAP_IRR
   if(IRREGULAR)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
