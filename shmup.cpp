@@ -750,7 +750,7 @@ void handleInput(int delta) {
     if(DIM == 2)
       View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
     else
-      View = cspin(0, 2, panx) * cspin(0, 1, pany) * spin(panspin * d) * cpush(2, panmove) * View;
+      View = cspin(0, 2, panx/10) * cspin(0, 1, pany/10) * spin(panspin * d) * cpush(2, panmove/10) * View;
     playermoved = false;
     }
 #endif
