@@ -281,6 +281,7 @@ hyperpoint goodpoint;
 vector<pair<int, hyperpoint>> tofix;
 
 bool two_sided_model() {
+  if(DIM == 3) return false;
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
