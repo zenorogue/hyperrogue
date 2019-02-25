@@ -87,6 +87,14 @@ void precalc() {
       }
     goto finish;
     }
+  
+  if(sphere && DIM == 3) {
+    rhexf = hexf = 0.378077;
+    crossf = hcrossf = 0.620672;
+    tessf = 1.090550;
+    hexhexdist = 0.566256;
+    goto finish;
+    }
 
   fmin = 0, fmax = hyperbolic ? 10 : 3;
   
