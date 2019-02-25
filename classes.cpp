@@ -1757,7 +1757,7 @@ vector<geometryinfo> ginf = {
   {"{8,3}", "Bolza",    "Bolza Surface",                              "Bolza",    8, 3, qsDOCKS,   gcHyperbolic, 0x18200, {{6, 4}}, eVariation::bitruncated},
   {"{8,3}", "Bolza2",   "Bolza Surface x2",                           "Bolza2",   8, 3, qsDOCKS,   gcHyperbolic, 0x18400, {{6, 4}}, eVariation::bitruncated},
   {"{7,3}", "minimal",  "minimal quotient",                           "minimal",  7, 3, qsSMALLN,  gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
-  {"binary","none",     "variant of the binary tiling",               "binary",   7, 3, 0,gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
+  {"binary","none",     "variant of the binary tiling",               "binary",   7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"Arch",  "none",     "Archimedean",                                "A",        7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"{7,3}", "Macbeath", "Macbeath Surface",                           "Macbeath", 7, 3, qsSMALL,   gcHyperbolic, 0x20000, {{7, 5}}, eVariation::bitruncated},
   {"{5,4}", "Bring",    "Bring's Surface",                            "Bring",    5, 4, qsSMALL,   gcHyperbolic, 0x20200, {{6, 4}}, eVariation::bitruncated},
