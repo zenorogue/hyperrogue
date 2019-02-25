@@ -268,7 +268,7 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
 
 template<class T, class U> 
 void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
-  if(euclid || sphere) {
+  if((euclid || sphere) && DIM == 2) {
     again:
     if(euwrap) for(int i=0; i<6; i++) {
       // fix cylinder and square grid
@@ -297,7 +297,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
   while(true) {
   
-    double currz = check(at)[2];
+    double currz = check(at)[DIM];
     
     heptagon *h = base->master;
     
@@ -305,11 +305,11 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
     transmatrix bestV;
     
-    if(!binarytiling) for(int d=0; d<S7; d++) {
+    if(DIM == 2 && !binarytiling) for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
-      double newz = check(V2 * at) [2];
+      double newz = check(V2 * at) [DIM];
       if(newz < currz) {
         currz = newz;
         bestV = V2;
@@ -325,7 +325,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       if(tohex && BITRUNCATED) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->c.spin(d)*2*M_PI/S6) * invhexmove[d];
-        double newz = check(V2 *at) [2];
+        double newz = check(V2 *at) [DIM];
         if(newz < currz) {
           currz = newz;
           bestV = V2;
@@ -337,12 +337,12 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
         at = bestV * at;
         }
       else at = master_relative(base, true) * at;
-      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR))) {
+      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || DIM == 3) {
         while(true) {
           newbase = NULL;
           forCellCM(c2, base) {
             transmatrix V2 = calc_relative_matrix(base, c2, C0);
-            double newz = check(V2 * at) [2];
+            double newz = check(V2 * at) [DIM];
             if(newz < currz) {
               currz = newz;
               bestV = V2;
