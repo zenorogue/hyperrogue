@@ -493,7 +493,11 @@ void init() {
     bool hp = (sp == shader_projection::halfplane);
     bool sh3 = (sp == shader_projection::standardH3);
     bool sr3 = (sp == shader_projection::standardR3);
-    bool ss3 = (sp == shader_projection::standardS3);
+    bool ss30 = (sp == shader_projection::standardS30);
+    bool ss31 = (sp == shader_projection::standardS31);
+    bool ss32 = (sp == shader_projection::standardS32);
+    bool ss33 = (sp == shader_projection::standardS33);
+    bool ss3 = ss30 || ss31 || ss32 || ss33;
     
     bool s3 = (sh3 || sr3 || ss3);
     
@@ -561,7 +565,11 @@ void init() {
       s3,        "vec4 t = uMV * aPosition;",
       sh3,       "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
       sr3,       "vColor.xyz = vColor.xyz * (1.0 - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / 7.);",
-      ss3,       "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / 1.6);",
+      
+      ss30,      "vColor.xyz = vColor.xyz * (acos(t[3]) / 6.3); t = -t; ",
+      ss31,      "vColor.xyz = vColor.xyz * (acos(t[3]) / 6.3); t.xyz = -t.xyz; ",
+      ss32,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / 6.3); t.w = -t.w; ",
+      ss33,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / 6.3); ",
       sh3 || sr3,"t[3] = 1.0;",
       
       band || hp || s3,"gl_Position = uP * t;",

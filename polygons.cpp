@@ -1396,6 +1396,41 @@ void reverse_side_priorities() {
     PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM})
       reverse_priority(p);
   }
+
+// on the sphere, parts on the back are drawn first
+void draw_backside() {  
+  if(pmodel == mdHyperboloid && hyperbolic) {
+    dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
+    for(auto& ptd: ptds) 
+      if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+        ptd->draw();
+    }
+
+  spherespecial = sphereflipped() ? 1 : -1;
+  current_display->set_projection(0, true);
+  
+  if(pmodel == mdRotatedHyperboles) {
+    for(auto& ptd: ptds)
+      if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+        ptd->draw();
+    glflush();
+    }
+  else {
+    reverse_side_priorities();
+    for(int i=ptds.size()-1; i>=0; i--) 
+      if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+        ptds[i]->draw_back();
+    
+    glflush();
+    reverse_side_priorities();
+    }
+
+  spherespecial *= -1;
+  spherephase = 1;
+  current_display->set_projection(0, true);
+  }
+
+extern bool lshiftclick, lctrlclick;
   
 void drawqueue() {
   callhooks(hook_drawqueue);
@@ -1445,48 +1480,44 @@ void drawqueue() {
   current_display->set_projection(0, true);
   setcameraangle(true);
     
-  for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
-    ptd->draw();
-    
-  // on the sphere, parts on the back are drawn first
-  if(two_sided_model()) {
-  
-    if(pmodel == mdHyperboloid && hyperbolic) {
-      dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
-      for(auto& ptd: ptds) 
-        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-          ptd->draw();
+  if(sphere && DIM == 3) {
+    for(int p: {0, 1, 2, 3}) {
+      if(p == 1 || p == 3) {
+  #ifdef GL_ES
+        glClearDepthf(1.0f);
+  #else
+        glClearDepth(1.0f);
+  #endif
+        glDepthFunc(GL_LEQUAL);
+        }
+      else {
+  #ifdef GL_ES
+        glClearDepthf(0.0f);
+  #else
+        glClearDepth(0.0f);
+  #endif
+        glDepthFunc(GL_GEQUAL);
+        }
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glhr::be_nontextured();
+      spherephase = p;
+      current_display->set_projection(0, true);
+      for(auto& ptd: ptds) ptd->draw();
+      // glflush();
       }
-
-    spherespecial = sphereflipped() ? 1 : -1;
-    current_display->set_projection(0, true);
-    
-    if(pmodel == mdRotatedHyperboles) {
-      for(auto& ptd: ptds)
-        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-          ptd->draw();
-      glflush();
-      }
-    else {
-      reverse_side_priorities();
-      for(int i=ptds.size()-1; i>=0; i--) 
-        if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-          ptds[i]->draw_back();
-      
-      glflush();
-      reverse_side_priorities();
-      }
-
-    spherespecial *= -1;
-    spherephase = 1;
-    current_display->set_projection(0, true);
     }
+  else {
+    for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
+      ptd->draw();
+    
+    if(two_sided_model()) draw_backside();
   
-  for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
-    dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
-    ptd->draw();
+    for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
+      dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
+      ptd->draw();
+      }
+    glflush();
     }
-  glflush();
 
 #if CAP_GL
   if(vid.usingGL) 

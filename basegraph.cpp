@@ -222,8 +222,13 @@ void display_data::set_projection(int ed, bool apply_models) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3;
     if(DIM == 3 && euclid)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3;
-    if(DIM == 3 && sphere)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardS3;
+    if(DIM == 3 && sphere) {
+      shaderside_projection = true;
+      if(spherephase == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
+      if(spherephase == 1) glhr::new_shader_projection = glhr::shader_projection::standardS31;
+      if(spherephase == 2) glhr::new_shader_projection = glhr::shader_projection::standardS32;
+      if(spherephase == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
+      }
     }
   
   start_projection(ed, shaderside_projection);
