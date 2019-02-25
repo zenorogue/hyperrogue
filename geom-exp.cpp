@@ -371,7 +371,7 @@ void ge_land_selection() {
 vector<eGeometry> tilinglist = {
   gTinySphere, gSmallSphere, gSphere, gEuclid, gNormal, gOctagon,
   gOctahedron, gEuclidSquare, g45, g46, g47,
-  gArchimedean, gBinaryTiling, gBinary3, gCubeTiling
+  gArchimedean, gBinaryTiling
   };
 
 vector<eGeometry> quotientlist = {
@@ -380,6 +380,10 @@ vector<eGeometry> quotientlist = {
   gSmallElliptic, 
   gKleinQuartic, gBolza, gBolza2, gMinimal, 
   gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal  
+  };
+
+vector<eGeometry> list3d = {
+  gBinary3, gCubeTiling, gCell120, gECell120
   };
 
 void ge_select_tiling(const vector<eGeometry>& lst) {
@@ -582,6 +586,9 @@ void showEuclideanMenu() {
 
   dialog::add_action([] { pushScreen([] { ge_select_tiling(quotientlist); }); });
 
+  dialog::addSelItem(XLAT("dimension"), its(DIM), 'd');
+  dialog::add_action([] { pushScreen([] { ge_select_tiling(list3d); }); });
+  
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
     nom = isize(irr::cells);
@@ -605,10 +612,11 @@ void showEuclideanMenu() {
         };
       });
     }
+  else if(DIM == 3) dialog::addBreak(100);
   else {
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {
-      if(euclid6) ;
+      if(0) ;
       #if CAP_ARCM
       else if(archimedean) arcm::next_variation();
       #endif
@@ -677,11 +685,11 @@ void showEuclideanMenu() {
   
   dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
   
-  dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
-  
+  if(DIM == 2) dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
+
   dialog::addSelItem(XLAT("size of the world"), 
     #if CAP_BT
-    binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / vid.binary_width) + " exp(∞)" :
+    binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, DIM-1)) + " exp(∞)" :
     #endif
     #if CAP_ARCM
     archimedean ? arcm::current.world_size() :
@@ -690,20 +698,24 @@ void showEuclideanMenu() {
     #if CAP_CRYSTAL
     geometry == gCrystal ? "∞^" + its(ts/2) :
     #endif
+    DIM == 3 && sphere ? its(isize(currentmap->allcells())) :
+    DIM == 3 && euclid ? "∞" :
     worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
     (euwrap && !fulltorus) ? "∞" :
     worldsize == 0 ? "∞²" :
     its(worldsize),
     '3');
   
-  dialog::add_action([] {
+  if(DIM == 2) dialog::add_action([] {
     if(!viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
     else if(viewdists) viewdists = false;
     });
 
   if(bounded) {
+    if(DIM == 3) euler = 0;
     dialog::addSelItem(XLAT("Euler characteristics"), its(euler), 0);
-    if(nonorientable)
+    if(DIM == 3) ;
+    else if(nonorientable)
       dialog::addSelItem(XLAT("demigenus"), its(2-euler), 0);
     else
       dialog::addSelItem(XLAT("genus"), its((2-euler)/2), 0);
