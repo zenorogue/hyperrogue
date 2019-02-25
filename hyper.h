@@ -3180,7 +3180,9 @@ extern ld backbrightness;
 
 void initcells();
 void precalc();
-extern const hyperpoint C0;
+extern const hyperpoint C02, C03;
+
+#define C0 (DIM == 2 ? C02 : C03)
 
 extern long long circlesize[100], disksize[100];
 extern ld circlesizeD[10000];

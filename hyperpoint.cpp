@@ -128,13 +128,17 @@ hyperpoint hpxy3(ld x, ld y, ld z) {
   }
 
 // center of the pseudosphere
-const hyperpoint Hypc = hpxyz(0,0,0);
+const hyperpoint Hypc = hyperpoint(0,0,0,0);
 
 // origin of the hyperbolic plane
-const hyperpoint C0 = hpxyz(0,0,1);
+const hyperpoint C02 = hyperpoint(0,0,1,0);
+const hyperpoint C03 = hyperpoint(0,0,0,1);
 
 // a point (I hope this number needs no comments ;) )
-const hyperpoint Cx1 = hpxyz(1,0,1.41421356237);
+const hyperpoint Cx12 = hyperpoint(1,0,1.41421356237,0);
+const hyperpoint Cx13 = hyperpoint(1,0,0,1.41421356237);
+
+#define Cx1 (DIM==2?Cx12:Cx13)
 
 // this function returns approximate square of distance between two points
 // (in the spherical analogy, this would be the distance in the 3D space,
