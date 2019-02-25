@@ -5130,6 +5130,17 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       prec += vid.linequality;
       
       if(0);
+      #if MAXDIM == 4
+      else if(DIM == 3) {
+        for(int t=0; t<c->type; t++) {
+          if(!c->move(t)) continue;
+          if(hyperbolic && !among(t, 5, 6, 8)) continue;
+          if(!hyperbolic && c->move(t) < c) continue;
+          dynamicval<color_t> p (poly_outline, gridcolor(c, c->move(t)));
+          queuepoly(V, shBinaryWall[t], 0);
+          }
+        }
+      #endif
       #if CAP_BT
       else if(binarytiling && DIM == 2) {
         ld yx = log(2) / 2;
@@ -5145,11 +5156,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
         horizontal(yy, xx, -xx, 8, binary::bd_up);
         horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
-        }
-      #endif
-      #if CAP_BT && MAXDIM == 4
-      else if(binarytiling && DIM == 3) {
-        binary::queuecube(V, 1, 0xC0C0C080, 0);
         }
       #endif
       else if(isWarped(c) && has_nice_dual()) {
