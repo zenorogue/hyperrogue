@@ -731,6 +731,7 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   }
 
 bool invis_point(const hyperpoint h) {
+  if(DIM == 2 || sphere) return false;
   return h[2] < 0;
   }
 

@@ -164,4 +164,196 @@ heptagon *getDodecahedron(int i) {
   return s->dodecahedron[i];
   }
 
+namespace sphere3 {
+
+vector<hyperpoint> vertices120;
+array<transmatrix, 120> vmatrix120;
+vector<int> adj0;
+array<array<int, 4>, 120> js;
+array<hyperpoint, 60> dodefaces;
+
+hyperpoint zero4;
+
+ld norm(hyperpoint a, hyperpoint b) {
+  ld res = 0;
+  for(int i=0; i<4; i++) res += pow(a[i]-b[i], 2);
+  return res;
+  }
+
+void gen600() {
+  vertices120.clear();
+  
+  /// coordinates taken from Wikipedia
+  
+  for(int a=0; a<16; a++) {
+    hyperpoint v = zero4;
+    for(int i=0; i<4; i++) v[i] = ((a >> i) & 1) ? .5 : -.5;
+    vertices120.push_back(v);
+    }
+  
+  for(int i=0; i<4; i++) for(int q: {-1, 1}) {
+    hyperpoint v = zero4;
+    v[i]=q;
+    vertices120.push_back(v);
+    }
+  
+  ld phi = (1 + sqrt(5)) / 2;
+  
+  array<ld, 4> coo = {1, phi, 1/phi, 0};
+  
+  // all permutations
+  array<int, 4> tab;
+  for(int i=0; i<4; i++) tab[i] = i;
+  
+  do {
+
+    // check the permutation's sign
+    auto tabs = tab;
+    int inv = 0;
+
+    for(int i=0; i<4; i++) while(tabs[i] != i) {
+      swap(tabs[i], tabs[tabs[i]]);
+      inv++;
+      }
+    
+    if(inv&1) goto again;
+    
+    // 8 vertices for each permutation
+    
+    for(int sg=0; sg<8; sg++) {
+      hyperpoint v;
+      for(int i=0; i<4; i++) 
+        v[i] = (((sg >> tab[i])&1) ? 1 : -1) * coo[tab[i]]/2;
+      vertices120.push_back(v);
+      }
+      
+    again: ;
+    }
+  while(std::next_permutation(tab.begin(), tab.end()));
+  
+  if(isize(vertices120) != 120) {
+    printf("error: wrong number of vertices\n");
+    exit(1);
+    }
+  // we add edges between vertices which are close to each other
+  // ((specifically in distance 1/phi/phi)
+  
+  bool inedge[120][120];
+    
+  for(int i=0; i<120; i++)
+  for(int j=0; j<120; j++) {
+    ld d = hdist(vertices120[i], vertices120[j]);
+    inedge[i][j] = (i != j) && d < sqrt(.4);
+    }
+  
+  vector<hyperpoint> cellvertices;
+  
+  for(int i=0; i<120; i++)
+    for(int j=0; j<120; j++) if(inedge[i][j])
+    for(int k=0; k<120; k++) if(inedge[i][k] && inedge[k][j])
+    for(int l=0; l<120; l++) if(inedge[i][l] && inedge[j][l] && inedge[k][l]) {
+      array<int, 4> ijkl = {i, j, k, l};
+      transmatrix T;
+      for(int z=0; z<4; z++) set_column(T, z, vertices120[ijkl[z]]);
+      if(det(T) > 0) js[i] = ijkl;
+      }
+    
+  /* transmatrix src;
+  for(int z=0; z<4; z++) set_column(src, z, vertices120[js[0][z]]); */
+
+  for(int i=0; i<120; i++)
+    for(int z=0; z<4; z++) set_column(vmatrix120[i], z, vertices120[js[i][z]]);
+
+  for(int i=0; i<120; i++) println(hlog, i, ": ", js[i], " -> ", vmatrix120[i]);  
+  
+  adj0.clear();
+  for(int i=0; i<120; i++) if(inedge[0][i]) adj0.push_back(i);
+  
+  using namespace hyperpoint_vec;
+  
+  int id = 0;
+  for(int i=0; i<12; i++) {
+    int ot = adj0[i];
+    
+    vector<int> pentagon;
+    for(int j: adj0) if(inedge[ot][j]) pentagon.push_back(j);
+    println(hlog, i, ": ", pentagon);
+    
+    int illegal = -1;
+    int at = pentagon[0];
+    for(int d=0; d<5; d++) {
+      for(int s: pentagon) if(inedge[at][s] && s != illegal) {
+        hyperpoint m = vertices120[0] + vertices120[ot] + vertices120[at] + vertices120[s];
+        m = mid(m, m);
+        println(hlog, id, ": ", m);
+        dodefaces[id++] = m;
+        illegal = at;
+        at = s;
+        break;
+        }
+      }
+    }
+  
+  printf("id = %d\n", id);
+  }
+
+struct hrmap_spherical3 : hrmap {
+  heptagon* cells[120];
+
+  hrmap_spherical3() {
+    gen600();
+    for(int i=0; i<120; i++) {
+      cells[i] = tailored_alloc<heptagon> (12);
+      heptagon& h = *(cells[i]);
+      h.s = hsOrigin;
+      h.emeraldval = i;
+      h.zebraval = i;
+      h.fiftyval = i;
+      h.rval0 = h.rval1 = 0;
+      h.alt = NULL;
+      h.cdata = NULL;
+      h.c.fullclear();
+      h.fieldval = i;
+      h.c7 = newCell(12, &h);      
+      }
+
+    for(int i=0; i<120; i++) {
+      for(int k=0; k<12; k++) {
+        hyperpoint which = vmatrix120[i] * inverse(vmatrix120[0]) * vertices120[adj0[k]];
+        for(int s=0; s<120; s++) if(hdist(which, vertices120[s]) < 1e-6) {
+          cells[i]->move(k) = cells[s];
+          println(hlog, i,".",k, " -> ", s, " ; ", js[i]);
+          }
+        }
+      }
+
+    for(int i=0; i<120; i++)
+      for(int k=0; k<12; k++) 
+        for(int l=0; l<12; l++)
+          if(cells[i]->move(k)->move(l) == cells[i])
+            cells[i]->c.setspin(k, l, false);
+    }
+
+  heptagon *getOrigin() { return cells[0]; }
+
+  ~hrmap_spherical3() {
+    for(int i=0; i<120; i++) tailored_delete(cells[i]);
+    }    
+  };
+
+void draw() {
+  auto m = (hrmap_spherical3*) currentmap;
+
+  int old = viewctr.at->zebraval;
+
+  for(int i=0; i<120; i++)
+    drawcell(m->cells[i]->c7, View * vmatrix120[0] * inverse(vmatrix120[old]) * vmatrix120[i] * inverse(vmatrix120[0]), 0, false);
+  }
+
+transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+  return vmatrix120[0] * inverse(vmatrix120[h1->zebraval]) * vmatrix120[h2->zebraval] * inverse(vmatrix120[0]);
+  }
+
+}
+
 }

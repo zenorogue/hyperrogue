@@ -232,6 +232,7 @@ void initcells() {
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid && DIM == 3) currentmap = euclid3::new_map();
   else if(euclid) currentmap = new hrmap_euclidean;
+  else if(sphere && DIM == 3) currentmap = new sphere3::hrmap_spherical3;
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
   else currentmap = new hrmap_hyperbolic;

@@ -1615,7 +1615,7 @@ hpcshape
   
   shAsymmetric,
   
-  shBinaryWall[9],
+  shBinaryWall[12],
 
   shDodeca;
 #endif
@@ -2461,6 +2461,14 @@ void buildpolys() {
         int z = (y+2)%3;
         hpcpush(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
         }
+      }
+    }
+  
+  if(DIM == 3 && sphere) {
+    for(int w=0; w<12; w++) {
+      bshape(shBinaryWall[w], PPR::WALL);
+      for(int a=0; a<=5; a++) 
+        hpcpush(sphere3::dodefaces[w*5+a%5]);
       }
     }
   

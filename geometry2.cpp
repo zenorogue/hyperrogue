@@ -94,6 +94,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
   #endif
   #if MAXDIM == 4
   if(euclid && DIM == 3) return euclid3::relative_matrix(c2->master, c1->master);
+  if(sphere && DIM == 3) return sphere3::relative_matrix(c2->master, c1->master);
   #endif
   #if CAP_ARCM
   if(archimedean) return arcm::relative_matrix(c2->master, c1->master);

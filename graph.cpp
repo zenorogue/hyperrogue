@@ -4595,9 +4595,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       if(DIM == 3) {
         if(isWall(c)) {
+          const int darkval_h[9] = {0,2,2,0,6,6,8,8,0};
+          const int darkval_s[12] = {0,1,2,3,0,1,2,3,0,1,2,3};
+          const int darkval_e[6] = {0,0,4,4,6,6};
+          const int *darkval = sphere ? darkval_s : hyperbolic ? darkval_h : darkval_e;
+          int d = (asciicol & 0xF0F0F0) >> 4;
 
-          const int darkval[9] = {0,1,1,0,3,3,4,4,0};
-          int d = (asciicol & 0xF0F0F0) >> 3;
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall(c->move(a))) {
               if(a < 4 && hyperbolic) {
@@ -5712,6 +5715,8 @@ void drawthemap() {
   #if MAXDIM == 4
   else if(euclid && DIM == 3)
     euclid3::draw();
+  else if(sphere && DIM == 3)
+    sphere3::draw();
   #endif
   else
     drawStandard();
