@@ -211,7 +211,6 @@ namespace binary {
     direct_tmatrix[7] = parabolic3(0, +2);
     for(int i=0; i<8; i++)
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
-    btrange_cosh = cosh(btrange);
     }
   
   const transmatrix& tmatrix(heptagon *h, int dir) {
@@ -265,8 +264,6 @@ namespace binary {
     return hr::parabolic13(y * co, z * co);
     }
   
-  ld btrange = 3, btrange_cosh;
-
   void draw() {
     dq::visited.clear();
     dq::enqueue(viewctr.at, cview());
@@ -340,10 +337,6 @@ auto bt_config = addHook(hooks_args, 0, [] () {
   using namespace arg;
   if(argis("-btwidth")) {
     shift_arg_formula(vid.binary_width, delayed_geo_reset);
-    return 0;
-    }
-  else if(argis("-btrange")) {
-    shift_arg_formula(btrange, delayed_geo_reset);
     return 0;
     }
   return 1;

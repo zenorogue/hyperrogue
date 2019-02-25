@@ -6,6 +6,8 @@ namespace hr {
 
 const char *conffile = "hyperrogue.ini";
 
+array<ld, gGUARD> sightranges;
+
 videopar vid;
 
 #define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
@@ -355,6 +357,10 @@ void initConfig() {
   addsaver(conformal::formula, "formula");
   addsaverenum(conformal::basic_model, "basic model");
   addsaver(conformal::use_atan, "use_atan");
+  
+  addsaver(sightranges[gBinary3], "sight-binary3", 3);
+  addsaver(sightranges[gCubeTiling], "sight-cubes", 7);
+  addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
 
   addsaver(vid.consider_shader_projection, "shader-projection", true);
   
@@ -733,11 +739,21 @@ void edit_sightrange() {
   }
 
 void menuitem_sightrange(char c) {
-  if(vid.use_smart_range)
-    dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(vid.smart_range_detail), c);
-  else
-    dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
-  dialog::add_action(edit_sightrange);
+  if(DIM == 3) {
+    dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);
+    dialog::add_action([] {
+      dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("sight range"),
+        XLAT("Affects both the generation and the fog effect.")
+        );
+      });
+    }
+  else {
+    if(vid.use_smart_range)
+      dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(vid.smart_range_detail), c);
+    else
+      dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
+    dialog::add_action(edit_sightrange);
+    }
   }
   
 void showGraphConfig() {

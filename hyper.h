@@ -196,6 +196,8 @@ typedef complex<ld> cld;
 #endif
 #define MDIM (DIM+1)
 
+extern array<ld, gGUARD> sightranges;
+
 struct hyperpoint : array<ld, MAXDIM> {
   hyperpoint() {}
   

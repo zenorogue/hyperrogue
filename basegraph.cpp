@@ -209,6 +209,8 @@ glhr::glmatrix model_orientation_gl() {
 void display_data::set_projection(int ed, bool apply_models) {
   DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
   
+  bool dim3 = false;
+  
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
   if(vid.consider_shader_projection) {
@@ -229,6 +231,7 @@ void display_data::set_projection(int ed, bool apply_models) {
       if(spherephase == 2) glhr::new_shader_projection = glhr::shader_projection::standardS32;
       if(spherephase == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
       }
+    if(DIM == 3 && apply_models) dim3 = true;
     }
   
   start_projection(ed, shaderside_projection);
@@ -267,8 +270,8 @@ void display_data::set_projection(int ed, bool apply_models) {
   
     current_display->scrdist_text = cd->ysize * sc / 2;
 
-    if(glhr::new_shader_projection == glhr::shader_projection::standardH3) {
-      glhr::fog_max(1/binary::btrange);
+    if(dim3) {
+      glhr::fog_max(1/sightranges[geometry]);
       }
     
     if(glhr::new_shader_projection == glhr::shader_projection::band) {
