@@ -174,6 +174,8 @@ array<hyperpoint, 60> dodefaces;
 
 hyperpoint zero4;
 
+int root;
+
 ld norm(hyperpoint a, hyperpoint b) {
   ld res = 0;
   for(int i=0; i<4; i++) res += pow(a[i]-b[i], 2);
@@ -182,6 +184,7 @@ ld norm(hyperpoint a, hyperpoint b) {
 
 void gen600() {
   vertices120.clear();
+  root = 23;
   
   /// coordinates taken from Wikipedia
   
@@ -264,10 +267,13 @@ void gen600() {
   for(int i=0; i<120; i++)
     for(int z=0; z<4; z++) set_column(vmatrix120[i], z, vertices120[js[i][z]]);
 
-  for(int i=0; i<120; i++) println(hlog, i, ": ", js[i], " -> ", vmatrix120[i]);  
+  for(int i=0; i<120; i++) {
+    println(hlog, i, ": ", js[i], " -> ", vmatrix120[i]);  
+    println(hlog, vmatrix120[i] * hyperpoint(1,0,0,0), " should be ", vertices120[i]);  
+    }
   
   adj0.clear();
-  for(int i=0; i<120; i++) if(inedge[0][i]) adj0.push_back(i);
+  for(int i=0; i<120; i++) if(inedge[root][i]) adj0.push_back(i);
   
   using namespace hyperpoint_vec;
   
@@ -283,7 +289,7 @@ void gen600() {
     int at = pentagon[0];
     for(int d=0; d<5; d++) {
       for(int s: pentagon) if(inedge[at][s] && s != illegal) {
-        hyperpoint m = vertices120[0] + vertices120[ot] + vertices120[at] + vertices120[s];
+        hyperpoint m = vertices120[root] + vertices120[ot] + vertices120[at] + vertices120[s];
         m = mid(m, m);
         println(hlog, id, ": ", m);
         dodefaces[id++] = m;
@@ -319,10 +325,10 @@ struct hrmap_spherical3 : hrmap {
 
     for(int i=0; i<120; i++) {
       for(int k=0; k<12; k++) {
-        hyperpoint which = vmatrix120[i] * inverse(vmatrix120[0]) * vertices120[adj0[k]];
+        hyperpoint which = vmatrix120[i] * inverse(vmatrix120[root]) * vertices120[adj0[k]];
         for(int s=0; s<120; s++) if(hdist(which, vertices120[s]) < 1e-6) {
           cells[i]->move(k) = cells[s];
-          println(hlog, i,".",k, " -> ", s, " ; ", js[i]);
+          println(hlog, i,".",k, " -> ", s, " ; ", js[i], " distance = ", hdist(vertices120[i], vertices120[s]));
           }
         }
       }
@@ -334,12 +340,20 @@ struct hrmap_spherical3 : hrmap {
             cells[i]->c.setspin(k, l, false);
     }
 
-  heptagon *getOrigin() { return cells[0]; }
+  heptagon *getOrigin() { return cells[root]; }
 
   ~hrmap_spherical3() {
     for(int i=0; i<120; i++) tailored_delete(cells[i]);
     }    
   };
+
+transmatrix gmatr(heptagon *h) {
+  return vmatrix120[h->zebraval] * inverse(vmatrix120[root]);
+  }
+
+transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+  return inverse(gmatr(h1)) * gmatr(h2);
+  }
 
 void draw() {
   auto m = (hrmap_spherical3*) currentmap;
@@ -347,11 +361,7 @@ void draw() {
   int old = viewctr.at->zebraval;
 
   for(int i=0; i<120; i++)
-    drawcell(m->cells[i]->c7, View * vmatrix120[0] * inverse(vmatrix120[old]) * vmatrix120[i] * inverse(vmatrix120[0]), 0, false);
-  }
-
-transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-  return vmatrix120[0] * inverse(vmatrix120[h1->zebraval]) * vmatrix120[h2->zebraval] * inverse(vmatrix120[0]);
+    drawcell(m->cells[i]->c7, View * relative_matrix(m->cells[i], viewctr.at), 0, false);
   }
 
 void makewax(int x) {
