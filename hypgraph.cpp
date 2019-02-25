@@ -1037,6 +1037,11 @@ void centerpc(ld aspd) {
   if(geometry == gCrystal)
     crystal::centerrug(aspd);
   #endif
+
+  if(shmup::on && DIM == 3) {
+    transmatrix at = cpush(2, -vid.yshift) * ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at;  
+    View = inverse(at) * View;
+    }
     
   #if CAP_RACING
   if(racing::on && !racing::standard_centering) {

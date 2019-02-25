@@ -728,6 +728,8 @@ void handleInput(int delta) {
     
   double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
   
+  double panmove = actionspressed[59] - actionspressed[60] + axespressed[4] / 20000.0;
+  
   if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
 
   if(actionspressed[55] && !lactionpressed[55]) 
@@ -744,8 +746,11 @@ void handleInput(int delta) {
   if(actionspressed[58] && !lactionpressed[58]) 
     pushScreen(showMainMenu);
   
-  if(panx || pany || panspin) {
-    View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
+  if(panx || pany || panspin || (DIM == 3 && panmove)) {
+    if(DIM == 2)
+      View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
+    else
+      View = cspin(0, 2, panx) * cspin(0, 1, pany) * spin(panspin * d) * cpush(2, panmove) * View;
     playermoved = false;
     }
 #endif
@@ -1176,7 +1181,7 @@ void degradeDemons() {
   }
 
 // we need these for the Mimics!
-double playerturn[MAXPLAYER], playergo[MAXPLAYER];
+double playerturn[MAXPLAYER], playergo[MAXPLAYER], playerstrafe[MAXPLAYER], playerturny[MAXPLAYER];
 bool playerfire[MAXPLAYER];
 
 void awakenMimics(monster *m, cell *c2) {
@@ -1538,7 +1543,6 @@ void movePlayer(monster *m, int delta) {
   #endif
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
-  ignore(mdx); ignore(mdy);
   
   bool shotkey = false, dropgreen = false, facemouse = false;
   if(facemouse) {
@@ -1546,7 +1550,7 @@ void movePlayer(monster *m, int delta) {
     }
   
   int b = 16*tableid[cpid];
-    for(int i=0; i<8; i++) if(actionspressed[b+i]) playermoved = true;
+    for(int i=0; i<(DIM == 3 ? 4 : 8); i++) if(actionspressed[b+i]) playermoved = true;
   
   int jb = 4*tableid[cpid];
   for(int i=0; i<4; i++) if(axespressed[jb+i]) playermoved = true;
@@ -1654,7 +1658,7 @@ void movePlayer(monster *m, int delta) {
 
   bool blown = m->blowoff > curtime;
     
-  if(playerturn[cpid] && canmove && !blown) {
+  if(playerturn[cpid] && canmove && !blown && DIM == 2) {
     m->swordangle -= playerturn[cpid];
     nat = nat * spin(playerturn[cpid]);
     }
@@ -1681,6 +1685,12 @@ void movePlayer(monster *m, int delta) {
   
   else {    
     playergo[cpid] = mgo * SCALE * delta / 600;
+    }
+  
+  if(DIM == 3) {
+    playerstrafe[cpid] = mturn * SCALE * delta / 600;
+    playerturn[cpid] = mdx * SCALE * delta / 600;
+    playerturny[cpid] = mdy * SCALE * delta / 600;
     }
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
@@ -1710,7 +1720,9 @@ void movePlayer(monster *m, int delta) {
   
     go = true;
     
-    if(playergo[cpid]) 
+    if(DIM == 3)
+      nat = nat1 * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+    else if(playergo[cpid]) 
       nat = nat1 * spin(igospan[igo]) * xpush(playergo[cpid]) * spin(-igospan[igo]);
     
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
@@ -2208,6 +2220,11 @@ int speedfactor() {
   return items[itOrbSpeed]?2:1;
   }
 
+transmatrix frontpush(ld x) {
+  if(DIM == 2) return xpush(x);
+  else return cpush(2, x);
+  }
+  
 void moveBullet(monster *m, int delta) {
   cpid = m->pid;
   m->findpat();
@@ -2241,7 +2258,7 @@ void moveBullet(monster *m, int delta) {
     if(m->isVirtual || !m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4)
       m->dead = true;
     }
-  nat = nat * xpush(delta * SCALE * m->vel / speedfactor());
+  nat = nat * frontpush(delta * SCALE * m->vel / speedfactor());
   cell *c2 = m->findbase(nat);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -3370,6 +3387,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     switch(m->type) {
       case moPlayer: 
         playerfound = true;
+        if(playermoved && DIM == 3) continue;
         cpid = m->pid; 
         drawPlayerEffects(view, c, true);
         if(m->inBoat) m->footphase = 0;
@@ -3442,7 +3460,10 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
         if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin);
-        drawMonsterType(m->type, c, view, col, m->footphase);
+        if(DIM == 3)
+          drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase);
+        else
+          drawMonsterType(m->type, c, view, col, m->footphase);
         if(m->type == moTortoise) tortoise::emap.erase(c);
         break;
       }
