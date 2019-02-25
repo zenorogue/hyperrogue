@@ -1729,6 +1729,7 @@ vector<eLand> randlands = {
   };
 
 static const flagtype qsNONOR           = qANYQ | qSMALL | qBOUNDED | qNONORIENTABLE;
+static const flagtype qsNONORE          = qsNONOR | qELLIPTIC;
 static const flagtype qsBQ              = qANYQ | qSMALL | qBOUNDED;
 static const flagtype qsSMALL           = qANYQ | qSMALL | qBOUNDED;
 static const flagtype qsSMALLN          = qANYQ | qSMALL | qBOUNDED | qNONORIENTABLE;
@@ -1736,6 +1737,7 @@ static const flagtype qsZEBRA           = qANYQ | qSMALL | qBOUNDED | qZEBRA;
 static const flagtype qsFIELD           = qANYQ | qFIELD | qBOUNDED;
 static const flagtype qsDOCKS           = qANYQ | qSMALL | qBOUNDED | qDOCKS;
 static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
+static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC;
 
 vector<geometryinfo> ginf = {
   {"{7,3}", "none",     "{7,3} (standard HyperRogue map)",            "HR",       7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::bitruncated},
@@ -1768,6 +1770,7 @@ vector<geometryinfo> ginf = {
   {"bin3",  "none",     "3D binary tiling",                           "binary3",  9, 4, 0,         gcHyperbolic,       0, {{7, 3}}, eVariation::pure},
   {"cube",  "none",     "3D cube tiling",                             "cube",     6, 4, 0,         gcEuclid,           0, {{7, 5}}, eVariation::pure},
   {"120c",  "none",     "120-cell",                                   "120c",    12, 4, qsSMALLB,  gcSphere,           0, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"e120c", "elliptic", "120-cell (elliptic space)",                  "e120c",   12, 4, qsSMALLBE, gcSphere,           0, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   };
 
 // remember to match the following mask when specifying codes for extra geometries: 0x78600

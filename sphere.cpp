@@ -172,6 +172,8 @@ vector<int> adj0;
 array<array<int, 4>, 120> js;
 array<hyperpoint, 60> dodefaces;
 
+int opposite[120];
+
 hyperpoint zero4;
 
 int root;
@@ -183,6 +185,7 @@ ld norm(hyperpoint a, hyperpoint b) {
   }
 
 void gen600() {
+  dynamicval<eGeometry> gp(geometry, gCell120);
   vertices120.clear();
   root = 23;
   
@@ -274,6 +277,10 @@ void gen600() {
   
   adj0.clear();
   for(int i=0; i<120; i++) if(inedge[root][i]) adj0.push_back(i);
+
+  for(int i=0; i<120; i++) for(int j=0; j<120; j++)
+    if(hdist(vertices120[i], vertices120[j]) > 3)
+      opposite[i] = j;
   
   using namespace hyperpoint_vec;
   
@@ -303,12 +310,26 @@ void gen600() {
   printf("id = %d\n", id);
   }
 
+bool goodside(int i) {
+  if(!elliptic) return true;
+  hyperpoint& h = vertices120[i];
+  for(int k=3; k>=0; k--) {
+    if(h[k] > 1e-3) return true;
+    if(h[k] < -1e-3) return false;
+    }
+  return false;
+  }
+
 struct hrmap_spherical3 : hrmap {
   heptagon* cells[120];
 
   hrmap_spherical3() {
     gen600();
     for(int i=0; i<120; i++) {
+      if(!goodside(i)) {
+        cells[i] = NULL;
+        continue;
+        }
       cells[i] = tailored_alloc<heptagon> (12);
       heptagon& h = *(cells[i]);
       h.s = hsOrigin;
@@ -323,12 +344,14 @@ struct hrmap_spherical3 : hrmap {
       h.c7 = newCell(12, &h);      
       }
 
-    for(int i=0; i<120; i++) {
+    for(int i=0; i<120; i++) if(cells[i]) {
       for(int k=0; k<12; k++) {
         hyperpoint which = vmatrix120[i] * inverse(vmatrix120[root]) * vertices120[adj0[k]];
         for(int s=0; s<120; s++) if(hdist(which, vertices120[s]) < 1e-6) {
-          cells[i]->move(k) = cells[s];
-          println(hlog, i,".",k, " -> ", s, " ; ", js[i], " distance = ", hdist(vertices120[i], vertices120[s]));
+          int s1 = s;
+          if(!cells[s1]) continue;
+          cells[i]->move(k) = cells[s1];
+          println(hlog, i,".",k, " -> ", s1, " ; ", js[i], " distance = ", hdist(vertices120[i], vertices120[s]));
           }
         }
       }
@@ -336,14 +359,14 @@ struct hrmap_spherical3 : hrmap {
     for(int i=0; i<120; i++)
       for(int k=0; k<12; k++) 
         for(int l=0; l<12; l++)
-          if(cells[i]->move(k)->move(l) == cells[i])
+          if(cells[i] && cells[i]->move(k)->move(l) == cells[i])
             cells[i]->c.setspin(k, l, false);
     }
 
   heptagon *getOrigin() { return cells[root]; }
 
   ~hrmap_spherical3() {
-    for(int i=0; i<120; i++) tailored_delete(cells[i]);
+    for(int i=0; i<120; i++) if(cells[i]) tailored_delete(cells[i]);
     }    
   };
 
@@ -358,21 +381,20 @@ transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
 void draw() {
   auto m = (hrmap_spherical3*) currentmap;
 
-  int old = viewctr.at->zebraval;
-
-  for(int i=0; i<120; i++)
+  for(int i=0; i<120; i++) if(m->cells[i])
     drawcell(m->cells[i]->c7, View * relative_matrix(m->cells[i], viewctr.at), 0, false);
   }
 
 void makewax(int x) {
+  int waxcenter = 63;
   auto m = (hrmap_spherical3*) currentmap;
-  for(int i=0; i<120; i++) m->cells[i]->c7->wall = waNone;
-  m->cells[70]->c7->wall = waDune;
+  for(int i=0; i<120; i++) if(m->cells[i]) m->cells[i]->c7->wall = waNone;
+  m->cells[waxcenter]->c7->wall = waDune;
   int cols[16] = {0x202020, 0x2020A0, 0x20A020, 0x20A0A0, 0xA02020, 0xA020A0, 0xA0A020, 0xA0A0A0,
     0x606060, 0x6060FF, 0x60FF60, 0x60FFFF, 0xFF6060, 0xFF60FF, 0xFFFF60, 0xFFFFFF };
   if(x) for(int i=0; i<12; i++) {
-    m->cells[70]->c7->move(i)->wall = waWaxWall;
-    m->cells[70]->c7->move(i)->landparam = cols[i];
+    m->cells[waxcenter]->c7->move(i)->wall = waWaxWall;
+    m->cells[waxcenter]->c7->move(i)->landparam = cols[i];
     }
   }
 

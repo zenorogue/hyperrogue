@@ -103,7 +103,7 @@ void addMessage(string s, char spamtype = 0);
 #define sphere (cgclass == gcSphere)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonorientable (ginf[geometry].flags & qNONORIENTABLE)
-#define elliptic (sphere && nonorientable)
+#define elliptic (ginf[geometry].flags & qELLIPTIC)
 #define quotient (ginf[geometry].flags & qANYQ)
 #define euwrap (quotient && euclid)
 #define fulltorus (bounded && euclid)
@@ -192,7 +192,7 @@ typedef complex<ld> cld;
 #if MAXDIM == 3
 #define DIM 2
 #else
-#define DIM ((geometry == gBinary3 || geometry == gCubeTiling || geometry == gCell120) ? 3 : 2)
+#define DIM ((geometry == gBinary3 || geometry == gCubeTiling || geometry == gCell120 || geometry == gECell120) ? 3 : 2)
 #endif
 #define MDIM (DIM+1)
 

@@ -1194,7 +1194,7 @@ void set_geometry(eGeometry target) {
     if(DUAL && geometry != gArchimedean) 
       variation = ginf[geometry].default_variation;
     #if CAP_BT
-    if(among(geometry, gBinaryTiling, gBinary3, gCubeTiling, gCell120)) variation = eVariation::pure;
+    if(among(geometry, gBinaryTiling, gBinary3, gCubeTiling, gCell120, gECell120)) variation = eVariation::pure;
     #endif
    
     need_reset_geometry = true; 

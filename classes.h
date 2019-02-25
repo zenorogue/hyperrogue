@@ -214,7 +214,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
 enum eGeometry {
   gNormal, gEuclid, gSphere, gElliptic, gZebraQuotient, gFieldQuotient, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, 
   gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gArchimedean, 
-  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal, gOctahedron, gBinary3, gCubeTiling, gCell120,
+  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal, gOctahedron, gBinary3, gCubeTiling, gCell120, gECell120,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
@@ -243,6 +243,8 @@ static const flagtype qSMALL           = 8;
 static const flagtype qFIELD           = 16;
 static const flagtype qDOCKS           = 32;
 static const flagtype qZEBRA           = 64;
+
+static const flagtype qELLIPTIC        = 128;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;

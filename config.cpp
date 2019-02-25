@@ -361,6 +361,7 @@ void initConfig() {
   addsaver(sightranges[gBinary3], "sight-binary3", 3);
   addsaver(sightranges[gCubeTiling], "sight-cubes", 7);
   addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
+  addsaver(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
 
   addsaver(vid.consider_shader_projection, "shader-projection", true);
   

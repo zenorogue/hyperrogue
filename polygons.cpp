@@ -497,8 +497,15 @@ void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
   if(DIM == 3) {
-    for(int y=0; y<4; y++) {
-      for(int x=0; x<4; x++) mat[id++] = V[x][y];
+    if(elliptic && spherephase < 2) {
+      for(int y=0; y<4; y++) {
+        for(int x=0; x<4; x++) mat[id++] = -V[x][y];
+        }
+      }
+    else {
+      for(int y=0; y<4; y++) {
+        for(int x=0; x<4; x++) mat[id++] = V[x][y];
+        }
       }
     glhr::set_modelview(glhr::as_glmatrix(mat));
     return;
@@ -1483,6 +1490,7 @@ void drawqueue() {
     
   if(sphere && DIM == 3) {
     for(int p: {0, 1, 2, 3}) {
+      if(elliptic && p < 2) continue;
       if(p == 1 || p == 3) {
   #ifdef GL_ES
         glClearDepthf(1.0f);
@@ -1504,6 +1512,10 @@ void drawqueue() {
       spherephase = p;
       current_display->set_projection(0, true);
       for(auto& ptd: ptds) ptd->draw();
+      if(elliptic) {
+        spherephase = p - 2;
+        for(auto& ptd: ptds) ptd->draw();
+        }
       // glflush();
       }
     }

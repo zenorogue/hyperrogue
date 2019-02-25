@@ -8,15 +8,15 @@ namespace hr {
 transmatrix &ggmatrix(cell *c);
 
 void fixelliptic(transmatrix& at) {
-  if(elliptic && at[2][2] < 0) {
-    for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+  if(elliptic && at[DIM][DIM] < 0) {
+    for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
       at[i][j] = -at[i][j];
     }
   }
 
 void fixelliptic(hyperpoint& h) {
-  if(elliptic && h[2] < 0)
-    for(int i=0; i<3; i++) h[i] = -h[i];
+  if(elliptic && h[DIM] < 0)
+    for(int i=0; i<MDIM; i++) h[i] = -h[i];
   }
 
 transmatrix master_relative(cell *c, bool get_inverse) {
