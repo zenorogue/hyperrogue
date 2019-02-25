@@ -566,10 +566,10 @@ void init() {
       sh3,       "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
       sr3,       "vColor.xyz = vColor.xyz * (1.0 - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
       
-      ss30,      "vColor.xyz = vColor.xyz * (1 - (6.284 - acos(t[3])) / uFog); t = -t; ",
-      ss31,      "vColor.xyz = vColor.xyz * (1 - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
-      ss32,      "vColor.xyz = vColor.xyz * (1 - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
-      ss33,      "vColor.xyz = vColor.xyz * (1 - acos(t[3]) / uFog); ",
+      ss30,      "vColor.xyz = vColor.xyz * (1.0 - (6.284 - acos(t[3])) / uFog); t = -t; ",
+      ss31,      "vColor.xyz = vColor.xyz * (1.0 - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
+      ss32,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
+      ss33,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / uFog); ",
       sh3 || sr3,"t[3] = 1.0;",
       
       band || hp || s3,"gl_Position = uP * t;",
