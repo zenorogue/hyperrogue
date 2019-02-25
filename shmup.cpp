@@ -1689,8 +1689,8 @@ void movePlayer(monster *m, int delta) {
   
   if(DIM == 3) {
     playerstrafe[cpid] = mturn * SCALE * delta / 600;
-    playerturn[cpid] = mdx * SCALE * delta / 600;
-    playerturny[cpid] = mdy * SCALE * delta / 600;
+    playerturn[cpid] = mdx * SCALE * delta / 200;
+    playerturny[cpid] = mdy * SCALE * delta / 200;
     }
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
