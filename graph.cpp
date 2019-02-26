@@ -3854,6 +3854,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     hyperpoint VC0 = tC0(V);
   
     if(inmirrorcount) ;
+    else if(DIM == 3) ;
     else if(intval(mouseh, VC0) < modist) {
       modist2 = modist; mouseover2 = mouseover;
       modist = intval(mouseh, VC0);
@@ -5355,6 +5356,12 @@ void queuecircleat(cell *c, double rad, color_t col) {
 #define MOBON true
 #endif
 
+cell *mouseover3() {
+  movedir md = vectodir(move_destination_vec(6));
+  cellwalker xc = cwt + md.d + wstep;
+  return xc.at;
+  }
+
 void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
@@ -5468,9 +5475,8 @@ void drawMarkers() {
       }
     
     if(DIM == 3 && !inHighQual && !shmup::on && vid.axes) {
-      movedir md = vectodir(move_destination_vec(6));
-      cellwalker xc = cwt + md.d + wstep;
-      IG(xc.at) queuecircleat(xc.at, .8, getcs().uicolor);
+      cell *c = mouseover3();
+      IG(c) queuecircleat(c, .8, getcs().uicolor);
       }
     #endif
     }
@@ -5617,6 +5623,7 @@ transmatrix cview() {
   }
 
 void precise_mouseover() {
+  if(DIM == 3) { mouseover2 = viewctr.at->c7; mouseover = mouseover3(); return; }
   if(!mouseover) return;
   cell *omouseover = mouseover;
   for(int loop = 0; loop < 10; loop++) { 
