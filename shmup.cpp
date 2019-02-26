@@ -78,8 +78,8 @@ namespace multi {
     };
 
   vector<string> playercmds_shmup3 = {
+    "move forward", "strafe right", "move backward", "strafe left", 
     "rotate up", "rotate down", "rotate left", "rotate right",
-    "move up", "move right", "move down", "move left", 
     "throw a knife", "face the pointer", "throw at the pointer", 
     "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
     "Orb power (target: facing)"
@@ -1718,9 +1718,10 @@ void movePlayer(monster *m, int delta) {
     }
   
   if(DIM == 3) {
-    playerstrafe[cpid] = mturn * SCALE * delta / 600;
-    playerturn[cpid] = mdx * SCALE * delta / 200;
-    playerturny[cpid] = mdy * SCALE * delta / 200;
+    playergo[cpid] = -mdy * SCALE * delta / 600;
+    playerstrafe[cpid] = mdx * SCALE * delta / 600;
+    playerturn[cpid] = mgo * SCALE * delta / 200;
+    playerturny[cpid] = mturn * SCALE * delta / 200;
 
     if(!lctrlclick) {
       playerturn[cpid] += mouseaim_x;
