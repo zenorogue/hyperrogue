@@ -100,10 +100,12 @@ namespace mapstream {
     f.write(geometry);
     char nbtype = char(variation);
     f.write(nbtype);
+    #if CAP_GP
     if(GOLDBERG) {
       f.write(gp::param.first);
       f.write(gp::param.second);
       }
+    #endif
     if(geometry == gTorus) {
       f.write(torusconfig::qty);
       f.write(torusconfig::dx);
@@ -112,6 +114,7 @@ namespace mapstream {
       f.write(torusconfig::sdy);
       f.write(torusconfig::torus_mode);
       }
+    #if CAP_FIELD
     if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
       f.write(quotient_field_changed);
@@ -120,12 +123,17 @@ namespace mapstream {
         f.write(fgeomextras[current_extra].current_prime_id);
         }
       }
+    #endif
+    #if CAP_CRYSTAL
     if(geometry == gCrystal) {
       f.write(ginf[gCrystal].sides);
       if(ginf[gCrystal].sides == 8)
         f.write(ginf[gCrystal].vertex);
       }
+    #endif
+    #if CAP_ARCM
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
+    #endif
     
     // game settings
     f.write(safety);
@@ -245,10 +253,12 @@ namespace mapstream {
       char nbtype;
       f.read(nbtype);
       variation = eVariation(nbtype);
+      #if CAP_GP
       if(GOLDBERG) {
         f.read(gp::param.first);
         f.read(gp::param.second);
         }
+      #endif
       if(geometry == gTorus) {
         f.read(torusconfig::qty);
         f.read(torusconfig::dx);
@@ -260,6 +270,7 @@ namespace mapstream {
           }
         torusconfig::activate();
         }
+      #if CAP_CRYSTAL
       if(geometry == gCrystal && vernum >= 10504) {
         int sides;
         f.read(sides);
@@ -276,6 +287,8 @@ namespace mapstream {
             }
           }
         }
+      #endif
+      #if CAP_FIELD
       if(geometry == gFieldQuotient) {
         using namespace fieldpattern;
         f.read(quotient_field_changed);
@@ -285,6 +298,8 @@ namespace mapstream {
           enableFieldChange();
           }
         }
+      #endif
+      #if CAP_ARCM
       if(geometry == gArchimedean) {
         string& symbol = arcm::current.symbol;
         symbol = f.get<string>();
@@ -293,6 +308,7 @@ namespace mapstream {
           printf("Errors! %s\n", arcm::current.errormsg.c_str());
           }
         }
+      #endif
       }
       
     need_reset_geometry = true;
