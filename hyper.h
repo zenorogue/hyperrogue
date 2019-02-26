@@ -3174,7 +3174,7 @@ static const auto SKIPFAC = .4;
 bool haveMobileCompass();
 bool handleCompass();
 
-inline bool sphereflipped() { return sphere && vid.alpha > 1.1; }
+inline bool sphereflipped() { return sphere && vid.alpha > 1.1 && DIM == 3; }
 int cellcolor(cell *c);
 transmatrix screenpos(ld x, ld y);
 extern ld backbrightness;

@@ -379,6 +379,7 @@ transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
   }
 
 void draw() {
+  sphereflip = Id;
   auto m = (hrmap_spherical3*) currentmap;
 
   for(int i=0; i<120; i++) if(m->cells[i])
