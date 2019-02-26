@@ -5423,17 +5423,17 @@ void drawMarkers() {
     #endif
   
     #if CAP_QUEUE        
-    if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON) {
+    if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && DIM == 2) {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
 
-    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON) {
+    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && DIM == 2) {
       queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
       }
     #endif
 
 #if CAP_SDLJOY && CAP_QUEUE
-    if(joydir.d >= 0) 
+    if(joydir.d >= 0 && DIM == 2) 
       queuecircleat(cwt.at->modmove(joydir.d+cwt.spin), .78 - .02 * sintick(199), 
         darkena(0x00FF00, 0, 0xFF));
 #endif
