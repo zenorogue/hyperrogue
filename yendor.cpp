@@ -266,6 +266,20 @@ namespace yendor {
               }
             }
           
+          else if(DIM == 3) {
+            int d = celldistance(nyi.path[0], ycw.at);
+            vector<cell*> next;
+            forCellCM(c, ycw.at) if(celldistance(nyi.path[0], c) > d) next.push_back(c);
+            if(!isize(next)) {
+              printf("error: no more cells"); 
+              ycw.at = ycw.at->move(hrand(ycw.at->type)); 
+              }
+            else {
+              ycw.at = next[hrand(isize(next))];
+              }
+            nyi.path[i+1] = ycw.at;
+            }
+          
           else {
             // stupid
             ycw += rev;

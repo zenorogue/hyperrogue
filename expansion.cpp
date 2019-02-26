@@ -387,6 +387,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   }
 
 bool sizes_known() {
+  if(DIM == 3) return false;
   if(bounded) return false;
   // Castle Anthrax is infinite
   if(binarytiling) return false;
