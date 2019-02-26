@@ -1964,7 +1964,10 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
     transmatrix Vb0 = Vb;
-    if(c->mondir != NODIR) {
+    if(c->mondir != NODIR && DIM == 3) {
+      queueline(tC0(Vparam), Vparam  * tC0(calc_relative_matrix(c->move(c->mondir), c, C0)), (col << 8) + 0xFF, 0);
+      }
+    else if(c->mondir != NODIR) {
       
       if(mmmon) {
         ld length;
@@ -2043,8 +2046,15 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
 
     if(mmmon) {
       if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
-        queuepoly(mmscale(Vb, geom3::ABODY), shILeaf[ctof(c)], darkena(col, 0, 0xFF));
-        ShadowV(Vb, shILeaf[ctof(c)], PPR::GIANTSHADOW);
+        if(DIM == 3) {
+          hyperpoint V0 = tC0(Vb);
+          transmatrix Vs = rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI/2);
+          queuepoly(Vs, shILeaf[1], darkena(col, 0, 0xFF));
+          }
+        else {
+          queuepoly(mmscale(Vb, geom3::ABODY), shILeaf[ctof(c)], darkena(col, 0, 0xFF));
+          ShadowV(Vb, shILeaf[ctof(c)], PPR::GIANTSHADOW);
+          }
         }
       else if(m == moWorm || m == moWormwait || m == moHexSnake) {
         Vb = Vb * pispin;
