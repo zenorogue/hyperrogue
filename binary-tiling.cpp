@@ -343,12 +343,30 @@ auto bt_config = addHook(hooks_args, 0, [] () {
   });
 #endif
 
-int celldistance3(cell *c1, cell *c2) {
+int celldistance3(cell *c1, cell *c2) { // [untested]
   int steps = 0;
+  int d1 = celldistAlt(c1);
+  int d2 = celldistAlt(c2);
+  while(d1 > d2) c1 = c1->cmove(8), steps++, d1--;
+  while(d2 > d1) c2 = c2->cmove(8), steps++, d2--;
+  vector<int> dx, dy;
   while(c1 != c2) {
-    int d1 = celldistAlt(c1), d2 = celldistAlt(c2);
-    if(d1 >= d2) c1 = c1->cmove(8), steps++;
-    if(d2 >= d1) c2 = c2->cmove(8), steps++;
+    dx.push_back((c1->c.spin(8) & 1) - (c2->c.spin(8) & 1));
+    dy.push_back((c1->c.spin(8) >> 1) - (c2->c.spin(8) >> 1));
+    c1 = c1->cmove(8);
+    c2 = c2->cmove(8);
+    steps += 2;
+    }
+  int xsteps = steps, sx = 0, sy = 0;
+  while(isize(dx)) {
+    xsteps -= 2;
+    sx *= 2;
+    sy *= 2;
+    sx += dx.back(); sy += dy.back();
+    dx.pop_back(); dy.pop_back();
+    int ysteps = xsteps + abs(sx) + abs(sy);
+    if(ysteps < steps) steps = ysteps;
+    if(sx >= 8 || sx <= -8 || sy >= 8 || sy <= -8) break;
     }
   return steps;
   }

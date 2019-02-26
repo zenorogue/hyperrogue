@@ -805,7 +805,7 @@ int heptdistance(cell *c1, cell *c2) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(c1, c2);
   #endif
-  if(!hyperbolic || quotient) return celldistance(c1, c2);
+  if(!hyperbolic || quotient || DIM == 3) return celldistance(c1, c2);
   else return heptdistance(c1->master, c2->master);
   }
 
