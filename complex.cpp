@@ -2606,11 +2606,11 @@ namespace sword {
   cell *pos(cell *c, int s) {
     int t = c->type;
     s *= 2;
-    s += S42/t;
-    s %= S84;
-    if(s<0) s += S84;
+    s += sword_angles/t;
+    s %= (2 * sword_angles);
+    if(s<0) s += sword_angles * 2;
     s *= t;
-    s /= S84;
+    s /= (sword_angles * 2);
     return c->move(s);
     }
   
@@ -2619,7 +2619,7 @@ namespace sword {
   
   cell *pos(int id, bool rev) {
     if(!orbcount(rev)) return NULL;
-    return pos(playerpos(id), angle[id] + (rev ? S21 : 0));
+    return pos(playerpos(id), angle[id] + (rev ? sword_angles/2 : 0));
     }
   
   bool at(cell *where, bool noplayer) {
@@ -2643,13 +2643,13 @@ namespace sword {
     int s2 = neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return angle;
     if(c1->c.mirror(s1))
-      return ((s2*S42/c2->type - angle + s1*S42/c1->type) + S21) % S42;
+      return ((s2*sword_angles/c2->type - angle + s1*sword_angles/c1->type) + sword_angles/2) % sword_angles;
     else
-      return ((s2*S42/c2->type - s1*S42/c1->type) + S21 + angle) % S42;
+      return ((s2*sword_angles/c2->type - s1*sword_angles/c1->type) + sword_angles/2 + angle) % sword_angles;
     }
 
   void shuffle(int i) {
-    sword::angle[i] = euclid ? S7*hrand(6) : PURE ? 3*hrand(S14)+1 : hrand(S42);
+    sword::angle[i] = euclid ? S7*hrand(6) : PURE ? 3*hrand(sword_angles/3)+1 : hrand(sword_angles);
     }
   
   void reset() {

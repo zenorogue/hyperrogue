@@ -1766,6 +1766,8 @@ namespace tortoise {
   int getRandomBits();
   }
 
+#define sword_angles (S7*S3*2)
+
 namespace sword {
 
   extern int angle[MAXPLAYER];

@@ -336,30 +336,30 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
     
     else {
       int& ang = angle[multi::cpid];
-      ang %= S42;
+      ang %= sword_angles;
 
 #if CAP_QUEUE || CAP_SHAPES
       transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * ddspin(c,0,M_PI); // (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
 #endif
       
 #if CAP_QUEUE
-      if(!euclid) for(int a=0; a<S42; a++) {
-        int dda = S42 + (-1-2*a);
+      if(!euclid) for(int a=0; a<sword_angles; a++) {
+        int dda = sword_angles + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
         if(PURE && a%3 != ang%3) continue;
-        if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
+        if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         color_t col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*xspinpush0(dda * M_PI / S42, PURE ? 0.6 * scalefactor : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/S42, PURE ? 0.7 * scalefactor : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*xspinpush0(dda * M_PI / sword_angles, PURE ? 0.6 * scalefactor : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/sword_angles, PURE ? 0.7 * scalefactor : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
 #if CAP_SHAPES
       if(items[itOrbSword])
-        queuepoly(Vnow*spin(M_PI+(-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(Vnow*spin(M_PI+(-1-2*ang)*M_PI/sword_angles), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
   
       if(items[itOrbSword2])
-        queuepoly(Vnow*spin((-1-2*ang)*2*M_PI/S84), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(Vnow*spin((-1-2*ang)*M_PI/sword_angles), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sintick(200)));
 #endif
       }
     }
