@@ -227,8 +227,14 @@ namespace yendor {
             // make it challenging
             vector<int> ds;
             for(int d=0; d<ycw.at->type; d++) {
-              if(celldistAlt((ycw+d).cpeek()) < celldistAlt(ycw.at))
-                ds.push_back(d);
+              if(i < YDIST/2) {
+                if(celldistAlt((ycw+d).cpeek()) < celldistAlt(ycw.at))
+                  ds.push_back(d);
+                }
+              else {
+                if(celldistAlt((ycw+d).cpeek()) > celldistAlt(ycw.at) && (ycw+d).cpeek() != nyi.path[i-1])
+                  ds.push_back(d);
+                }
               }
             if(isize(ds)) ycw += ds[hrand(isize(ds))];
             }
