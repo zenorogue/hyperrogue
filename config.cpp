@@ -1365,6 +1365,12 @@ void show3D() {
 
   dialog::addBreak(50);
   dialog::addSelItem(XLAT(DIM == 2 ? "Y shift" : "third person perspective"), fts3(vid.yshift), 'y');
+  if(DIM == 3) {
+    dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'f');
+    dialog::add_action([] () { 
+      dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
+      });
+    }
   if(DIM == 2) dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
   if(DIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
@@ -1906,6 +1912,9 @@ int read_config_args() {
     }
   else if(argis("-msmoff")) {
     PHASEFROM(2); memory_saving_mode = false;
+    }
+  else if(argis("-msens")) {
+    PHASEFROM(2); shift_arg_formula(mouseaim_sensitivity);
     }
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('f', vid.full, switchFullscreen())
