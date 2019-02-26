@@ -206,7 +206,7 @@ void precalc() {
 
 transmatrix xspinpush(ld dir, ld dist) {
   if(euclid)
-    return eupush(cos(dir) * dist, -sin(dir));
+    return eupush(cos(dir) * dist, -sin(dir) * dist);
   else
     return spin(dir) * xpush(dist) * spin(-dir);
   }
