@@ -2266,7 +2266,11 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     drawPlayerEffects(Vs, c, true);
     if(!mmmon) return true;
     
-    if(isWorm(m)) {
+    if(DIM == 3 && playermoved && vid.sspeed > -5 && vid.yshift == 0) {
+      /* FPP -- do not draw the player */
+      }
+    
+    else if(isWorm(m)) {
       ld depth = geom3::factor_to_lev(wormhead(c) == c ? geom3::AHEAD : geom3::ABODY);
       footphase = 0;
       int q = ptds.size();
