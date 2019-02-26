@@ -659,7 +659,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     }
   
   transmatrix Vit = V;
-  if(DIM == 3 && c) Vit = V * cspin(0, 2, ptick(618, 0));
+  if(DIM == 3 && c) Vit = rgpushxto0(tC0(V));
+  // V * cspin(0, 2, ptick(618, 0));
 
   if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
 
