@@ -700,7 +700,6 @@ bool passable(cell *w, cell *from, flagtype flags) {
   return true;
   }
 
-int airdir;
 vector<pair<cell*, int> > airmap;
 
 int airdist(cell *c) {
@@ -711,14 +710,13 @@ int airdist(cell *c) {
   return 3;
   }
 
-void calcAirdir(cell *c) {
+ld calcAirdir(cell *c) {
   if(!c || c->monst == moAirElemental || !passable(c, NULL, P_BLOW))
-    return;
+    return 0;
   for(int i=0; i<c->type; i++) {
     cell *c2 = c->move(i);
     if(c2 && c2->monst == moAirElemental) {
-      airdir = c->c.spin(i) * S42 / c2->type;
-      return;
+      return c->c.spin(i) * 2 * M_PI / c2->type;
       }
     }
   for(int i=0; i<c->type; i++) {
@@ -729,12 +727,11 @@ void calcAirdir(cell *c) {
     for(int i=0; i<c2->type; i++) {
       cell *c3 = c2->move(i);
       if(c3 && c3->monst == moAirElemental) {
-        airdir = c2->c.spin(i) * S42 / c3->type;
-        return;
+        return c2->c.spin(i) * 2 * M_PI / c3->type;
         }
       }
     }
-  return;
+  return 0;
   }
 
 bool againstWind(cell *cto, cell *cfrom) {

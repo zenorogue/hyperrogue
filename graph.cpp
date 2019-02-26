@@ -5047,10 +5047,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
      for(int i=0; i<c->type; i++) {
        cell *c2 = c->move(i); 
        if(airdist(c2) < airdist(c)) {
-         calcAirdir(c2); // printf("airdir = %d\n", airdir);
+         ld airdir = calcAirdir(c2); // printf("airdir = %d\n", airdir);
          transmatrix V0 = ddspin(c, i, M_PI);
          
-         double ph = ptick(PURE?150:75) + airdir * M_PI / (S21+.0);
+         double ph = ptick(PURE?150:75) + airdir;
          
          int aircol = 0x8080FF00 | int(32 + 32 * -cos(ph));
          
