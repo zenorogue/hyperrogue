@@ -734,7 +734,7 @@ namespace mapeditor {
         break;
       case 6:
         c->land = laCanvas;
-        c->wall = waNone;
+        c->wall = DIM == 3 ? waWaxWall : waNone;
         c->landparam = paintwhat >> 8;
         break;
       case 4:

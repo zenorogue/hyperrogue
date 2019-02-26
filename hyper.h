@@ -994,6 +994,7 @@ bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t
 bool outofmap(hyperpoint h);
 void applymodel(hyperpoint H, hyperpoint& Hscr);
 void drawCircle(int x, int y, int size, color_t color, color_t fillcolor = 0);
+void queuecircleat(cell *c, double rad, color_t col);
 void fixcolor(int& col);
 ld displayspin(cell *c, int d);
 bool non_spatial_model();

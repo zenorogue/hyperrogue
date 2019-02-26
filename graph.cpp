@@ -2983,6 +2983,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       break;
     case laCanvas:
       fcol = c->landparam;
+      if(c->wall == waWaxWall) wcol = c->landparam;
       break;
     case laPalace:
       fcol = floorcolors[c->land];
@@ -5244,9 +5245,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
 #if CAP_EDIT
     if((cmode & sm::MAP) && lmouseover && darken == 0 &&
-      !mouseout() && 
+      (DIM == 3 || !mouseout()) && 
       (patterns::whichPattern ? patterns::getpatterninfo0(c).id == patterns::getpatterninfo0(lmouseover).id : c == lmouseover)) {
-      queuecircle(V, .78, 0x00FFFFFF);
+      queuecircleat(c, .78, 0x00FFFFFF);
       }
 
     mapeditor::drawGhosts(c, V, ctype);
@@ -5357,7 +5358,7 @@ void queuecircleat(cell *c, double rad, color_t col) {
 #define MOBON true
 #endif
 
-cell *mouseover3() {
+cell *forwardcell() {
   movedir md = vectodir(move_destination_vec(6));
   cellwalker xc = cwt + md.d + wstep;
   return xc.at;
@@ -5476,7 +5477,7 @@ void drawMarkers() {
       }
     
     if(DIM == 3 && !inHighQual && !shmup::on && vid.axes) {
-      cell *c = mouseover3();
+      cell *c = forwardcell();
       IG(c) queuecircleat(c, .8, getcs().uicolor);
       }
     #endif
@@ -5624,7 +5625,16 @@ transmatrix cview() {
   }
 
 void precise_mouseover() {
-  if(DIM == 3) { mouseover2 = viewctr.at->c7; mouseover = mouseover3(); return; }
+  if(DIM == 3) { 
+    mouseover2 = mouseover = viewctr.at->c7; 
+    ld best = HUGE_VAL;
+    hyperpoint h = cpush(2, 1) * C0;
+    forCellEx(c1, mouseover2) {
+      ld dist = hdist(tC0(ggmatrix(c1)), h);
+      if(dist < best) mouseover = c1, best = dist;
+      }
+    return; 
+    }
   if(!mouseover) return;
   cell *omouseover = mouseover;
   for(int loop = 0; loop < 10; loop++) { 
