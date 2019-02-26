@@ -5360,8 +5360,10 @@ void queuecircleat(cell *c, double rad, color_t col) {
   if(!gmatrix.count(c)) return;
   if(DIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
-    for(int i=0; i<c->type; i++)
+    for(int i=0; i<c->type; i++) {
+      if(binarytiling && i < 4) continue;
       queuepolyat(gmatrix[c], shBinaryWall[i], 0, PPR::LINE);
+      }
     return;
     }    
   #if CAP_SHAPES
