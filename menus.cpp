@@ -334,10 +334,13 @@ void showDisplayMode() {
   const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",
     "3D", "high contrast/3D"};
 
-  dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
-  dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
-  dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
-  dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vid.alpha == 0, '4');
+  if(DIM == 2) {
+    dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
+    dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
+    dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
+    dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vid.alpha == 0, '4');
+    }
+
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
   if(getcstat == '5')
     mouseovers = XLAT("also hold Alt during the game to toggle high contrast");
@@ -345,30 +348,37 @@ void showDisplayMode() {
   dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
   dialog::addSelItem(XLAT("3D configuration"), "", '9');
 
+  if(DIM == 2)
   dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
   dialog::addSelItem(XLAT("monster display mode"), XLAT(mdmodes[vid.monmode]), 'm');
 
   dialog::addBreak(50);
 
 #if CAP_EDIT
+  if(DIM == 2)
   dialog::addBoolItem(XLAT("vector graphics editor"), (false), 'g');
 #endif
 
 #if CAP_TEXTURE
+  if(DIM == 2)
   dialog::addBoolItem(XLAT("texture mode"), texture::config.tstate == texture::tsActive, 't');
 #endif
 
 
   // display modes  
 #if CAP_RUG
+  if(DIM == 2)
   dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
 #endif
 #if CAP_MODEL
+  if(DIM == 2)
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
 
+  if(DIM == 2)
   dialog::addBoolItem(XLAT("models of hyperbolic geometry"), pmodel, 'a');
 
+  if(DIM == 2)
   dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'A');
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   

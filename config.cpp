@@ -1364,17 +1364,19 @@ void show3D() {
   dialog::addSelItem(XLAT("Level of water bottom"), fts3(lake_bottom), 'k');  
 
   dialog::addBreak(50);
-  dialog::addSelItem(XLAT("Y shift"), fts3(vid.yshift), 'y');
-  dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
-  dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
+  dialog::addSelItem(XLAT(DIM == 2 ? "Y shift" : "third person perspective"), fts3(vid.yshift), 'y');
+  if(DIM == 2) dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
+  if(DIM == 2) dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
   dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
     if(vid.fixed_facing) {
       dialog::editNumber(vid.fixed_facing_dir, 0, 360, 15, 90, "", "");
       dialog::dialogflags |= sm::CENTER;
       }
     });
-  dialog::addBreak(50);
-  dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
+  if(DIM == 2) {
+    dialog::addBreak(50);
+    dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
+    }
   
   dialog::addBreak(50);
   #if CAP_RUG
