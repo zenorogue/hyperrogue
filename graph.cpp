@@ -4621,6 +4621,15 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               }
           }
         else if(c->wall == waNone) ;
+        else if(isFire(c)) {
+          int r = ticks - lastt;
+          r += rand() % 5 + 1;
+          r /= 5;
+          while(r--) {
+            drawParticleSpeed(c, wcol, 75 + rand() % 75);
+            }
+          }
+
         else error = true;
         }
       
@@ -5290,9 +5299,13 @@ void drawFlash(cell *c) {
 void drawBigFlash(cell *c) { 
   flashes.push_back(flashdata(ticks, 2000, c, 0xC0FF00, 0)); 
   }
-void drawParticle(cell *c, color_t col, int maxspeed) {
+
+void drawParticleSpeed(cell *c, color_t col, int speed) {
   if(vid.particles && !confusingGeometry())
-    flashes.push_back(flashdata(ticks, rand() % 16, c, col, 1+rand() % maxspeed)); 
+    flashes.push_back(flashdata(ticks, rand() % 16, c, col, speed)); 
+  }
+void drawParticle(cell *c, color_t col, int maxspeed) {
+  drawParticleSpeed(c, col, 1 + rand() % maxspeed);
   }
 void drawParticles(cell *c, color_t col, int qty, int maxspeed) { 
   if(vid.particles)

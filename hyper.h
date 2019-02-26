@@ -967,6 +967,7 @@ void resetmusic();
 
 void drawFlash(cell* c);
 void drawBigFlash(cell* c);
+void drawParticleSpeed(cell *c, color_t col, int speed);
 void drawParticle(cell *c, color_t col, int maxspeed = 100);
 void drawParticles(cell *c, color_t col, int qty, int maxspeed = 100);
 void drawFireParticles(cell *c, int qty, int maxspeed = 100);
