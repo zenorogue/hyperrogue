@@ -91,13 +91,17 @@ movedir vectodir(const hyperpoint& P) {
 void remission() {
   if(!canmove && (cmode & sm::NORMAL)) showMissionScreen();
  }
- 
+
+hyperpoint move_destination_vec(int d) {
+  if(DIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
+  else return cspin(0, 2, d * M_PI/4) * tC0(pushone());
+  }
+
 void movepckeydir(int d) {
   DEBB(DF_GRAPH, (debugfile,"movepckeydir\n"));
   // EUCLIDEAN
-
-  movedir md = 
-    vectodir(spin(-d * M_PI/4) * tC0(pushone()));
+  
+  movedir md = vectodir(move_destination_vec(d));
     
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
@@ -144,6 +148,7 @@ void calcMousedest() {
   }
 
 void mousemovement() {
+  if(DIM == 3) return;
   calcMousedest();
     if(!canmove) movepcto(mousedest), remission(); else movepcto(mousedest);
   lmouseover = NULL;

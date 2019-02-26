@@ -5314,6 +5314,12 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id) {
 void queuecircleat(cell *c, double rad, color_t col) {
   if(!c) return;
   if(!gmatrix.count(c)) return;
+  if(DIM == 3) {
+    dynamicval<color_t> p(poly_outline, col);
+    for(int i=0; i<c->type; i++)
+      queuepolyat(gmatrix[c], shBinaryWall[i], 0, PPR::LINE);
+    return;
+    }    
   #if CAP_SHAPES
   if(vid.stereo_mode || sphere) {
     dynamicval<color_t> p(poly_outline, col);
@@ -5442,7 +5448,7 @@ void drawMarkers() {
 
     // process mouse
     #if CAP_SHAPES
-    if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
+    if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on && DIM == 2) {
       if(multi::players == 1) {
         forCellIdAll(c2, d, cwt.at) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
         }
@@ -5455,6 +5461,12 @@ void drawMarkers() {
           drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
           }
         }
+      }
+    
+    if(DIM == 3 && !inHighQual && !shmup::on && vid.axes) {
+      movedir md = vectodir(move_destination_vec(6));
+      cellwalker xc = cwt + md.d + wstep;
+      IG(xc.at) queuecircleat(xc.at, .8, getcs().uicolor);
       }
     #endif
     }
@@ -5803,6 +5815,7 @@ void drawthemap() {
 void drawmovestar(double dx, double dy) {
 
   if(viewdists) return;
+  if(DIM == 3) return;
 
   DEBB(DF_GRAPH, (debugfile,"draw movestar\n"));
   if(!playerfound) return;
