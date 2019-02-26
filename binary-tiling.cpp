@@ -260,7 +260,7 @@ namespace binary {
     }
 
   transmatrix parabolic3(ld y, ld z) {
-    ld co = vid.binary_width / log(2) / 2;
+    ld co = vid.binary_width / log(2) / 4;
     return hr::parabolic13(y * co, z * co);
     }
   
