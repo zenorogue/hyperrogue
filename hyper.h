@@ -129,13 +129,6 @@ void addMessage(string s, char spamtype = 0);
 #define euclid6 (masterless && !a4)
 
 #define S6 (S3*2)
-#define S42 (S7*S6)
-#define S12 (S6*2)
-#define S14 (S7*2)
-#define S21 (S7*S3)
-#define S28 (S7*4)
-#define S36 (S6*6)
-#define S84 (S7*S6*2)
 #define MAX_S3 4
 
 #define eurad crossf
@@ -4227,11 +4220,10 @@ namespace ors {
 
 bool saved_tortoise_on(cell *c);
 
-#define RING(i) for(double i=0; i<=S84+1e-6; i+=S3 * pow(.5, vid.linequality))
-#define REVRING(i) for(double i=S84; i>=-1e-6; i-=S3 * pow(.5, vid.linequality))
+#define RING(i) for(double i=0; i<=S84+1e-6; i+=SD3 * pow(.5, vid.linequality))
+#define REVRING(i) for(double i=S84; i>=-1e-6; i-=SD3 * pow(.5, vid.linequality))
 #define PRING(i) for(double i=0; i<=S84+1e-6; i+= pow(.5, vid.linequality))
 #define REVPRING(i) for(double i=S84; i>=-1e-6; i-=pow(.5, vid.linequality))
-
 #if CAP_BT
 void horopoint(ld y, ld x);
 hyperpoint get_horopoint(ld y, ld x);

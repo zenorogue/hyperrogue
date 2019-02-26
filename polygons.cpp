@@ -1684,6 +1684,8 @@ struct usershape {
 
 array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
 
+int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
+
 transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
@@ -1969,6 +1971,23 @@ void buildpolys() {
   gp::clear_plainshapes();
   #endif
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
+  
+  if(DIM == 3) {
+    if(sphere) SD3 = 3, SD7 = 5;
+    else SD3 = SD7 = 4;
+    }
+  else {
+    SD3 = S3;
+    SD7 = S7;
+    }
+  SD6 = SD3 * 2;
+  S42 = SD7 * SD6;
+  S12 = SD6 * 2;
+  S14 = SD7 * 2;
+  S21 = SD7 * SD3;
+  S28 = SD7 * 4;
+  S36 = SD6 * 6;
+  S84 = S42 * 2;
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
   hpc.clear();
@@ -2104,41 +2123,41 @@ void buildpolys() {
 // items
   
   bshape(shGem[0], PPR::ITEM);
-  for(int t=0; t<=S6; t++) {
-    hpcpush(ddi(S7 + t*S14, zhexf*.4) * C0);
-    if(t != S6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
+  for(int t=0; t<=SD6; t++) {
+    hpcpush(ddi(SD7 + t*S14, zhexf*.4) * C0);
+    if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
     }
   
   bshape(shGem[1], PPR::ITEM);
-  if(S7 == 6) {
-    for(int t=0; t<=S6; t++) {
-      hpcpush(ddi(S7 + t*S14, zhexf*.4) * C0);
-      if(t != S6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
+  if(SD7 == 6) {
+    for(int t=0; t<=SD6; t++) {
+      hpcpush(ddi(SD7 + t*S14, zhexf*.4) * C0);
+      if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
       }
     }
   else 
-    for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, zhexf*.5) * C0);
+    for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.5) * C0);
 
   bshape(shStar, PPR::ITEM);
-  for(int t=0; t<=S84; t+=S6) {
+  for(int t=0; t<=S84; t+=SD6) {
     hpcpush(ddi(t, zhexf*.2) * C0);
     if(t != S84) hpcpush(ddi(t+3,   zhexf*.6) * C0);
     }
 
   bshape(shDaisy, PPR::ITEM);
-  for(int t=0; t<=S6; t++) {
+  for(int t=0; t<=SD6; t++) {
     hpcpush(ddi(t*S14, zhexf*.8*3/4) * C0);
-    if(t != S6) hpcpush(ddi(t*S14+S7, zhexf*-.5*3/4) * C0);
+    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*-.5*3/4) * C0);
     }
   hpcpush(ddi(0, zhexf*.6) * C0);
 
   bshape(shTriangle, PPR::ITEM);
-  for(int t=0; t<=S3; t++) {
+  for(int t=0; t<=SD3; t++) {
     hpcpush(ddi(t*S28, zhexf*.5) * C0);
     }
   
   bshape(shDisk, PPR::ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);
 
   bshape(shDiskT, PPR::ITEM);
@@ -2155,7 +2174,7 @@ void buildpolys() {
     }
 
   bshape(shDiskM, PPR::ITEM);
-  for(int i=0; i<=S84; i+=S3) {
+  for(int i=0; i<=S84; i+=SD3) {
     hpcpush(ddi(i, orbsize * .1) * C0);
     }
 
@@ -2252,14 +2271,14 @@ void buildpolys() {
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
-    hpcpush(ddi(i, orbsize * (dmod(i, S28) < S7?.36 : .3)) * C0);
+    hpcpush(ddi(i, orbsize * (dmod(i, S28) < SD7?.36 : .3)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
   
   bshape(shHeptaRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
-    hpcpush(ddi(i, orbsize * (dmod(i, S12) < S3?.4 : .27)) * C0);
+    hpcpush(ddi(i, orbsize * (dmod(i, S12) < SD3?.4 : .27)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
   
   bshape(shCompass1, PPR::ITEM);
@@ -2277,20 +2296,20 @@ void buildpolys() {
   hpcpush(ddi(0, orbsize * .29) * C0);
   
   bshape(shILeaf[0], PPR::ONTENTACLE);
-  for(int t=0; t<=S6; t++) {
-    hpcpush(ddi(S7 + t*S14, zhexf*.7) * C0);
-    if(t != S6)
+  for(int t=0; t<=SD6; t++) {
+    hpcpush(ddi(SD7 + t*S14, zhexf*.7) * C0);
+    if(t != SD6)
       hpcpush(ddi(S14 + t*S14, zhexf*.15) * C0);
     }
 
   bshape(shILeaf[1], PPR::ONTENTACLE);
-  if(S3 == 3 && S7 % 3) 
-    for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, zhexf*.8) * C0);
+  if(SD3 == 3 && SD7 % 3) 
+    for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.8) * C0);
   else {
-    for(int t=0; t<=S7; t++) {
+    for(int t=0; t<=SD7; t++) {
       hpcpush(ddi(t*S12, zhexf*.8) * C0);
-      if(t != S6)
-        hpcpush(ddi(t*S12 + S6, zhexf*.2) * C0);
+      if(t != SD6)
+        hpcpush(ddi(t*S12 + SD6, zhexf*.2) * C0);
       }
     }
 
@@ -2303,10 +2322,10 @@ void buildpolys() {
     hpcpush(ddi(i, scalefactor * hcrossf7 * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
 
   bshape(shHeptaMarker, PPR::HEPTAMARK);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
   
   bshape(shSnowball, PPR::ITEM);
-  for(int t=0; t<=S7*4; t++) hpcpush(ddi(t*S3, zhexf*.1) * C0);
+  for(int t=0; t<=SD7*4; t++) hpcpush(ddi(t*SD3, zhexf*.1) * C0);
   
   bshape(shRose, PPR::ITEM);
   PRING(t)
