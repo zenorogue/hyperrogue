@@ -5272,11 +5272,13 @@ struct flashdata {
   int size;
   cell *where;
   double angle;
+  double angle2;
   int spd; // 0 for flashes, >0 for particles
   color_t color;
   flashdata(int _t, int _s, cell *_w, color_t col, int sped) { 
     t=_t; size=_s; where=_w; color = col; 
     angle = rand() % 1000; spd = sped;
+    if(DIM == 3) angle2 = acos((rand() % 1000 - 499.5) / 500);
     }
   };
 
@@ -5550,9 +5552,13 @@ void drawFlashes() {
     if(f.spd) {
       #if CAP_SHAPES
       kill = tim > 300;
-      int partcol = darkena(f.color, 0, max(255 - tim*255/300, 0));
+      int partcol = darkena(f.color, 0, DIM == 3 ? 255 : max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
-      queuepoly(V * spin(f.angle) * xpush(f.spd * tim * scalefactor / 50000.), shParticle[f.size], partcol);
+      ld t = f.spd * tim * scalefactor / 50000.;
+      transmatrix T =
+        DIM == 2 ? V * spin(f.angle) * xpush(t) :
+        V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
+      queuepoly(T, shParticle[f.size], partcol);
       #endif
       }
     
