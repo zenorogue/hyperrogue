@@ -492,6 +492,10 @@ void resize_screen_to(int x, int y) {
   setvideomode();
   }
 
+bool mousepan, oldmousepan;
+ld mouseaim_x, mouseaim_y;
+ld mouseaim_sensitivity = 0.01;
+
 void mainloopiter() {
 
   DEBB(DF_GRAPH, (debugfile,"main loop\n"));
@@ -523,6 +527,22 @@ void mainloopiter() {
   if(vid.sspeed >= 5 && gmatrix.count(cwt.at) && !elliptic) {
     cwtV = gmatrix[cwt.at] * ddspin(cwt.at, cwt.spin);
     if(cwt.mirrored) playerV = playerV * Mirror;
+    }
+  
+  mousepan = normal && DIM == 3;
+  if(mousepan != oldmousepan) {
+    oldmousepan = mousepan;
+    if(mousepan) {    
+      SDL_WM_GrabInput(SDL_GRAB_ON);
+      SDL_ShowCursor(SDL_DISABLE);
+      mouseaim_x = mouseaim_y = 0;
+      }
+    else {
+      SDL_WM_GrabInput( SDL_GRAB_OFF );
+      SDL_ShowCursor(SDL_ENABLE);
+      SDL_WarpMouse(vid.xres/2, vid.yres/2);
+      mouseaim_x = mouseaim_y = 0;      
+      }
     }
 
 #if ISWEB
@@ -580,6 +600,11 @@ void mainloopiter() {
 #endif
   SDL_Event ev;
   DEBB(DF_GRAPH, (debugfile,"polling for events\n"));
+  
+  if(DIM == 3 && !shmup::on && !rug::rugged) {
+    View = cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y) * View;
+    mouseaim_x = mouseaim_y = 0;
+    }
   
   if(smooth_scrolling && !shmup::on && !rug::rugged) {
     static int lastticks;
@@ -795,6 +820,13 @@ void handle_event(SDL_Event& ev) {
       mousemoved = true;
       mousex = ev.motion.x;
       mousey = ev.motion.y;
+      
+      if(mousepan) {
+        mousex = vid.xres/2;
+        mousey = vid.yres/2;      
+        mouseaim_x += ev.motion.xrel * mouseaim_sensitivity;
+        mouseaim_y += ev.motion.yrel * mouseaim_sensitivity;
+        }
       
       need_mouseh = true;
 

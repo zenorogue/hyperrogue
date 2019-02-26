@@ -764,12 +764,23 @@ void handleInput(int delta) {
   
   if(actionspressed[58] && !lactionpressed[58]) 
     pushScreen(showMainMenu);
+    
+  panx *= d;
+  pany *= d;
+  panspin *= d;
+  panmove *= d;
   
+  if(lctrlclick) {
+    panx += mouseaim_x / 2;
+    pany += mouseaim_y / 2;
+    mouseaim_x = mouseaim_y = 0;
+    }
+
   if(panx || pany || panspin || (DIM == 3 && panmove)) {
     if(DIM == 2)
-      View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
+      View = xpush(-panx) * ypush(-pany) * spin(panspin) * View;
     else
-      View = cspin(0, 2, panx/10) * cspin(0, 1, pany/10) * spin(panspin * d) * cpush(2, panmove/10) * View;
+      View = cspin(0, 2, panx*2) * cspin(0, 1, pany*2) * spin(panspin) * cpush(2, panmove*2) * View;
     playermoved = false;
     }
 #endif
@@ -1710,6 +1721,12 @@ void movePlayer(monster *m, int delta) {
     playerstrafe[cpid] = mturn * SCALE * delta / 600;
     playerturn[cpid] = mdx * SCALE * delta / 200;
     playerturny[cpid] = mdy * SCALE * delta / 200;
+
+    if(!lctrlclick) {
+      playerturn[cpid] += mouseaim_x;
+      playerturny[cpid] += mouseaim_y;
+      mouseaim_x = mouseaim_y = 0;
+      }
     }
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;

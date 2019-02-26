@@ -2473,6 +2473,7 @@ void initquickqueue();
 void quickqueue();
 int darkenedby(int c, int lev);
 extern int mousex, mousey;
+extern ld mouseaim_x, mouseaim_y, mouseaim_sensitivity;
 string generateHelpForItem(eItem it);
 bool graphglyph();
 extern bool hiliteclick;
