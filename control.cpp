@@ -94,6 +94,7 @@ void remission() {
 
 hyperpoint move_destination_vec(int d) {
   if(DIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
+  else if(d&1) return cspin(0, 1, d > 4 ? M_PI/2 : -M_PI/2) * tC0(pushone());
   else return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   }
 
