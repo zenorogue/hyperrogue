@@ -524,7 +524,7 @@ namespace euclid3 {
     for(int k=0; k<a; k++) { x -= getcoord(x, 0); x /= 1000; }
     x %= 1000; 
     if(x>500) x -= 1000; 
-    if(x<-500) x += 500; 
+    if(x<-500) x += 1000; 
     return x; 
     }
 
