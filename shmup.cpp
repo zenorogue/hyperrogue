@@ -1648,11 +1648,13 @@ void movePlayer(monster *m, int delta) {
   
   #if CAP_RACING
   if(racing::on) {
-    if(abs(mdy) > abs(mgo)) mgo = -mdy;
-    if(abs(mdx) > abs(mturn)) mturn = -mdx;
-    mdx = mdy = 0;
+    if(DIM == 2) {
+      if(abs(mdy) > abs(mgo)) mgo = -mdy;
+      if(abs(mdx) > abs(mturn)) mturn = -mdx;
+      mdx = mdy = 0;
+      }
     facemouse = shotkey = dropgreen = false;
-    if(ticks < racing::race_start_tick || !racing::race_start_tick) mgo = 0;
+    if(ticks < racing::race_start_tick || !racing::race_start_tick) (DIM == 2 ? mgo : mdy) = 0;
     }
   #endif
   
@@ -1702,24 +1704,38 @@ void movePlayer(monster *m, int delta) {
   if(rosedist(m->base) == 1)
     roseCurrents(nat, m, delta);
     
-  if(mgo > 1) mgo = 1;
-  if(mgo < -1) mgo = -1;
   if(!canmove) mgo = 0;
   
-  if(racing::on) {
-    // braking is more efficient
-    if(m->vel * mgo < 0) mgo *= 3;
-    m->vel += mgo * delta / 600;
-    playergo[cpid] = m->vel * SCALE * delta / 600;
+  if(DIM == 2) {
+    if(mgo > 1) mgo = 1;
+    if(mgo < -1) mgo = -1;
+    if(racing::on) {
+      // braking is more efficient
+      if(m->vel * mgo < 0) mgo *= 3;
+      m->vel += mgo * delta / 600;
+      playergo[cpid] = m->vel * SCALE * delta / 600;
+      }
+    
+    else {
+      playergo[cpid] = mgo * SCALE * delta / 600;
+      }
     }
   
-  else {    
-    playergo[cpid] = mgo * SCALE * delta / 600;
-    }
-  
-  if(DIM == 3) {
-    playergo[cpid] = -mdy * SCALE * delta / 600;
-    playerstrafe[cpid] = mdx * SCALE * delta / 600;
+  else if(DIM == 3) {
+    if(mdy > 1) mdy = 1;
+    if(mdy < -1) mdy = -1;
+    if(mdx > 1) mdx = 1;
+    if(mdx < -1) mdx = -1;
+    if(racing::on) {
+      if(m->vel * -mdy < 0) mdy *= 3;
+      m->vel += -mdy * delta / 600;
+      playergo[cpid] = m->vel * SCALE * delta / 600;
+      playerstrafe[cpid] = m->vel * mdx * SCALE * delta / 600;
+      }
+    else {
+      playergo[cpid] = -mdy * SCALE * delta / 600;
+      playerstrafe[cpid] = mdx * SCALE * delta / 600;
+      }
     playerturn[cpid] = mgo * SCALE * delta / 200;
     playerturny[cpid] = mturn * SCALE * delta / 200;
 
