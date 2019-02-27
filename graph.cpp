@@ -483,7 +483,7 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
   
   if(!footphase) rightfoot = leftfoot = 0;
 
-  transmatrix VAML = mmscale(V, 1.04);
+  transmatrix VAML = mmscale(V, geom3::ALEG);
   
   hpcshape* sh[6][4] = {
     {&shDogFrontPaw, &shDogRearPaw, &shDogFrontLeg, &shDogRearLeg},
