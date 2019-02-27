@@ -343,7 +343,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
           forCellCM(c2, base) {
             transmatrix V2 = calc_relative_matrix(base, c2, C0);
             double newz = check(V2 * at) [DIM];
-            if(newz < currz) {
+            if(newz < currz - 1e-4) {
               currz = newz;
               bestV = V2;
               newbase = c2;
