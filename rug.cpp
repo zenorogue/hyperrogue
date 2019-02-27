@@ -1048,10 +1048,12 @@ void addNewPoints() {
 
 void physics() {
 
+  #if CAP_CRYSTAL
   if(in_crystal()) {
     crystal::build_rugdata();
     return;
     }
+  #endif
 
   if(good_shape) return;
 
@@ -1424,12 +1426,14 @@ void init_model() {
   qvalid = 0; dt = 0; queueiter = 0;
   err_zero_current = err_zero;
   
+  #if CAP_CRYSTAL
   if(geometry == gCrystal && surface::sh == surface::dsNone) {
     surface::sh = surface::dsCrystal;
     crystal::init_rotation();
     good_shape = true;
     return;
     }
+  #endif
   
   try {
     buildRug();
@@ -1484,8 +1488,11 @@ ld protractor = 0;
 
 void apply_rotation(const transmatrix& t) {
   if(!rug_perspective) currentrot = t * currentrot;
+  #if CAP_CRYSTAL
   if(in_crystal()) crystal::apply_rotation(t);
-  else for(auto p: points) p->flat = t * p->flat;
+  else
+  #endif
+  for(auto p: points) p->flat = t * p->flat;
   }
 
 void move_forward(ld distance) {
@@ -1511,23 +1518,29 @@ bool handlekeys(int sym, int uni) {
     return true;
     }
   else if(NUMBERKEY == '2') {
+    #if CAP_CRYSTAL
     if(in_crystal())
       crystal::switch_z_coordinate();
     else
+    #endif
       apply_rotation(rotmatrix(M_PI, 0, 2));
     return true;
     }
   else if(NUMBERKEY == '3') {
+    #if CAP_CRYSTAL
     if(in_crystal())
       crystal::flip_z();
     else
+    #endif
       apply_rotation(rotmatrix(M_PI/2, 0, 2));
     return true;
     }
+  #if CAP_CRYSTAL
   else if(sym == SDLK_HOME && in_crystal()) {
     crystal::next_home_orientation();
     return true;
     }
+  #endif
 #if !CAP_HOLDKEYS
   else if(sym == SDLK_PAGEUP || uni == '[') {
     move_forward(.1);
