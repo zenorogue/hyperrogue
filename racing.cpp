@@ -1294,8 +1294,12 @@ void markers() {
     using namespace racing;
     cell *goal = NULL;
     for(cell *c: track) if(inscreenrange(c)) goal = c;
+    
+    if(!goal) return;
+
     hyperpoint H = tC0(ggmatrix(goal));
     if(invalid_point(H)) return;
+
     queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
     queuestr(H, vid.fsize, 
       #if CAP_CRYSTAL
