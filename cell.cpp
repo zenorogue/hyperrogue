@@ -138,7 +138,7 @@ cell *createMov(cell *c, int d) {
   #endif
   else if(archimedean || PURE) {
     heptagon *h2 = createStep(c->master, d);
-    c->c.connect(d, h2->c7,c->master->c.spin(d),false);
+    c->c.connect(d, h2->c7,c->master->c.spin(d), c->master->c.mirror(d));
     }
   else if(c == c->master->c7) {
     
