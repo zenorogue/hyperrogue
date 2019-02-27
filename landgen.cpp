@@ -542,6 +542,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           cell *c2 = c->move(i);
           if(!c2) continue;
           cell *c3 = c2->modmove(c->c.spin(i) + 3);
+          if(!c3) continue;
           if(c3->land != laPower && c3->land != laBarrier)
           if(c2->wall != waFire && c2->wall != waGlass) {
             if(isFire(c)) c->monst = moWitchWinter;
