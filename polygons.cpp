@@ -608,7 +608,7 @@ void dqi_poly::gldraw() {
         
         current_display->set_mask(ed);
         glhr::color2(color);
-        glhr::set_depthtest(model_needs_depth());
+        glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
   
         if(flags & (POLY_INVERSE | POLY_FORCE_INVERTED)) {
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
@@ -640,7 +640,7 @@ void dqi_poly::gldraw() {
     
     if(outline) {
       glhr::color2(outline);
-      glhr::set_depthtest(model_needs_depth());
+      glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
       glDrawArrays(GL_LINE_STRIP, offset, cnt);
       }
     }

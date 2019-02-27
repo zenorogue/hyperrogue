@@ -5364,7 +5364,7 @@ void queuecircleat(cell *c, double rad, color_t col) {
     dynamicval<color_t> p(poly_outline, col);
     for(int i=0; i<c->type; i++) {
       if(binarytiling && i < 4) continue;
-      queuepolyat(gmatrix[c], shBinaryWall[i], 0, PPR::LINE);
+      queuepolyat(gmatrix[c], shBinaryWall[i], 0, PPR::SUPERLINE);
       }
     return;
     }    

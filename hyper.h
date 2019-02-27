@@ -2074,7 +2074,9 @@ enum class PPR {
   PARTICLE, SWORDMARK, MAGICSWORD, MISSILE, 
   MINEMARK, ARROW,
   MOBILE_ARROW,
-  LINE, TEXT, CIRCLE,
+  LINE, 
+  // no depth testing for SUPERLINE and above
+  SUPERLINE, TEXT, CIRCLE,
   MAX,
   DEFAULT = -1
   };
