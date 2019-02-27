@@ -3801,7 +3801,7 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
 bool isWall3(cell *c, color_t& wcol) {
   if(isWorm(c)) { wcol = minf[c->monst].color; return true; }
   if(isWall(c)) return true;
-  // if(c->wall == waChasm) { wcol = 0x606000; return true; }
+  if(c->wall == waChasm && c->land == laMemory) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
   // if(chasmgraph(c)) return true;
   if(among(c->wall, waMirror, waCloud)) return true;
