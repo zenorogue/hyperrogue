@@ -569,7 +569,7 @@ namespace euclid3 {
   int celldistance(cell *c1, cell *c2) {
     auto cm = cubemap();
     coord a = cm->ispacemap[c1->master] - cm->ispacemap[c2->master];
-    return getcoord(a, 0) + getcoord(a, 1) + getcoord(a, 2);
+    return abs(getcoord(a, 0)) + abs(getcoord(a, 1)) + abs(getcoord(a, 2));
     }
 
   }
