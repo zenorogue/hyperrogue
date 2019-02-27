@@ -4657,7 +4657,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 }
               }
           }
-        else if(c->wall == waNone) ;
         else if(isFire(c)) {
           int r = ticks - lastt;
           r += rand() % 5 + 1;
@@ -4666,8 +4665,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             drawParticleSpeed(c, wcol, 75 + rand() % 75);
             }
           }
+        else if(winf[c->wall].glyph == '.') ;
 
-        else error = true;
+        else if(!hiliteclick) queuechr(V, 1, winf[c->wall].glyph, darkenedby(wcol, darken), 2);
         }
       
       else switch(c->wall) {
