@@ -1080,7 +1080,7 @@ void centerpc(ld aspd) {
     if(aspd > R) aspd = R;
     
     for(int i=0; i<DIM; i++)
-      View[i][DIM] -= cwtV[i][DIM] * aspd / R;
+      View[i][DIM] -= H[i] * aspd / R;
         
     }
   
