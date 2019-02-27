@@ -299,7 +299,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
   while(true) {
   
-    double currz = check(at)[DIM];
+    double currz = hdist0(check(at));
     
     heptagon *h = base->master;
     
@@ -344,7 +344,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
           newbase = NULL;
           forCellCM(c2, base) {
             transmatrix V2 = calc_relative_matrix(base, c2, C0);
-            double newz = check(V2 * at) [DIM];
+            double newz = hdist0(check(V2 * at));
             if(newz < currz - 1e-4) {
               currz = newz;
               bestV = V2;
