@@ -204,6 +204,10 @@
 #define CAP_POLY (CAP_SDLGFX || CAP_GL || CAP_SVG)
 #endif
 
+#ifndef CAP_SHAPES
+#define CAP_SHAPES 1
+#endif
+
 #define CAP_QUEUE CAP_POLY
 #define CAP_CURVE CAP_POLY
 
@@ -413,7 +417,7 @@ extern "C" {
 #endif
 #endif
 
-#if CAP_SAVE
+#if CAP_FILES
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
