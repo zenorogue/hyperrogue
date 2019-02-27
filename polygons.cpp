@@ -3020,6 +3020,7 @@ void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
 
 void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame) {
   if(invalid_point(h)) return;
+  if(DIM == 3 && invis_point(h)) return;
   int xc, yc, sc; getcoord0(h, xc, yc, sc);
   queuechr(xc, yc, sc, size, chr, col, frame);
   }
@@ -3030,6 +3031,7 @@ ld scale_in_pixels(const transmatrix& V) {
   
 void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame) {
   if(invalid_point(V)) return;
+  if(DIM == 3 && invis_point(tC0(V))) return;
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   queuechr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame);
   }
