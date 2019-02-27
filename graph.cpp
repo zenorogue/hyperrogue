@@ -1950,6 +1950,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   eMonster m = c->monst;
     
   if(isIvy(c) || isWorm(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
+  
+    if(isWorm(c) && DIM == 3) return false;
     
     if((m == moHexSnake || m == moHexSnakeTail) && c->hitpoints == 2) {
       int d = c->mondir;
@@ -3796,6 +3798,16 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
     }
   }
 
+bool isWall3(cell *c, color_t& wcol) {
+  if(isWorm(c)) { wcol = minf[c->monst].color; return true; }
+  if(isWall(c)) return true;
+  if(c->wall == waChasm) { wcol = 0x606000; return true; }
+  if(c->wall == waInvisibleFloor) return false;
+  if(chasmgraph(c)) return true;
+  if(among(c->wall, waMirror, waCloud)) return true;
+  return false;
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4625,22 +4637,23 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       char xch = winf[c->wall].glyph;
       
       if(DIM == 3) {
-        if(isWall(c)) {
+        if(isWall3(c, wcol)) {
+          color_t dummy;        
           const int darkval_h[9] = {0,2,2,0,6,6,8,8,0};
           const int darkval_s[12] = {0,1,2,3,0,1,2,3,0,1,2,3};
           const int darkval_e[6] = {0,0,4,4,6,6};
           const int *darkval = sphere ? darkval_s : hyperbolic ? darkval_h : darkval_e;
-          int d = (asciicol & 0xF0F0F0) >> 4;
+          int d = (wcol & 0xF0F0F0) >> 4;
 
           for(int a=0; a<c->type; a++)
-            if(c->move(a) && !isWall(c->move(a))) {
+            if(c->move(a) && !isWall3(c->move(a), dummy)) {
               if(a < 4 && hyperbolic) {
                 if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 dynamicval<color_t> p (poly_outline, 0);
-                queuepoly(V, shBinaryWall[a], darkena(asciicol - d * darkval[a], 0, 0xFF));
+                queuepoly(V, shBinaryWall[a], darkena(wcol - d * darkval[a], 0, 0xFF));
                 }
               else {
-                queuepoly(V, shBinaryWall[a], darkena(asciicol - d * darkval[a], 0, 0xFF));
+                queuepoly(V, shBinaryWall[a], darkena(wcol - d * darkval[a], 0, 0xFF));
                 }
               }
           }
