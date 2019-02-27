@@ -4650,10 +4650,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               if(a < 4 && hyperbolic) {
                 if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 dynamicval<color_t> p (poly_outline, 0);
-                queuepoly(V, shBinaryWall[a], darkena(wcol - d * darkval[a], 0, 0xFF));
+                queuepoly(V, shWall3D[a], darkena(wcol - d * darkval[a], 0, 0xFF));
                 }
               else {
-                queuepoly(V, shBinaryWall[a], darkena(wcol - d * darkval[a], 0, 0xFF));
+                queuepoly(V, shWall3D[a], darkena(wcol - d * darkval[a], 0, 0xFF));
                 }
               }
           }
@@ -5190,7 +5190,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(hyperbolic && !among(t, 5, 6, 8)) continue;
           if(!hyperbolic && c->move(t) < c) continue;
           dynamicval<color_t> p (poly_outline, gridcolor(c, c->move(t)));
-          queuepoly(V, shBinaryWall[t], 0);
+          queuepoly(V, shWall3D[t], 0);
           }
         }
       #endif
@@ -5377,7 +5377,7 @@ void queuecircleat(cell *c, double rad, color_t col) {
     dynamicval<color_t> p(poly_outline, col);
     for(int i=0; i<c->type; i++) {
       if(binarytiling && i < 4) continue;
-      queuepolyat(gmatrix[c], shBinaryWall[i], 0, PPR::SUPERLINE);
+      queuepolyat(gmatrix[c], shWall3D[i], 0, PPR::SUPERLINE);
       }
     return;
     }    

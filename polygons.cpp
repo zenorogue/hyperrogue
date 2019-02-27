@@ -1659,7 +1659,7 @@ hpcshape
   
   shAsymmetric,
   
-  shBinaryWall[12],
+  shWall3D[12],
 
   shDodeca;
 #endif
@@ -2500,20 +2500,20 @@ void buildpolys() {
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor, 242);
   
   if(DIM == 3 && binarytiling) {
-    make_wall(shBinaryWall[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
-    make_wall(shBinaryWall[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
-    make_wall(shBinaryWall[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
-    make_wall(shBinaryWall[3], 0,0,-1, +1,0,-1, 0,+1,-1, 2);
-    make_wall(shBinaryWall[4], -1,-1,-1, -1,1,-1, -1,-1,+1, 1);
-    make_wall(shBinaryWall[5], +1,-1,-1, +1,1,-1, +1,-1,+1, 1);
-    make_wall(shBinaryWall[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
-    make_wall(shBinaryWall[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
-    make_wall(shBinaryWall[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
+    make_wall(shWall3D[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
+    make_wall(shWall3D[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
+    make_wall(shWall3D[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
+    make_wall(shWall3D[3], 0,0,-1, +1,0,-1, 0,+1,-1, 2);
+    make_wall(shWall3D[4], -1,-1,-1, -1,1,-1, -1,-1,+1, 1);
+    make_wall(shWall3D[5], +1,-1,-1, +1,1,-1, +1,-1,+1, 1);
+    make_wall(shWall3D[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
+    make_wall(shWall3D[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
+    make_wall(shWall3D[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
     }
   
   if(DIM == 3 && euclid) {
     for(int w=0; w<6; w++) {
-      bshape(shBinaryWall[w], PPR::WALL);
+      bshape(shWall3D[w], PPR::WALL);
       for(int a=0; a<=4; a++) {
         int t[3];
         t[0] = (w>=3) ? -1 : 1;
@@ -2529,7 +2529,7 @@ void buildpolys() {
   
   if(DIM == 3 && sphere) {
     for(int w=0; w<12; w++) {
-      bshape(shBinaryWall[w], PPR::WALL);
+      bshape(shWall3D[w], PPR::WALL);
       for(int a=0; a<=5; a++) 
         hpcpush(sphere3::dodefaces[w*5+a%5]);
       }
