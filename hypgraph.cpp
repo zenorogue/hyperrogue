@@ -1040,7 +1040,7 @@ void centerpc(ld aspd) {
   #endif
 
   if(shmup::on && DIM == 3 && vid.sspeed > -5) {
-    transmatrix at = cpush(2, -vid.yshift) * ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at;  
+    transmatrix at = ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at * cpush(2, -vid.yshift);  
     View = inverse(at) * View;
     return;
     }
