@@ -534,6 +534,11 @@ namespace euclid3 {
     return true;
     }
 
+  bool dist_alt(cell *c) {
+    coord co = cubemap()->ispacemap[c->master];
+    return getcoord(co, 2);
+    }
+
   void draw() {
     dq::visited.clear();
     dq::enqueue(viewctr.at, cview());

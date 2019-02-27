@@ -402,7 +402,7 @@ int celldist(cell *c) {
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
     return eudist(decodeId(c->master));
-  if(sphere || binarytiling || geometry == gCrystal) return celldistance(c, currentmap->gamestart());
+  if(sphere || binarytiling || DIM == 3 || geometry == gCrystal) return celldistance(c, currentmap->gamestart());
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -439,6 +439,9 @@ int celldistAlt(cell *c) {
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
+  #if MAXDIM == 4
+  if(euclid && DIM == 3) return euclid3::dist_alt(c);
+  #endif
   if(!c->master->alt) return 0;
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, true);
