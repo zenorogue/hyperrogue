@@ -195,13 +195,17 @@ bool bad(cell *c2, cell *c) {
   }
 
 int rcelldist(cell *c) {
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(c, currentmap->gamestart());
-  else return celldist(c);
+  #endif
+  return celldist(c);
   }
 
 int pcelldist(cell *c) {
+  #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::precise_distance(c, currentmap->gamestart());
-  else return celldist(c);
+  #endif
+  return celldist(c);
   }
 
 int trackval(cell *c) {
@@ -1291,7 +1295,9 @@ void markers() {
     if(invalid_point(H)) return;
     queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
     queuestr(H, vid.fsize, 
+      #if CAP_CRYSTAL
       (geometry == gCrystal && !crystal::pure()) ? fts(crystal::space_distance(cwt.at, track.back())) :
+      #endif
       its(celldistance(cwt.at, track.back())), 0x10101 * int(128 - 100 * sintick(150)));
     addauraspecial(H, 0xFFD500, 0);
     }
