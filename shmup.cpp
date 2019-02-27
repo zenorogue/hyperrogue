@@ -78,8 +78,8 @@ namespace multi {
     };
 
   vector<string> playercmds_shmup3 = {
-    "move forward", "strafe right", "move backward", "strafe left", 
     "rotate up", "rotate down", "rotate left", "rotate right",
+    "move forward", "strafe right", "move backward", "strafe left", 
     "throw a knife", "face the pointer", "throw at the pointer", 
     "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
     "Orb power (target: facing)"
@@ -1580,7 +1580,8 @@ void movePlayer(monster *m, int delta) {
     }
   
   int b = 16*tableid[cpid];
-    for(int i=0; i<(DIM == 3 ? 4 : 8); i++) if(actionspressed[b+i]) playermoved = true;
+
+    for(int i=(DIM == 3 ? 4 : 0); i<8; i++) if(actionspressed[b+i]) playermoved = true;
   
   int jb = 4*tableid[cpid];
   for(int i=0; i<4; i++) if(axespressed[jb+i]) playermoved = true;
