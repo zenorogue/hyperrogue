@@ -1267,6 +1267,7 @@ namespace mirror {
   
   void breakMirror(cellwalker cw, int pid) {
     if(!cw.at) return;
+    if(DIM == 3) return;
     cell *c = cw.at;
     if(c->wall == waMirror || c->wall == waCloud) {
       drawParticles(c, winf[c->wall].color, 16);
