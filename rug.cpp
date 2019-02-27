@@ -81,12 +81,12 @@ transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
   
   for(int i=0; i<3; i++) {
     for(int j=0; j<i; j++) vec[i] -= vec[j] * (vec[i] | vec[j]);
-    if(zero3(vec[i])) {
+    if(zero_d(3, vec[i])) {
       // 'random' direction
       vec[i] = hpxyz(1.12, 1.512+i, 1.12904+i);
       for(int j=0; j<i; j++) vec[i] -= vec[j] * (vec[i] | vec[j]);
       }
-    vec[i] /= hypot3(vec[i]);
+    vec[i] /= hypot_d(3, vec[i]);
     }
 
   transmatrix M;
@@ -133,7 +133,7 @@ hyperpoint hyperboloid_to_azeq(hyperpoint h) {
   else {
     ld d = hdist0(h);
     if(d == 0) { h[2] = 0; return h; }
-    ld d2 = hypot2(h);
+    ld d2 = hypot_d(2, h);
     if(d2 == 0) { h[2] = 0; return h; }
     h[0] = d * h[0] / d2;
     h[1] = d * h[1] / d2;
@@ -162,7 +162,7 @@ void push_point(hyperpoint& h, int coord, ld val) {
     h[coord] += val;
   else if(!val) return;
   else {
-    // if(zero3(h)) { h[0] = 1e-9; h[1] = 1e-10; h[2] = 1e-11; }
+    // if(zero_d(3, h)) { h[0] = 1e-9; h[1] = 1e-10; h[2] = 1e-11; }
     normalizer n(hpxyz(coord==0,coord==1,coord==2), h);
     hyperpoint f = n(h);
     h = n[xpush(val) * f];
@@ -200,7 +200,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   
   if(euwrap && !bounded) {
     hyperpoint h1 = eumove(torusconfig::sdx, torusconfig::sdy) * C0;
-    h1 /= sqhypot2(h1);
+    h1 /= sqhypot_d(2, h1);
     if(nonorientable) h1 /= 2;
     m->valid = good_shape = true;
     ld d = h1[0] * h[1] - h1[1] * h[0]; 
@@ -211,7 +211,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     USING_NATIVE_GEOMETRY;
     hyperpoint hpoint = ypush(modelscale) * xpush0(modelscale * d * 2 * M_PI);
     ld hpdist = hdist0(hpoint);
-    ld z = hypot2(hpoint);
+    ld z = hypot_d(2, hpoint);
     if(z==0) z = 1;
     hpoint = hpoint * hpdist / z;
     
@@ -245,7 +245,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     m->valid = good_shape = true;
 
     ld d = hdist0(h);
-    ld d0 = hypot2(h); if(!d0) d0 = 1;
+    ld d0 = hypot_d(2, h); if(!d0) d0 = 1;
     
     hyperpoint hpoint;
     bool orig_euclid = euclid;
@@ -266,7 +266,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
       }
 
     ld hpdist = hdist0(hpoint);
-    ld z = hypot2(hpoint);
+    ld z = hypot_d(2, hpoint);
     if(z==0) z = 1;
     m->flat = hpxyz(hpdist * h[0]/d0 * hpoint[1] / z, hpdist * h[1]/d0 * hpoint[1] / z, -hpdist * hpoint[0] / z);    
     }
@@ -285,8 +285,9 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   }
 
 rugpoint *findRugpoint(hyperpoint h) {
+  using namespace hyperpoint_vec;
   for(int i=0; i<isize(points); i++) 
-    if(intvalxyz(points[i]->h, h) < 1e-5) return points[i];
+    if(sqhypot_d(3, points[i]->h - h) < 1e-5) return points[i];
   return NULL;
   }
 
@@ -909,7 +910,7 @@ typedef array<ld, 4> hyperpoint4;
 
 hyperpoint4 azeq_to_4(const hyperpoint& h) {
   array<ld, 4> res;
-  ld rad = hypot3(h);
+  ld rad = hypot_d(3, h);
   res[3] = cos(rad);
   ld sr = sin(rad) / rad;
   for(int j=0; j<3; j++) res[j] = h[j] * sr;
@@ -941,7 +942,7 @@ bincode get_bincode(hyperpoint h) {
     case gcEuclid:
       return acd_bin(h[0]) + acd_bin(h[1]) * sY + acd_bin(h[2]) * sZ;
     case gcHyperbolic:
-      return acd_bin(hypot3(h));
+      return acd_bin(hypot_d(3, h));
     case gcSphere: {
       auto p = azeq_to_4(h);
       return acd_bin(p[0]) + acd_bin(p[1]) * sY + acd_bin(p[2]) * sZ + acd_bin(p[3]) * sT;
@@ -1089,7 +1090,7 @@ void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
   h = use_precompute ? m->getglue()->precompute : m->getglue()->flat;
   if(rug_perspective && gwhere >= gSphere) {
     if(h[2] > 0) {
-      ld rad = hypot3(h);
+      ld rad = hypot_d(3, h);
       // turn M_PI to -M_PI
       // the only difference between sphere and elliptic is here:
       // in elliptic, we subtract PI from the distance
@@ -1126,7 +1127,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   if(!sphere) tanalpha = -tanalpha;
   
   using namespace hyperpoint_vec;  
-  ld d = hypot3(azeq);
+  ld d = hypot_d(3, azeq);
   ld sindbd = sin_auto(d)/d, cosd = cos_auto(d);
   
   ld x = azeq[0] * sindbd;
@@ -1185,7 +1186,7 @@ void drawTriangle(triangle& t) {
       pts[i] = t.m[i]->getglue()->flat;    
 
     hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
-    double hch = hypot3(hc);
+    double hch = hypot_d(3, hc);
     
     ld col = (2 + hc[0]/hch) / 3;
     
@@ -1251,7 +1252,7 @@ void drawTriangle(triangle& t) {
   if(spherepoints == 1 || spherepoints == 2) return;
   
   hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
-  double hch = hypot3(hc);
+  double hch = hypot_d(3, hc);
   
   ld col = (2 + hc[0]/hch) / 3;
   

@@ -235,12 +235,12 @@ dexp_data dexp(hyperpoint p, hyperpoint t) {
     
     transmatrix T = build_matrix(coord_derivative(p, 0), coord_derivative(p, 1), Hypc);
     
-    // printf("Tt = %lf\n", hypot3(T * t));
+    // printf("Tt = %lf\n", hypot_d(3, T * t));
 
     p += t * eps;
 
     if(!is_inbound(p) || surface_branch(p) != b)
-      return { p - t * eps, t, hypot3(t) * (1-u) / precision };
+      return { p - t * eps, t, hypot_d(3, t) * (1-u) / precision };
       
     auto v0 = coord_derivative(p, 0);
     auto v1 = coord_derivative(p, 1);
@@ -255,7 +255,7 @@ dexp_data dexp(hyperpoint p, hyperpoint t) {
 
 dexp_data map_to_surface(hyperpoint p, const dexp_origin& dor) {
   hyperpoint h = dor.H * p;
-  ld rad = hypot2(h);
+  ld rad = hypot_d(2, h);
   if(rad == 0) rad = 1;
   ld d = hdist0(h);
 
@@ -273,10 +273,10 @@ transmatrix create_M_matrix(hyperpoint zero, hyperpoint v1) {
 
   transmatrix T = build_matrix(Te0, Te1, Hypc);
 
-  v1 = v1 / hypot3(T*v1);
+  v1 = v1 / hypot_d(3, T*v1);
   hyperpoint v2 = hpxyz(1e-3, 1e-4, 0);
-  v2 = v2 - v1 * ((T*v1) | (T*v2)) / hypot3(T*v1);
-  v2 = v2 / hypot3(T*v2);
+  v2 = v2 - v1 * ((T*v1) | (T*v2)) / hypot_d(3, T*v1);
+  v2 = v2 / hypot_d(3, T*v2);
   
   if((((T*v1) ^ (T*v2)) | ((T*unit_vector[0]) ^ (T*unit_vector[1]))) < 0)
     v2 = v2 * -1;
@@ -286,7 +286,7 @@ transmatrix create_M_matrix(hyperpoint zero, hyperpoint v1) {
   println(hlog, M);
 
   println(hlog, "M matrix test: ", 
-    make_tuple(hypot3(T*M*unit_vector[0]), hypot3(T*M*unit_vector[1]), hypot3(T*M*(unit_vector[0]+unit_vector[1])),
+    make_tuple(hypot_d(3, T*M*unit_vector[0]), hypot_d(3, T*M*unit_vector[1]), hypot_d(3, T*M*(unit_vector[0]+unit_vector[1])),
     ((T*M*unit_vector[0]) | (T*M*unit_vector[1]))));
     
   return M;
@@ -336,7 +336,7 @@ hyperpoint kuen_cross(ld v, ld u) {
 ld kuen_hypot(ld v, ld u) {
   auto du = coord_derivative(hpxyz(v,u,0), 0);
   auto dv = coord_derivative(hpxyz(v,u,0), 1);
-  auto n = hypot3(du^dv);
+  auto n = hypot_d(3, du^dv);
   return n;
   }
 
@@ -377,7 +377,7 @@ void draw_kuen_map() {
       ld u = 2 * M_PI * (h+.5) / 512;
       auto du = coord_derivative(hpxyz(v,u,0), 0);
       auto dv = coord_derivative(hpxyz(v,u,0), 1);
-      auto n = hypot3(du^dv);
+      auto n = hypot_d(3, du^dv);
 
       if(n > nmax) nmax = n;
       if(i == 1) {
@@ -525,7 +525,7 @@ void run_kuen() {
         if(!r[i]) looks_good = false;
       if(!looks_good) continue;
       for(int i=0; i<3; i++)
-        if(hypot3(r[i]->flat - r[(i+1)%3]->flat) > .2)
+        if(hypot_d(3, r[i]->flat - r[(i+1)%3]->flat) > .2)
           looks_good = false;
       if(looks_good)
         addTriangleV(r[0], r[1], r[2]);
@@ -616,7 +616,7 @@ void run_shape(eShape s) {
       break;
 
     case dsHemisphere:
-      run_function([] (hyperpoint h) { h = h / h[2]; h[2] = sqrt(1 - sqhypot2(h)); return h; });
+      run_function([] (hyperpoint h) { h = h / h[2]; h[2] = sqrt(1 - sqhypot_d(2, h)); return h; });
       break;      
     }
 
