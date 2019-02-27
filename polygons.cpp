@@ -1659,9 +1659,10 @@ hpcshape
   
   shAsymmetric,
   
-  shWall3D[12],
-
   shDodeca;
+
+vector<hpcshape> shWall3D, shMiniWall3D;
+
 #endif
 
 ld tentacle_length;
@@ -2500,6 +2501,7 @@ void buildpolys() {
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor, 242);
   
   if(DIM == 3 && binarytiling) {
+    shWall3D.resize(9);
     make_wall(shWall3D[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
     make_wall(shWall3D[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
     make_wall(shWall3D[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
@@ -2512,6 +2514,7 @@ void buildpolys() {
     }
   
   if(DIM == 3 && euclid) {
+    shWall3D.resize(6);
     for(int w=0; w<6; w++) {
       bshape(shWall3D[w], PPR::WALL);
       for(int a=0; a<=4; a++) {
@@ -2528,10 +2531,22 @@ void buildpolys() {
     }
   
   if(DIM == 3 && sphere) {
+    shWall3D.resize(12);
     for(int w=0; w<12; w++) {
       bshape(shWall3D[w], PPR::WALL);
       for(int a=0; a<=5; a++) 
         hpcpush(sphere3::dodefaces[w*5+a%5]);
+      }
+    }
+  
+  if(DIM == 3) {
+    shMiniWall3D.resize(isize(shWall3D));
+    for(int i=0; i<isize(shWall3D); i++) {
+      bshape(shMiniWall3D[i], PPR::WALL);
+      for(int a=shWall3D[i].s; a < shWall3D[i].e; a++)
+        hpcpush(mid(C0, hpc[a]));
+      if(shWall3D[i].flags & POLY_TRIANGLES)
+        last->flags |= POLY_TRIANGLES;
       }
     }
   

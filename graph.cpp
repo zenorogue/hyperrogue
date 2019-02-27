@@ -3808,6 +3808,16 @@ bool isWall3(cell *c, color_t& wcol) {
   return false;
   }
 
+// how much should be the d-th wall darkened in 3D
+int get_darkval(int d) {
+  const int darkval_h[9] = {0,2,2,0,6,6,8,8,0};
+  const int darkval_s[12] = {0,1,2,3,4,5,0,1,2,3,4,5};
+  const int darkval_e[6] = {0,4,6,0,4,6};
+  if(sphere) return darkval_s[d];
+  if(euclid) return darkval_e[d];
+  return darkval_h[d];
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4639,10 +4649,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(DIM == 3) {
         if(isWall3(c, wcol)) {
           color_t dummy;        
-          const int darkval_h[9] = {0,2,2,0,6,6,8,8,0};
-          const int darkval_s[12] = {0,1,2,3,0,1,2,3,0,1,2,3};
-          const int darkval_e[6] = {0,0,4,4,6,6};
-          const int *darkval = sphere ? darkval_s : hyperbolic ? darkval_h : darkval_e;
           int d = (wcol & 0xF0F0F0) >> 4;
 
           for(int a=0; a<c->type; a++)
@@ -4650,10 +4656,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               if(a < 4 && hyperbolic) {
                 if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 dynamicval<color_t> p (poly_outline, 0);
-                queuepoly(V, shWall3D[a], darkena(wcol - d * darkval[a], 0, 0xFF));
+                queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 }
               else {
-                queuepoly(V, shWall3D[a], darkena(wcol - d * darkval[a], 0, 0xFF));
+                queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 }
               }
           }
@@ -4667,7 +4673,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         else if(winf[c->wall].glyph == '.') ;
 
-        else if(!hiliteclick) queuechr(V, 1, winf[c->wall].glyph, darkenedby(wcol, darken), 2);
+        else if(!hiliteclick) {
+          int d = (wcol & 0xF0F0F0) >> 4;
+
+          for(int a=0; a<c->type; a++) 
+            queuepoly(V, shMiniWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
+          }
         }
       
       else switch(c->wall) {
