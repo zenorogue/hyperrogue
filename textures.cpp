@@ -621,7 +621,8 @@ ld magic_quality() {
     applymodel(ggmatrix(p.c) * p.cell_relative, inmodel);
     inmodel[0] *= current_display->radius * 1. / current_display->scrsize;
     inmodel[1] *= current_display->radius * 1. / current_display->scrsize;
-    q += intvalxy(inmodel, p.texture_coords);
+    using namespace hyperpoint_vec;
+    q += sqhypot_d(2, inmodel - p.texture_coords);
     }
   return q;
   }
@@ -697,7 +698,7 @@ void mousemovement() {
       // do not zoom in portrait!
       if(nonzero && !newmove) {
         View = inverse(spintox(mouseeu)) * spintox(lastmouse) * View;
-        vid.scale = vid.scale * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
+        vid.scale = vid.scale * sqhypot_d(2, mouseeu) / sqhypot_d(2, lastmouse);
         config.perform_mapping();
         }
       if(nonzero) lastmouse = mouseeu;
@@ -707,7 +708,7 @@ void mousemovement() {
     
     case tpsProjection: {
       if(nonzero && !newmove) {          
-        vid.alpha = vid.alpha * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
+        vid.alpha = vid.alpha * sqhypot_d(2, mouseeu) / sqhypot_d(2, lastmouse);
         }
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
