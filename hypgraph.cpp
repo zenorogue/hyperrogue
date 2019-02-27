@@ -1042,10 +1042,12 @@ void centerpc(ld aspd) {
   if(shmup::on && DIM == 3 && vid.sspeed > -5) {
     transmatrix at = ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at * cpush(2, -vid.yshift);  
     View = inverse(at) * View;
+    #if CAP_RACING
     if(racing::on) racing::set_view();
+    #endif
     return;
     }
-    
+  
   #if CAP_RACING
   if(racing::on && !racing::standard_centering) {
     racing::set_view();   
