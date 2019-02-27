@@ -2004,6 +2004,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(hrand(80000) < 5 + items[itRuby] + yendor::hardness())
           c->monst = moEagle;
         else if(pseudohept(c) && c != currentmap->gamestart() && hrand(4000) < 300 + items[itRuby] && !c->monst) {
+          if(DIM == 3 && euclid && hrand(100) < 10) break;
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;
