@@ -274,9 +274,9 @@ namespace geom3 {
   
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, 
     SLEV[4], FLATEYE,
-    LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
+    LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2,
-    ALEG, ABODY, AHEAD, BIRD;
+    ALEG0, ALEG, ABODY, AHEAD, BIRD;
   
   string invalid;
   
@@ -341,25 +341,32 @@ namespace geom3 {
       WALL = lev_to_factor(wh);
       
       human_height = human_wall_ratio * wh;
+      if(DIM == 3) human_height *= 1.5;
+      
+      ld reduce = (DIM == 3 ? human_height / 2 : 0);
 
-      LEG1  = lev_to_factor(human_height * .1);
-      LEG   = lev_to_factor(human_height * .2);
-      LEG3  = lev_to_factor(human_height * .3);
-      GROIN = lev_to_factor(human_height * .4);
-      GROIN1= lev_to_factor(human_height * .5);
-      BODY  = lev_to_factor(human_height * .6);
-      NECK1 = lev_to_factor(human_height * .7);
-      NECK  = lev_to_factor(human_height * .8);
-      NECK3 = lev_to_factor(human_height * .9);
-      HEAD  = lev_to_factor(human_height * .98);
-      HEAD1 = lev_to_factor(human_height * .99);
+      LEG0  = lev_to_factor(human_height * .0 - reduce);
+      LEG1  = lev_to_factor(human_height * .1 - reduce);
+      LEG   = lev_to_factor(human_height * .2 - reduce);
+      LEG3  = lev_to_factor(human_height * .3 - reduce);
+      GROIN = lev_to_factor(human_height * .4 - reduce);
+      GROIN1= lev_to_factor(human_height * .5 - reduce);
+      BODY  = lev_to_factor(human_height * .6 - reduce);
+      NECK1 = lev_to_factor(human_height * .7 - reduce);
+      NECK  = lev_to_factor(human_height * .8 - reduce);
+      NECK3 = lev_to_factor(human_height * .9 - reduce);
+      HEAD  = lev_to_factor(human_height * .98 - reduce);
+      HEAD1 = lev_to_factor(human_height * .99 - reduce);
       HEAD2 = lev_to_factor(human_height);
       
-      ABODY = lev_to_factor(human_height * .4);
-      ALEG  = lev_to_factor(human_height * .2);
-      AHEAD = lev_to_factor(human_height * .6);
-      BIRD = lev_to_factor((human_wall_ratio+1)/2 * wh * .8);
-      GHOST = lev_to_factor(human_height * .5);
+      reduce = (DIM == 3 ? human_height * .3 : 0);
+      
+      ABODY = lev_to_factor(human_height * .4 - reduce);
+      ALEG0 = lev_to_factor(human_height * .0 - reduce);
+      ALEG  = lev_to_factor(human_height * .2 - reduce);
+      AHEAD = lev_to_factor(human_height * .6 - reduce);
+      BIRD = lev_to_factor(DIM == 3 ? 0 : (human_wall_ratio+1)/2 * wh * .8);
+      GHOST = lev_to_factor(DIM == 3 ? 0 : human_height * .5);
       FLATEYE = lev_to_factor(human_height * .15);
       
       slev = rock_wall_ratio * wh / 3;

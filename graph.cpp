@@ -496,11 +496,12 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
 
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
 
-  if(x[0]) queuepolyat(V * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
-  if(x[0]) queuepolyat(V * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
-  if(x[1]) queuepolyat(V * xpush(-rightfoot), *x[1], col, PPR::MONSTER_FOOT);
-  if(x[1]) queuepolyat(V * Mirror * xpush(-leftfoot), *x[1], col, PPR::MONSTER_FOOT);
+  static const transmatrix VL = (DIM == 2 ? V : mmscale(V, geom3::ALEG0));
 
+  if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
+  if(x[0]) queuepolyat(VL * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
+  if(x[1]) queuepolyat(VL * xpush(-rightfoot), *x[1], col, PPR::MONSTER_FOOT);
+  if(x[1]) queuepolyat(VL * Mirror * xpush(-leftfoot), *x[1], col, PPR::MONSTER_FOOT);
 
   if(x[2]) queuepolyat(VAML * xpush(rightfoot/2), *x[2], col, PPR::MONSTER_FOOT);
   if(x[2]) queuepolyat(VAML * Mirror * xpush(leftfoot/2), *x[2], col, PPR::MONSTER_FOOT);
@@ -526,7 +527,7 @@ void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
 #if CAP_SHAPES
 transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, double footphase) {
 
-#define VFOOT V
+#define VFOOT (DIM == 2 ? V : mmscale(V, geom3::LEG0))
 #define VLEG mmscale(V, geom3::LEG)
 #define VGROIN mmscale(V, geom3::GROIN)
 #define VBODY mmscale(V, geom3::BODY)
