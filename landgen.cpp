@@ -211,7 +211,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean) {
+      if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || DIM == 3) {
         if(d == 9) {
           int i = hrand(100);
           if(i < 10) 
