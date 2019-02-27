@@ -219,7 +219,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
 
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
-  if(t[2][2] == 0) {
+  if(t[DIM][DIM] == 0) {
     if(euwrap && centerover.at) 
       t = calc_relative_matrix(c, centerover.at, C0);
     else if(euclid && DIM == 2) {
