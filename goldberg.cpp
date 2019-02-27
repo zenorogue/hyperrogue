@@ -565,7 +565,7 @@ namespace hr { namespace gp {
       else
         area = x * x + y * y;
       next = point3(x+y/2., -y * sqrt(3) / 2, 0);
-      ld scale = 1 / hypot2(next);
+      ld scale = 1 / hypot_d(2, next);
       crossf *= scale;
       hepvdist *= scale;
       hexhexdist *= scale;

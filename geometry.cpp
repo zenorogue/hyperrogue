@@ -284,7 +284,7 @@ namespace geom3 {
   ld actual_wall_height() {
       #if CAP_GP
       if(GOLDBERG && gp_autoscale_heights) 
-        return wall_height * min<ld>(4 / hypot2(gp::next), 1);
+        return wall_height * min<ld>(4 / hypot_d(2, gp::next), 1);
       #endif
       return wall_height;
       }
