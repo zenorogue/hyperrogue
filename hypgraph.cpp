@@ -288,7 +288,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       conformal::apply_orientation(H[0], H[1]);
   
       H[1] += 1;
-      double rad = sqhypot_d(H, 2);
+      double rad = sqhypot_d(2, H);
       H /= -rad;
       H[1] += .5;
       
@@ -318,7 +318,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         case gcHyperbolic: {
           ld zl = zlevel(H);
           ret = H / H[2];
-          ret[2] = sqrt(1 - sqhypot_d(ret, 2));
+          ret[2] = sqrt(1 - sqhypot_d(2, ret));
           ret = ret * (1 + (zl - 1) * ret[2]);
           break;
           }
@@ -356,7 +356,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       if(pmodel == mdHyperboloid) {
         ld& topz = conformal::top_z;
         if(H[2] > topz) {
-          ld scale = sqrt(topz*topz-1) / hypot_d(H, 2);
+          ld scale = sqrt(topz*topz-1) / hypot_d(2, H);
           H *= scale;
           H[2] = topz;
           }
@@ -378,7 +378,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
       H[2] = zlev;
-      ret = H / sqrt(1 + sqhypot_d(H, 3));
+      ret = H / sqrt(1 + sqhypot_d(3, H));
       break;
       }
     
@@ -408,7 +408,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
   
       H = space_to_perspective(H);
-      ld r = hypot_d(H, 2);
+      ld r = hypot_d(2, H);
       ld c = H[0] / r;
       ld s = H[1] / r;
       ld& mt = conformal::model_transition;
@@ -423,7 +423,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         ret = mobius(ret, vid.skiprope, 2);
       
       if(pmodel == mdJoukowskyInverted) {
-        ld r2 = sqhypot_d(ret, 2);
+        ld r2 = sqhypot_d(2, ret);
         ret[0] = ret[0] / r2;
         ret[1] = -ret[1] / r2;
         conformal::apply_orientation(ret[1], ret[0]);
@@ -473,7 +473,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         H[0] -= .5;
         
         ld phi = atan2(H);
-        ld r = hypot_d(H, 2);
+        ld r = hypot_d(2, H);
         
         r = pow(r, 1 - mt);
         phi *= (1 - mt);
@@ -510,7 +510,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdEquidistant: case mdEquiarea: {
       ld zlev = find_zlev(H);
 
-      ld rad = hypot_d(H, 2);
+      ld rad = hypot_d(2, H);
       if(rad == 0) rad = 1;
       ld d = hdist0(H);
       ld df, zf;
@@ -1062,7 +1062,7 @@ void centerpc(ld aspd) {
   hyperpoint H = tC0(cwtV);
   if(DIM == 2) H = ypush(-vid.yshift) * sphereflip * H;
   if(DIM == 3 && !shmup::on && vid.yshift) H = cpush(2, -vid.yshift) * H;
-  ld R = zero_d(H, DIM) ? 0 : hdist0(H);
+  ld R = zero_d(DIM, H) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
     /* if(playerfoundL && playerfoundR) {
@@ -1247,7 +1247,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
   if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) && vid.camera_angle == 0) {
     hyperpoint ret;
     applymodel(xpush0(radius), ret);
-    ld r = hypot_d(ret, 2);
+    ld r = hypot_d(2, ret);
     queuecircle(current_display->xcenter, current_display->ycenter, r * current_display->radius, linecol, prio, fillcol);
     return;
     }  
@@ -1343,7 +1343,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
   hyperpoint H;
   applymodel(X, H);
   H *= current_display->radius;
-  ld mul = hypot(vid.xres, vid.yres) / hypot_d(H, 2);
+  ld mul = hypot(vid.xres, vid.yres) / hypot_d(2, H);
   ld m = style == 1 ? -mul : -1;
   
   queuereset(mdUnchanged, p);
@@ -1606,7 +1606,7 @@ bool do_draw(cell *c) {
 bool do_draw(cell *c, const transmatrix& T) {
   if(DIM == 3) {
     if(hyperbolic && T[DIM][DIM] > cosh(sightranges[geometry])) return false;
-    if(euclid && hypot_d(tC0(T), 3) > sightranges[geometry]) return false;
+    if(euclid && hypot_d(3, tC0(T)) > sightranges[geometry]) return false;
     setdist(c, 7, c);
     return true;
     }

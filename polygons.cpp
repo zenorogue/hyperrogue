@@ -656,7 +656,7 @@ double scale_at(const transmatrix& T) {
   applymodel(tC0(T), h1);
   applymodel(T * xpush0(.01), h2);
   applymodel(T * ypush(.01) * C0, h3);
-  return sqrt(hypot_d(h2-h1, 2) * hypot_d(h3-h1, 2) / .0001);
+  return sqrt(hypot_d(2, h2-h1) * hypot_d(2, h3-h1) / .0001);
   }
 
 double linewidthat(const hyperpoint& h) {
@@ -960,7 +960,7 @@ void dqi_poly::draw() {
           ld c1 = ah1[1], c2 = -ah2[1];
           if(c1 < 0) c1 = -c1, c2 = -c2;
           hyperpoint h = ah1 * c1 + ah2 * c2;
-          h /= hypot_d(h, 3);
+          h /= hypot_d(3, h);
           if(h[2] < 0 && abs(h[0]) < sin(vid.twopoint_param)) cpha = 1-cpha, pha = 2;
           }
         if(cpha == 1) pha = 0;

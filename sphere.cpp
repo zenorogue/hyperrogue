@@ -279,7 +279,7 @@ void gen600() {
   for(int i=0; i<120; i++) if(inedge[root][i]) adj0.push_back(i);
   
   using namespace hyperpoint_vec;
-  for(int i=0; i<6; i++) for(int j=i+1; j<12; j++) if(zero_d(vertices120[adj0[i]] + vertices120[adj0[j]], 3))
+  for(int i=0; i<6; i++) for(int j=i+1; j<12; j++) if(zero_d(3, vertices120[adj0[i]] + vertices120[adj0[j]]))
     swap(adj0[j], adj0[i+6]);
 
   for(int i=0; i<120; i++) for(int j=0; j<120; j++)

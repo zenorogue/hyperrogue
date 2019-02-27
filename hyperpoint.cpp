@@ -145,7 +145,7 @@ const hyperpoint Cx13 = hyperpoint(1,0,0,1.41421356237);
 // through the interior, not on the surface)
 // also used to verify whether a point h1 is on the hyperbolic plane by using Hypc for h2
 
-bool zero_d(hyperpoint h, int d) { 
+bool zero_d(int d, hyperpoint h) { 
   for(int i=0; i<d; i++) if(h[i]) return false;
   return true;
   }
@@ -161,14 +161,14 @@ ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   return res;
   }
 
-ld sqhypot_d(const hyperpoint& h, int d) {
+ld sqhypot_d(int d, const hyperpoint& h) {
   ld sum = 0;
   for(int i=0; i<d; i++) sum += h[i]*h[i];
   return sum;
   }
   
-ld hypot_d(const hyperpoint& h, int d) {
-  return sqrt(sqhypot_d(h, d));
+ld hypot_d(int d, const hyperpoint& h) {
+  return sqrt(sqhypot_d(d, h));
   }
   
 ld zlevel(const hyperpoint &h) {
@@ -415,8 +415,8 @@ transmatrix ggpushxto0(const hyperpoint& H, ld co) {
     return eupush(co * H);
     }
   transmatrix res = Id;
-  if(sqhypot_d(H, DIM) < 1e-12) return res;
-  ld fac = (H[DIM]-1) / sqhypot_d(H, DIM);
+  if(sqhypot_d(DIM, H) < 1e-12) return res;
+  ld fac = (H[DIM]-1) / sqhypot_d(DIM, H);
   for(int i=0; i<DIM; i++)
   for(int j=0; j<DIM; j++)
     res[i][j] += H[i] * H[j] * fac;
@@ -557,7 +557,7 @@ double hdist0(const hyperpoint& mh) {
       if(mh[DIM] < 1) return 0;
       return acosh(mh[DIM]);
     case gcEuclid: {
-      return hypot_d(mh, DIM);
+      return hypot_d(DIM, mh);
       }
     case gcSphere: {
       ld res = mh[DIM] >= 1 ? 0 : mh[DIM] <= -1 ? M_PI : acos(mh[DIM]);
