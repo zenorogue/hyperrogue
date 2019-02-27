@@ -258,6 +258,8 @@ void generate_track() {
     celllister cl(s, TWIDTH, 1000000, NULL);
     for(cell *c: cl.lst) c->bardir = NOBARRIERS;
     }                              
+  
+  int dl = 7 - getDistLimit() - genrange_bonus;
 
   setdist(s, 6, NULL);
   makeEmpty(s);
@@ -290,7 +292,7 @@ void generate_track() {
       goal = c;
       break;
       }
-    setdist(c, 4, parent[c]);
+    setdist(c, (8 + dl) / 2, parent[c]);
     forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
       parent[c1] = c;
       cellbydist[trackval(c1)].push_back(c1);
@@ -362,7 +364,7 @@ void generate_track() {
     } */
     
   // for(cell *c:track) if(c->land != laMirror) c->bardir = NOBARRIERS;
-  for(cell *c:track) setdist(c, 0, NULL);
+  for(cell *c:track) setdist(c, dl, NULL);
   
   if(1) {
     manual_celllister cl;
