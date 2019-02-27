@@ -5665,6 +5665,7 @@ purehookset hooks_drawmap;
 
 transmatrix cview() {
   sphereflip = Id;
+  if(DIM == 3 && !shmup::on && vid.yshift) return cpush(2, vid.yshift) * View;
   if(DIM == 3) return View;
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
   return ypush(vid.yshift) * sphereflip * View;

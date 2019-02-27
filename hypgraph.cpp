@@ -1059,7 +1059,9 @@ void centerpc(ld aspd) {
   
   ors::unrotate(cwtV); ors::unrotate(View);
   
-  hyperpoint H = ypush(-vid.yshift) * sphereflip * tC0(cwtV);
+  hyperpoint H = tC0(cwtV);
+  if(DIM == 2) H = ypush(-vid.yshift) * sphereflip * H;
+  if(DIM == 3 && !shmup::on && vid.yshift) H = cpush(2, -vid.yshift) * H;
   ld R = zero_d(H, DIM) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
