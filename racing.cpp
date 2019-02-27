@@ -647,7 +647,6 @@ int current_player;
 void set_view() {
 
   if(race_start_tick == 0) race_start_tick = ticks + 5000;
-  if(DIM == 3) return;
 
   if(subscreen_split(set_view)) return;
 
@@ -665,6 +664,8 @@ void set_view() {
       frac_to_uchar(who->footphase)
       });
     }
+
+  if(DIM == 3) return;
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
