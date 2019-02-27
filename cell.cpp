@@ -881,7 +881,7 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   if(geometry == gCrystal) return crystal::build_shortest_path(c1, c2);
   #endif
   vector<cell*> p;
-  if(euclid) {
+  if(euclid && DIM == 2) {
     using namespace hyperpoint_vec;
     p.push_back(c1);
     hyperpoint h = tC0(calc_relative_matrix(c2, c1, C0)) - C0;
