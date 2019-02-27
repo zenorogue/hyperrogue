@@ -378,6 +378,10 @@ transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
   return inverse(gmatr(h1)) * gmatr(h2);
   }
 
+bool pseudohept(cell *c) {
+  return c->master->zebraval < 16;
+  }
+
 void draw() {
   sphereflip = Id;
   auto m = (hrmap_spherical3*) currentmap;

@@ -1287,7 +1287,15 @@ bool pseudohept(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
-  if(binarytiling) return c->type & c->master->distance & 1;
+  #if CAP_BT
+  if(binarytiling) return binary::pseudohept(c);
+  #endif
+  #if MAXDIM == 4
+  if(DIM == 3) {
+    if(euclid) return euclid3::pseudohept(c);
+    if(sphere) return sphere3::pseudohept(c);
+    }
+  #endif
   #if CAP_ARCM
   if(archimedean) return arcm::pseudohept(c);
   #endif

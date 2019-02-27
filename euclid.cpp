@@ -528,6 +528,12 @@ namespace euclid3 {
     return x; 
     }
 
+  bool pseudohept(cell *c) {
+    coord co = cubemap()->ispacemap[c->master];
+    for(int i=0; i<3; i++) if(!(getcoord(co, i) & 1)) return false;
+    return true;
+    }
+
   void draw() {
     dq::visited.clear();
     dq::enqueue(viewctr.at, cview());

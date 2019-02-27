@@ -343,6 +343,13 @@ auto bt_config = addHook(hooks_args, 0, [] () {
   });
 #endif
 
+bool pseudohept(cell *c) {
+  if(DIM == 2)
+    return c->type & c->master->distance & 1;
+  else
+    return (c->master->zebraval == 1) && (c->master->distance & 1);
+  }
+
 int celldistance3(cell *c1, cell *c2) { // [untested]
   int steps = 0;
   int d1 = celldistAlt(c1);
