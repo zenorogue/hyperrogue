@@ -3801,9 +3801,9 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
 bool isWall3(cell *c, color_t& wcol) {
   if(isWorm(c)) { wcol = minf[c->monst].color; return true; }
   if(isWall(c)) return true;
-  if(c->wall == waChasm) { wcol = 0x606000; return true; }
+  // if(c->wall == waChasm) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
-  if(chasmgraph(c)) return true;
+  // if(chasmgraph(c)) return true;
   if(among(c->wall, waMirror, waCloud)) return true;
   return false;
   }
@@ -4673,12 +4673,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         else if(winf[c->wall].glyph == '.') ;
 
-        else if(!hiliteclick) {
-          int d = (wcol & 0xF0F0F0) >> 4;
-
-          for(int a=0; a<c->type; a++) 
-            queuepoly(V, shMiniWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
-          }
+        else
+          queuepoly(rgpushxto0(tC0(V)), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
         }
       
       else switch(c->wall) {
