@@ -465,7 +465,7 @@ heptagon* encodeId(int id) {
 
 // 3D Euclidean space
 
-#if MAXDIM == 4
+#if MAXMDIM == 4
 
 namespace euclid3 {
 

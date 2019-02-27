@@ -439,7 +439,7 @@ int celldistAlt(cell *c) {
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
-  #if MAXDIM == 4
+  #if MAXMDIM == 4
   if(euclid && DIM == 3) return euclid3::dist_alt(c);
   #endif
   if(!c->master->alt) return 0;

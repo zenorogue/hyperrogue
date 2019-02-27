@@ -5194,7 +5194,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       prec += vid.linequality;
       
       if(0);
-      #if MAXDIM == 4
+      #if MAXMDIM == 4
       else if(DIM == 3) {
         for(int t=0; t<c->type; t++) {
           if(!c->move(t)) continue;
@@ -5823,7 +5823,7 @@ void drawthemap() {
   else if(archimedean)
     arcm::draw();
   #endif
-  #if MAXDIM == 4
+  #if MAXMDIM == 4
   else if(euclid && DIM == 3)
     euclid3::draw();
   else if(sphere && DIM == 3)

@@ -303,7 +303,7 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
 transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 
 transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
-  #if MAXDIM==3
+  #if MAXMDIM==3
   return transmatrix {{{a,b,c},{d,e,f},{g,h,i}}};
   #else
   return transmatrix {{{a,b,c,0},{d,e,f,0},{g,h,i,0},{0,0,0,1}}};
@@ -311,7 +311,7 @@ transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
   }
 
 transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld j, ld k, ld l, ld m, ld n, ld o, ld p) {
-  #if MAXDIM==3
+  #if MAXMDIM==3
   return transmatrix {{{a,b,d},{e,f,h},{m,n,p}}};
   #else
   return transmatrix {{{a,b,c,d},{e,f,g,h},{i,j,k,l},{m,n,o,p}}};

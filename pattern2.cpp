@@ -1290,7 +1290,7 @@ bool pseudohept(cell *c) {
   #if CAP_BT
   if(binarytiling) return binary::pseudohept(c);
   #endif
-  #if MAXDIM == 4
+  #if MAXMDIM == 4
   if(DIM == 3) {
     if(euclid) return euclid3::pseudohept(c);
     if(sphere) return sphere3::pseudohept(c);

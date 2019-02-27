@@ -1118,7 +1118,7 @@ void optimizeview() {
   
   if(0) ;
 
-  #if CAP_BT || CAP_ARCM || MAXDIM == 4
+  #if CAP_BT || CAP_ARCM || MAXMDIM == 4
   else if(binarytiling || archimedean || DIM == 3) {
     turn = -1, best = hdist0(tC0(View));
     for(int i=0; i<viewctr.at->c7->type; i++) {
@@ -1128,7 +1128,7 @@ void optimizeview() {
       #if CAP_BT
       if(binarytiling) T = binary::relative_matrix(h2, viewctr.at);
       #endif
-      #if MAXDIM == 4
+      #if MAXMDIM == 4
       if(euclid && DIM == 3) T = euclid3::relative_matrix(h2, viewctr.at);
       if(sphere && DIM == 3) T = sphere3::relative_matrix(h2, viewctr.at);
       #endif

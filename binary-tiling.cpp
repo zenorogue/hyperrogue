@@ -94,7 +94,7 @@ namespace binary {
     return h;
     }
 
-  #if MAXDIM==4
+  #if MAXMDIM==4
   heptagon *build3(heptagon *parent, int d, int d1, int delta) {
     int side = 0;
     if(d < 4) side = (parent->zebraval * 2 + d) % 5;
@@ -157,7 +157,7 @@ namespace binary {
     return NULL;
     }
 
-  #if MAXDIM==4
+  #if MAXMDIM==4
   heptagon *createStep3(heptagon *parent, int d) {
     auto h = parent;
     switch(d) {
@@ -220,7 +220,7 @@ namespace binary {
       return direct_tmatrix[dir];
     }
   
-  #if MAXDIM == 4
+  #if MAXMDIM == 4
 
   void queuecube(const transmatrix& V, ld size, color_t linecolor, color_t facecolor) {
     ld yy = log(2) / 2;

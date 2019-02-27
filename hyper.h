@@ -182,7 +182,7 @@ typedef complex<ld> cld;
 
 #define DEBSM(x) 
 
-#if MAXDIM == 3
+#if MAXMDIM == 3
 #define DIM 2
 #else
 #define DIM ((geometry == gBinary3 || geometry == gCubeTiling || geometry == gCell120 || geometry == gECell120) ? 3 : 2)
@@ -191,17 +191,17 @@ typedef complex<ld> cld;
 
 extern array<ld, gGUARD> sightranges;
 
-struct hyperpoint : array<ld, MAXDIM> {
+struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
   
   hyperpoint(ld x, ld y, ld z, ld w) { 
     (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; 
-    if(MAXDIM == 4) (*this)[3] = w;
+    if(MAXMDIM == 4) (*this)[3] = w;
     }
   };
 
 struct transmatrix {
-  ld tab[MAXDIM][MAXDIM];
+  ld tab[MAXMDIM][MAXMDIM];
   ld * operator [] (int i) { return tab[i]; }
   const ld * operator [] (int i) const { return tab[i]; }
   };
@@ -226,7 +226,7 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   }
 
 constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
-  #if MAXDIM==3
+  #if MAXMDIM==3
   return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
   #else
   return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
@@ -2792,7 +2792,7 @@ typedef array<GLfloat, 2> glvec2;
 typedef array<GLfloat, 3> glvec3;
 typedef array<GLfloat, 4> glvec4;
 
-#if MAXDIM == 4
+#if MAXMDIM == 4
 #define SHDIM 4
 typedef glvec4 glvertex;
 #else
@@ -4240,7 +4240,7 @@ hyperpoint get_horopoint3(ld y, ld x, ld z);
 
 namespace binary {
   heptagon *createStep(heptagon *parent, int d);
-  #if MAXDIM == 4
+  #if MAXMDIM == 4
   heptagon *createStep3(heptagon *parent, int d);
   #endif
   transmatrix parabolic(ld u);
@@ -4249,7 +4249,7 @@ namespace binary {
   }
 #endif
 
-#if MAXDIM == 4
+#if MAXMDIM == 4
 namespace euclid3 {
   heptagon *createStep(heptagon *parent, int d);
   hrmap* new_map();
@@ -4510,7 +4510,7 @@ struct comma_printer {
 template<class T, size_t X> void print(hstream& hs, const array<T, X>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 
-inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MAXDIM>&)h); }
+inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MAXMDIM>&)h); }
 inline void print(hstream& hs, const transmatrix T) { 
   print(hs, "("); comma_printer c(hs);
   for(int i=0; i<MDIM; i++)
