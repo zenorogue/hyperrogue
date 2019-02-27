@@ -306,7 +306,7 @@ namespace binary {
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
         if(DIM == 3)
-          h2 = hr::createStep(h2, 8), where = inverse(tmatrix(h2, 8)) * where;
+          where = inverse(tmatrix(h2, 8)) * where, h2 = hr::createStep(h2, 8);
         else {
           if(type_of(h2) == 6)
             h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
@@ -318,7 +318,7 @@ namespace binary {
         }
       else {
         if(DIM == 3)
-          h1 = hr::createStep(h1, 8), where = where * tmatrix(h1, 8);
+          gm = gm * tmatrix(h1, 8), h1 = hr::createStep(h1, 8);
         else {
           if(type_of(h1) == 6)
             h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
