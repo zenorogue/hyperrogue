@@ -340,6 +340,11 @@ void showDisplayMode() {
     dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
     dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vid.alpha == 0, '4');
     }
+  else {
+    dialog::addBoolItem(XLAT("first person perspective"), vid.yshift == 0 && vid.sspeed > -5, '1');
+    dialog::addBoolItem(XLAT("fixed point of view"), vid.sspeed <= -5, '2');
+    dialog::addBoolItem(XLAT("third person perspective"), vid.yshift > 0 && vid.sspeed > -5, '3');
+    }
 
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
   if(getcstat == '5')
