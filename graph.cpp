@@ -4974,7 +4974,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #if CAP_SHAPES
     int sha = shallow(c);
 
-    if(wmspatial && sha) {
+    if(wmspatial && sha && DIM == 2) {
       color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
       if(!chasmg) {
 
