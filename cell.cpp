@@ -881,7 +881,7 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   if(geometry == gCrystal) return crystal::build_shortest_path(c1, c2);
   #endif
   vector<cell*> p;
-  if(euclid && DIM == 2) {
+  if(euclid) {
     using namespace hyperpoint_vec;
     p.push_back(c1);
     hyperpoint h = tC0(calc_relative_matrix(c2, c1, C0)) - C0;
@@ -891,7 +891,13 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
     for(int i=0; i<=d * 10; i++) {
       h1 += h / d / 10.;
       virtualRebase(x, h1,  true);
-      if(x != p.back()) p.push_back(x);
+      while(x != p.back()) {
+        forCellCM(c, p.back()) 
+          if(celldistance(c, x) < celldistance(p.back(), x)) {
+            p.push_back(c);
+            break;
+            }
+        }
       }
     if(isize(p) != d + 1)
       println(hlog, "warning: path size ", isize(p), " should be ", d+1);
