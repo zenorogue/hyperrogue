@@ -4163,6 +4163,16 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
     }
   cellwalker push = who;
   push += wstep;
+  if(DIM == 3 && binarytiling) {
+    for(int a=0; a<4; a++) {
+      if(push.spin < 4) push.spin = 8;
+      else if(push.spin >= 8) push.spin = a;
+      else push.spin ^= 1;
+      push += wstep;
+      if(valid(push.at)) return push.at;
+      }
+    return c2;
+    }
   int pd = push.at->type/2;
   push += pd * -subdir;
   push += wstep;

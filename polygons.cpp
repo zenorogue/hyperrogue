@@ -2516,10 +2516,10 @@ void buildpolys() {
       bshape(shBinaryWall[w], PPR::WALL);
       for(int a=0; a<=4; a++) {
         int t[3];
-        t[0] = (w&1) ? -1 : 1;
+        t[0] = (w>=3) ? -1 : 1;
         t[1] = among(a, 0, 3, 4) ? -1 : 1;
         t[2] = among(a, 2, 3) ? -1 : 1;
-        int x = w/2;
+        int x = w%3;
         int y = (x+2)%3;
         int z = (y+2)%3;
         hpcpush(hpxy3(t[x]/2., t[y]/2., t[z]/2.));

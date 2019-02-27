@@ -506,6 +506,11 @@ template<class T> struct walker {
     }
   walker<T>& operator += (rev_t) {
     int d = at->degree();
+    if(DIM == 3 && binarytiling) {
+      if(spin < 4) spin = 8;
+      else if(spin >= 8) spin = 0;
+      else spin ^= 1;
+      }
     return (*this) += d/2 + ((d&1)?hrand(2):0);
     }
   walker<T>& operator += (revstep_t) {

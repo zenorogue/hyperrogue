@@ -497,13 +497,13 @@ namespace euclid3 {
     
     heptagon *build(heptagon *parent, int d, coord at) {
       auto h = get_at(at);
-      h->c.connect(d^1, parent, d, false);
+      h->c.connect((d+3)%6, parent, d, false);
       return h;
       }
   
     heptagon *createStep(heptagon *parent, int d) {
       int at = ispacemap[parent];
-      coord shifttable[6] = { +1, -1, +1000, -1000, +1000000, -1000000 };
+      coord shifttable[6] = { +1, +1000, +1000000, -1, -1000, -1000000 };
       return build(parent, d, at + shifttable[d]);
       }
     };
@@ -556,7 +556,7 @@ namespace euclid3 {
       drawcell(c, V, 0, false);
 
       for(int i=0; i<6; i++)
-        dq::enqueue(h->move(i), V * cpush(i>>1, (i&1) ? -1 : 1));
+        dq::enqueue(h->move(i), V * cpush(i%3, (i>=3) ? -1 : 1));
       }
     }
   
