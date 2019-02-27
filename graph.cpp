@@ -531,6 +531,9 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 #define VLEG mmscale(V, geom3::LEG)
 #define VGROIN mmscale(V, geom3::GROIN)
 #define VBODY mmscale(V, geom3::BODY)
+#define VBODY1 mmscale(V, geom3::BODY1)
+#define VBODY2 mmscale(V, geom3::BODY2)
+#define VBODY3 mmscale(V, geom3::BODY3)
 #define VNECK mmscale(V, geom3::NECK)
 #define VHEAD  mmscale(V, geom3::HEAD)
 #define VHEAD1 mmscale(V, geom3::HEAD1)
@@ -824,12 +827,12 @@ void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   ShadowV(V, shPBody);
   color_t col = linf[laTerracotta].color;
   int bcol = darkena(false ? 0xC0B23E : col, 0, 0xFF);
-  const transmatrix VBS = VBODY * otherbodyparts(V, bcol, moDesertman, footphase);
-  queuepoly(VBS, shPBody, bcol);
-  if(!peace::on) queuepoly(VBS * Mirror, shPSword, darkena(0xC0C0C0, 0, 0xFF));
-  queuepoly(VBS, shTerraArmor1, darkena(t > 0 ? 0x4040FF : col, 0, 0xFF));
-  if(hp >= 4) queuepoly(VBS, shTerraArmor2, darkena(t > 1 ? 0xC00000 : col, 0, 0xFF));
-  if(hp >= 2) queuepoly(VBS, shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
+  const transmatrix VBS = otherbodyparts(V, bcol, moDesertman, footphase);
+  queuepoly(VBODY * VBS, shPBody, bcol);
+  if(!peace::on) queuepoly(VBODY * VBS * Mirror, shPSword, darkena(0xC0C0C0, 0, 0xFF));
+  queuepoly(VBODY1 * VBS, shTerraArmor1, darkena(t > 0 ? 0x4040FF : col, 0, 0xFF));
+  if(hp >= 4) queuepoly(VBODY2 * VBS, shTerraArmor2, darkena(t > 1 ? 0xC00000 : col, 0, 0xFF));
+  if(hp >= 2) queuepoly(VBODY3 * VBS, shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
   queuepoly(VHEAD, shTerraHead, darkena(t > 4 ? 0x202020 : t > 3 ? 0x504040 : col, 0, 0xFF));
   queuepoly(VHEAD1, shPFace, bcol);
   }
@@ -928,33 +931,33 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
         }
       else {
 
-      const transmatrix VBS = VBODY * otherbodyparts(V, fc(0, cs.skincolor, 0), items[itOrbFish] ? moWaterElemental : moPlayer, footphase);
+      const transmatrix VBS = otherbodyparts(V, fc(0, cs.skincolor, 0), items[itOrbFish] ? moWaterElemental : moPlayer, footphase);
 
-      queuepoly(VBS, (cs.charid&1) ? shFemaleBody : shPBody, fc(0, cs.skincolor, 0));      
+      queuepoly(VBODY * VBS, (cs.charid&1) ? shFemaleBody : shPBody, fc(0, cs.skincolor, 0));      
 
       ShadowV(V, (cs.charid&1) ? shFemaleBody : shPBody);
 
       if(cs.charid&1)
-        queuepoly(VBS, shFemaleDress, fc(500, cs.dresscolor, 4));
+        queuepoly(VBODY1 * VBS, shFemaleDress, fc(500, cs.dresscolor, 4));
 
       if(cs.charid == 2)
-        queuepoly(VBS, shPrinceDress,  fc(400, cs.dresscolor, 5));
+        queuepoly(VBODY2 * VBS, shPrinceDress,  fc(400, cs.dresscolor, 5));
       if(cs.charid == 3) 
-        queuepoly(VBS, shPrincessDress,  fc(400, cs.dresscolor2, 5));
+        queuepoly(VBODY2 * VBS, shPrincessDress,  fc(400, cs.dresscolor2, 5));
         
       if(items[itOrbSide3])
-        queuepoly(VBS, (cs.charid&1) ? shFerocityF : shFerocityM, fc(0, cs.skincolor, 0));
+        queuepoly(VBODY * VBS, (cs.charid&1) ? shFerocityF : shFerocityM, fc(0, cs.skincolor, 0));
 
       if(items[itOrbHorns]) {
-        queuepoly(VBS, shBullHead, items[itOrbDiscord] ? watercolor(0) : 0xFF000030);
-        queuepoly(VBS, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
-        queuepoly(VBS * Mirror, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
+        queuepoly(VBODY * VBS, shBullHead, items[itOrbDiscord] ? watercolor(0) : 0xFF000030);
+        queuepoly(VBODY * VBS, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
+        queuepoly(VBODY * VBS * Mirror, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
         }
 
       if(items[itOrbSide1] && !shmup::on)
-        queuepoly(VBS * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       
-      transmatrix VWPN = cs.lefthanded ? VBS * Mirror : VBS;
+      transmatrix VWPN = cs.lefthanded ? VBODY * VBS * Mirror : VBODY * VBS;
       
       if(peace::on) ;
       else if(racing::on) {
@@ -1057,34 +1060,34 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       queuepoly(VAHEAD * xpush(.04), shWolf2, darkena(col, 1, 0xC0));
       }
     else {
-      const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
-      queuepoly(VBS, (cs.charid&1) ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
+      const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
+      queuepoly(VBODY * VBS, (cs.charid&1) ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
   
       if(!shmup::on) {
         bool emp = items[itOrbEmpathy] && m != moShadow;
         if(items[itOrbThorns] && emp)
-          queuepoly(VBS, shHedgehogBladePlayer, darkena(col, 0, 0x40));
+          queuepoly(VBODY * VBS, shHedgehogBladePlayer, darkena(col, 0, 0x40));
         if(items[itOrbSide1] && !shmup::on)
-          queuepoly(VBS * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, darkena(col, 0, 0x40));      
+          queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, darkena(col, 0, 0x40));      
         if(items[itOrbSide3] && emp)
-          queuepoly(VBS, (cs.charid&1) ? shFerocityF : shFerocityM, darkena(col, 0, 0x40));
+          queuepoly(VBODY * VBS, (cs.charid&1) ? shFerocityF : shFerocityM, darkena(col, 0, 0x40));
 
-        queuepoly(VBS, (cs.charid >= 2 ? shSabre : shPSword), darkena(col, 0, 0XC0));
+        queuepoly(VBODY * VBS, (cs.charid >= 2 ? shSabre : shPSword), darkena(col, 0, 0XC0));
         }
       else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
-        queuepoly(VBS, shPKnife, darkena(col, 0, 0XC0));
+        queuepoly(VBODY * VBS, shPKnife, darkena(col, 0, 0XC0));
 
       if(knighted)
-        queuepoly(VBS, shKnightCloak, darkena(col, 1, 0xC0));
+        queuepoly(VBODY3 * VBS, shKnightCloak, darkena(col, 1, 0xC0));
   
       queuepoly(VHEAD1, (cs.charid&1) ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
       queuepoly(VHEAD, shPFace,  darkena(col, 0, 0XC0));
       if(cs.charid&1)
-        queuepoly(VBS, shFemaleDress,  darkena(col, 1, 0XC0));
+        queuepoly(VBODY1 * VBS, shFemaleDress,  darkena(col, 1, 0XC0));
       if(cs.charid == 2)
-        queuepoly(VBS, shPrinceDress,  darkena(col, 1, 0XC0));
+        queuepoly(VBODY2 * VBS, shPrinceDress,  darkena(col, 1, 0XC0));
       if(cs.charid == 3)
-        queuepoly(VBS, shPrincessDress,  darkena(col, 1, 0XC0));
+        queuepoly(VBODY2 * VBS, shPrincessDress,  darkena(col, 1, 0XC0));
       }
     }
   
@@ -1095,17 +1098,17 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
   
   else if(m == moKnight || m == moKnightMoved) {
     ShadowV(V, shPBody);
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(0xC0C0A0, 0, 0xC0), m, footphase);
-    queuepoly(VBS, shPBody, darkena(0xC0C0A0, 0, 0xC0));
+    const transmatrix VBS = otherbodyparts(V, darkena(0xC0C0A0, 0, 0xC0), m, footphase);
+    queuepoly(VBODY * VBS, shPBody, darkena(0xC0C0A0, 0, 0xC0));
     if(!racing::on) 
-      queuepoly(VBS, shPSword, darkena(0xFFFF00, 0, 0xFF));
-    queuepoly(VBS, shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
+      queuepoly(VBODY * VBS, shPSword, darkena(0xFFFF00, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
     color_t col;
     if(!eubinary && where && where->master->alt)
       col = cloakcolor(roundTableRadius(where));
     else
       col = cloakcolor(newRoundTableRadius());
-    queuepoly(VBS, shKnightCloak, darkena(col, 1, 0xFF));
+    queuepoly(VBODY2 * VBS, shKnightCloak, darkena(col, 1, 0xFF));
     queuepoly(VHEAD1, shPHead, darkena(0x703800, 1, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     return false;
@@ -1113,8 +1116,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
   
   else if(m == moGolem || m == moGolemMoved) {
     ShadowV(V, shPBody);
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0XC0), m, footphase);
-    queuepoly(VBS, shPBody, darkena(col, 0, 0XC0));
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0XC0), m, footphase);
+    queuepoly(VBODY * VBS, shPBody, darkena(col, 0, 0XC0));
     queuepoly(VHEAD, shGolemhead, darkena(col, 1, 0XFF));
     }
 
@@ -1126,28 +1129,28 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     int facecolor = evil ? 0xC0B090FF : 0xD0C080FF;
     
     ShadowV(V, girl ? shFemaleBody : shPBody);
-    const transmatrix VBS = VBODY * otherbodyparts(V, facecolor, m, footphase);
-    queuepoly(VBS, girl ? shFemaleBody : shPBody, facecolor);
+    const transmatrix VBS = otherbodyparts(V, facecolor, m, footphase);
+    queuepoly(VBODY * VBS, girl ? shFemaleBody : shPBody, facecolor);
 
     if(m == moPrincessArmed) 
-      queuepoly(VBS * Mirror, vid.cs.charid < 2 ? shSabre : shPSword, 0xFFFFFFFF);
+      queuepoly(VBODY * VBS * Mirror, vid.cs.charid < 2 ? shSabre : shPSword, 0xFFFFFFFF);
     
     if((m == moFalsePrincess || m == moRoseBeauty) && where && where->cpdist == 1)
-      queuepoly(VBS, shPKnife, 0xFFFFFFFF);
+      queuepoly(VBODY * VBS, shPKnife, 0xFFFFFFFF);
 
     if(m == moRoseLady) {
-      queuepoly(VBS, shPKnife, 0xFFFFFFFF);
-      queuepoly(VBS * Mirror, shPKnife, 0xFFFFFFFF);
+      queuepoly(VBODY * VBS, shPKnife, 0xFFFFFFFF);
+      queuepoly(VBODY * VBS * Mirror, shPKnife, 0xFFFFFFFF);
       }
 
     if(girl) {
-      queuepoly(VBS, shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
+      queuepoly(VBODY1 * VBS, shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
       if(vid.cs.charid < 2) 
-        queuepoly(VBS, shPrincessDress, evil ? 0xC040C0C0 : 0x8080FFC0);
+        queuepoly(VBODY2 * VBS, shPrincessDress, evil ? 0xC040C0C0 : 0x8080FFC0);
       }
     else {
       if(vid.cs.charid < 2) 
-        queuepoly(VBS, shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
+        queuepoly(VBODY1 * VBS, shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
       }    
 
     if(m == moRoseLady) {
@@ -1162,7 +1165,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       else {
         queuepoly(VHEAD1, shPHead,  0xF0A0D0FF);
         queuepoly(VBS, shFlowerHand,  0xC00000FF);
-        queuepoly(VBS, shSuspenders,  0xC00000FF);
+        queuepoly(VBODY2 * VBS, shSuspenders,  0xC00000FF);
         }
       }
     else {
@@ -1330,9 +1333,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     }
   else if(m == moZombie) {
     int c = darkena(col, where && where->land == laHalloween ? 1 : 0, 0xFF);
-    const transmatrix VBS = VBODY * otherbodyparts(V, c, m, footphase);
+    const transmatrix VBS = otherbodyparts(V, c, m, footphase);
     ShadowV(V, shPBody);
-    queuepoly(VBS, shPBody, c);
+    queuepoly(VBODY * VBS, shPBody, c);
     }
   else if(m == moTerraWarrior)
     drawTerraWarrior(V, 7, (where ? where->hitpoints : 7), footphase);
@@ -1358,44 +1361,44 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     queuepoly(VHEAD, shHood, darkena(col, 0, 0xFF));
     } */
   else if(m == moMonk) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shRaiderBody);
-    queuepoly(VBS, shRaiderBody, darkena(col, 0, 0xFF));
-    queuepoly(VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-    if(!peace::on) queuepoly(VBODY, shPKnife, 0xFFC0C0C0);
-    queuepoly(VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-    queuepolyat(VBS, shRatCape2, darkena(col, 2, 0xFF), PPR::MONSTER_ARMOR0);
+    queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
+    if(!peace::on) queuepoly(VBODY * VBS, shPKnife, 0xFFC0C0C0);
+    queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
+    queuepolyat(VBODY3 * VBS, shRatCape2, darkena(col, 2, 0xFF), PPR::MONSTER_ARMOR0);
     queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     }
   else if(m == moCrusher) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shRaiderBody);
-    queuepoly(VBS, shRaiderBody, darkena(col, 0, 0xFF));
-    queuepoly(VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-    queuepoly(VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-    queuepoly(VBS, shFlailTrunk, darkena(col, 1, 0XFF));
-    queuepoly(VBS, shHammerHead, darkena(col, 0, 0XFF));
+    queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
+    queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
+    queuepoly(VBODY * VBS, shFlailTrunk, darkena(col, 1, 0XFF));
+    queuepoly(VBODY1 * VBS, shHammerHead, darkena(col, 0, 0XFF));
     queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     }
   else if(m == moPair) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shRaiderBody);
-    queuepoly(VBS, shRaiderBody, darkena(col, 0, 0xFF));
-    queuepoly(VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-    queuepoly(VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-    queuepoly(VBS, shPickAxe, darkena(0xA0A0A0, 0, 0XFF));
+    queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
+    queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
+    queuepoly(VBODY * VBS, shPickAxe, darkena(0xA0A0A0, 0, 0XFF));
     queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     }
   else if(m == moAltDemon || m == moHexDemon) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shRaiderBody);
-    queuepoly(VBS, shRaiderBody, darkena(col, 0, 0xFF));
-    queuepoly(VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-    queuepoly(VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-    if(!peace::on) queuepoly(VBS, shPSword, 0xFFD0D0D0);
+    queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
+    queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
+    if(!peace::on) queuepoly(VBODY * VBS, shPSword, 0xFFD0D0D0);
     queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     }
@@ -1410,25 +1413,25 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       }
     else {
       ShadowV(V, shPBody);
-      const transmatrix VBS = VBODY * otherbodyparts(V, darkena(0xFFD500, 0, 0xFF), m, footphase);
+      const transmatrix VBS = otherbodyparts(V, darkena(0xFFD500, 0, 0xFF), m, footphase);
       if(m == moFatGuard) {
-        queuepoly(VBS, shFatBody, darkena(0xC06000, 0, 0xFF));
+        queuepoly(VBODY * VBS, shFatBody, darkena(0xC06000, 0, 0xFF));
         col = 0xFFFFFF;
         if(!where || where->hitpoints >= 3)
-          queuepoly(VBS, shKnightCloak, darkena(0xFFC0C0, 1, 0xFF));
+          queuepoly(VBODY1 * VBS, shKnightCloak, darkena(0xFFC0C0, 1, 0xFF));
         }
       else {
-        queuepoly(VBS, shPBody, darkena(0xFFD500, 0, 0xFF));
-        queuepoly(VBS, shKnightArmor, m == moVizier ? 0xC000C0FF :
+        queuepoly(VBODY * VBS, shPBody, darkena(0xFFD500, 0, 0xFF));
+        queuepoly(VBODY1 * VBS, shKnightArmor, m == moVizier ? 0xC000C0FF :
           darkena(0x00C000, 1, 0xFF));
         if(where && where->hitpoints >= 3)
-          queuepoly(VBS, shKnightCloak, m == moVizier ? 0x800080Ff :
+          queuepoly(VBODY2 * VBS, shKnightCloak, m == moVizier ? 0x800080Ff :
             darkena(0x00FF00, 1, 0xFF));
         }
       queuepoly(VHEAD1, shTurban1, darkena(col, 1, 0xFF));
       if(!where || where->hitpoints >= 2)
         queuepoly(VHEAD2, shTurban2, darkena(col, 0, 0xFF));
-      queuepoly(VBS, shSabre, 0xFFFFFFFF);
+      queuepoly(VBODY * VBS, shSabre, 0xFFFFFFFF);
       }
       
     drawStunStars(V, where ? where->stuntime : 0);
@@ -1518,7 +1521,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     auto V = mmscale(V0, z2);
     otherbodyparts(V, darkena(col, 0, 0xFF), m, m == moJiangshi ? 0 : footphase);
     queuepoly(VBODY, shJiangShi, darkena(col, 0, 0xFF));
-    queuepoly(VBODY, shJiangShiDress, darkena(0x202020, 0, 0xFF));
+    queuepoly(VBODY1, shJiangShiDress, darkena(0x202020, 0, 0xFF));
     queuepoly(VHEAD, shTerraHead, darkena(0x101010, 0, 0xFF));
     queuepoly(VHEAD, shPFace, darkena(col, 0, 0xFF));
     queuepoly(VHEAD, shJiangShiCap1, darkena(0x800000, 0, 0xFF));
@@ -1574,14 +1577,14 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     queuepoly(VBS, shPBody, darkena(0x404040, 0, 0xFF));
     queuepoly(VBS, shPirateHook, darkena(0xD0D0D0, 0, 0xFF));
     queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
-    queuepoly(VHEAD, shEyepatch, darkena(0, 0, 0xC0));
-    queuepoly(VHEAD, shPirateHood, darkena(col, 0, 0xFF));
+    queuepoly(VHEAD1, shEyepatch, darkena(0, 0, 0xC0));
+    queuepoly(VHEAD2, shPirateHood, darkena(col, 0, 0xFF));
     }
   else if(m == moRatling || m == moRatlingAvenger) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
     queuepoly(VLEG, shRatTail, darkena(col, 0, 0xFF));
-    queuepoly(VBS, shYeti, darkena(col, 1, 0xFF));
+    queuepoly(VBODY * VBS, shYeti, darkena(col, 1, 0xFF));
     queuepoly(VHEAD, shRatHead, darkena(col, 0, 0xFF));
 
     float t = sintick(1000, where ? where->cpdist*M_PI : 0);
@@ -1592,28 +1595,28 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     queuepoly(VHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
     
     if(m == moRatlingAvenger) {
-      queuepoly(VBS, shRatCape2, 0x484848FF);
+      queuepoly(VBODY1 * VBS, shRatCape2, 0x484848FF);
       queuepoly(VHEAD, shRatCape1, 0x303030FF);
       }
     }
   else if(m == moViking) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shPBody);
-    queuepoly(VBS, shPBody, darkena(0xE00000, 0, 0xFF));
-    if(!peace::on) queuepoly(VBS, shPSword, darkena(0xD0D0D0, 0, 0xFF));
-    queuepoly(VBS, shKnightCloak, darkena(0x404040, 0, 0xFF));
+    queuepoly(VBODY * VBS, shPBody, darkena(0xE00000, 0, 0xFF));
+    if(!peace::on) queuepoly(VBODY * VBS, shPSword, darkena(0xD0D0D0, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shKnightCloak, darkena(0x404040, 0, 0xFF));
     queuepoly(VHEAD, shVikingHelmet, darkena(0xC0C0C0, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
     }
   else if(m == moOutlaw) {
-    const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shPBody);
-    queuepoly(VBS, shPBody, darkena(col, 0, 0xFF));
-    queuepoly(VBS, shKnightCloak, darkena(col, 1, 0xFF));
+    queuepoly(VBODY * VBS, shPBody, darkena(col, 0, 0xFF));
+    queuepoly(VBODY1 * VBS, shKnightCloak, darkena(col, 1, 0xFF));
     queuepoly(VHEAD, shWestHat1, darkena(col, 2, 0XFF));
     queuepoly(VHEAD, shWestHat2, darkena(col, 1, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
-    queuepoly(VBODY, shGunInHand, darkena(col, 1, 0XFF));
+    queuepoly(VBODY * VBS, shGunInHand, darkena(col, 1, 0XFF));
     }
   else if(m == moNecromancer) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
@@ -1633,7 +1636,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     b--;
     if(b < 0) b = 0;
     if(b > 6) b = 6;
-    queuepoly(VHEAD, shWightCloak, 0x605040A0 + 0x10101000 * b);
+    queuepoly(VHEAD1, shWightCloak, 0x605040A0 + 0x10101000 * b);
     }
   else if(m == moVoidBeast) {
     const transmatrix VBS = VBODY * otherbodyparts(V, 0x080808D0, m, footphase);
@@ -1671,56 +1674,56 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
     queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-    queuepoly(VHEAD, shPHead, darkena(col, 1, 0XFF));
+    queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(col, 2, 0XFF));
     }        
   else if(m == moFjordTroll || m == moForestTroll || m == moStormTroll) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
     queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-    queuepoly(VHEAD, shPHead, darkena(col, 1, 0XFF));
+    queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(col, 2, 0XFF));
     }        
   else if(m == moDarkTroll) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
     queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-    queuepoly(VHEAD, shPHead, darkena(col, 1, 0XFF));
+    queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
     queuepoly(VHEAD, shPFace, 0xFFFFFF80);
     }        
   else if(m == moRedTroll) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
     queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-    queuepoly(VHEAD, shPHead, darkena(0xFF8000, 0, 0XFF));
+    queuepoly(VHEAD1, shPHead, darkena(0xFF8000, 0, 0XFF));
     queuepoly(VHEAD, shPFace, 0xFFFFFF80);
     }        
   else if(m == moEarthElemental) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shWaterElemental);
     queuepoly(VBS, shWaterElemental, darkena(col, 0, 0xC0));
-    queuepoly(VHEAD, shFemaleHair, darkena(col, 0, 0XFF));
+    queuepoly(VHEAD1, shFemaleHair, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, 0xF0000080);
     }        
   else if(m == moWaterElemental) {
     const transmatrix VBS = VBODY * otherbodyparts(V, watercolor(50), m, footphase);
     ShadowV(V, shWaterElemental);
     queuepoly(VBS, shWaterElemental, watercolor(0));
-    queuepoly(VHEAD, shFemaleHair, watercolor(100));
+    queuepoly(VHEAD1, shFemaleHair, watercolor(100));
     queuepoly(VHEAD, shPFace, watercolor(200));
     }        
   else if(m == moFireElemental) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(firecolor(50), 0, 0xFF), m, footphase);
     ShadowV(V, shWaterElemental);
     queuepoly(VBS, shWaterElemental, darkena(firecolor(0), 0, 0xFF));
-    queuepoly(VHEAD, shFemaleHair, darkena(firecolor(100), 0, 0xFF));
+    queuepoly(VHEAD1, shFemaleHair, darkena(firecolor(100), 0, 0xFF));
     queuepoly(VHEAD, shPFace, darkena(firecolor(200), 0, 0xFF));
     }
   else if(m == moAirElemental) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
     ShadowV(V, shWaterElemental);
     queuepoly(VBS, shWaterElemental, darkena(col, 0, 0x80));
-    queuepoly(VHEAD, shFemaleHair, darkena(col, 0, 0x80));
+    queuepoly(VHEAD1, shFemaleHair, darkena(col, 0, 0x80));
     queuepoly(VHEAD, shPFace, darkena(col, 0, 0x80));
     }        
   else if((xch == 'd' || xch == 'D') && m != moDragonHead && m != moDragonTail) {

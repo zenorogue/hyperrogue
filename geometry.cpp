@@ -275,7 +275,8 @@ namespace geom3 {
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, 
     SLEV[4], FLATEYE,
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
-    BODY, NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2,
+    BODY, BODY1, BODY2, BODY3,
+    NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2,
     ALEG0, ALEG, ABODY, AHEAD, BIRD;
   
   string invalid;
@@ -325,6 +326,9 @@ namespace geom3 {
       GROIN1 = 1.105;
       GHOST = 1.1;
       BODY = 1.15;
+      BODY1 = 1.151;
+      BODY2 = 1.152;
+      BODY3 = 1.153;
       NECK1 = 1.16;
       NECK = 1.17;
       NECK3 = 1.18;
@@ -352,6 +356,9 @@ namespace geom3 {
       GROIN = lev_to_factor(human_height * .4 - reduce);
       GROIN1= lev_to_factor(human_height * .5 - reduce);
       BODY  = lev_to_factor(human_height * .6 - reduce);
+      BODY1 = lev_to_factor(human_height * .61 - reduce);
+      BODY2 = lev_to_factor(human_height * .62 - reduce);
+      BODY3 = lev_to_factor(human_height * .63 - reduce);
       NECK1 = lev_to_factor(human_height * .7 - reduce);
       NECK  = lev_to_factor(human_height * .8 - reduce);
       NECK3 = lev_to_factor(human_height * .9 - reduce);
