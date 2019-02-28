@@ -3322,6 +3322,10 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     case waCavewall:
       if(c->land != laEmerald) fcol = winf[waCavefloor].color;
       break;
+   
+    case waEditStatue:
+      if(c->land == laCanvas) wcol = c->landparam;
+      else wcol = (0x125628 * c->wparam) & 0xFFFFFF;
   
     default:
       break;    
@@ -4915,6 +4919,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepoly(V, shMineMark[ct6], darkena(minecolors[mines], 0, 0xFF));
           break;
           }
+        
+        case waEditStatue:
+          if(!mapeditor::drawUserShape(V * ddspin(c, c->mondir), mapeditor::sgWall, c->wparam, darkena(wcol, fd, 0xFF), c))
+            queuepoly(V, shTriangle, darkena(wcol, fd, 0xFF));
+          break;
       
         default: {
           wa_default:

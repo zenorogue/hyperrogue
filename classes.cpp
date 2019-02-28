@@ -1467,6 +1467,9 @@ walltype winf[walltypes] = {
   { '^', 0xFD692F, "Explosive Barrel", 
     "These barrels can be pushed, and they will explode if next to a fire, or under some attacks."
     },
+  { '#', 0xC0C0C0, "editable statue", 
+    "A statue."
+    },
   };
 
 // --- land types ---

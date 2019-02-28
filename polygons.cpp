@@ -2877,7 +2877,7 @@ void initShape(int sg, int id) {
     usershapes[sg][id] = us;
 
     for(int i=0; i<USERLAYERS; i++) {
-      us->d[i].sh.prio = PPR((sg >= 3 ? 1:50) + i);
+      us->d[i].sh.prio = PPR((sg == 3 ? 1:50) + i);
 
       us->d[i].rots = 1;
       us->d[i].sym = 0;

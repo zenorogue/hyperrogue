@@ -136,7 +136,7 @@ enum eItem {
   itOrbIntensity, itOrbGravity, itOrbChoice
   };
 
-static const int walltypes = 111;
+static const int walltypes = 112;
 
 struct walltype {
   char  glyph;
@@ -178,7 +178,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waTerraWarrior, waBubble,
   waArrowTrap, waMercury, waMagma,
   waDock, waBurningDock, waRuinWall, waBrownian,
-  waFireTrap, waExplosiveBarrel
+  waFireTrap, waExplosiveBarrel, waEditStatue
   };
 
 static const int landtypes = 87;

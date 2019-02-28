@@ -494,6 +494,7 @@ namespace mapeditor {
 #if CAP_EDIT
   int paintwhat = 0;
   int painttype = 0;
+  int paintstatueid = 0;
   int radius = 0;
   string paintwhat_str = "clear monster";
   
@@ -657,6 +658,7 @@ namespace mapeditor {
   
   eShapegroup drawcellShapeGroup() {
     if(drawcell == cwt.at && drawplayer) return sgPlayer;
+    if(drawcell->wall == waEditStatue) return sgWall;
     if(drawcell->monst) return sgMonster;
     if(drawcell->item) return sgItem;
     return sgFloor;
@@ -664,6 +666,7 @@ namespace mapeditor {
   
   int drawcellShapeID() {
     if(drawcell == cwt.at && drawplayer) return vid.cs.charid;
+    if(drawcell->wall == waEditStatue) return drawcell->wparam;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
     auto si = patterns::getpatterninfo0(drawcell);
@@ -738,6 +741,11 @@ namespace mapeditor {
           }
         else if(hasTimeout(c))
           c->wparam += spillinc();
+        
+        if(c->wall == waEditStatue) {
+          c->wparam = paintstatueid;
+          c->mondir = cdir;
+          }
         break;
         }
       case 5:
@@ -899,8 +907,14 @@ namespace mapeditor {
       for(int z=0; z<isize(dialog::v); z++) if(1000 + z == uni) {
         paintwhat = dialog::v[z].second;
         paintwhat_str = dialog::v[z].first;
+
         mousepressed = false;
         popScreen();
+
+        if(painttype == 3 && paintwhat == waEditStatue)
+          dialog::editNumber(paintstatueid, 0, 127, 1, 1, XLAT1("editable statue"), 
+            XLAT("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.")
+            );
         return;
         }
       if(dialog::editInfix(uni)) ;

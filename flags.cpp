@@ -712,6 +712,7 @@ bool highwall(cell *c) {
   // if(wmspatial && isTree(c)) return false;
   if(isGrave(c->wall)) return true;
   if(c->wall == waMirrorWall) return false;
+  if(c->wall == waEditStatue) return false;
   return winf[c->wall].glyph == '#' || c->wall == waClosedGate;
   }
 
