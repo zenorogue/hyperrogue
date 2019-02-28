@@ -2755,6 +2755,8 @@ void moveMonster(monster *m, int delta) {
     roseCurrents(nat, m, delta), carried = true;
 
   step /= speedfactor();
+
+  if(DIM == 3) step /= 3;
   
   int igo = 0;
   
