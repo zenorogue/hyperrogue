@@ -249,7 +249,14 @@ typedef SDL_Event eventtype;
 bool smooth_scrolling = false;
 
 void handlePanning(int sym, int uni) {
-  if(rug::rugged || smooth_scrolling) return;
+  if(DIM == 3) {
+    if(sym == PSEUDOKEY_WHEELUP) View = cpush(2, -0.05*shiftmul) * View, didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELDOWN) View = cpush(2, 0.05*shiftmul) * View, didsomething = true, playermoved = false;
+    }
+
+  if(rug::rugged || smooth_scrolling) {
+    return;
+    }
   
 #if !ISPANDORA
   if(sym == SDLK_END && DIM == 3) { 
@@ -307,7 +314,7 @@ void handlePanning(int sym, int uni) {
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
     if(isGravityLand(cwt.at->land)) playermoved = false;
 
-  if(sym == PSEUDOKEY_WHEELUP) {
+  if(sym == PSEUDOKEY_WHEELUP && DIM == 2) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
     playermoved = false;
@@ -784,13 +791,13 @@ void handle_event(SDL_Event& ev) {
         }
       
       else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
-        if(anyctrl && anyshift && !rug::rugged) {
+        if(anyctrl && anyshift && !rug::rugged && DIM == 2) {
           mapeditor::scaleall(1/1.2);
           vid.alpha /= 1.2;
           }
-        else if(anyctrl && !rug::rugged)
+        else if(anyctrl && !rug::rugged && DIM == 2)
           mapeditor::scaleall(pow(2, -.25));
-        else if(anyshift && !rug::rugged)
+        else if(anyshift && !rug::rugged && DIM == 2)
           vid.alpha -= 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
@@ -800,13 +807,13 @@ void handle_event(SDL_Event& ev) {
           }
         }
       if(ev.button.button==SDL_BUTTON_WHEELUP) {
-        if(anyctrl && anyshift && !rug::rugged) {
+        if(anyctrl && anyshift && !rug::rugged && DIM == 2) {
           mapeditor::scaleall(1.2);
           vid.alpha *= 1.2;
           }
-        else if(anyctrl && !rug::rugged)
+        else if(anyctrl && !rug::rugged && DIM == 2)
           mapeditor::scaleall(pow(2, .25));
-        else if(anyshift && !rug::rugged)
+        else if(anyshift && !rug::rugged && DIM == 2)
           vid.alpha += 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
