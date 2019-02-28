@@ -260,15 +260,21 @@ void display_data::set_projection(int ed, bool apply_models) {
 
     eyewidth_translate(ed);
 
-    glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
+    if(dim3) {
+      glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * vid.yres / vid.xres));
+      glhr::projection_multiply(glhr::scale(1, -1, -1));
+      current_display->scrdist_text = cd->ysize;
+      }
+    else {
+      glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
+      GLfloat sc = current_display->radius / (cd->ysize/2.);  
+      glhr::projection_multiply(glhr::scale(sc, -sc, -1));
+      current_display->scrdist_text = cd->ysize * sc / 2;
+      }
 
-    GLfloat sc = current_display->radius / (cd->ysize/2.);
-
-    glhr::projection_multiply(glhr::scale(sc, -sc, -1));
     
     if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
   
-    current_display->scrdist_text = cd->ysize * sc / 2;
 
     if(dim3) {
       glhr::fog_max(1/sightranges[geometry]);
