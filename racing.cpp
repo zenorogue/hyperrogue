@@ -1200,8 +1200,10 @@ void race_won() {
     sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result < g2.result; });
     if(isize(subtrack) > ghosts_to_save && ghosts_to_save > 0) 
       subtrack.resize(ghosts_to_save);
+    #if CAP_FILES
     if(ghosts_to_save > 0)
       write_ghosts(track_code, modecode());
+    #endif
       
     if(official_race) uploadScore();
     }
