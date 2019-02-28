@@ -641,7 +641,7 @@ void dqi_poly::gldraw() {
         }
       }
     
-    if(outline) {
+    if(outline && !(flags & POLY_TRIANGLES)) {
       glhr::color2(outline);
       glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
       glDrawArrays(GL_LINE_STRIP, offset, cnt);
