@@ -1910,6 +1910,7 @@ transmatrix shadowmulmatrix;
 void pushShape(const usershapelayer& ds) {
 
   if(ds.list.empty()) return;
+  if(DIM == 3) last->flags |= POLY_TRIANGLES;
 
   transmatrix T = rgpushxto0(ds.shift) * rspintox(ds.spin);
   

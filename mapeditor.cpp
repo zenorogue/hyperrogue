@@ -1132,7 +1132,9 @@ namespace mapeditor {
       }
     return area;
     }
-    
+
+#define EDITING_TRIANGLES (DIM == 3)
+
   void showDrawEditor() {
 #if CAP_POLY
     cmode = sm::DRAW;
@@ -1202,26 +1204,34 @@ namespace mapeditor {
         displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
       else
         displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
-      displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
+      displayButton(8, 8+fs*3, XLAT(DIM == 3 ? "l = color group: %1" : "l = layers: %1", its(dslayer)), 'l', 0);
       }
 
     if(us && isize(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
-      displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
-      displayButton(8, 8+fs*5, XLAT(ds.sym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
+      if(!EDITING_TRIANGLES) {
+        displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
+        displayButton(8, 8+fs*5, XLAT(ds.sym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
+        }
 
       displayfr(8, 8+fs*7, 2, vid.fsize, XLAT("%1 vertices", its(isize(ds.list))), 0xC0C0C0, 0);
       displaymm('a', 8, 8+fs*8, 2, vid.fsize, XLAT("a = add v"), 0);
-      if(autochoose) {
-        displaymm('m', 8, 8+fs*9, 2, vid.fsize, XLAT("m = move v"), 0);
-        displaymm('d', 8, 8+fs*10, 2, vid.fsize, XLAT("d = delete v"), 0);
+      if(!EDITING_TRIANGLES) {
+        if(autochoose) {
+          displaymm('m', 8, 8+fs*9, 2, vid.fsize, XLAT("m = move v"), 0);
+          displaymm('d', 8, 8+fs*10, 2, vid.fsize, XLAT("d = delete v"), 0);
+          }
+        else {
+          displayButton(8, 8+fs*9, XLAT("m = move v"), 'm', 0);
+          displayButton(8, 8+fs*10, XLAT("d = delete v"), 'd', 0);
+          }
+        displaymm('c', 8, 8+fs*11, 2, vid.fsize, XLAT(autochoose ? "autochoose" : "c = choose"), 0);
+        displayButton(8, 8+fs*12, XLAT("b = switch auto"), 'b', 0);
         }
       else {
-        displayButton(8, 8+fs*9, XLAT("m = move v"), 'm', 0);
-        displayButton(8, 8+fs*10, XLAT("d = delete v"), 'd', 0);
+        displayfr(8, 8+fs*9, 2, vid.fsize, XLAT("c = reuse"), 0xC0C0C0, 0);
+        displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("d = delete"), 0xC0C0C0, 0);
         }
-      displaymm('c', 8, 8+fs*11, 2, vid.fsize, XLAT(autochoose ? "autochoose" : "c = choose"), 0);
-      displayButton(8, 8+fs*12, XLAT("b = switch auto"), 'b', 0);
 
       if(DIM == 2) {
         displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
@@ -1259,7 +1269,7 @@ namespace mapeditor {
       }
     
     if(DIM == 3)
-      displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
+      displayfr(8, 8+fs*19, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
 
     if(DIM == 2) displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
@@ -1395,6 +1405,46 @@ namespace mapeditor {
       dialog::editNumber(dsCur->zlevel, -10, +10, 0.1, 0, XLAT("z-level"),
         XLAT("Changing the z-level will make this layer affected by the parallax effect."));
 
+    if(EDITING_TRIANGLES) {
+      if(uni == 'a') {
+        dsCur->list.push_back(mh);
+        uni = 0;
+        rebuildPolys = true;
+        }
+      else if(uni == 'c' || uni == 'd' || uni == 'm') {
+        hyperpoint best = mh;
+        hyperpoint onscr;
+        applymodel(drawtrans * mh, onscr);
+        println(hlog, "onscr = ", onscr);
+        ld dist = HUGE_VAL;
+        for(auto& layer: usershapes[sg][id]->d)
+        for(const hyperpoint& h: layer.list) {
+          using namespace hyperpoint_vec;
+          hyperpoint h1;
+          applymodel(drawtrans * h, h1);
+          ld d = sqhypot_d(2, h1 - onscr);
+          if(d < dist) dist = d, best = h;
+          }
+        if(uni == 'c') dsCur->list.push_back(best);
+        else if(uni == 'd') {
+          vector<hyperpoint> oldlist = move(dsCur->list);
+          dsCur->list.clear();
+          int i;
+          for(i=0; i<isize(oldlist); i+=3)
+            if(oldlist[i] != best && oldlist[i+1] != best && oldlist[i+2] != best)
+              dsCur->list.push_back(oldlist[i]),
+              dsCur->list.push_back(oldlist[i+1]),
+              dsCur->list.push_back(oldlist[i+2]);
+          for(; i<isize(oldlist); i++)
+            if(oldlist[i] != best)
+              dsCur->list.push_back(oldlist[i]);
+          }
+        rebuildPolys = true;
+        uni = 0;
+        }
+      else if(uni != 'D') uni = 0;
+      }
+    
     if(uni == 'a' && haveshape) {
       mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
       if(ew.symid) mh = Mirror * mh;
@@ -1920,7 +1970,18 @@ namespace mapeditor {
   
     if(cmode & sm::DRAW) {
 
-      if(mapeditor::editingShape(group, id)) {
+      if(c == drawcell && EDITING_TRIANGLES && mapeditor::editingShape(group, id)) {
+        if(!us) return false;
+        usershapelayer &ds(us->d[mapeditor::dslayer]);
+        for(int i=0; i<isize(ds.list); i++) {
+          int j = (i%3 == 2 ? i-2 : i+1);
+          if(j < isize(ds.list))
+            queueline(V * ds.list[i], V * ds.list[j], 0xFF00FFFF, -1, PPR::SUPERLINE);
+          queuechr(V * ds.list[i], 10, 'x', 0xFF00FF);
+          }
+        }
+
+      if(mapeditor::editingShape(group, id) && !EDITING_TRIANGLES) {
   
         /* for(int a=0; a<isize(ds.list); a++) {
           hyperpoint P2 = V * ds.list[a];
