@@ -7,6 +7,7 @@ namespace mapeditor {
 
   hyperpoint lstart;
   cell *lstartcell;
+  ld front_edit = 0.5;
 
   struct editwhat {
     double dist;
@@ -1053,6 +1054,10 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   void drawGrid() {
+    if(DIM == 3) {
+      queuecircleat(mapeditor::drawcell, 1, 0x80D080FF);
+      return;
+      }
     unsigned lightgrid = gridcolor;
     lightgrid -= (lightgrid & 0xFF) / 2;
 
@@ -1215,13 +1220,16 @@ namespace mapeditor {
       displaymm('c', 8, 8+fs*11, 2, vid.fsize, XLAT(autochoose ? "autochoose" : "c = choose"), 0);
       displayButton(8, 8+fs*12, XLAT("b = switch auto"), 'b', 0);
 
-      displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
-      displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
-      if(mousekey == 'g')
+      if(DIM == 2) {
+        displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
+        displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
+        }
+      if(mousekey == 'g' && DIM == 2)
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
         displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
-      displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
+      if(DIM == 2) 
+        displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
 
       }
 #if CAP_TEXTURE
@@ -1246,8 +1254,11 @@ namespace mapeditor {
       if(mousekey == 'a' || mousekey == 'd' || mousekey == 'd' ||
         mousekey == 'c') mousekey = 'n';
       }
+    
+    if(DIM == 3)
+      displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
 
-    displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
+    if(DIM == 2) displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
 #if CAP_TEXTURE    
     if(intexture) for(int i=0; i<10; i++) {
@@ -1377,7 +1388,7 @@ namespace mapeditor {
     if(uni == 'u') 
       loadShapes(sg, id);
     
-    if(uni == 'z' && haveshape)
+    if(uni == 'z' && haveshape && DIM == 2)
       dialog::editNumber(dsCur->zlevel, -10, +10, 0.1, 0, XLAT("z-level"),
         XLAT("Changing the z-level will make this layer affected by the parallax effect."));
 
@@ -1476,13 +1487,13 @@ namespace mapeditor {
     }
 
   void writeHyperpoint(FILE *f, hyperpoint h) {
-    for(int i=0; i<3; i++) fprintf(f, "%lf ", double(h[i]));
+    for(int i=0; i<MDIM; i++) fprintf(f, "%lf ", double(h[i]));
     fprintf(f, "\n");
     }
   
   hyperpoint readHyperpoint(FILE *f) {
     hyperpoint h;
-    for(int i=0; i<3; i++) {
+    for(int i=0; i<MDIM; i++) {
       double d;
       int err = fscanf(f, "%lf", &d);
       if(err != 1) printf("Warning: read error\n");
@@ -1606,7 +1617,8 @@ namespace mapeditor {
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
     
-    hyperpoint mh = inverse(drawtrans) * mouseh;
+    hyperpoint mh = DIM == 2 ? mouseh : cpush0(2, front_edit);
+    mh = inverse(drawtrans) * mh;
 
     bool clickused = false;
     
@@ -1707,6 +1719,10 @@ namespace mapeditor {
       if(uni == 'u') {
         texture::config.data.undo();
         }        
+      
+      if(uni == 'z' && DIM == 3)
+        dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"),
+          XLAT("The distance from the camera to added points."));
 
       if(uni == 'p') {
         if(!clickused)
@@ -1743,10 +1759,12 @@ namespace mapeditor {
           
           for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
             usershapelayer& ds(us->d[l]);
-            printf("// %d %d %d [%06X]\n", i, usp.first, l, ds.color);
+            printf("// %d %d %d [%06X %lf]\n", i, usp.first, l, ds.color, double(ds.zlevel));
             printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
-            for(int i=0; i<isize(us->d[l].list); i++) 
-              printf("%lf,%lf, ", double(us->d[l].list[i][0]), double(us->d[l].list[i][1]));
+            for(int i=0; i<isize(us->d[l].list); i++) {
+              for(int d=0; d<DIM; d++) printf("%lf,", double(us->d[l].list[i][d]));
+              printf(" ");
+              }
             printf("\n");
             }
           }

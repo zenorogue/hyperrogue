@@ -756,7 +756,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
     xsh = NULL;
     }
   
-  else if(mapeditor::drawUserShape(Vit, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) ;
+  else if(mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) ;
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
