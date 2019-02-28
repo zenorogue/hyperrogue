@@ -1056,6 +1056,9 @@ namespace mapeditor {
   void drawGrid() {
     if(DIM == 3) {
       queuecircleat(mapeditor::drawcell, 1, 0x80D080FF);
+      color_t cols[4] = { 0x80D080FF, 0x80D080FF, 0xFFFFFF40, 0x00000040 };
+      for(int i=0; i<4; i++)
+        queueline(cpush(2, front_edit) * cpush0(i&1, 0.1), cpush(2, front_edit) * cpush0(i&1, -0.1), cols[i], -1, i < 2 ? PPR::LINE : PPR::SUPERLINE);
       return;
       }
     unsigned lightgrid = gridcolor;
