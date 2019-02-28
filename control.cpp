@@ -535,7 +535,7 @@ void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
   
-  mousepan = normal && DIM == 3 && mouseaim_sensitivity;
+  mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && DIM == 3 && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
     if(mousepan) {    
