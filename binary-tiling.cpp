@@ -264,6 +264,17 @@ namespace binary {
     return hr::parabolic13(y * co, z * co);
     }
   
+  hyperpoint deparabolic3(hyperpoint h) {
+    using namespace hyperpoint_vec;
+    h /= (1 + h[3]);
+    hyperpoint one = point3(1,0,0);
+    h -= one;
+    h /= sqhypot_d(3, h);
+    h[0] += .5;
+    ld co = vid.binary_width / log(2) / 8;
+    return point3(log(2) + log(-h[0]), h[1] / co, h[2] / co);
+    }
+  
   void draw() {
     dq::visited.clear();
     dq::enqueue(viewctr.at, cview());

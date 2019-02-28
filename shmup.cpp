@@ -1036,6 +1036,19 @@ typedef multimap<cell*, monster*>::iterator mit;
 vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(hyperpoint p, cell *around) {
+  #if MAXMDIM == 4 && CAP_BT
+  // this needs a more precise algorithm because the cells have curved faces
+  if(DIM == 3 && binarytiling) {
+    hyperpoint h = binary::deparabolic3(inverse(ggmatrix(around)) * p);
+    if(h[0] < -log(2)/2) return around->cmove((h[1] > 0 ? 1 : 0) + (h[2] > 0 ? 2 : 0));
+    if(h[1] < -1) return around->cmove(4);
+    if(h[1] > +1) return around->cmove(5);
+    if(h[2] < -1) return around->cmove(6);
+    if(h[2] > +1) return around->cmove(7);
+    if(h[0] > +log(2)/2) return around->cmove(8);
+    return around;
+    }
+  #endif
   cell *best = around;
   double d0 = intval(p, ggmatrix(around) * C0);
   for(int i=0; i<around->type; i++) {
