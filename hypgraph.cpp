@@ -234,8 +234,9 @@ hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
 void applymodel(hyperpoint H, hyperpoint& ret) {
 
   if(DIM == 3) { 
-    ret[0] = H[0]/H[2]; 
-    ret[1] = H[1]/H[2]; 
+    ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
+    ret[0] = H[0]/H[2] * ratio;
+    ret[1] = H[1]/H[2] * ratio;
     ret[2] = 1;
     return; 
     }

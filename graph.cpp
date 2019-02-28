@@ -6030,7 +6030,8 @@ void calcparam() {
     if(current_display->sidescreen) cd->xcenter = vid.yres/2;
     }
 
-  cd->radius = vid.scale * cd->scrsize;  
+  cd->radius = vid.scale * cd->scrsize;
+  if(DIM == 3) cd->radius = cd->scrsize;
   realradius = min(realradius, cd->radius);
   
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }
