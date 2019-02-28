@@ -664,8 +664,14 @@ void showEuclideanMenu() {
   if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
   dialog::add_action([] { pushScreen(patterns::showPrePattern); });
   validity_info();
-  dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-  dialog::add_action([] { pushScreen(conformal::model_menu); });
+  if(DIM == 3) {
+    dialog::addItem(XLAT("3D configuration"), '1');
+    dialog::add_action([] { pushScreen(show3D); });
+    }
+  else {
+    dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+    dialog::add_action([] { pushScreen(conformal::model_menu); });
+    }
 
   dialog::addBreak(50);
    
