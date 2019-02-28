@@ -114,7 +114,7 @@ vector<unique_ptr<drawqueueitem>> ptds;
 #if CAP_SHAPES
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  ld threshold = (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
+  ld threshold = (DIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
   if(/*vid.usingGL && */!first && intval(hpc.back(), h) > threshold) {
     hyperpoint md = mid(hpc.back(), h);
     hpcpush(md);
@@ -1957,6 +1957,7 @@ void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int
     hpcpush(res);
     };
   if(flags == 2) {
+    last->flags |= POLY_TRIANGLES;
     for(int y=0; y<STEP; y++)
     for(int x=0; x<STEP; x++) {
       int x1 = x + 1;
@@ -1967,7 +1968,6 @@ void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int
       at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
       at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
       at((h0 * (STEP-x1-y1) + h1 * x1 + h2 * y1) / STEP);
-      last->flags |= POLY_TRIANGLES;
       }
     }
   else {
