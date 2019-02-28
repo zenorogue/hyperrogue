@@ -1375,6 +1375,7 @@ void show3D() {
   else {
     dialog::addSelItem(XLAT("Creature scale"), fts3(creature_scale), 'c');
     dialog::addSelItem(XLAT("Height to width"), fts3(height_width), 'h');
+    menuitem_sightrange('s');
     }
 
   dialog::addBreak(50);
