@@ -184,11 +184,14 @@ void precalc() {
   #endif
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
   if(binarytiling && DIM == 3) binary::build_tmatrix();
-
+  
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
+  if(DIM == 3) scalefactor *= geom3::creature_scale;
+
   zhexf = BITRUNCATED ? hexf : crossf* .55;
+  if(DIM == 3) zhexf *= geom3::creature_scale;
 
   floorrad0 = hexvdist* 0.92;
   floorrad1 = rhexf * 0.94;
@@ -224,6 +227,8 @@ namespace geom3 {
   ld human_wall_ratio = .7;
   ld human_height;
   bool gp_autoscale_heights = true;
+  
+  ld creature_scale, height_width;
   
   ld highdetail = 8, middetail = 8;
   
@@ -345,7 +350,7 @@ namespace geom3 {
       WALL = lev_to_factor(wh);
       
       human_height = human_wall_ratio * wh;
-      if(DIM == 3) human_height *= 1.5;
+      if(DIM == 3) human_height = scalefactor * height_width / 2;
       
       ld reduce = (DIM == 3 ? human_height / 2 : 0);
 

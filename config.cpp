@@ -296,7 +296,10 @@ void initConfig() {
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
   addsaver(vid.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
-  
+
+  addsaver(geom3::creature_scale, "3d-creaturescale", 1);
+  addsaver(geom3::height_width, "3d-heightwidth", 1.5);
+
   #if CAP_GP
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
   addsaver(gp::param.second, "goldberg-y", gp::param.second);
@@ -1253,6 +1256,20 @@ string explain3D(ld *param) {
   return "";
   }
 
+void add_edit_fov(char key = 'f') {
+  dialog::addSelItem(XLAT("field of view"), fts(vid.fov) + "°", key);
+  dialog::add_action([] {
+    dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
+      XLAT(
+        "Horizontal field of view, in angles. "
+        "This affects the Hypersian Rug mode (even when stereo is OFF) "
+        "and non-disk models.")
+        );
+    dialog::bound_low(1e-8);
+    dialog::bound_up(179);
+    });
+  }
+
 void showStereo() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1275,8 +1292,8 @@ void showStereo() {
       dialog::addBreak(100);
       break;
     }
-
-  dialog::addSelItem(XLAT("field of view"), fts(vid.fov) + "°", 'f');
+  
+  add_edit_fov('f');
 
   dialog::addBack();
   dialog::display();
@@ -1314,16 +1331,6 @@ void showStereo() {
         help3 +
         XLAT("The distance between your eyes. 1 is the width of the screen."));
       
-    else if(uni == 'f') {
-      dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
-        help3 + XLAT(
-          "Horizontal field of view, in angles. "
-          "This affects the Hypersian Rug mode (even when stereo is OFF) "
-          "and non-disk models.")
-          );
-      dialog::bound_low(1e-8);
-      }
-
     else if(doexiton(sym, uni)) popScreen();
     };
   }
@@ -1345,28 +1352,34 @@ void show3D() {
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 
-  if(vid.use_smart_range == 0) {
+  if(vid.use_smart_range == 0 && DIM == 2) {
     dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
     dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
     dialog::addBreak(50);
     }
   
-  dialog::addSelItem(XLAT("Camera level above the plane"), fts3(camera), 'c');
-  dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
-
-  dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'a');
-  dialog::addBreak(50);
-  dialog::addSelItem(XLAT("Height of walls"), fts3(wall_height), 'w');
+  if(DIM == 2) {
+    dialog::addSelItem(XLAT("Camera level above the plane"), fts3(camera), 'c');
+    dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
   
-  dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts3(rock_wall_ratio), 'r');
-  dialog::addSelItem(XLAT("Human to wall ratio"), fts3(human_wall_ratio), 'h');
-  dialog::addSelItem(XLAT("Level of water surface"), fts3(lake_top), 'l');
-  dialog::addSelItem(XLAT("Level of water bottom"), fts3(lake_bottom), 'k');  
+    dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'a');
+    dialog::addBreak(50);
+    dialog::addSelItem(XLAT("Height of walls"), fts3(wall_height), 'w');
+    
+    dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts3(rock_wall_ratio), 'r');
+    dialog::addSelItem(XLAT("Human to wall ratio"), fts3(human_wall_ratio), 'h');
+    dialog::addSelItem(XLAT("Level of water surface"), fts3(lake_top), 'l');
+    dialog::addSelItem(XLAT("Level of water bottom"), fts3(lake_bottom), 'k');  
+    }
+  else {
+    dialog::addSelItem(XLAT("Creature scale"), fts3(creature_scale), 'c');
+    dialog::addSelItem(XLAT("Height to width"), fts3(height_width), 'h');
+    }
 
   dialog::addBreak(50);
   dialog::addSelItem(XLAT(DIM == 2 ? "Y shift" : "third person perspective"), fts3(vid.yshift), 'y');
   if(DIM == 3) {
-    dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'f');
+    dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
@@ -1385,6 +1398,7 @@ void show3D() {
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
     }
+  if(DIM == 3) add_edit_fov('f');
   
   dialog::addBreak(50);
   #if CAP_RUG
@@ -1436,29 +1450,29 @@ void show3D() {
     using namespace geom3;
     dialog::handleNavigation(sym, uni);
     
-    if(uni == 'n') {
+    if(uni == 'n' && DIM == 2) {
       dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
       dialog::reaction = [] () {
         if(highdetail > middetail) middetail = highdetail;
         };
       }
-    else if(uni == 'm') {
+    else if(uni == 'm' && DIM == 2) {
       dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
       dialog::reaction = [] () {
         if(highdetail > middetail) highdetail = middetail;
         };
       }
-    else if(uni == 'c') 
+    else if(uni == 'c' && DIM == 2) 
       tc_camera = ticks,
       dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'g') 
+    else if(uni == 'g' && DIM == 2) 
       tc_depth = ticks,
       dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'a') 
+    else if(uni == 'a' && DIM == 2) 
       projectionDialog();
-    else if(uni == 'w') {
+    else if(uni == 'w' && DIM == 2) {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::reaction = delayed_geo_reset;
       dialog::extra_options = [] () {
@@ -1472,17 +1486,23 @@ void show3D() {
           });
         };
       }
-    else if(uni == 'l') 
+    else if(uni == 'l' && DIM == 2) 
       dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'k') 
+    else if(uni == 'k' && DIM == 2) 
       dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'r') 
+    else if(uni == 'r' && DIM == 2) 
       dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'h')
+    else if(uni == 'h' && DIM == 2)
       dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
+      dialog::reaction = delayed_geo_reset;
+    else if(uni == 'h' && DIM == 3)
+      dialog::editNumber(geom3::height_width, 0, 1, .1, .7, XLAT("Height to width"), ""),
+      dialog::reaction = delayed_geo_reset;
+    else if(uni == 'c' && DIM == 3)
+      dialog::editNumber(geom3::creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), ""),
       dialog::reaction = delayed_geo_reset;
 
     else if(uni == 'e')
