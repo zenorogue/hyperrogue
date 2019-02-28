@@ -201,7 +201,9 @@ namespace mapstream {
       
       for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
-        f.write(i); f.write(usp.first); f.write(l); f.write(ds.sym); f.write(ds.rots); f.write(ds.color);
+        f.write(i); f.write(usp.first); f.write(l); 
+        f.write(ds.zlevel);      
+        f.write(ds.sym); f.write(ds.rots); f.write(ds.color);
         n = isize(ds.list); f.write(n);
         f.write(ds.shift);
         f.write(ds.spin);
@@ -435,6 +437,8 @@ namespace mapstream {
 
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
+
+      if(vernum >= 11008) f.read(ds.zlevel);
       
       f.read(ds.sym); f.read(ds.rots); f.read(ds.color);
       ds.list.clear();
@@ -1217,6 +1221,7 @@ namespace mapeditor {
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
         displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
+      displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
 
       }
 #if CAP_TEXTURE
@@ -1324,6 +1329,7 @@ namespace mapeditor {
       dsCur->color = ptd.color;
       dsCur->sym = false;
       dsCur->rots = 1;
+      dsCur->zlevel = 0;
       
       for(auto& v: symmetriesAt)
         if(v[0] == ptd.offset) {
@@ -1370,6 +1376,10 @@ namespace mapeditor {
 
     if(uni == 'u') 
       loadShapes(sg, id);
+    
+    if(uni == 'z' && haveshape)
+      dialog::editNumber(dsCur->zlevel, -10, +10, 0.1, 0, XLAT("z-level"),
+        XLAT("Changing the z-level will make this layer affected by the parallax effect."));
 
     if(uni == 'a' && haveshape) {
       mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
@@ -1526,6 +1536,7 @@ namespace mapeditor {
 
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
+      if(VERNUM_HEX >= 0xA608) { double z; err = fscanf(f, "%lf", &z); ds.zlevel = z; }
       ds.shift = readHyperpoint(f);
       ds.spin = readHyperpoint(f);
       ds.list.clear();
@@ -1562,6 +1573,7 @@ namespace mapeditor {
         usershapelayer& ds(us->d[l]);
         fprintf(f, "\n%d %d %d %d %d %6x %d\n", 
           i, usp.first, l, ds.sym, ds.rots, ds.color, int(isize(ds.list)));
+        fprintf(f, "\n%lf", double(ds.zlevel));
         writeHyperpoint(f, ds.shift);
         writeHyperpoint(f, ds.spin);
         fprintf(f,"\n");
@@ -1881,7 +1893,7 @@ namespace mapeditor {
         hpcshape& sh(ds.sh);
     
         if(sh.s != sh.e) 
-          queuepolyat(V, sh, ds.color ? ds.color : color, prio);
+          queuepolyat(mmscale(V, geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);
         }
       }
   

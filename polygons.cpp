@@ -1692,6 +1692,7 @@ struct usershapelayer {
   int rots;
   color_t color;
   hyperpoint shift, spin;
+  ld zlevel;
   hpcshape sh;
   };
 
@@ -2884,6 +2885,7 @@ void initShape(int sg, int id) {
       us->d[i].shift = C0;
       us->d[i].spin = Cx1;
       us->d[i].color = 0;
+      us->d[i].zlevel = 0;
       }
     }
   }
