@@ -3,6 +3,8 @@
 
 namespace hr {
 
+vector<radarpoint> radarpoints;
+
 purehookset hooks_stats;
 
 int monsterclass(eMonster m) {
@@ -346,6 +348,37 @@ void drawMobileArrow(int i) {
 
 bool nofps = false;
 
+void draw_radar(bool cornermode) {
+  dynamicval<eGeometry> g(geometry, gEuclid);
+  initquickqueue();
+  current_display->set_projection(0, false);
+  int rad = vid.radarsize;
+  
+  ld cx = cornermode ? rad+2 : vid.xres-rad-2;
+  ld cy = vid.yres-rad-2 - vid.fsize;
+  for(int i=0; i<360; i++)
+    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
+  queuecurve(0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
+
+  for(int i=0; i<360; i++)
+    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad/3, 1) * C0);
+  queuecurve(0xFF0000FF, 0x200000FF, PPR::ZERO);
+
+  curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
+  curvepoint(atscreenpos(cx, cy, 1) * C0);
+  curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
+  queuecurve(0xFF8000FF, 0, PPR::ZERO);
+  
+  for(auto& r: radarpoints) {    
+    queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2]/3 + rad * r.h[1]*2/3, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2]/3, 0)*C0, r.line, -1);
+    }
+
+  quickqueue();
+
+  for(auto& r: radarpoints)
+    displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2]/3 + rad * r.h[1]*2/3), 0, 8, r.glyph, r.color);
+  }
+
 void drawStats() {
   if(nohud || vid.stereo_mode == sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
@@ -362,6 +395,14 @@ void drawStats() {
 
   calcparam(); 
   current_display->set_projection(0, false);
+  
+  bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
+    
+  if(DIM == 3 && vid.radarsize > 0 && !peace::on && playermoved && vid.sspeed > -5 && vid.yshift == 0)
+  #if CAP_RACING
+    if(!racing::on)
+  #endif
+    draw_radar(cornermode);
 
   if(haveMobileCompass()) {
     initquickqueue();
@@ -386,7 +427,7 @@ void drawStats() {
 #else
     {}
 #endif
-  else if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
+  else if(cornermode) {
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;
     for(int i=0; i<glyphs; i++) if(ikappear(i) && (glyphflags(i) & GLYPH_INSQUARE))

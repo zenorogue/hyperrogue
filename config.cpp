@@ -138,6 +138,7 @@ void initConfig() {
   addsaver(fontscale, "fontscale", 100);
 
   addsaver(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
+  addsaver(vid.radarsize, "radarsize size", 120);
   addsaver(vid.axes, "movement help", 1);
   addsaver(vid.shifttarget, "shift-targetting", 2);
   addsaver(vid.steamscore, "scores to Steam", 1);
@@ -1399,6 +1400,12 @@ void show3D() {
     dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
     }
   if(DIM == 3) add_edit_fov('f');
+  if(DIM == 3) {
+    dialog::addSelItem(XLAT("radar size"), fts3(vid.radarsize), 'r');
+    dialog::add_action([] () {
+      dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", "");
+      });
+    }
   
   dialog::addBreak(50);
   #if CAP_RUG

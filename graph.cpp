@@ -632,7 +632,24 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
 #endif
   }
 
-bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks, bool hidden) {
+hyperpoint makeradar(transmatrix V) {
+  hyperpoint h = tC0(V);
+  using namespace hyperpoint_vec;
+  h = h * (hdist0(h) / sightranges[geometry] / hypot_d(3, h));
+  return h;
+  }
+  
+color_t kind_outline(eItem it) {
+  int k = itemclass(it);
+  if(k == IC_TREASURE)
+    return OUTLINE_TREASURE;
+  else if(k == IC_ORB)
+    return OUTLINE_ORB;
+  else
+    return OUTLINE_OTHER;
+  }
+
+bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pticks, bool hidden) {
 #if !CAP_SHAPES
   return it;
 #else
@@ -661,15 +678,12 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int pticks,
     it == itRevolver ? &shGun :
     NULL;
    
-  if(c && doHighlight()) {
-    int k = itemclass(it);
-    if(k == IC_TREASURE)
-      poly_outline = OUTLINE_TREASURE;
-    else if(k == IC_ORB)
-      poly_outline = OUTLINE_ORB;
-    else
-      poly_outline = OUTLINE_OTHER;
-    }
+  if(c && doHighlight()) 
+    poly_outline = kind_outline(it);
+
+#if MAXMDIM >= 4
+  if(c && DIM == 3) radarpoints.emplace_back(radarpoint{makeradar(V), iinf[it].glyph, icol, kind_outline(it)});
+#endif
   
   transmatrix Vit = V;
   if(DIM == 3 && c) Vit = rgpushxto0(tC0(V));
@@ -842,6 +856,11 @@ void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
 #endif
 
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
+
+#if MAXMDIM >= 4
+  if(DIM == 3 && m != moPlayer)
+    radarpoints.emplace_back(radarpoint{makeradar(V), minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF });
+#endif
 
 #if CAP_SHAPES
   char xch = minf[m].glyph;
@@ -5738,6 +5757,7 @@ void precise_mouseover() {
 
 void drawthemap() {
 
+  radarpoints.clear();
   callhooks(hooks_drawmap);
 
   frameid++;

@@ -1041,10 +1041,20 @@ extern reaction_t help_delegate;
 
 enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
+struct radarpoint {
+  hyperpoint h;
+  char glyph;
+  color_t color;
+  color_t line;
+  };
+
+extern vector<radarpoint> radarpoints;
+
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
   ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width, fixed_facing_dir;
   int mobilecompasssize;
+  int radarsize; // radar for 3D geometries
   int aurastr, aurasmoothen;
   bool fixed_facing;
   
@@ -2471,7 +2481,7 @@ namespace inv {
   void show();
   }
 
-bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden);
+bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int ticks, bool hidden);
 
 void initquickqueue();
 void quickqueue();
