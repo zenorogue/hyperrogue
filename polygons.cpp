@@ -1942,6 +1942,7 @@ ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
 
+#if CAP_BT && MAXMDIM >= 4
 void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2, int z2, int flags) {
   hyperpoint h0 = point3(x0,y0,z0);
   hyperpoint h1 = point3(x1,y1,z1);
@@ -1978,6 +1979,7 @@ void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int
     at(h0);
     }
   }
+#endif
 
 void buildpolys() {
  

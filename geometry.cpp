@@ -182,8 +182,12 @@ void precalc() {
     rhexf = arcm::current.scale() * .5;
     }
   #endif
+  #if CAP_BT
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
+  #endif
+  #if CAP_BT && MAXMDIM >= 4
   if(binarytiling && DIM == 3) binary::build_tmatrix();
+  #endif
   
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;

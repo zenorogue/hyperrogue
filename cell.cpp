@@ -867,8 +867,10 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
 
+  #if CAP_BT && MAXMDIM >= 4
   if(binarytiling && DIM == 3) 
     return binary::celldistance3(c1, c2);
+  #endif
 
   if(euclid && DIM == 3) 
     return euclid3::celldistance(c1, c2);
