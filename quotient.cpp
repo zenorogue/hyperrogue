@@ -334,6 +334,7 @@ struct hrmap_quotient : hrmap {
         h->rval0 = h->rval1 = 0; h->cdata = NULL;
         h->distance = 0;
         if(!IRREGULAR) h->c7 = newCell(S7, h);
+        else h->c7 = NULL;
         }
       for(int j=0; j<S7; j++) {
         int co = connections[i*S7+j];

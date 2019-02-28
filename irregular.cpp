@@ -1015,6 +1015,14 @@ int readArgs() {
     PHASE(2);
     shift_arg_formula(density);
     }
+  else if(argis("-irrb")) {
+    PHASE(2);
+    shift(); bitruncations_requested = argi();
+    }
+  else if(argis("-irrq")) {
+    PHASE(2);
+    shift_arg_formula(quality);
+    }
   else if(argis("-irrload")) {
     PHASE(3);
     restart_game();

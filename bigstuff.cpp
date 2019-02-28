@@ -123,7 +123,7 @@ bool grailWasFound(cell *c) {
 void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
-  forCellEx(c2, h->c7) preventbarriers(c2);
+  if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
   if(GOLDBERG)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
