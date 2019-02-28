@@ -481,6 +481,9 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
   
   if(bug) rightfoot /= 2.5, leftfoot /= 2.5;
   
+  rightfoot *= SCALE;
+  leftfoot *= SCALE;
+  
   if(!footphase) rightfoot = leftfoot = 0;
 
   transmatrix VAML = mmscale(V, geom3::ALEG);
@@ -552,7 +555,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
   // if(!mmspatial && !footphase && who != moSkeleton) return;
   
   footphase /= SCALE;
-  double rightfoot = footfun(footphase / .4 / 2.5) / 4 * 2.5;
+  double rightfoot = footfun(footphase / .4 / 2.5) / 4 * 2.5 * SCALE;
   
   const double wobble = -1;
 

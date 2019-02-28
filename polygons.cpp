@@ -1816,7 +1816,7 @@ void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (!BITRUNCATED && !archimedean ? crossf / hcrossf : 1), shzoomy = 1.6 * (!BITRUNCATED && !archimedean ? crossf / hcrossf : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * (!BITRUNCATED && !archimedean ? scalefactor : 1), shzoomy = 1.6 * (!BITRUNCATED && !archimedean ? scalefactor : 1);
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {

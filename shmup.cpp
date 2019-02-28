@@ -1011,7 +1011,7 @@ void profile(const char *buf) {
   }
 */
 
-#define SCALE (crossf/hcrossf)
+#define SCALE scalefactor
 #define SCALE2 (SCALE*SCALE)
 
 namespace shmup {
