@@ -1225,7 +1225,7 @@ void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
   else prettypoint(h2);
   }
 
-void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags) {
+void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags, PPR prio) {
   prettylinepoints.clear();
   prettypoint(h1);
   prettylinesub(h1, h2, lev);
@@ -1241,6 +1241,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags) {
   ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE | flags;
   ptd.tinf = NULL;
   ptd.intester = C0;
+  ptd.prio = prio;
   ptd.draw();
   }
 
@@ -1275,7 +1276,7 @@ void queuereset(eModel m, PPR prio) {
 void dqi_line::draw() {
   dynamicval<ld> d(vid.linewidth, width); 
   dynamicval<ld> bs(hr::band_shift, band_shift);
-  prettyline(H1, H2, color, prf, 0);
+  prettyline(H1, H2, color, prf, 0, prio);
   }
 
 void dqi_string::draw() {
