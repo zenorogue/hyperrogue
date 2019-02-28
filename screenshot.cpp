@@ -939,16 +939,19 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
+#if CAP_ANIMATIONS
   else if(argis("-animmenu")) {
     PHASE(3); showstartmenu = false; pushScreen(show);
     }
   else if(argis("-animperiod")) {
     PHASE(2); shift_arg_formula(period);
     }
-  else if(argis("-animrecord")) {
+#if CAP_SHOT
+  else if(argis("-animrecord") || argis("-animrec")) {
     PHASE(3); shift(); noframes = argi();
     shift(); animfile = args(); record_animation();
     }
+#endif
   else if(argis("-animcircle")) {
     PHASE(3); start_game();
     ma = maCircle; 
@@ -989,13 +992,7 @@ int readArgs() {
   else if(argis("-animj")) {
     shift(); joukowsky_anim = true;
     }
-  else if(argis("-animrec")) {
-    PHASE(3);
-    shift(); noframes = argi();
-    shift(); animfile = args();
-    record_animation();
-    }
-
+#endif
   else return 1;
   return 0;
   }
