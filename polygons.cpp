@@ -529,6 +529,8 @@ void glapplymatrix(const transmatrix& V) {
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
+int global_projection;
+
 void dqi_poly::gldraw() {
   auto& v = *tab;
   
@@ -582,6 +584,7 @@ void dqi_poly::gldraw() {
     }
 
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
+    if(global_projection && global_projection != ed) continue;
     if(ed) current_display->set_projection(ed, true), current_display->set_viewport(ed);
     bool draw = color;
     
@@ -1439,6 +1442,52 @@ void draw_backside() {
   }
 
 extern bool lshiftclick, lctrlclick;
+
+void draw_main() {
+  if(sphere && DIM == 3) {
+    for(int p: {0, 1, 2, 3}) {
+      if(elliptic && p < 2) continue;
+      if(p == 1 || p == 3) {
+  #ifdef GL_ES
+        glClearDepthf(1.0f);
+  #else
+        glClearDepth(1.0f);
+  #endif
+        glDepthFunc(GL_LEQUAL);
+        }
+      else {
+  #ifdef GL_ES
+        glClearDepthf(0.0f);
+  #else
+        glClearDepth(0.0f);
+  #endif
+        glDepthFunc(GL_GEQUAL);
+        }
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glhr::be_nontextured();
+      spherephase = p;
+      current_display->set_projection(0, true);
+      for(auto& ptd: ptds) ptd->draw();
+      if(elliptic) {
+        spherephase = p - 2;
+        for(auto& ptd: ptds) ptd->draw();
+        }
+      // glflush();
+      }
+    }
+  else {
+    for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
+      ptd->draw();
+    
+    if(two_sided_model()) draw_backside();
+  
+    for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
+      dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
+      ptd->draw();
+      }
+    glflush();
+    }
+  }
   
 void drawqueue() {
   callhooks(hook_drawqueue);
@@ -1487,50 +1536,17 @@ void drawqueue() {
   spherephase = 0;
   current_display->set_projection(0, true);
   setcameraangle(true);
-    
-  if(sphere && DIM == 3) {
-    for(int p: {0, 1, 2, 3}) {
-      if(elliptic && p < 2) continue;
-      if(p == 1 || p == 3) {
-  #ifdef GL_ES
-        glClearDepthf(1.0f);
-  #else
-        glClearDepth(1.0f);
-  #endif
-        glDepthFunc(GL_LEQUAL);
-        }
-      else {
-  #ifdef GL_ES
-        glClearDepthf(0.0f);
-  #else
-        glClearDepth(0.0f);
-  #endif
-        glDepthFunc(GL_GEQUAL);
-        }
-      glClear(GL_DEPTH_BUFFER_BIT);
-      glhr::be_nontextured();
-      spherephase = p;
-      current_display->set_projection(0, true);
-      for(auto& ptd: ptds) ptd->draw();
-      if(elliptic) {
-        spherephase = p - 2;
-        for(auto& ptd: ptds) ptd->draw();
-        }
-      // glflush();
-      }
+  
+  if(model_needs_depth() && current_display->stereo_active()) {
+    global_projection = -1;
+    draw_main();
+    glClear(GL_DEPTH_BUFFER_BIT);
+    global_projection = +1;
+    draw_main();
     }
   else {
-    for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
-      ptd->draw();
-    
-    if(two_sided_model()) draw_backside();
-  
-    for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
-      dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
-      ptd->draw();
-      }
-    glflush();
-    }
+    draw_main();
+    }    
 
 #if CAP_GL
   if(vid.usingGL) 
