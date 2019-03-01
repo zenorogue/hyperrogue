@@ -21,6 +21,7 @@ struct cellinfo {
   int localindex;
   bool is_pseudohept;
   int patterndir;
+  int generation;
   };
 
 map<cell*, int> cellindex;
@@ -157,6 +158,7 @@ void bitruncate() {
         s.neid.push_back(-1);
         s.neid.push_back(next);
         s.neid.push_back(-1);
+        s.generation = bitruncations_performed + 1;
         virtualRebase(s.owner, s.p, false);
         set_relmatrices(s);
         }
@@ -242,6 +244,7 @@ bool step(int delta) {
          cellinfo& s = cells.back();
          s.patterndir = -1;
          s.owner = h, s.p = xspinpush0(hrand(1000), .01);
+         s.generation = 0;
          set_relmatrices(s);
          }
        }
@@ -813,11 +816,19 @@ bool save_map(const string& fname) {
   FILE *f = fopen(fname.c_str(), "wt");
   if(!f) return false;
   auto& all = base->allcells();
-  fprintf(f, "%d %d %d\n", geometry, isize(all), isize(cells));
+  int origcells = 0;
+  for(cellinfo& ci: cells) 
+    if(ci.generation == 0) 
+      origcells++;
+  fprintf(f, "%d %d %d\n", geometry, isize(all), origcells);
   
   for(auto h: all) {
-    fprintf(f, "%d\n", isize(cells_of_heptagon[h->master]));
-    for(auto i: cells_of_heptagon[h->master]) {
+    origcells = 0;
+    for(auto i: cells_of_heptagon[h->master]) 
+      if(cells[i].generation == 0)
+        origcells++;
+    fprintf(f, "%d\n", origcells);
+    for(auto i: cells_of_heptagon[h->master]) if(cells[i].generation == 0) {
       auto &ci = cells[i];
       fprintf(f, "%lf %lf %lf\n", double(ci.p[0]), double(ci.p[1]), double(ci.p[2]));
       }
