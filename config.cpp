@@ -366,6 +366,8 @@ void initConfig() {
   addsaver(sightranges[gCubeTiling], "sight-cubes", 7);
   addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
   addsaver(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
+  addsaver(sightranges[gRhombic3], "sight-rhombic", 5.5);
+  addsaver(sightranges[gBitrunc3], "sight-bitrunc", 4.5);
   addsaver(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
 

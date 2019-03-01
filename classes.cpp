@@ -1774,6 +1774,8 @@ vector<geometryinfo> ginf = {
   {"cube",  "none",     "3D cube tiling",                             "cube",     6, 4, 0,         gcEuclid,     0x30200, {{7, 5}}, eVariation::pure},
   {"120c",  "none",     "120-cell",                                   "120c",    12, 4, qsSMALLB,  gcSphere,     0x30400, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"e120c", "elliptic", "120-cell (elliptic space)",                  "e120c",   12, 4, qsSMALLBE, gcSphere,     0x30600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"rhombic","none",    "rhombic dodecahedral honeycomb",             "rhombic", 12, 4, 0,         gcEuclid,     0x31000, {{7, 5}}, eVariation::pure},
+  {"bitrunc","none",    "bitruncated cubic honeycomb",                "bitrunc", 14, 3, 0,         gcEuclid,     0x31200, {{7, 5}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

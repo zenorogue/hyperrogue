@@ -3842,9 +3842,13 @@ bool isWall3(cell *c, color_t& wcol) {
 int get_darkval(int d) {
   const int darkval_h[9] = {0,2,2,0,6,6,8,8,0};
   const int darkval_s[12] = {0,1,2,3,4,5,0,1,2,3,4,5};
-  const int darkval_e[6] = {0,4,6,0,4,6};
+  const int darkval_e6[6] = {0,4,6,0,4,6};
+  const int darkval_e12[12] = {0,4,6,0,4,6,0,4,6,0,4,6};
+  const int darkval_e14[14] = {0,0,0,4,6,4,6,0,0,0,6,4,6,4};
   if(sphere) return darkval_s[d];
-  if(euclid) return darkval_e[d];
+  if(euclid && S7 == 6) return darkval_e6[d];
+  if(euclid && S7 == 12) return darkval_e12[d];
+  if(euclid && S7 == 14) return darkval_e14[d];
   return darkval_h[d];
   }
 

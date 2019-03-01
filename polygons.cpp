@@ -1945,85 +1945,7 @@ ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
 
-#if CAP_BT && MAXMDIM >= 4
-void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2, int z2, int flags) {
-  hyperpoint h0 = point3(x0,y0,z0);
-  hyperpoint h1 = point3(x1,y1,z1);
-  hyperpoint h2 = point3(x2,y2,z2);
-  using namespace hyperpoint_vec;
-  hyperpoint h3 = h1 + h2 - h0;
-  bshape(sh, PPR::WALL);
-  ld yy = log(2) / 2;
-  const int STEP=10;
-  auto at = [&] (hyperpoint h) { 
-    hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-    hpcpush(res);
-    };
-  if(flags == 2) {
-    last->flags |= POLY_TRIANGLES;
-    for(int y=0; y<STEP; y++)
-    for(int x=0; x<STEP; x++) {
-      int x1 = x + 1;
-      int y1 = y + 1;
-      at((h0 * (STEP-x -y ) + h1 * x  + h2 * y ) / STEP);
-      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
-      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
-      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
-      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
-      at((h0 * (STEP-x1-y1) + h1 * x1 + h2 * y1) / STEP);
-      }
-    }
-  else {
-    int STP2 = ((flags == 1) ? 2 : 1) * STEP;
-    for(int t=0; t<STP2; t++) at((h0 * (STP2-t) + h1 * t) / STP2);
-    for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h3 * t) / STEP);
-    for(int t=0; t<STEP; t++) at((h3 * (STEP-t) + h2 * t) / STEP);
-    for(int t=0; t<STEP; t++) at((h2 * (STEP-t) + h0 * t) / STEP);
-    at(h0);
-    }
-  }
-#endif
-
-void buildpolys() {
- 
-  symmetriesAt.clear();
-  allshapes.clear();
-  geom3::compute();
-  #if CAP_GP
-  gp::clear_plainshapes();
-  #endif
-  DEBB(DF_INIT, (debugfile,"buildpolys\n"));
-  
-  if(DIM == 3) {
-    if(sphere) SD3 = 3, SD7 = 5;
-    else SD3 = SD7 = 4;
-    }
-  else {
-    SD3 = S3;
-    SD7 = S7;
-    }
-  SD6 = SD3 * 2;
-  S42 = SD7 * SD6;
-  S12 = SD6 * 2;
-  S14 = SD7 * 2;
-  S21 = SD7 * SD3;
-  S28 = SD7 * 4;
-  S36 = SD6 * 6;
-  S84 = S42 * 2;
-
-  // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
-  hpc.clear();
-
-  bshape(shMovestar, PPR::MOVESTAR);
-  for(int i=0; i<=8; i++) {
-    hpcpush(xspinpush0(M_PI * i/4, crossf));
-    if(i != 8) hpcpush(xspinpush0(M_PI * i/4 + M_PI/8, crossf/4));
-    }
-  
-  // procedural floors
-  
-  int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;
-  
+void make_sidewalls() {
   // sidewall parameters for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
     double dlow=1, dhi=1;
@@ -2041,7 +1963,17 @@ void buildpolys() {
     bshape(shSemiFloorSide[k], PPR::LAKEWALL);
     for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, floorrad0) * C0);
     chasmifyPoly(dlow, dhi, k);
+    }  
+  }
+
+void procedural_shapes() {
+  bshape(shMovestar, PPR::MOVESTAR);
+  for(int i=0; i<=8; i++) {
+    hpcpush(xspinpush0(M_PI * i/4, crossf));
+    if(i != 8) hpcpush(xspinpush0(M_PI * i/4 + M_PI/8, crossf/4));
     }
+  
+  // procedural floors
   
   bshape(shBarrel, PPR::FLOOR);
   for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.5) * C0);
@@ -2128,6 +2060,7 @@ void buildpolys() {
       }
     
     bshape(shWall[1], PPR::WALL);
+    int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;  
     if(S7 == 6 || S7 == 4) {
       for(int t=0; t<=S6; t++) {
         hpcpush(ddi(S7 + t*S14, floorrad1) * C0);
@@ -2364,8 +2297,144 @@ void buildpolys() {
     hpc.push_back(hpc[last->s]);
     }
   
-  // hand-drawn shapes
+  bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
+  }
+
+#if CAP_BT && MAXMDIM >= 4
+void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2, int z2, int flags) {
+  hyperpoint h0 = point3(x0,y0,z0);
+  hyperpoint h1 = point3(x1,y1,z1);
+  hyperpoint h2 = point3(x2,y2,z2);
+  using namespace hyperpoint_vec;
+  hyperpoint h3 = h1 + h2 - h0;
+  bshape(sh, PPR::WALL);
+  ld yy = log(2) / 2;
+  const int STEP=10;
+  auto at = [&] (hyperpoint h) { 
+    hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+    hpcpush(res);
+    };
+  if(flags == 2) {
+    last->flags |= POLY_TRIANGLES;
+    for(int y=0; y<STEP; y++)
+    for(int x=0; x<STEP; x++) {
+      int x1 = x + 1;
+      int y1 = y + 1;
+      at((h0 * (STEP-x -y ) + h1 * x  + h2 * y ) / STEP);
+      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
+      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
+      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
+      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
+      at((h0 * (STEP-x1-y1) + h1 * x1 + h2 * y1) / STEP);
+      }
+    }
+  else {
+    int STP2 = ((flags == 1) ? 2 : 1) * STEP;
+    for(int t=0; t<STP2; t++) at((h0 * (STP2-t) + h1 * t) / STP2);
+    for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h3 * t) / STEP);
+    for(int t=0; t<STEP; t++) at((h3 * (STEP-t) + h2 * t) / STEP);
+    for(int t=0; t<STEP; t++) at((h2 * (STEP-t) + h0 * t) / STEP);
+    at(h0);
+    }
+  }
+
+void create_wall3d() {
+  shWall3D.resize(S7);
+  if(DIM == 3 && binarytiling) {
+    make_wall(shWall3D[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
+    make_wall(shWall3D[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
+    make_wall(shWall3D[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
+    make_wall(shWall3D[3], 0,0,-1, +1,0,-1, 0,+1,-1, 2);
+    make_wall(shWall3D[4], -1,-1,-1, -1,1,-1, -1,-1,+1, 1);
+    make_wall(shWall3D[5], +1,-1,-1, +1,1,-1, +1,-1,+1, 1);
+    make_wall(shWall3D[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
+    make_wall(shWall3D[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
+    make_wall(shWall3D[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
+    }
   
+  if(DIM == 3 && euclid && S7 == 6) {
+    for(int w=0; w<6; w++) {
+      bshape(shWall3D[w], PPR::WALL);
+      for(int a=0; a<=4; a++) {
+        int t[3];
+        t[0] = (w>=3) ? -1 : 1;
+        t[1] = among(a, 0, 3, 4) ? -1 : 1;
+        t[2] = among(a, 2, 3) ? -1 : 1;
+        int x = w%3;
+        int y = (x+2)%3;
+        int z = (y+2)%3;
+        hpcpush(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
+        }
+      }
+    }
+
+  if(DIM == 3 && euclid && S7 == 12) {
+    using namespace hyperpoint_vec;
+    auto v = euclid3::get_shifttable();
+    for(int w=0; w<12; w++) {
+      vector<int> valid;
+      for(int c=0; c<3; c++) if(euclid3::getcoord(v[w], c)) valid.push_back(c);
+      int third = 3 - valid[1] - valid[0];
+      bshape(shWall3D[w], PPR::WALL); 
+      hyperpoint v0 = cpush0(valid[0], euclid3::getcoord(v[w], valid[0]) > 0 ? 1 : -1);
+      hyperpoint v1 = cpush0(valid[1], euclid3::getcoord(v[w], valid[1]) > 0 ? 1 : -1);
+      hpcpush(v0);
+      hpcpush(v0/2 + v1/2 + cpush0(third, .5) - C0);
+      hpcpush(v1);
+      hpcpush(v0/2 + v1/2 + cpush0(third, -.5) - C0);
+      hpcpush(v0);
+      }
+    }
+
+  if(DIM == 3 && euclid && S7 == 14) {
+    using namespace hyperpoint_vec;
+    auto v = euclid3::get_shifttable();
+    for(int w=0; w<14; w++) {
+      bshape(shWall3D[w], PPR::WALL);
+      if(w%7 < 3) {
+        int z = w>=7?-1:1;
+        hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
+        hpcpush(cpush0(w%7, z) + cpush0((w%7+2)%3, 1/2.) - C0);
+        hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3,-1/2.) - C0);
+        hpcpush(cpush0(w%7, z) + cpush0((w%7+2)%3,-1/2.) - C0);
+        hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
+        }
+      else {
+        ld x = euclid3::getcoord(v[w], 0), y = euclid3::getcoord(v[w], 1), z = euclid3::getcoord(v[w], 2);
+        hpcpush(hpxy3(x, y/2, 0));
+        hpcpush(hpxy3(x/2, y, 0));
+        hpcpush(hpxy3(0, y, z/2));
+        hpcpush(hpxy3(0, y/2, z));
+        hpcpush(hpxy3(x/2, 0, z));
+        hpcpush(hpxy3(x, 0, z/2));
+        hpcpush(hpxy3(x, y/2, 0));
+        }
+      }
+    }
+  
+  if(DIM == 3 && sphere) {
+    sphere3::gen600();
+    for(int w=0; w<12; w++) {
+      bshape(shWall3D[w], PPR::WALL);
+      for(int a=0; a<=5; a++) 
+        hpcpush(sphere3::dodefaces[w*5+a%5]);
+      }
+    }
+  
+  if(DIM == 3) {
+    shMiniWall3D.resize(isize(shWall3D));
+    for(int i=0; i<isize(shWall3D); i++) {
+      bshape(shMiniWall3D[i], PPR::WALL);
+      for(int a=shWall3D[i].s; a < shWall3D[i].e; a++)
+        hpcpush(mid(C0, hpc[a]));
+      if(shWall3D[i].flags & POLY_TRIANGLES)
+        last->flags |= POLY_TRIANGLES;
+      }
+    }  
+  }
+#endif
+
+void configure_floorshapes() {
   if(0);
   #if CAP_ARCM
   else if(archimedean)
@@ -2418,7 +2487,50 @@ void buildpolys() {
   shMFloor3.prio = PPR::FLOOR_DRAGON;
   shMFloor4.prio = PPR::FLOOR_DRAGON;
   for(int i=0; i<3; i++) shRedRockFloor[i].scale = .9 - .1 * i;
-  generate_floorshapes();
+  generate_floorshapes();  
+  }
+
+void buildpolys() {
+ 
+  symmetriesAt.clear();
+  allshapes.clear();
+  geom3::compute();
+  #if CAP_GP
+  gp::clear_plainshapes();
+  #endif
+  DEBB(DF_INIT, (debugfile,"buildpolys\n"));
+  
+  if(DIM == 3) {
+    if(sphere) SD3 = 3, SD7 = 5;
+    else SD3 = SD7 = 4;
+    }
+  else {
+    SD3 = S3;
+    SD7 = S7;
+    }
+  SD6 = SD3 * 2;
+  S42 = SD7 * SD6;
+  S12 = SD6 * 2;
+  S14 = SD7 * 2;
+  S21 = SD7 * SD3;
+  S28 = SD7 * 4;
+  S36 = SD6 * 6;
+  S84 = S42 * 2;
+
+  // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
+  hpc.clear();
+  
+  make_sidewalls();
+  
+  procedural_shapes();
+
+  #if MAXMDIM >= 4
+  create_wall3d();
+  #endif
+  
+  configure_floorshapes();
+  
+  // hand-drawn shapes
   
   bshape(shHalfFloor[0], PPR::FLOOR, scalefactor, 329);
   bshape(shHalfFloor[1], PPR::FLOOR, scalefactor, 327);
@@ -2448,8 +2560,6 @@ void buildpolys() {
   bshape(shPalaceGate, PPR::STRUCT1, scalefactor, 47);
   bshape(shSemiFeatherFloor[0], PPR::FLOOR,  scalefactor, 48);
   bshape(shSemiFeatherFloor[1], PPR::FLOOR,  scalefactor, 49);
-
-  bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
 
   bshape(shZebra[0], PPR::FLOOR,  scalefactor, 162);
   bshape(shZebra[1], PPR::FLOOR,  scalefactor, 163);
@@ -2520,56 +2630,6 @@ void buildpolys() {
   bshape(shDragonTail, PPR::TENTACLE1, scalefactor, 240); //239 alt
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor, 242);
-  
-  if(DIM == 3 && binarytiling) {
-    shWall3D.resize(9);
-    make_wall(shWall3D[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
-    make_wall(shWall3D[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
-    make_wall(shWall3D[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
-    make_wall(shWall3D[3], 0,0,-1, +1,0,-1, 0,+1,-1, 2);
-    make_wall(shWall3D[4], -1,-1,-1, -1,1,-1, -1,-1,+1, 1);
-    make_wall(shWall3D[5], +1,-1,-1, +1,1,-1, +1,-1,+1, 1);
-    make_wall(shWall3D[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
-    make_wall(shWall3D[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
-    make_wall(shWall3D[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
-    }
-  
-  if(DIM == 3 && euclid) {
-    shWall3D.resize(6);
-    for(int w=0; w<6; w++) {
-      bshape(shWall3D[w], PPR::WALL);
-      for(int a=0; a<=4; a++) {
-        int t[3];
-        t[0] = (w>=3) ? -1 : 1;
-        t[1] = among(a, 0, 3, 4) ? -1 : 1;
-        t[2] = among(a, 2, 3) ? -1 : 1;
-        int x = w%3;
-        int y = (x+2)%3;
-        int z = (y+2)%3;
-        hpcpush(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
-        }
-      }
-    }
-  
-  if(DIM == 3 && sphere) {
-    shWall3D.resize(12);
-    for(int w=0; w<12; w++) {
-      bshape(shWall3D[w], PPR::WALL);
-      for(int a=0; a<=5; a++) 
-        hpcpush(sphere3::dodefaces[w*5+a%5]);
-      }
-    }
-  
-  if(DIM == 3) {
-    shMiniWall3D.resize(isize(shWall3D));
-    for(int i=0; i<isize(shWall3D); i++) {
-      bshape(shMiniWall3D[i], PPR::WALL);
-      for(int a=shWall3D[i].s; a < shWall3D[i].e; a++)
-        hpcpush(mid(C0, hpc[a]));
-      if(shWall3D[i].flags & POLY_TRIANGLES)
-        last->flags |= POLY_TRIANGLES;
-      }
-    }
   
   ld krsc = 1;
   if(sphere) krsc *= 1.4;

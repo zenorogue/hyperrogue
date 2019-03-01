@@ -475,10 +475,47 @@ namespace euclid3 {
   
   int getcoord(coord x, int a);
 
+  vector<coord> get_shifttable() {
+    static const coord D0 = 1;
+    static const coord D1 = COORDMAX;
+    static const coord D2 = COORDMAX * COORDMAX;
+    vector<coord> shifttable;
+    vector<transmatrix> tmatrix;
+    switch(geometry) {
+      case gCubeTiling:
+        shifttable = { +D0, +D1, +D2 };
+        break;
+      
+      case gRhombic3:
+        shifttable = { D0+D1, D0+D2, D1+D2, D1-D2, D0-D2, D0-D1 };
+        break;
+      
+      case gBitrunc3:
+        shifttable = { 2*D0, 2*D1, 2*D2, D0+D1+D2, D0+D1-D2, D0-D1-D2, D0-D1+D2 };
+        break;
+      
+      default:
+        printf("euclid3::get_shifttable() called in geometry that is not euclid3");
+        exit(1);
+      }
+    
+    // reverse everything
+    int s = isize(shifttable);
+    for(int i=0; i<s; i++) shifttable.push_back(-shifttable[i]);
+    return shifttable;
+    }
+  
   struct hrmap_euclid3 : hrmap {
+    vector<coord> shifttable;
+    vector<transmatrix> tmatrix;
     map<coord, heptagon*> spacemap;
     map<heptagon*, coord> ispacemap;
     hrmap_euclid3() {
+      shifttable = get_shifttable();
+      tmatrix.resize(S7);
+      for(int i=0; i<S7; i++) tmatrix[i] = Id;
+      for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
+        tmatrix[i][j][DIM] = getcoord(shifttable[i], j);
       getOrigin();
       }
     heptagon *getOrigin() {
@@ -489,11 +526,14 @@ namespace euclid3 {
       if(spacemap.count(at)) 
         return spacemap[at];
       else {
-        auto h = tailored_alloc<heptagon> (6);
-        h->c7 = newCell(6, h);
+        auto h = tailored_alloc<heptagon> (S7);
+        h->c7 = newCell(S7, h);
         h->distance = 0;
         h->cdata = NULL;
-        h->zebraval = gmod(getcoord(at, 0) + getcoord(at, 1) * 2 + getcoord(at, 2) * 4, 5);
+        if(S7 != 14)
+          h->zebraval = gmod(getcoord(at, 0) + getcoord(at, 1) * 2 + getcoord(at, 2) * 4, 5);
+        else 
+          h->zebraval = getcoord(at, 0) & 1;
         spacemap[at] = h;
         ispacemap[h] = at;
         return h;
@@ -502,14 +542,12 @@ namespace euclid3 {
     
     heptagon *build(heptagon *parent, int d, coord at) {
       auto h = get_at(at);
-      h->c.connect((d+3)%6, parent, d, false);
+      h->c.connect((d+S7/2)%S7, parent, d, false);
       return h;
       }
   
     heptagon *createStep(heptagon *parent, int d) {
-      coord at = ispacemap[parent];
-      const coord shifttable[6] = { +1, +COORDMAX, +COORDMAX*COORDMAX, -1, -COORDMAX, -COORDMAX*COORDMAX };
-      return build(parent, d, at + shifttable[d]);
+      return build(parent, d, ispacemap[parent] + shifttable[d]);
       }
     };
   
@@ -541,27 +579,30 @@ namespace euclid3 {
 
   int dist_alt(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
-    return getcoord(co, 2);
+    if(S7 == 6) return getcoord(co, 2);
+    else if(S7 == 12) return (getcoord(co, 0) + getcoord(co, 1) + getcoord(co, 2)) / 2;
+    else return getcoord(co, 2)/2;
     }
 
   void draw() {
     dq::visited.clear();
     dq::enqueue(viewctr.at, cview());
+    auto cm = cubemap();
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
       heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
+      transmatrix V = get<1>(p);      
       dynamicval<ld> b(band_shift, get<2>(p));
       bandfixer bf(V);
       dq::drawqueue.pop();
-            
+      
       cell *c = h->c7;
       if(!do_draw(c, V)) continue;
       drawcell(c, V, 0, false);
 
-      for(int i=0; i<6; i++)
-        dq::enqueue(h->move(i), V * cpush(i%3, (i>=3) ? -1 : 1));
+      for(int i=0; i<S7; i++)
+        dq::enqueue(h->move(i), V * cm->tmatrix[i]);
       }
     }
   
@@ -574,7 +615,29 @@ namespace euclid3 {
   int celldistance(cell *c1, cell *c2) {
     auto cm = cubemap();
     coord a = cm->ispacemap[c1->master] - cm->ispacemap[c2->master];
-    return abs(getcoord(a, 0)) + abs(getcoord(a, 1)) + abs(getcoord(a, 2));
+    if(S7 == 6) 
+      return abs(getcoord(a, 0)) + abs(getcoord(a, 1)) + abs(getcoord(a, 2));
+    else {
+      vector<int> ar = { getcoord(a,0), getcoord(a,1), getcoord(a,2) };
+      for(int i=0; i<3; i++) ar[i] = abs(ar[i]);
+      sort(ar.begin(), ar.end());
+      int dist = 0;
+      if(S7 == 12) {
+        int d = ar[1] - ar[0]; ar[1] -= d; ar[2] -= d;
+        dist += d;
+        int m = min((ar[2] - ar[0]) / 2, ar[0]);
+        dist += 2 * d;
+        ar[0] -= m; ar[1] -= m; ar[2] -= m;
+        if(ar[0])
+          dist += (ar[0] + ar[1] + ar[2]) / 2;
+        else
+          dist += ar[2];
+        }
+      else {
+        dist = ar[0] + (ar[1] - ar[0]) / 2 + (ar[2] - ar[0]) / 2;
+        }
+      return dist;
+      }
     }
 
   }

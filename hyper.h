@@ -185,7 +185,7 @@ typedef complex<ld> cld;
 #if MAXMDIM == 3
 #define DIM 2
 #else
-#define DIM ((geometry == gBinary3 || geometry == gCubeTiling || geometry == gCell120 || geometry == gECell120) ? 3 : 2)
+#define DIM ((geometry >= gBinary3) ? 3 : 2)
 #endif
 #define MDIM (DIM+1)
 
