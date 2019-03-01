@@ -534,7 +534,7 @@ namespace euclid3 {
     return true;
     }
 
-  bool dist_alt(cell *c) {
+  int dist_alt(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
     return getcoord(co, 2);
     }
