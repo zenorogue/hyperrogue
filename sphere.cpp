@@ -205,7 +205,7 @@ void gen600() {
   
   ld phi = (1 + sqrt(5)) / 2;
   
-  array<ld, 4> coo = {1, phi, 1/phi, 0};
+  array<ld, 4> coo = make_array<ld>(1, phi, 1/phi, 0);
   
   // all permutations
   array<int, 4> tab;
@@ -258,7 +258,7 @@ void gen600() {
     for(int j=0; j<120; j++) if(inedge[i][j])
     for(int k=0; k<120; k++) if(inedge[i][k] && inedge[k][j])
     for(int l=0; l<120; l++) if(inedge[i][l] && inedge[j][l] && inedge[k][l]) {
-      array<int, 4> ijkl = {i, j, k, l};
+      array<int, 4> ijkl = make_array(i, j, k, l);
       transmatrix T;
       for(int z=0; z<4; z++) set_column(T, z, vertices120[ijkl[z]]);
       if(det(T) > 0) js[i] = ijkl;

@@ -3589,6 +3589,7 @@ string helptitle(string s, color_t col);
 pair<int, int> cell_to_pair(cell *c);
 extern bool nohud, nofps, nomap;
 
+template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0] = a; x[1] = b; x[2] = c; x[3] = d; return x; }
 template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
 
@@ -3838,9 +3839,9 @@ namespace glhr {
   
   inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
     #if SHDIM == 3
-    return glvertex({x,y,z});
+    return make_array(x, y, z);
     #else
-    return glvertex({x,y,z,1});
+    return make_array<GLfloat>(x, y, z, 1);
     #endif
     }
   
