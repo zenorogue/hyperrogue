@@ -473,6 +473,8 @@ namespace euclid3 {
   
   static const long long COORDMAX = (1<<16);
   
+  int getcoord(coord x, int a);
+
   struct hrmap_euclid3 : hrmap {
     map<coord, heptagon*> spacemap;
     map<heptagon*, coord> ispacemap;
@@ -491,6 +493,7 @@ namespace euclid3 {
         h->c7 = newCell(6, h);
         h->distance = 0;
         h->cdata = NULL;
+        h->zebraval = gmod(getcoord(at, 0) + getcoord(at, 1) * 2 + getcoord(at, 2) * 4, 5);
         spacemap[at] = h;
         ispacemap[h] = at;
         return h;

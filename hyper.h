@@ -1518,7 +1518,7 @@ bool bearsCamelot(eLand l);
 extern bool safety;
 
 #define SAGEMELT .1
-#define TEMPLE_EACH (DIM == 3 ? 2 : 6)
+#define TEMPLE_EACH ((DIM == 3 && hyperbolic) ? 2 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15

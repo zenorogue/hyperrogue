@@ -1343,7 +1343,7 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if(binarytiling && DIM == 3) {
+        if(DIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;
           }
         else if(weirdhyperbolic && !BITRUNCATED) {
