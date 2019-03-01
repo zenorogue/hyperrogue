@@ -471,6 +471,8 @@ namespace euclid3 {
 
   typedef long long coord;
   
+  static const long long COORDMAX = (1<<16);
+  
   struct hrmap_euclid3 : hrmap {
     map<coord, heptagon*> spacemap;
     map<heptagon*, coord> ispacemap;
@@ -502,8 +504,8 @@ namespace euclid3 {
       }
   
     heptagon *createStep(heptagon *parent, int d) {
-      int at = ispacemap[parent];
-      coord shifttable[6] = { +1, +1000, +1000000, -1, -1000, -1000000 };
+      coord at = ispacemap[parent];
+      const coord shifttable[6] = { +1, +COORDMAX, +COORDMAX*COORDMAX, -1, -COORDMAX, -COORDMAX*COORDMAX };
       return build(parent, d, at + shifttable[d]);
       }
     };
@@ -521,10 +523,10 @@ namespace euclid3 {
     }
   
   int getcoord(coord x, int a) { 
-    for(int k=0; k<a; k++) { x -= getcoord(x, 0); x /= 1000; }
-    x %= 1000; 
-    if(x>500) x -= 1000; 
-    if(x<-500) x += 1000; 
+    for(int k=0; k<a; k++) { x -= getcoord(x, 0); x /= COORDMAX; }
+    x %= COORDMAX; 
+    if(x>COORDMAX/2) x -= COORDMAX; 
+    if(x<-COORDMAX/2) x += COORDMAX; 
     return x; 
     }
 
