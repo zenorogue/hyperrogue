@@ -499,7 +499,7 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
 
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
 
-  static const transmatrix VL = (DIM == 2 ? V : mmscale(V, geom3::ALEG0));
+  const transmatrix VL = (DIM == 2 ? V : mmscale(V, geom3::ALEG0));
 
   if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
   if(x[0]) queuepolyat(VL * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
