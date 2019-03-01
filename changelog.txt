@@ -2966,3 +2966,13 @@ the interesting (adult) part quickly)
  - formula pattern works in spherical
  - no more Brown generation in PTM Ocean
  - no more mobile compass by default in mobile
+
+2019-03-01 04:30 Version 11.0h:
+- an option to make arrow keys etc. move smoothly (even in the default control system)
+- map editor: editable statues (to be drawn with the graphics editor); z-level can now be set for each layer in the graphics editor
+- fixed racing in {4,4}
+- fixed irregular tilings on quotient spaces; saving non-bitruncated maps
+- fixed minemark help
+- fixed the graphics scaling for wolves, animated legs, and the shmup mode
+- yet more interesting Yendor path in binary tilings
+- a preview of 3D geometries
