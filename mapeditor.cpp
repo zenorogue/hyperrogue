@@ -1923,7 +1923,6 @@ namespace mapeditor {
       if(c == ls)
         textrans = inverse(V * applyPatterndir(ls, sio));
       
-#if CAP_TEXTURE      
       transmatrix mh = textrans * rgpushxto0(mouseh);
       transmatrix ml = textrans * rgpushxto0(lstart);
 

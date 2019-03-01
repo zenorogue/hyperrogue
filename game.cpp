@@ -3544,7 +3544,7 @@ void uncoverMinesFull(cell *c2) {
     items[itBombEgg] < 30 ? 2 :
     3;
   
-  bool nomine = false;
+  bool nomine = !normal_gravity_at(c2);
   if(!nomine && uncoverMines(c2, mineradius, 0, true) && markOrb(itOrbAether))
     nomine = true;
   

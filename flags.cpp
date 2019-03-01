@@ -769,6 +769,4 @@ bool is_mirrorland(cell *c) {
   return among(c->land, laMirror, laMirrorOld);
   }
 
-bool isPushable(eWall w) { return w == waThumperOn; }
-
 }
