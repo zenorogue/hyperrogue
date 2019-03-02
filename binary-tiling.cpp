@@ -80,7 +80,8 @@ namespace binary {
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
     h->distance = parent->distance + delta;
-    h->c7 = newCell(t, h);
+    h->c7 = NULL;
+    if(parent->c7) h->c7 = newCell(t, h);
     h->cdata = NULL;
     h->zebraval = side;
     #if DEBUG_BINARY_TILING
@@ -402,6 +403,38 @@ int celldistance3(heptagon *c1, heptagon *c2) {
 
 int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
 #endif
+
+void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
+
+  while(true) {
+  
+    double currz = at[DIM][DIM];
+    
+    heptagon *h = base;
+    
+    heptagon *newbase = NULL;
+    
+    transmatrix bestV;
+    
+    for(int d=0; d<S7; d++) {
+      transmatrix V2 = itmatrix(h, d) * at;
+      double newz = V2[DIM][DIM];
+      if(newz < currz) {
+        currz = newz;
+        bestV = V2;
+        newbase = h->cmove(d);
+        }
+      }
+
+    if(newbase) {
+      base = newbase;
+      at = bestV;
+      continue;
+      }
+
+    return;
+    }
+  }
 
 
   }
