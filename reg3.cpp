@@ -171,7 +171,6 @@ namespace reg3 {
       h.alt = NULL;
       h.distance = 0;
       h.c7 = newCell(S7, origin);
-      sightranges[geometry] = 3;
       
       dynamicval<hrmap*> cr(currentmap, this);
       
