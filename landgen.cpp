@@ -415,6 +415,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(fulltorus) {
           c->wall = waCavefloor;
           }
+        else if(euclid && DIM == 3)
+          c->wall = euclid3::get_emerald(c) ? waCavewall : waCavefloor;
         else if(euclid) {
           int x, y;
           tie(x,y) = cell_to_pair(c);
