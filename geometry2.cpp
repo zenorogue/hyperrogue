@@ -380,7 +380,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
-    double currz = at[2][2];
+    double currz = at[DIM][DIM];
     
     heptagon *h = base;
     
@@ -392,7 +392,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d] * at;
-      double newz = V2[2][2];
+      double newz = V2[DIM][DIM];
       if(newz < currz) {
         currz = newz;
         bestV = V2;
