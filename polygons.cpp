@@ -2372,12 +2372,13 @@ void create_wall3d() {
     using namespace hyperpoint_vec;
     auto v = euclid3::get_shifttable();
     for(int w=0; w<12; w++) {
+      auto co = euclid3::getcoord(v[w]);
       vector<int> valid;
-      for(int c=0; c<3; c++) if(euclid3::getcoord(v[w], c)) valid.push_back(c);
+      for(int c=0; c<3; c++) if(co[c]) valid.push_back(c);
       int third = 3 - valid[1] - valid[0];
       bshape(shWall3D[w], PPR::WALL); 
-      hyperpoint v0 = cpush0(valid[0], euclid3::getcoord(v[w], valid[0]) > 0 ? 1 : -1);
-      hyperpoint v1 = cpush0(valid[1], euclid3::getcoord(v[w], valid[1]) > 0 ? 1 : -1);
+      hyperpoint v0 = cpush0(valid[0], co[valid[0]] > 0 ? 1 : -1);
+      hyperpoint v1 = cpush0(valid[1], co[valid[1]] > 0 ? 1 : -1);
       hpcpush(v0);
       hpcpush(v0/2 + v1/2 + cpush0(third, .5) - C0);
       hpcpush(v1);
@@ -2400,7 +2401,8 @@ void create_wall3d() {
         hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
         }
       else {
-        ld x = euclid3::getcoord(v[w], 0), y = euclid3::getcoord(v[w], 1), z = euclid3::getcoord(v[w], 2);
+        auto t = euclid3::getcoord(v[w]);
+        ld x = t[0], y = t[1], z = t[2];
         hpcpush(hpxy3(x, y/2, 0));
         hpcpush(hpxy3(x/2, y, 0));
         hpcpush(hpxy3(0, y, z/2));

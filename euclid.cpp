@@ -473,7 +473,18 @@ namespace euclid3 {
   
   static const long long COORDMAX = (1<<16);
   
-  int getcoord(coord x, int a);
+  array<int, 3> getcoord(coord x) {
+    array<int, 3> res;
+    for(int k=0; k<3; k++) {
+      int next = x % COORDMAX;
+      if(next>COORDMAX/2) next -= COORDMAX; 
+      if(next<-COORDMAX/2) next += COORDMAX; 
+      res[k] = next;
+      x -= next;
+      x /= COORDMAX;
+      }
+    return res; 
+    }
 
   vector<coord> get_shifttable() {
     static const coord D0 = 1;
@@ -515,7 +526,7 @@ namespace euclid3 {
       tmatrix.resize(S7);
       for(int i=0; i<S7; i++) tmatrix[i] = Id;
       for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
-        tmatrix[i][j][DIM] = getcoord(shifttable[i], j);
+        tmatrix[i][j][DIM] = getcoord(shifttable[i])[j];
       getOrigin();
       }
     heptagon *getOrigin() {
@@ -530,10 +541,11 @@ namespace euclid3 {
         h->c7 = newCell(S7, h);
         h->distance = 0;
         h->cdata = NULL;
+        auto co = getcoord(at);
         if(S7 != 14)
-          h->zebraval = gmod(getcoord(at, 0) + getcoord(at, 1) * 2 + getcoord(at, 2) * 4, 5);
+          h->zebraval = gmod(co[0] + co[1] * 2 + co[2] * 4, 5);
         else 
-          h->zebraval = getcoord(at, 0) & 1;
+          h->zebraval = co[0] & 1;
         spacemap[at] = h;
         ispacemap[h] = at;
         return h;
@@ -563,25 +575,24 @@ namespace euclid3 {
     return cubemap()->createStep(parent, d);
     }
   
-  int getcoord(coord x, int a) { 
-    for(int k=0; k<a; k++) { x -= getcoord(x, 0); x /= COORDMAX; }
-    x %= COORDMAX; 
-    if(x>COORDMAX/2) x -= COORDMAX; 
-    if(x<-COORDMAX/2) x += COORDMAX; 
-    return x; 
-    }
-
   bool pseudohept(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
-    for(int i=0; i<3; i++) if(!(getcoord(co, i) & 1)) return false;
+    auto v = getcoord(co);
+    if(S7 == 12) {
+      for(int i=0; i<3; i++) if((v[i] & 1)) return false;
+      }
+    else {
+      for(int i=0; i<3; i++) if(!(v[i] & 1)) return false;
+      }
     return true;
     }
 
   int dist_alt(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
-    if(S7 == 6) return getcoord(co, 2);
-    else if(S7 == 12) return (getcoord(co, 0) + getcoord(co, 1) + getcoord(co, 2)) / 2;
-    else return getcoord(co, 2)/2;
+    auto v = getcoord(co);
+    if(S7 == 6) return v[2];
+    else if(S7 == 12) return (v[0] + v[1] + v[2]) / 2;
+    else return v[2]/2;
     }
 
   void draw() {
@@ -608,33 +619,45 @@ namespace euclid3 {
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
     auto cm = cubemap();
-    coord a = cm->ispacemap[h2] - cm->ispacemap[h1];
-    return eupush3(getcoord(a, 0), getcoord(a, 1), getcoord(a, 2));
+    auto v = getcoord(cm->ispacemap[h2] - cm->ispacemap[h1]);
+    return eupush3(v[0], v[1], v[2]);
+    }
+  
+  bool get_emerald(cell *c) {
+    auto v = getcoord(cubemap()->ispacemap[c->master]);
+    int s0 = 0, s1 = 0;
+    for(int i=0; i<3; i++) {
+      v[i] = gmod(v[i], 6);
+      int d = min(v[i], 6-v[i]);;
+      s0 += min(v[i], 6-v[i]);
+      s1 += 3-d;
+      }
+    if(s0 == s1) println(hlog, "equality");
+    return s0 > s1;
     }
 
   int celldistance(cell *c1, cell *c2) {
     auto cm = cubemap();
-    coord a = cm->ispacemap[c1->master] - cm->ispacemap[c2->master];
+    auto v = getcoord(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]);
     if(S7 == 6) 
-      return abs(getcoord(a, 0)) + abs(getcoord(a, 1)) + abs(getcoord(a, 2));
+      return abs(v[0]) + abs(v[1]) + abs(v[2]);
     else {
-      vector<int> ar = { getcoord(a,0), getcoord(a,1), getcoord(a,2) };
-      for(int i=0; i<3; i++) ar[i] = abs(ar[i]);
-      sort(ar.begin(), ar.end());
+      for(int i=0; i<3; i++) v[i] = abs(v[i]);
+      sort(v.begin(), v.end());
       int dist = 0;
       if(S7 == 12) {
-        int d = ar[1] - ar[0]; ar[1] -= d; ar[2] -= d;
+        int d = v[1] - v[0]; v[1] -= d; v[2] -= d;
         dist += d;
-        int m = min((ar[2] - ar[0]) / 2, ar[0]);
+        int m = min((v[2] - v[0]) / 2, v[0]);
         dist += 2 * d;
-        ar[0] -= m; ar[1] -= m; ar[2] -= m;
-        if(ar[0])
-          dist += (ar[0] + ar[1] + ar[2]) / 2;
+        v[0] -= m; v[1] -= m; v[2] -= m;
+        if(v[0])
+          dist += (v[0] + v[1] + v[2]) / 2;
         else
-          dist += ar[2];
+          dist += v[2];
         }
       else {
-        dist = ar[0] + (ar[1] - ar[0]) / 2 + (ar[2] - ar[0]) / 2;
+        dist = v[0] + (v[1] - v[0]) / 2 + (v[2] - v[0]) / 2;
         }
       return dist;
       }
