@@ -449,6 +449,10 @@ int getHemisphere(heptagon *h, int which) {
 
 int getHemisphere(cell *c, int which) {
   if(euwrap) return 0;
+  if(DIM == 3) {
+    ld z = sphere3::vertices120[c->master->zebraval][which];
+    return int(z * 6  + 10.5) - 10;
+    }
   if(which == 0 && GOLDBERG && has_nice_dual()) {
     set<cell*> visited;
     vector<cell*> q;

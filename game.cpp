@@ -3337,6 +3337,8 @@ bool makeEmpty(cell *c) {
     c->wall = waBoat;
   else if(c->wall == waFreshGrave && bounded)
     ;
+  else if(c->wall == waBarrier && sphere && DIM == 3)
+    ;
   else if(isReptile(c->wall))
     c->wparam = reptilemax();
   else if(c->wall == waAncientGrave && bounded)
