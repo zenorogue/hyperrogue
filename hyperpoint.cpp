@@ -588,8 +588,10 @@ double hdist(const hyperpoint& h1, const hyperpoint& h2) {
   ld iv = intval(h1, h2);
   switch(cgclass) {
     case gcEuclid:
+      if(iv < 0) return 0;
       return sqrt(iv);
     case gcHyperbolic:
+      if(iv < 0) return 0;
       return 2 * asinh(sqrt(iv) / 2);
     case gcSphere:
       return 2 * asin_auto_clamp(sqrt(iv) / 2);
