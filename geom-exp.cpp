@@ -383,7 +383,15 @@ vector<eGeometry> quotientlist = {
   };
 
 vector<eGeometry> list3d = {
-  gBinary3, gCubeTiling, gRhombic3, gBitrunc3, gCell120, gECell120
+  gBinary3,
+  gSpace534, gSpace435, 
+  gCubeTiling, gRhombic3, gBitrunc3, 
+  gCell120, gECell120,
+  gCell600, gECell600,
+  gCell24, gECell24,
+  gCell16, gECell16,
+  gCell8, gECell8,
+  gCell5
   };
 
 void ge_select_tiling(const vector<eGeometry>& lst) {

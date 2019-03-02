@@ -35,6 +35,7 @@
 #include "sphere.cpp"
 #include "quotient.cpp"
 #include "crystal.cpp"
+#include "reg3.cpp"
 #include "language.cpp"
 #include "cell.cpp"
 #include "expansion.cpp"

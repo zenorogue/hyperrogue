@@ -2414,12 +2414,13 @@ void create_wall3d() {
       }
     }
   
-  if(DIM == 3 && sphere) {
-    sphere3::gen600();
-    for(int w=0; w<12; w++) {
+  if(DIM == 3 && !euclid && !binarytiling) {
+    reg3::generate();
+    int facesize = isize(reg3::cellshape) / S7;
+    for(int w=0; w<S7; w++) {
       bshape(shWall3D[w], PPR::WALL);
-      for(int a=0; a<=5; a++) 
-        hpcpush(sphere3::dodefaces[w*5+a%5]);
+      for(int a=0; a<=facesize; a++) 
+        hpcpush(reg3::cellshape[w*facesize+a%facesize]);
       }
     }
   

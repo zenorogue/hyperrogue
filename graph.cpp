@@ -3842,16 +3842,19 @@ bool isWall3(cell *c, color_t& wcol) {
 
 // how much should be the d-th wall darkened in 3D
 int get_darkval(int d) {
-  const int darkval_h[9] = {0,2,2,0,6,6,8,8,0};
-  const int darkval_s[12] = {0,1,2,3,4,5,0,1,2,3,4,5};
+  const int darkval_hbt[9] = {0,2,2,0,6,6,8,8,0};
+  const int darkval_s12[12] = {0,1,2,3,4,5,0,1,2,3,4,5};
   const int darkval_e6[6] = {0,4,6,0,4,6};
   const int darkval_e12[12] = {0,4,6,0,4,6,0,4,6,0,4,6};
   const int darkval_e14[14] = {0,0,0,4,6,4,6,0,0,0,6,4,6,4};
-  if(sphere) return darkval_s[d];
+  if(sphere) return darkval_s12[d];
   if(euclid && S7 == 6) return darkval_e6[d];
   if(euclid && S7 == 12) return darkval_e12[d];
   if(euclid && S7 == 14) return darkval_e14[d];
-  return darkval_h[d];
+  if(binarytiling) return darkval_hbt[d];
+  if(hyperbolic && S7 == 6) return darkval_e6[d];
+  if(hyperbolic && S7 == 12) return darkval_s12[d];
+  return 0;
   }
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
@@ -4689,7 +4692,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(a < 4 && hyperbolic) {
+              if(a < 4 && binarytiling) {
                 if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 }
@@ -5245,8 +5248,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(DIM == 3) {
         for(int t=0; t<c->type; t++) {
           if(!c->move(t)) continue;
-          if(hyperbolic && !among(t, 5, 6, 8)) continue;
-          if(!hyperbolic && c->move(t) < c) continue;
+          if(binarytiling && !among(t, 5, 6, 8)) continue;
+          if(!binarytiling && c->move(t) < c) continue;
           queuepoly(V, shWall3D[t], 0);
           }
         }
@@ -5872,8 +5875,8 @@ void drawthemap() {
   #if MAXMDIM == 4
   else if(euclid && DIM == 3)
     euclid3::draw();
-  else if(sphere && DIM == 3)
-    sphere3::draw();
+  else if(DIM == 3)
+    reg3::draw();
   #endif
   else
     drawStandard();

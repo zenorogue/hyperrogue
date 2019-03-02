@@ -88,7 +88,7 @@ void precalc() {
     goto finish;
     }
   
-  if(sphere && DIM == 3) {
+  if((sphere || hyperbolic) && DIM == 3 && !binarytiling) {
     rhexf = hexf = 0.378077;
     crossf = hcrossf = 0.620672;
     tessf = 1.090550;

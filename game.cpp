@@ -134,7 +134,7 @@ vector<int> reachedfrom;
 // it remembers from where we have got to this location
 // the opposite cell will be added to the queue first,
 // which helps the AI
-vector<cell*> movesofgood[8];
+vector<cell*> movesofgood[MAX_EDGE+1];
 
 int first7;           // the position of the first monster at distance 7 in dcal
 
@@ -5119,7 +5119,7 @@ void moveshadow() {
 void moveghosts() {
 
   if(invismove) return;
-  for(int d=0; d<8; d++) movesofgood[d].clear();  
+  for(int d=0; d<=MAX_EDGE; d++) movesofgood[d].clear();  
 
   for(int i=0; i<isize(ghosts); i++) {
     cell *c = ghosts[i];
@@ -5137,7 +5137,7 @@ void moveghosts() {
       }
     }
   
-  for(int d=0; d<8; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
+  for(int d=0; d<=MAX_EDGE; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
     cell *c = movesofgood[d][i];
     if(c->stuntime) return;
     
@@ -6053,7 +6053,7 @@ void consMove(cell *c, eMonster param) {
 void moveNormals(eMonster param) {
   pathdata pd(param);
 
-  for(int d=0; d<8; d++) movesofgood[d].clear();
+  for(int d=0; d<=MAX_EDGE; d++) movesofgood[d].clear();
 
   for(int i=0; i<isize(pathqm); i++) 
     consMove(pathqm[i], param);
@@ -6064,7 +6064,7 @@ void moveNormals(eMonster param) {
     if(c->pathdist == PINFD) consMove(c, param);
     }
 
-  for(int d=0; d<8; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
+  for(int d=0; d<=MAX_EDGE; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
     cell *c = movesofgood[d][i];
     if(normalMover(c->monst)) {
       moveNormal(c, MF_PATHDIST);

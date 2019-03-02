@@ -216,6 +216,12 @@ enum eGeometry {
   gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gArchimedean, 
   gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal, gOctahedron, 
   gBinary3, gCubeTiling, gCell120, gECell120, gRhombic3, gBitrunc3, 
+  gSpace534, gSpace435, 
+  gCell5, 
+  gCell8, gECell8,
+  gCell16, gECell16,
+  gCell24, gECell24,
+  gCell600, gECell600,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };

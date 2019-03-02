@@ -1132,8 +1132,8 @@ void optimizeview() {
       if(binarytiling) T = binary::relative_matrix(h2, viewctr.at);
       #endif
       #if MAXMDIM == 4
-      if(euclid && DIM == 3) T = euclid3::relative_matrix(h2, viewctr.at);
-      if(sphere && DIM == 3) T = sphere3::relative_matrix(h2, viewctr.at);
+      else if(euclid && DIM == 3) T = euclid3::relative_matrix(h2, viewctr.at);
+      else if(DIM == 3) T = reg3::relative_matrix(h2, viewctr.at);
       #endif
       #if CAP_ARCM
       if(archimedean)  T = arcm::relative_matrix(h2, viewctr.at);

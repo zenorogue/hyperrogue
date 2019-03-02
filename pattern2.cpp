@@ -450,8 +450,8 @@ int getHemisphere(heptagon *h, int which) {
 int getHemisphere(cell *c, int which) {
   if(euwrap) return 0;
   if(DIM == 3) {
-    ld z = sphere3::vertices120[c->master->zebraval][which];
-    return int(z * 6  + 10.5) - 10;
+    hyperpoint p = tC0(calc_relative_matrix(c, currentmap->gamestart(), C0));
+    return int(p[which] * 6  + 10.5) - 10;
     }
   if(which == 0 && GOLDBERG && has_nice_dual()) {
     set<cell*> visited;
@@ -765,7 +765,7 @@ namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(IRREGULAR || archimedean || binarytiling) si.symmetries = 1;
+    if(IRREGULAR || archimedean || binarytiling || DIM == 3) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
@@ -1297,7 +1297,7 @@ bool pseudohept(cell *c) {
   #if MAXMDIM == 4
   if(DIM == 3) {
     if(euclid) return euclid3::pseudohept(c);
-    if(sphere) return sphere3::pseudohept(c);
+    else return reg3::pseudohept(c);
     }
   #endif
   #if CAP_ARCM

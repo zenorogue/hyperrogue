@@ -96,7 +96,7 @@ void addMessage(string s, char spamtype = 0);
 
 #define binarytiling (geometry == gBinaryTiling || geometry == gBinary3)
 #define archimedean (geometry == gArchimedean)
-#define eubinary (euclid || binarytiling || geometry == gCrystal)
+#define eubinary (euclid || binarytiling || geometry == gCrystal || (DIM == 3 && hyperbolic))
 
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
@@ -1518,7 +1518,7 @@ bool bearsCamelot(eLand l);
 extern bool safety;
 
 #define SAGEMELT .1
-#define TEMPLE_EACH ((DIM == 3 && hyperbolic) ? 2 : 6)
+#define TEMPLE_EACH ((DIM == 3 && binarytiling) ? 2 : (DIM == 3 && hyperbolic) ? 3 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
@@ -4257,6 +4257,7 @@ namespace binary {
   transmatrix parabolic(ld u);
   transmatrix parabolic3(ld u, ld v);
   extern ld btrange, btrange_cosh;
+  transmatrix relative_matrix(heptagon *h2, heptagon *h1);
   }
 #endif
 
@@ -4265,6 +4266,18 @@ namespace euclid3 {
   heptagon *createStep(heptagon *parent, int d);
   hrmap* new_map();
   void draw();
+  }
+
+namespace reg3 {
+  void generate();
+  hrmap* new_map();
+  heptagon *createStep(heptagon *parent, int d);
+  extern vector<hyperpoint> cellshape;
+  void draw();
+  transmatrix relative_matrix(heptagon *h2, heptagon *h1);  
+  int dist_alt(cell *c);
+  int celldistance(cell *c1, cell *c2);
+  bool pseudohept(cell *c);
   }
 #endif
 
