@@ -214,10 +214,21 @@ namespace binary {
     }
   
   const transmatrix& tmatrix(heptagon *h, int dir) {
-    if(dir == 8)
+    if(dir == 8) {
+      h->cmove(8);
       return inverse_tmatrix[h->c.spin(8)];
+      }
     else
       return direct_tmatrix[dir];
+    }
+
+  const transmatrix& itmatrix(heptagon *h, int dir) {
+    if(dir == 8) {
+      h->cmove(8);
+      return h->cmove(8), direct_tmatrix[h->c.spin(8)];
+      }
+    else
+      return inverse_tmatrix[dir];
     }
   
   #if MAXMDIM == 4
@@ -317,7 +328,7 @@ namespace binary {
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
         if(DIM == 3)
-          where = inverse(tmatrix(h2, 8)) * where, h2 = hr::createStep(h2, 8);
+          where = itmatrix(h2, 8) * where, h2 = hr::createStep(h2, 8);
         else {
           if(type_of(h2) == 6)
             h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
