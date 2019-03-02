@@ -399,6 +399,9 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
   gamescreen(0);  
 
   dialog::init(XLAT("experiment with geometry"));
+  
+  if(&lst == &list3d)
+    dialog::addInfo("3D geometries are a work in progress", 0x800000);
 
   char letter = 'a';
   for(eGeometry i: lst) {
