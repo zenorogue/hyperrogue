@@ -3340,13 +3340,15 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     fcol = wcol;
     } */
   
-  int rd = rosedist(c);
-  if(rd == 1) 
-    wcol = gradient(0x804060, wcol, 0,1,3),
-    fcol = gradient(0x804060, fcol, 0,1,3);
-  if(rd == 2) 
-    wcol = gradient(0x804060, wcol, 0,2,3),
-    fcol = gradient(0x804060, fcol, 0,2,3);
+  if(DIM == 2) {
+    int rd = rosedist(c);
+    if(rd == 1) 
+      wcol = gradient(0x804060, wcol, 0,1,3),
+      fcol = gradient(0x804060, fcol, 0,1,3);
+    if(rd == 2) 
+      wcol = gradient(0x804060, wcol, 0,2,3),
+      fcol = gradient(0x804060, fcol, 0,2,3);
+    }
   
   if(items[itRevolver] && !shmup::on) {
     bool inrange = c->mpdist <= GUNRANGE;
@@ -4713,6 +4715,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
         else
           queuepoly(rgpushxto0(tC0(V)), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
+
+        int rd = rosedist(c);
+        if(rd == 1) 
+          queuepoly(rgpushxto0(tC0(V)), shLoveRing, darkena(0x804060, 0, 0xFF));
+        if(rd == 2) 
+          queuepoly(rgpushxto0(tC0(V)), shLoveRing, darkena(0x402030, 0, 0xFF));
         }
       
       else switch(c->wall) {
