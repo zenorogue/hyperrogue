@@ -3834,7 +3834,7 @@ bool isWall3(cell *c, color_t& wcol) {
   if(c->wall == waChasm && c->land == laMemory) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
   // if(chasmgraph(c)) return true;
-  if(among(c->wall, waMirror, waCloud)) return true;
+  if(among(c->wall, waMirror, waCloud, waMineUnknown, waMineMine)) return true;
   return false;
   }
 
@@ -4704,6 +4704,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             drawParticleSpeed(c, wcol, 75 + rand() % 75);
             }
           }
+        else if(c->wall == waMineOpen) {
+          int mines = countMinesAround(c);
+          queuepoly(rgpushxto0(tC0(V)), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
+          }
+
         else if(winf[c->wall].glyph == '.') ;
 
         else
