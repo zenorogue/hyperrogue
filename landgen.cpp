@@ -154,6 +154,7 @@ void place_elemental_wall(cell *c) {
   }
 
 void giantLandSwitch(cell *c, int d, cell *from) {
+  bool fargen = d == min(BARLEV, 9);
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
@@ -212,7 +213,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laPalace: // -------------------------------------------------------------
     
       if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || DIM == 3) {
-        if(d == 9) {
+        if(fargen) {
           int i = hrand(100);
           if(i < 10) 
             c->wall = waPalace;
@@ -467,7 +468,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laDryForest:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? waNone : RANDPATV(laHell) ? waBigTree : waSmallTree;
         else
@@ -641,7 +642,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laReptile:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode) {
           int ch =  hrand(200);
           if(RANDPAT) c->wall = waChasm;
@@ -676,7 +677,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laBurial:
-      if(d == 9) {
+      if(fargen) {
         if(hrand(5000) < 25 && celldist(c) >= 5 && !safety) {
           bool goodland = true;
           cell *c2 = createMov(c, hrand(c->type));
@@ -718,7 +719,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laTrollheim:
-      if(d == 9) {
+      if(fargen) {
         if(hrand(50000) < (chaosmode?1000:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
           bool okay = true;
           forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
@@ -775,6 +776,17 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->wall == waIcewall && items[itDiamond] >= 5 && hrand(200) == 1)
           c->wall = waBonfireOff;
         }
+      if(d == 8 && BARLEV == 8) {
+        if(hrand(100) < 10 && c->wall != waBarrier) {
+          c->wall = waIcewall;
+          for(int i=0; i<c->type; i++) if(hrand(100) < 50) {
+            cell *c2 = createMov(c, i);
+            setdist(c2, d+1, c);
+            if(c2->wall == waBarrier || c2->land != laIce) continue;
+            c2->wall = waIcewall;
+            }
+          }
+        }
       if(d == 8) c->landparam = 0;
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moYeti] + kills[moWolf]), 200) && notDippingFor(itDiamond))
@@ -794,7 +806,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laDragon:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode) {
           if(RANDPAT) c->wall = waChasm;
           }
@@ -857,7 +869,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laCaves:
-      if(d == 9)
+      if(fargen)
         c->wall = (randomPatternsMode ? RANDPAT3(1) : hrand(100) < 55) ? waCavewall : waCavefloor;
       if(d == 7 && c->wall == waCavewall && hrand(5000) < items[itGold] + yendor::hardness() && !safety)
         c->monst = moSeep;
@@ -870,12 +882,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laCA:
-      if(d == 9)
+      if(fargen)
         c->wall = (hrand(1000000) < ca::prob * 1000000) ? waFloorA : waNone;
       break;
     
     case laLivefjord:
-      if(d == 9) {
+      if(fargen) {
         int die = (randomPatternsMode ? (RANDPAT3(2)?100:0) : hrand(100));
         if(die < 50)
           c->wall = waSea;
@@ -914,7 +926,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laDeadCaves:
-      if(d == 9) {
+      if(fargen) {
         int die = (randomPatternsMode ? (RANDPAT?100:0) : hrand(100));
         if(die<50) c->wall = waDeadwall;
         else if(die<55) c->wall = waDeadfloor2;
@@ -945,7 +957,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laAlchemist:
-      if(d == 9) 
+      if(fargen) 
         c->wall = (randomPatternsMode ? RANDPAT : hrand(2)) ? waFloorA : waFloorB;
       ONEMPTY {
         if(hrand(5000) < PT(25 + min(kills[moSlime], 200), 100) && notDippingFor(itElixir))
@@ -957,7 +969,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laVolcano:
       #if CAP_FIELD
-      if(d == 9) {
+      if(fargen) {
         c->wall = waNone;
         if(hrand(20000) < (items[itLavaLily] + yendor::hardness()))
           c->monst = moSalamander,
@@ -976,7 +988,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         
     case laBlizzard:
       #if CAP_FIELD
-      if(d == 9) {
+      if(fargen) {
         bool windless = true;
         int w = windmap::at(c);
         forCellCM(c2, c) {
@@ -1003,7 +1015,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laTerracotta: 
-      if(d == 9) {
+      if(fargen) {
         if(hrand(500) < 15) 
           createArrowTrapAt(c, laTerracotta);
         if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
@@ -1035,7 +1047,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laOvergrown:
-      if(d == 9) {
+      if(fargen) {
         // 0: 60%
         // 10: 50%
         if(randomPatternsMode)
@@ -1073,7 +1085,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laHalloween:
-      if(d == 9) {
+      if(fargen) {
         if(GOLDBERG) {
           int fv = c->master->fiftyval;
           if(fv == 1 || fv == 4 || fv == 10) 
@@ -1120,7 +1132,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laWildWest:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? waNone : waSaloon;
         else if(hyperbolic_37 ? cdist50(c) <= 2 : hrand(100) < 20) c->wall = waSaloon;
@@ -1135,7 +1147,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laWestWall:
       #if CAP_COMPLEX2
-      if(d == 9)
+      if(fargen)
         westwall::switchTreasure(c);
       ONEMPTY {
         if(hrand(6000) < 5 + items[itWest] + yendor::hardness())
@@ -1145,7 +1157,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laWhirlwind:
-      if(d == 9) {
+      if(fargen) {
         if(S7 == 5) 
           c->wall = (pseudohept(c) && (c->master->fiftyval == 0 || c->master->fiftyval == 6)) ?
             waFan : waNone;
@@ -1173,7 +1185,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laStorms: {
       bool randstorm = hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient);
-      if(d == 9) {
+      if(fargen) {
       
         if(fulltorus) {
           int pid = decodeId(c->master);
@@ -1297,7 +1309,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       }
     
     case laGraveyard:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? ((RANDPATV(laCrossroads) || RANDPATV(laCrossroads2)) ? waAncientGrave : waFreshGrave) : waNone;
         else if(pseudohept(c)) 
@@ -1314,7 +1326,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
 
     case laRlyeh:
-      if(d == 9)  {
+      if(fargen)  {
         if(randomPatternsMode) {
           c->wall = RANDPAT ? waColumn : waNone;
           }
@@ -1384,7 +1396,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
 
     case laHell:      
-      if(d == 9) {
+      if(fargen) {
         if(hrand(1000) < (PURE ? 16 : 36) && celldist(c) >= 3) {
           for(int i=0; i<c->type; i++) {
             cell *c2 = createMov(c, i);
@@ -1407,7 +1419,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
 
     case laCocytus:      
-      if(d == 9)  {
+      if(fargen)  {
         if(c->wall == waNone) c->wall = waFrozenLake;
         if(hrand(100) < 5 && !safety && celldist(c) >= 3) {
           for(int i=0; i<c->type; i++) {
@@ -1436,7 +1448,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laHive:
-      if(d == 9) {
+      if(fargen) {
         if(hrand(2000) < (chaosmode ? 1000 : PURE ?200:2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
@@ -1462,7 +1474,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laKraken:
-      if(d == 9) c->wall = waSea;
+      if(fargen) c->wall = waSea;
 
       if(d == 8 && c->land == laKraken && kraken_pseudohept(c) && hrand(1000) <= 2) {
         c->wall = waNone;
@@ -1499,7 +1511,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laCaribbean:
-      if(d == 9) {
+      if(fargen) {
         if(!eubinary) {
           if(c->master->alt && c->master->alt->distance <= 2) {
             if(!eubinary) generateAlts(c->master);
@@ -1555,7 +1567,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laTortoise:
-      if(d == 9) {
+      if(fargen) {
         using namespace tortoise;
         int f = hrand(30);
         if(f < 21 && ((getBits(c)>>f) & 1)) {
@@ -1597,7 +1609,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laDesert:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? waDune : waNone;
         else {
@@ -1629,7 +1641,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
       
     case laRedRock:
-      if(d == 9) {
+      if(fargen) {
         if(randomPatternsMode) {
           c->wall = waNone;
           if(!ishept(c)) { if(RANDPAT) buildRedWall(c, 20); }
@@ -1692,7 +1704,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laWarpSea:
     case laWarpCoast:
-      if(d == 9 && randomPatternsMode)
+      if(fargen && randomPatternsMode)
         setland(c, RANDPAT ? laWarpCoast : laWarpSea); 
       
       if(d == 8) {
@@ -2286,7 +2298,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laVariant: {
       #if CAP_COMPLEX2
       int b = getBits(c);
-      if(d == 9) {
+      if(fargen) {
         int treasure_rate = 2;
         for(int i=0; i<21; i++) if((b>>i) & 1) {
           treasure_rate += variant_features[i].rate_change;
@@ -2527,7 +2539,7 @@ void setdist(cell *c, int d, cell *from) {
 
   giantLandSwitch(c, d, from);
   
-  if(d == 9) moreBigStuff(c);
+  if(d == min(BARLEV, 9)) moreBigStuff(c);
 
   if(d == 7) repairLandgen(c);
 
