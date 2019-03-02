@@ -372,10 +372,10 @@ bool pseudohept(cell *c) {
     return (c->master->zebraval == 1) && (c->master->distance & 1);
   }
 
-int celldistance3(cell *c1, cell *c2) { // [untested]
+int celldistance3(heptagon *c1, heptagon *c2) {
   int steps = 0;
-  int d1 = celldistAlt(c1);
-  int d2 = celldistAlt(c2);
+  int d1 = c1->distance;
+  int d2 = c2->distance;
   while(d1 > d2) c1 = c1->cmove(8), steps++, d1--;
   while(d2 > d1) c2 = c2->cmove(8), steps++, d2--;
   vector<int> dx, dy;
@@ -399,6 +399,8 @@ int celldistance3(cell *c1, cell *c2) { // [untested]
     }
   return steps;
   }
+
+int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
 #endif
 
 
