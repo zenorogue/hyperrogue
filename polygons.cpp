@@ -1285,7 +1285,8 @@ void dqi_string::draw() {
     svg::text(x, y, size, str, frame, color, align);
     return;
     }
-  #elif ISMOBILE==0
+  #endif
+  #if ISMOBILE==0
   int fr = frame & 255;
   displayfrSP(x, y, shift, fr, size, str, color, align, frame >> 8);
   #else
