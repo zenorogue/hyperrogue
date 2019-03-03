@@ -18,7 +18,7 @@ namespace binary {
 
 namespace reg3 {
 
-  int loop=4, face=5;
+  int loop, face;
 
   vector<hyperpoint> cellshape;
   
@@ -157,8 +157,6 @@ namespace reg3 {
     heptagon *origin;
     hrmap *binary_map;
     
-    int mycellcount = 1;
-
     unordered_map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     unordered_map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
@@ -171,6 +169,7 @@ namespace reg3 {
       h.alt = NULL;
       h.distance = 0;
       h.c7 = newCell(S7, origin);
+      worst_error1 = 0, worst_error2 = 0;
       
       dynamicval<hrmap*> cr(currentmap, this);
       
@@ -195,7 +194,7 @@ namespace reg3 {
       altmap[alt].emplace_back(origin, T);
       }
     
-    ld worst_error1 = 0, worst_error2 = 0;
+    ld worst_error1, worst_error2;
 
     heptagon *getOrigin() {
       return origin;
@@ -250,9 +249,7 @@ namespace reg3 {
         return p2.first;
         }
       
-      // println(hlog, "NOT found in ", isize(altmap[alt]), " intval = ", intval(tC0(p1.second),Hypc), " to = ", intval(hT,Hypc), " mcc = ", mycellcount);
       if(DEB) println(hlog, "-> not found");
-      mycellcount++;
       heptagon *created = tailored_alloc<heptagon> (S7);
       created->c7 = newCell(S7, created);
       created->alt = NULL;
