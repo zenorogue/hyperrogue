@@ -2976,3 +2976,11 @@ the interesting (adult) part quickly)
 - fixed the graphics scaling for wolves, animated legs, and the shmup mode
 - yet more interesting Yendor path in binary tilings
 - a preview of 3D geometries
+
+2019-03-01 19:14 Version 11.0i:
+- fixed the bug with animal legs
+- added two Euclidean honeycombs
+
+2019-03-03 00:51 Version 11.0j:
+- improved lands: minefield displays correctly; Emerald Mine in Euclidean geometries; nice crossroads in spherical geometries
+- all the regular honeycombs
