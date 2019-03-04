@@ -2090,6 +2090,9 @@ enum class PPR {
   MINEMARK, ARROW,
   MOBILE_ARROW,
   LINE, 
+  // in depth tested models transparent surfaces need to be depth sorted by HyperRogue
+  // and set to PPR::TRANSPARENT to draw them after all the opaque ones
+  TRANSPARENT,
   // no depth testing for SUPERLINE and above
   SUPERLINE, TEXT, CIRCLE,
   MAX,
@@ -2832,6 +2835,7 @@ struct textureinfo {
 struct drawqueueitem {
   PPR prio;
   color_t color;
+  int subprio;
   virtual void draw() = 0;
   virtual void draw_back() {}
   virtual void draw_pre() {}

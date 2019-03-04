@@ -1515,6 +1515,12 @@ void drawqueue() {
         < xintval(ap2.V * xpush0(.1));
       });
 
+  for(PPR p: {PPR::TRANSPARENT})
+    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+      [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
+        return p1->subprio > p2->subprio;
+        });
+
   profile_stop(3);
 
 #if CAP_SDL
