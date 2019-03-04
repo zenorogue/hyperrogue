@@ -3432,14 +3432,21 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     
     if(m->inBoat) {
       view = m->pat;
-      Vboat = &(Vboat0 = view);
-      if(m->type == moPlayer && items[itOrbWater]) {
-        queuepoly(m->pat, shBoatOuter, watercolor(0));
-        queuepoly(m->pat, shBoatInner, 0x0060C0FF);
+      Vboat = &Vboat0;
+      if(DIM == 2) Vboat0 = view;
+      if(DIM == 3) Vboat0 = view * spin(-M_PI/2);
+      
+      bool magic = m->type == moPlayer && items[itOrbWater];
+      color_t outcolor = magic ? watercolor(0) : 0xC06000FF;
+      color_t incolor = magic ? 0x0060C0FF : 0x804000FF;
+      
+      if(DIM == 2) {
+        queuepoly(Vboat0, shBoatOuter, outcolor);
+        queuepoly(Vboat0, shBoatInner, incolor);
         }
-      else {
-        queuepoly(m->pat, shBoatOuter, 0xC06000FF);
-        queuepoly(m->pat, shBoatInner, 0x804000FF);
+      if(DIM == 3) {
+        queuepoly(mscale(Vboat0, scalefactor/2), shBoatOuter, outcolor);
+        queuepoly(mscale(Vboat0, scalefactor/2-0.01), shBoatInner, incolor);
         }
       }
 

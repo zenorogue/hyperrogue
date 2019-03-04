@@ -3883,6 +3883,47 @@ int get_darkval(int d) {
   return 0;
   }
 
+void drawBoat(cell *c, const transmatrix* Vboat, transmatrix& Vboat0, transmatrix& V) {
+  double footphase;
+  if(c == cwt.at && playermoved && vid.sspeed > -5 && vid.yshift == 0) return;
+  bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
+  int outcol = magical ? watercolor(0) : 0xC06000FF;
+  int incol = magical ? 0x0060C0FF : 0x804000FF;
+  bool nospin = false;
+
+  if(DIM == 3) {
+    Vboat0 = V;
+    nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
+    if(!nospin) Vboat0 = rgpushxto0(tC0(V));
+    else Vboat0 = cspin(0, 2, M_PI) * Vboat0;
+    queuepolyat(mscale(Vboat0, scalefactor/2), shBoatOuter, outcol, PPR::BOATLEV2);
+    queuepolyat(mscale(Vboat0, scalefactor/2-0.01), shBoatInner, incol, PPR::BOATLEV2);
+    return;
+    }
+
+  Vboat = &(Vboat0 = *Vboat); 
+  if(wmspatial && c->wall == waBoat) {
+    nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
+    if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
+    queuepolyat(Vboat0, shBoatOuter, outcol, PPR::BOATLEV);
+    Vboat = &(Vboat0 = V);
+    }
+  if(c->wall == waBoat) {
+    nospin = applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
+    }
+  if(!nospin) 
+    Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
+  else {
+    transmatrix Vx;
+    if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
+      animations[LAYER_SMALL][c].footphase = 0;
+    }
+  if(wmspatial)
+    queuepolyat(mscale(Vboat0, (geom3::LAKE+1)/2), shBoatOuter, outcol, PPR::BOATLEV2);
+  queuepoly(Vboat0, shBoatOuter, outcol);
+  queuepoly(Vboat0, shBoatInner, incol);
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4733,6 +4774,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWaterWall3(c->move(a)))
               queuepolyat(V, shWall3D[a], wcol_alpha - d * get_darkval(a), PPR::TRANSPARENT).subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
+          if(c->wall == waBoat) drawBoat(c, &V, V, V);
           }
         else if(isFire(c)) {
           int r = ticks - lastt;
@@ -4746,6 +4788,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           int mines = countMinesAround(c);
           queuepoly(rgpushxto0(tC0(V)), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
           }
+        
+        else if(c->wall == waStrandedBoat) drawBoat(c, &V, V, V);
 
         else if(winf[c->wall].glyph == '.') ;
 
@@ -4817,36 +4861,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           drawTerraWarrior(V, randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
           break;
         
-        case waBoat: case waStrandedBoat: {
-          double footphase;
-          bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
-          int outcol = magical ? watercolor(0) : 0xC06000FF;
-          int incol = magical ? 0x0060C0FF : 0x804000FF;
-          bool nospin = false;
-  
-          Vboat = &(Vboat0 = *Vboat); 
-          if(wmspatial && c->wall == waBoat) {
-            nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-            if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
-            queuepolyat(Vboat0, shBoatOuter, outcol, PPR::BOATLEV);
-            Vboat = &(Vboat0 = V);
-            }
-          if(c->wall == waBoat) {
-            nospin = applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-            }
-          if(!nospin) 
-            Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
-          else {
-            transmatrix Vx;
-            if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
-              animations[LAYER_SMALL][c].footphase = 0;
-            }
-          if(wmspatial)
-            queuepolyat(mscale(Vboat0, (geom3::LAKE+1)/2), shBoatOuter, outcol, PPR::BOATLEV2);
-          queuepoly(Vboat0, shBoatOuter, outcol);
-          queuepoly(Vboat0, shBoatInner, incol);
+        case waBoat: case waStrandedBoat: 
+          drawBoat(c, Vboat, Vboat0, V);
           break;
-          }
         
         case waBigStatue: {
           transmatrix V2 = V;
