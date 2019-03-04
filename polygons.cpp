@@ -2658,7 +2658,7 @@ void buildpolys() {
   bshape(shKrakenEye2, PPR::ONTENTACLE_EYES2, ksc, 249);
 
   // monsters
-  bshape(shGhost, PPR::MONSTER_BODY, scalefactor, 69);
+  bshape(shGhost, DIM == 3 ? PPR::SUPERLINE : PPR::MONSTER_BODY, scalefactor, 69);
   bshape(shMiniGhost, PPR::MONSTER_BODY, scalefactor/3, 69);
   bshape(shGargoyleWings, PPR::MONSTER_CLOAK, scalefactor, 70);
   bshape(shGargoyleBody, PPR::MONSTER_BODY, scalefactor, 71);

@@ -1323,7 +1323,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     m == moTameBomberbird || m == moWindCrow || m == moTameBomberbirdMoved ||
     m == moSandBird || m == moAcidBird) {
     ShadowV(V, shEagle);
-    queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
+    if(m == moParrot && DIM == 3)
+      queuepolyat(VBIRD, shEagle, darkena(col, 0, 0xFF), PPR::SUPERLINE);
+    else
+      queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
     }
   else if(among(m, moSparrowhawk, moWestHawk)) {
     ShadowV(V, shHawk);
