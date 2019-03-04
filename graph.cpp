@@ -742,11 +742,19 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
         }
       else V2 = V;
       }
-    if(c) V2 = V2 * spin(M_PI * sintick(100) / 30);
-    queuepoly(V2, shCompass1, 0xFF8080FF);
-    queuepoly(V2, shCompass2, 0xFFFFFFFF);
-    queuepoly(V2, shCompass3, 0xFF0000FF);
-    queuepoly(V2 * pispin, shCompass3, 0x000000FF);
+    if(DIM == 3) {
+      queuepoly(Vit, shRing, 0xFFFFFFFF);
+      V2 = V2 * cspin(1, 2, M_PI * sintick(100) / 39);
+      queuepoly(V2, shCompass3, 0xFF0000FF);
+      queuepoly(V2 * pispin, shCompass3, 0x000000FF);      
+      }
+    else {
+      if(c) V2 = V2 * spin(M_PI * sintick(100) / 30);
+      queuepoly(V2, shCompass1, 0xFF8080FF);
+      queuepoly(V2, shCompass2, 0xFFFFFFFF);
+      queuepoly(V2, shCompass3, 0xFF0000FF);
+      queuepoly(V2 * pispin, shCompass3, 0x000000FF);
+      }
     xsh = NULL;
     }
 
