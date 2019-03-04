@@ -311,7 +311,7 @@ void generateTreasureIsland(cell *c) {
     if(c->wall != waCTree && hrand(100) < 15)
       c->wall = (c->wall == waCIsland ? waCIsland2 : waCIsland);
     }
-  if(src && c2->wall == waCTree && (eubinary||c->master->alt) && celldistAlt(c) <= -10) {
+  if(src && c2->wall == waCTree && (eubinary||c->master->alt) && celldistAlt(c) <= -10 && geometry != gRhombic3) {
     bool end = true;
     for(int i=0; i<qc; i++) {
       generateTreasureIsland(ctab[i]);
