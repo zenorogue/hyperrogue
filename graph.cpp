@@ -2308,7 +2308,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
-        Vs = Vs * cspin(DIM-1, DIM, M_PI);
+        Vs = Vs * cspin(DIM-2, DIM-1, M_PI);
       }
     
     if(c->monst == moShadow) 
