@@ -680,6 +680,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
    
   if(c && doHighlight()) 
     poly_outline = kind_outline(it);
+  
+  if(c == viewctr.at->c7) return false;
 
 #if MAXMDIM >= 4
   if(c && DIM == 3) radarpoints.emplace_back(radarpoint{makeradar(V), iinf[it].glyph, icol, kind_outline(it)});
