@@ -18,6 +18,16 @@ namespace binary {
 
 namespace reg3 {
 
+  map<int, int> close_distances;
+
+  int bucketer(ld x) {
+    return int(x * 10 + 100000.5) - 100000;
+    }
+  
+  int bucketer(hyperpoint h) {
+    return bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
+    }
+  
   int loop, face;
 
   vector<hyperpoint> cellshape;
@@ -192,6 +202,12 @@ namespace reg3 {
       
       reg_gmatrix[origin] = make_pair(alt, T);
       altmap[alt].emplace_back(origin, T);
+      
+      celllister cl(origin->c7, 4, 100000, NULL);
+      for(cell *c: cl.lst) {
+        hyperpoint h = tC0(relative_matrix(c->master, origin));
+        close_distances[bucketer(h)] = cl.getdist(c);
+        }
       }
     
     ld worst_error1, worst_error2;
@@ -315,9 +331,15 @@ void draw() {
 
 int celldistance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
+
   auto r = regmap();
+
+  hyperpoint h = tC0(relative_matrix(c1->master, c2->master));
+  int b = bucketer(h);
+  if(close_distances.count(b)) return close_distances[b];
+
   dynamicval<eGeometry> g(geometry, gBinary3);  
-  return 1 + binary::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
+  return 20 + binary::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
   }
 
 bool pseudohept(cell *c) {
@@ -359,16 +381,6 @@ ld adistance(cell *c) {
   h = binary::deparabolic3(h);
   return regmap()->reg_gmatrix[c->master].first->distance * log(2) - h[0];
   }
-
-int bucketer(ld x) {
-  return int(x * 10 + 100000.5) - 100000;
-  }
-
-int bucketer(hyperpoint h) {
-  return bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
-  }
-
-map<int, int> close_distances;
 
 unordered_map<pair<cell*, cell*>, int> memo;
 
