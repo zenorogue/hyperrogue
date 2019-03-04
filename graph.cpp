@@ -3853,6 +3853,19 @@ bool isWall3(cell *c, color_t& wcol) {
   return false;
   }
 
+bool isWater3(cell *c, color_t wcol, color_t& wcol_alpha) {
+  if(c->wall == waChasm) { wcol_alpha = 0x20202040; return true; }
+  if(c->wall == waInvisibleFloor) return false;
+  wcol_alpha = darkena(wcol, 0, 0x80);
+  return chasmgraph(c);
+  }
+
+bool isWaterWall3(cell *c) {
+  if(c->wall == waInvisibleFloor) return false;
+  if(isWorm(c) | isWall(c) || chasmgraph(c)) return true;
+  return false;
+  }
+
 // how much should be the d-th wall darkened in 3D
 int get_darkval(int d) {
   const int darkval_hbt[9] = {0,2,2,0,6,6,8,8,0};
@@ -4699,8 +4712,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       char xch = winf[c->wall].glyph;
       
       if(DIM == 3) {
+        color_t wcol_alpha;
+        color_t dummy;        
         if(isWall3(c, wcol)) {
-          color_t dummy;        
           int d = (wcol & 0xF0F0F0) >> 4;
 
           for(int a=0; a<c->type; a++)
@@ -4713,6 +4727,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 }
               }
+          }
+        else if(isWater3(c, wcol, wcol_alpha)) {
+          int d = (wcol_alpha & 0xF0F0F000) >> 4;
+          for(int a=0; a<c->type; a++)
+            if(c->move(a) && !isWaterWall3(c->move(a)))
+              queuepolyat(V, shWall3D[a], wcol_alpha - d * get_darkval(a), PPR::TRANSPARENT).subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
           }
         else if(isFire(c)) {
           int r = ticks - lastt;
