@@ -314,7 +314,7 @@ transmatrix ddspin(cell *c, int d, ld bonus) {
   }
 
 transmatrix iddspin(cell *c, int d, ld bonus) {
-  if(DIM == 3) return spintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(0, 2, bonus);
+  if(DIM == 3) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
