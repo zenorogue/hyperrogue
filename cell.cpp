@@ -296,6 +296,7 @@ void unlink_cdata(heptagon *h) {
   }
 
 void clearfrom(heptagon *at) {
+  if(!at) return;
   queue<heptagon*> q;
   unlink_cdata(at);
   q.push(at);

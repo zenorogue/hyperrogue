@@ -1259,6 +1259,160 @@ void may_place_compass(cell *c) {
     c->item = itCompass;
   }
 #endif
+
+#if CAP_CRYSTAL && MAXMDIM >= 4
+
+euclid3::coord crystal_to_euclid(coord x) {
+  euclid3::coord c = 0;
+  c += x[0];
+  c += x[1] * euclid3::COORDMAX;
+  c += x[2] * euclid3::COORDMAX * euclid3::COORDMAX;
+  return c/2;
+  }
+
+coord euclid3_to_crystal(euclid3::coord x) {  
+  coord res;
+  auto tmp = euclid3::getcoord(x);
+  for(int i=0; i<3; i++) res[i] = tmp[i] * 2;
+  for(int i=3; i<MAXDIM; i++) res[i] = 0;
+  return res;
+  }
+  
+
+void transform_crystal_to_euclid () {
+  geometry = gCubeTiling;
+  need_reset_geometry = true;
+  auto e = new euclid3::hrmap_euclid3;
+  auto m = crystal_map();
+  auto infront = cwt.cpeek();
+
+  for(auto& p: m->hcoords) {
+    auto co = crystal_to_euclid(p.second);
+    e->spacemap[co] = p.first;
+    e->ispacemap[p.first] = co;
+    
+    cell* c = p.first->c7;
+
+    // rearrange the monster directions
+    if(c->mondir < S7 && c->move(c->mondir)) {
+      auto co1 = crystal_to_euclid(m->hcoords[c->move(c->mondir)->master]) - co;
+      for(int i=0; i<6; i++) 
+        if(co1 == e->shifttable[i])
+          c->mondir = i;
+      }
+    
+    for(int i=0; i<S7; i++) c->move(i) = NULL;
+    }
+  
+  // clean hcoords and heptagon_at so that the map is not deleted when we delete m
+  m->hcoords.clear();
+  m->heptagon_at.clear();
+  delete m;
+
+  for(int i=0; i<isize(allmaps); i++) 
+    if(allmaps[i] == m)
+      allmaps[i] = e;
+
+  currentmap = e;  
+  
+  // connect the cubes  
+  for(auto& p: e->spacemap) {
+    auto& co = p.first;
+    auto& h = p.second;
+    for(int i=0; i<S7; i++) 
+      if(e->spacemap.count(co + e->shifttable[i]))
+        h->move(i) = e->spacemap[co + e->shifttable[i]],
+        h->c.setspin(i, (i + 3) % 6, false),
+        h->c7->move(i) = h->move(i)->c7,
+        h->c7->c.setspin(i, (i + 3) % 6, false);
+    }
+  
+  clearAnimations();
+  cwt.spin = neighborId(cwt.at, infront);
+  View = iddspin(cwt.at, cwt.spin, M_PI/2);
+  if(!flipplayer) View = cspin(0, 2, M_PI) * View;
+  }
+
+void transform_euclid_to_crystal () {
+  geometry = gCrystal;
+  ginf[gCrystal].sides = 6;
+  ginf[gCrystal].vertex = 4;
+  ginf[gCrystal].tiling_name = "{6,4}";
+  need_reset_geometry = true;
+  ginf[gCrystal].distlimit = distlimit_table[6];
+
+  auto e = euclid3::cubemap();
+  auto m = new hrmap_crystal;
+  auto infront = cwt.cpeek();
+
+  for(auto& p: e->ispacemap) {
+    auto co = euclid3_to_crystal(p.second);
+    m->heptagon_at[co] = p.first;
+    m->hcoords[p.first] = co;
+    }
+
+  for(auto& p: e->ispacemap) {
+    cell *c = p.first->c7;
+    if(c->mondir < S7 && c->move(c->mondir)) {
+      auto co = euclid3_to_crystal(p.second);
+      for(int d=0; d<S7; d++) {
+        auto lw = m->makewalker(co, d);
+        auto co1 = add(co, lw, FULLSTEP);
+        if(m->heptagon_at.count(co1) && m->heptagon_at[co1] == c->move(c->mondir)->master)
+          c->mondir = d;
+        }
+      }
+    for(int i=0; i<S7; i++) c->move(i) = NULL;
+    }
+          
+  e->spacemap.clear();
+  e->ispacemap.clear();
+  delete e;
+
+  for(int i=0; i<isize(allmaps); i++) 
+    if(allmaps[i] == e)
+      allmaps[i] = m;
+
+  currentmap = m;
+  
+  // connect the cubes  
+  for(auto& p: m->heptagon_at) {
+    auto& co = p.first;
+    auto& h = p.second;
+    for(int i=0; i<S7; i++) {
+      auto lw = m->makewalker(co, i);
+      auto co1 = add(co, lw, FULLSTEP);
+      if(m->heptagon_at.count(co1)) {
+        auto lw1 = lw+wstep;
+        h->move(i) = m->heptagon_at[co1],
+        h->c.setspin(i, lw1.spin, false),
+        h->c7->move(i) = h->move(i)->c7;
+        h->c7->c.setspin(i, h->c.spin(i), false);
+        }
+      }
+    }
+  
+  View = Id;
+  clearAnimations();
+  cwt.spin = neighborId(cwt.at, infront);
+  }
+
+void add_crystal_transform(char c) {
+  if(shmup::on) return;
+  if(geometry == gCrystal && ginf[gCrystal].sides == 6) {
+    dialog::addItem("convert Crystal to 3D", c);
+    dialog::add_action(transform_crystal_to_euclid);
+    }
+  if(geometry == gCubeTiling) {
+    dialog::addItem("convert 3D to Crystal", c);
+    dialog::add_action(transform_euclid_to_crystal);
+    }
+  }
+
+#endif
+
 }
 
 }
+
+

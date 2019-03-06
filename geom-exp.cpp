@@ -683,6 +683,9 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
     dialog::add_action([] { pushScreen(conformal::model_menu); });
     }
+  #if CAP_CRYSTAL && MAXMDIM >= 4
+  crystal::add_crystal_transform('x');  
+  #endif
 
   dialog::addBreak(50);
    

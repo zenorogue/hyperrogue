@@ -820,6 +820,8 @@ void loadcs(FILE *f, charstyle& cs, int vernum);
 #define MAXAXE 16
 #define MAXHAT 4
 
+extern bool flipplayer;
+
 namespace multi {
 
   extern bool alwaysuse;

@@ -527,8 +527,8 @@ namespace euclid3 {
       for(int i=0; i<S7; i++) tmatrix[i] = Id;
       for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
         tmatrix[i][j][DIM] = getcoord(shifttable[i])[j];
-      getOrigin();
       }
+
     heptagon *getOrigin() {
       return get_at(0);
       }
