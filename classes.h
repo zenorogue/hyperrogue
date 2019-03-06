@@ -222,6 +222,7 @@ enum eGeometry {
   gCell16, gECell16,
   gCell24, gECell24,
   gCell600, gECell600,
+  gHoroTris,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };

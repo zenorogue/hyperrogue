@@ -94,7 +94,7 @@ void addMessage(string s, char spamtype = 0);
 #define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || archimedean) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
 
-#define binarytiling (geometry == gBinaryTiling || geometry == gBinary3)
+#define binarytiling (geometry == gBinaryTiling || geometry == gBinary3 || geometry == gHoroTris)
 #define archimedean (geometry == gArchimedean)
 #define eubinary (euclid || binarytiling || geometry == gCrystal || (DIM == 3 && hyperbolic))
 

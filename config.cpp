@@ -380,6 +380,7 @@ void initConfig() {
   addsaver(sightranges[gECell24], "sight-24cell-elliptic", M_PI);
   addsaver(sightranges[gCell600], "sight-600cell", 2 * M_PI);
   addsaver(sightranges[gECell600], "sight-600cell-elliptic", M_PI);
+  addsaver(sightranges[gHoroTris], "sight-horotris", 3);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);

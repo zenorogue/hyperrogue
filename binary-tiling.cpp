@@ -100,7 +100,7 @@ namespace binary {
     int side = 0;
     if(d < 4) side = (parent->zebraval * 2 + d) % 5;
     if(d == 8) side = ((parent->zebraval-d1) * 3) % 5;
-    return build(parent, d, d1, 9, side, delta);
+    return build(parent, d, d1, S7, side, delta);
     }
   #endif
   
@@ -161,6 +161,7 @@ namespace binary {
   #if MAXMDIM==4
   heptagon *createStep3(heptagon *parent, int d) {
     auto h = parent;
+    if(geometry == gBinary3)
     switch(d) {
       case 0: case 1:
       case 2: case 3:
@@ -192,6 +193,18 @@ namespace binary {
         else
           return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
       }
+    if(geometry == gHoroTris) switch(d) {
+      case 0: case 1: case 2: case 3:
+        return build3(parent, d, 7, 1);
+      case 7:
+        return build3(parent, 7, hrand(3), -1);
+      case 4: case 5: case 6: 
+        parent->cmove(7);
+        int s = parent->c.spin(7);
+        if(s == 0) return path(h, d, d, {7, d-3});
+        else if(s == d-3) return path(h, d, d, {7, 0});
+        else return path(h, d, d, {7, d, 9-d-s});
+      }
     printf("error: case not handled in binary tiling\n");
     breakhere();
     return NULL;
@@ -202,31 +215,43 @@ namespace binary {
   transmatrix inverse_tmatrix[8];
   
   void build_tmatrix() {
-    direct_tmatrix[0] = xpush(-log(2)) * parabolic3(-1, -1);
-    direct_tmatrix[1] = xpush(-log(2)) * parabolic3(1, -1);
-    direct_tmatrix[2] = xpush(-log(2)) * parabolic3(-1, 1);
-    direct_tmatrix[3] = xpush(-log(2)) * parabolic3(1, 1);
-    direct_tmatrix[4] = parabolic3(-2, 0);
-    direct_tmatrix[5] = parabolic3(+2, 0);
-    direct_tmatrix[6] = parabolic3(0, -2);
-    direct_tmatrix[7] = parabolic3(0, +2);
-    for(int i=0; i<8; i++)
+    if(geometry == gBinary3) {
+      direct_tmatrix[0] = xpush(-log(2)) * parabolic3(-1, -1);
+      direct_tmatrix[1] = xpush(-log(2)) * parabolic3(1, -1);
+      direct_tmatrix[2] = xpush(-log(2)) * parabolic3(-1, 1);
+      direct_tmatrix[3] = xpush(-log(2)) * parabolic3(1, 1);
+      direct_tmatrix[4] = parabolic3(-2, 0);
+      direct_tmatrix[5] = parabolic3(+2, 0);
+      direct_tmatrix[6] = parabolic3(0, -2);
+      direct_tmatrix[7] = parabolic3(0, +2);
+      }
+    if(geometry == gHoroTris) {
+      ld r3 = sqrt(3);
+      direct_tmatrix[0] = xpush(-log(2)) * cspin(1,2, M_PI);
+      direct_tmatrix[1] = parabolic3(0, +r3/3) * xpush(-log(2));
+      direct_tmatrix[2] = parabolic3(-0.5, -r3/6) * xpush(-log(2));
+      direct_tmatrix[3] = parabolic3(+0.5, -r3/6) * xpush(-log(2));
+      direct_tmatrix[4] = parabolic3(0, -r3*2/3) * cspin(1,2, M_PI);
+      direct_tmatrix[5] = parabolic3(1, r3/3) * cspin(1,2,M_PI);
+      direct_tmatrix[6] = parabolic3(-1, r3/3) * cspin(1,2,M_PI);
+      }
+    for(int i=0; i<S7-1; i++)
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
     }
   
   const transmatrix& tmatrix(heptagon *h, int dir) {
-    if(dir == 8) {
-      h->cmove(8);
-      return inverse_tmatrix[h->c.spin(8)];
+    if(dir == S7-1) {
+      h->cmove(S7-1);
+      return inverse_tmatrix[h->c.spin(S7-1)];
       }
     else
       return direct_tmatrix[dir];
     }
 
   const transmatrix& itmatrix(heptagon *h, int dir) {
-    if(dir == 8) {
-      h->cmove(8);
-      return h->cmove(8), direct_tmatrix[h->c.spin(8)];
+    if(dir == S7-1) {
+      h->cmove(S7-1);
+      return h->cmove(S7-1), direct_tmatrix[h->c.spin(S7-1)];
       }
     else
       return inverse_tmatrix[dir];
@@ -316,7 +341,7 @@ namespace binary {
           }
         }
       else {
-        for(int i=0; i<9; i++)
+        for(int i=0; i<S7; i++)
           dq::enqueue(h->move(i), V * tmatrix(h, i));
         }
       }
@@ -329,7 +354,7 @@ namespace binary {
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
         if(DIM == 3)
-          where = itmatrix(h2, 8) * where, h2 = hr::createStep(h2, 8);
+          where = itmatrix(h2, S7-1) * where, h2 = hr::createStep(h2, S7-1);
         else {
           if(type_of(h2) == 6)
             h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
@@ -341,7 +366,7 @@ namespace binary {
         }
       else {
         if(DIM == 3)
-          gm = gm * tmatrix(h1, 8), h1 = hr::createStep(h1, 8);
+          gm = gm * tmatrix(h1, S7-1), h1 = hr::createStep(h1, S7-1);
         else {
           if(type_of(h1) == 6)
             h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
@@ -377,14 +402,14 @@ int celldistance3(heptagon *c1, heptagon *c2) {
   int steps = 0;
   int d1 = c1->distance;
   int d2 = c2->distance;
-  while(d1 > d2) c1 = c1->cmove(8), steps++, d1--;
-  while(d2 > d1) c2 = c2->cmove(8), steps++, d2--;
+  while(d1 > d2) c1 = c1->cmove(S7-1), steps++, d1--;
+  while(d2 > d1) c2 = c2->cmove(S7-1), steps++, d2--;
   vector<int> dx, dy;
   while(c1 != c2) {
-    dx.push_back((c1->c.spin(8) & 1) - (c2->c.spin(8) & 1));
-    dy.push_back((c1->c.spin(8) >> 1) - (c2->c.spin(8) >> 1));
-    c1 = c1->cmove(8);
-    c2 = c2->cmove(8);
+    dx.push_back((c1->c.spin(S7-1) & 1) - (c2->c.spin(S7-1) & 1));
+    dy.push_back((c1->c.spin(S7-1) >> 1) - (c2->c.spin(S7-1) >> 1));
+    c1 = c1->cmove(S7-1);
+    c2 = c2->cmove(S7-1);
     steps += 2;
     }
   int xsteps = steps, sx = 0, sy = 0;

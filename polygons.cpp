@@ -2308,7 +2308,12 @@ void procedural_shapes() {
   }
 
 #if CAP_BT && MAXMDIM >= 4
-void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2, int z2, int flags) {
+// Make a wall for horocycle-based honeycombs
+// flags:
+// 1 = first edge should be doubled
+// 2 = use POLY_TRIANGLES
+// 4 = this is is a triangular face; otherwise, the face is rectangular, and x1+x2-x0 is the fourth vertex
+void make_wall(hpcshape& sh, ld x0, ld y0, ld z0, ld x1, ld y1, ld z1, ld x2, ld y2, ld z2, int flags) {
   hyperpoint h0 = point3(x0,y0,z0);
   hyperpoint h1 = point3(x1,y1,z1);
   hyperpoint h2 = point3(x2,y2,z2);
@@ -2321,15 +2326,17 @@ void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int
     hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
     hpcpush(res);
     };
-  if(flags == 2) {
+  if(flags & 2) {
     last->flags |= POLY_TRIANGLES;
     for(int y=0; y<STEP; y++)
     for(int x=0; x<STEP; x++) {
       int x1 = x + 1;
       int y1 = y + 1;
+      if((flags & 4) && x+y >= STEP) continue;
       at((h0 * (STEP-x -y ) + h1 * x  + h2 * y ) / STEP);
       at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
       at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
+      if((flags & 4) && x+y >= STEP-1) continue;
       at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
       at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
       at((h0 * (STEP-x1-y1) + h1 * x1 + h2 * y1) / STEP);
@@ -2338,8 +2345,13 @@ void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int
   else {
     int STP2 = ((flags == 1) ? 2 : 1) * STEP;
     for(int t=0; t<STP2; t++) at((h0 * (STP2-t) + h1 * t) / STP2);
-    for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h3 * t) / STEP);
-    for(int t=0; t<STEP; t++) at((h3 * (STEP-t) + h2 * t) / STEP);
+    if(flags&4) {
+      for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h2 * t) / STEP);
+      }
+    else {
+      for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h3 * t) / STEP);
+      for(int t=0; t<STEP; t++) at((h3 * (STEP-t) + h2 * t) / STEP);
+      }
     for(int t=0; t<STEP; t++) at((h2 * (STEP-t) + h0 * t) / STEP);
     at(h0);
     }
@@ -2347,7 +2359,7 @@ void make_wall(hpcshape& sh, int x0, int y0, int z0, int x1, int y1, int z1, int
 
 void create_wall3d() {
   shWall3D.resize(S7);
-  if(DIM == 3 && binarytiling) {
+  if(DIM == 3 && binarytiling && geometry == gBinary3) {
     make_wall(shWall3D[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
     make_wall(shWall3D[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
     make_wall(shWall3D[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
@@ -2357,6 +2369,21 @@ void create_wall3d() {
     make_wall(shWall3D[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
     make_wall(shWall3D[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
     make_wall(shWall3D[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
+    }
+
+  if(DIM == 3 && binarytiling && geometry == gHoroTris) {
+    ld r = sqrt(3)/6;
+    ld r1 = r;
+    ld r2 = r * 2;
+    ld r4 = r * 4;
+    make_wall(shWall3D[0], 0,-r2,-1, +.5, r1,-1,-.5, r1,-1, 2|4);
+    make_wall(shWall3D[1], 0, r4,-1, +.5, r1,-1,-.5, r1,-1, 2|4);
+    make_wall(shWall3D[2], 0,-r2,-1,  -1,-r2,-1,-.5, r1,-1, 2|4);
+    make_wall(shWall3D[3], 0,-r2,-1, +.5, r1,-1, +1,-r2,-1, 2|4);
+    make_wall(shWall3D[4],-1,-r2,-1,   1,-r2,-1, -1,-r2, 1, 1);
+    make_wall(shWall3D[5], 1,-r2,-1,   0, r4,-1,  1,-r2, 1, 1);
+    make_wall(shWall3D[6],-1,-r2,-1,   0, r4,-1, -1,-r2, 1, 1);
+    make_wall(shWall3D[7], 1,-r2, 1,   0, r4, 1, -1,-r2, 1, 4);
     }
   
   if(DIM == 3 && euclid && S7 == 6) {

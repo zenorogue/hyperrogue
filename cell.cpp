@@ -73,7 +73,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     binary::rxcode[1<<16] = &h;
     #endif
     h.zebraval = 0,
-    h.c7 = newCell(DIM == 3 ? 9 : 6, origin);
+    h.c7 = newCell(DIM == 3 ? S7 : 6, origin);
     }
   #endif
   #if CAP_IRR
