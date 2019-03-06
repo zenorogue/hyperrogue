@@ -763,6 +763,18 @@ void runGeometryExperiments() {
   }
 
 #if CAP_COMMANDLINE
+
+eGeometry readGeo(const string& ss) {
+  bool numeric = true;
+  for(char c: ss) if(c < '0' || c > '9') numeric = false;
+  if(numeric) return eGeometry(atoi(ss.c_str()));
+  for(int i=0; i<isize(ginf); i++) if(appears(ginf[i].menu_displayed_name, ss)) {
+    return eGeometry(i);
+    break;
+    }
+  return gNormal;
+  }
+
 int read_geom_args() {
   using namespace arg;
   if(0) ;
@@ -824,7 +836,7 @@ int read_geom_args() {
   else if(argis("-geo")) { 
     PHASEFROM(2);
     shift(); 
-    set_geometry((eGeometry) argi());
+    set_geometry(readGeo(args()));
     }
   #if CAP_GP
   else if(argis("-gp")) {
