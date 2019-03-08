@@ -1548,11 +1548,13 @@ bool do_draw(cell *c) {
   return true;
   }  
 
+ld extra_generation_distance = 99;
+
 bool do_draw(cell *c, const transmatrix& T) {
   if(DIM == 3) {
-    if(hyperbolic && T[DIM][DIM] > cosh(sightranges[geometry])) return false;
-    if(euclid && hypot_d(3, tC0(T)) > sightranges[geometry]) return false;
-    setdist(c, 7, c);
+    ld dist = hdist0(tC0(T));
+    if(dist > sightranges[geometry]) return false;
+    if(dist <= extra_generation_distance) setdist(c, 7, c);
     return true;
     }
 
