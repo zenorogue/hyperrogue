@@ -3523,6 +3523,8 @@ bool openorsafe(cell *c) {
 
 #define Dark(x) darkena(x,0,0xFF)
 
+color_t stdgridcolor = 0x202020FF;
+
 int gridcolor(cell *c1, cell *c2) {
   if(cmode & sm::DRAW) return Dark(forecolor);
   if(!c2)
@@ -3542,6 +3544,7 @@ int gridcolor(cell *c1, cell *c2) {
     return Dark(0x2020A0);
   if(c1->land == laMinefield && c2->land == laMinefield && (openorsafe(c1) != openorsafe(c2)))
     return Dark(0xA0A0A0);
+  if(!darken) return stdgridcolor;
   return Dark(0x202020);
   }
 

@@ -2497,7 +2497,7 @@ string generateHelpForItem(eItem it);
 bool graphglyph();
 extern bool hiliteclick;
 extern int antialiaslines;
-extern color_t ringcolor, periodcolor, modelcolor;
+extern color_t ringcolor, periodcolor, modelcolor, stdgridcolor;
 
 #include <functional>
 

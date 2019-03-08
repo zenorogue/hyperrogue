@@ -255,6 +255,7 @@ void initConfig() {
   addsaver(ringcolor, "color:ring");
   addsaver(modelcolor, "color:model");
   addsaver(periodcolor, "color:period");
+  addsaver(stdgridcolor, "color:stdgrid"); 
   addsaver(dialog::dialogcolor, "color:dialog");
   for(auto& p: colortables)
     savecolortable(p.second, s0+"canvas"+p.first);
@@ -1673,6 +1674,9 @@ void show_color_dialog() {
   dialog::addColorItem(XLAT("projection background"), modelcolor, 'c');
   dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
 
+  dialog::addColorItem(XLAT("standard grid color"), stdgridcolor, 'g');
+  dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::dialogflags |= sm::SIDE; });
+
   dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
   dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), "brightness behind the sphere"); dialog::bound_low(0); });
 
@@ -1852,6 +1856,9 @@ int read_color_args() {
     }
   else if(argis("-ring")) {
     PHASEFROM(2); shift(); ringcolor = arghex();
+    }
+  else if(argis("-stdgrid")) {
+    PHASEFROM(2); shift(); stdgridcolor = arghex();
     }
   else if(argis("-period")) {
     PHASEFROM(2); shift(); periodcolor = arghex();
