@@ -3032,8 +3032,6 @@ namespace princess {
 
 int eudist(int sx, int sy);
 
-heptagon *createStep(heptagon *h, int d);
-
 cell *createMovR(cell *c, int d);
 
 bool ishept(cell *c);
@@ -3050,20 +3048,48 @@ struct hrmap {
   virtual ~hrmap() { };
   virtual vector<cell*>& allcells() { return dcal; }
   virtual void verify() { }
+  virtual void link_alt(const cellwalker& hs) { }
+  virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
+  heptagon *may_create_step(heptagon *h, int direction) {
+    if(h->move(direction)) return h->move(direction);
+    return create_step(h, direction);
+    }
+  virtual heptagon *create_step(heptagon *h, int direction) {
+    printf("create_step called unexpectedly\n"); exit(1);
+    return NULL;
+    }
+  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+    printf("relative_matrix called unexpectedly\n"); 
+    return Id;
+    }
+  virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+    return relative_matrix(c2->master, c1->master);
+    }
+  virtual void draw() {
+    printf("undrawable\n");
+    }
   };
 
-struct hrmap_hyperbolic : hrmap {
+// hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient 
+struct hrmap_standard : hrmap {
+  void draw() override;
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
+  heptagon *create_step(heptagon *h, int direction) override;
+  };
+
+struct hrmap_hyperbolic : hrmap_standard {
   heptagon *origin;
   eVariation mvar;
   hrmap_hyperbolic();
-  heptagon *getOrigin() { return origin; }
+  hrmap_hyperbolic(heptagon *origin);
+  heptagon *getOrigin() override { return origin; }
   ~hrmap_hyperbolic() {
     DEBMEM ( verifycells(origin); )
     // printf("Deleting hyperbolic map: %p\n", this);
     dynamicval<eVariation> ph(variation, mvar);
     clearfrom(origin);
     }
-  void verify() { verifycells(origin); }
+  void verify() override { verifycells(origin); }
   };
 
 namespace irr { 
@@ -3671,6 +3697,8 @@ namespace gp {
     int first_dir;
     int total_dir;
     };
+
+  extern local_info draw_li;
   
   local_info get_local_info(cell *c);
   const char *disp(loc at);
@@ -4063,7 +4091,6 @@ void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int
 void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame = 0);
 
 extern bool just_gmatrix;
-void drawStandard();
 
 bool haveLeaderboard(int id);
 int get_currentscore(int id);
@@ -4231,8 +4258,6 @@ extern void switchHardcore();
 
 extern bool shaderside_projection;
 
-void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
-
 namespace ors {
   extern int mode;
   extern string choices[];
@@ -4256,20 +4281,16 @@ hyperpoint get_horopoint(ld y, ld x);
 hyperpoint get_horopoint3(ld y, ld x, ld z);
 
 namespace binary {
-  heptagon *createStep(heptagon *parent, int d);
-  #if MAXMDIM == 4
-  heptagon *createStep3(heptagon *parent, int d);
-  #endif
   transmatrix parabolic(ld u);
   transmatrix parabolic3(ld u, ld v);
   extern ld btrange, btrange_cosh;
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1);
+  hrmap *new_map();
+  hrmap *new_alt_map(heptagon *o);
   }
 #endif
 
 #if MAXMDIM == 4
 namespace euclid3 {
-  heptagon *createStep(heptagon *parent, int d);
   hrmap* new_map();
   void draw();
   }
@@ -4277,11 +4298,7 @@ namespace euclid3 {
 namespace reg3 {
   void generate();
   hrmap* new_map();
-  heptagon *createStep(heptagon *parent, int d);
   extern vector<hyperpoint> cellshape;
-  void draw();
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1);  
-  int dist_alt(cell *c);
   int celldistance(cell *c1, cell *c2);
   bool pseudohept(cell *c);
   }
@@ -4357,10 +4374,7 @@ namespace arcm {
   extern map<heptagon*, pair<heptagon*, transmatrix>> archimedean_gmatrix;
 
   void initialize(heptagon *root);
-  transmatrix relative_matrix(heptagon *h1, heptagon *h2);
   short& id_of(heptagon *);
-  void draw();
-  void create_adjacent(heptagon*, int);
   int fix(heptagon *h, int spin);
   #endif
   }
@@ -4385,7 +4399,6 @@ namespace crystal {
   int precise_distance(cell *c1, cell *c2);
   ld space_distance(cell *c1, cell *c2);
   hrmap *new_map();
-  void create_step(heptagon *h, int d);
   void build_rugdata();
   void apply_rotation(const transmatrix t);
   void switch_z_coordinate();

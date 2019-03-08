@@ -718,7 +718,7 @@ void compute_horocycle(heptagon *alt) {
   set<heptagon*> region;
   for(int i=0; i<LOOKUP-1; i++) {
     for(auto h: hs[i]) {
-      generateAlts(h);
+      currentmap->generateAlts(h);
       for(int j=0; j<S7; j++) {
         if(h->move(j)->alt->alt != master->alt->alt) continue;
         region.insert(h->move(j));
@@ -789,7 +789,7 @@ int celldist(cell *c, bool alts) {
         }
       }
     if(doalts == 0) {
-      generateAlts(master);
+      currentmap->generateAlts(master);
       for(int i=0; i<S7; i++) if(master->move(i)->alt == master->alt->move[0] && periodmap[master->move(i)].celldists[true].empty())
         compute_horocycle(master);
       }

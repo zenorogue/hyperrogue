@@ -217,32 +217,12 @@ hookset<void(heptagon*, int)> *hooks_createStep;
 
 heptagon *createStep(heptagon *h, int d) {
   d = h->c.fix(d);
-  if(!h->move(d))
-    callhooks(hooks_createStep, h, d);
-  #if CAP_CRYSTAL
-  if(!h->move(d) && geometry == gCrystal) 
-    crystal::create_step(h, d);
-  #endif
-  #if CAP_BT
-  if(!h->move(d) && binarytiling && DIM == 2)
-    return binary::createStep(h, d);
-  #endif
-  #if CAP_BT && MAXMDIM == 4
-  if(!h->move(d) && binarytiling && DIM == 3) 
-    return binary::createStep3(h, d);
-  #endif
-  #if MAXMDIM == 4
-  if(!h->move(d) && euclid && DIM == 3) 
-    return euclid3::createStep(h, d);
-  if(!h->move(d) && DIM == 3) 
-    return reg3::createStep(h, d);
-  #endif
-  #if CAP_ARCM
-  if(!h->move(d) && archimedean) {
-    arcm::create_adjacent(h, d); 
-    return h->move(d);
-    }
-  #endif
+  if(h->move(d)) return h->move(d);
+  callhooks(hooks_createStep, h, d);
+  return currentmap->create_step(h, d);
+  }
+
+heptagon *hrmap_standard::create_step(heptagon *h, int d) {
   if(!h->move(0) && h->s != hsOrigin && !binarytiling && (geometry != gCrystal)) {
     // cheating: 
     int pard=0;

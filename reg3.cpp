@@ -196,9 +196,10 @@ namespace reg3 {
         alt->distance = 0;
         alt->alt = alt;
         alt->cdata = NULL;
-        binary_map = newAltMap(alt); 
+        binary_map = binary::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
+      else binary_map = NULL;
       
       reg_gmatrix[origin] = make_pair(alt, T);
       altmap[alt].emplace_back(origin, T);
@@ -218,7 +219,7 @@ namespace reg3 {
     
     #define DEB 0
 
-    heptagon *createStep(heptagon *parent, int d) {
+    heptagon *create_step(heptagon *parent, int d) {
       auto& p1 = reg_gmatrix[parent];
       if(DEB) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
       heptagon *alt = p1.first;
@@ -226,6 +227,7 @@ namespace reg3 {
       transmatrix T1 = T;
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3);
+        dynamicval<hrmap*> cm(currentmap, binary_map);
         binary::virtualRebaseSimple(alt, T);
         }
       
@@ -277,6 +279,53 @@ namespace reg3 {
       return created;
       }
 
+    ~hrmap_reg3() {
+      if(binary_map) delete binary_map;
+      clearfrom(origin);
+      }
+    
+    void generateAlts(heptagon* h) {
+      }
+
+    void draw() {
+      sphereflip = Id;
+      
+      // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
+      
+      dq::visited.clear();
+      dq::enqueue(viewctr.at, cview());
+      
+      while(!dq::drawqueue.empty()) {
+        auto& p = dq::drawqueue.front();
+        heptagon *h = get<0>(p);
+        transmatrix V = get<1>(p);
+        dynamicval<ld> b(band_shift, get<2>(p));
+        bandfixer bf(V);
+        dq::drawqueue.pop();
+        
+        
+        cell *c = h->c7;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V, 0, false);
+    
+        for(int i=0; i<S7; i++)
+          if(h->move(i))
+            dq::enqueue(h->move(i), V * relative_matrix(h->move(i), h));
+        }
+      }
+    
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+      auto p1 = reg_gmatrix[h1];
+      auto p2 = reg_gmatrix[h2];
+      transmatrix T = Id;
+      if(hyperbolic) { 
+        dynamicval<eGeometry> g(geometry, gBinary3);
+        dynamicval<hrmap*> cm(currentmap, binary_map);
+        T = binary_map->relative_matrix(p2.first, p1.first);
+        }
+      return inverse(p1.second) * T * p2.second;
+      }
+    
     };
   
 hrmap* new_map() {
@@ -287,54 +336,12 @@ hrmap_reg3* regmap() {
   return ((hrmap_reg3*) currentmap);
   }
 
-heptagon *createStep(heptagon *parent, int d) {
-  return regmap()->createStep(parent, d);
-  }
-
-transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-  auto m = regmap();
-  auto p1 = m->reg_gmatrix[h1];
-  auto p2 = m->reg_gmatrix[h2];
-  transmatrix T = Id;
-  if(hyperbolic) { 
-    dynamicval<eGeometry> g(geometry, gBinary3);
-    T = binary::relative_matrix(p2.first, p1.first);
-    }
-  return inverse(p1.second) * T * p2.second;
-  }
-
-void draw() {
-  sphereflip = Id;
-  
-  // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
-  
-  dq::visited.clear();
-  dq::enqueue(viewctr.at, cview());
-  
-  while(!dq::drawqueue.empty()) {
-    auto& p = dq::drawqueue.front();
-    heptagon *h = get<0>(p);
-    transmatrix V = get<1>(p);
-    dynamicval<ld> b(band_shift, get<2>(p));
-    bandfixer bf(V);
-    dq::drawqueue.pop();
-    
-    
-    cell *c = h->c7;
-    if(!do_draw(c, V)) continue;
-    drawcell(c, V, 0, false);
-
-    for(int i=0; i<S7; i++)
-      dq::enqueue(h->move(i), V * relative_matrix(h->move(i), h));
-    }
-  }
-
 int celldistance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
 
   auto r = regmap();
 
-  hyperpoint h = tC0(relative_matrix(c1->master, c2->master));
+  hyperpoint h = tC0(r->relative_matrix(c1->master, c2->master));
   int b = bucketer(h);
   if(close_distances.count(b)) return close_distances[b];
 
@@ -343,8 +350,9 @@ int celldistance(cell *c1, cell *c2) {
   }
 
 bool pseudohept(cell *c) {
+  auto m = regmap();
   if(sphere) {
-    hyperpoint h = tC0(relative_matrix(c->master, regmap()->origin));
+    hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin));
     if(S7 == 12) {
       hyperpoint h1 = cspin(0, 1, atan2(16, 69) + M_PI/4) * h;
       for(int i=0; i<4; i++) if(abs(abs(h1[i]) - .5) > .01) return false;
@@ -353,7 +361,7 @@ bool pseudohept(cell *c) {
     if(S7 == 8)
       return h[3] >= .99 || h[3] <= -.99 || abs(h[3]) < .01; 
     if(loop == 3 && face == 3 && S7 == 4)
-      return c == currentmap->gamestart();
+      return c == m->gamestart();
     if(loop == 4 && face == 3)
       return abs(h[3]) > .9;
     if(loop == 3 && face == 4)

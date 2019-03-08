@@ -17,7 +17,7 @@ int spherecells() {
 
 vector<int> siblings;
   
-struct hrmap_spherical : hrmap {
+struct hrmap_spherical : hrmap_standard {
   heptagon *dodecahedron[12];
   eVariation mvar;
 
@@ -155,6 +155,33 @@ struct hrmap_spherical : hrmap {
       if(hs2.at != hs.at) printf("error %d,%d\n", i, k);
       }
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
+    }
+  
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+    if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
+      printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
+      #if CAP_GP
+      auto bak = gp::draw_li;
+      #endif
+      swap(gmatrix, gmatrix0);
+      just_gmatrix = true;
+      draw();
+      just_gmatrix = false;
+      swap(gmatrix, gmatrix0);
+      #if CAP_GP
+      gp::draw_li = bak;
+      #endif
+      }
+    if(gmatrix0.count(c2) && gmatrix0.count(c1)) {
+      transmatrix T = inverse(gmatrix0[c1]) * gmatrix0[c2];
+      if(elliptic && T[2][2] < 0)
+        T = centralsym * T;
+      return T;
+      }
+    else {
+      printf("error: gmatrix0 not known\n");
+      return Id;
+      }
     }
   };
 

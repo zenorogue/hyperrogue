@@ -56,75 +56,17 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
   return calc_relative_matrix(c2, c1, ddspin(c1, direction_hint) * xpush0(1e-2));
   }
 
+transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+  return currentmap->relative_matrix(c2, c1, point_hint);
+  }
+
 // target, source, direction from source to target
 
 #if CAP_GP
 namespace gp { extern gp::local_info draw_li; }
 #endif
 
-transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
-
-  if(sphere_narcm && DIM == 2) {
-    if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
-      printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
-      #if CAP_GP
-      auto bak = gp::draw_li;
-      #endif
-      swap(gmatrix, gmatrix0);
-      just_gmatrix = true;
-      drawStandard();
-      just_gmatrix = false;
-      swap(gmatrix, gmatrix0);
-      #if CAP_GP
-      gp::draw_li = bak;
-      #endif
-      }
-    if(gmatrix0.count(c2) && gmatrix0.count(c1)) {
-      transmatrix T = inverse(gmatrix0[c1]) * gmatrix0[c2];
-      if(elliptic && T[2][2] < 0)
-        T = centralsym * T;
-      return T;
-      }
-    else {
-      printf("error: gmatrix0 not known\n");
-      return Id;
-      }
-    }
-  
-  #if CAP_BT
-  if(binarytiling) return binary::relative_matrix(c2->master, c1->master);
-  #endif
-  #if MAXMDIM == 4
-  if(euclid && DIM == 3) return euclid3::relative_matrix(c2->master, c1->master);
-  if(DIM == 3) return reg3::relative_matrix(c2->master, c1->master);
-  #endif
-  #if CAP_ARCM
-  if(archimedean) return arcm::relative_matrix(c2->master, c1->master);
-  #endif
-  
-  if(euwrap) {
-    transmatrix t = Id;
-    // if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
-    int d = celldistance(c2, c1);
-    while(d) {
-      forCellIdEx(cc, i, c1) {
-        int d1 = celldistance(cc, c2);
-        if(d1 < d) {
-          t = t * cellrelmatrix(c1, i);
-          c1 = cc;
-          d = d1;
-          goto again;
-          }
-        }
-      printf("ERROR not reached\n");
-      break;
-      again: ;
-      }
-    return t;
-    }
-  
-  if(euclid) 
-    return eumove(cell_to_vec(c2) - cell_to_vec(c1));
+transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
   heptagon *h1 = c1->master;
   transmatrix gm = master_relative(c1, true);

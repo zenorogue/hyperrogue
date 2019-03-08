@@ -60,8 +60,7 @@ void recursive_delete(heptagon *h, int i) {
   if(h2->alt && h2->alt->alt == h2->alt) {
     DEBSM(printf("destroying alternate map %p\n", h2->alt);)
     for(hrmap *& hm: allmaps) {
-      auto hm2 = dynamic_cast<hrmap_alternate*> (hm);
-      if(hm2 && hm2->origin == h2->alt) {
+      if(hm->getOrigin() == h2->alt) {
         delete hm;
         hm = allmaps.back();
         allmaps.pop_back();

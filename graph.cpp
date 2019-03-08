@@ -5912,24 +5912,7 @@ void drawthemap() {
   arrowtraps.clear();
 
   profile_start(1);
-  if(masterless)
-    drawEuclidean();
-  #if CAP_BT
-  else if(binarytiling)
-    binary::draw();
-  #endif
-  #if CAP_ARCM
-  else if(archimedean)
-    arcm::draw();
-  #endif
-  #if MAXMDIM == 4
-  else if(euclid && DIM == 3)
-    euclid3::draw();
-  else if(DIM == 3)
-    reg3::draw();
-  #endif
-  else
-    drawStandard();
+  currentmap->draw();
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();

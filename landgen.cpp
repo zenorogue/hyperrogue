@@ -1514,7 +1514,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen) {
         if(!eubinary) {
           if(c->master->alt && c->master->alt->distance <= 2) {
-            if(!eubinary) generateAlts(c->master);
+            if(!eubinary) currentmap->generateAlts(c->master);
             preventbarriers(c);
             int d = celldistAlt(c);
             if(d <= 0) 

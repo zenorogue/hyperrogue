@@ -352,7 +352,9 @@ int fiftyrule(coord c) {
   */
   }
 
-struct hrmap_crystal : hrmap {
+bool is_bi(crystal_structure& cs, coord co);
+
+struct hrmap_crystal : hrmap_standard {
   heptagon *getOrigin() { return get_heptagon_at(c0, S7); }
 
   map<heptagon*, coord> hcoords;
@@ -435,6 +437,44 @@ struct hrmap_crystal : hrmap {
   void verify() { }
   
   void prepare_east();
+
+  heptagon *create_step(heptagon *h, int d) {
+    if(!hcoords.count(h)) {
+      printf("not found\n");
+      return NULL;
+      }
+    auto co = hcoords[h];
+    
+    if(is_bi(cs, co)) {
+      heptspin hs(h, d);
+      (hs + 1 + wstep + 1).cpeek();
+      return h->move(d);
+      }
+  
+    auto lw = makewalker(co, d);
+  
+    if(ginf[gCrystal].vertex == 4) {
+      auto c1 = add(co, lw, FULLSTEP);
+      auto lw1 = lw+wstep;
+      
+      h->c.connect(d, heptspin(get_heptagon_at(c1, S7), lw1.spin));
+      }
+    else {
+      auto coc = add(add(co, lw, HALFSTEP), lw+1, HALFSTEP);
+      auto hc = get_heptagon_at(coc, 8);
+      for(int a=0; a<8; a+=2) {
+        hc->c.connect(a, heptspin(h, lw.spin));
+        if(h->modmove(lw.spin-1)) {
+          hc->c.connect(a+1, heptspin(h, lw.spin) - 1 + wstep - 1);
+          }
+        co = add(co, lw, FULLSTEP);
+        lw = lw + wstep + (-1);
+        h = get_heptagon_at(co, S7);
+        }
+      }
+    return h->move(d);
+    }
+
   };
 
 hrmap_crystal *crystal_map() {
@@ -448,44 +488,6 @@ ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
 bool is_bi(crystal_structure& cs, coord co) {
   for(int i=0; i<cs.dim; i++) if(co[i] & HALFSTEP) return true;
   return false;
-  }
-
-void create_step(heptagon *h, int d) {
-  auto m = crystal_map();
-  if(geometry != gCrystal) return;
-  if(!m->hcoords.count(h)) {
-    printf("not found\n");
-    return;
-    }
-  auto co = m->hcoords[h];
-  
-  if(is_bi(m->cs, co)) {
-    heptspin hs(h, d);
-    (hs + 1 + wstep + 1).cpeek();
-    return;
-    }
-
-  auto lw = m->makewalker(co, d);
-
-  if(ginf[gCrystal].vertex == 4) {
-    auto c1 = add(co, lw, FULLSTEP);
-    auto lw1 = lw+wstep;
-    
-    h->c.connect(d, heptspin(m->get_heptagon_at(c1, S7), lw1.spin));
-    }
-  else {
-    auto coc = add(add(co, lw, HALFSTEP), lw+1, HALFSTEP);
-    auto hc = m->get_heptagon_at(coc, 8);
-    for(int a=0; a<8; a+=2) {
-      hc->c.connect(a, heptspin(h, lw.spin));
-      if(h->modmove(lw.spin-1)) {
-        hc->c.connect(a+1, heptspin(h, lw.spin) - 1 + wstep - 1);
-        }
-      co = add(co, lw, FULLSTEP);
-      lw = lw + wstep + (-1);
-      h = m->get_heptagon_at(co, S7);
-      }
-    }
   }
 
 array<array<int,2>, MAX_EDGE> distlimit_table = {{

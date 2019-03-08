@@ -45,6 +45,9 @@ namespace binary {
   void breakhere() {
     exit(1);
     }
+
+  const transmatrix& tmatrix(heptagon *h, int dir);
+  const transmatrix& itmatrix(heptagon *h, int dir);
   
   heptagon *path(heptagon *h, int d, int d1, std::initializer_list<int> p) {
     static int rec = 0;
@@ -53,7 +56,7 @@ namespace binary {
     heptagon *h1 = h;
     for(int d0: p) {
       // printf(" [%d]", d0);
-      h1 = hr::createStep(h1, d0);
+      h1 = currentmap->may_create_step(h1, d0);
       // printf(" %p", h1);
       }
 
@@ -104,113 +107,205 @@ namespace binary {
     }
   #endif
   
-  heptagon *createStep(heptagon *parent, int d) {
-    auto h = parent;
-    switch(d) {
-      case bd_right: {
-        if(mapside(h) > 0 && type_of(h) == 7) 
-          return path(h, d, bd_left, {bd_left, bd_down, bd_right, bd_up});
-        else if(mapside(h) >= 0) 
-          return build(parent, bd_right, bd_left, type_of(parent) ^ 1, 1, 0);
-        else if(type_of(h) == 6)
-          return path(h, d, bd_left, {bd_down, bd_right, bd_up, bd_left});
-        else
-          return path(h, d, bd_left, {bd_down_right, bd_up});
-        }
-      case bd_left: {
-        if(mapside(h) < 0 && type_of(h) == 7) 
-          return path(h, d, bd_right, {bd_right, bd_down, bd_left, bd_up});
-        else if(mapside(h) <= 0) 
-          return build(parent, bd_left, bd_right, type_of(parent) ^ 1, -1, 0);
-        else if(type_of(h) == 6)
-          return path(h, d, bd_right, {bd_down, bd_left, bd_up, bd_right});
-        else
-          return path(h, d, bd_right, {bd_down_left, bd_up});
-        }
-      case bd_up_right: {
-        return path(h, d, bd_down_left, {bd_up, bd_right});
-        }
-      case bd_up_left: {
-        return path(h, d, bd_down_right, {bd_up, bd_left});
-        }
-      case bd_up: 
-        return build(parent, bd_up, bd_down, 6, mapside(parent), 1);
-      default:
-        /* bd_down */
-        if(type_of(h) == 6) {
-          if(mapside(h) == 0)
-            return build(parent, bd_down, bd_up, 6, 0, -1);
-          else if(mapside(h) == 1)
-            return path(h, d, bd_up, {bd_left, bd_left, bd_down, bd_right});
-          else if(mapside(h) == -1)
-            return path(h, d, bd_up, {bd_right, bd_right, bd_down, bd_left});
-          }
-        /* bd_down_left */
-        else if(d == bd_down_left) {
-          return path(h, d, bd_up_right, {bd_left, bd_down});
-          }
-        else if(d == bd_down_right) {
-          return path(h, d, bd_up_left, {bd_right, bd_down});
-          }
-        }
-    printf("error: case not handled in binary tiling\n");
-    breakhere();
-    return NULL;
-    }
-
-  #if MAXMDIM==4
-  heptagon *createStep3(heptagon *parent, int d) {
-    auto h = parent;
-    if(geometry == gBinary3)
-    switch(d) {
-      case 0: case 1:
-      case 2: case 3:
-        return build3(parent, d, 8, 1);
-      case 8:
-        return build3(parent, 8, hrand(4), -1);
-      case 4:
-        parent->cmove(8);
-        if(parent->c.spin(8) & 1)
-          return path(h, 4, 5, {8, parent->c.spin(8) ^ 1});
-        else
-          return path(h, 4, 5, {8, 4, parent->c.spin(8) ^ 1});
-      case 5:
-        parent->cmove(8);
-        if(!(parent->c.spin(8) & 1))
-          return path(h, 5, 4, {8, parent->c.spin(8) ^ 1});
-        else
-          return path(h, 5, 4, {8, 5, parent->c.spin(8) ^ 1});
-      case 6:
-        parent->cmove(8);
-        if(parent->c.spin(8) & 2)
-          return path(h, 6, 7, {8, parent->c.spin(8) ^ 2});
-        else
-          return path(h, 6, 7, {8, 6, parent->c.spin(8) ^ 2});
-      case 7:
-        parent->cmove(8);
-        if(!(parent->c.spin(8) & 2))
-          return path(h, 7, 6, {8, parent->c.spin(8) ^ 2});
-        else
-          return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
-      }
-    if(geometry == gHoroTris) switch(d) {
-      case 0: case 1: case 2: case 3:
-        return build3(parent, d, 7, 1);
-      case 7:
-        return build3(parent, 7, hrand(3), -1);
-      case 4: case 5: case 6: 
-        parent->cmove(7);
-        int s = parent->c.spin(7);
-        if(s == 0) return path(h, d, d, {7, d-3});
-        else if(s == d-3) return path(h, d, d, {7, 0});
-        else return path(h, d, d, {7, d, 9-d-s});
-      }
-    printf("error: case not handled in binary tiling\n");
-    breakhere();
-    return NULL;
-    }
-  #endif
+  struct hrmap_binary : hrmap_hyperbolic {
   
+    hrmap_binary(heptagon *o) : hrmap_hyperbolic(o) {}
+
+    hrmap_binary() : hrmap_hyperbolic() {}
+
+    heptagon *create_step(heptagon *parent, int d) {
+      auto h = parent;
+      switch(geometry) {
+        case gBinaryTiling: {
+          switch(d) {
+            case bd_right: {
+              if(mapside(h) > 0 && type_of(h) == 7) 
+                return path(h, d, bd_left, {bd_left, bd_down, bd_right, bd_up});
+              else if(mapside(h) >= 0) 
+                return build(parent, bd_right, bd_left, type_of(parent) ^ 1, 1, 0);
+              else if(type_of(h) == 6)
+                return path(h, d, bd_left, {bd_down, bd_right, bd_up, bd_left});
+              else
+                return path(h, d, bd_left, {bd_down_right, bd_up});
+              }
+            case bd_left: {
+              if(mapside(h) < 0 && type_of(h) == 7) 
+                return path(h, d, bd_right, {bd_right, bd_down, bd_left, bd_up});
+              else if(mapside(h) <= 0) 
+                return build(parent, bd_left, bd_right, type_of(parent) ^ 1, -1, 0);
+              else if(type_of(h) == 6)
+                return path(h, d, bd_right, {bd_down, bd_left, bd_up, bd_right});
+              else
+                return path(h, d, bd_right, {bd_down_left, bd_up});
+              }
+            case bd_up_right: {
+              return path(h, d, bd_down_left, {bd_up, bd_right});
+              }
+            case bd_up_left: {
+              return path(h, d, bd_down_right, {bd_up, bd_left});
+              }
+            case bd_up: 
+              return build(parent, bd_up, bd_down, 6, mapside(parent), 1);
+            default:
+              /* bd_down */
+              if(type_of(h) == 6) {
+                if(mapside(h) == 0)
+                  return build(parent, bd_down, bd_up, 6, 0, -1);
+                else if(mapside(h) == 1)
+                  return path(h, d, bd_up, {bd_left, bd_left, bd_down, bd_right});
+                else if(mapside(h) == -1)
+                  return path(h, d, bd_up, {bd_right, bd_right, bd_down, bd_left});
+                }
+              /* bd_down_left */
+              else if(d == bd_down_left) {
+                return path(h, d, bd_up_right, {bd_left, bd_down});
+                }
+              else if(d == bd_down_right) {
+                return path(h, d, bd_up_left, {bd_right, bd_down});
+                }
+              }
+          printf("error: case not handled in binary tiling\n");
+          breakhere();
+          return NULL;
+          }
+        case gBinary3: {
+          switch(d) {
+            case 0: case 1:
+            case 2: case 3:
+              return build3(parent, d, 8, 1);
+            case 8:
+              return build3(parent, 8, hrand(4), -1);
+            case 4:
+              parent->cmove(8);
+              if(parent->c.spin(8) & 1)
+                return path(h, 4, 5, {8, parent->c.spin(8) ^ 1});
+              else
+                return path(h, 4, 5, {8, 4, parent->c.spin(8) ^ 1});
+            case 5:
+              parent->cmove(8);
+              if(!(parent->c.spin(8) & 1))
+                return path(h, 5, 4, {8, parent->c.spin(8) ^ 1});
+              else
+                return path(h, 5, 4, {8, 5, parent->c.spin(8) ^ 1});
+            case 6:
+              parent->cmove(8);
+              if(parent->c.spin(8) & 2)
+                return path(h, 6, 7, {8, parent->c.spin(8) ^ 2});
+              else
+                return path(h, 6, 7, {8, 6, parent->c.spin(8) ^ 2});
+            case 7:
+              parent->cmove(8);
+              if(!(parent->c.spin(8) & 2))
+                return path(h, 7, 6, {8, parent->c.spin(8) ^ 2});
+              else
+                return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
+            }
+          }
+        case gHoroTris: {            
+          switch(d) {
+            case 0: case 1: case 2: case 3:
+              return build3(parent, d, 7, 1);
+            case 7:
+              return build3(parent, 7, hrand(3), -1);
+            case 4: case 5: case 6: 
+              parent->cmove(7);
+              int s = parent->c.spin(7);
+              if(s == 0) return path(h, d, d, {7, d-3});
+              else if(s == d-3) return path(h, d, d, {7, 0});
+              else return path(h, d, d, {7, d, 9-d-s});
+            }
+          }
+        
+        default: ;
+        }
+      printf("error: case not handled in binary tiling\n");
+      breakhere();
+      return NULL;
+      }
+
+    void draw() {
+      dq::visited.clear();
+      dq::enqueue(viewctr.at, cview());
+      {
+      dynamicval<color_t> d(poly_outline, 0xFFFFFFFF);
+      for(int i=0; i<S7; i++) queuepolyat(cview(), shWall3D[i], 0, PPR::SUPERLINE);
+      }
+      
+      while(!dq::drawqueue.empty()) {
+        auto& p = dq::drawqueue.front();
+        heptagon *h = get<0>(p);
+        transmatrix V = get<1>(p);
+        dynamicval<ld> b(band_shift, get<2>(p));
+        bandfixer bf(V);
+        dq::drawqueue.pop();
+        
+        
+        cell *c = h->c7;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V, 0, false);
+  
+        if(DIM == 2) {
+          dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
+          dq::enqueue(h->move(bd_right), V * parabolic(1));
+          dq::enqueue(h->move(bd_left), V * parabolic(-1));
+          if(c->type == 6)
+            dq::enqueue(h->move(bd_down), V * xpush(log(2)));
+          if(c->type == 7) {
+            dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
+            dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
+            }
+          }
+        else {
+          for(int i=0; i<S7; i++)
+            dq::enqueue(h->move(i), V * tmatrix(h, i));
+          }
+        }
+      }
+    
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+      if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
+        return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+      transmatrix gm = Id, where = Id;
+      while(h1 != h2) {
+        if(h1->distance <= h2->distance) {
+          if(DIM == 3)
+            where = itmatrix(h2, S7-1) * where, h2 = may_create_step(h2, S7-1);
+          else {
+            if(type_of(h2) == 6)
+              h2 = may_create_step(h2, bd_down), where = xpush(-log(2)) * where;
+            else if(mapside(h2) == 1)
+              h2 = may_create_step(h2, bd_left), where = parabolic(+1) * where;
+            else if(mapside(h2) == -1)
+              h2 = may_create_step(h2, bd_right), where = parabolic(-1) * where;
+            }
+          }
+        else {
+          if(DIM == 3)
+            gm = gm * tmatrix(h1, S7-1), h1 = may_create_step(h1, S7-1);
+          else {
+            if(type_of(h1) == 6)
+              h1 = may_create_step(h1, bd_down), gm = gm * xpush(log(2));
+            else if(mapside(h1) == 1)
+              h1 = may_create_step(h1, bd_left), gm = gm * parabolic(-1);
+            else if(mapside(h1) == -1)
+              h1 = may_create_step(h1, bd_right), gm = gm * parabolic(+1);
+            }
+          }
+        }
+      return gm * where;
+      }
+    };
+
+  hrmap *new_map() { return new hrmap_binary; }
+  
+  struct hrmap_alternate_binary : hrmap_binary {
+    heptagon *origin;
+    hrmap_alternate_binary(heptagon *o) { origin = o; }
+    ~hrmap_alternate_binary() { clearfrom(origin); }
+    };
+
+  hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
+
   transmatrix direct_tmatrix[8];
   transmatrix inverse_tmatrix[8];
   
@@ -312,74 +407,6 @@ namespace binary {
     return point3(log(2) + log(-h[0]), h[1] / co, h[2] / co);
     }
   
-  void draw() {
-    dq::visited.clear();
-    dq::enqueue(viewctr.at, cview());
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
-      dynamicval<ld> b(band_shift, get<2>(p));
-      bandfixer bf(V);
-      dq::drawqueue.pop();
-      
-      
-      cell *c = h->c7;
-      if(!do_draw(c, V)) continue;
-      drawcell(c, V, 0, false);
-
-      if(DIM == 2) {
-        dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
-        dq::enqueue(h->move(bd_right), V * parabolic(1));
-        dq::enqueue(h->move(bd_left), V * parabolic(-1));
-        if(c->type == 6)
-          dq::enqueue(h->move(bd_down), V * xpush(log(2)));
-        if(c->type == 7) {
-          dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
-          dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
-          }
-        }
-      else {
-        for(int i=0; i<S7; i++)
-          dq::enqueue(h->move(i), V * tmatrix(h, i));
-        }
-      }
-    }
-  
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-    if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-      return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
-    transmatrix gm = Id, where = Id;
-    while(h1 != h2) {
-      if(h1->distance <= h2->distance) {
-        if(DIM == 3)
-          where = itmatrix(h2, S7-1) * where, h2 = hr::createStep(h2, S7-1);
-        else {
-          if(type_of(h2) == 6)
-            h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
-          else if(mapside(h2) == 1)
-            h2 = hr::createStep(h2, bd_left), where = parabolic(+1) * where;
-          else if(mapside(h2) == -1)
-            h2 = hr::createStep(h2, bd_right), where = parabolic(-1) * where;
-          }
-        }
-      else {
-        if(DIM == 3)
-          gm = gm * tmatrix(h1, S7-1), h1 = hr::createStep(h1, S7-1);
-        else {
-          if(type_of(h1) == 6)
-            h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
-          else if(mapside(h1) == 1)
-            h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(-1);
-          else if(mapside(h1) == -1)
-            h1 = hr::createStep(h1, bd_right), gm = gm * parabolic(+1);
-          }
-        }
-      }
-    return gm * where;
-    }
-
 #if CAP_COMMANDLINE
 auto bt_config = addHook(hooks_args, 0, [] () {
   using namespace arg;

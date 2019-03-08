@@ -839,7 +839,7 @@ void drawrec(cell *c, const transmatrix& V) {
 
 vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 
-void drawStandard() {
+void hrmap_standard::draw() {
   drawn_cells.clear();
   drawn_cells.emplace_back(viewctr, hsOrigin, cview(), band_shift);
   for(int i=0; i<isize(drawn_cells); i++) {    
@@ -969,54 +969,6 @@ transmatrix eumovedir(int d) {
   return eumove(0,0);
   }
 
-ld matrixnorm(const transmatrix& Mat) {
-  return Mat[0][2] * Mat[0][2] + Mat[1][2] * Mat[1][2];
-  }
-  
-void drawEuclidean() {
-  DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
-  sphereflip = Id;
-  if(!centerover.at) centerover = cwt;
-  // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
-  //   mindx, mindy, maxdx, maxdy);
-  int pvec = cellwalker_to_vec(centerover);
-  
-  typedef pair<int, int> euspot;
-  
-  const euspot zero = {0,0};
-  
-  set<euspot> visited = {zero};
-  vector<euspot> dfs = {zero};
-
-  ld centerd = matrixnorm(View);
-  auto View0 = View;
-  
-  for(int i=0; i<isize(dfs); i++) {
-    int dx, dy;
-    tie(dx, dy) = dfs[i];
-    
-    cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
-    if(!cw.at) continue;
-    transmatrix Mat = View0 * eumove(dx, dy);
-    torusconfig::torus_cx = dx;
-    torusconfig::torus_cy = dy;
-
-    if(true) {
-      ld locald = matrixnorm(Mat);
-      if(locald < centerd) centerd = locald, centerover = cw, View = Mat;
-      }
-
-    if(do_draw(cw.at, Mat)) {
-      drawcell(cw.at, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat, cw.spin, cw.mirrored);
-      for(int x=-1; x<=+1; x++)
-      for(int y=-1; y<=+1; y++) {
-        euspot p(dx+x, dy+y);
-        if(!visited.count(p)) visited.insert(p), dfs.push_back(p);
-        }
-      }
-    }
-  }
-
 void spinEdge(ld aspd) { 
 
   if(playerfound && vid.fixed_facing) {
@@ -1127,17 +1079,7 @@ void optimizeview() {
     for(int i=0; i<viewctr.at->c7->type; i++) {
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
-      transmatrix T;
-      #if CAP_BT
-      if(binarytiling) T = binary::relative_matrix(h2, viewctr.at);
-      #endif
-      #if MAXMDIM == 4
-      else if(euclid && DIM == 3) T = euclid3::relative_matrix(h2, viewctr.at);
-      else if(DIM == 3) T = reg3::relative_matrix(h2, viewctr.at);
-      #endif
-      #if CAP_ARCM
-      if(archimedean)  T = arcm::relative_matrix(h2, viewctr.at);
-      #endif
+      transmatrix T = currentmap->relative_matrix(h2, viewctr.at);
       hyperpoint H = View * tC0(T);
       ld quality = hdist0(H);
       if(quality < best) best = quality, turn = i1, TB = T;

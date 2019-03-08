@@ -10,6 +10,8 @@ namespace hr {
 // NOTE: patterns assume that pair_to_vec(0,1) % 3 == 2!
 // Thus, pair_to_vec(0,1) must not be e.g. a power of four
 
+int cell_to_vec(cell *c);
+
 int pair_to_vec(int x, int y) {
   return x + (y << 15);
   }
@@ -299,7 +301,11 @@ template<class T> void build_euclidean_moves(cell *c, int vec, const T& builder)
     }
   }
 
-struct hrmap_torus : hrmap {
+struct hrmap_euclid_any : hrmap {
+  void draw() override;
+  };
+
+struct hrmap_torus : hrmap_euclid_any {
 
   vector<cell*> all;
   vector<int> dists;
@@ -340,6 +346,27 @@ struct hrmap_torus : hrmap {
   ~hrmap_torus() {
     for(cell *c: all) tailored_delete(c);
     }
+
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+    transmatrix t = Id;
+    // if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
+    int d = celldistance(c2, c1);
+    while(d) {
+      forCellIdEx(cc, i, c1) {
+        int d1 = celldistance(cc, c2);
+        if(d1 < d) {
+          t = t * cellrelmatrix(c1, i);
+          c1 = cc;
+          d = d1;
+          goto again;
+          }
+        }
+      printf("ERROR not reached\n");
+      break;
+      again: ;
+      }
+    return t;
+    }
   };
 
 hrmap_torus *torusmap() {
@@ -352,7 +379,7 @@ hrmap_torus *torusmap() {
   return cur->all[id];
   } */
 
-struct hrmap_euclidean : hrmap {
+struct hrmap_euclidean : hrmap_euclid_any {
 
   cell *gamestart() {
     return *(euclideanAtCreate(0).first);
@@ -399,6 +426,10 @@ struct hrmap_euclidean : hrmap {
         euclidean[y][x] = NULL;
         }
     eucdata.clear();
+    }
+
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+    return eumove(cell_to_vec(c2) - cell_to_vec(c1));
     }
   };
 
@@ -558,9 +589,36 @@ namespace euclid3 {
       return h;
       }
   
-    heptagon *createStep(heptagon *parent, int d) {
+    heptagon *create_step(heptagon *parent, int d) {
       return build(parent, d, ispacemap[parent] + shifttable[d]);
+      }  
+
+    void draw() {
+      dq::visited.clear();
+      dq::enqueue(viewctr.at, cview());
+      
+      while(!dq::drawqueue.empty()) {
+        auto& p = dq::drawqueue.front();
+        heptagon *h = get<0>(p);
+        transmatrix V = get<1>(p);      
+        dynamicval<ld> b(band_shift, get<2>(p));
+        bandfixer bf(V);
+        dq::drawqueue.pop();
+        
+        cell *c = h->c7;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V, 0, false);
+  
+        for(int i=0; i<S7; i++)
+          dq::enqueue(h->move(i), V * tmatrix[i]);
+        }
       }
+    
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+      auto v = getcoord(ispacemap[h2] - ispacemap[h1]);
+      return eupush3(v[0], v[1], v[2]);
+      }
+    
     };
   
   hrmap_euclid3* cubemap() {
@@ -571,10 +629,6 @@ namespace euclid3 {
     return new hrmap_euclid3;
     }
 
-  heptagon *createStep(heptagon *parent, int d) {
-    return cubemap()->createStep(parent, d);
-    }
-  
   bool pseudohept(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
     auto v = getcoord(co);
@@ -595,34 +649,6 @@ namespace euclid3 {
     else return v[2]/2;
     }
 
-  void draw() {
-    dq::visited.clear();
-    dq::enqueue(viewctr.at, cview());
-    auto cm = cubemap();
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);      
-      dynamicval<ld> b(band_shift, get<2>(p));
-      bandfixer bf(V);
-      dq::drawqueue.pop();
-      
-      cell *c = h->c7;
-      if(!do_draw(c, V)) continue;
-      drawcell(c, V, 0, false);
-
-      for(int i=0; i<S7; i++)
-        dq::enqueue(h->move(i), V * cm->tmatrix[i]);
-      }
-    }
-  
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-    auto cm = cubemap();
-    auto v = getcoord(cm->ispacemap[h2] - cm->ispacemap[h1]);
-    return eupush3(v[0], v[1], v[2]);
-    }
-  
   bool get_emerald(cell *c) {
     auto v = getcoord(cubemap()->ispacemap[c->master]);
     int s0 = 0, s1 = 0;
@@ -665,4 +691,53 @@ namespace euclid3 {
 
   }
 #endif
+
+ld matrixnorm(const transmatrix& Mat) {
+  return Mat[0][2] * Mat[0][2] + Mat[1][2] * Mat[1][2];
+  }
+  
+void hrmap_euclid_any::draw() {
+  DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
+  sphereflip = Id;
+  if(!centerover.at) centerover = cwt;
+  // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
+  //   mindx, mindy, maxdx, maxdy);
+  int pvec = cellwalker_to_vec(centerover);
+  
+  typedef pair<int, int> euspot;
+  
+  const euspot zero = {0,0};
+  
+  set<euspot> visited = {zero};
+  vector<euspot> dfs = {zero};
+
+  ld centerd = matrixnorm(View);
+  auto View0 = View;
+  
+  for(int i=0; i<isize(dfs); i++) {
+    int dx, dy;
+    tie(dx, dy) = dfs[i];
+    
+    cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
+    if(!cw.at) continue;
+    transmatrix Mat = View0 * eumove(dx, dy);
+    torusconfig::torus_cx = dx;
+    torusconfig::torus_cy = dy;
+
+    if(true) {
+      ld locald = matrixnorm(Mat);
+      if(locald < centerd) centerd = locald, centerover = cw, View = Mat;
+      }
+
+    if(do_draw(cw.at, Mat)) {
+      drawcell(cw.at, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat, cw.spin, cw.mirrored);
+      for(int x=-1; x<=+1; x++)
+      for(int y=-1; y<=+1; y++) {
+        euspot p(dx+x, dy+y);
+        if(!visited.count(p)) visited.insert(p), dfs.push_back(p);
+        }
+      }
+    }
+  }
+
 }

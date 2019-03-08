@@ -357,11 +357,18 @@ hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
+bool skip_digons(heptspin hs, int step);
+void connect_digons_too(heptspin h1, heptspin h2);
+void fixup_matrix(transmatrix& T, const transmatrix& X, ld step);
+void connectHeptagons(heptspin hi, heptspin hs);
+transmatrix adjcell_matrix(heptagon *h, int d);
+
 struct hrmap_archimedean : hrmap {
   heptagon *origin;
   heptagon *getOrigin() { return origin; }
 
   hrmap_archimedean() {
+    dynamicval<hrmap*> curmap(currentmap, this);
     int id = DUAL ? current.N * 2 : 0;;
     int N0 = isize(current.adjacent[id]);
     origin = tailored_alloc<heptagon> (N0);
@@ -405,9 +412,9 @@ struct hrmap_archimedean : hrmap {
         origin->c.connect(s, hnew, s, false);
       }
     else if(current.real_faces == 0) {
-      create_adjacent(origin, 0); 
+      may_create_step(origin, 0); 
       heptagon *o0 = origin->move(0);
-      create_adjacent(origin, 1);
+      may_create_step(origin, 1);
       heptagon *o1 = origin->move(1);
       for(int s=1; s<2*current.N; s+=2)
         o0->c.connect(s, o1, 2*current.N-s, false);
@@ -420,8 +427,8 @@ struct hrmap_archimedean : hrmap {
       o1->c.connect(1, o0, 2*current.N-1, false);
       }
     else if(origin->degree() == 2) {
-      create_adjacent(origin, 0);
-      create_adjacent(origin, 1);
+      may_create_step(origin, 0);
+      may_create_step(origin, 1);
       origin->move(0)->c.connect(1, origin->move(1), 2*current.N-1, false);
       origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
       }
@@ -443,11 +450,135 @@ struct hrmap_archimedean : hrmap {
       }
     }
   void verify() { }
+
+  heptagon *create_step(heptagon *h, int d) {
+  
+    SDEBUG( printf("%p.%d ~ ?\n", h, d); )
+  
+    heptspin hi(h, d);
+    
+    while(skip_digons(hi, 1)) hi++;
+    
+    auto& t1 = current.get_triangle(hi);
+  
+    // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
+    
+    auto& p1 = archimedean_gmatrix[h];
+    
+    heptagon *alt = p1.first;
+  
+    transmatrix T = p1.second * spin(-t1.first) * xpush(t1.second);
+    transmatrix U = Id;
+    
+    if(hyperbolic) {
+      dynamicval<eGeometry> g(geometry, gNormal); 
+      dynamicval<hrmap*> cm(currentmap, current_altmap);
+      U = T;
+      virtualRebaseSimple(alt, T);
+      U = U * inverse(T);
+      }
+    
+    if(euclid) 
+      alt = encodeId(pair_to_vec(int(T[0][2]), int(T[1][2])));
+      
+    SDEBUG( println(hlog, "look for: ", alt, " / ", T * C0); )
+  
+    for(auto& p2: altmap[alt]) if(intval(p2.second * C0, T * C0) < 1e-4) {
+      SDEBUG( println(hlog, "cell found: ", p2.first); )
+      for(int d2=0; d2<p2.first->degree(); d2++) {
+        heptspin hs(p2.first, d2);
+        auto& t2 = current.get_triangle(p2.first, d2);
+        transmatrix T1 = T * spin(M_PI + t2.first);
+        SDEBUG( print(hlog, "compare: ", T1 * xpush0(1));  )
+        SDEBUG( println(hlog, ":: ", p2.second * xpush0(1));  )
+        if(intval(T1 * xpush0(1), p2.second * xpush0(1)) < 1e-4) {
+        
+          // T1 = p2.second
+          // T * spin(pi+t2.first) == p2.second
+          // p1.second * spinm(-t1.first) * xpush(t1.second) * spin(pi+t2.first) == p2.second
+          
+          // bring p1 and p2 closer, to prevent floating point errors
+          if(hyperbolic) {
+            fixup_matrix(p1.second, U * p2.second * spin(-M_PI - t2.first) * xpush(-t1.second) * spin(t1.first), 0.25);
+            fixup_matrix(p2.second, T1, 0.25);
+            }
+  
+          while(skip_digons(hs, -1)) hs--;
+          connectHeptagons(hi, hs);
+          connect_digons_too(hi, hs);
+          return h->move(d);
+          }
+        }
+      SDEBUG( println(hlog, "but rotation not found"));
+      }
+    
+    auto& t2 = current.get_triangle(current.get_adj(hi));
+    transmatrix T1 = T * spin(M_PI + t2.first);
+    fixmatrix(T1);
+  
+    heptagon *hnew = build_child(hi, current.get_adj(hi));
+    altmap[alt].emplace_back(hnew, T1);
+    archimedean_gmatrix[hnew] = make_pair(alt, T1);
+    connect_digons_too(hi, heptspin(hnew, 0));
+    
+    return hnew;
+    }
+  
+  void draw() {
+    dq::visited.clear();
+    dq::enqueue(viewctr.at, cview());
+    
+    while(!dq::drawqueue.empty()) {
+      auto& p = dq::drawqueue.front();
+      heptagon *h = get<0>(p);
+      transmatrix V = get<1>(p);
+      dynamicval<ld> b(band_shift, get<2>(p));
+      dq::drawqueue.pop();
+  
+      int id = id_of(h);
+      int S = isize(current.triangles[id]);
+  
+      if(id < 2*current.N ? !DUAL : !PURE) {
+        if(!do_draw(h->c7, V)) continue;
+        drawcell(h->c7, V, 0, false);
+        }
+  
+      for(int i=0; i<S; i++) {
+        if(DUAL && (i&1)) continue;
+        h->cmove(i);
+        if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
+        transmatrix V1 = V * adjcell_matrix(h, i);
+        bandfixer bf(V1);
+        dq::enqueue(h->move(i), V1);
+        }
+      }
+    }
+  
+  transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+    if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
+      return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+    transmatrix gm = Id, where = Id;
+    while(h1 != h2) {
+      for(int i=0; i<neighbors_of(h1); i++) {
+        if(h1->move(i) == h2) {
+          return gm * adjcell_matrix(h1, i) * where;
+          }
+        }
+      if(h1->distance > h2->distance) {
+        gm = gm * adjcell_matrix(h1, 0);
+        h1 = h1->move(0);
+        }
+      else {
+        where = inverse(adjcell_matrix(h2, 0)) * where;
+        h2 = h2->move(0);
+        }
+      }
+    return gm * where;
+    }
+  
   };
 
 hrmap *new_map() { return new hrmap_archimedean; }
-
-transmatrix adjcell_matrix(heptagon *h, int d);
 
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
@@ -540,76 +671,6 @@ void fixup_matrix(transmatrix& T, const transmatrix& X, ld step) {
   fixmatrix(T);
   }
 
-void create_adjacent(heptagon *h, int d) {
-
-  SDEBUG( printf("%p.%d ~ ?\n", h, d); )
-
-  heptspin hi(h, d);
-  
-  while(skip_digons(hi, 1)) hi++;
-  
-  auto& t1 = current.get_triangle(hi);
-
-  // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
-  
-  auto& p1 = archimedean_gmatrix[h];
-  
-  heptagon *alt = p1.first;
-
-  transmatrix T = p1.second * spin(-t1.first) * xpush(t1.second);
-  transmatrix U = Id;
-  
-  if(hyperbolic) {
-    dynamicval<eGeometry> g(geometry, gNormal); 
-    U = T;
-    virtualRebaseSimple(alt, T);
-    U = U * inverse(T);
-    }
-  
-  if(euclid) 
-    alt = encodeId(pair_to_vec(int(T[0][2]), int(T[1][2])));
-    
-  SDEBUG( println(hlog, "look for: ", alt, " / ", T * C0); )
-
-  for(auto& p2: altmap[alt]) if(intval(p2.second * C0, T * C0) < 1e-4) {
-    SDEBUG( println(hlog, "cell found: ", p2.first); )
-    for(int d2=0; d2<p2.first->degree(); d2++) {
-      heptspin hs(p2.first, d2);
-      auto& t2 = current.get_triangle(p2.first, d2);
-      transmatrix T1 = T * spin(M_PI + t2.first);
-      SDEBUG( print(hlog, "compare: ", T1 * xpush0(1));  )
-      SDEBUG( println(hlog, ":: ", p2.second * xpush0(1));  )
-      if(intval(T1 * xpush0(1), p2.second * xpush0(1)) < 1e-4) {
-      
-        // T1 = p2.second
-        // T * spin(pi+t2.first) == p2.second
-        // p1.second * spinm(-t1.first) * xpush(t1.second) * spin(pi+t2.first) == p2.second
-        
-        // bring p1 and p2 closer, to prevent floating point errors
-        if(hyperbolic) {
-          fixup_matrix(p1.second, U * p2.second * spin(-M_PI - t2.first) * xpush(-t1.second) * spin(t1.first), 0.25);
-          fixup_matrix(p2.second, T1, 0.25);
-          }
-
-        while(skip_digons(hs, -1)) hs--;
-        connectHeptagons(hi, hs);
-        connect_digons_too(hi, hs);
-        return;
-        }
-      }
-    SDEBUG( println(hlog, "but rotation not found"));
-    }
-  
-  auto& t2 = current.get_triangle(current.get_adj(hi));
-  transmatrix T1 = T * spin(M_PI + t2.first);
-  fixmatrix(T1);
-
-  heptagon *hnew = build_child(hi, current.get_adj(hi));
-  altmap[alt].emplace_back(hnew, T1);
-  archimedean_gmatrix[hnew] = make_pair(alt, T1);
-  connect_digons_too(hi, heptspin(hnew, 0));
-  }
-
 pair<ld, ld>& archimedean_tiling::get_triangle(heptagon *h, int cid) {
   return triangles[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
   }
@@ -635,58 +696,6 @@ transmatrix adjcell_matrix(heptagon *h, int d) {
   auto& t2 = current.get_triangle(h2, d2);
   
   return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first);
-  }
-
-void draw() {
-  dq::visited.clear();
-  dq::enqueue(viewctr.at, cview());
-  
-  while(!dq::drawqueue.empty()) {
-    auto& p = dq::drawqueue.front();
-    heptagon *h = get<0>(p);
-    transmatrix V = get<1>(p);
-    dynamicval<ld> b(band_shift, get<2>(p));
-    dq::drawqueue.pop();
-
-    int id = id_of(h);
-    int S = isize(current.triangles[id]);
-
-    if(id < 2*current.N ? !DUAL : !PURE) {
-      if(!do_draw(h->c7, V)) continue;
-      drawcell(h->c7, V, 0, false);
-      }
-
-    for(int i=0; i<S; i++) {
-      if(DUAL && (i&1)) continue;
-      h->cmove(i);
-      if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
-      transmatrix V1 = V * adjcell_matrix(h, i);
-      bandfixer bf(V1);
-      dq::enqueue(h->move(i), V1);
-      }
-    }
-  }
-
-transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-  if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-    return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
-  transmatrix gm = Id, where = Id;
-  while(h1 != h2) {
-    for(int i=0; i<neighbors_of(h1); i++) {
-      if(h1->move(i) == h2) {
-        return gm * adjcell_matrix(h1, i) * where;
-        }
-      }
-    if(h1->distance > h2->distance) {
-      gm = gm * adjcell_matrix(h1, 0);
-      h1 = h1->move(0);
-      }
-    else {
-      where = inverse(adjcell_matrix(h2, 0)) * where;
-      h2 = h2->move(0);
-      }
-    }
-  return gm * where;
   }
 
 int fix(heptagon *h, int spin) {

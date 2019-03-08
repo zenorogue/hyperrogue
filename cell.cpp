@@ -39,15 +39,10 @@ struct cdata {
 hrmap *currentmap;
 vector<hrmap*> allmaps;
 
-// --- auxiliary hyperbolic map for horocycles ---
-struct hrmap_alternate : hrmap {
-  heptagon *origin;
-  hrmap_alternate(heptagon *o) { origin = o; }
-  ~hrmap_alternate() { clearfrom(origin); }
-  };
-
-hrmap *newAltMap(heptagon *o) { return new hrmap_alternate(o); }
+hrmap *newAltMap(heptagon *o) { return new hrmap_hyperbolic(o); }
 // --- hyperbolic geometry ---
+
+hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
 
 hrmap_hyperbolic::hrmap_hyperbolic() {
   // printf("Creating hyperbolic map: %p\n", this);
@@ -235,6 +230,7 @@ void initcells() {
   else if(DIM == 3 && !binarytiling) currentmap = reg3::new_map();
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
+  else if(binarytiling) currentmap = binary::new_map();
   else currentmap = new hrmap_hyperbolic;
   
   allmaps.push_back(currentmap);

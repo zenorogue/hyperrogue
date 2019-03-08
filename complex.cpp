@@ -765,9 +765,9 @@ namespace clearing {
   
   int plantdir(cell *c) {
     if(!quotient) {
-      generateAlts(c->master);
+      currentmap->generateAlts(c->master);
       for(int i=0; i<S7; i++)
-        generateAlts(c->master->move(i));
+        currentmap->generateAlts(c->master->move(i));
       }
     int d = celldistAlt(c);
     
@@ -848,7 +848,7 @@ namespace clearing {
       }
     
     // cell *oc = c;
-    if(!euclid) generateAlts(c->master);
+    if(!euclid) currentmap->generateAlts(c->master);
     if(pseudohept(c)) return;
     heptagon *a = euclid ? NULL : c->master->alt->alt;
     clearingdata& bd(bpdata[a]);

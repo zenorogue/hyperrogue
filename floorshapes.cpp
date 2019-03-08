@@ -535,7 +535,6 @@ void generate_floorshapes() {
 namespace gp {
   int pshid[3][8][32][32][8];
   int nextid;
-  extern gp::local_info draw_li;
   
   void clear_plainshapes() {
     for(int m=0; m<3; m++)

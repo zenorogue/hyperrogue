@@ -102,7 +102,7 @@ cell *findcompass(cell *c) {
   
   while(inscreenrange(c)) {
     if(!eubinary && !sphere && !quotient)
-      generateAlts(c->master);
+      currentmap->generateAlts(c->master);
     forCellEx(c2, c) if(compassDist(c2) < d) {
       c = c2;
       d = compassDist(c2);
@@ -120,7 +120,7 @@ bool grailWasFound(cell *c) {
   return c->master->alt->alt->emeraldval & GRAIL_FOUND;
   }
 
-void generateAlts(heptagon *h, int levs, bool link_cdata) {
+void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
@@ -165,7 +165,7 @@ void generateAlts(heptagon *h, int levs, bool link_cdata) {
       }
     ho->alt = hm;
     if(link_cdata) hm->cdata = (cdata*) ho;
-    if(levs) generateAlts(ho, levs-1, link_cdata);
+    if(levs) currentmap->generateAlts(ho, levs-1, link_cdata);
     }
   }
 
@@ -232,7 +232,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   alt->cdata = (cdata*) h;
   
   for(int d=rad; d>=0; d--) {
-    generateAlts(cx[d]->master);  
+    currentmap->generateAlts(cx[d]->master);  
     preventbarriers(cx[d]);
     }
 
@@ -265,7 +265,7 @@ void beCIsland(cell *c) {
   }
 
 void generateTreasureIsland(cell *c) {
-  if(!eubinary) generateAlts(c->master);
+  if(!eubinary) currentmap->generateAlts(c->master);
   if(isOnCIsland(c)) return;
   
   bool src = hrand(100) < 10;
@@ -277,7 +277,7 @@ void generateTreasureIsland(cell *c) {
   int qc = 0, qlo, qhi;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
-    if(!eubinary) generateAlts(c2->master);
+    if(!eubinary) currentmap->generateAlts(c2->master);
     if((eubinary || (c->master->alt && c2->master->alt)) && celldistAlt(c2) < celldistAlt(c)) {
       ctab[qc++] = c2;
       qlo = i; qhi = i;
@@ -1174,7 +1174,7 @@ void buildBigStuff(cell *c, cell *from) {
       (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on && !racing::on) {
       createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
       celllister cl(c, 5, 1000000, NULL);
-      for(cell *c: cl.lst) if(c->master->alt) generateAlts(c->master);
+      for(cell *c: cl.lst) if(c->master->alt) currentmap->generateAlts(c->master);
       }
     }
   
@@ -1225,12 +1225,12 @@ bool no_barriers_in_radius(cell *c, int rad) {
 void buildCamelot(cell *c) {
   int d = celldistAltRelative(c);
   if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
-    if(!eubinary) generateAlts(c->master);
+    if(!eubinary) currentmap->generateAlts(c->master);
     preventbarriers(c);
     if(d == 10) {
       if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
       else {
-        if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
+        if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
         int q = 0;
         if(weirdhyperbolic) {
           for(int t=0; t<c->type; t++) createMov(c, t);
@@ -1277,7 +1277,7 @@ void buildCamelot(cell *c) {
       // roughly as many knights as table cells
       if(hrand(1000000) < 1000000 / expansion.get_growth())
         c->monst = moKnight;
-      if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
+      if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
       for(int i=0; i<c->type; i++) 
         if(c->move(i) && celldistAltRelative(c->move(i)) < d)
           c->mondir = (i+3) % 6;
@@ -1304,16 +1304,16 @@ void moreBigStuff(cell *c) {
   
   if(c->land == laPalace && !eubinary && c->master->alt) {
     int d = celldistAlt(c);
-    if(d <= PRADIUS1) generateAlts(c->master);
+    if(d <= PRADIUS1) currentmap->generateAlts(c->master);
     }
 
   if(c->land == laCanvas && !eubinary && c->master->alt && !quotient) 
-    generateAlts(c->master);
+    currentmap->generateAlts(c->master);
 
   if(c->land == laStorms)
     if(!eubinary && !quotient && !sphere) {
       if(c->master->alt && c->master->alt->distance <= 2) {
-        generateAlts(c->master);
+        currentmap->generateAlts(c->master);
         preventbarriers(c);
         int d = celldistAlt(c);
         if(d <= -2) {
@@ -1336,7 +1336,7 @@ void moreBigStuff(cell *c) {
   
   else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple)) {
     if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
-      if(!eubinary && !chaosmode) generateAlts(c->master);
+      if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0) {
@@ -1352,7 +1352,7 @@ void moreBigStuff(cell *c) {
         else if(pseudohept(c)) 
           c->wall = waColumn;
         else {
-          if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move(i));
+          if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
           int q = 0;
           for(int t=0; t<c->type; t++) {
             createMov(c, t);
@@ -1366,7 +1366,7 @@ void moreBigStuff(cell *c) {
 
   if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(binarytiling && specialland != laClearing)) {
     if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
-      if(!eubinary) generateAlts(c->master);
+      if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0) {
@@ -1379,7 +1379,7 @@ void moreBigStuff(cell *c) {
 
   if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(binarytiling && specialland != laMountain)) {
     if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
-      if(!eubinary) generateAlts(c->master);
+      if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0 || (firstland == laMountain && tactic::on)) {
@@ -1395,7 +1395,7 @@ void moreBigStuff(cell *c) {
     if(yendor::on && yendor::clev().l == laWhirlpool)
       fullwhirlpool = true;
     if(eubinary || (c->master->alt && (fullwhirlpool || c->master->alt->distance <= 2))) {
-      if(!eubinary) generateAlts(c->master);
+      if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int dd = celldistAlt(c);
       if(dd <= 0 || fullwhirlpool) {
