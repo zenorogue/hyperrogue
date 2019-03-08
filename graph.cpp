@@ -5303,6 +5303,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(!c->move(t)) continue;
           if(binarytiling && !among(t, 5, 6, 8)) continue;
           if(!binarytiling && c->move(t) < c) continue;
+          dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
           queuepoly(V, shWall3D[t], 0);
           }
         }
