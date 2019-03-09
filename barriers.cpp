@@ -733,6 +733,9 @@ void buildCrossroads2(cell *c) {
 
 bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
 
+  // 3D binary tilings create walls using their own methods
+  if(DIM == 3 && binarytiling) return false;
+
   if(c->land == laNone) {
     printf("barrier nowall! [%p]\n", c);
     raiseBuggyGeneration(c, "barrier nowall!");

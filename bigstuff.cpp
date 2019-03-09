@@ -1007,35 +1007,42 @@ bool gp_wall_test() {
   #endif
   return true;
   }
-  
-void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient) return;
-  bool deepOcean = false;
+
+bool deep_ocean_at(cell *c, cell *from) {
+
+  if(generatingEquidistant) return false;
   
   if(c->land == laOcean) {
-    if(!from) deepOcean = true;
+    if(!from) return true;
     else for(int i=0; i<from->type; i++) {
       cell *c2 = from->move(i);
       if(c2 && c2->land == laOcean && c2->landparam > 30) {
-        deepOcean = true;
+        return true;
         }
       if(c2) forCellEx(c3, c2) if(c3 && c3->land == laOcean && c3->landparam > 30)
-        deepOcean = true;
+        return true;
       }
     }
   
   if(c->land == laGraveyard) {
-    if(!from) deepOcean = true;
+    if(!from) return true;
     else for(int i=0; i<from->type; i++) {
       cell *c2 = from->move(i);
       if(c2 && c2->landparam > HAUNTED_RADIUS+5)
-        deepOcean = true;
+        return true;
       if(c2) forCellEx(c3, c2) if(c3 && c3->land == laGraveyard && c3->landparam > HAUNTED_RADIUS+5)
-        deepOcean = true;
+        return true;
       }
     }
   
-  if(generatingEquidistant) deepOcean = false;
+  return false;
+  }
+
+  
+void buildBigStuff(cell *c, cell *from) {
+  if(sphere || quotient) return;
+  bool deepOcean = deep_ocean_at(c, from);
+  
   // if(weirdhyperbolic && c->land == laOcean) deepOcean = c->landparam >= 30;
   
   // buildgreatwalls

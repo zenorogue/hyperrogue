@@ -3965,6 +3965,8 @@ bool ishex1(cell *c);
 namespace fieldpattern { int fieldval_uniq(cell *c);  int fieldval_uniq_rand(cell *c, int d); }
 bool warptype(cell *c);
 bool horo_ok();
+bool deep_ocean_at(cell *c, cell *from);
+int wallchance(cell *c, bool deepOcean);
 
 ld master_to_c7_angle();
 

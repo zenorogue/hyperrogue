@@ -87,6 +87,15 @@ namespace binary {
     if(parent->c7) h->c7 = newCell(t, h);
     h->cdata = NULL;
     h->zebraval = side;
+    if(DIM == 3) {
+      int chance = 0;
+      if(specialland == laCrossroads4) chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));
+      if(chaosmode) chance = 1000;
+      if(chance && hrand(40000) < chance)
+        h->c7->land = getNewLand(parent->c7->land);
+      else
+        h->c7->land = parent->c7->land;
+      }
     #if DEBUG_BINARY_TILING
     xcode[h] = expected_xcode(parent, d);
     if(rxcode.count(xcode[h])) {
