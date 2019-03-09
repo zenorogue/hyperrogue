@@ -2902,6 +2902,14 @@ void init_floorcolors() {
   floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;
   }
 
+color_t magma_color(int id) {
+  if(id == 95/4-1) return 0x200000;
+  else if(id == 95/4) return 0x100000;
+  else if(id < 48/4) return gradient(0xF0F000, 0xF00000, 0, id, 48/4);
+  else if(id < 96/4) return gradient(0xF00000, 0x400000, 48/4, id, 95/4-2);
+  else return winf[waMagma].color;
+  }
+
 void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 
   wcol = fcol = winf[c->wall].color;
@@ -3004,12 +3012,8 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 #if CAP_FIELD
     case laVolcano: {
       int id = lavatide(c, -1)/4;
-      if(c->wall == waMagma) {
-        if(id == 95/4-1) fcol = wcol = 0x200000;
-        else if(id == 95/4) fcol = wcol = 0x100000;
-        else if(id < 48/4) fcol = wcol = gradient(0xF0F000, 0xF00000, 0, id, 48/4);
-        else if(id < 96/4) fcol = wcol = gradient(0xF00000, 0x400000, 48/4, id, 95/4-2);
-        }
+      if(c->wall == waMagma) 
+        fcol = wcol = magma_color(id);
       else if(c->wall == waNone) {
         fcol = wcol = 0x404040;
         if(id == 255/4) fcol = 0xA0A040;
@@ -3869,17 +3873,29 @@ bool isWall3(cell *c, color_t& wcol) {
   return false;
   }
 
-bool isWater3(cell *c, color_t wcol, color_t& wcol_alpha) {
-  if(c->wall == waChasm) { wcol_alpha = 0x20202040; return true; }
-  if(c->wall == waInvisibleFloor) return false;
-  wcol_alpha = darkena(wcol, 0, 0x80);
-  return chasmgraph(c);
-  }
+bool isSulphuric(eWall w) { return among(w, waSulphur, waSulphurC); }
 
-bool isWaterWall3(cell *c) {
-  if(c->wall == waInvisibleFloor) return false;
-  if(isWorm(c) | isWall(c) || chasmgraph(c)) return true;
-  return false;
+color_t transcolor(cell *c, cell *c2) {
+  if(c->land != c2->land) {
+    if(c < c2) 
+      return darkena(gradient(floorcolors[c->land], floorcolors[c2->land], 0, 1, 2), 0, 0x40);
+    return 0;
+    }
+  if(c->wall == c2->wall) return 0;
+  color_t dummy;
+  if(isWall3(c2, dummy)) return 0;
+
+  if(c->wall == waChasm && c2->wall != waChasm) return 0x40404080;
+  if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x00004040;
+  if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena(winf[c2->wall].color, 0, 0x40);
+  if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena(floorcolors[laAlchemist], 0, 0x40);
+  if(isAlch(c) && (c2->item || !isAlch(c2))) return darkena(winf[c->wall].color, 0, 0x30);
+  if(realred(c->wall) && realred(c2->wall) && c->wall != c2->wall) {
+    int l = snakelevel(c) - snakelevel(c2);
+    if(l > 0) return darkena(floorcolors[laRedRock], 0, 0x30 * l);
+    }
+  if(c->wall == waMagma && c2->wall != waMagma) return darkena(magma_color(lavatide(c, -1)/4), 0, 0x80);
+  return 0;
   }
 
 // how much should be the d-th wall darkened in 3D
@@ -4769,7 +4785,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       char xch = winf[c->wall].glyph;
       
       if(DIM == 3) {
-        color_t wcol_alpha;
         color_t dummy;        
         if(isWall3(c, wcol)) {
           int d = (wcol & 0xF0F0F0) >> 4;
@@ -4785,32 +4800,31 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 }
               }
           }
-        else if(isWater3(c, wcol, wcol_alpha)) {
-          int d = (wcol_alpha & 0xF0F0F000) >> 4;
-          for(int a=0; a<c->type; a++)
-            if(c->move(a) && !isWaterWall3(c->move(a)))
-              queuepolyat(V, shWall3D[a], wcol_alpha - d * get_darkval(a), PPR::TRANSPARENT).subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
-          if(c->wall == waBoat) drawBoat(c, &V, V, V);
-          }
-        else if(isFire(c)) {
-          int r = ticks - lastt;
-          r += rand() % 5 + 1;
-          r /= 5;
-          while(r--) {
-            drawParticleSpeed(c, wcol, 75 + rand() % 75);
+        else {
+          for(int a=0; a<c->type; a++) if(c->move(a)) {
+            color_t t = transcolor(c, c->move(a));
+            if(t)
+              queuepolyat(V, shWall3D[a], t - get_darkval(a) * ((t & 0xF0F0F000) >> 4), PPR::TRANSPARENT).subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
             }
+          if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, &V, V, V);
+          else if(isFire(c)) {
+            int r = ticks - lastt;
+            r += rand() % 5 + 1;
+            r /= 5;
+            while(r--) {
+              drawParticleSpeed(c, wcol, 75 + rand() % 75);
+              }
+            }
+          else if(c->wall == waMineOpen) {
+            int mines = countMinesAround(c);
+            queuepoly(rgpushxto0(tC0(V)), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
+            }
+          
+          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm) || isWatery(c) || isSulphuric(c->wall)) ;
+    
+          else
+            queuepoly(rgpushxto0(tC0(V)), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
           }
-        else if(c->wall == waMineOpen) {
-          int mines = countMinesAround(c);
-          queuepoly(rgpushxto0(tC0(V)), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
-          }
-        
-        else if(c->wall == waStrandedBoat) drawBoat(c, &V, V, V);
-
-        else if(winf[c->wall].glyph == '.') ;
-
-        else
-          queuepoly(rgpushxto0(tC0(V)), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
 
         int rd = rosedist(c);
         if(rd == 1) 
