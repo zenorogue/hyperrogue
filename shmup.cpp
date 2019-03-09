@@ -3463,13 +3463,15 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     switch(m->type) {
       case moPlayer: 
         playerfound = true;
-        if(playermoved && DIM == 3 && vid.yshift == 0 && vid.sspeed > -5) continue;
         cpid = m->pid; 
-        if(DIM == 3) view = view * spin(-M_PI/2);
-        drawPlayerEffects(view, c, true);
-        if(m->inBoat) m->footphase = 0;
-        if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
-        
+
+        if(!hide_player()) {
+          if(DIM == 3) view = view * spin(-M_PI/2);
+          drawPlayerEffects(view, c, true);
+          if(m->inBoat) m->footphase = 0;
+          if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
+          }
+
         if(keyresult[cpid]) {
           hyperpoint h = keytarget(cpid);
           queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);

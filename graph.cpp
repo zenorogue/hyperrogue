@@ -14,6 +14,10 @@ bool mmspatial, mmhigh, mmmon, mmitem;
 
 int detaillevel = 0;
 
+bool hide_player() {
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5;
+  }
+
 hookset<bool(int sym, int uni)> *hooks_handleKey;
 hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
 purehookset hooks_frame, hooks_markers;
@@ -2332,8 +2336,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     drawPlayerEffects(Vs, c, true);
     if(!mmmon) return true;
     
-    if(DIM == 3 && playermoved && vid.sspeed > -5 && vid.yshift == 0) {
-      /* FPP -- do not draw the player */
+    if(hide_player()) {
       }
     
     else if(isWorm(m)) {
@@ -3888,7 +3891,7 @@ int get_darkval(int d) {
 
 void drawBoat(cell *c, const transmatrix* Vboat, transmatrix& Vboat0, transmatrix& V) {
   double footphase;
-  if(c == cwt.at && playermoved && vid.sspeed > -5 && vid.yshift == 0) return;
+  if(c == cwt.at && hide_player()) return;
   bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
   int outcol = magical ? watercolor(0) : 0xC06000FF;
   int incol = magical ? 0x0060C0FF : 0x804000FF;
