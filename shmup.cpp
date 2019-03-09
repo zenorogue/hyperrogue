@@ -2802,7 +2802,13 @@ void moveMonster(monster *m, int delta) {
     return;
     }
   
-  nat = nat0 * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]);; // * spintox(wherePC);
+  if(DIM == 3 && igo) {
+    ld fspin = rand() % 1000;  
+    nat = nat0 * cspin(1,2,fspin) * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]) * cspin(2,1,fspin);
+    }
+  else {
+    nat = nat0 * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]); // * spintox(wherePC);
+    }
 
   if(m->type != moRagingBull && !peace::on)
   if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried) {
