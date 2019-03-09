@@ -137,18 +137,22 @@ bool fading = false;
 
 ld fadeout = 1;
 
-int darkened(int c) {
+color_t darkened(color_t c) {
   if(inmirrorcount&1)
     c = gradient(c, winf[waMirror].color, 0, 0.5, 1);
   else if(inmirrorcount)
     c = gradient(c, winf[waCloud].color, 0, 0.5, 1);
   if(fading) c = gradient(backcolor, c, 0, fadeout, 1);
+  if(vid.desaturate) {
+    ld luminance = 0.2125 * part(c,2) + 0.7154 * part(c,1) + 0.0721 * part(c, 0);
+    c = gradient(c, int(luminance+.5) * 0x10101, 0, vid.desaturate, 100);
+    }
   for(int i=0; i<darken; i++)
     c = ((c & 0xFEFEFE) >> 1) + ((backcolor & 0xFEFEFE) >> 1);
   return c;
   }
 
-int darkena(int c, int lev, int a) {
+color_t darkena(color_t c, int lev, int a) {
   return (darkenedby(c, lev) << 8) + a;
   }
 

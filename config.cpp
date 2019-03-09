@@ -293,6 +293,7 @@ void initConfig() {
   addsaver(vid.lr_eyewidth, "eyewidth-lr", 0.5);
   addsaver(vid.anaglyph_eyewidth, "eyewidth-anaglyph", 0.1);
   addsaver(vid.fov, "field-of-vision", 90);
+  addsaver(vid.desaturate, "desaturate", 0);
   addsaverenum(vid.stereo_mode, "stereo-mode");
   addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
@@ -1310,6 +1311,13 @@ void showStereo() {
       dialog::addBreak(100);
       break;
     }
+  
+  dialog::addSelItem(XLAT("desaturate colors"), its(vid.desaturate)+"%", 'c');
+  dialog::add_action([] {
+    dialog::editNumber(vid.desaturate, 0, 100, 10, 0, XLAT("remove standard colors"),
+      XLAT("Make the game colors less saturated. This is useful in the anaglyph mode.")
+      );    
+    });
   
   add_edit_fov('f');
 

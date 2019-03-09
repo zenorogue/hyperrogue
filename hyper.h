@@ -993,7 +993,7 @@ typedef color_t color_t;
 void displayButton(int x, int y, const string& name, int key, int align, int rad = 0);
 void displayColorButton(int x, int y, const string& name, int key, int align, int rad, color_t color, color_t color2 = 0);
 inline string ONOFF(bool b) { return XLAT(b ? "ON" : "OFF"); }
-int darkened(int c);
+color_t darkened(color_t c);
 extern int getcstat;
 bool displaychr(int x, int y, int shift, int size, char chr, color_t col);
 bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align);
@@ -1128,6 +1128,7 @@ struct videopar {
   ld lr_eyewidth, anaglyph_eyewidth;
   ld fov;
   bool consider_shader_projection;
+  int desaturate;
   };
 
 extern videopar vid;
@@ -2227,7 +2228,7 @@ inline bool mdAzimuthalEqui() { return pmodel == mdEquidistant || pmodel == mdEq
 
 inline bool mdBandAny() { return pmodel == mdBand || pmodel == mdBandEquidistant || pmodel == mdBandEquiarea || pmodel == mdSinusoidal; }
 
-int darkena(int c, int lev, int a);
+color_t darkena(color_t c, int lev, int a);
 
 #define SHSIZE 16
 
