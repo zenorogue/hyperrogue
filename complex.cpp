@@ -1197,8 +1197,8 @@ namespace mirror {
     cell *c = cw.at;
     
     #if MAXMDIM >= 4
-    if(DIM == 3 && !binarytiling && shmup::on) {
-      for(int i=0; i<cw.at->type; i++)
+    if(DIM == 3 && !binarytiling) {
+      if(shmup::on) for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep - i, cpid);
       return;
       }
@@ -1228,8 +1228,8 @@ namespace mirror {
       }
     #endif
     #if MAXMDIM >= 4
-    if(DIM == 3 && !binarytiling && shmup::on) {
-      for(int i=0; i<cw.at->type; i++)
+    if(DIM == 3 && !binarytiling) {
+      if(shmup::on) for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep - i, cpid);
       return;
       }
