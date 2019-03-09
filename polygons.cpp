@@ -2924,11 +2924,14 @@ void buildpolys() {
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
     copyshape(shTortoise[v][4+z], shTortoise[v][2+z], PPR(shTortoise[v][2+z].prio + (PPR::CARRIED-PPR::ITEM)));
 
-  if(!BITRUNCATED) bshape(shMagicSword, PPR::MAGICSWORD, scalefactor, 243);
-  else bshape(shMagicSword, PPR::MAGICSWORD, 1, 244);
+  if(scalefactor > 1.5) bshape(shMagicSword, PPR::MAGICSWORD, scalefactor / 1.7570466583108084, 243);
+  else bshape(shMagicSword, PPR::MAGICSWORD, scalefactor, 244);
+  
+  sword_size = 0;
+  for(int i=shMagicSword.s; i<shMagicSword.e; i++)
+    sword_size = max(sword_size, hdist0(hpc[i]));
 
-  if(!BITRUNCATED) bshape(shMagicShovel, PPR::MAGICSWORD, scalefactor, 333);
-  else bshape(shMagicShovel, PPR::MAGICSWORD, 1, 333);
+  bshape(shMagicShovel, PPR::MAGICSWORD, scalefactor, 333);
   
   bshape(shBead0, PPR(20), 1, 250);
   bshape(shBead1, PPR(20), 1, 251);

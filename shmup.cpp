@@ -1460,8 +1460,8 @@ hyperpoint keytarget(int i) {
   return 0;
   } */
 
-double getSwordSize() { return 0.7255; }
-double getHornsSize() { return 0.33; }
+double getSwordSize() { return sword_size; }
+double getHornsSize() { return scalefactor * 0.33; }
 
 hyperpoint swordpos(int id, bool rev, double frac) {
   return pc[id]->pat * xspinpush0(pc[id]->swordangle, (rev?-frac:frac) * getSwordSize());

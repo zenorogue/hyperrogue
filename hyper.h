@@ -3434,6 +3434,7 @@ void queuereset(eModel m, PPR prio);
 
 
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
+extern ld sword_size;
 
 extern ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
 
