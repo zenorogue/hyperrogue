@@ -6246,7 +6246,7 @@ void normalscreen() {
   if(tour::on) mouseovers = tour::tourhelp;
 #endif
 
-  if(!outofmap(mouseh)) getcstat = '-';
+  if(DIM == 3 || !outofmap(mouseh)) getcstat = '-';
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
