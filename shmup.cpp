@@ -1450,7 +1450,7 @@ void roseCurrents(transmatrix& nat, monster *m, int delta) {
 
 hyperpoint keytarget(int i) {
   double d = 2 + sin(curtime / 350.);
-  return pc[i]->pat * xpush0(d);
+  return pc[i]->pat * cpush0(DIM == 3 ? 2 : 0, d * scalefactor);
   }
 
 /* int charidof(int pid) {
@@ -3474,7 +3474,12 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
         if(keyresult[cpid]) {
           hyperpoint h = keytarget(cpid);
-          queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
+          if(DIM == 2) 
+            queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
+          else {
+            dynamicval<color_t> p(poly_outline, darkena(iinf[keyresult[cpid]].color, 0, 255));
+            queuepoly(rgpushxto0(h) * cspin(0, 1, ticks / 140.), shGem[1], 0);
+            }
           }
 
         break;
