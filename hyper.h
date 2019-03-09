@@ -96,7 +96,7 @@ void addMessage(string s, char spamtype = 0);
 
 #define binarytiling (geometry == gBinaryTiling || geometry == gBinary3 || geometry == gHoroTris)
 #define archimedean (geometry == gArchimedean)
-#define eubinary (euclid || binarytiling || geometry == gCrystal || (DIM == 3 && hyperbolic))
+#define eubinary (euclid || binarytiling || geometry == gCrystal)
 
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
@@ -2939,6 +2939,7 @@ extern string s0;
 extern int anthraxBonus;
 int celldistAlt(cell *c);
 int celldist(cell *c);
+int masterAlt(cell *c);
 int getHemisphere(cell *c, int which);
 
 namespace tactic {
@@ -4301,6 +4302,7 @@ namespace reg3 {
   extern vector<hyperpoint> cellshape;
   int celldistance(cell *c1, cell *c2);
   bool pseudohept(cell *c);
+  inline short& altdist(heptagon *h) { return h->emeraldval; }
   }
 #endif
 

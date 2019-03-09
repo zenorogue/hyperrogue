@@ -439,7 +439,7 @@ int celldistAlt(cell *c) {
   #if MAXMDIM == 4
   if(euclid && DIM == 3) return euclid3::dist_alt(c);
   #endif
-  if(hyperbolic && DIM == 3) return reg3::dist_alt(c);
+  if(hyperbolic && DIM == 3) return reg3::altdist(c->master);
   if(!c->master->alt) return 0;
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, true);

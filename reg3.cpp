@@ -196,6 +196,7 @@ namespace reg3 {
         alt->distance = 0;
         alt->alt = alt;
         alt->cdata = NULL;
+        alt->c7 = NULL;
         binary_map = binary::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
@@ -215,6 +216,40 @@ namespace reg3 {
 
     heptagon *getOrigin() {
       return origin;
+      }
+    
+    void fix_distances(heptagon *h, heptagon *h2) {
+      vector<heptagon*> to_fix;
+
+      auto fix_pair = [&] (heptagon *h, heptagon *h2) {
+        if(!h2) return;
+        if(h->distance > h2->distance+1) {
+          h->distance = h2->distance + 1;
+          to_fix.push_back(h);
+          }
+        else if(h2->distance > h->distance+1) {
+          h2->distance = h->distance + 1;
+          to_fix.push_back(h2);
+          }
+        if(h->alt && h->alt == h2->alt) {
+          if(altdist(h) > altdist(h2) + 1) {
+            altdist(h) = altdist(h2) + 1;
+            to_fix.push_back(h);
+            }
+          else if (altdist(h2) > altdist(h) + 1) {
+            altdist(h2) = altdist(h) + 1;
+            to_fix.push_back(h2);
+            }
+          }
+        };
+
+      if(!h2) to_fix = {h};
+      else fix_pair(h, h2);
+      
+      for(int i=0; i<isize(to_fix); i++) {
+        h = to_fix[i];
+        for(int j=0; j<S7; j++) fix_pair(h, h->move(j));
+        }
       }
     
     #define DEB 0
@@ -252,6 +287,7 @@ namespace reg3 {
             if(err > worst_error2) println(hlog, format("worst_error2 = %lg", double(worst_error2 = err)));
             if(p2.first->move(d2)) println(hlog, "error: repeated edge");
             p2.first->c.connect(d2, parent, d, false);
+            fix_distances(p2.first, parent);
             fb++;
             }
           }
@@ -271,7 +307,9 @@ namespace reg3 {
       heptagon *created = tailored_alloc<heptagon> (S7);
       created->c7 = newCell(S7, created);
       created->alt = NULL;
+      created->cdata = NULL;
       created->zebraval = hrand(10);
+      created->distance = parent->distance + 1;
       fixmatrix(T);
       reg_gmatrix[created] = make_pair(alt, T);
       altmap[alt].emplace_back(created, T);
@@ -280,11 +318,39 @@ namespace reg3 {
       }
 
     ~hrmap_reg3() {
-      if(binary_map) delete binary_map;
+      if(binary_map) {        
+        dynamicval<eGeometry> g(geometry, gBinary3);
+        // delete binary_map;
+        }
       clearfrom(origin);
       }
     
-    void generateAlts(heptagon* h) {
+    map<heptagon*, int> reducers;
+
+    void link_alt(const cellwalker& hs) override {
+      auto h = hs.at->master;
+      altdist(h) = 0;
+      if(h->alt->s != hsOrigin) reducers[h] = hs.spin;
+      }
+    
+    void generateAlts(heptagon* h, int levs, bool link_cdata) override {
+      if(reducers.count(h)) {
+        heptspin hs(h, reducers[h]);
+        reducers.erase(h);
+        hs += wstep;
+        hs += rev;
+        altdist(hs.at) = altdist(h) - 1;
+        hs.at->alt = h->alt;
+        reducers[hs.at] = hs.spin;
+        }
+      for(int i=0; i<S7; i++) {
+        auto h2 = h->cmove(i);
+        if(h2->alt == NULL) {
+          h2->alt = h->alt;
+          altdist(h2) = altdist(h) + 1;
+          fix_distances(h2, NULL);
+          }
+        }
       }
 
     void draw() {
@@ -338,6 +404,8 @@ hrmap_reg3* regmap() {
 
 int celldistance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
+  if(c1 == currentmap->gamestart()) return c2->master->distance;
+  if(c2 == currentmap->gamestart()) return c1->master->distance;
 
   auto r = regmap();
 
@@ -370,14 +438,10 @@ bool pseudohept(cell *c) {
       return abs(h[3]) > .99 || abs(h[0]) > .99 || abs(h[1]) > .99 || abs(h[2]) > .99;
     }
   if(hyperbolic) {
-    heptagon *h = regmap()->reg_gmatrix[c->master].first;
+    heptagon *h = m->reg_gmatrix[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);
     }    
   return false;
-  }
-
-int dist_alt(cell *c) {
-  return regmap()->reg_gmatrix[c->master].first->distance;
   }
 #endif
 

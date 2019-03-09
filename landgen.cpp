@@ -1513,7 +1513,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laCaribbean:
       if(fargen) {
         if(!eubinary) {
-          if(c->master->alt && c->master->alt->distance <= 2) {
+          if(c->master->alt && masterAlt(c) <= 2) {
             if(!eubinary) currentmap->generateAlts(c->master);
             preventbarriers(c);
             int d = celldistAlt(c);

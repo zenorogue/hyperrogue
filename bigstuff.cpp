@@ -197,6 +197,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
 
   // okay, let's go then!
   cellwalker bf(c, gdir);
+  if(PURE) bf += rev;
   std::vector<cell *> cx(rad+1);
   for(int i=0; i<rad; i++) {
     cx[i] = bf.at;
@@ -230,6 +231,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   alt->alt = alt;
   h->alt = alt;
   alt->cdata = (cdata*) h;
+  currentmap->link_alt(bf);
   
   for(int d=rad; d>=0; d--) {
     currentmap->generateAlts(cx[d]->master);  
@@ -1294,6 +1296,11 @@ void buildCamelot(cell *c) {
     }
   }
 
+int masterAlt(cell *c) {
+  if(DIM == 3 && hyperbolic) return reg3::altdist(c->master);
+  return c->master->alt->distance;
+  }
+
 void moreBigStuff(cell *c) {
 
   if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
@@ -1312,7 +1319,7 @@ void moreBigStuff(cell *c) {
 
   if(c->land == laStorms)
     if(!eubinary && !quotient && !sphere) {
-      if(c->master->alt && c->master->alt->distance <= 2) {
+      if(c->master->alt && masterAlt(c) <= 2) {
         currentmap->generateAlts(c->master);
         preventbarriers(c);
         int d = celldistAlt(c);
@@ -1335,7 +1342,7 @@ void moreBigStuff(cell *c) {
     }
   
   else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple)) {
-    if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1365,7 +1372,7 @@ void moreBigStuff(cell *c) {
     }
 
   if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(binarytiling && specialland != laClearing)) {
-    if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1378,7 +1385,7 @@ void moreBigStuff(cell *c) {
     }
 
   if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(binarytiling && specialland != laMountain)) {
-    if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1394,7 +1401,7 @@ void moreBigStuff(cell *c) {
       fullwhirlpool = true;
     if(yendor::on && yendor::clev().l == laWhirlpool)
       fullwhirlpool = true;
-    if(eubinary || (c->master->alt && (fullwhirlpool || c->master->alt->distance <= 2))) {
+    if(eubinary || (c->master->alt && (fullwhirlpool || masterAlt(c) <= 2))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int dd = celldistAlt(c);
