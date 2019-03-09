@@ -1463,8 +1463,14 @@ hyperpoint keytarget(int i) {
 double getSwordSize() { return sword_size; }
 double getHornsSize() { return scalefactor * 0.33; }
 
+// used in 3D
+transmatrix swordmatrix[MAXPLAYER];
+
 hyperpoint swordpos(int id, bool rev, double frac) {
-  return pc[id]->pat * xspinpush0(pc[id]->swordangle, (rev?-frac:frac) * getSwordSize());
+  if(DIM == 3)
+    return pc[id]->pat * swordmatrix[id] * cpush0(2, (rev?-frac:frac) * getSwordSize());
+  else
+    return pc[id]->pat * xspinpush0(pc[id]->swordangle, (rev?-frac:frac) * getSwordSize());
   }
 
 hyperpoint hornpos(int id) {
@@ -1881,6 +1887,11 @@ void movePlayer(monster *m, int delta) {
   if(!go || abs(playergo[cpid]) < 1e-3 || abs(playerturn[cpid]) > 1e-3) bulltime[cpid] = curtime;
   
   if(go) {
+
+    if(DIM == 3) 
+      swordmatrix[cpid] = 
+        cspin(1, 2, -playerturny[cpid]) * cspin(0, 2, -playerturn[cpid]) * swordmatrix[cpid];
+
     if(c2 != m->base) {
       if(cellUnstable(m->base) && !markOrb(itOrbAether))
         doesFallSound(m->base);
@@ -2405,7 +2416,10 @@ void moveBullet(monster *m, int delta) {
 
         if(m2->blowoff < curtime) {
           hyperpoint h = inverse(m2->pat) * nat0 * C0;
-          m2->swordangle += atan2(h[1], h[0]);
+          if(DIM == 3)
+           swordmatrix[m2->pid] = spintox(h) * swordmatrix[m2->pid];
+          else
+            m2->swordangle += atan2(h[1], h[0]);
           m2->rebasePat(m2->pat * rspintox(h));
           }
         m2->blowoff = curtime + 1000;
@@ -3383,6 +3397,7 @@ void init() {
     pc[i]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord ||
       firstland == laWhirlpool);
     pc[i]->store();
+    swordmatrix[i] = Id;
     }
   
   if(!safety) {
@@ -3466,10 +3481,17 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
         if(!hide_player() || !subscreens::is_current_player(m->pid)) {
           dynamicval<int> d(cpid, m->pid);
-          if(DIM == 3) view = view * spin(-M_PI/2);
           drawPlayerEffects(view, c, true);
+          if(DIM == 3) view = view * spin(-M_PI/2);
           if(m->inBoat) m->footphase = 0;
           if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
+          }
+
+        if(subscreens::is_current_player(m->pid) && hide_player() && DIM == 3) {
+          if(items[itOrbSword])
+            queuechr(swordpos(m->pid, false, 1), vid.fsize * 2, '+', iinf[itOrbSword].color);
+          if(items[itOrbSword2])
+            queuechr(swordpos(m->pid, true, 1), vid.fsize * 2, '+', iinf[itOrbSword2].color);
           }
 
         if(subscreens::is_current_player(m->pid) && keyresult[cpid]) {

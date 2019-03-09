@@ -332,7 +332,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
   
-    if(shmup::on) {
+    if(shmup::on && DIM == 2) {
 #if CAP_SHAPES
       if(items[itOrbSword])
         queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
@@ -341,6 +341,16 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle+M_PI), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
 #endif
       }                  
+
+    else if(shmup::on && DIM == 3) {
+#if CAP_SHAPES
+      if(items[itOrbSword])
+        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
+  
+      if(items[itOrbSword2])
+        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, -M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
+#endif
+      }
     
     else {
       int& ang = angle[multi::cpid];
