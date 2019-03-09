@@ -1350,7 +1350,12 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if(DIM == 3) {
+        if(geometry == gSpace534) {
+          int i = 0;
+          forCellCM(c2, c) if(celldistAlt(c2) < celldistAlt(c)) i++;
+          if(i > 1) c->wall = waColumn;
+          }
+        else if(DIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;
           }
         else if(weirdhyperbolic && !BITRUNCATED) {
