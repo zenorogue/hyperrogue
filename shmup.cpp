@@ -1224,7 +1224,7 @@ void degradeDemons() {
   }
 
 // we need these for the Mimics!
-double playerturn[MAXPLAYER], playergo[MAXPLAYER], playerstrafe[MAXPLAYER], playerturny[MAXPLAYER];
+double playerturn[MAXPLAYER], playergo[MAXPLAYER], playerstrafe[MAXPLAYER], playerturny[MAXPLAYER], playergoturn[MAXPLAYER];
 bool playerfire[MAXPLAYER];
 
 void awakenMimics(monster *m, cell *c2) {
@@ -1793,6 +1793,8 @@ void movePlayer(monster *m, int delta) {
   
     go = true;
     
+    playergoturn[cpid] = igospan[go];
+    
     if(DIM == 3)
       nat = nat1 * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
     else if(playergo[cpid]) 
@@ -1885,6 +1887,11 @@ void movePlayer(monster *m, int delta) {
     }
   
   if(!go || abs(playergo[cpid]) < 1e-3 || abs(playerturn[cpid]) > 1e-3) bulltime[cpid] = curtime;
+  
+  if(!go) {
+    playergo[cpid] = playergoturn[cpid] = playerstrafe[cpid] = 0;
+    if(DIM == 3) playerturn[cpid] = playerturny[cpid] = 0;
+    }
   
   if(go) {
 
@@ -2157,7 +2164,11 @@ void moveMimic(monster *m) {
   m->footphase = getPlayer()->footphase;
   
   // no need to care about Mirror images, as they already have their 'at' matrix reversed :|
-  nat = nat * spin(playerturn[cpid]) * xpush(playergo[cpid]);
+
+  if(DIM == 3)
+    nat = nat * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+  else
+    nat = nat * spin(playerturn[cpid] + playergoturn[cpid]) * xpush(playergo[cpid]) * spin(-playergoturn[cpid]);
 
   cell *c2 = m->findbase(nat);
   reflect(c2, m->base, nat);
@@ -3566,7 +3577,9 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
         if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin);
-        if(DIM == 3)
+        if(m->type == moMimic && DIM == 3)
+          drawMonsterType(m->type, c, view * spin(-M_PI/2), col, m->footphase);
+        else if(DIM == 3)
           drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase);
         else
           drawMonsterType(m->type, c, view, col, m->footphase);

@@ -1196,6 +1196,14 @@ namespace mirror {
     cw.mirrored = !cw.mirrored;
     cell *c = cw.at;
     
+    #if MAXMDIM >= 4
+    if(DIM == 3 && !binarytiling && shmup::on) {
+      for(int i=0; i<cw.at->type; i++)
+        createMirror(cw + i + wstep - i, cpid);
+      return;
+      }
+    #endif
+
     #if CAP_GP
     if(GOLDBERG) {
       for(int i=0; i<cw.at->type; i++) {
@@ -1216,6 +1224,13 @@ namespace mirror {
     #if CAP_ARCM
     if(archimedean) {
       create_archimedean(cw, cpid, false);
+      return;
+      }
+    #endif
+    #if MAXMDIM >= 4
+    if(DIM == 3 && !binarytiling && shmup::on) {
+      for(int i=0; i<cw.at->type; i++)
+        createMirror(cw + i + wstep - i, cpid);
       return;
       }
     #endif
@@ -1258,7 +1273,6 @@ namespace mirror {
     }
 
   void createHere(cellwalker cw, int cpid) {
-    if(DIM == 3) return;
     if(!cw.at) return;
     if(cw.at->wall == waCloud)
       createMirages(cw, cpid);
