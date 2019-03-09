@@ -1537,7 +1537,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         int mindist  = 9;
         for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);
-          if((eubinary || c2->master->alt) && celldistAlt(c2) < mindist)
+          if(c2 && (eubinary || c2->master->alt) && celldistAlt(c2) < mindist)
             mindist = celldistAlt(c2);
           }
         if(mindist == 0) beCIsland(c);
