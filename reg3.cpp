@@ -320,7 +320,7 @@ namespace reg3 {
     ~hrmap_reg3() {
       if(binary_map) {        
         dynamicval<eGeometry> g(geometry, gBinary3);
-        // delete binary_map;
+        delete binary_map;
         }
       clearfrom(origin);
       }

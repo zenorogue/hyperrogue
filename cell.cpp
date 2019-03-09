@@ -314,7 +314,7 @@ void clearfrom(heptagon *at) {
         }
       }
     int edges = at->degree();
-    if(binarytiling) edges = at->c7->type;
+    if(binarytiling && DIM == 2) edges = at->c7->type;
     for(int i=0; i<edges; i++) if(at->move(i)) {
       if(at->move(i)->alt != &deletion_marker)
         q.push(at->move(i));    

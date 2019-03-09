@@ -380,6 +380,7 @@ struct hrmap_archimedean : hrmap {
     origin->rval0 = origin->rval1 = 0;
     origin->cdata = NULL;
     origin->alt = NULL;
+    origin->c7 = NULL;
     origin->distance = 0;
 
     parent_index_of(origin) = DUAL ? 1 : 0;

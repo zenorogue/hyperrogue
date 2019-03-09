@@ -572,6 +572,7 @@ namespace euclid3 {
         h->c7 = newCell(S7, h);
         h->distance = 0;
         h->cdata = NULL;
+        h->alt = NULL;
         auto co = getcoord(at);
         if(S7 != 14)
           h->zebraval = gmod(co[0] + co[1] * 2 + co[2] * 4, 5);
