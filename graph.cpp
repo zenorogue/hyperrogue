@@ -6174,15 +6174,22 @@ void drawfullmap() {
 
 void gamescreen(int _darken) {
 
-  if(subscreen_split([=] () {
+  if(subscreens::split([=] () {
     calcparam();
     current_display->set_projection(0, false);
     current_display->set_viewport(0);
     compute_graphical_distance();
     gamescreen(_darken);
     })) {
+    if(racing::on) return;
+    // create the gmatrix
     current_display->set_projection(0, false);
-    current_display->set_viewport(0);    
+    current_display->set_viewport(0);
+    View = subscreens::player_displays[0].view_matrix;
+    viewctr = subscreens::player_displays[0].view_center;
+    just_gmatrix = true;
+    currentmap->draw();
+    just_gmatrix = false;
     return;
     }
 

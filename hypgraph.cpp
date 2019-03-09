@@ -987,13 +987,16 @@ void spinEdge(ld aspd) {
 
 void centerpc(ld aspd) { 
   
+  if(subscreens::split([=] () {centerpc(aspd);})) return;
+
   #if CAP_CRYSTAL
   if(geometry == gCrystal)
     crystal::centerrug(aspd);
   #endif
 
   if(shmup::on && DIM == 3 && vid.sspeed > -5) {
-    transmatrix at = ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at * cpush(2, -vid.yshift);  
+    int id = subscreens::in ? subscreens::current_player : 0;
+    transmatrix at = ggmatrix(shmup::pc[id]->base) * shmup::pc[id]->at * cpush(2, -vid.yshift);  
     View = inverse(at) * View;
     #if CAP_RACING
     if(racing::on) racing::set_view();
@@ -1057,7 +1060,7 @@ void centerpc(ld aspd) {
 
 void optimizeview() {
 
-  subscreen_split(optimizeview);
+  if(subscreens::split(optimizeview)) return;
   
   #if CAP_ANIMATIONS
   if(centerover.at && inmirror(centerover.at)) {

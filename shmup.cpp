@@ -1582,7 +1582,7 @@ void movePlayer(monster *m, int delta) {
   cpid = m->pid;
 
   #if CAP_RACING
-  if(racing::on && cpid != racing::current_player) return;
+  if(racing::on && cpid != subscreens::current_player) return;
   #endif
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
@@ -1753,7 +1753,7 @@ void movePlayer(monster *m, int delta) {
     playerturn[cpid] = mgo * SCALE * delta / 200;
     playerturny[cpid] = mturn * SCALE * delta / 200;
 
-    if(!lctrlclick) {
+    if(!lctrlclick && cpid == 0) {
       playerturn[cpid] += mouseaim_x;
       playerturny[cpid] += mouseaim_y;
       mouseaim_x = mouseaim_y = 0;
@@ -3112,7 +3112,7 @@ hookset<bool(int)> *hooks_turn;
 
 void turn(int delta) {
 
-  if(subscreen_split( [delta] () { turn(delta); })) return;
+  if(racing::on && subscreens::split( [delta] () { turn(delta); })) return;
 
   if(callhandlers(false, hooks_turn, delta)) return;
   if(!shmup::on) return;
@@ -3463,16 +3463,16 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     switch(m->type) {
       case moPlayer: 
         playerfound = true;
-        cpid = m->pid; 
 
-        if(!hide_player()) {
+        if(!hide_player() || !subscreens::is_current_player(m->pid)) {
+          dynamicval<int> d(cpid, m->pid);
           if(DIM == 3) view = view * spin(-M_PI/2);
           drawPlayerEffects(view, c, true);
           if(m->inBoat) m->footphase = 0;
           if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
           }
 
-        if(keyresult[cpid]) {
+        if(subscreens::is_current_player(m->pid) && keyresult[cpid]) {
           hyperpoint h = keytarget(cpid);
           if(DIM == 2) 
             queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);

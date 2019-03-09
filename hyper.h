@@ -4902,8 +4902,6 @@ namespace racing {
   void displayScore(eLand l);
   }
 
-bool subscreen_split(reaction_t for_each_subscreen);
-
 #else
 
 // static bool on = false: emits a warning
@@ -4924,6 +4922,11 @@ void createArrowTrapAt(cell *c, eLand land);
 bool no_barriers_in_radius(cell *c, int rad);
 
 extern ld extra_generation_distance;
+
+namespace subscreens {
+  void prepare();
+  bool split(reaction_t for_each_subscreen);
+  }
 
 }
 

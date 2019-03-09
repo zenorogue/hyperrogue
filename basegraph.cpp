@@ -265,7 +265,7 @@ void display_data::set_projection(int ed, bool apply_models) {
     eyewidth_translate(ed);
 
     if(dim3) {
-      glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * vid.yres / vid.xres));
+      glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
       current_display->scrdist_text = cd->ysize;
       }
@@ -1252,6 +1252,56 @@ int calcfps() {
   lidx++; lidx %= CFPS;
   if(ret == 0) return 0;
   return (1000 * CFPS) / ret;
+  }
+
+namespace subscreens {
+
+  vector<display_data> player_displays;
+  bool in;
+  int current_player;
+  
+  bool is_current_player(int id) {
+    if(!in) return true;
+    return id == current_player;
+    }
+
+  void prepare() {
+    int N = multi::players;
+    if(N > 1) {
+      player_displays.resize(N, *current_display);
+      int qrows[10] = {1, 1, 1, 1, 2, 2, 2, 3, 3, 3};
+      int rows = qrows[N];
+      int cols = (N + rows - 1) / rows;
+      for(int i=0; i<N; i++) {
+        auto& pd = player_displays[i];
+        pd.xmin = (i % cols) * 1. / cols;
+        pd.xmax = ((i % cols) + 1.) / cols;
+        pd.ymin = (i / cols) * 1. / rows;
+        pd.ymax = ((i / cols) + 1.) / rows;
+        }
+      }
+    else {
+      player_displays.clear();
+      }
+    }
+
+  bool split(reaction_t what) {
+    using namespace racing;
+    if(in) return false;
+    if(!racing::on && !(shmup::on && DIM == 3)) return false;
+    if(!player_displays.empty()) {
+      in = true;
+      int& p = current_player;
+      for(p = 0; p < multi::players; p++) {
+        dynamicval<display_data*> c(current_display, &player_displays[p]);
+        what();
+        }
+      in = false;
+      return true;
+      }
+    return false;
+    }
+
   }
 
 }

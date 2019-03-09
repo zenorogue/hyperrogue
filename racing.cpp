@@ -643,22 +643,20 @@ bool inrec = false;
 
 ld race_angle = 90;
 
-int current_player;
-
 void set_view() {
+
+  multi::cpid = subscreens::in ? subscreens::current_player : 0;
 
   if(race_start_tick == 0) race_start_tick = ticks + 5000;
 
-  if(subscreen_split(set_view)) return;
-
-  shmup::monster *who = shmup::pc[current_player];
+  shmup::monster *who = shmup::pc[multi::cpid];
   
   if(!inrec) {
     const transmatrix T = who->at;
     ld alpha = -atan2(T * C0);
     ld distance = hdist0(T * C0);
     ld beta = -atan2(xpush(-distance) * spin(-alpha) * T * Cx1);
-    current_history[current_player].emplace_back(ghostmoment{ticks - race_start_tick, rti_id[who->base], 
+    current_history[multi::cpid].emplace_back(ghostmoment{ticks - race_start_tick, rti_id[who->base], 
       angle_to_uchar(alpha),
       frac_to_uchar(distance / distance_multiplier),
       angle_to_uchar(beta),
@@ -1092,29 +1090,6 @@ auto hooks1 =
     else return named_functionality();
     });
 
-vector<display_data> player_displays;
-bool in_subscreen;
-
-void prepare_subscreens() {
-  int N = multi::players;
-  if(N > 1) {
-    player_displays.resize(N, *current_display);
-    int qrows[10] = {1, 1, 1, 1, 2, 2, 2, 3, 3, 3};
-    int rows = qrows[N];
-    int cols = (N + rows - 1) / rows;
-    for(int i=0; i<N; i++) {
-      auto& pd = player_displays[i];
-      pd.xmin = (i % cols) * 1. / cols;
-      pd.xmax = ((i % cols) + 1.) / cols;
-      pd.ymin = (i / cols) * 1. / rows;
-      pd.ymax = ((i / cols) + 1.) / rows;
-      }
-    }
-  else {
-    player_displays.clear();
-    }
-  }
-
 map<string, map<eLand, int> > scoreboard;
 
 void uploadScore() {
@@ -1153,7 +1128,7 @@ void displayScore(eLand l) {
   }
 
 void race_won() {
-  if(!race_finish_tick[current_player]) {
+  if(!race_finish_tick[multi::cpid]) {
     int result = ticks - race_start_tick;
     int losers = 0;
     int place = 1;
@@ -1161,9 +1136,9 @@ void race_won() {
     for(auto& ghost: ghostset()[specialland]) if(ghost.result < result) place++; else losers++;
     for(auto& ghost: oghostset()[specialland]) if(ghost.result < result) place++; else losers++;
 
-    if(place == 1 && losers) trophy[current_player] = 0xFFD500FF;
-    if(place == 2) trophy[current_player] = 0xFFFFC0FF;
-    if(place == 3) trophy[current_player] = 0x967444FF;
+    if(place == 1 && losers) trophy[multi::cpid] = 0xFFD500FF;
+    if(place == 2) trophy[multi::cpid] = 0xFFFFC0FF;
+    if(place == 3) trophy[multi::cpid] = 0x967444FF;
   
     if(place + losers > 1)
       addMessage(XLAT("Finished the race! Time: %1, place: %2 out of %3", racetimeformat(result), its(place), its(place+losers)));
@@ -1173,7 +1148,7 @@ void race_won() {
     if(place == 1 && losers && official_race)
       achievement_gain("RACEWON", rg::racing);
     
-    race_finish_tick[current_player] = ticks;
+    race_finish_tick[multi::cpid] = ticks;
     charstyle gcs = getcs();
     for(color_t *x: {&gcs.skincolor, &gcs.haircolor, &gcs.dresscolor, &gcs.swordcolor, &gcs.dresscolor2}) {
       for(int a=1; a<4; a++)
@@ -1196,7 +1171,7 @@ void race_won() {
       }
     subtrack.resize(ngh);    
 
-    subtrack.emplace_back(ghost{gcs, result, race_checksum, time(NULL), current_history[current_player]});
+    subtrack.emplace_back(ghost{gcs, result, race_checksum, time(NULL), current_history[multi::cpid]});
     sort(subtrack.begin(), subtrack.end(), [] (const ghost &g1, const ghost &g2) { return g1.result < g2.result; });
     if(isize(subtrack) > ghosts_to_save && ghosts_to_save > 0) 
       subtrack.resize(ghosts_to_save);
@@ -1339,22 +1314,5 @@ void add_debug(cell *c) {
   }
 
 }
-
-bool subscreen_split(reaction_t what) {
-  using namespace racing;
-  if(!racing::on) return false;
-  if(in_subscreen) return false;
-  if(!player_displays.empty()) {
-    in_subscreen = true;
-    int& p = current_player;
-    for(p = 0; p < multi::players; p++) {
-      dynamicval<display_data*> c(current_display, &player_displays[p]);
-      what();
-      }
-    in_subscreen = false;
-    return true;
-    }
-  return false;
-  }
 
 }

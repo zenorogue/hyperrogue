@@ -1366,9 +1366,7 @@ void start_game() {
 #if CAP_TEXTURE
   texture::config.remap();
 #endif
-#if CAP_RACING
-  racing::prepare_subscreens();
-#endif
+  subscreens::prepare();
   }
 
 void restart_game(char switchWhat) {
