@@ -3105,13 +3105,16 @@ void bfs() {
     }
   
   int qb = 0;
+  first7 = 0;
   while(true) {
     if(qb == isize(dcal)) break;
     int i, fd = reachedfrom[qb] + 3;
     cell *c = dcal[qb++];
     
     int d = c->cpdist;
-    if(d == distlimit) { first7 = qb; break; }
+    
+    if(DIM == 2 && d == distlimit) { first7 = qb; break; }
+
     for(int j=0; j<c->type; j++) if(i = (fd+j) % c->type, c->move(i)) {
       // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
       cell *c2 = c->move(i);
@@ -3125,6 +3128,10 @@ void bfs() {
         c2->wall = waSea;
       
       if(c2 && signed(c2->cpdist) > d+1) {
+        if(DIM == 3 && !gmatrix.count(c2)) {
+          if(!first7) first7 = qb;
+          continue;
+          }
         c2->cpdist = d+1;
         
         // remove treasures
