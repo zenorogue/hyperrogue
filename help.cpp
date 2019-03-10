@@ -845,7 +845,7 @@ void describeMouseover() {
     if(randomPatternsMode)
       out += " " + describeRPM(c->land);
       
-    if(euclid && cheater) {
+    if(masterless && cheater) {
       out += " ("+its(cell_to_vec(c))+")";
       if(!fulltorus || torusconfig::torus_mode != torusconfig::tmSingle) {
         int x, y;
