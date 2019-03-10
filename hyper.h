@@ -3686,6 +3686,7 @@ namespace gp {
   loc operator-(loc e1, loc e2);
   loc operator*(loc e1, loc e2);
   extern loc eudir(int dir);
+  int length(loc p);
 
   #if CAP_GP
   void compute_geometry();

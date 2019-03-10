@@ -38,16 +38,16 @@ namespace hr { namespace gp {
       }
     }
   
+  int length(loc p) {
+    return eudist(p.first, p.second);
+    }
+  
 #if CAP_GP
   loc param(1, 0);
 
   hyperpoint next;
   ld alpha;
   int area;
-  
-  int length(loc p) {
-    return eudist(p.first, p.second);
-    }
   
   struct goldberg_mapping_t {
     cellwalker cw;

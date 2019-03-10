@@ -445,7 +445,55 @@ bool pseudohept(cell *c) {
     return (c->master->zebraval == 1) && (c->master->distance & 1);
   }
 
+pair<gp::loc, gp::loc> gpvalue(heptagon *h) {
+  int d = h->c.spin(S7-1);
+  if(d == 0) return make_pair(gp::loc(0,0), gp::loc(-1,0));
+  else return make_pair(gp::eudir((d-1)*2), gp::loc(1,0));
+  }
+
+// distance in a triangular grid
+int tridist(gp::loc v) {
+  using namespace gp;
+  int d = v.first - v.second;
+  int d0 = d % 3;
+  if(d0 == 1 || d0 == -2) return 1 + min(tridist(v - eudir(0)), min(tridist(v - eudir(2)), tridist(v - eudir(4))));
+  if(d0 == 2 || d0 == -1) return 1 + min(tridist(v + eudir(0)), min(tridist(v + eudir(2)), tridist(v + eudir(4))));
+  return length(v * loc(1,1)) * 2 / 3;
+  }
+
+int celldistance3_tri(heptagon *c1, heptagon *c2) {
+  using namespace gp;
+  int steps = 0;
+  int d1 = c1->distance;
+  int d2 = c2->distance;
+  while(d1 > d2) c1 = c1->cmove(S7-1), steps++, d1--;
+  while(d2 > d1) c2 = c2->cmove(S7-1), steps++, d2--;
+  vector<pair<loc, loc> > m1, m2;
+  while(c1 != c2) {
+    m2.push_back(gpvalue(c2));
+    m1.push_back(gpvalue(c1));
+    c1 = c1->cmove(S7-1);
+    c2 = c2->cmove(S7-1);
+    steps += 2;
+    }
+  loc T1(0,0), T2(0,0), inv1(1,0), inv2(1,0);
+  int xsteps = steps;
+  while(isize(m1)) {
+    xsteps -= 2;
+    inv1 = inv1 * m1.back().second;
+    inv2 = inv2 * m2.back().second;
+    T1 = T1 + T1 + m1.back().first * inv1;
+    T2 = T2 + T2 + m2.back().first * inv2;
+    m1.pop_back(); m2.pop_back();
+    loc T0 = T2 - T1;
+    if(T0.first > 3 || T0.second > 3 || T0.first < -3 || T0.second < -3) break;
+    steps = min(steps, xsteps + tridist(T0));
+    }
+  return steps;
+  }
+
 int celldistance3(heptagon *c1, heptagon *c2) {
+  if(geometry == gHoroTris) return celldistance3_tri(c1, c2);
   int steps = 0;
   int d1 = c1->distance;
   int d2 = c2->distance;
