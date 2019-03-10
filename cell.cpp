@@ -67,7 +67,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     binary::xcode[&h] = (1 << 16);
     binary::rxcode[1<<16] = &h;
     #endif
-    h.zebraval = 0,
+    h.zebraval = 0, h.emeraldval = 0,
     h.c7 = newCell(DIM == 3 ? S7 : 6, origin);
     }
   #endif

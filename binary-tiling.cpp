@@ -87,14 +87,22 @@ namespace binary {
     if(parent->c7) h->c7 = newCell(t, h);
     h->cdata = NULL;
     h->zebraval = side;
-    if(DIM == 3) {
+    h->emeraldval = 0;
+    if(DIM == 3 && h->c7) {
+      if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
+      eLand z = eLand(parent->emeraldval);
       int chance = 0;
-      if(specialland == laCrossroads4) chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));
+      if(specialland == laCrossroads4) {
+        eLand x = parent->c7->land;
+        parent->c7->land = z;
+        chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));
+        parent->c7->land = x;
+        }
       if(chaosmode) chance = 1000;
       if(chance && hrand(40000) < chance)
-        h->c7->land = getNewLand(parent->c7->land);
+        h->emeraldval = getNewLand(z);
       else
-        h->c7->land = parent->c7->land;
+        h->emeraldval = z;
       }
     #if DEBUG_BINARY_TILING
     xcode[h] = expected_xcode(parent, d);
