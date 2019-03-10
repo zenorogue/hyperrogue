@@ -3875,21 +3875,28 @@ bool isWall3(cell *c, color_t& wcol) {
 
 bool isSulphuric(eWall w) { return among(w, waSulphur, waSulphurC); }
 
+// 'land color', but a bit twisted for Alchemist Lab
+color_t lcolor(cell *c) {
+  if(isAlch(c->wall) && !c->item) return winf[c->wall].color;
+  return floorcolors[c->land];
+  }
+
 color_t transcolor(cell *c, cell *c2) {
-  if(c->land != c2->land) {
-    if(c < c2) 
-      return darkena(gradient(floorcolors[c->land], floorcolors[c2->land], 0, 1, 2), 0, 0x40);
-    return 0;
-    }
-  if(c->wall == c2->wall) return 0;
   color_t dummy;
   if(isWall3(c2, dummy)) return 0;
+  if(c->land != c2->land) {
+    if(c>c2) return 0;
+    if(c->land == laBarrier) return darkena(lcolor(c2), 0, 0x40);
+    if(c2->land == laBarrier) return darkena(lcolor(c), 0, 0x40);
+    return darkena(gradient(lcolor(c), lcolor(c2), 0, 1, 2), 0, 0x40);
+    }
+  if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena(winf[c->wall].color, 0, 0x40);
+  if(c->wall == c2->wall) return 0;
 
-  if(c->wall == waChasm && c2->wall != waChasm) return 0x40404080;
-  if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x00004040;
-  if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena(winf[c2->wall].color, 0, 0x40);
-  if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena(floorcolors[laAlchemist], 0, 0x40);
-  if(isAlch(c) && (c2->item || !isAlch(c2))) return darkena(winf[c->wall].color, 0, 0x30);
+  if(c->wall == waChasm && c2->wall != waChasm) return 0x606060A0;
+  if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x0000C060;
+  if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena(winf[c->wall].color, 0, 0x40);
+  if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena(0xFF00FF, 0, 0x80);
   if(realred(c->wall) && realred(c2->wall) && c->wall != c2->wall) {
     int l = snakelevel(c) - snakelevel(c2);
     if(l > 0) return darkena(floorcolors[laRedRock], 0, 0x30 * l);
@@ -4803,8 +4810,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         else {
           for(int a=0; a<c->type; a++) if(c->move(a)) {
             color_t t = transcolor(c, c->move(a));
-            if(t)
-              queuepolyat(V, shWall3D[a], t - get_darkval(a) * ((t & 0xF0F0F000) >> 4), PPR::TRANSPARENT).subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
+            if(t) {
+              t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
+              auto& poly = queuepolyat(V, shWall3D[a], t, PPR::TRANSPARENT);
+              poly.subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
+              }
             }
           if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, &V, V, V);
           else if(isFire(c)) {
