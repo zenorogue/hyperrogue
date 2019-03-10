@@ -153,6 +153,14 @@ void place_elemental_wall(cell *c) {
   else if(c->land == laEEarth) c->wall = waStone;
   }
 
+int hrand_monster(int x) {
+  if(DIM == 3 && !sphere) {
+    int t = isize(gmatrix);
+    if(t > 500) x = ((long long)(x)) * t / 500;
+    }
+  return hrand(x);
+  }
+
 void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == min(BARLEV, 9);
   switch(c->land) {
@@ -166,7 +174,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else prairie::generateBeast(c);
           }
         else if(!prairie::nearriver(c) && c->LHU.fi.flowerdist > 7) {
-          if(hrand(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0))
+          if(hrand_monster(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0))
             c->monst = moGadfly;
           else buildPrizeMirror(c, 1000);
           }
@@ -180,7 +188,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       dungeon::all(c, d);
       ONEMPTY {
         if(c->land == laIvoryTower) {
-          if(hrand(20000) < 20 + items[itIvory] + yendor::hardness()) {
+          if(hrand_monster(20000) < 20 + items[itIvory] + yendor::hardness()) {
             if(cellEdgeUnstable(c))
               c->monst = moGargoyle;
             else
@@ -194,13 +202,13 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->land == laDungeon) {
           int lp = c->landparam * c->landparam;
           if(lp > 100) lp = 100;
-          if(c->landparam >= 10 && hrand(20000) < 5*lp + items[itSlime] + yendor::hardness() && !cellEdgeUnstable(c) && !peace::on) {
+          if(c->landparam >= 10 && hrand_monster(20000) < 5*lp + items[itSlime] + yendor::hardness() && !cellEdgeUnstable(c) && !peace::on) {
             c->monst = moSkeleton, c->hitpoints = 3;
             }
-          else if(c->landparam >= 10 && hrand(50000) < lp/2 + items[itSlime] + yendor::hardness()) {
+          else if(c->landparam >= 10 && hrand_monster(50000) < lp/2 + items[itSlime] + yendor::hardness()) {
             c->monst = moGhost;
             }
-          else if(c->landparam >= 10 && hrand(50000) < 3*(100-lp) + 80 + items[itSlime]/3 + yendor::hardness()) {
+          else if(c->landparam >= 10 && hrand_monster(50000) < 3*(100-lp) + 80 + items[itSlime]/3 + yendor::hardness()) {
             c->monst = moBat;
             }
           else if(c->landparam >= 15 && hrand(800) < min(PT(150 + 2 * kills[moBat], 250), 250) && !cellEdgeUnstable(c) && c->wall != waOpenGate) {
@@ -386,17 +394,17 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             }
           havewhat |= HF_MOUSE;
           }
-        else if(hrand(15000) < 10 + hardness) {
+        else if(hrand_monster(15000) < 10 + hardness) {
           c->monst = moPalace;
           c->hitpoints = palaceHP();
           if(hrand(10 + items[itPalace] + yendor::hardness()) >= 14 && !lookingForPrincess)
             c->monst = moSkeleton;
           }
-        else if(hrand(20000) < hardness) {
+        else if(hrand_monster(20000) < hardness) {
           c->monst = moFatGuard;
           c->hitpoints = palaceHP();
           }
-        else if(hrand(20000) < hardness - 7) {
+        else if(hrand_monster(20000) < hardness - 7) {
           c->monst = moVizier;
           c->hitpoints = palaceHP();
           }
@@ -446,7 +454,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
 
-      if(d == 7 && c->wall == waCavewall && hrand(5000) < items[itEmerald] + yendor::hardness() && !safety)
+      if(d == 7 && c->wall == waCavewall && hrand_monster(5000) < items[itEmerald] + yendor::hardness() && !safety)
         c->monst = moSeep;
     
       ONEMPTY {
@@ -456,7 +464,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           for(int i=0; i<c->type; i++) if(c->move(i)->wall == waCavewall) ok = false;
           if(ok) c->item = itEmerald;
           }
-        if(hrand(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) {
+        if(hrand_monster(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) {
           static eMonster emeraldmonsters[4] = { moHedge, moLancer, moFlailer, moMiner };
           c->monst = emeraldmonsters[hrand(4)];
           }
@@ -479,9 +487,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moFireFairy]*2 + kills[moHedge]), 160) && notDippingFor(itFernFlower))
           c->item = itFernFlower;
-        if(hrand(4000) < 40 + items[itFernFlower] + yendor::hardness())
+        if(hrand_monster(4000) < 40 + items[itFernFlower] + yendor::hardness())
           c->monst = moHedge;
-        else if(hrand(8000) < 2 * items[itFernFlower] + yendor::hardness() && !peace::on)
+        else if(hrand_monster(8000) < 2 * items[itFernFlower] + yendor::hardness() && !peace::on)
           c->monst = moFireFairy;
         }
       break;    
@@ -561,7 +569,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = powerorbs[hrand(6)];
           }
         else if(hrand(5000) < 10 && mirror::build(c)) ;
-        else if(hrand(1000) < 10 + (items[itPower] ? 10:0) + (items[itPower] + yendor::hardness()))
+        else if(hrand_monster(1000) < 10 + (items[itPower] ? 10:0) + (items[itPower] + yendor::hardness()))
           c->monst = eMonster(moWitch + hrand(NUMWITCH));
         }
       break;
@@ -589,7 +597,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(c->wall == waNone && hrand(2500) < PT(100 + 2 * (kills[moOrangeDog]), 300) && notDippingFor(itZebra))
           c->item = itZebra;
-        if(hrand(10000) < 40 + 2*(items[itZebra] + yendor::hardness()))
+        if(hrand_monster(10000) < 40 + 2*(items[itZebra] + yendor::hardness()))
           c->monst = moOrangeDog;
         }
       break;
@@ -636,7 +644,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moVineBeast] + kills[moVineSpirit]), 200) && notDippingFor(itWine))
           c->item = itWine;
-        if(hrand(8000) < 12 * (items[itWine] + yendor::hardness()))
+        if(hrand_monster(8000) < 12 * (items[itWine] + yendor::hardness()))
           c->monst = moVineBeast;
         }
       break;
@@ -711,7 +719,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY if(!peace::on) {
-        if(hrand(15000) < 5 + 3 * items[itBarrow] + 4 * yendor::hardness())
+        if(hrand_monster(15000) < 5 + 3 * items[itBarrow] + 4 * yendor::hardness())
           c->monst = moDraugr;
         else if(hrand(5000) < 20 + (quickfind(laBurial) ? 40 : 0))
           c->item = itOrbSword;
@@ -750,7 +758,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           dieTroll(c, pickTroll(c));
         }
       ONEMPTY {
-        if(hrand(8000) < items[itTrollEgg] + hardness_empty())
+        if(hrand_monster(8000) < items[itTrollEgg] + hardness_empty())
           c->monst = pickTroll(c);
         }
       break;
@@ -791,7 +799,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moYeti] + kills[moWolf]), 200) && notDippingFor(itDiamond))
           c->item = itDiamond;
-        if(hrand(8000) < 2 * (items[itDiamond] + yendor::hardness()))
+        if(hrand_monster(8000) < 2 * (items[itDiamond] + yendor::hardness()))
           c->monst = hrand(2) ? moYeti : moWolf;
         }      
       break;
@@ -800,7 +808,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moSwitch1] + kills[moSwitch2]), 200) && notDippingFor(itSwitch))
           c->item = itSwitch;
-        if(hrand(8000) < 40 + 5 * (items[itSwitch] + yendor::hardness()))
+        if(hrand_monster(8000) < 40 + 5 * (items[itSwitch] + yendor::hardness()))
           c->monst = hrand(2) ? moSwitch1 : moSwitch2;
         }      
       break;
@@ -827,7 +835,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if((havewhat&HF_DRAGON) && items[itDragon] < 10)
           dchance = 5; 
           
-        if(hrand(150000) < dchance && !c->monst && (!c->wall || c->wall == waChasm) && !peace::on) {
+        if(hrand_monster(150000) < dchance && !c->monst && (!c->wall || c->wall == waChasm) && !peace::on) {
           havewhat |= HF_DRAGON;
           // printf("dragon generated with dchance = %d\n", dchance);
           vector<int> possi;
@@ -876,7 +884,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * min(kills[moTroll] + kills[moGoblin], 150), 200) && notDippingFor(itGold))
           c->item = itGold;
-        if(hrand(8000) < 10 + 2 * (items[itGold] + yendor::hardness()))
+        if(hrand_monster(8000) < 10 + 2 * (items[itGold] + yendor::hardness()))
           c->monst = hrand(2) ? moTroll : moGoblin;
         }
       break;
@@ -896,7 +904,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
 
       if(d == 7) {
-        if(c->wall == waSea && hrand(5000) < 15 + items[itFjord] + yendor::hardness() && !safety) {
+        if(c->wall == waSea && hrand_monster(5000) < 15 + items[itFjord] + yendor::hardness() && !safety) {
           if(items[itFjord] >= 5 && hrand(100) < 20 && !peace::on)
             c->monst = moWaterElemental;
           else {
@@ -905,7 +913,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
       
-        else if(yendor::path && c->wall == waSea && hrand(5000) < 20) {
+        else if(yendor::path && c->wall == waSea && hrand_monster(5000) < 20) {
           c->monst = moViking;
           c->wall = waBoat;
           }
@@ -920,7 +928,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       
       ONEMPTY {
-        if(hrand(16000) < 10 + 2 * (items[itFjord] + yendor::hardness()) + (yendor::path ? 90:0))
+        if(hrand_monster(16000) < 10 + 2 * (items[itFjord] + yendor::hardness()) + (yendor::path ? 90:0))
           c->monst = moFjordTroll;
         }
       break;
@@ -933,13 +941,13 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else c->wall = waDeadfloor;
         }
 
-      if(d == 7 && c->wall == waDeadwall && hrand(1000) < items[itSilver] + yendor::hardness() && !safety)
+      if(d == 7 && c->wall == waDeadwall && hrand_monster(1000) < items[itSilver] + yendor::hardness() && !safety)
         c->monst = moSeep;
     
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moDarkTroll] + kills[moEarthElemental]), 200) && notDippingFor(itSilver))
           c->item = itSilver;
-        if(hrand(16000) < (items[itSilver] + yendor::hardness())) {
+        if(hrand_monster(16000) < (items[itSilver] + yendor::hardness())) {
           c->monst = moEarthElemental;
           for(int i=0; i<c->type; i++) {
             cell *c2 = c->move(i);
@@ -948,7 +956,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           for(int i=0; i<c->type; i++) if(c->move(i)->mpdist < c->mpdist) c->mondir = i;
           chasmifyEarth(c); c->wall = waDeadfloor2;
           }
-        else if(hrand(8000) < 60 + 8 * (items[itSilver] + yendor::hardness())) {
+        else if(hrand_monster(8000) < 60 + 8 * (items[itSilver] + yendor::hardness())) {
           if(hrand(100) < 25) {
             }
           else c->monst = hrand(2) ? moDarkTroll : moGoblin;
@@ -962,7 +970,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(25 + min(kills[moSlime], 200), 100) && notDippingFor(itElixir))
           c->item = itElixir;
-        else if(hrand(3500) < 10 + items[itElixir] + yendor::hardness())
+        else if(hrand_monster(3500) < 10 + items[itElixir] + yendor::hardness())
           c->monst = moSlime;
         }
       break;
@@ -971,7 +979,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       #if CAP_FIELD
       if(fargen) {
         c->wall = waNone;
-        if(hrand(20000) < (items[itLavaLily] + yendor::hardness()))
+        if(hrand_monster(20000) < (items[itLavaLily] + yendor::hardness()))
           c->monst = moSalamander,
           c->hitpoints = 3;
         if(hrand(8000) < PT(100 + 2 * kills[moLavaWolf], 200) && notDippingFor(itLavaLily))
@@ -980,7 +988,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         // prize orbs get a bonus, because most of them are not allowed anyway
         }
       ONEMPTY {
-        if(hrand(8000) < (items[itLavaLily] + yendor::hardness()))
+        if(hrand_monster(8000) < (items[itLavaLily] + yendor::hardness()))
           c->monst = moLavaWolf;
         }
       #endif
@@ -1006,7 +1014,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       if(d == 8) c->landparam = 0;
       ONEMPTY {
-        if(hrand(8000) < 10 + (items[itBlizzard] + yendor::hardness()))
+        if(hrand_monster(8000) < 10 + (items[itBlizzard] + yendor::hardness()))
           c->monst = pick(moVoidBeast, moIceGolem);
         }
       if((d == 7 || d == 6) && blizzard_no_escape(c))
@@ -1041,7 +1049,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = itTerra;
         int t = 2 * (items[itTerra] + yendor::hardness());
         if(t < 60) t += (60-t) * (60 - t) / 120;
-        if(hrand(20000) < t)
+        if(hrand_monster(20000) < t)
           c->monst = moJiangshi;
         }
       break;
@@ -1065,7 +1073,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             if(c->move(i) && (c->move(i)->wall == waBigTree || c->move(i)->wall == waSmallTree)) 
               c->move(i)->wall = waNone;
           }
-        else if(hrand(15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
+        else if(hrand_monster(15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
           // for the Yendor Challenge, use only Mutants
           if(!(yendor::on && yendor::clev().l == laMirror)) {
             c->monst = moForestTroll;
@@ -1138,7 +1146,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(hyperbolic_37 ? cdist50(c) <= 2 : hrand(100) < 20) c->wall = waSaloon;
         }
       ONEMPTY {
-        if(hrand(25000) < 2 + (2 * items[itBounty] + yendor::hardness()) + (items[itRevolver] ? 150:0))
+        if(hrand_monster(25000) < 2 + (2 * items[itBounty] + yendor::hardness()) + (items[itRevolver] ? 150:0))
           c->monst = moOutlaw;
         if(hrand(1000) < PT(20 + kills[moOutlaw], 40))
           c->item = itRevolver;
@@ -1150,7 +1158,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen)
         westwall::switchTreasure(c);
       ONEMPTY {
-        if(hrand(6000) < 5 + items[itWest] + yendor::hardness())
+        if(hrand_monster(6000) < 5 + items[itWest] + yendor::hardness())
           c->monst = hrand(100) < 20 ? moWestHawk : moFallingDog;
         }
       #endif
@@ -1176,9 +1184,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           whirlwind::switchTreasure(c);
         }
       ONEMPTY {
-        if(hrand(4500) < items[itWindstone] + yendor::hardness())
+        if(hrand_monster(4500) < items[itWindstone] + yendor::hardness())
           c->monst = moWindCrow;
-        if(hrand(doCross?3000:30000) < items[itWindstone] + yendor::hardness() - 5)
+        if(hrand_monster(doCross?3000:30000) < items[itWindstone] + yendor::hardness() - 5)
           c->monst = moAirElemental;
         }
       break;
@@ -1298,10 +1306,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(hrand(7500) < 25 + (items[itFulgurite] + yendor::hardness()))
+        if(hrand_monster(7500) < 25 + (items[itFulgurite] + yendor::hardness()))
           c->monst = (hrand(5) ? moMetalBeast : moMetalBeast2),
           c->hitpoints = 3;
-        if(hrand(10000) < 20 + (items[itFulgurite] + yendor::hardness()) && !ishept(c)) {
+        if(hrand_monster(10000) < 20 + (items[itFulgurite] + yendor::hardness()) && !ishept(c)) {
           c->monst = moStormTroll;
           }
         }
@@ -1318,7 +1326,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(30 + 4*kills[moZombie] + 6*kills[moNecromancer], 120) && notDippingFor(itBone))
           c->item = itBone;
-        if(hrand(20000) < 10 + items[itBone] + yendor::hardness()) {
+        if(hrand_monster(20000) < 10 + items[itBone] + yendor::hardness()) {
           eMonster grm[6] = { moZombie, moZombie, moZombie, moGhost, moGhost, moNecromancer};
           c->monst = grm[hrand(6)];
           }
@@ -1351,9 +1359,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(30 + 2 * (kills[moCultist] + kills[moTentacle] + kills[moPyroCultist]), 100) && notDippingFor(itStatue))
           c->item = itStatue;
-        if(hrand(8000) < 5 + items[itStatue] + yendor::hardness() && !c->monst && !peace::on)
+        if(hrand_monster(8000) < 5 + items[itStatue] + yendor::hardness() && !c->monst && !peace::on)
           c->monst = moTentacle, c->item = itStatue, c->mondir = NODIR;
-        else if(hrand(12000) < 5 + items[itStatue] + yendor::hardness())
+        else if(hrand_monster(12000) < 5 + items[itStatue] + yendor::hardness())
           c->monst = hrand(3) ? ((hrand(40) < items[itStatue]-25) ? moCultistLeader : moCultist) : moPyroCultist;
         else if(hrand(8000) < 5 + items[itStatue] + yendor::hardness() && c->type == 6 && !(yendor::on && (yendor::clev().flags & YF_NEAR_TENT)) && celldist(c)>=3) {
           for(int t=0; t<c->type; t++) {
@@ -1375,7 +1383,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           (eubinary || c->master->alt) ? celldistAlt(c) : 10;
         // remember: d is negative
         if(chaosmode ? hrand(100) < 25 : d % TEMPLE_EACH == 0) {
-          if(hrand(5000) < 20 - 2*d && !c->monst && !peace::on)
+          if(hrand_monster(5000) < 20 - 2*d && !c->monst && !peace::on)
             c->monst = moTentacle, c->mondir = NODIR;
           }
         else {
@@ -1383,9 +1391,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           // if(d0<0) d0=-d0;
           if(hrand(100) < (peace::on ? 15 : 30) && DIM == 2)
             c->wall = waBigStatue;
-          else if(hrand(20000) < -d)
+          else if(hrand_monster(20000) < -d)
             c->monst = hrand(3) ? moCultist : moPyroCultist;
-          else if(hrand(100000) < -d)
+          else if(hrand_monster(100000) < -d)
             c->monst = moCultistLeader;
           else if(hrand(5000) < 250 && !peace::on)
             c->item = itGrimoire;
@@ -1411,9 +1419,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(6000) < PT(120 + (kills[moLesser]), 240) && notDippingFor(itHell))
           c->item = itHell;
-        if(hrand(8000) < 40 + items[itHell] * (chaosmode?4:1) + yendor::hardness())
+        if(hrand_monster(8000) < 40 + items[itHell] * (chaosmode?4:1) + yendor::hardness())
           c->monst = moLesser;
-        else if(hrand(24000) < 40 + items[itHell] * (chaosmode?4:1) + yendor::hardness())
+        else if(hrand_monster(24000) < 40 + items[itHell] * (chaosmode?4:1) + yendor::hardness())
           c->monst = moGreater;
         }
       break;
@@ -1431,7 +1439,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           
           c->wall = waLake;
 
-          if(hrand(500) < 100 + 2 * (items[itSapphire] + yendor::hardness()))
+          if(hrand_monster(500) < 100 + 2 * (items[itSapphire] + yendor::hardness()))
             c->monst = moShark;
           }
         }
@@ -1439,7 +1447,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moShark] + kills[moGreaterShark] + kills[moCrystalSage]), 200) && notDippingFor(itSapphire))
           c->item = itSapphire;
-        if(hrand(5000) < 2 * (items[itSapphire] + yendor::hardness())) {
+        if(hrand_monster(5000) < 2 * (items[itSapphire] + yendor::hardness())) {
           eMonster ms[3] = { moYeti, moGreaterShark, moCrystalSage };
           c->monst = ms[hrand(3)];
           if(c->monst == moGreaterShark) c->wall = waLake;
@@ -1463,7 +1471,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(isHive(c->land) && hrand(6000) < (hive::hivehard() - 15)) 
+        if(isHive(c->land) && hrand_monster(6000) < (hive::hivehard() - 15)) 
           c->monst = hive::randomHyperbug();
 
         /* if(hrand(1500) < 30 + (kills[moBug0] + kills[moBug1] + kills[moBug2]) && notDippingFor(itRoyalJelly))
@@ -1481,7 +1489,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         forCellEx(c2, c) c2->wall = waNone;
         }
   
-      if(d == 8 && !kraken_pseudohept(c) && hrand(20000) < 10 + 3 * items[itKraken] + 2 * yendor::hardness() && c->wall == waSea && !c->item && !c->monst && !safety) {
+      if(d == 8 && !kraken_pseudohept(c) && hrand_monster(20000) < 10 + 3 * items[itKraken] + 2 * yendor::hardness() && c->wall == waSea && !c->item && !c->monst && !safety) {
         bool ok = true;
         forCellEx(c2, c)
           if(c2->wall != waSea || c2->item || c2->monst) 
@@ -1499,7 +1507,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
 
       if(d == 7 && c->wall == waSea && !c->item && !c->monst && !safety) {
-        if(hrand(2000) < 3) {
+        if(hrand_monster(2000) < 3) {
           c->wall = waBoat;
           c->item = itOrbFish;
           c->monst = moViking;
@@ -1554,14 +1562,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           placeLocalSpecial(c, 50);
           }
         }  
-      if(d == 7 && c->wall == waSea && hrand(10000) < 20 + items[itPirate] + 2 * yendor::hardness() && !safety)
+      if(d == 7 && c->wall == waSea && hrand_monster(10000) < 20 + items[itPirate] + 2 * yendor::hardness() && !safety)
         c->monst = moCShark;  
-      if(d == 7 && c->wall == waCTree && hrand(5000) < 100 + items[itPirate] + yendor::hardness())
+      if(d == 7 && c->wall == waCTree && hrand_monster(5000) < 100 + items[itPirate] + yendor::hardness())
         c->monst = moParrot;    
       ONEMPTY {
         if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on && geometry != gCrystal)
           c->item = itCompass;
-        if(hrand(16000) < 40 + (items[itPirate] + yendor::hardness()))
+        if(hrand_monster(16000) < 40 + (items[itPirate] + yendor::hardness()))
           c->monst = moPirate;
         }
       break;
@@ -1594,7 +1602,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(hrand(4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6) && !safety) {
+        if(hrand_monster(4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6) && !safety) {
           c->monst = moTortoise;
           c->hitpoints = 3;
           }
@@ -1634,7 +1642,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moWorm] + kills[moDesertman]), 200) && notDippingFor(itSpice))
           c->item = itSpice;
-        if(hrand(8000) < 10 + 2 * (items[itSpice] + yendor::hardness()) && !c->monst)
+        if(hrand_monster(8000) < 10 + 2 * (items[itSpice] + yendor::hardness()) && !c->monst)
           c->monst = (hrand(2) && !peace::on) ? moWorm : moDesertman,
           c->mondir = NODIR;
         }
@@ -1669,14 +1677,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waNone)
         buildPrizeMirror(c, 1000);    
       ONEMPTY {
-        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(!BITRUNCATED && S3==4)) {
+        if(hrand_monster((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(!BITRUNCATED && S3==4)) {
           int i = -1;
           for(int t=0; t<c->type; t++) if(c->move(t)->mpdist > c->mpdist && !pseudohept(c->move(t)))
             i = t;
           if(i != -1 && !peace::on) 
             generateSnake(c, i, 1);
           }
-        else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (PURE?hrand(10)<3:!ishept(c)) && !c->monst)
+        else if(hrand_monster(16000) < 50+items[itRedGem]+yendor::hardness() && (PURE?hrand(10)<3:!ishept(c)) && !c->monst)
           c->monst = moRedTroll,
           c->mondir = NODIR;
         }
@@ -1684,14 +1692,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laSnakeNest:
       ONEMPTY {
-        if(hrand(30000) < 30+items[itSnake]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
+        if(hrand_monster(30000) < 30+items[itSnake]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           vector<int> gooddir;
           for(int t=0; t<c->type; t++) if(c->move(t)->mpdist > c->mpdist)
             gooddir.push_back(t);
           if(isize(gooddir))
             generateSnake(c, gooddir[hrand(isize(gooddir))], 2);
           }
-        else if(hrand(10000) < items[itSnake] - 10 + yendor::hardness() && !c->monst && !c->wall && !peace::on) {
+        else if(hrand_monster(10000) < items[itSnake] - 10 + yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           c->monst = pick(moRedTroll, moMiner, moSkeleton, moBomberbird);
           c->hitpoints = 3;
           }
@@ -1732,7 +1740,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waBoat;
           c->monst = moRatling;
           }
-        if(hrand(12000) < 30 + 2 * items[itCoral] + yendor::hardness()) {
+        if(hrand_monster(12000) < 30 + 2 * items[itCoral] + yendor::hardness()) {
           c->wall = waBoat;
           c->monst = moRatling;
           }
@@ -1743,7 +1751,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
   
       ONEMPTY if(c->land == laWarpCoast) {
-        if(hrand(12000) < 20 + 2 * items[itCoral] + yendor::hardness()) {
+        if(hrand_monster(12000) < 20 + 2 * items[itCoral] + yendor::hardness()) {
           c->monst = moRatling;
           c->stuntime = hrand(2);
           }
@@ -1769,7 +1777,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
       if(d == 7 && c->wall == waNone && !safety) {
         if(hrand(1000) < 20) c->monst = moSleepBull;
-        else if(hrand(2500) < items[itBull] + yendor::hardness() - 10) c->monst = moGadfly;
+        else if(hrand_monster(2500) < items[itBull] + yendor::hardness() - 10) c->monst = moGadfly;
         else if(hrand(1000) < 50) {
           int nearwall = 0;
           int walls[8];
@@ -1807,7 +1815,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->item = itRose;
           }
         else {
-          int p = hrand(10000);
+          int p = hrand_monster(10000);
           if(p >= 10 + items[itRose] + yendor::hardness()) ;
           else if(p < 10) c->monst = moFalsePrincess;
           else if(p < 13) c->monst = moRoseBeauty;
@@ -1879,7 +1887,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else placeLocalSpecial(c, 10);
             }
           }
-        if(hrand(5000) < items[itHunting]- 17 + yendor::hardness())
+        if(hrand_monster(5000) < items[itHunting]- 17 + yendor::hardness())
           c->monst = moHunterDog;
         }
       break;
@@ -1915,7 +1923,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waBoat;
           if(hrand(1000) < PT(50 + kills[moAlbatross]/2, 150) && !peace::on)
             c->item = itCoast;
-          if(hrand(15000) < 10 + 2 * items[itCoast] + 2 * yendor::hardness())
+          if(hrand_monster(15000) < 10 + 2 * items[itCoast] + 2 * yendor::hardness())
             c->monst = moAlbatross;
           if(items[itCoast] >= treasureForLocal() && hrand(10000) < 5 && !peace::on && !inv::on)
             c->item = itOrbAir;
@@ -1925,15 +1933,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(c->landparam > 25) {
           int amberbonus = items[itCoast] - 50;
           // 50 => 10
-          if(hrand(15000) < 10 + amberbonus + 2 * yendor::hardness())
+          if(hrand_monster(15000) < 10 + amberbonus + 2 * yendor::hardness())
             c->monst = moAlbatross;
-          if(hrand(30000) < 20 + 2 * yendor::hardness()) {
+          if(hrand_monster(30000) < 20 + 2 * yendor::hardness()) {
             c->wall = waBoat;
             c->monst = moPirate;
             // orbs are possible!
             placeOceanOrbs(c);
             }
-          else if(hrand(30000) < 10 + 2 * yendor::hardness())
+          else if(hrand_monster(30000) < 10 + 2 * yendor::hardness())
             c->monst = moCShark;
           }
         }
@@ -1967,7 +1975,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = itBombEgg;
           c->landparam = items[itBombEgg] + 5 + hrand(11);
           }
-        else if(hrand(5000) < treas - 20 + yendor::hardness() && !safety)
+        else if(hrand_monster(5000) < treas - 20 + yendor::hardness() && !safety)
           c->monst = moBomberbird;
         else placeLocalSpecial(c, 500);
         }
@@ -1982,11 +1990,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laMountain:
       if(d == 7) {
-        if(hrand(50000) < 100)
+        if(hrand_monster(50000) < 100)
           buildIvy(c, 0, 3);
-        else if(hrand(125000) < 100 - celldistAlt(c))
+        else if(hrand_monster(125000) < 100 - celldistAlt(c))
           c->monst = moMonkey;
-        else if(hrand(200000) < min(100, -10*celldistAlt(c)) - celldistAlt(c))
+        else if(hrand_monster(200000) < min(100, -10*celldistAlt(c)) - celldistAlt(c))
           c->monst = moEagle;
         else if(hrand(100) < 5) 
           c->wall = waPlatform;
@@ -2001,11 +2009,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laEndorian:
       ONEMPTY {
-        if(c->wall == waNone && coastval(c, laEndorian) >= 10 && hrand(5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
+        if(c->wall == waNone && coastval(c, laEndorian) >= 10 && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
           c->monst = moSparrowhawk;
-        else if(c->wall != waNone && hrand(5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
+        else if(c->wall != waNone && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
           c->monst = moResearcher;
-        else if(c->wall == waCanopy && !checkInTree(c, 3) && hrand(5000) < PT(300 + 5 * (kills[moSparrowhawk] + kills[moResearcher]), 750))
+        else if(c->wall == waCanopy && !checkInTree(c, 3) && hrand_monster(5000) < PT(300 + 5 * (kills[moSparrowhawk] + kills[moResearcher]), 750))
           c->item = itApple;
         }
       break;
@@ -2014,12 +2022,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(25 + 2 * (kills[moIvyRoot] + kills[moMonkey]), 40) && notDippingFor(itRuby))
           c->item = itRuby;
-        if(hrand(15000) < 5 + 1 * (items[itRuby] + yendor::hardness()))
+        if(hrand_monster(15000) < 5 + 1 * (items[itRuby] + yendor::hardness()))
           c->monst = moMonkey;
-        else if(hrand(80000) < 5 + items[itRuby] + yendor::hardness())
+        else if(hrand_monster(80000) < 5 + items[itRuby] + yendor::hardness())
           c->monst = moEagle;
-        else if(pseudohept(c) && c != currentmap->gamestart() && hrand(4000) < 300 + items[itRuby] && !c->monst) {
-          if(DIM == 3 && euclid && hrand(100) < 10) break;
+        else if(pseudohept(c) && c != currentmap->gamestart() && hrand_monster(4000) < 300 + items[itRuby] && !c->monst) {
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;
@@ -2034,9 +2041,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(5000) < 120 && (peace::on || notDippingFor(itShard)) && mirror::build(c));
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
-        else if(hrand(12000) < 8 + items[itShard] + yendor::hardness())
+        else if(hrand_monster(12000) < 8 + items[itShard] + yendor::hardness())
           c->monst = moRanger;
-        else if(hrand(60000) < 8 + items[itShard] + yendor::hardness())
+        else if(hrand_monster(60000) < 8 + items[itShard] + yendor::hardness())
           c->monst = moEagle;
         }
       break;
@@ -2046,7 +2053,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(1250) < 120 && (peace::on || notDippingFor(itShard)) && mirror::build(c)) ;
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
-        else if(hrand(cwt.at->land == laMirror ? 600 : 2400) < 8 + items[itShard] + yendor::hardness()) {
+        else if(hrand_monster(cwt.at->land == laMirror ? 600 : 2400) < 8 + items[itShard] + yendor::hardness()) {
           if(items[itShard] >= 5 && hrand(120) <= 20)
             c->monst = moMirrorSpirit;
           else
@@ -2060,7 +2067,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         clearing::generate(c);
         if(pseudohept(c)) {
           int d = -celldistAlt(c);
-          if(hrand(2500) < items[itMutant2] + yendor::hardness() - 10)
+          if(hrand_monster(2500) < items[itMutant2] + yendor::hardness() - 10)
             c->monst = moRedFox;
           else if(hrand(100 + d) < d)
             c->item = itMutant2;          
@@ -2072,7 +2079,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
        ONEMPTY {
          if(hrand(1500) < PT(30 + kills[moRunDog], 100) && notDippingFor(itFeather))
            c->item = itFeather;
-         if(hrand(20000) < 25 + items[itFeather] + yendor::hardness()) {
+         if(hrand_monster(20000) < 25 + items[itFeather] + yendor::hardness()) {
            c->monst = moRunDog;
            // preset the movement direction
            // this will make the dog go in the direction of the center,
@@ -2119,7 +2126,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               c->wall = waRuinWall;
             }
           }
-        if(hrand(40000) < kf && !c->monst && !c->wall && !shmup::on) {
+        if(hrand_monster(40000) < kf && !c->monst && !c->wall && !shmup::on) {
           cell *c1 = c;
           cell *c2 = createMov(c1, hrand(c1->type));
           if(c2->monst || c2->wall) return;
@@ -2135,7 +2142,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           forCellEx(c2, c) if(c2->monst == moMonk)
             c->item = itNone;
           }
-        if(hrand(7000) < kf && !c->monst) {
+        if(hrand_monster(7000) < kf && !c->monst) {
           c->monst = genRuinMonster(c);
           c->hitpoints = 3;
           }
@@ -2181,9 +2188,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(si.id == 16 && hrand(250) < PT(30 + kills[moRatling] + kills[moCShark] + kills[moAlbatross] + kills[moPirate] + kills[moFireFairy], 100))
             c->item = itDock;
           }
-        if(c->wall == waDock && hrand(6000) < 25 + items[itDock] + yendor::hardness())
+        if(c->wall == waDock && hrand_monster(6000) < 25 + items[itDock] + yendor::hardness())
           c->monst = pick(moPirate, moRatling, moFireFairy);
-        if(c->wall == waSea && hrand(6000) < 25 + items[itDock] + yendor::hardness())
+        if(c->wall == waSea && hrand_monster(6000) < 25 + items[itDock] + yendor::hardness())
           c->monst = pick(moCShark, moAlbatross);
         }
       break;
@@ -2204,7 +2211,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         eMonster elof = elementalOf(c->land);
         int elkills = PT(kills[elof], 25);
         
-        if(hrand(8000) < 12 + (items[itElemental] + danger + yendor::hardness())) {
+        if(hrand_monster(8000) < 12 + (items[itElemental] + danger + yendor::hardness())) {
           c->monst = elof;
           if(c->land != laEAir) chasmifyElemental(c);
           c->wall = waNone;
@@ -2244,7 +2251,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else {
           if(hyperstonesUnlocked() && hrand(25000) < min(PT(tkills(), 2000), 5000) && notDippingFor(itHyperstone))
             c->item = itHyperstone;
-          if(hrand(4000) < items[itHyperstone] && !c->monst) {
+          if(hrand_monster(4000) < items[itHyperstone] && !c->monst) {
             // only interesting monsters here!
             eMonster cm = crossroadsMonster();
             if(cm == moIvyRoot) buildIvy(c, 0, c->type);
@@ -2275,7 +2282,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(hrand(5000) < 30)
             c->item = itGreenStone;
     
-          if(hrand(4000) < 10 + items[itLotus] + yendor::hardness() && !safety) 
+          if(hrand_monster(4000) < 10 + items[itLotus] + yendor::hardness() && !safety) 
             c->monst = moGhost;
             
           int depth = getHauntedDepth(c);
@@ -2350,7 +2357,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * kills[moRatling], 200) && notDippingFor(itGlowCrystal))
           c->item = itGlowCrystal;
-        if(hrand(2000) < 2 * (items[itGlowCrystal] + yendor::hardness()))
+        if(hrand_monster(2000) < 2 * (items[itGlowCrystal] + yendor::hardness()))
           c->monst = moRatling;
         }      
       break;

@@ -479,6 +479,9 @@ static const struct revstep_t { revstep_t() {}} revstep;
 
 int hrand(int x);
 
+// automatically adjust monster generation for 3D geometries
+int hrand_monster(int x);
+
 template<class T> struct walker {
   T *at;
   int spin;

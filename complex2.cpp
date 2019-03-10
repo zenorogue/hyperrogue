@@ -155,11 +155,11 @@ namespace brownian {
     ONEMPTY {
       if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
         c->item = itBrownian;
-      if(hrand(8000) < 15 + items[itBrownian])
+      if(hrand_monster(8000) < 15 + items[itBrownian])
         c->monst = moAcidBird;
-      else if(hrand(8000) < 15)
+      else if(hrand_monster(8000) < 15)
         c->monst = moAlbatross;
-      else if(hrand(8000) < 15 + items[itBrownian]) {
+      else if(hrand_monster(8000) < 15 + items[itBrownian]) {
         c->monst = moBrownBug;
         c->hitpoints = 3;
         }
@@ -279,13 +279,13 @@ const array<variant_feature, 21> variant_features {{
     if(hrand(20000) < 10 + items[itVarTreasure])
       c->monst = moNecromancer;
     }},
-  {0x000010, 5, moLancer, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moLancer; } },
-  {0x100008,15, moMonk, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moMonk; } },
-  {0x080010, 5, moCrusher, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moCrusher; } },
-  {0x181418, 5, moSkeleton, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moSkeleton, c->hitpoints = 3; } },
-  {0x180000, 5, moPyroCultist, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moPyroCultist; } },
-  {0x00000C, 2, moFlailer, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure]) c->monst = moFlailer; } },
-  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand(80000) < 25 + items[itVarTreasure] && VALENCE == 3) c->monst = moHedge; } },
+  {0x000010, 5, moLancer, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moLancer; } },
+  {0x100008,15, moMonk, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moMonk; } },
+  {0x080010, 5, moCrusher, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moCrusher; } },
+  {0x181418, 5, moSkeleton, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moSkeleton, c->hitpoints = 3; } },
+  {0x180000, 5, moPyroCultist, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moPyroCultist; } },
+  {0x00000C, 2, moFlailer, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moFlailer; } },
+  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure] && VALENCE == 3) c->monst = moHedge; } },
   {0x000c00,-1, moNone, VF { if(hrand(1500) < 30) createArrowTrapAt(c, laVariant); } },
   {0x001200,-1, moNone, VF { if(hrand(1500) < 50 && c->wall == waNone) c->wall = waTrapdoor; } },
   {0x000c18,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
