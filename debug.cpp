@@ -516,6 +516,16 @@ void modalDebug(cell *c) {
   quitmainloop = false;
   }
 
+void test_distances(int max) {
+  int ok = 0, bad = 0;
+  celllister cl(cwt.at, max, 100000, NULL);
+  for(cell *c: cl.lst) {
+    bool is_ok = cl.getdist(c) == celldistance(c, cwt.at);
+    if(is_ok) ok++; else bad++;
+    }
+  println(hlog, "ok=", ok, " bad=", bad);
+  }
+
 void raiseBuggyGeneration(cell *c, const char *s) {
 
   printf("procgen error (%p): %s\n", c, s);
@@ -600,6 +610,9 @@ int read_cheat_args() {
     // example: hyper -W Hunt -IP Shield 1 -ambush 60
     PHASE(3) cheat();
     shift(); ambushval = argi();
+    }
+  else if(argis("-testdistances")) {
+    PHASE(3); shift(); test_distances(argi());
     }
   else if(argis("-M")) {
     PHASE(3) cheat();
