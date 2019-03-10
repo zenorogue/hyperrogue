@@ -2467,7 +2467,7 @@ void setdist(cell *c, int d, cell *from) {
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
   
-    if(!c->land && from && (DIM == 3 || among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient) {
+    if(!c->land && from && (DIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient) {
       if(!hasbardir(c)) setland(c, from->land);
       }
     if(c->land == laTemple && !tactic::on && !chaosmode) setland(c, laRlyeh);
