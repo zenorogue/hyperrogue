@@ -279,7 +279,12 @@ namespace binary {
         }
       }
     
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+    // hrmap_standard overrides hrmap's default, override it back
+    virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
+      return relative_matrix(c2->master, c1->master);
+      }
+
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
       transmatrix gm = Id, where = Id;
