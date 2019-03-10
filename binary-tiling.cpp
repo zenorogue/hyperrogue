@@ -439,6 +439,8 @@ auto bt_config = addHook(hooks_args, 0, [] () {
 bool pseudohept(cell *c) {
   if(DIM == 2)
     return c->type & c->master->distance & 1;
+  else if(geometry == gHoroTris)
+    return c->c.spin(S7-1) == 0 && (c->master->distance & 1);
   else
     return (c->master->zebraval == 1) && (c->master->distance & 1);
   }

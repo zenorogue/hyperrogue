@@ -1362,6 +1362,9 @@ void moreBigStuff(cell *c) {
           forCellCM(c2, c) if(celldistAlt(c2) < celldistAlt(c)) i++;
           if(i > 1) c->wall = waColumn;
           }
+        else if(geometry == gHoroTris) {
+          if(c->c.spin(S7-1) != 0) c->wall = waColumn;
+          }
         else if(DIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;
           }
