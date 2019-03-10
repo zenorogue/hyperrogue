@@ -5641,7 +5641,7 @@ void drawMarkers() {
 #endif
 
     #if CAP_QUEUE
-    if(centerover.at && !playermoved && m && !anims::any_animation())
+    if(centerover.at && !playermoved && m && !anims::any_animation() && DIM == 2)
       queuecircleat(centerover.at, .70 - .06 * sintick(200), 
         darkena(int(175 + 25 * sintick(200)), 0, 0xFF));
 
@@ -5670,10 +5670,16 @@ void drawMarkers() {
         }
       }
     
-    if(DIM == 3 && !inHighQual && !shmup::on && vid.axes) {
+    if(DIM == 3 && !inHighQual && !shmup::on && vid.axes && playermoved) {
       cell *c = forwardcell();
       IG(c) queuecircleat(c, .8, getcs().uicolor);
       }
+    
+    if(DIM == 3 && !inHighQual && !playermoved) {
+      cell *c = mouseover;
+      IG(c) queuecircleat(c, .8, 0xFFFFFFFF);
+      }
+    
     #endif
     }
 
