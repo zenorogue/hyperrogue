@@ -841,6 +841,8 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
   poly_flags &= ~POLY_INVERSE;
   if(poly_flags & POLY_CENTERIN) {
     poly_flags |= POLY_INVERSE;
+    if(abs(zlevel(tC0(p->V)) - 1) > 1e-6) nofill = true;
+
     /* nofill = true;
     outline = (flags & POLY_CENTERIN) ? 0x00FF00FF : 0xFF0000FF;
     addpoint(hscr); */
