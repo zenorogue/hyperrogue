@@ -1159,6 +1159,10 @@ land_validity_t& land_validity(eLand l) {
   if(among(l, laBrownian, laWestWall, laVariant))
     return disabled;
   #endif
+
+  if(DIM == 3) {
+    if(isEquidLand(l) || isGravityLand(l) || l == laBrownian) return not_implemented;
+    }
   
   if(l == laBrownian) {
     if(quotient || !hyperbolic || geometry == gCrystal) return dont_work;
