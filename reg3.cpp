@@ -34,6 +34,9 @@ namespace reg3 {
   
   transmatrix spins[12], adjmoves[12];
 
+  ld adjcheck, strafedist;
+  bool dirs_adjacent[16][16];
+
   template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
     for(int i=0; i<200; i++) {
       ld d = (dmin + dmax) / 2;
@@ -154,7 +157,18 @@ namespace reg3 {
       println(hlog, "center of ", a, " is ", tC0(adjmoves[a]));    
     
     println(hlog, "doublemove = ", tC0(adjmoves[0] * adjmoves[0]));
-    // exit(1);
+
+    adjcheck = hdist(tC0(adjmoves[0]), tC0(adjmoves[1])) * 1.0001;
+
+    int numedges = 0;
+    for(int a=0; a<S7; a++) for(int b=0; b<S7; b++) {
+      dirs_adjacent[a][b] = a != b && hdist(tC0(adjmoves[a]), tC0(adjmoves[b])) < adjcheck;
+      if(dirs_adjacent[a][b]) numedges++;
+      }
+    println(hlog, "numedges = ", numedges);
+    
+    if(loop == 4) strafedist = adjcheck;
+    else strafedist = hdist(adjmoves[0] * C0, adjmoves[1] * C0);
     }
 
   void binary_rebase(heptagon *h, const transmatrix& V) {
@@ -536,6 +550,19 @@ int dist_alt(cell *c) {
     }
   }
 #endif
+
+// Construct a cellwalker in direction j from cw.at, such that its direction is as close
+// as possible to cw.spin. Assume that j and cw.spin are adjacent
+
+cellwalker strafe(cellwalker cw, int j) {
+  hyperpoint hfront = tC0(adjmoves[cw.spin]);
+  transmatrix T = currentmap->relative_matrix(cw.at->cmove(j)->master, cw.at->master);
+  for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+    if(hdist(hfront, T * tC0(adjmoves[i])) < strafedist + .01)
+      return cellwalker(cw.at->move(j), i);
+  println(hlog, "incorrect strafe");
+  exit(1);
+  }
 
 }
 }

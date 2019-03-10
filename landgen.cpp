@@ -2414,7 +2414,7 @@ void repairLandgen(cell *c) {
     }
   
   if(passable(c, NULL, 0)) {
-    if(c->land == laBarrier) c->wall = waBarrier;
+    if(c->land == laBarrier && DIM != 3) c->wall = waBarrier;
     if(c->land == laOceanWall) 
       c->wall = c->type == 7 ? waBarrier : waSea;
     }
@@ -2467,10 +2467,9 @@ void setdist(cell *c, int d, cell *from) {
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
   
-    if(!c->land && from && from->land != laElementalWall && from->land != laHauntedWall && from->land != laOceanWall &&
-      from->land != laBarrier && !quotient) {
-        if(!hasbardir(c)) setland(c, from->land);
-        }
+    if(!c->land && from && (DIM == 3 || among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient) {
+      if(!hasbardir(c)) setland(c, from->land);
+      }
     if(c->land == laTemple && !tactic::on && !chaosmode) setland(c, laRlyeh);
     if(c->land == laMountain && !tactic::on && !chaosmode) setland(c, laJungle);
     if(c->land == laClearing && !tactic::on) setland(c, laOvergrown);

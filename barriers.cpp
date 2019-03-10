@@ -336,6 +336,8 @@ bool isbar4(cell *c) {
     c->land == laMercuryRiver;
   }  
 
+void extend3D(cell *c);
+
 void extendBarrier(cell *c) {
   limitgen("extend barrier %p\n", c); 
   if(buggyGeneration) return;
@@ -357,7 +359,8 @@ void extendBarrier(cell *c) {
     }
 
   if(c->barleft == NOWALLSEP) {
-    extendNowall(c);
+    if(DIM == 3) extend3D(c);
+    else extendNowall(c);
     return;
     }
   
@@ -731,10 +734,91 @@ void buildCrossroads2(cell *c) {
     }
   }
 
+void extend3D(cell *c) {
+  eLand l1 = c->land;
+  c->barleft = NOWALLSEP_USED;
+  
+  cellwalker cw(c, c->bardir);
+  
+  if(S3 == 5) {
+    cw += wstep; cw += rev;
+    cw.at->bardir = NOBARRIERS;
+    setland(cw.at, laBarrier);
+    }
+  
+  auto cw1 = cw + wstep;
+  setland(cw1.at, c->barright);
+  if(cw1.at->bardir == NODIR) {
+    cw1.at->barleft = NOWALLSEP_USED;
+    cw1.at->barright = l1;
+    cw1.at->bardir = cw1.spin;
+    }
+
+  for(int j=0; j<S7; j++) if(reg3::dirs_adjacent[cw.spin][j]) {
+    cellwalker bb2 = reg3::strafe(cw, j);
+    if(S3 == 5) { bb2 += rev; bb2 += wstep; }
+
+    if(bb2.at->bardir == NODIR) {
+      bb2.at->bardir = bb2.spin;
+      bb2.at->barleft = NOWALLSEP;
+      bb2.at->barright = c->barright;
+      bb2.at->land = l1;
+      // bb2.at->item = itGold;
+      extendBarrier(bb2.at);
+      }
+    }
+  }
+
+bool built = false;
+
+bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
+  if(forced_dir == NODIR) {
+    for(int t=0; t<S7; t++) if((!c->move(t) || c->move(t)->mpdist > c->mpdist) && buildBarrier3D(c, l2, t)) return true;
+    return false;
+    }
+  cellwalker cw(c, forced_dir);
+  if(S3 == 5) { cw += wstep; cw += rev; }
+  set<cell*> listed_cells = { cw.at };
+  vector<cellwalker> to_test { cw };  
+  for(int i=0; i<isize(to_test); i++) {
+    auto bb = to_test[i];
+    if(bb.at->mpdist < BARLEV) return false;
+    if(bb.cpeek()->mpdist < BARLEV) return false;
+    if(bb.cpeek()->bardir != NODIR) return false;
+    if(S3 == 5 && (bb+rev).cpeek()->mpdist < BARLEV) return false;
+    if(S3 == 5 && (bb+rev).cpeek()->bardir != NODIR) return false;
+    if(bb.at->bardir != NODIR) return false;
+    for(int j=0; j<S7; j++) {
+      if(S3 == 5 && i <= 5) bb.at->cmove(j);
+      if(reg3::dirs_adjacent[bb.spin][j] && bb.at->move(j)) {
+        cellwalker bb2 = reg3::strafe(bb, j);
+        if(listed_cells.count(bb2.at)) continue;
+        listed_cells.insert(bb2.at);
+        to_test.push_back(bb2);
+        }
+      }
+    }
+
+  for(int i=0; i<isize(to_test); i++) {
+    auto bb = to_test[i];
+    if(S3 == 5) { bb.at->bardir = NOBARRIERS; setland(bb.at, laBarrier); bb += rev; bb += wstep; }
+    bb.at->land = c->land;
+    bb.at->bardir = bb.spin;
+    bb.at->barleft = NOWALLSEP;
+    bb.at->barright = l2;
+    extendBarrier(bb.at);
+    }
+
+  built = true;
+  return true;
+  }
+
 bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
 
   // 3D binary tilings create walls using their own methods
   if(DIM == 3 && binarytiling) return false;
+
+  if(DIM == 3 && hyperbolic) return buildBarrier3D(c, l2, forced_dir);
 
   if(c->land == laNone) {
     printf("barrier nowall! [%p]\n", c);
