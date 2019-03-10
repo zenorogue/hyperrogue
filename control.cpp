@@ -400,7 +400,7 @@ void handleKeyNormal(int sym, int uni) {
         cell *c = whirlwind::jumpDestination(cwt.at);
         if(c) centerover.at = c;
         }
-      targetRangedOrb(centerover.at, roKeyboard);
+      targetRangedOrb(DIM == 3 ? mouseover : centerover.at, roKeyboard);
       sym = 0; uni = 0;
       }
     }
