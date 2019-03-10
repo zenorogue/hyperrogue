@@ -949,7 +949,7 @@ void setLandEuclid(cell *c) {
 
 bool quickfind(eLand l) {
   if(l == cheatdest) return true;
-  if(l == specialland && weirdhyperbolic) return true;
+  if(l == specialland && (weirdhyperbolic || specialland != laIce)) return true;
 #if CAP_TOUR
   if(tour::on && tour::quickfind(l)) return true;
 #endif

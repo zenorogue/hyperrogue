@@ -760,7 +760,7 @@ void showEuclideanMenu() {
   }
 
 void runGeometryExperiments() {
-  if(!geometry)
+  if(!geometry && specialland == laIce)
     specialland = getLandForList(cwt.at);
   pushScreen(showEuclideanMenu);
   }
