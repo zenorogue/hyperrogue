@@ -718,6 +718,17 @@ void handleAllConfig(int sym, int uni) {
 #endif  
   }
 
+void add_cells_drawn(char c = 'C') {
+  dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), c);
+  dialog::add_action([] () { 
+    popScreen();
+    dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"), 
+      XLAT("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.")
+      );
+    dialog::scaleLog();
+    });
+  }
+
 void edit_sightrange() {
   if(vid.use_smart_range == 0) {
     dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
@@ -752,14 +763,7 @@ void edit_sightrange() {
       dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
       dialog::add_action(enable_cheat);
       }
-    dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), 'C');
-    dialog::add_action([] () { 
-      popScreen();
-      dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"), 
-        XLAT("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.")
-        );
-      dialog::scaleLog();
-      });
+    add_cells_drawn('C');
     };
   }
 
@@ -768,8 +772,24 @@ void menuitem_sightrange(char c) {
     dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);
     dialog::add_action([] {
       dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("sight range"),
-        XLAT("Affects both the generation and the fog effect.")
+        XLAT(
+          "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
+          "In spherical geometries, the sight range of 2pi will let you see things behind you as if they were in front of you, "
+          "and the sight range of pi (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+          "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
+          "reduces the performance.\n\n"
+          "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
+          )
         );
+      dialog::extra_options = [] {
+        add_cells_drawn('C');
+        dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'G');
+        dialog::add_action([] {
+          dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
+            "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
+            );
+          });
+        };
       });
     }
   else {

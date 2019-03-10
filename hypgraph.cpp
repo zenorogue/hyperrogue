@@ -1555,6 +1555,7 @@ ld extra_generation_distance = 99;
 
 bool do_draw(cell *c, const transmatrix& T) {
   if(DIM == 3) {
+    if(cells_drawn > vid.cells_drawn_limit) return false;
     ld dist = hdist0(tC0(T));
     if(dist > sightranges[geometry]) return false;
     if(dist <= extra_generation_distance) setdist(c, 7, c);
