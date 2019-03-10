@@ -1211,7 +1211,7 @@ void projectionDialog() {
     dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'K');
     dialog::add_action([] () { *dialog::ne.editwhat = 0; vid.scale = 1; dialog::ne.s = "0"; });
     dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'O');
-    dialog::add_action([] () { double d = exp(shiftmul/10); vid.alpha *= d; vid.scale *= d; dialog::ne.s = dialog::disp(vid.alpha); });
+    dialog::add_action([] () { double d = 1.1; vid.alpha *= d; vid.scale *= d; dialog::ne.s = dialog::disp(vid.alpha); });
     };
   }
 
