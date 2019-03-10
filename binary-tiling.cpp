@@ -243,10 +243,6 @@ namespace binary {
     void draw() {
       dq::visited.clear();
       dq::enqueue(viewctr.at, cview());
-      {
-      dynamicval<color_t> d(poly_outline, 0xFFFFFFFF);
-      for(int i=0; i<S7; i++) queuepolyat(cview(), shWall3D[i], 0, PPR::SUPERLINE);
-      }
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
