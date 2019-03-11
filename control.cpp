@@ -975,6 +975,7 @@ void gmodekeys(int sym, int uni) {
     if(NUMBERKEY == '1') { vid.yshift = 0; vid.sspeed = 0; }
     if(NUMBERKEY == '2') { vid.yshift = 0; vid.sspeed = -10; }
     if(NUMBERKEY == '3') { vid.yshift = 2; vid.sspeed = 0; }
+    if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
     }
   if(NUMBERKEY == '6') vid.grid = !vid.grid;
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; }
