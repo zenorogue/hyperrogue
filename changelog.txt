@@ -2984,3 +2984,36 @@ the interesting (adult) part quickly)
 2019-03-03 00:51 Version 11.0j:
 - improved lands: minefield displays correctly; Emerald Mine in Euclidean geometries; nice crossroads in spherical geometries
 - all the regular honeycombs
+
+2018-03-10 19:18 Version 11.0k:
+- fixed a glitch with a bodypart taking the whole screen in spherical geometry
+- selecting horocyclic lands in standard geometry works
+- 'towards Gans' option works again
+- added some people to credits
+- distance tester added
+- improved the Magic Sword graphic, and its tip is now computed correctly when changing geometries
+- an option to desaturate colors for anaglyph
+- grid color is now configurable
+- CLI option -geo recognizes menu_displayed_names
+- fixed regrouping dogs disappearing
+
+3D:
+- the 't' key now targets the same target as the mouse
+- water etc and land barriers are now drawn as transparent walls
+- improved which 'circles' are drawn
+- Great Walls and horospheres in H3 geometries
+- set the S3 parameter in 3D geometries to the smallest loop, so that it tells whether hedgehogs can be killed
+- new 3D geometry: 'triangles on horospheres'
+- improved sightrange change dialog; in standard mode, monster action depends on whether they are drawn. Automatically adjust monster generation based on the number of generated cells.
+- Orb of the Sword and Mirage Clouds work in 3D shmup (Mirrors work too but they start weirdly)
+- monsters better at avoiding obstacles in shmup
+- two-player 3D works
+- orb targetting (in noshmup it already worked, in shmup it works like in 2D)
+- help works
+- grid drawn correctly
+- transformation between Crystal 3D and Cube tiling
+- boats are drawn
+- parrots and seeps now ignore depth testing
+- a 3d image for compasses in the world
+
+11.0l: fixed aura on sphere
