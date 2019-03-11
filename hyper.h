@@ -3895,6 +3895,7 @@ namespace glhr {
       coords[0] = x;
       coords[1] = y;
       coords[2] = current_display->scrdist;
+      coords[3] = 1;
       color[0] = r;
       color[1] = g;
       color[2] = b;
