@@ -388,7 +388,7 @@ void bantar_frame() {
     
     gmatrix.clear();
     
-    drawStandard();
+    currentmap->draw();
     if(0) for(auto p: parent) if(gmatrix.count(p.first) && gmatrix.count(p.second) && infos[p.first].gid == i && infos[p.second].gid == i)
       queueline(tC0(gmatrix[p.first]), tC0(gmatrix[p.second]), 0xFFFFFFFF, 2);
     subscr[i] = move(ptds);

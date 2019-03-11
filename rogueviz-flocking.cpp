@@ -195,7 +195,7 @@ namespace flocking {
       if(coh_count) velvec += coh * (d * coh_factor / coh_count);
       
       // hypot2 is the length of a vector in R^2
-      vels[i] = hypot2(velvec);
+      vels[i] = hypot_d(2, velvec);
       ld alpha = -atan2(velvec);
 
       if(vels[i] > max_speed) { 
