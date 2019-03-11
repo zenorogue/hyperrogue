@@ -383,7 +383,7 @@ vector<eGeometry> quotientlist = {
   };
 
 vector<eGeometry> list3d = {
-  gBinary3,
+  gBinary3, gHoroTris,
   gSpace534, gSpace435, 
   gCubeTiling, gRhombic3, gBitrunc3, 
   gCell120, gECell120,
