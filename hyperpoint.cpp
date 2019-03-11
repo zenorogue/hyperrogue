@@ -287,10 +287,6 @@ inline hyperpoint cpush0(int c, ld x) {
   return h;
   }
 
-inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
-
-inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
-
 inline hyperpoint xspinpush0(ld alpha, ld x) { 
   hyperpoint h = Hypc;
   h[DIM] = cos_auto(x);

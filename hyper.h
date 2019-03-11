@@ -3577,8 +3577,9 @@ extern eLand safetyland;
 extern int sagephase;
 extern int lastsize;
 extern int noiseuntil;
-hyperpoint xpush0(ld x);
-hyperpoint ypush0(ld x);
+hyperpoint cpush0(int d, ld x);
+inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
+inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
 transmatrix xspinpush(ld alpha, ld x);
 hyperpoint xspinpush0(ld alpha, ld x);
 
