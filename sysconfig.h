@@ -43,6 +43,10 @@
 #define ISSTEAM 0
 #endif
 
+#if ISSTEAM
+#define override
+#endif
+
 #ifndef ISWEB
 #define ISWEB 0
 #endif
@@ -480,3 +484,5 @@ union SDL_Event;
 #ifndef CAP_FIELD
 #define CAP_FIELD (!(ISMINI))
 #endif
+
+#undef TRANSPARENT
