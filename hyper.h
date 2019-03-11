@@ -2825,12 +2825,15 @@ struct texture_triangle {
   texture_triangle(array<hyperpoint, 3> _v, array<hyperpoint, 3> _tv) : v(_v), tv(_tv) {}
   };
 
-struct textureinfo {
-  transmatrix M;
+struct basic_textureinfo {
   int texture_id;
+  vector<glvertex> tvertices; 
+  };
+  
+struct textureinfo : basic_textureinfo {
+  transmatrix M;
   vector<texture_triangle> triangles;
   vector<glvertex> vertices;
-  vector<glvertex> tvertices; 
   cell *c;
   vector<transmatrix> matrices;
   
@@ -2858,7 +2861,7 @@ struct dqi_poly : drawqueueitem {
   color_t outline;
   double linewidth;
   int flags;
-  textureinfo *tinf;
+  basic_textureinfo *tinf;
   hyperpoint intester;
   void draw();
   void gldraw();
@@ -3938,7 +3941,7 @@ struct floorshape;
 struct qfloorinfo {
   transmatrix spin;
   const hpcshape *shape;
-  const floorshape *fshape;
+  floorshape *fshape;
   textureinfo *tinf;
   int usershape;
   };
@@ -4150,6 +4153,7 @@ struct floorshape {
   int shapeid;
   PPR prio;
   vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE];
+  basic_textureinfo tinf3;
   floorshape() { prio = PPR::FLOOR; }
   };
 
@@ -4936,6 +4940,8 @@ namespace subscreens {
   void prepare();
   bool split(reaction_t for_each_subscreen);
   }
+
+const int TEXTURE_STEP_3D=8;
 
 }
 

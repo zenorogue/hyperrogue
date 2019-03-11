@@ -639,7 +639,7 @@ template<class T> void bindbuffer(T& v) {
 
 #endif
 
-void vertices(const vector<glvertex>& v) {
+void vertices(const vector<glvertex>& v, int vshift = 0) {
   #if CAP_VERTEXBUFFER
   if(&v[0] == buffered_vertices) {
     if(&v[0] == current_vertices) return;
@@ -651,21 +651,21 @@ void vertices(const vector<glvertex>& v) {
   bindbuffer(v);
   glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
   #else
-  if(current_vertices == &v[0]) return;
-  current_vertices = &v[0];
+  if(current_vertices == &v[vshift]) return;
+  current_vertices = &v[vshift];
   #if CAP_SHADER
-  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[0]);
+  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[vshift]);
   #else
   glVertexPointer(3, GL_FLOAT, sizeof(glvertex), &v[0]);
   #endif
   #endif
   }
 
-void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t) {
+void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift = 0) {
   #if CAP_VERTEXBUFFER
   // not implemented!
   #else
-  vertices(v);
+  vertices(v, vshift);
   #if CAP_SHADER
   glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[0]);
   #else

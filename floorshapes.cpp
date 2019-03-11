@@ -716,4 +716,113 @@ auto floor_hook =
     });
 #endif
 #endif
+
+#if MAXMDIM >= 4
+
+renderbuffer *floor_textures;
+
+void draw_shape_for_texture(floorshape* sh, int& id) {
+  ld gx = (id % 8) * 1.5 - 3.5 * 1.5;
+  ld gy = (id / 8) * 1.5 - 3.5 * 1.5;
+  id++;
+  for(int a=-1; a<=1; a++)
+  for(int b=-1; b<=1; b++)
+    queuepoly(eupush(gx+a/2., gy+b/2.), sh->b[0], 0xFFFFFFFF);
+
+  if(1) {
+    dynamicval<ld> v(vid.linewidth, 8);
+    curvepoint(eupush(gx+.25, gy-.25) * C0);
+    curvepoint(eupush(gx+.25, gy+.25) * C0);
+    curvepoint(eupush(gx-.25, gy+.25) * C0);
+    curvepoint(eupush(gx-.25, gy-.25) * C0);
+    curvepoint(eupush(gx+.25, gy-.25) * C0);
+    queuecurve(0x404040C0, 0, PPR::LINE);
+    }
+  
+  sh->tinf3.tvertices.clear();
+  sh->tinf3.texture_id = floor_textures->renderedTexture;
+  
+  auto at = [&] (hyperpoint h, int a) {
+    hyperpoint inmodel;
+    applymodel(h, inmodel);
+    glvec2 v;
+    v[0] = (1 + inmodel[0] * vid.scale) / 2;
+    v[1] = (1 - inmodel[1] * vid.scale) / 2;
+    sh->tinf3.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
+    };
+  
+  const int STEP = TEXTURE_STEP_3D;
+  using namespace hyperpoint_vec;
+
+  for(int a=0; a<8; a++)
+    for(int y=0; y<STEP; y++)
+    for(int x=0; x<STEP; x++) {
+      hyperpoint center = eupush(gx, gy) * C0;
+      hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0) / STEP;
+      hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0) / STEP;
+      if(x+y < STEP) {
+        at(center + v1 * x + v2 * y, 0);
+        at(center + v1 * (x+1) + v2 * y, 1);
+        at(center + v1 * x + v2 * (y+1), 2);
+        }
+      if(x+y <= STEP && x && y) {
+        at(center + v1 * x + v2 * y, 0);
+        at(center + v1 * (x-1) + v2 * y, 1);
+        at(center + v1 * x + v2 * (y-1), 2);
+        }
+      }
+
+  }
+
+const int FLOORTEXTURESIZE = 4096;
+
+void make_floor_textures() {
+  if(1) {
+    dynamicval<eGeometry> g(geometry, gEuclidSquare);
+    dynamicval<eVariation> va(variation, eVariation::pure);
+    dynamicval<bool> hq(inHighQual, true);
+  
+    resetGeometry();
+    dynamicval<videopar> vi(vid, vid);
+    vid.xres = FLOORTEXTURESIZE;
+    vid.yres = FLOORTEXTURESIZE;
+    vid.scale = 0.25;
+    dynamicval<ld> lw(vid.linewidth, 2);
+
+    floor_textures = new renderbuffer(vid.xres, vid.yres, vid.usingGL);
+    resetbuffer rb;
+
+    auto cd = current_display;
+    cd->xtop = cd->ytop = 0;
+    cd->xsize = cd->ysize = FLOORTEXTURESIZE;
+    cd->xcenter = cd->ycenter = cd->scrsize = FLOORTEXTURESIZE/2;
+    
+    cd->radius = cd->scrsize * vid.scale;
+
+    floor_textures->enable();
+    current_display->set_viewport(0);
+    current_display->set_projection(0, true);
+    current_display->set_mask(0);
+    floor_textures->clear(0xE8E8E8);
+    
+    ptds.clear();
+    
+    int id = 0;
+    poly_outline = 0xF0F0F0FF;
+    
+    for(auto v: all_plain_floorshapes) draw_shape_for_texture(v, id);
+    for(auto v: all_escher_floorshapes) draw_shape_for_texture(v, id);
+    
+    drawqueue();
+    
+    SDL_Surface *sdark = floor_textures->render();
+    IMAGESAVE(sdark, "texture-test.png");
+    rb.reset();
+    }
+  
+  need_reset_geometry = true;
+  }
+
+
+#endif
 }

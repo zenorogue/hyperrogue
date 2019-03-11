@@ -531,8 +531,11 @@ void glapplymatrix(const transmatrix& V) {
 
 int global_projection;
 
+extern renderbuffer *floor_textures;
+
 void dqi_poly::gldraw() {
   auto& v = *tab;
+  int ioffset = offset;
   
 #if MINIMIZE_GL_CALLS  
   if(current_display->stereo_active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
@@ -564,7 +567,9 @@ void dqi_poly::gldraw() {
     #if CAP_TEXTURE
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-    glhr::vertices_texture(v, tinf->tvertices);
+    current_display->set_projection(0, true);
+    glhr::vertices_texture(v, tinf->tvertices, offset);
+    ioffset = 0;
     #endif
     }
   else { 
@@ -597,7 +602,7 @@ void dqi_poly::gldraw() {
       if(flags & POLY_TRIANGLES) {
         glhr::color2(color);
         glhr::set_depthtest(model_needs_depth());
-        glDrawArrays(GL_TRIANGLES, offset, cnt);
+        glDrawArrays(GL_TRIANGLES, ioffset, cnt);
         }
       else {
         glEnable(GL_STENCIL_TEST);
@@ -896,7 +901,7 @@ void dqi_poly::draw() {
     if(!any) return;
     }
   
-  if(sphere && tinf && cnt > 3) {
+  if(sphere && tinf && DIM == 2 && cnt > 3) {
     int i = cnt;
     cnt = 3;
     for(int j=0; j<i; j+=3) {
@@ -1687,7 +1692,7 @@ hpcshape
   
   shDodeca;
 
-vector<hpcshape> shWall3D, shMiniWall3D;
+vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
 
 #endif
 
@@ -2310,97 +2315,151 @@ void procedural_shapes() {
   }
 
 #if CAP_BT && MAXMDIM >= 4
+
 // Make a wall for horocycle-based honeycombs
 // flags:
 // 1 = first edge should be doubled
 // 2 = use POLY_TRIANGLES
 // 4 = this is is a triangular face; otherwise, the face is rectangular, and x1+x2-x0 is the fourth vertex
-void make_wall(hpcshape& sh, ld x0, ld y0, ld z0, ld x1, ld y1, ld z1, ld x2, ld y2, ld z2, int flags) {
-  hyperpoint h0 = point3(x0,y0,z0);
-  hyperpoint h1 = point3(x1,y1,z1);
-  hyperpoint h2 = point3(x2,y2,z2);
+void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false) {
   using namespace hyperpoint_vec;
-  hyperpoint h3 = h1 + h2 - h0;
-  bshape(sh, PPR::WALL);
+  
+  // orient correctly
+  transmatrix T;
+  set_column(T, 0, vertices[0]);
+  set_column(T, 1, vertices[1]);
+  set_column(T, 2, vertices[2]);
+  set_column(T, 3, C0);
+  if(det(T) < 0)
+    reverse(vertices.begin(), vertices.end());
+
   ld yy = log(2) / 2;
-  const int STEP=10;
   auto at = [&] (hyperpoint h) { 
+    if(!binarytiling) { hpcpush(normalize(h)); return; }
     hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
     hpcpush(res);
     };
-  if(flags & 2) {
-    last->flags |= POLY_TRIANGLES;
+  
+  const auto STEP = TEXTURE_STEP_3D;
+  const int n = isize(vertices);
+
+  bshape(shWall3D[id], PPR::WALL);
+  last->flags |= POLY_TRIANGLES;
+  
+  hyperpoint center = Hypc;
+  for(auto v: vertices) center += v;
+  center /= n;  
+  println(hlog, "vertices = ", vertices, " center = ", center);
+  
+  for(int a=0; a<n; a++)
     for(int y=0; y<STEP; y++)
     for(int x=0; x<STEP; x++) {
-      int x1 = x + 1;
-      int y1 = y + 1;
-      if((flags & 4) && x+y >= STEP) continue;
-      at((h0 * (STEP-x -y ) + h1 * x  + h2 * y ) / STEP);
-      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
-      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
-      if((flags & 4) && x+y >= STEP-1) continue;
-      at((h0 * (STEP-x1-y ) + h1 * x1 + h2 * y ) / STEP);
-      at((h0 * (STEP-x -y1) + h1 * x  + h2 * y1) / STEP);
-      at((h0 * (STEP-x1-y1) + h1 * x1 + h2 * y1) / STEP);
+      hyperpoint v1 = (vertices[a] - center) / STEP;
+      hyperpoint v2 = (vertices[(a+1)%n] - center) / STEP;
+      if(x+y < STEP) {
+        at(center + v1 * x + v2 * y);
+        at(center + v1 * (x+1) + v2 * y);
+        at(center + v1 * x + v2 * (y+1));
+        }
+      if(x+y <= STEP && x && y) {
+        at(center + v1 * x + v2 * y);
+        at(center + v1 * (x-1) + v2 * y);
+        at(center + v1 * x + v2 * (y-1));
+        }
       }
+    
+  bshape(shWireframe3D[id], PPR::WALL);
+  if(!binarytiling) {
+    for(auto v: vertices) hpcpush(v);
+    hpcpush(vertices[0]);
     }
   else {
-    int STP2 = ((flags == 1) ? 2 : 1) * STEP;
-    for(int t=0; t<STP2; t++) at((h0 * (STP2-t) + h1 * t) / STP2);
-    if(flags&4) {
-      for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h2 * t) / STEP);
-      }
-    else {
-      for(int t=0; t<STEP; t++) at((h1 * (STEP-t) + h3 * t) / STEP);
-      for(int t=0; t<STEP; t++) at((h3 * (STEP-t) + h2 * t) / STEP);
-      }
-    for(int t=0; t<STEP; t++) at((h2 * (STEP-t) + h0 * t) / STEP);
-    at(h0);
+    for(int a=0; a<n; a++) for(int y=0; y<STEP; y++)
+      at((vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP);
+    at(vertices[0]);
     }
+  
+  finishshape();
+
+  shPlainWall3D[id] = force_triangles ? shWall3D[id] : shWireframe3D[id];
   }
 
+vector<hyperpoint> make4(hyperpoint a, hyperpoint b, hyperpoint c) {
+  using namespace hyperpoint_vec;
+  return {a, b, b+c-a, c};
+  }  
+
+vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
+  using namespace hyperpoint_vec;
+  return {a, (a+b)/2, b, b+c-a, c};
+  }  
+
 void create_wall3d() {
+  using namespace hyperpoint_vec;
   shWall3D.resize(S7);
+  shPlainWall3D.resize(S7);
+  shWireframe3D.resize(S7);
   if(DIM == 3 && binarytiling && geometry == gBinary3) {
-    make_wall(shWall3D[0], 0,0,-1, -1,0,-1, 0,-1,-1, 2);
-    make_wall(shWall3D[1], 0,0,-1, +1,0,-1, 0,-1,-1, 2);
-    make_wall(shWall3D[2], 0,0,-1, -1,0,-1, 0,+1,-1, 2);
-    make_wall(shWall3D[3], 0,0,-1, +1,0,-1, 0,+1,-1, 2);
-    make_wall(shWall3D[4], -1,-1,-1, -1,1,-1, -1,-1,+1, 1);
-    make_wall(shWall3D[5], +1,-1,-1, +1,1,-1, +1,-1,+1, 1);
-    make_wall(shWall3D[6], -1,-1,-1, 1,-1,-1, -1,-1,+1, 1);
-    make_wall(shWall3D[7], -1,+1,-1, 1,+1,-1, -1,+1,+1, 1);
-    make_wall(shWall3D[8], 1,1,+1, -1,1,+1, 1,-1,+1, 0);
+    hyperpoint h00 = point3(-1,-1,-1);
+    hyperpoint h01 = point3(-1,0,-1);
+    hyperpoint h02 = point3(-1,+1,-1);
+    hyperpoint h10 = point3(0,-1,-1);
+    hyperpoint h11 = point3(0,0,-1);
+    hyperpoint h12 = point3(0,+1,-1);
+    hyperpoint h20 = point3(+1,-1,-1);
+    hyperpoint h21 = point3(+1,0,-1);
+    hyperpoint h22 = point3(+1,+1,-1);
+    hyperpoint down = point3(0,0,2);
+
+    make_wall(0, make4(h11, h01, h10), true);
+    make_wall(1, make4(h11, h21, h10), true);
+    make_wall(2, make4(h11, h01, h12), true);
+    make_wall(3, make4(h11, h21, h12), true);
+    make_wall(4, make5(h00, h02, h00+down));
+    make_wall(5, make5(h20, h22, h20+down));
+    make_wall(6, make5(h00, h20, h00+down));
+    make_wall(7, make5(h02, h22, h02+down));
+    make_wall(8, make4(h22+down, h02+down, h20+down));
     }
 
   if(DIM == 3 && binarytiling && geometry == gHoroTris) {
     ld r = sqrt(3)/6;
     ld r1 = r;
     ld r2 = r * 2;
-    ld r4 = r * 4;
-    make_wall(shWall3D[0], 0,-r2,-1, +.5, r1,-1,-.5, r1,-1, 2|4);
-    make_wall(shWall3D[1], 0, r4,-1, +.5, r1,-1,-.5, r1,-1, 2|4);
-    make_wall(shWall3D[2], 0,-r2,-1,  -1,-r2,-1,-.5, r1,-1, 2|4);
-    make_wall(shWall3D[3], 0,-r2,-1, +.5, r1,-1, +1,-r2,-1, 2|4);
-    make_wall(shWall3D[4],-1,-r2,-1,   1,-r2,-1, -1,-r2, 1, 1);
-    make_wall(shWall3D[5], 1,-r2,-1,   0, r4,-1,  1,-r2, 1, 1);
-    make_wall(shWall3D[6],-1,-r2,-1,   0, r4,-1, -1,-r2, 1, 1);
-    make_wall(shWall3D[7], 1,-r2, 1,   0, r4, 1, -1,-r2, 1, 4);
+    
+    hyperpoint t0 = point3(0,-r2,-1);
+    hyperpoint t1 = point3(+.5,r1,-1);
+    hyperpoint t2 = point3(-.5,r1,-1);
+    hyperpoint shift = point3(0,0,-3);
+    hyperpoint down = point3(0,0,2);
+    hyperpoint d0 = -2 * t0 + shift;
+    hyperpoint d1 = -2 * t1 + shift;
+    hyperpoint d2 = -2 * t2 + shift;
+    
+    make_wall(0, {t0, t1, t2}, true);
+    make_wall(1, {d0, t1, t2}, true);
+    make_wall(2, {t0, d1, t2}, true);
+    make_wall(3, {t0, t1, d2});
+    make_wall(4, make5(d2, d1, d2 + down));
+    make_wall(5, make5(d0, d2, d0 + down));
+    make_wall(6, make5(d1, d0, d1 + down));
+    make_wall(7, {d0+down, d1+down, d2+down});
     }
   
   if(DIM == 3 && euclid && S7 == 6) {
     for(int w=0; w<6; w++) {
-      bshape(shWall3D[w], PPR::WALL);
-      for(int a=0; a<=4; a++) {
+      vector<hyperpoint> vertices;
+      for(int a=0; a<4; a++) {
         int t[3];
         t[0] = (w>=3) ? -1 : 1;
-        t[1] = among(a, 0, 3, 4) ? -1 : 1;
+        t[1] = among(a, 0, 3) ? -1 : 1;
         t[2] = among(a, 2, 3) ? -1 : 1;
         int x = w%3;
         int y = (x+2)%3;
         int z = (y+2)%3;
-        hpcpush(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
+        vertices.push_back(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
         }
+      make_wall(w, vertices, 0);
       }
     }
 
@@ -2412,14 +2471,9 @@ void create_wall3d() {
       vector<int> valid;
       for(int c=0; c<3; c++) if(co[c]) valid.push_back(c);
       int third = 3 - valid[1] - valid[0];
-      bshape(shWall3D[w], PPR::WALL); 
       hyperpoint v0 = cpush0(valid[0], co[valid[0]] > 0 ? 1 : -1);
       hyperpoint v1 = cpush0(valid[1], co[valid[1]] > 0 ? 1 : -1);
-      hpcpush(v0);
-      hpcpush(v0/2 + v1/2 + cpush0(third, .5) - C0);
-      hpcpush(v1);
-      hpcpush(v0/2 + v1/2 + cpush0(third, -.5) - C0);
-      hpcpush(v0);
+      make_wall(w, {v0, v0/2 + v1/2 + cpush0(third, .5) - C0, v1, v0/2 + v1/2 + cpush0(third, -.5) - C0});
       }
     }
 
@@ -2430,22 +2484,20 @@ void create_wall3d() {
       bshape(shWall3D[w], PPR::WALL);
       if(w%7 < 3) {
         int z = w>=7?-1:1;
-        hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
-        hpcpush(cpush0(w%7, z) + cpush0((w%7+2)%3, 1/2.) - C0);
-        hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3,-1/2.) - C0);
-        hpcpush(cpush0(w%7, z) + cpush0((w%7+2)%3,-1/2.) - C0);
-        hpcpush(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
+        make_wall(w, {
+          cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0,
+          cpush0(w%7, z) + cpush0((w%7+2)%3, 1/2.) - C0,
+          cpush0(w%7, z) + cpush0((w%7+1)%3,-1/2.) - C0,
+          cpush0(w%7, z) + cpush0((w%7+2)%3,-1/2.) - C0
+          });
         }
       else {
         auto t = euclid3::getcoord(v[w]);
         ld x = t[0], y = t[1], z = t[2];
-        hpcpush(hpxy3(x, y/2, 0));
-        hpcpush(hpxy3(x/2, y, 0));
-        hpcpush(hpxy3(0, y, z/2));
-        hpcpush(hpxy3(0, y/2, z));
-        hpcpush(hpxy3(x/2, 0, z));
-        hpcpush(hpxy3(x, 0, z/2));
-        hpcpush(hpxy3(x, y/2, 0));
+        make_wall(w, {
+          hpxy3(x, y/2, 0), hpxy3(x/2, y, 0), hpxy3(0, y, z/2),
+          hpxy3(0, y/2, z), hpxy3(x/2, 0, z), hpxy3(x, 0, z/2)
+          });
         }
       }
     }
@@ -2454,9 +2506,10 @@ void create_wall3d() {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
-      bshape(shWall3D[w], PPR::WALL);
-      for(int a=0; a<=facesize; a++) 
-        hpcpush(reg3::cellshape[w*facesize+a%facesize]);
+      vector<hyperpoint> vertices;
+      for(int a=0; a<facesize; a++) 
+        vertices.push_back(reg3::cellshape[w*facesize+a]);
+      make_wall(w, vertices, 0);
       }
     }
   

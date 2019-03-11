@@ -4798,13 +4798,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(a < 4 && binarytiling) {
-                if(celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
-                queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
+              if(a < 4 && binarytiling && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+              if(qfi.fshape && wmescher) {
+                auto& poly = queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
+                poly.tinf = &qfi.fshape->tinf3;
                 }
-              else {
-                queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
-                }
+              else
+                queuepoly(V, shPlainWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
               }
           }
         else {
@@ -4812,7 +4812,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             color_t t = transcolor(c, c->move(a));
             if(t) {
               t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
-              auto& poly = queuepolyat(V, shWall3D[a], t, PPR::TRANSPARENT);
+              auto& poly = queuepolyat(V, shPlainWall3D[a], t, PPR::TRANSPARENT);
               poly.subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
               }
             }
@@ -5341,7 +5341,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(binarytiling && !among(t, 5, 6, 8)) continue;
           if(!binarytiling && c->move(t) < c) continue;
           dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
-          queuepoly(V, shWall3D[t], 0);
+          queuepoly(V, shWireframe3D[t], 0);
           }
         }
       #endif
@@ -5527,7 +5527,7 @@ void queuecircleat(cell *c, double rad, color_t col) {
   if(DIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
     for(int i=0; i<c->type; i++) {
-      queuepolyat(gmatrix[c], shWall3D[i], 0, PPR::SUPERLINE);
+      queuepolyat(gmatrix[c], shWireframe3D[i], 0, PPR::SUPERLINE);
       }
     return;
     }    
@@ -6458,6 +6458,8 @@ auto graphcm = addHook(clearmemory, 0, [] () {
   });
 
 void resetGeometry() {
+  if(DIM == 3 && !floor_textures)
+    make_floor_textures();
   precalc();
 #if CAP_FIELD
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid) currfp.analyze();
