@@ -1314,7 +1314,7 @@ monster *playerCrash(monster *who, hyperpoint where) {
   for(int j=0; j<players; j++) if(pc[j] && pc[j]!=who) {
     if(pc[j]->isVirtual) continue;
     double d = intval(pc[j]->pat*C0, where);
-    if(d < 0.1 * SCALE2 || d > 100) return pc[j];
+    if(d < 0.1 * SCALE2 || d > 100 || (DIM == 3 && hdist(tC0(pc[j]->pat), where) > sightranges[geometry]/2)) return pc[j];
     }
   return NULL;
   }
