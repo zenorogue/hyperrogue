@@ -361,12 +361,14 @@ bool texture_config::apply(cell *c, const transmatrix &V, color_t col) {
     if(using_aura()) {
       for(int i=0; i<isize(mi.tvertices); i += 3) {
         ld p[3];
+        if(inHighQual)
         while(true) {
           p[0] = hrandf();
           p[1] = hrandf();
           p[2] = 1 - p[0] - p[1];
           if(p[2] >= 0) break;
           }
+        else p[0] = p[1] = p[2] = 1/3.;
         ld v[2] = {0,0};
         for(int j=0; j<2; j++) for(int k=0; k<3; k++)
           v[j] += mi.tvertices[i+k][j] * p[k];
