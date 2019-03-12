@@ -111,7 +111,7 @@ bool texture_data::readtexture(string tn) {
   auto txt2 = convertSurface(txt);
   SDL_FreeSurface(txt);
 
-  int tx = txt2->w, ty = txt2->h;
+  tx = txt2->w, ty = txt2->h;
   
   auto pix = [&] (int x, int y) { return qpixel(txt2, x, y); };
 
@@ -130,8 +130,8 @@ bool texture_data::readtexture(string tn) {
   // set the expected format
   png_infop info = png_create_info_struct(png);
   png_read_info(png, info);
-  int tx = png_get_image_width(png, info);
-  int ty = png_get_image_height(png, info);    
+  tx = png_get_image_width(png, info);
+  ty = png_get_image_height(png, info);    
   png_byte color_type = png_get_color_type(png, info);
   png_byte bit_depth = png_get_bit_depth(png, info);
   if(bit_depth == 16) png_set_strip_16(png);  
@@ -180,7 +180,7 @@ bool texture_data::readtexture(string tn) {
    
   else {
   
-    int origdim = max(tx, ty);
+    origdim = max(tx, ty);
     int base_x = tx/2 - origdim/2;
     int base_y = ty/2 - origdim/2;
   

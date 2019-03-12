@@ -3319,6 +3319,7 @@ namespace texture {
     GLuint textureid;
   
     int twidth;
+    int tx, ty, origdim;
     
     texture_data() { textureid = 0; twidth = 2048; }
   
