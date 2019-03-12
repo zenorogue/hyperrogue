@@ -1374,7 +1374,7 @@ map<char, colortable> colortables = {
   {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
   };
 
-color_t random_landscape(cell *c, int mul, int div, int step) {
+color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
   int col[4];
   for(int j=0; j<4; j++) {
     col[j] = getCdata(c, j);
@@ -1387,7 +1387,7 @@ color_t random_landscape(cell *c, int mul, int div, int step) {
   col[1] /= div;
   col[2] /= div;
   if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + step/2) / step * step;
-  return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16));
+  return (base + col[0] + (col[1] << 8) + (col[2] << 16));
   }
 
 namespace patterns {
@@ -1508,11 +1508,11 @@ namespace patterns {
       case 'w':
         return colortables['w'][randpattern(c, subcanvas) ? 1 : 0];
       case 'l': 
-        return random_landscape(c, 3, 1, 17);
+        return random_landscape(c, 3, 1, 17, 0x808080);
       case 'd':
-        return random_landscape(c, 6, 8, 2);
+        return random_landscape(c, 6, 8, 2, 0x101010);
       case 'h':
-        return random_landscape(c, 6, 4, 4);      
+        return random_landscape(c, 6, 4, 4, 0x202020);
       case 'c':
         return colortables['c'][chessvalue(c)];
       case 'F':
