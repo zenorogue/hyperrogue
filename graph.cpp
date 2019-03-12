@@ -313,12 +313,12 @@ double hexshiftat(cell *c) {
 #define FACE3 (DIM == 3 ? M_PI/2 : 0)
 
 transmatrix ddspin(cell *c, int d, ld bonus) {
-  if(DIM == 3) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
+  if(DIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 transmatrix iddspin(cell *c, int d, ld bonus) {
-  if(DIM == 3) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
+  if(DIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
@@ -2300,7 +2300,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
     isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || euwrap || dont_face_pc))) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
-    if(!nospins) Vs = Vs * ddspin(c, c->mondir, M_PI);
+    if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
