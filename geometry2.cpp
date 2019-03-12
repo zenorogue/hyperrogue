@@ -253,7 +253,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
-      double newz = check(V2 * at) [DIM];
+      double newz = hdist0(check(V2 * at));
       if(newz < currz) {
         currz = newz;
         bestV = V2;
@@ -269,7 +269,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       if(tohex && BITRUNCATED) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->c.spin(d)*2*M_PI/S6) * invhexmove[d];
-        double newz = check(V2 *at) [DIM];
+        double newz = hdist0(check(V2 *at));
         if(newz < currz) {
           currz = newz;
           bestV = V2;
