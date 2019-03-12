@@ -517,6 +517,8 @@ void texture_config::drawRawTexture() {
     rtver[i].texture[1] = (inmodel[1]+1)/2;
     rtver[i].coords[0] = x * current_display->scrsize;
     rtver[i].coords[1] = y * current_display->scrsize;
+    rtver[i].coords[2] = 0;
+    rtver[i].coords[3] = 1;
     }
   glhr::set_modelview(glhr::translate(0, 0, current_display->scrdist));
   glhr::prepare(rtver);
