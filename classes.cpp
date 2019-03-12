@@ -1762,7 +1762,7 @@ vector<geometryinfo> ginf = {
   {"{8,3}", "Bolza",    "Bolza Surface",                              "Bolza",    8, 3, qsDOCKS,   gcHyperbolic, 0x18200, {{6, 4}}, eVariation::bitruncated},
   {"{8,3}", "Bolza2",   "Bolza Surface x2",                           "Bolza2",   8, 3, qsDOCKS,   gcHyperbolic, 0x18400, {{6, 4}}, eVariation::bitruncated},
   {"{7,3}", "minimal",  "minimal quotient",                           "minimal",  7, 3, qsSMALLN,  gcHyperbolic, 0x18600, {{7, 5}}, eVariation::bitruncated},
-  {"binary","none",     "variant of the binary tiling",               "binary",   7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
+  {"binary","none",     "variant of the binary tiling",               "binary",   7, 3, qBINARY,   gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"Arch",  "none",     "Archimedean",                                "A",        7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"{7,3}", "Macbeath", "Macbeath Surface",                           "Macbeath", 7, 3, qsSMALL,   gcHyperbolic, 0x20000, {{7, 5}}, eVariation::bitruncated},
   {"{5,4}", "Bring",    "Bring's Surface",                            "Bring",    5, 4, qsSMALL,   gcHyperbolic, 0x20200, {{6, 4}}, eVariation::bitruncated},
@@ -1770,7 +1770,7 @@ vector<geometryinfo> ginf = {
   {"{12,3}","M4",       "Schmutz's M(4)",                             "M4",      12, 3, qsSMALL,   gcHyperbolic, 0x20600, {{4, 2}}, eVariation::bitruncated},
   {"{6,4}", "Crystal",  "dimensional crystal",                        "Crystal",  6, 4, qANYQ,     gcHyperbolic, 0x28000, {{5, 3}}, eVariation::pure},
   {"{3,4}", "none",     "{3,4} (octahedron)",                         "4x3",      3, 4, qsSMALLB,  gcSphere,     0x28200, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
-  {"bin{4,4}",  "none", "{4,4} on horospheres",                       "bin44",    9, 3, 0,         gcHyperbolic, 0x30000, {{7, 3}}, eVariation::pure},
+  {"bin{4,4}",  "none", "{4,4} on horospheres",                       "bin44",    9, 3, qBINARY,   gcHyperbolic, 0x30000, {{7, 3}}, eVariation::pure},
   {"{4,3,4}","none",    "{4,3,4} cube tiling",                        "433",      6, 4, 0,         gcEuclid,     0x30200, {{7, 5}}, eVariation::pure},
   {"{5,3,3}","none",    "{5,3,3} 120-cell",                           "533",     12, 3, qsSMALLB,  gcSphere,     0x30400, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{5,3,3}", "elliptic","{5,3,3} 120-cell (elliptic space)",         "e533",    12, 3, qsSMALLBE, gcSphere,     0x30600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
@@ -1787,8 +1787,9 @@ vector<geometryinfo> ginf = {
   {"{3,4,3}","elliptic","{3,4,3} 24-cell (elliptic)",                 "e343",     8, 3, qsSMALLBE, gcSphere,     0x39600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,5}","none",    "{3,3,5} 600-cell",                           "335",      4, 3, qsSMALLB,  gcSphere,     0x30800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,5}","elliptic","{3,3,5} 600-cell (elliptic)",                "e335",     4, 3, qsSMALLBE, gcSphere,     0x31800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, 0,         gcHyperbolic, 0x40000, {{7, 3}}, eVariation::pure},
-  };       
+  {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, qBINARY,   gcHyperbolic, 0x40000, {{7, 3}}, eVariation::pure},
+  {"bin-rect", "none",  "rectangles on horospheres",                  "bin44/2",  7, 3, qBINARY,   gcHyperbolic, 0x40200, {{7, 3}}, eVariation::pure},
+  };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

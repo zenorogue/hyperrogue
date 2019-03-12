@@ -222,7 +222,7 @@ enum eGeometry {
   gCell16, gECell16,
   gCell24, gECell24,
   gCell600, gECell600,
-  gHoroTris,
+  gHoroTris, gHoroRec,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
@@ -253,6 +253,8 @@ static const flagtype qDOCKS           = 32;
 static const flagtype qZEBRA           = 64;
 
 static const flagtype qELLIPTIC        = 128;
+
+static const flagtype qBINARY          = 256;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;

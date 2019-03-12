@@ -186,6 +186,7 @@ void precalc() {
   #endif
   #if CAP_BT
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
+  if(geometry == gHoroRec) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   #endif
   #if CAP_BT && MAXMDIM >= 4
   if(binarytiling && DIM == 3) binary::build_tmatrix();

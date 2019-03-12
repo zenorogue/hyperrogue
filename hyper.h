@@ -94,7 +94,7 @@ void addMessage(string s, char spamtype = 0);
 #define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || archimedean) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
 
-#define binarytiling (geometry == gBinaryTiling || geometry == gBinary3 || geometry == gHoroTris)
+#define binarytiling (ginf[geometry].flags & qBINARY)
 #define archimedean (geometry == gArchimedean)
 #define eubinary (euclid || binarytiling || geometry == gCrystal)
 
@@ -1524,7 +1524,7 @@ bool bearsCamelot(eLand l);
 extern bool safety;
 
 #define SAGEMELT .1
-#define TEMPLE_EACH ((DIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (DIM == 3 && hyperbolic) ? 3 : 6)
+#define TEMPLE_EACH (geometry == gHoroRec ? 3 : (DIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (DIM == 3 && hyperbolic) ? 3 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15

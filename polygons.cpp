@@ -2445,6 +2445,28 @@ void create_wall3d() {
     make_wall(6, make5(d1, d0, d1 + down));
     make_wall(7, {d0+down, d1+down, d2+down});
     }
+
+  if(geometry == gHoroRec) {
+    ld r2 = sqrt(2);
+    ld z = hororec_scale;
+    
+    hyperpoint a00 = point3(-r2*z,-2*z,-.5);
+    hyperpoint a01 = point3(+r2*z,-2*z,-.5);
+    hyperpoint a10 = point3(-r2*z, 0*z,-.5);
+    hyperpoint a11 = point3(+r2*z, 0*z,-.5);
+    hyperpoint a20 = point3(-r2*z,+2*z,-.5);
+    hyperpoint a21 = point3(+r2*z,+2*z,-.5);
+
+    hyperpoint down = point3(0,0,1);
+    
+    make_wall(0, make4(a00, a01, a10), true);
+    make_wall(1, make4(a10, a11, a20), true);
+    make_wall(2, make5(a01, a21, a01+down));
+    make_wall(3, make4(a21, a20, a21+down));
+    make_wall(4, make5(a20, a00, a20+down));
+    make_wall(5, make5(a00, a01, a00+down));
+    make_wall(6, make4(a00+down, a01+down, a20+down));
+    }
   
   if(DIM == 3 && euclid && S7 == 6) {
     for(int w=0; w<6; w++) {

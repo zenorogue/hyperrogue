@@ -4798,7 +4798,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(a < 4 && binarytiling && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+              if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+              if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 poly.tinf = &qfi.fshape->tinf3;

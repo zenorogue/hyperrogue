@@ -80,6 +80,8 @@ namespace binary {
     return h1;
     }
   
+  ld hororec_scale = 0.25;
+  
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
     h->distance = parent->distance + delta;
@@ -218,6 +220,32 @@ namespace binary {
                 return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
             }
           }
+        case gHoroRec: {
+          switch(d) {
+            case 0: case 1:
+              return build3(parent, d, 6, 1);
+            case 6:
+              return build3(parent, 6, hrand(2), -1);
+            case 2:
+              parent->cmove(6);
+              if(parent->c.spin(6) == 0)
+                return path(h, 2, 4, {6, 1});
+              else
+                return path(h, 2, 4, {6, 3, 0});
+            case 4:
+              parent->cmove(6);
+              if(parent->c.spin(6) == 0)
+                return path(h, 4, 2, {6, 5, 1});
+              else
+                return path(h, 4, 2, {6, 0});
+            case 3:
+              parent->cmove(6);
+              return path(h, 3, 5, {6, 4, parent->c.spin(6)});
+            case 5:
+              parent->cmove(6);
+              return path(h, 5, 3, {6, 2, parent->c.spin(6)});
+            }
+          }
         case gHoroTris: {            
           switch(d) {
             case 0: case 1: case 2: case 3:
@@ -347,6 +375,17 @@ namespace binary {
       direct_tmatrix[4] = parabolic3(0, -r3*2/3) * cspin(1,2, M_PI);
       direct_tmatrix[5] = parabolic3(1, r3/3) * cspin(1,2,M_PI);
       direct_tmatrix[6] = parabolic3(-1, r3/3) * cspin(1,2,M_PI);
+      }
+    if(geometry == gHoroRec) {
+      ld r2 = sqrt(2);
+      ld l = -log(2)/2;
+      ld z = hororec_scale;
+      direct_tmatrix[0] = parabolic3(0, -z) * xpush(l) * cspin(2,1,M_PI/2);
+      direct_tmatrix[1] = parabolic3(0, +z) * xpush(l) * cspin(2,1,M_PI/2);
+      direct_tmatrix[2] = parabolic3(+2*r2*z, 0);
+      direct_tmatrix[3] = parabolic3(0, +4*z);
+      direct_tmatrix[4] = parabolic3(-2*r2*z, 0);
+      direct_tmatrix[5] = parabolic3(0, -4*z);
       }
     for(int i=0; i<S7-1; i++)
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
