@@ -280,24 +280,16 @@ namespace ss {
     slideshows.push_back(ss);
     }
 
-  int sssize;
+  string slidechars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
    
   void showMenu() {
     if(!wts) wts = slides; 
 
     dialog::init(XLAT("slides"), forecolor, 150, 100);
     
-    for(sssize=0;; sssize++) {
-      int i = sssize;
-      dialog::addBoolItem(XLAT(wts[i].name), wts == slides && i == currentslide, 'a'+i);
-      if(wts[i].flags & FINALSLIDE) break;
-      }
-    dialog::addBreak(50);
-    if(isize(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
-    dialog::addBack();
-    dialog::display();
-    keyhandler = [] (int sym, int uni) {
-      if(uni >= 'a' && uni < 'a' + sssize) {
+    for(int i=0;; i++) {
+      dialog::addBoolItem(XLAT(wts[i].name), wts == slides && i == currentslide, slidechars[i]);
+      dialog::add_action([i] {
         if(geometry || CHANGED_VARIATION) {
           pop_game();
           presentation(pmGeometryReset);
@@ -308,20 +300,26 @@ namespace ss {
           tour::start();
           }
         presentation(pmStop);
-        currentslide = uni - 'a';
+        currentslide = i;
         popScreenAll();
         presentation(pmStart);
         slidehelp();
-        }
-      else if(uni == '1') {
+        });
+      if(wts[i].flags & FINALSLIDE) break;
+      }
+    dialog::addBreak(50);
+    if(isize(slideshows) > 1) {
+      dialog::addItem(XLAT("change slideshow"), '1');
+      dialog::add_action([] {
         list(wts);
         for(int i=0; i<isize(slideshows)-1; i++) if(slideshows[i] == wts) {
           wts = slideshows[i+1]; return;
           }
         wts = slideshows[0];
-        }
-      else if(doexiton(sym, uni)) { wts = NULL; popScreen(); }
-      };
+        });
+      }
+    dialog::addBack();
+    dialog::display();
     }
 
   }
