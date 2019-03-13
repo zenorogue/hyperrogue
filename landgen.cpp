@@ -2530,13 +2530,15 @@ void setdist(cell *c, int d, cell *from) {
       if(buggyGeneration) return;
       }
     
-    if(d == BARLEV-2 && c->land == laOcean) 
+    int eqlevel = max(BARLEV-2, 7);
+    
+    if(d == eqlevel && c->land == laOcean) 
       buildEquidistant(c);
 
-    if(d == BARLEV-2 && inmirror(c)) 
+    if(d == eqlevel && inmirror(c)) 
       buildEquidistant(c);
 
-    if(d == BARLEV-2 && (c->land == laGraveyard || c->land == laHauntedBorder || c->land == laHaunted) && !tactic::on)
+    if(d == eqlevel && (c->land == laGraveyard || c->land == laHauntedBorder || c->land == laHaunted) && !tactic::on)
       buildEquidistant(c);
     }
   
