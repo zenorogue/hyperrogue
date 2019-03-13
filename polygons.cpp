@@ -2448,7 +2448,7 @@ void create_wall3d() {
 
   if(geometry == gHoroRec) {
     ld r2 = sqrt(2);
-    ld z = hororec_scale;
+    ld z = binary::hororec_scale;
     
     hyperpoint a00 = point3(-r2*z,-2*z,-.5);
     hyperpoint a01 = point3(+r2*z,-2*z,-.5);
@@ -2466,6 +2466,33 @@ void create_wall3d() {
     make_wall(4, make5(a20, a00, a20+down));
     make_wall(5, make5(a00, a01, a00+down));
     make_wall(6, make4(a00+down, a01+down, a20+down));
+    }
+  
+  if(geometry == gHoroHex) {
+    ld z = log(3) / log(2) / 2;
+    ld r3 = sqrt(3) / 2 * binary::horohex_scale;
+    ld h = binary::horohex_scale / 2;
+    hyperpoint down = point3(0,0,2*z);
+    
+    for(int i=0; i<3; i++) {
+      transmatrix T = cspin(0, 1, 2*M_PI*i/3);
+      
+      hyperpoint hcenter = point3(0,0,-z);
+      hyperpoint hu0 = T*point3(+h,  +r3,-z);
+      hyperpoint hu1 = T*point3(+h*3,+r3,-z);
+      hyperpoint hd0 = T*point3(+h,  -r3,-z);
+      hyperpoint hd1 = T*point3(+h*3,-r3,-z);
+      hyperpoint hcn = T*point3(-h*2,0,  -z);
+      hyperpoint hun = T*point3(-h*3,+r3,-z);
+      hyperpoint hdn = T*point3(-h*3,-r3,-z);
+      make_wall(i, {hcenter, hu0, hu1, hd1, hd0});
+      make_wall(i+3, {hcn, hun, hdn});
+      make_wall(i+6, make4(hd1, hu1, hd1+down));
+      make_wall(i+9, make4(hun, hdn, hun+down));
+      }
+    
+    make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
+    make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)}, true);
     }
   
   if(DIM == 3 && euclid && S7 == 6) {

@@ -3912,10 +3912,14 @@ int get_darkval(int d) {
   const int darkval_e6[6] = {0,4,6,0,4,6};
   const int darkval_e12[12] = {0,4,6,0,4,6,0,4,6,0,4,6};
   const int darkval_e14[14] = {0,0,0,4,6,4,6,0,0,0,6,4,6,4};
+  const int darkval_hh[14] = {0,0,0,1,1,1,2,2,2,3,3,3,1,0};
+  const int darkval_hrec[7] = {0,0,2,4,2,4,0};
   if(sphere) return darkval_s12[d];
   if(euclid && S7 == 6) return darkval_e6[d];
   if(euclid && S7 == 12) return darkval_e12[d];
   if(euclid && S7 == 14) return darkval_e14[d];
+  if(geometry == gHoroHex) return darkval_hh[d];
+  if(geometry == gHoroRec) return darkval_hrec[d];
   if(binarytiling) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];

@@ -79,8 +79,15 @@ namespace binary {
     rec--;
     return h1;
     }
-  
+
+  heptagon *pathc(heptagon *h, int d, int d1, std::vector<std::initializer_list<int>> p) {
+    h->cmove(S7-1);
+    int z = h->c.spin(S7-1);
+    return path(h, d, d1, p[z]);
+    }
+    
   ld hororec_scale = 0.25;
+  ld horohex_scale = 0.6;
   
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
@@ -120,8 +127,14 @@ namespace binary {
   #if MAXMDIM==4
   heptagon *build3(heptagon *parent, int d, int d1, int delta) {
     int side = 0;
-    if(d < 4) side = (parent->zebraval * 2 + d) % 5;
-    if(d == 8) side = ((parent->zebraval-d1) * 3) % 5;
+    if(geometry == gBinary3) {
+      if(d < 4) side = (parent->zebraval * 2 + d) % 5;
+      if(d == S7-1) side = ((5+parent->zebraval-d1) * 3) % 5;
+      }
+    if(geometry == gHoroHex) {
+      if(d < 3) side = (parent->zebraval + d) % 3;
+      if(d == S7-1) side = (parent->zebraval + 3 - d1) % 3;
+      }
     return build(parent, d, d1, S7, side, delta);
     }
   #endif
@@ -260,6 +273,38 @@ namespace binary {
               else return path(h, d, d, {7, d, 9-d-s});
             }
           }
+        case gHoroHex: {
+          // the comment is a picture...
+          // generated with the help of hexb.cpp          
+          switch(d) {
+            case 0: case 1: case 2:
+              return build3(parent, d, 13, 1);
+            case 13:
+              return build3(parent, 13, hrand(3), -1);
+            case 3:
+              return pathc(h, 3, 12, {{13,4,2}, {13,5,2}, {13,3,2}});
+            case 4:
+              return pathc(h, 4, 12, {{13,6,2,0}, {13,7,0,0}, {13,8,1,0}});
+            case 5:
+              return pathc(h, 5, 12, {{13,1,1}, {13,2,1}, {13,0,1}});
+            case 6:
+              return pathc(h, 6, 10, {{13,5}, {13,3}, {13,4}});
+            case 7:
+              return pathc(h, 7, 11, {{13,2}, {13,0}, {13,1}});
+            case 8:
+              return pathc(h, 8, 9, {{13,6,0}, {13,7,1}, {13,8,2}});
+            case 9:
+              return pathc(h, 9, 8, {{13,4}, {13,5}, {13,3}});
+            case 10:
+              return pathc(h, 10, 6, {{13,6,2}, {13,7,0}, {13,8,1}});
+            case 11:
+              return pathc(h, 11, 7, {{13,1}, {13,2}, {13,0}});
+            case 12: 
+              h->cmove(13);
+              int z = h->c.spin(13);
+              return path(h, 12, (z+1)%3+3, {13, z+6});
+            }
+          }
         
         default: ;
         }
@@ -352,10 +397,15 @@ namespace binary {
 
   hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
 
-  transmatrix direct_tmatrix[8];
-  transmatrix inverse_tmatrix[8];
+  transmatrix direct_tmatrix[14];
+  transmatrix inverse_tmatrix[14];
+
+  int use_direct;
+  // directions below 'use_direct' are taken from direct_tmatrix;
+  // directions at/above are taken by checking spin and inverse_tmatrix based on that
   
   void build_tmatrix() {
+    use_direct = S7-1;
     if(geometry == gBinary3) {
       direct_tmatrix[0] = xpush(-log(2)) * parabolic3(-1, -1);
       direct_tmatrix[1] = xpush(-log(2)) * parabolic3(1, -1);
@@ -387,23 +437,46 @@ namespace binary {
       direct_tmatrix[4] = parabolic3(-2*r2*z, 0);
       direct_tmatrix[5] = parabolic3(0, -4*z);
       }
-    for(int i=0; i<S7-1; i++)
+    if(geometry == gHoroHex) {
+      // also generated with the help of hexb.cpp
+      ld l = log(3)/2;
+      auto& t = direct_tmatrix;
+      t[0] = parabolic3(horohex_scale, 0) * xpush(-l) * cspin(1, 2, M_PI/2);
+      t[1] = cspin(1, 2, 2*M_PI/3) * t[0];
+      t[2] = cspin(1, 2, 4*M_PI/3) * t[0];
+      auto it = inverse(t[0]);
+
+      t[5] = it * t[1] * t[1];
+      t[6] = it * t[5];
+      t[4] = it * t[6] * t[2] * t[0];
+      t[3] = it * t[4] * t[2];
+
+      t[7] = it * t[2];
+      t[8] = it * t[6] * t[0];
+      t[9] = it * t[4];
+      t[10] = it * t[6] * t[2];
+      t[11] = it * t[1];
+
+      for(int a=0; a<12; a++) println(hlog, t[a]);
+      use_direct--;
+      }
+    for(int i=0; i<use_direct; i++)
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
     }
   
   const transmatrix& tmatrix(heptagon *h, int dir) {
-    if(dir == S7-1) {
-      h->cmove(S7-1);
-      return inverse_tmatrix[h->c.spin(S7-1)];
+    if(dir >= use_direct) {
+      h->cmove(dir);
+      return inverse_tmatrix[h->c.spin(dir)];
       }
     else
       return direct_tmatrix[dir];
     }
 
   const transmatrix& itmatrix(heptagon *h, int dir) {
-    if(dir == S7-1) {
-      h->cmove(S7-1);
-      return h->cmove(S7-1), direct_tmatrix[h->c.spin(S7-1)];
+    if(dir >= use_direct) {
+      h->cmove(dir);
+      return h->cmove(dir), direct_tmatrix[h->c.spin(dir)];
       }
     else
       return inverse_tmatrix[dir];
@@ -478,7 +551,7 @@ auto bt_config = addHook(hooks_args, 0, [] () {
 bool pseudohept(cell *c) {
   if(DIM == 2)
     return c->type & c->master->distance & 1;
-  else if(geometry == gHoroTris)
+  else if(among(geometry, gHoroTris, gHoroRec))
     return c->c.spin(S7-1) == 0 && (c->master->distance & 1);
   else
     return (c->master->zebraval == 1) && (c->master->distance & 1);

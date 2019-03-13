@@ -2463,6 +2463,7 @@ void setdist(cell *c, int d, cell *from) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;
+      if(geometry == gHoroHex) z *= 2;
       while(z < 3.999 && step < 10) cseek = cseek->cmove(S7-1), z *= 2;
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }

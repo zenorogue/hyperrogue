@@ -1789,6 +1789,7 @@ vector<geometryinfo> ginf = {
   {"{3,3,5}","elliptic","{3,3,5} 600-cell (elliptic)",                "e335",     4, 3, qsSMALLBE, gcSphere,     0x31800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, qBINARY,   gcHyperbolic, 0x40000, {{7, 3}}, eVariation::pure},
   {"bin-rect", "none",  "rectangles on horospheres",                  "bin44/2",  7, 3, qBINARY,   gcHyperbolic, 0x40200, {{7, 3}}, eVariation::pure},
+  {"bin{6,3}", "none",  "{6,3} on horospheres",                       "bin63",   14, 3, qBINARY,   gcHyperbolic, 0x40400, {{7, 3}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
