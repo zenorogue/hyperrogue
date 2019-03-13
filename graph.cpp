@@ -6,6 +6,8 @@
 
 namespace hr {
 
+int last_firelimit, firelimit;
+
 int inmirrorcount = 0;
 
 bool spatial_graphics;
@@ -3881,7 +3883,7 @@ color_t lcolor(cell *c) {
   return floorcolors[c->land];
   }
 
-color_t transcolor(cell *c, cell *c2) {
+color_t transcolor(cell *c, cell *c2, color_t wcol) {
   color_t dummy;
   if(isWall3(c2, dummy)) return 0;
   if(c->land != c2->land) {
@@ -3892,6 +3894,7 @@ color_t transcolor(cell *c, cell *c2) {
     }
   if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena(winf[c->wall].color, 0, 0x40);
   if(c->wall == c2->wall) return 0;
+  if(isFire(c) && !isFire(c2)) return darkena(wcol, 0, 0x30);
 
   if(c->wall == waChasm && c2->wall != waChasm) return 0x606060A0;
   if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x0000C060;
@@ -4814,7 +4817,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         else {
           for(int a=0; a<c->type; a++) if(c->move(a)) {
-            color_t t = transcolor(c, c->move(a));
+            color_t t = transcolor(c, c->move(a), wcol);
             if(t) {
               t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
               auto& poly = queuepolyat(V, shPlainWall3D[a], t, PPR::TRANSPARENT);
@@ -4823,12 +4826,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, &V, V, V);
           else if(isFire(c)) {
-            int r = ticks - lastt;
-            r += rand() % 5 + 1;
-            r /= 5;
-            while(r--) {
+            static int r = 0;
+            r += ticks - lastt;
+            int each = 5 + last_firelimit;
+            while(r >= each) {
               drawParticleSpeed(c, wcol, 75 + rand() % 75);
+              r -= each;
               }
+            firelimit++;
             }
           else if(c->wall == waMineOpen) {
             int mines = countMinesAround(c);
@@ -5884,6 +5889,8 @@ void precise_mouseover() {
   }
 
 void drawthemap() {
+  last_firelimit = firelimit;
+  firelimit = 0;
 
   radarpoints.clear();
   callhooks(hooks_drawmap);
