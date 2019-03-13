@@ -2369,11 +2369,7 @@ void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false
       }
     
   bshape(shWireframe3D[id], PPR::WALL);
-  if(!binarytiling) {
-    for(auto v: vertices) hpcpush(v);
-    hpcpush(vertices[0]);
-    }
-  else {
+  if(true) {
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++)
       at((vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP);
     at(vertices[0]);
@@ -2381,7 +2377,7 @@ void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false
   
   finishshape();
 
-  shPlainWall3D[id] = force_triangles ? shWall3D[id] : shWireframe3D[id];
+  shPlainWall3D[id] = shWall3D[id]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
   }
 
 vector<hyperpoint> make4(hyperpoint a, hyperpoint b, hyperpoint c) {
