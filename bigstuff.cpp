@@ -1038,6 +1038,11 @@ bool deep_ocean_at(cell *c, cell *from) {
   return false;
   }
 
+bool good_for_wall(cell *c) {
+  if(archimedean) return true;
+  if(DIM == 3) return true;
+  return pseudohept(c);
+  }
   
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
@@ -1054,7 +1059,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
   
   else if(chaosmode) {
-    if((archimedean || pseudohept(c)) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
+    if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       {}
     else if(ctof(c) && c->land == laMirror && hrand(10000) < 2000 && !weirdhyperbolic) {
       int bd = 2 + hrand(2) * 3;
@@ -1062,13 +1067,13 @@ void buildBigStuff(cell *c, cell *from) {
       }
     }
   
-  else if((archimedean || pseudohept(c)) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
+  else if(good_for_wall(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
-  else if((archimedean || pseudohept(c)) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on &&
+  else if(good_for_wall(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on &&
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if((archimedean || pseudohept(c)) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on && !isCrossroads(c->land) && 
+  else if(good_for_wall(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on && !isCrossroads(c->land) && 
     gold() >= R200 && !weirdhyperbolic && !c->master->alt &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
