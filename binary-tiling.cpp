@@ -552,7 +552,7 @@ bool pseudohept(cell *c) {
   if(DIM == 2)
     return c->type & c->master->distance & 1;
   else if(geometry == gHoroRec)
-    return c->c.spin(S7-1) == 0 && (c->master->distance & 1) && c->comve(S7-1)->c.spin(S7-1) == 0;
+    return c->c.spin(S7-1) == 0 && (c->master->distance & 1) && c->cmove(S7-1)->c.spin(S7-1) == 0;
   else if(geometry == gHoroTris)
     return c->c.spin(S7-1) == 0 && (c->master->distance & 1);
   else
