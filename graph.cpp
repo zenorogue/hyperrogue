@@ -4027,7 +4027,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   viewBuggyCells(c,V);
   #endif
   
-  if(conformal::on || inHighQual || sightrange_bonus > gamerange_bonus) checkTide(c);
+  if(conformal::on || inHighQual || DIM == 3 || sightrange_bonus > gamerange_bonus) checkTide(c);
   
   // save the player's view center
   if(isPlayerOn(c) && !shmup::on) {
