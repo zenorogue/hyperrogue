@@ -2536,6 +2536,7 @@ extern hookset<bool(cell*)> *hooks_mark;
 extern hookset<eLand(eLand)> *hooks_nextland;
 extern hookset<bool()> *hooks_welcome_message, *hooks_default_help;
 extern hookset<void(cell*)> *hooks_mouseover;
+extern hookset<struct hrmap*()> *hooks_newmap;
 
 extern ld shiftmul;
 void initcs(charstyle &cs);
@@ -3587,6 +3588,12 @@ inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
 transmatrix xspinpush(ld alpha, ld x);
 hyperpoint xspinpush0(ld alpha, ld x);
 
+transmatrix cspin(int a, int b, ld alpha);
+transmatrix cpush(int cid, ld alpha);
+
+bool eqmatrix(transmatrix A, transmatrix B, ld eps = 1e-6);
+void set_column(transmatrix& T, int i, const hyperpoint& H);
+
 #define DF_INIT              0 // always display these
 #define DF_MSG               0 // always display these
 #define DF_STEAM             1
@@ -3957,6 +3964,16 @@ struct hpcshape {
   };
 
 extern hpcshape shFullCross[2];
+
+void bshape(hpcshape& sh, PPR prio);
+void hpcpush(hyperpoint h);
+void finishshape();
+void extra_vertices();
+extern vector<hyperpoint> hpc;
+
+extern hpcshape *last;
+
+extern vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
 #endif
 
 int fix6(int a);
@@ -4319,6 +4336,10 @@ namespace reg3 {
   int celldistance(cell *c1, cell *c2);
   bool pseudohept(cell *c);
   inline short& altdist(heptagon *h) { return h->emeraldval; }
+  extern transmatrix spins[12], adjmoves[12];
+  int bucketer(hyperpoint h);
+  extern bool dirs_adjacent[16][16];
+  cellwalker strafe(cellwalker cw, int j);
   }
 #endif
 

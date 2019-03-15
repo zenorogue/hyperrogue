@@ -103,5 +103,18 @@ namespace rogueviz {
   namespace pentagonal {
     void run_snub(int v, int w);
     }
-}
+
+  extern int dftcolor;
+  namespace collatz { extern double s2, s3, p2, p3; void start(); }
+  namespace tree { void read(string fn); }
+  namespace sag { extern ld edgepower, edgemul; 
+    void read(string fn);  
+    void loadsnake(const string& fn);
+    }
+  void readcolor(const string& cfname);
+  extern bool on;
+
+  void close();
+  extern bool showlabels;
+  }
 

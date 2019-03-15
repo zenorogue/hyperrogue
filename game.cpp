@@ -7020,7 +7020,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     babymap.erase(c2);
     int bold = seekbits;
     seekbits = bnew;
-    last = seekbits;
+    tortoise::last = seekbits;
     if(seek()) {
       cell *c = passable(cwt.at, NULL, 0) ? cwt.at : c2;
       c->item = itBabyTortoise;

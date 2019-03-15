@@ -295,6 +295,14 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
   return h;
   }
 
+bool eqmatrix(transmatrix A, transmatrix B, ld eps) {
+  for(int i=0; i<MDIM; i++)
+  for(int j=0; j<MDIM; j++)
+    if(std::abs(A[i][j] - B[i][j]) > 1e-2)
+      return false;
+  return true;
+  }
+
 // push alpha units vertically
 transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 
