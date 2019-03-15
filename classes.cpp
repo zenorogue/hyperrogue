@@ -1740,6 +1740,7 @@ static const flagtype qsZEBRA           = qANYQ | qSMALL | qBOUNDED | qZEBRA;
 static const flagtype qsFIELD           = qANYQ | qFIELD | qBOUNDED;
 static const flagtype qsDOCKS           = qANYQ | qSMALL | qBOUNDED | qDOCKS;
 static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
+static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC;
 
 vector<geometryinfo> ginf = {
@@ -1790,6 +1791,8 @@ vector<geometryinfo> ginf = {
   {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, qBINARY,   gcHyperbolic, 0x40000, {{7, 3}}, eVariation::pure},
   {"bin-rect", "none",  "rectangles on horospheres",                  "bin44/2",  7, 3, qBINARY,   gcHyperbolic, 0x40200, {{7, 3}}, eVariation::pure},
   {"bin{6,3}", "none",  "{6,3} on horospheres",                       "bin63",   14, 3, qBINARY,   gcHyperbolic, 0x40400, {{7, 3}}, eVariation::pure},
+  {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF, gcHyperbolic, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, gcHyperbolic, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

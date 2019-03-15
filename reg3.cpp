@@ -176,6 +176,247 @@ namespace reg3 {
   
   void test();
     
+  struct hrmap_field3 : hrmap {
+    vector<heptagon*> allh;
+    vector<cell*> acells;
+    
+    vector<vector<transmatrix>> tmatrices;
+    
+    int mgmul(std::initializer_list<int> v) { 
+      int a = 0;
+      for(int b: v) a = a ? currfp_gmul(a, b) : b;
+      return a;
+      }
+    
+    vector<transmatrix> fullmatrices;
+    
+    int P, R, X;
+    transmatrix full_P, full_R, full_X;
+    
+    vector<int> field_adjmoves;
+    vector<int> cyclers;
+    int perm_group;
+  
+    vector<int> wsrcode;
+    vector<int> srcode;
+    
+    void seek(set<int>& seen_matrices, set<int>& seen_codes, const transmatrix& at, int ccode, const hyperpoint checker) {
+      if(hdist0(tC0(at)) > 4) return;
+      int b = reg3::bucketer(tC0(at));
+      if(seen_matrices.count(b)) return;
+      seen_matrices.insert(b);
+      for(int a=0; a<perm_group; a++) {
+        transmatrix T = at * fullmatrices[a];
+        if(hdist(T * checker, checker) < 1e-2) {
+          int co = mgmul({ccode, a});
+          seen_codes.insert(co);
+          fullmatrices[co] = T;
+          }
+        }
+      for(int a=0; a<perm_group; a++) seek(seen_matrices, seen_codes, at * fullmatrices[a] * full_P, mgmul({ccode, a, P}), checker);
+      }
+    
+    hrmap_field3() {
+      eGeometry g = geometry;
+      geometry = gSpace435;
+      reg3::generate();
+      R = currfp_get_R();
+      P = currfp_get_P();
+      X = currfp_get_X();
+      full_P = reg3::adjmoves[0] * cspin(0, 2, M_PI) * cspin(0, 1, M_PI);
+      full_R = spin(-2 * M_PI / 4);
+      full_X = cspin(1, 2, M_PI / 2);
+  
+      println(hlog, "full_P = ", full_P, " / ", R);
+      println(hlog, "full_R = ", full_R, " / ", P);
+      println(hlog, "full_X = ", full_X, " / ", X);
+  
+      int N = currfp_n();
+  
+      perm_group = 24;
+      fullmatrices.resize(N);
+      fullmatrices[0] = Id;
+      vector<bool> known(perm_group, false);
+      known[0] = true;
+      for(int a=0; a<perm_group; a++) 
+      for(int i=0; i<perm_group; i++) if(known[i]) {
+        int iR = currfp_gmul(i, R);
+        fullmatrices[iR] = fullmatrices[i] * full_R;
+        known[iR] = true;
+        int iX = currfp_gmul(i, X);
+        fullmatrices[iX] = fullmatrices[i] * full_X;
+        known[iX] = true;
+        }
+      for(int i=0; i<perm_group; i++) if(known[i]) {
+        println(hlog, i, ". ", fullmatrices[i]);
+        }
+      
+      // find cav such that:
+      // cav * Id          * C0 = corner0
+      // cav * adjmoves[0] * C0 = corner1
+      // cav * adjmoves[1] * C0 = corner3
+      // cav * adjmoves[2] * C0 = cornerx
+      
+      hyperpoint corner0 = reg3::cellshape[0];
+      hyperpoint corner1 = reg3::cellshape[1];
+      hyperpoint corner3 = reg3::cellshape[3];
+      hyperpoint cornerx;
+  
+      for(hyperpoint h: reg3::cellshape) println(hlog, "some corner ", h);
+  
+      for(hyperpoint h: reg3::cellshape)
+        if(hdist(h, corner1) > .1 && hdist(h, corner3) > .1 && abs(hdist(h, corner0)-hdist(corner0, corner1)) < .1)
+          cornerx = h;
+      println(hlog, "corner0 = ", corner0);
+      println(hlog, "corner1 = ", corner1);
+      println(hlog, "corner3 = ", corner3);
+      println(hlog, "cornerx = ", cornerx);
+      
+      transmatrix adj = Id, iadj = Id;
+  
+      geometry = g;
+      reg3::generate();
+      
+      cyclers.clear();
+      println(hlog, "S7 = ", S7);
+      if(S7 == 12) {
+      
+        transmatrix resmatrix;
+        set_column(resmatrix, 0, corner0);
+        set_column(resmatrix, 1, corner1);
+        set_column(resmatrix, 2, corner3);
+        set_column(resmatrix, 3, cornerx);
+        
+        transmatrix transformer;
+        set_column(transformer, 0, C0);
+        set_column(transformer, 1, tC0(reg3::adjmoves[0]));
+        set_column(transformer, 2, tC0(reg3::adjmoves[1]));
+        set_column(transformer, 3, tC0(reg3::adjmoves[2]));
+        
+        transmatrix cav = resmatrix * inverse(transformer);
+        println(hlog, "cav = ", cav);
+        println(hlog, "cav * C0 = ", cav * C0);
+  
+        set<int> seen_matrices;
+        set<int> seen_codes;
+        seek(seen_matrices, seen_codes, Id, 0, corner0);
+        
+        for(int x: seen_codes) cyclers.push_back(x);
+        perm_group = isize(cyclers);
+        adj = cav;
+        iadj = inverse(cav);
+        }
+      else {
+        for(int i=0; i<perm_group; i++) cyclers.push_back(i);
+        }
+      
+      field_adjmoves.resize(S7);
+      for(int i=0; i<S7; i++) field_adjmoves[i] = -1;
+  
+      for(int i=0; i<S7; i++) 
+        for(int a: cyclers)
+        for(int b: cyclers) {
+          transmatrix T = iadj * fullmatrices[a] * full_P * fullmatrices[b] * adj;
+          if(eqmatrix(T, reg3::adjmoves[i])) {
+            int code = mgmul({a,P,b});
+            field_adjmoves[i] = code;
+            println(hlog, i, " = ", make_tuple(a,P,b), " = ", code, " T = ", T);
+            }
+          }
+        
+      println(hlog, "field_adjmoves = ", field_adjmoves);
+      
+      println(hlog, "finding srcode/wsrcode...");
+  
+      wsrcode.clear();
+      srcode.resize(N);
+      for(int i=0; i<N; i++) srcode[i] = -1;
+      for(int i=0; i<N; i++) if(srcode[i] == -1) {
+        for(int j: cyclers) srcode[currfp_gmul(i, j)] = isize(wsrcode);
+        wsrcode.push_back(i);
+        }
+      
+      println(hlog, "building allh...");
+      int cells = N / perm_group;
+      allh.resize(cells);
+      for(int i=0; i<cells; i++) {
+        allh[i] = tailored_alloc<heptagon> (S7);
+        allh[i]->c7 = newCell(S7, allh[i]);
+        allh[i]->fieldval = i;
+        acells.push_back(allh[i]->c7);
+        }
+      
+      println(hlog, "finding tmatrices...");
+      tmatrices.resize(cells);
+      
+      for(int i=0; i<cells; i++) {
+        for(int d=0; d<S7; d++) {
+          int found = 0;
+          int tmul = currfp_gmul(wsrcode[i], field_adjmoves[d]);
+          for(int s: cyclers) {
+            int tmul2 = currfp_gmul(tmul, s);
+            if(wsrcode[srcode[tmul2]] == tmul2) {
+              allh[i]->move(d) = allh[srcode[tmul2]];
+              tmatrices[i].push_back(reg3::adjmoves[d] * iadj * fullmatrices[s] * adj);
+              found++;
+              }
+            }
+          if(found != 1) println(hlog, "bad found: ", i, "/", d, "/", found);
+          println(hlog, "tmatrix(",i,",",d,") = ", tmatrices[i][d]);
+          }
+        }
+  
+      println(hlog, "setting spin...");
+      for(int i=0; i<cells; i++) 
+      for(int d=0; d<S7; d++)
+      for(int e=0; e<S7; e++) 
+        if(allh[i]->move(d)->move(e) == allh[i])
+          allh[i]->c.setspin(d, e, false);
+  
+      }
+    
+    void draw() override {
+      sphereflip = Id;
+      if(!sightranges[geometry]) sightranges[geometry] = 3;
+      
+      // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
+      
+      dq::visited_by_matrix.clear();
+      dq::enqueue_by_matrix(viewctr.at, cview());
+      
+      while(!dq::drawqueue.empty()) {
+        auto& p = dq::drawqueue.front();
+        heptagon *h = get<0>(p);
+        transmatrix V = get<1>(p);
+        dynamicval<ld> b(band_shift, get<2>(p));
+        bandfixer bf(V);
+        dq::drawqueue.pop();
+              
+        cell *c = h->c7;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V, 0, false);
+    
+        for(int d=0; d<S7; d++)
+          dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
+        }
+      }
+  
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
+      if(h1 == h2) return Id;
+      int d = hr::celldistance(h2->c7, h1->c7);
+
+      for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
+        return tmatrices[h1->fieldval][a] * relative_matrix(h2, h1->move(a));
+      
+      println(hlog, "error in hrmap_field3:::relative_matrix");
+      return Id;
+      }
+  
+    heptagon *getOrigin() override { return allh[0]; }
+    
+    vector<cell*>& allcells() override { return acells; }    
+    };
+
   struct hrmap_reg3 : hrmap {
   
     heptagon *origin;
@@ -409,6 +650,7 @@ namespace reg3 {
     };
   
 hrmap* new_map() {
+  if(quotient) return new hrmap_field3;
   return new hrmap_reg3;
   }
 

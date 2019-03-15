@@ -4903,10 +4903,13 @@ inline void delayed_geo_reset() { need_reset_geometry = true; }
 extern unordered_map<string, ld&> params;
 
 namespace dq {
-  extern set<heptagon*> visited;
   extern queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
 
+  extern set<heptagon*> visited;
   void enqueue(heptagon *h, const transmatrix& T);
+
+  extern set<int> visited_by_matrix;
+  void enqueue_by_matrix(heptagon *h, const transmatrix& T);
   }
 
 typedef pair<string, reaction_t> named_functionality;

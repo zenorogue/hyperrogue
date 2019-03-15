@@ -383,8 +383,9 @@ vector<eGeometry> quotientlist = {
   };
 
 vector<eGeometry> list3d = {
-  gBinary3, gHoroTris,
+  gBinary3, gHoroTris, gHoroRec, gHoroHex,
   gSpace534, gSpace435, 
+  gField534, gField435,
   gCubeTiling, gRhombic3, gBitrunc3, 
   gCell120, gECell120,
   gCell600, gECell600,
@@ -718,7 +719,7 @@ void showEuclideanMenu() {
     #if CAP_CRYSTAL
     geometry == gCrystal ? "∞^" + its(ts/2) :
     #endif
-    DIM == 3 && sphere ? its(isize(currentmap->allcells())) :
+    DIM == 3 && bounded ? its(isize(currentmap->allcells())) :
     DIM == 3 && euclid ? "∞" :
     worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
     (euwrap && !fulltorus) ? "∞" :

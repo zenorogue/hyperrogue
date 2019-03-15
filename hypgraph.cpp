@@ -1528,15 +1528,23 @@ void fix_the_band(transmatrix& T) {
   }
 
 namespace dq {
-  set<heptagon*> visited;
   queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
 
+  set<heptagon*> visited;
   void enqueue(heptagon *h, const transmatrix& T) {
     if(!h || visited.count(h)) { return; }
     visited.insert(h);
     drawqueue.emplace(h, T, band_shift);
     }  
 
+  set<int> visited_by_matrix;
+  void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
+    if(!h) return;
+    int b = reg3::bucketer(tC0(T));
+    if(visited_by_matrix.count(b)) { return; }
+    visited_by_matrix.insert(b);
+    drawqueue.emplace(h, T, band_shift);
+    }
   }
 
 bool do_draw(cell *c) {
