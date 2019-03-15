@@ -197,8 +197,8 @@ namespace reg3 {
     vector<int> cyclers;
     int perm_group;
   
-    vector<int> wsrcode;
-    vector<int> srcode;
+    vector<int> cell_to_code;
+    vector<int> code_to_cell;
     
     void seek(set<int>& seen_matrices, set<int>& seen_codes, const transmatrix& at, int ccode, const hyperpoint checker) {
       if(hdist0(tC0(at)) > 4) return;
@@ -326,14 +326,14 @@ namespace reg3 {
         
       println(hlog, "field_adjmoves = ", field_adjmoves);
       
-      println(hlog, "finding srcode/wsrcode...");
+      println(hlog, "finding code_to_cell/cell_to_code...");
   
-      wsrcode.clear();
-      srcode.resize(N);
-      for(int i=0; i<N; i++) srcode[i] = -1;
-      for(int i=0; i<N; i++) if(srcode[i] == -1) {
-        for(int j: cyclers) srcode[currfp_gmul(i, j)] = isize(wsrcode);
-        wsrcode.push_back(i);
+      cell_to_code.clear();
+      code_to_cell.resize(N);
+      for(int i=0; i<N; i++) code_to_cell[i] = -1;
+      for(int i=0; i<N; i++) if(code_to_cell[i] == -1) {
+        for(int j: cyclers) code_to_cell[currfp_gmul(i, j)] = isize(cell_to_code);
+        cell_to_code.push_back(i);
         }
       
       println(hlog, "building allh...");
@@ -352,11 +352,11 @@ namespace reg3 {
       for(int i=0; i<cells; i++) {
         for(int d=0; d<S7; d++) {
           int found = 0;
-          int tmul = currfp_gmul(wsrcode[i], field_adjmoves[d]);
+          int tmul = currfp_gmul(cell_to_code[i], field_adjmoves[d]);
           for(int s: cyclers) {
             int tmul2 = currfp_gmul(tmul, s);
-            if(wsrcode[srcode[tmul2]] == tmul2) {
-              allh[i]->move(d) = allh[srcode[tmul2]];
+            if(cell_to_code[code_to_cell[tmul2]] == tmul2) {
+              allh[i]->move(d) = allh[code_to_cell[tmul2]];
               tmatrices[i].push_back(reg3::adjmoves[d] * iadj * fullmatrices[s] * adj);
               found++;
               }
