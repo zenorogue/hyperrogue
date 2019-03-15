@@ -451,6 +451,9 @@ bool pseudohept(cell *c) {
     if(loop == 5 && face == 3)
       return abs(h[3]) > .99 || abs(h[0]) > .99 || abs(h[1]) > .99 || abs(h[2]) > .99;
     }
+  // chessboard pattern in 534
+  if(geometry == gSpace534) 
+    return c->master->distance & 1;
   if(hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);
