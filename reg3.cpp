@@ -362,7 +362,7 @@ namespace reg3 {
               }
             }
           if(found != 1) println(hlog, "bad found: ", i, "/", d, "/", found);
-          println(hlog, "tmatrix(",i,",",d,") = ", tmatrices[i][d]);
+          // println(hlog, "tmatrix(",i,",",d,") = ", tmatrices[i][d]);
           }
         }
   
@@ -420,6 +420,7 @@ namespace reg3 {
   
     heptagon *origin;
     hrmap *binary_map;
+    hrmap_field3 *quotient_map;
     
     unordered_map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     unordered_map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
@@ -432,6 +433,7 @@ namespace reg3 {
       h.cdata = NULL;
       h.alt = NULL;
       h.distance = 0;
+      h.fieldval = 0;
       h.c7 = newCell(S7, origin);
       worst_error1 = 0, worst_error2 = 0;
       
@@ -441,6 +443,10 @@ namespace reg3 {
       transmatrix T = Id;
       
       if(hyperbolic) {
+        #if CAP_FIELD
+        quotient_map = new hrmap_field3;
+        #endif
+
         dynamicval<eGeometry> g(geometry, gBinary3); 
         binary::build_tmatrix();
         alt = tailored_alloc<heptagon> (S7);
@@ -454,7 +460,7 @@ namespace reg3 {
         binary_map = binary::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
-      else binary_map = NULL;
+      else binary_map = NULL, quotient_map = NULL;
       
       reg_gmatrix[origin] = make_pair(alt, T);
       altmap[alt].emplace_back(origin, T);
@@ -507,12 +513,20 @@ namespace reg3 {
       }
     
     #define DEB 0
+    
+    heptagon *counterpart(heptagon *h) {
+      return quotient_map->allh[h->fieldval];
+      }
 
     heptagon *create_step(heptagon *parent, int d) {
       auto& p1 = reg_gmatrix[parent];
       if(DEB) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
       heptagon *alt = p1.first;
+      #if CAP_FIELD
+      transmatrix T = p1.second * (hyperbolic ? quotient_map->tmatrices[parent->fieldval][d] : adjmoves[d]);
+      #else
       transmatrix T = p1.second * adjmoves[d];
+      #endif
       transmatrix T1 = T;
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3);
@@ -535,6 +549,12 @@ namespace reg3 {
         if(DEB) println(hlog, "-> found ", p2.first);
         int fb = 0;
         hyperpoint old = T * (inverse(T1) * tC0(p1.second));
+        #if CAP_FIELD
+        if(hyperbolic) {
+          p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
+          return p2.first;
+          }
+        #endif
         for(int d2=0; d2<S7; d2++) {
           hyperpoint back = p2.second * tC0(adjmoves[d2]);
           if((err = intval(back, old)) < 1e-3) {
@@ -558,16 +578,25 @@ namespace reg3 {
         }
       
       if(DEB) println(hlog, "-> not found");
+      int d2 = 0, fv = 0;
+      #if CAP_FIELD
+      if(hyperbolic) {
+        auto cp = counterpart(parent);
+        d2 = cp->c.spin(d);
+        fv = cp->c.move(d)->fieldval;
+        }
+      #endif
       heptagon *created = tailored_alloc<heptagon> (S7);
       created->c7 = newCell(S7, created);
       created->alt = NULL;
       created->cdata = NULL;
       created->zebraval = hrand(10);
+      created->fieldval = fv;
       created->distance = parent->distance + 1;
       fixmatrix(T);
       reg_gmatrix[created] = make_pair(alt, T);
       altmap[alt].emplace_back(created, T);
-      created->c.connect(0, parent, d, false);
+      created->c.connect(d2, parent, d, false);
       return created;
       }
 
@@ -576,6 +605,7 @@ namespace reg3 {
         dynamicval<eGeometry> g(geometry, gBinary3);
         delete binary_map;
         }
+      if(quotient_map) delete quotient_map;
       clearfrom(origin);
       }
     
@@ -628,9 +658,13 @@ namespace reg3 {
         if(!do_draw(c, V)) continue;
         drawcell(c, V, 0, false);
     
-        for(int i=0; i<S7; i++)
-          if(h->move(i))
-            dq::enqueue(h->move(i), V * relative_matrix(h->move(i), h));
+        for(int i=0; i<S7; i++) if(h->move(i)) {
+          #if CAP_FIELD
+          if(hyperbolic) dq::enqueue(h->move(i), V * quotient_map->tmatrices[h->fieldval][i]);
+          else
+          #endif
+          dq::enqueue(h->move(i), V * relative_matrix(h->move(i), h));
+          }
         }
       }
     
