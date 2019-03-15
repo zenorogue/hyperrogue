@@ -377,7 +377,6 @@ namespace reg3 {
     
     void draw() override {
       sphereflip = Id;
-      if(!sightranges[geometry]) sightranges[geometry] = 3;
       
       // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
       
