@@ -343,6 +343,7 @@ namespace reg3 {
         allh[i] = tailored_alloc<heptagon> (S7);
         allh[i]->c7 = newCell(S7, allh[i]);
         allh[i]->fieldval = i;
+        allh[i]->zebraval = 0;
         acells.push_back(allh[i]->c7);
         }
       
@@ -357,6 +358,7 @@ namespace reg3 {
             int tmul2 = currfp_gmul(tmul, s);
             if(cell_to_code[code_to_cell[tmul2]] == tmul2) {
               allh[i]->move(d) = allh[code_to_cell[tmul2]];
+              allh[i]->c7->move(d) = allh[i]->move(d)->c7;
               tmatrices[i].push_back(reg3::adjmoves[d] * iadj * fullmatrices[s] * adj);
               found++;
               }
@@ -370,9 +372,98 @@ namespace reg3 {
       for(int i=0; i<cells; i++) 
       for(int d=0; d<S7; d++)
       for(int e=0; e<S7; e++) 
-        if(allh[i]->move(d)->move(e) == allh[i])
+        if(allh[i]->move(d)->move(e) == allh[i]) {
           allh[i]->c.setspin(d, e, false);
+          allh[i]->c7->c.setspin(d, e, false);
+          }
   
+      create_patterns();
+      }
+    
+    set<cellwalker> plane;
+
+    void make_plane(cellwalker cw) {
+      if(plane.count(cw)) return;
+      plane.insert(cw);
+      for(int i=0; i<S7; i++)
+        if(reg3::dirs_adjacent[i][cw.spin])
+          make_plane(reg3::strafe(cw, i));
+      }
+    
+    
+    void create_patterns() {
+      // change the geometry to make sure that the correct celldistance is used
+      dynamicval<eGeometry> g(geometry, S7 == 12 ? gField534 : gField435);
+      // also, strafe needs currentmap
+      dynamicval<hrmap*> c(currentmap, this);
+
+      if(S7 == 12) {
+        // Emerald in 534
+        cell *a = gamestart();
+        cell *b;
+        for(cell *c: allcells())
+          if(hr::celldistance(a, c) == 5) {
+            b = c;
+            break;
+            }
+        for(cell *c: allcells())
+          if(hr::celldistance(a, c) > hr::celldistance(b, c))
+            c->master->zebraval |= 1;
+          
+        // Vineyard in 534
+        b = (cellwalker(a, 0) + wstep + rev + wstep).at;
+        for(cell *c: allcells())
+          if(hr::celldistance(a, c) == hr::celldistance(b, c))
+            c->master->zebraval |= 2;
+        }
+      
+      if(S7 == 6) {
+        // Emerald in 534
+        cell *a = gamestart();
+        for(cell *c: allcells())
+          if(hr::celldistance(a, c) > 3)
+            c->master->zebraval |= 1;
+        
+        // Vineyard in 435
+        make_plane(cellwalker(gamestart(), 0));
+        println(hlog, "plane size = ", isize(plane));
+        
+        set<int> plane_indices;
+        for(auto cw: plane) plane_indices.insert(cw.at->master->fieldval);
+
+        set<int> nwi;
+        for(int i=0; i<currfp_n(); i++) {
+          bool ok = true;
+          for(auto o: plane_indices) {
+            int j = code_to_cell[currfp_gmul(i, cell_to_code[o])];
+            if(plane_indices.count(j)) ok = false;
+            forCellEx(c1, allcells()[j]) if(plane_indices.count(c1->master->fieldval)) ok = false;
+            }
+          if(ok) nwi.insert(i);
+          }
+
+        int gpow;
+        
+        for(int i: nwi) {
+          int pw = 1;
+          int at = i;
+          while(true) {
+            at = currfp_gmul(at, i);
+            if(!nwi.count(at)) break;
+            pw++;
+            }
+          if(pw == 4) gpow = i;
+          }
+        
+        int u = 0;
+        for(int a=0; a<5; a++) {
+          for(int o: plane_indices) {
+            int j = code_to_cell[currfp_gmul(u, cell_to_code[o])];
+            allcells()[j]->master->zebraval |= 2;
+            }
+          u = currfp_gmul(u, gpow);
+          }
+        }
       }
     
     void draw() override {
@@ -445,6 +536,7 @@ namespace reg3 {
       if(hyperbolic) {
         #if CAP_FIELD
         quotient_map = new hrmap_field3;
+        h.zebraval = quotient_map->allh[0]->zebraval;
         #endif
 
         dynamicval<eGeometry> g(geometry, gBinary3); 
@@ -590,6 +682,12 @@ namespace reg3 {
       created->c7 = newCell(S7, created);
       created->alt = NULL;
       created->cdata = NULL;
+      #if CAP_FIELD
+      if(hyperbolic) {
+        created->zebraval = quotient_map->allh[fv]->zebraval;
+        }
+      else
+      #endif
       created->zebraval = hrand(10);
       created->fieldval = fv;
       created->distance = parent->distance + 1;

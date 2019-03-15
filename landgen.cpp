@@ -424,6 +424,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(fulltorus) {
           c->wall = waCavefloor;
           }
+        else if(DIM == 3 && hyperbolic && !binarytiling)
+          c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
         else if(euclid && DIM == 3)
           c->wall = euclid3::get_emerald(c) ? waCavewall : waCavefloor;
         else if(euclid) {
@@ -467,6 +469,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand_monster(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) {
           static eMonster emeraldmonsters[4] = { moHedge, moLancer, moFlailer, moMiner };
           c->monst = emeraldmonsters[hrand(4)];
+          if(c->monst == moHedge && S3 != 3)
+            c->monst = moFlailer;
           }
         if(sphere && c->type != 6 && c->master->fiftyval == 5) {
           c->monst = moMiner;
@@ -615,6 +619,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
+        else if(DIM == 3 && hyperbolic && !binarytiling)
+          c->wall = (c->master->zebraval & 2) ? waVinePlant : waNone;
         else if(a4 || sphere || archimedean)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
