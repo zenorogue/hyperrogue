@@ -15,25 +15,25 @@ bool isprime(int n) {
   }
   
 struct matrix {
-  int a[3][3];
+  int a[MAXMDIM][MAXMDIM];
   int* operator [] (int k) { return a[k]; }
   const int* operator [] (int k) const { return a[k]; }
   };
 
 bool operator == (const matrix& A, const matrix& B) {
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
     if(A[i][j] != B[i][j]) return false;
   return true;
   }
 
 bool operator != (const matrix& A, const matrix& B) {
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
     if(A[i][j] != B[i][j]) return true;
   return false;
   }
 
 bool operator < (const matrix& A, const matrix& B) {
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
     if(A[i][j] != B[i][j]) return A[i][j] < B[i][j];
   return false;
   }
@@ -101,15 +101,15 @@ struct fpattern {
   
   matrix mmul(const matrix& A, const matrix& B) {
     matrix res;
-    for(int i=0; i<3; i++) for(int k=0; k<3; k++) {
+    for(int i=0; i<MDIM; i++) for(int k=0; k<MDIM; k++) {
+      int t = 0;
   #ifdef EASY
-      res[i][k] = 
-        (mul(A[i][0], B[0][k]) + mul(A[i][1], B[1][k]) + mul(A[i][2], B[2][k])) % Prime;
+      for(int j=0; j<MDIM; j++) t += mul(A[i][j], B[j][k]);
+      t %= Prime;
   #else
-      int t=0;                
-      for(int j=0; j<3; j++) t = add(t, mul(A[i][j], B[j][k]));
-      res[i][k] = t;
+      for(int j=0; j<MDIM; j++) t = add(t, mul(A[i][j], B[j][k]));
   #endif
+      res[i][k] = t;
       }
     return res;
     }
@@ -121,7 +121,18 @@ struct fpattern {
   
   vector<matrix> qcoords;
   
-  matrix Id, R, P;
+  // S7 in 2D, but e.g. 4 for a 3D cube
+  int rotations;
+  
+  // S7 in 2D, but e.g. 24 for a 3D cube
+  int local_group;
+  
+  // Id: Identity
+  // R : rotate by 1/rotations of the full circle
+  // P : make a step and turn backwards
+  // X : in 3-dim, turn by 90 degrees
+
+  matrix Id, R, P, X;
   
   matrix strtomatrix(string s) {
     matrix res = Id;
@@ -149,6 +160,7 @@ struct fpattern {
       matcode[M] = i, matrices.push_back(M);
       for(int j=0; j<isize(qcoords); j++)
         addas(mmul(M, qcoords[j]), i);
+      if(DIM == 3) add(mmul(X, M));
       add(mmul(R, M));
       }
     }
@@ -157,9 +169,11 @@ struct fpattern {
   
   vector<int> connections;
   
-  vector<int> inverses;
-  vector<int> rrf; // rrf[i] equals gmul(i, S7-1)
-  vector<int> rpf; // rpf[i] equals gmul(i, S7)
+  vector<int> inverses; // NYI in 3D
+  
+  // 2D only
+  vector<int> rrf; // rrf[i] equals gmul(i, rotations-1)
+  vector<int> rpf; // rpf[i] equals gmul(i, rotations)
   
   matrix mpow(matrix M, int N) {
     while((N&1) == 0) N >>= 1, M = mmul(M, M);
@@ -201,11 +215,14 @@ struct fpattern {
   
   int solve() {
     
-    for(int a=0; a<3; a++) for(int b=0; b<3; b++) Id[a][b] = a==b?1:0;
+    for(int a=0; a<MDIM; a++) for(int b=0; b<MDIM; b++) Id[a][b] = a==b?1:0;
   
     if(!isprime(Prime)) {
       return 1;
       }
+    
+    rotations = DIM == 2 ? S7 : 4;
+    local_group = DIM == 2 ? S7 : 24;
   
     for(int pw=1; pw<3; pw++) {
       if(pw>3) break;
@@ -234,8 +251,9 @@ struct fpattern {
         printf("\n");
         }
       
-      for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-        R[i][j] = P[i][j] = i==j ? 1 : 0;
+      R = P = X = Id;
+      X[1][1] = 0; X[2][2] = 0;
+      X[1][2] = 1; X[2][1] = Prime-1;
               
       for(cs=0; cs<fmax; cs++) {
         int sb = sub(1, sqr(cs));
@@ -246,7 +264,7 @@ struct fpattern {
         R[0][1] = sn; R[1][0] = sub(0, sn);
         
         matrix Z = R;
-        for(int i=1; i<S7; i++) {
+        for(int i=1; i<rotations; i++) {
           if(Z == Id) goto nextcs;
           Z = mmul(Z, R);
           }
@@ -259,10 +277,10 @@ struct fpattern {
           
           sh = sqrts[chx];
           P[0][0] = sub(0, ch);
-          P[0][2] = sub(0, sh);
+          P[0][DIM] = sub(0, sh);
           P[1][1] = Prime-1;
-          P[2][0] = sh;
-          P[2][2] = ch;
+          P[DIM][0] = sh;
+          P[DIM][DIM] = ch;
           
           matrix Z1 = mmul(P, R);
           matrix Z = Z1;
@@ -290,7 +308,7 @@ struct fpattern {
     
     matcode.clear(); matrices.clear();
     add(Id);
-    if(isize(matrices) != S7) { printf("Error: rotation crash #1 (%d)\n", isize(matrices)); exit(1); }
+    if(isize(matrices) != local_group) { printf("Error: rotation crash #1 (%d)\n", isize(matrices)); exit(1); }
     
     connections.clear();
     
@@ -302,7 +320,7 @@ struct fpattern {
       
       add(PM);
   
-      if(isize(matrices) % S7) { printf("Error: rotation crash (%d)\n", isize(matrices)); exit(1); }
+      if(isize(matrices) % local_group) { printf("Error: rotation crash (%d)\n", isize(matrices)); exit(1); }
       
       if(!matcode.count(PM)) { printf("Error: not marked\n"); exit(1); }
   
@@ -313,6 +331,8 @@ struct fpattern {
     int N = isize(matrices);
 
     DEBB(DF_FIELD, (debugfile, "Number of heptagons: %d\n", N));
+    
+    if(DIM == 3) return;
   
     rrf.resize(N); rrf[0] = S7-1;
     for(int i=0; i<N; i++) 
@@ -402,6 +422,8 @@ struct fpattern {
     }
   
   void analyze() {
+  
+    if(DIM == 3) return;
 
     DEBB(DF_FIELD, (debugfile, "variation = %d\n", int(variation)));
     int N = connections.size();
@@ -707,6 +729,11 @@ bool quotient_field_changed;
 fpattern& getcurrfp() {
   if(geometry == gFieldQuotient && quotient_field_changed)
     return current_quotient_field;  
+  if(DIM == 3) {
+    dynamicval<eGeometry> g(geometry, gSpace435);
+    static fpattern fp(5);
+    return fp;
+    }
   if(S7 == 8 && S3 == 3) {
     static fpattern fp(17);
     return fp;
@@ -790,6 +817,10 @@ void enableFieldChange() {
 int currfp_gmul(int a, int b) { return currfp.gmul(a,b); }
 int currfp_inverses(int i) { return currfp.inverses[i]; }
 int currfp_distwall(int i) { return currfp.distwall[i]; }
+int currfp_n() { return isize(currfp.matrices); }
+int currfp_get_R() { return currfp.matcode[currfp.R]; }
+int currfp_get_P() { return currfp.matcode[currfp.P]; }
+int currfp_get_X() { return currfp.matcode[currfp.X]; }
 
 }
 #endif

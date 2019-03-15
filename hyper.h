@@ -3190,6 +3190,11 @@ namespace fieldpattern {
 int currfp_gmul(int a, int b);
 int currfp_inverses(int i);
 int currfp_distwall(int i);
+
+int currfp_n();
+int currfp_get_P();
+int currfp_get_R();
+int currfp_get_X();
 #endif
 
 const char *dnameof(eMonster m);
