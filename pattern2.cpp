@@ -369,6 +369,7 @@ int fieldval_uniq(cell *c) {
     }
   else if(binarytiling || archimedean) return 0;
   else if(&currfp == &fp_invalid) return 0;
+  else if(DIM == 3) return c->master->fieldval;
   else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
   else {
     int z = 0;

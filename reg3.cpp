@@ -670,7 +670,7 @@ namespace reg3 {
         }
       
       if(DEB) println(hlog, "-> not found");
-      int d2 = 0, fv = 0;
+      int d2 = 0, fv = isize(reg_gmatrix);
       #if CAP_FIELD
       if(hyperbolic) {
         auto cp = counterpart(parent);
