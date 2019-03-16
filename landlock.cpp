@@ -1138,6 +1138,9 @@ namespace lv {
   land_validity_t no_fractal_landscapes = {1, q1 | one_and_half, "Fractal landscapes not implemented in this geometry."};
   land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
   land_validity_t disabled = {0, q0, "This land has been disabled with compilation flags."};
+  land_validity_t pattern_special = {3, qm3, "Special pattern implemented for this geometry."}; 
+  land_validity_t not_3d = {0, q0, "This land does not make much sense in 3D."}; 
+  land_validity_t not_binary = {0, q0, "This land does not make much sense in binary tiling."}; 
   }
 
 // old Daily Challenges should keep their validity forever
@@ -1161,7 +1164,15 @@ land_validity_t& land_validity(eLand l) {
   #endif
 
   if(DIM == 3) {
-    if(isEquidLand(l) || isGravityLand(l) || l == laBrownian) return not_implemented;
+    if(l == laWarpCoast) return ugly_version;
+    if(l == laWineyard && hyperbolic && !binarytiling && S7 == 6) return lv::pattern_special;
+    if(l == laEmerald && hyperbolic && !binarytiling && S7 == 12) return lv::pattern_special;
+    if(l == laZebra) return pattern_not_implemented_random;
+    if(among(l, laWhirlpool, laPrairie, laWestWall, laBull)) return lv::not_3d;
+    if(isGravityLand(l) || l == laBrownian) return not_implemented;
+    if(l == laKraken) return binarytiling ? not_binary : not_implemented;
+    if(l == laBurial && !shmup::on) return not_implemented;
+    if(l == laMirrorOld && !shmup::on) return not_implemented;
     }
   
   if(l == laBrownian) {
@@ -1528,7 +1539,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laDual && !geometry && !GOLDBERG)
     return hyperbolic_37 ? not_in_full_game3 : not_in_full_game;
   
-  if(l == laSnakeNest) {
+  if(l == laSnakeNest && DIM == 2) {
     if(geosupport_threecolor() < 2)
       return needs_threecolor;
     else return specially_designed;
