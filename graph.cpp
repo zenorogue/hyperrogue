@@ -4609,8 +4609,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           set_floor(shCaveFloor);
           break;
         
-        case laDesert:
         case laDryForest:
+          set_floor(DIM == 3 ? shFeatherFloor : shDesertFloor);
+          break;
+
+        case laDesert:
         case laRedRock: case laSnakeNest:
         case laCocytus:
           set_floor(shDesertFloor);
