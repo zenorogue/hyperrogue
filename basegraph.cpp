@@ -654,8 +654,12 @@ void resetGL() {
     delete glfont[i];
     glfont[i] = NULL;
     }
+  if(floor_textures) {
+    delete floor_textures;
+    floor_textures = NULL;
+    }
 #endif
-  buildpolys();
+  resetGeometry(); // includes buildPoly
   }
 
 #endif

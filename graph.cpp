@@ -6479,9 +6479,7 @@ void resetGeometry() {
 #if CAP_FIELD
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid) currfp.analyze();
 #endif
-#if CAP_GL
-  resetGL();
-#endif
+  buildpolys();
   }
 
 //=== animation
