@@ -722,12 +722,30 @@ auto floor_hook =
 renderbuffer *floor_textures;
 
 void draw_shape_for_texture(floorshape* sh, int& id) {
+
   ld gx = (id % 8) * 1.5 - 3.5 * 1.5;
   ld gy = (id / 8) * 1.5 - 3.5 * 1.5;
   id++;
+
+  if(1) {
+    dynamicval<ld> v(vid.linewidth, 8);
+    curvepoint(eupush(gx+.5, gy-.5) * C0);
+    curvepoint(eupush(gx+.5, gy+.5) * C0);
+    curvepoint(eupush(gx-.5, gy+.5) * C0);
+    curvepoint(eupush(gx-.5, gy-.5) * C0);
+    curvepoint(eupush(gx+.5, gy-.5) * C0);
+    queuecurve(0x000000FF, 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 24/10), PPR::LAKELEV);
+    }
+
+  poly_outline = 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 3/2);
+
   for(int a=-1; a<=1; a++)
   for(int b=-1; b<=1; b++)
     queuepoly(eupush(gx+a/2., gy+b/2.), sh->b[0], 0xFFFFFFFF);
+
+  if(sh == &shCrossFloor) {
+    queuepoly(eupush(gx, gy) * spin(M_PI/4), shCross, 0x808080FF);
+    }
 
   if(1) {
     dynamicval<ld> v(vid.linewidth, 8);
@@ -736,7 +754,7 @@ void draw_shape_for_texture(floorshape* sh, int& id) {
     curvepoint(eupush(gx-.25, gy+.25) * C0);
     curvepoint(eupush(gx-.25, gy-.25) * C0);
     curvepoint(eupush(gx+.25, gy-.25) * C0);
-    queuecurve(0x404040C0, 0, PPR::LINE);
+    queuecurve(0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
     }
   
   sh->tinf3.tvertices.clear();
@@ -803,20 +821,36 @@ void make_floor_textures() {
     current_display->set_viewport(0);
     current_display->set_projection(0, true);
     current_display->set_mask(0);
-    floor_textures->clear(0xE8E8E8);
+    floor_textures->clear(0); // 0xE8E8E8 = 1
+    
+    shOverFloor.pstrength = 20;
+    shFeatherFloor.pstrength = 40;
+    shFeatherFloor.fstrength = 5;
+    shTrollFloor.pstrength = 25;
+    shCaveFloor.pstrength = 40;
+    shCaveFloor.fstrength = 0;
+    shDesertFloor.pstrength = 30;
+    shDesertFloor.fstrength =10;
+    shRoseFloor.pstrength = 30;
+    shDragonFloor.pstrength = 30;
+    shBarrowFloor.pstrength = 40;
+
+    // all using Tortoise
+    for(auto v: all_escher_floorshapes) if(v->shapeid2 == 178) v->pstrength = 20;
     
     ptds.clear();
     
     int id = 0;
-    poly_outline = 0xF0F0F0FF;
     
     for(auto v: all_plain_floorshapes) draw_shape_for_texture(v, id);
     for(auto v: all_escher_floorshapes) draw_shape_for_texture(v, id);
     
     drawqueue();
     
+    /*
     SDL_Surface *sdark = floor_textures->render();
-    IMAGESAVE(sdark, "texture-test.png");
+    IMAGESAVE(sdark, "texture-test.png"); 
+    */
     rb.reset();
     }
   
