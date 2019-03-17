@@ -3017,3 +3017,16 @@ the interesting (adult) part quickly)
 - a 3d image for compasses in the world
 
 11.0l: fixed aura on sphere
+
+2018-03-17 04:20 Version 11.0m:
+
+- floor patterns are now used in 3D geometries as textures
+- implemented field quotient spaces for the regular hyperbolic honeycombs. Synchronizing non-quotient regular honeycombs with the field quotient has improved their performance
+and led to an implementation of a cool Emerald Mine pattern for 534, and also some Vineyard/Emerald patterns for both 435 and 534.
+- implemented two new horospherical honeycombs, based on rectangles and hexagons
+- 3D Ocean works (not very fun though), fixed a crash in 3D (e.g. in the Hive)
+- borders on fires, limit particles if there are too many fires
+- tour:: replaced 'a'+i to allow longer presentations
+- fixed the image not appearing in the texture mode
+- fixed "dark landscape" etc. patterns
+- texture:: aura no longer flickers
