@@ -585,13 +585,18 @@ int tridist(gp::loc v) {
   return length(v * loc(1,1)) * 2 / 3;
   }
 
-int celldistance3_tri(heptagon *c1, heptagon *c2) {
-  using namespace gp;
+int equalize(heptagon*& c1, heptagon*& c2) {
   int steps = 0;
   int d1 = c1->distance;
   int d2 = c2->distance;
   while(d1 > d2) c1 = c1->cmove(S7-1), steps++, d1--;
   while(d2 > d1) c2 = c2->cmove(S7-1), steps++, d2--;
+  return steps;
+  }  
+
+int celldistance3_tri(heptagon *c1, heptagon *c2) {
+  using namespace gp;
+  int steps = equalize(c1, c2);
   vector<pair<loc, loc> > m1, m2;
   while(c1 != c2) {
     m2.push_back(gpvalue(c2));
@@ -616,13 +621,29 @@ int celldistance3_tri(heptagon *c1, heptagon *c2) {
   return steps;
   }
 
-int celldistance3(heptagon *c1, heptagon *c2) {
-  if(geometry == gHoroTris) return celldistance3_tri(c1, c2);
-  int steps = 0;
-  int d1 = c1->distance;
-  int d2 = c2->distance;
-  while(d1 > d2) c1 = c1->cmove(S7-1), steps++, d1--;
-  while(d2 > d1) c2 = c2->cmove(S7-1), steps++, d2--;
+int celldistance3_rec(heptagon *c1, heptagon *c2) {
+  int steps = equalize(c1, c2);
+  vector<int> dx;
+  while(c1 != c2) {
+    dx.push_back(c1->c.spin(S7-1) - c2->c.spin(S7-1));
+    c1 = c1->cmove(S7-1);
+    c2 = c2->cmove(S7-1);
+    steps += 2;
+    }
+  int xsteps = steps, sx = 0, sy = 0;
+  while(isize(dx)) {
+    xsteps -= 2;
+    tie(sx, sy) = make_pair(-sy, 2 * sx + dx.back());
+    dx.pop_back();
+    int ysteps = xsteps + abs(sx) + abs(sy);
+    if(ysteps < steps) steps = ysteps;
+    if(sx >= 8 || sx <= -8 || sy >= 8 || sy <= -8) break;
+    }
+  return steps;
+  }
+
+int celldistance3_square(heptagon *c1, heptagon *c2) {
+  int steps = equalize(c1, c2);
   vector<int> dx, dy;
   while(c1 != c2) {
     dx.push_back((c1->c.spin(S7-1) & 1) - (c2->c.spin(S7-1) & 1));
@@ -643,6 +664,48 @@ int celldistance3(heptagon *c1, heptagon *c2) {
     if(sx >= 8 || sx <= -8 || sy >= 8 || sy <= -8) break;
     }
   return steps;
+  }
+
+// this algorithm is wrong: it never considers the "narrow gap" moves
+int celldistance3_hex(heptagon *c1, heptagon *c2) {
+  int steps = equalize(c1, c2);
+  vector<int> d1, d2;
+  while(c1 != c2) {
+    d1.push_back(c1->c.spin(S7-1));
+    d2.push_back(c2->c.spin(S7-1));
+    c1 = c1->cmove(S7-1);
+    c2 = c2->cmove(S7-1);
+    steps += 2;
+    }
+  int xsteps = steps;
+  dynamicval<eGeometry> g(geometry, gEuclid);
+  transmatrix T = Id;
+  while(isize(d1)) {
+    xsteps -= 2;
+
+    T = euscalezoom(hpxy(0,sqrt(3))) * eupush(1,0) * spin(-d2.back() * 2 * M_PI/3) * T * spin(d1.back() * 2 * M_PI/3) * eupush(-1,0) * euscalezoom(hpxy(0,-1/sqrt(3)));
+    
+    d1.pop_back(); d2.pop_back();
+    
+    hyperpoint h = tC0(T);
+    int sx = int(floor(h[0] - h[1] / sqrt(3) + .5)) / 3;
+    int sy = int(floor(h[1] * 2 / sqrt(3) + .5)) / 3;
+    
+    int ysteps = xsteps + eudist(sx, sy);
+    if(ysteps < steps) steps = ysteps;
+    if(sx >= 8 || sx <= -8 || sy >= 8 || sy <= -8) break;
+    }
+  return steps;
+  }
+
+int celldistance3(heptagon *c1, heptagon *c2) {
+  switch(geometry) {
+    case gBinary3: return celldistance3_square(c1, c2);
+    case gHoroTris: return celldistance3_tri(c1, c2);
+    case gHoroRec: return celldistance3_rec(c1, c2);
+    case gHoroHex: return celldistance3_hex(c1, c2);
+    default: println(hlog, "called celldistance3 for wrong geometry"); return 0;
+    }
   }
 
 int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
