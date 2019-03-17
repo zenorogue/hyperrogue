@@ -238,7 +238,8 @@ ld start_line_width;
 void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
-  if(binarytiling && DIM == 3) TWIDTH++;
+  if(TWIDTH == 1) TWIDTH = 2;
+  TWIDTH += race_try / 8;
 
   #if CAP_FILES
   if(ghostset().empty())
