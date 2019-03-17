@@ -525,6 +525,16 @@ namespace binary {
     ld co = vid.binary_width / log(2) / 4;
     return hr::parabolic13(y * co, z * co);
     }
+
+  // on which horocycle are we
+  ld horo_level(hyperpoint h) {
+    using namespace hyperpoint_vec;
+    h /= (1 + h[DIM]);
+    h[0] -= 1;
+    h /= sqhypot_d(DIM, h);
+    h[0] += .5;
+    return log(2) + log(-h[0]);
+    }
   
   hyperpoint deparabolic3(hyperpoint h) {
     using namespace hyperpoint_vec;

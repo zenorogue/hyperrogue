@@ -1035,26 +1035,33 @@ typedef multimap<cell*, monster*>::iterator mit;
 
 vector<monster*> active, nonvirtual, additional;
 
-cell *findbaseAround(hyperpoint p, cell *around) {
-  #if MAXMDIM == 4 && CAP_BT
-  // this needs a more precise algorithm because the cells have curved faces
-  if(DIM == 3 && binarytiling) {
-    hyperpoint h = binary::deparabolic3(inverse(ggmatrix(around)) * p);
-    if(h[0] < -log(2)/2) return around->cmove((h[1] > 0 ? 1 : 0) + (h[2] > 0 ? 2 : 0));
-    if(h[1] < -1) return around->cmove(4);
-    if(h[1] > +1) return around->cmove(5);
-    if(h[2] < -1) return around->cmove(6);
-    if(h[2] > +1) return around->cmove(7);
-    if(h[0] > +log(2)/2) return around->cmove(8);
-    return around;
+struct horo_distance {
+  ld a, b;
+  horo_distance(hyperpoint h1, cell *c) {
+    if(binarytiling) {
+      hyperpoint ih1 = inverse(ggmatrix(c)) * h1;
+      b = intval(ih1, C0);
+      a = abs(binary::horo_level(ih1));
+      }
+    else
+      b = intval(h1, tC0(ggmatrix(c)));
     }
-  #endif
+  bool operator < (const horo_distance z) {
+    if(binarytiling) {
+      if(a < z.a-1e-6) return true;
+      if(a > z.a+1e-6) return false;
+      }
+    return b < z.b;
+    }
+  };
+
+cell *findbaseAround(hyperpoint p, cell *around) {
   cell *best = around;
-  double d0 = intval(p, ggmatrix(around) * C0);
+  horo_distance d0(p, around);
   for(int i=0; i<around->type; i++) {
     cell *c2 = around->move(i);
     if(c2) {
-      double d1 = intval(p, ggmatrix(c2) * C0);
+      horo_distance d1(p, c2);
       if(d1 < d0) { best = c2; d0 = d1; }
       }
     }
