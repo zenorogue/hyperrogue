@@ -2378,7 +2378,6 @@ array<array<int,4>,AURA+1> aurac;
 
 bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
-  if(DIM == 3) return false;
   if(sphere && mdAzimuthalEqui()) return true;
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && conformal::model_transition < 1) 
     return true;
