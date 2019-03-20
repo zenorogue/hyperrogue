@@ -226,6 +226,7 @@ void initConfig() {
   addsaver(conformal::rotation, "conformal rotation");
   addsaver(conformal::do_rotate, "conformal rotation mode", 1);
   addsaver(conformal::model_orientation, "model orientation", 0);
+  addsaver(conformal::model_orientation_yz, "model orientation-yz", 0);
   addsaver(conformal::top_z, "topz", 5);
   addsaver(conformal::model_transition, "model transition", 1);
   addsaver(conformal::halfplane_scale, "halfplane scale", 1);

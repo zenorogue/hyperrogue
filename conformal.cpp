@@ -274,10 +274,10 @@ namespace conformal {
   int bandsegment = 16000;
   ld rotation = 0;
   int do_rotate = 1;
-  ld model_orientation, halfplane_scale;
-  ld ocos, osin;
+  ld model_orientation, halfplane_scale, model_orientation_yz;
+  ld ocos, osin, ocos_yz, osin_yz;
   ld cos_ball, sin_ball;
-  bool model_straight;
+  bool model_straight, model_straight_yz;
   ld top_z = 5;
   ld model_transition = 1;
 
@@ -402,7 +402,10 @@ namespace conformal {
     cos_ball = cos(ball), sin_ball = sin(ball);
     ocos = cos(model_orientation * degree);
     osin = sin(model_orientation * degree);
+    ocos_yz = cos(model_orientation_yz * degree);
+    osin_yz = sin(model_orientation_yz * degree);
     model_straight = (ocos > 1 - 1e-9);
+    model_straight_yz = DIM == 2 || (ocos_yz > 1-1e-9);
     if(conformal::on) conformal::apply();
     
     if(hyperbolic) {
@@ -721,6 +724,12 @@ namespace conformal {
       dialog::add_action([] () {
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
         });
+      if(DIM == 3) {
+        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz), 'L');
+        dialog::add_action([] () {
+          dialog::editNumber(model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
+          });
+        }
       }
     
     if(pmodel == mdPolynomial) {
@@ -1129,6 +1138,11 @@ namespace conformal {
     else if(argis("-mori")) { 
       PHASEFROM(2); 
       shift_arg_formula(conformal::model_orientation);
+      }
+    else if(argis("-mori2")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(conformal::model_orientation);
+      shift_arg_formula(conformal::model_orientation_yz);
       }
     else if(argis("-mtrans")) { 
       PHASEFROM(2); 

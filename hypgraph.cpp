@@ -186,6 +186,7 @@ void move_y_to_z(hyperpoint& H, pair<ld, ld> coef) {
 
 template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   ld zlev = find_zlev(H);
+  conformal::apply_orientation_yz(H[1], H[2]);
   conformal::apply_orientation(H[0], H[1]);
   auto r = move_z_to_y(H);
   
@@ -204,6 +205,7 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   ret = hpxyz(x / M_PI, y / M_PI, 0);
   move_y_to_z(ret, r);
   conformal::apply_orientation(ret[1], ret[0]);
+  conformal::apply_orientation_yz(ret[2], ret[1]);
   if(zlev != 1 && current_display->stereo_active()) 
     apply_depth(ret, yzf / M_PI);
   return;
@@ -311,12 +313,24 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
       
+      conformal::apply_orientation_yz(H[1], H[2]);
       conformal::apply_orientation(H[0], H[1]);
   
       H[1] += 1;
       double rad = sqhypot_d(DIM, H);
       H /= -rad;
       H[1] += .5;
+      
+      if(DIM == 3) {
+        // a bit simpler when we do not care about 3D
+        ret[0] = -H[0];
+        ret[1] = 1 + H[1];
+        ret[2] = H[2];
+        ret[3] = 1;
+        conformal::apply_orientation(ret[1], ret[0]);
+        conformal::apply_orientation_yz(ret[2], ret[1]);
+        break;
+        }
       
       conformal::apply_orientation(H[0], H[1]);
       
@@ -411,6 +425,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdJoukowsky: 
     case mdJoukowskyInverted: {
+      conformal::apply_orientation_yz(H[1], H[2]);
       conformal::apply_orientation(H[0], H[1]);
       // with equal speed skiprope: conformal::apply_orientation(H[1], H[0]);
   
@@ -471,6 +486,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         move_y_to_z(ret, yz);      
         conformal::apply_orientation(ret[0], ret[1]);
         }
+      conformal::apply_orientation_yz(ret[2], ret[1]);
   
       break;
       }
