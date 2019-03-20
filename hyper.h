@@ -2858,7 +2858,7 @@ struct dqi_poly : drawqueueitem {
   ld band_shift;
   transmatrix V;
   const vector<glvertex> *tab;
-  int offset, cnt;
+  int offset, cnt, offset_texture;
   color_t outline;
   double linewidth;
   int flags;

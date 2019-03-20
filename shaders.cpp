@@ -661,15 +661,15 @@ void vertices(const vector<glvertex>& v, int vshift = 0) {
   #endif
   }
 
-void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift = 0) {
+void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift = 0, int tshift = 0) {
   #if CAP_VERTEXBUFFER
   // not implemented!
   #else
   vertices(v, vshift);
   #if CAP_SHADER
-  glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[0]);
+  glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[tshift]);
   #else
-  glTexCoordPointer(SHDIM, GL_FLOAT, 0, &v[0]);
+  glTexCoordPointer(SHDIM, GL_FLOAT, 0, &t[tshift]);
   #endif
   #endif
   }

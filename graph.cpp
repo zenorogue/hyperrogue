@@ -4813,6 +4813,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 poly.tinf = &qfi.fshape->tinf3;
+                poly.offset_texture = 0;
                 }
               else
                 queuepoly(V, shPlainWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));

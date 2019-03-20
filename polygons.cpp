@@ -568,7 +568,7 @@ void dqi_poly::gldraw() {
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
     current_display->set_projection(0, true);
-    glhr::vertices_texture(v, tinf->tvertices, offset);
+    glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
     ioffset = 0;
     #endif
     }
@@ -905,11 +905,13 @@ void dqi_poly::draw() {
     int i = cnt;
     cnt = 3;
     for(int j=0; j<i; j+=3) {
-      offset = j;
+      offset += j;
+      offset_texture += j;
       draw();
+      offset -= j;
+      offset_texture -= j;
       }
     cnt = i;
-    offset = 0;
     return;
     }
 
@@ -976,12 +978,6 @@ void dqi_poly::draw() {
         if(cpha == 1) pha = 0;
         }
       }
-    vector<glvertex> tv;
-    if(tinf) {
-      for(int i=0; i<cnt; i++)
-        tv.push_back(tinf->tvertices[offset+i]);
-      swap(tinf->tvertices, tv);
-      }
     dynamicval<eModel> d1(pmodel, mdUnchanged);
     dynamicval<transmatrix> d2(V, Id);
     dynamicval<int> d3(offset, 0);
@@ -991,7 +987,6 @@ void dqi_poly::draw() {
       tab = &phases[j];
       draw();
       }
-    if(tinf) swap(tinf->tvertices, tv);
     return;
     }
   
@@ -1145,17 +1140,7 @@ void dqi_poly::draw() {
       npoly.cnt = isize(glcoords);
       if(nofill) npoly.color = 0, npoly.tinf = NULL;
       npoly.flags = poly_flags;
-      if(npoly.tinf && offset) {
-        vector<glvertex> tv;
-        for(int i=0; i<cnt; i++)
-          tv.push_back(tinf->tvertices[offset+i]);
-        swap(tinf->tvertices, tv);
-        npoly.gldraw();
-        swap(tinf->tvertices, tv);
-        }
-      else {
-        npoly.gldraw();
-        }
+      npoly.gldraw();
       continue;
       }
   #endif
@@ -1181,7 +1166,7 @@ void dqi_poly::draw() {
       #if CAP_TEXTURE
       if(!(poly_flags & POLY_INVERSE))
         for(int i=0; i<polyi; i += 3)
-          drawTexturedTriangle(s, polyx+i, polyy+i, &tinf->tvertices[offset + i], color);
+          drawTexturedTriangle(s, polyx+i, polyy+i, &tinf->tvertices[offset_texture + i], color);
       #endif
       }
     else if(poly_flags & POLY_INVERSE) {

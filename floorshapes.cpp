@@ -674,6 +674,7 @@ void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio = PPR::DEFAUL
   else if(qfi.tinf) {
     auto& poly = queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == PPR::DEFAULT ? PPR::FLOOR : prio);
     poly.tinf = qfi.tinf;
+    poly.offset_texture = 0;
     poly.flags = POLY_INVERSE;
     }
 #endif
