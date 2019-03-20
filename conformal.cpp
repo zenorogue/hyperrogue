@@ -805,7 +805,7 @@ namespace conformal {
         });
       }
 
-    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral)) {
+    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && DIM == 2) {
       dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope), 'S');
       dialog::add_action([](){
         dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
