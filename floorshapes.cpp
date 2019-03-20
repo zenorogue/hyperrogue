@@ -798,6 +798,7 @@ const int FLOORTEXTURESIZE = 4096;
 void make_floor_textures() {
   if(1) {
     dynamicval<eGeometry> g(geometry, gEuclidSquare);
+    dynamicval<eModel> gm(pmodel, mdDisk);
     dynamicval<eVariation> va(variation, eVariation::pure);
     dynamicval<bool> hq(inHighQual, true);
   
