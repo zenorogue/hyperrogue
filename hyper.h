@@ -3868,6 +3868,7 @@ transmatrix rspintox(const hyperpoint& H);
 transmatrix gpushxto0(const hyperpoint& H);
 transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3);
 hyperpoint normalize(hyperpoint H);
+ld signum(ld x);
 
 extern ld hrandf();
 
