@@ -202,7 +202,7 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uColor, tTexture, uMV, uProjection;
+  GLint uMVP, uFog, uColor, tTexture, uMV, uProjection, uAlpha;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -253,6 +253,7 @@ struct GLprogram {
     uProjection = glGetUniformLocation(_program, "uP");
     uMVP = glGetUniformLocation(_program, "uMVP");
     uFog = glGetUniformLocation(_program, "uFog");
+    uAlpha = glGetUniformLocation(_program, "uAlpha");
     uColor = glGetUniformLocation(_program, "uColor");
     tTexture = glGetUniformLocation(_program, "tTexture");
 
@@ -461,6 +462,10 @@ void fog_max(ld fogmax) {
   #endif
   }
 
+void set_ualpha(ld alpha) {
+  glUniform1f(current->uAlpha, alpha);
+  }
+
 void init() {
   #if CAP_GLEW
     if(!glew) { 
@@ -490,7 +495,7 @@ void init() {
     
     bool mps = j != 0;
     bool band = (sp == shader_projection::band);
-    bool hp = (sp == shader_projection::halfplane);
+    bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
     bool sr3 = (sp == shader_projection::standardR3);
     bool ss30 = (sp == shader_projection::standardS30);
@@ -500,6 +505,9 @@ void init() {
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
     bool s3 = (sh3 || sr3 || ss3);
+    bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3);
+    bool dim2 = !dim3;
+    bool ball = (sp == shader_projection::ball);
     
     programs[i][j] = new GLprogram(stringbuilder(
 
@@ -515,6 +523,7 @@ void init() {
       mps,     "uniform mediump mat4 uMV;",
       mps,     "uniform mediump mat4 uP;",
       1,       "uniform mediump float uFog;",
+      ball,    "uniform mediump float uAlpha;",
       !varcol, "uniform mediump vec4 uColor;",
 
       1,       "float sinh(float x) {",
@@ -547,20 +556,25 @@ void init() {
       !varcol,   "vColor = uColor;",
       lfog,      "vColor = vColor * clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
       !mps,      "gl_Position = uMVP * aPosition;",
-      mps&&!band,"gl_Position = uP * (uMV * aPosition);",
+      ball,      "vec4 t = uMV * aPosition; t /= (t[3] + uAlpha); ",
+      mps&&!(band||hp||s3||ball),"gl_Position = uP * (uMV * aPosition);",
 
       band||hp,  "vec4 t = uMV * aPosition;",  
-      band||hp,  "float zlev = zlevel(t);",
-      band||hp,  "t /= zlev;",
+      (band||hp) && dim2,  "float zlev = zlevel(t);",
+      (band||hp) && dim2,  "t /= zlev;",
 
       band,      "float ty = asinh(t.y);",
       band,      "float tx = asinh(t.x / cosh(ty));",
       band,      "ty = 2.0 * atan(tanh(ty/2.0));",
       band,      "t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;",
       
-      hp,        "t.x /= t.z; t.y /= t.z; t.y = t.y + 1.0; ",
-      hp,        "float rads = t.x * t.x + t.y * t.y; ",
-      hp,        "t.x /= -rads; t.y /= -rads; t.z = 1.0; t[3] = 1.0;",
+      hp && dim2, "t.x /= t.z; t.y /= t.z; t.y = t.y + 1.0; ",
+      hp && dim2, "float rads = t.x * t.x + t.y * t.y; ",
+      hp && dim2, "t.x /= -rads; t.y /= -rads; t.z = 1.0; t[3] = 1.0;",
+
+      hp && dim3, "t.x /= (1.0+t.w); t.y /= (1.0+t.w); t.z /= (1.0+t.w); t.y = t.y + 1.0; ",
+      hp && dim3, "float rads = t.x * t.x + t.y * t.y + t.z * t.z; ",
+      hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
       sh3,       "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
@@ -570,9 +584,9 @@ void init() {
       ss31,      "vColor.xyz = vColor.xyz * (1.0 - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
       ss32,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
       ss33,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / uFog); ",
-      sh3 || sr3,"t[3] = 1.0;",
+      sh3 || sr3 || ball,"t[3] = 1.0;",
       
-      band || hp || s3,"gl_Position = uP * t;",
+      band || hp || s3 || ball,"gl_Position = uP * t;",
       1,         "}"), 
       
       stringbuilder(

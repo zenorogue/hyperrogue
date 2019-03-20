@@ -511,20 +511,32 @@ void glapplymatrix(const transmatrix& V) {
     return;
     }
   
-  for(int y=0; y<3; y++) {
-    for(int x=0; x<3; x++) mat[id++] = V[x][y];
-    mat[id++] = 0;
+  if(DIM == 3) {
+    for(int y=0; y<4; y++) 
+      for(int x=0; x<4; x++) mat[id++] = V[x][y];
     }
-  mat[12] = 0;
-  mat[13] = 0;
-  mat[14] = (glhr::current_shader_projection != glhr::shader_projection::band) ? GLfloat(vid.alpha) : 0;
-  mat[15] = 1;  
+  else {
+    for(int y=0; y<3; y++) {
+      for(int x=0; x<3; x++) mat[id++] = V[x][y];
+      mat[id++] = 0;
+      }
+    mat[12] = 0;
+    mat[13] = 0;
+    if(glhr::current_shader_projection != glhr::shader_projection::band)
+      mat[14] = GLfloat(vid.alpha);
+    else
+      mat[14] = 0;
+    mat[15] = 1;  
+    }
   
   if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
   
-  if(conformal::model_has_orientation())
+  if(conformal::model_has_orientation()) {
     for(int a=0; a<4; a++) 
       conformal::apply_orientation(mat[a*4], mat[a*4+1]);
+    if(DIM == 3) for(int a=0; a<4; a++) 
+      conformal::apply_orientation_yz(mat[a*4+2], mat[a*4+2]);
+    }
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }

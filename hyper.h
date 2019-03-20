@@ -3885,7 +3885,9 @@ namespace glhr {
     };
   
   enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
-    standardS30, standardS31, standardS32, standardS33, MAX 
+    standardS30, standardS31, standardS32, standardS33, 
+    ball, halfplane3,
+    MAX 
     };
   
   extern shader_projection new_shader_projection;
