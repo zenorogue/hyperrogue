@@ -5933,6 +5933,7 @@ void drawthemap() {
   if(pmodel == mdDisk && abs(vid.alpha) < 1e-6) spatial_graphics = false;
   
   if(!spatial_graphics) wmspatial = mmspatial = false;
+  if(DIM == 3) wmspatial = mmspatial = true;
 
   DEBB(DF_GRAPH, (debugfile,"draw the map\n"));
   
