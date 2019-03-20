@@ -398,9 +398,9 @@ void drawStats() {
   
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
     
-  if(DIM == 3 && vid.radarsize > 0 && !peace::on && playermoved && vid.sspeed > -5 && vid.yshift == 0)
+  if(vid.radarsize > 0 && hide_player())
   #if CAP_RACING
-    if(!racing::on)
+    if(!racing::on && !peace::on)
   #endif
     draw_radar(cornermode);
 
