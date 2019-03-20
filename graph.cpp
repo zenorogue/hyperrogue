@@ -17,7 +17,7 @@ bool mmspatial, mmhigh, mmmon, mmitem;
 int detaillevel = 0;
 
 bool hide_player() {
-  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5;
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective;
   }
 
 hookset<bool(int sym, int uni)> *hooks_handleKey;
