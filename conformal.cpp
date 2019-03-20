@@ -275,6 +275,7 @@ namespace conformal {
   ld rotation = 0;
   int do_rotate = 1;
   ld model_orientation, halfplane_scale, model_orientation_yz;
+  ld clip_min, clip_max;
   ld ocos, osin, ocos_yz, osin_yz;
   ld cos_ball, sin_ball;
   bool model_straight, model_straight_yz;
@@ -731,6 +732,28 @@ namespace conformal {
           });
         }
       }
+        
+  if(DIM == 3 && pmodel != mdPerspective) {
+    const string cliphelp = XLAT(
+      "Your view of the 3D model is naturally bounded from four directions by your window. "
+      "Here, you can also set up similar bounds in the Z direction. Radius of the ball/band "
+      "models, and the distance from the center to the plane in the halfspace model, are 1.\n\n");
+    dialog::addSelItem(XLAT("near clipping plane"), fts(clip_max), 'c');
+    dialog::add_action([cliphelp] () {
+      dialog::editNumber(clip_max, -10, 10, 0.2, 1, XLAT("near clipping plane"), 
+        cliphelp + XLAT("Objects with Z coordinate "
+          "bigger than this parameter are not shown. This is useful with the models which "
+          "extend infinitely in the Z direction, or if you want things close to your character "
+          "to be not obscured by things closer to the camera."));
+      });
+    dialog::addSelItem(XLAT("far clipping plane"), fts(clip_min), 'C');
+    dialog::add_action([cliphelp] () {
+      dialog::editNumber(clip_max, -10, 10, 0.2, 1, XLAT("far clipping plane"), 
+        cliphelp + XLAT("Objects with Z coordinate "
+          "smaller than this parameter are not shown; it also affects the fog effect"
+          " (near clipping plane = 0% fog, far clipping plane = 100% fog)."));
+      });
+    }
     
     if(pmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
@@ -1143,6 +1166,11 @@ namespace conformal {
       PHASEFROM(2); 
       shift_arg_formula(conformal::model_orientation);
       shift_arg_formula(conformal::model_orientation_yz);
+      }
+    else if(argis("-clip")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(conformal::clip_min);
+      shift_arg_formula(conformal::clip_max);
       }
     else if(argis("-mtrans")) { 
       PHASEFROM(2); 

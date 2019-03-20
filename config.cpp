@@ -233,6 +233,8 @@ void initConfig() {
   addsaver(conformal::autoband, "automatic band");
   addsaver(conformal::autobandhistory, "automatic band history");
   addsaver(conformal::dospiral, "do spiral");
+  addsaver(conformal::clip_min, "clip-min", -1);
+  addsaver(conformal::clip_max, "clip-max", +1);
   
   addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
   // control
@@ -2076,6 +2078,9 @@ unordered_map<string, ld&> params = {
   {"lvspeed", conformal::lvspeed},
   {"rotation", conformal::rotation},
   {"mori", conformal::model_orientation},
+  {"mori_yz", conformal::model_orientation_yz},
+  {"clipmin", conformal::clip_min},
+  {"clipmax", conformal::clip_max},
   {"topz", conformal::top_z},
   {"mtrans", conformal::model_transition},
   {"hp", conformal::halfplane_scale},

@@ -590,7 +590,7 @@ void init() {
       sh3 || sr3 || ball,"t[3] = 1.0;",
       
       band || hp || s3 || ball,"gl_Position = uP * t;",
-      dim3 && !s3, "vColor.xyz = vColor.xyz * (1.0 - gl_Position.z / 2.0);",
+      dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0);",
       1,         "}"), 
       
       stringbuilder(

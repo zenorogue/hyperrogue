@@ -1405,6 +1405,7 @@ namespace conformal {
   extern ld top_z;
   extern ld spiral_angle, spiral_x, spiral_y;
   extern ld spiral_cone;
+  extern ld clip_min, clip_max;
   
   // screen coordinates to logical coordinates: apply_orientation(x,y)
   // logical coordinates back to screen coordinates: apply_orientation(y,x)
