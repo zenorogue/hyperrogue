@@ -748,7 +748,7 @@ namespace conformal {
     if(pmodel == mdHalfplane) {
       dialog::addSelItem(XLAT("half-plane scale"), fts(halfplane_scale), 'b');
       dialog::add_action([] () {
-        dialog::editNumber(model_orientation, 0, 2, 0.25, 1, XLAT("half-plane scale"), "");
+        dialog::editNumber(halfplane_scale, 0, 2, 0.25, 1, XLAT("half-plane scale"), "");
         });
       }
 
