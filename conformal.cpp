@@ -595,18 +595,21 @@ namespace conformal {
     }
   
   bool model_has_transition() {
-    return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand);
+    return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && DIM == 2;
     }
   
   int editpos = 0;
   
   string get_model_name(eModel m) {
+    if(m == mdDisk && DIM == 3 && hyperbolic) return XLAT("ball model/Gans");
+    if(m == mdDisk && DIM == 3) return XLAT("perspective in 4D");
+    if(m == mdHalfplane && DIM == 3 && hyperbolic) return XLAT("half-space");
     if(sphere) 
-      return models[m].name_spherical;
+      return XLAT(models[m].name_spherical);
     if(euclid) 
-      return models[m].name_euclidean;
+      return XLAT(models[m].name_euclidean);
     if(hyperbolic) 
-      return models[m].name_hyperbolic;
+      return XLAT(models[m].name_hyperbolic);
     return "?";
     }
 
@@ -670,7 +673,7 @@ namespace conformal {
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
-    dialog::init(XLAT("models of hyperbolic geometry"));
+    dialog::init(XLAT("models and projections"));
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
@@ -709,7 +712,8 @@ namespace conformal {
       }
     
     if(among(pmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
-      dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'p');
+      dialog::addSelItem(XLAT("projection distance"), 
+      fts3(vid.alpha) + " (" + current_proj_name() + ")", 'p');
       }
                                   
     if(model_has_orientation()) {

@@ -448,17 +448,21 @@ string current_proj_name() {
   if(pmodel != mdDisk)
     return conformal::get_model_name(pmodel);
   else if(hyperbolic && vid.alpha == 1)
-    return "Poincaré";
+    return XLAT("Poincaré");
   else if(hyperbolic && vid.alpha == 0)
-    return "Klein";
+    return XLAT("Klein");
   else if(hyperbolic && vid.alpha == -1)
-    return "inverted Poincaré";
+    return XLAT("inverted Poincaré");
   else if(sphere && vid.alpha == 1)
-    return "stereographic";
+    return XLAT("stereographic");
   else if(sphere && vid.alpha == 0)
-    return "gnomonic";
+    return XLAT("gnomonic");
+  else if(sphere && vid.alpha >= 999)
+    return XLAT("orthographic");
+  else if(hyperbolic && vid.alpha >= 999)
+    return XLAT("Gans");
   else 
-    return "generalized perspective";  
+    return XLAT("general perspective");
   }
 
 void showEuclideanMenu() {
