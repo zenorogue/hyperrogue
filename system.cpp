@@ -1197,7 +1197,7 @@ void set_geometry(eGeometry target) {
     #if CAP_BT
     if(geometry == gBinaryTiling || DIM == 3) variation = eVariation::pure;
     #endif
-    if(DIM == 3 && old_DIM == 3 && pmodel == mdDisk) pmodel = mdPerspective;
+    if(DIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
     if(DIM == 2 && pmodel == mdPerspective) pmodel = mdDisk;
    
     need_reset_geometry = true; 
