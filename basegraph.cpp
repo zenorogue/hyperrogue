@@ -275,7 +275,7 @@ void display_data::set_projection(int ed, bool apply_models) {
       current_display->scrdist_text = cd->ysize;
       }
     else if(DIM == 3) {
-      glhr::projection_multiply(glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 10));
+      glhr::projection_multiply(glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1));
       current_display->scrdist_text = 0;
       }
     else {
