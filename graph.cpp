@@ -4808,8 +4808,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
-              if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+              if(a < 4 && pmodel == mdPerspective && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+              if(a < 2 && pmodel == mdPerspective && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
                 poly.tinf = &qfi.fshape->tinf3;
@@ -5923,6 +5923,7 @@ void drawthemap() {
   mmspatial = vid.monmode == 4 || vid.monmode == 5;
   
   spatial_graphics = wmspatial || mmspatial;
+  spatial_graphics = spatial_graphics && DIM == 2;
   #if CAP_RUG
   if(rug::rugged && !rug::spatial_rug) spatial_graphics = false;
   #endif
@@ -6146,7 +6147,7 @@ void calcparam() {
     }
 
   cd->radius = vid.scale * cd->scrsize;
-  if(DIM == 3) cd->radius = cd->scrsize;
+  if(DIM == 3 && pmodel == mdPerspective) cd->radius = cd->scrsize;
   realradius = min(realradius, cd->radius);
   
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }

@@ -584,6 +584,8 @@ namespace conformal {
   bool model_available(eModel pm) {
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
+    if(DIM == 2 && pm == mdPerspective) return false;
+    if(DIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
     return true;
     }    
   
@@ -673,7 +675,7 @@ namespace conformal {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()" [m]);
+        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()]" [m]);
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
@@ -697,7 +699,8 @@ namespace conformal {
     dialog::lastItem().value += " " + its(rotation) + "°";
 
     // if(pmodel == mdBand && sphere)
-    dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+    if(pmodel != mdPerspective)
+      dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
     
     if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere && pmodel != mdDisk) {
       dialog::addBreak(50);

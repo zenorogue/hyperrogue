@@ -283,7 +283,7 @@ enum eModel {
   mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
   mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
-  mdRotatedHyperboles, mdSpiral,
+  mdRotatedHyperboles, mdSpiral, mdPerspective,
   mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial
   };
 

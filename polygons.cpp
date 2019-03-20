@@ -496,7 +496,7 @@ vector<glvertex> line_vertices;
 void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
-  if(DIM == 3) {
+  if(pmodel == mdPerspective && DIM == 3) {
     if(elliptic && spherephase < 2) {
       for(int y=0; y<4; y++) {
         for(int x=0; x<4; x++) mat[id++] = -V[x][y];

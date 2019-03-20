@@ -220,29 +220,29 @@ void display_data::set_projection(int ed, bool apply_models) {
   if(vid.consider_shader_projection) {
     if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 2)
       shaderside_projection = true;
-    if(pmodel == mdBand && hyperbolic && apply_models)
+    if(pmodel == mdBand && hyperbolic && apply_models && DIM == 2)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
-    if(pmodel == mdHalfplane && hyperbolic && apply_models)
+    if(pmodel == mdHalfplane && hyperbolic && apply_models && DIM == 2)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
-    if(DIM == 3 && hyperbolic && apply_models)
+    if(DIM == 3 && hyperbolic && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3;
-    if(DIM == 3 && euclid && apply_models)
+    if(DIM == 3 && euclid && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3;
-    if(DIM == 3 && sphere && apply_models) {
+    if(DIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
       shaderside_projection = true;
       if(spherephase == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
       if(spherephase == 1) glhr::new_shader_projection = glhr::shader_projection::standardS31;
       if(spherephase == 2) glhr::new_shader_projection = glhr::shader_projection::standardS32;
       if(spherephase == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
       }
-    if(DIM == 3 && apply_models) dim3 = true;
+    if(DIM == 3 && apply_models && shaderside_projection) dim3 = true;
     }
   
   start_projection(ed, shaderside_projection);
 
   auto cd = current_display;
 
-  if(!shaderside_projection && DIM != 3) {
+  if(!shaderside_projection) {
     glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
     if(ed) {
       glhr::glmatrix m = glhr::id;

@@ -69,7 +69,12 @@ hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
   ld s = 1 / (alpha + z[DIM]);
   z[0] *= s;
   z[1] *= s;
-  z[DIM] = 0;
+  if(DIM == 3) {
+    z[2] *= s;
+    z[3] = 0;
+    }
+  else
+    z[2] = 0;
   return z;
   }
 
@@ -154,7 +159,7 @@ ld find_zlev(hyperpoint& H) {
   }
 
 ld get_tz(hyperpoint H) {
-  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[2];
+  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[DIM];
   if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   return tz;
   }
@@ -163,9 +168,26 @@ ld atan2(hyperpoint h) {
   return atan2(h[1], h[0]);
   }
 
+pair<ld, ld> move_z_to_y(hyperpoint& H) {
+  if(DIM == 2) return make_pair(0, 0);
+  ld R = hypot(H[1], H[2]);
+  pair<ld, ld> res = { H[1] / R, H[2] / R };
+  H[1] = R; H[2] = 0;
+  return res;
+  }
+
+void move_y_to_z(hyperpoint& H, pair<ld, ld> coef) {
+  if(DIM == 3) {
+    H[2] = H[1] * coef.second;
+    H[1] = H[1] * coef.first;
+    H[3] = 1;
+    }
+  }
+
 template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   ld zlev = find_zlev(H);
   conformal::apply_orientation(H[0], H[1]);
+  auto r = move_z_to_y(H);
   
   ld x, y, yf, zf=0;
   y = asin_auto(H[1]);
@@ -179,8 +201,9 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   f(x, y);
   
   ld yzf = y * zf; y *= yf;
-  conformal::apply_orientation(y, x);
   ret = hpxyz(x / M_PI, y / M_PI, 0);
+  move_y_to_z(ret, r);
+  conformal::apply_orientation(ret[1], ret[0]);
   if(zlev != 1 && current_display->stereo_active()) 
     apply_depth(ret, yzf / M_PI);
   return;
@@ -233,19 +256,19 @@ hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
 
 void applymodel(hyperpoint H, hyperpoint& ret) {
 
-  if(DIM == 3) { 
-    ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
-    ret[0] = H[0]/H[2] * ratio;
-    ret[1] = H[1]/H[2] * ratio;
-    ret[2] = 1;
-    return; 
-    }
-  
   using namespace hyperpoint_vec;
   
   hyperpoint H_orig = H;
   
   switch(pmodel) {
+    case mdPerspective: {
+      ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
+      ret[0] = H[0]/H[2] * ratio;
+      ret[1] = H[1]/H[2] * ratio;
+      ret[2] = 1;
+      return;
+      }
+      
     case mdUnchanged:
       ret = H / current_display->radius;
       return; 
@@ -264,7 +287,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       if(!vid.camera_angle) {
         ret[0] = H[0] / tz;
         ret[1] = H[1] / tz;
-        ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / tz / 2;
+        if(DIM == 3) ret[2] = H[2] / tz;
+        else ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / tz / 2;
+        if(MAXMDIM == 4) ret[3] = 1;
         }
       else {
         ld tx = H[0];
@@ -289,7 +314,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       conformal::apply_orientation(H[0], H[1]);
   
       H[1] += 1;
-      double rad = sqhypot_d(2, H);
+      double rad = sqhypot_d(DIM, H);
       H /= -rad;
       H[1] += .5;
       
@@ -307,7 +332,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           H[1] += H[0] * conformal::osin * log(zlev);
         }
       ret[1] = conformal::ocos + H[1];
-      ret[2] = 0;
+      ret[2] = DIM == 3 ? H[2] : 0;
+      if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, -H[1] * geom3::factor_to_lev(zlev));
       break;
@@ -378,8 +404,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdFisheye: {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
-      H[2] = zlev;
-      ret = H / sqrt(1 + sqhypot_d(3, H));
+      H[DIM] = zlev;
+      ret = H / sqrt(1 + sqhypot_d(DIM+1, H));
       break;
       }
     
@@ -409,6 +435,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
   
       H = space_to_perspective(H);
+      auto yz = move_z_to_y(H);
       ld r = hypot_d(2, H);
       ld c = H[0] / r;
       ld s = H[1] / r;
@@ -422,11 +449,12 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
       if(vid.skiprope) 
         ret = mobius(ret, vid.skiprope, 2);
-      
+        
       if(pmodel == mdJoukowskyInverted) {
         ld r2 = sqhypot_d(2, ret);
         ret[0] = ret[0] / r2;
         ret[1] = -ret[1] / r2;
+        move_y_to_z(ret, yz);      
         conformal::apply_orientation(ret[1], ret[0]);
         
         /*
@@ -439,7 +467,10 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         ret[0] = alpha;
         ret[1] = log(mod); */
         }
-      else conformal::apply_orientation(ret[0], ret[1]);
+      else {
+        move_y_to_z(ret, yz);      
+        conformal::apply_orientation(ret[0], ret[1]);
+        }
   
       break;
       }
@@ -511,7 +542,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdEquidistant: case mdEquiarea: {
       ld zlev = find_zlev(H);
 
-      ld rad = hypot_d(2, H);
+      ld rad = hypot_d(DIM, H);
       if(rad == 0) rad = 1;
       ld d = hdist0(H);
       ld df, zf;
@@ -525,7 +556,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         d = sqrt(2*(cosh(d) - 1)) / 1.5;
 
       ret = H * (d * df / rad / M_PI);
-      ret[2] = 0; 
+      if(DIM == 2) ret[2] = 0; 
+      if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, d * zf / M_PI);
       

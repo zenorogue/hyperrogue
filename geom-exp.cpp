@@ -677,13 +677,11 @@ void showEuclideanMenu() {
   dialog::add_action([] { pushScreen(patterns::showPrePattern); });
   validity_info();
   if(DIM == 3) {
-    dialog::addItem(XLAT("3D configuration"), '1');
+    dialog::addItem(XLAT("3D configuration"), '9');
     dialog::add_action([] { pushScreen(show3D); });
     }
-  else {
-    dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-    dialog::add_action([] { pushScreen(conformal::model_menu); });
-    }
+  dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+  dialog::add_action([] { pushScreen(conformal::model_menu); });
   #if CAP_CRYSTAL && MAXMDIM >= 4
   crystal::add_crystal_transform('x');  
   #endif
