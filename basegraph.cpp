@@ -224,8 +224,8 @@ void display_data::set_projection(int ed, bool apply_models) {
       shaderside_projection = true;
     if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 3 && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::ball;
-    if(pmodel == mdBand && hyperbolic && apply_models && DIM == 2)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::band;
+    if(pmodel == mdBand && hyperbolic && apply_models)
+      shaderside_projection = true, glhr::new_shader_projection = (DIM == 2 ? glhr::shader_projection::band : glhr::shader_projection::band3);
     if(pmodel == mdHalfplane && hyperbolic && apply_models && DIM == 2)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
     if(pmodel == mdHalfplane && hyperbolic && apply_models && DIM == 3 && vid.alpha == 1)
@@ -296,9 +296,9 @@ void display_data::set_projection(int ed, bool apply_models) {
     if(glhr::new_shader_projection == glhr::shader_projection::ball)
       glhr::set_ualpha(vid.alpha);
     
-    if(glhr::new_shader_projection == glhr::shader_projection::band) {
+    if(among(glhr::new_shader_projection, glhr::shader_projection::band, glhr::shader_projection::band3)) {
       glhr::projection_multiply(model_orientation_gl());
-      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI,1));
+      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, DIM == 3 ? 2/M_PI : 1));
       }
 
     if(among(glhr::new_shader_projection, glhr::shader_projection::halfplane, glhr::shader_projection::halfplane3)) {

@@ -494,7 +494,7 @@ void init() {
     shader_projection sp = shader_projection(j);
     
     bool mps = j != 0;
-    bool band = (sp == shader_projection::band);
+    bool band = among(sp, shader_projection::band, shader_projection::band3);
     bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
     bool sr3 = (sp == shader_projection::standardR3);
@@ -505,7 +505,7 @@ void init() {
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
     bool s3 = (sh3 || sr3 || ss3);
-    bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3);
+    bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
     
@@ -563,10 +563,13 @@ void init() {
       (band||hp) && dim2,  "float zlev = zlevel(t);",
       (band||hp) && dim2,  "t /= zlev;",
 
-      band,      "float ty = asinh(t.y);",
+      band&&dim3,"float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);",
+      band&&dim2,"float ty = asinh(t.y);",
       band,      "float tx = asinh(t.x / cosh(ty));",
       band,      "ty = 2.0 * atan(tanh(ty/2.0));",
-      band,      "t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;",
+      band&&dim2,"t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;",
+      band&&dim3,"t[0] = tx; t[1] = ty*t.y/r; t[2] = ty*t.z/r; t[3] = 1.0;",
+      
       
       hp && dim2, "t.x /= t.z; t.y /= t.z; t.y = t.y + 1.0; ",
       hp && dim2, "float rads = t.x * t.x + t.y * t.y; ",
