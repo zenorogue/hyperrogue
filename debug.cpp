@@ -678,7 +678,7 @@ int read_cheat_args() {
   else if(argis("-smart")) {
     PHASEFROM(2); cheat();
     vid.use_smart_range = 2;
-    shift_arg_formula(vid.smart_range_detail);
+    shift_arg_formula(DIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail);
     }
   else if(argis("-smartn")) {
     PHASEFROM(2);

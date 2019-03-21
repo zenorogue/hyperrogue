@@ -787,41 +787,60 @@ bool invis_point(const hyperpoint h) {
   }
 
 bool invalid_point(const hyperpoint h) {
-  return std::isnan(h[2]) || h[2] > 1e8 || std::isinf(h[2]);
+  return std::isnan(h[DIM]) || h[DIM] > 1e8 || std::isinf(h[DIM]);
   }
 
 bool invalid_point(const transmatrix T) {
-  return std::isnan(T[2][2]) || T[2][2] > 1e8 || std::isinf(T[2][2]);
+  return std::isnan(T[DIM][DIM]) || T[DIM][DIM] > 1e8 || std::isinf(T[DIM][DIM]);
   }
 
 bool in_smart_range(const transmatrix& T) {
   if(invalid_point(T)) return false;
-  hyperpoint h1, h2, h3;
+  hyperpoint h1;
   applymodel(tC0(T), h1);
-  if(std::isnan(h1[0]) || std::isnan(h1[1])) return false;
-  if(std::isinf(h1[0]) || std::isinf(h1[1])) return false;
+  for(int i=0; i<DIM; i++) 
+    if(std::isnan(h1[i]) || std::isinf(h1[i])) return false;
   ld x = current_display->xcenter + current_display->radius * h1[0];
   ld y = current_display->ycenter + current_display->radius * h1[1] * vid.stretch;
 
-  if(x > current_display->xtop + current_display->xsize * 2)return false;
+  if(x > current_display->xtop + current_display->xsize * 2) return false;
   if(x < current_display->xtop - current_display->xsize * 1) return false;
-  if(y > current_display->ytop + current_display->ysize * 2)return false;
+  if(y > current_display->ytop + current_display->ysize * 2) return false;
   if(y < current_display->ytop - current_display->ysize * 1) return false;
+  if(DIM == 3) {
+    if(-h1[2] < conformal::clip_min * 2 - conformal::clip_max) return false;
+    if(-h1[2] > conformal::clip_max * 2 - conformal::clip_min) return false;
+    }
 
   ld epsilon = 0.01;
-  applymodel(T * xpush0(epsilon), h2);
-  ld x1 = current_display->radius * abs(h2[0] - h1[0]) / epsilon;
-  ld y1 = current_display->radius * abs(h2[1] - h1[1]) * vid.stretch / epsilon;
-  applymodel(T * ypush(epsilon) * C0, h3);
-  ld x2 = current_display->radius * abs(h3[0] - h1[0]) / epsilon;
-  ld y2 = current_display->radius * abs(h3[1] - h1[1]) * vid.stretch / epsilon;
-  ld scale = sqrt(hypot(x1, y1) * hypot(x2, y2)) * scalefactor * hcrossf7;
+  
+  ld dx = 0, dy = 0, dz = 0, dh[MAXMDIM];
+  for(int i=0; i<DIM; i++) {    
+    hyperpoint h2;
+    applymodel(T * cpush0(i, epsilon), h2);
+    ld x1 = current_display->radius * abs(h2[0] - h1[0]) / epsilon;
+    ld y1 = current_display->radius * abs(h2[1] - h1[1]) * vid.stretch / epsilon;
+    dx = max(dx, x1); dy = max(dy, y1);
+    if(DIM == 3) dz = max(dz, abs(h2[2] - h1[2]));
+    dh[i] = hypot(x1, y1);
+    }
+  
+  if(DIM == 3) { 
+    if(-h1[2] + 2 * dz < conformal::clip_min || -h1[2] - 2 * dz > conformal::clip_max) return false;
+    sort(dh, dh+DIM); 
+    ld scale = sqrt(dh[1] * dh[2]) * scalefactor * hcrossf7;
+    if(scale <= vid.smart_range_detail_3) return false;
+    }
+  else {
+    ld scale = sqrt(dh[0] * dh[1]) * scalefactor * hcrossf7;
+    if(scale <= vid.smart_range_detail) return false;
+    }
+  
   return 
-    scale > vid.smart_range_detail && 
-    x - 2 * max(x1, x2) < current_display->xtop + current_display->xsize && 
-    x + 2 * max(x1, x2) > current_display->xtop &&
-    y - 2 * max(y1, y2) < current_display->ytop + current_display->ysize &&
-    y + 2 * max(y1, y2) > current_display->ytop;
+    x - 2 * dx < current_display->xtop + current_display->xsize && 
+    x + 2 * dx > current_display->xtop &&
+    y - 2 * dy < current_display->ytop + current_display->ysize &&
+    y + 2 * dy > current_display->ytop;
   }
 
 #if CAP_GP
@@ -1613,9 +1632,15 @@ ld extra_generation_distance = 99;
 bool do_draw(cell *c, const transmatrix& T) {
   if(DIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    ld dist = hdist0(tC0(T));
-    if(dist > sightranges[geometry]) return false;
-    if(dist <= extra_generation_distance) setdist(c, 7, c);
+    if(vid.use_smart_range) {
+      if(cells_drawn >= 50 && !in_smart_range(T)) return false;
+      setdist(c, 7, c);
+      }
+    else {
+      ld dist = hdist0(tC0(T));
+      if(dist > sightranges[geometry]) return false;
+      if(dist <= extra_generation_distance) setdist(c, 7, c);
+      }
     return true;
     }
 

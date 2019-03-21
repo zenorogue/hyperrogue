@@ -1122,6 +1122,7 @@ struct videopar {
   
   int use_smart_range;  // 0 = distance-based, 1 = model-based, 2 = model-based and generate
   ld smart_range_detail;// minimum visible cell for modes 1 and 2
+  ld smart_range_detail_3;// minimum visible cell in 3D (for mode 2, there is no mode 1)
   int cells_drawn_limit;
   
   ld skiprope;

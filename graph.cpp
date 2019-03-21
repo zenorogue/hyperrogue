@@ -5829,6 +5829,7 @@ bool allowIncreasedSight() {
   if(randomPatternsMode) return true;
   if(racing::on) return true;
   if(quotient || !hyperbolic || archimedean) return true;
+  if(DIM == 3) return true;
   return false;
   }
 
@@ -5840,6 +5841,7 @@ bool allowChangeRange() {
   if(racing::on) return true;
   if(sightrange_bonus >= 0) return true;
   if(archimedean) return true;
+  if(DIM == 3) return true;
   return false;
   }
 
