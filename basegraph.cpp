@@ -316,7 +316,7 @@ void display_data::set_projection(int ed, bool apply_models) {
       glhr::projection_multiply(model_orientation_gl());
       glhr::projection_multiply(glhr::translate(0, 1, 0));      
       glhr::projection_multiply(glhr::scale(-1, 1, 1));
-      glhr::projection_multiply(glhr::scale(conformal::halfplane_scale, conformal::halfplane_scale, 1));
+      glhr::projection_multiply(glhr::scale(conformal::halfplane_scale, conformal::halfplane_scale, DIM == 3 ? conformal::halfplane_scale : 1));
       glhr::projection_multiply(glhr::translate(0, 0.5, 0));
       }      
     }
