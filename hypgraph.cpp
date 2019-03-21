@@ -323,6 +323,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       
       if(DIM == 3) {
         // a bit simpler when we do not care about 3D
+        H *= conformal::halfplane_scale;
         ret[0] = -H[0];
         ret[1] = 1 + H[1];
         ret[2] = H[2];
