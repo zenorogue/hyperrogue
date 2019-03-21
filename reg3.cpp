@@ -827,6 +827,8 @@ bool pseudohept(cell *c) {
   // chessboard pattern in 534
   if(geometry == gSpace534) 
     return c->master->distance & 1;
+  if(geometry == gField534) 
+    return hr::celldistance(c, currentmap->gamestart()) & 1;
   if(hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);

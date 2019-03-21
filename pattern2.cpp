@@ -1297,7 +1297,7 @@ bool pseudohept(cell *c) {
   #endif
   #if MAXMDIM == 4
   if(DIM == 3) {
-    if(quotient) return false;
+    if(geometry == gField435) return false;
     else if(euclid) return euclid3::pseudohept(c);
     else return reg3::pseudohept(c);
     }
