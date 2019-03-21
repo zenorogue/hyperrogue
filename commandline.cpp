@@ -147,6 +147,12 @@ int arg::readCommon() {
     shift(); ld b = argf();
     View = View * spin(M_PI * 2 * a / b);
     }
+  else if(argis("-rotate3")) {
+    PHASE(3);  start_game();
+    shift(); ld a = argf();
+    shift(); ld b = argf();
+    View = View * cspin(1, 2, M_PI * 2 * a / b);
+    }
   else if(argis("-exit")) {
     PHASE(3); printf("Success.\n");
     exit(0);
