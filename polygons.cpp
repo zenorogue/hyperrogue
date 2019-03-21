@@ -532,10 +532,10 @@ void glapplymatrix(const transmatrix& V) {
   if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
   
   if(conformal::model_has_orientation()) {
+    if(DIM == 3) for(int a=0; a<4; a++) 
+      conformal::apply_orientation_yz(mat[a*4+1], mat[a*4+2]);
     for(int a=0; a<4; a++) 
       conformal::apply_orientation(mat[a*4], mat[a*4+1]);
-    if(DIM == 3) for(int a=0; a<4; a++) 
-      conformal::apply_orientation_yz(mat[a*4+2], mat[a*4+2]);
     }
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
