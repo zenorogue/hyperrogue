@@ -1004,6 +1004,10 @@ int readArgs() {
     }
   else if(argis("-animrot")) {
     ma = maRotation;
+    if(DIM == 3) {
+      shift_arg_formula(movement_angle);
+      shift_arg_formula(normal_angle);
+      }
     }
   else if(argis("-animrug")) {
     shift_arg_formula(rug_rotation1);
