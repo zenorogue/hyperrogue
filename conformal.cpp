@@ -774,7 +774,7 @@ namespace conformal {
       });
     dialog::addSelItem(XLAT("far clipping plane"), fts(clip_min), 'C');
     dialog::add_action([cliphelp] () {
-      dialog::editNumber(clip_max, -10, 10, 0.2, 1, XLAT("far clipping plane"), 
+      dialog::editNumber(clip_min, -10, 10, 0.2, -1, XLAT("far clipping plane"), 
         cliphelp + XLAT("Objects with Z coordinate "
           "smaller than this parameter are not shown; it also affects the fog effect"
           " (near clipping plane = 0% fog, far clipping plane = 100% fog)."));
