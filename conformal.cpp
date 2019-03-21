@@ -360,8 +360,16 @@ namespace conformal {
     if(ph<0) ph = 0;
     if(ph >= siz-1) ph = siz-2;
     
+    heptagon *old = viewctr.at;
+    
     viewctr.at = v[ph]->base->master;
     viewctr.spin = 0;
+    
+    ld angle = 0;
+    if(DIM == 3) {
+      hyperpoint h = spin(-rotation * degree) * cspin(0, 2, rotation_xz * degree) * View * hpxy3(1,2,3);
+      angle = atan2(h[1], h[2]);
+      }
     
     View = inverse(master_relative(v[ph]->base) * v[ph]->at);
   
@@ -370,8 +378,18 @@ namespace conformal {
     hyperpoint next = calc_relative_matrix(v[ph+1]->base, v[ph]->base, C0) * 
       v[ph+1]->at * C0;
   
-    View = spin(rotation * degree) * xpush(-(phase-ph) * hdist(now, next)) * View;
-    if(DIM == 3) View = cspin(0, 2, rotation_xz * degree) * View;
+    View = xpush(-(phase-ph) * hdist(now, next)) * View;
+    if(DIM == 2)
+      View = spin(rotation * degree) * View;
+    else {
+      if(celldistance(v[ph]->base, old->c7) <= 2) {
+        hyperpoint h1 = View * currentmap->relative_matrix(old, viewctr.at) * hpxy3(1,2,3);
+        ld angle1 = atan2(h1[1], h1[2]);
+        View = cspin(2, 1, angle1 - angle) * View;
+        }
+      View = cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree) * View;
+      }
+
     playermoved = false;
     centerover.at = v[ph]->base;
     compute_graphical_distance();
