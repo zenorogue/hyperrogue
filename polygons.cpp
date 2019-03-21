@@ -366,8 +366,15 @@ void addpoint(const hyperpoint& H) {
       }
     hyperpoint Hscr;
     applymodel(H, Hscr); 
-    for(int i=0; i<3; i++) Hscr[i] *= z;
-    Hscr[1] *= vid.stretch;
+    if(DIM == 2) {
+      for(int i=0; i<3; i++) Hscr[i] *= z;
+      Hscr[1] *= vid.stretch;
+      }
+    else {
+      Hscr[0] *= z;
+      Hscr[1] *= z * vid.stretch;
+      Hscr[2] = 1 - 2 * (-Hscr[2] - conformal::clip_min) / (conformal::clip_max - conformal::clip_min);
+      }
     add1(Hscr);
     }
   }

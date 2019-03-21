@@ -248,13 +248,20 @@ void display_data::set_projection(int ed, bool apply_models) {
   auto cd = current_display;
 
   if(!shaderside_projection) {
-    glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
-    if(ed) {
-      glhr::glmatrix m = glhr::id;
-      m[2][0] -= ed;
-      glhr::projection_multiply(m);
+    if(DIM == 3 && apply_models) {
+      glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, 1));
+      glhr::id_modelview();
+      current_display->scrdist_text = 0;
       }
-    glhr::id_modelview();
+    else {
+      glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
+      if(ed) {
+        glhr::glmatrix m = glhr::id;
+        m[2][0] -= ed;
+        glhr::projection_multiply(m);
+        }
+      glhr::id_modelview();
+      }
     }
   else {
 
