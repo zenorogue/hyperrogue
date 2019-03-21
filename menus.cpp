@@ -380,10 +380,8 @@ void showDisplayMode() {
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
 
-  if(DIM == 2)
   dialog::addBoolItem(XLAT("models and projections"), pmodel, 'a');
 
-  if(DIM == 2)
   dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'A');
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   

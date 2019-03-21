@@ -479,6 +479,7 @@ enum eMovementAnimation {
 eMovementAnimation ma;
 
 ld shift_angle, movement_angle;
+ld normal_angle = 90;
 ld period = 10000;
 int noframes = 30;
 ld cycle_length = 2 * M_PI;
@@ -595,19 +596,31 @@ void apply() {
             fullcenter(); View = spin(rand() % 1000) * View;
             }
           }
-        View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * xpush(cycle_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
-          spin(-movement_angle * M_PI / 180) * View;
+        View = cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
+          cspin(0, DIM-1, -movement_angle * degree) * View;
         moved();
         }
       break;
     case maRotation:
+      if(DIM == 3) {
+        View = spin(-movement_angle * degree) * View;
+        View = cspin(1, 2, normal_angle * degree) * View;
+        }
       View = spin(2 * M_PI * t / period) * View;
+      if(DIM == 3) {
+        View = cspin(2, 1, normal_angle * degree) * View;
+        View = spin(movement_angle * degree) * View;
+        }
       break;
     #if CAP_BT
     case maParabolic:
       reflect_view();
-      View = spin(movement_angle * M_PI / 180) * ypush(shift_angle * M_PI / 180) * binary::parabolic(parabolic_length * t / period) * ypush(-shift_angle * M_PI / 180) * 
-        spin(-movement_angle * M_PI / 180) * View;
+      View = ypush(-shift_angle * degree) * spin(-movement_angle * degree) * View;
+      if(DIM == 2)
+        View = binary::parabolic(parabolic_length * t / period) * View;
+      else
+        View = binary::parabolic3(parabolic_length * t / period, 0) * View;
+      View = spin(movement_angle * degree) * ypush(shift_angle * degree) * View;
       moved();
       break;
     #endif
@@ -636,9 +649,9 @@ void apply() {
   #if CAP_RUG
   if(rug::rugged) {
     if(rug_rotation1) {
-      rug::apply_rotation(rotmatrix(rug_angle * M_PI / 180, 1, 2));
+      rug::apply_rotation(rotmatrix(rug_angle * degree, 1, 2));
       rug::apply_rotation(rotmatrix(rug_rotation1 * 2 * M_PI * t / period, 0, 2));
-      rug::apply_rotation(rotmatrix(-rug_angle * M_PI / 180, 1, 2));
+      rug::apply_rotation(rotmatrix(-rug_angle * degree, 1, 2));
       }
     if(rug_rotation2) {
       rug::apply_rotation(rug::currentrot * rotmatrix(rug_rotation2 * 2 * M_PI * t / period, 0, 1) * inverse(rug::currentrot));
@@ -866,6 +879,21 @@ void show() {
         });
       break;
       }
+    case maRotation:
+      if(DIM == 3) {
+        dialog::addSelItem(XLAT("angle to screen normal"), fts(normal_angle) + "°", 's');
+        dialog::add_action([] () { 
+          dialog::editNumber(normal_angle, 0, 360, 15, 0, XLAT("angle to screen normal"), ""); 
+          });
+        dialog::addSelItem(XLAT("movement angle"), fts(movement_angle) + "°", 'm');
+        dialog::add_action([] () { 
+          dialog::editNumber(movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
+          });
+        dialog::addBreak(100);
+        }
+      else
+        dialog::addBreak(300);
+      break;
     default: {
       dialog::addBreak(300);
       }
