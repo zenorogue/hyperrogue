@@ -273,6 +273,7 @@ namespace conformal {
   int bandhalf = 200;
   int bandsegment = 16000;
   ld rotation = 0;
+  ld rotation_xz = 90;
   int do_rotate = 1;
   ld model_orientation, halfplane_scale, model_orientation_yz;
   ld clip_min, clip_max;
@@ -370,6 +371,7 @@ namespace conformal {
       v[ph+1]->at * C0;
   
     View = spin(rotation * degree) * xpush(-(phase-ph) * hdist(now, next)) * View;
+    if(DIM == 3) View = cspin(0, 2, rotation_xz * degree) * View;
     playermoved = false;
     centerover.at = v[ph]->base;
     compute_graphical_distance();
@@ -704,6 +706,12 @@ namespace conformal {
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
     if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
     dialog::lastItem().value += " " + its(rotation) + "°";
+    
+    if(DIM == 3) {
+      dialog::addBoolItem(XLAT("rotation (x/z plane)"), do_rotate == 2, 'k');
+      if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
+      dialog::lastItem().value += " " + its(rotation_xz) + "°";
+      }
 
     // if(pmodel == mdBand && sphere)
     if(pmodel != mdPerspective)
@@ -959,9 +967,10 @@ namespace conformal {
         }
       else if(uni == 'a')
         pushScreen(history_menu);
-      else if(uni == 'r') {
-        if(rotation < 0) rotation = 0;
-        dialog::editNumber(rotation, 0, 360, 90, 0, XLAT("rotation"), 
+      else if(uni == 'r' || uni == 'k') {
+        ld& selected_rotation = uni == 'r' ? rotation : rotation_xz;
+        if(selected_rotation < 0) selected_rotation = 0;
+        dialog::editNumber(selected_rotation, 0, 360, 90, 0, XLAT("rotation"), 
           "This controls the automatic rotation of the world. "
           "It affects the line animation in the history mode, and "
           "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
