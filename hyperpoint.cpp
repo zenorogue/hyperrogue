@@ -639,6 +639,7 @@ transmatrix xyzscale(const transmatrix& t, double fac, double facz) {
 // double downspin_zivory;
 
 transmatrix mzscale(const transmatrix& t, double fac) {
+  if(DIM == 3) return t * cpush(2, fac);
   // take only the spin
   transmatrix tcentered = gpushxto0(tC0(t)) * t;
   // tcentered = tcentered * spin(downspin_zivory);
