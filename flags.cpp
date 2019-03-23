@@ -263,47 +263,51 @@ bool isFriendlyGhost(eMonster m) {
   return m == moFriendlyGhost || (markEmpathy(itOrbAether) && isFriendly(m));
   }
 
+bool isGhostAether(eMonster m) {
+  return isGhost(m) || checkOrb(m, itOrbAether);
+  }
+
 bool survivesWater(eMonster m) {
   return 
     m == moShark || m == moGreaterShark || m == moCShark || 
-    isGhost(m) || m == moWitchGhost || m == moShadow ||
+    isGhostAether(m) || m == moWitchGhost || m == moShadow ||
     isBird(m) || m == moWaterElemental || m == moAirElemental ||
     isWorm(m) || isIvy(m) || isDragon(m) || isKraken(m) ||
     m == moMutant || m == moFriendlyIvy || 
-    (isFriendly(m) && markOrb(itOrbFish)) ||
+    checkOrb(m, itOrbFish) ||
     m == moTortoise; // Tortoises and Ivies survive, but don't go through water
   }
 
 // survives Mercury or Sulphur or Lava
 bool survivesPoison(eMonster m, eWall p) {
   return
-    isGhost(m) || m == moWitchGhost || m == moShadow ||
+    isGhostAether(m) || m == moWitchGhost || m == moShadow ||
     isBird(m) || m == moAirElemental || isDragon(m) || isWorm(m);
   }
 
 // flying even if stunned
 bool isPermanentFlying(eMonster m) {
-  return m == moAirElemental || isGhost(m);
+  return m == moAirElemental || isGhostAether(m);
   }
 
 bool survivesFire(eMonster m) {
   return
-    isGhost(m) || m == moWitchWinter || m == moWitchGhost ||
+    isGhostAether(m) || m == moWitchWinter || m == moWitchGhost ||
     m == moBomberbird || m == moTameBomberbird || m == moTameBomberbirdMoved ||
-    (isFriendly(m) && markOrb(itOrbWinter)) || m == moFireElemental ||
+    checkOrb(m, itOrbWinter) || m == moFireElemental ||
     isDragon(m) || m == moShadow;
   }
 
 bool survivesWall(eMonster m) {
-  return isGhost(m);
+  return isGhostAether(m);
   }
 
 bool survivesThorns(eMonster m) {
-  return isGhost(m) || m == moSkeleton || m == moDraugr;
+  return isGhostAether(m) || m == moSkeleton || m == moDraugr;
   }
 
 bool survivesFall(eMonster m) {
-  return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow || isGhost(m);
+  return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow || isGhostAether(m);
   }
 
 bool checkOrb(eMonster m1, eItem orb) {
