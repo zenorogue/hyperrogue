@@ -156,7 +156,7 @@ void place_elemental_wall(cell *c) {
 int hrand_monster(int x) {
   if(DIM == 3 && !sphere) {
     int t = isize(gmatrix);
-    if(t > 500) x = ((long long)(x)) * t / 500;
+    if(t > 300) x = ((long long)(x)) * t / 300;
     }
   return hrand(x);
   }
