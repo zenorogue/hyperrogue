@@ -1477,7 +1477,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(isHive(c->land) && hrand_monster(6000) < (hive::hivehard() - 15)) 
+        if(hrand_monster(6000) < (hive::hivehard() - 15)) 
           c->monst = hive::randomHyperbug();
 
         /* if(hrand(1500) < 30 + (kills[moBug0] + kills[moBug1] + kills[moBug2]) && notDippingFor(itRoyalJelly))

@@ -1775,7 +1775,6 @@ namespace hive {
         // pheromones!
         if(c->land == laHive && c->landparam < 90) c->landparam += 5;
         if(c2->land == laHive && c2->landparam < 90) c2->landparam += 5;
-        // if(isHive(c2->land)) c2->land = eLand(laHive0+k);
   /*      if(c2->item == itRoyalJelly && !isQueen(m)) {
           // advance!
           c2->monst = eMonster(m+BUGCOLORS);

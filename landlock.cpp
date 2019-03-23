@@ -702,12 +702,6 @@ eLand getNewLand(eLand old) {
   eLand tab[1024];
   int cnt = 0;
   
-/*   if(isHive(old) && hrand(100) < 90) {
-    eLand n = old;
-    while(n == old) n = eLand(laHive0 + hrand(3));
-    return n;
-    } */
-  
   // return (hrand(2)) ? laMotion : laJungle;
 
   // the basic lands, always available

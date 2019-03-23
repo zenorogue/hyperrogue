@@ -244,10 +244,6 @@ bool isArmedEnemy(cell *w, eMonster forwho) {
   return w->monst != moCrystalSage && w->monst != moCrusher && isActiveEnemy(w, forwho);
   }
 
-bool isHive(eLand l) {
-  return l == laHive;
-  }
-  
 bool eternalFire(cell *c) {
   return c->land == laDryForest || (c->land == laPower && !smallbounded) || c->land == laMinefield ||
     c->land == laEFire || c->land == laElementalWall;
