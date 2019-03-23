@@ -353,8 +353,7 @@ int chasmgraph(cell *c) {
   }
 
 bool conegraph(cell *c) {
-  return wmescher && wmspatial && conegraphtype(c);
-  (c->wall == waDune || c->wall == waBigTree || c->wall == waSmallTree || c->wall == waCTree || (c->wall == waBarrier && c->land == laOceanWall));
+  return wmescher && wmspatial && (conegraphtype(c) || (c->wall == waBarrier && c->land == laOceanWall));
   }
 
 bool hornStuns(cell *c) {
