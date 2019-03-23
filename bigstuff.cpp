@@ -515,6 +515,19 @@ void buildEquidistant(cell *c) {
     // if(generatingEquidistant) printf("mcv=0\n");
     c->landparam = 1;
     }
+  else if(DIM == 3) {
+    forCellCM(c2, c) if(coastval(c2, b) == mcv) 
+      forCellEx(c3, c2) if(coastval(c3, b) < mcv)
+        forCellCM(c4, c3) {
+          if(c4->land == laNone && c2->mpdist <= BARLEV) setdist(c4, BARLEV, c2);
+          buildEquidistant(c4);
+          }
+    forCellCM(c2, c) {
+      int cv = coastval(c2, b);
+      if(cv < mcv) mcv = cv;
+      }
+    c->landparam = mcv + 1;
+    }
   else {
     // if it appears twice, increase it
     int qcv = 0;
