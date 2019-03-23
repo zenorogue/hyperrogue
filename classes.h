@@ -56,6 +56,8 @@ static const flagtype MF_IGNORE_SMELL = Flag(42);
 static const flagtype MF_RATLING = Flag(43);
 static const flagtype MF_POWER = Flag(44);
 static const flagtype MF_GHOSTMOVER = Flag(45);
+static const flagtype MF_TECHNICAL = Flag(46);
+static const flagtype MF_MOVED = Flag(47);
 
 enum eMonster {
   #define MONSTER(a,b,c,d,e,f,g,h) d,

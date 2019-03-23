@@ -29,7 +29,7 @@ MONSTER( 'W', 0xD08040, "Icewolf"    , moWolf, ZERO, RESERVED, moYeti,
     "A nasty predator from the Icy Land. Contrary to other monsters, "
     "it tracks its prey by their heat."
   )
-MONSTER( 'W', 0xD08040, "Icewolf"    , moWolfMoved, ZERO, RESERVED, moNone, "")
+MONSTER( 'W', 0xD08040, "Icewolf"    , moWolfMoved, MF_MOVED, RESERVED, moNone, "")
 MONSTER( 'R', 0xFF8000, "Ranger"     , moRanger, ZERO, RESERVED, moYeti,
     "Rangers take care of the magic mirrors in the Land of Mirrors. "
     "They know that rogues like to break these mirrors... so "
@@ -69,7 +69,7 @@ MONSTER( '@', 0xFF8080, "Mirage (REMOVED)", moREMOVED, ZERO, RESERVED, moNone,
 MONSTER( '@', 0x509050, "Golem", moGolem, ZERO | MF_NOGHOST | MF_GOK | MF_NONLIVING | MF_FRIENDLY, RESERVED, moNone,
     "You can summon these friendly constructs with a magical process."
     )
-MONSTER( '@', 0x509050, "Golem", moGolemMoved, ZERO | MF_NOGHOST | MF_GOK | MF_NONLIVING | MF_FRIENDLY, RESERVED, moNone,
+MONSTER( '@', 0x509050, "Golem", moGolemMoved, ZERO | MF_NOGHOST | MF_GOK | MF_NONLIVING | MF_FRIENDLY | MF_MOVED, RESERVED, moNone,
     "You can summon these friendly constructs with a magical process."
     )
 MONSTER( 'E', 0xD09050, "Eagle", moEagle, ZERO | MF_BIRD | MF_FLYING | MF_IGNORE_PLATE, RESERVED, moEagle,
@@ -197,7 +197,7 @@ MONSTER( 'P', 0xD10000, "Cult Leader", moCultistLeader, ZERO | MF_LEADER, RESERV
     "These Cultists can push the statues, just like you."
     )
 MONSTER( 'B', 0x909000, "Slime Beast", moSlimeNextTurn, ZERO, RESERVED, moNone, slimehelp)
-MONSTER( '@', 0x8080FF, "Knight", moKnightMoved, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY, RESERVED, moNone, camelothelp )
+MONSTER( '@', 0x8080FF, "Knight", moKnightMoved, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_MOVED, RESERVED, moNone, camelothelp )
 MONSTER( '@', 0x8B4513, "Illusion", moIllusion, ZERO | MF_NOGHOST | MF_NONLIVING | MF_FRIENDLY | MF_IGNORE_PLATE, RESERVED, moNone, 
     "Illusions are targeted "
     "by most monsters, just like yourself, Thumpers, and your friends."
@@ -221,7 +221,7 @@ MONSTER( 'A', 0xFFFFFF, "Albatross", moAlbatross, ZERO | MF_BIRD | MF_FLYING | M
     "as fast as Eagles..."
     )
 MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbird, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_BIRD | MF_FLYING | MF_IGNORE_PLATE, RESERVED, moTameBomberbird, tamebomberdesc)
-MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbirdMoved, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_BIRD | MF_FLYING | MF_IGNORE_PLATE, RESERVED, moTameBomberbird, tamebomberdesc)
+MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbirdMoved, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_BIRD | MF_FLYING | MF_IGNORE_PLATE | MF_MOVED, RESERVED, moTameBomberbird, tamebomberdesc)
 MONSTER( 'G', 0xFF0000, "Palace Guard", moPalace, ZERO | MF_STUNNABLE | MF_HP, RESERVED, moYeti, 
      "You have to hit Palace Guards several times to kill them. After each hit, they "
      "are pushed away and stunned for some time."
@@ -246,11 +246,11 @@ MONSTER( 'E', 0x0000FF, "Water Elemental", moWaterElemental, ZERO | MF_NOBLOW | 
     "As a special case, you can attack the Water Elemental from the water, without drowning immediately."
     )
 MONSTER( 'M', 0xD0D0D0, "Mouse", moMouse, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_UNARMED | MF_IGNORE_PLATE, RESERVED, moNone, princessdesc)
-MONSTER( 'M', 0xD0D0D0, "Mouse", moMouseMoved, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_UNARMED, RESERVED, moNone, princessdesc)
+MONSTER( 'M', 0xD0D0D0, "Mouse", moMouseMoved, ZERO | MF_NOGHOST | MF_GOK | MF_FRIENDLY | MF_UNARMED | MF_MOVED, RESERVED, moNone, princessdesc)
 MONSTER( 'P', 0xFF80FF, "Prince", moPrincess, ZERO | MF_NOGHOST | MF_PRINCESS | MF_GOK | MF_STUNNABLE | MF_HP | MF_FRIENDLY | MF_UNARMED, RESERVED, moNone, princessdesc)
-MONSTER( 'P', 0xFF80FF, "Princess", moPrincessMoved, ZERO | MF_NOGHOST | MF_PRINCESS | MF_GOK | MF_STUNNABLE | MF_HP | MF_FRIENDLY | MF_UNARMED, RESERVED, moNone, princessdesc)
+MONSTER( 'P', 0xFF80FF, "Princess", moPrincessMoved, ZERO | MF_NOGHOST | MF_PRINCESS | MF_GOK | MF_STUNNABLE | MF_HP | MF_FRIENDLY | MF_UNARMED | MF_MOVED, RESERVED, moNone, princessdesc)
 MONSTER( 'P', 0xFF80FF, "Prince", moPrincessArmed, ZERO | MF_NOGHOST | MF_PRINCESS | MF_GOK | MF_STUNNABLE | MF_HP | MF_FRIENDLY, RESERVED, moNone, princessdesc)
-MONSTER( 'P', 0xFF80FF, "Princess", moPrincessArmedMoved, ZERO | MF_NOGHOST | MF_PRINCESS | MF_GOK | MF_STUNNABLE | MF_HP | MF_FRIENDLY, RESERVED, moNone, princessdesc)
+MONSTER( 'P', 0xFF80FF, "Princess", moPrincessArmedMoved, ZERO | MF_NOGHOST | MF_PRINCESS | MF_GOK | MF_STUNNABLE | MF_HP | MF_FRIENDLY | MF_MOVED, RESERVED, moNone, princessdesc)
 MONSTER( 'F', 0xD03000, "Familiar", moFamiliar, ZERO, RESERVED, moYeti, "A simple servant of the master of the Ivory Tower.")
 MONSTER( 'B', 0x707070, "Gargoyle", moGargoyle, ZERO | MF_BIRD | MF_FLYING | MF_IGNORE_PLATE, RESERVED, moEagle, gargdesc)
 MONSTER( 'E', 0xFF0000, "Fire Elemental", moFireElemental, ZERO, RESERVED, moYeti, 
@@ -1259,17 +1259,17 @@ MONSTER( '*', 0xFF0000, "Flail", moFlailBullet, ZERO | MF_BULLET, RESERVED, moNo
 MONSTER( '*', 0xFFFF00, "Fireball", moFireball, ZERO | MF_BULLET, RESERVED, moNone, "This magical missile burns whatever it hits.")
 MONSTER( '*', 0xFFFF00, "Tongue", moTongue, ZERO | MF_BULLET, RESERVED, moNone, "Some monsters have long tongues, which allow them to attack enemies in nearby cells.")
 MONSTER( '*', 0xFFFFFF, "Airball", moAirball, ZERO | MF_BULLET, RESERVED, moNone, "This magical missile pushes back whatever it hits.")
-MONSTER( '*', 0x0060E0, "Blueball", moCrushball, ZERO, RESERVED, moNone, "A powerful missile from a Blue Raider.")
+MONSTER( '*', 0x0060E0, "Blueball", moCrushball, ZERO | MF_BULLET, RESERVED, moNone, "A powerful missile from a Blue Raider.")
 
 //technical/temporary
-MONSTER( '?', 0x00C000, "dead bug", moDeadBug, ZERO, RESERVED, moNone, NODESC)
+MONSTER( '?', 0x00C000, "dead bug", moDeadBug, ZERO | MF_TECHNICAL, RESERVED, moNone, NODESC)
 // appears as 'killed by electric discharge'
-MONSTER( '?', 0xFFFF00, "electric discharge", moLightningBolt, ZERO, RESERVED, moNone, elecdesc)
-MONSTER( '?', 0xE06000, "dead bird", moDeadBird, ZERO, RESERVED, moNone, NODESC)
-MONSTER( '?', 0xE06000, "Energy Sword", moEnergySword, ZERO, RESERVED, moNone, NODESC)
-MONSTER( '!', 0xFF0000, "Warning", moWarning, ZERO, RESERVED, moNone, warningdesc)
-MONSTER( '!', 0xFF0000, "arrow trap", moArrowTrap, ZERO | MF_BULLET, RESERVED, moNone, arrowtrapdesc)
-MONSTER( '*', 0,        "vertex", moRogueviz, ZERO, RESERVED, moNone, "A vertex from rogueviz.")
+MONSTER( '?', 0xFFFF00, "electric discharge", moLightningBolt, ZERO | MF_TECHNICAL, RESERVED, moNone, elecdesc)
+MONSTER( '?', 0xE06000, "dead bird", moDeadBird, ZERO | MF_TECHNICAL, RESERVED, moNone, NODESC)
+MONSTER( '?', 0xE06000, "Energy Sword", moEnergySword, ZERO | MF_TECHNICAL, RESERVED, moNone, NODESC)
+MONSTER( '!', 0xFF0000, "Warning", moWarning, ZERO | MF_TECHNICAL, RESERVED, moNone, warningdesc)
+MONSTER( '!', 0xFF0000, "arrow trap", moArrowTrap, ZERO | MF_BULLET | MF_TECHNICAL, RESERVED, moNone, arrowtrapdesc)
+MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | MF_TECHNICAL, RESERVED, moNone, "A vertex from rogueviz.")
 
 #undef MONSTER
 #undef LAND
