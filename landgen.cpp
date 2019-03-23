@@ -2015,11 +2015,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laEndorian:
       ONEMPTY {
-        if(c->wall == waNone && coastval(c, laEndorian) >= 10 && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
+        if(c->wall == waNone && coastval(c, laEndorian) >= 10 && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()) && (DIM == 2 || hrand(100) < 25))
           c->monst = moSparrowhawk;
-        else if(c->wall != waNone && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
+        else if(c->wall != waNone && hrand_monster(DIM == 3 ? 25000 : 5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
           c->monst = moResearcher;
-        else if(c->wall == waCanopy && !checkInTree(c, 3) && hrand_monster(5000) < PT(300 + 5 * (kills[moSparrowhawk] + kills[moResearcher]), 750))
+        else if(c->wall == waCanopy && !checkInTree(c, 3) && hrand(5000) < PT(300 + 5 * (kills[moSparrowhawk] + kills[moResearcher]), 750))
           c->item = itApple;
         }
       break;

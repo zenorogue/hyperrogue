@@ -464,10 +464,13 @@ int coastval(cell *c, eLand base) {
 
 bool checkInTree(cell *c, int maxv) {
   if(c->landparam <= 3) return false;
+  if(!maxv && DIM == 3 && binarytiling) {
+    forCellEx(c2, c) if(c2->landflags) return true;
+    }
   if(!maxv) return false;
   if(c->landflags) return true;
-  for(int t=0; t<c->type; t++)
-    if(c->move(t) && c->move(t)->landparam < c->landparam && checkInTree(c->move(t), maxv-1))
+  forCellEx(c2, c)
+    if(c2->landparam < c->landparam && checkInTree(c2, maxv-1))
       return true;
   return false;
   }
@@ -581,7 +584,76 @@ void buildEquidistant(cell *c) {
   
   if(c->land == laEndorian) {
     int ct = c->type;
-    if(c->landparam == 1 && ctof(c)) {
+    if(binarytiling) {
+      int skip = geometry == gHoroRec ? 3 : 2;
+      if(c->landparam == 1) 
+        c->landflags = (hrand(100) < 20);
+      else if(DIM == 2 && c->type == 6 && (c->landparam % 2) && c->move(binary::bd_down) && c->move(binary::bd_down)->landflags)
+        c->landflags = 1;
+      else if(DIM == 2 && c->type == 7 && (c->landparam % 2 == 0)) {
+        for(int d: {binary::bd_down_left, binary::bd_down_right})
+          if(c->move(d) && c->move(d)->landflags)
+            c->landflags = 1;
+        }
+      else if(DIM == 3 && c->landparam % skip != 1 && c->move(S7-1) && c->move(S7-1)->landflags)
+        c->landflags = 1;
+      else if(DIM == 3 && c->landparam % skip == 1 && c->move(S7-1) && c->move(S7-1)->c.spin(S7-1) == (c->c.spin(S7-1)) && c->move(S7-1)->move(S7-1)->landflags)
+        c->landflags = 1;
+      if(c->landflags) c->wall = (DIM == 3 ? waTrunk3 : waTrunk);
+      }
+    else if(DIM == 3 && hyperbolic) {
+      if(c->landparam == 1) 
+        c->landflags = (hrand(100) < 20);
+      else if(S7 == 12) {
+        for(int i=0; i<S7; i++) {
+          cellwalker cw(c, i);
+          if(!cw.peek()) continue;
+          cw += wstep;
+          if(cw.at->landparam != c->landparam-1) continue;
+          if(!cw.at->landflags) continue;
+          if(S7 == 6) c->landflags = 1;
+          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !reg3::dirs_adjacent[j][cw.spin])
+            if(c->landparam == 2 ? cw.at->move(j)->land != laEndorian : cw.at->move(j)->landparam)
+              c->landflags = 1;
+          }
+        }
+      else if(c->landparam == 2) {
+        for(int i=0; i<S7; i++) {
+          cellwalker cw(c, i);
+          if(!cw.peek()) continue;
+          cw += wstep;
+          if(cw.at->landparam != 1) continue;
+          if(!cw.at->landflags) continue;
+          cw += rev;
+          if(cw.peek() && cw.peek()->land != laEndorian) c->landflags = 1;
+          }
+        }
+      else if(c->landparam % 2 == 1) {
+        for(int i=0; i<S7; i++) {
+          cellwalker cw(c, i);
+          if(!cw.peek()) continue;
+          cw += wstep;
+          if(cw.at->landparam != c->landparam-1) continue;
+          if(!cw.at->landflags) continue;
+          if(S7 == 6) c->landflags = 1;
+          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !reg3::dirs_adjacent[j][cw.spin] && cw.at->move(j)->landflags)
+            c->landflags = 1;
+          }
+        }
+      else {
+        for(int i=0; i<S7; i++) {
+          cellwalker cw(c, i);
+          if(!cw.peek()) continue;
+          cw += wstep;
+          if(cw.at->landparam != c->landparam-1) continue;
+          if(!cw.at->landflags) continue;
+          cw += rev;
+          if(cw.peek() && cw.peek()->landflags) c->landflags = 1;
+          }
+        }
+      if(c->landflags) c->wall = waTrunk3;
+      }
+    else if(c->landparam == 1 && ctof(c)) {
       for(int i=0; i<ct; i++) {
         int i1 = (i+1) % c->type;
         if(c->move(i) && c->move(i)->land != laEndorian && c->move(i)->land != laNone)
@@ -645,13 +717,12 @@ void buildEquidistant(cell *c) {
             }
           }
         }
-      
-      if(!c->landflags && checkInTree(c, 5)) {
-        int lev = hrand(100);
-        if(lev < 10) c->wall = waSolidBranch;
-        else if(lev < 20) c->wall = waWeakBranch;
-        else c->wall = waCanopy;
-        }
+      }
+    if(!c->landflags && checkInTree(c, 5)) {
+      int lev = hrand(100);
+      if(lev < 10) c->wall = waSolidBranch;
+      else if(lev < 20) c->wall = waWeakBranch;
+      else c->wall = waCanopy;
       }
     }
   

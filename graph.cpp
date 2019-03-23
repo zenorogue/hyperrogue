@@ -3909,6 +3909,7 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
   if(c->wall == waChasm && c2->wall != waChasm) return 0x606060A0;
   if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x0000C060;
   if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena(winf[c->wall].color, 0, 0x40);
+  if(among(c->wall, waCanopy, waSolidBranch, waWeakBranch) && !among(c2->wall, waCanopy, waSolidBranch, waWeakBranch)) return 0x00C00060;
   if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena(0xFF00FF, 0, 0x80);
   if(realred(c->wall) && realred(c2->wall) && c->wall != c2->wall) {
     int l = snakelevel(c) - snakelevel(c2);
@@ -4854,8 +4855,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepoly(face_the_player(V), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
             }
           
-          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder) || isWatery(c) || isSulphuric(c->wall)) ;
-    
+          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder, waCanopy) || isWatery(c) || isSulphuric(c->wall)) ;
+          
+          else if(c->wall == waBigBush || c->wall == waSolidBranch)
+            queuepolyat(face_the_player(V), shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
+
+          else if(c->wall == waSmallBush || c->wall == waWeakBranch)
+            queuepolyat(face_the_player(V), shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
+          
           else
             queuepoly(face_the_player(V), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
           }
