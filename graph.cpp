@@ -3904,6 +3904,7 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
   if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena(winf[c->wall].color, 0, 0x40);
   if(c->wall == c2->wall) return 0;
   if(isFire(c) && !isFire(c2)) return darkena(wcol, 0, 0x30);
+  if(c->wall == waLadder) return darkena(wcol, 0, 0x30);
 
   if(c->wall == waChasm && c2->wall != waChasm) return 0x606060A0;
   if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x0000C060;
@@ -4853,7 +4854,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepoly(face_the_player(V), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
             }
           
-          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm) || isWatery(c) || isSulphuric(c->wall)) ;
+          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder) || isWatery(c) || isSulphuric(c->wall)) ;
     
           else
             queuepoly(face_the_player(V), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
