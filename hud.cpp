@@ -385,6 +385,8 @@ void drawStats() {
   if(viewdists && show_distance_lists) 
     expansion.view_distances_dialog();
   if(current_display->sidescreen) return;
+  
+  bool h = hide_player();
 
   {
   dynamicval<eModel> pm(pmodel, mdDisk);
@@ -397,8 +399,8 @@ void drawStats() {
   current_display->set_projection(0, false);
   
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
-    
-  if(vid.radarsize > 0 && hide_player())
+  
+  if(vid.radarsize > 0 && h)
   #if CAP_RACING
     if(!racing::on && !peace::on)
   #endif
