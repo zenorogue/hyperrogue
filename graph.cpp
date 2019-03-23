@@ -722,7 +722,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
 #endif
   
   transmatrix Vit = V;
-  if(DIM == 3 && c) Vit = rgpushxto0(tC0(V));
+  if(DIM == 3 && c) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 
   if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
@@ -3949,7 +3949,7 @@ void drawBoat(cell *c, const transmatrix* Vboat, transmatrix& Vboat0, transmatri
   if(DIM == 3) {
     Vboat0 = V;
     nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-    if(!nospin) Vboat0 = rgpushxto0(tC0(V));
+    if(!nospin) Vboat0 = face_the_player(V);
     else Vboat0 = cspin(0, 2, M_PI) * Vboat0;
     queuepolyat(mscale(Vboat0, scalefactor/2), shBoatOuter, outcol, PPR::BOATLEV2);
     queuepolyat(mscale(Vboat0, scalefactor/2-0.01), shBoatInner, incol, PPR::BOATLEV2);
@@ -4850,20 +4850,20 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           else if(c->wall == waMineOpen) {
             int mines = countMinesAround(c);
-            queuepoly(rgpushxto0(tC0(V)), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
+            queuepoly(face_the_player(V), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
             }
           
           else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm) || isWatery(c) || isSulphuric(c->wall)) ;
     
           else
-            queuepoly(rgpushxto0(tC0(V)), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
+            queuepoly(face_the_player(V), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
           }
 
         int rd = rosedist(c);
         if(rd == 1) 
-          queuepoly(rgpushxto0(tC0(V)), shLoveRing, darkena(0x804060, 0, 0xFF));
+          queuepoly(face_the_player(V), shLoveRing, darkena(0x804060, 0, 0xFF));
         if(rd == 2) 
-          queuepoly(rgpushxto0(tC0(V)), shLoveRing, darkena(0x402030, 0, 0xFF));
+          queuepoly(face_the_player(V), shLoveRing, darkena(0x402030, 0, 0xFF));
         }
       
       else switch(c->wall) {
