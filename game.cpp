@@ -5099,7 +5099,8 @@ void moveghosts() {
   for(int i=0; i<isize(ghosts); i++) {
     cell *c = ghosts[i];
     
-    if(c->stuntime) return;
+    if(c->stuntime) continue;    
+    if(isPowerMonster(c) && !playerInPower()) continue;
 
     if(isGhostMover(c->monst)) {
       int goodmoves = 0;
@@ -5114,7 +5115,9 @@ void moveghosts() {
   
   for(int d=0; d<=MAX_EDGE; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
     cell *c = movesofgood[d][i];
-    if(c->stuntime) return;
+
+    if(c->stuntime) continue;    
+    if(isPowerMonster(c) && !playerInPower()) continue;
     
     if(isGhostMover(c->monst) && c->cpdist >= 1) {
       
