@@ -3633,6 +3633,26 @@ namespace dungeon {
         c->wall = waLadder;
       }
     
+    else if(DIM == 3) {    
+      int cnt = 0;
+      int below = 0;
+      manual_celllister cl;
+      cl.add(c);
+      for(int i=0; i<isize(cl.lst); i++) {
+        cell *c1 = cl.lst[i];
+        generate_around(c1);
+        if(coastvalEdge(c1) == coastvalEdge(c) - 3) {
+          if(c1->landflags == 3) cnt++;
+          continue;
+          }
+        if(c1->landflags == 3) below++;
+        forCellEx(c2, c1) if(coastvalEdge(c2) < coastvalEdge(c1))
+          cl.add(c2);
+        }
+      if(cnt) c->wall = waPlatform;
+      else if(below && coastvalEdge(c) < 3) c->wall = waPlatform;
+      }
+    
     else if(true) {
       
       cell *c2 = c;
@@ -3692,30 +3712,52 @@ namespace dungeon {
     if(!c) return 0;
     buildEquidistant(c);
     bool rdepths[5];
-  
-    cell *c2 = c;
-    cell *c3 = c;
-      
     int switchcount = 0;
-    for(int i=0; i<5; i++) {
-      if(coastvalEdge(c2) == 0) { 
-        rdepths[i] = false;
+    
+    if(DIM == 3) {
+      for(int i=0; i<5; i++) rdepths[i] = false;
+      
+      manual_celllister cl;
+      cl.add(c);
+      int d = coastvalEdge(c);
+
+      for(int i=0; i<isize(cl.lst); i++) {
+        cell *c1 = cl.lst[i];
+        generate_around(c1);
+        int d1 = d - coastvalEdge(c);
+        if(c1->landflags == 3) rdepths[d1] = true;
+        if(c1->landflags == 1) switchcount++;
+        if(d1 == 4) break;
+        forCellEx(c2, c1) if(coastvalEdge(c2) < coastvalEdge(c1))
+          cl.add(c2);
         }
-      else {
-        cell *c4 = c2;
-        if(c2 != c3 && !isNeighbor(c2, c3)) {
-          for(int i=0; i<c2->type; i++) if(c2->move(i) && isNeighbor(c2->move(i), c3))
-            c4 = c2->move(i);
+      }
+    
+    else {
+      
+      cell *c2 = c;
+      cell *c3 = c;
+        
+      for(int i=0; i<5; i++) {
+        if(coastvalEdge(c2) == 0) { 
+          rdepths[i] = false;
           }
-        rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
-        if((c2&&c2->landflags == 1) || (c3&&c3->landflags == 1) || (c4&&c4->landflags == 1))
-          switchcount++;
-        generate_around(c2);
-        generate_around(c3);
-        c2 = ts::left_parent(c2, coastvalEdge);
-        c3 = ts::right_parent(c3, coastvalEdge);
-        if(!c2) { towerError(c); return 0; }
-        if(!c3) { towerError(c); return 0; }
+        else {
+          cell *c4 = c2;
+          if(c2 != c3 && !isNeighbor(c2, c3)) {
+            for(int i=0; i<c2->type; i++) if(c2->move(i) && isNeighbor(c2->move(i), c3))
+              c4 = c2->move(i);
+            }
+          rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
+          if((c2&&c2->landflags == 1) || (c3&&c3->landflags == 1) || (c4&&c4->landflags == 1))
+            switchcount++;
+          generate_around(c2);
+          generate_around(c3);
+          c2 = ts::left_parent(c2, coastvalEdge);
+          c3 = ts::right_parent(c3, coastvalEdge);
+          if(!c2) { towerError(c); return 0; }
+          if(!c3) { towerError(c); return 0; }
+          }
         }
       }
     
@@ -3747,6 +3789,14 @@ namespace dungeon {
     placeGate(c, hrand(2) ? waOpenGate : waClosedGate);
     }
   
+  cell *random_child(cell *c, const cellfunction& cf) {
+    generate_around(c);
+    vector<cell*> children;
+    forCellEx(c2, c) if(cf(c2) > cf(c)) children.push_back(c2);
+    if(!isize(children)) return NULL;
+    return children[hrand(isize(children))];
+    }
+  
   void build(cell *c) {
     /* if(int(c->landparam) % 5 == 0) 
       c->wall = waCamelot;
@@ -3764,8 +3814,8 @@ namespace dungeon {
       
       if(df&1) {
         generate_around(c);
-        int df1 = dungeonFlags(ts::left_of(c, coastvalEdge));
-        int df2 = dungeonFlags(ts::right_of(c, coastvalEdge));
+        int df1 = DIM == 3 ? 0 : dungeonFlags(ts::left_of(c, coastvalEdge));
+        int df2 = DIM == 3 ? 0 : dungeonFlags(ts::right_of(c, coastvalEdge));
         
         c->wparam = 0;
         if(hrand(100) < (c->landparam % 5 == 0 ? 80 : 20)) {
@@ -3793,6 +3843,7 @@ namespace dungeon {
         if(q) downs[hrand(q)]->wall = waLadder;
         */
         cell *c2 = 
+          DIM == 3 ? random_child(c, coastvalEdge) :
           c->wparam == 1 ? ts::add(c, 1, 2, coastvalEdge) :
           c->wparam == 2 ? ts::add(c, -1, -2, coastvalEdge) :
           c->wparam == 3 ? ts::add(c, 1, 3, coastvalEdge) :
@@ -3847,7 +3898,7 @@ namespace dungeon {
   void all(cell *c, int d) {
     if(d == 8 && (c->land == laIvoryTower || c->land == laDungeon) && !euclid) {
 
-      if(hrand(1000) < 75 && (c->landparam & 1) ) {
+      if(hrand(1000) < 75 && (DIM == 3 || (c->landparam & 1))) {
         c->landflags = 3;
         }
       else c->landflags = 0;
@@ -3863,7 +3914,7 @@ namespace dungeon {
       }
 
     if(d == 7 && c->land == laIvoryTower) buildIvoryTower(c);
-    if(d == 8 && c->land == laDungeon) build(c);
+    if(d == (BARLEV == 8 ? 7 : 8) && c->land == laDungeon) build(c);
     if(d == 7 && c->land == laDungeon) buildPlates(c);
     }
   }
