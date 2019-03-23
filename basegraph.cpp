@@ -283,7 +283,8 @@ void display_data::set_projection(int ed, bool apply_models) {
       }
     else if(DIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
-      using conformal::clip_max, conformal::clip_min;
+      using conformal::clip_max; 
+      using conformal::clip_min;
       M[2][2] = 2 / (clip_max - clip_min);
       M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
       glhr::projection_multiply(M);
