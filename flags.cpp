@@ -327,9 +327,7 @@ bool checkOrb2(eMonster m1, eItem orb) {
   }
 
 bool ignoresSmell(eMonster m) {
-  return 
-    m == moHexSnake || isIvy(m) || isMutantIvy(m) || isGhostMover(m) || isSlimeMover(m) ||
-    m == moRoseLady || checkOrb(m, itOrbBeauty) || checkOrb(m, itOrbAether) || checkOrb(m, itOrbShield);
+  return ignoresSmellType(m) || checkOrb(m, itOrbBeauty) || checkOrb(m, itOrbAether) || checkOrb(m, itOrbShield);
   }
 
 bool highwall(cell *c) {
