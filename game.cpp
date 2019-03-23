@@ -2649,15 +2649,20 @@ bool canUnstable(eWall w, flagtype flags) {
 bool cellEdgeUnstable(cell *c, flagtype flags) {
   if(!isGravityLand(c->land) || !canUnstable(c->wall, flags)) return false;
   if(shmup::on && c->land == laWestWall) return false;
-  for(int i=0; i<c->type; i++) if(c->move(i)) {
-    if(isAnyIvy(c->move(i)->monst) && 
+  forCellEx(c2, c) {
+    if(isAnyIvy(c2->monst) && 
       c->land == laMountain && !(flags & MF_IVY)) return false;
-    if(gravityLevelDiff(c, c->move(i)) == gravity_zone_diff(c)) {
-      if(againstWind(c->move(i), c)) return false;
-      if(!passable(c->move(i), NULL, P_MONSTER | P_DEADLY))
+    int d = gravityLevelDiff(c, c2);
+    if(d == gravity_zone_diff(c)) {
+      if(againstWind(c2, c)) return false;
+      if(!passable(c2, NULL, P_MONSTER | P_DEADLY))
         return false;
-      if(isWorm(c->move(i)))
+      if(isWorm(c2))
         return false;
+      }
+    if(DIM == 3) {
+      if(d == 0 && !passable(c2, NULL, P_MONSTER | P_DEADLY)) return false;
+      if(d == -1 && !passable(c2, NULL, P_MONSTER | P_DEADLY)) forCellEx(c3, c2) if(c3 != c && gravityLevelDiff(c3, c) == 0) return false;
       }
     }
   return true;
