@@ -91,6 +91,7 @@ static const flagtype IF_PROTECTION = Flag(2);
 static const flagtype IF_EMPATHY = Flag(3);
 static const flagtype IF_RANGED = Flag(4);
 static const flagtype IF_SHMUPLIFE = Flag(5);
+static const flagtype IF_REVIVAL = Flag(6);
 
 struct itemtype {
   char  glyph;

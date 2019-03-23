@@ -129,6 +129,7 @@ ITEMFLAGCHECK(itemBurns, !(flag & IF_FIREPROOF))
 ITEMFLAGCHECK(isProtectionOrb, flag & IF_PROTECTION)
 ITEMFLAGCHECK(isEmpathyOrb, flag & IF_EMPATHY)
 ITEMFLAGCHECK(isRangedOrb, flag & IF_RANGED)
+ITEMFLAGCHECK(isRevivalOrb, flag & IF_REVIVAL)
 
 eMonster movegroup(eMonster m);
 
@@ -260,10 +261,6 @@ bool haveRangedOrb() {
     items[itRevolver] || items[itOrbStunning] || items[itStrongWind] ||
     items[itOrbDomination] || items[itOrbNature] || items[itOrbDash] ||
     items[itOrbMorph] || items[itOrbPhasing];
-  }
-
-bool isRevivalOrb(eItem i) {
-  return i == itOrbLife || i == itOrbFriend || i == itOrbUndeath;
   }
 
 bool isFriendlyGhost(eMonster m) {
