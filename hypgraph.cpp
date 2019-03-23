@@ -421,6 +421,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       H = space_to_perspective(H);
       H[DIM] = zlev;
       ret = H / sqrt(1 + sqhypot_d(DIM+1, H));
+      if(DIM == 3) ret[DIM] = zlev;
       break;
       }
     
