@@ -57,6 +57,7 @@ WALLFLAGCHECK(isStandardTree, flag & WF_STDTREE)
 WALLFLAGCHECK(isGrave, flag & WF_GRAVE)
 WALLFLAGCHECK(isReptile, flag & WF_REPTILE)
 WALLFLAGCHECK(useHeatColoring, flag & WF_HEATCOLOR)
+WALLFLAGCHECK(isThorny, flag & WF_THORNY)
 
 LANDFLAGCHECK(generateAll, flag & LF_GENERATE_ALL)
 LANDFLAGCHECK(isIcyLand, flag & LF_ICY)
@@ -311,8 +312,6 @@ bool survivesThorns(eMonster m) {
 bool survivesFall(eMonster m) {
   return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow || isGhost(m);
   }
-
-bool isThorny(eWall w) { return w == waRose; }
 
 bool checkOrb(eMonster m1, eItem orb) {
   if(m1 == moPlayer) return markOrb(orb);
