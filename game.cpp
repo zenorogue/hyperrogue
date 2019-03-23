@@ -456,10 +456,6 @@ eGravity get_move_gravity(cell *c, cell *c2) {
   }
 
 
-bool isWarped(cell *c) {
-  return isWarped(c->land) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
-  }
-
 bool nonAdjacent(cell *c, cell *c2) {
   if(isWarped(c) && isWarped(c2) && warptype(c) == warptype(c2)) {
     /* int i = neighborId(c, c2);
@@ -892,7 +888,7 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(m == moPair)
     return !(w && from && againstPair(from, w, m)) && passable(w, from, extra);
   if(m == passive_switch) return false;
-  if(normalMover(m) || isBug(m) || isDemon(m) || m == moHerdBull || m == moMimic) {
+  if(minf[m].mgroup == moYeti || isBug(m) || isDemon(m) || m == moHerdBull || m == moMimic) {
     if((isWitch(m) || m == moEvilGolem) && w->land != laPower && w->land != laHalloween)
       return false;
     return passable(w, from, extra);
@@ -972,37 +968,7 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   return false;
   }
 
-eMonster movegroup(eMonster m) {
-  if(isWitch(m) || m == moEvilGolem) {
-    if(m == moWitchGhost) return moWitchGhost;
-    if(m == moWitchWinter) return moWitchWinter;
-    return moWitch;
-    }
-  // if(isMagneticPole(m)) return m;
-  if(normalMover(m)) return moYeti;
-  if(m == moShark || m == moCShark) return moShark;
-  if(isSlimeMover(m)) return moSlime;
-  if(m == moEarthElemental) return moEarthElemental;
-  if(isLeader(m)) return moPirate;
-  if(m == moButterfly) return moButterfly;
-  if(isAngryBird(m)) return moEagle;
-  if(isBird(m)) return moTameBomberbird;
-  if(m == moReptile) return moReptile;
-  if(m == moGhost) return moGhost;
-  if(m == moFriendlyGhost) return moFriendlyGhost;
-  if(m == moGreaterShark) return moGreaterShark;
-  if(m == moWolf) return moWolf;
-  if(isDemon(m)) return moLesser;
-  if(isDragon(m)) return moDragonHead;
-  if(isBug(m)) return m;
-  if(m == moWaterElemental) return moWaterElemental;
-  if(m == moAirElemental) return moAirElemental;
-  if(isBull(m)) return moRagingBull;
-  if(m == moVoidBeast) return moVoidBeast;
-  if(m == moAltDemon || m == moHexDemon || m == moMonk)
-    return m;
-  return moNone;
-  }
+eMonster movegroup(eMonster m) { return minf[m].mgroup; }
 
 void useup(cell *c) {
   c->wparam--;
@@ -2077,10 +2043,6 @@ void minerEffect(cell *c) {
     c->wall = waNone;
   if(c->wall != ow && ow) drawParticles(c, winf[ow].color, 16);
   } 
-
-bool isRatling(eMonster m) {
-  return m == moRatling || m == moRatlingAvenger;
-  }
 
 void killMutantIvy(cell *c, eMonster who) {
   if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, moMutant);
@@ -4248,6 +4210,7 @@ bool quantum;
 
 cell *moveNormal(cell *c, flagtype mf) {
   eMonster m = c->monst;
+  if(isPowerMonster(m) && !playerInPower()) return NULL;
   
   int d;
   
@@ -6034,7 +5997,7 @@ void moverefresh(bool turn = true) {
 void consMove(cell *c, eMonster param) {
   eMonster m = c->monst;
 
-  if(!normalMover(m)) return;
+  if(movegroup(m) != moYeti) return;
   
   if(m == moWitchSpeed) havewhat |= HF_FAST;
   bool slow = slowMover(m);
@@ -6073,7 +6036,7 @@ void moveNormals(eMonster param) {
 
   for(int d=0; d<=MAX_EDGE; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
     cell *c = movesofgood[d][i];
-    if(normalMover(c->monst)) {
+    if(minf[c->monst].mgroup == moYeti) {
       moveNormal(c, MF_PATHDIST);
       }
     }

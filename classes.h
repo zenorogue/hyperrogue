@@ -10,70 +10,66 @@ static inline void set_flag(flagtype& f, flagtype which, bool b) {
   else f &= ~which;
   }
 
-static const int motypes = 167;
+static const flagtype MF_NOGHOST = Flag(0);
+static const flagtype MF_RAIDER = Flag(1);
+static const flagtype MF_PRINCESS = Flag(2);
+static const flagtype MF_MIMIC = Flag(3);
+static const flagtype MF_GOK = Flag(4);
+static const flagtype MF_NONLIVING = Flag(5);
+static const flagtype MF_METAL = Flag(6);
+static const flagtype MF_STUNNABLE = Flag(7);
+static const flagtype MF_HP = Flag(8);
+static const flagtype MF_MOUNTABLE = Flag(9);
+static const flagtype MF_FRIENDLY = Flag(10);
+static const flagtype MF_PLAYER = Flag(11);
+static const flagtype MF_BUG = Flag(12);
+static const flagtype MF_IVY = Flag(13);
+static const flagtype MF_PART = Flag(14);
+static const flagtype MF_MUTANTIVY = Flag(15);
+static const flagtype MF_ANYIVY = Flag(16);
+static const flagtype MF_BULLET = Flag(17);
+static const flagtype MF_DEMON = Flag(18);
+static const flagtype MF_WORM = Flag(19);
+static const flagtype MF_WITCH = Flag(20);
+static const flagtype MF_BIRD = Flag(21);
+static const flagtype MF_SLOWMOVER = Flag(22);
+static const flagtype MF_MAGNETIC = Flag(23);
+static const flagtype MF_SWITCH = Flag(24);
+static const flagtype MF_GHOST = Flag(25);
+static const flagtype MF_SHARK = Flag(26);
+static const flagtype MF_SLIME = Flag(27);
+static const flagtype MF_DRAGON = Flag(28);
+static const flagtype MF_KRAKEN = Flag(29);
+static const flagtype MF_NOBLOW = Flag(30);
+static const flagtype MF_MULTITILE = Flag(31);
+static const flagtype MF_LEADER = Flag(32);
+static const flagtype MF_FLYING = Flag(33);
+static const flagtype MF_ATTACK_THRU_VINE = Flag(34);
+static const flagtype MF_ATTACK_NONADJACENT = Flag(35);
+static const flagtype MF_NOHIGHLIGHT = Flag(36);
+static const flagtype MF_INACTIVE = Flag(37);
+static const flagtype MF_UNARMED = Flag(38);
+static const flagtype MF_IGNORE_PLATE = Flag(39);
+static const flagtype MF_BULL = Flag(40);
+static const flagtype MF_TROLL = Flag(41);
+static const flagtype MF_IGNORE_SMELL = Flag(42);
+static const flagtype MF_RATLING = Flag(43);
+static const flagtype MF_POWER = Flag(44);
+static const flagtype MF_GHOSTMOVER = Flag(45);
+
+enum eMonster {
+  #define MONSTER(a,b,c,d,e,f,g,h) d,
+  #include "content.cpp"
+  motypes
+  };
 
 struct monstertype {
   char  glyph;
   color_t color;
   const char *name;
+  flagtype flags;
+  enum eMonster mgroup;
   const char *help;
-  };
-
-enum eMonster { 
-  moNone, 
-  moYeti, moWolf, moWolfMoved, 
-  moRanger, 
-  moTroll, moGoblin, 
-  moWorm, moWormtail, moWormwait, moHedge, 
-  moDesertman, 
-  moIvyRoot, moIvyHead, moIvyBranch, moIvyWait, moIvyNext, moIvyDead,
-  moMonkey,
-  moSlime,
-  moMimic, moREMOVED, moGolem, moGolemMoved,
-  moEagle, moSeep,
-  moZombie, moGhost, moNecromancer, moShadow,
-  moTentacle, moTentacletail, moTentaclewait, moTentacleEscaping, 
-  moCultist, moPyroCultist,
-  moGreater, moGreaterM, moLesser, moLesserM,
-  moShark, moRunDog, moGreaterShark, moFireFairy,
-  moCrystalSage, moLancer, moFlailer, moMiner,
-  moVineBeast, moVineSpirit, moDarkTroll, moEarthElemental,
-  moBug0, moBug1, moBug2, 
-  moWitch, moWitchSpeed, moWitchFlash, moWitchFire, moWitchWinter, moWitchGhost,
-  moEvilGolem, moKnight, moCultistLeader, moSlimeNextTurn, moKnightMoved,
-  moIllusion,
-  moPirate, moCShark, moParrot,
-  moHexSnake, moHexSnakeTail, moRedTroll, moBomberbird, moAlbatross,
-  moTameBomberbird, moTameBomberbirdMoved,
-  moPalace, moFatGuard, moSkeleton, moVizier,
-  moViking, moFjordTroll, moWaterElemental,
-  moMouse, moMouseMoved, 
-  moPrincess, moPrincessMoved, 
-  moPrincessArmed, moPrincessArmedMoved,
-  moFamiliar, moGargoyle, moFireElemental, moAirElemental,
-  moOrangeDog, moTentacleGhost,
-  moMetalBeast, moMetalBeast2, moOutlaw, moMutant, 
-  moStormTroll, moForestTroll, 
-  moRedFox, moWindCrow, moFriendlyGhost, moRatling, moFalsePrincess, moRoseLady,
-  moRoseBeauty, moRatlingAvenger,
-  moTortoise, moDragonHead, moDragonTail,
-  moGadfly, moResearcher, moSparrowhawk,
-  moKrakenH, moKrakenT, moDraugr, moFriendlyIvy,
-  moVampire, moBat, moReptile, 
-  moHerdBull, moRagingBull, moSleepBull,
-  moButterfly, moNarciss, moMirrorSpirit,
-  moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLavaWolf, moHunterGuard,
-  moIceGolem, moSandBird, moSalamander, moHunterChanging,
-  moNorthPole, moSouthPole,
-  moPair, moHexDemon, moAltDemon, moMonk, moCrusher,
-  moSwitch1, moSwitch2,
-  moBrownBug, moAcidBird, moVariantWarrior,
-  moFallingDog, moWestHawk, 
-  // shmup specials
-  moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball, moCrushball,
-  // temporary
-  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning, moArrowTrap,
-  moRogueviz
   };
 
 struct genderswitch_t {
@@ -85,130 +81,103 @@ struct genderswitch_t {
 
 #define NUM_GS 6
 
-static const int ittypes = 136;
+enum eOrbshape { osNone, osLove, osRanged, osOffensive, osFriend, osUtility, osDirectional, osWarping };
+
+static const flagtype ZERO = 0;
+
+static const flagtype IF_SHARD = Flag(0);
+static const flagtype IF_FIREPROOF = Flag(1);
+static const flagtype IF_PROTECTION = Flag(2);
+static const flagtype IF_EMPATHY = Flag(3);
+static const flagtype IF_RANGED = Flag(4);
+static const flagtype IF_SHMUPLIFE = Flag(5);
 
 struct itemtype {
   char  glyph;
   color_t color;
   const char *name;
+  int itemclass;
+  flagtype flags;
+  eOrbshape orbshape;
   const char *help;
   };
 
 enum eItem { 
-  itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
-  itFeather, itSapphire, itHyperstone, itKey,
-  itGreenStone, itOrbYendor,
-  itOrbLightning, itOrbFlash, itOrbWinter, itOrbSpeed, itOrbLife, itOrbShield, itOrbDigging,
-  itOrbTeleport, itOrbSafety,
-  itOrbThorns, itFernFlower,
-  itWine, itOrbAether, itSilver, itOrbPsi,
-  itRoyalJelly, itEmerald, itOrbInvis, itPower, itOrbFire,
-  itHolyGrail, itGrimoire,
-  itOrbDragon, itOrbIllusion,
-  itPirate, itCompass,
-  itRedGem, itOrbTime, itOrbSpace,
-  itBombEgg, itCoast, itWhirlpool,
-  itOrbFriend, itOrbWater, itOrbAir,
-  itPalace, itOrbFrog,
-  itFjord, itOrbFish,
-  itOrbDiscord,
-  itSavedPrincess, itOrbLove,
-  itIvory, itZebra, 
-  itFireShard, itAirShard, itEarthShard, itWaterShard,
-  itElemental, itOrbSummon, itOrbMatter,
-  itBounty, itRevolver, itFulgurite, itMutant,
-  itOrbStunning, itOrbLuck, 
-  itMutant2, itOrbFreedom, itLotus, itOrbUndeath,
-  itWindstone, itOrbEmpathy, itStrongWind, itBuggy, itBuggy2,
-  itRose, itCoral, itOrbBeauty, itOrb37, itOrbEnergy,
-  itBabyTortoise, itOrbShell, itApple, itDragon, itOrbDomination,
-  itOrbSword, itKraken, itOrbSword2, itBarrow,
-  itTrollEgg, itWarning, itOrbStone, itOrbNature, itTreat,
-  itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
-  itOrbBull, itBull, itOrbMirror,
-  itInventory,
-  itLavaLily, itHunting, itBlizzard, itTerra,
-  itOrbSide1, itOrbSide2, itOrbSide3,
-  itOrbLava, itOrbMorph, itGlowCrystal, itSnake,
-  itDock, itRuins, itMagnet, itSwitch,
-  itOrbPhasing, itOrbMagnetism, itOrbSlaying,
-  itBrownian, itWest, itVarTreasure,
-  itOrbIntensity, itOrbGravity, itOrbChoice
+  #define ITEM(a,b,c,d,e,f,g,h,i) d,
+  #include "content.cpp"
+  ittypes
   };
 
-static const int walltypes = 112;
+enum eSlimegroup { sgNone, sgCave, sgWater, sgFloorA, sgFloorB, sgVine, sgTree };
+
+static const flagtype WF_WATER = Flag(0);
+static const flagtype WF_BOAT = Flag(1);
+static const flagtype WF_CHASM = Flag(2);
+static const flagtype WF_NOFLIGHT = Flag(3);
+static const flagtype WF_FIRE = Flag(4);
+static const flagtype WF_THUMPER = Flag(5);
+static const flagtype WF_ACTIVABLE = Flag(6);
+static const flagtype WF_ALCHEMY = Flag(7);
+static const flagtype WF_RED = Flag(8);
+static const flagtype WF_WALL = Flag(9);
+static const flagtype WF_PUSHABLE = Flag(10);
+static const flagtype WF_CONE = Flag(11);
+static const flagtype WF_STDTREE = Flag(12);
+static const flagtype WF_GRAVE = Flag(13);
+static const flagtype WF_REPTILE = Flag(14);
+static const flagtype WF_HEATCOLOR = Flag(15);
+static const flagtype WF_HIGHWALL = Flag(16);
+static const flagtype WF_THORNY = Flag(17);
+static const flagtype WF_TIMEOUT = Flag(18);
+static const flagtype WF_CISLAND = Flag(19);
+static const flagtype WF_SULPHURIC = Flag(20);
+static const flagtype WF_HALFVINE = Flag(21);
 
 struct walltype {
   char  glyph;
   color_t color;
   const char *name;
+  flagtype flags;
+  int snakelevel;
+  eSlimegroup sg;
   const char *help;
   };
 
-enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
-  waMirror, waCloud, waThumperOff, waFire, waAncientGrave, waFreshGrave, waColumn, waSulphurC, waSulphur,
-  waLake, waFrozenLake, waChasm, waChasmD, waBigTree, waSmallTree, 
-  waVinePlant, waVineHalfA, waVineHalfB, waPartialFire, 
-  waDeadwall, waDeadfloor, waDeadfloor2, waWaxWall, waGlass, waCamelot, waRoundTable,
-  waCamelotMoat,
-  waBigStatue,
-  waSea, waBoat, waCIsland, waCIsland2, waCTree,
-  waRed1, waRed2, waRed3,
-  waMineUnknown, waMineMine, waMineOpen,
-  waStrandedBoat,
-  waPalace, waClosedGate, waOpenGate, waClosePlate, waOpenPlate, waTrapdoor,
-  waGiantRug,
-  waPlatform, waGargoyle, waGargoyleFloor, waRubble, waLadder, waStone,
-  waBonfireOff, waThumperOn, waEternalFire,
-  waGargoyleBridge,
-  waTempWall, waTempFloor, waTempBridge,
-  waCharged, waGrounded, waSandstone, waSaloon, waMetal,
-  waDeadTroll2, waFan,
-  waTemporary, waEarthD, waElementalTmp, waElementalD,
-  waSlime1, waSlime2, waRose, waWarpGate,
-  waTrunk, waSolidBranch, waWeakBranch, waCanopy,
-  waBarrowWall, waBarrowDig,
-  waPetrified, waTower,
-  waBigBush, waSmallBush,
-  waReptile, waReptileBridge,
-  waInvisibleFloor,
-  waMirrorWall,
-  waPetrifiedBridge,
-  waTempBridgeBlocked,
-  waTerraWarrior, waBubble,
-  waArrowTrap, waMercury, waMagma,
-  waDock, waBurningDock, waRuinWall, waBrownian,
-  waFireTrap, waExplosiveBarrel, waEditStatue
+enum eWall { 
+  #define WALL(a,b,c,d,e,f,g,h,i) d,
+  #include "content.cpp"
+  walltypes
   };
 
-static const int landtypes = 87;
+static const flagtype LF_GENERATE_ALL = Flag(0);
+static const flagtype LF_ICY = Flag(1);
+static const flagtype LF_GRAVITY = Flag(2);
+static const flagtype LF_EQUI = Flag(3);
+static const flagtype LF_WARPED = Flag(4);
+static const flagtype LF_CYCLIC = Flag(5);
+static const flagtype LF_TECHNICAL = Flag(6);
+static const flagtype LF_MIRROR = Flag(7);
+static const flagtype LF_SEA = Flag(8);
+static const flagtype LF_COASTAL = Flag(9);
+static const flagtype LF_PURESEA = Flag(10);
+static const flagtype LF_ELEMENTAL = Flag(11);
+static const flagtype LF_HAUNTED = Flag(12);
+static const flagtype LF_TROLL = Flag(13);
+static const flagtype LF_INMIRROR = Flag(14);
+static const flagtype LF_INMIRRORORWALL = Flag(15);
 
 struct landtype {
   color_t color;
   const char *name;
+  flagtype flags;
+  eItem treasure;
   const char *help;
   };
 
-enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
-  laRlyeh, laHell, laCocytus, laMotion, laDryForest, laEmerald, laWineyard, laDeadCaves, 
-  laHive, laPower, laCamelot, laTemple, 
-  laCrossroads2, laCaribbean, laRedRock, laMinefield, laOcean, laWhirlpool,
-  laPalace, laLivefjord, 
-  laIvoryTower, laZebra, laEFire, laEAir, laEEarth, laEWater, laCrossroads3,
-  laOceanWall, laElementalWall, 
-  laCanvas, laPrincessQuest,
-  laWildWest, laStorms, laOvergrown, laClearing, 
-  laHaunted, laHauntedWall, laHauntedBorder,
-  laWhirlwind, laRose, laWarpCoast, laWarpSea, laCrossroads4,
-  laEndorian, laTortoise, laDragon,
-  laKraken, laBurial, laTrollheim,
-  laHalloween, laDungeon, laMountain, laReptile,
-  laPrairie, laBull, laCrossroads5, laCA,
-  laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
-  laMirrorOld,
-  laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
-  laDual, laSnakeNest, laDocks, laRuins, laMagnetic,
-  laSwitch, laMemory, laBrownian, laWestWall, laVariant
+enum eLand {
+  #define LAND(a,b,c,d,e,f,g) c,
+  #include "content.cpp"
+  landtypes
   };
 
 enum eGeometry {

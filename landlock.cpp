@@ -236,114 +236,13 @@ int isNative(eLand l, eMonster m) {
       
     case laMagnetic:
       return isMagneticPole(m) ? 2 : 0;
+    
+    case landtypes: return 0;
     }
   return false;
   }
 
-eItem treasureType(eLand l) {
-  switch(l) {
-    case laBrownian: 
-      return itBrownian;
-      
-    case laIce: return itDiamond;
-    case laJungle: return itRuby;
-    case laCaves: return itGold;
-    case laDesert: return itSpice;
-
-    case laAlchemist: return itElixir;
-
-    case laMirror: case laMirrored: case laMirrorWall: case laMirrorWall2: case laMirrored2:
-    case laMirrorOld:
-      return itShard;
-
-    case laMotion: return itFeather;
-
-    case laGraveyard: return itBone;
-    case laRlyeh: return itStatue;
-    case laDryForest: return itFernFlower;    
-
-    case laHell: return itHell;
-    case laCocytus: return itSapphire;
-    case laCrossroads: return itHyperstone;
-    case laCrossroads2: return itHyperstone;
-    case laCrossroads3: return itHyperstone;
-    case laCrossroads4: return itHyperstone;
-    case laCrossroads5: return itHyperstone;
-    
-    case laNone: return itNone;
-    case laBarrier: return itNone;
-    case laOceanWall: return itNone;
-    case laCanvas: return itNone;
-    case laMemory: return itNone;
-    
-    case laEmerald: return itEmerald;
-    case laWineyard: return itWine;
-    case laHive: return itRoyalJelly;
-    case laDeadCaves: return itSilver;
-    case laPower: return itPower;
-    case laCamelot: return itHolyGrail;
-    case laTemple: return itGrimoire;
-    
-    case laCaribbean: return itPirate;
-    case laRedRock: return itRedGem;
-    
-    case laMinefield: return itBombEgg;
-    case laOcean: return itCoast;
-    case laWhirlpool: return itWhirlpool;
-    case laPalace: return itPalace;
-    case laLivefjord: return itFjord;
-    
-    case laIvoryTower: return itIvory;
-    case laZebra: return itZebra;
-
-    case laEAir: case laEEarth: case laEWater: case laEFire: 
-    case laElementalWall: return itElemental;
-    
-    case laPrincessQuest: return itSavedPrincess;
-    
-    case laStorms: return itFulgurite;
-    case laOvergrown: return itMutant;
-    case laWildWest: return itBounty;
-    case laHalloween: return itTreat;
-    case laClearing: return itMutant2;
-    case laHaunted: case laHauntedWall: case laHauntedBorder: return itLotus;
-    case laWhirlwind: return itWindstone;
-    
-    case laRose: return itRose;
-    case laWarpCoast: case laWarpSea: return itCoral;
-    
-    case laDragon: return itDragon;
-    case laEndorian: return itApple;
-    case laTortoise: return itBabyTortoise;
-    
-    case laTrollheim: return itTrollEgg;
-    case laKraken: return itKraken;
-    case laBurial: return itBarrow;
-    
-    case laDungeon: return itSlime;
-    case laMountain: return itAmethyst;
-    case laReptile: return itDodeca;
-    
-    case laBull: return itBull;
-    case laPrairie: return itGreenGrass;
-    
-    case laVolcano: return itLavaLily;
-    case laTerracotta: case laMercuryRiver: return itTerra;
-    case laBlizzard: return itBlizzard;
-    case laHunting: return itHunting;
-    case laDual: return itGlowCrystal;
-    case laSnakeNest: return itSnake;
-    case laDocks: return itDock;
-    case laRuins: return itRuins;
-    case laSwitch: return itSwitch;
-    case laMagnetic: return itMagnet;
-    case laVariant: return itVarTreasure;
-    case laWestWall: return itWest;
-    
-    case laCA: return itNone;
-    }
-  return itNone;
-  }
+eItem treasureType(eLand l) { return linf[l].treasure; }
 
 eItem treasureTypeUnlock(eLand l, eItem u) {
   if(u != itOrbLove && l == laPrincessQuest)
@@ -356,36 +255,9 @@ eLand landof(eItem it) {
   return laNone;
   }
 
-bool isSealand(eLand l) {
-  return l == laOcean || l == laCaribbean || l == laWhirlpool || l == laLivefjord ||
-    l == laOceanWall || l == laWarpSea || l == laKraken || l == laDocks;
-  }
-
-bool isCoastal(eLand l) {
-  return l == laWarpSea || l == laWarpCoast || l == laLivefjord || l == laOcean;
-  }
-
-bool isPureSealand(eLand l) {
-  return l == laCaribbean || l == laKraken || l == laBrownian;
-  }
-
-bool isElemental(eLand l) {
-  return l == laEAir || l == laEWater || l == laEEarth || l == laEFire ||
-    l == laElementalWall;
-  }
-
-bool isHaunted(eLand l) {
-  return l == laHaunted || l == laHauntedBorder || l == laHauntedWall;
-  }
-
 int landMultiplier(eLand l) {
   if(l == laCamelot || l == laPrincessQuest) return 10;
   return 1;
-  }
-
-bool isTrollLand(eLand l) {
-  return l == laCaves || l == laStorms || l == laOvergrown ||
-    l == laDeadCaves || l == laLivefjord || l == laRedRock;
   }
 
 bool isCrossroads(eLand l) {
@@ -395,18 +267,6 @@ bool isCrossroads(eLand l) {
 
 bool bearsCamelot(eLand l) {
   return isCrossroads(l) && l != laCrossroads2 && l != laCrossroads5;
-  }
-
-bool inmirror(eLand l) {
-  return l == laMirrored || l == laMirrorWall2 || l == laMirrored2;
-  }
-
-bool inmirrororwall(eLand l) {
-  return l == laMirrored || l == laMirrorWall2 || l == laMirrored2 || l == laMirrorWall;
-  }
-
-bool inmirror(cell *c) {
-  return inmirror(c->land);
   }
 
 bool inmirror(const cellwalker& cw) {
@@ -601,6 +461,9 @@ bool landUnlocked(eLand l) {
     
     case laMagnetic:
       return false; // not implemented
+    
+    case landtypes:
+      return false;
     }
   return false;
   }

@@ -3,49 +3,135 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+
+/*
+rewritten
+*/
+
+// itemclass
+// slimegroup (wall)
+
+/*
+      it == itOrbLove ? shLoveRing :
+      isRangedOrb(it) ? shTargetRing :
+      isOffensiveOrb(it) ? shSawRing :
+      isFriendOrb(it) ? shPeaceRing :
+      isUtilityOrb(it) ? shGearRing :
+      isDirectionalOrb(it) ? shSpearRing :
+      among(it, itOrb37, itOrbGravity) ? shHeptaRing :
+      shRing;
+*/
+
 namespace hr {
 
-bool isIcyLand(eLand l) {
-  return l == laIce || l == laCocytus || l == laBlizzard;
-  }
+const flagtype& classflag(eItem it) { return iinf[it].flags; }
+const flagtype& classflag(eWall w) { return winf[w].flags; }
+const flagtype& classflag(eMonster m) { return minf[m].flags; }
+const flagtype& classflag(eLand l) { return linf[l].flags; }
 
-bool isIcyLand(cell *c) {
-  return isIcyLand(c->land);
-  }
+#define ANYFLAGCHECK(name, cond, field, enum) bool name(enum w) { flagtype flag = classflag(w); return cond; } bool name(cell *c) { return name(c->field); }
 
-bool isGravityLand(eLand l) {
-  return among(l, laIvoryTower, laEndorian, laMountain, laDungeon, laWestWall);
-  }
+#define MONFLAGCHECK(name, cond) ANYFLAGCHECK(name, cond, monst, eMonster)
+#define WALLFLAGCHECK(name, cond) ANYFLAGCHECK(name, cond, wall, eWall)
+#define ITEMFLAGCHECK(name, cond) ANYFLAGCHECK(name, cond, item, eItem)
+#define LANDFLAGCHECK(name, cond) ANYFLAGCHECK(name, cond, land, eLand)
 
-bool isEquidLand(eLand l) {
-  return isHaunted(l) || among(l, laIvoryTower, laEndorian, laDungeon, laOcean, laWestWall);
-  }
+WALLFLAGCHECK(isWatery, flag & WF_WATER)
+WALLFLAGCHECK(isBoat, flag & WF_BOAT)
+WALLFLAGCHECK(isChasmy, flag & WF_CHASM)
+WALLFLAGCHECK(isWateryOrBoat, flag & (WF_WATER | WF_BOAT))
+WALLFLAGCHECK(isNoFlight, flag & WF_NOFLIGHT)
+WALLFLAGCHECK(isFire, flag & WF_FIRE)
+WALLFLAGCHECK(isThumper, flag & WF_THUMPER)
+WALLFLAGCHECK(isActivable, flag & WF_ACTIVABLE)
+WALLFLAGCHECK(hasTimeout, flag & WF_TIMEOUT)
+WALLFLAGCHECK(isOnCIsland, flag & WF_CISLAND)
+WALLFLAGCHECK(cellHalfvine, flag & WF_HALFVINE)
+WALLFLAGCHECK(isAlch, flag & WF_ALCHEMY)
+WALLFLAGCHECK(isAlchAny, flag & WF_ALCHEMY)
+WALLFLAGCHECK(realred, flag & WF_RED)
+WALLFLAGCHECK(isWall, flag & WF_WALL)
+WALLFLAGCHECK(isPushable, flag & WF_PUSHABLE)
+WALLFLAGCHECK(conegraphtype, flag & WF_CONE)
+WALLFLAGCHECK(isStandardTree, flag & WF_STDTREE)
+WALLFLAGCHECK(isGrave, flag & WF_GRAVE)
+WALLFLAGCHECK(isReptile, flag & WF_REPTILE)
+WALLFLAGCHECK(useHeatColoring, flag & WF_HEATCOLOR)
+
+LANDFLAGCHECK(generateAll, flag & LF_GENERATE_ALL)
+LANDFLAGCHECK(isIcyLand, flag & LF_ICY)
+LANDFLAGCHECK(isGravityLand, flag & LF_GRAVITY)
+LANDFLAGCHECK(isEquidLand, flag & LF_EQUI)
+LANDFLAGCHECK(isWarped, flag & LF_WARPED)
+LANDFLAGCHECK(isCyclic, flag & LF_CYCLIC)
+LANDFLAGCHECK(isTechnicalLand, flag & LF_TECHNICAL)
+LANDFLAGCHECK(is_mirrorland, flag & LF_MIRROR)
+LANDFLAGCHECK(isSealand, flag & LF_SEA)
+LANDFLAGCHECK(isCoastal, flag & LF_COASTAL)
+LANDFLAGCHECK(isPureSealand, flag & LF_PURESEA)
+LANDFLAGCHECK(isElemental, flag & LF_ELEMENTAL)
+LANDFLAGCHECK(isHaunted, flag & LF_HAUNTED)
+LANDFLAGCHECK(isTrollLand, flag & LF_TROLL)
+LANDFLAGCHECK(inmirror, flag & LF_INMIRROR)
+LANDFLAGCHECK(inmirrororwall, flag & LF_INMIRRORORWALL)
+
+MONFLAGCHECK(isGhostable, !(flag & MF_NOGHOST))
+MONFLAGCHECK(isRaider, flag & MF_RAIDER)
+MONFLAGCHECK(isMimic, flag & MF_MIMIC)
+MONFLAGCHECK(isPrincess, flag & MF_PRINCESS)
+MONFLAGCHECK(isGolemOrKnight, flag & MF_GOK)
+MONFLAGCHECK(isNonliving, flag & MF_NONLIVING)
+MONFLAGCHECK(isMetalBeast, flag & MF_METAL)
+MONFLAGCHECK(isStunnable, flag & MF_STUNNABLE)
+MONFLAGCHECK(hasHitpoints, flag & MF_HP)
+MONFLAGCHECK(isMountable, flag & MF_MOUNTABLE)
+MONFLAGCHECK(isFriendlyType, flag & MF_FRIENDLY)
+MONFLAGCHECK(isFriendlyOrPlayer, flag & (MF_FRIENDLY | MF_PLAYER))
+MONFLAGCHECK(isBug, flag & MF_BUG)
+MONFLAGCHECK(isIvy, flag & MF_IVY)
+MONFLAGCHECK(isMonsterPart, flag & MF_PART)
+MONFLAGCHECK(isMutantIvy, flag & MF_MUTANTIVY)
+MONFLAGCHECK(isAnyIvy, flag & MF_ANYIVY)
+MONFLAGCHECK(isBulletType, flag & MF_BULLET)
+MONFLAGCHECK(isDemon, flag & MF_DEMON)
+MONFLAGCHECK(isWorm, flag & MF_WORM)
+MONFLAGCHECK(isWitch, flag & MF_WITCH)
+MONFLAGCHECK(isAngryBird, (flag & MF_BIRD) && !(flag & MF_FRIENDLY))
+MONFLAGCHECK(isBird, flag & MF_BIRD)
+MONFLAGCHECK(slowMover, flag & MF_SLOWMOVER)
+MONFLAGCHECK(isMagneticPole, flag & MF_MAGNETIC)
+MONFLAGCHECK(isSwitch, flag & MF_SWITCH)
+MONFLAGCHECK(isGhost, flag & MF_GHOST)
+MONFLAGCHECK(isShark, flag & MF_SHARK)
+MONFLAGCHECK(isSlimeMover, flag & MF_SLIME)
+MONFLAGCHECK(isDragon, flag & MF_DRAGON)
+MONFLAGCHECK(isKraken, flag & MF_KRAKEN)
+MONFLAGCHECK(isBlowableMonster, !(flag & MF_NOBLOW))
+MONFLAGCHECK(isMultitile, flag & MF_MULTITILE)
+MONFLAGCHECK(isLeader, flag & MF_LEADER)
+MONFLAGCHECK(isFlyingType, flag & MF_FLYING)
+MONFLAGCHECK(attackThruVine, flag & MF_ATTACK_THRU_VINE)
+MONFLAGCHECK(attackNonAdjacent, flag & MF_ATTACK_NONADJACENT)
+MONFLAGCHECK(noHighlight, flag & MF_NOHIGHLIGHT)
+MONFLAGCHECK(isInactiveEnemyType, flag & MF_INACTIVE)
+MONFLAGCHECK(isUnarmed, flag & MF_UNARMED)
+MONFLAGCHECK(ignoresPlatesType, flag & MF_IGNORE_PLATE)
+MONFLAGCHECK(isBull, flag & MF_BULL)
+MONFLAGCHECK(isTroll, flag & MF_TROLL)
+MONFLAGCHECK(ignoresSmellType, flag & MF_IGNORE_SMELL)
+MONFLAGCHECK(isRatling, flag & MF_RATLING)
+MONFLAGCHECK(isGhostMover, flag & MF_GHOSTMOVER)
+MONFLAGCHECK(isPowerMonster, flag & MF_POWER)
+
+ITEMFLAGCHECK(isElementalShard, flag & IF_SHARD)
+ITEMFLAGCHECK(itemBurns, !(flag & IF_FIREPROOF))
+ITEMFLAGCHECK(isProtectionOrb, flag & IF_PROTECTION)
+ITEMFLAGCHECK(isEmpathyOrb, flag & IF_EMPATHY)
+ITEMFLAGCHECK(isRangedOrb, flag & IF_RANGED)
+
+eMonster movegroup(eMonster m);
 
 // watery
-
-bool isWatery(cell *c) {
-  return c->wall == waCamelotMoat || c->wall == waSea || c->wall == waLake;
-  }
-
-bool isBoat(cell *c) {
-  return among(c->wall, waBoat, waStrandedBoat);
-  }
-
-bool isChasmy(cell *c) {
-  return c->wall == waChasm || c->wall == waSulphur || c->wall == waSulphurC || c->wall == waBubble ||
-    c->wall == waMercury;
-  }
-
-bool isWateryOrBoat(cell *c) {
-  return isWatery(c) || c->wall == waBoat;
-  }
-
-bool isNoFlight(cell *c) {
-  return 
-    c->wall == waBoat || c->wall == waVineHalfA || c->wall == waVineHalfB ||
-    c->wall == waStrandedBoat || c->wall == waTrunk ||
-    c->wall == waBigBush || c->wall == waSmallBush;
-  }
 
 bool boatStrandable(cell *c) {
   return c->wall == waNone && (c->land == laLivefjord || c->land == laOcean);
@@ -53,95 +139,12 @@ bool boatStrandable(cell *c) {
 
 // monster/wall types
 
-bool isFire(cell *w) {
-  return w->wall == waFire || w->wall == waPartialFire || w->wall == waEternalFire || w->wall == waBurningDock;
-  }
-
 bool isFireOrMagma(cell *w) {
   return isFire(w) || w->wall == waMagma;
   }
 
-bool isThumper(eWall w) {
-  return w == waThumperOff || w == waThumperOn;
-  }
-
-bool isThumper(cell *c) {
-  return isThumper(c->wall);
-  }
-
-bool isActivable(cell *c) {
-  return c->wall == waThumperOff || c->wall == waBonfireOff;
-  }
-
-bool hasTimeout(cell *c) {
-  return c->wall == waThumperOn || c->wall == waFire || c->wall == waPartialFire ||
-    c->wall == waTempWall || c->wall == waTempFloor || c->wall == waTempBridge ||
-    c->wall == waTempBridgeBlocked || c->wall == waBurningDock;
-  }
-
-bool isMimic(eMonster m) {
-  return m == moMimic;
-  }
-
 int mirrorcolor(bool mirrored) {
   return winf[mirrored ? waMirror : waCloud].color;
-  }
-
-bool isMimic(cell *c) { 
-  return isMimic(c->monst);
-  }
-
-bool isPrincess(eMonster m) {
-  return 
-    m == moPrincess || m == moPrincessMoved ||
-    m == moPrincessArmed || m == moPrincessArmedMoved;
-  }
-
-bool isGolemOrKnight(eMonster m) {
-  return 
-    m == moGolem  || m == moGolemMoved || 
-    m == moKnight || m == moKnightMoved ||
-    m == moTameBomberbird  || m == moTameBomberbirdMoved ||
-    m == moMouse || m == moMouseMoved ||
-    m == moFriendlyGhost ||
-    isPrincess(m);
-  }
-
-bool isGolemOrKnight(cell *c) { return isGolemOrKnight(c->monst); }
-
-bool isNonliving(eMonster m) {
-  return 
-    m == moMimic || m == moGolem || m == moGolemMoved ||
-    m == moZombie || m == moGhost || m == moShadow || m == moSkeleton ||
-    m == moEvilGolem || m == moIllusion || m == moEarthElemental || 
-    m == moWaterElemental || m == moDraugr || m == moTerraWarrior ||
-    m == moIceGolem || m == moVoidBeast || m == moJiangshi;
-  }
-
-bool isMetalBeast(eMonster m) {
-  return m == moMetalBeast || m == moMetalBeast2;
-  }
-
-bool isStunnable(eMonster m) {
-  return 
-    isMetalBeast(m) || isDragon(m) || isPrincess(m) ||
-    among(m, moPalace, moFatGuard, moSkeleton, moTortoise, moReptile, moTerraWarrior, moSalamander, moVizier, moBrownBug);
-  }
-
-bool hasHitpoints(eMonster m) {
-  return m == moPalace || m == moFatGuard || m == moVizier || isPrincess(m) || m == moTerraWarrior;
-  }
-
-bool isMountable(eMonster m) {
-  return isWorm(m) && m != moTentacleGhost;
-  }
-
-bool isFriendly(eMonster m) {
-  return isMimic(m) || isGolemOrKnight(m) || m == moIllusion || m == moFriendlyIvy;
-  }
-
-bool isFriendlyOrPlayer(eMonster m) {
-  return isFriendly(m) || m == moPlayer;
   }
 
 bool isMounted(cell *c) {
@@ -156,85 +159,18 @@ bool isMounted(cell *c) {
   return false;
   }
 
+int itemclass(eItem it) { return iinf[it].itemclass; }
+
+bool isFriendly(eMonster m) { return isFriendlyType(m); }
+
 bool isFriendly(cell *c) { 
   return isMounted(c) || isFriendly(c->monst); 
-  }
-
-bool isBug(eMonster m) {
-  return m >= moBug0 && m < moBug0+BUGCOLORS;
-  }
-
-bool isBug(cell *c) {
-  return isBug(c->monst);
   }
 
 bool isFriendlyOrBug(cell *c) { // or killable discord!
   // do not attack the stunned Princess
   if(isPrincess(c->monst) && c->stuntime) return false;
   return isFriendly(c) || isBug(c) || (c->monst && markOrb(itOrbDiscord) && !c->stuntime);
-  }
-
-bool isIvy(eMonster m) {
-  return m == moIvyRoot || m == moIvyHead || m == moIvyBranch || m == moIvyWait ||
-    m == moIvyNext || m == moIvyDead;
-  }
-
-bool isIvy(cell *c) {
-  return isIvy(c->monst);
-  }
-
-bool isMonsterPart(eMonster m) {
-  return m == moMutant || (isIvy(m) && m != moIvyRoot) ||
-    m == moDragonTail || m == moKrakenT;
-  }
-  
-bool isMutantIvy(eMonster m) {
-  return m == moMutant;
-  }
-
-bool isAnyIvy(eMonster m) {
-  return isIvy(m) || isMutantIvy(m) || m == moFriendlyIvy;
-  }
-
-bool isBulletType(eMonster m) { 
-  return 
-    m == moBullet || m == moFlailBullet || m == moFireball || 
-    m == moTongue || m == moAirball || m == moArrowTrap; 
-  }
-
-bool isMutantIvy(cell *c) { return isMutantIvy(c->monst); }
-
-bool isDemon(eMonster m) {
-  return m == moLesser || m == moLesserM || m == moGreater || m == moGreaterM;
-  }
-
-bool isDemon(cell *c) {
-  return isDemon(c->monst);
-  }
-
-bool isWorm(eMonster m) {
-  return m == moWorm || m == moWormtail || m == moWormwait || 
-    m == moTentacle || m == moTentacletail || m == moTentaclewait ||
-    m == moTentacleEscaping || m == moTentacleGhost ||
-    m == moHexSnake || m == moHexSnakeTail ||
-    m == moDragonHead || m == moDragonTail;
-  }
-
-bool isWorm(cell *c) {
-  return isWorm(c->monst);
-  }
-
-bool isWitch(eMonster m) {
-  // evil golems don't count
-  return m >= moWitch && m < moWitch+NUMWITCH-1;
-  }
-
-bool isOnCIsland(cell *c) {
-  return (c->wall == waCIsland || c->wall == waCTree || c->wall == waCIsland2);
-  }
-
-bool isGhostable(eMonster m) {
-  return m && !isFriendly(m) && !isIvy(m) && !isMultitile(m) && !isMutantIvy(m);
   }
 
 bool cellUnstable(cell *c) {
@@ -245,19 +181,6 @@ bool cellUnstableOrChasm(cell *c) {
   return 
     (c->land == laMotion && c->wall == waNone) || 
     c->wall == waChasm || c->wall == waTrapdoor;
-  }
-
-bool cellHalfvine(cell *c) {
-  return c->wall == waVineHalfA || c->wall == waVineHalfB;
-  }
-
-bool isWarped(eLand l) {
-  return l == laWarpCoast || l == laWarpSea;
-  }
-
-bool isElementalShard(eItem i) {
-  return 
-    i == itFireShard || i == itAirShard || i == itEarthShard || i == itWaterShard;
   }
 
 eMonster elementalOf(eLand l) {
@@ -272,219 +195,21 @@ eItem localshardof(eLand l) {
   return eItem(itFireShard + (l - laEFire));
   }
 
-int itemclass(eItem i) {
-  if(i == 0) return -1;
-  if(i < itKey || i == itFernFlower || 
-    i == itWine || i == itSilver || i == itEmerald || i == itRoyalJelly || i == itPower ||
-    i == itGrimoire || i == itPirate || i == itRedGem || i == itBombEgg ||
-    i == itCoast || i == itWhirlpool || i == itPalace || i == itFjord ||
-    i == itElemental || i == itZebra || i == itIvory ||
-    i == itBounty || i == itFulgurite || i == itMutant || i == itLotus || i == itMutant2 ||
-    i == itWindstone || i == itCoral || i == itRose ||
-    i == itBabyTortoise || i == itDragon || i == itApple ||
-    i == itKraken || i == itBarrow || i == itTrollEgg || i == itTreat ||
-    i == itSlime || i == itAmethyst || i == itDodeca ||
-    i == itGreenGrass || i == itBull ||
-    i == itLavaLily || i == itHunting ||
-    i == itBlizzard || i == itTerra || i == itGlowCrystal || i == itSnake ||
-    i == itDock || i == itRuins || i == itSwitch || i == itMagnet || 
-    among(i, itWest, itVarTreasure, itBrownian)
-    )
-    return IC_TREASURE;
-  if(i == itSavedPrincess || i == itStrongWind || i == itWarning || i == itBuggy || i == itBuggy2)
-    return IC_NAI;
-  if(i == itKey || i == itOrbYendor || i == itGreenStone || i == itHolyGrail || i == itCompass ||
-    isElementalShard(i) || i == itRevolver || i == itInventory) 
-    return IC_OTHER;  
-  return IC_ORB;
-  }
-  
-bool isAlch(eWall w) {
-  return w == waFloorA || w == waFloorB;
-  }
-
-/* bool isAlch2(eWall w, bool bubbletoo) {
-  return w == waSlime1 || w == waSlime2 || (bubbletoo && w == waBubble);
-  } */
-
-/* bool isAlch2(cell *c, bool bubbletoo) {
-  return isAlch2(c->wall, bubbletoo);
-  } */
-
-bool isAlch(cell *c) { return isAlch(c->wall); }
-  
-bool isAlchAny(eWall w) {
-  return w == waFloorA || w == waFloorB;
-  }
-  
-bool isAlchAny(cell *c) { return isAlchAny(c->wall); }
-  
-bool realred(eWall w) {
-  return w == waRed1 || w == waRed2 || w == waRed3;
-  }
-
-int snakelevel(eWall w) {
-  if(w == waRed1 || w == waDeadfloor2 || w == waRubble || w == waGargoyleFloor || 
-    w == waGargoyleBridge || w == waTempFloor || w == waTempBridge || w == waRoundTable ||
-    w == waPetrifiedBridge || w == waMagma) 
-    return 1;
-  if(w == waRed2) return 2;
-  if(w == waRed3) return 3;
-  if(w == waTower) return 3;
-  return 0;
-  }
-
 int snakelevel(cell *c) { 
 #if CAP_COMPLEX2
   if(c->land == laBrownian && among(c->wall, waNone, waMineMine, waFire)) return min(c->landparam / brownian::level, 3);
 #endif
-  return snakelevel(c->wall); 
-  }
-
-bool isWall(cell *w) {
-  if(w->wall == waNone || isAlchAny(w) || 
-    w->wall == waCavefloor || w->wall == waFrozenLake || w->wall == waVineHalfA ||
-    w->wall == waVineHalfB || w->wall == waDeadfloor || w->wall == waDeadfloor2 ||
-    w->wall == waRubble || w->wall == waGargoyleFloor || w->wall == waGargoyleBridge ||
-    w->wall == waTempFloor || w->wall == waTempBridge || w->wall == waPetrifiedBridge ||
-    w->wall == waBoat || w->wall == waCIsland || w->wall == waCIsland2 || 
-    w->wall == waRed1 || w->wall == waRed2 || w->wall == waRed3 ||
-    w->wall == waMineUnknown || w->wall == waMineMine || w->wall == waMineOpen ||
-    w->wall == waStrandedBoat || w->wall == waOpenGate || w->wall == waClosePlate ||
-    w->wall == waOpenPlate || w->wall == waTrapdoor || w->wall == waGiantRug ||
-    w->wall == waLadder || w->wall == waTrunk || w->wall == waSolidBranch ||
-    w->wall == waWeakBranch || w->wall == waCanopy || w->wall == waTower ||
-    w->wall == waSmallBush || w->wall == waBigBush ||
-    w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor ||
-    w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap || w->wall == waMagma ||
-    w->wall == waDock || w->wall == waFireTrap) 
-    return false;
-  if(isWatery(w) || isChasmy(w) || isFire(w)) return false;
-  return true;
-  }
-
-bool isPushable(eWall w) {
-  return w == waThumperOn || w == waExplosiveBarrel;
-  }
-
-bool isAngryBird(eMonster m) {
-  return m == moEagle || m == moAlbatross || m == moBomberbird || m == moGargoyle ||
-    m == moWindCrow || m == moSparrowhawk || 
-    m == moVampire || m == moBat || m == moButterfly || m == moGadfly ||
-    m == moAcidBird || m == moWestHawk;
-  }
-
-bool isBird(eMonster m) {
-  return isAngryBird(m) || m == moTameBomberbird || m == moTameBomberbirdMoved;
-  }
-
-bool slowMover(eMonster m) {
-  return 
-    m == moLesser || m == moGreater || isMetalBeast(m) ||
-    m == moTortoise || m == moDraugr;
-  }
-
-bool isMagneticPole(eMonster m) {
-  return m == moNorthPole || m == moSouthPole;
-  }
-
-bool normalMover(eMonster m) {
-  return
-    m == moYeti || m == moRanger || m == moGoblin || m == moTroll || m == moDesertman || 
-    m == moMonkey || m == moZombie || m == moNecromancer || m == moCultist || 
-    m == moRunDog || m == moPyroCultist || 
-    m == moFireFairy || m == moCrystalSage || m == moHedge ||
-    m == moVineBeast || m == moLancer || m == moFlailer ||
-    m == moMiner || m == moDarkTroll || 
-    (playerInPower() && (
-      (isWitch(m) && m != moWitchGhost && m != moWitchWinter) || m == moEvilGolem
-      )) ||
-    m == moRedTroll || 
-    m == moPalace || m == moFatGuard || m == moSkeleton || m == moVizier ||
-    m == moFjordTroll || m == moStormTroll || m == moForestTroll ||
-    m == moFamiliar ||
-    m == moFireElemental || m == moOrangeDog ||    
-    m == moOutlaw || m == moRedFox || m == moFalsePrincess || m == moRoseLady ||
-    m == moRoseBeauty || m == moWolf ||
-    m == moResearcher || m == moRagingBull || 
-    m == moNarciss || m == moMirrorSpirit || 
-    m == moHunterDog || m == moTerraWarrior || m == moJiangshi || 
-    m == moLavaWolf || m == moSalamander ||
-    m == moHunterGuard || m == moHunterChanging ||
-    m == moIceGolem || 
-    m == moSwitch1 || m == moSwitch2 || m == moCrusher || m == moPair || 
-    m == moBrownBug || m == moVariantWarrior || m == moFallingDog ||
-    isMagneticPole(m) || 
-    slowMover(m);
-  }
-
-bool isSwitch(eMonster m) {
-  return m == moSwitch1 || m == moSwitch2;
+  return winf[c->wall].snakelevel;
   }
 
 // from-to
 
-bool isGhost(eMonster m) {
-  return m == moGhost || m == moTentacleGhost || m == moFriendlyGhost;
-  }
-
-bool isGhostMover(eMonster m) {
-  return m == moGhost || m == moGreaterShark || m == moTentacleGhost ||
-    (playerInPower() && (m == moWitchGhost || m == moWitchWinter));
-  }
-
-bool isShark(eMonster m) {
-  return m == moShark || m == moCShark || m == moGreaterShark;
-  }
-
-bool isSlimeMover(eMonster m) {
-  return
-    m == moSlime || m == moSeep || m == moVineSpirit || m == moParrot;
-  }
-
-bool isDragon(eMonster m) { return m == moDragonHead || m == moDragonTail; }
-
-bool isKraken(eMonster m) { return m == moKrakenH || m == moKrakenT; }
-
-bool isBlowableMonster(eMonster m) {
-  return m && !(
-    isWorm(m) || isIvy(m) || isMutantIvy(m) || isSlimeMover(m) || 
-    m == moGhost || m == moGreaterShark ||
-    m == moWaterElemental || m == moWitchGhost || isMimic(m) ||
-    isKraken(m)
-    );
-  }
-  
-bool isMultitile(eMonster m) {
-  return isWorm(m) || isIvy(m) || isMutantIvy(m) || isKraken(m);
-  }
-  
-bool isSlimeMover(cell *c) {
-  return isSlimeMover(c->monst);
-  }
-  
-int slimegroup(cell *c) {
-  if(c->wall == waCavewall || c->wall == waDeadwall)
-    return 1;
-  if(isWatery(c))
-    return 2;
-  if(c->wall == waFloorA)
-    return 3;
-  if(c->wall == waFloorB)
-    return 4;
-  if(c->wall == waVinePlant || cellHalfvine(c))
-    return 5;
-  if(c->wall == waCTree)
-    return 6;
-  return 0;
-  }
-
-bool isLeader(eMonster m) {
-  return m == moPirate || m == moCultistLeader || m == moViking || m == moRatling || m == moRatlingAvenger;
+eSlimegroup slimegroup(cell *c) {
+  return winf[c->wall].sg;
   }
 
 bool isFlying(eMonster m) {
-  return isBird(m) || isGhost(m) || m == moAirElemental || isDragon(m) || checkOrb(m, itOrbAether);
+  return isFlyingType(m) || checkOrb(m, itOrbAether);
   }
 
 bool survivesChasm(eMonster m) {
@@ -492,33 +217,11 @@ bool survivesChasm(eMonster m) {
   }
 
 bool ignoresPlates(eMonster m) {
-  return m == moMouse || isFlying(m) || m == moIllusion;
-  }
-
-bool itemBurns(eItem it) {
-  return it && it != itOrbDragon && it != itOrbFire && it != itDragon && it != itOrbWinter && it != itOrbLava && it != itTreat && it != itLavaLily;
-  }
-
-bool attackThruVine(eMonster m) {
-  return m == moGhost || m == moVineSpirit || m == moFriendlyGhost || m == moTentacleGhost;
-  }
-
-bool attackNonAdjacent(eMonster m) {
-  return m == moGhost || m == moFriendlyGhost || m == moTentacleGhost;
-  }
-
-bool noHighlight(eMonster m) {
-  return
-    (m == moIvyWait || m == moIvyNext || m == moIvyDead);
+  return ignoresPlatesType(m) || isFlying(m);
   }
 
 bool isInactiveEnemy(cell *w, eMonster forwho) {
-  if(w->monst == moWormtail || w->monst == moWormwait || w->monst == moTentacletail || w->monst == moTentaclewait || w->monst == moHexSnakeTail)
-    return true;
-  if(w->monst == moLesserM || w->monst == moGreaterM)
-    return true;
-  if(w->monst == moIvyRoot || w->monst == moIvyWait || w->monst == moIvyNext || w->monst == moIvyDead)
-    return true;
+  if(isInactiveEnemyType(w->monst)) return true;
   if(w->monst && ((forwho == moPlayer) ? realstuntime(w) : realstuntime(w) > 1) && !isFriendly(w))
     return true;
   return false;
@@ -535,12 +238,6 @@ bool isActiveEnemy(cell *w, eMonster forwho) {
   return true;
   }
 
-bool isUnarmed(eMonster m) {
-  return 
-    m == moMouse || m == moMouseMoved || m == moPrincess || m == moPrincessMoved ||
-    m == moCrystalSage || m == moVampire || m == moBat;
-  }
-
 bool isArmedEnemy(cell *w, eMonster forwho) {
   return w->monst != moCrystalSage && w->monst != moCrusher && isActiveEnemy(w, forwho);
   }
@@ -549,21 +246,11 @@ bool isHive(eLand l) {
   return l == laHive;
   }
   
-bool isIcyWall(cell *c) {
-  return c->wall == waNone || c->wall == waIcewall || c->wall == waFrozenLake || c->wall == waLake;
-  }
-
 bool eternalFire(cell *c) {
   return c->land == laDryForest || (c->land == laPower && !smallbounded) || c->land == laMinefield ||
     c->land == laEFire || c->land == laElementalWall;
   }
   
-bool isCyclic(eLand l) {
-  return 
-    l == laWhirlpool || l == laTemple || l == laCamelot || l == laClearing ||
-    l == laMountain;
-  }
-
 bool haveRangedOrb() {
   return 
     items[itOrbPsi] || items[itOrbDragon] || items[itOrbTeleport] ||
@@ -574,54 +261,8 @@ bool haveRangedOrb() {
     items[itOrbMorph] || items[itOrbPhasing];
   }
 
-bool isOffensiveOrb(eItem it) {
-  return it == itOrbLightning || it == itOrbFlash || it == itOrbThorns ||
-    it == itOrbDragon || it == itOrbStunning || 
-    it == itOrbFreedom || it == itOrbPsi ||
-    it == itOrbSide1 || it == itOrbSide2 || it == itOrbSide3 ||
-    it == itOrbSlaying;
-  }
-
-bool isRangedOrb(eItem i) {
-  return i == itOrbPsi || i == itOrbDragon || i == itOrbTeleport || i == itOrbIllusion ||
-    i == itOrbSpace || i == itOrbAir || i == itOrbFrog ||
-    i == itOrbSummon || i == itOrbMatter || i == itRevolver || i == itOrbStunning ||
-    i == itOrbDomination || i == itOrbNature || i == itOrbDash || i == itOrbMorph;
-  }
-
-bool isProtectionOrb(eItem i) {
-  return i == itOrbWinter || i == itOrbShield || i == itOrbInvis || i == itOrbShell;
-  }
-
-bool isEmpathyOrb(eItem i) {
-  return 
-    i == itOrbFire || i == itOrbDigging || i == itOrbWinter ||
-    i == itOrbUndeath || i == itOrbSpeed || i == itOrbShield ||
-    i == itOrbAether || i == itOrbInvis || i == itOrbThorns ||
-    i == itOrbWater || i == itOrbStone ||
-    i == itOrbSide1 || i == itOrbSide2 || i == itOrbSide3 ||
-    i == itOrbSlaying || i == itOrbFish;
-  }
-
-bool isUtilityOrb(eItem i) {
-  return i == itOrbSpeed || i == itOrbDigging || 
-    i == itOrbSafety || i == itOrbTeleport || i == itOrbAether ||
-    i == itOrbTime || i == itOrbSpace || 
-    i == itOrbSummon || i == itOrbLuck || i == itOrbEnergy ||
-    i == itOrbLava;
-  }
-
-bool isDirectionalOrb(eItem i) {
-  return i == itOrbHorns || i == itOrbBull || i == itOrbSword || i == itOrbSword2;
-  }
-
 bool isRevivalOrb(eItem i) {
   return i == itOrbLife || i == itOrbFriend || i == itOrbUndeath;
-  }
-
-bool isFriendOrb(eItem i) {
-  return i == itOrbLife || i == itOrbFriend || i == itOrbDiscord || i == itOrbLove ||
-    i == itOrbEmpathy || i == itOrbUndeath;
   }
 
 bool isFriendlyGhost(eMonster m) {
@@ -691,20 +332,6 @@ bool ignoresSmell(eMonster m) {
     m == moRoseLady || checkOrb(m, itOrbBeauty) || checkOrb(m, itOrbAether) || checkOrb(m, itOrbShield);
   }
 
-bool isTroll(eMonster m) {
-  return 
-    m == moTroll || m == moRedTroll || m == moDarkTroll ||
-    m == moForestTroll || m == moStormTroll || m == moFjordTroll;
-  }
-
-bool isGrave(eWall w) {
-  return w == waFreshGrave || w == waAncientGrave;
-  }
-
-bool isStandardTree(cell *c) {
-  return c->wall == waBigTree || c->wall == waSmallTree;
-  }
-
 bool highwall(cell *c) {
   if(c->wall == waGlass) return false;
   if(wmescher && wmspatial && c->wall == waBarrier && c->land == laOceanWall)
@@ -726,15 +353,8 @@ int chasmgraph(cell *c) {
   }
 
 bool conegraph(cell *c) {
-  return wmescher && wmspatial && (c->wall == waDune || c->wall == waBigTree || c->wall == waSmallTree || c->wall == waCTree || (c->wall == waBarrier && c->land == laOceanWall));
-  }
-
-bool isReptile(eWall w) {
-  return w == waReptile || w == waReptileBridge; 
-  }
-
-bool isBull(eMonster m) {
-  return m == moRagingBull || m == moHerdBull || m == moSleepBull;
+  return wmescher && wmspatial && conegraphtype(c);
+  (c->wall == waDune || c->wall == waBigTree || c->wall == waSmallTree || c->wall == waCTree || (c->wall == waBarrier && c->land == laOceanWall));
   }
 
 bool hornStuns(cell *c) {
@@ -747,26 +367,5 @@ bool hornStuns(cell *c) {
     attackJustStuns(c, AF_NORMAL, moNone);
   }
 
-// generate all the world first in the quotient geometry
-bool generateAll(eLand l) {
-  return 
-    l == laIce || l == laDryForest || l == laCocytus || l == laLivefjord ||
-    l == laCaves || l == laCA;
-  }
-
-bool isRaider(eMonster m) {
-  return m == moPair || m == moMonk || m == moCrusher || m == moAltDemon || m == moHexDemon;
-  }
-
-bool isTechnicalLand(eLand l) {
-  return l == laNone || l == laOceanWall || l == laBarrier || l == laCanvas ||
-    l == laHauntedWall || l == laHauntedBorder || l == laCA ||
-    l == laMirrorWall || l == laMirrored || l == laMirrored2 ||
-    l == laMirrorWall2 || l == laMercuryRiver || l == laMemory;
-  }
-
-bool is_mirrorland(cell *c) {
-  return among(c->land, laMirror, laMirrorOld);
-  }
 
 }

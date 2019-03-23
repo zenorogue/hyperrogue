@@ -665,6 +665,24 @@ color_t kind_outline(eItem it) {
     return OUTLINE_OTHER;
   }
 
+transmatrix face_the_player(transmatrix V) {
+  if(DIM == 2) return V;
+  return rgpushxto0(tC0(V));
+  }
+
+hpcshape& orbshape(eOrbshape s) {
+  switch(s) {
+     case osLove: return shLoveRing;
+     case osRanged: return shTargetRing;
+     case osOffensive: return shSawRing;
+     case osFriend: return shPeaceRing;
+     case osUtility: return shGearRing;
+     case osDirectional: return shSpearRing;
+     case osWarping: return shHeptaRing;
+     default: return shRing;
+     }
+  }
+
 bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pticks, bool hidden) {
 #if !CAP_SHAPES
   return it;
@@ -847,16 +865,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
       queuepolyat(Vit * spinptick(1500), shFishTail, col, PPR::ITEM_BELOW);
 
     queuepolyat(Vit, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
-    hpcshape& sh = 
-      it == itOrbLove ? shLoveRing :
-      isRangedOrb(it) ? shTargetRing :
-      isOffensiveOrb(it) ? shSawRing :
-      isFriendOrb(it) ? shPeaceRing :
-      isUtilityOrb(it) ? shGearRing :
-      isDirectionalOrb(it) ? shSpearRing :
-      among(it, itOrb37, itOrbGravity) ? shHeptaRing :
-      shRing;
-    queuepolyat(Vit * spinptick(1500), sh, col, prio);
+
+    queuepolyat(Vit * spinptick(1500), orbshape(iinf[it].orbshape), col, prio);
     }
 
   else if(it) return true;
@@ -3213,7 +3223,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       }
 
     case laIce: case laCocytus: case laBlizzard:
-      if(isIcyWall(c)) {
+      if(useHeatColoring(c)) {
         float h = HEAT(c);
         eLand l = c->land;
         
