@@ -1026,7 +1026,9 @@ land_validity_t& land_validity(eLand l) {
     if(l == laEmerald && hyperbolic && !binarytiling && S7 == 12) return lv::pattern_special;
     if(l == laZebra) return pattern_not_implemented_random;
     if(among(l, laWhirlpool, laPrairie, laWestWall, laBull)) return lv::not_3d;
-    if(isGravityLand(l) || l == laBrownian) return not_implemented;
+    if(l == laEndorian && hyperbolic && !quotient) return lv::pattern_special;
+    if(l == laIvoryTower && hyperbolic && binarytiling) return lv::pattern_special;
+    if(l == laDungeon || l == laBrownian) return not_implemented;
     if(l == laKraken) return binarytiling ? not_binary : not_implemented;
     if(l == laBurial && !shmup::on) return not_implemented;
     if(l == laMirrorOld && !shmup::on) return not_implemented;
