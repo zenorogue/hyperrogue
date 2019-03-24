@@ -1956,6 +1956,10 @@ namespace heat {
     
     vector<ld> hmods(dcs, 0);
     
+    int divby = 10;
+    if(S7 > 10) divby *= 2;
+    if(DIM == 3) divby *= 2;
+    
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
       double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
@@ -2007,7 +2011,7 @@ namespace heat {
             continue;
             }
           ld hdiff = absheat(ct) - absheat(c);
-          hdiff /= 10;
+          hdiff /= divby;
 
           #if CAP_FIELD
           if(ct->land == laBlizzard) {
