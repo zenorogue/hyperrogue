@@ -3030,3 +3030,18 @@ and led to an implementation of a cool Emerald Mine pattern for 534, and also so
 - fixed the image not appearing in the texture mode
 - fixed "dark landscape" etc. patterns
 - texture:: aura no longer flickers
+
+2018-03-24 01:53 Version 11.0n:
+
+- fixed the animation of items on boat
+- fixed knight cloaks and tortoises
+- fixed some instances of friends not being protected from environment with Orb and Empathy, or being protected with Orb but without Empathy
+- stunning a ghost no longer also prevents some other ghosts from moving
+- improved the naming of models and projections; in general perspective projection, you can now explicitly set inverse Poincare and ortho/Gans
+
+3D:
+- models; animations; smart range now work in 3D.
+- made 3D a bit easier
+- fixed a bug with ice in 534f; also you can now actually melt something
+- Ivory Tower in horosphere tilings (and also in regular hyperbolic honeycombs, but better with horospheres)
+- Yendorian Forest, interesting (and different) in each available hyperbolic honeycomb
