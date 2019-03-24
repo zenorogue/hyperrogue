@@ -1061,10 +1061,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
         }      
 
       if(knighted)
-        queuepoly(VBS, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
+        queuepoly(VBODY * VBS, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
 
       if(tortoise::seek())
-        tortoise::draw(VBS * ypush(-crossf*.25), tortoise::seekbits, 4, 0);
+        tortoise::draw(VBODY * VBS * ypush(-crossf*.25), tortoise::seekbits, 4, 0);
       }
 
 
