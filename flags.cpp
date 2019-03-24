@@ -39,7 +39,7 @@ const flagtype& classflag(eLand l) { return linf[l].flags; }
 WALLFLAGCHECK(isWatery, flag & WF_WATER)
 WALLFLAGCHECK(isBoat, flag & WF_BOAT)
 WALLFLAGCHECK(isChasmy, flag & WF_CHASM)
-WALLFLAGCHECK(isWateryOrBoat, flag & (WF_WATER | WF_BOAT))
+WALLFLAGCHECK(isWateryOrBoat, (flag & WF_WATER) || w == waBoat)
 WALLFLAGCHECK(isNoFlight, flag & WF_NOFLIGHT)
 WALLFLAGCHECK(isFire, flag & WF_FIRE)
 WALLFLAGCHECK(isThumper, flag & WF_THUMPER)
