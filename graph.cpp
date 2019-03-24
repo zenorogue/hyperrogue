@@ -3940,7 +3940,7 @@ int get_darkval(int d) {
   return 0;
   }
 
-void drawBoat(cell *c, const transmatrix* Vboat, transmatrix& Vboat0, transmatrix& V) {
+void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatrix& V) {
   double footphase;
   if(c == cwt.at && hide_player()) return;
   bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
@@ -4839,7 +4839,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               poly.subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
               }
             }
-          if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, &V, V, V);
+          if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, Vboat, V, V);
           else if(isFire(c)) {
             static int r = 0;
             r += ticks - lastt;
