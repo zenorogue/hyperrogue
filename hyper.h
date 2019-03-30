@@ -1013,6 +1013,8 @@ hyperpoint gethyper(ld x, ld y);
 void resetview(); 
 void drawthemap();
 void drawfullmap();
+void draw_boundary(int w);
+void draw_model_elements();
 extern function<void()> wrap_drawfullmap;
 bool displaystr(int x, int y, int shift, int size, const char *str, color_t color, int align);
 bool displaystr(int x, int y, int shift, int size, const string& str, color_t color, int align);

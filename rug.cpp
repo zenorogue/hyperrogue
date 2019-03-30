@@ -1288,6 +1288,14 @@ void prepareTexture() {
   glbuf->clear(0);
 
   ptds.clear();
+
+  #if CAP_QUEUE
+  draw_boundary(0);
+  draw_boundary(1);
+  
+  draw_model_elements();
+  #endif
+
   drawthemap();
   if(mousing && !renderonce) {
     for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
