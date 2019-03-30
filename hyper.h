@@ -21,6 +21,9 @@ void ignore(T&&) {
   // placate GCC's overzealous -Wunused-result
   }
 
+template<class T, class V, class... U> bool among(T x, V y) { return x == y; }
+template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==y || among(x,u...); }
+
 // functions and types used from the standard library
 using std::vector;
 using std::map;
@@ -2480,9 +2483,6 @@ bool canPushThumperOn(cell *tgt, cell *thumper, cell *player);
 void pushThumper(cell *th, cell *cto);
 
 template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
-
-template<class T, class V, class... U> bool among(T x, V y) { return x == y; }
-template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==y || among(x,u...); }
 
 eLand getNewSealand(eLand old);
 bool createOnSea(eLand old);
