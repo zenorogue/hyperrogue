@@ -14,6 +14,8 @@ bool rug_failure = false;
 
 namespace rug {
 
+ld lwidth = 2;
+
 bool in_crystal() { return surface::sh == surface::dsCrystal; }
 
 bool computed = false;
@@ -1173,9 +1175,12 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
 
 vector<glhr::ct_vertex> ct_array;
 
+vector<glhr::ct_vertex> cp_array;
+
 void drawTriangle(triangle& t) {
+  int num = t.m[2] ? 3 : 2;
   using namespace hyperpoint_vec;  
-  for(int i: {0,1,2}) {
+  for(int i=0; i<num; i++) {
     if(!t.m[i]->valid) return;
     // if(t.m[i]->dist >= get_sightrange()+.51) return;
     }
@@ -1184,9 +1189,13 @@ void drawTriangle(triangle& t) {
 #if CAP_ODS
   if(vid.stereo_mode == current_display->sODS) {
     hyperpoint pts[3];
-    for(int i=0; i<3; i++)
-      pts[i] = t.m[i]->getglue()->flat;    
 
+    // not implemented
+    if(num == 2) return; 
+
+    for(int i=0; i<num; i++)
+      pts[i] = t.m[i]->getglue()->flat;    
+      
     hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
     double hch = hypot_d(3, hc);
     
@@ -1250,16 +1259,18 @@ void drawTriangle(triangle& t) {
 
   int spherepoints = 0;
   array<hyperpoint,3> h;
-  for(int i: {0,1,2}) getco(t.m[i], h[i], spherepoints);
+  for(int i=0; i<num; i++) getco(t.m[i], h[i], spherepoints);
   if(spherepoints == 1 || spherepoints == 2) return;
   
-  hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
-  double hch = hypot_d(3, hc);
+  ld col = 1;
+  if(num == 3) {
+    hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
+    double hch = hypot_d(3, hc);  
+    col = (2 + hc[0]/hch) / 3;
+    }
   
-  ld col = (2 + hc[0]/hch) / 3;
-  
-  for(int i: {0,1,2}) 
-    ct_array.emplace_back(h[i], t.m[i]->x1, t.m[i]->y1, col);
+  for(int i=0; i<num; i++) 
+    (num==3?ct_array:cp_array).emplace_back(h[i], t.m[i]->x1, t.m[i]->y1, col);
   }
 
 renderbuffer *glbuf;
@@ -1327,6 +1338,7 @@ void drawRugScene() {
   for(int ed=current_display->stereo_active() && vid.stereo_mode != sODS ? -1 : 0; ed < 2; ed += 2) {
     use_precompute = false;
     ct_array.clear();
+    cp_array.clear();
     current_display->set_mask(ed), current_display->set_viewport(ed);
     if(ed == 1 && vid.stereo_mode == sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -1379,8 +1391,17 @@ void drawRugScene() {
       drawTriangle(triangles[t]);
       
     glhr::id_modelview();
-    glhr::prepare(ct_array);
-    glDrawArrays(GL_TRIANGLES, 0, isize(ct_array));
+    
+    if(isize(ct_array) > 0) {
+      glhr::prepare(ct_array);
+      glDrawArrays(GL_TRIANGLES, 0, isize(ct_array));
+      }
+
+    if(isize(cp_array) > 0) {
+      glhr::prepare(cp_array);
+      glLineWidth(lwidth);
+      glDrawArrays(GL_LINES, 0, isize(cp_array));
+      }
 
     current_display->set_mask(0);
     }
@@ -1719,6 +1740,7 @@ hyperpoint gethyper(ld x, ld y) {
     auto r0 = triangles[i].m[0];
     auto r1 = triangles[i].m[1];
     auto r2 = triangles[i].m[2];
+    if(!r2) continue;
     hyperpoint p0, p1, p2;
     bool error = false;
     int spherepoints = 0;
@@ -1984,6 +2006,10 @@ int rugArgs() {
 
   else if(argis("-rugmany")) {
     renderonce = false;
+    }
+
+  else if(argis("-ruglwidth")) {
+    shift_arg_formula(lwidth);
     }
 
   else if(argis("-rugauto")) {
