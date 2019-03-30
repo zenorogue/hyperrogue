@@ -1076,7 +1076,7 @@ void show() {
   dialog::addBreak(100);
 
   dialog::addItem(XLAT("stereo vision config"), 'e');
-  dialog::add_action([] () { pushScreen(showStereo); });
+  dialog::add_action_push(showStereo);
 
   dialog::addItem(XLAT("experiment with geometry"), 'g');
   dialog::add_action([] () { runGeometryExperiments(); });

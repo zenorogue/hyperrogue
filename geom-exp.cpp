@@ -474,7 +474,7 @@ void showEuclideanMenu() {
   dialog::init(XLAT("experiment with geometry"));
   
   dialog::addSelItem(XLAT("basic tiling"), XLAT(ginf[geometry].tiling_name), 't');
-  dialog::add_action([] { pushScreen([] { ge_select_tiling(tilinglist); }); });
+  dialog::add_action_push([] { ge_select_tiling(tilinglist); });
 
   int ts = ginf[geometry].sides;
   int tv = ginf[geometry].vertex;
@@ -600,10 +600,10 @@ void showEuclideanMenu() {
   else
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 'q');
 
-  dialog::add_action([] { pushScreen([] { ge_select_tiling(quotientlist); }); });
+  dialog::add_action_push([] { ge_select_tiling(quotientlist); });
 
   dialog::addSelItem(XLAT("dimension"), its(DIM), 'd');
-  dialog::add_action([] { pushScreen([] { ge_select_tiling(list3d); }); });
+  dialog::add_action_push([] { ge_select_tiling(list3d); });
   
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
@@ -675,17 +675,17 @@ void showEuclideanMenu() {
   dialog::addBreak(50);
   
   dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
-  dialog::add_action([] { pushScreen(ge_land_selection); });
+  dialog::add_action_push(ge_land_selection);
   dialog::addBoolItem(XLAT("pattern"), specialland == laCanvas, 'p');
   if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
-  dialog::add_action([] { pushScreen(patterns::showPrePattern); });
+  dialog::add_action_push(patterns::showPrePattern);
   validity_info();
   if(DIM == 3) {
     dialog::addItem(XLAT("3D configuration"), '9');
-    dialog::add_action([] { pushScreen(show3D); });
+    dialog::add_action_push(show3D);
     }
   dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-  dialog::add_action([] { pushScreen(conformal::model_menu); });
+  dialog::add_action_push(conformal::model_menu);
   #if CAP_CRYSTAL && MAXMDIM >= 4
   crystal::add_crystal_transform('x');  
   #endif
@@ -694,7 +694,7 @@ void showEuclideanMenu() {
    
   #if CAP_SHOT
   dialog::addItem(XLAT("take picture"), 's');
-  dialog::add_action([] { pushScreen(shot::menu); });
+  dialog::add_action_push(shot::menu);
   #endif
 
   dialog::addHelp();

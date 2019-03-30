@@ -1218,7 +1218,7 @@ void show() {
     });
   if(geometry == gCrystal) {
     dialog::addBoolItem(XLAT("3D display"), rug::rugged, 'r');
-    dialog::add_action([]() { pushScreen(rug::show); });
+    dialog::add_action_push(rug::show);
     }
   else
     dialog::addBreak(100);

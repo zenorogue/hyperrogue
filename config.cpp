@@ -1603,7 +1603,7 @@ void refresh_canvas() {
 void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
   cmode = sm::SIDE;
   gamescreen(0);
-  dialog::init(XLAT("customize colors and aura"));
+  dialog::init(XLAT("colors & aura"));
   
   for(int i=0; i<isize(ct); i++) {
     dialog::addColorItem(its(i), ct[i] << 8, 'a'+i);
@@ -1618,7 +1618,7 @@ void show_color_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   getcstat = '-';
   gamescreen(0);
-  dialog::init(XLAT("customize colors and aura"));
+  dialog::init(XLAT("colors & aura"));
 
   dialog::addColorItem(XLAT("background"), backcolor << 8, 'b');
   dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
@@ -1650,17 +1650,17 @@ void show_color_dialog() {
   dialog::addBreak(50);
   if(specialland == laCanvas && colortables.count(patterns::whichCanvas)) {
     dialog::addItem(XLAT("pattern colors"), 'P');
-    dialog::add_action([] () { pushScreen([] () { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas); });});
+    dialog::add_action_push([] { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas); });
     }
  
   if(cwt.at->land == laMinefield) {
     dialog::addItem(XLAT("minefield colors"), 'm');
-    dialog::add_action([] () { pushScreen([] () { edit_color_table(minecolors); });});
+    dialog::add_action_push([] { edit_color_table(minecolors); });
     }
   
   if(viewdists) {
     dialog::addItem(XLAT("distance colors"), 'd');
-    dialog::add_action([] () { pushScreen([] () { edit_color_table(distcolors); });});
+    dialog::add_action_push([] () {edit_color_table(distcolors); });
     }
   
   #if CAP_CRYSTAL
@@ -1836,7 +1836,7 @@ void configureMouse() {
 
   #if CAP_ORIENTATION
   dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
-  dialog::add_action([] { pushScreen(ors::show); });
+  dialog::add_action_push(ors::show);
   #endif
 
   dialog::display();
@@ -1852,17 +1852,17 @@ void showSettings() {
   dialog::addItem(XLAT("general graphics"), 'g');
   dialog::add_action_push(showGraphConfig);
 
-  dialog::addItem(XLAT("colors and aura"), 'c');
-  dialog::add_action_push(show_color_dialog);
-
   dialog::addItem(XLAT("3D configuration"), '9');
   dialog::add_action_push(show3D);
 
   dialog::addItem(XLAT("quick options"), 'q');
   dialog::add_action_push(showGraphQuickKeys);
 
-  dialog::addItem(XLAT("models & projections"), 'a');
+  dialog::addItem(XLAT("models & projections"), 'p');
   dialog::add_action_push(conformal::model_menu);
+
+  dialog::addItem(XLAT("colors & aura"), 'c');
+  dialog::add_action_push(show_color_dialog);
 
 #if CAP_SHMUP
   if(CAP_SHMUP && !ISMOBILE) {

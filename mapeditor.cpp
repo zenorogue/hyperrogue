@@ -2109,7 +2109,7 @@ namespace mapeditor {
     dialog::addInfo(XLAT("(unlock all, allow cheats, normal character display, cannot be turned off!)"));
     
     dialog::addItem(XLAT("change the pattern/color of new Canvas cells"), 'c');
-    dialog::add_action([] () { pushScreen(patterns::showPrePatternNoninstant); });
+    dialog::add_action_push(patterns::showPrePatternNoninstant);
     
     dialog::addBack();
     dialog::display();

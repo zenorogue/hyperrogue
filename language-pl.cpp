@@ -7252,7 +7252,7 @@ S(
 
 // color edit dialog
 
-S("customize colors and aura", "dostosuj kolory i aurę")
+S("colors & aura", "dostosuj kolory i aurę")
 
 S("background", "tło")
 S("foreground", "pierwszy plan")

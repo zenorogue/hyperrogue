@@ -1888,7 +1888,7 @@ void showMenu() {
   dialog::addSelItem(XLAT("vertex shape"), its(vertex_shape), 'w');
 
   dialog::addItem(XLAT("vertex search"), '/');
-  dialog::add_action([] () { pushScreen(showVertexSearch); });
+  dialog::add_action_push(showVertexSearch);
   
   if(kind == kKohonen)
     kohonen::showMenu();
@@ -2258,7 +2258,7 @@ auto hooks  =
   addHook(hooks_o_key, 100, o_key) +
   addHook(hooks_mainmenu, 100, [] () {
     dialog::addItem(XLAT("rogueviz menu"), 'u'); 
-    dialog::add_action([] () { pushScreen(rogueviz::showMenu); });
+    dialog::add_action_push(rogueviz::showMenu);
     }) +
   addHook(hooks_welcome_message, 100, [] () {
     if(rogueviz::on) addMessage(XLAT("Welcome to RogueViz!"));

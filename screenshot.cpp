@@ -429,8 +429,8 @@ void menu() {
   dialog::addBoolItem(XLAT("hide the player"), !mapeditor::drawplayer, 'H');
   dialog::add_action([] { mapeditor::drawplayer = !mapeditor::drawplayer; });
 
-  dialog::addItem(XLAT("customize colors and aura"), 'c');
-  dialog::add_action([] { pushScreen(show_color_dialog); });
+  dialog::addItem(XLAT("colors & aura"), 'c');
+  dialog::add_action_push(show_color_dialog);
 
   menuitem_sightrange('r');
 
@@ -941,11 +941,11 @@ void show() {
     });
 
   dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
-  dialog::add_action([] () { pushScreen(conformal::history_menu); });
+  dialog::add_action_push(conformal::history_menu);
 
   #if CAP_FILES && CAP_SHOT
   dialog::addItem(XLAT("shot settings"), 's');
-  dialog::add_action([] () { pushScreen(shot::menu); });
+  dialog::add_action_push(shot::menu);
 
   if(needs_highqual) 
     dialog::addInfo(XLAT("some parameters will only change in recorded animation"));

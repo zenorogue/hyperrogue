@@ -7499,7 +7499,7 @@ S(
 
 // color edit dialog
 
-S("customize colors and aura", "uprav barvy a auru")
+S("colors & aura", "uprav barvy a auru")
 
 S("background", "pozadí")
 S("foreground", "popøedí")

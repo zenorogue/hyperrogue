@@ -1009,7 +1009,7 @@ void race_projection() {
     dialog::addBreak(100);
 
     dialog::addItem(XLAT("configure the projection"), 'p');
-    dialog::add_action([] () { pushScreen(race_projection); });
+    dialog::add_action_push(race_projection);
   
     dialog::addBoolItem(XLAT("guiding line"), guiding, 'g');
     dialog::add_action([] () { guiding = !guiding; });

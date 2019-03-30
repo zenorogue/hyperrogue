@@ -205,7 +205,7 @@ void showMainMenu() {
   dialog::init(XLAT("HyperRogue %1", VER), 0xC00000, 200, 100);
 
   dialog::addItem(XLAT("settings"), 's');
-  dialog::add_action([] { pushScreen(showSettings); });
+  dialog::add_action_push(showSettings);
   dialog::addItem(XLAT("special modes"), 'm');
 
 #if CAP_SAVE
@@ -448,9 +448,9 @@ void showCreative() {
 #endif
 
   dialog::addItem(XLAT("screenshots"), 's');
-  dialog::add_action([] () { pushScreen(shot::menu); });
-      
-  dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'A');
+  dialog::add_action_push(shot::menu);
+     
+  dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'a');
   dialog::add_action_push(anims::show);
 
 #if CAP_TEXTURE
