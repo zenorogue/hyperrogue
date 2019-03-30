@@ -1067,8 +1067,14 @@ void centerpc(ld aspd) {
 
   if(shmup::on && DIM == 3 && vid.sspeed > -5) {
     int id = subscreens::in ? subscreens::current_player : 0;
-    transmatrix at = ggmatrix(shmup::pc[id]->base) * shmup::pc[id]->at * cpush(2, -vid.yshift);  
-    View = inverse(at) * View;
+    if(false) { // gmatrix.count(shmup::pc[id]->base)) {
+      transmatrix at = ggmatrix(shmup::pc[id]->base) * shmup::pc[id]->at * cpush(2, -vid.yshift);  
+      View = inverse(at) * View;
+      }
+    else {
+      viewctr = shmup::pc[id]->base->master;
+      View = inverse(shmup::pc[id]->at * cpush(2, -vid.yshift));
+      }
     #if CAP_RACING
     if(racing::on) racing::set_view();
     #endif
