@@ -2126,8 +2126,10 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
 //  nospin = true;
 
   eMonster m = c->monst;
+  
+  if(!m) ;
     
-  if(isAnyIvy(c) || isWorm(c)) {
+  else if(isAnyIvy(c) || isWorm(c)) {
   
     if(isWorm(c) && DIM == 3) return false;
     
@@ -2227,7 +2229,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
       }
 
     if(mmmon) {
-      if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
+      if(isAnyIvy(c)) {
         if(DIM == 3) {
           hyperpoint V0 = tC0(Vb);
           transmatrix Vs = rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI/2);
@@ -2372,7 +2374,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     return !mmmon;
     }
   
-  else if(c->monst && !mmmon) return true;
+  else if(!mmmon) return true;
   
   // illusions face randomly
   
@@ -2422,8 +2424,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
-  else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
-    isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || euwrap || dont_face_pc))) {
+  else if((hasFacing(c) && c->mondir != NODIR) || conformal::on || quotient || euwrap || dont_face_pc) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
@@ -2431,7 +2432,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
 
-  else if(c->monst) {
+  else {
     // other monsters face the player
     
     if(!nospins) {

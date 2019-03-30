@@ -63,17 +63,17 @@ MONSTER( 'C', 0x800000, "Dead Ivy", moIvyDead, ZERO | CF_NOGHOST | CF_NOBLOW | C
 MONSTER( 'M', 0x804000, "Giant Ape", moMonkey, ZERO, RESERVED, moYeti,
     "This giant ape thinks that you are an enemy.")
 MONSTER( 'B', 0x909000, "Slime Beast", moSlime, ZERO | CF_NOBLOW | CF_SLIME | CF_IGNORE_SMELL, RESERVED, moSlime, slimehelp)
-MONSTER( '@', 0xFF80FF, "Mimic", moMimic, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MIMIC | CF_NONLIVING | CF_FRIENDLY, RESERVED, moNone,
+MONSTER( '@', 0xFF80FF, "Mimic", moMimic, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MIMIC | CF_NONLIVING | CF_FRIENDLY | CF_FACING, RESERVED, moNone,
     "A magical being which copies your movements. "
     "You feel that it would be much more useful in an Euclidean space."
     )
 MONSTER( '@', 0xFF8080, "Mirage (REMOVED)", moREMOVED, ZERO, RESERVED, moNone,
     "A magical being which copies your movements. "
     )
-MONSTER( '@', 0x509050, "Golem", moGolem, ZERO | CF_NOGHOST | CF_GOK | CF_NONLIVING | CF_FRIENDLY, RESERVED, moNone,
+MONSTER( '@', 0x509050, "Golem", moGolem, ZERO | CF_NOGHOST | CF_GOK | CF_NONLIVING | CF_FRIENDLY | CF_FACING, RESERVED, moNone,
     "You can summon these friendly constructs with a magical process."
     )
-MONSTER( '@', 0x509050, "Golem", moGolemMoved, ZERO | CF_NOGHOST | CF_GOK | CF_NONLIVING | CF_FRIENDLY | CF_MOVED, RESERVED, moNone,
+MONSTER( '@', 0x509050, "Golem", moGolemMoved, ZERO | CF_NOGHOST | CF_GOK | CF_NONLIVING | CF_FRIENDLY | CF_FACING | CF_MOVED, RESERVED, moNone,
     "You can summon these friendly constructs with a magical process."
     )
 MONSTER( 'E', 0xD09050, "Eagle", moEagle, ZERO | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moEagle,
@@ -169,9 +169,9 @@ MONSTER( 'E', 0xFFFF40, "Earth Elemental", moEarthElemental, ZERO | CF_NONLIVING
     "an impassable wall behind it. You suppose that this impassable wall helps it to "
     "escape from some threats. You hope you won't meet these threats..."
     )
-MONSTER( 'B', 0xC04040, "Red Hyperbug", moBug0, ZERO | CF_BUG, RESERVED, moBug0, hivehelp)
-MONSTER( 'B', 0x40C040, "Green Hyperbug", moBug1, ZERO | CF_BUG, RESERVED, moBug1, hivehelp)
-MONSTER( 'B', 0x4040C0, "Blue Hyperbug", moBug2, ZERO | CF_BUG, RESERVED, moBug2, hivehelp)
+MONSTER( 'B', 0xC04040, "Red Hyperbug", moBug0, ZERO | CF_BUG | CF_FACING, RESERVED, moBug0, hivehelp)
+MONSTER( 'B', 0x40C040, "Green Hyperbug", moBug1, ZERO | CF_BUG | CF_FACING, RESERVED, moBug1, hivehelp)
+MONSTER( 'B', 0x4040C0, "Blue Hyperbug", moBug2, ZERO | CF_BUG | CF_FACING, RESERVED, moBug2, hivehelp)
 MONSTER( 'W', 0x404040, "Witch Apprentice", moWitch, ZERO | CF_WITCH | CF_POWER, RESERVED, moYeti, 
     "A Witch without any special powers. But watch out! She will "
     "pick up any basic Orbs on her path, and use their powers."
@@ -197,13 +197,13 @@ MONSTER( 'W', 0x808080, "Aether Witch", moWitchGhost, ZERO | CF_NOBLOW | CF_WITC
 MONSTER( '@', 0x905050, "Evil Golem", moEvilGolem, ZERO | CF_NONLIVING | CF_POWER, RESERVED, moYeti,
     "Somebody has summoned these evil constructs with a magical process."
     )
-MONSTER( '@', 0x8080FF, "Knight", moKnight, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY, RESERVED, moNone, camelothelp )
+MONSTER( '@', 0x8080FF, "Knight", moKnight, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING, RESERVED, moNone, camelothelp )
 MONSTER( 'P', 0xD10000, "Cult Leader", moCultistLeader, ZERO | CF_LEADER, RESERVED, moPirate, 
     "These Cultists can push the statues, just like you."
     )
 MONSTER( 'B', 0x909000, "Slime Beast", moSlimeNextTurn, ZERO, RESERVED, moNone, slimehelp)
-MONSTER( '@', 0x8080FF, "Knight", moKnightMoved, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_MOVED, RESERVED, moNone, camelothelp )
-MONSTER( '@', 0x8B4513, "Illusion", moIllusion, ZERO | CF_NOGHOST | CF_NONLIVING | CF_FRIENDLY | CF_IGNORE_PLATE, RESERVED, moNone, 
+MONSTER( '@', 0x8080FF, "Knight", moKnightMoved, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_MOVED, RESERVED, moNone, camelothelp )
+MONSTER( '@', 0x8B4513, "Illusion", moIllusion, ZERO | CF_NOGHOST | CF_NONLIVING | CF_FRIENDLY | CF_FACING | CF_IGNORE_PLATE, RESERVED, moNone, 
     "Illusions are targeted "
     "by most monsters, just like yourself, Thumpers, and your friends."
     )
@@ -225,8 +225,8 @@ MONSTER( 'A', 0xFFFFFF, "Albatross", moAlbatross, ZERO | CF_BIRD | CF_FLYING | C
     "Those large seabirds attack you for some reason. At least they are not "
     "as fast as Eagles..."
     )
-MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbird, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moTameBomberbird, tamebomberdesc)
-MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbirdMoved, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_MOVED, RESERVED, moTameBomberbird, tamebomberdesc)
+MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbird, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moTameBomberbird, tamebomberdesc)
+MONSTER( 'B', 0x40C000, "Tame Bomberbird", moTameBomberbirdMoved, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_MOVED, RESERVED, moTameBomberbird, tamebomberdesc)
 MONSTER( 'G', 0xFF0000, "Palace Guard", moPalace, ZERO | CF_STUNNABLE | CF_HP, RESERVED, moYeti, 
      "You have to hit Palace Guards several times to kill them. After each hit, they "
      "are pushed away and stunned for some time."
@@ -250,12 +250,12 @@ MONSTER( 'E', 0x0000FF, "Water Elemental", moWaterElemental, ZERO | CF_NOBLOW | 
     "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
     "As a special case, you can attack the Water Elemental from the water, without drowning immediately."
     )
-MONSTER( 'M', 0xD0D0D0, "Mouse", moMouse, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_UNARMED | CF_IGNORE_PLATE, RESERVED, moNone, princessdesc)
-MONSTER( 'M', 0xD0D0D0, "Mouse", moMouseMoved, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_UNARMED | CF_MOVED, RESERVED, moNone, princessdesc)
-MONSTER( 'P', 0xFF80FF, "Prince", moPrincess, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_UNARMED, RESERVED, moNone, princessdesc)
-MONSTER( 'P', 0xFF80FF, "Princess", moPrincessMoved, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_UNARMED | CF_MOVED, RESERVED, moNone, princessdesc)
-MONSTER( 'P', 0xFF80FF, "Prince", moPrincessArmed, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY, RESERVED, moNone, princessdesc)
-MONSTER( 'P', 0xFF80FF, "Princess", moPrincessArmedMoved, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_MOVED, RESERVED, moNone, princessdesc)
+MONSTER( 'M', 0xD0D0D0, "Mouse", moMouse, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_UNARMED | CF_IGNORE_PLATE, RESERVED, moNone, princessdesc)
+MONSTER( 'M', 0xD0D0D0, "Mouse", moMouseMoved, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_UNARMED | CF_MOVED, RESERVED, moNone, princessdesc)
+MONSTER( 'P', 0xFF80FF, "Prince", moPrincess, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_FACING | CF_UNARMED, RESERVED, moNone, princessdesc)
+MONSTER( 'P', 0xFF80FF, "Princess", moPrincessMoved, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_FACING | CF_UNARMED | CF_MOVED, RESERVED, moNone, princessdesc)
+MONSTER( 'P', 0xFF80FF, "Prince", moPrincessArmed, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_FACING, RESERVED, moNone, princessdesc)
+MONSTER( 'P', 0xFF80FF, "Princess", moPrincessArmedMoved, ZERO | CF_NOGHOST | CF_PRINCESS | CF_GOK | CF_STUNNABLE | CF_HP | CF_FRIENDLY | CF_FACING | CF_MOVED, RESERVED, moNone, princessdesc)
 MONSTER( 'F', 0xD03000, "Familiar", moFamiliar, ZERO, RESERVED, moYeti, "A simple servant of the master of the Ivory Tower.")
 MONSTER( 'B', 0x707070, "Gargoyle", moGargoyle, ZERO | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moEagle, gargdesc)
 MONSTER( 'E', 0xFF0000, "Fire Elemental", moFireElemental, ZERO, RESERVED, moYeti, 
@@ -283,7 +283,7 @@ MONSTER( 'F', 0xC35817, "Giant Fox", moRedFox, ZERO, RESERVED, moYeti,
 MONSTER( 'C', 0x8080FF, "Wind Crow", moWindCrow, ZERO | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moEagle,
     "A large bird who likes strong winds. Just as you, it can fly quickly in the wind."
     )
-MONSTER( 'G', 0xC0FFC0, "Friendly Ghost", moFriendlyGhost, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_GHOST | CF_FLYING | CF_ATTACK_THRU_VINE | CF_ATTACK_NONADJACENT | CF_IGNORE_PLATE, RESERVED, moFriendlyGhost, 
+MONSTER( 'G', 0xC0FFC0, "Friendly Ghost", moFriendlyGhost, ZERO | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_GHOST | CF_FLYING | CF_ATTACK_THRU_VINE | CF_ATTACK_NONADJACENT | CF_IGNORE_PLATE, RESERVED, moFriendlyGhost, 
     "Friendly ghosts are friendly beings who can go through any obstacles. However, "
     "unlike most friends, they tend to fly away from you."
     )
@@ -311,13 +311,13 @@ MONSTER( 'Y', 0xFF8000, "Yendorian Researcher", moResearcher, ZERO, RESERVED, mo
 MONSTER( 'K', 0xA8A8A8, "Sparrowhawk", moSparrowhawk, ZERO | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moEagle, 
     "A bird who hunts in the treetops of Yendorian Forest."
     )
-MONSTER( 'K', 0xD0A0A0, "Kraken", moKrakenH, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MULTITILE | CF_KRAKEN, RESERVED, moNone, krakendesc)
+MONSTER( 'K', 0xD0A0A0, "Kraken", moKrakenH, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MULTITILE | CF_KRAKEN | CF_FACING, RESERVED, moNone, krakendesc)
 MONSTER( 'K', 0xC07070, "Kraken Tentacle", moKrakenT, ZERO | CF_NOGHOST | CF_NOBLOW | CF_PART | CF_MULTITILE | CF_KRAKEN, RESERVED, moNone, krakendesc)
 MONSTER( 'D', 0xF09090, "Draugr", moDraugr, ZERO | CF_NONLIVING | CF_SLOWMOVER, RESERVED, moYeti,
     "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, "
     "but they can be destroyed by your Orb of the Sword."
     )
-MONSTER( 'C', 0xC08000, "Friendly Ivy", moFriendlyIvy, ZERO | CF_NOGHOST | CF_FRIENDLY | CF_ANYIVY, RESERVED, moNone, naturedesc )
+MONSTER( 'C', 0xC08000, "Friendly Ivy", moFriendlyIvy, ZERO | CF_NOGHOST | CF_FRIENDLY | CF_FACING | CF_ANYIVY, RESERVED, moNone, naturedesc )
 MONSTER( 'V', 0xC000C0, "Vampire Bat", moVampire, ZERO | CF_BIRD | CF_FLYING | CF_UNARMED | CF_IGNORE_PLATE, RESERVED, moEagle, 
     "Vampire Bats don't attack normally, but they drain your magical powers if "
     "they are at distance at most 2 from you."
@@ -329,9 +329,9 @@ MONSTER( 'B', 0x404040, "Bat", moBat, ZERO | CF_BIRD | CF_FLYING | CF_UNARMED | 
     "It does not. Bats cannot hurt you, but may block your movement, or "
     "toggle switches if they fall on them." )
 MONSTER( 'R', 0x8080C0, "Reptile", moReptile, ZERO | CF_STUNNABLE, RESERVED, moReptile, reptiledesc )
-MONSTER( 'B', 0x606020, "Herd Bull", moHerdBull, ZERO | CF_BULL, RESERVED, moRagingBull, 
+MONSTER( 'B', 0x606020, "Herd Bull", moHerdBull, ZERO | CF_BULL | CF_FACING, RESERVED, moRagingBull, 
     "Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them." )
-MONSTER( 'B', 0xA03000, "Raging Bull", moRagingBull, ZERO | CF_BULL, RESERVED, moYeti, 
+MONSTER( 'B', 0xA03000, "Raging Bull", moRagingBull, ZERO | CF_BULL | CF_FACING, RESERVED, moYeti, 
     "Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, "
     "they choose one closer to your current location. In the case of a tie, the cell where more neighbors is "
     "closer to your current location is chosen; if still a tie, past locations are considered. "
@@ -340,10 +340,10 @@ MONSTER( 'B', 0xA03000, "Raging Bull", moRagingBull, ZERO | CF_BULL, RESERVED, m
     "which they charge at you again (in any direction). "
     "Raging Bulls cannot be killed or stunned conventionally."
     )
-MONSTER( 'B', 0xB07000, "Sleeping Bull", moSleepBull, ZERO | CF_BULL, RESERVED, moRagingBull, 
+MONSTER( 'B', 0xB07000, "Sleeping Bull", moSleepBull, ZERO | CF_BULL | CF_FACING, RESERVED, moRagingBull, 
     "Sleeping bulls wake up when you get into distance of two cells from them."
      )
-MONSTER( 'S', 0xFFD500, "Butterfly", moButterfly, ZERO | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moButterfly, bulldashdesc)
+MONSTER( 'S', 0xFFD500, "Butterfly", moButterfly, ZERO | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_FACING, RESERVED, moButterfly, bulldashdesc)
 MONSTER( 'N', 0xFFFF80, "Narcissist", moNarciss, ZERO, RESERVED, moYeti, 
     "This person loves to look at their own reflection in the mirror. "
     "He believes himself to be one of the most important creatures in this world, "
@@ -383,16 +383,16 @@ MONSTER( 'S', 0xA00000, "Salamander", moSalamander, ZERO | CF_STUNNABLE, RESERVE
     "are stunned for a longer time if you push them into lava, fire, or a solid obstacle.")
 MONSTER( 'W', 0x202020, "Hunting Dog (regrouping)", moHunterChanging, ZERO, RESERVED, moYeti, 
     "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this.")
-MONSTER( 'B', 0xC00000, "North Pole", moNorthPole, ZERO | CF_MAGNETIC, RESERVED, moYeti, NODESCYET)
-MONSTER( 'B', 0x0000C0, "South Pole", moSouthPole, ZERO | CF_MAGNETIC, RESERVED, moYeti, NODESCYET)
-MONSTER( 'P', 0xC03000, "Red Raider", moPair, ZERO | CF_RAIDER, RESERVED, moYeti, "Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way.")
+MONSTER( 'B', 0xC00000, "North Pole", moNorthPole, ZERO | CF_MAGNETIC | CF_FACING, RESERVED, moYeti, NODESCYET)
+MONSTER( 'B', 0x0000C0, "South Pole", moSouthPole, ZERO | CF_MAGNETIC | CF_FACING, RESERVED, moYeti, NODESCYET)
+MONSTER( 'P', 0xC03000, "Red Raider", moPair, ZERO | CF_RAIDER | CF_FACING, RESERVED, moYeti, "Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way.")
 MONSTER( 'H', 0xC0C0C0, "Gray Raider", moHexDemon, ZERO | CF_RAIDER, RESERVED, moHexDemon, "Gray Raiders never step on gray cells.")
 MONSTER( 'A', 0x80B080, "Green Raider", moAltDemon, ZERO | CF_RAIDER, RESERVED, moAltDemon, "Green Raiders never step from one green cell to another.")
 MONSTER( 'M', 0x904000, "Brown Raider", moMonk, ZERO | CF_RAIDER, RESERVED, moMonk, "Brown Raiders never move adjacent to an item.")
 MONSTER( 'C', 0x0060E0, "Blue Raider", moCrusher, ZERO | CF_RAIDER, RESERVED, moYeti, "Blue Raiders have a powerful attack which takes two turns to complete, and also makes the Blue Raider stunned "
   "for a long time. This attack can destroy other Raiders if it hits them.")
-MONSTER( '@', 0xC00000, "Red Jelly", moSwitch1, ZERO | CF_SWITCH, RESERVED, moYeti, jellydesc)
-MONSTER( '@', 0x0000C0, "Blue Jelly", moSwitch2, ZERO | CF_SWITCH, RESERVED, moYeti, jellydesc)
+MONSTER( '@', 0xC00000, "Red Jelly", moSwitch1, ZERO | CF_SWITCH | CF_FACING, RESERVED, moYeti, jellydesc)
+MONSTER( '@', 0x0000C0, "Blue Jelly", moSwitch2, ZERO | CF_SWITCH | CF_FACING, RESERVED, moYeti, jellydesc)
 MONSTER( 'B', 0xE07000, "Bronze Beast", moBrownBug, ZERO | CF_STUNNABLE, RESERVED, moYeti, 
     "A large bug native to the Brown Islands. Cannot be killed easily due to their tough armor; still, they can be killed by pushing them into water or from great heights. "
     "Bronze Beasts are very bad at descending slopes -- it takes them extra time to get down, and they are stunned for a longer time if you push them down."
