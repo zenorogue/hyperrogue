@@ -291,6 +291,7 @@ eItem wanderingTreasure(cell *c) {
   if(l == laEAir) return itAirShard;
   if(l == laEEarth) return itEarthShard;
   if(l == laElementalWall) return itNone;
+  if(l == laAsteroids) return itNone;
   if(l == laMirror && c->type != 6) return itNone;
   if(l == laMirrorOld && c->type != 6) return itNone;
   if(l == laEmerald) {
@@ -497,6 +498,26 @@ void wandering() {
       }
     
     else if(c->monst || c->pathdist == PINFD) break;
+    
+    else if(c->land == laAsteroids) {
+      int gen = 0;
+      if(asteroids_generated * 12 <= items[itAsteroid]) gen = 2;
+      if(gen == 0) {
+        int qty = 0;
+        for(cell *c: currentmap->allcells()) if(c->monst == moAsteroid) qty++;
+        if(!qty) gen = 1;
+        }
+      if(gen) c->monst = moAsteroid, c->hitpoints = 4;
+      if(gen == 2) 
+        asteroids_generated++;
+      
+      if(items[itAsteroid] > (asteroid_orbs_generated+2) * (asteroid_orbs_generated+3) && !c->item) {
+        c->item = pick(itOrbThorns, itOrbSide1, itOrbSide2, itOrbSide3, itOrbShield, itOrbLife);
+        asteroid_orbs_generated++;
+        }
+
+      break;
+      }
     
     else if(c->land == laClearing && wchance(items[itMutant2], 150) && items[itMutant2] >= 15 && !c->monst && c->type == 7) 
       c->monst = moRedFox;

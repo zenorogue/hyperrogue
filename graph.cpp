@@ -1891,6 +1891,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shTentHead, PPR::GIANTSHADOW);
       return false;
       }
+    
+    case moAsteroid: {
+      queuepoly(V, shAsteroid[1], darkena(col, 0, 0xFF));
+      return false;
+      }
 
     default: ;    
     }

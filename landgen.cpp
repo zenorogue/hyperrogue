@@ -2377,6 +2377,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         c->monst = moGhost;
       break;
     
+    case laAsteroids:
+      break;
+    
     case landtypes: break;
     }
   }

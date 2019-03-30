@@ -27,6 +27,8 @@ ld hexshift;
 
 ld sword_size = 0;
 
+ld asteroid_size[8];
+
 // the results are:
 // hexf = 0.378077 hcrossf = 0.620672 tessf = 1.090550
 // hexhexdist = 0.566256

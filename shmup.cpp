@@ -1283,6 +1283,27 @@ void visibleFor(int t) {
   visibleAt = max(visibleAt, curtime + t);
   }
 
+ld bullet_velocity(eMonster t) {
+  switch(t) {
+    case moBullet:
+      return 1/300.;
+    case moFireball:
+      return 1/500.;
+    case moCrushball:
+      return 1/1000.;
+    case moAirball:
+      return 1/200.;
+    case moArrowTrap:
+      return 1/200.;
+    case moTongue:
+      return 1/1500.;
+    default:
+      return 1/300.;
+    }
+  }
+
+int frontdir() { return DIM == 2 ? 0 : 2; }
+
 void shootBullet(monster *m) {
   monster* bullet = new monster;
   bullet->base = m->base;
@@ -1291,6 +1312,10 @@ void shootBullet(monster *m) {
   bullet->parent = m;
   bullet->pid = m->pid;
   bullet->parenttype = m->type;
+  bullet->inertia = m->inertia;
+  bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
+  bullet->hitpoints = 0;
+
   additional.push_back(bullet);
   
   eItem orbdir[8] = {
@@ -1305,6 +1330,10 @@ void shootBullet(monster *m) {
     bullet->parent = m;
     bullet->pid = m->pid;
     bullet->parenttype = m->type;
+    bullet->hitpoints = 0;
+    using namespace hyperpoint_vec;
+    bullet->inertia = spin(-M_PI/4 * i) * m->inertia;
+    bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
     additional.push_back(bullet);
     }
   }
@@ -1592,6 +1621,8 @@ static const int reflectflag = P_MIRRORWALL;
 
 void movePlayer(monster *m, int delta) {
 
+  bool inertia_based = m->base->land == laAsteroids;
+
   cpid = m->pid;
 
   #if CAP_RACING
@@ -1720,6 +1751,7 @@ void movePlayer(monster *m, int delta) {
   if(playerturn[cpid] && canmove && !blown && DIM == 2) {
     m->swordangle -= playerturn[cpid];
     nat = nat * spin(playerturn[cpid]);
+    if(inertia_based) m->inertia = spin(-playerturn[cpid]) * m->inertia;
     }
   transmatrix nat0 = nat;
   
@@ -1752,6 +1784,7 @@ void movePlayer(monster *m, int delta) {
     if(mdy > 1) mdy = 1;
     if(mdy < -1) mdy = -1;
     if(mdx > 1) mdx = 1;
+    
     if(mdx < -1) mdx = -1;
     if(racing::on) {
       if(m->vel * -mdy < 0) mdy *= 3;
@@ -1795,6 +1828,14 @@ void movePlayer(monster *m, int delta) {
   nextstep:
 
   transmatrix nat1 = nat;
+  
+  hyperpoint avg_inertia;
+  
+  if(inertia_based) {
+    avg_inertia = m->inertia;
+    m->inertia[frontdir()] += playergo[cpid] / 1000;
+    avg_inertia[frontdir()] += playergo[cpid] / 2000;
+    }
     
   for(int igo=0; igo<IGO && !go; igo++) {
   
@@ -1802,10 +1843,21 @@ void movePlayer(monster *m, int delta) {
     
     playergoturn[cpid] = igospan[go];
     
-    if(DIM == 3)
+    if(inertia_based) {
+      if(igo) { go = false; break; }
+      ld r = hypot_d(DIM, avg_inertia);
+      nat = nat * rspintox(avg_inertia) * xpush(r * delta) * spintox(avg_inertia);
+      }
+    else if(DIM == 3) {
       nat = nat1 * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
-    else if(playergo[cpid]) 
+      m->inertia[0] = playerstrafe[cpid] / delta;
+      m->inertia[1] = 0;
+      m->inertia[2] = playergo[cpid] / delta;
+      }
+    else if(playergo[cpid]) {
       nat = nat1 * spin(igospan[igo]) * xpush(playergo[cpid]) * spin(-igospan[igo]);
+      m->inertia = spin(igospan[igo]) * xpush0(playergo[cpid] / delta);
+      }
     
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
@@ -1898,13 +1950,16 @@ void movePlayer(monster *m, int delta) {
   if(!go) {
     playergo[cpid] = playergoturn[cpid] = playerstrafe[cpid] = 0;
     if(DIM == 3) playerturn[cpid] = playerturny[cpid] = 0;
+    m->inertia = Hypc;
     }
   
   if(go) {
 
-    if(DIM == 3) 
+    if(DIM == 3) {
       swordmatrix[cpid] = 
         cspin(1, 2, -playerturny[cpid]) * cspin(0, 2, -playerturn[cpid]) * swordmatrix[cpid];
+      m->inertia = cspin(1, 2, -playerturny[cpid]) * cspin(0, 2, -playerturn[cpid]) * m->inertia;
+      }
 
     if(c2 != m->base) {
       if(cellUnstable(m->base) && !markOrb(itOrbAether))
@@ -2320,7 +2375,37 @@ transmatrix frontpush(ld x) {
   if(DIM == 2) return xpush(x);
   else return cpush(2, x);
   }
+
+ld collision_distance(monster *bullet, monster *target) {
+  if(target->type == moAsteroid)
+    return SCALE * 0.15 + asteroid_size[target->hitpoints & 7];
+  return SCALE * 0.3;
+  }
+
+void spawn_asteroids(monster *bullet, monster *target) {
+  if(target->hitpoints <= 1) return;
+  hyperpoint rnd = random_spin() * point2(SCALE/3000., 0);
   
+  hyperpoint bullet_inertia = inverse(target->pat) * bullet->pat * bullet->inertia;
+
+  for(int i=0; i<2; i++) {
+    using namespace hyperpoint_vec;
+    monster* child = new monster;
+    child->base = target->base;
+    child->at = target->at;
+    child->type = target->type;
+    child->parent = NULL;
+    child->pid = target->pid;
+    child->parenttype = target->type;
+    child->inertia = target->inertia;
+    child->inertia += bullet_inertia / 5;
+    child->hitpoints = target->hitpoints - 1;
+    if(i == 0) child->inertia += rnd;
+    if(i == 1) child->inertia -= rnd;  
+    additional.push_back(child);
+    }
+  }
+
 void moveBullet(monster *m, int delta) {
   cpid = m->pid;
   m->findpat();
@@ -2329,6 +2414,12 @@ void moveBullet(monster *m, int delta) {
   transmatrix nat0 = m->pat;
   transmatrix nat = m->pat;
   
+  bool inertia_based = m->base->land == laAsteroids;
+  
+  if(m->base->land == laAsteroids) {
+    m->hitpoints += delta;
+    if(m->hitpoints >= 500) m->dead = true;
+    }
 
   if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
     
@@ -2339,22 +2430,17 @@ void moveBullet(monster *m, int delta) {
       nat = nat * rspintox(inverse(m->pat) * m->parent->pat * C0) * spin(M_PI);
       }
     }
-  else if(m->type == moBullet)
-    m->vel = 1/300.;
-  else if(m->type == moFireball)
-    m->vel = 1/500.;
-  else if(m->type == moCrushball)
-    m->vel = 1/1000.;
-  else if(m->type == moAirball)
-    m->vel = 1/200.;
-  else if(m->type == moArrowTrap)
-    m->vel = 1/200.;
-  else if(m->type == moTongue) {
-    m->vel = 1/1500.;
-    if(m->isVirtual || !m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4)
-      m->dead = true;
+  else m->vel = bullet_velocity(m->type);
+  
+  if(m->type == moTongue && (m->isVirtual || !m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4))
+    m->dead = true;
+
+  if(inertia_based) {
+    ld r = hypot_d(DIM, m->inertia);
+    nat = nat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
     }
-  nat = nat * frontpush(delta * SCALE * m->vel / speedfactor());
+  else 
+    nat = nat * frontpush(delta * SCALE * m->vel / speedfactor());
   cell *c2 = m->findbase(nat);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -2410,6 +2496,8 @@ void moveBullet(monster *m, int delta) {
   if(!m->isVirtual) for(monster* m2: nonvirtual) {
     if(m2 == m || (m2 == m->parent && m->vel >= 0) || m2->parent == m->parent) 
       continue;
+    
+    if(m2->dead) continue;
 
     eMonster ptype = parentOrSelf(m)->type;
     bool slayer = m->type == moCrushball ||
@@ -2424,9 +2512,9 @@ void moveBullet(monster *m, int delta) {
     // fireballs/airballs don't collide
     if(m->type == moFireball && m2->type == moFireball) continue;
     if(m->type == moAirball && m2->type == moAirball) continue;
-    double d = intval(m2->pat*C0, m->pat*C0);
+    double d = hdist(m2->pat*C0, m->pat*C0);
     
-    if(d < SCALE2 * 0.1) {
+    if(d < collision_distance(m, m2)) {
 
       if(m2->type == passive_switch) { m->dead = true; continue; }
       
@@ -2526,6 +2614,10 @@ void moveBullet(monster *m, int delta) {
         multi::kills[cpid]--;
         mirrorspirits++;
         }
+      if(m2->dead && m2->type == moAsteroid) {
+        gainItem(itAsteroid);
+        spawn_asteroids(m, m2);
+        }
       }
     }
   }
@@ -2553,6 +2645,8 @@ bool dragonbreath(cell *dragon) {
 
 void moveMonster(monster *m, int delta) {
 
+  bool inertia_based = m->type == moAsteroid;
+  
   bool stunned = m->stunoff > curtime || m->blowoff > curtime;
   
   if(stunned && cellUnstable(m->base))
@@ -2623,7 +2717,14 @@ void moveMonster(monster *m, int delta) {
     if(nearplayer) markOrb(itOrbBeauty), step /= 2;
     }
 
-  if(m->isVirtual) return;
+  if(m->isVirtual) {
+    if(m->type == moAsteroid) {
+      ld r = hypot_d(DIM, m->inertia);
+      transmatrix nat = m->pat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
+      m->rebasePat(nat);
+      }
+    return;
+    }
   transmatrix nat = m->pat;
 
   if(stunned) {
@@ -2643,6 +2744,8 @@ void moveMonster(monster *m, int delta) {
     }
   
   else if(m->type == moRagingBull && m->stunoff == CHARGING) ;
+  
+  else if(m->type == moAsteroid) ;
 
   else {
   
@@ -2809,7 +2912,12 @@ void moveMonster(monster *m, int delta) {
     return;
     }
   
-  if(DIM == 3 && igo) {
+  if(inertia_based) {
+    if(igo) return;
+    ld r = hypot_d(DIM, m->inertia);
+    nat = nat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
+    }
+  else if(DIM == 3 && igo) {
     ld fspin = rand() % 1000;  
     nat = nat0 * cspin(1,2,fspin) * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]) * cspin(2,1,fspin);
     }
@@ -2818,7 +2926,7 @@ void moveMonster(monster *m, int delta) {
     }
 
   if(m->type != moRagingBull && !peace::on)
-  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried) {
+  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried && !inertia_based) {
     igo++; goto igo_retry; }
 
   for(int i=0; i<multi::players; i++) for(int b=0; b<2; b++) if(sword::orbcount(b)) {  
@@ -2832,10 +2940,13 @@ void moveMonster(monster *m, int delta) {
 
   monster* crashintomon = NULL;
   
-  if(!m->isVirtual) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
+  if(!m->isVirtual && m->type != moAsteroid) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
     double d = intval(m2->pat*C0, nat*C0);
     if(d < SCALE2 * 0.1) crashintomon = m2;
     }
+  
+  if(m->type == moAsteroid) for(int i=0; i<players; i++) if(pc[i] && hdist(tC0(pc[i]->pat), tC0(m->pat)) < collision_distance(pc[i], m))
+    crashintomon = pc[i];
   
   if(!peace::on) 
   for(int i=0; i<players; i++) 
@@ -2862,7 +2973,7 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
-  if(crashintomon) { igo++; goto igo_retry; }
+  if(crashintomon && m->type != moAsteroid) { igo++; goto igo_retry; }
 
   cell *c2 = m->findbase(nat);
   if(reflectflag & P_MIRRORWALL) reflect(c2, m->base, nat);
@@ -3129,6 +3240,9 @@ void activateMonstersAt(cell *c) {
     enemy->hitpoints = c->hitpoints;
     if(c->wall == waBoat && isLeader(c->monst)) 
       enemy->inBoat = true, c->wall = waSea;
+    if(c->monst == moAsteroid) {
+      enemy->inertia = random_spin() * point2(SCALE/3000., 0);
+      }
     c->monst = moNone;
     active.push_back(enemy);
     }
@@ -3572,6 +3686,12 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         transmatrix t = view * spin(curtime / 50.0);
         queuepoly(mmscale(t, 1.15), shFlailMissile, (minf[m->type].color << 8) | 0xFF);
         ShadowV(view, shFlailMissile);
+        break;        
+        }
+      case moAsteroid: {
+        transmatrix t = view * spin(curtime / 500.0);
+        queuepoly(mmscale(t, 1.15), shAsteroid[m->hitpoints & 7], (minf[m->type].color << 8) | 0xFF);
+        ShadowV(t, shAsteroid[m->hitpoints & 7]);
         break;
         }
 

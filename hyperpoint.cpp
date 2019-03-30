@@ -136,9 +136,6 @@ hyperpoint hpxy3(ld x, ld y, ld z) {
   return hpxyz3(x,y,z, euclid ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
-// center of the pseudosphere
-const hyperpoint Hypc = hyperpoint(0,0,0,0);
-
 // origin of the hyperbolic plane
 const hyperpoint C02 = hyperpoint(0,0,1,0);
 const hyperpoint C03 = hyperpoint(0,0,0,1);
@@ -240,6 +237,16 @@ transmatrix cspin(int a, int b, ld alpha) {
   }
 
 transmatrix spin(ld alpha) { return cspin(0, 1, alpha); }
+
+transmatrix random_spin() {
+  if(DIM == 2) return spin(randd() * 2 * M_PI);
+  else {
+    ld alpha2 = acos(randd() * 2 - 1);
+    ld alpha = randd() * 2 * M_PI;
+    ld alpha3 = randd() * 2 * M_PI;
+    return cspin(0, 1, alpha) * cspin(0, 2, alpha2) * cspin(1, 2, alpha3);
+    }
+  }
 
 transmatrix eupush(ld x, ld y) {
   transmatrix T = Id;

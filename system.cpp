@@ -17,6 +17,8 @@ bool canvas_invisible;
 int truelotus;
 int gamecount;
 
+int asteroids_generated, asteroid_orbs_generated;
+
 time_t timerstart, savetime;
 bool timerstopped;
 int savecount;
@@ -287,6 +289,8 @@ void initgame() {
       gen_wandering = true;
       }
     truelotus = 0;
+    asteroids_generated = 0;
+    asteroid_orbs_generated = 0;
     survivalist = true;
     #if CAP_CRYSTAL
     crystal::used_compass_inside = false;

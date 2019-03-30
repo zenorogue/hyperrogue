@@ -1677,7 +1677,7 @@ hpcshape
   shDragonWings, 
   shSolidBranch, shWeakBranch, shBead0, shBead1,
   shBatWings, shBatBody, shBatMouth, shBatFang, shBatEye,
-  shParticle[16],
+  shParticle[16], shAsteroid[8],
   shReptile[5][4],
   shReptileBody, shReptileHead, shReptileFrontFoot, shReptileRearFoot,
   shReptileFrontLeg, shReptileRearLeg, shReptileTail, shReptileEye,
@@ -2311,7 +2311,16 @@ void procedural_shapes() {
   for(int i=0; i<16; i++) {
     bshape(shParticle[i], PPR::PARTICLE);
     for(int t=0; t<6; t++) 
-      hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150., (0.03 + hrand(100) * 0.0003) * scalefactor));
+//    hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150., (0.03 + hrand(100) * 0.0003) * scalefactor));
+      hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * randd() / 1.5, (0.03 + randd() * 0.03) * scalefactor));
+    hpc.push_back(hpc[last->s]);
+    }
+
+  for(int i=0; i<8; i++) {
+    asteroid_size[i] = scalefactor * 0.1 * pow(2, (i-1) * 1. / DIM);
+    bshape(shAsteroid[i], PPR::PARTICLE);
+    for(int t=0; t<12; t++) 
+      hpcpush(xspinpush0(M_PI * t / 6, asteroid_size[i] * (1 - randd() * .2)));
     hpc.push_back(hpc[last->s]);
     }
   

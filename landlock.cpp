@@ -237,6 +237,9 @@ int isNative(eLand l, eMonster m) {
     case laMagnetic:
       return isMagneticPole(m) ? 2 : 0;
     
+    case laAsteroids:
+      return m == moAsteroid ? 2 : 0;
+    
     case landtypes: return 0;
     }
   return false;
@@ -316,7 +319,7 @@ bool landUnlocked(eLand l) {
     case laStorms: case laWhirlwind: 
       return gold() >= R60;
     
-    case laWildWest: case laHalloween: 
+    case laWildWest: case laHalloween:  case laAsteroids:
       return false;
       
     case laIce: case laJungle: case laCaves: case laDesert: 

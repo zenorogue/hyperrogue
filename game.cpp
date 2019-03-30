@@ -888,7 +888,7 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(m == moPair)
     return !(w && from && againstPair(from, w, m)) && passable(w, from, extra);
   if(m == passive_switch) return false;
-  if(minf[m].mgroup == moYeti || isBug(m) || isDemon(m) || m == moHerdBull || m == moMimic) {
+  if(minf[m].mgroup == moYeti || isBug(m) || isDemon(m) || m == moHerdBull || m == moMimic || m == moAsteroid) {
     if((isWitch(m) || m == moEvilGolem) && w->land != laPower && w->land != laHalloween)
       return false;
     return passable(w, from, extra);
@@ -6958,6 +6958,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     else playSound(c2, "pickup-orb");
     if(items[itOrbChoice]) items[itOrbChoice] = 0, had_choice = true;
     int oc = orbcharges(it);
+    if(c2->land == laAsteroids) oc = 10;
     if(markOrb(itOrbIntensity)) oc = oc * 6 / 5;
     if(!items[it]) items[it]++;
     items[it] += oc;

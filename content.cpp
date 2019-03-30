@@ -1257,6 +1257,10 @@ LAND( 0x30FF30, "Irradiated Field", laVariant, ZERO, itVarTreasure, RESERVED,
 
 // add new content here
 
+LAND( 0x202020, "Asteroids", laAsteroids, ZERO, itAsteroid, RESERVED, NODESCYET)
+ITEM( '*', 0xFFFFFF, "Ice Diamond", itAsteroid, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
+MONSTER('A', 0x606040, "Asteroid", moAsteroid, ZERO, RESERVED, moAsteroid, NODESCYET)
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, ZERO | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")

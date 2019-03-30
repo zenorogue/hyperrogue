@@ -233,6 +233,7 @@ constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
   #endif
   }
 
+const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
 
 // identity matrix
 const static transmatrix Id = diag(1,1,1,1);
@@ -898,18 +899,19 @@ namespace shmup {
     eMonster parenttype; // type of the parent
     int nextshot;    // when will it be able to shot (players/flailers)
     int pid;         // player ID
-    char hitpoints;
+    int hitpoints;   // hitpoints; or time elapsed in Asteroids
     int stunoff;
     int blowoff;
     double swordangle; // sword angle wrt at
     double vel;        // velocity, for flail balls
     double footphase;
     bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
+    hyperpoint inertia;// for frictionless lands
     
     monster() { 
       dead = false; inBoat = false; parent = NULL; nextshot = 0; 
       stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
-      swordangle = 0;
+      swordangle = 0; inertia = Hypc;
       }
   
     void store();
@@ -1641,6 +1643,7 @@ void destroyBoats(cell *c, cell *cf, bool strandedToo);
 extern bool showoff;
 extern int lastexplore;
 extern int truelotus;
+extern int asteroids_generated, asteroid_orbs_generated;
 extern eLand lastland;
 extern time_t timerstart;
 extern bool timerstopped;
