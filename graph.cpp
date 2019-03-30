@@ -665,7 +665,7 @@ color_t kind_outline(eItem it) {
     return OUTLINE_OTHER;
   }
 
-transmatrix face_the_player(transmatrix V) {
+transmatrix face_the_player(const transmatrix V) {
   if(DIM == 2) return V;
   return rgpushxto0(tC0(V));
   }
@@ -5465,7 +5465,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
-    if(vid.grid) {
+    if(vid.grid || (DIM == 3 && c->land == laAsteroids)) {
       dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
       vid.linewidth *= scalefactor;

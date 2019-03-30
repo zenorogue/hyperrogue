@@ -2022,6 +2022,9 @@ extern bool ivoryz;
 #define SHADOW_SL   0x18
 #define SHADOW_MON  0x30
 
+transmatrix face_the_player(const transmatrix V);
+hyperpoint makeradar(transmatrix V);
+
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase);
 
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);

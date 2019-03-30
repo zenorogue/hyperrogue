@@ -2318,6 +2318,7 @@ void procedural_shapes() {
 
   for(int i=0; i<8; i++) {
     asteroid_size[i] = scalefactor * 0.1 * pow(2, (i-1) * 1. / DIM);
+    if(DIM == 3) asteroid_size[i] *= 4;
     bshape(shAsteroid[i], PPR::PARTICLE);
     for(int t=0; t<12; t++) 
       hpcpush(xspinpush0(M_PI * t / 6, asteroid_size[i] * (1 - randd() * .2)));

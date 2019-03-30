@@ -1847,6 +1847,7 @@ void movePlayer(monster *m, int delta) {
       if(igo) { go = false; break; }
       ld r = hypot_d(DIM, avg_inertia);
       nat = nat * rspintox(avg_inertia) * xpush(r * delta) * spintox(avg_inertia);
+      if(DIM == 3) nat = nat * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
       }
     else if(DIM == 3) {
       nat = nat1 * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
@@ -3690,9 +3691,15 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         break;        
         }
       case moAsteroid: {
-        transmatrix t = view * spin(curtime / 500.0);
-        queuepoly(mmscale(t, 1.15), shAsteroid[m->hitpoints & 7], (minf[m->type].color << 8) | 0xFF);
+        if(DIM == 3) radarpoints.emplace_back(radarpoint{makeradar(view), '*', 0xFFFFFF, 0xC0C0C0FF});
+        transmatrix t = view;
+        if(DIM == 3) t = face_the_player(t);
+        t = t * spin(curtime / 500.0);
         ShadowV(t, shAsteroid[m->hitpoints & 7]);
+        if(DIM == 2) t = mmscale(t, 1.15);
+        color_t col = DIM == 3 ? 0xFFFFFF : minf[m->type].color;
+        col <<= 8;
+        queuepoly(t, shAsteroid[m->hitpoints & 7], col | 0xFF);
         break;
         }
 
