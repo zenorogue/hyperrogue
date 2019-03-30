@@ -698,7 +698,7 @@ namespace conformal {
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
-    dialog::init(XLAT("models and projections"));
+    dialog::init(XLAT("models & projections"));
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;

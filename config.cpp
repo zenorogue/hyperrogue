@@ -1855,13 +1855,13 @@ void showSettings() {
   dialog::addItem(XLAT("colors and aura"), 'c');
   dialog::add_action_push(show_color_dialog);
 
-  dialog::addItem(XLAT("3D graphics"), '9');
+  dialog::addItem(XLAT("3D configuration"), '9');
   dialog::add_action_push(show3D);
 
   dialog::addItem(XLAT("quick options"), 'q');
   dialog::add_action_push(showGraphQuickKeys);
 
-  dialog::addItem(XLAT("models and projections"), 'a');
+  dialog::addItem(XLAT("models & projections"), 'a');
   dialog::add_action_push(conformal::model_menu);
 
 #if CAP_SHMUP
