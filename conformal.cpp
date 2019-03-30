@@ -1024,7 +1024,7 @@ namespace conformal {
     // bool notconformal0 = (pmodel >= 5 && pmodel <= 6) && !euclid;
     // bool notconformal = notconformal0 || abs(vid.alpha-1) > 1e-3;
 
-    dialog::addSelItem(XLAT("model used"), get_model_name(pmodel), 'm');
+    dialog::addSelItem(XLAT("projection"), current_proj_name(), 'm');
     
     if(!bounded && !euclid) dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
