@@ -809,11 +809,13 @@ int dist_alt(cell *c) {
     }
   }
 
-ld crug_rotation[MAXDIM][MAXDIM];
+array<array<ld, MAXDIM>, MAXDIM> crug_rotation;
 
 int ho = 1;
 
 ldcoord rug_center;
+bool draw_cut = false;
+ld cut_level = 0;
 
 void init_rotation() {
   for(int i=0; i<MAXDIM; i++)
@@ -823,7 +825,7 @@ void init_rotation() {
   auto& cs = crystal_map()->cs;
 
   if(ho & 1) {
-    for(int i=cs.dim-1; i>=1; i--) {
+    for(int i=(draw_cut ? 2 : cs.dim-1); i>=1; i--) {
       ld c = cos(M_PI / 2 / (i+1));
       ld s = sin(M_PI / 2 / (i+1));
       for(int j=0; j<cs.dim; j++)
@@ -836,6 +838,24 @@ void init_rotation() {
     }
   }
 
+void random_rotation() {
+  auto& cs = crystal_map()->cs;
+  for(int i=0; i<100; i++) {
+    int a = hrand(cs.dim);
+    int b = hrand(cs.dim);
+    if(a == b) continue;
+    ld alpha = hrand(1000);
+    ld c = cos(alpha);
+    ld s = sin(alpha);
+    for(int u=0; u<cs.dim; u++) {
+      auto& x = crug_rotation[u][a];
+      auto& y = crug_rotation[u][b];
+      tie(x,y) = make_pair(x * c + y * s, y * c - x * s);
+      }
+    }
+  }
+
+
 void next_home_orientation() {
   ho++;
   init_rotation();
@@ -846,12 +866,13 @@ void flip_z() {
     crug_rotation[i][2] *= -1;
   }
 
-hyperpoint coord_to_flat(ldcoord co) {
+hyperpoint coord_to_flat(ldcoord co, int dim = 3) {
+  auto& cs = crystal_map()->cs;
   hyperpoint res = Hypc;
   co = co - rug_center;
-  for(int a=0; a<MAXDIM; a++)
-    for(int b=0; b<3; b++)
-      res[b] += crug_rotation[b][a] * co[a];
+  for(int a=0; a<cs.dim; a++)
+    for(int b=0; b<dim; b++)
+      res[b] += crug_rotation[b][a] * co[a] * rug::modelscale;
   return res;
   }
 
@@ -865,7 +886,8 @@ void switch_z_coordinate() {
   }
 
 void apply_rotation(const transmatrix t) {
-  for(int i=0; i<MAXDIM; i++) {
+  auto& cs = crystal_map()->cs;
+  for(int i=0; i<cs.dim; i++) {
     hyperpoint h;
     for(int j=0; j<3; j++) h[j] = crug_rotation[i][j];
     h = t * h;
@@ -889,6 +911,38 @@ void centerrug(ld aspd) {
     }
   }
   
+void cut_triangle2(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc, const hyperpoint ha, const hyperpoint hb, const hyperpoint hc) {
+  using namespace hyperpoint_vec;
+  using hyperpoint_vec::operator *;
+  using hyperpoint_vec::operator +;
+  ld zac = pc[3] / (pc[3] - pa[3]);
+  hyperpoint pac = pa * zac + pc * (1-zac);
+  hyperpoint hac = ha * zac + hc * (1-zac);
+
+  ld zbc = pc[3] / (pc[3] - pb[3]);
+  hyperpoint pbc = pb * zbc + pc * (1-zbc);
+  hyperpoint hbc = hb * zbc + hc * (1-zbc);
+  
+  pac[3] = pbc[3] = 1;
+  
+  rug::rugpoint *rac = rug::addRugpoint(hac, 0);
+  rug::rugpoint *rbc = rug::addRugpoint(hbc, 0);
+  rac->flat = pac;
+  rbc->flat = pbc;
+  rac->valid = true;
+  rbc->valid = true;
+  rug::triangles.push_back(rug::triangle(rac, rbc, NULL));
+  }
+
+void cut_triangle(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc, const hyperpoint ha, const hyperpoint hb, const hyperpoint hc) {
+  if((pa[3] >= 0) == (pb[3] >= 0))
+    cut_triangle2(pa, pb, pc, ha, hb, hc);
+  else if((pa[3] >= 0) == (pc[3] >= 0))
+    cut_triangle2(pc, pa, pb, hc, ha, hb);
+  else
+    cut_triangle2(pb, pc, pa, hb, hc, ha);
+  }
+
 void build_rugdata() {
   using namespace rug;
   rug::clear_model(); 
@@ -901,25 +955,51 @@ void build_rugdata() {
     cell *c = gp.first;
     if(c->wall == waInvisibleFloor) continue;
     const transmatrix& V = gp.second;
-    
-    rugpoint *v = addRugpoint(tC0(V), 0);
-    auto co = m->get_coord(c);
-    v->flat = coord_to_flat(co);
-    v->valid = true;
-    
-    rugpoint *p[MAX_EDGE];
-    
-    for(int i=0; i<c->type; i++) {
-      p[i] = addRugpoint(V * get_corner_position(c, i), 0);
-      p[i]->valid = true;
-      if(VALENCE == 4)
-        p[i]->flat = coord_to_flat((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1))) / 2);
-      else
-        p[i]->flat = coord_to_flat((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1)) + co) / 3);
-      }
 
-    for(int i=0; i<c->type; i++) addTriangle(v, p[i], p[(i+1) % c->type]);
+    auto co = m->get_coord(c);
+    ldcoord vcoord[MAX_EDGE];
+
+    for(int i=0; i<c->type; i++) 
+      if(VALENCE == 4)
+        vcoord[i] = ((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1))) / 2);
+      else
+        vcoord[i] = ((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1)) + co) / 3);
+    
+    if(!draw_cut) {
+      rugpoint *v = addRugpoint(tC0(V), 0);
+      v->flat = coord_to_flat(co);
+      v->valid = true;
+      
+      rugpoint *p[MAX_EDGE];
+      
+      for(int i=0; i<c->type; i++) {
+        p[i] = addRugpoint(V * get_corner_position(c, i), 0);
+        p[i]->valid = true;
+        p[i]->flat = coord_to_flat(vcoord[i]);
+        }
+  
+      for(int i=0; i<c->type; i++) addTriangle(v, p[i], p[(i+1) % c->type]);
+      }
+    
+    else {
+      hyperpoint hco = coord_to_flat(co, 4);
+      hco[3] -= cut_level * rug::modelscale;
+      hyperpoint vco[MAX_EDGE];
+      for(int i=0; i<c->type; i++) {
+        vco[i] = coord_to_flat(vcoord[i], 4);
+        vco[i][3] -= cut_level * rug::modelscale;
+        }
+      
+      for(int i=0; i<c->type; i++) {
+        int j = (i+1) % c->type;
+        if((vco[i][3] >= 0) != (hco[3] >= 0) || (vco[j][3] >= 0) != (hco[3] >= 0)) {
+          cut_triangle(hco, vco[i], vco[j], tC0(V), V * get_corner_position(c, i), V * get_corner_position(c, j));
+          }
+        }
+      }
     }
+  
+  println(hlog, "cut ", cut_level, "r ", crug_rotation);
   }
 
 eLand getCLand(int x) {
@@ -1058,6 +1138,20 @@ int readArgs() {
   else if(argis("-cprob")) {
     PHASEFROM(2); shift_arg_formula(compass_probability);
     }
+  else if(argis("-ccut")) {
+    draw_cut = true;
+    PHASEFROM(2); shift_arg_formula(cut_level);
+    }
+  else if(argis("-ccutoff")) {
+    draw_cut = false;
+    }
+  else if(argis("-cho")) {
+    shift(); ho = argi();
+    init_rotation();
+    }
+  else if(argis("-chrr")) {
+    random_rotation();
+    }
   else if(argis("-test:crt")) {
     test_crt();
     }
@@ -1128,6 +1222,18 @@ void show() {
     }
   else
     dialog::addBreak(100);
+  if(rug::rugged && geometry == gCrystal && ginf[gCrystal].sides == 8) {
+    dialog::addBoolItem(XLAT("render a cut"), draw_cut, 'x');
+    dialog::add_action([]() { 
+      draw_cut = true;
+      dialog::editNumber(cut_level, -1, 1, 0.1, 0, XLAT("cut level"), ""); 
+      dialog::extra_options = [] {
+        dialog::addItem(XLAT("disable"), 'D');
+        dialog::add_action([] { draw_cut = false; popScreen(); });
+        };
+      });
+    }
+  else dialog::addBreak(100);
   dialog::addBack();
   dialog::addHelp();
   dialog::add_action([] { gotoHelp(make_help()); });

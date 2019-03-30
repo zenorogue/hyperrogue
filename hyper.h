@@ -1291,6 +1291,7 @@ namespace rug {
   extern bool rendernogl;
   extern int  texturesize;
   extern ld   model_distance;
+  extern ld   modelscale;
   extern transmatrix currentrot;
 #if CAP_RUG
   void show();
