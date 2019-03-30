@@ -972,7 +972,7 @@ int readArgs() {
     PHASE(3); showstartmenu = false; pushScreen(show);
     }
   else if(argis("-animperiod")) {
-    PHASE(2); shift_arg_formula(period);
+    PHASEFROM(2); shift_arg_formula(period);
     }
 #if CAP_SHOT
   else if(argis("-animrecord") || argis("-animrec")) {
