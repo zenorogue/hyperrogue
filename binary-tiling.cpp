@@ -101,7 +101,7 @@ namespace binary {
       if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
       eLand z = eLand(parent->emeraldval);
       int chance = 0;
-      if(specialland == laCrossroads4) {
+      if(specialland == laCrossroads4 || parent->emeraldval == laCrossroads4) {
         eLand x = parent->c7->land;
         parent->c7->land = z;
         chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));

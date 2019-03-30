@@ -3045,3 +3045,5 @@ and led to an implementation of a cool Emerald Mine pattern for 534, and also so
 - fixed a bug with ice in 534f; also you can now actually melt something
 - Ivory Tower in horosphere tilings (and also in regular hyperbolic honeycombs, but better with horospheres)
 - Yendorian Forest, interesting (and different) in each available hyperbolic honeycomb
+
+2018-03-24 12:31 Version 11.0o: fixed Ivory/Yendorian
