@@ -956,29 +956,36 @@ int get_direction_key(int sym, int uni) {
   return sym;
   }
 
-void gmodekeys(int sym, int uni) {
+bool gmodekeys(int sym, int uni) {
   #if CAP_RUG
-  if(rug::rugged) rug::handlekeys(sym, uni);
+  if(rug::rugged && rug::handlekeys(sym, uni)) return true;
   #endif
+
+  if(NUMBERKEY == '6') { vid.grid = !vid.grid; return true; }
+  if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }
+
   if(DIM == 2) {
     if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
-    if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
-    if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-    if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-    if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
-    if(uni == '%') { 
+    else if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
+    else if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+    else if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+    else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
+    else if(NUMBERKEY == '8') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }  
+    else if(uni == '%') { 
       if(vid.wallmode == 0) vid.wallmode = 6;
       vid.wallmode--;
       }
+    else return false;
+    return true;
     }
   else {
     if(NUMBERKEY == '1') { vid.yshift = 0; vid.sspeed = 0; }
-    if(NUMBERKEY == '2') { vid.yshift = 0; vid.sspeed = -10; }
-    if(NUMBERKEY == '3') { vid.yshift = 2; vid.sspeed = 0; }
-    if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
+    else if(NUMBERKEY == '2') { vid.yshift = 0; vid.sspeed = -10; }
+    else if(NUMBERKEY == '3') { vid.yshift = 2; vid.sspeed = 0; }
+    else if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
+    else return false;
+    return true;
     }
-  if(NUMBERKEY == '6') vid.grid = !vid.grid;
-  if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; }
   }
 
 bool haveMobileCompass() {

@@ -869,6 +869,8 @@ namespace multi {
   void checklastmove();
   void leaveGame(int i);
   void configure();
+
+  void showConfigureMultiplayer();
   }
 
 template<class T> class hookset : public map<int, function<T>> {};
@@ -963,6 +965,8 @@ namespace shmup {
 
   extern monster *pc[MAXPLAYER];
   int reflect(cell*& c2, cell*& mbase, transmatrix& nat);
+
+  void switch_shmup();
   }
 
 transmatrix& ggmatrix(cell *c);
@@ -1944,6 +1948,9 @@ namespace dialog {
   void addBack();
   void add_action(const reaction_t& action);
   void add_key_action(int key, const reaction_t& action);
+
+  void add_action_push(const reaction_t& action);
+  inline void add_action_push(void a()) { add_action_push((reaction_t) a); }
   
   string view_edited_string();
   void start_editing(string& s);
@@ -2625,11 +2632,7 @@ void closeJoysticks();
 
 void preparesort();
 
-#if ISMOBILE==1
 #define SHMUPTITLE "shoot'em up mode"
-#else
-#define SHMUPTITLE "shoot'em up / multiplayer / input"
-#endif
 
 bool dodrawcell(cell *c);
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored);
@@ -2643,7 +2646,7 @@ extern function <void(int sym, int uni)> keyhandler;
 #if CAP_SDL
 extern function <bool(SDL_Event &ev)> joyhandler;
 #endif
-void gmodekeys(int sym, int uni);
+bool gmodekeys(int sym, int uni);
 
 // check for a plain number key
 #define NUMBERKEY (interpret_as_direction(sym, uni) ? 0 : uni)
@@ -2662,7 +2665,7 @@ namespace scores { void load(); }
 void gotoHelp(const string& h);
 void showCustomizeChar();
 void showCheatMenu();
-void showDisplayMode();
+void showGraphQuickKeys();
 void showChangeMode();
 void showEuclideanMenu();
 void show3D();

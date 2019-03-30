@@ -89,6 +89,8 @@ namespace dialog {
     add_key_action(lastItem().key, action);
     }
   
+  void add_action_push(const reaction_t& action) { add_action([action] { pushScreen(action); }); }
+
   void handler(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(doexiton(sym, uni)) popScreen();

@@ -357,81 +357,74 @@ struct joy_configurer {
 
 struct shmup_configurer {
 
-  bool shmupcfg;
-  int playercfg;
-  
-  shmup_configurer() { shmupcfg = shmup::on; playercfg = multi::players; }
-  
   void operator()() {
   #if CAP_SDL
     cmode = sm::SHMUPCONFIG;
-    dialog::init(SHMUPTITLE);
-  
-    dialog::addItem(player_count_name(playercfg), 'n');
-  
-    dialog::addItem(XLAT(shmupcfg ? "shoot'em up mode" : "turn-based mode"), 's');
+    gamescreen(3);
+    dialog::init(XLAT("keyboard & joysticks"));
     
-    dialog::addItem(XLAT(shmup::on == shmupcfg && players == playercfg ?
-          "continue playing"
-        : "start a new game"), '0');
+    bool haveconfig = shmup::on || players > 1 || multi::alwaysuse;
   
-    if(shmupcfg || multi::alwaysuse || playercfg > 1)
-      dialog::addItem(XLAT("configure player 1") + dsc(0), '1');
+    if(haveconfig)
+      dialog::addItem(XLAT("configure player 1"), '1');
     else
       dialog::addBreak(100);
-    if(playercfg > 1)
-      dialog::addItem(XLAT("configure player 2") + dsc(1), '2');
-    else if(playercfg == 1 && !shmupcfg)
+    if(players > 1)
+      dialog::addItem(XLAT("configure player 2"), '2');
+    else if(players == 1 && !shmup::on)
       dialog::addSelItem(XLAT("input"), XLAT(multi::alwaysuse ? "config" : "default"), 'a');
     else
       dialog::addBreak(100);
-    if(playercfg > 2)
-      dialog::addItem(XLAT("configure player 3") + dsc(2), '3');
+    if(players > 2)
+      dialog::addItem(XLAT("configure player 3"), '3');
   #if CAP_SDLJOY
-    else if(playercfg == 1 && !shmupcfg && !shmupcfg && !multi::alwaysuse)
+    else if(!haveconfig)
       dialog::addItem(XLAT("old style joystick configuration"), 'b');
   #endif
     else dialog::addBreak(100);
-    if(playercfg > 3)
-      dialog::addItem(XLAT("configure player 4") + dsc(3), '4');
+    if(players > 3)
+      dialog::addItem(XLAT("configure player 4"), '4');
     else if(!shmup::on && !multi::alwaysuse) {
       dialog::addBoolItem(XLAT("smooth scrolling"), smooth_scrolling, 'c');
       }
+    else if(alwaysuse)
+      dialog::addInfo(XLAT("note: configured input is designed for"));
     else dialog::addBreak(100);
       
-    if(playercfg > 4)
-      dialog::addItem(XLAT("configure player 5") + dsc(4), '5');
+    if(players > 4)
+      dialog::addItem(XLAT("configure player 5"), '5');
+    else if(!shmup::on && !multi::alwaysuse) {
+      const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
+      dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'h');
+      dialog::add_action([] {vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; } );
+      }
+    else if(alwaysuse)
+      dialog::addInfo(XLAT("multiplayer and shmup mode; some features"));
     else dialog::addBreak(100);
   
-    if(playercfg > 5)
-      dialog::addItem(XLAT("configure player 6") + dsc(5), '6');
+    if(players > 5)
+      dialog::addItem(XLAT("configure player 6"), '6');
+    else if(alwaysuse)
+      dialog::addInfo(XLAT("work worse if you use it."));
     else dialog::addBreak(100);
   
-    if(playercfg > 6)
-      dialog::addItem(XLAT("configure player 7") + dsc(6), '7');
+    if(players > 6)
+      dialog::addItem(XLAT("configure player 7"), '7');
     else dialog::addBreak(100);
       
-    if(shmupcfg || multi::alwaysuse || playercfg > 1)
+    if(shmup::on || multi::alwaysuse || players > 1)
       dialog::addItem(XLAT("configure panning and general keys"), 'p');
     else dialog::addBreak(100);
   
   #if CAP_SDLJOY
     if(numsticks > 0) {
-      if(shmupcfg || multi::alwaysuse || playercfg > 1) 
+      if(shmup::on || multi::alwaysuse || players > 1) 
         dialog::addItem(XLAT("configure joystick axes"), 'j');
       else dialog::addBreak(100);
       }
   #endif
   
-    if(multi::players > 1) 
-      dialog::addItem(XLAT("reset per-player statistics"), 'r');
-    else dialog::addBreak(100);
-    
     dialog::addBreak(50);
-  
-  #if CAP_CONFIG
-    dialog::addItem(XLAT("save the configuration"), 'c');
-  #endif
   
     dialog::addHelp();
   
@@ -443,7 +436,7 @@ struct shmup_configurer {
     }
 
   void handleConfig(int sym, int uni) {
-    auto& cmdlist = shmupcfg ? (DIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
+    auto& cmdlist = shmup::on ? (DIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
     
     #if CAP_SDL
     if(uni == '1') pushScreen(key_configurer(1, cmdlist));
@@ -455,79 +448,50 @@ struct shmup_configurer {
     else if(uni == '6') pushScreen(key_configurer(7, cmdlist));
     else if(uni == '7') pushScreen(key_configurer(8, cmdlist));
   #if CAP_SDLJOY
-    else if(uni == 'j') pushScreen(joy_configurer(playercfg));
+    else if(uni == 'j') pushScreen(joy_configurer(players));
   #endif
     else if(uni == 'a') multi::alwaysuse = !multi::alwaysuse;
   #if CAP_SDLJOY
     else if(uni == 'b') pushScreen(showJoyConfig);
   #endif
     else if(uni == 'c') smooth_scrolling = !smooth_scrolling;
-    else if(uni == 'r') 
-      for(int i=0; i<MAXPLAYER; i++) 
-        kills[i] = deaths[i] = treasures[i] = 0;
-    else if(uni == 's' || uni == 't') 
-      shmupcfg = !shmupcfg;
-  #if CAP_CONFIG
-    else if(uni == 'c')
-      hr::saveConfig();
-  #endif
-    else if(uni == 'n' || uni == 'N') {
-      playercfg += shiftmul > 0 ? 1 : -1;
-      playercfg %= MAXPLAYER;
-      if(playercfg <= 0) playercfg += MAXPLAYER;
-      }
-    else if(sym == SDLK_F1 || uni == '?' || uni == 'h') {
-      gotoHelp("");
-
-      help = XLAT(
-        "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
-        "on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
-        "throwing knives, and you have three extra lives. There are no allies, so all Orbs "
-        "related to allies give you extra lives instead (up to 5). Some other rules have been "
-        "adapted too.\n\n");
-  
-      help += XLAT(
-        "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
-        "for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
-        "faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
-  
-      help += XLAT(
-        "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
-        "by pressing a designated key (useful when about to get killed or lost). The following "
-        "Orbs work to bring such players back: ");
-  
-      help += XLATN(iinf[itOrbLife].name); help += ", ";
-      help += XLATN(iinf[itOrbFriend].name); help += ", ";
-      help += XLATN(iinf[itOrbUndeath].name); help += ", ";
-      help += XLATN(iinf[itOrbTeleport].name); help += ", ";
-      help += XLATN(iinf[itOrbSafety].name); help += "\n\n";
-      
-      help += XLAT("This menu can be also used to configure keys.\n\n");          
-      }
-    else if(doexiton(sym, uni)) {
-      popScreen();
-      auto sc = shmupcfg;
-      auto pc = playercfg;
-      if(shmup::on != sc || pc != players) dialog::do_if_confirmed([sc, pc] {
-        if(shmup::on != sc) { 
-          stop_game(); 
-          switch_game_mode(rg::shmup); 
-          resetScores(); 
-          }
-        if(pc != players) { 
-          stop_game(); 
-          players = pc;
-          resetScores();
-          }
-        start_game();
-        });
-      }
     #endif
+    else if(doexiton(sym, uni)) popScreen();
     }
   };
 
 void configure() {
   pushScreen(shmup_configurer());
+  }
+
+void showConfigureMultiplayer() {
+  gamescreen(1);
+  dialog::init("multiplayer");
+  
+  for(int i=1; i <= MAXPLAYER; i++) {
+    string s = player_count_name(i);
+    if(i <= players) s += dsc(i-1);
+    dialog::addBoolItem(s, '1', i == multi::players);
+    dialog::add_action([i] {
+      dialog::do_if_confirmed([i] {
+        stop_game();
+        players = i;
+        start_game();
+        });
+      });
+    }
+
+  if(multi::players > 1) {
+    dialog::addItem(XLAT("reset per-player statistics"), 'r');
+    dialog::add_action([] {
+      for(int i=0; i<MAXPLAYER; i++) 
+        kills[i] = deaths[i] = treasures[i] = 0;
+      });
+    }
+  else dialog::addBreak(100);
+  
+  dialog::addBack();
+  dialog::display();
   }
 
 #define NUMACT 128
@@ -3826,6 +3790,14 @@ auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
       else it++;
       }
     });
+
+void switch_shmup() { 
+  stop_game();
+  switch_game_mode(rg::shmup);
+  resetScores();
+  start_game();
+  configure();
+  }
     
 }
 }

@@ -74,6 +74,35 @@ void buildHelpText() {
       "The monster could also kill you by moving into your location, but the game "
       "automatically cancels all moves which result in that.\n\n"
       );
+      
+  if(shmup::on) {
+    help += XLAT(
+      "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
+      "on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
+      "throwing knives, and you have three extra lives. There are no allies, so all Orbs "
+      "related to allies give you extra lives instead (up to 5). Some other rules have been "
+      "adapted too.\n\n");  
+    }
+  
+  if(shmup::on && multi::players > 1) {
+    help += XLAT(
+      "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
+      "for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
+      "faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
+    }
+  
+  if(multi::players > 1 && !shmup::on) {
+    help += XLAT(
+      "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
+      "by pressing a designated key (useful when about to get killed or lost). The following "
+      "Orbs work to bring such players back: ");
+
+    help += XLATN(iinf[itOrbLife].name); help += ", ";
+    help += XLATN(iinf[itOrbFriend].name); help += ", ";
+    help += XLATN(iinf[itOrbUndeath].name); help += ", ";
+    help += XLATN(iinf[itOrbTeleport].name); help += ", ";
+    help += XLATN(iinf[itOrbSafety].name); help += "\n\n";      
+    }
 
 #if CAP_INV    
   if(inv::on)

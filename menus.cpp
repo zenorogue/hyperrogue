@@ -204,10 +204,9 @@ void showMainMenu() {
   
   dialog::init(XLAT("HyperRogue %1", VER), 0xC00000, 200, 100);
 
-  dialog::addItem(XLAT("basic configuration"), 'b');
-  dialog::addItem(XLAT("graphics configuration"), 'g');
-  dialog::addItem(XLAT("special display modes"), 'd');
-  dialog::addItem(XLAT("special game modes"), 'm');
+  dialog::addItem(XLAT("settings"), 's');
+  dialog::add_action([] { pushScreen(showSettings); });
+  dialog::addItem(XLAT("special modes"), 'm');
 
 #if CAP_SAVE
   dialog::addItem(XLAT("local highscores"), 't');
@@ -262,9 +261,6 @@ void showMainMenu() {
     dialog::handleNavigation(sym, uni);
     if(sym == SDLK_F1 || uni == 'h') gotoHelp("@");
     else if(uni == 'c' && cheater) pushScreen(showCheatMenu);
-    else if(uni == 'b') pushScreen(showBasicConfig);
-    else if(uni == 'g') pushScreen(showGraphConfig);
-    else if(uni == 'd') pushScreen(showDisplayMode);
     else if(uni == 'm') pushScreen(showChangeMode);
     else if(uni == 'R') dialog::do_if_confirmed([] {
       #if CAP_STARTANIM
@@ -324,15 +320,11 @@ void editScale() {
   dialog::scaleSinh();
   }
 
-void showDisplayMode() {
+void showGraphQuickKeys() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
 
-  dialog::init(XLAT("special display modes"));
-
-  const char *wdmodes[6] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D"};
-  const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",
-    "3D", "high contrast/3D"};
+  dialog::init(XLAT("quick options"));
 
   if(DIM == 2) {
     dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
@@ -346,97 +338,29 @@ void showDisplayMode() {
     dialog::addBoolItem(XLAT("third person perspective"), vid.yshift > 0 && vid.sspeed > -5, '3');
     }
 
+  const char *wdmodes[6] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D"};
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
-  if(getcstat == '5')
-    mouseovers = XLAT("also hold Alt during the game to toggle high contrast");
+
+  const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",
+    "3D", "high contrast/3D"};
+  dialog::addSelItem(XLAT("monster display mode"), XLAT(mdmodes[vid.monmode]), '8');
+
   dialog::addBoolItem(XLAT("draw the grid"), (vid.grid), '6');
   dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
-  dialog::addSelItem(XLAT("3D configuration"), "", '9');
 
-  if(DIM == 2)
-  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
-  dialog::addSelItem(XLAT("monster display mode"), XLAT(mdmodes[vid.monmode]), 'm');
-
-  dialog::addBreak(50);
-
-#if CAP_EDIT
-  if(DIM == 2)
-  dialog::addBoolItem(XLAT("vector graphics editor"), (false), 'g');
-#endif
-
-#if CAP_TEXTURE
-  if(DIM == 2)
-  dialog::addBoolItem(XLAT("texture mode"), texture::config.tstate == texture::tsActive, 't');
-#endif
-
-
-  // display modes  
-#if CAP_RUG
-  if(DIM == 2)
-  dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
-#endif
-#if CAP_MODEL
-  if(DIM == 2)
-  dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
-#endif
-
-  dialog::addBoolItem(XLAT("models and projections"), pmodel, 'a');
-
-  dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'A');
-//  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
-  
-  showAllConfig();
+  dialog::addBreak(50);  
+  dialog::addInfo("Hint: these keys usually work during the game");
+  dialog::addInfo("also hold Alt during the game to toggle high contrast");
+ 
+  dialog::addBreak(50);  
+  dialog::addBack();
   dialog::display();
-  
+
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    char xuni = uni;
-    // if((xuni >= 'A' && xuni <= 'Z') || (xuni >= 1 && xuni <= 26)) xuni |= 32;
-  
-    if(xuni == 'p') projectionDialog();
     
-    if(xuni == 'z') editScale();
-    
-    #if CAP_TEXTURE
-    if(xuni == 't') pushScreen(texture::showMenu);
-    #endif
-
-    if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
-  
-    if(xuni == '9') pushScreen(show3D);
-    
-  #if CAP_EDIT
-    else if(xuni == 'g') {
-      pushScreen(mapeditor::showDrawEditor);
-      mapeditor::initdraw(cwt.at);
-      }
-  #endif
-  
-    else if(xuni == 'x') {
-      viewdists = !viewdists;
-      }
-  #if CAP_RUG
-    else if(xuni == 'u') {
-      //if(sphere) projectionDialog();
-      //else 
-      rug::select();
-      }
-  #endif
-    else if(uni == 'a')
-      pushScreen(conformal::model_menu);
-  #if CAP_ANIMATIONS
-    else if(uni == 'A')
-      pushScreen(anims::show);
-  #endif
-  
-  #if CAP_MODEL
-    else if(xuni == 'n') 
-      netgen::run();
-  #endif
-  
-    else gmodekeys(sym, uni);
-  
-    handleAllConfig(sym, xuni);
+    if(gmodekeys(sym, uni)) ;
+    else if(doexiton(sym, uni)) popScreen();
     };
   }
 
@@ -486,19 +410,82 @@ void help_nochaos() {
     "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
     );
   }
+
+void showCreative() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(3);
+  dialog::init(XLAT("creative mode"));
+
+  dialog::addItem("map editor", 'm');
+  dialog::add_action([] {
+    if(tactic::on) 
+      addMessage(XLAT("Not available in the pure tactics mode!"));
+    else if(daily::on) {
+      addMessage(XLAT("Not available in the daily challenge!"));
+      }
+    else dialog::cheat_if_confirmed([] {
+      cheater++;
+      pushScreen(mapeditor::showMapEditor);
+      lastexplore = turncount;
+      addMessage(XLAT("You activate your terraforming powers!"));
+      });
+    });
+
+#if CAP_EDIT
+  dialog::addItem(XLAT("vector graphics editor"), 'g');
+  dialog::add_action([] {
+    pushScreen(mapeditor::showDrawEditor);
+    mapeditor::initdraw(cwt.at);
+    });
+#endif
+
+  // display modes  
+#if CAP_MODEL
+  if(DIM == 2) {
+    dialog::addItem(XLAT("paper model creator"), 'n');
+    dialog::add_action([] { netgen::run(); });
+    }
+#endif
+
+  dialog::addItem(XLAT("screenshots"), 's');
+  dialog::add_action([] () { pushScreen(shot::menu); });
+      
+  dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'A');
+  dialog::add_action_push(anims::show);
+
+#if CAP_TEXTURE
+  if(DIM == 2) {
+    dialog::addBoolItem(XLAT("texture mode"), texture::config.tstate == texture::tsActive, 't');
+    dialog::add_action_push(texture::showMenu);
+    }
+#endif
+
+  dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
+  dialog::add_action(enable_cheat);
+
+//  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
+  
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
   
 void showChangeMode() {
   gamescreen(3);
-  dialog::init(XLAT("special game modes"));
-  
-  // gameplay modes
+  dialog::init(XLAT("special modes"));
+                               // gameplay modes
 
 #if CAP_TOUR
   dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
 #endif
-
+  dialog::addBoolItem(XLAT("creative mode"), (false), 'c');
+  dialog::add_action_push(showCreative);
   dialog::addBoolItem(XLAT("experiment with geometry"), geometry || CHANGED_VARIATION || viewdists, 'e');
-  dialog::addBoolItem(XLAT(SHMUPTITLE), (shmup::on || multi::players > 1), 's');
+
+  dialog::addBreak(100);
+
+  dialog::addBoolItem(XLAT(SHMUPTITLE), shmup::on, 's');
+  dialog::addBoolItem(XLAT("multiplayer"), multi::players > 1, 'm');
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
   if(getcstat == 'h')
@@ -520,14 +507,6 @@ void showChangeMode() {
 #endif
 
   dialog::addBreak(50);
-  // cheating and map editor
-
-  dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
-#if CAP_EDIT
-  dialog::addBoolItem(XLAT("map editor"), (false), 'm');
-#endif
-
-  dialog::addBreak(50);
   
   dialog::addBack();
   dialog::display();
@@ -542,9 +521,6 @@ void showChangeMode() {
     else if(uni == 'z')
       pushScreen(daily::showMenu);
     #endif
-    
-    else if(uni == 'c') 
-      enable_cheat();
     
     else if(xuni == 'e') 
       runGeometryExperiments();
@@ -583,28 +559,9 @@ void showChangeMode() {
       else
         dialog::do_if_confirmed([] { restart_game(rg::princess); });
       }
-  #if CAP_EDIT
-    else if(xuni == 'm') {
-      if(tactic::on) 
-        addMessage(XLAT("Not available in the pure tactics mode!"));
-      else if(daily::on) {
-        addMessage(XLAT("Not available in the daily challenge!"));
-        }
-      else dialog::cheat_if_confirmed([] {
-        cheater++;
-        pushScreen(mapeditor::showMapEditor);
-        lastexplore = turncount;
-        addMessage(XLAT("You activate your terraforming powers!"));
-        });
-      }
-  #endif
-    else if(xuni == 's') {
-  #if ISMOBILE==1
-      restart_game(rg::shmup);
-  #else
-      shmup::configure();
-  #endif
-      }
+    else if(xuni == 's') 
+      dialog::do_if_confirmed(shmup::switch_shmup);
+
     else if(xuni == 'h' && !shmup::on) 
       switchHardcore();
     else if(xuni == 'r') {
@@ -983,9 +940,6 @@ int read_menu_args() {
     }
   else if(argis("-d:main")) {
     PHASEFROM(2); launch_dialog(showMainMenu);
-    }
-  else if(argis("-d:display")) {
-    PHASEFROM(2); launch_dialog(showDisplayMode);
     }
   else if(argis("-d:mode")) {
     PHASEFROM(2); launch_dialog(showChangeMode);

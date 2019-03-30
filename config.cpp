@@ -709,25 +709,6 @@ void loadConfig() {
   }
 #endif
 
-void showAllConfig() {
-  dialog::addBreak(50);
-  dialog::addBack();
-#if CAP_CONFIG
-  dialog::addItem(XLAT("save the current config"), 's');
-  if(getcstat == 's')
-    mouseovers = XLAT("Config file: %1", conffile);
-#endif
-  }
-
-void handleAllConfig(int sym, int uni) {
-  if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
-
-  else if(uni == ' ' || sym == SDLK_ESCAPE) popScreen();
-#if CAP_CONFIG
-  else if(uni == 's') saveConfig();
-#endif  
-  }
-
 void add_cells_drawn(char c = 'C') {
   dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), c);
   dialog::add_action([] () { 
@@ -858,26 +839,8 @@ void showGraphConfig() {
   dialog::addSelItem(XLAT("whatever"), fts(whatever), 'j');
 #endif
 
-  const char *glyphsortnames[6] = {
-    "first on top", "first on bottom", 
-    "last on top", "last on bottom",
-    "by land", "by number"
-    };
- 
-  const char *glyphmodenames[3] = {"letters", "auto", "images"};
-  dialog::addSelItem(XLAT("inventory/kill sorting"), XLAT(glyphsortnames[glyphsortorder]), 'k');
-
-  dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
-
-  dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
-
-  menuitem_sightrange();
-  
-  dialog::addSelItem(XLAT("move by clicking on compass"), its(vid.mobilecompasssize), 'C');
-  
-  dialog::addItem(XLAT("customize colors and aura"), 'c');
-
-  showAllConfig();
+  dialog::addBreak(50);
+  dialog::addBack();
   dialog::display();
 
   keyhandler = [] (int sym, int uni) {
@@ -890,37 +853,30 @@ void showGraphConfig() {
     if((uni >= 32 && uni < 64) || uni == 'L' || uni == 'C') xuni = uni;
     
     if(xuni == 'u') vid.particles = !vid.particles;
-    if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
-    
-    if(xuni == 'c') pushScreen(show_color_dialog);
-        
-    if(xuni == 'j') {
+
+    else if(xuni == 'j') {
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
         XLAT("Whatever."));
       dialog::reaction = delayed_geo_reset;
       }
   
-    if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
+    else if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
       XLAT("scrolling speed"),
       XLAT("+5 = center instantly, -5 = do not center the map")
       + "\n\n" +
       XLAT("press Space or Home to center on the PC"));
   
-    if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
+    else if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
       XLAT("movement animation speed"),
       XLAT("+5 = move instantly"));
   
-    if(xuni == 'k') {
-      glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
-      }
-    
-    if(xuni == 'f') switchFullscreen();
+    else if(xuni == 'f') switchFullscreen();
   
   #if CAP_GLORNOT
-    if(xuni == 'o' && shiftmul > 0) switchGL();
+    else if(xuni == 'o' && shiftmul > 0) switchGL();
   #endif
   
-    if(xuni == 'o' && shiftmul < 0) {
+    else if(xuni == 'o' && shiftmul < 0) {
       if(!vid.usingGL)
         vid.antialias ^= AA_NOGL | AA_FONT;
       else if(vid.antialias & AA_MULTI)
@@ -938,7 +894,7 @@ void showGraphConfig() {
     
     // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
    
-    if(xuni == 'w' && vid.usingGL) {
+    else if(xuni == 'w' && vid.usingGL) {
       dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
       dialog::extra_options = [] () {
         dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
@@ -946,37 +902,23 @@ void showGraphConfig() {
         };
       }
     
-    if(xuni == 'L') {
+    else if(xuni == 'L') {
       dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
         XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
       dialog::reaction = delayed_geo_reset;
       }
   
-    if(xuni == 'C') {
-      dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), XLAT("0 to disable"));
-      // we need to check the moves
-      dialog::reaction = checkmove;
-      dialog::bound_low(0);
-      }
-
   #if CAP_FRAMELIMIT    
-    if(xuni == 'l') {
+    else if(xuni == 'l') {
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
       dialog::bound_low(5);
       }
   #endif
       
-    if(xuni =='b') {
-      dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
-      const int minfontscale = ISMOBILE ? 50 : 25;
-      dialog::reaction = [] () { setfsize = true; do_setfsize(); };
-      dialog::bound_low(minfontscale);
-      }
-  
-    if(xuni =='p') 
+    else if(xuni =='p') 
       vid.backeffects = !vid.backeffects;
-  
-    handleAllConfig(sym, xuni);
+      
+    else if(doexiton(sym, uni)) popScreen();
     };
   }
   
@@ -1012,85 +954,25 @@ void switchGL() {
 
 void resetConfigMenu();
 
-void showBasicConfig() {
+void configureOther() {
   gamescreen(3);
-  const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
-  dialog::init(XLAT("basic configuration"));
 
-  if(CAP_TRANS) dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
-  dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
-  if(getcstat == 'g') 
-    mouseovers = XLAT("Affects looks and grammar");
-
-  if(CAP_AUDIO) {
-    dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-    dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-    }
-
-// input:  
-  dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'c');
-
-  dialog::addBoolItem(XLAT("reverse pointer control"), (vid.revcontrol), 'r');
-  dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
-  
-  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
-  dialog::addSelItem(XLAT("limit messages shown"), its(vid.msglimit), 'z');
-  
-  const char* msgstyles[3] = {"centered", "left-aligned", "line-broken"};
-  
-  dialog::addSelItem(XLAT("message style"), XLAT(msgstyles[vid.msgleft]), 'a');
-
-#if ISMOBILE
-  dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
-#else
-  dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
-#endif
+  dialog::init(XLAT("other configuration"));
 
 #if ISSTEAM
   dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'x');
+  dialog::add_action([] {vid.steamscore = vid.steamscore^1; });
 #endif
 
   dialog::addBoolItem(XLAT("skip the start menu"), vid.skipstart, 'm');
-#if !ISMOBILE
-  dialog::addBoolItem(XLAT("quick mouse"), vid.quickmouse, 'M');
-#endif
+  dialog::add_action([] { vid.skipstart = !vid.skipstart; });
 
   dialog::addBoolItem(XLAT("forget faraway cells"), memory_saving_mode, 'y');
+  dialog::add_action([] { memory_saving_mode = !memory_saving_mode; });
 
-  #if CAP_ORIENTATION
-  dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
-  #endif
-
-  if(CAP_SHMUP && !ISMOBILE)
-    dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
-
-#if CAP_CONFIG
-  dialog::addItem(XLAT("reset all configuration"), 'R');
-#endif
-  showAllConfig();
-  
-  dialog::display();
-  
-  keyhandler = []   (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-      
-    char xuni = uni | 96;
-    
-    if(uni >= 32 && uni < 64) xuni = uni;
-    
-    #if CAP_ORIENTATION
-    if(xuni == '1') pushScreen(ors::show);
-    #endif
-
-    if(uni == 'M') vid.quickmouse = !vid.quickmouse;
-    else if(xuni == 'm') vid.skipstart = !vid.skipstart;
-
-    if(xuni == 'y') memory_saving_mode = !memory_saving_mode;
-  
-    if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
-
-    #if CAP_AUDIO
-    if(CAP_AUDIO && xuni == 'b') {
+  if(CAP_AUDIO) {
+    dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
+    dialog::add_action([] {
       dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
       dialog::reaction = [] () {
         #if CAP_SDLAUDIO
@@ -1102,9 +984,10 @@ void showBasicConfig() {
         };
       dialog::bound_low(0);
       dialog::bound_up(MIX_MAX_VOLUME);
-      }
+      });
 
-    if(CAP_AUDIO && xuni == 'e') {
+    dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+    dialog::add_action([] {
       dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
       dialog::reaction = [] () {
         #if ISANDROID
@@ -1113,46 +996,79 @@ void showBasicConfig() {
         };
       dialog::bound_low(0);
       dialog::bound_up(MIX_MAX_VOLUME);
-      }
-    #endif
-    
-    if(CAP_TRANS && xuni == 'l')
-      pushScreen(selectLanguageScreen); 
-    
-    if(xuni == 'g') pushScreen(showCustomizeChar);
-  
-#if CAP_SHMUP
-    if(xuni == 'p') 
-      shmup::configure();
-#endif
-    
-    if(uni == 'r') vid.revcontrol = !vid.revcontrol;
-    if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
-#if CAP_CONFIG
-    if(uni == 'R') pushScreen(resetConfigMenu);
-#endif
-  
-  #if ISSTEAM
-    if(xuni == 'x') vid.steamscore = vid.steamscore^1;
-  #endif
-    if(xuni == 't') {
-      dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
-        XLAT("How long should the messages stay on the screen."));
-      dialog::bound_low(0);
-      }
+      });
+    }
 
-    if(xuni == 'z') {
-      dialog::editNumber(vid.msglimit, 0, 64, 1, 5, XLAT("limit messages shown"),
-        XLAT("Maximum number of messages on screen."));
-      dialog::bound_low(0);
-      }
-    
-    if(xuni == 'i') { vid.shifttarget = vid.shifttarget^3; }
-    
-    if(xuni == 'a') { vid.msgleft = (1+vid.msgleft) % 3; }
+  menuitem_sightrange('r');
+
+  dialog::addBreak(50);
+  dialog::addBack();
   
-    handleAllConfig(sym, xuni);
+  dialog::display();
+  }
+
+void configureInterface() {
+  gamescreen(3);
+  dialog::init(XLAT("interface"));
+
+  if(CAP_TRANS) {
+    dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
+    dialog::add_action_push(selectLanguageScreen);
+    }
+
+  dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
+  dialog::add_action_push(showCustomizeChar);
+  if(getcstat == 'g') mouseovers = XLAT("Affects looks and grammar");
+
+  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
+  dialog::add_action([] {
+    dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
+      XLAT("How long should the messages stay on the screen."));
+    dialog::bound_low(0);
+    });
+
+  dialog::addSelItem(XLAT("limit messages shown"), its(vid.msglimit), 'z');
+  dialog::add_action([] {
+    dialog::editNumber(vid.msglimit, 0, 64, 1, 5, XLAT("limit messages shown"),
+      XLAT("Maximum number of messages on screen."));
+    dialog::bound_low(0);
+    });
+  
+  const char* msgstyles[3] = {"centered", "left-aligned", "line-broken"};
+  
+  dialog::addSelItem(XLAT("message style"), XLAT(msgstyles[vid.msgleft]), 'a');
+  dialog::add_action([] {
+    vid.msgleft = (1+vid.msgleft) % 3;
+    });
+
+  dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
+  dialog::add_action([] {
+    dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
+    const int minfontscale = ISMOBILE ? 50 : 25;
+    dialog::reaction = [] () { setfsize = true; do_setfsize(); };
+    dialog::bound_low(minfontscale);
+    });  
+
+  const char *glyphsortnames[6] = {
+    "first on top", "first on bottom", 
+    "last on top", "last on bottom",
+    "by land", "by number"
     };
+  dialog::addSelItem(XLAT("inventory/kill sorting"), XLAT(glyphsortnames[glyphsortorder]), 'k');
+  dialog::add_action([] {
+    glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
+    });
+
+  const char *glyphmodenames[3] = {"letters", "auto", "images"};
+  dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
+  dialog::add_action([] {
+    vid.graphglyph = (1+vid.graphglyph)%3;
+    });    
+   
+  dialog::addBreak(50);
+  dialog::addBack();
+  
+  dialog::display();
   }
 
 #if CAP_SDLJOY
@@ -1888,6 +1804,95 @@ void selectLanguageScreen() {
   }
 #endif
 
+void configureMouse() {
+  gamescreen(1);
+  dialog::init(XLAT("mouse & touchscreen"));
+
+  dialog::addBoolItem(XLAT("reverse pointer control"), (vid.revcontrol), 'r');
+  dialog::add_action([] {vid.revcontrol = !vid.revcontrol; });
+  
+  dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
+  dialog::add_action([] { vid.drawmousecircle = !vid.drawmousecircle; });
+  
+#if ISMOBILE
+  dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
+#else
+  dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
+#endif
+  dialog::add_action([] {vid.shifttarget = vid.shifttarget^3; });    
+
+  #if !ISMOBILE
+  dialog::addBoolItem(XLAT("quick mouse"), vid.quickmouse, 'M');
+  dialog::add_action([] {vid.quickmouse = !vid.quickmouse; });
+  #endif
+
+  dialog::addSelItem(XLAT("move by clicking on compass"), its(vid.mobilecompasssize), 'C');
+  dialog::add_action([] {
+    dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), XLAT("0 to disable"));
+    // we need to check the moves
+    dialog::reaction = checkmove;
+    dialog::bound_low(0);
+    });
+
+  #if CAP_ORIENTATION
+  dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
+  dialog::add_action([] { pushScreen(ors::show); });
+  #endif
+
+  dialog::display();
+  }
+
+void showSettings() {
+  gamescreen(1);
+  dialog::init(XLAT("settings"));
+
+  dialog::addItem(XLAT("interface"), 'i');
+  dialog::add_action_push(configureInterface);
+
+  dialog::addItem(XLAT("general graphics"), 'g');
+  dialog::add_action_push(showGraphConfig);
+
+  dialog::addItem(XLAT("colors and aura"), 'c');
+  dialog::add_action_push(show_color_dialog);
+
+  dialog::addItem(XLAT("3D graphics"), '9');
+  dialog::add_action_push(show3D);
+
+  dialog::addItem(XLAT("quick options"), 'q');
+  dialog::add_action_push(showGraphQuickKeys);
+
+  dialog::addItem(XLAT("models and projections"), 'a');
+  dialog::add_action_push(conformal::model_menu);
+
+#if CAP_SHMUP
+  if(CAP_SHMUP && !ISMOBILE) {
+    dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
+    dialog::add_action(shmup::configure);
+    }
+#endif
+
+  dialog::addSelItem(XLAT("mouse & touchscreen"), "", 'm');
+  dialog::add_action_push(configureMouse);
+
+  dialog::addItem(XLAT("other settings"), 'o');
+  dialog::add_action_push(configureOther);
+  
+  dialog::addBreak(100);
+
+#if CAP_CONFIG
+  dialog::addItem(XLAT("save the current config"), 's');
+  dialog::add_action(saveConfig);
+
+  dialog::addItem(XLAT("reset all configuration"), 'R');
+  dialog::add_action_push(resetConfigMenu);
+#endif  
+  
+  if(getcstat == 's') mouseovers = XLAT("Config file: %1", conffile);
+  
+  dialog::addBack();
+  dialog::display();
+  }
+
 #if CAP_COMMANDLINE
 
 int read_color_args() {
@@ -2027,8 +2032,8 @@ int read_config_args() {
   else if(argis("-d:stereo")) {
     PHASEFROM(2); launch_dialog(showStereo);
     }
-  else if(argis("-d:basic")) {
-    PHASEFROM(2); launch_dialog(showBasicConfig);
+  else if(argis("-d:iface")) {
+    PHASEFROM(2); launch_dialog(configureInterface);
     }
   else if(argis("-d:graph")) {
     PHASEFROM(2); launch_dialog(showGraphConfig);

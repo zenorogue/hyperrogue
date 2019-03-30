@@ -147,7 +147,7 @@ hint hints[] = {
       dialog::addItem(XLAT("special display modes"), 'z');
       },
     []() {
-      pushScreen(showDisplayMode);
+      pushScreen(conformal::model_menu);
       }},
 
   {
