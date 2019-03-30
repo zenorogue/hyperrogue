@@ -59,6 +59,7 @@ static const flagtype CF_POWER = Flag(44);
 static const flagtype CF_GHOSTMOVER = Flag(45);
 static const flagtype CF_TECHNICAL = Flag(46);
 static const flagtype CF_MOVED = Flag(47);
+static const flagtype CF_FACING = Flag(48);
 
 enum eMonster {
   #define MONSTER(a,b,c,d,e,f,g,h) d,
