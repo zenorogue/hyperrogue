@@ -1057,7 +1057,9 @@ void showBasicConfig() {
 
   dialog::addBoolItem(XLAT("forget faraway cells"), memory_saving_mode, 'y');
 
+  #if CAP_ORIENTATION
   dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
+  #endif
 
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
@@ -1076,7 +1078,9 @@ void showBasicConfig() {
     
     if(uni >= 32 && uni < 64) xuni = uni;
     
+    #if CAP_ORIENTATION
     if(xuni == '1') pushScreen(ors::show);
+    #endif
 
     if(uni == 'M') vid.quickmouse = !vid.quickmouse;
     else if(xuni == 'm') vid.skipstart = !vid.skipstart;
