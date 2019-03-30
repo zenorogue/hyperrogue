@@ -2232,9 +2232,9 @@ void drawShape(pair<ld,ld>* coords, int qty, color_t color);
 
 extern eModel pmodel;
 
-inline bool mdAzimuthalEqui() { return pmodel == mdEquidistant || pmodel == mdEquiarea; }
+inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
 
-inline bool mdBandAny() { return pmodel == mdBand || pmodel == mdBandEquidistant || pmodel == mdBandEquiarea || pmodel == mdSinusoidal; }
+inline bool mdBandAny() { return among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal); }
 
 color_t darkena(color_t c, int lev, int a);
 

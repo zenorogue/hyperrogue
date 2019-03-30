@@ -585,6 +585,7 @@ const modelinfo models[int(mdPolynomial)+1] = {
   {X3("rotated hyperboles"), mf::hyper_only},  
   {X3("spiral"), mf::hyper_or_torus | mf::quasiband},
   {X3("native perspective"), 0},
+  {X3("azimuthal equi-volume"), mf::azimuthal | mf::equivolume | mf::euc_boring},
   {X3(""), 0},
   {X3(""), 0},
   {X3(""), 0},

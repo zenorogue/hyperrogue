@@ -67,6 +67,15 @@ ld asin_auto(ld x) {
     }
   }
 
+ld volume_auto(ld r) {
+  switch(cgclass) {
+    case gcEuclid: return 4 * r * r * r / 3 * M_PI;
+    case gcHyperbolic: return M_PI * (sinh(2*r) - 2 * r);
+    case gcSphere: return M_PI * (2 * r - sin(2*r));
+    default: return 0;
+    }
+  }
+
 ld asin_auto_clamp(ld x) {
   switch(cgclass) {
     case gcEuclid: return x;

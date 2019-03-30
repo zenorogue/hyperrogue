@@ -258,6 +258,7 @@ enum eModel {
   mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
   mdRotatedHyperboles, mdSpiral, mdPerspective,
+  mdEquivolume, 
   mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial
   };
 
@@ -274,6 +275,7 @@ namespace mf {
   static const flagtype hyper_only = 128;
   static const flagtype hyper_or_torus = 256;
   static const flagtype quasiband = 512;
+  static const flagtype equivolume = 1024;
   };
   
 struct modelinfo {

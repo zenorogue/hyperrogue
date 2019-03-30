@@ -609,6 +609,7 @@ namespace conformal {
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
     if(DIM == 2 && pm == mdPerspective) return false;
+    if(DIM == 2 && pm == mdEquivolume) return false;
     if(DIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
     return true;
     }    

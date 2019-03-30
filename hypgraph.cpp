@@ -557,7 +557,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       makeband(H, ret, [] (ld& x, ld& y) { x *= cos_auto(y); });
       break;
     
-    case mdEquidistant: case mdEquiarea: {
+    case mdEquidistant: case mdEquiarea: case mdEquivolume: {
       ld zlev = find_zlev(H);
 
       ld rad = hypot_d(DIM, H);
@@ -568,7 +568,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       
       // 4 pi / 2pi = M_PI 
       
-      if(pmodel == mdEquiarea && sphere)
+      if(pmodel == mdEquivolume)
+        d = pow(volume_auto(d), 1/3.) * pow(M_PI / 2, 1/3.);
+      else if(pmodel == mdEquiarea && sphere)
         d = sqrt(2*(1 - cos(d))) * M_PI / 2;
       else if(pmodel == mdEquiarea && hyperbolic)
         d = sqrt(2*(cosh(d) - 1)) / 1.5;
