@@ -1051,7 +1051,7 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
 void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
   charstyle& cs = getcs();
   
-  if(mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, darkena(col, 0, 0x80), where)) return false;
+  if(mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, darkena(col, 0, 0x80), where)) return;
   
   if(cs.charid >= 8) {
     queuepoly(VABODY, shWolfBody, darkena(col, 0, 0xC0));
@@ -1154,7 +1154,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       drawPlayer(m, where, V, col, footphase);  
       return false;
 
-    case moMimic: moShadow: moIllusion:
+    case moMimic: case moShadow: case moIllusion:
       drawMimic(m, where, V, col, footphase);
       return false;
     
@@ -1351,11 +1351,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       return false;
       }
     
-    case moShark: moGreaterShark: moCShark:
+    case moShark: case moGreaterShark: case moCShark:
       queuepoly(VFISH, shShark, darkena(col, 0, 0xFF));
       return false;
 
-    case moEagle: moParrot: moBomberbird: moAlbatross:
+    case moEagle: case moParrot: case moBomberbird: case moAlbatross:
     case moTameBomberbird: case moWindCrow: case moTameBomberbirdMoved:
     case moSandBird: case moAcidBird:
       ShadowV(V, shEagle);
@@ -2127,7 +2127,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
 
   eMonster m = c->monst;
     
-  if(isIvy(c) || isWorm(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
+  if(isAnyIvy(c) || isWorm(c)) {
   
     if(isWorm(c) && DIM == 3) return false;
     
@@ -2486,10 +2486,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
       drawMonsterType(moPlayer, c, Vs, col, footphase);
     }
 
-  return false;
-#else
-  return false;
 #endif
+  return false;
   }
 
 double downspin;
