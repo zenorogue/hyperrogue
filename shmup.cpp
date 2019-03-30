@@ -3614,11 +3614,11 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     if(callhandlers(false, hooks_draw, V, c, m)) continue;
 
     switch(m->type) {
-      case moPlayer: 
+      case moPlayer: {
         playerfound = true;
 
+        dynamicval<int> d(cpid, m->pid);
         if(!hide_player() || !subscreens::is_current_player(m->pid)) {
-          dynamicval<int> d(cpid, m->pid);
           drawPlayerEffects(view, c, true);
           if(DIM == 3) view = view * spin(-M_PI/2);
           if(m->inBoat) m->footphase = 0;
@@ -3643,6 +3643,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           }
 
         break;
+        }
       case moBullet: {
         color_t col;
         cpid = m->pid;
