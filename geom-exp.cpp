@@ -649,7 +649,7 @@ void showEuclideanMenu() {
 
         
   
-  if(euwrap || geometry == gFieldQuotient) {
+  if(euwrap || geometry == gFieldQuotient || geometry == gCrystal || archimedean) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 
