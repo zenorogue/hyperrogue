@@ -908,7 +908,7 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
     while(c1 != c2) {
       p.push_back(c1);
       forCellCM(c, c1) if(celldist(c) < celldist(c1)) { c1 = c; goto next1; }
-      println(hlog, "could not build_shortest_path"); exit(1);
+      throw hr_shortest_path_exception();
       next1: ;
       }
     p.push_back(c1);
@@ -921,7 +921,7 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
     while(c1 != c2) {
       p.push_back(c1);
       forCellCM(c, c1) if(celldistance(c, c2) < celldistance(c1, c2)) { c1 = c; goto next; }
-      println(hlog, "could not build_shortest_path"); exit(1);
+      throw hr_shortest_path_exception();
       next: ;
       }
     p.push_back(c1);

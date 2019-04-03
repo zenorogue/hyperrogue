@@ -79,6 +79,9 @@ using std::asinh;
 using std::acosh;
 #endif
 
+struct hr_exception: std::exception { hr_exception() {} };
+struct hr_shortest_path_exception: hr_exception { };
+
 // genus (in grammar)
 #define GEN_M 0
 #define GEN_F 1
@@ -4547,7 +4550,7 @@ template<class T, class U> void hread(hstream& hs, map<T,U>& a) {
 template<class C, class C1, class... CS> void hwrite(hstream& hs, const C& c, const C1& c1, const CS&... cs) { hwrite(hs, c); hwrite(hs, c1, cs...); }
 template<class C, class C1, class... CS> void hread(hstream& hs, C& c, C1& c1, CS&... cs) { hread(hs, c); hread(hs, c1, cs...); }
 
-struct hstream_exception : std::exception { hstream_exception() {} };
+struct hstream_exception : hr_exception { hstream_exception() {} };
 
 struct fhstream : hstream {
   FILE *f;

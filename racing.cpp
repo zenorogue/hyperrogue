@@ -301,8 +301,15 @@ void generate_track() {
       }
     }
 
-  track = build_shortest_path(s, goal);
-  
+  try {
+    track = build_shortest_path(s, goal);
+    }
+  catch(hr_shortest_path_exception&) {
+    addMessage("error: could not build path");
+    gamegen_failure = true;
+    racing::on = false;
+    return;
+    }  
   
   /*
   transmatrix At = spin(hrand(1000));
