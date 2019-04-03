@@ -411,7 +411,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
 map<int, cellcrawler> scc;
 
 pair<int, int> get_cellcrawler_id(cell *c) {
-  if(among(geometry, gZebraQuotient, gMinimal) || (euwrap && !fulltorus) || IRREGULAR) {
+  if(among(geometry, gZebraQuotient, gMinimal, gField435, gField534) || (euwrap && !fulltorus) || IRREGULAR || (DIM == 3 && sphere)) {
     // Zebra Quotient does exhibit some symmetries,
     // but these are so small anyway that it is safer to just build
     // a crawler for every neuron
@@ -714,7 +714,8 @@ void sominit(int initto, bool load_compressed) {
     dispersion_count = 0;  
     
     scc.clear();
-    for(cell *c: currentmap->allcells()) {
+    for(int i=0; i<cells; i++) {
+      cell *c = net[i].where;
       auto cid = get_cellcrawler_id(c);
       if(!scc.count(cid.first)) {
         printf("Building cellcrawler id = %x\n", cid.first);
@@ -1344,6 +1345,9 @@ int readArgs() {
 
   else if(argis("-somkrad")) {
     gaussian = 0; uninit(0);
+    }
+  else if(argis("-somskrad")) {
+    shift(); krad = argi();
     }
   else if(argis("-somsim")) {
     gaussian = 0; uninit(1);

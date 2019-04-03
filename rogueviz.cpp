@@ -1111,6 +1111,12 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
   auto& sh = *(vshapes[vertex_shape]);
   
   if(vertex_shape == 0) ;
+  else if(DIM == 3) {
+    V1 = face_the_player(V);
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
+    queuepolyat(V1, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
+    if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
+    }
   else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
@@ -1305,7 +1311,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     
     hyperpoint h = tC0(V * m->at);
-    transmatrix V2 = rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
+    transmatrix V2 = DIM == 3 ? V : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
