@@ -424,6 +424,8 @@ namespace conformal {
   
   cld spiral_multiplier;
   ld right_spiral_multiplier = 1;
+  ld any_spiral_multiplier = 1;
+  ld sphere_spiral_multiplier = 2;
   ld spiral_cone = 360;
   ld spiral_cone_rad;
   bool ring_not_spiral;
@@ -439,19 +441,18 @@ namespace conformal {
     model_straight_yz = DIM == 2 || (ocos_yz > 1-1e-9);
     if(conformal::on) conformal::apply();
     
-    if(hyperbolic) {
+    if(!euclid) {
       ld b = spiral_angle * degree;
       ld cos_spiral = cos(b);
       ld sin_spiral = sin(b);
       spiral_cone_rad = spiral_cone * degree;
       ring_not_spiral = abs(cos_spiral) < 1e-3;
-      if(ring_not_spiral) {
-        cos_spiral = 0;
-        sin_spiral = 1;
-        spiral_multiplier = cld(0, right_spiral_multiplier * spiral_cone_rad / 2);
-        }
-      else
-        spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * cos_spiral / 2., 0);
+      ld mul = 1;
+      if(sphere) mul = .5 * sphere_spiral_multiplier;
+      else if(ring_not_spiral) mul = right_spiral_multiplier;
+      else mul = any_spiral_multiplier * cos_spiral;
+      
+      spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * mul / 2., 0);
       }
     if(euclid) {
       hyperpoint h = tC0(eumove(spiral_x, spiral_y));
@@ -908,18 +909,28 @@ namespace conformal {
         });
       }
     
-    if(pmodel == mdSpiral && hyperbolic) {
+    if(pmodel == mdSpiral && !euclid) {
       dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle), 'x');
       dialog::add_action([](){
         dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
         });
 
-      if(ring_not_spiral) {
-        dialog::addSelItem(XLAT("spiral multiplier"), fts(right_spiral_multiplier), 'M');
-        dialog::add_action([](){
-          dialog::editNumber(right_spiral_multiplier, 0, 10, -.1, 1, XLAT("spiral multiplier"), "");
-          });
-        }
+      ld& which =
+        sphere ? sphere_spiral_multiplier :
+        ring_not_spiral ? right_spiral_multiplier :
+        any_spiral_multiplier;
+                
+      dialog::addSelItem(XLAT("spiral multiplier"), fts(which), 'M');
+      dialog::add_action([&which](){
+        dialog::editNumber(which, 0, 10, -.1, 1, XLAT("spiral multiplier"), 
+          XLAT(
+            "This parameter has a bit different scale depending on the settings:\n"
+            "(1) in spherical geometry (with spiral angle=90, 1 produces a stereographic projection)\n"
+            "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
+            "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)"
+            )
+          );
+        });
 
       dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone), 'C');
       dialog::add_action([](){
@@ -1225,9 +1236,14 @@ namespace conformal {
     else if(argis("-sang")) { 
       PHASEFROM(2); 
       shift_arg_formula(conformal::spiral_angle);
-      if(conformal::spiral_angle == 90) {
+      if(sphere)
+        shift_arg_formula(conformal::sphere_spiral_multiplier);
+      else if(conformal::spiral_angle == 90)
         shift_arg_formula(conformal::right_spiral_multiplier);
-        }        
+      }
+    else if(argis("-ssm")) { 
+      PHASEFROM(2);
+      shift_arg_formula(conformal::any_spiral_multiplier);
       }
     else if(argis("-scone")) { 
       PHASEFROM(2); 

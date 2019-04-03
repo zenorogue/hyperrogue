@@ -192,11 +192,12 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   
   ld x, y, yf, zf=0;
   y = asin_auto(H[1]);
-  x = asin_auto_clamp(H[0] / cos_auto(y)) + band_shift;
+  x = asin_auto_clamp(H[0] / cos_auto(y));
   if(sphere) {
     if(H[DIM] < 0 && x > 0) x = M_PI - x;
     else if(H[DIM] < 0 && x <= 0) x = -M_PI - x;
     }
+  x += band_shift;
   hypot_zlev(zlev, y, yf, zf);
   
   f(x, y);
@@ -628,7 +629,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdSpiral: {
       cld z;
-      if(hyperbolic) makeband(H, ret, band_conformal);
+      if(hyperbolic || sphere) makeband(H, ret, band_conformal);
       else ret = H;
       z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
       
@@ -910,7 +911,33 @@ void drawrec(cell *c, const transmatrix& V) {
 
 vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 
+bool in_multi = false;
+
 void hrmap_standard::draw() {
+  if(sphere && pmodel == mdSpiral && !in_multi) {
+    in_multi = true;
+    if(conformal::ring_not_spiral) {
+      int qty = ceil(1. / conformal::sphere_spiral_multiplier);
+      if(qty > 100) qty = 100;
+      for(int i=-qty; i < qty; i++) {
+        band_shift = 2 * M_PI * i;
+        draw();
+        }
+      }
+    else {
+      draw();
+      if(vid.use_smart_range) for(int i=1;; i++) {
+        int drawn = cells_drawn;
+        band_shift = 2 * M_PI * i;
+        draw();
+        band_shift = -2 * M_PI * i;
+        draw();
+        if(drawn == cells_drawn) break;
+        }
+      }
+    in_multi = false;
+    return;
+    }
   drawn_cells.clear();
   drawn_cells.emplace_back(viewctr, hsOrigin, cview(), band_shift);
   for(int i=0; i<isize(drawn_cells); i++) {    
@@ -972,6 +999,8 @@ void hrmap_standard::draw() {
           }
         }
       }
+    
+    if(sphere) draw = true;
   
     if(draw) for(int d=0; d<S7; d++) {
       hstate s2 = transition(s, d);
@@ -1556,6 +1585,7 @@ void draw_boundary(int w) {
     case mdSpiral: {
       using namespace hyperpoint_vec;
       if(euclid) return;
+      if(conformal::ring_not_spiral) return;
       // if(p == PPR::CIRCLE) p = PPR::OUTCIRCLE;
       auto& sm = conformal::spiral_multiplier;
       ld u = hypot(1, imag(sm) / real(sm));
@@ -1590,13 +1620,17 @@ void draw_boundary(int w) {
 
 ld band_shift = 0;
 void fix_the_band(transmatrix& T) {
-  if((models[pmodel].flags & mf::quasiband) && T[2][2] > 1e6) {
+  if(((models[pmodel].flags & mf::quasiband) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
     hyperpoint H = tC0(T);
     find_zlev(H);
     conformal::apply_orientation(H[0], H[1]);
     
     ld y = asin_auto(H[1]);
     ld x = asin_auto_clamp(H[0] / cos_auto(y));
+    if(sphere) {
+      if(H[DIM] < 0 && x > 0) x = M_PI - x;
+      else if(H[DIM] < 0 && x <= 0) x = -M_PI - x;
+      }
     band_shift += x;
     // printf("fixing with shift = %lf\n", x);
     T = xpush(-x) * T;
@@ -1663,7 +1697,7 @@ bool do_draw(cell *c, const transmatrix& T) {
     ld iz = imag(z) + 1.14279e-2; // make it never fall exactly on PI
     if(iz < -M_PI || iz >= M_PI) return false;
     }
-  if(hyperbolic && pmodel == mdSpiral && conformal::ring_not_spiral) {
+  if(pmodel == mdSpiral && conformal::ring_not_spiral) {
     cld z;
     hyperpoint H = tC0(T);
     hyperpoint ret;
