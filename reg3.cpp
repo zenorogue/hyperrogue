@@ -516,6 +516,13 @@ namespace reg3 {
     unordered_map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     unordered_map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
+    vector<cell*> spherecells;  
+
+    vector<cell*>& allcells() override { 
+      if(sphere) return spherecells;
+      return hrmap::allcells();
+      }
+
     hrmap_reg3() {
       generate();
       origin = tailored_alloc<heptagon> (S7);
@@ -526,6 +533,7 @@ namespace reg3 {
       h.distance = 0;
       h.fieldval = 0;
       h.c7 = newCell(S7, origin);
+      if(sphere) spherecells.push_back(h.c7);
       worst_error1 = 0, worst_error2 = 0;
       
       dynamicval<hrmap*> cr(currentmap, this);
@@ -680,6 +688,7 @@ namespace reg3 {
       #endif
       heptagon *created = tailored_alloc<heptagon> (S7);
       created->c7 = newCell(S7, created);
+      if(sphere) spherecells.push_back(created->c7);
       created->alt = NULL;
       created->cdata = NULL;
       #if CAP_FIELD
