@@ -46,7 +46,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       return (get_inverse?invhexmove:hexmove)[d];
     return Id;
     }
-  else if(DIM == 3)
+  else if(DIM == 3 || euclid)
     return Id;
   else
     return pispin * Id;
