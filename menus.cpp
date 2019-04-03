@@ -450,8 +450,11 @@ void showCreative() {
   dialog::addItem(XLAT("screenshots"), 's');
   dialog::add_action_push(shot::menu);
      
-  dialog::addBoolItem(XLAT("animations/history"), anims::any_on(), 'a');
+  dialog::addBoolItem(XLAT("animations"), anims::any_on(), 'a');
   dialog::add_action_push(anims::show);
+
+  dialog::addBoolItem(XLAT("history mode"), conformal::on || conformal::includeHistory, 'h');
+  dialog::add_action_push(conformal::history_menu);
 
 #if CAP_TEXTURE
   if(DIM == 2) {
