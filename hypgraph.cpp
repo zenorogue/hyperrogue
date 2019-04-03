@@ -1237,6 +1237,7 @@ void panning(hyperpoint hf, hyperpoint ht) {
 int cells_drawn;
 
 void fullcenter() {
+  conformal::path_for_lineanimation.clear();
   if(playerfound && false) centerpc(INF);
   else {
     bfs();

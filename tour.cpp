@@ -735,7 +735,7 @@ slide default_slides[] = {
     "memory.",
     [] (presmode mode) {
       static int smart;
-      if(mode == 1) pmodel = mdBand, conformal::create(), conformal::rotation = 0,
+      if(mode == 1) pmodel = mdBand, conformal::create_playerpath(), conformal::rotation = 0,
         smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 3) {
         conformal::clear(), pmodel = mdDisk;
@@ -748,7 +748,7 @@ slide default_slides[] = {
 #if CAP_SDL
       slidecommand = "render spiral";
       if(mode == 4) conformal::createImage(true);
-      if(mode == 11) conformal::create();
+      if(mode == 11) conformal::create_playerpath();
       if(mode == 13) conformal::clear();
 #endif
       }

@@ -216,7 +216,7 @@ hint hints[] = {
       bool h = conformal::includeHistory;
       conformal::rotation = 0;
       conformal::includeHistory = true;
-      conformal::create();
+      conformal::create_playerpath();
       cancel = [m,r,h] () { 
         conformal::clear(); pmodel = m; 
         conformal::rotation = r;

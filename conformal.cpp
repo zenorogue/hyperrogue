@@ -288,6 +288,8 @@ namespace conformal {
   bool dospiral = true;
   
   ld extra_line_steps = 0;
+  
+  vector<cell*> path_for_lineanimation;
 
   void clear() {
     on = false;
@@ -295,30 +297,30 @@ namespace conformal {
     for(int i=0; i<N; i++) delete v[i];
     v.resize(0);
     }
-  
-  void create() {
-    if(celldist(cwt.at) == 0) {
+
+  void create(cell *start, cell *target) {
+    
+    if(target == start) {
       addMessage("Must go a distance from the starting point");
       return;
       }
     
     on = true;
-    cell *c = cwt.at;
-    
-    while(true) {
+  
+    if(!quotient) try {
+      path_for_lineanimation = build_shortest_path(start, target);
+      }
+    catch(hr_shortest_path_exception&) {
+      addMessage("Error: could not build a path");
+      return;
+      }
+
+    for(cell *c: path_for_lineanimation) {
       shmup::monster *m = new shmup::monster;
       m->at = Id;
       m->base = c;
       v.push_back(m);
-      if(c == currentmap->gamestart()) break;
-      for(int i=0; i<c->type; i++)
-        if(celldist(c->move(i)) < celldist(c)) {
-          c = c->move(i);
-          break;
-          }
       }
-  
-    reverse(v.begin(), v.end());
   
     int Q = isize(v)-1;
     // virtualRebase(v[0], false);
@@ -351,6 +353,14 @@ namespace conformal {
     
     llv = ticks;
     phase = 0;
+    }
+
+  void create_playerpath() {
+    create(currentmap->gamestart(), cwt.at);
+    }
+  
+  void create_recenter_to_view() {
+    create(path_for_lineanimation[0], centerover.at ? centerover.at : cwt.at);
     }
   
   void movetophase() {
@@ -448,6 +458,11 @@ namespace conformal {
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     
+    if(centerover.at && !on)
+    if(isize(path_for_lineanimation) == 0 || (quotient && path_for_lineanimation.back() != centerover.at)) {
+      path_for_lineanimation.push_back(centerover.at);
+      }
+
     band_shift = 0;
     }
   
@@ -1026,8 +1041,10 @@ namespace conformal {
 
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'm');
     
-    if(!bounded && !euclid) dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
+    dialog::addBoolItem(XLAT("animate from start to current player position"), (on), 'e');
+    dialog::addBoolItem(XLAT("animate from last recenter to current view"), (on), 'E');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
+    else dialog::addBreak(100);
     dialog::addSelItem(XLAT("extend the ends"), fts(extra_line_steps), 'p');
     
 #if CAP_SDL
@@ -1053,7 +1070,7 @@ namespace conformal {
   void handleKeyC(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
   
-    if(uni == 'e') {
+    if(uni == 'e' || uni == 'E') {
       if(on) clear();
       else {
         if(canmove && !cheater) {
@@ -1061,7 +1078,8 @@ namespace conformal {
           return;
           }
         if(canmove && cheater) cheater++;
-        create();
+        if(uni == 'E') create_recenter_to_view();
+        else create_playerpath();
         }
       }
     else if(uni == 'o') 
@@ -1148,7 +1166,7 @@ namespace conformal {
     bool ih = includeHistory;
     includeHistory = autobandhistory;
     pmodel = mdBand;
-    create();
+    create_playerpath();
     createImage(dospiral);
     clear();
     pmodel = spm;
@@ -1253,6 +1271,7 @@ namespace conformal {
     conformal::killhistory.clear();
     conformal::findhistory.clear();
     conformal::movehistory.clear();
+    conformal::path_for_lineanimation.clear();
     conformal::includeHistory = false;
     });
 

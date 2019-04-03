@@ -1443,7 +1443,9 @@ namespace conformal {
   extern int bandhalf;  
   extern ld extra_line_steps;
   
-  void create();
+  void create(cell *start, cell *target);
+  void create_playerpath();
+  void create_recenter_to_view();
   void clear();
   void model_menu();
   void history_menu();
