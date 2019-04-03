@@ -318,6 +318,8 @@ bool correct_side(const hyperpoint& H) {
   return get_side(H) == spherespecial;
   }
 
+hyperpoint Hlast;
+
 void fixpoint(glvertex& hscr, hyperpoint H) {
   hyperpoint bad = H, good = goodpoint;
 
@@ -366,6 +368,20 @@ void addpoint(const hyperpoint& H) {
       }
     hyperpoint Hscr;
     applymodel(H, Hscr); 
+    if(sphere && pmodel == mdSpiral) {
+      if(isize(glcoords)) {
+        hyperpoint Hscr1;
+        band_shift += 2 * M_PI;
+        applymodel(H, Hscr1);
+        using namespace hyperpoint_vec;
+        if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
+        band_shift -= 4 * M_PI;
+        applymodel(H, Hscr1);
+        if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
+        band_shift += 2 * M_PI;
+        }
+      Hlast = Hscr;
+      }
     if(DIM == 2) {
       for(int i=0; i<3; i++) Hscr[i] *= z;
       Hscr[1] *= vid.stretch;

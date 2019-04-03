@@ -912,7 +912,9 @@ namespace conformal {
     if(pmodel == mdSpiral && !euclid) {
       dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle), 'x');
       dialog::add_action([](){
-        dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), "");
+        dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), 
+          XLAT("set to 90° for the ring projection"
+          );
         });
 
       ld& which =
