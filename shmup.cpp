@@ -1080,10 +1080,11 @@ void monster::rebasePat(const transmatrix& new_pat) {
     fixmatrix(at); pat = at;
     return;
     }
-  if(among(geometry, gZebraQuotient, gTorus, gKleinQuartic, gBolza, gBolza2, gMinimal)) {
+  if(quotient) {
     at = inverse(gmatrix[base]) * new_pat;
     virtualRebase(this, true);
     fixmatrix(at);
+    fixelliptic(at);
     return;
     }
   pat = new_pat;
