@@ -1249,6 +1249,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
           evil ? 0xC00000FF : 0x332A22FF);
         }
       queuepoly(VHEAD, shPFace,  facecolor);
+      return false;
       }
   
     case moWolf: case moRedFox: case moWolfMoved: case moLavaWolf: {
@@ -1264,7 +1265,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
         }
       queuepoly(VAHEAD, shWolfHead, darkena(col, 0, 0xFF));
       queuepoly(VAHEAD, shWolfEyes, darkena(col, 3, 0xFF));
-      break;
+      return false;
       }
     
     case moReptile: {
@@ -1275,7 +1276,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       queuepoly(VAHEAD, shReptileEye, darkena(col, 3, 0xFF));
       queuepoly(VAHEAD * Mirror, shReptileEye, darkena(col, 3, 0xFF));
       queuepoly(VABODY, shReptileTail, darkena(col, 2, 0xFF));
-      break;
+      return false;
       }
     
     case moSalamander: {
@@ -1286,7 +1287,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       queuepoly(VAHEAD, shReptileEye, darkena(0xD00000, 0, 0xFF));
       queuepoly(VAHEAD * Mirror, shReptileEye, darkena(0xD00000, 0, 0xFF));
       queuepoly(VABODY, shReptileTail, darkena(0xD08000, 0, 0xFF));
-      break;
+      return false;
       }
     
     case moVineBeast: {
@@ -1298,14 +1299,14 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       queuepoly(VABODY, shWolfBody, darkena(col, 1, 0xFF));
       queuepoly(VAHEAD, shWolfHead, darkena(col, 0, 0xFF));
       queuepoly(VAHEAD, shWolfEyes, 0xFF0000FF);
-      break;
+      return false;
       }
     
     case moMouse: case moMouseMoved: {
       queuepoly(VALEGS, shMouse, darkena(col, 0, 0xFF));
       queuepoly(VALEGS, shMouseLegs, darkena(col, 1, 0xFF));
       queuepoly(VALEGS, shMouseEyes, 0xFF);
-      break;
+      return false;
       }
     
     case moRunDog: case moHunterDog: case moHunterGuard: case moHunterChanging: case moFallingDog: {
