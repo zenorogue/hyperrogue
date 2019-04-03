@@ -3735,37 +3735,6 @@ void destroyBoats(cell *c) {
       m->inBoat = false;
   }
 
-transmatrix master_relative(cell *c, bool get_inverse) {
-  if(0); 
-  #if CAP_IRR
-  else if(IRREGULAR) {
-    int id = irr::cellindex[c];
-    ld alpha = 2 * M_PI / S7 * irr::periodmap[c->master].base.spin;
-    return get_inverse ? irr::cells[id].rpusher * spin(-alpha-master_to_c7_angle()): spin(alpha + master_to_c7_angle()) * irr::cells[id].pusher;
-    }
-  #endif
-  #if CAP_GP
-  else if(GOLDBERG) {
-    if(c == c->master->c7) {
-      return spin((get_inverse?-1:1) * master_to_c7_angle());
-      }
-    else {
-      auto li = gp::get_local_info(c);
-      transmatrix T = spin(master_to_c7_angle()) * gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][gp::fixg6(li.total_dir)];
-      if(get_inverse) T = inverse(T);
-      return T;
-      }
-    }
-  #endif
-  else if(BITRUNCATED && !euclid) {
-    for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
-      return (get_inverse?invhexmove:hexmove)[d];
-    return Id;
-    }
-  else
-    return pispin * Id;
-  }
-
 void virtualRebase(shmup::monster *m, bool tohex) {
   virtualRebase(m->base, m->at, tohex);
   }
