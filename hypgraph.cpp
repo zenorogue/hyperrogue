@@ -709,11 +709,11 @@ bool behindsphere(const hyperpoint& h) {
   if(mdBandAny()) return false;
 
   if(vid.alpha > 1) {
-     if(h[2] > -1/vid.alpha) return true;
+     if(h[DIM] > -1/vid.alpha) return true;
      }  
   
   if(vid.alpha <= 1) {
-    if(h[2] < .2-vid.alpha) return true;
+    if(h[DIM] < .2-vid.alpha) return true;
     }
   
   return false;
@@ -786,7 +786,7 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   }
 
 bool invis_point(const hyperpoint h) {
-  if(DIM == 2 || sphere) return false;
+  if(DIM == 2 || sphere || pmodel != mdPerspective) return false;
   return h[2] < 0;
   }
 
