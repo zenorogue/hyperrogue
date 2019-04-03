@@ -444,7 +444,7 @@ slide default_slides[] = {
     "brings you benefits, but trying to get too many of the same kind is extremely dangerous.",
     [] (presmode mode) {
       if(mode == 1) viewdists = true;
-      if(mode == 2) viewdists = canmove; // disable when killed
+      if(mode == 2 && !canmove) viewdists = false; // disable when killed
       if(mode == 3) viewdists = false;
       SHOWLAND( l == laIce );
       }
