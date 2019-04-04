@@ -270,6 +270,9 @@ void initgame() {
       makeEmpty(cwt.at);
     }
   
+  if(specialland == laMinefield && bounded)
+    generate_mines();
+  
   princess::squeaked = false;
   clearing::current_root = NULL;
   

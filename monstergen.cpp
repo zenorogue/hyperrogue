@@ -304,6 +304,13 @@ eItem wanderingTreasure(cell *c) {
   }
 
 void wandering() {
+  if(bounded && specialland == laMinefield) {
+    kills[moBomberbird] = 0;
+    kills[moTameBomberbird] = 0;
+    for(cell *c: currentmap->allcells()) if(c->wall == waMineUnknown) kills[moBomberbird]++;
+    for(cell *c: currentmap->allcells()) if(among(c->wall, waMineMine, waMineUnknown) && mineMarked(c)) kills[moTameBomberbird]++;
+    return;
+    }
   if(!canmove) return;
   if(!gen_wandering) return;
   if(racing::on) return;

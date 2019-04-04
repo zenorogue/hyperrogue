@@ -3515,6 +3515,7 @@ void gainShard(cell *c2, const char *msg) {
 
 void uncoverMinesFull(cell *c2) {
   int mineradius = 
+    bounded ? 3 :
     (items[itBombEgg] < 1 && !tactic::on) ? 0 :
     items[itBombEgg] < 20 ? 1 :
     items[itBombEgg] < 30 ? 2 :

@@ -676,6 +676,24 @@ void showEuclideanMenu() {
   
   dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
   dialog::add_action_push(ge_land_selection);
+  
+  if(specialland == laMinefield && bounded) {
+    dialog::addSelItem(XLAT("number of mines"), its(bounded_mine_quantity), 'm');
+    dialog::add_action([] {
+      dialog::editNumber(bounded_mine_quantity, 0, bounded_mine_max, (bounded_mine_max+5)/10, 1, 
+        XLAT("number of mines"), "");
+      dialog::reaction = [] {
+        if(bounded_mine_quantity < 0) bounded_mine_quantity = 0;
+        if(bounded_mine_quantity > bounded_mine_max) bounded_mine_quantity = bounded_mine_max;
+        };
+      dialog::reaction_final = [] {
+        bounded_mine_percentage = bounded_mine_quantity * 1. / bounded_mine_max;
+        stop_game();
+        start_game();
+        };
+      });
+    }
+  
   dialog::addBoolItem(XLAT("pattern"), specialland == laCanvas, 'p');
   if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
   dialog::add_action_push(patterns::showPrePattern);

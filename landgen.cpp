@@ -1954,7 +1954,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
 
     case laMinefield:  
-      if(d == 7) {
+      if(d == 7 && bounded) c->wall = waMineUnknown;
+      else if(d == 7) {
         c->wall = waMineUnknown;
         // 250: rare mines
         // 1250: at 25
@@ -1985,7 +1986,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moBomberbird;
         else placeLocalSpecial(c, 500);
         }
-      if(d == 3 && safety && (c->wall == waMineMine || c->wall == waMineUnknown))
+      if(d == 3 && safety && (c->wall == waMineMine || c->wall == waMineUnknown) && !bounded)
         c->wall = waMineOpen;
       break;
     

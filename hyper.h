@@ -1663,6 +1663,10 @@ extern bool timerstopped;
 bool againstRose(cell *cfrom, cell *cto);
 bool withRose(cell *cfrom, cell *cto);
 
+extern ld bounded_mine_percentage;
+extern int bounded_mine_quantity, bounded_mine_max;
+void generate_mines();
+
 // loops
 
 #define fakecellloop(ct) for(cell *ct = (cell*)1; ct; ct=NULL)

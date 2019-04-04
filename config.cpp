@@ -4,6 +4,9 @@
 
 namespace hr {
 
+ld bounded_mine_percentage = 0.1;
+int bounded_mine_quantity, bounded_mine_max;
+
 const char *conffile = "hyperrogue.ini";
 
 array<ld, gGUARD> sightranges;
@@ -408,6 +411,8 @@ void initConfig() {
   addsaver(racing::player_relative, "race_player_relative");
   addsaver(racing::standard_centering, "race_standard_centering");
 #endif
+
+  addsaver(bounded_mine_percentage, "bounded_mine_percentage");
 
 #if CAP_SHMUP  
   shmup::initConfig();

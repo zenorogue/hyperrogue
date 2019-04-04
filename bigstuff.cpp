@@ -1516,4 +1516,15 @@ void moreBigStuff(cell *c) {
     }      
   }
 
+void generate_mines() {
+  vector<cell*> candidates;
+  for(cell *c: currentmap->allcells())
+    if(c->wall == waMineUnknown) 
+      candidates.push_back(c);
+  bounded_mine_max = isize(candidates);
+  hrandom_shuffle(&candidates[0], bounded_mine_max);
+  bounded_mine_quantity = int(bounded_mine_max * bounded_mine_percentage + 0.5);
+  for(int i=0; i<bounded_mine_quantity; i++) candidates[i]->wall = waMineMine;
+  }
+
 }
