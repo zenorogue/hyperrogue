@@ -496,6 +496,7 @@ void showEuclideanMenu() {
   else if(sphere && nonorientable) euler = 1;
   else if(sphere) euler = 2;
   else if(!bounded) euler = -2;
+  else if(DIM == 3) euler = 0;
   else switch(geometry) {
     case gFieldQuotient:
       worldsize = isize(currentmap->allcells());
