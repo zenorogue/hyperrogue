@@ -681,7 +681,7 @@ void showEuclideanMenu() {
   if(specialland == laMinefield && bounded) {
     dialog::addSelItem(XLAT("number of mines"), its(bounded_mine_quantity), 'm');
     dialog::add_action([] {
-      dialog::editNumber(bounded_mine_quantity, 0, bounded_mine_max, (bounded_mine_max+5)/10, 1, 
+      dialog::editNumber(bounded_mine_quantity, 0, bounded_mine_max, 1, (bounded_mine_max+5)/10, 
         XLAT("number of mines"), "");
       dialog::reaction = [] {
         if(bounded_mine_quantity < 0) bounded_mine_quantity = 0;
