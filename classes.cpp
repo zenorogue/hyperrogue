@@ -410,6 +410,9 @@ const char *ruindesc =
   "Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
   "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.";
 
+const char *rock_description = 
+  "Shoot the Space Rocks for score. Large Rocks will split into two smaller rocks.";
+  
 monstertype minf[motypes] = {
   #define MONSTER(a,b,c,d,e,f,g,h) {a,b,c,e,g,h},
   #include "content.cpp"

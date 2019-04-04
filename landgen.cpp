@@ -2379,6 +2379,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laAsteroids:
+      c->wall = waInvisibleFloor;
       break;
     
     case landtypes: break;

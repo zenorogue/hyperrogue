@@ -3305,6 +3305,8 @@ bool makeEmpty(cell *c) {
     ;
   else if(c->wall == waGiantRug)
     ;
+  else if(c->wall == waInvisibleFloor)
+    ;
   else if(c->wall == waDock)
     ;
   else if(c->land == laDocks)

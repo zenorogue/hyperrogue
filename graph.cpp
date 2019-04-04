@@ -5466,7 +5466,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
-    if(vid.grid || (DIM == 3 && c->land == laAsteroids)) {
+    if(vid.grid || c->land == laAsteroids) {
       dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
       vid.linewidth *= scalefactor;

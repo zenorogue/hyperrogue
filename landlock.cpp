@@ -1001,6 +1001,7 @@ namespace lv {
   land_validity_t pattern_special = {3, qm3, "Special pattern implemented for this geometry."}; 
   land_validity_t not_3d = {0, q0, "This land does not make much sense in 3D."}; 
   land_validity_t not_binary = {0, q0, "This land does not make much sense in binary tiling."}; 
+  land_validity_t shmup_only = {0, q0, "This land works only in the shmup mode."}; 
   }
 
 // old Daily Challenges should keep their validity forever
@@ -1022,6 +1023,12 @@ land_validity_t& land_validity(eLand l) {
   if(among(l, laBrownian, laWestWall, laVariant))
     return disabled;
   #endif
+
+  if(l == laAsteroids) {
+    if(!shmup::on) return shmup_only;
+    if(!bounded) return bounded_only;
+    return specially_designed;
+    }
 
   if(DIM == 3) {
     if(l == laWarpCoast) return ugly_version;

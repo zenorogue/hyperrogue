@@ -1257,9 +1257,9 @@ LAND( 0x30FF30, "Irradiated Field", laVariant, ZERO, itVarTreasure, RESERVED,
 
 // add new content here
 
-LAND( 0x202020, "Asteroids", laAsteroids, ZERO, itAsteroid, RESERVED, NODESCYET)
-ITEM( '*', 0xFFFFFF, "Ice Diamond", itAsteroid, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
-MONSTER('A', 0x606040, "Asteroid", moAsteroid, ZERO, RESERVED, moAsteroid, NODESCYET)
+LAND( 0x202020, "Space Rocks", laAsteroids, ZERO, itAsteroid, RESERVED, rock_description)
+ITEM( '!', 0xFFD0D0, "Fuel", itAsteroid, IC_TREASURE, ZERO, RESERVED, osNone, rock_description)
+MONSTER('A', 0x606040, "Space Rock", moAsteroid, ZERO, RESERVED, moAsteroid, rock_description)
 
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, ZERO | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
