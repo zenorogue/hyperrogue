@@ -400,7 +400,7 @@ namespace reg3 {
       if(S7 == 12) {
         // Emerald in 534
         cell *a = gamestart();
-        cell *b;
+        cell *b = a;
         for(cell *c: allcells())
           if(hr::celldistance(a, c) == 5) {
             b = c;
@@ -442,7 +442,7 @@ namespace reg3 {
           if(ok) nwi.insert(i);
           }
 
-        int gpow;
+        int gpow = 0;
         
         for(int i: nwi) {
           int pw = 1;

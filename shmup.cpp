@@ -1008,7 +1008,7 @@ struct horo_distance {
       a = abs(binary::horo_level(ih1));
       }
     else
-      b = intval(h1, tC0(ggmatrix(c)));
+      a = 0, b = intval(h1, tC0(ggmatrix(c)));
     }
   bool operator < (const horo_distance z) {
     if(binarytiling) {
