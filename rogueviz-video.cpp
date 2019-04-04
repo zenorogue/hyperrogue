@@ -57,7 +57,7 @@ void rvvideo(const string &fname) {
     
     found:
     printf("steps = %d\n", steps);
-    conformal::create(), conformal::rotation = 1;
+    conformal::create_playerpath(), conformal::rotation = 1;
     // pmodel = mdBand;
 
 #define STORYCOUNT 24
