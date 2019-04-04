@@ -734,8 +734,8 @@ void edit_sightrange() {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
       XLAT(
         "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
-        "In spherical geometries, the sight range of 2pi will let you see things behind you as if they were in front of you, "
-        "and the sight range of pi (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+        "In spherical geometries, the sight range of 2? will let you see things behind you as if they were in front of you, "
+        "and the sight range of ? (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
         "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
         "reduces the performance.\n\n"
         "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
@@ -962,7 +962,7 @@ void resetConfigMenu();
 void configureOther() {
   gamescreen(3);
 
-  dialog::init(XLAT("other configuration"));
+  dialog::init(XLAT("other settings"));
 
 #if ISSTEAM
   dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'x');
@@ -1143,7 +1143,7 @@ void projectionDialog() {
     dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'K');
     dialog::add_action([] () { *dialog::ne.editwhat = 0; vid.scale = 1; dialog::ne.s = "0"; });
     if(hyperbolic) {
-      dialog::addSelItem("inverse Poincaré model", "-1", 'I');
+      dialog::addSelItem("inverted Poincaré model", "-1", 'I');
       dialog::add_action([] () { *dialog::ne.editwhat = -1; vid.scale = 1; dialog::ne.s = "-1"; });
       }
     dialog::addItem(sphere ? "orthographic" : "Gans model", 'O');
@@ -1272,7 +1272,7 @@ void showStereo() {
   
   dialog::addSelItem(XLAT("desaturate colors"), its(vid.desaturate)+"%", 'c');
   dialog::add_action([] {
-    dialog::editNumber(vid.desaturate, 0, 100, 10, 0, XLAT("remove standard colors"),
+    dialog::editNumber(vid.desaturate, 0, 100, 10, 0, XLAT("desaturate colors"),
       XLAT("Make the game colors less saturated. This is useful in the anaglyph mode.")
       );    
     });
@@ -1381,13 +1381,13 @@ void show3D() {
     }
   if(DIM == 2) {
     dialog::addBreak(50);
-    dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
+    dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
     }
   if(DIM == 3) add_edit_fov('f');
   if(DIM == 3) {
     dialog::addSelItem(XLAT("radar size"), fts3(vid.radarsize), 'r');
     dialog::add_action([] () {
-      dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", "");
+      dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", "set to 0 to disable");
       });
     }
   
@@ -1644,7 +1644,8 @@ void show_color_dialog() {
   dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::dialogflags |= sm::SIDE; });
 
   dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
-  dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), "brightness behind the sphere"); dialog::bound_low(0); });
+  dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
+    XLAT("In the orthogonal projection, objects on the other side of the sphere are drawn darker.")); dialog::bound_low(0); });
 
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
   dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::dialogflags |= sm::SIDE; });

@@ -7620,3 +7620,231 @@ S("do not use special centering for racing", "wyścig bez specjalnego centrowani
 S("F8 = settings", "F8 = ustawienia")
 #undef Orb
 
+// standarization of geometry names
+
+S("{7,3} (standard HyperRogue map)", "{7,3} (domyślna mapa HyperRogue)")
+S("{6,3} (Euclidean grid)", "{6,3} (Euklidesowa siatka sześciokątna)")
+S("{5,3} (dodecahedron)", "{5,3} (dwunastościan)")
+S("elliptic geometry in {5,3}", "płaszczyzna eliptyczna w {5,3}")
+S("torus/Klein bottle/...", "torus/butelka Kleina/...")
+S("{8,3} (like standard but with octagons)", "{8,3} (jak domyślna ale ośmiokąty)")
+S("{5,4} (four pentagons)", "{5,4} (cztery pięciokąty)")
+S("{6,4} (four hexagons)", "{6,4} (cztery sześciokąty)")
+S("{7,4} (four heptagons)", "{7,4} (cztery siedmiokąty)")
+S("{4,3} (cube)", "{4,3} (sześcian)")
+S("{3,3} (tetrahedron)", "{3,3} (czworościan)")
+S("{4,4} (Euclidean square grid)", "{4,4} (Euklidesowa siatka kwadratowa)")
+S("elliptic geometry in {4,3}", "płaszczyzna eliptyczna w {4,3}")
+S("{3,4} (octahedron)", "{3,4} (ośmiościan)")
+
+// new 3D geometries
+                     
+S("variant of the binary tiling", "wariant parkietażu binarnego")
+S("{4,3,4} cube tiling", "{4,3,4} sześciany")
+S("rhombic dodecahedral honeycomb", "{5,3,4} dwunastościany rombowe")
+S("{bitruncated cubic honeycomb", "ośmiościany ścięte")
+
+S("{4,4} on horospheres", "{4,4} na horosferach")
+S("{3,6} on horospheres", "{3,6} na horosferach")
+S("{6,3} on horospheres", "{3,6} na horosferach")
+S("rectangles on horospheres", "prostokąty na horosferach")
+
+// quotient space abbreviations
+S("minimal", "minimal")
+S("Klein", "Klein")
+S("Bolza", "Bolza")
+S("Bolza2", "Bolza2")
+S("Macbeath", "Macbeath")
+S("Bring", "Bring")
+S("M3", "M3")
+S("M4", "M4")
+S("Crystal", "Kryształ")
+
+#define Cell(x) \
+  S(x "-cell", x "-komórka") \
+  S(x "-cell (elliptic space", x "-komórka (przestrzeń eliptyczna)")
+
+Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("{5,3,3} 120") Cell("{3,3,5} 600")
+#undef Cell
+
+#define Honeycomb(x) \
+  S(x " hyperbolic honeycomb", x " siatka hiperboliczna") \
+  S(x " field quotient space", x " przestrzeń ilorazowa ciała")
+
+Honeycomb("{5,3,4}") Honeycomb("{4,3,5}")
+#undef Honeycomb
+
+// new or previously untranslated options
+S("dimension", "wymiar")
+S("pattern", "wzór")
+S("Euler characteristics", "charakterystyka Eulera")
+S("demigenus", "genus nieorientowalny")
+S("number of mines", "liczba min") // for Minefield in bounded spaces
+S("advanced parameters", "parametry dodatkowe")
+
+// models & projections
+
+S("disk/Gans", "dysk/model Gansa")
+S("spiral/ring", "spirala/pierścień")
+S("native perspective", "wewnętrzna perspektywa")
+S("azimuthal equi-volume", "azymutalny, równe objętości")
+S("ball model/Gans", "model kuli/Gansa")
+S("perspective in 4D", "perspektywa w 4D")
+S("half-space", "półprzestrzeń")
+
+// projection configuration
+
+S("projection distance", "ogległość rzutu")
+S("rotation (x/z plane)", "obrót w płaszczyźnie x/z")
+S("model orientation (y/z plane)", "orientacja modelu (y/z)")
+
+S("near clipping plane", "przycinanie bliskie")
+S("far clipping plane", "przycinanie dalekie")
+S(
+  "Your view of the 3D model is naturally bounded from four directions by your window. "
+  "Here, you can also set up similar bounds in the Z direction. Radius of the ball/band "
+  "models, and the distance from the center to the plane in the halfspace model, are 1.\n\n",
+  
+  "Model 3D widoczny na ekranie jest naturalnie ograniczony z 4 strony przez wielkość okna. "
+  "Tu można również ustawić podobne ograniczenie w kierunku Z. Promień modelu kuli/wstęgi, "
+  "oraz odległość od środka do płaszczyzny w modelu półprzestrzeni, są równe 1.\n\n")
+
+S("Objects with Z coordinate "
+  "bigger than this parameter are not shown. This is useful with the models which "
+  "extend infinitely in the Z direction, or if you want things close to your character "
+  "to be not obscured by things closer to the camera.",
+  
+  "Obiekty ze współrzędną Z powyżej tego parametru nie są widoczne. Jest to użyteczne "
+  "w modelach rozszerzających się w nieskończoność w kierunku dodatnich Z, lub gdy "
+  "chcesz, by obiekty obok Twojej postaci nie były zasłaniane przez obiekty bliżej "
+  "kamery.")
+
+S("Objects with Z coordinate "
+  "smaller than this parameter are not shown; it also affects the fog effect"
+  " (near clipping plane = 0% fog, far clipping plane = 100% fog).",
+  
+  "Obiekty ze współrzędną Z poniżej tego parametru nie są widoczne; wpływa on "
+  "również na efekt mgły (przycinanie bliskie = 0% mgły, przycinanie dalekie = 100% mgły).")
+
+S("set to 90° for the ring projection", "ustaw 90° by uzyskać rzut pierścieniowy")
+
+S("spiral multiplier", "mnożnik spirali")
+S(
+  "This parameter has a bit different scale depending on the settings:\n"
+  "(1) in spherical geometry (with spiral angle=90, 1 produces a stereographic projection)\n"
+  "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
+  "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)",
+  
+  "Ten parametr ma różną skalę w zależności od ustawień:\n"
+  "(1) w geometrii sferycznej (przy kącie=90, 1 to rzut stereograficzny)\n"
+  "(2) w geometrii hiperbolicznej, przy kącie równym +90° lub -90°\n"
+  "(3) w geometrii hiperbolicznej, przy innym kącie (1 to dokładnie dopasowana wstęga)\n"
+  )
+
+// line animation
+
+S("animate from start to current player position", "animacja od startu do obecnej pozycji gracza")
+S("animate from last recenter to current view", "animacja od ostatniej pozycji centrowania do obecnego punktu widzenia")
+
+// 3D settings for 3D mode
+
+S("3D sight range", "zasięg wzroku w 3D")
+S(
+  "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
+  "In spherical geometries, the sight range of 2π will let you see things behind you as if they were in front of you, "
+  "and the sight range of π (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+  "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
+  "reduces the performance.\n\n"
+  "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account.",
+  
+  "Zasięg wzroku w geometriach 3D jest określany w jednostkach absolutnych. Od tego parametru zależy również efekt mgły.\n\n"
+  "W geometrii sferycznej zasięg wzroku 2π powoduje, że rzeczy za Tobą wyglądają jakby były przed Tobą, a zasięg π (i powyżej "
+  "pozwala widzieć rzeczy w punkcie antypodycznym tak, jakby były blisko Ciebie.\n\n"
+  "W geometriach hiperbolicznych liczba renderowanych komórek zależy wykładniczo od zasięgu wzroku. Im więcej komórek jest "
+  "renderowane, tym gorsza wydajność.\n\n"
+  "Rozgrywka zależy od zasięgu wzroku: przeciwnicy działają wtedy, gdy są widoczni. Częstość generowania przeciwników jest automatycznie dostosowywana.")
+
+S("limit generation", "ograniczenie generacji")
+S("Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range.",
+  "Komórki dalsze niż w tej odległości nie będą automatycznie generowane, ale będą renderowane, jeżeli zostały wygenerowane wcześniej.")
+
+S("inverted Poincaré model", "model Poincarégo w inwersji")
+S("mouse aiming sensitivity", "czułość celowania myszą")
+S("set to 0 to disable", "ustaw 0 by wyłączyć")
+S("radar size", "wielkość radaru")
+S("Height to width", "wysokość do szerokości")
+S("Creature scale", "skala stworzeń")
+
+// not only in 3D mode
+S("desaturate colors", "desaturowane kolory")
+S("Make the game colors less saturated. This is useful in the anaglyph mode.",
+  "Powoduje, że kolory są mniej nasycone. Jest to użyteczne w trybie anaglifów.")
+
+S("brightness behind the sphere", "jasność za sferą")
+S("In the orthogonal projection, objects on the other side of the sphere are drawn darker.",
+  "W rzucie ortogonalnym obiekty po drugiej stronie sfery są rysowane ciemniejsze.")
+
+// restructured menus
+
+S("colors & aura", "kolory i aura")
+S("colors of some game objects can be edited by clicking them.", "można zmieniać kolory niektórych obiektów gry, klikając je.")
+S("standard grid color", "standardowy kolor siatki")
+S("mouse & touchscreen", "mysz i ekran dotykowy")
+S("settings", "ustawienia")
+S("interface", "interfejs")
+S("general graphics", "grafika ogólna")
+S("quick options", "szybkie opcje")
+S("models & projections", "modele i projekcje")
+S("keyboard & joysticks", "klawiatura i kontrolery")
+S("other settings", "inne ustawienia")
+S("special modes", "tryby specjalne")
+S("creative mode", "tryb kreatywny")
+S("multiplayer", "gra wieloosobowa")
+
+// extra / previously untranslated options
+
+S("smooth scrolling", "gładkie przewijanie")
+S("change slideshow", "zmień pokaz slajdów")
+S("move by clicking on compass", "ruch przez klikanie kompasu")
+S("disable the HUD", "wyłącz elementy interfejsu (HUD)")
+S("hide the player", "ukryj gracza")
+
+// redefinable key in 3D shmup mode
+S("scroll forward", "przewijanie w przód")
+S("scroll backward", "przewijanie w tył")
+
+S("note: configured input is designed for", "uwaga: sterowanie skonfigurowane jest zaprojektowane")
+S("multiplayer and shmup mode; some features", "dla trybu wieloosobowwego i strzelanki; część")
+S("work worse if you use it.", "funkcjonalności działa gorzej w tym trybie.")
+
+// quick options in 3D
+S("first person perspective", "perspektywa pierwszej osoby")
+S("fixed point of view", "ustalony punkt widzenia")
+S("third person perspective", "perspektywa trzeciej osoby")
+
+S("Hint: these keys usually work during the game", "Wskazówka: te klawisze działają również podczas gry")
+
+// 3D graphics editor
+
+S("l = color group: %1", "l = grupa koloru: %1")
+S("z = z-level", "z = poziom Z")
+S("Changing the z-level will make this layer affected by the parallax effect.", "zmiana poziomu Z powoduje efekt paralaksy dla tej warstwy.")
+S("The distance from the camera to added points.", "Punkty są dodawane w tej odległości od kamery.")
+
+S("This land has been disabled with compilation flags.", "Ta kraina została wyłączona opcjami kompilacji.")
+S("This land does not make much sense in 3D.", "Ta kraina nie ma sensu w 3D.")
+S("This land does not make much sense in binary tiling.", "Ta kraina nie ma sensu w parkietażach binarnych.")
+S("Special pattern implemented for this geometry.", "Specjalny wzór zaimplementowany w tej geometrii.")
+S("This land works only in the shmup mode.", "Ta kraina działa jedynie w trybie strzelanki.")
+
+// new land
+
+N("Space Rocks", GEN_F, "Kosmiczne Skały", "Kosmiczne Skały", "Kosmicznymi Skałami", "wśród Kosmicznych Skał")
+N("Space Rock", GEN_F, "Kosmiczna Skała", "Kosmiczne Skały", "Kosmiczną Skałę", "Kosmiczną Skałą")
+N("Fuel", GEN_F, "Paliwo", "Paliwa", "Paliwo", "Paliwo")
+S("Shoot the Space Rocks for score. Large Rocks will split into two smaller rocks.",
+  "Strzelaj w Kosmiczne Skały by zdobywać punkty. Duże Skały rozpadają się na dwie mniejsze.")
+
+N("editable statue", GEN_O, "edytowalny pomnik", "edytowalne pomniki", "edytowalny pomnik", "edytowalnym pomnikiem")
+S("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.",
+  "Można zmienić wygląd tych pomników w Edytorze Grafiki. Każdy indeks ma swoją własną, osobną grafikę.")

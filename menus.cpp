@@ -349,8 +349,8 @@ void showGraphQuickKeys() {
   dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
 
   dialog::addBreak(50);  
-  dialog::addInfo("Hint: these keys usually work during the game");
-  dialog::addInfo("also hold Alt during the game to toggle high contrast");
+  dialog::addInfo(XLAT("Hint: these keys usually work during the game"));
+  dialog::addInfo(XLAT("also hold Alt during the game to toggle high contrast"));
  
   dialog::addBreak(50);  
   dialog::addBack();
@@ -416,7 +416,7 @@ void showCreative() {
   gamescreen(3);
   dialog::init(XLAT("creative mode"));
 
-  dialog::addItem("map editor", 'm');
+  dialog::addItem(XLAT("map editor"), 'm');
   dialog::add_action([] {
     if(tactic::on) 
       addMessage(XLAT("Not available in the pure tactics mode!"));

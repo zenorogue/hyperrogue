@@ -452,7 +452,7 @@ string current_proj_name() {
   else if(hyperbolic && vid.alpha == 0)
     return XLAT("Klein");
   else if(hyperbolic && vid.alpha == -1)
-    return XLAT("inverted Poincaré");
+    return XLAT("inverted Poincaré model");
   else if(sphere && vid.alpha == 1)
     return XLAT("stereographic");
   else if(sphere && vid.alpha == 0)
@@ -711,7 +711,7 @@ void showEuclideanMenu() {
   dialog::addBreak(50);
    
   #if CAP_SHOT
-  dialog::addItem(XLAT("take picture"), 's');
+  dialog::addItem(XLAT("take screenshot"), 's');
   dialog::add_action_push(shot::menu);
   #endif
 
