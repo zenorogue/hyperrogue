@@ -2258,6 +2258,7 @@ void setcameraangle(bool b);
 void drawShape(pair<ld,ld>* coords, int qty, color_t color);
 
 extern eModel pmodel;
+string current_proj_name();
 
 inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
 
