@@ -8114,6 +8114,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
       else if(c2->wall == waChasm && c2->land == laDual)
         addMessage(XLAT("You cannot move there!"));
+      else if(!c2->wall)
+        addMessage(XLAT("You cannot move there!"));
       else {
         addMessage(XLAT("You cannot move through %the1!", c2->wall));
         }
