@@ -503,6 +503,41 @@ void showCheatMenu() {
     };
   }
 
+void viewall() {
+  celllister cl(cwt.at, 20, 2000, NULL);
+  
+  vector<eMonster> all_monsters;
+  for(int i=0; i<motypes; i++) {
+    eMonster m = eMonster(i);
+    if(!isMultitile(m)) all_monsters.push_back(m);
+    }
+  
+  for(cell *c: cl.lst) {
+    if(isPlayerOn(c)) continue;
+    bool can_put_monster = true;
+    forCellEx(c2, c) if(c2->monst || isPlayerOn(c2)) can_put_monster = false;
+    if(can_put_monster) {
+      for(int k=0; k<isize(all_monsters); k++)
+        if(passable_for(all_monsters[k], c, nullptr, 0)) {
+          c->monst = all_monsters[k];
+          all_monsters[k] = all_monsters.back();
+          all_monsters.pop_back();
+          }
+      }
+    }
+
+  vector<cell*> itemcells;
+  for(cell *c: cl.lst) {
+    if(isPlayerOn(c) || c->monst || c->item) continue;
+    itemcells.push_back(c);
+    }
+  int id = 0;
+  for(int it=1; it<ittypes; it++) {
+    if(id >= isize(itemcells)) break;
+    itemcells[id++]->item = eItem(it);
+    }
+  }
+
 void modalDebug(cell *c) {
   viewctr.at = c->master;
   if(noGUI) {
@@ -639,6 +674,10 @@ int read_cheat_args() {
     for(int i=0; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_TREASURE)
         items[i] = q;
+    }
+  else if(argis("-viewall")) {
+    PHASE(3); start_game();
+    viewall();
     }
   else if(argis("-we")) {    
     PHASEFROM(2);
