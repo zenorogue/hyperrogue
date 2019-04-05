@@ -626,6 +626,9 @@ bool passable(cell *w, cell *from, flagtype flags) {
     }
 
   if(F(P_LEADER)) {
+    if(from && from->wall == waBoat && isWatery(w) && from->item == itOrbYendor)
+      return false;
+
     if(from && from->wall == waBoat && isWateryOrBoat(w) && !againstCurrent(w, from))
       return true;
     
@@ -674,7 +677,7 @@ bool passable(cell *w, cell *from, flagtype flags) {
   if(isWatery(w)) {
     if(in_gravity_zone(w)) ;
     else if(from && from->wall == waBoat && F(P_USEBOAT) && 
-      (!againstCurrent(w, from) || F(P_MARKWATER))) ;
+      (!againstCurrent(w, from) || F(P_MARKWATER)) && !(from->item == itOrbYendor)) ;
     else if(!F(P_AETHER | P_FISH | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE)) return false;
     }
   if(isChasmy(w)) {
@@ -7856,6 +7859,11 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(markOrb(itOrbFish) || markOrb(itOrbAether) || gravity_state) goto escape;
         if(!checkonly)
           addMessage(XLAT("You cannot go against the current!"));
+        return false;
+        }
+
+      if(cwt.at->item == itOrbYendor) {        
+        addMessage(XLAT("The Orb of Yendor is locked in with powerful magic."));
         return false;
         }
 
