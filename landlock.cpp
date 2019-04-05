@@ -1025,7 +1025,7 @@ land_validity_t& land_validity(eLand l) {
   #endif
 
   if(l == laMinefield && bounded)
-    return specially_geo3;
+    return special_geo3;
   
   if(l == laAsteroids) {
     if(!shmup::on) return shmup_only;
