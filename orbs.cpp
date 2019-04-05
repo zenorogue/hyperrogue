@@ -262,6 +262,7 @@ void checkFreedom(cell *cf) {
       // todo leader
       if(cl.listed(c2)) continue;
       if(!passable(c2, c, P_ISPLAYER | P_MIRROR | P_LEADER)) continue;
+      if(againstRose(c, c2) && !scentResistant()) continue;
       if(c2->wall == waArrowTrap && c2->wparam == 2) continue;
       bool monsterhere = false;
       for(int j=0; j<c2->type; j++) {
