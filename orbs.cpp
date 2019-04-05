@@ -1083,7 +1083,7 @@ eItem targetRangedOrb(cell *c, orbAction a) {
       if(cf->monst == moFriendlyIvy) {
 
         if(c->monst) {
-          if(!canAttack(c, c->monst, cf, moFriendlyIvy, 0)) continue;
+          if(!canAttack(cf, moFriendlyIvy, c, c->monst, 0)) continue;
           if(monstersnear(cwt.at, c, moPlayer, NULL, cwt.at)) continue;
           }
         else {
