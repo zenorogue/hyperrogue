@@ -8128,3 +8128,5 @@ S("These statues are designed to have their graphics edited in the Vector Graphi
 
 S("The Orb of Yendor is locked in with powerful magic.", "Yendorská Sféra je uzamčena mocnou magií.")
 
+S("general perspective", "obecná perspektiva")
+S("formula", "vzorec")

@@ -448,19 +448,19 @@ string current_proj_name() {
   if(pmodel != mdDisk)
     return conformal::get_model_name(pmodel);
   else if(hyperbolic && vid.alpha == 1)
-    return XLAT("Poincaré");
+    return XLAT("Poincaré model");
   else if(hyperbolic && vid.alpha == 0)
-    return XLAT("Klein");
+    return XLAT("Klein-Beltrami model");
   else if(hyperbolic && vid.alpha == -1)
     return XLAT("inverted Poincaré model");
   else if(sphere && vid.alpha == 1)
-    return XLAT("stereographic");
+    return XLAT("stereographic projection");
   else if(sphere && vid.alpha == 0)
-    return XLAT("gnomonic");
+    return XLAT("gnomonic projection");
   else if(sphere && vid.alpha >= 999)
-    return XLAT("orthographic");
+    return XLAT("orthographic projection");
   else if(hyperbolic && vid.alpha >= 999)
-    return XLAT("Gans");
+    return XLAT("Gans model");
   else 
     return XLAT("general perspective");
   }
