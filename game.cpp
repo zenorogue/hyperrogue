@@ -2594,6 +2594,7 @@ void pushMonster(cell *ct, cell *cf, int direction_hint) {
     if(t > 0)
       ct->stuntime = min(ct->stuntime + 2 * t, 7);
     }
+  if(isBull(ct->monst)) ct->monst = moRagingBull;
   }
 
 bool destroyHalfvine(cell *c, eWall newwall, int tval) {
