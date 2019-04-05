@@ -1076,8 +1076,8 @@ eItem targetRangedOrb(cell *c, orbAction a) {
   
   // nature
   if(items[itOrbNature] && numplayers() == 1 && c->monst != moFriendlyIvy) {
-    cell *sides[8];
-    int dirs[8];
+    cell *sides[MAX_EDGE];
+    int dirs[MAX_EDGE];
     int qsides = 0;
     forCellIdCM(cf, d, c)
       if(cf->monst == moFriendlyIvy) {
