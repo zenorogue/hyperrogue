@@ -3047,3 +3047,32 @@ and led to an implementation of a cool Emerald Mine pattern for 534, and also so
 - Yendorian Forest, interesting (and different) in each available hyperbolic honeycomb
 
 2018-03-24 12:31 Version 11.0o: fixed Ivory/Yendorian
+
+2018-04-05 14:41 Version 11.0p:
+
+Interface:
+- major restructuring of the menus
+- removed an option "scrolling by orientation" on devices which do not support this (it caused a black screen)
+
+Gameplay:
+- Space Rocks, a shmup-exclusive, bounded-exclusive land (based on a well known classic game)
+- a special construction of the Minefield in bounded geometries, which is very similar to the original Minesweeper
+- Orbs of Yendor can no longer be moved with boats
+- fixed Friendly Ivy attacking non-attackable monsters
+- removed Witch and Evil Golem from the polymorph list; replaced them with Falling Dog and Mutant
+- Orb of Freedom takes Rose scent into account
+- a better message on illegal moves in Brown Island
+- bulls become enraged when blown with Orb of Air
+- Shadows are now immune to Orb of Air
+
+Projections:
+- line animation (in the history mode) should now work in all geometries; you can choose game start -> current position or last recenter -> current view; in quotient geometries, the latter option follows the geodesic homotopic with the path taken by the camera, rather than the shortest path
+- the spiral projection is renamed to "spiral/ring" and now works in spherical geometry (hint: change wall mode to black and draw the grid)
+- an option to display a 3D cut when displaying 4D Crystal in rug mode
+- changing the model color had no effect in hypersian rug mode -- this is fixed
+- [3D] azimuthal equivolume projection; buggy model boundaries not shown
+
+Other:
+- fixed the ESC key flashing and doing nothing in the Expansion slide
+- restructured menus
+- [3D] more stable PC centering
