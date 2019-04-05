@@ -911,9 +911,9 @@ void poly_attack(cell *dest) {
   auto polymonsters = {
     moYeti, moRunDog, moHunterDog, moRanger,
     moDesertman, moMonkey, moZombie, moCultist,
-    moWitch, moEvilGolem, moFamiliar, moOrangeDog,
+    moFallingDog, moMutant, moFamiliar, moOrangeDog,
     moRedFox, moFalsePrincess, moResearcher,
-    moNarciss, moJiangshi
+    moNarciss, moJiangshi, 
     };
   int ssf = 0;
   eMonster target = *(polymonsters.begin() + hrand(isize(polymonsters)));
