@@ -94,7 +94,7 @@ MONSTER( 'G', 0xFFFFFF, "Ghost", moGhost, ZERO | CF_NOBLOW | CF_NONLIVING | CF_G
 MONSTER( 'N', 0x404040, "Necromancer", moNecromancer, ZERO, RESERVED, moYeti,
     "Necromancers can raise ghosts and zombies from fresh graves."
     )
-MONSTER( 'S', 0x404040, "Shadow", moShadow, ZERO | CF_NONLIVING, RESERVED, moNone,
+MONSTER( 'S', 0x404040, "Shadow", moShadow, ZERO | CF_NOBLOW | CF_NONLIVING, RESERVED, moNone,
     "A creepy monster who follows you everywhere in the Graveyard."
     )
 MONSTER( 'T', 0x40E040, "Tentacle", moTentacle, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MOUNTABLE | CF_MULTITILE | CF_WORM, RESERVED, moNone, tentdes )
