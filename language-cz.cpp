@@ -7499,8 +7499,6 @@ S(
 
 // color edit dialog
 
-S("colors & aura", "uprav barvy a auru")
-
 S("background", "pozadí")
 S("foreground", "popøedí")
 S("projection boundary", "hranice projekce")
@@ -7891,4 +7889,242 @@ S("do not use special centering for racing", "nepoužívat speciální centrová
 S("F8 = settings", "F8 = nastavení")
 
 #undef Orb
+
+// 11.0p
+
+// standarization of geometry names
+
+S("{7,3} (standard HyperRogue map)", "{7,3} (standardní mapa HyperRogue)")
+S("{6,3} (Euclidean grid)", "{6,3} (Eukleidovská šestiúhelníková mřížka)")
+S("{5,3} (dodecahedron)", "{5,3} (dvanáctistěn)")
+S("elliptic geometry in {5,3}", "eliptická geometrie v {5,3}")
+S("torus/Klein bottle/...", "torus/Kleinova láhev/...")
+S("{8,3} (like standard but with octagons)", "{8,3} (jako standard, ale s osmiúhelníky)")
+S("{5,4} (four pentagons)", "{5,4} (čtyři pětiúhelníky)")
+S("{6,4} (four hexagons)", "{6,4} (čtyři šestiúhelníky)")
+S("{7,4} (four heptagons)", "{7,4} (čtyři sedmiúhelníky)")
+S("{4,3} (cube)", "{4,3} (krychle)")
+S("{3,3} (tetrahedron)", "{3,3} (čtyřstěn)")
+S("{4,4} (Euclidean square grid)", "{4,4} (Eukleidovská čtvercová mřížka)")
+S("elliptic geometry in {4,3}", "eliptická geometrie ve {4,3}")
+S("{3,4} (octahedron)", "{3,4} (osmistěn)")
+
+// new 3D geometries
+                     
+S("variant of the binary tiling", "varianta binárního dělení")
+S("{4,3,4} cube tiling", "{4,3,4} krychlové dělení")
+S("rhombic dodecahedral honeycomb", "rhombické dvanáctistěnové dělení")
+S("bitruncated cubic honeycomb", "dvojseříznuté krychlové dělení")
+
+S("{4,4} on horospheres", "{4,4} na horosférách")
+S("{3,6} on horospheres", "{3,6} na horosférách")
+S("{6,3} on horospheres", "{3,6} na horosférách")
+S("rectangles on horospheres", "obdélníky na horosférách")
+
+// quotient space abbreviations
+S("minimal", "minimální")
+S("Klein", "Klein")
+S("Bolza", "Bolza")
+S("Bolza2", "Bolza2")
+S("Macbeath", "Macbeath")
+S("Bring", "Bring")
+S("M3", "M3")
+S("M4", "M4")
+S("Crystal", "Krystal")
+
+#define Cell(x) \
+  S(x "-cell", x "-nadstěn") \
+  S(x "-cell (elliptic space", x "-nadstěn (eliptický prostor)")
+
+Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("{5,3,3} 120") Cell("{3,3,5} 600")
+#undef Cell
+
+#define Honeycomb(x) \
+  S(x " hyperbolic honeycomb", x " hyperbolické dělení") \
+  S(x " field quotient space", x " prostor s tělesovým kvocientem")
+
+Honeycomb("{5,3,4}") Honeycomb("{4,3,5}")
+#undef Honeycomb
+
+// new or previously untranslated options
+S("dimension", "rozměr")
+S("pattern", "vzor")
+S("Euler characteristics", "Eulerova charakteristika")
+S("demigenus", "neorientovatelný genus")
+S("number of mines", "počet min") // for Minefield in bounded spaces
+S("advanced parameters", "pokročilé parametry")
+
+// models & projections
+
+S("disk/Gans", "disk/Gansův model")
+S("spiral/ring", "spirála/prstenec")
+S("native perspective", "domorodá perspektiva")
+S("azimuthal equi-volume", "azimutální, objemojevný")
+S("ball model/Gans", "kulový/Gansův model")
+S("perspective in 4D", "4D perspektiva")
+S("half-space", "poloprostor")
+
+// projection configuration
+
+S("projection distance", "projekční vzdálenost")
+S("rotation (x/z plane)", "rotace (rovina x/z)")
+S("model orientation (y/z plane)", "orientace modelu (rovina y/z)")
+
+S("near clipping plane", "blízká klipovací rovina")
+S("far clipping plane", "vzdálená klipovací rovina")
+S(
+  "Your view of the 3D model is naturally bounded from four directions by your window. "
+  "Here, you can also set up similar bounds in the Z direction. Radius of the ball/band "
+  "models, and the distance from the center to the plane in the halfspace model, are 1.\n\n",
+  
+  "Tvůj pohled na 3D model je ve čtyřech směrech přirozeně omezený vaším oknem. Zde "
+  "můžeš nastavit podobné hranice i ve směru osy Z. Poloměr kulových/pásových modelů "
+  "a vzdálenost od středu k rovině v poloprostorovém modelu je 1.\n\n")
+
+S("Objects with Z coordinate "
+  "bigger than this parameter are not shown. This is useful with the models which "
+  "extend infinitely in the Z direction, or if you want things close to your character "
+  "to be not obscured by things closer to the camera.",
+  
+  "Objekty se souřadnicí Z větší než tento parametr nejsou zobrazovány. Toto je "
+  "užitečné pro modely s nekonečnými rozměry ve směru Z, nebo pokud chceš, aby "
+  "objekty poblíž tvé postavy nebyly zakrývány objekty, které jsou blíže ke kameře.")
+
+S("Objects with Z coordinate "
+  "smaller than this parameter are not shown; it also affects the fog effect"
+  " (near clipping plane = 0% fog, far clipping plane = 100% fog).",
+  
+  "Objekty se souřadnicí Z menší, než je tento parametr, se nezobrazují; "
+  "také to ovlivňuje efekt mlhy (blízká klipovací rovina = 0% mlhy, "
+  "vzdálená klipovací rovina = 100% mlhy).")
+
+S("set to 90° for the ring projection", "Pro prstencovou projekci nastav na 90°")
+
+S("spiral multiplier", "spirálový multiplikátor")
+S(
+  "This parameter has a bit different scale depending on the settings:\n"
+  "(1) in spherical geometry (with spiral angle=90°, 1 produces a stereographic projection)\n"
+  "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
+  "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)",
+  
+  "Měřítko tohoto parametru se poněkud liší v závislosti na nastavení:\n"
+  "(1) ve sférické geometrii (stereografická projekce vznikne se spirálovým úhlem 90°)\n"
+  "(2) v hyperbolické geometrii, se spirálovým úhlem +90° nebo -90°\n"
+  "(3) v hyperbolické geometrii, s jinými spirálovými úhly (hodnota 1 způsobí, "
+  "že pásy budou přesně pasovat)\n"
+  )
+
+// line animation
+
+S("animate from start to current player position", "animace od začátku do současné polohy hráče")
+S("animate from last recenter to current view", "animace od posledního vycentrování k současnému pohledu")
+
+// 3D settings for 3D mode
+
+S("3D sight range", "viditelnost ve 3D")
+S(
+  "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
+  "In spherical geometries, the sight range of 2π will let you see things behind you as if they were in front of you, "
+  "and the sight range of π (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+  "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
+  "reduces the performance.\n\n"
+  "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account.",
+  
+  "Viditelnost ve 3D geometriích je specifikovaná v absolutních jednotkách. "
+  "Tato hodnota také ovlivňuje efekt mlhy.\n\n"
+  "Ve sférických geometriích vám viditelnost 2π umožní vidět věci za vámi, "
+  "jako by byly před vámi, a viditelnost π (nebo víc) vám umožní vidět věci "
+  "ve vašem protipólu, jako kdyby byly blízko vás.\n\n"
+  "V hyperbolických geometriích počet renderovaných buněk exponenciálně "
+  "závisí na viditelnosti. Více vykreslovaných buněk zhoršuje výkon.\n\n"
+  "Viditelnost ovlivňuje hru; netvoři jednají právě tehdy, jsou-li viditelní. "
+  "Generování netvorů to bere v úvahu.")
+
+S("limit generation", "omezení generování")
+S("Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range.",
+  "Buňky ve větší vzdálenosti nebudou generovány, ale pokud už jsou vygenerovány a "
+  "viditelné, budou se vykreslovat.")
+
+S("inverted Poincaré model", "inverzní Poincarého model")
+S("mouse aiming sensitivity", "citlivost zaměřování myší")
+S("set to 0 to disable", "pro vypnutí nastav na 0")
+S("radar size", "velikost radaru")
+S("Height to width", "výška : šířka")
+S("Creature scale", "měřítko bytostí")
+
+// not only in 3D mode
+S("desaturate colors", "desaturované barvy")
+S("Make the game colors less saturated. This is useful in the anaglyph mode.",
+  "Snižuje sytost barev. Užitečné pro anaglyfový mód.")
+
+S("brightness behind the sphere", "jas za koulí")
+S("In the orthogonal projection, objects on the other side of the sphere are drawn darker.",
+  "V ortogonální projekci se objekty na druhé straně sféry vykreslují tmavěji.")
+
+// restructured menus
+
+S("colors & aura", "barvy a aura")
+S("colors of some game objects can be edited by clicking them.", "barvy některých herních objektů lze editovat kliknutím.")
+S("standard grid color", "standardní barva mřížky")
+S("mouse & touchscreen", "myš a doteková obrazovka")
+S("settings", "nastavení")
+S("interface", "rozhraní")
+S("general graphics", "obecná grafika")
+S("quick options", "rychlé možnosti")
+S("models & projections", "modely a projekce")
+S("keyboard & joysticks", "klávesnice a joysticky")
+S("other settings", "další nastavení")
+S("special modes", "zvláštní módy")
+S("creative mode", "kreativní mód")
+S("multiplayer", "multiplayer")
+
+// extra / previously untranslated options
+
+S("smooth scrolling", "hladké scrollování")
+S("change slideshow", "změnit slideshow")
+S("move by clicking on compass", "pohyb klikáním na kompas")
+S("disable the HUD", "vypnout HUD")
+S("hide the player", "skrýt hráče")
+
+// redefinable key in 3D shmup mode
+S("scroll forward", "scrollování dopředu")
+S("scroll backward", "scrollování dozadu")
+
+S("note: configured input is designed for", "pozunámka: konfigurovaný vstup je určen pro")
+S("multiplayer and shmup mode; some features", "multiplayer a mód střílečky; některé prvky")
+S("work worse if you use it.", "budou fungovat hůř, pokud ho budete používat.")
+
+// quick options in 3D
+S("first person perspective", "perspektiva první osoby")
+S("fixed point of view", "pevný bod pohledu")
+S("third person perspective", "perspektiva třetí osoby")
+
+S("Hint: these keys usually work during the game", "Nápověda: tyto klávesy obvykle fungují během hry")
+
+// 3D graphics editor
+
+S("l = color group: %1", "l = skupina barev: %1")
+S("z = z-level", "z = z-hladina")
+S("Changing the z-level will make this layer affected by the parallax effect.", "změna z-hladiny způsobí, že tato vrstva bude ovlivněná efektem paralaxy.")
+S("The distance from the camera to added points.", "Vzdálenost mezi kamerou a přidanými body.")
+
+S("This land has been disabled with compilation flags.", "Tento kraj byl vypnut kompilačními flagy.")
+S("This land does not make much sense in 3D.", "Tento kraj nedává ve 3D velký smysl.")
+S("This land does not make much sense in binary tiling.", "Tento kraj nedává v binárním dělení velký smysl.")
+S("Special pattern implemented for this geometry.", "Speciální vzor implementovaný pro tuto geometrii.")
+S("This land works only in the shmup mode.", "Tento kraj funguje pouze v módu střílečky.")
+
+// new land
+
+N("Space Rocks", GEN_F, "Vesmírné skály", "Vesmírné skály", "Vesmírnými skalami", "ve Vesmírných skálách")
+N("Space Rock", GEN_F, "Vesmírná skála", "Vesmírné skály", "Vesmírnou skálu", "Vesmírnou skálou")
+N("Fuel", GEN_N, "Palivo", "Palivo", "Palivo", "Palivem")
+S("Shoot the Space Rocks for score. Large Rocks will split into two smaller rocks.",
+  "Střílej do Vesmírných skal a získávej za to body. Velké skály se rozpadnou na dvě menší.")
+
+N("editable statue", GEN_F, "editovatelná socha", "editovatelné sochy", "editovatelnou sochu", "editovatelnou sochou")
+S("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.",
+  "Tyto sochy jsou určeny k tomu, aby se ve vektorovém grafickém editoru měnila jejich grafika. Každé číslo má svou vlastní, odlišnou grafiku.")
+
+S("The Orb of Yendor is locked in with powerful magic.", "Yendorská Sféra je uzamčena mocnou magií.")
 

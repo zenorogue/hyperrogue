@@ -7252,8 +7252,6 @@ S(
 
 // color edit dialog
 
-S("colors & aura", "dostosuj kolory i aurę")
-
 S("background", "tło")
 S("foreground", "pierwszy plan")
 S("projection boundary", "brzeg modelu")
@@ -7641,8 +7639,8 @@ S("{3,4} (octahedron)", "{3,4} (ośmiościan)")
                      
 S("variant of the binary tiling", "wariant parkietażu binarnego")
 S("{4,3,4} cube tiling", "{4,3,4} sześciany")
-S("rhombic dodecahedral honeycomb", "{5,3,4} dwunastościany rombowe")
-S("{bitruncated cubic honeycomb", "ośmiościany ścięte")
+S("rhombic dodecahedral honeycomb", "dwunastościany rombowe")
+S("bitruncated cubic honeycomb", "ośmiościany ścięte")
 
 S("{4,4} on horospheres", "{4,4} na horosferach")
 S("{3,6} on horospheres", "{3,6} na horosferach")
@@ -7731,12 +7729,12 @@ S("set to 90° for the ring projection", "ustaw 90° by uzyskać rzut pierścien
 S("spiral multiplier", "mnożnik spirali")
 S(
   "This parameter has a bit different scale depending on the settings:\n"
-  "(1) in spherical geometry (with spiral angle=90, 1 produces a stereographic projection)\n"
+  "(1) in spherical geometry (with spiral angle=90°, 1 produces a stereographic projection)\n"
   "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
   "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)",
   
   "Ten parametr ma różną skalę w zależności od ustawień:\n"
-  "(1) w geometrii sferycznej (przy kącie=90, 1 to rzut stereograficzny)\n"
+  "(1) w geometrii sferycznej (przy kącie=90°, 1 to rzut stereograficzny)\n"
   "(2) w geometrii hiperbolicznej, przy kącie równym +90° lub -90°\n"
   "(3) w geometrii hiperbolicznej, przy innym kącie (1 to dokładnie dopasowana wstęga)\n"
   )

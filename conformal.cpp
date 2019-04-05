@@ -764,12 +764,12 @@ namespace conformal {
       }
                                   
     if(model_has_orientation()) {
-      dialog::addSelItem(XLAT("model orientation"), fts(model_orientation), 'l');
+      dialog::addSelItem(XLAT("model orientation"), fts(model_orientation) + "°", 'l');
       dialog::add_action([] () {
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
         });
       if(DIM == 3) {
-        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz), 'L');
+        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz) + "°", 'L');
         dialog::add_action([] () {
           dialog::editNumber(model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
           });
@@ -860,7 +860,7 @@ namespace conformal {
       }
     
     if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360)) {
-      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
+      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle) + "°", 'b');
       dialog::add_action(config_camera_rotation);
       }
     
@@ -881,7 +881,7 @@ namespace conformal {
       }
 
     if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && DIM == 2) {
-      dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope), 'S');
+      dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope) + "°", 'S');
       dialog::add_action([](){
         dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
         });
@@ -910,7 +910,7 @@ namespace conformal {
       }
     
     if(pmodel == mdSpiral && !euclid) {
-      dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle), 'x');
+      dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle) + "°", 'x');
       dialog::add_action([](){
         dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), 
           XLAT("set to 90° for the ring projection")
@@ -922,19 +922,19 @@ namespace conformal {
         ring_not_spiral ? right_spiral_multiplier :
         any_spiral_multiplier;
                 
-      dialog::addSelItem(XLAT("spiral multiplier"), fts(which), 'M');
+      dialog::addSelItem(XLAT("spiral multiplier"), fts(which) + "°", 'M');
       dialog::add_action([&which](){
         dialog::editNumber(which, 0, 10, -.1, 1, XLAT("spiral multiplier"), 
           XLAT(
             "This parameter has a bit different scale depending on the settings:\n"
-            "(1) in spherical geometry (with spiral angle=90, 1 produces a stereographic projection)\n"
+            "(1) in spherical geometry (with spiral angle=90°, 1 produces a stereographic projection)\n"
             "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
             "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)"
             )
           );
         });
 
-      dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone), 'C');
+      dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone) + "°", 'C');
       dialog::add_action([](){
         dialog::editNumber(spiral_cone, 0, 360, -45, 360, XLAT("spiral cone"), "");
         });
