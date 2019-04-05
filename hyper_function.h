@@ -1,67 +1,54 @@
 #pragma once
 
-#if USE_STDFUNCTION
-
-#include <functional>
-namespace hr {
-    using std::function;
-} // namespace hr
-
-#else
-
 #include <type_traits>
 #include <utility>
 
 namespace hr {
 
 template<class Sig>
-class hyper_function;
-
-template<class Sig>
-using function = hyper_function<Sig>;
+class function;
 
 template<class R, class... Args>
-struct hyper_function_state_base {
+struct function_state_base {
     virtual R call(Args...) const = 0;
-    virtual hyper_function_state_base *clone() const = 0;
-    virtual ~hyper_function_state_base() = default;
+    virtual function_state_base *clone() const = 0;
+    virtual ~function_state_base() {}
 };
 
 template<class T, class R, class... Args>
-struct hyper_function_state : hyper_function_state_base<R, Args...> {
-    using Self = hyper_function_state<T, R, Args...>;
+struct function_state : function_state_base<R, Args...> {
     T t_;
-    explicit hyper_function_state(T t) : t_(std::move(t)) {}
-    R call(Args... args) const override {
+    explicit function_state(T t) : t_(std::move(t)) {}
+    R call(Args... args) const /*override*/ {
         return const_cast<T&>(t_)(static_cast<Args&&>(args)...);
     }
-    hyper_function_state_base<R, Args...> *clone() const override {
-        return new Self(*this);
+    function_state_base<R, Args...> *clone() const /*override*/ {
+        return new function_state(*this);
     }
 };
 
 template<class R, class... Args>
-class hyper_function<R(Args...)>
+class function<R(Args...)>
 {
-    hyper_function_state_base<R, Args...> *ptr_ = nullptr;
+    function_state_base<R, Args...> *ptr_;
 public:
-    hyper_function() = default;
+    function() : ptr_(nullptr) {}
 
     template<class Callable, class = decltype(R(std::declval<typename std::decay<Callable>::type>()(std::declval<Args>()...)))>
-    hyper_function(Callable&& t) :
-        ptr_(new hyper_function_state<typename std::decay<Callable>::type, R, Args...>(static_cast<Callable&&>(t)))
+    function(Callable&& t) :
+        ptr_(new function_state<typename std::decay<Callable>::type, R, Args...>(static_cast<Callable&&>(t)))
     {}
 
-    ~hyper_function() {
+    ~function() {
         delete ptr_;
     }
 
-    hyper_function(hyper_function& rhs) : ptr_(rhs.ptr_ ? rhs.ptr_->clone() : nullptr) {}
-    hyper_function(const hyper_function& rhs) : ptr_(rhs.ptr_ ? rhs.ptr_->clone() : nullptr) {}
-    hyper_function(hyper_function&& rhs) noexcept : ptr_(rhs.ptr_) { rhs.ptr_ = nullptr; }
-    hyper_function(const hyper_function&& rhs) = delete;
+    function(function& rhs) : ptr_(rhs.ptr_ ? rhs.ptr_->clone() : nullptr) {}
+    function(const function& rhs) : ptr_(rhs.ptr_ ? rhs.ptr_->clone() : nullptr) {}
+    function(function&& rhs) noexcept : ptr_(rhs.ptr_) { rhs.ptr_ = nullptr; }
+    function(const function&& rhs) = delete;
 
-    void operator=(hyper_function rhs) noexcept {
+    void operator=(function rhs) noexcept {
         std::swap(ptr_, rhs.ptr_);
     }
 
@@ -75,5 +62,3 @@ public:
 };
 
 } // namespace hr
-
-#endif

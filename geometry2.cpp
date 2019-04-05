@@ -356,7 +356,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
     
     heptagon *newbase = NULL;
     
-    transmatrix bestV;
+    transmatrix bestV {};
     
     for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
@@ -592,4 +592,3 @@ hyperpoint get_warp_corner(cell *c, int cid) {
   }
   
   }
-

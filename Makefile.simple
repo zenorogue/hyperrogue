@@ -33,7 +33,11 @@ else
   ifneq (,$(findstring clang,$(TOOLCHAIN_VERSION_S)))
     TOOLCHAIN := clang
   else
-    TOOLCHAIN := gcc
+    ifneq (,$(findstring 4.6.,$(TOOLCHAIN_VERSION_S)))
+      TOOLCHAIN := gcc46
+    else
+      TOOLCHAIN := gcc
+    endif
   endif
 endif
 
@@ -89,6 +93,12 @@ ifeq (${TOOLCHAIN},gcc)
   CXXFLAGS_EARLY += -std=c++11 -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
   CXXFLAGS_EARLY += -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter
+endif
+
+ifeq (${TOOLCHAIN},gcc46)
+  CXXFLAGS_EARLY += -std=c++0x
+  CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
+  CXXFLAGS_EARLY += -Wno-missing-field-initializers -Wno-unused-parameter
 endif
 
 ifeq (${TOOLCHAIN},mingw)
