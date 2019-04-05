@@ -1654,7 +1654,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     case moSlime: {
       queuepoly(VFISH, shSlime, darkena(col, 0, 0x80));
       queuepoly(VSLIMEEYE, shEyes, 0xFF);
+      return false;
       }
+
     case moKrakenH: {
       queuepoly(VFISH, shKrakenHead, darkena(col, 0, 0xD0));
       queuepoly(VFISH, shKrakenEye, 0xFFFFFFC0);
