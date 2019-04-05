@@ -1469,6 +1469,7 @@ void draw_boundary(int w) {
       }
     
     case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: {
+      if(DIM == 3) return;
       if(pmodel == mdBand && conformal::model_transition != 1) return;
       bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);
       transmatrix T = spin(-conformal::model_orientation * degree);
@@ -1494,7 +1495,7 @@ void draw_boundary(int w) {
       }
     
     case mdHalfplane: 
-      if(hyperbolic) {
+      if(hyperbolic && DIM == 2) {
         queuestraight(xspinpush0(-conformal::model_orientation * degree - M_PI/2, fakeinf), 1, lc, fc, p);
         return;
         }
