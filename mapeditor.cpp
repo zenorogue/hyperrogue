@@ -1704,6 +1704,10 @@ namespace mapeditor {
       pushScreen(showMapEditor);
       }
 
+    if(uni == 'z' && DIM == 3)
+      dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"),
+        XLAT("The distance from the camera to added points."));
+
     if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
       }
@@ -1773,10 +1777,6 @@ namespace mapeditor {
         texture::config.data.undo();
         }        
       
-      if(uni == 'z' && DIM == 3)
-        dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"),
-          XLAT("The distance from the camera to added points."));
-
       if(uni == 'p') {
         if(!clickused)
           dialog::openColorDialog(texture::config.paint_color, texture_colors);
