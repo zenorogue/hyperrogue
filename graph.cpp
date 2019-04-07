@@ -714,7 +714,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
    
   if(c && doHighlight()) 
     poly_outline = kind_outline(it);
-  
+
+  if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
+    
   if(DIM == 3 && c == viewctr.at->c7) return false;
 
 #if MAXMDIM >= 4
