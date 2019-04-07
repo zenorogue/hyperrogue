@@ -825,6 +825,23 @@ void make_floor_textures() {
     current_display->set_mask(0);
     floor_textures->clear(0); // 0xE8E8E8 = 1
     
+    // gradient vertices
+    vector<glhr::colored_vertex> gv;
+    current_display->scrdist = 0;
+    gv.emplace_back(-1, -1, 0, 0, 0);
+    gv.emplace_back(+1, -1, 0, 0, 0);
+    gv.emplace_back(+1, +1, 1, 1, 1);
+    gv.emplace_back(-1, -1, 0, 0, 0);
+    gv.emplace_back(+1, +1, 1, 1, 1);
+    gv.emplace_back(-1, +1, 1, 1, 1);
+
+    glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
+    glhr::new_projection();
+    glhr::id_modelview();
+    glhr::prepare(gv);
+    glhr::set_depthtest(false);
+    glDrawArrays(GL_TRIANGLES, 0, isize(gv));
+    
     shOverFloor.pstrength = 20;
     shFeatherFloor.pstrength = 40;
     shFeatherFloor.fstrength = 5;
