@@ -702,4 +702,20 @@ hyperpoint mid_at_actual(hyperpoint h, ld v) {
   return rspintox(h) * xpush0(hdist0(h) * v);
   }
 
+// in 3D, an orthogonal projection of C0 on the given triangle
+hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
+  using namespace hyperpoint_vec;
+  h0 /= h0[3];
+  h1 /= h1[3];
+  h2 /= h2[3];
+  hyperpoint w = h0;
+  hyperpoint d1 = h1 - h0;
+  hyperpoint d2 = h2 - h0;
+  ld denom = (d1|d1) * (d2|d2) - (d1|d2) * (d1|d2);
+  ld a1 = (d2|w) * (d1|d2) - (d1|w) * (d2|d2);
+  ld a2 = (d1|w) * (d1|d2) - (d2|w) * (d1|d1);
+  hyperpoint h = w * denom + d1 * a1 + d2 * a2;
+  return normalize(h);
+  }
+
 }

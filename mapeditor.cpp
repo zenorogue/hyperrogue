@@ -1962,8 +1962,13 @@ namespace mapeditor {
         usershapelayer& ds(us->d[i]);
         hpcshape& sh(ds.sh);
     
-        if(sh.s != sh.e) 
-          queuepolyat(mmscale(V, geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);
+        if(sh.s != sh.e) {
+          auto& last = queuepolyat(mmscale(V, geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);
+          if(DIM == 3) {
+            last.tinf = &user_triangles_texture;
+            last.offset_texture = ds.texture_offset;
+            }
+          }
         }
       }
   

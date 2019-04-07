@@ -89,6 +89,7 @@ static const int POLY_ALWAYS_IN = (1<<21);
 static const int POLY_TRIANGLES = (1<<22);
 
 vector<hyperpoint> hpc;
+basic_textureinfo user_triangles_texture;
 
 int prehpc;
 
@@ -1729,6 +1730,7 @@ struct usershapelayer {
   hyperpoint shift, spin;
   ld zlevel;
   hpcshape sh;
+  int texture_offset;
   };
 
 struct usershape {
@@ -1941,15 +1943,17 @@ void bshapeend() {
 
 transmatrix shadowmulmatrix;
 
-void pushShape(const usershapelayer& ds) {
+void pushShape(usershapelayer& ds) {
 
   if(ds.list.empty()) return;
   if(DIM == 3) last->flags |= POLY_TRIANGLES;
 
   transmatrix T = rgpushxto0(ds.shift) * rspintox(ds.spin);
   
+  int z = DIM == 3 ? 3 : 1;
+  
   for(int r=0; r<ds.rots; r++) {
-    for(int i=0; i<isize(ds.list); i++)
+    for(int i=0; i<isize(ds.list)/z*z; i++)
       hpcpush(T * spin(2*M_PI*r/ds.rots) * ds.list[i]);
 
     if(ds.sym) {
@@ -1959,7 +1963,21 @@ void pushShape(const usershapelayer& ds) {
         hpcpush(T * spin(2*M_PI*r/ds.rots) * mirrortrans * ds.list[i]);
       }
     }
-  hpcpush(T * ds.list[0]);
+  
+  if(DIM == 2) hpcpush(T * ds.list[0]);
+
+  if(DIM == 3) {
+    auto& utt = user_triangles_texture;
+    utt.texture_id = floor_textures->renderedTexture;
+    ds.texture_offset = isize(utt.tvertices);
+    for(int i=0; i<isize(ds.list)-2; i+=3) {
+      hyperpoint h = orthogonal_of_C0(ds.list[i], ds.list[i+1], ds.list[i+2]);
+      ld rad = hypot_d(3, h);
+      ld factor = 0.49 + (0.17 * h[2] + 0.13 * h[1] + 0.20 * h[0]) / rad;
+      for(int i=0; i<3; i++)
+        utt.tvertices.push_back(glhr::makevertex(-1, factor, 0));
+      }
+    }
   }
 
 ld gsca() { return 1; }
@@ -3071,6 +3089,8 @@ void buildpolys() {
 
   prehpc = isize(hpc);
   DEBB(DF_INIT, (debugfile,"hpc = %d\n", prehpc));
+
+  user_triangles_texture.tvertices.clear();
   
   for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
     auto us = usp.second;
