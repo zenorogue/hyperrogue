@@ -695,7 +695,7 @@ namespace dialog {
     
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')') || (uni >= 'a' && uni <= 'z')) {
+      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',') || (uni >= 'a' && uni <= 'z')) {
         ne.s += uni;
         apply_edit();
         }
