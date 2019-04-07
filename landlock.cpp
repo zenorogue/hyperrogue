@@ -912,7 +912,7 @@ vector<eLand> land_over = {
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,
   // EXTRA
-  laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA, laAsteroids
   };
 
 vector<eLand> landlist;

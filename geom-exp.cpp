@@ -303,6 +303,7 @@ void ge_land_selection() {
   landvisited[laSnakeNest] |= landvisited[laRedRock];
   landvisited[laCamelot] |= hiitemsMax(treasureType(laCamelot)) >= 1;
   landvisited[laCA] = true;
+  landvisited[laAsteroids] = true;
 
   dialog::init(XLAT("experiment with geometry"));
   
