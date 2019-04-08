@@ -936,6 +936,7 @@ bool texture_config::load() {
   if(!data.readtexture(texturename)) return false;
   if(!data.loadTextureGL()) return false;
   calcparam();
+  conformal::configure();
   drawthemap();
   config.tstate = config.tstate_max = tsActive;
   string s = move(texture_tuner);
@@ -1516,6 +1517,7 @@ void texture_config::remap() {
   else if(tstate == tsAdjusting) {
     printf("perform_mapping %d/%d\n", config.tstate, config.tstate_max);
     calcparam();
+    conformal::configure();
     drawthemap();
     perform_mapping();
     finish_mapping();
