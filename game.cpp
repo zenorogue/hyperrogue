@@ -1903,6 +1903,7 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
     if(!isFire(c)) c->wparam = 0;
     c->wall = w;
     c->wparam = max(c->wparam, (char) timeout);
+    if(c->land == laBrownian) c->landparam = 0;
     }
   return true;
   }
