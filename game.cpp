@@ -7352,6 +7352,28 @@ void knightFlavorMessage(cell *c2) {
   msgid++;
   }
 
+int mine_adjacency_rule = 0;
+
+vector<cell*> adj_minefield_cells(cell *c) {
+  vector<cell*> res;
+  if(mine_adjacency_rule == 0 || (VALENCE == 3 && DIM == 2))
+    forCellCM(c2, c) res.push_back(c2);
+  else if(DIM == 2) {
+    cellwalker cw(c, 0);
+    cw += wstep;
+    cw++;
+    cellwalker cw1 = cw;
+    do {
+      res.push_back(cw.at);
+      cw += wstep;
+      cw++;
+      if(cw.cpeek() == c) cw++;
+      }
+    while(cw != cw1);
+    }
+  return res;
+  }
+
 bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
   bool b = false;
   if(c->wall == waMineMine && just_checking) return true;
@@ -7367,21 +7389,23 @@ bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
   bool minesNearby = false;
   bool nominesNearby = false;
   bool mineopens = false;
+  
+  auto adj = adj_minefield_cells(c);
 
-  forCellEx(c2, c) {
+  for(cell *c2: adj) {
     if(c2->wall == waMineMine) minesNearby = true;
     if(c2->wall == waMineOpen) mineopens = true;
     if(c2->wall == waMineUnknown && !c2->item) nominesNearby = true;
     }
 
-  if(lev && (nominesNearby || mineopens) && !minesNearby) for(int i=0; i<c->type; i++)
-    if(c->move(i) && (c->move(i)->wall == waMineUnknown || c->move(i)->wall == waMineOpen)) {
-      b |= uncoverMines(c->move(i), lev-1, dist+1, just_checking);
+  if(lev && (nominesNearby || mineopens) && !minesNearby) for(cell *c2: adj)
+    if(c2->wall == waMineUnknown || c2->wall == waMineOpen) {
+      b |= uncoverMines(c2, lev-1, dist+1, just_checking);
       if(b && just_checking) return true;
       }
 
   if(minesNearby && !nominesNearby && dist == 0) {
-    forCellEx(c2, c) 
+    for(cell *c2: adj)
       if(c2->wall == waMineMine && c2->land == laMinefield)
         c2->landparam |= 1;
     }

@@ -2741,8 +2741,8 @@ const char* minetexts[8] = {
 
 int countMinesAround(cell *c) {
   int mines = 0;
-  for(int i=0; i<c->type; i++)
-    if(c->move(i) && c->move(i)->wall == waMineMine)
+  for(cell *c2: adj_minefield_cells(c))
+    if(c2->wall == waMineMine)
       mines++;
   return mines;
   }
@@ -6544,10 +6544,10 @@ void drawscreen() {
     mines[p] = 0;
     cell *c = playerpos(p);
     if(!c) continue;
-    for(int i=0; i<c->type; i++) if(c->move(i)) {
-      if(c->move(i)->land == laMinefield) 
+    for(cell *c2: adj_minefield_cells(c)) {
+      if(c2->land == laMinefield) 
         minefieldNearby = true;
-      if(c->move(i)->wall == waMineMine) {
+      if(c2->wall == waMineMine) {
         bool ep = false;
         if(!ep) mines[p]++, tmines++;
         }

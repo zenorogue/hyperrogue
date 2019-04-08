@@ -695,6 +695,15 @@ void showEuclideanMenu() {
         };
       });
     }
+
+  if(specialland == laMinefield && (DIM == 3 || VALENCE != 3)) {
+    dialog::addSelItem(XLAT("mine adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : DIM == 3 ? "face" : "edge"), 'M');
+    dialog::add_action([] {
+      stop_game();
+      mine_adjacency_rule = !mine_adjacency_rule;
+      start_game();
+      });
+    }
   
   dialog::addBoolItem(XLAT("pattern"), specialland == laCanvas, 'p');
   if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
@@ -838,6 +847,9 @@ int read_geom_args() {
     currfp.findsubpath();
     }
   #endif
+  else if(argis("-mineadj")) {
+    shift(); mine_adjacency_rule = argi();
+    }
   else if(argis("-tpar")) { 
     torusconfig::torus_mode = torusconfig::tmSingle;
     shift(); sscanf(argcs(), "%d,%d,%d", 
