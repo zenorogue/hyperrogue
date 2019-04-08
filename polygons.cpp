@@ -116,11 +116,14 @@ vector<unique_ptr<drawqueueitem>> ptds;
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
   ld threshold = (DIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
-  if(/*vid.usingGL && */!first && intval(hpc.back(), h) > threshold) {
-    hyperpoint md = mid(hpc.back(), h);
-    hpcpush(md);
-    hpcpush(h);
-    return;
+  if(/*vid.usingGL && */!first) {
+    ld i = intval(hpc.back(), h);
+    if(i > threshold && i < 10) {
+      hyperpoint md = mid(hpc.back(), h);
+      hpcpush(md);
+      hpcpush(h);
+      return;
+      }
     }
   first = false;
   hpc.push_back(h);
