@@ -1511,6 +1511,9 @@ void texture_config::remap() {
   if(tstate == tsActive) {
     patterns::computeCgroup();
     correctly_mapped = patterns::compatible(texture::cgroup, patterns::cgroup);
+    if(!correctly_mapped)
+      correctly_mapped = 
+        current_texture_parameters == config.orig_texture_parameters;
     if(correctly_mapped) true_remap();
     else addMessage(XLAT("Pattern incompatible."));
     }
