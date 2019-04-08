@@ -1202,6 +1202,12 @@ land_validity_t& land_validity(eLand l) {
   if(l == laPrincessQuest && (!stdeuc || NONSTDVAR))
     return not_implemented;
 
+  if(l == laMountain && chaosmode)
+    return not_in_chaos;
+  
+  if(l == laBrownian && chaosmode)
+    return not_in_chaos;
+  
   // works correctly only in some geometries
   if(l == laClearing && chaosmode)
     return not_in_chaos;
