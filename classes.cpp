@@ -537,7 +537,7 @@ vector<geometryinfo> ginf = {
   {"{6,4}", "Crystal",  "dimensional crystal",                        "Crystal",  6, 4, qANYQ,     gcHyperbolic, 0x28000, {{5, 3}}, eVariation::pure},
   {"{3,4}", "none",     "{3,4} (octahedron)",                         "4x3",      3, 4, qsSMALLB,  gcSphere,     0x28200, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   {"bin{4,4}",  "none", "{4,4} on horospheres",                       "bin44",    9, 3, qBINARY,   gcHyperbolic, 0x30000, {{7, 3}}, eVariation::pure},
-  {"{4,3,4}","none",    "{4,3,4} cube tiling",                        "433",      6, 4, 0,         gcEuclid,     0x30200, {{7, 5}}, eVariation::pure},
+  {"{4,3,4}","none",    "{4,3,4} cube tiling",                        "434",      6, 4, 0,         gcEuclid,     0x30200, {{7, 5}}, eVariation::pure},
   {"{5,3,3}","none",    "{5,3,3} 120-cell",                           "533",     12, 3, qsSMALLB,  gcSphere,     0x30400, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{5,3,3}", "elliptic","{5,3,3} 120-cell (elliptic space)",         "e533",    12, 3, qsSMALLBE, gcSphere,     0x30600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"rh{4,3,4}","none",  "rhombic dodecahedral honeycomb",             "rh434",   12, 3, 0,         gcEuclid,     0x31000, {{7, 5}}, eVariation::pure},
