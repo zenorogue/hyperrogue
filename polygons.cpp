@@ -1624,7 +1624,7 @@ hpcshape
   shWave[8][2],  
   shCircleFloor,
   shBarrel,
-  shWall[2], shMineMark[2], shFan,
+  shWall[2], shMineMark[2], shBigMineMark[2], shFan,
   shZebra[5],
   shSwitchDisk,
   shTower[11],
@@ -2065,6 +2065,12 @@ void procedural_shapes() {
 
   bshape(shMineMark[1], PPR::MINEMARK);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
+  
+  bshape(shBigMineMark[0], PPR::MINEMARK);
+  for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.15) * C0);
+
+  bshape(shBigMineMark[1], PPR::MINEMARK);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.15) * C0);
   
   for(int d=0; d<2; d++) {
     bshape(shSemiBFloor[d], PPR::BFLOOR);

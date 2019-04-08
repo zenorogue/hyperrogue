@@ -2720,7 +2720,7 @@ bool bugsNearby(cell *c, int dist = 2) {
 
 colortable minecolors = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
-  0x60, 0x600000, 0x00C0C0, 0x000000
+  0x60, 0x600000, 0x00C0C0, 0x000000, 0x808080, 0xFFD500
   };
 
 colortable distcolors = {
@@ -4974,7 +4974,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           else if(c->wall == waMineOpen) {
             int mines = countMinesAround(c);
-            queuepoly(face_the_player(V), shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
+            if(mines >= 10)
+              queuepoly(face_the_player(V), shBigMineMark[0], darkena(minecolors[(mines/10)%10], 0, 0xFF));
+            queuepoly(face_the_player(V), shMineMark[0], darkena(minecolors[mines%10], 0, 0xFF));
             }
           
           else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder, waCanopy) || isWatery(c) || isSulphuric(c->wall)) ;
@@ -5177,8 +5179,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waMineOpen: {
           int mines = countMinesAround(c);
+          if(mines >= 10)
+            queuepoly(V, shBigMineMark[ct6], darkena(minecolors[(mines/10) % 10], 0, 0xFF));
           if(mines)
-            queuepoly(V, shMineMark[ct6], darkena(minecolors[mines], 0, 0xFF));
+            queuepoly(V, shMineMark[ct6], darkena(minecolors[mines%10], 0, 0xFF));
           break;
           }
         
@@ -5261,9 +5265,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         int mines = countMinesAround(c);
         if(ch == '.') {
           if(mines == 0) ch = ' ';
-          else ch = '0' + mines, asciicol = minecolors[mines];
+          else ch = '0' + mines, asciicol = minecolors[mines%10];
           }
-        else if(ch == '@') asciicol = minecolors[mines];
+        else if(ch == '@') asciicol = minecolors[mines%10];
         }
       if(!(it || c->monst || c->cpdist == 0)) error = true;
       }
@@ -6535,7 +6539,7 @@ void drawscreen() {
       its(hive::bugcount[k]), minf[moBug0+k].color, 8);
     
   bool minefieldNearby = false;
-  int mines[4], tmines=0;
+  int mines[MAXPLAYER], tmines=0;
   for(int p=0; p<numplayers(); p++) {
     mines[p] = 0;
     cell *c = playerpos(p);
@@ -6552,8 +6556,8 @@ void drawscreen() {
 
   if((minefieldNearby || tmines) && !items[itOrbAether] && !last_gravity_state && darken == 0 && normal) {
     string s;
-    if(tmines > 7) tmines = 7;
-    color_t col = minecolors[tmines];
+    if(tmines > 9) tmines = 9;
+    color_t col = minecolors[tmines%10];
     
     if(tmines == 7) seenSevenMines = true;
     
@@ -6561,7 +6565,7 @@ void drawscreen() {
       displayfr(vid.xres * (p+.5) / numplayers(),
         current_display->ycenter - current_display->radius * 3/4, 2,
         vid.fsize, 
-        XLAT(minetexts[mines[p]]), minecolors[mines[p]], 8);
+        mines[p] > 7 ? its(mines[p]) : XLAT(minetexts[mines[p]]), minecolors[mines[p]%10], 8);
 
     if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield) {
       displayfr(vid.xres/2, current_display->ycenter - current_display->radius * 3/4 - vid.fsize*3/2, 2,
