@@ -31,6 +31,7 @@ namespace reg3 {
   int loop, face;
 
   vector<hyperpoint> cellshape;
+  vector<hyperpoint> vertices_only;
   
   transmatrix spins[12], adjmoves[12];
 
@@ -169,6 +170,13 @@ namespace reg3 {
     
     if(loop == 4) strafedist = adjcheck;
     else strafedist = hdist(adjmoves[0] * C0, adjmoves[1] * C0);
+
+    vertices_only.clear();
+    for(hyperpoint h: cellshape) {
+      bool found = false;
+      for(hyperpoint h2: vertices_only) if(hdist(h, h2) < 1e-6) found = true;
+      if(!found) vertices_only.push_back(h);
+      }
     }
 
   void binary_rebase(heptagon *h, const transmatrix& V) {
@@ -505,6 +513,10 @@ namespace reg3 {
     heptagon *getOrigin() override { return allh[0]; }
     
     vector<cell*>& allcells() override { return acells; }    
+
+    vector<hyperpoint> get_vertices(cell* c) override {
+      return vertices_only;
+      }
     };
 
   struct hrmap_reg3 : hrmap {
@@ -787,6 +799,9 @@ namespace reg3 {
       return inverse(p1.second) * T * p2.second;
       }
     
+    vector<hyperpoint> get_vertices(cell* c) override {
+      return vertices_only;
+      }
     };
   
 hrmap* new_map() {

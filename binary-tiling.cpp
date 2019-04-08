@@ -385,6 +385,49 @@ namespace binary {
         }
       return gm * where;
       }
+
+    vector<hyperpoint> get_vertices(cell* c) override {
+      vector<hyperpoint> res;
+      ld yy = log(2) / 2;
+      using namespace hyperpoint_vec;
+      auto add = [&] (hyperpoint h) { 
+        res.push_back(binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
+        };
+      switch(geometry) {
+        case gBinary3: 
+          for(int x=-1; x<2; x++) for(int y=-1; y<2; y++) for(int z=-1; z<=1; z+=2)
+            if(z == -1 || x != 0 || y != 0)
+              add(point3(x,y,z));
+          break;
+        case gHoroTris: {
+          ld r = sqrt(3)/6;
+          ld r2 = r * 2;
+          
+          hyperpoint shift3 = point3(0,0,-3);
+          hyperpoint shift1 = point3(0,0,-1);
+          
+          for(int i=0; i<3; i++) {
+            hyperpoint t0 = spin(120 * degree * i) * point3(0,-r2,-1);          
+            add(t0);
+            add(-2 * t0 + shift3);
+            add(-2 * t0 + shift1);
+            }
+          }
+        case gHoroRec: {
+          ld r2 = sqrt(2);
+          for(int y=-1; y<=1; y++) for(int x=-1; x<=1; x+=2) for(int z=-1; z<=1; z++)
+            if(z == -1 || y != 0)
+              add(point3(-r2*x*hororec_scale, -2*y*hororec_scale, z*.5));
+          break;
+          }
+        case gHoroHex: {
+          // complicated and unused for now -- todo
+          break;
+          }
+        default: ;
+        }
+      return res;
+      }
     };
 
   hrmap *new_map() { return new hrmap_binary; }

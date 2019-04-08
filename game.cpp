@@ -7354,9 +7354,17 @@ void knightFlavorMessage(cell *c2) {
 
 int mine_adjacency_rule = 0;
 
+map<cell*, vector<cell*>> adj_memo;
+
+bool geometry_has_alt_mine_rule() {
+  if(DIM == 2) return VALENCE > 3;
+  if(DIM == 3) return !among(geometry, gHoroHex, gCell5, gBitrunc3, gCell8, gECell8, gCell120, gECell120);
+  return true;
+  }
+
 vector<cell*> adj_minefield_cells(cell *c) {
   vector<cell*> res;
-  if(mine_adjacency_rule == 0 || (VALENCE == 3 && DIM == 2))
+  if(mine_adjacency_rule == 0 || !geometry_has_alt_mine_rule())
     forCellCM(c2, c) res.push_back(c2);
   else if(DIM == 2) {
     cellwalker cw(c, 0);
@@ -7370,6 +7378,25 @@ vector<cell*> adj_minefield_cells(cell *c) {
       if(cw.cpeek() == c) cw++;
       }
     while(cw != cw1);
+    }
+  else if(adj_memo.count(c)) return adj_memo[c];
+  else {
+    const vector<hyperpoint> vertices = currentmap->get_vertices(c);
+    manual_celllister cl;
+    cl.add(c);
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c1 = cl.lst[i];
+      bool shares = false;
+      if(c != c1) {
+        transmatrix T = currentmap->relative_matrix(c1->master, c->master);
+        for(hyperpoint h: vertices) for(hyperpoint h2: vertices)
+          if(hdist(h, T * h2) < 1e-6) shares = true;
+        if(shares) res.push_back(c1);
+        }
+      if(shares || c == c1) forCellEx(c2, c1) cl.add(c2);
+      }
+    println(hlog, "adjacent to ", c, " = ", isize(res));
+    adj_memo[c] = res;
     }
   return res;
   }

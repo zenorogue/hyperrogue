@@ -3103,6 +3103,7 @@ struct hrmap {
   virtual void draw() {
     printf("undrawable\n");
     }
+  virtual vector<hyperpoint> get_vertices(cell*);
   };
 
 // hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient 
