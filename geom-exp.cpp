@@ -141,7 +141,7 @@ void showTorusConfig() {
     dialog::addSelItem(XLAT("height (y)"), its(torusconfig::newsdy), 'y');
     }
 
-  if(square) dialog::addBoolItem(XLAT("bitruncated"), !torus_bitrunc, 't');
+  if(square) dialog::addBoolItem(XLAT("bitruncated"), torus_bitrunc, 't');
   else dialog::addInfo("", 100);
   
   int valid = 2;
@@ -150,7 +150,7 @@ void showTorusConfig() {
   if(single) {  
     if(square) {
       dialog::addInfo("this mode has bad patterns", 0x808080), valid = 1;
-      if(!torus_bitrunc && valid == 1)
+      if(torus_bitrunc && valid == 1 && (torusconfig::newqty%2 || torusconfig::newdy % 2 == 0))
         dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
       }
     else {
@@ -168,7 +168,7 @@ void showTorusConfig() {
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
       if(torusconfig::newsdx & 1)
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
-      if(!torus_bitrunc && valid == 1)
+      if(torus_bitrunc && valid == 1)
         dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;      
       if(klein && !torusconfig::mobius_symmetric(square, adx, ady))
         dialog::addInfo("Möbius band requires a symmetric period", 0x800000), valid = 0;
@@ -188,7 +188,7 @@ void showTorusConfig() {
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
       if(torusconfig::newsdy & 1)
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
-      if(!torus_bitrunc && valid == 1)
+      if(torus_bitrunc && valid == 1)
         dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
       }
     else if(simple) {
