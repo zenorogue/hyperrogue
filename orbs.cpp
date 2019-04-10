@@ -79,6 +79,7 @@ bool reduceOrbPower(eItem it, int cap) {
     return true;
     }
   if(items[it] > cap && timerghost) items[it] = cap;
+  auto_teleport_charges();
   return false;
   }
 
@@ -571,6 +572,7 @@ void teleportTo(cell *dest) {
     checkmoveO();
 
   movecost(from, dest, 2);
+  auto_teleport_charges();
   }
 
 void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {

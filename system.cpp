@@ -302,6 +302,7 @@ void initgame() {
 #if CAP_INV
     if(inv::on) inv::init();
 #endif
+    auto_teleport_charges();
     if(!use_special_land) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }

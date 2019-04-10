@@ -781,6 +781,7 @@ bool isMultitile(eMonster m);
 void checkFreedom(cell *cf);
 int rosedist(cell *c);
 bool canPushStatueOn(cell *c);
+void auto_teleport_charges();
 
 namespace hive { void createBugArmy(cell *c); }
 namespace whirlpool { void generate(cell *wto); }

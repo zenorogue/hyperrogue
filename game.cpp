@@ -1954,6 +1954,7 @@ void explodeMine(cell *c) {
   
   c->wall = waMineOpen;
   explosion(c, 20, 20);
+  auto_teleport_charges();
   }
 
 void explodeBarrel(cell *c) {
@@ -7399,6 +7400,11 @@ vector<cell*> adj_minefield_cells(cell *c) {
     adj_memo[c] = res;
     }
   return res;
+  }
+
+void auto_teleport_charges() {
+  if(specialland == laMinefield && firstland == laMinefield && bounded)
+    items[itOrbTeleport] = isFire(cwt.at->wall) ? 0 : 1;
   }
 
 bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
