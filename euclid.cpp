@@ -701,9 +701,9 @@ namespace euclid3 {
       if(S7 == 12) {
         int d = v[1] - v[0]; v[1] -= d; v[2] -= d;
         dist += d;
-        int m = min((v[2] - v[0]) / 2, v[0]);
-        dist += 2 * d;
-        v[0] -= m; v[1] -= m; v[2] -= m;
+        int m = min((v[2] - v[0]), v[0]);
+        dist += 2 * m;
+        v[0] -= m; v[1] -= m; v[2] -= m * 2;
         if(v[0])
           dist += (v[0] + v[1] + v[2]) / 2;
         else
