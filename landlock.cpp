@@ -636,6 +636,8 @@ namespace lv {
   land_validity_t not_3d = {0, q0, "This land does not make much sense in 3D."}; 
   land_validity_t not_binary = {0, q0, "This land does not make much sense in binary tiling."}; 
   land_validity_t shmup_only = {0, q0, "This land works only in the shmup mode."}; 
+  land_validity_t not_in_shmup = {0, q0, "This land is not available in the shmup mode."}; 
+  land_validity_t not_in_multi = {0, q0, "This land is not available in multiplayer."}; 
   }
 
 // old Daily Challenges should keep their validity forever
@@ -835,6 +837,12 @@ land_validity_t& land_validity(eLand l) {
     
   if(l == laPrincessQuest && (!stdeuc || NONSTDVAR))
     return not_implemented;
+  
+  if(l == laPrincessQuest && shmup::on)
+    return not_in_shmup;
+
+  if(l == laPrincessQuest && multi::players > 1)
+    return not_in_multi;
 
   if(l == laMountain && chaosmode)
     return not_in_chaos;
