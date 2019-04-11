@@ -910,6 +910,7 @@ void stun_attack(cell *dest) {
 
 void poly_attack(cell *dest) {
   playSound(dest, "orb-ranged");
+  eMonster orig = dest->monst;
   auto polymonsters = {
     moYeti, moRunDog, moHunterDog, moRanger,
     moDesertman, moMonkey, moZombie, moCultist,
@@ -928,6 +929,15 @@ void poly_attack(cell *dest) {
   addMessage(XLAT("You polymorph %the1 into %the2!", dest->monst, target));
   dest->monst = target;
   if(!dest->stuntime) dest->stuntime = 1;
+
+  if(orig == moPair) {
+    cell *dest2 = dest->move(dest->mondir);
+    if(dest2->monst == moPair) {
+      dest2->monst = dest->monst;
+      if(!dest2->stuntime) dest2->stuntime = 1;
+      }
+    }
+  
   checkStunKill(dest);
   useupOrb(itOrbMorph, 3);
   createNoise(3);
