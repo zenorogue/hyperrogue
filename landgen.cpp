@@ -2500,6 +2500,9 @@ void setdist(cell *c, int d, cell *from) {
       #if CAP_CRYSTAL
       else if(geometry == gCrystal) crystal::set_land(c);
       #endif
+      #if MAXMDIM == 4
+      else if(euclid && DIM == 3) euclid3::set_land(c);
+      #endif
       else if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }

@@ -552,12 +552,14 @@ namespace euclid3 {
     vector<transmatrix> tmatrix;
     map<coord, heptagon*> spacemap;
     map<heptagon*, coord> ispacemap;
+    cell *camelot_center;
     hrmap_euclid3() {
       shifttable = get_shifttable();
       tmatrix.resize(S7);
       for(int i=0; i<S7; i++) tmatrix[i] = Id;
       for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
         tmatrix[i][j][DIM] = getcoord(shifttable[i])[j];
+      camelot_center = NULL;
       }
 
     heptagon *getOrigin() {
@@ -666,6 +668,7 @@ namespace euclid3 {
     }
 
   int dist_alt(cell *c) {
+    if(specialland == laCamelot) return dist_relative(c) + roundTableRadius(c);
     coord co = cubemap()->ispacemap[c->master];
     auto v = getcoord(co);
     if(S7 == 6) return v[2];
@@ -713,6 +716,34 @@ namespace euclid3 {
       }
     }
 
+  void set_land(cell *c) {
+    setland(c, specialland); 
+    auto m = cubemap();
+    auto co = getcoord(m->ispacemap[c->master]);
+    
+    int dv = 1;
+    if(geometry != gCubeTiling) dv = 2;
+  
+    int hash = 0;
+    for(int a=0; a<3; a++) hash = 1317 * hash + co[a] / 4;
+  
+    set_euland3(c, co[0]*120, co[1]*120, (co[1]+co[2]) / dv, hash);
+    }
+  
+  int dist_relative(cell *c) {
+    auto m = cubemap();
+    auto& cc = m->camelot_center;
+    int r = roundTableRadius(NULL);
+    cell *start = m->gamestart();
+    if(!cc) {
+      cc = start;
+      while(euclid3::celldistance(cc, start) < r + 5)
+        cc = cc->cmove(hrand(cc->type));
+      }
+    
+    return euclid3::celldistance(cc, c) - r;
+    }
+  
   }
 #endif
 

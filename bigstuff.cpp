@@ -39,6 +39,7 @@ int celldistAltRelative(cell *c) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::dist_relative(c);
   #endif
+  if(euclid && DIM == 3) return euclid3::dist_relative(c);
   if(euwrap) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
@@ -857,6 +858,8 @@ void setLandSphere(cell *c) {
   }
 
 eLand euland[max_vec];
+map<int, eLand> euland3;
+map<int, eLand> euland3_hash;
 
 eLand& get_euland(int c) {
   return euland[c & (max_vec-1)];
@@ -865,6 +868,8 @@ eLand& get_euland(int c) {
 void clear_euland(eLand first) {
   for(int i=0; i<max_vec; i++) euland[i] = laNone;
   euland[0] = euland[1] = euland[max_vec-1] = first;
+  euland3.clear();
+  euland3[0] = laCrossroads;
   }
 
 eLand switchable(eLand nearland, eLand farland, int c) {
@@ -1026,6 +1031,69 @@ void setLandEuclid(cell *c) {
       setland(c, laWarpSea);
     else
       setland(c, laWarpCoast);
+    }
+  }
+
+eLand get_euland3(int x) {
+  if(euland3.count(x)) return euland3[x]; 
+  if(x > 0) return euland3[x] = getNewLand(euland3[x-1]);
+  if(x < 0) return euland3[x] = getNewLand(euland3[x+1]);
+  return euland3[x] = laCrossroads;
+  }
+
+void set_euland3(cell *c, int co10, int co11, int alt, int hash) {
+
+  if(chaosmode) {
+    setland(c, get_euland3(gdiv(co10, 60)));
+    }
+  
+  else if(specialland == laCrossroads) {
+    eLand l1 = get_euland3(gdiv(co10, 360));
+    eLand l2 = get_euland3(gdiv(co10+59, 360));
+    if(l1 != l2 && hrand(100) < 75) setland(c, laBarrier);
+    else setland(c, l1);
+    }
+
+  else if(specialland == laCrossroads2) {
+    setland(c, get_euland3(alt/4));
+    }
+
+  else if(specialland == laCrossroads3) {
+    auto& l = euland3_hash[hash];
+    if(l == laNone) l = getNewLand(laBarrier);
+    setland(c, l);
+    }
+
+  else if(specialland == laCrossroads4) {
+    setland(c, get_euland3(gdiv(co10, 360)));
+    }
+  
+  else if(specialland == laElementalWall) {
+    setland(c, eLand(laEFire + ((co10 / 240)&1?0:2) + ((co11 / 240)&1?0:1)));
+    }
+  
+  if(specialland == laCamelot) {
+    setland(c, laCrossroads);
+    buildCamelot(c);
+    }
+
+  if(specialland == laTerracotta) {
+    if(((alt&15) == 8) && hrand(100) < 90)
+       c->wall = waMercury;
+    }
+
+  if(among(specialland, laOcean, laIvoryTower, laDungeon, laEndorian)) {
+    if(alt == 0)
+      c->land = laCrossroads4;
+    else if(alt > 0)
+      c->landparam = alt;
+    else
+      c->landparam = -alt;
+    }
+  
+  if(specialland == laWarpCoast) {
+    if(gmod(co10, 240) >= 120)
+      c->land = laWarpSea;
     }
   }
 

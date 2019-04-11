@@ -1002,78 +1002,18 @@ void build_rugdata() {
   println(hlog, "cut ", cut_level, "r ", crug_rotation);
   }
 
-eLand getCLand(int x) {
-  auto& landmemo = crystal_map()->landmemo;
-     
-  if(landmemo.count(x)) return landmemo[x]; 
-  if(x > 0) return landmemo[x] = getNewLand(landmemo[x-1]);
-  if(x < 0) return landmemo[x] = getNewLand(landmemo[x+1]);
-  return landmemo[x] = laCrossroads;
-  }
-
 void set_land(cell *c) {
   setland(c, specialland); 
   auto m = crystal_map();
 
   auto co = m->get_coord(c);
   auto co1 = roundcoord(co * 60);
-  int cv = co1[0];
-
-  if(chaosmode) {
-    setland(c, getCLand(gdiv(cv, 60)));
-    }
   
-  else if(specialland == laCrossroads) {
-    eLand l1 = getCLand(gdiv(cv, 360));
-    eLand l2 = getCLand(gdiv(cv+59, 360));
-    if(l1 != l2 && hrand(100) < 75) setland(c, laBarrier);
-    else setland(c, l1);
-    }
-
-  else if(specialland == laCrossroads2) {
-    setland(c, getCLand(dist_alt(c)/4));
-    }
-
-  else if(specialland == laCrossroads3) {
-    coord cx = roundcoord(co / 8);
-    auto& l = m->landmemo4[cx];
-    if(l == laNone) l = getNewLand(laBarrier);
-    setland(c, l);
-    }
-
-  else if(specialland == laCrossroads4) {
-    setland(c, getCLand(gdiv(cv, 360)));
-    }
+  coord cx = roundcoord(co / 8);
+  int hash = 0;
+  for(int a=0; a<m->cs.dim; a++) hash = 1317 * hash + cx[a];
   
-  else if(specialland == laElementalWall) {
-    setland(c, eLand(laEFire + ((co1[0] / 240)&1?0:2) + ((co1[1] / 240)&1?0:1)));
-    }
-  
-  if(specialland == laCamelot) {
-    setland(c, laCrossroads);
-    buildCamelot(c);
-    }
-
-  if(specialland == laTerracotta) {
-    int v = dist_alt(c);
-    if(((v&15) == 8) && hrand(100) < 90)
-       c->wall = waMercury;
-    }
-
-  if(among(specialland, laOcean, laIvoryTower, laDungeon, laEndorian)) {
-    int v = dist_alt(c);
-    if(v == 0)
-      c->land = laCrossroads4;
-    else if(v > 0)
-      c->landparam = v;
-    else
-      c->landparam = -v;
-    }
-  
-  if(specialland == laWarpCoast) {
-    if(gmod(cv, 240) >= 120)
-      c->land = laWarpSea;
-    }
+  set_euland3(c, co1[0], co1[1], dist_alt(c), hash);
   }
 
 void set_crystal(int sides) {
@@ -1412,6 +1352,9 @@ void transform_crystal_to_euclid () {
     for(int i=0; i<S7; i++) c->move(i) = NULL;
     }
   
+  if(m->camelot_center) 
+    e->camelot_center = e->spacemap[crystal_to_euclid(m->hcoords[m->camelot_center->master])]->c7;
+
   // clean hcoords and heptagon_at so that the map is not deleted when we delete m
   m->hcoords.clear();
   m->heptagon_at.clear();
@@ -1475,6 +1418,9 @@ void transform_euclid_to_crystal () {
     for(int i=0; i<S7; i++) c->move(i) = NULL;
     }
           
+  if(e->camelot_center) 
+    m->camelot_center = m->heptagon_at[euclid3_to_crystal(e->ispacemap[e->camelot_center->master])]->c7;
+
   e->spacemap.clear();
   e->ispacemap.clear();
   delete e;

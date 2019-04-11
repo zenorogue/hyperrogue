@@ -4362,6 +4362,7 @@ namespace binary {
 namespace euclid3 {
   hrmap* new_map();
   void draw();
+  int dist_relative(cell *c);
   }
 
 namespace reg3 {
@@ -5002,6 +5003,8 @@ namespace subscreens {
   }
 
 const int TEXTURE_STEP_3D=8;
+
+void set_euland3(cell *c, int co0, int co1, int alt, int hash);
 
 }
 
