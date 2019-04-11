@@ -6712,7 +6712,7 @@ void commitAnimations(int layer) {
 void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb) {
   if(vid.mspeed >= 5) return; // no animations!
   static cell c1;
-  gmatrix[&c1] = gmatrix[b];
+  gmatrix[&c1] = gmatrix[b]; c1.master = b->master;
   if(animations[layer].count(b)) animations[layer][&c1] = animations[layer][b];
   animateMovement(a, b, layer, direction_hinta);
   animateMovement(&c1, a, layer, direction_hintb);
