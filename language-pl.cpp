@@ -2666,7 +2666,7 @@ S(
 N("Ivory Figurine", GEN_F, "Figurka", "Figurki", "Figurkę", "Figurką")
 
 S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower "
-  "tend do disappear after you have collected many of them.",
+  "tend to disappear after you have collected many of them.",
   "Piękna figurka z kości słoniowej. Figurki blisko podstawy Wieży znikają, gdy "
   "zbierzesz dużo figurek.")
 
@@ -5311,7 +5311,7 @@ S(
   "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
   "always be facing in the same direction whatever you do, and it appears that "
   "you have to rotate the sword to excavate the treasures; "
-  "yet, it is possible to excavate them! You migth have already noticed "
+  "yet, it is possible to excavate them! You might have already noticed "
   "that the world rotates after you move around a loop and return to an old "
   "place.\n\n"
   "This is related to the fact that the world of HyperRogue is curved, and "

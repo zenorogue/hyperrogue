@@ -615,7 +615,7 @@ ITEM( 'o', 0xFF208F, "Orb of Love", itOrbLove, IC_ORB, ZERO | IF_SHMUPLIFE, RESE
     )
 ITEM( '/', 0xFFFFE0, "Ivory Figurine", itIvory, IC_TREASURE, ZERO, RESERVED, osNone, 
     "A beautiful figurine, made of ivory. Figurines close to the base of the Tower "
-    "tend do disappear after you have collected many of them."
+    "tend to disappear after you have collected many of them."
     )
 ITEM( '*', 0x606060, "Onyx", itZebra, IC_TREASURE, ZERO, RESERVED, osNone, "A black gem with white stripes. It is beautiful.")
 ITEM( '%', 0xFF8000, "Fire Shard", itFireShard, IC_OTHER, ZERO | IF_SHARD, RESERVED, osNone, elemdesc)

@@ -594,7 +594,7 @@ slide default_slides[] = {
     "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
     "always be facing in the same direction whatever you do, and it appears that "
     "you have to rotate the sword to excavate the treasures; "
-    "yet, it is possible to excavate them! You migth have already noticed "
+    "yet, it is possible to excavate them! You might have already noticed "
     "that the world rotates after you move around a loop and return to an old "
     "place.\n\n"
     "This is related to the fact that the world of HyperRogue is curved, and "

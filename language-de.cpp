@@ -2548,7 +2548,7 @@ S("A being made of stone, who likes high buildings. It becomes normal stone when
 N("Ivory Figurine", GEN_F, "Elfenbeinfigur", "Elfenbeinfiguren", "Elfenbeinfigur")
 
 S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower "
-  "tend do disappear after you have collected many of them.",
+  "tend to disappear after you have collected many of them.",
   "Eine hübsche Figur aus Elfenbein. Figuren nah am Fuße des Turms neigen dazu "
   "zu verschwinden wenn du viele gesammelt hast.")
 

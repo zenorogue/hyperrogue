@@ -2538,7 +2538,7 @@ S(
 N("Ivory Figurine", GEN_F, "Fildişi Biblo", "Fildişi Biblolar", "Fildişi Bibloyu", "Fildişi Bibloyla")
 
 S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower "
-  "tend do disappear after you have collected many of them.",
+  "tend to disappear after you have collected many of them.",
   "Fildişinden yapılmış güzel bir biblo. Bunlardan çok sayıda topladığında, kulenin temeline yakın biblolar yok olmaya başlar.")
 
 N("Platform", GEN_F, "Platform", "Platformlar", "Platformu", "Platformla")
