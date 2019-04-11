@@ -334,7 +334,7 @@ void showMission() {
       dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
     else if(gold() < R60)
       dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R60)));
-    else if(!hellUnlocked())
+    else if(!landUnlocked(laHell))
       dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
     else if(items[itHell] < R10)
       dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
@@ -363,7 +363,7 @@ void showMission() {
     dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
   else if(items[itEmerald] < U5)
     dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
-  else if(hellUnlocked() && !chaosmode) {
+  else if(landUnlocked(laHell) && !chaosmode) {
     eLand l = nextHyperstone();
     if(l) 
         dialog::addInfo(

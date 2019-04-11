@@ -775,8 +775,6 @@ void moveMonster(cell *ct, cell *cf, int direction_hint);
 int palaceHP();
 void placeLocalOrbs(cell *c);
 int elementalKills();
-bool elementalUnlocked();
-bool trollUnlocked();
 bool isMultitile(eMonster m);
 void checkFreedom(cell *cf);
 int rosedist(cell *c);
@@ -1601,7 +1599,6 @@ static const int NO_LOVE = 8;
 
 int gold(int no = 0);
 int tkills();
-bool hellUnlocked();
 
 bool markOrb(eItem it); // mark the orb as 'used', return true if exists
 bool markEmpathy(eItem it); // mark both the given orb and Empathy as 'used', return true if exists

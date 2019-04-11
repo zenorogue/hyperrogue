@@ -2533,8 +2533,8 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
     c->stuntime = 2;
     }
   
-  bool eu = elementalUnlocked();
-  bool tu = trollUnlocked();
+  bool eu = landUnlocked(laElementalWall);
+  bool tu = landUnlocked(laTrollheim);
   
   if(flags & AF_MSG) fightmessage(m, killer, dostun, flags);
   if(dostun) 
@@ -2573,12 +2573,12 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   if(tk < R100 && ntk >= R100 && !euclid && !sphere)
     addMessage(XLAT("You feel that the souls of slain enemies pull you to the Graveyard..."));
   
-  if(!tu && trollUnlocked()) {
+  if(!tu && landUnlocked(laTrollheim)) {
     playSound(c, "message-troll");
     addMessage(XLAT("%The1 says, \"I die, but my clan in Trollheim will avenge me!\"", m));
     }
 
-  if(!eu && elementalUnlocked())
+  if(!eu && landUnlocked(laElementalWall))
     addMessage(XLAT("After killing %the1, you feel able to reach the Elemental Planes!", m));
   
   if(m == moVizier && c->monst != moVizier && kills[moVizier] == 1) {
@@ -7063,7 +7063,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     halloween::getTreat(c2);
     }   
   else {
-    bool lhu = hellUnlocked();
+    bool lhu = landUnlocked(laHell);
     if(c2->item == itBarrow) 
       for(int i=0; i<c2->landparam; i++) gainItem(c2->item);
     else if(c2->item) gainItem(c2->item);
@@ -7119,7 +7119,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
     IF(R10 * 9) 
       addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
-    if(hellUnlocked() && !lhu) {
+    if(landUnlocked(laHell) && !lhu) {
       addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
       addMessage(XLAT("And the Orbs of Yendor await!"));
       }

@@ -561,6 +561,36 @@ string generateHelpForMonster(eMonster m) {
   return s;
   }
 
+void add_reqs(eLand l, string& s) {
+  back:
+  
+  switch(l) {
+    #define LAND(a,b,c,d,e,f,g) case c:
+    #define REQ(x) x return;
+    #define REQAS(x,y) y l = x; goto back;
+    #define GOLD(x) NUMBER(gold(), x, XLAT("Treasure required: %1 $$$.\n", its(x)))
+    #define KILL(who, where) NUMBER(kills[who], 1, XLAT("Kills required: %1 (%2).\n", who, where))
+    #define ITEMS(kind, number) NUMBER(items[kind], number, XLAT("Treasure required: %1 x %2.\n", its(number), kind))
+    #define NEVER ;
+    #define ALWAYS s += XLAT("Always available.\n");
+    #define KILLS(x) NUMBER(tkills(), x, XLAT("Kills required: %1.\n", its(x)))
+    #define AKILL(who, where) s += XLAT("Alternatively: kill a %1 in %the2.\n", who, where); buteol(s, kills[who], 1);
+    #define ORD(a, b) b a
+    #define ALT(x) // if([&] { x return true; } ()) return true;
+    #define NUMBER(val, required, description) s += description; buteol(s, val, required);
+    #define COND(x,y) s += (y);
+    #define ITEMS_TOTAL(list, z) \
+      { int now = 0; string t = ""; for(eItem i: list) { if(t!="") t += " + "; t += XLATN(iinf[i].name); now += items[i]; } s += XLAT("Treasure required: %1 x %2.\n", its(z), t); buteol(s, now, z); }
+    #define ACCONLY(z) s += XLAT("Accessible only from %the1.\n", z);
+    #define ACCONLY2(z,x) s += XLAT("Accessible only from %the1 or %the2.\n", z, x);
+    #define ACCONLYF(z) s += XLAT("Accessible only from %the1 (until finished).\n", z);
+    #include "content.cpp"
+
+    case landtypes: return;
+    }
+
+  }
+
 string generateHelpForLand(eLand l) {
   string s = helptitle(XLATN(linf[l].name), linf[l].color);
   
@@ -571,21 +601,8 @@ string generateHelpForLand(eLand l) {
   if(l == laMinefield) addMinefieldExplanation(s);
 
   s += "\n\n";
-  if(l == laIce || l == laCaves || l == laDesert || l == laMotion || l == laJungle ||
-    l == laCrossroads || l == laAlchemist || l == laHunting)
-      s += XLAT("Always available.\n");
-
-  #define ACCONLY(z) s += XLAT("Accessible only from %the1.\n", z);
-  #define ACCONLY2(z,x) s += XLAT("Accessible only from %the1 or %the2.\n", z, x);
-  #define ACCONLYF(z) s += XLAT("Accessible only from %the1 (until finished).\n", z);
-  #define TREQ(z) { s += XLAT("Treasure required: %1 $$$.\n", its(z)); buteol(s, gold(), z); }
-  #define TREQ2(z,x) { s += XLAT("Treasure required: %1 x %2.\n", its(z), x); buteol(s, items[x], z); }
-  #define TREQ3(z,x) { int now = 0; string t = ""; for(eItem i: x) { if(t!="") t += " + "; t += XLATN(iinf[i].name); now += items[i]; } s += XLAT("Treasure required: %1 x %2.\n", its(z), t); buteol(s, now, z); }
   
-  if(l == laMirror || l == laMinefield || l == laPalace ||
-    l == laOcean || l == laLivefjord || l == laZebra || l == laWarpCoast || l == laWarpSea ||
-    l == laReptile || l == laIvoryTower || l == laSwitch)
-      TREQ(R30)
+  add_reqs(l, s);
 
   if(l == laPower && inv::on)
     help += XLAT(
@@ -601,112 +618,6 @@ string generateHelpForLand(eLand l) {
   if(isPureSealand(l)) 
     s += XLAT("Aquatic region -- accessible only from coastal regions and other aquatic regions.\n");
     
-  if(l == laWhirlpool) ACCONLY(laOcean)
-  if(l == laRlyeh) ACCONLYF(laOcean)
-  if(l == laTemple) ACCONLY(laRlyeh)  
-  if(l == laClearing) ACCONLY(laOvergrown)  
-  if(l == laHaunted) ACCONLY(laGraveyard)  
-  if(l == laPrincessQuest) ACCONLY(laPalace)
-  if(l == laMountain) ACCONLY(laJungle)
-  if(l == laCamelot) ACCONLY2(laCrossroads, laCrossroads3)
-  
-  if(l == laDryForest || l == laWineyard || l == laDeadCaves || l == laHive || l == laRedRock ||
-    l == laOvergrown || l == laStorms || l == laWhirlwind || 
-    l == laCrossroads2 || l == laRlyeh || l == laVolcano)
-      TREQ(R60)
-    
-  if(l == laReptile) TREQ2(U10, itElixir)
-  if(l == laVolcano) TREQ2(U10, itElixir)
-  if(l == laSwitch) TREQ2(U10, itElixir)
-  
-  if(l == laEndorian) TREQ2(U10, itIvory)
-  if(l == laKraken) TREQ2(U10, itFjord)
-  if(l == laBurial) TREQ2(U10, itKraken)
-
-  if(l == laDungeon) TREQ2(U5, itIvory)
-  if(l == laDungeon) TREQ2(U5, itPalace)
-  if(l == laMountain) TREQ2(U5, itIvory)
-  if(l == laMountain) TREQ2(U5, itRuby)
-
-  if(l == laBlizzard) TREQ2(U5, itDiamond)
-  if(l == laBlizzard) TREQ2(U5, itWindstone)
-  
-  if(l == laWestWall) TREQ2(U5, itIvory)
-  if(l == laWestWall) TREQ2(U5, itFeather)
-  
-  if(l == laBrownian) TREQ(R30)
-  
-  if(l == laVariant) {
-    const auto lst = vector<eItem>{itRuins, itEmerald, itBone};
-    TREQ3(variant_unlock_value(), lst)
-    }
-    
-  if(l == laPrairie) TREQ(R90)
-  if(l == laBull) TREQ(R90)
-  if(l == laRose) TREQ(R90)
-  if(l == laTerracotta) TREQ(R90)
-  if(l == laCrossroads4) TREQ(R200)
-  if(l == laCrossroads5) TREQ(R300)
-  
-  if(l == laGraveyard || l == laHive) {
-    s += XLAT("Kills required: %1.\n", "100");
-    buteol(s, tkills(), R100);
-    }
-  
-  if(l == laDragon) {
-    s += XLAT("Different kills required: %1.\n", "20");
-    buteol(s, killtypes(), R20);
-    }
-  
-  if(l == laTortoise) ACCONLY(laDragon)
-  if(l == laTortoise) s += XLAT("Find a %1 in %the2.", itBabyTortoise, laDragon);
-
-  if(l == laHell || l == laCrossroads3) {
-    s += XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10));
-    buteol(s, orbsUnlocked(), 9);
-    }
-  
-  if(l == laCocytus || l == laPower) TREQ2(U10, itHell)
-  if(l == laRedRock) TREQ2(U10, itSpice)
-  if(l == laOvergrown) TREQ2(U10, itRuby)
-  if(l == laClearing) TREQ2(U5, itMutant)
-  if(l == laCocytus) TREQ2(U10, itDiamond)
-  if(l == laDeadCaves) TREQ2(U10, itGold)
-  if(l == laTemple) TREQ2(U5, itStatue)
-  if(l == laHaunted) TREQ2(U10, itBone)
-  if(l == laCamelot) TREQ2(U5, itEmerald)
-  if(l == laEmerald) {
-    TREQ2(U5, itFernFlower) TREQ2(U5, itGold)
-    s += XLAT("Alternatively: kill a %1 in %the2.\n", moVizier, laPalace);
-    buteol(s, kills[moVizier], 1);
-    }
-  
-#define KILLREQ(who, where) { s += XLAT("Kills required: %1 (%2).\n", who, where); buteol(s, kills[who], 1); }
-
-  if(l == laPrincessQuest)
-    KILLREQ(moVizier, laPalace);
-    
-  if(l == laElementalWall) {
-    KILLREQ(moFireElemental, laDragon);
-    KILLREQ(moEarthElemental, laDeadCaves);
-    KILLREQ(moWaterElemental, laLivefjord);
-    KILLREQ(moAirElemental, laWhirlwind);
-    }
-  
-  if(l == laRuins)
-    KILLREQ(moSkeleton, laPalace);
-    
-  if(l == laTrollheim) {
-    KILLREQ(moTroll, laCaves);
-    KILLREQ(moFjordTroll, laLivefjord);
-    KILLREQ(moDarkTroll, laDeadCaves);
-    KILLREQ(moStormTroll, laStorms);
-    KILLREQ(moForestTroll, laOvergrown);
-    KILLREQ(moRedTroll, laRedRock);
-    }
-  
-  if(l == laZebra) TREQ2(U10, itFeather)
-  
   if(l == laCamelot || l == laPrincessQuest)
     s += XLAT("Completing the quest in this land is not necessary for the Hyperstone Quest.");
 

@@ -26,7 +26,7 @@ void showOverview() {
     mouseovers += "       ";
     mouseovers += XLAT(" kills: %1/%2", its(tkills()), its(killtypes()));
     mouseovers += XLAT(" $$$: %1", its(gold()));
-    if(hellUnlocked()) {
+    if(landUnlocked(laHell)) {
       int i1, i2; countHyperstoneQuest(i1, i2);
       mouseovers += XLAT(" Hyperstone: %1/%2", its(i1), its(i2));
       }

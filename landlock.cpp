@@ -17,228 +17,9 @@ bool nodisplay(eMonster m) {
 // returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear
 int isNative(eLand l, eMonster m) {
   switch(l) {
-    case laIce: 
-      return (m == moWolf || m == moWolfMoved || m == moYeti) ? 2 : 0;
-
-    case laJungle: 
-      return (m == moIvyRoot || m == moMonkey) ? 2 : 
-        (isIvy(m) || m == moEagle || m == moMonkey) ? 1 : 0;
-
-    case laCaves: 
-      return (m == moGoblin || m == moTroll) ? 2 : m == moSeep ? 1 : 0;
-      
-    case laDesert: 
-      return (m == moDesertman || m == moWorm) ? 2 : 0;
-
-    case laAlchemist: 
-      return (m == moSlime) ? 2 : 0;
-
-    case laMirror: case laMirrored: case laMirrorWall: case laMirrorWall2: case laMirrored2:
-      return (m == moMirrorSpirit || m == moNarciss || m == moMimic) ? 1 : 0;
-      
-    case laMirrorOld:
-      return (m == moEagle || m == moRanger || m == moMimic) ? 1 : 0;
-      
-    case laMotion: 
-      return (m == moRunDog) ? 2 : 0;
-
-    case laGraveyard: 
-      return (m == moZombie || m == moNecromancer) ? 2 : 
-        m == moGhost ? 1 : 0;
-      
-    case laRlyeh: 
-      return 
-        (m == moCultist || m == moTentacle || m == moPyroCultist) ? 2 :
-        (m == moCultistLeader || isIvy(m)) ? 1 : 0;
-        
-    case laDryForest: 
-      return (m == moHedge || m == moFireFairy) ? 2 : 0;
-
-    case laHell: 
-      return (m == moLesser || m == moGreater) ? 2 : 0;
-      
-    case laCocytus: 
-      return (m == moShark || m == moGreaterShark || m == moCrystalSage) ? 2 :
-        m == moYeti ? 1 : 0;
-
-    case laCrossroads: case laCrossroads2: case laCrossroads3: case laCrossroads4: 
-    case laCrossroads5:
-    case laNone: case laBarrier: case laOceanWall: case laCanvas: case laMemory: 
-      return 0;
-    
-    case laEmerald: 
-      return (m == moFlailer || m == moLancer || m == moMiner) ? 2 : 
-        m == moHedge ? 1 : 0;
-      
-    case laWineyard: 
-      return (m == moVineSpirit || m == moVineBeast) ? 2 : 0;
-    
-    case laHive: 
-      return isBug(m) ? 1 : 0;
-
-    case laDeadCaves: 
-      return (m == moEarthElemental || m == moDarkTroll) ? 2 : 
-        (m == moGoblin || m == moSeep) ? 1 : 0;
-
-    case laPower: 
-      return (isWitch(m) || m == moEvilGolem) ? 1 : 0;
-
-    case laCamelot: 
-      return (m == moKnight || m == moHedge || m == moFlailer || m == moLancer) ? 1 : 0;
-      
-    case laTemple: 
-      return (m == moTentacle || m == moCultist || m == moPyroCultist || m == moCultistLeader) ? 1 : 0;
-    
-    case laCaribbean: 
-      return (m == moPirate || m == moParrot || m == moCShark) ? 1 : 0;
-
-    case laRedRock: return (m == moRedTroll || m == moHexSnake) ? 2 : 0;
-    
-    case laMinefield: 
-      return (m == moBomberbird || m == moTameBomberbird) ? 1 : 0;
-      
-    case laOcean: 
-      return (m == moAlbatross) ? 2 : (m == moPirate || m == moCShark) ? 1 : 0;
-      
-    case laWhirlpool: 
-      return (m == moPirate || m == moCShark) ? 1 : 0;
-      
-    case laPalace: case laPrincessQuest:
-      return (m == moPalace || m == moFatGuard || m == moSkeleton || m == moVizier) ? 2 : 
-        m == moSkeleton ? 1 : 0;
-
-    case laLivefjord: 
-      return m == moViking ? 2 : (m == moFjordTroll || m == moWaterElemental) ? 1 : 0;
-    
-    case laIvoryTower: 
-      return (m == moFamiliar || m == moGargoyle) ? 2 : 0;
-      
-    case laZebra: return (m == moOrangeDog) ? 2 : 0;
-
-    case laEAir: case laEEarth: case laEWater: case laEFire: 
-    case laElementalWall: 
-      if(m == elementalOf(l) && m) return 2;
-      return (m == moAirElemental || m == moEarthElemental || m == moWaterElemental || m == moFireElemental) ? 1 : 0;
-    
-    case laStorms: 
-      return (m == moMetalBeast || m == moMetalBeast2 || m == moStormTroll) ? 1 : 0;
-    
-    case laOvergrown: 
-      return (m == moMutant || m == moForestTroll) ? 1 : 0;
-      
-    case laWildWest: 
-      return (m == moOutlaw) ? 2 : 0;
-
-    case laHalloween: 
-      return (m == moGhost || m == moZombie || m == moWitch ||
-        m == moLesser || m == moGreater || 
-        m == moVampire || m == moDraugr ||
-        m == moSkeleton || m == moWitchFire || 
-        m == moFlailer || m == moPyroCultist || 
-        m == moFatGuard || m == moHedge || 
-        m == moLancer || m == moFireFairy || 
-        m == moBomberbird || m == moRatlingAvenger || 
-        m == moVineBeast || m == moDragonHead || m == moDragonTail) ? 1 : 0;
-
-    case laClearing: 
-      return (m == moMutant || m == moRedFox) ? 1 : 0;
-    
-    case laHaunted: case laHauntedWall: case laHauntedBorder: 
-      return (m == moGhost || m == moFriendlyGhost) ? 1 : 0;
-      
-    case laWhirlwind: 
-      return (m == moAirElemental || m == moWindCrow) ? 2 : 0;
-    
-    case laRose: 
-      return (m == moFalsePrincess || m == moRoseBeauty || m == moRoseLady) ? 2 : 0;
-      
-    case laWarpCoast: case laWarpSea: 
-      return m == moRatling ? 2 : m == moRatlingAvenger ? 1 : 0;
-    
-    case laDragon: 
-      return (isDragon(m) || m == moFireElemental) ? 1 : 0;
-    
-    case laEndorian: 
-      return (m == moResearcher || m == moSparrowhawk) ? 2 : 0;
-      
-    case laTortoise: 
-      return m == moTortoise ? 1 : 0;
-    
-    case laTrollheim: 
-      return isTroll(m) ? 1 : 0;
-
-    case laKraken: 
-      return m == moKrakenH ? 2 : (m == moViking || m == moKrakenT) ? 1 : 0;
-
-    case laBurial: 
-      return m == moDraugr ? 1 : 0;
-    
-    case laDungeon: 
-      return 
-        m == moBat ? 2 :
-        m == moSkeleton || m == moGhost ? 1 : 
-        0;
-      
-    case laMountain:
-      return
-        m == moEagle || m == moMonkey || isIvy(m) || m == moFriendlyIvy ? 1 : 0;
-      
-    case laReptile:
-      return m == moReptile ? 1 : 0;
-    
-    case laBull:
-      return (m == moSleepBull || m == moRagingBull || m == moButterfly || m == moGadfly) ? 1 : 0;
-
-    case laPrairie:
-      return (m == moRagingBull || m == moHerdBull || m == moGadfly) ? 1 : 0;
-    
-    case laVolcano:
-      return (m == moLavaWolf || m == moSalamander) ? 2 : 0;
-    
-    case laTerracotta: case laMercuryRiver:
-      return m == moJiangshi ? 2 : m == moTerraWarrior ? 1 : 0;
-    
-    case laBlizzard:
-      return (m == moVoidBeast || m == moIceGolem) ? 2 : 0;
-
-    case laHunting:
-      return m == moHunterDog ? 1 : 0;
-    
-    case laDual: 
-      return m == moRatling ? 2 : 0;
-    
-    case laSnakeNest:
-      return m == moHexSnake ? 2 : 0;
-
-    case laCA: return 0;
-
-    case laDocks:
-      return among(m, moRatling, moPirate, moCShark, moAlbatross, moFireFairy) ? 2 : 0;
-    
-    case laSwitch:
-      return m == moSwitch1 || m == moSwitch2 ? 2 : 0;
-    
-    case laRuins:
-      return among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 :
-        m == moSkeleton ? 1 : 0;
-      
-    case laVariant:
-      return 
-        m == moVariantWarrior ? 2 :
-        among(m, moMonk, moCrusher, moSkeleton, moHedge, moLancer, moFlailer, moCultist, moPyroCultist, moNecromancer, moGhost, moZombie, moRatling) ? 1 :
-        isIvy(m) ? 1 : 0;       
-      
-    case laWestWall:
-      return among(m, moWestHawk, moFallingDog) ? 2 : 0;
-
-    case laBrownian: 
-      return among(m, moBrownBug, moAcidBird) ? 2 : 0;
-      
-    case laMagnetic:
-      return isMagneticPole(m) ? 2 : 0;
-    
-    case laAsteroids:
-      return m == moAsteroid ? 2 : 0;
+    #define LAND(a,b,c,d,e,f,g) case c:
+    #define NATIVE(x) return x;
+    #include "content.cpp"
     
     case landtypes: return 0;
     }
@@ -299,10 +80,6 @@ bool landUnlockedRPM(eLand n) {
   return false;
   }
 
-int variant_unlock() {
-  return items[itRuins] + items[itEmerald] + items[itBone];
-  }
-
 int variant_unlock_value() {
   return inv::on ? 75 : 30;
   }
@@ -312,161 +89,29 @@ bool landUnlocked(eLand l) {
     return landUnlockedRPM(l);
     }
   
+  back:
+  
   switch(l) {
-    case laOvergrown: 
-      return gold() >= R60 && items[itRuby] >= U10;
-    
-    case laStorms: case laWhirlwind: 
-      return gold() >= R60;
-    
-    case laWildWest: case laHalloween:  case laAsteroids:
-      return false;
-      
-    case laIce: case laJungle: case laCaves: case laDesert: 
-    case laMotion: case laCrossroads:  case laAlchemist:
-      return true;
+    #define LAND(a,b,c,d,e,f,g) case c:
+    #define REQ(x) x return true;
+    #define REQAS(x,y) l = x; goto back;
+    #define GOLD(x) if(gold() < x) return false;
+    #define ITEMS(kind, number) if(items[kind] < number) return false;
+    #define NEVER if(1) return false;
+    #define ALWAYS ;
+    #define KILLS(x) if(tkills() < x) return false;
+    #define KILL(x, where) if(!kills[x]) return false;
+    #define AKILL(x, where) if(kills[x]) return true;
+    #define ORD(a, b) a b
+    #define NUMBER(val, required, description) if(val < required) return false;
+    #define COND(x,y) if(!(x)) return false;
+    #define ITEMS_TOTAL(list, z) { int total = 0; for(eItem x: list) total += items[x]; if(total < z) return false; }
+    #define ACCONLY(x)
+    #define ACCONLY2(x,y)
+    #define ACCONLYF(x)
+    #include "content.cpp"
 
-    case laMirror: case laMinefield: case laPalace:
-    case laOcean: case laLivefjord: case laMirrored: case laMirrorWall: case laMirrorWall2:
-    case laDocks:
-    case laMirrored2: 
-      return gold() >= R30;
-    
-    case laCaribbean: case laWhirlpool:
-      return gold() >= R30;
-    
-    case laRlyeh: case laDryForest: case laWineyard: case laCrossroads2:
-      return gold() >= R60;
-    
-    case laDeadCaves:
-      return gold() >= R60 && items[itGold] >= U10;
-
-    case laGraveyard:
-      return tkills() >= R100;
-
-    case laHive:
-      return tkills() >= R100 && gold() >= R60;
-
-    case laRedRock:
-      return gold() >= R60 && items[itSpice] >= U10;
-    
-    case laEmerald:
-      return (items[itFernFlower] >= U5 && items[itGold] >= U5) || kills[moVizier];
-    
-    case laCamelot:
-      return items[itEmerald] >= U5;
-    
-    case laHell: case laCrossroads3:
-      return hellUnlocked();
-      
-    case laPower: 
-      return items[itHell] >= U10;
-
-    case laCocytus: 
-      return items[itHell] >= U10 && items[itDiamond] >= U10;
-
-    case laTemple:
-      return items[itStatue] >= U5;
-
-    case laClearing:
-      return items[itMutant] >= U5;
-
-    case laIvoryTower: return gold() >= R30;
-    case laZebra: return gold() >= R30 && items[itFeather] >= U10;
-
-    case laEAir: case laEEarth: case laEWater: case laEFire:  case laElementalWall:
-      return elementalUnlocked();
-    
-    case laBarrier: case laNone: case laOceanWall: case laCanvas: case laCA: case laMemory:
-      return false;
-    
-    case laMirrorOld:
-      return false;
-    
-    case laHaunted: case laHauntedWall: case laHauntedBorder: 
-      return items[itBone] >= U10;
-
-    case laPrincessQuest: return kills[moVizier] && !shmup::on && multi::players == 1;
-    
-    case laRose: 
-      return gold() >= R90;
-      
-    case laWarpCoast: case laWarpSea: 
-      return gold() >= R30;
-      
-    case laCrossroads4:
-      return gold() >= R200;
-    
-    case laEndorian:
-      return items[itIvory] >= U10;
-    
-    case laTortoise:
-      return tortoise::seek();
-    
-    case laDragon:
-      return killtypes() >= R20;
-    
-    case laKraken:
-      return items[itFjord] >= U10;
-
-    case laBurial:
-      return items[itKraken] >= U10;
-
-    case laTrollheim:
-      return trollUnlocked();
-    
-    case laDungeon:
-      return items[itPalace] >= U5 && items[itIvory] >= U5;
-
-    case laMountain:
-      return items[itRuby] >= U5 && items[itIvory] >= U5;
-      
-    case laReptile:
-      return gold() >= R30 && items[itElixir] >= U10;
-    
-    case laPrairie:
-    case laBull:
-      return gold() >= R90;
-    
-    case laVolcano:
-      return gold() >= R60 && items[itElixir] >= U10;
-    
-    case laHunting:
-      return true;
-    
-    case laTerracotta: case laMercuryRiver:
-      return gold() >= R90;
-    
-    case laBlizzard:
-      return items[itDiamond] >= U5 && items[itWindstone] >= U5;
-    
-    case laCrossroads5:
-      return gold() >= R300;
-    
-    case laDual:
-    case laSnakeNest:
-      return gold() >= R90;
-      
-    case laSwitch:
-      return gold() >= R30 && items[itElixir] >= U10;
-    
-    case laRuins:
-      return kills[moSkeleton];
-
-    case laBrownian:
-      return gold() >= R30;
-    
-    case laWestWall:
-      return items[itFeather] >= 5 && items[itIvory] >= 5;
-    
-    case laVariant:
-      return variant_unlock() >= variant_unlock_value();
-    
-    case laMagnetic:
-      return false; // not implemented
-    
-    case landtypes:
-      return false;
+    case landtypes: return false;
     }
   return false;
   }
@@ -529,17 +174,6 @@ eLand randomElementalLand() {
 int elementalKills() {
   return
     kills[moAirElemental] + kills[moWaterElemental] + kills[moEarthElemental] + kills[moFireElemental];
-  }
-
-bool elementalUnlocked() {
-  return
-    kills[moAirElemental] && kills[moWaterElemental] && kills[moEarthElemental] && kills[moFireElemental];
-  }
-
-bool trollUnlocked() {
-  return
-    kills[moTroll] && kills[moDarkTroll] && kills[moRedTroll] && 
-    kills[moStormTroll] && kills[moForestTroll] && kills[moFjordTroll];
   }
 
 eLand randomElementalLandWeighted() {
@@ -804,7 +438,7 @@ eLand getNewLand(eLand old) {
     if(items[itIvory] >= U5 && !generatingEquidistant && items[itFeather] >= U5)
       tab[cnt++] = laWestWall;
     
-    if(variant_unlock() >= variant_unlock_value()) {
+    if(landUnlocked(laVariant)) {
       tab[cnt++] = laVariant;
       if(old == laRuins) LIKELY tab[cnt++] = laVariant;
       if(old == laGraveyard) LIKELY tab[cnt++] = laVariant;
@@ -837,7 +471,7 @@ eLand getNewLand(eLand old) {
     if(old == laReptile) LIKELY tab[cnt++] = laDragon;
     }
   
-  if(trollUnlocked()) {
+  if(landUnlocked(laTrollheim)) {
     tab[cnt++] = laTrollheim;
     if(isTrollLand(old)) LIKELY tab[cnt++] = laTrollheim;
     if(old == laTrollheim) for(int i=0; i<landtypes; i++) {
@@ -846,7 +480,7 @@ eLand getNewLand(eLand old) {
       }
     }
 
-  if(elementalUnlocked()) {
+  if(landUnlocked(laElementalWall)) {
     tab[cnt++] = randomElementalLandWeighted();
     
     if(old == laDragon) LIKELY tab[cnt++] = laEFire;
@@ -862,7 +496,7 @@ eLand getNewLand(eLand old) {
     if(old == laEAir) LIKELY tab[cnt++] = laWhirlwind;
     }
   
-  if(hellUnlocked()) {
+  if(landUnlocked(laHell)) {
     if(!generatingEquidistant && old != laPrairie) tab[cnt++] = laCrossroads3;
     tab[cnt++] = laHell;
     }

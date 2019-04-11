@@ -20,6 +20,15 @@
 #define LAND(a,b,c,d,e,f,g)
 #endif
 
+#ifndef NATIVE
+#define NATIVE(x)
+#endif
+
+#ifndef REQ
+#define REQ(x)
+#define REQAS(x,y)
+#endif
+
 
 MONSTER( 0,   0,        "no monster"       , moNone, ZERO | CF_NOGHOST | CF_NOBLOW, RESERVED, moNone, NULL)
 MONSTER( 'Y', 0x4040FF, "Yeti"       , moYeti, ZERO, RESERVED, moYeti,
@@ -1044,7 +1053,13 @@ WALL( '+', 0x804000, "trunk", waTrunk3, WF_WALL, RESERVED, 0, sgNone, "The skele
 
 
 LAND( 0xFF00FF, "???"          , laNone, ZERO | LF_TECHNICAL, itNone, RESERVED, "")
+  NATIVE(0)
+  REQ(NEVER)
+
 LAND( 0xC06000, "Great Wall"   , laBarrier, ZERO | LF_TECHNICAL, itNone, RESERVED, "")
+  NATIVE(0)
+  REQ(NEVER)
+
 LAND( 0xFF0000, "Crossroads"   , laCrossroads, ZERO, itHyperstone, RESERVED, 
     "This land is a quick gateway to other lands. It is very easy to find other lands "
     "from the Crossroads. Which means that you find monsters from most other lands here!\n\n"
@@ -1054,51 +1069,104 @@ LAND( 0xFF0000, "Crossroads"   , laCrossroads, ZERO, itHyperstone, RESERVED,
     "A special treasure, Hyperstone, can be found on the Crossroads, but only "
     "after you have found 10 of every other treasure."
     )
+  NATIVE(0)
+  REQ(ALWAYS)
+
 LAND( 0xCDA98F, "Desert", laDesert, ZERO, itSpice, RESERVED,
     "A hot land, full of sand dunes, mysterious Spice, and huge and dangerous sand worms."
     )
+  NATIVE((m == moDesertman || m == moWorm) ? 2 : 0)
+  REQ(ALWAYS)
+
 LAND( 0x8080FF, "Icy Land", laIce, ZERO | LF_ICY, itDiamond, RESERVED,
     "A very cold land, full of ice walls. Your mere presence will cause these ice walls to "
     "melt, even if you don't want it."
     )
+  NATIVE((m == moWolf || m == moWolfMoved || m == moYeti) ? 2 : 0)
+  REQ(ALWAYS)
+
 LAND( 0x306060, "Living Cave", laCaves, ZERO | LF_TROLL, itGold, RESERVED, cavehelp)
+  NATIVE((m == moGoblin || m == moTroll) ? 2 : m == moSeep ? 1 : 0)
+  REQ(ALWAYS)
+
 LAND( 0x00C000, "Jungle", laJungle, ZERO, itRuby, RESERVED,
     "A land filled with huge ivy plants and dangerous animals."
     )
+  NATIVE((m == moIvyRoot || m == moMonkey) ? 2 : (isIvy(m) || m == moEagle || m == moMonkey) ? 1 : 0)
+  REQ(ALWAYS)
+
 LAND( 0x900090, "Alchemist Lab", laAlchemist, ZERO, itElixir, RESERVED, slimehelp)
+  NATIVE((m == moSlime) ? 2 : 0)
+  REQ(ALWAYS)
+
 LAND( 0x704070, "Hall of Mirrors", laMirror, ZERO | LF_MIRROR, itShard, RESERVED,
     "A strange land filled with mirrors. "
     "Break magic mirrors and mirage clouds to "
     "gain treasures and helpful Mimics."
     )
+  NATIVE((m == moMirrorSpirit || m == moNarciss || m == moMimic) ? 1 : 0)
+  REQ(GOLD(R30))
+
 LAND( 0x404070, "Graveyard", laGraveyard, ZERO, itBone, RESERVED,
     "All the monsters you kill are carried to this strange land, and buried. "
     "Careless Rogues are also carried here..."
     )
+  NATIVE((m == moZombie || m == moNecromancer) ? 2 : m == moGhost ? 1 : 0)
+  REQ(KILLS(R100))
+
 LAND( 0x00FF00, "R'Lyeh", laRlyeh, ZERO, itStatue, RESERVED,
     "An ancient sunken city which can be reached only when the stars are right.\n\n"
     "You can find Temples of Cthulhu in R'Lyeh once you collect five Statues of Cthulhu."
     )
+  NATIVE(
+        (m == moCultist || m == moTentacle || m == moPyroCultist) ? 2 :
+        (m == moCultistLeader || isIvy(m)) ? 1 : 0)
+  REQ(ACCONLYF(laOcean) GOLD(R60))
+
 LAND( 0xC00000, "Hell", laHell, ZERO, itHell, RESERVED,
     "A land filled with demons and molten sulphur. Abandon all hope ye who enter here!"
     )
+  NATIVE((m == moLesser || m == moGreater) ? 2 : 0)
+  REQ(NUMBER(orbsUnlocked(), 9, XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10))))
+
 LAND( 0x00FF00, "Cocytus", laCocytus, ZERO | LF_ICY, itSapphire, RESERVED,
     cocytushelp
     )
+  NATIVE((m == moShark || m == moGreaterShark || m == moCrystalSage) ? 2 : m == moYeti ? 1 : 0)
+  REQ(ITEMS(itHell, U10) ITEMS(itDiamond, U10))
+
 LAND( 0xFFFF00, "Land of Eternal Motion", laMotion, ZERO, itFeather, RESERVED,
     "A land where you cannot stop, because every piece of floor is extremely unstable. Only monsters who "
     "can run forever are able to survive there, and only phoenix feathers are so light that they do not disturb "
     "the floor.\n"
     )
+  NATIVE((m == moRunDog) ? 2 : 0)
+  REQ(ALWAYS)
+
 LAND( 0x008000, "Dry Forest", laDryForest, ZERO, itFernFlower, RESERVED, foresthelp)
+  NATIVE((m == moHedge || m == moFireFairy) ? 2 : 0)
+  REQ(GOLD(R60))
+
 LAND( 0x60C060, "Emerald Mine", laEmerald, ZERO, itEmerald, RESERVED, 
      "Evil people are mining for emeralds in this living cave. "
      "It does not grow naturally, but it is dug out in a regular "
      "pattern, which is optimal according to the evil engineers."
      )
+  NATIVE((m == moFlailer || m == moLancer || m == moMiner) ? 2 : m == moHedge ? 1 : 0)
+  REQ( ORD(AKILL(moVizier, laPalace), ITEMS(itFernFlower, U5) ITEMS(itGold, U5)))
+
 LAND( 0x421C52, "Vineyard", laWineyard, ZERO, itWine, RESERVED, vinehelp)
+  NATIVE((m == moVineSpirit || m == moVineBeast) ? 2 : 0)
+  REQ(GOLD(R60))
+
 LAND( 0x104040, "Dead Cave", laDeadCaves, ZERO | LF_TROLL, itSilver, RESERVED, deadcavehelp)
+  NATIVE((m == moEarthElemental || m == moDarkTroll) ? 2 : (m == moGoblin || m == moSeep) ? 1 : 0)
+  REQ(GOLD(R60) ITEMS(itGold, 10))
+
 LAND( 0x705020, "Hive", laHive, ZERO, itRoyalJelly, RESERVED, hivehelp)
+  NATIVE(isBug(m) ? 1 : 0)
+  REQ(KILLS(R100) GOLD(R60))
+
 LAND( 0xFFFF00, "Land of Power", laPower, ZERO, itPower, RESERVED, 
     "The Land of Power is filled with everburning fire, magical Orbs, and guarded by "
     "witches and golems. There are basic orbs lying everywhere, and more prized ones "
@@ -1109,27 +1177,58 @@ LAND( 0xFFFF00, "Land of Power", laPower, ZERO, itPower, RESERVED,
     "Witches and Golems don't pursue you into other Lands. Also, most Orb powers "
     "are drained when you leave the Land of Power."
     )
+  NATIVE((isWitch(m) || m == moEvilGolem) ? 1 : 0)
+  REQ(ITEMS(itHell, U10))
+
 LAND( 0xD0D0D0, "Camelot", laCamelot, ZERO | LF_CYCLIC, itHolyGrail, RESERVED, camelothelp )
+  NATIVE((m == moKnight || m == moHedge || m == moFlailer || m == moLancer) ? 1 : 0)
+  REQ(ITEMS(itEmerald, U5) ACCONLY2(laCrossroads, laCrossroads3))
+
 LAND( 0xD000D0, "Temple of Cthulhu", laTemple, ZERO | LF_CYCLIC, itGrimoire, RESERVED, templehelp )
+  NATIVE((m == moTentacle || m == moCultist || m == moPyroCultist || m == moCultistLeader) ? 1 : 0)
+  REQ(ACCONLY(laRlyeh) ITEMS(itStatue, U5))
+
 LAND( 0xFF8000, "Crossroads II", laCrossroads2, ZERO, itHyperstone, RESERVED, 
     "An alternate layout of the Crossroads. It is more dense and more regular, "
     "although you won't find the castle of Camelot here."
     )
+  NATIVE(0)
+  REQ(GOLD(R60))
+
 LAND( 0x0000FF, "Caribbean", laCaribbean, ZERO | LF_SEA | LF_PURESEA, itPirate, RESERVED, caribbeanhelp)
+  NATIVE((m == moPirate || m == moParrot || m == moCShark) ? 1 : 0)
+  REQAS(laOcean,)
+
 LAND( 0x400000, "Red Rock Valley", laRedRock, ZERO | LF_TROLL, itRedGem, RESERVED, redrockhelp )
+  NATIVE((m == moRedTroll || m == moHexSnake) ? 2 : 0)
+  REQ(GOLD(R60) ITEMS(itSpice, 10))
+
 LAND( 0xD0D0D0, "Minefield", laMinefield, ZERO, itBombEgg, RESERVED, minedesc)
+  NATIVE((m == moBomberbird || m == moTameBomberbird) ? 1 : 0)
+  REQ(GOLD(R30))
+
 LAND( 0x2020FF, "Ocean", laOcean, ZERO | LF_EQUI | LF_SEA | LF_COASTAL, itCoast, RESERVED, 
     "You can collect some valuable Ambers on the coast, but beware the tides!\n\n"
     "You can also take one of the boats and venture into the Ocean, "
     "to find other coasts, dangerous whirlpools, and islands inhabited by Pirates."
     )
+  NATIVE((m == moBomberbird || m == moTameBomberbird) ? 1 : 0)
+  REQ(GOLD(R30))
+
 LAND( 0x0000C0, "Whirlpool", laWhirlpool, ZERO | LF_CYCLIC | LF_SEA, itWhirlpool, RESERVED, 
     "Many lost boats are spinning in this whirlpool. Some of them contain treasures "
     "and Pirates.\n\n"
     "Unmanned boats will go one cell clockwise in each turn. Sharks and manned boats "
     "are only allowed to go with the current, that is, towards the center, or clockwise."
     )
+  NATIVE((m == moPirate || m == moCShark) ? 1 : 0)
+  REQAS(laOcean, ACCONLY(laOcean))
+
 LAND( 0xFFD500, "Palace", laPalace, ZERO, itPalace, RESERVED, palacedesc )
+  NATIVE((m == moPalace || m == moFatGuard || m == moSkeleton || m == moVizier) ? 2 : 
+        m == moSkeleton ? 1 : 0)
+  REQ(GOLD(R30))
+
 LAND( 0xC0C000, "Living Fjord", laLivefjord, ZERO | LF_SEA | LF_COASTAL | LF_TROLL, itFjord, RESERVED, 
     "A coastal area, from where you can get both to the inland worlds and to the Ocean. "
     "Each turn, each cell will become water or earth, based on the majority of cells around it. "
@@ -1137,44 +1236,126 @@ LAND( 0xC0C000, "Living Fjord", laLivefjord, ZERO | LF_SEA | LF_COASTAL | LF_TRO
     "but elementals, dead Trolls, and cells outside of the Living Fjord have "
     "a very powerful effect."
      )
+  NATIVE(m == moViking ? 2 : (m == moFjordTroll || m == moWaterElemental) ? 1 : 0)
+  REQAS(laOcean,)
+
 LAND( 0xFFFFE0, "Ivory Tower", laIvoryTower, ZERO | LF_GRAVITY | LF_EQUI, itIvory, RESERVED, "Powerful wizards claimed this part of the world, to perform their magical "
   "experiments in peace and solitude. They have changed the direction of gravity, "
   "to make it even harder for intruders to reach them.\n\n"
   "Gravity works as follows: cells are unstable if they are empty, and there is "
   "no cell immediately below them which contains a wall. It is impossible to move "
   "from one unstable cell to another, except if moving down.")
+  NATIVE((m == moFamiliar || m == moGargoyle) ? 2 : 0)
+  REQ(GOLD(R30))
+
 LAND( 0x606060, "Zebra", laZebra, ZERO, itZebra, RESERVED, "Everything in this Land has black and white stripes.")
+  NATIVE((m == moOrangeDog) ? 2 : 0)
+  REQ(GOLD(R30) ITEMS(itFeather, U10))
+
 LAND( 0xC08080, "Plane of Fire", laEFire, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
+  NATIVE(isNative(laElementalWall, m))
+  REQAS(laElementalWall,)
+
 LAND( 0x808080, "Plane of Air", laEAir, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
+  NATIVE(isNative(laElementalWall, m))
+  REQAS(laElementalWall,)
+
 LAND( 0x80C080, "Plane of Earth", laEEarth, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
+  NATIVE(isNative(laElementalWall, m))
+  REQAS(laElementalWall,)
+
 LAND( 0x8080C0, "Plane of Water", laEWater, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
+  NATIVE(isNative(laElementalWall, m))
+  REQAS(laElementalWall,)
+
 LAND( 0x4040FF, "Crossroads III", laCrossroads3, ZERO, itHyperstone, RESERVED, 
     "An alternate layout of the Crossroads. Great Walls cross here at right angles."
     )
+  NATIVE(0)
+  REQ(NUMBER(orbsUnlocked(), 9, XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10))))
+
 LAND( 0x4040C0, "Sea Border", laOceanWall, ZERO | LF_TECHNICAL | LF_SEA, itNone, RESERVED, "Border between seas.")
+  // REQAS(laOcean,)
+  REQ(NEVER)
+  NATIVE(0)
+
 LAND( 0x4040C0, "Elemental Planes", laElementalWall, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
+  NATIVE((m == elementalOf(l) && m) ? 2 : (m == moAirElemental || m == moEarthElemental || m == moWaterElemental || m == moFireElemental) ? 1 : 0)
+  REQ(KILL(moAirElemental, laWhirlwind) KILL(moWaterElemental, laLivefjord) KILL(moEarthElemental, laDeadCaves) KILL(moFireElemental, laDragon))
+
 LAND( 0xE08020, "Canvas", laCanvas, ZERO | LF_TECHNICAL, itNone, RESERVED, "A fake Land with colored floors.")
+  NATIVE(0)
+  REQ(NEVER)
+
 LAND( 0x00C000, "Palace Quest", laPrincessQuest, ZERO, itSavedPrincess, RESERVED, princessdesc) // fake
+  NATIVE(isNative(laPalace, m))
+  REQ(ACCONLY(laPalace) KILL(moVizier, laPalace))
+
 LAND( 0xD0D060, "Wild West", laWildWest, ZERO, itBounty, RESERVED, wildwestdesc)
+  NATIVE((m == moOutlaw) ? 2 : 0)
+  REQ( NEVER )
+
 LAND( 0x80A080, "Land of Storms", laStorms, ZERO | LF_TROLL, itFulgurite, RESERVED, elecdesc)
+  NATIVE((m == moMetalBeast || m == moMetalBeast2 || m == moStormTroll) ? 1 : 0)
+  REQ( GOLD(R60) )
+
 LAND( 0x20A050, "Overgrown Woods", laOvergrown, ZERO | LF_TROLL, itMutant, RESERVED, overdesc)
+  NATIVE((m == moMutant || m == moForestTroll) ? 1 : 0)
+  REQ( GOLD(R60) ITEMS(itRuby, U10) )
+
 LAND( 0x20D050, "Clearing", laClearing, ZERO | LF_CYCLIC, itMutant2, RESERVED, cleardesc)
+  NATIVE((m == moMutant || m == moRedFox) ? 1 : 0)
+  REQ(ACCONLY(laOvergrown) ITEMS(itMutant, U5))
+
 LAND( 0x303030, "Haunted Woods", laHaunted, ZERO | LF_EQUI | LF_HAUNTED, itLotus, RESERVED, hauntdesc)
+  NATIVE((m == moGhost || m == moFriendlyGhost) ? 1 : 0)
+  REQ(ACCONLY(laGraveyard) ITEMS(itBone, U10))
+
 LAND( 0x303030, "Haunted Woods", laHauntedWall, ZERO | LF_EQUI | LF_TECHNICAL | LF_HAUNTED, itLotus, RESERVED, hauntdesc)
+  NATIVE(isNative(laHaunted, m))
+  REQAS(laHaunted,)
+
 LAND( 0x303030, "Haunted Woods", laHauntedBorder, ZERO | LF_EQUI | LF_TECHNICAL | LF_HAUNTED, itLotus, RESERVED, hauntdesc)
+  NATIVE(isNative(laHaunted, m))
+  REQAS(laHaunted,)
+
 LAND( 0xC0C0FF, "Windy Plains", laWhirlwind, ZERO, itWindstone, RESERVED, winddesc)
+  NATIVE((m == moAirElemental || m == moWindCrow) ? 2 : 0)
+  REQ( GOLD(R60) )
+
 LAND( 0x764e7c*2, "Rose Garden", laRose, ZERO, itRose, RESERVED, roselanddesc)
+  NATIVE((m == moFalsePrincess || m == moRoseBeauty || m == moRoseLady) ? 2 : 0)
+  REQ( GOLD(R60) )
+
 LAND( 0xFFD580, "Warped Coast", laWarpCoast, ZERO | LF_WARPED | LF_COASTAL, itCoral, RESERVED, warplanddesc)
+  NATIVE(m == moRatling ? 2 : m == moRatlingAvenger ? 1 : 0)
+  REQAS(laOcean,)
+
 LAND( 0xFFD580, "Warped Sea", laWarpSea, ZERO | LF_WARPED | LF_SEA | LF_COASTAL, itCoral, RESERVED, warplanddesc)
+  NATIVE(isNative(laWarpCoast, m))
+  REQAS(laWarpCoast,)
+
 LAND( 0xC08080, "Crossroads IV", laCrossroads4, ZERO, itHyperstone, RESERVED, 
     "An alternate layout of the Crossroads, without walls."
     )
+  NATIVE(0)
+  REQ(GOLD(R200))
+
 LAND( 0xFFD580, "Yendorian Forest", laEndorian, ZERO | LF_GRAVITY | LF_EQUI, itApple, RESERVED, 
     "This forest was planted by one of the wizards from the Ivory Tower "
     "to conduct experiments with gravity."
     )
+  NATIVE((m == moResearcher || m == moSparrowhawk) ? 2 : 0)
+  REQ(ITEMS(itIvory, U10))
+
 LAND( 0x487830, "Galápagos", laTortoise, ZERO, itBabyTortoise, RESERVED, tortoisedesc)
+  NATIVE(m == moTortoise ? 1 : 0)
+  REQ(COND(tortoise::seek(), XLAT("Find a %1 in %the2.", itBabyTortoise, laDragon)) ACCONLY(laDragon))
+
 LAND( 0xD04000, "Dragon Chasms", laDragon, ZERO, itDragon, RESERVED, dragondesc)
+  NATIVE((isDragon(m) || m == moFireElemental) ? 1 : 0)
+  REQ(NUMBER(killtypes(), R20, XLAT("Different kills required: %1.\n", its(R20))))
+
 LAND( 0xD04000, "Kraken Depths", laKraken, ZERO | LF_SEA | LF_PURESEA, itKraken, RESERVED, 
     "A long time ago, this was a trade route. But then, Krakens have risen out of the "
     "depths. Many trading ships sank here. Legend says that you can uncover the secret "
@@ -1184,56 +1365,147 @@ LAND( 0xD04000, "Kraken Depths", laKraken, ZERO | LF_SEA | LF_PURESEA, itKraken,
     "a Kraken. You will also need Orb of the Fish to get the treasures, luckily you can "
     "steal one from the Viking treasure hunters."
     )
+  NATIVE(m == moKrakenH ? 2 : (m == moViking || m == moKrakenT) ? 1 : 0)
+  REQ(ITEMS(itFjord, U10))
+
 LAND( 0x804020, "Burial Grounds", laBurial, ZERO, itBarrow, RESERVED, 
     "Ancient Viking heroes were buried here. Their graves have barrows raised over "
     "them, and are guarded by Draugar, animated corpses who are immune to mundane weapons. "
     "You will need to use a magical weapon spell to defeat them, and to rob the "
     "ancient jewelry buried in the graves."
     )
+  NATIVE(m == moDraugr ? 1 : 0)
+  REQ(ITEMS(itBarrow, U10))
+
 LAND( 0x90A548, "Trollheim", laTrollheim, ZERO, itTrollEgg, RESERVED, 
     "Many clans of Trolls spend their lives in this kingdom. You can find many "
     "statues of Trolls here. You suppose that they are not actually statues, but simply "
     "elderly Trolls, who have petrified upon death. Or maybe you have killed "
     "these Trolls yourself?"
     )
+  NATIVE(isTroll(m) ? 1 : 0)
+  REQ( KILL(moTroll, laCaves) KILL(moDarkTroll, laDeadCaves) KILL(moRedTroll, laRedRock) KILL(moStormTroll, laStorms) KILL(moForestTroll, laOvergrown) KILL(moFjordTroll, laLivefjord) )
+
 LAND( 0xFF7518, "Halloween", laHalloween, ZERO, itTreat, RESERVED, halloweendesc)
+  NATIVE((m == moGhost || m == moZombie || m == moWitch ||
+        m == moLesser || m == moGreater || 
+        m == moVampire || m == moDraugr ||
+        m == moSkeleton || m == moWitchFire || 
+        m == moFlailer || m == moPyroCultist || 
+        m == moFatGuard || m == moHedge || 
+        m == moLancer || m == moFireFairy || 
+        m == moBomberbird || m == moRatlingAvenger || 
+        m == moVineBeast || m == moDragonHead || m == moDragonTail) ? 1 : 0)
+  REQ( NEVER )
+
 LAND( 0x605040, "Dungeon", laDungeon, ZERO | LF_GRAVITY | LF_EQUI, itSlime, RESERVED, 
     "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower."
     )
+  NATIVE(m == moBat ? 2 : m == moSkeleton || m == moGhost ? 1 : 0)
+  REQ(ITEMS(itPalace, U5) ITEMS(itIvory, U5))
+
 LAND( 0x603000, "Lost Mountain", laMountain, ZERO | LF_GRAVITY | LF_CYCLIC, itAmethyst, RESERVED, 
     "Gravitational anomalies in the Jungle create mountains "
     "overgrown with ivies and bushes. "
     "Will you dare to climb the ivies to get the amethysts hidden above?\n\n"  
     "Cells adjacent to Ivies count as stable (but Ivies "
     "cannot climb themselves or other Ivies).")
+  NATIVE(m == moEagle || m == moMonkey || isIvy(m) || m == moFriendlyIvy ? 1 : 0)
+  REQ(ITEMS(itRuby, U5) ITEMS(itIvory, U5) ACCONLY(laJungle))
+
 LAND( 0xFFFF00, "Reptiles", laReptile, ZERO, itDodeca, RESERVED, reptiledesc)
+  NATIVE(m == moReptile ? 1 : 0)
+  REQ(GOLD(R30) ITEMS(itElixir, U10))
+
 LAND( 0x0000D0, "Prairie", laPrairie, ZERO, itGreenGrass, RESERVED, prairiedesc)
+  NATIVE((m == moRagingBull || m == moHerdBull || m == moGadfly) ? 1 : 0)
+  REQ(GOLD(R90))
+
 LAND( 0x800080, "Bull Dash", laBull, ZERO, itBull, RESERVED, bulldashdesc)
+  NATIVE((m == moSleepBull || m == moRagingBull || m == moButterfly || m == moGadfly) ? 1 : 0)
+  REQ(GOLD(R90))
+
 LAND( 0xC000C0, "Crossroads V", laCrossroads5, ZERO, itHyperstone, RESERVED, "Extremely narrow Crossroads layout.\n")
+  NATIVE(0)
+  REQ(GOLD(R300))
+
 LAND( 0xC0C0C0, "Cellular Automaton", laCA, ZERO | LF_TECHNICAL, itNone, RESERVED, cadesc)
+  NATIVE(0)
+  REQ(NEVER)
+
 LAND( 0xC0C0FF, "Mirror Wall", laMirrorWall, ZERO | LF_TECHNICAL | LF_INMIRRORORWALL, itShard, RESERVED, mirroreddesc)
+  NATIVE(isNative(laMirror, m))
+
 LAND( 0xC8C8FF, "Reflection", laMirrored, ZERO | LF_TECHNICAL | LF_INMIRROR | LF_INMIRRORORWALL, itShard, RESERVED, mirroreddesc)
+  NATIVE(isNative(laMirror, m))
+  REQAS(laMirror,)
+
 LAND( 0xC0C0FF, "Reflection", laMirrorWall2, ZERO | LF_TECHNICAL | LF_INMIRROR | LF_INMIRRORORWALL, itShard, RESERVED, mirroreddesc)
+  NATIVE(isNative(laMirror, m))
+  REQAS(laMirror,)
+
 LAND( 0xC8C8FF, "Reflection", laMirrored2, ZERO | LF_TECHNICAL | LF_INMIRROR | LF_INMIRRORORWALL, itShard, RESERVED, mirroreddesc)
+  NATIVE(isNative(laMirror, m))
+  REQAS(laMirror,)
+
 LAND( 0xC8C8FF, "Mirror Land", laMirrorOld, ZERO | LF_MIRROR, itShard, RESERVED, 
     "A strange land which contains mirrors and mirages, protected by Mirror Rangers.")
+  NATIVE((m == moEagle || m == moRanger || m == moMimic) ? 1 : 0)
+  REQ(GOLD(R30))
+
 LAND( 0xA06000, "Volcanic Wasteland", laVolcano, ZERO, itLavaLily, RESERVED, lavadesc)
+  NATIVE((m == moLavaWolf || m == moSalamander) ? 2 : 0)
+  REQ(GOLD(R60) ITEMS(itElixir, U10))
+
 LAND( 0x8080FF, "Blizzard", laBlizzard, ZERO | LF_ICY, itBlizzard, RESERVED, blizzarddesc)
+  NATIVE((m == moVoidBeast || m == moIceGolem) ? 2 : 0)
+  REQ(ITEMS(itDiamond, U5) ITEMS(itWindstone, U5))
+
 LAND( 0x207068, "Hunting Ground", laHunting, ZERO, itHunting, RESERVED, huntingdesc)
+  NATIVE(m == moHunterDog ? 1 : 0)
+  REQ(ALWAYS)
+
 LAND( 0xE2725B, "Terracotta Army", laTerracotta, ZERO, itTerra, RESERVED, terraldesc)
+  NATIVE(m == moJiangshi ? 2 : m == moTerraWarrior ? 1 : 0)
+  REQ(GOLD(R90))
+
 LAND( 0xE2725B, "Terracotta Army", laMercuryRiver, ZERO | LF_TECHNICAL, itTerra, RESERVED, terraldesc)
+  NATIVE(isNative(laTerracotta, m))
+  REQAS(laTerracotta,)
+      
 LAND( 0x80FF00, "Crystal World", laDual, ZERO, itGlowCrystal, RESERVED, crystaldesc)
+  NATIVE(m == moRatling ? 2 : 0)
+  REQ(GOLD(R90))
+
 LAND( 0x306030, "Snake Nest", laSnakeNest, ZERO, itSnake, RESERVED, NODESCYET)
+  NATIVE(m == moHexSnake ? 2 : 0)
+  REQ(GOLD(R90))
+
 LAND( 0x80FF00, "Docks", laDocks, ZERO | LF_SEA, itDock, RESERVED, NODESCYET)
+  NATIVE(among(m, moRatling, moPirate, moCShark, moAlbatross, moFireFairy) ? 2 : 0)
+  REQAS(laOcean,)
+
 LAND( 0x306030, "Ruined City", laRuins, ZERO, itRuins, RESERVED, ruindesc)
+  NATIVE(m == moSwitch1 || m == moSwitch2 ? 2 : 0)
+  REQ(KILL(moSkeleton, laPalace))
+
 LAND( 0x306030, "Magnetosphere", laMagnetic, ZERO, itMagnet, RESERVED, NODESCYET)
+  NATIVE(isMagneticPole(m) ? 2 : 0)
+  REQ(NEVER)
+
 LAND( 0x306030, "Jelly Kingdom", laSwitch, ZERO, itSwitch, RESERVED, jellydesc)
+  NATIVE(m == moSwitch1 || m == moSwitch2 ? 2 : 0)
+  REQ(GOLD(R30) ITEMS(itElixir, U10))
+
 LAND( 0xFF00FF, "Lost Memory", laMemory, ZERO | LF_TECHNICAL, itNone, RESERVED, 
     "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
     "get back to a faraway place you have been to. However, you have managed to get there "
     "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
     " option was on."
     )
+  NATIVE(0)
+  REQ(NEVER)
+
 LAND( 0x804000, "Brown Island", laBrownian, ZERO | LF_PURESEA, itBrownian, RESERVED, 
     "The Brown Islands have been generated by ancient underground creatures, who moved randomly and raised lands in their path... "
     "adults spawned larvae in each move, which also moved randomly and also raised lands in their path, and eventually became adults and spawned their own larvae. "
@@ -1243,10 +1515,16 @@ LAND( 0x804000, "Brown Island", laBrownian, ZERO | LF_PURESEA, itBrownian, RESER
     "or to lose three levels, in a single move, (attacks are possible at any "
     "difference, though). Killed Bronze Beasts rise the land by one level."
     )
+  NATIVE(among(m, moBrownBug, moAcidBird) ? 2 : 0)
+  REQAS(laOcean,)
+
 LAND( 0x211F6F, "Free Fall", laWestWall, ZERO | LF_GRAVITY | LF_EQUI, itWest, RESERVED, 
     "What on one side looks to be a normal (well, infinite) horizontal wall, on to the other side turns out to be the vertical wall"
     " of an infinitely high tower. Jump from the window, and let the magical gravity carry you..."
     )
+  NATIVE(among(m, moWestHawk, moFallingDog) ? 2 : 0)
+  REQ(ITEMS(itFeather, 5) ITEMS(itIvory, 5))
+
 LAND( 0x30FF30, "Irradiated Field", laVariant, ZERO, itVarTreasure, RESERVED, 
     "These fields are ravaged with many kinds of magical radiation, which not only make the ground glow nicely in various colors, "
     "but also cause the inhabitants to protect the treasures of their land in various ways. In some areas of the Irradiated Fields, "
@@ -1254,12 +1532,21 @@ LAND( 0x30FF30, "Irradiated Field", laVariant, ZERO, itVarTreasure, RESERVED,
     "careless, or help you if you know how to use them to your advantage. Will you walk through the Irradiated Fields randomly, or "
     "try to find areas where treasures are common but nasty monsters are not, and keep to them? It is your choice!\n\n"
     )
+  NATIVE(
+        m == moVariantWarrior ? 2 :
+        among(m, moMonk, moCrusher, moSkeleton, moHedge, moLancer, moFlailer, moCultist, moPyroCultist, moNecromancer, moGhost, moZombie, moRatling) ? 1 :
+        isIvy(m) ? 1 : 0)
+  #define LST {itRuins, itEmerald, itBone}
+  REQ(ITEMS_TOTAL(LST, variant_unlock_value()))
+  #undef LST
 
 // add new content here
 
 LAND( 0x202020, "Space Rocks", laAsteroids, ZERO, itAsteroid, RESERVED, rock_description)
 ITEM( '!', 0xFFD0D0, "Fuel", itAsteroid, IC_TREASURE, ZERO, RESERVED, osNone, rock_description)
 MONSTER('A', 0x606040, "Space Rock", moAsteroid, ZERO, RESERVED, moAsteroid, rock_description)
+  NATIVE(m == moAsteroid ? 2 : 0)
+  REQ( NEVER )
 
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, ZERO | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
@@ -1284,4 +1571,21 @@ MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | CF_TECHNICAL, RESERVED, moN
 #undef LAND
 #undef WALL
 #undef ITEM
+#undef NATIVE
+#undef REQ
+#undef REQAS
 
+#undef GOLD
+#undef ITEMS
+#undef NEVER
+#undef ALWAYS
+#undef KILLS
+#undef KILL
+#undef AKILL
+#undef ORD
+#undef NUMBER
+#undef COND
+#undef ITEMS_TOTAL
+#undef ACCONLY
+#undef ACCONLY2
+#undef ACCONLYF

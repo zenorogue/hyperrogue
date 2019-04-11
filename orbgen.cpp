@@ -360,10 +360,6 @@ int orbsUnlocked() {
   return i;
   }
 
-bool hellUnlocked() {
-  return orbsUnlocked() >= 9;
-  }
-
 ld orbprizefun(int tr) {
   if(tactic::on) return 1;
   if(tr < 10) return 0;
