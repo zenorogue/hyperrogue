@@ -1439,6 +1439,8 @@ void transform_crystal_to_euclid () {
   cwt.spin = neighborId(cwt.at, infront);
   View = iddspin(cwt.at, cwt.spin, M_PI/2);
   if(!flipplayer) View = cspin(0, 2, M_PI) * View;
+  
+  if(pmodel == mdDisk) pmodel = mdPerspective;
   }
 
 void transform_euclid_to_crystal () {
@@ -1503,6 +1505,7 @@ void transform_euclid_to_crystal () {
   View = Id;
   clearAnimations();
   cwt.spin = neighborId(cwt.at, infront);
+  if(pmodel == mdPerspective) pmodel = mdDisk;
   }
 
 void add_crystal_transform(char c) {
