@@ -3398,6 +3398,8 @@ namespace texture {
     
     map<int, textureinfo> texture_map, texture_map_orig;
     set<cell*> models;
+    
+    basic_textureinfo tinf3;
   
     bool texture_tuned;
     string texture_tuner;

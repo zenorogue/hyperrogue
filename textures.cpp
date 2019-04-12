@@ -458,6 +458,38 @@ void texture_config::perform_mapping() {
 set<int> missing_cells_known;
 
 void texture_config::finish_mapping() {
+  tinf3.tvertices.clear();
+  tinf3.texture_id = config.data.textureid;
+  if(isize(texture_map) && isize(texture_map.begin()->second.triangles)) {
+    auto& tri = texture_map.begin()->second.triangles[0];
+    auto& tv = tri.tv;
+    const int STEP = TEXTURE_STEP_3D;
+    using namespace hyperpoint_vec;
+
+    auto at = [&] (hyperpoint h, int a) {
+      h = normalize(h);
+      tinf3.tvertices.push_back(glhr::pointtogl(texture_coordinates(h)));
+      };
+
+    for(int a=0; a<8; a++)
+      for(int y=0; y<STEP; y++)
+      for(int x=0; x<STEP; x++) {
+        hyperpoint center = tv[0];
+        hyperpoint v1 = (tv[1] - center) / STEP;
+        hyperpoint v2 = (tv[2] - center) / STEP;
+        if(x+y < STEP) {
+          at(center + v1 * x + v2 * y, 0);
+          at(center + v1 * (x+1) + v2 * y, 1);
+          at(center + v1 * x + v2 * (y+1), 2);
+          }
+        if(x+y <= STEP && x && y) {
+          at(center + v1 * x + v2 * y, 0);
+          at(center + v1 * (x-1) + v2 * y, 1);
+          at(center + v1 * x + v2 * (y-1), 2);
+          }
+        }
+    }
+  
   if(config.tstate == tsActive) {
     for(auto& mi: texture_map)
       mapTexture2(mi.second);
@@ -1087,11 +1119,11 @@ void showMenu() {
     dialog::addItem(XLAT("select geometry/pattern"), 'r');
     if(config.tstate_max == tsAdjusting || config.tstate_max == tsActive)
       dialog::addItem(XLAT("reactivate the texture"), 't');
-    dialog::addItem(XLAT("open PNG as texture"), 'o');
+    if(DIM == 2 && !rug::rugged) dialog::addItem(XLAT("open PNG as texture"), 'o');
     dialog::addItem(XLAT("load texture config"), 'l');
     dialog::addSelItem(XLAT("texture size"), its(config.data.twidth), 'w');
 #if CAP_EDIT
-    dialog::addItem(XLAT("paint a new texture"), 'n');
+    if(DIM == 2) dialog::addItem(XLAT("paint a new texture"), 'n');
 #endif
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
 
@@ -1154,7 +1186,7 @@ void showMenu() {
     dialog::addBoolItem(XLAT("aura from texture"), texture_aura, 'a');
     dialog::add_action([] () { texture_aura = !texture_aura; });
 #if CAP_EDIT
-    dialog::addItem(XLAT("edit the texture"), 'e');
+    if(DIM == 2) dialog::addItem(XLAT("edit the texture"), 'e');
 #endif
     dialog::addItem(XLAT("save the full texture image"), 'S');
     dialog::addItem(XLAT("save texture config"), 's');
@@ -1460,7 +1492,9 @@ void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps) {
   }
 
 void texture_config::true_remap() {
+  conformal::configure();
   drawthemap();
+  if(DIM == 3) return;
   clear_texture_map();
   missing_cells_known.clear();
   for(cell *c: dcal) {

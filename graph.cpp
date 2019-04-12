@@ -4481,7 +4481,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         set_floor(shFullFloor);
 
 #if CAP_TEXTURE
-      else if(texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
+      else if(DIM == 2 && texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
 #endif
       
       else if(c->land == laMirrorWall) {
@@ -4937,6 +4937,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(DIM == 3) {
         color_t dummy;        
         if(isWall3(c, wcol)) {
+          color_t wcol2 = wcol;
+          if(texture::config.tstate == texture::tsActive) wcol2 = texture::config.recolor(wcol);
+
           int d = (wcol & 0xF0F0F0) >> 4;
 
           for(int a=0; a<c->type; a++)
@@ -4944,12 +4947,18 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               if(a < 4 && pmodel == mdPerspective && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
               if(a < 2 && pmodel == mdPerspective && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
               if(qfi.fshape && wmescher) {
-                auto& poly = queuepoly(V, shWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
-                poly.tinf = &qfi.fshape->tinf3;
-                poly.offset_texture = 0;
+                auto& poly = queuepoly(V, shWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                if(texture::config.tstate == texture::tsActive && isize(texture::config.tinf3.tvertices)) {
+                  poly.tinf = &texture::config.tinf3;
+                  poly.offset_texture = 0;
+                  }
+                else {
+                  poly.tinf = &qfi.fshape->tinf3;
+                  poly.offset_texture = 0;
+                  }
                 }
               else
-                queuepoly(V, shPlainWall3D[a], darkena(wcol - d * get_darkval(a), 0, 0xFF));
+                queuepoly(V, shPlainWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
               }
           }
         else {
