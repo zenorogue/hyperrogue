@@ -2517,7 +2517,7 @@ void create_wall3d() {
     make_wall(2, make5(a01, a21, a01+down));
     make_wall(3, make4(a21, a20, a21+down));
     make_wall(4, make5(a20, a00, a20+down));
-    make_wall(5, make5(a00, a01, a00+down));
+    make_wall(5, make4(a00, a01, a00+down));
     make_wall(6, make4(a00+down, a01+down, a20+down));
     }
   
