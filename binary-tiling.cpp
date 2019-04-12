@@ -141,9 +141,15 @@ namespace binary {
   
   struct hrmap_binary : hrmap_hyperbolic {
   
-    hrmap_binary(heptagon *o) : hrmap_hyperbolic(o) {}
+    std::mt19937 directions_generator;
+  
+    hrmap_binary(heptagon *o) : hrmap_hyperbolic(o) { set_seed(); }
+    
+    void set_seed() { directions_generator.seed(137137137); }
+    
+    int nextdir(int choices) { return directions_generator() % choices; }
 
-    hrmap_binary() : hrmap_hyperbolic() {}
+    hrmap_binary() : hrmap_hyperbolic() { set_seed(); }
 
     heptagon *create_step(heptagon *parent, int d) {
       auto h = parent;
@@ -206,7 +212,7 @@ namespace binary {
             case 2: case 3:
               return build3(parent, d, 8, 1);
             case 8:
-              return build3(parent, 8, hrand(4), -1);
+              return build3(parent, 8, nextdir(4), -1);
             case 4:
               parent->cmove(8);
               if(parent->c.spin(8) & 1)
@@ -238,7 +244,7 @@ namespace binary {
             case 0: case 1:
               return build3(parent, d, 6, 1);
             case 6:
-              return build3(parent, 6, hrand(2), -1);
+              return build3(parent, 6, nextdir(2), -1);
             case 2:
               parent->cmove(6);
               if(parent->c.spin(6) == 0)
@@ -264,7 +270,7 @@ namespace binary {
             case 0: case 1: case 2: case 3:
               return build3(parent, d, 7, 1);
             case 7:
-              return build3(parent, 7, hrand(3), -1);
+              return build3(parent, 7, nextdir(3), -1);
             case 4: case 5: case 6: 
               parent->cmove(7);
               int s = parent->c.spin(7);
@@ -280,7 +286,7 @@ namespace binary {
             case 0: case 1: case 2:
               return build3(parent, d, 13, 1);
             case 13:
-              return build3(parent, 13, hrand(3), -1);
+              return build3(parent, 13, nextdir(3), -1);
             case 3:
               return pathc(h, 3, 12, {{13,4,2}, {13,5,2}, {13,3,2}});
             case 4:
