@@ -2547,12 +2547,12 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   int ntk = tkills();
   int ntkt = killtypes();
     
-  if(tkt < R20 && ntkt >= R20) {
+  if(tkt < R20 && ntkt >= R20 && in_full_game()) {
     addMessage(XLAT("You hear a distant roar!"));
     playSound(NULL, "message-roar");
     }
-
-  if(tk == 0 && ntk > 0 && !tactic::on && !euclid && !sphere && !cheater) {
+  
+  if(tk == 0 && ntk > 0 && in_full_game() && !cheater) {
     if(notthateasy(m))
       addMessage(XLAT("Quite tough, for your first fight."));
     else {
@@ -2564,24 +2564,24 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
       }
     }
     
-  if(tk < 10 && ntk >= 10 && !tactic::on && !euclid && !sphere && !inv::on)
+  if(tk < 10 && ntk >= 10 && in_full_game() && !inv::on)
     addMessage(XLAT("Good to know that your fighting skills serve you well in this strange world."));
 
-  if(tk < R100/2 && ntk >= R100/2 && !euclid && !sphere)
+  if(tk < R100/2 && ntk >= R100/2 && in_full_game())
     addMessage(XLAT("You wonder where all these monsters go, after their death..."));
 
-  if(tk < R100 && ntk >= R100 && !euclid && !sphere)
+  if(tk < R100 && ntk >= R100 && in_full_game())
     addMessage(XLAT("You feel that the souls of slain enemies pull you to the Graveyard..."));
   
-  if(!tu && landUnlocked(laTrollheim)) {
+  if(!tu && landUnlocked(laTrollheim) && in_full_game()) {
     playSound(c, "message-troll");
     addMessage(XLAT("%The1 says, \"I die, but my clan in Trollheim will avenge me!\"", m));
     }
 
-  if(!eu && landUnlocked(laElementalWall))
+  if(!eu && landUnlocked(laElementalWall) && in_full_game())
     addMessage(XLAT("After killing %the1, you feel able to reach the Elemental Planes!", m));
   
-  if(m == moVizier && c->monst != moVizier && kills[moVizier] == 1) {
+  if(m == moVizier && c->monst != moVizier && kills[moVizier] == 1 && in_full_game()) {
     addMessage(XLAT("Hmm, he has been training in the Emerald Mine. Interesting..."));
     princess::forceMouse = true;
     }
@@ -6625,8 +6625,7 @@ void gainLife() {
   }
 
 void collectMessage(cell *c2, eItem which) {
-  bool specialmode = 
-    yendor::on || tactic::on || princess::challenge || euclid || sphere;
+  bool specialmode = yendor::on || princess::challenge || cheater || !in_full_game();
   
   if(which == itDodeca && peace::on) return;  
   if(which == itTreat) ;    
@@ -6685,9 +6684,9 @@ void collectMessage(cell *c2, eItem which) {
     }
   else if(which == itHunting && items[itHunting] == 4 && !specialmode && !ISMOBWEB)
     addMessage(XLAT("Hint: hold Alt to highlights enemies and other important features."));
-  else if(which == itSpice && items[itSpice] == U10*7/10 && !specialmode)
+  else if(which == itSpice && items[itSpice] == U10*7/10 && !specialmode && isLandIngame(laHell))
     addMessage(XLAT("You have a vision of the future, fighting demons in Hell..."));
-  else if(which == itSpice && items[itSpice] == U10-1 && !specialmode)
+  else if(which == itSpice && items[itSpice] == U10-1 && !specialmode && isLandIngame(laRedRock))
     addMessage(XLAT("You will be fighting red rock snakes, too..."));
   else if(which == itKraken && items[itKraken] == U10-1 && !specialmode)
     addMessage(XLAT("You feel that a magical weapon is waiting for you..."));
@@ -6695,10 +6694,10 @@ void collectMessage(cell *c2, eItem which) {
 //    addMessage(XLAT("There should be a Palace somewhere nearby..."));
   else if(which == itElixir && items[itElixir] == U5-1 && !specialmode)
     addMessage(XLAT("With this Elixir, your life should be long and prosperous..."));
-  else if(which == itRuby && items[itRuby] == U5-1 && !specialmode) {
+  else if(which == itRuby && items[itRuby] == U5-1 && !specialmode && isLandIngame(laMountain)) {
     addMessage(XLAT("You feel something strange about gravity here..."));
     }
-  else if(which == itPalace && items[itPalace] == U5-1 && !specialmode) {
+  else if(which == itPalace && items[itPalace] == U5-1 && !specialmode && isLandIngame(laDungeon)) {
     addMessage(XLAT("The rug depicts a man in a deep dungeon, unable to leave."));
     }
   else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on)
@@ -6713,22 +6712,22 @@ void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("You have gained an offensive power!"));
   else if(which == itHell && items[itHell] >= 100 && items[itHell] % 25 == 24 && !specialmode && inv::on)
     addMessage(XLAT("A small reward for braving the Hell."));
-  else if(which == itIvory && items[itIvory] == U5-1 && !specialmode) {
+  else if(which == itIvory && items[itIvory] == U5-1 && !specialmode && (isLandIngame(laMountain) || isLandIngame(laDungeon))) {
     addMessage(XLAT("You feel attuned to gravity, ready to face mountains and dungeons."));
     }
-  else if(which == itBone && items[itBone] == U5+1 && !specialmode)
+  else if(which == itBone && items[itBone] == U5+1 && !specialmode && isLandIngame(laHell))
     addMessage(XLAT("The Necromancer's Totem contains hellish incantations..."));
   else if(which == itStatue && items[itStatue] == U5+1 && !specialmode)
     addMessage(XLAT("The inscriptions on the Statue of Cthulhu point you toward your destiny..."));
-  else if(which == itStatue && items[itStatue] == U5-1 && !specialmode)
+  else if(which == itStatue && items[itStatue] == U5-1 && isLandIngame(laTemple))
     addMessage(XLAT("There must be some temples of Cthulhu in R'Lyeh..."));
   else if(which == itDiamond && items[itDiamond] == U10-2 && !specialmode)
     addMessage(XLAT("Still, even greater treasures lie ahead..."));
-  else if(which == itFernFlower && items[itFernFlower] == U5-1 && !specialmode)
+  else if(which == itFernFlower && items[itFernFlower] == U5-1 && isLandIngame(laEmerald))
     addMessage(XLAT("You overheard Hedgehog Warriors talking about emeralds..."));
-  else if(which == itEmerald && items[itEmerald] == U5-1 && !specialmode && !chaosmode)
+  else if(which == itEmerald && items[itEmerald] == U5-1 && !specialmode && isLandIngame(laCamelot))
     addMessage(XLAT("You overhear miners talking about a castle..."));
-  else if(which == itEmerald && items[itEmerald] == U5 && !specialmode && !chaosmode)
+  else if(which == itEmerald && items[itEmerald] == U5 && !specialmode && isLandIngame(laCamelot))
     addMessage(XLAT("A castle in the Crossroads..."));
   else if(which == itShard) ;
   else {
@@ -7231,8 +7230,10 @@ void roundTableMessage(cell *c2) {
   }
 
 bool in_full_game() {
+  if(tactic::on) return false;
+  if(princess::challenge) return false;
   if(chaosmode) return true;
-  if(geometry == gEuclid && isCrossroads(specialland)) return true;
+  if(euclid && isCrossroads(specialland)) return true;
   if(weirdhyperbolic && specialland == laCrossroads4) return true;
   if(geometry == gCrystal && isCrossroads(specialland)) return true;
   if(geometry == gNormal && !NONSTDVAR) return true;
