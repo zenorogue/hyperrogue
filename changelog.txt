@@ -3076,3 +3076,32 @@ Other:
 - fixed the ESC key flashing and doing nothing in the Expansion slide
 - restructured menus
 - [3D] more stable PC centering
+
+2018-04-13 13:09 Version 11.0q:
+
+Gameplay:
+- using an Orb of Change on a Red Raider now also changes the other Red Raider
+- improvements in the bounded Minefield: fixed in spherical geometries; auto-charged teleport; adjacency rule can be changed in geometries with valence > 3; fixed some bugs with more than 7 adjacent mines
+- Orb of Phasing is now forbidden in the Princess Challenge
+- Narcissist and Mirror Spirit kills are now saved
+- fixed incorrect counter values when pushing thumpers into water
+- removed Lost Mountain and Brownian Islands from the chaos mode overview
+- fixed fire in Brown Islands
+- some flavor messages no longer display in special modes if they are inappropriate for them
+
+Geometries:
+- in Euclidean 3D modes, lands such as Crossroads and Camelot are now generated just like in Crystal (transformation works correctly)
+- fixed a crash bug when switching places in some geometries
+- fixed the wrong code for {4,3,4}
+- the option to restrict generation in 3D no longer produces weird elements
+- fixed wrong texturing in hororec
+- distance calculated correctly in Rhombic
+- fixed some Archimedean geometries freezing
+- fixed invalid bitruncation in torus geometries
+
+Creative/3D:
+- horosphere tilings now save/load correctly
+- vector graphics editor improved in 3D: display all coordinates; level changing; 3D models are now shaded; edited items do not disappear
+- single-type textures now can be remapped to 3D geometries
+- in some situations texture was lost when starting a new game while it should not
+- formula editor: comma can now actually be entered; 'shot' parameter to change shots
