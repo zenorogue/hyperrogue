@@ -362,6 +362,10 @@ namespace mapstream {
         
         // spinval becomes xspinval
         rspin = (c2->c.spin(dir) - f.read_char() + MODFIXER) % c->type;
+        if(DIM == 3 && rspin) {
+          println(hlog, "rspin in 3D");
+          throw hstream_exception();
+          }
         }
       
       cellbyid.push_back(c);
