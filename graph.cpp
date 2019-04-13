@@ -4017,7 +4017,7 @@ color_t lcolor(cell *c) {
 color_t transcolor(cell *c, cell *c2, color_t wcol) {
   color_t dummy;
   if(isWall3(c2, dummy)) return 0;
-  if(c->land != c2->land) {
+  if(c->land != c2->land && c->land != laNone && c2->land != laNone) {
     if(c>c2) return 0;
     if(c->land == laBarrier) return darkena(lcolor(c2), 0, 0x40);
     if(c2->land == laBarrier) return darkena(lcolor(c), 0, 0x40);
@@ -4303,11 +4303,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     asciicol = wcol;
     
-    #if CAP_SHAPES
-    if(c->land == laNone && c->wall == waNone) 
-      queuepoly(V, shTriangle, 0xFFFF0000);
-    #endif
-
     if(c->wall == waThumperOn) {
       ld ds = fractick(160);
       for(int u=0; u<5; u++) {
