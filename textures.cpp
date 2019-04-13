@@ -461,8 +461,7 @@ void texture_config::finish_mapping() {
   tinf3.tvertices.clear();
   tinf3.texture_id = config.data.textureid;
   if(isize(texture_map) && isize(texture_map.begin()->second.triangles)) {
-    auto& tri = texture_map.begin()->second.triangles[0];
-    auto& tv = tri.tv;
+    auto& tris = texture_map.begin()->second.triangles;
     const int STEP = TEXTURE_STEP_3D;
     using namespace hyperpoint_vec;
 
@@ -474,9 +473,10 @@ void texture_config::finish_mapping() {
     for(int a=0; a<8; a++)
       for(int y=0; y<STEP; y++)
       for(int x=0; x<STEP; x++) {
-        hyperpoint center = tv[0];
-        hyperpoint v1 = (tv[1] - center) / STEP;
-        hyperpoint v2 = (tv[2] - center) / STEP;
+        auto& tri = tris[a % isize(tris)];
+        hyperpoint center = tri.tv[0];
+        hyperpoint v1 = (tri.tv[1] - center) / STEP;
+        hyperpoint v2 = (tri.tv[2] - center) / STEP;
         if(x+y < STEP) {
           at(center + v1 * x + v2 * y, 0);
           at(center + v1 * (x+1) + v2 * y, 1);
