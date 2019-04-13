@@ -1289,11 +1289,19 @@ namespace mapeditor {
     if(!mouseout()) {
       transmatrix T = inverse(drawtrans * rgpushxto0(ccenter));
       hyperpoint mh = spintox(gpushxto0(ccenter) * coldcenter) * T * mouseh;
-      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("r: %1", fts4(hdist0(mh))), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) / degree)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])) + (DIM == 3 ? "/" + fts4(mh[3]) : ""), 0xC0C0C0, 16);
+      if(DIM == 3)
+        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts4(mh[3])), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts4(hdist0(mh))), 0xC0C0C0, 16);
+      if(DIM == 3) {
+        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[2], hypot_d(2, mh)) / degree)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts4(-atan2(mh[1], mh[0]) / degree)), 0xC0C0C0, 16);
+        }
+      else {
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) / degree)), 0xC0C0C0, 16);
+        }
       }
 
     if(us) {

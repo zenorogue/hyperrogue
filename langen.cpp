@@ -294,6 +294,7 @@ int main() {
   allchars.insert("²");
   allchars.insert("π");
   allchars.insert("Θ");
+  allchars.insert("λ");
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();
