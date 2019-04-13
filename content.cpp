@@ -862,7 +862,7 @@ ITEM( 'o', 0xD08080, "Orb of Choice", itOrbChoice, IC_ORB, ZERO, RESERVED, osNon
     "Hyperbolic geometry makes this even easier!\n\n"
     "When you pick up another Orb, it will not disappear from the ground -- Orb of Choice will be drained instead."
     )
-//ITEM( '*', 0x26619C, "Lapis Lazuli", moNone, ZERO | MF_NOGHOST | MF_NOBLOW, RESERVED, moNone, NODESCYET)
+//ITEM( '*', 0x26619C, "Lapis Lazuli", itLapisLazuli, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
 
 WALL( '.', 0xFF00FF, "no wall", waNone, ZERO | WF_HEATCOLOR, RESERVED, 0, sgNone,        NULL)
 WALL( '#', 0x8080FF, "ice wall", waIcewall, WF_WALL | WF_HIGHWALL | WF_HEATCOLOR, RESERVED, 0, sgNone,    
