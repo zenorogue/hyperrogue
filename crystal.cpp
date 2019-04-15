@@ -1328,6 +1328,7 @@ coord euclid3_to_crystal(euclid3::coord x) {
   
 
 void transform_crystal_to_euclid () {
+  euclid3::clear_torus3();
   geometry = gCubeTiling;
   need_reset_geometry = true;
   auto e = new euclid3::hrmap_euclid3;
@@ -1460,7 +1461,7 @@ void add_crystal_transform(char c) {
     dialog::addItem("convert Crystal to 3D", c);
     dialog::add_action(transform_crystal_to_euclid);
     }
-  if(geometry == gCubeTiling) {
+  if(geometry == gCubeTiling && !quotient) {
     dialog::addItem("convert 3D to Crystal", c);
     dialog::add_action(transform_euclid_to_crystal);
     }

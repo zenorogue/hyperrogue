@@ -496,7 +496,10 @@ namespace reg3 {
     
         for(int d=0; d<S7; d++)
           dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
+
+        if(c == cwt.at) first_cell_to_draw = false;
         }
+      first_cell_to_draw = true;
       }
   
     transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {

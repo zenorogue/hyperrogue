@@ -651,7 +651,7 @@ void showEuclideanMenu() {
 
         
   
-  if(euwrap || geometry == gFieldQuotient || geometry == gCrystal || archimedean) {
+  if(euwrap || geometry == gFieldQuotient || geometry == gCrystal || archimedean || (euclid && DIM == 3)) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 
@@ -662,6 +662,11 @@ void showEuclideanMenu() {
       #if CAP_CRYSTAL
       else if(geometry == gCrystal)
         pushScreen(crystal::show);
+      #endif
+      #if MAXMDIM == 4
+      else if(euclid && DIM == 3)
+        euclid3::prepare_torus3(),
+        pushScreen(euclid3::show_torus3);
       #endif
       else if(euwrap) 
         prepare_torusconfig(),

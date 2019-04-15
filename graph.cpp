@@ -16,8 +16,10 @@ bool mmspatial, mmhigh, mmmon, mmitem;
 
 int detaillevel = 0;
 
+bool first_cell_to_draw = true;
+
 bool hide_player() {
-  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective;
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && first_cell_to_draw;
   }
 
 hookset<bool(int sym, int uni)> *hooks_handleKey;
@@ -4123,7 +4125,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     transmatrix& gm = gmatrix[c];
     orig = 
       gm[DIM][DIM] == 0 ? true : 
-      euwrap ? hypot(gm[0][DIM], gm[1][DIM]) >= hypot(V[0][DIM], V[1][DIM]) :
+      euwrap ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
       sphereflipped() ? fabs(gm[DIM][DIM]-1) <= fabs(V[DIM][DIM]-1) :
       fabs(gm[DIM][DIM]-1) >= fabs(V[DIM][DIM]-1) - 1e-8;
 

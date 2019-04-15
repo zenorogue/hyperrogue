@@ -1852,6 +1852,7 @@ extern bool gen_wandering;
 namespace dialog {
   extern string highlight_text;
   extern color_t dialogcolor;
+  extern int dfsize, dfspace;
 
   enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diSlider, diBigItem};
 
@@ -4365,6 +4366,9 @@ namespace euclid3 {
   hrmap* new_map();
   void draw();
   int dist_relative(cell *c);
+  void build_torus3();
+  void clear_torus3();
+  void show_torus3();
   }
 
 namespace reg3 {
@@ -5009,5 +5013,6 @@ const int TEXTURE_STEP_3D=8;
 
 void set_euland3(cell *c, int co0, int co1, int alt, int hash);
 
+extern bool first_cell_to_draw;
 }
 

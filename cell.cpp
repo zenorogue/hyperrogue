@@ -224,8 +224,8 @@ void initcells() {
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif
-  else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid && DIM == 3) currentmap = euclid3::new_map();
+  else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(DIM == 3 && !binarytiling) currentmap = reg3::new_map();
   else if(sphere) currentmap = new hrmap_spherical;
@@ -393,7 +393,7 @@ int compdist(int dx[]) {
   }
 
 int celldist(cell *c) {
-  if(fulltorus) 
+  if(fulltorus && DIM == 2) 
     return torusmap()->dists[decodeId(c->master)];
   if(euwrap)
     return torusconfig::cyldist(decodeId(c->master), 0);

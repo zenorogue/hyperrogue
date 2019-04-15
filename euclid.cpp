@@ -500,9 +500,11 @@ heptagon* encodeId(int id) {
 
 namespace euclid3 {
 
-  typedef long long coord;
-  
+  typedef long long coord; 
   static const long long COORDMAX = (1<<16);
+  typedef array<coord, 3> axes;  
+
+  static const axes main_axes = { 1, COORDMAX, COORDMAX * COORDMAX };
   
   array<int, 3> getcoord(coord x) {
     array<int, 3> res;
@@ -518,9 +520,9 @@ namespace euclid3 {
     }
 
   vector<coord> get_shifttable() {
-    static const coord D0 = 1;
-    static const coord D1 = COORDMAX;
-    static const coord D2 = COORDMAX * COORDMAX;
+    static const coord D0 = main_axes[0];
+    static const coord D1 = main_axes[1];
+    static const coord D2 = main_axes[2];
     vector<coord> shifttable;
     vector<transmatrix> tmatrix;
     switch(geometry) {
@@ -547,12 +549,28 @@ namespace euclid3 {
     return shifttable;
     }
   
+  coord canonicalize(coord x);
+  void build_torus3();
+  
   struct hrmap_euclid3 : hrmap {
     vector<coord> shifttable;
     vector<transmatrix> tmatrix;
     map<coord, heptagon*> spacemap;
     map<heptagon*, coord> ispacemap;
     cell *camelot_center;
+
+    vector<cell*> toruscells;  
+    vector<cell*>& allcells() override { 
+      if(bounded) {
+        if(isize(toruscells) == 0) {
+          celllister cl(getOrigin()->c7, 1000, 1000000, NULL);
+          toruscells = cl.lst;
+          }
+        return toruscells;
+        }
+      return hrmap::allcells();
+      }
+
     hrmap_euclid3() {
       shifttable = get_shifttable();
       tmatrix.resize(S7);
@@ -560,6 +578,7 @@ namespace euclid3 {
       for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
         tmatrix[i][j][DIM] = getcoord(shifttable[i])[j];
       camelot_center = NULL;
+      build_torus3();
       }
 
     heptagon *getOrigin() {
@@ -593,12 +612,12 @@ namespace euclid3 {
       }
   
     heptagon *create_step(heptagon *parent, int d) {
-      return build(parent, d, ispacemap[parent] + shifttable[d]);
+      return build(parent, d, canonicalize(ispacemap[parent] + shifttable[d]));
       }  
 
     void draw() {
-      dq::visited.clear();
-      dq::enqueue(viewctr.at, cview());
+      dq::visited_by_matrix.clear();
+      dq::enqueue_by_matrix(viewctr.at, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -613,12 +632,16 @@ namespace euclid3 {
         drawcell(c, V, 0, false);
   
         for(int i=0; i<S7; i++)
-          dq::enqueue(h->move(i), V * tmatrix[i]);
+          dq::enqueue_by_matrix(h->move(i), V * tmatrix[i]);
+        if(c == cwt.at) first_cell_to_draw = false;
         }
+      first_cell_to_draw = true;
       }
     
     transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-      auto v = getcoord(ispacemap[h2] - ispacemap[h1]);
+      auto d = ispacemap[h2] - ispacemap[h1];
+      d = canonicalize(d);
+      auto v = getcoord(d);
       return eupush3(v[0], v[1], v[2]);
       }
     
@@ -655,6 +678,11 @@ namespace euclid3 {
     return new hrmap_euclid3;
     }
 
+  transmatrix move_matrix(int i) {
+    auto v = getcoord(cubemap()->shifttable[i]);
+    return eupush3(v[0], v[1], v[2]);
+    }
+  
   bool pseudohept(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
     auto v = getcoord(co);
@@ -688,10 +716,17 @@ namespace euclid3 {
     if(s0 == s1) println(hlog, "equality");
     return s0 > s1;
     }
+  
+  bool cellvalid(coord co) {
+    auto v = getcoord(co);
+    if(S7 == 6) return true;
+    if(S7 == 12) return (v[0] + v[1] + v[2]) % 2 == 0;
+    if(S7 == 14) return v[0] % 2 == v[1] % 2 && v[0] % 2 == v[2] % 2;
+    return false;
+    }
 
-  int celldistance(cell *c1, cell *c2) {
-    auto cm = cubemap();
-    auto v = getcoord(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]);
+  int celldistance(coord co) {
+    auto v = getcoord(co);
     if(S7 == 6) 
       return abs(v[0]) + abs(v[1]) + abs(v[2]);
     else {
@@ -714,6 +749,11 @@ namespace euclid3 {
         }
       return dist;
       }
+    }
+
+  int celldistance(cell *c1, cell *c2) {
+    auto cm = cubemap();
+    return celldistance(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]);
     }
 
   void set_land(cell *c) {
@@ -744,7 +784,212 @@ namespace euclid3 {
     return euclid3::celldistance(cc, c) - r;
     }
   
+  /* quotient spaces */
+
+  typedef array<array<int, 3>, 3> intmatrix;
+  
+  intmatrix make_intmatrix(axes a) {
+    intmatrix T;
+    T[0] = getcoord(a[0]);
+    T[1] = getcoord(a[1]);
+    T[2] = getcoord(a[2]);
+    return T;
+    }
+  
+  int determinant(const intmatrix T) {
+    int det = 0;
+    for(int i=0; i<3; i++) 
+      det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
+    for(int i=0; i<3; i++) 
+      det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
+    return det;
+    }
+  
+  intmatrix scaled_inverse(const intmatrix T) {
+    intmatrix T2;
+    for(int i=0; i<3; i++) 
+    for(int j=0; j<3; j++) 
+      T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]);
+    return T2;
+    }
+  
+  axes user_axes;
+  axes optimal_axes;
+  axes regular_axes;
+  
+  intmatrix T, T2, T0, T_edit;
+  int det;
+  int coords;
+  
+  void clear_torus3() {
+    for(int i=0; i<3; i++) user_axes[i] = 0;
+    }
+  
+  unordered_map<coord, int> canonical_hash;
+  vector<coord> canonical_seq;
+  int canonical_index;
+  
+  coord compute_cat(coord co) {
+    auto coo = getcoord(co);
+    coord cat = 0;
+    for(int i=0; i<3; i++) {
+      int val = T2[0][i] * coo[0] + T2[1][i] * coo[1] + T2[2][i] * coo[2];
+      if(i < coords) val = gmod(val, det);
+      cat += val * main_axes[i];
+      }
+    return cat;
+    };
+  
+  
+  void add_canonical(coord val) {
+    auto cat = compute_cat(val);
+    if(canonical_hash.count(cat)) return;
+    canonical_hash[cat] = isize(canonical_seq);
+    canonical_seq.push_back(val);
+    }
+  
+  void build_torus3() {
+  
+    for(int i=0; i<3; i++) {
+      user_axes[i] = 0;
+      for(int j=0; j<3; j++) user_axes[i] += main_axes[j] * T0[i][j];
+      }
+  
+    optimal_axes = user_axes;
+    
+    again:
+    for(int i=0; i<3; i++) if(optimal_axes[i] < 0) optimal_axes[i] = -optimal_axes[i];
+    if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
+    if(optimal_axes[1] < optimal_axes[2]) swap(optimal_axes[1], optimal_axes[2]);
+    if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
+    for(int i=0; i<3; i++) {
+      int i1 = (i+1) % 3;
+      int i2 = (i+2) % 3;
+      for(int a=-10; a<=10; a++)
+      for(int b=-10; b<=10; b++) {
+        coord cand = optimal_axes[i] + optimal_axes[i1] * a + optimal_axes[i2] * b;
+        if(celldistance(cand) < celldistance(optimal_axes[i])) {
+          optimal_axes[i] = cand;
+          goto again; 
+          }
+        }
+      }
+  
+    regular_axes = optimal_axes;
+    coords = 0;
+    for(int i=0; i<3; i++) if(optimal_axes[i]) coords++;
+  
+    int attempt = 0;
+    next_attempt:
+    for(int i=coords; i<3; i++)
+      regular_axes[i] = main_axes[(attempt+i)%3];
+      
+    T = make_intmatrix(regular_axes);
+    det = determinant(T);
+    if(det == 0) { 
+      attempt++;
+      if(attempt == 3) {
+        println(hlog, "weird singular!\n");
+        exit(1);
+        }
+      goto next_attempt;
+      }
+      
+    if(det < 0) det = -det;
+    
+    T2 = scaled_inverse(T);
+    canonical_hash.clear();
+    canonical_seq.clear();  
+    canonical_index = 0;  
+    add_canonical(0);
+    
+    for(eGeometry g: {gCubeTiling, gRhombic3, gBitrunc3}) {
+      set_flag(ginf[g].flags, qANYQ, coords);
+      set_flag(ginf[g].flags, qBOUNDED, coords == 3);
+      }
+    }
+  
+  coord canonicalize(coord x) {
+    if(coords == 0) return x;
+    if(coords == 1) {
+      while(celldistance(x + optimal_axes[0]) <= celldistance(x)) x += optimal_axes[0];
+      while(celldistance(x - optimal_axes[0]) <  celldistance(x)) x -= optimal_axes[0];
+      return x;
+      }
+    auto cat = compute_cat(x);
+    auto& st = cubemap()->shifttable;
+    while(!canonical_hash.count(cat)) {
+      if(canonical_index == isize(canonical_seq)) throw hr_exception();
+      auto v = canonical_seq[canonical_index++];
+      for(auto s: st) add_canonical(v + s);
+      }
+    return canonical_seq[canonical_hash[cat]];
+    }
+
+  void prepare_torus3() {
+    T_edit = T0;
+    }
+
+  void show_torus3() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(1);  
+    dialog::init(XLAT("3D Euclidean spaces"));
+    for(int y=0; y<5; y++)
+      dialog::addBreak(100);
+    
+    char xch = 'p';
+    for(eGeometry g: {gCubeTiling, gRhombic3, gBitrunc3}) {
+      dialog::addItem(XLAT(ginf[g].menu_displayed_name), xch++);
+      dialog::add_action([g] {
+        stop_game();
+        set_geometry(g);
+        T0 = T_edit;
+        start_game();
+        });
+      }
+    dialog::addBreak(50);
+    dialog::addBack();
+    dialog::display();
+    
+    int i = -1;
+    for(auto& v: dialog::items) if(v.type == dialog::diBreak) {
+      if(i >= 0 && i < 3) {
+        for(int j=0; j<3; j++) {
+          char ch = 'a' + i * 3 + j;
+          if(displayfr(dialog::dcenter + dialog::dfspace * 4 * (j-1), v.position, 2, dialog::dfsize, its(T_edit[j][i]), 0xFFFFFF, 8))
+            getcstat = ch;
+          dialog::add_key_action(ch, [=] {
+            dialog::editNumber(T_edit[j][i], -10, +10, 1, 0, "", 
+              "columns of the matrix equal 0"
+              );
+            });
+          }
+        }
+      i++;
+      }
+    }
+
+  int euArgs() {
+    using namespace arg;
+             
+    if(0) ;
+    else if(argis("-t3")) {
+      PHASEFROM(2);
+      stop_game();
+      for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++) {
+        shift(); T0[i][j] = argi();
+        }
+      build_torus3();
+      }
+  
+    else return 1;
+    return 0;
+    }
+  
+  auto euhook = addHook(hooks_args, 100, euArgs);
   }
+
 #endif
 
 ld matrixnorm(const transmatrix& Mat) {
