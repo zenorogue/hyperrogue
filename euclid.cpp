@@ -611,7 +611,15 @@ namespace euclid3 {
     
     heptagon *build(heptagon *parent, int d, coord at) {
       auto h = get_at(at);
-      h->c.connect((d+S7/2)%S7, parent, d, false);
+      int d1 = (d+S7/2)%S7;
+      if(twisted) {
+        coord a = ispacemap[parent];
+        coord b = ispacemap[h];
+        for(int i=0; i<S7; i++) 
+          if(canonicalize(b + shifttable[i]) == a)
+            d1 = i;
+        }
+      h->c.connect(d1, parent, d, false);
       return h;
       }
   
