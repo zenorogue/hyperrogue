@@ -1111,6 +1111,24 @@ namespace euclid3 {
       shift(); twisted0 = argi();
       build_torus3();
       }
+    else if(argis("-twisttest")) {
+      start_game();
+      celllister cl(cwt.at, 10000, 10000, NULL);
+      for(cell *c: cl.lst) {
+        for(int i=0; i<S7; i++)
+        for(int j=0; j<S7; j++)
+        for(int k=0; k<S7; k++)
+        for(int l=0; l<S7; l++)
+          if(c->move(i) && c->move(k) && c->move(i)->move(j) == c->move(k)->move(l) && c->move(i)->move(j)) {
+            transmatrix T1 = move_matrix(c, i) * move_matrix(c->move(i), j);
+            transmatrix T2 = move_matrix(c, k) * move_matrix(c->move(k), l);
+            if(!eqmatrix(T1, T2)) {
+              println(hlog, c, " @ ", getcoord(cubemap()->ispacemap[c->master]), " : ", i, "/", j, "/", k, "/", l, " :: ", T1, " vs ", T2);
+              exit(1);
+              }
+            }
+        }
+      }
   
     else return 1;
     return 0;
