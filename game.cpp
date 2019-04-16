@@ -455,6 +455,9 @@ eGravity get_move_gravity(cell *c, cell *c2) {
     }
   }
 
+bool isWarped(cell *c) {
+  return isWarpedType(c->land) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
+  }
 
 bool nonAdjacent(cell *c, cell *c2) {
   if(isWarped(c) && isWarped(c2) && warptype(c) == warptype(c2)) {
@@ -1791,7 +1794,7 @@ bool snakepile(cell *c, eMonster m) {
   else if(doesFall(c)) return false;
   else if((c->wall == waSea && c->land == laLivefjord))
     c->wall = waNone;
-  else if((c->wall == waSea && isWarped(c->land)))
+  else if((c->wall == waSea && isWarpedType(c->land)))
     c->wall = waNone;
   else if(isGravityLand(c->land)) {
     if(m == moHexSnake)
@@ -2113,7 +2116,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   
   if(isRatling(m) && c->wall == waBoat) {
     bool avenge = false;
-    for(int i=0; i<c->type; i++) if(!isWarped(c->move(i)->land))
+    for(int i=0; i<c->type; i++) if(!isWarpedType(c->move(i)->land))
       avenge = true;
     if(avenge) { avengers += 2; }
     }
@@ -3093,7 +3096,7 @@ void bfs() {
       cell *c2 = c->move(i);
       if(!c2) continue;
       
-      if(isWarped(c2->land)) havewhat |= HF_WARP;
+      if(isWarpedType(c2->land)) havewhat |= HF_WARP;
       if(c2->land == laMirror) havewhat |= HF_MIRROR;
       
       if((c->wall == waBoat || c->wall == waSea) &&

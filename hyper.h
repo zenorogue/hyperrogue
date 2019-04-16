@@ -3074,7 +3074,7 @@ int cdist50(cell *c);
 bool polarb50(cell *c);
 
 bool isGravityLand(eLand l);
-bool isWarped(eLand l);
+bool isWarpedType(eLand l);
 bool isWarped(cell *c);
 
 struct hrmap {

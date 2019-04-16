@@ -3085,7 +3085,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       fcol = 0x0000C0 + int(32 * sintick(200, ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*.75/M_PI));
     else if(c->land == laLivefjord)
       fcol = 0x000080;
-    else if(isWarped(c->land))
+    else if(isWarpedType(c->land))
       fcol = 0x0000C0 + int((warptype(c)?30:-30) * sintick(600));
     else
       fcol = wcol;
@@ -3400,7 +3400,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
         
     default:
       if(isElemental(c->land)) fcol = linf[c->land].color;
-      if(isWarped(c->land)) {
+      if(isWarpedType(c->land)) {
         fcol = warptype(c) ? 0x80C080 : 0xA06020;
         if(c->wall == waSmallTree) wcol = 0x608000;
         }  
@@ -4605,7 +4605,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         set_floor(shFloor);
         }
 
-      else if(randomPatternsMode && c->land != laBarrier && !isWarped(c->land)) {
+      else if(randomPatternsMode && c->land != laBarrier && !isWarpedType(c->land)) {
         int j = (randompattern[c->land]/5) % 15;
         int k = randompattern[c->land] % RPV_MODULO;
         int k7 = randompattern[c->land] % 7;

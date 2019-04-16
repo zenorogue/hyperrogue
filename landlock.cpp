@@ -322,7 +322,7 @@ eLand getNewLand(eLand old) {
   if(old == laDragon && tortoise::seek() && hrand(100) < 50)
     return laTortoise;
   
-  if(isWarped(old) && (hrand(100) < 25) && chaosmode) return eLand(old ^ laWarpCoast ^ laWarpSea);
+  if(isWarpedType(old) && (hrand(100) < 25) && chaosmode) return eLand(old ^ laWarpCoast ^ laWarpSea);
 
   if(createOnSea(old)) 
       return getNewSealand(old);
@@ -788,11 +788,11 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWhirlpool && a4)
     return dont_work;
 
-  if(isWarped(l) && a4 && GOLDBERG)
+  if(isWarpedType(l) && a4 && GOLDBERG)
     return dont_work;
   
   #if CAP_IRR
-  if((isWarped(l) || l == laDual) && IRREGULAR && !irr::bitruncations_performed)
+  if((isWarpedType(l) || l == laDual) && IRREGULAR && !irr::bitruncations_performed)
     return dont_work;
   
   if(IRREGULAR && among(l, laPrairie, laMirror, laMirrorOld))

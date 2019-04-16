@@ -864,7 +864,7 @@ void describeMouseover() {
     if(rosedist(c) || c->land == laRose || c->wall == waRose)
       appendHelp(string("\n\n") + rosedesc);
     
-    if(isWarped(c) && !isWarped(c->land))
+    if(isWarped(c) && !isWarpedType(c->land))
       out += ", warped";
 
     if(isWarped(c)) {

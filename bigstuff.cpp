@@ -1219,7 +1219,7 @@ void buildBigStuff(cell *c, cell *from) {
       }
     }
   
-  else if(good_for_wall(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
+  else if(good_for_wall(c) && isWarpedType(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
   else if(good_for_wall(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on &&
