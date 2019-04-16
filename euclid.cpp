@@ -941,8 +941,8 @@ namespace euclid3 {
     add_canonical(0);
     
     twisted = twisted0;
-    if(geometry != gCubeTiling && (T0[0][0] & 1)) twisted &=~ 1;
-    if(geometry != gCubeTiling && (T0[1][1] & 1)) twisted &=~ 2;
+    if(geometry != gCubeTiling && ((T0[0][0]+T0[2][2]) & 1)) twisted &=~ 1;
+    if(geometry != gCubeTiling && ((T0[1][1]+T0[2][2]) & 1)) twisted &=~ 2;
     for(int i=0; i<3; i++) for(int j=0; j<3; j++)
       if(i != j && T0[i][j]) twisted = 0;
     if(T0[2][2] == 0) twisted = 0;
@@ -1032,13 +1032,13 @@ namespace euclid3 {
       dialog::addBreak(100);
       }
     else {
-      if(geometry == gCubeTiling || T0[0][0] % 2 == 0)
+      if(geometry == gCubeTiling || (T_edit[0][0]+T_edit[2][2]) % 2 == 0)
         dialog::addBoolItem(XLAT("flip X coordinate"), twisted_edit & 1, 'x');
       else
         dialog::addBoolItem(XLAT("flipping X impossible"), twisted_edit & 1, 'x');
       dialog::add_action([] { twisted_edit ^= 1; });
 
-      if(geometry == gCubeTiling || T0[1][1] % 2 == 0)
+      if(geometry == gCubeTiling || (T_edit[1][1]+T_edit[2][2]) % 2 == 0)
         dialog::addBoolItem(XLAT("flip Y coordinate"), twisted_edit & 2, 'y');
       else
         dialog::addBoolItem(XLAT("flipping Y impossible"), twisted_edit & 2, 'y');
