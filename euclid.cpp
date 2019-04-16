@@ -654,7 +654,8 @@ namespace euclid3 {
     transmatrix warppush(coord dif) {
       auto v = getcoord(dif);
       for(int i: {0, 1})
-        v[i] = gmod(v[i] + T0[i][i] / 2, T0[i][i]) - T0[i][i] / 2;
+        if(T0[i][i])
+          v[i] = gmod(v[i] + T0[i][i] / 2, T0[i][i]) - T0[i][i] / 2;
       return eupush3(v[0], v[1], v[2]);
       }
     
