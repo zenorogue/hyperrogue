@@ -249,6 +249,7 @@ const static transmatrix Zero = diag(0,0,0,0);
 
 // mirror image
 const static transmatrix Mirror = diag(1,-1,1,1);
+const static transmatrix MirrorY = diag(1,-1,1,1);
 
 // mirror image
 const static transmatrix MirrorX = diag(-1,1,1,1);

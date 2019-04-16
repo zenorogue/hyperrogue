@@ -1190,7 +1190,7 @@ void optimizeview() {
       heptagon *h2 = createStep(viewctr.at, i1);
       transmatrix T = currentmap->relative_matrix(h2, viewctr.at);
       if(euclid && DIM == 3)
-        T = euclid3::move_matrix(i);
+        T = euclid3::move_matrix(viewctr.at->c7, i);
       hyperpoint H = View * tC0(T);
       ld quality = hdist0(H);
       if(quality < best) best = quality, turn = i1, TB = T;

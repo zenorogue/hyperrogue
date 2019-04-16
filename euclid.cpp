@@ -503,6 +503,8 @@ namespace euclid3 {
   typedef long long coord; 
   static const long long COORDMAX = (1<<16);
   typedef array<coord, 3> axes;  
+  typedef array<array<int, 3>, 3> intmatrix;  
+
 
   static const axes main_axes = { 1, COORDMAX, COORDMAX * COORDMAX };
   
@@ -524,7 +526,6 @@ namespace euclid3 {
     static const coord D1 = main_axes[1];
     static const coord D2 = main_axes[2];
     vector<coord> shifttable;
-    vector<transmatrix> tmatrix;
     switch(geometry) {
       case gCubeTiling:
         shifttable = { +D0, +D1, +D2 };
@@ -551,6 +552,9 @@ namespace euclid3 {
   
   coord canonicalize(coord x);
   void build_torus3();
+  coord twist(coord x, transmatrix& M);
+  extern int twisted;
+  extern intmatrix T0;
   
   struct hrmap_euclid3 : hrmap {
     vector<coord> shifttable;
@@ -615,6 +619,15 @@ namespace euclid3 {
       return build(parent, d, canonicalize(ispacemap[parent] + shifttable[d]));
       }  
 
+    transmatrix get_move(cell *c, int i) {
+      if(!twisted) return tmatrix[i];
+      transmatrix res = tmatrix[i];
+      coord id = ispacemap[c->master];
+      id += shifttable[i];
+      twist(id, res);
+      return res;
+      }
+
     void draw() {
       dq::visited_by_matrix.clear();
       dq::enqueue_by_matrix(viewctr.at, cview());
@@ -632,13 +645,38 @@ namespace euclid3 {
         drawcell(c, V, 0, false);
   
         for(int i=0; i<S7; i++)
-          dq::enqueue_by_matrix(h->move(i), V * tmatrix[i]);
+          dq::enqueue_by_matrix(h->move(i), V * get_move(h->c7, i));
         if(c == cwt.at) first_cell_to_draw = false;
         }
       first_cell_to_draw = true;
       }
     
+    transmatrix warppush(coord dif) {
+      auto v = getcoord(dif);
+      for(int i: {0, 1})
+        v[i] = gmod(v[i] + T0[i][i] / 2, T0[i][i]) - T0[i][i] / 2;
+      return eupush3(v[0], v[1], v[2]);
+      }
+    
     transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+      if(twisted) {
+        coord c1 = ispacemap[h1];
+        coord c2 = ispacemap[h2];
+        transmatrix T = warppush(c2 - c1);
+        for(int d: {-1, 1}) {
+          transmatrix I = Id;
+          coord cs = c1;
+          for(int s=0; s<3; s++) {
+            cs += d * T0[2][2] * main_axes[2];
+            I = I * eupush3(0, 0, d * T0[2][2]);
+            cs = twist(cs, I);
+            transmatrix T1 = I * warppush(c2 - cs);
+            if(hdist0(tC0(T1)) < hdist0(tC0(T)))
+              T = T1;
+            }
+          }
+        return T;
+        }
       auto d = ispacemap[h2] - ispacemap[h1];
       d = canonicalize(d);
       auto v = getcoord(d);
@@ -678,9 +716,8 @@ namespace euclid3 {
     return new hrmap_euclid3;
     }
 
-  transmatrix move_matrix(int i) {
-    auto v = getcoord(cubemap()->shifttable[i]);
-    return eupush3(v[0], v[1], v[2]);
+  transmatrix move_matrix(cell *c, int i) { 
+    return cubemap()->get_move(c, i);
     }
   
   bool pseudohept(cell *c) {
@@ -786,8 +823,6 @@ namespace euclid3 {
   
   /* quotient spaces */
 
-  typedef array<array<int, 3>, 3> intmatrix;
-  
   intmatrix make_intmatrix(axes a) {
     intmatrix T;
     T[0] = getcoord(a[0]);
@@ -820,6 +855,7 @@ namespace euclid3 {
   intmatrix T, T2, T0, T_edit;
   int det;
   int coords;
+  int twisted, twisted0, twisted_edit;
   
   void clear_torus3() {
     for(int i=0; i<3; i++) user_axes[i] = 0;
@@ -903,13 +939,53 @@ namespace euclid3 {
     canonical_index = 0;  
     add_canonical(0);
     
+    twisted = twisted0;
+    if(geometry != gCubeTiling && (T0[0][0] & 1)) twisted &=~ 1;
+    if(geometry != gCubeTiling && (T0[1][1] & 1)) twisted &=~ 2;
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+      if(i != j && T0[i][j]) twisted = 0;
+    if(T0[2][2] == 0) twisted = 0;
+    if(T0[0][0] != T0[1][1]) twisted &= 3;
+    
     for(eGeometry g: {gCubeTiling, gRhombic3, gBitrunc3}) {
       set_flag(ginf[g].flags, qANYQ, coords);
       set_flag(ginf[g].flags, qBOUNDED, coords == 3);
+      bool nonori = false;
+      if(twisted&1) nonori = !nonori;
+      if(twisted&2) nonori = !nonori;
+      if(twisted&4) nonori = !nonori;
+      set_flag(ginf[g].flags, qNONORIENTABLE, nonori);      
       }
     }
   
+  void swap01(transmatrix& M) {
+    for(int i=0; i<4; i++) swap(M[i][0], M[i][1]);
+    }
+
+  coord twist(coord x, transmatrix& M) {
+    auto coo = getcoord(x);
+    while(coo[2] >= T0[2][2]) {
+      coo[2] -= T0[2][2];
+      if(twisted & 1) coo[0] *= -1, M = M * MirrorX;
+      if(twisted & 2) coo[1] *= -1, M = M * MirrorY;
+      if(twisted & 4) swap(coo[0], coo[1]), swap01(M);
+      }
+    while(coo[2] < 0) {
+      coo[2] += T0[2][2];
+      if(twisted & 4) swap(coo[0], coo[1]), swap01(M);
+      if(twisted & 1) coo[0] *= -1, M = M * MirrorX;
+      if(twisted & 2) coo[1] *= -1, M = M * MirrorY;
+      }
+    for(int i: {0,1})
+      if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
+    return coo[0] * main_axes[0] + coo[1] * main_axes[1] + coo[2] * main_axes[2];
+    }
+
   coord canonicalize(coord x) {
+    if(twisted) {
+      transmatrix M = Id;
+      return twist(x, M);
+      }
     if(coords == 0) return x;
     if(coords == 1) {
       while(celldistance(x + optimal_axes[0]) <= celldistance(x)) x += optimal_axes[0];
@@ -928,14 +1004,53 @@ namespace euclid3 {
 
   void prepare_torus3() {
     T_edit = T0;
+    twisted_edit = twisted0;
     }
 
   void show_torus3() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(1);  
     dialog::init(XLAT("3D Euclidean spaces"));
-    for(int y=0; y<5; y++)
+    for(int y=0; y<4; y++)
       dialog::addBreak(100);
+    
+    dialog::addBreak(50);
+
+    bool nondiag = false;
+    for(int i=0; i<3; i++) 
+      for(int j=0; j<3; j++) 
+        if(T_edit[i][j] && i != j) nondiag = true;
+      
+    if(nondiag) {
+      dialog::addInfo(XLAT("twisting implemented only for diagonal matrices"));
+      dialog::addBreak(200);
+      }
+    else if(T_edit[2][2] == 0) {
+      dialog::addInfo(XLAT("nothing to twist"));
+      dialog::addInfo(XLAT("change the bottom left corner"));
+      dialog::addBreak(100);
+      }
+    else {
+      if(geometry == gCubeTiling || T0[0][0] % 2 == 0)
+        dialog::addBoolItem(XLAT("flip X coordinate"), twisted_edit & 1, 'x');
+      else
+        dialog::addBoolItem(XLAT("flipping X impossible"), twisted_edit & 1, 'x');
+      dialog::add_action([] { twisted_edit ^= 1; });
+
+      if(geometry == gCubeTiling || T0[1][1] % 2 == 0)
+        dialog::addBoolItem(XLAT("flip Y coordinate"), twisted_edit & 2, 'y');
+      else
+        dialog::addBoolItem(XLAT("flipping Y impossible"), twisted_edit & 2, 'y');
+      dialog::add_action([] { twisted_edit ^= 2; });
+
+      if(T_edit[0][0] == T_edit[1][1])
+        dialog::addBoolItem(XLAT("swap X and Y"), twisted_edit & 4, 'z');
+      else
+        dialog::addBoolItem(XLAT("swapping impossible"), twisted_edit & 4, 'z');
+      dialog::add_action([] { twisted_edit ^= 4; });
+      }
+    
+    dialog::addBreak(50);
     
     char xch = 'p';
     for(eGeometry g: {gCubeTiling, gRhombic3, gBitrunc3}) {
@@ -944,6 +1059,7 @@ namespace euclid3 {
         stop_game();
         set_geometry(g);
         T0 = T_edit;
+        twisted0 = twisted_edit;
         start_game();
         });
       }
@@ -980,6 +1096,18 @@ namespace euclid3 {
       for(int j=0; j<3; j++) {
         shift(); T0[i][j] = argi();
         }
+      build_torus3();
+      }
+    else if(argis("-twist3")) {
+      PHASEFROM(2);
+      stop_game();
+      for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++) T0[i][j] = 0;
+      
+      for(int i=0; i<3; i++) {
+        shift(); T0[i][i] = argi();
+        }
+      shift(); twisted0 = argi();
       build_torus3();
       }
   
