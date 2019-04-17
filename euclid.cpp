@@ -1084,8 +1084,18 @@ namespace euclid3 {
           if(displayfr(dialog::dcenter + dialog::dfspace * 4 * (j-1), v.position, 2, dialog::dfsize, its(T_edit[j][i]), 0xFFFFFF, 8))
             getcstat = ch;
           dialog::add_key_action(ch, [=] {
-            dialog::editNumber(T_edit[j][i], -10, +10, 1, 0, "", 
-              "columns of the matrix equal 0"
+            dialog::editNumber(T_edit[j][i], -10, +10, 1, 0, "", XLAT(
+              "This matrix lets you play on the quotient spaces of three-dimensional. "
+              "Euclidean space. Every column specifies a translation vector which "
+              "takes you back to the starting point. For example, if you put "
+              "set 2, 6, 0 on the diagonal, you get back to the starting point "
+              "if you move 2 steps in the X direction, 6 steps in the Y direction "
+              "(the quotient space is infinite in the Z direction).\n\n"
+              "You can also introduce twists for diagonal matrices: after going "
+              "the given number of steps in the Z direction, the space is also "
+              "mirrored or rotated. (More general 'twisted' spaces are currently "
+              "not implemented.)"
+              )
               );
             });
           }
