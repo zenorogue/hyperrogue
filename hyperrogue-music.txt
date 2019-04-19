@@ -133,7 +133,19 @@
 # Terracotta (and Mercury River) [75-76]
 [75] */music/hr3-graveyard.ogg
 [76] */music/hr3-graveyard.ogg
-# None [00] (used when the window is out of focus)
+# Crystal Land (alternate geometry special)
+[77] */music/hr3-desert.ogg
+# Snake Nest (three-colorable geometry special)
+[78] */music/hr3-desert.ogg
+# Docks (octagonal geometry special)
+[79] */music/hr3-caves.ogg
+# Ruined City
+[80] */music/hr3-graveyard.ogg
+# Magnetic (unused)
+[81] */music/hr3-caves.ogg
+# Jelly Kingdom
+[82] */music/hr3-laboratory.ogg
 
+# None [00] (used when the window is out of focus)
 
 HyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/
