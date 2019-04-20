@@ -1809,7 +1809,7 @@ void finishshape() {
       if(asign(y1, y2)) {
         ld x = xcross(x1, y1, x2, y2);
         if(abs(x) < 1e-3 && !(last->flags & POLY_ISSIDE)) {
-          if(s >= 2) printf("close call [%d], x = %lf\n", s, x);
+          if(s >= 2 && DIM == 2) printf("close call [%d], x = %lf\n", s, x);
           last->flags |= POLY_BADCENTERIN;
           }
         if(x < 0) last->flags ^= POLY_CENTERIN;
@@ -2406,7 +2406,6 @@ void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false
   hyperpoint center = Hypc;
   for(auto v: vertices) center += v;
   center /= n;  
-  println(hlog, "vertices = ", vertices, " center = ", center);
   
   for(int a=0; a<n; a++)
     for(int y=0; y<STEP; y++)
