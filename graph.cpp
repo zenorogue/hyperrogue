@@ -559,6 +559,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 #define VHEAD  mmscale(V, geom3::HEAD)
 #define VHEAD1 mmscale(V, geom3::HEAD1)
 #define VHEAD2 mmscale(V, geom3::HEAD2)
+#define VHEAD3 mmscale(V, geom3::HEAD3)
 
 #define VALEGS V
 #define VABODY mmscale(V, geom3::ABODY)
@@ -1240,7 +1241,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       else if(m == moRoseBeauty) {
         if(girl) {
           queuepoly(VHEAD1, shBeautyHair,  0xF0A0D0FF);
-          queuepoly(VHEAD1, shFlowerHair,  0xC00000FF);
+          queuepoly(VHEAD2, shFlowerHair,  0xC00000FF);
           }
         else {
           queuepoly(VHEAD1, shPHead,  0xF0A0D0FF);
@@ -1611,8 +1612,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0x90), m, footphase);
       queuepoly(VBS, shPBody, darkena(col, 0, 0x90));
       if(!peace::on) queuepoly(VBS * Mirror, shPSword, darkena(col, 0, 0xD0));
-      queuepoly(VHEAD, shPHead, darkena(col, 1, 0x90));
-      queuepoly(VHEAD, shPFace, darkena(col, 1, 0x90));
+      queuepoly(VHEAD1, shPHead, darkena(col, 1, 0x90));
+      queuepoly(VHEAD2, shPFace, darkena(col, 1, 0x90));
       queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
       return false;
       }
@@ -1626,9 +1627,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       queuepoly(VBODY, shJiangShi, darkena(col, 0, 0xFF));
       queuepoly(VBODY1, shJiangShiDress, darkena(0x202020, 0, 0xFF));
       queuepoly(VHEAD, shTerraHead, darkena(0x101010, 0, 0xFF));
-      queuepoly(VHEAD, shPFace, darkena(col, 0, 0xFF));
-      queuepoly(VHEAD, shJiangShiCap1, darkena(0x800000, 0, 0xFF));
-      queuepoly(VHEAD, shJiangShiCap2, darkena(0x400000, 0, 0xFF));
+      queuepoly(VHEAD1, shPFace, darkena(col, 0, 0xFF));
+      queuepoly(VHEAD2, shJiangShiCap1, darkena(0x800000, 0, 0xFF));
+      queuepoly(VHEAD3, shJiangShiCap2, darkena(0x400000, 0, 0xFF));
       return false;
       }
     
@@ -1651,7 +1652,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shFemaleBody);
       queuepoly(VBS, shFemaleBody, darkena(col, 0, 0XC0));
       queuepoly(VHEAD, shWitchHair, darkena(col, 1, 0xFF));
-      queuepoly(VHEAD, shPFace, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD1, shPFace, darkena(col, 0, 0XFF));
       return false;
       }      
       
@@ -1711,7 +1712,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       
       if(m == moRatlingAvenger) {
         queuepoly(VBODY1 * VBS, shRatCape2, 0x484848FF);
-        queuepoly(VHEAD, shRatCape1, 0x303030FF);
+        queuepoly(VHEAD1, shRatCape1, 0x303030FF);
         }
       return false;
       }
@@ -1732,8 +1733,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shPBody);
       queuepoly(VBODY * VBS, shPBody, darkena(col, 0, 0xFF));
       queuepoly(VBODY1 * VBS, shKnightCloak, darkena(col, 1, 0xFF));
-      queuepoly(VHEAD, shWestHat1, darkena(col, 2, 0XFF));
-      queuepoly(VHEAD, shWestHat2, darkena(col, 1, 0XFF));
+      queuepoly(VHEAD1, shWestHat1, darkena(col, 2, 0XFF));
+      queuepoly(VHEAD2, shWestHat2, darkena(col, 1, 0XFF));
       queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
       queuepoly(VBODY * VBS, shGunInHand, darkena(col, 1, 0XFF));
       return false;

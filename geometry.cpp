@@ -290,7 +290,7 @@ namespace geom3 {
     SLEV[4], FLATEYE,
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, BODY1, BODY2, BODY3,
-    NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2,
+    NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
     ALEG0, ALEG, ABODY, AHEAD, BIRD;
   
   string invalid;
@@ -349,6 +349,7 @@ namespace geom3 {
       HEAD = 1.188;
       HEAD1= 1.189;
       HEAD2= 1.190;
+      HEAD3= 1.191;
       ABODY = 1.08;
       AHEAD = 1.12;
       BIRD = 1.20;
@@ -376,9 +377,10 @@ namespace geom3 {
       NECK1 = lev_to_factor(human_height * .7 - reduce);
       NECK  = lev_to_factor(human_height * .8 - reduce);
       NECK3 = lev_to_factor(human_height * .9 - reduce);
-      HEAD  = lev_to_factor(human_height * .98 - reduce);
-      HEAD1 = lev_to_factor(human_height * .99 - reduce);
-      HEAD2 = lev_to_factor(human_height);
+      HEAD  = lev_to_factor(human_height * .97 - reduce);
+      HEAD1 = lev_to_factor(human_height * .98 - reduce);
+      HEAD2 = lev_to_factor(human_height * .99 - reduce);
+      HEAD3 = lev_to_factor(human_height - reduce);
       
       reduce = (DIM == 3 ? human_height * .3 : 0);
       
