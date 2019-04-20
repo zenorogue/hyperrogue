@@ -3190,7 +3190,8 @@ dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR 
   ptd.outline = poly_outline;
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
-  ptd.tinf = NULL;
+  ptd.tinf = h.tinf;
+  ptd.offset_texture = h.texture_offset;
   ptd.intester = h.intester;
   return ptd;
   }

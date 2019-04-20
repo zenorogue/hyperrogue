@@ -3998,6 +3998,8 @@ struct hpcshape {
   PPR prio;
   int flags;
   hyperpoint intester;
+  basic_textureinfo *tinf;
+  int texture_offset;
   };
 
 extern hpcshape shFullCross[2];
