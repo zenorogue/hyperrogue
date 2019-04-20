@@ -32,6 +32,7 @@ int getAnthraxData(cell *c, bool b) {
 int roundTableRadius(cell *c) {
   if(eubinary) return 28;
   if(tactic::on) return getAnthraxData(c, true);
+  if(!c->master->alt) return 28;
   return c->master->alt->alt->emeraldval & GRAIL_RADIUS_MASK;
   }
 
