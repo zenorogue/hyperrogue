@@ -152,8 +152,12 @@ color_t darkened(color_t c) {
   return c;
   }
 
-color_t darkena(color_t c, int lev, int a) {
+color_t darkena3(color_t c, int lev, int a) {
   return (darkenedby(c, lev) << 8) + a;
+  }
+
+color_t darkena(color_t c, int lev, int a) {
+  return darkena3(c, lev, DIM == 3 ? 255 : a);
   }
 
 #if !CAP_GL

@@ -326,6 +326,8 @@ transmatrix iddspin(cell *c, int d, ld bonus) {
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
+#define UNTRANS (DIM == 3 ? 0x000000FF : 0)
+
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(!onplayer && !items[itOrbEmpathy]) return;
   if(items[itOrbShield] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShield);
@@ -1227,7 +1229,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       if(girl) {
         queuepoly(VBODY1 * VBS, shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
         if(vid.cs.charid < 2) 
-          queuepoly(VBODY2 * VBS, shPrincessDress, evil ? 0xC040C0C0 : 0x8080FFC0);
+          queuepoly(VBODY2 * VBS, shPrincessDress, (evil ? 0xC040C0C0 : 0x8080FFC0) | UNTRANS);
         }
       else {
         if(vid.cs.charid < 2) 
@@ -1446,7 +1448,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shPBody);
       queuepoly(VBS, shPBody, darkena(col, 0, 0xC0));
       if(!peace::on) queuepoly(VBS, shPSword, 0xFFFF00FF);
-      queuepoly(VHEAD, shHood, 0xD0D000C0);
+      queuepoly(VHEAD, shHood, 0xD0D000C0 | UNTRANS);
       return false;
       }
     
@@ -1641,7 +1643,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       }
     
     case moVineSpirit: {
-      queuepoly(VGHOST, shGhost, 0xD0D0D0C0);
+      queuepoly(VGHOST, shGhost, 0xD0D0D0C0 | UNTRANS);
       queuepoly(VGHOST, shEyes, 0xFF0000FF);
       return false;
       }
@@ -1664,9 +1666,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
 
     case moKrakenH: {
       queuepoly(VFISH, shKrakenHead, darkena(col, 0, 0xD0));
-      queuepoly(VFISH, shKrakenEye, 0xFFFFFFC0);
+      queuepoly(VFISH, shKrakenEye, 0xFFFFFFC0 | UNTRANS);
       queuepoly(VFISH, shKrakenEye2, 0xC0);
-      queuepoly(VFISH * Mirror, shKrakenEye, 0xFFFFFFC0);
+      queuepoly(VFISH * Mirror, shKrakenEye, 0xFFFFFFC0 | UNTRANS);
       queuepoly(VFISH * Mirror, shKrakenEye2, 0xC0);
       return false;
       }
@@ -1743,16 +1745,16 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
     case moNecromancer: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
       ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, 0xC00000C0);
+      queuepoly(VBS, shPBody, 0xC00000C0 | UNTRANS);
       queuepoly(VHEAD, shHood, darkena(col, 1, 0xFF));
       return false;
       }
 
     case moDraugr: {
-      const transmatrix VBS = VBODY * otherbodyparts(V, 0x483828D0, m, footphase);
-      queuepoly(VBS, shPBody, 0x483828D0);
-      queuepoly(VBS, shPSword, 0xFFFFD0A0);
-      queuepoly(VHEAD, shPHead, 0x483828D0);
+      const transmatrix VBS = VBODY * otherbodyparts(V, 0x483828D0 | UNTRANS, m, footphase);
+      queuepoly(VBS, shPBody, 0x483828D0 | UNTRANS);
+      queuepoly(VBS, shPSword, 0xFFFFD0A0 | UNTRANS);
+      queuepoly(VHEAD, shPHead, 0x483828D0 | UNTRANS);
       // queuepoly(V, shSkull, 0xC06020D0);
       //queuepoly(V, shSkullEyes, 0x000000D0);
   //  queuepoly(V, shWightCloak, 0xC0A080A0);
@@ -1760,15 +1762,15 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       b--;
       if(b < 0) b = 0;
       if(b > 6) b = 6;
-      queuepoly(VHEAD1, shWightCloak, 0x605040A0 + 0x10101000 * b);
+      queuepoly(VHEAD1, shWightCloak, (0x605040A0 | UNTRANS) + 0x10101000 * b);
       return false;
       }
 
     case moVoidBeast: {
-      const transmatrix VBS = VBODY * otherbodyparts(V, 0x080808D0, m, footphase);
-      queuepoly(VBS, shPBody, 0x080808D0);
-      queuepoly(VHEAD, shPHead, 0x080808D0);
-      queuepoly(VHEAD, shWightCloak, 0xFF0000A0);
+      const transmatrix VBS = VBODY * otherbodyparts(V, 0x080808D0 | UNTRANS, m, footphase);
+      queuepoly(VBS, shPBody, 0x080808D0 | UNTRANS);
+      queuepoly(VHEAD, shPHead, 0x080808D0 | UNTRANS);
+      queuepoly(VHEAD, shWightCloak, 0xFF0000A0 | UNTRANS);
       return false;
       }
 
@@ -1825,7 +1827,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shYeti);
       queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
       queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
-      queuepoly(VHEAD, shPFace, 0xFFFFFF80);
+      queuepoly(VHEAD, shPFace, 0xFFFFFF80 | UNTRANS);
       return false;
       }        
 
@@ -1834,7 +1836,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shYeti);
       queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
       queuepoly(VHEAD1, shPHead, darkena(0xFF8000, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, 0xFFFFFF80);
+      queuepoly(VHEAD, shPFace, 0xFFFFFF80 | UNTRANS);
       return false;
       }        
 
@@ -1843,7 +1845,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col,
       ShadowV(V, shWaterElemental);
       queuepoly(VBS, shWaterElemental, darkena(col, 0, 0xC0));
       queuepoly(VHEAD1, shFemaleHair, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, 0xF0000080);
+      queuepoly(VHEAD, shPFace, 0xF0000080 | UNTRANS);
       return false;
       }        
 
@@ -4026,21 +4028,21 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
     if(c2->land == laBarrier) return darkena(lcolor(c), 0, 0x40);
     return darkena(gradient(lcolor(c), lcolor(c2), 0, 1, 2), 0, 0x40);
     }
-  if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena(winf[c->wall].color, 0, 0x40);
+  if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena3(winf[c->wall].color, 0, 0x40);
   if(c->wall == c2->wall) return 0;
-  if(isFire(c) && !isFire(c2)) return darkena(wcol, 0, 0x30);
-  if(c->wall == waLadder) return darkena(wcol, 0, 0x30);
+  if(isFire(c) && !isFire(c2)) return darkena3(wcol, 0, 0x30);
+  if(c->wall == waLadder) return darkena3(wcol, 0, 0x30);
 
   if(c->wall == waChasm && c2->wall != waChasm) return 0x606060A0;
   if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x0000C060;
-  if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena(winf[c->wall].color, 0, 0x40);
+  if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena3(winf[c->wall].color, 0, 0x40);
   if(among(c->wall, waCanopy, waSolidBranch, waWeakBranch) && !among(c2->wall, waCanopy, waSolidBranch, waWeakBranch)) return 0x00C00060;
-  if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena(0xFF00FF, 0, 0x80);
+  if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena3(0xFF00FF, 0, 0x80);
   if(realred(c->wall) && realred(c2->wall) && c->wall != c2->wall) {
     int l = snakelevel(c) - snakelevel(c2);
-    if(l > 0) return darkena(floorcolors[laRedRock], 0, 0x30 * l);
+    if(l > 0) return darkena3(floorcolors[laRedRock], 0, 0x30 * l);
     }
-  if(c->wall == waMagma && c2->wall != waMagma) return darkena(magma_color(lavatide(c, -1)/4), 0, 0x80);
+  if(c->wall == waMagma && c2->wall != waMagma) return darkena3(magma_color(lavatide(c, -1)/4), 0, 0x80);
   return 0;
   }
 
