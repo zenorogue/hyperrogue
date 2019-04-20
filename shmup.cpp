@@ -1273,6 +1273,7 @@ void shootBullet(monster *m) {
   monster* bullet = new monster;
   bullet->base = m->base;
   bullet->at = m->at;
+  if(DIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
   bullet->type = moBullet;
   bullet->parent = m;
   bullet->pid = m->pid;
@@ -1291,6 +1292,7 @@ void shootBullet(monster *m) {
     monster* bullet = new monster;
     bullet->base = m->base;
     bullet->at = m->at * spin(M_PI/4*i);
+    if(DIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
     bullet->type = moBullet;
     bullet->parent = m;
     bullet->pid = m->pid;
@@ -1796,7 +1798,7 @@ void movePlayer(monster *m, int delta) {
   
   hyperpoint avg_inertia;
   
-  if(inertia_based) {
+  if(inertia_based && canmove) {
     avg_inertia = m->inertia;
     m->inertia[frontdir()] += playergo[cpid] / 1000;
     avg_inertia[frontdir()] += playergo[cpid] / 2000;
@@ -2250,6 +2252,7 @@ void shoot(eItem it, monster *m) {
   monster* bullet = new monster;
   bullet->base = m->base;
   bullet->at = m->at * rspintox(inverse(m->pat) * mouseh);
+  if(DIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
   bullet->type = it == itOrbDragon ? moFireball : it == itOrbAir ? moAirball : moBullet;
   bullet->parent = m;
   bullet->pid = m->pid;
@@ -2384,7 +2387,7 @@ void moveBullet(monster *m, int delta) {
   
   if(m->base->land == laAsteroids) {
     m->hitpoints += delta;
-    if(m->hitpoints >= 500) m->dead = true;
+    if(m->hitpoints >= (DIM == 3 ? 750 : 500)) m->dead = true;
     }
 
   if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
@@ -3629,7 +3632,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           }
         else {
           transmatrix t = view * spin(curtime / 50.0);
-          queuepoly(mmscale(t, 1.15), shKnife, col);
+          queuepoly(DIM == 3 ? t : mmscale(t, 1.15), shKnife, col);
           ShadowV(t, shKnife);
           }
         break;
