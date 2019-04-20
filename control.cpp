@@ -981,7 +981,7 @@ bool gmodekeys(int sym, int uni) {
   else {
     if(NUMBERKEY == '1') { vid.yshift = 0; vid.sspeed = 0; }
     else if(NUMBERKEY == '2') { vid.yshift = 0; vid.sspeed = -10; }
-    else if(NUMBERKEY == '3') { vid.yshift = 2; vid.sspeed = 0; }
+    else if(NUMBERKEY == '3') { vid.yshift = 1; vid.sspeed = 0; }
     else if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
     else return false;
     return true;
