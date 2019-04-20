@@ -532,7 +532,7 @@ void viewall() {
     itemcells.push_back(c);
     }
   int id = 0;
-  for(int it=1; it<ittypes; it++) {
+  for(int it=1; it<ittypes; it++) if(it != itBarrow) {
     if(id >= isize(itemcells)) break;
     itemcells[id++]->item = eItem(it);
     }
@@ -650,7 +650,7 @@ int read_cheat_args() {
     PHASE(3); shift(); test_distances(argi());
     }
   else if(argis("-M")) {
-    PHASE(3) cheat();
+    PHASE(3) cheat(); start_game(); if(DIM == 3) { drawthemap(); bfs(); }
     shift(); eMonster m = readMonster(args());
     shift(); int q = argi();
     printf("m = %s q = %d\n", dnameof(m), q);
