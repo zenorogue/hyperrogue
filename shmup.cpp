@@ -3589,7 +3589,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         dynamicval<int> d(cpid, m->pid);
         if(!hide_player() || !subscreens::is_current_player(m->pid)) {
           drawPlayerEffects(view, c, true);
-          if(DIM == 3) view = view * spin(-M_PI/2);
+          if(DIM == 3) view = view * spin(-M_PI/2) * cspin(0, 2, -M_PI/2);
           if(m->inBoat) m->footphase = 0;
           if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
           }
@@ -3686,11 +3686,11 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
         if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin);
-        if(m->type == moMimic && DIM == 3)
-          drawMonsterType(m->type, c, view * spin(-M_PI/2), col, m->footphase);
-        else if(DIM == 3)
-          drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase);
-        else
+        /* if(m->type == moMimic && DIM == 3)
+          drawMonsterType(m->type, c, view * spin(-M_PI/2), col, m->footphase); */
+        /* else if(DIM == 3)
+          drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase); */
+        /* else */
           drawMonsterType(m->type, c, view, col, m->footphase);
         if(m->type == moTortoise) tortoise::emap.erase(c);
         break;

@@ -314,8 +314,6 @@ double hexshiftat(cell *c) {
   return 0;
   }
 
-#define FACE3 (DIM == 3 ? M_PI/2 : 0)
-
 transmatrix ddspin(cell *c, int d, ld bonus) {
   if(DIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
@@ -1129,15 +1127,20 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
     }
   }
 
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
+bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col, double footphase) {
 
 #if MAXMDIM >= 4
   if(DIM == 3 && m != moPlayer)
-    radarpoints.emplace_back(radarpoint{makeradar(V), minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF });
+    radarpoints.emplace_back(radarpoint{makeradar(V1), minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF });
 #endif
 
 #if CAP_SHAPES
   char xch = minf[m].glyph;
+  
+  transmatrix V = V1;
+  if(DIM == 3 && (classflag(m) & CF_FACE_UP)) V = V1 * cspin(0, 2, M_PI/2);
+  
+  // if(DIM == 3) V = V * cspin(0, 2, M_PI/2);
 
   if(m == moTortoise && where && where->stuntime >= 3)
     drawStunStars(V, where->stuntime-2);
@@ -2042,7 +2045,7 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
     footphase = a.footphase;
     V = V * a.wherenow;
     if(a.attacking == 2) V = V * pispin;
-    if(DIM == 3) V = V * cspin(0, 2, M_PI/2);
+    // if(DIM == 3) V = V * cspin(0, 2, M_PI/2);
     a.ltick = ticks;
     return true;
     }
@@ -2409,7 +2412,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
         bheat = HEAT(c->move(i));
         d = i;
         }
-      Vs = Vs * ddspin(c, d, FACE3);
+      Vs = Vs * ddspin(c, d, 0);
       }
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
@@ -2459,7 +2462,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
         }
       else {
         hyperpoint V0 = inverse(cwtV) * tC0(Vs);
-        Vs = cwtV * rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI/2);
+        Vs = cwtV * rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI);
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
@@ -4174,14 +4177,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(multi::players > 1) {
       for(int i=0; i<numplayers(); i++) 
         if(playerpos(i) == c) {
-          playerV = V * ddspin(c, multi::player[i].spin, FACE3);
+          playerV = V * ddspin(c, multi::player[i].spin, 0);
           if(multi::player[i].mirrored) playerV = playerV * Mirror;
           if(multi::player[i].mirrored == mirrored)
             multi::whereis[i] = playerV;
           }
       }
     else {
-      playerV = V * ddspin(c, cwt.spin, FACE3);
+      playerV = V * ddspin(c, cwt.spin, 0);
       if(cwt.mirrored) playerV = playerV * Mirror;
       if(orig) cwtV = playerV;
       }
