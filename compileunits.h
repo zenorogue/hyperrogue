@@ -65,6 +65,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "geometry.cpp"
 #include "geometry2.cpp"
 #include "polygons.cpp"
+#include "3d-models.cpp"
 #include "floorshapes.cpp"
 #include "mapeditor.cpp"
 #if CAP_MODEL

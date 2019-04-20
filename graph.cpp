@@ -580,43 +580,56 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 
   // todo
 
-  if(detaillevel >= 2) { 
+  if(detaillevel >= 2 && DIM == 2) { 
     transmatrix VL = mmscale(V, geom3::LEG1);
     queuepoly(VL * xpush(rightfoot*3/4), shHumanLeg, col);
     queuepoly(VL * Mirror * xpush(-rightfoot*3/4), shHumanLeg, col);
     }
 
-  if(true) {
+  if(DIM == 2) {
     transmatrix VL = mmscale(V, geom3::LEG);
     queuepoly(VL * xpush(rightfoot/2), shHumanLeg, col);
     queuepoly(VL * Mirror * xpush(-rightfoot/2), shHumanLeg, col);
     }
 
-  if(detaillevel >= 2) { 
+  if(detaillevel >= 2 && DIM == 2) { 
     transmatrix VL = mmscale(V, geom3::LEG3);
     queuepoly(VL * xpush(rightfoot/4), shHumanLeg, col);
     queuepoly(VL * Mirror * xpush(-rightfoot/4), shHumanLeg, col);
     }
 
-  if(who == moWaterElemental) {
+  transmatrix Tright, Tleft;
+  
+  if(DIM == 2) {
+    Tright = VFOOT * xpush(rightfoot);
+    Tleft = VFOOT * Mirror * xpush(-rightfoot);
+    }
+  else {
+    Tright = V * cspin(0, 2, rightfoot/SCALE * 3);
+    Tleft  = V * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
+    }
+    
+  if(who == moWaterElemental && DIM == 2) {
     double fishtail = footfun(footphase / .4) / 4 * 1.5;
     queuepoly(VFOOT * xpush(fishtail), shFishTail, watercolor(100));
     }
   else if(who == moSkeleton) {
-    queuepoly(VFOOT * xpush(rightfoot), shSkeletalFoot, col);
-    queuepoly(VFOOT * Mirror * xpush(-rightfoot), shSkeletalFoot, col);
+    queuepoly(Tright, shSkeletalFoot, col);
+    queuepoly(Tleft, shSkeletalFoot, col);
     return spin(rightfoot * wobble);
     }
   else if(isTroll(who) || who == moMonkey || who == moYeti || who == moRatling || who == moRatlingAvenger || who == moGoblin) {
-    queuepoly(VFOOT * xpush(rightfoot), shYetiFoot, col);
-    queuepoly(VFOOT * Mirror * xpush(-rightfoot), shYetiFoot, col);
+    queuepoly(Tright, shYetiFoot, col);
+    queuepoly(Tleft, shYetiFoot, col);
     }
   else {
-    queuepoly(VFOOT * xpush(rightfoot), shHumanFoot, col);
-    queuepoly(VFOOT * Mirror * xpush(-rightfoot), shHumanFoot, col);
+    queuepoly(Tright, shHumanFoot, col);
+    queuepoly(Tleft, shHumanFoot, col);
     }
 
-  if(!mmspatial) return spin(rightfoot * wobble);
+  if(DIM == 3) queuepoly(VHEAD, shPHeadOnly, col);
+
+  if(DIM == 3 || !mmspatial) return spin(rightfoot * wobble);  
 
   if(detaillevel >= 2 && who != moZombie)
     queuepoly(mmscale(V, geom3::NECK1), shHumanNeck, col);
@@ -630,8 +643,6 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
     }
   
   return spin(rightfoot * wobble);
-  
-  return Id;
   }
 #endif
 
