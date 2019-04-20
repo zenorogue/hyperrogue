@@ -352,6 +352,7 @@ namespace reg3 {
         allh[i]->c7 = newCell(S7, allh[i]);
         allh[i]->fieldval = i;
         allh[i]->zebraval = 0;
+        allh[i]->alt = NULL;
         acells.push_back(allh[i]->c7);
         }
       
