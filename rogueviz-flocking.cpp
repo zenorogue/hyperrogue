@@ -16,6 +16,30 @@
 
 // press 'o' when flocking active to change the parameters.
 
+#ifndef NO_THREADS
+#include <thread>
+int threads = 1;
+#endif
+
+template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
+#ifdef NO_THREADS
+  return action(0,N);
+#else
+  if(threads == 1) return action(0,N);
+  std::vector<std::thread> v;
+  typedef decltype(action(0,0)) Res;
+  std::vector<Res> results(threads);
+  for(int k=0; k<threads; k++)
+    v.emplace_back([&,k] () { 
+      results[k] = action(N*k/threads, N*(k+1)/threads); 
+      });
+  for(std::thread& t:v) t.join();
+  Res res = 0;
+  for(Res r: results) res += r;
+  return res;
+#endif
+  }
+
 namespace rogueviz {
 
 namespace flocking {
@@ -121,7 +145,7 @@ namespace flocking {
     
     lines.clear();
 
-    for(int i=0; i<N; i++) {
+    parallelize(N, [&monsat, &d, &vels, &pats] (int a, int b) { for(int i=a; i<b; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       
@@ -142,7 +166,8 @@ namespace flocking {
       int coh_count = 0;
       
       for(auto& p: relmatrices[m->base]) {
-        for(auto m2: monsat[p.first]) if(m != m2) {
+        auto f = monsat.find(p.first);
+        if(f != monsat.end()) for(auto m2: f->second) if(m != m2) {
           ld vel2 = m2->vel;
           transmatrix at2 = I * p.second * m2->at;
 
@@ -203,7 +228,8 @@ namespace flocking {
       
       pats[i] = m->at * alphaspin * xpush(vels[i] * d);
       fixmatrix(pats[i]);
-      }
+      } return 0; });
+      
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
@@ -280,6 +306,11 @@ namespace flocking {
     else if(argis("-flockfollow")) {
       shift(); follow = argi();
       }
+    #ifndef NO_THREADS
+    else if(argis("-threads")) {
+      shift(); threads = argi();
+      }
+    #endif
     else return 1;
     return 0;
     }
