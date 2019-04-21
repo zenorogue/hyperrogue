@@ -251,8 +251,14 @@ namespace flocking {
     
     if(follow) {
 
-      if(follow == 1) 
+      if(follow == 1) {
+        gmatrix.clear();
+        vdata[0].m->pat = View * calc_relative_matrix(vdata[0].m->base, viewctr.at->c7, C0) * vdata[0].m->at;
         View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
+        if(DIM == 3) {
+          View = hr::cspin(1, 2, 90 * degree) * View;
+          }
+        }
 
       if(follow == 2) {
         // we take the average in R^3 of all the boid positions of the Minkowski hyperboloid
@@ -261,7 +267,10 @@ namespace flocking {
         // (the same method is commonly used on the sphere AFAIK)
         using namespace hyperpoint_vec;
         hyperpoint h = Hypc;
-        for(int i=0; i<N; i++) h += tC0(vdata[i].m->pat);
+        for(int i=0; i<N; i++) if(gmatrix.count(vdata[i].m->base)) {
+          vdata[i].m->pat = gmatrix[vdata[i].m->base] * vdata[i].m->at;
+          h += tC0(vdata[i].m->pat);
+          }
         h = normalize(h);
         View = gpushxto0(h) * View;
         }
