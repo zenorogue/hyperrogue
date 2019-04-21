@@ -119,8 +119,6 @@ namespace flocking {
       monsat[m->base].push_back(m);
       }
     
-    for(cell *c: currentmap->allcells()) ggmatrix(c);
-    
     lines.clear();
 
     for(int i=0; i<N; i++) {
@@ -143,8 +141,6 @@ namespace flocking {
       hyperpoint coh = hpxyz(0, 0, 0);
       int coh_count = 0;
       
-      m->findpat();
-
       for(auto& p: relmatrices[m->base]) {
         for(auto m2: monsat[p.first]) if(m != m2) {
           ld vel2 = m2->vel;
@@ -205,13 +201,14 @@ namespace flocking {
         vels[i] = max_speed;
         }      
       
-      pats[i] = m->pat * spin(alpha) * xpush(vels[i] * d);
+      pats[i] = m->at * alphaspin * xpush(vels[i] * d);
+      fixmatrix(pats[i]);
       }
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       // these two functions compute new base and at, based on pats[i]
-      m->rebasePat(pats[i]);
+      m->at = pats[i];
       virtualRebase(m, true);
       m->vel = vels[i];
       }
