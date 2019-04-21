@@ -180,7 +180,7 @@ namespace flocking {
           
           // distance and azimuth to m2
           ld di = hdist0(ac);
-          ld alpha = -atan2(ac);
+          transmatrix alphaspin = rspintox(ac); // spin(-atan2(ac));
 
           color_t col = 0;
             
@@ -197,13 +197,13 @@ namespace flocking {
             // azimuthal equidistant projection of ac
             // (thus the cohesion force pushes us towards the
             // average of azimuthal equidistant projections)
-            coh += spin(alpha) * hpxyz(di, 0, 0);
+            coh += alphaspin * hpxyz(di, 0, 0);
             coh_count++;
             col |= 0xFF40;
             }
           
-          if(di < sep_range) {
-            sep -= spin(alpha) * hpxyz(1 / di, 0, 0);
+          if(di < sep_range && di > 0) {
+            sep -= alphaspin * hpxyz(1 / di, 0, 0);
             sep_count++;
             col |= 0xFF000040;
             }
@@ -221,7 +221,8 @@ namespace flocking {
       
       // hypot2 is the length of a vector in R^2
       vels[i] = hypot_d(2, velvec);
-      ld alpha = -atan2(velvec);
+      
+      transmatrix alphaspin = rspintox(velvec); // spin(-atan2(velvec));
 
       if(vels[i] > max_speed) { 
         velvec = velvec * (max_speed / vels[i]);
