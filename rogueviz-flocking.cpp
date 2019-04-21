@@ -99,8 +99,10 @@ namespace flocking {
   int precision = 10;
   
   void simulate(int delta) {
-    while(delta > precision && delta < 100 * precision) { 
+    int iter = 0;
+    while(delta > precision && iter < 100) { 
       simulate(precision); delta -= precision; 
+      iter++;
       }      
     ld d = delta / 1000.;
     using namespace hyperpoint_vec;
