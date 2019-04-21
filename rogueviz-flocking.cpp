@@ -67,6 +67,8 @@ namespace flocking {
   
   ld check_range = 2.5;
   
+  char shape = 'b';
+  
   vector<tuple<hyperpoint, hyperpoint, color_t> > lines;
   
   // parameters of each boid
@@ -112,7 +114,7 @@ namespace flocking {
       vd.name = its(i+1);
       vd.cp = dftcolor;
       vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
-      vd.cp.shade = 'b';
+      vd.cp.shade = shape;
       vd.m->vel = ini_speed;
       }
   
@@ -305,6 +307,11 @@ namespace flocking {
       }
     else if(argis("-flockfollow")) {
       shift(); follow = argi();
+      }
+    else if(argis("-flockshape")) {
+      shift(); shape = argcs()[0];
+      for(int i=0; i<N; i++) 
+        vdata[i].cp.shade = shape;
       }
     #ifndef NO_THREADS
     else if(argis("-threads")) {
