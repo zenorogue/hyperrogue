@@ -306,6 +306,9 @@ namespace flocking {
     else if(argis("-sepf")) {
       shift(); sep_factor = argf();
       }
+    else if(argis("-checkr")) {
+      shift(); check_range = argf();
+      }
     else if(argis("-cohr")) {
       shift(); coh_range = argf();
       }
