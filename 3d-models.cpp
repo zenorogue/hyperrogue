@@ -744,6 +744,10 @@ void make_3d_models() {
   make_revolution_cut(shEagle, 180, 0, 0.05*S);
   make_revolution_cut(shHawk, 180, 0, 0.05*S);
 
+  make_revolution_cut(shTinyBird, 180, 0, 0.025 * S);
+  make_revolution_cut(shTinyShark, 90);
+  make_revolution_cut(shMiniGhost, 60);
+
   make_revolution_cut(shGargoyleWings, 180, 0, 0.05*S);
   make_revolution_cut(shGargoyleBody, 180, 0, 0.05*S);
   make_revolution_cut(shGadflyWing, 180, 0, 0.05*S);
