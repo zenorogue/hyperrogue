@@ -318,6 +318,9 @@ namespace flocking {
     else if(argis("-flockfollow")) {
       shift(); follow = argi();
       }
+    else if(argis("-flockprec")) {
+      shift(); precision = argi();
+      }
     else if(argis("-flockshape")) {
       shift(); shape = argcs()[0];
       for(int i=0; i<N; i++) 
@@ -409,7 +412,7 @@ namespace flocking {
 
     dialog::addSelItem("precision", its(precision), 'p');
     dialog::add_action([]() {
-      dialog::editNumber(N, 0, 1000, 1, 10, "", "smaller number = more precise simulation");
+      dialog::editNumber(precision, 0, 1000, 1, 10, "", "smaller number = more precise simulation");
       });
 
     dialog::addSelItem("change geometry", XLAT(ginf[geometry].shortname), 'g');
