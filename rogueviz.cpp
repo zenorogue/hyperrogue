@@ -27,6 +27,8 @@
 
 #include "rogueviz.h"
 
+namespace hr { extern hpcshape shEagle, shMiniGhost, shGhost, shShark; }
+
 namespace rogueviz {
 
 const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
@@ -1111,11 +1113,15 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
   auto& sh = *(vshapes[vertex_shape]);
   
   if(vertex_shape == 0) ;
+  else if(DIM == 3 && among(cp.shade, 'b', 'f', 'g', 'B', 'F', 'G')) {
+    V1 = V;
+    }
   else if(DIM == 3) {
     V1 = face_the_player(V);
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
     queuepolyat(V1, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
     if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
+    V1 = V;
     }
   else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
@@ -1130,12 +1136,18 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     queuepoly(V1 = V, sh, darken_a(cp.color1));
     if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
     }
-  if(cp.shade == 't') queuepoly(V1, shDiskT, darken_a(cp.color2));
-  if(cp.shade == 's') queuepoly(V1, shDiskS, darken_a(cp.color2));
-  if(cp.shade == 'q') queuepoly(V1, shDiskSq, darken_a(cp.color2));
-  if(cp.shade == 'm') queuepoly(V1, shDiskM, darken_a(cp.color2));
-  if(cp.shade == 'b') queuepoly(V1, shTinyBird, darken_a(cp.color2));
-  if(cp.shade == 'f') queuepoly(V1, shTinyShark, darken_a(cp.color2));
+  switch(cp.shade) {
+    case 't': queuepoly(V1, shDiskT, darken_a(cp.color2)); return;
+    case 's': queuepoly(V1, shDiskS, darken_a(cp.color2)); return;
+    case 'q': queuepoly(V1, shDiskSq, darken_a(cp.color2)); return;
+    case 'm': queuepoly(V1, shDiskM, darken_a(cp.color2)); return;
+    case 'b': queuepoly(V1, shTinyBird, darken_a(cp.color2)); return;
+    case 'f': queuepoly(V1, shTinyShark, darken_a(cp.color2)); return;
+    case 'g': queuepoly(V1, shMiniGhost, darken_a(cp.color2)); return;
+    case 'B': queuepoly(V1, shEagle, darken_a(cp.color2)); return;
+    case 'F': queuepoly(V1, shShark, darken_a(cp.color2)); return;
+    case 'G': queuepoly(V1, shGhost, darken_a(cp.color2)); return;
+    }
   }
 
 unordered_map<pair<edgeinfo*, int>, int> drawn_edges;
