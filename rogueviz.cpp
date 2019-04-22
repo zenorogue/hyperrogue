@@ -280,6 +280,8 @@ namespace collatz {
   double s2, s3, p2, p3;
   double cshift = -1;
   
+  transmatrix T2, T3;
+  
   edgetype *collatz1, *collatz2;
   
   void start() {
@@ -295,6 +297,9 @@ namespace collatz {
     addedge(0, 0, 1, false, collatz::collatz1);
     vd.name = "1";
     storeall();
+
+    T2 = spin(collatz::s2) * xpush(collatz::p2);
+    T3 = spin(collatz::s3) * xpush(collatz::p3);
     }
   }
 
@@ -1342,7 +1347,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       int i0 = isize(vdata);
       vdata.resize(i0+1);
       vertexdata& vdn = vdata[i0];
-      createViz(i0, m->base, m->at * spin(collatz::s2) * xpush(collatz::p2));
+      createViz(i0, m->base, m->at * collatz::T2);
       
       virtualRebase(vdn.m, true);
       vdn.cp = perturb(cp);
@@ -1366,7 +1371,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       if(m3 % 3 == 2 && s != "2" && s != "1") {
         vdata.resize(i0+2);
         vertexdata& vdn = vdata[i0+1];
-        createViz(i0+1, m->base, m->at * spin(collatz::s3) * xpush(collatz::p3));          
+        createViz(i0+1, m->base, m->at * collatz::T3);
         virtualRebase(vdn.m, true);
         vdn.cp = perturb(cp);
         vdn.data = 0;
@@ -1615,6 +1620,16 @@ bool turn(int delta) {
 #define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
 #endif
 
+int dimid(char x) {
+  if(x >= 'a' && x < 'a' + DIM) return x - 'a';
+  else if(x >= '0' && x < '0' + DIM) return x - '0';
+  else if(x >= 'x' && x < 'x' + DIM) return x - 'x';
+  else {
+    println(hlog, "incorrect dimension ID");
+    throw hr_exception();
+    }
+  }
+
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
@@ -1696,6 +1711,22 @@ int readArgs() {
     using namespace collatz; 
     shift(); sscanf(argcs(), "%lf,%lf,%lf,%lf", &s2, &p2, &s3, &p3);
     start();
+    }
+
+  else if(argis("-collatz3")) {
+    PHASE(3); 
+    using namespace collatz; 
+    s2 = p2 = s3 = p3 = 0;
+    start();
+    shift();
+    transmatrix *T = &T2;
+    while(true) {
+      if(arg::pos >= isize(arg::argument)) break;
+      else if(argis("fd")) { shift(); *T = *T * xpush(argf()); shift(); }
+      else if(argcs()[0] == 't') { shift(); *T = *T * hr::cspin(dimid(argcs()[1]),dimid(argcs()[2]),argf()); shift(); }
+      else if(argis("/")) { shift(); if(T == &T2) T = &T3; else break; }
+      else break;
+      }
     }
 
   else if(argis("-spiral")) {
