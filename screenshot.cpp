@@ -695,6 +695,7 @@ bool record_animation() {
   lastticks = 0;
   ticks = 0;
   for(int i=0; i<noframes; i++) {
+    printf("%d/%d\n", i, noframes);
     int newticks = i * period / noframes;
     while(ticks < newticks) shmup::turn(1), ticks++;
     dynamicval<bool> v2(inHighQual, true);
