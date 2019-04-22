@@ -2292,6 +2292,7 @@ namespace arg {
   int argi();
   ld argf();
   bool argis(const string& s);
+  bool nomore();
   unsigned arghex();
 
   inline void shift_arg_formula(ld& x, const reaction_t& r = reaction_t()) { shift(); x = argf(); 

@@ -65,6 +65,8 @@ namespace arg {
     lshift(); if(pos > isize(argument)) { printf("Missing parameter\n"); exit(1); }
     }
   
+  bool nomore() { return pos >= isize(argument); }
+  
   const string& args() { return argument[pos]; }
   const char* argcs() { return args().c_str(); }
   int argi() { return atoi(argcs()); }

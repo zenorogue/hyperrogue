@@ -1721,9 +1721,9 @@ int readArgs() {
     shift();
     transmatrix *T = &T2;
     while(true) {
-      if(arg::pos >= isize(arg::argument)) break;
+      if(arg::nomore()) break;
       else if(argis("fd")) { shift(); *T = *T * xpush(argf()); shift(); }
-      else if(argcs()[0] == 't') { shift(); *T = *T * hr::cspin(dimid(argcs()[1]),dimid(argcs()[2]),argf()); shift(); }
+      else if(argcs()[0] == 't') { int x = dimid(argcs()[1]); int y = dimid(argcs()[2]); shift(); *T = *T * hr::cspin(x, y, argf()); shift(); }
       else if(argis("/")) { shift(); if(T == &T2) T = &T3; else break; }
       else break;
       }
