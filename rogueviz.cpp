@@ -1329,7 +1329,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     
     hyperpoint h = tC0(V * m->at);
-    transmatrix V2 = DIM == 3 ? V : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
+    transmatrix V2 = DIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
