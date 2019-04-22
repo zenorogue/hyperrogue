@@ -1379,13 +1379,15 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
 
     case moEagle: case moParrot: case moBomberbird: case moAlbatross:
     case moTameBomberbird: case moWindCrow: case moTameBomberbirdMoved:
-    case moSandBird: case moAcidBird:
+    case moSandBird: case moAcidBird: {
       ShadowV(V, shEagle);
+      auto& sh = DIM == 3 ? shAnimatedEagle[((long long)(ticks) * 30 / 1000) % 30] : shEagle;
       if(m == moParrot && DIM == 3)
-        queuepolyat(VBIRD, shEagle, darkena(col, 0, 0xFF), PPR::SUPERLINE);
+        queuepolyat(VBIRD, sh, darkena(col, 0, 0xFF), PPR::SUPERLINE);
       else
-        queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
+        queuepoly(VBIRD, sh, darkena(col, 0, 0xFF));
       return false;
+      }
     
     case moSparrowhawk: case moWestHawk: {
       ShadowV(V, shHawk);

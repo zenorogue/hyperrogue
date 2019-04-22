@@ -27,7 +27,7 @@
 
 #include "rogueviz.h"
 
-namespace hr { extern hpcshape shEagle, shMiniGhost, shGhost, shShark; }
+namespace hr { extern hpcshape shEagle, shMiniGhost, shGhost, shShark, shAnimatedEagle[30], shAnimatedTinyEagle[30]; }
 
 namespace rogueviz {
 
@@ -1107,7 +1107,7 @@ color_t darken_a(color_t c) {
   return c;
   }
 
-void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info) {
+void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info, int i) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
   else
@@ -1146,10 +1146,10 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     case 's': queuepoly(V1, shDiskS, darken_a(cp.color2)); return;
     case 'q': queuepoly(V1, shDiskSq, darken_a(cp.color2)); return;
     case 'm': queuepoly(V1, shDiskM, darken_a(cp.color2)); return;
-    case 'b': queuepoly(V1, shTinyBird, darken_a(cp.color2)); return;
+    case 'b': queuepoly(V1, DIM == 3 ? shAnimatedTinyEagle[((long long)(ticks) * 30 / 1000+i) % 30] : shTinyBird, darken_a(cp.color2)); return;
     case 'f': queuepoly(V1, shTinyShark, darken_a(cp.color2)); return;
     case 'g': queuepoly(V1, shMiniGhost, darken_a(cp.color2)); return;
-    case 'B': queuepoly(V1, shEagle, darken_a(cp.color2)); return;
+    case 'B': queuepoly(V1, DIM == 3 ? shAnimatedEagle[((long long)(ticks) * 30 / 1000+i) % 30] : shEagle, darken_a(cp.color2)); return;
     case 'F': queuepoly(V1, shShark, darken_a(cp.color2)); return;
     case 'G': queuepoly(V1, shGhost, darken_a(cp.color2)); return;
     }
@@ -1315,7 +1315,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     }
 
   if(!vd.virt) {
-    queuedisk(V * m->at, ghilite ? colorpair(0xFF0000FF) : vd.cp, false, vd.info);
+    queuedisk(V * m->at, ghilite ? colorpair(0xFF0000FF) : vd.cp, false, vd.info, i);
     }
   
   
@@ -1430,7 +1430,7 @@ bool rogueviz_hud() {
     transmatrix V = atscreenpos(x, y, current_display->radius/4);
     
     poly_outline = OUTLINE_NONE;
-    queuedisk(V, vd.cp, true, NULL);
+    queuedisk(V, vd.cp, true, NULL, i);
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, forecolor, 0, 16);
     }

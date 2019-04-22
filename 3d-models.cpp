@@ -621,6 +621,29 @@ void disable(hpcshape& sh) {
   sh.s = sh.e = 0;
   }
 
+void clone_shape(hpcshape& sh, hpcshape& target) {
+  target = sh;
+  target.s = isize(hpc);
+  for(int i=sh.s; i<sh.e; i++) hpc.push_back(hpc[i]);
+  target.e = isize(hpc);
+  }
+
+void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
+  for(int i=0; i<30; i++) {
+    auto& tgt = animated[i];
+    clone_shape(orig, tgt);
+    ld alpha = sin(12 * degree * i) * 30 * degree;
+    for(int i=tgt.s; i<tgt.e; i++) {
+      if(abs(hpc[i][1]) > body) {
+        ld off = hpc[i][1] > 0 ? body : -body;
+        hpc[i][2] += abs(hpc[i][1] - off) * sin(alpha);
+        hpc[i][1] = off + (hpc[i][1] - off) * cos(alpha);
+        hpc[i] = normalize(hpc[i]);
+        }
+      }
+    }
+  }
+
 void make_3d_models() {
   if(DIM == 2) return;
   shcenter = C0;
@@ -776,6 +799,9 @@ void make_3d_models() {
   
   shift_shape(shEyes, (-3.3) * S / -20);
   for(int i=shEyes.s; i<shEyes.e; i++) hpc[i] = cspin(0, 2, M_PI/2) * hpc[i];
+  
+  animate_bird(shEagle, shAnimatedEagle, 0.05*S);
+  animate_bird(shTinyBird, shAnimatedTinyEagle, 0.05*S/2);
 
   disable(shWolfRearLeg);
   disable(shWolfFrontLeg);

@@ -1716,6 +1716,8 @@ hpcshape
   
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
   
+  shAnimatedEagle[30], shAnimatedTinyEagle[30],
+  
   shDodeca;
 
 vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
