@@ -93,8 +93,9 @@ void buildhue() {
 
 int perturb(int c) {
   if(nh == 0) buildhue();
-  int hueid = 0;
+  int hueid = -1;
   for(int t=0; t<nh; t++) if(hues[t] == c) hueid = t;
+  if(hueid == -1) return c;
   hueid += rand() % 50;
   hueid -= rand() % 50;
   if(hueid<0) hueid += nh;
