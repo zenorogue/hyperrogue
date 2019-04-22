@@ -220,7 +220,7 @@ void storeall(int from) {
       vdata[i].m->store();
   }
 
-int dftcolor = 0x282828FF;
+colorpair dftcolor = 0x282828FF;
 
 namespace spiral {
 
@@ -1461,7 +1461,8 @@ void drawExtra() {
       bool draw = true;
       for(int i=0; i<isize(named); i++) if(named[i] == c) draw = false;
       if(draw && gmatrix.count(c))
-        queuepolyat(it->second, shDisk, dftcolor, PPR::LINE);
+        queuedisk(it->second, dftcolor, false, NULL);
+        // queuepolyat(it->second, shDisk, dftcolor., PPR::LINE);
       }
     
     for(int i=0; i<isize(named); i++) if(gmatrix.count(named[i])) {
@@ -1621,7 +1622,7 @@ int readArgs() {
 // options before reading
   if(0) ;
   else if(argis("-dftcolor")) {
-    shift(); dftcolor = arghex();
+    shift(); dftcolor = parse(args());
     }  
 
 // tree visualizer (e.g. Tree of Life)

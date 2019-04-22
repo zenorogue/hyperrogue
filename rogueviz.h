@@ -104,7 +104,7 @@ namespace rogueviz {
     void run_snub(int v, int w);
     }
 
-  extern int dftcolor;
+  extern colorpair dftcolor;
   namespace collatz { extern double s2, s3, p2, p3; void start(); }
   namespace tree { void read(string fn); }
   namespace sag { extern ld edgepower, edgemul; 
