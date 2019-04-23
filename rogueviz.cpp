@@ -65,63 +65,68 @@ edgetype *add_edgetype(const string& name) {
   return &*e;
   }
 
-colorpair parse(const string& s) {
-  colorpair cp;
-  cp.shade = 0; cp.color2 = 0;
-  sscanf(s.c_str(), "%x:%c%x", &cp.color1, &cp.shade, &cp.color2);
-  return cp;
+map<color_t, array<color_t, 16> > next_hue;
+
+color_t parse1(const string& s) {
+  // color can be given as RRGGBB
+  // or as 'Rmax,min,alpha,step,start', for rainbow Collatz
+  if(s[0] == 'R') {
+    int mh = 192, minh = 0, alpha = 255, step = 50, start = 0;
+    sscanf(s.c_str(), "R%x,%x,%x,%d,%d", &mh, &minh, &alpha, &step, &start);
+    vector<color_t> hues;
+    color_t difh = mh - minh;
+    color_t base = alpha + minh * 0x1010100;
+
+    for(unsigned y=0; y<difh; y++)
+      hues.push_back(base + 0x1000000*mh + 0x10000 * y);
+    for(unsigned y=0; y<difh; y++)
+      hues.push_back(base + 0x1010000*mh - 0x1000000 * y);
+    for(unsigned y=0; y<difh; y++)
+      hues.push_back(base + 0x0010000*mh + 0x100 * y);
+    for(unsigned y=0; y<difh; y++)
+      hues.push_back(base + 0x0010100*mh - 0x10000 * y);
+    for(unsigned y=0; y<difh; y++)
+      hues.push_back(base + 0x0000100*mh + 0x1000000 * y);
+    for(unsigned y=0; y<difh; y++)
+      hues.push_back(base + 0x1000100*mh - 0x100 * y);
+
+    for(int t=0; t<isize(hues); t++)
+      for(int a=0; a<16; a++)
+        next_hue[hues[t]][a] = hues[gmod(t + rand() % step - rand() % step, isize(hues))];
+      
+    return hues[gmod(start, isize(hues))];
+    }
+  else {
+    color_t res;
+    sscanf(s.c_str(), "%x", &res);
+    return res;
+    }
   }
 
-int nh = 0;
-color_t hues[256*6];
-
-void buildhue() {
-  color_t mh = 193;
-  for(unsigned y=0; y<=mh; y++)
-    hues[nh++] = (int) (0xFF + 0x1000000*mh + (unsigned) 0x10000 * y);
-  for(unsigned y=0; y<=mh; y++)
-    hues[nh++] = (int) (0xFF + 0x1010000*mh - 0x1000000 * y);
-  for(unsigned y=0; y<=mh; y++)
-    hues[nh++] = (int) (0xFF + 0x0010000*mh + 0x100 * y);
-  for(unsigned y=0; y<=mh; y++)
-    hues[nh++] = (int) (0xFF + 0x0010100*mh - 0x10000 * y);
-  for(unsigned y=0; y<=mh; y++)
-    hues[nh++] = (int) (0xFF + 0x0000100*mh + 0x1000000 * y);
-  for(unsigned y=0; y<=mh; y++)
-    hues[nh++] = (int) (0xFF + 0x1000100*mh - 0x100 * y);
-  }
 
 color_t perturb(color_t c) {
-  if(nh == 0) buildhue();
-  int hueid = -1;
-  for(int t=0; t<nh; t++) if(hues[t] == c) hueid = t;
-  if(hueid == -1) return c;
-  hueid += rand() % 50;
-  hueid -= rand() % 50;
-  if(hueid<0) hueid += nh;
-  hueid %= nh;
-  return hues[hueid];
-  /*
-  int part[4];
-  for(int u=0; u<=3; u++) {
-    part[u] = (c >> (8*u)) & 0xFF;
-    }
-  int 
-  if(part[1] == 255 && part[2] == 0) 
-    int k = 
-    k += rand() % 16;
-    k -= rand() % 16;
-    if(k<0) k=-k;
-    if(k>255) k = 255-(k-255);
-    c &=~ (0xFF << (8*u));
-    c |= k << (8*u);
-    } */
-  return c;
+  if(!next_hue.count(c)) return c;
+  return next_hue[c][rand() % 16];
   }
 
 colorpair perturb(colorpair cp) {
   cp.color1 = perturb(cp.color1);
   cp.color2 = perturb(cp.color2);
+  return cp;
+  }
+
+colorpair parse(const string& s) {
+  colorpair cp;
+  auto pos = s.find(":");
+  if(pos != string::npos) {
+    cp.color1 = parse1(s.substr(0, pos));
+    cp.shade = s[pos+1];
+    cp.color2 = parse1(s.substr(pos+2));
+    }
+  else {
+    cp.shade = 0; cp.color2 = 0;
+    cp.color1 = parse1(s);
+    }
   return cp;
   }
 
@@ -293,7 +298,7 @@ namespace collatz {
     vertexdata& vd = vdata[0];
     createViz(0, cwt.at, xpush(cshift));
     virtualRebase(vd.m, true);
-    vd.cp = perturb(dftcolor);
+    vd.cp = dftcolor;
     vd.data = 0;
     addedge(0, 0, 1, false, collatz::collatz1);
     vd.name = "1";
