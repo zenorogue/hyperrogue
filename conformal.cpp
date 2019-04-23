@@ -1224,6 +1224,14 @@ namespace conformal {
       shift_arg_formula(conformal::model_orientation);
       shift_arg_formula(conformal::model_orientation_yz);
       }
+    else if(argis("-crot")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(conformal::rotation);
+      if(DIM == 3) shift_arg_formula(conformal::rotation_xz);
+      }
+    else if(argis("-playerpath")) {
+      conformal::create_playerpath();
+      }
     else if(argis("-clip")) { 
       PHASEFROM(2); 
       shift_arg_formula(conformal::clip_min);
