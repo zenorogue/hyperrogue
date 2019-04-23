@@ -73,10 +73,10 @@ colorpair parse(const string& s) {
   }
 
 int nh = 0;
-int hues[256*6];
+color_t hues[256*6];
 
 void buildhue() {
-  unsigned mh = 193;
+  color_t mh = 193;
   for(unsigned y=0; y<=mh; y++)
     hues[nh++] = (int) (0xFF + 0x1000000*mh + (unsigned) 0x10000 * y);
   for(unsigned y=0; y<=mh; y++)
@@ -91,7 +91,7 @@ void buildhue() {
     hues[nh++] = (int) (0xFF + 0x1000100*mh - 0x100 * y);
   }
 
-int perturb(int c) {
+color_t perturb(color_t c) {
   if(nh == 0) buildhue();
   int hueid = -1;
   for(int t=0; t<nh; t++) if(hues[t] == c) hueid = t;
