@@ -732,6 +732,10 @@ int read_cheat_args() {
     PHASEFROM(2); 
     shift_arg_formula(sightranges[geometry]);
     }
+  else if(argis("-gen3")) {
+    PHASEFROM(2); 
+    shift_arg_formula(extra_generation_distance);
+    }
   else if(argis("-quantum")) {
     cheat();
     quantum = true;
