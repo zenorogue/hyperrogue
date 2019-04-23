@@ -28,6 +28,7 @@ namespace rogueviz {
     int i, j;
     double weight, weight2;
     vector<glvertex> prec;
+    basic_textureinfo tinf;
     cell *orig;
     int lastdraw;
     edgetype *type;

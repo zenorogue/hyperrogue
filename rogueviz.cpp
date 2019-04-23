@@ -28,8 +28,11 @@
 #include "rogueviz.h"
 
 namespace hr { extern hpcshape shEagle, shMiniGhost, shGhost, shShark, shAnimatedEagle[30], shAnimatedTinyEagle[30]; }
+namespace hr { extern renderbuffer *floor_textures; }
 
 namespace rogueviz {
+
+ld fat_edges = 0;
 
 const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
 
@@ -1172,6 +1175,18 @@ transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
   return p;
   }
 
+void queue_prec(const transmatrix& V, edgeinfo*& ei, color_t col) {
+  if(!fat_edges)
+    queuetable(V, ei->prec, isize(ei->prec), col, 0, PPR::STRUCT0);
+  else {
+    auto& t = queuetable(V, ei->prec, isize(ei->prec), 0, col | 0x000000FF, PPR::STRUCT0);
+    t.flags |= (1<<22), // poly triangles
+    t.offset_texture = 0,
+    t.tinf = &ei->tinf;
+    t.tinf->texture_id = floor_textures->renderedTexture;
+    }
+  }
+
 bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   int i = m->pid;
@@ -1268,7 +1283,8 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
 
       bool onspiral = kind == kSpiral && abs(ei->i - ei->j) == 1;      
-      if(pmodel || onspiral) {
+
+      if((pmodel || onspiral) && !fat_edges) {
         if(onspiral) {
           const int prec = 20; 
           transmatrix T = ggmatrix(currentmap->gamestart());
@@ -1294,8 +1310,27 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           ei->prec.clear();
           
           transmatrix T = inverse(ggmatrix(ei->orig));
-
-          if(kind == kSpiral && abs(ei->i - ei->j) == 1) {
+          
+          if(fat_edges) {
+            ei->tinf.tvertices.clear();
+            transmatrix T1 = inverse(gm1 * vd1.m->at);
+            hyperpoint goal = T1 * h2;
+            transmatrix S = T * gm1 * vd1.m->at * rspintox(goal);
+            ld d = hdist0(goal);
+            for(int a=0; a<360; a+=30) {
+              auto store = [&] (ld a, ld b) {
+                storevertex(ei->prec, S * cpush(0, b) * hr::cspin(1, 2, a * degree) * cpush(1, fat_edges) * C0);
+                ei->tinf.tvertices.push_back(glhr::makevertex(0,(3+cos(a * degree))/4,0));
+                };
+              store(a, 0);
+              store(a+30, 0);
+              store(a, d);
+              store(a+30, 0);
+              store(a, d);
+              store(a+30, d);
+              }
+            }
+          else if(kind == kSpiral && abs(ei->i - ei->j) == 1) {
             ei->orig = currentmap->gamestart();
             hyperpoint l1 = tC0(spiral::at(1+ei->i));
             storevertex(ei->prec, l1);
@@ -1309,11 +1344,8 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           else 
             storeline(ei->prec, T*h1, T*h2);
           }
-        queuetable(multidraw ? V : ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
-          PPR::STRUCT0);
-        if(elliptic)
-        queuetable(centralsym * ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
-          PPR::STRUCT0);
+        queue_prec(multidraw ? V : ggmatrix(ei->orig), ei, col);
+        if(elliptic) queue_prec(centralsym * ggmatrix(ei->orig), ei, col);
         }
       }
 /*
@@ -1789,6 +1821,10 @@ int readArgs() {
     }
   else if(argis("-rvedge")) {
     shift(); default_edgetype.color = arghex();
+    }
+  else if(argis("-rvfat")) {
+    shift(); 
+    fat_edges = argf();
     }
   else if(argis("-ggamma")) {
     // backward compatibility
