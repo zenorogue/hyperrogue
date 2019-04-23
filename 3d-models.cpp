@@ -644,6 +644,41 @@ void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
     }
   }
 
+void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
+  if(lev == 0) {
+    hpcpush(a);
+    hpcpush(b);
+    hpcpush(c);
+    }
+  else {
+    hyperpoint cx = rspintox(mid(a,b)) * xpush0(rad);
+    hyperpoint ax = rspintox(mid(b,c)) * xpush0(rad);
+    hyperpoint bx = rspintox(mid(c,a)) * xpush0(rad);
+    balltriangle(ax, bx, cx, rad, lev-1);
+    balltriangle(ax, bx, c , rad, lev-1);
+    balltriangle(ax, b , cx, rad, lev-1);
+    balltriangle(a , bx, cx, rad, lev-1);
+    }
+  }
+
+void make_ball(hpcshape& sh, ld rad, int lev) {
+  bshape(sh, sh.prio);
+  sh.flags |= POLY_TRIANGLES;
+  hyperpoint tip = xpush0(rad);
+  hyperpoint atip = xpush0(-rad);
+  for(int i=0; i<5; i++) {
+    hyperpoint a = cspin(1, 2, (72 * i   ) * degree) * spin(1) * tip;
+    hyperpoint b = cspin(1, 2, (72 * i-72) * degree) * spin(1) * tip;
+    hyperpoint c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-1) * tip;
+    hyperpoint d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-1) * tip;
+    balltriangle(tip, a, b, rad, lev);
+    balltriangle(a, b, c, rad, lev);
+    balltriangle(b, c, d, rad, lev);
+    balltriangle(c, d, atip, rad, lev);
+    }
+  add_texture(sh);
+  }
+
 void make_3d_models() {
   if(DIM == 2) return;
   shcenter = C0;
@@ -815,6 +850,10 @@ void make_3d_models() {
   disable(shJiangShi);
 
   make_head_only();
+  
+  make_ball(shDisk, orbsize*.2, 2);
+  make_ball(shHeptaMarker, zhexf*.2, 1);
+  make_ball(shSnowball, zhexf*.1, 0);
   }
 
 #undef S
