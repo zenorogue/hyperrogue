@@ -2657,8 +2657,6 @@ void drawaura() {
 #endif
 
 #if CAP_GL
-  setcameraangle(true);
-  
   float cx[AURA+1][11][5];
 
   double facs[11] = {1, 1.01, 1.02, 1.04, 1.08, 1.70, 1.95, 1.5, 2, 6, 10};
@@ -2717,16 +2715,13 @@ void drawaura() {
       }
     }
   glflush();
-  current_display->set_projection(0, false);
-  setcameraangle(true);
+  dynamicval<eModel> p(pmodel, DIM == 2 && pmodel == mdDisk ? mdDisk : mdText);
+  current_display->set_all(0);
   glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
   glhr::id_modelview();
   glhr::prepare(auravertices);
   glhr::set_depthtest(false);
   glDrawArrays(GL_TRIANGLES, 0, isize(auravertices));
-
-
-  setcameraangle(false);
 #endif
   }
 
@@ -6336,6 +6331,7 @@ void calcparam() {
   cd->scrdist_text = cd->scrdist;
 
   callhooks(hooks_calcparam);
+  reset_projection();
   }
 
 function<void()> wrap_drawfullmap = drawfullmap;
@@ -6404,15 +6400,11 @@ void gamescreen(int _darken) {
 
   if(subscreens::split([=] () {
     calcparam();
-    current_display->set_projection(0, false);
-    current_display->set_viewport(0);
     compute_graphical_distance();
     gamescreen(_darken);
     })) {
     if(racing::on) return;
     // create the gmatrix
-    current_display->set_projection(0, false);
-    current_display->set_viewport(0);
     View = subscreens::player_displays[0].view_matrix;
     viewctr = subscreens::player_displays[0].view_center;
     just_gmatrix = true;

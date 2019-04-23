@@ -164,27 +164,6 @@ color_t darkena(color_t c, int lev, int a) {
 void setcameraangle(bool b) { }
 #else
 
-bool cameraangle_on;
-
-void setcameraangle(bool b) {
-  if(cameraangle_on != b) {
-    cameraangle_on = b;
-    ld cam = vid.camera_angle * degree;
-
-    GLfloat cc = cos(cam);
-    GLfloat ss = sin(cam * (b?1:-1));
-    
-    GLfloat yzspin[16] = {
-      1, 0, 0, 0,
-      0, cc, ss, 0,
-      0, -ss, cc, 0,
-      0, 0, 0, 1
-      };
-    
-    glhr::projection_multiply(glhr::as_glmatrix(yzspin));
-    }
-  }
-
 bool shaderside_projection;
 
 void start_projection(int ed, bool perspective) {
@@ -216,10 +195,26 @@ glhr::glmatrix model_orientation_gl() {
   return s;
   }
 
-void display_data::set_projection(int ed, bool apply_models) {
+tuple<int, eModel, display_data*, int> last_projection;
+bool new_projection_needed;
+
+void display_data::set_all(int ed) {
+  auto t = this;
+  auto current_projection = tie(ed, pmodel, t, current_rbuffer);
+  if(new_projection_needed || last_projection != current_projection) {
+    last_projection = current_projection;
+    set_projection(ed);
+    set_mask(ed);
+    set_viewport(ed);
+    new_projection_needed = false;
+    }
+  }  
+
+void display_data::set_projection(int ed) {
   DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
   
   bool pers3 = false;
+  bool apply_models = !among(pmodel, mdText, mdRug);
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
@@ -248,6 +243,7 @@ void display_data::set_projection(int ed, bool apply_models) {
     }
   
   start_projection(ed, shaderside_projection);
+  if(pmodel == mdRug) return;
 
   auto cd = current_display;
 
@@ -326,7 +322,21 @@ void display_data::set_projection(int ed, bool apply_models) {
       }      
     }
   
-  cameraangle_on = false;
+  if(vid.camera_angle && !among(pmodel, mdText, mdUnchanged, mdRug)) {
+    ld cam = vid.camera_angle * degree;
+
+    GLfloat cc = cos(cam);
+    GLfloat ss = sin(cam);
+    
+    GLfloat yzspin[16] = {
+      1, 0, 0, 0,
+      0, cc, ss, 0,
+      0, -ss, cc, 0,
+      0, 0, 0, 1
+      };
+    
+    glhr::projection_multiply(glhr::as_glmatrix(yzspin));
+    }
   }
 
 void display_data::set_mask(int ed) { 
@@ -406,10 +416,7 @@ void setGLProjection(color_t col) {
     glhr::set_depthtest(false);
   
   GLERR("setGLProjection");
-  
-  current_display->set_projection(0, true);
-  
-  GLERR("after set_projection");
+  reset_projection();
   }
 
 inline int next_p2 (int a )

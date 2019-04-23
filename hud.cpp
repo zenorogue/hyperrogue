@@ -351,7 +351,6 @@ bool nofps = false;
 void draw_radar(bool cornermode) {
   dynamicval<eGeometry> g(geometry, gEuclid);
   initquickqueue();
-  current_display->set_projection(0, false);
   int rad = vid.radarsize;
   
   ld cx = cornermode ? rad+2 : vid.xres-rad-2;
@@ -373,6 +372,7 @@ void draw_radar(bool cornermode) {
     queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2]/3 + rad * r.h[1]*2/3, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2]/3, 0)*C0, r.line, -1);
     }
 
+  dynamicval<eModel> pm(pmodel, mdText);
   quickqueue();
 
   for(auto& r: radarpoints)
@@ -395,8 +395,7 @@ void drawStats() {
   dynamicval<ld> va(vid.alpha, 1);
   dynamicval<ld> vs(vid.scale, 1);
 
-  calcparam(); 
-  current_display->set_projection(0, false);
+  calcparam();
   
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
   
@@ -535,7 +534,7 @@ void drawStats() {
       }
     }
   }
-  calcparam(); current_display->set_projection(0, false);
+  calcparam();
   
   string s0;
   if(racing::on) {

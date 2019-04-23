@@ -520,7 +520,6 @@ namespace conformal {
       vid.xres = vid.yres = bandfull;
       glbuf.enable(); current_display->radius = bandhalf;  
       calcparam();
-      current_display->set_viewport(0);
       
       ld xpos = 0;
       
@@ -610,7 +609,6 @@ namespace conformal {
       }
 
     rbuf.reset();
-    current_display->set_viewport(0);
 
     if(includeHistory) restoreBack();
     

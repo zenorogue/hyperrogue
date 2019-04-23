@@ -820,9 +820,6 @@ void make_floor_textures() {
     cd->radius = cd->scrsize * vid.scale;
 
     floor_textures->enable();
-    current_display->set_viewport(0);
-    current_display->set_projection(0, true);
-    current_display->set_mask(0);
     floor_textures->clear(0); // 0xE8E8E8 = 1
     
     // gradient vertices
@@ -836,6 +833,7 @@ void make_floor_textures() {
     gv.emplace_back(-1, +1, 1, 1, 1);
 
     glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
+    current_display->set_all(0);
     glhr::new_projection();
     glhr::id_modelview();
     glhr::prepare(gv);

@@ -194,7 +194,6 @@ void staircase_video(int from, int num, int step) {
     dynamicval<int> vy(vid.yres, TSIZE);
     dynamicval<int> vxc(current_display->xcenter, TSIZE/2);
     dynamicval<int> vyc(current_display->ycenter, TSIZE/2);
-    current_display->set_viewport(0);
     printf("draw scene\n");
     rug::drawRugScene();
     
@@ -224,7 +223,6 @@ void bantar_record() {
 
     rbuf.enable();
     vid.xres = vid.yres = TSIZE;
-    current_display->set_viewport(0);
     banachtarski::bantar_frame();
     
     IMAGESAVE(rbuf.render(), ("bantar/" + its05(fr) + IMAGEEXT).c_str());

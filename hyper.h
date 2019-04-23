@@ -1182,8 +1182,10 @@ struct display_data {
   bool in_anaglyph();
 
   void set_viewport(int ed);
-  void set_projection(int ed, bool apply_models);
+  void set_projection(int ed);
   void set_mask(int ed);
+
+  void set_all(int ed);
   };
 
 extern display_data default_display;
@@ -5022,5 +5024,8 @@ const int TEXTURE_STEP_3D=8;
 void set_euland3(cell *c, int co0, int co1, int alt, int hash);
 
 extern bool first_cell_to_draw;
+extern int current_rbuffer;
+extern bool new_projection_needed;
+inline void reset_projection() { new_projection_needed = true; }
 }
 

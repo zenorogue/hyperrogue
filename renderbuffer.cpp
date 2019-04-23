@@ -126,11 +126,14 @@ SDL_Surface *renderbuffer::render() {
   }
 #endif
 
+int current_rbuffer = -1;
+
 void renderbuffer::enable() {
   #if CAP_GL
   if(FramebufferName) {
     GLERR("prebind");
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+    current_rbuffer = FramebufferName;
     GLERR("bind");
     vid.usingGL = true;
     return;
@@ -210,6 +213,7 @@ resetbuffer::resetbuffer() {
 void resetbuffer::reset() {
   #if CAP_GL
   glBindFramebuffer(GL_FRAMEBUFFER, drawFboId);
+  current_rbuffer = drawFboId;
   #endif
   #if CAP_SDL
   s = sreset;

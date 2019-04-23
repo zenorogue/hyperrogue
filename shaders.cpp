@@ -363,6 +363,7 @@ void be_textured(shader_projection sp) { switch_mode(gmTextured, sp); }
 
 void switch_mode(eMode m, shader_projection sp) {
   if(m == mode && current_shader_projection == sp) return;
+  reset_projection();
   GLERR("pre_switch_mode");
   #if CAP_SHADER
   programs[m][int(sp)]->enable();

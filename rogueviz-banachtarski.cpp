@@ -301,7 +301,6 @@ void bantar_frame() {
     cci.second.c->wparam = cci.second.gid;
 
   calcparam();
-  current_display->set_projection(0, true);
   
   vector<unique_ptr<drawqueueitem>> subscr[4];
   
@@ -407,7 +406,6 @@ void bantar_frame() {
     vid.xposition = (!(i&2)) ? xdst : -xdst;
     vid.yposition = (!(i&1)) ? ydst : -ydst;
     calcparam();
-    current_display->set_projection(0, true);
     drawqueue();
     }
 

@@ -184,8 +184,9 @@ void glflush() {
 
   if(isize(text_vertices)) {
     // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
-    if(!svg::in) current_display->set_projection(0, false);
     glhr::be_textured();
+    dynamicval<eModel> pm(pmodel, mdText);
+    if(!svg::in) current_display->set_all(0);
     glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);
     glhr::set_depthtest(false);
@@ -606,7 +607,6 @@ void dqi_poly::gldraw() {
     #if CAP_TEXTURE
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-    current_display->set_projection(0, true);
     glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
     ioffset = 0;
     #endif
@@ -629,7 +629,7 @@ void dqi_poly::gldraw() {
 
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
-    if(ed) current_display->set_projection(ed, true), current_display->set_viewport(ed);
+    current_display->set_all(ed);
     bool draw = color;
     
     if(shaderside_projection) {
@@ -691,8 +691,6 @@ void dqi_poly::gldraw() {
       glDrawArrays(GL_LINE_STRIP, offset, cnt);
       }
     }
-  
-  if(current_display->stereo_active()) current_display->set_projection(0, true), current_display->set_viewport(0), current_display->set_mask(0);
   }
 #endif
 
@@ -1301,7 +1299,7 @@ int curvestart = 0;
 bool keep_curvedata = false;
 
 void queuereset(eModel m, PPR prio) {
-  queueaction(prio, [m] () { pmodel = m; current_display->set_projection(0, true); });
+  queueaction(prio, [m] () { pmodel = m; });
   }
 
 void dqi_line::draw() {
@@ -1350,9 +1348,9 @@ void sortquickqueue() {
   }
 
 void quickqueue() {
-  spherespecial = 0; current_display->set_projection(0, true);
+  spherespecial = 0; 
+  reset_projection(); current_display->set_all(0);
   int siz = isize(ptds);
-  setcameraangle(false);
   for(int i=0; i<siz; i++) ptds[i]->draw();
   ptds.clear();
   }
@@ -1451,7 +1449,7 @@ void draw_backside() {
     }
 
   spherespecial = sphereflipped() ? 1 : -1;
-  current_display->set_projection(0, true);
+  reset_projection();
   
   if(pmodel == mdRotatedHyperboles) {
     for(auto& ptd: ptds)
@@ -1471,7 +1469,7 @@ void draw_backside() {
 
   spherespecial *= -1;
   spherephase = 1;
-  current_display->set_projection(0, true);
+  reset_projection();
   }
 
 extern bool lshiftclick, lctrlclick;
@@ -1499,7 +1497,6 @@ void draw_main() {
       glClear(GL_DEPTH_BUFFER_BIT);
       glhr::be_nontextured();
       spherephase = p;
-      current_display->set_projection(0, true);
       for(auto& ptd: ptds) ptd->draw();
       if(elliptic) {
         spherephase = p - 2;
@@ -1524,9 +1521,9 @@ void draw_main() {
   
 void drawqueue() {
   callhooks(hook_drawqueue);
+  reset_projection(); current_display->set_all(0);
+  // reset_projection() is not sufficient here, because we need to know shaderside_projection
 
-  setcameraangle(true);
-  
 #if CAP_GL
   if(vid.usingGL) 
     glClear(GL_STENCIL_BUFFER_BIT);
@@ -1573,8 +1570,7 @@ void drawqueue() {
 
   spherespecial = 0;
   spherephase = 0;
-  current_display->set_projection(0, true);
-  setcameraangle(true);
+  reset_projection();
   
   if(model_needs_depth() && current_display->stereo_active()) {
     global_projection = -1;
@@ -1586,11 +1582,6 @@ void drawqueue() {
   else {
     draw_main();
     }    
-
-#if CAP_GL
-  if(vid.usingGL) 
-    current_display->set_projection(0, true), current_display->set_mask(0), current_display->set_viewport(0);
-#endif
 
 #if CAP_SDL
   if(vid.stereo_mode == sAnaglyph && !vid.usingGL) {
@@ -1614,7 +1605,6 @@ void drawqueue() {
     }
 #endif
 
-  setcameraangle(false);
   if(!keep_curvedata) {
     curvedata.clear(); curvestart = 0;
     }

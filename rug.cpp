@@ -1284,9 +1284,6 @@ void prepareTexture() {
   conformal::configure();
   
   glbuf->enable();
-  current_display->set_viewport(0);
-  current_display->set_projection(0, true);
-  current_display->set_mask(0);
   glbuf->clear(0);
 
   ptds.clear();
@@ -1349,11 +1346,11 @@ void drawRugScene() {
     use_precompute = false;
     ct_array.clear();
     cp_array.clear();
-    current_display->set_mask(ed), current_display->set_viewport(ed);
     if(ed == 1 && vid.stereo_mode == sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
     
-    start_projection(ed, true);
+    dynamicval<eModel> p(pmodel, mdRug);
+    current_display->set_all(ed);
     eyewidth_translate(ed);
 
     if(vid.stereo_mode == sODS) {
@@ -1418,9 +1415,6 @@ void drawRugScene() {
 
   glEnable(GL_BLEND);
 
-  current_display->set_mask(0), current_display->set_viewport(0);
-  current_display->set_projection(0, true);
-  
   if(rug_failure) {
     rug::close();
     rug::clear_model();

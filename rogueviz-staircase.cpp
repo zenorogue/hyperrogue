@@ -118,7 +118,6 @@ bool on;
 void make_staircase() {
 
   // vid.stereo_mode = current_display->sODS;
-  // current_display->set_viewport(0);
   rug::no_fog = true;
 
   printf("scurvature = %lf progress = %lf strafe=%lf,%lf\n", scurvature, progress, strafex, strafey);

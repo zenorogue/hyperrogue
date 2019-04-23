@@ -261,7 +261,7 @@ enum eModel {
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
   mdRotatedHyperboles, mdSpiral, mdPerspective,
   mdEquivolume, 
-  mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial
+  mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial, mdText, mdRug
   };
 
 typedef unsigned long long flagtype;

@@ -654,7 +654,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       }
     
-    case mdGUARD: break;
+    case mdGUARD: case mdRug: case mdText: break;
     }
 
   ghcheck(ret,H_orig);
