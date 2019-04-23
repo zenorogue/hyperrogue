@@ -310,6 +310,50 @@ namespace collatz {
     T2 = spin(collatz::s2) * xpush(collatz::p2);
     T3 = spin(collatz::s3) * xpush(collatz::p3);
     }
+  
+  void lookup(long long reached, int bits) {
+    while(reached < (1ll<<bits)) {
+      if(reached%3 == 2 && (2*reached-1) % 9 && hrand(100) < 50)
+        reached = (2*reached-1) / 3;
+      else reached *= 2;
+      }
+    printf("reached = %lld\n", reached);
+    vector<string> seq;
+    while(reached>1) { 
+      seq.push_back(llts(reached));
+      if(reached&1) reached += (reached>>1)+1;
+      else reached >>= 1;
+      }
+    // seq.push_back("1");
+    reverse(seq.begin(), seq.end());
+    
+    int id = 0;
+    int next = 0;
+    
+    int steps = 0;
+    while(true) {
+      steps++;
+      if(std::isnan(View[0][0])) exit(1);
+      shmup::turn(100);
+      drawthemap();
+      centerpc(100); optimizeview();
+      fixmatrix(View);
+      bfs(); setdist(cwt.at, 7 - getDistLimit() - genrange_bonus, NULL);
+      vertexdata& vd = vdata[id];
+      for(int e=0; e<isize(vd.edges); e++) {
+        int id2 = vd.edges[e].first;
+        if(vdata[id2].name == seq[next]) {
+          id = id2; next++;
+          cwt.at = vdata[id2].m->base;
+          if(shmup::on) shmup::pc[0]->base = cwt.at;
+          if(next == isize(seq)) goto found;
+          }
+        }
+      }
+    
+    found:
+    printf("steps = %d\n", steps);    
+    }
   }
 
 string readLabel_s(FILE *f) {
@@ -1750,6 +1794,14 @@ int readArgs() {
     using namespace collatz; 
     shift(); sscanf(argcs(), "%lf,%lf,%lf,%lf", &s2, &p2, &s3, &p3);
     start();
+    }
+
+  else if(argis("-collatz-go")) {
+    if(kind != kCollatz) { printf("not in Collatz\n"); throw hr_exception(); }
+    shift(); int i = argi(); shift(); int j = argi();
+    if(i <= 0) i = 763;
+    if(j < 0 || j > 61) j = 61;
+    collatz::lookup(i, j);
     }
 
   else if(argis("-collatz3")) {
