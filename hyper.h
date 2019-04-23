@@ -2284,6 +2284,7 @@ namespace arg {
 #if CAP_COMMANDLINE
   
   void lshift();
+  void unshift();
 
   void shift();
 

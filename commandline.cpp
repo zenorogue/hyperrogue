@@ -60,9 +60,10 @@ namespace arg {
   int pos;
 
   void lshift() { pos++; }
+  void unshift() { pos--; }
 
   void shift() {
-    lshift(); if(pos > isize(argument)) { printf("Missing parameter\n"); exit(1); }
+    lshift(); if(pos >= isize(argument)) { printf("Missing parameter\n"); exit(1); }
     }
   
   bool nomore() { return pos >= isize(argument); }
@@ -74,7 +75,7 @@ namespace arg {
   ld argf() { return parseld(args()); }
   bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
   
-  void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); shift(); }
+  void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); lshift(); }
  
   void phaseerror(int x) {
     printf("Command line error: cannot read command '%s' from phase %d in phase %d\n", args().c_str(), x, curphase);

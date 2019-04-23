@@ -191,6 +191,9 @@ treeoflife-white: hyper
 collatz: hyper
 	${CMD} -canvas h -dftcolor 206020FF -ggamma 2 -collatz .3,.5,-.4,.4
 
+collatz-bird: hyper
+	${CMD} -canvas h -dftcolor R -ggamma 2 -geo 435h -collatz3 txy .3 fd .25 tyz pi/2 / txy -.4 fd .2 tyz pi/2 -PM 0 -rvshape 3 -I Flash 100 -I Speed 100
+
 fullnet: hyper
 	${CMD} -dftcolor 808080FF -ggamma 2 -back FFFFFF -net
 

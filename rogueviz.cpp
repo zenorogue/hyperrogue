@@ -1720,15 +1720,16 @@ int readArgs() {
     using namespace collatz; 
     s2 = p2 = s3 = p3 = 0;
     start();
-    shift();
     transmatrix *T = &T2;
     while(true) {
+      lshift();
       if(arg::nomore()) break;
-      else if(argis("fd")) { shift(); *T = *T * xpush(argf()); shift(); }
-      else if(argcs()[0] == 't') { int x = dimid(argcs()[1]); int y = dimid(argcs()[2]); shift(); *T = *T * hr::cspin(x, y, argf()); shift(); }
-      else if(argis("/")) { shift(); if(T == &T2) T = &T3; else break; }
+      else if(argis("fd")) { shift(); *T = *T * xpush(argf()); }
+      else if(argcs()[0] == 't') { int x = dimid(argcs()[1]); int y = dimid(argcs()[2]); shift(); *T = *T * hr::cspin(x, y, argf()); }
+      else if(argis("/")) { if(T == &T2) T = &T3; else break; }
       else break;
       }
+    unshift();
     }
 
   else if(argis("-spiral")) {
