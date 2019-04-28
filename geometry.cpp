@@ -46,7 +46,6 @@ void precalc() {
   
   hexshift = 0;
 
-  int vertexdegree = S6/2;
   ld fmin, fmax;  
 
   if(archimedean) 
@@ -100,39 +99,12 @@ void precalc() {
     goto finish;
     }
 
-  fmin = 0, fmax = hyperbolic ? 10 : 3;
+  tessf = edge_of_triangle_with_angles(2*M_PI/S3, M_PI/S7, M_PI/S7);
   
-  for(int p=0; p<100; p++) {
-    ld f =  (fmin+fmax) / 2;
-    ld v1=0, v2=0;
-    if(vertexdegree == 3) {
-      hyperpoint H = xpush0(f);
-      v1 = intval(H, C0), v2 = intval(H, spin(2*M_PI/S7)*H);
-      }
-    else if(vertexdegree == 4) {
-      hyperpoint H = xpush0(f);
-      ld opposite = hdist(H, spin(2*M_PI/S7)*H);
-      hyperpoint Hopposite = xspinpush0(M_PI/S7, opposite);
-      v2 = intval(H, Hopposite), v1 = intval(H, C0);
-      }
-    if(sphere ? v1 < v2 : v1 > v2) fmin = f; else fmax = f;
-    }
-  tessf = fmin;
   if(elliptic && S7 == 4) tessf = M_PI/2;
   
-  if(vertexdegree == 3) {
-    fmin = 0, fmax = sphere ? M_PI / 2 : 2;
-    for(int p=0; p<100; p++) {
-      ld f =  (fmin+fmax) / 2;
-      hyperpoint H = xspinpush0(M_PI/S7, f);
-      ld v1 = intval(H, C0), v2 = intval(H, xpush0(tessf));
-      if(v1 < v2) fmin = f; else fmax = f;
-      }
-    hcrossf = fmin;
-    }
-  else {
-    hcrossf = hdist(xpush0(tessf), xspinpush0(2*M_PI/S7, tessf)) / 2;
-    }
+  hcrossf = edge_of_triangle_with_angles(M_PI/2, M_PI/S7, M_PI/S3);
+
   crossf = BITRUNCATED ? hcrossf : tessf;
   
   fmin = 0, fmax = tessf;
