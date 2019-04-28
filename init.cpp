@@ -44,8 +44,6 @@ void initAll() {
 #endif
   start_game();
   
-  shmup::safety = safety;
-
   if(!shmup::on) {
     restoreGolems(items[itOrbLife], moGolem); items[itOrbLife] = 0;
     restoreGolems(items[itOrbFriend], moTameBomberbird); items[itOrbFriend] = 0;

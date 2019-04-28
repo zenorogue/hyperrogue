@@ -883,7 +883,7 @@ namespace shmup {
   using namespace multi;
   void recall();
   extern bool on;
-  extern bool safety;
+  extern bool delayed_safety;
   extern int curtime;
   void clearMonsters();
   void clearMemory();

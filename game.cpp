@@ -6992,7 +6992,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     playSound(c2, "pickup-orb"); // TODO safety
     items[c2->item] = 7;
     if(shmup::on)
-      shmup::safety = true;
+      shmup::delayed_safety = true;
     else 
       activateSafety(c2->land);
     return true;
@@ -7053,7 +7053,7 @@ bool collectItem(cell *c2, bool telekinesis) {
   else if(c2->item == itBuggy || c2->item == itBuggy2) {
     items[itOrbSafety] += 7;
     if(shmup::on)
-      shmup::safety = true;
+      shmup::delayed_safety = true;
     else {
       buggyGeneration = false;
       activateSafety(laCrossroads);

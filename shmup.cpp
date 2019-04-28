@@ -987,7 +987,8 @@ eItem keyresult[MAXPLAYER];
 
 ld fabsl(ld x) { return x>0?x:-x; }
 
-bool on = false, safety = false;
+bool on = false;
+bool delayed_safety = false;
 
 bool lastdead = false;
 
@@ -3467,9 +3468,9 @@ void turn(int delta) {
     
   active.clear();
 
-  if(safety) { 
+  if(delayed_safety) { 
     activateSafety(pc[0]->base->land);
-    safety = false;
+    delayed_safety = false;
     }
   }
 
@@ -3513,7 +3514,7 @@ void init() {
       addMessage(XLAT("Welcome to the Shoot'em Up mode!"));
     // addMessage(XLAT("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move"));
     }
-  else safety = false;
+  delayed_safety = false;
   }
 
 bool boatAt(cell *c) {
