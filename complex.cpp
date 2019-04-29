@@ -1958,6 +1958,7 @@ namespace heat {
     
     int divby = 10;
     if(S7 > 10) divby *= 2;
+    if(archimedean) divby *= 2;
     if(DIM == 3) divby *= 2;
     
     for(int i=0; i<dcs; i++) {
