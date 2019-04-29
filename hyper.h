@@ -833,8 +833,6 @@ struct charstyle {
 
 string csname(charstyle& cs);
 void initcs(charstyle& cs);
-void savecs(FILE *f, charstyle& cs, int vernum);
-void loadcs(FILE *f, charstyle& cs, int vernum);
 
 #define MAXPLAYER 7
 #define MAXJOY 8

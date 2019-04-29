@@ -78,6 +78,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "screenshot.cpp"
 #include "renderbuffer.cpp"
 #include "help.cpp"
+#include "legacy.cpp"
 #include "config.cpp"
 #include "scores.cpp"
 #include "dialogs.cpp"
