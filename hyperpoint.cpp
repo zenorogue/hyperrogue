@@ -67,6 +67,14 @@ ld asin_auto(ld x) {
     }
   }
 
+ld acos_auto(ld x) {
+  switch(cgclass) {
+    case gcHyperbolic: return acosh(x);
+    case gcSphere: return acos(x);
+    default: return x;
+    }
+  }
+
 ld volume_auto(ld r) {
   switch(cgclass) {
     case gcEuclid: return 4 * r * r * r / 3 * M_PI;
@@ -119,6 +127,11 @@ ld atan2_auto(ld y, ld x) {
     case gcSphere: return atan2(y, x);
     default: return 1;
     }
+  }
+
+// cosine rule -- edge opposite alpha
+ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
+  return acos_auto((cos(alpha) + cos(beta) * cos(gamma)) / (sin(beta) * sin(gamma)));
   }
 
 // hyperbolic point:
