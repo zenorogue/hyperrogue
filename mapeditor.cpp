@@ -230,8 +230,12 @@ namespace mapstream {
     return true;
     }
   
-  int fixspin(int rspin, int dir, int t) {
-    if(dir >= 0 && dir < t)
+  int fixspin(int rspin, int dir, int t, int vernum) {
+    if(vernum < 11018 && dir == 14)
+      return NODIR;
+    else if(vernum < 11018 && dir == 15)
+      return NOBARRIERS;
+    else if(dir >= 0 && dir < t)
       return (dir + rspin) % t;
     else
       return dir;
@@ -356,7 +360,7 @@ namespace mapstream {
         if(parent<0 || parent >= isize(cellbyid)) break;
         int dir = f.read_char();
         cell *c2 = cellbyid[parent];
-        dir  = fixspin(dir, relspin[parent], c2->type);
+        dir  = fixspin(dir, relspin[parent], c2->type, vernum);
         c = createMov(c2, dir);
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
@@ -371,7 +375,7 @@ namespace mapstream {
       cellbyid.push_back(c);
       relspin.push_back(rspin);
       c->land = (eLand) f.read_char();
-      c->mondir = fixspin(rspin, f.read_char(), c->type);
+      c->mondir = fixspin(rspin, f.read_char(), c->type, vernum);
       c->monst = (eMonster) f.read_char();
       if(c->monst == moTortoise && vernum >= 11001)
         f.read(tortoise::emap[c]);
