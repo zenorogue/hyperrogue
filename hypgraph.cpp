@@ -273,6 +273,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
       
     case mdUnchanged:
+    case mdText: 
       ret = H / current_display->radius;
       return; 
     
@@ -654,7 +655,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       }
     
-    case mdGUARD: case mdRug: case mdText: break;
+    case mdGUARD: case mdRug: break;
     }
 
   ghcheck(ret,H_orig);

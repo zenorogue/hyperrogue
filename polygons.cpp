@@ -191,9 +191,6 @@ void glflush() {
     glhr::color2(text_color);
     glhr::set_depthtest(false);
     for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
-      if(vid.scale < 0)
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text) * glhr::scale(-1,-1,-1));
-      else
       glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text));
       current_display->set_mask(ed);
   
@@ -1035,7 +1032,7 @@ void dqi_poly::draw() {
     } */
 
 #if CAP_GL
-  if(vid.usingGL && shaderside_projection) {
+  if(vid.usingGL && (current_display->set_all(global_projection), shaderside_projection)) {
     glLineWidth(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();
@@ -1521,7 +1518,7 @@ void draw_main() {
   
 void drawqueue() {
   callhooks(hook_drawqueue);
-  reset_projection(); current_display->set_all(0);
+  reset_projection();
   // reset_projection() is not sufficient here, because we need to know shaderside_projection
 
 #if CAP_GL

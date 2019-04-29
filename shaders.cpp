@@ -360,6 +360,7 @@ void colorClear(color_t color) {
 
 void be_nontextured(shader_projection sp) { switch_mode(gmColored, sp); }
 void be_textured(shader_projection sp) { switch_mode(gmTextured, sp); }
+void use_projection(shader_projection sp) { switch_mode(mode, sp); }
 
 void switch_mode(eMode m, shader_projection sp) {
   if(m == mode && current_shader_projection == sp) return;

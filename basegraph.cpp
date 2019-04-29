@@ -167,6 +167,7 @@ void setcameraangle(bool b) { }
 bool shaderside_projection;
 
 void start_projection(int ed, bool perspective) {
+  glhr::use_projection();
   glhr::new_projection();
   shaderside_projection = perspective;
 

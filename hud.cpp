@@ -350,6 +350,7 @@ bool nofps = false;
 
 void draw_radar(bool cornermode) {
   dynamicval<eGeometry> g(geometry, gEuclid);
+  dynamicval<eModel> pm(pmodel, mdText);
   initquickqueue();
   int rad = vid.radarsize;
   
@@ -372,7 +373,6 @@ void draw_radar(bool cornermode) {
     queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2]/3 + rad * r.h[1]*2/3, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2]/3, 0)*C0, r.line, -1);
     }
 
-  dynamicval<eModel> pm(pmodel, mdText);
   quickqueue();
 
   for(auto& r: radarpoints)
