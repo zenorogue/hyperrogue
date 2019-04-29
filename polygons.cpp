@@ -1841,6 +1841,7 @@ void bshape(hpcshape& sh, PPR prio) {
   last = &sh;
   last->s = isize(hpc), last->prio = prio;
   last->flags = 0;
+  last->tinf = NULL;
   first = true; 
   }
 
