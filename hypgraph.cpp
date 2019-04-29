@@ -1654,7 +1654,7 @@ bool do_draw(cell *c) {
   // do not display not fully generated cells, unless changing range allowed
   if(c->mpdist > 7 && !allowChangeRange()) return false;
   // in the Yendor Challenge, scrolling back is forbidden
-  if(c->cpdist > 7 && yendor::on && !cheater && !autocheat) return false;
+  if(c->cpdist > 7 && (yendor::on || isHaunted(cwt.at->land)) && !cheater && !autocheat) return false;
 
   return true;
   }  
