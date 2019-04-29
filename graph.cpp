@@ -6011,12 +6011,40 @@ bool allowChangeRange() {
 
 purehookset hooks_drawmap;
 
-transmatrix cview() {
+transmatrix actual_view_transform;
+
+ld wall_radar(cell *c, transmatrix T) {
+  if(!vid.use_wall_radar) return vid.yshift;
+  ld fixed_yshift = 0;
+  ld step = vid.yshift / 20;
+  for(int i=0; i<20; i++) {
+    T = T * cpush(2, -step);
+    virtualRebase(c, T, false);
+    color_t col;
+    if(isWall3(c, col)) { 
+      T = T * cpush(2, step); 
+      step /= 2; i = 17; 
+      if(step < 1e-3) break; 
+      }
+    else fixed_yshift += step;
+    }
+  return fixed_yshift;
+  }
+
+void make_actual_view() {
   sphereflip = Id;
-  if(DIM == 3 && !shmup::on && vid.yshift) return cpush(2, vid.yshift) * View;
-  if(DIM == 3) return View;
+  if(DIM == 3 && !shmup::on && vid.yshift) {
+    actual_view_transform = cpush(2, wall_radar(viewctr.at->c7, inverse(View)));
+    return;
+    }  
+  if(DIM == 3) { actual_view_transform = Id; return; }
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
-  return ypush(vid.yshift) * sphereflip * View;
+  actual_view_transform = ypush(vid.yshift) * sphereflip;  
+  }
+
+transmatrix cview() {
+  make_actual_view();
+  return actual_view_transform * View;
   }
 
 void precise_mouseover() {

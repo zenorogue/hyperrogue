@@ -181,6 +181,7 @@ void initConfig() {
 
   addsaver(vid.ballangle, "ball angle", 20);
   addsaver(vid.yshift, "Y shift", 0);
+  addsaver(vid.use_wall_radar, "wallradar", true);
   addsaver(vid.fixed_facing, "fixed facing", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaver(vid.ballproj, "ballproj", 1);
@@ -1499,10 +1500,15 @@ void show3D() {
     else if(uni == 'e')
       pushScreen(showStereo);
     
-    else if(uni == 'y') 
+    else if(uni == 'y') {
       dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
         XLAT("Don't center on the player character.")
         );
+      if(DIM == 3) dialog::extra_options = [] () {
+        dialog::addBoolItem(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
+        dialog::add_action([] () { vid.use_wall_radar = !vid.use_wall_radar; });
+        };
+      }
     else if(uni == 's') 
       dialog::editNumber(vid.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
         XLAT("Rotate the camera. Can be used to obtain a first person perspective, "

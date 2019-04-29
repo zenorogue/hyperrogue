@@ -1096,14 +1096,11 @@ void centerpc(ld aspd) {
 
   if(shmup::on && DIM == 3 && vid.sspeed > -5) {
     int id = subscreens::in ? subscreens::current_player : 0;
-    if(false) { // gmatrix.count(shmup::pc[id]->base)) {
-      transmatrix at = ggmatrix(shmup::pc[id]->base) * shmup::pc[id]->at * cpush(2, -vid.yshift);  
-      View = inverse(at) * View;
-      }
-    else {
-      viewctr = shmup::pc[id]->base->master;
-      View = inverse(shmup::pc[id]->at * cpush(2, -vid.yshift));
-      }
+    viewctr = shmup::pc[id]->base->master;
+    transmatrix& T = shmup::pc[id]->at;
+    View = inverse(T);
+    if(vid.yshift) View = cpush(2, wall_radar(viewctr.at->c7, T)) * View;
+
     #if CAP_RACING
     if(racing::on) racing::set_view();
     #endif
@@ -1123,9 +1120,7 @@ void centerpc(ld aspd) {
   
   ors::unrotate(cwtV); ors::unrotate(View);
   
-  hyperpoint H = tC0(cwtV);
-  if(DIM == 2) H = ypush(-vid.yshift) * sphereflip * H;
-  if(DIM == 3 && !shmup::on && vid.yshift) H = cpush(2, -vid.yshift) * H;
+  hyperpoint H = inverse(actual_view_transform) * tC0(cwtV);
   ld R = zero_d(DIM, H) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
