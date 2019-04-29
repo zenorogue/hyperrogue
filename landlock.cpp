@@ -1011,7 +1011,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laZebra && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
   
-  if(l == laZebra && !(stdeuc || (a4 && !BITRUNCATED) || a46) && !randomPatternsMode)
+  if(l == laZebra && !(stdeuc || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
