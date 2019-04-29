@@ -1745,6 +1745,7 @@ hyperpoint gethyper(ld x, ld y) {
     auto r1 = triangles[i].m[1];
     auto r2 = triangles[i].m[2];
     if(!r2) continue;
+    if(!r0->valid || !r1->valid || !r2->valid) continue;
     hyperpoint p0, p1, p2;
     bool error = false;
     int spherepoints = 0;
