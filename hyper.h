@@ -88,6 +88,8 @@ struct hr_shortest_path_exception: hr_exception { };
 #define GEN_N 2
 #define GEN_O 3
 
+// Add a message to the GUI.
+// If multiple messages appear with the same spamtype != 0, the older ones disappear quickly
 void addMessage(string s, char spamtype = 0);
 
 // geometry-dependent constants
@@ -102,6 +104,8 @@ void addMessage(string s, char spamtype = 0);
 
 #define binarytiling (ginf[geometry].flags & qBINARY)
 #define archimedean (geometry == gArchimedean)
+
+// these geometries do not feature alternate structures for horocycles
 #define eubinary (euclid || binarytiling || geometry == gCrystal)
 
 #define cgclass (ginf[geometry].cclass)
@@ -113,11 +117,16 @@ void addMessage(string s, char spamtype = 0);
 #define quotient (ginf[geometry].flags & qANYQ)
 #define euwrap (quotient && euclid)
 #define fulltorus (bounded && euclid)
-#define doall (bounded)
 #define smallbounded (ginf[geometry].flags & qSMALL)
 #define bounded (ginf[geometry].flags & qBOUNDED)
 
+// Dry Forest burning, heat transfer, etc. are performed on the whole universe
+#define doall (bounded)
+
+// These geometries are generated without the heptagon structure. 
+// 'master' holds the coordinates
 #define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
+
 #define sphere_narcm (sphere && !archimedean)
 
 #define a4 (S3 == 4)
