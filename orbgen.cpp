@@ -301,7 +301,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbWinter && l == laMinefield)
     return olrForbidden;
   
-  if(it == itOrbWinter && l != laRlyeh && l != laTemple) 
+  if(it == itOrbWinter && !among(l, laRlyeh, laTemple, laVolcano)) 
     return olrUseless;
   
   if(it == itOrbLife && l == laMotion)
