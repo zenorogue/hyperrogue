@@ -2715,7 +2715,7 @@ void drawaura() {
       }
     }
   glflush();
-  dynamicval<eModel> p(pmodel, DIM == 2 && pmodel == mdDisk ? mdDisk : mdText);
+  dynamicval<eModel> p(pmodel, DIM == 2 && pmodel == mdDisk ? mdDisk : mdUnchanged);
   current_display->set_all(0);
   glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
   glhr::id_modelview();

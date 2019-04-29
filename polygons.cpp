@@ -185,7 +185,7 @@ void glflush() {
   if(isize(text_vertices)) {
     // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
     glhr::be_textured();
-    dynamicval<eModel> pm(pmodel, mdText);
+    dynamicval<eModel> pm(pmodel, mdUnchanged);
     if(!svg::in) current_display->set_all(0);
     glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);

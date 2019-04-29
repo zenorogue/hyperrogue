@@ -215,7 +215,7 @@ void display_data::set_projection(int ed) {
   DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
   
   bool pers3 = false;
-  bool apply_models = !among(pmodel, mdText, mdRug);
+  bool apply_models = !among(pmodel, mdUnchanged, mdRug);
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
@@ -323,7 +323,7 @@ void display_data::set_projection(int ed) {
       }      
     }
   
-  if(vid.camera_angle && !among(pmodel, mdText, mdUnchanged, mdRug)) {
+  if(vid.camera_angle && !among(pmodel, mdUnchanged, mdRug)) {
     ld cam = vid.camera_angle * degree;
 
     GLfloat cc = cos(cam);

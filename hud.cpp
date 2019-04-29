@@ -349,13 +349,15 @@ void drawMobileArrow(int i) {
 bool nofps = false;
 
 void draw_radar(bool cornermode) {
+
   dynamicval<eGeometry> g(geometry, gEuclid);
-  dynamicval<eModel> pm(pmodel, mdText);
+  dynamicval<eModel> pm(pmodel, mdUnchanged);
   initquickqueue();
   int rad = vid.radarsize;
   
   ld cx = cornermode ? rad+2 : vid.xres-rad-2;
   ld cy = vid.yres-rad-2 - vid.fsize;
+
   for(int i=0; i<360; i++)
     curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
   queuecurve(0xFFFFFFFF, 0x000000FF, PPR::ZERO);      

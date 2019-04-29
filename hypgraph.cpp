@@ -273,7 +273,6 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
       
     case mdUnchanged:
-    case mdText: 
       ret = H / current_display->radius;
       return; 
     
