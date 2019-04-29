@@ -6356,7 +6356,6 @@ void calcparam() {
     cd->scrdist = vid.xres / 2 / cd->tanfov;
   else 
     cd->scrdist = cd->radius;
-  cd->scrdist_text = cd->scrdist;
 
   callhooks(hooks_calcparam);
   reset_projection();

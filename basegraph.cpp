@@ -27,7 +27,7 @@ namespace stereo {
   ld lr_eyewidth, anaglyph_eyewidth;
   ld fov, tanfov;
 
-  GLfloat scrdist, scrdist_text;
+  GLfloat scrdist;
   }
 
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
@@ -252,7 +252,6 @@ void display_data::set_projection(int ed) {
     if(DIM == 3 && apply_models) {
       glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, 1));
       glhr::id_modelview();
-      current_display->scrdist_text = 0;
       }
     else {
       glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
@@ -280,7 +279,6 @@ void display_data::set_projection(int ed) {
     if(pers3) {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
-      current_display->scrdist_text = cd->ysize;
       }
     else if(DIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
@@ -289,13 +287,11 @@ void display_data::set_projection(int ed) {
       M[2][2] = 2 / (clip_max - clip_min);
       M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
       glhr::projection_multiply(M);
-      current_display->scrdist_text = 0;
       }
     else {
       glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
       GLfloat sc = current_display->radius / (cd->ysize/2.);  
       glhr::projection_multiply(glhr::scale(sc, -sc, -1));
-      current_display->scrdist_text = cd->ysize * sc / 2;
       }
 
     

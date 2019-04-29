@@ -191,7 +191,7 @@ void glflush() {
     glhr::color2(text_color);
     glhr::set_depthtest(false);
     for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist_text));
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist));
       current_display->set_mask(ed);
   
       glhr::current_vertices = NULL;
