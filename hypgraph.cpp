@@ -669,7 +669,7 @@ double q3 = sqrt(double(3));
 
 bool outofmap(hyperpoint h) {
   if(euclid) 
-    return h[2] < .5; // false; // h[0] * h[0] + h[1] * h[1] > 15 * eurad;
+    return h[2] < .5; // false; // h[0] * h[0] + h[1] * h[1] > 15 * crossf;
   else if(sphere)
     return h[2] < .1 && h[2] > -.1 && h[1] > -.1 && h[1] < .1 && h[0] > -.1 && h[0] < .1;
   else
@@ -1010,22 +1010,22 @@ transmatrix eumove(ld x, ld y) {
   Mat[2][2] = 1;
   
   if(a4) {
-    Mat[0][2] += x * eurad;
-    Mat[1][2] += y * eurad;
+    Mat[0][2] += x * crossf;
+    Mat[1][2] += y * crossf;
     }
   else {
-    Mat[0][2] += (x + y * .5) * eurad;
-    // Mat[2][0] += (x + y * .5) * eurad;
-    Mat[1][2] += y * q3 /2 * eurad;
-    // Mat[2][1] += y * q3 /2 * eurad;
+    Mat[0][2] += (x + y * .5) * crossf;
+    // Mat[2][0] += (x + y * .5) * crossf;
+    Mat[1][2] += y * q3 /2 * crossf;
+    // Mat[2][1] += y * q3 /2 * crossf;
     }
   
   ld v = a4 ? 1 : q3;
 
-  while(Mat[0][2] <= -16384 * eurad) Mat[0][2] += 32768 * eurad;
-  while(Mat[0][2] >= 16384 * eurad) Mat[0][2] -= 32768 * eurad;
-  while(Mat[1][2] <= -16384 * v * eurad) Mat[1][2] += 32768 * v * eurad;
-  while(Mat[1][2] >= 16384 * v * eurad) Mat[1][2] -= 32768 * v * eurad;
+  while(Mat[0][2] <= -16384 * crossf) Mat[0][2] += 32768 * crossf;
+  while(Mat[0][2] >= 16384 * crossf) Mat[0][2] -= 32768 * crossf;
+  while(Mat[1][2] <= -16384 * v * crossf) Mat[1][2] += 32768 * v * crossf;
+  while(Mat[1][2] >= 16384 * v * crossf) Mat[1][2] -= 32768 * v * crossf;
   return Mat;
   }
 

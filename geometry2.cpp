@@ -354,8 +354,8 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
 double cellgfxdist(cell *c, int i) {
   if(euclid) {
-    if(c->type == 8 && (i&1)) return eurad * sqrt(2);
-    return eurad;
+    if(c->type == 8 && (i&1)) return crossf * sqrt(2);
+    return crossf;
     }
   if(NONSTDVAR || archimedean) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
   return !BITRUNCATED ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;

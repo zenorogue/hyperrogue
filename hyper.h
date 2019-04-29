@@ -146,8 +146,6 @@ void addMessage(string s, char spamtype = 0);
 #define S6 (S3*2)
 #define MAX_S3 4
 
-#define eurad crossf
-
 #define SG6 (S3==3?6:4)
 #define SG3 (S3==3?3:2)
 #define SG2 (S3==3?2:1)
