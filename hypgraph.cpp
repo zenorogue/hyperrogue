@@ -776,16 +776,6 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
-transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
-  #if CAP_BT
-  if(binarytiling) return V;
-  #endif
-  #if CAP_ARCM
-  if(archimedean) return V * spin(arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
-  #endif
-  return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
-  }
-
 bool invis_point(const hyperpoint h) {
   if(DIM == 2 || sphere || pmodel != mdPerspective) return false;
   return h[2] < 0;
