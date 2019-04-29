@@ -63,7 +63,7 @@ void archimedean_tiling::prepare() {
     return;
     }
   if(isize(faces) > MAX_EDGE/2) {
-    errormsg = XLAT("currently no more than %1 faces in vertex", its(MAX_EDGE));
+    errormsg = XLAT("currently no more than %1 faces in vertex", its(MAX_EDGE/2));
     errors++;
     return;
     }
@@ -583,7 +583,7 @@ hrmap *new_map() { return new hrmap_archimedean; }
 
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
-  auto h = buildHeptagon1(tailored_alloc<heptagon> (isize(current.adjacent[adj.first])), p.at, p.spin, hstate(1), 0);
+  auto h = buildHeptagon1(tailored_alloc<heptagon> (isize(current.adjacent[adj.first])), p.at, p.spin, hstate(1), 0, adj.first);
   SDEBUG( printf("NEW %p.%d ~ %p.0\n", p.at, p.spin, h); )
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;

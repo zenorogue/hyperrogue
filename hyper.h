@@ -338,10 +338,10 @@ struct gcell {
     cpdist : 8;         // current/minimum player distance
 
   unsigned 
-    mondir : 4,         // monster direction, for multi-tile monsters and graphics
-    bardir : 4,         // barrier direction
-    stuntime : 4,       // stun time left (for Palace Guards and Skeletons)
-    hitpoints : 4;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
+    mondir : 8,         // monster direction, for multi-tile monsters and graphics
+    bardir : 8,         // barrier direction
+    stuntime : 8,       // stun time left (for Palace Guards and Skeletons)
+    hitpoints : 8;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
   
   unsigned landflags : 8;      // extra flags for land
 #else
@@ -398,11 +398,11 @@ struct gcell {
 
 #define fval LHU.fi.fieldval
 
-#define NODIR 14
-#define NOBARRIERS 15
-#define MODFIXER 10090080
+#define NODIR 126
+#define NOBARRIERS 127
+#define MODFIXER (2*10090080*17)
 
-#define MAX_EDGE 14
+#define MAX_EDGE 18
 
 template<class T> struct walker;
 
@@ -414,26 +414,19 @@ template<class T> struct connection_table {
   // less than MAX_EDGE neighbors (see tailored_alloc),
   // the order of fields matters.
 
-  unsigned char spintable[6];
-  unsigned short mirrortable;
-  T* move_table[MAX_EDGE];
-  unsigned char spintable_extra[2];
+  T* move_table[MAX_EDGE + (MAX_EDGE + sizeof(char*) - 1) / sizeof(char*)];
   
+  unsigned char *spintable() { return (unsigned char*) (&move_table[full()->degree()]); }
+
   T* full() { T* x = (T*) this; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
-  unsigned char& get_spinchar(int d) {
-    if(d < 12) return spintable[d>>1];
-    else return spintable_extra[(d-12)>>1];
-    }
   void setspin(int d, int spin, bool mirror) { 
-    unsigned char& c = get_spinchar(d);
-    c &= ~(15 << ((d&1) << 2));
-    c |= spin << ((d&1) << 2);
-    if(mirror) mirrortable |= (1 << d);
-    else mirrortable &=~ (1 << d);
+    unsigned char& c = spintable() [d];
+    c = spin;
+    if(mirror) c |= 128;
     }
   // we are spin(i)-th neighbor of move[i]
-  int spin(int d) { return (get_spinchar(d) >> ((d&1)<<2)) & 15; }
-  bool mirror(int d) { return (mirrortable >> d) & 1; }  
+  int spin(int d) { return spintable() [d] & 127; }
+  bool mirror(int d) { return spintable() [d] & 128; }  
   int fix(int d) { return (d + MODFIXER) % full()->degree(); }
   T*& modmove(int i) { return move(fix(i)); }
   T*& move(int i) { return move_table[i]; }
@@ -463,14 +456,12 @@ template<class T> T* tailored_alloc(int degree) {
   const T* sample = (T*) &degree;
   T* result;
 #ifndef NO_TAILORED_ALLOC
-  if(degree <= 12) {
-    int b = (char*)&sample->c.move_table[degree] - (char*) sample;
-    result = (T*) new char[b];
-    new (result) T();
-    }
-  else 
+  int b = (char*)&sample->c.move_table[degree] + degree - (char*) sample;
+  result = (T*) new char[b];
+  new (result) T();
+#else
+  result = new T;
 #endif
-    result = new T;
   for(int i=0; i<degree; i++) result->c.move_table[i] = NULL;
   return result;
   }

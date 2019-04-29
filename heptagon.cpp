@@ -62,9 +62,10 @@ hstate transition(hstate s, int dir) {
 #define COMPUTE -1000000
 
 // create a new heptagon
-heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
+heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int pard = 0, int zv = 0) {
   h->alt = NULL;
   h->s = s;
+  h->zebraval = zv;
   h->c.connect(pard, parent, d, false);
   h->cdata = NULL;
   return h;
