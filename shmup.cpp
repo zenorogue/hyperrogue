@@ -974,33 +974,13 @@ typedef multimap<cell*, monster*>::iterator mit;
 
 vector<monster*> active, nonvirtual, additional;
 
-struct horo_distance {
-  ld a, b;
-  horo_distance(hyperpoint h1, cell *c) {
-    if(binarytiling) {
-      hyperpoint ih1 = inverse(ggmatrix(c)) * h1;
-      b = intval(ih1, C0);
-      a = abs(binary::horo_level(ih1));
-      }
-    else
-      a = 0, b = intval(h1, tC0(ggmatrix(c)));
-    }
-  bool operator < (const horo_distance z) {
-    if(binarytiling) {
-      if(a < z.a-1e-6) return true;
-      if(a > z.a+1e-6) return false;
-      }
-    return b < z.b;
-    }
-  };
-
 cell *findbaseAround(hyperpoint p, cell *around) {
   cell *best = around;
-  horo_distance d0(p, around);
+  horo_distance d0(p, ggmatrix(around));
   for(int i=0; i<around->type; i++) {
     cell *c2 = around->move(i);
     if(c2) {
-      horo_distance d1(p, c2);
+      horo_distance d1(p, ggmatrix(c2));
       if(d1 < d0) { best = c2; d0 = d1; }
       }
     }

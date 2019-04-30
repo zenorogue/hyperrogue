@@ -210,6 +210,34 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   return gm * where;
   }
 
+struct horo_distance {
+  ld a, b;
+  horo_distance(hyperpoint h1) {
+    if(binarytiling) {
+      b = intval(h1, C0);
+      a = abs(binary::horo_level(h1));
+      }
+    else
+      a = 0, b = intval(h1, C0);
+    }
+  horo_distance(hyperpoint h1, const transmatrix& T) {
+    if(binarytiling) {
+      hyperpoint ih1 = inverse(T) * h1;
+      b = intval(ih1, C0);
+      a = abs(binary::horo_level(ih1));
+      }
+    else
+      a = 0, b = intval(h1, tC0(T));
+    }
+  bool operator < (const horo_distance z) {
+    if(binarytiling) {
+      if(a < z.a-1e-6) return true;
+      if(a > z.a+1e-6) return false;
+      }
+    return b < z.b - 1e-4;
+    }
+  };
+
 template<class T, class U> 
 void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   if((euclid || sphere) && DIM == 2) {
@@ -241,8 +269,8 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
   while(true) {
   
-    double currz = hdist0(check(at));
-    
+    horo_distance currz(check(at));
+  
     heptagon *h = base->master;
     
     cell *newbase = NULL;
@@ -253,7 +281,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
-      double newz = hdist0(check(V2 * at));
+      horo_distance newz(check(V2 * at));
       if(newz < currz) {
         currz = newz;
         bestV = V2;
@@ -269,7 +297,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       if(tohex && BITRUNCATED) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->c.spin(d)*2*M_PI/S6) * invhexmove[d];
-        double newz = hdist0(check(V2 *at));
+        horo_distance newz(check(V2 * at));
         if(newz < currz) {
           currz = newz;
           bestV = V2;
@@ -286,8 +314,8 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
           newbase = NULL;
           forCellCM(c2, base) {
             transmatrix V2 = calc_relative_matrix(base, c2, C0);
-            double newz = hdist0(check(V2 * at));
-            if(newz < currz - 1e-4) {
+            horo_distance newz(check(V2 * at));
+            if(newz < currz) {
               currz = newz;
               bestV = V2;
               newbase = c2;
