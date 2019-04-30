@@ -585,7 +585,7 @@ void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 9
     stillin[i] = false;
     }
   
-  for(int i=n; i>=0; i--) if(!stillin[i] && !stillin[nextid[i]]) nextid[i] = nextid[nextid[i]];
+  for(int i=n-1; i>=0; i--) if(!stillin[i] && !stillin[nextid[i]]) nextid[i] = nextid[nextid[i]];
   for(int i=0; i<n; i++) if(!stillin[i] && !stillin[lastid[i]]) lastid[i] = lastid[lastid[i]];
 
   for(int i=0; i<n; i++) {
