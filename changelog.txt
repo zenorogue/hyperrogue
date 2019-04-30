@@ -3105,3 +3105,35 @@ Creative/3D:
 - single-type textures now can be remapped to 3D geometries
 - in some situations texture was lost when starting a new game while it should not
 - formula editor: comma can now actually be entered; 'shot' parameter to change shots
+
+2018-04-29 20:13 Version 11.0r:
+
+Game:
+- disabled scrolling in Haunted Woods
+- Zebra valid in Zebra quotient; Minefield and Kraken Depths no longer valid in Strange Challenge in bounded geometries
+- Orb of Winter no longer marked as useless in Volcanic Wasteland
+- no more complaining when trying to save the game on your first run
+- fixed a bug with incorrect number of lives when loading game in the shmup mode
+- fixed backward incompatibility when loading polygons via MapEditor
+- fixed the Orb of the Warp effect (destroyed while refactoring)
+
+Archimedean:
+- increased the limit from 14 to 18
+- slower heat transfer
+- fixed potential incorrect computation of default ranges
+
+3D:
+- monsters now use 3D models (based on the 2D models) and are now facing correctly
+- 3D tori and some twisted versions (see 'advanced parameters')
+- in third person perspective, the camera distance is now automatically reduced if there is a wall on the way
+- removed transparency from monsters in 3D
+- fixed shots (shmup mode) not being displayed at their actual locations
+- rebalanced Space Rocks in 3D
+
+RogueViz:
+- CLI option -collatz-go
+- fat_edges
+- rainbow color specification
+- fixed label positioning in 3D
+- 3D trees in Collatz
+- Flocking in 3D, more CLI parameters (check_range, flock shape), multithread support, do not try large steps even if delta way too big
