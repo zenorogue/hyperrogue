@@ -506,7 +506,7 @@ namespace euclid3 {
   typedef array<array<int, 3>, 3> intmatrix;  
 
 
-  static const axes main_axes = { 1, COORDMAX, COORDMAX * COORDMAX };
+  static const axes main_axes = make_array<coord>(1, COORDMAX, COORDMAX * COORDMAX );
   
   array<int, 3> getcoord(coord x) {
     array<int, 3> res;

@@ -41,14 +41,16 @@ template <typename N = uint32_t>
 class Earcut {
 public:
     std::vector<N> indices;
-    std::size_t vertices = 0;
+    std::size_t vertices;
 
     template <typename Polygon>
     void operator()(const Polygon& points);
+    
+    Earcut() { vertices = 0; inv_size = 0; }
 
 private:
     struct Node {
-        Node(N index, double x_, double y_) : i(index), x(x_), y(y_) {}
+        Node(N index, double x_, double y_) : i(index), x(x_), y(y_) { z = 0; prev = nullptr; next = nullptr; prevZ = nextZ = nullptr; steiner = false; }
         Node(const Node&) = delete;
         Node& operator=(const Node&) = delete;
         Node(Node&&) = delete;
@@ -59,18 +61,18 @@ private:
         const double y;
 
         // previous and next vertice nodes in a polygon ring
-        Node* prev = nullptr;
-        Node* next = nullptr;
+        Node* prev;
+        Node* next;
 
         // z-order curve value
-        int32_t z = 0;
+        int32_t z;
 
         // previous and next nodes in z-order
-        Node* prevZ = nullptr;
-        Node* nextZ = nullptr;
+        Node* prevZ;
+        Node* nextZ;
 
         // indicates whether this is a steiner point
-        bool steiner = false;
+        bool steiner; 
     };
 
     template <typename Ring> Node* linkedList(const Ring& points, const bool clockwise);
@@ -102,12 +104,12 @@ private:
     bool hashing;
     double minX, maxX;
     double minY, maxY;
-    double inv_size = 0;
+    double inv_size;
 
-    template <typename T, typename Alloc = std::allocator<T>>
+    template <typename T> // , typename Alloc = std::allocator<T>>
     class ObjectPool {
     public:
-        ObjectPool() { }
+        ObjectPool() { currentIndex = blockSize = 1; currentBlock = nullptr; }
         ObjectPool(std::size_t blockSize_) {
             reset(blockSize_);
         }
@@ -117,17 +119,20 @@ private:
         template <typename... Args>
         T* construct(Args&&... args) {
             if (currentIndex >= blockSize) {
-                currentBlock = alloc_traits::allocate(alloc, blockSize);
+                currentBlock = (T*) new char[sizeof(T) * blockSize];
+                // alloc_traits::allocate(alloc, blockSize);
                 allocations.emplace_back(currentBlock);
                 currentIndex = 0;
             }
             T* object = &currentBlock[currentIndex++];
-            alloc_traits::construct(alloc, object, std::forward<Args>(args)...);
+            // alloc_traits::construct(alloc, object, std::forward<Args>(args)...);
+            ::new (static_cast<void*>(object)) T(std::forward<Args>(args)...);
             return object;
         }
         void reset(std::size_t newBlockSize) {
             for (auto allocation : allocations) {
-                alloc_traits::deallocate(alloc, allocation, blockSize);
+                // alloc_traits::deallocate(alloc, allocation, blockSize);                
+                delete[] allocation;
             }
             allocations.clear();
             blockSize = std::max<std::size_t>(1, newBlockSize);
@@ -136,12 +141,12 @@ private:
         }
         void clear() { reset(blockSize); }
     private:
-        T* currentBlock = nullptr;
-        std::size_t currentIndex = 1;
-        std::size_t blockSize = 1;
+        T* currentBlock;
+        std::size_t currentIndex;
+        std::size_t blockSize;
         std::vector<T*> allocations;
-        Alloc alloc;
-        typedef typename std::allocator_traits<Alloc> alloc_traits;
+        // Alloc alloc;
+        // typedef typename std::allocator_traits<Alloc> alloc_traits;
     };
     ObjectPool<Node> nodes;
 };
@@ -203,7 +208,7 @@ void Earcut<N>::operator()(const Polygon& points) {
 template <typename N> template <typename Ring>
 typename Earcut<N>::Node*
 Earcut<N>::linkedList(const Ring& points, const bool clockwise) {
-    using Point = typename Ring::value_type;
+    typedef typename Ring::value_type Point;
     double sum = 0;
     const std::size_t len = points.size();
     std::size_t i, j;

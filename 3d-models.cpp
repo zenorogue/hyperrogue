@@ -457,7 +457,7 @@ void make_head_3d(hpcshape& sh) {
     pts[0].emplace_back(p);
     }
   
-  array<ld, 2> zero = {0,0};
+  array<ld, 2> zero = make_array<ld>(0,0);
   pts[1].emplace_back(zero);
   head.push_back(C0);
   
