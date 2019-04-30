@@ -7644,7 +7644,7 @@ S("bitruncated cubic honeycomb", "ośmiościany ścięte")
 
 S("{4,4} on horospheres", "{4,4} na horosferach")
 S("{3,6} on horospheres", "{3,6} na horosferach")
-S("{6,3} on horospheres", "{3,6} na horosferach")
+S("{6,3} on horospheres", "{6,3} na horosferach")
 S("rectangles on horospheres", "prostokąty na horosferach")
 
 // quotient space abbreviations

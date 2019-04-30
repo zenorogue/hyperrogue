@@ -7918,7 +7918,7 @@ S("bitruncated cubic honeycomb", "dvojseříznuté krychlové dělení")
 
 S("{4,4} on horospheres", "{4,4} na horosférách")
 S("{3,6} on horospheres", "{3,6} na horosférách")
-S("{6,3} on horospheres", "{3,6} na horosférách")
+S("{6,3} on horospheres", "{6,3} na horosférách")
 S("rectangles on horospheres", "obdélníky na horosférách")
 
 // quotient space abbreviations
