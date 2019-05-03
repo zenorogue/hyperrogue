@@ -1817,6 +1817,13 @@ string geometry_name(eGeometry g) {
     }
   }
 
+void change_texturesize() {
+  if(rugged) {
+    close();
+    reopen();
+    }
+  }
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1963,9 +1970,10 @@ void show() {
       gwhere = eGeometry((gwhere+1) % 4);
     else if(uni == 'g' && !rug::rugged && CAP_SDL)
       rendernogl = !rendernogl;
-    else if(uni == 's' && !rug::rugged) {
+    else if(uni == 's') {
       texturesize *= 2;
       if(texturesize == 8192) texturesize = 64;
+      change_texturesize();
       }
 #if CAP_SURFACE
     else if(uni == 'c') 
@@ -2032,6 +2040,7 @@ int rugArgs() {
 
   else if(argis("-rugtsize")) {
     shift(); rug::texturesize = argi();
+    change_texturesize();
     }
 
   else if(argis("-rugv")) {
