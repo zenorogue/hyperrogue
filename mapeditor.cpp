@@ -2108,21 +2108,17 @@ namespace mapeditor {
   
     dialog::init(XLAT("Map settings"));
   
-    dialog::addBoolItem(XLAT("disable wandering monsters"), !gen_wandering, 'w');
-    dialog::add_action([] () { gen_wandering = !gen_wandering; });
+    dialog::addBoolItem_action_neg(XLAT("disable wandering monsters"), gen_wandering, 'w');
 
     if(gen_wandering) {
-      dialog::addBoolItem(XLAT("disable ghost timer"), !timerghost, 'g');
-      dialog::add_action([] () { timerghost = !timerghost; });
+      dialog::addBoolItem_action_neg(XLAT("disable ghost timer"), timerghost, 'g');
       }
     else dialog::addBreak(100);
 
-    dialog::addBoolItem(XLAT("simple pattern generation"), reptilecheat, 'p');
-    dialog::add_action([] () { reptilecheat = !reptilecheat; });
+    dialog::addBoolItem_action(XLAT("simple pattern generation"), reptilecheat, 'p');
     dialog::addInfo(XLAT("(e.g. pure Reptile pattern)"));
 
-    dialog::addBoolItem(XLAT("safety generation"), safety, 's');
-    dialog::add_action([] () { safety = !safety; });
+    dialog::addBoolItem_action(XLAT("safety generation"), safety, 's');
     dialog::addInfo(XLAT("(no treasure, no dangers)"));
 
     dialog::addBoolItem(XLAT("god mode"), autocheat, 'G');

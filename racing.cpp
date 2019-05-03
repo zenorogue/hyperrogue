@@ -1018,8 +1018,7 @@ void race_projection() {
     dialog::addItem(XLAT("configure the projection"), 'p');
     dialog::add_action_push(race_projection);
   
-    dialog::addBoolItem(XLAT("guiding line"), guiding, 'g');
-    dialog::add_action([] () { guiding = !guiding; });
+    dialog::addBoolItem_action(XLAT("guiding line"), guiding, 'g');
   
     dialog::addItem(shmup::player_count_name(playercfg), 'n');
     dialog::add_action([/*this*/] () { 

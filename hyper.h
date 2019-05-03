@@ -1974,6 +1974,11 @@ namespace dialog {
 
   void add_action_push(const reaction_t& action);
   void addBoolItem_action(const string&  s, bool& b, char c);
+  void addBoolItem_action_neg(const string&  s, bool& b, char c);
+  template<class T> void addBoolItem_choice(const string&  s, T& b, T val, char c) {
+    addBoolItem(s, b == val, c);
+    add_action([&b, val] { b = val; });
+    }
   
   string view_edited_string();
   void start_editing(string& s);

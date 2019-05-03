@@ -1959,10 +1959,8 @@ void configure_edge_display() {
     }
   dialog::addBreak(100);
   if(among(kind, kSAG, kKohonen, kSpiral)) {
-    dialog::addBoolItem("color/alpha", mode == 0, '1');
-    dialog::add_action([] () { mode = 0; });
-    dialog::addBoolItem(s3, mode == 1, '2');
-    dialog::add_action([] () { mode = 1; });
+    dialog::addBoolItem_choice("color/alpha", mode, 0, '1');
+    dialog::addBoolItem_choice(s3, mode, 1, '2');
     }
   else mode = 0;
   

@@ -1147,19 +1147,19 @@ void showMenu() {
     dialog::addItem(XLAT("select the texture's pattern"), 'r');
     dialog::addItem(XLAT("enable the texture"), 't');
     dialog::addItem(XLAT("cancel the texture"), 'T');
-    dialog::addBoolItem(XLAT("move the model"), panstate == tpsModel, 'm');
-    dialog::addBoolItem(XLAT("move the texture"), panstate == tpsMove, 'a');
-    dialog::addBoolItem(XLAT("zoom/scale the texture"), panstate == tpsScale, 'x');
-    dialog::addBoolItem(XLAT("zoom/scale the model"), panstate == tpsZoom, 'z');
-    dialog::addBoolItem(XLAT("projection"), panstate == tpsProjection, 'p');
-    dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
+    dialog::addBoolItem_choice(XLAT("move the model"), panstate, tpsModel, 'm');
+    dialog::addBoolItem_choice(XLAT("move the texture"), panstate, tpsMove, 'a');
+    dialog::addBoolItem_choice(XLAT("zoom/scale the texture"), panstate, tpsScale, 'x');
+    dialog::addBoolItem_choice(XLAT("zoom/scale the model"), panstate, tpsZoom, 'z');
+    dialog::addBoolItem_choice(XLAT("projection"), panstate, tpsProjection, 'p');
+    dialog::addBoolItem_choice(XLAT("affine transformations"), panstate, tpsAffine, 'y');
     dialog::addBoolItem(XLAT("magic"), false, 'A');
     
     dialog::addBreak(50);
 
-    dialog::addBoolItem(XLAT("select master cells"), panstate == tpsCell, 'C');
-    dialog::addBoolItem(XLAT("select master triangles"), panstate == tpsTriangle, 'X');
-    dialog::addBoolItem(XLAT("fine tune vertices"), panstate == tpsTune, 'F');
+    dialog::addBoolItem_choice(XLAT("select master cells"), panstate, tpsCell, 'C');
+    dialog::addBoolItem_choice(XLAT("select master triangles"), panstate, tpsTriangle, 'X');
+    dialog::addBoolItem_choice(XLAT("fine tune vertices"), panstate, tpsTune, 'F');
 
     dialog::addColorItem(XLAT("grid color (master)"), config.master_color, 'M');
     dialog::addColorItem(XLAT("grid color (copy)"), config.slave_color, 'K');
@@ -1183,8 +1183,7 @@ void showMenu() {
     dialog::addColorItem(XLAT("mesh color"), config.mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(config.color_alpha), 'c');
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
-    dialog::addBoolItem(XLAT("aura from texture"), texture_aura, 'a');
-    dialog::add_action([] () { texture_aura = !texture_aura; });
+    dialog::addBoolItem_action(XLAT("aura from texture"), texture_aura, 'a');
 #if CAP_EDIT
     if(DIM == 2) dialog::addItem(XLAT("edit the texture"), 'e');
 #endif
@@ -1212,15 +1211,6 @@ void showMenu() {
         }
       }
 
-    else if(uni == 'm' && config.tstate == tsAdjusting) panstate = tpsModel;
-    else if(uni == 'a' && config.tstate == tsAdjusting) panstate = tpsMove;
-    else if(uni == 'x' && config.tstate == tsAdjusting) panstate = tpsScale;
-    else if(uni == 'y' && config.tstate == tsAdjusting) panstate = tpsAffine;
-    else if(uni == 'z' && config.tstate == tsAdjusting) panstate = tpsZoom;
-    else if(uni == 'p' && config.tstate == tsAdjusting) panstate = tpsProjection;
-    else if(uni == 'C' && config.tstate == tsAdjusting) panstate = tpsCell;
-    else if(uni == 'X' && config.tstate == tsAdjusting) panstate = tpsTriangle;
-    else if(uni == 'F' && config.tstate == tsAdjusting) panstate = tpsTune;
     else if(uni == 'A' && config.tstate == tsAdjusting) 
       pushScreen(showMagicMenu);
 

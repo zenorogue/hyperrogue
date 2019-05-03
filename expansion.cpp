@@ -583,8 +583,7 @@ void viewdist_configure_dialog() {
   dialog::addSelItem(XLAT("number codes"), XLAT(ncnames[number_coding]), 'n');
   dialog::add_action([] () { number_coding = eNumberCoding((number_coding + 1) % (mod_allowed() ? 4 : 2)); });
 
-  dialog::addBoolItem(XLAT("color codes"), use_color_codes, 'u');
-  dialog::add_action([] () { use_color_codes = !use_color_codes; });
+  dialog::addBoolItem_action(XLAT("color codes"), use_color_codes, 'u');
 
   dialog::addSelItem(XLAT("display distances from"), its(first_distance), 'd');
   dialog::add_action([] () { 

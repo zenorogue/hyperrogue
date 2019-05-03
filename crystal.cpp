@@ -1149,8 +1149,7 @@ void show() {
   dialog::addBoolItem(XLAT("4D double bitruncated"), ginf[gCrystal].vertex == 3, 'D');
   dialog::add_action(dialog::add_confirmation([]() { set_crystal(8); set_variation(eVariation::bitruncated); set_variation(eVariation::bitruncated); start_game(); }));
   dialog::addBreak(50);
-  dialog::addBoolItem(XLAT("view coordinates in the cheat mode"), view_coordinates, 'v');
-  dialog::add_action([]() { view_coordinates = !view_coordinates; });
+  dialog::addBoolItem_action(XLAT("view coordinates in the cheat mode"), view_coordinates, 'v');
   dialog::addSelItem(XLAT("compass probability"), fts(compass_probability), 'p');
   dialog::add_action([]() { 
     dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); 

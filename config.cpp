@@ -859,11 +859,9 @@ void configureOther() {
   dialog::add_action([] {vid.steamscore = vid.steamscore^1; });
 #endif
 
-  dialog::addBoolItem(XLAT("skip the start menu"), vid.skipstart, 'm');
-  dialog::add_action([] { vid.skipstart = !vid.skipstart; });
+  dialog::addBoolItem_action(XLAT("skip the start menu"), vid.skipstart, 'm');
 
-  dialog::addBoolItem(XLAT("forget faraway cells"), memory_saving_mode, 'y');
-  dialog::add_action([] { memory_saving_mode = !memory_saving_mode; });
+  dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
 
   if(CAP_AUDIO) {
     dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
@@ -1284,8 +1282,7 @@ void show3D() {
   dialog::addBreak(50);
   #if CAP_RUG
   if(rug::rugged) {
-    dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
-    dialog::add_action([] () { rug::spatial_rug = !rug::spatial_rug; });
+    dialog::addBoolItem_action(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
     }
   #endif
   dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
@@ -1394,8 +1391,7 @@ void show3D() {
         XLAT("Don't center on the player character.")
         );
       if(DIM == 3) dialog::extra_options = [] () {
-        dialog::addBoolItem(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
-        dialog::add_action([] () { vid.use_wall_radar = !vid.use_wall_radar; });
+        dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
         };
       }
     else if(uni == 's') 
@@ -1709,11 +1705,9 @@ void configureMouse() {
   gamescreen(1);
   dialog::init(XLAT("mouse & touchscreen"));
 
-  dialog::addBoolItem(XLAT("reverse pointer control"), (vid.revcontrol), 'r');
-  dialog::add_action([] {vid.revcontrol = !vid.revcontrol; });
+  dialog::addBoolItem_action(XLAT("reverse pointer control"), (vid.revcontrol), 'r');
   
-  dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
-  dialog::add_action([] { vid.drawmousecircle = !vid.drawmousecircle; });
+  dialog::addBoolItem_action(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
   
 #if ISMOBILE
   dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
@@ -1723,8 +1717,7 @@ void configureMouse() {
   dialog::add_action([] {vid.shifttarget = vid.shifttarget^3; });    
 
   #if !ISMOBILE
-  dialog::addBoolItem(XLAT("quick mouse"), vid.quickmouse, 'M');
-  dialog::add_action([] {vid.quickmouse = !vid.quickmouse; });
+  dialog::addBoolItem_action(XLAT("quick mouse"), vid.quickmouse, 'M');
   #endif
 
   dialog::addSelItem(XLAT("move by clicking on compass"), its(vid.mobilecompasssize), 'C');

@@ -826,8 +826,7 @@ namespace conformal {
       }
 
     if(pmodel == mdRotatedHyperboles) {
-      dialog::addBoolItem(XLAT("use atan to make it finite"), use_atan, 'x');
-      dialog::add_action([] () { use_atan = !use_atan; });
+      dialog::addBoolItem_action(XLAT("use atan to make it finite"), use_atan, 'x');
       }
 
     if(pmodel == mdBall) {
@@ -1023,12 +1022,9 @@ namespace conformal {
         dialog::dialogflags |= sm::CENTER;
         dialog::extra_options = [] () {
           dialog::addBreak(100);
-          dialog::addBoolItem("line animation only", conformal::do_rotate == 0, 'N');
-          dialog::add_action([] () { conformal::do_rotate = 0; });
-          dialog::addBoolItem("gravity lands", conformal::do_rotate == 1, 'G');
-          dialog::add_action([] () { conformal::do_rotate = 1; });
-          dialog::addBoolItem("all directional lands", conformal::do_rotate == 2, 'D');
-          dialog::add_action([] () { conformal::do_rotate = 2; });
+          dialog::addBoolItem_choice("line animation only", conformal::do_rotate, 0, 'N');
+          dialog::addBoolItem_choice("gravity lands", conformal::do_rotate, 1, 'G');
+          dialog::addBoolItem_choice("all directional lands", conformal::do_rotate, 2, 'D');
           };
         }
       else if(doexiton(sym, uni)) popScreen();

@@ -414,8 +414,7 @@ void menu() {
     dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
     dialog::add_action([] { shot_aa *= 2; if(shot_aa > 16) shot_aa = 1; });
     }
-  dialog::addBoolItem(XLAT("transparent"), transparent, 't');
-  dialog::add_action([] { transparent = !transparent; });
+  dialog::addBoolItem_action(XLAT("transparent"), transparent, 't');
 
   dialog::addSelItem(XLAT("gamma"), fts(gamma), 'g');
   dialog::add_action([] { dialog::editNumber(gamma, 0, 2, .1, .5, XLAT("gamma"), "higher value = darker"); });
@@ -423,11 +422,9 @@ void menu() {
   dialog::addSelItem(XLAT("brightness"), fts(fade), 'b');
   dialog::add_action([] { dialog::editNumber(fade, 0, 2, .1, 1, XLAT("brightness"), "higher value = lighter"); });
 
-  dialog::addBoolItem(XLAT("disable the HUD"), hide_hud, 'h');
-  dialog::add_action([] { hide_hud = !hide_hud; });
+  dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
 
-  dialog::addBoolItem(XLAT("hide the player"), !mapeditor::drawplayer, 'H');
-  dialog::add_action([] { mapeditor::drawplayer = !mapeditor::drawplayer; });
+  dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
 
   dialog::addItem(XLAT("colors & aura"), 'c');
   dialog::add_action_push(show_color_dialog);
@@ -796,19 +793,14 @@ void show() {
         };
       });
     }
-  dialog::addBoolItem(XLAT("no movement animation"), ma == maNone, '0');
-  dialog::add_action([] () { ma = maNone; });
-  dialog::addBoolItem(XLAT("translation"), ma == maTranslation, '1');
-  dialog::add_action([] () { ma = maTranslation; });
-  dialog::addBoolItem(XLAT("rotation"), ma == maRotation, '2');
-  dialog::add_action([] () { ma = maRotation; });
+  dialog::addBoolItem_choice(XLAT("no movement animation"), ma, maNone, '0');
+  dialog::addBoolItem_choice(XLAT("translation"), ma, maTranslation, '1');
+  dialog::addBoolItem_choice(XLAT("rotation"), ma, maRotation, '2');
   if(hyperbolic) {
-    dialog::addBoolItem(XLAT("parabolic"), ma == maParabolic, '3');
-    dialog::add_action([] () { ma = maParabolic; });
+    dialog::addBoolItem_choice(XLAT("parabolic"), ma, maParabolic, '3');
     }
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
-    dialog::addBoolItem(XLAT("joukowsky_anim"), joukowsky_anim, 'j');
-    dialog::add_action([] () { joukowsky_anim = !joukowsky_anim; });
+    dialog::addBoolItem_action(XLAT("joukowsky_anim"), joukowsky_anim, 'j');
     }
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
     animator(XLAT("Möbius transformations"), skiprope_rotation, 'S');

@@ -422,8 +422,7 @@ namespace flocking {
     hr::showquotients = true;
     dialog::add_action(runGeometryExperiments);
 
-    dialog::addBoolItem("draw forces", draw_lines, 'l');
-    dialog::add_action([] () { draw_lines = !draw_lines; });
+    dialog::addBoolItem_action("draw forces", draw_lines, 'l');
   
     dialog::addSelItem("follow", follow_names[follow], 'f');
     dialog::add_action([] () { follow++; follow %= 3; });
