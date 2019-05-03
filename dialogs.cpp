@@ -1087,6 +1087,10 @@ namespace dialog {
     dialog::display();
     }
 
+  void addBoolItem_action(const string&  s, bool& b, char c) { 
+    dialog::addBoolItem(s, b, c);
+    dialog::add_action([&b] { b = !b; });
+    }
   };
 
 }

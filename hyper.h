@@ -1973,6 +1973,7 @@ namespace dialog {
   void add_key_action(int key, const reaction_t& action);
 
   void add_action_push(const reaction_t& action);
+  void addBoolItem_action(const string&  s, bool& b, char c);
   
   string view_edited_string();
   void start_editing(string& s);
