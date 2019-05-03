@@ -3137,3 +3137,7 @@ RogueViz:
 - fixed label positioning in 3D
 - 3D trees in Collatz
 - Flocking in 3D, more CLI parameters (check_range, flock shape), multithread support, do not try large steps even if delta way too big
+
+2018-04-29 20:13 Version 11.0s:
+
+- 3D fixes: fixed a crash; correct camera distance reduction in horosphere tilings; fixed PL/CZ translations
