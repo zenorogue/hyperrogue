@@ -1824,6 +1824,8 @@ void change_texturesize() {
     }
   }
 
+ld old_distance;
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1924,22 +1926,41 @@ void show() {
     else if(uni == 'r') 
       addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
     else if(uni == 'm') {
-      dialog::editNumber(modelscale, 0.1, 10, rugged ? .001 : .1, 1, XLAT("model scale factor"), 
+      dialog::editNumber(modelscale, 0.1, 10, rugged ? .01 : .1, 1, XLAT("model scale factor"), 
         XLAT("This is relevant when the native geometry is not Euclidean. "
         "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
         "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ")
         );
       dialog::scaleLog();
       if(rug::rugged) {
+        static bool adjust_points = true;
+        static bool camera_center = false;
+        static bool adjust_edges = true;
+        static bool adjust_distance = true;
         static ld last;
         last = modelscale;
+        dialog::extra_options = [] () {
+          dialog::addBoolItem_action(XLAT("adjust points"), adjust_points, 'P');
+          if(adjust_points)
+            dialog::addBoolItem_action(XLAT("center on camera"), camera_center, 'C');
+          else
+            dialog::addBreak(100);
+          dialog::addBoolItem_action(XLAT("adjust edges"), adjust_edges, 'E');
+          dialog::addBoolItem_action(XLAT("adjust distance"), adjust_distance, 'D');
+          };
         dialog::reaction = [] () {
+          if(!last || !modelscale) return;
+          if(!camera_center) push_all_points(2, model_distance);
           for(auto p:points) {
-            for(auto& e: p->edges) e.len *= modelscale / last;
+            if(adjust_edges) for(auto& e: p->edges) e.len *= modelscale / last;
+            using namespace hyperpoint_vec;
+            if(adjust_points) p->flat *= modelscale / last;
             enqueue(p);
             }
+          if(adjust_distance) model_distance = model_distance * modelscale / last;
           last = modelscale;
           good_shape = false;
+          if(!camera_center) push_all_points(2, -model_distance);
           };
         }
       }
@@ -1952,11 +1973,19 @@ void show() {
           push_all_points(2, +model_distance);
         }
       }
-    else if(uni == 'd')
+    else if(uni == 'd') {
       dialog::editNumber(model_distance, -10, 10, .1, 1, XLAT("model distance"), 
         XLAT("In the perspective projection, this sets the distance from the camera to the center of the model. "
         "In the orthogonal projection this just controls the scale.")
         );
+      old_distance = model_distance;
+      dialog::reaction = [] () { 
+        if(rug::rugged && rug_perspective) {
+          push_all_points(2, old_distance - model_distance);
+          }
+        old_distance = model_distance;
+        };
+      }
     else if(uni == 'e') {
       dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, XLAT("maximum error"), 
         XLAT("New points are added when the current error in the model is smaller than this value.")
