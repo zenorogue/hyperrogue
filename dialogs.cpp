@@ -681,8 +681,6 @@ namespace dialog {
 
     addBreak(100);
     
-    if(cmode & sm::A3) ne.help = explain3D(ne.editwhat);
-
     if(ne.help != "") {
       addHelp(ne.help);
       // bool scal = !ISMOBILE && !ISPANDORA && isize(ne.help) > 160;
@@ -799,7 +797,7 @@ namespace dialog {
     ne.help = help;
     ne.sc = identity;
     ne.intval = NULL;
-    dialogflags = (cmode & sm::A3);
+    dialogflags = 0;
     if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
@@ -1064,7 +1062,7 @@ namespace dialog {
     start_editing(s);
     ne.title = title;
     ne.help = help;
-    dialogflags = (cmode & sm::A3);
+    dialogflags = 0;
     if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
     cmode |= sm::NUMBER;
     pushScreen(string_edit_dialog);

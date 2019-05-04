@@ -2446,7 +2446,6 @@ namespace sm {
   static const int SIDE = 256;
   static const int DOTOUR = 512;
   static const int CENTER = 1024;
-  static const int A3 = 2048; // affects poly
   static const int ZOOMABLE = 4096;
   static const int TORUSCONFIG = 8192;
   static const int MAYDARK = 16384;

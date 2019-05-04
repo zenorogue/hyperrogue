@@ -1030,6 +1030,12 @@ void projectionDialog() {
     "for more models."));
   dialog::extra_options = [] () {
     dialog::addBreak(100);
+    dialog::addHelp(XLAT(
+      "If we are viewing an equidistant g absolute units below a plane, "
+      "from a point c absolute units above the plane, this corresponds "
+      "to viewing a Minkowski hyperboloid from a point "
+      "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
+      "the Poincaré model for g=c, and Klein-Beltrami model for g=0."));
     dialog::addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'P');
     dialog::add_action([] () { *dialog::ne.editwhat = 1; vid.scale = 1; dialog::ne.s = "1"; });
     dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'K');
@@ -1045,84 +1051,13 @@ void projectionDialog() {
     };
   }
 
-string explain3D(ld *param) {
-  using namespace geom3;
-  if(param == &highdetail || param == &middetail)
-    return 
-      XLAT(
-        "Objects at distance less than %1 absolute units "
-        "from the center will be displayed with high "
-        "detail, and at distance at least %2 with low detail.",
-        fts3(highdetail), fts3(middetail)
-        );
-      
-  if(param == &camera)
-    return
-      XLAT(
-        "Camera is placed %1 absolute units above a plane P in a three-dimensional "
-        "world. Ground level is actually an equidistant surface, %2 absolute units "
-        "below the plane P. The plane P (as well as the ground level or any "
-        "other equidistant surface below it) is viewed at an angle of %3 "
-        "(the tangent of the angle between the point in "
-        "the center of your vision and a faraway location is 1/cosh(c) = %4).",
-        fts3(camera),
-        fts3(depth),
-        fts3(atan(1/cosh(camera))*2/degree),
-        fts3(1/cosh(camera)));
-  if(param == &depth)
-    return
-      XLAT(
-        "Ground level is actually an equidistant surface, "
-        "%1 absolute units below the plane P. "
-        "Theoretically, this value affects the world -- "
-        "for example, eagles could fly %2 times faster by "
-        "flying above the ground level, on the plane P -- "
-        "but the actual game mechanics are not affected. "
-        "(Distances reported by the vector graphics editor "
-        "are not about points on the ground level, but "
-        "about the matching points on the plane P -- "
-        "divide them by the factor above to get actual "
-        "distances.)"
-        
-        ,
-        fts3(depth), fts3(cosh(depth)));
-        // mention absolute units
-        
-  if(param == &vid.alpha)
-    return
-      XLAT(
-        "If we are viewing an equidistant g absolute units below a plane, "
-        "from a point c absolute units above the plane, this corresponds "
-        "to viewing a Minkowski hyperboloid from a point "
-        "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
-        "the Poincaré model for g=c, and Klein-Beltrami model for g=0.");
-      
-  if(param == &wall_height)
-    return
-      XLAT(
-        "The height of walls, in absolute units. For the current values of g and c, "
-        "wall height of %1 absolute units corresponds to projection value of %2.",
-        fts3(actual_wall_height()), fts3(factor_to_projection(geom3::WALL)));
-
-  if(param == &rock_wall_ratio)
-    return
-      XLAT(
-        "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
-        "Length of paths on the Rock III level is %3 of the corresponding length on the "
-        "ground level.",
-        fts3(rock_wall_ratio), fts3(wall_height * rock_wall_ratio),
-        fts3(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth)));
-
-  if(param == &human_wall_ratio)
-    return
-      XLAT(
-        "Humans are %1 "
-        "absolute units high. Your head travels %2 times the distance travelled by your "
-        "feet.",
-        fts3(wall_height * human_wall_ratio),
-        fts3(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)));
-        
-  return "";
+void explain_detail() {
+  dialog::addHelp(XLAT(
+    "Objects at distance less than %1 absolute units "
+    "from the center will be displayed with high "
+    "detail, and at distance at least %2 with low detail.",
+    fts3(geom3::highdetail), fts3(geom3::middetail)
+    ));
   }
 
 void add_edit_fov(char key = 'f') {
@@ -1223,7 +1158,7 @@ void config_camera_rotation() {
   }
 
 void show3D() {
-  cmode = sm::SIDE | sm::A3 | sm::MAYDARK;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
@@ -1358,12 +1293,14 @@ void show3D() {
     
     if(uni == 'n' && DIM == 2) {
       dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
+      dialog::extra_options = explain_detail;
       dialog::reaction = [] () {
         if(highdetail > middetail) middetail = highdetail;
         };
       }
     else if(uni == 'm' && DIM == 2) {
       dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
+      dialog::extra_options = explain_detail;
       dialog::reaction = [] () {
         if(highdetail > middetail) highdetail = middetail;
         };
@@ -1371,17 +1308,52 @@ void show3D() {
     else if(uni == 'c' && DIM == 2) 
       tc_camera = ticks,
       dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::reaction = delayed_geo_reset,
+      dialog::extra_options = [] {
+        dialog::addHelp(XLAT(
+          "Camera is placed %1 absolute units above a plane P in a three-dimensional "
+          "world. Ground level is actually an equidistant surface, %2 absolute units "
+          "below the plane P. The plane P (as well as the ground level or any "
+          "other equidistant surface below it) is viewed at an angle of %3 "
+          "(the tangent of the angle between the point in "
+          "the center of your vision and a faraway location is 1/cosh(c) = %4).",
+          fts3(camera),
+          fts3(depth),
+          fts3(atan(1/cosh(camera))*2/degree),
+          fts3(1/cosh(camera))));
+        };
     else if(uni == 'g' && DIM == 2) 
       tc_depth = ticks,
       dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::reaction = delayed_geo_reset,
+      dialog::extra_options = [] {
+        dialog::addHelp(XLAT(
+          "Ground level is actually an equidistant surface, "
+          "%1 absolute units below the plane P. "
+          "Theoretically, this value affects the world -- "
+          "for example, eagles could fly %2 times faster by "
+          "flying above the ground level, on the plane P -- "
+          "but the actual game mechanics are not affected. "
+          "(Distances reported by the vector graphics editor "
+          "are not about points on the ground level, but "
+          "about the matching points on the plane P -- "
+          "divide them by the factor above to get actual "
+          "distances.)"
+          
+          ,
+          fts3(depth), fts3(cosh(depth))));
+          // mention absolute units
+          };
     else if(uni == 'a' && DIM == 2) 
       projectionDialog();
     else if(uni == 'w' && DIM == 2) {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::reaction = delayed_geo_reset;
       dialog::extra_options = [] () {
+        dialog::addHelp(XLAT(
+          "The height of walls, in absolute units. For the current values of g and c, "
+          "wall height of %1 absolute units corresponds to projection value of %2.",
+          fts3(actual_wall_height()), fts3(factor_to_projection(geom3::WALL))));
         dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'O');
         dialog::add_action([] () {
           geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
@@ -1400,10 +1372,25 @@ void show3D() {
       dialog::reaction = delayed_geo_reset;
     else if(uni == 'r' && DIM == 2) 
       dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
+      dialog::extra_options = [] { dialog::addHelp(XLAT(
+        "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
+        "Length of paths on the Rock III level is %3 of the corresponding length on the "
+        "ground level.",
+        fts3(rock_wall_ratio), fts3(wall_height * rock_wall_ratio),
+        fts3(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth))));
+        },
       dialog::reaction = delayed_geo_reset;
     else if(uni == 'h' && DIM == 2)
       dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::reaction = delayed_geo_reset,
+      dialog::extra_options = [] { dialog::addHelp(XLAT(
+        "Humans are %1 "
+        "absolute units high. Your head travels %2 times the distance travelled by your "
+        "feet.",
+        fts3(wall_height * human_wall_ratio),
+        fts3(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)))
+        );
+        };
     else if(uni == 'h' && DIM == 3)
       dialog::editNumber(geom3::height_width, 0, 1, .1, .7, XLAT("Height to width"), ""),
       dialog::reaction = delayed_geo_reset;
