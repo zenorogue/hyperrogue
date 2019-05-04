@@ -2610,7 +2610,7 @@ void drawaura() {
     }
 
 #if CAP_SDL || CAP_GL
-  double bak[3];
+  ld bak[3];
   bak[0] = ((backcolor>>16)&255)/255.;
   bak[1] = ((backcolor>>8)&255)/255.;
   bak[2] = ((backcolor>>0)&255)/255.;
@@ -2639,14 +2639,14 @@ void drawaura() {
       if(alpha >= AURA) alpha -= AURA;
       
       int rm = int(alpha);
-      double fr = alpha-rm;
+      ld fr = alpha-rm;
       
       if(rm<0 || rm >= AURA) continue;
       
       color_t& p = qpixel(s, x, y);
       for(int c=0; c<3; c++) {
-        double c1 = aurac[rm][2-c] / (aurac[rm][3]+.1);
-        double c2 = aurac[rm+1][2-c] / (aurac[rm+1][3]+.1);
+        ld c1 = aurac[rm][2-c] / (aurac[rm][3]+.1);
+        ld c2 = aurac[rm+1][2-c] / (aurac[rm+1][3]+.1);
         const ld one = 1;
         part(p, c) = int(255 * min(one, bak[2-c] + cmul * ((c1 + fr * (c2-c1) - bak[2-c])))); 
         }

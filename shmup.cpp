@@ -1418,8 +1418,8 @@ hyperpoint keytarget(int i) {
   return 0;
   } */
 
-double getSwordSize() { return sword_size; }
-double getHornsSize() { return scalefactor * 0.33; }
+ld getSwordSize() { return sword_size; }
+ld getHornsSize() { return scalefactor * 0.33; }
 
 // used in 3D
 transmatrix swordmatrix[MAXPLAYER];

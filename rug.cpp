@@ -1029,7 +1029,7 @@ void addNewPoints() {
     return;
     }
   
-  double dist = hdist0(points[qvalid]->h) + .1e-6;
+  ld dist = hdist0(points[qvalid]->h) + .1e-6;
   
   int oqvalid = qvalid;
 

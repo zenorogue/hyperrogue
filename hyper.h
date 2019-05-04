@@ -1339,7 +1339,7 @@ namespace rug {
 
   struct edge {
     struct rugpoint *target;
-    double len;
+    ld len;
     };
   
   struct dexp_data {
@@ -3331,7 +3331,7 @@ transmatrix rgpushxto0(const hyperpoint& H);
 
 string its(int i);
 
-double hdist0(const hyperpoint& mh);
+ld hdist0(const hyperpoint& mh);
 
 extern bool fading;
 extern ld fadeout;

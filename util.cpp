@@ -167,7 +167,7 @@ cld exp_parser::parse(int prio) {
   else if(eat("conj(")) res = std::conj(parsepar());
   else if(eat("floor(")) res = floor(real(parsepar()));
   else if(eat("frac(")) { res = parsepar(); res = res - floor(real(res)); }
-  else if(eat("to01(")) { res = parsepar(); return atan(res) / M_PI + 0.5; }
+  else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
   else if(eat("ifp(")) {
     cld cond = parse(0);
     if(next() != ',') {at = -1; return 0; } at++;

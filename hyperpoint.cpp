@@ -584,7 +584,7 @@ transmatrix inverse(const transmatrix& T) {
   }
 
 // distance between mh and 0
-double hdist0(const hyperpoint& mh) {
+ld hdist0(const hyperpoint& mh) {
   switch(cgclass) {
     case gcHyperbolic:
       if(mh[DIM] < 1) return 0;
@@ -616,7 +616,7 @@ ld circlelength(ld r) {
   }
 
 // distance between two points
-double hdist(const hyperpoint& h1, const hyperpoint& h2) {
+ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
   // return hdist0(gpushxto0(h1) * h2);
   ld iv = intval(h1, h2);
   switch(cgclass) {

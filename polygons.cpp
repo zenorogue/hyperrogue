@@ -691,7 +691,7 @@ void dqi_poly::gldraw() {
   }
 #endif
 
-double scale_at(const transmatrix& T) {
+ld scale_at(const transmatrix& T) {
   if(DIM == 3 && pmodel == mdPerspective) return 1 / (tC0(T))[2];
   using namespace hyperpoint_vec;
   hyperpoint h1, h2, h3;
@@ -701,7 +701,7 @@ double scale_at(const transmatrix& T) {
   return sqrt(hypot_d(2, h2-h1) * hypot_d(2, h3-h1) / .0001);
   }
 
-double linewidthat(const hyperpoint& h) {
+ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1) {
     double dz = h[DIM];
