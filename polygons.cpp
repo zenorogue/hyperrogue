@@ -2615,7 +2615,11 @@ void create_wall3d() {
       if(shWall3D[i].flags & POLY_TRIANGLES)
         last->flags |= POLY_TRIANGLES;
       }
-    }  
+    }
+  
+  corner_bonus = 0;
+  for(hpcshape sh: shWall3D) for(int i=sh.s; i<sh.e; i++)
+    corner_bonus = max(corner_bonus, hdist0(hpc[i]));
   }
 #endif
 

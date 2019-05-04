@@ -27,6 +27,8 @@ ld hexshift;
 
 ld sword_size = 0;
 
+ld corner_bonus = 0;
+
 ld asteroid_size[8];
 
 // the results are:

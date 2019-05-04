@@ -1670,7 +1670,7 @@ bool do_draw(cell *c, const transmatrix& T) {
       }
     else {
       ld dist = hdist0(tC0(T));
-      if(dist > sightranges[geometry]) return false;
+      if(dist > sightranges[geometry] + corner_bonus) return false;
       if(dist <= extra_generation_distance) setdist(c, 7, c);
       }
     return true;
