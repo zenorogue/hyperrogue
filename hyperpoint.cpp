@@ -327,7 +327,7 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
 bool eqmatrix(transmatrix A, transmatrix B, ld eps) {
   for(int i=0; i<MDIM; i++)
   for(int j=0; j<MDIM; j++)
-    if(std::abs(A[i][j] - B[i][j]) > 1e-2)
+    if(std::abs(A[i][j] - B[i][j]) > eps)
       return false;
   return true;
   }

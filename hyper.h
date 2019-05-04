@@ -3649,7 +3649,7 @@ hyperpoint xspinpush0(ld alpha, ld x);
 transmatrix cspin(int a, int b, ld alpha);
 transmatrix cpush(int cid, ld alpha);
 
-bool eqmatrix(transmatrix A, transmatrix B, ld eps = 1e-6);
+bool eqmatrix(transmatrix A, transmatrix B, ld eps = 1e-2);
 void set_column(transmatrix& T, int i, const hyperpoint& H);
 
 #define DF_INIT              0 // always display these
