@@ -801,6 +801,7 @@ void make_floor_textures() {
     dynamicval<eModel> gm(pmodel, mdDisk);
     dynamicval<eVariation> va(variation, eVariation::pure);
     dynamicval<bool> hq(inHighQual, true);
+    dynamicval<int> hd(darken, 0);
   
     resetGeometry();
     dynamicval<videopar> vi(vid, vid);
