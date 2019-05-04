@@ -386,6 +386,7 @@ void initConfig() {
   addsaver(sightranges[gField435], "sight-field435", 3);
   addsaver(sightranges[gField534], "sight-field534", 3);
   addsaver(vid.sloppy_3d, "sloppy3d", false);
+  addsaver(vid.texture_step, "wall-quality", 1);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
