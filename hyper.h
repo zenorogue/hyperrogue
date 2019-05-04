@@ -1160,6 +1160,7 @@ struct videopar {
   ld fov;
   bool consider_shader_projection;
   int desaturate;
+  int texture_step;
   };
 
 extern videopar vid;
@@ -5041,7 +5042,7 @@ namespace subscreens {
   bool split(reaction_t for_each_subscreen);
   }
 
-const int TEXTURE_STEP_3D=8;
+#define TEXTURE_STEP_3D vid.texture_step
 
 void set_euland3(cell *c, int co0, int co1, int alt, int hash);
 

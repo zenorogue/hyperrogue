@@ -1282,6 +1282,30 @@ void show3D() {
       dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", "set to 0 to disable");
       });
     }
+  if(DIM == 3) {
+    dialog::addSelItem(XLAT("wall quality"), its(vid.texture_step), 'W');
+    dialog::add_action([] {
+      dialog::editNumber(vid.texture_step, 1, 16, 1, 1, XLAT("wall quality"), 
+        XLAT(
+        "Controls the number of triangles used for wall surfaces. "
+        "Higher numbers reduce the performance. "
+        "This has a strong effect when the walls are curved indeed "
+        "(honeycombs based on horospheres, and projections other than native perspective), "
+        "but otherwise, usually it can be set to 1 without significant adverse effects other "
+        "than slightly incorrect texturing."
+        )
+        );
+      dialog::bound_low(1);
+      dialog::bound_up(128);
+      dialog::reaction = [] {
+        if(floor_textures) {
+          delete floor_textures;
+          floor_textures = NULL;
+          }
+        need_reset_geometry = true;          
+        };
+      });
+    }
   
   dialog::addBreak(50);
   #if CAP_RUG
