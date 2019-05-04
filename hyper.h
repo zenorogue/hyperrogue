@@ -1144,6 +1144,7 @@ struct videopar {
   bool drawmousecircle; // draw the circle around the mouse
   bool skipstart;       // skip the start menu
   bool quickmouse;      // quick mouse on the map
+  bool sloppy_3d;       // make 3D faster but ugly
   int timeformat;       // time format used in the message log
   
   int use_smart_range;  // 0 = distance-based, 1 = model-based, 2 = model-based and generate

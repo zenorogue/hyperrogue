@@ -385,6 +385,7 @@ void initConfig() {
   
   addsaver(sightranges[gField435], "sight-field435", 3);
   addsaver(sightranges[gField534], "sight-field534", 3);
+  addsaver(vid.sloppy_3d, "sloppy3d", false);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
@@ -661,6 +662,9 @@ void edit_sightrange() {
     if(!allowChangeRange() || !allowIncreasedSight()) {
       dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
       dialog::add_action(enable_cheat);
+      }
+    if(DIM == 3 && !vid.use_smart_range) {
+      dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
       }
     if(DIM == 3 && !vid.use_smart_range) {
       dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
