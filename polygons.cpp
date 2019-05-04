@@ -1472,7 +1472,7 @@ void draw_backside() {
 extern bool lshiftclick, lctrlclick;
 
 void draw_main() {
-  if(sphere && DIM == 3) {
+  if(sphere && DIM == 3 && pmodel == mdPerspective) {
     for(int p: {0, 1, 2, 3}) {
       if(elliptic && p < 2) continue;
       if(p == 1 || p == 3) {
@@ -1494,9 +1494,11 @@ void draw_main() {
       glClear(GL_DEPTH_BUFFER_BIT);
       glhr::be_nontextured();
       spherephase = p;
+      reset_projection();
       for(auto& ptd: ptds) ptd->draw();
       if(elliptic) {
         spherephase = p - 2;
+        reset_projection();
         for(auto& ptd: ptds) ptd->draw();
         }
       // glflush();
