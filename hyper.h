@@ -1143,7 +1143,7 @@ struct videopar {
   int steamscore;
   bool drawmousecircle; // draw the circle around the mouse
   bool skipstart;       // skip the start menu
-  int quickmouse;       // quick mouse on the map
+  bool quickmouse;      // quick mouse on the map
   int timeformat;       // time format used in the message log
   
   int use_smart_range;  // 0 = distance-based, 1 = model-based, 2 = model-based and generate
