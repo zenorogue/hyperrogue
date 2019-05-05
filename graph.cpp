@@ -3310,7 +3310,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       else {
         while(ed > clev + sr) ed -= 2;
         while(ed < clev - sr) ed += 2;
-        fcol = gradient(fcol, 0x0000D0, clev-sr, edgeDepth(c), clev+sr);
+        fcol = gradient(fcol, 0x0000D0, clev-sr, ed, clev+sr);
         }
       if(c->wall == waTrunk) fcol = winf[waTrunk].color;
   
