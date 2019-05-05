@@ -668,6 +668,7 @@ namespace reg3 {
         #if CAP_FIELD
         if(hyperbolic) {
           p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
+          fix_distances(p2.first, parent);
           return p2.first;
           }
         #endif
@@ -749,6 +750,7 @@ namespace reg3 {
         altdist(hs.at) = altdist(h) - 1;
         hs.at->alt = h->alt;
         reducers[hs.at] = hs.spin;
+        fix_distances(hs.at, NULL);
         }
       for(int i=0; i<S7; i++) {
         auto h2 = h->cmove(i);
