@@ -628,6 +628,7 @@ struct cell : gcell {
   // do not add any fields after connection_table (see tailored_alloc)
   };
 
+/*
 namespace arcm { int degree(heptagon *h); int valence(); }
 
 int heptagon::degree() { 
@@ -635,7 +636,7 @@ int heptagon::degree() {
   if(archimedean) return arcm::degree(this); else 
   #endif
   return S7; 
-  }
+  } */
 
 typedef walker<heptagon> heptspin;
 typedef walker<cell> cellwalker;
