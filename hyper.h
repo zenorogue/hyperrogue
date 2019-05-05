@@ -469,6 +469,7 @@ template<class T> T* tailored_alloc(int degree) {
 #else
   result = new T;
 #endif
+  result->type = degree;
   for(int i=0; i<degree; i++) result->c.move_table[i] = NULL;
   return result;
   }
@@ -573,7 +574,9 @@ struct heptagon {
   // zebra generator (1B actually)
   short zebraval;
   // field id
-  int fieldval;
+  int fieldval : 24;
+  // degree
+  unsigned char type : 8;
   // data for fractal landscapes
   short rval0, rval1;
   // for alternate structures, cdata contains the pointer to the original
@@ -592,7 +595,7 @@ struct heptagon {
   ~heptagon () { heptacount--; }
   heptagon *cmove(int d) { return createStep(this, d); }
   heptagon *cmodmove(int d) { return createStep(this, c.fix(d)); }
-  inline int degree(); 
+  inline int degree() { return type; }
 
   // prevent accidental copying
   heptagon(const heptagon&) = delete;
