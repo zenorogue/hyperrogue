@@ -731,6 +731,10 @@ int read_cheat_args() {
     PHASEFROM(2); 
     shift_arg_formula(sightranges[geometry]);
     }
+  else if(argis("-sloppy")) {
+    PHASEFROM(2); 
+    vid.sloppy_3d = true;
+    }
   else if(argis("-gen3")) {
     PHASEFROM(2); 
     shift_arg_formula(extra_generation_distance);
