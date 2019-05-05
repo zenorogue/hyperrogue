@@ -589,6 +589,7 @@ bool passable(cell *w, cell *from, flagtype flags) {
     }
 
   if(from && strictlyAgainstGravity(w, from, vrevdir, flags)
+    && !((flags & P_ISPLAYER) && shmup::on)
     && !F(P_GRAVITY | P_BLOW | P_JUMP1 | P_JUMP2 | P_FLYING | P_BULLET | P_AETHER)
     ) return false;
   

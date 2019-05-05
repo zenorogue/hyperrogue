@@ -4119,6 +4119,13 @@ void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatr
   queuepoly(Vboat0, shBoatInner, incol);
   }
 
+void shmup_gravity_floor(cell *c) {
+  if(DIM == 2 && cellEdgeUnstable(c))
+    set_floor(shMFloor);
+  else
+    set_floor(shFullFloor);
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4671,7 +4678,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laMountain:
-          set_towerfloor(c, euclid ? celldist : c->master->alt ? celldistAltPlus : celldist);
+          if(shmup::on)
+            shmup_gravity_floor(c);
+          else 
+            set_towerfloor(c, euclid ? celldist : c->master->alt ? celldistAltPlus : celldist);
           break;
         
         case laEmerald:
@@ -4832,7 +4842,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laEndorian:
-          if(c->wall == waTrunk) 
+          if(shmup::on)
+            shmup_gravity_floor(c);
+
+          else if(c->wall == waTrunk) 
             set_floor(shFloor);
     
           else if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) 
@@ -4843,7 +4856,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laIvoryTower: case laDungeon: case laWestWall:
-          set_towerfloor(c);
+          if(shmup::on)
+            shmup_gravity_floor(c);
+          else
+            set_towerfloor(c);
           break;
         
         case laBrownian:

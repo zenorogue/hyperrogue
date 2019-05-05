@@ -1309,7 +1309,7 @@ bool airCurrents(transmatrix& nat, monster *m, int delta) {
   bool carried = false;
   cell *c = m->base;
   #if CAP_COMPLEX2
-  if(c->land == laWestWall) {
+  if(false && c->land == laWestWall) {
     cell *c2 = ts::left_of(c, westwall::coastvalEdge1);
       
     double spd = SCALE * delta / 900.;
@@ -1543,7 +1543,11 @@ static const int reflectflag = P_MIRRORWALL;
 
 void movePlayer(monster *m, int delta) {
 
-  bool inertia_based = m->base->land == laAsteroids;
+  bool falling = isGravityLand(m->base) && cellEdgeUnstable(m->base);
+  if(m->base->land == laWestWall) falling = true;
+  if(items[itOrbAether]) falling = false;
+
+  bool inertia_based = falling || m->base->land == laAsteroids;
 
   cpid = m->pid;
 
@@ -1754,9 +1758,49 @@ void movePlayer(monster *m, int delta) {
   hyperpoint avg_inertia;
   
   if(inertia_based && canmove) {
+    using namespace hyperpoint_vec;
     avg_inertia = m->inertia;
-    m->inertia[frontdir()] += playergo[cpid] / 1000;
-    avg_inertia[frontdir()] += playergo[cpid] / 2000;
+    ld coef = m->base->land == laWestWall ? 0.65 : falling ? 0.15 : 1;
+    coef /= 1000;
+    m->inertia[frontdir()] += coef * playergo[cpid];
+    avg_inertia[frontdir()] += coef * playergo[cpid] / 2;
+    if(falling) {
+      vector<cell*> below;
+      manual_celllister mcl;
+      mcl.add(m->base);
+      for(int i=0; i<isize(mcl.lst); i++) {
+        cell *c = mcl.lst[i];
+        bool go = false;
+        if(c->land == laMountain) {
+          int d = celldistAlt(c);
+          forCellEx(c2, c) if(celldistAlt(c2) > d && gmatrix.count(c2))
+            go = true, mcl.add(c2);
+          }
+        else {
+          int d = coastvalEdge(c);
+          forCellEx(c2, c) if(coastvalEdge(c2) < d && gmatrix.count(c2))
+            go = true, mcl.add(c2);
+          }
+        if(!go) below.push_back(c);
+        }
+      ld cinertia = hypot_d(DIM, m->inertia);
+      hyperpoint drag = m->inertia * cinertia * delta / -1. / SCALE;
+      m->inertia += drag;
+      avg_inertia += drag/2;
+      transmatrix T = inverse(m->pat);
+      ld xp = SCALE / 60000. / isize(below) * delta / 15;
+      ld yp = 0;
+      if(cwt.at->land == laDungeon) xp = -xp;
+      if(cwt.at->land == laWestWall) yp = xp * 1, xp *= 0.7;
+      for(cell *c2: below) if(c2 != m->base) {
+        
+        hyperpoint h = rspintox(T * tC0(gmatrix[c2])) * hpxy(xp, yp);
+      
+        m->inertia += h;
+        avg_inertia += h/2;
+        }
+      }
+    // if(inertia_based) m->inertia = spin(-playerturn[cpid]) * m->inertia;
     }
     
   for(int igo=0; igo<IGO && !go; igo++) {
@@ -1871,9 +1915,11 @@ void movePlayer(monster *m, int delta) {
   if(!go || abs(playergo[cpid]) < 1e-3 || abs(playerturn[cpid]) > 1e-3) bulltime[cpid] = curtime;
   
   if(!go) {
+    using namespace hyperpoint_vec;
     playergo[cpid] = playergoturn[cpid] = playerstrafe[cpid] = 0;
     if(DIM == 3) playerturn[cpid] = playerturny[cpid] = 0;
-    m->inertia = Hypc;
+    if(falling) m->inertia = m->inertia * -1;
+    else m->inertia = Hypc;
     }
   
   if(go) {
