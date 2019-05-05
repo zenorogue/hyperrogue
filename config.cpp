@@ -735,10 +735,6 @@ void showGraphConfig() {
   dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
   dialog::addBoolItem(XLAT("background particle effects"), (vid.backeffects), 'p');
 
-#ifdef WHATEVER
-  dialog::addSelItem(XLAT("whatever"), fts(whatever), 'j');
-#endif
-
   dialog::addBreak(50);
   dialog::addBack();
   dialog::display();
@@ -754,12 +750,6 @@ void showGraphConfig() {
     
     if(xuni == 'u') vid.particles = !vid.particles;
 
-    else if(xuni == 'j') {
-      dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
-        XLAT("Whatever."));
-      dialog::reaction = delayed_geo_reset;
-      }
-  
     else if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
       XLAT("scrolling speed"),
       XLAT("+5 = center instantly, -5 = do not center the map")
@@ -854,6 +844,28 @@ void switchGL() {
 
 void resetConfigMenu();
 
+void edit_whatever(char type, int index) {
+  if(type == 'f') {
+    dialog::editNumber(whatever[index], -10, 10, 1, 0, XLAT("whatever"), 
+      "f:" + its(index));
+    }
+  else {
+    dialog::editNumber(whateveri[index], -10, 10, 1, 0, XLAT("whatever"), 
+      "i:" + its(index));
+    }
+  dialog::reaction = delayed_geo_reset;
+  dialog::extra_options = [type, index] {
+    dialog::addItem(XLAT("integer"), 'X');
+    dialog::add_action( [index] { popScreen(); edit_whatever('i', index); });
+    dialog::addItem(XLAT("float"), 'Y');
+    dialog::add_action( [index] { popScreen(); edit_whatever('f', index); });
+    for(int x=0; x<8; x++) {
+      dialog::addSelItem(its(x), type == 'i' ? its(whateveri[x]) : fts(whatever[x]), 'A' + x);
+      dialog::add_action([type,x] { popScreen(); edit_whatever(type, x); });
+      }
+    };
+  }
+
 void configureOther() {
   gamescreen(3);
 
@@ -899,6 +911,11 @@ void configureOther() {
 
   menuitem_sightrange('r');
 
+#ifdef WHATEVER
+  dialog::addSelItem(XLAT("whatever"), fts(whatever[0]), 'j');
+  dialog::add_action([] { edit_whatever('f', 0); });
+#endif
+  
   dialog::addBreak(50);
   dialog::addBack();
   
