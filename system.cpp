@@ -156,7 +156,7 @@ void initgame() {
     if(firstland == laWhirlpool) cwt.at->move(0)->wall = waSea;
     
     setdist(cwt.at->move(0), BARLEV-1, cwt.at);
-    if(!sphere && !eubinary) {
+    if(!sphere && !eubinary && !quotient) {
       heptagon *h = createAlternateMap(cwt.at, 2, hsA);
       if(!h) printf("FAIL\n");
       }
