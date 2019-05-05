@@ -130,8 +130,6 @@ void profile_info() {
 #define profile_info()
 #endif
 
-int whateveri, whateveri2;
-
 purehookset hooks_tests;
 
 string simplify(const string& s) {

@@ -7,7 +7,8 @@
 #define REDDISH 0x400000
 
 namespace hr {
-ld whatever = 0;
+ld whatever[16];
+int whateveri[16];
 
 int PREC(ld x) {
   ld sh = shiftmul;

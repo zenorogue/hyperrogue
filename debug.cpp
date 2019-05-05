@@ -679,17 +679,16 @@ int read_cheat_args() {
     PHASE(3); start_game();
     viewall();
     }
-  else if(argis("-we")) {    
+  else if(argis("-wef")) {
     PHASEFROM(2);
-    shift_arg_formula(whatever, delayed_geo_reset);
+    shift(); int index = argi(); 
+    shift_arg_formula(whatever[index], delayed_geo_reset);
     }
   else if(argis("-wei")) {    
     PHASEFROM(2);
-    shift(); whateveri = argi(); delayed_geo_reset();
-    }
-  else if(argis("-wei2")) {
-    PHASEFROM(2);
-    shift(); whateveri2 = argi(); delayed_geo_reset();
+    shift(); int index = argi();
+    shift(); whateveri[index] = argi();
+    delayed_geo_reset();
     }
   else if(argis("-W3")) {
     shift(); top_land = readland(args()); cheat();

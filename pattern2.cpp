@@ -344,7 +344,7 @@ int zebra3(cell *c) {
 namespace fieldpattern {
 
 pair<int, bool> fieldval(cell *c) {
-  if(ctof(c)) return make_pair(c->master->fieldval, false);
+  if(ctof(c)) return make_pair(int(c->master->fieldval), false);
   else return make_pair(btspin(c->master->fieldval, c->c.spin(0)), true);
   }
 

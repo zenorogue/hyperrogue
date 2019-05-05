@@ -2432,7 +2432,8 @@ void optimizeview();
 extern bool noGUI;
 extern bool dronemode;
 
-extern ld whatever;
+extern ld whatever[16];
+extern int whateveri[16];
 
 namespace sm {
   static const int NORMAL = 1;
@@ -3525,8 +3526,6 @@ ld wall_radar(cell *c, transmatrix T);
 
 extern string bitruncnames[5];
 extern bool need_mouseh;
-
-extern int whateveri, whateveri2;
 
 void clear_euland(eLand first);
 
