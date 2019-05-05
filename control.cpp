@@ -537,7 +537,7 @@ void mainloopiter() {
   if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
 
-  if(vid.sspeed >= 5 && gmatrix.count(cwt.at) && !elliptic) {
+  if(vid.sspeed >= 5 && gmatrix.count(cwt.at) && !elliptic && !shmup::on) {
     cwtV = gmatrix[cwt.at] * ddspin(cwt.at, cwt.spin);
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
