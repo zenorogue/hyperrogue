@@ -969,6 +969,10 @@ int readArgs() {
     PHASEFROM(2); shift_arg_formula(period);
     }
 #if CAP_SHOT
+  else if(argis("-animrecordf")) {
+    PHASEFROM(2); shift(); noframes = argi();
+    shift(); animfile = args();
+    }
   else if(argis("-animrecord") || argis("-animrec")) {
     PHASE(3); shift(); noframes = argi();
     shift(); animfile = args(); record_animation();
