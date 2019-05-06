@@ -486,6 +486,7 @@ ld skiprope_rotation;
 int lastticks, bak_turncount;
 
 ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
+bool env_shmup;
 ld rug_angle;
 
 heptspin rotation_center_h;
@@ -694,7 +695,9 @@ bool record_animation() {
   for(int i=0; i<noframes; i++) {
     printf("%d/%d\n", i, noframes);
     int newticks = i * period / noframes;
+    cmode = (env_shmup ? sm::NORMAL : 0);
     while(ticks < newticks) shmup::turn(1), ticks++;
+    if(playermoved) centerpc(INF), optimizeview();
     dynamicval<bool> v2(inHighQual, true);
     apply();
     conformal::configure();
@@ -894,6 +897,7 @@ void show() {
     }
   animator(XLATN("Ocean"), env_ocean, 'o');
   animator(XLATN("Volcanic Wasteland"), env_volcano, 'v');
+  if(shmup::on) dialog::addBoolItem_action(XLAT("shmup action"), env_shmup, 'T');
 
   #if CAP_RUG
   if(rug::rugged) {
