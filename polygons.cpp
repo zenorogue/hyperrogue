@@ -154,6 +154,13 @@ int shapes_merged;
 
 vector<glhr::textured_vertex> text_vertices;
 
+#if MINIMIZE_GL_CALLS
+color_t triangle_color, line_color;
+vector<glvertex> triangle_vertices;
+vector<glvertex> line_vertices;
+void glapplymatrix(const transmatrix& V);
+#endif
+
 void glflush() {
   #if MINIMIZE_GL_CALLS
   if(isize(triangle_vertices)) {
@@ -509,14 +516,6 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
 #endif
 
 #if CAP_GL
-
-void glapplymatrix(const transmatrix& V);
-
-#if MINIMIZE_GL_CALLS
-color_t triangle_color, line_color;
-vector<glvertex> triangle_vertices;
-vector<glvertex> line_vertices;
-#endif
 
 void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
