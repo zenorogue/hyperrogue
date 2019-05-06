@@ -3,7 +3,7 @@
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 #define ISWEB 1
-#define ISMINI 1
+#define ISMINI 0
 #define CAP_AUDIO 0
 #define CAP_SDLGFX 0
 #define CAP_PNG 0
@@ -14,6 +14,8 @@
 #define CAP_INV 0
 #define CAP_URL 1
 #define GLES_ONLY
+#define MAXMDIM 3
+#define CAP_COMPLEX2 0
 
 #ifndef CAP_ORIENTATION
 #define CAP_ORIENTATION 1
