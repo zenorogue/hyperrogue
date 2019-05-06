@@ -145,7 +145,7 @@ void initConfig() {
   // basic graphics
   
   addsaver(vid.usingGL, "usingGL", true);
-  addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | AA_LINES | AA_LINEWIDTH | AA_VERSION);
+  addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_LINEWIDTH | AA_VERSION);
   addsaver(vid.linewidth, "linewidth", 1);
   addsaver(linepatterns::width, "pattern-linewidth", 1);
   addsaver(vid.scale, "scale", 1);

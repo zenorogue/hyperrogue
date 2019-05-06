@@ -1137,12 +1137,10 @@ void setvideomode() {
     flags = SDL_OPENGL | SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER;
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
     if(vsync_off) disable_vsync();
-#if !ISWEB
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (vid.antialias & AA_MULTI16) ? 16 : 4);
       }
-#endif
     }
 #endif
 
@@ -1168,12 +1166,15 @@ void setvideomode() {
 
 #if CAP_GL
   if(vid.usingGL) {
-#if !ISWEB
-    if(vid.antialias & AA_MULTI) 
+
+    if(vid.antialias & AA_MULTI) {
       glEnable(GL_MULTISAMPLE);
-    else
+      glEnable(GL_MULTISAMPLE_ARB);
+      }
+    else {
       glDisable(GL_MULTISAMPLE);
-#endif
+      glDisable(GL_MULTISAMPLE_ARB);
+      }
   
     glViewport(0, 0, vid.xres, vid.yres);
     glhr::init();
