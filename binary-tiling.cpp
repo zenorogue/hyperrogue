@@ -151,7 +151,7 @@ namespace binary {
 
     hrmap_binary() : hrmap_hyperbolic() { set_seed(); }
 
-    heptagon *create_step(heptagon *parent, int d) {
+    heptagon *create_step(heptagon *parent, int d) override {
       auto h = parent;
       switch(geometry) {
         case gBinaryTiling: {
@@ -320,7 +320,7 @@ namespace binary {
       return NULL;
       }
 
-    void draw() {
+    void draw() override {
       dq::visited.clear();
       dq::enqueue(viewctr.at, cview());
       
