@@ -1,5 +1,6 @@
 namespace rogueviz {
 
+#if CAP_ARCM
 namespace pentagonal {
 transmatrix ts[3];
 
@@ -343,4 +344,5 @@ auto xhook = addHook(hooks_args, 100, readArgs)
 + addHook(clearmemory, 40, [] () { snubon = false; } );
  
 }
+#endif
 }

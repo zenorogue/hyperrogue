@@ -7,6 +7,8 @@
 
 namespace hr {
 
+#if MAXMDIM >= 4
+
 #define S (scalefactor / 0.805578)
 #define SH (scalefactor / 0.805578 * geom3::height_width / 1.5)
 
@@ -858,5 +860,6 @@ void make_3d_models() {
 
 #undef S
 #undef SH
+#endif
 
 }

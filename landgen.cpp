@@ -426,8 +426,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(DIM == 3 && hyperbolic && !binarytiling)
           c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
+        #if MAXMDIM >= 4
         else if(euclid && DIM == 3)
           c->wall = euclid3::get_emerald(c) ? waCavewall : waCavefloor;
+        #endif
         else if(euclid) {
           int x, y;
           tie(x,y) = cell_to_pair(c);

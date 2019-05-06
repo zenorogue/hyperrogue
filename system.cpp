@@ -1264,7 +1264,9 @@ void switch_game_mode(char switchWhat) {
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
       chaosmode = randomPatternsMode = false;
       variation = eVariation::bitruncated;
+      #if CAP_GP
       gp::param = gp::loc(1, 1);
+      #endif
       shmup::on = false;
       need_reset_geometry = true;    
       tour::on = !tour::on;

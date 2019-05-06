@@ -417,6 +417,7 @@ void showCreative() {
   gamescreen(3);
   dialog::init(XLAT("creative mode"));
 
+#if CAP_EDIT
   dialog::addItem(XLAT("map editor"), 'm');
   dialog::add_action([] {
     if(tactic::on) 
@@ -431,6 +432,7 @@ void showCreative() {
       addMessage(XLAT("You activate your terraforming powers!"));
       });
     });
+#endif
 
 #if CAP_EDIT
   dialog::addItem(XLAT("vector graphics editor"), 'g');
@@ -448,11 +450,15 @@ void showCreative() {
     }
 #endif
 
+  #if CAP_SHOT
   dialog::addItem(XLAT("screenshots"), 's');
   dialog::add_action_push(shot::menu);
+  #endif
      
+  #if CAP_ANIMATIONS
   dialog::addBoolItem(XLAT("animations"), anims::any_on(), 'a');
   dialog::add_action_push(anims::show);
+  #endif
 
   dialog::addBoolItem(XLAT("history mode"), conformal::on || conformal::includeHistory, 'h');
   dialog::add_action_push(conformal::history_menu);

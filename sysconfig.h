@@ -455,7 +455,9 @@ union SDL_Event;
 #endif
 #endif
 
+#ifndef MAXMDIM
 #define MAXMDIM 4
+#endif
 
 #ifndef CAP_GEOMETRY
 #define CAP_GEOMETRY (!(ISMINI))

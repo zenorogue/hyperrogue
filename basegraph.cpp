@@ -686,6 +686,8 @@ void resetGL() {
     delete glfont[i];
     glfont[i] = NULL;
     }
+#endif
+#if MAXMDIM >= 4
   if(floor_textures) {
     delete floor_textures;
     floor_textures = NULL;

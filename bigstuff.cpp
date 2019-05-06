@@ -40,7 +40,9 @@ int celldistAltRelative(cell *c) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::dist_relative(c);
   #endif
+  #if MAXMDIM >= 4
   if(euclid && DIM == 3) return euclid3::dist_relative(c);
+  #endif
   if(euwrap) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
@@ -586,6 +588,7 @@ void buildEquidistant(cell *c) {
   
   if(c->land == laEndorian) {
     int ct = c->type;
+    #if CAP_BT
     if(binarytiling) {
       int skip = geometry == gHoroRec ? 3 : 2;
       if(c->landparam == 1) 
@@ -603,7 +606,10 @@ void buildEquidistant(cell *c) {
         c->landflags = 1;
       if(c->landflags) c->wall = (DIM == 3 ? waTrunk3 : waTrunk);
       }
-    else if(DIM == 3 && hyperbolic) {
+    else 
+    #endif
+    #if MAXMDIM >= 4
+    if(DIM == 3 && hyperbolic) {
       if(c->landparam == 1) 
         c->landflags = (hrand(100) < 20);
       else if(S7 == 12) {
@@ -655,7 +661,9 @@ void buildEquidistant(cell *c) {
         }
       if(c->landflags) c->wall = waTrunk3;
       }
-    else if(c->landparam == 1 && ctof(c)) {
+    else
+    #endif
+    if(c->landparam == 1 && ctof(c)) {
       for(int i=0; i<ct; i++) {
         int i1 = (i+1) % c->type;
         if(c->move(i) && c->move(i)->land != laEndorian && c->move(i)->land != laNone)
@@ -1462,7 +1470,9 @@ void buildCamelot(cell *c) {
   }
 
 int masterAlt(cell *c) {
+  #if MAXMDIM >= 4
   if(DIM == 3 && hyperbolic) return reg3::altdist(c->master);
+  #endif
   return c->master->alt->distance;
   }
 

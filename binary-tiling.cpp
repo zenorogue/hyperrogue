@@ -206,6 +206,7 @@ namespace binary {
           breakhere();
           return NULL;
           }
+        #if MAXMDIM >= 4
         case gBinary3: {
           switch(d) {
             case 0: case 1:
@@ -311,7 +312,7 @@ namespace binary {
               return path(h, 12, (z+1)%3+3, {13, z+6});
             }
           }
-        
+        #endif
         default: ;
         }
       printf("error: case not handled in binary tiling\n");
@@ -758,7 +759,6 @@ int celldistance3(heptagon *c1, heptagon *c2) {
   }
 
 int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
-#endif
 
 void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
@@ -791,6 +791,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
     return;
     }
   }
+#endif
 
 
   }

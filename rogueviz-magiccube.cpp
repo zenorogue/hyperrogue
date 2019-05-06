@@ -1,5 +1,6 @@
 namespace hr {
 
+#if CAP_CRYSTAL
 void performMarkCommand(cell *c);
 
 namespace crystal {
@@ -171,5 +172,5 @@ auto magichook = addHook(hooks_args, 100, readArgs) + addHook(hooks_drawcell, 10
   + addHook(hooks_handleKey, 150, magic_rugkey);
  
 }
-
+#endif
 }

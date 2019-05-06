@@ -28,7 +28,9 @@
 #include "rogueviz.h"
 
 namespace hr { extern hpcshape shEagle, shMiniGhost, shGhost, shShark, shAnimatedEagle[30], shAnimatedTinyEagle[30]; }
+#if MAXMDIM >= 4
 namespace hr { extern renderbuffer *floor_textures; }
+#endif
 
 namespace rogueviz {
 
@@ -1160,6 +1162,12 @@ color_t darken_a(color_t c) {
   return c;
   }
 
+#if CAP_SVG
+#define SVG_LINK(x) svg::link = (x)
+#else
+#define SVG_LINK(x) 
+#endif
+
 void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info, int i) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
@@ -1176,23 +1184,23 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     }
   else if(DIM == 3) {
     V1 = face_the_player(V);
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
     queuepolyat(V1, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     V1 = V;
     }
   else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
     queuepolyat(V1 = mscale(V, geom3::BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   else {
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
     queuepoly(V1 = V, sh, darken_a(cp.color1));
-    if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
+    if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   switch(cp.shade) {
     case 't': queuepoly(V1, shDiskT, darken_a(cp.color2)); return;
@@ -1222,6 +1230,7 @@ transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
 void queue_prec(const transmatrix& V, edgeinfo*& ei, color_t col) {
   if(!fat_edges)
     queuetable(V, ei->prec, isize(ei->prec), col, 0, PPR::STRUCT0);
+  #if MAXMDIM >= 4
   else {
     auto& t = queuetable(V, ei->prec, isize(ei->prec), 0, col | 0x000000FF, PPR::STRUCT0);
     t.flags |= (1<<22), // poly triangles
@@ -1229,6 +1238,7 @@ void queue_prec(const transmatrix& V, edgeinfo*& ei, color_t col) {
     t.tinf = &ei->tinf;
     t.tinf->texture_id = floor_textures->renderedTexture;
     }
+  #endif
   }
 
 bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
@@ -1413,9 +1423,9 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     transmatrix V2 = DIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
-      if(info) queueaction(PPR::MONSTER_HEAD, [info] () { svg::link = *info; });
+      if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, (svg::in || ISWEB) ? 0 : 1);
-      if(info) queueaction(PPR::MONSTER_HEAD, [] () { svg::link = ""; });
+      if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
       }
     }
 

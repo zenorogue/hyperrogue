@@ -4961,14 +4961,17 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       char xch = winf[c->wall].glyph;
       
+      #if MAXMDIM >= 4
       if(DIM == 3) {
         color_t dummy;        
         if(isWall3(c, wcol)) {
           color_t wcol2 = wcol;
+          #if CAP_TEXTURE
           if(texture::config.tstate == texture::tsActive) wcol2 = texture::config.recolor(wcol);
+          #endif
 
           int d = (wcol & 0xF0F0F0) >> 4;
-
+          
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
               if(a < 4 && pmodel == mdPerspective && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
@@ -5033,6 +5036,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(rd == 2) 
           queuepoly(face_the_player(V), shLoveRing, darkena(0x402030, 0, 0xFF));
         }
+      #else
+      if(0) ;
+      #endif
       
       else switch(c->wall) {
       
@@ -6681,8 +6687,10 @@ auto graphcm = addHook(clearmemory, 0, [] () {
   });
 
 void resetGeometry() {
+  #if MAXMDIM >= 4
   if(DIM == 3 && !floor_textures)
     make_floor_textures();
+  #endif
   precalc();
 #if CAP_FIELD
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid) currfp.analyze();

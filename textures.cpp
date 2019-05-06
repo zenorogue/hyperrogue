@@ -504,6 +504,7 @@ void texture_config::finish_mapping() {
   // printf("texture_map has %d elements (S%d)\n", isize(texture_map), config.tstate);
   }
 
+#if CAP_SHOT
 void texture_config::saveFullTexture(string tn) {
   addMessage(XLAT("Saving full texture to %1...", tn));
   dynamicval<color_t> dd(grid_color, 0);
@@ -529,6 +530,7 @@ void texture_config::saveFullTexture(string tn) {
     finish_mapping();
     }
   }
+#endif
 
 bool newmove = false;
 
@@ -1094,6 +1096,7 @@ string texturehelp =
   "(these probably work best with the 'large picture' setting in geometry selection). "
   "Again, tesselations can have their geometry changed.\n\n";
 
+#if CAP_EDIT
 void start_editor() {
   addMessage("white");
   if(config.data.whitetexture() && config.data.loadTextureGL()) {
@@ -1104,6 +1107,7 @@ void start_editor() {
     pushScreen(mapeditor::showDrawEditor);
     }
   }
+#endif
 
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
@@ -1167,7 +1171,9 @@ void showMenu() {
     dialog::addBreak(50);
     
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
+#if CAP_SHOT
     dialog::addItem(XLAT("save the raw texture"), 'S');
+#endif
     }
   
   if(config.tstate == tsActive) {
@@ -1187,7 +1193,9 @@ void showMenu() {
 #if CAP_EDIT
     if(DIM == 2) dialog::addItem(XLAT("edit the texture"), 'e');
 #endif
+#if CAP_SHOT
     dialog::addItem(XLAT("save the full texture image"), 'S');
+#endif
     dialog::addItem(XLAT("save texture config"), 's');
     }
   
@@ -1296,6 +1304,7 @@ void showMenu() {
       if(config.tstate == tsActive) dialog::reaction = [] () { config.finish_mapping();
         };
       }
+#if CAP_SHOT
     else if(uni == 'S' && config.tstate == tsAdjusting) 
       dialog::openFileDialog(config.texturename, XLAT("save the raw texture"), ".png", 
         [] () {
@@ -1307,6 +1316,7 @@ void showMenu() {
           config.saveFullTexture(config.texturename);
           return true;
           });
+#endif
     else if(uni == SDLK_F1)
       gotoHelp(texturehelp);
     else if(doexiton(sym, uni))

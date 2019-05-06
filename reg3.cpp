@@ -962,6 +962,7 @@ int dist_alt(cell *c) {
 // Construct a cellwalker in direction j from cw.at, such that its direction is as close
 // as possible to cw.spin. Assume that j and cw.spin are adjacent
 
+#if MAXMDIM >= 4
 cellwalker strafe(cellwalker cw, int j) {
   hyperpoint hfront = tC0(adjmoves[cw.spin]);
   transmatrix T = currentmap->relative_matrix(cw.at->cmove(j)->master, cw.at->master);
@@ -971,7 +972,7 @@ cellwalker strafe(cellwalker cw, int j) {
   println(hlog, "incorrect strafe");
   exit(1);
   }
-
 }
+#endif
 }
 

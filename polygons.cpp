@@ -568,7 +568,9 @@ void glapplymatrix(const transmatrix& V) {
 
 int global_projection;
 
+#if MAXMDIM >= 4
 extern renderbuffer *floor_textures;
+#endif
 
 void dqi_poly::gldraw() {
   auto& v = *tab;
@@ -1963,6 +1965,7 @@ void pushShape(usershapelayer& ds) {
   
   if(DIM == 2) hpcpush(T * ds.list[0]);
 
+  #if MAXMDIM >= 4
   if(DIM == 3) {
     auto& utt = user_triangles_texture;
     utt.texture_id = floor_textures->renderedTexture;
@@ -1975,6 +1978,7 @@ void pushShape(usershapelayer& ds) {
         utt.tvertices.push_back(glhr::makevertex(-1, factor, 0));
       }
     }
+  #endif
   }
 
 ld gsca() { return 1; }
@@ -2681,7 +2685,9 @@ void configure_floorshapes() {
   generate_floorshapes();  
   }
 
+#if MAXMDIM >= 4
 extern void make_3d_models();
+#endif
 
 void buildpolys() {
  
@@ -3098,7 +3104,9 @@ void buildpolys() {
   bshape(shBead1, PPR(20), 1, 251);
   bshape(shArrow, PPR::ARROW, 1, 252);
   
+  #if MAXMDIM >= 4
   make_3d_models();
+  #endif
   
   bshapeend();
 

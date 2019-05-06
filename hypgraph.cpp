@@ -1174,8 +1174,10 @@ void optimizeview() {
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
       transmatrix T = currentmap->relative_matrix(h2, viewctr.at);
+      #if MAXMDIM >= 4
       if(euclid && DIM == 3)
         T = euclid3::move_matrix(viewctr.at->c7, i);
+      #endif
       hyperpoint H = View * tC0(T);
       ld quality = hdist0(H);
       if(quality < best) best = quality, turn = i1, TB = T;
@@ -1637,6 +1639,7 @@ namespace dq {
     drawqueue.emplace(h, T, band_shift);
     }  
 
+  #if MAXMDIM >= 4
   set<int> visited_by_matrix;
   void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
     if(!h) return;
@@ -1645,6 +1648,7 @@ namespace dq {
     visited_by_matrix.insert(b);
     drawqueue.emplace(h, T, band_shift);
     }
+  #endif
   }
 
 bool do_draw(cell *c) {

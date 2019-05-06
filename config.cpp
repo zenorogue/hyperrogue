@@ -879,7 +879,8 @@ void configureOther() {
   dialog::addBoolItem_action(XLAT("skip the start menu"), vid.skipstart, 'm');
 
   dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
-
+  
+  #if CAP_AUDIO
   if(CAP_AUDIO) {
     dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
     dialog::add_action([] {
@@ -908,6 +909,7 @@ void configureOther() {
       dialog::bound_up(MIX_MAX_VOLUME);
       });
     }
+  #endif
 
   menuitem_sightrange('r');
 
@@ -1228,6 +1230,7 @@ void show3D() {
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
     }
+  #if MAXMDIM >= 4
   if(DIM == 3) add_edit_fov('f');
   if(DIM == 3) {
     dialog::addSelItem(XLAT("radar size"), fts3(vid.radarsize), 'r');
@@ -1259,6 +1262,7 @@ void show3D() {
         };
       });
     }
+  #endif
   
   dialog::addBreak(50);
   #if CAP_RUG

@@ -734,6 +734,7 @@ void buildCrossroads2(cell *c) {
     }
   }
 
+#if MAXMDIM >= 4
 void extend3D(cell *c) {
   eLand l1 = c->land;
   c->barleft = NOWALLSEP_USED;
@@ -812,13 +813,16 @@ bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
   built = true;
   return true;
   }
+#endif
 
 bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
 
+  #if MAXMDIM >= 4
   // 3D binary tilings create walls using their own methods
   if(DIM == 3 && binarytiling) return false;
 
   if(DIM == 3 && hyperbolic) return buildBarrier3D(c, l2, forced_dir);
+  #endif
 
   if(c->land == laNone) {
     printf("barrier nowall! [%p]\n", c);

@@ -224,13 +224,19 @@ void initcells() {
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif
+  #if MAXMDIM >= 4
   else if(euclid && DIM == 3) currentmap = euclid3::new_map();
+  #endif
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
+  #if MAXMDIM >= 4
   else if(DIM == 3 && !binarytiling) currentmap = reg3::new_map();
+  #endif
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
+  #if CAP_BT
   else if(binarytiling) currentmap = binary::new_map();
+  #endif
   else currentmap = new hrmap_hyperbolic;
   
   allmaps.push_back(currentmap);
@@ -436,10 +442,10 @@ int celldistAlt(cell *c) {
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
-  #if MAXMDIM == 4
+  #if MAXMDIM >= 4
   if(euclid && DIM == 3) return euclid3::dist_alt(c);
-  #endif
   if(hyperbolic && DIM == 3) return reg3::altdist(c->master);
+  #endif
   if(!c->master->alt) return 0;
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, true);
@@ -869,11 +875,13 @@ int celldistance(cell *c1, cell *c2) {
   if(binarytiling && DIM == 3) 
     return binary::celldistance3(c1, c2);
   #endif
-
+  
+  #if MAXMDIM >= 4
   if(euclid && DIM == 3) 
     return euclid3::celldistance(c1, c2);
   
   if(hyperbolic && DIM == 3) return reg3::celldistance(c1, c2);
+  #endif
 
   return hyperbolic_celldistance(c1, c2);
   }

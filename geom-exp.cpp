@@ -604,8 +604,10 @@ void showEuclideanMenu() {
 
   dialog::add_action_push([] { ge_select_tiling(quotientlist); });
 
+  #if MAXMDIM >= 4
   dialog::addSelItem(XLAT("dimension"), its(DIM), 'd');
   dialog::add_action_push([] { ge_select_tiling(list3d); });
+  #endif
   
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {

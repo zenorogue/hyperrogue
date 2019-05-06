@@ -1300,8 +1300,10 @@ namespace mapeditor {
   
   extern cell *drawcell;
   void initdraw(cell *c); 
+  #if CAP_EDIT
   void showMapEditor();
   void showDrawEditor();
+  #endif
   
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
   static const int USERSHAPEGROUPS = 5;

@@ -3,7 +3,7 @@
 // https://github.com/zenorogue/newconformist (see the option '-cvl')
 
 namespace hr {
-
+#if CAP_SHOT
 struct location {
   transmatrix lView;
   heptspin lviewctr;
@@ -106,7 +106,7 @@ int readArgs() {
   }
 
 auto magichook = addHook(hooks_args, 100, readArgs) + addHook(hooks_frame, 100, cvl_marker);
-
+#endif
 
  
 }

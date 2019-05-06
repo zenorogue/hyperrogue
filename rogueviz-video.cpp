@@ -3,7 +3,7 @@
 
 namespace rogueviz {
 
-#if CAP_SDL
+#if CAP_SDL && CAP_SHOT
 
 // see: https://www.youtube.com/watch?v=4Vu3F95jpQ4&t=6s (Collatz)
 // see: https://www.youtube.com/watch?v=mDG3_f8R2Ns (SAG boardgames)
@@ -217,9 +217,8 @@ int videoArgs() {
   else return 1;
   return 0;
   }
-#endif
-#endif
 
 auto rv_hooks = addHook(hooks_args, 100, videoArgs);
-
+#endif
+#endif
 }
