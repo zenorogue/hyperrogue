@@ -206,7 +206,9 @@ void horopoint(ld y, ld x, cell &fc, int c) {
   }
 
 void horoline(ld y, ld x1, ld x2) {
-  for(int a=0; a<=16; a++)
+  if(DIM == 3)
+    horopoint(y, x1), horopoint(y, x2);
+  else for(int a=0; a<=16; a++)
     horopoint(y, x1 + (x2-x1) * a / 16.);
   }
 
@@ -270,43 +272,6 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
     hpcpush(xspinpush0(+M_PI/sides, size));
     hpcpush(xspinpush0(-M_PI/sides, size));
     chasmifyPoly(dlow_table[k], dhi_table[k], k);
-    }
-
-  for(int k=0; k<SIDEPARS; k++) {
-    fsh.levels[k].resize(2);
-    bshape(fsh.levels[k][id], fsh.prio);
-    /*
-    for(int i=fsh.b[id].s; i< fsh.b[id].e; i++)
-      hpcpush(zshift(hpc[i], dfloor_table[k]));
-    */
-
-    fsh.levels[k][id].tinf = &fsh.tinf3;
-    fsh.levels[k][id].texture_offset = 0;
-    auto at = [&] (hyperpoint h, int a) {
-      hpcpush(normalize(h));
-      };
-  
-    const int STEP = TEXTURE_STEP_3D;
-
-    for(int t=0; t<sides; t++)
-    for(int y=0; y<STEP; y++)
-    for(int x=0; x<STEP; x++) {
-      using namespace hyperpoint_vec;
-      hyperpoint center = zpush(dfloor_table[k]) * C0;
-      hyperpoint v1 = (xspinpush(t*2 * M_PI / sides + shift * M_PI / S42, size) * center - center) / STEP;
-      hyperpoint v2 = (xspinpush((t+1)*2 * M_PI / sides + shift * M_PI / S42, size) * center - center) / STEP;
-      if(x+y < STEP) {
-        at(center + v1 * x + v2 * y, 0);
-        at(center + v1 * (x+1) + v2 * y, 1);
-        at(center + v1 * x + v2 * (y+1), 2);
-        }
-      if(x+y <= STEP && x && y) {
-        at(center + v1 * x + v2 * y, 0);
-        at(center + v1 * (x-1) + v2 * y, 1);
-        at(center + v1 * x + v2 * (y-1), 2);
-        }
-      }
-    last->flags |= POLY_TRIANGLES;
     }
   }
 
@@ -443,35 +408,12 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         hpcpush(iddspin(c, cid) * cornerlist[(cid+1)%cor]);
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
-
-    for(int k=0; k<SIDEPARS; k++) {
-      sizeto(fsh.levels[k], id);
-      bshape(fsh.levels[k][id], fsh.prio);
-      for(int i=fsh.b[id].s; i< fsh.b[id].e; i++)
-        hpcpush(zshift(hpc[i], dfloor_table[k]));
-      }
     }
   
   for(auto pfsh: all_escher_floorshapes) {
   
     auto& fsh = *pfsh;
     
-    if(WDIM == 2 && GDIM == 3) {
-      ld hexside = shFullFloor.rad0, heptside = shFullFloor.rad1;
-      int td = ((PURE || euclid) && !(S7&1)) ? S42+S6 : 0;
-
-      if(id == 1)
-        bshape_regular(fsh, 1, S7, td, heptside);
-      
-      else if(PURE)
-        bshape_regular(fsh, 0, S7, td, heptside);
-
-      else 
-        bshape_regular(fsh, 0, S6, S7, hexside);
-      
-      continue;
-      }
-
     sizeto(fsh.b, id);
     sizeto(fsh.shadow, id);
     
@@ -533,6 +475,90 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         bshape2((ii?fsh.shadow:fsh.b)[id], fsh.prio, (fsh.shapeid2 && geosupport_football() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
         }
       }
+    }
+  
+  if(WDIM == 2 && GDIM == 3) {
+    finishshape();
+    for(auto pfsh: all_plain_floorshapes) {
+      auto& fsh = *pfsh;
+
+      for(int k=0; k<SIDEPARS; k++) {
+        sizeto(fsh.levels[k], id);
+        bshape(fsh.levels[k][id], fsh.prio);
+    
+        fsh.levels[k][id].tinf = &fsh.tinf3;
+        fsh.levels[k][id].texture_offset = 0;
+        auto at = [&] (hyperpoint h, int a) {
+          hpcpush(normalize(h));
+          };
+  
+        const int STEP = TEXTURE_STEP_3D;
+        
+        int s = fsh.b[id].s;
+        int e = fsh.b[id].e-1;
+        
+        if(binarytiling) {
+          vector<hyperpoint> cors;
+          for(int i=0; i<c->type; i++) cors.push_back(get_corner_position(c, i, 3));
+          cors.push_back(cors[0]);
+          for(int t=0; t<c->type; t++)
+          for(int y=0; y<STEP; y++)
+          for(int x=0; x<STEP; x++) {
+            using namespace hyperpoint_vec;
+            hyperpoint center = zpush(dfloor_table[k]) * C0;
+            hyperpoint v1 = (rgpushxto0(cors[t]) * center - center) / STEP;
+            hyperpoint v2 = (rgpushxto0(cors[t+1]) * center - center) / STEP;
+            if(x+y < STEP) {
+              at(center + v1 * x + v2 * y, 0);
+              at(center + v1 * (x+1) + v2 * y, 1);
+              at(center + v1 * x + v2 * (y+1), 2);
+              }
+            if(x+y <= STEP && x && y) {
+              at(center + v1 * x + v2 * y, 0);
+              at(center + v1 * (x-1) + v2 * y, 1);
+              at(center + v1 * x + v2 * (y-1), 2);
+              }
+            }          
+          }
+        else {
+          for(int t=0; t<e-s; t++)
+          for(int y=0; y<STEP; y++)
+          for(int x=0; x<STEP; x++) {
+            using namespace hyperpoint_vec;
+            hyperpoint center = zpush(dfloor_table[k]) * C0;
+            hyperpoint v1 = (rgpushxto0(hpc[s+t]) * center - center) / STEP;
+            hyperpoint v2 = (rgpushxto0(hpc[s+t+1]) * center - center) / STEP;
+            if(x+y < STEP) {
+              at(center + v1 * x + v2 * y, 0);
+              at(center + v1 * (x+1) + v2 * y, 1);
+              at(center + v1 * x + v2 * (y+1), 2);
+              }
+            if(x+y <= STEP && x && y) {
+              at(center + v1 * x + v2 * y, 0);
+              at(center + v1 * (x-1) + v2 * y, 1);
+              at(center + v1 * x + v2 * (y-1), 2);
+              }
+            }
+          }
+        last->flags |= POLY_TRIANGLES;
+        }
+      }
+      
+    for(auto pfsh: all_escher_floorshapes) {
+      auto& fsh = *pfsh;
+      
+      for(int l=0; l<SIDEPARS; l++) {
+        fsh.levels[l] = shFullFloor.levels[l];
+        fsh.side[l] = shFullFloor.side[l];
+        for(int e=0; e<MAX_EDGE; e++)
+          fsh.gpside[l][e] = shFullFloor.gpside[l][e];
+        }
+      
+      for(auto& l: fsh.levels)
+      for(auto& li: l)
+        li.tinf = &fsh.tinf3;
+      }
+    finishshape();
     }
   }
 
