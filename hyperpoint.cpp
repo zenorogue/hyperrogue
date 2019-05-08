@@ -38,7 +38,7 @@ ld inverse_tanh(ld x) { return log((1+x)/(1-x)) / 2; } */
 
 ld squar(ld x) { return x*x; }
 
-int sig(int z) { return (sphere || z<DIM)?1:-1; }
+int sig(int z) { return (sphere || z<GDIM)?1:-1; }
 
 int curvature() {
   switch(cgclass) {
@@ -157,7 +157,7 @@ const hyperpoint C03 = hyperpoint(0,0,0,1);
 const hyperpoint Cx12 = hyperpoint(1,0,1.41421356237,0);
 const hyperpoint Cx13 = hyperpoint(1,0,0,1.41421356237);
 
-#define Cx1 (DIM==2?Cx12:Cx13)
+#define Cx1 (GDIM==2?Cx12:Cx13)
 
 // this function returns approximate square of distance between two points
 // (in the spherical analogy, this would be the distance in the 3D space,
@@ -191,9 +191,9 @@ ld hypot_d(int d, const hyperpoint& h) {
   }
   
 ld zlevel(const hyperpoint &h) {
-  if(euclid) return h[DIM];
+  if(euclid) return h[GDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
-  else return (h[DIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
+  else return (h[GDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
 
 ld hypot_auto(ld x, ld y) {
@@ -252,7 +252,7 @@ transmatrix cspin(int a, int b, ld alpha) {
 transmatrix spin(ld alpha) { return cspin(0, 1, alpha); }
 
 transmatrix random_spin() {
-  if(DIM == 2) return spin(randd() * 2 * M_PI);
+  if(GDIM == 2) return spin(randd() * 2 * M_PI);
   else {
     ld alpha2 = acos(randd() * 2 - 1);
     ld alpha = randd() * 2 * M_PI;
@@ -263,22 +263,22 @@ transmatrix random_spin() {
 
 transmatrix eupush(ld x, ld y) {
   transmatrix T = Id;
-  T[0][DIM] = x;
-  T[1][DIM] = y;
+  T[0][GDIM] = x;
+  T[1][GDIM] = y;
   return T;
   }
 
 transmatrix eupush3(ld x, ld y, ld z) {
   transmatrix T = Id;
-  T[0][DIM] = x;
-  T[1][DIM] = y;
-  if(DIM == 3) T[2][DIM] = z;
+  T[0][GDIM] = x;
+  T[1][GDIM] = y;
+  if(GDIM == 3) T[2][GDIM] = z;
   return T;
   }
 
 transmatrix eupush(hyperpoint h) {
   transmatrix T = Id;
-  for(int i=0; i<DIM; i++) T[i][DIM] = h[i];
+  for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
   return T;
   }
 
@@ -300,9 +300,9 @@ transmatrix euaffine(hyperpoint h) {
 
 transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
-  T[DIM][DIM] = T[cid][cid] = cos_auto(alpha);
-  T[cid][DIM] = sin_auto(alpha);
-  T[DIM][cid] = -curvature() * sin_auto(alpha);
+  T[GDIM][GDIM] = T[cid][cid] = cos_auto(alpha);
+  T[cid][GDIM] = sin_auto(alpha);
+  T[GDIM][cid] = -curvature() * sin_auto(alpha);
   return T;
   }
 
@@ -311,14 +311,14 @@ transmatrix xpush(ld alpha) { return cpush(0, alpha); }
 
 inline hyperpoint cpush0(int c, ld x) { 
   hyperpoint h = Hypc;
-  h[DIM] = cos_auto(x);
+  h[GDIM] = cos_auto(x);
   h[c] = sin_auto(x);
   return h;
   }
 
 inline hyperpoint xspinpush0(ld alpha, ld x) { 
   hyperpoint h = Hypc;
-  h[DIM] = cos_auto(x);
+  h[GDIM] = cos_auto(x);
   h[0] = sin_auto(x) * cos(alpha);
   h[1] = sin_auto(x) * -sin(alpha);
   return h;
@@ -400,7 +400,7 @@ transmatrix rspintoc(const hyperpoint& H, int t, int f) {
 
 // rotate the hyperbolic plane around C0 such that H[1] == 0 and H[0] >= 0
 transmatrix spintox(const hyperpoint& H) { 
-  if(DIM == 2) return spintoc(H, 0, 1); 
+  if(GDIM == 2) return spintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return spintoc(T1*H, 0, 2) * T1;
   }
@@ -421,7 +421,7 @@ transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
 
 // reverse of spintox(H)
 transmatrix rspintox(const hyperpoint& H) { 
-  if(DIM == 2) return rspintoc(H, 0, 1); 
+  if(GDIM == 2) return rspintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
   }
@@ -429,16 +429,16 @@ transmatrix rspintox(const hyperpoint& H) {
 // for H such that H[1] == 0, this matrix pushes H to C0
 transmatrix pushxto0(const hyperpoint& H) {
   transmatrix T = Id;
-  T[0][0] = +H[DIM]; T[0][DIM] = -H[0];
-  T[DIM][0] = curvature() * H[0]; T[DIM][DIM] = +H[DIM];
+  T[0][0] = +H[GDIM]; T[0][GDIM] = -H[0];
+  T[GDIM][0] = curvature() * H[0]; T[GDIM][GDIM] = +H[GDIM];
   return T;
   }
 
 // reverse of pushxto0(H)
 transmatrix rpushxto0(const hyperpoint& H) {
   transmatrix T = Id;
-  T[0][0] = +H[DIM]; T[0][DIM] = H[0];
-  T[DIM][0] = -curvature() * H[0]; T[DIM][DIM] = +H[DIM];
+  T[0][0] = +H[GDIM]; T[0][GDIM] = H[0];
+  T[GDIM][0] = -curvature() * H[0]; T[GDIM][GDIM] = +H[GDIM];
   return T;
   }
 
@@ -448,16 +448,16 @@ transmatrix ggpushxto0(const hyperpoint& H, ld co) {
     return eupush(co * H);
     }
   transmatrix res = Id;
-  if(sqhypot_d(DIM, H) < 1e-12) return res;
-  ld fac = (H[DIM]-1) / sqhypot_d(DIM, H);
-  for(int i=0; i<DIM; i++)
-  for(int j=0; j<DIM; j++)
+  if(sqhypot_d(GDIM, H) < 1e-12) return res;
+  ld fac = (H[GDIM]-1) / sqhypot_d(GDIM, H);
+  for(int i=0; i<GDIM; i++)
+  for(int j=0; j<GDIM; j++)
     res[i][j] += H[i] * H[j] * fac;
     
-  for(int d=0; d<DIM; d++)
-    res[d][DIM] = co * H[d],
-    res[DIM][d] = -curvature() * co * H[d];
-  res[DIM][DIM] = H[DIM];
+  for(int d=0; d<GDIM; d++)
+    res[d][GDIM] = co * H[d],
+    res[GDIM][d] = -curvature() * co * H[d];
+  res[GDIM][GDIM] = H[GDIM];
   
   return res;
   }
@@ -476,16 +476,16 @@ transmatrix rgpushxto0(const hyperpoint& H) {
 
 void fixmatrix(transmatrix& T) {
   if(euclid) {
-    for(int x=0; x<DIM; x++) for(int y=0; y<=x; y++) {
+    for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
       ld dp = 0;
-      for(int z=0; z<DIM; z++) dp += T[z][x] * T[z][y];
+      for(int z=0; z<GDIM; z++) dp += T[z][x] * T[z][y];
       
       if(y == x) dp = 1 - sqrt(1/dp);
       
-      for(int z=0; z<DIM; z++) T[z][x] -= dp * T[z][y];
+      for(int z=0; z<GDIM; z++) T[z][x] -= dp * T[z][y];
       }
-    for(int x=0; x<DIM; x++) T[DIM][x] = 0;
-    T[DIM][DIM] = 1;
+    for(int x=0; x<GDIM; x++) T[GDIM][x] = 0;
+    T[GDIM][GDIM] = 1;
     }
   else for(int x=0; x<MDIM; x++) for(int y=0; y<=x; y++) {
     ld dp = 0;
@@ -500,7 +500,7 @@ void fixmatrix(transmatrix& T) {
 // show the matrix on screen
 
 ld det(const transmatrix& T) {
-  if(DIM == 2) {
+  if(GDIM == 2) {
     ld det = 0;
     for(int i=0; i<3; i++) 
       det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
@@ -512,14 +512,14 @@ ld det(const transmatrix& T) {
     ld det = 1;
     transmatrix M = T;
     for(int a=0; a<MDIM; a++) {
-      for(int b=a; b<=DIM; b++)
+      for(int b=a; b<=GDIM; b++)
         if(M[b][a]) {
           if(b != a)
             for(int c=a; c<MDIM; c++) tie(M[b][c], M[a][c]) = make_pair(-M[a][c], M[b][c]);
           break;
           }
       if(!M[a][a]) return 0;
-      for(int b=a+1; b<=DIM; b++) {
+      for(int b=a+1; b<=GDIM; b++) {
         ld co = -M[b][a] / M[a][a];
         for(int c=a; c<MDIM; c++) M[b][c] += M[a][c] * co;
         }
@@ -534,7 +534,7 @@ void inverse_error(const transmatrix& T) {
   }
 
 transmatrix inverse(const transmatrix& T) {
-  if(DIM == 2) {
+  if(GDIM == 2) {
     ld d = det(T);
     transmatrix T2;
     if(d == 0) {
@@ -565,7 +565,7 @@ transmatrix inverse(const transmatrix& T) {
           swap(T1[b][c], T1[a][c]), swap(T2[b][c], T2[a][c]);
 
       if(!T1[a][a]) { inverse_error(T); return Id; }
-      for(int b=a+1; b<=DIM; b++) {
+      for(int b=a+1; b<=GDIM; b++) {
         ld co = -T1[b][a] / T1[a][a];
         for(int c=0; c<MDIM; c++) T1[b][c] += T1[a][c] * co, T2[b][c] += T2[a][c] * co;
         }
@@ -587,13 +587,13 @@ transmatrix inverse(const transmatrix& T) {
 ld hdist0(const hyperpoint& mh) {
   switch(cgclass) {
     case gcHyperbolic:
-      if(mh[DIM] < 1) return 0;
-      return acosh(mh[DIM]);
+      if(mh[GDIM] < 1) return 0;
+      return acosh(mh[GDIM]);
     case gcEuclid: {
-      return hypot_d(DIM, mh);
+      return hypot_d(GDIM, mh);
       }
     case gcSphere: {
-      ld res = mh[DIM] >= 1 ? 0 : mh[DIM] <= -1 ? M_PI : acos(mh[DIM]);
+      ld res = mh[GDIM] >= 1 ? 0 : mh[GDIM] <= -1 ? M_PI : acos(mh[GDIM]);
       if(elliptic && res > M_PI/2) res = M_PI-res;
       return res;
       }
@@ -634,7 +634,7 @@ ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
   }
 
 hyperpoint mscale(const hyperpoint& t, double fac) {
-  if(DIM == 3) return cpush(2, fac) * t;
+  if(GDIM == 3) return cpush(2, fac) * t;
   hyperpoint res;
   for(int i=0; i<MDIM; i++) 
     res[i] = t[i] * fac;
@@ -642,7 +642,7 @@ hyperpoint mscale(const hyperpoint& t, double fac) {
   }
 
 transmatrix mscale(const transmatrix& t, double fac) {
-  if(DIM == 3) return t * cpush(2, fac);
+  if(GDIM == 3) return t * cpush(2, fac);
   transmatrix res;
   for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
     res[i][j] = t[i][j] * fac;
@@ -651,24 +651,24 @@ transmatrix mscale(const transmatrix& t, double fac) {
 
 transmatrix xyscale(const transmatrix& t, double fac) {
   transmatrix res;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<DIM; j++)
+  for(int i=0; i<MDIM; i++) for(int j=0; j<GDIM; j++)
     res[i][j] = t[i][j] * fac;
   return res;
   }
 
 transmatrix xyzscale(const transmatrix& t, double fac, double facz) {
   transmatrix res;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<DIM; j++)
+  for(int i=0; i<MDIM; i++) for(int j=0; j<GDIM; j++)
     res[i][j] = t[i][j] * fac;
   for(int i=0; i<MDIM; i++) 
-    res[i][DIM] = t[i][DIM] * facz;
+    res[i][GDIM] = t[i][GDIM] * facz;
   return res;
   }
 
 // double downspin_zivory;
 
 transmatrix mzscale(const transmatrix& t, double fac) {
-  if(DIM == 3) return t * cpush(2, fac);
+  if(GDIM == 3) return t * cpush(2, fac);
   // take only the spin
   transmatrix tcentered = gpushxto0(tC0(t)) * t;
   // tcentered = tcentered * spin(downspin_zivory);

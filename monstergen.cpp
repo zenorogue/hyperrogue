@@ -265,7 +265,7 @@ bool haveOrbPower() {
     cell *c = dcal[i];
     if(itemclass(c->item) == IC_ORB) return true;
     }
-  else if(sphere_narcm && DIM == 2) for(int i=0; i<spherecells(); i++) {
+  else if(sphere_narcm && WDIM == 2) for(int i=0; i<spherecells(); i++) {
     cell *c = getDodecahedron(i)->c7;
     if(itemclass(c->item) == IC_ORB) return true;
     forCellEx(c2, c) if(itemclass(c2->item) == IC_ORB) return true;
@@ -474,7 +474,7 @@ void wandering() {
         }
       if(!peace::on && c->land == laKraken && ((sphere && !hrand(15)) || wchance(items[itKraken], 240)) && !kraken_pseudohept(c)) {
         bool b = sphere || canReachPlayer(c, moKrakenH);
-        if(sphere_narcm && DIM == 2 && (haveKraken() || !items[itOrbFish])) { 
+        if(sphere_narcm && WDIM == 2 && (haveKraken() || !items[itOrbFish])) { 
           c->monst = moViking; c->wall = waBoat; c->item = itOrbFish; 
           playSeenSound(c);
           continue;

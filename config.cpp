@@ -361,6 +361,8 @@ void initConfig() {
   addsaverenum(conformal::basic_model, "basic model");
   addsaver(conformal::use_atan, "use_atan");
   
+  for(auto& g: sightranges) g = 10;
+  
   addsaver(sightranges[gBinary3], "sight-binary3", 3);
   addsaver(sightranges[gCubeTiling], "sight-cubes", 7);
   addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
@@ -619,10 +621,10 @@ void add_cells_drawn(char c = 'C') {
 
 void edit_sightrange() {
   if(vid.use_smart_range) {
-    ld& det = DIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
-    dialog::editNumber(det, 1, 50, 1, DIM == 2 ? 8 : 30, XLAT("minimum visible cell in pixels"), "");
+    ld& det = WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
+    dialog::editNumber(det, 1, 50, 1, WDIM == 2 ? 8 : 30, XLAT("minimum visible cell in pixels"), "");
     }
-  else if(DIM == 3) {
+  else if(WDIM == 3) {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
       XLAT(
         "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
@@ -646,7 +648,7 @@ void edit_sightrange() {
   dialog::extra_options = [] () {
     dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
     dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
-    if(DIM == 2 && allowIncreasedSight()) {
+    if(WDIM == 2 && allowIncreasedSight()) {
       dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
       dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
       }
@@ -654,7 +656,7 @@ void edit_sightrange() {
       dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
       dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
       }
-    if(vid.use_smart_range == 0 && allowChangeRange() && DIM == 2) {
+    if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
       dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
       dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
       dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
@@ -664,7 +666,7 @@ void edit_sightrange() {
       dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
       dialog::add_action(enable_cheat);
       }
-    if(DIM == 3 && !vid.use_smart_range) {
+    if(WDIM == 3 && !vid.use_smart_range) {
       dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
       }
     if(DIM == 3 && !vid.use_smart_range) {
@@ -681,8 +683,8 @@ void edit_sightrange() {
 
 void menuitem_sightrange(char c) {
   if(vid.use_smart_range)
-    dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(DIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
-  else if(DIM == 3)
+    dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
+  else if(WDIM == 3)
     dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);
   else
     dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
@@ -1189,7 +1191,7 @@ void show3D() {
     dialog::addBreak(50);
     }
   
-  if(DIM == 2) {
+  if(WDIM == 2) {
     dialog::addSelItem(XLAT("Camera level above the plane"), fts3(camera), 'c');
     dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
   
@@ -1270,26 +1272,50 @@ void show3D() {
     dialog::addBoolItem_action(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
     }
   #endif
-  dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
-  dialog::add_action([] () { 
-    if(pmodel == mdDisk && vid.camera_angle) {
-      vid.yshift = 0;
-      vid.camera_angle = 0;
-      vid.xposition = 0;
-      vid.yposition = 0;
-      vid.scale = 1;      
-      vid.fixed_facing = false;
-      }
-    else {
-      vid.yshift = -0.3;
-      vid.camera_angle = -45;
-      vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
-      vid.xposition = 0;
-      vid.yposition = -0.9;
-      vid.fixed_facing = true;
-      vid.fixed_facing_dir = 90;
-      }
-    });
+  if(GDIM == 2) {
+    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
+    dialog::add_action([] () { 
+      if(pmodel == mdDisk && vid.camera_angle) {
+        vid.yshift = 0;
+        vid.camera_angle = 0;
+        vid.xposition = 0;
+        vid.yposition = 0;
+        vid.scale = 1;      
+        vid.fixed_facing = false;
+        }
+      else {
+        vid.yshift = -0.3;
+        vid.camera_angle = -45;
+        vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
+        vid.xposition = 0;
+        vid.yposition = -0.9;
+        vid.fixed_facing = true;
+        vid.fixed_facing_dir = 90;
+        }
+      });
+    }
+  
+  if(WDIM == 2) {
+    dialog::addBoolItem(XLAT("configure FPP automatically"), DIM == 3, 'F');
+    dialog::add_action([] {
+      if(!geom3::always3) {
+        geom3::always3 = true;
+        geom3::wall_height = 1.5;
+        geom3::human_wall_ratio = 0.8;
+        geom3::camera = 0;
+        if(pmodel == mdDisk) pmodel = mdPerspective;
+        need_reset_geometry = true;
+        }
+      else {
+        geom3::always3 = false;
+        geom3::wall_height = .3;
+        geom3::human_wall_ratio = .7;
+        geom3::camera = 1;
+        if(pmodel == mdPerspective) pmodel = mdDisk;
+        need_reset_geometry = true;
+        }
+      });
+    }
 
   if(0);
   #if CAP_RUG
@@ -1327,7 +1353,7 @@ void show3D() {
         if(highdetail > middetail) highdetail = middetail;
         };
       }
-    else if(uni == 'c' && DIM == 2) 
+    else if(uni == 'c' && WDIM == 2) 
       tc_camera = ticks,
       dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), ""),
       dialog::reaction = delayed_geo_reset,
@@ -1344,7 +1370,7 @@ void show3D() {
           fts3(atan(1/cosh(camera))*2/degree),
           fts3(1/cosh(camera))));
         };
-    else if(uni == 'g' && DIM == 2) 
+    else if(uni == 'g' && WDIM == 2) 
       tc_depth = ticks,
       dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
       dialog::reaction = delayed_geo_reset,
@@ -1366,9 +1392,9 @@ void show3D() {
           fts3(depth), fts3(cosh(depth))));
           // mention absolute units
           };
-    else if(uni == 'a' && DIM == 2) 
+    else if(uni == 'a' && WDIM == 2) 
       projectionDialog();
-    else if(uni == 'w' && DIM == 2) {
+    else if(uni == 'w' && WDIM == 2) {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::reaction = delayed_geo_reset;
       dialog::extra_options = [] () {
@@ -1386,13 +1412,13 @@ void show3D() {
           });
         };
       }
-    else if(uni == 'l' && DIM == 2) 
+    else if(uni == 'l' && WDIM == 2) 
       dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'k' && DIM == 2) 
+    else if(uni == 'k' && WDIM == 2) 
       dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'r' && DIM == 2) 
+    else if(uni == 'r' && WDIM == 2) 
       dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
       dialog::extra_options = [] { dialog::addHelp(XLAT(
         "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
@@ -1402,7 +1428,7 @@ void show3D() {
         fts3(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth))));
         },
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'h' && DIM == 2)
+    else if(uni == 'h' && WDIM == 2)
       dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
       dialog::reaction = delayed_geo_reset,
       dialog::extra_options = [] { dialog::addHelp(XLAT(
@@ -1413,10 +1439,10 @@ void show3D() {
         fts3(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)))
         );
         };
-    else if(uni == 'h' && DIM == 3)
+    else if(uni == 'h' && WDIM == 3)
       dialog::editNumber(geom3::height_width, 0, 1, .1, .7, XLAT("Height to width"), ""),
       dialog::reaction = delayed_geo_reset;
-    else if(uni == 'c' && DIM == 3)
+    else if(uni == 'c' && WDIM == 3)
       dialog::editNumber(geom3::creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), ""),
       dialog::reaction = delayed_geo_reset;
 
@@ -1894,6 +1920,15 @@ int read_config_args() {
   else if(argis("-nomenu")) {
     PHASEFROM(2);
     nomenukey = true;
+    }
+  else if(argis("-al3")) {
+    PHASEFROM(2);
+    geom3::always3 = true;
+    geom3::wall_height = 1.5;
+    geom3::human_wall_ratio = 0.8;
+    geom3::camera = 0;
+    if(pmodel == mdDisk) pmodel = mdPerspective;
+    need_reset_geometry = true;
     }
   else if(argis("-nohelp")) {
     PHASEFROM(2);

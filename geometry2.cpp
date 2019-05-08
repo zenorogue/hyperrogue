@@ -8,14 +8,14 @@ namespace hr {
 transmatrix &ggmatrix(cell *c);
 
 void fixelliptic(transmatrix& at) {
-  if(elliptic && at[DIM][DIM] < 0) {
+  if(elliptic && at[GDIM][GDIM] < 0) {
     for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
       at[i][j] = -at[i][j];
     }
   }
 
 void fixelliptic(hyperpoint& h) {
-  if(elliptic && h[DIM] < 0)
+  if(elliptic && h[GDIM] < 0)
     for(int i=0; i<MDIM; i++) h[i] = -h[i];
   }
 
@@ -46,7 +46,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       return (get_inverse?invhexmove:hexmove)[d];
     return Id;
     }
-  else if(DIM == 3 || euclid)
+  else if(WDIM == 3 || euclid)
     return Id;
   else
     return pispin * Id;
@@ -163,10 +163,10 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
 
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
-  if(t[DIM][DIM] == 0) {
+  if(t[GDIM][GDIM] == 0) {
     if(euwrap && centerover.at) 
       t = calc_relative_matrix(c, centerover.at, C0);
-    else if(euclid && DIM == 2) {
+    else if(euclid && WDIM == 2) {
       if(!centerover.at) centerover = cwt;
       t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
@@ -246,7 +246,7 @@ struct horo_distance {
 
 template<class T, class U> 
 void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
-  if((euclid || sphere) && DIM == 2) {
+  if((euclid || sphere) && WDIM == 2) {
     again:
     if(euwrap) for(int i=0; i<6; i++) {
       // fix cylinder and square grid
@@ -283,7 +283,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
     transmatrix bestV;
     
-    if(DIM == 2 && !binarytiling) for(int d=0; d<S7; d++) {
+    if(WDIM == 2 && !binarytiling) for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
@@ -315,7 +315,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
         at = bestV * at;
         }
       else at = master_relative(base, true) * at;
-      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || DIM == 3) {
+      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || WDIM == 3) {
         while(true) {
           newbase = NULL;
           forCellCM(c2, base) {
@@ -345,8 +345,8 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
 void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
   // we perform fixing in check, so that it works with larger range
   virtualRebase(base, h, tohex, [] (const hyperpoint& h) { 
-    if(hyperbolic && DIM == 2) return hpxy(h[0], h[1]);
-    if(hyperbolic && DIM == 3) return hpxy3(h[0], h[1], h[2]);
+    if(hyperbolic && GDIM == 2) return hpxy(h[0], h[1]);
+    if(hyperbolic && GDIM == 3) return hpxy3(h[0], h[1], h[2]);
     return h; 
     });
   }
@@ -356,7 +356,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
-    double currz = at[DIM][DIM];
+    double currz = at[GDIM][GDIM];
     
     heptagon *h = base;
     
@@ -368,7 +368,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d] * at;
-      double newz = V2[DIM][DIM];
+      double newz = V2[GDIM][GDIM];
       if(newz < currz) {
         currz = newz;
         bestV = V2;
@@ -439,7 +439,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   #endif
   #if CAP_BT
   if(binarytiling) {
-    if(DIM == 3) {
+    if(WDIM == 3) {
       println(hlog, "get_corner_position called");
       return C0;
       }
@@ -528,7 +528,7 @@ hyperpoint nearcorner(cell *c, int i) {
   #endif
   #if CAP_BT
   if(binarytiling) {
-    if(DIM == 3) {
+    if(WDIM == 3) {
       println(hlog, "nearcorner called");
       return Hypc;
       }

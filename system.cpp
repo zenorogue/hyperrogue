@@ -1207,7 +1207,7 @@ void set_geometry(eGeometry target) {
     if(DUAL && geometry != gArchimedean) 
       variation = ginf[geometry].default_variation;
     #if CAP_BT
-    if(geometry == gBinaryTiling || DIM == 3) variation = eVariation::pure;
+    if(geometry == gBinaryTiling || WDIM == 3) variation = eVariation::pure;
     #endif
     if(DIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
     if(DIM == 2 && pmodel == mdPerspective) pmodel = mdDisk;

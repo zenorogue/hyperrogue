@@ -97,7 +97,7 @@ namespace binary {
     h->cdata = NULL;
     h->zebraval = side;
     h->emeraldval = 0;
-    if(DIM == 3 && h->c7) {
+    if(WDIM == 3 && h->c7) {
       if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
       eLand z = eLand(parent->emeraldval);
       int chance = 0;
@@ -337,7 +337,7 @@ namespace binary {
         if(!do_draw(c, V)) continue;
         drawcell(c, V, 0, false);
   
-        if(DIM == 2) {
+        if(WDIM == 2) {
           dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
           dq::enqueue(h->move(bd_right), V * parabolic(1));
           dq::enqueue(h->move(bd_left), V * parabolic(-1));
@@ -366,7 +366,7 @@ namespace binary {
       transmatrix gm = Id, where = Id;
       while(h1 != h2) {
         if(h1->distance <= h2->distance) {
-          if(DIM == 3)
+          if(WDIM == 3)
             where = itmatrix(h2, S7-1) * where, h2 = may_create_step(h2, S7-1);
           else {
             if(type_of(h2) == 6)
@@ -378,7 +378,7 @@ namespace binary {
             }
           }
         else {
-          if(DIM == 3)
+          if(WDIM == 3)
             gm = gm * tmatrix(h1, S7-1), h1 = may_create_step(h1, S7-1);
           else {
             if(type_of(h1) == 6)
@@ -609,7 +609,7 @@ auto bt_config = addHook(hooks_args, 0, [] () {
 #endif
 
 bool pseudohept(cell *c) {
-  if(DIM == 2)
+  if(WDIM == 2)
     return c->type & c->master->distance & 1;
   else if(geometry == gHoroRec)
     return c->c.spin(S7-1) == 0 && (c->master->distance & 1) && c->cmove(S7-1)->c.spin(S7-1) == 0;

@@ -352,6 +352,7 @@ void draw_radar(bool cornermode) {
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdUnchanged);
+  dynamicval<bool> ga(geom3::always3, false);
   initquickqueue();
   int rad = vid.radarsize;
   

@@ -27,7 +27,11 @@ hyperpoint get_center(const vector<hyperpoint>& vh) {
   return normalize(h);
   }
 
-ld zc(ld z) { return geom3::human_height * (z - 0.5); }
+ld zc(ld z) { 
+  if(WDIM == 2 && GDIM == 3)
+    return geom3::lev_to_factor(geom3::human_height * z);
+  return geom3::human_height * (z - 0.5); 
+  }
 
 transmatrix zpush(ld z) {
   return cpush(2, z);
@@ -487,7 +491,6 @@ void make_paw_3d(hpcshape& sh, hpcshape& legsh) {
   add_prism_sync(zc(0.1), leg, zc(0.4), leg);
   add_cone(zc(0.4), leg, zc(0.45));
   add_texture(sh);
-  shift_last(-geom3::LEG0);
   }
 
 void make_abody_3d(hpcshape& sh, ld tail) {
@@ -508,6 +511,7 @@ void make_abody_3d(hpcshape& sh, ld tail) {
   add_cone(zc(0.4), body8, zc(0.36));
   add_cone(zc(0.6), body8, zc(0.64));
   add_texture(sh);
+  if(GDIM == 3 && WDIM == 2) shift_last(-geom3::ABODY);
   }
 
 void make_ahead_3d(hpcshape& sh) {
@@ -760,33 +764,35 @@ void make_3d_models() {
   // make_abody_3d(shWolfBody, 0.01);
   // make_ahead_3d(shWolfHead);
   // make_ahead_3d(shFamiliarHead);
-  make_revolution_cut(shWolfBody, 30, 0, 0.01*S);
-  make_revolution_cut(shWolfHead, 180, geom3::AHEAD - geom3::ABODY);
-  make_revolution_cut(shFamiliarHead, 30, geom3::AHEAD - geom3::ABODY);
+  ld g = WDIM == 2 ? geom3::ABODY - zc(0.4) : 0;
+  
+  make_revolution_cut(shWolfBody, 30, g, 0.01*S);
+  make_revolution_cut(shWolfHead, 180, geom3::AHEAD - geom3::ABODY +g);
+  make_revolution_cut(shFamiliarHead, 30, geom3::AHEAD - geom3::ABODY +g);
 
   // make_abody_3d(shDogTorso, 0.01);
-  make_revolution_cut(shDogTorso, 30);
-  make_revolution_cut(shDogHead, 180, geom3::AHEAD - geom3::ABODY);
+  make_revolution_cut(shDogTorso, 30, +g);
+  make_revolution_cut(shDogHead, 180, geom3::AHEAD - geom3::ABODY +g);
   // make_ahead_3d(shDogHead);
 
   // make_abody_3d(shCatBody, 0.05);
   // make_ahead_3d(shCatHead);
-  make_revolution_cut(shCatBody, 30);
-  make_revolution_cut(shCatHead, 180, geom3::AHEAD - geom3::ABODY);
+  make_revolution_cut(shCatBody, 30, +g);
+  make_revolution_cut(shCatHead, 180, geom3::AHEAD - geom3::ABODY +g);
 
   make_paw_3d(shReptileFrontFoot, shReptileFrontLeg);
   make_paw_3d(shReptileRearFoot, shReptileRearLeg);  
   make_abody_3d(shReptileBody, -1);
   // make_ahead_3d(shReptileHead);
-  make_revolution_cut(shReptileHead, 180, geom3::AHEAD - geom3::ABODY);
+  make_revolution_cut(shReptileHead, 180, geom3::AHEAD - geom3::ABODY+g);
 
   make_paw_3d(shBullFrontHoof, shBullFrontHoof);
   make_paw_3d(shBullRearHoof, shBullRearHoof);
   // make_abody_3d(shBullBody, 0.05);
   // make_ahead_3d(shBullHead);
   // make_ahead_3d(shBullHorn);
-  make_revolution_cut(shBullBody, 180);
-  make_revolution_cut(shBullHead, 60, geom3::AHEAD - geom3::ABODY);
+  make_revolution_cut(shBullBody, 180, +g);
+  make_revolution_cut(shBullHead, 60, geom3::AHEAD - geom3::ABODY +g);
   shift_shape(shBullHorn, -(geom3::AHEAD - geom3::ABODY));
   // make_revolution_cut(shBullHorn, 180, geom3::AHEAD - geom3::ABODY);
   
@@ -794,7 +800,7 @@ void make_3d_models() {
   make_paw_3d(shTrylobiteRearClaw, shTrylobiteRearLeg);
   make_abody_3d(shTrylobiteBody, 0);
   // make_ahead_3d(shTrylobiteHead);
-  make_revolution_cut(shTrylobiteHead, 180, geom3::AHEAD - geom3::ABODY);
+  make_revolution_cut(shTrylobiteHead, 180, geom3::AHEAD - geom3::ABODY +g);
   
   make_revolution_cut(shShark, 180);
 

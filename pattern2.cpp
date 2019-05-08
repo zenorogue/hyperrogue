@@ -369,7 +369,7 @@ int fieldval_uniq(cell *c) {
     }
   else if(binarytiling || archimedean) return 0;
   else if(&currfp == &fp_invalid) return 0;
-  else if(DIM == 3) return c->master->fieldval;
+  else if(WDIM == 3) return c->master->fieldval;
   else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
   else {
     int z = 0;
@@ -450,7 +450,7 @@ int getHemisphere(heptagon *h, int which) {
 
 int getHemisphere(cell *c, int which) {
   if(euwrap) return 0;
-  if(DIM == 3) {
+  if(WDIM == 3) {
     hyperpoint p = tC0(calc_relative_matrix(c, currentmap->gamestart(), C0));
     return int(p[which] * 6  + 10.5) - 10;
     }
@@ -766,7 +766,7 @@ namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(IRREGULAR || archimedean || binarytiling || DIM == 3) si.symmetries = 1;
+    if(IRREGULAR || archimedean || binarytiling || WDIM == 3) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
@@ -1296,7 +1296,7 @@ bool pseudohept(cell *c) {
   if(binarytiling) return binary::pseudohept(c);
   #endif
   #if MAXMDIM == 4
-  if(DIM == 3) {
+  if(WDIM == 3) {
     if(geometry == gField435) return false;
     else if(euclid) return euclid3::pseudohept(c);
     else return reg3::pseudohept(c);

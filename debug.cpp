@@ -650,7 +650,7 @@ int read_cheat_args() {
     PHASE(3); shift(); test_distances(argi());
     }
   else if(argis("-M")) {
-    PHASE(3) cheat(); start_game(); if(DIM == 3) { drawthemap(); bfs(); }
+    PHASE(3) cheat(); start_game(); if(WDIM == 3) { drawthemap(); bfs(); }
     shift(); eMonster m = readMonster(args());
     shift(); int q = argi();
     printf("m = %s q = %d\n", dnameof(m), q);
@@ -716,7 +716,7 @@ int read_cheat_args() {
   else if(argis("-smart")) {
     PHASEFROM(2); cheat();
     vid.use_smart_range = 2;
-    shift_arg_formula(DIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail);
+    shift_arg_formula(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail);
     }
   else if(argis("-smartn")) {
     PHASEFROM(2);

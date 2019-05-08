@@ -738,7 +738,7 @@ void describeMouseover() {
     out = XLAT1(linf[c->land].name);
     help = bygen([c] () { gotoHelpFor(c->land); });
     
-    if(DIM == 3 && isGravityLand(c->land)) out += " [" + its(gravityLevel(c)) + "]";
+    if(WDIM == 3 && isGravityLand(c->land)) out += " [" + its(gravityLevel(c)) + "]";
     
     if(isIcyLand(c)) 
       out += " (" + fts(heat::celsius(c)) + " °C)";

@@ -93,7 +93,7 @@ void precalc() {
     goto finish;
     }
   
-  if((sphere || hyperbolic) && DIM == 3 && !binarytiling) {
+  if((sphere || hyperbolic) && WDIM == 3 && !binarytiling) {
     rhexf = hexf = 0.378077;
     crossf = hcrossf = 0.620672;
     tessf = 1.090550;
@@ -165,16 +165,16 @@ void precalc() {
   if(geometry == gHoroRec) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   #endif
   #if CAP_BT && MAXMDIM >= 4
-  if(binarytiling && DIM == 3) binary::build_tmatrix();
+  if(binarytiling && WDIM == 3) binary::build_tmatrix();
   #endif
   
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
-  if(DIM == 3) scalefactor *= geom3::creature_scale;
+  if(WDIM == 3) scalefactor *= geom3::creature_scale;
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
-  if(DIM == 3) zhexf *= geom3::creature_scale;
+  if(WDIM == 3) zhexf *= geom3::creature_scale;
 
   floorrad0 = hexvdist* 0.92;
   floorrad1 = rhexf * 0.94;
@@ -199,6 +199,7 @@ transmatrix xspinpush(ld dir, ld dist) {
 
 namespace geom3 {
 
+  bool always3 = false; 
   int tc_alpha=3, tc_depth=1, tc_camera=2;
   
   ld depth = 1;        // world below the plane
@@ -246,7 +247,8 @@ namespace geom3 {
     }
   
   ld lev_to_factor(ld lev) { 
-    if(DIM == 3) return lev;
+    if(WDIM == 3) return lev;
+    if(GDIM == 3) return lev - depth;
     return projection_to_factor(lev_to_projection(lev)); 
     }
   ld factor_to_lev(ld fac) { 
@@ -260,7 +262,7 @@ namespace geom3 {
     return cosh(depth - lev); 
     }
   
-  ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, 
+  ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
     SLEV[4], FLATEYE,
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, BODY1, BODY2, BODY3,
@@ -281,7 +283,8 @@ namespace geom3 {
     // tanh(depth) / tanh(camera) == vid.alpha
     invalid = "";
     
-    if(tc_alpha < tc_depth && tc_alpha < tc_camera)
+    if(GDIM == 3) ;
+    else if(tc_alpha < tc_depth && tc_alpha < tc_camera)
       vid.alpha = tan_auto(depth) / tan_auto(camera);
     else if(tc_depth < tc_alpha && tc_depth < tc_camera) {
       ld v = vid.alpha * tan_auto(camera);
@@ -301,6 +304,7 @@ namespace geom3 {
       BOTTOM = .8;
       HELLSPIKE = .85;
       LAKE = .9;
+      FLOOR = 1;
       WALL = 1.25;
       SLEV[0] = 1;
       SLEV[1] = 1.08;
@@ -332,12 +336,13 @@ namespace geom3 {
       INFDEEP = (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
+      FLOOR = lev_to_factor(0);
       
       human_height = human_wall_ratio * wh;
-      if(DIM == 3) human_height = scalefactor * height_width / 2;
+      if(WDIM == 3) human_height = scalefactor * height_width / 2;
       
-      ld reduce = (DIM == 3 ? human_height / 2 : 0);
-
+      ld reduce = (WDIM == 3 ? human_height / 2 : 0);
+      
       LEG0  = lev_to_factor(human_height * .0 - reduce);
       LEG1  = lev_to_factor(human_height * .1 - reduce);
       LEG   = lev_to_factor(human_height * .2 - reduce);
@@ -357,6 +362,8 @@ namespace geom3 {
       HEAD3 = lev_to_factor(human_height - reduce);
       
       reduce = (DIM == 3 ? human_height * .3 : 0);
+      
+      STUFF = lev_to_factor(human_height * .2);
       
       ABODY = lev_to_factor(human_height * .4 - reduce);
       ALEG0 = lev_to_factor(human_height * .0 - reduce);

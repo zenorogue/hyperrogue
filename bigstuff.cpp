@@ -41,7 +41,7 @@ int celldistAltRelative(cell *c) {
   if(geometry == gCrystal) return crystal::dist_relative(c);
   #endif
   #if MAXMDIM >= 4
-  if(euclid && DIM == 3) return euclid3::dist_relative(c);
+  if(euclid && WDIM == 3) return euclid3::dist_relative(c);
   #endif
   if(euwrap) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
@@ -468,7 +468,7 @@ int coastval(cell *c, eLand base) {
 
 bool checkInTree(cell *c, int maxv) {
   if(c->landparam <= 3) return false;
-  if(!maxv && DIM == 3 && binarytiling) {
+  if(!maxv && WDIM == 3 && binarytiling) {
     forCellEx(c2, c) if(c2->landflags) return true;
     }
   if(!maxv) return false;
@@ -522,7 +522,7 @@ void buildEquidistant(cell *c) {
     // if(generatingEquidistant) printf("mcv=0\n");
     c->landparam = 1;
     }
-  else if(DIM == 3) {
+  else if(WDIM == 3) {
     forCellCM(c2, c) if(coastval(c2, b) == mcv) 
       forCellEx(c3, c2) if(coastval(c3, b) < mcv)
         forCellCM(c4, c3) {
@@ -593,23 +593,23 @@ void buildEquidistant(cell *c) {
       int skip = geometry == gHoroRec ? 3 : 2;
       if(c->landparam == 1) 
         c->landflags = (hrand(100) < 20);
-      else if(DIM == 2 && c->type == 6 && (c->landparam % 2) && c->move(binary::bd_down) && c->move(binary::bd_down)->landflags)
+      else if(WDIM == 2 && c->type == 6 && (c->landparam % 2) && c->move(binary::bd_down) && c->move(binary::bd_down)->landflags)
         c->landflags = 1;
-      else if(DIM == 2 && c->type == 7 && (c->landparam % 2 == 0)) {
+      else if(WDIM == 2 && c->type == 7 && (c->landparam % 2 == 0)) {
         for(int d: {binary::bd_down_left, binary::bd_down_right})
           if(c->move(d) && c->move(d)->landflags)
             c->landflags = 1;
         }
-      else if(DIM == 3 && c->landparam % skip != 1 && c->move(S7-1) && c->move(S7-1)->landflags)
+      else if(WDIM == 3 && c->landparam % skip != 1 && c->move(S7-1) && c->move(S7-1)->landflags)
         c->landflags = 1;
-      else if(DIM == 3 && c->landparam % skip == 1 && c->move(S7-1) && c->move(S7-1)->c.spin(S7-1) == (c->c.spin(S7-1)) && c->move(S7-1)->move(S7-1)->landflags)
+      else if(WDIM == 3 && c->landparam % skip == 1 && c->move(S7-1) && c->move(S7-1)->c.spin(S7-1) == (c->c.spin(S7-1)) && c->move(S7-1)->move(S7-1)->landflags)
         c->landflags = 1;
-      if(c->landflags) c->wall = (DIM == 3 ? waTrunk3 : waTrunk);
+      if(c->landflags) c->wall = (WDIM == 3 ? waTrunk3 : waTrunk);
       }
     else 
     #endif
     #if MAXMDIM >= 4
-    if(DIM == 3 && hyperbolic) {
+    if(WDIM == 3 && hyperbolic) {
       if(c->landparam == 1) 
         c->landflags = (hrand(100) < 20);
       else if(S7 == 12) {
@@ -1201,7 +1201,7 @@ bool deep_ocean_at(cell *c, cell *from) {
 
 bool good_for_wall(cell *c) {
   if(archimedean) return true;
-  if(DIM == 3) return true;
+  if(WDIM == 3) return true;
   return pseudohept(c);
   }
   
@@ -1471,7 +1471,7 @@ void buildCamelot(cell *c) {
 
 int masterAlt(cell *c) {
   #if MAXMDIM >= 4
-  if(DIM == 3 && hyperbolic) return reg3::altdist(c->master);
+  if(WDIM == 3 && hyperbolic) return reg3::altdist(c->master);
   #endif
   return c->master->alt->distance;
   }
@@ -1533,7 +1533,7 @@ void moreBigStuff(cell *c) {
         else if(geometry == gHoroTris || geometry == gHoroRec) {
           if(c->c.spin(S7-1) != 0) c->wall = waColumn;
           }
-        else if(DIM == 3) {
+        else if(WDIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;
           }
         else if(weirdhyperbolic && !BITRUNCATED) {

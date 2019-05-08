@@ -68,7 +68,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     binary::rxcode[1<<16] = &h;
     #endif
     h.zebraval = 0, h.emeraldval = 0,
-    h.c7 = newCell(DIM == 3 ? S7 : 6, origin);
+    h.c7 = newCell(WDIM == 3 ? S7 : 6, origin);
     }
   #endif
   #if CAP_IRR
@@ -225,12 +225,12 @@ void initcells() {
   else if(archimedean) currentmap = arcm::new_map();
   #endif
   #if MAXMDIM >= 4
-  else if(euclid && DIM == 3) currentmap = euclid3::new_map();
+  else if(euclid && WDIM == 3) currentmap = euclid3::new_map();
   #endif
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   #if MAXMDIM >= 4
-  else if(DIM == 3 && !binarytiling) currentmap = reg3::new_map();
+  else if(WDIM == 3 && !binarytiling) currentmap = reg3::new_map();
   #endif
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
@@ -320,7 +320,7 @@ void clearfrom(heptagon *at) {
         }
       }
     int edges = at->degree();
-    if(binarytiling && DIM == 2) edges = at->c7->type;
+    if(binarytiling && WDIM == 2) edges = at->c7->type;
     for(int i=0; i<edges; i++) if(at->move(i)) {
       if(at->move(i)->alt != &deletion_marker)
         q.push(at->move(i));    
@@ -399,13 +399,13 @@ int compdist(int dx[]) {
   }
 
 int celldist(cell *c) {
-  if(fulltorus && DIM == 2) 
+  if(fulltorus && WDIM == 2) 
     return torusmap()->dists[decodeId(c->master)];
   if(euwrap)
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
     return eudist(decodeId(c->master));
-  if(sphere || binarytiling || DIM == 3 || geometry == gCrystal) return celldistance(c, currentmap->gamestart());
+  if(sphere || binarytiling || WDIM == 3 || geometry == gCrystal) return celldistance(c, currentmap->gamestart());
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -443,8 +443,8 @@ int celldistAlt(cell *c) {
     return celldist(c) - 3;
     }
   #if MAXMDIM >= 4
-  if(euclid && DIM == 3) return euclid3::dist_alt(c);
-  if(hyperbolic && DIM == 3) return reg3::altdist(c->master);
+  if(euclid && WDIM == 3) return euclid3::dist_alt(c);
+  if(hyperbolic && WDIM == 3) return reg3::altdist(c->master);
   #endif
   if(!c->master->alt) return 0;
   #if CAP_IRR
@@ -812,7 +812,7 @@ int heptdistance(cell *c1, cell *c2) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(c1, c2);
   #endif
-  if(!hyperbolic || quotient || DIM == 3) return celldistance(c1, c2);
+  if(!hyperbolic || quotient || WDIM == 3) return celldistance(c1, c2);
   else return heptdistance(c1->master, c2->master);
   }
 
@@ -872,15 +872,15 @@ int celldistance(cell *c1, cell *c2) {
     }
 
   #if CAP_BT && MAXMDIM >= 4
-  if(binarytiling && DIM == 3) 
+  if(binarytiling && WDIM == 3) 
     return binary::celldistance3(c1, c2);
   #endif
   
   #if MAXMDIM >= 4
-  if(euclid && DIM == 3) 
+  if(euclid && WDIM == 3) 
     return euclid3::celldistance(c1, c2);
   
-  if(hyperbolic && DIM == 3) return reg3::celldistance(c1, c2);
+  if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
   #endif
 
   return hyperbolic_celldistance(c1, c2);

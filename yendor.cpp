@@ -272,7 +272,7 @@ namespace yendor {
               }
             }
           
-          else if(DIM == 3) {
+          else if(WDIM == 3) {
             int d = celldistance(nyi.path[0], ycw.at);
             vector<cell*> next;
             forCellCM(c, ycw.at) if(celldistance(nyi.path[0], c) > d) next.push_back(c);

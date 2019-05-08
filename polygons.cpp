@@ -131,14 +131,16 @@ void hpcpush(hyperpoint h) {
 
 bool validsidepar[SIDEPARS];
 
+hyperpoint zshift(hyperpoint x, ld z) {
+  if(DIM == 3 && WDIM == 2)
+    return rgpushxto0(x) * cpush(2, z) * C0;
+  else return mscale(x, z);
+  }
+
 void chasmifyPoly(double fac, double fac2, int k) {
   for(int i=isize(hpc)-1; i >= last->s; i--) {
-    hyperpoint H;
-    for(int j=0; j<3; j++) {
-      H[j] = hpc[i][j] * fac;
-      hpc[i][j] *= fac2;
-      }
-    hpc.push_back(H);
+    hpc.push_back(zshift(hpc[i], fac));
+    hpc[i] = zshift(hpc[i], fac2);
     }
   hpc.push_back(hpc[last->s]);
   last->flags |= POLY_ISSIDE;
@@ -1535,7 +1537,7 @@ void drawqueue() {
   
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
     PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
-  sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+  if(DIM == 2) sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
     [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
       auto ap1 = (dqi_poly&) *p1;
       auto ap2 = (dqi_poly&) *p2;
@@ -1993,14 +1995,21 @@ template<class... T> ld grot(bool geometry, ld factor, T... t) {
   else return grot(t...);
   }
 
-ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
+ld dlow_table[SIDEPARS], dhi_table[SIDEPARS], dfloor_table[SIDEPARS];
 
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
 
 void make_sidewalls() {
+  for(int i=0; i<=3; i++)
+    dfloor_table[i] = geom3::SLEV[i];
+  dfloor_table[SIDE_WALL] = geom3::WALL;
+  dfloor_table[SIDE_LAKE] = geom3::LAKE;
+  dfloor_table[SIDE_LTOB] = geom3::BOTTOM;
+  dfloor_table[SIDE_BTOI] = geom3::INFDEEP;
+  
   // sidewall parameters for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
-    double dlow=1, dhi=1;
+    double dlow=geom3::FLOOR, dhi=geom3::FLOOR;
     if(k==SIDE_WALL) dhi = geom3::WALL;
     else if(k==SIDE_LAKE) dlow = geom3::LAKE;
     else if(k==SIDE_LTOB) dlow = geom3::BOTTOM, dhi = geom3::LAKE;
@@ -2010,7 +2019,7 @@ void make_sidewalls() {
     dlow_table[k] = dlow;
     dhi_table[k] = dhi;
 
-    validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0);
+    validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0) || GDIM == 3;
 
     bshape(shSemiFloorSide[k], PPR::LAKEWALL);
     for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, floorrad0) * C0);
@@ -2444,6 +2453,7 @@ vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
   }  
 
 void create_wall3d() {
+  if(WDIM == 2) return;
   using namespace hyperpoint_vec;
   shWall3D.resize(S7);
   shPlainWall3D.resize(S7);
@@ -2698,7 +2708,7 @@ void buildpolys() {
   #endif
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
   
-  if(DIM == 3) {
+  if(WDIM == 3) {
     if(sphere) SD3 = 3, SD7 = 5;
     else SD3 = SD7 = 4;
     }

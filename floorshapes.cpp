@@ -267,9 +267,46 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
   for(int k=0; k<SIDEPARS; k++) {
     fsh.side[k].resize(2);
     bshape(fsh.side[k][id], PPR::LAKEWALL);
-    hpcpush(xspinpush0(M_PI/sides, size));
+    hpcpush(xspinpush0(+M_PI/sides, size));
     hpcpush(xspinpush0(-M_PI/sides, size));
     chasmifyPoly(dlow_table[k], dhi_table[k], k);
+    }
+
+  for(int k=0; k<SIDEPARS; k++) {
+    fsh.levels[k].resize(2);
+    bshape(fsh.levels[k][id], fsh.prio);
+    /*
+    for(int i=fsh.b[id].s; i< fsh.b[id].e; i++)
+      hpcpush(zshift(hpc[i], dfloor_table[k]));
+    */
+
+    fsh.levels[k][id].tinf = &fsh.tinf3;
+    fsh.levels[k][id].texture_offset = 0;
+    auto at = [&] (hyperpoint h, int a) {
+      hpcpush(normalize(h));
+      };
+  
+    const int STEP = TEXTURE_STEP_3D;
+
+    for(int t=0; t<sides; t++)
+    for(int y=0; y<STEP; y++)
+    for(int x=0; x<STEP; x++) {
+      using namespace hyperpoint_vec;
+      hyperpoint center = zpush(dfloor_table[k]) * C0;
+      hyperpoint v1 = (xspinpush(t*2 * M_PI / sides + shift * M_PI / S42, size) * center - center) / STEP;
+      hyperpoint v2 = (xspinpush((t+1)*2 * M_PI / sides + shift * M_PI / S42, size) * center - center) / STEP;
+      if(x+y < STEP) {
+        at(center + v1 * x + v2 * y, 0);
+        at(center + v1 * (x+1) + v2 * y, 1);
+        at(center + v1 * x + v2 * (y+1), 2);
+        }
+      if(x+y <= STEP && x && y) {
+        at(center + v1 * x + v2 * y, 0);
+        at(center + v1 * (x-1) + v2 * y, 1);
+        at(center + v1 * x + v2 * (y-1), 2);
+        }
+      }
+    last->flags |= POLY_TRIANGLES;
     }
   }
 
@@ -406,11 +443,35 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         hpcpush(iddspin(c, cid) * cornerlist[(cid+1)%cor]);
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
+
+    for(int k=0; k<SIDEPARS; k++) {
+      sizeto(fsh.levels[k], id);
+      bshape(fsh.levels[k][id], fsh.prio);
+      for(int i=fsh.b[id].s; i< fsh.b[id].e; i++)
+        hpcpush(zshift(hpc[i], dfloor_table[k]));
+      }
     }
-    
+  
   for(auto pfsh: all_escher_floorshapes) {
+  
     auto& fsh = *pfsh;
     
+    if(WDIM == 2 && GDIM == 3) {
+      ld hexside = shFullFloor.rad0, heptside = shFullFloor.rad1;
+      int td = ((PURE || euclid) && !(S7&1)) ? S42+S6 : 0;
+
+      if(id == 1)
+        bshape_regular(fsh, 1, S7, td, heptside);
+      
+      else if(PURE)
+        bshape_regular(fsh, 0, S7, td, heptside);
+
+      else 
+        bshape_regular(fsh, 0, S6, S7, hexside);
+      
+      continue;
+      }
+
     sizeto(fsh.b, id);
     sizeto(fsh.shadow, id);
     
@@ -477,7 +538,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
 void generate_floorshapes() {
 
-  if(DIM == 3) ;
+  if(WDIM == 3) ;
   
   #if CAP_IRR
   else if(IRREGULAR) {
@@ -622,7 +683,7 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
 
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
   if(!c) queuepolyat(V, shv[0], col, prio);
-  else if(DIM == 3) ;
+  else if(WDIM == 3) ;
   #if CAP_GP
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);
@@ -800,8 +861,12 @@ void make_floor_textures() {
     dynamicval<eGeometry> g(geometry, gEuclidSquare);
     dynamicval<eModel> gm(pmodel, mdDisk);
     dynamicval<eVariation> va(variation, eVariation::pure);
+    dynamicval<bool> a3(geom3::always3, false);
     dynamicval<bool> hq(inHighQual, true);
     dynamicval<int> hd(darken, 0);
+    dynamicval<ld> ga(vid.alpha, 1);
+    dynamicval<ld> gd(geom3::depth, 1);
+    dynamicval<ld> gc(geom3::camera, 1);
   
     resetGeometry();
     dynamicval<videopar> vi(vid, vid);

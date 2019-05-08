@@ -315,12 +315,12 @@ double hexshiftat(cell *c) {
   }
 
 transmatrix ddspin(cell *c, int d, ld bonus) {
-  if(DIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
+  if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 transmatrix iddspin(cell *c, int d, ld bonus) {
-  if(DIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
+  if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
@@ -336,7 +336,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
   
-    if(shmup::on && DIM == 2) {
+    if(shmup::on && WDIM == 2) {
 #if CAP_SHAPES
       if(items[itOrbSword])
         queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
@@ -346,7 +346,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
 #endif
       }                  
 
-    else if(shmup::on && DIM == 3) {
+    else if(shmup::on && WDIM == 3) {
 #if CAP_SHAPES
       if(items[itOrbSword])
         queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
@@ -517,7 +517,7 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
 
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
 
-  const transmatrix VL = (DIM == 2 ? V : mmscale(V, geom3::ALEG0));
+  const transmatrix VL = (GDIM == 3 ? V : mmscale(V, geom3::ALEG0));
 
   if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
   if(x[0]) queuepolyat(VL * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
@@ -738,6 +738,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
 #endif
   
   transmatrix Vit = V;
+  if(GDIM == 3 && WDIM == 2) Vit = mscale(V, geom3::STUFF);
   if(DIM == 3 && c) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 
@@ -1149,7 +1150,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
   char xch = minf[m].glyph;
   
   transmatrix V = V1;
-  if(DIM == 3 && (classflag(m) & CF_FACE_UP)) V = V1 * cspin(0, 2, M_PI/2);
+  if(WDIM == 3 && (classflag(m) & CF_FACE_UP)) V = V1 * cspin(0, 2, M_PI/2);
   
   // if(DIM == 3) V = V * cspin(0, 2, M_PI/2);
 
@@ -2467,7 +2468,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     // other monsters face the player
     
     if(!nospins) {
-      if(DIM == 2) {
+      if(WDIM == 2) {
         hyperpoint V0 = inverse(cwtV) * tC0(Vs);
         hyperpoint V1 = spintox(V0) * V0;
   
@@ -2479,7 +2480,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
-        Vs = Vs * cspin(DIM-2, DIM-1, M_PI);
+        Vs = Vs * cspin(WDIM-2, WDIM-1, M_PI);
       }
     
     if(c->monst == moShadow) 
@@ -3650,7 +3651,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, color_t col) {
 
 bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t col) {
 
-  if(!qfi.fshape || !qfi.fshape->is_plain || !validsidepar[sidepar] || qfi.usershape >= 0) {
+  if(!qfi.fshape || !qfi.fshape->is_plain || !validsidepar[sidepar] || qfi.usershape >= 0) if(GDIM == 2) {
     escherSidewall(c, sidepar, V, col);
     return true;
     }
@@ -3867,6 +3868,18 @@ int getSnakelevColor(cell *c, int i, int last, int fd, color_t wcol) {
 
 #if CAP_SHAPES
 void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int ct6, int fd) {
+
+  if(DIM == 3 && WDIM == 2) {
+    color_t wcol0 = wcol;
+    color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
+    if(!qfi.fshape) qfi.fshape = &shFullFloor;
+    draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
+    forCellIdEx(c2, i, c) 
+      if(!highwall(c2))
+        placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
+    return;
+    }
+
   zcol = wcol;
   color_t wcol0 = wcol;
   int starcol = wcol;        
@@ -4183,7 +4196,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   viewBuggyCells(c,V);
   #endif
   
-  if(conformal::on || inHighQual || DIM == 3 || sightrange_bonus > gamerange_bonus) checkTide(c);
+  if(conformal::on || inHighQual || WDIM == 3 || sightrange_bonus > gamerange_bonus) checkTide(c);
   
   // save the player's view center
   if(isPlayerOn(c) && !shmup::on) {
@@ -4877,7 +4890,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if(chasmg == 2) ;
       else if(chasmg && wmspatial && detaillevel == 0) {
-        draw_qfi(c, (*Vdp), darkena(fcol, fd, 0x80), PPR::LAKELEV);
+        if(WDIM == 2 && GDIM == 3 && qfi.fshape)
+          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd, 0x80), PPR::LAKELEV);
+        else
+          draw_qfi(c, (*Vdp), darkena(fcol, fd, 0x80), PPR::LAKELEV);
         }
       else if(chasmg && wmspatial) {
       
@@ -4892,14 +4908,23 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         else if(qfi.fshape == &shCaveFloor)
           set_floor(shCaveSeabed);
         
-        draw_qfi(c, mscale(V, geom3::BOTTOM), col, PPR::LAKEBOTTOM);
+        if(WDIM == 2 && GDIM == 3 && qfi.fshape)
+          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LTOB], col, PPR::LAKEBOTTOM);
+        else
+          draw_qfi(c, mscale(V, geom3::BOTTOM), col, PPR::LAKEBOTTOM);
 
         int fd0 = fd ? fd-1 : 0;      
-        draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR::LAKELEV);
+        if(WDIM == 2 && GDIM == 3 && qfi.fshape)
+          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT);
+        else
+          draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR::LAKELEV);
         }
       else {
         if(patterns::whichShape == '^') poly_outline = darkena(fcol, fd, flooralpha);
-        draw_qfi(c, V, darkena(fcol, fd, flooralpha));
+        if(WDIM == 2 && GDIM == 3 && qfi.fshape)
+          draw_shapevec(c, V, qfi.fshape->levels[0], darkena(fcol, fd, 255), PPR::FLOOR);
+        else
+          draw_qfi(c, V, darkena(fcol, fd, flooralpha));
         }
       
       // walls
@@ -4962,7 +4987,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       char xch = winf[c->wall].glyph;
       
       #if MAXMDIM >= 4
-      if(DIM == 3) {
+      if(WDIM == 3) {
         color_t dummy;        
         if(isWall3(c, wcol)) {
           color_t wcol2 = wcol;
@@ -5317,7 +5342,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #if CAP_SHAPES
     int sha = shallow(c);
 
-    if(wmspatial && sha && DIM == 2) {
+    if(wmspatial && sha && WDIM == 2) {
       color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
       if(!chasmg) {
 
@@ -5534,7 +5559,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       if(0);
       #if MAXMDIM == 4
-      else if(DIM == 3) {
+      else if(WDIM == 3) {
         for(int t=0; t<c->type; t++) {
           if(!c->move(t)) continue;
           if(binarytiling && !among(t, 5, 6, 8)) continue;
@@ -5545,7 +5570,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       #endif
       #if CAP_BT
-      else if(binarytiling && DIM == 2) {
+      else if(binarytiling && WDIM == 2) {
         ld yx = log(2) / 2;
         ld yy = yx;
         ld xx = 1 / sqrt(2)/2;
@@ -5674,7 +5699,7 @@ struct flashdata {
   flashdata(int _t, int _s, cell *_w, color_t col, int sped) { 
     t=_t; size=_s; where=_w; color = col; 
     angle = rand() % 1000; spd = sped;
-    if(DIM == 3) angle2 = acos((rand() % 1000 - 499.5) / 500);
+    if(WDIM == 3) angle2 = acos((rand() % 1000 - 499.5) / 500);
     }
   };
 
@@ -5723,7 +5748,7 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id) {
 void queuecircleat(cell *c, double rad, color_t col) {
   if(!c) return;
   if(!gmatrix.count(c)) return;
-  if(DIM == 3) {
+  if(WDIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
     for(int i=0; i<c->type; i++) {
       queuepolyat(gmatrix[c], shWireframe3D[i], 0, PPR::SUPERLINE);
@@ -5828,17 +5853,17 @@ void drawMarkers() {
     #endif
   
     #if CAP_QUEUE        
-    if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && DIM == 2) {
+    if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
 
-    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && DIM == 2) {
+    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
       queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
       }
     #endif
 
 #if CAP_SDLJOY && CAP_QUEUE
-    if(joydir.d >= 0 && DIM == 2) 
+    if(joydir.d >= 0 && WDIM == 2) 
       queuecircleat(cwt.at->modmove(joydir.d+cwt.spin), .78 - .02 * sintick(199), 
         darkena(0x00FF00, 0, 0xFF));
 #endif
@@ -5850,7 +5875,7 @@ void drawMarkers() {
 #endif
 
     #if CAP_QUEUE
-    if(centerover.at && !playermoved && m && !anims::any_animation() && DIM == 2)
+    if(centerover.at && !playermoved && m && !anims::any_animation() && WDIM == 2)
       queuecircleat(centerover.at, .70 - .06 * sintick(200), 
         darkena(int(175 + 25 * sintick(200)), 0, 0xFF));
 
@@ -5963,7 +5988,7 @@ void drawFlashes() {
       poly_outline = OUTLINE_DEFAULT;
       ld t = f.spd * tim * scalefactor / 50000.;
       transmatrix T =
-        DIM == 2 ? V * spin(f.angle) * xpush(t) :
+        WDIM == 2 ? V * spin(f.angle) * xpush(t) :
         V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
       queuepoly(T, shParticle[f.size], partcol);
       #endif
@@ -6015,7 +6040,7 @@ bool allowIncreasedSight() {
   if(randomPatternsMode) return true;
   if(racing::on) return true;
   if(quotient || !hyperbolic || archimedean) return true;
-  if(DIM == 3) return true;
+  if(WDIM == 3) return true;
   return false;
   }
 
@@ -6027,7 +6052,7 @@ bool allowChangeRange() {
   if(racing::on) return true;
   if(sightrange_bonus >= 0) return true;
   if(archimedean) return true;
-  if(DIM == 3) return true;
+  if(WDIM == 3) return true;
   return false;
   }
 
@@ -6055,11 +6080,11 @@ ld wall_radar(cell *c, transmatrix T) {
 
 void make_actual_view() {
   sphereflip = Id;
-  if(DIM == 3 && !shmup::on && vid.yshift) {
+  if(WDIM == 3 && !shmup::on && vid.yshift) {
     actual_view_transform = cpush(2, wall_radar(viewctr.at->c7, inverse(View)));
     return;
     }  
-  if(DIM == 3) { actual_view_transform = Id; return; }
+  if(WDIM == 3) { actual_view_transform = Id; return; }
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
   actual_view_transform = ypush(vid.yshift) * sphereflip;  
   }

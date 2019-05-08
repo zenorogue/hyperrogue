@@ -1197,7 +1197,7 @@ namespace mirror {
     cell *c = cw.at;
     
     #if MAXMDIM >= 4
-    if(DIM == 3 && !binarytiling) {
+    if(WDIM == 3 && !binarytiling) {
       if(shmup::on) for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep - i, cpid);
       return;
@@ -1228,7 +1228,7 @@ namespace mirror {
       }
     #endif
     #if MAXMDIM >= 4
-    if(DIM == 3 && !binarytiling) {
+    if(WDIM == 3 && !binarytiling) {
       if(shmup::on) for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep - i, cpid);
       return;
@@ -1959,7 +1959,7 @@ namespace heat {
     int divby = 10;
     if(S7 > 10) divby *= 2;
     if(archimedean) divby *= 2;
-    if(DIM == 3) divby *= 2;
+    if(WDIM == 3) divby *= 2;
     
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
@@ -3637,7 +3637,7 @@ namespace dungeon {
         c->wall = waLadder;
       }
     
-    else if(DIM == 3) {    
+    else if(WDIM == 3) {    
       int cnt = 0;
       int below = 0;
       manual_celllister cl;
@@ -3718,7 +3718,7 @@ namespace dungeon {
     bool rdepths[5];
     int switchcount = 0;
     
-    if(DIM == 3) {
+    if(WDIM == 3) {
       for(int i=0; i<5; i++) rdepths[i] = false;
       
       manual_celllister cl;
@@ -3818,8 +3818,8 @@ namespace dungeon {
       
       if(df&1) {
         generate_around(c);
-        int df1 = DIM == 3 ? 0 : dungeonFlags(ts::left_of(c, coastvalEdge));
-        int df2 = DIM == 3 ? 0 : dungeonFlags(ts::right_of(c, coastvalEdge));
+        int df1 = WDIM == 3 ? 0 : dungeonFlags(ts::left_of(c, coastvalEdge));
+        int df2 = WDIM == 3 ? 0 : dungeonFlags(ts::right_of(c, coastvalEdge));
         
         c->wparam = 0;
         if(hrand(100) < (c->landparam % 5 == 0 ? 80 : 20)) {
@@ -3847,7 +3847,7 @@ namespace dungeon {
         if(q) downs[hrand(q)]->wall = waLadder;
         */
         cell *c2 = 
-          DIM == 3 ? random_child(c, coastvalEdge) :
+          WDIM == 3 ? random_child(c, coastvalEdge) :
           c->wparam == 1 ? ts::add(c, 1, 2, coastvalEdge) :
           c->wparam == 2 ? ts::add(c, -1, -2, coastvalEdge) :
           c->wparam == 3 ? ts::add(c, 1, 3, coastvalEdge) :
@@ -3902,7 +3902,7 @@ namespace dungeon {
   void all(cell *c, int d) {
     if(d == 8 && (c->land == laIvoryTower || c->land == laDungeon) && !euclid) {
 
-      if(hrand(1000) < 75 && (DIM == 3 || (c->landparam & 1))) {
+      if(hrand(1000) < 75 && (WDIM == 3 || (c->landparam & 1))) {
         c->landflags = 3;
         }
       else c->landflags = 0;

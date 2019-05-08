@@ -2670,7 +2670,7 @@ bool cellEdgeUnstable(cell *c, flagtype flags) {
       if(isWorm(c2))
         return false;
       }
-    if(DIM == 3) {
+    if(WDIM == 3) {
       if(d == 0 && !passable(c2, NULL, P_MONSTER | P_DEADLY)) return false;
       if(d == -1 && !passable(c2, NULL, P_MONSTER | P_DEADLY)) forCellEx(c3, c2) if(c3 != c && gravityLevelDiff(c3, c) == 0) return false;
       }
@@ -3090,7 +3090,7 @@ void bfs() {
     
     int d = c->cpdist;
     
-    if(DIM == 2 && d == distlimit) { first7 = qb; break; }
+    if(WDIM == 2 && d == distlimit) { first7 = qb; break; }
 
     for(int j=0; j<c->type; j++) if(i = (fd+j) % c->type, c->move(i)) {
       // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
@@ -3105,7 +3105,7 @@ void bfs() {
         c2->wall = waSea;
       
       if(c2 && signed(c2->cpdist) > d+1) {
-        if(DIM == 3 && !gmatrix.count(c2)) {
+        if(WDIM == 3 && !gmatrix.count(c2)) {
           if(!first7) first7 = qb;
           continue;
           }
@@ -3323,7 +3323,7 @@ bool makeEmpty(cell *c) {
     c->wall = waBoat;
   else if(c->wall == waFreshGrave && bounded)
     ;
-  else if(c->wall == waBarrier && sphere && DIM == 3)
+  else if(c->wall == waBarrier && sphere && WDIM == 3)
     ;
   else if(isReptile(c->wall))
     c->wparam = reptilemax();
@@ -4152,7 +4152,7 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
     }
   cellwalker push = who;
   push += wstep;
-  if(DIM == 3 && binarytiling) {
+  if(WDIM == 3 && binarytiling) {
     for(int a=0; a<4; a++) {
       if(push.spin < 4) push.spin = 8;
       else if(push.spin >= 8) push.spin = a;
@@ -7363,8 +7363,8 @@ int mine_adjacency_rule = 0;
 map<cell*, vector<cell*>> adj_memo;
 
 bool geometry_has_alt_mine_rule() {
-  if(DIM == 2) return VALENCE > 3;
-  if(DIM == 3) return !among(geometry, gHoroHex, gCell5, gBitrunc3, gCell8, gECell8, gCell120, gECell120);
+  if(WDIM == 2) return VALENCE > 3;
+  if(WDIM == 3) return !among(geometry, gHoroHex, gCell5, gBitrunc3, gCell8, gECell8, gCell120, gECell120);
   return true;
   }
 
@@ -7372,7 +7372,7 @@ vector<cell*> adj_minefield_cells(cell *c) {
   vector<cell*> res;
   if(mine_adjacency_rule == 0 || !geometry_has_alt_mine_rule())
     forCellCM(c2, c) res.push_back(c2);
-  else if(DIM == 2) {
+  else if(WDIM == 2) {
     cellwalker cw(c, 0);
     cw += wstep;
     cw++;

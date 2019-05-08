@@ -497,7 +497,7 @@ void showEuclideanMenu() {
   else if(sphere && nonorientable) euler = 1;
   else if(sphere) euler = 2;
   else if(!bounded) euler = -2;
-  else if(DIM == 3) euler = 0;
+  else if(WDIM == 3) euler = 0;
   else switch(geometry) {
     case gFieldQuotient:
       worldsize = isize(currentmap->allcells());
@@ -605,7 +605,7 @@ void showEuclideanMenu() {
   dialog::add_action_push([] { ge_select_tiling(quotientlist); });
 
   #if MAXMDIM >= 4
-  dialog::addSelItem(XLAT("dimension"), its(DIM), 'd');
+  dialog::addSelItem(XLAT("dimension"), its(WDIM), 'd');
   dialog::add_action_push([] { ge_select_tiling(list3d); });
   #endif
   
@@ -632,7 +632,7 @@ void showEuclideanMenu() {
         };
       });
     }
-  else if(DIM == 3) dialog::addBreak(100);
+  else if(WDIM == 3) dialog::addBreak(100);
   else {
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {
@@ -653,7 +653,7 @@ void showEuclideanMenu() {
 
         
   
-  if(euwrap || geometry == gFieldQuotient || geometry == gCrystal || archimedean || (euclid && DIM == 3)) {
+  if(euwrap || geometry == gFieldQuotient || geometry == gCrystal || archimedean || (euclid && WDIM == 3)) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 
@@ -666,7 +666,7 @@ void showEuclideanMenu() {
         pushScreen(crystal::show);
       #endif
       #if MAXMDIM == 4
-      else if(euclid && DIM == 3)
+      else if(euclid && WDIM == 3)
         euclid3::prepare_torus3(),
         pushScreen(euclid3::show_torus3);
       #endif
@@ -704,7 +704,7 @@ void showEuclideanMenu() {
     }
 
   if(specialland == laMinefield && geometry_has_alt_mine_rule()) {
-    dialog::addSelItem(XLAT("mine adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : DIM == 3 ? "face" : "edge"), 'M');
+    dialog::addSelItem(XLAT("mine adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : WDIM == 3 ? "face" : "edge"), 'M');
     dialog::add_action([] {
       stop_game();
       mine_adjacency_rule = !mine_adjacency_rule;
@@ -716,7 +716,7 @@ void showEuclideanMenu() {
   if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
   dialog::add_action_push(patterns::showPrePattern);
   validity_info();
-  if(DIM == 3) {
+  if(WDIM == 3) {
     dialog::addItem(XLAT("3D configuration"), '9');
     dialog::add_action_push(show3D);
     }
@@ -744,11 +744,11 @@ void showEuclideanMenu() {
   
   dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
   
-  if(DIM == 2) dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
+  if(WDIM == 2) dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
 
   dialog::addSelItem(XLAT("size of the world"), 
     #if CAP_BT
-    binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, DIM-1)) + " exp(∞)" :
+    binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1)) + " exp(∞)" :
     #endif
     #if CAP_ARCM
     archimedean ? arcm::current.world_size() :
@@ -757,23 +757,23 @@ void showEuclideanMenu() {
     #if CAP_CRYSTAL
     geometry == gCrystal ? "∞^" + its(ts/2) :
     #endif
-    DIM == 3 && bounded ? its(isize(currentmap->allcells())) :
-    DIM == 3 && euclid ? "∞" :
+    WDIM == 3 && bounded ? its(isize(currentmap->allcells())) :
+    WDIM == 3 && euclid ? "∞" :
     worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
     (euwrap && !fulltorus) ? "∞" :
     worldsize == 0 ? "∞²" :
     its(worldsize),
     '3');
   
-  if(DIM == 2) dialog::add_action([] {
+  if(WDIM == 2) dialog::add_action([] {
     if(!viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
     else if(viewdists) viewdists = false;
     });
 
   if(bounded) {
-    if(DIM == 3) euler = 0;
+    if(WDIM == 3) euler = 0;
     dialog::addSelItem(XLAT("Euler characteristics"), its(euler), 0);
-    if(DIM == 3) ;
+    if(WDIM == 3) ;
     else if(nonorientable)
       dialog::addSelItem(XLAT("demigenus"), its(2-euler), 0);
     else

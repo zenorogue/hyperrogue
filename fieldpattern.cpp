@@ -160,7 +160,7 @@ struct fpattern {
       matcode[M] = i, matrices.push_back(M);
       for(int j=0; j<isize(qcoords); j++)
         addas(mmul(M, qcoords[j]), i);
-      if(DIM == 3) add(mmul(X, M));
+      if(WDIM == 3) add(mmul(X, M));
       add(mmul(R, M));
       }
     }
@@ -221,8 +221,8 @@ struct fpattern {
       return 1;
       }
     
-    rotations = DIM == 2 ? S7 : 4;
-    local_group = DIM == 2 ? S7 : 24;
+    rotations = WDIM == 2 ? S7 : 4;
+    local_group = WDIM == 2 ? S7 : 24;
   
     for(int pw=1; pw<3; pw++) {
       if(pw>3) break;
@@ -277,10 +277,10 @@ struct fpattern {
           
           sh = sqrts[chx];
           P[0][0] = sub(0, ch);
-          P[0][DIM] = sub(0, sh);
+          P[0][WDIM] = sub(0, sh);
           P[1][1] = Prime-1;
-          P[DIM][0] = sh;
-          P[DIM][DIM] = ch;
+          P[WDIM][0] = sh;
+          P[WDIM][WDIM] = ch;
           
           matrix Z1 = mmul(P, R);
           matrix Z = Z1;
@@ -332,7 +332,7 @@ struct fpattern {
 
     DEBB(DF_FIELD, (debugfile, "Number of heptagons: %d\n", N));
     
-    if(DIM == 3) return;
+    if(WDIM == 3) return;
   
     rrf.resize(N); rrf[0] = S7-1;
     for(int i=0; i<N; i++) 
@@ -423,7 +423,7 @@ struct fpattern {
   
   void analyze() {
   
-    if(DIM == 3) return;
+    if(WDIM == 3) return;
 
     DEBB(DF_FIELD, (debugfile, "variation = %d\n", int(variation)));
     int N = connections.size();
@@ -729,7 +729,7 @@ bool quotient_field_changed;
 fpattern& getcurrfp() {
   if(geometry == gFieldQuotient && quotient_field_changed)
     return current_quotient_field;  
-  if(DIM == 3) {
+  if(WDIM == 3) {
     dynamicval<eGeometry> g(geometry, gSpace435);
     static fpattern fp(5);
     return fp;

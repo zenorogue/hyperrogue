@@ -196,13 +196,17 @@ typedef complex<ld> cld;
 #define DEBSM(x) 
 
 #if MAXMDIM == 3
-#define DIM 2
+#define WDIM 2
 #else
-#define DIM ((geometry >= gBinary3) ? 3 : 2)
+#define WDIM ((geometry >= gBinary3) ? 3 : 2)
 #endif
+#define GDIM (geom3::always3 ? 3 : WDIM)
+#define DIM GDIM
 #define MDIM (DIM+1)
 
 extern array<ld, gGUARD> sightranges;
+
+namespace geom3 { extern bool always3; }
 
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
@@ -516,7 +520,7 @@ template<class T> struct walker {
     }
   walker<T>& operator += (rev_t) {
     int d = at->degree();
-    if(DIM == 3 && binarytiling) {
+    if(WDIM == 3 && binarytiling) {
       if(spin < 4) spin = 8;
       else if(spin >= 8) spin = 0;
       else spin ^= 1;
@@ -1568,7 +1572,7 @@ bool bearsCamelot(eLand l);
 extern bool safety;
 
 #define SAGEMELT .1
-#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex) ? 3 : (DIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (DIM == 3 && hyperbolic) ? 3 : 6)
+#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex) ? 3 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
@@ -4228,11 +4232,11 @@ extern vector<blizzardcell*> bcells;
 void set_blizzard_frame(cell *c, int frameid);
 
 #define SIDE_SLEV 0
-#define SIDE_WALL 3
-#define SIDE_LAKE 4
-#define SIDE_LTOB 5
-#define SIDE_BTOI 6
-#define SIDE_WTS3 7
+#define SIDE_WTS3 3
+#define SIDE_WALL 4
+#define SIDE_LAKE 5
+#define SIDE_LTOB 6
+#define SIDE_BTOI 7
 #define SIDEPARS 8
 
 #if CAP_SHAPES
@@ -4242,7 +4246,7 @@ struct floorshape {
   int pstrength; // pattern strength in 3D
   int fstrength; // frame strength in 3D
   PPR prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE];
+  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE], levels[SIDEPARS];
   basic_textureinfo tinf3;
   floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
   };

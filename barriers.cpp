@@ -359,7 +359,7 @@ void extendBarrier(cell *c) {
     }
 
   if(c->barleft == NOWALLSEP) {
-    if(DIM == 3) extend3D(c);
+    if(WDIM == 3) extend3D(c);
     else extendNowall(c);
     return;
     }
@@ -819,9 +819,9 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
 
   #if MAXMDIM >= 4
   // 3D binary tilings create walls using their own methods
-  if(DIM == 3 && binarytiling) return false;
+  if(WDIM == 3 && binarytiling) return false;
 
-  if(DIM == 3 && hyperbolic) return buildBarrier3D(c, l2, forced_dir);
+  if(WDIM == 3 && hyperbolic) return buildBarrier3D(c, l2, forced_dir);
   #endif
 
   if(c->land == laNone) {

@@ -761,7 +761,7 @@ ld master_to_c7_angle() {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
-  if(DIM == 3) return V;
+  if(WDIM == 3) return V;
   #if CAP_IRR
   if(IRREGULAR)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
@@ -1168,7 +1168,7 @@ void optimizeview() {
   if(0) ;
 
   #if CAP_BT || CAP_ARCM || MAXMDIM == 4
-  else if(binarytiling || archimedean || DIM == 3) {
+  else if(binarytiling || archimedean || WDIM == 3) {
     turn = -1, best = hdist0(tC0(View));
     for(int i=0; i<viewctr.at->c7->type; i++) {
       int i1 = i * DUALMUL;
@@ -1666,7 +1666,7 @@ bool do_draw(cell *c) {
 ld extra_generation_distance = 99;
 
 bool do_draw(cell *c, const transmatrix& T) {
-  if(DIM == 3) {
+  if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;

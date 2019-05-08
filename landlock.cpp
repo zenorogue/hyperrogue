@@ -669,7 +669,7 @@ land_validity_t& land_validity(eLand l) {
     return specially_designed;
     }
 
-  if(DIM == 3) {
+  if(WDIM == 3) {
     if(l == laWarpCoast) return ugly_version;
     if(l == laWineyard && hyperbolic && !binarytiling && S7 == 6) return lv::pattern_special;
     if(l == laEmerald && hyperbolic && !binarytiling && S7 == 12) return lv::pattern_special;
@@ -1059,7 +1059,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laDual && !geometry && !GOLDBERG)
     return hyperbolic_37 ? not_in_full_game3 : not_in_full_game;
   
-  if(l == laSnakeNest && DIM == 2) {
+  if(l == laSnakeNest && WDIM == 2) {
     if(geosupport_threecolor() < 2)
       return needs_threecolor;
     else return specially_designed;
