@@ -354,6 +354,17 @@ transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld j, 
   #endif
   }
 
+#if MAXMDIM >= 4
+void swapmatrix(transmatrix& T) {
+  for(int i=0; i<4; i++) swap(T[i][2], T[i][3]);
+  for(int i=0; i<4; i++) swap(T[2][i], T[3][i]);
+  if(DIM == 3) {
+    for(int i=0; i<4; i++) T[i][0] = T[0][i] = 0;
+    T[2][2] = 1;
+    }
+  }
+#endif
+
 transmatrix parabolic1(ld u) {
   if(euclid)
     return ypush(u);

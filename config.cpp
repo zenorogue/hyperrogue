@@ -1305,6 +1305,7 @@ void show3D() {
         geom3::camera = 0;
         if(pmodel == mdDisk) pmodel = mdPerspective;
         need_reset_geometry = true;
+        callhooks(hooks_swapdim);
         }
       else {
         geom3::always3 = false;
@@ -1313,6 +1314,7 @@ void show3D() {
         geom3::camera = 1;
         if(pmodel == mdPerspective) pmodel = mdDisk;
         need_reset_geometry = true;
+        callhooks(hooks_swapdim);
         }
       });
     }
@@ -1929,6 +1931,7 @@ int read_config_args() {
     geom3::camera = 0;
     if(pmodel == mdDisk) pmodel = mdPerspective;
     need_reset_geometry = true;
+    callhooks(hooks_swapdim);
     }
   else if(argis("-nohelp")) {
     PHASEFROM(2);

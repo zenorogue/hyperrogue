@@ -480,7 +480,7 @@ struct hrmap_archimedean : hrmap {
       }
     
     if(euclid) 
-      alt = encodeId(pair_to_vec(int(T[0][2]), int(T[1][2])));
+      alt = encodeId(pair_to_vec(int(T[0][GDIM]), int(T[1][GDIM])));
       
     SDEBUG( println(hlog, "look for: ", alt, " / ", T * C0); )
   
@@ -660,8 +660,8 @@ void connectHeptagons(heptspin hi, heptspin hs) {
 
 // T and X are supposed to be equal -- move T so that it is closer to X
 void fixup_matrix(transmatrix& T, const transmatrix& X, ld step) {
-  for(int i=0; i<3; i++)
-  for(int j=0; j<3; j++)
+  for(int i=0; i<MDIM; i++)
+  for(int j=0; j<MDIM; j++)
     T[i][j] = (T[i][j] * (1-step) + X[i][j] * step);
 
   /*
@@ -802,6 +802,13 @@ int readArgs() {
 #if CAP_COMMANDLINE
 auto hook = 
   addHook(hooks_args, 100, readArgs);
+#endif
+
+#if MAXMDIM >= 4
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
+  for(auto& p: archimedean_gmatrix) swapmatrix(p.second.second);
+  });
 #endif
 
 int archimedean_tiling::support_threecolor() {

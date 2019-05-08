@@ -6845,4 +6845,8 @@ bool inscreenrange(cell *c) {
   return heptdistance(viewcenter(), c) <= 8;
   }
 
+#if MAXMDIM >= 4
+auto hooksw = addHook(hooks_swapdim, 100, [] { clearAnimations(); gmatrix.clear(); gmatrix0.clear(); });
+#endif
+
 }
