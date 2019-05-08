@@ -2474,7 +2474,7 @@ void setdist(cell *c, int d, cell *from) {
   
   if(d >= BARLEV) {
   
-    if(binarytiling && DIM == 3 && !c->land) {
+    if(binarytiling && WDIM == 3 && !c->land) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;
@@ -2483,7 +2483,7 @@ void setdist(cell *c, int d, cell *from) {
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
   
-    if(!c->land && from && (DIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient) {
+    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient) {
       if(!hasbardir(c)) setland(c, from->land);
       }
     if(c->land == laTemple && !tactic::on && !chaosmode) setland(c, laRlyeh);
@@ -2503,7 +2503,7 @@ void setdist(cell *c, int d, cell *from) {
       else if(geometry == gCrystal) crystal::set_land(c);
       #endif
       #if MAXMDIM == 4
-      else if(euclid && DIM == 3) euclid3::set_land(c);
+      else if(euclid && WDIM == 3) euclid3::set_land(c);
       #endif
       else if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
