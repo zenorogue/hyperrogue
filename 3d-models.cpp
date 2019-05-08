@@ -793,7 +793,7 @@ void make_3d_models() {
   // make_ahead_3d(shBullHorn);
   make_revolution_cut(shBullBody, 180, +g);
   make_revolution_cut(shBullHead, 60, geom3::AHEAD - geom3::ABODY +g);
-  shift_shape(shBullHorn, -(geom3::AHEAD - geom3::ABODY));
+  shift_shape(shBullHorn, g-(geom3::AHEAD - geom3::ABODY));
   // make_revolution_cut(shBullHorn, 180, geom3::AHEAD - geom3::ABODY);
   
   make_paw_3d(shTrylobiteFrontClaw, shTrylobiteFrontLeg);
@@ -804,7 +804,7 @@ void make_3d_models() {
   
   make_revolution_cut(shShark, 180);
 
-  make_revolution_cut(shGhost, 60);
+  make_revolution_cut(shGhost, 60, g);
   make_revolution_cut(shSlime, 60);
 
   make_revolution_cut(shEagle, 180, 0, 0.05*S);
@@ -834,13 +834,13 @@ void make_3d_models() {
   
   make_revolution_cut(shButterflyBody, 180);
   
-  shift_shape(shWolf1, -0.088 * S);
-  shift_shape(shWolf2, -0.088 * S);
-  shift_shape(shWolf3, -0.098 * S);
-  shift_shape(shFamiliarEye,  -0.088 * S);
-  shift_shape(shWolfEyes,  (-0.088 - 0.01 * 0.9) * S);
+  shift_shape(shWolf1, -g-0.088 * S);
+  shift_shape(shWolf2, -g-0.088 * S);
+  shift_shape(shWolf3, -g-0.098 * S);
+  shift_shape(shFamiliarEye,  -g-0.088 * S);
+  shift_shape(shWolfEyes,  -g+(-0.088 - 0.01 * 0.9) * S);
   
-  shift_shape(shEyes, (-3.3) * S / -20);
+  shift_shape(shEyes, -g+(-3.3) * S / -20);
   for(int i=shEyes.s; i<shEyes.e; i++) hpc[i] = cspin(0, 2, M_PI/2) * hpc[i];
   
   animate_bird(shEagle, shAnimatedEagle, 0.05*S);
