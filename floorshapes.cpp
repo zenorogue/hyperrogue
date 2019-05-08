@@ -890,7 +890,6 @@ void make_floor_textures() {
     dynamicval<bool> a3(geom3::always3, false);
     dynamicval<bool> hq(inHighQual, true);
     dynamicval<int> hd(darken, 0);
-    dynamicval<ld> ga(vid.alpha, 1);
     dynamicval<ld> gd(geom3::depth, 1);
     dynamicval<ld> gc(geom3::camera, 1);
   
@@ -899,6 +898,8 @@ void make_floor_textures() {
     vid.xres = FLOORTEXTURESIZE;
     vid.yres = FLOORTEXTURESIZE;
     vid.scale = 0.25;
+    vid.camera_angle = 0;
+    vid.alpha = 1;
     dynamicval<ld> lw(vid.linewidth, 2);
 
     floor_textures = new renderbuffer(vid.xres, vid.yres, vid.usingGL);

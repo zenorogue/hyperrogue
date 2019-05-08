@@ -250,7 +250,7 @@ namespace geom3 {
   
   ld lev_to_factor(ld lev) { 
     if(WDIM == 3) return lev;
-    if(GDIM == 3) return lev - depth;
+    if(GDIM == 3) return depth - lev;
     return projection_to_factor(lev_to_projection(lev)); 
     }
   ld factor_to_lev(ld fac) { 
@@ -335,7 +335,7 @@ namespace geom3 {
       BIRD = 1.20;
       }
     else {
-      INFDEEP = GDIM == 3 ? -10 : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
+      INFDEEP = GDIM == 3 ? +10 : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);

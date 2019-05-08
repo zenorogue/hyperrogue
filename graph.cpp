@@ -3723,7 +3723,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
       auto pp = dynamic_cast<dqi_poly*> (&*ptds[q++]);
       if(!pp) continue;
       auto& ptd = *pp;
-      ptd.V = ptd.V * zpush(-down);
+      ptd.V = ptd.V * zpush(+down);
       }
     return;
     }
@@ -6100,6 +6100,7 @@ void make_actual_view() {
   if(WDIM == 3) { actual_view_transform = Id; return; }
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
   actual_view_transform = ypush(vid.yshift) * sphereflip;  
+  if(geom3::always3) actual_view_transform = zpush(+geom3::camera) * actual_view_transform;
   }
 
 transmatrix cview() {

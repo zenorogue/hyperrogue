@@ -1185,6 +1185,15 @@ void show3D() {
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 
+  if(WDIM == 2) {
+    dialog::addBoolItem(XLAT("use the full 3D models"), geom3::always3, 'U');
+    dialog::add_action([] {
+      geom3::always3 = !geom3::always3;
+      need_reset_geometry = true;
+      callhooks(hooks_swapdim);
+      });
+    }
+
   if(vid.use_smart_range == 0 && DIM == 2) {
     dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
     dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
@@ -1218,7 +1227,7 @@ void show3D() {
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
-  if(DIM == 2) dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
+  dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
   if(DIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
@@ -1228,7 +1237,7 @@ void show3D() {
         }
       });
     }
-  if(DIM == 2) {
+  if(true) {
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
     }
