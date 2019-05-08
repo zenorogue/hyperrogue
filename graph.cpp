@@ -3717,6 +3717,16 @@ int gridcolor(cell *c1, cell *c2) {
 
 #if CAP_SHAPES
 void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority) {
+ 
+  if(GDIM == 3) {
+    for(int i=q; i<isize(ptds); i++) {
+      auto pp = dynamic_cast<dqi_poly*> (&*ptds[q++]);
+      if(!pp) continue;
+      auto& ptd = *pp;
+      ptd.V = ptd.V * zpush(-down);
+      }
+    return;
+    }
 
   // since we might be changing priorities, we have to make sure that we are sorting correctly
   if(down > 0 && repriority) { 
@@ -5387,8 +5397,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
            int t = (ticks - fa.t_floor);
            if(t <= maxtime) {
              erase = false;
-             if(fa.walltype == waNone)
+             if(DIM == 3)
+               draw_shapevec(c, V, qfi.fshape->levels[0], darkena(fcol, fd, 0xFF), PPR::WALL);
+             else if(fa.walltype == waNone) {
                draw_qfi(c, V, darkena(fcol, fd, 0xFF), PPR::FLOOR);
+               }
              else {
                color_t wcol2, fcol2;
                eWall w = c->wall; int p = c->wparam;
