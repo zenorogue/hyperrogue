@@ -5712,7 +5712,7 @@ struct flashdata {
   flashdata(int _t, int _s, cell *_w, color_t col, int sped) { 
     t=_t; size=_s; where=_w; color = col; 
     angle = rand() % 1000; spd = sped;
-    if(WDIM == 3) angle2 = acos((rand() % 1000 - 499.5) / 500);
+    if(DIM == 3) angle2 = acos((rand() % 1000 - 499.5) / 500);
     }
   };
 
@@ -6001,7 +6001,7 @@ void drawFlashes() {
       poly_outline = OUTLINE_DEFAULT;
       ld t = f.spd * tim * scalefactor / 50000.;
       transmatrix T =
-        WDIM == 2 ? V * spin(f.angle) * xpush(t) :
+        DIM == 2 ? V * spin(f.angle) * xpush(t) :
         V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
       queuepoly(T, shParticle[f.size], partcol);
       #endif
