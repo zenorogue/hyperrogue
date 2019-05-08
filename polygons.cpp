@@ -2653,10 +2653,10 @@ void configure_floorshapes() {
   shMFloor4.configure(floorrad0*4/8, floorrad1*4/8);
 
   {
-  shBigTriangle.configure(hcrossf * .94, 0); shBigTriangle.prio = PPR::FLOOR_TOWER;
+  shBigTriangle.configure(hcrossf * (GDIM == 3 ? 1 : .94), 0); shBigTriangle.prio = PPR::FLOOR_TOWER;
   }
 
-  shBigHepta.configure(0, crossf * .97);
+  shBigHepta.configure(0, crossf * (GDIM == 3 ? 1 : .97));
   
   {
   double p = -.006;

@@ -176,15 +176,15 @@ void precalc() {
   zhexf = BITRUNCATED ? hexf : crossf* .55;
   if(WDIM == 3) zhexf *= geom3::creature_scale;
 
-  floorrad0 = hexvdist* 0.92;
-  floorrad1 = rhexf * 0.94;
+  floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
+  floorrad1 = rhexf * (GDIM == 3 ? 1 : 0.94);
   
   if(euclid4) {
     if(!BITRUNCATED)
-      floorrad0 = floorrad1 = rhexf * .94;
+      floorrad0 = floorrad1 = rhexf * (GDIM == 3 ? 1 : .94);
     else
-      floorrad0 = hexvdist * .9,
-      floorrad1 = rhexf * .8;
+      floorrad0 = hexvdist * (GDIM == 3 ? 1 : .9),
+      floorrad1 = rhexf * (GDIM == 3 ? 1 : .8);
     }
   
   set_sibling_limit();
