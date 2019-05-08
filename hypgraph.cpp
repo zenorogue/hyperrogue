@@ -1084,12 +1084,16 @@ void centerpc(ld aspd) {
     crystal::centerrug(aspd);
   #endif
 
-  if(shmup::on && DIM == 3 && vid.sspeed > -5) {
+  if(shmup::on && vid.sspeed > -5 && DIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
     viewctr = shmup::pc[id]->base->master;
     transmatrix& T = shmup::pc[id]->at;
-    View = inverse(T);
+    if(WDIM == 2)
+      View = inverse(master_relative(shmup::pc[id]->base) * T);
+    else 
+      View = inverse(T);
     if(vid.yshift) View = cpush(2, wall_radar(viewctr.at->c7, T)) * View;
+    if(WDIM == 2) View = cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) * View;
 
     #if CAP_RACING
     if(racing::on) racing::set_view();
