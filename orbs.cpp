@@ -914,7 +914,7 @@ void poly_attack(cell *dest) {
   auto polymonsters = {
     moYeti, moRunDog, moHunterDog, moRanger,
     moDesertman, moMonkey, moZombie, moCultist,
-    moFallingDog, moMutant, moFamiliar, moOrangeDog,
+    moFallingDog, moVariantWarrior, moFamiliar, moOrangeDog,
     moRedFox, moFalsePrincess, moResearcher,
     moNarciss, moJiangshi, 
     };
