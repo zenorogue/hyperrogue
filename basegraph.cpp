@@ -1024,6 +1024,7 @@ void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
     glflush();
     glhr::be_nontextured();
     glhr::id_modelview();
+    dynamicval<eModel> em(pmodel, mdUnchanged);
     glcoords.clear();
     x -= current_display->xcenter; y -= current_display->ycenter;
     int pts = size * 4;
@@ -1033,6 +1034,7 @@ void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
       float rr = (M_PI * 2 * r) / pts;
       glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * vid.stretch * cos(rr), current_display->scrdist));
       }
+    current_display->set_all(0);
     glhr::vertices(glcoords);
     glhr::set_depthtest(false);
     if(fillcolor) {
