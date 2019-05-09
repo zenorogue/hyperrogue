@@ -464,6 +464,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       }
     }
   
+  #if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     finishshape();
     for(auto pfsh: all_plain_floorshapes) {
@@ -499,6 +500,12 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
             }
           }
         }
+
+      for(int l=0; l<SIDEPARS; l++) {
+        for(auto& li: fsh.side[l]) li.tinf = &fsh.tinf3;
+        for(int e=0; e<MAX_EDGE; e++)
+          for(auto& li: fsh.gpside[l][e]) li.tinf = &fsh.tinf3;
+        }
       }
       
     for(auto pfsh: all_escher_floorshapes) {
@@ -506,17 +513,18 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       
       for(int l=0; l<SIDEPARS; l++) {
         fsh.levels[l] = shFullFloor.levels[l];
+        for(auto& li: fsh.levels[l]) li.tinf = &fsh.tinf3;
         fsh.side[l] = shFullFloor.side[l];
-        for(int e=0; e<MAX_EDGE; e++)
+        for(auto& li: fsh.side[l]) li.tinf = &fsh.tinf3;
+        for(int e=0; e<MAX_EDGE; e++) {
           fsh.gpside[l][e] = shFullFloor.gpside[l][e];
+          for(auto& li: fsh.gpside[l][e]) li.tinf = &fsh.tinf3;
+          }
         }
-      
-      for(auto& l: fsh.levels)
-      for(auto& li: l)
-        li.tinf = &fsh.tinf3;
       }
     finishshape();
     }
+  #endif
   }
 
 void generate_floorshapes() {

@@ -631,6 +631,8 @@ void showEuclideanMenu() {
         #endif
         };
       });
+    extern void add_edit_wall_quality(char);
+    add_edit_wall_quality('W');
     }
   else if(WDIM == 3) dialog::addBreak(100);
   else {

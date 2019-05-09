@@ -138,12 +138,33 @@ hyperpoint zshift(hyperpoint x, ld z) {
   }
 
 void chasmifyPoly(double fac, double fac2, int k) {
-  for(int i=isize(hpc)-1; i >= last->s; i--) {
-    hpc.push_back(zshift(hpc[i], fac));
-    hpc[i] = zshift(hpc[i], fac2);
+  if(GDIM == 2) {
+     for(int i=isize(hpc)-1; i >= last->s; i--) {
+       hpc.push_back(mscale(hpc[i], fac));
+       hpc[i] = mscale(hpc[i], fac2);
+       }
+     hpc.push_back(hpc[last->s]);
+     last->flags |= POLY_ISSIDE;
+     }
+  else {
+    vector<hyperpoint> points;
+    for(int s = last->s; s<isize(hpc); s++) points.push_back(hpc[s]);
+    hpc.resize(last->s);
+    last->flags |= POLY_TRIANGLES;
+    last->texture_offset = 0;
+    last->s = isize(hpc);
+    using namespace hyperpoint_vec;
+    auto at = [&] (ld x, ld y) {
+      x *= (isize(points) - 1);
+      int zf = int(x);
+      x -= zf;
+      hpcpush(zshift(points[zf] + (points[zf+1] - points[zf]) * x, fac + (fac2-fac) * y));
+      };
+    texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
+    texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });
+    texture_order([&] (ld x, ld y) { at((1+x-y)/2, (1+x+y)/2); });
+    texture_order([&] (ld x, ld y) { at((1+x+y)/2, (1-x+y)/2); });      
     }
-  hpc.push_back(hpc[last->s]);
-  last->flags |= POLY_ISSIDE;
   }
 #endif
 
