@@ -885,6 +885,15 @@ void make_3d_models() {
 
   shift_shape(shBoatOuter, geom3::FLOOR);
   shift_shape(shBoatInner, (geom3::FLOOR+geom3::LAKE)/2);
+  
+  for(int i=0; i<14; i++)
+    shift_shape(shTriheptaSpecial[i], geom3::FLOOR);
+
+  shift_shape(shBigCarpet1, geom3::FLOOR - geom3::human_height * 1/40);
+  shift_shape(shBigCarpet2, geom3::FLOOR - geom3::human_height * 2/40);
+  shift_shape(shBigCarpet3, geom3::FLOOR - geom3::human_height * 3/40);
+  for(int a=0; a<5; a++) for(int b=0; b<4; b++)
+    shift_shape(shReptile[a][b], geom3::FLOOR - geom3::human_height * min(b, 2) / 40);
   }
 
 #undef S
