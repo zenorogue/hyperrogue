@@ -4470,11 +4470,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     transmatrix Vd0, Vboat0;
     const transmatrix *Vdp =
-      (!wmspatial) ? &V : 
-      sl ? &(Vd0= mscale(V, geom3::SLEV[sl])) : 
-      highwall(c) ? &(Vd0= mscale(V, (1+geom3::WALL)/2)) :
+      WDIM == 3 ? &V:
+      !wmspatial ? &V : 
+      sl ? &(Vd0= mscale(V, geom3::SLEV[sl] - geom3::FLOOR)) : 
+      (highwall(c) && GDIM == 2) ? &(Vd0= mscale(V, (1+geom3::WALL)/2)) :
 #if CAP_SHAPES
-      (chasmg==1) ? &(Vd0 = mscale(V, geom3::LAKE)) :
+      (chasmg==1) ? &(Vd0 = mscale(V, geom3::LAKE - geom3::FLOOR)) :
 #endif
       &V;
     
@@ -5502,9 +5503,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       #endif
       error |= drawMonster(V, ctype, c, moncol); 
       #if CAP_SHAPES
-      if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) 
-        pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
+      if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) {
+        if(WDIM == 2)
+          pushdown(c, q, V, geom3::SLEV[sl] - geom3::FLOOR, false, false);
+        else pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
           !isMultitile(c->monst), false);
+        }
       #endif
       }
       

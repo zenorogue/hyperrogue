@@ -1094,11 +1094,11 @@ void centerpc(ld aspd) {
   if(shmup::on && vid.sspeed > -5 && DIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
     viewctr = shmup::pc[id]->base->master;
-    transmatrix& T = shmup::pc[id]->at;
-    if(WDIM == 2)
-      View = inverse(master_relative(shmup::pc[id]->base) * T);
-    else 
-      View = inverse(T);
+    transmatrix T = shmup::pc[id]->at;
+    if(WDIM == 2) T = master_relative(shmup::pc[id]->base) * T;
+    int sl = snakelevel(cwt.at);
+    if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
+    View = inverse(T);
     if(vid.yshift) View = cpush(2, wall_radar(viewctr.at->c7, T)) * View;
     if(WDIM == 2) View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) * View;
 
@@ -1121,7 +1121,10 @@ void centerpc(ld aspd) {
   
   ors::unrotate(cwtV); ors::unrotate(View);
   
-  hyperpoint H = inverse(actual_view_transform) * tC0(cwtV);
+  transmatrix T = cwtV;
+  int sl = snakelevel(cwt.at);
+  if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
+  hyperpoint H = inverse(actual_view_transform) * tC0(T);
   ld R = zero_d(DIM, H) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
