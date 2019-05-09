@@ -668,7 +668,9 @@ bool playerfound; // has player been found in the last drawing?
 double q3 = sqrt(double(3));
 
 bool outofmap(hyperpoint h) {
-  if(euclid) 
+  if(GDIM == 3)
+    return false;
+  else if(euclid) 
     return h[2] < .5; // false; // h[0] * h[0] + h[1] * h[1] > 15 * crossf;
   else if(sphere)
     return h[2] < .1 && h[2] > -.1 && h[1] > -.1 && h[1] < .1 && h[0] > -.1 && h[0] < .1;

@@ -4149,6 +4149,17 @@ void shmup_gravity_floor(cell *c) {
     set_floor(shFullFloor);
   }
 
+ld mousedist(transmatrix T) {
+  if(GDIM == 2) return intval(mouseh, tC0(T));
+  hyperpoint T1 = tC0(mscale(T, geom3::FLOOR));
+  if(mouseaim_sensitivity) return sqhypot_d(2, T1) + (invis_point(T1) ? 1e10 : 0);
+  hyperpoint h1;
+  applymodel(T1, h1);
+  using namespace hyperpoint_vec;
+  h1 = h1 - hpxy((mousex - current_display->xcenter) / current_display->radius, (mousey - current_display->ycenter) / current_display->radius);
+  return sqhypot_d(2, h1) + (invis_point(T1) ? 1e10 : 0);
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4230,22 +4241,22 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   
   if(1) {
   
-    hyperpoint VC0 = tC0(V);
+    ld dist = mousedist(V);
   
     if(inmirrorcount) ;
-    else if(DIM == 3) ;
-    else if(intval(mouseh, VC0) < modist) {
+    else if(WDIM == 3) ;
+    else if(dist < modist) {
       modist2 = modist; mouseover2 = mouseover;
-      modist = intval(mouseh, VC0);
+      modist = dist;
       mouseover = c;
       }
-    else if(intval(mouseh, VC0) < modist2) {
-      modist2 = intval(mouseh, VC0);
+    else if(dist < modist2) {
+      modist2 = dist;
       mouseover2 = c;
       }
 
     if(!euclid) {
-      double dfc = euclid ? intval(VC0, C0) : VC0[DIM];
+      double dfc = euclid ? intval(tC0(V), C0) : V[GDIM][GDIM];
     
       if(dfc < centdist) {
         centdist = dfc;
@@ -4257,7 +4268,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(c->cpdist <= orbrange) if(multi::players > 1 || multi::alwaysuse) 
     for(int i=0; i<multi::players; i++) if(multi::playerActive(i)) {
-      double dfc = intval(VC0, tC0(multi::crosscenter[i]));
+      double dfc = intval(tC0(V), tC0(multi::crosscenter[i]));
       if(dfc < multi::ccdist[i] && celldistance(playerpos(i), c) <= orbrange) {
         multi::ccdist[i] = dfc;
         multi::ccat[i] = c;
@@ -5666,7 +5677,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if(usethis) {
         straightDownSeek = c;
-        downspin = atan2(VC0[1], VC0[0]);
+        downspin = atan2(V[1][GDIM], V[0][GDIM]);
         downspin += (side-1) * M_PI/2;
         downspin += conformal::rotation * degree;
         while(downspin < -M_PI) downspin += 2*M_PI;
@@ -6109,7 +6120,7 @@ transmatrix cview() {
   }
 
 void precise_mouseover() {
-  if(DIM == 3) { 
+  if(WDIM == 3) { 
     mouseover2 = mouseover = viewctr.at->c7; 
     ld best = HUGE_VAL;
     hyperpoint h = cpush(2, 1) * C0;
@@ -6120,6 +6131,7 @@ void precise_mouseover() {
     return; 
     }
   if(!mouseover) return;
+  if(GDIM == 3) return;
   cell *omouseover = mouseover;
   for(int loop = 0; loop < 10; loop++) { 
     bool found = false;
@@ -6222,7 +6234,7 @@ void drawthemap() {
   #if ISMOBILE
   mouseovers = XLAT("No info about this...");
   #endif
-  if(mouseout()) 
+  if(mouseout() && !mousepan) 
     modist = -5;
   playerfound = false;
   // playerfoundL = false;
