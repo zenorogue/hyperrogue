@@ -795,6 +795,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
       }
     if(DIM == 3) {
       queuepoly(Vit, shRing, 0xFFFFFFFF);
+      if(WDIM == 2) V2 = mscale(V2, geom3::STUFF);
       V2 = V2 * cspin(1, 2, M_PI * sintick(100) / 39);
       queuepoly(V2, shCompass3, 0xFF0000FF);
       queuepoly(V2 * pispin, shCompass3, 0x000000FF);      
