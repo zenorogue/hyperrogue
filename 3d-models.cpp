@@ -92,11 +92,11 @@ void add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1) {
   }
   
 void shift_last(ld z) {
-  for(int i=last->s; i<isize(hpc); i++) hpc[i] = cpush(2, z) * hpc[i];
+  for(int i=last->s; i<isize(hpc); i++) hpc[i] = zshift(hpc[i], z);
   }
 
 void shift_shape(hpcshape& sh, ld z) {
-  for(int i=sh.s; i<sh.e; i++) hpc[i] = cpush(2, z) * hpc[i];
+  for(int i=sh.s; i<sh.e; i++) hpc[i] = zshift(hpc[i], z);
   }
 
 extern
@@ -865,6 +865,11 @@ void make_3d_models() {
   make_ball(shDisk, orbsize*.2, 2);
   make_ball(shHeptaMarker, zhexf*.2, 1);
   make_ball(shSnowball, zhexf*.1, 0);
+  
+  if(WDIM == 2) {
+    for(int i=0; i<3; i++)
+      shift_shape(shHalfFloor[i], geom3::lev_to_factor(geom3::human_height * .01));
+    }
   }
 
 #undef S

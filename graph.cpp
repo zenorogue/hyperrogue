@@ -19,7 +19,7 @@ int detaillevel = 0;
 bool first_cell_to_draw = true;
 
 bool hide_player() {
-  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && first_cell_to_draw && (WDIM == 3 || geom3::camera == 0);
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && first_cell_to_draw && (WDIM == 3 || geom3::camera == 0) && !inmirrorcount;
   }
 
 hookset<bool(int sym, int uni)> *hooks_handleKey;
@@ -4556,7 +4556,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepolyat(V2 * spin(d*M_PI/S3), shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             inmirrorcount-=d;
             }          
-          if(wmspatial) {
+          if(GDIM == 3) {
+            for(int d=0; d<6; d++)
+              queuepolyat(V2 * spin(d*M_PI/S3), shHalfMirror[2], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->move(d)->cpdist;
+            }
+          else if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
               queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[2], 0xC0C0C080, PPR::WALL3+z-layers);
@@ -4574,7 +4578,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepolyat(mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             }
   
-          if(wmspatial) {
+          if(GDIM == 3) {
+            queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->move(d)->cpdist;
+            }
+          else if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
               queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR::WALL3+z-layers);
@@ -4936,7 +4943,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
         int fd0 = fd ? fd-1 : 0;      
         if(WDIM == 2 && GDIM == 3 && qfi.fshape)
-          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT);
+          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT), ptds.back()->subprio = c->cpdist * 4;
         else
           draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR::LAKELEV);
         }

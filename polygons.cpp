@@ -2758,7 +2758,18 @@ void buildpolys() {
   bshape(shHalfFloor[2], PPR::FLOOR, scalefactor, 331);
   bshape(shHalfMirror[0], PPR::WALL, scalefactor, 330);
   bshape(shHalfMirror[1], PPR::WALL, scalefactor, 328);
-  bshape(shHalfMirror[2], PPR::WALL, scalefactor, 332);
+  
+  if(GDIM == 2) {
+    bshape(shHalfMirror[2], PPR::WALL, scalefactor, 332);
+    }
+  else {
+    bshape(shHalfMirror[2], PPR::WALL);
+    hpcpush(hpxy(-0.016778,0)); hpcpush(hpxy(-0.261607,0));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    bshape(shHalfMirror[1], PPR::WALL);
+    hpcpush(hpxy(-0.315398,0)); hpcpush(hpxy(+0.568278,0));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    bshape(shHalfMirror[0], PPR::WALL);
+    hpcpush(hpxy(+0.262597,0)); hpcpush(hpxy(-0.261563,0));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    }
   
   bshape(shAsymmetric, PPR::TEXT, scalefactor, 374);
   
