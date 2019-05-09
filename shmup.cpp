@@ -1652,7 +1652,7 @@ void movePlayer(monster *m, int delta) {
 
   if(WDIM == 2 && GDIM == 3) {
     double mdd = hypot(mdx, mdy);
-    godir[cpid] = atan2(mdx, -mdy);
+    godir[cpid] = -atan2(mdx, -mdy);
     mgo += mdd;
     }
 
@@ -1687,8 +1687,8 @@ void movePlayer(monster *m, int delta) {
   bool blown = m->blowoff > curtime;
 
   if(WDIM == 2 && GDIM == 3 && !lctrlclick && cpid == 0 && !racing::on) {
-    playerturn[cpid] += mouseaim_x;
-    playerturny[cpid] += mouseaim_y;
+    playerturn[cpid] -= mouseaim_x;
+    playerturny[cpid] -= mouseaim_y;
     mouseaim_x = 0;
     mouseaim_y = 0;
     }

@@ -1100,7 +1100,7 @@ void centerpc(ld aspd) {
     else 
       View = inverse(T);
     if(vid.yshift) View = cpush(2, wall_radar(viewctr.at->c7, T)) * View;
-    if(WDIM == 2) View = cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) * View;
+    if(WDIM == 2) View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) * View;
 
     #if CAP_RACING
     if(racing::on) racing::set_view();
