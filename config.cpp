@@ -171,6 +171,7 @@ void initConfig() {
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(vid.use_wall_radar, "wallradar", true);
   addsaver(vid.fixed_facing, "fixed facing", 0);
+  addsaver(vid.fixed_yz, "fixed YZ", true);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaver(vid.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
@@ -1275,6 +1276,10 @@ void show3D() {
         }
       });
     }
+
+  if(WDIM == 2 && GDIM == 3)
+    dialog::addBoolItem_action("fixed Y/Z rotation", vid.fixed_yz, 'Z');
+
   if(true) {
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');

@@ -1095,6 +1095,7 @@ struct videopar {
   int radarsize; // radar for 3D geometries
   int aurastr, aurasmoothen;
   bool fixed_facing;
+  bool fixed_yz;
   bool use_wall_radar;
   
   int linequality;

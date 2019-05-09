@@ -1075,6 +1075,11 @@ void spinEdge(ld aspd) {
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
   View = spin(downspin) * View;
+  
+  if(WDIM == 2 && GDIM == 3 && vid.fixed_yz && View[0][2]) {
+    ld d12 = atan2(View[0][2], View[1][2]);
+    View = cspin(1, 0, d12) * View;
+    }
   }
 
 void centerpc(ld aspd) { 
