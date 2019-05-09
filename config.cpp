@@ -1292,9 +1292,9 @@ void show3D() {
   else if(rug::rugged && !rug::spatial_rug)
     dialog::addBreak(100);
   #endif
-  else if(non_spatial_model())
+  else if(GDIM == 2 && non_spatial_model())
     dialog::addInfo(XLAT("no 3D effects available in this projection"), 0xC00000);
-  else if(!spatial_graphics)
+  else if(GDIM == 2 && !spatial_graphics)
     dialog::addInfo(XLAT("set 3D monsters or walls in basic config first"));
   else if(invalid != "")
     dialog::addInfo(XLAT("error: "+invalid), 0xC00000);
@@ -1326,7 +1326,7 @@ void show3D() {
     else if(uni == 'c' && WDIM == 2) 
       tc_camera = ticks,
       dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), ""),
-      dialog::reaction = delayed_geo_reset,
+      dialog::reaction = [] { if(GDIM == 2) need_reset_geometry = true; },
       dialog::extra_options = [] {
         dialog::addHelp(XLAT(
           "Camera is placed %1 absolute units above a plane P in a three-dimensional "
