@@ -2163,7 +2163,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     
   else if(isAnyIvy(c) || isWorm(c)) {
   
-    if(isWorm(c) && DIM == 3) return false;
+    if(isWorm(c) && WDIM == 3) return false;
     
     if((m == moHexSnake || m == moHexSnakeTail) && c->hitpoints == 2) {
       int d = c->mondir;
@@ -2180,7 +2180,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
     transmatrix Vb0 = Vb;
-    if(c->mondir != NODIR && DIM == 3) {
+    if(c->mondir != NODIR && DIM == 3 && isAnyIvy(c)) {
       queueline(tC0(Vparam), Vparam  * tC0(calc_relative_matrix(c->move(c->mondir), c, C0)), (col << 8) + 0xFF, 0);
       }
     else if(c->mondir != NODIR) {

@@ -859,6 +859,19 @@ void make_3d_models() {
   disable(shTrylobiteRearLeg);
   disable(shPFace);
   disable(shJiangShi);
+  
+  make_revolution_cut(shDragonSegment, 60, g);
+  make_revolution_cut(shDragonHead, 60, g);
+  make_revolution_cut(shDragonTail, 60, g);
+  make_revolution_cut(shWormSegment, 60, g);
+  make_revolution_cut(shSmallWormSegment, 60, g);
+  make_revolution_cut(shWormHead, 60, g);
+  make_revolution_cut(shTentHead, 60, g);
+  make_revolution_cut(shKrakenHead, 60, -geom3::FLOOR);
+  make_revolution_cut(shSeaTentacle, 60, -geom3::FLOOR);
+  make_revolution_cut(shDragonLegs, 60, g);
+  make_revolution_cut(shDragonWings, 60, g);
+  disable(shDragonNostril);
 
   make_head_only();
   
