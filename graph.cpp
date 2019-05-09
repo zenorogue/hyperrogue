@@ -5284,6 +5284,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waBarrier:
           if(c->land == laOceanWall && wmescher && wmspatial) {
+           if(GDIM == 3 && qfi.fshape) {
+             draw_shapevec(c, V, qfi.fshape->cone, darkena(wcol, 0, 0xFF), PPR::WALL);
+             break;
+             }           
            const int layers = 2 << detaillevel;
            dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
            dynamicval<transmatrix> dss(qfi.spin, Id);
@@ -5364,7 +5368,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
             auto V2 = V;
             if(hasTimeout(c)) V2 = V2 * spintick(c->land == laPower ? 5000 : 500);
-            queuepoly(V2, shStar, darkena(wcol, 0, 0xF0));
+            if(GDIM == 3 && qfi.fshape)
+              draw_shapevec(c, V2, qfi.fshape->cone, darkena(wcol, 0, 0xF0), PPR::WALL);
+            else queuepoly(V2, shStar, darkena(wcol, 0, 0xF0));
             if(isFire(c) && rand() % 300 < ticks - lastt)
               drawParticle(c, wcol, 75);
             }
