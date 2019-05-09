@@ -421,12 +421,6 @@ hyperpoint randomPointIn(int t) {
     }
   }
 
-#if CAP_BT
-hyperpoint get_horopoint(ld y, ld x) {
-  return xpush(-y) * binary::parabolic(x) * C0;
-  }
-#endif
-
 hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
@@ -443,18 +437,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
       println(hlog, "get_corner_position called");
       return C0;
       }
-    ld yx = log(2) / 2;
-    ld yy = yx;
-    ld xx = 1 / sqrt(2)/2;
-    hyperpoint vertices[7];
-    vertices[0] = get_horopoint(-yy, xx);
-    vertices[1] = get_horopoint(yy, 2*xx);
-    vertices[2] = get_horopoint(yy, xx);
-    vertices[3] = get_horopoint(yy, -xx);
-    vertices[4] = get_horopoint(yy, -2*xx);
-    vertices[5] = get_horopoint(-yy, -xx);
-    vertices[6] = get_horopoint(-yy, 0);
-    return mid_at_actual(vertices[cid], 3/cf);
+    return mid_at_actual(binary::get_horopoint(binary::get_corner_horo_coordinates(c, cid)), 3/cf);
     }
   #endif
   #if CAP_ARCM
@@ -536,16 +519,16 @@ hyperpoint nearcorner(cell *c, int i) {
     ld yy = yx;
     // ld xx = 1 / sqrt(2)/2;
     hyperpoint neis[7];
-    neis[0] = get_horopoint(0, 1);
-    neis[1] = get_horopoint(yy*2, 1);
-    neis[2] = get_horopoint(yy*2, 0);
-    neis[3] = get_horopoint(yy*2, -1);
-    neis[4] = get_horopoint(0, -1);
+    neis[0] = binary::get_horopoint(0, 1);
+    neis[1] = binary::get_horopoint(yy*2, 1);
+    neis[2] = binary::get_horopoint(yy*2, 0);
+    neis[3] = binary::get_horopoint(yy*2, -1);
+    neis[4] = binary::get_horopoint(0, -1);
     if(c->type == 7)
-      neis[5] = get_horopoint(-yy*2, -.5),
-      neis[6] = get_horopoint(-yy*2, +.5);
+      neis[5] = binary::get_horopoint(-yy*2, -.5),
+      neis[6] = binary::get_horopoint(-yy*2, +.5);
     else
-      neis[5] = get_horopoint(-yy*2, 0);
+      neis[5] = binary::get_horopoint(-yy*2, 0);
     return neis[i];
     }
   #endif

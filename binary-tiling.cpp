@@ -793,6 +793,30 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
   }
 #endif
 
+hyperpoint get_horopoint(ld y, ld x) {
+  return xpush(-y) * binary::parabolic(x) * C0;
+  }
+
+hyperpoint get_horopoint(hyperpoint h) {
+  return get_horopoint(h[0], h[1]);
+  }
+
+hyperpoint get_corner_horo_coordinates(cell *c, int i) {
+  ld yx = log(2) / 2;
+  ld yy = yx;
+  ld xx = 1 / sqrt(2)/2;
+  switch(gmod(i, c->type)) {
+    case 0: return point2(-yy, xx);
+    case 1: return point2(yy, 2*xx);
+    case 2: return point2(yy, xx);
+    case 3: return point2(yy, -xx);
+    case 4: return point2(yy, -2*xx);
+    case 5: return point2(-yy, -xx);
+    case 6: return point2(-yy, 0);    
+    default: return point2(0, 0);
+    }
+  }
+
 
   }
 }

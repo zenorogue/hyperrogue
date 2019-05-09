@@ -2112,9 +2112,9 @@ void procedural_shapes() {
   else if(binarytiling) {
     for(int i=0; i<2; i++) {
       bshape(shWall[i], PPR::WALL);
-      horopoint(log(2)/8, .1);
-      horopoint(log(2)/8, -.1);
-      horopoint(-log(2)/8, 0);
+      hpcpush(binary::get_horopoint(log(2)/8, .1));
+      hpcpush(binary::get_horopoint(log(2)/8, -.1));
+      hpcpush(binary::get_horopoint(-log(2)/8, 0));
       }
     }
   #endif

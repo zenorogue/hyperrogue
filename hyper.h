@@ -4387,9 +4387,6 @@ bool saved_tortoise_on(cell *c);
 #define PRING(i) for(double i=0; i<=S84+1e-6; i+= pow(.5, vid.linequality))
 #define REVPRING(i) for(double i=S84; i>=-1e-6; i-=pow(.5, vid.linequality))
 #if CAP_BT
-void horopoint(ld y, ld x);
-hyperpoint get_horopoint(ld y, ld x);
-hyperpoint get_horopoint3(ld y, ld x, ld z);
 
 namespace binary {
   transmatrix parabolic(ld u);
@@ -4397,6 +4394,9 @@ namespace binary {
   extern ld btrange, btrange_cosh;
   hrmap *new_map();
   hrmap *new_alt_map(heptagon *o);
+  hyperpoint get_horopoint(ld y, ld x);
+  hyperpoint get_horopoint3(ld y, ld x, ld z);
+  hyperpoint get_horopoint(hyperpoint h);
   }
 #endif
 

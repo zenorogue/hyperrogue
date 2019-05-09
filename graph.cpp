@@ -5587,11 +5587,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         ld yx = log(2) / 2;
         ld yy = yx;
         ld xx = 1 / sqrt(2)/2;
-        queueline(V * get_horopoint(-yy, xx), V * get_horopoint(yy, 2*xx), gridcolor(c, c->move(binary::bd_right)), prec);
+        queueline(V * binary::get_horopoint(-yy, xx), V * binary::get_horopoint(yy, 2*xx), gridcolor(c, c->move(binary::bd_right)), prec);
         auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
           if(vid.linequality > 0) steps <<= vid.linequality;
           if(vid.linequality < 0) steps >>= -vid.linequality;
-          for(int i=0; i<=steps; i++) curvepoint(V * get_horopoint(y, x1 + (x2-x1) * i / steps));
+          for(int i=0; i<=steps; i++) curvepoint(V * binary::get_horopoint(y, x1 + (x2-x1) * i / steps));
           queuecurve(gridcolor(c, c->move(dir)), 0, PPR::LINE);
           };
         horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);

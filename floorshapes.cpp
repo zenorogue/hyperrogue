@@ -196,28 +196,6 @@ void bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
   hpcpush(hpc[last->s]);
   }
 
-#if CAP_BT
-void horopoint(ld y, ld x) {
-  hpcpush(get_horopoint(y, x));
-  }
-
-void horopoint(ld y, ld x, cell &fc, int c) {
-  hpcpush(iddspin(&fc, c) * get_horopoint(y, x));
-  }
-
-void horoline(ld y, ld x1, ld x2) {
-  if(DIM == 3)
-    horopoint(y, x1), horopoint(y, x2);
-  else for(int a=0; a<=16; a++)
-    horopoint(y, x1 + (x2-x1) * a / 16.);
-  }
-
-void horoline(ld y, ld x1, ld x2, cell &fc, int c) {
-  for(int a=0; a<=16; a++)
-    horopoint(y, x1 + (x2-x1) * a / 16., fc, c);
-  }
-#endif
-
 void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
   
   fsh.b.resize(2);
@@ -225,32 +203,41 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
 
   #if CAP_BT
   if(binarytiling) {
-    bshape(fsh.b[id], fsh.prio);
-    
-    ld yx = size * log(2) / 2;
-    ld yy = yx;
-    ld xx = size / sqrt(2)/2;
-    horoline(-yx, -xx, xx); horoline(yx, xx*2, -xx*2); horopoint(-yx, -xx);
-
-    bshape(fsh.shadow[id], fsh.prio);
-    horoline(-yx*SHADMUL, -xx*SHADMUL, xx*SHADMUL); horoline(yx*SHADMUL, xx*SHADMUL*2, -xx*SHADMUL*2); horopoint(-yx*SHADMUL, -xx*SHADMUL);
 
     cell fc;
     fc.type = 6+id;
-
-    for(int k=0; k<SIDEPARS; k++) {
-      for(int i=0; i<fc.type; i++) fsh.gpside[k][i].resize(2);
-      bshape(fsh.gpside[k][0][id], PPR::LAKEWALL); horopoint(-yy, xx, fc, 0); horopoint(yy, 2*xx, fc, 0); chasmifyPoly(dlow_table[k], dhi_table[k], k);
-      bshape(fsh.gpside[k][1][id], PPR::LAKEWALL); horoline(yy, 2*xx, xx, fc, 1); chasmifyPoly(dlow_table[k], dhi_table[k], k);
-      bshape(fsh.gpside[k][2][id], PPR::LAKEWALL); horoline(yy, xx, -xx, fc, 2); chasmifyPoly(dlow_table[k], dhi_table[k], k);
-      bshape(fsh.gpside[k][3][id], PPR::LAKEWALL); horoline(yy, -xx, -2*xx, fc, 3); chasmifyPoly(dlow_table[k], dhi_table[k], k);
-      bshape(fsh.gpside[k][4][id], PPR::LAKEWALL); horopoint(yy, -2*xx, fc, 4); horopoint(-yy, -xx, fc, 4); chasmifyPoly(dlow_table[k], dhi_table[k], k);
-      if(id == 0) {
-        bshape(fsh.gpside[k][5][id], PPR::LAKEWALL); horoline(-yy, -xx, xx, fc, 5); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+    const int STEP = TEXTURE_STEP_3D;
+    using namespace hyperpoint_vec;
+    
+    for(int t=0; t<2; t++) {
+    
+      if(t == 0) 
+        bshape(fsh.b[id], fsh.prio);
+      if(t == 1)
+        bshape(fsh.shadow[id], fsh.prio);
+      
+      for(int i=0; i<sides; i++) {
+        hyperpoint h0 = binary::get_corner_horo_coordinates(&fc, i) * size;
+        hyperpoint h1 = binary::get_corner_horo_coordinates(&fc, i+1) * size;
+        if(t) h0 *= SHADMUL, h1 *= SHADMUL;
+        hyperpoint hd = (h1 - h0) / STEP;
+        for(int j=0; j<STEP; j++)
+          hpcpush(binary::get_horopoint(h0 + hd * j));
         }
-      else {
-        bshape(fsh.gpside[k][5][id], PPR::LAKEWALL); horoline(-yy, -xx, 0, fc, 5); chasmifyPoly(dlow_table[k], dhi_table[k], k);
-        bshape(fsh.gpside[k][6][id], PPR::LAKEWALL); horoline(-yy, -0, xx, fc, 6); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      
+      hpcpush(hpc[last->s]);
+      }
+    
+    for(int k=0; k<SIDEPARS; k++) {
+      for(int i=0; i<fc.type; i++) {
+        fsh.gpside[k][i].resize(2);
+        bshape(fsh.gpside[k][i][id], PPR::LAKEWALL); 
+        hyperpoint h0 = binary::get_corner_horo_coordinates(&fc, i) * size;
+        hyperpoint h1 = binary::get_corner_horo_coordinates(&fc, i+1) * size;
+        hyperpoint hd = (h1 - h0) / STEP;
+        for(int j=0; j<=STEP; j++)
+          hpcpush(iddspin(&fc, i) * binary::get_horopoint(h0 + hd * j));
+        chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
       }
 
@@ -488,39 +475,42 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     
         fsh.levels[k][id].tinf = &fsh.tinf3;
         fsh.levels[k][id].texture_offset = 0;
-        auto at = [&] (hyperpoint h, int a) {
-          hpcpush(normalize(h));
-          };
-  
+
         const int STEP = TEXTURE_STEP_3D;
         
         int s = fsh.b[id].s;
         int e = fsh.b[id].e-1;
         
+        #if CAP_BT
         if(binarytiling) {
-          vector<hyperpoint> cors;
-          for(int i=0; i<c->type; i++) cors.push_back(get_corner_position(c, i, 3));
-          cors.push_back(cors[0]);
           for(int t=0; t<c->type; t++)
           for(int y=0; y<STEP; y++)
           for(int x=0; x<STEP; x++) {
-            using namespace hyperpoint_vec;
-            hyperpoint center = zpush(dfloor_table[k]) * C0;
-            hyperpoint v1 = (rgpushxto0(cors[t]) * center - center) / STEP;
-            hyperpoint v2 = (rgpushxto0(cors[t+1]) * center - center) / STEP;
+            auto at = [&] (int x, int y) {
+              using namespace hyperpoint_vec;
+              hyperpoint left = binary::get_corner_horo_coordinates(c, t);
+              hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
+              hyperpoint mid = (left * x + right * y) / STEP;
+              hpcpush(binary::get_horopoint(mid));
+              };
             if(x+y < STEP) {
-              at(center + v1 * x + v2 * y, 0);
-              at(center + v1 * (x+1) + v2 * y, 1);
-              at(center + v1 * x + v2 * (y+1), 2);
+              at(x, y);
+              at(x+1, y);
+              at(x, y+1);
               }
             if(x+y <= STEP && x && y) {
-              at(center + v1 * x + v2 * y, 0);
-              at(center + v1 * (x-1) + v2 * y, 1);
-              at(center + v1 * x + v2 * (y-1), 2);
+              at(x, y);
+              at(x-1, y);
+              at(x, y-1);
               }
-            }          
+            }
           }
-        else {
+        else 
+        #endif
+        if(1) {
+          auto at = [&] (hyperpoint h, int a) {
+            hpcpush(normalize(h));
+            };
           for(int t=0; t<e-s; t++)
           for(int y=0; y<STEP; y++)
           for(int x=0; x<STEP; x++) {
