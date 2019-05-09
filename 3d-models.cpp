@@ -354,14 +354,13 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
       hsh[s] = abs(h[1]);
       zz -= h[1] * h[1] / 0.14 / 0.14 * 0.01 / S / S * SH;
       zz -= h[0] * h[0] / 0.10 / 0.10 * 0.01 / S / S * SH;
-      if(abs(h[1]) > 0.14*S) ok = false, zz -= (abs(h[1])/S - 0.14) * SH;
-      if(abs(h[0]) > 0.08*S) ok = false, zz -= (abs(h[0])/S - 0.08) * (abs(h[0])/S - 0.08) * 25 * SH;
+      if(abs(h[1]) > 0.14*S) ok = false, zz -= revZ * (abs(h[1])/S - 0.14) * SH;
+      if(abs(h[0]) > 0.08*S) ok = false, zz -= revZ * (abs(h[0])/S - 0.08) * (abs(h[0])/S - 0.08) * 25 * SH;
       hpcpush(ht[s] = zpush(zz) * h);
       if(hsh[s] < 0.1*S) shi[s] = -0.5;
       else if(hsh[s] < 0.12*S) shi[s] = -0.1 - 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
       else shi[s] = -0.1;
       shi[s] *= geom3::human_height;
-      shi[s] *= revZ;
       }
     if(ok && kind == 1) for(int i=0; i<3; i++) {
       int j = (i+1) % 3;
