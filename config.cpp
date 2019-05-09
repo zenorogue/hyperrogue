@@ -361,8 +361,19 @@ void initConfig() {
   addsaverenum(conformal::basic_model, "basic model");
   addsaver(conformal::use_atan, "use_atan");
   
-  for(auto& g: sightranges) g = 10;
-  
+  for(int i=0; i<isize(ginf); i++) {
+    if(ginf[i].flags & qELLIPTIC)
+      sightranges[i] = M_PI;
+    else if(ginf[i].cclass == gcSphere)
+      sightranges[i] = 2 * M_PI;
+    else if(ginf[i].cclass == gcEuclid)
+      sightranges[i] = 10;
+    else
+      sightranges[i] = 5;
+    sightranges[gArchimedean] = 10;
+    if(i < gBinary3) addsaver(sightranges[i], "sight-g" + its(i));
+    }
+
   addsaver(sightranges[gBinary3], "sight-binary3", 3);
   addsaver(sightranges[gCubeTiling], "sight-cubes", 7);
   addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
@@ -678,6 +689,12 @@ void edit_sightrange() {
         });
       }
     add_cells_drawn('C');
+    if(GDIM == 3 && WDIM == 2 && pmodel == mdPerspective) {
+      dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
+      dialog::add_action([] {
+        dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
+        });
+      };
     };
   }
 
