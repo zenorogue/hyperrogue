@@ -414,6 +414,10 @@ namespace geom3 {
     if(!geom3::always3) {
       geom3::always3 = true;
       geom3::wall_height = 1.5;
+      if(sphere) {
+        geom3::depth = M_PI / 6;
+        geom3::wall_height = M_PI / 3;
+        }
       geom3::human_wall_ratio = 0.8;
       geom3::camera = 0;
       if(pmodel == mdDisk) pmodel = mdPerspective;
@@ -425,6 +429,7 @@ namespace geom3 {
       geom3::wall_height = .3;
       geom3::human_wall_ratio = .7;
       geom3::camera = 1;
+      geom3::depth = 1;
       if(pmodel == mdPerspective) pmodel = mdDisk;
       need_reset_geometry = true;
       callhooks(hooks_swapdim);
