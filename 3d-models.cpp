@@ -805,7 +805,7 @@ void make_3d_models() {
   // make_ahead_3d(shTrylobiteHead);
   make_revolution_cut(shTrylobiteHead, 180, geom3::AHEAD - geom3::ABODY +g);
   
-  make_revolution_cut(shShark, 180);
+  make_revolution_cut(shShark, 180, WDIM == 2 ? -geom3::FLOOR : 0);
 
   make_revolution_cut(shGhost, 60, g);
   make_revolution_cut(shSlime, 60);
