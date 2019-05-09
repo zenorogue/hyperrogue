@@ -4248,7 +4248,7 @@ struct floorshape {
   int pstrength; // pattern strength in 3D
   int fstrength; // frame strength in 3D
   PPR prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE], levels[SIDEPARS];
+  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE], levels[SIDEPARS], cone;
   basic_textureinfo tinf3;
   floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
   };

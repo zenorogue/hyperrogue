@@ -500,6 +500,33 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
             }
           }
         }
+      
+      sizeto(fsh.cone, id);
+      bshape(fsh.cone[id], fsh.prio);    
+      last->flags |= POLY_TRIANGLES;
+      last->tinf = &fsh.tinf3;
+      last->texture_offset = 0;
+      #if CAP_BT
+      if(binarytiling)
+        for(int t=0; t<c->type; t++)
+          texture_order([&] (ld x, ld y) {
+            using namespace hyperpoint_vec;
+            hyperpoint left = binary::get_corner_horo_coordinates(c, t);
+            hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
+            hpcpush(rgpushxto0(binary::get_horopoint(left * x + right * y)) * zpush(geom3::WALL + (geom3::FLOOR-geom3::WALL) * (x+y)) * C0);
+            });
+      else
+      #endif
+      if(1) {
+        int s = fsh.b[id].s;
+        int e = fsh.b[id].e-1;        
+        for(int t=0; t<e-s; t++) {
+          using namespace hyperpoint_vec;
+          hyperpoint v1 = hpc[s+t] - C0;
+          hyperpoint v2 = hpc[s+t+1] - C0;
+          texture_order([&] (ld x, ld y) { hpcpush(rgpushxto0(normalize(C0 + v1 * x + v2 * y))*zpush(geom3::WALL + (geom3::FLOOR-geom3::WALL) * (x+y))*C0); });
+          }
+        }
 
       for(int l=0; l<SIDEPARS; l++) {
         for(auto& li: fsh.side[l]) li.tinf = &fsh.tinf3;
@@ -520,6 +547,8 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
           fsh.gpside[l][e] = shFullFloor.gpside[l][e];
           for(auto& li: fsh.gpside[l][e]) li.tinf = &fsh.tinf3;
           }
+        fsh.cone = shFullFloor.cone;
+        for(auto& li: fsh.cone) li.tinf = &fsh.tinf3;
         }
       }
     finishshape();

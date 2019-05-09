@@ -3881,9 +3881,13 @@ int getSnakelevColor(cell *c, int i, int last, int fd, color_t wcol) {
 void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int ct6, int fd) {
 
   if(DIM == 3 && WDIM == 2) {
+    if(!qfi.fshape) qfi.fshape = &shFullFloor;
+    if(conegraph(c)) {
+      draw_shapevec(c, V, qfi.fshape->cone, darkena(wcol, 0, 0xFF), PPR::WALL);
+      return;
+      }
     color_t wcol0 = wcol;
     color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
-    if(!qfi.fshape) qfi.fshape = &shFullFloor;
     draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
     forCellIdEx(c2, i, c) 
       if(!highwall(c2))
