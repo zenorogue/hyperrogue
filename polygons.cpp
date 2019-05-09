@@ -2764,12 +2764,28 @@ void buildpolys() {
     bshape(shHalfMirror[2], PPR::WALL, scalefactor, 332);
     }
   else {
+    dynamicval<int> d(vid.texture_step, max(vid.texture_step, 4));
+    ld len6 = hdist0(mid(xpush0(hexvdist), spin(M_PI/S3) * xpush0(hexvdist)));
+
+    ld len7 = hdist0(mid(xpush0(hexf), spin(M_PI*2/S7) * xpush0(hexf)));
+    ld hlen7 = hdist0(mid(xpush0(hcrossf), spin(M_PI*2/S7) * xpush0(hcrossf)));
+
+    ld lenx = hdist(xpush0(hexvdist), spin(M_PI/S3) * xpush0(hexvdist));
+    ld hlenx = hdist(xpush0(hcrossf), spin(2*M_PI/S7) * xpush0(hcrossf));
+    
+    println(hlog, "len6 = ", len6, " len7 = ", len7, " lenx = ", lenx);
+
     bshape(shHalfMirror[2], PPR::WALL);
-    hpcpush(hpxy(-0.016778,0)); hpcpush(hpxy(-0.261607,0));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
     bshape(shHalfMirror[1], PPR::WALL);
-    hpcpush(hpxy(-0.315398,0)); hpcpush(hpxy(+0.568278,0));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    if(PURE) {
+      hpcpush(xpush0(-hlen7)); hpcpush(xpush0(hcrossf+hlenx/2));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+      }
+    else {
+      hpcpush(xpush0(-len7*scalefactor)); hpcpush(xpush0((hexf+lenx/2)*scalefactor));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+      }
     bshape(shHalfMirror[0], PPR::WALL);
-    hpcpush(hpxy(+0.262597,0)); hpcpush(hpxy(-0.261563,0));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    hpcpush(xpush0(len6)); hpcpush(xpush0(-len6));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
     }
   
   bshape(shAsymmetric, PPR::TEXT, scalefactor, 374);
