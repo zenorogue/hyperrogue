@@ -462,32 +462,18 @@ void texture_config::finish_mapping() {
   tinf3.texture_id = config.data.textureid;
   if(isize(texture_map) && isize(texture_map.begin()->second.triangles)) {
     auto& tris = texture_map.begin()->second.triangles;
-    const int STEP = TEXTURE_STEP_3D;
     using namespace hyperpoint_vec;
 
-    auto at = [&] (hyperpoint h, int a) {
-      h = normalize(h);
-      tinf3.tvertices.push_back(glhr::pointtogl(texture_coordinates(h)));
-      };
-
-    for(int a=0; a<8; a++)
-      for(int y=0; y<STEP; y++)
-      for(int x=0; x<STEP; x++) {
-        auto& tri = tris[a % isize(tris)];
-        hyperpoint center = tri.tv[0];
-        hyperpoint v1 = (tri.tv[1] - center) / STEP;
-        hyperpoint v2 = (tri.tv[2] - center) / STEP;
-        if(x+y < STEP) {
-          at(center + v1 * x + v2 * y, 0);
-          at(center + v1 * (x+1) + v2 * y, 1);
-          at(center + v1 * x + v2 * (y+1), 2);
-          }
-        if(x+y <= STEP && x && y) {
-          at(center + v1 * x + v2 * y, 0);
-          at(center + v1 * (x-1) + v2 * y, 1);
-          at(center + v1 * x + v2 * (y-1), 2);
-          }
-        }
+    for(int a=0; a<8; a++) {
+      auto& tri = tris[a % isize(tris)];
+      hyperpoint center = tri.tv[0];
+      hyperpoint v1 = tri.tv[1] - center;
+      hyperpoint v2 = tri.tv[2] - center;
+      texture_order([&] (ld x, ld y) {
+        hyperpoint h = normalize(center + v1 * x + v2 * y);
+        tinf3.tvertices.push_back(glhr::pointtogl(texture_coordinates(h)));
+        });
+      }
     }
   
   if(config.tstate == tsActive) {

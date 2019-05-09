@@ -2397,44 +2397,36 @@ void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false
     reverse(vertices.begin(), vertices.end());
 
   ld yy = log(2) / 2;
-  auto at = [&] (hyperpoint h) { 
-    if(!binarytiling) { hpcpush(normalize(h)); return; }
-    hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-    hpcpush(res);
-    };
-  
-  const auto STEP = TEXTURE_STEP_3D;
-  const int n = isize(vertices);
 
   bshape(shWall3D[id], PPR::WALL);
   last->flags |= POLY_TRIANGLES;
   
   hyperpoint center = Hypc;
   for(auto v: vertices) center += v;
-  center /= n;  
-  
-  for(int a=0; a<n; a++)
-    for(int y=0; y<STEP; y++)
-    for(int x=0; x<STEP; x++) {
-      hyperpoint v1 = (vertices[a] - center) / STEP;
-      hyperpoint v2 = (vertices[(a+1)%n] - center) / STEP;
-      if(x+y < STEP) {
-        at(center + v1 * x + v2 * y);
-        at(center + v1 * (x+1) + v2 * y);
-        at(center + v1 * x + v2 * (y+1));
-        }
-      if(x+y <= STEP && x && y) {
-        at(center + v1 * x + v2 * y);
-        at(center + v1 * (x-1) + v2 * y);
-        at(center + v1 * x + v2 * (y-1));
-        }
-      }
+  int n = isize(vertices);
+  center /= n; 
+
+  for(int a=0; a<n; a++) {
+    hyperpoint v1 = vertices[a] - center;
+    hyperpoint v2 = vertices[(a+1)%n] - center;
+    texture_order([&] (ld x, ld y) {
+      hyperpoint h = center + v1 * x + v2 * y;
+      if(!binarytiling) { hpcpush(normalize(h)); return; }
+      hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+      hpcpush(res);
+      });
+    }
     
   bshape(shWireframe3D[id], PPR::WALL);
   if(true) {
-    for(int a=0; a<n; a++) for(int y=0; y<STEP; y++)
-      at((vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP);
-    at(vertices[0]);
+    int STEP = vid.texture_step;
+    for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
+      hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
+      if(!binarytiling) { hpcpush(normalize(h)); return; }
+      hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+      hpcpush(res);
+      }
+    hpcpush(hpc[last->s]);
     }
   
   finishshape();

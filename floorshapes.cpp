@@ -206,7 +206,7 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
 
     cell fc;
     fc.type = 6+id;
-    const int STEP = TEXTURE_STEP_3D;
+    const int STEP = vid.texture_step;
     using namespace hyperpoint_vec;
     
     for(int t=0; t<2; t++) {
@@ -471,66 +471,33 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
       for(int k=0; k<SIDEPARS; k++) {
         sizeto(fsh.levels[k], id);
-        bshape(fsh.levels[k][id], fsh.prio);
-    
-        fsh.levels[k][id].tinf = &fsh.tinf3;
-        fsh.levels[k][id].texture_offset = 0;
+        bshape(fsh.levels[k][id], fsh.prio);    
+        last->flags |= POLY_TRIANGLES;
+        last->tinf = &fsh.tinf3;
+        last->texture_offset = 0;
 
-        const int STEP = TEXTURE_STEP_3D;
-        
-        int s = fsh.b[id].s;
-        int e = fsh.b[id].e-1;
-        
         #if CAP_BT
-        if(binarytiling) {
+        if(binarytiling) 
           for(int t=0; t<c->type; t++)
-          for(int y=0; y<STEP; y++)
-          for(int x=0; x<STEP; x++) {
-            auto at = [&] (int x, int y) {
+            texture_order([&] (ld x, ld y) {
               using namespace hyperpoint_vec;
               hyperpoint left = binary::get_corner_horo_coordinates(c, t);
               hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
-              hyperpoint mid = (left * x + right * y) / STEP;
-              hpcpush(binary::get_horopoint(mid));
-              };
-            if(x+y < STEP) {
-              at(x, y);
-              at(x+1, y);
-              at(x, y+1);
-              }
-            if(x+y <= STEP && x && y) {
-              at(x, y);
-              at(x-1, y);
-              at(x, y-1);
-              }
-            }
-          }
+              hpcpush(rgpushxto0(binary::get_horopoint(left * x + right * y)) * zpush(dfloor_table[k]) * C0);
+              });
         else 
         #endif
         if(1) {
-          auto at = [&] (hyperpoint h, int a) {
-            hpcpush(normalize(h));
-            };
-          for(int t=0; t<e-s; t++)
-          for(int y=0; y<STEP; y++)
-          for(int x=0; x<STEP; x++) {
+          int s = fsh.b[id].s;
+          int e = fsh.b[id].e-1;        
+          for(int t=0; t<e-s; t++) {
             using namespace hyperpoint_vec;
             hyperpoint center = zpush(dfloor_table[k]) * C0;
-            hyperpoint v1 = (rgpushxto0(hpc[s+t]) * center - center) / STEP;
-            hyperpoint v2 = (rgpushxto0(hpc[s+t+1]) * center - center) / STEP;
-            if(x+y < STEP) {
-              at(center + v1 * x + v2 * y, 0);
-              at(center + v1 * (x+1) + v2 * y, 1);
-              at(center + v1 * x + v2 * (y+1), 2);
-              }
-            if(x+y <= STEP && x && y) {
-              at(center + v1 * x + v2 * y, 0);
-              at(center + v1 * (x-1) + v2 * y, 1);
-              at(center + v1 * x + v2 * (y-1), 2);
-              }
+            hyperpoint v1 = (rgpushxto0(hpc[s+t]) * center - center);
+            hyperpoint v2 = (rgpushxto0(hpc[s+t+1]) * center - center);
+            texture_order([&] (ld x, ld y) { hpcpush(normalize(center + v1 * x + v2 * y)); });
             }
           }
-        last->flags |= POLY_TRIANGLES;
         }
       }
       
@@ -838,36 +805,21 @@ void draw_shape_for_texture(floorshape* sh, int& id) {
   sh->tinf3.tvertices.clear();
   sh->tinf3.texture_id = floor_textures->renderedTexture;
   
-  auto at = [&] (hyperpoint h, int a) {
-    hyperpoint inmodel;
-    applymodel(h, inmodel);
-    glvec2 v;
-    v[0] = (1 + inmodel[0] * vid.scale) / 2;
-    v[1] = (1 - inmodel[1] * vid.scale) / 2;
-    sh->tinf3.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
-    };
-  
-  const int STEP = TEXTURE_STEP_3D;
   using namespace hyperpoint_vec;
+  hyperpoint center = eupush(gx, gy) * C0;
+  hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0);
+  hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0);
 
   for(int a=0; a<8; a++)
-    for(int y=0; y<STEP; y++)
-    for(int x=0; x<STEP; x++) {
-      hyperpoint center = eupush(gx, gy) * C0;
-      hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0) / STEP;
-      hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0) / STEP;
-      if(x+y < STEP) {
-        at(center + v1 * x + v2 * y, 0);
-        at(center + v1 * (x+1) + v2 * y, 1);
-        at(center + v1 * x + v2 * (y+1), 2);
-        }
-      if(x+y <= STEP && x && y) {
-        at(center + v1 * x + v2 * y, 0);
-        at(center + v1 * (x-1) + v2 * y, 1);
-        at(center + v1 * x + v2 * (y-1), 2);
-        }
-      }
-
+    texture_order([&] (ld x, ld y) {
+      hyperpoint h = center + v1 * x + v2 * y;
+      hyperpoint inmodel;
+      applymodel(h, inmodel);
+      glvec2 v;
+      v[0] = (1 + inmodel[0] * vid.scale) / 2;
+      v[1] = (1 - inmodel[1] * vid.scale) / 2;
+      sh->tinf3.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
+      });
   }
 
 const int FLOORTEXTURESIZE = 4096;

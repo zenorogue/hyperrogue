@@ -5054,7 +5054,23 @@ namespace subscreens {
   bool split(reaction_t for_each_subscreen);
   }
 
-#define TEXTURE_STEP_3D vid.texture_step
+template <class T> void texture_order(const T& f) {
+  const int STEP = vid.texture_step;
+  const ld STEP2 = STEP;
+  for(int y=0; y<STEP; y++)
+  for(int x=0; x<STEP; x++) {
+    ld x0 = x / STEP2;
+    ld y0 = y / STEP2;
+    ld b = 1 / STEP2;
+
+     if(x+y < STEP) {
+       f(x0, y0); f(x0+b, y0); f(x0, y0+b);
+       }
+     if(x+y <= STEP && x && y) {
+       f(x0, y0); f(x0-b, y0); f(x0, y0-b);
+       }
+    }
+  }
 
 void set_euland3(cell *c, int co0, int co1, int alt, int hash);
 
