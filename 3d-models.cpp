@@ -882,6 +882,9 @@ void make_3d_models() {
     for(int i=0; i<3; i++)
       shift_shape(shHalfFloor[i], geom3::lev_to_factor(geom3::human_height * .01));
     }
+
+  shift_shape(shBoatOuter, geom3::FLOOR);
+  shift_shape(shBoatInner, (geom3::FLOOR+geom3::LAKE)/2);
   }
 
 #undef S

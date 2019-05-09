@@ -4114,7 +4114,7 @@ void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatr
   int incol = magical ? 0x0060C0FF : 0x804000FF;
   bool nospin = false;
 
-  if(DIM == 3) {
+  if(WDIM == 3) {
     Vboat0 = V;
     nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
     if(!nospin) Vboat0 = face_the_player(V);
@@ -4141,7 +4141,7 @@ void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatr
     if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
       animations[LAYER_SMALL][c].footphase = 0;
     }
-  if(wmspatial)
+  if(wmspatial && GDIM == 2)
     queuepolyat(mscale(Vboat0, (geom3::LAKE+1)/2), shBoatOuter, outcol, PPR::BOATLEV2);
   queuepoly(Vboat0, shBoatOuter, outcol);
   queuepoly(Vboat0, shBoatInner, incol);
