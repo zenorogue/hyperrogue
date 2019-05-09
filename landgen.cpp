@@ -154,7 +154,7 @@ void place_elemental_wall(cell *c) {
   }
 
 int hrand_monster(int x) {
-  if(DIM == 3 && !sphere) {
+  if(WDIM == 3 && !sphere) {
     int t = isize(gmatrix);
     if(t > 300) x = ((long long)(x)) * t / 300;
     }
@@ -220,7 +220,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || DIM == 3) {
+      if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || WDIM == 3) {
         if(fargen) {
           int i = hrand(100);
           if(i < 10) 
@@ -424,10 +424,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(fulltorus) {
           c->wall = waCavefloor;
           }
-        else if(DIM == 3 && hyperbolic && !binarytiling)
+        else if(WDIM == 3 && hyperbolic && !binarytiling)
           c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
         #if MAXMDIM >= 4
-        else if(euclid && DIM == 3)
+        else if(euclid && WDIM == 3)
           c->wall = euclid3::get_emerald(c) ? waCavewall : waCavefloor;
         #endif
         else if(euclid) {
@@ -621,7 +621,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
-        else if(DIM == 3 && hyperbolic && !binarytiling)
+        else if(WDIM == 3 && hyperbolic && !binarytiling)
           c->wall = (c->master->zebraval & 2) ? waVinePlant : waNone;
         else if(a4 || sphere || archimedean)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
@@ -1397,7 +1397,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else {
           // int d0 = d % TEMPLE_EACH;
           // if(d0<0) d0=-d0;
-          if(hrand(100) < (peace::on ? 15 : 30) && DIM == 2)
+          if(hrand(100) < (peace::on ? 15 : 30) && WDIM == 2)
             c->wall = waBigStatue;
           else if(hrand_monster(20000) < -d)
             c->monst = hrand(3) ? moCultist : moPyroCultist;
@@ -2018,9 +2018,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laEndorian:
       ONEMPTY {
-        if(c->wall == waNone && coastval(c, laEndorian) >= 10 && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()) && (DIM == 2 || hrand(100) < 25))
+        if(c->wall == waNone && coastval(c, laEndorian) >= 10 && hrand_monster(5000) < 10 + 2 * (items[itApple] + yendor::hardness()) && (WDIM == 2 || hrand(100) < 25))
           c->monst = moSparrowhawk;
-        else if(c->wall != waNone && hrand_monster(DIM == 3 ? 25000 : 5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
+        else if(c->wall != waNone && hrand_monster(WDIM == 3 ? 25000 : 5000) < 10 + 2 * (items[itApple] + yendor::hardness()))
           c->monst = moResearcher;
         else if(c->wall == waCanopy && !checkInTree(c, 3) && hrand(5000) < PT(300 + 5 * (kills[moSparrowhawk] + kills[moResearcher]), 750))
           c->item = itApple;
@@ -2429,7 +2429,7 @@ void repairLandgen(cell *c) {
     }
   
   if(passable(c, NULL, 0)) {
-    if(c->land == laBarrier && DIM != 3) c->wall = waBarrier;
+    if(c->land == laBarrier && WDIM != 3) c->wall = waBarrier;
     if(c->land == laOceanWall) 
       c->wall = c->type == 7 ? waBarrier : waSea;
     }
@@ -2451,7 +2451,7 @@ void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && geometry != gCrystal && DIM == 2) {
+  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && geometry != gCrystal && WDIM == 2) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {
