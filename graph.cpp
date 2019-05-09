@@ -4558,7 +4558,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }          
           if(GDIM == 3) {
             for(int d=0; d<6; d++)
-              queuepolyat(V2 * spin(d*M_PI/S3), shHalfMirror[2], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->move(d)->cpdist;
+              queuepolyat(V2 * spin(d*M_PI/S3), shHalfMirror[2], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->cmove(d)->cpdist;
             }
           else if(wmspatial) {
             const int layers = 2 << detaillevel;
@@ -4579,7 +4579,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
   
           if(GDIM == 3) {
-            queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->move(d)->cpdist;
+            queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->cmove(d)->cpdist;
             }
           else if(wmspatial) {
             const int layers = 2 << detaillevel;
