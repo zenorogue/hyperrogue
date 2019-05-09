@@ -1187,11 +1187,7 @@ void show3D() {
 
   if(WDIM == 2) {
     dialog::addBoolItem(XLAT("use the full 3D models"), geom3::always3, 'U');
-    dialog::add_action([] {
-      geom3::always3 = !geom3::always3;
-      need_reset_geometry = true;
-      callhooks(hooks_swapdim);
-      });
+    dialog::add_action(geom3::switch_always3);
     }
 
   if(vid.use_smart_range == 0 && DIM == 2) {
@@ -1283,49 +1279,12 @@ void show3D() {
   #endif
   if(GDIM == 2) {
     dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
-    dialog::add_action([] () { 
-      if(pmodel == mdDisk && vid.camera_angle) {
-        vid.yshift = 0;
-        vid.camera_angle = 0;
-        vid.xposition = 0;
-        vid.yposition = 0;
-        vid.scale = 1;      
-        vid.fixed_facing = false;
-        }
-      else {
-        vid.yshift = -0.3;
-        vid.camera_angle = -45;
-        vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
-        vid.xposition = 0;
-        vid.yposition = -0.9;
-        vid.fixed_facing = true;
-        vid.fixed_facing_dir = 90;
-        }
-      });
+    dialog::add_action(geom3::switch_tpp);
     }
   
   if(WDIM == 2) {
     dialog::addBoolItem(XLAT("configure FPP automatically"), DIM == 3, 'F');
-    dialog::add_action([] {
-      if(!geom3::always3) {
-        geom3::always3 = true;
-        geom3::wall_height = 1.5;
-        geom3::human_wall_ratio = 0.8;
-        geom3::camera = 0;
-        if(pmodel == mdDisk) pmodel = mdPerspective;
-        need_reset_geometry = true;
-        callhooks(hooks_swapdim);
-        }
-      else {
-        geom3::always3 = false;
-        geom3::wall_height = .3;
-        geom3::human_wall_ratio = .7;
-        geom3::camera = 1;
-        if(pmodel == mdPerspective) pmodel = mdDisk;
-        need_reset_geometry = true;
-        callhooks(hooks_swapdim);
-        }
-      });
+    dialog::add_action(geom3::switch_fpp);
     }
 
   if(0);
@@ -1932,15 +1891,17 @@ int read_config_args() {
     PHASEFROM(2);
     nomenukey = true;
     }
-  else if(argis("-al3")) {
+  else if(argis("-switch-fpp")) {
     PHASEFROM(2);
-    geom3::always3 = true;
-    geom3::wall_height = 1.5;
-    geom3::human_wall_ratio = 0.8;
-    geom3::camera = 0;
-    if(pmodel == mdDisk) pmodel = mdPerspective;
-    need_reset_geometry = true;
-    callhooks(hooks_swapdim);
+    geom3::switch_fpp();
+    }
+  else if(argis("-switch-tpp")) {
+    PHASEFROM(2);
+    geom3::switch_tpp();
+    }
+  else if(argis("-switch-3d")) {
+    PHASEFROM(2);
+    geom3::switch_always3();
     }
   else if(argis("-nohelp")) {
     PHASEFROM(2);

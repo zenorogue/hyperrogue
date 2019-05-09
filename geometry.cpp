@@ -383,6 +383,54 @@ namespace geom3 {
       BOTTOM = lev_to_factor(-lake_bottom);
       }
     }    
+
+  void switch_always3() {
+    geom3::always3 = !geom3::always3;
+    need_reset_geometry = true;
+    callhooks(hooks_swapdim);
+    }
+
+  void switch_tpp() {
+    if(pmodel == mdDisk && vid.camera_angle) {
+      vid.yshift = 0;
+      vid.camera_angle = 0;
+      vid.xposition = 0;
+      vid.yposition = 0;
+      vid.scale = 1;      
+      vid.fixed_facing = false;
+      }
+    else {
+      vid.yshift = -0.3;
+      vid.camera_angle = -45;
+      vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
+      vid.xposition = 0;
+      vid.yposition = -0.9;
+      vid.fixed_facing = true;
+      vid.fixed_facing_dir = 90;
+      }
+    }
+    
+  void switch_fpp() {
+    if(!geom3::always3) {
+      geom3::always3 = true;
+      geom3::wall_height = 1.5;
+      geom3::human_wall_ratio = 0.8;
+      geom3::camera = 0;
+      if(pmodel == mdDisk) pmodel = mdPerspective;
+      need_reset_geometry = true;
+      callhooks(hooks_swapdim);
+      }
+    else {
+      geom3::always3 = false;
+      geom3::wall_height = .3;
+      geom3::human_wall_ratio = .7;
+      geom3::camera = 1;
+      if(pmodel == mdPerspective) pmodel = mdDisk;
+      need_reset_geometry = true;
+      callhooks(hooks_swapdim);
+      }
+    }
+
   }
 
 void initgeo() {

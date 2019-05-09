@@ -4338,6 +4338,9 @@ namespace gamestack {
 namespace geom3 {
   extern ld BODY;
   extern ld depth, camera, wall_height, creature_scale, height_width;
+  void switch_always3();
+  void switch_fpp();
+  void switch_tpp();
   }
 
 void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame = 0, int align = 8);
