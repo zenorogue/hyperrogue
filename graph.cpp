@@ -4108,7 +4108,7 @@ int get_darkval(int d) {
 
 void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatrix& V) {
   double footphase;
-  if(c == cwt.at && hide_player()) return;
+  if(WDIM == 3 && c == cwt.at && hide_player()) return;
   bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
   int outcol = magical ? watercolor(0) : 0xC06000FF;
   int incol = magical ? 0x0060C0FF : 0x804000FF;
