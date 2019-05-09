@@ -5779,6 +5779,17 @@ void queuecircleat(cell *c, double rad, color_t col) {
       }
     return;
     }    
+  if(spatial_graphics || GDIM == 3) {
+    vector<transmatrix> corners(c->type+1);
+    for(int i=0; i<c->type; i++) corners[i] = gmatrix[c] * rgpushxto0(get_corner_position(c, i, 3 / rad));    
+    corners[c->type] = corners[0];
+    for(int i=0; i<c->type; i++) {
+      queueline(mscale(corners[i], geom3::FLOOR) * C0, mscale(corners[i+1], geom3::FLOOR) * C0, col, 2, PPR::SUPERLINE);
+      queueline(mscale(corners[i], geom3::WALL) * C0, mscale(corners[i+1], geom3::WALL) * C0, col, 2, PPR::SUPERLINE);
+      queueline(mscale(corners[i], geom3::FLOOR) * C0, mscale(corners[i], geom3::WALL) * C0, col, 2, PPR::SUPERLINE);
+      }
+    return;
+    }
   #if CAP_SHAPES
   if(vid.stereo_mode || sphere) {
     dynamicval<color_t> p(poly_outline, col);
@@ -5928,14 +5939,9 @@ void drawMarkers() {
         }
       }
     
-    if(DIM == 3 && !inHighQual && !shmup::on && vid.axes && playermoved) {
+    if(GDIM == 3 && !inHighQual && !shmup::on && vid.axes && playermoved) {
       cell *c = forwardcell();
       IG(c) queuecircleat(c, .8, getcs().uicolor);
-      }
-    
-    if(DIM == 3 && !inHighQual && !playermoved) {
-      cell *c = mouseover;
-      IG(c) queuecircleat(c, .8, 0xFFFFFFFF);
       }
     
     #endif
