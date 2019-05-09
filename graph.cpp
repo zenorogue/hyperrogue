@@ -4510,7 +4510,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
           transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
-          draw_floorshape(c, Vdepth, shFullFloor, darkena(firecolor(0, 10), 0, 0xDF), PPR::LAKEBOTTOM);
+          if(DIM == 3)
+            draw_shapevec(c, V, shFullFloor.levels[SIDE_LAKE], darkena(firecolor(0, 10), 0, 0xDF), PPR::TRANSPARENT);
+          else
+            draw_floorshape(c, Vdepth, shFullFloor, darkena(firecolor(0, 10), 0, 0xDF), PPR::LAKEBOTTOM);
           }
         }
 
@@ -4720,7 +4723,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laMountain:
-          if(shmup::on)
+          if(shmup::on || DIM == 3)
             shmup_gravity_floor(c);
           else 
             set_towerfloor(c, euclid ? celldist : c->master->alt ? celldistAltPlus : celldist);
@@ -4874,9 +4877,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(c->wall != waFloorB && c->wall != waFloorA && c->wall != waMirror && c->wall != waCloud) {
             fd = 1;
             set_floor(shFloor);
-            if(c->wall != waMirror && c->wall != waCloud)
+            if(c->wall != waMirror && c->wall != waCloud && DIM == 2)
               draw_floorshape(c, V, shMFloor, darkena(fcol, 2, 0xFF), PPR::FLOORa);
-            if(c->wall != waMirror && c->wall != waCloud)
+            if(c->wall != waMirror && c->wall != waCloud && DIM == 2)
               draw_floorshape(c, V, shMFloor2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF), PPR::FLOORb);
             }
           else
@@ -4884,7 +4887,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laEndorian:
-          if(shmup::on)
+          if(shmup::on || DIM == 3)
             shmup_gravity_floor(c);
 
           else if(c->wall == waTrunk) 
@@ -4898,7 +4901,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laIvoryTower: case laDungeon: case laWestWall:
-          if(shmup::on)
+          if(shmup::on || DIM == 3)
             shmup_gravity_floor(c);
           else
             set_towerfloor(c);
@@ -5007,7 +5010,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         c->land == laRedRock || 
         vid.darkhepta ||
         (c->land == laClearing && !BITRUNCATED))) {
-        queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
+        if(DIM == 3 && WDIM == 2)
+          queuepoly((*Vdp)*zpush(geom3::FLOOR), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
+        else
+          queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
       if(conformal::includeHistory && conformal::inmovehistory.count(c))
@@ -5125,7 +5131,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
       
         case waLadder:
-          if(euclid) {
+          if(DIM == 3) {
+            draw_shapevec(c, V * zpush(-geom3::human_height/20), shMFloor.levels[0], 0x804000FF, PPR::FLOOR+1);
+            }
+          else if(euclid) {
             draw_floorshape(c, V, shMFloor, 0x804000FF);
             draw_floorshape(c, V, shMFloor2, 0x000000FF);
             }
@@ -5186,8 +5195,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case waClosePlate: case waOpenPlate: {
           transmatrix V2 = V;
           if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
-          draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
-          draw_floorshape(c, V2, shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+          if(DIM == 3) {
+            draw_shapevec(c, V2 * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
+            draw_shapevec(c, V2 * zpush(-geom3::human_height/20), shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+            }
+          else {
+            draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
+            draw_floorshape(c, V2, shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+            }
           break;
           }
         
@@ -5228,7 +5243,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             color_t col = winf[waGlass].color;
             int dcol = darkena(col, 0, 0x80);
             transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
-            draw_floorshape(c, Vdepth, shMFloor, dcol, PPR::WALL); // GLASS
+            if(DIM == 3) 
+              draw_shapevec(c, V, shMFloor.levels[SIDE_WALL], dcol, PPR::WALL);
+            else
+              draw_floorshape(c, Vdepth, shMFloor, dcol, PPR::WALL); // GLASS
             dynamicval<qfloorinfo> dq(qfi, qfi);
             set_floor(shMFloor);
             if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
@@ -5291,7 +5309,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           wa_default:
           if(sl && wmspatial) {
       
-            draw_qfi(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR::REDWALL-4+4*sl);
+            if(DIM == 3 && qfi.fshape)
+              draw_shapevec(c, V, qfi.fshape->levels[sl], darkena(wcol, fd, 0xFF), PPR::REDWALL-4+4*sl);
+            else
+              draw_qfi(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR::REDWALL-4+4*sl);
             floorShadow(c, V, SHADOW_SL * sl);
             for(int s=0; s<sl; s++) 
             forCellIdEx(c2, i, c) {
@@ -5312,7 +5333,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               color_t col = winf[c->wall].color;
               int dcol = darkena(col, 0, 0xC0);
               transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
-              draw_floorshape(c, Vdepth, shMFloor, dcol, PPR::WALL); // GLASS
+              if(DIM == 3)
+                draw_shapevec(c, V, shMFloor.levels[SIDE_WALL], dcol, PPR::WALL);
+              else
+                draw_floorshape(c, Vdepth, shMFloor, dcol, PPR::WALL); // GLASS
               dynamicval<qfloorinfo> dq(qfi, qfi);
               set_floor(shMFloor);
               if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
