@@ -335,7 +335,7 @@ namespace geom3 {
       BIRD = 1.20;
       }
     else {
-      INFDEEP = GDIM == 3 ? +10 : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
+      INFDEEP = GDIM == 3 ? (sphere ? M_PI/2 : +10) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);
