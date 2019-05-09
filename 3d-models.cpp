@@ -12,6 +12,8 @@ namespace hr {
 #define S (scalefactor / 0.805578)
 #define SH (scalefactor / 0.805578 * geom3::height_width / 1.5)
 
+#define revZ (WDIM == 2 ? -1 : 1)
+
 hyperpoint shcenter;
 
 vector<hyperpoint> get_shape(hpcshape sh) {
@@ -359,6 +361,7 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
       else if(hsh[s] < 0.12*S) shi[s] = -0.1 - 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
       else shi[s] = -0.1;
       shi[s] *= geom3::human_height;
+      shi[s] *= revZ;
       }
     if(ok && kind == 1) for(int i=0; i<3; i++) {
       int j = (i+1) % 3;
@@ -374,9 +377,9 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
     for(int s=0; s<3; s++) {
       hyperpoint h = hs[s];
       ld zz = zc(0.925);
-      if(h[0] < -0.05*S) zz += (h[0]/S + 0.05) * SH;
+      if(h[0] < -0.05*S) zz += revZ * (h[0]/S + 0.05) * SH;
       if(hdist0(h) <= 0.0501*S) {
-        zz += sqrt(0.0026 - pow(hdist0(h)/S, 2)) * SH;
+        zz += revZ * sqrt(0.0026 - pow(hdist0(h)/S, 2)) * SH;
         }
       hpcpush(zpush(zz) * h);
       }
@@ -448,7 +451,7 @@ void make_head_only() {
     }
   
   add_texture(shPHeadOnly);
-  shift_last(-geom3::HEAD - 0.01 * SH); 
+  shift_last(-geom3::HEAD - revZ * 0.01 * SH); 
   }
 
 
@@ -866,6 +869,7 @@ void make_3d_models() {
 
 #undef S
 #undef SH
+#undef revZ
 #endif
 
 }
