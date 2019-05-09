@@ -157,8 +157,9 @@ void chasmifyPoly(double fac, double fac2, int k) {
     auto at = [&] (ld x, ld y) {
       x *= (isize(points) - 1);
       int zf = int(x);
+      if(zf == isize(points)) zf--;
       x -= zf;
-      hpcpush(zshift(points[zf] + (points[zf+1] - points[zf]) * x, fac + (fac2-fac) * y));
+      hpcpush(zshift(normalize(points[zf] + (points[zf+1] - points[zf]) * x), fac + (fac2-fac) * y));
       };
     texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });
