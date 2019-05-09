@@ -19,7 +19,7 @@ int detaillevel = 0;
 bool first_cell_to_draw = true;
 
 bool hide_player() {
-  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && first_cell_to_draw;
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && first_cell_to_draw && (WDIM == 3 || geom3::camera == 0);
   }
 
 hookset<bool(int sym, int uni)> *hooks_handleKey;
