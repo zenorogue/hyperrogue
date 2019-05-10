@@ -3890,7 +3890,7 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
     color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
     draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
     forCellIdEx(c2, i, c) 
-      if(!highwall(c2))
+      if(!highwall(c2) || conegraph(c2))
         placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
     return;
     }
