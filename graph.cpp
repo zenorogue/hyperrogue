@@ -1655,8 +1655,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     
     case moGhost: case moSeep: case moFriendlyGhost: {
       if(m == moFriendlyGhost) col = fghostcolor(where);
-      queuepoly(VGHOST, shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80));
-      queuepoly(VGHOST, shEyes, 0xFF);
+      queuepolyat(VGHOST, shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80), DIM == 3 ? PPR::SUPERLINE : shGhost.prio);
+      queuepolyat(VGHOST, shEyes, 0xFF, DIM == 3 ? PPR::SUPERLINE : shEyes.prio);
       return false;
       }
     

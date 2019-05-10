@@ -662,7 +662,7 @@ void dqi_poly::gldraw() {
     if(draw) {
       if(flags & POLY_TRIANGLES) {
         glhr::color2(color);
-        glhr::set_depthtest(model_needs_depth());
+        glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
         glDrawArrays(GL_TRIANGLES, ioffset, cnt);
         }
       else {
