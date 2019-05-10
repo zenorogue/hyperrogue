@@ -3656,6 +3656,7 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t co
     escherSidewall(c, sidepar, V, col);
     return true;
     }
+  if(!qfi.fshape) return true;
   
   if(qfi.fshape == &shBigTriangle && pseudohept(c->move(i))) return false;
   if(qfi.fshape == &shTriheptaFloor && !pseudohept(c) && !pseudohept(c->move(i))) return false;
