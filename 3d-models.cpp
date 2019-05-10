@@ -894,6 +894,22 @@ void make_3d_models() {
   shift_shape(shBigCarpet3, geom3::FLOOR - geom3::human_height * 3/40);
   for(int a=0; a<5; a++) for(int b=0; b<4; b++)
     shift_shape(shReptile[a][b], geom3::FLOOR - geom3::human_height * min(b, 2) / 40);
+    
+  shift_shape(shMineMark[0], geom3::FLOOR - geom3::human_height * 1/40);
+  shift_shape(shMineMark[1], geom3::FLOOR - geom3::human_height * 1/40);
+
+  for(int a=0; a<5; a++) shift_shape(shZebra[a], geom3::FLOOR);
+  
+  for(int t=0; t<13; t++) for(int u=0; u<6; u++)
+    shift_shape(shTortoise[t][u], geom3::FLOOR - geom3::human_height * (t+1) / 120);
+
+  make_revolution_cut(shStatue, 60);
+  
+  shift_shape(shThorns, geom3::FLOOR - geom3::human_height * 1/40);
+  shift_shape(shRose, geom3::FLOOR - geom3::human_height * 1/20);
+  
+  shift_shape(shMagicSword, geom3::ABODY);
+  shift_shape(shMagicShovel, geom3::ABODY);
   }
 
 #undef S
