@@ -9,6 +9,8 @@ namespace fieldpattern {
 extern int subpathid;
 extern int subpathorder;
 
+#define MWDIM (WDIM+1)
+
 bool isprime(int n) {
   for(int k=2; k<n; k++) if(n%k == 0) return false;
   return true;
@@ -21,19 +23,19 @@ struct matrix {
   };
 
 bool operator == (const matrix& A, const matrix& B) {
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
     if(A[i][j] != B[i][j]) return false;
   return true;
   }
 
 bool operator != (const matrix& A, const matrix& B) {
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
     if(A[i][j] != B[i][j]) return true;
   return false;
   }
 
 bool operator < (const matrix& A, const matrix& B) {
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
     if(A[i][j] != B[i][j]) return A[i][j] < B[i][j];
   return false;
   }
@@ -101,13 +103,13 @@ struct fpattern {
   
   matrix mmul(const matrix& A, const matrix& B) {
     matrix res;
-    for(int i=0; i<MDIM; i++) for(int k=0; k<MDIM; k++) {
+    for(int i=0; i<MWDIM; i++) for(int k=0; k<MWDIM; k++) {
       int t = 0;
   #ifdef EASY
-      for(int j=0; j<MDIM; j++) t += mul(A[i][j], B[j][k]);
+      for(int j=0; j<MWDIM; j++) t += mul(A[i][j], B[j][k]);
       t %= Prime;
   #else
-      for(int j=0; j<MDIM; j++) t = add(t, mul(A[i][j], B[j][k]));
+      for(int j=0; j<MWDIM; j++) t = add(t, mul(A[i][j], B[j][k]));
   #endif
       res[i][k] = t;
       }
@@ -215,7 +217,7 @@ struct fpattern {
   
   int solve() {
     
-    for(int a=0; a<MDIM; a++) for(int b=0; b<MDIM; b++) Id[a][b] = a==b?1:0;
+    for(int a=0; a<MWDIM; a++) for(int b=0; b<MWDIM; b++) Id[a][b] = a==b?1:0;
   
     if(!isprime(Prime)) {
       return 1;
