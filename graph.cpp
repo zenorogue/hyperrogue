@@ -3521,7 +3521,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     fcol = wcol;
     } */
   
-  if(DIM == 2) {
+  if(GDIM == 2) {
     int rd = rosedist(c);
     if(rd == 1) 
       wcol = gradient(0x804060, wcol, 0,1,3),
