@@ -5128,11 +5128,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
       
         case waSolidBranch:
-          queuepoly(V, shSolidBranch, darkena(wcol, 0, 0xFF));
+          queuepoly(DIM == 3 ? mscale(V, geom3::BODY) : V, shSolidBranch, darkena(wcol, 0, 0xFF));
           break;
         
         case waWeakBranch:
-          queuepoly(V, shWeakBranch, darkena(wcol, 0, 0xFF));
+          queuepoly(DIM == 3 ? mscale(V, geom3::BODY) : V, shWeakBranch, darkena(wcol, 0, 0xFF));
           break;
       
         case waLadder:
@@ -5274,8 +5274,15 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
       
         case waFireTrap:
-          draw_floorshape(c, V, shMFloor, darkena(0xC00000, 0, 0xFF));
-          draw_floorshape(c, V, shMFloor2, darkena(0x600000, 0, 0xFF));
+
+          if(DIM == 3) {
+            draw_shapevec(c, V * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(0xC00000, 0, 0xFF));
+            draw_shapevec(c, V * zpush(-geom3::human_height/20), shMFloor2.levels[0], darkena(0x600000, 0, 0xFF));
+            }
+          else {
+            draw_floorshape(c, V, shMFloor, darkena(0xC00000, 0, 0xFF));
+            draw_floorshape(c, V, shMFloor2, darkena(0x600000, 0, 0xFF));
+            }
           if(c->wparam >= 1)
             queuepoly(mscale(V, geom3::FLOOR), shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           break;
@@ -5362,12 +5369,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           
           else if(c->wall == waExplosiveBarrel) {
-           const int layers = 2 << detaillevel;
-           for(int z=1; z<=layers; z++) {
-             double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
-             queuepolyat(xyzscale(V, zg, zg), shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::REDWALLm+z));
-             }
-           }
+            if(DIM == 3 && qfi.fshape) {
+              draw_shapevec(c, V, qfi.fshape->cone, 0xD00000FF, PPR::REDWALL);
+              break;
+              }
+            const int layers = 2 << detaillevel;
+            for(int z=1; z<=layers; z++) {
+              double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
+              queuepolyat(xyzscale(V, zg, zg), shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::REDWALLm+z));
+              }
+            }
           
           else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
             auto V2 = V;
