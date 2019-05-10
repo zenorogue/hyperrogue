@@ -829,7 +829,7 @@ void make_3d_models() {
   for(int i=0; i<8; i++)
     make_revolution(shAsteroid[i], 360);
   
-  make_revolution_cut(shBugLeg, 60, geom3::ALEG0);
+  make_revolution_cut(shBugLeg, 60);
 
   make_revolution(shBugArmor, 180, geom3::ABODY);
   make_revolution_cut(shBugAntenna, 90, geom3::ABODY);
