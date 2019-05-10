@@ -3141,3 +3141,19 @@ RogueViz:
 2018-04-29 20:13 Version 11.0s:
 
 - 3D fixes: fixed a crash; correct camera distance reduction in horosphere tilings; fixed PL/CZ translations
+
+2019-05-10 03:26 Version 11.0t:
+- fixed the binary tiling
+- fixed Mutant Ivies appearing via Orb of Change
+- redone gravity in shmup
+- cell cursors are now prisms, not circles or stars
+- enabled antialiasing in the browser version
+- fixed the sky display in Yendorian
+- a setting to configure the smoothness of binary tiling (also quality of 3D textures)
+- in the Hypersian Rug mode, changing parameters live now works better
+
+3D:
+- the 3D engine now can be enabled for 2D geometries, for a nice first-person perspective view (3d settings -> FPP)
+- seeps visible through walls, no junk in Jelly Kingdom
+- a setting which prevents the walls from appearing out of nothing
+- fixed sphere in native perspective
