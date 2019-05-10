@@ -2900,7 +2900,7 @@ void draw_reptile(cell *c, const transmatrix &V, color_t col) {
   }      
 
 void set_emeraldfloor(cell *c) {
-  if(!masterless && BITRUNCATED) {
+  if(!masterless && BITRUNCATED && GDIM == 2) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_EMERALD, patterns::SPF_SYM0123);
   
     int j = -1;
