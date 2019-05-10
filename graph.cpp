@@ -4791,7 +4791,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laSwitch:
           set_floor(shSwitchFloor);
-          if(ctof(c) && STDVAR && !archimedean && !binarytiling) for(int i=0; i<c->type; i++)
+          if(ctof(c) && STDVAR && !archimedean && !binarytiling && GDIM == 2) for(int i=0; i<c->type; i++)
             queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
           break;
 
