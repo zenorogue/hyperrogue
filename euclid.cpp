@@ -585,7 +585,7 @@ namespace euclid3 {
       build_torus3();
       }
 
-    heptagon *getOrigin() {
+    heptagon *getOrigin() override {
       return get_at(0);
       }
 
@@ -623,7 +623,7 @@ namespace euclid3 {
       return h;
       }
   
-    heptagon *create_step(heptagon *parent, int d) {
+    heptagon *create_step(heptagon *parent, int d) override {
       return build(parent, d, canonicalize(ispacemap[parent] + shifttable[d]));
       }  
 
@@ -636,7 +636,7 @@ namespace euclid3 {
       return res;
       }
 
-    void draw() {
+    void draw() override {
       dq::visited_by_matrix.clear();
       dq::enqueue_by_matrix(viewctr.at, cview());
       
@@ -667,7 +667,7 @@ namespace euclid3 {
       return eupush3(v[0], v[1], v[2]);
       }
     
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
       if(twisted) {
         coord c1 = ispacemap[h1];
         coord c2 = ispacemap[h2];

@@ -762,7 +762,7 @@ namespace reg3 {
         }
       }
 
-    void draw() {
+    void draw() override {
       sphereflip = Id;
       
       // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
@@ -793,7 +793,7 @@ namespace reg3 {
         }
       }
     
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
       auto p1 = reg_gmatrix[h1];
       auto p2 = reg_gmatrix[h2];
       transmatrix T = Id;
