@@ -387,6 +387,7 @@ namespace geom3 {
   void switch_always3() {
     geom3::always3 = !geom3::always3;
     need_reset_geometry = true;
+    swapmatrix(View);
     callhooks(hooks_swapdim);
     }
 
@@ -422,6 +423,7 @@ namespace geom3 {
       geom3::camera = 0;
       if(pmodel == mdDisk) pmodel = mdPerspective;
       need_reset_geometry = true;
+      swapmatrix(View);
       callhooks(hooks_swapdim);
       }
     else {
@@ -432,6 +434,7 @@ namespace geom3 {
       geom3::depth = 1;
       if(pmodel == mdPerspective) pmodel = mdDisk;
       need_reset_geometry = true;
+      swapmatrix(View);
       callhooks(hooks_swapdim);
       }
     }

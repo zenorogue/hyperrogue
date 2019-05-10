@@ -359,9 +359,11 @@ void swapmatrix(transmatrix& T) {
   for(int i=0; i<4; i++) swap(T[i][2], T[i][3]);
   for(int i=0; i<4; i++) swap(T[2][i], T[3][i]);
   if(DIM == 3) {
-    for(int i=0; i<4; i++) T[i][0] = T[0][i] = 0;
+    for(int i=0; i<4; i++) T[i][2] = T[2][i] = 0;
     T[2][2] = 1;
     }
+  fixmatrix(T);
+  for(int i=0; i<4; i++) for(int j=0; j<4; j++) if(isnan(T[i][j])) T = Id;
   }
 #endif
 
