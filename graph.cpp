@@ -5263,7 +5263,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case waFan:
           if(DIM == 3)
             for(int a=0; a<10; a++)
-            queuepoly(V * zpush(geom3::FLOOR + (geom3::WALL - geom3::FLOOR) * a/10.) * spintick(a * degree + PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
+            queuepoly(V * zpush(geom3::FLOOR + (geom3::WALL - geom3::FLOOR) * a/10.) * spin(a *degree) * spintick(PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
           else
             queuepoly(V * spintick(PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
           break;
