@@ -5269,7 +5269,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waArrowTrap:
           if(c->wparam >= 1)
-            queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+            queuepoly(mscale(V, geom3::FLOOR), shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           if(isCentralTrap(c)) arrowtraps.push_back(c);
           break;
       
@@ -5277,7 +5277,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           draw_floorshape(c, V, shMFloor, darkena(0xC00000, 0, 0xFF));
           draw_floorshape(c, V, shMFloor2, darkena(0x600000, 0, 0xFF));
           if(c->wparam >= 1)
-            queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+            queuepoly(mscale(V, geom3::FLOOR), shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           break;
       
         case waGiantRug:
