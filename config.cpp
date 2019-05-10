@@ -1213,10 +1213,12 @@ void add_edit_wall_quality(char c) {
     dialog::bound_low(1);
     dialog::bound_up(128);
     dialog::reaction = [] {
+      #if MAXMDIM >= 4
       if(floor_textures) {
         delete floor_textures;
         floor_textures = NULL;
         }
+      #endif
       need_reset_geometry = true;          
       };
     });

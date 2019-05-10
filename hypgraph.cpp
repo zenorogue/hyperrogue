@@ -1091,6 +1091,7 @@ void centerpc(ld aspd) {
     crystal::centerrug(aspd);
   #endif
 
+  #if MAXMDIM >= 4
   if(shmup::on && vid.sspeed > -5 && DIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
     viewctr = shmup::pc[id]->base->master;
@@ -1107,6 +1108,7 @@ void centerpc(ld aspd) {
     #endif
     return;
     }
+  #endif
   
   #if CAP_RACING
   if(racing::on && !racing::standard_centering) {
@@ -1122,8 +1124,12 @@ void centerpc(ld aspd) {
   ors::unrotate(cwtV); ors::unrotate(View);
   
   transmatrix T = cwtV;
-  int sl = snakelevel(cwt.at);
-  if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
+  #if MAXMDIM >= 4
+  if(GDIM == 3 && WDIM == 2) {
+    int sl = snakelevel(cwt.at);
+    if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
+    }
+  #endif
   hyperpoint H = inverse(actual_view_transform) * tC0(T);
   ld R = zero_d(DIM, H) ? 0 : hdist0(H);
   if(R < 1e-9) {

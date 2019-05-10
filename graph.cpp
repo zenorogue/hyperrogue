@@ -3720,6 +3720,7 @@ int gridcolor(cell *c1, cell *c2) {
 #if CAP_SHAPES
 void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority) {
  
+  #if MAXMDIM >= 4
   if(GDIM == 3) {
     for(int i=q; i<isize(ptds); i++) {
       auto pp = dynamic_cast<dqi_poly*> (&*ptds[q++]);
@@ -3729,6 +3730,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
       }
     return;
     }
+  #endif
 
   // since we might be changing priorities, we have to make sure that we are sorting correctly
   if(down > 0 && repriority) { 
@@ -5016,9 +5018,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         c->land == laRedRock || 
         vid.darkhepta ||
         (c->land == laClearing && !BITRUNCATED))) {
+        #if MAXMDIM >= 4
         if(DIM == 3 && WDIM == 2)
           queuepoly((*Vdp)*zpush(geom3::FLOOR), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         else
+        #endif
           queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
@@ -5138,7 +5142,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
         case waLadder:
           if(DIM == 3) {
+            #if MAXMDIM >= 4
             draw_shapevec(c, V * zpush(-geom3::human_height/20), shMFloor.levels[0], 0x804000FF, PPR::FLOOR+1);
+            #endif
             }
           else if(euclid) {
             draw_floorshape(c, V, shMFloor, 0x804000FF);
@@ -5202,8 +5208,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           transmatrix V2 = V;
           if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
           if(DIM == 3) {
+            #if MAXMDIM >= 4
             draw_shapevec(c, V2 * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
             draw_shapevec(c, V2 * zpush(-geom3::human_height/20), shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+            #endif
             }
           else {
             draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
@@ -5261,10 +5269,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case waFan:
+          #if MAXMDIM >= 4
           if(DIM == 3)
             for(int a=0; a<10; a++)
             queuepoly(V * zpush(geom3::FLOOR + (geom3::WALL - geom3::FLOOR) * a/10.) * spin(a *degree) * spintick(PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
           else
+          #endif
             queuepoly(V * spintick(PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
           break;
         
@@ -5277,8 +5287,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case waFireTrap:
 
           if(DIM == 3) {
+            #if MAXMDIM >= 4
             draw_shapevec(c, V * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(0xC00000, 0, 0xFF));
             draw_shapevec(c, V * zpush(-geom3::human_height/20), shMFloor2.levels[0], darkena(0x600000, 0, 0xFF));
+            #endif
             }
           else {
             draw_floorshape(c, V, shMFloor, darkena(0xC00000, 0, 0xFF));
@@ -6172,14 +6184,18 @@ ld wall_radar(cell *c, transmatrix T) {
 
 void make_actual_view() {
   sphereflip = Id;
+  #if MAXMDIM >= 4
   if(WDIM == 3 && !shmup::on && vid.yshift) {
     actual_view_transform = cpush(2, wall_radar(viewctr.at->c7, inverse(View)));
     return;
     }  
   if(WDIM == 3) { actual_view_transform = Id; return; }
+  #endif
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
   actual_view_transform = ypush(vid.yshift) * sphereflip;  
+  #if MAXMDIM >= 4
   if(geom3::always3) actual_view_transform = zpush(+geom3::camera) * actual_view_transform;
+  #endif
   }
 
 transmatrix cview() {
