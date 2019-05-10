@@ -377,6 +377,7 @@ void draw_radar(bool cornermode) {
     }
 
   quickqueue();
+  glflush();
 
   for(auto& r: radarpoints)
     displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2]/3 + rad * r.h[1]*2/3), 0, 8, r.glyph, r.color);
@@ -538,6 +539,7 @@ void drawStats() {
       }
     }
   }
+  glflush();
   calcparam();
   
   string s0;
@@ -621,6 +623,7 @@ XLAT(
 #endif
     }
 
+  glflush();
   achievement_display();
 
   callhooks(hooks_stats);
