@@ -157,7 +157,7 @@ void chasmifyPoly(double fac, double fac2, int k) {
     auto at = [&] (ld x, ld y) {
       x *= (isize(points) - 1);
       int zf = int(x);
-      if(zf == isize(points)) zf--;
+      if(zf == isize(points)-1) zf--;
       x -= zf;
       hpcpush(zshift(normalize(points[zf] + (points[zf+1] - points[zf]) * x), fac + (fac2-fac) * y));
       };
