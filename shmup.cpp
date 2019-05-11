@@ -3620,21 +3620,27 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         playerfound = true;
 
         dynamicval<int> d(cpid, m->pid);
-        if(!hide_player() || !subscreens::is_current_player(m->pid)) {
+        
+        bool h = hide_player();
+        bool ths = subscreens::is_current_player(m->pid);
+        
+        if(!ths || !h) {
           drawPlayerEffects(view, c, true);
           if(WDIM == 3) view = view * spin(-M_PI/2) * cspin(0, 2, -M_PI/2);
           if(m->inBoat) m->footphase = 0;
           if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
           }
 
-        if(subscreens::is_current_player(m->pid) && hide_player() && WDIM == 3) {
+        if(ths && h) first_cell_to_draw = false;
+
+        if(ths && h && WDIM == 3) {
           if(items[itOrbSword])
             queuechr(swordpos(m->pid, false, 1), vid.fsize * 2, '+', iinf[itOrbSword].color);
           if(items[itOrbSword2])
             queuechr(swordpos(m->pid, true, 1), vid.fsize * 2, '+', iinf[itOrbSword2].color);
           }
 
-        if(subscreens::is_current_player(m->pid) && keyresult[cpid]) {
+        if(ths && keyresult[cpid]) {
           hyperpoint h = keytarget(cpid);
           if(WDIM == 2) 
             queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
