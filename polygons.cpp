@@ -2445,7 +2445,7 @@ void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
-      if(!binarytiling) { hpcpush(normalize(h)); return; }
+      if(!binarytiling) { hpcpush(normalize(h)); continue; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       }
