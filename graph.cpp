@@ -159,6 +159,8 @@ int lightat, safetyat;
 void drawLightning() { lightat = ticks; }
 void drawSafety() { safetyat = ticks; }
 
+void queueball(const transmatrix& V, ld rad, color_t col, eItem what);
+
 void drawShield(const transmatrix& V, eItem it) {
 #if CAP_CURVE
   float ds = ptick(300);
@@ -169,9 +171,13 @@ void drawShield(const transmatrix& V, eItem it) {
     col = 0;
   double d = it == itOrbShield ? hexf : hexf - .1;
   int mt = sphere ? 7 : 5;
-  for(ld a=0; a<=S84*mt+1e-6; a+=pow(.5, vid.linequality))
-    curvepoint(V*xspinpush0(a * M_PI/S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
-  queuecurve(darkena(col, 0, 0xFF), 0x8080808, PPR::LINE);
+  if(DIM == 3)
+    queueball(V * zpush(geom3::GROIN1), geom3::human_height / 2, darkena(col, 0, 0xFF), itOrbShield);
+  else {
+    for(ld a=0; a<=S84*mt+1e-6; a+=pow(.5, vid.linequality))
+      curvepoint(V*xspinpush0(a * M_PI/S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
+    queuecurve(darkena(col, 0, 0xFF), 0x8080808, PPR::LINE);
+    }
 #endif
   }
 
@@ -179,7 +185,8 @@ void drawSpeed(const transmatrix& V) {
 #if CAP_CURVE
   ld ds = ptick(10);
   color_t col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
-  for(int b=0; b<S84; b+=S14) {
+  if(DIM == 3) queueball(V * zpush(geom3::GROIN1), geom3::human_height * 0.55, col, itOrbSpeed);
+  else for(int b=0; b<S84; b+=S14) {
     PRING(a)
       curvepoint(V*xspinpush0((ds+b+a) * M_PI/S42, hexf*a/S84));
     queuecurve(col, 0x8080808, PPR::LINE);
@@ -207,7 +214,9 @@ void drawSafety(const transmatrix& V, int ct) {
 #if CAP_QUEUE
   ld ds = ptick(50);
   color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
-  for(int a=0; a<ct; a++)
+  if(DIM == 3)
+    queueball(V * zpush(geom3::GROIN1), 2*hexf, col, itOrbSafety);
+  else for(int a=0; a<ct; a++)
     queueline(V*xspinpush0((ds+a*S84/ct) * M_PI/S42, 2*hexf), V*xspinpush0((ds+(a+(ct-1)/2)*S84/ct) * M_PI / S42, 2*hexf), col, vid.linequality);
 #endif
   }
@@ -219,10 +228,20 @@ void drawFlash(const transmatrix& V) {
   col &= ~1;
   for(int u=0; u<5; u++) {
     ld rad = hexf * (2.5 + .5 * sin(ds+u*.3));
-    PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
-    queuecurve(col, 0x8080808, PPR::LINE);
+    if(DIM == 3) {
+      queueball(V * zpush(geom3::GROIN1), rad, col, itOrbFlash);
+      }
+    else {
+      PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+      queuecurve(col, 0x8080808, PPR::LINE);
+      }
     }
 #endif
+  }
+
+transmatrix chei(const transmatrix V, int a, int b) {
+  if(DIM == 2) return V;
+  return V * zpush(geom3::FLOOR + (geom3::HEAD - geom3::FLOOR) * (a+.5) / b);
   }
 
 void drawLove(const transmatrix& V, int hdir) {
@@ -237,7 +256,8 @@ void drawLove(const transmatrix& V, int hdir) {
       if(z <= 10) d += (10-z) * (10-z) * (10-z) / 3000.;
 
       ld rad = hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
-      curvepoint(V*xspinpush0((S42+hdir+a-1) * M_PI/S42, rad));
+      transmatrix V1 = chei(V, u, 5);
+      curvepoint(V1*xspinpush0((S42+hdir+a-1) * M_PI/S42, rad));
       }
     queuecurve(col, 0x8080808, PPR::LINE);
     }
@@ -250,7 +270,8 @@ void drawWinter(const transmatrix& V, ld hdir) {
   color_t col = darkena(iinf[itOrbWinter].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
     ld rad = sin(ds+u * 2 * M_PI / 20) * M_PI / S7;
-    queueline(V*xspinpush0(M_PI+hdir+rad, hexf*.5), V*xspinpush0(M_PI+hdir+rad, hexf*3), col, 2 + vid.linequality);
+    transmatrix V1 = chei(V, u, 20);
+    queueline(V1*xspinpush0(M_PI+hdir+rad, hexf*.5), V1*xspinpush0(M_PI+hdir+rad, hexf*3), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -261,7 +282,8 @@ void drawLightning(const transmatrix& V) {
   for(int u=0; u<20; u++) {
     ld leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
     ld rad = rand() % 1000;
-    queueline(V*xspinpush0(rad, hexf*0.3), V*xspinpush0(rad, hexf*leng), col, 2 + vid.linequality);
+    transmatrix V1 = chei(V, u, 20);
+    queueline(V1*xspinpush0(rad, hexf*0.3), V1*xspinpush0(rad, hexf*leng), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -6108,8 +6130,12 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
         flashcol = darkena(flashcol, 0, 0xFF);
-        PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
-        queuecurve(flashcol, 0x8080808, PPR::LINE);
+        if(DIM == 3)
+          queueball(V * zpush(geom3::GROIN1), rad, flashcol, itDiamond);
+        else {
+          PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+          queuecurve(flashcol, 0x8080808, PPR::LINE);
+          }
         }
       }
     else if(f.size == 2000) {
@@ -6122,8 +6148,12 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
         flashcol = darkena(flashcol, 0, 0xFF);
-        PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
-        queuecurve(flashcol, 0x8080808, PPR::LINE);
+        if(DIM == 3)
+          queueball(V * zpush(geom3::GROIN1), rad, flashcol, itRuby);
+        else {
+          PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+          queuecurve(flashcol, 0x8080808, PPR::LINE);
+          }
         }
       }
 

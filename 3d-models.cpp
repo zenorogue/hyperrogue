@@ -688,6 +688,47 @@ void make_ball(hpcshape& sh, ld rad, int lev) {
   add_texture(sh);
   }
 
+void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
+  if(what == itOrbSpeed) {
+    transmatrix V1 = V * cspin(1, 2, M_PI/2);
+    ld tt = ptick(100);
+    for(int t=0; t<5; t++) {
+      for(int a=-50; a<50; a++)
+        curvepoint(V1 * cspin(0, 2, a * M_PI/100.) * cspin(0, 1, t * 72 * degree + tt + a*2*M_PI/50.) * xpush0(rad));
+      queuecurve(col, 0, PPR::LINE);
+      }
+    return;
+    }
+  ld z = 63.43 * degree;
+  transmatrix V1 = V * cspin(0, 2, M_PI/2);
+  if(what == itOrbShield) V1 = V * cspin(0, 1, ptick(500));
+  if(what == itOrbFlash) V1 = V * cspin(0, 1, ptick(1500));
+  if(what == itOrbShield) V1 = V * cspin(1, 2, ptick(1000));
+  if(what == itOrbFlash) V1 = V * cspin(1, 2, ptick(750));
+  if(what == itDiamond) V1 = V * cspin(1, 2, ptick(200));
+  if(what == itRuby) V1 = V * cspin(1, 2, ptick(300));
+  auto line = [&] (transmatrix A, transmatrix B) {
+    hyperpoint h0 = A * xpush0(1);
+    hyperpoint h1 = B * xpush0(1);
+    using namespace hyperpoint_vec;
+    for(int i=0; i<=8; i++)
+      curvepoint(V1 * rspintox(normalize(h0*(8-i) + h1*i)) * xpush0(rad));
+    queuecurve(col, 0, PPR::LINE);
+    };
+  for(int i=0; i<5; i++) {
+    auto a = cspin(1, 2, (72 * i   ) * degree) * spin(z);
+    auto b = cspin(1, 2, (72 * i-72) * degree) * spin(z);
+    auto c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-z);
+    auto d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-z);
+    line(Id, a);
+    line(a, b);
+    line(a, c);
+    line(a, d);
+    line(d, c);
+    line(c, spin(M_PI));
+    }
+  }
+
 void make_3d_models() {
   if(DIM == 2) return;
   shcenter = C0;
