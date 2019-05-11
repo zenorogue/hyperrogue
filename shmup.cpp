@@ -1655,7 +1655,7 @@ void movePlayer(monster *m, int delta) {
   
   godir[cpid] = 0;
 
-  if(WDIM == 2 && GDIM == 3) {
+  if(WDIM == 2 && GDIM == 3 && (mdx || mdy)) {
     double mdd = hypot(mdx, mdy);
     godir[cpid] = -atan2(mdx, -mdy);
     mgo += mdd;
