@@ -942,8 +942,6 @@ void make_floor_textures() {
     */
     rb.reset();
     }
-  
-  need_reset_geometry = true;
   }
 
 
