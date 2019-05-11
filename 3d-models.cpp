@@ -964,6 +964,8 @@ void make_3d_models() {
   make_revolution_cut(shWormSegment, 60, g);
   make_revolution_cut(shSmallWormSegment, 60, g);
   make_revolution_cut(shWormHead, 60, g);
+  make_revolution_cut(shWormTail, 60, g);
+  make_revolution_cut(shSmallWormTail, 60, g);
   make_revolution_cut(shTentHead, 60, g);
   make_revolution_cut(shKrakenHead, 60, -geom3::FLOOR);
   make_revolution_cut(shSeaTentacle, 60, -geom3::FLOOR);

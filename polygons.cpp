@@ -2854,6 +2854,8 @@ void buildpolys() {
   bshape(shPirateX, PPR::ITEM, scalefactor, 124);
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
 
+  ld wormscale = WDIM == 3 ? 3 : 1;
+  
   // first layer monsters
   bshape(shTentacleX, PPR::TENTACLE0);
   drawTentacle(shTentacleX, crossf * .25, crossf * .1, 10);
@@ -2862,24 +2864,24 @@ void buildpolys() {
   bshape(shTentacle, PPR::TENTACLE1);
   drawTentacle(shTentacle, crossf * .2, crossf * .1, 10);
   copyshape(shJoint, shDisk, PPR::ONTENTACLE);
-  bshape(shTentHead, PPR::ONTENTACLE, scalefactor, 79);
-  bshape(shWormHead, PPR::ONTENTACLE, scalefactor, 80);
+  bshape(shTentHead, PPR::ONTENTACLE, scalefactor * wormscale, 79);
+  bshape(shWormHead, PPR::ONTENTACLE, scalefactor * wormscale, 80);
   
   bshape(shWormSegment, PPR::TENTACLE1);
   RING(i)
-   hpcpush(ddi(i, .20 * scalefactor) * C0);
+   hpcpush(ddi(i, .20 * scalefactor * wormscale) * C0);
   bshape(shSmallWormSegment, PPR::TENTACLE1);
   RING(i)
-    hpcpush(ddi(i, .16 * scalefactor) * C0);
-  bshape(shWormTail, PPR::TENTACLE1, scalefactor, 383);
-  bshape(shSmallWormTail, PPR::TENTACLE1, scalefactor, 384);
+    hpcpush(ddi(i, .16 * scalefactor * wormscale) * C0);
+  bshape(shWormTail, PPR::TENTACLE1, scalefactor * wormscale, 383);
+  bshape(shSmallWormTail, PPR::TENTACLE1, scalefactor * wormscale, 384);
 
-  bshape(shDragonSegment, PPR::TENTACLE1, scalefactor, 234); //233 alt
-  bshape(shDragonWings, PPR::ONTENTACLE, scalefactor, 237);
-  bshape(shDragonLegs, PPR::TENTACLE0, scalefactor, 238);
-  bshape(shDragonTail, PPR::TENTACLE1, scalefactor, 240); //239 alt
-  bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor, 241);
-  bshape(shDragonHead, PPR::ONTENTACLE, scalefactor, 242);
+  bshape(shDragonSegment, PPR::TENTACLE1, scalefactor * wormscale, 234); //233 alt
+  bshape(shDragonWings, PPR::ONTENTACLE, scalefactor * wormscale, 237);
+  bshape(shDragonLegs, PPR::TENTACLE0, scalefactor * wormscale, 238);
+  bshape(shDragonTail, PPR::TENTACLE1, scalefactor * wormscale, 240); //239 alt
+  bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor * wormscale, 241);
+  bshape(shDragonHead, PPR::ONTENTACLE, scalefactor * wormscale, 242);
   
   ld krsc = 1;
   if(sphere) krsc *= 1.4;

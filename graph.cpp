@@ -2195,8 +2195,6 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     
   else if(isAnyIvy(c) || isWorm(c)) {
   
-    if(isWorm(c) && WDIM == 3) return false;
-    
     if((m == moHexSnake || m == moHexSnakeTail) && c->hitpoints == 2) {
       int d = c->mondir;
       if(d == NODIR)
@@ -2211,6 +2209,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
 
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
+    if(DIM == 3 && among(c->monst, moIvyRoot, moWorm, moHexSnake, moDragonHead, moKrakenH))
+      radarpoints.emplace_back(radarpoint{makeradar(Vparam), minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF });
+  
     transmatrix Vb0 = Vb;
     if(c->mondir != NODIR && DIM == 3 && isAnyIvy(c)) {
       queueline(tC0(Vparam), Vparam  * tC0(calc_relative_matrix(c->move(c->mondir), c, C0)), (col << 8) + 0xFF, 0);
@@ -2274,7 +2275,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
           add_segment(taildist(c), [=] () {
             for(int i=11; i>=0; i--) {
               if(i < 3 && (c->monst == moTentacle || c->monst == moTentaclewait)) continue;
-              transmatrix Vbx = Vb * spin(sin(M_PI * i / 6.) * wav / (i+.1)) * xpush(length * (i) / 12.0);
+              transmatrix Vbx = Vb;
+              if(WDIM == 2) Vbx = Vbx * spin(sin(M_PI * i / 6.) * wav / (i+.1));
+              Vbx = Vbx * xpush(length * (i) / 12.0);
               // transmatrix Vbx2 = Vnext * xpush(length2 * i / 6.0);
               // Vbx = Vbx * rspintox(inverse(Vbx) * Vbx2 * C0) * pispin;
               ShadowV(Vbx, sh, PPR::GIANTSHADOW);
@@ -2308,14 +2311,14 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
         Vb = Vb * pispin;
         transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
         queuepoly(Vbh, shWormHead, darkena(col, 0, 0xFF));
-        queuepolyat(Vbh, shEyes, 0xFF, PPR::ONTENTACLE_EYES);
+        queuepolyat(Vbh, shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
         ShadowV(Vb, shWormHead, PPR::GIANTSHADOW);
         }
       else if(m == moDragonHead) {
         transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
         ShadowV(Vb, shDragonHead, PPR::GIANTSHADOW);
         queuepoly(Vbh, shDragonHead, darkena(col, c->hitpoints?0:1, 0xFF));
-        queuepolyat(Vbh/* * pispin */, shEyes, 0xFF, PPR::ONTENTACLE_EYES);
+        queuepolyat(Vbh/* * pispin */, shDragonEyes, 0xFF, PPR::ONTENTACLE_EYES);
         
         int noscolor = (c->hitpoints == 1 && c->stuntime ==1) ? 0xFF0000FF : 0xFF;
         queuepoly(Vbh, shDragonNostril, noscolor);
@@ -4075,7 +4078,6 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
   }
 
 bool isWall3(cell *c, color_t& wcol) {
-  if(isWorm(c)) { wcol = minf[c->monst].color; return true; }
   if(isWall(c)) return true;
   if(c->wall == waChasm && c->land == laMemory) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
