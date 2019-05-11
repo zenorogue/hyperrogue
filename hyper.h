@@ -1160,6 +1160,7 @@ struct videopar {
   ld smart_range_detail;// minimum visible cell for modes 1 and 2
   ld smart_range_detail_3;// minimum visible cell in 3D (for mode 2, there is no mode 1)
   int cells_drawn_limit;
+  int cells_generated_limit; // limit on cells generated per frame
   
   ld skiprope;
 

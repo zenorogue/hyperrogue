@@ -355,6 +355,7 @@ void initConfig() {
   addsaver(vid.smart_range_detail, "smart-range-detail", 8);
   addsaver(vid.smart_range_detail_3, "smart-range-detail", 30);
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
+  addsaver(vid.cells_generated_limit, "limit on cells generated", 25);
   
   addsaver(vid.skiprope, "mobius", 0);
   
@@ -629,6 +630,14 @@ void add_cells_drawn(char c = 'C') {
       );
     dialog::scaleLog();
     });
+  if(WDIM == 3 || vid.use_smart_range == 2) {
+    dialog::addSelItem(XLAT("limit generation per frame"), its(vid.cells_generated_limit), 'L');
+    dialog::add_action([] () { 
+      dialog::editNumber(vid.cells_generated_limit, 1, 1000, log(10), 25, XLAT("limit generation per frame"), 
+        XLAT("In the 3D mode, lowering this value may help if the game lags while exploring new areas.")
+        );
+      });
+    }
   }
 
 void edit_sightrange() {

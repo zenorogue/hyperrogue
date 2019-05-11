@@ -1272,7 +1272,7 @@ void panning(hyperpoint hf, hyperpoint ht) {
   playermoved = false;
   }
 
-int cells_drawn;
+int cells_drawn, cells_generated;
 
 void fullcenter() {
   conformal::path_for_lineanimation.clear();
@@ -1690,6 +1690,8 @@ bool do_draw(cell *c, const transmatrix& T) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;
+      if(c->mpdist > 7 && cells_generated > vid.cells_generated_limit) return false;
+      cells_generated++;
       setdist(c, 7, c);
       }
     else {
@@ -1720,7 +1722,11 @@ bool do_draw(cell *c, const transmatrix& T) {
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient || euwrap;
   if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
-  if(vid.use_smart_range == 2) setdist(c, 7, c);
+  if(vid.use_smart_range == 2) {
+    if(cells_generated > vid.cells_generated_limit) return false;
+    setdist(c, 7, c);
+    cells_generated++;
+    }
   return true; 
   }
 
