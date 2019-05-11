@@ -184,7 +184,7 @@ void bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
       int mapped = 0;
       for(auto& m: matrices) {        
         hyperpoint z = m.first * h;
-        if(z[0] > -1e-5 && z[1] > -1e-5 && z[2] > -1e-5) {
+        if(z[0] > -1e-5 && z[1] > -1e-5 && z[GDIM] > -1e-5) {
           nh = m.second[r] * z, mapped++;
           }
         }
