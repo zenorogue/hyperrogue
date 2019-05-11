@@ -390,6 +390,7 @@ void drawStats() {
     expansion.view_distances_dialog();
   if(current_display->sidescreen) return;
   
+  first_cell_to_draw = true;
   bool h = hide_player();
 
   {
