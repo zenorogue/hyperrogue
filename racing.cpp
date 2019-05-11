@@ -651,7 +651,7 @@ bool inrec = false;
 
 ld race_angle = 90;
 
-void set_view() {
+bool set_view() {
 
   multi::cpid = subscreens::in ? subscreens::current_player : 0;
 
@@ -672,12 +672,13 @@ void set_view() {
       });
     }
 
-  if(DIM == 3) return;
+  if(standard_centering) return false;
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
-  if(racing::player_relative || quotient)
-    View = spin(race_angle * degree) * inverse(at) * View;
+  if(racing::player_relative || quotient) {
+    View = inverse(at) * View;
+    }
   else {
     int z = get_info(who->base).completion;
     int steps = euclid ? 1000 : 20;
@@ -687,13 +688,17 @@ void set_view() {
     transmatrix T2 = ypush(-vid.yshift) * ggmatrix(c2);
     transmatrix T = spintox(inverse(T1) * T2 * C0);
     hyperpoint h = T * inverse(T1) * at * C0;
-    ld y = asin_auto(h[1]);
+    ld y = GDIM == 2 ? asin_auto(h[1]) : asin_auto(hypot(h[1], h[2]));
     ld x = asin_auto(h[0] / cos_auto(y));
     x += race_advance;
     // printf("%d %lf\n", z, x);
     transmatrix Z = T1 * inverse(T) * xpush(x);
-    View = spin(race_angle * degree) * inverse(Z) * View;
+    View = inverse(Z) * View;
     }
+  if(GDIM == 3 && WDIM == 2)
+    View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[multi::cpid]) * spin(-M_PI/2) * View;
+  else View = spin(race_angle * degree) * View;
+  return true;
   }
 
 #if CAP_COMMANDLINE  
@@ -928,7 +933,7 @@ void race_projection() {
     vid.smart_range_detail = 3;
     });
   
-  if(pmodel == mdDisk) {    
+  if(true) {    
     dialog::addSelItem(XLAT("point of view"), XLAT(player_relative ? "player" : "track"), 'p');
     if(quotient || racing::standard_centering)
       dialog::lastItem().value = XLAT("N/A");
@@ -942,12 +947,14 @@ void race_projection() {
     }
   else dialog::addBreak(100);
         
-  dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
-  dialog::add_action([] () { 
-    dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
-    int q = conformal::model_orientation - race_angle;
-    dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
-    });
+  if(DIM == 2) {
+    dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
+    dialog::add_action([] () { 
+      dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
+      int q = conformal::model_orientation - race_angle;
+      dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
+      });
+    }
 
   dialog::addSelItem(XLAT("show more in front"), fts(race_advance), 'A');
   dialog::add_action([] () {

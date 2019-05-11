@@ -1090,6 +1090,10 @@ void centerpc(ld aspd) {
   if(geometry == gCrystal)
     crystal::centerrug(aspd);
   #endif
+  
+  #if CAP_RACING
+  if(racing::on && racing::set_view()) return;
+  #endif
 
   #if MAXMDIM >= 4
   if(shmup::on && vid.sspeed > -5 && DIM == 3) {
