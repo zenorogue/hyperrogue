@@ -257,7 +257,7 @@ transmatrix random_spin() {
     ld alpha2 = acos(randd() * 2 - 1);
     ld alpha = randd() * 2 * M_PI;
     ld alpha3 = randd() * 2 * M_PI;
-    return cspin(0, 1, alpha) * cspin(0, 2, alpha2) * cspin(1, 2, alpha3);
+    return cspin(0, 2, alpha2) * cspin(0, 1, alpha) * cspin(1, 2, alpha3);
     }
   }
 
