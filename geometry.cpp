@@ -384,12 +384,14 @@ namespace geom3 {
       }
     }    
 
-  void switch_always3() {
+  #if MAXMDIM >= 4
+void switch_always3() {
     geom3::always3 = !geom3::always3;
     need_reset_geometry = true;
     swapmatrix(View);
     callhooks(hooks_swapdim);
     }
+#endif
 
   void switch_tpp() {
     if(pmodel == mdDisk && vid.camera_angle) {
@@ -412,6 +414,7 @@ namespace geom3 {
     }
     
   void switch_fpp() {
+#if MAXMDIM >= 4
     if(!geom3::always3) {
       geom3::always3 = true;
       geom3::wall_height = 1.5;
@@ -437,7 +440,8 @@ namespace geom3 {
       swapmatrix(View);
       callhooks(hooks_swapdim);
       }
-    }
+#endif
+   }
 
   }
 

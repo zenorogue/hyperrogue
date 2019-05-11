@@ -1230,11 +1230,12 @@ void show3D() {
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 
+#if MAXMDIM >= 4
   if(WDIM == 2) {
     dialog::addBoolItem(XLAT("use the full 3D models"), geom3::always3, 'U');
     dialog::add_action(geom3::switch_always3);
     }
-
+#endif
   if(vid.use_smart_range == 0 && DIM == 2) {
     dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
     dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
@@ -1308,10 +1309,12 @@ void show3D() {
     dialog::add_action(geom3::switch_tpp);
     }
   
+#if MAXMDIM >=4
   if(WDIM == 2) {
     dialog::addBoolItem(XLAT("configure FPP automatically"), DIM == 3, 'F');
     dialog::add_action(geom3::switch_fpp);
     }
+#endif
 
   if(0);
   #if CAP_RUG
@@ -1917,18 +1920,22 @@ int read_config_args() {
     PHASEFROM(2);
     nomenukey = true;
     }
+#if MAXMDIM >= 4
   else if(argis("-switch-fpp")) {
     PHASEFROM(2);
     geom3::switch_fpp();
     }
+#endif
   else if(argis("-switch-tpp")) {
     PHASEFROM(2);
     geom3::switch_tpp();
     }
+#if MAXMDIM >= 4
   else if(argis("-switch-3d")) {
     PHASEFROM(2);
     geom3::switch_always3();
     }
+#endif
   else if(argis("-nohelp")) {
     PHASEFROM(2);
     nohelp = true;
