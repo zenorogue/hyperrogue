@@ -2428,7 +2428,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
       if(mirr) Vs = Vs * Mirror;
       if(inmirrorcount&1) mirr = !mirr;
       col = mirrorcolor(geometry == gElliptic ? det(Vs) < 0 : mirr);
-      if(!mouseout() && !nospins) {
+      if(!mouseout() && !nospins && GDIM == 2) {
         hyperpoint P2 = Vs * inverse(cwtV) * mouseh;
         queuechr(P2, 10, 'x', 0xFF00);
         }     
