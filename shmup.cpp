@@ -1691,8 +1691,8 @@ void movePlayer(monster *m, int delta) {
 
   bool blown = m->blowoff > curtime;
 
-  if(WDIM == 2 && GDIM == 3 && !lctrlclick && cpid == 0 && !racing::on) {
-    playerturn[cpid] -= mouseaim_x;
+  if(WDIM == 2 && GDIM == 3 && !lctrlclick && cpid == 0) {
+    if(!racing::on) playerturn[cpid] -= mouseaim_x;
     playerturny[cpid] -= mouseaim_y;
     mouseaim_x = 0;
     mouseaim_y = 0;
