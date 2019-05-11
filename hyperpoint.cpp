@@ -252,7 +252,7 @@ transmatrix cspin(int a, int b, ld alpha) {
 transmatrix spin(ld alpha) { return cspin(0, 1, alpha); }
 
 transmatrix random_spin() {
-  if(GDIM == 2) return spin(randd() * 2 * M_PI);
+  if(WDIM == 2) return spin(randd() * 2 * M_PI);
   else {
     ld alpha2 = acos(randd() * 2 - 1);
     ld alpha = randd() * 2 * M_PI;
