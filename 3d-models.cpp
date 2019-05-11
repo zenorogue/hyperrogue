@@ -674,11 +674,12 @@ void make_ball(hpcshape& sh, ld rad, int lev) {
   sh.flags |= POLY_TRIANGLES;
   hyperpoint tip = xpush0(rad);
   hyperpoint atip = xpush0(-rad);
+  ld z = 63.43 * degree;
   for(int i=0; i<5; i++) {
-    hyperpoint a = cspin(1, 2, (72 * i   ) * degree) * spin(1) * tip;
-    hyperpoint b = cspin(1, 2, (72 * i-72) * degree) * spin(1) * tip;
-    hyperpoint c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-1) * tip;
-    hyperpoint d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-1) * tip;
+    hyperpoint a = cspin(1, 2, (72 * i   ) * degree) * spin(z) * tip;
+    hyperpoint b = cspin(1, 2, (72 * i-72) * degree) * spin(z) * tip;
+    hyperpoint c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-z) * tip;
+    hyperpoint d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-z) * tip;
     balltriangle(tip, a, b, rad, lev);
     balltriangle(a, b, c, rad, lev);
     balltriangle(b, c, d, rad, lev);
