@@ -1028,18 +1028,27 @@ cell *monster::findbase(const transmatrix& T) {
   else return findbaseAround(T, base);
   }
 
+void fix_to_2(transmatrix& T) {
+  if(GDIM == 3 && WDIM == 2) {
+    for(int i=0; i<4; i++) T[i][2] = 0, T[2][i] = 0;
+    T[2][2] = 1;
+    }
+  fixmatrix(T);
+  fixelliptic(T);
+  }
+
 void monster::rebasePat(const transmatrix& new_pat) {
   if(isVirtual) {
     at = new_pat;
     virtualRebase(this, true);
-    fixmatrix(at); pat = at;
+    fix_to_2(at);
+    pat = at;
     return;
     }
   if(quotient) {
     at = inverse(gmatrix[base]) * new_pat;
     virtualRebase(this, true);
-    fixmatrix(at);
-    fixelliptic(at);
+    fix_to_2(at);
     return;
     }
   pat = new_pat;
@@ -1047,11 +1056,7 @@ void monster::rebasePat(const transmatrix& new_pat) {
   // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
   base = c2;
   at = inverse(gmatrix[c2]) * pat;
-  if(GDIM == 3 && WDIM == 2) {
-    for(int i=0; i<4; i++) at[i][2] = 0, at[2][i] = 0;
-    at[2][2] = 1;
-    }
-  fixmatrix(at);
+  fix_to_2(at);
   fixelliptic(at);
   }
 
