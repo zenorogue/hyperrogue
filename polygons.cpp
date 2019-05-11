@@ -1683,6 +1683,7 @@ hpcshape
   shWestHat1, shWestHat2, shGunInHand,
   shKnightArmor, shKnightCloak, shWightCloak,
   shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
+  shSlimeEyes, shDragonEyes, shWormEyes, shGhostEyes,
   shMiniGhost, shMiniEyes,
   shHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
@@ -3047,6 +3048,7 @@ void buildpolys() {
   bshape(shEyes, PPR::MONSTER_EYE0, scalefactor, 135);
   bshape(shMiniEyes, PPR::MONSTER_EYE0, scalefactor/3, 135);
   bshape(shShark, PPR::MONSTER_BODY, scalefactor, 136);
+  shSlimeEyes = shDragonEyes = shWormEyes = shGhostEyes = shEyes;
   bshape(shTinyShark, PPR::MONSTER_BODY, scalefactor / 2, 136);
   bshape(shBugBody, PPR::MONSTER_BODY, scalefactor, 137);
   bshape(shBugArmor, PPR::MONSTER_ARMOR0, scalefactor, 138);

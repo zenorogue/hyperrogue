@@ -1310,6 +1310,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
         }
       queuepoly(VAHEAD, shWolfHead, darkena(col, 0, 0xFF));
       queuepoly(VAHEAD, shWolfEyes, darkena(col, 3, 0xFF));
+      if(DIM == 3) {
+        queuepoly(VAHEAD, shFamiliarEye, 0xFF);
+        queuepoly(VAHEAD * Mirror, shFamiliarEye, 0xFF);
+        }
       return false;
       }
     
@@ -1678,13 +1682,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     case moGhost: case moSeep: case moFriendlyGhost: {
       if(m == moFriendlyGhost) col = fghostcolor(where);
       queuepolyat(VGHOST, shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80), DIM == 3 ? PPR::SUPERLINE : shGhost.prio);
-      queuepolyat(VGHOST, shEyes, 0xFF, DIM == 3 ? PPR::SUPERLINE : shEyes.prio);
+      queuepolyat(VGHOST, shGhostEyes, 0xFF, DIM == 3 ? PPR::SUPERLINE : shEyes.prio);
       return false;
       }
     
     case moVineSpirit: {
       queuepoly(VGHOST, shGhost, 0xD0D0D0C0 | UNTRANS);
-      queuepoly(VGHOST, shEyes, 0xFF0000FF);
+      queuepolyat(VGHOST, shGhostEyes, 0xFF0000FF, DIM == 3 ? PPR::SUPERLINE : shGhostEyes.prio);
       return false;
       }
     
@@ -1700,7 +1704,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       
     case moSlime: {
       queuepoly(VFISH, shSlime, darkena(col, 0, 0x80));
-      queuepoly(VSLIMEEYE, shEyes, 0xFF);
+      queuepoly(VSLIMEEYE, shSlimeEyes, 0xFF);
       return false;
       }
 
@@ -1918,13 +1922,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
 
     case moWorm: case moWormwait: case moHexSnake: {
       queuepoly(V, shWormHead, darkena(col, 0, 0xFF));
-      queuepolyat(V, shEyes, 0xFF, PPR::ONTENTACLE_EYES);
+      queuepolyat(V, shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
       return false;
       }
 
     case moDragonHead: {
       queuepoly(V, shDragonHead, darkena(col, 0, 0xFF));
-      queuepolyat(V, shEyes, 0xFF, PPR::ONTENTACLE_EYES);          
+      queuepolyat(V, shDragonEyes, 0xFF, PPR::ONTENTACLE_EYES);          
       int noscolor = 0xFF0000FF;
       queuepoly(V, shDragonNostril, noscolor);
       queuepoly(V * Mirror, shDragonNostril, noscolor);
@@ -1977,7 +1981,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     queuepoly(VFISH, shJelly, darkena(col, 0, 0xD0));
     queuepolyat(VBODY, shJelly, darkena(col, 0, 0xD0), PPR::MONSTER_BODY);
     queuepolyat(VHEAD, shJelly, darkena(col, 0, 0xD0), PPR::MONSTER_HEAD);
-    queuepolyat(VHEAD, shEyes, 0xFF, PPR::MONSTER_HEAD);
+    queuepolyat(VHEAD, shSlimeEyes, 0xFF, PPR::MONSTER_HEAD);
     }
   else if(isDemon(m)) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);

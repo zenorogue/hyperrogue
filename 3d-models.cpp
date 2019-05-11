@@ -699,6 +699,62 @@ void make_ball(hpcshape& sh, ld rad, int lev) {
   add_texture(sh);
   }
 
+hyperpoint psmin(hyperpoint H) {
+  hyperpoint res;
+  res[2] = asin_auto(H[2]);
+  ld cs = pow(cos_auto(res[2]), 2);
+  ld r = sqrt(cs+H[0]*H[0]+H[1]*H[1]);
+  res[0] = H[0] / r;
+  res[1] = H[1] / r;
+  return res;
+  }
+
+void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1) {
+  using namespace hyperpoint_vec;
+  hyperpoint center = Hypc;
+  for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
+  center = normalize(center);
+  // center /= (eye.e - eye.s);
+  ld rad = 0;
+  for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) rad += hdist(center, hpc[i]);
+  rad /= (eye.e - eye.s);
+  
+  hyperpoint pscenter = psmin(center);
+  
+  ld pos = 0;
+  int qty = 0, qtyall = 0;
+  
+  vector<hyperpoint> pss;
+  
+  for(int i=head.s; i<head.e; i++) pss.push_back(psmin(zpush(shift_head) * hpc[i]));
+  
+  ld zmid = 0;
+  for(hyperpoint& h: pss) zmid += h[2];
+  zmid /= isize(pss);
+  
+  ld mindist = 1e9;
+  for(int i=0; i<isize(pss); i+=3) if(pss[i][2] < zmid || WDIM == 3) {
+    ld d = sqhypot_d(2, pss[i]-pscenter) + sqhypot_d(2, pss[i+1]-pscenter) + sqhypot_d(2, pss[i+2]-pscenter);
+    if(d < mindist) mindist = d, pos = min(min(pss[i][2], pss[i+1][2]), pss[i+2][2]), qty++;
+    qtyall++;
+    }
+  println(hlog, "center = ", center);
+  println(hlog, "qty= ", qty, "/",qtyall, " pos = ", pos, " mindist=", mindist);
+  
+  make_ball(eye, rad, 0);
+  transmatrix T = zpush(-shift_eye) * rgpushxto0(center) * zpush(pos); 
+  for(int i=eye.s; i<isize(hpc); i++) hpc[i] = T * hpc[i];
+  int s = isize(hpc);
+  if(q == 2)
+    for(int i=eye.s; i<s; i++) hpcpush(MirrorY * hpc[i]);
+  finishshape();
+  // eye.prio = PPR::SUPERLINE;
+  }
+
+void shift_last_straight(ld z) {
+  for(int i=last->s; i<isize(hpc); i++) hpc[i] = zpush(z) * hpc[i];
+  }
+
 void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
   if(what == itOrbSpeed) {
     transmatrix V1 = V * cspin(1, 2, M_PI/2);
@@ -888,15 +944,6 @@ void make_3d_models() {
   
   make_revolution_cut(shButterflyBody, 180);
   
-  shift_shape(shWolf1, -g-0.088 * S);
-  shift_shape(shWolf2, -g-0.088 * S);
-  shift_shape(shWolf3, -g-0.098 * S);
-  shift_shape(shFamiliarEye,  -g-0.088 * S);
-  shift_shape(shWolfEyes,  -g+(-0.088 - 0.01 * 0.9) * S);
-  
-  shift_shape(shEyes, -g+(-3.3) * S / -20);
-  for(int i=shEyes.s; i<shEyes.e; i++) hpc[i] = cspin(0, 2, M_PI/2) * hpc[i];
-  
   animate_bird(shEagle, shAnimatedEagle, 0.05*S);
   animate_bird(shTinyBird, shAnimatedTinyEagle, 0.05*S/2);
 
@@ -982,6 +1029,24 @@ void make_3d_models() {
   
   shift_shape(shMagicSword, geom3::ABODY);
   shift_shape(shMagicShovel, geom3::ABODY);
+  
+  adjust_eye(shSlimeEyes, shSlime, geom3::FLATEYE, 0, 2, 2);
+  adjust_eye(shGhostEyes, shGhost, geom3::GHOST, geom3::GHOST, 2, WDIM == 2 ? 2 : 4);
+  adjust_eye(shMiniEyes, shMiniGhost, geom3::GHOST, geom3::GHOST, 2, 2);
+  adjust_eye(shWormEyes, shWormHead, 0, 0, 2, 4);
+  adjust_eye(shDragonEyes, shDragonHead, 0, 0, 2, 4);
+  
+  adjust_eye(shKrakenEye, shKrakenHead, 0, 0, 1);
+  adjust_eye(shKrakenEye2, shKrakenEye, 0, 0, 1, 2);
+  
+  adjust_eye(shWolf1, shDogHead, geom3::AHEAD, geom3::AHEAD, 1); 
+  adjust_eye(shWolf2, shDogHead, geom3::AHEAD, geom3::AHEAD, 1); 
+  adjust_eye(shWolf3, shDogHead, geom3::AHEAD, geom3::AHEAD, 1);
+  adjust_eye(shFamiliarEye, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
+  
+  adjust_eye(shWolfEyes, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
+
+  adjust_eye(shReptileEye, shReptileHead, geom3::AHEAD, geom3::AHEAD, 1);
   }
 
 #undef S
