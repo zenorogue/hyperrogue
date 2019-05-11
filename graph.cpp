@@ -632,8 +632,11 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
     Tleft = VFOOT * Mirror * xpush(-rightfoot);
     }
   else {
-    Tright = V * cspin(0, 2, rightfoot/SCALE * 3);
-    Tleft  = V * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
+    transmatrix V1 = V;
+    if(WDIM == 2) V1 = V1 * zpush(geom3::GROIN);
+    Tright = V1 * cspin(0, 2, rightfoot/SCALE * 3);
+    Tleft  = V1 * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
+    if(WDIM == 2) Tleft = Tleft * zpush(-geom3::GROIN), Tright = Tright * zpush(-geom3::GROIN);
     }
     
   if(who == moWaterElemental && DIM == 2) {
