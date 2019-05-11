@@ -5079,5 +5079,6 @@ extern bool first_cell_to_draw;
 extern int current_rbuffer;
 extern bool new_projection_needed;
 inline void reset_projection() { new_projection_needed = true; }
+extern ld ptick(int period, ld phase = 0);
 }
 

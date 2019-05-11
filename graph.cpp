@@ -29,7 +29,7 @@ purehookset hooks_frame, hooks_markers;
 ld animation_factor = 1;
 int animation_lcm = 0;
 
-ld ptick(int period, ld phase = 0) {
+ld ptick(int period, ld phase) {
   if(animation_lcm) animation_lcm = animation_lcm * (period / gcd(animation_lcm, period));
   return (ticks * animation_factor) / period + phase * 2 * M_PI;
   }
