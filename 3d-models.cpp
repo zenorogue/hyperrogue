@@ -865,7 +865,7 @@ void make_3d_models() {
   
   make_foot_3d(shHumanFoot);
   make_foot_3d(shYetiFoot);
-  make_skeletal(shSkeletalFoot);
+  make_skeletal(shSkeletalFoot, WDIM == 2 ? zc(0.5) + geom3::human_height/40 - geom3::FLOOR : 0);
   
   make_paw_3d(shWolfFrontPaw, shWolfFrontLeg);
   make_paw_3d(shWolfRearPaw, shWolfRearLeg);
