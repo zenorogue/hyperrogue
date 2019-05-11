@@ -1786,8 +1786,16 @@ void movePlayer(monster *m, int delta) {
     avg_inertia = m->inertia;
     ld coef = m->base->land == laWestWall ? 0.65 : falling ? 0.15 : 1;
     coef /= 1000;
-    m->inertia[frontdir()] += coef * playergo[cpid];
-    avg_inertia[frontdir()] += coef * playergo[cpid] / 2;
+    if(WDIM == 3) {
+      m->inertia[frontdir()] += coef * playergo[cpid];
+      avg_inertia[frontdir()] += coef * playergo[cpid] / 2;
+      }
+    else {
+      m->inertia[0] += cos(godir[cpid]) * coef * playergo[cpid];
+      avg_inertia[0] += cos(godir[cpid]) * coef * playergo[cpid] / 2;
+      m->inertia[1] -= sin(godir[cpid]) * coef * playergo[cpid];
+      avg_inertia[1] -= sin(godir[cpid]) * coef * playergo[cpid] / 2;
+      }
     if(falling) {
       vector<cell*> below;
       manual_celllister mcl;
