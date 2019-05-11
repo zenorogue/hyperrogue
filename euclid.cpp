@@ -654,9 +654,7 @@ namespace euclid3 {
   
         for(int i=0; i<S7; i++)
           dq::enqueue_by_matrix(h->move(i), V * get_move(h->c7, i));
-        if(c == cwt.at) first_cell_to_draw = false;
         }
-      first_cell_to_draw = true;
       }
     
     transmatrix warppush(coord dif) {

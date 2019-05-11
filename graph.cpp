@@ -2542,6 +2542,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     if(!mmmon) return true;
     
     if(hide_player()) {
+      first_cell_to_draw = false;
       }
     
     else if(isWorm(m)) {
@@ -6342,6 +6343,7 @@ void drawthemap() {
   frameid++;
   cells_drawn = 0;
   noclipped = 0;
+  first_cell_to_draw = true;
   
   wavephase = (-(ticks / 100)) & 7;
 
