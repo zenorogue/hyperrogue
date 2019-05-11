@@ -360,7 +360,7 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
       if(hsh[s] < 0.1*S) shi[s] = -0.5;
       else if(hsh[s] < 0.12*S) shi[s] = -0.1 - 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
       else shi[s] = -0.1;
-      shi[s] *= geom3::human_height;
+      shi[s] *= geom3::human_height * revZ;
       }
     if(ok && kind == 1) for(int i=0; i<3; i++) {
       int j = (i+1) % 3;
