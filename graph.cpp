@@ -4190,6 +4190,27 @@ ld mousedist(transmatrix T) {
   return sqhypot_d(2, h1) + (invis_point(T1) ? 1e10 : 0);
   }
 
+vector<hyperpoint> clipping_planes;
+int noclipped;
+
+void make_clipping_planes() {
+  clipping_planes.clear();
+  auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
+    using namespace hyperpoint_vec;
+    ld z1 = 1, z2 = 1;
+    hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
+    sx /= hypot_d(3, sx);
+    sx[3] = 0;
+    clipping_planes.push_back(sx);
+    };
+  ld tx = current_display->tanfov;
+  ld ty = tx * current_display->ysize / current_display->xsize;
+  add_clipping_plane(+tx, +ty, -tx, +ty);
+  add_clipping_plane(-tx, +ty, -tx, -ty);
+  add_clipping_plane(-tx, -ty, +tx, -ty);
+  add_clipping_plane(+tx, -ty, +tx, +ty);
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4217,6 +4238,28 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(orig) gm = V;
     }
   if(just_gmatrix) return;
+  if(WDIM == 3 && pmodel == mdPerspective) {
+    using namespace hyperpoint_vec;
+    hyperpoint H = tC0(V);
+    for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(corner_bonus)) {
+      #if CAP_SHMUP
+      if(shmup::on) {
+        pair<shmup::mit, shmup::mit> p = 
+          shmup::monstersAt.equal_range(c);
+        for(shmup::mit it = p.first; it != p.second; it++) {
+          shmup::monster* m = it->second;
+          radarpoints.emplace_back(radarpoint{makeradar(V*m->at), minf[m->type].glyph, minf[m->type].color, 0xFF0000FF});
+          }
+        }
+      #endif
+      if(c->monst) 
+        radarpoints.emplace_back(radarpoint{makeradar(V), minf[c->monst].glyph, minf[c->monst].color, isFriendly(c->monst) ? 0x00FF00FF : 0xFF0000FF});
+      else if(c->item)
+        radarpoints.emplace_back(radarpoint{makeradar(V), iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item)});
+      return;
+      }
+    noclipped++;
+    }
 
   #if CAP_SHAPES
   set_floor(shFloor);
@@ -6276,11 +6319,13 @@ void drawthemap() {
   last_firelimit = firelimit;
   firelimit = 0;
 
+  if(DIM == 3) make_clipping_planes();
   radarpoints.clear();
   callhooks(hooks_drawmap);
 
   frameid++;
   cells_drawn = 0;
+  noclipped = 0;
   
   wavephase = (-(ticks / 100)) & 7;
 
