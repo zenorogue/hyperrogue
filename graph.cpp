@@ -6262,15 +6262,15 @@ purehookset hooks_drawmap;
 
 transmatrix actual_view_transform;
 
-ld wall_radar(cell *c, transmatrix T) {
-  if(!vid.use_wall_radar) return vid.yshift;
+ld wall_radar(cell *c, transmatrix T, ld max) {
+  if(pmodel != mdPerspective || !vid.use_wall_radar) return max;
+  ld step = max / 20;
   ld fixed_yshift = 0;
-  ld step = vid.yshift / 20;
   for(int i=0; i<20; i++) {
     T = T * cpush(2, -step);
     virtualRebase(c, T, false);
     color_t col;
-    if(isWall3(c, col)) { 
+    if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > geom3::FLOOR)) { 
       T = T * cpush(2, step); 
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
@@ -6282,17 +6282,15 @@ ld wall_radar(cell *c, transmatrix T) {
 
 void make_actual_view() {
   sphereflip = Id;
-  #if MAXMDIM >= 4
-  if(WDIM == 3 && !shmup::on && vid.yshift) {
-    actual_view_transform = cpush(2, wall_radar(viewctr.at->c7, inverse(View)));
-    return;
-    }  
-  if(WDIM == 3) { actual_view_transform = Id; return; }
-  #endif
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
-  actual_view_transform = ypush(vid.yshift) * sphereflip;  
+  actual_view_transform = sphereflip;  
+  if(vid.yshift && WDIM == 2) actual_view_transform = ypush(vid.yshift) * actual_view_transform;
   #if MAXMDIM >= 4
-  if(geom3::always3) actual_view_transform = zpush(+geom3::camera) * actual_view_transform;
+  if(GDIM == 3) {
+    ld max = WDIM == 2 ? geom3::camera : vid.yshift;
+    if(max) 
+      actual_view_transform = zpush(wall_radar(viewctr.at->c7, inverse(View), max)) * actual_view_transform; 
+    }
   #endif
   }
 

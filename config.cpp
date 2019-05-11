@@ -1255,7 +1255,7 @@ void show3D() {
     }
   
   if(WDIM == 2) {
-    dialog::addSelItem(XLAT("Camera level above the plane"), fts3(camera), 'c');
+    dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts3(camera), 'c');
     dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
   
     dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'a');
@@ -1274,7 +1274,7 @@ void show3D() {
     }
 
   dialog::addBreak(50);
-  dialog::addSelItem(XLAT(DIM == 2 ? "Y shift" : "third person perspective"), fts3(vid.yshift), 'y');
+  dialog::addSelItem(XLAT(DIM == 3 && WDIM == 2 ? "Y shift" : "third person perspective"), fts3(vid.yshift), 'y');
   if(DIM == 3) {
     dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'a');
     dialog::add_action([] () { 
@@ -1366,10 +1366,10 @@ void show3D() {
       }
     else if(uni == 'c' && WDIM == 2) 
       tc_camera = ticks,
-      dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), ""),
+      dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), ""),
       dialog::reaction = [] { if(GDIM == 2) need_reset_geometry = true; },
       dialog::extra_options = [] {
-        dialog::addHelp(XLAT(
+        dialog::addHelp(GDIM == 2 ? XLAT(
           "Camera is placed %1 absolute units above a plane P in a three-dimensional "
           "world. Ground level is actually an equidistant surface, %2 absolute units "
           "below the plane P. The plane P (as well as the ground level or any "
@@ -1379,7 +1379,10 @@ void show3D() {
           fts3(camera),
           fts3(depth),
           fts3(atan(1/cosh(camera))*2/degree),
-          fts3(1/cosh(camera))));
+          fts3(1/cosh(camera))) : XLAT("Look from behind."));
+        if(DIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
+          dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
+          };
         };
     else if(uni == 'g' && WDIM == 2) 
       tc_depth = ticks,
@@ -1464,7 +1467,7 @@ void show3D() {
       dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
         XLAT("Don't center on the player character.")
         );
-      if(DIM == 3) dialog::extra_options = [] () {
+      if(WDIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
         dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
         };
       }
