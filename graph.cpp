@@ -4479,10 +4479,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     const transmatrix *Vdp =
       WDIM == 3 ? &V:
       !wmspatial ? &V : 
-      sl ? &(Vd0= mscale(V, geom3::SLEV[sl] - geom3::FLOOR)) : 
+      sl ? &(Vd0= mscale(V, DIM == 3 ? geom3::SLEV[sl] - geom3::FLOOR : geom3::SLEV[sl])) : 
       (highwall(c) && GDIM == 2) ? &(Vd0= mscale(V, (1+geom3::WALL)/2)) :
 #if CAP_SHAPES
-      (chasmg==1) ? &(Vd0 = mscale(V, geom3::LAKE - geom3::FLOOR)) :
+      (chasmg==1) ? &(Vd0 = mscale(V, DIM == 3 ? geom3::LAKE - geom3::FLOOR : geom3::LAKE)) :
 #endif
       &V;
     
@@ -5542,7 +5542,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       error |= drawMonster(V, ctype, c, moncol); 
       #if CAP_SHAPES
       if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) {
-        if(WDIM == 2)
+        if(WDIM == 2 && GDIM == 3)
           pushdown(c, q, V, geom3::SLEV[sl] - geom3::FLOOR, false, false);
         else pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
           !isMultitile(c->monst), false);

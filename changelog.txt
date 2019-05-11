@@ -3157,3 +3157,7 @@ RogueViz:
 - seeps visible through walls, no junk in Jelly Kingdom
 - a setting which prevents the walls from appearing out of nothing
 - fixed sphere in native perspective
+
+2019-05-10 11:51 Version 11.0u:
+- fixed Ocean/Red Rock
+
