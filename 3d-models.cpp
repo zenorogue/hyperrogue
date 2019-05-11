@@ -652,6 +652,17 @@ void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
     }
   }
 
+void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
+  dynamicval<int> d(vid.texture_step, 8);
+  texture_order([&] (ld x, ld y) {
+    using namespace hyperpoint_vec;
+    ld z = 1-x-y;
+    ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8);
+    hyperpoint h = rspintox(a*x+b*y+c*z) * xpush0(r);
+    hpcpush(h);
+    });  
+  }
+
 void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   if(lev == 0) {
     hpcpush(a);
@@ -849,7 +860,6 @@ void make_3d_models() {
   make_revolution_cut(shShark, 180, WDIM == 2 ? -geom3::FLOOR : 0);
 
   make_revolution_cut(shGhost, 60, g);
-  make_revolution_cut(shSlime, 60);
 
   make_revolution_cut(shEagle, 180, 0, 0.05*S);
   make_revolution_cut(shHawk, 180, 0, 0.05*S);
@@ -949,6 +959,26 @@ void make_3d_models() {
   
   shift_shape(shThorns, geom3::FLOOR - geom3::human_height * 1/40);
   shift_shape(shRose, geom3::FLOOR - geom3::human_height * 1/20);
+
+  bshape(shSlime, PPR::MONSTER_BODY);
+  hyperpoint tip = xpush0(1);
+  hyperpoint atip = xpush0(-1);
+  ld z = 63.43 * degree;
+  for(int i=0; i<5; i++) {
+    auto a = cspin(1, 2, (72 * i   ) * degree) * spin(z) * xpush0(1);
+    auto b = cspin(1, 2, (72 * i-72) * degree) * spin(z) * xpush0(1);
+    auto c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-z) * xpush0(1);
+    auto d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-z) * xpush0(1);
+    slimetriangle(tip, a, b, 1, 0);
+    slimetriangle(a, b, c, 1, 0);
+    slimetriangle(b, c, d, 1, 0);
+    slimetriangle(c, d, atip, 1, 0);    
+    }
+  last->flags |= POLY_TRIANGLES;
+  add_texture(*last);
+  finishshape();
+  if(WDIM == 2) shift_last_straight(geom3::FLOOR);
+  shJelly = shSlime;
   
   shift_shape(shMagicSword, geom3::ABODY);
   shift_shape(shMagicShovel, geom3::ABODY);
