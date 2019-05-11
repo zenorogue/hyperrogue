@@ -2166,18 +2166,18 @@ namespace linepatterns {
       if(lp.id == id) lp.color ^= col;
     }
   
-  void queuelinef(const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) {
+  void gridlinef(const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) {
     if(!elliptic)
-      queueline(h1, h2, col, par);
+      gridline(h1, h2, col, par);
     else {
       ld cros = h1[0]*h2[0] + h1[1]*h2[1] + h1[2]*h2[2];
       using namespace hyperpoint_vec;
       if(cros > 0)
-        queueline(h1, h2, col, par),
-        queueline(-1*h1, -1*h2, col, par);
+        gridline(h1, h2, col, par),
+        gridline(-1*h1, -1*h2, col, par);
       else
-        queueline(h1, -1*h2, col, par),
-        queueline(-1*h1, h2, col, par);
+        gridline(h1, -1*h2, col, par),
+        gridline(-1*h1, h2, col, par);
       }
     }
   
@@ -2188,12 +2188,12 @@ namespace linepatterns {
       case patZebraTriangles:
         if(euclid) {
           if(patterns::sevenval(c)) break;
-          queueline(tC0(V), V * tC0(eumove(-1, +3)), col, 3 + vid.linequality);
-          queueline(tC0(V), V * tC0(eumove(-3, +2)), col, 3 + vid.linequality);
-          queueline(tC0(V), V * tC0(eumove(-2, -1)), col, 3 + vid.linequality);
-          queueline(tC0(V), V * tC0(eumove(+1, -3)), col, 3 + vid.linequality);
-          queueline(tC0(V), V * tC0(eumove(+3, -2)), col, 3 + vid.linequality);
-          queueline(tC0(V), V * tC0(eumove(+2, +1)), col, 3 + vid.linequality);
+          gridline(tC0(V), V * tC0(eumove(-1, +3)), col, 3 + vid.linequality);
+          gridline(tC0(V), V * tC0(eumove(-3, +2)), col, 3 + vid.linequality);
+          gridline(tC0(V), V * tC0(eumove(-2, -1)), col, 3 + vid.linequality);
+          gridline(tC0(V), V * tC0(eumove(+1, -3)), col, 3 + vid.linequality);
+          gridline(tC0(V), V * tC0(eumove(+3, -2)), col, 3 + vid.linequality);
+          gridline(tC0(V), V * tC0(eumove(+2, +1)), col, 3 + vid.linequality);
           break;
           }
         if(zebra40(c) / 4 == 10) {
@@ -2206,7 +2206,7 @@ namespace linepatterns {
             }
           
           if(all) for(int i=0; i<3; i++)
-            queueline(tri[i], tri[(i+1)%3], col, 3 + vid.linequality);
+            gridline(tri[i], tri[(i+1)%3], col, 3 + vid.linequality);
           }
         break;
       
@@ -2221,7 +2221,7 @@ namespace linepatterns {
           
           double x = hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
           
-          queuelinef(V * ddspin(c,i,-M_PI/S3) * xpush0(x), 
+          gridlinef(V * ddspin(c,i,-M_PI/S3) * xpush0(x), 
             V * ddspin(c,i,M_PI/S3) * xpush0(x), 
             col, 1 + vid.linequality);
           }
@@ -2230,7 +2230,7 @@ namespace linepatterns {
       case patNormal: {
         for(int t=0; t<c->type; t++)
           if(c->move(t) && c->move(t) < c)
-          queueline(V * get_corner_position(c, t),
+          gridline(V * get_corner_position(c, t),
                     V * get_corner_position(c, (t+1)%c->type),
                     col, 1 + vid.linequality);
         break;
@@ -2238,14 +2238,14 @@ namespace linepatterns {
       
       case patTrihepta:
         if(pseudohept(c)) for(int t=0; t<c->type; t++)
-          queueline(V * get_warp_corner(c, t%c->type),
+          gridline(V * get_warp_corner(c, t%c->type),
                     V * get_warp_corner(c, (t+1)%c->type),
                     col, 1 + vid.linequality);
         break;
       
       case patDual:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) {
-          queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+          gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;
 
@@ -2253,32 +2253,32 @@ namespace linepatterns {
         forCellIdEx(c2, i, c) {
           if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
           if(c2 > c) if(gmatrix.count(c2) && curr_dist(c) == curr_dist(c2)) 
-            queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+            gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;
 
       case patTriTree: {
         cell *parent = ts::right_parent(c, curr_dist);
         if(gmatrix.count(parent)) 
-          queuelinef(tC0(V), gmatrix[parent]*C0, col, 2 + vid.linequality);
+          gridlinef(tC0(V), gmatrix[parent]*C0, col, 2 + vid.linequality);
         break;
         }
       
       case patTriOther: {
         cell *parent = ts::right_parent(c, curr_dist);
         forCellEx(c2, c) if(gmatrix.count(c2) && curr_dist(c2) < curr_dist(c) && c2 != parent)
-          queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+          gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
         break;
         }
 
       case patHepta:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 
-          queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+          gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
         break;
 
       case patRhomb:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) != pseudohept(c2)) 
-          queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+          gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
         break;
       
       case patPalace: {
@@ -2287,7 +2287,7 @@ namespace linepatterns {
             cell *c1 = createMov(c, (i+3) % 7);
             cell *c2 = createMov(c, (i+4) % 7);
             if(polarb50(c1) != a && polarb50(c2) != a)
-                queuelinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
+                gridlinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
                           V * ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
                                     col, 1 + vid.linequality);
             }
@@ -2296,7 +2296,7 @@ namespace linepatterns {
       
       case patPalacelike:
         if(pseudohept(c)) for(int i=0; i<7; i++) 
-          queuelinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
+          gridlinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
                     V * ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
                               col, 1 + vid.linequality);
         break;
@@ -2304,7 +2304,7 @@ namespace linepatterns {
       case patBigTriangles: {
        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master) {
-            queuelinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
+            gridlinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
             }
         break;
         }
@@ -2312,14 +2312,14 @@ namespace linepatterns {
       case patBigRings: {
         if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
-            queuelinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
+            gridlinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
         break;
         }
         
       case patTree:
         if(is_master(c)) {
           cell *c2 = c->master->move(binarytiling ? 5 : 0)->c7;
-          if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+          if(gmatrix.count(c2)) gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;
       
@@ -2327,7 +2327,7 @@ namespace linepatterns {
         if(c->master->alt) {
           int d = celldistAlt(c);
           forCellEx(c2, c) if(c2 > c && c2->master->alt && celldistAlt(c2) == d && gmatrix.count(c2))
-            queuelinef(tC0(V), gmatrix[c2]*C0, 
+            gridlinef(tC0(V), gmatrix[c2]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
@@ -2338,7 +2338,7 @@ namespace linepatterns {
           for(int i=0; i<S7; i++)
             if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
               cell *c2 = c->master->move(i)->c7;
-              if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
+              if(gmatrix.count(c2)) gridlinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
               }
           }
         break;
@@ -2346,13 +2346,13 @@ namespace linepatterns {
       case patVine: {
         if(GOLDBERG) {
           if(c->master->c7 != c) if(gmatrix.count(c->move(0)))
-            queuelinef(tC0(V), gmatrix[c->move(0)]*C0, 
+            gridlinef(tC0(V), gmatrix[c->move(0)]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
         else if(IRREGULAR) {
           if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
-            queuelinef(tC0(V), gmatrix[c->master->c7]*C0, 
+            gridlinef(tC0(V), gmatrix[c->master->c7]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
@@ -2361,8 +2361,8 @@ namespace linepatterns {
           double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
           if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
           for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
-            queuelinef(tC0(V), V*tC0(heptmove[i]), col, 2 + vid.linequality);
-            queuelinef(tC0(V), V*xspinpush0(-i * ALPHA, -hdist/2), col, 2 + vid.linequality);
+            gridlinef(tC0(V), V*tC0(heptmove[i]), col, 2 + vid.linequality);
+            gridlinef(tC0(V), V*xspinpush0(-i * ALPHA, -hdist/2), col, 2 + vid.linequality);
             }
           }
         break;
@@ -2371,13 +2371,13 @@ namespace linepatterns {
       case patPower: {
         if(GOLDBERG) {
           for(int i=0; i<S7; i++) if(c->move(i) && c->move(i)->master != c->master && gmatrix.count(c->move(i)))
-            queuelinef(tC0(V), gmatrix[c->move(i)]*C0, 
+            gridlinef(tC0(V), gmatrix[c->move(i)]*C0, 
               col,
               1 + vid.linequality);
           }
         else if(archimedean) {
           if(!pseudohept(c)) for(int i=0; i<c->type; i++) if(c->move(i) && c < c->move(i) && !pseudohept(c->move(i)) && gmatrix.count(c->move(i))) 
-            queuelinef(tC0(V), gmatrix[c->move(i)]*C0, 
+            gridlinef(tC0(V), gmatrix[c->move(i)]*C0, 
               col,
               1 + vid.linequality);
           }
@@ -2388,7 +2388,7 @@ namespace linepatterns {
               heptagon *h2 = c->master->modmove(i-1);
               if(!h1 || !h2) continue;
               if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-                  queuelinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
+                  gridlinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
                             V * ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
                                       col, 1 + vid.linequality);
               }

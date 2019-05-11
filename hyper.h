@@ -5081,5 +5081,7 @@ extern int current_rbuffer;
 extern bool new_projection_needed;
 inline void reset_projection() { new_projection_needed = true; }
 extern ld ptick(int period, ld phase = 0);
+void gridline(const hyperpoint h1, const hyperpoint h2, color_t col, int prec);
+void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec);
 }
 

@@ -4228,14 +4228,18 @@ void make_clipping_planes() {
   add_clipping_plane(+tx, -ty, +tx, +ty);
   }
 
-void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
+void gridline(const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
   if(WDIM == 2 && GDIM == 3) {
     ld eps = geom3::human_height/100;
-    queueline(V*orthogonal_move(h1,geom3::FLOOR+eps), V*orthogonal_move(h2,geom3::FLOOR+eps), col, prec);
-    queueline(V*orthogonal_move(h1,geom3::WALL-eps), V*orthogonal_move(h2,geom3::WALL-eps), col, prec);
+    queueline(orthogonal_move(h1,geom3::FLOOR+eps), orthogonal_move(h2,geom3::FLOOR+eps), col, prec);
+    queueline(orthogonal_move(h1,geom3::WALL-eps), orthogonal_move(h2,geom3::WALL-eps), col, prec);
     }
   else
-    queueline(V*h1, V*h2, col, prec);  
+    queueline(h1, h2, col, prec);
+  }
+
+void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
+  gridline(V*h1, V*h2, col, prec);
   }
 
 void draw_grid_at(cell *c, const transmatrix& V) {
