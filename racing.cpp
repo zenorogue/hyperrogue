@@ -446,14 +446,14 @@ void generate_track() {
   straight = rspintox(straight * C0);
   
   ld& a = start_line_width;
-  if(DIM == 2) for(a=0; a<10; a += .1) {
+  if(WDIM == 2) for(a=0; a<10; a += .1) {
     hyperpoint h = straight * parabolic1(a) * C0;
     cell *at = s;
     virtualRebase(at, h,  true);
     if(!rti_id.count(at) || get_info(at).from_track >= TWIDTH) break;
     }
   
-  if(DIM == 2) for(ld cleaner=0; cleaner<a*.75; cleaner += .2) for(int dir=-1; dir<=1; dir+=2) {
+  if(WDIM == 2) for(ld cleaner=0; cleaner<a*.75; cleaner += .2) for(int dir=-1; dir<=1; dir+=2) {
     transmatrix T = straight * parabolic1(cleaner * dir);
     cell *at = s;
     virtualRebase(at, T,  true);
@@ -484,7 +484,7 @@ void generate_track() {
     // this is intentionally not hrand
     
     for(int j=0; j<100; j++) {
-      if(DIM == 3)
+      if(WDIM == 3)
         who->at = Id; // straight * cspin(0, 2, rand() % 360) * cspin(1, 2, rand() % 360);
       else
         who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 40000) * spin(rand() % 360);
@@ -1250,7 +1250,7 @@ void draw_ghost_state(ghost& ghost) {
 void drawStats() {
 
   if(!racing::on) return;
-  if(DIM == 3) return;
+  if(GDIM == 3) return;
   
   initquickqueue();
   
@@ -1276,13 +1276,13 @@ void drawStats() {
 
 void markers() {
   if(!racing::on) return;
-  if(guiding && DIM == 2) for(int i=0; i<multi::players; i++) {
+  if(guiding && WDIM == 2) for(int i=0; i<multi::players; i++) {
     shmup::monster *m = shmup::pc[i];
     if(!m) continue;
     for(int j=0; j<5; j++)
-      queueline(m->pat * xpush0(j), m->pat * xpush0(j+1), multi::scs[i].uicolor, 2);
+      gridline(m->pat, xpush0(j), xpush0(j+1), multi::scs[i].uicolor, 2);
     }
-  if(racing::player_relative || racing::standard_centering || DIM == 3) {
+  if(racing::player_relative || racing::standard_centering || WDIM == 3) {
     using namespace racing;
     cell *goal = NULL;
     for(cell *c: track) if(inscreenrange(c)) goal = c;
@@ -1311,8 +1311,9 @@ void markers() {
     draw_ghost(ghost);
   
   if(gmatrix.count(track[0])) {
+    hyperpoint h = WDIM == 2 && GDIM == 3 ? zpush(geom3::FLOOR - geom3::human_height/80) * C0 : C0;
     for(ld z=-start_line_width; z<=start_line_width; z+=0.1) 
-      curvepoint(ggmatrix(track[0]) * straight * parabolic1(z) * C0);
+      curvepoint(ggmatrix(track[0]) * straight * parabolic1(z) * h);
     queuecurve(0xFFFFFFFF, 0, PPR::BFLOOR);
     }
   }
