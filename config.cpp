@@ -375,15 +375,18 @@ void initConfig() {
     sightranges[gArchimedean] = 10;
     if(i < gBinary3) addsaver(sightranges[i], "sight-g" + its(i));
     }
+  
+  ld bonus = 0;
+  ld emul = 1;
 
-  addsaver(sightranges[gBinary3], "sight-binary3", 3);
-  addsaver(sightranges[gCubeTiling], "sight-cubes", 7);
+  addsaver(sightranges[gBinary3], "sight-binary3", 3.1 + bonus);
+  addsaver(sightranges[gCubeTiling], "sight-cubes", 10);
   addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
   addsaver(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
-  addsaver(sightranges[gRhombic3], "sight-rhombic", 5.5);
-  addsaver(sightranges[gBitrunc3], "sight-bitrunc", 4.5);
-  addsaver(sightranges[gSpace534], "sight-534", 3);
-  addsaver(sightranges[gSpace435], "sight-435", 3);
+  addsaver(sightranges[gRhombic3], "sight-rhombic", 10.5 * emul);
+  addsaver(sightranges[gBitrunc3], "sight-bitrunc", 12 * emul);
+  addsaver(sightranges[gSpace534], "sight-534", 4 + bonus);
+  addsaver(sightranges[gSpace435], "sight-435", 3.8 + bonus);
 
   addsaver(sightranges[gCell5], "sight-5cell", 2 * M_PI);
   addsaver(sightranges[gCell8], "sight-8cell", 2 * M_PI);
@@ -394,13 +397,13 @@ void initConfig() {
   addsaver(sightranges[gECell24], "sight-24cell-elliptic", M_PI);
   addsaver(sightranges[gCell600], "sight-600cell", 2 * M_PI);
   addsaver(sightranges[gECell600], "sight-600cell-elliptic", M_PI);
-  addsaver(sightranges[gHoroTris], "sight-horotris", 3);
-  addsaver(sightranges[gHoroRec], "sight-hororec", 2);
-  addsaver(sightranges[gHoroHex], "sight-horohex", 2.5);
+  addsaver(sightranges[gHoroTris], "sight-horotris", 2.9 + bonus);
+  addsaver(sightranges[gHoroRec], "sight-hororec", 2.2 + bonus);
+  addsaver(sightranges[gHoroHex], "sight-horohex", 2.75 + bonus);
   
-  addsaver(sightranges[gField435], "sight-field435", 3);
-  addsaver(sightranges[gField534], "sight-field534", 3);
-  addsaver(vid.sloppy_3d, "sloppy3d", false);
+  addsaver(sightranges[gField435], "sight-field435", 4 + bonus);
+  addsaver(sightranges[gField534], "sight-field534", 3.8 + bonus);
+  addsaver(vid.sloppy_3d, "sloppy3d", true);
   addsaver(vid.texture_step, "wall-quality", 1);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
