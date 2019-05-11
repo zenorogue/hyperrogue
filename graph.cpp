@@ -753,7 +753,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
 
   if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
     
-  if(DIM == 3 && c == viewctr.at->c7) return false;
+  if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < orbsize * 0.25) return false;
 
 #if MAXMDIM >= 4
   if(c && DIM == 3) radarpoints.emplace_back(radarpoint{makeradar(V), iinf[it].glyph, icol, kind_outline(it)});
