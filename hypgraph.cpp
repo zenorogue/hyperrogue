@@ -825,7 +825,7 @@ bool in_smart_range(const transmatrix& T) {
     if(-h1[2] + 2 * dz < conformal::clip_min || -h1[2] - 2 * dz > conformal::clip_max) return false;
     sort(dh, dh+DIM); 
     ld scale = sqrt(dh[1] * dh[2]) * scalefactor * hcrossf7;
-    if(scale <= vid.smart_range_detail_3) return false;
+    if(scale <= (WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3)) return false;
     }
   else {
     ld scale = sqrt(dh[0] * dh[1]) * scalefactor * hcrossf7;
