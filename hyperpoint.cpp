@@ -332,6 +332,16 @@ bool eqmatrix(transmatrix A, transmatrix B, ld eps) {
   return true;
   }
 
+#if MAXMDIM >= 4
+// in the 3D space, move the point h orthogonally to the (x,y) plane by z units
+hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
+  ld u = 1;
+  if(h[2]) z += asinh(h[2]), u /= acosh(z);
+  u *= cosh(z);
+  return hpxy3(h[0] * u, h[1] * u, sinh(z));
+  }
+#endif
+
 // push alpha units vertically
 transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 

@@ -4225,6 +4225,72 @@ void make_clipping_planes() {
   add_clipping_plane(+tx, -ty, +tx, +ty);
   }
 
+void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
+  if(WDIM == 2 && GDIM == 3) {
+    ld eps = geom3::human_height/100;
+    queueline(V*orthogonal_move(h1,geom3::FLOOR+eps), V*orthogonal_move(h2,geom3::FLOOR+eps), col, prec);
+    queueline(V*orthogonal_move(h1,geom3::WALL-eps), V*orthogonal_move(h2,geom3::WALL-eps), col, prec);
+    }
+  else
+    queueline(V*h1, V*h2, col, prec);  
+  }
+
+void draw_grid_at(cell *c, const transmatrix& V) {
+  dynamicval<ld> lw(vid.linewidth, vid.linewidth);
+
+  vid.linewidth *= scalefactor;
+
+  // sphere: 0.3948
+  // sphere heptagonal: 0.5739
+  // sphere trihepta: 0.3467
+  
+  // hyper trihepta: 0.2849
+  // hyper heptagonal: 0.6150
+  // hyper: 0.3798
+  
+  int prec = sphere ? 3 : 1;
+  prec += vid.linequality;
+  
+  if(0);
+  #if MAXMDIM == 4
+  else if(WDIM == 3) {
+    for(int t=0; t<c->type; t++) {
+      if(!c->move(t)) continue;
+      if(binarytiling && !among(t, 5, 6, 8)) continue;
+      if(!binarytiling && c->move(t) < c) continue;
+      dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
+      queuepoly(V, shWireframe3D[t], 0);
+      }
+    }
+  #endif
+  #if CAP_BT
+  else if(binarytiling && WDIM == 2) {
+    ld yx = log(2) / 2;
+    ld yy = yx;
+    ld xx = 1 / sqrt(2)/2;
+    queueline(V * binary::get_horopoint(-yy, xx), V * binary::get_horopoint(yy, 2*xx), gridcolor(c, c->move(binary::bd_right)), prec);
+    auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
+      if(vid.linequality > 0) steps <<= vid.linequality;
+      if(vid.linequality < 0) steps >>= -vid.linequality;
+      for(int i=0; i<=steps; i++) curvepoint(V * binary::get_horopoint(y, x1 + (x2-x1) * i / steps));
+      queuecurve(gridcolor(c, c->move(dir)), 0, PPR::LINE);
+      };
+    horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
+    horizontal(yy, xx, -xx, 8, binary::bd_up);
+    horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
+    }
+  #endif
+  else if(isWarped(c) && has_nice_dual()) {
+    if(pseudohept(c)) for(int t=0; t<c->type; t++)
+      gridline(V, get_warp_corner(c, t%c->type), get_warp_corner(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
+    }
+  else {
+    for(int t=0; t<c->type; t++)
+      if(c->move(t) && c->move(t) < c)
+      gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
+    }
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -5721,65 +5787,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
-    if(vid.grid || c->land == laAsteroids) {
-      dynamicval<ld> lw(vid.linewidth, vid.linewidth);
-
-      vid.linewidth *= scalefactor;
-
-      // sphere: 0.3948
-      // sphere heptagonal: 0.5739
-      // sphere trihepta: 0.3467
-      
-      // hyper trihepta: 0.2849
-      // hyper heptagonal: 0.6150
-      // hyper: 0.3798
-      
-      int prec = sphere ? 3 : 1;
-      prec += vid.linequality;
-      
-      if(0);
-      #if MAXMDIM == 4
-      else if(WDIM == 3) {
-        for(int t=0; t<c->type; t++) {
-          if(!c->move(t)) continue;
-          if(binarytiling && !among(t, 5, 6, 8)) continue;
-          if(!binarytiling && c->move(t) < c) continue;
-          dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
-          queuepoly(V, shWireframe3D[t], 0);
-          }
-        }
-      #endif
-      #if CAP_BT
-      else if(binarytiling && WDIM == 2) {
-        ld yx = log(2) / 2;
-        ld yy = yx;
-        ld xx = 1 / sqrt(2)/2;
-        queueline(V * binary::get_horopoint(-yy, xx), V * binary::get_horopoint(yy, 2*xx), gridcolor(c, c->move(binary::bd_right)), prec);
-        auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
-          if(vid.linequality > 0) steps <<= vid.linequality;
-          if(vid.linequality < 0) steps >>= -vid.linequality;
-          for(int i=0; i<=steps; i++) curvepoint(V * binary::get_horopoint(y, x1 + (x2-x1) * i / steps));
-          queuecurve(gridcolor(c, c->move(dir)), 0, PPR::LINE);
-          };
-        horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
-        horizontal(yy, xx, -xx, 8, binary::bd_up);
-        horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
-        }
-      #endif
-      else if(isWarped(c) && has_nice_dual()) {
-        if(pseudohept(c)) for(int t=0; t<c->type; t++)
-          queueline(V * get_warp_corner(c, t%c->type),
-                    V * get_warp_corner(c, (t+1)%c->type),
-                    gridcolor(c, c->move(t)), prec);
-        }
-      else {
-        for(int t=0; t<c->type; t++)
-          if(c->move(t) && c->move(t) < c)
-          queueline(V * get_corner_position(c, t%c->type),
-                    V * get_corner_position(c, (t+1)%c->type),
-                    gridcolor(c, c->move(t)), prec);
-        }
-      }
+    if(vid.grid || c->land == laAsteroids) draw_grid_at(c, V);
     #endif
 
     if(!euclid) {
