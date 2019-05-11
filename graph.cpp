@@ -4101,9 +4101,9 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
   if(isWall3(c2, dummy)) return 0;
   if(c->land != c2->land && c->land != laNone && c2->land != laNone) {
     if(c>c2) return 0;
-    if(c->land == laBarrier) return darkena(lcolor(c2), 0, 0x40);
-    if(c2->land == laBarrier) return darkena(lcolor(c), 0, 0x40);
-    return darkena(gradient(lcolor(c), lcolor(c2), 0, 1, 2), 0, 0x40);
+    if(c->land == laBarrier) return darkena3(lcolor(c2), 0, 0x40);
+    if(c2->land == laBarrier) return darkena3(lcolor(c), 0, 0x40);
+    return darkena3(gradient(lcolor(c), lcolor(c2), 0, 1, 2), 0, 0x40);
     }
   if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena3(winf[c->wall].color, 0, 0x40);
   if(c->wall == c2->wall) return 0;
