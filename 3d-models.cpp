@@ -738,8 +738,6 @@ void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q
     if(d < mindist) mindist = d, pos = min(min(pss[i][2], pss[i+1][2]), pss[i+2][2]), qty++;
     qtyall++;
     }
-  println(hlog, "center = ", center);
-  println(hlog, "qty= ", qty, "/",qtyall, " pos = ", pos, " mindist=", mindist);
   
   make_ball(eye, rad, 0);
   transmatrix T = zpush(-shift_eye) * rgpushxto0(center) * zpush(pos); 
