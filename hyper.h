@@ -2071,7 +2071,7 @@ extern bool ivoryz;
 #define SHADOW_MON  0x30
 
 transmatrix face_the_player(const transmatrix V);
-hyperpoint makeradar(transmatrix V);
+void addradar(const transmatrix& V, char ch, color_t col, color_t outline);
 
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase);
 

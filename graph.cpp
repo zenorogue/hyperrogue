@@ -689,13 +689,15 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
 #endif
   }
 
-hyperpoint makeradar(transmatrix V) {
+void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
   hyperpoint h = tC0(V);
   using namespace hyperpoint_vec;
-  h = h * (hdist0(h) / sightranges[geometry] / hypot_d(3, h));
-  return h;
+  ld d = hdist0(h);
+  if(d > sightranges[geometry]) return;
+  h = h * (d / sightranges[geometry] / hypot_d(3, h));
+  radarpoints.emplace_back(radarpoint{h, ch, col, outline});
   }
-  
+
 color_t kind_outline(eItem it) {
   int k = itemclass(it);
   if(k == IC_TREASURE)
@@ -761,7 +763,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < orbsize * 0.25) return false;
 
 #if MAXMDIM >= 4
-  if(c && DIM == 3) radarpoints.emplace_back(radarpoint{makeradar(V), iinf[it].glyph, icol, kind_outline(it)});
+  if(c && DIM == 3) addradar(V, iinf[it].glyph, icol, kind_outline(it));
 #endif
   
   transmatrix Vit = V;
@@ -1171,7 +1173,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
 
 #if MAXMDIM >= 4
   if(DIM == 3 && m != moPlayer)
-    radarpoints.emplace_back(radarpoint{makeradar(V1), minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF });
+    addradar(V1, minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
 #endif
 
 #if CAP_SHAPES
@@ -2210,7 +2212,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
     if(DIM == 3 && among(c->monst, moIvyRoot, moWorm, moHexSnake, moDragonHead, moKrakenH))
-      radarpoints.emplace_back(radarpoint{makeradar(Vparam), minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF });
+      addradar(Vparam, minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
   
     transmatrix Vb0 = Vb;
     if(c->mondir != NODIR && DIM == 3 && isAnyIvy(c)) {
@@ -4259,14 +4261,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           shmup::monstersAt.equal_range(c);
         for(shmup::mit it = p.first; it != p.second; it++) {
           shmup::monster* m = it->second;
-          radarpoints.emplace_back(radarpoint{makeradar(V*m->at), minf[m->type].glyph, minf[m->type].color, 0xFF0000FF});
+          addradar(V*m->at, minf[m->type].glyph, minf[m->type].color, 0xFF0000FF);
           }
         }
       #endif
       if(c->monst) 
-        radarpoints.emplace_back(radarpoint{makeradar(V), minf[c->monst].glyph, minf[c->monst].color, isFriendly(c->monst) ? 0x00FF00FF : 0xFF0000FF});
+        addradar(V, minf[c->monst].glyph, minf[c->monst].color, isFriendly(c->monst) ? 0x00FF00FF : 0xFF0000FF);
       else if(c->item)
-        radarpoints.emplace_back(radarpoint{makeradar(V), iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item)});
+        addradar(V, iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item));
       return;
       }
     noclipped++;

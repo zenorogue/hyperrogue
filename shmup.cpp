@@ -3679,7 +3679,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         break;        
         }
       case moAsteroid: {
-        if(DIM == 3) radarpoints.emplace_back(radarpoint{makeradar(view), '*', 0xFFFFFF, 0xC0C0C0FF});
+        if(DIM == 3) addradar(view, '*', 0xFFFFFF, 0xC0C0C0FF);
         transmatrix t = view;
         if(WDIM == 3) t = face_the_player(t);
         t = t * spin(curtime / 500.0);
