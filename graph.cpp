@@ -394,7 +394,12 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         color_t col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*xspinpush0(dda * M_PI / sword_angles, PURE ? 0.6 * scalefactor : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/sword_angles, PURE ? 0.7 * scalefactor : longer ? 0.44 : 0.42), col, 1);
+        ld l0 = PURE ? 0.6 * scalefactor : longer ? 0.36 : 0.4;
+        ld l1 = PURE ? 0.7 * scalefactor : longer ? 0.44 : 0.42;
+        hyperpoint h0 = DIM == 3 ? xpush(l0) * zpush(geom3::FLOOR - geom3::human_height/50) * C0 : xpush0(l0);
+        hyperpoint h1 = DIM == 3 ? xpush(l1) * zpush(geom3::FLOOR - geom3::human_height/50) * C0 : xpush0(l1);        
+        transmatrix T = Vnow*spin(dda * M_PI / sword_angles);
+        queueline(T*h0, T*h1, col, 1, PPR::SUPERLINE);
         }
 #endif
 
