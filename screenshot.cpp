@@ -1202,7 +1202,7 @@ void fib_ghosts() {
 reaction_t current = null_animation;
 
 void pick() {
-  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE) {
+  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || geom3::always3 || pmodel || rug::rugged) {
     current = null_animation;
     return;
     }
