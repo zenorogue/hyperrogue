@@ -100,8 +100,7 @@ unsigned int haircolors[]  = { 8, 0x686868FF, 0x8C684AFF, 0xF2E1AEFF, 0xB55239FF
 unsigned int dresscolors[] = { 6, 0xC00000FF, 0x00C000FF, 0x0000C0FF, 0xC0C000FF, 0xC0C0C0FF, 0x202020FF };
 unsigned int dresscolors2[] = { 7, 0x8080FFC0, 0x80FF80C0, 0xFF8080C0, 0xFFFF80C0, 0xFF80FFC0, 0x80FFFFC0, 0xFFFFFF80 };
 unsigned int swordcolors[] = { 6, 0xC0C0C0FF, 0xFFFFFFFF, 0xFFC0C0FF, 0xC0C0FFFF, 0x808080FF, 0x202020FF };
-unsigned int eyecolors[] = { 4, 0x00C000FF, 0x0000C0FF, 0xC00000FF, 0xC0C000FF };
-
+unsigned int eyecolors[] = { 4, 0x00C000FF, 0x0000C0FF, 0xC00000FF, 0xC0C000FF, 0x804010FF, 0x00C000FF };
 
 void initcs(charstyle &cs) {
   cs.charid     = 0;
@@ -111,6 +110,7 @@ void initcs(charstyle &cs) {
   cs.swordcolor = 0xD0D0D0FF;
   cs.dresscolor2= 0x8080FFC0;
   cs.uicolor    = 0xFF0000FF;
+  cs.eyecolor   = 0x603000FF;
   cs.lefthanded = false;
   }
 
@@ -1505,6 +1505,7 @@ void showCustomizeChar() {
   
   dialog::addSelItem(XLAT("character"), csname(cs), 'g');
   dialog::addColorItem(XLAT("skin color"), cs.skincolor, 's');
+  dialog::addColorItem(XLAT("eye color"), cs.eyecolor, 'e');
   dialog::addColorItem(XLAT("weapon color"), cs.swordcolor, 'w');
   dialog::addColorItem(XLAT("hair color"), cs.haircolor, 'h');
   
@@ -1550,10 +1551,11 @@ void showCustomizeChar() {
     else if(uni == 'p') vid.samegender = !vid.samegender;
     else if(uni == 's') switchcolor(cs.skincolor, cat ? haircolors : skincolors);
     else if(uni == 'h') switchcolor(cs.haircolor, haircolors);
-    else if(uni == 'w') switchcolor(cs.swordcolor, cat ? eyecolors : swordcolors);
+    else if(uni == 'w') switchcolor(cs.swordcolor, swordcolors);
     else if(uni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
     else if(uni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
     else if(uni == 'u') switchcolor(cs.uicolor, eyecolors);
+    else if(uni == 'e') switchcolor(cs.eyecolor, eyecolors);
     else if(uni == 'l') cs.lefthanded = !cs.lefthanded;
     else if(doexiton(sym, uni)) popScreen();
     };

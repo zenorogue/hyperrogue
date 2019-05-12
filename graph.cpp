@@ -949,6 +949,15 @@ void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   }
 #endif
 
+color_t skincolor = 0xD0C080FF;
+
+void humanoid_eyes(const transmatrix& V, color_t ecol, color_t hcol = skincolor) {
+  if(DIM == 3) {
+    queuepoly(VHEAD, shPHeadOnly, hcol);
+    queuepoly(VHEAD, shSkullEyes, ecol);
+    }
+  }
+
 void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
   charstyle& cs = getcs();
 
@@ -965,7 +974,7 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       queuepoly(VABODY, shWolfBody, fc(0, cs.skincolor, 0));
       queuepoly(VAHEAD, shFamiliarHead, fc(500, cs.haircolor, 2));
       if(!shmup::on || shmup::curtime >= shmup::getPlayer()->nextshot) {
-        color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.swordcolor, 3);
+        color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.eyecolor, 3);
         queuepoly(VAHEAD, shFamiliarEye, col);
         queuepoly(VAHEAD * Mirror, shFamiliarEye, col);
         }
@@ -988,7 +997,7 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       queuepoly(VAHEAD, shDogHead, fc(150, cs.haircolor, 2));
 
       if(!shmup::on || shmup::curtime >= shmup::getPlayer()->nextshot) {
-        color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.swordcolor, 3);
+        color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.eyecolor, 3);
         queuepoly(VAHEAD, shWolf1, col);
         queuepoly(VAHEAD, shWolf2, col);
         }
@@ -1013,7 +1022,7 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       queuepoly(VABODY, shCatBody, fc(0, cs.skincolor, 0));
       queuepoly(VAHEAD, shCatHead, fc(150, cs.haircolor, 2));
       if(!shmup::on || shmup::curtime >= shmup::getPlayer()->nextshot) {
-        color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.swordcolor, 3);
+        color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.eyecolor, 3);
         queuepoly(VAHEAD * xpush(.04), shWolf1, col);
         queuepoly(VAHEAD * xpush(.04), shWolf2, col);
         }
@@ -1096,6 +1105,8 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
         queuepoly(VHEAD, shPFace, fc(500, cs.skincolor, 1));
         queuepoly(VHEAD1, (cs.charid&1) ? shFemaleHair : shPHead, fc(150, cs.haircolor, 2));
         }      
+      
+      humanoid_eyes(V, cs.eyecolor, cs.skincolor);
   
       if(knighted)
         queuepoly(VBODY * VBS, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
@@ -1177,15 +1188,6 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
       queuepoly(VBODY2 * VBS, shPrinceDress,  darkena(col, 1, 0XC0));
     if(cs.charid == 3)
       queuepoly(VBODY2 * VBS, shPrincessDress,  darkena(col, 1, 0XC0));
-    }
-  }
-
-color_t skincolor = 0xD0C080FF;
-
-void humanoid_eyes(const transmatrix& V, color_t ecol, color_t hcol = skincolor) {
-  if(DIM == 3) {
-    queuepoly(VHEAD, shPHeadOnly, hcol);
-    queuepoly(VHEAD, shSkullEyes, ecol);
     }
   }
 
@@ -1307,7 +1309,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       if(m == moRoseLady) {
   //    queuepoly(V, girl ? shGoatHead : shDemon,  0x800000FF);
         // make her hair a bit darker to stand out in 3D
-        queuepoly(VHEAD1, girl ? shFemaleHair : shPHead,  evil ? 0x500050FF : DIM == 3 ? 0x433A32FF : 0x332A22FF);
+        queuepoly(VHEAD1, girl ? shFemaleHair : shPHead,  evil ? 0x500050FF : DIM == 3 ? 0x666A64FF : 0x332A22FF);
         }
       else if(m == moRoseBeauty) {
         if(girl) {

@@ -7,6 +7,8 @@
 
 namespace hr {
 
+ld eyepos;
+
 #if MAXMDIM >= 4
 
 #define S (scalefactor / 0.805578)
@@ -343,7 +345,7 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
     }
   
   if(kind) {
-    hyperpoint ht[3];
+    array<hyperpoint, 3> ht;
     ld hsh[3];
     ld shi[3];
     bool ok = true;
@@ -356,26 +358,50 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
       zz -= h[0] * h[0] / 0.10 / 0.10 * 0.01 / S / S * SH;
       if(abs(h[1]) > 0.14*S) ok = false, zz -= revZ * (abs(h[1])/S - 0.14) * SH;
       if(abs(h[0]) > 0.08*S) ok = false, zz -= revZ * (abs(h[0])/S - 0.08) * (abs(h[0])/S - 0.08) * 25 * SH;
-      hpcpush(ht[s] = zpush(zz) * h);
-      if(hsh[s] < 0.1*S) shi[s] = -0.5;
-      else if(hsh[s] < 0.12*S) shi[s] = -0.1 - 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
-      else shi[s] = -0.1;
-      shi[s] *= geom3::human_height * revZ;
+      h = normalize(h);
+      ht[s] = zpush(zz) * h;
+      if(hsh[s] < 0.1*S) shi[s] = 0.5;
+      else if(hsh[s] < 0.12*S) shi[s] = 0.1 + 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
+      else shi[s] = 0.1;
       }
-    if(ok && kind == 1) for(int i=0; i<3; i++) {
-      int j = (i+1) % 3;
-      hpcpush(ht[i]);
-      hpcpush(ht[j]);
-      hpcpush(zpush(shi[i]) * ht[i]);
-      hpcpush(ht[j]);
-      hpcpush(zpush(shi[i]) * ht[i]);
-      hpcpush(zpush(shi[i]) * ht[j]);
+    if(ok && kind == 1) {
+      array<array<hyperpoint, 3>, 6> htx;
+      for(int i=0; i<6; i++) htx[i] = ht;
+
+      for(int i=0; i<3; i++) {
+        htx[0][i][0] *= 0.7; htx[0][i][1] *= 0.7;
+        htx[1][i][0] *= 1.2; htx[1][i][1] *= 1.7;
+        htx[2][i][1] *= 1.7;
+        htx[4][i][0] = htx[4][i][0] * 0.4 + scalefactor * 0.1;
+        htx[5][i][0] = htx[5][i][0] * 0.3 + scalefactor * 0.1;
+        for(int a=0; a<6; a++) htx[a][i] = hpxy3(htx[a][i][0], htx[a][i][1], htx[a][i][2]);
+        }
+      ld levels[6] = {0, 0.125, 0.125, 0.250, 0.375, 0.5};
+      for(int a=0; a<6; a++) for(int i=0; i<3; i++) 
+        htx[a][i] = zpush(-min(shi[i], levels[a]) * geom3::human_height * revZ) * htx[a][i];
+      
+      hpcpush(htx[0][0]);
+      hpcpush(htx[0][1]);
+      hpcpush(htx[0][2]);
+
+      for(int a=0; a<5; a++) for(int i=0; i<3; i++) {
+        int j = (i+1) % 3;
+        int b = a+1;
+        hpcpush(htx[a][i]);
+        hpcpush(htx[a][j]);
+        hpcpush(htx[b][i]);
+        hpcpush(htx[a][j]);
+        hpcpush(htx[b][i]);
+        hpcpush(htx[b][j]);
+        }
       }
+    else 
+      hpcpush(ht[0]), hpcpush(ht[1]), hpcpush(ht[2]);
     }
   else {
     for(int s=0; s<3; s++) {
       hyperpoint h = hs[s];
-      ld zz = zc(0.925);
+      ld zz = zc(eyepos);
       if(h[0] < -0.05*S) zz += revZ * (h[0]/S + 0.05) * SH;
       if(hdist0(h) <= 0.0501*S) {
         zz += revZ * sqrt(0.0026 - pow(hdist0(h)/S, 2)) * SH;
@@ -434,7 +460,7 @@ void make_foot_3d(hpcshape& sh) {
 void make_head_only() {
 
   auto addpt = [] (int d, int u) {
-    hpcpush(zpush(zc(0.925) + 0.06 * SH * sin(u * degree)) * xspinpush0(d * degree, 0.05 * S * cos(u * degree)));
+    hpcpush(zpush(zc(eyepos) + 0.06 * SH * sin(u * degree)) * xspinpush0(d * degree, 0.05 * S * cos(u * degree)));
     };
   
   bshape(shPHeadOnly, shPHeadOnly.prio);
@@ -712,6 +738,7 @@ hyperpoint psmin(hyperpoint H) {
   }
 
 void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1) {
+  eyepos = WDIM == 2 ? 0.875 : 0.925;
   using namespace hyperpoint_vec;
   hyperpoint center = Hypc;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
@@ -743,7 +770,7 @@ void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q
   
   if(&eye == &shSkullEyes) println(hlog, "skull pos = ", pos);
   if(&eye == &shSkullEyes) 
-    pos = zc(0.925) - 0.06 * SH * 0.05;
+    pos = zc(eyepos) - 0.06 * SH * 0.05;
   
   make_ball(eye, rad, 0);
   transmatrix T = zpush(-shift_eye) * rgpushxto0(center) * zpush(pos); 
