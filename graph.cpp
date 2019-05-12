@@ -3974,7 +3974,7 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
   if(DIM == 3 && WDIM == 2) {
     if(!qfi.fshape) qfi.fshape = &shFullFloor;
     if(conegraph(c)) {
-      draw_shapevec(c, V, qfi.fshape->cone, darkena(wcol, 0, 0xFF), PPR::WALL);
+      draw_shapevec(c, V, qfi.fshape->cone[0], darkena(wcol, 0, 0xFF), PPR::WALL);
       return;
       }
     color_t wcol0 = wcol;
@@ -5512,7 +5512,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case waBarrier:
           if(c->land == laOceanWall && wmescher && wmspatial) {
            if(GDIM == 3 && qfi.fshape) {
-             draw_shapevec(c, V, qfi.fshape->cone, darkena(wcol, 0, 0xFF), PPR::WALL);
+             draw_shapevec(c, V, qfi.fshape->cone[1], darkena(wcol, 0, 0xFF), PPR::WALL);
              break;
              }           
            const int layers = 2 << detaillevel;
@@ -5586,7 +5586,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           else if(c->wall == waExplosiveBarrel) {
             if(DIM == 3 && qfi.fshape) {
-              draw_shapevec(c, V, qfi.fshape->cone, 0xD00000FF, PPR::REDWALL);
+              draw_shapevec(c, V, qfi.fshape->cone[1], 0xD00000FF, PPR::REDWALL);
               break;
               }
             const int layers = 2 << detaillevel;
@@ -5600,7 +5600,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             auto V2 = V;
             if(hasTimeout(c)) V2 = V2 * spintick(c->land == laPower ? 5000 : 500);
             if(GDIM == 3 && qfi.fshape)
-              draw_shapevec(c, V2, qfi.fshape->cone, darkena(wcol, 0, 0xF0), PPR::WALL);
+              draw_shapevec(c, V2, qfi.fshape->cone[1], darkena(wcol, 0, 0xF0), PPR::WALL);
             else queuepoly(V2, shStar, darkena(wcol, 0, 0xF0));
             if(isFire(c) && rand() % 300 < ticks - lastt)
               drawParticle(c, wcol, 75);
