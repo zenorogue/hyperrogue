@@ -650,6 +650,8 @@ void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
         }
       }
     }
+  for(int i=0; i<30; i++) shift_shape(animated[i], geom3::BIRD);
+  shift_shape(orig, geom3::BIRD);
   }
 
 void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
@@ -913,10 +915,10 @@ void make_3d_models() {
   
   make_revolution_cut(shShark, 180, WDIM == 2 ? -geom3::FLOOR : 0);
 
-  make_revolution_cut(shGhost, 60, g);
+  make_revolution_cut(shGhost, 60, geom3::GHOST + g);
 
-  make_revolution_cut(shEagle, 180, 0, 0.05*S);
-  make_revolution_cut(shHawk, 180, 0, 0.05*S);
+  make_revolution_cut(shEagle, 180, -geom3::BIRD, 0.05*S);
+  make_revolution_cut(shHawk, 180, -geom3::BIRD, 0.05*S);
 
   make_revolution_cut(shTinyBird, 180, 0, 0.025 * S);
   make_revolution_cut(shTinyShark, 90);
@@ -924,14 +926,14 @@ void make_3d_models() {
 
   make_revolution_cut(shGargoyleWings, 180, 0, 0.05*S);
   make_revolution_cut(shGargoyleBody, 180, 0, 0.05*S);
-  make_revolution_cut(shGadflyWing, 180, 0, 0.05*S);
-  make_revolution_cut(shBatWings, 180, 0, 0.05*S);
-  make_revolution_cut(shBatBody, 180, 0, 0.05*S);
+  make_revolution_cut(shGadflyWing, 180, -geom3::BIRD, 0.05*S);
+  make_revolution_cut(shBatWings, 180, -geom3::BIRD, 0.05*S);
+  make_revolution_cut(shBatBody, 180, -geom3::BIRD, 0.05*S);
 
   make_revolution_cut(shJelly, 60);
   make_revolution(shFoxTail1);
   make_revolution(shFoxTail2);
-  make_revolution(shGadflyBody);
+  make_revolution(shGadflyBody, 180, -geom3::BIRD);
   for(int i=0; i<8; i++)
     make_revolution(shAsteroid[i], 360);
   
@@ -940,7 +942,7 @@ void make_3d_models() {
   make_revolution(shBugArmor, 180, geom3::ABODY);
   make_revolution_cut(shBugAntenna, 90, geom3::ABODY);
   
-  make_revolution_cut(shButterflyBody, 180);
+  make_revolution_cut(shButterflyBody, 180, -geom3::BIRD);
   
   animate_bird(shEagle, shAnimatedEagle, 0.05*S);
   animate_bird(shTinyBird, shAnimatedTinyEagle, 0.05*S/2);
@@ -1047,6 +1049,7 @@ void make_3d_models() {
   adjust_eye(shWolfEyes, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
 
   adjust_eye(shReptileEye, shReptileHead, geom3::AHEAD, geom3::AHEAD, 1);
+  adjust_eye(shGadflyEye, shGadflyBody, -geom3::BIRD, -geom3::BIRD, 1);
   }
 
 #undef S

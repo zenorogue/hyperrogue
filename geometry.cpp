@@ -371,8 +371,8 @@ namespace geom3 {
       ALEG0 = lev_to_factor(human_height * .0 - reduce);
       ALEG  = lev_to_factor(human_height * .2 - reduce);
       AHEAD = lev_to_factor(human_height * .6 - reduce);
-      BIRD = lev_to_factor(DIM == 3 ? 0 : (human_wall_ratio+1)/2 * wh * .8);
-      GHOST = lev_to_factor(DIM == 3 ? 0 : human_height * .5);
+      BIRD = lev_to_factor(WDIM == 3 ? 0 : (human_wall_ratio+1)/2 * wh * .8);
+      GHOST = lev_to_factor(WDIM == 3 ? 0 : human_height * .5);
       FLATEYE = lev_to_factor(human_height * .15);
       
       slev = rock_wall_ratio * wh / 3;
