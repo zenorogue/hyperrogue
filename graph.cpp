@@ -1798,14 +1798,23 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       ShadowV(V, shYeti);
       queuepoly(VLEG, shRatTail, darkena(col, 0, 0xFF));
       queuepoly(VBODY * VBS, shYeti, darkena(col, 1, 0xFF));
-      queuepoly(VHEAD, shRatHead, darkena(col, 0, 0xFF));
   
       float t = sintick(1000, where ? where->cpdist*M_PI : 0);
       int eyecol = t > 0.92 ? 0xFF0000 : 0;
       
-      queuepoly(VHEAD, shWolf1, darkena(eyecol, 0, 0xFF));
-      queuepoly(VHEAD, shWolf2, darkena(eyecol, 0, 0xFF));
-      queuepoly(VHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
+      if(DIM == 2) {
+        queuepoly(VHEAD, shRatHead, darkena(col, 0, 0xFF));
+        queuepoly(VHEAD, shWolf1, darkena(eyecol, 0, 0xFF));
+        queuepoly(VHEAD, shWolf2, darkena(eyecol, 0, 0xFF));
+        queuepoly(VHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
+        }
+      else {
+        transmatrix V1 = V * zpush(geom3::AHEAD - zc(0.4) - zc(0.925) + geom3::HEAD) * cpush(0, scalefactor * (-0.1));
+        queuepoly(V1, shWolfHead, darkena(col, 0, 0xFF));
+        queuepoly(V1, shFamiliarEye, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1 * Mirror, shFamiliarEye, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1, shWolfEyes, darkena(col, 3, 0xFF));
+        }
       
       if(m == moRatlingAvenger) {
         queuepoly(VBODY1 * VBS, shRatCape2, 0x484848FF);
