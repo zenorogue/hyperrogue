@@ -741,12 +741,19 @@ void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q
     qtyall++;
     }
   
+  if(&eye == &shSkullEyes) println(hlog, "skull pos = ", pos);
+  if(&eye == &shSkullEyes) 
+    pos = zc(0.925) - 0.06 * SH * 0.05;
+  
   make_ball(eye, rad, 0);
   transmatrix T = zpush(-shift_eye) * rgpushxto0(center) * zpush(pos); 
   for(int i=eye.s; i<isize(hpc); i++) hpc[i] = T * hpc[i];
   int s = isize(hpc);
+  if(&eye == &shSkullEyes) 
+    for(int i=eye.s; i<s; i++) hpc[i] = xpush(0.07 * scalefactor) * hpc[i];
   if(q == 2)
     for(int i=eye.s; i<s; i++) hpcpush(MirrorY * hpc[i]);
+
   finishshape();
   // eye.prio = PPR::SUPERLINE;
   }
@@ -1050,6 +1057,8 @@ void make_3d_models() {
 
   adjust_eye(shReptileEye, shReptileHead, geom3::AHEAD, geom3::AHEAD, 1);
   adjust_eye(shGadflyEye, shGadflyBody, -geom3::BIRD, -geom3::BIRD, 1);
+  
+  adjust_eye(shSkullEyes, shPHeadOnly, geom3::HEAD1, geom3::HEAD, 2, 2);
   }
 
 #undef S
