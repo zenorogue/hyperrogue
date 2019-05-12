@@ -273,6 +273,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
       
     case mdUnchanged:
+    case mdFlatten:
       ret = H / current_display->radius;
       return; 
     
@@ -1288,12 +1289,20 @@ transmatrix screenpos(ld x, ld y) {
 
 transmatrix atscreenpos(ld x, ld y, ld size) {
   transmatrix V = Id;
-
-  V[0][2] += (x - current_display->xcenter);
-  V[1][2] += (y - current_display->ycenter);
-  V[0][0] = size * 2 * hcrossf / crossf;
-  V[1][1] = size * 2 * hcrossf / crossf;
-  V[2][2] = current_display->scrdist;
+  
+  if(pmodel == mdFlatten) {
+    V[0][3] += (x - current_display->xcenter);
+    V[1][3] += (y - current_display->ycenter);
+    V[0][0] = size * 2 * hcrossf / crossf;
+    V[1][1] = size * 2 * hcrossf / crossf;
+    }
+  else { 
+    V[0][2] += (x - current_display->xcenter);
+    V[1][2] += (y - current_display->ycenter);
+    V[0][0] = size * 2 * hcrossf / crossf;
+    V[1][1] = size * 2 * hcrossf / crossf;
+    V[2][2] = current_display->scrdist;
+    }
 
   return V;
   }

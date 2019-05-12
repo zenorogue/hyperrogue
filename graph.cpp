@@ -771,7 +771,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
 #endif
   
   transmatrix Vit = V;
-  if(GDIM == 3 && WDIM == 2) Vit = mscale(V, geom3::STUFF);
+  if(GDIM == 3 && WDIM == 2 && c) Vit = mscale(V, geom3::STUFF);
   if(DIM == 3 && c) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 

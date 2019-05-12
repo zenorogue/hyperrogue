@@ -441,6 +441,15 @@ void coords_to_poly() {
   }
 
 void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
+  if(pmodel == mdFlatten) {
+    for(int i=ofs; i<ofs+cnt; i++) {
+      hyperpoint h = glhr::gltopoint(tab[i]);
+      h[3] = 1;
+      h = V * h;
+      add1(h);
+      }
+    return;
+    }
   tofix.clear(); knowgood = false;
   hyperpoint last = V * glhr::gltopoint(tab[ofs]);
   bool last_behind = is_behind(last);
@@ -2709,6 +2718,8 @@ void configure_floorshapes() {
   generate_floorshapes();  
   }
 
+ld wormscale;
+
 #if MAXMDIM >= 4
 extern void make_3d_models();
 #endif
@@ -2854,7 +2865,7 @@ void buildpolys() {
   bshape(shPirateX, PPR::ITEM, scalefactor, 124);
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
 
-  ld wormscale = WDIM == 3 ? 3 : 1;
+  wormscale = WDIM == 3 ? 3 : 1;
   
   // first layer monsters
   bshape(shTentacleX, PPR::TENTACLE0);

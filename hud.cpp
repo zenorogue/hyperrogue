@@ -162,7 +162,7 @@ int glyphflags(int gid) {
   }
 
 bool graphglyph() {
-  if(DIM == 3) return false;
+  // if(DIM == 3) return false;
   return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
   }
 
@@ -187,6 +187,9 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
       if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
       transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize*zoom);
+      if(isWorm(m) && wormscale != 1) 
+        for(int i=0; i<DIM; i++)
+          V[i][i] /= wormscale;
       int mcol = color;
       mcol -= (color & 0xFCFCFC) >> 2;
       drawMonsterType(m, NULL, V, mcol, glyphphase[id]/500.0);
@@ -394,7 +397,7 @@ void drawStats() {
   bool h = hide_player();
 
   {
-  dynamicval<eModel> pm(pmodel, mdDisk);
+  dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
   // dynamicval<videopar> v(vid, vid);
   // vid.alpha = vid.scale = 1;
   dynamicval<ld> va(vid.alpha, 1);

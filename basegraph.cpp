@@ -215,7 +215,7 @@ void display_data::set_projection(int ed) {
   DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
   
   bool pers3 = false;
-  bool apply_models = !among(pmodel, mdUnchanged, mdRug);
+  bool apply_models = !among(pmodel, mdUnchanged, mdFlatten, mdRug);
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
@@ -242,13 +242,14 @@ void display_data::set_projection(int ed) {
       if(spherephase == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
       }
     }
+  if(pmodel == mdFlatten) shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::flatten;
   
   start_projection(ed, shaderside_projection);
   if(pmodel == mdRug) return;
 
   auto cd = current_display;
 
-  if(!shaderside_projection) {
+  if(!shaderside_projection || glhr::new_shader_projection == glhr::shader_projection::flatten) {
     if(DIM == 3 && apply_models) {
       glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, 1));
       glhr::id_modelview();
@@ -319,7 +320,7 @@ void display_data::set_projection(int ed) {
       }      
     }
   
-  if(vid.camera_angle && !among(pmodel, mdUnchanged, mdRug)) {
+  if(vid.camera_angle && !among(pmodel, mdUnchanged, mdFlatten, mdRug)) {
     ld cam = vid.camera_angle * degree;
 
     GLfloat cc = cos(cam);

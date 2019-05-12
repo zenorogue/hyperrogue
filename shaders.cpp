@@ -305,9 +305,11 @@ bool operator != (const glmatrix& m1, const glmatrix& m2) {
   return !(m1 == m2);
   }
 
+bool uses_mvp(shader_projection sp) { return among(sp, shader_projection::standard, shader_projection::flatten); }
+
 void set_modelview(const glmatrix& modelview) {
   if(!current) return;
-  if(current_shader_projection != shader_projection::standard) {
+  if(!uses_mvp(current_shader_projection)) {
     if(modelview != current_modelview) {
       current_modelview = modelview;
       glUniformMatrix4fv(current->uMV, 1, 0, modelview.as_array());
@@ -331,7 +333,7 @@ void set_modelview(const glmatrix& modelview) {
 
 void id_modelview() {
   if(!current) return;
-  if(current_shader_projection != shader_projection::standard) { set_modelview(id); return; }
+  if(!uses_mvp(current_shader_projection)) { set_modelview(id); return; }
   #if MINIMIZE_GL_CALLS
   if(projection == current_matrix) return;
   current_matrix = projection;
@@ -495,7 +497,7 @@ void init() {
     
     shader_projection sp = shader_projection(j);
     
-    bool mps = j != 0;
+    bool mps = !uses_mvp(sp);
     bool band = among(sp, shader_projection::band, shader_projection::band3);
     bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
@@ -510,6 +512,7 @@ void init() {
     bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
+    bool flatten = (sp == shader_projection::flatten);
     
     programs[i][j] = new GLprogram(stringbuilder(
 
@@ -557,9 +560,11 @@ void init() {
       varcol,    "vColor = aColor;",
       !varcol,   "vColor = uColor;",
       lfog,      "vColor = vColor * clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
-      !mps,      "gl_Position = uMVP * aPosition;",
+      !mps && !flatten,      "gl_Position = uMVP * aPosition;",
+      !mps && flatten,   "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uMVP * pos;",
       ball,      "vec4 t = uMV * aPosition; t /= (t[3] + uAlpha); ",
-      mps&&!(band||hp||s3||ball),"gl_Position = uP * (uMV * aPosition);",
+      mps&&!(band||hp||s3||ball||flatten),"gl_Position = uP * (uMV * aPosition);",
+      mps&&flatten, "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uP * (uMV * pos);",
 
       band||hp,  "vec4 t = uMV * aPosition;",  
       (band||hp) && dim2,  "float zlev = zlevel(t);",
