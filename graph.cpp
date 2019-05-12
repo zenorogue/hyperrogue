@@ -1306,7 +1306,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
   
       if(m == moRoseLady) {
   //    queuepoly(V, girl ? shGoatHead : shDemon,  0x800000FF);
-        queuepoly(VHEAD1, girl ? shFemaleHair : shPHead,  evil ? 0x500050FF : 0x332A22FF);
+        // make her hair a bit darker to stand out in 3D
+        queuepoly(VHEAD1, girl ? shFemaleHair : shPHead,  evil ? 0x500050FF : DIM == 3 ? 0x433A32FF : 0x332A22FF);
         }
       else if(m == moRoseBeauty) {
         if(girl) {
