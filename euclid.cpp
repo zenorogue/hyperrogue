@@ -1160,7 +1160,7 @@ ld matrixnorm(const transmatrix& Mat) {
   }
   
 void hrmap_euclid_any::draw() {
-  DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
+  DEBB(DF_GRAPH, ("drawEuclidean\n"));
   sphereflip = Id;
   if(!centerover.at) centerover = cwt;
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,

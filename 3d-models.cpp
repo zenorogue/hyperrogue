@@ -768,9 +768,7 @@ void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q
     qtyall++;
     }
   
-  if(&eye == &shSkullEyes) println(hlog, "skull pos = ", pos);
-  if(&eye == &shSkullEyes) 
-    pos = zc(eyepos) - 0.06 * SH * 0.05;
+  if(&eye == &shSkullEyes) pos = zc(eyepos) - 0.06 * SH * 0.05;
   
   make_ball(eye, rad, 0);
   transmatrix T = zpush(-shift_eye) * rgpushxto0(center) * zpush(pos); 
@@ -832,6 +830,7 @@ void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
 
 void make_3d_models() {
   if(DIM == 2) return;
+  DEBBI(DF_POLY, ("make_3d_models"));
   shcenter = C0;
   
   if(floor_textures) {
@@ -840,6 +839,7 @@ void make_3d_models() {
     utt.texture_id = floor_textures->renderedTexture;
     }
     
+  DEBB(DF_POLY, ("humanoids"));
   make_humanoid_3d(shPBody);
   make_humanoid_3d(shYeti);
   make_humanoid_3d(shFemaleBody);
@@ -854,6 +854,7 @@ void make_3d_models() {
   // shRaiderBody = shPBody;
   // shJiangShi = shPBody;
 
+  DEBB(DF_POLY, ("heads"));
   make_head_3d(shFemaleHair);
   make_head_3d(shPHead);
   make_head_3d(shTurban1);
@@ -879,6 +880,7 @@ void make_3d_models() {
   make_head_3d(shJiangShiCap2);
   make_head_3d(shTerraHead);
   
+  DEBB(DF_POLY, ("armors"));
   make_armor_3d(shKnightArmor);
   make_armor_3d(shKnightCloak, 2);
   make_armor_3d(shPrinceDress);
@@ -897,6 +899,7 @@ void make_3d_models() {
   
   make_armor_3d(shHood, 2);
   
+  DEBB(DF_POLY, ("feet and paws"));
   make_foot_3d(shHumanFoot);
   make_foot_3d(shYetiFoot);
   make_skeletal(shSkeletalFoot, WDIM == 2 ? zc(0.5) + geom3::human_height/40 - geom3::FLOOR : 0);
@@ -906,6 +909,7 @@ void make_3d_models() {
   make_paw_3d(shDogFrontPaw, shDogFrontLeg);
   make_paw_3d(shDogRearPaw, shDogRearLeg);  
   
+  DEBB(DF_POLY, ("revolution"));
   // make_abody_3d(shWolfBody, 0.01);
   // make_ahead_3d(shWolfHead);
   // make_ahead_3d(shFamiliarHead);
@@ -1009,6 +1013,7 @@ void make_3d_models() {
 
   make_head_only();
   
+  DEBB(DF_POLY, ("balls"));
   make_ball(shDisk, orbsize*.2, 2);
   make_ball(shHeptaMarker, zhexf*.2, 1);
   make_ball(shSnowball, zhexf*.1, 0);
@@ -1043,6 +1048,7 @@ void make_3d_models() {
   shift_shape(shThorns, geom3::FLOOR - geom3::human_height * 1/40);
   shift_shape(shRose, geom3::FLOOR - geom3::human_height * 1/20);
 
+  DEBB(DF_POLY, ("slime"));
   bshape(shSlime, PPR::MONSTER_BODY);
   hyperpoint tip = xpush0(1);
   hyperpoint atip = xpush0(-1);
@@ -1066,6 +1072,7 @@ void make_3d_models() {
   shift_shape(shMagicSword, geom3::ABODY);
   shift_shape(shMagicShovel, geom3::ABODY);
   
+  DEBB(DF_POLY, ("eyes"));
   adjust_eye(shSlimeEyes, shSlime, geom3::FLATEYE, 0, 2, 2);
   adjust_eye(shGhostEyes, shGhost, geom3::GHOST, geom3::GHOST, 2, WDIM == 2 ? 2 : 4);
   adjust_eye(shMiniEyes, shMiniGhost, geom3::GHOST, geom3::GHOST, 2, 2);

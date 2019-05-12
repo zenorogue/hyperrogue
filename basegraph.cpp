@@ -212,7 +212,7 @@ void display_data::set_all(int ed) {
   }  
 
 void display_data::set_projection(int ed) {
-  DEBB(DF_GRAPH, (debugfile,"current_display->set_projection\n"));
+  DEBBI(DF_GRAPH, ("current_display->set_projection"));
   
   bool pers3 = false;
   bool apply_models = !among(pmodel, mdUnchanged, mdFlatten, mdRug);
@@ -367,7 +367,7 @@ bool model_needs_depth() {
   }
 
 void setGLProjection(color_t col) {
-  DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
+  DEBBI(DF_GRAPH, ("setGLProjection"));
   GLERR("pre_setGLProjection");
 
   glClearColor(part(col, 2) / 255.0, part(col, 1) / 255.0, part(col, 0) / 255.0, 1);
@@ -483,7 +483,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   
 void init_glfont(int size) {
   if(glfont[size]) return;
-  DEBB(DF_INIT, (debugfile,"init GL font: %d\n", size));
+  DEBBI(DF_GRAPH, ("init GL font: ", size));
   
 #if !CAP_TABFONT
   loadfont(size);
@@ -680,7 +680,7 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 purehookset hooks_resetGL;
 
 void resetGL() {
-  DEBB(DF_INIT, (debugfile,"reset GL\n"));
+  DEBBI(DF_INIT | DF_GRAPH, ("reset GL"))
   callhooks(hooks_resetGL);
 #if CAP_GLFONT
   for(int i=0; i<128; i++) if(glfont[i]) {
@@ -903,7 +903,7 @@ void addMessageToLog(msginfo& m, vector<msginfo>& log) {
 void clearMessages() { msgs.clear(); }
 
 void addMessage(string s, char spamtype) {
-  DEBB(DF_MSG, (debugfile,"addMessage: %s\n", s.c_str()));
+  DEBB(DF_MSG, ("addMessage: ", s));
 
   msginfo m;
   m.msg = s; m.spamtype = spamtype; m.flashout = false; m.stamp = ticks;
@@ -973,7 +973,7 @@ void drawmessage(const string& s, int& y, color_t col) {
   }
 
 void drawmessages() {
-  DEBB(DF_GRAPH, (debugfile,"draw messages\n"));
+  DEBBI(DF_GRAPH, ("draw messages"));
   int i = 0;
   int t = ticks;
   for(int j=0; j<isize(msgs); j++) {
@@ -1124,7 +1124,7 @@ void disable_vsync() {
 #if CAP_SDL
 void setvideomode() {
 
-  DEBB(DF_INIT, (debugfile,"setvideomode\n"));
+  DEBBI(DF_INIT | DF_GRAPH, ("setvideomode"));
   
   if(!vid.full) {
     if(vid.xres > vid.xscr) vid.xres = vid.xscr * 9/10, setfsize = true;
@@ -1191,7 +1191,7 @@ bool noGUI = false;
 
 void initgraph() {
 
-  DEBB(DF_INIT, (debugfile,"initgraph\n"));
+  DEBBI(DF_INIT | DF_GRAPH, ("initgraph"));
   
   initConfig();
 
@@ -1270,7 +1270,7 @@ void initgraph() {
   }
 
 void cleargraph() {
-  DEBB(DF_INIT, (debugfile,"clear graph\n"));
+  DEBBI(DF_INIT, ("clear graph"));
 #if CAP_SDLTTF
   for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
 #endif

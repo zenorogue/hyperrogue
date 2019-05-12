@@ -5,8 +5,6 @@
 
 namespace hr {
 
-bool debug_geometry = false;
-
 ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
 // tessf: distance from heptagon center to another heptagon center
@@ -44,7 +42,7 @@ ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
 
 void precalc() {
 
-  DEBB(DF_INIT, (debugfile,"precalc\n"));
+  DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("precalc"));
   
   hexshift = 0;
 
@@ -140,9 +138,9 @@ void precalc() {
   
   hexvdist = hdist(xpush0(hexf), xspinpush0(ALPHA/2, hcrossf));
 
-  if(debug_geometry) 
-  printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
-    hexhexdist, hexvdist);  
+  DEBB(DF_GEOM | DF_POLY,
+    (format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
+    hexhexdist, hexvdist)));  
   
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
 
@@ -282,6 +280,7 @@ namespace geom3 {
       }
   
   void compute() {
+    DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("geom3::compute"));
     // tanh(depth) / tanh(camera) == vid.alpha
     invalid = "";
     

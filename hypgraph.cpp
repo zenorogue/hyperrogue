@@ -1112,7 +1112,7 @@ void centerpc(ld aspd) {
   
   if(ors::mode == 2 && vid.sspeed < 5) return;
   if(vid.sspeed >= 4.99) aspd = 1000;
-  DEBB(DF_GRAPH, (debugfile,"center pc\n"));
+  DEBBI(DF_GRAPH, ("center pc"));
   
   ors::unrotate(cwtV); ors::unrotate(View);
   
@@ -1172,7 +1172,7 @@ void optimizeview() {
     }
   #endif
   
-  DEBB(DF_GRAPH, (debugfile,"optimize view\n"));
+  DEBBI(DF_GRAPH, ("optimize view"));
   int turn = 0;
   ld best = INF;
   
@@ -1246,7 +1246,7 @@ void ballgeometry() {
   }
 
 void resetview() {
-  DEBB(DF_GRAPH, (debugfile,"reset view\n"));
+  DEBBI(DF_GRAPH, ("reset view"));
   View = Id;
   // EUCLIDEAN
   if(!masterless) 

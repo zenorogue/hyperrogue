@@ -2732,7 +2732,7 @@ void buildpolys() {
   #if CAP_GP
   gp::clear_plainshapes();
   #endif
-  DEBB(DF_INIT, (debugfile,"buildpolys\n"));
+  DEBBI(DF_POLY, ("buildpolys"));
   
   if(WDIM == 3) {
     if(sphere) SD3 = 3, SD7 = 5;
@@ -3176,7 +3176,7 @@ void buildpolys() {
   bshapeend();
 
   prehpc = isize(hpc);
-  DEBB(DF_INIT, (debugfile,"hpc = %d\n", prehpc));
+  DEBB(DF_POLY, ("hpc = ", prehpc));
 
   user_triangles_texture.tvertices.clear();
   
@@ -3192,9 +3192,9 @@ void buildpolys() {
   
   static int qhpc0;
   int qhpc = isize(hpc);
-  if(qhpc != qhpc0 && debug_geometry) {
-    printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
-    printf("shapes = %d\n", isize(allshapes));
+  if(qhpc != qhpc0 && (debugflags & (DF_GEOM | DF_POLY))) {
+    println(hlog, "qhpc = ", qhpc0=qhpc, " (", prehpc, "+", qhpc-prehpc, ")");
+    println(hlog, "shapes = ", isize(allshapes));
     int inve=0, issi=0, vcon=0, ccon=0;
     for(auto sh: allshapes) {
       if(sh->flags & POLY_INVERSE) inve++;
@@ -3202,10 +3202,7 @@ void buildpolys() {
       if(sh->flags & POLY_VCONVEX) vcon++;
       if(sh->flags & POLY_CCONVEX) ccon++;
       }
-    printf("triangle flags = %x\n", shTriangle.flags);
-    printf("plain floor flags = %x\n", shFloor.b[0].flags);
-    printf("ball flags = %x\n", shDisk.flags);
-    printf("inverse = %d isside = %d vcon = %d ccon = %d\n", inve, issi, vcon, ccon);
+    println(hlog, format("inverse = %d isside = %d vcon = %d ccon = %d", inve, issi, vcon, ccon));
     }
   
   initPolyForGL();

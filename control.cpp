@@ -101,7 +101,7 @@ hyperpoint move_destination_vec(int d) {
   }
 
 void movepckeydir(int d) {
-  DEBB(DF_GRAPH, (debugfile,"movepckeydir\n"));
+  DEBB(DF_GRAPH, ("movepckeydir\n"));
   // EUCLIDEAN
   
   movedir md = vectodir(move_destination_vec(d));
@@ -162,7 +162,7 @@ SDL_Joystick* sticks[8];
 int numsticks;
 
 void initJoysticks() {
-  DEBB(DF_INIT, (debugfile,"init joysticks\n"));
+  DEBB(DF_INIT, ("init joysticks"));
   numsticks = SDL_NumJoysticks();
   if(numsticks > 8) numsticks = 8;
   for(int i=0; i<numsticks; i++) {
@@ -177,7 +177,7 @@ void initJoysticks() {
   }
 
 void closeJoysticks() {
-  DEBB(DF_INIT, (debugfile,"close joysticks\n"));
+  DEBB(DF_INIT, ("close joysticks"));
   for(int i=0; i<numsticks; i++) {
     SDL_JoystickClose(sticks[i]), sticks[i] = NULL;
     }
@@ -185,7 +185,7 @@ void closeJoysticks() {
   }
 
 void checkjoy() {
-  DEBB(DF_GRAPH, (debugfile,"check joy\n"));
+  DEBB(DF_GRAPH, ("check joy"));
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
   ld joyvalue2 = sqr(vid.joyvalue2);
@@ -513,7 +513,7 @@ ld mouseaim_sensitivity = 0.01;
 
 void mainloopiter() {
 
-  DEBB(DF_GRAPH, (debugfile,"main loop\n"));
+  DEBB(DF_GRAPH, ("main loop\n"));
 
   #if !CAP_SDLGFX && !CAP_GL 
   vid.wallmode = 0;
@@ -614,7 +614,7 @@ void mainloopiter() {
   if(audio) handlemusic();
 #endif
   SDL_Event ev;
-  DEBB(DF_GRAPH, (debugfile,"polling for events\n"));
+  DEBB(DF_GRAPH, ("polling for events\n"));
   
   if(DIM == 3 && !shmup::on && !rug::rugged) {
     View = cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y) * View;
@@ -661,7 +661,7 @@ void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
   Uint8 *keystate = SDL_GetKeyState(NULL);
 
-    DEBB(DF_GRAPH, (debugfile,"got event type #%d\n", ev.type));
+    DEBB(DF_GRAPH, ("got event type #%d\n", ev.type));
     int sym = 0;
     int uni = 0;
     shiftmul = 1;

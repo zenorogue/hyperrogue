@@ -94,7 +94,7 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
     else
       valid = true;
 
-    printf("Framebuffer remains = %d (%d)\n", FramebufferName, valid);
+    DEBB(DF_GRAPH, ("Framebuffer remains = ", int(FramebufferName), " (", int(valid), ")"));
     GLERR("initialization");
     
     rb.reset();

@@ -7,7 +7,6 @@ namespace hr {
 namespace arcm {
 
 #if CAP_ARCM
-#define SDEBUG(x) if(debug_geometry) { x; fflush(stdout); }
 
 static const int sfPH = 1;
 static const int sfLINE = 2;
@@ -42,7 +41,7 @@ int gcd(int x, int y) { return x ? gcd(y%x, x) : y < 0 ? -y : y; }
 
 void archimedean_tiling::make_match(int a, int i, int b, int j) {
   if(isize(adjacent[a]) != isize(adjacent[b])) {
-    SDEBUG(printf("(error here)"));
+    DEBB(DF_GEOM, ("(error here)"));
     errormsg = XLAT("polygons match incorrectly");
     errors++;
     }
@@ -122,9 +121,9 @@ void archimedean_tiling::prepare() {
     for(int oi=0; oi<1; oi++) {
       int at = (i+oi)%N;
       int inv = oi;
-      SDEBUG(printf("vertex ");)
+      DEBB0(DF_GEOM, ("vertex "));
       for(int z=0; z<faces[i]; z++) {
-        SDEBUG(printf("[%d %d] " , at, inv);)
+        DEBB0(DF_GEOM, (format("[%d %d] " , at, inv)));
         adjacent[2*i+oi].emplace_back(2*N+int(inv), inv ? (2*at+2*N-2) % (2*N) : 2*at);
         if(invert[at]) inv ^= 1;
         at = adj[at];
@@ -132,7 +131,7 @@ void archimedean_tiling::prepare() {
         else at = (at+N-1) % N;
         }
       if(!inv) make_match(2*i, 0, inv ? (2*at+2*N-1) % 2*N : 2*at, 0);
-      SDEBUG(printf("-> [%d %d]\n", at, inv);)
+      DEBB(DF_GEOM, (format("-> [%d %d]\n", at, inv)));
       }
     }
   for(int i=0; i<N; i++) {
@@ -156,15 +155,16 @@ void archimedean_tiling::prepare() {
       }
     }
   
-  SDEBUG(
-  for(int i=0; i<M; i++) {
-    printf("adjacent %2d:", i);
-    for(int j=0; j<isize(adjacent[i]); j++) {
-      auto p = adjacent[i][j];
-      printf(" (%d,%d)", p.first, p.second);
+  if(debugflags & DF_GEOM) {
+    for(int i=0; i<M; i++) {
+      DEBB0(DF_GEOM, ("adjacent ", i, ":"));
+      for(int j=0; j<isize(adjacent[i]); j++) {
+        auto p = adjacent[i][j];
+        DEBB0(DF_GEOM, (" ", p));
+        }
+      DEBB(DF_GEOM, ("\n"));
       }
-    printf("\n");
-    } )
+    }
 
   for(int i=0; i<M; i++) {
     for(int j=0; j<isize(adjacent[i]); j++) {
@@ -178,13 +178,13 @@ void archimedean_tiling::prepare() {
   for(int i=0; i<M; i++) {
     for(int j=0; j<isize(adjacent[i]); j++) {
       int ai = i, aj = j;
-      SDEBUG( printf("triangle "); )
+      DEBB0(DF_GEOM, ("triangle "));
       for(int s=0; s<3; s++) {
-        SDEBUG( printf("[%d %d] ", ai, aj); fflush(stdout); )
+        DEBB0(DF_GEOM, (format("[%d %d] ", ai, aj)));
         tie(ai, aj) = adjacent[ai][aj];
         aj++; if(aj >= isize(adjacent[ai])) aj = 0;
         }
-      SDEBUG( printf("-> [%d %d]\n", ai, aj); )
+      DEBB(DF_GEOM, (format("-> [%d %d]\n", ai, aj)));
       make_match(i, j, ai, aj);
       }
     }
@@ -234,10 +234,11 @@ void archimedean_tiling::regroup() {
     for(int i=0; i<M; i++) if(tilegroup[i] == 0) flags[i] |= sfPH;
     }
   
-  SDEBUG( for(int i=0; i<M; i+=(have_symmetry?1:2)) {
-    printf("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i]);
-    printf("\n");
-    } )
+  if(debugflags & DF_GEOM) {
+    for(int i=0; i<M; i+=(have_symmetry?1:2)) {
+      DEBB(DF_GEOM, (format("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i])));
+      }
+    }
   }
 
 eGeometryClass archimedean_tiling::get_class() {
@@ -250,7 +251,7 @@ void archimedean_tiling::compute_geometry() {
   ginf[gArchimedean].cclass = get_class();
   set_flag(ginf[gArchimedean].flags, qBOUNDED, get_class() == gcSphere);
   
-  SDEBUG( printf("euclidean_angle_sum = %f\n", float(euclidean_angle_sum)); )
+  DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
   
   dynamicval<eGeometry> dv(geometry, gArchimedean);
   
@@ -313,7 +314,7 @@ void archimedean_tiling::compute_geometry() {
     if(euclid) break;
     }
   
-  SDEBUG( printf("computed edgelength = %f\n", float(edgelength)); )
+  DEBB(DF_GEOM, (format("computed edgelength = %f\n", float(edgelength))));
   
   triangles.clear();
   triangles.resize(2*N+2);
@@ -334,11 +335,11 @@ void archimedean_tiling::compute_geometry() {
     // printf("total = %lf\n", double(total));
     }
 
-  SDEBUG( for(auto& ts: triangles) {
-    printf("T");
-    for(auto& t: ts) printf(" %f@%f", float(t.first), float(t.second));
-    printf("\n");
-    } )
+  if(debugflags & DF_GEOM) for(auto& ts: triangles) {
+    DEBB0(DF_GEOM, ("T"));
+    for(auto& t: ts) DEBB0(DF_GEOM, (format(" %f@%f", float(t.first), float(t.second))));
+    DEBB(DF_GEOM, ());
+    }
   
   }
 
@@ -454,7 +455,7 @@ struct hrmap_archimedean : hrmap {
 
   heptagon *create_step(heptagon *h, int d) {
   
-    SDEBUG( printf("%p.%d ~ ?\n", h, d); )
+    DEBB(DF_GEOM, (format("%p.%d ~ ?\n", h, d)));
   
     heptspin hi(h, d);
     
@@ -482,16 +483,15 @@ struct hrmap_archimedean : hrmap {
     if(euclid) 
       alt = encodeId(pair_to_vec(int(T[0][GDIM]), int(T[1][GDIM])));
       
-    SDEBUG( println(hlog, "look for: ", alt, " / ", T * C0); )
+    DEBB(DF_GEOM, ("look for: ", alt, " / ", T * C0));
   
     for(auto& p2: altmap[alt]) if(intval(p2.second * C0, T * C0) < 1e-4) {
-      SDEBUG( println(hlog, "cell found: ", p2.first); )
+      DEBB(DF_GEOM, ("cell found: ", p2.first));
       for(int d2=0; d2<p2.first->degree(); d2++) {
         heptspin hs(p2.first, d2);
         auto& t2 = current.get_triangle(p2.first, d2);
         transmatrix T1 = T * spin(M_PI + t2.first);
-        SDEBUG( print(hlog, "compare: ", T1 * xpush0(1));  )
-        SDEBUG( println(hlog, ":: ", p2.second * xpush0(1));  )
+        DEBB(DF_GEOM, ("compare: ", T1 * xpush0(1), ":: ", p2.second * xpush0(1)));
         if(intval(T1 * xpush0(1), p2.second * xpush0(1)) < 1e-4) {
         
           // T1 = p2.second
@@ -510,7 +510,7 @@ struct hrmap_archimedean : hrmap {
           return h->move(d);
           }
         }
-      SDEBUG( println(hlog, "but rotation not found"));
+      DEBB(DF_GEOM, ("but rotation not found"));
       }
     
     auto& t2 = current.get_triangle(current.get_adj(hi));
@@ -584,7 +584,7 @@ hrmap *new_map() { return new hrmap_archimedean; }
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
   auto h = buildHeptagon1(tailored_alloc<heptagon> (isize(current.adjacent[adj.first])), p.at, p.spin, hstate(1), 0);
-  SDEBUG( printf("NEW %p.%d ~ %p.0\n", p.at, p.spin, h); )
+  DEBB(DF_GEOM, (format("NEW %p.%d ~ %p.0\n", p.at, p.spin, h)));
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;
   int nei = neighbors_of(h);
@@ -628,23 +628,23 @@ void connect_digons_too(heptspin h1, heptspin h2) {
     // no need to specify archimedean_gmatrix and altmap
     hnew->c.connect(1, h2);
     h1--, h2++;
-    SDEBUG( printf("OL2 %p.%d ~ %p.%d\n", h1.at, h1.spin, h2.at, h2.spin); )
+    DEBB(DF_GEOM, (format("OL2 %p.%d ~ %p.%d\n", h1.at, h1.spin, h2.at, h2.spin)));
     h1.at->c.connect(h1.spin, h2);
     }
   }
 
 void connectHeptagons(heptspin hi, heptspin hs) {
-  SDEBUG( printf("OLD %p.%d ~ %p.%d\n", hi.at, hi.spin, hs.at, hs.spin); )
+  DEBB(DF_GEOM, (format("OLD %p.%d ~ %p.%d\n", hi.at, hi.spin, hs.at, hs.spin)));
   if(hi.at->move(hi.spin) == hs.at && hi.at->c.spin(hi.spin) == hs.spin) {
-    SDEBUG( printf("WARNING: already connected\n"); )
+    DEBB(DF_GEOM, (format("WARNING: already connected\n")));
     return;
     }
   if(hi.peek()) {
-    SDEBUG( printf("ERROR: already connected left\n"); )
+    DEBB(DF_GEOM, (format("ERROR: already connected left\n")));
     exit(1);
     }
   if(hs.peek()) {
-    SDEBUG( printf("ERROR: already connected right\n"); )
+    DEBB(DF_GEOM, (format("ERROR: already connected right\n")));
     exit(1);
     }
   hi.at->c.connect(hi.spin, hs);
@@ -781,7 +781,7 @@ int readArgs() {
     archimedean_tiling at;
     shift(); at.parse(args());
     if(at.errors) {
-      println(hlog, "error: ", at.errormsg);
+      DEBB(DF_ERROR | DF_GEOM, ("error: ", at.errormsg));
       }
     else {
       set_geometry(gArchimedean);
@@ -790,7 +790,6 @@ int readArgs() {
       showstartmenu = false;
       }
     }
-  else if(argis("-dgeom")) debug_geometry = true;
   else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }
   else if(argis("-d:arcm")) 
     launch_dialog(show);
@@ -1035,7 +1034,7 @@ void show() {
     archimedean_tiling tested;
     tested.parse(s);
     if(tested.errors) {
-      println(hlog, "WARNING: ", tested.errors, " errors on ", s, " '", tested.errormsg, "'");
+      DEBB(DF_GEOM | DF_WARN, ("WARNING: ", tested.errors, " errors on ", s, " '", tested.errormsg, "'"));
       }
     else {
       tested.coloring = col;

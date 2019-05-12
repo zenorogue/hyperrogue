@@ -8,12 +8,7 @@ namespace hr {
 #if CU_INIT
 int fontscale = 100;
 
-#if ISANDROID
-FILE *debfile;
-#endif
-
-FILE *debugfile;
-int debugflags;
+int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME;
 
 string s0;
 
@@ -297,7 +292,6 @@ void mobile_draw(MOBPAR_FORMAL) {
   if(!inmenu && vid.stereo_mode == sLR && ors::mode)
     mousex = vid.xres/2, mousey = vid.yres/2, mouseh = sphereflip * C0;
 
-//  if(debfile) fprintf(debfile, "d1\n"), fflush(debfile);
   frames++;
   conformal::configure();
   

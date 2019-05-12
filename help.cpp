@@ -48,7 +48,7 @@ vector<string> extra_keys = {
   };
 
 void buildHelpText() {
-  DEBB(DF_GRAPH, (debugfile,"buildHelpText\n"));
+  DEBBI(DF_GRAPH, ("buildHelpText"));
 
   help = XLAT("Welcome to HyperRogue");
 #if ISANDROID  
@@ -729,7 +729,7 @@ int windtotal;
 hookset<void(cell*)> *hooks_mouseover;
 
 void describeMouseover() {
-  DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
+  DEBBI(DF_GRAPH, ("describeMouseover"));
 
   cell *c = mousing ? mouseover : playermoved ? NULL : centerover.at;
   string& out = mouseovers;

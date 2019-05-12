@@ -58,8 +58,6 @@ namespace hr { namespace gp {
 
   int fixg6(int x) { return (x + MODFIXER) % SG6; }
   
-#define WHD(x) // x
-
   int get_code(const local_info& li) {
     return 
       ((li.relative.first & 15) << 0) +
@@ -158,7 +156,7 @@ namespace hr { namespace gp {
       if(peek(wcw)) {
         auto wcw1 = get_localwalk(wc1, dir1);
         if(wcw + wstep != wcw1) {
-          WHD( println(hlog, at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
+          DEBB(DF_GP, (at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
           exit(1);
           }
         }
@@ -166,7 +164,7 @@ namespace hr { namespace gp {
       }
     if(peek(wcw)) {
       set_localwalk(wc1, dir1, wcw + wstep);
-      WHD( println(hlog, at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
+      DEBB(DF_GP, (at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
       return true;
       }
     return false;
@@ -176,12 +174,12 @@ namespace hr { namespace gp {
     auto& wc = get_mapping(at);
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    WHD( print(hlog, format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
-    WHD( print(hlog, "  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1); )
+    DEBB0(DF_GP, (format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
+    DEBB0(DF_GP, ("  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1); )
     if(!wc1.cw.at) {
       wc1.start = wc.start;
       if(peek(wcw)) {
-        WHD( print(hlog, "(pulled) "); )
+        DEBB0(DF_GP, ("(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
         }
       else {
@@ -189,25 +187,25 @@ namespace hr { namespace gp {
         wcw.at->c.setspin(wcw.spin, 0, false);
         set_localwalk(wc1, dir1, wcw + wstep);
         spawn++;
-        WHD( print(hlog, "(created) "); )
+        DEBB0(DF_GP, ("(created) "); )
         }
       }
-    WHD( Xprintf("%s ", dcw(wc1.cw+dir1)); )
+    DEBB0(DF_GP, (wc1.cw+dir1, " "));
     auto wcw1 = get_localwalk(wc1, dir1);
     if(peek(wcw)) {
       if(wcw+wstep != wcw1) {
-        WHD( println(hlog, "FAIL: ", wcw, " / ", wcw1); exit(1); )
+        DEBB(DF_GP, ("FAIL: ", wcw, " / ", wcw1); exit(1); )
         }
       else {
-        WHD( println(hlog, "(was there)\n");)
+        DEBB(DF_GP, ("(was there)"));
         }
       }
     else {
-      WHD(Xprintf("ok\n"); )
+      DEBB(DF_GP, ("ok"));
       peek(wcw) = wcw1.at;
       wcw.at->c.setspin(wcw.spin, wcw1.spin, wcw.mirrored != wcw1.mirrored);
       if(wcw+wstep != wcw1) {
-        println(hlog, "assertion failed");
+        DEBB(DF_GP | DF_ERROR, ("assertion failed"));
         exit(1);
         }
       }
@@ -222,15 +220,15 @@ namespace hr { namespace gp {
     auto& ac0 = get_mapping(at);
     ac0.cw = cellwalker(hs.at->c7, hs.spin, hs.mirrored);
     ac0.start = at;
-    WHD( println(hlog, at, " : ", dcw(ac0.cw)); )
+    DEBB(DF_GP, (at, " : ", ac0.cw));
     return ac0;
     }
 
   void extend_map(cell *c, int d) {
-    WHD( Xprintf("EXTEND %p %d\n", c, d); )
+    DEBB(DF_GP, ("EXTEND ",c, " ", d));
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
-        WHD( println(hlog, c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spinm(0)); )
+        DEBB(DF_GP, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spin(0)); )
         d = c->c.spin(0);
         c = c->move(0);
         }
@@ -316,11 +314,11 @@ namespace hr { namespace gp {
     for(int i=0; i<S3; i++) {
       loc start = vc[i];
       loc end = vc[(i+1)%S3];
-      WHD( println(hlog, "from ", start, " to ", end); )
+      DEBB(DF_GP, ("from ", start, " to ", end); )
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
         int dx1 = dx + SG2*i;
-        WHD( println(make_pair(hlog, at), " .. ", make_pair(at + eudir(dx1), fixg6(dx1+SG3))); )
+        DEBB(DF_GP, (at, " .. ", make_pair(at + eudir(dx1), fixg6(dx1+SG3))));
         conn(at, dx1);        
         if(forward) get_mapping(at).rdir = fixg6(dx1);
         else get_mapping(at+eudir(dx1)).rdir = fixg6(dx1+SG3);
@@ -364,19 +362,19 @@ namespace hr { namespace gp {
       for(int k=0; k<SG6; k++)
         if(start + eudir(k+SG2*i) == end)
           build(start, k, true);                         
-      if(start != end) { println(hlog, "assertion failed: start ", start, " == end ", end); exit(1); }
+      if(start != end) { DEBB(DF_GP | DF_ERROR, ("assertion failed: start ", start, " == end ", end)); exit(1); }
       }
 
     // now we can fill the interior of our big equilateral triangle
     loc at = vc[0];
     int maxstep = 3000;
     while(true) {
-      maxstep--; if(maxstep < 0) { printf("maxstep exceeded\n"); exit(1); }
+      maxstep--; if(maxstep < 0) { DEBB(DF_GP | DF_ERROR, ("maxstep exceeded")); exit(1); }
       auto& wc = get_mapping(at);
       int dx = wc.rdir;
       auto at1 = at + eudir(dx);
       auto& wc1 = get_mapping(at1);
-      WHD( println(make_pair(at, dx), " ", make_pair(at1, wc1.rdir)); )
+      DEBB(DF_GP, (make_pair(at, dx), " ", make_pair(at1, wc1.rdir)));
       int df = wc1.rdir - dx;
       if(df < 0) df += SG6;
       if(df == SG3) break;
@@ -450,7 +448,7 @@ namespace hr { namespace gp {
         }
       }
 
-    WHD( println(hlog, "DONE"); println(hlog); )
+    DEBB(DF_GP, ("DONE"))
     }
   
   hyperpoint loctoh_ort(loc at) {
@@ -583,8 +581,7 @@ namespace hr { namespace gp {
       if(base_distlimit > SEE_ALL)
         base_distlimit = SEE_ALL;
       prepare_matrices();
-      if(debug_geometry)
-        println(hlog, "scale = ", scale);
+      DEBB(DF_GEOM | DF_POLY, ("scale = ", scale));
       }
     else {
       alpha = 0;

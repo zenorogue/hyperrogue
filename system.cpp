@@ -102,7 +102,7 @@ hookset<void()> *hooks_initgame;
 
 // initialize the game
 void initgame() {
-  DEBB(DF_INIT, (debugfile,"initGame\n"));
+  DEBBI(DF_INIT, ("initGame"));
   callhooks(hooks_initgame); 
 
   if(multi::players < 1 || multi::players > MAXPLAYER)
@@ -826,7 +826,7 @@ void remove_emergency_save() {
   }
 
 void saveStats(bool emergency = false) {
-  DEBB(DF_INIT, (debugfile,"saveStats [%s]\n", scorefile));
+  DEBBI(DF_INIT, ("saveStats [%s]", scorefile));
 
   if(autocheat) return;
   #if CAP_TOUR
@@ -940,7 +940,7 @@ void saveStats(bool emergency = false) {
   fprintf(f, "\n\n\n");
   
 #if ISMOBILE==0
-  DEBB(DF_INIT, (debugfile, "Game statistics saved to %s\n", scorefile));
+  DEBB(DF_INIT, ("Game statistics saved to ", scorefile));
   if(!tactic::trailer)
     addMessage(XLAT("Game statistics saved to %1", scorefile));
 #endif
@@ -953,7 +953,7 @@ void loadsave() {
 #if CAP_TOUR
   if(tour::on) return;
 #endif
-  DEBB(DF_INIT, (debugfile,"loadSave\n"));
+  DEBBI(DF_INIT, ("loadSave"));
 
   gamecount = 0;
 
@@ -1139,7 +1139,7 @@ void popAllGames() {
 
 void stop_game() {
   if(!game_active) return;
-  DEBB(DF_INIT, (debugfile,"stop_game\n"));
+  DEBBI(DF_INIT, ("stop_game"));
   achievement_final(true);
 #if CAP_SAVE
   saveStats();
@@ -1232,7 +1232,7 @@ void set_variation(eVariation target) {
   }
 
 void switch_game_mode(char switchWhat) {
-  DEBB(DF_INIT, (debugfile,"switch_game_mode\n"));
+  DEBBI(DF_INIT, ("switch_game_mode ", switchWhat));
   switch(switchWhat) {
     case rg::peace:
       peace::on = !peace::on;
@@ -1351,7 +1351,7 @@ void switch_game_mode(char switchWhat) {
 
 void start_game() {
   if(game_active) return;
-  DEBB(DF_INIT, (debugfile,"start_game\n"));
+  DEBBI(DF_INIT, ("start_game"));
   restart:
   game_active = true;
   gamegen_failure = false;

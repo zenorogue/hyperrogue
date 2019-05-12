@@ -74,7 +74,7 @@ eLand cid = laNone;
 hookset<bool(eLand&)> *hooks_music;
 
 void handlemusic() {
-  DEBB(DF_GRAPH, (debugfile,"handle music\n"));
+  DEBBI(DF_GRAPH, ("handle music"));
   if(audio && musicvolume) {
     eLand id = getCurrentLandForMusic();
     if(callhandlers(false, hooks_music, id)) return;
@@ -120,7 +120,7 @@ void resetmusic() {
   }
 
 bool loadMusicInfo(string dir) {
-  DEBB(DF_INIT, (debugfile,"load music info\n"));
+  DEBBI(DF_INIT, ("load music info"));
   if(dir == "") return false;
   FILE *f = fopen(dir.c_str(), "rt");
   if(f) {

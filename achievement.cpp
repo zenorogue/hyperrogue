@@ -714,7 +714,7 @@ void check_total_victory() {
   }
   
 void achievement_victory(bool hyper) {
-  DEBB(DF_STEAM, (debugfile,"achievement_victory\n"))
+  DEBBI(DF_STEAM, ("achievement_victory"))
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
@@ -726,7 +726,7 @@ void achievement_victory(bool hyper) {
   if(peace::on) return;
   if(tactic::on) return;
   if(chaosmode) return;
-  DEBB(DF_STEAM, (debugfile,"after checks\n"))
+  DEBB(DF_STEAM, ("after checks"))
 
   int t = getgametime();
   
@@ -777,7 +777,7 @@ void achievement_victory(bool hyper) {
       }
     }
   
-  DEBB(DF_STEAM, (debugfile, "uploading scores\n"))
+  DEBB(DF_STEAM, ("uploading scores"))
   upload_score(ih1, t);
   upload_score(ih2, turncount);
 #endif

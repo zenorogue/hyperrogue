@@ -93,10 +93,6 @@ int currentLocalTreasure;
 
 bool landvisited[landtypes];
 
-extern void DEBT(const char *buf);
-
-#define DEBT(x) DEBB(DF_TURN, (debugfile,"%s\n", x))
-
 bool eq(short a, short b) { return a==b; }
 
 // game state
@@ -2063,7 +2059,7 @@ void killMutantIvy(cell *c, eMonster who) {
 
 void killMonster(cell *c, eMonster who, flagtype deathflags) {
   eMonster m = c->monst;
-  DEBB(DF_TURN, (debugfile,"killmonster %s", dnameof(m)));
+  DEBBI(DF_TURN, ("killmonster ", dnameof(m)));
   
   if(!m) return;
   
@@ -5513,10 +5509,10 @@ void movegolems(flagtype flags) {
       bool recorduse[ittypes];
       for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
 
-      DEBT("stayval");
+      DEBB(DF_TURN, ("stayval"));
       int bestv = stayvalue(m, c), bq = 0, bdirs[MAX_EDGE];
 
-      DEBT("moveval");
+      DEBB(DF_TURN, ("moveval"));
       for(int k=0; k<c->type; k++) if(c->move(k)) {
         cell *c2 = c->move(k);
         int val = movevalue(m, c, c2, flags);
@@ -5565,7 +5561,7 @@ void movegolems(flagtype flags) {
         }
       else {
         passable_for(m, c2, c, P_DEADLY);
-        DEBT("move");
+        DEBB(DF_TURN, ("move"));
         moveMonster(c2, c, dir);
         if(m != moTameBomberbird && m != moFriendlyGhost) 
           moveBoatIfUsingOne(c2, c, dir);
@@ -5582,7 +5578,7 @@ void movegolems(flagtype flags) {
 
         empathyMove(c, c2, dir);
         }
-      DEBT("other");
+      DEBB(DF_TURN, ("other"));
       }
     }
   achievement_count("GOLEM", qg, 0);
@@ -6122,7 +6118,7 @@ void movehex_all() {
 void movemonsters() {
   ambush_distance = 0;
 
-  DEBT("lava1");
+  DEBB(DF_TURN, ("lava1"));
   orboflava(1);
   
   checkAmbushState();
@@ -6132,70 +6128,70 @@ void movemonsters() {
 
   specialMoves();
 
-  DEBT("ghosts");
+  DEBB(DF_TURN, ("ghosts"));
   moveghosts();
     
-  DEBT("butterflies");
+  DEBB(DF_TURN, ("butterflies"));
   moveButterflies();
 
-  DEBT("normal");
+  DEBB(DF_TURN, ("normal"));
   moveNormals(moYeti);
 
-  DEBT("slow");
+  DEBB(DF_TURN, ("slow"));
   if(havewhat & HF_SLOW) moveNormals(moTortoise);
   
   if(sagefresh) sagephase = 0;
   
-  DEBT("ivy");
+  DEBB(DF_TURN, ("ivy"));
   moveivy();
-  DEBT("slimes");
+  DEBB(DF_TURN, ("slimes"));
   groupmove(moSlime, 0);
-  DEBT("sharks");
+  DEBB(DF_TURN, ("sharks"));
   if(havewhat & HF_SHARK) groupmove(moShark, 0);
-  DEBT("eagles");
+  DEBB(DF_TURN, ("eagles"));
   if(havewhat & HF_BIRD) groupmove(moEagle, 0);
   if(havewhat & HF_EAGLES) groupmove(moEagle, MF_NOATTACKS | MF_ONLYEAGLE);
-  DEBT("eagles");
+  DEBB(DF_TURN, ("eagles"));
   if(havewhat & HF_REPTILE) groupmove(moReptile, 0);
-  DEBT("air");
+  DEBB(DF_TURN, ("air"));
   if(havewhat & HF_AIR) {
     airmap.clear();
     groupmove(moAirElemental, 0); 
     buildAirmap();
     }
-  DEBT("earth");
+  DEBB(DF_TURN, ("earth"));
   if(havewhat & HF_EARTH) groupmove(moEarthElemental, 0);
-  DEBT("water");
+  DEBB(DF_TURN, ("water"));
   if(havewhat & HF_WATER) groupmove(moWaterElemental, 0);
-  DEBT("void");
+  DEBB(DF_TURN, ("void"));
   if(havewhat & HF_VOID) groupmove(moVoidBeast, 0);
-  DEBT("leader");
+  DEBB(DF_TURN, ("leader"));
   if(havewhat & HF_LEADER) groupmove(moPirate, 0);
-  DEBT("mutant");
+  DEBB(DF_TURN, ("mutant"));
   if((havewhat & HF_MUTANT) || (bounded && among(specialland, laOvergrown, laClearing))) movemutant();
-  DEBT("bugs");
+  DEBB(DF_TURN, ("bugs"));
   if(havewhat & HF_BUG) hive::movebugs();
-  DEBT("whirlpool");
+  DEBB(DF_TURN, ("whirlpool"));
   if(havewhat & HF_WHIRLPOOL) whirlpool::move();
-  DEBT("whirlwind");
+  DEBB(DF_TURN, ("whirlwind"));
   if(havewhat & HF_WHIRLWIND) whirlwind::move();
   #if CAP_COMPLEX2
-  DEBT("westwall");
+  DEBB(DF_TURN, ("westwall"));
   if(havewhat & HF_WESTWALL) westwall::move();
   #endif
   for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) return;
-  DEBT("river");
+  DEBB(DF_TURN, ("river"));
   if(havewhat & HF_RIVER) prairie::move();
-  /* DEBT("magnet");
+  /* DEBB(DF_TURN, ("magnet"));
   if(havewhat & HF_MAGNET) 
     groupmove(moSouthPole, 0),
     groupmove(moNorthPole, 0); */
-  DEBT("bugs");
+  DEBB(DF_TURN, ("bugs"));
   if(havewhat & HF_HEXD) groupmove(moHexDemon, 0);
   if(havewhat & HF_ALT) groupmove(moAltDemon, 0);
   if(havewhat & HF_MONK) groupmove(moMonk, 0);
 
-  DEBT("worm");
+  DEBB(DF_TURN, ("worm"));
   cell *savepos[MAXPLAYER];
   
   for(int i=0; i<numplayers(); i++)
@@ -6209,22 +6205,22 @@ void movemonsters() {
   if(havewhat & HF_DRAGON) groupmove(moDragonHead, MF_NOFRIEND);
   if(haveMount()) groupmove(moDragonHead, MF_MOUNT);
 
-  DEBT("golems");
+  DEBB(DF_TURN, ("golems"));
   movegolems(0);
   
-  DEBT("fresh");
+  DEBB(DF_TURN, ("fresh"));
   moverefresh();
   
-  DEBT("lava2");
+  DEBB(DF_TURN, ("lava2"));
   orboflava(2);
 
-  DEBT("shadow");
+  DEBB(DF_TURN, ("shadow"));
   moveshadow();
   
-  DEBT("wandering");
+  DEBB(DF_TURN, ("wandering"));
   wandering();
   
-  DEBT("rosemap");
+  DEBB(DF_TURN, ("rosemap"));
   if(havewhat & HF_ROSE) buildRosemap();
 
   for(int i=0; i<numplayers(); i++)
@@ -7551,11 +7547,11 @@ void checkSwitch() {
 void monstersTurn() {
   checkSwitch();
   mirror::breakAll();
-  DEBT("bfs");
+  DEBB(DF_TURN, ("bfs"));
   bfs();
-  DEBT("charge");
+  DEBB(DF_TURN, ("charge"));
   if(elec::havecharge) elec::act();
-  DEBT("mmo");
+  DEBB(DF_TURN, ("mmo"));
   int phase2 = (1 & items[itOrbSpeed]);
   if(!phase2) movemonsters();
   for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) {
@@ -7575,10 +7571,10 @@ void monstersTurn() {
       refreshFriend(dcal[i]);
       }
     }
-  DEBT("rop");
+  DEBB(DF_TURN, ("rop"));
   reduceOrbPowers();
   int phase1 = (1 & items[itOrbSpeed]);
-  DEBT("lc");
+  DEBB(DF_TURN, ("lc"));
   if(!phase1) livecaves();
   if(!phase1) ca::simulate();
   if(!phase1) heat::processfires();
@@ -7596,7 +7592,7 @@ void monstersTurn() {
   crush_now = move(crush_next);
   crush_next.clear();
   
-  DEBT("heat");
+  DEBB(DF_TURN, ("heat"));
   heat::processheat();
   // if(elec::havecharge) elec::drawcharges();
 
@@ -7609,7 +7605,7 @@ void monstersTurn() {
       if(multi::playerActive(i))
         checkFreedom(playerpos(i));
 
-  DEBT("check");
+  DEBB(DF_TURN, ("check"));
   checkmove();
   if(canmove) elec::checklightningfast();
 
@@ -7797,7 +7793,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
     flipplayer = false;
     if(multi::players > 1) multi::flipped[multi::cpid] = false;
     }
-  if(!checkonly) { DEBB(DF_TURN, (debugfile,"movepc\n")); }
+  DEBBI(checkonly ? 0 : DF_TURN, ("movepc"));
   int origd = d;
   if(d >= 0) {
     cwt += d;
@@ -8390,7 +8386,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
     achievement_gain("SEVENMINE");
     }
   
-  DEBT("done");
+  DEBB(DF_TURN, ("done"));
   return true;
   }
 

@@ -273,6 +273,7 @@ template<class T> void sizeto(T& t, int n) {
 // !siid equals pseudohept(c)
 
 void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
+  DEBBI(DF_POLY, ("generate_floorshapes_for ", id));
 
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
@@ -565,11 +566,12 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
 void generate_floorshapes() {
 
+  DEBBI(DF_POLY, ("generate_floorshapes"));
   if(WDIM == 3) ;
   
   #if CAP_IRR
   else if(IRREGULAR) {
-    printf("generating irregular floorshapes...\n");
+    DEBBI(DF_POLY, ("generate_floorshapes: irregular"));
     cell model;
 
     int cc = isize(irr::cells);
@@ -640,8 +642,7 @@ namespace gp {
     bool master = !(li.relative.first||li.relative.second);
     int cor = master ? S7 : SG6;
     if(master) li.last_dir = -1;
-    if(debug_geometry) 
-      printf("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id);
+    DEBB(DF_GP, (format("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id)));
       
     generate_floorshapes_for(id, c0, siid, sidir);
     
@@ -870,6 +871,7 @@ const int FLOORTEXTURESIZE = 4096;
 
 void make_floor_textures() {
   if(1) {
+    DEBBI(DF_POLY, ("make_floor_textures"));
     dynamicval<eGeometry> g(geometry, gEuclidSquare);
     dynamicval<eModel> gm(pmodel, mdDisk);
     dynamicval<eVariation> va(variation, eVariation::pure);

@@ -214,7 +214,7 @@ hookset<hrmap*()> *hooks_newmap;
 
 // initializer (also inits origin from heptagon.cpp)
 void initcells() {
-  DEBB(DF_INIT, (debugfile,"initcells\n"));
+  DEBB(DF_INIT, ("initcells"));
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
@@ -250,18 +250,17 @@ void initcells() {
 
 void clearcell(cell *c) {
   if(!c) return;
-  DEBMEM ( printf("c%d %p\n", c->type, c); )
+  DEBB(DF_MEMORY, (format("c%d %p\n", c->type, c)));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
-    DEBMEM ( printf("mov %p [%p] S%d\n", c->move(t), c->move(t)->move(c->c.spin(t)), c->c.spin(t)); )
+    DEBB(DF_MEMORY, (format("mov %p [%p] S%d\n", c->move(t), c->move(t)->move(c->c.spin(t)), c->c.spin(t))));
     if(c->move(t)->move(c->c.spin(t)) != NULL &&
       c->move(t)->move(c->c.spin(t)) != c) {
-        printf("type = %d %d -> %d\n", c->type, t, c->c.spin(t));
-        printf("cell error\n");
+        DEBB(DF_MEMORY | DF_ERROR, (format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t))));
         exit(1);
         }
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
-  DEBMEM ( printf("DEL %p\n", c); )
+  DEBB(DF_MEMORY, (format("DEL %p\n", c)));
   tailored_delete(c);
   }
 
@@ -308,11 +307,11 @@ void clearfrom(heptagon *at) {
     at = q.front(); 
 //  if(q.size() > maxq) maxq = q.size();
     q.pop();
-    DEBMEM ( printf("from %p\n", at); )
+    DEBB(DF_MEMORY, ("from %p", at));
     if(!at->c7) {
       heptagon *h = (heptagon*) at->cdata;
       if(h) {
-        if(h->alt != at) printf("alt error :: h->alt = %p\n", h->alt);
+        if(h->alt != at) { DEBB(DF_MEMORY | DF_ERROR, ("alt error :: h->alt = ", h->alt)); }
         cell *c = h->c7;
         subcell(c, destroycellcontents);
         h->alt = NULL;
@@ -326,10 +325,10 @@ void clearfrom(heptagon *at) {
         q.push(at->move(i));    
       unlink_cdata(at->move(i));
       at->move(i)->alt = &deletion_marker;
-      DEBMEM ( printf("!mov %p [%p]\n", at->move(i), at->move(i)->move[at->c.spin(i)]); )
+      DEBB(DF_MEMORY, ("!mov ", at->move(i), " [", at->move(i)->move(at->c.spin(i)), "]"));
       if(at->move(i)->move(at->c.spin(i)) != NULL &&
         at->move(i)->move(at->c.spin(i)) != at) {
-          printf("hept error\n");
+          DEBB(DF_MEMORY | DF_ERROR, ("hept error"));
           exit(1);
           }
       at->move(i)->move(at->c.spin(i)) = NULL;

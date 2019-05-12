@@ -6423,6 +6423,8 @@ void precise_mouseover() {
   }
 
 void drawthemap() {
+  DEBBI(DF_GRAPH, ("draw the map"));
+  
   last_firelimit = firelimit;
   firelimit = 0;
 
@@ -6468,8 +6470,6 @@ void drawthemap() {
   if(!spatial_graphics) wmspatial = mmspatial = false;
   if(DIM == 3) wmspatial = mmspatial = true;
 
-  DEBB(DF_GRAPH, (debugfile,"draw the map\n"));
-  
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";
     
@@ -6587,10 +6587,10 @@ void drawthemap() {
 
 void drawmovestar(double dx, double dy) {
 
+  DEBBI(DF_GRAPH, ("draw movestar"));
   if(viewdists) return;
   if(DIM == 3) return;
 
-  DEBB(DF_GRAPH, (debugfile,"draw movestar\n"));
   if(!playerfound) return;
   
   if(shmup::on) return;
@@ -6647,9 +6647,9 @@ purehookset hooks_calcparam;
 
 void calcparam() {
 
+  DEBBI(DF_GRAPH, ("calc param"));
   auto cd = current_display;
   
-  DEBB(DF_GRAPH, (debugfile,"calc param\n"));
   cd->xtop = vid.xres * cd->xmin;
   cd->ytop = vid.yres * cd->ymin;
   
@@ -6707,7 +6707,7 @@ bool force_sphere_outline = false;
 
 void drawfullmap() {
 
-  DEBB(DF_GRAPH, (debugfile,"draw full map\n"));
+  DEBBI(DF_GRAPH, ("draw full map"));
     
   ptds.clear();
 
@@ -6869,9 +6869,9 @@ int cmode;
 
 void drawscreen() {
 
-  if(vid.xres == 0 || vid.yres == 0) return;
+  DEBBI(DF_GRAPH, ("drawscreen"));
 
-  DEBB(DF_GRAPH, (debugfile,"drawscreen\n"));
+  if(vid.xres == 0 || vid.yres == 0) return;
 
   calcparam();
   // rug::setVidParam();
@@ -6962,7 +6962,7 @@ void drawscreen() {
   // SDL_UnlockSurface(s);
 
   glflush();
-  DEBT("swapbuffers");
+  DEBB(DF_GRAPH, ("swapbuffers"));
 #if CAP_SDL
 #if CAP_GL
   if(vid.usingGL) SDL_GL_SwapBuffers(); else
@@ -6974,7 +6974,7 @@ void drawscreen() {
   }
 
 void restartGraph() {
-  DEBB(DF_INIT, (debugfile,"restartGraph\n"));
+  DEBBI(DF_INIT, ("restartGraph"));
   
   View = Id;
   if(!autocheat) linepatterns::clearAll();
@@ -6998,13 +6998,14 @@ void clearAnimations() {
   }
   
 auto graphcm = addHook(clearmemory, 0, [] () {
-  DEBB(DF_INIT, (debugfile,"clear graph memory\n"));
+  DEBBI(DF_MEMORY, ("clear graph memory"));
   mouseover = centerover.at = lmouseover = NULL;  
   gmatrix.clear(); gmatrix0.clear();
   clearAnimations();
   });
 
 void resetGeometry() {
+  DEBBI(DF_POLY | DF_GRAPH, ("resetGeometry"));
   #if MAXMDIM >= 4
   if(DIM == 3 && !floor_textures)
     make_floor_textures();

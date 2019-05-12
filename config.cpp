@@ -527,7 +527,7 @@ void resetConfig() {
 
 #if CAP_CONFIG
 void saveConfig() {
-  DEBB(DF_INIT, (debugfile,"save config\n"));
+  DEBB(DF_INIT, ("save config\n"));
   FILE *f = fopen(conffile, "wt");
   if(!f) {
     addMessage(s0 + "Could not open the config file: " + conffile);
@@ -599,7 +599,7 @@ void loadNewConfig(FILE *f) {
 
 void loadConfig() {
  
-  DEBB(DF_INIT, (debugfile,"load config\n"));
+  DEBB(DF_INIT, ("load config"));
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
   FILE *f = fopen(conffile, "rt");
   if(f) {
@@ -616,7 +616,7 @@ void loadConfig() {
       }
   
     fclose(f);
-    DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
+    DEBB(DF_INIT, ("Loaded configuration: %s\n", conffile));
     }
 
   polygonal::solve();

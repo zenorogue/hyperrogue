@@ -112,13 +112,15 @@ int arg::readCommon() {
     PHASE(1);
     offlineMode = true;
     }
-  else if(argis("-debugf")) {
-    debugfile = fopen("hyperrogue-debug.txt", "w");
-    shift(); debugflags = argi();
-    }
-  else if(argis("-debuge")) {
-    debugfile = stderr;
-    shift(); debugflags = argi();
+  else if(argis("-debf")) {
+    shift(); 
+    string s = args();
+    for(char c: s) {
+      for(int i=0; i<int(strlen(DF_KEYS)); i++) {
+        if(DF_KEYS[i] == c) debugflags |= (1<<i);
+        if(DF_KEYS[i] == (c ^ 32)) debugflags &= ~(1<<i);
+        }
+      }
     }
   else if(argis("-run")) {
     PHASE(3); 

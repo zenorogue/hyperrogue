@@ -191,10 +191,6 @@ typedef long double ld;
 
 typedef complex<ld> cld;
 
-#define DEBMEM(x) // { x fflush(stdout); }
-
-#define DEBSM(x) 
-
 #if MAXMDIM == 3
 #define WDIM 2
 #else
@@ -3157,7 +3153,7 @@ struct hrmap_hyperbolic : hrmap_standard {
   hrmap_hyperbolic(heptagon *origin);
   heptagon *getOrigin() override { return origin; }
   ~hrmap_hyperbolic() {
-    DEBMEM ( verifycells(origin); )
+    // verifycells(origin);
     // printf("Deleting hyperbolic map: %p\n", this);
     dynamicval<eVariation> ph(variation, mvar);
     clearfrom(origin);
@@ -3665,20 +3661,31 @@ transmatrix cpush(int cid, ld alpha);
 bool eqmatrix(transmatrix A, transmatrix B, ld eps = 1e-2);
 void set_column(transmatrix& T, int i, const hyperpoint& H);
 
-#define DF_INIT              0 // always display these
-#define DF_MSG               0 // always display these
-#define DF_STEAM             1
-#define DF_GRAPH             2
-#define DF_TURN              4
-#define DF_FIELD             8
+#define DF_INIT              1 // always display these
+#define DF_MSG               2 // always display these
+#define DF_WARN              4 // always display these
+#define DF_ERROR             8 // always display these
+#define DF_STEAM            16
+#define DF_GRAPH            32
+#define DF_TURN             64
+#define DF_FIELD           128
+#define DF_GEOM            256
+#define DF_MEMORY          512
+#define DF_TIME           1024 // a flag to display timestamps
+#define DF_GP             2048
+#define DF_POLY           4096
+#define DF_KEYS "imwesxufgbtop"
 
 #if ISANDROID
 #define DEBB(r,x)
+#define DEBB0(r,x)
+#define DEBBI(r,x)
 #else
-#define DEBB(r,x) { if(debugfile && (!(r) || (debugflags & (r)))) { fprintf x; fflush(debugfile); } }
+#define DEBB(r,x) { if(debugflags & (r)) { println_log x; } }
+#define DEBB0(r,x) { if(debugflags & (r)) { print_log x; } }
+#define DEBBI(r,x) { if(debugflags & (r)) { println_log x; } } indenter_finish _debbi(debugflags & (r));
 #endif
 
-extern FILE *debugfile;
 extern int debugflags;
 int gmod(int i, int j);
 int gdiv(int i, int j);
@@ -4189,8 +4196,6 @@ namespace gp {
   void clear_plainshapes();
   plainshape& get_plainshape();
   }
-
-extern bool debug_geometry;
 
 #if CAP_SHAPES
 dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col);
@@ -4705,11 +4710,15 @@ struct logger : hstream {
   int indentation;
   bool doindent;
   logger() { doindent = false; }
-  virtual void write_char(char c) { if(doindent) { doindent = false; for(int i=0; i<indentation; i++) special_log(' '); } special_log(c); if(c == 10) doindent = true; }
+  virtual void write_char(char c) { if(doindent) { doindent = false; 
+    if(debugflags & DF_TIME) { int t = SDL_GetTicks(); if(t < 0) t = 999999; t %= 1000000; string s = its(t); while(isize(s) < 6) s = "0" + s; for(char c: s) special_log(c); special_log(' '); }
+    for(int i=0; i<indentation; i++) special_log(' '); } special_log(c); if(c == 10) doindent = true; }
   virtual char read_char() { throw hstream_exception(); }
   };
 
 extern logger hlog;
+template<class... T> void println_log(T... t) { println(hlog, t...); }
+template<class... T> void print_log(T... t) { print(hlog, t...); }
 
 #ifdef __GNUC__
 __attribute__((__format__ (__printf__, 1, 2)))
@@ -4735,6 +4744,11 @@ struct indenter {
   dynamicval<int> ind;
   
   indenter(int i = 2) : ind(hlog.indentation, hlog.indentation + (i)) {}
+  };
+
+struct indenter_finish : indenter {
+  indenter_finish(bool b): indenter(b ? 2:0) {}
+  ~indenter_finish() { if(hlog.indentation != ind.backup) println(hlog, "(done)"); }
   };
 
 void appendHelp(string s);

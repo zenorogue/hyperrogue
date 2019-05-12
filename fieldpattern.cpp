@@ -329,10 +329,10 @@ struct fpattern {
       connections.push_back(matcode[PM]);
       }
   
-    DEBB(DF_FIELD, (debugfile, "Computing inverses...\n"));
+    DEBB(DF_FIELD, ("Computing inverses...\n"));
     int N = isize(matrices);
 
-    DEBB(DF_FIELD, (debugfile, "Number of heptagons: %d\n", N));
+    DEBB(DF_FIELD, ("Number of heptagons: %d\n", N));
     
     if(WDIM == 3) return;
   
@@ -361,7 +361,7 @@ struct fpattern {
       if(i%S7 == S7-1) printf("\n");       
       }
     
-    DEBB(DF_FIELD, (debugfile, "Built.\n"));
+    DEBB(DF_FIELD, ("Built.\n"));
     }
   
   static const int MAXDIST = 120;
@@ -427,7 +427,7 @@ struct fpattern {
   
     if(WDIM == 3) return;
 
-    DEBB(DF_FIELD, (debugfile, "variation = %d\n", int(variation)));
+    DEBB(DF_FIELD, ("variation = %d\n", int(variation)));
     int N = connections.size();
     
     markers.resize(N);
@@ -473,7 +473,7 @@ struct fpattern {
       if(disthep[connections[i]] < disthep[i] && disthep[connections[btspin(i,u)]] < disthep[i])
         circrad = disthep[i];
   
-    DEBB(DF_FIELD, (debugfile, "maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad));
+    DEBB(DF_FIELD, ("maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad));
     
     matrix PRRR = strtomatrix("PRRR");
     matrix PRRPRRRRR = strtomatrix("PRRPRRRRR");
@@ -485,7 +485,7 @@ struct fpattern {
     wallorder = order(Wall);
     wallid = matcode[Wall];
     
-    DEBB(DF_FIELD, (debugfile, "wall order = %d\n", wallorder));
+    DEBB(DF_FIELD, ("wall order = %d\n", wallorder));
 
 #define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(it == itNone) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
     
@@ -501,7 +501,7 @@ struct fpattern {
       }
     
     int walldist = dijkstra(distwall, indist);
-    DEBB(DF_FIELD, (debugfile, "wall dist = %d\n", walldist));
+    DEBB(DF_FIELD, ("wall dist = %d\n", walldist));
     
     
     W = strtomatrix("RRRRPR");
@@ -523,7 +523,7 @@ struct fpattern {
       int ipush = gmul(rpushid, i);
       for(int k=0; k<wallorder; k++) {
         if(ipush == j) {
-          DEBB(DF_FIELD, (debugfile, "River found at %d:%d\n", i, k));
+          DEBB(DF_FIELD, ("River found at %d:%d\n", i, k));
           riverid = i;
           goto riveridfound;
           }
@@ -565,7 +565,7 @@ struct fpattern {
       W = mmul(W, Wall);
       }
     int riverdist = dijkstra(PURE ? distflower : distriver, indist);
-    DEBB(DF_FIELD, (debugfile, "river dist = %d\n", riverdist));
+    DEBB(DF_FIELD, ("river dist = %d\n", riverdist));
     
     for(int i=0; i<isize(currfp.matrices); i++)
       if(currfp.distflower[i] == 0) {
@@ -628,8 +628,8 @@ struct fpattern {
       dijkstra(distriverright, indist);
       }
 
-    DEBB(DF_FIELD, (debugfile, "wall-river distance = %d\n", distwall[riverid]));
-    DEBB(DF_FIELD, (debugfile, "river-wall distance = %d\n", distriver[0]));
+    DEBB(DF_FIELD, ("wall-river distance = %d\n", distwall[riverid]));
+    DEBB(DF_FIELD, ("river-wall distance = %d\n", distriver[0]));
     }
 
   bool easy(int i) {
@@ -660,7 +660,7 @@ struct fpattern {
       if(gpow(i, Prime) == 0) {
         subpathid = i;
         subpathorder = Prime;
-        DEBB(DF_FIELD, (debugfile, "Subpath found: %s\n", decodepath(i).c_str()));
+        DEBB(DF_FIELD, ("Subpath found: %s\n", decodepath(i).c_str()));
         return;
         }
     }
