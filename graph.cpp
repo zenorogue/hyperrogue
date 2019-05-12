@@ -696,7 +696,16 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
   if(d > sightranges[geometry]) return;
-  h = h * (d / sightranges[geometry] / hypot_d(3, h));
+  if(WDIM == 3)
+    h = h * (d / sightranges[geometry] / hypot_d(3, h));
+  else {
+    ld z = h[2] + h[1]/1000000;
+    h[1] = hypot(h[1], h[2]) / (1 + h[3]);
+    // we add h[1]/1000000 so that it also works for h[2] == 0
+    if(z < 0) h[1] = -h[1];
+    h[0] = h[0] / (1 + h[3]);
+    h[2] = 0;
+    }
   radarpoints.emplace_back(radarpoint{h, ch, col, outline});
   }
 
@@ -2262,7 +2271,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
 
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
-    if(DIM == 3 && among(c->monst, moIvyRoot, moWorm, moHexSnake, moDragonHead, moKrakenH))
+    if(DIM == 3)
       addradar(Vparam, minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
   
     transmatrix Vb0 = Vb;
@@ -4653,6 +4662,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     #endif
 
     bool error = false;
+    bool onradar = true;
     
     #if CAP_SHAPES
     chasmg = chasmgraph(c);
@@ -5615,7 +5625,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #endif
       }
 
-    else {
+    if(wmascii || (WDIM == 2 && GDIM == 3)) {
+      if(c->wall == waNone || isWatery(c)) asciicol = fcol;
+      if(c->wall == waBoat) asciicol = 0xC06000;
+
       if(c->wall == waArrowTrap)
         asciicol = trapcol[c->wparam & 3];
       if(c->wall == waFireTrap)
@@ -5631,7 +5644,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         else if(ch == '@') asciicol = minecolors[mines%10];
         }
-      if(!(it || c->monst || c->cpdist == 0)) error = true;
+      if(wmascii && !(it || c->monst || c->cpdist == 0)) error = true;
       }
     
 #if CAP_SHAPES
@@ -5735,14 +5748,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         Vboat = &(Vboat0 = *Vboat * ddspin(c, i) * xpush(-.13));
         }
     
-      error |= drawItemType(it, c, *Vboat, icol, ticks, hidden);
+      if(drawItemType(it, c, *Vboat, icol, ticks, hidden)) error = true, onradar = false;
       }
 
     if(true) {
       #if CAP_SHAPES
       int q = ptds.size();
       #endif
-      error |= drawMonster(V, ctype, c, moncol); 
+      bool m = drawMonster(V, ctype, c, moncol);
+      if(m) error = true;
+      if(m || c->monst) onradar = false; 
       #if CAP_SHAPES
       if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) {
         if(WDIM == 2 && GDIM == 3)
@@ -5843,6 +5858,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(vid.grid || c->land == laAsteroids) draw_grid_at(c, V);
+    
+    if(onradar) addradar(V, ch, darkenedby(asciicol, darken), 0);
     #endif
 
     if(!euclid) {

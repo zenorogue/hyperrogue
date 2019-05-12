@@ -366,16 +366,18 @@ void draw_radar(bool cornermode) {
     curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
   queuecurve(0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
 
-  for(int i=0; i<360; i++)
-    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad/3, 1) * C0);
-  queuecurve(0xFF0000FF, 0x200000FF, PPR::ZERO);
-
-  curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
-  curvepoint(atscreenpos(cx, cy, 1) * C0);
-  curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
-  queuecurve(0xFF8000FF, 0, PPR::ZERO);
+  if(WDIM == 3) {
+    for(int i=0; i<360; i++)
+      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad/3, 1) * C0);
+    queuecurve(0xFF0000FF, 0x200000FF, PPR::ZERO);
   
-  for(auto& r: radarpoints) {    
+    curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
+    curvepoint(atscreenpos(cx, cy, 1) * C0);
+    curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
+    queuecurve(0xFF8000FF, 0, PPR::ZERO);
+    }
+  
+  if(WDIM == 3) for(auto& r: radarpoints) {    
     queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2]/3 + rad * r.h[1]*2/3, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2]/3, 0)*C0, r.line, -1);
     }
 
@@ -383,7 +385,11 @@ void draw_radar(bool cornermode) {
   glflush();
 
   for(auto& r: radarpoints)
-    displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2]/3 + rad * r.h[1]*2/3), 0, 8, r.glyph, r.color);
+    if(WDIM == 3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2]/3 + rad * r.h[1]*2/3), 0, 8, r.glyph, r.color);
+    else {
+      int siz = 1/(1+r.h[3]) * scalefactor * current_display->radius / (inHighQual ? 10 : 6);
+      displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, siz, r.glyph, r.color);
+      }
   }
 
 void drawStats() {
