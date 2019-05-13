@@ -385,6 +385,7 @@ namespace geom3 {
 
   #if MAXMDIM >= 4
 void switch_always3() {
+    if(rug::rugged) rug::close();
     geom3::always3 = !geom3::always3;
     need_reset_geometry = true;
     swapmatrix(View);
@@ -414,6 +415,7 @@ void switch_always3() {
     
   void switch_fpp() {
 #if MAXMDIM >= 4
+    if(rug::rugged) rug::close();
     if(!geom3::always3) {
       geom3::always3 = true;
       geom3::wall_height = 1.5;

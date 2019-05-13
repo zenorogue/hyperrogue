@@ -966,7 +966,7 @@ namespace conformal {
     dialog::addBreak(100);
     dialog::addItem(XLAT("history mode"), 'a');
 #if CAP_RUG
-    dialog::addItem(XLAT("hypersian rug mode"), 'u');
+    if(GDIM == 2) dialog::addItem(XLAT("hypersian rug mode"), 'u');
 #endif
     dialog::addBack();
 
@@ -981,7 +981,7 @@ namespace conformal {
       else if(uni == 'p')
         projectionDialog();
 #if CAP_RUG
-      else if(uni == 'u')
+      else if(uni == 'u' && DIM == 2)
         pushScreen(rug::show);
 #endif
       else if(uni == 's') {
