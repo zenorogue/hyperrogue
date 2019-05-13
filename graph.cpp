@@ -4439,7 +4439,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       #endif
       if(c->monst) 
         addradar(V, minf[c->monst].glyph, minf[c->monst].color, isFriendly(c->monst) ? 0x00FF00FF : 0xFF0000FF);
-      else if(c->item)
+      else if(c->item && !itemHiddenFromSight(c))
         addradar(V, iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item));
       return;
       }
