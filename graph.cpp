@@ -2644,8 +2644,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   return false;
   }
 
-double downspin;
 cell *straightDownSeek;
+hyperpoint straightDownPoint;
+ld straightDownSpeed;
 
 #define AURA 180
 
@@ -5958,12 +5959,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if(usethis) {
         straightDownSeek = c;
-        downspin = atan2(V[1][GDIM], V[0][GDIM]);
-        downspin += (side-1) * M_PI/2;
-        downspin += conformal::rotation * degree;
-        while(downspin < -M_PI) downspin += 2*M_PI;
-        while(downspin > +M_PI) downspin -= 2*M_PI;
-        downspin = downspin * min(spd, (double)1);
+        straightDownPoint = tC0(V);
+        straightDownSpeed = spd;
+        if(side == 2) for(int i=0; i<3; i++) straightDownPoint[i] = -straightDownPoint[i];
+        if(side == 1) straightDownPoint = spin(-M_PI/2) * straightDownPoint;
         }
       }
       
@@ -6529,7 +6528,7 @@ void drawthemap() {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
     }
 
-  straightDownSeek = NULL; downspin = 0;
+  straightDownSeek = NULL;
 
   #if ISMOBILE
   mouseovers = XLAT("No info about this...");

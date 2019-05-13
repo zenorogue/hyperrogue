@@ -2678,7 +2678,9 @@ void preparesort();
 
 bool dodrawcell(cell *c);
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored);
-extern double downspin;
+extern cell* straightDownSeek;
+extern hyperpoint straightDownPoint;
+extern ld straightDownSpeed;
 
 extern int frameid;
 extern bool leftclick;

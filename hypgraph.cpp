@@ -1063,7 +1063,7 @@ transmatrix eumovedir(int d) {
   }
 
 void spinEdge(ld aspd) { 
-
+  ld downspin = 0;
   if(playerfound && vid.fixed_facing) {
     hyperpoint H = gpushxto0(playerV * C0) * playerV * xpush0(5);
     downspin = atan2(H[1], H[0]);
@@ -1073,14 +1073,28 @@ void spinEdge(ld aspd) {
     while(downspin > +M_PI) downspin -= 2*M_PI;
     aspd = (1 + 2 * abs(downspin)) * aspd;
     }
+  else if(WDIM == 2 && GDIM == 3 && vid.fixed_yz) {  
+    aspd = 999999;
+    if(straightDownSeek) {
+      if(straightDownPoint[0])
+        downspin = conformal::rotation * degree - atan2(straightDownPoint[0], straightDownPoint[1]);
+      }
+    else {
+      if(View[0][2]) 
+        downspin = -atan2(View[0][2], View[1][2]);
+      }
+    }
+  else if(straightDownSeek) {
+    downspin = atan2(straightDownPoint[1], straightDownPoint[0]);
+    downspin -= M_PI/2;
+    downspin += conformal::rotation * degree;
+    while(downspin < -M_PI) downspin += 2*M_PI;
+    while(downspin > +M_PI) downspin -= 2*M_PI;
+    downspin = downspin * min(straightDownSpeed, (double)1);
+    }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
-  View = spin(downspin) * View;
-  
-  if(WDIM == 2 && GDIM == 3 && vid.fixed_yz && View[0][2]) {
-    ld d12 = atan2(View[0][2], View[1][2]);
-    View = cspin(1, 0, d12) * View;
-    }
+  View = spin(downspin) * View;  
   }
 
 void centerpc(ld aspd) { 
