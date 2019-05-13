@@ -353,7 +353,7 @@ bool nofps = false;
 
 void draw_radar(bool cornermode) {
 
-  bool d3 = WDIM == 3;
+  bool d3 = WDIM == 3 || straightDownSeek || vid.fixed_yz;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdUnchanged);
