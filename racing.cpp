@@ -691,13 +691,15 @@ bool set_view() {
     ld y = GDIM == 2 ? asin_auto(h[1]) : asin_auto(hypot(h[1], h[2]));
     ld x = asin_auto(h[0] / cos_auto(y));
     x += race_advance;
+    if(GDIM == 3 && race_advance == 0 && pmodel == mdPerspective) race_advance = -1;
     // printf("%d %lf\n", z, x);
     transmatrix Z = T1 * inverse(T) * xpush(x);
     View = inverse(Z) * View;
+    if(GDIM == 3) View = cspin(2, 0, M_PI/2) * View;
     }
   if(GDIM == 3 && WDIM == 2)
     View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[multi::cpid]) * spin(-M_PI/2) * View;
-  else View = spin(race_angle * degree) * View;
+  else if(GDIM == 2) View = spin(race_angle * degree) * View;
   return true;
   }
 
