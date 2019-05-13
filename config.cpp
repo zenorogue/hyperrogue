@@ -31,8 +31,41 @@ charstyle& getcs(int id) {
     return vid.cs;
   }
 
-void hread(hstream& hs, charstyle& cs) { hread_raw(hs, cs); }
-void hwrite(hstream& hs, const charstyle& cs) { hwrite_raw(hs, cs); }
+struct charstyle_old {
+  int charid;
+  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor;
+  bool lefthanded;
+  };
+
+void hread(hstream& hs, charstyle& cs) {
+  charstyle_old cso;
+  hread_raw(hs, cso);
+  cs.charid = cso.charid;
+  cs.skincolor = cso.skincolor;
+  cs.haircolor = cso.haircolor;
+  cs.dresscolor = cso.dresscolor;
+  cs.swordcolor = cs.eyecolor = cso.swordcolor;
+  if(cs.charid < 4) cs.eyecolor = 0;
+  cs.dresscolor2 = cso.dresscolor2;
+  cs.uicolor = cso.uicolor;
+  cs.lefthanded = cso.lefthanded;
+  }
+
+void hwrite(hstream& hs, const charstyle& cs) {
+  charstyle_old cso;
+  cso.charid = cs.charid;
+  cso.skincolor = cs.skincolor;
+  cso.haircolor = cs.haircolor;
+  cso.dresscolor = cs.dresscolor;
+  cso.swordcolor = cs.charid >= 4 ? cs.eyecolor : cs.swordcolor;
+  cso.dresscolor2 = cs.dresscolor2;
+  cso.uicolor = cs.uicolor;
+  cso.lefthanded = cs.lefthanded;
+  hwrite_raw(hs, cso);
+  }
+
+// void hread(hstream& hs, charstyle& cs) { hread_raw(hs, cs); }
+// void hwrite(hstream& hs, const charstyle& cs) { hwrite_raw(hs, cs); }
 
 string csnameid(int id) {
   if(id == 0) return XLAT("male");
