@@ -587,7 +587,7 @@ namespace reg3 {
     
     ld worst_error1, worst_error2;
 
-    heptagon *getOrigin() {
+    heptagon *getOrigin() override {
       return origin;
       }
     
@@ -631,7 +631,7 @@ namespace reg3 {
       return quotient_map->allh[h->fieldval];
       }
 
-    heptagon *create_step(heptagon *parent, int d) {
+    heptagon *create_step(heptagon *parent, int d) override {
       auto& p1 = reg_gmatrix[parent];
       if(DEB) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
       heptagon *alt = p1.first;
