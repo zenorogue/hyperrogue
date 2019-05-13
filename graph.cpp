@@ -563,6 +563,16 @@ bool noshadow;
 
 #if CAP_SHAPES
 void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
+  if(WDIM == 2 && GDIM == 3 && bp.shs != bp.she) {
+    auto& p = queuepolyat(V, bp, 0x18, PPR::TRANSPARENT); 
+    p.outline = 0;
+    p.subprio = -100;
+    p.offset = bp.shs;
+    p.cnt = bp.she - bp.shs;
+    p.flags &=~ POLY_TRIANGLES;
+    p.tinf = NULL;
+    return;
+    }
   if(mmspatial) { 
     if(model_needs_depth() || noshadow) 
       return; // shadows break the depth testing
@@ -5177,7 +5187,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
         int fd0 = fd ? fd-1 : 0;      
         if(WDIM == 2 && GDIM == 3 && qfi.fshape)
-          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT), ptds.back()->subprio = c->cpdist * 4;
+          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT), ptds.back()->subprio = -200;
         else
           draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR::LAKELEV);
         }

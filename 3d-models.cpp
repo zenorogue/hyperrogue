@@ -828,6 +828,12 @@ void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
     }
   }
 
+void make_shadow(hpcshape& sh) {
+  sh.shs = isize(hpc);
+  for(int i=sh.s; i < sh.e; i++) hpcpush(orthogonal_move(hpc[i], geom3::FLOOR - geom3::human_height / 100));
+  sh.she = isize(hpc);
+  }
+
 void make_3d_models() {
   if(DIM == 2) return;
   DEBBI(DF_POLY, ("make_3d_models"));
@@ -837,6 +843,17 @@ void make_3d_models() {
     auto& utt = models_texture;
     utt.tvertices.clear();
     utt.texture_id = floor_textures->renderedTexture;
+    }
+  
+  if(WDIM == 2) {
+    DEBB(DF_POLY, ("shadows"));
+    for(hpcshape* sh: {&shBatWings, &shBugBody, &shBullBody, &shButterflyWing, &shCatBody, &shDogBody, &shDogTorso,
+      &shEagle, &shFemaleBody, &shFlailMissile, &shGadflyWing, &shGargoyleWings, &shHawk, &shJiangShi, &shKnife,
+      &shPBody, &shPHead, &shRaiderBody, &shReptileBody, &shSkeletonBody, &shTongue, &shTrapArrow, &shTrylobite,
+      &shWaterElemental, &shWolfBody, &shYeti})
+      make_shadow(*sh);
+    
+    for(int i=0; i<8; i++) make_shadow(shAsteroid[i]);
     }
     
   DEBB(DF_POLY, ("humanoids"));

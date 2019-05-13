@@ -4045,6 +4045,7 @@ struct hpcshape {
   hyperpoint intester;
   basic_textureinfo *tinf;
   int texture_offset;
+  int shs, she;
   };
 
 extern hpcshape shFullCross[2];
