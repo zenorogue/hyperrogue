@@ -5290,7 +5290,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               if(pmodel == mdPerspective && !sphere && !quotient) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
-                else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance) continue;
+                else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, shWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
