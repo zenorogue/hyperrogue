@@ -488,7 +488,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
               using namespace hyperpoint_vec;
               hyperpoint left = binary::get_corner_horo_coordinates(c, t);
               hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
-              hpcpush(rgpushxto0(binary::get_horopoint(left * x + right * y)) * zpush(dfloor_table[k]) * C0);
+              hpcpush(orthogonal_move(binary::get_horopoint(left * x + right * y), dfloor_table[k]));
               });
         else 
         #endif
@@ -497,10 +497,9 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
           int e = fsh.b[id].e-1;        
           for(int t=0; t<e-s; t++) {
             using namespace hyperpoint_vec;
-            hyperpoint center = zpush(dfloor_table[k]) * C0;
-            hyperpoint v1 = (rgpushxto0(hpc[s+t]) * center - center);
-            hyperpoint v2 = (rgpushxto0(hpc[s+t+1]) * center - center);
-            texture_order([&] (ld x, ld y) { hpcpush(normalize(center + v1 * x + v2 * y)); });
+            hyperpoint v1 = hpc[s+t] - C0;
+            hyperpoint v2 = hpc[s+t+1] - C0;
+            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), dfloor_table[k])); });
             }
           }
         }
@@ -520,7 +519,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
               using namespace hyperpoint_vec;
               hyperpoint left = binary::get_corner_horo_coordinates(c, t);
               hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
-              hpcpush(rgpushxto0(binary::get_horopoint(left * x + right * y)) * zpush(top + h * (x+y)) * C0);
+              hpcpush(orthogonal_move(binary::get_horopoint(left * x + right * y), top + h * (x+y)));
               });
         else
         #endif
@@ -531,7 +530,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
             using namespace hyperpoint_vec;
             hyperpoint v1 = hpc[s+t] - C0;
             hyperpoint v2 = hpc[s+t+1] - C0;
-            texture_order([&] (ld x, ld y) { hpcpush(rgpushxto0(normalize(C0 + v1 * x + v2 * y))*zpush(top + h * (x+y))*C0); });
+            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), top + h * (x+y))); });
             }
           }
         }
