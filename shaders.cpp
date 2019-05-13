@@ -25,6 +25,8 @@ namespace glhr {
 
 bool glew   = false;
 
+bool current_depthtest, current_depthwrite;
+
 typedef const void *constvoidptr;
 
 constvoidptr current_vertices, buffered_vertices;
@@ -456,6 +458,10 @@ void switch_mode(eMode m, shader_projection sp) {
   current_modelview[0][0] = -1e8;
   current_projection[0][0] = -1e8;
   id_modelview();
+  /* if(current_depthwrite) glDepthMask(GL_TRUE);
+  else glDepthMask(GL_FALSE);
+  if(current_depthtest) glEnable(GL_DEPTH_TEST);
+  else glDisable(GL_DEPTH_TEST); */
   }
 
 void fog_max(ld fogmax) {
@@ -772,8 +778,6 @@ void store_in_buffer(vector<glvertex>& v) {
 #endif
   }
 
-bool current_depthtest;
-
 void set_depthtest(bool b) {
   if(b != current_depthtest) {
     current_depthtest = b;
@@ -783,14 +787,12 @@ void set_depthtest(bool b) {
   }
 
 
-bool current_depthwrite;
-
 void set_depthwrite(bool b) {
-  if(b != current_depthwrite) {
+  /*if(b != current_depthwrite) { <- this does not work ask intended for some reason...
     current_depthwrite = b;
     if(b) glDepthMask(GL_TRUE);
     else glDepthMask(GL_FALSE);
-    }
+    } */
   }
 
 }
