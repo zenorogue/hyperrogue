@@ -2159,8 +2159,8 @@ enum class PPR {
   MOBILE_ARROW,
   LINE, 
   // in depth tested models transparent surfaces need to be depth sorted by HyperRogue
-  // and set to PPR::TRANSPARENT to draw them after all the opaque ones
-  TRANSPARENT,
+  // and set to PPR::TRANSPARENT_* to draw them after all the opaque ones
+  TRANSPARENT_LAKE, TRANSPARENT_SHADOW, TRANSPARENT_WALL,
   // no depth testing for SUPERLINE and above
   SUPERLINE, TEXT, CIRCLE,
   MAX,

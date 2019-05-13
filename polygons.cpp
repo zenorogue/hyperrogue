@@ -1576,7 +1576,7 @@ void drawqueue() {
         < xintval(ap2.V * xpush0(.1));
       });
 
-  for(PPR p: {PPR::TRANSPARENT})
+  for(PPR p: {PPR::TRANSPARENT_WALL})
     sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         return p1->subprio > p2->subprio;
@@ -1812,8 +1812,15 @@ void finishshape() {
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
   if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
+  
+  if(DIM == 3) {
+    using namespace hyperpoint_vec;
+    last->intester = Hypc;
+    for(int i=last->s; i<=last->e; i++) last->intester += hpc[i];
+    if(last->s != last->e) last->intester /= last->e-last->s;
+    }
 
-  for(int s=0; s<4; s++) {
+  else for(int s=0; s<4; s++) {
     last->intester = C0;
     if(s == 0) {
       for(int i=last->s; i<last->e-1; i++)  

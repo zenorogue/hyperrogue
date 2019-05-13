@@ -564,7 +564,7 @@ bool noshadow;
 #if CAP_SHAPES
 void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
   if(WDIM == 2 && GDIM == 3 && bp.shs != bp.she) {
-    auto& p = queuepolyat(V, bp, 0x18, PPR::TRANSPARENT); 
+    auto& p = queuepolyat(V, bp, 0x18, PPR::TRANSPARENT_SHADOW); 
     p.outline = 0;
     p.subprio = -100;
     p.offset = bp.shs;
@@ -4377,6 +4377,18 @@ void draw_grid_at(cell *c, const transmatrix& V) {
     }
   }
 
+void queue_transparent_wall(const transmatrix& V, hpcshape& sh, color_t color) {
+  auto& poly = queuepolyat(V, sh, color, PPR::TRANSPARENT_WALL);
+  hyperpoint h = V * sh.intester;
+  if(pmodel == mdPerspective)
+    poly.subprio = int(hdist0(h) * 100000);
+  else {
+    hyperpoint h2;
+    applymodel(h, h2);
+    poly.subprio = int(h2[2] * 100000);
+    }
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4751,7 +4763,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(c->land == laHalloween && !wmblack) {
           transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
           if(DIM == 3)
-            draw_shapevec(c, V, shFullFloor.levels[SIDE_LAKE], darkena(firecolor(0, 10), 0, 0xDF), PPR::TRANSPARENT);
+            draw_shapevec(c, V, shFullFloor.levels[SIDE_LAKE], darkena(firecolor(0, 10), 0, 0xDF), PPR::TRANSPARENT_LAKE);
           else
             draw_floorshape(c, Vdepth, shFullFloor, darkena(firecolor(0, 10), 0, 0xDF), PPR::LAKEBOTTOM);
           }
@@ -4802,7 +4814,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }          
           if(GDIM == 3) {
             for(int d=0; d<6; d++)
-              queuepolyat(V2 * spin(d*M_PI/S3), shHalfMirror[2], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->cmove(d)->cpdist;
+              queue_transparent_wall(V2 * spin(d*M_PI/S3), shHalfMirror[2], 0xC0C0C080);
             }
           else if(wmspatial) {
             const int layers = 2 << detaillevel;
@@ -4822,9 +4834,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepolyat(mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             }
   
-          if(GDIM == 3) {
-            queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR::TRANSPARENT).subprio = 3 * c->cpdist + c->cmove(d)->cpdist;
-            }
+          if(GDIM == 3) 
+            queue_transparent_wall(V2, shHalfMirror[ct6], 0xC0C0C080);
           else if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
@@ -5187,7 +5198,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
         int fd0 = fd ? fd-1 : 0;      
         if(WDIM == 2 && GDIM == 3 && qfi.fshape)
-          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT), ptds.back()->subprio = -200;
+          draw_shapevec(c, V, qfi.fshape->levels[SIDE_LAKE], darkena3(fcol, fd0, 0x80), PPR::TRANSPARENT_LAKE);
         else
           draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR::LAKELEV);
         }
@@ -5301,8 +5312,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             color_t t = transcolor(c, c->move(a), wcol);
             if(t) {
               t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
-              auto& poly = queuepolyat(V, shPlainWall3D[a], t, PPR::TRANSPARENT);
-              poly.subprio = celldistance(c, viewctr.at->c7) + celldistance(c->move(a), viewctr.at->c7);
+              queue_transparent_wall(V, shPlainWall3D[a], t);
               }
             }
           if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, Vboat, V, V);
