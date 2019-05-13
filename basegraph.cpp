@@ -401,17 +401,12 @@ void setGLProjection(color_t col) {
   //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
-  if(model_needs_depth()) {
 #ifdef GL_ES
-    glClearDepthf(1.0f);
+  glClearDepthf(1.0f);
 #else
-    glClearDepth(1.0f);
+  glClearDepth(1.0f);
 #endif
-    glDepthFunc(GL_LEQUAL);
-    glhr::set_depthtest(true);
-    }
-  else
-    glhr::set_depthtest(false);
+  glDepthFunc(GL_LEQUAL);
   
   GLERR("setGLProjection");
   reset_projection();
