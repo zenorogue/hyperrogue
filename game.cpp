@@ -6465,7 +6465,7 @@ void checkmove() {
 
   for(int i=0; i<=MAX_EDGE; i++) legalmoves[i] = false;
 
-  canmove = false;
+  canmove = haveRangedTarget();
   items[itWarning]+=2;
   if(movepcto(-1, 0, true)) canmove = legalmoves[MAX_EDGE] = true;
   
@@ -7787,8 +7787,6 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
   bool errormsgs = multi::players == 1 || multi::cpid == multi::players-1;
   if(hardcore && !canmove) return false;
-  if(hardcore && checkonly) { return false; }
-  if(checkonly && haveRangedTarget()) return true;
   if(!checkonly && d >= 0) {
     flipplayer = false;
     if(multi::players > 1) multi::flipped[multi::cpid] = false;
