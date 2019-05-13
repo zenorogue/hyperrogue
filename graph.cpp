@@ -1601,7 +1601,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(0xFFFFFF, 0, 0xFF), moSkeleton, footphase);
       queuepoly(VBS, shSkeletonBody, darkena(0xFFFFFF, 0, 0xFF));
       if(DIM == 2) queuepoly(VHEAD, shSkull, darkena(0xFFFFFF, 0, 0xFF));
-      humanoid_eyes(V, 0x000000FF, 0xFFFFFFFF);
+      if(DIM == 2) queuepoly(VHEAD1, shSkullEyes, 0x000000FF);
+      humanoid_eyes(V, 0x000000FF, 0xFFFFFFFF);      
       ShadowV(V, shSkeletonBody);
       queuepoly(VBS, shSabre, 0xFFFFFFFF);
       return false;
