@@ -5891,7 +5891,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(vid.grid || c->land == laAsteroids) draw_grid_at(c, V);
     
-    if(onradar) addradar(V, ch, darkenedby(asciicol, darken), 0);
+    if(onradar && WDIM == 2) addradar(V, ch, darkenedby(asciicol, darken), 0);
     #endif
 
     if(!euclid) {
