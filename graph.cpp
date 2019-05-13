@@ -4006,6 +4006,8 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
     if(!qfi.fshape) qfi.fshape = &shFullFloor;
     if(conegraph(c)) {
       draw_shapevec(c, V, qfi.fshape->cone[0], darkena(wcol, 0, 0xFF), PPR::WALL);
+      dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+      draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
       return;
       }
     color_t wcol0 = wcol;
@@ -4014,6 +4016,9 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
     forCellIdEx(c2, i, c) 
       if(!highwall(c2) || conegraph(c2))
         placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
+
+    dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+    draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
     return;
     }
 
@@ -5555,6 +5560,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(c->land == laOceanWall && wmescher && wmspatial) {
            if(GDIM == 3 && qfi.fshape) {
              draw_shapevec(c, V, qfi.fshape->cone[1], darkena(wcol, 0, 0xFF), PPR::WALL);
+             dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+             draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
              break;
              }           
            const int layers = 2 << detaillevel;
@@ -5629,6 +5636,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           else if(c->wall == waExplosiveBarrel) {
             if(DIM == 3 && qfi.fshape) {
               draw_shapevec(c, V, qfi.fshape->cone[1], 0xD00000FF, PPR::REDWALL);
+              dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+              draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
               break;
               }
             const int layers = 2 << detaillevel;
@@ -5641,8 +5650,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
             auto V2 = V;
             if(hasTimeout(c)) V2 = V2 * spintick(c->land == laPower ? 5000 : 500);
-            if(GDIM == 3 && qfi.fshape)
+            if(GDIM == 3 && qfi.fshape) {
               draw_shapevec(c, V2, qfi.fshape->cone[1], darkena(wcol, 0, 0xF0), PPR::WALL);
+              dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+              draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+              }
             else queuepoly(V2, shStar, darkena(wcol, 0, 0xF0));
             if(isFire(c) && rand() % 300 < ticks - lastt)
               drawParticle(c, wcol, 75);

@@ -781,5 +781,17 @@ void set_depthtest(bool b) {
     else glDisable(GL_DEPTH_TEST);
     }
   }
+
+
+bool current_depthwrite;
+
+void set_depthwrite(bool b) {
+  if(b != current_depthwrite) {
+    current_depthwrite = b;
+    if(b) glDepthMask(GL_TRUE);
+    else glDisable(GL_FALSE);
+    }
+  }
+
 }
 }

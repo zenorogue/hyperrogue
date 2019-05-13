@@ -470,6 +470,9 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     finishshape();
     for(auto pfsh: all_plain_floorshapes) {
       auto& fsh = *pfsh;
+      
+      for(int i=fsh.shadow[id].s; i<fsh.shadow[id].e; i++)
+        hpc[i] = orthogonal_move(hpc[i], geom3::FLOOR - geom3::human_height / 100);
 
       for(int k=0; k<SIDEPARS; k++) {
         sizeto(fsh.levels[k], id);
@@ -545,6 +548,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       
       for(int l=0; l<SIDEPARS; l++) {
         fsh.levels[l] = shFullFloor.levels[l];
+        fsh.shadow = shFullFloor.shadow;
         for(auto& li: fsh.levels[l]) li.tinf = &fsh.tinf3;
         fsh.side[l] = shFullFloor.side[l];
         for(auto& li: fsh.side[l]) li.tinf = &fsh.tinf3;
