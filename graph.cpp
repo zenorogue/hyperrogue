@@ -4589,7 +4589,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     asciicol = wcol;
     
-    if(c->wall == waThumperOn) {
+    if(c->wall == waThumperOn && DIM == 2) {
       ld ds = fractick(160);
       for(int u=0; u<5; u++) {
         ld rad = hexf * (.3 * (u + ds));
