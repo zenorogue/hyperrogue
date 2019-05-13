@@ -429,6 +429,9 @@ void switch_always3() {
       need_reset_geometry = true;
       swapmatrix(View);
       callhooks(hooks_swapdim);
+#if CAP_RACING
+      racing::player_relative = true;
+#endif
       }
     else {
       geom3::always3 = false;
