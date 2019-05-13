@@ -789,7 +789,7 @@ void set_depthwrite(bool b) {
   if(b != current_depthwrite) {
     current_depthwrite = b;
     if(b) glDepthMask(GL_TRUE);
-    else glDisable(GL_FALSE);
+    else glDepthMask(GL_FALSE);
     }
   }
 
