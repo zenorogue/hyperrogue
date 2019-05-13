@@ -738,7 +738,6 @@ hyperpoint psmin(hyperpoint H) {
   }
 
 void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1) {
-  eyepos = WDIM == 2 ? 0.875 : 0.925;
   using namespace hyperpoint_vec;
   hyperpoint center = Hypc;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
@@ -836,6 +835,7 @@ void make_shadow(hpcshape& sh) {
 
 void make_3d_models() {
   if(DIM == 2) return;
+  eyepos = WDIM == 2 ? 0.875 : 0.925;
   DEBBI(DF_POLY, ("make_3d_models"));
   shcenter = C0;
   
