@@ -195,6 +195,7 @@ namespace mapstream {
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     f.write(id);
 
+    f.write(geom3::always3);
     #if CAP_POLY
     for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
       usershape *us = usp.second;
@@ -435,6 +436,9 @@ namespace mapstream {
     savecount = 0; savetime = 0;
     cheater = 1;
     
+    dynamicval<bool> a3(geom3::always3, geom3::always3);
+    if(vernum >= 0xA616) f.read(geom3::always3);
+
     if(vernum >= 7400) while(true) {
       int i = f.get<int>();
       if(i == -1) break;
