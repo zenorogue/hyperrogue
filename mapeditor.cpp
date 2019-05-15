@@ -1524,6 +1524,7 @@ namespace mapeditor {
         rebuildPolys = true;
         uni = 0;
         }
+      else if(uni == COLORKEY) dsCur->color = colortouse;
       else if(uni != 'D') uni = 0;
       }
     
