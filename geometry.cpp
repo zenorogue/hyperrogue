@@ -173,6 +173,7 @@ void precalc() {
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
   if(WDIM == 3) zhexf *= geom3::creature_scale;
+  if(WDIM == 2 && GDIM == 3) zhexf *= 1.5, orbsize *= 1.2;
 
   floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
   floorrad1 = rhexf * (GDIM == 3 ? 1 : 0.94);
@@ -364,7 +365,7 @@ namespace geom3 {
       
       reduce = (DIM == 3 ? human_height * .3 : 0);
       
-      STUFF = lev_to_factor(human_height * .2);
+      STUFF = lev_to_factor(0) - max(orbsize * 0.3, zhexf * .6);
       
       ABODY = lev_to_factor(human_height * .4 - reduce);
       ALEG0 = lev_to_factor(human_height * .0 - reduce);
