@@ -3183,3 +3183,26 @@ RogueViz:
 - [3D] engine optimizations: do not draw back walls, do not draw walls outside of the view (default view range increased), an option to limit cell generation
 - [3D] fixed transparent walls between lands
 - [3D] using models not walls for worms
+
+2019-05-15 17:49 Version 11.0w:
+
+Gameplay:
+- Thumpers activated by Bulls are no longer permanent
+- Terracotta Warrior statues flashed or shocked now count as kills; Terracotta Warriors now display time; Terracotta Warriors now turn into slimes when slimed
+- fixed the Burial Grounds unlock rule
+- fixed the menu option 'help for keyboard users' doing nothing
+- fixed some issues with the per-frame limit on cell generation (in 3D/smart generation modes)
+- monster orientation is now fully modelled in non-orientable geometries
+- selecting a (horo)cyclic/equidistant-based land in the Experiments in Geometry while in standard geometry works now
+
+2.5D/3D preview:
+- fixed in 2.5D: irregular tilings, Goldberg tilings, Euclidean Archimedean tilings, and elliptic plane
+- better minimap in Euclidean, spherical, and 3D geometries
+- items shown on the radar even if user-shaped or hidden
+- shadows no longer flicker
+- Orb of Gravity and Orb of Lightning particles
+- fixed the z-ordering in spherical geometry
+- disabled the optimization in spherical geometry (we may see things behind us)
+- items are now a bit larger
+- improvements to the 3D modeller: correct placement, quicker editing, color changing works now, ways to place new points in 3D more intelligently; you cannot edit floors, so 'pick something' is displayed when you try
+
