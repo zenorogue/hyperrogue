@@ -1311,7 +1311,7 @@ namespace mapeditor {
         displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
         displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
         }
-      if(mousekey == 'g' && DIM == 2)
+      if(mousekey == 'g')
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
         displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
@@ -1345,7 +1345,7 @@ namespace mapeditor {
     if(DIM == 3)
       displayfr(8, 8+fs*19, 2, vid.fsize, XLAT(front_config == eFront::sphere_camera ? "z = camera" : front_config == eFront::sphere_center ? "z = spheres" : "z = equi"), 0xC0C0C0, 0);
 
-    if(DIM == 2) displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
+    displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
 #if CAP_TEXTURE    
     if(intexture) for(int i=0; i<10; i++) {
