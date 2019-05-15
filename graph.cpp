@@ -4306,6 +4306,7 @@ int noclipped;
 
 void make_clipping_planes() {
   clipping_planes.clear();
+  if(sphere) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     using namespace hyperpoint_vec;
     ld z1 = 1, z2 = 1;
