@@ -437,6 +437,7 @@ struct shmup_configurer {
 
   void handleConfig(int sym, int uni) {
     auto& cmdlist = shmup::on ? (WDIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
+    dialog::handleNavigation(sym, uni);
     
     #if CAP_SDL
     if(uni == '1') pushScreen(key_configurer(1, cmdlist));
