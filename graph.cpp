@@ -705,6 +705,8 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
 #endif
   }
 
+ld max_eu_dist = 0;
+
 void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
   hyperpoint h = tC0(V);
   using namespace hyperpoint_vec;
@@ -729,7 +731,8 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
     }
   else {
     ld z = h[2] + h[1]/1000000;
-    if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
+    if(d > max_eu_dist) max_eu_dist = d;
+    if(d) h = h * (d / (max_eu_dist + scalefactor/4) / hypot_d(3, h));
     h[1] = hypot(h[1], h[2]) / (1 + h[3]);
     if(z < 0) h[1] = -h[1];
     h[2] = 0;
@@ -6484,6 +6487,7 @@ void drawthemap() {
 
   if(DIM == 3) make_clipping_planes();
   radarpoints.clear();
+  if(!(cmode & sm::NORMAL)) max_eu_dist = 0;
   callhooks(hooks_drawmap);
 
   frameid++;

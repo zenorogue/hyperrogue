@@ -350,6 +350,7 @@ void drawMobileArrow(int i) {
 #endif
 
 bool nofps = false;
+extern ld max_eu_dist;
 
 void draw_radar(bool cornermode) {
 
@@ -406,7 +407,7 @@ void draw_radar(bool cornermode) {
       displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, siz, r.glyph, r.color);
       }
     else {
-      displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, 8, r.glyph, r.color);
+      displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, rad * scalefactor / (max_eu_dist + scalefactor/4) * 0.8, r.glyph, r.color);
       }    
   }
 
