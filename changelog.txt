@@ -3161,3 +3161,25 @@ RogueViz:
 2019-05-10 11:51 Version 11.0u:
 - fixed Ocean/Red Rock
 
+2019-05-13 16:02 Version 11.0v:
+- push cursor did not appear in the hardcore mode or while having targettable orbs
+
+2.5D/3D improvements:
+- 3D model improvements: monster eyes, humanoid eyes (with configurable color for the player), 
+  armor shape, humanoid model, disabled the Thumper animation, Orb visual effects, ratling model, smaller cones for
+  slimes, (in 2.5D) armor displayed as headgear, added shadows, fires/bonfires/buoys/thumpers, humanoid leg movement, 
+  skeletal feet, Orb of the Sword markers
+- transparency now works better (Hall of Mirrors in 2.5D, non-perspective models in 3D)
+- Hypersian Rug is no longer available in 2.5D/3D
+- item/monster icons in HUD
+- fixed racing
+- fixed items being hidden incorrectly
+- [2.5D] ASCII minimap replaces radar!
+- [2.5D] gravity rotation
+- [2.5D] fixed Space Rocks: fixed movement direction, space rocks no longer try to 'randomly spin' into space
+- [2.5D] no more incorrect mirror markers
+- [2.5D] better view range in quotient spaces; things no longer get off into space in quotient geometries
+- [2.5D] fixed in Euclidean
+- [3D] engine optimizations: do not draw back walls, do not draw walls outside of the view (default view range increased), an option to limit cell generation
+- [3D] fixed transparent walls between lands
+- [3D] using models not walls for worms
