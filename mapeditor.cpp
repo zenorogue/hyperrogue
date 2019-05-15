@@ -8,6 +8,9 @@ namespace mapeditor {
   hyperpoint lstart;
   cell *lstartcell;
   ld front_edit = 0.5;
+  enum class eFront { sphere_camera, sphere_center, equidistants };
+  eFront front_config;
+  ld front_step = 0.1;
 
   struct editwhat {
     double dist;
@@ -1065,18 +1068,70 @@ namespace mapeditor {
   
   unsigned gridcolor = 0xC0C0C040;
   
+  hyperpoint find_mouseh3() {
+    if(front_config == eFront::sphere_camera)
+      return cpush0(2, front_edit);
+    ld step = 0.01;
+    ld cdist = 0;
+    
+    auto idt = inverse(drawtrans);
+
+    auto qu = [&] (ld d) { 
+      if(front_config == eFront::sphere_center) 
+        return pow(hdist(drawtrans * C0, cpush0(2, d)) - front_edit, 2); 
+      if(front_config == eFront::equidistants) {
+        hyperpoint h = idt * cpush0(2, d);
+        return pow(asin_auto(h[2]) - front_edit, 2);
+        }
+      return ld(0);
+      };
+    
+    ld bq = qu(cdist);
+    while(step > 1e-10) {
+      ld cq = qu(cdist + step);
+      if(cq < bq) cdist += step, bq = cq;
+      else step /= 2;
+      }
+    return cpush0(2, cdist);
+    }
+    
   void drawGrid() {
+    color_t lightgrid = gridcolor;
+    lightgrid -= (lightgrid & 0xFF) / 2;
+    transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
+
     if(DIM == 3) {
       queuecircleat(mapeditor::drawcell, 1, 0x80D080FF);
       color_t cols[4] = { 0x80D080FF, 0x80D080FF, 0xFFFFFF40, 0x00000040 };
-      for(int i=0; i<4; i++)
-        queueline(cpush(2, front_edit) * cpush0(i&1, 0.1), cpush(2, front_edit) * cpush0(i&1, -0.1), cols[i], -1, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+      if(true) {
+        transmatrix t = rgpushxto0(find_mouseh3());
+        for(int i=0; i<4; i++)
+          queueline(t * cpush0(i&1, 0.1), cpush(2, front_edit) * cpush0(i&1, -0.1), cols[i], -1, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+        }
+      if(front_config == eFront::sphere_center) for(int i=0; i<4; i+=2) {
+        for(int a=0; a<360; a+=30) {
+          for(int b=-90; b<90; b+=5) curvepoint(d2 * spin(a*degree) * cspin(0, 2, b*degree) * xpush0(front_edit));
+          queuecurve(cols[i + (a % 90 != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+          }
+        for(int b=-60; b<=60; b+=30) {
+          for(int a=0; a<=360; a+=5) curvepoint(d2 * spin(a*degree) * cspin(0, 2, b*degree) * xpush0(front_edit));
+          queuecurve(cols[i + (b != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+          }
+        }
+      if(front_config == eFront::equidistants) for(int i=0; i<4; i+=2) {
+        for(int u=2; u<=20; u++) {
+          PRING(d) {
+            curvepoint(d2 * xspinpush(M_PI*d/S42, u/20.) * zpush(front_edit) * C0);
+            }
+          queuecurve(cols[i + (u%5 != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+          }
+        for(int d=0; d<S84; d++) {
+          for(int u=0; u<=20; u++) curvepoint(d2 * xspinpush(M_PI*d/S42, u/20.) * zpush(front_edit) * C0);
+          queuecurve(cols[i + (d % (S84/drawcell->type) != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+          }
+        }
       return;
       }
-    unsigned lightgrid = gridcolor;
-    lightgrid -= (lightgrid & 0xFF) / 2;
-
-    transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
 
     for(int d=0; d<S84; d++) {
       unsigned col = (d % (S84/drawcell->type) == 0) ? gridcolor : lightgrid;
@@ -1281,7 +1336,7 @@ namespace mapeditor {
       }
     
     if(DIM == 3)
-      displayfr(8, 8+fs*19, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
+      displayfr(8, 8+fs*19, 2, vid.fsize, XLAT(front_config == eFront::sphere_camera ? "z = camera" : front_config == eFront::sphere_center ? "z = spheres" : "z = equi"), 0xC0C0C0, 0);
 
     if(DIM == 2) displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
@@ -1673,6 +1728,14 @@ namespace mapeditor {
 
   void drawHandleKey(int sym, int uni) {
 
+    if(uni == PSEUDOKEY_WHEELUP && DIM == 3 && front_step) {
+      front_edit += front_step * shiftmul; return;
+      }
+
+    if(uni == PSEUDOKEY_WHEELDOWN && DIM == 3 && front_step) {
+      front_edit -= front_step * shiftmul; return;
+      }
+
     handlePanning(sym, uni);
   
     if(uni == SETMOUSEKEY) {
@@ -1690,7 +1753,7 @@ namespace mapeditor {
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
     
-    hyperpoint mh = DIM == 2 ? mouseh : cpush0(2, front_edit);
+    hyperpoint mh = DIM == 2 ? mouseh : find_mouseh3();
     mh = inverse(drawtrans) * mh;
 
     bool clickused = false;
@@ -1724,10 +1787,23 @@ namespace mapeditor {
       pushScreen(showMapEditor);
       }
 
-    if(uni == 'z' && DIM == 3)
-      dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"),
-        XLAT("The distance from the camera to added points."));
-
+    if(uni == 'z' && DIM == 3) {
+      dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"), "");
+      dialog::extra_options = [] () {
+        dialog::addBoolItem(XLAT("The distance from the camera to added points."), front_config == eFront::sphere_camera, 'A');
+        dialog::add_action([] { front_config = eFront::sphere_camera; });
+        dialog::addBoolItem(XLAT("place points at fixed radius"), front_config == eFront::sphere_center, 'B');
+        dialog::add_action([] { front_config = eFront::sphere_center; });
+        dialog::addBoolItem(XLAT("place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
+        dialog::add_action([] { front_config = eFront::equidistants; });
+        dialog::addSelItem(XLAT("mousewheel step"), fts(front_step), 'S');
+        dialog::add_action([] {
+          popScreen();
+          dialog::editNumber(front_step, -10, 10, 0.1, 0.1, XLAT("mousewheel step"), "hint: shift for finer steps");
+          });
+        };
+      }
+    
     if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
       }
@@ -1900,6 +1976,7 @@ namespace mapeditor {
     ew.pointid = -1;
     ew.side = 0;
     ewsearch = ew;
+    ccenter = coldcenter = C0;
     }
   
   transmatrix textrans;
