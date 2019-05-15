@@ -706,14 +706,22 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
   if(d > sightranges[geometry]) return;
-  if(WDIM == 3)
-    h = h * (d / sightranges[geometry] / hypot_d(3, h));
-  else {
+  if(WDIM == 3) {
+    if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
+    }
+  else if(hyperbolic) {
     ld z = h[2] + h[1]/1000000;
     h[1] = hypot(h[1], h[2]) / (1 + h[3]);
     // we add h[1]/1000000 so that it also works for h[2] == 0
     if(z < 0) h[1] = -h[1];
     h[0] = h[0] / (1 + h[3]);
+    h[2] = 0;
+    }
+  else {
+    ld z = h[2] + h[1]/1000000;
+    if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
+    h[1] = hypot(h[1], h[2]) / (1 + h[3]);
+    if(z < 0) h[1] = -h[1];
     h[2] = 0;
     }
   radarpoints.emplace_back(radarpoint{h, ch, col, outline});
