@@ -30,8 +30,8 @@ vector<cellinfo> cells;
 
 ld inner(hyperpoint h1, hyperpoint h2) {
   return 
-    hyperbolic ? h1[2] * h2[2] - h1[0] * h2[0] - h1[1] * h2[1] :
-    h1[2] * h2[2] + h1[0] * h2[0] + h1[1] * h2[1];
+    hyperbolic ? h1[GDIM] * h2[GDIM] - h1[0] * h2[0] - h1[1] * h2[1] :
+    h1[GDIM] * h2[GDIM] + h1[0] * h2[0] + h1[1] * h2[1];
   }
 
 hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
@@ -61,7 +61,7 @@ hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
     h = h - c * inner(h, c);
     }
   
-  if(h[2] < 0) h[0] = -h[0], h[1] = -h[1], h[2] = -h[2];
+  if(h[GDIM] < 0) h[0] = -h[0], h[1] = -h[1], h[GDIM] = -h[GDIM];
 
   ld i = inner(h, h);
   if(i > 0) h /= sqrt(i);
@@ -319,7 +319,7 @@ bool step(int delta) {
           hyperpoint best_h;
           for(int k=0; k<isize(cells); k++) if(k != i && k != j && k != oldj) {
             hyperpoint h = circumscribe(C0, p1.jpoints[j], p1.jpoints[k]);
-            if(h[2] < 0) continue;
+            if(h[GDIM] < 0) continue;
             if(!clockwise(t, h)) continue;
             if(best_k == -1)
               best_k = k, best_h = h;
@@ -532,11 +532,11 @@ bool draw_cell_schematics(cell *c, transmatrix V) {
         queuestr(V * rgpushxto0(p.p), .1, its(i), isize(p.vertices) > 8 ? 0xFF0000 : 0xFFFFFF);
         int N = isize(p.vertices);
         for(int j=0; j<N; j++)
-          queueline(V * p.pusher * p.vertices[j], V * p.pusher * p.vertices[(1+j)%N], 0xFFFFFFFF);
+          gridline(V * p.pusher * p.vertices[j], V * p.pusher * p.vertices[(1+j)%N], 0xFFFFFFFF, 0);
 
-        queueline(V * p.p, V * C0, 0xFF0000FF);
+        gridline(V * p.p, V * C0, 0xFF0000FF, 0);
         if(p.patterndir != -1)
-          queueline(V * p.p, V * calc_relative_matrix(c->master->move(p.patterndir)->c7, c, p.p) * C0, 0x00FF00FF);
+          gridline(V * p.p, V * calc_relative_matrix(c->master->move(p.patterndir)->c7, c, p.p) * C0, 0x00FF00FF, 0);
         }
       }
     }
@@ -830,7 +830,7 @@ bool save_map(const string& fname) {
     fprintf(f, "%d\n", origcells);
     for(auto i: cells_of_heptagon[h->master]) if(cells[i].generation == 0) {
       auto &ci = cells[i];
-      fprintf(f, "%lf %lf %lf\n", double(ci.p[0]), double(ci.p[1]), double(ci.p[2]));
+      fprintf(f, "%lf %lf %lf\n", double(ci.p[0]), double(ci.p[1]), double(ci.p[GDIM]));
       }
     }
   fclose(f);
@@ -1080,6 +1080,18 @@ array<heptagon*, 3> get_masters(cell *c) {
 auto hook = 
 #if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) + 
+#endif
+#if MAXMDIM >= 4
+  addHook(hooks_swapdim, 100, [] {
+    for(auto& c: cells) {
+      swapmatrix(c.p);
+      swapmatrix(c.pusher);
+      swapmatrix(c.rpusher);
+      for(auto& jp: c.jpoints) swapmatrix(jp);
+      for(auto& rm: c.relmatrices) swapmatrix(rm.second);
+      for(auto& v: c.vertices) swapmatrix(v);
+      }
+  }) +
 #endif
   addHook(hooks_drawcell, 100, draw_cell_schematics) +
   addHook(shmup::hooks_turn, 100, step);

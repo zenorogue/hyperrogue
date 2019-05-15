@@ -377,6 +377,10 @@ void swapmatrix(transmatrix& T) {
   fixmatrix(T);
   for(int i=0; i<4; i++) for(int j=0; j<4; j++) if(isnan(T[i][j])) T = Id;
   }
+
+void swapmatrix(hyperpoint& h) {
+  swap(h[2], h[3]);
+  }
 #endif
 
 transmatrix parabolic1(ld u) {
