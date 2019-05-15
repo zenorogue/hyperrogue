@@ -718,7 +718,7 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, c
   #if CAP_GP
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);
-    queuepolyat(V, shv[id], col, prio);
+    if(isize(shv) > id) queuepolyat(V, shv[id], col, prio);
     }
   #endif
   #if CAP_IRR
