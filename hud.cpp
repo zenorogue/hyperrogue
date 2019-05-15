@@ -355,6 +355,7 @@ void draw_radar(bool cornermode) {
 
   bool d3 = WDIM == 3 || straightDownSeek || !vid.fixed_yz;
   bool hyp = hyperbolic;
+  bool sph = sphere;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdUnchanged);
@@ -369,26 +370,37 @@ void draw_radar(bool cornermode) {
     curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
   queuecurve(0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
 
+  ld alpha = 15 * degree;
+  ld co = cos(alpha);
+  ld si = sin(alpha);
+  
+  if(sph && !d3) {
+    for(int i=0; i<360; i++)
+      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
+    queuecurve(0, 0x200000FF, PPR::ZERO);
+    }
+
   if(d3) {
     for(int i=0; i<360; i++)
-      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad/3, 1) * C0);
+      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
     queuecurve(0xFF0000FF, 0x200000FF, PPR::ZERO);
   
-    curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
+    curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
     curvepoint(atscreenpos(cx, cy, 1) * C0);
-    curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad/3, 1) * C0);
+    curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
     queuecurve(0xFF8000FF, 0, PPR::ZERO);
     }
   
   if(d3) for(auto& r: radarpoints) {    
-    queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2]/3 + rad * r.h[1]*2/3, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2]/3, 0)*C0, r.line, -1);
+    queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
     }
 
   quickqueue();
   glflush();
 
   for(auto& r: radarpoints)
-    if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2]/3 + rad * r.h[1]*2/3), 0, 8, r.glyph, r.color);
+    if(d3 || sphere) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
+    else if(sph) displaychr(int(cx + (rad-10) * r.h[0]), int(cy + (rad-10) * r.h[2] * si - (rad-10) * r.h[1] * co), 0, -r.h[1] * si > r.h[2] * co ? 8 : 16, r.glyph, r.color);
     else if(hyp) {
       int siz = 1/(1+r.h[3]) * scalefactor * current_display->radius / (inHighQual ? 10 : 6);
       displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, siz, r.glyph, r.color);

@@ -721,6 +721,12 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
     h[0] = h[0] / (1 + h[3]);
     h[2] = 0;
     }
+  else if(sphere) {
+    ld z = h[2] + h[1]/1000000;
+    h[1] = hypot(h[2], h[1]);
+    if(z < 0) h[1] = -h[1];
+    h[2] = h[3];
+    }
   else {
     ld z = h[2] + h[1]/1000000;
     if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
