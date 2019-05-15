@@ -2801,8 +2801,6 @@ void buildpolys() {
     ld lenx = hdist(xpush0(hexvdist), spin(M_PI/S3) * xpush0(hexvdist));
     ld hlenx = hdist(xpush0(hcrossf), spin(2*M_PI/S7) * xpush0(hcrossf));
     
-    println(hlog, "len6 = ", len6, " len7 = ", len7, " lenx = ", lenx);
-
     bshape(shHalfMirror[2], PPR::WALL);
     hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
     bshape(shHalfMirror[1], PPR::WALL);
