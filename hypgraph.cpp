@@ -1203,7 +1203,7 @@ void optimizeview() {
       heptagon *h2 = createStep(viewctr.at, i1);
       transmatrix T = currentmap->relative_matrix(h2, viewctr.at);
       #if MAXMDIM >= 4
-      if(euclid && DIM == 3)
+      if(euclid && WDIM == 3)
         T = euclid3::move_matrix(viewctr.at->c7, i);
       #endif
       hyperpoint H = View * tC0(T);
