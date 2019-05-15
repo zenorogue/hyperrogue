@@ -2277,7 +2277,7 @@ void drawWormSegments() {
 
 bool dont_face_pc = false;
 
-bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
+bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool mirrored) {
   #if CAP_SHAPES
 
   bool darkhistory = conformal::includeHistory && conformal::inkillhistory.count(c);
@@ -2298,6 +2298,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   eMonster m = c->monst;
   
   if(!m) ;
+  
+  else if(elliptic && GDIM == 3 && WDIM == 2 && mirrored) ;
     
   else if(isAnyIvy(c) || isWorm(c)) {
   
@@ -2632,12 +2634,13 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col) {
   
   for(int i=0; i<numplayers(); i++) if(c == playerpos(i) && !shmup::on && mapeditor::drawplayer && 
     !(hardcore && !canmove)) {
+    bool mirr = multi::players > 1 ? multi::player[i].mirrored : cwt.mirrored;
+    if(elliptic && GDIM == 3 && WDIM == 2 && mirr != mirrored) continue;
     if(!nospins) {
       Vs = playerV;
       if(multi::players > 1 ? multi::flipped[i] : flipplayer) Vs = Vs * pispin;
       }
     else {
-      bool mirr = multi::players > 1 ? multi::player[i].mirrored : cwt.mirrored;
       if(mirr) Vs = Vs * Mirror;
       }
     shmup::cpid = i;
@@ -5826,7 +5829,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       #if CAP_SHAPES
       int q = ptds.size();
       #endif
-      bool m = drawMonster(V, ctype, c, moncol);
+      bool m = drawMonster(V, ctype, c, moncol, mirrored);
       if(m) error = true;
       if(m || c->monst) onradar = false; 
       #if CAP_SHAPES
