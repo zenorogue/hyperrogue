@@ -1532,7 +1532,6 @@ void draw_main() {
         glClearDepth(0.0f);
   #endif
         glDepthFunc(GL_GEQUAL);
-        reverse_transparent_walls();
         }
       glClear(GL_DEPTH_BUFFER_BIT);
       glhr::be_nontextured();
@@ -1544,7 +1543,6 @@ void draw_main() {
         reset_projection();
         for(auto& ptd: ptds) ptd->draw();
         }
-      if(p == 1 || p == 2) reverse_transparent_walls();
       // glflush();
       }
     }
