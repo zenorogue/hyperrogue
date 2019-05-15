@@ -240,9 +240,13 @@ void drawFlash(const transmatrix& V) {
 #endif
   }
 
+ld cheilevel(ld v) {
+  return geom3::FLOOR + (geom3::HEAD - geom3::FLOOR) * v;
+  }
+
 transmatrix chei(const transmatrix V, int a, int b) {
   if(DIM == 2) return V;
-  return V * zpush(geom3::FLOOR + (geom3::HEAD - geom3::FLOOR) * (a+.5) / b);
+  return V * zpush(cheilevel((a+.5) / b));
   }
 
 void drawLove(const transmatrix& V, int hdir) {
@@ -4119,22 +4123,24 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
   const color_t antigrav_color = 0xF04040FF;
   const color_t levitate_color = 0x40F040FF;
   
-  ld lev = 2;
+  auto levf = [] (ld l) { 
+    return DIM == 3 ? cheilevel(l) : 1 + (1-l) * 1;
+    };
   
-  if(spatial_graphics) {
+  if(spatial_graphics || (WDIM == 2 && GDIM == 3)) {
 
     switch(gravity_state) {
       case gsNormal:
         for(int i=0; i<6; i++) {
           transmatrix T = V * spin(i*degree*60) * xpush(crossf/3);
-          queueline(mmscale(T, 1 + (1-r0) * (lev-1)) * C0, mmscale(T, 1 + (1-r1) * (lev - 1)) * C0, grav_normal_color);
+          queueline(mmscale(T, levf(r0)) * C0, mmscale(T, levf(r1)) * C0, grav_normal_color);
           }
         break;
       
       case gsAnti:
         for(int i=0; i<6; i++) {
           transmatrix T = V * spin(i*degree*60) * xpush(crossf/3);
-          queueline(mmscale(T, 1 + r0 * (lev-1)) * C0, mmscale(T, 1 + r1 * (lev-1)) * C0, antigrav_color);
+          queueline(mmscale(T, levf(r0)) * C0, mmscale(T, levf(r1)) * C0, antigrav_color);
           }
         break;
       
@@ -4142,7 +4148,8 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
         for(int i=0; i<6; i++) {
           transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(crossf/3);
           transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(crossf/3);
-          queueline(mmscale(T0, (lev+1)/2) * C0, mmscale(T1, (lev+1)/2) * C0, levitate_color);
+          ld lv = levf(DIM == 3 ? (i+0.5)/6 : 0.5);
+          queueline(mmscale(T0, lv) * C0, mmscale(T1, lv) * C0, levitate_color);
           }
         break;
       }
