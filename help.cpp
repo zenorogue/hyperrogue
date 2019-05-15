@@ -802,6 +802,7 @@ void describeMouseover() {
       out += ", "; out += XLAT1(winf[c->wall].name); 
       
       if(c->wall == waRose) out += " (" + its(7-rosephase) + ")";
+      if(c->wall == waTerraWarrior) out += " (" + its(c->landparam) + ")";
       
       if((c->wall == waBigTree || c->wall == waSmallTree) && c->land != laDryForest)
         help = 
