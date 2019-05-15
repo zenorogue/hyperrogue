@@ -4740,7 +4740,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->ligon) {
         ld hdir = displayspin(c, t);
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*xspinpush0(ticks * M_PI / S42, hexf/2), V*xspinpush0(hdir, crossf), lcol, 2 + vid.linequality);
+        queueline(V*chei(xspinpush(ticks * M_PI / S42, hexf/2), rand() % 1000, 1000) * C0, V*chei(xspinpush(hdir, crossf), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
         }
       }
     
