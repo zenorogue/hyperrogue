@@ -1110,7 +1110,7 @@ void set_euland3(cell *c, int co10, int co11, int alt, int hash) {
 
 bool quickfind(eLand l) {
   if(l == cheatdest) return true;
-  if(l == specialland && (weirdhyperbolic || specialland != laIce)) return true;
+  if(l == specialland && (weirdhyperbolic || specialland != laIce || cheater)) return true;
 #if CAP_TOUR
   if(tour::on && tour::quickfind(l)) return true;
 #endif

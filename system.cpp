@@ -150,6 +150,10 @@ void initgame() {
   
   setdist(cwt.at, BARLEV, NULL);
 
+  if(!use_special_land) {
+    if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
+    }
+
   if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
     anthraxBonus = items[itHolyGrail];
     cwt.at->move(0)->land = firstland;
