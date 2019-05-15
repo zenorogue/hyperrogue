@@ -1568,7 +1568,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->monst == moGreaterShark || c->monst == moParrot || c->monst == moCShark)
     return;
   // turn statues into Slimes!
-  if(c->wall == waBigStatue && t != waNone) {
+  if(among(c->wall, waBigStatue, waTerraWarrior) && t != waNone) {
     c->wall = waNone;
     c->monst = moSlimeNextTurn;
     }
@@ -1628,6 +1628,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     }
     
   destroyHalfvine(c);
+  if(c->wall == waTerraWarrior) kills[waTerraWarrior]++;
   c->wall = t;
   // destroy items...
   c->item = itNone;
