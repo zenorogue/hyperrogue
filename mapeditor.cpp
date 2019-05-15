@@ -1956,7 +1956,7 @@ namespace mapeditor {
       }
 
     if(rebuildPolys)
-      buildpolys(), rebuildPolys = false;
+      add_user_shapes(), rebuildPolys = false;
     }
 #endif    
 

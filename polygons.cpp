@@ -1814,6 +1814,7 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
 vector<hpcshape*> allshapes;
 
 void finishshape() {
+  if(!last) return;
   last->e = isize(hpc);
   double area = 0;
   for(int i=last->s; i<last->e-1; i++)
@@ -3189,8 +3190,14 @@ void buildpolys() {
   #endif
   
   bshapeend();
-
+  extern void add_user_shapes();
   prehpc = isize(hpc);
+  add_user_shapes();
+  }
+
+void add_user_shapes() {
+  hpc.resize(prehpc);
+  last = NULL;
   DEBB(DF_POLY, ("hpc = ", prehpc));
 
   user_triangles_texture.tvertices.clear();
