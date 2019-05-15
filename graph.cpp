@@ -6514,6 +6514,7 @@ void drawthemap() {
 
   frameid++;
   cells_drawn = 0;
+  cells_generated = 0;
   noclipped = 0;
   first_cell_to_draw = true;
   

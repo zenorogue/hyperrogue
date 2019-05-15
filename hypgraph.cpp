@@ -1701,19 +1701,26 @@ bool do_draw(cell *c) {
 
 ld extra_generation_distance = 99;
 
+// returns false if limited
+bool limited_generation(cell *c) {
+  if(c->mpdist <= 7) return true;
+  if(cells_generated > vid.cells_generated_limit) return false;
+  setdist(c, 7, c);
+  cells_generated++;
+  return true;
+  }
+
 bool do_draw(cell *c, const transmatrix& T) {
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;
-      if(c->mpdist > 7 && cells_generated > vid.cells_generated_limit) return false;
-      cells_generated++;
-      setdist(c, 7, c);
+      if(!limited_generation(c)) return false;
       }
     else {
       ld dist = hdist0(tC0(T));
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : corner_bonus)) return false;
-      if(dist <= extra_generation_distance) setdist(c, 7, c);
+      if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
     return true;
     }
@@ -1738,11 +1745,7 @@ bool do_draw(cell *c, const transmatrix& T) {
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient || euwrap;
   if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
-  if(vid.use_smart_range == 2) {
-    if(cells_generated > vid.cells_generated_limit) return false;
-    setdist(c, 7, c);
-    cells_generated++;
-    }
+  if(vid.use_smart_range == 2 && !limited_generation(c)) return false;
   return true; 
   }
 
