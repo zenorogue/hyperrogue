@@ -101,7 +101,7 @@ hyperpoint coord(hyperpoint h) {
   }
 
 ld det(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
-  return det(build_matrix(h1, h2, h3));
+  return det(build_matrix(h1, h2, h3,C03));
   }
 
 ld epsd = 1e-5;
@@ -233,7 +233,7 @@ dexp_data dexp(hyperpoint p, hyperpoint t) {
   
   for(ld u=0; u<1; u += eps) {
     
-    transmatrix T = build_matrix(coord_derivative(p, 0), coord_derivative(p, 1), Hypc);
+    transmatrix T = build_matrix(coord_derivative(p, 0), coord_derivative(p, 1), Hypc, C03);
     
     // printf("Tt = %lf\n", hypot_d(3, T * t));
 
@@ -245,7 +245,7 @@ dexp_data dexp(hyperpoint p, hyperpoint t) {
     auto v0 = coord_derivative(p, 0);
     auto v1 = coord_derivative(p, 1);
 
-    transmatrix T2 = build_matrix(v0, v1, v0 ^ v1);
+    transmatrix T2 = build_matrix(v0, v1, v0 ^ v1, C03);
       
     t = inverse(T2) * T * t;
     t[2] = 0;
@@ -271,7 +271,7 @@ transmatrix create_M_matrix(hyperpoint zero, hyperpoint v1) {
   hyperpoint Te0 = coord_derivative(zero, 0);
   hyperpoint Te1 = coord_derivative(zero, 1);
 
-  transmatrix T = build_matrix(Te0, Te1, Hypc);
+  transmatrix T = build_matrix(Te0, Te1, Hypc, C03);
 
   v1 = v1 / hypot_d(3, T*v1);
   hyperpoint v2 = hpxyz(1e-3, 1e-4, 0);
@@ -281,7 +281,7 @@ transmatrix create_M_matrix(hyperpoint zero, hyperpoint v1) {
   if((((T*v1) ^ (T*v2)) | ((T*unit_vector[0]) ^ (T*unit_vector[1]))) < 0)
     v2 = v2 * -1;
   
-  transmatrix M = build_matrix(v1, v2, Hypc);
+  transmatrix M = build_matrix(v1, v2, Hypc, C03);
   
   println(hlog, M);
 

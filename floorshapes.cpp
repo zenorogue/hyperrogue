@@ -82,7 +82,7 @@ matrixitem genitem(const transmatrix& m1, const transmatrix& m2, int nsym) {
   }
 
 void addmatrix(matrixlist& matrices, hyperpoint o0, hyperpoint o1, hyperpoint o2, hyperpoint n0, hyperpoint n1, hyperpoint n2, int d, int osym, int nsym) {
-  matrices.v.push_back(genitem(inverse(spin(2*M_PI*d/osym)*build_matrix(o0, o1, o2)), spin(2*M_PI*d/nsym)*build_matrix(n0, n1, n2), nsym));
+  matrices.v.push_back(genitem(inverse(spin(2*M_PI*d/osym)*build_matrix(o0, o1, o2,C02)), spin(2*M_PI*d/nsym)*build_matrix(n0, n1, n2,C02), nsym));
   }
 
 matrixlist hex_matrices, hept_matrices;
@@ -450,10 +450,10 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
             
             hyperpoint nlfar = farcorner(c, (d+cid+v+1) % cor, 0);
             hyperpoint nrfar = farcorner(c, (d+cid+v+1) % cor, 1);
-            m.v[i].second[cid] = build_matrix(center, nlcorner, nrcorner);
-            m.v[i+1].second[cid] = build_matrix(nfar, nlcorner, nrcorner);
-            m.v[i+2].second[cid] = build_matrix(nfar, nlcorner, nlfar);
-            m.v[i+3].second[cid] = build_matrix(nfar, nrcorner, nrfar);
+            m.v[i].second[cid] = build_matrix(center, nlcorner, nrcorner,C02);
+            m.v[i+1].second[cid] = build_matrix(nfar, nlcorner, nrcorner,C02);
+            m.v[i+2].second[cid] = build_matrix(nfar, nlcorner, nlfar,C02);
+            m.v[i+3].second[cid] = build_matrix(nfar, nrcorner, nrfar,C02);
             }
           
           i += 4;

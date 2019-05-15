@@ -513,7 +513,8 @@ namespace hr { namespace gp {
     return spin(-alpha) * build_matrix(
       C0, 
       ddspin(&cc, i) * xpush0(tessf),
-      ddspin(&cc, i+1) * xpush0(tessf)
+      ddspin(&cc, i+1) * xpush0(tessf),
+      C03
       );
     }
   
@@ -521,7 +522,8 @@ namespace hr { namespace gp {
     corners = inverse(build_matrix(
       loctoh_ort(loc(0,0)),
       loctoh_ort(param),
-      loctoh_ort(param * loc(0,1))
+      loctoh_ort(param * loc(0,1)),
+      C03
       ));
     for(int i=0; i<S7; i++) {
       transmatrix T = dir_matrix(i);

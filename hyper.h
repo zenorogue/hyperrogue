@@ -3941,7 +3941,7 @@ transmatrix eupush3(ld x, ld y, ld z);
 transmatrix eupush(hyperpoint h);
 transmatrix rspintox(const hyperpoint& H);
 transmatrix gpushxto0(const hyperpoint& H);
-transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3);
+transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
 hyperpoint normalize(hyperpoint H);
 ld signum(ld x);
 

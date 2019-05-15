@@ -438,15 +438,13 @@ void set_column(transmatrix& T, int i, const hyperpoint& H) {
     T[j][i] = H[j];
   }
 
-transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
+transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4) {
   transmatrix T;
   for(int i=0; i<MDIM; i++)
     T[i][0] = h1[i],
     T[i][1] = h2[i],
     T[i][2] = h3[i];
-  if(DIM == 3) 
-    for(int i=0; i<MDIM; i++)
-      T[i][3] = (i == WDIM);
+  if(MAXMDIM == 4) for(int i=0; i<MDIM; i++) T[i][3] = h4[i];
   return T;
   }
 
