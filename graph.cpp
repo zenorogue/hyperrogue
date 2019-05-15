@@ -800,14 +800,14 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   if(c && doHighlight()) 
     poly_outline = kind_outline(it);
 
-  if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
-    
-  if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < orbsize * 0.25) return false;
-
 #if MAXMDIM >= 4
   if(c && DIM == 3) addradar(V, iinf[it].glyph, icol, kind_outline(it));
 #endif
   
+  if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
+    
+  if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < orbsize * 0.25) return false;
+
   transmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c) Vit = mscale(V, geom3::STUFF);
   if(DIM == 3 && c) Vit = face_the_player(Vit);
