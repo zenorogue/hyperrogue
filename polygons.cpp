@@ -1511,6 +1511,7 @@ void draw_main() {
   if(sphere && DIM == 3 && pmodel == mdPerspective) {
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
+      glhr::set_depthwrite(true);
       if(p == 0 || p == 3) {
   #ifdef GL_ES
         glClearDepthf(1.0f);
