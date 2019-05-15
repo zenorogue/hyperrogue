@@ -1156,7 +1156,7 @@ namespace euclid3 {
 #endif
 
 ld matrixnorm(const transmatrix& Mat) {
-  return Mat[0][2] * Mat[0][2] + Mat[1][2] * Mat[1][2];
+  return Mat[0][DIM] * Mat[0][DIM] + Mat[1][DIM] * Mat[1][DIM] + Mat[2][DIM] * Mat[2][DIM];
   }
   
 void hrmap_euclid_any::draw() {
@@ -1175,7 +1175,7 @@ void hrmap_euclid_any::draw() {
   vector<euspot> dfs = {zero};
 
   ld centerd = matrixnorm(View);
-  auto View0 = View;
+  auto View0 = cview();
   
   for(int i=0; i<isize(dfs); i++) {
     int dx, dy;
@@ -1189,7 +1189,7 @@ void hrmap_euclid_any::draw() {
 
     if(true) {
       ld locald = matrixnorm(Mat);
-      if(locald < centerd) centerd = locald, centerover = cw, View = Mat;
+      if(locald < centerd) centerd = locald, centerover = cw, View = inverse(actual_view_transform) * Mat;
       }
 
     if(do_draw(cw.at, Mat)) {

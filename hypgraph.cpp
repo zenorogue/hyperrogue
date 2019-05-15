@@ -1010,25 +1010,25 @@ int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
   
 transmatrix eumove(ld x, ld y) {
   transmatrix Mat = Id;
-  Mat[2][2] = 1;
+  Mat[DIM][DIM] = 1;
   
   if(a4) {
-    Mat[0][2] += x * crossf;
-    Mat[1][2] += y * crossf;
+    Mat[0][DIM] += x * crossf;
+    Mat[1][DIM] += y * crossf;
     }
   else {
-    Mat[0][2] += (x + y * .5) * crossf;
-    // Mat[2][0] += (x + y * .5) * crossf;
-    Mat[1][2] += y * q3 /2 * crossf;
-    // Mat[2][1] += y * q3 /2 * crossf;
+    Mat[0][DIM] += (x + y * .5) * crossf;
+    // Mat[DIM][0] += (x + y * .5) * crossf;
+    Mat[1][DIM] += y * q3 /2 * crossf;
+    // Mat[DIM][1] += y * q3 /2 * crossf;
     }
   
   ld v = a4 ? 1 : q3;
 
-  while(Mat[0][2] <= -16384 * crossf) Mat[0][2] += 32768 * crossf;
-  while(Mat[0][2] >= 16384 * crossf) Mat[0][2] -= 32768 * crossf;
-  while(Mat[1][2] <= -16384 * v * crossf) Mat[1][2] += 32768 * v * crossf;
-  while(Mat[1][2] >= 16384 * v * crossf) Mat[1][2] -= 32768 * v * crossf;
+  while(Mat[0][DIM] <= -16384 * crossf) Mat[0][DIM] += 32768 * crossf;
+  while(Mat[0][DIM] >= 16384 * crossf) Mat[0][DIM] -= 32768 * crossf;
+  while(Mat[1][DIM] <= -16384 * v * crossf) Mat[1][DIM] += 32768 * v * crossf;
+  while(Mat[1][DIM] >= 16384 * v * crossf) Mat[1][DIM] -= 32768 * v * crossf;
   return Mat;
   }
 
@@ -1113,9 +1113,10 @@ void centerpc(ld aspd) {
   #if MAXMDIM >= 4
   if(shmup::on && vid.sspeed > -5 && DIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
-    viewctr = shmup::pc[id]->base->master;
+    if(masterless) centerover = shmup::pc[id]->base;
+    else viewctr = shmup::pc[id]->base->master;
     transmatrix T = shmup::pc[id]->at;
-    if(WDIM == 2) T = master_relative(shmup::pc[id]->base) * T;
+    if(WDIM == 2 && !masterless) T = master_relative(shmup::pc[id]->base) * T;
     int sl = snakelevel(cwt.at);
     if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
     View = inverse(T);
