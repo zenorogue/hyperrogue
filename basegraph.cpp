@@ -236,10 +236,11 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
     if(DIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
       shaderside_projection = true; pers3 = true;
-      if(spherephase == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
-      if(spherephase == 1) glhr::new_shader_projection = glhr::shader_projection::standardS31;
-      if(spherephase == 2) glhr::new_shader_projection = glhr::shader_projection::standardS32;
-      if(spherephase == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
+      int sp = spherephase & 3;
+      if(sp == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
+      if(sp == 1) glhr::new_shader_projection = glhr::shader_projection::standardS31;
+      if(sp == 2) glhr::new_shader_projection = glhr::shader_projection::standardS32;
+      if(sp == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
       }
     }
   if(pmodel == mdFlatten) shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::flatten;

@@ -554,7 +554,7 @@ void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
   if(pmodel == mdPerspective && DIM == 3) {
-    if(elliptic && spherephase < 2) {
+    if(spherephase & 4) {
       for(int y=0; y<4; y++) {
         for(int x=0; x<4; x++) mat[id++] = -V[x][y];
         }
@@ -1509,9 +1509,9 @@ extern bool lshiftclick, lctrlclick;
 
 void draw_main() {
   if(sphere && DIM == 3 && pmodel == mdPerspective) {
-    for(int p: {0, 1, 2, 3}) {
+    for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
-      if(p == 1 || p == 3) {
+      if(p == 0 || p == 3) {
   #ifdef GL_ES
         glClearDepthf(1.0f);
   #else
@@ -1533,7 +1533,7 @@ void draw_main() {
       reset_projection();
       for(auto& ptd: ptds) ptd->draw();
       if(elliptic) {
-        spherephase = p - 2;
+        spherephase = p | 4;
         reset_projection();
         for(auto& ptd: ptds) ptd->draw();
         }
