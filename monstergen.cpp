@@ -13,6 +13,7 @@ int buildIvy(cell *c, int children, int minleaf) {
   if(c->monst) return 0;
   c->mondir = NODIR;
   c->monst = moIvyRoot;
+  c->monmirror = nonorientable && hrand(2);
   
   cell *child = NULL;
 
@@ -25,7 +26,8 @@ int buildIvy(cell *c, int children, int minleaf) {
         child = c->move(i), leafchild = buildIvy(c->move(i), children-1, 5);
       else 
         c->move(i)->monst = (leaf++ || peace::on) ? moIvyWait : moIvyHead,
-        c->move(i)->mondir = c->c.spin(i);
+        c->move(i)->mondir = c->c.spin(i),
+        c->move(i)->monmirror = c->monmirror;
       }
     }
   

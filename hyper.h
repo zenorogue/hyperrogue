@@ -348,7 +348,8 @@ struct gcell {
     mondir : 8,         // monster direction, for multi-tile monsters and graphics
     bardir : 8,         // barrier direction
     stuntime : 8,       // stun time left (for Palace Guards and Skeletons)
-    hitpoints : 8;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
+    hitpoints : 7,      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
+    monmirror : 1;      // monster mirroring state for nonorientable geometries
   
   unsigned landflags : 8;      // extra flags for land
 #else
@@ -2082,6 +2083,7 @@ struct animation {
   transmatrix wherenow;
   int attacking;
   transmatrix attackat;
+  bool mirrored;
   };
 
 // we need separate animation layers for Orb of Domination and Tentacle+Ghost,

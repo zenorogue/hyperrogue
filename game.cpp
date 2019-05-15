@@ -188,6 +188,7 @@ void initcell(cell *c) {
   c->land = laNone;
   c->ligon = 0;
   c->stuntime = 0;
+  c->monmirror = 0;
   }
 
 bool doesnotFall(cell *c) {
@@ -3664,8 +3665,11 @@ void moveMonster(cell *ct, cell *cf, int direction_hint) {
     ct->monst = m;
     if(m == moWolf) ct->monst = moWolfMoved;
     if(m == moHunterChanging) ct->stuntime = 1;
+    int d =neighborId(ct, cf);
     if(ct->monst != moTentacleGhost)
-      ct->mondir = neighborId(ct, cf);
+      ct->mondir = d;
+    if(d >= 0)
+      ct->monmirror = cf->monmirror ^ ct->c.mirror(d);
     }
   ct->hitpoints = cf->hitpoints;
   ct->stuntime = cf->stuntime;
@@ -4553,6 +4557,7 @@ void moveWorm(cell *c) {
     animateMovement(c, goal, LAYER_BIG, dir);
     c->monst = eMonster(moWormtail + id);
     goal->mondir = c->c.spin(j);
+    goal->monmirror = c->monmirror ^ c->c.mirror(j);
   
     mountmove(goal, goal->mondir, true, c);
     
@@ -4589,7 +4594,7 @@ void moveWorm(cell *c) {
   }
 
 void ivynext(cell *c) {
-  cellwalker cw(c, c->mondir);
+  cellwalker cw(c, c->mondir, c->monmirror);
   
   // check the mirroring status
   cell *c2 = c;
@@ -4683,6 +4688,7 @@ void moveivy() {
     if(mto && mto->cpdist) {
       animateMovement(mto->move(sp), mto, LAYER_BIG, mto->c.spin(sp));
       mto->monst = moIvyWait, mto->mondir = sp;
+      mto->monmirror = c->monmirror ^ c->c.mirror(sp);
       moveEffect(mto, NULL, moIvyWait, NOHINT);
       // if this is the only branch, we want to move the head immediately to mto instead
       if(mto->move(mto->mondir)->monst == moIvyHead) {

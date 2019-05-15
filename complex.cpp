@@ -2786,7 +2786,7 @@ namespace kraken {
     vector<pair<cell*, cell*> > acells;
     acells.push_back(make_pair(c2, c));
     forCellIdEx(c3, i, c) {
-      c3->monst = moKrakenT, c3->mondir = c->c.spin(i), onpath(c3, 0);
+      c3->monst = moKrakenT, c3->mondir = c->c.spin(i), c3->monmirror = c->monmirror ^ c->c.mirror(i), onpath(c3, 0);
       int i0 = (i+c->c.spin(c->mondir)-c->mondir+96+c->type/2) % c2->type;
       c3->hitpoints = hpcount[i0];
       acells.push_back(make_pair(c2->move(i0), c3));

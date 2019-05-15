@@ -2196,6 +2196,7 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
     a.footphase += a.attacking == 2 ? -aspd : aspd;
     footphase = a.footphase;
     V = V * a.wherenow;
+    if(a.mirrored) V = V * Mirror;
     if(a.attacking == 2) V = V * pispin;
     // if(DIM == 3) V = V * cspin(0, 2, M_PI/2);
     a.ltick = ticks;
@@ -2297,9 +2298,11 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
 
   eMonster m = c->monst;
   
+  bool half_elliptic = elliptic && GDIM == 3 && WDIM == 2;
+  
   if(!m) ;
   
-  else if(elliptic && GDIM == 3 && WDIM == 2 && mirrored) ;
+  else if(half_elliptic && mirrored != c->monmirror && !isMimic(m)) ;
     
   else if(isAnyIvy(c) || isWorm(c)) {
   
@@ -2336,6 +2339,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           length = cellgfxdist(c, c->mondir);
           }
         
+        if(c->monmirror) Vb = Vb * Mirror;
+  
         if(mapeditor::drawUserShape(Vb, mapeditor::sgMonster, c->monst, (col << 8) + 0xFF, c)) 
           return false;
 
@@ -2411,18 +2416,21 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           queuepoly(Vs, shILeaf[1], darkena(col, 0, 0xFF));
           }
         else {
+          if(c->monmirror) Vb = Vb * Mirror;
           queuepoly(mmscale(Vb, geom3::ABODY), shILeaf[ctof(c)], darkena(col, 0, 0xFF));
           ShadowV(Vb, shILeaf[ctof(c)], PPR::GIANTSHADOW);
           }
         }
       else if(m == moWorm || m == moWormwait || m == moHexSnake) {
         Vb = Vb * pispin;
+        if(c->monmirror) Vb = Vb * Mirror;
         transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
         queuepoly(Vbh, shWormHead, darkena(col, 0, 0xFF));
         queuepolyat(Vbh, shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
         ShadowV(Vb, shWormHead, PPR::GIANTSHADOW);
         }
       else if(m == moDragonHead) {
+        if(c->monmirror) Vb = Vb * Mirror;
         transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
         ShadowV(Vb, shDragonHead, PPR::GIANTSHADOW);
         queuepoly(Vbh, shDragonHead, darkena(col, c->hitpoints?0:1, 0xFF));
@@ -2434,6 +2442,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         }
       else if(m == moTentacle || m == moTentaclewait || m == moTentacleEscaping) {
         Vb = Vb * pispin;
+        if(c->monmirror) Vb = Vb * Mirror;
         transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
         queuepoly(Vbh, shTentHead, darkena(col, 0, 0xFF));
         ShadowV(Vb, shTentHead, PPR::GIANTSHADOW);
@@ -2454,6 +2463,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           else {
             Vb = Vb0 * ddspin(c, nd, M_PI);
             }
+          if(c->monmirror) Vb = Vb * Mirror;
           transmatrix Vbb = mmscale(Vb, geom3::ABODY);
           queuepoly(Vbb, shDragonTail, darkena(col, c->hitpoints?0:1, 0xFF));
           ShadowV(Vb, shDragonTail, PPR::GIANTSHADOW);
@@ -2474,6 +2484,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
             while(hdir1 < hdir0 - M_PI) hdir1 += 2*M_PI;
             Vb = Vb0 * spin((hdir0 + hdir1)/2 + M_PI);
             }
+          if(c->monmirror) Vb = Vb * Mirror;
           transmatrix Vbb = mmscale(Vb, geom3::ABODY);
           if(part == 'l' || part == '2') {
             queuepoly(Vbb, shDragonLegs, darkena(col, c->hitpoints?0:1, 0xFF));
@@ -2483,6 +2494,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         }
       else {
         if(c->monst == moTentacletail && c->mondir == NODIR) {
+          if(c->monmirror) Vb = Vb * Mirror;
           queuepoly(Vb, shWormSegment, darkena(col, 0, 0xFF));
           }
         else if(c->mondir == NODIR) {
@@ -2500,6 +2512,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           else {
             Vb = Vb0 * ddspin(c, nd, M_PI);
             }
+          if(c->monmirror) Vb = Vb * Mirror;
           transmatrix Vbb = mmscale(Vb, geom3::ABODY) * pispin;
           hpcshape& sh = hexsnake ? shWormTail : shSmallWormTail;
           queuepoly(Vbb, sh, darkena(col, 0, 0xFF));
@@ -2527,6 +2540,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       if(d>=4) cw += 2;
       transmatrix Vs = Vparam;
       bool mirr = cw.mirrored;
+      if(mirrored != mirr && half_elliptic) continue;
       transmatrix T = Id;
       nospins = applyAnimation(cwt.at, T, footphase, LAYER_SMALL);
       if(nospins) 
@@ -2555,6 +2569,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   
   else if(c->monst == moIllusion) {
     multi::cpid = 0;
+    if(c->monmirror) Vs = Vs * Mirror;
     drawMonsterType(c->monst, c, Vs, col, footphase);
     drawPlayerEffects(Vs, c, false);
     }
@@ -2571,6 +2586,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         }
       Vs = Vs * ddspin(c, d, 0);
       }
+    if(c->monmirror) Vs = Vs * Mirror;
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
 
@@ -2590,6 +2606,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       Vb = Vb * ddspin(c, c->mondir, M_PI);
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
+    if(c->monmirror) Vb = Vb * Mirror;
       
       // if(ctof(c) && !masterless) Vb = Vb * xpush(hexhexdist - hcrossf);
       // return (!BITRUNCATED) ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
@@ -2603,6 +2620,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
+    if(c->monmirror) Vs = Vs * Mirror;
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
@@ -2625,6 +2643,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       if(c->monst == moHunterChanging)  
         Vs = Vs * cspin(WDIM-2, WDIM-1, M_PI);
       }
+    if(c->monmirror) Vs = Vs * Mirror;
     
     if(c->monst == moShadow) 
       multi::cpid = c->hitpoints;
@@ -2635,7 +2654,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   for(int i=0; i<numplayers(); i++) if(c == playerpos(i) && !shmup::on && mapeditor::drawplayer && 
     !(hardcore && !canmove)) {
     bool mirr = multi::players > 1 ? multi::player[i].mirrored : cwt.mirrored;
-    if(elliptic && GDIM == 3 && WDIM == 2 && mirr != mirrored) continue;
+    if(half_elliptic && mirr != mirrored) continue;
     if(!nospins) {
       Vs = playerV;
       if(multi::players > 1 ? multi::flipped[i] : flipplayer) Vs = Vs * pispin;
@@ -7116,6 +7135,11 @@ void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
     a.ltick = ticks;
     a.wherenow = T;
     a.footphase = 0;
+    a.mirrored = false;
+    }
+  if(direction_hint >= 0 && direction_hint < src->type) {
+    if(src->c.mirror(direction_hint))
+      a.mirrored = !a.mirrored;
     }
   }
 
