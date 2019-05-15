@@ -788,11 +788,11 @@ void set_depthtest(bool b) {
 
 
 void set_depthwrite(bool b) {
-  /*if(b != current_depthwrite) { <- this does not work ask intended for some reason...
+  if(b != current_depthwrite) { // <- this does not work ask intended for some reason...
     current_depthwrite = b;
     if(b) glDepthMask(GL_TRUE);
     else glDepthMask(GL_FALSE);
-    } */
+    }
   }
 
 }

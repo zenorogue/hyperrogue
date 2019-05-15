@@ -411,6 +411,9 @@ void setGLProjection(color_t col) {
   
   GLERR("setGLProjection");
   reset_projection();
+  
+  glhr::set_depthwrite(true);
+  glClear(GL_DEPTH_BUFFER_BIT);
   }
 
 inline int next_p2 (int a )
