@@ -4209,6 +4209,7 @@ void beastAttack(cell *c, bool player) {
     if(c2->wall == waThumperOff) {
       playSound(c2, "click");
       c2->wall = waThumperOn;
+      c2->wparam = 100;
       }
     if(c2->wall == waExplosiveBarrel) {
       playSound(c2, "click");
