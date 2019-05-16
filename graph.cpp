@@ -549,8 +549,23 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
     };
 
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
+  
+  if(GDIM == 3) {
+    queuepolyat(V * front_leg_move * cspin(0, 2, rightfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
+    queuepolyat(V * Mirror * front_leg_move * cspin(0, 2, leftfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
+    queuepolyat(V * rear_leg_move * cspin(0, 2, -rightfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
+    queuepolyat(V * Mirror * rear_leg_move * cspin(0, 2, -leftfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
+    return;
 
-  const transmatrix VL = (GDIM == 3 ? V : mmscale(V, geom3::ALEG0));
+/*
+    if(WDIM == 2) V1 = V1 * zpush(geom3::GROIN);
+    Tright = V1 * cspin(0, 2, rightfoot/SCALE * 3);
+    Tleft  = V1 * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
+    if(WDIM == 2) Tleft = Tleft * zpush(-geom3::GROIN), Tright = Tright * zpush(-geom3::GROIN);
+*/
+    }
+
+  const transmatrix VL = mmscale(V, geom3::ALEG0);
 
   if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
   if(x[0]) queuepolyat(VL * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
@@ -650,8 +665,8 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
   else {
     transmatrix V1 = V;
     if(WDIM == 2) V1 = V1 * zpush(geom3::GROIN);
-    Tright = V1 * cspin(0, 2, rightfoot/SCALE * 3);
-    Tleft  = V1 * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
+    Tright = V1 * cspin(0, 2, rightfoot/ leg_length);
+    Tleft  = V1 * Mirror * cspin(2, 0, rightfoot / leg_length);
     if(WDIM == 2) Tleft = Tleft * zpush(-geom3::GROIN), Tright = Tright * zpush(-geom3::GROIN);
     }
     

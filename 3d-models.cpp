@@ -18,6 +18,10 @@ ld eyepos;
 
 hyperpoint shcenter;
 
+hyperpoint front_leg, rear_leg;
+transmatrix front_leg_move, rear_leg_move, front_leg_move_inverse, rear_leg_move_inverse;
+ld leg_length;
+
 vector<hyperpoint> get_shape(hpcshape sh) {
   vector<hyperpoint> res;
   for(int i=sh.s; i<sh.e-1; i++) res.push_back(hpc[i]);
@@ -926,6 +930,19 @@ void make_3d_models() {
   make_foot_3d(shHumanFoot);
   make_foot_3d(shYetiFoot);
   make_skeletal(shSkeletalFoot, WDIM == 2 ? zc(0.5) + geom3::human_height/40 - geom3::FLOOR : 0);
+  
+  hyperpoint front_leg = Hypc;
+  hyperpoint rear_leg = Hypc;
+  using namespace hyperpoint_vec;
+  for(int i=shDogFrontPaw.s; i<shDogFrontPaw.e; i++) front_leg += hpc[i];
+  for(int i=shDogRearPaw.s; i<shDogRearPaw.e; i++) rear_leg += hpc[i];
+  front_leg = normalize(front_leg);
+  rear_leg = normalize(rear_leg);
+  front_leg_move = zpush(zc(0.4)) * rgpushxto0(front_leg);
+  front_leg_move_inverse = inverse(front_leg_move);
+  rear_leg_move = zpush(zc(0.4)) * rgpushxto0(rear_leg);
+  rear_leg_move_inverse = inverse(rear_leg_move);
+  leg_length = zc(0.4) - zc(0);
   
   make_paw_3d(shWolfFrontPaw, shWolfFrontLeg);
   make_paw_3d(shWolfRearPaw, shWolfRearLeg);
