@@ -150,7 +150,7 @@ void initgame() {
   
   setdist(cwt.at, BARLEV, NULL);
 
-  if(!use_special_land) {
+  if(!use_special_land && !safety) {
     if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
     }
 

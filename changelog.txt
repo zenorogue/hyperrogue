@@ -3206,3 +3206,5 @@ Gameplay:
 - items are now a bit larger
 - improvements to the 3D modeller: correct placement, quicker editing, color changing works now, ways to place new points in 3D more intelligently; you cannot edit floors, so 'pick something' is displayed when you try
 
+2019-05-16 03:22 Version 11.0x:
+- using Orb of Safety marked you as cheater
