@@ -950,7 +950,7 @@ void make_3d_models() {
   // make_abody_3d(shCatBody, 0.05);
   // make_ahead_3d(shCatHead);
   make_revolution_cut(shCatBody, 30, +g);
-  make_revolution_cut(shCatHead, 180, geom3::AHEAD - geom3::ABODY +g);
+  make_revolution_cut(shCatHead, 180, geom3::AHEAD - geom3::ABODY +g, 0.055 * scalefactor);
 
   make_paw_3d(shReptileFrontFoot, shReptileFrontLeg);
   make_paw_3d(shReptileRearFoot, shReptileRearLeg);  
