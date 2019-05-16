@@ -1007,6 +1007,9 @@ void make_3d_models() {
   make_revolution_cut(shGadflyWing, 180, 0, 0.05*S);
   make_revolution_cut(shBatWings, 180, 0, 0.05*S);
   make_revolution_cut(shBatBody, 180, 0, 0.05*S);
+  
+  make_revolution_cut(shMouse, 180, -geom3::FLOOR);
+  shift_shape(shMouseLegs, geom3::FLOOR - geom3::human_height / 200);
 
   make_revolution_cut(shJelly, 60);
   make_revolution(shFoxTail1);
@@ -1144,6 +1147,8 @@ void make_3d_models() {
   
   adjust_eye(shSkullEyes, shPHeadOnly, geom3::HEAD1, geom3::HEAD, 2, 2);
   shSkullEyes.tinf = NULL;
+
+  adjust_eye(shMouseEyes, shMouse, geom3::FLOOR, geom3::FLOOR, 2, 1);
 
   shift_shape(shRatTail, zc(0.5) - geom3::LEG);
   for(int i=shRatTail.s; i<shRatTail.e; i++) hpc[i] = xpush(-scalefactor * 0.1) * hpc[i];
