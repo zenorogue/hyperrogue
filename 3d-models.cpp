@@ -965,7 +965,7 @@ void make_3d_models() {
   // make_ahead_3d(shBullHorn);
   make_revolution_cut(shBullBody, 180, +g);
   make_revolution_cut(shBullHead, 60, geom3::AHEAD - geom3::ABODY +g);
-  shift_shape(shBullHorn, g-(geom3::AHEAD - geom3::ABODY));
+  shift_shape(shBullHorn, -g-(geom3::AHEAD - geom3::ABODY));
   // make_revolution_cut(shBullHorn, 180, geom3::AHEAD - geom3::ABODY);
   
   make_paw_3d(shTrylobiteFrontClaw, shTrylobiteFrontLeg);
