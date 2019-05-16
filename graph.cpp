@@ -1149,6 +1149,18 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
     }
   }
 
+int wingphase(int period, int phase = 0) {
+  ld t = fractick(period, phase);
+  return int(t * 30) % 30;
+  }
+
+transmatrix wingmatrix(int period, int phase = 0) {
+  ld t = fractick(period, phase) * 2 * M_PI;
+  transmatrix Vwing = Id;
+  Vwing[1][1] = .85 + .15 * sin(t);
+  return Vwing;
+  }
+
 void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
   charstyle& cs = getcs();
   
@@ -1475,7 +1487,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     case moTameBomberbird: case moWindCrow: case moTameBomberbirdMoved:
     case moSandBird: case moAcidBird: {
       ShadowV(V, shEagle);
-      auto& sh = DIM == 3 ? shAnimatedEagle[((long long)(ticks) * 30 / 1000) % 30] : shEagle;
+      auto& sh = DIM == 3 ? shAnimatedEagle[wingphase(200)] : shEagle;
       if(m == moParrot && DIM == 3)
         queuepolyat(VBIRD, sh, darkena(col, 0, 0xFF), PPR::SUPERLINE);
       else
@@ -1485,24 +1497,26 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     
     case moSparrowhawk: case moWestHawk: {
       ShadowV(V, shHawk);
-      queuepoly(VBIRD, shHawk, darkena(col, 0, 0xFF));
+      auto& sh = DIM == 3 ? shAnimatedHawk[wingphase(200)] : shHawk;
+      queuepoly(VBIRD, sh, darkena(col, 0, 0xFF));
       return false;
       }
     
     case moButterfly: {
-      transmatrix Vwing = Id;
-      Vwing[1][1] = .85 + .15 * sintick(100);
+      transmatrix Vwing = wingmatrix(100);
       ShadowV(V * Vwing, shButterflyWing);
-      queuepoly(VBIRD * Vwing, shButterflyWing, darkena(col, 0, 0xFF));
+      if(DIM == 2)
+        queuepoly(VBIRD * Vwing, shButterflyWing, darkena(col, 0, 0xFF));
+      else
+        queuepoly(VBIRD, shAnimatedButterfly[wingphase(100)], darkena(col, 0, 0xFF));
       queuepoly(VBIRD, shButterflyBody, darkena(col, 2, 0xFF));
       return false;
       }
     
     case moGadfly: {
-      transmatrix Vwing = Id;
-      Vwing[1][1] = .85 + .15 * sintick(100);
+      transmatrix Vwing = wingmatrix(100);
       ShadowV(V * Vwing, shGadflyWing);
-      queuepoly(VBIRD * Vwing, shGadflyWing, darkena(col, 0, 0xFF));
+      queuepoly(VBIRD * Vwing, DIM == 2 ? shGadflyWing : shAnimatedGadfly[wingphase(100)], darkena(col, 0, 0xFF));
       queuepoly(VBIRD, shGadflyBody, darkena(col, 1, 0xFF));
       queuepoly(VBIRD, shGadflyEye, darkena(col, 2, 0xFF));
       queuepoly(VBIRD * Mirror, shGadflyEye, darkena(col, 2, 0xFF));
@@ -1513,8 +1527,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       // vampires have no shadow and no mirror images
       if(m == moBat) ShadowV(V, shBatWings);
       if(m == moBat || !inmirrorcount) {
-        queuepoly(VBIRD, shBatWings, darkena(0x303030, 0, 0xFF));
-        queuepoly(VBIRD, shBatBody, darkena(0x606060, 0, 0xFF));
+        queuepoly(VBIRD, DIM == 2 ? shBatWings : shAnimatedBat[wingphase(100)], darkena(0x303030, 0, 0xFF));
+        queuepoly(VBIRD, DIM == 2 ? shBatBody : shAnimatedBat2[wingphase(100)], darkena(0x606060, 0, 0xFF));
         }
       /* queuepoly(V, shBatMouth, darkena(0xC00000, 0, 0xFF));
       queuepoly(V, shBatFang, darkena(0xFFC0C0, 0, 0xFF));
@@ -1526,8 +1540,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     
     case moGargoyle: {
       ShadowV(V, shGargoyleWings);
-      queuepoly(VBIRD, shGargoyleWings, darkena(col, 0, 0xD0));
-      queuepoly(VBIRD, shGargoyleBody, darkena(col, 0, 0xFF));
+      queuepoly(VBIRD, DIM == 2 ? shGargoyleWings : shAnimatedGargoyle[wingphase(300)], darkena(col, 0, 0xD0));
+      queuepoly(VBIRD, DIM == 2 ? shGargoyleBody : shAnimatedGargoyle2[wingphase(300)], darkena(col, 0, 0xFF));
       return false;
       }
     

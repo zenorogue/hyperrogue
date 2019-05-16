@@ -1748,7 +1748,8 @@ hpcshape
   
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
   
-  shAnimatedEagle[30], shAnimatedTinyEagle[30],
+  shAnimatedEagle[30], shAnimatedTinyEagle[30], shAnimatedGadfly[30], shAnimatedHawk[30], shAnimatedButterfly[30], 
+  shAnimatedGargoyle[30], shAnimatedGargoyle2[30], shAnimatedBat[30], shAnimatedBat2[30],
   
   shDodeca;
 

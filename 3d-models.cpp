@@ -682,8 +682,8 @@ void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
         }
       }
     }
-  for(int i=0; i<30; i++) shift_shape(animated[i], geom3::BIRD);
-  shift_shape(orig, geom3::BIRD);
+  // for(int i=0; i<30; i++) shift_shape(animated[i], geom3::BIRD);
+  // shift_shape(orig, geom3::BIRD);
   }
 
 void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
@@ -978,8 +978,8 @@ void make_3d_models() {
 
   make_revolution_cut(shGhost, 60, geom3::GHOST + g);
 
-  make_revolution_cut(shEagle, 180, -geom3::BIRD, 0.05*S);
-  make_revolution_cut(shHawk, 180, -geom3::BIRD, 0.05*S);
+  make_revolution_cut(shEagle, 180, 0, 0.05*S);
+  make_revolution_cut(shHawk, 180, 0, 0.05*S);
 
   make_revolution_cut(shTinyBird, 180, 0, 0.025 * S);
   make_revolution_cut(shTinyShark, 90);
@@ -987,14 +987,14 @@ void make_3d_models() {
 
   make_revolution_cut(shGargoyleWings, 180, 0, 0.05*S);
   make_revolution_cut(shGargoyleBody, 180, 0, 0.05*S);
-  make_revolution_cut(shGadflyWing, 180, -geom3::BIRD, 0.05*S);
-  make_revolution_cut(shBatWings, 180, -geom3::BIRD, 0.05*S);
-  make_revolution_cut(shBatBody, 180, -geom3::BIRD, 0.05*S);
+  make_revolution_cut(shGadflyWing, 180, 0, 0.05*S);
+  make_revolution_cut(shBatWings, 180, 0, 0.05*S);
+  make_revolution_cut(shBatBody, 180, 0, 0.05*S);
 
   make_revolution_cut(shJelly, 60);
   make_revolution(shFoxTail1);
   make_revolution(shFoxTail2);
-  make_revolution(shGadflyBody, 180, -geom3::BIRD);
+  make_revolution(shGadflyBody, 180, 0);
   for(int i=0; i<8; i++)
     make_revolution(shAsteroid[i], 360);
   
@@ -1003,10 +1003,20 @@ void make_3d_models() {
   make_revolution(shBugArmor, 180, geom3::ABODY);
   make_revolution_cut(shBugAntenna, 90, geom3::ABODY);
   
-  make_revolution_cut(shButterflyBody, 180, -geom3::BIRD);
+  make_revolution_cut(shButterflyBody, 180, 0);
+  make_revolution_cut(shButterflyWing, 180, 0, 0.05*S);
+  finishshape();
   
   animate_bird(shEagle, shAnimatedEagle, 0.05*S);
   animate_bird(shTinyBird, shAnimatedTinyEagle, 0.05*S/2);
+
+  animate_bird(shButterflyWing, shAnimatedButterfly, 0);
+  animate_bird(shGadflyWing, shAnimatedGadfly, 0);
+  animate_bird(shHawk, shAnimatedHawk, 0.05*S);
+  animate_bird(shGargoyleWings, shAnimatedGargoyle, 0.05*S);
+  animate_bird(shGargoyleBody, shAnimatedGargoyle2, 0.05*S);
+  animate_bird(shBatWings, shAnimatedBat, 0.05*S);
+  animate_bird(shBatBody, shAnimatedBat2, 0.05*S);
 
   disable(shWolfRearLeg);
   disable(shWolfFrontLeg);
