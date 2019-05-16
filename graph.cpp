@@ -446,6 +446,7 @@ void drawStunStars(const transmatrix& V, int t) {
 #if CAP_SHAPES
   for(int i=0; i<3*t; i++) {
     transmatrix V2 = V * spin(M_PI * 2 * i / (3*t) + ptick(200));
+    if(GDIM == 3) V2 = V2 * zpush(geom3::HEAD);
     queuepolyat(V2, shFlailBall, 0xFFFFFFFF, PPR::STUNSTARS);
     }
 #endif
