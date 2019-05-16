@@ -1088,8 +1088,8 @@ void make_3d_models() {
     }
   last->flags |= POLY_TRIANGLES;
   add_texture(*last);
-  finishshape();
   if(WDIM == 2) shift_last_straight(geom3::FLOOR);
+  finishshape();
   shJelly = shSlime;
   
   shift_shape(shMagicSword, geom3::ABODY);

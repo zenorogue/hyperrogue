@@ -1882,6 +1882,7 @@ void finishshape() {
   if(allminus || allplus) last->flags |= POLY_VCONVEX;
   
   allshapes.push_back(last);
+  last = NULL;
 
   /* if(isnan(area)) ;
   else if(intval(hpc[last->s], hpc[last->e-1]) > 1e-6)
