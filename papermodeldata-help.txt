@@ -1,0 +1,43 @@
+99 1280 905 2 2 3 2000 27.7010000 0
+
+How to create your own net for a paper model:
+
+1) Edit the parameters above. These are:
+
+  a) How many cells to put in the model. Currently, the cells are given in order
+    of increasing distance from the player, so you should probably enter one of
+    the numbers from the list below (if the player is placed on a heptagon):
+    
+    1 8 22 50 99 183 330 582
+    
+    For example, there are 50 cells in radius 3.
+
+  b) (SX,SY) Size of the window used to edit the net. For example 1280x905
+  
+  c) (PX,PY) How many pages you are going to print. For best results,
+    (SX/PX, SY/PY) should correspond to the size of the paper you are using.
+  
+  d) Scale factor. Bigger scale creates files of a larger resolution,
+     but uses more memory and disk space. 3 is default.
+  
+  e) Model size. Bigger number creates files of a better quality,
+     but uses more memory and disk space. 2000 is default.
+  
+  f) Edge length of each shape, in pixels. You can change this later while editing.
+  
+  g) Keep this as 0 to mark that the net is not yet created.
+  
+2) Make a backup of papermodeldata.txt, and copy this file to papermodeldata.txt.
+
+3) Run HyperRogue, and choose the 'create paper models' option.
+
+4) A net editor is shown. Initially, all the cells are glued together, and they don't
+  fit in the Euclidean plane. You have to distribute them over the screen, so that
+  they are no longer covering each other. Hover over a glued edge, press 'g' to
+  unglue them, and then drag one of the parts away with the mouse.
+  
+  You can also use 'g' to glue an edge back, PgUp/Dn to rotate a fragment of the net,
+  z/x to resize the model. 
+
+5) After you exit the editor, papermodeldata2.txt will contain the data of the net 
+  you have created. If you want to reuse it, just copy this to papermodeldata.txt.
