@@ -3208,3 +3208,7 @@ Gameplay:
 
 2019-05-16 03:22 Version 11.0x:
 - using Orb of Safety marked you as cheater
+
+2019-05-16 18:03 Version 11.0y:
+ - improved 3D models: Bull horns, Cat head, anything which had holes at its ends, Butterfly (previously crashed the game), animation for all winged creatures (previously only Eagle had animation), 
+   leg movement animation for quadrupeds; also the stun stars are drawn now
