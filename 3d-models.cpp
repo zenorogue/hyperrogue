@@ -591,7 +591,12 @@ void make_revolution(hpcshape& sh, int mx = 180, ld push = 0) {
 
 void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 99) {
   auto body = get_shape(sh);
-  int n = isize(body) / 2;
+  body.resize(isize(body) / 2);
+  ld fx = body[0][0];
+  ld lx = body.back()[0];
+  body.insert(body.begin(), hpxy(fx + (fx-lx) * 1e-3, 0));
+  body.push_back(hpxy(lx + (lx-fx) * 1e-3, 0));
+  int n = isize(body);
   
   auto gbody = body;
   
@@ -602,6 +607,7 @@ void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 9
   vector<bool> stillin(n, true);
   for(int i=0; i<n; i++) nextid[i] = i+1;
   for(int i=0; i<n; i++) lastid[i] = i-1;
+  nextid[n-1] = n-1; lastid[0] = 0;
 
   while(true) {
     it++;
