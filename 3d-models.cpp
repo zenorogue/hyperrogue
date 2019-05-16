@@ -1143,7 +1143,7 @@ void make_3d_models() {
   adjust_eye(shWolfEyes, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
 
   adjust_eye(shReptileEye, shReptileHead, geom3::AHEAD, geom3::AHEAD, 1);
-  adjust_eye(shGadflyEye, shGadflyBody, -geom3::BIRD, -geom3::BIRD, 1);
+  adjust_eye(shGadflyEye, shGadflyBody, 0, 0, 1);
   
   adjust_eye(shSkullEyes, shPHeadOnly, geom3::HEAD1, geom3::HEAD, 2, 2);
   shSkullEyes.tinf = NULL;
