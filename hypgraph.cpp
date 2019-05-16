@@ -1744,7 +1744,7 @@ bool do_draw(cell *c, const transmatrix& T) {
     }
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient || euwrap;
-  if(usr && cells_drawn >= 50 && !in_smart_range(T)) return false;
+  if(usr && cells_drawn >= 50 && !in_smart_range(T) && !(WDIM == 2 && GDIM == 3 && hdist0(tC0(T)) < 2.5)) return false;
   if(vid.use_smart_range == 2 && !limited_generation(c)) return false;
   return true; 
   }
