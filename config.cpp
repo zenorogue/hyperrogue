@@ -1561,6 +1561,11 @@ void showCustomizeChar() {
   
   int firsty = dialog::items[0].position / 2;
   int scale = firsty - 2 * vid.fsize;
+  
+  dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
+  dynamicval<ld> va(vid.alpha, 1);
+  dynamicval<ld> vs(vid.scale, 1);
+  dynamicval<ld> vc(vid.camera_angle, 0);
 
   initquickqueue();
   transmatrix V = atscreenpos(vid.xres/2, firsty, scale);
