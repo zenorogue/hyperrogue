@@ -4473,6 +4473,23 @@ void queue_transparent_wall(const transmatrix& V, hpcshape& sh, color_t color) {
     }
   }
 
+void drawcell_in_radar(cell *c, transmatrix V) {
+  #if CAP_SHMUP
+  if(shmup::on) {
+    pair<shmup::mit, shmup::mit> p = 
+      shmup::monstersAt.equal_range(c);
+    for(shmup::mit it = p.first; it != p.second; it++) {
+      shmup::monster* m = it->second;
+      addradar(V*m->at, minf[m->type].glyph, minf[m->type].color, 0xFF0000FF);
+      }
+    }
+  #endif
+  if(c->monst) 
+    addradar(V, minf[c->monst].glyph, minf[c->monst].color, isFriendly(c->monst) ? 0x00FF00FF : 0xFF0000FF);
+  else if(c->item && !itemHiddenFromSight(c))
+    addradar(V, iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item));
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   cells_drawn++;
@@ -4504,20 +4521,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(corner_bonus)) {
-      #if CAP_SHMUP
-      if(shmup::on) {
-        pair<shmup::mit, shmup::mit> p = 
-          shmup::monstersAt.equal_range(c);
-        for(shmup::mit it = p.first; it != p.second; it++) {
-          shmup::monster* m = it->second;
-          addradar(V*m->at, minf[m->type].glyph, minf[m->type].color, 0xFF0000FF);
-          }
-        }
-      #endif
-      if(c->monst) 
-        addradar(V, minf[c->monst].glyph, minf[c->monst].color, isFriendly(c->monst) ? 0x00FF00FF : 0xFF0000FF);
-      else if(c->item && !itemHiddenFromSight(c))
-        addradar(V, iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item));
+      drawcell_in_radar(c, V);
       return;
       }
     noclipped++;
