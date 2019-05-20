@@ -305,7 +305,8 @@ eLand getNewLand(eLand old) {
   #endif
 
   if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
-  if((weirdhyperbolic || cheater) && specialland != old && specialland != laCrossroads4 && specialland != laIce && !chaosmode && old != laBarrier) return specialland;
+  if((weirdhyperbolic || cheater) && specialland != old && specialland != laCrossroads4 && specialland != laIce && !chaosmode && old != laBarrier && !isCyclic(specialland) && specialland != laBrownian)
+    return specialland;
 
   if(yendor::on && (yendor::clev().flags & YF_WALLS)) {
     if(old != yendor::clev().l) return yendor::clev().l;
