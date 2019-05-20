@@ -68,6 +68,8 @@ rugpoint *finger_center;
 ld finger_range = .1;
 ld finger_force = 1;
 
+int rugdim;
+
 bool rug_perspective = ISANDROID;
 
 // extra geometry functions
@@ -273,8 +275,12 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     m->flat = hpxyz(hpdist * h[0]/d0 * hpoint[1] / z, hpdist * h[1]/d0 * hpoint[1] / z, -hpdist * hpoint[0] / z);    
     }
   
-  else m->flat = // hpxyz(h[0], h[1], sin(atan2(h[0], h[1]) * 3 + hyprand) * (h[2]-1) / 1000);
-    hpxyz(h[0], h[1], (h[2] - .99) * (rand() % 1000 - rand() % 1000) / 1000);
+  else {
+    m->flat = h;
+    ld hd = h[DIM];
+    for(int d=DIM; d<rugdim; d++)
+      m->flat[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
+    }
 
   if(rug_perspective)
     push_point(m->flat, 2, -model_distance);
@@ -289,7 +295,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
 rugpoint *findRugpoint(hyperpoint h) {
   using namespace hyperpoint_vec;
   for(int i=0; i<isize(points); i++) 
-    if(sqhypot_d(3, points[i]->h - h) < 1e-5) return points[i];
+    if(sqhypot_d(rugdim, points[i]->h - h) < 1e-5) return points[i];
   return NULL;
   }
 
@@ -577,10 +583,15 @@ void verify() {
       auto m2 = e.target;
       ld l = e.len;
       
-      normalizer n(m->flat, m2->flat);
-      hyperpoint h1 = n(m->flat);
-      hyperpoint h2 = n(m2->flat);
-      ld l0 = hdist(h1, h2);
+      ld l0;
+      if(fast_euclidean) l0 = sqdhypot_d(rugdim, m->flat, m2->flat);
+      else {      
+        normalizer n(m->flat, m2->flat);
+        hyperpoint h1 = n(m->flat);
+        hyperpoint h2 = n(m2->flat);
+        l0 = hdist(h1, h2);
+        }
+
       ratios.push_back(l0 / l);
       }
     
@@ -679,8 +690,7 @@ bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = f
   if(!m1.valid || !m2.valid) return false;
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
-  double t = 0;
-  for(int i=0; i<3; i++) t += (m1.flat[i] - m2.flat[i]) * (m1.flat[i] - m2.flat[i]);
+  double t = sqdhypot_d(rugdim, m1.flat, m2.flat);
   if(is_anticusp && t > rd*rd) return false;
   t = sqrt(t);
   /* printf("%s ", display(m1.flat));
@@ -689,7 +699,7 @@ bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = f
   current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double force = (t - rd) / t / 2; // 20.0;
-  for(int i=0; i<3; i++) {
+  for(int i=0; i<rugdim; i++) {
     double di = (m2.flat[i] - m1.flat[i]) * force;
     m1.flat[i] += di * d1;
     m2.flat[i] -= di * d2;
@@ -739,6 +749,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
 vector<pair<ld, rugpoint*> > preset_points;
 
 void preset(rugpoint *m) {
+  if(DIM == 3) return;
   int q = 0;
   hyperpoint h;
   for(int i=0; i<3; i++) h[i] = 0;
@@ -794,14 +805,19 @@ void preset(rugpoint *m) {
     throw rug_exception();
   }
 
-ld sse(hyperpoint h) {
+ld sse(const hyperpoint& h) {
   ld sse = 0;
   for(auto& p: preset_points) {
     ld l = p.first;
-    normalizer n(h, p.second->flat);
-    hyperpoint h1 = n(h);
-    hyperpoint h2 = n(p.second->flat);
-    ld l0 = hdist(h1, h2);
+    ld l0;
+    if(fast_euclidean) 
+      l0 = dhypot_d(rugdim, h, p.second->flat);
+    else {
+      normalizer n(h, p.second->flat);
+      hyperpoint h1 = n(h);
+      hyperpoint h2 = n(p.second->flat);
+      l0 = hdist(h1, h2);
+      }
     sse += (l0-l) * (l0-l);
     }
   
@@ -815,20 +831,13 @@ void optimize(rugpoint *m, bool do_preset) {
     // int ed0 = isize(preset_points);
     for(auto& e: m->edges) if(e.target->valid) 
       preset_points.emplace_back(e.len, e.target);
-    if(gwhere >= gSphere) {
+    if(gwhere >= gSphere || DIM == 3) {
       ld cur = sse(m->flat);
       for(int it=0; it<500; it++) {
         ld ex = exp(-it/60);
         again:
         hyperpoint last = m->flat;
-        switch(it%6) {
-          case 0: m->flat[0] += ex; break;
-          case 1: m->flat[0] -= ex; break;
-          case 2: m->flat[1] += ex; break;
-          case 3: m->flat[1] -= ex; break;
-          case 4: m->flat[2] += ex; break;
-          case 5: m->flat[2] -= ex; break;
-          }
+        m->flat[(it/2)%rugdim] += ((it&1)?1:-1) * ex;
         ld now = sse(m->flat);
         if(now < cur) { cur = now; ex *= 1.2; goto again; }
         else m->flat = last;
@@ -846,6 +855,7 @@ bool stop = false;
 
 bool subdivide_further() {
   if(fulltorus) return false;
+  if(DIM == 3) return false;
   return isize(points) * 4 < vertex_limit;
   }
 
@@ -1429,6 +1439,7 @@ transmatrix currentrot;
     
 void reopen() {
   if(rugged) return;
+  rugdim = 2 * DIM - 1;
   when_enabled = ticks;
   GLERR("before init");
   glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);

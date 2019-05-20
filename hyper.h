@@ -3739,6 +3739,8 @@ hyperpoint hpxy(ld x, ld y);
 hyperpoint hpxy3(ld x, ld y, ld z);
 ld sqhypot_d(int d, const hyperpoint& h);
 ld hypot_d(int d, const hyperpoint& h);
+ld dsqhypot_d(int d, const hyperpoint& a, const hyperpoint& b);
+ld dhypot_d(int d, const hyperpoint& a, const hyperpoint& b);
 transmatrix pushxto0(const hyperpoint& H);
 transmatrix rpushxto0(const hyperpoint& H);
 transmatrix spintox(const hyperpoint& H);
