@@ -2070,12 +2070,13 @@ void make_sidewalls() {
     else if(k==SIDE_LTOB) dlow = geom3::BOTTOM, dhi = geom3::LAKE;
     else if(k==SIDE_BTOI) dlow = geom3::INFDEEP, dhi = geom3::BOTTOM;
     else if(k==SIDE_WTS3) dlow = geom3::SLEV[3], dhi = geom3::WALL;
+    else if(k==SIDE_SKY) dlow = geom3::WALL, dhi = geom3::LOWSKY;
     else dlow = geom3::SLEV[k-SIDE_SLEV], dhi = geom3::SLEV[k-SIDE_SLEV+1];
     dlow_table[k] = dlow;
     dhi_table[k] = dhi;
 
     validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0) || GDIM == 3;
-
+    
     bshape(shSemiFloorSide[k], PPR::LAKEWALL);
     for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, floorrad0) * C0);
     chasmifyPoly(dlow, dhi, k);
