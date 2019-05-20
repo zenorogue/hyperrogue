@@ -105,6 +105,10 @@ void shift_shape(hpcshape& sh, ld z) {
   for(int i=sh.s; i<sh.e; i++) hpc[i] = zshift(hpc[i], z);
   }
 
+void shift_shape_orthogonally(hpcshape& sh, ld z) {
+  for(int i=sh.s; i<sh.e; i++) hpc[i] = orthogonal_move(hpc[i], z);
+  }
+
 extern
 hpcshape 
   shSemiFloorSide[SIDEPARS],
@@ -122,7 +126,7 @@ hpcshape
   shMercuryBridge[2],
   shTriheptaSpecial[14], 
   shCross, shGiantStar[2], shLake, shMirror,
-  shHalfFloor[3], shHalfMirror[3],
+  shHalfFloor[6], shHalfMirror[3],
   shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
   shTinyBird, shTinyShark,
   shEgg,
@@ -1074,8 +1078,11 @@ void make_3d_models() {
   make_ball(shNightStar, 0.75, 2);
   
   if(WDIM == 2) {
-    for(int i=0; i<3; i++)
-      shift_shape(shHalfFloor[i], geom3::lev_to_factor(geom3::human_height * .01));
+    for(int i=0; i<3; i++) {
+      clone_shape(shHalfFloor[i], shHalfFloor[i+3]);
+      shift_shape_orthogonally(shHalfFloor[i], geom3::FLOOR - geom3::human_height * .007);
+      shift_shape_orthogonally(shHalfFloor[i+3], geom3::WALL + geom3::human_height * .007);
+      }
     }
 
   shift_shape(shBoatOuter, geom3::FLOOR);

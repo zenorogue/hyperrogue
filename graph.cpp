@@ -5072,6 +5072,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(!wmblack) for(int d=0; d<c->type; d++) {
             inmirrorcount+=d;
             queuepolyat(V2 * spin(d*M_PI/S3), shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            if(GDIM == 3 && camera_level > geom3::WALL)
+              queuepolyat(V2 * spin(d*M_PI/S3), shHalfFloor[5], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             inmirrorcount-=d;
             }          
           if(GDIM == 3) {
@@ -5092,8 +5094,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(!wmblack) {
             inmirrorcount++;
             queuepolyat(mirrorif(V2, !onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            if(GDIM == 3 && camera_level > geom3::WALL)
+              queuepolyat(mirrorif(V2, !onleft), shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             inmirrorcount--;
             queuepolyat(mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            if(GDIM == 3 && camera_level > geom3::WALL)
+              queuepolyat(mirrorif(V2, onleft), shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             }
   
           if(GDIM == 3) 

@@ -1672,7 +1672,7 @@ hpcshape
   shMercuryBridge[2],
   shTriheptaSpecial[14], 
   shCross, shGiantStar[2], shLake, shMirror,
-  shHalfFloor[3], shHalfMirror[3],
+  shHalfFloor[6], shHalfMirror[3],
   shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
   shTinyBird, shTinyShark,
   shEgg,
