@@ -1108,6 +1108,7 @@ void make_3d_models() {
   make_revolution_cut(shStatue, 60);
   
   shift_shape(shThorns, geom3::FLOOR - geom3::human_height * 1/40);
+  clone_shape(shRose, shRoseItem);
   shift_shape(shRose, geom3::FLOOR - geom3::human_height * 1/20);
 
   DEBB(DF_POLY, ("slime"));

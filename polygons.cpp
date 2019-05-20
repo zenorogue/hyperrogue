@@ -1725,7 +1725,7 @@ hpcshape
   shPrincessDress, shPrinceDress,
   shWizardCape1, shWizardCape2,
   shBigCarpet1, shBigCarpet2, shBigCarpet3,
-  shGoatHead, shRose, shThorns,
+  shGoatHead, shRose, shRoseItem, shThorns,
   shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
   shWizardHat1, shWizardHat2,
   shTortoise[13][6],
@@ -2408,6 +2408,9 @@ void procedural_shapes() {
   bshape(shRose, PPR::ITEM);
   PRING(t)
     hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
+  
+  finishshape();
+  shRoseItem = shRose;
 
   bshape(shThorns, PPR::THORNS);
   for(int t=0; t<=60; t++) 

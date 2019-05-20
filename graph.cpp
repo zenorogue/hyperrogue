@@ -909,7 +909,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
-      queuepoly(Vit * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), shRose, darkena(icol, 0, hidden ? 0x30 : 0xA0));
+      queuepoly(Vit * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
     }
 
   else if(it == itBarrow && c) {
