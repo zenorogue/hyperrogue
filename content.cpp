@@ -1486,7 +1486,7 @@ LAND( 0x80FF00, "Docks", laDocks, ZERO | LF_SEA, itDock, RESERVED, NODESCYET)
   REQAS(laOcean,)
 
 LAND( 0x306030, "Ruined City", laRuins, ZERO, itRuins, RESERVED, ruindesc)
-  NATIVE(m == moSwitch1 || m == moSwitch2 ? 2 : 0)
+  NATIVE(among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 : m == moSkeleton ? 1 : 0)
   REQ(KILL(moSkeleton, laPalace))
 
 LAND( 0x306030, "Magnetosphere", laMagnetic, ZERO, itMagnet, RESERVED, NODESCYET)
