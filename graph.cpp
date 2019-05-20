@@ -3717,7 +3717,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
     fcol = wcol;
     } */
   
-  if(GDIM == 2) {
+  if(WDIM == 2) {
     int rd = rosedist(c);
     if(rd == 1) 
       wcol = gradient(0x804060, wcol, 0,1,3),
@@ -5482,9 +5482,27 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       // draw the ceiling
-      if(WDIM == 2 && GDIM == 3)
+      if(WDIM == 2 && GDIM == 3) {
         draw_ceiling(c, V, fd, fcol, wcol);
-      
+
+        int rd = rosedist(c);
+        if(rd) {
+          dynamicval<qfloorinfo> qfi2(qfi, qfi);
+          qfi.fshape = &shRoseFloor;
+          int t = isize(ptds);
+          color_t rcol;
+          if(rd == 1) rcol = 0x80406040;
+          if(rd == 2) rcol = 0x80406080;
+          forCellIdEx(c2, i, c)
+            if(rosedist(c2) < rd)
+              placeSidewall(c, i, SIDE_WALL, V, rcol);
+          for(int i=t; i<isize(ptds); i++) {
+            auto p = dynamic_cast<dqi_poly*>(&*(ptds[i]));
+            if(p) p->prio = PPR::TRANSPARENT_WALL;
+            }
+          }
+        }
+
       // walls
 
 #if CAP_EDIT
