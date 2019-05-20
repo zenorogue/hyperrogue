@@ -5932,7 +5932,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     if(wmascii || (WDIM == 2 && GDIM == 3)) {
-      if(c->wall == waNone || isWatery(c)) asciicol = fcol;
+      if(!it) {
+        if(c->wall == waNone || isWatery(c)) asciicol = fcol;
+        }
       if(c->wall == waBoat) asciicol = 0xC06000;
 
       if(c->wall == waArrowTrap)
@@ -5942,7 +5944,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(c->wall == waTerraWarrior)
         asciicol = terracol[c->landparam & 7];
 
-      if(c->wall == waMineOpen) {
+      if(c->wall == waMineOpen && !it) {
         int mines = countMinesAround(c);
         if(ch == '.') {
           if(mines == 0) ch = ' ';
