@@ -1152,6 +1152,9 @@ void make_3d_models() {
 
   shift_shape(shRatTail, zc(0.5) - geom3::LEG);
   for(int i=shRatTail.s; i<shRatTail.e; i++) hpc[i] = xpush(-scalefactor * 0.1) * hpc[i];
+
+  shift_shape(shSemiFloorShadow, geom3::FLOOR - geom3::human_height / 100);
+  shift_shape(shSemiFloor[0], geom3::WALL);
   }
 
 #undef S

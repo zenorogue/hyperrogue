@@ -4943,7 +4943,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         qfi.spin = ddspin(c, i, M_PI/S3);
         transmatrix V2 = V * qfi.spin;
         
-        if(wmspatial && wmescher) {
+        if(wmspatial && wmescher && GDIM == 2) {
           set_floor(shSemiFeatherFloor[0]);
           int dk = 1;
           int vcol = winf[waVinePlant].color;
@@ -4953,8 +4953,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           set_floor(shFeatherFloor);
           }
         
-        else if(wmspatial) {
-          floorshape& shar = *(wmplain ? (floorshape*)&shFloor : (floorshape*)&shFeatherFloor);
+        else if(wmspatial || GDIM == 3) {
+          floorshape& shar = *((wmplain || GDIM == 3) ? (floorshape*)&shFloor : (floorshape*)&shFeatherFloor);
           
           set_floor(shar);
 
@@ -4963,9 +4963,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           transmatrix Vdepth = mscale(V2, geom3::WALL);
 
-          queuepolyat(Vdepth, shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
-          {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), shSemiFloorShadow, SHADOW_WALL, PPR::WALLSHADOW); }
-          queuepolyat(V2, shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2));
+          queuepolyat(DIM == 2 ? Vdepth : V2, shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
+          {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), shSemiFloorShadow, SHADOW_WALL, DIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW); }
+          auto& side = queuepolyat(V2, shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2));
+          if(DIM == 3 && qfi.fshape) side.tinf = &shar.tinf3;
 
           if(validsidepar[SIDE_WALL]) forCellIdEx(c2, j, c) {
             int dis = i-j;
