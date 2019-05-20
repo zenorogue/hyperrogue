@@ -1247,6 +1247,8 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
       queuepoly(VBODY2 * VBS, shPrinceDress,  darkena(col, 1, 0XC0));
     if(cs.charid == 3)
       queuepoly(VBODY2 * VBS, shPrincessDress,  darkena(col, 1, 0XC0));
+
+    humanoid_eyes(V,  0xFF, darkena(col, 0, 0x40));
     }
   }
 
