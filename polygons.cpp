@@ -88,6 +88,9 @@ static const int POLY_ALWAYS_IN = (1<<21);
 // made of TRIANGLES, not TRIANGLE_FAN
 static const int POLY_TRIANGLES = (1<<22);
 
+// extra intense colors
+static const int POLY_INTENSE = (1<<23);
+
 vector<hyperpoint> hpc;
 basic_textureinfo user_triangles_texture;
 
@@ -670,9 +673,10 @@ void dqi_poly::gldraw() {
 
     if(draw) {
       if(flags & POLY_TRIANGLES) {
-        glhr::color2(color);
+        glhr::color2(color, (flags & POLY_INTENSE) ? 2 : 1);
         glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
         glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW);
+        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + 5 / sightranges[geometry] : 1.0);
         glDrawArrays(GL_TRIANGLES, ioffset, cnt);
         }
       else {
@@ -1714,7 +1718,7 @@ hpcshape
   shKnife, shTongue, shFlailMissile, shTrapArrow,
   shPirateHook, shPirateHood, shEyepatch, shPirateX,
   // shScratch, 
-  shHeptaMarker, shSnowball, 
+  shHeptaMarker, shSnowball, shSun, shNightStar,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
   shPalaceGate, shFishTail,
   shMouse, shMouseLegs, shMouseEyes,
@@ -2056,6 +2060,7 @@ void make_sidewalls() {
   dfloor_table[SIDE_LAKE] = geom3::LAKE;
   dfloor_table[SIDE_LTOB] = geom3::BOTTOM;
   dfloor_table[SIDE_BTOI] = geom3::INFDEEP;
+  dfloor_table[SIDE_SKY ] = geom3::SKY;
   
   // sidewall parameters for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {

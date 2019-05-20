@@ -4473,6 +4473,180 @@ void queue_transparent_wall(const transmatrix& V, hpcshape& sh, color_t color) {
     }
   }
 
+int ceiling_category(cell *c) {
+  switch(c->land) {
+    case laNone:
+    case laMemory:
+    case laMirrorWall2:
+    case laMirrored:
+    case laMirrored2:
+    case landtypes:
+      return 0;
+
+    /* starry levels */
+    case laIce:
+    case laCrossroads:
+    case laCrossroads2:
+    case laCrossroads3:
+    case laCrossroads4:
+    case laCrossroads5:
+    case laJungle:    
+    case laGraveyard:
+    case laMotion:
+    case laRedRock:
+    case laZebra:
+    case laHunting:
+    case laEAir:
+    case laStorms:
+    case laMountain:
+    case laHaunted:
+    case laHauntedWall:
+    case laHauntedBorder:
+    case laWhirlwind:
+    case laDragon:
+    case laBurial:
+    case laHalloween:
+    case laReptile:
+    case laVolcano:
+    case laBlizzard:
+    case laDual:
+    case laWestWall:
+    case laAsteroids:
+      return 1;
+    
+    case laWineyard:
+    case laDesert:
+    case laAlchemist:
+    case laDryForest:
+    case laCaribbean:
+    case laMinefield:
+    case laOcean:
+    case laWhirlpool:
+    case laLivefjord:
+    case laEWater:
+    case laOceanWall:
+    case laWildWest:
+    case laOvergrown:
+    case laClearing:
+    case laRose:
+    case laWarpCoast:
+    case laWarpSea:
+    case laEndorian:
+    case laTortoise:
+    case laPrairie:
+    case laSnakeNest:
+    case laDocks:
+    case laKraken:
+    case laBrownian: 
+      return 2;
+    
+    case laBarrier: 
+    case laCaves:
+    case laMirror:
+    case laMirrorOld:
+    case laRlyeh:
+    case laHell:
+    case laCocytus:
+    case laEmerald:
+    case laDeadCaves:
+    case laPower:
+    case laHive:
+    case laCamelot:
+    case laTemple:
+    case laPalace:
+    case laPrincessQuest:
+    case laIvoryTower:
+    case laEFire:
+    case laEEarth:
+    case laElementalWall:
+    case laCanvas:
+    case laTrollheim:
+    case laDungeon:
+    case laBull:
+    case laCA:
+    case laMirrorWall:
+    case laTerracotta:
+    case laMercuryRiver:
+    case laRuins:
+    case laMagnetic:
+    case laSwitch:
+    case laVariant:    
+      return 3;
+    
+    default:
+      return 4;
+    }
+  }
+
+ld camera_level;
+
+int get_skybrightness() {
+  ld s = 1 - (camera_level - geom3::WALL) / -2;
+  if(s > 1) return 255;
+  if(s < 0) return 0;
+  return int(s * 255);
+  }
+
+void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t& wcol) {
+
+  if(pmodel != mdPerspective || sphere) return;
+  
+  switch(ceiling_category(c)) {
+    /* ceilingless levels */
+    case 1: {
+      if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
+        auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
+        star.tinf = NULL;
+        star.flags |= POLY_INTENSE;
+        }
+      int sk = get_skybrightness();
+      if(sk > 0) {
+        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
+        }
+      return;
+      }
+    
+    case 2: {
+      color_t col;
+      if(c->land == laWineyard) {
+        col = 0x4040FF;
+        if(emeraldval(c) / 4 == 11) {
+          auto &sun = queuepolyat(V * zpush(geom3::SKY+0.5), shSun, 0xFFFF00FF, PPR::SKY);
+          sun.tinf = NULL;
+          sun.flags |= POLY_INTENSE;
+          }
+        }
+      else {
+        int cd = (euclid || stdhyperbolic) ? getCdata(c, 1) : 0;
+        int z = cd & 127;
+        if(z >= 64) z = 127 - z;
+        col = gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
+        }
+      int sk = get_skybrightness();
+      if(sk > 0) {
+        col = gradient(0, col, 0, sk, 255);
+        col = darkena(col, 0, 255);      
+        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], col, PPR::SKY);
+        if(sky) sky->tinf = NULL;
+        }
+
+      return;
+      }
+    
+    case 3: {
+      if(camera_level <= geom3::WALL) return;
+      draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
+      forCellIdEx(c2, i, c) 
+        if(ceiling_category(c2) != 3) {
+          color_t wcol2 = gradient(0, wcol, 0, .8, 1);
+          placeSidewall(c, i, SIDE_SKY, V, darkena(wcol2, fd, 0xFF));
+          }
+      return;
+      }
+    }
+  }
+
 void drawcell_in_radar(cell *c, transmatrix V) {
   #if CAP_SHMUP
   if(shmup::on) {
@@ -5298,6 +5472,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         else
           draw_qfi(c, V, darkena(fcol, fd, flooralpha));
         }
+      
+      // draw the ceiling
+      if(WDIM == 2 && GDIM == 3)
+        draw_ceiling(c, V, fd, fcol, wcol);
       
       // walls
 
@@ -6488,6 +6666,7 @@ void make_actual_view() {
     ld max = WDIM == 2 ? geom3::camera : vid.yshift;
     if(max) 
       actual_view_transform = zpush(wall_radar(viewctr.at->c7, inverse(View), max)) * actual_view_transform; 
+    camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
   #endif
   }

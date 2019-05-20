@@ -1070,6 +1070,8 @@ void make_3d_models() {
   make_ball(shDisk, orbsize*.2, 2);
   make_ball(shHeptaMarker, zhexf*.2, 1);
   make_ball(shSnowball, zhexf*.1, 0);
+  make_ball(shSun, 3, 5);
+  make_ball(shNightStar, 0.75, 2);
   
   if(WDIM == 2) {
     for(int i=0; i<3; i++)

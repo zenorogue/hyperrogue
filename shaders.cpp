@@ -26,6 +26,7 @@ namespace glhr {
 bool glew   = false;
 
 bool current_depthtest, current_depthwrite;
+ld fogbase;
 
 typedef const void *constvoidptr;
 
@@ -204,7 +205,7 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uColor, tTexture, uMV, uProjection, uAlpha;
+  GLint uMVP, uFog, uColor, tTexture, uMV, uProjection, uAlpha, uFogBase;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -255,6 +256,7 @@ struct GLprogram {
     uProjection = glGetUniformLocation(_program, "uP");
     uMVP = glGetUniformLocation(_program, "uMVP");
     uFog = glGetUniformLocation(_program, "uFog");
+    uFogBase = glGetUniformLocation(_program, "uFogBase");
     uAlpha = glGetUniformLocation(_program, "uAlpha");
     uColor = glGetUniformLocation(_program, "uColor");
     tTexture = glGetUniformLocation(_program, "tTexture");
@@ -450,6 +452,7 @@ void switch_mode(eMode m, shader_projection sp) {
     glDisable(GL_LIGHTING); */
 #endif
     }
+  glUniform1f(current->uFogBase, 1); fogbase = 1;
   mode = m;
   current_shader_projection = sp;
   GLERR("after_switch_mode");
@@ -469,6 +472,15 @@ void fog_max(ld fogmax) {
   glUniform1f(current->uFog, 1 / fogmax);
   #else
   glFogf(GL_FOG_END, fogmax);
+  #endif
+  }
+
+void set_fogbase(ld _fogbase) {
+  #if CAP_SHADER
+  if(fogbase != _fogbase) {
+    fogbase = _fogbase;
+    glUniform1f(current->uFogBase, fogbase);
+    }
   #endif
   }
 
@@ -534,6 +546,7 @@ void init() {
       mps,     "uniform mediump mat4 uMV;",
       mps,     "uniform mediump mat4 uP;",
       1,       "uniform mediump float uFog;",
+      1,       "uniform mediump float uFogBase;",
       ball,    "uniform mediump float uAlpha;",
       !varcol, "uniform mediump vec4 uColor;",
 
@@ -593,13 +606,13 @@ void init() {
       hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
-      sh3,       "vColor.xyz = vColor.xyz * (1.0 - acosh(t[3]) / uFog);",
-      sr3,       "vColor.xyz = vColor.xyz * (1.0 - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
+      sh3,       "vColor.xyz = vColor.xyz * (uFogBase - acosh(t[3]) / uFog);",
+      sr3,       "vColor.xyz = vColor.xyz * (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
       
-      ss30,      "vColor.xyz = vColor.xyz * (1.0 - (6.284 - acos(t[3])) / uFog); t = -t; ",
-      ss31,      "vColor.xyz = vColor.xyz * (1.0 - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
-      ss32,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
-      ss33,      "vColor.xyz = vColor.xyz * (1.0 - acos(t[3]) / uFog); ",
+      ss30,      "vColor.xyz = vColor.xyz * (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
+      ss31,      "vColor.xyz = vColor.xyz * (uFogBase - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
+      ss32,      "vColor.xyz = vColor.xyz * (uFogBase - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
+      ss33,      "vColor.xyz = vColor.xyz * (uFogBase - acos(t[3]) / uFog); ",
       sh3 || sr3 || ball,"t[3] = 1.0;",
       
       band || hp || s3 || ball,"gl_Position = uP * t;",

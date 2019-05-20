@@ -2156,7 +2156,7 @@ enum class PPR {
   MONSTER_HOODCLOAK1, MONSTER_HOODCLOAK2,
   STUNSTARS,
   CARRIED, CARRIEDa, CARRIEDb,
-  PARTICLE, SWORDMARK, MAGICSWORD, MISSILE, 
+  PARTICLE, SWORDMARK, MAGICSWORD, MISSILE, SKY,
   MINEMARK, ARROW,
   MOBILE_ARROW,
   LINE, 
@@ -4250,7 +4250,8 @@ void set_blizzard_frame(cell *c, int frameid);
 #define SIDE_LAKE 5
 #define SIDE_LTOB 6
 #define SIDE_BTOI 7
-#define SIDEPARS 8
+#define SIDE_SKY  8
+#define SIDEPARS  9
 
 #if CAP_SHAPES
 struct floorshape {

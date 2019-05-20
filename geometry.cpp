@@ -268,7 +268,7 @@ namespace geom3 {
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, BODY1, BODY2, BODY3,
     NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
-    ALEG0, ALEG, ABODY, AHEAD, BIRD;
+    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY;
   
   string invalid;
   
@@ -335,7 +335,7 @@ namespace geom3 {
       BIRD = 1.20;
       }
     else {
-      INFDEEP = GDIM == 3 ? (sphere ? M_PI/2 : +10) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
+      INFDEEP = GDIM == 3 ? (sphere ? M_PI/2 : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);
@@ -381,6 +381,8 @@ namespace geom3 {
       LAKE = lev_to_factor(-lake_top);
       HELLSPIKE = lev_to_factor(-(lake_top+lake_bottom)/2);
       BOTTOM = lev_to_factor(-lake_bottom);
+      LOWSKY = lev_to_factor((1 + rock_wall_ratio) * wh);
+      SKY = LOWSKY - 5;
       }
     }    
 

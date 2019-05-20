@@ -712,43 +712,44 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.usershape = -1;
   }
 
-void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
-  if(!c) queuepolyat(V, shv[0], col, prio);
-  else if(WDIM == 3) ;
+dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
+  if(!c) return &queuepolyat(V, shv[0], col, prio);
+  else if(WDIM == 3) return NULL;
   #if CAP_GP
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);
-    if(isize(shv) > id) queuepolyat(V, shv[id], col, prio);
+    if(isize(shv) > id) return &queuepolyat(V, shv[id], col, prio);
+    return NULL;
     }
   #endif
   #if CAP_IRR
   else if(IRREGULAR) {
     int id = irr::cellindex[c];
     if(id < 0 || id >= isize(shv)) {
-      return;
+      return NULL;
       }
-    queuepolyat(V, shv[id], col, prio);
+    return &queuepolyat(V, shv[id], col, prio);
     }
   #endif
   #if CAP_ARCM
   else if(archimedean) {
-    queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
+    return &queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
   #endif
   else if((euclid || GOLDBERG) && ishex1(c)) 
-    queuepolyat(V * pispin, shv[0], col, prio);
+    return &queuepolyat(V * pispin, shv[0], col, prio);
   else if(!(S7&1) && PURE) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
     transmatrix D = applyPatterndir(c, si);    
-    queuepolyat(V*D, shv[pseudohept(c)], col, prio);
+    return &queuepolyat(V*D, shv[pseudohept(c)], col, prio);
     }
   else if(geosupport_threecolor() == 2)
-    queuepolyat(V, shv[pseudohept(c)], col, prio);
+    return &queuepolyat(V, shv[pseudohept(c)], col, prio);
   else if(binarytiling)
-    queuepolyat(V, shv[c->type-6], col, prio);
+    return &queuepolyat(V, shv[c->type-6], col, prio);
   else
-    queuepolyat(V, shv[ctof(c)], col, prio);
+    return &queuepolyat(V, shv[ctof(c)], col, prio);
   }
 
 void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio = PPR::DEFAULT) {
