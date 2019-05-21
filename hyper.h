@@ -4582,6 +4582,7 @@ struct hstream {
   virtual void write_chars(const char* c, size_t q) { while(q--) write_char(*(c++)); }
   virtual char read_char() = 0;
   virtual void read_chars(char* c, size_t q) { while(q--) *(c++) = read_char(); }
+  virtual color_t get_vernum() { return VERNUM_HEX; }
 
   template<class T> void write(const T& t) { hwrite(*this, t); }
   template<class T> void read(T& t) { hread(*this, t); }
@@ -4628,6 +4629,7 @@ struct hstream_exception : hr_exception { hstream_exception() {} };
 
 struct fhstream : hstream {
   color_t vernum;
+  virtual color_t get_vernum() override { return vernum; }
   FILE *f;
   virtual void write_char(char c) { write_chars(&c, 1); }
   virtual void write_chars(const char* c, size_t i) { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }

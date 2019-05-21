@@ -39,7 +39,7 @@ struct charstyle_old {
 
 void hread(hstream& hs, charstyle& cs) {
   // before 0xA61A there was no eyecolor
-  if(hs.vernum < 0xA61A) {
+  if(hs.get_vernum() < 0xA61A) {
     charstyle_old cso;
     hread_raw(hs, cso);
     cs.charid = cso.charid;
