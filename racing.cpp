@@ -673,6 +673,7 @@ bool set_view() {
     }
 
   if(standard_centering) return false;
+  if(player_relative && specialland == laAsteroids) return false;
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
@@ -805,6 +806,7 @@ vector<eLand> race_lands = {
   laElementalWall,
   laDryForest,
   laDeadCaves,
+  laAsteroids
   };
 
 vector<string> playercmds_race = {

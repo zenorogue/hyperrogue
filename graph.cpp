@@ -3901,7 +3901,7 @@ int gridcolor(cell *c1, cell *c2) {
     if(r == 3) return Dark(0xC02020);
     if(r == 2) return Dark(0xF02020);
     }
-  if(chasmgraph(c1) != chasmgraph(c2))
+  if(chasmgraph(c1) != chasmgraph(c2) && c1->land != laAsteroids && c2->land != laAsteroids)
     return Dark(0x808080);
   if(c1->land == laAlchemist && c2->land == laAlchemist && c1->wall != c2->wall && !c1->item && !c2->item)
     return Dark(0xC020C0);

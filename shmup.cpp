@@ -1623,6 +1623,8 @@ void movePlayer(monster *m, int delta) {
 #endif
     keyresult[cpid] = itNone;
 
+  bool stdracing = racing::on && !inertia_based;
+
   if(actionspressed[b+pcCenter]) {
     if(!racing::on) {
       centerplayer = cpid; centerpc(100); playermoved = true; 
@@ -1641,7 +1643,7 @@ void movePlayer(monster *m, int delta) {
   // if(mturn < -1) mturn = -1;
   
   #if CAP_RACING
-  if(racing::on) {
+  if(stdracing) {
     if(WDIM == 2) {
       if(abs(mdy) > abs(mgo)) mgo = -mdy;
       if(abs(mdx) > abs(mturn)) mturn = -mdx;
@@ -1649,6 +1651,9 @@ void movePlayer(monster *m, int delta) {
       }
     facemouse = shotkey = dropgreen = false;
     if(ticks < racing::race_start_tick || !racing::race_start_tick) (WDIM == 2 ? mgo : mdy) = 0;
+    }
+  else {
+    if(racing::on && (ticks < racing::race_start_tick || !racing::race_start_tick)) mgo = mdx = mdy = 0;
     }
   #endif
   
@@ -1681,7 +1686,7 @@ void movePlayer(monster *m, int delta) {
 #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
-  if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout() && !racing::on && GDIM == 2) {
+  if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout() && !stdracing && GDIM == 2) {
     // playermoved = true;
     hyperpoint h = inverse(m->pat) * mouseh;
     playerturn[cpid] = -atan2(h[1], h[0]);
@@ -1693,7 +1698,7 @@ void movePlayer(monster *m, int delta) {
   bool blown = m->blowoff > curtime;
 
   if(WDIM == 2 && GDIM == 3 && !lctrlclick && cpid == 0) {
-    if(!racing::on) playerturn[cpid] -= mouseaim_x;
+    if(!stdracing) playerturn[cpid] -= mouseaim_x;
     playerturny[cpid] -= mouseaim_y;
     mouseaim_x = 0;
     mouseaim_y = 0;
@@ -1719,7 +1724,7 @@ void movePlayer(monster *m, int delta) {
   if(WDIM == 2) {
     if(mgo > 1) mgo = 1;
     if(mgo < -1) mgo = -1;
-    if(racing::on) {
+    if(stdracing) {
       // braking is more efficient
       if(m->vel * mgo < 0) mgo *= 3;
       m->vel += mgo * delta / 600;
@@ -1737,7 +1742,7 @@ void movePlayer(monster *m, int delta) {
     if(mdx > 1) mdx = 1;
     
     if(mdx < -1) mdx = -1;
-    if(racing::on) {
+    if(stdracing) {
       if(m->vel * -mdy < 0) mdy *= 3;
       m->vel += -mdy * delta / 600;
       playergo[cpid] = m->vel * SCALE * delta / 600;
@@ -2114,7 +2119,7 @@ void movePlayer(monster *m, int delta) {
     }
 
   #if CAP_RACING  
-  if(!go && racing::on) m->vel = 0;
+  if(!go && stdracing) m->vel = 0;
   #endif
   
   if(shotkey && canmove && curtime >= m->nextshot) {
