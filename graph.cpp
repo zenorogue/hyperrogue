@@ -4582,8 +4582,8 @@ int ceiling_category(cell *c) {
 
 ld camera_level;
 
-int get_skybrightness() {
-  ld s = 1 - (camera_level - geom3::WALL) / -2;
+int get_skybrightness(int mul = 1) {
+  ld s = 1 - mul * (camera_level - geom3::WALL) / -2;
   if(s > 1) return 255;
   if(s < 0) return 0;
   return int(s * 255);
@@ -4604,6 +4604,16 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       int sk = get_skybrightness();
       if(sk > 0) {
         auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
+        }
+      if(c->land == laAsteroids) {
+        if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
+          auto &downstar = queuepolyat(V * zpush(-0.5-geom3::SKY), shNightStar, 0xFFFFFFFF, PPR::SKY);
+          downstar.tinf = NULL;
+          downstar.flags |= POLY_INTENSE;
+          }
+        sk = get_skybrightness(-1);
+        auto sky = draw_shapevec(c, V * MirrorZ, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
         }
       return;
@@ -6191,7 +6201,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
-    if(vid.grid || c->land == laAsteroids) draw_grid_at(c, V);
+    if(vid.grid || (c->land == laAsteroids && !(WDIM == 2 && GDIM == 3))) draw_grid_at(c, V);
     
     if(onradar && WDIM == 2) addradar(V, ch, darkenedby(asciicol, darken), 0);
     #endif
