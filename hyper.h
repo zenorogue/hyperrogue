@@ -3680,7 +3680,8 @@ void set_column(transmatrix& T, int i, const hyperpoint& H);
 #define DF_TIME           1024 // a flag to display timestamps
 #define DF_GP             2048
 #define DF_POLY           4096
-#define DF_KEYS "imwesxufgbtop"
+#define DF_LOG            8192
+#define DF_KEYS "imwesxufgbtopl"
 
 #if ISANDROID
 #define DEBB(r,x)

@@ -8,7 +8,7 @@ namespace hr {
 #if CU_INIT
 int fontscale = 100;
 
-int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME;
+int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
 
 string s0;
 
