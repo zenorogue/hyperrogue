@@ -332,7 +332,6 @@ void archimedean_tiling::compute_geometry() {
   for(auto& ts: triangles) {
     ld total = 0;
     for(auto& t: ts) tie(t.first, total) = make_pair(total, total + t.first);
-    // printf("total = %lf\n", double(total));
     }
 
   if(debugflags & DF_GEOM) for(auto& ts: triangles) {

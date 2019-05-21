@@ -386,8 +386,6 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     for(int i=0; i<=cor; i++)
       hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
     
-    // printf("at = %d,%d cor = %d sca = %lf\n", li.relative.first, li.relative.second, cor, sca);
-
     for(int k=0; k<SIDEPARS; k++) 
       for(int cid=0; cid<cor; cid++) {
         sizeto(fsh.gpside[k][cid], id);

@@ -692,7 +692,6 @@ bool set_view() {
     ld x = asin_auto(h[0] / cos_auto(y));
     x += race_advance;
     if(GDIM == 3 && race_advance == 0 && pmodel == mdPerspective) race_advance = -1;
-    // printf("%d %lf\n", z, x);
     transmatrix Z = T1 * inverse(T) * xpush(x);
     View = inverse(Z) * View;
     if(GDIM == 3) View = cspin(2, 0, M_PI/2) * View;

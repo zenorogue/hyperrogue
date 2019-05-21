@@ -235,8 +235,6 @@ dexp_data dexp(hyperpoint p, hyperpoint t) {
     
     transmatrix T = build_matrix(coord_derivative(p, 0), coord_derivative(p, 1), Hypc, C03);
     
-    // printf("Tt = %lf\n", hypot_d(3, T * t));
-
     p += t * eps;
 
     if(!is_inbound(p) || surface_branch(p) != b)

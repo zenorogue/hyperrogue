@@ -273,7 +273,6 @@ bool step(int delta) {
             }
           if(mindist > bestval) bestval = mindist, s.owner = c, s.p = h, s.relmatrices = move(relmatrices);
           }
-        // printf("%lf %p %s\n", bestval, s.owner, display(s.p));
         }
       make_cells_of_heptagon();
       cell_sorting = true; bitruncations_performed = 0;

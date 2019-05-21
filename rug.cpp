@@ -689,13 +689,9 @@ void enqueue(rugpoint *m) {
 bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = false, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return false;
   // double rd = hdist(m1.h, m2.h) * xd;
-  // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
   double t = sqdhypot_d(rugdim, m1.flat, m2.flat);
   if(is_anticusp && t > rd*rd) return false;
   t = sqrt(t);
-  /* printf("%s ", display(m1.flat));
-  printf("%s ", display(m2.flat));
-  printf("%lf/%lf\n", t, rd); */
   current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double force = (t - rd) / t / 2; // 20.0;
@@ -713,8 +709,6 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
   if(gwhere == gEuclid && fast_euclidean) {
     return force_euclidean(m1, m2, rd, is_anticusp, d1, d2);
     }
-  // double rd = hdist(m1.h, m2.h) * xd;
-  // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
   using namespace hyperpoint_vec;
   normalizer n(m1.flat, m2.flat);
   hyperpoint f1 = n(m1.flat);
@@ -794,8 +788,6 @@ void preset(rugpoint *m) {
       
       preset_points.emplace_back(hypot(blen * (ah+ch), blen * (az-cz)), c);
       q++;
-      
-      // printf("A %lf %lf %lf %lf C %lf %lf %lf %lf\n", a1, a2, az, ah, c1, c2, cz, ch);
       }
     }
     
@@ -842,7 +834,6 @@ void optimize(rugpoint *m, bool do_preset) {
         if(now < cur) { cur = now; ex *= 1.2; goto again; }
         else m->flat = last;
         }
-      // printf("edges = [%d] %d sse = %lf\n",ed0, isize(preset_points), cur);
       }
     }
   for(int it=0; it<50; it++) 

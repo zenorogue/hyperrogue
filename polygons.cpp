@@ -434,7 +434,6 @@ void addpoint(const hyperpoint& H) {
 void coords_to_poly() {
   polyi = isize(glcoords);
   for(int i=0; i<polyi; i++) {
-    // printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
     if(!current_display->stereo_active()) glcoords[i][2] = 0;
 
     polyx[i]  = current_display->xcenter + glcoords[i][0] - glcoords[i][2]; 

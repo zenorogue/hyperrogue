@@ -195,7 +195,6 @@ void addedge(int i, int j, edgeinfo *ei) {
   hyperpoint hj = where(j, base);
   double d = hdist(hi, hj);
   if(d >= 4) {
-    // printf("splitting %lf\n", d);
     hyperpoint h = mid(hi, hj);
     int id = isize(vdata);
     vdata.resize(id+1);

@@ -331,7 +331,6 @@ ld expansion_analyzer::get_growth() {
       total += neweigen[i];
       }
     for(int i=0; i<N; i++) eigen[i] = .1 * eigen[i] + .9 * neweigen[i] / total;
-    // for(int i=0; i<N; i++) printf("%lf ", eigen[i]); printf("total = %lf\n", total);
     }
   return growth = total;
   }

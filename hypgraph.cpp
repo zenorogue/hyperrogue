@@ -1658,7 +1658,6 @@ void fix_the_band(transmatrix& T) {
       else if(H[DIM] < 0 && x <= 0) x = -M_PI - x;
       }
     band_shift += x;
-    // printf("fixing with shift = %lf\n", x);
     T = xpush(-x) * T;
     fixmatrix(T);
     // todo orientation

@@ -1918,7 +1918,6 @@ void movePlayer(monster *m, int delta) {
           if(!c) continue;
           if(m->isVirtual || !gmatrix.count(c)) continue;
           double d = intval(gmatrix[c] * C0, m->pat * C0);
-          // printf("di=%d d=%lf\n", di, d);
           if(d<bestd) bestd=d, subdir = di;
           }
         visibleFor(300);
