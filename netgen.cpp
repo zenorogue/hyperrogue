@@ -134,28 +134,25 @@ namespace hr { namespace netgen {
   
   void loadData() {
 
-    FILE *f = fopen("papermodeldata.txt", "rt");
-    if(!f) return;
+    fhstream f("papermodeldata.txt", "rt");
+    if(!f.f) return;
 
-    int err = fscanf(f, "%d %d %d %d %d %d %d %lf %d\n\n", 
-      &CELLS, &SX, &SY, &PX, &PY, &SCALE, &BASE, &el, &created);
-    if(err != 9) { fclose(f); return; }
+    if(!scan(f, CELLS, SX, SY, PX, PY, SCALE, BASE, el, created)) return;
     
     loaded = true;
       
-    if(!created) { fclose(f); return; }
+    if(!created) return;
     
-    for(int i=0; i<CELLS; i++) err = fscanf(f, "%d", &ct[i]);
+    for(int i=0; i<CELLS; i++) scan(f, ct[i]);
 
-    for(int i=0; i<CELLS; i++) for(int j=0; j<16; j++)
-      err = fscanf(f, "%lf" ,&vx[i][j]);
+    for(int i=0; i<CELLS; i++) for(int j=0; j<16; j++) scan(f, vx[i][j]);
 
     for(int i=0; i<CELLS; i++) 
     for(int j=0; j<7; j++) nei[i][j] = -1;
 
     while(true) {
-      int a, b, c;      
-      err = fscanf(f, "%d%d%d", &a, &b, &c);
+      int a, b, c;
+      scan(f, a, b, c);
       if(a < 0) break;
       else nei[a][c] = b;
       }
@@ -163,51 +160,41 @@ namespace hr { namespace netgen {
     for(int i=0; i<CELLS; i++) {
       double dx, dy, dr;
       int g;
-      err = fscanf(f, "%lf%lf%lf%d\n", &dx, &dy, &dr, &g);
+      scan(f, dx, dy, dr, g);
       center[i] = vec(dx, dy);
       rot[i] = dr;
       glued[i] = g;
       }
-    
-    fclose(f);
     }
 
   void saveData() {
     // global parameters
-    FILE *f = fopen("papermodeldata2.txt", "wt");
-    if(!f) {
+    fhstream f("papermodeldata2.txt", "wt");
+    if(!f.f) {
       addMessage("Could not save the paper model data");
       return;
       }
-    fprintf(f, "%d %d %d %d %d %d %d %lf %d\n\n", CELLS, SX, SY, PX, PY, SCALE, BASE, el, created);
+    println(f, spaced(CELLS, SX, SY, PX, PY, SCALE, BASE, el, created), "\n");
 
     // net parameters: cell types    
-    for(int i=0; i<CELLS; i++)
-      fprintf(f, "%d ", ct[i]);
-    fprintf(f, "\n");
+    println(f, spaced_of(ct, CELLS));
     
     // net parameters: hcenters    
     for(int i=0; i<CELLS; i++) {
-      for(int k=0; k<16; k++)
-        fprintf(f, "%9.6lf ", vx[i][k]);
-      fprintf(f, "\n");
+      println(f, spaced_of(vx[i], 16));
       }
-    fprintf(f, "\n\n");
+    println(f, "\n");
     
     // create netgen
     for(int i=0; i<CELLS; i++) for(int j=0; j<CELLS; j++) {
       for(int k=0; k<ct[i]; k++) if(nei[i][k] == j)
-        fprintf(f, "%d %d %d  ", i, j, k);
+        print(f, spaced(i, j, k), "  ");
       }
-    fprintf(f, "-1 -1 -1\n\n");
+    println(f, "-1 -1 -1");
     
     // graphics
     for(int i=0; i<CELLS; i++) 
-      fprintf(f, "%12.7lf %12.7lf %10.7lf %d\n",
-        center[i].x, center[i].y, rot[i], glued[i]
-        );
-      
-    fclose(f);
+      println(f, spaced(center[i].x, center[i].y, rot[i], glued[i]));
     }  
 
   // Simple graphical functions

@@ -39,6 +39,12 @@ string ftssmart(ld x) {
   return buf;
   }
 
+bool scan(fhstream& hs, int& i) { return fscanf(hs.f, "%d", &i) == 1; }
+bool scan(fhstream& hs, color_t& c) { return fscanf(hs.f, "%x", &c) == 1; }
+bool scan(fhstream& hs, ld& x) { return fscanf(hs.f, "%lf", &x) == 1; }
+bool scan(fhstream& hs, string& s) { char t[10000]; t[0] = 0; int err = fscanf(hs.f, "%9500s", t); s = t; return err == 1 && t[0]; }
+string scanline(fhstream& hs) { char buf[10000]; buf[0] = 0; fgets(buf, 10000, hs.f); return buf; }
+
 /*
 string fts_smartdisplay(ld x, int maxdisplay) {
   string rv;

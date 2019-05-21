@@ -1622,19 +1622,13 @@ namespace mapeditor {
     if(uni == COLORKEY) dsCur->color = colortouse;
     }
 
-  void writeHyperpoint(FILE *f, hyperpoint h) {
-    for(int i=0; i<MDIM; i++) fprintf(f, "%lf ", double(h[i]));
-    fprintf(f, "\n");
+  void writeHyperpoint(hstream& f, hyperpoint h) {
+    println(f, spaced_of(&h[0], MDIM));
     }
   
-  hyperpoint readHyperpoint(FILE *f) {
+  hyperpoint readHyperpoint(fhstream& f) {
     hyperpoint h;
-    for(int i=0; i<MDIM; i++) {
-      double d;
-      int err = fscanf(f, "%lf", &d);
-      if(err != 1) printf("Warning: read error\n");
-      h[i] = d;
-      }
+    for(int i=0; i<MDIM; i++) scan(f, h[i]);
     return h;
     }
   
@@ -1645,24 +1639,24 @@ namespace mapeditor {
   bool onelayeronly;
   
   bool loadPicFile(const string& s) {
-    FILE *f = fopen(picfile.c_str(), "rt");
-    if(!f) {
+    fhstream f(picfile, "rt");
+    if(!f.f) {
       addMessage(XLAT("Failed to load pictures from %1", picfile));
       return false;
       }
-    int err;
-    char buf[200];
-    if(!fgets(buf, 200, f)) { 
-      addMessage(XLAT("Failed to load pictures from %1", picfile));
-      fclose(f); return false; 
-      }
-    int vernum; err = fscanf(f, "%x", &vernum);
+    scanline(f);
+    color_t vernum;
+    scan(f, vernum);
     printf("vernum = %x\n", vernum);
+    if(vernum == 0) {
+      addMessage(XLAT("Failed to load pictures from %1", picfile));
+      return false;
+      }
 
     if(vernum >= 0xA0A0) {
       int tg, wp;
       int nt;
-      hr::ignore(fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags));
+      scan(f, tg, nt, wp, patterns::subpattern_flags);
       patterns::whichPattern = patterns::ePattern(wp);
       set_geometry(eGeometry(tg));
       set_variation(eVariation(nt));
@@ -1670,9 +1664,10 @@ namespace mapeditor {
       }
 
     while(true) {
-      int i, j, l, sym, rots, color, siz;
-      err = fscanf(f, "%d%d%d%d%d%x%d", &i, &j, &l, &sym, &rots, &color, &siz);
-      if(i == -1 || err < 6) break;
+      int i, j, l, sym, rots, siz;
+      color_t color;
+      if(!scan(f, i, j, l, sym, rots, color, siz)) break;
+      if(i == -1) break;
       if(siz < 0 || siz > 1000) break;
       
       if(i >= 4) {
@@ -1683,19 +1678,18 @@ namespace mapeditor {
 
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
-      if(VERNUM_HEX >= 0xA608) { double z; err = fscanf(f, "%lf", &z); ds.zlevel = z; }
+      if(vernum >= 0xA608) scan(f, ds.zlevel);
       ds.shift = readHyperpoint(f);
       ds.spin = readHyperpoint(f);
       ds.list.clear();
       for(int i=0; i<siz; i++) {
         ds.list.push_back(readHyperpoint(f));
-        writeHyperpoint(stdout, ds.list[i]);
+        writeHyperpoint(hlog, ds.list[i]);
         }
       ds.sym = sym;
       ds.rots = rots;
       ds.color = color;
       }
-    fclose(f);
     addMessage(XLAT("Pictures loaded from %1", picfile));
     
     buildpolys();
@@ -1703,33 +1697,31 @@ namespace mapeditor {
     }
   
   bool savePicFile(const string& s) {
-    FILE *f = fopen(picfile.c_str(), "wt");
-    if(!f) {
+    fhstream f(picfile, "wt");
+    if(!f.f) {
       addMessage(XLAT("Failed to save pictures to %1", picfile));
       return false;
       }
-    fprintf(f, "HyperRogue saved picture\n");
-    fprintf(f, "%x\n", VERNUM_HEX);
+    println(f, "HyperRogue saved picture");
+    println(f, format("%x\n", VERNUM_HEX));
     if(VERNUM_HEX >= 0xA0A0)
-      fprintf(f, "%d %d %d %d\n", geometry, int(variation), patterns::whichPattern, patterns::subpattern_flags);
+      println(f, spaced(geometry, int(variation), patterns::whichPattern, patterns::subpattern_flags));
     for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
       usershape *us = usp.second;
       if(!us) continue;
       
       for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
-        fprintf(f, "\n%d %d %d %d %d %6x %d\n", 
-          i, usp.first, l, ds.sym, ds.rots, ds.color, int(isize(ds.list)));
-        fprintf(f, "\n%lf", double(ds.zlevel));
+        println(f, spaced(i, usp.first, l, ds.sym, ds.rots, ds.color, int(isize(ds.list))));
+        print(f, spaced(ds.zlevel), " ");
         writeHyperpoint(f, ds.shift);
         writeHyperpoint(f, ds.spin);
-        fprintf(f,"\n");
+        println(f);
         for(int i=0; i<isize(ds.list); i++)
           writeHyperpoint(f, ds.list[i]);
         }
       }
-    fprintf(f, "\n-1\n");
-    fclose(f);
+    println(f, "-1");
     addMessage(XLAT("Pictures saved to %1", picfile));
     return true;
     }
@@ -1916,13 +1908,13 @@ namespace mapeditor {
           
           for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
             usershapelayer& ds(us->d[l]);
-            printf("// %d %d %d [%06X %lf]\n", i, usp.first, l, ds.color, double(ds.zlevel));
-            printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
+            println(hlog, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
+            print(hlog, " ID, ", us->d[l].rots, ", ", us->d[l].sym?2:1, ", "); 
             for(int i=0; i<isize(us->d[l].list); i++) {
-              for(int d=0; d<DIM; d++) printf("%lf,", double(us->d[l].list[i][d]));
-              printf(" ");
+              for(int d=0; d<DIM; d++) print(hlog, fts(us->d[l].list[i][d]), ", ");
+              print(hlog, " ");
               }
-            printf("\n");
+            println(hlog);
             }
           }
         }
