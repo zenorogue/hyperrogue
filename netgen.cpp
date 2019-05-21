@@ -622,6 +622,7 @@ namespace hr { namespace netgen {
     cmode = sm::SIDE;
     gamescreen(0);
     if(true) {
+      initquickqueue();
       for(int i=0; i<CELLS; i++) {
         int t = ct[i];
         int ofs = t == 7 ? 0 : 5;
@@ -635,6 +636,7 @@ namespace hr { namespace netgen {
           queueline(hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t), (col << 8) + 0xFF, 3);
           }
         }
+      quickqueue();
       }
     if(mode != 2) {
       dialog::init("paper model creator");
