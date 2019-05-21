@@ -48,30 +48,27 @@ int readArgs() {
   else if(argis("-cvlbuild")) {
     PHASEFROM(3);
     start_game();
-    shift(); FILE *f = fopen(argcs(), "rt");
-    if(!f) { shift(); printf("failed to open file\n"); return 0; }
+    shift(); 
+    fhstream f(argcs(), "rt");
+    if(!f.f) { shift(); printf("failed to open file\n"); return 0; }
     int id;
     lineinfo l0;    
-    ignore(fscanf(f, "%d%d%d", &id, &l0.plus_matrices, &l0.minus_matrices));
+    scan(f, id, l0.plus_matrices, l0.minus_matrices);
     l0.locs.push_back(location{View, viewctr});
     for(int i=1; i<l0.plus_matrices; i++)
       l0.locs.push_back(loc_multiply(l0.locs.back(), xpush(1)));
     lines[id] = std::move(l0);
     
     while(true) {
-      ignore(fscanf(f, "%d", &id));
+      scan(f, id);
       println(hlog, "id=", id, ".");
       if(id < 0) break;
       auto& l1 = lines[id];
       int step;
-      ignore(fscanf(f, "%d%d", &id, &step));
+      scan(f, id, step);
       transmatrix T;
-      double d;
-      for(int a=0; a<9; a++) {
-        ignore(fscanf(f, "%lf", &d));
-        T[0][a] = d;
-        }
-      ignore(fscanf(f, "%d%d", &l1.plus_matrices, &l1.minus_matrices));
+      for(int a=0; a<9; a++) scan(f, T[0][a]);
+      scan(f, l1.plus_matrices, l1.minus_matrices);
       auto old = lines[id].locs[step];
       println(hlog, "FROM ", old.lView, old.lviewctr, " id=", id, " step=", step);
       l1.locs.push_back(loc_multiply(old, T));

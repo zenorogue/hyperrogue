@@ -120,7 +120,7 @@ void make_staircase() {
   // vid.stereo_mode = current_display->sODS;
   rug::no_fog = true;
 
-  printf("scurvature = %lf progress = %lf strafe=%lf,%lf\n", scurvature, progress, strafex, strafey);
+  println(hlog, "scurvature = ", scurvature, " progress = ", progress, " strafe=", strafex, ",", strafey);
   rug::renderonce = true;
   rug::rug_perspective = true;
   if(scurvature > -1e-6 && scurvature < 1e-6) { 

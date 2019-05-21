@@ -77,26 +77,26 @@ bool noshow = false;
 vector<int> samples_to_show;
 
 void loadsamples(const string& fname) {
-  FILE *f = fopen(fname.c_str(), "rt");
-  if(!f) {
+  fhstream f(fname, "rt");
+  if(!f.f) {
     fprintf(stderr, "Could not load samples: %s\n", fname.c_str());
     return;
     }
-  if(fscanf(f, "%d", &columns) != 1) { 
+  if(!scan(f, columns)) { 
     printf("Bad format: %s\n", fname.c_str());
-    fclose(f); return; 
+    return; 
     }
   printf("Loading samples: %s\n", fname.c_str());
   while(true) {
     sample s;
     bool shown = false;
     alloc(s.val);
-    if(feof(f)) break;
+    if(feof(f.f)) break;
     for(int i=0; i<columns; i++)
-      if(fscanf(f, "%lf", &s.val[i]) != 1) { goto bigbreak; }
-    fgetc(f);
+      if(!scan(f, s.val[i])) { goto bigbreak; }
+    fgetc(f.f);
     while(true) {
-      int c = fgetc(f);
+      int c = fgetc(f.f);
       if(c == -1 || c == 10 || c == 13) break;
       if(c == '!' && s.name == "") shown = true;
       else if(c != 32 && c != 9) s.name += c;
@@ -106,7 +106,6 @@ void loadsamples(const string& fname) {
       samples_to_show.push_back(isize(data)-1);
     }
   bigbreak:
-  fclose(f);
   samples = isize(data);
   normalize();
   colnames.resize(columns);
@@ -703,16 +702,16 @@ void sominit(int initto, bool load_compressed) {
   if(inited < 2 && initto >= 2) {
     inited = 2;
 
-    printf("Initializing SOM (2)\n");
+    DEBB(DF_LOG, ("Initializing SOM (2)"));
 
     if(gaussian) {
-      printf("dist = %lf\n", mydistance(net[0].where, net[1].where));
+      DEBB(DF_LOG, ("dist = ", fts(mydistance(net[0].where, net[1].where))));
       cell *c1 = net[cells/2].where;
       vector<double> mapdist;
       for(neuron &n2: net) mapdist.push_back(mydistance(c1,n2.where));
       sort(mapdist.begin(), mapdist.end());
       maxdist = mapdist[isize(mapdist)*5/6] * distmul;
-      printf("maxdist = %lf\n", maxdist);
+      DEBB(DF_LOG, ("maxdist = ", fts(maxdist)));
       }
       
     dispersion_count = 0;  
@@ -722,7 +721,7 @@ void sominit(int initto, bool load_compressed) {
       cell *c = net[i].where;
       auto cid = get_cellcrawler_id(c);
       if(!scc.count(cid.first)) {
-        printf("Building cellcrawler id = %x\n", cid.first);
+        DEBB(DF_LOG, ("Building cellcrawler id = ", itsh(cid.first)));
         buildcellcrawler(c, scc[cid.first], cid.second);
         }
       }
@@ -903,12 +902,12 @@ void ksave(const string& fname) {
 void kload(const string& fname) {
   sominit(1);
   int xcells;
-  FILE *f = fopen(fname.c_str(), "rt");
-  if(!f) {
+  fhstream f(fname.c_str(), "rt");
+  if(!f.f) {
     fprintf(stderr, "Could not load the network: %s\n", fname.c_str());
     return;
     }
-  if(fscanf(f, "%d%d\n", &xcells, &t) != 2) {
+  if(!scan(f, xcells, t)) {
     fprintf(stderr, "Bad network format: %s\n", fname.c_str());
     return;
     }
@@ -918,9 +917,8 @@ void kload(const string& fname) {
     exit(1);
     }
   for(neuron& n: net) {
-    for(int k=0; k<columns; k++) if(fscanf(f, "%lf", &n.net[k]) != 1) return;
+    for(int k=0; k<columns; k++) if(!scan(f, n.net[k])) return;
     }
-  fclose(f);
   analyze();
   }
 

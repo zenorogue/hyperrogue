@@ -357,14 +357,8 @@ namespace collatz {
     }
   }
 
-string readLabel_s(FILE *f) {
-  char xlabel[10000];
-  if(fscanf(f, "%9500s", xlabel) <= 0) return "";
-  return xlabel;
-  }
-
-int readLabel(FILE *f) {
-  string s = readLabel_s(f);
+int readLabel(fhstream& f) {
+  string s = scan<string>(f);
   if(s == "") return -1;
   return getid(s);
   }
@@ -387,25 +381,28 @@ namespace anygraph {
       addedge(e->i, e->j, e);
       }
     }
+  
+  void tst() {}
 
   void read(string fn, bool subdiv, bool doRebase, bool doStore) {
     init(); kind = kAnyGraph;
     any = add_edgetype("embedded edges");
     fname = fn;
-    FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
-    if(!f) {
+    fhstream f(fn + "-coordinates.txt", "rt");
+    if(!f.f) {
       printf("Missing file: %s-coordinates.txt\n", fname.c_str());
       exit(1);
       }
     printf("Reading coordinates...\n");
-    char buf[100];  
-    int err;
-    err = fscanf(f, "%s%s%s%s%d%lf%lf%lf", buf, buf, buf, buf, &N, 
-      &anygraph::R, &anygraph::alpha, &anygraph::T);
-    if(err < 8) { printf("Error: incorrect format of the first line\n"); exit(1); }
+    string ignore;
+    if(!scan(f, ignore, ignore, ignore, ignore, N, anygraph::R, anygraph::alpha, anygraph::T)) {
+      printf("Error: incorrect format of the first line\n"); exit(1);
+      }
     vdata.reserve(N);
     while(true) {
-      string s = readLabel_s(f);
+      string s = scan<string>(f);
+      println(hlog, "s: ", s.c_str());
+      if(s == "D11.11") tst();
       if(s == "" || s == "#ROGUEVIZ_ENDOFDATA") break;
       int id = getid(s);
       vertexdata& vd(vdata[id]);
@@ -413,30 +410,27 @@ namespace anygraph {
       vd.cp = colorpair(dftcolor);
       
       double r, alpha;
-      int err = fscanf(f, "%lf%lf", &r, &alpha);
+      if(!scan(f, r, alpha)) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
       coords.push_back(make_pair(r, alpha));
-      if(err < 2) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
   
       transmatrix h = spin(alpha * degree) * xpush(r);
       
       createViz(id, currentmap->gamestart(), h);
       }
-    fclose(f);
     
-    f = fopen((fn + "-links.txt").c_str(), "rt");
-    if(!f) {
-      printf("Missing file: %s-links.txt\n", fname.c_str());
+    fhstream g(fn + "-links.txt", "rt");
+    if(!g.f) {
+      println(hlog, "Missing file: ", fname, "-links.txt");
       exit(1);
       }
-    printf("Reading links...\n");
+    println(hlog, "Reading links...");
     int qlink = 0;
     while(true) {
-      int i = readLabel(f), j = readLabel(f);
+      int i = readLabel(g), j = readLabel(g);
       if(i == -1 || j == -1) break;
       addedge(i, j, 1, subdiv, any);
       qlink++;
       }
-    fclose(f);
   
     if(doRebase) {
       printf("Rebasing...\n");
@@ -847,14 +841,14 @@ namespace sag {
         numiter++;
         sag::saiter();
         }
-      printf("it %8d temp %6.4" PLDF" [1/e at %13.6" PLDF"] cost = %lf ", 
-        numiter, sag::temperature, (ld) exp(sag::temperature),
-        sag::cost);
+      DEBB(DF_LOG, (format("it %8d temp %6.4f [1/e at %13.6f] cost = %f ", 
+        numiter, double(sag::temperature), (double) exp(sag::temperature),
+        double(sag::cost))));
       
       sort(chgs.begin(), chgs.end());
       int cc = chgs.size() - 1;
-      printf("%9.4lf .. %9.4lf .. %9.4lf .. %9.4lf .. %9.4lf\n", 
-        chgs[0], chgs[cc/4], chgs[cc/2], chgs[cc*3/4], chgs[cc]);
+      DEBB(DF_LOG, (format("%9.4f .. %9.4f .. %9.4f .. %9.4f .. %9.4f\n", 
+        double(chgs[0]), double(chgs[cc/4]), double(chgs[cc/2]), double(chgs[cc*3/4]), double(chgs[cc]))));
       fflush(stdout);
       }
     
@@ -877,12 +871,12 @@ namespace sag {
     if(t < 50) ipturn *= 2;
     else if(t > 200) ipturn /= 2;
     else ipturn = ipturn * 100 / t;
-    printf("it %8d temp %6.4" PLDF" [2:%8.6" PLDF",10:%8.6" PLDF",50:%8.6" PLDF"] cost = %lf\n", 
-      numiter, sag::temperature, 
-      exp(-2 * exp(-sag::temperature)),
-      exp(-10 * exp(-sag::temperature)),
-      exp(-50 * exp(-sag::temperature)),
-      sag::cost);
+    DEBB(DF_LOG, ("it %8d temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n", 
+      numiter, double(sag::temperature), 
+      (double) exp(-2 * exp(-sag::temperature)),
+      (double) exp(-10 * exp(-sag::temperature)),
+      (double) exp(-50 * exp(-sag::temperature)),
+      (double) sag::cost));
     }
   
   void savesnake(const string& fname) {
@@ -924,34 +918,33 @@ namespace sag {
         loglik += p * log(p) + q * log(q) - pq * log(pq);
       }
     
-    printf("loglikelihood = %lf\n", (double) loglik);
+    println(hlog, "loglikelihood = ", fts(loglik));
     }
   
   void readsag(const char *fname) {
     maxweight = 0;
     sag_edge = add_edgetype("SAG edge");
-    FILE *f = fopen(fname, "rt");
-    if(!f) { printf("Failed to open SAG file: %s\n", fname); exit(1); }
+    fhstream f(fname, "rt");
+    if(!f.f) { printf("Failed to open SAG file: %s\n", fname); exit(1); }
     // while(fgetc(f) != 10 && fgetc(f) != 13 && !feof(f)) ;
-    while(!feof(f)) {
+    while(!feof(f.f)) {
       string l1, l2;
       while(true) {
-        int c = fgetc(f);
-        if(c == EOF) { fclose(f); return; }
+        int c = fgetc(f.f);
+        if(c == EOF) return;
         else if(c == ';') break;
         else if(c == 10 || c == 13 || c == 32 || c == 9) ;
         else l1 += c;
         }
       while(true) {
-        int c = fgetc(f);
-        if(c == EOF) { fclose(f); return; }
+        int c = fgetc(f.f);
+        if(c == EOF) return;
         else if(c == ';') break;
         else if(c == 10 || c == 13 || c == 32 || c == 9) ;
         else l2 += c;
         }
-      double wei;
-      int err = fscanf(f, "%lf", &wei);
-      if(err < 1) continue;
+      ld wei;
+      if(!scan(f, wei)) continue;
       edgeinfo ei(sag_edge);
       ei.i = getid(l1);
       ei.j = getid(l2);

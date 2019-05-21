@@ -17,7 +17,7 @@ cwpath invertpath(cwpath p) {
   return res;
   }
 
-cwpath gens[4];
+array<cwpath, 4> gens;
 
 cellwalker bttargets[4];
 
@@ -234,8 +234,8 @@ void bantar() {
       bool tres = test_uniq(cwt, -1, 15, NULL);
       auto q = quality(bc);
       if(tres) {
-        printf("g0: "); for(int w: gens[0]) printf("%d ", w); printf("g1: "); for(int w: gens[1]) printf("%d ", w); printf("\n");
-        printf("testing quality %lf/%lf [%d,%d], result = %d\n", get<0>(q), get<2>(q), celldist(bc.first), celldist(bc.second), tres);
+        DEBB(DF_LOG, ("gens = ", gens));
+        DEBB(DF_LOG, ("testing quality ", q, " ", make_pair(celldist(bc.first), celldist(bc.second)), ", result = ", tres));
         lnotry--; if(lnotry <= 0) goto picked;
         }
       // if(tres) goto picked;
