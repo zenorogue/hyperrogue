@@ -1881,7 +1881,7 @@ namespace dialog {
   extern color_t dialogcolor;
   extern int dfsize, dfspace;
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diSlider, diBigItem};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem};
 
   struct item {
     tDialogItem type;
@@ -1892,6 +1892,7 @@ namespace dialog {
     color_t color, colorv, colork, colors, colorc;
     int scale;
     double param;
+    int p1, p2, p3;
     int position;
     };
   

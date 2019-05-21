@@ -127,6 +127,17 @@ namespace dialog {
     items.push_back(it);
     }
   
+  void addIntSlider(int d1, int d2, int d3, int key) {
+    item it;
+    it.type = diIntSlider;
+    it.color = dialogcolor;
+    it.scale = 100;
+    it.key = key;
+    it.p1 = (d2-d1);
+    it.p2 = (d3-d1);
+    items.push_back(it);
+    }
+  
   void addSelItem(string body, string value, int key) {
     item it;
     it.type = diItem;
@@ -384,7 +395,7 @@ namespace dialog {
           }
         if(xthis) getcstat = I.key;
         }      
-      else if(I.type == diSlider) {
+      else if(among(I.type, diSlider, diIntSlider)) {
         bool xthis = (mousey >= top && mousey < tothei);
         int sl, sr;
         if(current_display->sidescreen)
@@ -392,9 +403,18 @@ namespace dialog {
         else
           sl = vid.xres/4, sr = vid.xres*3/4;
         int sw = sr-sl;
-        displayfr(sl, mid, 2, dfsize * I.scale/100, "(", I.color, 16);
-        displayfr(sl + double(sw * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
-        displayfr(sr, mid, 2, dfsize * I.scale/100, ")", I.color, 0);
+        if(I.type == diSlider) {
+          displayfr(sl, mid, 2, dfsize * I.scale/100, "(", I.color, 16);
+          displayfr(sl + double(sw * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
+          displayfr(sr, mid, 2, dfsize * I.scale/100, ")", I.color, 0);
+          }
+        else {
+          displayfr(sl, mid, 2, dfsize * I.scale/100, "{", I.color, 16);
+          if(I.p2 < sw / 4) for(int a=0; a<=I.p2; a++) if(a != I.p1)
+            displayfr(sl + double(sw * a / I.p2), mid, 2, dfsize * I.scale/100, a == I.p1 ? "#" : ".", I.color, 8);
+          displayfr(sl + double(sw * I.p1 / I.p2), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
+          displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
+          }
         if(xthis) getcstat = I.key, inslider = true;
         }
       }
@@ -669,7 +689,10 @@ namespace dialog {
     gamescreen(numberdark);
     init(ne.title);
     addInfo(ne.s);
-    addSlider(ne.sc.direct(ne.vmin), ne.sc.direct(*ne.editwhat), ne.sc.direct(ne.vmax), 500);
+    if(ne.intval && ne.sc.direct == &identity_f)
+      addIntSlider(int(ne.vmin), int(*ne.editwhat), int(ne.vmax), 500);
+    else
+      addSlider(ne.sc.direct(ne.vmin), ne.sc.direct(*ne.editwhat), ne.sc.direct(ne.vmax), 500);
     addBreak(100);
 #if ISMOBILE==0
     addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
@@ -708,6 +731,7 @@ namespace dialog {
           (*ne.editwhat)++;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) + shiftmul * ne.step);
+        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval) *ne.editwhat = 0;
         apply_slider();
         }
       else if(DKEY == SDLK_LEFT) {
@@ -715,6 +739,7 @@ namespace dialog {
           (*ne.editwhat)--;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) - shiftmul * ne.step);
+        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval) *ne.editwhat = 0;
         apply_slider();
         }
   #endif
@@ -729,8 +754,18 @@ namespace dialog {
         else
           sl = vid.xres/4, sr = vid.xres*3/4;
         ld d = (mousex - sl + .0) / (sr-sl);
-        *ne.editwhat = 
-          ne.sc.inverse(d * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
+        ld val = ne.sc.inverse(d * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
+        ld nextval = ne.sc.inverse((mousex + 1. - sl) / (sr - sl) * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
+        ld dif = abs(val - nextval);
+        if(dif > 1e-6) {
+          ld mul = 1;
+          while(dif < 10) dif *= 10, mul *= 10;
+          val *= mul;
+          val = floor(val + 0.5);
+          val /= mul;
+          }
+        *ne.editwhat = val;
+          
         apply_slider();
         }
       else if(doexiton(sym, uni)) { popScreen(); if(reaction_final) reaction_final(); }
