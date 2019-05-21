@@ -1253,8 +1253,8 @@ void draw_ghost_state(ghost& ghost) {
 void drawStats() {
 
   if(!racing::on) return;
-  if(GDIM == 3) return;
   
+  dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
   initquickqueue();
   
   int bsize = vid.fsize * 2;
