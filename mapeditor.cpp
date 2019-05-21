@@ -99,7 +99,7 @@ namespace mapstream {
   bool saveMap(const char *fname) {
     fhstream f(fname, "wb");
     if(!f.f) return false;
-    int32_t i = VERNUM; f.write(i);
+    f.write(f.vernum);
     f.write(patterns::whichPattern);
     f.write(geometry);
     char nbtype = char(variation);
@@ -249,17 +249,17 @@ namespace mapstream {
     fhstream f(fname, "rb");
     if(!f.f) return false;
     clearMemory();
-    int vernum = f.get<int>();
-    if(vernum > 10505 && vernum < 11000) 
-      vernum = 11005;
-    if(vernum >= 10420 && vernum < 10503) {
+    f.read(f.vernum);
+    if(f.vernum > 10505 && f.vernum < 11000) 
+      f.vernum = 11005;
+    if(f.vernum >= 10420 && f.vernum < 10503) {
       int i;
       f.read(i);
       patterns::whichPattern = patterns::ePattern(i);
       }
-    else if(vernum >= 7400) f.read(patterns::whichPattern);
+    else if(f.vernum >= 7400) f.read(patterns::whichPattern);
     
-    if(vernum >= 10203) {
+    if(f.vernum >= 10203) {
       f.read(geometry);
       char nbtype;
       f.read(nbtype);
@@ -274,7 +274,7 @@ namespace mapstream {
         f.read(torusconfig::qty);
         f.read(torusconfig::dx);
         f.read(torusconfig::dy);
-        if(vernum >= 10504) {
+        if(f.vernum >= 10504) {
           f.read(torusconfig::sdx);
           f.read(torusconfig::sdy);
           f.read(torusconfig::torus_mode);
@@ -282,7 +282,7 @@ namespace mapstream {
         torusconfig::activate();
         }
       #if CAP_CRYSTAL
-      if(geometry == gCrystal && vernum >= 10504) {
+      if(geometry == gCrystal && f.vernum >= 10504) {
         int sides;
         f.read(sides);
         #if CAP_CRYSTAL
@@ -327,7 +327,7 @@ namespace mapstream {
     initcells();
     if(shmup::on) shmup::init();
     
-    if(vernum >= 10505) {
+    if(f.vernum >= 10505) {
       // game settings
       f.read(safety);
       bool b;
@@ -364,7 +364,7 @@ namespace mapstream {
         if(parent<0 || parent >= isize(cellbyid)) break;
         int dir = f.read_char();
         cell *c2 = cellbyid[parent];
-        dir  = fixspin(dir, relspin[parent], c2->type, vernum);
+        dir  = fixspin(dir, relspin[parent], c2->type, f.vernum);
         c = createMov(c2, dir);
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
@@ -379,20 +379,20 @@ namespace mapstream {
       cellbyid.push_back(c);
       relspin.push_back(rspin);
       c->land = (eLand) f.read_char();
-      c->mondir = fixspin(rspin, f.read_char(), c->type, vernum);
+      c->mondir = fixspin(rspin, f.read_char(), c->type, f.vernum);
       c->monst = (eMonster) f.read_char();
-      if(c->monst == moTortoise && vernum >= 11001)
+      if(c->monst == moTortoise && f.vernum >= 11001)
         f.read(tortoise::emap[c]);
       c->wall = (eWall) f.read_char();
       // c->barleft = (eLand) f.read_char();
       // c->barright = (eLand) f.read_char();
       c->item = (eItem) f.read_char();
-      if(c->item == itBabyTortoise && vernum >= 11001)
+      if(c->item == itBabyTortoise && f.vernum >= 11001)
         f.read(tortoise::babymap[c]);
       c->mpdist = f.read_char();
       c->bardir = NOBARRIERS;
       // fixspin(rspin, f.read_char(), c->type);
-      if(vernum < 7400) {
+      if(f.vernum < 7400) {
         short z;
         f.read(z);
         c->wparam = z;
@@ -400,7 +400,7 @@ namespace mapstream {
       else f.read(c->wparam);
       f.read(c->landparam);
       // backward compatibility
-      if(vernum < 7400 && !isIcyLand(c->land)) c->landparam = HEAT(c);
+      if(f.vernum < 7400 && !isIcyLand(c->land)) c->landparam = HEAT(c);
       c->stuntime = f.read_char();
       c->hitpoints = f.read_char();
 
@@ -440,9 +440,9 @@ namespace mapstream {
     cheater = 1;
     
     dynamicval<bool> a3(geom3::always3, geom3::always3);
-    if(vernum >= 0xA616) f.read(geom3::always3);
+    if(f.vernum >= 0xA616) f.read(geom3::always3);
 
-    if(vernum >= 7400) while(true) {
+    if(f.vernum >= 7400) while(true) {
       int i = f.get<int>();
       if(i == -1) break;
       #if CAP_POLY
@@ -454,7 +454,7 @@ namespace mapstream {
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
 
-      if(vernum >= 11008) f.read(ds.zlevel);
+      if(f.vernum >= 11008) f.read(ds.zlevel);
       
       f.read(ds.sym); f.read(ds.rots); f.read(ds.color);
       ds.list.clear();
@@ -470,7 +470,7 @@ namespace mapstream {
       #endif
       }
     
-    if(vernum >= 11005) {
+    if(f.vernum >= 11005) {
       f.read(mutantphase);
       f.read(rosewave);
       f.read(rosephase);
@@ -1645,15 +1645,14 @@ namespace mapeditor {
       return false;
       }
     scanline(f);
-    color_t vernum;
-    scan(f, vernum);
-    printf("vernum = %x\n", vernum);
-    if(vernum == 0) {
+    scan(f, f.vernum);
+    printf("vernum = %x\n", f.vernum);
+    if(f.vernum == 0) {
       addMessage(XLAT("Failed to load pictures from %1", picfile));
       return false;
       }
 
-    if(vernum >= 0xA0A0) {
+    if(f.vernum >= 0xA0A0) {
       int tg, wp;
       int nt;
       scan(f, tg, nt, wp, patterns::subpattern_flags);
@@ -1678,7 +1677,7 @@ namespace mapeditor {
 
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
-      if(vernum >= 0xA608) scan(f, ds.zlevel);
+      if(f.vernum >= 0xA608) scan(f, ds.zlevel);
       ds.shift = readHyperpoint(f);
       ds.spin = readHyperpoint(f);
       ds.list.clear();
@@ -1703,8 +1702,8 @@ namespace mapeditor {
       return false;
       }
     println(f, "HyperRogue saved picture");
-    println(f, format("%x\n", VERNUM_HEX));
-    if(VERNUM_HEX >= 0xA0A0)
+    println(f, f.vernum);
+    if(f.vernum >= 0xA0A0)
       println(f, spaced(geometry, int(variation), patterns::whichPattern, patterns::subpattern_flags));
     for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
       usershape *us = usp.second;

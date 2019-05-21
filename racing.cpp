@@ -150,8 +150,8 @@ bool read_ghosts(string seed, int mcode) {
   println(hlog, "trying to read ghosts from: ", fname);
   fhstream f(fname, "rb");
   if(!f.f) return false;
-  int vernum = f.get<int> ();
-  if(vernum <= 0xA600) return true; // scores removed due to the possibility of cheating
+  f.vernum = f.get<int> ();
+  if(f.vernum <= 0xA600) return true; // scores removed due to the possibility of cheating
   hread(f, ghostset());
   return true;
   }
@@ -160,7 +160,7 @@ void write_ghosts(string seed, int mcode) {
   fhstream f;
   f.f = fopen(ghost_filename(seed, mcode).c_str(), "wb");
   if(!f.f) throw hstream_exception(); // ("failed to write the ghost file");
-  hwrite(f, (const int&) VERNUM_HEX);
+  hwrite(f, f.vernum);
   hwrite(f, ghostset());
   }
 #endif

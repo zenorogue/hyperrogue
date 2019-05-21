@@ -3,7 +3,6 @@
 
 // version numbers
 #define VER "11.0y"
-#define VERNUM 11025
 #define VERNUM_HEX 0xA619
 
 #include <stdarg.h>
@@ -4628,13 +4627,14 @@ template<class C, class C1, class... CS> void hread(hstream& hs, C& c, C1& c1, C
 struct hstream_exception : hr_exception { hstream_exception() {} };
 
 struct fhstream : hstream {
+  color_t vernum;
   FILE *f;
   virtual void write_char(char c) { write_chars(&c, 1); }
   virtual void write_chars(const char* c, size_t i) { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
   virtual void read_chars(char* c, size_t i) { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
   virtual char read_char() { char c; read_chars(&c, 1); return c; }
-  fhstream() { f = NULL; }
-  fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); }
+  fhstream() { f = NULL; vernum = VERNUM_HEX; }
+  fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); vernum = VERNUM_HEX; }
   ~fhstream() { if(f) fclose(f); }
   };
 
