@@ -531,11 +531,11 @@ bool draw_cell_schematics(cell *c, transmatrix V) {
         queuestr(V * rgpushxto0(p.p), .1, its(i), isize(p.vertices) > 8 ? 0xFF0000 : 0xFFFFFF);
         int N = isize(p.vertices);
         for(int j=0; j<N; j++)
-          gridline(V * p.pusher * p.vertices[j], V * p.pusher * p.vertices[(1+j)%N], 0xFFFFFFFF, 0);
+          gridline(V, p.pusher * p.vertices[j], p.pusher * p.vertices[(1+j)%N], 0xFFFFFFFF, 0);
 
-        gridline(V * p.p, V * C0, 0xFF0000FF, 0);
+        gridline(V, p.p, C0, 0xFF0000FF, 0);
         if(p.patterndir != -1)
-          gridline(V * p.p, V * calc_relative_matrix(c->master->move(p.patterndir)->c7, c, p.p) * C0, 0x00FF00FF, 0);
+          gridline(V, p.p, calc_relative_matrix(c->master->move(p.patterndir)->c7, c, p.p) * C0, 0x00FF00FF, 0);
         }
       }
     }
