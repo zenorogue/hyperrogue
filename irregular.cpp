@@ -898,7 +898,7 @@ void show_gridmaker() {
       int s = cellcount;
       if(density < 1) density = 1;
       cellcount = int(isize(currentmap->allcells()) * density + .5);
-      printf("density = %lf cellcount = %d\n", double(density), cellcount);
+      println(hlog, "density = ", fts(density), " cellcount = ", cellcount);
       if(cellcount > s) runlevel = 1;
       if(cellcount < s) runlevel = 0;
       };
@@ -910,7 +910,7 @@ void show_gridmaker() {
       "Tilings with low values are easier to generate, but tend to be more ugly."
       ));
     dialog::reaction = [] () {
-      printf("quality = %lf\n", double(density));
+      println(hlog, "quality = ", density);
       if(runlevel > 4) runlevel = 4;
       };
     });

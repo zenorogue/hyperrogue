@@ -338,8 +338,8 @@ bool handleTune(int sym, int uni) {
   else if(uni == 'z')
     bscale7 = bscale6 = 1, brot7 = brot6 = 0;
   else return false;
-  printf("s7 %lf r7 %lf s6 %lf r6 %lf\n", bscale7, brot7, bscale6, brot6);
   resetGeometry();
+  println(hlog, spaced(bscale7, brot7, bscale6, brot6));
   return true;
   }
 #endif
