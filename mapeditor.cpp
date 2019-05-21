@@ -1326,7 +1326,7 @@ namespace mapeditor {
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
         displayButton(8, 8+fs*16, XLAT("p = color"), 'p', 0);
-      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts4(texture::penwidth)), 'b', 0);
+      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts(texture::penwidth)), 'b', 0);
       displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
       displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
@@ -1363,25 +1363,25 @@ namespace mapeditor {
     if(!mouseout()) {
       transmatrix T = inverse(drawtrans * rgpushxto0(ccenter));
       hyperpoint mh = spintox(gpushxto0(ccenter) * coldcenter) * T * mouseh;
-      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])) + (DIM == 3 ? "/" + fts4(mh[3]) : ""), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],4)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],4)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)) + (DIM == 3 ? "/" + fts(mh[3], 4) : ""), 0xC0C0C0, 16);
       if(DIM == 3)
-        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts4(mh[3])), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts4(hdist0(mh))), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hdist0(mh),4)), 0xC0C0C0, 16);
       if(DIM == 3) {
-        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[2], hypot_d(2, mh)) / degree)), 0xC0C0C0, 16);
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts4(-atan2(mh[1], mh[0]) / degree)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
         }
       else {
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) / degree)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
         }
       }
 
     if(us) {
       auto& sh = us->d[dslayer].sh;
       if(sh.e >= sh.s + 3)
-        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts4(compute_area(sh) / M_PI) + "π" : fts4(compute_area(sh))), 'w', 16);
+        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), 4)), 'w', 16);
       }
 
     

@@ -1123,7 +1123,7 @@ void show() {
     
     if(archimedean) {
       dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
-      dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts6(current.edgelength), 0);
+      dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts(current.edgelength), 0);
 
       dialog::addItem(XLAT("color by symmetries"), 't');
       dialog::add_action(setcanvas('A'));

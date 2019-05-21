@@ -1854,16 +1854,16 @@ void show() {
   if(!rug::rugged)
     dialog::addSelItem(XLAT("native geometry"), geometry_name(gwhere), 'n');
   else
-    dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts4(radar_distance), 'r');
+    dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts(radar_distance, 4), 'r');
   dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');
   if(rug::rugged)
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
   dialog::addItem(XLAT("stereo vision config"), 'f');
   // dialog::addSelItem(XLAT("protractor"), fts(protractor * 180 / M_PI) + "°", 'f');
   if(!good_shape) {
-    dialog::addSelItem(XLAT("maximum error"), ftsg(err_zero), 'e');
+    dialog::addSelItem(XLAT("maximum error"), fts(err_zero), 'e');
     if(rug::rugged)
-      dialog::lastItem().value += " (" + ftsg(err_zero_current) + ")";
+      dialog::lastItem().value += " (" + fts(err_zero_current) + ")";
     }
   dialog::addSelItem(XLAT("automatic move speed"), fts(ruggo), 'G');
   dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');

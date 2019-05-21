@@ -26,17 +26,12 @@ int SDL_GetTicks() {
 
 long double sqr(long double x) { return x*x; }
 string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
-string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
-string fts3(float x) { char buf[64]; sprintf(buf, "%5.3f", x); return buf; }
-string fts4(float x) { char buf[64]; sprintf(buf, "%6.4f", x); return buf; }
-string fts6(float x) { char buf[64]; sprintf(buf, "%8.6f", x); return buf; }
-string ftsg(float x) { char buf[64]; sprintf(buf, "%4.2g", x); return buf; }
 
-string ftssmart(ld x) {
-  if(x == int(x)) return its(int(x));
-  if(abs(x) > 1) return fts4(x);
-  char buf[64]; sprintf(buf, "%.10e", (float) x); 
-  return buf;
+string fts(ld x, int prec) {
+  std::stringstream ss;
+  ss.precision(prec);
+  ss << x;
+  return ss.str();
   }
 
 bool scan(fhstream& hs, int& i) { return fscanf(hs.f, "%d", &i) == 1; }

@@ -383,7 +383,7 @@ bool step(int delta) {
   
       ld median = edgelens[isize(edgelens) / 2];
       ld minedge = median * quality;
-      status[3] = XLAT("median edge: %1 minimum: %2", fts4(median), fts4(edgelens[0]));
+      status[3] = XLAT("median edge: %1 minimum: %2", fts(median), fts(edgelens[0]));
       if(!bitruncations_performed && edgelens[0] < minedge) {
         if(rearrange_index >= rearrange_max_attempts) {
           runlevel = 0; break;

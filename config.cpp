@@ -1141,7 +1141,7 @@ void explain_detail() {
     "Objects at distance less than %1 absolute units "
     "from the center will be displayed with high "
     "detail, and at distance at least %2 with low detail.",
-    fts3(geom3::highdetail), fts3(geom3::middetail)
+    fts(geom3::highdetail), fts(geom3::middetail)
     ));
   }
 
@@ -1168,7 +1168,7 @@ void showStereo() {
   string modenames[4] = { "OFF", "anaglyph", "side-by-side", "ODS" };
   
   dialog::addSelItem(XLAT("stereo mode"), XLAT(modenames[vid.stereo_mode]), 'm');
-  dialog::addSelItem(XLAT("pupillary distance"), fts3(vid.ipd), 'e');
+  dialog::addSelItem(XLAT("pupillary distance"), fts(vid.ipd), 'e');
   
   switch(vid.stereo_mode) {
     case sAnaglyph:
@@ -1288,33 +1288,33 @@ void show3D() {
     }
   
   if(WDIM == 2) {
-    dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts3(camera), 'c');
-    dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
+    dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts(camera), 'c');
+    dialog::addSelItem(XLAT("Ground level below the plane"), fts(depth), 'g');
   
-    dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'a');
+    dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'a');
     dialog::addBreak(50);
-    dialog::addSelItem(XLAT("Height of walls"), fts3(wall_height), 'w');
+    dialog::addSelItem(XLAT("Height of walls"), fts(wall_height), 'w');
     
-    dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts3(rock_wall_ratio), 'r');
-    dialog::addSelItem(XLAT("Human to wall ratio"), fts3(human_wall_ratio), 'h');
-    dialog::addSelItem(XLAT("Level of water surface"), fts3(lake_top), 'l');
-    dialog::addSelItem(XLAT("Level of water bottom"), fts3(lake_bottom), 'k');  
+    dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts(rock_wall_ratio), 'r');
+    dialog::addSelItem(XLAT("Human to wall ratio"), fts(human_wall_ratio), 'h');
+    dialog::addSelItem(XLAT("Level of water surface"), fts(lake_top), 'l');
+    dialog::addSelItem(XLAT("Level of water bottom"), fts(lake_bottom), 'k');  
     }
   else {
-    dialog::addSelItem(XLAT("Creature scale"), fts3(creature_scale), 'c');
-    dialog::addSelItem(XLAT("Height to width"), fts3(height_width), 'h');
+    dialog::addSelItem(XLAT("Creature scale"), fts(creature_scale), 'c');
+    dialog::addSelItem(XLAT("Height to width"), fts(height_width), 'h');
     menuitem_sightrange('s');
     }
 
   dialog::addBreak(50);
-  dialog::addSelItem(XLAT(DIM == 3 && WDIM == 2 ? "Y shift" : "third person perspective"), fts3(vid.yshift), 'y');
+  dialog::addSelItem(XLAT(DIM == 3 && WDIM == 2 ? "Y shift" : "third person perspective"), fts(vid.yshift), 'y');
   if(DIM == 3) {
     dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
-  dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
+  dialog::addSelItem(XLAT("camera rotation"), fts(vid.camera_angle), 's');
   if(DIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
@@ -1335,7 +1335,7 @@ void show3D() {
   #if MAXMDIM >= 4
   if(DIM == 3) add_edit_fov('f');
   if(DIM == 3) {
-    dialog::addSelItem(XLAT("radar size"), fts3(vid.radarsize), 'r');
+    dialog::addSelItem(XLAT("radar size"), fts(vid.radarsize), 'r');
     dialog::add_action([] () {
       dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", "set to 0 to disable");
       });
@@ -1409,10 +1409,10 @@ void show3D() {
           "other equidistant surface below it) is viewed at an angle of %3 "
           "(the tangent of the angle between the point in "
           "the center of your vision and a faraway location is 1/cosh(c) = %4).",
-          fts3(camera),
-          fts3(depth),
-          fts3(atan(1/cosh(camera))*2/degree),
-          fts3(1/cosh(camera))) : XLAT("Look from behind."));
+          fts(camera),
+          fts(depth),
+          fts(atan(1/cosh(camera))*2/degree),
+          fts(1/cosh(camera))) : XLAT("Look from behind."));
         if(DIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
           dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
           };
@@ -1436,7 +1436,7 @@ void show3D() {
           "distances.)"
           
           ,
-          fts3(depth), fts3(cosh(depth))));
+          fts(depth), fts(cosh(depth))));
           // mention absolute units
           };
     else if(uni == 'a' && WDIM == 2) 
@@ -1448,7 +1448,7 @@ void show3D() {
         dialog::addHelp(XLAT(
           "The height of walls, in absolute units. For the current values of g and c, "
           "wall height of %1 absolute units corresponds to projection value of %2.",
-          fts3(actual_wall_height()), fts3(factor_to_projection(geom3::WALL))));
+          fts(actual_wall_height()), fts(factor_to_projection(geom3::WALL))));
         dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'O');
         dialog::add_action([] () {
           geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
@@ -1471,8 +1471,8 @@ void show3D() {
         "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
         "Length of paths on the Rock III level is %3 of the corresponding length on the "
         "ground level.",
-        fts3(rock_wall_ratio), fts3(wall_height * rock_wall_ratio),
-        fts3(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth))));
+        fts(rock_wall_ratio), fts(wall_height * rock_wall_ratio),
+        fts(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth))));
         },
       dialog::reaction = delayed_geo_reset;
     else if(uni == 'h' && WDIM == 2)
@@ -1482,8 +1482,8 @@ void show3D() {
         "Humans are %1 "
         "absolute units high. Your head travels %2 times the distance travelled by your "
         "feet.",
-        fts3(wall_height * human_wall_ratio),
-        fts3(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)))
+        fts(wall_height * human_wall_ratio),
+        fts(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)))
         );
         };
     else if(uni == 'h' && WDIM == 3)
@@ -1651,7 +1651,7 @@ void show_color_dialog() {
   dialog::addColorItem(XLAT("standard grid color"), stdgridcolor, 'g');
   dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::dialogflags |= sm::SIDE; });
 
-  dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
+  dialog::addSelItem(XLAT("brightness behind the sphere"), fts(backbrightness), 'i');
   dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
     XLAT("In the orthogonal projection, objects on the other side of the sphere are drawn darker.")); dialog::bound_low(0); });
 

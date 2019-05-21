@@ -3733,7 +3733,8 @@ extern const hyperpoint Hypc;
 ld det(const transmatrix& T);
 void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame = 0);
 
-string fts(float x);
+string fts(ld x, int prec = 6);
+
 bool model_needs_depth();
 
 hyperpoint hpxy(ld x, ld y);
@@ -3849,8 +3850,6 @@ typedef vector<shared_ptr<supersaver>> saverlist;
 
 extern saverlist savers;
 
-extern string ftssmart(ld x);
-
 string itsh(int i);
 
 #if CAP_CONFIG
@@ -3929,7 +3928,7 @@ template<> struct saver<string> : dsaver<string> {
 
 template<> struct saver<ld> : dsaver<ld> {
   saver<ld>(ld& val) : dsaver<ld>(val) { }
-  string save() { return ftssmart(val); }
+  string save() { return fts(val, 10); }
   void load(const string& s) { 
     if(s == "0.0000000000e+000") ; // ignore!
     else val = atof(s.c_str()); 

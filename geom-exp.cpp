@@ -750,7 +750,7 @@ void showEuclideanMenu() {
 
   dialog::addSelItem(XLAT("size of the world"), 
     #if CAP_BT
-    binarytiling ?  fts4(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1)) + " exp(∞)" :
+    binarytiling ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
     #endif
     #if CAP_ARCM
     archimedean ? arcm::current.world_size() :

@@ -604,7 +604,7 @@ namespace dialog {
   string disp(ld x) { 
     if(dialogflags & sm::HEXEDIT) return "0x" + itsh(x);
     else if(ne.intval) return its(ldtoint(x)); 
-    else if(ne.vmax-ne.vmin < 1) return fts4(x); else return fts(x); }
+    else return fts(x); }
 
   reaction_t reaction;
   reaction_t reaction_final;

@@ -873,7 +873,7 @@ bool texture_config::save() {
       for(auto& t: a.second.triangles)
         for(auto& v: t.tv) 
           for(int i=0; i<3; i++) {
-            texture_tuner += ftssmart(v[i]);
+            texture_tuner += fts(v[i]);
             texture_tuner += ';';
             }
     }

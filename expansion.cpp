@@ -714,9 +714,7 @@ void expansion_analyzer::view_distances_dialog() {
         }
       else dialog::addBreak(100);
       
-      char buf[20];
-      snprintf(buf, 20, "%.8lf", (double) get_growth());
-      dialog::addInfo("Θ(" + string(buf) + "...ᵈ)", forecolor);
+      dialog::addInfo("Θ(" + fts(get_growth(), 8) + "...ᵈ)", forecolor);
       }
     }
   
@@ -808,7 +806,7 @@ int expansion_readArgs() {
       for(int c: expansion.children[i]) printf(" %d", c);
       printf("\n");
       }
-    printf("growth = %lf\n", (double) expansion.get_growth());
+    println(hlog, "growth = ", expansion.get_growth());
     expansion.find_coefficients();      
     if(expansion.coefficients_known == 2) {
       printf("coefficients:"); for(int x: expansion.coef) printf(" %d", x);

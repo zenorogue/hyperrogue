@@ -758,7 +758,7 @@ namespace conformal {
     
     if(among(pmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
       dialog::addSelItem(XLAT("projection distance"), 
-      fts3(vid.alpha) + " (" + current_proj_name() + ")", 'p');
+      fts(vid.alpha) + " (" + current_proj_name() + ")", 'p');
       }
                                   
     if(model_has_orientation()) {
@@ -798,14 +798,14 @@ namespace conformal {
     
     if(pmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
-        fts4(polygonal::coefr[polygonal::coefid]), 'x');
+        fts(polygonal::coefr[polygonal::coefid]), 'x');
       dialog::add_action([] () {
         polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
         int ci = polygonal::coefid + 1;
         dialog::editNumber(polygonal::coefr[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
         });
       dialog::addSelItem(XLAT("coefficient (imaginary)"), 
-        fts4(polygonal::coefi[polygonal::coefid]), 'y');
+        fts(polygonal::coefi[polygonal::coefid]), 'y');
       dialog::add_action([] () {
         polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
         int ci = polygonal::coefid + 1;
@@ -830,7 +830,7 @@ namespace conformal {
       }
 
     if(pmodel == mdBall) {
-      dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
+      dialog::addSelItem(XLAT("projection in ball model"), fts(vid.ballproj), 'x');
       dialog::add_action([] () {
         dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
           "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
@@ -857,19 +857,19 @@ namespace conformal {
       }
     
     if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360)) {
-      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle) + "°", 'b');
+      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vid.ballangle) + "°", 'b');
       dialog::add_action(config_camera_rotation);
       }
     
     if(pmodel == mdHyperboloid) {
-      dialog::addSelItem(XLAT("maximum z coordinate to show"), fts3(top_z), 'l');
+      dialog::addSelItem(XLAT("maximum z coordinate to show"), fts(top_z), 'l');
       dialog::add_action([](){
         dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
         });
       }
     
     if(model_has_transition()) {
-      dialog::addSelItem(XLAT("model transition"), fts3(model_transition), 't');
+      dialog::addSelItem(XLAT("model transition"), fts(model_transition), 't');
       dialog::add_action([]() {
         dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
           "You can change this parameter for a transition from another model to this one."
@@ -878,14 +878,14 @@ namespace conformal {
       }
 
     if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && DIM == 2) {
-      dialog::addSelItem(XLAT("Möbius transformations"), fts3(vid.skiprope) + "°", 'S');
+      dialog::addSelItem(XLAT("Möbius transformations"), fts(vid.skiprope) + "°", 'S');
       dialog::add_action([](){
         dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
         });
       }
     
     if(pmodel == mdHemisphere && euclid) {
-      dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
+      dialog::addSelItem(XLAT("parameter"), fts(vid.euclid_to_sphere), 'l');
       dialog::add_action([] () {
         dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
           "Stereographic projection to a sphere. Choose the radius of the sphere."
@@ -895,7 +895,7 @@ namespace conformal {
       }
       
     if(pmodel == mdTwoPoint) {
-      dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'b');
+      dialog::addSelItem(XLAT("parameter"), fts(vid.twopoint_param), 'b');
       dialog::add_action([](){
         dialog::editNumber(vid.twopoint_param, 0, 10, .1, 1, XLAT("parameter"), 
           "This model maps the world so that the distances from two points "
@@ -952,7 +952,7 @@ namespace conformal {
         }
       }
 
-    dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');
+    dialog::addSelItem(XLAT("vertical stretch"), fts(vid.stretch), 's');
 
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
     if(vid.consider_shader_projection && !shaderside_projection)
