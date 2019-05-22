@@ -142,15 +142,17 @@ bool read_ghosts(string seed, int mcode) {
 
   if(seed == "OFFICIAL" && mcode == 2) {
     fhstream f("officials.data", "rb");
-    f.get<int>();
-    hread(f, oghostset());
+    if(f.f) {
+      hread(f, f.vernum);
+      hread(f, oghostset());
+      }
     }
   
   string fname = ghost_filename(seed, mcode);
   println(hlog, "trying to read ghosts from: ", fname);
   fhstream f(fname, "rb");
   if(!f.f) return false;
-  f.vernum = f.get<int> ();
+  hread(f, f.vernum);
   if(f.vernum <= 0xA600) return true; // scores removed due to the possibility of cheating
   hread(f, ghostset());
   return true;
@@ -641,7 +643,7 @@ void generate_track() {
   for(int i=0; i<MAXPLAYER; i++) race_finish_tick[i] = 0;
 
   official_race = (track_code == "OFFICIAL" && modecode() == 2);
-  if(official_race && race_checksum != oghostset() [specialland] [0].checksum) {
+  if(official_race && isize(oghostset() [specialland]) && race_checksum != oghostset() [specialland] [0].checksum) {
     official_race = false;
     addMessage(XLAT("Race did not generate correctly for some reason -- not ranked"));
     }
@@ -1162,7 +1164,7 @@ void race_won() {
     else
       addMessage(XLAT("Finished the race in time %1!", racetimeformat(result)));
     
-    if(place == 1 && losers && official_race)
+    if(place == 1 && losers && official_race && isize(oghostset()[specialland]))
       achievement_gain("RACEWON", rg::racing);
     
     race_finish_tick[multi::cpid] = ticks;
