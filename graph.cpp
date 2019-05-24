@@ -551,10 +551,10 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
   
   if(GDIM == 3) {
-    queuepolyat(V * front_leg_move * cspin(0, 2, rightfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
-    queuepolyat(V * Mirror * front_leg_move * cspin(0, 2, leftfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
-    queuepolyat(V * rear_leg_move * cspin(0, 2, -rightfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
-    queuepolyat(V * Mirror * rear_leg_move * cspin(0, 2, -leftfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
+    if(x[0]) queuepolyat(V * front_leg_move * cspin(0, 2, rightfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
+    if(x[0]) queuepolyat(V * Mirror * front_leg_move * cspin(0, 2, leftfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
+    if(x[1]) queuepolyat(V * rear_leg_move * cspin(0, 2, -rightfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
+    if(x[1]) queuepolyat(V * Mirror * rear_leg_move * cspin(0, 2, -leftfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
     return;
 
 /*
