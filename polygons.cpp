@@ -1691,6 +1691,7 @@ hpcshape
   shHawk,
   shCatBody, shCatLegs, shCatHead, shFamiliarHead, shFamiliarEye,
   shWolf1, shWolf2, shWolf3,
+  shRatEye1, shRatEye2, shRatEye3,
   shDogStripes,
   shPBody, shPSword, shPKnife,
   shFerocityM, shFerocityF, 

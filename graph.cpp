@@ -1864,18 +1864,25 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
         queuepoly(VHEAD, shWolf1, darkena(eyecol, 0, 0xFF));
         queuepoly(VHEAD, shWolf2, darkena(eyecol, 0, 0xFF));
         queuepoly(VHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
+        if(m == moRatlingAvenger) queuepoly(VHEAD1, shRatCape1, 0x303030FF);
         }
       else {
-        transmatrix V1 = V * zpush(geom3::AHEAD - zc(0.4) - zc(0.925) + geom3::HEAD) * cpush(0, scalefactor * (-0.1));
-        queuepoly(V1, shWolfHead, darkena(col, 0, 0xFF));
+        transmatrix V1 = V * zpush(geom3::AHEAD - zc(0.4) - zc(0.98) + geom3::HEAD); // * cpush(0, scalefactor * (-0.1));
+        queuepoly(V1, shRatHead, darkena(col, 0, 0xFF));
+
+        /*
         queuepoly(V1, shFamiliarEye, darkena(eyecol, 0, 0xFF));
         queuepoly(V1 * Mirror, shFamiliarEye, darkena(eyecol, 0, 0xFF));
         queuepoly(V1, shWolfEyes, darkena(col, 3, 0xFF));
+        */
+        queuepoly(V1, shRatEye1, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1, shRatEye2, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1, shRatEye3, darkena(0x202020, 0, 0xFF));
+        if(m == moRatlingAvenger) queuepoly(V1, shRatCape1, 0x303030FF);
         }
       
       if(m == moRatlingAvenger) {
         queuepoly(VBODY1 * VBS, shRatCape2, 0x484848FF);
-        queuepoly(VHEAD1, shRatCape1, 0x303030FF);
         }
       return false;
       }

@@ -804,10 +804,8 @@ void make_3d_models() {
   make_head_3d(shPirateHood);
   make_head_3d(shEyepatch);
   make_head_3d(shSkull);
-  make_head_3d(shRatHead);
   make_head_3d(shDemon);
   make_head_3d(shGoatHead);
-  make_head_3d(shRatCape1);
   make_head_3d(shJiangShiCap1);
   make_head_3d(shJiangShiCap2);
   make_head_3d(shTerraHead);
@@ -862,6 +860,8 @@ void make_3d_models() {
   
   make_revolution_cut(shWolfBody, 30, g, 0.01*S);
   make_revolution_cut(shWolfHead, 180, geom3::AHEAD - geom3::ABODY +g);
+  make_revolution_cut(shRatHead, 180, geom3::AHEAD - geom3::ABODY +g, 0.04*scalefactor);
+  make_revolution_cut(shRatCape1, 180, geom3::AHEAD - geom3::ABODY +g);
   make_revolution_cut(shFamiliarHead, 30, geom3::AHEAD - geom3::ABODY +g);
 
   // make_abody_3d(shDogTorso, 0.01);
@@ -1046,10 +1046,19 @@ void make_3d_models() {
   adjust_eye(shKrakenEye, shKrakenHead, 0, 0, 1);
   adjust_eye(shKrakenEye2, shKrakenEye, 0, 0, 1, 2);
   
+  shRatEye1 = shWolf1;
+  shRatEye2 = shWolf2;
+  shRatEye3 = shWolf3;
+
   adjust_eye(shWolf1, shDogHead, geom3::AHEAD, geom3::AHEAD, 1); 
   adjust_eye(shWolf2, shDogHead, geom3::AHEAD, geom3::AHEAD, 1); 
   adjust_eye(shWolf3, shDogHead, geom3::AHEAD, geom3::AHEAD, 1);
   adjust_eye(shFamiliarEye, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
+
+  adjust_eye(shRatEye1, shRatHead, geom3::AHEAD, geom3::AHEAD, 1); 
+  adjust_eye(shRatEye2, shRatHead, geom3::AHEAD, geom3::AHEAD, 1); 
+  for(int i=shRatEye3.s; i<shRatEye3.e; i++) hpc[i] = xpush(-scalefactor * 0.02) * hpc[i];
+  adjust_eye(shRatEye3, shRatHead, geom3::AHEAD, geom3::AHEAD, 1);
   
   adjust_eye(shWolfEyes, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
 
