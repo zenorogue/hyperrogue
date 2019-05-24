@@ -808,7 +808,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
     poly_outline = kind_outline(it);
 
 #if MAXMDIM >= 4
-  if(c && DIM == 3) addradar(V, iinf[it].glyph, icol, kind_outline(it));
+  if(c && WDIM == 3) addradar(V, iinf[it].glyph, icol, kind_outline(it));
 #endif
   
   if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
