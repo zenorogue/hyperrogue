@@ -2060,6 +2060,8 @@ void make_sidewalls() {
   dfloor_table[SIDE_LAKE] = geom3::LAKE;
   dfloor_table[SIDE_LTOB] = geom3::BOTTOM;
   dfloor_table[SIDE_BTOI] = geom3::INFDEEP;
+  dfloor_table[SIDE_HIGH] = geom3::HIGH;
+  dfloor_table[SIDE_HIGH2] = geom3::HIGH2;
   dfloor_table[SIDE_SKY ] = geom3::SKY;
   
   // sidewall parameters for the 3D mode
@@ -2070,6 +2072,8 @@ void make_sidewalls() {
     else if(k==SIDE_LTOB) dlow = geom3::BOTTOM, dhi = geom3::LAKE;
     else if(k==SIDE_BTOI) dlow = geom3::INFDEEP, dhi = geom3::BOTTOM;
     else if(k==SIDE_WTS3) dlow = geom3::SLEV[3], dhi = geom3::WALL;
+    else if(k==SIDE_HIGH) dlow = geom3::WALL, dhi = geom3::HIGH;
+    else if(k==SIDE_HIGH2) dlow = geom3::HIGH, dhi = geom3::HIGH2;
     else if(k==SIDE_SKY) dlow = geom3::WALL, dhi = geom3::LOWSKY;
     else dlow = geom3::SLEV[k-SIDE_SLEV], dhi = geom3::SLEV[k-SIDE_SLEV+1];
     dlow_table[k] = dlow;

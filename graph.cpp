@@ -4560,7 +4560,6 @@ int ceiling_category(cell *c) {
     case laHive:
     case laCamelot:
     case laTemple:
-    case laPalace:
     case laPrincessQuest:
     case laIvoryTower:
     case laEFire:
@@ -4580,6 +4579,7 @@ int ceiling_category(cell *c) {
     case laVariant:    
       return 3;
     
+    case laPalace:
     default:
       return 4;
     }
@@ -4660,6 +4660,35 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
           placeSidewall(c, i, SIDE_SKY, V, darkena(wcol2, fd, 0xFF));
           }
       return;
+      }
+    
+    case 4: {
+      auto ispal = [&] (cell *c0) { return c0->land == laPalace && among(c0->wall, waPalace, waClosedGate, waOpenGate); };
+      color_t wcol2 = 0xFFD500;
+      if(ispal(c)) {
+        forCellIdEx(c2, i, c) if(!ispal(c2))
+          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+        }
+      else {
+        bool window = false;
+        forCellIdEx(c2, i, c) if(c2->wall == waPalace && ispal(c->modmove(i+1)) && ispal(c->modmove(i-1))) window = true;        
+        if(!window) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(fcol, fd, 0xFF), PPR::WALL);
+        if(window) 
+          forCellIdEx(c2, i, c) 
+            placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
+        }
+      if(among(c->wall, waClosedGate, waOpenGate)) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
+
+      if(true) {
+        auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
+        star.tinf = NULL;
+        star.flags |= POLY_INTENSE;
+        }
+      int sk = get_skybrightness();
+      if(sk > 0) {
+        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
+        }
       }
     }
   }

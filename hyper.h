@@ -4254,7 +4254,9 @@ void set_blizzard_frame(cell *c, int frameid);
 #define SIDE_LTOB 6
 #define SIDE_BTOI 7
 #define SIDE_SKY  8
-#define SIDEPARS  9
+#define SIDE_HIGH 9
+#define SIDE_HIGH2 10
+#define SIDEPARS  11
 
 #if CAP_SHAPES
 struct floorshape {

@@ -268,7 +268,7 @@ namespace geom3 {
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, BODY1, BODY2, BODY3,
     NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
-    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY;
+    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2;
   
   string invalid;
   
@@ -382,6 +382,8 @@ namespace geom3 {
       HELLSPIKE = lev_to_factor(-(lake_top+lake_bottom)/2);
       BOTTOM = lev_to_factor(-lake_bottom);
       LOWSKY = lev_to_factor((1 + rock_wall_ratio) * wh);
+      HIGH = LOWSKY;
+      HIGH2 = lev_to_factor((2 + rock_wall_ratio) * wh);
       SKY = LOWSKY - 5;
       }
     }    
