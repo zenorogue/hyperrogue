@@ -624,7 +624,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 #define VAHEAD mmscale(V, geom3::AHEAD)
 
 #define VFISH V
-#define VBIRD  ((DIM == 3 || (where && bird_disruption(where))) ? V : mmscale(V, geom3::BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.)))
+#define VBIRD  ((DIM == 3 || (where && bird_disruption(where))) ? (WDIM == 2 ? mmscale(V, geom3::BIRD) : V) : mmscale(V, geom3::BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.)))
 #define VGHOST  mmscale(V, geom3::GHOST)
 
 #define VSLIMEEYE  mscale(V, geom3::FLATEYE)
