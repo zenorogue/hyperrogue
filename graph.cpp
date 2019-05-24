@@ -722,9 +722,12 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
   }
 
 ld max_eu_dist = 0;
+transmatrix radar_transform;
 
 void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
   hyperpoint h = tC0(V);
+  if(GDIM == 3 && WDIM == 2) h = tC0(radar_transform * V);
+
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
   if(d > sightranges[geometry]) return;
@@ -732,26 +735,14 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
     if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
     }
   else if(hyperbolic) {
-    ld z = h[2] + h[1]/1000000;
-    h[1] = hypot(h[1], h[2]) / (1 + h[3]);
-    // we add h[1]/1000000 so that it also works for h[2] == 0
-    if(z < 0) h[1] = -h[1];
-    h[0] = h[0] / (1 + h[3]);
-    h[2] = 0;
+    for(int a=0; a<3; a++) h[a] = h[a] / (1 + h[3]);
     }
   else if(sphere) {
-    ld z = h[2] + h[1]/1000000;
-    h[1] = hypot(h[2], h[1]);
-    if(z < 0) h[1] = -h[1];
     h[2] = h[3];
     }
   else {
-    ld z = h[2] + h[1]/1000000;
     if(d > max_eu_dist) max_eu_dist = d;
     if(d) h = h * (d / (max_eu_dist + scalefactor/4) / hypot_d(3, h));
-    h[1] = hypot(h[1], h[2]) / (1 + h[3]);
-    if(z < 0) h[1] = -h[1];
-    h[2] = 0;
     }
   radarpoints.emplace_back(radarpoint{h, ch, col, outline});
   }
@@ -6711,6 +6702,21 @@ void make_actual_view() {
 
 transmatrix cview() {
   make_actual_view();
+  if(GDIM == 3 && WDIM == 2) {
+    transmatrix T = actual_view_transform * View;
+    transmatrix U = inverse(T);
+    
+    if(T[0][2]) 
+      T = spin(-atan2(T[0][2], T[1][2])) * T;
+    if(T[1][2] && T[2][2]) 
+      T = cspin(1, 2, -atan2(T[1][2], T[2][2])) * T;
+
+    ld z = -asin_auto(tC0(inverse(T)) [2]);
+    T = zpush(-z) * T;
+
+    radar_transform = T * U;
+    }
+  
   return actual_view_transform * View;
   }
 

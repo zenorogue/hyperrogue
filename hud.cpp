@@ -354,7 +354,7 @@ extern ld max_eu_dist;
 
 void draw_radar(bool cornermode) {
 
-  bool d3 = WDIM == 3 || straightDownSeek || !vid.fixed_yz;
+  bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
   bool sph = sphere;
 
@@ -400,14 +400,14 @@ void draw_radar(bool cornermode) {
   glflush();
 
   for(auto& r: radarpoints)
-    if(d3 || sphere) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
-    else if(sph) displaychr(int(cx + (rad-10) * r.h[0]), int(cy + (rad-10) * r.h[2] * si - (rad-10) * r.h[1] * co), 0, -r.h[1] * si > r.h[2] * co ? 8 : 16, r.glyph, r.color);
+    if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
+    else if(sph) displaychr(int(cx + (rad-10) * r.h[0]), int(cy + (rad-10) * r.h[2] * si + (rad-10) * r.h[1] * co), 0, +r.h[1] * si > r.h[2] * co ? 8 : 16, r.glyph, r.color);
     else if(hyp) {
       int siz = 1/(1+r.h[3]) * scalefactor * current_display->radius / (inHighQual ? 10 : 6);
-      displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, siz, r.glyph, r.color);
+      displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, siz, r.glyph, r.color);
       }
     else {
-      displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[1]), 0, rad * scalefactor / (max_eu_dist + scalefactor/4) * 0.8, r.glyph, r.color);
+      displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, rad * scalefactor / (max_eu_dist + scalefactor/4) * 0.8, r.glyph, r.color);
       }    
   }
 
