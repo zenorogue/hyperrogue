@@ -1075,6 +1075,23 @@ void make_3d_models() {
 
   shift_shape(shSemiFloorShadow, geom3::FLOOR - geom3::human_height / 100);
   shift_shape(shSemiFloor[0], geom3::WALL);
+  
+  bshape(shPalaceGate, PPR::WALL);
+  for(int i=0; i<4; i++) {
+    ld x = -0.219482 + (0.135153 + 0.219482) * (i+.5) / 4;
+    for(int j=0; j<12; j++) {
+      hyperpoint left = xpush(x) * xspinpush0(j * 30 * degree, 0.02);
+      hyperpoint right = xpush(x) * xspinpush0((j+1) * 30 * degree, 0.02);
+      hpcpush(orthogonal_move(left, geom3::FLOOR));
+      hpcpush(orthogonal_move(right, geom3::FLOOR));
+      hpcpush(orthogonal_move(left, geom3::WALL));
+      hpcpush(orthogonal_move(right, geom3::FLOOR));
+      hpcpush(orthogonal_move(left, geom3::WALL));
+      hpcpush(orthogonal_move(right, geom3::WALL));
+      }
+    }
+  shPalaceGate.flags |= POLY_TRIANGLES;
+  finishshape();
   }
 
 #undef S

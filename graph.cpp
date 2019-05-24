@@ -4085,11 +4085,18 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
       draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
       return;
       }
+    if(c->wall == waClosedGate) {
+      int hdir = 0;
+      for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
+        hdir = i;
+      queuepolyat(V * ddspin(c, hdir, M_PI), shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
+      return;
+      }
     color_t wcol0 = wcol;
     color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
     draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
     forCellIdEx(c2, i, c) 
-      if(!highwall(c2) || conegraph(c2))
+      if(!highwall(c2) || conegraph(c2) || c2->wall == waClosedGate)
         placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
 
     dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
