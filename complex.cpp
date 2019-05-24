@@ -2769,7 +2769,7 @@ namespace kraken {
     if(!isWatery(c)) return;
     if(againstCurrent(c, c2)) return;
     forCellIdEx(c3, i, c) {
-      if(c3->monst && c3 != c2 && !(c3->mondir >= 0 && c3->mondir < c3->type &&
+      if(c3->monst && c3 != c2 && !(c3->mondir < c3->type &&
         c3->move(c3->mondir) == c2))
         return;
       if(isPlayerOn(c3)) return;
