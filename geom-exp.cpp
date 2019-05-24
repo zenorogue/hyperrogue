@@ -869,11 +869,16 @@ int read_geom_args() {
     }
   else if(argis("-tparx")) {
     shift(); 
-    sscanf(argcs(), "%d,%d,%d", 
-      (int*) &torusconfig::torus_mode,
+    int tmode;
+    sscanf(argcs(), "%d,%d,%d", &tmode,
       &torusconfig::sdx,
       &torusconfig::sdy
       );
+    if(tmode < 0 || tmode >= isize(torusconfig::tmodes)) {
+      println(hlog, "bad tmode");
+      exit(1);
+      }
+    torusconfig::torus_mode = torusconfig::eTorusMode(tmode);
     if(torusconfig::torus_mode == torusconfig::tmSingle)
       torusconfig::qty = torusconfig::sdx,
       torusconfig::dy = torusconfig::sdy;
