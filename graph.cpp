@@ -4696,7 +4696,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
         }
       else {
         bool window = false;
-        forCellIdEx(c2, i, c) if(c2->wall == waPalace && ispal(c->modmove(i+1)) && ispal(c->modmove(i-1))) window = true;        
+        forCellIdEx(c2, i, c) if(c2->wall == waPalace && ispal(c->cmodmove(i+1)) && ispal(c->cmodmove(i-1))) window = true;        
         if(!window) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(fcol, fd, 0xFF), PPR::WALL);
         if(window) 
           forCellIdEx(c2, i, c) 
