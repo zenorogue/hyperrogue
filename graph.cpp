@@ -5931,9 +5931,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
       
         case waGiantRug:
-          queuepoly(V, shBigCarpet1, darkena(0xC09F00, 0, 0xFF));
-          queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
-          queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
+          queuepoly(V, shBigCarpet1, darkena(DIM == 3 ? 0 : 0xC09F00, 0, 0xFF));
+          queuepoly(V, shBigCarpet2, darkena(DIM == 3 ? 0xC09F00 : 0x600000, 0, 0xFF));
+          queuepoly(V, shBigCarpet3, darkena(DIM == 3 ? 0x600000 : 0xC09F00, 0, 0xFF));
           break;
         
         case waBarrier:

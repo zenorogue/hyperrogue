@@ -992,9 +992,9 @@ void make_3d_models() {
   for(int i=0; i<14; i++)
     shift_shape(shTriheptaSpecial[i], geom3::FLOOR);
 
-  shift_shape(shBigCarpet1, geom3::FLOOR - geom3::human_height * 1/40);
-  shift_shape(shBigCarpet2, geom3::FLOOR - geom3::human_height * 2/40);
-  shift_shape(shBigCarpet3, geom3::FLOOR - geom3::human_height * 3/40);
+  shift_shape_orthogonally(shBigCarpet1, geom3::FLOOR - geom3::human_height * 1/40);
+  shift_shape_orthogonally(shBigCarpet2, geom3::FLOOR - geom3::human_height * 2/40);
+  shift_shape_orthogonally(shBigCarpet3, geom3::FLOOR - geom3::human_height * 3/40);
   for(int a=0; a<5; a++) for(int b=0; b<4; b++)
     shift_shape(shReptile[a][b], geom3::FLOOR - geom3::human_height * min(b, 2) / 40);
     
@@ -1091,6 +1091,31 @@ void make_3d_models() {
       }
     }
   shPalaceGate.flags |= POLY_TRIANGLES;
+  
+  for(int i=0; i<3; i++) {
+  
+    array<hpcshape*,3> sh = {&shBigCarpet1, &shBigCarpet2, &shBigCarpet3};
+
+    bshape(*sh[i], PPR::GFLOORa);  
+    for(int t=0; t<S7; t++) {
+      dynamicval<int> dv(vid.texture_step, 16);
+      texture_order([&] (ld x, ld y) {
+        using namespace hyperpoint_vec;
+        ld z = 1-x-y;
+        ld rad = 2.1 - i * 0.2;
+        hyperpoint hx = ddi(t*12, -zhexf*rad) * C0;
+        hyperpoint hy = ddi(t*12+12, -zhexf*rad) * C0;
+        hyperpoint hz = C0;
+        hyperpoint h = hx * x + hy * y + hz * z;
+        h = mid(h, h);
+        h = orthogonal_move(h, geom3::FLOOR - geom3::human_height * (i+2.5) / 100 * (x+y+1)/2);
+        hpcpush(h);
+        });  
+      }
+      
+    sh[i]->flags |= POLY_TRIANGLES;
+    }
+
   finishshape();
   }
 
