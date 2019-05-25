@@ -3065,7 +3065,7 @@ namespace prairie {
 //    if(nearriver(c) && op
     if(enter && nearriver(c) && opposite(c) && thisriver(c)) {
       int hr = hrand(100);
-      if(hr == 0 && items[itGreenGrass] >= 10) {
+      if(hr == 0 && items[itGreenGrass] >= 10 && !inv::on) {
         c->item = itOrbBull;
         // orbs.push_back(c); 
         }
