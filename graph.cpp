@@ -4573,7 +4573,6 @@ int ceiling_category(cell *c) {
     case laCaves:
     case laMirror:
     case laMirrorOld:
-    case laRlyeh:
     case laHell:
     case laCocytus:
     case laEmerald:
@@ -4581,8 +4580,6 @@ int ceiling_category(cell *c) {
     case laPower:
     case laHive:
     case laCamelot:
-    case laTemple:
-    case laPrincessQuest:
     case laIvoryTower:
     case laEFire:
     case laEEarth:
@@ -4595,13 +4592,18 @@ int ceiling_category(cell *c) {
     case laMirrorWall:
     case laTerracotta:
     case laMercuryRiver:
-    case laRuins:
     case laMagnetic:
     case laSwitch:
     case laVariant:    
       return 3;
     
+    case laRlyeh:
+    case laTemple:
+    case laRuins:
+      return 5;
+
     case laPalace:
+    case laPrincessQuest:
     default:
       return 4;
     }
@@ -4685,6 +4687,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       }
     
     case 4: {
+      if(camera_level <= geom3::HIGH2) return;
       auto ispal = [&] (cell *c0) { return c0->land == laPalace && among(c0->wall, waPalace, waClosedGate, waOpenGate); };
       color_t wcol2 = 0xFFD500;
       if(ispal(c)) {
@@ -4700,6 +4703,29 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
             placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
         }
       if(among(c->wall, waClosedGate, waOpenGate)) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
+
+      if(true) {
+        auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
+        star.tinf = NULL;
+        star.flags |= POLY_INTENSE;
+        }
+      int sk = get_skybrightness();
+      if(sk > 0) {
+        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
+        }
+      break;
+      }
+    
+    case 5: {
+      if(camera_level <= geom3::WALL) return;
+    
+      if(pseudohept(c)) {
+        forCellIdEx(c2, i, c) 
+          placeSidewall(c, i, SIDE_HIGH, V, darkena(fcol, fd, 0xFF));
+        }
+      else
+        draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
       if(true) {
         auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
