@@ -889,10 +889,32 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
     }
 
   else if(it == itPalace) {
-    transmatrix V2 = Vit * spin(ticks / 1500.);
-    draw_floorshape(c, V2, shMFloor3, 0xFFD500FF);
-    draw_floorshape(c, V2, shMFloor4, darkena(icol, 0, 0xFF));
-    queuepoly(V2, shGem[ct6], 0xFFD500FF);
+    ld h = geom3::human_height;
+    if(GDIM == 3 && WDIM == 2) {
+      dynamicval<qfloorinfo> qfi2(qfi, qfi);
+      transmatrix V2 = V * spin(ticks / 1500.);
+      /* divisors should be higher than in plate renderer */
+      qfi.fshape = &shMFloor2;
+      draw_shapevec(c, V2 * zpush(-h/30), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
+
+      qfi.fshape = &shMFloor3;
+      draw_shapevec(c, V2 * zpush(-h/25), qfi.fshape->levels[0], darkena(icol, 0, 0xFF), PPR::WALL);
+
+      qfi.fshape = &shMFloor4;
+      draw_shapevec(c, V2 * zpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
+      }
+    else if(WDIM == 3) {
+      transmatrix V2 = Vit * spin(ticks / 1500.);
+      draw_floorshape(c, V2 * zpush(h/100), shMFloor3, 0xFFD500FF);
+      draw_floorshape(c, V2 * zpush(h/50), shMFloor4, darkena(icol, 0, 0xFF));
+      queuepoly(V2, shGem[ct6], 0xFFD500FF);
+      }
+    else {
+      transmatrix V2 = Vit * spin(ticks / 1500.);
+      draw_floorshape(c, V2, shMFloor3, 0xFFD500FF);
+      draw_floorshape(c, V2, shMFloor4, darkena(icol, 0, 0xFF));
+      queuepoly(V2, shGem[ct6], 0xFFD500FF);
+      }
     xsh = NULL;
     }
   
@@ -5792,7 +5814,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(DIM == 3) {
             #if MAXMDIM >= 4
             draw_shapevec(c, V2 * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
-            draw_shapevec(c, V2 * zpush(-geom3::human_height/20), shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+            draw_shapevec(c, V2 * zpush(-geom3::human_height/35), shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
             #endif
             }
           else {
