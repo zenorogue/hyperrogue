@@ -1316,7 +1316,7 @@ void markers() {
     draw_ghost(ghost);
   
   if(gmatrix.count(track[0])) {
-    hyperpoint h = WDIM == 2 && GDIM == 3 ? zpush(geom3::FLOOR - geom3::human_height/80) * C0 : C0;
+    hyperpoint h = WDIM == 2 && GDIM == 3 ? zpush(cgi.FLOOR - cgi.human_height/80) * C0 : C0;
     for(ld z=-start_line_width; z<=start_line_width; z+=0.1) 
       curvepoint(ggmatrix(track[0]) * straight * parabolic1(z) * h);
     queuecurve(0xFFFFFFFF, 0, PPR::BFLOOR);

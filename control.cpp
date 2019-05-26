@@ -300,13 +300,13 @@ void handlePanning(int sym, int uni) {
     if(conformal::on)
       conformal::rotation++;
     else
-      View = spin(M_PI/S21/2*shiftmul) * View, didsomething = true;
+      View = spin(M_PI/cgi.S21/2*shiftmul) * View, didsomething = true;
     }
   if(sym == SDLK_PAGEDOWN) {
     if(conformal::on)
       conformal::rotation++;
     else
-      View = spin(-M_PI/S21/2*shiftmul) * View, didsomething = true;
+      View = spin(-M_PI/cgi.S21/2*shiftmul) * View, didsomething = true;
     }
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
@@ -338,7 +338,6 @@ bool handleTune(int sym, int uni) {
   else if(uni == 'z')
     bscale7 = bscale6 = 1, brot7 = brot6 = 0;
   else return false;
-  resetGeometry();
   println(hlog, spaced(bscale7, brot7, bscale6, brot6));
   return true;
   }

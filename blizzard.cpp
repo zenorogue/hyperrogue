@@ -121,7 +121,7 @@ void drawBlizzards() {
       if(wmascii || wmblack)
         queuechr(tpartial, .2, '.', 0xFFFFFF);
       else
-        queuepoly(tpartial, shSnowball, 0xFFFFFF80);
+        queuepoly(tpartial, cgi.shSnowball, 0xFFFFFF80);
       }
     }
 
@@ -130,9 +130,9 @@ void drawBlizzards() {
 
     /* if(isNeighbor(bc.c, mouseover)) {
       if(againstWind(mouseover, bc.c))
-        queuepoly(*bc.gm, shHeptaMarker, 0x00C00040);
+        queuepoly(*bc.gm, cgi.shHeptaMarker, 0x00C00040);
       if(againstWind(bc.c, mouseover))
-        queuepoly(*bc.gm, shHeptaMarker, 0xC0000040);
+        queuepoly(*bc.gm, cgi.shHeptaMarker, 0xC0000040);
       } */
 
     forCellIdEx(c2, i, bc.c) if(bc.c == mouseover || c2 == mouseover) {
@@ -144,7 +144,7 @@ void drawBlizzards() {
       if(isPlayerOn(bc.c))
         col ^= 0x00000040;
       if(againstWind(bc.c, c2))
-        queuepoly(*bc.gm * ddspin(bc.c, i) * xpush(cellgfxdist(bc.c, i)/2), shWindArrow, col);
+        queuepoly(*bc.gm * ddspin(bc.c, i) * xpush(cellgfxdist(bc.c, i)/2), cgi.shWindArrow, col);
       }
 
     int B = isize(bc.outorder);
@@ -230,7 +230,7 @@ void drawArrowTraps() {
           transmatrix& tv = u ? t1 : t0;
           hyperpoint trel = inverse(tu) * tC0(tv);
           transmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
-          queuepoly(tpartial * ypush(.05), shTrapArrow, 0xFFFFFFFF);
+          queuepoly(tpartial * ypush(.05), cgi.shTrapArrow, 0xFFFFFFFF);
           }
         }
       #endif

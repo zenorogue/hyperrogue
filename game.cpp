@@ -2916,7 +2916,7 @@ void buildRosemap() {
 
   }
 
-int getDistLimit() { return base_distlimit; }
+int getDistLimit() { return cgi.base_distlimit; }
 
 bool nogoSlow(cell *to, cell *from) {
   if(cellEdgeUnstable(to) && gravityLevelDiff(to, from) >= 0) return true;

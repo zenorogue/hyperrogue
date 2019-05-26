@@ -1025,7 +1025,6 @@ void set_crystal(int sides) {
   static char buf[20];
   sprintf(buf, "{%d,4}", sides);
   ginf[gCrystal].tiling_name = buf;
-  need_reset_geometry = true;
   if(sides < MAX_EDGE)
     ginf[gCrystal].distlimit = distlimit_table[sides];
   }
@@ -1329,7 +1328,6 @@ coord euclid3_to_crystal(euclid3::coord x) {
 void transform_crystal_to_euclid () {
   euclid3::clear_torus3();
   geometry = gCubeTiling;
-  need_reset_geometry = true;
   auto e = new euclid3::hrmap_euclid3;
   auto m = crystal_map();
   auto infront = cwt.cpeek();
@@ -1391,7 +1389,6 @@ void transform_euclid_to_crystal () {
   ginf[gCrystal].sides = 6;
   ginf[gCrystal].vertex = 4;
   ginf[gCrystal].tiling_name = "{6,4}";
-  need_reset_geometry = true;
   ginf[gCrystal].distlimit = distlimit_table[6];
 
   auto e = euclid3::cubemap();

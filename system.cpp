@@ -6,8 +6,6 @@
 
 namespace hr {
 
-bool need_reset_geometry = true;
-
 bool game_active;
 
 bool cblind;
@@ -1091,39 +1089,48 @@ namespace gamestack {
     eGeometry geometry;
     eVariation variation;
     bool shmup;
+    void store();
+    void restore();
     };
 
   vector<gamedata> gd;
   
   bool pushed() { return isize(gd); }
   
+  void gamedata::store() {
+    hmap = currentmap;
+    cwt = hr::cwt;
+    geometry = hr::geometry;
+    shmup = hr::shmup::on;
+    variation = hr::variation;
+    d = *current_display;
+    }
+  
+  void gamedata::restore() {
+    currentmap = hmap;
+    hr::cwt = cwt;
+    hr::geometry = geometry;
+    hr::variation = variation;
+    if(shmup::on) shmup::clearMonsters();
+    shmup::on = shmup;
+    check_cgi();
+    cgi.require_basics();
+    *current_display = d;
+    bfs();
+    }
+  
   void push() {
     if(geometry) {
       printf("ERROR: push implemented only in non-hyperbolic geometry\n");
       exit(1);
       }
-    gamedata gdn;
-    gdn.hmap = currentmap;
-    gdn.cwt = cwt;
-    gdn.geometry = geometry;
-    gdn.shmup = shmup::on;
-    gdn.variation = variation;
-    gdn.d = *current_display;
-    gd.push_back(gdn);
+    gd.emplace_back();
+    gd.back().store();
     }
     
   void pop() {
-    gamedata& gdn = gd[isize(gd)-1];
-    currentmap = gdn.hmap;
-    cwt = gdn.cwt;
-    geometry = gdn.geometry;
-    variation = gdn.variation;
-    if(shmup::on) shmup::clearMonsters();
-    shmup::on = gdn.shmup;
-    resetGeometry();
-    *current_display = gdn.d;
+    gd.back().restore();
     gd.pop_back();
-    bfs();
     }
   
   };
@@ -1215,8 +1222,6 @@ void set_geometry(eGeometry target) {
     #endif
     if(DIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
     if(DIM == 2 && pmodel == mdPerspective) pmodel = mdDisk;
-   
-    need_reset_geometry = true; 
     }
   }
 
@@ -1231,7 +1236,6 @@ void set_variation(eVariation target) {
       target = eVariation::pure;
       }
     variation = target;
-    need_reset_geometry = true;
     }
   }
 
@@ -1256,7 +1260,6 @@ void switch_game_mode(char switchWhat) {
     case rg::chaos:
       if(tactic::on) firstland = laIce;
       yendor::on = tactic::on = princess::challenge = false;
-      need_reset_geometry = true;
       chaosmode = !chaosmode;
       if(bounded) set_geometry(gNormal);
       racing::on = false;
@@ -1272,7 +1275,6 @@ void switch_game_mode(char switchWhat) {
       gp::param = gp::loc(1, 1);
       #endif
       shmup::on = false;
-      need_reset_geometry = true;    
       tour::on = !tour::on;
       racing::on = false;
       break;
@@ -1359,7 +1361,8 @@ void start_game() {
   restart:
   game_active = true;
   gamegen_failure = false;
-  if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
+  check_cgi();
+  cgi.require_basics();
   initcells();
   expansion.reset();
 

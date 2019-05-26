@@ -484,10 +484,10 @@ void showEuclideanMenu() {
   
   #if CAP_GP
   if(GOLDBERG && S3)
-    nom = 2 * (2*tv + ts * (gp::area-1));
+    nom = 2 * (2*tv + ts * (cgi.gpdata->area-1));
 
   if(GOLDBERG && S3 == 4)
-    nom = 2 * (2*tv + 2 * ts * (gp::area-1));
+    nom = 2 * (2*tv + 2 * ts * (cgi.gpdata->area-1));
   #endif
 
   int worldsize;
@@ -625,7 +625,6 @@ void showEuclideanMenu() {
     dialog::add_action([] {
       dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
       dialog::reaction = [] () {
-        need_reset_geometry = true;
         #if CAP_TEXTURE
         texture::config.remap();
         #endif

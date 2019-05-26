@@ -11,8 +11,8 @@ ld eyepos;
 
 #if MAXMDIM >= 4
 
-#define S (scalefactor / 0.805578)
-#define SH (scalefactor / 0.805578 * geom3::height_width / 1.5)
+#define S (cgi.scalefactor / 0.805578)
+#define SH (cgi.scalefactor / 0.805578 * geom3::height_width / 1.5)
 
 #define revZ (WDIM == 2 ? -1 : 1)
 
@@ -22,7 +22,7 @@ hyperpoint front_leg, rear_leg;
 transmatrix front_leg_move, rear_leg_move, front_leg_move_inverse, rear_leg_move_inverse;
 ld leg_length;
 
-vector<hyperpoint> get_shape(hpcshape sh) {
+vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
   vector<hyperpoint> res;
   for(int i=sh.s; i<sh.e-1; i++) res.push_back(hpc[i]);
   return res;  
@@ -37,15 +37,15 @@ hyperpoint get_center(const vector<hyperpoint>& vh) {
 
 ld zc(ld z) { 
   if(WDIM == 2 && GDIM == 3)
-    return geom3::lev_to_factor(geom3::human_height * z);
-  return geom3::human_height * (z - 0.5); 
+    return geom3::lev_to_factor(cgi.human_height * z);
+  return cgi.human_height * (z - 0.5); 
   }
 
 transmatrix zpush(ld z) {
   return cpush(2, z);
   }
 
-void add_cone(ld z0, const vector<hyperpoint>& vh, ld z1) {
+void geometry_information::add_cone(ld z0, const vector<hyperpoint>& vh, ld z1) {
   last->flags |= POLY_TRIANGLES;
   for(int i=0; i<isize(vh); i++) {
     hpcpush(zpush(z0) * vh[i]);
@@ -54,7 +54,7 @@ void add_cone(ld z0, const vector<hyperpoint>& vh, ld z1) {
     }
   }
 
-void add_prism_sync(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1) {
+void geometry_information::add_prism_sync(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1) {
   last->flags |= POLY_TRIANGLES;
   for(int i=0; i<isize(vh0); i++) {
     int i1 = (i+1) % isize(vh0);
@@ -67,7 +67,7 @@ void add_prism_sync(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1
     }
   }
 
-void add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1) {
+void geometry_information::add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1) {
   last->flags |= POLY_TRIANGLES;
   
   struct mixed {
@@ -97,15 +97,15 @@ void add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1) {
     }
   }
   
-void shift_last(ld z) {
+void geometry_information::shift_last(ld z) {
   for(int i=last->s; i<isize(hpc); i++) hpc[i] = zshift(hpc[i], z);
   }
 
-void shift_shape(hpcshape& sh, ld z) {
+void geometry_information::shift_shape(hpcshape& sh, ld z) {
   for(int i=sh.s; i<sh.e; i++) hpc[i] = zshift(hpc[i], z);
   }
 
-void shift_shape_orthogonally(hpcshape& sh, ld z) {
+void geometry_information::shift_shape_orthogonally(hpcshape& sh, ld z) {
   for(int i=sh.s; i<sh.e; i++) hpc[i] = orthogonal_move(hpc[i], z);
   }
 
@@ -113,7 +113,7 @@ extern renderbuffer *floor_textures;
 
 basic_textureinfo models_texture;
 
-void add_texture(hpcshape& sh) {
+void geometry_information::add_texture(hpcshape& sh) {
   if(!floor_textures) return;
   auto& utt = models_texture;
   sh.tinf = &utt;
@@ -133,7 +133,7 @@ vector<hyperpoint> scaleshape(const vector<hyperpoint>& vh, ld s) {
   return res;
   }
 
-void make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
+void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   shcenter = C0;
 
   auto groin = get_shape(shHumanGroin);
@@ -191,14 +191,14 @@ void make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   add_cone(zc(0.8), neck, zc(0.83));
 
   int at0 = isize(hpc);
-  ld h = geom3::human_height;
+  ld h = human_height;
   
   if(isize(arm) > 3) {
     shcenter = get_center(arm);
     int arm0 = isize(hpc);
-    add_prism_sync(geom3::BODY - h*.03, arm, geom3::BODY + h*.03, arm);
-    add_cone(geom3::BODY + h*.03, arm, geom3::BODY + h*.05);
-    add_cone(geom3::BODY - h*.03, arm, geom3::BODY - h*.05);
+    add_prism_sync(BODY - h*.03, arm, BODY + h*.03, arm);
+    add_cone(BODY + h*.03, arm, BODY + h*.05);
+    add_cone(BODY - h*.03, arm, BODY - h*.05);
     int arm1 = isize(hpc);
     for(int i=arm0; i<arm1; i++) {
       hyperpoint h = hpc[i];
@@ -207,7 +207,7 @@ void make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
       ld rad = hdist0(h);
       rad = (rad - 0.1124*S) / (0.2804*S - 0.1124*S);
       rad = 1 - rad;
-      rad *= zc(0.7) - geom3::BODY;
+      rad *= zc(0.7) - BODY;
       hpc[i] = zpush(rad) * hpc[i];
       }
     }
@@ -216,15 +216,15 @@ void make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
    
   if(isize(hand) > 3) {
     shcenter = get_center(hand);
-    add_cone(geom3::BODY, hand, geom3::BODY + 0.05 * geom3::human_height);
-    add_cone(geom3::BODY, hand, geom3::BODY - 0.05 * geom3::human_height);
+    add_cone(BODY, hand, BODY + 0.05 * human_height);
+    add_cone(BODY, hand, BODY - 0.05 * human_height);
     }
 
   int at1 = isize(hpc);
   for(int i=at0; i<at1; i++) hpc.push_back(Mirror * hpc[i]);  
   
   add_texture(shPBody);
-  shift_last(-geom3::BODY);
+  shift_last(-BODY);
   }
 
 /*
@@ -232,9 +232,9 @@ void make_humanoid_3d(hpcshape& sh) { make_ha_3d(sh, false, 0.90); }
 void make_armor_3d(hpcshape& sh, ld scale = 1) { make_ha_3d(sh, true, scale); }
 */
 
-void make_humanoid_3d(hpcshape& sh) { make_ha_3d(sh, false, 1); }
+void geometry_information::make_humanoid_3d(hpcshape& sh) { make_ha_3d(sh, false, 1); }
 
-void addtri(array<hyperpoint, 3> hs, int kind) {
+void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
   ld ds[3];
   ds[0] = hdist(hs[0], hs[1]);
   ds[1] = hdist(hs[1], hs[2]);
@@ -287,7 +287,7 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
         }
       ld levels[6] = {0, 0.125, 0.125, 0.250, 0.375, 0.5};
       for(int a=0; a<6; a++) for(int i=0; i<3; i++) 
-        htx[a][i] = zpush(-min(shi[i], levels[a]) * geom3::human_height * revZ) * htx[a][i];
+        htx[a][i] = zpush(-min(shi[i], levels[a]) * human_height * revZ) * htx[a][i];
       
       hpcpush(htx[0][0]);
       hpcpush(htx[0][1]);
@@ -320,7 +320,7 @@ void addtri(array<hyperpoint, 3> hs, int kind) {
     }
   }
 
-void make_armor_3d(hpcshape& sh, int kind = 1) { 
+void geometry_information::make_armor_3d(hpcshape& sh, int kind) { 
 
   auto body = get_shape(sh);
   vector<vector<array<ld, 2> >> pts(2);
@@ -345,12 +345,12 @@ void make_armor_3d(hpcshape& sh, int kind = 1) {
   
   add_texture(sh);
   if(&sh == &shHood || &sh == &shWightCloak || &sh == &shArmor)
-    shift_last(-geom3::HEAD);
+    shift_last(-HEAD);
   else
-    shift_last(-geom3::BODY);
+    shift_last(-BODY);
   }
 
-void make_foot_3d(hpcshape& sh) {
+void geometry_information::make_foot_3d(hpcshape& sh) {
   auto foot = get_shape(sh);
   auto leg = get_shape(shHumanLeg);
   auto leg5 = scaleshape(leg, 0.8);
@@ -362,13 +362,13 @@ void make_foot_3d(hpcshape& sh) {
   add_prism_sync(zc(0.1), leg, zc(0.4), leg5);
   add_cone(zc(0.4), leg5, zc(0.45));
   add_texture(sh);
-  // shift_last(-geom3::LEG0);
+  // shift_last(-LEG0);
   for(int i=last->s; i<isize(hpc); i++) hpc[i] = cpush(0, -0.0125*S) * hpc[i];
   }
 
-void make_head_only() {
+void geometry_information::make_head_only() {
 
-  auto addpt = [] (int d, int u) {
+  auto addpt = [this] (int d, int u) {
     hpcpush(zpush(zc(eyepos) + 0.06 * SH * sin(u * degree)) * xspinpush0(d * degree, 0.05 * S * cos(u * degree)));
     };
   
@@ -385,11 +385,11 @@ void make_head_only() {
     }
   
   add_texture(shPHeadOnly);
-  shift_last(-geom3::HEAD - revZ * 0.01 * SH); 
+  shift_last(-HEAD - revZ * 0.01 * SH); 
   }
 
 
-void make_head_3d(hpcshape& sh) {
+void geometry_information::make_head_3d(hpcshape& sh) {
   auto head = get_shape(sh);
   vector<vector<array<ld, 2> >> pts(2);
   
@@ -414,10 +414,10 @@ void make_head_3d(hpcshape& sh) {
     }
   
   add_texture(sh);
-  shift_last(-geom3::HEAD);
+  shift_last(-HEAD);
   }
 
-void make_paw_3d(hpcshape& sh, hpcshape& legsh) {
+void geometry_information::make_paw_3d(hpcshape& sh, hpcshape& legsh) {
   auto foot = get_shape(sh);
   auto leg = get_shape(legsh);
 
@@ -430,7 +430,7 @@ void make_paw_3d(hpcshape& sh, hpcshape& legsh) {
   add_texture(sh);
   }
 
-void make_abody_3d(hpcshape& sh, ld tail) {
+void geometry_information::make_abody_3d(hpcshape& sh, ld tail) {
   auto body = get_shape(sh);
   shcenter = get_center(body);
 
@@ -448,10 +448,10 @@ void make_abody_3d(hpcshape& sh, ld tail) {
   add_cone(zc(0.4), body8, zc(0.36));
   add_cone(zc(0.6), body8, zc(0.64));
   add_texture(sh);
-  if(GDIM == 3 && WDIM == 2) shift_last(-geom3::ABODY);
+  if(GDIM == 3 && WDIM == 2) shift_last(-ABODY);
   }
 
-void make_ahead_3d(hpcshape& sh) {
+void geometry_information::make_ahead_3d(hpcshape& sh) {
   auto body = get_shape(sh);
   shcenter = get_center(body);
   auto body8 = scaleshape(body, 0.5);
@@ -464,7 +464,7 @@ void make_ahead_3d(hpcshape& sh) {
   add_texture(sh);
   }
 
-void make_skeletal(hpcshape& sh, ld push = 0) {
+void geometry_information::make_skeletal(hpcshape& sh, ld push) {
   auto body = get_shape(sh);
   shcenter = get_center(body);
   
@@ -477,7 +477,7 @@ void make_skeletal(hpcshape& sh, ld push = 0) {
   shift_last(-push);
   }
 
-void make_revolution(hpcshape& sh, int mx = 180, ld push = 0) {
+void geometry_information::make_revolution(hpcshape& sh, int mx, ld push) {
   auto body = get_shape(sh);
   bshape(sh, PPR::MONSTER_BODY);
   int step = (mx == 360 ? 24 : 10);
@@ -498,7 +498,7 @@ void make_revolution(hpcshape& sh, int mx = 180, ld push = 0) {
   shift_last(-push);
   }
 
-void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 99) {
+void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, ld width) {
   auto body = get_shape(sh);
   body.resize(isize(body) / 2);
   ld fx = body[0][0];
@@ -570,14 +570,14 @@ void disable(hpcshape& sh) {
   sh.s = sh.e = 0;
   }
 
-void clone_shape(hpcshape& sh, hpcshape& target) {
+void geometry_information::clone_shape(hpcshape& sh, hpcshape& target) {
   target = sh;
   target.s = isize(hpc);
   for(int i=sh.s; i<sh.e; i++) hpc.push_back(hpc[i]);
   target.e = isize(hpc);
   }
 
-void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
+void geometry_information::animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
   for(int i=0; i<30; i++) {
     auto& tgt = animated[i];
     clone_shape(orig, tgt);
@@ -591,11 +591,11 @@ void animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
         }
       }
     }
-  // for(int i=0; i<30; i++) shift_shape(animated[i], geom3::BIRD);
-  // shift_shape(orig, geom3::BIRD);
+  // for(int i=0; i<30; i++) shift_shape(animated[i], BIRD);
+  // shift_shape(orig, BIRD);
   }
 
-void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
+void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   dynamicval<int> d(vid.texture_step, 8);
   texture_order([&] (ld x, ld y) {
     using namespace hyperpoint_vec;
@@ -606,7 +606,7 @@ void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
     });  
   }
 
-void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
+void geometry_information::balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   if(lev == 0) {
     hpcpush(a);
     hpcpush(b);
@@ -623,7 +623,7 @@ void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
     }
   }
 
-void make_ball(hpcshape& sh, ld rad, int lev) {
+void geometry_information::make_ball(hpcshape& sh, ld rad, int lev) {
   bshape(sh, sh.prio);
   sh.flags |= POLY_TRIANGLES;
   hyperpoint tip = xpush0(rad);
@@ -652,7 +652,7 @@ hyperpoint psmin(hyperpoint H) {
   return res;
   }
 
-void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1) {
+void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom) {
   using namespace hyperpoint_vec;
   hyperpoint center = Hypc;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
@@ -697,7 +697,7 @@ void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q
   // eye.prio = PPR::SUPERLINE;
   }
 
-void shift_last_straight(ld z) {
+void geometry_information::shift_last_straight(ld z) {
   for(int i=last->s; i<isize(hpc); i++) hpc[i] = zpush(z) * hpc[i];
   }
 
@@ -742,13 +742,13 @@ void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
     }
   }
 
-void make_shadow(hpcshape& sh) {
+void geometry_information::make_shadow(hpcshape& sh) {
   sh.shs = isize(hpc);
-  for(int i=sh.s; i < sh.e; i++) hpcpush(orthogonal_move(hpc[i], geom3::FLOOR - geom3::human_height / 100));
+  for(int i=sh.s; i < sh.e; i++) hpcpush(orthogonal_move(hpc[i], FLOOR - human_height / 100));
   sh.she = isize(hpc);
   }
 
-void make_3d_models() {
+void geometry_information::make_3d_models() {
   if(DIM == 2) return;
   eyepos = WDIM == 2 ? 0.875 : 0.925;
   DEBBI(DF_POLY, ("make_3d_models"));
@@ -832,7 +832,7 @@ void make_3d_models() {
   DEBB(DF_POLY, ("feet and paws"));
   make_foot_3d(shHumanFoot);
   make_foot_3d(shYetiFoot);
-  make_skeletal(shSkeletalFoot, WDIM == 2 ? zc(0.5) + geom3::human_height/40 - geom3::FLOOR : 0);
+  make_skeletal(shSkeletalFoot, WDIM == 2 ? zc(0.5) + human_height/40 - FLOOR : 0);
   
   hyperpoint front_leg = Hypc;
   hyperpoint rear_leg = Hypc;
@@ -856,29 +856,29 @@ void make_3d_models() {
   // make_abody_3d(shWolfBody, 0.01);
   // make_ahead_3d(shWolfHead);
   // make_ahead_3d(shFamiliarHead);
-  ld g = WDIM == 2 ? geom3::ABODY - zc(0.4) : 0;
+  ld g = WDIM == 2 ? ABODY - zc(0.4) : 0;
   
   make_revolution_cut(shWolfBody, 30, g, 0.01*S);
-  make_revolution_cut(shWolfHead, 180, geom3::AHEAD - geom3::ABODY +g);
-  make_revolution_cut(shRatHead, 180, geom3::AHEAD - geom3::ABODY +g, 0.04*scalefactor);
-  make_revolution_cut(shRatCape1, 180, geom3::AHEAD - geom3::ABODY +g);
-  make_revolution_cut(shFamiliarHead, 30, geom3::AHEAD - geom3::ABODY +g);
+  make_revolution_cut(shWolfHead, 180, AHEAD - ABODY +g);
+  make_revolution_cut(shRatHead, 180, AHEAD - ABODY +g, 0.04*scalefactor);
+  make_revolution_cut(shRatCape1, 180, AHEAD - ABODY +g);
+  make_revolution_cut(shFamiliarHead, 30, AHEAD - ABODY +g);
 
   // make_abody_3d(shDogTorso, 0.01);
   make_revolution_cut(shDogTorso, 30, +g);
-  make_revolution_cut(shDogHead, 180, geom3::AHEAD - geom3::ABODY +g);
+  make_revolution_cut(shDogHead, 180, AHEAD - ABODY +g);
   // make_ahead_3d(shDogHead);
 
   // make_abody_3d(shCatBody, 0.05);
   // make_ahead_3d(shCatHead);
   make_revolution_cut(shCatBody, 30, +g);
-  make_revolution_cut(shCatHead, 180, geom3::AHEAD - geom3::ABODY +g, 0.055 * scalefactor);
+  make_revolution_cut(shCatHead, 180, AHEAD - ABODY +g, 0.055 * scalefactor);
 
   make_paw_3d(shReptileFrontFoot, shReptileFrontLeg);
   make_paw_3d(shReptileRearFoot, shReptileRearLeg);  
   make_abody_3d(shReptileBody, -1);
   // make_ahead_3d(shReptileHead);
-  make_revolution_cut(shReptileHead, 180, geom3::AHEAD - geom3::ABODY+g);
+  make_revolution_cut(shReptileHead, 180, AHEAD - ABODY+g);
 
   make_paw_3d(shBullFrontHoof, shBullFrontHoof);
   make_paw_3d(shBullRearHoof, shBullRearHoof);
@@ -886,19 +886,19 @@ void make_3d_models() {
   // make_ahead_3d(shBullHead);
   // make_ahead_3d(shBullHorn);
   make_revolution_cut(shBullBody, 180, +g);
-  make_revolution_cut(shBullHead, 60, geom3::AHEAD - geom3::ABODY +g);
-  shift_shape(shBullHorn, -g-(geom3::AHEAD - geom3::ABODY));
-  // make_revolution_cut(shBullHorn, 180, geom3::AHEAD - geom3::ABODY);
+  make_revolution_cut(shBullHead, 60, AHEAD - ABODY +g);
+  shift_shape(shBullHorn, -g-(AHEAD - ABODY));
+  // make_revolution_cut(shBullHorn, 180, AHEAD - ABODY);
   
   make_paw_3d(shTrylobiteFrontClaw, shTrylobiteFrontLeg);
   make_paw_3d(shTrylobiteRearClaw, shTrylobiteRearLeg);
   make_abody_3d(shTrylobiteBody, 0);
   // make_ahead_3d(shTrylobiteHead);
-  make_revolution_cut(shTrylobiteHead, 180, geom3::AHEAD - geom3::ABODY +g);
+  make_revolution_cut(shTrylobiteHead, 180, AHEAD - ABODY +g);
   
-  make_revolution_cut(shShark, 180, WDIM == 2 ? -geom3::FLOOR : 0);
+  make_revolution_cut(shShark, 180, WDIM == 2 ? -FLOOR : 0);
 
-  make_revolution_cut(shGhost, 60, geom3::GHOST + g);
+  make_revolution_cut(shGhost, 60, GHOST + g);
 
   make_revolution_cut(shEagle, 180, 0, 0.05*S);
   make_revolution_cut(shHawk, 180, 0, 0.05*S);
@@ -913,8 +913,8 @@ void make_3d_models() {
   make_revolution_cut(shBatWings, 180, 0, 0.05*S);
   make_revolution_cut(shBatBody, 180, 0, 0.05*S);
   
-  make_revolution_cut(shMouse, 180, -geom3::FLOOR);
-  shift_shape(shMouseLegs, geom3::FLOOR - geom3::human_height / 200);
+  make_revolution_cut(shMouse, 180, -FLOOR);
+  shift_shape(shMouseLegs, FLOOR - human_height / 200);
 
   make_revolution_cut(shJelly, 60);
   make_revolution(shFoxTail1);
@@ -925,8 +925,8 @@ void make_3d_models() {
   
   make_revolution_cut(shBugLeg, 60);
 
-  make_revolution(shBugArmor, 180, geom3::ABODY);
-  make_revolution_cut(shBugAntenna, 90, geom3::ABODY);
+  make_revolution(shBugArmor, 180, ABODY);
+  make_revolution_cut(shBugAntenna, 90, ABODY);
   
   make_revolution_cut(shButterflyBody, 180, 0);
   make_revolution_cut(shButterflyWing, 180, 0, 0.05*S);
@@ -963,8 +963,8 @@ void make_3d_models() {
   make_revolution_cut(shWormTail, 60, g);
   make_revolution_cut(shSmallWormTail, 60, g);
   make_revolution_cut(shTentHead, 60, g);
-  make_revolution_cut(shKrakenHead, 60, -geom3::FLOOR);
-  make_revolution_cut(shSeaTentacle, 60, -geom3::FLOOR);
+  make_revolution_cut(shKrakenHead, 60, -FLOOR);
+  make_revolution_cut(shSeaTentacle, 60, -FLOOR);
   make_revolution_cut(shDragonLegs, 60, g);
   make_revolution_cut(shDragonWings, 60, g);
   disable(shDragonNostril);
@@ -981,36 +981,36 @@ void make_3d_models() {
   if(WDIM == 2) {
     for(int i=0; i<3; i++) {
       clone_shape(shHalfFloor[i], shHalfFloor[i+3]);
-      shift_shape_orthogonally(shHalfFloor[i], geom3::FLOOR - geom3::human_height * .007);
-      shift_shape_orthogonally(shHalfFloor[i+3], geom3::WALL + geom3::human_height * .007);
+      shift_shape_orthogonally(shHalfFloor[i], FLOOR - human_height * .007);
+      shift_shape_orthogonally(shHalfFloor[i+3], WALL + human_height * .007);
       }
     }
 
-  shift_shape(shBoatOuter, geom3::FLOOR);
-  shift_shape(shBoatInner, (geom3::FLOOR+geom3::LAKE)/2);
+  shift_shape(shBoatOuter, FLOOR);
+  shift_shape(shBoatInner, (FLOOR+LAKE)/2);
   
   for(int i=0; i<14; i++)
-    shift_shape(shTriheptaSpecial[i], geom3::FLOOR);
+    shift_shape(shTriheptaSpecial[i], FLOOR);
 
-  shift_shape_orthogonally(shBigCarpet1, geom3::FLOOR - geom3::human_height * 1/40);
-  shift_shape_orthogonally(shBigCarpet2, geom3::FLOOR - geom3::human_height * 2/40);
-  shift_shape_orthogonally(shBigCarpet3, geom3::FLOOR - geom3::human_height * 3/40);
+  shift_shape_orthogonally(shBigCarpet1, FLOOR - human_height * 1/40);
+  shift_shape_orthogonally(shBigCarpet2, FLOOR - human_height * 2/40);
+  shift_shape_orthogonally(shBigCarpet3, FLOOR - human_height * 3/40);
   for(int a=0; a<5; a++) for(int b=0; b<4; b++)
-    shift_shape(shReptile[a][b], geom3::FLOOR - geom3::human_height * min(b, 2) / 40);
+    shift_shape(shReptile[a][b], FLOOR - human_height * min(b, 2) / 40);
     
-  shift_shape(shMineMark[0], geom3::FLOOR - geom3::human_height * 1/40);
-  shift_shape(shMineMark[1], geom3::FLOOR - geom3::human_height * 1/40);
+  shift_shape(shMineMark[0], FLOOR - human_height * 1/40);
+  shift_shape(shMineMark[1], FLOOR - human_height * 1/40);
 
-  for(int a=0; a<5; a++) shift_shape(shZebra[a], geom3::FLOOR);
+  for(int a=0; a<5; a++) shift_shape(shZebra[a], FLOOR);
   
   for(int t=0; t<13; t++) for(int u=0; u<6; u++)
-    shift_shape(shTortoise[t][u], geom3::FLOOR - geom3::human_height * (t+1) / 120);
+    shift_shape(shTortoise[t][u], FLOOR - human_height * (t+1) / 120);
 
   make_revolution_cut(shStatue, 60);
   
-  shift_shape(shThorns, geom3::FLOOR - geom3::human_height * 1/40);
+  shift_shape(shThorns, FLOOR - human_height * 1/40);
   clone_shape(shRose, shRoseItem);
-  shift_shape(shRose, geom3::FLOOR - geom3::human_height * 1/20);
+  shift_shape(shRose, FLOOR - human_height * 1/20);
 
   DEBB(DF_POLY, ("slime"));
   bshape(shSlime, PPR::MONSTER_BODY);
@@ -1029,17 +1029,17 @@ void make_3d_models() {
     }
   last->flags |= POLY_TRIANGLES;
   add_texture(*last);
-  if(WDIM == 2) shift_last_straight(geom3::FLOOR);
+  if(WDIM == 2) shift_last_straight(FLOOR);
   finishshape();
   shJelly = shSlime;
   
-  shift_shape(shMagicSword, geom3::ABODY);
-  shift_shape(shMagicShovel, geom3::ABODY);
+  shift_shape(shMagicSword, ABODY);
+  shift_shape(shMagicShovel, ABODY);
   
   DEBB(DF_POLY, ("eyes"));
-  adjust_eye(shSlimeEyes, shSlime, geom3::FLATEYE, 0, 2, 2);
-  adjust_eye(shGhostEyes, shGhost, geom3::GHOST, geom3::GHOST, 2, WDIM == 2 ? 2 : 4);
-  adjust_eye(shMiniEyes, shMiniGhost, geom3::GHOST, geom3::GHOST, 2, 2);
+  adjust_eye(shSlimeEyes, shSlime, FLATEYE, 0, 2, 2);
+  adjust_eye(shGhostEyes, shGhost, GHOST, GHOST, 2, WDIM == 2 ? 2 : 4);
+  adjust_eye(shMiniEyes, shMiniGhost, GHOST, GHOST, 2, 2);
   adjust_eye(shWormEyes, shWormHead, 0, 0, 2, 4);
   adjust_eye(shDragonEyes, shDragonHead, 0, 0, 2, 4);
   
@@ -1050,31 +1050,31 @@ void make_3d_models() {
   shRatEye2 = shWolf2;
   shRatEye3 = shWolf3;
 
-  adjust_eye(shWolf1, shDogHead, geom3::AHEAD, geom3::AHEAD, 1); 
-  adjust_eye(shWolf2, shDogHead, geom3::AHEAD, geom3::AHEAD, 1); 
-  adjust_eye(shWolf3, shDogHead, geom3::AHEAD, geom3::AHEAD, 1);
-  adjust_eye(shFamiliarEye, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
+  adjust_eye(shWolf1, shDogHead, AHEAD, AHEAD, 1); 
+  adjust_eye(shWolf2, shDogHead, AHEAD, AHEAD, 1); 
+  adjust_eye(shWolf3, shDogHead, AHEAD, AHEAD, 1);
+  adjust_eye(shFamiliarEye, shWolfHead, AHEAD, AHEAD, 1);
 
-  adjust_eye(shRatEye1, shRatHead, geom3::AHEAD, geom3::AHEAD, 1); 
-  adjust_eye(shRatEye2, shRatHead, geom3::AHEAD, geom3::AHEAD, 1); 
+  adjust_eye(shRatEye1, shRatHead, AHEAD, AHEAD, 1); 
+  adjust_eye(shRatEye2, shRatHead, AHEAD, AHEAD, 1); 
   for(int i=shRatEye3.s; i<shRatEye3.e; i++) hpc[i] = xpush(-scalefactor * 0.02) * hpc[i];
-  adjust_eye(shRatEye3, shRatHead, geom3::AHEAD, geom3::AHEAD, 1);
+  adjust_eye(shRatEye3, shRatHead, AHEAD, AHEAD, 1);
   
-  adjust_eye(shWolfEyes, shWolfHead, geom3::AHEAD, geom3::AHEAD, 1);
+  adjust_eye(shWolfEyes, shWolfHead, AHEAD, AHEAD, 1);
 
-  adjust_eye(shReptileEye, shReptileHead, geom3::AHEAD, geom3::AHEAD, 1);
+  adjust_eye(shReptileEye, shReptileHead, AHEAD, AHEAD, 1);
   adjust_eye(shGadflyEye, shGadflyBody, 0, 0, 1);
   
-  adjust_eye(shSkullEyes, shPHeadOnly, geom3::HEAD1, geom3::HEAD, 2, 2);
+  adjust_eye(shSkullEyes, shPHeadOnly, HEAD1, HEAD, 2, 2);
   shSkullEyes.tinf = NULL;
 
-  adjust_eye(shMouseEyes, shMouse, geom3::FLOOR, geom3::FLOOR, 2, 1);
+  adjust_eye(shMouseEyes, shMouse, FLOOR, FLOOR, 2, 1);
 
-  shift_shape(shRatTail, zc(0.5) - geom3::LEG);
+  shift_shape(shRatTail, zc(0.5) - LEG);
   for(int i=shRatTail.s; i<shRatTail.e; i++) hpc[i] = xpush(-scalefactor * 0.1) * hpc[i];
 
-  shift_shape(shSemiFloorShadow, geom3::FLOOR - geom3::human_height / 100);
-  shift_shape(shSemiFloor[0], geom3::WALL);
+  shift_shape(shSemiFloorShadow, FLOOR - human_height / 100);
+  shift_shape(shSemiFloor[0], WALL);
   
   bshape(shPalaceGate, PPR::WALL);
   for(int i=0; i<4; i++) {
@@ -1082,12 +1082,12 @@ void make_3d_models() {
     for(int j=0; j<12; j++) {
       hyperpoint left = xpush(x) * xspinpush0(j * 30 * degree, 0.02);
       hyperpoint right = xpush(x) * xspinpush0((j+1) * 30 * degree, 0.02);
-      hpcpush(orthogonal_move(left, geom3::FLOOR));
-      hpcpush(orthogonal_move(right, geom3::FLOOR));
-      hpcpush(orthogonal_move(left, geom3::WALL));
-      hpcpush(orthogonal_move(right, geom3::FLOOR));
-      hpcpush(orthogonal_move(left, geom3::WALL));
-      hpcpush(orthogonal_move(right, geom3::WALL));
+      hpcpush(orthogonal_move(left, FLOOR));
+      hpcpush(orthogonal_move(right, FLOOR));
+      hpcpush(orthogonal_move(left, WALL));
+      hpcpush(orthogonal_move(right, FLOOR));
+      hpcpush(orthogonal_move(left, WALL));
+      hpcpush(orthogonal_move(right, WALL));
       }
     }
   shPalaceGate.flags |= POLY_TRIANGLES;
@@ -1108,7 +1108,7 @@ void make_3d_models() {
         hyperpoint hz = C0;
         hyperpoint h = hx * x + hy * y + hz * z;
         h = mid(h, h);
-        h = orthogonal_move(h, geom3::FLOOR - geom3::human_height * (i+2.5) / 100 * (x+y+1)/2);
+        h = orthogonal_move(h, FLOOR - human_height * (i+2.5) / 100 * (x+y+1)/2);
         hpcpush(h);
         });  
       }

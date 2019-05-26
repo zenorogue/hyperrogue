@@ -1,40 +1,61 @@
 namespace hr {
 #if CAP_SHAPES
-vector<plain_floorshape*> all_plain_floorshapes;
-vector<escher_floorshape*> all_escher_floorshapes;
 
-plain_floorshape
-  shFloor, 
-  shMFloor, shMFloor2, shMFloor3, shMFloor4, shFullFloor,
-  shBigTriangle, shTriheptaFloor, shBigHepta;
+vector<basic_textureinfo> floor_texture_vertices;
+renderbuffer *floor_textures;
 
-escher_floorshape shStarFloor(1,2), 
-  shCloudFloor(3, 4),
-  shCrossFloor(5, 6, 2, 54),
-  shChargedFloor(7, 385, 1, 10),
-  shSStarFloor(11, 12),
-  shOverFloor(13, 15, 1, 14),
-  shTriFloor(17, 18, 0, 385),
-  shFeatherFloor(19, 21, 1, 20),
-  shBarrowFloor(23, 24, 1, 25),
-  shNewFloor(26, 27, 2, 54),
-  shTrollFloor(28, 29), 
-  shButterflyFloor(325, 326, 1, 178),
-  shLavaFloor(359, 360, 1, 178),
-  shLavaSeabed(386, 387, 1, 178),
-  shSeabed(334, 335),
-  shCloudSeabed(336, 337),
-  shCaveSeabed(338, 339, 2, 54),
-  shPalaceFloor(45, 46, 0, 385),
-  shDemonFloor(51, 50, 1, 178),
-  shCaveFloor(52, 53, 2, 54),
-  shDesertFloor(55, 56, 0, 4),
-  shPowerFloor(57, 58, 0, 12), /* dragon */
-  shRoseFloor(174, 175, 1, 173),
-  shSwitchFloor(377, 378, 1, 379),
-  shTurtleFloor(176, 177, 1, 178),
-  shRedRockFloor[3] = {{55, 56}, {55, 56}, {55, 56}}, // 1 - .1 * i   
-  shDragonFloor(181, 182, 2, 183); /* dragon */
+void geometry_information::init_floorshapes() {
+  all_escher_floorshapes.clear();
+  all_plain_floorshapes = { 
+    &shFloor, &shMFloor, &shMFloor2, &shMFloor3, &shMFloor4, 
+    &shFullFloor, &shBigTriangle, &shTriheptaFloor, &shBigHepta
+    };
+  
+  for(auto s: all_plain_floorshapes) s->is_plain = true;
+  
+  auto init_escher = [this] (escher_floorshape& sh, int s0, int s1, int noft=0, int s2=0) {
+    sh.shapeid0 = s0;
+    sh.shapeid1 = s1;
+    sh.noftype = noft;
+    sh.shapeid2 = s2;
+    sh.scale = 1;
+    sh.is_plain = false;
+    all_escher_floorshapes.push_back(&sh);
+    };
+  
+  init_escher(shStarFloor, 1,2);
+  init_escher(shCloudFloor, 3, 4);
+  init_escher(shCrossFloor, 5, 6, 2, 54);
+  init_escher(shChargedFloor, 7, 385, 1, 10);
+  init_escher(shSStarFloor, 11, 12);
+  init_escher(shOverFloor, 13, 15, 1, 14);
+  init_escher(shTriFloor, 17, 18, 0, 385);
+  init_escher(shFeatherFloor, 19, 21, 1, 20);
+  init_escher(shBarrowFloor, 23, 24, 1, 25);
+  init_escher(shNewFloor, 26, 27, 2, 54);
+  init_escher(shTrollFloor, 28, 29); 
+  init_escher(shButterflyFloor, 325, 326, 1, 178);
+  init_escher(shLavaFloor, 359, 360, 1, 178);
+  init_escher(shLavaSeabed, 386, 387, 1, 178);
+  init_escher(shSeabed, 334, 335);
+  init_escher(shCloudSeabed, 336, 337);
+  init_escher(shCaveSeabed, 338, 339, 2, 54);
+  init_escher(shPalaceFloor, 45, 46, 0, 385);
+  init_escher(shDemonFloor, 51, 50, 1, 178);
+  init_escher(shCaveFloor, 52, 53, 2, 54);
+  init_escher(shDesertFloor, 55, 56, 0, 4);
+  init_escher(shPowerFloor, 57, 58, 0, 12); /* dragon */
+  init_escher(shRoseFloor, 174, 175, 1, 173);
+  init_escher(shSwitchFloor, 377, 378, 1, 379);
+  init_escher(shTurtleFloor, 176, 177, 1, 178);
+  for(int i: {0,1,2})
+    init_escher(shRedRockFloor[i], 55, 56);
+  init_escher(shDragonFloor, 181, 182, 2, 183); /* dragon */
+  
+  int ids = 0;
+  for(auto sh: all_plain_floorshapes) sh->id = ids++;
+  for(auto sh: all_escher_floorshapes) sh->id = ids++;
+  }
 
 typedef pair<transmatrix, array<transmatrix, MAX_EDGE>> matrixitem;
 
@@ -108,7 +129,7 @@ void generate_matrices_scale(ld scale, int noft) {
   mesher ohex = msh(gNormal, 6, 0.329036, 0.566256, 0.620672, 0, 1);
   mesher ohept = msh(gNormal, 7, hexf7, hcrossf7, hcrossf7, M_PI/7, 1);
   if(!BITRUNCATED) {
-    mesher nall = msh(geometry, S7, rhexf, tessf, tessf, -M_PI, scale);
+    mesher nall = msh(geometry, S7, cgi.rhexf, cgi.tessf, cgi.tessf, -M_PI, scale);
     bool use = geosupport_football() < 2;
     if(use && noft == 1) {
       mesher opure = msh(gNormal, 7, 0.620672, 1.090550, 1.090550, M_PI/7, 1);
@@ -127,12 +148,12 @@ void generate_matrices_scale(ld scale, int noft) {
       }
     }
   else {
-    generate_matrices(hex_matrices, ohex, msh(geometry, S6, hexvdist, hexhexdist, hcrossf, (S3-3)*M_PI/S3, scale));
-    generate_matrices(hept_matrices, ohept, msh(geometry, S7, rhexf, hcrossf, hcrossf, euclid6?0:euclid4?0:M_PI/S7, scale));
+    generate_matrices(hex_matrices, ohex, msh(geometry, S6, cgi.hexvdist, cgi.hexhexdist, cgi.hcrossf, (S3-3)*M_PI/S3, scale));
+    generate_matrices(hept_matrices, ohept, msh(geometry, S7, cgi.rhexf, cgi.hcrossf, cgi.hcrossf, euclid6?0:euclid4?0:M_PI/S7, scale));
     }
   }
 
-void bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
+void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
   auto& matrices = m.v;
   int osym = m.o.sym;
   int nsym = m.n.sym;
@@ -196,7 +217,7 @@ void bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
   hpcpush(hpc[last->s]);
   }
 
-void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
+void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
   
   fsh.b.resize(2);
   fsh.shadow.resize(2);
@@ -272,7 +293,7 @@ template<class T> void sizeto(T& t, int n) {
 
 // !siid equals pseudohept(c)
 
-void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
+void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
   DEBBI(DF_POLY, ("generate_floorshapes_for ", id));
 
   for(auto pfsh: all_plain_floorshapes) {
@@ -470,13 +491,13 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       auto& fsh = *pfsh;
       
       for(int i=fsh.shadow[id].s; i<fsh.shadow[id].e; i++)
-        hpc[i] = orthogonal_move(hpc[i], geom3::FLOOR - geom3::human_height / 100);
+        hpc[i] = orthogonal_move(hpc[i], FLOOR - human_height / 100);
 
       for(int k=0; k<SIDEPARS; k++) {
         sizeto(fsh.levels[k], id);
         bshape(fsh.levels[k][id], fsh.prio);    
         last->flags |= POLY_TRIANGLES;
-        last->tinf = &fsh.tinf3;
+        last->tinf = &floor_texture_vertices[fsh.id];
         last->texture_offset = 0;
 
         #if CAP_BT
@@ -506,10 +527,10 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         sizeto(fsh.cone[co], id);
         bshape(fsh.cone[co][id], fsh.prio);    
         last->flags |= POLY_TRIANGLES;
-        last->tinf = &fsh.tinf3;
+        last->tinf = &floor_texture_vertices[fsh.id];
         last->texture_offset = 0;
-        ld h = (geom3::FLOOR - geom3::WALL) / (co+1);
-        ld top = co ? (geom3::FLOOR + geom3::WALL) / 2 : geom3::WALL;
+        ld h = (FLOOR - WALL) / (co+1);
+        ld top = co ? (FLOOR + WALL) / 2 : WALL;
         #if CAP_BT
         if(binarytiling)
           for(int t=0; t<c->type; t++)
@@ -534,9 +555,9 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         }
 
       for(int l=0; l<SIDEPARS; l++) {
-        for(auto& li: fsh.side[l]) li.tinf = &fsh.tinf3;
+        for(auto& li: fsh.side[l]) li.tinf = &floor_texture_vertices[fsh.id];
         for(int e=0; e<MAX_EDGE; e++)
-          for(auto& li: fsh.gpside[l][e]) li.tinf = &fsh.tinf3;
+          for(auto& li: fsh.gpside[l][e]) li.tinf = &floor_texture_vertices[fsh.id];
         }
       }
       
@@ -546,18 +567,18 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       for(int l=0; l<SIDEPARS; l++) {
         fsh.levels[l] = shFullFloor.levels[l];
         fsh.shadow = shFullFloor.shadow;
-        for(auto& li: fsh.levels[l]) li.tinf = &fsh.tinf3;
+        for(auto& li: fsh.levels[l]) li.tinf = &floor_texture_vertices[fsh.id];
         fsh.side[l] = shFullFloor.side[l];
-        for(auto& li: fsh.side[l]) li.tinf = &fsh.tinf3;
+        for(auto& li: fsh.side[l]) li.tinf = &floor_texture_vertices[fsh.id];
         for(int e=0; e<MAX_EDGE; e++) {
           fsh.gpside[l][e] = shFullFloor.gpside[l][e];
-          for(auto& li: fsh.gpside[l][e]) li.tinf = &fsh.tinf3;
+          for(auto& li: fsh.gpside[l][e]) li.tinf = &floor_texture_vertices[fsh.id];
           }
         fsh.cone[0] = shFullFloor.cone[0];
         fsh.cone[1] = shFullFloor.cone[1];
         for(int c=0; c<2; c++)
           for(auto& li: fsh.cone[c])
-            li.tinf = &fsh.tinf3;
+            li.tinf = &floor_texture_vertices[fsh.id];
         }
       }
     finishshape();
@@ -565,9 +586,10 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
   #endif
   }
 
-void generate_floorshapes() {
+void geometry_information::generate_floorshapes() {
 
   DEBBI(DF_POLY, ("generate_floorshapes"));
+  
   if(WDIM == 3) ;
   
   #if CAP_IRR
@@ -645,10 +667,10 @@ namespace gp {
     if(master) li.last_dir = -1;
     DEBB(DF_GP, (format("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id)));
       
-    generate_floorshapes_for(id, c0, siid, sidir);
+    cgi.generate_floorshapes_for(id, c0, siid, sidir);
     
-    finishshape(); last = NULL;
-    extra_vertices();
+    cgi.finishshape();
+    cgi.extra_vertices();
     }
   
   int get_plainshape_id(cell *c) {
@@ -670,7 +692,7 @@ namespace gp {
       sidir = 0;
       }
     auto& id = pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][fix6(draw_li.total_dir)];
-    if(id == -1 && sphere && isize(shFloor.b) > 0) {
+    if(id == -1 && sphere && isize(cgi.shFloor.b) > 0) {
       forCellEx(c1, c) if(!gmatrix0.count(c1)) return 0;
       }
     if(id == -1) build_plainshape(id, draw_li, c, siid, sidir);
@@ -811,13 +833,12 @@ auto floor_hook =
 
 #if MAXMDIM >= 4
 
-renderbuffer *floor_textures;
+void draw_shape_for_texture(floorshape* sh) {
 
-void draw_shape_for_texture(floorshape* sh, int& id) {
+  int id = sh->id;
 
   ld gx = (id % 8) * 1.5 - 3.5 * 1.5;
   ld gy = (id / 8) * 1.5 - 3.5 * 1.5;
-  id++;
 
   if(1) {
     dynamicval<ld> v(vid.linewidth, 8);
@@ -835,8 +856,8 @@ void draw_shape_for_texture(floorshape* sh, int& id) {
   for(int b=-1; b<=1; b++)
     queuepoly(eupush(gx+a/2., gy+b/2.), sh->b[0], 0xFFFFFFFF);
 
-  if(sh == &shCrossFloor) {
-    queuepoly(eupush(gx, gy) * spin(M_PI/4), shCross, 0x808080FF);
+  if(sh == &cgi.shCrossFloor) {
+    queuepoly(eupush(gx, gy) * spin(M_PI/4), cgi.shCross, 0x808080FF);
     }
 
   if(1) {
@@ -849,8 +870,9 @@ void draw_shape_for_texture(floorshape* sh, int& id) {
     queuecurve(0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
     }
   
-  sh->tinf3.tvertices.clear();
-  sh->tinf3.texture_id = floor_textures->renderedTexture;
+  auto& ftv = floor_texture_vertices[sh->id];
+  ftv.tvertices.clear();
+  ftv.texture_id = floor_textures->renderedTexture;
   
   using namespace hyperpoint_vec;
   hyperpoint center = eupush(gx, gy) * C0;
@@ -865,94 +887,98 @@ void draw_shape_for_texture(floorshape* sh, int& id) {
       glvec2 v;
       v[0] = (1 + inmodel[0] * vid.scale) / 2;
       v[1] = (1 - inmodel[1] * vid.scale) / 2;
-      sh->tinf3.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
+      ftv.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
       });
   }
 
 const int FLOORTEXTURESIZE = 4096;
 
-void make_floor_textures() {
-  if(1) {
-    DEBBI(DF_POLY, ("make_floor_textures"));
-    dynamicval<eGeometry> g(geometry, gEuclidSquare);
-    dynamicval<eModel> gm(pmodel, mdDisk);
-    dynamicval<eVariation> va(variation, eVariation::pure);
-    dynamicval<bool> a3(geom3::always3, false);
-    dynamicval<bool> hq(inHighQual, true);
-    dynamicval<int> hd(darken, 0);
-    dynamicval<ld> gd(geom3::depth, 1);
-    dynamicval<ld> gc(geom3::camera, 1);
+void geometry_information::make_floor_textures_here() {
+  require_shapes();
+
+  dynamicval<videopar> vi(vid, vid);
+  vid.xres = FLOORTEXTURESIZE;
+  vid.yres = FLOORTEXTURESIZE;
+  vid.scale = 0.25;
+  vid.camera_angle = 0;
+  vid.alpha = 1;
+  dynamicval<ld> lw(vid.linewidth, 2);
+
+  floor_textures = new renderbuffer(vid.xres, vid.yres, vid.usingGL);
+  resetbuffer rb;
+
+  floor_texture_vertices.resize(isize(all_escher_floorshapes) + isize(all_plain_floorshapes));
   
-    resetGeometry();
-    dynamicval<videopar> vi(vid, vid);
-    vid.xres = FLOORTEXTURESIZE;
-    vid.yres = FLOORTEXTURESIZE;
-    vid.scale = 0.25;
-    vid.camera_angle = 0;
-    vid.alpha = 1;
-    dynamicval<ld> lw(vid.linewidth, 2);
+  auto cd = current_display;
+  cd->xtop = cd->ytop = 0;
+  cd->xsize = cd->ysize = FLOORTEXTURESIZE;
+  cd->xcenter = cd->ycenter = cd->scrsize = FLOORTEXTURESIZE/2;
+  
+  cd->radius = cd->scrsize * vid.scale;
 
-    floor_textures = new renderbuffer(vid.xres, vid.yres, vid.usingGL);
-    resetbuffer rb;
+  floor_textures->enable();
+  floor_textures->clear(0); // 0xE8E8E8 = 1
+  
+  // gradient vertices
+  vector<glhr::colored_vertex> gv;
+  current_display->scrdist = 0;
+  gv.emplace_back(-1, -1, 0, 0, 0);
+  gv.emplace_back(+1, -1, 0, 0, 0);
+  gv.emplace_back(+1, +1, 1, 1, 1);
+  gv.emplace_back(-1, -1, 0, 0, 0);
+  gv.emplace_back(+1, +1, 1, 1, 1);
+  gv.emplace_back(-1, +1, 1, 1, 1);
 
-    auto cd = current_display;
-    cd->xtop = cd->ytop = 0;
-    cd->xsize = cd->ysize = FLOORTEXTURESIZE;
-    cd->xcenter = cd->ycenter = cd->scrsize = FLOORTEXTURESIZE/2;
-    
-    cd->radius = cd->scrsize * vid.scale;
+  glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
+  current_display->set_all(0);
+  glhr::new_projection();
+  glhr::id_modelview();
+  glhr::prepare(gv);
+  glhr::set_depthtest(false);
+  glDrawArrays(GL_TRIANGLES, 0, isize(gv));
+  
+  shOverFloor.pstrength = 20;
+  shFeatherFloor.pstrength = 40;
+  shFeatherFloor.fstrength = 5;
+  shTrollFloor.pstrength = 25;
+  shCaveFloor.pstrength = 40;
+  shCaveFloor.fstrength = 0;
+  shDesertFloor.pstrength = 30;
+  shDesertFloor.fstrength =10;
+  shRoseFloor.pstrength = 30;
+  shDragonFloor.pstrength = 30;
+  shBarrowFloor.pstrength = 40;
 
-    floor_textures->enable();
-    floor_textures->clear(0); // 0xE8E8E8 = 1
-    
-    // gradient vertices
-    vector<glhr::colored_vertex> gv;
-    current_display->scrdist = 0;
-    gv.emplace_back(-1, -1, 0, 0, 0);
-    gv.emplace_back(+1, -1, 0, 0, 0);
-    gv.emplace_back(+1, +1, 1, 1, 1);
-    gv.emplace_back(-1, -1, 0, 0, 0);
-    gv.emplace_back(+1, +1, 1, 1, 1);
-    gv.emplace_back(-1, +1, 1, 1, 1);
+  // all using Tortoise
+  for(auto v: all_escher_floorshapes) if(v->shapeid2 == 178) v->pstrength = 20;
+  
+  ptds.clear();
+  
+  for(auto v: all_plain_floorshapes) draw_shape_for_texture(v);
+  for(auto v: all_escher_floorshapes) draw_shape_for_texture(v);
+  
+  drawqueue();
+  
+  /*
+  SDL_Surface *sdark = floor_textures->render();
+  IMAGESAVE(sdark, "texture-test.png"); 
+  */
+  rb.reset();
+  }
 
-    glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
-    current_display->set_all(0);
-    glhr::new_projection();
-    glhr::id_modelview();
-    glhr::prepare(gv);
-    glhr::set_depthtest(false);
-    glDrawArrays(GL_TRIANGLES, 0, isize(gv));
-    
-    shOverFloor.pstrength = 20;
-    shFeatherFloor.pstrength = 40;
-    shFeatherFloor.fstrength = 5;
-    shTrollFloor.pstrength = 25;
-    shCaveFloor.pstrength = 40;
-    shCaveFloor.fstrength = 0;
-    shDesertFloor.pstrength = 30;
-    shDesertFloor.fstrength =10;
-    shRoseFloor.pstrength = 30;
-    shDragonFloor.pstrength = 30;
-    shBarrowFloor.pstrength = 40;
-
-    // all using Tortoise
-    for(auto v: all_escher_floorshapes) if(v->shapeid2 == 178) v->pstrength = 20;
-    
-    ptds.clear();
-    
-    int id = 0;
-    
-    for(auto v: all_plain_floorshapes) draw_shape_for_texture(v, id);
-    for(auto v: all_escher_floorshapes) draw_shape_for_texture(v, id);
-    
-    drawqueue();
-    
-    /*
-    SDL_Surface *sdark = floor_textures->render();
-    IMAGESAVE(sdark, "texture-test.png"); 
-    */
-    rb.reset();
-    }
+void make_floor_textures() {
+  DEBBI(DF_POLY, ("make_floor_textures"));
+  dynamicval<eGeometry> g(geometry, gEuclidSquare);
+  dynamicval<eModel> gm(pmodel, mdDisk);
+  dynamicval<eVariation> va(variation, eVariation::pure);
+  dynamicval<bool> a3(geom3::always3, false);
+  dynamicval<bool> hq(inHighQual, true);
+  dynamicval<int> hd(darken, 0);
+  dynamicval<ld> gd(geom3::depth, 1);
+  dynamicval<ld> gc(geom3::camera, 1);
+  dynamicval<geometry_information*> dcgip(cgip, cgip);
+  check_cgi();
+  cgi.make_floor_textures_here();
   }
 
 

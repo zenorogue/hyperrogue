@@ -338,7 +338,7 @@ struct debugScreen {
     
     if(what) {
       #if CAP_SHAPES
-      queuepoly(gmatrix[what], shAsymmetric, 0x80808080);
+      queuepoly(gmatrix[what], cgi.shAsymmetric, 0x80808080);
       #endif
       char buf[200];
       sprintf(buf, "%p", what);
@@ -682,13 +682,12 @@ int read_cheat_args() {
   else if(argis("-wef")) {
     PHASEFROM(2);
     shift(); int index = argi(); 
-    shift_arg_formula(whatever[index], delayed_geo_reset);
+    shift_arg_formula(whatever[index]);
     }
   else if(argis("-wei")) {    
     PHASEFROM(2);
     shift(); int index = argi();
     shift(); whateveri[index] = argi();
-    delayed_geo_reset();
     }
   else if(argis("-W3")) {
     shift(); top_land = readland(args()); cheat();

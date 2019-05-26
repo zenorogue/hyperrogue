@@ -950,7 +950,7 @@ void profile(const char *buf) {
   }
 */
 
-#define SCALE scalefactor
+#define SCALE cgi.scalefactor
 #define SCALE2 (SCALE*SCALE)
 
 namespace shmup {
@@ -1076,7 +1076,7 @@ bool trackroute(monster *m, transmatrix goal, double spd) {
     d += spd;
     transmatrix nat = m->pat * rspintox(mat * C0) * xpush(d); 
 
-    // queuepoly(nat, shKnife, 0xFFFFFFC0);
+    // queuepoly(nat, cgi.shKnife, 0xFFFFFFC0);
 
     cell *c2 = findbaseAround(nat, c);
     if(c2 != c && !passable_for(m->type, c2, c, P_CHAIN | P_ONPLAYER)) {
@@ -1418,7 +1418,7 @@ void roseCurrents(transmatrix& nat, monster *m, int delta) {
 
 hyperpoint keytarget(int i) {
   double d = 2 + sin(curtime / 350.);
-  return pc[i]->pat * cpush0(WDIM == 3 ? 2 : 0, d * scalefactor);
+  return pc[i]->pat * cpush0(WDIM == 3 ? 2 : 0, d * cgi.scalefactor);
   }
 
 /* int charidof(int pid) {
@@ -1428,8 +1428,8 @@ hyperpoint keytarget(int i) {
   return 0;
   } */
 
-ld getSwordSize() { return sword_size; }
-ld getHornsSize() { return scalefactor * 0.33; }
+ld getSwordSize() { return cgi.sword_size; }
+ld getHornsSize() { return cgi.scalefactor * 0.33; }
 
 // used in 3D
 transmatrix swordmatrix[MAXPLAYER];
@@ -1777,7 +1777,7 @@ void movePlayer(monster *m, int delta) {
 
   if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
   
-  int steps = 1 + abs(int(playergo[cpid] / (.2 * scalefactor)));
+  int steps = 1 + abs(int(playergo[cpid] / (.2 * cgi.scalefactor)));
   
   playergo[cpid] /= steps;
   
@@ -2385,7 +2385,7 @@ transmatrix frontpush(ld x) {
 
 ld collision_distance(monster *bullet, monster *target) {
   if(target->type == moAsteroid)
-    return SCALE * 0.15 + asteroid_size[target->hitpoints & 7];
+    return SCALE * 0.15 + cgi.asteroid_size[target->hitpoints & 7];
   return SCALE * 0.3;
   }
 
@@ -3601,12 +3601,12 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
       color_t incolor = magic ? 0x0060C0FF : 0x804000FF;
       
       if(WDIM == 2) {
-        queuepoly(Vboat0, shBoatOuter, outcolor);
-        queuepoly(Vboat0, shBoatInner, incolor);
+        queuepoly(Vboat0, cgi.shBoatOuter, outcolor);
+        queuepoly(Vboat0, cgi.shBoatInner, incolor);
         }
       if(WDIM == 3) {
-        queuepoly(mscale(Vboat0, scalefactor/2), shBoatOuter, outcolor);
-        queuepoly(mscale(Vboat0, scalefactor/2-0.01), shBoatInner, incolor);
+        queuepoly(mscale(Vboat0, cgi.scalefactor/2), cgi.shBoatOuter, outcolor);
+        queuepoly(mscale(Vboat0, cgi.scalefactor/2-0.01), cgi.shBoatInner, incolor);
         }
       }
 
@@ -3651,7 +3651,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
             queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
           else {
             dynamicval<color_t> p(poly_outline, darkena(iinf[keyresult[cpid]].color, 0, 255));
-            queuepoly(rgpushxto0(h) * cspin(0, 1, ticks / 140.), shGem[1], 0);
+            queuepoly(rgpushxto0(h) * cspin(0, 1, ticks / 140.), cgi.shGem[1], 0);
             }
           }
 
@@ -3667,39 +3667,39 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         else
           col = (minf[m->parenttype].color << 8) | 0xFF;
         if(getcs().charid >= 4) {
-          queuepoly(mmscale(view, 1.15), shPHead, col);
-          ShadowV(view, shPHead);
+          queuepoly(mmscale(view, 1.15), cgi.shPHead, col);
+          ShadowV(view, cgi.shPHead);
           }
         else if(peace::on) {
-          queuepolyat(mmscale(view, 1.15), shDisk, col, PPR::MISSILE);
-          ShadowV(view, shPHead);
+          queuepolyat(mmscale(view, 1.15), cgi.shDisk, col, PPR::MISSILE);
+          ShadowV(view, cgi.shPHead);
           }
         else {
           transmatrix t = view * spin(curtime / 50.0);
-          queuepoly(WDIM == 3 ? t : DIM == 3 ? mscale(t, geom3::BODY) : mmscale(t, 1.15), shKnife, col);
-          ShadowV(t, shKnife);
+          queuepoly(WDIM == 3 ? t : DIM == 3 ? mscale(t, cgi.BODY) : mmscale(t, 1.15), cgi.shKnife, col);
+          ShadowV(t, cgi.shKnife);
           }
         break;
         }
       case moArrowTrap: {
-        queuepoly(mmscale(view, 1.15), shTrapArrow, 0xFFFFFFFF);
-        ShadowV(view, shTrapArrow);
+        queuepoly(mmscale(view, 1.15), cgi.shTrapArrow, 0xFFFFFFFF);
+        ShadowV(view, cgi.shTrapArrow);
         break;
         }
       case moTongue: {
-        queuepoly(mmscale(view, 1.15), shTongue, (minf[m->parenttype].color << 8) | 0xFF);
-        ShadowV(view, shTongue);
+        queuepoly(mmscale(view, 1.15), cgi.shTongue, (minf[m->parenttype].color << 8) | 0xFF);
+        ShadowV(view, cgi.shTongue);
         break;
         }
       case moFireball:  case moAirball: { // case moLightningBolt:
-        queuepoly(mmscale(view, 1.15), shPHead, (minf[m->type].color << 8) | 0xFF);
-        ShadowV(view, shPHead);
+        queuepoly(mmscale(view, 1.15), cgi.shPHead, (minf[m->type].color << 8) | 0xFF);
+        ShadowV(view, cgi.shPHead);
         break;
         }
       case moFlailBullet: case moCrushball: {
         transmatrix t = view * spin(curtime / 50.0);
-        queuepoly(mmscale(t, 1.15), shFlailMissile, (minf[m->type].color << 8) | 0xFF);
-        ShadowV(view, shFlailMissile);
+        queuepoly(mmscale(t, 1.15), cgi.shFlailMissile, (minf[m->type].color << 8) | 0xFF);
+        ShadowV(view, cgi.shFlailMissile);
         break;        
         }
       case moAsteroid: {
@@ -3707,11 +3707,11 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         transmatrix t = view;
         if(WDIM == 3) t = face_the_player(t);
         t = t * spin(curtime / 500.0);
-        ShadowV(t, shAsteroid[m->hitpoints & 7]);
+        ShadowV(t, cgi.shAsteroid[m->hitpoints & 7]);
         if(WDIM == 2) t = mmscale(t, 1.15);
         color_t col = WDIM == 3 ? 0xFFFFFF : minf[m->type].color;
         col <<= 8;
-        queuepoly(t, shAsteroid[m->hitpoints & 7], col | 0xFF);
+        queuepoly(t, cgi.shAsteroid[m->hitpoints & 7], col | 0xFF);
         break;
         }
 

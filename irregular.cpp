@@ -1,5 +1,7 @@
 namespace hr { namespace irr {
 
+int irrid;
+
 #if CAP_IRR
 ld density = 2;
 ld quality = .2;
@@ -487,12 +489,12 @@ bool step(int delta) {
 
       for(auto& s: cells) {
         int d = -1;
-        ld dist = hcrossf / 2;
+        ld dist = cgi.hcrossf / 2;
         ld dists[8];
         for(int i=0; i<S7; i++) {
-          dists[i] = hdist(s.p, xspinpush0(hexshift - i * ALPHA, -hcrossf));
+          dists[i] = hdist(s.p, xspinpush0(cgi.hexshift - i * ALPHA, -cgi.hcrossf));
           if(dists[i] < dist)
-            d = i, dist = dists[i];            
+            d = i, dist = dists[i];
           }
         if(d != -1 && dists[(d+1) % S7] > dists[(d+S7-1) % S7])
           d = (d + S7 - 1) % S7;
@@ -512,13 +514,13 @@ bool step(int delta) {
 void compute_geometry() {
   if(IRREGULAR) {
     ld scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
-    crossf *= scale;
-    hepvdist *= scale;
-    rhexf *= scale;
-    hexhexdist *= scale;
-    hexvdist *= scale;
-    base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
-    if(base_distlimit > 25) base_distlimit = 25;
+    cgi.crossf *= scale;
+    cgi.hepvdist *= scale;
+    cgi.rhexf *= scale;
+    cgi.hexhexdist *= scale;
+    cgi.hexvdist *= scale;
+    cgi.base_distlimit = (cgi.base_distlimit + log(scale) / log(2.618)) / scale;
+    if(cgi.base_distlimit > 25) cgi.base_distlimit = 25;
     }
   }
 
@@ -806,7 +808,7 @@ void start_game_on_created_map() {
   stop_game();
   geometry = orig_geometry;
   variation = eVariation::irregular;
-  need_reset_geometry = true;
+  irrid++;
   gridmaking = false;
   start_game();
   }
@@ -874,7 +876,6 @@ void cancel_map_creation() {
   gridmaking = false;
   stop_game();
   geometry = orig_geometry;
-  need_reset_geometry = true;
   start_game();
   }
 
@@ -986,7 +987,6 @@ void visual_creator() {
     }
 
   variation = eVariation::pure;
-  need_reset_geometry = true;
   start_game();
   if(base) delete base;
   base = currentmap; 

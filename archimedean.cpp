@@ -434,10 +434,10 @@ struct hrmap_archimedean : hrmap {
       origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
       }
     
-    base_distlimit = 0;
+    cgi.base_distlimit = 0;
     celllister cl(origin->c7, 1000, 200, NULL);
-    ginf[geometry].distlimit[!BITRUNCATED] = base_distlimit = cl.dists.back();
-    if(sphere) base_distlimit = SEE_ALL;
+    ginf[geometry].distlimit[!BITRUNCATED] = cgi.base_distlimit = cl.dists.back();
+    if(sphere) cgi.base_distlimit = SEE_ALL;
     }
 
   ~hrmap_archimedean() {
@@ -784,7 +784,6 @@ int readArgs() {
       }
     else {
       set_geometry(gArchimedean);
-      need_reset_geometry = true;
       current = at;
       showstartmenu = false;
       }
@@ -982,7 +981,6 @@ void next_variation() {
     PURE ? eVariation::dual :
     DUAL ? eVariation::bitruncated : 
     eVariation::pure);
-  need_reset_geometry = true;
   start_game();
   }
 
@@ -1012,7 +1010,6 @@ void enable(archimedean_tiling& arct) {
       }
     }
 #endif
-  need_reset_geometry = true;
   start_game();
   }
 

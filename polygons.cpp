@@ -1,122 +1,18 @@
 
 // HyperRogue, shapes used for the vector graphics
-// also the implementation of the rendering queue and svg renderer
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+#if CAP_SHAPES
 
 namespace hr {
 
-unsigned char& part(color_t& col, int i) {
-  unsigned char* c = (unsigned char*) &col;
-#if ISMOBILE
-  return c[i];
-#else
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  return c[sizeof(col) - 1 - i];
-#else
-  return c[i];
-#endif
-#endif
-  }
-
-ld signum(ld x) { return x<0?-1:x>0?1:0; }
-
-bool asign(ld y1, ld y2) {
-  return signum(y1) != signum(y2);
-  }
-
-ld xcross(ld x1, ld y1, ld x2, ld y2) {
-  return x1 + (x2 - x1) * y1 / (y1 - y2);
-  }
-
-// draw the lines
-static const int POLY_DRAWLINES = 1;
-// draw the area
-static const int POLY_DRAWAREA = 2;
-// draw the inverse -- useful in stereographic projection
-static const int POLY_INVERSE = 4;
-// never draw in inverse
-static const int POLY_ISSIDE = 8;
-
-// there are points behind the camera
-static const int POLY_BEHIND = 16;
-// some coordinates are too large -- best not to draw to avoid glitches
-static const int POLY_TOOLARGE = 32;
-// on the sphere (orthogonal projection), do not draw without any points in front
-static const int POLY_INFRONT = 64;
-
-// floor shapes which have their sidewalls
-static const int POLY_HASWALLS = 128;
-// plain floors
-static const int POLY_PLAIN = 256;
-// full floors
-static const int POLY_FULL = 512;
-// floor shapes which have their shadows, or can use shFloorShadow
-static const int POLY_HASSHADOW = 1024;
-// Goldberg shapes
-static const int POLY_GP = 2048;
-
-// Convex shape (vertex)
-static const int POLY_VCONVEX = 4096;
-// Convex shape (central)
-static const int POLY_CCONVEX = 8192;
-
-// new system of side checking 
-static const int POLY_CENTERIN = 16384;
-
-// force wide lines
-static const int POLY_FORCEWIDE = (1<<15);
-
-// points not in front
-static const int POLY_NOTINFRONT = (1<<16);
-
-// points moved to the outline cross the image, disable
-static const int POLY_NIF_ERROR = (1<<17);
-
-// new system of side checking 
-static const int POLY_BADCENTERIN = (1<<18);
-
-// precise width calculation
-static const int POLY_PRECISE_WIDE = (1<<19);
-
-// force inverted
-static const int POLY_FORCE_INVERTED = (1<<20);
-
-// always draw this
-static const int POLY_ALWAYS_IN = (1<<21);
-
-// made of TRIANGLES, not TRIANGLE_FAN
-static const int POLY_TRIANGLES = (1<<22);
-
-// extra intense colors
-static const int POLY_INTENSE = (1<<23);
-
-vector<hyperpoint> hpc;
-basic_textureinfo user_triangles_texture;
-
-int prehpc;
-
-bool first;
-
-bool fatborder;
-
-color_t poly_outline;
-
-// #define STLSORT
-
-#define NEWSHAPE (-13.5)
-#define WOLF (-15.5)
+static constexpr ld NEWSHAPE = (-13.5);
+static constexpr ld WOLF = (-15.5);
 
 extern long double polydata[];
 
-#if CAP_SHAPES
-hpcshape *last = NULL;
-#endif
-
-vector<unique_ptr<drawqueueitem>> ptds;
-
-#if CAP_SHAPES
-void hpcpush(hyperpoint h) { 
+void geometry_information::hpcpush(hyperpoint h) {
   if(sphere) h = mid(h,h);
   ld threshold = (DIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
   if(/*vid.usingGL && */!first) {
@@ -132,15 +28,7 @@ void hpcpush(hyperpoint h) {
   hpc.push_back(h);
   }
 
-bool validsidepar[SIDEPARS];
-
-hyperpoint zshift(hyperpoint x, ld z) {
-  if(DIM == 3 && WDIM == 2)
-    return rgpushxto0(x) * cpush(2, z) * C0;
-  else return mscale(x, z);
-  }
-
-void chasmifyPoly(double fac, double fac2, int k) {
+void geometry_information::chasmifyPoly(double fac, double fac2, int k) {
   if(GDIM == 2) {
      for(int i=isize(hpc)-1; i >= last->s; i--) {
        hpc.push_back(mscale(hpc[i], fac));
@@ -167,111 +55,28 @@ void chasmifyPoly(double fac, double fac2, int k) {
     texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1+x-y)/2, (1+x+y)/2); });
-    texture_order([&] (ld x, ld y) { at((1+x+y)/2, (1-x+y)/2); });      
+    texture_order([&] (ld x, ld y) { at((1+x+y)/2, (1-x+y)/2); });
     }
   }
-#endif
 
-#if CAP_GL
-color_t text_color;
-int text_shift;
-GLuint text_texture;
-int texts_merged;
-int shapes_merged;
-
-vector<glhr::textured_vertex> text_vertices;
-
-#if MINIMIZE_GL_CALLS
-color_t triangle_color, line_color;
-vector<glvertex> triangle_vertices;
-vector<glvertex> line_vertices;
-void glapplymatrix(const transmatrix& V);
-#endif
-
-void glflush() {
-  #if MINIMIZE_GL_CALLS
-  if(isize(triangle_vertices)) {
-    // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
-    if(triangle_color) {
-      glhr::be_nontextured();
-      glapplymatrix(Id);
-      glhr::current_vertices = NULL;
-      glhr::vertices(triangle_vertices);
-      glhr::color2(triangle_color);
-      glDrawArrays(GL_TRIANGLES, 0, isize(triangle_vertices));
-      }
-    triangle_vertices.clear();
-    }
-  if(isize(line_vertices)) {
-    if(line_color) {
-      glhr::be_nontextured();
-      glapplymatrix(Id);
-      glhr::current_vertices = NULL;
-      glhr::vertices(line_vertices);
-      glhr::color2(line_color);
-      glDrawArrays(GL_LINES, 0, isize(line_vertices));
-      }
-    line_vertices.clear();
-    }
-  shapes_merged = 0;
-  #endif
-
-  if(isize(text_vertices)) {
-    // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
-    glhr::be_textured();
-    dynamicval<eModel> pm(pmodel, mdUnchanged);
-    if(!svg::in) current_display->set_all(0);
-    glBindTexture(GL_TEXTURE_2D, text_texture);
-    glhr::color2(text_color);
-    glhr::set_depthtest(false);
-    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist));
-      current_display->set_mask(ed);
-  
-      glhr::current_vertices = NULL;
-      glhr::prepare(text_vertices);
-      glDrawArrays(GL_TRIANGLES, 0, isize(text_vertices));
-      
-      GLERR("print");
-      }
-
-    if(current_display->stereo_active() && text_shift && !svg::in) current_display->set_mask(0);
- 
-    texts_merged = 0;
-    text_vertices.clear();
-    }
-  }
-#endif
-
-#if CAP_SHAPES
-void shift(hpcshape& sh, double dx, double dy, double dz) {
+void geometry_information::shift(hpcshape& sh, double dx, double dy, double dz) {
   hyperpoint H = hpxyz(dx, dy, dz);
   transmatrix m = rgpushxto0(H);
-  for(int i=sh.s; i<sh.e; i++) 
+  for(int i=sh.s; i<sh.e; i++)
     hpc[i] = m * hpc[i];
   }
-#endif
 
-#if ISMOBILE==0
-SDL_Surface *aux;
-#endif
-
-#if CAP_POLY
-#define POLYMAX 60000
-
-vector<glvertex> glcoords, ourshape;
-
-void initPolyForGL() {
+void geometry_information::initPolyForGL() {
 
   ourshape.clear();
-  
+
   for(auto& h: hpc)
     ourshape.push_back(glhr::pointtogl(h));
-  
+
   glhr::store_in_buffer(ourshape);
   }
 
-void extra_vertices() {
+void geometry_information::extra_vertices() {
   while(isize(ourshape) < isize(hpc))
     ourshape.push_back(glhr::pointtogl(hpc[isize(ourshape)]));
   glhr::store_in_buffer(ourshape);
@@ -279,1515 +84,9 @@ void extra_vertices() {
   prehpc = isize(hpc);
   }
 
-#endif
+transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
 
-int spherespecial, spherephase;
-
-#if CAP_POLY
-int polyi;
-
-int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
-
-int poly_flags;
-
-void add1(const hyperpoint& H) {
-  glcoords.push_back(glhr::pointtogl(H)); 
-  }  
-
-bool is_behind(const hyperpoint& H) {
-  return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && vid.alpha + H[2] <= BEHIND_LIMIT;
-  }
-
-hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {
-  using namespace hyperpoint_vec;
-  // H1[2] * t + H2[2] * (1-t) == BEHIND_LIMIT - vid.alpha
-  // H2[2]- BEHIND_LIMIT + vid.alpha = t * (H2[2] - H1[2])
-  ld t = (H2[2] - BEHIND_LIMIT + vid.alpha) / (H2[2] - H1[2]);
-  return H1 * t + H2 * (1-t);
-  }
-
-bool last_infront;
-
-bool nif_error_in(ld x1, ld y1, ld x2, ld y2) {
-  return pow(x1 * x2 + y2 * y2, 2) < (x1*x1+y1*y1)*(x2*x2+y2*y2)*.5;
-  }
-
-bool knowgood;
-hyperpoint goodpoint;
-vector<pair<int, hyperpoint>> tofix;
-
-bool two_sided_model() {
-  if(DIM == 3) return false;
-  if(pmodel == mdHyperboloid) return !euclid;
-  // if(pmodel == mdHemisphere) return true;
-  if(pmodel == mdDisk) return sphere;
-  if(pmodel == mdHemisphere) return true;
-  if(pmodel == mdRotatedHyperboles) return true;
-  if(pmodel == mdSpiral && conformal::spiral_cone < 360) return true;
-  return false;
-  }
-
-int get_side(const hyperpoint& H) {
-  if(pmodel == mdDisk && sphere) {
-    double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-    double horizon = curnorm / vid.alpha;
-    return (H[2] <= -horizon) ? -1 : 1;
-    }
-  if(pmodel == mdRotatedHyperboles)
-    return H[1] > 0 ? -1 : 1;
-  if(pmodel == mdHyperboloid && hyperbolic)
-    return (conformal::sin_ball * H[2] > -conformal::cos_ball * H[1]) ? -1 : 1;
-  if(pmodel == mdHyperboloid && sphere)
-    return (conformal::sin_ball * H[2] > conformal::cos_ball * H[1]) ? -1 : 1;
-  if(pmodel == mdHemisphere) {
-    hyperpoint res;
-    applymodel(H, res);
-    return res[2] < 0 ? -1 : 1;
-    }
-  if(pmodel == mdSpiral && conformal::spiral_cone < 360) {    
-    return cone_side(H);
-    }
-  return 0;
-  }
-
-bool correct_side(const hyperpoint& H) {
-  return get_side(H) == spherespecial;
-  }
-
-hyperpoint Hlast;
-
-void fixpoint(glvertex& hscr, hyperpoint H) {
-  hyperpoint bad = H, good = goodpoint;
-
-  for(int i=0; i<10; i++) {
-    hyperpoint mid = midz(bad, good);
-    if(correct_side(mid))
-      good = mid;
-    else
-      bad = mid;
-    }
-  hyperpoint Hscr;
-  applymodel(good, Hscr); 
-  hscr = glhr::makevertex(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*current_display->radius); 
-  }
-
-void addpoint(const hyperpoint& H) {
-  if(true) {
-    ld z = current_display->radius;
-    // if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
-    
-    if(spherespecial) {
-      
-      if(correct_side(H)) {
-        poly_flags |= POLY_INFRONT, last_infront = false;
-        if(!knowgood || (spherespecial > 0 ? H[2]>goodpoint[2] : H[2]<goodpoint[2])) goodpoint = H, knowgood = true;
-        } 
-      else if(sphere && (poly_flags & POLY_ISSIDE)) {
-        double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-        double horizon = curnorm / vid.alpha;
-        poly_flags |= POLY_NOTINFRONT;
-        if(last_infront && nif_error_in(glcoords.back()[0], glcoords.back()[1], H[0], H[1]))
-          poly_flags |= POLY_NIF_ERROR;
-
-        last_infront = true;
-        
-        z *=
-          (sqrt(curnorm - horizon*horizon) / (vid.alpha - horizon)) / 
-          (sqrt(curnorm - H[2]*H[2]) / (vid.alpha+H[2]));
-        }
-      else {
-        poly_flags |= POLY_NOTINFRONT;
-        tofix.push_back(make_pair(glcoords.size(), H));
-        add1(H);
-        return;
-        }
-      }
-    hyperpoint Hscr;
-    applymodel(H, Hscr); 
-    if(sphere && pmodel == mdSpiral) {
-      if(isize(glcoords)) {
-        hyperpoint Hscr1;
-        band_shift += 2 * M_PI;
-        applymodel(H, Hscr1);
-        using namespace hyperpoint_vec;
-        if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
-        band_shift -= 4 * M_PI;
-        applymodel(H, Hscr1);
-        if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
-        band_shift += 2 * M_PI;
-        }
-      Hlast = Hscr;
-      }
-    if(DIM == 2) {
-      for(int i=0; i<3; i++) Hscr[i] *= z;
-      Hscr[1] *= vid.stretch;
-      }
-    else {
-      Hscr[0] *= z;
-      Hscr[1] *= z * vid.stretch;
-      Hscr[2] = 1 - 2 * (-Hscr[2] - conformal::clip_min) / (conformal::clip_max - conformal::clip_min);
-      }
-    add1(Hscr);
-    }
-  }
-
-void coords_to_poly() {
-  polyi = isize(glcoords);
-  for(int i=0; i<polyi; i++) {
-    if(!current_display->stereo_active()) glcoords[i][2] = 0;
-
-    polyx[i]  = current_display->xcenter + glcoords[i][0] - glcoords[i][2]; 
-    polyxr[i] = current_display->xcenter + glcoords[i][0] + glcoords[i][2]; 
-    polyy[i]  = current_display->ycenter + glcoords[i][1];
-    }
-  }
-
-void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
-  if(pmodel == mdFlatten) {
-    for(int i=ofs; i<ofs+cnt; i++) {
-      hyperpoint h = glhr::gltopoint(tab[i]);
-      h[3] = 1;
-      h = V * h;
-      add1(h);
-      }
-    return;
-    }
-  tofix.clear(); knowgood = false;
-  hyperpoint last = V * glhr::gltopoint(tab[ofs]);
-  bool last_behind = is_behind(last);
-  if(!last_behind) addpoint(last);
-  hyperpoint enter = C0;
-  hyperpoint firstleave;
-  int start_behind = last_behind ? 1 : 0;
-  for(int i=ofs+1; i<ofs+cnt; i++) {
-    hyperpoint curr = V*glhr::gltopoint(tab[i]);
-    if(is_behind(curr) != last_behind) {
-      hyperpoint h = be_just_on_view(last, curr);
-      if(start_behind == 1) start_behind = 2, firstleave = h;
-      if(!last_behind) enter = h;
-      else if(h[0] * enter[0] + h[1] * enter[1] < 0) poly_flags |= POLY_BEHIND;
-      addpoint(h);
-      last_behind = !last_behind;
-      }
-    if(!last_behind) addpoint(curr);
-    last = curr;
-    }
-  if(start_behind == 2) {
-    if(firstleave[0] * enter[0] + firstleave[1] * enter[1] < 0) poly_flags |= POLY_BEHIND;
-    else addpoint(firstleave);
-    }
-  if(knowgood && isize(tofix)) {
-    
-    if(true) {
-      hyperpoint Hx = V * C0, Hy = goodpoint;
-      for(int i=0; i<20; i++) {
-        hyperpoint mid = midz(Hx, Hy);
-        if(correct_side(mid)) Hy = mid;
-        else Hx = mid;
-        }
-      using namespace hyperpoint_vec;
-      goodpoint = midz(Hy, goodpoint);
-      }
-    
-    for(auto& p: tofix)
-      fixpoint(glcoords[p.first], p.second);
-    /*
-    hyperpoint Hscr;
-    applymodel(goodpoint, Hscr); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch+10, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius-10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch-10, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius));  */
-    }
-  }
-
-#if CAP_SDLGFX
-void aapolylineColor(SDL_Surface *s, int*x, int *y, int polyi, color_t col) {
-  for(int i=1; i<polyi; i++)
-    aalineColor(s, x[i-1], y[i-1], x[i], y[i], col);
-  }
-
-void polylineColor(SDL_Surface *s, int *x, int *y, int polyi, color_t col) {
-  for(int i=1; i<polyi; i++)
-    lineColor(s, x[i-1], y[i-1], x[i], y[i], col);
-  }
-
-void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, color_t col) {
-  std::vector<Sint16> spx(px, px + polyi);
-  std::vector<Sint16> spy(py, py + polyi);
-  filledPolygonColor(s, spx.data(), spy.data(), polyi, col);
-  }
-#endif
-
-#if CAP_TEXTURE
-void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_t col) {
-  transmatrix source = {{{ld(px[0]),ld(px[1]),ld(px[2])}, {ld(py[0]),ld(py[1]),ld(py[2])}, {1,1,1}}};
-  transmatrix target = {{{tv[0][0],tv[1][0],tv[2][0]}, {tv[0][1],tv[1][1],tv[2][1]}, {1,1,1}}};
-  transmatrix isource = inverse(source);
-  int minx = px[0], maxx = px[0];
-  int miny = py[0], maxy = py[0];
-  for(int i=1; i<3; i++)
-    minx = min(minx, px[i]), maxx = max(maxx, px[i]),
-    miny = min(miny, py[i]), maxy = max(maxy, py[i]);
-  for(int mx=minx; mx<maxx; mx++)
-  for(int my=miny; my<maxy; my++) {
-    hyperpoint h = isource * point3(mx, my, 1);
-    if(h[0] >= -1e-7 && h[1] >= -1e-7 && h[2] >= -1e-7) {
-      hyperpoint ht = target * h;
-      int tw = texture::config.data.twidth;
-      int x = int(ht[0] * tw) & (tw-1);
-      int y = int(ht[1] * tw) & (tw-1);
-      color_t c = texture::config.data.texture_pixels[y * tw + x];
-      auto& pix = qpixel(s, mx, my);
-      for(int p=0; p<3; p++) {
-        int alpha = part(c, 3) * part(col, 0);
-        auto& v = part(pix, p);
-        v = ((255*255 - alpha) * 255 * v + alpha * part(col, p+1) * part(c, p) + 255 * 255 * 255/2 + 1) / (255 * 255 * 255);
-        }
-      }
-    }
-  }
-#endif
-
-#if CAP_GL
-
-void glapplymatrix(const transmatrix& V) {
-  GLfloat mat[16];
-  int id = 0;
-  if(pmodel == mdPerspective && DIM == 3) {
-    if(spherephase & 4) {
-      for(int y=0; y<4; y++) {
-        for(int x=0; x<4; x++) mat[id++] = -V[x][y];
-        }
-      }
-    else {
-      for(int y=0; y<4; y++) {
-        for(int x=0; x<4; x++) mat[id++] = V[x][y];
-        }
-      }
-    glhr::set_modelview(glhr::as_glmatrix(mat));
-    return;
-    }
-  
-  if(DIM == 3) {
-    for(int y=0; y<4; y++) 
-      for(int x=0; x<4; x++) mat[id++] = V[x][y];
-    }
-  else {
-    for(int y=0; y<3; y++) {
-      for(int x=0; x<3; x++) mat[id++] = V[x][y];
-      mat[id++] = 0;
-      }
-    mat[12] = 0;
-    mat[13] = 0;
-    if(glhr::current_shader_projection != glhr::shader_projection::band)
-      mat[14] = GLfloat(vid.alpha);
-    else
-      mat[14] = 0;
-    mat[15] = 1;  
-    }
-  
-  if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
-  
-  if(conformal::model_has_orientation()) {
-    if(DIM == 3) for(int a=0; a<4; a++) 
-      conformal::apply_orientation_yz(mat[a*4+1], mat[a*4+2]);
-    for(int a=0; a<4; a++) 
-      conformal::apply_orientation(mat[a*4], mat[a*4+1]);
-    }
-
-  glhr::set_modelview(glhr::as_glmatrix(mat));
-  }
-
-int global_projection;
-
-#if MAXMDIM >= 4
-extern renderbuffer *floor_textures;
-#endif
-
-void dqi_poly::gldraw() {
-  auto& v = *tab;
-  int ioffset = offset;
-  
-#if MINIMIZE_GL_CALLS  
-  if(current_display->stereo_active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
-    if(color != triangle_color || outline != line_color || texts_merged) {
-      glflush();
-      triangle_color = color;
-      line_color = outline;
-      }
-    shapes_merged++;
-
-    if((flags & POLY_CCONVEX) && !(flags & POLY_VCONVEX)) {
-      vector<glvertex> v2(cnt+1);
-      for(int i=0; i<cnt+1; i++) v2[i] = glhr::pointtogl( V * glhr::gltopoint( v[offset+i-1] ) );
-      if(color) for(int i=0; i<cnt; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i]), triangle_vertices.push_back(v2[i+1]);
-      for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i]), line_vertices.push_back(v2[i+1]);
-      }
-    else {
-      vector<glvertex> v2(cnt);
-      for(int i=0; i<cnt; i++) v2[i] = glhr::pointtogl( V * glhr::gltopoint( v[offset+i] ) );
-      if(color) for(int i=2; i<cnt-1; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i-1]), triangle_vertices.push_back(v2[i]);
-      for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i-1]), line_vertices.push_back(v2[i]);
-      }
-    return;
-    }
-  else glflush();
-#endif
-  
-  if(tinf) {
-    #if CAP_TEXTURE
-    glhr::be_textured();
-    glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-    glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
-    ioffset = 0;
-    #endif
-    }
-  else { 
-    glhr::be_nontextured();
-    
-    #if !ISANDROID
-    glhr::vertices(v);
-    #else
-    if(glhr::current_vertices != &v[offset]) {
-      glhr::current_vertices = &v[offset];
-      glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[offset]);
-      // glVertexPointer(3, GL_FLOAT, sizeof(glvertex), &v[ps]);
-      // glhr::vertices(v);
-      }
-    offset = 0;
-    #endif
-    }
-
-  for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
-    if(global_projection && global_projection != ed) continue;
-    current_display->set_all(ed);
-    bool draw = color;
-    
-    if(shaderside_projection) {
-      if(glhr::current_shader_projection == glhr::shader_projection::band && V[2][2] > 1e8) continue;
-      glapplymatrix(V);
-      }
-
-    if(draw) {
-      if(flags & POLY_TRIANGLES) {
-        glhr::color2(color, (flags & POLY_INTENSE) ? 2 : 1);
-        glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW);
-        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + 5 / sightranges[geometry] : 1.0);
-        glDrawArrays(GL_TRIANGLES, ioffset, cnt);
-        }
-      else {
-        glEnable(GL_STENCIL_TEST);
-  
-        glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
-        glhr::set_depthtest(false);
-        glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
-        glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
-        glhr::color2(0xFFFFFFFF);
-        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset, cnt);
-        
-        current_display->set_mask(ed);
-        glhr::color2(color);
-        glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW);
-  
-        if(flags & (POLY_INVERSE | POLY_FORCE_INVERTED)) {
-          glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-          glStencilFunc( GL_NOTEQUAL, 1, 1);
-          GLfloat xx = vid.xres;
-          GLfloat yy = vid.yres;
-          GLfloat dist = shaderside_projection ? current_display->scrdist : 0;
-          vector<glvertex> scr = {
-            glhr::makevertex(-xx, -yy, dist), 
-            glhr::makevertex(+xx, -yy, dist), 
-            glhr::makevertex(+xx, +yy, dist), 
-            glhr::makevertex(-xx, +yy, dist)
-            };
-          glhr::vertices(scr);
-          glhr::id_modelview();
-          glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
-          glhr::vertices(v);
-          if(shaderside_projection) glapplymatrix(V);
-          }
-        else { 
-          glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-          glStencilFunc( GL_EQUAL, 1, 1);
-          glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset, cnt);
-          }
-        
-        glDisable(GL_STENCIL_TEST);
-        }
-      }
-    
-    if(outline && !(flags & POLY_TRIANGLES)) {
-      glhr::color2(outline);
-      glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-      glDrawArrays(GL_LINE_STRIP, offset, cnt);
-      }
-    }
-  }
-#endif
-
-ld scale_at(const transmatrix& T) {
-  if(DIM == 3 && pmodel == mdPerspective) return 1 / (tC0(T))[2];
-  using namespace hyperpoint_vec;
-  hyperpoint h1, h2, h3;
-  applymodel(tC0(T), h1);
-  applymodel(T * xpush0(.01), h2);
-  applymodel(T * ypush(.01) * C0, h3);
-  return sqrt(hypot_d(2, h2-h1) * hypot_d(2, h3-h1) / .0001);
-  }
-
-ld linewidthat(const hyperpoint& h) {
-  if(!(vid.antialias & AA_LINEWIDTH)) return 1;
-  else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1) {
-    double dz = h[DIM];
-    if(dz < 1 || abs(dz-current_display->scrdist) < 1e-6) return 1;
-    else {
-      double dx = sqrt(dz * dz - 1);
-      double dfc = dx/(dz+1);
-      dfc = 1 - dfc*dfc;
-      return dfc;
-      }
-    }
-  else if(svg::in || inHighQual) {
-    using namespace hyperpoint_vec;
-    hyperpoint h0 = h / zlevel(h);
-    transmatrix T = rgpushxto0(h0);
-    return scale_at(T);
-    }
-  return 1;
-  }
-
-// -radius to +3radius
-
-int mercator_coord;
-int mercator_loop_min = 0, mercator_loop_max = 0;
-ld mercator_period;
-
-void fixMercator(bool tinf) {
-
-  if(pmodel == mdBand)
-    mercator_period = 4 * current_display->radius;
-  else
-    mercator_period = 2 * current_display->radius;
-  
-  if(!conformal::model_straight)
-    for(auto& g: glcoords)
-      conformal::apply_orientation(g[0], g[1]);
-    
-  if(pmodel == mdSinusoidal)
-    for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);
-
-  ld hperiod = mercator_period / 2;
-    
-  mercator_coord = 0;
-  
-  auto dist = [] (ld a, ld b) { return max(b, a-b); };
-  
-  ld chypot = hypot(dist(vid.xres, current_display->xcenter), dist(vid.yres, current_display->ycenter));
-  
-  ld cmin = -chypot/2, cmax = chypot/2, dmin = -chypot, dmax = chypot;
-
-  if(mercator_coord)
-    swap(cmin, dmin), swap(cmax, dmax);
-  if(pmodel == mdSinusoidal)
-    dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
-  if(pmodel == mdBandEquidistant)
-    dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
-  if(pmodel == mdBandEquiarea)
-    dmin = -vid.stretch * current_display->radius / M_PI, dmax = vid.stretch * current_display->radius / M_PI;
-
-  for(int i = 0; i<isize(glcoords); i++) {
-    while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
-    while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= mercator_period;
-    }
-    
-  ld first = glcoords[0][mercator_coord];
-  ld next = first;
-  
-  ld mincoord = first, maxcoord = first;
-
-  for(int i = 0; i<isize(glcoords); i++) {
-    while(glcoords[i][mercator_coord] < next - hperiod)
-      glcoords[i][mercator_coord] += mercator_period;
-    while(glcoords[i][mercator_coord] > next + hperiod)
-      glcoords[i][mercator_coord] -= mercator_period;
-    next = glcoords[i][mercator_coord];
-    mincoord = min<ld>(mincoord, glcoords[i][mercator_coord]);
-    maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
-    }
-  
-  if(abs(mincoord) > 50000 || abs(maxcoord) > 50000 || std::isnan(mincoord) || std::isnan(maxcoord)) {
-    mercator_loop_max--;
-    return;
-    }
-  
-  ld last = first;
-  while(last < next - hperiod) last += mercator_period;
-  while(last > next + hperiod) last -= mercator_period;
-    
-  if(first == last) {
-    while(mincoord > cmin)
-      mercator_loop_min--, mincoord -= mercator_period;
-    while(maxcoord < cmax)
-      mercator_loop_max++, maxcoord += mercator_period;
-    if(pmodel == mdSinusoidal)
-      for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);    
-    if(!conformal::model_straight)
-      for(auto& g: glcoords)
-        conformal::apply_orientation(g[1], g[0]);
-    }
-  else {
-    if(tinf) { 
-      // this cannot work in Mercator
-      mercator_loop_max--; return; 
-      }
-    if(last < first) {
-      reverse(glcoords.begin(), glcoords.end());
-      swap(first, last);
-      }
-    while(maxcoord > cmin) {
-      for(int i=0; i<isize(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period;
-      first -= mercator_period; last -= mercator_period;
-      mincoord -= mercator_period; maxcoord -= mercator_period;
-      }
-    int base = isize(glcoords);
-    int minto = mincoord;
-    while(minto < cmax) {
-      for(int i=0; i<base; i++) {
-        glcoords.push_back(glcoords[isize(glcoords)-base]);
-        glcoords.back()[mercator_coord] += mercator_period;
-        }
-      minto += mercator_period;
-      }
-    if(pmodel == mdSinusoidal)
-      for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);
-    glcoords.push_back(glcoords.back());
-    glcoords.push_back(glcoords[0]);
-    for(int u=1; u<=2; u++) {
-      auto& v = glcoords[isize(glcoords)-u][1-mercator_coord];
-      v = v < 0 ? dmin : dmax;
-      }
-    if(!conformal::model_straight)
-      for(auto& g: glcoords)
-        conformal::apply_orientation(g[1], g[0]);
-    /* printf("cycling %d -> %d\n", base, qglcoords);
-    for(int a=0; a<qglcoords; a++)
-      printf("[%3d] %10.5lf %10.5lf\n", a, glcoords[a][0], glcoords[a][1]); */
-    }
-
-    
-  }
-  
-bool in_twopoint = false;
-
-ld glhypot2(glvertex a, glvertex b) { 
-  return (a[0]-b[0]) * (a[0]-b[0]) + (a[1]-b[1]) * (a[1]-b[1]) + (a[2]-b[2]) * (a[2]-b[2]);
-  }
-
-void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
-
-  hyperpoint hscr;
-  hyperpoint h1 = p->V * p->intester;
-  if(is_behind(h1)) {
-    if(sphere) {
-      for(int i=0; i<3; i++) h1[i] = -h1[i];
-      poly_flags &= ~POLY_CENTERIN;
-      }
-    else
-      nofill = true; 
-    }
-  applymodel(h1, hscr); hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * vid.stretch;
-  for(int i=0; i<isize(glcoords)-1; i++) {
-    double x1 = glcoords[i][0] - hscr[0];
-    double y1 = glcoords[i][1] - hscr[1];
-    double x2 = glcoords[i+1][0] - hscr[0];
-    double y2 = glcoords[i+1][1] - hscr[1];
-    if(asign(y1, y2)) {
-      ld x = xcross(x1, y1, x2, y2);
-      if(x < -1e-6) poly_flags ^= POLY_CENTERIN;
-      else if (x < 1e-6) nofill = true;
-      }
-    }
-  
-  poly_flags &= ~POLY_INVERSE;
-  if(poly_flags & POLY_CENTERIN) {
-    poly_flags |= POLY_INVERSE;
-    if(abs(zlevel(tC0(p->V)) - 1) > 1e-6) nofill = true;
-
-    /* nofill = true;
-    outline = (flags & POLY_CENTERIN) ? 0x00FF00FF : 0xFF0000FF;
-    addpoint(hscr); */
-    }
-  
-  /*
-  if(poly_flags & POLY_BADCENTERIN) {
-    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
-    } */
-  }
-
-void compute_side_by_area() {
-
-  double rarea = 0;
-  for(int i=0; i<isize(glcoords)-1; i++) 
-    rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
-  rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
-
-  if(rarea>0)
-    poly_flags ^= POLY_INVERSE;
-  }
-
-ld get_width(dqi_poly* p) {
-  if(p->flags & POLY_PRECISE_WIDE) {
-    ld maxwidth = 0;
-    for(int i=0; i<p->cnt; i++) {
-      hyperpoint h1 = p->V * glhr::gltopoint((*p->tab)[p->offset+i]);
-      maxwidth = max(maxwidth, linewidthat(h1));
-      }
-    return maxwidth * p->linewidth;
-    }
-  else if(p->flags & POLY_FORCEWIDE)
-    return p->linewidth;
-  else
-    return linewidthat(tC0(p->V)) * p->linewidth;
-  }
-
-void dqi_poly::draw() {
-
-  dynamicval<ld> bs(hr::band_shift, band_shift);
-  if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
-    bool any = false;
-    for(int i=0; i<cnt; i++) {
-      hyperpoint h1 = V * glhr::gltopoint((*tab)[offset+i]);
-      if(h1[2] > 0) any = true;
-      }
-    if(!any) return;
-    }
-  
-  if(sphere && tinf && DIM == 2 && cnt > 3) {
-    int i = cnt;
-    cnt = 3;
-    for(int j=0; j<i; j+=3) {
-      offset += j;
-      offset_texture += j;
-      draw();
-      offset -= j;
-      offset_texture -= j;
-      }
-    cnt = i;
-    return;
-    }
-
-  if(sphere && pmodel == mdTwoPoint && !in_twopoint) {
-    #define MAX_PHASE 4
-    vector<glvertex> phases[MAX_PHASE];
-    extern int twopoint_sphere_flips;
-    extern bool twopoint_do_flips;
-    int pha;
-    if(twopoint_do_flips) {
-      for(int i=0; i<cnt; i++) {
-        hyperpoint h1 = V * glhr::gltopoint((*tab)[offset+i]);
-        for(int j=0; j<MAX_PHASE; j++) {
-          twopoint_sphere_flips = j;
-          hyperpoint h2; applymodel(h1, h2);
-          using namespace hyperpoint_vec;
-          glvertex h = glhr::pointtogl(h2 * current_display->radius); h[1] *= vid.stretch;
-          if(i == 0)
-            phases[j].push_back(h);
-          else {
-            int best = -1;
-            ld bhypot = 1e60;
-            for(int j0=0; j0<MAX_PHASE; j0++)
-              if(isize(phases[j0]) == i) {
-                ld chypot = glhypot2(phases[j0].back(), h);
-                if(chypot < bhypot || best == -1) bhypot = chypot, best = j0;
-                }
-            phases[best].push_back(h);
-            }
-          }
-        }
-      twopoint_sphere_flips = 0;
-      pha = MAX_PHASE-1;
-      }
-    else {
-      pha = 1;
-      if(true) {
-        // a
-        // b
-        // lin(a,b) is of form (x, 0, z)
-        int cpha = 0;
-        for(int i=0; i<cnt; i++) {
-          using namespace hyperpoint_vec;
-
-          hyperpoint h1 = V * glhr::gltopoint((*tab)[offset+i]);
-          hyperpoint mh1; applymodel(h1, mh1); mh1[1] *= vid.stretch;
-          phases[cpha].push_back(glhr::pointtogl(mh1 * current_display->radius));
-
-          // check if the i-th edge intersects the boundary of the ellipse
-          // (which corresponds to the segment between the antipodes of foci)
-          // if yes, switch cpha to the opposite
-          hyperpoint h2 = V * glhr::gltopoint((*tab)[offset+(i+1)%cnt]);
-          
-          hyperpoint ah1 = h1, ah2 = h2;
-          conformal::apply_orientation(ah1[0], ah1[1]);
-          conformal::apply_orientation(ah2[0], ah2[1]);
-          if(ah1[1] * ah2[1] > 0) continue;
-          ld c1 = ah1[1], c2 = -ah2[1];
-          if(c1 < 0) c1 = -c1, c2 = -c2;
-          hyperpoint h = ah1 * c1 + ah2 * c2;
-          h /= hypot_d(3, h);
-          if(h[2] < 0 && abs(h[0]) < sin(vid.twopoint_param)) cpha = 1-cpha, pha = 2;
-          }
-        if(cpha == 1) pha = 0;
-        }
-      }
-    dynamicval<eModel> d1(pmodel, mdUnchanged);
-    dynamicval<transmatrix> d2(V, Id);
-    dynamicval<int> d3(offset, 0);
-    dynamicval<decltype(tab)> d4(tab, tab);
-    for(int j=0; j<pha; j++) {
-      dynamicval<int> d5(cnt, isize(phases[j]));
-      tab = &phases[j];
-      draw();
-      }
-    return;
-    }
-  
-  /* if(spherespecial && prio == PPR::MOBILE_ARROW) {
-    if(spherephase == 0) return;
-    dynamicval<int> ss(spherespecial, 0);
-    draw();
-    return;
-    } */
-
-#if CAP_GL
-  if(vid.usingGL && (current_display->set_all(global_projection), shaderside_projection)) {
-    glLineWidth(get_width(this));
-    flags &= ~POLY_INVERSE;
-    gldraw();
-    return;
-    }
-#endif
-  
-  glcoords.clear();
-  poly_flags = flags;
-  
-  double d = 0, curradius = 0;
-  if(sphere) {
-    d = det(V);
-    curradius = pow(abs(d), 1/3.);
-    }
-  
-  /* outline = 0x80808080;
-  color = 0; */
-  
-  last_infront = false;
-  
-  addpoly(V, *tab, offset, cnt);
-  if(!(sphere && vid.alpha < .9)) if(pmodel != mdJoukowsky) if(!(flags & POLY_ALWAYS_IN)) for(int i=1; i<isize(glcoords); i++) {
-    ld dx = glcoords[i][0] - glcoords[i-1][0];
-    ld dy = glcoords[i][1] - glcoords[i-1][1];
-    if(dx > vid.xres * 2 || dy > vid.yres * 2) return;
-    }
-  if(poly_flags & POLY_BEHIND) return;
-  if(isize(glcoords) <= 1) return;
-  
-  mercator_loop_min = mercator_loop_max = 0;
-  if(sphere && mdBandAny())
-    fixMercator(tinf);
-    
-  int poly_limit = max(vid.xres, vid.yres) * 2;
-  
-
-  if(0) for(auto& p: glcoords) {
-    if(abs(p[0]) > poly_limit || abs(p[1]) > poly_limit)
-      return; // too large!
-    }
-  
-  bool equi = mdAzimuthalEqui() || pmodel == mdFisheye;
-
-  bool nofill = false;
-
-  if(poly_flags & POLY_NIF_ERROR) return;
-  
-  if(spherespecial == 1 && sphere && (poly_flags & POLY_INFRONT) && (poly_flags & POLY_NOTINFRONT) && vid.alpha <= 1) {
-    bool around_center = false;
-    for(int i=0; i<isize(glcoords)-1; i++) {
-      double x1 = glcoords[i][0];
-      double y1 = glcoords[i][1];
-      double x2 = glcoords[i+1][0];
-      double y2 = glcoords[i+1][1];
-      if(asign(y1, y2)) {
-        ld x = xcross(x1, y1, x2, y2);
-        if(x < -1e-6) around_center = !around_center;
-        }
-      }
-    if(around_center) return;
-    }
-  
-  bool can_have_inverse = false;  
-  if(sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) can_have_inverse = true;
-  if(pmodel == mdJoukowsky) can_have_inverse = true;
-  if(pmodel == mdJoukowskyInverted && vid.skiprope) can_have_inverse = true;
-  if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) can_have_inverse = true;
-  if(pmodel == mdSpiral && vid.skiprope) can_have_inverse = true;
-    
-  if(can_have_inverse && !(poly_flags & POLY_ISSIDE)) {
-  
-    if(!tinf) 
-      compute_side_by_centerin(this, nofill);
-        
-    else {
-      if(d < 0) poly_flags ^= POLY_INVERSE;  
-      compute_side_by_area();
-      }
-    
-    if(poly_flags & POLY_INVERSE) {
-      if(curradius < vid.alpha - 1e-6) return;
-      if(!sphere) return;
-      }
-    
-    }
-  else poly_flags &=~ POLY_INVERSE;
-  
-  if(spherespecial) {
-    if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
-    }
-    
-  int lastl = 0;
-
-  for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
-  
-    if(l || lastl) { 
-      for(int i=0; i<isize(glcoords); i++) {
-        if(pmodel == mdSinusoidal) {
-          ld y = glcoords[i][1], x = glcoords[i][0];
-          conformal::apply_orientation(x, y);
-          mercator_period = 2 * current_display->radius * cos(y / current_display->radius / vid.stretch * M_PI);
-          }
-        glcoords[i][mercator_coord] += conformal::ocos * mercator_period * (l - lastl);
-        glcoords[i][1-mercator_coord] += conformal::osin * mercator_period * (l - lastl);
-        }
-      lastl = l;
-      }
-    
-    if(equi && (poly_flags & POLY_INVERSE)) {
-      if(abs(zlevel(V * C0) - 1) < 1e-6 && !tinf) {
-        // we should fill the other side
-        ld h = atan2(glcoords[0][0], glcoords[0][1]);
-        for(int i=0; i<=360; i++) {
-          ld a = i * degree + h;
-          glcoords.push_back(glhr::makevertex(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), current_display->scrdist));
-          }
-        poly_flags ^= POLY_INVERSE;
-        }
-      else {
-        // If we are on a zlevel, the algorithm above will not work correctly.
-        // It is hard to tell what to do in this case. Just fill neither side
-        nofill = true;
-        }
-      }
-  
-  #if CAP_GL
-    if(vid.usingGL) {
-      poly_flags &= ~(POLY_VCONVEX | POLY_CCONVEX);
-      // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = current_display->scrdist;
-      if(tinf && (poly_flags & POLY_INVERSE)) {
-        return; 
-        }
-      glLineWidth(get_width(this));
-      dqi_poly npoly = (*this);
-      npoly.V = Id;
-      npoly.tab = &glcoords;
-      npoly.offset = 0;
-      npoly.cnt = isize(glcoords);
-      if(nofill) npoly.color = 0, npoly.tinf = NULL;
-      npoly.flags = poly_flags;
-      npoly.gldraw();
-      continue;
-      }
-  #endif
-  
-  #if CAP_SVG==1
-    if(svg::in) {
-      coords_to_poly();
-      color_t col = color;
-      if(poly_flags & POLY_INVERSE) col = 0;
-      svg::polygon(polyx, polyy, polyi, col, outline, get_width(this));
-      continue;
-      }
-  #endif
-  
-    coords_to_poly();
-  
-  #if CAP_XGD==1
-    gdpush(1); gdpush(color); gdpush(outline); gdpush(polyi);
-    for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
-  #elif CAP_SDLGFX==1
-  
-    if(tinf) {
-      #if CAP_TEXTURE
-      if(!(poly_flags & POLY_INVERSE))
-        for(int i=0; i<polyi; i += 3)
-          drawTexturedTriangle(s, polyx+i, polyy+i, &tinf->tvertices[offset_texture + i], color);
-      #endif
-      }
-    else if(poly_flags & POLY_INVERSE) {
-      int i = polyi;
-      if(true) {
-        polyx[i] = 0; polyy[i] = 0; i++;
-        polyx[i] = vid.xres; polyy[i] = 0; i++;
-        polyx[i] = vid.xres; polyy[i] = vid.yres; i++;
-        polyx[i] = 0; polyy[i] = vid.yres; i++;
-        polyx[i] = 0; polyy[i] = 0; i++;
-        }
-      filledPolygonColorI(s, polyx, polyy, polyi+5, color);
-      }
-    else  
-      filledPolygonColorI(s, polyx, polyy, polyi, color);
-  
-    if(current_display->stereo_active()) filledPolygonColorI(aux, polyxr, polyy, polyi, color);
-    
-    ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
-    if(current_display->stereo_active()) aapolylineColor(aux, polyxr, polyy, polyi, outline);
-    
-    if(vid.xres >= 2000 || fatborder) {
-      int xmi = 3000, xma = -3000;
-      for(int t=0; t<polyi; t++) xmi = min(xmi, polyx[t]), xma = max(xma, polyx[t]);
-      
-      if(xma > xmi + 20) for(int x=-1; x<2; x++) for(int y=-1; y<=2; y++) if(x*x+y*y == 1) {
-        for(int t=0; t<polyi; t++) polyx[t] += x, polyy[t] += y;
-        aapolylineColor(s, polyx, polyy, polyi, outline);
-        for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
-        }
-      }
-  #endif
-    }
-  }
-
-vector<glvertex> prettylinepoints;
-
-void prettypoint(const hyperpoint& h) {
-  prettylinepoints.push_back(glhr::pointtogl(h));
-  }
-
-void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
-  if(lev >= 0) {
-    hyperpoint h3 = midz(h1, h2);
-    prettylinesub(h1, h3, lev-1);
-    prettylinesub(h3, h2, lev-1);
-    }
-  else prettypoint(h2);
-  }
-
-void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags, PPR prio) {
-  prettylinepoints.clear();
-  prettypoint(h1);
-  prettylinesub(h1, h2, lev);
-  dqi_poly ptd;
-  ptd.V = Id;
-  ptd.band_shift = band_shift;
-  ptd.tab = &prettylinepoints;
-  ptd.offset = 0;
-  ptd.cnt = isize(prettylinepoints);
-  ptd.linewidth = vid.linewidth;
-  ptd.color = 0;
-  ptd.outline = col;
-  ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE | flags;
-  ptd.tinf = NULL;
-  ptd.intester = C0;
-  ptd.prio = prio;
-  ptd.draw();
-  }
-
-void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, int lev) {
-  prettylinepoints.clear();
-  prettypoint(t[0]);
-  for(int i=0; i<isize(t); i++)
-    prettylinesub(t[i], t[(i+1)%3], lev);
-  dqi_poly ptd;
-  ptd.V = Id;
-  ptd.band_shift = band_shift;
-  ptd.tab = &prettylinepoints;
-  ptd.offset = 0;
-  ptd.cnt = isize(prettylinepoints);
-  ptd.linewidth = vid.linewidth;
-  ptd.color = fillcol;
-  ptd.outline = linecol;
-  ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE;
-  ptd.tinf = NULL;
-  ptd.intester = C0;
-  ptd.draw();
-  }
-  
-vector<glvertex> curvedata;
-int curvestart = 0;
-bool keep_curvedata = false;
-
-void queuereset(eModel m, PPR prio) {
-  queueaction(prio, [m] () { pmodel = m; });
-  }
-
-void dqi_line::draw() {
-  dynamicval<ld> d(vid.linewidth, width); 
-  dynamicval<ld> bs(hr::band_shift, band_shift);
-  prettyline(H1, H2, color, prf, 0, prio);
-  }
-
-void dqi_string::draw() {
-  #if CAP_SVG
-  if(svg::in) {
-    svg::text(x, y, size, str, frame, color, align);
-    return;
-    }
-  #endif
-  #if ISMOBILE==0
-  int fr = frame & 255;
-  displayfrSP(x, y, shift, fr, size, str, color, align, frame >> 8);
-  #else
-  displayfr(x, y, frame, size, str, color, align);
-  #endif
-  }
-
-void dqi_circle::draw() {
-  #if CAP_SVG
-  if(svg::in) {
-    svg::circle(x, y, size, color, fillcolor, linewidth);
-    }
-  else
-  #endif
-  drawCircle(x, y, size, color, fillcolor);
-  }
-        
-void initquickqueue() {
-  ptds.clear();
-  poly_outline = OUTLINE_NONE;
-  }
-
-void sortquickqueue() {
-  for(int i=1; i<isize(ptds);)
-    if(i && ptds[i]->prio < ptds[i-1]->prio) {
-      swap(ptds[i], ptds[i-1]);
-      i--;
-      }
-    else i++;
-  }
-
-void quickqueue() {
-  spherespecial = 0; 
-  reset_projection(); current_display->set_all(0);
-  int siz = isize(ptds);
-  for(int i=0; i<siz; i++) ptds[i]->draw();
-  ptds.clear();
-  }
-
-ld xintval(const hyperpoint& h) {
-  if(sphereflipped()) return -h[2];
-  return -intval(h, C0);
-  }
-
-ld backbrightness = .25;
-
-purehookset hook_drawqueue;
-
-constexpr int PMAX = int(PPR::MAX);
-int qp[PMAX], qp0[PMAX];
-
-color_t darken_color(color_t& color, bool outline) {
-  int alpha = color & 255;
-  if(sphere && pmodel == mdDisk && vid.alpha <= 1)
-    return 0;
-  else {
-    if(outline && alpha < 255) 
-      return color - alpha + int(backbrightness * alpha);
-    else
-      return (gradient(modelcolor>>8, color>>8, 0, backbrightness, 1)<<8) | 0xFF;
-    }
-  }
-
-void dqi_poly::draw_back() { 
-  dynamicval<color_t> dvo(outline, darken_color(outline, true));
-  dynamicval<color_t> dvc(color, darken_color(color, false));
-  draw();
-  }
-
-void dqi_line::draw_back() { 
-  dynamicval<color_t> dvc(color, darken_color(color, true));
-  draw();
-  }
-
-void sort_drawqueue() {
-  
-  for(int a=0; a<PMAX; a++) qp[a] = 0;
-  
-  int siz = isize(ptds);
-
-  #if MINIMIZE_GL_CALLS
-  unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
-  for(auto& p: ptds) subqueue[p->prio == PPR::CIRCLE ? 0 : p->outline_group()].push_back(move(p));
-  ptds.clear();
-  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
-  subqueue.clear();
-  for(auto& p: ptds) subqueue[p->prio == PPR::CIRCLE ? 0 : p->color].push_back(move(p));
-  ptds.clear();
-  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
-  #endif
-    
-  for(auto& p: ptds) {
-    int pd = p->prio - PPR::ZERO;
-    if(pd < 0 || pd >= PMAX) {
-      printf("Illegal priority %d\n", pd);
-      p->prio = PPR(rand() % int(PPR::MAX));
-      }
-    qp[pd]++;
-    }
-  
-  int total = 0;
-  for(int a=0; a<PMAX; a++) {
-    int b = qp[a];
-    qp0[a] = qp[a] = total; total += b;
-    }
-
-  vector<unique_ptr<drawqueueitem>> ptds2;  
-  ptds2.resize(siz);
-  
-  for(int i = 0; i<siz; i++) ptds2[qp[int(ptds[i]->prio)]++] = move(ptds[i]);
-  swap(ptds, ptds2);
-  }
-
-void reverse_priority(PPR p) {
-  reverse(ptds.begin()+qp0[int(p)], ptds.begin()+qp[int(p)]);
-  }
-
-void reverse_side_priorities() {
-  for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
-    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM})
-      reverse_priority(p);
-  }
-
-// on the sphere, parts on the back are drawn first
-void draw_backside() {  
-  if(pmodel == mdHyperboloid && hyperbolic) {
-    dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
-    for(auto& ptd: ptds) 
-      if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-        ptd->draw();
-    }
-
-  spherespecial = sphereflipped() ? 1 : -1;
-  reset_projection();
-  
-  if(pmodel == mdRotatedHyperboles) {
-    for(auto& ptd: ptds)
-      if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-        ptd->draw();
-    glflush();
-    }
-  else {
-    reverse_side_priorities();
-    for(int i=ptds.size()-1; i>=0; i--) 
-      if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
-        ptds[i]->draw_back();
-    
-    glflush();
-    reverse_side_priorities();
-    }
-
-  spherespecial *= -1;
-  spherephase = 1;
-  reset_projection();
-  }
-
-extern bool lshiftclick, lctrlclick;
-
-void reverse_transparent_walls() {
-  int pt = int(PPR::TRANSPARENT_WALL);
-  reverse(&ptds[qp0[pt]], &ptds[qp[pt]]);
-  }
-
-void draw_main() {
-  if(sphere && DIM == 3 && pmodel == mdPerspective) {
-    for(int p: {1, 0, 2, 3}) {
-      if(elliptic && p < 2) continue;
-      glhr::set_depthwrite(true);
-      if(p == 0 || p == 3) {
-  #ifdef GL_ES
-        glClearDepthf(1.0f);
-  #else
-        glClearDepth(1.0f);
-  #endif
-        glDepthFunc(GL_LEQUAL);
-        }
-      else {
-  #ifdef GL_ES
-        glClearDepthf(0.0f);
-  #else
-        glClearDepth(0.0f);
-  #endif
-        glDepthFunc(GL_GEQUAL);
-        }
-      glClear(GL_DEPTH_BUFFER_BIT);
-      glhr::be_nontextured();
-      spherephase = p;
-      reset_projection();
-      for(auto& ptd: ptds) ptd->draw();
-      if(elliptic) {
-        spherephase = p | 4;
-        reset_projection();
-        for(auto& ptd: ptds) ptd->draw();
-        }
-      // glflush();
-      }
-    }
-  else {
-    for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
-      ptd->draw();
-    
-    if(two_sided_model()) draw_backside();
-  
-    for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
-      dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
-      ptd->draw();
-      }
-    glflush();
-    }
-  }
-  
-void drawqueue() {
-  callhooks(hook_drawqueue);
-  reset_projection();
-  // reset_projection() is not sufficient here, because we need to know shaderside_projection
-
-#if CAP_GL
-  if(vid.usingGL) 
-    glClear(GL_STENCIL_BUFFER_BIT);
-#endif
-  
-  profile_start(3);
-  
-  sort_drawqueue();
-  
-  for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
-    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
-  if(DIM == 2) sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
-    [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
-      auto ap1 = (dqi_poly&) *p1;
-      auto ap2 = (dqi_poly&) *p2;
-      return xintval(ap1.V * xpush0(.1))
-        < xintval(ap2.V * xpush0(.1));
-      });
-
-  for(PPR p: {PPR::TRANSPARENT_WALL})
-    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
-      [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
-        return p1->subprio > p2->subprio;
-        });
-
-  profile_stop(3);
-
-#if CAP_SDL
-  if(current_display->stereo_active() && !vid.usingGL) {
-
-    if(aux && (aux->w != s->w || aux->h != s->h))
-      SDL_FreeSurface(aux);
-  
-    if(!aux) {
-      aux = SDL_CreateRGBSurface(SDL_SWSURFACE,s->w,s->h,32,0,0,0,0);
-      }
-
-    // SDL_LockSurface(aux);
-    // memset(aux->pixels, 0, vid.xres * vid.yres * 4);
-    // SDL_UnlockSurface(aux);
-    SDL_BlitSurface(s, NULL, aux, NULL);
-    }
-#endif
-
-  spherespecial = 0;
-  spherephase = 0;
-  reset_projection();
-  
-  if(model_needs_depth() && current_display->stereo_active()) {
-    global_projection = -1;
-    draw_main();
-    glClear(GL_DEPTH_BUFFER_BIT);
-    global_projection = +1;
-    draw_main();
-    }
-  else {
-    draw_main();
-    }    
-
-#if CAP_SDL
-  if(vid.stereo_mode == sAnaglyph && !vid.usingGL) {
-    int qty = s->w * s->h;
-    int *a = (int*) s->pixels;
-    int *b = (int*) aux->pixels;
-    SDL_LockSurface(aux);
-    while(qty) {
-      *a = ((*a) & 0xFF0000) | ((*b) & 0x00FFFF);
-      a++; b++; qty--;
-      }
-    SDL_UnlockSurface(aux);
-    }
-
-  if(vid.stereo_mode == sLR && !vid.usingGL) {
-    SDL_LockSurface(aux);
-    for(int y=0; y<vid.yres; y++)
-    for(int x=vid.xres/2; x<vid.xres; x++)
-      qpixel(s,x,y) = qpixel(aux,x,y);
-    SDL_UnlockSurface(aux);
-    }
-#endif
-
-  if(!keep_curvedata) {
-    curvedata.clear(); curvestart = 0;
-    }
-  }
-
-#if CAP_SHAPES
-hpcshape 
-  shSemiFloorSide[SIDEPARS],
-  shBFloor[2],
-  shWave[8][2],  
-  shCircleFloor,
-  shBarrel,
-  shWall[2], shMineMark[2], shBigMineMark[2], shFan,
-  shZebra[5],
-  shSwitchDisk,
-  shTower[11],
-  shEmeraldFloor[6],
-  shSemiFeatherFloor[2], 
-  shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
-  shMercuryBridge[2],
-  shTriheptaSpecial[14], 
-  shCross, shGiantStar[2], shLake, shMirror,
-  shHalfFloor[6], shHalfMirror[3],
-  shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
-  shTinyBird, shTinyShark,
-  shEgg,
-  shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
-  shSpearRing, shLoveRing,
-  shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
-  shGun,
-  shFigurine, shTreat,
-  shElementalShard,
-  // shBranch, 
-  shIBranch, shTentacle, shTentacleX, shILeaf[2], 
-  shMovestar,
-  shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
-  shFoxTail1, shFoxTail2,
-  shDogBody, shDogHead, shDogFrontLeg, shDogRearLeg, shDogFrontPaw, shDogRearPaw,
-  shDogTorso,
-  shHawk,
-  shCatBody, shCatLegs, shCatHead, shFamiliarHead, shFamiliarEye,
-  shWolf1, shWolf2, shWolf3,
-  shRatEye1, shRatEye2, shRatEye3,
-  shDogStripes,
-  shPBody, shPSword, shPKnife,
-  shFerocityM, shFerocityF, 
-  shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
-  shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
-  shArrow,
-  shPHead, shPFace, shGolemhead, shHood, shArmor, 
-  shAztecHead, shAztecCap,
-  shSabre, shTurban1, shTurban2, shVikingHelmet, shRaiderHelmet, shRaiderArmor, shRaiderBody, shRaiderShirt,
-  shWestHat1, shWestHat2, shGunInHand,
-  shKnightArmor, shKnightCloak, shWightCloak,
-  shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
-  shSlimeEyes, shDragonEyes, shWormEyes, shGhostEyes,
-  shMiniGhost, shMiniEyes,
-  shHedgehogBlade, shHedgehogBladePlayer,
-  shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
-  shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
-  shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
-  shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders, shTrophy,
-  shBugBody, shBugArmor, shBugLeg, shBugAntenna,
-  shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain, shHammerHead,
-  shBook, shBookCover, shGrail,
-  shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
-  shKnife, shTongue, shFlailMissile, shTrapArrow,
-  shPirateHook, shPirateHood, shEyepatch, shPirateX,
-  // shScratch, 
-  shHeptaMarker, shSnowball, shSun, shNightStar,
-  shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
-  shPalaceGate, shFishTail,
-  shMouse, shMouseLegs, shMouseEyes,
-  shPrincessDress, shPrinceDress,
-  shWizardCape1, shWizardCape2,
-  shBigCarpet1, shBigCarpet2, shBigCarpet3,
-  shGoatHead, shRose, shRoseItem, shThorns,
-  shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
-  shWizardHat1, shWizardHat2,
-  shTortoise[13][6],
-  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril, 
-  shDragonWings, 
-  shSolidBranch, shWeakBranch, shBead0, shBead1,
-  shBatWings, shBatBody, shBatMouth, shBatFang, shBatEye,
-  shParticle[16], shAsteroid[8],
-  shReptile[5][4],
-  shReptileBody, shReptileHead, shReptileFrontFoot, shReptileRearFoot,
-  shReptileFrontLeg, shReptileRearLeg, shReptileTail, shReptileEye,
-
-  shTrylobite, shTrylobiteHead, shTrylobiteBody,
-  shTrylobiteFrontLeg, shTrylobiteRearLeg, shTrylobiteFrontClaw, shTrylobiteRearClaw,
-  
-  shBullBody, shBullHead, shBullHorn, shBullRearHoof, shBullFrontHoof,
-  
-  shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
-
-  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
-  shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
-  
-  shAsymmetric,
-  
-  shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
-  
-  shAnimatedEagle[30], shAnimatedTinyEagle[30], shAnimatedGadfly[30], shAnimatedHawk[30], shAnimatedButterfly[30], 
-  shAnimatedGargoyle[30], shAnimatedGargoyle2[30], shAnimatedBat[30], shAnimatedBat2[30],
-  
-  shDodeca;
-
-vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
-
-#endif
-
-ld tentacle_length;
-
-#if CAP_SHAPES
-#define USERLAYERS 32
-
-struct usershapelayer {
-  vector<hyperpoint> list;
-  bool sym;
-  int rots;
-  color_t color;
-  hyperpoint shift, spin;
-  ld zlevel;
-  hpcshape sh;
-  int texture_offset;
-  };
-
-struct usershape {
-  usershapelayer d[USERLAYERS];
-  };
-
-array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
-
-int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
-
-transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
-
-void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
+void geometry_information::drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist);
   #if CAP_ARCM
   if(archimedean) tlength = arcm::current.scale();
@@ -1800,25 +99,17 @@ void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   hpcpush(ddi(S21, rad + var * sin(0 * M_PI/divby)) * C0);
   }
 
-hyperpoint hpxd(ld d, ld x, ld y, ld z) {
-  hyperpoint H = hpxyz(d*x, d*y, z);
-  H = mid(H, H);
-  return H;
-  }
-
-hyperpoint hpxyzsc(double x, double y, double z) {
+hyperpoint geometry_information::hpxyzsc(double x, double y, double z) {
   return hpxd(scalefactor, x,y,z);
   }
 
-hyperpoint turtlevertex(int u, double x, double y, double z) {
+hyperpoint geometry_information::turtlevertex(int u, double x, double y, double z) {
   ld scale = BITRUNCATED ? 1 : scalefactor;
   if(u) scale /= 2;
   return hpxd(scale, x, y, z);
   }
 
-vector<hpcshape*> allshapes;
-
-void finishshape() {
+void geometry_information::finishshape() {
   if(!last) return;
   last->e = isize(hpc);
   double area = 0;
@@ -1837,7 +128,7 @@ void finishshape() {
   else for(int s=0; s<4; s++) {
     last->intester = C0;
     if(s == 0) {
-      for(int i=last->s; i<last->e-1; i++)  
+      for(int i=last->s; i<last->e-1; i++)
       for(int j=0; j<3; j++)
         last->intester[j] += hpc[i][j];
       last->intester = mid(last->intester, last->intester);
@@ -1894,24 +185,18 @@ void finishshape() {
     printf("bad end\n"); */
   }
 
-void bshape(hpcshape& sh, PPR prio) {
+void geometry_information::bshape(hpcshape& sh, PPR prio) {
   if(last) finishshape();
   hpc.push_back(hpxy(0,0));
   last = &sh;
   last->s = isize(hpc), last->prio = prio;
   last->flags = 0;
   last->tinf = NULL;
-  first = true; 
+  first = true;
   }
 
-vector<array<int, 3>> symmetriesAt;
 
-#ifndef SCALETUNER
-static const
-#endif
-double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
-
-void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0) {
+void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus, flagtype flags) {
   bshape(sh, prio);
   int whereis = 0;
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
@@ -1937,7 +222,7 @@ void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0
       shzoomx *= bscale7;
       shzoomy *= bscale7;
       bonus += brot7;
-      if(euclid) shzoomx *= .9, shzoomy *= .9, bonus += .3;    
+      if(euclid) shzoomx *= .9, shzoomy *= .9, bonus += .3;
       }
     if(rots == 3) {
       rots2 = S3;
@@ -1972,14 +257,15 @@ void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0
       hpcpush(spin(2*M_PI*r/rots2) * ipoint(i, -1));
     }
   hpcpush(ipoint(0, 1));
+  finishshape();
   }
 
-void copyshape(hpcshape& sh, hpcshape& orig, PPR prio) {
+void geometry_information::copyshape(hpcshape& sh, hpcshape& orig, PPR prio) {
   if(last) last->e = isize(hpc);
   sh = orig; sh.prio = prio;
   }
 
-void zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio) {
+void geometry_information::zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio) {
 
   bshape(newsh, prio);
   for(int i=old.s; i<old.e; i++) {
@@ -1990,132 +276,84 @@ void zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio) {
     }
   }
 
-void bshapeend() {
-  if(last) finishshape();
-  last = NULL;
-  }
-
-transmatrix shadowmulmatrix;
-
-void pushShape(usershapelayer& ds) {
-
-  if(ds.list.empty()) return;
-  if(DIM == 3) last->flags |= POLY_TRIANGLES;
-
-  transmatrix T = rgpushxto0(ds.shift) * rspintox(ds.spin);
-  
-  int z = DIM == 3 ? 3 : 1;
-  
-  for(int r=0; r<ds.rots; r++) {
-    for(int i=0; i<isize(ds.list)/z*z; i++)
-      hpcpush(T * spin(2*M_PI*r/ds.rots) * ds.list[i]);
-
-    if(ds.sym) {
-  
-      transmatrix mirrortrans = Id; mirrortrans[1][1] = -1;
-      for(int i=isize(ds.list)-1; i>=0; i--)
-        hpcpush(T * spin(2*M_PI*r/ds.rots) * mirrortrans * ds.list[i]);
-      }
-    }
-  
-  if(DIM == 2) hpcpush(T * ds.list[0]);
-
-  #if MAXMDIM >= 4
-  if(DIM == 3) {
-    auto& utt = user_triangles_texture;
-    utt.texture_id = floor_textures->renderedTexture;
-    ds.texture_offset = isize(utt.tvertices);
-    for(int i=0; i<isize(ds.list)-2; i+=3) {
-      hyperpoint h = orthogonal_of_C0(ds.list[i], ds.list[i+1], ds.list[i+2]);
-      ld rad = hypot_d(3, h);
-      ld factor = 0.49 + (0.17 * h[2] + 0.13 * h[1] + 0.20 * h[0]) / rad;
-      for(int i=0; i<3; i++)
-        utt.tvertices.push_back(glhr::makevertex(-1, factor, 0));
-      }
-    }
-  #endif
-  }
-
 ld gsca() { return 1; }
 ld grot() { return 0; }
 
-template<class... T> ld gsca(bool geometry, ld factor, T... t) { 
+template<class... T> ld gsca(bool geometry, ld factor, T... t) {
   if(geometry) return factor * gsca(t...);
   else return gsca(t...);
   }
 
-template<class... T> ld grot(bool geometry, ld factor, T... t) { 
+template<class... T> ld grot(bool geometry, ld factor, T... t) {
   if(geometry) return factor + grot(t...);
   else return grot(t...);
   }
 
-ld dlow_table[SIDEPARS], dhi_table[SIDEPARS], dfloor_table[SIDEPARS];
-
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
 
-void make_sidewalls() {
+void geometry_information::make_sidewalls() {
   for(int i=0; i<=3; i++)
-    dfloor_table[i] = geom3::SLEV[i];
-  dfloor_table[SIDE_WALL] = geom3::WALL;
-  dfloor_table[SIDE_LAKE] = geom3::LAKE;
-  dfloor_table[SIDE_LTOB] = geom3::BOTTOM;
-  dfloor_table[SIDE_BTOI] = geom3::INFDEEP;
-  dfloor_table[SIDE_HIGH] = geom3::HIGH;
-  dfloor_table[SIDE_HIGH2] = geom3::HIGH2;
-  dfloor_table[SIDE_SKY ] = geom3::SKY;
-  
+    dfloor_table[i] = SLEV[i];
+  dfloor_table[SIDE_WALL] = WALL;
+  dfloor_table[SIDE_LAKE] = LAKE;
+  dfloor_table[SIDE_LTOB] = BOTTOM;
+  dfloor_table[SIDE_BTOI] = INFDEEP;
+  dfloor_table[SIDE_HIGH] = HIGH;
+  dfloor_table[SIDE_HIGH2] = HIGH2;
+  dfloor_table[SIDE_SKY ] = SKY;
+
   // sidewall parameters for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
-    double dlow=geom3::FLOOR, dhi=geom3::FLOOR;
-    if(k==SIDE_WALL) dhi = geom3::WALL;
-    else if(k==SIDE_LAKE) dlow = geom3::LAKE;
-    else if(k==SIDE_LTOB) dlow = geom3::BOTTOM, dhi = geom3::LAKE;
-    else if(k==SIDE_BTOI) dlow = geom3::INFDEEP, dhi = geom3::BOTTOM;
-    else if(k==SIDE_WTS3) dlow = geom3::SLEV[3], dhi = geom3::WALL;
-    else if(k==SIDE_HIGH) dlow = geom3::WALL, dhi = geom3::HIGH;
-    else if(k==SIDE_HIGH2) dlow = geom3::HIGH, dhi = geom3::HIGH2;
-    else if(k==SIDE_SKY) dlow = geom3::WALL, dhi = geom3::LOWSKY;
-    else dlow = geom3::SLEV[k-SIDE_SLEV], dhi = geom3::SLEV[k-SIDE_SLEV+1];
+    double dlow=FLOOR, dhi=FLOOR;
+    if(k==SIDE_WALL) dhi = WALL;
+    else if(k==SIDE_LAKE) dlow = LAKE;
+    else if(k==SIDE_LTOB) dlow = BOTTOM, dhi = LAKE;
+    else if(k==SIDE_BTOI) dlow = INFDEEP, dhi = BOTTOM;
+    else if(k==SIDE_WTS3) dlow = SLEV[3], dhi = WALL;
+    else if(k==SIDE_HIGH) dlow = WALL, dhi = HIGH;
+    else if(k==SIDE_HIGH2) dlow = HIGH, dhi = HIGH2;
+    else if(k==SIDE_SKY) dlow = WALL, dhi = LOWSKY;
+    else dlow = SLEV[k-SIDE_SLEV], dhi = SLEV[k-SIDE_SLEV+1];
     dlow_table[k] = dlow;
     dhi_table[k] = dhi;
 
     validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0) || GDIM == 3;
-    
+
     bshape(shSemiFloorSide[k], PPR::LAKEWALL);
     for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, floorrad0) * C0);
     chasmifyPoly(dlow, dhi, k);
-    }  
+    }
   }
 
-void procedural_shapes() {
+void geometry_information::procedural_shapes() {
   bshape(shMovestar, PPR::MOVESTAR);
   for(int i=0; i<=8; i++) {
     hpcpush(xspinpush0(M_PI * i/4, crossf));
     if(i != 8) hpcpush(xspinpush0(M_PI * i/4 + M_PI/8, crossf/4));
     }
-  
+
   // procedural floors
-  
+
   bshape(shBarrel, PPR::FLOOR);
   for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.5) * C0);
 
   bshape(shCircleFloor, PPR::FLOOR);
   for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.9) * C0);
-  
+
   for(int i=0; i<3; i++) for(int j=0; j<3; j++) shadowmulmatrix[i][j] =
     i==2&&j==2 ? 1:
     i==j ? SHADMUL:
     0;
-  
+
   for(int d=0; d<2; d++) {
     bshape(shSemiFloor[d], PPR::FLOOR);
     for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0) * C0);
     }
 
   // todo not shexf
-  
-  bshape(shBigCarpet1, PPR::GFLOORa);  
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*2.1) * C0);  
+
+  bshape(shBigCarpet1, PPR::GFLOORa);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*2.1) * C0);
 
   bshape(shBigCarpet2, PPR::GFLOORb);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*1.9) * C0);
@@ -2187,7 +425,7 @@ void procedural_shapes() {
       }
     
     bshape(shWall[1], PPR::WALL);
-    int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;  
+    int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;
     if(S7 == 6 || S7 == 4) {
       for(int t=0; t<=S6; t++) {
         hpcpush(ddi(S7 + t*S14, floorrad1) * C0);
@@ -2385,7 +623,7 @@ void procedural_shapes() {
     }
 
   bshape(shILeaf[1], PPR::ONTENTACLE);
-  if(SD3 == 3 && SD7 % 3) 
+  if(SD3 == 3 && SD7 % 3)
     for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.8) * C0);
   else {
     for(int t=0; t<=SD7; t++) {
@@ -2405,24 +643,23 @@ void procedural_shapes() {
 
   bshape(shHeptaMarker, PPR::HEPTAMARK);
   for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
-  
+
   bshape(shSnowball, PPR::ITEM);
   for(int t=0; t<=SD7*4; t++) hpcpush(ddi(t*SD3, zhexf*.1) * C0);
-  
+
   bshape(shRose, PPR::ITEM);
   PRING(t)
     hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
-  
-  finishshape();
+
   shRoseItem = shRose;
 
   bshape(shThorns, PPR::THORNS);
-  for(int t=0; t<=60; t++) 
+  for(int t=0; t<=60; t++)
     hpcpush(xspinpush0(M_PI * t / 30.0, scalefactor * hcrossf7 * ((t&1) ? 0.3 : 0.6)));
-    
+
   for(int i=0; i<16; i++) {
     bshape(shParticle[i], PPR::PARTICLE);
-    for(int t=0; t<6; t++) 
+    for(int t=0; t<6; t++)
 //    hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150., (0.03 + hrand(100) * 0.0003) * scalefactor));
       hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * randd() / 1.5, (0.03 + randd() * 0.03) * scalefactor));
     hpc.push_back(hpc[last->s]);
@@ -2432,11 +669,11 @@ void procedural_shapes() {
     asteroid_size[i] = scalefactor * 0.1 * pow(2, (i-1) * 1. / DIM);
     if(DIM == 3) asteroid_size[i] *= 7;
     bshape(shAsteroid[i], PPR::PARTICLE);
-    for(int t=0; t<12; t++) 
+    for(int t=0; t<12; t++)
       hpcpush(xspinpush0(M_PI * t / 6, asteroid_size[i] * (1 - randd() * .2)));
     hpc.push_back(hpc[last->s]);
     }
-  
+
   bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
   }
 
@@ -2447,9 +684,9 @@ void procedural_shapes() {
 // 1 = first edge should be doubled
 // 2 = use POLY_TRIANGLES
 // 4 = this is is a triangular face; otherwise, the face is rectangular, and x1+x2-x0 is the fourth vertex
-void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false) {
+void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool force_triangles) {
   using namespace hyperpoint_vec;
-  
+
   // orient correctly
   transmatrix T;
   set_column(T, 0, vertices[0]);
@@ -2467,7 +704,7 @@ void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false
   hyperpoint center = Hypc;
   for(auto v: vertices) center += v;
   int n = isize(vertices);
-  center /= n; 
+  center /= n;
 
   for(int a=0; a<n; a++) {
     hyperpoint v1 = vertices[a] - center;
@@ -2507,7 +744,7 @@ vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
   return {a, (a+b)/2, b, b+c-a, c};
   }  
 
-void create_wall3d() {
+void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
   using namespace hyperpoint_vec;
   shWall3D.resize(S7);
@@ -2670,7 +907,7 @@ void create_wall3d() {
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
       vector<hyperpoint> vertices;
-      for(int a=0; a<facesize; a++) 
+      for(int a=0; a<facesize; a++)
         vertices.push_back(reg3::cellshape[w*facesize+a]);
       make_wall(w, vertices, 0);
       }
@@ -2686,14 +923,15 @@ void create_wall3d() {
         last->flags |= POLY_TRIANGLES;
       }
     }
-  
+
   corner_bonus = 0;
   for(hpcshape sh: shWall3D) for(int i=sh.s; i<sh.e; i++)
     corner_bonus = max(corner_bonus, hdist0(hpc[i]));
   }
 #endif
 
-void configure_floorshapes() {
+void geometry_information::configure_floorshapes() {
+  &floor_texture_vertices[shar.id];init_floorshapes();
   if(0);
   #if CAP_ARCM
   else if(archimedean)
@@ -2723,8 +961,8 @@ void configure_floorshapes() {
   
   double eps = hexhexdist * .05;
   if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
-  
-  if(euclid4) 
+
+  if(euclid4)
     trihepta0 = trihepta1 = crossf * 1.35 / 2;
 
   if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
@@ -2746,25 +984,20 @@ void configure_floorshapes() {
   shMFloor3.prio = PPR::FLOOR_DRAGON;
   shMFloor4.prio = PPR::FLOOR_DRAGON;
   for(int i=0; i<3; i++) shRedRockFloor[i].scale = .9 - .1 * i;
-  generate_floorshapes();  
+  generate_floorshapes();
   }
 
-ld wormscale;
+void geometry_information::prepare_shapes() {
+  require_basics();
+  if(DIM == 3 && !floor_textures) make_floor_textures();
 
-#if MAXMDIM >= 4
-extern void make_3d_models();
-#endif
-
-void buildpolys() {
- 
   symmetriesAt.clear();
   allshapes.clear();
-  geom3::compute();
   #if CAP_GP
   gp::clear_plainshapes();
   #endif
   DEBBI(DF_POLY, ("buildpolys"));
-  
+
   if(WDIM == 3) {
     if(sphere) SD3 = 3, SD7 = 5;
     else SD3 = SD7 = 4;
@@ -2815,22 +1048,24 @@ void buildpolys() {
 
     ld lenx = hdist(xpush0(hexvdist), spin(M_PI/S3) * xpush0(hexvdist));
     ld hlenx = hdist(xpush0(hcrossf), spin(2*M_PI/S7) * xpush0(hcrossf));
-    
+
     bshape(shHalfMirror[2], PPR::WALL);
-    hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(FLOOR, WALL, 0);
     bshape(shHalfMirror[1], PPR::WALL);
     if(PURE) {
-      hpcpush(xpush0(-hlen7)); hpcpush(xpush0(hcrossf+hlenx/2));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+      hpcpush(xpush0(-hlen7)); hpcpush(xpush0(hcrossf+hlenx/2));  chasmifyPoly(FLOOR, WALL, 0);
       }
     else {
-      hpcpush(xpush0(-len7*scalefactor)); hpcpush(xpush0((hexf+lenx/2)*scalefactor));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+      hpcpush(xpush0(-len7*scalefactor)); hpcpush(xpush0((hexf+lenx/2)*scalefactor));  chasmifyPoly(FLOOR, WALL, 0);
       }
     bshape(shHalfMirror[0], PPR::WALL);
-    hpcpush(xpush0(len6)); hpcpush(xpush0(-len6));  chasmifyPoly(geom3::FLOOR, geom3::WALL, 0);
+    hpcpush(xpush0(len6)); hpcpush(xpush0(-len6));  chasmifyPoly(FLOOR, WALL, 0);
     }
-  
+
   bshape(shAsymmetric, PPR::TEXT, scalefactor, 374);
-  
+
+  for(auto& sh: shTriheptaSpecial) sh.s = sh.e = 0;
+
   bshape(shTriheptaSpecial[2], PPR::FLOOR,  scalefactor, 32);
   bshape(shTriheptaSpecial[3], PPR::FLOOR,  scalefactor, 33);
   bshape(shTriheptaSpecial[4], PPR::FLOOR,  scalefactor, 34);
@@ -2922,22 +1157,22 @@ void buildpolys() {
   bshape(shDragonTail, PPR::TENTACLE1, scalefactor * wormscale, 240); //239 alt
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor * wormscale, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor * wormscale, 242);
-  
+
   ld krsc = 1;
   if(sphere) krsc *= 1.4;
   if(S7 ==8) krsc *= 1.3;
-  
+
   if(PURE && !euclid4) {
     tentacle_length = 1.52;
     bshape(shSeaTentacle, PPR::TENTACLE1, 1, 245);
     }
   else if(NONSTDVAR) {
     tentacle_length = 0.566256 * 1.6 * scalefactor * krsc;
-    bshape(shSeaTentacle, PPR::TENTACLE1, 1.6 * scalefactor * krsc, 246);  
+    bshape(shSeaTentacle, PPR::TENTACLE1, 1.6 * scalefactor * krsc, 246);
     }
   else {
     tentacle_length = 0.566256 * scalefactor;
-    bshape(shSeaTentacle, PPR::TENTACLE1, scalefactor, 246);  
+    bshape(shSeaTentacle, PPR::TENTACLE1, scalefactor, 246);
     }
   ld ksc = (!BITRUNCATED ? 1.8 : 1.5) * scalefactor * krsc;
   if(euclid4 && PURE) ksc *= .5;
@@ -2975,7 +1210,9 @@ void buildpolys() {
   for(int i=0; i<5; i++)
     for(int j=0; j<4; j++)
       bshape(shReptile[i][j], j >= 2 ? PPR::LIZEYE : j == 1 ? PPR::FLOORa : PPR::FLOOR_DRAGON, scalefactor * gsca(euclid, 1.16), 277+i*4+j);
-    
+
+  finishshape();
+
   shift(shReptile[1][2], 0.316534, -0.136547, 1.057752);
   shift(shReptile[1][3], 0.340722, -0.059946, 1.058152);
 
@@ -2995,9 +1232,9 @@ void buildpolys() {
   bshape(shReptileFrontLeg, PPR::MONSTER_LEG, scalefactor, 301);
   bshape(shReptileRearLeg, PPR::MONSTER_LEG, scalefactor, 302);
   bshape(shReptileTail, PPR::MONSTER_BODY, scalefactor, 303);
-  bshape(shReptileEye, PPR::MONSTER_EYE0, scalefactor, 304);  
-  bshape(shDodeca, PPR::ITEM, scalefactor, 305);  
-  
+  bshape(shReptileEye, PPR::MONSTER_EYE0, scalefactor, 304);
+  bshape(shDodeca, PPR::ITEM, scalefactor, 305);
+
   bshape(shTerraArmor1, PPR::MONSTER_BODY, scalefactor, 349);
   bshape(shTerraArmor2, PPR::MONSTER_BODY, scalefactor, 350);
   bshape(shTerraArmor3, PPR::MONSTER_BODY, scalefactor, 351);
@@ -3050,7 +1287,7 @@ void buildpolys() {
 
   bshape(shGoatHead, PPR::MONSTER_HAIR, scalefactor, 101);
   bshape(shRatHead, PPR::MONSTER_HEAD, scalefactor, 102);
-  bshape(shRatEyes, PPR::MONSTER_EYE0, scalefactor, 103);  
+  bshape(shRatEyes, PPR::MONSTER_EYE0, scalefactor, 103);
   bshape(shRatTail, PPR::MONSTER_LEG, scalefactor, 104);
   bshape(shRatCape1, PPR::MONSTER_HOODCLOAK2, scalefactor, 105);
   bshape(shRatCape2, PPR::MONSTER_HOODCLOAK1, scalefactor, 106);
@@ -3187,279 +1424,27 @@ void buildpolys() {
 
   if(scalefactor > 1.5) bshape(shMagicSword, PPR::MAGICSWORD, scalefactor / 1.7570466583108084, 243);
   else bshape(shMagicSword, PPR::MAGICSWORD, scalefactor, 244);
-  
+
   sword_size = 0;
   for(int i=shMagicSword.s; i<shMagicSword.e; i++)
     sword_size = max(sword_size, hdist0(hpc[i]));
 
   bshape(shMagicShovel, PPR::MAGICSWORD, scalefactor, 333);
-  
+
   bshape(shBead0, PPR(20), 1, 250);
   bshape(shBead1, PPR(20), 1, 251);
   bshape(shArrow, PPR::ARROW, 1, 252);
-  
+
   #if MAXMDIM >= 4
   make_3d_models();
   #endif
-  
-  bshapeend();
-  extern void add_user_shapes();
+
+  finishshape();
   prehpc = isize(hpc);
-  add_user_shapes();
-  }
 
-void add_user_shapes() {
-  hpc.resize(prehpc);
-  last = NULL;
-  DEBB(DF_POLY, ("hpc = ", prehpc));
-
-  user_triangles_texture.tvertices.clear();
-  
-  for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
-    auto us = usp.second;
-    if(!us) continue;
-    for(int l=0; l<USERLAYERS; l++) {
-      bshape(us->d[l].sh, us->d[l].sh.prio);
-      pushShape(us->d[l]);
-      finishshape();
-      }
-    }
-  
-  static int qhpc0;
-  int qhpc = isize(hpc);
-  if(qhpc != qhpc0 && (debugflags & (DF_GEOM | DF_POLY))) {
-    println(hlog, "qhpc = ", qhpc0=qhpc, " (", prehpc, "+", qhpc-prehpc, ")");
-    println(hlog, "shapes = ", isize(allshapes));
-    int inve=0, issi=0, vcon=0, ccon=0;
-    for(auto sh: allshapes) {
-      if(sh->flags & POLY_INVERSE) inve++;
-      if(sh->flags & POLY_ISSIDE) issi++;
-      if(sh->flags & POLY_VCONVEX) vcon++;
-      if(sh->flags & POLY_CCONVEX) ccon++;
-      }
-    println(hlog, format("inverse = %d isside = %d vcon = %d ccon = %d", inve, issi, vcon, ccon));
-    }
-  
   initPolyForGL();
   }
 
-void initShape(int sg, int id) {
-
-  if(!usershapes[sg][id]) {
-    usershape *us = new usershape;
-    usershapes[sg][id] = us;
-
-    for(int i=0; i<USERLAYERS; i++) {
-      us->d[i].sh.prio = PPR((sg == 3 ? 1:50) + i);
-
-      us->d[i].rots = 1;
-      us->d[i].sym = 0;
-      us->d[i].shift = C0;
-      us->d[i].spin = Cx1;
-      us->d[i].color = 0;
-      us->d[i].zlevel = 0;
-      }
-    }
-  }
-#else
-
-void buildpolys() { }
-#endif
-
-template<class T, class... U> T& queuea(PPR prio, U... u) {
-  ptds.push_back(unique_ptr<T>(new T (u...)));
-  ptds.back()->prio = prio;  
-  return (T&) *ptds.back();
-  }
-
-#if CAP_SHAPES
-dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
-  if(prio == PPR::DEFAULT) prio = h.prio;
-
-  auto& ptd = queuea<dqi_poly> (prio);
-
-  ptd.V = V;
-  ptd.band_shift = band_shift;
-  ptd.offset = h.s;
-  ptd.cnt = h.e-h.s;
-  ptd.tab = &ourshape;
-  if(cblind) {
-    // protanopia
-    /* int r = (56 * part(col,3) + 43 * part(col,2)) / 100;
-    int g = (58 * part(col,3) + 42 * part(col,2)) / 100;
-    int b = (24 * part(col,2) + 75 * part(col,1)) / 100; */
-    // deuteranopia
-    /* int r = (625 * part(col,3) + 375 * part(col,2)) / 1000;
-    int g = (700 * part(col,3) + 300 * part(col,2)) / 1000;
-    int b = (300 * part(col,2) + 700 * part(col,1)) / 1000; 
-    part(col,3) = r;
-    part(col,2) = g;
-    part(col,1) = b; */
-    part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
-    }
-  ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
-  ptd.outline = poly_outline;
-  ptd.linewidth = vid.linewidth;
-  ptd.flags = h.flags;
-  ptd.tinf = h.tinf;
-  ptd.offset_texture = h.texture_offset;
-  ptd.intester = h.intester;
-  return ptd;
-  }
-#endif
-
-void addfloats(vector<GLfloat>& v, hyperpoint h) {
-  for(int i=0; i<3; i++) v.push_back(h[i]);
-  }
-
-dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, color_t linecol, color_t fillcol, PPR prio) {
- 
-  auto& ptd = queuea<dqi_poly> (prio);
-
-  ptd.V = V;
-  ptd.band_shift = band_shift;
-  ptd.tab = &f;
-  ptd.offset = 0;
-  ptd.cnt = cnt;
-  ptd.color = fillcol;
-  ptd.outline = linecol;
-  ptd.linewidth = vid.linewidth;
-  ptd.flags = POLY_ISSIDE | POLY_PRECISE_WIDE;
-  ptd.tinf = NULL;
-  ptd.intester = C0;
-  return ptd;
-  }
-
-#if CAP_SHAPES
-dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col) {
-  return queuepolyat(V,h,col,h.prio);
-  }
-
-void queuepolyb(const transmatrix& V, const hpcshape& h, color_t col, int b) {
-  queuepolyat(V,h,col,h.prio+b);
-  }
-#endif
-
-void curvepoint(const hyperpoint& H1) {
-  curvedata.push_back(glhr::pointtogl(H1));
-  }
-
-dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio) {
-  auto &res = queuetable(Id, curvedata, isize(curvedata)-curvestart, linecol, fillcol, prio);
-  res.offset = curvestart;
-  curvestart = isize(curvedata);
-  return res;
-  }
-
-dqi_action& queueaction(PPR prio, const reaction_t& action) {
-  return queuea<dqi_action> (prio, action);
-  }
-
-dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int prf, PPR prio) {
-  auto& ptd = queuea<dqi_line> (prio);
-
-  ptd.H1 = H1;
-  ptd.H2 = H2;
-  ptd.band_shift = band_shift;
-  ptd.prf = prf;
-  ptd.width = vid.linewidth;
-  ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
-  
-  return ptd;
-  }
-
-void queuestr(int x, int y, int shift, int size, string str, color_t col, int frame, int align) {
-  auto& ptd = queuea<dqi_string> (PPR::TEXT);
-  ptd.x = x;
-  ptd.y = y;
-  ptd.str = str;
-  ptd.align = align;
-  ptd.shift = shift;
-  ptd.size = size;
-  ptd.color = darkened(col);
-  ptd.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
-  }
-
-void queuechr(int x, int y, int shift, int size, char chr, color_t col, int frame, int align) {
-  auto& ptd = queuea<dqi_string> (PPR::TEXT);
-  ptd.x = x;
-  ptd.y = y;
-  ptd.str = chr;
-  ptd.shift = shift;
-  ptd.size = size;
-  ptd.align = align;
-  ptd.color = col;
-  ptd.frame = frame ? (poly_outline & ~ 255) : 0;
-  }
-
-void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, color_t fillcolor = 0) {
-  auto& ptd = queuea<dqi_circle>(prio);
-  ptd.x = x;
-  ptd.y = y;
-  ptd.size = size;
-  ptd.color = color;
-  ptd.fillcolor = fillcolor;
-  ptd.linewidth = vid.linewidth;
-  }
-
-void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
-  hyperpoint hscr;
-  applymodel(h, hscr);
-  xc = current_display->xcenter + current_display->radius * hscr[0];
-  yc = current_display->ycenter + current_display->radius * vid.stretch * hscr[1];
-  sc = 0;
-  // EYETODO sc = vid.eye * current_display->radius * hscr[2];
-  }
-
-void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame) {
-  if(invalid_point(h)) return;
-  if(DIM == 3 && invis_point(h)) return;
-  int xc, yc, sc; getcoord0(h, xc, yc, sc);
-  queuechr(xc, yc, sc, size, chr, col, frame);
-  }
-
-ld scale_in_pixels(const transmatrix& V) {
-  return scale_at(V) * scalefactor * current_display->radius / 2.5;
-  }
-  
-void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame) {
-  if(invalid_point(V)) return;
-  if(DIM == 3 && invis_point(tC0(V))) return;
-  int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  queuechr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame);
-  }
-  
-void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame) {
-  if(invalid_point(h)) return;
-  if(DIM == 3 && invis_point(h)) return;
-  int xc, yc, sc; getcoord0(h, xc, yc, sc);
-  queuestr(xc, yc, sc, size, chr, col, frame);
-  }
-  
-void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame, int align) {
-  if(invalid_point(V)) return;
-  if(DIM == 3 && invis_point(tC0(V))) return;
-  int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  // int xs, ys, ss;  getcoord0(V * xpush0(.01), xs, ys, ss); 
-  
-  queuestr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame, align);
-  }
-  
-void queuecircle(const transmatrix& V, double size, color_t col) {
-  if(invalid_point(V)) return;
-  if(DIM == 3 && invis_point(tC0(V))) return;
-  int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss; getcoord0(V * xpush0(.01), xs, ys, ss);  
-  queuecircle(xc, yc, scale_in_pixels(V) * size, col);
-  }
-
-void queuemarkerat(const transmatrix& V, color_t col) {
-#if CAP_SHAPES
-  queuepolyat(V, shTriangle, col, PPR::LINE);
-#endif
-  }
-
-#if CAP_SHAPES
 long double polydata[] = {
 // shStarFloor[0] (6x1)
 NEWSHAPE,   1,6,1, 0.267355,0.153145, 0.158858,0.062321, 0.357493,-0.060252,
@@ -3966,54 +1951,54 @@ NEWSHAPE, 251,1,1, -0.186883,0.074525, -0.165331,0.041449, -0.154901,0.003708, -
 // shArrow (1x2)
 NEWSHAPE, 252,1,2, -0.053383,0.030028, 0.040021,0.022234, 0.033369,0.056728, 0.101370,0.001114,
 // shTreat
-NEWSHAPE, 253,3,2, 0.220188,0.075636, 0.089347,0.084922, 0.109762,0.055626, 0.120125,0.037135, 0.127589,0.018676, 0.128473,0.010613, 
+NEWSHAPE, 253,3,2, 0.220188,0.075636, 0.089347,0.084922, 0.109762,0.055626, 0.120125,0.037135, 0.127589,0.018676, 0.128473,0.010613,
 // shBatWings
-NEWSHAPE, 254,1,2, 0.063731,-0.043246, 0.124072,-0.170024, 0.084056,-0.324550, -0.103512,-0.366996, -0.074400,-0.297599, -0.108529,-0.230913, -0.086972,-0.144190, -0.118951,-0.109801, -0.072887,-0.059221, -0.167080,-0.022888, 
+NEWSHAPE, 254,1,2, 0.063731,-0.043246, 0.124072,-0.170024, 0.084056,-0.324550, -0.103512,-0.366996, -0.074400,-0.297599, -0.108529,-0.230913, -0.086972,-0.144190, -0.118951,-0.109801, -0.072887,-0.059221, -0.167080,-0.022888,
 // shBatBody
-NEWSHAPE, 255,1, 2, -0.061429,-0.022752, -0.059165,-0.038685, -0.141985,-0.103054, -0.043229,-0.050055, 0.029576,-0.056876, 0.080137,-0.153405, -0.107472,-0.114332, 0.084857,-0.172008, -0.094609,-0.230753, 0.085016,-0.193009, 0.060443,-0.299888, -0.096263,-0.356877, 0.086368,-0.322128, 0.128679,-0.167743, 0.068287,-0.038696, 0.148735,-0.073224, 0.174190,-0.061883, 0.183380,-0.032092, 0.157798,-0.016009, 0.118603,-0.015966, 
+NEWSHAPE, 255,1, 2, -0.061429,-0.022752, -0.059165,-0.038685, -0.141985,-0.103054, -0.043229,-0.050055, 0.029576,-0.056876, 0.080137,-0.153405, -0.107472,-0.114332, 0.084857,-0.172008, -0.094609,-0.230753, 0.085016,-0.193009, 0.060443,-0.299888, -0.096263,-0.356877, 0.086368,-0.322128, 0.128679,-0.167743, 0.068287,-0.038696, 0.148735,-0.073224, 0.174190,-0.061883, 0.183380,-0.032092, 0.157798,-0.016009, 0.118603,-0.015966,
 // shBatMouth
-NEWSHAPE, 256, 1, 2, 0.065982,0.006826, 0.081971,0.027324, 0.091097,0.002277, 
+NEWSHAPE, 256, 1, 2, 0.065982,0.006826, 0.081971,0.027324, 0.091097,0.002277,
 // shBatFang
-NEWSHAPE, 257, 1, 1, 0.084220,0.016514, 0.054588,0.011372, 0.088636,0.006606, 
+NEWSHAPE, 257, 1, 1, 0.084220,0.016514, 0.054588,0.011372, 0.088636,0.006606,
 // shBatEye
-NEWSHAPE, 258, 1, 1, 0.100828,0.030855, 0.108021,0.024250, 0.106903,0.014878, 0.099146,0.009915, 
+NEWSHAPE, 258, 1, 1, 0.100828,0.030855, 0.108021,0.024250, 0.106903,0.014878, 0.099146,0.009915,
 
 // shHumanFoot
-NEWSHAPE, 259, 1, 1, -0.091073,0.081161, -0.071926,0.092823, -0.046931,0.094885, -0.019968,0.097943, -0.001122,0.092149, 0.011212,0.084470, 0.010501,0.070502, -0.001155,0.056218, -0.018631,0.051502, -0.070956,0.049847, -0.086365,0.056093, -0.094267,0.064719, 
+NEWSHAPE, 259, 1, 1, -0.091073,0.081161, -0.071926,0.092823, -0.046931,0.094885, -0.019968,0.097943, -0.001122,0.092149, 0.011212,0.084470, 0.010501,0.070502, -0.001155,0.056218, -0.018631,0.051502, -0.070956,0.049847, -0.086365,0.056093, -0.094267,0.064719,
 // shHumanLeg
-NEWSHAPE, 260, 1, 1, -0.085549,0.082560, -0.066987,0.087728, -0.050005,0.088432, -0.036738,0.073722, -0.033485,0.056714, -0.050113,0.042534, -0.076986,0.046956, -0.086334,0.058587, 
+NEWSHAPE, 260, 1, 1, -0.085549,0.082560, -0.066987,0.087728, -0.050005,0.088432, -0.036738,0.073722, -0.033485,0.056714, -0.050113,0.042534, -0.076986,0.046956, -0.086334,0.058587,
 // shHumanGroin
-NEWSHAPE, 261, 1, 2, -0.092531,0.043227, -0.077988,0.087426, -0.048692,0.113964, -0.022425,0.100486, 0.002705,0.048193, 
+NEWSHAPE, 261, 1, 2, -0.092531,0.043227, -0.077988,0.087426, -0.048692,0.113964, -0.022425,0.100486, 0.002705,0.048193,
 // shHumanNeck
 NEWSHAPE, 262, 1, 2, -0.035947,0.023404, -0.011281,0.043922, 0.017582,0.045486, 0.031600,0,
 // shSemiFloorShadow
-NEWSHAPE, 263, 1, 2, -0.317691,0.208329, 0.065767,0.397781, 
+NEWSHAPE, 263, 1, 2, -0.317691,0.208329, 0.065767,0.397781,
 // shSkeletalFoot
-NEWSHAPE, 264, 1, 1, -0.082697,0.087468, -0.071752,0.102240, -0.048756,0.105169, 0.005645,0.101864, 0.009206,0.097754, 0.005659,0.094999, -0.043535,0.093347, -0.043804,0.090603, 0.007314,0.087046, 0.010873,0.084038, 0.005962,0.079364, -0.043239,0.079083, -0.045150,0.075798, 0.004608,0.072508, 0.010903,0.067865, 0.006269,0.060184, -0.065401,0.062704, -0.079938,0.072088, 
+NEWSHAPE, 264, 1, 1, -0.082697,0.087468, -0.071752,0.102240, -0.048756,0.105169, 0.005645,0.101864, 0.009206,0.097754, 0.005659,0.094999, -0.043535,0.093347, -0.043804,0.090603, 0.007314,0.087046, 0.010873,0.084038, 0.005962,0.079364, -0.043239,0.079083, -0.045150,0.075798, 0.004608,0.072508, 0.010903,0.067865, 0.006269,0.060184, -0.065401,0.062704, -0.079938,0.072088,
 // shDogBody
-NEWSHAPE, 265, 1, 2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.173168,0.066320, -0.250414,0.056912, -0.242122,0.064314, -0.253563,0.065926, -0.241104,0.075740, -0.249897,0.082453, -0.237118,0.081982, -0.246310,0.097762, -0.230366,0.088118, -0.210870,0.082352, -0.194727,0.083100, -0.180298,0.087679, -0.162032,0.087154, -0.135091,0.081542, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.025203,0.099613, 0.040964,0.113252, 0.067885,0.127285, 0.086481,0.135203, 0.104129,0.144556, 0.097579,0.132951, 0.112604,0.134635, 0.098603,0.124167, 0.118341,0.115901, 0.094688,0.115325, 0.079806,0.108826, 0.065011,0.097516, 0.053964,0.082746, 0.049028,0.066966, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.074561,0.026708, 0.111469,0.022294, 
+NEWSHAPE, 265, 1, 2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.173168,0.066320, -0.250414,0.056912, -0.242122,0.064314, -0.253563,0.065926, -0.241104,0.075740, -0.249897,0.082453, -0.237118,0.081982, -0.246310,0.097762, -0.230366,0.088118, -0.210870,0.082352, -0.194727,0.083100, -0.180298,0.087679, -0.162032,0.087154, -0.135091,0.081542, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.025203,0.099613, 0.040964,0.113252, 0.067885,0.127285, 0.086481,0.135203, 0.104129,0.144556, 0.097579,0.132951, 0.112604,0.134635, 0.098603,0.124167, 0.118341,0.115901, 0.094688,0.115325, 0.079806,0.108826, 0.065011,0.097516, 0.053964,0.082746, 0.049028,0.066966, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.074561,0.026708, 0.111469,0.022294,
 // shDogHead
-NEWSHAPE, 266, 1, 2, 0.063398,0.010010, 0.064517,0.018910, 0.069275,0.029860, 0.077732,0.029897, 0.081360,0.028715, 0.066249,0.039649, 0.106662,0.046229, 0.146020,0.025919, 0.159666,0.028110, 0.172131,0.020186, 0.172077,0.013438, 0.168613,0.007837, 
+NEWSHAPE, 266, 1, 2, 0.063398,0.010010, 0.064517,0.018910, 0.069275,0.029860, 0.077732,0.029897, 0.081360,0.028715, 0.066249,0.039649, 0.106662,0.046229, 0.146020,0.025919, 0.159666,0.028110, 0.172131,0.020186, 0.172077,0.013438, 0.168613,0.007837,
 // shDogTorso
-NEWSHAPE, 267, 1, 2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.036721,0.067879, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.074561,0.026708, 0.111469,0.022294, 
+NEWSHAPE, 267, 1, 2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.036721,0.067879, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.074561,0.026708, 0.111469,0.022294,
 // shDogFrontPaw
-NEWSHAPE, 268, 1, 1, -0.021458,0.071528, 0.056770,0.096454, 0.086625,0.096557, 0.094338,0.086062, 0.091509,0.069458, 0.029143,0.047289, -0.007695,0.037376, -0.024745,0.050039, 
+NEWSHAPE, 268, 1, 1, -0.021458,0.071528, 0.056770,0.096454, 0.086625,0.096557, 0.094338,0.086062, 0.091509,0.069458, 0.029143,0.047289, -0.007695,0.037376, -0.024745,0.050039,
 // shDogRearPaw
-NEWSHAPE, 269, 1, 1, -0.120244,0.033095, -0.181823,0.053216, -0.199420,0.068325, -0.189994,0.093330, -0.169179,0.099289, -0.138237,0.080730, -0.088688,0.049026, -0.094739,0.030294, -0.102488,0.029755, 
+NEWSHAPE, 269, 1, 1, -0.120244,0.033095, -0.181823,0.053216, -0.199420,0.068325, -0.189994,0.093330, -0.169179,0.099289, -0.138237,0.080730, -0.088688,0.049026, -0.094739,0.030294, -0.102488,0.029755,
 // shDogFrontLeg
-NEWSHAPE, 270, 1, 1, 0.050083,0.064552, 0.044492,0.047829, 0.018900,0.044470, 0.002224,0.057826, 0.003338,0.075664, 0.020042,0.089074, 0.034520,0.086856, 0.040087,0.084629, 0.052335,0.076832, 
+NEWSHAPE, 270, 1, 1, 0.050083,0.064552, 0.044492,0.047829, 0.018900,0.044470, 0.002224,0.057826, 0.003338,0.075664, 0.020042,0.089074, 0.034520,0.086856, 0.040087,0.084629, 0.052335,0.076832,
 // shDogRearLeg
-NEWSHAPE, 271, 1, 1, -0.147691,0.079440, -0.120617,0.078177, -0.102586,0.061329, -0.100284,0.036771, -0.112610,0.034564, -0.133966,0.033491, -0.153171,0.040249, -0.157810,0.067153, 
+NEWSHAPE, 271, 1, 1, -0.147691,0.079440, -0.120617,0.078177, -0.102586,0.061329, -0.100284,0.036771, -0.112610,0.034564, -0.133966,0.033491, -0.153171,0.040249, -0.157810,0.067153,
 // shWolfFrontPaw
-NEWSHAPE, 272, 1, 1, 0.044056,0.084808, 0.114167,0.147973, 0.121635,0.170511, 0.126416,0.144158, 0.148897,0.151675, 0.134077,0.125212, 0.157522,0.115923, 0.123842,0.098410, 0.074868,0.045141, 0.056665,0.043462, 0.046213,0.055016, 0.039626,0.070996, 
+NEWSHAPE, 272, 1, 1, 0.044056,0.084808, 0.114167,0.147973, 0.121635,0.170511, 0.126416,0.144158, 0.148897,0.151675, 0.134077,0.125212, 0.157522,0.115923, 0.123842,0.098410, 0.074868,0.045141, 0.056665,0.043462, 0.046213,0.055016, 0.039626,0.070996,
 // shWolfRearPaw
-NEWSHAPE, 273, 1, 1, -0.228714,0.033559, -0.341382,0.086496, -0.314606,0.087990, -0.326169,0.109775, -0.303428,0.105707, -0.309485,0.135882, -0.287964,0.110057, -0.198121,0.069332, -0.187804,0.046735, -0.200044,0.035736, -0.213491,0.031344, 
+NEWSHAPE, 273, 1, 1, -0.228714,0.033559, -0.341382,0.086496, -0.314606,0.087990, -0.326169,0.109775, -0.303428,0.105707, -0.309485,0.135882, -0.287964,0.110057, -0.198121,0.069332, -0.187804,0.046735, -0.200044,0.035736, -0.213491,0.031344,
 // shWolfFrontLeg
-NEWSHAPE, 274, 1, 1, 0.043124,0.086241, 0.073285,0.082608, 0.078919,0.072022, 0.084577,0.049131, 0.058349,0.030045, 0.038327,0.023872, 0.019412,0.043794, 0.027622,0.072180, 
+NEWSHAPE, 274, 1, 1, 0.043124,0.086241, 0.073285,0.082608, 0.078919,0.072022, 0.084577,0.049131, 0.058349,0.030045, 0.038327,0.023872, 0.019412,0.043794, 0.027622,0.072180,
 // shWolfRearLeg
-NEWSHAPE, 275, 1, 1, -0.209981,0.074314, -0.168422,0.064352, -0.158696,0.031877, -0.173682,0.018683, -0.192122,0.019786, -0.221918,0.028600, -0.240782,0.055614, -0.225734,0.072687, 
+NEWSHAPE, 275, 1, 1, -0.209981,0.074314, -0.168422,0.064352, -0.158696,0.031877, -0.173682,0.018683, -0.192122,0.019786, -0.221918,0.028600, -0.240782,0.055614, -0.225734,0.072687,
 // shYetiFoot
-NEWSHAPE, 276, 1, 1, -0.099231,0.063552, -0.100435,0.085928, -0.045726,0.113758, -0.046823,0.105908, 0.034547,0.103641, -0.006678,0.083479, 0.042290,0.067886, -0.004448,0.057826, 0.046713,0.042264, -0.033354,0.037802, -0.081272,0.036739, 
+NEWSHAPE, 276, 1, 1, -0.099231,0.063552, -0.100435,0.085928, -0.045726,0.113758, -0.046823,0.105908, 0.034547,0.103641, -0.006678,0.083479, 0.042290,0.067886, -0.004448,0.057826, 0.046713,0.042264, -0.033354,0.037802, -0.081272,0.036739,
 
 // inspired by "Reptiles" by M. C. Escher
 // shReptile[0][0]
@@ -4023,33 +2008,33 @@ NEWSHAPE, 279, 1, 1, -0.252522,-0.071341, -0.245933,-0.086380, -0.256407,-0.1081
 NEWSHAPE, 280, 1, 1, -0.258740,0.011957, -0.254596,-0.009727, -0.273495,-0.033201, -0.294516,-0.034869, -0.307872,-0.015362, -0.306068,0.008710, -0.288916,0.020706,
 // shReptile[1][0]
 NEWSHAPE, 281, 1, 1,  0.267913,-0.363961, 0.103423,-0.407902, 0.029926,-0.285688, 0.004562,-0.182498, -0.089218,-0.185966, -0.096986,-0.367985, -0.248327,-0.455994, -0.256139,-0.447327, -0.237682,-0.433175, -0.257547,-0.445407, -0.265780,-0.439947, -0.250475,-0.422667, -0.268312,-0.437951, -0.275164,-0.436243, -0.203450,-0.358525, -0.187185,-0.110088, -0.484119,-0.068248, -0.424486,0.012521, -0.323946,-0.003100, -0.200798,0.033484, -0.244734,0.222076, -0.357719,0.170021, -0.365522,0.192816, -0.333464,0.208694, -0.367623,0.196994, -0.371956,0.213819, -0.339807,0.232001, -0.373008,0.216200, -0.376113,0.227855, -0.287818,0.311052, -0.201927,0.336476, -0.162665,0.301719, -0.123143,0.195801, -0.085354,0.085987, 0.106772,0.103301, 0.235043,0.288663, 0.398887,0.202650, 0.392371,0.193980, 0.362197,0.205391, 0.393392,0.192794, 0.388672,0.184045, 0.354985,0.191178, 0.388962,0.181776, 0.383857,0.173107, 0.273977,0.186438, 0.201147,0.007597, 0.385514,-0.014104, 0.452378,-0.139100, 0.441679,-0.165374, 0.286863,-0.196581, 0.154996,-0.121531, 0.112780,-0.178884, 0.130676,-0.244138, 0.233120,-0.294200, 0.242235,-0.311655, 0.187156,-0.319959, 0.242817,-0.315142, 0.253181,-0.338344, 0.193625,-0.348671, 0.254919,-0.341938,
-NEWSHAPE, 282, 1, 1, 0.326447,-0.044290, 0.268772,-0.053597, 0.235899,-0.055845, 0.171515,-0.048557, 0.088801,-0.018246, 0.037774,0.004993, -0.027541,0.016777, -0.088937,0.009667, -0.172537,-0.011240, -0.219668,-0.017765, -0.282928,-0.032376, -0.337206,-0.032470, -0.385877,-0.034804, -0.440028,-0.044474, -0.371779,-0.058999, -0.311902,-0.066325, -0.248815,-0.064253, -0.177727,-0.063011, -0.059856,-0.073519, 0.027306,-0.080984, 0.112403,-0.081788, 0.185321,-0.082903, 0.246089,-0.091503, 0.280118,-0.131876, 0.327222,-0.147933, 0.374578,-0.123044, 0.364318,-0.067249, 
-NEWSHAPE, 283, 7, 1, 0.027415,-0.009216, 
-NEWSHAPE, 284, 7, 1, 0.023426,0.005270, 
+NEWSHAPE, 282, 1, 1, 0.326447,-0.044290, 0.268772,-0.053597, 0.235899,-0.055845, 0.171515,-0.048557, 0.088801,-0.018246, 0.037774,0.004993, -0.027541,0.016777, -0.088937,0.009667, -0.172537,-0.011240, -0.219668,-0.017765, -0.282928,-0.032376, -0.337206,-0.032470, -0.385877,-0.034804, -0.440028,-0.044474, -0.371779,-0.058999, -0.311902,-0.066325, -0.248815,-0.064253, -0.177727,-0.063011, -0.059856,-0.073519, 0.027306,-0.080984, 0.112403,-0.081788, 0.185321,-0.082903, 0.246089,-0.091503, 0.280118,-0.131876, 0.327222,-0.147933, 0.374578,-0.123044, 0.364318,-0.067249,
+NEWSHAPE, 283, 7, 1, 0.027415,-0.009216,
+NEWSHAPE, 284, 7, 1, 0.023426,0.005270,
 // shReptile[2][0]
 NEWSHAPE, 285, 1, 1, 0.264174,-0.393902, 0.220100,-0.344820, 0.196314,-0.232131, 0.044844,-0.186655, 0.015265,-0.205081, -0.003936,-0.333213, -0.136120,-0.408084, -0.149930,-0.405620, -0.177207,-0.243366, -0.085946,-0.199911, -0.087381,-0.147154, -0.302464,-0.169877, -0.302092,-0.297549, -0.327187,-0.293024, -0.330841,-0.249219, -0.329911,-0.292299, -0.353906,-0.290880, -0.354914,-0.247858, -0.357304,-0.291341, -0.377715,-0.287105, -0.387134,-0.104888, -0.106049,-0.041562, -0.095545,0.040016, -0.302051,0.163655, -0.332611,0.319950, -0.310541,0.349402, -0.289857,0.281329, -0.303842,0.352541, -0.278525,0.372081, -0.261882,0.313955, -0.275092,0.376585, -0.247719,0.398573, -0.239799,0.336833, -0.214496,0.215823, -0.168074,0.170579, -0.067435,0.196926, 0.028714,0.266822, 0.015830,0.400766, 0.131125,0.319617, 0.148574,0.162459, 0.283651,0.088527, 0.295994,0.169290, 0.331188,0.179878, 0.329752,0.145196, 0.335770,0.181014, 0.363641,0.191082, 0.365077,0.157473, 0.367064,0.192650, 0.395018,0.204633, 0.405110,0.041551, 0.311991,0.015994, 0.195242,0.016634, 0.122740,-0.085748, 0.261020,-0.098708, 0.286694,-0.182139, 0.332188,-0.307144, 0.306926,-0.340004, 0.279202,-0.289607, 0.302360,-0.343229, 0.284083,-0.365340, 0.252717,-0.314768, 0.279532,-0.371945,
-NEWSHAPE, 286, 1, 1, -0.127096,-0.255815, -0.091894,-0.241092, -0.073203,-0.219108, -0.050918,-0.160430, -0.046653,-0.121421, -0.028140,-0.044121, -0.017641,0.026545, 0.022513,0.133022, 0.050663,0.193120, 0.058157,0.270962, 0.054214,0.311270, 0.046360,0.353789, 0.068493,0.316069, 0.093492,0.242457, 0.080840,0.108339, 0.056390,0.006556, 0.031831,-0.062813, -0.001836,-0.143721, -0.034334,-0.239758, -0.041121,-0.297513, -0.071677,-0.333221, -0.108488,-0.343266, -0.135448,-0.293017, 
-NEWSHAPE, 287, 7, 1, -0.021896,-0.012396, 
-NEWSHAPE, 288, 7, 1, -0.023484,-0.012828, 
+NEWSHAPE, 286, 1, 1, -0.127096,-0.255815, -0.091894,-0.241092, -0.073203,-0.219108, -0.050918,-0.160430, -0.046653,-0.121421, -0.028140,-0.044121, -0.017641,0.026545, 0.022513,0.133022, 0.050663,0.193120, 0.058157,0.270962, 0.054214,0.311270, 0.046360,0.353789, 0.068493,0.316069, 0.093492,0.242457, 0.080840,0.108339, 0.056390,0.006556, 0.031831,-0.062813, -0.001836,-0.143721, -0.034334,-0.239758, -0.041121,-0.297513, -0.071677,-0.333221, -0.108488,-0.343266, -0.135448,-0.293017,
+NEWSHAPE, 287, 7, 1, -0.021896,-0.012396,
+NEWSHAPE, 288, 7, 1, -0.023484,-0.012828,
 // shReptile[3][0]
-NEWSHAPE, 289, 1, 1, 0.276554,-0.041210, 0.310457,0.039428, 0.287105,0.072645, 0.169859,-0.000837, 0.151648,-0.089695, 0.191477,-0.149470, 0.280888,-0.183226, 0.341099,-0.338656, 0.273683,-0.366029, 0.209539,-0.273223, 0.105852,-0.172588, -0.061113,-0.279714, -0.013642,-0.342451, -0.058157,-0.375558, -0.090346,-0.316684, -0.061781,-0.378853, -0.101453,-0.409200, -0.128968,-0.341003, -0.106321,-0.412460, -0.147327,-0.447396, -0.196876,-0.316767, -0.070150,-0.182145, -0.133594,-0.036417, -0.294753,-0.151579, -0.409075,-0.148250, -0.444408,-0.105385, -0.374677,-0.113506, -0.443332,-0.098946, -0.434173,-0.078381, -0.367706,-0.088453, -0.432558,-0.074716, -0.428663,-0.053306, -0.293683,-0.069123, -0.141662,0.058415, -0.281560,0.174905, -0.249829,0.284696, -0.226324,0.297042, -0.119112,0.263418, -0.075663,0.144858, -0.021279,0.097533, 0.064463,0.189563, 0.011865,0.335469, -0.005820,0.393456, 0.044789,0.390508, 0.065571,0.321367, 0.047251,0.390455, 0.090068,0.386431, 0.103507,0.317601, 0.093275,0.386149, 0.130199,0.386756, 0.148881,0.163862, 0.089483,0.079942, 0.135587,0.047323, 0.293067,0.168426, 0.408382,0.092603, 0.384168,0.007719, 0.315700,-0.045433, 0.346149,0.015698, 0.313006,-0.045307, 0.295254,-0.041824, 0.326732,0.017229, 0.292941,-0.042281, 
-NEWSHAPE, 290, 1, 1, -0.130824,0.101694, -0.057151,-0.007670, 0.115177,-0.160650, 0.211980,-0.236858, 0.296693,-0.311866, 0.232978,-0.219581, 0.138912,-0.105664, -0.002855,0.058899, -0.100445,0.121752, -0.136992,0.183934, -0.144345,0.222791, -0.168225,0.256064, -0.232048,0.242113, -0.236767,0.213008, -0.234529,0.179695, -0.198210,0.146185, -0.167694,0.143175, 
-NEWSHAPE, 291, 7, 1, -0.019211,0.011243, 
-NEWSHAPE, 292, 7, 1, -0.017430,0.009904, 
+NEWSHAPE, 289, 1, 1, 0.276554,-0.041210, 0.310457,0.039428, 0.287105,0.072645, 0.169859,-0.000837, 0.151648,-0.089695, 0.191477,-0.149470, 0.280888,-0.183226, 0.341099,-0.338656, 0.273683,-0.366029, 0.209539,-0.273223, 0.105852,-0.172588, -0.061113,-0.279714, -0.013642,-0.342451, -0.058157,-0.375558, -0.090346,-0.316684, -0.061781,-0.378853, -0.101453,-0.409200, -0.128968,-0.341003, -0.106321,-0.412460, -0.147327,-0.447396, -0.196876,-0.316767, -0.070150,-0.182145, -0.133594,-0.036417, -0.294753,-0.151579, -0.409075,-0.148250, -0.444408,-0.105385, -0.374677,-0.113506, -0.443332,-0.098946, -0.434173,-0.078381, -0.367706,-0.088453, -0.432558,-0.074716, -0.428663,-0.053306, -0.293683,-0.069123, -0.141662,0.058415, -0.281560,0.174905, -0.249829,0.284696, -0.226324,0.297042, -0.119112,0.263418, -0.075663,0.144858, -0.021279,0.097533, 0.064463,0.189563, 0.011865,0.335469, -0.005820,0.393456, 0.044789,0.390508, 0.065571,0.321367, 0.047251,0.390455, 0.090068,0.386431, 0.103507,0.317601, 0.093275,0.386149, 0.130199,0.386756, 0.148881,0.163862, 0.089483,0.079942, 0.135587,0.047323, 0.293067,0.168426, 0.408382,0.092603, 0.384168,0.007719, 0.315700,-0.045433, 0.346149,0.015698, 0.313006,-0.045307, 0.295254,-0.041824, 0.326732,0.017229, 0.292941,-0.042281,
+NEWSHAPE, 290, 1, 1, -0.130824,0.101694, -0.057151,-0.007670, 0.115177,-0.160650, 0.211980,-0.236858, 0.296693,-0.311866, 0.232978,-0.219581, 0.138912,-0.105664, -0.002855,0.058899, -0.100445,0.121752, -0.136992,0.183934, -0.144345,0.222791, -0.168225,0.256064, -0.232048,0.242113, -0.236767,0.213008, -0.234529,0.179695, -0.198210,0.146185, -0.167694,0.143175,
+NEWSHAPE, 291, 7, 1, -0.019211,0.011243,
+NEWSHAPE, 292, 7, 1, -0.017430,0.009904,
 // shReptile[4][0]
 NEWSHAPE, 293, 3, 1, 0.000458,0.307912, 0.204532,0.422468, 0.260617,0.384080, 0.177355,0.114658, 0.351515,0.031931, 0.411778,0.098785, 0.502998,0.070318, 0.433450,0.021025, 0.502176,0.057577, 0.563080,-0.085829, 0.478445,-0.055947, 0.558143,-0.094808, 0.534739,-0.111613, 0.420992,-0.057813,
-NEWSHAPE, 294, 3, 1, -0.169183,-0.225979, -0.187272,-0.078673, -0.281255,0.003711, -0.095795,0.040777, 
-NEWSHAPE, 295, 7, 1, -0.019211,0.011243, 
-NEWSHAPE, 296, 7, 1, -0.017430,0.009904, 
+NEWSHAPE, 294, 3, 1, -0.169183,-0.225979, -0.187272,-0.078673, -0.281255,0.003711, -0.095795,0.040777,
+NEWSHAPE, 295, 7, 1, -0.019211,0.011243,
+NEWSHAPE, 296, 7, 1, -0.017430,0.009904,
 
 // shReptileBody
 NEWSHAPE, 297, 1, 1, 0.207893,0.052816, 0.154587,0.095216, 0.118624,0.121981, 0.077111,0.131872, 0.011141,0.103613, -0.040061,0.066768, -0.052300,0.056751, -0.041318,0.136239, -0.097277,0.126349, -0.146652,0.094036, -0.214827,0.059612, -0.280943,0.028321, -0.353759,-0.002290, -0.410588,-0.042794, -0.446484,-0.083934, -0.379856,-0.069065, -0.301215,-0.057970, -0.243697,-0.056411, -0.176013,-0.072872, -0.133073,-0.090579, -0.099458,-0.115103, -0.065944,-0.139713, -0.052291,-0.050065, 0.014488,-0.109218, 0.077073,-0.123987, 0.130941,-0.109677, 0.162455,-0.085149, 0.218159,-0.035985,
 // shReptileHead
-NEWSHAPE, 298, 1, 2, 0.471485,-0.015757, 0.288467,-0.098421, 0.170941,-0.033237, 
+NEWSHAPE, 298, 1, 2, 0.471485,-0.015757, 0.288467,-0.098421, 0.170941,-0.033237,
 // shReptileFrontFoot
-NEWSHAPE, 299, 1, 1, 0.250278,0.167235, 0.238951,0.195456, 0.195709,0.200188, 0.240500,0.197580, 0.232498,0.224361, 0.186427,0.225955, 0.227016,0.226262, 0.227409,0.260408, 0.102772,0.258192, 0.080173,0.252350, 0.059570,0.224171, 0.051410,0.202351, 0.074841,0.180175, 0.114709,0.161348, 
+NEWSHAPE, 299, 1, 1, 0.250278,0.167235, 0.238951,0.195456, 0.195709,0.200188, 0.240500,0.197580, 0.232498,0.224361, 0.186427,0.225955, 0.227016,0.226262, 0.227409,0.260408, 0.102772,0.258192, 0.080173,0.252350, 0.059570,0.224171, 0.051410,0.202351, 0.074841,0.180175, 0.114709,0.161348,
 // shReptileRearFoot
-NEWSHAPE, 300, 1, 1, -0.067876,0.206615, -0.114088,0.181539, -0.272616,0.185109, -0.253628,0.222368, -0.216050,0.219537, -0.249625,0.225089, -0.240714,0.244505, -0.205182,0.244381, -0.232919,0.248821, -0.217457,0.272915, -0.099816,0.264976, -0.065058,0.238612, 
+NEWSHAPE, 300, 1, 1, -0.067876,0.206615, -0.114088,0.181539, -0.272616,0.185109, -0.253628,0.222368, -0.216050,0.219537, -0.249625,0.225089, -0.240714,0.244505, -0.205182,0.244381, -0.232919,0.248821, -0.217457,0.272915, -0.099816,0.264976, -0.065058,0.238612,
 // shReptileFrontLeg
 NEWSHAPE, 301, 1, 1, 0.047213,0.212458, 0.077946,0.248522, 0.130365,0.256196, 0.141554,0.241207, 0.148626,0.179026, 0.127519,0.104028, 0.091374,0.056830, 0.045625,0.063430, 0.028944,0.082379, 0.036887,0.150900,
 // shReptileRearLeg
@@ -4057,164 +2042,162 @@ NEWSHAPE, 302, 1, 1, -0.098128,0.262832, -0.068071,0.236831, -0.053685,0.166798,
 // shReptileTail
 NEWSHAPE, 303, 1, 1, -0.419630,-0.067234, -0.351432,-0.034342, -0.278537,-0.003397, -0.200906,0.024692, -0.083503,0.034515, 0.041138,0.030019, 0.138446,0.017864, 0.197445,0.006731, 0.094656,-0.005568, 0.007778,0.003333, -0.085713,-0.003339, -0.197452,-0.013463, -0.280927,-0.023788,
 // shReptileEye
-NEWSHAPE, 304, 1, 1, 0.288102,0.032160, 0.268177,0.043655, 0.265884,0.058115, 0.276356,0.070881, 0.290293,0.073602, 0.310905,0.064370, 0.308359,0.045081, 
+NEWSHAPE, 304, 1, 1, 0.288102,0.032160, 0.268177,0.043655, 0.265884,0.058115, 0.276356,0.070881, 0.290293,0.073602, 0.310905,0.064370, 0.308359,0.045081,
 
 // shDodeca,
 NEWSHAPE, 305, 5, 2, 0.123140,0.087570, 0.151044,0.006085, 0.141348,0.003141, 0.091602,0.003971, 0.064937,0.045676, 0.057217,0.044013, 0.086006,0.002395, 0.086006,-0.002395,
 // shBugLeg
-NEWSHAPE, 306, 1, 1, -0.188132,0.071590, -0.106107,0.109975, -0.020337,0.032429, -0.010997,-0.052235, 0.027591,-0.128573, -0.009955,-0.162603, -0.123175,-0.156466, -0.129658,-0.186975, -0.003881,-0.192409, 0.048636,-0.145908, 0.045758,-0.106953, 0.012643,-0.040678, 0.031326,0.003847, 0.131788,0.118499, 0.134832,0.147039, 0.121802,0.186319, 0.018400,0.244215, 0.011672,0.216213, 0.079288,0.174654, 0.095323,0.160720, 0.088932,0.115998, 0.010444,0.037927, -0.102392,0.137814, 
+NEWSHAPE, 306, 1, 1, -0.188132,0.071590, -0.106107,0.109975, -0.020337,0.032429, -0.010997,-0.052235, 0.027591,-0.128573, -0.009955,-0.162603, -0.123175,-0.156466, -0.129658,-0.186975, -0.003881,-0.192409, 0.048636,-0.145908, 0.045758,-0.106953, 0.012643,-0.040678, 0.031326,0.003847, 0.131788,0.118499, 0.134832,0.147039, 0.121802,0.186319, 0.018400,0.244215, 0.011672,0.216213, 0.079288,0.174654, 0.095323,0.160720, 0.088932,0.115998, 0.010444,0.037927, -0.102392,0.137814,
 // shBugAntenna
-NEWSHAPE, 307, 1, 2, -0.037388,-0.035738, 0.121931,-0.041931, 0.148538,-0.114729, 0.171226,-0.135647, 0.193388,-0.143787, 0.206926,-0.136091, 0.172174,-0.118855, 0.163075,-0.108717, 0.147190,-0.083002, 0.129680,-0.024281, 
+NEWSHAPE, 307, 1, 2, -0.037388,-0.035738, 0.121931,-0.041931, 0.148538,-0.114729, 0.171226,-0.135647, 0.193388,-0.143787, 0.206926,-0.136091, 0.172174,-0.118855, 0.163075,-0.108717, 0.147190,-0.083002, 0.129680,-0.024281,
 
 // shTrylobiteBody
-NEWSHAPE, 308, 1, 2, 0.196119,0.032415, 0.090349,0.051694, 0.014858,0.048341, -0.084517,0.042642, -0.099309,0.031132, -0.146522,0.055533, -0.190296,0.065896, -0.234005,0.061772, -0.245550,0.053775, -0.212120,0.048191, -0.163612,0.030837, -0.143014,0.007540, 
+NEWSHAPE, 308, 1, 2, 0.196119,0.032415, 0.090349,0.051694, 0.014858,0.048341, -0.084517,0.042642, -0.099309,0.031132, -0.146522,0.055533, -0.190296,0.065896, -0.234005,0.061772, -0.245550,0.053775, -0.212120,0.048191, -0.163612,0.030837, -0.143014,0.007540,
 // shTrylobiteFrontClaw
-NEWSHAPE, 309, 1, 1, 0.162924,0.164217, 0.134529,0.219357, 0.096861,0.266620, 0.040792,0.297621, 0.018375,0.280440, 0.073270,0.189478, 0.089713,0.132980, 0.111928,0.119234, 0.144100,0.124454, 
+NEWSHAPE, 309, 1, 1, 0.162924,0.164217, 0.134529,0.219357, 0.096861,0.266620, 0.040792,0.297621, 0.018375,0.280440, 0.073270,0.189478, 0.089713,0.132980, 0.111928,0.119234, 0.144100,0.124454,
 // shTrylobiteRearClaw
-NEWSHAPE, 310, 1, 1, -0.014785,0.165073, -0.030220,0.198964, -0.060610,0.240281, -0.086102,0.254842, -0.112355,0.254248, -0.091511,0.215066, -0.070034,0.152230, -0.057129,0.134268, -0.041113,0.127236, -0.022776,0.135081, 
+NEWSHAPE, 310, 1, 1, -0.014785,0.165073, -0.030220,0.198964, -0.060610,0.240281, -0.086102,0.254842, -0.112355,0.254248, -0.091511,0.215066, -0.070034,0.152230, -0.057129,0.134268, -0.041113,0.127236, -0.022776,0.135081,
 // shTrylobiteFrontLeg
-NEWSHAPE, 311, 1, 1, 0.196620,0.034345, 0.161944,0.165955, 0.131681,0.185106, 0.105471,0.183927, 0.090859,0.133459, 0.094842,0.063710, 0.082033,0.026880, 0.114740,0.000635, 0.168794,0.000330, 
+NEWSHAPE, 311, 1, 1, 0.196620,0.034345, 0.161944,0.165955, 0.131681,0.185106, 0.105471,0.183927, 0.090859,0.133459, 0.094842,0.063710, 0.082033,0.026880, 0.114740,0.000635, 0.168794,0.000330,
 // shTrylobiteRearLeg
-NEWSHAPE, 312, 1, 1, 0.014403,0.049247, -0.005676,0.101370, -0.014283,0.164470, -0.036662,0.174292, -0.054954,0.173745, -0.070446,0.153946, -0.074749,0.083574, -0.082124,0.043654, -0.052716,0.016562, -0.009043,0.013419, 
+NEWSHAPE, 312, 1, 1, 0.014403,0.049247, -0.005676,0.101370, -0.014283,0.164470, -0.036662,0.174292, -0.054954,0.173745, -0.070446,0.153946, -0.074749,0.083574, -0.082124,0.043654, -0.052716,0.016562, -0.009043,0.013419,
 // shLeafFloor,
-NEWSHAPE, 313, 3, 1, -0.124709,0.213831, -0.127071,0.274094, -0.099723,0.369490, -0.023215,0.462261, 0.072785,0.531016, 0.152171,0.570046, 0.244072,0.583021, 0.278329,0.581281, 0.289459,0.567347, 0.241111,0.530198, 0.189086,0.449607, 0.153336,0.354939, 0.133803,0.281218, 0.127619,0.205626, 0.145868,0.133361, 0.140560,0.107526, 0.106341,0.086253, 0.061487,0.046396, 0.029920,0.018377, 0.013295,0.007733, 0.050569,0.013990, 0.166612,0.102510, 
+NEWSHAPE, 313, 3, 1, -0.124709,0.213831, -0.127071,0.274094, -0.099723,0.369490, -0.023215,0.462261, 0.072785,0.531016, 0.152171,0.570046, 0.244072,0.583021, 0.278329,0.581281, 0.289459,0.567347, 0.241111,0.530198, 0.189086,0.449607, 0.153336,0.354939, 0.133803,0.281218, 0.127619,0.205626, 0.145868,0.133361, 0.140560,0.107526, 0.106341,0.086253, 0.061487,0.046396, 0.029920,0.018377, 0.013295,0.007733, 0.050569,0.013990, 0.166612,0.102510,
 // shLeafFloor,
 NEWSHAPE, 314, 1, 1, 0, 0,
 
 // shBullBody
-NEWSHAPE, 315, 1, 2, -0.399002,0.000618, -0.412389,-0.011435, -0.383217,-0.004139, -0.396241,-0.020642, -0.365704,-0.007876, -0.335517,-0.003463, -0.306649,-0.005631, -0.286501,-0.014485, -0.270113,-0.034709, -0.263139,-0.079331, -0.257114,-0.110215, -0.247630,-0.125790, -0.231094,-0.131733, -0.215499,-0.134849, -0.198771,-0.130780, -0.184961,-0.120425, -0.176890,-0.110874, -0.170135,-0.107553, -0.128764,-0.126896, -0.138805,-0.126406, -0.089067,-0.151289, -0.099830,-0.154113, -0.066698,-0.158059, -0.043468,-0.159303, -0.027802,-0.156801, -0.033201,-0.163796, -0.009201,-0.151129, 0.003865,-0.145169, 0.002259,-0.154029, 0.022833,-0.142371, 0.035183,-0.139200, 0.057625,-0.133866, 0.085702,-0.138411, 0.106606,-0.143670, 0.123715,-0.148158, 0.139656,-0.143049, 0.152591,-0.131020, 0.170000,-0.108676, 0.194767,-0.076789, 0.218502,-0.057643, 
+NEWSHAPE, 315, 1, 2, -0.399002,0.000618, -0.412389,-0.011435, -0.383217,-0.004139, -0.396241,-0.020642, -0.365704,-0.007876, -0.335517,-0.003463, -0.306649,-0.005631, -0.286501,-0.014485, -0.270113,-0.034709, -0.263139,-0.079331, -0.257114,-0.110215, -0.247630,-0.125790, -0.231094,-0.131733, -0.215499,-0.134849, -0.198771,-0.130780, -0.184961,-0.120425, -0.176890,-0.110874, -0.170135,-0.107553, -0.128764,-0.126896, -0.138805,-0.126406, -0.089067,-0.151289, -0.099830,-0.154113, -0.066698,-0.158059, -0.043468,-0.159303, -0.027802,-0.156801, -0.033201,-0.163796, -0.009201,-0.151129, 0.003865,-0.145169, 0.002259,-0.154029, 0.022833,-0.142371, 0.035183,-0.139200, 0.057625,-0.133866, 0.085702,-0.138411, 0.106606,-0.143670, 0.123715,-0.148158, 0.139656,-0.143049, 0.152591,-0.131020, 0.170000,-0.108676, 0.194767,-0.076789, 0.218502,-0.057643,
 // shBullHorn
-NEWSHAPE, 316, 1, 1, 0.321702,-0.078714, 0.329603,-0.122456, 0.342058,-0.140037, 0.360561,-0.149754, 0.379070,-0.152553, 0.395131,-0.150636, 0.423718,-0.142016, 0.448897,-0.133266, 0.441750,-0.150756, 0.426899,-0.163295, 0.403192,-0.169643, 0.371044,-0.173385, 0.345193,-0.167994, 0.313418,-0.152134, 0.303510,-0.135781, 0.297242,-0.118441, 0.292244,-0.102342, 0.308799,-0.096856, 
+NEWSHAPE, 316, 1, 1, 0.321702,-0.078714, 0.329603,-0.122456, 0.342058,-0.140037, 0.360561,-0.149754, 0.379070,-0.152553, 0.395131,-0.150636, 0.423718,-0.142016, 0.448897,-0.133266, 0.441750,-0.150756, 0.426899,-0.163295, 0.403192,-0.169643, 0.371044,-0.173385, 0.345193,-0.167994, 0.313418,-0.152134, 0.303510,-0.135781, 0.297242,-0.118441, 0.292244,-0.102342, 0.308799,-0.096856,
 // shBullRearHoof
-NEWSHAPE, 317, 1, 1, -0.218107,-0.148042, -0.243390,-0.132449, -0.246496,-0.105156, -0.238188,-0.090308, -0.226562,-0.085665, -0.207006,-0.088878, -0.189916,-0.100015, -0.189059,-0.127164, -0.196081,-0.138609, 
+NEWSHAPE, 317, 1, 1, -0.218107,-0.148042, -0.243390,-0.132449, -0.246496,-0.105156, -0.238188,-0.090308, -0.226562,-0.085665, -0.207006,-0.088878, -0.189916,-0.100015, -0.189059,-0.127164, -0.196081,-0.138609,
 // shBullFrontHoof
 NEWSHAPE, 318, 1, 1, 0.110547,-0.088215, 0.135310,-0.087225, 0.144428,-0.099644, 0.144636,-0.125576, 0.135691,-0.137934, 0.121038,-0.142332, 0.104105,-0.138807, 0.088308,-0.128550, 0.088231,-0.113919, 0.096026,-0.102725,
 // shBullHead
-NEWSHAPE, 319, 1, 2, 0.334622,-0.050250, 0.307607,-0.096839, 0.281739,-0.111332, 0.258180,-0.106443, 0.236906,-0.077841, 0.214842,-0.061865, 0.184962,-0.040355, 0.198626,-0.028054, 0.195166,-0.013460, 0.181470,-0.002240, 
+NEWSHAPE, 319, 1, 2, 0.334622,-0.050250, 0.307607,-0.096839, 0.281739,-0.111332, 0.258180,-0.106443, 0.236906,-0.077841, 0.214842,-0.061865, 0.184962,-0.040355, 0.198626,-0.028054, 0.195166,-0.013460, 0.181470,-0.002240,
 
 // shButterflyBody
-NEWSHAPE, 320, 1, 2, 0.176732,-0.004396, 0.195200,-0.015935, 0.201979,-0.028577, 0.202087,-0.043427, 0.198784,-0.050031, 0.198704,-0.041226, 0.196945,-0.030227, 0.190734,-0.019233, 0.170044,-0.008793, 0.163946,-0.020339, 0.151703,-0.020894, 0.140009,-0.012649, 0.122852,-0.026418, 0.108465,-0.031392, 0.017314,-0.028016, 0.000470,-0.019079, -0.088765,-0.013614, -0.095608,-0.005678, 
+NEWSHAPE, 320, 1, 2, 0.176732,-0.004396, 0.195200,-0.015935, 0.201979,-0.028577, 0.202087,-0.043427, 0.198784,-0.050031, 0.198704,-0.041226, 0.196945,-0.030227, 0.190734,-0.019233, 0.170044,-0.008793, 0.163946,-0.020339, 0.151703,-0.020894, 0.140009,-0.012649, 0.122852,-0.026418, 0.108465,-0.031392, 0.017314,-0.028016, 0.000470,-0.019079, -0.088765,-0.013614, -0.095608,-0.005678,
 // shButterflyWing
-NEWSHAPE, 321, 1, 2, 0.101344,-0.004988, 0.178342,-0.088519, 0.202439,-0.133112, 0.222376,-0.199882, 0.236304,-0.245909, 0.228546,-0.251735, 0.203290,-0.253007, 0.178432,-0.236979, 0.151432,-0.218854, 0.124491,-0.196352, 0.092144,-0.173026, 0.066111,-0.165612, 0.055720,-0.012369, 0.055445,-0.104987, 0.048098,-0.123101, 0.031857,-0.142619, 0.017719,-0.157675, -0.015575,-0.171093, -0.037946,-0.176348, -0.059503,-0.171340, -0.086100,-0.144824, -0.102753,-0.105546, -0.111188,-0.079719, -0.110326,-0.064989, -0.025725,-0.012627, -0.023585,-0.006998, 
+NEWSHAPE, 321, 1, 2, 0.101344,-0.004988, 0.178342,-0.088519, 0.202439,-0.133112, 0.222376,-0.199882, 0.236304,-0.245909, 0.228546,-0.251735, 0.203290,-0.253007, 0.178432,-0.236979, 0.151432,-0.218854, 0.124491,-0.196352, 0.092144,-0.173026, 0.066111,-0.165612, 0.055720,-0.012369, 0.055445,-0.104987, 0.048098,-0.123101, 0.031857,-0.142619, 0.017719,-0.157675, -0.015575,-0.171093, -0.037946,-0.176348, -0.059503,-0.171340, -0.086100,-0.144824, -0.102753,-0.105546, -0.111188,-0.079719, -0.110326,-0.064989, -0.025725,-0.012627, -0.023585,-0.006998,
 
 // shGadflyBody
-NEWSHAPE, 322, 1, 2, 0.170044,-0.008793, 0.163946,-0.020339, 0.151703,-0.020894, 0.140009,-0.012649, 0.122852,-0.026418, 0.108465,-0.031392, 0.017314,-0.028016, 0.000470,-0.019079, 
+NEWSHAPE, 322, 1, 2, 0.170044,-0.008793, 0.163946,-0.020339, 0.151703,-0.020894, 0.140009,-0.012649, 0.122852,-0.026418, 0.108465,-0.031392, 0.017314,-0.028016, 0.000470,-0.019079,
 // shGadflyWing
-NEWSHAPE, 323, 1, 2, 0.130571,-0.024552, -0.001114,-0.108092, -0.042319,-0.085751, -0.047826,-0.042265, 0.091301,-0.002227, 0.124928,-0.003346, 
+NEWSHAPE, 323, 1, 2, 0.130571,-0.024552, -0.001114,-0.108092, -0.042319,-0.085751, -0.047826,-0.042265, 0.091301,-0.002227, 0.124928,-0.003346,
 // shGadflyEye
-NEWSHAPE, 324, 1, 1, 0.168968,-0.004476, 0.175788,-0.012316, 0.172390,-0.020150, 0.165580,-0.020138, 0.161038,-0.013420, 0.161033,-0.007828, 
+NEWSHAPE, 324, 1, 1, 0.168968,-0.004476, 0.175788,-0.012316, 0.172390,-0.020150, 0.165580,-0.020138, 0.161038,-0.013420, 0.161033,-0.007828,
 
 // inspired by "Seven Butterflies Pattern" by Doug Dunham (in turn inspired by M. C. Escher)
 // http://www.bridgesmathart.org/art-exhibits/bridges2001/dunham1/index.html
 // shButterflyFloor[0]
-NEWSHAPE, 325, 3, 1, 0.003906,-0.017741, -0.005665,-0.023874, -0.001296,-0.059255, 0.008110,-0.088485, 0.021638,-0.119244, 0.001998,-0.123781, -0.025603,-0.125790, -0.042514,-0.132101, -0.062642,-0.134604, -0.080079,-0.114436, -0.119123,-0.090010, -0.141865,-0.078372, -0.171380,-0.068573, -0.219062,-0.058323, -0.143742,-0.087861, -0.091657,-0.119016, -0.064293,-0.149293, -0.035036,-0.174552, 0.008068,-0.188158, 0.033975,-0.202674, 0.014209,-0.230302, -0.012607,-0.273132, -0.029424,-0.294809, -0.225216,-0.161997, -0.242761,-0.128783, -0.243022,-0.100285, -0.242528,-0.076469, -0.253522,-0.113827, -0.276566,-0.145725, -0.242545,-0.170535, -0.250219,-0.181472, -0.286326,-0.161348, -0.293850,-0.153836, -0.307260,-0.144896, -0.340292,-0.119818, -0.408251,-0.088506, -0.397993,-0.073727, -0.374925,-0.086159, -0.356519,-0.086714, -0.343301,-0.057086, -0.319019,-0.041256, -0.278705,-0.010797, -0.342214,0.129479, -0.259524,0.175390, -0.228995,0.117575, -0.204395,0.063454, -0.257242,0.022435, -0.263564,0.003431, -0.193668,0.062052, -0.104991,0.119589, -0.107623,0.096041, -0.111440,0.076555, -0.126283,0.044518, -0.143519,0.037706, -0.175989,0.003239, -0.213542,-0.048387, -0.188075,-0.038009, -0.156904,-0.002863, -0.139409,0.021202, -0.129500,0.034230, 
+NEWSHAPE, 325, 3, 1, 0.003906,-0.017741, -0.005665,-0.023874, -0.001296,-0.059255, 0.008110,-0.088485, 0.021638,-0.119244, 0.001998,-0.123781, -0.025603,-0.125790, -0.042514,-0.132101, -0.062642,-0.134604, -0.080079,-0.114436, -0.119123,-0.090010, -0.141865,-0.078372, -0.171380,-0.068573, -0.219062,-0.058323, -0.143742,-0.087861, -0.091657,-0.119016, -0.064293,-0.149293, -0.035036,-0.174552, 0.008068,-0.188158, 0.033975,-0.202674, 0.014209,-0.230302, -0.012607,-0.273132, -0.029424,-0.294809, -0.225216,-0.161997, -0.242761,-0.128783, -0.243022,-0.100285, -0.242528,-0.076469, -0.253522,-0.113827, -0.276566,-0.145725, -0.242545,-0.170535, -0.250219,-0.181472, -0.286326,-0.161348, -0.293850,-0.153836, -0.307260,-0.144896, -0.340292,-0.119818, -0.408251,-0.088506, -0.397993,-0.073727, -0.374925,-0.086159, -0.356519,-0.086714, -0.343301,-0.057086, -0.319019,-0.041256, -0.278705,-0.010797, -0.342214,0.129479, -0.259524,0.175390, -0.228995,0.117575, -0.204395,0.063454, -0.257242,0.022435, -0.263564,0.003431, -0.193668,0.062052, -0.104991,0.119589, -0.107623,0.096041, -0.111440,0.076555, -0.126283,0.044518, -0.143519,0.037706, -0.175989,0.003239, -0.213542,-0.048387, -0.188075,-0.038009, -0.156904,-0.002863, -0.139409,0.021202, -0.129500,0.034230,
 // shButterflyFloor[1]
-NEWSHAPE, 326, 7, 1, -0.199281,-0.117040, -0.202870,-0.110023, -0.247957,-0.128116, -0.298501,0.006170, -0.226086,0.045756, -0.061553,0.006677, -0.059070,0.020733, -0.217691,0.072727, 
+NEWSHAPE, 326, 7, 1, -0.199281,-0.117040, -0.202870,-0.110023, -0.247957,-0.128116, -0.298501,0.006170, -0.226086,0.045756, -0.061553,0.006677, -0.059070,0.020733, -0.217691,0.072727,
 
 // halfhepta
-NEWSHAPE, 327, 1, 1, 0.335252,0.044112, 0.225849,0.283419, -0.081851,0.347313, -0.325491,0.159424, -0.323584,0.033019, 
+NEWSHAPE, 327, 1, 1, 0.335252,0.044112, 0.225849,0.283419, -0.081851,0.347313, -0.325491,0.159424, -0.323584,0.033019,
 // hepta mirror
-NEWSHAPE, 328, 1, 2, -0.315398,0.010102, 0.568278,0.010645, 
+NEWSHAPE, 328, 1, 2, -0.315398,0.010102, 0.568278,0.010645,
 
 // halfhex
-NEWSHAPE, 329, 1, 1, 0.263160,0.022375, 0.265137,0.152727, 0.000228,0.306625, -0.261438,0.151819, -0.263489,0.020161, 
+NEWSHAPE, 329, 1, 1, 0.263160,0.022375, 0.265137,0.152727, 0.000228,0.306625, -0.261438,0.151819, -0.263489,0.020161,
 // halfhex mirror
-NEWSHAPE, 330, 1, 2, 0.262597,0.018558, -0.261563,0.016306, 
+NEWSHAPE, 330, 1, 2, 0.262597,0.018558, -0.261563,0.016306,
 
-NEWSHAPE, 331, 1, 1, 0.148337,0.215535, 0.267624,0.150567, 0.262973,0.019662, 0.033981,0.019835, 
+NEWSHAPE, 331, 1, 1, 0.148337,0.215535, 0.267624,0.150567, 0.262973,0.019662, 0.033981,0.019835,
 // 0 0 1 [000000]
-NEWSHAPE, 332, 6, 2, -0.016778,-0.008267, -0.261607,-0.011992, 
+NEWSHAPE, 332, 6, 2, -0.016778,-0.008267, -0.261607,-0.011992,
 
 NEWSHAPE, 333, 1, 2, 0.309841,0.030742, 0.317580,0.053457, 0.334636,0.058055, 0.348174,0.020510, 0.376877,0.022300, 0.687421,0.025648, 0.689655,0.067551, 0.764187,0.063670, 0.857074,0.041713, 0.877970,0.009947,
 
-NEWSHAPE, 334, 3, 1, -0.105576,-0.310802, -0.089088,-0.290550, -0.093680,-0.249985, -0.122644,-0.145810, -0.163610,-0.059795, -0.218747,-0.008106, -0.248163,0.025043, -0.288167,0.072185, -0.343952,0.136311, -0.334320,0.175461, -0.167285,0.005435, -0.033821,-0.070939, 0.023553,-0.057189, 0.018549,-0.042281, -0.037669,-0.048310, -0.159595,0.014100, -0.324263,0.188022, -0.292243,0.222279, -0.156865,0.105267, -0.269602,0.234419, 
+NEWSHAPE, 334, 3, 1, -0.105576,-0.310802, -0.089088,-0.290550, -0.093680,-0.249985, -0.122644,-0.145810, -0.163610,-0.059795, -0.218747,-0.008106, -0.248163,0.025043, -0.288167,0.072185, -0.343952,0.136311, -0.334320,0.175461, -0.167285,0.005435, -0.033821,-0.070939, 0.023553,-0.057189, 0.018549,-0.042281, -0.037669,-0.048310, -0.159595,0.014100, -0.324263,0.188022, -0.292243,0.222279, -0.156865,0.105267, -0.269602,0.234419,
 // 3 1 0 [000000]
-NEWSHAPE, 335, 7, 1, 0.630896,-0.017243, 0.635685,-0.036640, 0.598195,-0.013808, 0.578658,0.004348, 0.518765,0.041438, 0.473213,0.052123, 0.438282,0.057356, 0.363338,0.043998, 0.319911,0.024470, 0.305024,0.010850, 0.311704,-0.028346, 0.329285,-0.092284, 0.336019,-0.135243, 0.389245,-0.255305, 0.391920,-0.305109, 0.393425,-0.394636, 0.393988,-0.421032, 0.392645,-0.461313, 0.388233,-0.488635, 
+NEWSHAPE, 335, 7, 1, 0.630896,-0.017243, 0.635685,-0.036640, 0.598195,-0.013808, 0.578658,0.004348, 0.518765,0.041438, 0.473213,0.052123, 0.438282,0.057356, 0.363338,0.043998, 0.319911,0.024470, 0.305024,0.010850, 0.311704,-0.028346, 0.329285,-0.092284, 0.336019,-0.135243, 0.389245,-0.255305, 0.391920,-0.305109, 0.393425,-0.394636, 0.393988,-0.421032, 0.392645,-0.461313, 0.388233,-0.488635,
 
-NEWSHAPE, 336, 6, 1, -0.275302,-0.159499, -0.271762,-0.143824, -0.259519,-0.121154, -0.233677,-0.073572, -0.230950,-0.048375, -0.253372,-0.021090, -0.282216,0.003606, -0.312272,0.027869, -0.333611,0.051397, -0.322056,0.102122, -0.310427,0.125702, -0.289273,0.151653, 
+NEWSHAPE, 336, 6, 1, -0.275302,-0.159499, -0.271762,-0.143824, -0.259519,-0.121154, -0.233677,-0.073572, -0.230950,-0.048375, -0.253372,-0.021090, -0.282216,0.003606, -0.312272,0.027869, -0.333611,0.051397, -0.322056,0.102122, -0.310427,0.125702, -0.289273,0.151653,
 // 3 1 0 [000000]
-NEWSHAPE, 337, 7, 1, -0.344613,-0.163178, -0.343328,-0.158477, -0.339398,-0.155316, -0.331625,-0.143563, -0.312189,-0.120371, -0.298918,-0.094936, -0.290925,-0.065675, -0.303772,-0.033612, -0.318623,-0.019712, -0.333911,-0.009121, -0.358867,0.006952, -0.378653,0.024361, -0.388462,0.047480, -0.384686,0.080428, -0.365524,0.120307, -0.357683,0.137712, -0.349127,0.156460, 
+NEWSHAPE, 337, 7, 1, -0.344613,-0.163178, -0.343328,-0.158477, -0.339398,-0.155316, -0.331625,-0.143563, -0.312189,-0.120371, -0.298918,-0.094936, -0.290925,-0.065675, -0.303772,-0.033612, -0.318623,-0.019712, -0.333911,-0.009121, -0.358867,0.006952, -0.378653,0.024361, -0.388462,0.047480, -0.384686,0.080428, -0.365524,0.120307, -0.357683,0.137712, -0.349127,0.156460,
 
-NEWSHAPE, 338, 3, 1, -0.236647,0.182860, -0.048267,0.312652, -0.029042,0.305930, -0.008857,0.306171, 0.028203,0.314150, 0.035096,0.317705, 0.052903,0.320051, 0.074068,0.315314, 0.103117,0.308962, 0.141064,0.295765, 0.177370,0.274685, 0.212797,0.248082, 0.250462,0.198914, 
+NEWSHAPE, 338, 3, 1, -0.236647,0.182860, -0.048267,0.312652, -0.029042,0.305930, -0.008857,0.306171, 0.028203,0.314150, 0.035096,0.317705, 0.052903,0.320051, 0.074068,0.315314, 0.103117,0.308962, 0.141064,0.295765, 0.177370,0.274685, 0.212797,0.248082, 0.250462,0.198914,
 // 3 1 0 [000000]
-NEWSHAPE, 339, 7, 1, -0.311164,0.181794, -0.281489,0.184438, -0.224601,0.202893, -0.166641,0.244605, -0.128636,0.295175, -0.104773,0.341126, -0.103079,0.384939, -0.097144,0.419892, -0.083906,0.427485, -0.076666,0.412206, 
+NEWSHAPE, 339, 7, 1, -0.311164,0.181794, -0.281489,0.184438, -0.224601,0.202893, -0.166641,0.244605, -0.128636,0.295175, -0.104773,0.341126, -0.103079,0.384939, -0.097144,0.419892, -0.083906,0.427485, -0.076666,0.412206,
 
 NEWSHAPE, 340, 7, 1, 0.358115,-0.002263, 0.352245,-0.015654, 0.339277,-0.044366, 0.301027,-0.104037, 0.302282,-0.125857, 0.336188,-0.163014, 0.378199,-0.161820, 0.415940,-0.146184, 0.418836,-0.142581, 0.387934,-0.194555, 0.331182,-0.238021, 0.273850,-0.271284,
 
-NEWSHAPE, 341, 1, 1, 0.058098,-0.184167, 0.043764,-0.193521, 0.030120,-0.205230, 0.062927,-0.201718, 0.085161,-0.207060, 0.103674,-0.214608, 0.119223,-0.223616, 0.129906,-0.266195, 0.124486,-0.282176, 0.070902,-0.310435, -0.020955,-0.372622, -0.046676,-0.402829, -0.083152,-0.396295, -0.125465,-0.373796, -0.149041,-0.292258, -0.123746,-0.212687, -0.154293,-0.114741, -0.205826,-0.089865, -0.236903,-0.086544, -0.188542,0.041769, -0.189476,0.058860, -0.192794,0.076530, -0.206156,0.046363, -0.221900,0.029778, -0.237693,0.017520, -0.253269,0.008558, -0.295485,0.020596, -0.306615,0.033280, -0.304296,0.093815, -0.312223,0.204459, -0.325522,0.241837, -0.301626,0.270159, -0.260984,0.295554, -0.178582,0.275202, -0.122319,0.213511, -0.022222,0.190992, 0.025088,0.223183, 0.043502,0.248436, 0.130444,0.142398, 0.145712,0.134661, 0.162674,0.128700, 0.143229,0.155355, 0.136739,0.177282, 0.134019,0.197088, 0.134046,0.215058, 0.165579,0.245599, 0.182129,0.248896, 0.233394,0.216620, 0.333178,0.168163, 0.372198,0.160992, 0.384778,0.126136, 0.386449,0.078242, 0.327623,0.017056, 0.246065,-0.000824, 0.176515,-0.076251, 0.180738,-0.133318, 0.193401,-0.161892, 0.058098,-0.184167, 
-NEWSHAPE, 342, 1, 1, 0.085922,-0.170851, 0.094684,-0.178713, 0.111076,-0.179370, 0.126675,-0.183798, 0.152543,-0.203864, 0.159822,-0.219394, 0.158645,-0.253717, 0.151002,-0.264105, 0.099747,-0.278812, 0.046291,-0.301056, 0.001653,-0.327469, -0.024257,-0.346115, -0.052036,-0.374799, -0.074384,-0.388585, -0.100523,-0.395273, -0.130621,-0.374380, -0.147379,-0.344657, -0.158388,-0.304821, -0.148369,-0.279439, -0.119203,-0.194952, -0.129525,-0.133964, -0.153101,-0.109438, -0.181621,-0.090898, -0.223761,-0.104234, -0.191091,-0.043735, -0.182715,-0.018133, -0.190922,0.011015, -0.202112,0.007358, -0.210877,-0.006510, -0.222511,-0.017805, -0.252823,-0.030174, -0.269912,-0.028713, -0.299048,-0.010532, -0.304223,0.001281, -0.291332,0.053023, -0.283868,0.110439, -0.284423,0.162303, -0.287616,0.194065, -0.298567,0.232464, -0.299332,0.258711, -0.292055,0.284692, -0.258912,0.300311, -0.224792,0.299962, -0.184789,0.289579, -0.167817,0.268211, -0.109232,0.200709, -0.051254,0.179154, -0.018226,0.187308, 0.012091,0.202737, 0.021611,0.245900, 0.057670,0.187357, 0.075654,0.167302, 0.105000,0.159836, 0.107428,0.171355, 0.099801,0.185880, 0.095836,0.201603, 0.100280,0.234038, 0.110090,0.248107, 0.140403,0.264249, 0.153221,0.262824, 0.191585,0.225789, 0.237577,0.190617, 0.282770,0.165166, 0.311873,0.152050, 0.350603,0.142335, 0.373716,0.129874, 0.392578,0.110581, 0.389533,0.074069, 0.372171,0.044695, 0.343177,0.015242, 0.316186,0.011228, 0.228435,-0.005757, 0.180779,-0.045190, 0.171327,-0.077870, 0.169530,-0.111839, 0.202150,-0.141666, 0.133421,-0.143622, 0.107061,-0.149169, 0.085922,-0.170851, 
-NEWSHAPE, 343, 1, 1, 0.123762,-0.146862, 0.148168,-0.159183, 0.171907,-0.173839, 0.194215,-0.193089, 0.194432,-0.231857, 0.182134,-0.248025, 0.118729,-0.258775, 0.010421,-0.297013, -0.053987,-0.359470, -0.067850,-0.369100, -0.094636,-0.374835, -0.116752,-0.372581, -0.136917,-0.354191, -0.147941,-0.314240, -0.129620,-0.188762, -0.137276,-0.139942, -0.169277,-0.114566, -0.218880,-0.123383, -0.206725,-0.105873, -0.189067,-0.033750, -0.211941,-0.048726, -0.236502,-0.061956, -0.264327,-0.071651, -0.298010,-0.052455, -0.305863,-0.033720, -0.283470,0.026565, -0.262431,0.139482, -0.284317,0.226489, -0.285725,0.243310, -0.277299,0.269375, -0.264289,0.287401, -0.238280,0.295669, -0.198169,0.285241, -0.098663,0.206635, -0.052555,0.188856, -0.014579,0.203881, 0.002587,0.251247, 0.011674,0.231966, 0.065305,0.180612, 0.063773,0.207909, 0.064595,0.235795, 0.070112,0.264740, 0.103578,0.284312, 0.123729,0.281745, 0.164741,0.232210, 0.252010,0.157531, 0.338304,0.132981, 0.353575,0.125790, 0.371935,0.105460, 0.381041,0.085180, 0.375197,0.058522, 0.346110,0.028999, 0.228283,-0.017873, 0.189831,-0.048914, 0.183856,-0.089315, 0.216293,-0.127864, 0.195051,-0.126093, 0.123762,-0.146862, 
-NEWSHAPE, 344, 1, 1, 0.176734,-0.128319, 0.183999,-0.139147, 0.224403,-0.163780, 0.239334,-0.182738, 0.230289,-0.228566, 0.217192,-0.239264, 0.096376,-0.250178, 0.041628,-0.264450, -0.012807,-0.297334, -0.043367,-0.322080, -0.108868,-0.364399, -0.136576,-0.367959, -0.150241,-0.361680, -0.162970,-0.349757, -0.155723,-0.340758, -0.143049,-0.329347, -0.136673,-0.296693, -0.139002,-0.273102, -0.137671,-0.229504, -0.129949,-0.174244, -0.118095,-0.156850, -0.112660,-0.151602, -0.127923,-0.130954, -0.158854,-0.123781, -0.190420,-0.128861, -0.206135,-0.137967, -0.222795,-0.149463, -0.206378,-0.120377, -0.199745,-0.105164, -0.199495,-0.088897, -0.212504,-0.089774, -0.254039,-0.112449, -0.277923,-0.115900, -0.313088,-0.085153, -0.315805,-0.068462, -0.264849,0.041625, -0.249834,0.096174, -0.251095,0.159758, -0.257246,0.198597, -0.261145,0.276482, -0.250374,0.302258, -0.238104,0.310953, -0.221413,0.316015, -0.217244,0.305239, -0.213698,0.288558, -0.188607,0.266709, -0.167012,0.256930, -0.129921,0.233979, -0.085925,0.199661, -0.076789,0.180698, -0.074961,0.173367, -0.049448,0.176262, -0.027770,0.199462, -0.016387,0.229339, -0.016415,0.247502, -0.018041,0.267678, -0.001061,0.238917, 0.008798,0.225566, 0.022761,0.217216, 0.028505,0.228921, 0.029636,0.276229, 0.038589,0.298638, 0.082799,0.313719, 0.098613,0.307726, 0.168473,0.208553, 0.208206,0.168276, 0.263902,0.137576, 0.300613,0.123483, 0.370013,0.087917, 0.386950,0.065701, 0.388345,0.050727, 0.384383,0.033742, 0.372967,0.035519, 0.356747,0.040789, 0.325280,0.029984, 0.306014,0.016172, 0.267592,-0.004475, 0.215874,-0.025417, 0.194884,-0.023848, 0.187621,-0.021765, 0.177371,-0.045308, 0.186624,-0.075681, 0.206807,-0.100478, 0.222550,-0.109535, 0.240836,-0.118215, 0.207439,-0.118540, 0.190947,-0.120402, 0.176734,-0.128319, 
-NEWSHAPE, 345, 1, 1, 0.227190,-0.112910, 0.227678,-0.122664, 0.258616,-0.141627, 0.284143,-0.179401, 0.271193,-0.219662, 0.253336,-0.228455, 0.186161,-0.226070, 0.083987,-0.230586, -0.035239,-0.293862, -0.071610,-0.335399, -0.107589,-0.345855, -0.138890,-0.318922, -0.137405,-0.245784, -0.139048,-0.174181, -0.178492,-0.141135, -0.221384,-0.154076, -0.211378,-0.140297, -0.220069,-0.135843, -0.251961,-0.153155, -0.297437,-0.156375, -0.325829,-0.125029, -0.324516,-0.105168, -0.288863,-0.048185, -0.241687,0.042558, -0.236872,0.177449, -0.254659,0.229716, -0.245725,0.266102, -0.206750,0.279743, -0.144153,0.241888, -0.081321,0.207510, -0.032980,0.225146, -0.022742,0.268762, -0.015812,0.253207, -0.007609,0.258507, -0.006655,0.294782, 0.013294,0.335776, 0.054636,0.344691, 0.071180,0.333623, 0.102702,0.274255, 0.157700,0.188028, 0.272111,0.116413, 0.326269,0.105683, 0.353314,0.079753, 0.345640,0.039179, 0.281558,0.003896, 0.220369,-0.033329, 0.211472,-0.084011, 0.244126,-0.114686, 0.227190,-0.112910, 
-NEWSHAPE, 346, 3, 1, -0.239730,-0.007608, -0.223885,0.067283, -0.220256,0.133782, -0.242650,0.195422, -0.253278,0.205455, -0.260377,0.171703, -0.282853,0.129264, -0.323970,0.130146, -0.298985,0.146911, -0.285820,0.188205, -0.265413,0.247080, -0.253036,0.259972, -0.219733,0.277154, -0.176198,0.277543, -0.141016,0.238755, -0.107826,0.210921, -0.064270,0.213048, -0.027789,0.236562, -0.013484,0.250322, 0.005700,0.314857, 0.015326,0.356416, 0.035962,0.374414, 0.050913,0.366903, 
-NEWSHAPE, 347, 3, 1, -0.224843,0.011231, -0.221774,0.155893, -0.237013,0.176616, -0.235167,0.161978, -0.233348,0.147389, -0.243466,0.116780, -0.268483,0.091378, -0.289413,0.094518, -0.303691,0.109465, -0.306027,0.164940, -0.298818,0.218829, -0.292029,0.245261, -0.240190,0.282931, -0.188317,0.284726, -0.152862,0.259042, -0.141074,0.232138, -0.099370,0.203720, -0.045785,0.208279, 0.009668,0.253588, 0.013535,0.280682, 0.018420,0.337425, 0.015783,0.401804, -0.001438,0.415925, 0.031579,0.404581, 0.041846,0.335206, 0.079240,0.235103, 
-NEWSHAPE, 348, 1, 1, 0.008663,-0.233609, 0.008598,-0.236670, 0.039937,-0.234457, 0.082195,-0.248873, 0.101194,-0.283516, 0.097960,-0.306736, 0.045069,-0.337983, -0.033666,-0.406661, -0.064823,-0.404114, -0.127271,-0.339591, -0.144421,-0.275485, -0.132327,-0.228734, -0.153707,-0.155774, -0.224124,-0.089714, -0.257905,-0.091799, -0.211227,-0.013730, -0.195172,0.041425, -0.206643,0.109302, -0.209261,0.110889, -0.223014,0.082642, -0.256628,0.053254, -0.296129,0.054121, -0.314621,0.068532, -0.315236,0.129961, -0.335346,0.232486, -0.317561,0.258195, -0.230459,0.280015, -0.166367,0.262815, -0.131926,0.228966, -0.058051,0.211001, 0.034367,0.238954, 0.049452,0.269252, 0.093723,0.189793, 0.133461,0.148311, 0.197980,0.124307, 0.200663,0.125781, 0.183077,0.151815, 0.174433,0.195619, 0.194935,0.229395, 0.216661,0.238204, 0.270167,0.208022, 0.369012,0.174175, 0.382384,0.145919, 0.357730,0.059576, 0.310788,0.012670, 0.264253,-0.000232, 0.211758,-0.055227, 0.189757,-0.149240, 0.208453,-0.177453, 0.117504,-0.176063, 0.061711,-0.189736, 0.008663,-0.233609, 
+NEWSHAPE, 341, 1, 1, 0.058098,-0.184167, 0.043764,-0.193521, 0.030120,-0.205230, 0.062927,-0.201718, 0.085161,-0.207060, 0.103674,-0.214608, 0.119223,-0.223616, 0.129906,-0.266195, 0.124486,-0.282176, 0.070902,-0.310435, -0.020955,-0.372622, -0.046676,-0.402829, -0.083152,-0.396295, -0.125465,-0.373796, -0.149041,-0.292258, -0.123746,-0.212687, -0.154293,-0.114741, -0.205826,-0.089865, -0.236903,-0.086544, -0.188542,0.041769, -0.189476,0.058860, -0.192794,0.076530, -0.206156,0.046363, -0.221900,0.029778, -0.237693,0.017520, -0.253269,0.008558, -0.295485,0.020596, -0.306615,0.033280, -0.304296,0.093815, -0.312223,0.204459, -0.325522,0.241837, -0.301626,0.270159, -0.260984,0.295554, -0.178582,0.275202, -0.122319,0.213511, -0.022222,0.190992, 0.025088,0.223183, 0.043502,0.248436, 0.130444,0.142398, 0.145712,0.134661, 0.162674,0.128700, 0.143229,0.155355, 0.136739,0.177282, 0.134019,0.197088, 0.134046,0.215058, 0.165579,0.245599, 0.182129,0.248896, 0.233394,0.216620, 0.333178,0.168163, 0.372198,0.160992, 0.384778,0.126136, 0.386449,0.078242, 0.327623,0.017056, 0.246065,-0.000824, 0.176515,-0.076251, 0.180738,-0.133318, 0.193401,-0.161892, 0.058098,-0.184167,
+NEWSHAPE, 342, 1, 1, 0.085922,-0.170851, 0.094684,-0.178713, 0.111076,-0.179370, 0.126675,-0.183798, 0.152543,-0.203864, 0.159822,-0.219394, 0.158645,-0.253717, 0.151002,-0.264105, 0.099747,-0.278812, 0.046291,-0.301056, 0.001653,-0.327469, -0.024257,-0.346115, -0.052036,-0.374799, -0.074384,-0.388585, -0.100523,-0.395273, -0.130621,-0.374380, -0.147379,-0.344657, -0.158388,-0.304821, -0.148369,-0.279439, -0.119203,-0.194952, -0.129525,-0.133964, -0.153101,-0.109438, -0.181621,-0.090898, -0.223761,-0.104234, -0.191091,-0.043735, -0.182715,-0.018133, -0.190922,0.011015, -0.202112,0.007358, -0.210877,-0.006510, -0.222511,-0.017805, -0.252823,-0.030174, -0.269912,-0.028713, -0.299048,-0.010532, -0.304223,0.001281, -0.291332,0.053023, -0.283868,0.110439, -0.284423,0.162303, -0.287616,0.194065, -0.298567,0.232464, -0.299332,0.258711, -0.292055,0.284692, -0.258912,0.300311, -0.224792,0.299962, -0.184789,0.289579, -0.167817,0.268211, -0.109232,0.200709, -0.051254,0.179154, -0.018226,0.187308, 0.012091,0.202737, 0.021611,0.245900, 0.057670,0.187357, 0.075654,0.167302, 0.105000,0.159836, 0.107428,0.171355, 0.099801,0.185880, 0.095836,0.201603, 0.100280,0.234038, 0.110090,0.248107, 0.140403,0.264249, 0.153221,0.262824, 0.191585,0.225789, 0.237577,0.190617, 0.282770,0.165166, 0.311873,0.152050, 0.350603,0.142335, 0.373716,0.129874, 0.392578,0.110581, 0.389533,0.074069, 0.372171,0.044695, 0.343177,0.015242, 0.316186,0.011228, 0.228435,-0.005757, 0.180779,-0.045190, 0.171327,-0.077870, 0.169530,-0.111839, 0.202150,-0.141666, 0.133421,-0.143622, 0.107061,-0.149169, 0.085922,-0.170851,
+NEWSHAPE, 343, 1, 1, 0.123762,-0.146862, 0.148168,-0.159183, 0.171907,-0.173839, 0.194215,-0.193089, 0.194432,-0.231857, 0.182134,-0.248025, 0.118729,-0.258775, 0.010421,-0.297013, -0.053987,-0.359470, -0.067850,-0.369100, -0.094636,-0.374835, -0.116752,-0.372581, -0.136917,-0.354191, -0.147941,-0.314240, -0.129620,-0.188762, -0.137276,-0.139942, -0.169277,-0.114566, -0.218880,-0.123383, -0.206725,-0.105873, -0.189067,-0.033750, -0.211941,-0.048726, -0.236502,-0.061956, -0.264327,-0.071651, -0.298010,-0.052455, -0.305863,-0.033720, -0.283470,0.026565, -0.262431,0.139482, -0.284317,0.226489, -0.285725,0.243310, -0.277299,0.269375, -0.264289,0.287401, -0.238280,0.295669, -0.198169,0.285241, -0.098663,0.206635, -0.052555,0.188856, -0.014579,0.203881, 0.002587,0.251247, 0.011674,0.231966, 0.065305,0.180612, 0.063773,0.207909, 0.064595,0.235795, 0.070112,0.264740, 0.103578,0.284312, 0.123729,0.281745, 0.164741,0.232210, 0.252010,0.157531, 0.338304,0.132981, 0.353575,0.125790, 0.371935,0.105460, 0.381041,0.085180, 0.375197,0.058522, 0.346110,0.028999, 0.228283,-0.017873, 0.189831,-0.048914, 0.183856,-0.089315, 0.216293,-0.127864, 0.195051,-0.126093, 0.123762,-0.146862,
+NEWSHAPE, 344, 1, 1, 0.176734,-0.128319, 0.183999,-0.139147, 0.224403,-0.163780, 0.239334,-0.182738, 0.230289,-0.228566, 0.217192,-0.239264, 0.096376,-0.250178, 0.041628,-0.264450, -0.012807,-0.297334, -0.043367,-0.322080, -0.108868,-0.364399, -0.136576,-0.367959, -0.150241,-0.361680, -0.162970,-0.349757, -0.155723,-0.340758, -0.143049,-0.329347, -0.136673,-0.296693, -0.139002,-0.273102, -0.137671,-0.229504, -0.129949,-0.174244, -0.118095,-0.156850, -0.112660,-0.151602, -0.127923,-0.130954, -0.158854,-0.123781, -0.190420,-0.128861, -0.206135,-0.137967, -0.222795,-0.149463, -0.206378,-0.120377, -0.199745,-0.105164, -0.199495,-0.088897, -0.212504,-0.089774, -0.254039,-0.112449, -0.277923,-0.115900, -0.313088,-0.085153, -0.315805,-0.068462, -0.264849,0.041625, -0.249834,0.096174, -0.251095,0.159758, -0.257246,0.198597, -0.261145,0.276482, -0.250374,0.302258, -0.238104,0.310953, -0.221413,0.316015, -0.217244,0.305239, -0.213698,0.288558, -0.188607,0.266709, -0.167012,0.256930, -0.129921,0.233979, -0.085925,0.199661, -0.076789,0.180698, -0.074961,0.173367, -0.049448,0.176262, -0.027770,0.199462, -0.016387,0.229339, -0.016415,0.247502, -0.018041,0.267678, -0.001061,0.238917, 0.008798,0.225566, 0.022761,0.217216, 0.028505,0.228921, 0.029636,0.276229, 0.038589,0.298638, 0.082799,0.313719, 0.098613,0.307726, 0.168473,0.208553, 0.208206,0.168276, 0.263902,0.137576, 0.300613,0.123483, 0.370013,0.087917, 0.386950,0.065701, 0.388345,0.050727, 0.384383,0.033742, 0.372967,0.035519, 0.356747,0.040789, 0.325280,0.029984, 0.306014,0.016172, 0.267592,-0.004475, 0.215874,-0.025417, 0.194884,-0.023848, 0.187621,-0.021765, 0.177371,-0.045308, 0.186624,-0.075681, 0.206807,-0.100478, 0.222550,-0.109535, 0.240836,-0.118215, 0.207439,-0.118540, 0.190947,-0.120402, 0.176734,-0.128319,
+NEWSHAPE, 345, 1, 1, 0.227190,-0.112910, 0.227678,-0.122664, 0.258616,-0.141627, 0.284143,-0.179401, 0.271193,-0.219662, 0.253336,-0.228455, 0.186161,-0.226070, 0.083987,-0.230586, -0.035239,-0.293862, -0.071610,-0.335399, -0.107589,-0.345855, -0.138890,-0.318922, -0.137405,-0.245784, -0.139048,-0.174181, -0.178492,-0.141135, -0.221384,-0.154076, -0.211378,-0.140297, -0.220069,-0.135843, -0.251961,-0.153155, -0.297437,-0.156375, -0.325829,-0.125029, -0.324516,-0.105168, -0.288863,-0.048185, -0.241687,0.042558, -0.236872,0.177449, -0.254659,0.229716, -0.245725,0.266102, -0.206750,0.279743, -0.144153,0.241888, -0.081321,0.207510, -0.032980,0.225146, -0.022742,0.268762, -0.015812,0.253207, -0.007609,0.258507, -0.006655,0.294782, 0.013294,0.335776, 0.054636,0.344691, 0.071180,0.333623, 0.102702,0.274255, 0.157700,0.188028, 0.272111,0.116413, 0.326269,0.105683, 0.353314,0.079753, 0.345640,0.039179, 0.281558,0.003896, 0.220369,-0.033329, 0.211472,-0.084011, 0.244126,-0.114686, 0.227190,-0.112910,
+NEWSHAPE, 346, 3, 1, -0.239730,-0.007608, -0.223885,0.067283, -0.220256,0.133782, -0.242650,0.195422, -0.253278,0.205455, -0.260377,0.171703, -0.282853,0.129264, -0.323970,0.130146, -0.298985,0.146911, -0.285820,0.188205, -0.265413,0.247080, -0.253036,0.259972, -0.219733,0.277154, -0.176198,0.277543, -0.141016,0.238755, -0.107826,0.210921, -0.064270,0.213048, -0.027789,0.236562, -0.013484,0.250322, 0.005700,0.314857, 0.015326,0.356416, 0.035962,0.374414, 0.050913,0.366903,
+NEWSHAPE, 347, 3, 1, -0.224843,0.011231, -0.221774,0.155893, -0.237013,0.176616, -0.235167,0.161978, -0.233348,0.147389, -0.243466,0.116780, -0.268483,0.091378, -0.289413,0.094518, -0.303691,0.109465, -0.306027,0.164940, -0.298818,0.218829, -0.292029,0.245261, -0.240190,0.282931, -0.188317,0.284726, -0.152862,0.259042, -0.141074,0.232138, -0.099370,0.203720, -0.045785,0.208279, 0.009668,0.253588, 0.013535,0.280682, 0.018420,0.337425, 0.015783,0.401804, -0.001438,0.415925, 0.031579,0.404581, 0.041846,0.335206, 0.079240,0.235103,
+NEWSHAPE, 348, 1, 1, 0.008663,-0.233609, 0.008598,-0.236670, 0.039937,-0.234457, 0.082195,-0.248873, 0.101194,-0.283516, 0.097960,-0.306736, 0.045069,-0.337983, -0.033666,-0.406661, -0.064823,-0.404114, -0.127271,-0.339591, -0.144421,-0.275485, -0.132327,-0.228734, -0.153707,-0.155774, -0.224124,-0.089714, -0.257905,-0.091799, -0.211227,-0.013730, -0.195172,0.041425, -0.206643,0.109302, -0.209261,0.110889, -0.223014,0.082642, -0.256628,0.053254, -0.296129,0.054121, -0.314621,0.068532, -0.315236,0.129961, -0.335346,0.232486, -0.317561,0.258195, -0.230459,0.280015, -0.166367,0.262815, -0.131926,0.228966, -0.058051,0.211001, 0.034367,0.238954, 0.049452,0.269252, 0.093723,0.189793, 0.133461,0.148311, 0.197980,0.124307, 0.200663,0.125781, 0.183077,0.151815, 0.174433,0.195619, 0.194935,0.229395, 0.216661,0.238204, 0.270167,0.208022, 0.369012,0.174175, 0.382384,0.145919, 0.357730,0.059576, 0.310788,0.012670, 0.264253,-0.000232, 0.211758,-0.055227, 0.189757,-0.149240, 0.208453,-0.177453, 0.117504,-0.176063, 0.061711,-0.189736, 0.008663,-0.233609,
 
-NEWSHAPE, 349, 1, 2, -0.121972,-0.043111, -0.114642,-0.068365, -0.088391,-0.109437, -0.091010,-0.186252, -0.070420,-0.268876, -0.057667,-0.278726, -0.022404,-0.276319, 0.004269,-0.280716, 0.026650,-0.269700, 0.029709,-0.230247, 0.015894,-0.219344, -0.003181,-0.226933, -0.023333,-0.226963, -0.014779,-0.180514, -0.018939,-0.137833, 0.007353,-0.112396, 0.031445,-0.054504, 
-NEWSHAPE, 350, 1, 2, -0.125160,-0.046277, -0.115709,-0.070478, -0.085233,-0.111539, -0.094180,-0.184127, -0.071510,-0.271096, -0.054491,-0.283139, -0.006399,-0.274075, -0.002121,-0.225846, -0.022277,-0.229136, -0.014789,-0.188031, -0.018940,-0.138896, 0.010503,-0.110284, 0.034592,-0.055557, 
-NEWSHAPE, 351, 1, 2, -0.121946,-0.031538, -0.111405,-0.049397, -0.096675,-0.069354, -0.087345,-0.111549, -0.015775,-0.131461, -0.086284,-0.110485, -0.103742,-0.183136, -0.083551,-0.182966, -0.069423,-0.115705, -0.082446,-0.182860, -0.056507,-0.184308, -0.046776,-0.124036, -0.055447,-0.183766, -0.033783,-0.184751, -0.028908,-0.130351, -0.033253,-0.184213, -0.004225,-0.188021, -0.009468,-0.136762, -0.003150,-0.102889, -0.000000,-0.075460, -0.095569,-0.069314, -0.000000,-0.075500, 0.026212,-0.067103, 0.037193,-0.053432, -0.109760,-0.048841, 0.019376,-0.051845, 0.019363,0.000523, 0.020425,-0.052894, 0.037736,-0.052411, 0.036122,-0.020417, -0.121335,-0.020485, 0.034027,-0.019893, 0.002093,-0.019887, 0.001048,-0.077037, 0.001047,-0.021457, 0.001570,0.001047, 0.003140,-0.019887, 0.034027,-0.020416, 
+NEWSHAPE, 349, 1, 2, -0.121972,-0.043111, -0.114642,-0.068365, -0.088391,-0.109437, -0.091010,-0.186252, -0.070420,-0.268876, -0.057667,-0.278726, -0.022404,-0.276319, 0.004269,-0.280716, 0.026650,-0.269700, 0.029709,-0.230247, 0.015894,-0.219344, -0.003181,-0.226933, -0.023333,-0.226963, -0.014779,-0.180514, -0.018939,-0.137833, 0.007353,-0.112396, 0.031445,-0.054504,
+NEWSHAPE, 350, 1, 2, -0.125160,-0.046277, -0.115709,-0.070478, -0.085233,-0.111539, -0.094180,-0.184127, -0.071510,-0.271096, -0.054491,-0.283139, -0.006399,-0.274075, -0.002121,-0.225846, -0.022277,-0.229136, -0.014789,-0.188031, -0.018940,-0.138896, 0.010503,-0.110284, 0.034592,-0.055557,
+NEWSHAPE, 351, 1, 2, -0.121946,-0.031538, -0.111405,-0.049397, -0.096675,-0.069354, -0.087345,-0.111549, -0.015775,-0.131461, -0.086284,-0.110485, -0.103742,-0.183136, -0.083551,-0.182966, -0.069423,-0.115705, -0.082446,-0.182860, -0.056507,-0.184308, -0.046776,-0.124036, -0.055447,-0.183766, -0.033783,-0.184751, -0.028908,-0.130351, -0.033253,-0.184213, -0.004225,-0.188021, -0.009468,-0.136762, -0.003150,-0.102889, -0.000000,-0.075460, -0.095569,-0.069314, -0.000000,-0.075500, 0.026212,-0.067103, 0.037193,-0.053432, -0.109760,-0.048841, 0.019376,-0.051845, 0.019363,0.000523, 0.020425,-0.052894, 0.037736,-0.052411, 0.036122,-0.020417, -0.121335,-0.020485, 0.034027,-0.019893, 0.002093,-0.019887, 0.001048,-0.077037, 0.001047,-0.021457, 0.001570,0.001047, 0.003140,-0.019887, 0.034027,-0.020416,
 NEWSHAPE, 352, 1, 2, 0.060794,0.001192, 0.058426,0.023847, 0.050054,0.030986, 0.042896,0.038130, 0.044109,0.042917, 0.032180,0.050058, 0.017884,0.059612, 0.005963,0.064401, -0.009546,0.068015, -0.022689,0.070455, -0.044247,0.070556, -0.053847,0.068206, -0.047819,0.065752, -0.040573,0.056087, -0.040563,0.053686, -0.053753,0.053753, -0.067016,0.056246, -0.076602,0.051418, -0.065710,0.040621, -0.063272,0.034621, -0.064461,0.031037, -0.074098,0.028683, -0.094756,0.031185, -0.082872,0.019931, -0.074452,0.013632,
-NEWSHAPE, 353, 1, 2, -0.006280,-0.006803, -0.001570,-0.039786, 0.007333,-0.062332, 0.014659,-0.042408, 0.019888,-0.016748, 0.027740,-0.009945, 
+NEWSHAPE, 353, 1, 2, -0.006280,-0.006803, -0.001570,-0.039786, 0.007333,-0.062332, 0.014659,-0.042408, 0.019888,-0.016748, 0.027740,-0.009945,
 
-NEWSHAPE, 354, 1, 2, 0.250609,-0.000793, 0.091262,-0.024449, 0.090008,-0.008476, -0.131783,-0.007990, -0.229492,-0.028849, -0.208244,0.002239, 
-NEWSHAPE, 355, 1, 2, -0.120944,-0.046316, -0.118320,-0.065458, -0.026635,-0.134194, 0.069939,-0.150868, 0.257603,-0.099875, 0.263931,-0.098916, 0.295208,-0.074359, 0.292228,-0.069765, 0.274479,-0.081250, 0.293481,-0.057622, 0.290757,-0.055430, 0.266210,-0.078038, 0.289156,-0.044495, 0.286442,-0.042311, 0.263022,-0.071079, 0.275695,-0.039346, 0.256850,-0.068686, 0.254313,-0.048283, 0.242683,-0.074603, 0.079643,-0.108059, 0.017947,-0.089316, 0.039133,-0.032229, 
+NEWSHAPE, 354, 1, 2, 0.250609,-0.000793, 0.091262,-0.024449, 0.090008,-0.008476, -0.131783,-0.007990, -0.229492,-0.028849, -0.208244,0.002239,
+NEWSHAPE, 355, 1, 2, -0.120944,-0.046316, -0.118320,-0.065458, -0.026635,-0.134194, 0.069939,-0.150868, 0.257603,-0.099875, 0.263931,-0.098916, 0.295208,-0.074359, 0.292228,-0.069765, 0.274479,-0.081250, 0.293481,-0.057622, 0.290757,-0.055430, 0.266210,-0.078038, 0.289156,-0.044495, 0.286442,-0.042311, 0.263022,-0.071079, 0.275695,-0.039346, 0.256850,-0.068686, 0.254313,-0.048283, 0.242683,-0.074603, 0.079643,-0.108059, 0.017947,-0.089316, 0.039133,-0.032229,
 NEWSHAPE, 356, 1, 2, 0.038226,0.003813, 0.036965,0.050265, 0.023804,0.086855, 0.079552,0.105995, 0.217008,0.045866, 0.243467,0.129202, 0.068641,0.159263, -0.027665,0.143726, -0.122085,0.061736,
-NEWSHAPE, 357, 1, 2, -0.056345,0.025535, -0.042089,0.052635, 0.008058,0.053871, 0.047795,0.029085, 
-NEWSHAPE, 358, 1, 2, -0.045357,0.025586, -0.031505,0.043770, 0.005524,0.044623, 0.033574,0.024080, 
+NEWSHAPE, 357, 1, 2, -0.056345,0.025535, -0.042089,0.052635, 0.008058,0.053871, 0.047795,0.029085,
+NEWSHAPE, 358, 1, 2, -0.045357,0.025586, -0.031505,0.043770, 0.005524,0.044623, 0.033574,0.024080,
 
-NEWSHAPE, 359, 3, 1, -0.266809,0.074675, -0.122340,0.044980, -0.116509,0.053995, -0.263332,0.086012, -0.243276,0.226327, -0.046949,0.233904, -0.045697,0.176132, 0.043359,0.148557, 0.174518,-0.035928, 0.185648,-0.026857, 0.048860,0.153622, -0.026215,0.175210, -0.030599,0.236932, 0.114203,0.249675, 
-NEWSHAPE, 360, 7, 1, -0.118455,0.162875, -0.179457,0.274805, -0.139062,0.404961, -0.014470,0.358081, 0.088081,0.314743, 0.043390,0.203194, -0.025414,0.211780, -0.019156,0.324240, -0.044420,0.213922, -0.097269,0.172336, -0.097226,0.166975, -0.013745,0.197716, 
+NEWSHAPE, 359, 3, 1, -0.266809,0.074675, -0.122340,0.044980, -0.116509,0.053995, -0.263332,0.086012, -0.243276,0.226327, -0.046949,0.233904, -0.045697,0.176132, 0.043359,0.148557, 0.174518,-0.035928, 0.185648,-0.026857, 0.048860,0.153622, -0.026215,0.175210, -0.030599,0.236932, 0.114203,0.249675,
+NEWSHAPE, 360, 7, 1, -0.118455,0.162875, -0.179457,0.274805, -0.139062,0.404961, -0.014470,0.358081, 0.088081,0.314743, 0.043390,0.203194, -0.025414,0.211780, -0.019156,0.324240, -0.044420,0.213922, -0.097269,0.172336, -0.097226,0.166975, -0.013745,0.197716,
 
 NEWSHAPE, 361, 1, 2, -0.077784,0.096705, -0.112723,0.108509, -0.096729,0.084112, -0.130665,0.091676, -0.112529,0.069411, -0.150758,0.068526, -0.119865,0.047315, -0.151705,0.038980, -0.116648,0.028374, -0.149534,0.021061, -0.119798,0.000000,
 NEWSHAPE, 362, 1, 1, -0.098710,-0.040954, -0.120861,-0.011561, -0.169793,0.001055, -0.213918,-0.011649, -0.244439,-0.030821, -0.257630,-0.038325, -0.286489,-0.056656, -0.321137,-0.048332, -0.347048,-0.011856, -0.316514,-0.028969, -0.296328,-0.024605, -0.263040,0.006390, -0.210822,0.055089, -0.164571,0.054857, -0.130462,0.046293, -0.098742,0.054623, -0.091289,-0.004197,
 
-NEWSHAPE, 363, 1, 2, -0.252495,0.014545, -0.330447,0.029660, -0.319594,0.016402, -0.419249,0.040217, -0.457189,-0.013336, 
-NEWSHAPE, 364, 1, 2, -0.486619,0.002830, -0.418060,0.040577, -0.427473,0.022591, -0.408958,0.019603, -0.426031,0.010325, -0.407739,0.001037, 
+NEWSHAPE, 363, 1, 2, -0.252495,0.014545, -0.330447,0.029660, -0.319594,0.016402, -0.419249,0.040217, -0.457189,-0.013336,
+NEWSHAPE, 364, 1, 2, -0.486619,0.002830, -0.418060,0.040577, -0.427473,0.022591, -0.408958,0.019603, -0.426031,0.010325, -0.407739,0.001037,
 
-NEWSHAPE, 365, 1, 2, -0.236444,-0.000864, -0.300824,-0.142089, 0.027603,-0.331178, 0.117026,-0.205327, 
+NEWSHAPE, 365, 1, 2, -0.236444,-0.000864, -0.300824,-0.142089, 0.027603,-0.331178, 0.117026,-0.205327,
 NEWSHAPE, 366, 1, 2, 0.120242,0.202432, 0.476077,0.202192,
 
-NEWSHAPE, 367, 1, 2, -0.096569,0.019944, 0.040859,0.019906, 0.037742,0.058710, 0.116624,-0.000000, 
+NEWSHAPE, 367, 1, 2, -0.096569,0.019944, 0.040859,0.019906, 0.037742,0.058710, 0.116624,-0.000000,
 
 // overgrown for 4-5 to 4-7 non-bitrunc
-NEWSHAPE, 368, 5, 1, -0.722750,-0.522024, -0.310675,-0.189104, -0.809015,-0.052887, -0.464722,0.060902, -1.057795,0.207750, 
-NEWSHAPE, 369, 6, 1, 1.125689,-0.648796, 0.574166,-0.456509, 0.822679,-1.131184, 0.174168,-0.605003, 0.411340,-1.336854, 
-NEWSHAPE, 370, 7, 1, 1.034599,-1.366924, 0.528060,-0.892063, 0.490794,-1.701844, 0.081991,-0.819912, 0.042928,-1.637383, 
+NEWSHAPE, 368, 5, 1, -0.722750,-0.522024, -0.310675,-0.189104, -0.809015,-0.052887, -0.464722,0.060902, -1.057795,0.207750,
+NEWSHAPE, 369, 6, 1, 1.125689,-0.648796, 0.574166,-0.456509, 0.822679,-1.131184, 0.174168,-0.605003, 0.411340,-1.336854,
+NEWSHAPE, 370, 7, 1, 1.034599,-1.366924, 0.528060,-0.892063, 0.490794,-1.701844, 0.081991,-0.819912, 0.042928,-1.637383,
 
 NEWSHAPE, 371, 1, 1, -0.013726,-0.304365, 0.244972,-0.147728, 0.266167,0.130112, 0.156825,0.210539, -0.271641,0.147226, -0.281599,-0.145412,
-NEWSHAPE, 372, 1, 1, -0.514563,-0.238476, -0.340659,0.172987, -0.100245,0.368967, 0.214334,0.276255, 0.349294,-0.008293, 0.203063,-0.280225, -0.078470,-0.352806, 
+NEWSHAPE, 372, 1, 1, -0.514563,-0.238476, -0.340659,0.172987, -0.100245,0.368967, 0.214334,0.276255, 0.349294,-0.008293, 0.203063,-0.280225, -0.078470,-0.352806,
 NEWSHAPE, 373, 1, 1, -0.019312,0.304743, -0.289045,0.177117, -0.127176,-0.240665, 0.007400,-0.336712, 0.257684,-0.184398, 0.234654,0.191587,
 
 NEWSHAPE, 374, 1, 1, -0.229502,-0.051000, 0.320183,0.006447, 0.148302,0.144065, 0.173317,0.054954, -0.253447,0.021298,
 
-NEWSHAPE, 375, 1, 2, -0.090497,-0.016548, -0.072731,-0.044408, -0.058869,-0.063422, -0.031762,-0.071442, -0.001140,-0.143435, 0.032854,-0.162181, 0.080022,-0.161459, 0.108605,-0.129676, 0.112564,-0.096396, 0.102658,-0.077590, 0.088332,-0.113771, 0.046216,-0.129074, 0.017935,-0.063369, 0.049033,-0.046641, 0.032200,-0.027430, 
+NEWSHAPE, 375, 1, 2, -0.090497,-0.016548, -0.072731,-0.044408, -0.058869,-0.063422, -0.031762,-0.071442, -0.001140,-0.143435, 0.032854,-0.162181, 0.080022,-0.161459, 0.108605,-0.129676, 0.112564,-0.096396, 0.102658,-0.077590, 0.088332,-0.113771, 0.046216,-0.129074, 0.017935,-0.063369, 0.049033,-0.046641, 0.032200,-0.027430,
 
 NEWSHAPE, 376, 1, 1, 0.202167,-0.134605, 0.204591,-0.145446, 0.192856,-0.139999, 0.180908,-0.136821, 0.063679,-0.150430, 0.054862,-0.154571, 0.051985,-0.159521, 0.036546,-0.062257, 0.043529,-0.066187, 0.054300,-0.069873, 0.182749,-0.064458, 0.195918,-0.057169, 0.204973,-0.052339, 0.199643,-0.078121, 0.042703,-0.084239, 0.199470,-0.077992, 0.199531,-0.090084, 0.044591,-0.098658, 0.198774,-0.089982, 0.199787,-0.100708, 0.045748,-0.113148, 0.198272,-0.100502, 0.200147,-0.110605, 0.048127,-0.124053, 0.198630,-0.110398, 0.199672,-0.121163, 0.050049,-0.138713, 0.198913,-0.121059,
 
-NEWSHAPE, 377, 6, 1, -0.206510,0.223410, 0.017622,0.231073, 0.048705,0.240382, 0.069206,0.259727, 
-NEWSHAPE, 378, 7, 1, 0.349494,-0.088062, 0.159923,-0.228824, 0.145483,-0.260010, 0.142821,-0.290692, 
-NEWSHAPE, 379, 7, 1, 0.649585,0.084560, 0.623391,0.075842, 0.599921,0.058309, 0.572892,0.035489, 0.552783,-0.024612, 
+NEWSHAPE, 377, 6, 1, -0.206510,0.223410, 0.017622,0.231073, 0.048705,0.240382, 0.069206,0.259727,
+NEWSHAPE, 378, 7, 1, 0.349494,-0.088062, 0.159923,-0.228824, 0.145483,-0.260010, 0.142821,-0.290692,
+NEWSHAPE, 379, 7, 1, 0.649585,0.084560, 0.623391,0.075842, 0.599921,0.058309, 0.572892,0.035489, 0.552783,-0.024612,
 NEWSHAPE, 380, 1, 2, -0.157063,0.003936, -0.151414,0.044436, -0.065427,0.009052, -0.151414,0.044436, -0.151129,0.067964, -0.072440,0.024229, -0.150301,0.069258, -0.113069,0.110826, -0.037964,0.039249, -0.110463,0.109185, -0.011307,0.146227, -0.108855,0.111771, -0.113069,0.110826, -0.110452,0.155897, -0.007227,0.165082, -0.111749,0.156720, -0.114514,0.196200, 0.003252,0.188966, -0.009486,0.143350, 0.043508,0.083540, 0.057523,0.000604,
-NEWSHAPE, 381, 1, 2, -0.128015,0.002500, -0.121343,0.106487, -0.104134,0.121999, -0.063293,0.274181, 0.038783,0.286293, 0.071085,0.292868, 0.087907,0.266956, 0.077475,0.243894, 0.083000,0.234337, 0.068629,0.220991, 0.042226,0.206757, 0.023044,0.227068, -0.009573,0.218873, -0.027348,0.140245, -0.005432,-0.096462, 0.020544,-0.030837, 
+NEWSHAPE, 381, 1, 2, -0.128015,0.002500, -0.121343,0.106487, -0.104134,0.121999, -0.063293,0.274181, 0.038783,0.286293, 0.071085,0.292868, 0.087907,0.266956, 0.077475,0.243894, 0.083000,0.234337, 0.068629,0.220991, 0.042226,0.206757, 0.023044,0.227068, -0.009573,0.218873, -0.027348,0.140245, -0.005432,-0.096462, 0.020544,-0.030837,
 NEWSHAPE, 382, 1, 2, 0.024784,0.028900, -0.009988,0.111744, -0.018320,0.147991, -0.006519,0.215354, 0.020083,0.223620, 0.029811,0.291799, -0.066579,0.278718, -0.136927,0.082023, -0.147101,-0.050084,
 
 NEWSHAPE, 383, 1, 2, 0.164154,0.032677, 0.112722,0.126268, 0.093106,0.144972, 0.036998,0.184005, -0.028137,0.220088, -0.088953,0.208314, -0.221199,0.117397, -0.270025,0.057450, -0.290973,0.020569,
-NEWSHAPE, 384, 1, 2, 0.146470,0.021791, 0.134179,0.071381, 0.089857,0.116839, 0.039860,0.139410, -0.005910,0.150902, -0.047971,0.139775, -0.104973,0.100695, -0.147597,0.052809, -0.177722,0.017653, -0.186756,0.003107, 
+NEWSHAPE, 384, 1, 2, 0.146470,0.021791, 0.134179,0.071381, 0.089857,0.116839, 0.039860,0.139410, -0.005910,0.150902, -0.047971,0.139775, -0.104973,0.100695, -0.147597,0.052809, -0.177722,0.017653, -0.186756,0.003107,
 NEWSHAPE, 385, 7, 1, 0.354675,0,
 
-NEWSHAPE, 386, 3, 1, 0.173768,0.275379, 0.340287,0.116342, 0.229291,-0.115277, 
-NEWSHAPE, 387, 7, 1, 0.315263,-0.310217, 0.085056,-0.287538, 
-NEWSHAPE, 388, 1, 1, 0.046590,0.284199, 0.028110,0.325611, 0.098711,0.333738, 0.088761,0.294314, 0.090351,0.227036, 0.092387,0.196322, 0.129546,0.192006, 0.168982,0.166667, 0.173088,0.117700, 0.022882,0.091527, 0.004586,0.133004, 0.022981,0.160866, 0.052990,0.184313, 0.085413,0.193910, 0.055297,0.184324, 
+NEWSHAPE, 386, 3, 1, 0.173768,0.275379, 0.340287,0.116342, 0.229291,-0.115277,
+NEWSHAPE, 387, 7, 1, 0.315263,-0.310217, 0.085056,-0.287538,
+NEWSHAPE, 388, 1, 1, 0.046590,0.284199, 0.028110,0.325611, 0.098711,0.333738, 0.088761,0.294314, 0.090351,0.227036, 0.092387,0.196322, 0.129546,0.192006, 0.168982,0.166667, 0.173088,0.117700, 0.022882,0.091527, 0.004586,0.133004, 0.022981,0.160866, 0.052990,0.184313, 0.085413,0.193910, 0.055297,0.184324,
 
-NEWSHAPE, 389, 1, 2, -0.127943,0.000000, -0.121732,0.008437, -0.120752,0.047093, -0.114785,0.065246, -0.096531,0.082051, -0.079664,0.100183, -0.087015,0.156872, -0.056388,0.171466, -0.021870,0.150662, -0.022997,0.136774, -0.004819,0.120485, 0.007204,0.104455, 0.016748,0.083741, 0.026225,0.054833, 0.033323,0.030943, 0.034483,0.001189, 0.034483,-0.001189, 
-NEWSHAPE, 390, 1, 1, -0.079664,0.100183, -0.087015,0.156872, -0.090442,0.188317, -0.085023,0.215058, -0.078296,0.241201, -0.070101,0.263835, -0.062700,0.273833, -0.053763,0.276497, -0.037212,0.273273, -0.026261,0.230095, -0.024880,0.217700, -0.022225,0.198787, -0.020850,0.180288, -0.021870,0.150662, -0.022997,0.136774, -0.036634,0.100744, 
-NEWSHAPE, 391, 1, 1, -0.063645,0.226806, -0.078296,0.241201, -0.070101,0.263835, -0.062700,0.273833, -0.053763,0.276497, -0.030638,0.274461, -0.015319,0.275737, 0.001277,0.277150, 0.020384,0.271369, 0.038101,0.262896, 0.045596,0.255842, 0.062388,0.263558, 0.085371,0.258660, 0.084235,0.228817, 0.071073,0.213220, 0.048603,0.218088, 0.042541,0.228972, 0.028749,0.228742, 0.011222,0.224439, -0.012498,0.229969, -0.026261,0.230095, 
+NEWSHAPE, 389, 1, 2, -0.127943,0.000000, -0.121732,0.008437, -0.120752,0.047093, -0.114785,0.065246, -0.096531,0.082051, -0.079664,0.100183, -0.087015,0.156872, -0.056388,0.171466, -0.021870,0.150662, -0.022997,0.136774, -0.004819,0.120485, 0.007204,0.104455, 0.016748,0.083741, 0.026225,0.054833, 0.033323,0.030943, 0.034483,0.001189, 0.034483,-0.001189,
+NEWSHAPE, 390, 1, 1, -0.079664,0.100183, -0.087015,0.156872, -0.090442,0.188317, -0.085023,0.215058, -0.078296,0.241201, -0.070101,0.263835, -0.062700,0.273833, -0.053763,0.276497, -0.037212,0.273273, -0.026261,0.230095, -0.024880,0.217700, -0.022225,0.198787, -0.020850,0.180288, -0.021870,0.150662, -0.022997,0.136774, -0.036634,0.100744,
+NEWSHAPE, 391, 1, 1, -0.063645,0.226806, -0.078296,0.241201, -0.070101,0.263835, -0.062700,0.273833, -0.053763,0.276497, -0.030638,0.274461, -0.015319,0.275737, 0.001277,0.277150, 0.020384,0.271369, 0.038101,0.262896, 0.045596,0.255842, 0.062388,0.263558, 0.085371,0.258660, 0.084235,0.228817, 0.071073,0.213220, 0.048603,0.218088, 0.042541,0.228972, 0.028749,0.228742, 0.011222,0.224439, -0.012498,0.229969, -0.026261,0.230095,
 NEWSHAPE, 392, 1, 2, 0.060794,0.001192, 0.058426,0.023847, 0.050054,0.030986, 0.042896,0.038130, 0.044109,0.042917, 0.032180,0.050058, 0.017884,0.059612, 0.005963,0.064401, -0.009546,0.068015, -0.022689,0.070455, -0.053753,0.053753, -0.065710,0.040621, -0.074098,0.028683, -0.088611,0.020357, -0.087387,0.017956,
 
 NEWSHAPE
 };
-#endif
-
-#endif
 
 }
+#endif

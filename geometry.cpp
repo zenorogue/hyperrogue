@@ -5,30 +5,6 @@
 
 namespace hr {
 
-ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
-
-// tessf: distance from heptagon center to another heptagon center
-// hexf: distance from heptagon center to small heptagon vertex
-// hcrossf: distance from heptagon center to big heptagon vertex
-// crossf: distance from heptagon center to adjacent cell center (either hcrossf or tessf)
-// hexhexdist: distance between adjacent hexagon vertices
-// hexvdist: distance between hexagon vertex and hexagon center
-// hepvdist: distance between heptagon vertex and hexagon center (either hcrossf or something else)
-// rhexf: distance from heptagon center to heptagon vertex (either hexf or hcrossf)
-
-int base_distlimit;
-
-transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
-transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
-
-ld hexshift;
-
-ld sword_size = 0;
-
-ld corner_bonus = 0;
-
-ld asteroid_size[8];
-
 // the results are:
 // hexf = 0.378077 hcrossf = 0.620672 tessf = 1.090550
 // hexhexdist = 0.566256
@@ -36,13 +12,11 @@ ld asteroid_size[8];
 ld hcrossf7 = 0.620672;
 ld hexf7 = 0.378077;
 
-ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
-
 // the distance between two hexagon centers
 
-void precalc() {
+void geometry_information::prepare_basics() {
 
-  DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("precalc"));
+  DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
   
   hexshift = 0;
 
@@ -53,7 +27,6 @@ void precalc() {
 
   if(euclid) {
     // dynamicval<eGeometry> g(geometry, gNormal);
-    // precalc(); }
     // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
     if(a4 && !BITRUNCATED) {
       crossf = .5;
@@ -187,6 +160,10 @@ void precalc() {
     }
   
   set_sibling_limit();
+  
+  prepare_compute3();
+  if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
+    currfp.analyze(); 
   }
 
 transmatrix xspinpush(ld dir, ld dist) {
@@ -206,11 +183,9 @@ namespace geom3 {
   ld depth = 1;        // world below the plane
   ld camera = 1;       // camera above the plane
   ld wall_height = .3;
-  ld slev = .08;
   ld lake_top = .25, lake_bottom = .9;
   ld rock_wall_ratio = .9;
   ld human_wall_ratio = .7;
-  ld human_height;
   bool gp_autoscale_heights = true;
   
   ld creature_scale, height_width;
@@ -263,13 +238,6 @@ namespace geom3 {
     return cosh(depth - lev); 
     }
   
-  ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
-    SLEV[4], FLATEYE,
-    LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
-    BODY, BODY1, BODY2, BODY3,
-    NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
-    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2;
-  
   string invalid;
   
   ld actual_wall_height() {
@@ -279,8 +247,10 @@ namespace geom3 {
       #endif
       return wall_height;
       }
+  }
   
-  void compute() {
+  void geometry_information::prepare_compute3() {
+    using namespace geom3;
     DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("geom3::compute"));
     // tanh(depth) / tanh(camera) == vid.alpha
     invalid = "";
@@ -388,11 +358,11 @@ namespace geom3 {
       }
     }    
 
+namespace geom3 {
   #if MAXMDIM >= 4
 void switch_always3() {
     if(rug::rugged) rug::close();
     geom3::always3 = !geom3::always3;
-    need_reset_geometry = true;
     swapmatrix(View);
     callhooks(hooks_swapdim);
     }
@@ -431,7 +401,6 @@ void switch_always3() {
       geom3::human_wall_ratio = 0.8;
       geom3::camera = 0;
       if(pmodel == mdDisk) pmodel = mdPerspective;
-      need_reset_geometry = true;
       swapmatrix(View);
       callhooks(hooks_swapdim);
 #if CAP_RACING
@@ -445,7 +414,6 @@ void switch_always3() {
       geom3::camera = 1;
       geom3::depth = 1;
       if(pmodel == mdPerspective) pmodel = mdDisk;
-      need_reset_geometry = true;
       swapmatrix(View);
       callhooks(hooks_swapdim);
       }
@@ -454,8 +422,50 @@ void switch_always3() {
 
   }
 
-void initgeo() {
-  // printf("%Lf\n", (ld) hdist0(xpush(-1)*ypush(0.01)*xpush(1)*C0));
-  precalc();
+geometry_information *cgip;
+map<string, geometry_information> cgis;
+
+void check_cgi() {
+  string s;
+  auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
+  V("GEO", its(int(geometry)));
+  V("VAR", its(int(variation)));
+  
+  if(GOLDBERG) V("GP", its(gp::param.first) + "," + its(gp::param.second));
+  if(IRREGULAR) V("IRR", its(irr::irrid));
+
+  if(geometry == gArchimedean) V("ARCM", arcm::current.symbol);
+  
+  if(geometry == gCrystal) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
+  
+  if(binarytiling || DIM == 3) V("WQ", its(vid.texture_step));
+  
+  if(binarytiling) V("BT", fts(vid.binary_width));
+  
+  if(GDIM == 2) { 
+    V("CAMERA", fts(geom3::camera));
+    }
+  
+  if(WDIM == 2) {
+    V("WH", fts(geom3::wall_height));
+    V("HW", fts(geom3::human_wall_ratio));
+    V("RW", fts(geom3::rock_wall_ratio));
+    V("DEPTH", fts(geom3::depth));
+    V("ASH", ONOFF(geom3::gp_autoscale_heights));
+    V("LT", fts(geom3::lake_top));
+    V("LB", fts(geom3::lake_bottom));
+    }
+
+  V("3D", ONOFF(geom3::always3));
+  
+  if(WDIM == 3) {
+    V("CS", fts(geom3::creature_scale));
+    V("HTW", fts(geom3::height_width));
+    }
+  
+  V("LQ", its(vid.linequality));
+  
+  cgip = &cgis[s];
   }
+
 }

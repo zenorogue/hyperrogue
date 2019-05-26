@@ -187,9 +187,9 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
       if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
       transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize*zoom);
-      if(isWorm(m) && wormscale != 1) 
+      if(isWorm(m) && cgi.wormscale != 1) 
         for(int i=0; i<DIM; i++)
-          V[i][i] /= wormscale;
+          V[i][i] /= cgi.wormscale;
       int mcol = color;
       mcol -= (color & 0xFCFCFC) >> 2;
       drawMonsterType(m, NULL, V, mcol, glyphphase[id]/500.0);
@@ -345,7 +345,7 @@ void drawMobileArrow(int i) {
   double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
   double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
   
-  queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), shArrow, col, PPR::MOBILE_ARROW);
+  queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), cgi.shArrow, col, PPR::MOBILE_ARROW);
   }
 #endif
 
@@ -403,11 +403,11 @@ void draw_radar(bool cornermode) {
     if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
     else if(sph) displaychr(int(cx + (rad-10) * r.h[0]), int(cy + (rad-10) * r.h[2] * si + (rad-10) * r.h[1] * co), 0, +r.h[1] * si > r.h[2] * co ? 8 : 16, r.glyph, r.color);
     else if(hyp) {
-      int siz = 1/(1+r.h[3]) * scalefactor * current_display->radius / (inHighQual ? 10 : 6);
+      int siz = 1/(1+r.h[3]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6);
       displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, siz, r.glyph, r.color);
       }
     else {
-      displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, rad * scalefactor / (max_eu_dist + scalefactor/4) * 0.8, r.glyph, r.color);
+      displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, rad * cgi.scalefactor / (max_eu_dist + cgi.scalefactor/4) * 0.8, r.glyph, r.color);
       }    
   }
 

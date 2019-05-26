@@ -127,7 +127,7 @@ int watercolor(int phase) {
   }
 
 int aircolor(int phase) {
-  return 0x8080FF00 | int(32 + 32 * sintick(200, phase * 1. / S21));
+  return 0x8080FF00 | int(32 + 32 * sintick(200, phase * 1. / cgi.S21));
   }
 
 int fghostcolor(cell *c) {
@@ -160,8 +160,6 @@ int lightat, safetyat;
 void drawLightning() { lightat = ticks; }
 void drawSafety() { safetyat = ticks; }
 
-void queueball(const transmatrix& V, ld rad, color_t col, eItem what);
-
 void drawShield(const transmatrix& V, eItem it) {
 #if CAP_CURVE
   float ds = ptick(300);
@@ -170,13 +168,13 @@ void drawShield(const transmatrix& V, eItem it) {
     col = (col & 0xFEFEFE) / 2;
   if(sphere && cwt.at->land == laHalloween && !wmblack && !wmascii)
     col = 0;
-  double d = it == itOrbShield ? hexf : hexf - .1;
+  double d = it == itOrbShield ? cgi.hexf : cgi.hexf - .1;
   int mt = sphere ? 7 : 5;
   if(DIM == 3)
-    queueball(V * zpush(geom3::GROIN1), geom3::human_height / 2, darkena(col, 0, 0xFF), itOrbShield);
+    queueball(V * zpush(cgi.GROIN1), cgi.human_height / 2, darkena(col, 0, 0xFF), itOrbShield);
   else {
-    for(ld a=0; a<=S84*mt+1e-6; a+=pow(.5, vid.linequality))
-      curvepoint(V*xspinpush0(a * M_PI/S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
+    for(ld a=0; a<=cgi.S84*mt+1e-6; a+=pow(.5, vid.linequality))
+      curvepoint(V*xspinpush0(a * M_PI/cgi.S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
     queuecurve(darkena(col, 0, 0xFF), 0x8080808, PPR::LINE);
     }
 #endif
@@ -186,10 +184,10 @@ void drawSpeed(const transmatrix& V) {
 #if CAP_CURVE
   ld ds = ptick(10);
   color_t col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
-  if(DIM == 3) queueball(V * zpush(geom3::GROIN1), geom3::human_height * 0.55, col, itOrbSpeed);
-  else for(int b=0; b<S84; b+=S14) {
+  if(DIM == 3) queueball(V * zpush(cgi.GROIN1), cgi.human_height * 0.55, col, itOrbSpeed);
+  else for(int b=0; b<cgi.S84; b+=cgi.S14) {
     PRING(a)
-      curvepoint(V*xspinpush0((ds+b+a) * M_PI/S42, hexf*a/S84));
+      curvepoint(V*xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84));
     queuecurve(col, 0x8080808, PPR::LINE);
     }
 #endif
@@ -216,9 +214,9 @@ void drawSafety(const transmatrix& V, int ct) {
   ld ds = ptick(50);
   color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
   if(DIM == 3)
-    queueball(V * zpush(geom3::GROIN1), 2*hexf, col, itOrbSafety);
+    queueball(V * zpush(cgi.GROIN1), 2*cgi.hexf, col, itOrbSafety);
   else for(int a=0; a<ct; a++)
-    queueline(V*xspinpush0((ds+a*S84/ct) * M_PI/S42, 2*hexf), V*xspinpush0((ds+(a+(ct-1)/2)*S84/ct) * M_PI / S42, 2*hexf), col, vid.linequality);
+    queueline(V*xspinpush0((ds+a*cgi.S84/ct) * M_PI/cgi.S42, 2*cgi.hexf), V*xspinpush0((ds+(a+(ct-1)/2)*cgi.S84/ct) * M_PI / cgi.S42, 2*cgi.hexf), col, vid.linequality);
 #endif
   }
 
@@ -228,12 +226,12 @@ void drawFlash(const transmatrix& V) {
   color_t col = darkena(iinf[itOrbFlash].color, 0, 0xFF);
   col &= ~1;
   for(int u=0; u<5; u++) {
-    ld rad = hexf * (2.5 + .5 * sin(ds+u*.3));
+    ld rad = cgi.hexf * (2.5 + .5 * sin(ds+u*.3));
     if(DIM == 3) {
-      queueball(V * zpush(geom3::GROIN1), rad, col, itOrbFlash);
+      queueball(V * zpush(cgi.GROIN1), rad, col, itOrbFlash);
       }
     else {
-      PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+      PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
       queuecurve(col, 0x8080808, PPR::LINE);
       }
     }
@@ -241,7 +239,7 @@ void drawFlash(const transmatrix& V) {
   }
 
 ld cheilevel(ld v) {
-  return geom3::FLOOR + (geom3::HEAD - geom3::FLOOR) * v;
+  return cgi.FLOOR + (cgi.HEAD - cgi.FLOOR) * v;
   }
 
 transmatrix chei(const transmatrix V, int a, int b) {
@@ -256,13 +254,13 @@ void drawLove(const transmatrix& V, int hdir) {
   col &= ~1;
   for(int u=0; u<5; u++) {
     PRING(a) {
-      double d = (1 + cos(a * M_PI/S42)) / 2;
-      double z = a; if(z>S42) z = S84-z;
+      double d = (1 + cos(a * M_PI/cgi.S42)) / 2;
+      double z = a; if(z>cgi.S42) z = cgi.S84-z;
       if(z <= 10) d += (10-z) * (10-z) * (10-z) / 3000.;
 
-      ld rad = hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
+      ld rad = cgi.hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
       transmatrix V1 = chei(V, u, 5);
-      curvepoint(V1*xspinpush0((S42+hdir+a-1) * M_PI/S42, rad));
+      curvepoint(V1*xspinpush0((cgi.S42+hdir+a-1) * M_PI/cgi.S42, rad));
       }
     queuecurve(col, 0x8080808, PPR::LINE);
     }
@@ -276,7 +274,7 @@ void drawWinter(const transmatrix& V, ld hdir) {
   for(int u=0; u<20; u++) {
     ld rad = sin(ds+u * 2 * M_PI / 20) * M_PI / S7;
     transmatrix V1 = chei(V, u, 20);
-    queueline(V1*xspinpush0(M_PI+hdir+rad, hexf*.5), V1*xspinpush0(M_PI+hdir+rad, hexf*3), col, 2 + vid.linequality);
+    queueline(V1*xspinpush0(M_PI+hdir+rad, cgi.hexf*.5), V1*xspinpush0(M_PI+hdir+rad, cgi.hexf*3), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -288,7 +286,7 @@ void drawLightning(const transmatrix& V) {
     ld leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
     ld rad = rand() % 1000;
     transmatrix V1 = chei(V, u, 20);
-    queueline(V1*xspinpush0(rad, hexf*0.3), V1*xspinpush0(rad, hexf*leng), col, 2 + vid.linequality);
+    queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -335,9 +333,9 @@ ld displayspin(cell *c, int d) {
 
 double hexshiftat(cell *c) {
   if(binarytiling) return 0;
-  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) return hexshift + 2*M_PI/S7;
-  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) return hexshift + 2*M_PI/S7;
-  if(hexshift && ctof(c)) return hexshift;
+  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) return cgi.hexshift + 2*M_PI/S7;
+  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) return cgi.hexshift + 2*M_PI/S7;
+  if(cgi.hexshift && ctof(c)) return cgi.hexshift;
   return 0;
   }
 
@@ -366,20 +364,20 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
     if(shmup::on && WDIM == 2) {
 #if CAP_SHAPES
       if(items[itOrbSword])
-        queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
+        queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
   
       if(items[itOrbSword2])
-        queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle+M_PI), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
+        queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle+M_PI), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
 #endif
       }                  
 
     else if(shmup::on && WDIM == 3) {
 #if CAP_SHAPES
       if(items[itOrbSword])
-        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
+        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
   
       if(items[itOrbSword2])
-        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, -M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
+        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, -M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
 #endif
       }
     
@@ -399,10 +397,10 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         color_t col = darkena(0xC0C0C0, 0, 0xFF);
-        ld l0 = PURE ? 0.6 * scalefactor : longer ? 0.36 : 0.4;
-        ld l1 = PURE ? 0.7 * scalefactor : longer ? 0.44 : 0.42;
-        hyperpoint h0 = DIM == 3 ? xpush(l0) * zpush(geom3::FLOOR - geom3::human_height/50) * C0 : xpush0(l0);
-        hyperpoint h1 = DIM == 3 ? xpush(l1) * zpush(geom3::FLOOR - geom3::human_height/50) * C0 : xpush0(l1);        
+        ld l0 = PURE ? 0.6 * cgi.scalefactor : longer ? 0.36 : 0.4;
+        ld l1 = PURE ? 0.7 * cgi.scalefactor : longer ? 0.44 : 0.42;
+        hyperpoint h0 = DIM == 3 ? xpush(l0) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l0);
+        hyperpoint h1 = DIM == 3 ? xpush(l1) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l1);        
         transmatrix T = Vnow*spin(dda * M_PI / sword_angles);
         queueline(T*h0, T*h1, col, 1, PPR::SUPERLINE);
         }
@@ -410,10 +408,10 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
 
 #if CAP_SHAPES
       if(items[itOrbSword])
-        queuepoly(Vnow*spin(M_PI+(-1-2*ang)*M_PI/sword_angles), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(Vnow*spin(M_PI+(-1-2*ang)*M_PI/sword_angles), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
   
       if(items[itOrbSword2])
-        queuepoly(Vnow*spin((-1-2*ang)*M_PI/sword_angles), (peace::on ? shMagicShovel : shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(Vnow*spin((-1-2*ang)*M_PI/sword_angles), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sintick(200)));
 #endif
       }
     }
@@ -433,10 +431,10 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
     if(tim > 2500) safetyat = 0;
     for(int u=tim; u<=2500; u++) {
       if((u-tim)%250) continue;
-      ld rad = hexf * u / 250;
+      ld rad = cgi.hexf * u / 250;
       color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
       PRING(a)
-        curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+        curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
       queuecurve(col, 0, PPR::LINE);
       }
     }
@@ -446,8 +444,8 @@ void drawStunStars(const transmatrix& V, int t) {
 #if CAP_SHAPES
   for(int i=0; i<3*t; i++) {
     transmatrix V2 = V * spin(M_PI * 2 * i / (3*t) + ptick(200));
-    if(GDIM == 3) V2 = V2 * zpush(geom3::HEAD);
-    queuepolyat(V2, shFlailBall, 0xFFFFFFFF, PPR::STUNSTARS);
+    if(GDIM == 3) V2 = V2 * zpush(cgi.HEAD);
+    queuepolyat(V2, cgi.shFlailBall, 0xFFFFFFFF, PPR::STUNSTARS);
     }
 #endif
   }
@@ -479,17 +477,17 @@ namespace tortoise {
       
       if(i >= 8 && i <= 11 && stuntime >= 3) continue;
 
-      queuepoly(V, shTortoise[i][b+small], d);
+      queuepoly(V, cgi.shTortoise[i][b+small], d);
       if((i >= 5 && i <= 7) || (i >= 9 && i <= 10))
-        queuepoly(V * Mirror, shTortoise[i][b+small], d);
+        queuepoly(V * Mirror, cgi.shTortoise[i][b+small], d);
       
       if(i == 8) {
         for(int k=0; k<stuntime; k++) {
           eyecolor &= 0xFEFEFE; 
           eyecolor >>= 1;
           }
-        queuepoly(V, shTortoise[12][b+small], darkena(eyecolor, 0, 0xFF));
-        queuepoly(V * Mirror, shTortoise[12][b+small], darkena(eyecolor, 0, 0xFF));
+        queuepoly(V, cgi.shTortoise[12][b+small], darkena(eyecolor, 0, 0xFF));
+        queuepoly(V * Mirror, cgi.shTortoise[12][b+small], darkena(eyecolor, 0, 0xFF));
         }
       }
 #endif
@@ -537,15 +535,15 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
   
   if(!footphase) rightfoot = leftfoot = 0;
 
-  transmatrix VAML = mmscale(V, geom3::ALEG);
+  transmatrix VAML = mmscale(V, cgi.ALEG);
   
   hpcshape* sh[6][4] = {
-    {&shDogFrontPaw, &shDogRearPaw, &shDogFrontLeg, &shDogRearLeg},
-    {&shWolfFrontPaw, &shWolfRearPaw, &shWolfFrontLeg, &shWolfRearLeg},
-    {&shReptileFrontFoot, &shReptileRearFoot, &shReptileFrontLeg, &shReptileRearLeg},
-    {&shBugLeg, NULL, NULL, NULL},
-    {&shTrylobiteFrontClaw, &shTrylobiteRearClaw, &shTrylobiteFrontLeg, &shTrylobiteRearLeg},
-    {&shBullFrontHoof, &shBullRearHoof, &shBullFrontHoof, &shBullRearHoof},
+    {&cgi.shDogFrontPaw, &cgi.shDogRearPaw, &cgi.shDogFrontLeg, &cgi.shDogRearLeg},
+    {&cgi.shWolfFrontPaw, &cgi.shWolfRearPaw, &cgi.shWolfFrontLeg, &cgi.shWolfRearLeg},
+    {&cgi.shReptileFrontFoot, &cgi.shReptileRearFoot, &cgi.shReptileFrontLeg, &cgi.shReptileRearLeg},
+    {&cgi.shBugLeg, NULL, NULL, NULL},
+    {&cgi.shTrylobiteFrontClaw, &cgi.shTrylobiteRearClaw, &cgi.shTrylobiteFrontLeg, &cgi.shTrylobiteRearLeg},
+    {&cgi.shBullFrontHoof, &cgi.shBullRearHoof, &cgi.shBullFrontHoof, &cgi.shBullRearHoof},
     };
 
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
@@ -558,14 +556,14 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
     return;
 
 /*
-    if(WDIM == 2) V1 = V1 * zpush(geom3::GROIN);
+    if(WDIM == 2) V1 = V1 * zpush(cgi.GROIN);
     Tright = V1 * cspin(0, 2, rightfoot/SCALE * 3);
     Tleft  = V1 * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
-    if(WDIM == 2) Tleft = Tleft * zpush(-geom3::GROIN), Tright = Tright * zpush(-geom3::GROIN);
+    if(WDIM == 2) Tleft = Tleft * zpush(-cgi.GROIN), Tright = Tright * zpush(-cgi.GROIN);
 */
     }
 
-  const transmatrix VL = mmscale(V, geom3::ALEG0);
+  const transmatrix VL = mmscale(V, cgi.ALEG0);
 
   if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
   if(x[0]) queuepolyat(VL * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
@@ -606,28 +604,28 @@ void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
 #if CAP_SHAPES
 transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, double footphase) {
 
-#define VFOOT (DIM == 2 ? V : mmscale(V, geom3::LEG0))
-#define VLEG mmscale(V, geom3::LEG)
-#define VGROIN mmscale(V, geom3::GROIN)
-#define VBODY mmscale(V, geom3::BODY)
-#define VBODY1 mmscale(V, geom3::BODY1)
-#define VBODY2 mmscale(V, geom3::BODY2)
-#define VBODY3 mmscale(V, geom3::BODY3)
-#define VNECK mmscale(V, geom3::NECK)
-#define VHEAD  mmscale(V, geom3::HEAD)
-#define VHEAD1 mmscale(V, geom3::HEAD1)
-#define VHEAD2 mmscale(V, geom3::HEAD2)
-#define VHEAD3 mmscale(V, geom3::HEAD3)
+#define VFOOT (DIM == 2 ? V : mmscale(V, cgi.LEG0))
+#define VLEG mmscale(V, cgi.LEG)
+#define VGROIN mmscale(V, cgi.GROIN)
+#define VBODY mmscale(V, cgi.BODY)
+#define VBODY1 mmscale(V, cgi.BODY1)
+#define VBODY2 mmscale(V, cgi.BODY2)
+#define VBODY3 mmscale(V, cgi.BODY3)
+#define VNECK mmscale(V, cgi.NECK)
+#define VHEAD  mmscale(V, cgi.HEAD)
+#define VHEAD1 mmscale(V, cgi.HEAD1)
+#define VHEAD2 mmscale(V, cgi.HEAD2)
+#define VHEAD3 mmscale(V, cgi.HEAD3)
 
 #define VALEGS V
-#define VABODY mmscale(V, geom3::ABODY)
-#define VAHEAD mmscale(V, geom3::AHEAD)
+#define VABODY mmscale(V, cgi.ABODY)
+#define VAHEAD mmscale(V, cgi.AHEAD)
 
 #define VFISH V
-#define VBIRD  ((DIM == 3 || (where && bird_disruption(where))) ? (WDIM == 2 ? mmscale(V, geom3::BIRD) : V) : mmscale(V, geom3::BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.)))
-#define VGHOST  mmscale(V, geom3::GHOST)
+#define VBIRD  ((DIM == 3 || (where && bird_disruption(where))) ? (WDIM == 2 ? mmscale(V, cgi.BIRD) : V) : mmscale(V, cgi.BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.)))
+#define VGHOST  mmscale(V, cgi.GHOST)
 
-#define VSLIMEEYE  mscale(V, geom3::FLATEYE)
+#define VSLIMEEYE  mscale(V, cgi.FLATEYE)
 
   // if(!mmspatial && !footphase && who != moSkeleton) return;
   
@@ -639,21 +637,21 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
   // todo
 
   if(detaillevel >= 2 && DIM == 2) { 
-    transmatrix VL = mmscale(V, geom3::LEG1);
-    queuepoly(VL * xpush(rightfoot*3/4), shHumanLeg, col);
-    queuepoly(VL * Mirror * xpush(-rightfoot*3/4), shHumanLeg, col);
+    transmatrix VL = mmscale(V, cgi.LEG1);
+    queuepoly(VL * xpush(rightfoot*3/4), cgi.shHumanLeg, col);
+    queuepoly(VL * Mirror * xpush(-rightfoot*3/4), cgi.shHumanLeg, col);
     }
 
   if(DIM == 2) {
-    transmatrix VL = mmscale(V, geom3::LEG);
-    queuepoly(VL * xpush(rightfoot/2), shHumanLeg, col);
-    queuepoly(VL * Mirror * xpush(-rightfoot/2), shHumanLeg, col);
+    transmatrix VL = mmscale(V, cgi.LEG);
+    queuepoly(VL * xpush(rightfoot/2), cgi.shHumanLeg, col);
+    queuepoly(VL * Mirror * xpush(-rightfoot/2), cgi.shHumanLeg, col);
     }
 
   if(detaillevel >= 2 && DIM == 2) { 
-    transmatrix VL = mmscale(V, geom3::LEG3);
-    queuepoly(VL * xpush(rightfoot/4), shHumanLeg, col);
-    queuepoly(VL * Mirror * xpush(-rightfoot/4), shHumanLeg, col);
+    transmatrix VL = mmscale(V, cgi.LEG3);
+    queuepoly(VL * xpush(rightfoot/4), cgi.shHumanLeg, col);
+    queuepoly(VL * Mirror * xpush(-rightfoot/4), cgi.shHumanLeg, col);
     }
 
   transmatrix Tright, Tleft;
@@ -664,41 +662,41 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
     }
   else {
     transmatrix V1 = V;
-    if(WDIM == 2) V1 = V1 * zpush(geom3::GROIN);
+    if(WDIM == 2) V1 = V1 * zpush(cgi.GROIN);
     Tright = V1 * cspin(0, 2, rightfoot/ leg_length);
     Tleft  = V1 * Mirror * cspin(2, 0, rightfoot / leg_length);
-    if(WDIM == 2) Tleft = Tleft * zpush(-geom3::GROIN), Tright = Tright * zpush(-geom3::GROIN);
+    if(WDIM == 2) Tleft = Tleft * zpush(-cgi.GROIN), Tright = Tright * zpush(-cgi.GROIN);
     }
     
   if(who == moWaterElemental && DIM == 2) {
     double fishtail = footfun(footphase / .4) / 4 * 1.5;
-    queuepoly(VFOOT * xpush(fishtail), shFishTail, watercolor(100));
+    queuepoly(VFOOT * xpush(fishtail), cgi.shFishTail, watercolor(100));
     }
   else if(who == moSkeleton) {
-    queuepoly(Tright, shSkeletalFoot, col);
-    queuepoly(Tleft, shSkeletalFoot, col);
+    queuepoly(Tright, cgi.shSkeletalFoot, col);
+    queuepoly(Tleft, cgi.shSkeletalFoot, col);
     return spin(rightfoot * wobble);
     }
   else if(isTroll(who) || who == moMonkey || who == moYeti || who == moRatling || who == moRatlingAvenger || who == moGoblin) {
-    queuepoly(Tright, shYetiFoot, col);
-    queuepoly(Tleft, shYetiFoot, col);
+    queuepoly(Tright, cgi.shYetiFoot, col);
+    queuepoly(Tleft, cgi.shYetiFoot, col);
     }
   else {
-    queuepoly(Tright, shHumanFoot, col);
-    queuepoly(Tleft, shHumanFoot, col);
+    queuepoly(Tright, cgi.shHumanFoot, col);
+    queuepoly(Tleft, cgi.shHumanFoot, col);
     }
 
   if(DIM == 3 || !mmspatial) return spin(rightfoot * wobble);  
 
   if(detaillevel >= 2 && who != moZombie)
-    queuepoly(mmscale(V, geom3::NECK1), shHumanNeck, col);
+    queuepoly(mmscale(V, cgi.NECK1), cgi.shHumanNeck, col);
   if(detaillevel >= 1) {
-    queuepoly(VGROIN, shHumanGroin, col);
-    if(who != moZombie) queuepoly(VNECK, shHumanNeck, col);
+    queuepoly(VGROIN, cgi.shHumanGroin, col);
+    if(who != moZombie) queuepoly(VNECK, cgi.shHumanNeck, col);
     }
   if(detaillevel >= 2) {
-    queuepoly(mmscale(V, geom3::GROIN1), shHumanGroin, col);
-    if(who != moZombie) queuepoly(mmscale(V, geom3::NECK3), shHumanNeck, col);
+    queuepoly(mmscale(V, cgi.GROIN1), cgi.shHumanGroin, col);
+    if(who != moZombie) queuepoly(mmscale(V, cgi.NECK3), cgi.shHumanNeck, col);
     }
   
   return spin(rightfoot * wobble);
@@ -742,7 +740,7 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
     }
   else {
     if(d > max_eu_dist) max_eu_dist = d;
-    if(d) h = h * (d / (max_eu_dist + scalefactor/4) / hypot_d(3, h));
+    if(d) h = h * (d / (max_eu_dist + cgi.scalefactor/4) / hypot_d(3, h));
     }
   radarpoints.emplace_back(radarpoint{h, ch, col, outline});
   }
@@ -764,14 +762,14 @@ transmatrix face_the_player(const transmatrix V) {
 
 hpcshape& orbshape(eOrbshape s) {
   switch(s) {
-     case osLove: return shLoveRing;
-     case osRanged: return shTargetRing;
-     case osOffensive: return shSawRing;
-     case osFriend: return shPeaceRing;
-     case osUtility: return shGearRing;
-     case osDirectional: return shSpearRing;
-     case osWarping: return shHeptaRing;
-     default: return shRing;
+     case osLove: return cgi.shLoveRing;
+     case osRanged: return cgi.shTargetRing;
+     case osOffensive: return cgi.shSawRing;
+     case osFriend: return cgi.shPeaceRing;
+     case osUtility: return cgi.shGearRing;
+     case osDirectional: return cgi.shSpearRing;
+     case osWarping: return cgi.shHeptaRing;
+     default: return cgi.shRing;
      }
   }
 
@@ -784,24 +782,24 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   auto spinptick = [c, pticks] (int period, ld phase=0) { return c ? spintick(period, phase) : spin((animation_factor * pticks + phase) / period); };
   int ct6 = c ? ctof(c) : 1;
   hpcshape *xsh = 
-    (it == itPirate || it == itKraken) ? &shPirateX :
-    (it == itBuggy || it == itBuggy2) ? &shPirateX :
-    it == itHolyGrail ? &shGrail :
-    isElementalShard(it) ? &shElementalShard :
-    (it == itBombEgg || it == itTrollEgg) ? &shEgg :
-    it == itHunting ? &shTriangle :
-    it == itDodeca ? &shDodeca :
-    xch == '*' ? &shGem[ct6] : 
-    xch == '(' ? &shKnife : 
-    it == itShard ? &shMFloor.b[0] :
-    it == itTreat ? &shTreat :
-    it == itSlime ? &shEgg :
-    xch == '%' ? &shDaisy : xch == '$' ? &shStar : xch == ';' ? &shTriangle :
-    xch == '!' ? &shTriangle : it == itBone ? &shNecro : it == itStatue ? &shStatue :
-    it == itIvory ? &shFigurine : 
-    xch == '?' ? &shBookCover : 
-    it == itKey ? &shKey : 
-    it == itRevolver ? &shGun :
+    (it == itPirate || it == itKraken) ? &cgi.shPirateX :
+    (it == itBuggy || it == itBuggy2) ? &cgi.shPirateX :
+    it == itHolyGrail ? &cgi.shGrail :
+    isElementalShard(it) ? &cgi.shElementalShard :
+    (it == itBombEgg || it == itTrollEgg) ? &cgi.shEgg :
+    it == itHunting ? &cgi.shTriangle :
+    it == itDodeca ? &cgi.shDodeca :
+    xch == '*' ? &cgi.shGem[ct6] : 
+    xch == '(' ? &cgi.shKnife : 
+    it == itShard ? &cgi.shMFloor.b[0] :
+    it == itTreat ? &cgi.shTreat :
+    it == itSlime ? &cgi.shEgg :
+    xch == '%' ? &cgi.shDaisy : xch == '$' ? &cgi.shStar : xch == ';' ? &cgi.shTriangle :
+    xch == '!' ? &cgi.shTriangle : it == itBone ? &cgi.shNecro : it == itStatue ? &cgi.shStatue :
+    it == itIvory ? &cgi.shFigurine : 
+    xch == '?' ? &cgi.shBookCover : 
+    it == itKey ? &cgi.shKey : 
+    it == itRevolver ? &cgi.shGun :
     NULL;
    
   if(c && doHighlight()) 
@@ -813,10 +811,10 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   
   if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
     
-  if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < orbsize * 0.25) return false;
+  if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
   transmatrix Vit = V;
-  if(GDIM == 3 && WDIM == 2 && c) Vit = mscale(V, geom3::STUFF);
+  if(GDIM == 3 && WDIM == 2 && c) Vit = mscale(V, cgi.STUFF);
   if(DIM == 3 && c) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 
@@ -830,18 +828,18 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
     }
   
   else if(it == itStrongWind) {
-    queuepoly(Vit * spinptick(750), shFan, darkena(icol, 0, 255));
+    queuepoly(Vit * spinptick(750), cgi.shFan, darkena(icol, 0, 255));
     }
 
   else if(it == itWarning) {
-    queuepoly(Vit * spinptick(750), shTriangle, darkena(icol, 0, 255));
+    queuepoly(Vit * spinptick(750), cgi.shTriangle, darkena(icol, 0, 255));
     }
     
   else if(it == itBabyTortoise) {
     int bits = c ? tortoise::babymap[c] : tortoise::last;
     int over = c && c->monst == moTortoise;
-    tortoise::draw(Vit * spinptick(5000) * ypush(crossf*.15), bits, over ? 4 : 2, 0);
-    // queuepoly(Vit, shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
+    tortoise::draw(Vit * spinptick(5000) * ypush(cgi.crossf*.15), bits, over ? 4 : 2, 0);
+    // queuepoly(Vit, cgi.shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
     }
   
   else if(it == itCompass) {
@@ -872,48 +870,48 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
       else V2 = V;
       }
     if(DIM == 3) {
-      queuepoly(Vit, shRing, 0xFFFFFFFF);
-      if(WDIM == 2) V2 = mscale(V2, geom3::STUFF);
+      queuepoly(Vit, cgi.shRing, 0xFFFFFFFF);
+      if(WDIM == 2) V2 = mscale(V2, cgi.STUFF);
       V2 = V2 * cspin(1, 2, M_PI * sintick(100) / 39);
-      queuepoly(V2, shCompass3, 0xFF0000FF);
-      queuepoly(V2 * pispin, shCompass3, 0x000000FF);      
+      queuepoly(V2, cgi.shCompass3, 0xFF0000FF);
+      queuepoly(V2 * pispin, cgi.shCompass3, 0x000000FF);      
       }
     else {
       if(c) V2 = V2 * spin(M_PI * sintick(100) / 30);
-      queuepoly(V2, shCompass1, 0xFF8080FF);
-      queuepoly(V2, shCompass2, 0xFFFFFFFF);
-      queuepoly(V2, shCompass3, 0xFF0000FF);
-      queuepoly(V2 * pispin, shCompass3, 0x000000FF);
+      queuepoly(V2, cgi.shCompass1, 0xFF8080FF);
+      queuepoly(V2, cgi.shCompass2, 0xFFFFFFFF);
+      queuepoly(V2, cgi.shCompass3, 0xFF0000FF);
+      queuepoly(V2 * pispin, cgi.shCompass3, 0x000000FF);
       }
     xsh = NULL;
     }
 
   else if(it == itPalace) {
-    ld h = geom3::human_height;
+    ld h = cgi.human_height;
     if(GDIM == 3 && WDIM == 2) {
       dynamicval<qfloorinfo> qfi2(qfi, qfi);
       transmatrix V2 = V * spin(ticks / 1500.);
       /* divisors should be higher than in plate renderer */
-      qfi.fshape = &shMFloor2;
+      qfi.fshape = &cgi.shMFloor2;
       draw_shapevec(c, V2 * zpush(-h/30), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
 
-      qfi.fshape = &shMFloor3;
+      qfi.fshape = &cgi.shMFloor3;
       draw_shapevec(c, V2 * zpush(-h/25), qfi.fshape->levels[0], darkena(icol, 0, 0xFF), PPR::WALL);
 
-      qfi.fshape = &shMFloor4;
+      qfi.fshape = &cgi.shMFloor4;
       draw_shapevec(c, V2 * zpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
       }
     else if(WDIM == 3) {
       transmatrix V2 = Vit * spin(ticks / 1500.);
-      draw_floorshape(c, V2 * zpush(h/100), shMFloor3, 0xFFD500FF);
-      draw_floorshape(c, V2 * zpush(h/50), shMFloor4, darkena(icol, 0, 0xFF));
-      queuepoly(V2, shGem[ct6], 0xFFD500FF);
+      draw_floorshape(c, V2 * zpush(h/100), cgi.shMFloor3, 0xFFD500FF);
+      draw_floorshape(c, V2 * zpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
+      queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
       }
     else {
       transmatrix V2 = Vit * spin(ticks / 1500.);
-      draw_floorshape(c, V2, shMFloor3, 0xFFD500FF);
-      draw_floorshape(c, V2, shMFloor4, darkena(icol, 0, 0xFF));
-      queuepoly(V2, shGem[ct6], 0xFFD500FF);
+      draw_floorshape(c, V2, cgi.shMFloor3, 0xFFD500FF);
+      draw_floorshape(c, V2, cgi.shMFloor4, darkena(icol, 0, 0xFF));
+      queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
       }
     xsh = NULL;
     }
@@ -922,7 +920,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
-      queuepoly(Vit * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
+      queuepoly(Vit * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), cgi.shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
     }
 
   else if(it == itBarrow && c) {
@@ -931,7 +929,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
         (highwall(c) && wmspatial) ? 0x60 : 0xFF),
         PPR::HIDDEN);
 
-//      queuepoly(Vit*spin(M_PI+(1-2*ang)*2*M_PI/S84), shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
+//      queuepoly(Vit*spin(M_PI+(1-2*ang)*2*M_PI/cgi.S84), cgi.shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
     }
     
   else if(xsh) {
@@ -944,11 +942,11 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
     
     transmatrix V2 = Vit * spinptick(1500);
   
-    if(xsh == &shBookCover && mmitem) {
+    if(xsh == &cgi.shBookCover && mmitem) {
       if(DIM == 3)
-        queuepoly(V2 * cpush(2, 1e-3), shBook, 0x805020FF);
+        queuepoly(V2 * cpush(2, 1e-3), cgi.shBook, 0x805020FF);
       else
-        queuepoly(V2, shBook, 0x805020FF);
+        queuepoly(V2, cgi.shBook, 0x805020FF);
       }
     
     PPR pr = PPR::ITEM;
@@ -980,9 +978,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
     color_t col = darkena(icol, 0, int(0x80 + 0x70 * sinptick(300)));
     
     if(it == itOrbFish)
-      queuepolyat(Vit * spinptick(1500), shFishTail, col, PPR::ITEM_BELOW);
+      queuepolyat(Vit * spinptick(1500), cgi.shFishTail, col, PPR::ITEM_BELOW);
 
-    queuepolyat(Vit, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
+    queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
 
     queuepolyat(Vit * spinptick(1500), orbshape(iinf[it].orbshape), col, prio);
     }
@@ -995,17 +993,17 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
 
 #if CAP_SHAPES
 void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
-  ShadowV(V, shPBody);
+  ShadowV(V, cgi.shPBody);
   color_t col = linf[laTerracotta].color;
   int bcol = darkena(false ? 0xC0B23E : col, 0, 0xFF);
   const transmatrix VBS = otherbodyparts(V, bcol, moDesertman, footphase);
-  queuepoly(VBODY * VBS, shPBody, bcol);
-  if(!peace::on) queuepoly(VBODY * VBS * Mirror, shPSword, darkena(0xC0C0C0, 0, 0xFF));
-  queuepoly(VBODY1 * VBS, shTerraArmor1, darkena(t > 0 ? 0x4040FF : col, 0, 0xFF));
-  if(hp >= 4) queuepoly(VBODY2 * VBS, shTerraArmor2, darkena(t > 1 ? 0xC00000 : col, 0, 0xFF));
-  if(hp >= 2) queuepoly(VBODY3 * VBS, shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
-  queuepoly(VHEAD, shTerraHead, darkena(t > 4 ? 0x202020 : t > 3 ? 0x504040 : col, 0, 0xFF));
-  queuepoly(VHEAD1, shPFace, bcol);
+  queuepoly(VBODY * VBS, cgi.shPBody, bcol);
+  if(!peace::on) queuepoly(VBODY * VBS * Mirror, cgi.shPSword, darkena(0xC0C0C0, 0, 0xFF));
+  queuepoly(VBODY1 * VBS, cgi.shTerraArmor1, darkena(t > 0 ? 0x4040FF : col, 0, 0xFF));
+  if(hp >= 4) queuepoly(VBODY2 * VBS, cgi.shTerraArmor2, darkena(t > 1 ? 0xC00000 : col, 0, 0xFF));
+  if(hp >= 2) queuepoly(VBODY3 * VBS, cgi.shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
+  queuepoly(VHEAD, cgi.shTerraHead, darkena(t > 4 ? 0x202020 : t > 3 ? 0x504040 : col, 0, 0xFF));
+  queuepoly(VHEAD1, cgi.shPFace, bcol);
   }
 #endif
 
@@ -1013,8 +1011,8 @@ color_t skincolor = 0xD0C080FF;
 
 void humanoid_eyes(const transmatrix& V, color_t ecol, color_t hcol = skincolor) {
   if(DIM == 3) {
-    queuepoly(VHEAD, shPHeadOnly, hcol);
-    queuepoly(VHEAD, shSkullEyes, ecol);
+    queuepoly(VHEAD, cgi.shPHeadOnly, hcol);
+    queuepoly(VHEAD, cgi.shSkullEyes, ecol);
     }
   }
 
@@ -1026,21 +1024,21 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
     if(cs.charid >= 8) {
       /* famililar */
       if(!mmspatial && !footphase)
-        queuepoly(VALEGS, shWolfLegs, fc(150, cs.dresscolor, 4));   
+        queuepoly(VALEGS, cgi.shWolfLegs, fc(150, cs.dresscolor, 4));   
       else {
-        ShadowV(V, shWolfBody);
+        ShadowV(V, cgi.shWolfBody);
         animallegs(VALEGS, moWolf, fc(500, cs.dresscolor, 4), footphase);
         }
-      queuepoly(VABODY, shWolfBody, fc(0, cs.skincolor, 0));
-      queuepoly(VAHEAD, shFamiliarHead, fc(500, cs.haircolor, 2));
+      queuepoly(VABODY, cgi.shWolfBody, fc(0, cs.skincolor, 0));
+      queuepoly(VAHEAD, cgi.shFamiliarHead, fc(500, cs.haircolor, 2));
       if(!shmup::on || shmup::curtime >= shmup::getPlayer()->nextshot) {
         color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.eyecolor, 3);
-        queuepoly(VAHEAD, shFamiliarEye, col);
-        queuepoly(VAHEAD * Mirror, shFamiliarEye, col);
+        queuepoly(VAHEAD, cgi.shFamiliarEye, col);
+        queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, col);
         }
 
       if(knighted)
-        queuepoly(VABODY, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
+        queuepoly(VABODY, cgi.shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
 
       if(tortoise::seek())
         tortoise::draw(VABODY, tortoise::seekbits, 4, 0);
@@ -1048,25 +1046,25 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
     else if(cs.charid >= 6) {
       /* dog */
       if(!mmspatial && !footphase)
-        queuepoly(VABODY, shDogBody, fc(0, cs.skincolor, 0));
+        queuepoly(VABODY, cgi.shDogBody, fc(0, cs.skincolor, 0));
       else {
-        ShadowV(V, shDogTorso);          
+        ShadowV(V, cgi.shDogTorso);          
         animallegs(VALEGS, moRunDog, fc(500, cs.dresscolor, 4), footphase);
-        queuepoly(VABODY, shDogTorso, fc(0, cs.skincolor, 0));
+        queuepoly(VABODY, cgi.shDogTorso, fc(0, cs.skincolor, 0));
         }
-      queuepoly(VAHEAD, shDogHead, fc(150, cs.haircolor, 2));
+      queuepoly(VAHEAD, cgi.shDogHead, fc(150, cs.haircolor, 2));
 
       if(!shmup::on || shmup::curtime >= shmup::getPlayer()->nextshot) {
         color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.eyecolor, 3);
-        queuepoly(VAHEAD, shWolf1, col);
-        queuepoly(VAHEAD, shWolf2, col);
+        queuepoly(VAHEAD, cgi.shWolf1, col);
+        queuepoly(VAHEAD, cgi.shWolf2, col);
         }
 
       color_t colnose = items[itOrbDiscord] ? watercolor(0) : fc(314, 0xFF, 3);
-      queuepoly(VAHEAD, shWolf3, colnose);
+      queuepoly(VAHEAD, cgi.shWolf3, colnose);
 
       if(knighted)
-        queuepoly(VABODY, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
+        queuepoly(VABODY, cgi.shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
 
       if(tortoise::seek())
         tortoise::draw(VABODY, tortoise::seekbits, 4, 0);
@@ -1074,21 +1072,21 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
     else if(cs.charid >= 4) {
       /* cat */
       if(!mmspatial && !footphase)
-        queuepoly(VALEGS, shCatLegs, fc(500, cs.dresscolor, 4));
+        queuepoly(VALEGS, cgi.shCatLegs, fc(500, cs.dresscolor, 4));
       else {
-        ShadowV(V, shCatBody);
+        ShadowV(V, cgi.shCatBody);
         animallegs(VALEGS, moRunDog, fc(500, cs.dresscolor, 4), footphase);
         }
-      queuepoly(VABODY, shCatBody, fc(0, cs.skincolor, 0));
-      queuepoly(VAHEAD, shCatHead, fc(150, cs.haircolor, 2));
+      queuepoly(VABODY, cgi.shCatBody, fc(0, cs.skincolor, 0));
+      queuepoly(VAHEAD, cgi.shCatHead, fc(150, cs.haircolor, 2));
       if(!shmup::on || shmup::curtime >= shmup::getPlayer()->nextshot) {
         color_t col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.eyecolor, 3);
-        queuepoly(VAHEAD * xpush(.04), shWolf1, col);
-        queuepoly(VAHEAD * xpush(.04), shWolf2, col);
+        queuepoly(VAHEAD * xpush(.04), cgi.shWolf1, col);
+        queuepoly(VAHEAD * xpush(.04), cgi.shWolf2, col);
         }
 
       if(knighted)
-        queuepoly(VABODY, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
+        queuepoly(VABODY, cgi.shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
 
       if(tortoise::seek())
         tortoise::draw(VABODY, tortoise::seekbits, 4, 0);
@@ -1097,29 +1095,29 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
        /* human */
       const transmatrix VBS = otherbodyparts(V, fc(0, cs.skincolor, 0), items[itOrbFish] ? moWaterElemental : moPlayer, footphase);
   
-      queuepoly(VBODY * VBS, (cs.charid&1) ? shFemaleBody : shPBody, fc(0, cs.skincolor, 0));      
+      queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody, fc(0, cs.skincolor, 0));      
   
-      ShadowV(V, (cs.charid&1) ? shFemaleBody : shPBody);
+      ShadowV(V, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody);
   
       if(cs.charid&1)
-        queuepoly(VBODY1 * VBS, shFemaleDress, fc(500, cs.dresscolor, 4));
+        queuepoly(VBODY1 * VBS, cgi.shFemaleDress, fc(500, cs.dresscolor, 4));
   
       if(cs.charid == 2)
-        queuepoly(VBODY2 * VBS, shPrinceDress,  fc(400, cs.dresscolor, 5));
+        queuepoly(VBODY2 * VBS, cgi.shPrinceDress,  fc(400, cs.dresscolor, 5));
       if(cs.charid == 3) 
-        queuepoly(VBODY2 * VBS, shPrincessDress,  fc(400, cs.dresscolor2, 5));
+        queuepoly(VBODY2 * VBS, cgi.shPrincessDress,  fc(400, cs.dresscolor2, 5));
         
       if(items[itOrbSide3])
-        queuepoly(VBODY * VBS, (cs.charid&1) ? shFerocityF : shFerocityM, fc(0, cs.skincolor, 0));
+        queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFerocityF : cgi.shFerocityM, fc(0, cs.skincolor, 0));
   
       if(items[itOrbHorns]) {
-        queuepoly(VBODY * VBS, shBullHead, items[itOrbDiscord] ? watercolor(0) : 0xFF000030);
-        queuepoly(VBODY * VBS, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
-        queuepoly(VBODY * VBS * Mirror, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
+        queuepoly(VBODY * VBS, cgi.shBullHead, items[itOrbDiscord] ? watercolor(0) : 0xFF000030);
+        queuepoly(VBODY * VBS, cgi.shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
+        queuepoly(VBODY * VBS * Mirror, cgi.shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
         }
   
       if(items[itOrbSide1] && !shmup::on)
-        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       
       transmatrix VWPN = cs.lefthanded ? VBODY * VBS * Mirror : VBODY * VBS;
       
@@ -1127,52 +1125,52 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       else if(racing::on) {
   #if CAP_RACING
         if(racing::trophy[multi::cpid])
-          queuepoly(VWPN, shTrophy, racing::trophy[multi::cpid]);
+          queuepoly(VWPN, cgi.shTrophy, racing::trophy[multi::cpid]);
   #endif
         }
       else if(items[itOrbThorns])
-        queuepoly(VWPN, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
+        queuepoly(VWPN, cgi.shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
       else if(!shmup::on && items[itOrbDiscord])
-        queuepoly(VWPN, cs.charid >= 2 ? shSabre : shPSword, watercolor(0));
+        queuepoly(VWPN, cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, watercolor(0));
       else if(items[itRevolver])
-        queuepoly(VWPN, shGunInHand, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VWPN, cgi.shGunInHand, fc(314, cs.swordcolor, 3)); // 3 not colored
       else if(items[itOrbSlaying]) {
-        queuepoly(VWPN, shFlailTrunk, fc(314, cs.swordcolor, 3));
-        queuepoly(VWPN, shHammerHead, fc(314, cs.swordcolor, 3));
+        queuepoly(VWPN, cgi.shFlailTrunk, fc(314, cs.swordcolor, 3));
+        queuepoly(VWPN, cgi.shHammerHead, fc(314, cs.swordcolor, 3));
         }
       else if(!shmup::on)
-        queuepoly(VWPN, cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VWPN, cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       else if(shmup::curtime >= shmup::getPlayer()->nextshot)
-        queuepoly(VWPN, shPKnife, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VWPN, cgi.shPKnife, fc(314, cs.swordcolor, 3)); // 3 not colored
       
       if(items[itOrbBeauty]) {
         if(cs.charid&1)
-          queuepoly(VHEAD1, shFlowerHair, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
+          queuepoly(VHEAD1, cgi.shFlowerHair, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
         else
-          queuepoly(VWPN, shFlowerHand, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
+          queuepoly(VWPN, cgi.shFlowerHand, darkena(iinf[itOrbBeauty].color, 0, 0xFF));
         }
       
       if(where && where->land == laWildWest) {
-        queuepoly(VHEAD1, shWestHat1, darkena(cs.swordcolor, 1, 0XFF));
-        queuepoly(VHEAD2, shWestHat2, darkena(cs.swordcolor, 0, 0XFF));
+        queuepoly(VHEAD1, cgi.shWestHat1, darkena(cs.swordcolor, 1, 0XFF));
+        queuepoly(VHEAD2, cgi.shWestHat2, darkena(cs.swordcolor, 0, 0XFF));
         }
   
       if(cheater && !autocheat) {
-        queuepoly(VHEAD1, (cs.charid&1) ? shGoatHead : shDemon, darkena(0xFFFF00, 0, 0xFF));
+        queuepoly(VHEAD1, (cs.charid&1) ? cgi.shGoatHead : cgi.shDemon, darkena(0xFFFF00, 0, 0xFF));
         // queuepoly(V, shHood, darkena(0xFF00, 1, 0xFF));
         }
       else {
-        queuepoly(VHEAD, shPFace, fc(500, cs.skincolor, 1));
-        queuepoly(VHEAD1, (cs.charid&1) ? shFemaleHair : shPHead, fc(150, cs.haircolor, 2));
+        queuepoly(VHEAD, cgi.shPFace, fc(500, cs.skincolor, 1));
+        queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead, fc(150, cs.haircolor, 2));
         }      
       
       humanoid_eyes(V, cs.eyecolor, cs.skincolor);
   
       if(knighted)
-        queuepoly(VBODY * VBS, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
+        queuepoly(VBODY * VBS, cgi.shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
   
       if(tortoise::seek())
-        tortoise::draw(VBODY * VBS * ypush(-crossf*.25), tortoise::seekbits, 4, 0);
+        tortoise::draw(VBODY * VBS * ypush(-cgi.crossf*.25), tortoise::seekbits, 4, 0);
       }
     }
   }
@@ -1195,71 +1193,71 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
   if(mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, darkena(col, 0, 0x80), where)) return;
   
   if(cs.charid >= 8) {
-    queuepoly(VABODY, shWolfBody, darkena(col, 0, 0xC0));
-    ShadowV(V, shWolfBody);
+    queuepoly(VABODY, cgi.shWolfBody, darkena(col, 0, 0xC0));
+    ShadowV(V, cgi.shWolfBody);
 
     if(mmspatial || footphase)
       animallegs(VALEGS, moWolf, darkena(col, 0, 0xC0), footphase);
     else 
-      queuepoly(VABODY, shWolfLegs, darkena(col, 0, 0xC0));
+      queuepoly(VABODY, cgi.shWolfLegs, darkena(col, 0, 0xC0));
 
-    queuepoly(VABODY, shFamiliarHead, darkena(col, 0, 0xC0));
-    queuepoly(VAHEAD, shFamiliarEye, darkena(col, 0, 0xC0));
-    queuepoly(VAHEAD * Mirror, shFamiliarEye, darkena(col, 0, 0xC0));
+    queuepoly(VABODY, cgi.shFamiliarHead, darkena(col, 0, 0xC0));
+    queuepoly(VAHEAD, cgi.shFamiliarEye, darkena(col, 0, 0xC0));
+    queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, darkena(col, 0, 0xC0));
     }
   else if(cs.charid >= 6) {
-    ShadowV(V, shDogBody);
-    queuepoly(VAHEAD, shDogHead, darkena(col, 0, 0xC0));
+    ShadowV(V, cgi.shDogBody);
+    queuepoly(VAHEAD, cgi.shDogHead, darkena(col, 0, 0xC0));
     if(mmspatial || footphase) {
       animallegs(VALEGS, moRunDog, darkena(col, 0, 0xC0), footphase);
-      queuepoly(VABODY, shDogTorso, darkena(col, 0, 0xC0));
+      queuepoly(VABODY, cgi.shDogTorso, darkena(col, 0, 0xC0));
       }
     else 
-      queuepoly(VABODY, shDogBody, darkena(col, 0, 0xC0));
-    queuepoly(VABODY, shWolf1, darkena(col, 1, 0xC0));
-    queuepoly(VABODY, shWolf2, darkena(col, 1, 0xC0));
-    queuepoly(VABODY, shWolf3, darkena(col, 1, 0xC0));
+      queuepoly(VABODY, cgi.shDogBody, darkena(col, 0, 0xC0));
+    queuepoly(VABODY, cgi.shWolf1, darkena(col, 1, 0xC0));
+    queuepoly(VABODY, cgi.shWolf2, darkena(col, 1, 0xC0));
+    queuepoly(VABODY, cgi.shWolf3, darkena(col, 1, 0xC0));
     }
   else if(cs.charid >= 4) {
-    ShadowV(V, shCatBody);
-    queuepoly(VABODY, shCatBody, darkena(col, 0, 0xC0));
-    queuepoly(VAHEAD, shCatHead, darkena(col, 0, 0xC0));
+    ShadowV(V, cgi.shCatBody);
+    queuepoly(VABODY, cgi.shCatBody, darkena(col, 0, 0xC0));
+    queuepoly(VAHEAD, cgi.shCatHead, darkena(col, 0, 0xC0));
     if(mmspatial || footphase) 
       animallegs(VALEGS, moRunDog, darkena(col, 0, 0xC0), footphase);
     else 
-      queuepoly(VALEGS, shCatLegs, darkena(col, 0, 0xC0));
-    queuepoly(VAHEAD * xpush(.04), shWolf1, darkena(col, 1, 0xC0));
-    queuepoly(VAHEAD * xpush(.04), shWolf2, darkena(col, 1, 0xC0));
+      queuepoly(VALEGS, cgi.shCatLegs, darkena(col, 0, 0xC0));
+    queuepoly(VAHEAD * xpush(.04), cgi.shWolf1, darkena(col, 1, 0xC0));
+    queuepoly(VAHEAD * xpush(.04), cgi.shWolf2, darkena(col, 1, 0xC0));
     }
   else {
     const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
-    queuepoly(VBODY * VBS, (cs.charid&1) ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
+    queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody,  darkena(col, 0, 0X80));
 
     if(!shmup::on) {
       bool emp = items[itOrbEmpathy] && m != moShadow;
       if(items[itOrbThorns] && emp)
-        queuepoly(VBODY * VBS, shHedgehogBladePlayer, darkena(col, 0, 0x40));
+        queuepoly(VBODY * VBS, cgi.shHedgehogBladePlayer, darkena(col, 0, 0x40));
       if(items[itOrbSide1] && !shmup::on)
-        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, darkena(col, 0, 0x40));      
+        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, darkena(col, 0, 0x40));      
       if(items[itOrbSide3] && emp)
-        queuepoly(VBODY * VBS, (cs.charid&1) ? shFerocityF : shFerocityM, darkena(col, 0, 0x40));
+        queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFerocityF : cgi.shFerocityM, darkena(col, 0, 0x40));
 
-      queuepoly(VBODY * VBS, (cs.charid >= 2 ? shSabre : shPSword), darkena(col, 0, 0XC0));
+      queuepoly(VBODY * VBS, (cs.charid >= 2 ? cgi.shSabre : cgi.shPSword), darkena(col, 0, 0XC0));
       }
     else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
-      queuepoly(VBODY * VBS, shPKnife, darkena(col, 0, 0XC0));
+      queuepoly(VBODY * VBS, cgi.shPKnife, darkena(col, 0, 0XC0));
 
     if(knighted)
-      queuepoly(VBODY3 * VBS, shKnightCloak, darkena(col, 1, 0xC0));
+      queuepoly(VBODY3 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xC0));
 
-    queuepoly(VHEAD1, (cs.charid&1) ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
-    queuepoly(VHEAD, shPFace,  darkena(col, 0, 0XC0));
+    queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead,  darkena(col, 1, 0XC0));
+    queuepoly(VHEAD, cgi.shPFace,  darkena(col, 0, 0XC0));
     if(cs.charid&1)
-      queuepoly(VBODY1 * VBS, shFemaleDress,  darkena(col, 1, 0XC0));
+      queuepoly(VBODY1 * VBS, cgi.shFemaleDress,  darkena(col, 1, 0XC0));
     if(cs.charid == 2)
-      queuepoly(VBODY2 * VBS, shPrinceDress,  darkena(col, 1, 0XC0));
+      queuepoly(VBODY2 * VBS, cgi.shPrinceDress,  darkena(col, 1, 0XC0));
     if(cs.charid == 3)
-      queuepoly(VBODY2 * VBS, shPrincessDress,  darkena(col, 1, 0XC0));
+      queuepoly(VBODY2 * VBS, cgi.shPrincessDress,  darkena(col, 1, 0XC0));
 
     humanoid_eyes(V,  0xFF, darkena(col, 0, 0x40));
     }
@@ -1294,7 +1292,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       int bits = where ? tortoise::getb(where) : tortoise::last;
       tortoise::draw(V, bits, 0, where ? where->stuntime : 0);
       if(tortoise::seek() && !tortoise::diff(bits) && where)
-        queuepoly(V, shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(V, cgi.shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sintick(200)));
       return false;
       }
     
@@ -1307,43 +1305,43 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       return false;
     
     case moBullet:
-      ShadowV(V, shKnife);
-      queuepoly(VBODY * spin(-M_PI/4), shKnife, getcs().swordcolor);
+      ShadowV(V, cgi.shKnife);
+      queuepoly(VBODY * spin(-M_PI/4), cgi.shKnife, getcs().swordcolor);
       return false;
     
     case moKnight: case moKnightMoved: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = otherbodyparts(V, darkena(0xC0C0A0, 0, 0xC0), m, footphase);
-      queuepoly(VBODY * VBS, shPBody, darkena(0xC0C0A0, 0, 0xC0));
+      queuepoly(VBODY * VBS, cgi.shPBody, darkena(0xC0C0A0, 0, 0xC0));
       if(!racing::on) 
-        queuepoly(VBODY * VBS, shPSword, darkena(0xFFFF00, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
+        queuepoly(VBODY * VBS, cgi.shPSword, darkena(0xFFFF00, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
       color_t col;
       if(!eubinary && where && where->master->alt)
         col = cloakcolor(roundTableRadius(where));
       else
         col = cloakcolor(newRoundTableRadius());
-      queuepoly(VBODY2 * VBS, shKnightCloak, darkena(col, 1, 0xFF));
-      queuepoly(VHEAD1, shPHead, darkena(0x703800, 1, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+      queuepoly(VBODY2 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xFF));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(0x703800, 1, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moGolem: case moGolemMoved: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0XC0), m, footphase);
-      queuepoly(VBODY * VBS, shPBody, darkena(col, 0, 0XC0));
-      queuepoly(VHEAD, shGolemhead, darkena(col, 1, 0XFF));
+      queuepoly(VBODY * VBS, cgi.shPBody, darkena(col, 0, 0XC0));
+      queuepoly(VHEAD, cgi.shGolemhead, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0xC0C000FF, darkena(col, 0, 0xFF));
       return false;
       }
     
     case moEvilGolem: case moIceGolem: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 2, 0xC0), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, darkena(col, 0, 0XC0));
-      queuepoly(VHEAD, shGolemhead, darkena(col, 1, 0XFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0XC0));
+      queuepoly(VHEAD, cgi.shGolemhead, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0xFF0000FF, darkena(col, 0, 0xFF));
       return false;
       }
@@ -1355,126 +1353,126 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
   
       int facecolor = evil ? 0xC0B090FF : 0xD0C080FF;
       
-      ShadowV(V, girl ? shFemaleBody : shPBody);
+      ShadowV(V, girl ? cgi.shFemaleBody : cgi.shPBody);
       const transmatrix VBS = otherbodyparts(V, facecolor, m, footphase);
-      queuepoly(VBODY * VBS, girl ? shFemaleBody : shPBody, facecolor);
+      queuepoly(VBODY * VBS, girl ? cgi.shFemaleBody : cgi.shPBody, facecolor);
   
       if(m == moPrincessArmed) 
-        queuepoly(VBODY * VBS * Mirror, vid.cs.charid < 2 ? shSabre : shPSword, 0xFFFFFFFF);
+        queuepoly(VBODY * VBS * Mirror, vid.cs.charid < 2 ? cgi.shSabre : cgi.shPSword, 0xFFFFFFFF);
       
       if((m == moFalsePrincess || m == moRoseBeauty) && where && where->cpdist == 1)
-        queuepoly(VBODY * VBS, shPKnife, 0xFFFFFFFF);
+        queuepoly(VBODY * VBS, cgi.shPKnife, 0xFFFFFFFF);
   
       if(m == moRoseLady) {
-        queuepoly(VBODY * VBS, shPKnife, 0xFFFFFFFF);
-        queuepoly(VBODY * VBS * Mirror, shPKnife, 0xFFFFFFFF);
+        queuepoly(VBODY * VBS, cgi.shPKnife, 0xFFFFFFFF);
+        queuepoly(VBODY * VBS * Mirror, cgi.shPKnife, 0xFFFFFFFF);
         }
   
       if(girl) {
-        queuepoly(VBODY1 * VBS, shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
+        queuepoly(VBODY1 * VBS, cgi.shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
         if(vid.cs.charid < 2) 
-          queuepoly(VBODY2 * VBS, shPrincessDress, (evil ? 0xC040C0C0 : 0x8080FFC0) | UNTRANS);
+          queuepoly(VBODY2 * VBS, cgi.shPrincessDress, (evil ? 0xC040C0C0 : 0x8080FFC0) | UNTRANS);
         }
       else {
         if(vid.cs.charid < 2) 
-          queuepoly(VBODY1 * VBS, shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
+          queuepoly(VBODY1 * VBS, cgi.shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
         }    
   
       if(m == moRoseLady) {
-  //    queuepoly(V, girl ? shGoatHead : shDemon,  0x800000FF);
+  //    queuepoly(V, girl ? cgi.shGoatHead : cgi.shDemon,  0x800000FF);
         // make her hair a bit darker to stand out in 3D
-        queuepoly(VHEAD1, girl ? shFemaleHair : shPHead,  evil ? 0x500050FF : DIM == 3 ? 0x666A64FF : 0x332A22FF);
+        queuepoly(VHEAD1, girl ? cgi.shFemaleHair : cgi.shPHead,  evil ? 0x500050FF : DIM == 3 ? 0x666A64FF : 0x332A22FF);
         }
       else if(m == moRoseBeauty) {
         if(girl) {
-          queuepoly(VHEAD1, shBeautyHair,  0xF0A0D0FF);
-          queuepoly(VHEAD2, shFlowerHair,  0xC00000FF);
+          queuepoly(VHEAD1, cgi.shBeautyHair,  0xF0A0D0FF);
+          queuepoly(VHEAD2, cgi.shFlowerHair,  0xC00000FF);
           }
         else {
-          queuepoly(VHEAD1, shPHead,  0xF0A0D0FF);
-          queuepoly(VBS, shFlowerHand,  0xC00000FF);
-          queuepoly(VBODY2 * VBS, shSuspenders,  0xC00000FF);
+          queuepoly(VHEAD1, cgi.shPHead,  0xF0A0D0FF);
+          queuepoly(VBS, cgi.shFlowerHand,  0xC00000FF);
+          queuepoly(VBODY2 * VBS, cgi.shSuspenders,  0xC00000FF);
           }
         }
       else {
-        queuepoly(VHEAD1, girl ? shFemaleHair : shPHead,  
+        queuepoly(VHEAD1, girl ? cgi.shFemaleHair : cgi.shPHead,  
           evil ? 0xC00000FF : 0x332A22FF);
         }
-      queuepoly(VHEAD, shPFace,  facecolor);
+      queuepoly(VHEAD, cgi.shPFace,  facecolor);
       humanoid_eyes(V, evil ? 0x0000C0FF : 0x00C000FF, facecolor);
       return false;
       }
   
     case moWolf: case moRedFox: case moWolfMoved: case moLavaWolf: {
-      ShadowV(V, shWolfBody);
+      ShadowV(V, cgi.shWolfBody);
       if(mmspatial || footphase)
         animallegs(VALEGS, moWolf, darkena(col, 0, 0xFF), footphase);
       else
-        queuepoly(VALEGS, shWolfLegs, darkena(col, 0, 0xFF));
-      queuepoly(VABODY, shWolfBody, darkena(col, 0, 0xFF));
+        queuepoly(VALEGS, cgi.shWolfLegs, darkena(col, 0, 0xFF));
+      queuepoly(VABODY, cgi.shWolfBody, darkena(col, 0, 0xFF));
       if(m == moRedFox) {
-        queuepoly(VABODY, shFoxTail1, darkena(col, 0, 0xFF));
-        queuepoly(VABODY, shFoxTail2, darkena(0xFFFFFF, 0, 0xFF));
+        queuepoly(VABODY, cgi.shFoxTail1, darkena(col, 0, 0xFF));
+        queuepoly(VABODY, cgi.shFoxTail2, darkena(0xFFFFFF, 0, 0xFF));
         }
-      queuepoly(VAHEAD, shWolfHead, darkena(col, 0, 0xFF));
-      queuepoly(VAHEAD, shWolfEyes, darkena(col, 3, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolfHead, darkena(col, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolfEyes, darkena(col, 3, 0xFF));
       if(DIM == 3) {
-        queuepoly(VAHEAD, shFamiliarEye, 0xFF);
-        queuepoly(VAHEAD * Mirror, shFamiliarEye, 0xFF);
+        queuepoly(VAHEAD, cgi.shFamiliarEye, 0xFF);
+        queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, 0xFF);
         }
       return false;
       }
     
     case moReptile: {
-      ShadowV(V, shReptileBody);
+      ShadowV(V, cgi.shReptileBody);
       animallegs(VALEGS, moReptile, darkena(col, 0, 0xFF), footphase);
-      queuepoly(VABODY, shReptileBody, darkena(col, 0, 0xFF));
-      queuepoly(VAHEAD, shReptileHead, darkena(col, 0, 0xFF));
-      queuepoly(VAHEAD, shReptileEye, darkena(col, 3, 0xFF));
-      queuepoly(VAHEAD * Mirror, shReptileEye, darkena(col, 3, 0xFF));
-      queuepoly(VABODY, shReptileTail, darkena(col, 2, 0xFF));
+      queuepoly(VABODY, cgi.shReptileBody, darkena(col, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shReptileHead, darkena(col, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shReptileEye, darkena(col, 3, 0xFF));
+      queuepoly(VAHEAD * Mirror, cgi.shReptileEye, darkena(col, 3, 0xFF));
+      queuepoly(VABODY, cgi.shReptileTail, darkena(col, 2, 0xFF));
       return false;
       }
     
     case moSalamander: {
-      ShadowV(V, shReptileBody);
+      ShadowV(V, cgi.shReptileBody);
       animallegs(VALEGS, moReptile, darkena(0xD00000, 1, 0xFF), footphase);
-      queuepoly(VABODY, shReptileBody, darkena(0xD00000, 0, 0xFF));
-      queuepoly(VAHEAD, shReptileHead, darkena(0xD00000, 1, 0xFF));
-      queuepoly(VAHEAD, shReptileEye, darkena(0xD00000, 0, 0xFF));
-      queuepoly(VAHEAD * Mirror, shReptileEye, darkena(0xD00000, 0, 0xFF));
-      queuepoly(VABODY, shReptileTail, darkena(0xD08000, 0, 0xFF));
+      queuepoly(VABODY, cgi.shReptileBody, darkena(0xD00000, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shReptileHead, darkena(0xD00000, 1, 0xFF));
+      queuepoly(VAHEAD, cgi.shReptileEye, darkena(0xD00000, 0, 0xFF));
+      queuepoly(VAHEAD * Mirror, cgi.shReptileEye, darkena(0xD00000, 0, 0xFF));
+      queuepoly(VABODY, cgi.shReptileTail, darkena(0xD08000, 0, 0xFF));
       return false;
       }
     
     case moVineBeast: {
-      ShadowV(V, shWolfBody);
+      ShadowV(V, cgi.shWolfBody);
       if(mmspatial || footphase)
         animallegs(VALEGS, moWolf, 0x00FF00FF, footphase);
       else
-        queuepoly(VALEGS, shWolfLegs, 0x00FF00FF);
-      queuepoly(VABODY, shWolfBody, darkena(col, 1, 0xFF));
-      queuepoly(VAHEAD, shWolfHead, darkena(col, 0, 0xFF));
-      queuepoly(VAHEAD, shWolfEyes, 0xFF0000FF);
+        queuepoly(VALEGS, cgi.shWolfLegs, 0x00FF00FF);
+      queuepoly(VABODY, cgi.shWolfBody, darkena(col, 1, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolfHead, darkena(col, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolfEyes, 0xFF0000FF);
       return false;
       }
     
     case moMouse: case moMouseMoved: {
-      queuepoly(VALEGS, shMouse, darkena(col, 0, 0xFF));
-      queuepoly(VALEGS, shMouseLegs, darkena(col, 1, 0xFF));
-      queuepoly(VALEGS, shMouseEyes, 0xFF);
+      queuepoly(VALEGS, cgi.shMouse, darkena(col, 0, 0xFF));
+      queuepoly(VALEGS, cgi.shMouseLegs, darkena(col, 1, 0xFF));
+      queuepoly(VALEGS, cgi.shMouseEyes, 0xFF);
       return false;
       }
     
     case moRunDog: case moHunterDog: case moHunterGuard: case moHunterChanging: case moFallingDog: {
       if(!mmspatial && !footphase) 
-        queuepoly(VABODY, shDogBody, darkena(col, 0, 0xFF));
+        queuepoly(VABODY, cgi.shDogBody, darkena(col, 0, 0xFF));
       else {
-        ShadowV(V, shDogTorso);
-        queuepoly(VABODY, shDogTorso, darkena(col, 0, 0xFF));
+        ShadowV(V, cgi.shDogTorso);
+        queuepoly(VABODY, cgi.shDogTorso, darkena(col, 0, 0xFF));
         animallegs(VALEGS, moRunDog, m == moFallingDog ? 0xFFFFFFFF : darkena(col, 0, 0xFF), footphase);
         }
-      queuepoly(VAHEAD, shDogHead, darkena(col, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shDogHead, darkena(col, 0, 0xFF));
   
       {
       dynamicval<color_t> dp(poly_outline);
@@ -1486,38 +1484,38 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       int eyes = darkena(eyecolor, 0, 0xFF);
   
       if(redeyes) poly_outline = eyes;
-      queuepoly(VAHEAD, shWolf1, eyes).flags |= POLY_FORCEWIDE;
-      queuepoly(VAHEAD, shWolf2, eyes).flags |= POLY_FORCEWIDE;
+      queuepoly(VAHEAD, cgi.shWolf1, eyes).flags |= POLY_FORCEWIDE;
+      queuepoly(VAHEAD, cgi.shWolf2, eyes).flags |= POLY_FORCEWIDE;
       }
-      queuepoly(VAHEAD, shWolf3, darkena(m == moRunDog ? 0x202020 : 0x000000, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolf3, darkena(m == moRunDog ? 0x202020 : 0x000000, 0, 0xFF));
       return false;
       }
     
     case moOrangeDog: {
       if(!mmspatial && !footphase) 
-        queuepoly(VABODY, shDogBody, darkena(0xFFFFFF, 0, 0xFF));
+        queuepoly(VABODY, cgi.shDogBody, darkena(0xFFFFFF, 0, 0xFF));
       else {
-        ShadowV(V, shDogTorso);
-        queuepoly(VABODY, shDogTorso, darkena(0xFFFFFF, 0, 0xFF));
+        ShadowV(V, cgi.shDogTorso);
+        queuepoly(VABODY, cgi.shDogTorso, darkena(0xFFFFFF, 0, 0xFF));
         animallegs(VALEGS, moRunDog, darkena(0xFFFFFF, 0, 0xFF), footphase);
         }
-      queuepoly(VAHEAD, shDogHead, darkena(0xFFFFFF, 0, 0xFF));
-      queuepoly(VABODY, shDogStripes, darkena(0x303030, 0, 0xFF));
-      queuepoly(VAHEAD, shWolf1, darkena(0x202020, 0, 0xFF));
-      queuepoly(VAHEAD, shWolf2, darkena(0x202020, 0, 0xFF));
-      queuepoly(VAHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shDogHead, darkena(0xFFFFFF, 0, 0xFF));
+      queuepoly(VABODY, cgi.shDogStripes, darkena(0x303030, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolf1, darkena(0x202020, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolf2, darkena(0x202020, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
       return false;
       }
     
     case moShark: case moGreaterShark: case moCShark:
-      queuepoly(VFISH, shShark, darkena(col, 0, 0xFF));
+      queuepoly(VFISH, cgi.shShark, darkena(col, 0, 0xFF));
       return false;
 
     case moEagle: case moParrot: case moBomberbird: case moAlbatross:
     case moTameBomberbird: case moWindCrow: case moTameBomberbirdMoved:
     case moSandBird: case moAcidBird: {
-      ShadowV(V, shEagle);
-      auto& sh = DIM == 3 ? shAnimatedEagle[wingphase(200)] : shEagle;
+      ShadowV(V, cgi.shEagle);
+      auto& sh = DIM == 3 ? cgi.shAnimatedEagle[wingphase(200)] : cgi.shEagle;
       if(m == moParrot && DIM == 3)
         queuepolyat(VBIRD, sh, darkena(col, 0, 0xFF), PPR::SUPERLINE);
       else
@@ -1526,60 +1524,60 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       }
     
     case moSparrowhawk: case moWestHawk: {
-      ShadowV(V, shHawk);
-      auto& sh = DIM == 3 ? shAnimatedHawk[wingphase(200)] : shHawk;
+      ShadowV(V, cgi.shHawk);
+      auto& sh = DIM == 3 ? cgi.shAnimatedHawk[wingphase(200)] : cgi.shHawk;
       queuepoly(VBIRD, sh, darkena(col, 0, 0xFF));
       return false;
       }
     
     case moButterfly: {
       transmatrix Vwing = wingmatrix(100);
-      ShadowV(V * Vwing, shButterflyWing);
+      ShadowV(V * Vwing, cgi.shButterflyWing);
       if(DIM == 2)
-        queuepoly(VBIRD * Vwing, shButterflyWing, darkena(col, 0, 0xFF));
+        queuepoly(VBIRD * Vwing, cgi.shButterflyWing, darkena(col, 0, 0xFF));
       else
-        queuepoly(VBIRD, shAnimatedButterfly[wingphase(100)], darkena(col, 0, 0xFF));
-      queuepoly(VBIRD, shButterflyBody, darkena(col, 2, 0xFF));
+        queuepoly(VBIRD, cgi.shAnimatedButterfly[wingphase(100)], darkena(col, 0, 0xFF));
+      queuepoly(VBIRD, cgi.shButterflyBody, darkena(col, 2, 0xFF));
       return false;
       }
     
     case moGadfly: {
       transmatrix Vwing = wingmatrix(100);
-      ShadowV(V * Vwing, shGadflyWing);
-      queuepoly(VBIRD * Vwing, DIM == 2 ? shGadflyWing : shAnimatedGadfly[wingphase(100)], darkena(col, 0, 0xFF));
-      queuepoly(VBIRD, shGadflyBody, darkena(col, 1, 0xFF));
-      queuepoly(VBIRD, shGadflyEye, darkena(col, 2, 0xFF));
-      queuepoly(VBIRD * Mirror, shGadflyEye, darkena(col, 2, 0xFF));
+      ShadowV(V * Vwing, cgi.shGadflyWing);
+      queuepoly(VBIRD * Vwing, DIM == 2 ? cgi.shGadflyWing : cgi.shAnimatedGadfly[wingphase(100)], darkena(col, 0, 0xFF));
+      queuepoly(VBIRD, cgi.shGadflyBody, darkena(col, 1, 0xFF));
+      queuepoly(VBIRD, cgi.shGadflyEye, darkena(col, 2, 0xFF));
+      queuepoly(VBIRD * Mirror, cgi.shGadflyEye, darkena(col, 2, 0xFF));
       return false;
       }
     
     case moVampire: case moBat: {
       // vampires have no shadow and no mirror images
-      if(m == moBat) ShadowV(V, shBatWings);
+      if(m == moBat) ShadowV(V, cgi.shBatWings);
       if(m == moBat || !inmirrorcount) {
-        queuepoly(VBIRD, DIM == 2 ? shBatWings : shAnimatedBat[wingphase(100)], darkena(0x303030, 0, 0xFF));
-        queuepoly(VBIRD, DIM == 2 ? shBatBody : shAnimatedBat2[wingphase(100)], darkena(0x606060, 0, 0xFF));
+        queuepoly(VBIRD, DIM == 2 ? cgi.shBatWings : cgi.shAnimatedBat[wingphase(100)], darkena(0x303030, 0, 0xFF));
+        queuepoly(VBIRD, DIM == 2 ? cgi.shBatBody : cgi.shAnimatedBat2[wingphase(100)], darkena(0x606060, 0, 0xFF));
         }
-      /* queuepoly(V, shBatMouth, darkena(0xC00000, 0, 0xFF));
-      queuepoly(V, shBatFang, darkena(0xFFC0C0, 0, 0xFF));
-      queuepoly(V*Mirror, shBatFang, darkena(0xFFC0C0, 0, 0xFF));
-      queuepoly(V, shBatEye, darkena(00000000, 0, 0xFF));
-      queuepoly(V*Mirror, shBatEye, darkena(00000000, 0, 0xFF)); */
+      /* queuepoly(V, cgi.shBatMouth, darkena(0xC00000, 0, 0xFF));
+      queuepoly(V, cgi.shBatFang, darkena(0xFFC0C0, 0, 0xFF));
+      queuepoly(V*Mirror, cgi.shBatFang, darkena(0xFFC0C0, 0, 0xFF));
+      queuepoly(V, cgi.shBatEye, darkena(00000000, 0, 0xFF));
+      queuepoly(V*Mirror, cgi.shBatEye, darkena(00000000, 0, 0xFF)); */
       return false;
       }
     
     case moGargoyle: {
-      ShadowV(V, shGargoyleWings);
-      queuepoly(VBIRD, DIM == 2 ? shGargoyleWings : shAnimatedGargoyle[wingphase(300)], darkena(col, 0, 0xD0));
-      queuepoly(VBIRD, DIM == 2 ? shGargoyleBody : shAnimatedGargoyle2[wingphase(300)], darkena(col, 0, 0xFF));
+      ShadowV(V, cgi.shGargoyleWings);
+      queuepoly(VBIRD, DIM == 2 ? cgi.shGargoyleWings : cgi.shAnimatedGargoyle[wingphase(300)], darkena(col, 0, 0xD0));
+      queuepoly(VBIRD, DIM == 2 ? cgi.shGargoyleBody : cgi.shAnimatedGargoyle2[wingphase(300)], darkena(col, 0, 0xFF));
       return false;
       }
     
     case moZombie: {
       int c = darkena(col, where && where->land == laHalloween ? 1 : 0, 0xFF);
       const transmatrix VBS = otherbodyparts(V, c, m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBODY * VBS, shPBody, c);
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBODY * VBS, cgi.shPBody, c);
       return false;
       }
     
@@ -1591,389 +1589,389 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     
     case moVariantWarrior: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, darkena(0xFFD500, 0, 0xF0));
-      if(!peace::on) queuepoly(VBS, shPSword, 0xFFFF00FF);
-      queuepoly(VHEAD, shHood, 0x008000FF);
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, darkena(0xFFD500, 0, 0xF0));
+      if(!peace::on) queuepoly(VBS, cgi.shPSword, 0xFFFF00FF);
+      queuepoly(VHEAD, cgi.shHood, 0x008000FF);
       humanoid_eyes(V, 0xFFFF00FF);
       return false;
       }
     
     case moDesertman: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, darkena(col, 0, 0xC0));
-      if(!peace::on) queuepoly(VBS, shPSword, 0xFFFF00FF);
-      queuepoly(VHEAD, shHood, 0xD0D000C0 | UNTRANS);
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0xC0));
+      if(!peace::on) queuepoly(VBS, cgi.shPSword, 0xFFFF00FF);
+      queuepoly(VHEAD, cgi.shHood, 0xD0D000C0 | UNTRANS);
       humanoid_eyes(V, 0x301800FF);
       return false;
       }
     
     case moMonk: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-      ShadowV(V, shRaiderBody);
-      queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-      if(!peace::on) queuepoly(VBODY * VBS, shPKnife, 0xFFC0C0C0);
-      queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-      queuepolyat(VBODY3 * VBS, shRatCape2, darkena(col, 2, 0xFF), PPR::MONSTER_ARMOR0);
-      queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+      ShadowV(V, cgi.shRaiderBody);
+      queuepoly(VBODY * VBS, cgi.shRaiderBody, darkena(col, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shRaiderShirt, darkena(col, 2, 0xFF));
+      if(!peace::on) queuepoly(VBODY * VBS, cgi.shPKnife, 0xFFC0C0C0);
+      queuepoly(VBODY2 * VBS, cgi.shRaiderArmor, darkena(col, 1, 0xFF));
+      queuepolyat(VBODY3 * VBS, cgi.shRatCape2, darkena(col, 2, 0xFF), PPR::MONSTER_ARMOR0);
+      queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moCrusher: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V, shRaiderBody);
-      queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-      queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-      queuepoly(VBODY * VBS, shFlailTrunk, darkena(col, 1, 0XFF));
-      queuepoly(VBODY1 * VBS, shHammerHead, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+      ShadowV(V, cgi.shRaiderBody);
+      queuepoly(VBODY * VBS, cgi.shRaiderBody, darkena(col, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shRaiderShirt, darkena(col, 2, 0xFF));
+      queuepoly(VBODY2 * VBS, cgi.shRaiderArmor, darkena(col, 1, 0xFF));
+      queuepoly(VBODY * VBS, cgi.shFlailTrunk, darkena(col, 1, 0XFF));
+      queuepoly(VBODY1 * VBS, cgi.shHammerHead, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moPair: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V, shRaiderBody);
-      queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-      queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-      queuepoly(VBODY * VBS, shPickAxe, darkena(0xA0A0A0, 0, 0XFF));
-      queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+      ShadowV(V, cgi.shRaiderBody);
+      queuepoly(VBODY * VBS, cgi.shRaiderBody, darkena(col, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shRaiderShirt, darkena(col, 2, 0xFF));
+      queuepoly(VBODY2 * VBS, cgi.shRaiderArmor, darkena(col, 1, 0xFF));
+      queuepoly(VBODY * VBS, cgi.shPickAxe, darkena(0xA0A0A0, 0, 0XFF));
+      queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moAltDemon: case moHexDemon: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-      ShadowV(V, shRaiderBody);
-      queuepoly(VBODY * VBS, shRaiderBody, darkena(col, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shRaiderShirt, darkena(col, 2, 0xFF));
-      queuepoly(VBODY2 * VBS, shRaiderArmor, darkena(col, 1, 0xFF));
-      if(!peace::on) queuepoly(VBODY * VBS, shPSword, 0xFFD0D0D0);
-      queuepoly(VHEAD1, shRaiderHelmet, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+      ShadowV(V, cgi.shRaiderBody);
+      queuepoly(VBODY * VBS, cgi.shRaiderBody, darkena(col, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shRaiderShirt, darkena(col, 2, 0xFF));
+      queuepoly(VBODY2 * VBS, cgi.shRaiderArmor, darkena(col, 1, 0xFF));
+      if(!peace::on) queuepoly(VBODY * VBS, cgi.shPSword, 0xFFD0D0D0);
+      queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moSkeleton: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(0xFFFFFF, 0, 0xFF), moSkeleton, footphase);
-      queuepoly(VBS, shSkeletonBody, darkena(0xFFFFFF, 0, 0xFF));
-      if(DIM == 2) queuepoly(VHEAD, shSkull, darkena(0xFFFFFF, 0, 0xFF));
-      if(DIM == 2) queuepoly(VHEAD1, shSkullEyes, 0x000000FF);
+      queuepoly(VBS, cgi.shSkeletonBody, darkena(0xFFFFFF, 0, 0xFF));
+      if(DIM == 2) queuepoly(VHEAD, cgi.shSkull, darkena(0xFFFFFF, 0, 0xFF));
+      if(DIM == 2) queuepoly(VHEAD1, cgi.shSkullEyes, 0x000000FF);
       humanoid_eyes(V, 0x000000FF, 0xFFFFFFFF);      
-      ShadowV(V, shSkeletonBody);
-      queuepoly(VBS, shSabre, 0xFFFFFFFF);
+      ShadowV(V, cgi.shSkeletonBody);
+      queuepoly(VBS, cgi.shSabre, 0xFFFFFFFF);
       return false;
       }
     
     case moPalace: case moFatGuard: case moVizier: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = otherbodyparts(V, darkena(0xFFD500, 0, 0xFF), m, footphase);
       if(m == moFatGuard) {
-        queuepoly(VBODY * VBS, shFatBody, darkena(0xC06000, 0, 0xFF));
+        queuepoly(VBODY * VBS, cgi.shFatBody, darkena(0xC06000, 0, 0xFF));
         col = 0xFFFFFF;
         if(!where || where->hitpoints >= 3)
-          queuepoly(VBODY1 * VBS, shKnightCloak, darkena(0xFFC0C0, 1, 0xFF));
+          queuepoly(VBODY1 * VBS, cgi.shKnightCloak, darkena(0xFFC0C0, 1, 0xFF));
         }
       else {
-        queuepoly(VBODY * VBS, shPBody, darkena(0xFFD500, 0, 0xFF));
-        queuepoly(VBODY1 * VBS, shKnightArmor, m == moVizier ? 0xC000C0FF :
+        queuepoly(VBODY * VBS, cgi.shPBody, darkena(0xFFD500, 0, 0xFF));
+        queuepoly(VBODY1 * VBS, cgi.shKnightArmor, m == moVizier ? 0xC000C0FF :
           darkena(0x00C000, 1, 0xFF));
         if(where && where->hitpoints >= 3)
-          queuepoly(VBODY2 * VBS, shKnightCloak, m == moVizier ? 0x800080Ff :
+          queuepoly(VBODY2 * VBS, cgi.shKnightCloak, m == moVizier ? 0x800080Ff :
             darkena(0x00FF00, 1, 0xFF));
         }
-      queuepoly(VHEAD1, shTurban1, darkena(col, 1, 0xFF));
+      queuepoly(VHEAD1, cgi.shTurban1, darkena(col, 1, 0xFF));
       if(!where || where->hitpoints >= 2)
-        queuepoly(VHEAD2, shTurban2, darkena(col, 0, 0xFF));
-      queuepoly(VBODY * VBS, shSabre, 0xFFFFFFFF);
+        queuepoly(VHEAD2, cgi.shTurban2, darkena(col, 0, 0xFF));
+      queuepoly(VBODY * VBS, cgi.shSabre, 0xFFFFFFFF);
       humanoid_eyes(V, 0x301800FF);
       return false;
       }
     
     case moCrystalSage: {
       const transmatrix VBS = VBODY * otherbodyparts(V, 0xFFFFFFFF, m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, 0xFFFFFFFF);
-      queuepoly(VHEAD1, shPHead, 0xFFFFFFFF);
-      queuepoly(VHEAD, shPFace, 0xFFFFFFFF);
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, 0xFFFFFFFF);
+      queuepoly(VHEAD1, cgi.shPHead, 0xFFFFFFFF);
+      queuepoly(VHEAD, cgi.shPFace, 0xFFFFFFFF);
       humanoid_eyes(V, 0xFFFFFFFF, 0xC0C0C0FF);
       return false;
       }
     
     case moHedge: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      queuepoly(VBS, shPBody, darkena(col, 0, 0xFF));
-      queuepoly(VBS, shHedgehogBlade, 0xC0C0C0FF);
-      queuepoly(VHEAD1, shPHead, 0x804000FF);
-      queuepoly(VHEAD, shPFace, 0xF09000FF);
+      queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0xFF));
+      queuepoly(VBS, cgi.shHedgehogBlade, 0xC0C0C0FF);
+      queuepoly(VHEAD1, cgi.shPHead, 0x804000FF);
+      queuepoly(VHEAD, cgi.shPFace, 0xF09000FF);
       humanoid_eyes(V, 0x00D000FF);
       return false;
       }
     
     case moYeti: case moMonkey: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, shPHead, darkena(col, 0, 0xFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(col, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
       return false;
       }
     
     case moResearcher: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, darkena(0xFFFF00, 0, 0xC0));
-      queuepoly(VHEAD, shAztecHead, darkena(col, 0, 0xFF));
-      queuepoly(VHEAD1, shAztecCap, darkena(0xC000C0, 0, 0xFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, darkena(0xFFFF00, 0, 0xC0));
+      queuepoly(VHEAD, cgi.shAztecHead, darkena(col, 0, 0xFF));
+      queuepoly(VHEAD1, cgi.shAztecCap, darkena(0xC000C0, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moFamiliar: {
-      ShadowV(V, shWolfBody);
-      queuepoly(VABODY, shWolfBody, darkena(0xA03000, 0, 0xFF));
+      ShadowV(V, cgi.shWolfBody);
+      queuepoly(VABODY, cgi.shWolfBody, darkena(0xA03000, 0, 0xFF));
        if(mmspatial || footphase)
          animallegs(VALEGS, moWolf, darkena(0xC04000, 0, 0xFF), footphase);
        else
-        queuepoly(VALEGS, shWolfLegs, darkena(0xC04000, 0, 0xFF));
+        queuepoly(VALEGS, cgi.shWolfLegs, darkena(0xC04000, 0, 0xFF));
       
-      queuepoly(VAHEAD, shFamiliarHead, darkena(0xC04000, 0, 0xFF));
-      // queuepoly(V, shCatLegs, darkena(0x902000, 0, 0xFF));
+      queuepoly(VAHEAD, cgi.shFamiliarHead, darkena(0xC04000, 0, 0xFF));
+      // queuepoly(V, cgi.shCatLegs, darkena(0x902000, 0, 0xFF));
       if(true) {
-        queuepoly(VAHEAD, shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
-        queuepoly(VAHEAD * Mirror, shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
+        queuepoly(VAHEAD, cgi.shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
+        queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
         }
       return false;
       }
     
     case moRanger: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      queuepoly(VBS, shPBody, darkena(col, 0, 0xC0));
-      if(!peace::on) queuepoly(VBS, shPSword, darkena(col, 0, 0xFF));
-      queuepoly(VHEAD, shArmor, darkena(col, 1, 0xFF));
+      queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0xC0));
+      if(!peace::on) queuepoly(VBS, cgi.shPSword, darkena(col, 0, 0xFF));
+      queuepoly(VHEAD, cgi.shArmor, darkena(col, 1, 0xFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
     
     case moNarciss: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      queuepoly(VBS, shFlowerHand, darkena(col, 0, 0xFF));
-      queuepoly(VBS, shPBody, 0xFFE080FF);
-      if(!peace::on) queuepoly(VBS, shPKnife, 0xC0C0C0FF);
-      queuepoly(VHEAD, shPFace, 0xFFE080FF);
-      queuepoly(VHEAD1, shPHead, 0x806A00FF);
+      queuepoly(VBS, cgi.shFlowerHand, darkena(col, 0, 0xFF));
+      queuepoly(VBS, cgi.shPBody, 0xFFE080FF);
+      if(!peace::on) queuepoly(VBS, cgi.shPKnife, 0xC0C0C0FF);
+      queuepoly(VHEAD, cgi.shPFace, 0xFFE080FF);
+      queuepoly(VHEAD1, cgi.shPHead, 0x806A00FF);
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
 
     case moMirrorSpirit: {
-      ShadowV(V, shPBody);
+      ShadowV(V, cgi.shPBody);
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0x90), m, footphase);
-      queuepoly(VBS, shPBody, darkena(col, 0, 0x90));
-      if(!peace::on) queuepoly(VBS * Mirror, shPSword, darkena(col, 0, 0xD0));
-      queuepoly(VHEAD1, shPHead, darkena(col, 1, 0x90));
-      queuepoly(VHEAD2, shPFace, darkena(col, 1, 0x90));
-      queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
+      queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0x90));
+      if(!peace::on) queuepoly(VBS * Mirror, cgi.shPSword, darkena(col, 0, 0xD0));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0x90));
+      queuepoly(VHEAD2, cgi.shPFace, darkena(col, 1, 0x90));
+      queuepoly(VHEAD, cgi.shArmor, darkena(col, 0, 0xC0));
       humanoid_eyes(V, 0xFFFFFFFF, darkena(col, 0, 0xFF));
       return false;
       }
     
     case moJiangshi: {
-      ShadowV(V, shJiangShi);
-      auto z2 = geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * geom3::human_height);
+      ShadowV(V, cgi.shJiangShi);
+      auto z2 = geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * cgi.human_height);
       auto V0 = V;
       auto V = mmscale(V0, z2);
       otherbodyparts(V, darkena(col, 0, 0xFF), m, m == moJiangshi ? 0 : footphase);
-      queuepoly(VBODY, shJiangShi, darkena(col, 0, 0xFF));
-      queuepoly(VBODY1, shJiangShiDress, darkena(0x202020, 0, 0xFF));
-      queuepoly(VHEAD, shTerraHead, darkena(0x101010, 0, 0xFF));
-      queuepoly(VHEAD1, shPFace, darkena(col, 0, 0xFF));
-      queuepoly(VHEAD2, shJiangShiCap1, darkena(0x800000, 0, 0xFF));
-      queuepoly(VHEAD3, shJiangShiCap2, darkena(0x400000, 0, 0xFF));
+      queuepoly(VBODY, cgi.shJiangShi, darkena(col, 0, 0xFF));
+      queuepoly(VBODY1, cgi.shJiangShiDress, darkena(0x202020, 0, 0xFF));
+      queuepoly(VHEAD, cgi.shTerraHead, darkena(0x101010, 0, 0xFF));
+      queuepoly(VHEAD1, cgi.shPFace, darkena(col, 0, 0xFF));
+      queuepoly(VHEAD2, cgi.shJiangShiCap1, darkena(0x800000, 0, 0xFF));
+      queuepoly(VHEAD3, cgi.shJiangShiCap2, darkena(0x400000, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
       return false;
       }
     
     case moGhost: case moSeep: case moFriendlyGhost: {
       if(m == moFriendlyGhost) col = fghostcolor(where);
-      queuepolyat(VGHOST, shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80), DIM == 3 ? PPR::SUPERLINE : shGhost.prio);
-      queuepolyat(VGHOST, shGhostEyes, 0xFF, DIM == 3 ? PPR::SUPERLINE : shEyes.prio);
+      queuepolyat(VGHOST, cgi.shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80), DIM == 3 ? PPR::SUPERLINE : cgi.shGhost.prio);
+      queuepolyat(VGHOST, cgi.shGhostEyes, 0xFF, DIM == 3 ? PPR::SUPERLINE : cgi.shEyes.prio);
       return false;
       }
     
     case moVineSpirit: {
-      queuepoly(VGHOST, shGhost, 0xD0D0D0C0 | UNTRANS);
-      queuepolyat(VGHOST, shGhostEyes, 0xFF0000FF, DIM == 3 ? PPR::SUPERLINE : shGhostEyes.prio);
+      queuepoly(VGHOST, cgi.shGhost, 0xD0D0D0C0 | UNTRANS);
+      queuepolyat(VGHOST, cgi.shGhostEyes, 0xFF0000FF, DIM == 3 ? PPR::SUPERLINE : cgi.shGhostEyes.prio);
       return false;
       }
     
     case moFireFairy: {
       col = firecolor(0);
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shFemaleBody);
-      queuepoly(VBS, shFemaleBody, darkena(col, 0, 0XC0));
-      queuepoly(VHEAD, shWitchHair, darkena(col, 1, 0xFF));
-      queuepoly(VHEAD1, shPFace, darkena(col, 0, 0XFF));
+      ShadowV(V, cgi.shFemaleBody);
+      queuepoly(VBS, cgi.shFemaleBody, darkena(col, 0, 0XC0));
+      queuepoly(VHEAD, cgi.shWitchHair, darkena(col, 1, 0xFF));
+      queuepoly(VHEAD1, cgi.shPFace, darkena(col, 0, 0XFF));
       humanoid_eyes(V, darkena(col, 1, 0xFF));
       return false;
       }      
       
     case moSlime: {
-      queuepoly(VFISH, shSlime, darkena(col, 0, 0x80));
-      queuepoly(VSLIMEEYE, shSlimeEyes, 0xFF);
+      queuepoly(VFISH, cgi.shSlime, darkena(col, 0, 0x80));
+      queuepoly(VSLIMEEYE, cgi.shSlimeEyes, 0xFF);
       return false;
       }
 
     case moKrakenH: {
-      queuepoly(VFISH, shKrakenHead, darkena(col, 0, 0xD0));
-      queuepoly(VFISH, shKrakenEye, 0xFFFFFFC0 | UNTRANS);
-      queuepoly(VFISH, shKrakenEye2, 0xC0);
-      queuepoly(VFISH * Mirror, shKrakenEye, 0xFFFFFFC0 | UNTRANS);
-      queuepoly(VFISH * Mirror, shKrakenEye2, 0xC0);
+      queuepoly(VFISH, cgi.shKrakenHead, darkena(col, 0, 0xD0));
+      queuepoly(VFISH, cgi.shKrakenEye, 0xFFFFFFC0 | UNTRANS);
+      queuepoly(VFISH, cgi.shKrakenEye2, 0xC0);
+      queuepoly(VFISH * Mirror, cgi.shKrakenEye, 0xFFFFFFC0 | UNTRANS);
+      queuepoly(VFISH * Mirror, cgi.shKrakenEye2, 0xC0);
       return false;
       }
 
     case moKrakenT: {
-      queuepoly(VFISH, shSeaTentacle, darkena(col, 0, 0xD0));
+      queuepoly(VFISH, cgi.shSeaTentacle, darkena(col, 0, 0xD0));
       return false;
       }
 
     case moCultist: case moPyroCultist: case moCultistLeader: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, darkena(col, 0, 0xC0));
-      if(!peace::on) queuepoly(VBS, shPSword, darkena(col, 2, 0xFF));
-      queuepoly(VHEAD, shHood, darkena(col, 1, 0xFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0xC0));
+      if(!peace::on) queuepoly(VBS, cgi.shPSword, darkena(col, 2, 0xFF));
+      queuepoly(VHEAD, cgi.shHood, darkena(col, 1, 0xFF));
       humanoid_eyes(V, 0x00FF00FF);
       return false;
       }
 
     case moPirate: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, darkena(0x404040, 0, 0xFF));
-      queuepoly(VBS, shPirateHook, darkena(0xD0D0D0, 0, 0xFF));
-      queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
-      queuepoly(VHEAD1, shEyepatch, darkena(0, 0, 0xC0));
-      queuepoly(VHEAD2, shPirateHood, darkena(col, 0, 0xFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, darkena(0x404040, 0, 0xFF));
+      queuepoly(VBS, cgi.shPirateHook, darkena(0xD0D0D0, 0, 0xFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xFFFF80, 0, 0xFF));
+      queuepoly(VHEAD1, cgi.shEyepatch, darkena(0, 0, 0xC0));
+      queuepoly(VHEAD2, cgi.shPirateHood, darkena(col, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
 
     case moRatling: case moRatlingAvenger: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shYeti);
-      queuepoly(VLEG, shRatTail, darkena(col, 0, 0xFF));
-      queuepoly(VBODY * VBS, shYeti, darkena(col, 1, 0xFF));
+      ShadowV(V, cgi.shYeti);
+      queuepoly(VLEG, cgi.shRatTail, darkena(col, 0, 0xFF));
+      queuepoly(VBODY * VBS, cgi.shYeti, darkena(col, 1, 0xFF));
   
       float t = sintick(1000, where ? where->cpdist*M_PI : 0);
       int eyecol = t > 0.92 ? 0xFF0000 : 0;
       
       if(DIM == 2) {
-        queuepoly(VHEAD, shRatHead, darkena(col, 0, 0xFF));
-        queuepoly(VHEAD, shWolf1, darkena(eyecol, 0, 0xFF));
-        queuepoly(VHEAD, shWolf2, darkena(eyecol, 0, 0xFF));
-        queuepoly(VHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
-        if(m == moRatlingAvenger) queuepoly(VHEAD1, shRatCape1, 0x303030FF);
+        queuepoly(VHEAD, cgi.shRatHead, darkena(col, 0, 0xFF));
+        queuepoly(VHEAD, cgi.shWolf1, darkena(eyecol, 0, 0xFF));
+        queuepoly(VHEAD, cgi.shWolf2, darkena(eyecol, 0, 0xFF));
+        queuepoly(VHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
+        if(m == moRatlingAvenger) queuepoly(VHEAD1, cgi.shRatCape1, 0x303030FF);
         }
       else {
-        transmatrix V1 = V * zpush(geom3::AHEAD - zc(0.4) - zc(0.98) + geom3::HEAD); // * cpush(0, scalefactor * (-0.1));
-        queuepoly(V1, shRatHead, darkena(col, 0, 0xFF));
+        transmatrix V1 = V * zpush(cgi.AHEAD - zc(0.4) - zc(0.98) + cgi.HEAD); // * cpush(0, cgi.scalefactor * (-0.1));
+        queuepoly(V1, cgi.shRatHead, darkena(col, 0, 0xFF));
 
         /*
-        queuepoly(V1, shFamiliarEye, darkena(eyecol, 0, 0xFF));
-        queuepoly(V1 * Mirror, shFamiliarEye, darkena(eyecol, 0, 0xFF));
-        queuepoly(V1, shWolfEyes, darkena(col, 3, 0xFF));
+        queuepoly(V1, cgi.shFamiliarEye, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1 * Mirror, cgi.shFamiliarEye, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1, cgi.shWolfEyes, darkena(col, 3, 0xFF));
         */
-        queuepoly(V1, shRatEye1, darkena(eyecol, 0, 0xFF));
-        queuepoly(V1, shRatEye2, darkena(eyecol, 0, 0xFF));
-        queuepoly(V1, shRatEye3, darkena(0x202020, 0, 0xFF));
-        if(m == moRatlingAvenger) queuepoly(V1, shRatCape1, 0x303030FF);
+        queuepoly(V1, cgi.shRatEye1, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1, cgi.shRatEye2, darkena(eyecol, 0, 0xFF));
+        queuepoly(V1, cgi.shRatEye3, darkena(0x202020, 0, 0xFF));
+        if(m == moRatlingAvenger) queuepoly(V1, cgi.shRatCape1, 0x303030FF);
         }
       
       if(m == moRatlingAvenger) {
-        queuepoly(VBODY1 * VBS, shRatCape2, 0x484848FF);
+        queuepoly(VBODY1 * VBS, cgi.shRatCape2, 0x484848FF);
         }
       return false;
       }
 
     case moViking: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBODY * VBS, shPBody, darkena(0xE00000, 0, 0xFF));
-      if(!peace::on) queuepoly(VBODY * VBS, shPSword, darkena(0xD0D0D0, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shKnightCloak, darkena(0x404040, 0, 0xFF));
-      queuepoly(VHEAD, shVikingHelmet, darkena(0xC0C0C0, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBODY * VBS, cgi.shPBody, darkena(0xE00000, 0, 0xFF));
+      if(!peace::on) queuepoly(VBODY * VBS, cgi.shPSword, darkena(0xD0D0D0, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shKnightCloak, darkena(0x404040, 0, 0xFF));
+      queuepoly(VHEAD, cgi.shVikingHelmet, darkena(0xC0C0C0, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xFFFF80, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
 
     case moOutlaw: {
       const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBODY * VBS, shPBody, darkena(col, 0, 0xFF));
-      queuepoly(VBODY1 * VBS, shKnightCloak, darkena(col, 1, 0xFF));
-      queuepoly(VHEAD1, shWestHat1, darkena(col, 2, 0XFF));
-      queuepoly(VHEAD2, shWestHat2, darkena(col, 1, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
-      queuepoly(VBODY * VBS, shGunInHand, darkena(col, 1, 0XFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBODY * VBS, cgi.shPBody, darkena(col, 0, 0xFF));
+      queuepoly(VBODY1 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xFF));
+      queuepoly(VHEAD1, cgi.shWestHat1, darkena(col, 2, 0XFF));
+      queuepoly(VHEAD2, cgi.shWestHat2, darkena(col, 1, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(0xFFFF80, 0, 0xFF));
+      queuepoly(VBODY * VBS, cgi.shGunInHand, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0x000000FF);
       return false;
       }
 
     case moNecromancer: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shPBody);
-      queuepoly(VBS, shPBody, 0xC00000C0 | UNTRANS);
-      queuepoly(VHEAD, shHood, darkena(col, 1, 0xFF));
+      ShadowV(V, cgi.shPBody);
+      queuepoly(VBS, cgi.shPBody, 0xC00000C0 | UNTRANS);
+      queuepoly(VHEAD, cgi.shHood, darkena(col, 1, 0xFF));
       humanoid_eyes(V, 0xFF0000FF);
       return false;
       }
 
     case moDraugr: {
       const transmatrix VBS = VBODY * otherbodyparts(V, 0x483828D0 | UNTRANS, m, footphase);
-      queuepoly(VBS, shPBody, 0x483828D0 | UNTRANS);
-      queuepoly(VBS, shPSword, 0xFFFFD0A0 | UNTRANS);
-      queuepoly(VHEAD, shPHead, 0x483828D0 | UNTRANS);
+      queuepoly(VBS, cgi.shPBody, 0x483828D0 | UNTRANS);
+      queuepoly(VBS, cgi.shPSword, 0xFFFFD0A0 | UNTRANS);
+      queuepoly(VHEAD, cgi.shPHead, 0x483828D0 | UNTRANS);
       humanoid_eyes(V, 0xFF0000FF, 0x483828FF);
-      // queuepoly(V, shSkull, 0xC06020D0);
-      //queuepoly(V, shSkullEyes, 0x000000D0);
-  //  queuepoly(V, shWightCloak, 0xC0A080A0);
+      // queuepoly(V, cgi.shSkull, 0xC06020D0);
+      //queuepoly(V, cgi.shSkullEyes, 0x000000D0);
+  //  queuepoly(V, cgi.shWightCloak, 0xC0A080A0);
       int b = where ? where->cpdist : 0;
       b--;
       if(b < 0) b = 0;
       if(b > 6) b = 6;
-      queuepoly(VHEAD1, shWightCloak, (0x605040A0 | UNTRANS) + 0x10101000 * b);
+      queuepoly(VHEAD1, cgi.shWightCloak, (0x605040A0 | UNTRANS) + 0x10101000 * b);
       return false;
       }
 
     case moVoidBeast: {
       const transmatrix VBS = VBODY * otherbodyparts(V, 0x080808D0 | UNTRANS, m, footphase);
-      queuepoly(VBS, shPBody, 0x080808D0 | UNTRANS);
-      queuepoly(VHEAD, shPHead, 0x080808D0 | UNTRANS);
-      queuepoly(VHEAD, shWightCloak, 0xFF0000A0 | UNTRANS);
+      queuepoly(VBS, cgi.shPBody, 0x080808D0 | UNTRANS);
+      queuepoly(VHEAD, cgi.shPHead, 0x080808D0 | UNTRANS);
+      queuepoly(VHEAD, cgi.shWightCloak, 0xFF0000A0 | UNTRANS);
       humanoid_eyes(V, 0xFF0000FF, 0x080808FF);
       return false;
       }
 
     case moGoblin: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shYeti);
-      queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD, shArmor, darkena(col, 1, 0XFF));
+      ShadowV(V, cgi.shYeti);
+      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD, cgi.shArmor, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0x800000FF, darkena(col, 0, 0xFF));
       return false;
       }
@@ -1982,20 +1980,20 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
       transmatrix V2 = V;
       if(m == moLancer)
         V2 = V * spin((where && where->type == 6) ? -M_PI/3 : -M_PI/2 );
-      transmatrix Vh = mmscale(V2, geom3::HEAD);
-      transmatrix Vb = mmscale(V2, geom3::BODY);
+      transmatrix Vh = mmscale(V2, cgi.HEAD);
+      transmatrix Vb = mmscale(V2, cgi.BODY);
       Vb = Vb * otherbodyparts(V2, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V2, shPBody);
-      queuepoly(Vb, shPBody, darkena(col, 0, 0xC0));
-      queuepoly(Vh, m == moFlailer ? shArmor : shHood, darkena(col, 1, 0XFF));
+      ShadowV(V2, cgi.shPBody);
+      queuepoly(Vb, cgi.shPBody, darkena(col, 0, 0xC0));
+      queuepoly(Vh, m == moFlailer ? cgi.shArmor : cgi.shHood, darkena(col, 1, 0XFF));
       if(m == moMiner)
-        queuepoly(Vb, shPickAxe, darkena(0xC0C0C0, 0, 0XFF));
+        queuepoly(Vb, cgi.shPickAxe, darkena(0xC0C0C0, 0, 0XFF));
       if(m == moLancer)
-        queuepoly(Vb, shPike, darkena(col, 0, 0XFF));
+        queuepoly(Vb, cgi.shPike, darkena(col, 0, 0XFF));
       if(m == moFlailer) {
-        queuepoly(Vb, shFlailBall, darkena(col, 0, 0XFF));
-        queuepoly(Vb, shFlailChain, darkena(col, 1, 0XFF));
-        queuepoly(Vb, shFlailTrunk, darkena(col, 0, 0XFF));
+        queuepoly(Vb, cgi.shFlailBall, darkena(col, 0, 0XFF));
+        queuepoly(Vb, cgi.shFlailChain, darkena(col, 1, 0XFF));
+        queuepoly(Vb, cgi.shFlailTrunk, darkena(col, 0, 0XFF));
         }
       humanoid_eyes(V, 0x000000FF);
       return false;
@@ -2003,112 +2001,112 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
 
     case moTroll: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shYeti);
-      queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(col, 2, 0XFF));
+      ShadowV(V, cgi.shYeti);
+      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(col, 2, 0XFF));
       humanoid_eyes(V, 0x004000FF, darkena(col, 0, 0xFF));
       return false;
       }        
 
     case moFjordTroll: case moForestTroll: case moStormTroll: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shYeti);
-      queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
-      queuepoly(VHEAD, shPFace, darkena(col, 2, 0XFF));
+      ShadowV(V, cgi.shYeti);
+      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(col, 2, 0XFF));
       humanoid_eyes(V, 0x004000FF, darkena(col, 0, 0xFF));
       return false;
       }
 
     case moDarkTroll: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shYeti);
-      queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, shPHead, darkena(col, 1, 0XFF));
-      queuepoly(VHEAD, shPFace, 0xFFFFFF80 | UNTRANS);
+      ShadowV(V, cgi.shYeti);
+      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, 0xFFFFFF80 | UNTRANS);
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
       return false;
       }        
 
     case moRedTroll: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
-      ShadowV(V, shYeti);
-      queuepoly(VBS, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, shPHead, darkena(0xFF8000, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, 0xFFFFFF80 | UNTRANS);
+      ShadowV(V, cgi.shYeti);
+      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(0xFF8000, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, 0xFFFFFF80 | UNTRANS);
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
       return false;
       }        
 
     case moEarthElemental: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-      ShadowV(V, shWaterElemental);
-      queuepoly(VBS, shWaterElemental, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, shFemaleHair, darkena(col, 0, 0XFF));
-      queuepoly(VHEAD, shPFace, 0xF0000080 | UNTRANS);
+      ShadowV(V, cgi.shWaterElemental);
+      queuepoly(VBS, cgi.shWaterElemental, darkena(col, 0, 0xC0));
+      queuepoly(VHEAD1, cgi.shFemaleHair, darkena(col, 0, 0XFF));
+      queuepoly(VHEAD, cgi.shPFace, 0xF0000080 | UNTRANS);
       humanoid_eyes(V, 0xD0D000FF, darkena(col, 1, 0xFF));
       return false;
       }        
 
     case moWaterElemental: {
       const transmatrix VBS = VBODY * otherbodyparts(V, watercolor(50), m, footphase);
-      ShadowV(V, shWaterElemental);
-      queuepoly(VBS, shWaterElemental, watercolor(0));
-      queuepoly(VHEAD1, shFemaleHair, watercolor(100));
-      queuepoly(VHEAD, shPFace, watercolor(200));
+      ShadowV(V, cgi.shWaterElemental);
+      queuepoly(VBS, cgi.shWaterElemental, watercolor(0));
+      queuepoly(VHEAD1, cgi.shFemaleHair, watercolor(100));
+      queuepoly(VHEAD, cgi.shPFace, watercolor(200));
       humanoid_eyes(V, 0x0000FFFF, watercolor(150));
       return false;
       }        
 
     case moFireElemental: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(firecolor(50), 0, 0xFF), m, footphase);
-      ShadowV(V, shWaterElemental);
-      queuepoly(VBS, shWaterElemental, darkena(firecolor(0), 0, 0xFF));
-      queuepoly(VHEAD1, shFemaleHair, darkena(firecolor(100), 0, 0xFF));
-      queuepoly(VHEAD, shPFace, darkena(firecolor(200), 0, 0xFF));
+      ShadowV(V, cgi.shWaterElemental);
+      queuepoly(VBS, cgi.shWaterElemental, darkena(firecolor(0), 0, 0xFF));
+      queuepoly(VHEAD1, cgi.shFemaleHair, darkena(firecolor(100), 0, 0xFF));
+      queuepoly(VHEAD, cgi.shPFace, darkena(firecolor(200), 0, 0xFF));
       humanoid_eyes(V, darkena(firecolor(200), 0, 0xFF), darkena(firecolor(50), 0, 0xFF));
       return false;
       }
 
     case moAirElemental: {
       const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
-      ShadowV(V, shWaterElemental);
-      queuepoly(VBS, shWaterElemental, darkena(col, 0, 0x80));
-      queuepoly(VHEAD1, shFemaleHair, darkena(col, 0, 0x80));
-      queuepoly(VHEAD, shPFace, darkena(col, 0, 0x80));
+      ShadowV(V, cgi.shWaterElemental);
+      queuepoly(VBS, cgi.shWaterElemental, darkena(col, 0, 0x80));
+      queuepoly(VHEAD1, cgi.shFemaleHair, darkena(col, 0, 0x80));
+      queuepoly(VHEAD, cgi.shPFace, darkena(col, 0, 0x80));
       humanoid_eyes(V, 0xFFFFFFFF, darkena(col, 1, 0xFF));
       return false;
       }        
 
     case moWorm: case moWormwait: case moHexSnake: {
-      queuepoly(V, shWormHead, darkena(col, 0, 0xFF));
-      queuepolyat(V, shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
+      queuepoly(V, cgi.shWormHead, darkena(col, 0, 0xFF));
+      queuepolyat(V, cgi.shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
       return false;
       }
 
     case moDragonHead: {
-      queuepoly(V, shDragonHead, darkena(col, 0, 0xFF));
-      queuepolyat(V, shDragonEyes, 0xFF, PPR::ONTENTACLE_EYES);          
+      queuepoly(V, cgi.shDragonHead, darkena(col, 0, 0xFF));
+      queuepolyat(V, cgi.shDragonEyes, 0xFF, PPR::ONTENTACLE_EYES);          
       int noscolor = 0xFF0000FF;
-      queuepoly(V, shDragonNostril, noscolor);
-      queuepoly(V * Mirror, shDragonNostril, noscolor);
+      queuepoly(V, cgi.shDragonNostril, noscolor);
+      queuepoly(V * Mirror, cgi.shDragonNostril, noscolor);
       return false;
       }
 
     case moDragonTail: {
-      queuepoly(V, shDragonSegment, darkena(col, 0, 0xFF));
+      queuepoly(V, cgi.shDragonSegment, darkena(col, 0, 0xFF));
       return false;
       }
 
     case moTentacle: case moTentaclewait: case moTentacleEscaping: {
-      queuepoly(V, shTentHead, darkena(col, 0, 0xFF));
-      ShadowV(V, shTentHead, PPR::GIANTSHADOW);
+      queuepoly(V, cgi.shTentHead, darkena(col, 0, 0xFF));
+      ShadowV(V, cgi.shTentHead, PPR::GIANTSHADOW);
       return false;
       }
     
     case moAsteroid: {
-      queuepoly(V, shAsteroid[1], darkena(col, 0, 0xFF));
+      queuepoly(V, cgi.shAsteroid[1], darkena(col, 0, 0xFF));
       return false;
       }
 
@@ -2118,56 +2116,56 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
   if(isPrincess(m)) goto princess;
 
   else if(isBull(m)) {
-    ShadowV(V, shBullBody);
+    ShadowV(V, cgi.shBullBody);
     int hoofcol = darkena(gradient(0, col, 0, .65, 1), 0, 0xFF);
     if(mmspatial || footphase)
       animallegs(VALEGS, moRagingBull, hoofcol, footphase);
-    queuepoly(VABODY, shBullBody, darkena(gradient(0, col, 0, .80, 1), 0, 0xFF));
-    queuepoly(VAHEAD, shBullHead, darkena(col, 0, 0xFF));
-    queuepoly(VAHEAD, shBullHorn, darkena(0xFFFFFF, 0, 0xFF));
-    queuepoly(VAHEAD * Mirror, shBullHorn, darkena(0xFFFFFF, 0, 0xFF));
+    queuepoly(VABODY, cgi.shBullBody, darkena(gradient(0, col, 0, .80, 1), 0, 0xFF));
+    queuepoly(VAHEAD, cgi.shBullHead, darkena(col, 0, 0xFF));
+    queuepoly(VAHEAD, cgi.shBullHorn, darkena(0xFFFFFF, 0, 0xFF));
+    queuepoly(VAHEAD * Mirror, cgi.shBullHorn, darkena(0xFFFFFF, 0, 0xFF));
     }
 
   else if(isBug(m)) {
-    ShadowV(V, shBugBody);
+    ShadowV(V, cgi.shBugBody);
     if(!mmspatial && !footphase)
-      queuepoly(VABODY, shBugBody, darkena(col, 0, 0xFF));
+      queuepoly(VABODY, cgi.shBugBody, darkena(col, 0, 0xFF));
     else {
       animallegs(VALEGS, moBug0, darkena(col, 0, 0xFF), footphase);
-      queuepoly(VABODY, shBugAntenna, darkena(col, 1, 0xFF));
+      queuepoly(VABODY, cgi.shBugAntenna, darkena(col, 1, 0xFF));
       }
-    queuepoly(VABODY, shBugArmor, darkena(col, 1, 0xFF));
+    queuepoly(VABODY, cgi.shBugArmor, darkena(col, 1, 0xFF));
     }
   else if(isSwitch(m)) {
-    queuepoly(VFISH, shJelly, darkena(col, 0, 0xD0));
-    queuepolyat(VBODY, shJelly, darkena(col, 0, 0xD0), PPR::MONSTER_BODY);
-    queuepolyat(VHEAD, shJelly, darkena(col, 0, 0xD0), PPR::MONSTER_HEAD);
-    queuepolyat(VHEAD, shSlimeEyes, 0xFF, PPR::MONSTER_HEAD);
+    queuepoly(VFISH, cgi.shJelly, darkena(col, 0, 0xD0));
+    queuepolyat(VBODY, cgi.shJelly, darkena(col, 0, 0xD0), PPR::MONSTER_BODY);
+    queuepolyat(VHEAD, cgi.shJelly, darkena(col, 0, 0xD0), PPR::MONSTER_HEAD);
+    queuepolyat(VHEAD, cgi.shSlimeEyes, 0xFF, PPR::MONSTER_HEAD);
     }
   else if(isDemon(m)) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-    queuepoly(VBS, shPBody, darkena(col, 1, 0xC0));
-    ShadowV(V, shPBody);
+    queuepoly(VBS, cgi.shPBody, darkena(col, 1, 0xC0));
+    ShadowV(V, cgi.shPBody);
     int acol = col;
     if(xch == 'D') acol = 0xD0D0D0;
-    queuepoly(VHEAD, shDemon, darkena(acol, 0, 0xFF));
+    queuepoly(VHEAD, cgi.shDemon, darkena(acol, 0, 0xFF));
     humanoid_eyes(V, 0xFF0000FF, 0xC00000FF);
     }
   else if(isMagneticPole(m)) {
     if(m == moNorthPole)
-      queuepolyat(VBODY * spin(M_PI), shTentacle, 0x000000C0, PPR::TENTACLE1);
-    queuepolyat(VBODY, shDisk, darkena(col, 0, 0xFF), PPR::MONSTER_BODY);
+      queuepolyat(VBODY * spin(M_PI), cgi.shTentacle, 0x000000C0, PPR::TENTACLE1);
+    queuepolyat(VBODY, cgi.shDisk, darkena(col, 0, 0xFF), PPR::MONSTER_BODY);
     }
   else if(isMetalBeast(m) || m == moBrownBug) {
-    ShadowV(V, shTrylobite);
+    ShadowV(V, cgi.shTrylobite);
     if(!mmspatial)
-      queuepoly(VABODY, shTrylobite, darkena(col, 1, 0xC0));
+      queuepoly(VABODY, cgi.shTrylobite, darkena(col, 1, 0xC0));
     else {
-      queuepoly(VABODY, shTrylobiteBody, darkena(col, 1, 0xFF));
+      queuepoly(VABODY, cgi.shTrylobiteBody, darkena(col, 1, 0xFF));
       animallegs(VALEGS, moMetalBeast, darkena(col, 1, 0xFF), footphase);
       }
     int acol = col;
-    queuepoly(VAHEAD, shTrylobiteHead, darkena(acol, 0, 0xFF));
+    queuepoly(VAHEAD, cgi.shTrylobiteHead, darkena(acol, 0, 0xFF));
     }
   else if(isWitch(m)) {
     const transmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
@@ -2177,22 +2175,22 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     if(m == moWitchFlash && where) drawFlash(V);
     if(m == moWitchSpeed && where) drawSpeed(V);
     if(m == moWitchFire) col = firecolor(0);
-    ShadowV(V, shFemaleBody);
-    queuepoly(VBS, shFemaleBody, darkena(col, 0, cc));
-//    queuepoly(cV2, ct, shPSword, darkena(col, 0, 0XFF));
-//    queuepoly(V, shHood, darkena(col, 0, 0XC0));
+    ShadowV(V, cgi.shFemaleBody);
+    queuepoly(VBS, cgi.shFemaleBody, darkena(col, 0, cc));
+//    queuepoly(cV2, ct, cgi.shPSword, darkena(col, 0, 0XFF));
+//    queuepoly(V, cgi.shHood, darkena(col, 0, 0XC0));
     if(m == moWitchFire) col = firecolor(100);
-    queuepoly(VHEAD1, shWitchHair, darkena(col, 1, cc));
+    queuepoly(VHEAD1, cgi.shWitchHair, darkena(col, 1, cc));
     if(m == moWitchFire) col = firecolor(200);
-    queuepoly(VHEAD, shPFace, darkena(col, 0, cc));
+    queuepoly(VHEAD, cgi.shPFace, darkena(col, 0, cc));
     if(m == moWitchFire) col = firecolor(300);
-    queuepoly(VBS, shWitchDress, darkena(col, 1, 0XC0));
+    queuepoly(VBS, cgi.shWitchDress, darkena(col, 1, 0XC0));
     humanoid_eyes(V, 0x000000FF);
     }
 
   // just for the HUD glyphs...
   else if(isAnyIvy(m)) {
-    queuepoly(V, shILeaf[0], darkena(col, 0, 0xFF));
+    queuepoly(V, cgi.shILeaf[0], darkena(col, 0, 0xFF));
     }
 
   else return true;
@@ -2397,11 +2395,11 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           return false;
 
         if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy)
-          queuepoly(Vb, shIBranch, (col << 8) + 0xFF);
+          queuepoly(Vb, cgi.shIBranch, (col << 8) + 0xFF);
 /*         else if(c->monst < moTentacle && wormstyle == 0) {
-          ShadowV(Vb, shTentacleX, PPR::GIANTSHADOW);
-          queuepoly(mmscale(Vb, geom3::ABODY), shTentacleX, 0xFF);
-          queuepoly(mmscale(Vb, geom3::ABODY), shTentacle, (col << 8) + 0xFF);
+          ShadowV(Vb, cgi.shTentacleX, PPR::GIANTSHADOW);
+          queuepoly(mmscale(Vb, cgi.ABODY), cgi.shTentacleX, 0xFF);
+          queuepoly(mmscale(Vb, cgi.ABODY), cgi.shTentacle, (col << 8) + 0xFF);
           } */
 //        else if(c->monst < moTentacle) {
 //          }
@@ -2409,8 +2407,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         else if(c->monst == moDragonHead || c->monst == moDragonTail) {
           char part = dragon::bodypart(c, dragon::findhead(c));
           if(part != '2') {
-            queuepoly(mmscale(Vb, geom3::ABODY), shDragonSegment, darkena(col, 0, 0xFF));
-            ShadowV(Vb, shDragonSegment, PPR::GIANTSHADOW);
+            queuepoly(mmscale(Vb, cgi.ABODY), cgi.shDragonSegment, darkena(col, 0, 0xFF));
+            ShadowV(Vb, cgi.shDragonSegment, PPR::GIANTSHADOW);
             }
           }
         else {
@@ -2422,13 +2420,13 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
             col = minf[moTentacletail].color;
             }
           /*
-          queuepoly(mmscale(Vb, geom3::ABODY), shTentacleX, 0xFFFFFFFF);
-          queuepoly(mmscale(Vb, geom3::ABODY), shTentacle, (col << 8) + 0xFF);
-          ShadowV(Vb, shTentacleX, PPR::GIANTSHADOW);
+          queuepoly(mmscale(Vb, cgi.ABODY), cgi.shTentacleX, 0xFFFFFFFF);
+          queuepoly(mmscale(Vb, cgi.ABODY), cgi.shTentacle, (col << 8) + 0xFF);
+          ShadowV(Vb, cgi.shTentacleX, PPR::GIANTSHADOW);
           */
           bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
           bool thead = c->monst == moTentacle || c->monst == moTentaclewait || c->monst == moTentacleEscaping;
-          hpcshape& sh = hexsnake ? shWormSegment : shSmallWormSegment;
+          hpcshape& sh = hexsnake ? cgi.shWormSegment : cgi.shSmallWormSegment;
           ld wav = hexsnake ? 0 : 
             c->monst < moTentacle ? 1/1.5 :
             1;
@@ -2446,7 +2444,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
               // transmatrix Vbx2 = Vnext * xpush(length2 * i / 6.0);
               // Vbx = Vbx * rspintox(inverse(Vbx) * Vbx2 * C0) * pispin;
               ShadowV(Vbx, sh, PPR::GIANTSHADOW);
-              queuepoly(mmscale(Vbx, geom3::ABODY), sh, (col0 << 8) + 0xFF);
+              queuepoly(mmscale(Vbx, cgi.ABODY), sh, (col0 << 8) + 0xFF);
               }
             });
           }
@@ -2456,7 +2454,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         int hdir = displayspin(c, c->mondir);
         color_t col = darkena(0x606020, 0, 0xFF);
         for(int u=-1; u<=1; u++)
-          queueline(Vparam*xspinpush0(hdir+M_PI/2, u*crossf/5), Vparam*xspinpush(hdir, crossf)*xspinpush0(hdir+M_PI/2, u*crossf/5), col, 2 + vid.linequality);
+          queueline(Vparam*xspinpush0(hdir+M_PI/2, u*cgi.crossf/5), Vparam*xspinpush(hdir, cgi.crossf)*xspinpush0(hdir+M_PI/2, u*cgi.crossf/5), col, 2 + vid.linequality);
         }
       }
 
@@ -2465,39 +2463,39 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         if(DIM == 3) {
           hyperpoint V0 = tC0(Vb);
           transmatrix Vs = rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI/2);
-          queuepoly(Vs, shILeaf[1], darkena(col, 0, 0xFF));
+          queuepoly(Vs, cgi.shILeaf[1], darkena(col, 0, 0xFF));
           }
         else {
           if(c->monmirror) Vb = Vb * Mirror;
-          queuepoly(mmscale(Vb, geom3::ABODY), shILeaf[ctof(c)], darkena(col, 0, 0xFF));
-          ShadowV(Vb, shILeaf[ctof(c)], PPR::GIANTSHADOW);
+          queuepoly(mmscale(Vb, cgi.ABODY), cgi.shILeaf[ctof(c)], darkena(col, 0, 0xFF));
+          ShadowV(Vb, cgi.shILeaf[ctof(c)], PPR::GIANTSHADOW);
           }
         }
       else if(m == moWorm || m == moWormwait || m == moHexSnake) {
         Vb = Vb * pispin;
         if(c->monmirror) Vb = Vb * Mirror;
-        transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
-        queuepoly(Vbh, shWormHead, darkena(col, 0, 0xFF));
-        queuepolyat(Vbh, shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
-        ShadowV(Vb, shWormHead, PPR::GIANTSHADOW);
+        transmatrix Vbh = mmscale(Vb, cgi.AHEAD);
+        queuepoly(Vbh, cgi.shWormHead, darkena(col, 0, 0xFF));
+        queuepolyat(Vbh, cgi.shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
+        ShadowV(Vb, cgi.shWormHead, PPR::GIANTSHADOW);
         }
       else if(m == moDragonHead) {
         if(c->monmirror) Vb = Vb * Mirror;
-        transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
-        ShadowV(Vb, shDragonHead, PPR::GIANTSHADOW);
-        queuepoly(Vbh, shDragonHead, darkena(col, c->hitpoints?0:1, 0xFF));
-        queuepolyat(Vbh/* * pispin */, shDragonEyes, 0xFF, PPR::ONTENTACLE_EYES);
+        transmatrix Vbh = mmscale(Vb, cgi.AHEAD);
+        ShadowV(Vb, cgi.shDragonHead, PPR::GIANTSHADOW);
+        queuepoly(Vbh, cgi.shDragonHead, darkena(col, c->hitpoints?0:1, 0xFF));
+        queuepolyat(Vbh/* * pispin */, cgi.shDragonEyes, 0xFF, PPR::ONTENTACLE_EYES);
         
         int noscolor = (c->hitpoints == 1 && c->stuntime ==1) ? 0xFF0000FF : 0xFF;
-        queuepoly(Vbh, shDragonNostril, noscolor);
-        queuepoly(Vbh * Mirror, shDragonNostril, noscolor);
+        queuepoly(Vbh, cgi.shDragonNostril, noscolor);
+        queuepoly(Vbh * Mirror, cgi.shDragonNostril, noscolor);
         }
       else if(m == moTentacle || m == moTentaclewait || m == moTentacleEscaping) {
         Vb = Vb * pispin;
         if(c->monmirror) Vb = Vb * Mirror;
-        transmatrix Vbh = mmscale(Vb, geom3::AHEAD);
-        queuepoly(Vbh, shTentHead, darkena(col, 0, 0xFF));
-        ShadowV(Vb, shTentHead, PPR::GIANTSHADOW);
+        transmatrix Vbh = mmscale(Vb, cgi.AHEAD);
+        queuepoly(Vbh, cgi.shTentHead, darkena(col, 0, 0xFF));
+        ShadowV(Vb, cgi.shTentHead, PPR::GIANTSHADOW);
         }
       else if(m == moDragonTail) {
         cell *c2 = NULL;
@@ -2516,9 +2514,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
             Vb = Vb0 * ddspin(c, nd, M_PI);
             }
           if(c->monmirror) Vb = Vb * Mirror;
-          transmatrix Vbb = mmscale(Vb, geom3::ABODY);
-          queuepoly(Vbb, shDragonTail, darkena(col, c->hitpoints?0:1, 0xFF));
-          ShadowV(Vb, shDragonTail, PPR::GIANTSHADOW);
+          transmatrix Vbb = mmscale(Vb, cgi.ABODY);
+          queuepoly(Vbb, cgi.shDragonTail, darkena(col, c->hitpoints?0:1, 0xFF));
+          ShadowV(Vb, cgi.shDragonTail, PPR::GIANTSHADOW);
           }
         else if(true) {
           if(nospinb) {
@@ -2537,17 +2535,17 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
             Vb = Vb0 * spin((hdir0 + hdir1)/2 + M_PI);
             }
           if(c->monmirror) Vb = Vb * Mirror;
-          transmatrix Vbb = mmscale(Vb, geom3::ABODY);
+          transmatrix Vbb = mmscale(Vb, cgi.ABODY);
           if(part == 'l' || part == '2') {
-            queuepoly(Vbb, shDragonLegs, darkena(col, c->hitpoints?0:1, 0xFF));
+            queuepoly(Vbb, cgi.shDragonLegs, darkena(col, c->hitpoints?0:1, 0xFF));
             }
-          queuepoly(Vbb, shDragonWings, darkena(col, c->hitpoints?0:1, 0xFF));
+          queuepoly(Vbb, cgi.shDragonWings, darkena(col, c->hitpoints?0:1, 0xFF));
           }
         }
       else {
         if(c->monst == moTentacletail && c->mondir == NODIR) {
           if(c->monmirror) Vb = Vb * Mirror;
-          queuepoly(Vb, shWormSegment, darkena(col, 0, 0xFF));
+          queuepoly(Vb, cgi.shWormSegment, darkena(col, 0, 0xFF));
           }
         else if(c->mondir == NODIR) {
           bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
@@ -2565,8 +2563,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
             Vb = Vb0 * ddspin(c, nd, M_PI);
             }
           if(c->monmirror) Vb = Vb * Mirror;
-          transmatrix Vbb = mmscale(Vb, geom3::ABODY) * pispin;
-          hpcshape& sh = hexsnake ? shWormTail : shSmallWormTail;
+          transmatrix Vbb = mmscale(Vb, cgi.ABODY) * pispin;
+          hpcshape& sh = hexsnake ? cgi.shWormTail : cgi.shSmallWormTail;
           queuepoly(Vbb, sh, darkena(col, 0, 0xFF));
           ShadowV(Vb, sh, PPR::GIANTSHADOW);
           }
@@ -2648,20 +2646,20 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       ld length;
       chainAnimation(c, Vb, c->move(c->mondir), c->mondir, 0, Vparam, length);
       Vb = Vb * pispin;
-      Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
+      Vb = Vb * xpush(cgi.tentacle_length - cellgfxdist(c, c->mondir));
       }
     else if(NONSTDVAR) {
       transmatrix T = calc_relative_matrix(c->move(c->mondir), c, c->mondir);
-      Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
+      Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(cgi.tentacle_length);
       }
     else {
       Vb = Vb * ddspin(c, c->mondir, M_PI);
-      Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
+      Vb = Vb * xpush(cgi.tentacle_length - cellgfxdist(c, c->mondir));
       }
     if(c->monmirror) Vb = Vb * Mirror;
       
       // if(ctof(c) && !masterless) Vb = Vb * xpush(hexhexdist - hcrossf);
-      // return (!BITRUNCATED) ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+      // return (!BITRUNCATED) ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : cgi.crossf;
     return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
     }
 
@@ -2724,7 +2722,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       }
     
     else if(isWorm(m)) {
-      ld depth = geom3::factor_to_lev(wormhead(c) == c ? geom3::AHEAD : geom3::ABODY);
+      ld depth = geom3::factor_to_lev(wormhead(c) == c ? cgi.AHEAD : cgi.ABODY);
       footphase = 0;
       int q = ptds.size();
       drawMonsterType(moPlayer, c, Vs, col, footphase);
@@ -2995,7 +2993,7 @@ transmatrix applyDowndir(cell *c, const cellfunction& cf) {
 #if CAP_SHAPES
 void set_towerfloor(cell *c, const cellfunction& cf = coastvalEdge) {
   if(weirdhyperbolic || sphere) {
-    set_floor(shFloor);
+    set_floor(cgi.shFloor);
     return;
     }
   int j = -1;
@@ -3018,16 +3016,16 @@ void set_towerfloor(cell *c, const cellfunction& cf = coastvalEdge) {
     }
 
   if(j >= 0)
-    set_floor(applyDowndir(c, cf), shTower[j]);
+    set_floor(applyDowndir(c, cf), cgi.shTower[j]);
   else if(c->wall != waLadder)
-    set_floor(shMFloor);
+    set_floor(cgi.shMFloor);
   }
 
 void set_zebrafloor(cell *c) {
 
-  if(masterless) { set_floor(shTower[10]); return; }
+  if(masterless) { set_floor(cgi.shTower[10]); return; }
   if(weirdhyperbolic) {
-    set_floor(shFloor); return;
+    set_floor(cgi.shFloor); return;
     }
   
   auto si = patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
@@ -3039,7 +3037,7 @@ void set_zebrafloor(cell *c) {
   else if(si.id >= 28 && si.id < 40) j = 3;
   else j = 0;
 
-  set_floor(applyPatterndir(c, si), shZebra[j]);
+  set_floor(applyPatterndir(c, si), cgi.shZebra[j]);
   }
 
 void set_maywarp_floor(cell *c);
@@ -3069,7 +3067,7 @@ void set_reptile_floor(cell *c, const transmatrix& V, color_t col, bool nodetail
   transmatrix D = applyPatterndir(c, si);
   
   if(wmescher)
-    set_floor(D, shReptile[j][0]);
+    set_floor(D, cgi.shReptile[j][0]);
   else set_maywarp_floor(c);
 
   if(nodetails) return;
@@ -3097,14 +3095,14 @@ void set_reptile_floor(cell *c, const transmatrix& V, color_t col, bool nodetail
 
   if(!chasmg) {
     if(wmescher)
-      queuepoly(V*D, shReptile[j][1], dcol);
+      queuepoly(V*D, cgi.shReptile[j][1], dcol);
     else
-      draw_floorshape(c, V, shMFloor, dcol);
+      draw_floorshape(c, V, cgi.shMFloor, dcol);
     }
   
   if(ecol != -1) {
-    queuepoly(V*D, shReptile[j][2], (ecol << 8) + 0xFF);
-    queuepoly(V*D, shReptile[j][3], (ecol << 8) + 0xFF);
+    queuepoly(V*D, cgi.shReptile[j][2], (ecol << 8) + 0xFF);
+    queuepoly(V*D, cgi.shReptile[j][3], (ecol << 8) + 0xFF);
     }
   }
 
@@ -3129,18 +3127,18 @@ void set_emeraldfloor(cell *c) {
     else if(si.id == 36) j = 5;
 
     if(j >= 0) {
-      set_floor(applyPatterndir(c, si), shEmeraldFloor[j]);
+      set_floor(applyPatterndir(c, si), cgi.shEmeraldFloor[j]);
       return;
       }
     }
   
-  set_floor(shCaveFloor);
+  set_floor(cgi.shCaveFloor);
   }
 
 void viewBuggyCells(cell *c, transmatrix V) {
   for(int i=0; i<isize(buggycells); i++)
     if(c == buggycells[i]) {
-      queuepoly(V, shPirateX, 0xC000C080);
+      queuepoly(V, cgi.shPirateX, 0xC000C080);
       return;
       }
 
@@ -3151,7 +3149,7 @@ void viewBuggyCells(cell *c, transmatrix V) {
     while(cf != c1) {
       cf = pathTowards(cf, c1);
       if(cf == c) {
-        queuepoly(V, shMineMark[1], 0xC000C0D0);
+        queuepoly(V, cgi.shMineMark[1], 0xC000C0D0);
         return;
         }
       }
@@ -3173,12 +3171,12 @@ void drawMovementArrows(cell *c, transmatrix V) {
       color_t col = getcs().uicolor;
       col -= (col & 0xFF) >> 1;
       poly_outline = OUTLINE_DEFAULT;
-      queuepoly(fixrot * spin(-d * M_PI/4), shArrow, col);
+      queuepoly(fixrot * spin(-d * M_PI/4), cgi.shArrow, col);
 
       if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));
         int sd = md.subdir;
-        queuepoly(inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2), shArrow, col);
+        queuepoly(inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2), cgi.shArrow, col);
         }
       else if(!confusingGeometry()) break;
       }
@@ -3810,10 +3808,10 @@ void floorShadow(cell *c, const transmatrix& V, color_t col) {
     return; // shadows break the depth testing
   dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
   if(qfi.shape) {
-    queuepolyat(V * qfi.spin * shadowmulmatrix, *qfi.shape, col, PPR::WALLSHADOW);
+    queuepolyat(V * qfi.spin * cgi.shadowmulmatrix, *qfi.shape, col, PPR::WALLSHADOW);
     }
   else if(qfi.usershape >= 0)
-    mapeditor::drawUserShape(V * qfi.spin * shadowmulmatrix, mapeditor::sgFloor, qfi.usershape, col, c, PPR::WALLSHADOW);
+    mapeditor::drawUserShape(V * qfi.spin * cgi.shadowmulmatrix, mapeditor::sgFloor, qfi.usershape, col, c, PPR::WALLSHADOW);
   else 
     draw_shapevec(c, V, qfi.fshape->shadow, col, PPR::WALLSHADOW);
   }
@@ -3822,26 +3820,26 @@ void set_maywarp_floor(cell *c) {
   bool warp = isWarped(c);
   if(warp && !shmup::on && geosupport_football() == 2) {
     if(!stdhyperbolic) {
-      set_floor(shTriheptaFloor);
+      set_floor(cgi.shTriheptaFloor);
       return;
       }
     auto si = patterns::getpatterninfo(c, patterns::PAT_TYPES, 0);
     if(si.id == 0 || si.id == 1)
-      set_floor(shTriheptaFloor);
+      set_floor(cgi.shTriheptaFloor);
     else if(si.id >= 14)
-      set_floor(shFloor);
+      set_floor(cgi.shFloor);
     else
-      set_floor(applyPatterndir(c, si), shTriheptaSpecial[si.id]);
+      set_floor(applyPatterndir(c, si), cgi.shTriheptaSpecial[si.id]);
     }
-  else if(is_nice_dual(c)) set_floor(shBigTriangle);
-  else set_floor(shFloor);
+  else if(is_nice_dual(c)) set_floor(cgi.shBigTriangle);
+  else set_floor(cgi.shFloor);
   }
 
 void escherSidewall(cell *c, int sidepar, const transmatrix& V, color_t col) {
   if(sidepar >= SIDE_SLEV && sidepar <= SIDE_SLEV+2) {
     int sl = sidepar - SIDE_SLEV;
     for(int z=1; z<=4; z++) if(z == 1 || (z == 4 && detaillevel == 2))
-      draw_qfi(c, mscale(V, zgrad0(geom3::slev * sl, geom3::slev * (sl+1), z, 4)), col, PPR::REDWALL-4+z+4*sl);
+      draw_qfi(c, mscale(V, zgrad0(cgi.slev * sl, cgi.slev * (sl+1), z, 4)), col, PPR::REDWALL-4+z+4*sl);
     }
   else if(sidepar == SIDE_WALL) {
     const int layers = 2 << detaillevel;
@@ -3860,7 +3858,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, color_t col) {
     }
   else if(sidepar == SIDE_BTOI) {
     const int layers = 1 << detaillevel;
-    draw_qfi(c, mscale(V, geom3::INFDEEP), col, PPR::MINUSINF);
+    draw_qfi(c, mscale(V, cgi.INFDEEP), col, PPR::MINUSINF);
     for(int z=1; z<layers; z++) 
       draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, -z, 1)), col, PPR::LAKEBOTTOM+z-layers);
     }
@@ -3868,14 +3866,14 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, color_t col) {
 
 bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t col) {
 
-  if(!qfi.fshape || !qfi.fshape->is_plain || !validsidepar[sidepar] || qfi.usershape >= 0) if(GDIM == 2) {
+  if(!qfi.fshape || !qfi.fshape->is_plain || !cgi.validsidepar[sidepar] || qfi.usershape >= 0) if(GDIM == 2) {
     escherSidewall(c, sidepar, V, col);
     return true;
     }
   if(!qfi.fshape) return true;
   
-  if(qfi.fshape == &shBigTriangle && pseudohept(c->move(i))) return false;
-  if(qfi.fshape == &shTriheptaFloor && !pseudohept(c) && !pseudohept(c->move(i))) return false;
+  if(qfi.fshape == &cgi.shBigTriangle && pseudohept(c->move(i))) return false;
+  if(qfi.fshape == &cgi.shTriheptaFloor && !pseudohept(c) && !pseudohept(c->move(i))) return false;
 
   PPR prio;
   /* if(mirr) prio = PPR::GLASS - 2;
@@ -4100,7 +4098,7 @@ int getSnakelevColor(cell *c, int i, int last, int fd, color_t wcol) {
 void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int ct6, int fd) {
 
   if(DIM == 3 && WDIM == 2) {
-    if(!qfi.fshape) qfi.fshape = &shFullFloor;
+    if(!qfi.fshape) qfi.fshape = &cgi.shFullFloor;
     if(conegraph(c)) {
       draw_shapevec(c, V, qfi.fshape->cone[0], darkena(wcol, 0, 0xFF), PPR::WALL);
       dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
@@ -4111,7 +4109,7 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
       int hdir = 0;
       for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
         hdir = i;
-      queuepolyat(V * ddspin(c, hdir, M_PI), shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
+      queuepolyat(V * ddspin(c, hdir, M_PI), cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
       return;
       }
     color_t wcol0 = wcol;
@@ -4138,12 +4136,12 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
     int hdir = 0;
     for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
       hdir = i;
-    transmatrix V2 = mscale(V, wmspatial?geom3::WALL:1) * ddspin(c, hdir, M_PI);
-    queuepolyat(V2, shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
+    transmatrix V2 = mscale(V, wmspatial?cgi.WALL:1) * ddspin(c, hdir, M_PI);
+    queuepolyat(V2, cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
     starcol = 0;
     }
   
-  hpcshape& shThisWall = isGrave(c->wall) ? shCross : shWall[ct6];
+  hpcshape& shThisWall = isGrave(c->wall) ? cgi.shCross : cgi.shWall[ct6];
   
   if(conegraph(c)) {   
     const int layers = 2 << detaillevel;
@@ -4160,7 +4158,7 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
       if(starcol) queuepoly(V, shThisWall, darkena(starcol, 0, 0xFF));
       }
     else {
-      transmatrix Vdepth = mscale(V, geom3::WALL);
+      transmatrix Vdepth = mscale(V, cgi.WALL);
       int alpha = 0xFF;
       if(c->wall == waIcewall)
         alpha = 0xC0;
@@ -4222,22 +4220,22 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
     switch(gravity_state) {
       case gsNormal:
         for(int i=0; i<6; i++) {
-          transmatrix T = V * spin(i*degree*60) * xpush(crossf/3);
+          transmatrix T = V * spin(i*degree*60) * xpush(cgi.crossf/3);
           queueline(mmscale(T, levf(r0)) * C0, mmscale(T, levf(r1)) * C0, grav_normal_color);
           }
         break;
       
       case gsAnti:
         for(int i=0; i<6; i++) {
-          transmatrix T = V * spin(i*degree*60) * xpush(crossf/3);
+          transmatrix T = V * spin(i*degree*60) * xpush(cgi.crossf/3);
           queueline(mmscale(T, levf(r0)) * C0, mmscale(T, levf(r1)) * C0, antigrav_color);
           }
         break;
       
       case gsLevitation:
         for(int i=0; i<6; i++) {
-          transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(crossf/3);
-          transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(crossf/3);
+          transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(cgi.crossf/3);
+          transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(cgi.crossf/3);
           ld lv = levf(DIM == 3 ? (i+0.5)/6 : 0.5);
           queueline(mmscale(T0, lv) * C0, mmscale(T1, lv) * C0, levitate_color);
           }
@@ -4249,24 +4247,24 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
     switch(gravity_state) {
       case gsNormal:
         for(int i=0; i<6; i++) {
-          transmatrix T0 = V * spin(i*degree*60) * xpush(crossf/3 * (1-r0));
-          transmatrix T1 = V * spin(i*degree*60) * xpush(crossf/3 * (1-r1));
+          transmatrix T0 = V * spin(i*degree*60) * xpush(cgi.crossf/3 * (1-r0));
+          transmatrix T1 = V * spin(i*degree*60) * xpush(cgi.crossf/3 * (1-r1));
           queueline(T0 * C0, T1 * C0, grav_normal_color);
           }
         break;
       
       case gsAnti:
         for(int i=0; i<6; i++) {
-          transmatrix T0 = V * spin(i*degree*60) * xpush(crossf/3 * r0);
-          transmatrix T1 = V * spin(i*degree*60) * xpush(crossf/3 * r1);
+          transmatrix T0 = V * spin(i*degree*60) * xpush(cgi.crossf/3 * r0);
+          transmatrix T1 = V * spin(i*degree*60) * xpush(cgi.crossf/3 * r1);
           queueline(T0 * C0, T1 * C0, antigrav_color);
           }
         break;
       
       case gsLevitation:
         for(int i=0; i<6; i++) {
-          transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(crossf/3);
-          transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(crossf/3);
+          transmatrix T0 = V * spin(i*degree*60 + tt/60. * degree) * xpush(cgi.crossf/3);
+          transmatrix T1 = V * spin(i*degree*60 + (tt/60. + 30) * degree) * xpush(cgi.crossf/3);
           queueline(T0 * C0, T1 * C0, levitate_color);
           }
         break;
@@ -4352,8 +4350,8 @@ void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatr
     nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
     if(!nospin) Vboat0 = face_the_player(V);
     else Vboat0 = cspin(0, 2, M_PI) * Vboat0;
-    queuepolyat(mscale(Vboat0, scalefactor/2), shBoatOuter, outcol, PPR::BOATLEV2);
-    queuepolyat(mscale(Vboat0, scalefactor/2-0.01), shBoatInner, incol, PPR::BOATLEV2);
+    queuepolyat(mscale(Vboat0, cgi.scalefactor/2), cgi.shBoatOuter, outcol, PPR::BOATLEV2);
+    queuepolyat(mscale(Vboat0, cgi.scalefactor/2-0.01), cgi.shBoatInner, incol, PPR::BOATLEV2);
     return;
     }
 
@@ -4361,7 +4359,7 @@ void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatr
   if(wmspatial && c->wall == waBoat) {
     nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
     if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
-    queuepolyat(Vboat0, shBoatOuter, outcol, PPR::BOATLEV);
+    queuepolyat(Vboat0, cgi.shBoatOuter, outcol, PPR::BOATLEV);
     Vboat = &(Vboat0 = V);
     }
   if(c->wall == waBoat) {
@@ -4375,21 +4373,21 @@ void drawBoat(cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, transmatr
       animations[LAYER_SMALL][c].footphase = 0;
     }
   if(wmspatial && GDIM == 2)
-    queuepolyat(mscale(Vboat0, (geom3::LAKE+1)/2), shBoatOuter, outcol, PPR::BOATLEV2);
-  queuepoly(Vboat0, shBoatOuter, outcol);
-  queuepoly(Vboat0, shBoatInner, incol);
+    queuepolyat(mscale(Vboat0, (cgi.LAKE+1)/2), cgi.shBoatOuter, outcol, PPR::BOATLEV2);
+  queuepoly(Vboat0, cgi.shBoatOuter, outcol);
+  queuepoly(Vboat0, cgi.shBoatInner, incol);
   }
 
 void shmup_gravity_floor(cell *c) {
   if(DIM == 2 && cellEdgeUnstable(c))
-    set_floor(shMFloor);
+    set_floor(cgi.shMFloor);
   else
-    set_floor(shFullFloor);
+    set_floor(cgi.shFullFloor);
   }
 
 ld mousedist(transmatrix T) {
   if(GDIM == 2) return intval(mouseh, tC0(T));
-  hyperpoint T1 = tC0(mscale(T, geom3::FLOOR));
+  hyperpoint T1 = tC0(mscale(T, cgi.FLOOR));
   if(mouseaim_sensitivity) return sqhypot_d(2, T1) + (invis_point(T1) ? 1e10 : 0);
   hyperpoint h1;
   applymodel(T1, h1);
@@ -4422,9 +4420,9 @@ void make_clipping_planes() {
 
 void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   if(WDIM == 2 && GDIM == 3) {
-    ld eps = geom3::human_height/100;
-    queueline(V1*orthogonal_move(h1,geom3::FLOOR+eps), V2*orthogonal_move(h2,geom3::FLOOR+eps), col, prec);
-    queueline(V1*orthogonal_move(h1,geom3::WALL-eps), V2*orthogonal_move(h2,geom3::WALL-eps), col, prec);
+    ld eps = cgi.human_height/100;
+    queueline(V1*orthogonal_move(h1,cgi.FLOOR+eps), V2*orthogonal_move(h2,cgi.FLOOR+eps), col, prec);
+    queueline(V1*orthogonal_move(h1,cgi.WALL-eps), V2*orthogonal_move(h2,cgi.WALL-eps), col, prec);
     }
   else
     queueline(V1*h1, V2*h2, col, prec);
@@ -4437,7 +4435,7 @@ void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, co
 void draw_grid_at(cell *c, const transmatrix& V) {
   dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
-  vid.linewidth *= scalefactor;
+  vid.linewidth *= cgi.scalefactor;
 
   // sphere: 0.3948
   // sphere heptagonal: 0.5739
@@ -4458,7 +4456,7 @@ void draw_grid_at(cell *c, const transmatrix& V) {
       if(binarytiling && !among(t, 5, 6, 8)) continue;
       if(!binarytiling && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
-      queuepoly(V, shWireframe3D[t], 0);
+      queuepoly(V, cgi.shWireframe3D[t], 0);
       }
     }
   #endif
@@ -4612,7 +4610,7 @@ int ceiling_category(cell *c) {
 ld camera_level;
 
 int get_skybrightness(int mul = 1) {
-  ld s = 1 - mul * (camera_level - geom3::WALL) / -2;
+  ld s = 1 - mul * (camera_level - cgi.WALL) / -2;
   if(s > 1) return 255;
   if(s < 0) return 0;
   return int(s * 255);
@@ -4626,23 +4624,23 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
     /* ceilingless levels */
     case 1: {
       if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
-        auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
+        auto &star = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         star.tinf = NULL;
         star.flags |= POLY_INTENSE;
         }
       int sk = get_skybrightness();
       if(sk > 0) {
-        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        auto sky = draw_shapevec(c, V, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
         }
       if(c->land == laAsteroids) {
         if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
-          auto &downstar = queuepolyat(V * zpush(-0.5-geom3::SKY), shNightStar, 0xFFFFFFFF, PPR::SKY);
+          auto &downstar = queuepolyat(V * zpush(-0.5-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
           downstar.tinf = NULL;
           downstar.flags |= POLY_INTENSE;
           }
         sk = get_skybrightness(-1);
-        auto sky = draw_shapevec(c, V * MirrorZ, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
         }
       return;
@@ -4653,7 +4651,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(c->land == laWineyard) {
         col = 0x4040FF;
         if(emeraldval(c) / 4 == 11) {
-          auto &sun = queuepolyat(V * zpush(geom3::SKY+0.5), shSun, 0xFFFF00FF, PPR::SKY);
+          auto &sun = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
           sun.tinf = NULL;
           sun.flags |= POLY_INTENSE;
           }
@@ -4668,7 +4666,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(sk > 0) {
         col = gradient(0, col, 0, sk, 255);
         col = darkena(col, 0, 255);      
-        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], col, PPR::SKY);
+        auto sky = draw_shapevec(c, V, cgi.shFullFloor.levels[SIDE_SKY], col, PPR::SKY);
         if(sky) sky->tinf = NULL;
         }
 
@@ -4676,7 +4674,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       }
     
     case 3: {
-      if(camera_level <= geom3::WALL) return;
+      if(camera_level <= cgi.WALL) return;
       draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
       forCellIdEx(c2, i, c) 
         if(ceiling_category(c2) != 3) {
@@ -4687,7 +4685,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       }
     
     case 4: {
-      if(camera_level <= geom3::HIGH2) return;
+      if(camera_level <= cgi.HIGH2) return;
       auto ispal = [&] (cell *c0) { return c0->land == laPalace && among(c0->wall, waPalace, waClosedGate, waOpenGate); };
       color_t wcol2 = 0xFFD500;
       if(ispal(c)) {
@@ -4705,20 +4703,20 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(among(c->wall, waClosedGate, waOpenGate)) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
 
       if(true) {
-        auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
+        auto &star = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         star.tinf = NULL;
         star.flags |= POLY_INTENSE;
         }
       int sk = get_skybrightness();
       if(sk > 0) {
-        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        auto sky = draw_shapevec(c, V, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
         }
       break;
       }
     
     case 5: {
-      if(camera_level <= geom3::WALL) return;
+      if(camera_level <= cgi.WALL) return;
     
       if(pseudohept(c)) {
         forCellIdEx(c2, i, c) 
@@ -4728,13 +4726,13 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
         draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
       if(true) {
-        auto &star = queuepolyat(V * zpush(geom3::SKY+0.5), shNightStar, 0xFFFFFFFF, PPR::SKY);
+        auto &star = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         star.tinf = NULL;
         star.flags |= POLY_INTENSE;
         }
       int sk = get_skybrightness();
       if(sk > 0) {
-        auto sky = draw_shapevec(c, V, shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        auto sky = draw_shapevec(c, V, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
         }
       }
@@ -4788,7 +4786,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(WDIM == 3 && pmodel == mdPerspective) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
-    for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(corner_bonus)) {
+    for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
       drawcell_in_radar(c, V);
       return;
       }
@@ -4796,7 +4794,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
 
   #if CAP_SHAPES
-  set_floor(shFloor);
+  set_floor(cgi.shFloor);
   #endif
   ivoryz = isGravityLand(c->land);
 
@@ -4907,7 +4905,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     #if CAP_SHAPES
     if(c->land == laNone && (cmode & sm::MAP)) {
-      queuepoly(V, shTriangle, 0xFF0000FF);
+      queuepoly(V, cgi.shTriangle, 0xFF0000FF);
       }
     #endif
   
@@ -4970,10 +4968,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(c->wall == waThumperOn && DIM == 2) {
       ld ds = fractick(160);
       for(int u=0; u<5; u++) {
-        ld rad = hexf * (.3 * (u + ds));
-        int tcol = darkena(gradient(forecolor, backcolor, 0, rad, 1.5 * hexf), 0, 0xFF);
+        ld rad = cgi.hexf * (.3 * (u + ds));
+        int tcol = darkena(gradient(forecolor, backcolor, 0, rad, 1.5 * cgi.hexf), 0, 0xFF);
         PRING(a)
-          curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+          curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
         queuecurve(tcol, 0, PPR::LINE);
         }
       }
@@ -5042,7 +5040,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->ligon) {
         ld hdir = displayspin(c, t);
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*chei(xspinpush(ticks * M_PI / S42, hexf/2), rand() % 1000, 1000) * C0, V*chei(xspinpush(hdir, crossf), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+        queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(xspinpush(hdir, cgi.crossf), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
         }
       }
     
@@ -5079,16 +5077,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     const transmatrix *Vdp =
       WDIM == 3 ? &V:
       !wmspatial ? &V : 
-      sl ? &(Vd0= mscale(V, DIM == 3 ? geom3::SLEV[sl] - geom3::FLOOR : geom3::SLEV[sl])) : 
-      (highwall(c) && GDIM == 2) ? &(Vd0= mscale(V, (1+geom3::WALL)/2)) :
+      sl ? &(Vd0= mscale(V, DIM == 3 ? cgi.SLEV[sl] - cgi.FLOOR : cgi.SLEV[sl])) : 
+      (highwall(c) && GDIM == 2) ? &(Vd0= mscale(V, (1+cgi.WALL)/2)) :
 #if CAP_SHAPES
-      (chasmg==1) ? &(Vd0 = mscale(V, DIM == 3 ? geom3::LAKE - geom3::FLOOR : geom3::LAKE)) :
+      (chasmg==1) ? &(Vd0 = mscale(V, DIM == 3 ? cgi.LAKE - cgi.FLOOR : cgi.LAKE)) :
 #endif
       &V;
     
 #if CAP_SHAPES
     transmatrix Vf0;
-    const transmatrix& Vf = (chasmg && wmspatial) ? (Vf0=mscale(V, geom3::BOTTOM)) : V;
+    const transmatrix& Vf = (chasmg && wmspatial) ? (Vf0=mscale(V, cgi.BOTTOM)) : V;
 #endif
 
     const transmatrix *Vboat = &(*Vdp);
@@ -5112,16 +5110,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         zcol = 0;
         int rd = rosedist(c);
         if(rd == 1) 
-          draw_floorshape(c, V, shRoseFloor, 0x80406020);
+          draw_floorshape(c, V, cgi.shRoseFloor, 0x80406020);
         if(rd == 2)
-          draw_floorshape(c, V, shRoseFloor, 0x80406040);
+          draw_floorshape(c, V, cgi.shRoseFloor, 0x80406040);
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
-          transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
+          transmatrix Vdepth = wmspatial ? mscale(V, cgi.BOTTOM) : V;
           if(DIM == 3)
-            draw_shapevec(c, V, shFullFloor.levels[SIDE_LAKE], darkena(firecolor(0, 10), 0, 0xDF), PPR::TRANSPARENT_LAKE);
+            draw_shapevec(c, V, cgi.shFullFloor.levels[SIDE_LAKE], darkena(firecolor(0, 10), 0, 0xDF), PPR::TRANSPARENT_LAKE);
           else
-            draw_floorshape(c, Vdepth, shFullFloor, darkena(firecolor(0, 10), 0, 0xDF), PPR::LAKEBOTTOM);
+            draw_floorshape(c, Vdepth, cgi.shFullFloor, darkena(firecolor(0, 10), 0, 0xDF), PPR::LAKEBOTTOM);
           }
         }
 
@@ -5133,16 +5131,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #endif
 
       else if(patterns::whichShape == '7')
-        set_floor(shBigHepta);
+        set_floor(cgi.shBigHepta);
       
       else if(patterns::whichShape == '8')
-        set_floor(shTriheptaFloor);
+        set_floor(cgi.shTriheptaFloor);
       
       else if(patterns::whichShape == '6')
-        set_floor(shBigTriangle);
+        set_floor(cgi.shBigTriangle);
 
       else if(among(patterns::whichShape, '9', '^'))
-        set_floor(shFullFloor);
+        set_floor(cgi.shFullFloor);
 
 #if CAP_TEXTURE
       else if(DIM == 2 && texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
@@ -5165,46 +5163,46 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           transmatrix V2 = V * qfi.spin;
           if(!wmblack) for(int d=0; d<c->type; d++) {
             inmirrorcount+=d;
-            queuepolyat(V2 * spin(d*M_PI/S3), shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR::FLOORa);
-            if(GDIM == 3 && camera_level > geom3::WALL && pmodel == mdPerspective)
-              queuepolyat(V2 * spin(d*M_PI/S3), shHalfFloor[5], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            queuepolyat(V2 * spin(d*M_PI/S3), cgi.shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            if(GDIM == 3 && camera_level > cgi.WALL && pmodel == mdPerspective)
+              queuepolyat(V2 * spin(d*M_PI/S3), cgi.shHalfFloor[5], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             inmirrorcount-=d;
             }          
           if(GDIM == 3) {
             for(int d=0; d<6; d++)
-              queue_transparent_wall(V2 * spin(d*M_PI/S3), shHalfMirror[2], 0xC0C0C080);
+              queue_transparent_wall(V2 * spin(d*M_PI/S3), cgi.shHalfMirror[2], 0xC0C0C080);
             }
           else if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
-              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[2], 0xC0C0C080, PPR::WALL3+z-layers);
+              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), cgi.shHalfMirror[2], 0xC0C0C080, PPR::WALL3+z-layers);
             }
           else
-            queuepolyat(V2, shHalfMirror[2], 0xC0C0C080, PPR::WALL3);
+            queuepolyat(V2, cgi.shHalfMirror[2], 0xC0C0C080, PPR::WALL3);
           }
         else {
           qfi.spin = ddspin(c, d, M_PI);
           transmatrix V2 = V * qfi.spin;
           if(!wmblack) {
             inmirrorcount++;
-            queuepolyat(mirrorif(V2, !onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
-            if(GDIM == 3 && camera_level > geom3::WALL && pmodel == mdPerspective)
-              queuepolyat(mirrorif(V2, !onleft), shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            queuepolyat(mirrorif(V2, !onleft), cgi.shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            if(GDIM == 3 && camera_level > cgi.WALL && pmodel == mdPerspective)
+              queuepolyat(mirrorif(V2, !onleft), cgi.shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             inmirrorcount--;
-            queuepolyat(mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
-            if(GDIM == 3 && camera_level > geom3::WALL && pmodel == mdPerspective)
-              queuepolyat(mirrorif(V2, onleft), shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            queuepolyat(mirrorif(V2, onleft), cgi.shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            if(GDIM == 3 && camera_level > cgi.WALL && pmodel == mdPerspective)
+              queuepolyat(mirrorif(V2, onleft), cgi.shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
             }
   
           if(GDIM == 3) 
-            queue_transparent_wall(V2, shHalfMirror[ct6], 0xC0C0C080);
+            queue_transparent_wall(V2, cgi.shHalfMirror[ct6], 0xC0C0C080);
           else if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
-              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR::WALL3+z-layers);
+              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), cgi.shHalfMirror[ct6], 0xC0C0C080, PPR::WALL3+z-layers);
             }
           else 
-            queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR::WALL3);
+            queuepolyat(V2, cgi.shHalfMirror[ct6], 0xC0C0C080, PPR::WALL3);
           }
         }
       
@@ -5218,31 +5216,31 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         transmatrix V2 = V * qfi.spin;
         
         if(wmspatial && wmescher && GDIM == 2) {
-          set_floor(shSemiFeatherFloor[0]);
+          set_floor(cgi.shSemiFeatherFloor[0]);
           int dk = 1;
           int vcol = winf[waVinePlant].color;
-          draw_qfi(c, mscale(V2, geom3::WALL), darkena(vcol, dk, 0xFF), PPR::WALL3A);
+          draw_qfi(c, mscale(V2, cgi.WALL), darkena(vcol, dk, 0xFF), PPR::WALL3A);
           escherSidewall(c, SIDE_WALL, V2, darkena(gradient(0, vcol, 0, .8, 1), dk, 0xFF));
-          queuepoly(V2, shSemiFeatherFloor[1], darkena(fcol, dk, 0xFF));
-          set_floor(shFeatherFloor);
+          queuepoly(V2, cgi.shSemiFeatherFloor[1], darkena(fcol, dk, 0xFF));
+          set_floor(cgi.shFeatherFloor);
           }
         
         else if(wmspatial || GDIM == 3) {
-          floorshape& shar = *((wmplain || GDIM == 3) ? (floorshape*)&shFloor : (floorshape*)&shFeatherFloor);
+          floorshape& shar = *((wmplain || GDIM == 3) ? (floorshape*)&cgi.shFloor : (floorshape*)&cgi.shFeatherFloor);
           
           set_floor(shar);
 
           int vcol = winf[waVinePlant].color;
           int vcol2 = gradient(0, vcol, 0, .8, 1);
           
-          transmatrix Vdepth = mscale(V2, geom3::WALL);
+          transmatrix Vdepth = mscale(V2, cgi.WALL);
 
-          queuepolyat(DIM == 2 ? Vdepth : V2, shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
-          {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), shSemiFloorShadow, SHADOW_WALL, DIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW); }
-          auto& side = queuepolyat(V2, shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2));
-          if(DIM == 3 && qfi.fshape) side.tinf = &shar.tinf3;
+          queuepolyat(DIM == 2 ? Vdepth : V2, cgi.shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
+          {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), cgi.shSemiFloorShadow, SHADOW_WALL, DIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW); }
+          auto& side = queuepolyat(V2, cgi.shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2));
+          if(DIM == 3 && qfi.fshape) side.tinf = &floor_texture_vertices[shar.id];
 
-          if(validsidepar[SIDE_WALL]) forCellIdEx(c2, j, c) {
+          if(cgi.validsidepar[SIDE_WALL]) forCellIdEx(c2, j, c) {
             int dis = i-j;
             dis %= 6;
             if(dis<0) dis += 6;
@@ -5252,10 +5250,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         
         else {
-          hpcshape *shar = shSemiFeatherFloor;
+          hpcshape *shar = cgi.shSemiFeatherFloor;
           
-          if(wmblack) shar = shSemiBFloor;
-          if(wmplain) shar = shSemiFloor;
+          if(wmblack) shar = cgi.shSemiBFloor;
+          if(wmplain) shar = cgi.shSemiFloor;
           
           queuepoly(V2, shar[0], darkena(winf[waVinePlant].color, fd, 0xFF));
           
@@ -5270,19 +5268,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         ;
       
       else if(wmblack) {
-        set_floor(shBFloor[ct6]);
+        set_floor(cgi.shBFloor[ct6]);
         int rd = rosedist(c);
         if(rd == 1)
-          queuepoly(Vf, shHeptaMarker, darkena(fcol, 0, 0x80));
+          queuepoly(Vf, cgi.shHeptaMarker, darkena(fcol, 0, 0x80));
         else if(rd == 2)
-          queuepoly(Vf, shHeptaMarker, darkena(fcol, 0, 0x40));
+          queuepoly(Vf, cgi.shHeptaMarker, darkena(fcol, 0, 0x40));
         }
       
       else if(isWarped(c) || is_nice_dual(c))
         set_maywarp_floor(c); 
 
       else if(wmplain) {
-        set_floor(shFloor);
+        set_floor(cgi.shFloor);
         }
 
       else if(randomPatternsMode && c->land != laBarrier && !isWarpedType(c->land)) {
@@ -5295,26 +5293,26 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         else if(k == RPV_CYCLE && k7 < 4) set_towerfloor(c, celldist);
  
         else switch(j) {
-          case 0:  set_floor(shCloudFloor); break;
-          case 1:  set_floor(shFeatherFloor); break;
-          case 2:  set_floor(shStarFloor); break;
-          case 3:  set_floor(shTriFloor); break;
-          case 4:  set_floor(shSStarFloor); break;
-          case 5:  set_floor(shOverFloor); break;
-          case 6:  set_floor(shFeatherFloor); break;
-          case 7:  set_floor(shDemonFloor); break;
-          case 8:  set_floor(shCrossFloor); break;
-          case 9:  set_floor(shMFloor); break;
-          case 10: set_floor(shCaveFloor); break;
-          case 11: set_floor(shPowerFloor); break;
-          case 12: set_floor(shDesertFloor); break;
-          case 13: set_floor(shChargedFloor); break;
-          case 14: set_floor(shLavaFloor); break;
+          case 0:  set_floor(cgi.shCloudFloor); break;
+          case 1:  set_floor(cgi.shFeatherFloor); break;
+          case 2:  set_floor(cgi.shStarFloor); break;
+          case 3:  set_floor(cgi.shTriFloor); break;
+          case 4:  set_floor(cgi.shSStarFloor); break;
+          case 5:  set_floor(cgi.shOverFloor); break;
+          case 6:  set_floor(cgi.shFeatherFloor); break;
+          case 7:  set_floor(cgi.shDemonFloor); break;
+          case 8:  set_floor(cgi.shCrossFloor); break;
+          case 9:  set_floor(cgi.shMFloor); break;
+          case 10: set_floor(cgi.shCaveFloor); break;
+          case 11: set_floor(cgi.shPowerFloor); break;
+          case 12: set_floor(cgi.shDesertFloor); break;
+          case 13: set_floor(cgi.shChargedFloor); break;
+          case 14: set_floor(cgi.shLavaFloor); break;
           }
         }
 
       // else if(c->land == laPrairie && !eoh && allemptynear(c) && fieldpattern::getflowerdist(c) <= 1)
-      //   queuepoly(Vf, shLeafFloor[ct6], darkena(fcol, fd, 0xFF));
+      //   queuepoly(Vf, cgi.shLeafFloor[ct6], darkena(fcol, fd, 0xFF));
 
       /* else if(c->land == laPrairie && prairie::isriver(c))
         
@@ -5324,12 +5322,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else switch(c->land) {
         case laPrairie:
         case laAlchemist:
-          set_floor(shCloudFloor);
+          set_floor(cgi.shCloudFloor);
           break;
         
         case laJungle:
         case laWineyard:
-          set_floor(shFeatherFloor);
+          set_floor(cgi.shFeatherFloor);
           break;
         
         case laZebra:
@@ -5349,28 +5347,28 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laRlyeh:
         case laTemple:
-          set_floor(shTriFloor);
+          set_floor(cgi.shTriFloor);
           break;
         
         case laVolcano:
         case laVariant:
-          set_floor(shLavaFloor);
+          set_floor(cgi.shLavaFloor);
           break;
         
         case laRose:
-          set_floor(shRoseFloor);
+          set_floor(cgi.shRoseFloor);
           break;
         
         case laTortoise:
-          set_floor(shTurtleFloor);
+          set_floor(cgi.shTurtleFloor);
           break;
         
         case laBurial: case laRuins:
-          set_floor(shBarrowFloor);
+          set_floor(cgi.shBarrowFloor);
           break;
 
         case laTrollheim:
-          set_floor(shTrollFloor);
+          set_floor(cgi.shTrollFloor);
           break;
 
         /*case laMountain:
@@ -5378,88 +5376,88 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break; */
         
         case laGraveyard:
-          set_floor(shCrossFloor);
+          set_floor(cgi.shCrossFloor);
           break;
         
         case laMotion:
-          set_floor(shMFloor);
+          set_floor(cgi.shMFloor);
           break;
         
         case laWhirlwind:
         case laEFire: case laEAir: case laEWater: case laEEarth: case laElementalWall:
-          set_floor(shNewFloor);
+          set_floor(cgi.shNewFloor);
           break;
         
         case laHell:
-          set_floor(shDemonFloor);
+          set_floor(cgi.shDemonFloor);
           break;
               
         case laIce: case laBlizzard:
-          set_floor(shStarFloor);
+          set_floor(cgi.shStarFloor);
           break;
         
         case laSwitch:
-          set_floor(shSwitchFloor);
+          set_floor(cgi.shSwitchFloor);
           if(ctof(c) && STDVAR && !archimedean && !binarytiling && GDIM == 2) for(int i=0; i<c->type; i++)
-            queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
+            queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(cgi.rhexf), cgi.shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
           break;
 
         case laStorms:
-          set_floor(shChargedFloor);
+          set_floor(cgi.shChargedFloor);
           break;
         
         case laWildWest:
-          set_floor(shSStarFloor);
+          set_floor(cgi.shSStarFloor);
           break;
         
         case laPower:
-          set_floor(shPowerFloor);
+          set_floor(cgi.shPowerFloor);
           break;
         
         case laCaves:
         case laLivefjord:
         case laDeadCaves:
-          set_floor(shCaveFloor);
+          set_floor(cgi.shCaveFloor);
           break;
         
         case laDryForest:
-          set_floor(DIM == 3 ? shFeatherFloor : shDesertFloor);
+          set_floor(DIM == 3 ? cgi.shFeatherFloor : cgi.shDesertFloor);
           break;
 
         case laDesert:
         case laRedRock: case laSnakeNest:
         case laCocytus:
-          set_floor(shDesertFloor);
+          set_floor(cgi.shDesertFloor);
           break;
 
         case laBull:
-          set_floor(shButterflyFloor);
+          set_floor(cgi.shButterflyFloor);
           break;
         
         case laCaribbean: case laOcean: case laOceanWall: case laWhirlpool:
-          set_floor(shCloudFloor);
+          set_floor(cgi.shCloudFloor);
           break;
         
         case laKraken:
         case laDocks:
-          set_floor(shFullFloor);
+          set_floor(cgi.shFullFloor);
           break;
         
         case laPalace: case laTerracotta:
-          set_floor(shPalaceFloor);
+          set_floor(cgi.shPalaceFloor);
           break;
         
         case laDragon:
-          set_floor(shDragonFloor);
+          set_floor(cgi.shDragonFloor);
           break;
         
         case laOvergrown: case laClearing: case laHauntedWall: case laHaunted: case laHauntedBorder:
-          set_floor(shOverFloor);
+          set_floor(cgi.shOverFloor);
           break;
 
         case laMercuryRiver: {
           if(eoh)
-            set_floor(shFloor);
+            set_floor(cgi.shFloor);
           else {
             int bridgedir = -1;
             if(c->type == 6) {
@@ -5469,17 +5467,17 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                   bridgedir = i;
               }
             if(bridgedir == -1)
-              set_floor(shPalaceFloor);
+              set_floor(cgi.shPalaceFloor);
             else {
               transmatrix bspin = ddspin(c, bridgedir);
-              set_floor(bspin, shMercuryBridge[0]);
+              set_floor(bspin, cgi.shMercuryBridge[0]);
               // only needed in one direction
               if(c < c->move(bridgedir)) {
                 bspin = Vf * bspin;
-                queuepoly(bspin, shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
+                queuepoly(bspin, cgi.shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
                 if(wmspatial) {
-                  queuepolyat(mscale(bspin, geom3::LAKE), shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR::LAKELEV);
-                  queuepolyat(mscale(bspin, geom3::BOTTOM), shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR::LAKEBOTTOM);
+                  queuepolyat(mscale(bspin, cgi.LAKE), cgi.shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR::LAKELEV);
+                  queuepolyat(mscale(bspin, cgi.BOTTOM), cgi.shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR::LAKEBOTTOM);
                   }
                 }
               }
@@ -5490,14 +5488,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case laHive:
           if(c->wall != waFloorB && c->wall != waFloorA && c->wall != waMirror && c->wall != waCloud) {
             fd = 1;
-            set_floor(shFloor);
+            set_floor(cgi.shFloor);
             if(c->wall != waMirror && c->wall != waCloud && DIM == 2)
-              draw_floorshape(c, V, shMFloor, darkena(fcol, 2, 0xFF), PPR::FLOORa);
+              draw_floorshape(c, V, cgi.shMFloor, darkena(fcol, 2, 0xFF), PPR::FLOORa);
             if(c->wall != waMirror && c->wall != waCloud && DIM == 2)
-              draw_floorshape(c, V, shMFloor2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF), PPR::FLOORb);
+              draw_floorshape(c, V, cgi.shMFloor2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF), PPR::FLOORb);
             }
           else
-            set_floor(shFloor);
+            set_floor(cgi.shFloor);
           break;
         
         case laEndorian:
@@ -5505,10 +5503,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             shmup_gravity_floor(c);
 
           else if(c->wall == waTrunk) 
-            set_floor(shFloor);
+            set_floor(cgi.shFloor);
     
           else if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) 
-            set_floor(shFeatherFloor);
+            set_floor(cgi.shFeatherFloor);
           
           else 
             set_towerfloor(c);
@@ -5523,13 +5521,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laBrownian:
           if(among(c->wall, waSea, waBoat))
-            set_floor(shCloudFloor);
+            set_floor(cgi.shCloudFloor);
           else
-            set_floor(shTrollFloor);
+            set_floor(cgi.shTrollFloor);
           break;
 
         default: 
-          set_floor(shFloor);
+          set_floor(cgi.shFloor);
         }
 
       // actually draw the floor
@@ -5545,19 +5543,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
         color_t col = c->land == laCocytus ? 0x080808FF : 0x101010FF;
 
-        if(qfi.fshape == &shCloudFloor) 
-          set_floor(shCloudSeabed);
-        else if(qfi.fshape == &shLavaFloor) 
-          set_floor(shLavaSeabed);
-        else if(qfi.fshape == &shFloor)
-          set_floor(shFullFloor);
-        else if(qfi.fshape == &shCaveFloor)
-          set_floor(shCaveSeabed);
+        if(qfi.fshape == &cgi.shCloudFloor) 
+          set_floor(cgi.shCloudSeabed);
+        else if(qfi.fshape == &cgi.shLavaFloor) 
+          set_floor(cgi.shLavaSeabed);
+        else if(qfi.fshape == &cgi.shFloor)
+          set_floor(cgi.shFullFloor);
+        else if(qfi.fshape == &cgi.shCaveFloor)
+          set_floor(cgi.shCaveSeabed);
         
         if(WDIM == 2 && GDIM == 3 && qfi.fshape)
           draw_shapevec(c, V, qfi.fshape->levels[SIDE_LTOB], col, PPR::LAKEBOTTOM);
         else
-          draw_qfi(c, mscale(V, geom3::BOTTOM), col, PPR::LAKEBOTTOM);
+          draw_qfi(c, mscale(V, cgi.BOTTOM), col, PPR::LAKEBOTTOM);
 
         int fd0 = fd ? fd-1 : 0;      
         if(WDIM == 2 && GDIM == 3 && qfi.fshape)
@@ -5580,7 +5578,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         int rd = rosedist(c);
         if(rd) {
           dynamicval<qfloorinfo> qfi2(qfi, qfi);
-          qfi.fshape = &shRoseFloor;
+          qfi.fshape = &cgi.shRoseFloor;
           int t = isize(ptds);
           color_t rcol;
           if(rd == 1) rcol = 0x80406040;
@@ -5604,7 +5602,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         auto si = patterns::getpatterninfo0(c);
         
         for(int i=(si.dir + MODFIXER) % si.symmetries; i<c->type; i += si.symmetries) {
-          queuepoly(V * ddspin(c, i) * (si.reflect?Mirror:Id), shAsymmetric, darkena(0x000000, 0, 0xC0));
+          queuepoly(V * ddspin(c, i) * (si.reflect?Mirror:Id), cgi.shAsymmetric, darkena(0x000000, 0, 0xC0));
           si.dir += si.symmetries;
           }
         
@@ -5620,7 +5618,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           dist0 >= geom3::middetail ? 0xFFFF8080 :
           0XFFFFFF80;
 #if 1
-        queuepoly(V, shHeptaMarker, darkena(col & 0xFFFFFF, 0, 0xFF));
+        queuepoly(V, cgi.shHeptaMarker, darkena(col & 0xFFFFFF, 0, 0xFF));
 #else
         char buf[64];
         sprintf(buf, "%3.1f", float(dist0));
@@ -5632,14 +5630,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if(realred(c->wall) && !wmspatial) {
         int s = snakelevel(c);
-        if(s >= 1) draw_floorshape(c, V, shRedRockFloor[0], getSnakelevColor(c, 0, 7, fd, wcol));
-        if(s >= 2) draw_floorshape(c, V, shRedRockFloor[1], getSnakelevColor(c, 1, 7, fd, wcol));
-        if(s >= 3) draw_floorshape(c, V, shRedRockFloor[2], getSnakelevColor(c, 2, 7, fd, wcol));
+        if(s >= 1) draw_floorshape(c, V, cgi.shRedRockFloor[0], getSnakelevColor(c, 0, 7, fd, wcol));
+        if(s >= 2) draw_floorshape(c, V, cgi.shRedRockFloor[1], getSnakelevColor(c, 1, 7, fd, wcol));
+        if(s >= 3) draw_floorshape(c, V, cgi.shRedRockFloor[2], getSnakelevColor(c, 2, 7, fd, wcol));
         }
       
       if(c->wall == waTower && !wmspatial) {
         fcol = 0xE8E8E8;
-        set_floor(shMFloor);
+        set_floor(cgi.shMFloor);
         }
       
       if(pseudohept(c) && (
@@ -5648,14 +5646,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         (c->land == laClearing && !BITRUNCATED))) {
         #if MAXMDIM >= 4
         if(DIM == 3 && WDIM == 2)
-          queuepoly((*Vdp)*zpush(geom3::FLOOR), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
+          queuepoly((*Vdp)*zpush(cgi.FLOOR), cgi.shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         else
         #endif
-          queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
+          queuepoly((*Vdp), cgi.shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
       if(conformal::includeHistory && conformal::inmovehistory.count(c))
-        queuepoly((*Vdp), shHeptaMarker, 0x000000C0);
+        queuepoly((*Vdp), cgi.shHeptaMarker, 0x000000C0);
 
       char xch = winf[c->wall].glyph;
       
@@ -5678,18 +5676,18 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
               if(qfi.fshape && wmescher) {
-                auto& poly = queuepoly(V, shWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                auto& poly = queuepoly(V, cgi.shWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
                 if(texture::config.tstate == texture::tsActive && isize(texture::config.tinf3.tvertices)) {
                   poly.tinf = &texture::config.tinf3;
                   poly.offset_texture = 0;
                   }
                 else {
-                  poly.tinf = &qfi.fshape->tinf3;
+                  poly.tinf = &floor_texture_vertices[qfi.fshape->id];
                   poly.offset_texture = 0;
                   }
                 }
               else
-                queuepoly(V, shPlainWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                queuepoly(V, cgi.shPlainWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
               }
           }
         else {
@@ -5697,7 +5695,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             color_t t = transcolor(c, c->move(a), wcol);
             if(t) {
               t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
-              queue_transparent_wall(V, shPlainWall3D[a], t);
+              queue_transparent_wall(V, cgi.shPlainWall3D[a], t);
               }
             }
           if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, Vboat, V, V);
@@ -5714,27 +5712,27 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           else if(c->wall == waMineOpen) {
             int mines = countMinesAround(c);
             if(mines >= 10)
-              queuepoly(face_the_player(V), shBigMineMark[0], darkena(minecolors[(mines/10)%10], 0, 0xFF));
-            queuepoly(face_the_player(V), shMineMark[0], darkena(minecolors[mines%10], 0, 0xFF));
+              queuepoly(face_the_player(V), cgi.shBigMineMark[0], darkena(minecolors[(mines/10)%10], 0, 0xFF));
+            queuepoly(face_the_player(V), cgi.shMineMark[0], darkena(minecolors[mines%10], 0, 0xFF));
             }
           
           else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder, waCanopy) || isWatery(c) || isSulphuric(c->wall)) ;
           
           else if(c->wall == waBigBush || c->wall == waSolidBranch)
-            queuepolyat(face_the_player(V), shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
+            queuepolyat(face_the_player(V), cgi.shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
 
           else if(c->wall == waSmallBush || c->wall == waWeakBranch)
-            queuepolyat(face_the_player(V), shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
+            queuepolyat(face_the_player(V), cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
           
           else
-            queuepoly(face_the_player(V), chasmgraph(c) ? shSawRing : shRing, darkena(wcol, 0, 0xFF));
+            queuepoly(face_the_player(V), chasmgraph(c) ? cgi.shSawRing : cgi.shRing, darkena(wcol, 0, 0xFF));
           }
 
         int rd = rosedist(c);
         if(rd == 1) 
-          queuepoly(face_the_player(V), shLoveRing, darkena(0x804060, 0, 0xFF));
+          queuepoly(face_the_player(V), cgi.shLoveRing, darkena(0x804060, 0, 0xFF));
         if(rd == 2) 
-          queuepoly(face_the_player(V), shLoveRing, darkena(0x402030, 0, 0xFF));
+          queuepoly(face_the_player(V), cgi.shLoveRing, darkena(0x402030, 0, 0xFF));
         }
       #else
       if(0) ;
@@ -5744,45 +5742,45 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
         case waBigBush:
           if(detaillevel >= 2)
-            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL);
+            queuepolyat(mmscale(V, zgrad0(0, cgi.slev, 1, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL);
           if(detaillevel >= 1)
-            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
+            queuepolyat(mmscale(V, cgi.SLEV[1]) * pispin, cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
           if(detaillevel >= 2)
-            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL+2);
-          queuepolyat(mmscale(V, geom3::SLEV[2]), shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
+            queuepolyat(mmscale(V, zgrad0(0, cgi.slev, 3, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL+2);
+          queuepolyat(mmscale(V, cgi.SLEV[2]), cgi.shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
           break;
         
         case waSmallBush:
           if(detaillevel >= 2)
-            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL);
+            queuepolyat(mmscale(V, zgrad0(0, cgi.slev, 1, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL);
           if(detaillevel >= 1)
-            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
+            queuepolyat(mmscale(V, cgi.SLEV[1]) * pispin, cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
           if(detaillevel >= 2)
-            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL+2);
-          queuepolyat(mmscale(V, geom3::SLEV[2]), shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
+            queuepolyat(mmscale(V, zgrad0(0, cgi.slev, 3, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL+2);
+          queuepolyat(mmscale(V, cgi.SLEV[2]), cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
           break;
       
         case waSolidBranch:
-          queuepoly(DIM == 3 ? mscale(V, geom3::BODY) : V, shSolidBranch, darkena(wcol, 0, 0xFF));
+          queuepoly(DIM == 3 ? mscale(V, cgi.BODY) : V, cgi.shSolidBranch, darkena(wcol, 0, 0xFF));
           break;
         
         case waWeakBranch:
-          queuepoly(DIM == 3 ? mscale(V, geom3::BODY) : V, shWeakBranch, darkena(wcol, 0, 0xFF));
+          queuepoly(DIM == 3 ? mscale(V, cgi.BODY) : V, cgi.shWeakBranch, darkena(wcol, 0, 0xFF));
           break;
       
         case waLadder:
           if(DIM == 3) {
             #if MAXMDIM >= 4
-            draw_shapevec(c, V * zpush(-geom3::human_height/20), shMFloor.levels[0], 0x804000FF, PPR::FLOOR+1);
+            draw_shapevec(c, V * zpush(-cgi.human_height/20), cgi.shMFloor.levels[0], 0x804000FF, PPR::FLOOR+1);
             #endif
             }
           else if(euclid) {
-            draw_floorshape(c, V, shMFloor, 0x804000FF);
-            draw_floorshape(c, V, shMFloor2, 0x000000FF);
+            draw_floorshape(c, V, cgi.shMFloor, 0x804000FF);
+            draw_floorshape(c, V, cgi.shMFloor2, 0x000000FF);
             }
           else {
-            draw_floorshape(c, V, shFloor, 0x804000FF, PPR::FLOOR+1);
-            draw_floorshape(c, V, shMFloor, 0x000000FF, PPR::FLOOR+2);
+            draw_floorshape(c, V, cgi.shFloor, 0x804000FF, PPR::FLOOR+1);
+            draw_floorshape(c, V, cgi.shMFloor, 0x000000FF, PPR::FLOOR+2);
             }
           break;
         
@@ -5812,7 +5810,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           double footphase;
           applyAnimation(c, V2, footphase, LAYER_BOAT);
           
-          queuepolyat(V2, shStatue, 
+          queuepolyat(V2, cgi.shStatue, 
             darkena(winf[c->wall].color, 0, 0xFF),
             PPR::BIGSTATUE
             );
@@ -5823,9 +5821,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(drawstar(c)) {
             zcol = wcol;
             if(wmspatial) 
-              queuepolyat(mscale(V, geom3::HELLSPIKE), shGiantStar[ct6], darkena(wcol, 0, 0x40), PPR::HELLSPIKE);
+              queuepolyat(mscale(V, cgi.HELLSPIKE), cgi.shGiantStar[ct6], darkena(wcol, 0, 0x40), PPR::HELLSPIKE);
             else
-              queuepoly(V, shGiantStar[ct6], darkena(wcol, 0, 0xFF));
+              queuepoly(V, cgi.shGiantStar[ct6], darkena(wcol, 0, 0xFF));
             }
           break;
           }
@@ -5839,13 +5837,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
           if(DIM == 3) {
             #if MAXMDIM >= 4
-            draw_shapevec(c, V2 * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
-            draw_shapevec(c, V2 * zpush(-geom3::human_height/35), shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+            draw_shapevec(c, V2 * zpush(-cgi.human_height/40), cgi.shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
+            draw_shapevec(c, V2 * zpush(-cgi.human_height/35), cgi.shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
             #endif
             }
           else {
-            draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
-            draw_floorshape(c, V2, shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+            draw_floorshape(c, V2, cgi.shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
+            draw_floorshape(c, V2, cgi.shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
             }
           break;
           }
@@ -5868,10 +5866,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             wcol = 0xFF0000;
           else 
             wcol = gradient(wcol, 0xC00000, 0, rosephase, 6);
-          queuepoly(V, shThorns, 0xC080C0FF);
+          queuepoly(V, cgi.shThorns, 0xC080C0FF);
   
           for(int u=0; u<4; u+=2)
-            queuepoly(V * spin(2*M_PI / 3 / 4 * u), shRose, darkena(wcol, 0, 0xC0));
+            queuepoly(V * spin(2*M_PI / 3 / 4 * u), cgi.shRose, darkena(wcol, 0, 0xC0));
           break;
           }
 
@@ -5886,14 +5884,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(wmspatial) {
             color_t col = winf[waGlass].color;
             int dcol = darkena(col, 0, 0x80);
-            transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
+            transmatrix Vdepth = mscale((*Vdp), cgi.WALL);
             if(DIM == 3) 
-              draw_shapevec(c, V, shMFloor.levels[SIDE_WALL], dcol, PPR::WALL);
+              draw_shapevec(c, V, cgi.shMFloor.levels[SIDE_WALL], dcol, PPR::WALL);
             else
-              draw_floorshape(c, Vdepth, shMFloor, dcol, PPR::WALL); // GLASS
+              draw_floorshape(c, Vdepth, cgi.shMFloor, dcol, PPR::WALL); // GLASS
             dynamicval<qfloorinfo> dq(qfi, qfi);
-            set_floor(shMFloor);
-            if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
+            set_floor(cgi.shMFloor);
+            if(cgi.validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
               if(placeSidewall(c, i, SIDE_WALL, (*Vdp), dcol)) break;
             }
           break;
@@ -5902,15 +5900,15 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           #if MAXMDIM >= 4
           if(DIM == 3)
             for(int a=0; a<10; a++)
-            queuepoly(V * zpush(geom3::FLOOR + (geom3::WALL - geom3::FLOOR) * a/10.) * spin(a *degree) * spintick(PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
+            queuepoly(V * zpush(cgi.FLOOR + (cgi.WALL - cgi.FLOOR) * a/10.) * spin(a *degree) * spintick(PURE ? -1000 : -500, 1/12.), cgi.shFan, darkena(wcol, 0, 0xFF));
           else
           #endif
-            queuepoly(V * spintick(PURE ? -1000 : -500, 1/12.), shFan, darkena(wcol, 0, 0xFF));
+            queuepoly(V * spintick(PURE ? -1000 : -500, 1/12.), cgi.shFan, darkena(wcol, 0, 0xFF));
           break;
         
         case waArrowTrap:
           if(c->wparam >= 1)
-            queuepoly(mscale(V, geom3::FLOOR), shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+            queuepoly(mscale(V, cgi.FLOOR), cgi.shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           if(isCentralTrap(c)) arrowtraps.push_back(c);
           break;
       
@@ -5918,22 +5916,22 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           if(DIM == 3) {
             #if MAXMDIM >= 4
-            draw_shapevec(c, V * zpush(-geom3::human_height/40), shMFloor.levels[0], darkena(0xC00000, 0, 0xFF));
-            draw_shapevec(c, V * zpush(-geom3::human_height/20), shMFloor2.levels[0], darkena(0x600000, 0, 0xFF));
+            draw_shapevec(c, V * zpush(-cgi.human_height/40), cgi.shMFloor.levels[0], darkena(0xC00000, 0, 0xFF));
+            draw_shapevec(c, V * zpush(-cgi.human_height/20), cgi.shMFloor2.levels[0], darkena(0x600000, 0, 0xFF));
             #endif
             }
           else {
-            draw_floorshape(c, V, shMFloor, darkena(0xC00000, 0, 0xFF));
-            draw_floorshape(c, V, shMFloor2, darkena(0x600000, 0, 0xFF));
+            draw_floorshape(c, V, cgi.shMFloor, darkena(0xC00000, 0, 0xFF));
+            draw_floorshape(c, V, cgi.shMFloor2, darkena(0x600000, 0, 0xFF));
             }
           if(c->wparam >= 1)
-            queuepoly(mscale(V, geom3::FLOOR), shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+            queuepoly(mscale(V, cgi.FLOOR), cgi.shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
           break;
       
         case waGiantRug:
-          queuepoly(V, shBigCarpet1, darkena(DIM == 3 ? 0 : 0xC09F00, 0, 0xFF));
-          queuepoly(V, shBigCarpet2, darkena(DIM == 3 ? 0xC09F00 : 0x600000, 0, 0xFF));
-          queuepoly(V, shBigCarpet3, darkena(DIM == 3 ? 0x600000 : 0xC09F00, 0, 0xFF));
+          queuepoly(V, cgi.shBigCarpet1, darkena(DIM == 3 ? 0 : 0xC09F00, 0, 0xFF));
+          queuepoly(V, cgi.shBigCarpet2, darkena(DIM == 3 ? 0xC09F00 : 0x600000, 0, 0xFF));
+          queuepoly(V, cgi.shBigCarpet3, darkena(DIM == 3 ? 0x600000 : 0xC09F00, 0, 0xFF));
           break;
         
         case waBarrier:
@@ -5945,7 +5943,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
              break;
              }           
            const int layers = 2 << detaillevel;
-           dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
+           dynamicval<const hpcshape*> ds(qfi.shape, &cgi.shCircleFloor);
            dynamicval<transmatrix> dss(qfi.spin, Id);
            for(int z=1; z<layers; z++) {
              double zg = zgrad0(-geom3::lake_top, geom3::actual_wall_height(), z, layers);
@@ -5959,15 +5957,15 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         case waMineOpen: {
           int mines = countMinesAround(c);
           if(mines >= 10)
-            queuepoly(V, shBigMineMark[ct6], darkena(minecolors[(mines/10) % 10], 0, 0xFF));
+            queuepoly(V, cgi.shBigMineMark[ct6], darkena(minecolors[(mines/10) % 10], 0, 0xFF));
           if(mines)
-            queuepoly(V, shMineMark[ct6], darkena(minecolors[mines%10], 0, 0xFF));
+            queuepoly(V, cgi.shMineMark[ct6], darkena(minecolors[mines%10], 0, 0xFF));
           break;
           }
         
         case waEditStatue:
           if(!mapeditor::drawUserShape(V * ddspin(c, c->mondir), mapeditor::sgWall, c->wparam, darkena(wcol, fd, 0xFF), c))
-            queuepoly(V, shTriangle, darkena(wcol, fd, 0xFF));
+            queuepoly(V, cgi.shTriangle, darkena(wcol, fd, 0xFF));
           break;
       
         default: {
@@ -5997,18 +5995,18 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             if(wmspatial) {
               color_t col = winf[c->wall].color;
               int dcol = darkena(col, 0, 0xC0);
-              transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
+              transmatrix Vdepth = mscale((*Vdp), cgi.WALL);
               if(DIM == 3)
-                draw_shapevec(c, V, shMFloor.levels[SIDE_WALL], dcol, PPR::WALL);
+                draw_shapevec(c, V, cgi.shMFloor.levels[SIDE_WALL], dcol, PPR::WALL);
               else
-                draw_floorshape(c, Vdepth, shMFloor, dcol, PPR::WALL); // GLASS
+                draw_floorshape(c, Vdepth, cgi.shMFloor, dcol, PPR::WALL); // GLASS
               dynamicval<qfloorinfo> dq(qfi, qfi);
-              set_floor(shMFloor);
-              if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
+              set_floor(cgi.shMFloor);
+              if(cgi.validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
                 if(placeSidewall(c, i, SIDE_WALL, (*Vdp), dcol)) break;
               }
             else {
-              queuepoly(V, shMirror, darkena(wcol, 0, 0xC0));
+              queuepoly(V, cgi.shMirror, darkena(wcol, 0, 0xC0));
               }
             poly_outline = OUTLINE_DEFAULT;
             }
@@ -6023,7 +6021,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<=layers; z++) {
               double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
-              queuepolyat(xyzscale(V, zg, zg), shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::REDWALLm+z));
+              queuepolyat(xyzscale(V, zg, zg), cgi.shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::REDWALLm+z));
               }
             }
           
@@ -6035,7 +6033,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
               draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
               }
-            else queuepoly(V2, shStar, darkena(wcol, 0, 0xF0));
+            else queuepoly(V2, cgi.shStar, darkena(wcol, 0, 0xF0));
             if(isFire(c) && rand() % 300 < ticks - lastt)
               drawParticle(c, wcol, 75);
             }
@@ -6095,7 +6093,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           bool dbot = true;
           forCellIdEx(c2, i, c) if(chasmgraph(c2) == 2) {
             if(dbot) dbot = false,
-              draw_qfi(c, mscale(V, geom3::BOTTOM), 0x080808FF, PPR::LAKEBOTTOM);
+              draw_qfi(c, mscale(V, cgi.BOTTOM), 0x080808FF, PPR::LAKEBOTTOM);
             if(placeSidewall(c, i, SIDE_BTOI, V, D(.6))) break;
             }
 #undef D
@@ -6104,7 +6102,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       // wall between lake and chasm -- no Escher here
       if(chasmg == 1) forCellIdEx(c2, i, c) if(chasmgraph(c2) == 2) {
         dynamicval<qfloorinfo> qfib(qfi, qfi);
-        set_floor(shFullFloor);
+        set_floor(cgi.shFullFloor);
         placeSidewall(c, i, SIDE_LAKE, V, 0x202030FF);
         placeSidewall(c, i, SIDE_LTOB, V, 0x181820FF);
         placeSidewall(c, i, SIDE_BTOI, V, 0x101010FF);
@@ -6133,8 +6131,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                setcolors(c, wcol2, fcol2);
                int starcol = c->wall == waVinePlant ? 0x60C000 : wcol2;
                c->wall = w; c->wparam = p;
-               draw_qfi(c, mscale(V, geom3::WALL), darkena(starcol, fd, 0xFF), PPR::WALL3);
-               queuepolyat(mscale(V, geom3::WALL), shWall[ct6], darkena(wcol2, 0, 0xFF), PPR::WALL3A);
+               draw_qfi(c, mscale(V, cgi.WALL), darkena(starcol, fd, 0xFF), PPR::WALL3);
+               queuepolyat(mscale(V, cgi.WALL), cgi.shWall[ct6], darkena(wcol2, 0, 0xFF), PPR::WALL3A);
                forCellIdEx(c2, i, c)
                  if(placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, 1, 0xFF))) break;
                }
@@ -6187,7 +6185,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       #if CAP_SHAPES
       if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) {
         if(WDIM == 2 && GDIM == 3)
-          pushdown(c, q, V, geom3::SLEV[sl] - geom3::FLOOR, false, false);
+          pushdown(c, q, V, cgi.SLEV[sl] - cgi.FLOOR, false, false);
         else pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
           !isMultitile(c->monst), false);
         }
@@ -6196,7 +6194,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
     #if CAP_SHAPES
     if(!shmup::on && sword::at(c)) {
-      queuepolyat(V, shDisk, 0xC0404040, PPR::SWORDMARK);
+      queuepolyat(V, cgi.shDisk, 0xC0404040, PPR::SWORDMARK);
       }
     #endif
 
@@ -6223,7 +6221,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          ph0 -= floor(ph0/M_PI)*M_PI;
 
          poly_outline = OUTLINE_TRANS;
-         queuepoly((*Vdp)*V0*xpush(hexf*-cos(ph0)), shDisk, aircol);
+         queuepoly((*Vdp)*V0*xpush(cgi.hexf*-cos(ph0)), cgi.shDisk, aircol);
          poly_outline = OUTLINE_DEFAULT;
          }
        }
@@ -6238,7 +6236,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       else {
         forCellIdEx(c2, i, c) if(againstWind(c, c2))
-          queuepoly(V * ddspin(c, i) * xpush(cellgfxdist(c, i)/2), shWindArrow, 0x8080FF80);
+          queuepoly(V * ddspin(c, i) * xpush(cellgfxdist(c, i)/2), cgi.shWindArrow, 0x8080FF80);
         }
       }
     #endif
@@ -6268,10 +6266,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         double ldist = 
           cellgfxdist(c, whirlwind::dfrom[i]) * (1-ph1)/2 + 
           cellgfxdist(c, whirlwind::dto[i]) * ph1/2; 
-        // PURE ? crossf : c->type == 6 ? .2840 : 0.3399;
+        // PURE ? cgi.crossf : c->type == 6 ? .2840 : 0.3399;
  
         poly_outline = OUTLINE_TRANS;
-        queuepoly((*Vdp)*V0*xpush(ldist*(2*ph1-1)), shDisk, aircol);
+        queuepoly((*Vdp)*V0*xpush(ldist*(2*ph1-1)), cgi.shDisk, aircol);
         poly_outline = OUTLINE_DEFAULT;
         }
 
@@ -6362,8 +6360,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
       c->barleft != NOWALLSEP_USED) {
       color_t col = darkena(0x505050, 0, 0xFF);
-      queueline(tC0(V), V*tC0(heptmove[c->bardir]), col, 2 + vid.linequality);
-      queueline(tC0(V), V*tC0(hexmove[c->bardir]), col, 2 + vid.linequality);
+      queueline(tC0(V), V*tC0(cgi.heptmove[c->bardir]), col, 2 + vid.linequality);
+      queueline(tC0(V), V*tC0(cgi.hexmove[c->bardir]), col, 2 + vid.linequality);
       }
     
 #if CAP_MODEL
@@ -6435,7 +6433,7 @@ void queuecircleat(cell *c, double rad, color_t col) {
   if(WDIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
     for(int i=0; i<c->type; i++) {
-      queuepolyat(gmatrix[c], shWireframe3D[i], 0, PPR::SUPERLINE);
+      queuepolyat(gmatrix[c], cgi.shWireframe3D[i], 0, PPR::SUPERLINE);
       }
     return;
     }    
@@ -6444,29 +6442,29 @@ void queuecircleat(cell *c, double rad, color_t col) {
     for(int i=0; i<c->type; i++) corners[i] = gmatrix[c] * rgpushxto0(get_corner_position(c, i, 3 / rad));    
     corners[c->type] = corners[0];
     for(int i=0; i<c->type; i++) {
-      queueline(mscale(corners[i], geom3::FLOOR) * C0, mscale(corners[i+1], geom3::FLOOR) * C0, col, 2, PPR::SUPERLINE);
-      queueline(mscale(corners[i], geom3::WALL) * C0, mscale(corners[i+1], geom3::WALL) * C0, col, 2, PPR::SUPERLINE);
-      queueline(mscale(corners[i], geom3::FLOOR) * C0, mscale(corners[i], geom3::WALL) * C0, col, 2, PPR::SUPERLINE);
+      queueline(mscale(corners[i], cgi.FLOOR) * C0, mscale(corners[i+1], cgi.FLOOR) * C0, col, 2, PPR::SUPERLINE);
+      queueline(mscale(corners[i], cgi.WALL) * C0, mscale(corners[i+1], cgi.WALL) * C0, col, 2, PPR::SUPERLINE);
+      queueline(mscale(corners[i], cgi.FLOOR) * C0, mscale(corners[i], cgi.WALL) * C0, col, 2, PPR::SUPERLINE);
       }
     return;
     }
   #if CAP_SHAPES
   if(vid.stereo_mode || sphere) {
     dynamicval<color_t> p(poly_outline, col);
-    queuepolyat(gmatrix[c] * spintick(100), shGem[1], 0, PPR::LINE);
+    queuepolyat(gmatrix[c] * spintick(100), cgi.shGem[1], 0, PPR::LINE);
     return;
     }
   #endif
   queuecircle(gmatrix[c], rad, col);  
   if(!wmspatial) return;
   if(highwall(c))
-    queuecircle(mscale(gmatrix[c], geom3::WALL), rad, col);
+    queuecircle(mscale(gmatrix[c], cgi.WALL), rad, col);
   int sl;
   if((sl = snakelevel(c))) {
-    queuecircle(mscale(gmatrix[c], geom3::SLEV[sl]), rad, col);
+    queuecircle(mscale(gmatrix[c], cgi.SLEV[sl]), rad, col);
     }
   if(chasmgraph(c))
-    queuecircle(mscale(gmatrix[c], geom3::LAKE), rad, col);
+    queuecircle(mscale(gmatrix[c], cgi.LAKE), rad, col);
   }
 #endif
 
@@ -6646,7 +6644,7 @@ void drawMarkers() {
         transmatrix T2 = ggmatrix(c2);
         transmatrix T = T1 * rspintox(inverse(T1)*T2*C0) * xpush(hdist(T1*C0, T2*C0) * fractick(50, 0));
         color_t aircol = (orbToTarget == itOrbAir ? 0x8080FF40 : 0x8080FF20);
-        queuepoly(T, shDisk, aircol);
+        queuepoly(T, cgi.shDisk, aircol);
         c1 = c2;
         }
       }
@@ -6676,11 +6674,11 @@ void drawFlashes() {
       kill = tim > 300;
       int partcol = darkena(f.color, 0, DIM == 3 ? 255 : max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
-      ld t = f.spd * tim * scalefactor / 50000.;
+      ld t = f.spd * tim * cgi.scalefactor / 50000.;
       transmatrix T =
         DIM == 2 ? V * spin(f.angle) * xpush(t) :
         V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
-      queuepoly(T, shParticle[f.size], partcol);
+      queuepoly(T, cgi.shParticle[f.size], partcol);
       #endif
       }
     
@@ -6690,14 +6688,14 @@ void drawFlashes() {
         if(u < tim-150) continue;
         ld rad = u * 3 / 1000.;
         rad = rad * (5-rad) / 2;
-        rad *= hexf;
+        rad *= cgi.hexf;
         int flashcol = f.color;
         if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
         flashcol = darkena(flashcol, 0, 0xFF);
         if(DIM == 3)
-          queueball(V * zpush(geom3::GROIN1), rad, flashcol, itDiamond);
+          queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
         else {
-          PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+          PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
           queuecurve(flashcol, 0x8080808, PPR::LINE);
           }
         }
@@ -6708,14 +6706,14 @@ void drawFlashes() {
         if(u < tim-250) continue;
         ld rad = u * 3 / 2000.;
         rad = rad * (5-rad) * 1.25;
-        rad *= hexf;
+        rad *= cgi.hexf;
         int flashcol = f.color;
         if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
         flashcol = darkena(flashcol, 0, 0xFF);
         if(DIM == 3)
-          queueball(V * zpush(geom3::GROIN1), rad, flashcol, itRuby);
+          queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
         else {
-          PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
+          PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
           queuecurve(flashcol, 0x8080808, PPR::LINE);
           }
         }
@@ -6766,7 +6764,7 @@ ld wall_radar(cell *c, transmatrix T, ld max) {
     T = T * cpush(2, -step);
     virtualRebase(c, T, false);
     color_t col;
-    if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > geom3::FLOOR)) { 
+    if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
       T = T * cpush(2, step); 
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
@@ -7051,7 +7049,7 @@ void drawmovestar(double dx, double dy) {
 
 #if CAP_SHAPES
   else if(vid.axes == 3)
-    queuepoly(Centered, shMovestar, starcol);
+    queuepoly(Centered, cgi.shMovestar, starcol);
 #endif
   
   else for(int d=0; d<8; d++) {
@@ -7146,7 +7144,7 @@ void drawfullmap() {
   if(conformal::on) {
     char ch = 'A';
     for(auto& v: conformal::v) {
-      queuepoly(ggmatrix(v->base) * v->at, shTriangle, 0x306090C0);
+      queuepoly(ggmatrix(v->base) * v->at, cgi.shTriangle, 0x306090C0);
       queuechr(ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
       }      
     }
@@ -7219,6 +7217,8 @@ void gamescreen(int _darken) {
   if(conformal::includeHistory) conformal::restore();
 
   anims::apply();
+  check_cgi();
+  cgi.require_shapes();
 #if CAP_RUG
   if(rug::rugged) {
     rug::actDraw();
@@ -7434,19 +7434,6 @@ auto graphcm = addHook(clearmemory, 0, [] () {
   clearAnimations();
   });
 
-void resetGeometry() {
-  DEBBI(DF_POLY | DF_GRAPH, ("resetGeometry"));
-  #if MAXMDIM >= 4
-  if(DIM == 3 && !floor_textures)
-    make_floor_textures();
-  #endif
-  precalc();
-#if CAP_FIELD
-  if(hyperbolic && &currfp != &fieldpattern::fp_invalid) currfp.analyze();
-#endif
-  buildpolys();
-  }
-
 //=== animation
 
 map<cell*, animation> animations[ANIMLAYERS];
@@ -7545,7 +7532,7 @@ void drawBug(const cellwalker& cw, color_t col) {
   initquickqueue();
   transmatrix V = ggmatrix(cw.at);
   if(cw.spin) V = V * ddspin(cw.at, cw.spin, M_PI);
-  queuepoly(V, shBugBody, col);
+  queuepoly(V, cgi.shBugBody, col);
   quickqueue();
 #endif
   }

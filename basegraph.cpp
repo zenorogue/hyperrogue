@@ -693,7 +693,8 @@ void resetGL() {
     floor_textures = NULL;
     }
 #endif
-  resetGeometry(); // includes buildPoly
+  cgi.require_shapes();
+  cgi.initPolyForGL();
   }
 
 #endif
@@ -1101,7 +1102,7 @@ void displayColorButton(int x, int y, const string& name, int key, int align, in
   }
 
 ld textscale() { 
-  return vid.fsize / (current_display->radius * crossf) * (1+vid.alpha) * 2;
+  return vid.fsize / (current_display->radius * cgi.crossf) * (1+vid.alpha) * 2;
   }
   
 // bool notgl = false;
@@ -1238,7 +1239,7 @@ void initgraph() {
 #if CAP_COMMANDLINE
   arg::read(2);
 #endif
-  precalc();
+  cgi.prepare_basics();
 
 #if CAP_SDL
   setvideomode();

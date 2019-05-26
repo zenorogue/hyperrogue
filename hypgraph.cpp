@@ -672,7 +672,7 @@ bool outofmap(hyperpoint h) {
   if(GDIM == 3)
     return false;
   else if(euclid) 
-    return h[2] < .5; // false; // h[0] * h[0] + h[1] * h[1] > 15 * crossf;
+    return h[2] < .5; // false; // h[0] * h[0] + h[1] * h[1] > 15 * cgi.crossf;
   else if(sphere)
     return h[2] < .1 && h[2] > -.1 && h[1] > -.1 && h[1] < .1 && h[0] > -.1 && h[0] < .1;
   else
@@ -755,10 +755,9 @@ bool confusingGeometry() {
   }
 
 ld master_to_c7_angle() {
+  ld alpha = 0;
   #if CAP_GP
-  auto alpha = gp::alpha;
-  #else
-  auto alpha = 0;
+  if(cgi.gpdata) alpha = cgi.gpdata->alpha;
   #endif  
   return (!BITRUNCATED && !binarytiling && !archimedean) ? M_PI + alpha : 0;
   }
@@ -825,11 +824,11 @@ bool in_smart_range(const transmatrix& T) {
   if(DIM == 3) { 
     if(-h1[2] + 2 * dz < conformal::clip_min || -h1[2] - 2 * dz > conformal::clip_max) return false;
     sort(dh, dh+DIM); 
-    ld scale = sqrt(dh[1] * dh[2]) * scalefactor * hcrossf7;
+    ld scale = sqrt(dh[1] * dh[2]) * cgi.scalefactor * hcrossf7;
     if(scale <= (WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3)) return false;
     }
   else {
-    ld scale = sqrt(dh[0] * dh[1]) * scalefactor * hcrossf7;
+    ld scale = sqrt(dh[0] * dh[1]) * cgi.scalefactor * hcrossf7;
     if(scale <= vid.smart_range_detail) return false;
     }
   
@@ -852,7 +851,7 @@ void drawrec(cell *c, const transmatrix& V) {
     if(!c2) continue;
     if(c2->move(0) != c) continue;
     if(c2 == c2->master->c7) continue;
-    transmatrix V1 = V * ddspin(c, i) * xpush(crossf) * iddspin(c2, 0) * spin(M_PI);
+    transmatrix V1 = V * ddspin(c, i) * xpush(cgi.crossf) * iddspin(c2, 0) * spin(M_PI);
     drawrec(c2, V1);
     }
   } */
@@ -861,7 +860,7 @@ void drawrec(cell *c, const transmatrix& V) {
 
   bool drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) { 
     bool res = false;
-    transmatrix V1 = V * Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
+    transmatrix V1 = V * cgi.gpdata->Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
     if(do_draw(c, V1)) {
       /* auto li = get_local_info(c);
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
@@ -985,7 +984,7 @@ void hrmap_standard::draw() {
         int ds = hs.at->c.fix(hs.spin + d);
         // createMov(c, ds);
         if(c->move(ds) && c->c.spin(ds) == 0) {
-          transmatrix V2 = V1 * hexmove[d];
+          transmatrix V2 = V1 * cgi.hexmove[d];
           if(do_draw(c->move(ds), V2))
             draw = true,
             drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
@@ -999,7 +998,7 @@ void hrmap_standard::draw() {
       hstate s2 = transition(s, d);
       if(s2 == hsError) continue;
       heptspin hs2 = hs + d + wstep;
-      transmatrix Vd = V * heptmove[d];
+      transmatrix Vd = V * cgi.heptmove[d];
       bandfixer bf(Vd);
       drawn_cells.emplace_back(hs2, s2, Vd, band_shift);
       }
@@ -1013,22 +1012,22 @@ transmatrix eumove(ld x, ld y) {
   Mat[DIM][DIM] = 1;
   
   if(a4) {
-    Mat[0][DIM] += x * crossf;
-    Mat[1][DIM] += y * crossf;
+    Mat[0][DIM] += x * cgi.crossf;
+    Mat[1][DIM] += y * cgi.crossf;
     }
   else {
-    Mat[0][DIM] += (x + y * .5) * crossf;
-    // Mat[DIM][0] += (x + y * .5) * crossf;
-    Mat[1][DIM] += y * q3 /2 * crossf;
-    // Mat[DIM][1] += y * q3 /2 * crossf;
+    Mat[0][DIM] += (x + y * .5) * cgi.crossf;
+    // Mat[DIM][0] += (x + y * .5) * cgi.crossf;
+    Mat[1][DIM] += y * q3 /2 * cgi.crossf;
+    // Mat[DIM][1] += y * q3 /2 * cgi.crossf;
     }
   
   ld v = a4 ? 1 : q3;
 
-  while(Mat[0][DIM] <= -16384 * crossf) Mat[0][DIM] += 32768 * crossf;
-  while(Mat[0][DIM] >= 16384 * crossf) Mat[0][DIM] -= 32768 * crossf;
-  while(Mat[1][DIM] <= -16384 * v * crossf) Mat[1][DIM] += 32768 * v * crossf;
-  while(Mat[1][DIM] >= 16384 * v * crossf) Mat[1][DIM] -= 32768 * v * crossf;
+  while(Mat[0][DIM] <= -16384 * cgi.crossf) Mat[0][DIM] += 32768 * cgi.crossf;
+  while(Mat[0][DIM] >= 16384 * cgi.crossf) Mat[0][DIM] -= 32768 * cgi.crossf;
+  while(Mat[1][DIM] <= -16384 * v * cgi.crossf) Mat[1][DIM] += 32768 * v * cgi.crossf;
+  while(Mat[1][DIM] >= 16384 * v * cgi.crossf) Mat[1][DIM] -= 32768 * v * cgi.crossf;
   return Mat;
   }
 
@@ -1118,7 +1117,7 @@ void centerpc(ld aspd) {
     transmatrix T = shmup::pc[id]->at;
     if(WDIM == 2 && !masterless) T = master_relative(shmup::pc[id]->base) * T;
     int sl = snakelevel(cwt.at);
-    if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
+    if(sl) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     View = inverse(T);
     if(WDIM == 2) View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) * View;
     return;
@@ -1135,7 +1134,7 @@ void centerpc(ld aspd) {
   #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
     int sl = snakelevel(cwt.at);
-    if(sl) T = T * zpush(geom3::SLEV[sl] - geom3::FLOOR);
+    if(sl) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     }
   #endif
   hyperpoint H = inverse(actual_view_transform) * tC0(T);
@@ -1223,7 +1222,7 @@ void optimizeview() {
     for(int i=-1; i<S7; i++) {
   
       ld trot = -i * M_PI * 2 / (S7+.0);
-      transmatrix T = i < 0 ? Id : spin(trot) * xpush(tessf) * pispin;
+      transmatrix T = i < 0 ? Id : spin(trot) * xpush(cgi.tessf) * pispin;
       hyperpoint H = View * tC0(T);
       if(H[DIM] < best) best = H[DIM], turn = i, TB = T;
       }
@@ -1308,14 +1307,14 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   if(pmodel == mdFlatten) {
     V[0][3] += (x - current_display->xcenter);
     V[1][3] += (y - current_display->ycenter);
-    V[0][0] = size * 2 * hcrossf / crossf;
-    V[1][1] = size * 2 * hcrossf / crossf;
+    V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
+    V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
     }
   else { 
     V[0][2] += (x - current_display->xcenter);
     V[1][2] += (y - current_display->ycenter);
-    V[0][0] = size * 2 * hcrossf / crossf;
-    V[1][1] = size * 2 * hcrossf / crossf;
+    V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
+    V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
     V[2][2] = current_display->scrdist;
     }
 
@@ -1718,7 +1717,7 @@ bool do_draw(cell *c, const transmatrix& T) {
       }
     else {
       ld dist = hdist0(tC0(T));
-      if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : corner_bonus)) return false;
+      if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : cgi.corner_bonus)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
     return true;

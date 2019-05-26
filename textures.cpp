@@ -337,7 +337,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, color_t col) {
 
   if(config.tstate == tsAdjusting) {
     dynamicval<color_t> d(poly_outline, slave_color);
-    draw_floorshape(c, V, shFullFloor, 0, PPR::LINE);
+    draw_floorshape(c, V, cgi.shFullFloor, 0, PPR::LINE);
     
     curvepoint(V * C0);
     for(int i=0; i<c->type; i++) 
@@ -349,13 +349,13 @@ bool texture_config::apply(cell *c, const transmatrix &V, color_t col) {
   try {
     auto& mi = texture_map.at(si.id);
     
-    set_floor(shFullFloor);
+    set_floor(cgi.shFullFloor);
     qfi.tinf = &mi;
     qfi.spin = applyPatterndir(c, si);
 
     if(grid_color) {
       dynamicval<color_t> d(poly_outline, grid_color);
-      draw_floorshape(c, V, shFullFloor, 0, PPR::FLOOR);
+      draw_floorshape(c, V, cgi.shFullFloor, 0, PPR::FLOOR);
       }
       
     if(using_aura()) {
@@ -1571,7 +1571,6 @@ int textureArgs() {
   else if(argis("-txcl")) {
     PHASE(3); drawscreen();
     config.load();
-    need_reset_geometry = true;
     }
 
   else return 1;

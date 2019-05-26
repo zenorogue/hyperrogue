@@ -476,7 +476,7 @@ void buildTorusRug() {
     println(hlog, "factor = ", make_tuple(xfactor, yfactor, factor));
     println(hlog, "scales = ", make_tuple(xscale, yscale));
     
-    modelscale = xscale / crossf;
+    modelscale = xscale / cgi.crossf;
     }
   
   map<pair<int, int>, rugpoint*> glues;

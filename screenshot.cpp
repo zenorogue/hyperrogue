@@ -677,7 +677,6 @@ void apply() {
       }
     }
   apply_animated_parameters();
-  if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
   calcparam();
   }
 
@@ -1120,12 +1119,12 @@ reaction_t add_to_frame;
 #if CAP_STARTANIM
 void draw_ghost(const transmatrix V, int id) {
   if(id % 13 == 0) {
-    queuepoly(V, shMiniGhost, 0xFFFF00C0);
-    queuepoly(V, shMiniEyes, 0xFF);
+    queuepoly(V, cgi.shMiniGhost, 0xFFFF00C0);
+    queuepoly(V, cgi.shMiniEyes, 0xFF);
     }
   else {
-    queuepoly(V, shMiniGhost, 0xFFFFFFC0);
-    queuepoly(V, shMiniEyes, 0xFF);
+    queuepoly(V, cgi.shMiniGhost, 0xFFFFFFC0);
+    queuepoly(V, cgi.shMiniEyes, 0xFF);
     }
   }
 

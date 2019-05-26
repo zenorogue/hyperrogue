@@ -79,7 +79,7 @@ namespace hr { namespace netgen {
   
           int hdir = displayspin(c, i) + M_PI / S7;
         
-          transmatrix V2 = V * spin(hdir) * xpush(hexf);
+          transmatrix V2 = V * spin(hdir) * xpush(cgi.hexf);
           
           hcenter[ii][i] = V2 * C0;
           }
@@ -91,7 +91,7 @@ namespace hr { namespace netgen {
           int hdir = displayspin(c, i);
         
           transmatrix V2 = 
-            V * spin(hdir) * xpush(crossf) * spin(M_PI+M_PI/S7) * xpush(hexf);
+            V * spin(hdir) * xpush(cgi.crossf) * spin(M_PI+M_PI/S7) * xpush(cgi.hexf);
           
           hcenter[ii][i] = V2 * C0;
           }

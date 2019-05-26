@@ -648,7 +648,8 @@ void loadConfig() {
     }
 
   polygonal::solve();
-  precalc();
+  check_cgi();
+  cgi.prepare_basics();
   }
 #endif
 
@@ -855,7 +856,6 @@ void showGraphConfig() {
     else if(xuni == 'L') {
       dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
         XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
-      dialog::reaction = delayed_geo_reset;
       }
   
   #if CAP_FRAMELIMIT    
@@ -913,7 +913,6 @@ void edit_whatever(char type, int index) {
     dialog::editNumber(whateveri[index], -10, 10, 1, 0, XLAT("whatever"), 
       "i:" + its(index));
     }
-  dialog::reaction = delayed_geo_reset;
   dialog::extra_options = [type, index] {
     dialog::addItem(XLAT("integer"), 'X');
     dialog::add_action( [index] { popScreen(); edit_whatever('i', index); });
@@ -1259,7 +1258,6 @@ void add_edit_wall_quality(char c) {
         floor_textures = NULL;
         }
       #endif
-      need_reset_geometry = true;          
       };
     });
   }
@@ -1395,7 +1393,6 @@ void show3D() {
     else if(uni == 'c' && WDIM == 2) 
       tc_camera = ticks,
       dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), ""),
-      dialog::reaction = [] { if(GDIM == 2) need_reset_geometry = true; },
       dialog::extra_options = [] {
         dialog::addHelp(GDIM == 2 ? XLAT(
           "Camera is placed %1 absolute units above a plane P in a three-dimensional "
@@ -1415,7 +1412,6 @@ void show3D() {
     else if(uni == 'g' && WDIM == 2) 
       tc_depth = ticks,
       dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
-      dialog::reaction = delayed_geo_reset,
       dialog::extra_options = [] {
         dialog::addHelp(XLAT(
           "Ground level is actually an equidistant surface, "
@@ -1438,28 +1434,21 @@ void show3D() {
       projectionDialog();
     else if(uni == 'w' && WDIM == 2) {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
-      dialog::reaction = delayed_geo_reset;
       dialog::extra_options = [] () {
         dialog::addHelp(XLAT(
           "The height of walls, in absolute units. For the current values of g and c, "
           "wall height of %1 absolute units corresponds to projection value of %2.",
-          fts(actual_wall_height()), fts(factor_to_projection(geom3::WALL))));
+          fts(actual_wall_height()), fts(factor_to_projection(cgi.WALL))));
         dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'O');
         dialog::add_action([] () {
           geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
-          buildpolys();
-          #if CAP_GL
-          resetGL();
-          #endif
           });
         };
       }
     else if(uni == 'l' && WDIM == 2) 
-      dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
     else if(uni == 'k' && WDIM == 2) 
-      dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), "");
     else if(uni == 'r' && WDIM == 2) 
       dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
       dialog::extra_options = [] { dialog::addHelp(XLAT(
@@ -1468,11 +1457,9 @@ void show3D() {
         "ground level.",
         fts(rock_wall_ratio), fts(wall_height * rock_wall_ratio),
         fts(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth))));
-        },
-      dialog::reaction = delayed_geo_reset;
+        };
     else if(uni == 'h' && WDIM == 2)
       dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
-      dialog::reaction = delayed_geo_reset,
       dialog::extra_options = [] { dialog::addHelp(XLAT(
         "Humans are %1 "
         "absolute units high. Your head travels %2 times the distance travelled by your "
@@ -1482,11 +1469,9 @@ void show3D() {
         );
         };
     else if(uni == 'h' && WDIM == 3)
-      dialog::editNumber(geom3::height_width, 0, 1, .1, .7, XLAT("Height to width"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::editNumber(geom3::height_width, 0, 1, .1, .7, XLAT("Height to width"), "");
     else if(uni == 'c' && WDIM == 3)
-      dialog::editNumber(geom3::creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), ""),
-      dialog::reaction = delayed_geo_reset;
+      dialog::editNumber(geom3::creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
 
     else if(uni == 'e')
       pushScreen(showStereo);
@@ -1566,7 +1551,8 @@ void showCustomizeChar() {
   transmatrix V = atscreenpos(vid.xres/2, firsty, scale);
   
   double alpha = atan2(mousex - vid.xres/2, mousey - firsty) - M_PI/2;
-  drawMonsterType(moPlayer, NULL, V * spin(alpha), 0, cc_footphase / scale);
+  V = V * spin(alpha);
+  drawMonsterType(moPlayer, NULL, V, 0, cc_footphase / scale);
   quickqueue();
   
   keyhandler = [] (int sym, int uni) {

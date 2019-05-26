@@ -67,6 +67,8 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "polygons.cpp"
 #include "3d-models.cpp"
 #include "floorshapes.cpp"
+#include "usershapes.cpp"
+#include "drawing.cpp"
 #include "mapeditor.cpp"
 #if CAP_MODEL
 #include "netgen.cpp"

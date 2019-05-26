@@ -322,7 +322,7 @@ namespace mapstream {
       #endif
       }
       
-    need_reset_geometry = true;
+    usershape_changes++;
 
     initcells();
     if(shmup::on) shmup::init();
@@ -496,9 +496,9 @@ namespace mapstream {
       }
 
     cellbyid.clear();
-    buildpolys();
+    check_cgi();
+    cgi.require_basics();
     bfs();
-    restartGraph();
     return true;
     }
   
@@ -1056,7 +1056,7 @@ namespace mapeditor {
     dsCur->list.clear();
     dsCur->sym = d==2;
     for(int i=sh.s; i < sh.s + (sh.e-sh.s)/d; i++)
-      dsCur->list.push_back(hpc[i]);
+      dsCur->list.push_back(cgi.hpc[i]);
     }
   #endif
 
@@ -1121,25 +1121,25 @@ namespace mapeditor {
       if(front_config == eFront::equidistants) for(int i=0; i<4; i+=2) {
         for(int u=2; u<=20; u++) {
           PRING(d) {
-            curvepoint(d2 * xspinpush(M_PI*d/S42, u/20.) * zpush(front_edit) * C0);
+            curvepoint(d2 * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
             }
           queuecurve(cols[i + (u%5 != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
-        for(int d=0; d<S84; d++) {
-          for(int u=0; u<=20; u++) curvepoint(d2 * xspinpush(M_PI*d/S42, u/20.) * zpush(front_edit) * C0);
-          queuecurve(cols[i + (d % (S84/drawcell->type) != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+        for(int d=0; d<cgi.S84; d++) {
+          for(int u=0; u<=20; u++) curvepoint(d2 * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
+          queuecurve(cols[i + (d % (cgi.S84/drawcell->type) != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
         }
       return;
       }
 
-    for(int d=0; d<S84; d++) {
-      unsigned col = (d % (S84/drawcell->type) == 0) ? gridcolor : lightgrid;
-      queueline(d2 * C0, d2 * xspinpush0(M_PI*d/S42, 1), col, 4 + vid.linequality);
+    for(int d=0; d<cgi.S84; d++) {
+      unsigned col = (d % (cgi.S84/drawcell->type) == 0) ? gridcolor : lightgrid;
+      queueline(d2 * C0, d2 * xspinpush0(M_PI*d/cgi.S42, 1), col, 4 + vid.linequality);
       }
     for(int u=2; u<=20; u++) {
       PRING(d) {
-        curvepoint(d2 * xspinpush0(M_PI*d/S42, u/20.));
+        curvepoint(d2 * xspinpush0(M_PI*d/cgi.S42, u/20.));
         }
       queuecurve((u%5==0) ? gridcolor : lightgrid, 0, PPR::LINE);
       }
@@ -1174,8 +1174,8 @@ namespace mapeditor {
   ld compute_area(hpcshape& sh) {
     ld area = 0;
     for(int i=sh.s; i<sh.e-1; i++) {
-      hyperpoint h1 = hpc[i];
-      hyperpoint h2 = hpc[i+1];
+      hyperpoint h1 = cgi.hpc[i];
+      hyperpoint h2 = cgi.hpc[i+1];
       if(euclid)
         area += (h2[1] + h1[1]) * (h2[0] - h1[0]) / 2;
       else {
@@ -1379,7 +1379,8 @@ namespace mapeditor {
       }
 
     if(us) {
-      auto& sh = us->d[dslayer].sh;
+      cgi.require_usershapes();
+      auto& sh = cgi.ushr[&us->d[dslayer]];
       if(sh.e >= sh.s + 3)
         displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), 4)), 'w', 16);
       }
@@ -1393,8 +1394,6 @@ namespace mapeditor {
 #endif
     }
   
-  bool rebuildPolys = false;
-
 #if CAP_POLY
   void loadShapes(int sg, int id) {
     delete usershapes[sg][id];
@@ -1437,7 +1436,7 @@ namespace mapeditor {
       dsCur->rots = 1;
       dsCur->zlevel = 0;
       
-      for(auto& v: symmetriesAt)
+      for(auto& v: cgi.symmetriesAt)
         if(v[0] == ptd.offset) {
           dsCur->rots = v[1];
           dsCur->sym = v[2] == 2;
@@ -1451,7 +1450,7 @@ namespace mapeditor {
       layer++;      
       if(layer == USERLAYERS) break;
       }
-    rebuildPolys = true;
+    usershape_changes++;
     }
 
   void applyToShape(int sg, int id, int uni, hyperpoint mh) {
@@ -1477,7 +1476,7 @@ namespace mapeditor {
     if(uni == 'n' || xnew) {
       dsCur->list.clear();
       dsCur->list.push_back(mh);
-      rebuildPolys = true;
+      usershape_changes++;
       }
 
     if(uni == 'u') 
@@ -1491,7 +1490,7 @@ namespace mapeditor {
       if(uni == 'a') {
         dsCur->list.push_back(mh);
         uni = 0;
-        rebuildPolys = true;
+        usershape_changes++;
         }
       else if(uni == 'c' || uni == 'd' || uni == 'm') {
         hyperpoint best = mh;
@@ -1521,7 +1520,7 @@ namespace mapeditor {
             if(oldlist[i] != best)
               dsCur->list.push_back(oldlist[i]);
           }
-        rebuildPolys = true;
+        usershape_changes++;
         uni = 0;
         }
       else if(uni == COLORKEY) dsCur->color = colortouse;
@@ -1537,7 +1536,7 @@ namespace mapeditor {
 
       dsCur->list.insert(dsCur->list.begin()+ew.pointid+(ew.side?1:0), mh);
       if(ew.side) ew.pointid++;
-      rebuildPolys = true;
+      usershape_changes++;
       }
     
     if(uni == 'D') {
@@ -1561,41 +1560,41 @@ namespace mapeditor {
         if(ew.side == 1 && ew.pointid >= i) ew.pointid--;
         if(ew.side == 0 && ew.pointid > i) ew.pointid--;
         }
-      rebuildPolys = true;
+      usershape_changes++;
       }
     
     if(uni == 'K') {
       if(vid.cs.charid >= 4) {
-        loadShape(sg, id, shCatBody, 2, 0);
-        loadShape(sg, id, shCatHead, 2, 1);
+        loadShape(sg, id, cgi.shCatBody, 2, 0);
+        loadShape(sg, id, cgi.shCatHead, 2, 1);
         }
       else {
-        if(!(vid.cs.charid&1)) loadShape(sg, id, shPBody, 2, 0);
-        else loadShape(sg, id, shFemaleBody, 2, 0);
+        if(!(vid.cs.charid&1)) loadShape(sg, id, cgi.shPBody, 2, 0);
+        else loadShape(sg, id, cgi.shFemaleBody, 2, 0);
   
-        loadShape(sg, id, shPSword, 1, 1);
+        loadShape(sg, id, cgi.shPSword, 1, 1);
   
         if(vid.cs.charid&1)
-          loadShape(sg, id, shFemaleDress, 2, 2);
+          loadShape(sg, id, cgi.shFemaleDress, 2, 2);
 
         /* if(vid.cs.charid&1)
-          loadShape(sg, id, shPrincessDress, 1, 3);
+          loadShape(sg, id, cgi.shPrincessDress, 1, 3);
         else
-          loadShape(sg, id, shPrinceDress, 2, 3); */
+          loadShape(sg, id, cgi.shPrinceDress, 2, 3); */
         
-        loadShape(sg, id, shRatCape2, 1, 3);
+        loadShape(sg, id, cgi.shRatCape2, 1, 3);
       
         if(vid.cs.charid&1)
-          loadShape(sg, id, shFemaleHair, 2, 4);
+          loadShape(sg, id, cgi.shFemaleHair, 2, 4);
         else
-          loadShape(sg, id, shPHead, 2, 4);
+          loadShape(sg, id, cgi.shPHead, 2, 4);
         
-        loadShape(sg, id, shPFace, 2, 5); 
+        loadShape(sg, id, cgi.shPFace, 2, 5); 
         }
       
-      // loadShape(sg, id, shWolf, 2, dslayer);
+      // loadShape(sg, id, cgi.shWolf, 2, dslayer);
       
-      rebuildPolys = true;
+      usershape_changes++;
       }
 
     if(uni == '+') dsCur->rots++;
@@ -1603,20 +1602,20 @@ namespace mapeditor {
     if(uni >= '1' && uni <= '9') {
       dsCur->rots = uni - '0';
       if(dsCur->rots == 9) dsCur->rots = 21;
-      rebuildPolys = true;
+      usershape_changes++;
       }
     if(uni == '0') {
       dsCur->sym = !dsCur->sym;
-      rebuildPolys = true;
+      usershape_changes++;
       }
 
     if(uni == 't') {
       dsCur->shift = mh;
-      rebuildPolys = true;
+      usershape_changes++;
       }
     if(uni == 'y') {
       dsCur->spin = mh;
-      rebuildPolys = true;
+      usershape_changes++;
       }
 
     if(uni == COLORKEY) dsCur->color = colortouse;
@@ -1691,7 +1690,7 @@ namespace mapeditor {
       }
     addMessage(XLAT("Pictures loaded from %1", picfile));
     
-    buildpolys();
+    usershape_changes++;
     return true;
     }
   
@@ -1945,9 +1944,6 @@ namespace mapeditor {
           }
         }
       }
-
-    if(rebuildPolys)
-      add_user_shapes(), rebuildPolys = false;
     }
 #endif    
 
@@ -2053,10 +2049,11 @@ namespace mapeditor {
 
     usershape *us = usershapes[group][id];
     if(us) {  
+      cgi.require_usershapes();
       for(int i=0; i<USERLAYERS; i++) {
         if(i != dslayer && onelayeronly) continue;
         usershapelayer& ds(us->d[i]);
-        hpcshape& sh(ds.sh);
+        hpcshape& sh(cgi.ushr[&ds]);
     
         if(sh.s != sh.e) {
           auto& last = queuepolyat(mmscale(V, DIM == 3 ? 0 : geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);

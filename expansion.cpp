@@ -323,6 +323,7 @@ ld expansion_analyzer::get_growth() {
   if(!N) preliminary_grouping(), reduce_grouping();
   vector<ld> eigen(N, 1);
   ld total;
+
   for(int iter=0; iter<100000; iter++) {
     total = 0;
     vector<ld> neweigen(N, 0);
@@ -828,7 +829,6 @@ int expansion_readArgs() {
         if(x+y > 10) continue;
         stop_game();
         gp::param = gp::loc(x, y);
-        need_reset_geometry = true;
         set_variation(eVariation::goldberg);
         compute_coefficients();
         }

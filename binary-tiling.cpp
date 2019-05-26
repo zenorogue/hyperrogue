@@ -601,7 +601,7 @@ namespace binary {
 auto bt_config = addHook(hooks_args, 0, [] () {
   using namespace arg;
   if(argis("-btwidth")) {
-    shift_arg_formula(vid.binary_width, delayed_geo_reset);
+    shift_arg_formula(vid.binary_width);
     return 0;
     }
   return 1;

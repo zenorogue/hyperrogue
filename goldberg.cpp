@@ -46,8 +46,6 @@ namespace hr { namespace gp {
   loc param(1, 0);
 
   hyperpoint next;
-  ld alpha;
-  int area;
   
   struct goldberg_mapping_t {
     cellwalker cw;
@@ -504,22 +502,18 @@ namespace hr { namespace gp {
     return normalize(spin(2*M_PI*sp/S7) * cornmul(T, corner));
     }
   
-  transmatrix Tf[MAX_EDGE][32][32][6];
-  
-  transmatrix corners;
-  
   transmatrix dir_matrix(int i) {
     cell cc; cc.type = S7;
-    return spin(-alpha) * build_matrix(
+    return spin(-cgi.gpdata->alpha) * build_matrix(
       C0, 
-      ddspin(&cc, i) * xpush0(tessf),
-      ddspin(&cc, i+1) * xpush0(tessf),
+      ddspin(&cc, i) * xpush0(cgi.tessf),
+      ddspin(&cc, i+1) * xpush0(cgi.tessf),
       C03
       );
     }
   
   void prepare_matrices() {
-    corners = inverse(build_matrix(
+    cgi.gpdata->corners = inverse(build_matrix(
       loctoh_ort(loc(0,0)),
       loctoh_ort(param),
       loctoh_ort(param * loc(0,1)),
@@ -532,9 +526,9 @@ namespace hr { namespace gp {
       for(int d=0; d<(S3==3?6:4); d++) {
         loc at = loc(x, y);
         
-        hyperpoint h = atz(T, corners, at, 6);
-        hyperpoint hl = atz(T, corners, at + eudir(d), 6);
-        Tf[i][x&31][y&31][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
+        hyperpoint h = atz(T, cgi.gpdata->corners, at, 6);
+        hyperpoint hl = atz(T, cgi.gpdata->corners, at + eudir(d), 6);
+        cgi.gpdata->Tf[i][x&31][y&31][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
         }
       }       
     }
@@ -542,10 +536,10 @@ namespace hr { namespace gp {
   hyperpoint get_corner_position(const local_info& li, int cid, ld cf = 3) {
     int i = li.last_dir;
     if(i == -1) 
-      return atz(dir_matrix(cid), corners, li.relative, 0, cf);
+      return atz(dir_matrix(cid), cgi.gpdata->corners, li.relative, 0, cf);
     else {
-      auto& cellmatrix = Tf[i][li.relative.first&31][li.relative.second&31][fixg6(li.total_dir)];
-      return inverse(cellmatrix) * atz(dir_matrix(i), corners, li.relative, fixg6(cid + li.total_dir), cf);
+      auto& cellmatrix = cgi.gpdata->Tf[i][li.relative.first&31][li.relative.second&31][fixg6(li.total_dir)];
+      return inverse(cellmatrix) * atz(dir_matrix(i), cgi.gpdata->corners, li.relative, fixg6(cid + li.total_dir), cf);
       }
     }
   
@@ -558,35 +552,33 @@ namespace hr { namespace gp {
   void compute_geometry() {
     center_locs.clear();
     if(GOLDBERG) {
+      if(!cgi.gpdata) cgi.gpdata = make_shared<geometry_information::gpdata_t>();
       int x = param.first;
       int y = param.second;
       if(S3 == 3)
-        area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
+        cgi.gpdata->area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
       else
-        area = x * x + y * y;
+        cgi.gpdata->area = x * x + y * y;
       next = point3(x+y/2., -y * sqrt(3) / 2, 0);
       ld scale = 1 / hypot_d(2, next);
-      crossf *= scale;
-      hepvdist *= scale;
-      hexhexdist *= scale;
-      hexvdist *= scale;
-      rhexf *= scale;
+      cgi.crossf *= scale;
+      cgi.hepvdist *= scale;
+      cgi.hexhexdist *= scale;
+      cgi.hexvdist *= scale;
+      cgi.rhexf *= scale;
 //    spin = spintox(next);
 //    ispin = rspintox(next);
-      alpha = -atan2(next[1], next[0]) * 6 / S7;
+      cgi.gpdata->alpha = -atan2(next[1], next[0]) * 6 / S7;
       if(S3 == 3)
-        base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
+        cgi.base_distlimit = (cgi.base_distlimit + log(scale) / log(2.618)) / scale;
       else
-        base_distlimit = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
+        cgi.base_distlimit = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
       if(S7 == 12)
-        base_distlimit = 2 * param.first + 2 * param.second + 1;
-      if(base_distlimit > SEE_ALL)
-        base_distlimit = SEE_ALL;
+        cgi.base_distlimit = 2 * param.first + 2 * param.second + 1;
+      if(cgi.base_distlimit > SEE_ALL)
+        cgi.base_distlimit = SEE_ALL;
       prepare_matrices();
       DEBB(DF_GEOM | DF_POLY, ("scale = ", scale));
-      }
-    else {
-      alpha = 0;
       }
     }
 
@@ -625,7 +617,6 @@ namespace hr { namespace gp {
       stop_game(); set_variation(eVariation::bitruncated);
       }
     else {
-      if(param != xy) need_reset_geometry = true;
       param = xy;
       stop_game(); set_variation(eVariation::goldberg);
       }
@@ -765,7 +756,7 @@ namespace hr { namespace gp {
     int sp = 0;
     auto& at = li.relative;
     again:
-    auto corner = corners * loctoh_ort(at);
+    auto corner = cgi.gpdata->corners * loctoh_ort(at);
     if(corner[1] < -1e-6 || corner[2] < -1e-6) {
       at = at * eudir(1);
       sp++;
@@ -832,7 +823,7 @@ namespace hr { namespace gp {
   hyperpoint get_master_coordinates(cell *c) {
     auto li = get_local_info(c);
     be_in_triangle(li);
-    return corners * loctoh_ort(li.relative);
+    return cgi.gpdata->corners * loctoh_ort(li.relative);
     }
   
   int compute_dist(cell *c, int master_function(cell*)) {

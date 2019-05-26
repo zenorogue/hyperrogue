@@ -777,4 +777,21 @@ hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
   return normalize(h);
   }
 
+hyperpoint zshift(hyperpoint x, ld z) {
+  if(DIM == 3 && WDIM == 2) return orthogonal_move(x, z);
+  else return mscale(x, z);
+  }
+
+hyperpoint hpxd(ld d, ld x, ld y, ld z) {
+  hyperpoint H = hpxyz(d*x, d*y, z);
+  H = mid(H, H);
+  return H;
+  }
+
+ld signum(ld x) { return x<0?-1:x>0?1:0; }
+
+bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
+
+ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
+
 }

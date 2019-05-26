@@ -491,7 +491,7 @@ int getHemisphere(cell *c, int which) {
     else if(GOLDBERG) {
       auto li = gp::get_local_info(c);
       gp::be_in_triangle(li);
-      auto corner = gp::corners * gp::loctoh_ort(li.relative);
+      auto corner = cgi.gpdata->corners * gp::loctoh_ort(li.relative);
       ld scored = 
         corner[0] * getHemisphere(c->master->c7, which)
       + corner[1] * getHemisphere(c->master->move(li.last_dir)->c7, which)
@@ -2223,7 +2223,7 @@ namespace linepatterns {
           if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
           if((fv1&1) == (fv2&1)) continue;
           
-          double x = hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
+          double x = cgi.hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
           
           gridlinef(V, ddspin(c,i,-M_PI/S3) * xpush0(x), 
             ddspin(c,i,M_PI/S3) * xpush0(x), 
@@ -2291,8 +2291,8 @@ namespace linepatterns {
             cell *c1 = createMov(c, (i+3) % 7);
             cell *c2 = createMov(c, (i+4) % 7);
             if(polarb50(c1) != a && polarb50(c2) != a)
-                gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
-                          ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
+                gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
+                          ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
                                     col, 1 + vid.linequality);
             }
         break;
@@ -2300,15 +2300,15 @@ namespace linepatterns {
       
       case patPalacelike:
         if(pseudohept(c)) for(int i=0; i<7; i++) 
-          gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
-                       ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
+          gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
+                       ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
                               col, 1 + vid.linequality);
         break;
       
       case patBigTriangles: {
        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master) {
-            gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
+            gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
             }
         break;
         }
@@ -2316,7 +2316,7 @@ namespace linepatterns {
       case patBigRings: {
         if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
-            gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
+            gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
         break;
         }
         
@@ -2362,10 +2362,10 @@ namespace linepatterns {
           }
         else {
           int p = emeraldval(c);
-          double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
+          double hdist = hdist0(cgi.heptmove[0] * cgi.heptmove[2] * C0);
           if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
           for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
-            gridlinef(V, C0, tC0(heptmove[i]), col, 2 + vid.linequality);
+            gridlinef(V, C0, tC0(cgi.heptmove[i]), col, 2 + vid.linequality);
             gridlinef(V, C0, xspinpush0(-i * ALPHA, -hdist/2), col, 2 + vid.linequality);
             }
           }
@@ -2392,8 +2392,8 @@ namespace linepatterns {
               heptagon *h2 = c->master->modmove(i-1);
               if(!h1 || !h2) continue;
               if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-                  gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
-                            ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
+                  gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
+                            ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
                                       col, 1 + vid.linequality);
               }
           }
