@@ -117,7 +117,7 @@ void geometry_information::finishshape() {
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
   if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
-  
+
   if(DIM == 3) {
     using namespace hyperpoint_vec;
     last->intester = Hypc;
@@ -133,7 +133,7 @@ void geometry_information::finishshape() {
         last->intester[j] += hpc[i][j];
       last->intester = mid(last->intester, last->intester);
       }
-    
+
     if(s == 2)
       last->intester = hpxy(.5, .2);
 
@@ -143,7 +143,7 @@ void geometry_information::finishshape() {
     last->intester = rgpushxto0(hpxy(1.4e-8, 1.7e-8)) * last->intester;
 
     last->flags &=~ (POLY_BADCENTERIN | POLY_CENTERIN);
-    
+
     for(int i=last->s; i<last->e-1; i++) {
       ld x1 = hpc[i][0] - last->intester[0], y1 = hpc[i][1] - last->intester[1], x2 = hpc[i+1][0] - last->intester[0], y2 = hpc[i+1][1] - last->intester[1];
       if(asign(y1, y2)) {
@@ -157,7 +157,7 @@ void geometry_information::finishshape() {
       }
     if(!(last->flags & POLY_BADCENTERIN)) break;
     }
-  
+
   bool allplus = true, allminus = true;
   for(int i=last->s; i<last->e-1; i++) {
     ld v = hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
@@ -165,7 +165,7 @@ void geometry_information::finishshape() {
     if(v < -1e-6) allminus = false;
     }
   if(allminus || allplus) last->flags |= POLY_CCONVEX;
-  
+
   allplus = true, allminus = true;
   ld cx = hpc[last->s][0], cy = hpc[last->s][1];
 
@@ -174,9 +174,9 @@ void geometry_information::finishshape() {
     if(v > 1e-6) allplus = false;
     if(v < -1e-6) allminus = false;
     }
-  
+
   if(allminus || allplus) last->flags |= POLY_VCONVEX;
-  
+
   allshapes.push_back(last);
   last = NULL;
 
@@ -241,14 +241,14 @@ void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int sha
     }
   else shzoomx *= bscale7, shzoomy *= bscale7;
   double bonusf = /* sphere ? M_PI*4/35 : */ (rots-rots2+.0) / rots2;
-  
+
   auto ipoint = [&] (int i, int mul) {
     hyperpoint h = hpxy(polydata[whereis+2*i] * shzoomx, polydata[whereis+2*i+1] * shzoomy * mul);
     if(rots == rots2 && !bonus) return h;
     double d = atan2(h[0], h[1]);
     return spin(bonus + bonusf * d) * h;
     };
-  
+
   for(int r=0; r<rots2; r++) {
     for(int i=0; i<qty; i++)
       hpcpush(spin(2*M_PI*r/rots2) * ipoint(i, 1));
@@ -366,26 +366,26 @@ void geometry_information::procedural_shapes() {
 
   bshape(shBFloor[1], PPR::BFLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
-  
+
   bshape(shMineMark[0], PPR::MINEMARK);
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
 
   bshape(shMineMark[1], PPR::MINEMARK);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
-  
+
   bshape(shBigMineMark[0], PPR::MINEMARK);
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.15) * C0);
 
   bshape(shBigMineMark[1], PPR::MINEMARK);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.15) * C0);
-  
+
   for(int d=0; d<2; d++) {
     bshape(shSemiBFloor[d], PPR::BFLOOR);
     for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0*.1) * C0);
     }
 
   // walls etc
-  
+
   bshape(shGiantStar[1], PPR::GFLOORa);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, -zhexf*2.4) * C0);
 
@@ -395,7 +395,7 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(t*S14+S7, zhexf*1.5) * C0);
     }
   hpcpush(ddi(0, -zhexf*2.4) * C0);
-  
+
   bshape(shMirror, PPR::WALL);
   if(PURE) {
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, floorrad1*7/8) * C0);
@@ -405,7 +405,7 @@ void geometry_information::procedural_shapes() {
     }
 
   if(0);
-  
+
   #if CAP_BT
   else if(binarytiling) {
     for(int i=0; i<2; i++) {
@@ -423,7 +423,7 @@ void geometry_information::procedural_shapes() {
       hpcpush(ddi(S7 + t*S14, floorrad0) * C0);
       if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad0 /4) * C0);
       }
-    
+
     bshape(shWall[1], PPR::WALL);
     int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;
     if(S7 == 6 || S7 == 4) {
@@ -441,13 +441,13 @@ void geometry_information::procedural_shapes() {
     hpcpush(xspinpush0(2*M_PI*i/84, zhexf * (i%3 ? 0.8 : 0.3)));
 
 // items
-  
+
   bshape(shGem[0], PPR::ITEM);
   for(int t=0; t<=SD6; t++) {
     hpcpush(ddi(SD7 + t*S14, zhexf*.4) * C0);
     if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
     }
-  
+
   bshape(shGem[1], PPR::ITEM);
   if(SD7 == 6) {
     for(int t=0; t<=SD6; t++) {
@@ -455,7 +455,7 @@ void geometry_information::procedural_shapes() {
       if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
       }
     }
-  else 
+  else
     for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.5) * C0);
 
   bshape(shStar, PPR::ITEM);
@@ -475,7 +475,7 @@ void geometry_information::procedural_shapes() {
   for(int t=0; t<=SD3; t++) {
     hpcpush(ddi(t*S28, zhexf*.5) * C0);
     }
-  
+
   bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);
@@ -507,28 +507,28 @@ void geometry_information::procedural_shapes() {
 
   RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*.15, cos(i*2*M_PI/S84)*.11));
-  
+
   bshape(shRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * .30) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shSpikedRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * (int(i)&1?.35:.30)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shTargetRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shSpearRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
@@ -540,7 +540,7 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(i, orbsize * (.3 + .04 * d)) * C0);
     }
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   /* three nice spikes
   bshape(shLoveRing, PPR::ITEM);
   for(int i=0; i<=S84; i+=3)
@@ -555,7 +555,7 @@ void geometry_information::procedural_shapes() {
     }
   hpcpush(ddi(0, orbsize * .25) * C0);
   */
-  
+
   bshape(shLoveRing, PPR::ITEM);
   RING(i) hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i) {
@@ -570,51 +570,51 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(i, orbsize * (.27 + .02 * d)) * C0);
     }
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   auto dmod = [] (ld a, ld b) { return a - int(a/b)*b; };
-  
+
   bshape(shSawRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * (.3 + (int(i) & 3) * .02)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shGearRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:.36)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shPeaceRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * (dmod(i, S28) < SD7?.36 : .3)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shHeptaRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * (dmod(i, S12) < SD3?.4 : .27)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
-  
+
   bshape(shCompass1, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .35) * C0);
-  
+
   bshape(shCompass2, PPR::ITEMa);
   RING(i)
     hpcpush(ddi(i, orbsize * .30) * C0);
-  
+
   bshape(shCompass3, PPR::ITEMb);
   hpcpush(ddi(0, orbsize * .29) * C0);
   hpcpush(ddi(S21, orbsize * .04) * C0);
   hpcpush(ddi(-S21, orbsize * .04) * C0);
   hpcpush(ddi(0, orbsize * .29) * C0);
-  
+
   bshape(shILeaf[0], PPR::ONTENTACLE);
   for(int t=0; t<=SD6; t++) {
     hpcpush(ddi(SD7 + t*S14, zhexf*.7) * C0);
@@ -700,7 +700,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
 
   bshape(shWall3D[id], PPR::WALL);
   last->flags |= POLY_TRIANGLES;
-  
+
   hyperpoint center = Hypc;
   for(auto v: vertices) center += v;
   int n = isize(vertices);
@@ -716,7 +716,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
       hpcpush(res);
       });
     }
-    
+
   bshape(shWireframe3D[id], PPR::WALL);
   if(true) {
     int STEP = vid.texture_step;
@@ -728,7 +728,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
       }
     hpcpush(hpc[last->s]);
     }
-  
+
   finishshape();
 
   shPlainWall3D[id] = shWall3D[id]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
@@ -737,12 +737,12 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
 vector<hyperpoint> make4(hyperpoint a, hyperpoint b, hyperpoint c) {
   using namespace hyperpoint_vec;
   return {a, b, b+c-a, c};
-  }  
+  }
 
 vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
   using namespace hyperpoint_vec;
   return {a, (a+b)/2, b, b+c-a, c};
-  }  
+  }
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
@@ -777,7 +777,7 @@ void geometry_information::create_wall3d() {
     ld r = sqrt(3)/6;
     ld r1 = r;
     ld r2 = r * 2;
-    
+
     hyperpoint t0 = point3(0,-r2,-1);
     hyperpoint t1 = point3(+.5,r1,-1);
     hyperpoint t2 = point3(-.5,r1,-1);
@@ -786,7 +786,7 @@ void geometry_information::create_wall3d() {
     hyperpoint d0 = -2 * t0 + shift;
     hyperpoint d1 = -2 * t1 + shift;
     hyperpoint d2 = -2 * t2 + shift;
-    
+
     make_wall(0, {t0, t1, t2}, true);
     make_wall(1, {d0, t1, t2}, true);
     make_wall(2, {t0, d1, t2}, true);
@@ -800,7 +800,7 @@ void geometry_information::create_wall3d() {
   if(geometry == gHoroRec) {
     ld r2 = sqrt(2);
     ld z = binary::hororec_scale;
-    
+
     hyperpoint a00 = point3(-r2*z,-2*z,-.5);
     hyperpoint a01 = point3(+r2*z,-2*z,-.5);
     hyperpoint a10 = point3(-r2*z, 0*z,-.5);
@@ -809,7 +809,7 @@ void geometry_information::create_wall3d() {
     hyperpoint a21 = point3(+r2*z,+2*z,-.5);
 
     hyperpoint down = point3(0,0,1);
-    
+
     make_wall(0, make4(a00, a01, a10), true);
     make_wall(1, make4(a10, a11, a20), true);
     make_wall(2, make5(a01, a21, a01+down));
@@ -818,16 +818,16 @@ void geometry_information::create_wall3d() {
     make_wall(5, make4(a00, a01, a00+down));
     make_wall(6, make4(a00+down, a01+down, a20+down));
     }
-  
+
   if(geometry == gHoroHex) {
     ld z = log(3) / log(2) / 2;
     ld r3 = sqrt(3) / 2 * binary::horohex_scale;
     ld h = binary::horohex_scale / 2;
     hyperpoint down = point3(0,0,2*z);
-    
+
     for(int i=0; i<3; i++) {
       transmatrix T = cspin(0, 1, 2*M_PI*i/3);
-      
+
       hyperpoint hcenter = point3(0,0,-z);
       hyperpoint hu0 = T*point3(+h,  +r3,-z);
       hyperpoint hu1 = T*point3(+h*3,+r3,-z);
@@ -841,11 +841,11 @@ void geometry_information::create_wall3d() {
       make_wall(i+6, make4(hd1, hu1, hd1+down));
       make_wall(i+9, make4(hun, hdn, hun+down));
       }
-    
+
     make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
     make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)}, true);
     }
-  
+
   if(DIM == 3 && euclid && S7 == 6) {
     for(int w=0; w<6; w++) {
       vector<hyperpoint> vertices;
@@ -901,7 +901,7 @@ void geometry_information::create_wall3d() {
         }
       }
     }
-  
+
   if(DIM == 3 && !euclid && !binarytiling) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
@@ -912,7 +912,7 @@ void geometry_information::create_wall3d() {
       make_wall(w, vertices, 0);
       }
     }
-  
+
   if(DIM == 3) {
     shMiniWall3D.resize(isize(shWall3D));
     for(int i=0; i<isize(shWall3D); i++) {
@@ -950,15 +950,15 @@ void geometry_information::configure_floorshapes() {
   }
 
   shBigHepta.configure(0, crossf * (GDIM == 3 ? 1 : .97));
-  
+
   {
   double p = -.006;
-  
+
   double spherezoom = sphere ? 1.2375 : 1;
 
   double trihepta0 = scalefactor*spherezoom*(.2776+p) * gsca(a4, 1.3, a46, .975, a47, .85, a38, .9) * bscale6;
   double trihepta1 = (sphere ? .54 : scalefactor*spherezoom*(.5273-2*p)) * gsca(a4, .8, a46, 1.075, sphere4, 1.3) * bscale7;
-  
+
   double eps = hexhexdist * .05;
   if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
 
@@ -969,14 +969,14 @@ void geometry_information::configure_floorshapes() {
 
   if(!BITRUNCATED) {
     ld hedge = hdist(xspinpush0(M_PI/S7, rhexf), xspinpush0(-M_PI/S7, rhexf));
-    
+
     trihepta1 = hdist0(xpush(tessf) * xspinpush0(2*M_PI*2/S7, tessf)) / 2 * .98;
     trihepta0 = hdist0(xpush(-tessf) * xspinpush0(M_PI/S7, rhexf+hedge/2)) * .98;
     }
-  
+
   shTriheptaFloor.configure(trihepta0, trihepta1);
   }
-  
+
   shDragonFloor.prio = PPR::FLOOR_DRAGON;
   shPowerFloor.prio = PPR::FLOOR_DRAGON;
   shMFloor.prio = PPR::FLOOR_DRAGON;
@@ -1017,25 +1017,25 @@ void geometry_information::prepare_shapes() {
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
   hpc.clear();
-  
+
   make_sidewalls();
-  
+
   procedural_shapes();
 
   #if MAXMDIM >= 4
   create_wall3d();
   #endif
-  
+
   configure_floorshapes();
-  
+
   // hand-drawn shapes
-  
+
   bshape(shHalfFloor[0], PPR::FLOOR, scalefactor, 329);
   bshape(shHalfFloor[1], PPR::FLOOR, scalefactor, 327);
   bshape(shHalfFloor[2], PPR::FLOOR, scalefactor, 331);
   bshape(shHalfMirror[0], PPR::WALL, scalefactor, 330);
   bshape(shHalfMirror[1], PPR::WALL, scalefactor, 328);
-  
+
   if(GDIM == 2) {
     bshape(shHalfMirror[2], PPR::WALL, scalefactor, 332);
     }
@@ -1108,7 +1108,7 @@ void geometry_information::prepare_shapes() {
   bshape(shTower[8], PPR::FLOOR_TOWER,  1, 204); // pure 11
   bshape(shTower[9], PPR::FLOOR_TOWER,  1, 205); // pure 15
   bshape(shTower[10], PPR::FLOOR_TOWER,  scalefactor, 206);  // Euclidean
-  
+
   // structures & walls
   bshape(shBoatOuter, PPR::STRUCT0, scalefactor, 154);
   bshape(shBoatInner, PPR::STRUCT1, scalefactor, 155);
@@ -1130,7 +1130,7 @@ void geometry_information::prepare_shapes() {
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
 
   wormscale = WDIM == 3 ? 3 : 1;
-  
+
   // first layer monsters
   bshape(shTentacleX, PPR::TENTACLE0);
   drawTentacle(shTentacleX, crossf * .25, crossf * .1, 10);
@@ -1141,7 +1141,7 @@ void geometry_information::prepare_shapes() {
   copyshape(shJoint, shDisk, PPR::ONTENTACLE);
   bshape(shTentHead, PPR::ONTENTACLE, scalefactor * wormscale, 79);
   bshape(shWormHead, PPR::ONTENTACLE, scalefactor * wormscale, 80);
-  
+
   bshape(shWormSegment, PPR::TENTACLE1);
   RING(i)
    hpcpush(ddi(i, .20 * scalefactor * wormscale) * C0);
@@ -1362,7 +1362,7 @@ void geometry_information::prepare_shapes() {
   bshape(shBatMouth, PPR::MONSTER_EYE0, scalefactor, 256);
   bshape(shBatFang, PPR::MONSTER_EYE1, scalefactor, 257);
   bshape(shBatEye, PPR::MONSTER_EYE0, scalefactor, 258);
-  
+
   bshape(shDogBody, PPR::MONSTER_BODY, scalefactor, 265);
   bshape(shDogHead, PPR::MONSTER_HEAD, scalefactor, 266);
   bshape(shDogTorso, PPR::MONSTER_BODY, scalefactor, 267);
@@ -1375,7 +1375,7 @@ void geometry_information::prepare_shapes() {
   bshape(shWolfRearPaw, PPR::MONSTER_FOOT, scalefactor, 273);
   bshape(shWolfFrontLeg, PPR::MONSTER_LEG, scalefactor, 274);
   bshape(shWolfRearLeg, PPR::MONSTER_LEG, scalefactor, 275);
-  
+
   // missiles
   bshape(shKnife, PPR::MISSILE, scalefactor, 87);
   bshape(shTrapArrow, PPR::MISSILE, scalefactor, 354);
@@ -1383,13 +1383,13 @@ void geometry_information::prepare_shapes() {
   bshape(shFlailMissile, PPR::MISSILE, scalefactor, 89);
 
   for(int u=0; u<=2; u+=2) {
-  
+
     PPR sh = u ? PPR::ITEM : PPR::MONSTER_LEG;
     int uz = u?2:1;
-    
+
     PPR sh1 = PPR(sh + 1);
     PPR sh2 = PPR(sh + 2);
-  
+
     bshape(shTortoise[0][0+u], sh1, scalefactor/uz, 207);
     bshape(shTortoise[1][0+u], sh2, scalefactor/uz, 208);
     bshape(shTortoise[2][0+u], sh2, scalefactor/uz, 209);
@@ -1403,7 +1403,7 @@ void geometry_information::prepare_shapes() {
     bshape(shTortoise[10][0+u], sh, scalefactor/uz, 218);
     bshape(shTortoise[11][0+u], sh, scalefactor/uz, 219);
     bshape(shTortoise[12][0+u], sh2, scalefactor/uz, 216);
-    
+
     bshape(shTortoise[0][1+u], sh1, scalefactor/uz, 220);
     bshape(shTortoise[1][1+u], sh2, scalefactor/uz, 221);
     bshape(shTortoise[2][1+u], sh2, scalefactor/uz, 222);

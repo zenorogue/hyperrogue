@@ -541,7 +541,7 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
     using namespace hyperpoint_vec;
     if(!stillin[i]) gbody[i] = normalize(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
     }
-
+  
   bshape(sh, PPR::MONSTER_BODY);
   int step = 10;
   for(int i=0; i<n; i++) {
