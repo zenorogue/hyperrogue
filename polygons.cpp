@@ -931,7 +931,7 @@ void geometry_information::create_wall3d() {
 #endif
 
 void geometry_information::configure_floorshapes() {
-  &floor_texture_vertices[shar.id];init_floorshapes();
+  init_floorshapes();
   if(0);
   #if CAP_ARCM
   else if(archimedean)
