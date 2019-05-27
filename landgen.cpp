@@ -168,6 +168,16 @@ void giantLandSwitch(cell *c, int d, cell *from) {
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
+    
+      if(d == 7 && chaosmode) {
+        if(hrand_monster(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0))
+          c->monst = moGadfly;
+        if(hrand_monster(100) < 5) c->monst = moSleepBull;
+        if(hrand(800) < 10) {
+          c->item = itGreenGrass;
+          }        
+        return;
+        }
 
     #if CAP_FIELD
       if(d == 7) {
