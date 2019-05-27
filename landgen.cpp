@@ -27,6 +27,7 @@ void doOvergenerate() {
 
 bool notDippingFor(eItem i) {
   if(peace::on) return false;
+  if(chaosmode > 1) return true;
   int v = items[i] - currentLocalTreasure;
   if(v <= 10) return true;
   if(v >= 20) return false;
@@ -35,6 +36,7 @@ bool notDippingFor(eItem i) {
 
 bool notDippingForExtra(eItem i, eItem x) {
   if(peace::on) return false;
+  if(chaosmode > 1) return true;
   int v = items[i] - min(items[x], currentLocalTreasure);
   if(v <= 10) return true;
   if(v >= 20) return false;
@@ -2442,6 +2444,16 @@ void repairLandgen(cell *c) {
     }
   }
 
+void setland_randomwalk(cell *c) {
+  if(c->land) return;
+  if(hrand(10) == 0) setland(c, currentlands[hrand(isize(currentlands))]);
+  else {
+    cell *c2 = c->cmove(hrand(c->type));
+    setland_randomwalk(c2);
+    c->land = c2->land;
+    }
+  }
+
 void setdist(cell *c, int d, cell *from) {
   
   if(c->mpdist <= d) return;
@@ -2483,7 +2495,7 @@ void setdist(cell *c, int d, cell *from) {
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
   
-    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient) {
+    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient && !(chaosmode > 1)) {
       if(!hasbardir(c)) setland(c, from->land);
       }
     if(c->land == laTemple && !tactic::on && !chaosmode) setland(c, laRlyeh);
@@ -2492,6 +2504,25 @@ void setdist(cell *c, int d, cell *from) {
     if(c->land == laWhirlpool && !tactic::on && !yendor::on) setland(c, laOcean);
     if(c->land == laCamelot && !tactic::on) setland(c, laCrossroads);
     if(c->land == laBrownian && !tactic::on && !chaosmode) setland(c, laOcean);
+    
+    if(chaosmode && !c->land && isize(currentlands)) {
+      if(chaosmode == 3) setland(c, currentlands[hrand(isize(currentlands))]);
+      if(chaosmode == 2) {
+        if(stdeuc) {
+          cell *c2 = c;
+          while(true) {
+            forCellCM(c3, c2) if(cdist50(c3) < cdist50(c2)) { c2 = c3; goto again; }
+            break;
+            again: ;
+            }
+          if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
+          c->land = c2->land;
+          }
+        else chaosmode = 4;
+        }
+      if(chaosmode == 4)
+        setland_randomwalk(c);
+      }
 
 #if CAP_DAILY
     if(!daily::on) {
@@ -2499,6 +2530,7 @@ void setdist(cell *c, int d, cell *from) {
     if(true) {
 #endif
       if(0);
+      else if(chaosmode > 1) ;
       #if CAP_CRYSTAL
       else if(geometry == gCrystal) crystal::set_land(c);
       #endif

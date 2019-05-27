@@ -146,6 +146,7 @@ void initgame() {
   
   createMov(cwt.at, 0);
   
+  pregen();  
   setdist(cwt.at, BARLEV, NULL);
 
   if(!use_special_land && !safety) {
@@ -622,7 +623,7 @@ void applyBoxes() {
   applyBoxM(moFalsePrincess);
   applyBoxM(moRoseLady);
   applyBoxM(moRoseBeauty);
-  applyBoxBool(chaosmode, "Chaos mode");
+  applyBoxNum(chaosmode, "Chaos mode");
   applyBoxNum(multi::players, "shmup players");
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
@@ -778,7 +779,7 @@ void loadBoxHigh() {
   dynamicval<int> sp1(multi::players, savebox[197]);
   dynamicval<eGeometry> sp2(geometry, (eGeometry) savebox[116]);
   dynamicval<bool> sp3(shmup::on, savebox[119]);
-  dynamicval<bool> sp4(chaosmode, savebox[196]);
+  dynamicval<int> sp4(chaosmode, savebox[196]);
   dynamicval<eVariation> sp5(variation, (eVariation) savebox[186]);
   dynamicval<int> sp7(gp::param.first, savebox[342]);
   dynamicval<int> sp8(gp::param.second, savebox[343]);

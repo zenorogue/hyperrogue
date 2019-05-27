@@ -742,6 +742,24 @@ int read_cheat_args() {
     cheat();
     quantum = true;
     }
+  else if(argis("-chaos-circle")) {
+    PHASEFROM(2);
+    cheat();
+    stop_game();
+    chaosmode = 2;
+    }
+  else if(argis("-chaos-total")) {
+    PHASEFROM(2);
+    cheat();
+    stop_game();
+    chaosmode = 3;
+    }
+  else if(argis("-chaos-random")) {
+    PHASEFROM(2);
+    cheat();
+    stop_game();
+    chaosmode = 4;
+    }
   else if(argis("-fix")) {
     PHASE(1);
     fixseed = true; autocheat = true;

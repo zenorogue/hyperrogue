@@ -1207,6 +1207,7 @@ bool good_for_wall(cell *c) {
   
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
+  if(chaosmode > 1) return;
   bool deepOcean = deep_ocean_at(c, from);
   
   // if(weirdhyperbolic && c->land == laOcean) deepOcean = c->landparam >= 30;
@@ -1604,6 +1605,16 @@ void generate_mines() {
   hrandom_shuffle(&candidates[0], bounded_mine_max);
   bounded_mine_quantity = int(bounded_mine_max * bounded_mine_percentage + 0.5);
   for(int i=0; i<bounded_mine_quantity; i++) candidates[i]->wall = waMineMine;
+  }
+
+vector<eLand> currentlands;
+
+void pregen() {
+  currentlands.clear();
+  if(chaosmode > 1)
+    for(eLand l: land_over)
+      if(landUnlocked(l) && isLandIngame(l)) 
+        currentlands.push_back(l);
   }
 
 }

@@ -1744,7 +1744,7 @@ void generate_mines();
 
 bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags);
 
-extern bool chaosmode;
+extern int chaosmode;
 extern bool chaosUnlocked;
 extern bool chaosAchieved;
 bool isTechnicalLand(eLand l);
@@ -5407,5 +5407,7 @@ static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
 static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
 
+void pregen();
+extern vector<eLand> currentlands;
 }
 

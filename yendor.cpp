@@ -455,7 +455,7 @@ namespace yendor {
     if(phase == 1) {
       won = false;
       if(!easy) items[itOrbYendor] = bestscore[modecode()][challenge];
-      chaosmode = (clev().flags & YF_CHAOS);
+      chaosmode = (clev().flags & YF_CHAOS) ? 1 : 0;
       specialland = clev().l;
       if(clev().flags & YF_START_AL) {
         specialland = laAlchemist;
@@ -704,7 +704,7 @@ namespace yendor {
     if(yendor::on) {
       yendor::won = true;
       if(!cheater) {
-        dynamicval<bool> c(chaosmode, false);
+        dynamicval<int> c(chaosmode, 0);
         yendor::bestscore[modecode()][yendor::challenge] = 
           max(yendor::bestscore[modecode()][yendor::challenge], items[itOrbYendor]);
         yendor::uploadScore();        

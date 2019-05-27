@@ -3039,6 +3039,7 @@ namespace prairie {
     }
           
   void move() {
+    if(chaosmode) return;
     manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];

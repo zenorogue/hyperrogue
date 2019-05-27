@@ -4422,6 +4422,7 @@ void killThePlayerAt(eMonster m, cell *c, flagtype flags) {
   }
 
 void afterplayermoved() {
+  pregen();
   setdist(cwt.at, 7 - getDistLimit() - genrange_bonus, NULL);
   prairie::treasures();
   if(generatingEquidistant) {

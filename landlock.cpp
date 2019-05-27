@@ -71,7 +71,7 @@ eLand oppositeElement(eLand l, eLand l2) {
 
 eLand firstland = laIce, specialland = laIce;
 
-bool chaosmode = false;
+int chaosmode = 0;
 
 bool landUnlockedRPM(eLand n) {
   if(isRandland(n) == 2) return true;
