@@ -6849,6 +6849,9 @@ void precise_mouseover() {
   }
 
 void drawthemap() {
+  check_cgi();
+  cgi.require_shapes();
+
   DEBBI(DF_GRAPH, ("draw the map"));
   
   last_firelimit = firelimit;
@@ -7137,6 +7140,9 @@ void drawfullmap() {
 
   DEBBI(DF_GRAPH, ("draw full map"));
     
+  check_cgi();
+  cgi.require_shapes();
+
   ptds.clear();
 
   
@@ -7217,8 +7223,6 @@ void gamescreen(int _darken) {
   if(conformal::includeHistory) conformal::restore();
 
   anims::apply();
-  check_cgi();
-  cgi.require_shapes();
 #if CAP_RUG
   if(rug::rugged) {
     rug::actDraw();
