@@ -446,7 +446,7 @@ void bantar_stats() {
     for(auto p: parent) if(gmatrix.count(p.first) && gmatrix.count(p.second))
       queueline(tC0(gmatrix[p.first]), tC0(gmatrix[p.second]), 0x00FF00FF, 4);
 
-    double x = hexvdist;
+    double x = cgi.hexvdist;
     for(auto gm: gmatrix) for(cell *c: {gm.first})
     if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) if(infos.count(c) && infos.count(c->move(t)) && c->move(t) && infos[c].gid != infos[c->move(t)].gid)
       if(euclid ? c->move(t)<c : (((t^1)&1) || c->move(t) < c))

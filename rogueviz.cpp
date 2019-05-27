@@ -27,7 +27,6 @@
 
 #include "rogueviz.h"
 
-namespace hr { extern hpcshape shEagle, shMiniGhost, shGhost, shShark, shAnimatedEagle[30], shAnimatedTinyEagle[30]; }
 #if MAXMDIM >= 4
 namespace hr { extern renderbuffer *floor_textures; }
 #endif
@@ -1146,8 +1145,6 @@ void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2
   storelineto(tab, h1, h2);
   }
 
-hpcshape *vshapes[4] = { &shDisk, &shDisk, &shHeptaMarker, &shSnowball };
-
 color_t darken_a(color_t c) {
   for(int p=0; p<3; p++)
   for(int i=0; i<darken; i++) part(c, i+1) = (part(c, i+1) + part(backcolor, i)) >> 1;
@@ -1168,7 +1165,10 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     
   transmatrix V1;
   
-  auto& sh = *(vshapes[vertex_shape]);
+  auto& sh = 
+    vertex_shape == 2 ? cgi.shHeptaMarker :
+    vertex_shape == 3 ? cgi.shSnowball :
+    cgi.shDisk;
   
   if(vertex_shape == 0) ;
   else if(DIM == 3 && among(cp.shade, 'b', 'f', 'g', 'B', 'F', 'G')) {
@@ -1186,7 +1186,7 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
-    queuepolyat(V1 = mscale(V, geom3::BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
+    queuepolyat(V1 = mscale(V, cgi.BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
     if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   else {
@@ -1195,16 +1195,16 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   switch(cp.shade) {
-    case 't': queuepoly(V1, shDiskT, darken_a(cp.color2)); return;
-    case 's': queuepoly(V1, shDiskS, darken_a(cp.color2)); return;
-    case 'q': queuepoly(V1, shDiskSq, darken_a(cp.color2)); return;
-    case 'm': queuepoly(V1, shDiskM, darken_a(cp.color2)); return;
-    case 'b': queuepoly(V1, DIM == 3 ? shAnimatedTinyEagle[((long long)(ticks) * 30 / 1000+i) % 30] : shTinyBird, darken_a(cp.color2)); return;
-    case 'f': queuepoly(V1, shTinyShark, darken_a(cp.color2)); return;
-    case 'g': queuepoly(V1, shMiniGhost, darken_a(cp.color2)); return;
-    case 'B': queuepoly(V1, DIM == 3 ? shAnimatedEagle[((long long)(ticks) * 30 / 1000+i) % 30] : shEagle, darken_a(cp.color2)); return;
-    case 'F': queuepoly(V1, shShark, darken_a(cp.color2)); return;
-    case 'G': queuepoly(V1, shGhost, darken_a(cp.color2)); return;
+    case 't': queuepoly(V1, cgi.shDiskT, darken_a(cp.color2)); return;
+    case 's': queuepoly(V1, cgi.shDiskS, darken_a(cp.color2)); return;
+    case 'q': queuepoly(V1, cgi.shDiskSq, darken_a(cp.color2)); return;
+    case 'm': queuepoly(V1, cgi.shDiskM, darken_a(cp.color2)); return;
+    case 'b': queuepoly(V1, DIM == 3 ? cgi.shAnimatedTinyEagle[((long long)(ticks) * 30 / 1000+i) % 30] : cgi.shTinyBird, darken_a(cp.color2)); return;
+    case 'f': queuepoly(V1, cgi.shTinyShark, darken_a(cp.color2)); return;
+    case 'g': queuepoly(V1, cgi.shMiniGhost, darken_a(cp.color2)); return;
+    case 'B': queuepoly(V1, DIM == 3 ? cgi.shAnimatedEagle[((long long)(ticks) * 30 / 1000+i) % 30] : cgi.shEagle, darken_a(cp.color2)); return;
+    case 'F': queuepoly(V1, cgi.shShark, darken_a(cp.color2)); return;
+    case 'G': queuepoly(V1, cgi.shGhost, darken_a(cp.color2)); return;
     }
   }
 
@@ -1416,7 +1416,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
-      queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, (svg::in || ISWEB) ? 0 : 1);
+      queuestr(V2, (svg::in ? .28 : .2) * cgi.crossf / cgi.hcrossf, vd.name, forecolor, (svg::in || ISWEB) ? 0 : 1);
       if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
       }
     }
@@ -1527,7 +1527,7 @@ bool rogueviz_hud() {
     transmatrix V = atscreenpos(x, y, current_display->radius/8);
     
     poly_outline = t->color | 0xFF;
-    queuepolyat(V, shTriangle, 0, PPR::MONSTER_HEAD);
+    queuepolyat(V, cgi.shTriangle, 0, PPR::MONSTER_HEAD);
     
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, forecolor, 0, 16);

@@ -53,7 +53,7 @@ void magic(int sides) {
   firstland = specialland = laCanvas;
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0;
-  need_reset_geometry = true;
+  check_cgi();
   start_game();
   
   build(crystal::c0, 0);

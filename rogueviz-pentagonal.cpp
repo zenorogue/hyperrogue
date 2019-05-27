@@ -112,14 +112,13 @@ void run_snub(int v, int w) {
   set_geometry(gArchimedean);
   set_variation(eVariation::pure);
   arcm::current.parse("("+its(v)+",3," + its(w) + ",3,3) (2,3)(1,0)(4)");
+  check_cgi();
+  cgi.require_basics();
   specialland = laCanvas;
   patterns::whichCanvas = 'A';
   // vid.wallmode = 1;
-  need_reset_geometry = true;
   printf("start game\n");
-  printf("distlimit = %d\n", base_distlimit);
-  precalc();
-  printf("distlimit = %d\n", base_distlimit);
+  printf("distlimit = %d\n", cgi.base_distlimit);
   start_game();
   printf("ok\n");
   printf("allcells = %d\n", isize(currentmap->allcells()));

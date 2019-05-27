@@ -33,7 +33,7 @@ void cvl_marker() {
     for(auto& loc: l.second.locs) {
       if(gmatrix.count(loc.lviewctr.at->c7)) {
         transmatrix T = gmatrix[loc.lviewctr.at->c7] * inverse(spin(loc.lviewctr.spin*2*M_PI/S7 + master_to_c7_angle())) * inverse(loc.lView);
-        queuepoly(T, shAsymmetric, 0xFF00FFFF);
+        queuepoly(T, cgi.shAsymmetric, 0xFF00FFFF);
         queuestr(T, 1.0, its(l.first)+"/"+its(id), 0xFFFFFF);
         }
       id++;

@@ -200,11 +200,11 @@ void fundamental_marker() {
     
       int mc = (mirrored ? color1 : color2) >> 8;
       if(hdist(corner(cw), corner(next_corner[cw])) > 1e-3) {
-        queuestr(labelpos(corner(cw), corner(next_corner[cw])), label_scale/scalefactor, its(id), mc);
+        queuestr(labelpos(corner(cw), corner(next_corner[cw])), label_scale/cgi.scalefactor, its(id), mc);
         if(mirrored)
-          queuestr(labelpos(corner(cw1), corner(next_corner[cw1])), label_scale/scalefactor, its(id), mc);
+          queuestr(labelpos(corner(cw1), corner(next_corner[cw1])), label_scale/cgi.scalefactor, its(id), mc);
         else
-          queuestr(labelpos(corner(prev_corner[cw1]), corner(cw1)), label_scale/scalefactor, its(id), mc);
+          queuestr(labelpos(corner(prev_corner[cw1]), corner(cw1)), label_scale/cgi.scalefactor, its(id), mc);
         id++;
         }      
       }
