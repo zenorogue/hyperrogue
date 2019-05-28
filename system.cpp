@@ -208,7 +208,8 @@ void initgame() {
     createMov(cwt.at, 0)->land = laCrossroads2;
     }
     
-  for(int i=0; i<numplayers(); i++) sword::angle[i] = PURE ? 10 : 11;
+  sword::determine_sword_angles();
+  for(int i=0; i<numplayers(); i++) sword::angle[i] = (sword::sword_angles / cwt.at->type + 1) / 2;
 
   #if CAP_DAILY
   daily::split();

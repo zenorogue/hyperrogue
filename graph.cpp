@@ -383,35 +383,36 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
     
     else {
       int& ang = angle[multi::cpid];
-      ang %= sword_angles;
+      ang %= sword::sword_angles;
 
 #if CAP_QUEUE || CAP_SHAPES
       transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * ddspin(c,0,M_PI); // (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
 #endif
+
+      int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
 #if CAP_QUEUE
       if(!euclid) for(int a=0; a<sword_angles; a++) {
-        int dda = sword_angles + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
-        if(PURE && a%3 != ang%3) continue;
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
+        if(sword_angles > 48 && !longer) continue;
         color_t col = darkena(0xC0C0C0, 0, 0xFF);
         ld l0 = PURE ? 0.6 * cgi.scalefactor : longer ? 0.36 : 0.4;
         ld l1 = PURE ? 0.7 * cgi.scalefactor : longer ? 0.44 : 0.42;
         hyperpoint h0 = DIM == 3 ? xpush(l0) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l0);
-        hyperpoint h1 = DIM == 3 ? xpush(l1) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l1);        
-        transmatrix T = Vnow*spin(dda * M_PI / sword_angles);
+        hyperpoint h1 = DIM == 3 ? xpush(l1) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l1);
+        transmatrix T = Vnow*spin((sword_angles + (-adj-2*a)) * M_PI / sword_angles);
         queueline(T*h0, T*h1, col, 1, PPR::SUPERLINE);
         }
 #endif
 
 #if CAP_SHAPES
       if(items[itOrbSword])
-        queuepoly(Vnow*spin(M_PI+(-1-2*ang)*M_PI/sword_angles), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(Vnow*spin(M_PI+(-adj-2*ang)*M_PI/sword_angles), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0x80 + 0x70 * sintick(200)));
   
       if(items[itOrbSword2])
-        queuepoly(Vnow*spin((-1-2*ang)*M_PI/sword_angles), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sintick(200)));
+        queuepoly(Vnow*spin((-adj-2*ang)*M_PI/sword_angles), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0x80 + 0x70 * sintick(200)));
 #endif
       }
     }

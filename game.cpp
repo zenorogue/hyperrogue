@@ -5264,8 +5264,8 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
 
 template<class T> void do_swords(cell *mf, cell *mt, eMonster who, const T& f) {
   for(int bb=0; bb<2; bb++) if(who == moPlayer && sword::orbcount(bb)) {
-    cell *sf = sword::pos(mf, sword::angle[multi::cpid] + (bb?sword_angles/2:0));
-    cell *st = sword::pos(mt, sword::shift(mf, mt, sword::angle[multi::cpid]) + (bb?sword_angles/2:0));
+    cell *sf = sword::pos(mf, sword::angle[multi::cpid] + (bb?sword::sword_angles/2:0));
+    cell *st = sword::pos(mt, sword::shift(mf, mt, sword::angle[multi::cpid]) + (bb?sword::sword_angles/2:0));
     f(st, bb);
     if(sf != st && !isNeighbor(sf,st)) {
       // also attack the in-transit cell

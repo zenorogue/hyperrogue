@@ -2620,8 +2620,25 @@ namespace dragon {
   }
 
 namespace sword {
-  int angle[MAXPLAYER];
+  array<int, MAXPLAYER> angle;
+  int sword_angles;
 
+  void possible_divisor(int s) { sword_angles *= s / gcd(sword_angles, s); }
+
+  void determine_sword_angles() {
+    sword_angles = 2;
+    if(IRREGULAR) sword_angles = 840;
+    else if(binarytiling) sword_angles = 42;
+    else if(archimedean) {
+      if(!PURE) possible_divisor((BITRUNCATED ? 2 : 1) * isize(arcm::current.faces));
+      if(!DUAL) for(int f: arcm::current.faces) possible_divisor(f);
+      }
+    else {
+      possible_divisor(S7);
+      if(BITRUNCATED) possible_divisor(S3);
+      }
+    }
+  
   cell *pos(cell *c, int s) {
     int t = c->type;
     s *= 2;

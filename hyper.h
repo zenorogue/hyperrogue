@@ -1833,11 +1833,9 @@ namespace tortoise {
   int getRandomBits();
   }
 
-#define sword_angles (S7*S3*2)
-
 namespace sword {
 
-  extern int angle[MAXPLAYER];
+  extern array<int, MAXPLAYER> angle;
 
   cell *pos(cell *c, int s);
   cell *pos(int id);
