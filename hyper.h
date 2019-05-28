@@ -4467,6 +4467,7 @@ hpcshape
   void prepare_usershapes();
 
   void hpcpush(hyperpoint h);
+  void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
   void chasmifyPoly(double fac, double fac2, int k);
   void shift(hpcshape& sh, double dx, double dy, double dz);
   void initPolyForGL();
@@ -4522,6 +4523,7 @@ hpcshape
   void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void make_ball(hpcshape& sh, ld rad, int lev);
+  void make_star(hpcshape& sh, ld rad);
   void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1);
   void shift_last_straight(ld z);
   void queueball(const transmatrix& V, ld rad, color_t col, eItem what);
