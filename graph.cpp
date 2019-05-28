@@ -4617,6 +4617,27 @@ int get_skybrightness(int mul = 1) {
   return int(s * 255);
   }
 
+void draw_euclidean_sky() {
+  if(!euclid) return;
+  if(WDIM == 3 || GDIM == 2) return;
+  transmatrix T = ggmatrix(currentmap->gamestart());
+  T = gpushxto0(tC0(T)) * T;
+  for(int x=-20; x<20; x++)
+  for(int y=-20; y<20; y++) {
+    curvepoint(T * zpush(cgi.WALL) * hpxy(x, y));
+    curvepoint(T * zpush(cgi.WALL) * hpxy(x, y+1));
+    curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y));
+    curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y+1));
+    curvepoint(T * zpush(cgi.WALL) * hpxy(x, y+1));
+    curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y));
+    }
+  queuecurve(0, 0x0000FFFF, PPR::EUCLIDEAN_SKY).flags |= POLY_TRIANGLES;
+
+  auto &sun = queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+  sun.tinf = NULL;
+  sun.flags |= POLY_INTENSE;
+  }
+
 void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t& wcol) {
 
   if(pmodel != mdPerspective || sphere) return;
@@ -4624,6 +4645,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {
+      if(euclid) return;
       if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
         auto &star = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         star.tinf = NULL;
@@ -4648,6 +4670,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       }
     
     case 2: {
+      if(euclid) return;
       color_t col;
       if(c->land == laWineyard) {
         col = 0x4040FF;
@@ -4702,6 +4725,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
             placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
         }
       if(among(c->wall, waClosedGate, waOpenGate)) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
+      if(euclid) return;
 
       if(true) {
         auto &star = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
@@ -4726,6 +4750,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       else
         draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
+      if(euclid) return;
       if(true) {
         auto &star = queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         star.tinf = NULL;
@@ -7162,6 +7187,7 @@ void drawfullmap() {
   draw_boundary(1);
   
   draw_model_elements();
+  draw_euclidean_sky();
   #endif
   
   /* if(vid.wallmode < 2 && !euclid && !patterns::whichShape) {

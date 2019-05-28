@@ -501,8 +501,8 @@ void dqi_poly::gldraw() {
       if(flags & POLY_TRIANGLES) {
         glhr::color2(color, (flags & POLY_INTENSE) ? 2 : 1);
         glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW);
-        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + 5 / sightranges[geometry] : 1.0);
+        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + (euclid ? 20 : 5 / sightranges[geometry]) : 1.0);
         glDrawArrays(GL_TRIANGLES, ioffset, cnt);
         }
       else {

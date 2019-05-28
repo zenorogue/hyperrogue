@@ -2107,7 +2107,7 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id = multi::cpid);
 
 // ranks:
 enum class PPR {
-  ZERO, OUTCIRCLE, MOVESTAR,
+  ZERO, EUCLIDEAN_SKY, OUTCIRCLE, MOVESTAR,
   MINUSINF,
   BELOWBOTTOMm,
   BELOWBOTTOM,
