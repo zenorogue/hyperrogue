@@ -161,7 +161,7 @@ int hrand_monster(int x) {
   // in 3D monster generation depends on the sight range
   if(WDIM == 3 && !sphere) {
     int t = isize(gmatrix);
-    if(t > 300) x = ((long long)(x)) * t / 300;
+    if(t > 500) x = ((long long)(x)) * t / 500;
     }
   return hrand(x);
   }
