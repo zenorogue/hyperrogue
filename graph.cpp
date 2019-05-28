@@ -4631,7 +4631,7 @@ void draw_euclidean_sky() {
     curvepoint(T * zpush(cgi.WALL) * hpxy(x, y+1));
     curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y));
     }
-  queuecurve(0, 0x0000FFFF, PPR::EUCLIDEAN_SKY).flags |= POLY_TRIANGLES;
+  queuecurve(0, 0x0044e4FF, PPR::EUCLIDEAN_SKY).flags |= POLY_TRIANGLES;
 
   auto &sun = queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
   sun.tinf = NULL;
