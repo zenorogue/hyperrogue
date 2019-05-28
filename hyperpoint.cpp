@@ -778,7 +778,7 @@ hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
   }
 
 hyperpoint zshift(hyperpoint x, ld z) {
-  if(DIM == 3 && WDIM == 2) return orthogonal_move(x, z);
+  if(DIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
   else return mscale(x, z);
   }
 
