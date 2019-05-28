@@ -699,7 +699,7 @@ void edit_sightrange() {
       "the game effectively harder."));
     dialog::reaction = doOvergenerate;
     dialog::bound_low(1-getDistLimit());
-    dialog::bound_up(allowIncreasedSight() ? gp::dist_2() * 5 : 0);
+    dialog::bound_up(allowIncreasedSight() ? euclid ? 99 : gp::dist_2() * 5 : 0);
     }
   dialog::extra_options = [] () {
     dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
