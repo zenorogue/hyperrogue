@@ -6077,7 +6077,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(!it) {
         if(c->wall == waNone || isWatery(c)) asciicol = fcol;
         }
-      if(c->wall == waBoat) asciicol = 0xC06000;
+      if(c->wall == waBoat && !it) asciicol = 0xC06000;
 
       if(c->wall == waArrowTrap)
         asciicol = trapcol[c->wparam & 3];
