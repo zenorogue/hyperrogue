@@ -515,7 +515,10 @@ void reset_graph_settings() {
   }
 
 void resetModes(char leave) {
-  popAllGames();
+  while(game_active || gamestack::pushed()) {
+    if(game_active) stop_game();
+    if(gamestack::pushed()) gamestack::pop();
+    }
   if(shmup::on != (leave == rg::shmup)) stop_game_and_switch_mode(rg::shmup);
   if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
   if(chaosmode != (leave == rg::chaos)) stop_game_and_switch_mode(rg::chaos);

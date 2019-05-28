@@ -15,8 +15,8 @@ int gamerange_bonus = 0;
 int gamerange() { return getDistLimit() + gamerange_bonus; }
 
 cell *lastmove;
-enum eLastmovetype {lmSkip, lmMove, lmAttack, lmSpecial, lmPush, lmTree};
-eLastmovetype lastmovetype;
+eLastmovetype lastmovetype, nextmovetype;
+eForcemovetype forcedmovetype;
 
 bool hauntedWarning;
 bool survivalist;
@@ -7581,8 +7581,9 @@ void monstersTurn() {
       }
     }
   DEBB(DF_TURN, ("rop"));
-  reduceOrbPowers();
+  if(!dual::state) reduceOrbPowers();
   int phase1 = (1 & items[itOrbSpeed]);
+  if(dual::state && items[itOrbSpeed]) phase1 = !phase1;
   DEBB(DF_TURN, ("lc"));
   if(!phase1) livecaves();
   if(!phase1) ca::simulate();
@@ -7787,6 +7788,7 @@ void handle_switchplaces(cell *c1, cell *c2, bool& switchplaces) {
   }  
 
 bool movepcto(int d, int subdir, bool checkonly) {
+  if(dual::state == 1) return dual::movepc(d, subdir, checkonly);
   if(d >= 0 && !checkonly && subdir != 1 && subdir != -1) printf("subdir = %d\n", subdir);
   global_pushto = NULL;
   bool switchplaces = false;
@@ -7824,6 +7826,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
   gravity_state = gsNormal;
   
+  bool fmsMove     = forcedmovetype == fmSkip || forcedmovetype == fmMove;
+  bool fmsAttack   = forcedmovetype == fmSkip || forcedmovetype == fmAttack;
+  bool fmsActivate = forcedmovetype == fmSkip || forcedmovetype == fmActivate;
+  
   if(d >= 0) {
     cell *c2 = cwt.at->move(d);
     bool goodTortoise = c2->monst == moTortoise && tortoise::seek() && !tortoise::diff(tortoise::getb(c2)) && !c2->item;
@@ -7842,8 +7848,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return false;
       }
     
-    if(items[itOrbDomination] > ORBBASE && isMountable(c2->monst) && !monstersnear2()) {
-      if(checkonly) return true;
+    bool try_instant = (forcedmovetype == fmInstant) || (forcedmovetype == fmSkip && !passable(c2, cwt.at, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP));
+    
+    if(items[itOrbDomination] > ORBBASE && isMountable(c2->monst) && !monstersnear2() && fmsMove) {
+      if(checkonly) { nextmovetype = lmMove; return true; }
       if(!isMountable(cwt.at->monst)) dragon::target = NULL;
       movecost(cwt.at, c2, 3);
       
@@ -7853,8 +7861,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       goto mountjump;
       }
     
-    if(!passable(c2, cwt.at, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP) && items[itOrbFlash]) {
-      if(checkonly) return true;
+    if(items[itOrbFlash] && try_instant) {
+      if(checkonly) { nextmovetype = lmInstant; return true; }
       if(orbProtection(itOrbFlash)) return true;
       activateFlash();
       bfs();
@@ -7863,8 +7871,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return true;
       }
 
-    if(!passable(c2, cwt.at, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP) && items[itOrbLightning]) {
-      if(checkonly) return true;
+    if(items[itOrbLightning] && try_instant) {
+      if(checkonly) { nextmovetype = lmInstant; return true; }
       if(orbProtection(itOrbLightning)) return true;
       activateLightning();
       keepLightning = true;
@@ -7875,8 +7883,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return true;
       }
 
-    if(isActivable(c2)) {
-      if(checkonly) return true;
+    if(isActivable(c2) && fmsActivate) {
+      if(checkonly) { nextmovetype = lmInstant; return true; }
       activateActiv(c2, true);
       bfs();
       if(multi::players > 1) { multi::whereto[multi::cpid].d = MD_UNDECIDED; return false; }
@@ -7884,7 +7892,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return true;
       }
 
-    if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at)) {
+    if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
       int pushdir;
       cell *c3 = determinePush(cwt, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.at); }, pushdir);
       if(c3 == c2) {
@@ -7897,7 +7905,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         return false;
         }
       global_pushto = c3;
-      if(checkonly) return true;
+      if(checkonly) { nextmovetype = lmMove; return true; }
       addMessage(XLAT("You push %the1.", c2->wall));
       lastmovetype = lmPush; lastmove = cwt.at;
       pushThumper(c2, c3);
@@ -7913,7 +7921,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return false;
       }
 
-    if(isWatery(c2) && !nonAdjacentPlayer(cwt.at,c2) && !c2->monst && cwt.at->wall == waBoat) {
+    if(isWatery(c2) && !nonAdjacentPlayer(cwt.at,c2) && !c2->monst && cwt.at->wall == waBoat && fmsMove) {
 
       if(havePushConflict(cwt.at, checkonly)) return false;
 
@@ -7939,14 +7947,14 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(!checkonly && errormsgs) wouldkill("%The1 would kill you there!");
         return false;
         }
-
-      if(checkonly) return true;
+      
+      if(checkonly) { nextmovetype = lmMove; return true; }
       moveBoat(c2, cwt.at, d);
       boatmove = true;
       goto boatjump;
       }
     
-    if(!c2->monst && cwt.at->wall == waBoat && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at)) {
+    if(!c2->monst && cwt.at->wall == waBoat && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
 
       if(havePushConflict(cwt.at, checkonly)) return false;
       if(monstersnear(c2,NULL,moPlayer,NULL,cwt.at)) {
@@ -7954,7 +7962,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         return false;
         }
       
-      if(checkonly) return true;
+      if(checkonly) { nextmovetype = lmMove; return true; }
       if(c2->item && !cwt.at->item) moveItem(c2, cwt.at, false), boatmove = true;
       placeWater(c2, cwt.at);
       moveBoat(c2, cwt.at, d);
@@ -7964,7 +7972,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       }
 
     escape:
-    if(c2->wall == waBigStatue && !c2->monst && !nonAdjacentPlayer(c2, cwt.at)) {
+    if(c2->wall == waBigStatue && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
       if(!canPushStatueOn(cwt.at)) {
         if(checkonly) return false;
         if(isFire(cwt.at))
@@ -7988,7 +7996,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         return false;
         }        
           
-      if(checkonly) { c2->wall = save_c2; cwt.at->wall = save_cw; return true; }
+      if(checkonly) { c2->wall = save_c2; cwt.at->wall = save_cw; nextmovetype = lmMove; return true; }
       addMessage(XLAT("You push %the1 behind you!", waBigStatue));
       animateMovement(c2, cwt.at, LAYER_BOAT, cwt.at->c.spin(d));
       goto statuejump;
@@ -7999,18 +8007,19 @@ bool movepcto(int d, int subdir, bool checkonly) {
       c2->wall == waBigTree ||
       c2->wall == waSmallTree ||
       c2->wall == waMirrorWall;
-    attackable = attackable && (!c2->monst || isFriendly(c2));
     if(attackable && markOrb(itOrbAether) && c2->wall != waMirrorWall)
       attackable = false;
+    if(forcedmovetype == fmAttack) attackable = true;
+    attackable = attackable && (!c2->monst || isFriendly(c2));
     attackable = attackable && !nonAdjacentPlayer(cwt.at,c2);
       
-    if(attackable) {
+    if(attackable && fmsAttack) {
       if(checkNeedMove(checkonly, true)) return false;
       if(monstersnear(cwt.at,c2,moPlayer,NULL,cwt.at)) {
         if(!checkonly && errormsgs) wouldkill("%The1 would get you!");
         return false;
         }
-      if(checkonly) return true;
+      if(checkonly) { nextmovetype = lmAttack; return true; }
       if(c2->wall == waSmallTree) {
         drawParticles(c2, winf[c2->wall].color, 4);
         addMessage(XLAT("You chop down the tree."));
@@ -8029,7 +8038,12 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
       else {
         if(!peace::on) {
-          addMessage(XLAT("You swing your sword at the mirror."));
+          if(c2->wall == waMirrorWall)
+            addMessage(XLAT("You swing your sword at the mirror."));
+          else if(c2->wall)
+            addMessage(XLAT("You swing your sword at %the1.", c2->wall));
+          else
+            addMessage(XLAT("You swing your sword."));
           sideAttack(cwt.at, d, moPlayer, 0);
           animateAttack(cwt.at, c2, LAYER_SMALL, d);
           }
@@ -8047,6 +8061,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       }
     else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))
       && !(peace::on && !isMultitile(c2->monst) && !goodTortoise)) {
+      if(!fmsAttack) return false;
     
       flagtype attackflags = AF_NORMAL;
       if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
@@ -8122,7 +8137,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
       if(c2->monst == moTameBomberbird && warningprotection_hit(moTameBomberbird)) return false;
       
-      if(checkonly) return true;
+      if(checkonly) { nextmovetype = lmAttack; return true; }
 
       /* if(c2->monst == moTortoise) {
         printf("seek=%d get=%d <%x/%x> item=%d\n", 
@@ -8197,14 +8212,14 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
       return false;
       }
-    else {
+    else if(fmsMove) {
       if(mineMarked(c2) && !minesafe() && !checkonly && warningprotection(XLAT("Are you sure you want to step there?")))
         return false;
       if(monstersnear(c2, NULL, moPlayer, NULL, cwt.at)) {
         if(checkonly) return false;
 
         if(items[itOrbFlash]) {
-          if(checkonly) return true;
+          if(checkonly) { nextmovetype = lmInstant; return true; }
           if(orbProtection(itOrbFlash)) return true;
           activateFlash();
           checkmove();
@@ -8212,7 +8227,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           }
 
         if(items[itOrbLightning]) {
-          if(checkonly) return true;
+          if(checkonly) { nextmovetype = lmInstant; return true; }
           if(orbProtection(itOrbLightning)) return true;
           activateLightning();
           checkmove();
@@ -8244,7 +8259,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       if(!checkonly && warningprotection_hit(do_we_stab_a_friend(cwt.at, c2, moPlayer)))
         return false;
       
-      if(checkonly) return true;
+      if(checkonly) { nextmovetype = lmMove; return true; }
       boatjump:
       statuejump:
       flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
@@ -8336,6 +8351,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       landvisited[cwt.at->land] = true;
       afterplayermoved();
       }
+    else return false;
     }
   else {
     if(items[itOrbGravity]) {
@@ -8350,7 +8366,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         wouldkill("%The1 would get you!");
       return false;
       }
-    if(checkonly) return true;
+    if(checkonly) { nextmovetype = lmSkip; return true; }
     swordAttackStatic();
     if(d == -2) 
       dropGreenStone(cwt.at);

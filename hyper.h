@@ -2090,7 +2090,7 @@ struct animation {
 #define LAYER_SMALL 1 // for others
 #define LAYER_BOAT  2 // mark that a boat has moved
 
-extern map<cell*, animation> animations[ANIMLAYERS];
+extern array<map<cell*, animation>, ANIMLAYERS> animations;
 
 void animateAttack(cell *src, cell *tgt, int layer, int direction_hint);
 
@@ -4196,8 +4196,6 @@ bool score_loaded(int id);
 int score_default(int id);
 void handle_event(SDL_Event& ev);
 
-void pop_game();
-void push_game();
 void start_game();
 void stop_game();
 void switch_game_mode(char switchWhat);
@@ -4612,6 +4610,8 @@ extern vector<help_extension> help_extensions;
 
 namespace gamestack {
   bool pushed();
+  void push();
+  void pop();
   }
 
 namespace geom3 {
@@ -5407,5 +5407,58 @@ static const int POLY_INTENSE = (1<<23);        // extra intense colors
 
 void pregen();
 extern vector<eLand> currentlands;
-}
 
+struct gamedata {
+  // important parameters should be visible
+  eGeometry geo;
+  eVariation var;
+  eLand specland;
+  bool active;
+  // other properties are recorded
+  vector<char> record;
+  int index, mode;
+  void storegame();
+  void restoregame();
+  template<class T> void store(T& x) {
+    int ssize = sizeof(x);
+    if(ssize & 7) ssize = (ssize | 7) + 1;
+    if(mode == 0) {
+      record.resize(index+ssize);
+      T& at = *(new (&record[index]) T());
+      at = move(x);
+      }
+    else {
+      T& at = (T&) record[index];
+      x = move(at);
+      at.~T();
+      }
+    index += ssize;
+    }
+  };
+
+/* lastmovetype   uses lmSkip, lmMove, lmAttack, lmPush, lmTree */
+enum eLastmovetype { lmSkip, lmMove, lmAttack, lmPush, lmTree, lmInstant };
+extern eLastmovetype lastmovetype, nextmovetype;
+
+enum eForcemovetype { fmSkip, fmMove, fmAttack, fmInstant, fmActivate };
+extern eForcemovetype forcedmovetype;
+
+extern hookset<void(gamedata*)> *hooks_gamedata;
+
+namespace dual {
+  // 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames)
+  extern int state;
+  extern int currently_loaded, main_side;
+
+  bool movepc(int d, int subdir, bool checkonly);
+  extern transmatrix player_orientation[2];
+
+  bool split(reaction_t what);
+  void switch_to(int i);
+  void in_subscreen(reaction_t what);
+  
+  bool check_side(eLand l);
+  void assign_landsides();
+  }
+
+}

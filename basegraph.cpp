@@ -942,7 +942,9 @@ ld realradius() {
 void drawmessage(const string& s, int& y, color_t col) {
   int rrad = (int) realradius();
   int space;
-  if(y > current_display->ycenter + rrad * vid.stretch)
+  if(dual::state)
+    space = vid.xres;
+  else if(y > current_display->ycenter + rrad * vid.stretch)
     space = vid.xres;
   else if(y > current_display->ycenter)
     space = current_display->xcenter - rhypot(rrad, (y-current_display->ycenter) / vid.stretch);

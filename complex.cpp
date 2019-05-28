@@ -3202,6 +3202,20 @@ auto ccm = addHook(clearmemory, 0, [] () {
   #endif
   mirror::clearcache();
   }) +
+  addHook(hooks_gamedata, 0, [] (gamedata* gd) {
+    gd->store(heat::offscreen_heat);
+    gd->store(heat::offscreen_fire);
+    gd->store(princess::infos);
+    gd->store(mirror::mirrors);
+    gd->store(clearing::bpdata);
+    gd->store(tortoise::emap);
+    gd->store(tortoise::babymap);
+    gd->store(prairie::lasttreasure);
+    gd->store(prairie::enter);
+    gd->store(prairie::tchoices);
+    gd->store(prairie::beaststogen);
+    gd->store(sword::angle);
+    }) +
   addHook(hooks_removecells, 0, [] () {
     eliminate_if(heat::offscreen_heat, is_cell_removed);
     eliminate_if(heat::offscreen_fire, is_cell_removed);

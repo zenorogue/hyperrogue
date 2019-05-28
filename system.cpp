@@ -1082,76 +1082,9 @@ void loadsave() {
   }
 #endif
 
-namespace gamestack {
-
-  struct gamedata {
-    hrmap *hmap;
-    cellwalker cwt;
-    display_data d;
-    eGeometry geometry;
-    eVariation variation;
-    bool shmup;
-    void store();
-    void restore();
-    };
-
-  vector<gamedata> gd;
-  
-  bool pushed() { return isize(gd); }
-  
-  void gamedata::store() {
-    hmap = currentmap;
-    cwt = hr::cwt;
-    geometry = hr::geometry;
-    shmup = hr::shmup::on;
-    variation = hr::variation;
-    d = *current_display;
-    }
-  
-  void gamedata::restore() {
-    currentmap = hmap;
-    hr::cwt = cwt;
-    hr::geometry = geometry;
-    hr::variation = variation;
-    if(shmup::on) shmup::clearMonsters();
-    shmup::on = shmup;
-    check_cgi();
-    cgi.require_basics();
-    *current_display = d;
-    bfs();
-    }
-  
-  void push() {
-    if(geometry) {
-      printf("ERROR: push implemented only in non-hyperbolic geometry\n");
-      exit(1);
-      }
-    gd.emplace_back();
-    gd.back().store();
-    }
-    
-  void pop() {
-    gd.back().restore();
-    gd.pop_back();
-    }
-  
-  };
-
-void pop_game() {
-  if(gamestack::pushed()) {
-    gamestack::pop();
-    game_active = true;
-    }
-  }
-
-void popAllGames() {
-  while(gamestack::pushed()) {
-    gamestack::pop();
-    }
-  }
-
 void stop_game() {
   if(!game_active) return;
+  if(dual::split(stop_game)) return;
   DEBBI(DF_INIT, ("stop_game"));
   achievement_final(true);
 #if CAP_SAVE
@@ -1184,13 +1117,6 @@ void stop_game() {
   if(daily::on)
     daily::turnoff();
 #endif
-  }
-
-void push_game() {
-  gamestack::push();
-  pd_from = NULL;
-  centerover.at = NULL;
-  game_active = false;
   }
 
 void set_geometry(eGeometry target) {
@@ -1269,6 +1195,10 @@ void switch_game_mode(char switchWhat) {
 
 #if CAP_TOUR
     case rg::tour:
+      while(gamestack::pushed()) {
+        gamestack::pop();
+        stop_game();
+        }
       geometry = gNormal;
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
       chaosmode = randomPatternsMode = false;
@@ -1360,6 +1290,8 @@ void switch_game_mode(char switchWhat) {
 void start_game() {
   if(game_active) return;
   DEBBI(DF_INIT, ("start_game"));
+  if(dual::state == 1) dual::assign_landsides();  
+  if(dual::split(start_game)) return;
   restart:
   game_active = true;
   gamegen_failure = false;
@@ -1397,7 +1329,6 @@ void start_game() {
 
 void restart_game(char switchWhat) {
   popScreenAll();  
-  popAllGames();
   stop_game();
   switch_game_mode(switchWhat);
   start_game();
@@ -1428,6 +1359,21 @@ auto cgm = addHook(clearmemory, 40, [] () {
   rosemap.clear();
   adj_memo.clear();
   }) + 
+addHook(hooks_gamedata, 0, [] (gamedata* gd) {
+  gd->store(pathq);
+  gd->store(dcal);
+  gd->store(recallCell);
+  gd->store(butterflies);
+  gd->store(buggycells);
+  gd->store(crush_now);
+  gd->store(crush_next);
+  gd->store(rosemap);
+  gd->store(adj_memo);
+  gd->store(pd_from);
+  gd->store(pd_range);
+  gd->store(pathqm);
+  gd->store(reachedfrom);
+  }) +
 addHook(hooks_removecells, 0, [] () {
   eliminate_if(crush_next, is_cell_removed);
   eliminate_if(crush_now, is_cell_removed);

@@ -7240,7 +7240,14 @@ void gamescreen(int _darken) {
     just_gmatrix = false;
     return;
     }
-
+  
+  if(dual::split([=] () { 
+    dual::in_subscreen([=] () { gamescreen(_darken); });
+    })) {
+    calcparam(); 
+    return; 
+    }
+  
   if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;
     }
@@ -7463,11 +7470,19 @@ auto graphcm = addHook(clearmemory, 0, [] () {
   mouseover = centerover.at = lmouseover = NULL;  
   gmatrix.clear(); gmatrix0.clear();
   clearAnimations();
+  })
++ addHook(hooks_gamedata, 0, [] (gamedata* gd) {
+  gd->store(mouseover);
+  gd->store(lmouseover);
+  gd->store(animations);
+  gd->store(flashes);
+  gd->store(fallanims);
   });
+;
 
 //=== animation
 
-map<cell*, animation> animations[ANIMLAYERS];
+array<map<cell*, animation>, ANIMLAYERS> animations;
 
 int revhint(cell *c, int hint) {
   if(hint >= 0 && hint < c->type) return c->c.spin(hint);

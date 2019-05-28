@@ -22,7 +22,7 @@ void setCanvas(presmode mode, char canv) {
   static char wc;
   static eLand ld;
   if(mode == pmStart) {
-    push_game();
+    gamestack::push();
     wc = patterns::whichCanvas;
     patterns::whichCanvas = canv;
     ld = firstland;
@@ -30,9 +30,9 @@ void setCanvas(presmode mode, char canv) {
     start_game();
     }
   if(mode == pmStop) {
+    gamestack::pop();
     patterns::whichCanvas = wc;
     firstland = ld;
-    pop_game();
     }
   }
 
@@ -77,7 +77,7 @@ void slidehelp() {
   }
 
 void return_geometry() {
-  pop_game();
+  gamestack::pop();
   vid.scale = 1; vid.alpha = 1;
   presentation(pmGeometryReset);
   addMessage(XLAT("Returned to your game."));
@@ -103,7 +103,7 @@ bool handleKeyTour(int sym, int uni) {
     }
   if(sym == SDLK_BACKSPACE) {
     if(gamestack::pushed()) { 
-      pop_game();
+      gamestack::pop();
       if(!(flags & QUICKGEO)) return true;
       }
     if(currentslide == 0) { slidehelp(); return true; }
@@ -158,7 +158,7 @@ bool handleKeyTour(int sym, int uni) {
     presentation(pmGeometry);
 
     firstland = specialland = cwt.at->land;
-    push_game();
+    gamestack::push();
     switch(NUMBERKEY) {
       case '3': 
         set_variation(eVariation::pure);
@@ -290,8 +290,8 @@ namespace ss {
     for(int i=0;; i++) {
       dialog::addBoolItem(XLAT(wts[i].name), wts == slides && i == currentslide, slidechars[i]);
       dialog::add_action([i] {
-        if(geometry || CHANGED_VARIATION) {
-          pop_game();
+        if(gamestack::pushed()) {
+          gamestack::pop();
           presentation(pmGeometryReset);
           }
         if(slides != wts) {
@@ -770,13 +770,13 @@ slide default_slides[] = {
     [] (presmode mode) {
       if(mode == 1) {
         firstland = cwt.at->land;
-        push_game();
+        gamestack::push();
         switch_game_mode(rg::shmup);
         start_game();
         }
       if(mode == 3) {
         shmup::clearMonsters();
-        pop_game();
+        gamestack::pop();
         }    
       }
     },

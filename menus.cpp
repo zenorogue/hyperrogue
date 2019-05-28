@@ -37,7 +37,10 @@ void showOverview() {
   
   bool pages;
   
+  {
+  dynamicval<int> ds(dual::state, dual::state ? 2 : 0);
   generateLandList(isLandIngame);
+  }
   
   bool not_in_game = false;
   

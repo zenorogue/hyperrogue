@@ -3272,6 +3272,7 @@ hookset<bool(int)> *hooks_turn;
 void turn(int delta) {
 
   if(racing::on && subscreens::split( [delta] () { turn(delta); })) return;
+  if(dual::split( [delta] () { turn(delta); })) return;
 
   if(callhandlers(false, hooks_turn, delta)) return;
   if(!shmup::on) return;

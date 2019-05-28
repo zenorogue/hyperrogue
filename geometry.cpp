@@ -361,6 +361,7 @@ namespace geom3 {
 namespace geom3 {
   #if MAXMDIM >= 4
 void switch_always3() {
+    if(dual::split(switch_always3)) return;
     if(rug::rugged) rug::close();
     geom3::always3 = !geom3::always3;
     swapmatrix(View);
@@ -369,6 +370,7 @@ void switch_always3() {
 #endif
 
   void switch_tpp() {
+    if(dual::split(switch_fpp)) return;
     if(pmodel == mdDisk && vid.camera_angle) {
       vid.yshift = 0;
       vid.camera_angle = 0;
@@ -391,6 +393,7 @@ void switch_always3() {
   void switch_fpp() {
 #if MAXMDIM >= 4
     if(rug::rugged) rug::close();
+    if(dual::split(switch_fpp)) return;
     if(!geom3::always3) {
       geom3::always3 = true;
       geom3::wall_height = 1.5;

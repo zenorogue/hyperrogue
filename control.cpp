@@ -247,6 +247,7 @@ typedef SDL_Event eventtype;
 bool smooth_scrolling = false;
 
 void handlePanning(int sym, int uni) {
+  if(dual::split([=] { handlePanning(sym, uni); })) return;
   if(DIM == 3) {
     if(sym == PSEUDOKEY_WHEELUP) View = cpush(2, -0.05*shiftmul) * View, didsomething = true, playermoved = false;
     if(sym == PSEUDOKEY_WHEELDOWN) View = cpush(2, 0.05*shiftmul) * View, didsomething = true, playermoved = false;
@@ -473,8 +474,16 @@ void fix_mouseh() {
   else if(rug::rugged)
     mouseh = rug::gethyper(mousex, mousey);
 #endif
-  else
-    mouseh = gethyper(mousex, mousey);
+  else {
+    if(dual::state) {
+      if(cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) {
+        dual::main_side = (mousex >= current_display->xcenter);
+        dual::switch_to(dual::main_side);
+        }
+      dual::in_subscreen([=] () { calcparam(); mouseh = gethyper(mousex, mousey); });
+      }
+    else mouseh = gethyper(mousex, mousey);
+    }
   need_mouseh = false;
   }
 

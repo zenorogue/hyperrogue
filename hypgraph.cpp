@@ -1063,7 +1063,19 @@ transmatrix eumovedir(int d) {
 
 void spinEdge(ld aspd) { 
   ld downspin = 0;
-  if(playerfound && vid.fixed_facing) {
+  if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
+    transmatrix our   = gpushxto0(tC0(cwtV)) * cwtV;
+    transmatrix their = dual::player_orientation[dual::main_side];
+    fixmatrix(our);
+    fixmatrix(their);
+    if(DIM == 2) {
+      transmatrix T = their * inverse(our);
+      hyperpoint H = T * xpush0(1);
+      downspin = -atan2(H[1], H[0]);
+      }
+    else View = their * inverse(our) * View;
+    }
+  else if(playerfound && vid.fixed_facing) {
     hyperpoint H = gpushxto0(playerV * C0) * playerV * xpush0(5);
     downspin = atan2(H[1], H[0]);
     downspin += vid.fixed_facing_dir * degree;
@@ -1099,6 +1111,7 @@ void spinEdge(ld aspd) {
 void centerpc(ld aspd) { 
   
   if(subscreens::split([=] () {centerpc(aspd);})) return;
+  if(dual::split([=] () { centerpc(aspd); })) return;
 
   #if CAP_CRYSTAL
   if(geometry == gCrystal)
@@ -1179,6 +1192,7 @@ void centerpc(ld aspd) {
 void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
+  if(dual::split(optimizeview)) return;
   
   #if CAP_ANIMATIONS
   if(centerover.at && inmirror(centerover.at)) {

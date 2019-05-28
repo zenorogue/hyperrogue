@@ -1491,6 +1491,7 @@ void init_model() {
   }
 
 void init() {
+  if(dual::state) return;
   reopen();
   if(rugged) init_model();
   }
@@ -2016,6 +2017,7 @@ void show() {
   }
 
 void select() {
+  if(dual::state) return;
   pushScreen(rug::show);
   }
 

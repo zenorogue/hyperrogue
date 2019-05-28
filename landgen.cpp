@@ -156,6 +156,9 @@ void place_elemental_wall(cell *c) {
   }
 
 int hrand_monster(int x) {
+  // dual geometry mode is much harder, so generate less monsters to balance it
+  if(dual::state) x *= 3;
+  // in 3D monster generation depends on the sight range
   if(WDIM == 3 && !sphere) {
     int t = isize(gmatrix);
     if(t > 300) x = ((long long)(x)) * t / 300;
