@@ -394,15 +394,21 @@ void switch_always3() {
 #if MAXMDIM >= 4
     if(rug::rugged) rug::close();
     if(dual::split(switch_fpp)) return;
+    check_cgi(); cgi.require_basics();
     if(!geom3::always3) {
       geom3::always3 = true;
-      geom3::wall_height = 1.5;
+      ld ms = min<ld>(cgi.scalefactor, 1);
+      geom3::wall_height = 1.5 * ms;
       if(sphere) {
         geom3::depth = M_PI / 6;
         geom3::wall_height = M_PI / 3;
         }
       geom3::human_wall_ratio = 0.8;
+      if(euclid && allowIncreasedSight() && vid.use_smart_range == 0) {
+        genrange_bonus = gamerange_bonus = sightrange_bonus = cgi.base_distlimit * 3/2;
+        }
       geom3::camera = 0;
+      geom3::depth = ms;
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
       callhooks(hooks_swapdim);
