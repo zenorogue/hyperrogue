@@ -5,12 +5,7 @@
 // gamedata structure, for recording the game data in memory temporarily
 // namespace dual (dual mode)
 
-#include "allhyper.h"
-
 namespace hr {
-
-bool isEquidLand(eLand);
-extern bool orbused[ittypes];
 
 void gamedata_all(gamedata& gd) {
   gd.index = 0;

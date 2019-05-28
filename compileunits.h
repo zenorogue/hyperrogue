@@ -110,6 +110,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #endif
 #include "commandline.cpp"
 #include "bigstuff.cpp"
+#include "multigame.cpp"
 
 #if CAP_ROGUEVIZ
 #include "rogueviz.cpp"
