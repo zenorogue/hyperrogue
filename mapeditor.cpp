@@ -324,6 +324,9 @@ namespace mapstream {
       #endif
       }
       
+    check_cgi();
+    cgi.require_basics();
+
     usershape_changes++;
 
     initcells();
@@ -472,8 +475,6 @@ namespace mapstream {
       }
 
     cellbyid.clear();
-    check_cgi();
-    cgi.require_basics();
     restartGraph();
     bfs();
     game_active = true;
