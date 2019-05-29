@@ -7176,6 +7176,23 @@ bool collectItem(cell *c2, bool telekinesis) {
   return false;
   }
 
+void glance_message() {
+  if(gold() >= 300)
+    addMessage(XLAT("You feel great, like a true treasure hunter."));
+  else if(gold() >= 200)
+    addMessage(XLAT("Your eyes shine like gems."));
+  else if(gold() >= 100)
+    addMessage(XLAT("Your eyes shine as you glance at your precious treasures."));
+  else if(gold() >= 50)
+    addMessage(XLAT("You glance at your great treasures."));
+  else if(gold() >= 10)
+    addMessage(XLAT("You glance at your precious treasures."));
+  else if(gold() > 0)
+    addMessage(XLAT("You glance at your precious treasure."));
+  else
+    addMessage(XLAT("Your inventory is empty."));
+  }
+
 void dropGreenStone(cell *c) {
   if(items[itGreenStone] && !passable(c, NULL, P_MONSTER)) {
     // NOTE: PL/CZ translations assume that itGreenStone is dropped to avoid extra forms!
@@ -7204,20 +7221,7 @@ void dropGreenStone(cell *c) {
       addMessage(XLAT("Cannot drop %the1 here!", itGreenStone));
       return;
       }
-    else if(gold() >= 300)
-      addMessage(XLAT("You feel great, like a true treasure hunter."));
-    else if(gold() >= 200)
-      addMessage(XLAT("Your eyes shine like gems."));
-    else if(gold() >= 100)
-      addMessage(XLAT("Your eyes shine as you glance at your precious treasures."));
-    else if(gold() >= 50)
-      addMessage(XLAT("You glance at your great treasures."));
-    else if(gold() >= 10)
-      addMessage(XLAT("You glance at your precious treasures."));
-    else if(gold() > 0)
-      addMessage(XLAT("You glance at your precious treasure."));
-    else
-      addMessage(XLAT("Your inventory is empty."));
+    else glance_message();
     }
   }
 

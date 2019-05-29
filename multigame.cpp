@@ -96,8 +96,9 @@ namespace dual {
     for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
 
     if(d < 0) {
-      if(d == -2 && items[itGreenStone] == 1) {
+      if(d == -2 && items[itGreenStone] < 2) {
         switch_to(cg);
+        glance_message();
         return false;
         }
       bool ok = true;
