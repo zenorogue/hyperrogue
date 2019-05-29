@@ -96,10 +96,18 @@ namespace mapstream {
     cellids[c] = numcells;
     }
   
-  bool saveMap(const char *fname) {
-    fhstream f(fname, "wb");
-    if(!f.f) return false;
-    f.write(f.vernum);
+  int fixspin(int rspin, int dir, int t, int vernum) {
+    if(vernum < 11018 && dir == 14)
+      return NODIR;
+    else if(vernum < 11018 && dir == 15)
+      return NOBARRIERS;
+    else if(dir >= 0 && dir < t)
+      return (dir + rspin) % t;
+    else
+      return dir;
+    }
+  
+  void save_only_map(fhstream& f) {
     f.write(patterns::whichPattern);
     f.write(geometry);
     char nbtype = char(variation);
@@ -199,25 +207,6 @@ namespace mapstream {
     f.write(id);
 
     f.write(geom3::always3);
-    #if CAP_POLY
-    for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
-      usershape *us = usp.second;
-      if(!us) continue;
-      
-      for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
-        usershapelayer& ds(us->d[l]);
-        f.write(i); f.write(usp.first); f.write(l); 
-        f.write(ds.zlevel);      
-        f.write(ds.sym); f.write(ds.rots); f.write(ds.color);
-        n = isize(ds.list); f.write(n);
-        f.write(ds.shift);
-        f.write(ds.spin);
-        for(int i=0; i<isize(ds.list); i++) f.write(ds.list[i]);
-        }
-      }
-    #endif
-    n = -1; f.write(n);
-    
     f.write(mutantphase);
     f.write(rosewave);
     f.write(rosephase);
@@ -231,27 +220,40 @@ namespace mapstream {
 
     cellids.clear();
     cellbyid.clear();
-    return true;
     }
   
-  int fixspin(int rspin, int dir, int t, int vernum) {
-    if(vernum < 11018 && dir == 14)
-      return NODIR;
-    else if(vernum < 11018 && dir == 15)
-      return NOBARRIERS;
-    else if(dir >= 0 && dir < t)
-      return (dir + rspin) % t;
-    else
-      return dir;
+  void load_usershapes(fhstream& f) {
+    if(f.vernum >= 7400) while(true) {
+      int i = f.get<int>();
+      if(i == -1) break;
+      #if CAP_POLY
+      int j = f.get<int>(), l = f.get<int>();
+      if(i >= 4) i = 3;
+      if(i<0 || i >= mapeditor::USERSHAPEGROUPS) break;
+      if(l<0 || l >= USERLAYERS) break;
+
+      initShape(i, j);
+      usershapelayer& ds(usershapes[i][j]->d[l]);
+
+      if(f.vernum >= 11008) f.read(ds.zlevel);
+      
+      f.read(ds.sym); f.read(ds.rots); f.read(ds.color);
+      ds.list.clear();
+      int siz = f.get<int>();
+      
+      ds.shift = f.get<hyperpoint>();
+      ds.spin = f.get<hyperpoint>();
+      
+      for(int i=0; i<siz; i++)
+        ds.list.push_back(f.get<hyperpoint>());
+      #else
+      printf("cannot read shapes\n"); exit(1);
+      #endif
+      }    
     }
   
-  bool loadMap(const string& fname) {
-    fhstream f(fname, "rb");
-    if(!f.f) return false;
-    clearMemory();
-    f.read(f.vernum);
-    if(f.vernum > 10505 && f.vernum < 11000) 
-      f.vernum = 11005;
+  void load_only_map(fhstream& f) {
+    stop_game();
     if(f.vernum >= 10420 && f.vernum < 10503) {
       int i;
       f.read(i);
@@ -441,35 +443,9 @@ namespace mapstream {
     
     dynamicval<bool> a3(geom3::always3, geom3::always3);
     if(f.vernum >= 0xA616) f.read(geom3::always3);
-
-    if(f.vernum >= 7400) while(true) {
-      int i = f.get<int>();
-      if(i == -1) break;
-      #if CAP_POLY
-      int j = f.get<int>(), l = f.get<int>();
-      if(i >= 4) i = 3;
-      if(i<0 || i >= mapeditor::USERSHAPEGROUPS) break;
-      if(l<0 || l >= USERLAYERS) break;
-
-      initShape(i, j);
-      usershapelayer& ds(usershapes[i][j]->d[l]);
-
-      if(f.vernum >= 11008) f.read(ds.zlevel);
-      
-      f.read(ds.sym); f.read(ds.rots); f.read(ds.color);
-      ds.list.clear();
-      int siz = f.get<int>();
-      
-      ds.shift = f.get<hyperpoint>();
-      ds.spin = f.get<hyperpoint>();
-      
-      for(int i=0; i<siz; i++)
-        ds.list.push_back(f.get<hyperpoint>());
-      #else
-      printf("cannot read shapes\n"); exit(1);
-      #endif
-      }
     
+    if(f.vernum < 0xA61A) load_usershapes(f);
+
     if(f.vernum >= 11005) {
       f.read(mutantphase);
       f.read(rosewave);
@@ -498,7 +474,62 @@ namespace mapstream {
     cellbyid.clear();
     check_cgi();
     cgi.require_basics();
+    restartGraph();
     bfs();
+    game_active = true;
+    }
+  
+  void save_usershapes(fhstream& f) {
+    int32_t n;
+    #if CAP_POLY    
+    for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+      usershape *us = usp.second;
+      if(!us) continue;
+      
+      for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
+        usershapelayer& ds(us->d[l]);
+        f.write(i); f.write(usp.first); f.write(l); 
+        f.write(ds.zlevel);      
+        f.write(ds.sym); f.write(ds.rots); f.write(ds.color);
+        n = isize(ds.list); f.write(n);
+        f.write(ds.shift);
+        f.write(ds.spin);
+        for(int i=0; i<isize(ds.list); i++) f.write(ds.list[i]);
+        }
+      }
+    #endif
+    n = -1; f.write(n);
+    }
+  
+  bool saveMap(const char *fname) {
+    fhstream f(fname, "wb");
+    if(!f.f) return false;
+    f.write(f.vernum);
+    f.write(dual::state);
+    // make sure we save in correct order
+    if(dual::state) dual::switch_to(1);
+    dual::split_or_do([&] { save_only_map(f); });
+    save_usershapes(f);
+    return true;
+    }
+  
+  bool loadMap(const string& fname) {
+    fhstream f(fname, "rb");
+    if(!f.f) return false;
+    f.read(f.vernum);
+    if(f.vernum > 10505 && f.vernum < 11000) 
+      f.vernum = 11005;
+    auto ds = dual::state;
+    if(f.vernum >= 0xA61A)
+      f.read(ds);
+    else
+      ds = 0;
+    if(ds == 1 && dual::state == 0) dual::enable();
+    if(ds == 0 && dual::state == 1) dual::disable();
+    dual::split_or_do([&] { load_only_map(f); });
+    dual::assign_landsides();
+    if(f.vernum >= 0xA61A) 
+      load_usershapes(f);
     return true;
     }
   
