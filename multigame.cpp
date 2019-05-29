@@ -281,6 +281,39 @@ namespace dual {
       }
     }
 
+  
+  void add_choice() {
+    if(!state) return;
+    dialog::addSelItem(XLAT("subgame affected"), 
+      XLAT(affect_both ? "both" : main_side == 0 ? "left" : "right"), '`');
+    dialog::add_action([] () {
+      affect_both = !affect_both;
+      if(!affect_both) {
+        main_side = !main_side;
+        switch_to(main_side);
+        }
+      });
+    }
+  
+  void split_or_do(reaction_t what) {
+    if(split(what)) return;
+    else what();
+    }
+
+  bool may_split(reaction_t what) {
+    if(state == 1 && affect_both) {
+      split(what);
+      return true;
+      }
+    return false;
+    }
+
+  void may_split_or_do(reaction_t what) {
+    if(state == 1 && affect_both) {
+      split(what);
+      }
+    else what();
+    }
   }
 
 }

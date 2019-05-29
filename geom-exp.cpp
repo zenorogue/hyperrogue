@@ -331,23 +331,23 @@ void ge_land_selection() {
     dialog::lastItem().color = linf[l].color;
     dialog::lastItem().value += validclasses[land_validity(l).quality_level];
     dialog::add_action([l] {
-      if(landvisited[l]) dialog::do_if_confirmed([l] {
+      if(landvisited[l]) dialog::do_if_confirmed(dual::mayboth([l] {
         stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
         firstland = specialland = l;
         start_game();
         popScreen();
-        });
+        }));
       });
     }
   dialog::addBreak(50);
   if(chaosUnlocked && !quotient && !euclid && !sphere) {
     dialog::addItem(XLAT("Chaos mode"), '1');
-    dialog::add_action([] {
+    dialog::add_action(dual::mayboth([] {
       if(chaosUnlocked) dialog::do_if_confirmed([] {
         stop_game_and_switch_mode(rg::chaos);
         start_game();
         });
-      });
+      }));
     }
   dialog::addItem(XLAT("next page"), '-');
 
@@ -355,6 +355,7 @@ void ge_land_selection() {
   validity_info();    
   dialog::addBreak(25);
   
+  dual::add_choice();  
   dialog::addBack();
   dialog::display();
   

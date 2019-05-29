@@ -5453,11 +5453,17 @@ namespace dual {
   // 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames)
   extern int state;
   extern int currently_loaded, main_side;
+  bool affect_both;
 
   bool movepc(int d, int subdir, bool checkonly);
   extern transmatrix player_orientation[2];
+  
+  void add_choice();
 
   bool split(reaction_t what);
+  void split_or_do(reaction_t what);
+  bool may_split(reaction_t what);
+  void may_split_or_do(reaction_t what);
   void switch_to(int i);
   void in_subscreen(reaction_t what);
   
@@ -5466,6 +5472,8 @@ namespace dual {
   
   void disable();
   void enable();
+  
+  inline reaction_t mayboth(reaction_t what) { return [=] { may_split_or_do(what); }; }
   }
 
 }
