@@ -9,6 +9,7 @@ namespace hr {
 
 void gamedata_all(gamedata& gd) {
   gd.index = 0;
+  gd.store(firstland);
   gd.store(currentmap);
   gd.store(cwt);
   gd.store(allmaps);
@@ -178,6 +179,7 @@ namespace dual {
       // dynamicval<display_data*> pds(current_display, &subscreens::player_displays[s]);
       variation = eVariation::pure;
       geometry = s == 0 ? gEuclidSquare : gArchimedean;
+      firstland = specialland = laCrossroads4;
       arcm::current.parse("4,4,4,4,4");
       scales[s] = vid.scale;
       dgd[s].storegame();
