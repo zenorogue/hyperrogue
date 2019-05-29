@@ -14,6 +14,7 @@ void gamedata_all(gamedata& gd) {
   gd.store(cwt);
   gd.store(allmaps);
   gd.store(shmup::on);
+  gd.store(chaosmode);
   gd.store(*current_display);
   gd.store(cgip);
   gd.store(vid);
