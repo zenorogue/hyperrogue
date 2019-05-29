@@ -21,6 +21,7 @@ void gamedata_all(gamedata& gd) {
   gd.store(sightrange_bonus);
   gd.store(genrange_bonus);
   gd.store(gamerange_bonus);
+  gd.store(targets);
   if(GOLDBERG) gd.store(gp::param);
   callhooks(hooks_gamedata, &gd);
   }

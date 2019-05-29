@@ -3767,6 +3767,23 @@ void clearMemory() {
   for(int i=0; i<MAXPLAYER; i++) pc[i] = NULL;
   }
 
+void gamedata(hr::gamedata* gd) { 
+  if(shmup::on) {
+    for(int i=0; i<MAXPLAYER; i++) gd->store(pc[i]);
+    gd->store(nextmove);
+    gd->store(curtime);
+    gd->store(nextdragon);
+    gd->store(visibleAt);
+    gd->store(traplist);
+    gd->store(monstersAt);
+    gd->store(active);
+    gd->store(mousetarget);
+    gd->store(lmousetarget);
+    gd->store(nonvirtual);
+    gd->store(additional);
+    }
+  }
+
 cell *playerpos(int i) {
   if(!pc[i]) return NULL;
   return pc[i]->base;
@@ -3798,6 +3815,7 @@ void addShmupHelp(string& out) {
   }
 
 auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
+  addHook(hooks_gamedata, 0, shmup::gamedata) +
   addHook(hooks_removecells, 0, [] () {
     for(mit it = monstersAt.begin(); it != monstersAt.end();) {
       if(is_cell_removed(it->first)) {
