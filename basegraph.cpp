@@ -693,6 +693,7 @@ void resetGL() {
     floor_textures = NULL;
     }
 #endif
+  check_cgi();
   cgi.require_shapes();
   if(DIM == 3 && !floor_textures) make_floor_textures();
   cgi.initPolyForGL();
@@ -1242,7 +1243,8 @@ void initgraph() {
 #if CAP_COMMANDLINE
   arg::read(2);
 #endif
-  cgi.prepare_basics();
+  check_cgi();
+  cgi.require_basics();
 
 #if CAP_SDL
   setvideomode();
