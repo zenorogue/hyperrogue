@@ -184,7 +184,11 @@ namespace dual {
     eVariation v = variation;
     for(int s=0; s<2; s++) {
       // dynamicval<display_data*> pds(current_display, &subscreens::player_displays[s]);
-      if(shmup::on) {
+      if(WDIM == 3) {
+        variation = eVariation::pure;
+        geometry = s == 0 ? gCubeTiling : gSpace435;
+        }
+      else if(shmup::on) {
         geometry = b;
         variation = v;
         // 'do what I mean'
