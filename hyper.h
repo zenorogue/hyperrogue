@@ -211,6 +211,8 @@ namespace multi {
     char hataction[MAXJOY][MAXHAT][4];
     int  deadzoneval[MAXJOY][MAXAXE];
     };
+
+  multi::config scfg;  
   }
 
 enum eStereo { sOFF, sAnaglyph, sLR, sODS };
@@ -273,8 +275,6 @@ struct videopar {
   bool backeffects; // background particle effects
   
   int killreduction, itemreduction, portreduction;
-  
-  multi::config scfg;
   
   int steamscore;
   bool drawmousecircle; // draw the circle around the mouse

@@ -154,16 +154,16 @@ string listkeys(int id) {
 #if CAP_SDL
   string lk = "";
   for(int i=0; i<512; i++)
-    if(vid.scfg.keyaction[i] == id)
+    if(scfg.keyaction[i] == id)
       lk = lk + " " + SDL_GetKeyName(SDLKey(i));
 #if CAP_SDLJOY
   for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
-    if(vid.scfg.joyaction[i][k] == id) {
+    if(scfg.joyaction[i][k] == id) {
       lk = lk + " " + cts('A'+i)+"-B"+its(k);
       }
   for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumHats(sticks[i]) && k<MAXHAT; k++)
     for(int d=0; d<4; d++)
-      if(vid.scfg.hataction[i][k][d] == id) {
+      if(scfg.hataction[i][k][d] == id) {
         lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
         }
 #endif
@@ -246,7 +246,7 @@ struct key_configurer {
       if(!setwhat) dialog::handleNavigation(sym, uni);
       if(sym) {
         if(setwhat) {
-          vid.scfg.keyaction[sym] = setwhat;
+          scfg.keyaction[sym] = setwhat;
           setwhat = 0;
           }
         else if(uni >= 'a' && uni < 'a' + isize(shmupcmdtable) && shmupcmdtable[uni-'a'][0])
@@ -264,7 +264,7 @@ struct key_configurer {
         int joyid = ev.jbutton.which;
         int button = ev.jbutton.button;
         if(joyid < 8 && button < 32)
-           vid.scfg.joyaction[joyid][button] = setwhat;
+           scfg.joyaction[joyid][button] = setwhat;
         setwhat = 0;
         return true;
         }
@@ -279,7 +279,7 @@ struct key_configurer {
         if(ev.jhat.value == SDL_HAT_LEFT) dir = 3;
         printf("%d %d %d\n", joyid, hat, dir);
         if(joyid < 8 && hat < 4 && dir < 4) {
-          vid.scfg.hataction[joyid][hat][dir] = setwhat;
+          scfg.hataction[joyid][hat][dir] = setwhat;
           setwhat = 0;
           return true;
           }
@@ -313,10 +313,10 @@ struct joy_configurer {
           if(y>0) buf += "+";
           if(y<0) buf += "-";
           }
-        axeconfigs[numaxeconfigs] = &(vid.scfg.axeaction[j][ax]);
-        dzconfigs[numaxeconfigs] = &(vid.scfg.deadzoneval[j][ax]);
+        axeconfigs[numaxeconfigs] = &(scfg.axeaction[j][ax]);
+        dzconfigs[numaxeconfigs] = &(scfg.deadzoneval[j][ax]);
         char aa = *axeconfigs[numaxeconfigs];
-        string what = configdead ? its(vid.scfg.deadzoneval[j][ax]) : XLAT(axemodes[aa%SHMUPAXES]);
+        string what = configdead ? its(scfg.deadzoneval[j][ax]) : XLAT(axemodes[aa%SHMUPAXES]);
         dialog::addSelItem(XLAT("Joystick %1, axis %2", cts('A'+j), its(ax)) + buf, 
           what, 'a'+numaxeconfigs);
         numaxeconfigs++;
@@ -512,7 +512,7 @@ void pressaction(int id) {
   }
 
 bool notremapped(int sym) {
-  int k = vid.scfg.keyaction[sym];
+  int k = scfg.keyaction[sym];
   if(k == 0) return true;
   k /= 16;
   if(k > 3) k--; else if(k==3) k = 0;
@@ -521,7 +521,7 @@ bool notremapped(int sym) {
 
 void initConfig() {
   
-  char* t = vid.scfg.keyaction;
+  char* t = scfg.keyaction;
   
   t[(int)'w'] = 16 + 4;
   t[(int)'d'] = 16 + 5;
@@ -561,46 +561,46 @@ void initConfig() {
   t[SDLK_HOME] = 48 + 6;
 #endif
 
-  vid.scfg.joyaction[0][0] = 16 + pcFire;
-  vid.scfg.joyaction[0][1] = 16 + pcOrbPower;
-  vid.scfg.joyaction[0][2] = 16 + pcDrop;
-  vid.scfg.joyaction[0][3] = 16 + pcCenter;
-  vid.scfg.joyaction[0][4] = 16 + pcFace;
-  vid.scfg.joyaction[0][5] = 16 + pcFaceFire;
+  scfg.joyaction[0][0] = 16 + pcFire;
+  scfg.joyaction[0][1] = 16 + pcOrbPower;
+  scfg.joyaction[0][2] = 16 + pcDrop;
+  scfg.joyaction[0][3] = 16 + pcCenter;
+  scfg.joyaction[0][4] = 16 + pcFace;
+  scfg.joyaction[0][5] = 16 + pcFaceFire;
 
-  vid.scfg.joyaction[1][0] = 32 + pcFire;
-  vid.scfg.joyaction[1][1] = 32 + pcOrbPower;
-  vid.scfg.joyaction[1][2] = 32 + pcDrop;
-  vid.scfg.joyaction[1][3] = 32 + pcCenter;
-  vid.scfg.joyaction[1][4] = 32 + pcFace;
-  vid.scfg.joyaction[1][5] = 32 + pcFaceFire;
+  scfg.joyaction[1][0] = 32 + pcFire;
+  scfg.joyaction[1][1] = 32 + pcOrbPower;
+  scfg.joyaction[1][2] = 32 + pcDrop;
+  scfg.joyaction[1][3] = 32 + pcCenter;
+  scfg.joyaction[1][4] = 32 + pcFace;
+  scfg.joyaction[1][5] = 32 + pcFaceFire;
 
-  vid.scfg.axeaction[0][0] = 4;
-  vid.scfg.axeaction[0][1] = 5;
-  vid.scfg.axeaction[0][3] = 2;
-  vid.scfg.axeaction[0][4] = 3;
+  scfg.axeaction[0][0] = 4;
+  scfg.axeaction[0][1] = 5;
+  scfg.axeaction[0][3] = 2;
+  scfg.axeaction[0][4] = 3;
 
-  vid.scfg.axeaction[1][0] = 8;
-  vid.scfg.axeaction[1][1] = 9;
+  scfg.axeaction[1][0] = 8;
+  scfg.axeaction[1][1] = 9;
   
   // ULRD
-  vid.scfg.hataction[0][0][0] = 16 + 0;
-  vid.scfg.hataction[0][0][1] = 16 + 3;
-  vid.scfg.hataction[0][0][2] = 16 + 1;
-  vid.scfg.hataction[0][0][3] = 16 + 2;
-  vid.scfg.hataction[0][1][0] = 16 + 4;
-  vid.scfg.hataction[0][1][1] = 16 + 7;
-  vid.scfg.hataction[0][1][2] = 16 + 5;
-  vid.scfg.hataction[0][1][3] = 16 + 6;
+  scfg.hataction[0][0][0] = 16 + 0;
+  scfg.hataction[0][0][1] = 16 + 3;
+  scfg.hataction[0][0][2] = 16 + 1;
+  scfg.hataction[0][0][3] = 16 + 2;
+  scfg.hataction[0][1][0] = 16 + 4;
+  scfg.hataction[0][1][1] = 16 + 7;
+  scfg.hataction[0][1][2] = 16 + 5;
+  scfg.hataction[0][1][3] = 16 + 6;
 
-  vid.scfg.hataction[1][0][0] = 32 + 0;
-  vid.scfg.hataction[1][0][1] = 32 + 3;
-  vid.scfg.hataction[1][0][2] = 32 + 1;
-  vid.scfg.hataction[1][0][3] = 32 + 2;
-  vid.scfg.hataction[1][1][0] = 32 + 4;
-  vid.scfg.hataction[1][1][1] = 32 + 7;
-  vid.scfg.hataction[1][1][2] = 32 + 5;
-  vid.scfg.hataction[1][1][3] = 32 + 6;
+  scfg.hataction[1][0][0] = 32 + 0;
+  scfg.hataction[1][0][1] = 32 + 3;
+  scfg.hataction[1][0][2] = 32 + 1;
+  scfg.hataction[1][0][3] = 32 + 2;
+  scfg.hataction[1][1][0] = 32 + 4;
+  scfg.hataction[1][1][1] = 32 + 7;
+  scfg.hataction[1][1][2] = 32 + 5;
+  scfg.hataction[1][1][3] = 32 + 6;
 
   int charidtable[MAXPLAYER] = {0, 1, 4, 6, 2, 3, 0};
     
@@ -621,17 +621,17 @@ void initConfig() {
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<512; i++)
-    addsaver(vid.scfg.keyaction[i], string("key:")+its(i));
+    addsaver(scfg.keyaction[i], string("key:")+its(i));
   for(int i=0; i<MAXJOY; i++) {
     string pre = "joystick "+cts('A'+i);
     for(int j=0; j<MAXBUTTON; j++) 
-      addsaver(vid.scfg.joyaction[i][j], pre+"-B"+its(j));
+      addsaver(scfg.joyaction[i][j], pre+"-B"+its(j));
     for(int j=0; j<MAXAXE; j++) {
-      addsaver(vid.scfg.axeaction[i][j], pre+" axis "+its(j));
-      addsaver(vid.scfg.deadzoneval[i][j], pre+" deadzone "+its(j));
+      addsaver(scfg.axeaction[i][j], pre+" axis "+its(j));
+      addsaver(scfg.deadzoneval[i][j], pre+" deadzone "+its(j));
       }
     for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++) {
-      addsaver(vid.scfg.hataction[i][j][k], pre+" hat "+its(j)+" "+"URDL"[k]);
+      addsaver(scfg.hataction[i][j][k], pre+" hat "+its(j)+" "+"URDL"[k]);
       }
     }
   for(int i=0; i<7; i++) addsaver(multi::scs[i], "player"+its(i));
@@ -650,29 +650,29 @@ void handleInput(int delta) {
   for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
   
   for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
-    pressaction(vid.scfg.keyaction[i]);
+    pressaction(scfg.keyaction[i]);
 
 #if CAP_SDLJOY  
   for(int j=0; j<numsticks; j++) {
 
     for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
       if(SDL_JoystickGetButton(sticks[j], b))
-        pressaction(vid.scfg.joyaction[j][b]);
+        pressaction(scfg.joyaction[j][b]);
 
     for(int b=0; b<SDL_JoystickNumHats(sticks[j]) && b<MAXHAT; b++) {
       int stat = SDL_JoystickGetHat(sticks[j], b);
-      if(stat & SDL_HAT_UP) pressaction(vid.scfg.hataction[j][b][0]);
-      if(stat & SDL_HAT_RIGHT) pressaction(vid.scfg.hataction[j][b][1]);
-      if(stat & SDL_HAT_DOWN) pressaction(vid.scfg.hataction[j][b][2]);
-      if(stat & SDL_HAT_LEFT) pressaction(vid.scfg.hataction[j][b][3]);
+      if(stat & SDL_HAT_UP) pressaction(scfg.hataction[j][b][0]);
+      if(stat & SDL_HAT_RIGHT) pressaction(scfg.hataction[j][b][1]);
+      if(stat & SDL_HAT_DOWN) pressaction(scfg.hataction[j][b][2]);
+      if(stat & SDL_HAT_LEFT) pressaction(scfg.hataction[j][b][3]);
       }
     
     for(int b=0; b<SDL_JoystickNumAxes(sticks[j]) && b<MAXAXE; b++) {
       int value = SDL_JoystickGetAxis(sticks[j], b);
-      int dz = vid.scfg.deadzoneval[j][b];
+      int dz = scfg.deadzoneval[j][b];
       if(value > dz) value -= dz; else if(value < -dz) value += dz;
       else value = 0;
-      axespressed[vid.scfg.axeaction[j][b] % SHMUPAXES] += value;
+      axespressed[scfg.axeaction[j][b] % SHMUPAXES] += value;
       }
     }
 #endif
