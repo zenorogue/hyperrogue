@@ -75,17 +75,16 @@ namespace dual {
   int main_side;
 
   gamedata dgd[2];
-  ld scales[2];
   transmatrix player_orientation[2];
   
   void switch_to(int k) {
     if(k != currently_loaded) {
-      scales[currently_loaded] = vid.scale;
+      // gamedata has shmup::on because tutorial needs changing it, but dual should keep it fixed
+      dynamicval<bool> smon(shmup::on);
       player_orientation[currently_loaded] = gpushxto0(tC0(cwtV)) * cwtV;
       dgd[currently_loaded].storegame();
       currently_loaded = k;
       dgd[currently_loaded].restoregame();
-      vid.scale = scales[currently_loaded];
       }
     }
   
@@ -181,13 +180,29 @@ namespace dual {
   void enable() {
     if(dual::state) return;
     stop_game();
+    eGeometry b = geometry;
+    eVariation v = variation;
     for(int s=0; s<2; s++) {
       // dynamicval<display_data*> pds(current_display, &subscreens::player_displays[s]);
-      variation = eVariation::pure;
-      geometry = s == 0 ? gEuclidSquare : gArchimedean;
+      if(shmup::on) {
+        geometry = b;
+        variation = v;
+        // 'do what I mean'
+        if(euclid)
+          geometry = s == 0 ? b : (ginf[geometry].vertex == 3 ? gNormal : g45);
+        else
+          geometry = s == 0 ? (ginf[geometry].vertex == 3 ? gEuclid : gEuclidSquare) : b;
+        if(geometry == gEuclid) variation = eVariation::bitruncated;
+        }
+      else {
+        variation = eVariation::pure;
+        geometry = s == 0 ? gEuclidSquare : gArchimedean;
+        }
       firstland = specialland = laCrossroads4;
-      arcm::current.parse("4,4,4,4,4");
-      scales[s] = vid.scale;
+      if(geometry == gArchimedean) 
+        arcm::current.parse("4,4,4,4,4");
+      check_cgi();
+      cgi.require_basics();
       dgd[s].storegame();
       }
     
@@ -207,14 +222,17 @@ namespace dual {
              
     if(0) ;
     else if(argis("-dual0")) {
+      PHASEFROM(2);
       enable();
       switch_to(0);
       }
     else if(argis("-dual1")) {
+      PHASEFROM(2);
       enable();
       switch_to(1);
       }
     else if(argis("-dualoff")) {
+      PHASEFROM(2);
       disable();
       }
     else return 1;
