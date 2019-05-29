@@ -4622,17 +4622,7 @@ void draw_euclidean_sky() {
   if(WDIM == 3 || GDIM == 2) return;
   transmatrix T = ggmatrix(currentmap->gamestart());
   T = gpushxto0(tC0(T)) * T;
-  for(int x=-20; x<20; x++)
-  for(int y=-20; y<20; y++) {
-    curvepoint(T * zpush(cgi.WALL) * hpxy(x, y));
-    curvepoint(T * zpush(cgi.WALL) * hpxy(x, y+1));
-    curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y));
-    curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y+1));
-    curvepoint(T * zpush(cgi.WALL) * hpxy(x, y+1));
-    curvepoint(T * zpush(cgi.WALL) * hpxy(x+1, y));
-    }
-  queuecurve(0, 0x0044e4FF, PPR::EUCLIDEAN_SKY).flags |= POLY_TRIANGLES;
-
+  queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);
   queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
   }
 

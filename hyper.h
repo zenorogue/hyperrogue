@@ -4374,7 +4374,7 @@ hpcshape
   shKnife, shTongue, shFlailMissile, shTrapArrow,
   shPirateHook, shPirateHood, shEyepatch, shPirateX,
   // shScratch, 
-  shHeptaMarker, shSnowball, shSun, shNightStar,
+  shHeptaMarker, shSnowball, shSun, shNightStar, shEuclideanSky,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
   shPalaceGate, shFishTail,
   shMouse, shMouseLegs, shMouseEyes,
@@ -4524,6 +4524,7 @@ hpcshape
   void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void make_ball(hpcshape& sh, ld rad, int lev);
   void make_star(hpcshape& sh, ld rad);
+  void make_euclidean_sky();
   void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1);
   void shift_last_straight(ld z);
   void queueball(const transmatrix& V, ld rad, color_t col, eItem what);

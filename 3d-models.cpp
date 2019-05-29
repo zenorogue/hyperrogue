@@ -674,6 +674,18 @@ void geometry_information::make_star(hpcshape& sh, ld rad) {
     }
   }
 
+void geometry_information::make_euclidean_sky() {
+  bshape(cgi.shEuclideanSky, PPR::EUCLIDEAN_SKY);
+  for(int x=-20; x<20; x++)
+  for(int y=-20; y<20; y++)
+    hpcsquare(
+      zpush(cgi.WALL) * hpxy(x, y),
+      zpush(cgi.WALL) * hpxy(x, y+1),
+      zpush(cgi.WALL) * hpxy(x+1, y),
+      zpush(cgi.WALL) * hpxy(x+1, y+1)
+      );
+  }
+
 hyperpoint psmin(hyperpoint H) {
   hyperpoint res;
   res[2] = asin_auto(H[2]);
@@ -1007,8 +1019,10 @@ void geometry_information::make_3d_models() {
   make_ball(shDisk, orbsize*.2, 2);
   make_ball(shHeptaMarker, zhexf*.2, 1);
   make_ball(shSnowball, zhexf*.1, 0);
-  if(euclid)
+  if(euclid) {
     make_ball(shSun, 0.5, 2);
+    make_euclidean_sky();
+    }
   else
     make_star(shSun, 3);
   make_star(shNightStar, 0.75);
