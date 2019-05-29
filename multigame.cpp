@@ -158,7 +158,8 @@ namespace dual {
       reduceOrbPowers();
       return true;
       }
-    println(hlog, "no match");
+    addMessage(XLAT("Impossible."));
+    flipplayer = false;
     switch_to(cg);
     return false;
     }
