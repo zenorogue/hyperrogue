@@ -507,9 +507,11 @@ void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainl
 int cframelimit = 1000;
 
 void resize_screen_to(int x, int y) {
-  vid.xres = x;
-  vid.yres = y;
-  vid.killreduction = 0;
+  dual::split_or_do([&] {
+    vid.xres = x;
+    vid.yres = y;
+    vid.killreduction = 0;
+    });
   extern bool setfsize;
   setfsize = true;
   setvideomode();
