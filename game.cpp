@@ -7008,7 +7008,7 @@ bool collectItem(cell *c2, bool telekinesis) {
 #endif
   else if(c2->item == itOrbSafety) {
     playSound(c2, "pickup-orb"); // TODO safety
-    items[c2->item] = 7;
+    if(!dual::state) items[c2->item] = 7;
     if(shmup::on)
       shmup::delayed_safety = true;
     else 
