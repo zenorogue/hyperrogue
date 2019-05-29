@@ -16,6 +16,10 @@ void gamedata_all(gamedata& gd) {
   gd.store(shmup::on);
   gd.store(*current_display);
   gd.store(cgip);
+  gd.store(vid);
+  gd.store(sightrange_bonus);
+  gd.store(genrange_bonus);
+  gd.store(gamerange_bonus);
   if(GOLDBERG) gd.store(gp::param);
   callhooks(hooks_gamedata, &gd);
   }
