@@ -473,7 +473,7 @@ void showConfigureMultiplayer() {
     string s = player_count_name(i);
     if(i <= players) s += dsc(i-1);
     dialog::addBoolItem(s, '1', i == multi::players);
-    dialog::add_action([i] {
+    if(!dual::state) dialog::add_action([i] {
       dialog::do_if_confirmed([i] {
         stop_game();
         players = i;
