@@ -171,33 +171,43 @@ namespace dual {
     return true;    
     }
   
+  void enable() {
+    if(dual::state) return;
+    stop_game();
+    for(int s=0; s<2; s++) {
+      // dynamicval<display_data*> pds(current_display, &subscreens::player_displays[s]);
+      variation = eVariation::pure;
+      geometry = s == 0 ? gEuclidSquare : gArchimedean;
+      arcm::current.parse("4,4,4,4,4");
+      scales[s] = vid.scale;
+      dgd[s].storegame();
+      }
+    
+    currently_loaded = 0;
+    dgd[0].restoregame();
+    state = 1;
+    }
+  
+  void disable() {
+    if(!dual::state) return;
+    stop_game();
+    state = 0;
+    }
+  
   int args() {
     using namespace arg;
              
     if(0) ;
-    else if(argis("-dual")) {
-      PHASEFROM(3);
-      stop_game();
-      subscreens::prepare();
-      
-      for(int s=0; s<2; s++) {
-        // dynamicval<display_data*> pds(current_display, &subscreens::player_displays[s]);
-        variation = eVariation::pure;
-        geometry = s == 0 ? gEuclidSquare : gArchimedean;
-        arcm::current.parse("4,4,4,4,4");
-        scales[s] = vid.scale;
-        dgd[s].storegame();
-        }
-      
-      currently_loaded = 0;
-      dgd[0].restoregame();
-      state = 1;
-      }
-    else if(argis("-dual0:")) {
+    else if(argis("-dual0")) {
+      enable();
       switch_to(0);
       }
-    else if(argis("-dual1:")) {
+    else if(argis("-dual1")) {
+      enable();
       switch_to(1);
+      }
+    else if(argis("-dualoff")) {
+      disable();
       }
     else return 1;
     return 0;
