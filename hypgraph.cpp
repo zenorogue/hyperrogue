@@ -782,6 +782,18 @@ bool invis_point(const hyperpoint h) {
   return h[2] < 0;
   }
 
+void raise_error() {
+  println(hlog, "something wrong");
+  }
+  
+bool invalid_matrix(const transmatrix T) {
+  for(int i=0; i<DIM; i++) for(int j=0; j<DIM; j++)
+    if(std::isnan(T[i][j]) || T[i][j] > 1e8 || T[i][j] < -1e8 || std::isinf(T[i][j]))
+      return true;
+  for(int i=0; i<DIM; i++) for(int j=0; j<DIM; j++) if(T[i][j] > .5 || T[i][j] < -.5) return false;
+  return true;
+  }
+  
 bool invalid_point(const hyperpoint h) {
   return std::isnan(h[DIM]) || h[DIM] > 1e8 || std::isinf(h[DIM]);
   }

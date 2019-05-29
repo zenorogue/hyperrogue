@@ -5489,4 +5489,7 @@ namespace dual {
   inline reaction_t mayboth(reaction_t what) { return [=] { may_split_or_do(what); }; }
   }
 
+void raise_error();
+bool invalid_matrix(const transmatrix T);
+
 }
