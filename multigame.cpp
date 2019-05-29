@@ -121,11 +121,13 @@ namespace dual {
       }
     
     bool lms[2][5];
+    eLastmovetype lmt[2][5];
     for(int k=0; k<2; k++) {
       switch_to(k);
       for(eForcemovetype fm: { fmMove, fmAttack, fmInstant, fmActivate }) {
         forcedmovetype = fm; 
         lms[k][fm] = movepcto(fm == fmMove ? d : 0, subdir, true); 
+        lmt[k][fm] = nextmovetype;
         println(hlog, k, int(fm), " -> ", lms[k][fm]);
         forcedmovetype = fmSkip;
         for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
@@ -144,6 +146,8 @@ namespace dual {
       return true;
       }
     for(auto fm: {fmMove, fmInstant, fmAttack}) if(lms[0][fm] && lms[1][fm]) {
+      if(lmt[0][fm] == lmSkip && lmt[1][fm] == lmSkip)
+        continue;
       println(hlog, "apply ", int(fm));
       if(checkonly) { switch_to(cg); return true; }
       int flash = items[itOrbFlash], lgt = items[itOrbLightning];

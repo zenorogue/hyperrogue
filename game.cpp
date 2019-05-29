@@ -8025,6 +8025,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       c2->wall == waMirrorWall;
     if(attackable && markOrb(itOrbAether) && c2->wall != waMirrorWall)
       attackable = false;
+    bool nm; nm = attackable;
     if(forcedmovetype == fmAttack) attackable = true;
     attackable = attackable && (!c2->monst || isFriendly(c2));
     attackable = attackable && !nonAdjacentPlayer(cwt.at,c2);
@@ -8035,7 +8036,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(!checkonly && errormsgs) wouldkill("%The1 would get you!");
         return false;
         }
-      if(checkonly) { nextmovetype = lmAttack; return true; }
+      if(checkonly) { nextmovetype = nm ? lmAttack : lmSkip; return true; }
       if(c2->wall == waSmallTree) {
         drawParticles(c2, winf[c2->wall].color, 4);
         addMessage(XLAT("You chop down the tree."));
