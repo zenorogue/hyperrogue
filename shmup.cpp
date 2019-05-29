@@ -3272,7 +3272,15 @@ hookset<bool(int)> *hooks_turn;
 void turn(int delta) {
 
   if(racing::on && subscreens::split( [delta] () { turn(delta); })) return;
-  if(dual::split( [delta] () { turn(delta); })) return;
+  
+  int id = 0;
+  ld maimx = mouseaim_x;
+  ld maimy = mouseaim_y;
+  
+  if(dual::split( [&id, maimx, maimy, delta] () {
+    turn(delta); id++; 
+    if(id==1) mouseaim_x = maimx, mouseaim_y = maimy;
+    })) return;
 
   if(callhandlers(false, hooks_turn, delta)) return;
   if(!shmup::on) return;
