@@ -190,18 +190,142 @@ typedef long double ld;
 
 typedef complex<ld> cld;
 
+struct charstyle {
+  int charid;
+  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor, eyecolor;
+  bool lefthanded;
+  };
+
+static const int MAXPLAYER = 7;
+static const int MAXJOY = 8;
+static const int MAXBUTTON = 64;
+static const int MAXAXE = 16;
+static const int MAXHAT = 4;
+
+namespace multi {
+
+  struct config {
+    char keyaction[512];
+    char joyaction[MAXJOY][MAXBUTTON];
+    char axeaction[MAXJOY][MAXAXE];
+    char hataction[MAXJOY][MAXHAT][4];
+    int  deadzoneval[MAXJOY][MAXAXE];
+    };
+  }
+
+enum eStereo { sOFF, sAnaglyph, sLR, sODS };
+
+struct videopar {
+  ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
+  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width, fixed_facing_dir;
+  int mobilecompasssize;
+  int radarsize; // radar for 3D geometries
+  int aurastr, aurasmoothen;
+  bool fixed_facing;
+  bool fixed_yz;
+  bool use_wall_radar;
+  
+  int linequality;
+
+  bool full;
+  
+  int graphglyph; // graphical glyphs
+  bool darkhepta;
+  int shifttarget;
+  
+  int xres, yres, framelimit;
+  
+  int xscr, yscr;
+  
+  ld xposition, yposition;
+  
+  bool grid;
+  int particles;
+  
+  int fsize;
+  int flashtime;
+  
+  int wallmode, monmode, axes;
+  bool revcontrol;
+  
+  int msgleft, msglimit;
+
+  bool usingGL;
+  int antialias;
+  #define AA_NOGL      1
+  #define AA_VERSION   2
+  #define AA_LINES     4
+  #define AA_POLY      8
+  #define AA_LINEWIDTH 16
+  #define AA_FONT      32
+  #define AA_MULTI     64
+  #define AA_MULTI16   128 // not configurable
+  ld linewidth;
+
+  int joyvalue, joyvalue2, joypanthreshold;
+  ld joypanspeed;
+  
+  charstyle cs;
+  
+  bool samegender; // same gender for the Princess?
+  int language;
+  
+  bool backeffects; // background particle effects
+  
+  int killreduction, itemreduction, portreduction;
+  
+  multi::config scfg;
+  
+  int steamscore;
+  bool drawmousecircle; // draw the circle around the mouse
+  bool skipstart;       // skip the start menu
+  bool quickmouse;      // quick mouse on the map
+  bool sloppy_3d;       // make 3D faster but ugly
+  int timeformat;       // time format used in the message log
+  
+  int use_smart_range;  // 0 = distance-based, 1 = model-based, 2 = model-based and generate
+  ld smart_range_detail;// minimum visible cell for modes 1 and 2
+  ld smart_range_detail_3;// minimum visible cell in 3D (for mode 2, there is no mode 1)
+  int cells_drawn_limit;
+  int cells_generated_limit; // limit on cells generated per frame
+  
+  ld skiprope;
+
+  eStereo stereo_mode;
+  ld ipd;
+  ld lr_eyewidth, anaglyph_eyewidth;
+  ld fov;
+  bool consider_shader_projection;
+  int desaturate;
+  int texture_step;
+
+  
+  bool always3;  // always use the 3D engine
+  ld depth;      // world level below the plane
+  ld camera;     // camera level above the plane
+  ld wall_height, creature_scale, height_width;
+  eModel vpmodel;
+  ld lake_top, lake_bottom;
+  ld rock_wall_ratio;
+  ld human_wall_ratio;
+
+  int tc_alpha, tc_depth, tc_camera;
+  ld highdetail, middetail;
+  bool gp_autoscale_heights;
+  };
+
+extern videopar vid;
+
 #if MAXMDIM == 3
 #define WDIM 2
 #else
 #define WDIM ((geometry >= gBinary3) ? 3 : 2)
 #endif
-#define GDIM (geom3::always3 ? 3 : WDIM)
+#define GDIM (vid.always3 ? 3 : WDIM)
 #define DIM GDIM
 #define MDIM (DIM+1)
 
 extern array<ld, gGUARD> sightranges;
-
-namespace geom3 { extern bool always3; }
 
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
@@ -831,21 +955,8 @@ void activateActiv(cell *c, bool msg);
 
 // shmup
 
-struct charstyle {
-  int charid;
-  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor, eyecolor;
-  bool lefthanded;
-  };
-
 string csname(charstyle& cs);
 void initcs(charstyle& cs);
-
-#define MAXPLAYER 7
-#define MAXJOY 8
-
-#define MAXBUTTON 64
-#define MAXAXE 16
-#define MAXHAT 4
 
 extern bool flipplayer;
 
@@ -868,14 +979,6 @@ namespace multi {
 
   // treasure collection, kill, and death statistics
   extern int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
-
-  struct config {
-    char keyaction[512];
-    char joyaction[MAXJOY][MAXBUTTON];
-    char axeaction[MAXJOY][MAXAXE];
-    char hataction[MAXJOY][MAXHAT][4];
-    int  deadzoneval[MAXJOY][MAXAXE];
-    };
 
   void saveConfig(FILE *f);
   void loadConfig(FILE *f);
@@ -1075,8 +1178,6 @@ extern reaction_t help_delegate;
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
-enum eStereo { sOFF, sAnaglyph, sLR, sODS };
-
 struct radarpoint {
   hyperpoint h;
   char glyph;
@@ -1085,93 +1186,6 @@ struct radarpoint {
   };
 
 extern vector<radarpoint> radarpoints;
-
-struct videopar {
-  ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
-  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width, fixed_facing_dir;
-  int mobilecompasssize;
-  int radarsize; // radar for 3D geometries
-  int aurastr, aurasmoothen;
-  bool fixed_facing;
-  bool fixed_yz;
-  bool use_wall_radar;
-  
-  int linequality;
-
-  bool full;
-  
-  int graphglyph; // graphical glyphs
-  bool darkhepta;
-  int shifttarget;
-  
-  int xres, yres, framelimit;
-  
-  int xscr, yscr;
-  
-  ld xposition, yposition;
-  
-  bool grid;
-  int particles;
-  
-  int fsize;
-  int flashtime;
-  
-  int wallmode, monmode, axes;
-  bool revcontrol;
-  
-  int msgleft, msglimit;
-
-  bool usingGL;
-  int antialias;
-  #define AA_NOGL      1
-  #define AA_VERSION   2
-  #define AA_LINES     4
-  #define AA_POLY      8
-  #define AA_LINEWIDTH 16
-  #define AA_FONT      32
-  #define AA_MULTI     64
-  #define AA_MULTI16   128 // not configurable
-  ld linewidth;
-
-  int joyvalue, joyvalue2, joypanthreshold;
-  ld joypanspeed;
-  
-  charstyle cs;
-  
-  bool samegender; // same gender for the Princess?
-  int language;
-  
-  bool backeffects; // background particle effects
-  
-  int killreduction, itemreduction, portreduction;
-  
-  multi::config scfg;
-  
-  int steamscore;
-  bool drawmousecircle; // draw the circle around the mouse
-  bool skipstart;       // skip the start menu
-  bool quickmouse;      // quick mouse on the map
-  bool sloppy_3d;       // make 3D faster but ugly
-  int timeformat;       // time format used in the message log
-  
-  int use_smart_range;  // 0 = distance-based, 1 = model-based, 2 = model-based and generate
-  ld smart_range_detail;// minimum visible cell for modes 1 and 2
-  ld smart_range_detail_3;// minimum visible cell in 3D (for mode 2, there is no mode 1)
-  int cells_drawn_limit;
-  int cells_generated_limit; // limit on cells generated per frame
-  
-  ld skiprope;
-
-  eStereo stereo_mode;
-  ld ipd;
-  ld lr_eyewidth, anaglyph_eyewidth;
-  ld fov;
-  bool consider_shader_projection;
-  int desaturate;
-  int texture_step;
-  };
-
-extern videopar vid;
 
 extern vector< function<void()> > screens;
 
@@ -2287,7 +2301,7 @@ void setcameraangle(bool b);
 
 void drawShape(pair<ld,ld>* coords, int qty, color_t color);
 
-extern eModel pmodel;
+#define pmodel (vid.vpmodel)
 string current_proj_name();
 
 inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
@@ -4619,7 +4633,6 @@ namespace gamestack {
   }
 
 namespace geom3 {
-  extern ld depth, camera, wall_height, creature_scale, height_width;
   void switch_always3();
   void switch_fpp();
   void switch_tpp();

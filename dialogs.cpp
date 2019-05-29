@@ -613,7 +613,7 @@ namespace dialog {
   numberEditor ne;
   
   bool editingDetail() {
-    return ne.editwhat == &geom3::highdetail || ne.editwhat == &geom3::middetail;
+    return ne.editwhat == &vid.highdetail || ne.editwhat == &vid.middetail;
     }
   
   int ldtoint(ld x) {

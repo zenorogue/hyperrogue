@@ -971,11 +971,11 @@ void make_floor_textures() {
   dynamicval<eGeometry> g(geometry, gEuclidSquare);
   dynamicval<eModel> gm(pmodel, mdDisk);
   dynamicval<eVariation> va(variation, eVariation::pure);
-  dynamicval<bool> a3(geom3::always3, false);
+  dynamicval<bool> a3(vid.always3, false);
   dynamicval<bool> hq(inHighQual, true);
   dynamicval<int> hd(darken, 0);
-  dynamicval<ld> gd(geom3::depth, 1);
-  dynamicval<ld> gc(geom3::camera, 1);
+  dynamicval<ld> gd(vid.depth, 1);
+  dynamicval<ld> gc(vid.camera, 1);
   dynamicval<geometry_information*> dcgip(cgip, cgip);
   check_cgi();
   cgi.make_floor_textures_here();

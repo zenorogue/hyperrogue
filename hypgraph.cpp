@@ -94,7 +94,7 @@ hyperpoint gethyper(ld x, ld y) {
   }
 
 void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
-  hyperpoint H = ypush(geom3::camera) * xpush(d) * ypush(zl) * C0;
+  hyperpoint H = ypush(vid.camera) * xpush(d) * ypush(zl) * C0;
   ld tzh = vid.ballproj + H[DIM];
   ld ax = H[0] / tzh;
   ld ay = H[1] / tzh;
@@ -280,7 +280,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdBall: {
       ld zlev = find_zlev(H);
       
-      ld zl = geom3::depth-geom3::factor_to_lev(zlev);
+      ld zl = vid.depth-geom3::factor_to_lev(zlev);
   
       ballmodel(ret, atan2(H), hdist0(H), zl);
       break;      
@@ -588,14 +588,14 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdRotatedHyperboles: {
       // ld zlev =  <- not implemented
-      find_zlev(H); // + geom3::depth;
+      find_zlev(H); // + vid.depth;
       conformal::apply_orientation(H[0], H[1]);
       
       ld y = asin_auto(H[1]);
       ld x = asin_auto_clamp(H[0] / cos_auto(y));
       // ld z = zlev == 1 ? 0 : geom3::factor_to_lev(zlev);
       
-      ld factor = geom3::lev_to_factor(y + geom3::depth);
+      ld factor = geom3::lev_to_factor(y + vid.depth);
       
       ret[0] = sinh(x) * factor;
       ret[1] = cosh(x) * factor;
@@ -1263,12 +1263,12 @@ void ballgeometry() {
   for(double d=10; d>=-10; d-=.2)
     addball(0, d, 0);
   for(double d=-10; d<=10; d+=.2)
-    addball(0, d, geom3::depth);
-  addball(0, 0, -geom3::camera);
-  addball(0, 0, geom3::depth);
-  addball(0, 0, -geom3::camera);
+    addball(0, d, vid.depth);
+  addball(0, 0, -vid.camera);
+  addball(0, 0, vid.depth);
+  addball(0, 0, -vid.camera);
   addball(0, -10, 0);
-  addball(0, 0, -geom3::camera);
+  addball(0, 0, -vid.camera);
   queuecurve(darkena(0xFF, 0, 0x80), 0, PPR::CIRCLE);
   queuereset(pmodel, PPR::CIRCLE);
   }

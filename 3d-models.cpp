@@ -12,7 +12,7 @@ ld eyepos;
 #if MAXMDIM >= 4
 
 #define S (cgi.scalefactor / 0.805578)
-#define SH (cgi.scalefactor / 0.805578 * geom3::height_width / 1.5)
+#define SH (cgi.scalefactor / 0.805578 * vid.height_width / 1.5)
 
 #define revZ (WDIM == 2 ? -1 : 1)
 

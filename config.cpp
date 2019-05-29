@@ -205,19 +205,20 @@ void initConfig() {
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
 
-  addsaver(geom3::depth, "3D depth");
-  addsaver(geom3::camera, "3D camera level");
-  addsaver(geom3::wall_height, "3D wall height");
-  addsaver(geom3::rock_wall_ratio, "3D rock-wall ratio");
-  addsaver(geom3::human_wall_ratio, "3D human-wall ratio");
-  addsaver(geom3::lake_top, "3D lake top");
-  addsaver(geom3::lake_bottom, "3D lake bottom");
-  addsaver(geom3::tc_depth, "3D TC depth");
-  addsaver(geom3::tc_camera, "3D TC camera");
-  addsaver(geom3::tc_alpha, "3D TC alpha");
-  addsaver(geom3::highdetail, "3D highdetail");
-  addsaver(geom3::middetail, "3D middetail");
-  addsaver(geom3::gp_autoscale_heights, "3D Goldberg autoscaling");
+  addsaver(vid.depth, "3D depth", 1);
+  addsaver(vid.camera, "3D camera level", 1);
+  addsaver(vid.wall_height, "3D wall height", .3);
+  addsaver(vid.rock_wall_ratio, "3D rock-wall ratio", .9);
+  addsaver(vid.human_wall_ratio, "3D human-wall ratio", .7);
+  addsaver(vid.lake_top, "3D lake top", .25);
+  addsaver(vid.lake_bottom, "3D lake bottom", .9);
+  addsaver(vid.tc_depth, "3D TC depth", 1);
+  addsaver(vid.tc_camera, "3D TC camera", 2);
+  addsaver(vid.tc_alpha, "3D TC alpha", 3);
+  addsaver(vid.highdetail, "3D highdetail", 8);
+  addsaver(vid.middetail, "3D middetail", 8);
+  addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);
+  addsaver(vid.always3, "3D always", false);
   
   addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
 
@@ -228,7 +229,7 @@ void initConfig() {
   addsaver(rug::model_distance, "rug-model-distance");
 #endif
 
-  addsaverenum(pmodel, "used model");
+  addsaverenum(pmodel, "used model", mdDisk);
   addsaver(polygonal::SI, "polygon sides");
   addsaver(polygonal::STAR, "polygon star factor");
   addsaver(polygonal::deg, "polygonal degree");
@@ -325,8 +326,8 @@ void initConfig() {
   addsaver(vid.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
 
-  addsaver(geom3::creature_scale, "3d-creaturescale", 1);
-  addsaver(geom3::height_width, "3d-heightwidth", 1.5);
+  addsaver(vid.creature_scale, "3d-creaturescale", 1);
+  addsaver(vid.height_width, "3d-heightwidth", 1.5);
 
   #if CAP_GP
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
@@ -567,16 +568,15 @@ void saveConfig() {
   
   {
   int pt_depth = 0, pt_camera = 0, pt_alpha = 0;
-  using namespace geom3;
-  if(tc_depth > tc_camera) pt_depth++;
-  if(tc_depth < tc_camera) pt_camera++;
-  if(tc_depth > tc_alpha ) pt_depth++;
-  if(tc_depth < tc_alpha ) pt_alpha ++;
-  if(tc_alpha > tc_camera) pt_alpha++;
-  if(tc_alpha < tc_camera) pt_camera++;
-  tc_alpha = pt_alpha;
-  tc_camera = pt_camera;
-  tc_depth = pt_depth;
+  if(vid.tc_depth > vid.tc_camera) pt_depth++;
+  if(vid.tc_depth < vid.tc_camera) pt_camera++;
+  if(vid.tc_depth > vid.tc_alpha ) pt_depth++;
+  if(vid.tc_depth < vid.tc_alpha ) pt_alpha ++;
+  if(vid.tc_alpha > vid.tc_camera) pt_alpha++;
+  if(vid.tc_alpha < vid.tc_camera) pt_camera++;
+  vid.tc_alpha = pt_alpha;
+  vid.tc_camera = pt_camera;
+  vid.tc_depth = pt_depth;
   }
   
   for(auto s: savers) if(s->dosave())
@@ -1100,7 +1100,7 @@ void showJoyConfig() {
 #endif
 
 void projectionDialog() {
-  geom3::tc_alpha = ticks;
+  vid.tc_alpha = ticks;
   dialog::editNumber(vid.alpha, -5, 5, .1, 1,
     XLAT("projection"),
     XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
@@ -1138,7 +1138,7 @@ void explain_detail() {
     "Objects at distance less than %1 absolute units "
     "from the center will be displayed with high "
     "detail, and at distance at least %2 with low detail.",
-    fts(geom3::highdetail), fts(geom3::middetail)
+    fts(vid.highdetail), fts(vid.middetail)
     ));
   }
 
@@ -1159,7 +1159,6 @@ void add_edit_fov(char key = 'f') {
 void showStereo() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
-  using namespace geom3;
   dialog::init(XLAT("stereo vision config"));
 
   string modenames[4] = { "OFF", "anaglyph", "side-by-side", "ODS" };
@@ -1192,7 +1191,6 @@ void showStereo() {
   dialog::display();
 
   keyhandler = [] (int sym, int uni) {
-    using namespace geom3;
     dialog::handleNavigation(sym, uni);
     
     string help3 = XLAT(
@@ -1268,37 +1266,36 @@ void add_edit_wall_quality(char c) {
 void show3D() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
-  using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 
 #if MAXMDIM >= 4
   if(WDIM == 2) {
-    dialog::addBoolItem(XLAT("use the full 3D models"), geom3::always3, 'U');
+    dialog::addBoolItem(XLAT("use the full 3D models"), vid.always3, 'U');
     dialog::add_action(geom3::switch_always3);
     }
 #endif
   if(vid.use_smart_range == 0 && DIM == 2) {
-    dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
-    dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
+    dialog::addSelItem(XLAT("High detail range"), fts(vid.highdetail), 'n');
+    dialog::addSelItem(XLAT("Mid detail range"), fts(vid.middetail), 'm');
     dialog::addBreak(50);
     }
   
   if(WDIM == 2) {
-    dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts(camera), 'c');
-    dialog::addSelItem(XLAT("Ground level below the plane"), fts(depth), 'g');
+    dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts(vid.camera), 'c');
+    dialog::addSelItem(XLAT("Ground level below the plane"), fts(vid.depth), 'g');
   
     dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'a');
     dialog::addBreak(50);
-    dialog::addSelItem(XLAT("Height of walls"), fts(wall_height), 'w');
+    dialog::addSelItem(XLAT("Height of walls"), fts(vid.wall_height), 'w');
     
-    dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts(rock_wall_ratio), 'r');
-    dialog::addSelItem(XLAT("Human to wall ratio"), fts(human_wall_ratio), 'h');
-    dialog::addSelItem(XLAT("Level of water surface"), fts(lake_top), 'l');
-    dialog::addSelItem(XLAT("Level of water bottom"), fts(lake_bottom), 'k');  
+    dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts(vid.rock_wall_ratio), 'r');
+    dialog::addSelItem(XLAT("Human to wall ratio"), fts(vid.human_wall_ratio), 'h');
+    dialog::addSelItem(XLAT("Level of water surface"), fts(vid.lake_top), 'l');
+    dialog::addSelItem(XLAT("Level of water bottom"), fts(vid.lake_bottom), 'k');  
     }
   else {
-    dialog::addSelItem(XLAT("Creature scale"), fts(creature_scale), 'c');
-    dialog::addSelItem(XLAT("Height to width"), fts(height_width), 'h');
+    dialog::addSelItem(XLAT("Creature scale"), fts(vid.creature_scale), 'c');
+    dialog::addSelItem(XLAT("Height to width"), fts(vid.height_width), 'h');
     menuitem_sightrange('s');
     }
 
@@ -1366,8 +1363,8 @@ void show3D() {
     dialog::addInfo(XLAT("no 3D effects available in this projection"), 0xC00000);
   else if(GDIM == 2 && !spatial_graphics)
     dialog::addInfo(XLAT("set 3D monsters or walls in basic config first"));
-  else if(invalid != "")
-    dialog::addInfo(XLAT("error: "+invalid), 0xC00000);
+  else if(geom3::invalid != "")
+    dialog::addInfo(XLAT("error: "+geom3::invalid), 0xC00000);
   else
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
@@ -1380,22 +1377,22 @@ void show3D() {
     dialog::handleNavigation(sym, uni);
     
     if(uni == 'n' && DIM == 2) {
-      dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
+      dialog::editNumber(vid.highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
       dialog::extra_options = explain_detail;
       dialog::reaction = [] () {
-        if(highdetail > middetail) middetail = highdetail;
+        if(vid.highdetail > vid.middetail) vid.middetail = vid.highdetail;
         };
       }
     else if(uni == 'm' && DIM == 2) {
-      dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
+      dialog::editNumber(vid.middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
       dialog::extra_options = explain_detail;
       dialog::reaction = [] () {
-        if(highdetail > middetail) highdetail = middetail;
+        if(vid.highdetail > vid.middetail) vid.highdetail = vid.middetail;
         };
       }
     else if(uni == 'c' && WDIM == 2) 
-      tc_camera = ticks,
-      dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), ""),
+      vid.tc_camera = ticks,
+      dialog::editNumber(vid.camera, 0, 5, .1, 1, XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), ""),
       dialog::extra_options = [] {
         dialog::addHelp(GDIM == 2 ? XLAT(
           "Camera is placed %1 absolute units above a plane P in a three-dimensional "
@@ -1404,17 +1401,17 @@ void show3D() {
           "other equidistant surface below it) is viewed at an angle of %3 "
           "(the tangent of the angle between the point in "
           "the center of your vision and a faraway location is 1/cosh(c) = %4).",
-          fts(camera),
-          fts(depth),
-          fts(atan(1/cosh(camera))*2/degree),
-          fts(1/cosh(camera))) : XLAT("Look from behind."));
+          fts(vid.camera),
+          fts(vid.depth),
+          fts(atan(1/cosh(vid.camera))*2/degree),
+          fts(1/cosh(vid.camera))) : XLAT("Look from behind."));
         if(DIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
           dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
           };
         };
     else if(uni == 'g' && WDIM == 2) 
-      tc_depth = ticks,
-      dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
+      vid.tc_depth = ticks,
+      dialog::editNumber(vid.depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
       dialog::extra_options = [] {
         dialog::addHelp(XLAT(
           "Ground level is actually an equidistant surface, "
@@ -1430,51 +1427,51 @@ void show3D() {
           "distances.)"
           
           ,
-          fts(depth), fts(cosh(depth))));
+          fts(vid.depth), fts(cosh(vid.depth))));
           // mention absolute units
           };
     else if(uni == 'a' && WDIM == 2) 
       projectionDialog();
     else if(uni == 'w' && WDIM == 2) {
-      dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
+      dialog::editNumber(vid.wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::extra_options = [] () {
         dialog::addHelp(XLAT(
           "The height of walls, in absolute units. For the current values of g and c, "
           "wall height of %1 absolute units corresponds to projection value of %2.",
           fts(actual_wall_height()), fts(factor_to_projection(cgi.WALL))));
-        dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'O');
+        dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), vid.gp_autoscale_heights, 'O');
         dialog::add_action([] () {
-          geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
+          vid.gp_autoscale_heights = !vid.gp_autoscale_heights;
           });
         };
       }
     else if(uni == 'l' && WDIM == 2) 
-      dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
+      dialog::editNumber(vid.lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
     else if(uni == 'k' && WDIM == 2) 
-      dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), "");
+      dialog::editNumber(vid.lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), "");
     else if(uni == 'r' && WDIM == 2) 
-      dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
+      dialog::editNumber(vid.rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
       dialog::extra_options = [] { dialog::addHelp(XLAT(
         "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
         "Length of paths on the Rock III level is %3 of the corresponding length on the "
         "ground level.",
-        fts(rock_wall_ratio), fts(wall_height * rock_wall_ratio),
-        fts(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth))));
+        fts(vid.rock_wall_ratio), fts(vid.wall_height * vid.rock_wall_ratio),
+        fts(cosh(vid.depth - vid.wall_height * vid.rock_wall_ratio) / cosh(vid.depth))));
         };
     else if(uni == 'h' && WDIM == 2)
-      dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
+      dialog::editNumber(vid.human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
       dialog::extra_options = [] { dialog::addHelp(XLAT(
         "Humans are %1 "
         "absolute units high. Your head travels %2 times the distance travelled by your "
         "feet.",
-        fts(wall_height * human_wall_ratio),
-        fts(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)))
+        fts(vid.wall_height * vid.human_wall_ratio),
+        fts(cosh(vid.depth - vid.wall_height * vid.human_wall_ratio) / cosh(vid.depth)))
         );
         };
     else if(uni == 'h' && WDIM == 3)
-      dialog::editNumber(geom3::height_width, 0, 1, .1, .7, XLAT("Height to width"), "");
+      dialog::editNumber(vid.height_width, 0, 1, .1, .7, XLAT("Height to width"), "");
     else if(uni == 'c' && WDIM == 3)
-      dialog::editNumber(geom3::creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
+      dialog::editNumber(vid.creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
 
     else if(uni == 'e')
       pushScreen(showStereo);
@@ -2088,15 +2085,15 @@ unordered_map<string, ld&> params = {
   {"ballangle", vid.ballangle},
   {"yshift", vid.yshift},
   {"cameraangle", vid.camera_angle},
-  {"depth", geom3::depth},
-  {"camera", geom3::camera},
-  {"wall_height", geom3::wall_height},
-  {"highdetail", geom3::highdetail},
-  {"middetail", geom3::middetail},
-  {"rock_wall_ratio", geom3::rock_wall_ratio},
-  {"human_wall_ratio", geom3::human_wall_ratio},
-  {"lake_top", geom3::lake_top},
-  {"lake_bottom", geom3::lake_bottom},
+  {"depth", vid.depth},
+  {"camera", vid.camera},
+  {"wall_height", vid.wall_height},
+  {"highdetail", vid.highdetail},
+  {"middetail", vid.middetail},
+  {"rock_wall_ratio", vid.rock_wall_ratio},
+  {"human_wall_ratio", vid.human_wall_ratio},
+  {"lake_top", vid.lake_top},
+  {"lake_bottom", vid.lake_bottom},
   #if CAP_RUG
   {"rug_model_distance", rug::model_distance},
   #endif

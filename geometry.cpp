@@ -142,10 +142,10 @@ void geometry_information::prepare_basics() {
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
-  if(WDIM == 3) scalefactor *= geom3::creature_scale;
+  if(WDIM == 3) scalefactor *= vid.creature_scale;
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
-  if(WDIM == 3) zhexf *= geom3::creature_scale;
+  if(WDIM == 3) zhexf *= vid.creature_scale;
   if(WDIM == 2 && GDIM == 3) zhexf *= 1.5, orbsize *= 1.2;
 
   floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
@@ -176,21 +176,6 @@ transmatrix xspinpush(ld dir, ld dist) {
 purehookset hooks_swapdim;
 
 namespace geom3 {
-
-  bool always3 = false; 
-  int tc_alpha=3, tc_depth=1, tc_camera=2;
-  
-  ld depth = 1;        // world below the plane
-  ld camera = 1;       // camera above the plane
-  ld wall_height = .3;
-  ld lake_top = .25, lake_bottom = .9;
-  ld rock_wall_ratio = .9;
-  ld human_wall_ratio = .7;
-  bool gp_autoscale_heights = true;
-  
-  ld creature_scale, height_width;
-  
-  ld highdetail = 8, middetail = 8;
   
   // Here we convert between the following parameters:
   
@@ -200,18 +185,18 @@ namespace geom3 {
   // factor: zoom factor
   
   ld abslev_to_projection(ld abslev) {
-    if(sphere || euclid) return camera+abslev;
-    return tanh(abslev) / tanh(camera);
+    if(sphere || euclid) return vid.camera+abslev;
+    return tanh(abslev) / tanh(vid.camera);
     }
   
   ld projection_to_abslev(ld proj) {
-    if(sphere || euclid) return proj-camera;
+    if(sphere || euclid) return proj-vid.camera;
     // tanh(abslev) / tanh(camera) = proj
-    return atanh(proj * tanh(camera));
+    return atanh(proj * tanh(vid.camera));
     }
   
   ld lev_to_projection(ld lev) {
-    return abslev_to_projection(depth - lev);
+    return abslev_to_projection(vid.depth - lev);
     }
   
   ld projection_to_factor(ld proj) {
@@ -224,28 +209,28 @@ namespace geom3 {
   
   ld lev_to_factor(ld lev) { 
     if(WDIM == 3) return lev;
-    if(GDIM == 3) return depth - lev;
+    if(GDIM == 3) return vid.depth - lev;
     return projection_to_factor(lev_to_projection(lev)); 
     }
   ld factor_to_lev(ld fac) { 
     if(DIM == 3) return fac;
-    return depth - projection_to_abslev(factor_to_projection(fac)); 
+    return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
     }
   
   // how should we scale at level lev
   ld scale_at_lev(ld lev) { 
     if(sphere || euclid) return 1;
-    return cosh(depth - lev); 
+    return cosh(vid.depth - lev); 
     }
   
   string invalid;
   
   ld actual_wall_height() {
       #if CAP_GP
-      if(GOLDBERG && gp_autoscale_heights) 
-        return wall_height * min<ld>(4 / hypot_d(2, gp::next), 1);
+      if(GOLDBERG && vid.gp_autoscale_heights) 
+        return vid.wall_height * min<ld>(4 / hypot_d(2, gp::next), 1);
       #endif
-      return wall_height;
+      return vid.wall_height;
       }
   }
   
@@ -256,17 +241,17 @@ namespace geom3 {
     invalid = "";
     
     if(GDIM == 3) ;
-    else if(tc_alpha < tc_depth && tc_alpha < tc_camera)
-      vid.alpha = tan_auto(depth) / tan_auto(camera);
-    else if(tc_depth < tc_alpha && tc_depth < tc_camera) {
-      ld v = vid.alpha * tan_auto(camera);
-      if(hyperbolic && (v<1e-6-12 || v>1-1e-12)) invalid = "cannot adjust depth", depth = camera;
-      else depth = atan_auto(v);
+    else if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera)
+      vid.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
+    else if(vid.tc_depth < vid.tc_alpha && vid.tc_depth < vid.tc_camera) {
+      ld v = vid.alpha * tan_auto(vid.camera);
+      if(hyperbolic && (v<1e-6-12 || v>1-1e-12)) invalid = "cannot adjust depth", vid.depth = vid.camera;
+      else vid.depth = atan_auto(v);
       }
     else {
-      ld v = tan_auto(depth) / vid.alpha;
-      if(hyperbolic && (v<1e-12-1 || v>1-1e-12)) invalid = "cannot adjust camera", camera = depth;
-      else camera = atan_auto(v);
+      ld v = tan_auto(vid.depth) / vid.alpha;
+      if(hyperbolic && (v<1e-12-1 || v>1-1e-12)) invalid = "cannot adjust camera", vid.camera = vid.depth;
+      else vid.camera = atan_auto(v);
       }
     
     if(fabs(vid.alpha) < 1e-6) invalid = "does not work with perfect Klein";
@@ -305,13 +290,13 @@ namespace geom3 {
       BIRD = 1.20;
       }
     else {
-      INFDEEP = GDIM == 3 ? (sphere ? M_PI/2 : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
+      INFDEEP = GDIM == 3 ? (sphere ? M_PI/2 : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(vid.camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);
       
-      human_height = human_wall_ratio * wh;
-      if(WDIM == 3) human_height = scalefactor * height_width / 2;
+      human_height = vid.human_wall_ratio * wh;
+      if(WDIM == 3) human_height = scalefactor * vid.height_width / 2;
       
       ld reduce = (WDIM == 3 ? human_height / 2 : 0);
       
@@ -341,19 +326,19 @@ namespace geom3 {
       ALEG0 = lev_to_factor(human_height * .0 - reduce);
       ALEG  = lev_to_factor(human_height * .2 - reduce);
       AHEAD = lev_to_factor(human_height * .6 - reduce);
-      BIRD = lev_to_factor(WDIM == 3 ? 0 : (human_wall_ratio+1)/2 * wh * .8);
+      BIRD = lev_to_factor(WDIM == 3 ? 0 : (vid.human_wall_ratio+1)/2 * wh * .8);
       GHOST = lev_to_factor(WDIM == 3 ? 0 : human_height * .5);
       FLATEYE = lev_to_factor(human_height * .15);
       
-      slev = rock_wall_ratio * wh / 3;
+      slev = vid.rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
-        SLEV[s] = lev_to_factor(rock_wall_ratio * wh * s/3);
-      LAKE = lev_to_factor(-lake_top);
-      HELLSPIKE = lev_to_factor(-(lake_top+lake_bottom)/2);
-      BOTTOM = lev_to_factor(-lake_bottom);
-      LOWSKY = lev_to_factor((1 + rock_wall_ratio) * wh);
+        SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
+      LAKE = lev_to_factor(-vid.lake_top);
+      HELLSPIKE = lev_to_factor(-(vid.lake_top+vid.lake_bottom)/2);
+      BOTTOM = lev_to_factor(-vid.lake_bottom);
+      LOWSKY = lev_to_factor((1 + vid.rock_wall_ratio) * wh);
       HIGH = LOWSKY;
-      HIGH2 = lev_to_factor((2 + rock_wall_ratio) * wh);
+      HIGH2 = lev_to_factor((2 + vid.rock_wall_ratio) * wh);
       SKY = LOWSKY - 5;
       }
     }    
@@ -363,7 +348,7 @@ namespace geom3 {
 void switch_always3() {
     if(dual::split(switch_always3)) return;
     if(rug::rugged) rug::close();
-    geom3::always3 = !geom3::always3;
+    vid.always3 = !vid.always3;
     swapmatrix(View);
     callhooks(hooks_swapdim);
     }
@@ -395,20 +380,20 @@ void switch_always3() {
     if(rug::rugged) rug::close();
     if(dual::split(switch_fpp)) return;
     check_cgi(); cgi.require_basics();
-    if(!geom3::always3) {
-      geom3::always3 = true;
+    if(!vid.always3) {
+      vid.always3 = true;
       ld ms = min<ld>(cgi.scalefactor, 1);
-      geom3::wall_height = 1.5 * ms;
+      vid.wall_height = 1.5 * ms;
       if(sphere) {
-        geom3::depth = M_PI / 6;
-        geom3::wall_height = M_PI / 3;
+        vid.depth = M_PI / 6;
+        vid.wall_height = M_PI / 3;
         }
-      geom3::human_wall_ratio = 0.8;
+      vid.human_wall_ratio = 0.8;
       if(euclid && allowIncreasedSight() && vid.use_smart_range == 0) {
         genrange_bonus = gamerange_bonus = sightrange_bonus = cgi.base_distlimit * 3/2;
         }
-      geom3::camera = 0;
-      geom3::depth = ms;
+      vid.camera = 0;
+      vid.depth = ms;
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
       callhooks(hooks_swapdim);
@@ -417,11 +402,11 @@ void switch_always3() {
 #endif
       }
     else {
-      geom3::always3 = false;
-      geom3::wall_height = .3;
-      geom3::human_wall_ratio = .7;
-      geom3::camera = 1;
-      geom3::depth = 1;
+      vid.always3 = false;
+      vid.wall_height = .3;
+      vid.human_wall_ratio = .7;
+      vid.camera = 1;
+      vid.depth = 1;
       if(pmodel == mdPerspective) pmodel = mdDisk;
       swapmatrix(View);
       callhooks(hooks_swapdim);
@@ -452,24 +437,24 @@ void check_cgi() {
   if(binarytiling) V("BT", fts(vid.binary_width));
   
   if(GDIM == 2) { 
-    V("CAMERA", fts(geom3::camera));
+    V("CAMERA", fts(vid.camera));
     }
   
   if(WDIM == 2) {
-    V("WH", fts(geom3::wall_height));
-    V("HW", fts(geom3::human_wall_ratio));
-    V("RW", fts(geom3::rock_wall_ratio));
-    V("DEPTH", fts(geom3::depth));
-    V("ASH", ONOFF(geom3::gp_autoscale_heights));
-    V("LT", fts(geom3::lake_top));
-    V("LB", fts(geom3::lake_bottom));
+    V("WH", fts(vid.wall_height));
+    V("HW", fts(vid.human_wall_ratio));
+    V("RW", fts(vid.rock_wall_ratio));
+    V("DEPTH", fts(vid.depth));
+    V("ASH", ONOFF(vid.gp_autoscale_heights));
+    V("LT", fts(vid.lake_top));
+    V("LB", fts(vid.lake_bottom));
     }
 
-  V("3D", ONOFF(geom3::always3));
+  V("3D", ONOFF(vid.always3));
   
   if(WDIM == 3) {
-    V("CS", fts(geom3::creature_scale));
-    V("HTW", fts(geom3::height_width));
+    V("CS", fts(vid.creature_scale));
+    V("HTW", fts(vid.height_width));
     }
   
   V("LQ", its(vid.linequality));

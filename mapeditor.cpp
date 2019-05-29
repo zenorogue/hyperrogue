@@ -206,7 +206,7 @@ namespace mapstream {
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     f.write(id);
 
-    f.write(geom3::always3);
+    f.write(vid.always3);
     f.write(mutantphase);
     f.write(rosewave);
     f.write(rosephase);
@@ -441,8 +441,8 @@ namespace mapstream {
     savecount = 0; savetime = 0;
     cheater = 1;
     
-    dynamicval<bool> a3(geom3::always3, geom3::always3);
-    if(f.vernum >= 0xA616) f.read(geom3::always3);
+    dynamicval<bool> a3(vid.always3, vid.always3);
+    if(f.vernum >= 0xA616) f.read(vid.always3);
     
     if(f.vernum < 0xA61A) load_usershapes(f);
 

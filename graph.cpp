@@ -19,7 +19,7 @@ int detaillevel = 0;
 bool first_cell_to_draw = true;
 
 bool hide_player() {
-  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && (first_cell_to_draw || elliptic) && (WDIM == 3 || geom3::camera == 0) && !inmirrorcount
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && (first_cell_to_draw || elliptic) && (WDIM == 3 || vid.camera == 0) && !inmirrorcount
      && !(racing::on && !racing::standard_centering && !racing::player_relative);
   }
 
@@ -91,8 +91,6 @@ map<cell*, fallanim> fallanims;
 bool doHighlight() {
   return (hiliteclick && darken < 2) ? !mmhigh : mmhigh;
   }
-
-eModel pmodel = mdDisk;
 
 int dlit;
 
@@ -3850,18 +3848,18 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, color_t col) {
   else if(sidepar == SIDE_LAKE) {
     const int layers = 1 << (detaillevel-1);
     if(detaillevel) for(int z=0; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_top, 0, z, layers)), col, PPR::FLOOR+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(-vid.lake_top, 0, z, layers)), col, PPR::FLOOR+z-layers);
     }
   else if(sidepar == SIDE_LTOB) {
     const int layers = 1 << (detaillevel-1);
     if(detaillevel) for(int z=0; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, z, layers)), col, PPR::INLAKEWALL+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(-vid.lake_bottom, -vid.lake_top, z, layers)), col, PPR::INLAKEWALL+z-layers);
     }
   else if(sidepar == SIDE_BTOI) {
     const int layers = 1 << detaillevel;
     draw_qfi(c, mscale(V, cgi.INFDEEP), col, PPR::MINUSINF);
     for(int z=1; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, -z, 1)), col, PPR::LAKEBOTTOM+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(-vid.lake_bottom, -vid.lake_top, -z, 1)), col, PPR::LAKEBOTTOM+z-layers);
     }
   }
 
@@ -3979,12 +3977,12 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
       * inverse(V) * ptd.V;
       
     if(!repriority) ;
-    else if(nlev < -geom3::lake_bottom-1e-3) {
+    else if(nlev < -vid.lake_bottom-1e-3) {
       ptd.prio = PPR::BELOWBOTTOM_FALLANIM;
       if(c->wall != waChasm)
         ptd.color = 0; // disappear!
       }
-    else if(nlev < -geom3::lake_top-1e-3)
+    else if(nlev < -vid.lake_top-1e-3)
       ptd.prio = PPR::INLAKEWALL_FALLANIM;
     else if(nlev < 0)
       ptd.prio = PPR::LAKEWALL_FALLANIM;
@@ -4808,8 +4806,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   
   ld dist0 = hdist0(tC0(V)) - 1e-6;
   if(vid.use_smart_range) detaillevel = 2;
-  else if(dist0 < geom3::highdetail) detaillevel = 2;
-  else if(dist0 < geom3::middetail) detaillevel = 1;
+  else if(dist0 < vid.highdetail) detaillevel = 2;
+  else if(dist0 < vid.middetail) detaillevel = 1;
   else detaillevel = 0;
 
 #ifdef BUILDZEBRA
@@ -5618,8 +5616,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if((cmode & sm::NUMBER) && (dialog::editingDetail())) {
         color_t col = 
-          dist0 < geom3::highdetail ? 0xFF80FF80 :
-          dist0 >= geom3::middetail ? 0xFFFF8080 :
+          dist0 < vid.highdetail ? 0xFF80FF80 :
+          dist0 >= vid.middetail ? 0xFFFF8080 :
           0XFFFFFF80;
 #if 1
         queuepoly(V, cgi.shHeptaMarker, darkena(col & 0xFFFFFF, 0, 0xFF));
@@ -5950,7 +5948,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
            dynamicval<const hpcshape*> ds(qfi.shape, &cgi.shCircleFloor);
            dynamicval<transmatrix> dss(qfi.spin, Id);
            for(int z=1; z<layers; z++) {
-             double zg = zgrad0(-geom3::lake_top, geom3::actual_wall_height(), z, layers);
+             double zg = zgrad0(-vid.lake_top, geom3::actual_wall_height(), z, layers);
              draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
                darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR::WALL3+z-layers+2);
              }
@@ -6785,7 +6783,7 @@ void make_actual_view() {
   if(vid.yshift && WDIM == 2) actual_view_transform = ypush(vid.yshift) * actual_view_transform;
   #if MAXMDIM >= 4
   if(GDIM == 3) {
-    ld max = WDIM == 2 ? geom3::camera : vid.yshift;
+    ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) 
       actual_view_transform = zpush(wall_radar(viewctr.at->c7, inverse(View), max)) * actual_view_transform; 
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
