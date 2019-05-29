@@ -752,6 +752,7 @@ namespace rg {
   static const char daily = 'd';
   static const char daily_off = 'D';
   static const char racing = 'R';
+  static const char dualmode = 'U';
   
   // wrongmode only -- marks 'global' achievements not related to the current mode
   static const char global = 'x'; 
@@ -5462,6 +5463,9 @@ namespace dual {
   
   bool check_side(eLand l);
   void assign_landsides();
+  
+  void disable();
+  void enable();
   }
 
 }

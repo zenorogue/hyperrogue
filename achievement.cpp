@@ -90,6 +90,7 @@ bool wrongMode(char flags) {
 
   if(shmup::on != (flags == rg::shmup || flags == rg::racing)) return true;
   if(racing::on != (flags == rg::racing)) return true;
+  if((!!dual::state) != (flags == rg::dualmode)) return true;
 #if CAP_DAILY
   if(daily::on != (flags == rg::daily)) return true;
 #endif
@@ -526,6 +527,7 @@ void achievement_score(int cat, int number) {
   else if(geometry) return;
   if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
+  if(dual::state) return;
   if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP && cat != LB_RACING) return;
   if(yendor::on && cat != LB_YENDOR_CHALLENGE) return;
   if(tactic::on && cat != LB_PURE_TACTICS && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) 
@@ -615,6 +617,7 @@ void achievement_final(bool really_final) {
   if(randomPatternsMode) return;
   if(peace::on) return;
   if(yendor::on) return;
+  if(dual::state) return;
 
   if(tactic::on) {
     tactic::record();

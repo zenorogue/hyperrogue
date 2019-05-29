@@ -515,6 +515,10 @@ void showChangeMode() {
 #if CAP_RACING
   dialog::addBoolItem(XLAT("racing mode"), racing::on, 'R');
 #endif
+#if CAP_ARCM
+  dialog::addBoolItem(XLAT("dual geometry mode"), dual::state, 'D');
+  dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::dualmode); }); });
+#endif
 #if CAP_DAILY
   dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
 #endif

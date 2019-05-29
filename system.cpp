@@ -1166,6 +1166,13 @@ void set_variation(eVariation target) {
     variation = target;
     }
   }
+  
+void stop_tour() {
+  while(gamestack::pushed()) {
+    gamestack::pop();
+    stop_game();
+    }
+  }
 
 void switch_game_mode(char switchWhat) {
   DEBBI(DF_INIT, ("switch_game_mode ", switchWhat));
@@ -1175,6 +1182,14 @@ void switch_game_mode(char switchWhat) {
       tactic::on = yendor::on = princess::challenge = 
       randomPatternsMode = inv::on = false;
       racing::on = false;
+      break;
+    
+    case rg::dualmode:
+      stop_tour(); tour::on = false;
+      racing::on = false;
+      yendor::on = tactic::on = princess::challenge = false;
+      if(!dual::state) dual::enable();
+      else dual::disable();
       break;
     
     case rg::inv:
@@ -1195,12 +1210,10 @@ void switch_game_mode(char switchWhat) {
 
 #if CAP_TOUR
     case rg::tour:
-      while(gamestack::pushed()) {
-        gamestack::pop();
-        stop_game();
-        }
+      if(tour::on) stop_tour();
       geometry = gNormal;
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
+      dual::disable();
       chaosmode = randomPatternsMode = false;
       variation = eVariation::bitruncated;
       #if CAP_GP
@@ -1222,6 +1235,7 @@ void switch_game_mode(char switchWhat) {
       chaosmode = false;
       racing::on = false;
       if(!yendor::on) firstland = laIce;
+      dual::disable();
       break;
 
 #if CAP_RACING    
@@ -1234,6 +1248,7 @@ void switch_game_mode(char switchWhat) {
       chaosmode = false;
       princess::challenge = false;
       if(bounded) set_geometry(gNormal);
+      dual::disable();
       break;
 #endif
 
@@ -1247,6 +1262,7 @@ void switch_game_mode(char switchWhat) {
       racing::on = false;
       chaosmode = false;
       if(!tactic::on) firstland = laIce;
+      dual::disable();
       break;
     
     case rg::shmup:
@@ -1273,6 +1289,7 @@ void switch_game_mode(char switchWhat) {
       chaosmode = false;
       inv::on = false;
       racing::on = false;
+      dual::disable();
       break;
     
 #if CAP_DAILY
