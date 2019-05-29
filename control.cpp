@@ -29,6 +29,10 @@ bool mousepressed = false;
 bool mousemoved = false;
 bool actonrelease = false;
 
+bool mousepan, oldmousepan;
+ld mouseaim_x, mouseaim_y;
+ld mouseaim_sensitivity = 0.01;
+
 int timetowait;
 
 #if CAP_SDLJOY
@@ -247,7 +251,7 @@ typedef SDL_Event eventtype;
 bool smooth_scrolling = false;
 
 void handlePanning(int sym, int uni) {
-  if(dual::split([=] { handlePanning(sym, uni); })) return;
+  if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
   if(DIM == 3) {
     if(sym == PSEUDOKEY_WHEELUP) View = cpush(2, -0.05*shiftmul) * View, didsomething = true, playermoved = false;
     if(sym == PSEUDOKEY_WHEELDOWN) View = cpush(2, 0.05*shiftmul) * View, didsomething = true, playermoved = false;
@@ -510,10 +514,6 @@ void resize_screen_to(int x, int y) {
   setfsize = true;
   setvideomode();
   }
-
-bool mousepan, oldmousepan;
-ld mouseaim_x, mouseaim_y;
-ld mouseaim_sensitivity = 0.01;
 
 void mainloopiter() {
 
