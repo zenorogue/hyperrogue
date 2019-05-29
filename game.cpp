@@ -8061,6 +8061,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
             addMessage(XLAT("You swing your sword at %the1.", c2->wall));
           else
             addMessage(XLAT("You swing your sword."));
+          swing:
           sideAttack(cwt.at, d, moPlayer, 0);
           animateAttack(cwt.at, c2, LAYER_SMALL, d);
           }
@@ -8084,7 +8085,18 @@ bool movepcto(int d, int subdir, bool checkonly) {
       if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
       if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
       
-      if(!canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags)) {
+      bool ca =canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags);
+      
+      if(!ca) {
+        if(forcedmovetype == fmAttack) {
+          if(monstersnear(cwt.at,c2,moPlayer,NULL,cwt.at)) {
+            if(!checkonly && errormsgs) wouldkill("%The1 would get you!");
+            return false;
+            }
+          if(checkonly) { nextmovetype = lmSkip; return true; }
+          addMessage(XLAT("You swing your sword at %the1.", c2->monst));
+          goto swing;
+          }
         if(checkonly) return false;
         if(c2->monst == moWorm || c2->monst == moWormtail || c2->monst == moWormwait) 
           addMessage(XLAT("You cannot attack Sandworms directly!"));
