@@ -3427,7 +3427,7 @@ void turn(int delta) {
         buildRosemap();
         if(havewhat&HF_RIVER) prairie::move();
         }
-      if(recallCell && !markOrb(itOrbRecall)) activateRecall();
+      if(recallCell.at && !markOrb(itOrbRecall)) activateRecall();
       save_memory();
       }
     if(elec::havecharge) elec::act();

@@ -2248,7 +2248,7 @@ int reptilemax();
 extern bool mousing;
 #define IFM(x) (mousing?"":x)
 
-extern cell *recallCell;
+extern cellwalker recallCell;
 
 extern eLand cheatdest;
 void cheatMoveTo(eLand l);

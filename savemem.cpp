@@ -92,9 +92,9 @@ void save_memory() {
   heptagon *at = cwt.at->master;
   heptagon *orig = currentmap->gamestart()->master;
   
-  if(recallCell) {
-    if(unsafeLand(recallCell)) return;
-    heptagon *at2 = recallCell->master;
+  if(recallCell.at) {
+    if(unsafeLand(recallCell.at)) return;
+    heptagon *at2 = recallCell.at->master;
     int t = 0;
     while(at != at2) {
       t++; if(t > 10000) return;

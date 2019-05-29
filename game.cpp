@@ -6369,29 +6369,30 @@ void placeItems(int qty, eItem it) {
     }
   }
 
-cell *recallCell;
+cellwalker recallCell;
 
 bool activateRecall() {
-  if(!recallCell) {
+  if(!recallCell.at) {
     addMessage("Error: no recall");
     return false;
     }
   items[itOrbRecall] = 0; items[itOrbSafety] = 0;
-  if(!makeEmpty(recallCell)) {
+  if(!makeEmpty(recallCell.at)) {
     addMessage(XLAT("Your Orb of Recall is blocked by something big!"));
-    recallCell = NULL;
+    recallCell.at = NULL;
     return false;
     }
 
   killFriendlyIvy();
-  movecost(cwt.at, recallCell, 3);
-  playerMoveEffects(cwt.at, recallCell);
+  movecost(cwt.at, recallCell.at, 3);
+  playerMoveEffects(cwt.at, recallCell.at);
   mirror::destroyAll();
   
   sword::reset();
 
-  cwt.at = recallCell; recallCell = NULL;
-  cwt.spin = hrand(cwt.at->type); flipplayer = !!(hrand(2));
+  cwt = recallCell;
+  recallCell.at = NULL;
+  flipplayer = true;
   fullcenter(); 
   makeEmpty(cwt.at);
   forCellEx(c2, cwt.at) 
@@ -6406,12 +6407,12 @@ bool activateRecall() {
   return true;
   }
 
-void saveRecall(cell *c2) {  
-  if(!recallCell) recallCell = c2;
+void saveRecall(cellwalker cw2) {  
+  if(!recallCell.at) recallCell = cw2;
   }
 
 void activateSafety(eLand l) {
-  if(recallCell && activateRecall()) 
+  if(recallCell.at && activateRecall()) 
     return;
   savePrincesses();
   int gg = countMyGolems(moGolem);
@@ -6514,7 +6515,7 @@ void checkmove() {
   items[itWarning]-=2;
 
   for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
-  if(recallCell && !markOrb(itOrbRecall)) activateRecall();  
+  if(recallCell.at && !markOrb(itOrbRecall)) activateRecall();  
   }
 
 // move the PC. Warning: a very long function! todo: refactor
@@ -6966,7 +6967,12 @@ bool collectItem(cell *c2, bool telekinesis) {
     }
   else if(orbcharges(c2->item)) {
     eItem it = c2->item;
-    if(it == itOrbRecall) saveRecall(c2);
+    if(it == itOrbRecall) {
+      cellwalker cw2 = cwt;
+      cw2++;
+      cw2.at = c2;
+      saveRecall(cw2);
+      }
     if(it == itOrbFire) playSound(c2, "fire");
     else if(it == itOrbFire) playSound(c2, "fire");
     else if(it == itOrbWinter) playSound(c2, "pickup-winter");
