@@ -6967,7 +6967,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     }
   else if(orbcharges(c2->item)) {
     eItem it = c2->item;
-    if(it == itOrbRecall) {
+    if(it == itOrbRecall && !dual::state) {
       cellwalker cw2 = cwt;
       cw2++;
       cw2.at = c2;
@@ -6981,6 +6981,10 @@ bool collectItem(cell *c2, bool telekinesis) {
     else playSound(c2, "pickup-orb");
     if(items[itOrbChoice]) items[itOrbChoice] = 0, had_choice = true;
     int oc = orbcharges(it);
+    if(dual::state && among(it, itOrbTeleport, itOrbFrog, itOrbPhasing, itOrbDash, itOrbRecall)) {
+      oc = 10;
+      it = itOrbSpeed;
+      }
     if(c2->land == laAsteroids) oc = 10;
     if(markOrb(itOrbIntensity)) oc = oc * 6 / 5;
     if(!items[it]) items[it]++;
