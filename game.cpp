@@ -5600,8 +5600,6 @@ void sageheat(cell *c, double v) {
 
 void activateFlashFrom(cell *cf, eMonster who, flagtype flags);
 
-vector<cell*> nonmovers;
-
 bool sagefresh = true;
 
 int nearestPathPlayer(cell *c) {

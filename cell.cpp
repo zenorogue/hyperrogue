@@ -597,8 +597,6 @@ bool randpatternMajority(cell *c, int ival, int iterations) {
   return memo;
   }
 
-map<heptagon*, int> spins;
-
 #define RVAL_MASK 0x10000000
 #define DATA_MASK 0x20000000
 
@@ -684,17 +682,6 @@ cdata *getHeptagonCdata(heptagon *h) {
     setHeptagonRval(hs.at);
     
     affect(mydata, hs.spin ? hs.at->rval0 : hs.at->rval1, signum);
-
-    /* if(!(spins[hs.at] & hs.spin)) {
-      spins[hs.at] |= (1<<hs.spin);
-      int t = 0;
-      for(int k=0; k<7; k++) if(spins[hs.at] & (1<<k)) t++;
-      static bool wast[256];
-      if(!wast[spins[hs.at]]) {
-        printf("%p %4x\n", hs.at, spins[hs.at]);
-        wast[spins[hs.at]] = true;
-        }
-      } */
     }
 
   return h->cdata = new cdata(mydata);
