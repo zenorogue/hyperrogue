@@ -4,6 +4,7 @@
 namespace hr {
 
 vector<radarpoint> radarpoints;
+vector<radarline> radarlines;
 
 purehookset hooks_stats;
 
@@ -396,19 +397,33 @@ void draw_radar(bool cornermode) {
     queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
     }
 
+  auto locate = [&] (hyperpoint h) {
+    if(sph)
+      return point3(cx + (rad-10) * h[0], cy + (rad-10) * h[2] * si + (rad-10) * h[1] * co, +h[1] * si > h[2] * co ? 8 : 16);
+    else if(hyp) 
+      return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[3]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
+    else
+      return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (max_eu_dist + cgi.scalefactor/4) * 0.8);
+    };
+  
+  for(auto& r: radarlines) {
+    hyperpoint h1 = locate(r.h1);
+    hyperpoint h2 = locate(r.h2);
+    h1 = tC0(atscreenpos(h1[0], h1[1], 1));
+    h2 = tC0(atscreenpos(h2[0], h2[1], 1));
+    queueline(h1, h2, r.line, -1);
+    }
+
   quickqueue();
   glflush();
-
-  for(auto& r: radarpoints)
+  
+  for(auto& r: radarpoints) {
     if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
-    else if(sph) displaychr(int(cx + (rad-10) * r.h[0]), int(cy + (rad-10) * r.h[2] * si + (rad-10) * r.h[1] * co), 0, +r.h[1] * si > r.h[2] * co ? 8 : 16, r.glyph, r.color);
-    else if(hyp) {
-      int siz = 1/(1+r.h[3]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6);
-      displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, siz, r.glyph, r.color);
-      }
     else {
-      displaychr(int(cx + rad * r.h[0]), int(cy + rad * r.h[1]), 0, rad * cgi.scalefactor / (max_eu_dist + cgi.scalefactor/4) * 0.8, r.glyph, r.color);
-      }    
+      hyperpoint h = locate(r.h);
+      displaychr(int(h[0]), int(h[1]), 0, int(h[2]), r.glyph, r.color);
+      }
+    }
   }
 
 void drawStats() {

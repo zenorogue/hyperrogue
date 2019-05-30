@@ -1185,7 +1185,13 @@ struct radarpoint {
   color_t line;
   };
 
+struct radarline {
+  hyperpoint h1, h2;
+  color_t line;
+  };
+
 extern vector<radarpoint> radarpoints;
+extern vector<radarline> radarlines;
 
 extern vector< function<void()> > screens;
 

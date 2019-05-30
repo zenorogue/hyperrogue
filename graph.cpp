@@ -721,13 +721,13 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
 ld max_eu_dist = 0;
 transmatrix radar_transform;
 
-void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
-  hyperpoint h = tC0(V);
-  if(GDIM == 3 && WDIM == 2) h = tC0(radar_transform * V);
+pair<bool, hyperpoint> makeradar(hyperpoint h) {
+  if(GDIM == 3 && WDIM == 2) h = radar_transform * h;
 
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
-  if(d > sightranges[geometry]) return;
+  if(d >= sightranges[geometry]) return {false, h};
+  
   if(WDIM == 3) {
     if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
     }
@@ -741,7 +741,21 @@ void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
     if(d > max_eu_dist) max_eu_dist = d;
     if(d) h = h * (d / (max_eu_dist + cgi.scalefactor/4) / hypot_d(3, h));
     }
-  radarpoints.emplace_back(radarpoint{h, ch, col, outline});
+  return {true, h};
+  }
+
+void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
+  hyperpoint h = tC0(V);
+  auto hp = makeradar(h);
+  if(hp.first)
+    radarpoints.emplace_back(radarpoint{hp.second, ch, col, outline});
+  }
+
+void addradar(const hyperpoint h1, const hyperpoint h2, color_t col) {
+  auto hp1 = makeradar(h1);
+  auto hp2 = makeradar(h2);
+  if(hp1.first && hp2.first)
+    radarlines.emplace_back(radarline{hp1.second, hp2.second, col});
   }
 
 color_t kind_outline(eItem it) {
@@ -4431,6 +4445,12 @@ void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, co
   gridline(V, h1, V, h2, col, prec);
   }
 
+void radar_grid(cell *c, const transmatrix& V) {
+  for(int t=0; t<c->type; t++)
+    if(c->move(t) && c->move(t) < c)
+      addradar(V*get_corner_position(c, t%c->type), V*get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)));
+  }
+
 void draw_grid_at(cell *c, const transmatrix& V) {
   dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
@@ -6285,7 +6305,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(vid.grid || (c->land == laAsteroids && !(WDIM == 2 && GDIM == 3))) draw_grid_at(c, V);
     
-    if(onradar && WDIM == 2) addradar(V, ch, darkenedby(asciicol, darken), 0);
+    if(onradar && WDIM == 2 && GDIM == 3) addradar(V, ch, darkenedby(asciicol, darken), 0);
+    
+    if(WDIM == 2 && GDIM == 3) radar_grid(c, V);
     #endif
 
     if(!euclid) {
@@ -6861,6 +6883,7 @@ void drawthemap() {
 
   if(DIM == 3) make_clipping_planes();
   radarpoints.clear();
+  radarlines.clear();
   if(!(cmode & sm::NORMAL)) max_eu_dist = 0;
   callhooks(hooks_drawmap);
 
