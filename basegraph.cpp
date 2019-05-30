@@ -1116,7 +1116,9 @@ bool setfsize = true;
 bool vsync_off;
 
 void do_setfsize() {
-  vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
+  dual::split_or_do([&] {
+    vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
+    });
   }
 
 void disable_vsync() {
