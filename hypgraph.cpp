@@ -1154,6 +1154,7 @@ void centerpc(ld aspd) {
   DEBBI(DF_GRAPH, ("center pc"));
   
   ors::unrotate(cwtV); ors::unrotate(View);
+  if(invalid_matrix(cwtV)) return;
   
   transmatrix T = cwtV;
   #if MAXMDIM >= 4

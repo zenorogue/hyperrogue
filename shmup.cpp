@@ -1014,7 +1014,7 @@ void monster::store() {
   }
 
 void monster::findpat() {
-  isVirtual = !gmatrix.count(base);
+  isVirtual = !gmatrix.count(base) || invalid_matrix(gmatrix[base]);
   if(!isVirtual) pat = gmatrix[base] * at;
   else pat = at;
   }
@@ -3546,6 +3546,7 @@ void init() {
       pc[i]->at = Id;
     else
       pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
+    pc[i]->pat = pc[i]->at;
     pc[i]->base = cwt.at;
     pc[i]->vel = 0;
     pc[i]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord ||
