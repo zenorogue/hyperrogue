@@ -132,7 +132,6 @@ namespace dual {
         forcedmovetype = fm; 
         lms[k][fm] = movepcto(fm == fmMove ? d : 0, subdir, true); 
         lmt[k][fm] = nextmovetype;
-        println(hlog, k, int(fm), " -> ", lms[k][fm]);
         forcedmovetype = fmSkip;
         for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
         }
@@ -152,7 +151,6 @@ namespace dual {
     for(auto fm: {fmMove, fmInstant, fmAttack}) if(lms[0][fm] && lms[1][fm]) {
       if(lmt[0][fm] == lmSkip && lmt[1][fm] == lmSkip)
         continue;
-      println(hlog, "apply ", int(fm));
       if(checkonly) { switch_to(cg); return true; }
       int flash = items[itOrbFlash], lgt = items[itOrbLightning];
       switch_to(0); forcedmovetype = fm; movepcto(0, subdir, false); forcedmovetype = fmSkip;
@@ -317,7 +315,7 @@ namespace dual {
         println(hlog, "equivalent");
         v = nxt, nxt = 1 - nxt;
         }
-      println(hlog, dnameof(l), ": ", lv[0].msg, " vs ", lv[1].msg, " verdict = ", v);
+      // println(hlog, dnameof(l), ": ", lv[0].msg, " vs ", lv[1].msg, " verdict = ", v);
       }
     }
 
