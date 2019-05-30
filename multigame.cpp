@@ -119,6 +119,7 @@ namespace dual {
       if(ok) for(int k=0; k<2; k++) {
         switch_to(k);
         movepcto(d, subdir, false);
+        if(k == 0) turncount--;
         }
       switch_to(cg);
       return true;
@@ -155,6 +156,7 @@ namespace dual {
       int flash = items[itOrbFlash], lgt = items[itOrbLightning];
       switch_to(0); forcedmovetype = fm; movepcto(0, subdir, false); forcedmovetype = fmSkip;
       if(fm == fmInstant) { items[itOrbFlash] = flash, items[itOrbLightning] = lgt; }
+      turncount--;
       switch_to(1); forcedmovetype = fm; movepcto(0, subdir, false); forcedmovetype = fmSkip;
       switch_to(cg);
       reduceOrbPowers();
