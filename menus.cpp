@@ -406,15 +406,6 @@ void switchHardcore() {
   if(pureHardcore()) popScreenAll();
   }
 
-void help_nochaos() {
-  gotoHelp(
-    "In the Chaos mode, lands change very often, and "
-    "there are no walls between them. "
-    "Some lands are incompatible with this."
-    "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
-    );
-  }
-
 void showCreative() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(3);
@@ -482,6 +473,44 @@ void showCreative() {
   dialog::addBack();
   dialog::display();
   }
+
+void show_chaos() {
+  gamescreen(3);
+  dialog::init(XLAT("Chaos mode"));
+  chaosUnlocked = chaosUnlocked || autocheat;
+
+  dialog::addHelp(
+    "In the Chaos mode, lands change very often, and "
+    "there are no walls between them. "
+    "Some lands are incompatible with this."
+    "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+    );
+  
+  dialog::addBreak(100);
+  
+  dialog::addBoolItem(XLAT("Chaos mode") + " " + ONOFF(false), !chaosmode, 'A');
+  dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::chaos); }); });
+  
+  if(chaosUnlocked) for(int a=1; a<5; a++) {
+    dialog::addBoolItem(
+      a == 1 ? XLATN("Crossroads IV") : 
+      a == 2 ? XLATN("Palace") : 
+      a == 3 ? XLAT("total chaos") :
+      XLAT("random walk"), 
+      chaosmode == a, 'A' + a);
+    dialog::add_action([a] { dialog::do_if_confirmed([a] { 
+      int cm = chaosmode;
+      stop_game_and_switch_mode(rg::chaos); 
+      if(!chaosmode && cm != a) switch_game_mode(rg::chaos); 
+      if(chaosmode) chaosmode = a; 
+      start_game(); 
+      }); });
+    }
+
+  dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
+  }
   
 void showChangeMode() {
   gamescreen(3);
@@ -506,6 +535,7 @@ void showChangeMode() {
   
   multi::cpid = 0;
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
+  dialog::add_action_push(show_chaos);
   dialog::addBoolItem(XLAT("peaceful mode"), peace::on, 'p');
   dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
@@ -567,11 +597,6 @@ void showChangeMode() {
       tour::start();
       });
   #endif
-    else if(uni == 'C') {
-      chaosUnlocked = chaosUnlocked || autocheat;
-      if(chaosUnlocked) dialog::do_if_confirmed([] { restart_game(rg::chaos); });
-      if(!chaosUnlocked) help_nochaos();
-      }
     else if(xuni == 'P') {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
@@ -785,7 +810,6 @@ void showStartMenu() {
       }
     else if(uni == 'c' || uni == 'i' || uni == 's' || uni == 'C' || uni == '7') {
       if(uni == 'C' && !chaosUnlocked) {
-        help_nochaos();
         return;
         }
       popScreenAll();
