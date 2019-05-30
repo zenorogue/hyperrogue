@@ -452,9 +452,11 @@ void drawStats() {
   
   if(vid.radarsize > 0 && h)
   #if CAP_RACING
-    if(!racing::on && !peace::on)
+    if(!racing::on)
   #endif
-    draw_radar(cornermode);
+    if(!peace::on)
+    if(!(cmode & sm::MISSION))
+      draw_radar(cornermode);
 
   if(haveMobileCompass()) {
     initquickqueue();
