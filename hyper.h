@@ -2318,7 +2318,8 @@ color_t darkena(color_t c, int lev, int a);
 
 #define SHSIZE 16
 
-extern cell *shpos[MAXPLAYER][SHSIZE];
+
+extern vector<array<cell*, MAXPLAYER>> shpos;
 extern int cshpos;
 
 #if CAP_ANIMATIONS

@@ -4062,6 +4062,7 @@ int stayval(cell *c, flagtype mf) {
   }
 
 int totalbulldistance(cell *c, int k) {
+  shpos.resize(SHSIZE);
   int tbd = 0;
   for(int p=0; p<numplayers(); p++) {
     cell *c2  = shpos[p][(cshpos+SHSIZE-k-1)%SHSIZE];
@@ -5069,12 +5070,13 @@ void movemutant() {
     }  
   }
 
-cell *shpos[MAXPLAYER][SHSIZE];
+__typeof(shpos) shpos;
 int cshpos = 0;
 
 cell *lastmountpos[MAXPLAYER];
 
 void clearshadow() {
+  shpos.resize(SHSIZE);
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
     shpos[p][i] = NULL;
   }
@@ -5083,6 +5085,7 @@ void moveshadow() {
 
   cell *shfrom = NULL;
 
+  shpos.resize(SHSIZE);
   for(int p=0; p<numplayers(); p++) {
     cell *c = shpos[p][cshpos];
     if(c && c->monst == moShadow) {
