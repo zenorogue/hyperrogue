@@ -28,6 +28,7 @@ void setCanvas(presmode mode, char canv) {
     ld = firstland;
     firstland = laCanvas;
     start_game();
+    resetview();
     }
   if(mode == pmStop) {
     gamestack::pop();
@@ -173,6 +174,7 @@ bool handleKeyTour(int sym, int uni) {
         break;
       }      
     start_game();
+    resetview();
     presentation(pmGeometryStart);
     string x;
     if(slides[currentslide].flags & USE_SLIDE_NAME) {
@@ -773,6 +775,7 @@ slide default_slides[] = {
         gamestack::push();
         switch_game_mode(rg::shmup);
         start_game();
+        resetview();
         }
       if(mode == 3) {
         shmup::clearMonsters();
