@@ -355,6 +355,7 @@ extern ld max_eu_dist;
 
 void draw_radar(bool cornermode) {
 
+  if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
   bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
   bool sph = sphere;
@@ -364,8 +365,9 @@ void draw_radar(bool cornermode) {
   dynamicval<bool> ga(vid.always3, false);
   initquickqueue();
   int rad = vid.radarsize;
+  if(dual::state) rad /= 2; 
   
-  ld cx = cornermode ? rad+2 : vid.xres-rad-2;
+  ld cx = dual::state ? (dual::currently_loaded ? vid.xres/2+rad+2 : vid.xres/2-rad-2) : cornermode ? rad+2 : vid.xres-rad-2;
   ld cy = vid.yres-rad-2 - vid.fsize;
 
   for(int i=0; i<360; i++)
