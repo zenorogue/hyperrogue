@@ -890,7 +890,7 @@ eLand switchable(eLand nearland, eLand farland, int c) {
     return nearland;
     }
   else if(specialland == laCrossroads4) {
-    if(hrand(15) == 0)
+    if((dual::state && nearland == laCrossroads4) || hrand(15) == 0)
       return getNewLand(nearland);
     return nearland;
     }
