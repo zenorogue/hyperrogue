@@ -987,9 +987,10 @@ bool gmodekeys(int sym, int uni) {
     return true;
     }
   else {
-    if(NUMBERKEY == '1') { vid.yshift = 0; vid.sspeed = 0; }
-    else if(NUMBERKEY == '2') { vid.yshift = 0; vid.sspeed = -10; }
-    else if(NUMBERKEY == '3') { vid.yshift = 1; vid.sspeed = 0; }
+    auto& ysh = (WDIM == 2 ? vid.camera : vid.yshift);
+    if(NUMBERKEY == '1') { ysh = 0; vid.sspeed = 0; }
+    else if(NUMBERKEY == '2') { ysh = 0; vid.sspeed = -10; }
+    else if(NUMBERKEY == '3') { ysh = 1; vid.sspeed = 0; }
     else if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
     else return false;
     return true;
