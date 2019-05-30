@@ -6807,7 +6807,7 @@ void make_actual_view() {
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) 
-      actual_view_transform = zpush(wall_radar(viewctr.at->c7, inverse(View), max)) * actual_view_transform; 
+      actual_view_transform = zpush(wall_radar((masterless ? centerover.at : viewctr.at->c7), inverse(View), max)) * actual_view_transform; 
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
   #endif
