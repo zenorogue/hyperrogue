@@ -798,7 +798,9 @@ int readArgs() {
 
 #if CAP_COMMANDLINE
 auto hook = 
-  addHook(hooks_args, 100, readArgs);
+  addHook(hooks_args, 100, readArgs)
++ addHook(hooks_gamedata, 0, [] (gamedata* gd) { gd->store(altmap); gd->store(archimedean_gmatrix); gd->store(current_altmap); });
+
 #endif
 
 #if MAXMDIM >= 4

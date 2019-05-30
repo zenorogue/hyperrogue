@@ -866,15 +866,17 @@ void setLandSphere(cell *c) {
     }
   }
 
-eLand euland[max_vec];
+vector<eLand> euland;
 map<int, eLand> euland3;
 map<int, eLand> euland3_hash;
 
 eLand& get_euland(int c) {
+  euland.resize(max_vec);
   return euland[c & (max_vec-1)];
   }
 
 void clear_euland(eLand first) {
+  euland.resize(max_vec);
   for(int i=0; i<max_vec; i++) euland[i] = laNone;
   euland[0] = euland[1] = euland[max_vec-1] = first;
   euland3.clear();
@@ -1616,5 +1618,11 @@ void pregen() {
       if(landUnlocked(l) && isLandIngame(l)) 
         currentlands.push_back(l);
   }
+
+auto ccm_bigstuff = addHook(hooks_gamedata, 0, [] (gamedata* gd) {
+  gd->store(euland);
+  gd->store(euland3);
+  gd->store(euland3_hash);
+  });
 
 }

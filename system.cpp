@@ -1386,11 +1386,15 @@ addHook(hooks_gamedata, 0, [] (gamedata* gd) {
   gd->store(crush_now);
   gd->store(crush_next);
   gd->store(rosemap);
+  gd->store(airmap);
   gd->store(adj_memo);
   gd->store(pd_from);
   gd->store(pd_range);
   gd->store(pathqm);
   gd->store(reachedfrom);
+  gd->store(gravity_state);
+  gd->store(last_gravity_state);
+  gd->store(shpos);
   }) +
 addHook(hooks_removecells, 0, [] () {
   eliminate_if(crush_next, is_cell_removed);

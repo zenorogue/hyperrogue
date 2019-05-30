@@ -3777,7 +3777,7 @@ void clearMemory() {
 
 void gamedata(hr::gamedata* gd) { 
   if(shmup::on) {
-    for(int i=0; i<MAXPLAYER; i++) gd->store(pc[i]);
+    gd->store(pc[0]); // assuming 1 player!
     gd->store(nextmove);
     gd->store(curtime);
     gd->store(nextdragon);
@@ -3789,6 +3789,9 @@ void gamedata(hr::gamedata* gd) {
     gd->store(lmousetarget);
     gd->store(nonvirtual);
     gd->store(additional);
+    if(WDIM == 3) gd->store(swordmatrix[0]); // assuming 1 player!
+    gd->store(traplist);
+    gd->store(firetraplist);
     }
   }
 

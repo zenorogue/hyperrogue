@@ -7476,8 +7476,9 @@ auto graphcm = addHook(clearmemory, 0, [] () {
   gd->store(animations);
   gd->store(flashes);
   gd->store(fallanims);
+  gd->store(radar_transform);
+  gd->store(actual_view_transform);
   });
-;
 
 //=== animation
 

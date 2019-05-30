@@ -244,7 +244,13 @@ auto ccm_blizzard = addHook(clearmemory, 0, [] () {
   blizzardcells.clear();
   bcells.clear();
   }) + 
-addHook(hooks_removecells, 0, [] () {
++ addHook(hooks_gamedata, 0, [] (gamedata* gd) {
+  gd->store(arrowtraps);
+  gd->store(blizzardcells);
+  gd->store(bcells);
+  gd->store(blizzard_N);
+  })
++ addHook(hooks_removecells, 0, [] () {
   eliminate_if(arrowtraps, is_cell_removed);
   });
 
