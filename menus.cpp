@@ -489,7 +489,7 @@ void show_chaos() {
   dialog::addBreak(100);
   
   dialog::addBoolItem(XLAT("Chaos mode") + " " + ONOFF(false), !chaosmode, 'A');
-  dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::chaos); }); });
+  dialog::add_action([] { dialog::do_if_confirmed([] { if(chaosUnlocked) restart_game(rg::chaos); }); });
   
   if(chaosUnlocked) for(int a=1; a<5; a++) {
     if(a > 1 && ISWEB) continue;
