@@ -1199,7 +1199,7 @@ extern vector<radarline> radarlines;
 extern vector< function<void()> > screens;
 
 template<class T> void pushScreen(const T& x) { screens.push_back(x); } 
-inline void popScreen() { screens.pop_back(); }
+inline void popScreen() { if(isize(screens)>1) screens.pop_back(); }
 inline void popScreenAll() { while(isize(screens)>1) popScreen(); }
 
 struct display_data {
