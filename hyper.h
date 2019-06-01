@@ -4571,7 +4571,7 @@ hpcshape
   
   void require_basics() { if(state & 1) return; state |= 1; prepare_basics(); }
   void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }
-  void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_state; prepare_usershapes(); }
+  void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
   };
 
 #if MAXMDIM >= 4
