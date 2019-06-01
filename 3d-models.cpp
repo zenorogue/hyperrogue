@@ -1143,7 +1143,7 @@ void geometry_information::make_3d_models() {
   
   for(int i=0; i<3; i++) {
   
-    array<hpcshape*,3> sh = {&shBigCarpet1, &shBigCarpet2, &shBigCarpet3};
+    array<hpcshape*,3> sh = make_array(&shBigCarpet1, &shBigCarpet2, &shBigCarpet3);
 
     bshape(*sh[i], PPR::GFLOORa);  
     for(int t=0; t<S7; t++) {
