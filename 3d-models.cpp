@@ -564,6 +564,16 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   last->flags |= POLY_TRIANGLES;
   add_texture(sh);
   shift_last(-push);
+  
+  if(&sh == &shDogTorso) {
+    finishshape();
+    shDogStripes = shDogTorso;
+    auto& utt = models_texture;
+    int a = (6 * 360 / step);
+    for(int i=0; i<shDogStripes.e - shDogStripes.s; i++)
+      if(i % (2 * a) < a)
+        utt.tvertices[i + shDogStripes.texture_offset][1] /= 4;
+    }
   }
 
 void disable(hpcshape& sh) {

@@ -1545,11 +1545,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
         queuepoly(VABODY, cgi.shDogBody, darkena(0xFFFFFF, 0, 0xFF));
       else {
         ShadowV(V, cgi.shDogTorso);
-        queuepoly(VABODY, cgi.shDogTorso, darkena(0xFFFFFF, 0, 0xFF));
+        if(GDIM == 2) queuepoly(VABODY, cgi.shDogTorso, darkena(0xFFFFFF, 0, 0xFF));
         animallegs(VALEGS, moRunDog, darkena(0xFFFFFF, 0, 0xFF), footphase);
         }
       queuepoly(VAHEAD, cgi.shDogHead, darkena(0xFFFFFF, 0, 0xFF));
-      queuepoly(VABODY, cgi.shDogStripes, darkena(0x303030, 0, 0xFF));
+      queuepoly(VABODY, cgi.shDogStripes, GDIM == 2 ? darkena(0x303030, 0, 0xFF) : 0xFFFFFFFF);
       queuepoly(VAHEAD, cgi.shWolf1, darkena(0x202020, 0, 0xFF));
       queuepoly(VAHEAD, cgi.shWolf2, darkena(0x202020, 0, 0xFF));
       queuepoly(VAHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
