@@ -1112,7 +1112,7 @@ void projectionDialog() {
     "for more models."));
   dialog::extra_options = [] () {
     dialog::addBreak(100);
-    dialog::addHelp(XLAT(
+    if(GDIM == 2) dialog::addHelp(XLAT(
       "If we are viewing an equidistant g absolute units below a plane, "
       "from a point c absolute units above the plane, this corresponds "
       "to viewing a Minkowski hyperboloid from a point "
@@ -1284,7 +1284,11 @@ void show3D() {
     dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts(vid.camera), 'c');
     dialog::addSelItem(XLAT("Ground level below the plane"), fts(vid.depth), 'g');
   
-    dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'a');
+    if(GDIM == 2)
+      dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'p');
+    else if(pmodel != mdPerspective)
+      dialog::addSelItem(XLAT("Projection distance"), fts(vid.alpha), 'p');
+    
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("Height of walls"), fts(vid.wall_height), 'w');
     
