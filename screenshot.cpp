@@ -816,7 +816,7 @@ void show() {
     });
   switch(ma) {
     case maCircle: {
-      animator(XLAT("circle spins"), circle_spins, 's');
+      animator(XLAT("circle spins"), circle_spins, 'C');
       dialog::addSelItem(XLAT("circle radius"), fts(circle_radius), 'c');
       dialog::add_action([] () { 
         dialog::editNumber(circle_radius, 0, 10, 0.1, acosh(1.), XLAT("circle radius"), ""); 
@@ -841,6 +841,7 @@ void show() {
         dialog::openColorDialog(circle_display_color, NULL);
         });
       dialog::addBreak(100);
+      break;
       }
     case maTranslation: 
     case maParabolic: {
@@ -866,7 +867,7 @@ void show() {
           dialog::editNumber(parabolic_length, 0, 10, 1, 1, "cells to go", ""); 
           });
         }
-      dialog::addSelItem(XLAT("shift"), fts(shift_angle) + "°", 's');
+      dialog::addSelItem(XLAT("shift"), fts(shift_angle) + "°", 'C');
       dialog::add_action([] () { 
         dialog::editNumber(shift_angle, 0, 90, 15, 0, XLAT("shift"), ""); 
         });
@@ -878,7 +879,7 @@ void show() {
       }
     case maRotation:
       if(DIM == 3) {
-        dialog::addSelItem(XLAT("angle to screen normal"), fts(normal_angle) + "°", 's');
+        dialog::addSelItem(XLAT("angle to screen normal"), fts(normal_angle) + "°", 'C');
         dialog::add_action([] () { 
           dialog::editNumber(normal_angle, 0, 360, 15, 0, XLAT("angle to screen normal"), ""); 
           });
