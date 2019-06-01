@@ -212,7 +212,7 @@ namespace multi {
     int  deadzoneval[MAXJOY][MAXAXE];
     };
 
-  multi::config scfg;  
+  extern config scfg;  
   }
 
 enum eStereo { sOFF, sAnaglyph, sLR, sODS };
@@ -5493,7 +5493,7 @@ namespace dual {
   // 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames)
   extern int state;
   extern int currently_loaded, main_side;
-  bool affect_both;
+  extern bool affect_both;
 
   bool movepc(int d, int subdir, bool checkonly);
   extern transmatrix player_orientation[2];

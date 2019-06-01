@@ -77,6 +77,7 @@ namespace dual {
 
   int currently_loaded;
   int main_side;
+  bool affect_both;
 
   gamedata dgd[2];
   transmatrix player_orientation[2];

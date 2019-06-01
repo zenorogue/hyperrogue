@@ -24,6 +24,7 @@ namespace shmupballs {
 
 namespace multi {
 
+  config scfg;  
   charstyle scs[MAXPLAYER];
 
   int players = 1;
