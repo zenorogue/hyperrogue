@@ -3284,8 +3284,12 @@ void turn(int delta) {
     })) return;
 
   if(callhandlers(false, hooks_turn, delta)) return;
-  if(!shmup::on) return;
-  
+
+  lmousetarget = NULL;
+  if(mousetarget && !mousetarget->isVirtual && intval(mouseh, mousetarget->pat*C0) < 0.1)
+    lmousetarget = mousetarget;
+
+  if(!shmup::on) return;  
   if(!(cmode & sm::NORMAL)) {
     #if CAP_RACING
     if(racing::on) {
@@ -3299,9 +3303,6 @@ void turn(int delta) {
   timetowait = 0;
 
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
-  lmousetarget = NULL;
-  if(mousetarget && !mousetarget->isVirtual && intval(mouseh, mousetarget->pat*C0) < 0.1)
-    lmousetarget = mousetarget;
   
   if(delta > 1000) delta = 1000;
   

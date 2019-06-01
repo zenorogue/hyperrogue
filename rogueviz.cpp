@@ -209,6 +209,7 @@ void createViz(int id, cell *c, transmatrix at) {
   vd.m->type = moRogueviz;
   vd.m->base = c;
   vd.m->at = at;
+  vd.m->isVirtual = false;
   }
 
 void notimpl() {
