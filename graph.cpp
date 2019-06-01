@@ -5245,16 +5245,18 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       // floor
       bool eoh = euclid || !BITRUNCATED;
 
-      if(c->wall == waChasm || chaosmode || c->land != laRose) {
+      if(DIM == 2 && (c->land != laRose || chaosmode)) {
+        int rd = rosedist(c);
+        if(rd == 1) 
+          draw_floorshape(c, mmscale(V, cgi.SLEV[2]), cgi.shRoseFloor, 0x80406040, PPR::LIZEYE);
+        if(rd == 2)
+          draw_floorshape(c, mmscale(V, cgi.SLEV[2]), cgi.shRoseFloor, 0x80406080, PPR::LIZEYE);
+        }
+
+      if(c->wall == waChasm) {
         zcol = 0;
         int rd = rosedist(c);
-        if(chaosmode || c->land != laRose) {
-          if(rd == 1) 
-            draw_floorshape(c, mmscale(V, cgi.SLEV[2]), cgi.shRoseFloor, 0x80406040, PPR::LIZEYE);
-          if(rd == 2)
-            draw_floorshape(c, mmscale(V, cgi.SLEV[2]), cgi.shRoseFloor, 0x80406080, PPR::LIZEYE);
-          }
-        else {
+        if(DIM == 2) {
           if(rd == 1) 
             draw_floorshape(c, V, cgi.shRoseFloor, 0x80406020);
           if(rd == 2)
