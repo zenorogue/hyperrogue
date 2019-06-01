@@ -492,6 +492,7 @@ void show_chaos() {
   dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::chaos); }); });
   
   if(chaosUnlocked) for(int a=1; a<5; a++) {
+    if(a > 1 && ISWEB) continue;
     dialog::addBoolItem(
       a == 1 ? XLATN("Crossroads IV") : 
       a == 2 ? XLATN("Palace") : 
@@ -545,7 +546,7 @@ void showChangeMode() {
 #if CAP_RACING
   dialog::addBoolItem(XLAT("racing mode"), racing::on, 'R');
 #endif
-#if CAP_ARCM
+#if CAP_ARCM && !ISWEB
   if(multi::players == 1) {
     dialog::addBoolItem(XLAT("dual geometry mode"), dual::state, 'D');
     dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::dualmode); }); });
