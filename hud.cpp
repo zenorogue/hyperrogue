@@ -610,14 +610,16 @@ void drawStats() {
     for(int i=0; i<multi::players; i++) {
       if(race_finish_tick[i]) {
         multi::cpid = i;
-        if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), racetimeformat(race_finish_tick[i] - race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize))
+        if(displayButtonS(vid.xres - 8, vid.fsize * (3+2*i), racetimeformat(race_finish_tick[i] - race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize))
           getcstat = 'o';
         }
       else {
         int comp = get_percentage(i);
-        if(displayButtonS(vid.xres - 8, vid.fsize * (3+i), its(comp) + "%", (getcs().uicolor >> 8), 16, vid.fsize))
+        if(displayButtonS(vid.xres - 8, vid.fsize * (3+2*i), its(comp) + "%", (getcs().uicolor >> 8), 16, vid.fsize))
           getcstat = 'o';
         }
+      if(displayButtonS(vid.xres - 8, vid.fsize * (4+2*i), fts_fixed(shmup::pc[i]->vel * SCALE * 1000/600, 2), (getcs().uicolor >> 8), 16, vid.fsize))
+        getcstat = 'o';
       }
     #endif
     }

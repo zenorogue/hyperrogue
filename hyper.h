@@ -3761,6 +3761,7 @@ ld det(const transmatrix& T);
 void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame = 0);
 
 string fts(ld x, int prec = 6);
+string fts_fixed(ld x, int prec = 6);
 
 bool model_needs_depth();
 

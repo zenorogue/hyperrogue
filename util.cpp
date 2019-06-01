@@ -34,6 +34,13 @@ string fts(ld x, int prec) {
   return ss.str();
   }
 
+string fts_fixed(ld x, int prec) {
+  std::stringstream ss;
+  ss.precision(prec);
+  ss << std::fixed << x;
+  return ss.str();
+  }
+
 bool scan(fhstream& hs, int& i) { return fscanf(hs.f, "%d", &i) == 1; }
 bool scan(fhstream& hs, color_t& c) { return fscanf(hs.f, "%x", &c) == 1; }
 bool scan(fhstream& hs, ld& x) { return fscanf(hs.f, "%lf", &x) == 1; }

@@ -1853,6 +1853,7 @@ void movePlayer(monster *m, int delta) {
       ld r = hypot_d(WDIM, avg_inertia);
       nat = nat * rspintox(avg_inertia) * xpush(r * delta) * spintox(avg_inertia);
       if(WDIM == 3) nat = nat * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+      m->vel = r * (600/SCALE);
       }
     else if(WDIM == 3) {
       nat = nat1 * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
