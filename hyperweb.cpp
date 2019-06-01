@@ -48,10 +48,12 @@ namespace hr {
 
 void open_url(string s) {
   EM_ASM_({
-    window.open(Pointer_stringify($0));
+    window.open(UTF8ToString($0, 1000));
     }, s.c_str());
   }
 
+
+//    window.open(Pointer_stringify($0));
 bool demoanim;
 
 void toggleanim(bool v) {
