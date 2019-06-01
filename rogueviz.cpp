@@ -40,7 +40,7 @@ const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
 
 using namespace hr;
 
-edgetype default_edgetype = { .1, DEFAULT_COLOR, "default" };
+edgetype default_edgetype = { .1, .1, .1, DEFAULT_COLOR, 0xFF0000FF, "default" };
 
 void init();
 
@@ -1092,7 +1092,7 @@ void rogueviz_help(int id, int pagenumber) {
     hex.key = 'a' + i;
 
     edgeinfo *ei = alledges[pagenumber + i];
-    if(ei->weight < ei->type->visible_from) continue;
+    if(ei->weight < ei->type->visible_from_help) continue;
     int k = ei->i ^ ei->j ^ id;
     hex.text = vdata[k].name;
     hex.color = vdata[k].cp.color1 >> 8;
@@ -1298,7 +1298,6 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   
   if(!leftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
-    if(ei->weight < ei->type->visible_from) continue;
     vertexdata& vd1 = vdata[ei->i];
     vertexdata& vd2 = vdata[ei->j];
 
@@ -1310,6 +1309,8 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     else if(vd2.m == shmup::lmousetarget) hilite = true;
     else if(oi == lid || oj == lid) hilite = true;
 
+    if(ei->weight < (hilite ? ei->type->visible_from_hi : ei->type->visible_from)) continue;
+
     if(hilite) ghilite = true;
     
     bool multidraw = quotient || euwrap;
@@ -1317,14 +1318,14 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
       
-      color_t col = ei->type->color;
+      color_t col = (hilite ? ei->type->color_hi : ei->type->color);
       auto& alpha = part(col, 0);
       
       if(kind == kSAG) {
         if(ei->weight2 > maxweight) maxweight = ei->weight2;
         alpha *= pow(ei->weight2 / maxweight, ggamma);
         }
-      if(hilite || hiliteclick) alpha = (alpha + 256) / 2;
+      // if(hilite || hiliteclick) alpha = (alpha + 256) / 2;
       
       if(svg::in && alpha < 16) continue;
       
@@ -1367,12 +1368,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         display(shmup::calc_gmatrix(vd2.m->base));
         } */
       
-      if(hilite) {
-        col &= 0xFF;
-        col |= 0xFF000000;
-        }
-
-      else if((col >> 8) == (DEFAULT_COLOR >> 8)) {
+      if((col >> 8) == (DEFAULT_COLOR >> 8)) {
         col &= 0xFF;
         col |= (forecolor << 8);
         }
@@ -1448,7 +1444,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     }
 
   if(!vd.virt) {
-    queuedisk(V * m->at, ghilite ? colorpair(0xFF0000FF) : vd.cp, false, vd.info, i);
+    queuedisk(V * m->at, vd.cp, false, vd.info, i);
     }
   
   
@@ -1796,6 +1792,14 @@ int readArgs() {
     }
   else if(argis("-sagmin")) {
     shift_arg_formula(default_edgetype.visible_from);
+    default_edgetype.visible_from_hi = default_edgetype.visible_from;
+    default_edgetype.visible_from_help = default_edgetype.visible_from;    
+    }
+  else if(argis("-sagminhi")) {
+    shift_arg_formula(default_edgetype.visible_from_hi);
+    }
+  else if(argis("-sagminhelp")) {
+    shift_arg_formula(default_edgetype.visible_from_help);
     }
 // (2) read the edge data
   else if(argis("-sagpar")) {
