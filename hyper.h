@@ -2983,6 +2983,19 @@ struct dqi_action : drawqueueitem {
   void draw() { action(); }
   virtual color_t outline_group() { return 2; }
   };
+
+struct sky_item {
+  cell *c;
+  transmatrix T;
+  color_t color;
+  sky_item(cell *_c, const transmatrix _T, color_t _color) : c(_c), T(_T), color(_color) {}
+  };
+
+struct dqi_sky : drawqueueitem {
+  vector<sky_item> sky;
+  void draw();
+  virtual color_t outline_group() { return 3; }
+  };
   
 extern int emeraldtable[100][7];
 
@@ -4005,6 +4018,11 @@ namespace glhr {
       color[1] = g;
       color[2] = b;
       color[3] = 1;
+      }
+    colored_vertex(hyperpoint h, color_t col) {
+      coords = pointtogl(h);
+      for(int i=0; i<4; i++)
+        color[i] = part(col, 3-i) / 255.0;
       }
     };
   
