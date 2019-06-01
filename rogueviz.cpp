@@ -2327,7 +2327,7 @@ slide rvslides[] = {
     [] (presmode mode) {
       slidecommand = "staircase menu";
       if(mode == 3) {
-        while(gamestack::pushed()) pop_game();
+        while(gamestack::pushed()) stop_game(), gamestack::pop();
         banachtarski::bmap = false;
         banachtarski::on = false;
         }
@@ -2335,7 +2335,7 @@ slide rvslides[] = {
         if(!banachtarski::on) {
           bool b = mapeditor::drawplayer;
           specialland = cwt.at->land;
-          push_game();
+          gamestack::push();
           banachtarski::init_bantar();
           airmap.clear();
           dynamicval<int> vs(sightrange_bonus, 3);
@@ -2345,11 +2345,12 @@ slide rvslides[] = {
           quitmainloop = false;
           mapeditor::drawplayer = b;
           banachtarski::init_bantar_map();
+          resetview();
           }
         else if(banachtarski::on && banachtarski::bmap) {
           banachtarski::bmap = false;
           banachtarski::on = false;
-          pop_game();
+          gamestack::pop();
           }
         }
       }},
