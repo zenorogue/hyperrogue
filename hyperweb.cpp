@@ -64,7 +64,7 @@ void toggleanim(bool v) {
     vid.particles = true;
     vid.sspeed = -1;
     vid.mspeed = -1;
-    geom3::highdetail = geom3::middetail = 5;
+    vid.highdetail = vid.middetail = 5;
     }
   else {
     sightrange_bonus = 0;
@@ -72,7 +72,7 @@ void toggleanim(bool v) {
     vid.mspeed = 5;
     vid.particles = false;
     vid.wallmode = 3;
-    geom3::highdetail = geom3::middetail = -1;
+    vid.highdetail = vid.middetail = -1;
     }
   }
 
