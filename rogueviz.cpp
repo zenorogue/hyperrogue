@@ -119,8 +119,47 @@ colorpair perturb(colorpair cp) {
   return cp;
   }
 
-colorpair parse(const string& s) {
+colorpair parse(string s) {
   colorpair cp;
+  auto pospng = s.find(":PNG:");
+  if(pospng != string::npos) {
+    string fname = s.substr(pospng+5);
+    s = s.substr(0, pospng);
+    #if CAP_TEXTURE
+    cp.img = make_shared<rvimage>();
+    auto& i = *cp.img;
+    i.tdata.twidth = 1024;
+    if(!(i.tdata.readtexture(fname) && i.tdata.loadTextureGL())) {
+      println(hlog, "failed to load: ", fname);
+      cp.img = NULL;
+      return cp;
+      }
+    println(hlog, "loaded texture: ", fname);
+    for(int x=0; x<16; x++)
+    for(int y=0; y<16; y++) {
+      auto addv = [&] (ld x, ld y) {
+        x -= 8;
+        y -= 8;
+        x /= 16.;
+        y /= 16.;
+        ld r = max(abs(x), abs(y)) / hypot(x, y);
+        if(x || y) {
+          x *= r;
+          y *= r;      
+          }
+        i.tinf.tvertices.push_back(glhr::makevertex(x + .5, y + .5, 0));
+        i.vertices.push_back(hpxy(x * .4, y * .4));
+        };
+      addv(x, y);
+      addv(x, y+1);
+      addv(x+1, y);
+      addv(x, y+1);
+      addv(x+1, y);
+      addv(x+1, y+1);
+      }
+    i.tinf.texture_id = i.tdata.textureid;
+    #endif
+    }
   auto pos = s.find(":");
   if(pos != string::npos) {
     cp.color1 = parse1(s.substr(0, pos));
@@ -1162,6 +1201,15 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     poly_outline = 0x606060FF;
   else
     poly_outline = (bordcolor << 8) | 0xFF;
+  
+  if(cp.img) {
+    for(hyperpoint h: cp.img->vertices)
+      curvepoint(V * h);
+    auto& qc = queuecurve(0, 0xFFFFFFFF, PPR::MONSTER_HEAD);
+    qc.tinf = &cp.img->tinf;
+    qc.flags |= POLY_TRIANGLES;
+    return;
+    }
     
   transmatrix V1;
   
@@ -1619,8 +1667,8 @@ void readcolor(const string& cfname) {
       }
     else {
       ungetc(c2, f);
-      char buf[60];
-      int err = fscanf(f, "%30s", buf);
+      char buf[600];
+      int err = fscanf(f, "%500s", buf);
       if(err > 0) x = parse(buf);
       }
     

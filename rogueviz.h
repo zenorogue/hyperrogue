@@ -35,9 +35,16 @@ namespace rogueviz {
     edgeinfo(edgetype *t) { orig = NULL; lastdraw = -1; type = t; }
     };
   
+  struct rvimage {
+    basic_textureinfo tinf;
+    texture::texture_data tdata;
+    vector<hyperpoint> vertices;
+    };
+
   struct colorpair {
     color_t color1, color2;
     char shade;
+    shared_ptr<rvimage> img;
     colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = col; }
     };
   
