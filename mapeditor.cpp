@@ -1996,6 +1996,7 @@ namespace mapeditor {
 #endif
 
   void initdraw(cell *c) {
+    #if CAP_DRAW
     mapeditor::drawcell = c;
     ew.c = c;
     ew.rotid = 0;
@@ -2004,6 +2005,7 @@ namespace mapeditor {
     ew.side = 0;
     ewsearch = ew;
     ccenter = coldcenter = C0;
+    #endif
     }
   
   transmatrix textrans;

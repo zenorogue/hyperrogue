@@ -481,7 +481,7 @@ struct gcell {
   eMonster monst;
   eItem item;
   eLand barleft, barright;
-  bool ligon;
+  bool ligon, monmirror;
   signed char pathdist, cpdist, mpdist;
   
   unsigned char mondir, bardir, stuntime, hitpoints;
@@ -4574,7 +4574,9 @@ hpcshape
   void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_state; prepare_usershapes(); }
   };
 
+#if MAXMDIM >= 4
 void make_floor_textures();
+#endif
 
 extern map<string, geometry_information> cgis;
 extern geometry_information *cgip;

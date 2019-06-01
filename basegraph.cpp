@@ -695,7 +695,9 @@ void resetGL() {
 #endif
   check_cgi();
   cgi.require_shapes();
+  #if MAXMDIM >= 4
   if(DIM == 3 && !floor_textures) make_floor_textures();
+  #endif
   cgi.initPolyForGL();
   }
 

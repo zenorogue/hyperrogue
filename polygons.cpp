@@ -989,7 +989,9 @@ void geometry_information::configure_floorshapes() {
 
 void geometry_information::prepare_shapes() {
   require_basics();
+  #if MAXMDIM >= 4
   if(DIM == 3 && !floor_textures) make_floor_textures();
+  #endif
 
   symmetriesAt.clear();
   allshapes.clear();

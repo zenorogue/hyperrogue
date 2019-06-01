@@ -20,7 +20,10 @@ bool first_cell_to_draw = true;
 
 bool hide_player() {
   return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && (first_cell_to_draw || elliptic) && (WDIM == 3 || vid.camera == 0) && !inmirrorcount
-     && !(racing::on && !racing::standard_centering && !racing::player_relative);
+#if CAP_RACING     
+   && !(racing::on && !racing::standard_centering && !racing::player_relative)
+#endif
+     ;
   }
 
 hookset<bool(int sym, int uni)> *hooks_handleKey;
@@ -168,8 +171,12 @@ void drawShield(const transmatrix& V, eItem it) {
     col = 0;
   double d = it == itOrbShield ? cgi.hexf : cgi.hexf - .1;
   int mt = sphere ? 7 : 5;
+#if MAXMDIM >= 4
   if(DIM == 3)
     queueball(V * zpush(cgi.GROIN1), cgi.human_height / 2, darkena(col, 0, 0xFF), itOrbShield);
+#else
+  if(1) ;
+#endif  
   else {
     for(ld a=0; a<=cgi.S84*mt+1e-6; a+=pow(.5, vid.linequality))
       curvepoint(V*xspinpush0(a * M_PI/cgi.S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
@@ -182,8 +189,11 @@ void drawSpeed(const transmatrix& V) {
 #if CAP_CURVE
   ld ds = ptick(10);
   color_t col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
+#if MAXMDIM >= 4
   if(DIM == 3) queueball(V * zpush(cgi.GROIN1), cgi.human_height * 0.55, col, itOrbSpeed);
-  else for(int b=0; b<cgi.S84; b+=cgi.S14) {
+  else
+#endif
+  for(int b=0; b<cgi.S84; b+=cgi.S14) {
     PRING(a)
       curvepoint(V*xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84));
     queuecurve(col, 0x8080808, PPR::LINE);
@@ -211,9 +221,13 @@ void drawSafety(const transmatrix& V, int ct) {
 #if CAP_QUEUE
   ld ds = ptick(50);
   color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
-  if(DIM == 3)
+  #if MAXMDIM >= 4
+  if(DIM == 3) {
     queueball(V * zpush(cgi.GROIN1), 2*cgi.hexf, col, itOrbSafety);
-  else for(int a=0; a<ct; a++)
+    return;
+    }
+  #endif
+  for(int a=0; a<ct; a++)
     queueline(V*xspinpush0((ds+a*cgi.S84/ct) * M_PI/cgi.S42, 2*cgi.hexf), V*xspinpush0((ds+(a+(ct-1)/2)*cgi.S84/ct) * M_PI / cgi.S42, 2*cgi.hexf), col, vid.linequality);
 #endif
   }
@@ -225,9 +239,13 @@ void drawFlash(const transmatrix& V) {
   col &= ~1;
   for(int u=0; u<5; u++) {
     ld rad = cgi.hexf * (2.5 + .5 * sin(ds+u*.3));
+    #if MAXMDIM >= 4
     if(DIM == 3) {
       queueball(V * zpush(cgi.GROIN1), rad, col, itOrbFlash);
       }
+    #else
+    if(1) ;
+    #endif
     else {
       PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
       queuecurve(col, 0x8080808, PPR::LINE);
@@ -241,8 +259,12 @@ ld cheilevel(ld v) {
   }
 
 transmatrix chei(const transmatrix V, int a, int b) {
+#if MAXMDIM >= 4
   if(DIM == 2) return V;
   return V * zpush(cheilevel((a+.5) / b));
+#else
+  return V;
+#endif
   }
 
 void drawLove(const transmatrix& V, int hdir) {
@@ -398,8 +420,13 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         color_t col = darkena(0xC0C0C0, 0, 0xFF);
         ld l0 = PURE ? 0.6 * cgi.scalefactor : longer ? 0.36 : 0.4;
         ld l1 = PURE ? 0.7 * cgi.scalefactor : longer ? 0.44 : 0.42;
+#if MAXMDIM >= 4
         hyperpoint h0 = DIM == 3 ? xpush(l0) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l0);
         hyperpoint h1 = DIM == 3 ? xpush(l1) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l1);
+#else
+        hyperpoint h0 = xpush0(l0);
+        hyperpoint h1 = xpush0(l1);
+#endif
         transmatrix T = Vnow*spin((sword_angles + (-adj-2*a)) * M_PI / sword_angles);
         queueline(T*h0, T*h1, col, 1, PPR::SUPERLINE);
         }
@@ -443,7 +470,9 @@ void drawStunStars(const transmatrix& V, int t) {
 #if CAP_SHAPES
   for(int i=0; i<3*t; i++) {
     transmatrix V2 = V * spin(M_PI * 2 * i / (3*t) + ptick(200));
+#if MAXMDIM >= 4
     if(GDIM == 3) V2 = V2 * zpush(cgi.HEAD);
+#endif
     queuepolyat(V2, cgi.shFlailBall, 0xFFFFFFFF, PPR::STUNSTARS);
     }
 #endif
@@ -546,7 +575,8 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
     };
 
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
-  
+
+#if MAXMDIM >= 4  
   if(GDIM == 3) {
     if(x[0]) queuepolyat(V * front_leg_move * cspin(0, 2, rightfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
     if(x[0]) queuepolyat(V * Mirror * front_leg_move * cspin(0, 2, leftfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
@@ -561,6 +591,7 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
     if(WDIM == 2) Tleft = Tleft * zpush(-cgi.GROIN), Tright = Tright * zpush(-cgi.GROIN);
 */
     }
+#endif
 
   const transmatrix VL = mmscale(V, cgi.ALEG0);
 
@@ -659,6 +690,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
     Tright = VFOOT * xpush(rightfoot);
     Tleft = VFOOT * Mirror * xpush(-rightfoot);
     }
+  #if MAXMDIM >= 4
   else {
     transmatrix V1 = V;
     if(WDIM == 2) V1 = V1 * zpush(cgi.GROIN);
@@ -666,6 +698,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
     Tleft  = V1 * Mirror * cspin(2, 0, rightfoot / leg_length);
     if(WDIM == 2) Tleft = Tleft * zpush(-cgi.GROIN), Tright = Tright * zpush(-cgi.GROIN);
     }
+  #endif
     
   if(who == moWaterElemental && DIM == 2) {
     double fishtail = footfun(footphase / .4) / 4 * 1.5;
@@ -901,6 +934,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
 
   else if(it == itPalace) {
     ld h = cgi.human_height;
+    #if MAXMDIM >= 4
     if(GDIM == 3 && WDIM == 2) {
       dynamicval<qfloorinfo> qfi2(qfi, qfi);
       transmatrix V2 = V * spin(ticks / 1500.);
@@ -920,7 +954,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
       draw_floorshape(c, V2 * zpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
       queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
       }
-    else {
+    else 
+    #endif
+    {
       transmatrix V2 = Vit * spin(ticks / 1500.);
       draw_floorshape(c, V2, cgi.shMFloor3, 0xFFD500FF);
       draw_floorshape(c, V2, cgi.shMFloor4, darkena(icol, 0, 0xFF));
@@ -1899,6 +1935,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
         queuepoly(VHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
         if(m == moRatlingAvenger) queuepoly(VHEAD1, cgi.shRatCape1, 0x303030FF);
         }
+#if MAXMDIM >= 4
       else {
         transmatrix V1 = V * zpush(cgi.AHEAD - zc(0.4) - zc(0.98) + cgi.HEAD); // * cpush(0, cgi.scalefactor * (-0.1));
         queuepoly(V1, cgi.shRatHead, darkena(col, 0, 0xFF));
@@ -1913,7 +1950,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
         queuepoly(V1, cgi.shRatEye3, darkena(0x202020, 0, 0xFF));
         if(m == moRatlingAvenger) queuepoly(V1, cgi.shRatCape1, 0x303030FF);
         }
-      
+#endif      
       if(m == moRatlingAvenger) {
         queuepoly(VBODY1 * VBS, cgi.shRatCape2, 0x484848FF);
         }
@@ -4413,6 +4450,7 @@ vector<hyperpoint> clipping_planes;
 int noclipped;
 
 void make_clipping_planes() {
+#if MAXMDIM >= 4
   clipping_planes.clear();
   if(sphere) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
@@ -4429,15 +4467,18 @@ void make_clipping_planes() {
   add_clipping_plane(-tx, +ty, -tx, -ty);
   add_clipping_plane(-tx, -ty, +tx, -ty);
   add_clipping_plane(+tx, -ty, +tx, +ty);
+#endif
   }
 
 void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
+#if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     ld eps = cgi.human_height/100;
     queueline(V1*orthogonal_move(h1,cgi.FLOOR+eps), V2*orthogonal_move(h2,cgi.FLOOR+eps), col, prec);
     queueline(V1*orthogonal_move(h1,cgi.WALL-eps), V2*orthogonal_move(h2,cgi.WALL-eps), col, prec);
     }
   else
+#endif
     queueline(V1*h1, V2*h2, col, prec);
   }
 
@@ -4519,6 +4560,7 @@ void queue_transparent_wall(const transmatrix& V, hpcshape& sh, color_t color) {
     }
   }
 
+#if MAXMDIM >= 4
 int ceiling_category(cell *c) {
   switch(c->land) {
     case laNone:
@@ -4777,6 +4819,7 @@ void drawcell_in_radar(cell *c, transmatrix V) {
   else if(c->item && !itemHiddenFromSight(c))
     addradar(V, iinf[c->item].glyph, iinf[c->item].color, kind_outline(c->item));
   }
+#endif
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
@@ -4805,6 +4848,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(orig) gm = V;
     }
   if(just_gmatrix) return;
+#if MAXMDIM >= 4
   if(WDIM == 3 && pmodel == mdPerspective) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
@@ -4814,6 +4858,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     noclipped++;
     }
+#endif
 
   #if CAP_SHAPES
   set_floor(cgi.shFloor);
@@ -5186,8 +5231,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(!wmblack) for(int d=0; d<c->type; d++) {
             inmirrorcount+=d;
             queuepolyat(V2 * spin(d*M_PI/S3), cgi.shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            #if MAXMDIM >= 4
             if(GDIM == 3 && camera_level > cgi.WALL && pmodel == mdPerspective)
               queuepolyat(V2 * spin(d*M_PI/S3), cgi.shHalfFloor[5], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            #endif
             inmirrorcount-=d;
             }          
           if(GDIM == 3) {
@@ -5208,12 +5255,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(!wmblack) {
             inmirrorcount++;
             queuepolyat(mirrorif(V2, !onleft), cgi.shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            #if MAXMDIM >= 4
             if(GDIM == 3 && camera_level > cgi.WALL && pmodel == mdPerspective)
               queuepolyat(mirrorif(V2, !onleft), cgi.shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            #endif
             inmirrorcount--;
             queuepolyat(mirrorif(V2, onleft), cgi.shHalfFloor[ct6], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            #if MAXMDIM >= 4
             if(GDIM == 3 && camera_level > cgi.WALL && pmodel == mdPerspective)
               queuepolyat(mirrorif(V2, onleft), cgi.shHalfFloor[ct6+3], darkena(fcol, fd, 0xFF), PPR::FLOORa);
+            #endif
             }
   
           if(GDIM == 3) 
@@ -5593,6 +5644,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           draw_qfi(c, V, darkena(fcol, fd, flooralpha));
         }
       
+      #if MAXMDIM >= 4
       // draw the ceiling
       if(WDIM == 2 && GDIM == 3) {
         draw_ceiling(c, V, fd, fcol, wcol);
@@ -5614,6 +5666,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           }
         }
+      #endif
 
       // walls
 
@@ -6716,9 +6769,12 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
         flashcol = darkena(flashcol, 0, 0xFF);
+#if MAXMDIM >= 4
         if(DIM == 3)
           queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
-        else {
+        else 
+#endif
+        {
           PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
           queuecurve(flashcol, 0x8080808, PPR::LINE);
           }
@@ -6734,9 +6790,12 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
         flashcol = darkena(flashcol, 0, 0xFF);
+#if MAXMDIM >= 4
         if(DIM == 3)
           queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
-        else {
+        else 
+#endif
+        {
           PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
           queuecurve(flashcol, 0x8080808, PPR::LINE);
           }
@@ -6815,6 +6874,7 @@ void make_actual_view() {
 
 transmatrix cview() {
   make_actual_view();
+  #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
     transmatrix T = actual_view_transform * View;
     transmatrix U = inverse(T);
@@ -6829,6 +6889,7 @@ transmatrix cview() {
 
     radar_transform = T * U;
     }
+  #endif
   
   return actual_view_transform * View;
   }
