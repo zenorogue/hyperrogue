@@ -1835,7 +1835,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       ONEMPTY {
         if(hrand(2000) < PT(25 + min(kills[moFalsePrincess] + kills[moRoseBeauty] + kills[moRoseLady], 200), 100) && notDippingFor(itRose)) {
-          for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->wall == waRose)
+          if(chaosmode == 3)
+            c->item = itRose;
+          else for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->wall == waRose)
             c->item = itRose;
           }
         else {
