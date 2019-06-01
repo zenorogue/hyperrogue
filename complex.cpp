@@ -2861,8 +2861,11 @@ namespace prairie {
     c->LHU.fi.flowerdist = 8;
     c->LHU.fi.walldist = 8;
     c->LHU.fi.walldist2 = 8;
-    
-    if(euwrap) { // fix cylinder
+
+     if(chaosmode) {
+       c->LHU.fi.rval = 0;
+       }    
+    else if(euwrap) { // fix cylinder
       c->LHU.fi.rval = 0;
       }
     else if(euclid) {
