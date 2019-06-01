@@ -1159,8 +1159,9 @@ void centerpc(ld aspd) {
   transmatrix T = cwtV;
   #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
+    geom3::do_auto_eye();
     int sl = snakelevel(cwt.at);
-    if(sl) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
+    if(sl || vid.eye) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     }
   #endif
   hyperpoint H = inverse(actual_view_transform) * tC0(T);

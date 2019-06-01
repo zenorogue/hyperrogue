@@ -736,7 +736,9 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
     qtyall++;
     }
   
-  if(&eye == &shSkullEyes) pos = zc(eyepos) - 0.06 * SH * 0.05;
+  if(&eye == &shSkullEyes) cgi.eyelevel_human = pos = zc(eyepos) - 0.06 * SH * 0.05;
+  if(&eye == &shWolf1) cgi.eyelevel_dog = pos;
+  if(&eye == &shFamiliarEye) cgi.eyelevel_familiar = pos;
   
   make_ball(eye, rad, 0);
   transmatrix T = zpush(-shift_eye) * rgpushxto0(center) * zpush(pos); 

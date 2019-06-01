@@ -220,6 +220,9 @@ void initConfig() {
   addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);
   addsaver(vid.always3, "3D always", false);
   
+  addsaver(vid.eye, "eyelevel", 0);
+  addsaver(vid.auto_eye, "auto-eyelevel", false);
+  
   addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
 
   addsaver(rug::renderonce, "rug-renderonce");
@@ -1282,6 +1285,9 @@ void show3D() {
   
   if(WDIM == 2) {
     dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts(vid.camera), 'c');
+    if(GDIM == 3)
+      dialog::addSelItem(XLAT("Eye level"), fts(vid.eye), 'E');
+
     dialog::addSelItem(XLAT("Ground level below the plane"), fts(vid.depth), 'g');
   
     if(GDIM == 2)
@@ -2089,6 +2095,7 @@ unordered_map<string, ld&> params = {
   {"ballangle", vid.ballangle},
   {"yshift", vid.yshift},
   {"cameraangle", vid.camera_angle},
+  {"eye", vid.eye},
   {"depth", vid.depth},
   {"camera", vid.camera},
   {"wall_height", vid.wall_height},

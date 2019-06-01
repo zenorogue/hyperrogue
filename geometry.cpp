@@ -217,6 +217,17 @@ namespace geom3 {
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
     }
   
+  void do_auto_eye() {
+    if(!vid.auto_eye) return;
+    auto& cs = getcs();
+    if(cs.charid < 4)
+      vid.eye = cgi.eyelevel_human;
+    else if(cs.charid < 8)
+      vid.eye = cgi.eyelevel_dog;
+    else if(cs.charid == 8)
+      vid.eye = cgi.eyelevel_familiar;
+    }
+  
   // how should we scale at level lev
   ld scale_at_lev(ld lev) { 
     if(sphere || euclid) return 1;

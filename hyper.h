@@ -312,6 +312,9 @@ struct videopar {
   int tc_alpha, tc_depth, tc_camera;
   ld highdetail, middetail;
   bool gp_autoscale_heights;
+  
+  ld eye;
+  bool auto_eye;
   };
 
 extern videopar vid;
@@ -4349,6 +4352,8 @@ struct geometry_information {
     NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
     ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2;
   ld human_height, slev;
+
+  ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
 
 #if CAP_SHAPES
 hpcshape 
