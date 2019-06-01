@@ -4664,18 +4664,20 @@ S("Ground level is actually an equidistant surface, "
   "Theoretically, this value affects the world -- "
   "for example, eagles could fly %2 times faster by "
   "flying above the ground level, on the plane P -- "
-  "but the actual game mechanics are not affected. "
-  "(Distances reported by the vector graphics editor "
+  "but the actual game mechanics are not affected. ",
+
+  "Поверхность земли является эквидистантой на глубине  "
+  "%1 единицу ниже плоскости P. Теоретически, это значение "
+  "могло бы влиять на мир. Например, орлы могли бы летать в %2 раз "
+  "быстрее, летая над уровнем земли, на плоскости "
+  "P -- но механика игры не меняется. ")
+  
+S("(Distances reported by the vector graphics editor "
   "are not about points on the ground level, but "
   "about the matching points on the plane P -- "
   "divide them by the factor above to get actual "
   "distances.",
  
-  "Поверхность земли является эквидистантой на глубине  "
-  "%1 единицу ниже плоскости P. Теоретически, это значение "
-  "могло бы влиять на мир. Например, орлы могли бы летать в %2 раз "
-  "быстрее, летая над уровнем земли, на плоскости "
-  "P -- но механика игры не меняется. "
   "(Расстояния в редакторе векторной графики относятся"
   "не к точкам на поверхности, а к их проекциям на плоскость P.)")
  

@@ -4575,17 +4575,21 @@ S("Ground level is actually an equidistant surface, "
   "Theoretically, this value affects the world -- "
   "for example, eagles could fly %2 times faster by "
   "flying above the ground level, on the plane P -- "
-  "but the actual game mechanics are not affected. "
+  "but the actual game mechanics are not affected. ",
+
+  "Úroveň země je ve skutečnosti ekvidistantní plocha, která se nachází %1 absolutních "
+  "jednotek pod rovinou P. Tato hodnota teoreticky ovlivňuje svět -- orli by například "
+  "mohli létat %2-krát rychleji, kdyby létali nad úrovní země v rovině P -- ale herní "
+  "mechaniky jako takové tím ovlivněny nejsou. ")
+  
+S(
   "(Distances reported by the vector graphics editor "
   "are not about points on the ground level, but "
   "about the matching points on the plane P -- "
   "divide them by the factor above to get actual "
   "distances.",
   
-  "Úroveň země je ve skutečnosti ekvidistantní plocha, která se nachází %1 absolutních "
-  "jednotek pod rovinou P. Tato hodnota teoreticky ovlivňuje svět -- orli by například "
-  "mohli létat %2-krát rychleji, kdyby létali nad úrovní země v rovině P -- ale herní "
-  "mechaniky jako takové tím ovlivněny nejsou. (Vzdálenosti v editoru vektorové "
+  "(Vzdálenosti v editoru vektorové "
   "grafiky nejsou vzdálenosti bodů na úrovni země, ale odpovídajících bodů v rovině "
   "P -- skutečné vzdálenosti získáte jejich vydělením výše zmíněným faktorem.")
 

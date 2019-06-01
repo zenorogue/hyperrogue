@@ -1423,29 +1423,57 @@ void show3D() {
       vid.tc_depth = ticks,
       dialog::editNumber(vid.depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
       dialog::extra_options = [] {
-        dialog::addHelp(XLAT(
+        help = XLAT(
           "Ground level is actually an equidistant surface, "
           "%1 absolute units below the plane P. "
           "Theoretically, this value affects the world -- "
           "for example, eagles could fly %2 times faster by "
           "flying above the ground level, on the plane P -- "
-          "but the actual game mechanics are not affected. "
-          "(Distances reported by the vector graphics editor "
-          "are not about points on the ground level, but "
-          "about the matching points on the plane P -- "
-          "divide them by the factor above to get actual "
-          "distances.)"
-          
-          ,
-          fts(vid.depth), fts(cosh(vid.depth))));
-          // mention absolute units
-          };
-    else if(uni == 'a' && WDIM == 2) 
+          "but the actual game mechanics are not affected. ", fts(vid.depth), fts(cosh(vid.depth)));        
+        if(GDIM == 2)
+          help += XLAT(
+            "(Distances reported by the vector graphics editor "
+            "are not about points on the ground level, but "
+            "about the matching points on the plane P -- "
+            "divide them by the factor above to get actual "
+            "distances.)"
+            );
+        if(GDIM == 3 && pmodel == mdPerspective && !euclid) {
+          ld current_camera_level = hdist0(tC0(radar_transform));
+          help += "\n\n";
+          if(abs(current_camera_level) < 1e-6)
+            help += XLAT(
+              "The camera is currently exactly on the plane P. "
+              "The horizon is seen as a straight line."
+              );
+          else help += XLAT(
+              "The camera is currently %1 units above the plane P. "
+              "This makes you see the floor level as in general perspective projection "
+              "with parameter %2.", fts(current_camera_level), fts(tan_auto(vid.depth) / tan_auto(current_camera_level)));
+          }
+        dialog::addHelp(help);
+        };
+    else if(uni == 'E' && WDIM == 2 && GDIM == 3) 
+      vid.tc_depth = ticks,
+      dialog::editNumber(vid.eye, -5, 5, .1, 0, XLAT("eye level"), ""),
+      dialog::dialogflags |= sm::CENTER,
+      dialog::extra_options = [] {
+      
+        dialog::addHelp(XLAT("In the FPP mode, the camera will be set at this altitude (before applying shifts)."));
+
+        dialog::addBoolItem(XLAT("auto-adjust to eyes on the player model"), vid.auto_eye, 'O');
+        dialog::reaction = [] { vid.auto_eye = false; };
+        dialog::add_action([] () {
+          vid.auto_eye = !vid.auto_eye;
+          geom3::do_auto_eye();
+          });
+        };
+    else if(uni == 'p' && WDIM == 2) 
       projectionDialog();
     else if(uni == 'w' && WDIM == 2) {
       dialog::editNumber(vid.wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::extra_options = [] () {
-        dialog::addHelp(XLAT(
+        dialog::addHelp(GDIM == 3 ? "" : XLAT(
           "The height of walls, in absolute units. For the current values of g and c, "
           "wall height of %1 absolute units corresponds to projection value of %2.",
           fts(actual_wall_height()), fts(factor_to_projection(cgi.WALL))));

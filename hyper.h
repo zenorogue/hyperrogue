@@ -3559,7 +3559,7 @@ inline hyperpoint tC0(const transmatrix &T) {
 transmatrix actualV(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
 bool isWall3(cell *c, color_t& wcol);
-extern transmatrix actual_view_transform;
+extern transmatrix actual_view_transform, radar_transform;
 ld wall_radar(cell *c, transmatrix T);
 
 extern string bitruncnames[5];
