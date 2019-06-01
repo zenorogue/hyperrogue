@@ -4601,6 +4601,7 @@ int ceiling_category(cell *c) {
     case laAsteroids:
       return 1;
     
+    case laPower:
     case laWineyard:
     case laDesert:
     case laAlchemist:
@@ -4636,7 +4637,6 @@ int ceiling_category(cell *c) {
     case laCocytus:
     case laEmerald:
     case laDeadCaves:
-    case laPower:
     case laHive:
     case laCamelot:
     case laIvoryTower:
@@ -4785,6 +4785,10 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
           if(emeraldval(c) / 4 == 11) {
             queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
             }
+          break;
+
+        case laPower:
+          col = c->landparam ? 0xFF2010 : 0x000020;
           break;
         
         case laDesert:

@@ -550,7 +550,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(v == 0 && !euclid) c->wall = waStone;
         else {
           v &= ~3;
-          if((v == 24 || v == 32 || v == 56))
+          c->landparam = (v == 24 || v == 32 || v == 56);
+          if(c->landparam)
             c->wall = waEternalFire;
           else if(hrand(100) < 10) {
             c->wall = waGlass;
