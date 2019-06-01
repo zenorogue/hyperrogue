@@ -3210,5 +3210,34 @@ Gameplay:
 - using Orb of Safety marked you as cheater
 
 2019-05-16 18:03 Version 11.0y:
- - improved 3D models: Bull horns, Cat head, anything which had holes at its ends, Butterfly (previously crashed the game), animation for all winged creatures (previously only Eagle had animation), 
+ - improved 3D models: Bull horns, Cat head, anything which had holes at its ends, Butterfly (previously crashed the game), animation for all winged creatures (previously only Eagle model had animation), 
    leg movement animation for quadrupeds; also the stun stars are drawn now
+
+2019-05-30 18:30 Version 11.0z:
+ - fixed: selecting some lands in Experiments with Geometry caused incorrect generation
+ - fixed the monster list of the Ruined City
+ - fixed the way HyperRogue saves floating point numbers in text format on Windows (previously files generated with Vector Graphics Editor or Paper Model Creator could save incorrectly)
+ - also improved the way HyperRogue displays numbers, and the slider for editing integers looks different; fixed the growth ratio display on Windows
+ - Orb of Recall now recalls you to your old rotation/orientation
+ - larger sightrange limit in Euclidean
+ - improved the sword angle handling in non-standard geometries
+ - no more Orbs of the Bull in Prairie in the Orb Strategy Mode
+ - fixed drawing the net in the paper model creator
+
+ - new special game mode preview: 
+   - dual geometry mode [not yet working in non-shmup 3D]
+   - submodes of the Chaos mode
+   - frictionless track in the racing mode (Space Rocks)
+ 
+ - 2.5D preview: 
+   - improved Vineyard half-walls, item colors in the Minimap, Rose Garden (scent waves and Thornless Roses were not visible)
+   - added ceilings and skies (the elusive "hyperbolic sun" got an official interpretation!)
+   - third person perspective key ('3') now works
+   - improved ASCII mini-map: gridlines, no more double drawing of items, mini-map correct in all circumstances, including vertical movement or y/z rotation
+   - fixed a crash in Euclidean when changing camera level
+   - auto-adjust in switch_fpp
+ 
+ - 3D/2.5D preview:
+   - racing:: progress bar live in 3D
+   - 3D:: fixed a crash on drawing Hyperbugs
+   - improved models: Ratlings, hypersian rugs, Giant Rug
