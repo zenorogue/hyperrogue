@@ -34,6 +34,7 @@ namespace hr { extern renderbuffer *floor_textures; }
 namespace rogueviz {
 
 ld fat_edges = 0;
+ld ggamma = 1;
 
 const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
 
@@ -1320,8 +1321,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       
       if(kind == kSAG) {
         if(ei->weight2 > maxweight) maxweight = ei->weight2;
-        ld gamma = log(alpha / 255.) / log(.5);
-        alpha = int(pow(ei->weight2 / maxweight, gamma) * 255);
+        alpha *= pow(ei->weight2 / maxweight, ggamma);
         }
       if(hilite || hiliteclick) alpha = (alpha + 256) / 2;
       
@@ -1922,15 +1922,17 @@ int readArgs() {
     rog3 = true;
     }
   else if(argis("-rvedge")) {
-    shift(); default_edgetype.color = arghex();
+    shift(); default_edgetype.color = default_edgetype.color_hi = arghex();
+    }
+  else if(argis("-rvedgehi")) {
+    shift(); default_edgetype.color_hi = arghex();
     }
   else if(argis("-rvfat")) {
     shift(); 
     fat_edges = argf();
     }
   else if(argis("-ggamma")) {
-    // backward compatibility
-    shift(); part(default_edgetype.color, 0) = 255 * pow(.5, argf());
+    shift(); ggamma = argf();
     }
   else if(argis("-cshift")) {
     shift_arg_formula(collatz::cshift);
