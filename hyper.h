@@ -4928,10 +4928,10 @@ struct fhstream : hstream {
   color_t vernum;
   virtual color_t get_vernum() override { return vernum; }
   FILE *f;
-  virtual void write_char(char c) { write_chars(&c, 1); }
-  virtual void write_chars(const char* c, size_t i) { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
-  virtual void read_chars(char* c, size_t i) { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
-  virtual char read_char() { char c; read_chars(&c, 1); return c; }
+  virtual void write_char(char c) override { write_chars(&c, 1); }
+  virtual void write_chars(const char* c, size_t i) override { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
+  virtual void read_chars(char* c, size_t i) override { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
+  virtual char read_char() override { char c; read_chars(&c, 1); return c; }
   fhstream() { f = NULL; vernum = VERNUM_HEX; }
   fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); vernum = VERNUM_HEX; }
   ~fhstream() { if(f) fclose(f); }
