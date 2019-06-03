@@ -4080,6 +4080,7 @@ struct hpcshape {
   basic_textureinfo *tinf;
   int texture_offset;
   int shs, she;
+  void clear() { s = e = shs = she = texture_offset = 0; prio = PPR::ZERO; tinf = NULL; flags = 0; }
   };
 
 extern vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;

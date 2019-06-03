@@ -1067,7 +1067,7 @@ void geometry_information::prepare_shapes() {
 
   bshape(shAsymmetric, PPR::TEXT, scalefactor, 374);
 
-  for(auto& sh: shTriheptaSpecial) sh.s = sh.e = 0;
+  for(auto& sh: shTriheptaSpecial) sh.clear();
 
   bshape(shTriheptaSpecial[2], PPR::FLOOR,  scalefactor, 32);
   bshape(shTriheptaSpecial[3], PPR::FLOOR,  scalefactor, 33);
