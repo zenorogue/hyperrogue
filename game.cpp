@@ -6861,11 +6861,22 @@ int ambush(cell *c, eItem what) {
   vector<cell*> around;
   cell *clast = NULL;
   cell *ccur = c0;
+  int v = VALENCE;
   for(int tries=0; tries<10000; tries++) {
     cell *c2 = NULL;
-    forCellEx(c1, ccur)
-      if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
-        c2 = c1;
+    if(v == 3) {
+      forCellEx(c1, ccur)
+        if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
+          c2 = c1;
+      }
+    else {
+      for(int i=0; i<ccur->type; i++) {
+        cell *c1 = (cellwalker(ccur, i) + wstep + 1).peek();
+        if(!c1) continue;
+        if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
+          c2 = c1;        
+        }
+      }
     if(!c2) break;
     if(c2->land == laHunting && c2->wall == waNone && c2->monst == moNone)
       around.push_back(c2);
