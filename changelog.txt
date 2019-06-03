@@ -1277,7 +1277,7 @@
 - Orb power is now drained after the monsters move, not immediately after the movement (so Shielding at 1 charge will still defend you for the next turn, and Aether at 1 charge will let you move once more) -- this should be much more intuitive, especially with Orb of Time. Also fixed some bugs with Orb of Time (Thorns or Aether were considered to be used even though they were not). Also fixed Ghosts and Rock Snakes, who did not work correctly with Orb of the Shell/hardcore mode.
 - Knights of Camelot now quote Euclid, Lobachevsky, Gauss, and Escher.
 - As a reference to Deadly Rooms of Death, Goblins are now afraid of energy swords, and won't step on cells adjacent to them.
-- You can now change the projection quickly by pressing number keys. This is useful on the sphere, and also if you want to see the different models of hyperbolic plane quickly. 1 (orthographic or Gans model), 2, 3 (stereographic or Poincaré), 4 (gnomonic or Klein). 
+- You can now change the projection quickly by pressing number keys. This is useful on the sphere, and also if you want to see the different models of hyperbolic plane quickly. 1 (orthographic or Gans model), 2, 3 (stereographic or PoincarÃ©), 4 (gnomonic or Klein). 
 
 2016.10.29 16:18 version 9.1a
 - Just two shots are given for Orb of the Dragon in the Halloween. (Please tell me if you have been abusing this and your score should be deleted)
@@ -2771,7 +2771,7 @@ Projections:
 - 'rotated hyperboles' (2D version of the 3D model used by HyperRogue)
 - polynomial model replaced with one where you specify the formula used
 - projection-based range now works correctly in Archimedean, binary, and Euclidean tilings
-- Möbius transformations in spiral and Joukowsky projections
+- MÃ¶bius transformations in spiral and Joukowsky projections
 
 Patterns:
 - Added seven-coloring in the Euclidean mode. 'Zebra triangles' line pattern used on the torus shows the big triangles.
@@ -3241,3 +3241,21 @@ Gameplay:
    - racing:: progress bar live in 3D
    - 3D:: fixed a crash on drawing Hyperbugs
    - improved models: Ratlings, hypersian rugs, Giant Rug
+
+2019:06:03 22:31 Version 11.0Å¼:
+- fixed a crash bug when drawing weird shapes on OSX
+- fixed Thornless Roses not appearing / appearing incorrectly / crashing the game
+- fixed ambushes and Hunting Ground treasure generation in non-three-valent geometries
+- Rosebush scent waves are now more visible outside of the Rose Garden
+- fixed bugs with the Prairie in the total chaos mode; also more roses
+- speedometer in the racing mode
+- fixed some hotkey clashes in the menus (animations, 3D settings)
+- gfx: flattened reptiles on non-standard tilings
+
+2.5D/3D:
+- better sky, sky color variation
+- fixed a crash in Terracotta Army
+- striped dogs model
+- adjusted some dialog help texts
+- an option to configure the eye level
+- dual geometry mode: moved the Land of Power to the hyperbolic world
