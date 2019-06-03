@@ -650,6 +650,7 @@ void geometry_information::procedural_shapes() {
   bshape(shRose, PPR::ITEM);
   PRING(t)
     hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
+  finishshape();
 
   shRoseItem = shRose;
 
