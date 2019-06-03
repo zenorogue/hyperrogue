@@ -3116,7 +3116,7 @@ void set_reptile_floor(cell *c, const transmatrix& V, color_t col, bool nodetail
 
   transmatrix D = applyPatterndir(c, si);
   
-  if(wmescher)
+  if(wmescher && (stdhyperbolic || euclid6))
     set_floor(D, cgi.shReptile[j][0]);
   else set_maywarp_floor(c);
 
