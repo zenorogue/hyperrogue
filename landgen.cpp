@@ -1893,7 +1893,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                       if(t == 50) { c->item = itNone; break; }
                       cell *dog1 = dogcells[hrand(isize(dogcells))];
                       cell *dog2 = dogcells[hrand(isize(dogcells))];
-                      if(isNeighbor(dog1, dog2)) {
+                      if(VALENCE != 3 || isNeighbor(dog1, dog2)) {
                         dog1->monst = moHunterGuard;
                         dog1->landparam = 0;
                         dog2->monst = moHunterGuard;
