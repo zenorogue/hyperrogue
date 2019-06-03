@@ -298,7 +298,7 @@ namespace conformal {
     v.resize(0);
     }
 
-  void create(cell *start, cell *target) {
+  void create(cell *start, cell *target, transmatrix last) {
     
     if(target == start) {
       addMessage("Must go a distance from the starting point");
@@ -321,6 +321,8 @@ namespace conformal {
       m->base = c;
       v.push_back(m);
       }
+    
+    v.back()->at = last;
   
     int Q = isize(v)-1;
     // virtualRebase(v[0], false);
@@ -356,11 +358,12 @@ namespace conformal {
     }
 
   void create_playerpath() {
-    create(currentmap->gamestart(), cwt.at);
+    create(currentmap->gamestart(), cwt.at, Id);
     }
   
   void create_recenter_to_view() {
-    create(path_for_lineanimation[0], centerover.at ? centerover.at : cwt.at);
+    cell *c = centerover.at ? centerover.at : cwt.at;
+    create(path_for_lineanimation[0], c, inverse(ggmatrix(c)));
     }
   
   void movetophase() {
