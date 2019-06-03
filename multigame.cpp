@@ -290,6 +290,8 @@ namespace dual {
         v = -1; /* does not work in hyperbolic geos available, and better not do it in Euclidean ones either */
       else if(among(l, laHaunted)) 
         v = -1; /* graveyard prefers Euclidean, while Haunted prefers hyperbolic */
+      else if(l == laPower)
+        v = which_hyperbolic;
       else if(l == dgd[0].specland && l == dgd[1].specland)
         v = 2;
       else if(l == dgd[0].specland)
