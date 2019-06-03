@@ -4820,7 +4820,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
     
     case 3: {
       if(camera_level <= cgi.WALL) return;
-      draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
+      if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
       forCellIdEx(c2, i, c) 
         if(ceiling_category(c2) != 3) {
           color_t wcol2 = gradient(0, wcol, 0, .8, 1);
@@ -4841,12 +4841,12 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       else {
         bool window = false;
         forCellIdEx(c2, i, c) if(c2->wall == waPalace && ispal(c->cmodmove(i+1)) && ispal(c->cmodmove(i-1))) window = true;        
-        if(!window) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(fcol, fd, 0xFF), PPR::WALL);
+        if(qfi.fshape && !window) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(fcol, fd, 0xFF), PPR::WALL);
         if(window) 
           forCellIdEx(c2, i, c) 
             placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
         }
-      if(among(c->wall, waClosedGate, waOpenGate)) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
+      if(among(c->wall, waClosedGate, waOpenGate) && qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
       if(euclid) return;
 
       if(true) {
@@ -4863,7 +4863,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
         forCellIdEx(c2, i, c) 
           placeSidewall(c, i, SIDE_HIGH, V, darkena(fcol, fd, 0xFF));
         }
-      else
+      else if(qfi.fshape)
         draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
       if(euclid) return;
