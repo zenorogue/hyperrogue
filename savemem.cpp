@@ -5,6 +5,9 @@ namespace hr {
 
 bool memory_saving_mode = true;
 
+bool show_memory_warning = true;
+bool ignored_memory_warning;
+
 static const int LIM = 150;
 
 heptagon *last_cleared;
@@ -168,6 +171,116 @@ bool is_cell_removed(cell *c) {
 
 void set_if_removed(cell*& c, cell *val) {
   if(is_cell_removed(c)) c = val;
+  }
+
+typedef array<char, 1048576> reserve_block;
+
+int reserve_count = 0;
+int reserve_limit = 128;
+
+const int max_reserve = 4096;
+array<reserve_block*, max_reserve> reserve;
+
+std::new_handler default_handler;
+
+purehookset hooks_clear_cache;
+
+void reserve_handler() {
+  if(reserve_count) {
+    reserve_count--;
+    delete reserve[reserve_count];
+    }
+  if(reserve_count < 32) callhooks(hooks_clear_cache);
+  if(!reserve_count) std::set_new_handler(default_handler);
+  }
+
+void apply_memory_reserve() {
+  if(reserve_count > 0) std::set_new_handler(default_handler);
+  if(reserve_limit > max_reserve) reserve_limit = max_reserve;
+  if(reserve_limit < 0) reserve_limit = 0;
+  while(reserve_count > reserve_limit) { reserve_count--; delete reserve[reserve_count]; }
+  try {
+    while(reserve_count < reserve_limit) { 
+      reserve[reserve_count] = new reserve_block;
+      /* only if successful */
+      reserve_count++;
+      }
+    }
+  catch(std::bad_alloc&) {}
+  default_handler = std::get_new_handler();
+  if(reserve_count > 0) std::set_new_handler(reserve_handler);
+  }
+
+void memory_for_lib() {
+  if(reserve_count) { reserve_count--; delete reserve[reserve_count]; }
+  }
+
+void show_memory_menu() {
+  gamescreen(0);
+  dialog::init(XLAT("memory"));
+
+  dialog::addHelp(XLAT(
+    "HyperRogue takes place in a world that is larger than anything Euclidean. "
+    "Unfortunately, in some cases running it on an Euclidean computer might be "
+    "a problem -- the computer could simply run out of memory. Some lands (such as the Ocean or the Brown Islands) "
+    "may use up memory very fast!\n\n"
+    ));
+
+  if(sizeof(void*) <= 4)
+  dialog::addHelp(XLAT(
+    "You are playing a 32-bit HyperRogue executable, which can only use 4GB of memory.\n\n"));
+    
+  dialog::addHelp(XLAT(
+    "Although you are extremely unlikely to return to a place you have already been to, "
+    "the game never forgets these areas, unless you start a new game, use an Orb of "
+    "Safety (found in Land of Eternal Motion and the Prairie), or activate the memory "
+    "saving mode, which tries to intelligently predict which cells you will never find "
+    "again and can be safely forgotten.\n\n")
+    );
+  
+  if(cheater) dialog::addSelItem(XLAT("cells in memory"), its(cellcount) + "+" + its(heptacount), 0);
+  
+  dialog::addBoolItem(XLAT("memory saving mode"), memory_saving_mode, 'f');
+  dialog::add_action([] { memory_saving_mode = !memory_saving_mode; if(memory_saving_mode) save_memory(), apply_memory_reserve(); });
+
+  dialog::addBoolItem_action(XLAT("show memory warnings"), show_memory_warning, 'w');
+  
+  if(reserve_limit > 0 && reserve_count < reserve_limit) {
+    dialog::addItem(XLAT("just let me find Orb of Safety or finish the game"), 'l');
+    dialog::add_action([] { ignored_memory_warning = true; popScreen(); });
+    }
+
+  dialog::addSelItem("memory reserve", its(reserve_count) + "/" + its(reserve_limit) + " MB", 'r');
+  dialog::add_action([] {
+    dialog::editNumber(reserve_limit, 0, max_reserve, 16, 128, XLAT("memory reserve"), 
+      XLAT("When to show a memory warning.")
+      );
+    dialog::bound_low(0);
+    dialog::bound_up(max_reserve);
+    dialog::reaction = apply_memory_reserve;
+    });
+
+  dialog::addItem("clear caches", 'c');
+  dialog::add_action([] { callhooks(hooks_clear_cache); });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+bool protect_memory() {
+  if(reserve_limit && reserve_count < reserve_limit && !ignored_memory_warning) {
+    pushScreen(show_memory_menu);
+    return true;
+    }
+  if(reserve_limit && reserve_count < 8) {
+    pushScreen(show_memory_menu);
+    return true;
+    }
+  return false;
+  }
+
+bool memory_issues() {
+  return reserve_limit && reserve_count < 16;
   }
 
 }

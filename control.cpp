@@ -108,6 +108,8 @@ void movepckeydir(int d) {
   DEBB(DF_GRAPH, ("movepckeydir\n"));
   // EUCLIDEAN
   
+  if(protect_memory()) return;
+  
   movedir md = vectodir(move_destination_vec(d));
     
   if(!canmove) movepcto(md), remission(); else movepcto(md);
@@ -152,6 +154,9 @@ void calcMousedest() {
 
 void mousemovement() {
   if(DIM == 3) return;
+
+  if(protect_memory()) return;
+
   calcMousedest();
     if(!canmove) movepcto(mousedest), remission(); else movepcto(mousedest);
   lmouseover = NULL;
@@ -468,6 +473,8 @@ void handleKeyNormal(int sym, int uni) {
     }
 
   if(sym == SDLK_F1) gotoHelp(help);
+
+  if(sym == PSEUDOKEY_MEMORY) pushScreen(show_memory_menu);
   }
 
 bool need_mouseh = false;
@@ -619,6 +626,7 @@ void mainloopiter() {
 #if CAP_SDLAUDIO
   if(audio) handlemusic();
 #endif
+  apply_memory_reserve();
   SDL_Event ev;
   DEBB(DF_GRAPH, ("polling for events\n"));
   

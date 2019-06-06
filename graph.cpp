@@ -4826,7 +4826,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
           color_t wcol2 = gradient(0, wcol, 0, .8, 1);
           placeSidewall(c, i, SIDE_SKY, V, darkena(wcol2, fd, 0xFF));
           }
-      sky->sky.emplace_back(c, V, 0);
+      if(!euclid) sky->sky.emplace_back(c, V, 0);
       return;
       }
     

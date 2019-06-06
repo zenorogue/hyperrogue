@@ -5526,4 +5526,11 @@ namespace dual {
 void raise_error();
 bool invalid_matrix(const transmatrix T);
 
+extern bool show_memory_warning;
+extern bool ignored_memory_warning;
+extern int reserve_count, reserve_limit;
+void apply_memory_reserve();
+void show_memory_menu();
+static const int PSEUDOKEY_MEMORY = 16397;
+
 }

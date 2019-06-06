@@ -942,8 +942,11 @@ void configureOther() {
 #endif
 
   dialog::addBoolItem_action(XLAT("skip the start menu"), vid.skipstart, 'm');
+  
+  dialog::addItem(XLAT("memory configuration"), 'y');
+  dialog::add_action_push(show_memory_menu);
 
-  dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
+  // dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
   
   #if CAP_AUDIO
   if(CAP_AUDIO) {
@@ -1289,6 +1292,7 @@ void show3D() {
       dialog::addSelItem(XLAT("Eye level"), fts(vid.eye), 'E');
 
     dialog::addSelItem(XLAT("Ground level below the plane"), fts(vid.depth), 'g');
+    
   
     if(GDIM == 2)
       dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'p');
@@ -2038,6 +2042,9 @@ int read_config_args() {
     }    
   else if(argis("-msm")) {
     PHASEFROM(2); memory_saving_mode = true;
+    }
+  else if(argis("-mrsv")) {
+    PHASEFROM(2); shift(); reserve_limit = argi(); apply_memory_reserve();
     }
   else if(argis("-yca")) {
     PHASEFROM(2); 

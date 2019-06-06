@@ -80,10 +80,17 @@ void handlemusic() {
     if(callhandlers(false, hooks_music, id)) return;
     if(outoffocus) id = eLand(0);
     if(musfname[id] == "LAST") id = cid;
-    if(!loaded[id]) {
+    if(!loaded[id] && !memory_issues()) {
       loaded[id] = true;
-      // printf("loading (%d)> %s\n", id, musfname[id].c_str());
+      // printf("loading (%d)> %s\n", id, musfname[id].c_str());      
+      // reuse music
       if(musfname[id] != "") {
+        for(int i=0; i<landtypes; i++)
+          if(music[i] && musfname[i] == musfname[id])
+            music[id] = music[i];
+        }
+      if(!music[id]) {
+        memory_for_lib();
         music[id] = Mix_LoadMUS(musfname[id].c_str());
         if(!music[id]) {
            printf("Mix_LoadMUS: %s\n", Mix_GetError());
@@ -205,6 +212,8 @@ void playSound(cell *c, const string& fname, int vol) {
   // printf("Play sound: %s\n", fname.c_str());
   if(!chunks.count(fname)) {
     string s = wheresounds+fname+".ogg";
+    if(memory_issues()) return;
+    memory_for_lib();
     chunks[fname] = Mix_LoadWAV(s.c_str());
     // printf("Loading, as %p\n", chunks[fname]);
     }
@@ -213,6 +222,34 @@ void playSound(cell *c, const string& fname, int vol) {
     Mix_VolumeChunk(chunk, effvolume * vol / 100);
     Mix_PlayChannel(-1, chunk, 0);
     }
+  }
+
+void reuse_music_memory() {
+  for(int i=0; i<landtypes; i++)
+    if(music[i] && music[i] != music[cid]) {
+      Mix_Music *which = music[i];
+      println(hlog, "freeing music for ", dnameof(eLand(i)));
+      Mix_FreeMusic(which);
+      for(int j=0; j<landtypes; j++) if(music[j] == which) {
+        println(hlog, "... which equals ", dnameof(eLand(j)));
+        music[j] = NULL;
+        }
+      }
+  set<Mix_Chunk*> currently_played;
+  for(int ch=0; ch<16; ch++) currently_played.insert(Mix_GetChunk(ch));
+  set<string> to_free;
+  for(auto& p: chunks) 
+    if(p.second) {
+      if(currently_played.count(p.second)) {
+        println(hlog, p.first, ": currently played");
+        }
+      else {
+        Mix_FreeChunk(p.second);
+        to_free.insert(p.first); 
+        println(hlog, p.first, ": freed");
+        }
+      }
+  for(auto& s: to_free) chunks.erase(s);
   }
 
 #else
@@ -231,7 +268,7 @@ int read_sound_args() {
   return 0;
   }
 
-auto ah_sound = addHook(hooks_args, 0, read_sound_args);
+auto ah_sound = addHook(hooks_args, 0, read_sound_args) + addHook(hooks_clear_cache, 0, reuse_music_memory);
 
 #endif
 

@@ -1313,6 +1313,7 @@ void start_game() {
   restart:
   game_active = true;
   gamegen_failure = false;
+  ignored_memory_warning = false;
   check_cgi();
   cgi.require_basics();
   initcells();
