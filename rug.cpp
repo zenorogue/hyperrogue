@@ -1341,6 +1341,7 @@ void drawRugScene() {
   glDisable(GL_BLEND);
   glhr::switch_mode(glhr::gmLightFog, glhr::shader_projection::standard);
   glhr::set_depthtest(true);
+  glhr::set_depthwrite(true);
   glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
   
   for(int ed=current_display->stereo_active() && vid.stereo_mode != sODS ? -1 : 0; ed < 2; ed += 2) {
