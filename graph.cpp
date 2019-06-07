@@ -4761,12 +4761,12 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
     case 1: {
       if(euclid) return;
       if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
-        queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+        queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
       sky->sky.emplace_back(sky_item{c, V, 0x00000F});
       if(c->land == laAsteroids) {
         if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
-          queuepolyat(V * zpush(-0.5-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+          queuepolyat(V * zpush(-1-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
           }
         int sk = get_skybrightness(-1);
         auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
@@ -4783,7 +4783,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
         case laWineyard:
           col = 0x4040FF;
           if(emeraldval(c) / 4 == 11) {
-            queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+            queuepolyat(V * zpush(cgi.SKY+1), cgi.shSun, 0xFFFF00FF, PPR::SKY);
             }
           break;
 
@@ -4824,6 +4824,8 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       forCellIdEx(c2, i, c) 
         if(ceiling_category(c2) != 3) {
           color_t wcol2 = gradient(0, wcol, 0, .8, 1);
+          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
           placeSidewall(c, i, SIDE_SKY, V, darkena(wcol2, fd, 0xFF));
           }
       if(!euclid) sky->sky.emplace_back(c, V, 0);

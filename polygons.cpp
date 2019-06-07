@@ -312,7 +312,7 @@ void geometry_information::make_sidewalls() {
     else if(k==SIDE_WTS3) dlow = SLEV[3], dhi = WALL;
     else if(k==SIDE_HIGH) dlow = WALL, dhi = HIGH;
     else if(k==SIDE_HIGH2) dlow = HIGH, dhi = HIGH2;
-    else if(k==SIDE_SKY) dlow = WALL, dhi = LOWSKY;
+    else if(k==SIDE_SKY) dlow = HIGH2, dhi = SKY;
     else dlow = SLEV[k-SIDE_SLEV], dhi = SLEV[k-SIDE_SLEV+1];
     dlow_table[k] = dlow;
     dhi_table[k] = dhi;

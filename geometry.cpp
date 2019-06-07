@@ -347,9 +347,9 @@ namespace geom3 {
       LAKE = lev_to_factor(-vid.lake_top);
       HELLSPIKE = lev_to_factor(-(vid.lake_top+vid.lake_bottom)/2);
       BOTTOM = lev_to_factor(-vid.lake_bottom);
-      LOWSKY = lev_to_factor((1 + vid.rock_wall_ratio) * wh);
+      LOWSKY = lev_to_factor(2 * wh);
       HIGH = LOWSKY;
-      HIGH2 = lev_to_factor((2 + vid.rock_wall_ratio) * wh);
+      HIGH2 = lev_to_factor(3 * wh);
       SKY = LOWSKY - 5;
       }
     }    
