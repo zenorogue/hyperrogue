@@ -2994,10 +2994,15 @@ struct sky_item {
   sky_item(cell *_c, const transmatrix _T, color_t _color) : c(_c), T(_T), color(_color) {}
   };
 
+extern struct dqi_sky *sky;
+
 struct dqi_sky : drawqueueitem {
   vector<sky_item> sky;
   void draw();
   virtual color_t outline_group() { return 3; }
+  // singleton
+  dqi_sky() { hr::sky = this; }
+  ~dqi_sky() { hr::sky = NULL; }
   };
   
 extern int emeraldtable[100][7];

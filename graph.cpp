@@ -4677,7 +4677,7 @@ int get_skybrightness(int mul = 1) {
   return int(s * 255);
   }
 
-dqi_sky *sky ;
+dqi_sky *sky;
 
 void prepare_sky() {
   sky = NULL;
@@ -4763,7 +4763,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
         queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
-      sky->sky.emplace_back(sky_item{c, V, 0x00000F});
+      if(sky) sky->sky.emplace_back(sky_item{c, V, 0x00000F});
       if(c->land == laAsteroids) {
         if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
           queuepolyat(V * zpush(-1-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
@@ -4814,11 +4814,12 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
             col = gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
           }
         }
-      sky->sky.emplace_back(c, V, col);
+      if(sky) sky->sky.emplace_back(c, V, col);
       return;
       }
     
     case 3: {
+      if(sky) sky->sky.emplace_back(c, V, 0);
       if(camera_level <= cgi.WALL) return;
       if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
       forCellIdEx(c2, i, c) 
@@ -4828,11 +4829,11 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
           placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
           placeSidewall(c, i, SIDE_SKY, V, darkena(wcol2, fd, 0xFF));
           }
-      if(!euclid) sky->sky.emplace_back(c, V, 0);
       return;
       }
     
     case 4: {
+      if(sky) sky->sky.emplace_back(c, V, 0x00000F);
       if(camera_level <= cgi.HIGH2) return;
       auto ispal = [&] (cell *c0) { return c0->land == laPalace && among(c0->wall, waPalace, waClosedGate, waOpenGate); };
       color_t wcol2 = 0xFFD500;
@@ -4854,11 +4855,11 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(true) {
         queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
-      sky->sky.emplace_back(c, V, 0x00000F);
       break;
       }
     
     case 5: {
+      if(sky) sky->sky.emplace_back(c, V, 0x00000F);
       if(camera_level <= cgi.WALL) return;
     
       if(pseudohept(c)) {
@@ -4872,7 +4873,6 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(true) {
         queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
-      sky->sky.emplace_back(c, V, 0x00000F);
       }
     }
   }
