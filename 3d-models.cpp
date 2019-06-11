@@ -568,6 +568,7 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   if(&sh == &shDogTorso) {
     finishshape();
     shDogStripes = shDogTorso;
+    add_texture(shDogStripes);
     auto& utt = models_texture;
     int a = (6 * 360 / step);
     for(int i=0; i<shDogStripes.e - shDogStripes.s; i++)
