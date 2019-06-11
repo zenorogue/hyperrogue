@@ -274,6 +274,7 @@ namespace conformal {
   int bandsegment = 16000;
   ld rotation = 0;
   ld rotation_xz = 90;
+  ld rotation_yz = 0;
   int do_rotate = 1;
   ld model_orientation, halfplane_scale, model_orientation_yz;
   ld clip_min, clip_max;
@@ -392,8 +393,13 @@ namespace conformal {
       v[ph+1]->at * C0;
   
     View = xpush(-(phase-ph) * hdist(now, next)) * View;
-    if(DIM == 2)
+    if(WDIM == 2) {
       View = spin(rotation * degree) * View;
+      if(DIM == 3) {
+        View = cspin(0, 2, -rotation_xz * degree) * View;
+        View = cspin(1, 2, -rotation_yz * degree) * View;
+        }
+      }
     else {
       if(celldistance(v[ph]->base, old->c7) <= 2) {
         hyperpoint h1 = View * currentmap->relative_matrix(old, viewctr.at) * hpxy3(1,2,3);
@@ -1227,6 +1233,7 @@ namespace conformal {
       PHASEFROM(2); 
       shift_arg_formula(conformal::rotation);
       if(DIM == 3) shift_arg_formula(conformal::rotation_xz);
+      if(DIM == 3) shift_arg_formula(conformal::rotation_yz);
       }
     else if(argis("-playerpath")) {
       conformal::create_playerpath();
