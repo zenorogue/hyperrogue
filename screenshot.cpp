@@ -692,10 +692,13 @@ void rollback() {
 #if CAP_FILES && CAP_SHOT
 string animfile = "animation-%04d.png";
 
+int min_frame = 0, max_frame = 999999;
+
 bool record_animation() {
   lastticks = 0;
   ticks = 0;
   for(int i=0; i<noframes; i++) {
+    if(i < min_frame || i > max_frame) continue;
     printf("%d/%d\n", i, noframes);
     int newticks = i * period / noframes;
     cmode = (env_shmup ? sm::NORMAL : 0);
@@ -984,6 +987,11 @@ int readArgs() {
   else if(argis("-animrecord") || argis("-animrec")) {
     PHASE(3); shift(); noframes = argi();
     shift(); animfile = args(); record_animation();
+    }
+  else if(argis("-record-only")) {
+    PHASEFROM(2); 
+    shift(); min_frame = argi();
+    shift(); max_frame = argi();
     }
 #endif
   else if(argis("-animcircle")) {
