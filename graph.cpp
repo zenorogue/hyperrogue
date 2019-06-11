@@ -4072,6 +4072,7 @@ bool bright;
 // how much to darken
 int getfd(cell *c) {
   if(bright) return 0;
+  if(among(c->land, laAlchemist, laHell) && WDIM == 2 && GDIM == 3) return 0;
   switch(c->land) {
     case laRedRock:
     case laReptile:
