@@ -1260,7 +1260,7 @@ void shootBullet(monster *m) {
   for(int i=1; i<8; i++) if(markOrb(orbdir[i])) {
     monster* bullet = new monster;
     bullet->base = m->base;
-    bullet->at = m->at * spin(M_PI/4*i);
+    bullet->at = m->at * cspin(0, WDIM-1, M_PI/4*i);
     if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
     bullet->type = moBullet;
     bullet->parent = m;
@@ -1268,7 +1268,7 @@ void shootBullet(monster *m) {
     bullet->parenttype = m->type;
     bullet->hitpoints = 0;
     using namespace hyperpoint_vec;
-    bullet->inertia = spin(-M_PI/4 * i) * m->inertia;
+    bullet->inertia = cspin(0, WDIM-1, -M_PI/4 * i) * m->inertia;
     bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
     additional.push_back(bullet);
     }
