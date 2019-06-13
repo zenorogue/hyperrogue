@@ -1460,7 +1460,8 @@ namespace conformal {
   extern bool includeHistory;
   extern bool use_atan;
   extern ld rotation;
-  extern ld rotation_xz;
+  extern ld rotation_xz, rotation_xy2;
+  transmatrix rotmatrix();
   extern int do_rotate;
   extern ld model_orientation, model_orientation_yz;
   extern ld halfplane_scale;

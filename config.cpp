@@ -250,6 +250,7 @@ void initConfig() {
   addsaver(conformal::bandsegment, "band segment");
   addsaver(conformal::rotation, "conformal rotation");
   addsaver(conformal::rotation_xz, "conformal rotation_xz");
+  addsaver(conformal::rotation_xy2, "conformal rotation_2");
   addsaver(conformal::do_rotate, "conformal rotation mode", 1);
   addsaver(conformal::model_orientation, "model orientation", 0);
   addsaver(conformal::model_orientation_yz, "model orientation-yz", 0);

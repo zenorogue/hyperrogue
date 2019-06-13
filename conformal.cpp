@@ -274,7 +274,7 @@ namespace conformal {
   int bandsegment = 16000;
   ld rotation = 0;
   ld rotation_xz = 90;
-  ld rotation_yz = 0;
+  ld rotation_xy2 = 90;
   int do_rotate = 1;
   ld model_orientation, halfplane_scale, model_orientation_yz;
   ld clip_min, clip_max;
@@ -367,6 +367,11 @@ namespace conformal {
     create(path_for_lineanimation[0], c, inverse(ggmatrix(c)));
     }
   
+  transmatrix rotmatrix() {
+    if(DIM == 2) return spin(rotation * degree);
+    return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
+    }
+  
   void movetophase() {
     
     int ph = int(phase);
@@ -381,7 +386,7 @@ namespace conformal {
     
     ld angle = 0;
     if(DIM == 3) {
-      hyperpoint h = spin(-rotation * degree) * cspin(0, 2, rotation_xz * degree) * View * hpxy3(1,2,3);
+      hyperpoint h = inverse(rotmatrix()) * View * hpxy3(1,2,3);
       angle = atan2(h[1], h[2]);
       }
     
@@ -394,11 +399,7 @@ namespace conformal {
   
     View = xpush(-(phase-ph) * hdist(now, next)) * View;
     if(WDIM == 2) {
-      View = spin(rotation * degree) * View;
-      if(DIM == 3) {
-        View = cspin(0, 2, -rotation_xz * degree) * View;
-        View = cspin(1, 2, -rotation_yz * degree) * View;
-        }
+      View = rotmatrix() * View;
       }
     else {
       if(celldistance(v[ph]->base, old->c7) <= 2) {
@@ -406,7 +407,7 @@ namespace conformal {
         ld angle1 = atan2(h1[1], h1[2]);
         View = cspin(2, 1, angle1 - angle) * View;
         }
-      View = cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree) * View;
+      View = rotmatrix() * View;
       }
 
     playermoved = false;
@@ -718,6 +719,30 @@ namespace conformal {
       };
     }
   
+  void edit_rotation(ld& which) {
+    dialog::editNumber(which, 0, 360, 90, 0, XLAT("rotation"), 
+      "This controls the automatic rotation of the world. "
+      "It affects the line animation in the history mode, and "
+      "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
+      "it works only in the cheat mode.");
+    dialog::dialogflags |= sm::CENTER;
+    dialog::extra_options = [] () {
+      dialog::addBreak(100);
+      dialog::addBoolItem_choice("line animation only", conformal::do_rotate, 0, 'N');
+      dialog::addBoolItem_choice("gravity lands", conformal::do_rotate, 1, 'G');
+      dialog::addBoolItem_choice("all directional lands", conformal::do_rotate, 2, 'D');
+      if(DIM == 3) {
+        dialog::addBreak(100);
+        dialog::addSelItem(XLAT("XY plane"), fts(conformal::rotation) + "°", 'A');
+        dialog::add_action([] { popScreen(); edit_rotation(conformal::rotation); });
+        dialog::addSelItem(XLAT("XZ plane"), fts(conformal::rotation_xz) + "°", 'B');
+        dialog::add_action([] { popScreen(); edit_rotation(conformal::rotation_xz); });
+        dialog::addSelItem(XLAT("XY plane #2"), fts(conformal::rotation_xy2) + "°", 'C');
+        dialog::add_action([] { popScreen(); edit_rotation(conformal::rotation_xy2); });
+        }
+      };
+    }
+  
   void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
@@ -747,14 +772,12 @@ namespace conformal {
 
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
     if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
-    dialog::lastItem().value += " " + its(rotation) + "°";
+    if(DIM == 2)
+      dialog::lastItem().value += " " + its(rotation) + "°";
+    else
+      dialog::lastItem().value += " " + its(rotation) + "°" + its(rotation_xz) + "°" + its(rotation_xy2) + "°";
+    dialog::add_action([] { edit_rotation(conformal::rotation); });
     
-    if(DIM == 3) {
-      dialog::addBoolItem(XLAT("rotation (x/z plane)"), do_rotate == 2, 'k');
-      if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
-      dialog::lastItem().value += " " + its(rotation_xz) + "°";
-      }
-
     // if(pmodel == mdBand && sphere)
     if(pmodel != mdPerspective)
       dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
@@ -1020,22 +1043,6 @@ namespace conformal {
         }
       else if(uni == 'a')
         pushScreen(history_menu);
-      else if(uni == 'r' || uni == 'k') {
-        ld& selected_rotation = uni == 'r' ? rotation : rotation_xz;
-        if(selected_rotation < 0) selected_rotation = 0;
-        dialog::editNumber(selected_rotation, 0, 360, 90, 0, XLAT("rotation"), 
-          "This controls the automatic rotation of the world. "
-          "It affects the line animation in the history mode, and "
-          "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
-          "it works only in the cheat mode.");
-        dialog::dialogflags |= sm::CENTER;
-        dialog::extra_options = [] () {
-          dialog::addBreak(100);
-          dialog::addBoolItem_choice("line animation only", conformal::do_rotate, 0, 'N');
-          dialog::addBoolItem_choice("gravity lands", conformal::do_rotate, 1, 'G');
-          dialog::addBoolItem_choice("all directional lands", conformal::do_rotate, 2, 'D');
-          };
-        }
       else if(doexiton(sym, uni)) popScreen();
       };
     }
@@ -1233,7 +1240,7 @@ namespace conformal {
       PHASEFROM(2); 
       shift_arg_formula(conformal::rotation);
       if(DIM == 3) shift_arg_formula(conformal::rotation_xz);
-      if(DIM == 3) shift_arg_formula(conformal::rotation_yz);
+      if(DIM == 3) shift_arg_formula(conformal::rotation_xy2);
       }
     else if(argis("-playerpath")) {
       conformal::create_playerpath();
