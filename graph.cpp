@@ -4072,7 +4072,7 @@ bool bright;
 // how much to darken
 int getfd(cell *c) {
   if(bright) return 0;
-  if(among(c->land, laAlchemist, laHell) && WDIM == 2 && GDIM == 3) return 0;
+  if(among(c->land, laAlchemist, laHell, laVariant) && WDIM == 2 && GDIM == 3) return 0;
   switch(c->land) {
     case laRedRock:
     case laReptile:
@@ -4629,6 +4629,7 @@ int ceiling_category(cell *c) {
     case laKraken:
     case laBrownian: 
     case laHell:
+    case laVariant:    
       return 2;
     
     case laBarrier: 
@@ -4654,7 +4655,6 @@ int ceiling_category(cell *c) {
     case laMercuryRiver:
     case laMagnetic:
     case laSwitch:
-    case laVariant:    
       return 3;
     
     case laRlyeh:
@@ -4800,6 +4800,16 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
         case laAlchemist:
           col = fcol;
           break;
+        
+        case laVariant: {
+          int b = getBits(c);
+          col = 0x404040;
+          for(int a=0; a<21; a++)
+            if((b >> a) & 1)
+              col += variant_features[a].color_change;
+          col = col & 0x00FF00;
+          break;
+          }
         
         case laDragon:
           col = c->wall == waChasm ? 0xFFFFFF : 0x4040FF;
