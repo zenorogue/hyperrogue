@@ -529,6 +529,7 @@ void showChangeMode() {
 
   dialog::addBoolItem(XLAT(SHMUPTITLE), shmup::on, 's');
   dialog::addBoolItem(XLAT("multiplayer"), multi::players > 1, 'm');
+  dialog::add_action_push(multi::showConfigureMultiplayer);
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
   if(getcstat == 'h')

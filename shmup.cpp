@@ -473,7 +473,7 @@ void showConfigureMultiplayer() {
   for(int i=1; i <= MAXPLAYER; i++) {
     string s = player_count_name(i);
     if(i <= players) s += dsc(i-1);
-    dialog::addBoolItem(s, '1', i == multi::players);
+    dialog::addBoolItem(s, i == multi::players, '0' + i);
     if(!dual::state) dialog::add_action([i] {
       dialog::do_if_confirmed([i] {
         stop_game();
@@ -489,8 +489,11 @@ void showConfigureMultiplayer() {
       for(int i=0; i<MAXPLAYER; i++) 
         kills[i] = deaths[i] = treasures[i] = 0;
       });
+
+    dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
+    dialog::add_action(shmup::configure);
     }
-  else dialog::addBreak(100);
+  else dialog::addBreak(200);
   
   dialog::addBack();
   dialog::display();
