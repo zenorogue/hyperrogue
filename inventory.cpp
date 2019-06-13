@@ -470,6 +470,16 @@ namespace hr { namespace inv {
     if(plain) dialog::init(XLAT(mirroring ? "mirror what?" : "inventory"), forecolor, 150, 100);
     
     int j = 0, oc = 6;
+
+    if(1) {
+    dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
+    // dynamicval<videopar> v(vid, vid);
+    // vid.alpha = vid.scale = 1;
+    dynamicval<ld> va(vid.alpha, 1);
+    dynamicval<ld> vs(vid.scale, 1);
+    dynamicval<ld> vc(vid.camera_angle, 0);
+    calcparam();
+
     for(int i=0; i<ittypes; i++) {
       eItem o = eItem(i);
       if(itemclass(o) == IC_ORB) {
@@ -509,6 +519,7 @@ namespace hr { namespace inv {
           }
         }
       }
+    }
 
     if(plain) {
       dialog::addBreak(750);
