@@ -391,6 +391,7 @@ void switch_always3() {
     if(rug::rugged) rug::close();
     if(dual::split(switch_fpp)) return;
     check_cgi(); cgi.require_basics();
+    View = inverse(conformal::rotmatrix()) * View;
     if(!vid.always3) {
       vid.always3 = true;
       ld ms = min<ld>(cgi.scalefactor, 1);
@@ -422,8 +423,9 @@ void switch_always3() {
       swapmatrix(View);
       callhooks(hooks_swapdim);
       }
+    View = conformal::rotmatrix() * View;
 #endif
-   }
+    }
 
   }
 

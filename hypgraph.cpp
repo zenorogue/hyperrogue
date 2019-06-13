@@ -1289,13 +1289,13 @@ void ballgeometry() {
 
 void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
-  View = Id;
+  View = conformal::rotmatrix();
   // EUCLIDEAN
   if(!masterless) 
     viewctr.at = cwt.at->master,
     viewctr.spin = cwt.spin;
   else centerover = cwt;
-  cwtV = Id;
+  cwtV = View;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
