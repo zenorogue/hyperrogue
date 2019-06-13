@@ -1996,7 +1996,7 @@ namespace mapeditor {
 #endif
 
   void initdraw(cell *c) {
-    #if CAP_DRAW
+    #if CAP_EDIT
     mapeditor::drawcell = c;
     ew.c = c;
     ew.rotid = 0;
