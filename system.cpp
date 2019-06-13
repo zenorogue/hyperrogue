@@ -144,6 +144,7 @@ void initgame() {
 
   if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
   
+  resetview();  
   createMov(cwt.at, 0);
   
   pregen();  
