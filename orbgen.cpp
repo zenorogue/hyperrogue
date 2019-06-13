@@ -264,8 +264,8 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
       return olrDangerous;
     
   if(it == itOrbMatter)
-    if(l == laCaves || l == laEmerald || l == laAlchemist || l == laCaribbean || 
-      l == laMinefield || l == laCocytus) return olrUseless;
+    if(among(l, laCaves, laEmerald, laAlchemist, laCaribbean, laMinefield, laCocytus, laWestWall))
+      return olrUseless;
 
   if(l == laPrincessQuest)
     if(among(it, itOrbAether, itOrbFlash, itOrbTeleport, itOrbSummon, itOrbFreedom, itOrbFriend, itOrbPhasing))

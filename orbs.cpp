@@ -829,6 +829,7 @@ void summonAt(cell *dest) {
   }
 
 bool tempWallPossibleAt(cell *dest) {
+  if(dest->land == laWestWall) return false;
   if(dest->monst || (dest->item && !itemHidden(dest))) return false;
   return dest->wall == waChasm || isWatery(dest) || dest->wall == waNone ||
     dest->wall == waTempBridge;
