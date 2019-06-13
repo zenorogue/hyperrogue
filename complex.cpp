@@ -913,7 +913,7 @@ namespace clearing {
           printf("pdir i/ plantdir\n");
           exit(1);
           }
-        c->stuntime = ds;
+        c->stuntime = ds & 15;
         }
       if(c->mpdist <= 7 && c->monst != moMutant)
         break;
