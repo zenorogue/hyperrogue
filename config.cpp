@@ -224,6 +224,8 @@ void initConfig() {
   addsaver(vid.auto_eye, "auto-eyelevel", false);
   
   addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
+  addsaver(reserve_limit, "memory_reserve", 128);
+  addsaver(show_memory_warning, "show_memory_warning");
 
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");

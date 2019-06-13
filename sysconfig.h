@@ -402,6 +402,7 @@ extern "C" {
 #include <set>
 #include <random>
 #include <complex>
+#include <new>
 
 #ifdef USE_UNORDERED_MAP
 #include <unordered_map>

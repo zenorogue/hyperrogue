@@ -207,7 +207,12 @@ void apply_memory_reserve() {
       }
     }
   catch(std::bad_alloc&) {}
+  #if ((ISLINUX && ISSTEAM) || ISWINDOWS)
+  // no get_new_handler on this compiler...
+  default_handler = [] { throw std::bad_alloc(); };
+  #else
   default_handler = std::get_new_handler();
+  #endif
   if(reserve_count > 0) std::set_new_handler(reserve_handler);
   }
 
