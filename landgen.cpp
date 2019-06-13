@@ -2519,7 +2519,7 @@ void setdist(cell *c, int d, cell *from) {
     if(c->land == laClearing && !tactic::on) setland(c, laOvergrown);
     if(c->land == laWhirlpool && !tactic::on && !yendor::on) setland(c, laOcean);
     if(c->land == laCamelot && !tactic::on) setland(c, laCrossroads);
-    if(c->land == laBrownian && !tactic::on && !chaosmode) setland(c, laOcean);
+    if(c->land == laBrownian && !chaosmode) setland(c, laOcean);
     
     if(chaosmode && !c->land && isize(currentlands)) {
       if(chaosmode == 3) setland(c, currentlands[hrand(isize(currentlands))]);
