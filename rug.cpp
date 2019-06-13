@@ -1393,7 +1393,8 @@ void drawRugScene() {
       no_fog ? 1000 :
       gwhere == gSphere && rug_perspective ? 10 : 
       gwhere == gElliptic && rug_perspective ? 4 :
-      100
+      100,
+      darkena(backcolor, 0, 0xFF)
       );
       
     for(int t=0; t<isize(triangles); t++)

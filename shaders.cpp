@@ -205,7 +205,7 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uColor, tTexture, uMV, uProjection, uAlpha, uFogBase;
+  GLint uMVP, uFog, uFogColor, uColor, tTexture, uMV, uProjection, uAlpha, uFogBase;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -256,6 +256,7 @@ struct GLprogram {
     uProjection = glGetUniformLocation(_program, "uP");
     uMVP = glGetUniformLocation(_program, "uMVP");
     uFog = glGetUniformLocation(_program, "uFog");
+    uFogColor = glGetUniformLocation(_program, "uFogColor");
     uFogBase = glGetUniformLocation(_program, "uFogBase");
     uAlpha = glGetUniformLocation(_program, "uAlpha");
     uColor = glGetUniformLocation(_program, "uColor");
@@ -467,9 +468,13 @@ void switch_mode(eMode m, shader_projection sp) {
   else glDisable(GL_DEPTH_TEST); */
   }
 
-void fog_max(ld fogmax) {
+void fog_max(ld fogmax, color_t fogcolor) {
   #if CAP_SHADER
   glUniform1f(current->uFog, 1 / fogmax);
+
+  GLfloat cols[4];
+  for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
+  glUniform4f(current->uFogColor, cols[0], cols[1], cols[2], cols[3]);
   #else
   glFogf(GL_FOG_END, fogmax);
   #endif
@@ -547,6 +552,7 @@ void init() {
       mps,     "uniform mediump mat4 uP;",
       1,       "uniform mediump float uFog;",
       1,       "uniform mediump float uFogBase;",
+      1,       "uniform mediump vec4 uFogColor;",
       ball,    "uniform mediump float uAlpha;",
       !varcol, "uniform mediump vec4 uColor;",
 
@@ -578,7 +584,8 @@ void init() {
       texture,   "vTexCoord = aTexture;",
       varcol,    "vColor = aColor;",
       !varcol,   "vColor = uColor;",
-      lfog,      "vColor = vColor * clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
+      lfog,      "float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
+      lfog,      "vColor = vColor * fogx + uFogColor * (1.0-fogx);",
       !mps && !flatten,      "gl_Position = uMVP * aPosition;",
       !mps && flatten,   "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uMVP * pos;",
       ball,      "vec4 t = uMV * aPosition; t /= (t[3] + uAlpha); ",
@@ -606,17 +613,20 @@ void init() {
       hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
-      sh3,       "vColor.xyz = vColor.xyz * (uFogBase - acosh(t[3]) / uFog);",
-      sr3,       "vColor.xyz = vColor.xyz * (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
+      sh3,       "float fogs = (uFogBase - acosh(t[3]) / uFog);",
+      sr3,       "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
       
-      ss30,      "vColor.xyz = vColor.xyz * (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
-      ss31,      "vColor.xyz = vColor.xyz * (uFogBase - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
-      ss32,      "vColor.xyz = vColor.xyz * (uFogBase - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
-      ss33,      "vColor.xyz = vColor.xyz * (uFogBase - acos(t[3]) / uFog); ",
+      ss30,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
+      ss31,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
+      ss32,      "float fogs = (uFogBase - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
+      ss33,      "float fogs = (uFogBase - acos(t[3]) / uFog); ",
+
+      s3,        "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);",
+
       sh3 || sr3 || ball,"t[3] = 1.0;",
       
       band || hp || s3 || ball,"gl_Position = uP * t;",
-      dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0);",
+      dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0) + uFogColor.xyz * (0.5 + gl_Position.z / 2.0);",
       1,         "}"), 
       
       stringbuilder(

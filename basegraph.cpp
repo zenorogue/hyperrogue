@@ -301,7 +301,7 @@ void display_data::set_projection(int ed) {
   
 
     if(pers3) {
-      glhr::fog_max(1/sightranges[geometry]);
+      glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
       }
     
     if(glhr::new_shader_projection == glhr::shader_projection::ball)
