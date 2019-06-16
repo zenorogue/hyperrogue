@@ -1041,6 +1041,15 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   }
 
 #if CAP_SHAPES
+color_t skincolor = 0xD0C080FF;
+
+void humanoid_eyes(const transmatrix& V, color_t ecol, color_t hcol = skincolor) {
+  if(DIM == 3) {
+    queuepoly(VHEAD, cgi.shPHeadOnly, hcol);
+    queuepoly(VHEAD, cgi.shSkullEyes, ecol);
+    }
+  }
+
 void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   ShadowV(V, cgi.shPBody);
   color_t col = linf[laTerracotta].color;
@@ -1053,17 +1062,9 @@ void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   if(hp >= 2) queuepoly(VBODY3 * VBS, cgi.shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
   queuepoly(VHEAD, cgi.shTerraHead, darkena(t > 4 ? 0x202020 : t > 3 ? 0x504040 : col, 0, 0xFF));
   queuepoly(VHEAD1, cgi.shPFace, bcol);
+  humanoid_eyes(V, 0x400000FF, darkena(col, 0, 0xFF));
   }
 #endif
-
-color_t skincolor = 0xD0C080FF;
-
-void humanoid_eyes(const transmatrix& V, color_t ecol, color_t hcol = skincolor) {
-  if(DIM == 3) {
-    queuepoly(VHEAD, cgi.shPHeadOnly, hcol);
-    queuepoly(VHEAD, cgi.shSkullEyes, ecol);
-    }
-  }
 
 void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
   charstyle& cs = getcs();
@@ -1632,7 +1633,6 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     
     case moTerraWarrior: {
       drawTerraWarrior(V, 7, (where ? where->hitpoints : 7), footphase);
-      humanoid_eyes(V, 0x400000FF, darkena(col, 0, 0xFF));
       return false;
       }
     
