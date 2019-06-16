@@ -708,7 +708,9 @@ bool record_animation() {
     apply();
     conformal::configure();
     if(conformal::on) {
-      conformal::phase = isize(conformal::v) * i * 1. / noframes;
+      int len = (isize(conformal::v)-1);
+      conformal::phase = len * i * 1. / noframes;
+      if(conformal::lvspeed < 0) conformal::phase = len - conformal::phase;
       conformal::movetophase();
       }
     
