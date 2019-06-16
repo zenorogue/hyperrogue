@@ -3259,3 +3259,25 @@ Gameplay:
 - adjusted some dialog help texts
 - an option to configure the eye level
 - dual geometry mode: moved the Land of Power to the hyperbolic world
+
+2019-06-13 18:28 Version 11.0ź:
+- improved memory handling
+- fixed the PTM version of Brown Islands
+- Orb of Matter no longer 'works' in the Free Fall
+- fixed the depth testing in Hypersian Rug
+- fixed a crash in draw editor
+- fixed the multiplayer mode (it was not possible to enable or configure it)
+- fixed the Clearing
+- fixed a crash when using formula pattern in spherical geometry
+
+2.5D/3D:
+- fixed the worm shadows
+- fixed a crashbug related to sky
+- better sky in Irradiated Fields; brighter land in Hell, Alchemist Lab, and Irradiated Fields
+- fixed dog stripes
+- fixed a bug with the history animation
+- improved rotation config
+- when you start or press Space, the view direction defaults to horizontal
+- [full 3D] the extra knives given by Orbs now fly in different directions (rather than flying in the same direction but rotated)
+- fixed the orb display in Orb Strategy Mode
+- fog color is now the same as the background color instead of always black
