@@ -4657,15 +4657,17 @@ int ceiling_category(cell *c) {
     case laSwitch:
       return 3;
     
-    case laRlyeh:
-    case laTemple:
-    case laRuins:
-      return 5;
-
     case laPalace:
     case laPrincessQuest:
     default:
       return 4;
+    
+    case laRuins:
+      return 6;
+    
+    case laTemple:
+    case laRlyeh:
+      return 7;
     }
   }
 
@@ -4753,6 +4755,16 @@ void dqi_sky::draw() {
   glDrawArrays(GL_TRIANGLES, 0, isize(skyvertices));
   }
 
+color_t skycolor(cell *c) {
+  int cd = (euclid || stdhyperbolic) ? getCdata(c, 1) : 0;
+  int z = (cd * 5) & 127;
+  if(z >= 64) z = 127 - z;
+  if(c->land == laHell)
+    return z < 32 ? gradient(0x400000, 0xFF0000, 0, z, 32) : gradient(0xFF0000, 0xFFFF00, 32, z, 63);
+  else
+    return gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
+  }
+
 void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t& wcol) {
 
   if(pmodel != mdPerspective || sphere) return;
@@ -4815,15 +4827,8 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
           col = c->wall == waChasm ? 0xFFFFFF : 0x4040FF;
           break;
         
-        default: {
-          int cd = (euclid || stdhyperbolic) ? getCdata(c, 1) : 0;
-          int z = (cd * 5) & 127;
-          if(z >= 64) z = 127 - z;
-          if(c->land == laHell)
-            col = z < 32 ? gradient(0x400000, 0xFF0000, 0, z, 32) : gradient(0xFF0000, 0xFFFF00, 32, z, 63);
-          else
-            col = gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
-          }
+        default: 
+          col = skycolor(c);        
         }
       if(sky) sky->sky.emplace_back(c, V, col);
       return;
@@ -4866,6 +4871,43 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
       if(true) {
         queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
+      break;
+      }
+    
+    case 6: {
+      if(sky) sky->sky.emplace_back(c, V, skycolor(c));
+      if(camera_level <= cgi.HIGH2) return;
+      color_t wcol2 = winf[waRuinWall].color;
+      if(c->landparam == 1)
+        forCellIdEx(c2, i, c) if(c2->landparam != 1)
+          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+      if(c->landparam != 2)
+        forCellIdEx(c2, i, c) if(c2->landparam == 2)
+          placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
+      if(c->landparam == 0)
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(wcol2, fd, 0xFF), PPR::WALL);
+      if(c->landparam == 1)
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol2, fd, 0xFF), PPR::WALL);
+      break;
+      }
+    
+    case 7: {
+      if(sky) sky->sky.emplace_back(c, V, 0x00000F);
+      if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
+        queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+        }
+      if(camera_level <= cgi.HIGH2) return;
+      color_t wcol2 = winf[waColumn].color;
+      if(c->landparam == 1)
+        forCellIdEx(c2, i, c) if(c2->landparam != 1)
+          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+      if(c->landparam != 2)
+        forCellIdEx(c2, i, c) if(c2->landparam == 2)
+          placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
+      if(c->landparam == 0)
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(wcol2, fd, 0xFF), PPR::WALL);
+      if(c->landparam == 1)
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol2, fd, 0xFF), PPR::WALL);
       break;
       }
     

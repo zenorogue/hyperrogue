@@ -1397,6 +1397,20 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(buildIvy(c, 0, 3) && !peace::on) c->item = itStatue;
           }
         }
+      if(c->mpdist >= 7) {
+        if(c->wall == waColumn) c->landparam = 1;
+        else {
+          int i = 0, j = 0;
+          for(int k=0; k<c->type; k++) 
+            if(c->move(k) && c->move(k)->wall == waColumn) {
+              i++;
+              if(c->modmove(k+1) && c->modmove(k+1)->wall == waColumn) j++;
+              if(c->modmove(k+2) && c->modmove(k+2)->wall == waColumn) j++;
+              }
+          if(i > 2 || (i == 2 && !j)) c->landparam = 1;
+          else c->landparam = 2;
+          }
+        }
       break;
     
     case laTemple:
@@ -2144,14 +2158,16 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = RANDPAT ? waRuinWall : waNone;
           }
         else {
-          if(out_ruin(c)) {
-            if(hrand(100) < 3)
-              c->wall = waRuinWall;
-            }
-          else if(hrand(100) < 75) {
-            forCellEx(c2, c) if(out_ruin(c2))
-              c->wall = waRuinWall;
-            }
+          c->landparam = 2;
+          if(out_ruin(c)) 
+            c->landparam = 0;
+          else forCellEx(c2, c) if(out_ruin(c2))
+            c->landparam = 1;
+
+          if(c->landparam == 0 && hrand(100) < 3)
+            c->wall = waRuinWall, c->landparam = 1;
+          if(c->landparam == 1 && hrand(100) < 75)
+            c->wall = waRuinWall;
           }
         if(hrand_monster(40000) < kf && !c->monst && !c->wall && !shmup::on) {
           cell *c1 = c;

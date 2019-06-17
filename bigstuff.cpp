@@ -1528,6 +1528,7 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
+        c->landparam = 0;
         if(geometry == gSpace534) {
           int i = 0;
           forCellCM(c2, c) if(celldistAlt(c2) < celldistAlt(c)) i++;
@@ -1553,7 +1554,9 @@ void moreBigStuff(cell *c) {
             }
           if(q == 2) c->wall = waColumn;
           }
+        c->landparam = 1;
         }
+      else c->landparam = 2;
       }
     }
 
