@@ -4893,7 +4893,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
     
     case 7: {
       if(sky) sky->sky.emplace_back(c, V, 0x00000F);
-      if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
+      if(fieldpattern::fieldval_uniq(c) % 5 < 2) {
         queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
       if(camera_level <= cgi.HIGH2) return;
