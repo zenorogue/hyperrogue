@@ -5168,6 +5168,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(c->monst) {
       ch = minf[c->monst].glyph, moncol = minf[c->monst].color;
+      if(c->monst == moMimic) {
+        int all = 0, mirr = 0;
+        for(auto& m: mirror::mirrors) if(c == m.second.at) {
+          all++;
+          if(m.second.mirrored) mirr++;
+          }
+        if(all == 1) moncol = mirrorcolor(mirr);
+        }
       if(c->monst == moMutant) {
         // root coloring
         if(c->stuntime != mutantphase)
@@ -6232,7 +6240,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     if(wmascii || (WDIM == 2 && GDIM == 3)) {
-      if(!it) {
+      if(!it && !c->monst) {
         if(c->wall == waNone || isWatery(c)) asciicol = fcol;
         }
       if(c->wall == waBoat && !it) asciicol = 0xC06000;
