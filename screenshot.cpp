@@ -1216,7 +1216,7 @@ void fib_ghosts() {
 reaction_t current = null_animation;
 
 void pick() {
-  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || vid.always3 || pmodel || rug::rugged) {
+  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || vid.always3 || pmodel || rug::rugged || vid.wallmode < 2 || vid.monmode < 2) {
     current = null_animation;
     return;
     }
