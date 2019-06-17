@@ -2094,6 +2094,9 @@ int read_config_args() {
   else if(argis("-d:graph")) {
     PHASEFROM(2); launch_dialog(showGraphConfig);
     }
+  else if(argis("-tstep")) {
+    PHASEFROM(2); shift(); vid.texture_step = argi();
+    }
   else return 1;
   return 0;
   }
