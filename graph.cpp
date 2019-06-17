@@ -4539,12 +4539,12 @@ void draw_grid_at(cell *c, const transmatrix& V) {
     }
   #endif
   else if(isWarped(c) && has_nice_dual()) {
-    if(pseudohept(c)) for(int t=0; t<c->type; t++)
+    if(pseudohept(c)) for(int t=0; t<c->type; t++) if(isWarped(c->move(t)))
       gridline(V, get_warp_corner(c, t%c->type), get_warp_corner(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
     }
   else {
     for(int t=0; t<c->type; t++)
-      if(c->move(t) && c->move(t) < c)
+      if(c->move(t) && (c->move(t) < c || isWarped(c->move(t))))
       gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
     }
   }
