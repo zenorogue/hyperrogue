@@ -113,6 +113,7 @@ template<class T, class U> void addsaverenum(T& i, U name, T dft) {}
 void addsaver(charstyle& cs, string s) {
   addsaver(cs.charid, s + ".charid");
   addsaver(cs.skincolor, s + ".skincolor");
+  addsaver(cs.eyecolor, s + ".eyecolor");
   addsaver(cs.haircolor, s + ".haircolor");
   addsaver(cs.dresscolor, s + ".dresscolor");
   addsaver(cs.swordcolor, s + ".swordcolor");
