@@ -6576,6 +6576,8 @@ bool multiRevival(cell *on, cell *moveto) {
   return false;
   }
 
+bool got_crossroads;
+
 void movecost(cell* from, cell *to, int phase) {
   if(from->land == laPower && to->land != laPower && (phase & 1)) {
     int n=0;
@@ -6591,8 +6593,9 @@ void movecost(cell* from, cell *to, int phase) {
     tour::checkGoodLand(to->land);
 #endif
   
-  if(to->land ==laCrossroads4 && !chaosUnlocked && !geometry && (phase & 2)) {
+  if(to->land ==laCrossroads4 && !got_crossroads && !geometry && (phase & 2) && !cheater) {
     achievement_gain("CR4");
+    got_crossroads = true;
     chaosUnlocked = true;
     }
 
