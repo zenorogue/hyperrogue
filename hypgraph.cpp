@@ -1337,6 +1337,7 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
     V[1][3] += (y - current_display->ycenter);
     V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
     V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
+    if(WDIM == 3) V[2][2] = -1;
     }
   else { 
     V[0][2] += (x - current_display->xcenter);
