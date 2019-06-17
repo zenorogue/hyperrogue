@@ -2595,7 +2595,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       else {
         if(c->monst == moTentacletail && c->mondir == NODIR) {
           if(c->monmirror) Vb = Vb * Mirror;
-          queuepoly(Vb, cgi.shWormSegment, darkena(col, 0, 0xFF));
+          queuepoly(DIM == 3 ? mmscale(Vb, cgi.ABODY) : Vb, cgi.shWormSegment, darkena(col, 0, 0xFF));
           }
         else if(c->mondir == NODIR) {
           bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
