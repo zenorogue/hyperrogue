@@ -230,7 +230,9 @@ void drawArrowTraps() {
           transmatrix& tv = u ? t1 : t0;
           hyperpoint trel = inverse(tu) * tC0(tv);
           transmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
-          queuepoly(tpartial * ypush(.05), cgi.shTrapArrow, 0xFFFFFFFF);
+          tpartial = tpartial * ypush(.05);
+          if(DIM == 3) tpartial = tpartial * cspin(1, 2, M_PI/2);
+          queuepoly(tpartial, cgi.shTrapArrow, 0xFFFFFFFF);
           }
         }
       #endif
