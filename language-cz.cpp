@@ -8134,3 +8134,178 @@ S("The Orb of Yendor is locked in with powerful magic.", "Yendorská Sféra je u
 
 S("general perspective", "obecná perspektiva")
 S("formula", "vzorec")
+
+S("limit generated cells per frame", "limit počtu generovaných políček na snímek")
+
+S("In the 3D mode, lowering this value may help if the game lags while exploring new areas.",
+  "Snížení této hodnoty může ve 3D pomoci, pokud se hra zadrhává při zkoumání nových oblastí zadrhává.")
+  
+S("sloppy range checking", "nedbalá kontrola rozsahu")
+
+S("fog effect", "efekt mlhy")
+S("memory configuration", "konfigurace paměti")
+
+S("wall quality", "kvalita stěn")
+
+S(
+  "Controls the number of triangles used for wall surfaces. "
+  "Higher numbers reduce the performance. "
+  "This has a strong effect when the walls are curved indeed "
+  "(honeycombs based on horospheres, and projections other than native perspective), "
+  "but otherwise, usually it can be set to 1 without significant adverse effects other "
+  "than slightly incorrect texturing.",
+  
+  "Ovládá počet trojúhelníků použitých na povrchy stěn. "
+  "Vyšší hodnoty snižují výkon. "
+  "Toto má silný efekt, když jsou stěny opravdu zakřivené "
+  "(dělení založená na horosférách a projekce jiné než domorodá), "
+  "ale jinak to obvykle lze nastavit na 1 a nebude to mít žádné významné negativní následky "
+  "s výjimkou mírně nesprávného texturování.")
+
+S("use the full 3D models", "používej úplné 3D modely")
+
+S("Z shift", "Z-posuv")
+S("Eye level", "úroveň očí")
+S("fixed Y/Z rotation", "stálá Y/Z rotace")
+
+S("configure FPP automatically", "automatická konfigurace FPP")
+
+S("Look from behind.", "Pohled zezadu.")
+
+S("reduce if walls on the way", "zmenši, pokud jsou v dráze stěny")
+
+S("The camera is currently exactly on the plane P. "
+  "The horizon is seen as a straight line.",
+  
+  "V tuto chvíli je kamera přesně na rovině P. Obzor je vidět jako přímka.")
+
+S(
+  "The camera is currently %1 units above the plane P. "
+  "This makes you see the floor level as in general perspective projection "
+  "with parameter %2.", 
+  
+  "V tuto chvíli je kamera %1 jednotek nad rovinou P. "
+  "To znamená, že úroveň podlahy je vidět stejně jako v obecné perspektivní projekci s parametrem %2.")
+
+S("In the FPP mode, the camera will be set at this altitude (before applying shifts).", 
+  "V módu FPP bude kamera nastavena na tuto výšku "
+  "(před aplikací posuvů).")
+
+S("auto-adjust to eyes on the player model", "automaticky upravit podle očí modelu hráče")
+
+S("eye color", "barva očí")
+
+// rotation (line animation etc.)
+
+S("XY plane", "rovina XY")
+S("XZ plane", "rovina XZ")
+S("XY plane #2", "rovina XY #2")
+
+// cube honeycomb
+
+S("twisting implemented only for diagonal matrices", "kroucení implementováno pouze pro diagonální matice")
+S("nothing to twist", "není co kroutit")
+S("change the bottom left corner", "změna levého dolního rohu")
+
+S("flip X coordinate", "převrátit souřadnici X")
+S("flipping X impossible", "X nelze převrátit")
+S("flip Y coordinate", "převrátit souřadnici Y")
+S("flipping Y impossible", "Y nelze převrátit")
+S("flip X coordinate", "převrátit souřadnici X")
+S("swap X and Y", "záměna X a Y")
+S("swapping impossible", "záměnu nelze provést")
+
+S(
+  "This matrix lets you play on the quotient spaces of three-dimensional. "
+  "Euclidean space. Every column specifies a translation vector which "
+  "takes you back to the starting point. For example, if you put "
+  "set 2, 6, 0 on the diagonal, you get back to the starting point "
+  "if you move 2 steps in the X direction, 6 steps in the Y direction "
+  "(the quotient space is infinite in the Z direction).\n\n"
+  "You can also introduce twists for diagonal matrices: after going "
+  "the given number of steps in the Z direction, the space is also "
+  "mirrored or rotated. (More general 'twisted' spaces are currently "
+  "not implemented.)",
+
+  "Tato matice umožňuje hrát v kvocientových prostorech trojrozměrného eukleidovského "
+  "prostoru. Každý sloupec specifikuje translační vektor, který vás zavede zpět "
+  "do výchozího bodu. Pokud například zadáte na hlavní diagonále 2, 6 a 0, "
+  "vrátíte se do výchozího bodu po dvou krocích ve směru X nebo šesti "
+  "krocích ve směru Y (ve směru Z je kvocientový prostor nekonečný).\n\n"
+  "U diagonálních matic můžete také vytvořit zkroucení: po určitém počtu "
+  "kroků ve směru Z bude prostor zrcadlený nebo otočený. (Obecnější 'zkroucené' "
+  "prostory nejsou v současné době implementovány.)")
+
+// map editor 
+
+S("pick something", "něco vyber") // to edit
+
+S("z = camera", "z = kamera")
+S("Z = spheres", "z = sféry")
+S("z = equi", "z = ekvi")
+
+S("The distance from the camera to added points.", "Vzdálenost od kamery k přidaným bodům.")
+S("place points at fixed radius", "umísťování bodů v pevně daném poloměru")
+S("place points on equidistant surfaces", "umísťování bodů na ekvidistantních površích")
+S("mousewheel step", "krok kolečka myši")
+S("hint: shift for finer steps", "nápověda: stiskni Shift pro jemnější kroky")
+
+S("random walk", "náhodná procházka")
+
+// dual like two at once, not in mathematical sense
+S("dual geometry mode", "mód dvojité geometrie")
+
+S("Impossible.", "Nemožné.")
+
+S("subgame affected", "ovlivněná podhra")
+S("both", "obě")
+
+// changing the rug model distance
+S("adjust points", "upravení bodů")
+S("center on camera", "vycentrování na kameře")
+S("adjust edges", "úprava hran")
+S("adjust distance", "úprava vzdálenosti")
+
+S("memory", "paměť")
+
+S(
+  "HyperRogue takes place in a world that is larger than anything Euclidean. "
+  "Unfortunately, in some cases running it on an Euclidean computer might be "
+  "a problem -- the computer could simply run out of memory. Some lands (such as the Ocean or the Brown Islands) "
+  "may use up memory very fast!\n\n",
+  
+  "HyperRogue se odehrává ve světě, který je větší než cokoli eukleidovského. "
+  "Bohužel, v některých případech může při hře na eukleidovském počítači nastat "
+  "problém -- počítači může prostě dojít paměť. Některé kraje (například Oceán "
+  "nebo Hnědé ostrovy) mohou paměť spotřebovat velice rychle!\n\n")
+  
+S("You are playing a 32-bit HyperRogue executable, which can only use 4GB of memory.\n\n",
+  "Hraješ HyperRogue z 32-bitového spustitelného souboru, který může využívat pouze 4 GB paměti.\n\n")
+
+S(
+  "Although you are extremely unlikely to return to a place you have already been to, "
+  "the game never forgets these areas, unless you start a new game, use an Orb of "
+  "Safety (found in Land of Eternal Motion, the Prairie, and the Ocean), or activate the memory "
+  "saving mode, which tries to intelligently predict which cells you will never find "
+  "again and can be safely forgotten.\n\n",
+  
+  "Přestože je nesmírně nepravděpodobné, že by ses vrátil na místo, kde už jsi byl, "
+  "hra tyto oblasti nikdy nezapomíná, dokud nezačneš novou hru, nepoužiješ Sféru "
+  "Bezpečnosti (která se nachází v Kraji věčného pohybu, na Prérii a v Oceánu) "
+  "nebo neaktivuješ mód šetření pamětí, který se snaží inteligentně předvídat, "
+  "která políčka už nikdy znovu nenajdeš a mohou tedy být bezpečně zapomenuta.")
+
+S("cells in memory", "políčka v paměti")
+
+S("memory saving mode", "mód šetření pamětí")
+S("show memory warnings", "zobrazovat varování o paměti")
+
+S("just let me find Orb of Safety or finish the game", "prostě mě nech najít Sféru Bezpečnosti nebo dokončit hru")
+S("memory reserve", "paměťová rezerva")
+S("When to show a memory warning.", "Kdy zobrazovat varování o paměti.")
+S("clear caches", "vyčistit mezipaměť")
+
+// in animation menu
+S("shmup action", "akce v módu střílečky")
+
+
