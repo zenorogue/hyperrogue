@@ -2566,7 +2566,7 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
       }
     }
     
-  if(tk < 10 && ntk >= 10 && in_full_game() && !inv::on)
+  if(tk < 10 && ntk >= 10 && in_full_game() && !big_unlock)
     addMessage(XLAT("Good to know that your fighting skills serve you well in this strange world."));
 
   if(tk < R100/2 && ntk >= R100/2 && in_full_game())
@@ -6599,9 +6599,9 @@ void movecost(cell* from, cell *to, int phase) {
   if(isHaunted(from->land) && !isHaunted(to->land) && (phase & 2)) {
     updateHi(itLotus, truelotus = items[itLotus]);
     if(items[itLotus] >= 1) achievement_gain("LOTUS1");
-    if(items[itLotus] >= (inv::on ? 25 : 10)) achievement_gain("LOTUS2");
-    if(items[itLotus] >= (inv::on ? 50 : 25)) achievement_gain("LOTUS3");
-    if(items[itLotus] >= 50 && !inv::on) achievement_gain("LOTUS4");
+    if(items[itLotus] >= (big_unlock ? 25 : 10)) achievement_gain("LOTUS2");
+    if(items[itLotus] >= (big_unlock ? 50 : 25)) achievement_gain("LOTUS3");
+    if(items[itLotus] >= 50 && !big_unlock) achievement_gain("LOTUS4");
     achievement_final(false);
     }
   
@@ -6713,13 +6713,13 @@ void collectMessage(cell *c2, eItem which) {
   else if(which == itPalace && items[itPalace] == U5-1 && !specialmode && isLandIngame(laDungeon)) {
     addMessage(XLAT("The rug depicts a man in a deep dungeon, unable to leave."));
     }
-  else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on)
+  else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on && !chaosmode)
     addMessage(XLAT("You feel the presence of free saves on the Crossroads."));
-  else if(which == itHell && items[itHell] == 25-1 && !specialmode && inv::on)
+  else if(which == itHell && items[itHell] == 25-1 && !specialmode && inv::on && !chaosmode)
     addMessage(XLAT("You feel the Orbs of Yendor nearby..."));
-  else if(which == itHell && items[itHell] == 50-1 && !specialmode && inv::on)
+  else if(which == itHell && items[itHell] == 50-1 && !specialmode && inv::on && !chaosmode)
     addMessage(XLAT("You feel the Orbs of Yendor in the Crossroads..."));
-  else if(which == itHell && items[itHell] == 100-1 && !specialmode && inv::on)
+  else if(which == itHell && items[itHell] == 100-1 && !specialmode && inv::on && !chaosmode)
     addMessage(XLAT("You feel the Orbs of Yendor everywhere..."));
   else if(which == itBone && items[itBone] % 25 == 24 && !specialmode && inv::on)
     addMessage(XLAT("You have gained an offensive power!"));

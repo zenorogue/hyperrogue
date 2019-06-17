@@ -774,27 +774,29 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 
 #define BUGCOLORS 3
 
+#define big_unlock (inv::on && !chaosmode)
+
 // land completion for shared unlocking
-#define U5 (inv::on ? 10 : 5)
+#define U5 (big_unlock ? 10 : 5)
 // land completion for advanced unlocking
-#define U10 (inv::on ? 25 : 10)
+#define U10 (big_unlock ? 25 : 10)
 
 // land completion
-#define R10 (inv::on ? 50 : 10)
+#define R10 (big_unlock ? 50 : 10)
 // intermediate lands
-#define R30 (inv::on ? 100 : 30)
+#define R30 (big_unlock ? 100 : 30)
 // advanced lands
-#define R60 (inv::on ? 200 : 60)
+#define R60 (big_unlock ? 200 : 60)
 // advanced lands II
-#define R90 (inv::on ? 300 : 90)
+#define R90 (big_unlock ? 300 : 90)
 // Crossroads IV
-#define R200 (inv::on ? 800 : 200)
+#define R200 (big_unlock ? 800 : 200)
 // Crossroads V
-#define R300 (inv::on ? 1200 : 300)
+#define R300 (big_unlock ? 1200 : 300)
 // kill types for Dragon Chasms
-#define R20 (inv::on ? 30 : 20)
+#define R20 (big_unlock ? 30 : 20)
 // kill count for Graveyard/Hive
-#define R100 (inv::on ? 500 : 100)
+#define R100 (big_unlock ? 500 : 100)
 
 string XLAT(string x);    // translate the sentence x
 string XLATN(string x);   // translate the sentence x

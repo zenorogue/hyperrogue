@@ -123,11 +123,12 @@ namespace hr { namespace inv {
       }
     else {
       bool nextfound = false;
-      if(qty >= 10) remaining[o]++;
+      int fst = (chaosmode ? 5 : 10);
+      if(qty >= fst) remaining[o]++;
       else {
         if(whichorbinfo == o) {
           if(it == itHyperstone) {          
-            extra += extraline(it, "10");
+            extra += extraline(it, its(fst));
             }
           else {
             orbinfoline += XLAT("Unlocked by: %1 in %2", it, landof(it));
@@ -136,9 +137,9 @@ namespace hr { namespace inv {
           }
         nextfound = true;
         }
-      int last = 10;
+      int last = fst;
       for(int k=0; k<30 || !nextfound; k++) {
-        int maxstep = 15 + 5 * k;
+        int maxstep = chaosmode ? 10 + 2 * k : 15 + 5 * k;
         if(o == itOrbMirror)
           maxstep += 5 * (k-1) * (k-2);
         else
@@ -219,10 +220,11 @@ namespace hr { namespace inv {
     for(auto& oi: orbinfos) {
       if(oi.flags & orbgenflags::OSM_AT10) {
         eItem it = treasureType(oi.l);
-        if(items[it] >= 10) {
+        int fst = chaosmode ? 5 : 10;
+        if(items[it] >= fst) {
           remaining[oi.orb]++;
           }
-        if(whichorbinfo == oi.orb) extra += extraline(it, "10");
+        if(whichorbinfo == oi.orb) extra += extraline(it, its(fst));
         }
       }
     }
