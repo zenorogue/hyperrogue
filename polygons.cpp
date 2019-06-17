@@ -353,44 +353,44 @@ void geometry_information::procedural_shapes() {
   // todo not shexf
 
   bshape(shBigCarpet1, PPR::GFLOORa);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*2.1) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, -zhexf*2.1) * C0);
 
   bshape(shBigCarpet2, PPR::GFLOORb);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -zhexf*1.9) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, -zhexf*1.9) * C0);
 
   bshape(shBigCarpet3, PPR::GFLOORc);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12*3, -zhexf*1.7) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12*3, -zhexf*1.7) * C0);
 
   bshape(shBFloor[0], PPR::BFLOOR);
-  for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
+  for(int t=0; t<=SD6; t++) hpcpush(ddi(SD7 + t*S14, floorrad0*.1) * C0);
 
   bshape(shBFloor[1], PPR::BFLOOR);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
 
   bshape(shMineMark[0], PPR::MINEMARK);
-  for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
+  for(int t=0; t<=SD6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
 
   bshape(shMineMark[1], PPR::MINEMARK);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
 
   bshape(shBigMineMark[0], PPR::MINEMARK);
-  for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.15) * C0);
+  for(int t=0; t<=SD6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.15) * C0);
 
   bshape(shBigMineMark[1], PPR::MINEMARK);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, floorrad1*.15) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.15) * C0);
 
   for(int d=0; d<2; d++) {
     bshape(shSemiBFloor[d], PPR::BFLOOR);
-    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0*.1) * C0);
+    for(int t=0; t<=4; t++) hpcpush(ddi(SD7 + (3+3*d+t%4)*S14, floorrad0*.1) * C0);
     }
 
   // walls etc
 
   bshape(shGiantStar[1], PPR::GFLOORa);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, -zhexf*2.4) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, -zhexf*2.4) * C0);
 
   bshape(shGiantStar[0], PPR::GFLOORa);
-  for(int t=0; t<=S6; t++) {
+  for(int t=0; t<=SD6; t++) {
     hpcpush(ddi(t*S14, -zhexf*2.4) * C0);
     hpcpush(ddi(t*S14+S7, zhexf*1.5) * C0);
     }
