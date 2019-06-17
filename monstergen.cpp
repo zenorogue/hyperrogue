@@ -411,6 +411,11 @@ void wandering() {
       continue;
       }
     
+    else if(c->land == laOcean && cwt.at->land == laOcean && cwt.at->landparam > 25 && c->landparam > 25 && !tactic::on && !yendor::on && hrand(100) < 2) {
+      c->monst = moPirate; c->wall = waBoat; c->item = itOrbSafety; 
+      continue;
+      }
+
     else if(c->wall == waCTree && !c->monst && wchance(items[itPirate], 15) && canReachPlayer(c, moSlime)) {
       c->monst = moParrot;
       playSeenSound(c);
@@ -459,7 +464,7 @@ void wandering() {
         playSeenSound(c);
         continue;
         }
-      if(c->land == laOcean && (items[itCoast] > 50 || (cwt.at->landparam < 25 && c->landparam < 25)) && wchance(items[itCoast], 25) && canReachPlayer(c, moEagle)) {
+      if(c->land == laOcean && (items[itCoast] > 50 || ((cwt.at->land != laOcean || cwt.at->landparam < 25) && c->landparam < 25)) && wchance(items[itCoast], 25) && canReachPlayer(c, moEagle)) {
         c->monst = moAlbatross;
         playSeenSound(c);
         continue;
