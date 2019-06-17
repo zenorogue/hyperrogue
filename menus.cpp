@@ -99,6 +99,7 @@ void showOverview() {
     eItem it = treasureType(l);
     int lv = items[it] * landMultiplier(l);
     if(lv >= 25) col = 0xFFD500;
+    else if(lv && it == itSavedPrincess) col = 0xFFD500;
     else if(lv >= 10) col = 0x00D500;
     else if(items[it]) col = 0xC0C0C0;
     else col = BLACKISH;
