@@ -672,9 +672,9 @@ void add_cells_drawn(char c = 'C') {
     dialog::scaleLog();
     });
   if(WDIM == 3 || vid.use_smart_range == 2) {
-    dialog::addSelItem(XLAT("limit generation per frame"), its(vid.cells_generated_limit), 'L');
+    dialog::addSelItem(XLAT("limit generated cells per frame"), its(vid.cells_generated_limit), 'L');
     dialog::add_action([] () { 
-      dialog::editNumber(vid.cells_generated_limit, 1, 1000, log(10), 25, XLAT("limit generation per frame"), 
+      dialog::editNumber(vid.cells_generated_limit, 1, 1000, log(10), 25, XLAT("limit generated cells per frame"), 
         XLAT("In the 3D mode, lowering this value may help if the game lags while exploring new areas.")
         );
       });
@@ -1336,7 +1336,7 @@ void show3D() {
     }
 
   if(WDIM == 2 && GDIM == 3)
-    dialog::addBoolItem_action("fixed Y/Z rotation", vid.fixed_yz, 'Z');
+    dialog::addBoolItem_action(XLAT("fixed Y/Z rotation"), vid.fixed_yz, 'Z');
 
   if(true) {
     dialog::addBreak(50);
@@ -1347,7 +1347,7 @@ void show3D() {
   if(DIM == 3) {
     dialog::addSelItem(XLAT("radar size"), fts(vid.radarsize), 'r');
     dialog::add_action([] () {
-      dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", "set to 0 to disable");
+      dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", XLAT("set to 0 to disable"));
       });
     }
   if(DIM == 3) add_edit_wall_quality('W');

@@ -238,7 +238,7 @@ void show_memory_menu() {
   dialog::addHelp(XLAT(
     "Although you are extremely unlikely to return to a place you have already been to, "
     "the game never forgets these areas, unless you start a new game, use an Orb of "
-    "Safety (found in Land of Eternal Motion and the Prairie), or activate the memory "
+    "Safety (found in Land of Eternal Motion, the Prairie, and the Ocean), or activate the memory "
     "saving mode, which tries to intelligently predict which cells you will never find "
     "again and can be safely forgotten.\n\n")
     );
@@ -265,7 +265,7 @@ void show_memory_menu() {
     dialog::reaction = apply_memory_reserve;
     });
 
-  dialog::addItem("clear caches", 'c');
+  dialog::addItem(XLAT("clear caches"), 'c');
   dialog::add_action([] { callhooks(hooks_clear_cache); });
 
   dialog::addBack();

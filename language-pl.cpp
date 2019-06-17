@@ -7852,3 +7852,180 @@ S("These statues are designed to have their graphics edited in the Vector Graphi
 
 S("general perspective", "perspektywa ogólna")
 S("formula", "wzór")
+
+S("limit generated cells per frame", "ograniczenie komórek generowanych na klatkę")
+
+S("In the 3D mode, lowering this value may help if the game lags while exploring new areas.",
+  "W trybie 3D zmniejszenie tej wartości może pomóc, gdy gra zwalnia podczas zwiedzania nowych obszarów.")
+  
+S("sloppy range checking", "niedbałe sprawdzanie odległości")
+
+S("fog effect", "effect mgły")
+S("memory configuration", "konfiguracja pamięci")
+
+S("wall quality", "jakość ścian")
+
+S(
+  "Controls the number of triangles used for wall surfaces. "
+  "Higher numbers reduce the performance. "
+  "This has a strong effect when the walls are curved indeed "
+  "(honeycombs based on horospheres, and projections other than native perspective), "
+  "but otherwise, usually it can be set to 1 without significant adverse effects other "
+  "than slightly incorrect texturing.",
+  
+  "Steruje liczbą trójkątów użytych w teksturach powierzchni ścian. "
+  "Wyższa liczba obniża wydajność. "
+  "Ma istotny wpływ na wynik w przypadku gdy ściany są krzywoliniowe "
+  "(teselacje oparte na horosferach, i projekcje inne niż perspektywa wewnętrzna), "
+  "w pozostałych sytuacjach zwykle można ustawić 1 bez istotnego pogorszenia jakości, "
+  "oprócz lekko niepoprawnego teksturowania.")
+
+S("use the full 3D models", "użyj pełnych modeli 3D")
+
+S("Z shift", "przesunięcie Z")
+S("Eye level", "poziom oka")
+S("fixed Y/Z rotation", "ustalona rotacja Y/Z")
+
+S("configure FPP automatically", "automatycznie skonfiguruj FPP")
+
+S("Look from behind.", "Patrz od tyłu.")
+
+S("reduce if walls on the way", "zmniejsz, gdy po drodze jest ściana")
+
+S("The camera is currently exactly on the plane P. "
+  "The horizon is seen as a straight line.",
+  
+  "Kamera jest obecnie dokładnie na płaszczyźnie P. Horyzont jest widziany jako linia prosta.")
+
+S(
+  "The camera is currently %1 units above the plane P. "
+  "This makes you see the floor level as in general perspective projection "
+  "with parameter %2.", 
+  
+  "Kamera jest obecnie %1 jednostek ponad płaszczyzną P. "
+  "Oznacza to, że poziom podłogi jest widziany jak w perspektywie ogólnej z parametrem %2.")
+
+S("In the FPP mode, the camera will be set at this altitude (before applying shifts).", 
+  "W trybie perspektywy trzeciej osoby (FPP) kamera będize ustawiona na tej wysokości "
+  "(przed uwzględnieniem przesunięć).")
+
+S("auto-adjust to eyes on the player model", "automatyczne uzgadnianie z modelem postaci gracza")
+
+S("eye color", "kolor oczu")
+
+// rotation (line animation etc.)
+
+S("XY plane", "płaszczyzna XY")
+S("XZ plane", "płaszczyzna XZ")
+S("XY plane #2", "płaszczyzna XY #2")
+
+// cube honeycomb
+
+S("twisting implemented only for diagonal matrices", "skręcanie zaimplementowane tylko dla macierzy diagonalnych")
+S("nothing to twist", "nic do skręcania")
+S("change the bottom left corner", "ustaw dolny lewy róg")
+
+S("flip X coordinate", "odbij współrzędną X")
+S("flipping X impossible", "odbicie X niemożliwe")
+S("flip Y coordinate", "odbij współrzędną Y")
+S("flipping Y impossible", "odbicie Y niemożliwe")
+S("flip X coordinate", "odbij współrzędną X")
+S("swap X and Y", "zamień X i Y")
+S("swapping impossible", "zamiana niemożliwa")
+
+S(
+  "This matrix lets you play on the quotient spaces of three-dimensional. "
+  "Euclidean space. Every column specifies a translation vector which "
+  "takes you back to the starting point. For example, if you put "
+  "set 2, 6, 0 on the diagonal, you get back to the starting point "
+  "if you move 2 steps in the X direction, 6 steps in the Y direction "
+  "(the quotient space is infinite in the Z direction).\n\n"
+  "You can also introduce twists for diagonal matrices: after going "
+  "the given number of steps in the Z direction, the space is also "
+  "mirrored or rotated. (More general 'twisted' spaces are currently "
+  "not implemented.)",
+
+  "Ta macierz pozwala grać na przestrzeniach ilorazowych trójwymiarowej "
+  "przestrzeni Euklidesowej. Każda kolumna określa wektor przesunięcia, "
+  "po którego przejściu wracamy do punktu startowego. Przykładowo, "
+  "gdy ustawimy 2, 6, 0 na przekątnej, wracamy do punktu startowego "
+  "po przejściu 2 kroków w kierunku X, 6 kroków w kierunku Y (w kierunku "
+  "Z przestrzeń jest nieskończona).\n\n"
+  "Można także wprowadzić skręcenia: po przejściu danej liczby kroków "
+  "w kierunku Z, przestrzeń jest również odbijana lub obracana. "
+  "(Działa to dla macierzy diagonwalnych -- bardziej ogólne skręcenia "
+  "obecnie nie są zaimplementowane.)")
+
+// map editor 
+
+S("pick something", "wybierz coś") // to edit
+
+S("z = camera", "z = kamera")
+S("Z = spheres", "z = sfery")
+S("z = equi", "z = ekwi")
+
+S("The distance from the camera to added points.", "Odległość dodawanych punktów od kamery")
+S("place points at fixed radius", "punkty stawiaj na ustalonym promieniu")
+S("place points on equidistant surfaces", "punkty stawiaj na powierzchniach ekwidystantnych")
+S("mousewheel step", "krok kółka myszy")
+S("hint: shift for finer steps", "wskazówka: shift by uzyskać mniejsze kroki")
+
+S("random walk", "błądzenie losowe")
+
+// dual like two at once, not in mathematical sense
+S("dual geometry mode", "tryb podwójnej geometrii")
+
+S("Impossible.", "Niemożliwe.")
+
+S("subgame affected", "dotyczy podgry")
+S("both", "obie")
+
+// changing the rug model distance
+S("adjust points", "popraw punkty")
+S("center on camera", "centruj na kamerze")
+S("adjust edges", "popraw krawędzie")
+S("adjust distance", "popraw odległości")
+
+S("memory", "pamięć")
+
+S(
+  "HyperRogue takes place in a world that is larger than anything Euclidean. "
+  "Unfortunately, in some cases running it on an Euclidean computer might be "
+  "a problem -- the computer could simply run out of memory. Some lands (such as the Ocean or the Brown Islands) "
+  "may use up memory very fast!\n\n",
+  
+  "Akcja gry dzieje się w świecie większym niż cokolwiek Euklidesowego. "
+  "Niestetym w pewnych sytuacjach może to powodować problemy, gdy gra jest "
+  "uruchamiana na komputerze Euklidesowym -- któremu może skończyć się pamięć. "
+  "Niektóre krainy (takie jak Ocean albo Brązowa Wyspa) zjadają pamięć bardzo szybko!\n\n")
+  
+S("You are playing a 32-bit HyperRogue executable, which can only use 4GB of memory.\n\n",
+  "Używasz 32-bitowej wersji gry, zatem ma ona dostęp tylko 4 GB pamięci.")
+
+S(
+  "Although you are extremely unlikely to return to a place you have already been to, "
+  "the game never forgets these areas, unless you start a new game, use an Orb of "
+  "Safety (found in Land of Eternal Motion, the Prairie, and the Ocean), or activate the memory "
+  "saving mode, which tries to intelligently predict which cells you will never find "
+  "again and can be safely forgotten.\n\n",
+  
+  "Mimo że praktycznie niemożliwe jest wrócenie do miejsca, w którym się już było, "
+  "gra nigdy nie zapomina tych obszarów, chyba że zaczniesz nową grę, użyjesz Sfery "
+  "Bezpieczeństwa (Kraina Wiecznego Ruchu / Preria / Ocean), lub uruchomisz "
+  "tryb oszczędzania pamięci, który inteligentnie przewiduje czego nigdy nie odnajdziesz "
+  "i w związku z czym może być bezpiecznie zapomniane.")
+
+S("cells in memory", "pól w pamięci")
+
+S("memory saving mode", "tryb osczędzania pamięci")
+S("show memory warnings", "pokazuj ostrzeżenia pamięci")
+
+S("just let me find Orb of Safety or finish the game", "pozwól mi znaleźć Sferę Bezpieczeństwa lub skończyć grę")
+S("memory reserve", "rezerwa pamięci")
+S("When to show a memory warning.", "Kiedy pokazywać ostrzeżenia pamięci")
+S("clear caches", "wyczyść pamięć podręczną")
+
+// in animation menu
+S("shmup action", "akcja trybu strzelanki")
+
+
