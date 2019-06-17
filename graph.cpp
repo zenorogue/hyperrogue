@@ -5038,6 +5038,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       cw = mirror::reflect(cw);
       int cmc = (cw.mirrored == mirrored) ? 2 : 1;
       inmirrorcount += cmc;
+      if(vid.grid) draw_grid_at(c, V);
       if(cw.mirrored != mirrored) V = V * Mirror;
       if(cw.spin) V = V * spin(2*M_PI*cw.spin/cw.at->type);
       drawcell(cw.at, V, 0, cw.mirrored);
@@ -6451,7 +6452,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
-    if(vid.grid || (c->land == laAsteroids && !(WDIM == 2 && GDIM == 3))) draw_grid_at(c, V);
+    if(vid.grid || (c->land == laAsteroids && !(WDIM == 2 && GDIM == 3))) if(!inmirrorcount) draw_grid_at(c, V);
     
     if(onradar && WDIM == 2 && GDIM == 3) addradar(V, ch, darkenedby(asciicol, darken), 0);
     
