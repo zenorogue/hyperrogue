@@ -7869,7 +7869,7 @@ S(
   "Controls the number of triangles used for wall surfaces. "
   "Higher numbers reduce the performance. "
   "This has a strong effect when the walls are curved indeed "
-  "(honeycombs based on horospheres, and projections other than native perspective), "
+  "(floors in 2D geometries, honeycombs based on horospheres, and projections other than native perspective), "
   "but otherwise, usually it can be set to 1 without significant adverse effects other "
   "than slightly incorrect texturing.",
   
