@@ -5150,8 +5150,21 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     int icol = 0, moncol = 0xFF00FF;
     
-    if(it) 
+    if(it) {
       ch = iinf[it].glyph, asciicol = icol = iinf[it].color;
+      
+      if(it == itCompass && isPlayerOn(c)) {
+        cell *c1 = c ? findcompass(c) : NULL;
+        if(c1) {
+          transmatrix P = ggmatrix(c1);
+          hyperpoint P1 = tC0(P);
+        
+          queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+          queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
+          addauraspecial(P1, 0xFF0000, 0);
+          }
+        }
+      }
     
     if(c->monst) {
       ch = minf[c->monst].glyph, moncol = minf[c->monst].color;
