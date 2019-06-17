@@ -752,7 +752,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laTrollheim:
       if(fargen) {
-        if(hrand(50000) < (chaosmode?1000:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
+        if(hrand(50000) < (chaosmode==1?1000:chaosmode?50:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
           bool okay = true;
           forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
             cell *cx = chaosmode ? c3 : c5;
@@ -1481,7 +1481,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(fargen) {
-        if(hrand(2000) < (chaosmode ? 1000 : PURE ?200:2) && !safety) 
+        if(hrand(2000) < (chaosmode==1 ? 1000 : (PURE && !chaosmode) ?200: chaosmode ? 10 : 2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
