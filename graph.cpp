@@ -1324,8 +1324,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
   char xch = minf[m].glyph;
   
   transmatrix V = V1;
-  if(WDIM == 3 && (classflag(m) & CF_FACE_UP)) V = V1 * cspin(0, 2, M_PI/2);
-  
+  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where) V = V1 * cspin(0, 2, M_PI/2);
+
   // if(DIM == 3) V = V * cspin(0, 2, M_PI/2);
 
   if(m == moTortoise && where && where->stuntime >= 3)
