@@ -558,7 +558,7 @@ void dqi_poly::gldraw() {
 #endif
 
 ld scale_at(const transmatrix& T) {
-  if(DIM == 3 && pmodel == mdPerspective) return 1 / (tC0(T))[2];
+  if(DIM == 3 && pmodel == mdPerspective) return 1 / abs((tC0(T))[2]);
   using namespace hyperpoint_vec;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
