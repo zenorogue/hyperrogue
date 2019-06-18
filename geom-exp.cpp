@@ -415,7 +415,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     dialog::addBoolItem(XLAT(ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
-    dialog::add_action([i] {
+    dialog::add_action(dual::mayboth([i] {
       eGeometry targetgeometry = eGeometry(i);
       if(0) ;
       #if CAP_CRYSTAL
@@ -439,9 +439,10 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
           }
         #endif
         });
-      });
+      }));
     }
   
+  dual::add_choice();  
   dialog::addBack();
   dialog::display();
   }
