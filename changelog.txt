@@ -3281,3 +3281,28 @@ Gameplay:
 - [full 3D] the extra knives given by Orbs now fly in different directions (rather than flying in the same direction but rotated)
 - fixed the orb display in Orb Strategy Mode
 - fog color is now the same as the background color instead of always black
+- shading of all humanoid models
+
+2019-06-18 15:29 Version 11.1:
+- added Orbs of Safety in the Ocean and in geometries which drain memory quickly
+- reduced Trollheim/Hive generation in new submodes of Chaos
+- Chaos Mode + Orb Strategy Mode combination: you get Orbs earlier, and standard unlock rules are used
+- ASCII mode: fixed monster coloring, compasses, grid in Hall of Mirrors, better warped/normal border
+- improved line animation/recording
+- Crossroads IV achievement should be fixed
+- fixed a possible crash while changing graphics settings
+- eyecolor saved
+- one princess enough for gold
+- translations updated
+
+2.5D/3D:
+- eyes on warrior statues
+- CLI option: -tstep
+- fixed some shapes in 3D (like Mine Mark)
+- fixed the Z-placement of the Tentacle tail, and worm shadows
+- fixed the HUD icons of monsters
+- better sky for R'Lyeh, Temple, and Ruined City
+- arrows from arrow traps now visible in 3D
+- humanoids were not shaded
+- fixed the loss of texture happening sometimes on changing modes or the 'wall quality'
+- improved memory management
