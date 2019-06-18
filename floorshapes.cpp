@@ -964,6 +964,7 @@ void geometry_information::make_floor_textures_here() {
   IMAGESAVE(sdark, "texture-test.png"); 
   */
   rb.reset();
+  last_texture_step = vid.texture_step;
   }
 
 void make_floor_textures() {

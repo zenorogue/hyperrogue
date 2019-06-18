@@ -432,6 +432,8 @@ void switch_always3() {
 geometry_information *cgip;
 map<string, geometry_information> cgis;
 
+int last_texture_step;
+
 void check_cgi() {
   string s;
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
@@ -473,6 +475,35 @@ void check_cgi() {
   V("LQ", its(vid.linequality));
   
   cgip = &cgis[s];
+  
+  if(isize(cgis) > 2) {
+    cgi.timestamp = ticks;
+    vector<pair<int, string>> timestamps;
+    for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
+    sort(timestamps.begin(), timestamps.end());
+    while(isize(timestamps) > 2) {
+      println(hlog, "erasing geometry ", timestamps.back().second);
+      cgis.erase(timestamps.back().second);
+      timestamps.pop_back();
+      }
+    }
+  
+  if(floor_textures && last_texture_step != vid.texture_step) {
+    println(hlog, "changed ", last_texture_step, " to ", vid.texture_step);
+    delete floor_textures;
+    floor_textures = NULL;
+    }
+  
+  if(!floor_textures && DIM == 3 && (cgi.state & 2)) 
+    make_floor_textures();
+
   }
+
+void clear_cgis() {
+  printf("clear_cgis\n");
+  for(auto& p: cgis) if(&p.second != &cgi) { cgis.erase(p.first); return; }
+  }
+
+auto ah_clear_geo = addHook(hooks_clear_cache, 0, clear_cgis);
 
 }
