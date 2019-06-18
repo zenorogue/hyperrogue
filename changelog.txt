@@ -3306,3 +3306,6 @@ Gameplay:
 - humanoids were not shaded
 - fixed the loss of texture happening sometimes on changing modes or the 'wall quality'
 - improved memory management
+- reduced the number of bird animation frames to save memory
+- fixed a bug where changing wall quality sometimes caused the textures to disappear
+- fixed a possible crash bug, and made the game use less memory for geometry cache
