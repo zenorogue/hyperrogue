@@ -589,10 +589,10 @@ void geometry_information::clone_shape(hpcshape& sh, hpcshape& target) {
   }
 
 void geometry_information::animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
-  for(int i=0; i<30; i++) {
+  for(int i=0; i<=15; i++) {
     auto& tgt = animated[i];
     clone_shape(orig, tgt);
-    ld alpha = sin(12 * degree * i) * 30 * degree;
+    ld alpha = cos(12 * degree * i) * 30 * degree;
     for(int i=tgt.s; i<tgt.e; i++) {
       if(abs(hpc[i][1]) > body) {
         ld off = hpc[i][1] > 0 ? body : -body;
@@ -990,6 +990,7 @@ void geometry_information::make_3d_models() {
   make_revolution_cut(shButterflyWing, 180, 0, 0.05*S);
   finishshape();
   
+  DEBB(DF_POLY, ("animatebirds"));
   animate_bird(shEagle, shAnimatedEagle, 0.05*S);
   animate_bird(shTinyBird, shAnimatedTinyEagle, 0.05*S/2);
 
@@ -1000,6 +1001,8 @@ void geometry_information::make_3d_models() {
   animate_bird(shGargoyleBody, shAnimatedGargoyle2, 0.05*S);
   animate_bird(shBatWings, shAnimatedBat, 0.05*S);
   animate_bird(shBatBody, shAnimatedBat2, 0.05*S);
+
+  DEBB(DF_POLY, ("disablers"));
 
   disable(shWolfRearLeg);
   disable(shWolfFrontLeg);

@@ -4463,8 +4463,8 @@ hpcshape
   
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
   
-  shAnimatedEagle[30], shAnimatedTinyEagle[30], shAnimatedGadfly[30], shAnimatedHawk[30], shAnimatedButterfly[30], 
-  shAnimatedGargoyle[30], shAnimatedGargoyle2[30], shAnimatedBat[30], shAnimatedBat2[30],
+  shAnimatedEagle[16], shAnimatedTinyEagle[16], shAnimatedGadfly[16], shAnimatedHawk[16], shAnimatedButterfly[16], 
+  shAnimatedGargoyle[16], shAnimatedGargoyle2[16], shAnimatedBat[16], shAnimatedBat2[16],
   
   shDodeca;
 
@@ -4574,7 +4574,7 @@ hpcshape
   void make_revolution(hpcshape& sh, int mx = 180, ld push = 0);
   void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 99);
   void clone_shape(hpcshape& sh, hpcshape& target);
-  void animate_bird(hpcshape& orig, hpcshape animated[30], ld body);
+  void animate_bird(hpcshape& orig, hpcshape animated[16], ld body);
   void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void make_ball(hpcshape& sh, ld rad, int lev);
