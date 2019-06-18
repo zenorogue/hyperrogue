@@ -588,11 +588,11 @@ void geometry_information::clone_shape(hpcshape& sh, hpcshape& target) {
   target.e = isize(hpc);
   }
 
-void geometry_information::animate_bird(hpcshape& orig, hpcshape animated[30], ld body) {
-  for(int i=0; i<=15; i++) {
+void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& animated, ld body) {
+  for(int i=0; i<=WINGS; i++) {
     auto& tgt = animated[i];
     clone_shape(orig, tgt);
-    ld alpha = cos(12 * degree * i) * 30 * degree;
+    ld alpha = cos(180. * degree * i / WINGS) * 30 * degree;
     for(int i=tgt.s; i<tgt.e; i++) {
       if(abs(hpc[i][1]) > body) {
         ld off = hpc[i][1] > 0 ? body : -body;

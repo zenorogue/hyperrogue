@@ -1227,8 +1227,9 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
 
 int wingphase(int period, int phase = 0) {
   ld t = fractick(period, phase);
-  int ti = int(t * 30) % 30;
-  if(ti > 15) ti = 30 - ti;
+  const int WINGS2 = WINGS * 2;
+  int ti = int(t * WINGS2) % WINGS2;
+  if(ti > WINGS) ti = WINGS2 - ti;
   return ti;
   }
 

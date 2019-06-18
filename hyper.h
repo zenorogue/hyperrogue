@@ -4326,6 +4326,10 @@ void initShape(int sg, int id);
 
 extern int usershape_changes;
 
+static const int WINGS = 4;
+
+typedef array<hpcshape, WINGS+1> hpcshape_animated;
+
 struct geometry_information {
 
   /* basic geometry parameters */
@@ -4463,10 +4467,11 @@ hpcshape
   
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
   
-  shAnimatedEagle[16], shAnimatedTinyEagle[16], shAnimatedGadfly[16], shAnimatedHawk[16], shAnimatedButterfly[16], 
-  shAnimatedGargoyle[16], shAnimatedGargoyle2[16], shAnimatedBat[16], shAnimatedBat2[16],
-  
   shDodeca;
+  
+  hpcshape_animated 
+    shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
+    shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;  
 
   vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
 
@@ -4574,7 +4579,7 @@ hpcshape
   void make_revolution(hpcshape& sh, int mx = 180, ld push = 0);
   void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 99);
   void clone_shape(hpcshape& sh, hpcshape& target);
-  void animate_bird(hpcshape& orig, hpcshape animated[16], ld body);
+  void animate_bird(hpcshape& orig, hpcshape_animated& animated, ld body);
   void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
   void make_ball(hpcshape& sh, ld rad, int lev);
