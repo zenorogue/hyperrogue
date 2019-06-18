@@ -121,7 +121,7 @@ void geometry_information::finishshape() {
   if(DIM == 3) {
     using namespace hyperpoint_vec;
     last->intester = Hypc;
-    for(int i=last->s; i<=last->e; i++) last->intester += hpc[i];
+    for(int i=last->s; i<last->e; i++) last->intester += hpc[i];
     if(last->s != last->e) last->intester /= last->e-last->s;
     }
 
