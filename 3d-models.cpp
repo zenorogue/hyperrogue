@@ -223,7 +223,7 @@ void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   int at1 = isize(hpc);
   for(int i=at0; i<at1; i++) hpc.push_back(Mirror * hpc[i]);  
   
-  add_texture(shPBody);
+  add_texture(sh);
   shift_last(-BODY);
   }
 
