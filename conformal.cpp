@@ -301,7 +301,7 @@ namespace conformal {
 
   void create(cell *start, cell *target, transmatrix last) {
     
-    if(target == start) {
+    if(target == start && !(quotient && isize(path_for_lineanimation) > 1)) {
       addMessage("Must go a distance from the starting point");
       return;
       }
@@ -362,9 +362,9 @@ namespace conformal {
     create(currentmap->gamestart(), cwt.at, Id);
     }
   
-  void create_recenter_to_view() {
+  void create_recenter_to_view(bool precise) {
     cell *c = centerover.at ? centerover.at : cwt.at;
-    create(path_for_lineanimation[0], c, inverse(ggmatrix(c)));
+    create(path_for_lineanimation[0], c, precise ? inverse(ggmatrix(c)) : Id);
     }
   
   transmatrix rotmatrix() {
@@ -1066,6 +1066,7 @@ namespace conformal {
     
     dialog::addBoolItem(XLAT("animate from start to current player position"), (on), 'e');
     dialog::addBoolItem(XLAT("animate from last recenter to current view"), (on), 'E');
+    dialog::addBoolItem(XLAT("animate from last recenter to precise current view"), (on), 'E'-64);
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     else dialog::addBreak(100);
     dialog::addSelItem(XLAT("extend the ends"), fts(extra_line_steps), 'p');
@@ -1093,7 +1094,7 @@ namespace conformal {
   void handleKeyC(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
   
-    if(uni == 'e' || uni == 'E') {
+    if(uni == 'e' || uni == 'E' || uni == 'E'-64) {
       if(on) clear();
       else {
         if(canmove && !cheater) {
@@ -1101,7 +1102,8 @@ namespace conformal {
           return;
           }
         if(canmove && cheater) cheater++;
-        if(uni == 'E') create_recenter_to_view();
+        if(uni == 'E') create_recenter_to_view(false);
+        else if(uni == 'E'-64) create_recenter_to_view(true);
         else create_playerpath();
         }
       }

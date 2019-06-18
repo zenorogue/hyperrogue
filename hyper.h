@@ -1497,7 +1497,7 @@ namespace conformal {
   
   void create(cell *start, cell *target);
   void create_playerpath();
-  void create_recenter_to_view();
+  void create_recenter_to_view(bool precise);
   void clear();
   void model_menu();
   void history_menu();
