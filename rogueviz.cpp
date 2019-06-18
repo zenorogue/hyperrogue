@@ -1249,10 +1249,10 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     case 's': queuepoly(V1, cgi.shDiskS, darken_a(cp.color2)); return;
     case 'q': queuepoly(V1, cgi.shDiskSq, darken_a(cp.color2)); return;
     case 'm': queuepoly(V1, cgi.shDiskM, darken_a(cp.color2)); return;
-    case 'b': queuepoly(V1, DIM == 3 ? cgi.shAnimatedTinyEagle[((long long)(ticks) * 30 / 1000+i) % 30] : cgi.shTinyBird, darken_a(cp.color2)); return;
+    case 'b': queuepoly(V1, DIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, darken_a(cp.color2)); return;
     case 'f': queuepoly(V1, cgi.shTinyShark, darken_a(cp.color2)); return;
     case 'g': queuepoly(V1, cgi.shMiniGhost, darken_a(cp.color2)); return;
-    case 'B': queuepoly(V1, DIM == 3 ? cgi.shAnimatedEagle[((long long)(ticks) * 30 / 1000+i) % 30] : cgi.shEagle, darken_a(cp.color2)); return;
+    case 'B': queuepoly(V1, DIM == 3 ? cgi.shAnimatedEagle[wingphase(100)] : cgi.shEagle, darken_a(cp.color2)); return;
     case 'F': queuepoly(V1, cgi.shShark, darken_a(cp.color2)); return;
     case 'G': queuepoly(V1, cgi.shGhost, darken_a(cp.color2)); return;
     }
