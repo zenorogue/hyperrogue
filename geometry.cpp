@@ -434,6 +434,8 @@ map<string, geometry_information> cgis;
 
 int last_texture_step;
 
+int ntimestamp;
+
 void check_cgi() {
   string s;
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
@@ -475,13 +477,14 @@ void check_cgi() {
   V("LQ", its(vid.linequality));
   
   cgip = &cgis[s];
+  cgi.timestamp = ++ntimestamp;
   
-  if(isize(cgis) > 2) {
+  if(isize(cgis) > 4) {
     cgi.timestamp = ticks;
     vector<pair<int, string>> timestamps;
     for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());
-    while(isize(timestamps) > 2) {
+    while(isize(timestamps) > 4) {
       println(hlog, "erasing geometry ", timestamps.back().second);
       cgis.erase(timestamps.back().second);
       timestamps.pop_back();
