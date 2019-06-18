@@ -443,13 +443,26 @@ int treasureForLocal() {
   return (chaosmode ? 1+hrand(10) : 10);
   }
 
+bool extra_safety_for_memory(cell *c) {
+  if(hyperbolic && (archimedean || S3 > 3) && !quotient && !tactic::on && in_full_game()) {
+    if(hrand(1000) < 1) {
+      c->item = itOrbSafety;
+      return true;
+      }
+    }
+  return false;
+  }
+
 void placeLocalOrbs(cell *c) {
   eLand l = c->land;
   if(l == laZebra && c->wall == waTrapdoor) return;
   if(isGravityLand(l) && l != laWestWall && cellEdgeUnstable(c)) return;
   if(isElemental(l)) l = laElementalWall;
-  if(peace::on) return;
   if(daily::on) return;
+
+  if(extra_safety_for_memory(c)) return;
+
+  if(peace::on) return;
   
   for(auto& oi: orbinfos) {
     if(!(oi.flags & orbgenflags::LOCAL10)) continue;
@@ -483,7 +496,7 @@ void placeLocalOrbs(cell *c) {
   }
 
 void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
-  if(peace::on || safety || daily::on) return;
+  if(safety || daily::on || extra_safety_for_memory(c) || peace::on) return;
   int i = hrand(outof);
   if(i < loc && items[treasureType(c->land)] >= treasureForLocal() && !inv::on) 
     c->item = nativeOrbType(c->land);
