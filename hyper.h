@@ -5538,6 +5538,8 @@ namespace dual {
   
   void disable();
   void enable();
+
+  transmatrix get_orientation();
   
   inline reaction_t mayboth(reaction_t what) { return [=] { may_split_or_do(what); }; }
   }

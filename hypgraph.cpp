@@ -1076,7 +1076,7 @@ transmatrix eumovedir(int d) {
 void spinEdge(ld aspd) { 
   ld downspin = 0;
   if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
-    transmatrix our   = gpushxto0(tC0(cwtV)) * cwtV;
+    transmatrix our   = dual::get_orientation();
     transmatrix their = dual::player_orientation[dual::main_side];
     fixmatrix(our);
     fixmatrix(their);

@@ -82,11 +82,39 @@ namespace dual {
   gamedata dgd[2];
   transmatrix player_orientation[2];
   
+  hyperpoint which_dir;
+  
+  int remap_direction(int d, int cg) {
+    if(WDIM == 2 || cg == currently_loaded) return d;
+    
+    hyperpoint h = sword::dir[0].T * which_dir;
+
+    h = hpxy3(h[0]/10, h[1]/10, h[2]/10);
+    ld b = HUGE_VAL;
+    for(int i=0; i<S7; i++) {
+      hyperpoint checked = tC0(currentmap->relative_matrix(cwt.at->cmove(i)->master, cwt.at->master));
+      ld dist = hdist(checked, h);
+      if(dist < b) { b = dist; d = i; }
+      }
+    d = gmod(d - cwt.spin, S7);
+
+    return d;
+    }
+  
+  transmatrix get_orientation() {
+    if(WDIM == 2)
+      return gpushxto0(tC0(cwtV)) * cwtV;
+    else if(cwt.at)
+      return gpushxto0(tC0(ggmatrix(cwt.at))) * ggmatrix(cwt.at) * sword::dir[0].T;
+    else
+      return Id;
+    }
+  
   void switch_to(int k) {
     if(k != currently_loaded) {
       // gamedata has shmup::on because tutorial needs changing it, but dual should keep it fixed
       dynamicval<bool> smon(shmup::on);
-      player_orientation[currently_loaded] = gpushxto0(tC0(cwtV)) * cwtV;
+      player_orientation[currently_loaded] = get_orientation();
       dgd[currently_loaded].storegame();
       currently_loaded = k;
       dgd[currently_loaded].restoregame();
@@ -129,13 +157,15 @@ namespace dual {
       return ok;
       }
     
+    which_dir = inverse(sword::dir[0].T) * tC0(currentmap->relative_matrix((cwt+d).cpeek()->master, cwt.at->master));
+    
     bool lms[2][5];
     eLastmovetype lmt[2][5];
     for(int k=0; k<2; k++) {
       switch_to(k);
       for(eForcemovetype fm: { fmMove, fmAttack, fmInstant, fmActivate }) {
         forcedmovetype = fm; 
-        lms[k][fm] = movepcto(fm == fmMove ? d : 0, subdir, true); 
+        lms[k][fm] = movepcto(fm == fmMove ? remap_direction(d, cg) : 0, subdir, true); 
         lmt[k][fm] = nextmovetype;
         forcedmovetype = fmSkip;
         for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
