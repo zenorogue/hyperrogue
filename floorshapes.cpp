@@ -978,6 +978,8 @@ void make_floor_textures() {
   dynamicval<ld> gd(vid.depth, 1);
   dynamicval<ld> gc(vid.camera, 1);
   dynamicval<geometry_information*> dcgip(cgip, cgip);
+  dynamicval<eStereo> gvs(vid.stereo_mode, sOFF);
+  dynamicval<int> vgp(global_projection, 0);
   check_cgi();
   cgi.make_floor_textures_here();
   }
