@@ -2469,7 +2469,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
             hyperpoint V0 = conformal::on ? tC0(Vs) : inverse(cwtV) * tC0(Vs);
             hyperpoint V1 = spintox(V0) * V0;
             Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
-            drawMonsterType(moGhost, c, Vs, darkena(col, 0, 0xFF), footphase);
+            drawMonsterType(moGhost, c, Vs, col, footphase, asciicol);
             col = minf[moTentacletail].color;
             }
           /*
