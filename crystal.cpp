@@ -273,6 +273,7 @@ struct lwalker {
   int spin;
   lwalker(crystal_structure& cs) : cs(cs) {}
   void operator = (const lwalker& x) { id = x.id; spin = x.spin; }
+  constexpr lwalker(const lwalker& l) : cs(l.cs), id(l.id), spin(l.spin) {}
   };
 
 lwalker operator +(lwalker a, int v) { a.spin = gmod(a.spin + v, a.cs.dir); return a; }
