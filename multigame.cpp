@@ -122,8 +122,11 @@ namespace dual {
         movepcto(d, subdir, false);
         if(k == 0) turncount--;
         }
+      if(!ok) {
+        addMessage(XLAT("Impossible."));
+        }
       switch_to(cg);
-      return true;
+      return ok;
       }
     
     bool lms[2][5];
