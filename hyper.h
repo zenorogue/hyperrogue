@@ -2095,7 +2095,7 @@ extern bool ivoryz;
 transmatrix face_the_player(const transmatrix V);
 void addradar(const transmatrix& V, char ch, color_t col, color_t outline);
 
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase);
+bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase, color_t asciicol);
 
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);
 
@@ -5546,5 +5546,7 @@ extern int reserve_count, reserve_limit;
 void apply_memory_reserve();
 void show_memory_menu();
 static const int PSEUDOKEY_MEMORY = 16397;
+
+static const color_t NOCOLOR = 0;
 
 }

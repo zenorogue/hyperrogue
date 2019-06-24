@@ -1436,10 +1436,10 @@ namespace mapeditor {
     dynamicval<bool> ws(mmspatial, false);
     
     if(sg == 0) {
-      multi::cpid = id, drawMonsterType(moPlayer, drawcell, Id, 0xC0C0C0, 0);
+      multi::cpid = id, drawMonsterType(moPlayer, drawcell, Id, 0xC0C0C0, 0, 0xC0C0C0);
       }
     else if(sg == 1) {
-      drawMonsterType(eMonster(id), drawcell, Id, minf[id].color, 0);
+      drawMonsterType(eMonster(id), drawcell, Id, minf[id].color, 0, minf[id].color);
       }
     else if(sg == 2) {
       drawItemType(eItem(id), drawcell, Id, iinf[id].color, 0, false);

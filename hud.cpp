@@ -193,7 +193,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
           V[i][i] /= cgi.wormscale;
       int mcol = color;
       mcol -= (color & 0xFCFCFC) >> 2;
-      drawMonsterType(m, NULL, V, mcol, glyphphase[id]/500.0);
+      drawMonsterType(m, NULL, V, mcol, glyphphase[id]/500.0, NOCOLOR);
       }
     else {
       eItem it = eItem(id);

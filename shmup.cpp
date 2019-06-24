@@ -3649,7 +3649,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           drawPlayerEffects(view, c, true);
           if(WDIM == 3) view = view * spin(-M_PI/2) * cspin(0, 2, -M_PI/2);
           if(m->inBoat) m->footphase = 0;
-          if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
+          if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase, 0xFFFFFFC0);
           }
 
         if(ths && h) first_cell_to_draw = false;
@@ -3751,7 +3751,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         /* else if(DIM == 3)
           drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase); */
         /* else */
-          drawMonsterType(m->type, c, view, col, m->footphase);
+          drawMonsterType(m->type, c, view, col, m->footphase, col);
         if(m->type == moTortoise) tortoise::emap.erase(c);
         break;
       }

@@ -1207,11 +1207,11 @@ void draw_ghost_at(ghost& ghost, cell *w, const transmatrix& V, ghostmoment& p) 
   dynamicval<charstyle> x(getcs(), ghost.cs);
   if(ghost.cs.charid == -1) {
     dynamicval<bool> pc(peace::on, true);
-    drawMonsterType(eMonster(ghost.cs.uicolor), w, V, ghost.cs.dresscolor, uchar_to_frac(p.footphase));
+    drawMonsterType(eMonster(ghost.cs.uicolor), w, V, ghost.cs.dresscolor, uchar_to_frac(p.footphase), NOCOLOR);
     return;
     }
 
-  drawMonsterType(moPlayer, w, V, 0, uchar_to_frac(p.footphase));
+  drawMonsterType(moPlayer, w, V, 0, uchar_to_frac(p.footphase), NOCOLOR);
   }
 
 bool ghost_finished(ghost& ghost) {
@@ -1273,7 +1273,7 @@ void drawStats() {
   
   for(int i=0; i<multi::players; i++) {
     dynamicval<int> d(multi::cpid, i);
-    drawMonsterType(moPlayer, shmup::pc[i]->base, racerel(race_finish_tick[i] ? 100 : get_percentage(i)), 0xFFFFFFC0, shmup::pc[i]->footphase);    
+    drawMonsterType(moPlayer, shmup::pc[i]->base, racerel(race_finish_tick[i] ? 100 : get_percentage(i)), 0xFFFFFFC0, shmup::pc[i]->footphase, NOCOLOR);
     }
 
   quickqueue();

@@ -869,7 +869,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   if(!mmitem && it) return true;
   
   else if(it == itSavedPrincess) {
-    drawMonsterType(moPrincess, c, V, icol, 0);
+    drawMonsterType(moPrincess, c, V, icol, 0, icol);
     return false;
     }
   
@@ -1316,11 +1316,11 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
     }
   }
 
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col, double footphase) {
+bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col, double footphase, color_t asciicol) {
 
 #if MAXMDIM >= 4
-  if(DIM == 3 && m != moPlayer)
-    addradar(V1, minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
+  if(DIM == 3 && m != moPlayer && asciicol != NOCOLOR)
+    addradar(V1, minf[m].glyph, asciicol, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
 #endif
 
 #if CAP_SHAPES
@@ -2254,13 +2254,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
 #endif
   }
 
-bool drawMonsterTypeDH(eMonster m, cell *where, const transmatrix& V, color_t col, bool dh, ld footphase) {
+bool drawMonsterTypeDH(eMonster m, cell *where, const transmatrix& V, color_t col, bool dh, ld footphase, color_t asciicol) {
   dynamicval<color_t> p(poly_outline, poly_outline);
   if(dh) {
     poly_outline = OUTLINE_DEAD;
     darken++;
     }
-  bool b = drawMonsterType(m,where,V,col, footphase);
+  bool b = drawMonsterType(m,where,V,col, footphase, asciicol);
   if(dh) {
     darken--;
     }
@@ -2381,7 +2381,7 @@ void drawWormSegments() {
 
 bool dont_face_pc = false;
 
-bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool mirrored) {
+bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool mirrored, color_t asciicol) {
   #if CAP_SHAPES
 
   bool darkhistory = conformal::includeHistory && conformal::inkillhistory.count(c);
@@ -2424,7 +2424,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
     if(DIM == 3)
-      addradar(Vparam, minf[m].glyph, col, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
+      addradar(Vparam, minf[m].glyph, asciicol, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
   
     transmatrix Vb0 = Vb;
     if(c->mondir != NODIR && DIM == 3 && isAnyIvy(c)) {
@@ -2659,7 +2659,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         }     
       if(!nospins && flipplayer) Vs = Vs * pispin;
       if(mmmon) {
-        drawMonsterType(moMimic, c, Vs, col, footphase);
+        drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
         drawPlayerEffects(Vs, c, false);
         }
       }
@@ -2673,7 +2673,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   else if(c->monst == moIllusion) {
     multi::cpid = 0;
     if(c->monmirror) Vs = Vs * Mirror;
-    drawMonsterType(c->monst, c, Vs, col, footphase);
+    drawMonsterType(c->monst, c, Vs, col, footphase, asciicol);
     drawPlayerEffects(Vs, c, false);
     }
 
@@ -2690,7 +2690,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       Vs = Vs * ddspin(c, d, 0);
       }
     if(c->monmirror) Vs = Vs * Mirror;
-    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
+    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
 
   else if(c->monst == moKrakenT) {
@@ -2713,7 +2713,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       
       // if(ctof(c) && !masterless) Vb = Vb * xpush(hexhexdist - hcrossf);
       // return (!BITRUNCATED) ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : cgi.crossf;
-    return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
+    return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase, asciicol);
     }
 
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
@@ -2725,7 +2725,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(c->monmirror) Vs = Vs * Mirror;
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
-    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
+    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
 
   else {
@@ -2751,7 +2751,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
     if(c->monst == moShadow) 
       multi::cpid = c->hitpoints;
     
-    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
+    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
   
   for(int i=0; i<numplayers(); i++) if(c == playerpos(i) && !shmup::on && mapeditor::drawplayer && 
@@ -2778,12 +2778,12 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
       ld depth = geom3::factor_to_lev(wormhead(c) == c ? cgi.AHEAD : cgi.ABODY);
       footphase = 0;
       int q = ptds.size();
-      drawMonsterType(moPlayer, c, Vs, col, footphase);
+      drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
       pushdown(c, q, Vs, -depth, true, false);
       }
     
     else if(mmmon)
-      drawMonsterType(moPlayer, c, Vs, col, footphase);
+      drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
     }
 
 #endif
@@ -6385,7 +6385,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
              transmatrix V2 = V;
              double footphase = t / 200.0;
              applyAnimation(c, V2, footphase, LAYER_SMALL);
-             drawMonsterType(fa.m, c, V2, minf[fa.m].color, footphase);
+             drawMonsterType(fa.m, c, V2, minf[fa.m].color, footphase, NOCOLOR);
              pushdown(c, q, V2, t*t / 1000000. + t / 1000., true, true);
              }
            }
@@ -6416,7 +6416,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       #if CAP_SHAPES
       int q = ptds.size();
       #endif
-      bool m = drawMonster(V, ctype, c, moncol, mirrored);
+      bool m = drawMonster(V, ctype, c, moncol, mirrored, asciicol);
       if(m) error = true;
       if(m || c->monst) onradar = false; 
       #if CAP_SHAPES
