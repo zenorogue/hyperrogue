@@ -3218,6 +3218,11 @@ auto ccm = addHook(clearmemory, 0, [] () {
     gd->store(prairie::tchoices);
     gd->store(prairie::beaststogen);
     gd->store(sword::angle);
+    gd->store(elec::haveelec);
+    gd->store(elec::havecharge);
+    gd->store(elec::lightningfast);
+    gd->store(elec::havethunder);
+    gd->store(elec::afterOrb);
     }) +
   addHook(hooks_removecells, 0, [] () {
     eliminate_if(heat::offscreen_heat, is_cell_removed);
