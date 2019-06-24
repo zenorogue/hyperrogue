@@ -1842,7 +1842,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col
     
     case moJiangshi: {
       ShadowV(V, cgi.shJiangShi);
-      auto z2 = geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * cgi.human_height);
+      auto z2 = WDIM == 3 ? 0 : GDIM == 3 ? -abs(sin(footphase * M_PI * 2)) * cgi.human_height/3 : geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * cgi.human_height);
       auto V0 = V;
       auto V = mmscale(V0, z2);
       otherbodyparts(V, darkena(col, 0, 0xFF), m, m == moJiangshi ? 0 : footphase);
