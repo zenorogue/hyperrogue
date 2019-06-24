@@ -5705,7 +5705,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
 
         case laMercuryRiver: {
-          if(eoh)
+          if(eoh || DIM == 3)
             set_floor(cgi.shFloor);
           else {
             int bridgedir = -1;
