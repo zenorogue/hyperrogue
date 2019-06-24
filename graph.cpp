@@ -4763,12 +4763,18 @@ void dqi_sky::draw() {
       }
     }
 
-  current_display->set_all(0);
-  glhr::switch_mode(glhr::gmVarColored, glhr::new_shader_projection);
   for(auto& v: skyvertices) for(int i=0; i<3; i++) v.color[i] *= 2;
-  glhr::prepare(skyvertices);
-  glhr::set_fogbase(1.0 + 5 / sightranges[geometry]);
-  glDrawArrays(GL_TRIANGLES, 0, isize(skyvertices));
+
+  for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
+    if(global_projection && global_projection != ed) continue;
+    glhr::switch_mode(glhr::gmVarColored, glhr::new_shader_projection);
+    current_display->set_all(ed);
+    glhr::prepare(skyvertices);
+    glhr::set_fogbase(1.0 + 5 / sightranges[geometry]);
+    glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
+    glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+    glDrawArrays(GL_TRIANGLES, 0, isize(skyvertices));
+    }
   }
 
 color_t skycolor(cell *c) {
