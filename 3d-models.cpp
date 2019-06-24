@@ -1069,8 +1069,15 @@ void geometry_information::make_3d_models() {
 
   for(int a=0; a<5; a++) shift_shape(shZebra[a], FLOOR);
   
-  for(int t=0; t<13; t++) for(int u=0; u<6; u++)
-    shift_shape(shTortoise[t][u], FLOOR - human_height * (t+1) / 120);
+  auto tortz = [] (int t) {
+    if(t == 0) return 2;
+    else if(t < 8) return 3;
+    else if(t == 13) return 2;
+    else return 1;
+    };
+  
+  for(int t=0; t<13; t++) for(int u=0; u<4; u++)
+    shift_shape(shTortoise[t][u], FLOOR - human_height * tortz(t) / 120);
 
   make_revolution_cut(shStatue, 60);
   

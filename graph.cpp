@@ -860,8 +860,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
   transmatrix Vit = V;
-  if(GDIM == 3 && WDIM == 2 && c) Vit = mscale(V, cgi.STUFF);
-  if(DIM == 3 && c) Vit = face_the_player(Vit);
+  if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
+  if(DIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 
   if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
