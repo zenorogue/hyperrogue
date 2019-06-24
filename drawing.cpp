@@ -518,7 +518,8 @@ void dqi_poly::gldraw() {
         current_display->set_mask(ed);
         glhr::color2(color);
         glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW);
+        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + (euclid ? 20 : 5 / sightranges[geometry]) : 1.0);
   
         if(flags & (POLY_INVERSE | POLY_FORCE_INVERTED)) {
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
@@ -551,6 +552,8 @@ void dqi_poly::gldraw() {
     if(outline && !(flags & POLY_TRIANGLES)) {
       glhr::color2(outline);
       glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
+      glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+      glhr::set_fogbase(prio == PPR::SKY ? 1.0 + (euclid ? 20 : 5 / sightranges[geometry]) : 1.0);
       glDrawArrays(GL_LINE_STRIP, offset, cnt);
       }
     }
