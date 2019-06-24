@@ -1066,17 +1066,20 @@ void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   }
 #endif
 
-void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase) {
+void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase, bool stop = false) {
   charstyle& cs = getcs();
 
   if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
   
     if(cs.charid >= 8) {
       /* famililar */
-      if(!mmspatial && !footphase)
+      if(!mmspatial && !footphase) {
+        if(stop) return;
         queuepoly(VALEGS, cgi.shWolfLegs, fc(150, cs.dresscolor, 4));   
+        }
       else {
         ShadowV(V, cgi.shWolfBody);
+        if(stop) return;
         animallegs(VALEGS, moWolf, fc(500, cs.dresscolor, 4), footphase);
         }
       queuepoly(VABODY, cgi.shWolfBody, fc(0, cs.skincolor, 0));
@@ -1095,10 +1098,13 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       }
     else if(cs.charid >= 6) {
       /* dog */
-      if(!mmspatial && !footphase)
+      if(!mmspatial && !footphase) {
+        if(stop) return;
         queuepoly(VABODY, cgi.shDogBody, fc(0, cs.skincolor, 0));
+        }
       else {
         ShadowV(V, cgi.shDogTorso);          
+        if(stop) return;
         animallegs(VALEGS, moRunDog, fc(500, cs.dresscolor, 4), footphase);
         queuepoly(VABODY, cgi.shDogTorso, fc(0, cs.skincolor, 0));
         }
@@ -1121,10 +1127,13 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       }
     else if(cs.charid >= 4) {
       /* cat */
-      if(!mmspatial && !footphase)
+      if(!mmspatial && !footphase) {
+        if(stop) return;
         queuepoly(VALEGS, cgi.shCatLegs, fc(500, cs.dresscolor, 4));
+        }
       else {
         ShadowV(V, cgi.shCatBody);
+        if(stop) return;
         animallegs(VALEGS, moRunDog, fc(500, cs.dresscolor, 4), footphase);
         }
       queuepoly(VABODY, cgi.shCatBody, fc(0, cs.skincolor, 0));
@@ -1143,11 +1152,13 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
       }
     else {
        /* human */
+      ShadowV(V, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody);
+      if(stop) return;
+
       const transmatrix VBS = otherbodyparts(V, fc(0, cs.skincolor, 0), items[itOrbFish] ? moWaterElemental : moPlayer, footphase);
   
-      queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody, fc(0, cs.skincolor, 0));      
   
-      ShadowV(V, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody);
+      queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody, fc(0, cs.skincolor, 0));      
   
       if(cs.charid&1)
         queuepoly(VBODY1 * VBS, cgi.shFemaleDress, fc(500, cs.dresscolor, 4));
@@ -2772,6 +2783,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
     
     if(hide_player()) {
       first_cell_to_draw = false;
+      if(WDIM == 2 && GDIM == 3)
+        drawPlayer(moPlayer, c, Vs, col, footphase, true);
       }
     
     else if(isWorm(m)) {
