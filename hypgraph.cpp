@@ -1161,6 +1161,7 @@ void centerpc(ld aspd) {
   if(GDIM == 3 && WDIM == 2) {
     geom3::do_auto_eye();
     int sl = snakelevel(cwt.at);
+    if(isWorm(cwt.at->monst) && sl < 3) sl++;
     if(sl || vid.eye) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     }
   #endif
