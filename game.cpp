@@ -1464,9 +1464,9 @@ bool monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *come
   
   dynamicval<cell*> x5(*wcw, c);
   dynamicval<bool> x6(stalemate::nextturn, true);
-  dynamicval<int> x7(sword::angle[multi::cpid], 
-    who == moPlayer ? sword::shift(comefrom, c, sword::angle[multi::cpid]) :
-    sword::angle[multi::cpid]);
+  dynamicval<sword::sworddir> x7(sword::dir[multi::cpid], 
+    who == moPlayer ? sword::shift(comefrom, c, sword::dir[multi::cpid]) :
+    sword::dir[multi::cpid]);
   
   for(int b=0; b<2; b++) {
     if(who == moPlayer) {
@@ -3545,7 +3545,7 @@ void playerMoveEffects(cell *c1, cell *c2) {
 
   if(peace::on) items[itOrbSword] = c2->land == laBurial ? 100 : 0;
 
-  sword::angle[multi::cpid] = sword::shift(c1, c2, sword::angle[multi::cpid]);
+  sword::dir[multi::cpid] = sword::shift(c1, c2, sword::dir[multi::cpid]);
   
   destroyWeakBranch(c1, c2, moPlayer);
 
@@ -5267,8 +5267,8 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
 
 template<class T> void do_swords(cell *mf, cell *mt, eMonster who, const T& f) {
   for(int bb=0; bb<2; bb++) if(who == moPlayer && sword::orbcount(bb)) {
-    cell *sf = sword::pos(mf, sword::angle[multi::cpid] + (bb?sword::sword_angles/2:0));
-    cell *st = sword::pos(mt, sword::shift(mf, mt, sword::angle[multi::cpid]) + (bb?sword::sword_angles/2:0));
+    cell *sf = sword::pos(mf, sword::dir[multi::cpid], bb);
+    cell *st = sword::pos(mt, sword::shift(mf, mt, sword::dir[multi::cpid]), bb);
     f(st, bb);
     if(sf != st && !isNeighbor(sf,st)) {
       // also attack the in-transit cell

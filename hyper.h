@@ -1862,12 +1862,17 @@ namespace tortoise {
 
 namespace sword {
 
-  extern array<int, MAXPLAYER> angle;
+  struct sworddir {
+    int angle;
+    transmatrix T;
+    };
+  
+  extern array<sworddir, MAXPLAYER> dir;
 
-  cell *pos(cell *c, int s);
+  cell *pos(cell *c, const sworddir& sd, bool rev);
   cell *pos(int id);
   bool at(cell *where, bool noplayer = false);
-  int shift(cell *c1, cell *c2);
+  sworddir shift(cell *c1, cell *c2, sworddir);
   }
 
 void killThePlayer(eMonster m, int id, flagtype flags);

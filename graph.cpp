@@ -391,18 +391,22 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
 #endif
       }                  
 
-    else if(shmup::on && WDIM == 3) {
+    else if(WDIM == 3) {
 #if CAP_SHAPES
+      transmatrix Vsword = 
+        shmup::on ? V * shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) 
+                  : gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * sword::dir[multi::cpid].T;
+
       if(items[itOrbSword])
-        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
+        queuepoly(Vsword * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
   
       if(items[itOrbSword2])
-        queuepoly(V*shmup::swordmatrix[multi::cpid] * cspin(2, 0, -M_PI/2) * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
+        queuepoly(Vsword * pispin * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword2].color, 0, 0xC0 + 0x30 * sintick(200)));
 #endif
       }
     
     else {
-      int& ang = angle[multi::cpid];
+      int& ang = sword::dir[multi::cpid].angle;
       ang %= sword::sword_angles;
 
 #if CAP_QUEUE || CAP_SHAPES
@@ -415,7 +419,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       if(!euclid) for(int a=0; a<sword_angles; a++) {
         if(a == ang && items[itOrbSword]) continue;
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
-        bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
+        bool longer = sword::pos2(cwt.at, a-1) != sword::pos2(cwt.at, a+1);
         if(sword_angles > 48 && !longer) continue;
         color_t col = darkena(0xC0C0C0, 0, 0xFF);
         ld l0 = PURE ? 0.6 * cgi.scalefactor : longer ? 0.36 : 0.4;
@@ -6862,6 +6866,13 @@ void drawMarkers() {
       }
     
     #endif
+
+    if(WDIM == 3 && !shmup::on) {
+      if(items[itOrbSword])
+        queuechr(gmatrix[cwt.at] * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
+      if(items[itOrbSword2])
+        queuechr(gmatrix[cwt.at] * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
+      }
     }
 
   monsterToSummon = moNone;

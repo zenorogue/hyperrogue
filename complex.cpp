@@ -2620,14 +2620,17 @@ namespace dragon {
   }
 
 namespace sword {
-  array<int, MAXPLAYER> angle;
+
   int sword_angles;
+  
+  array<sworddir, MAXPLAYER> dir;
 
   void possible_divisor(int s) { sword_angles *= s / gcd(sword_angles, s); }
 
   void determine_sword_angles() {
     sword_angles = 2;
-    if(IRREGULAR) sword_angles = 840;
+    if(DIM == 3) sword_angles = 1;
+    else if(IRREGULAR) sword_angles = 840;
     else if(binarytiling) sword_angles = 42;
     else if(archimedean) {
       if(!PURE) possible_divisor((BITRUNCATED ? 2 : 1) * isize(arcm::current.faces));
@@ -2639,7 +2642,7 @@ namespace sword {
       }
     }
   
-  cell *pos(cell *c, int s) {
+  cell *pos2(cell *c, int s) {
     int t = c->type;
     s *= 2;
     s += sword_angles/t;
@@ -2650,12 +2653,26 @@ namespace sword {
     return c->move(s);
     }
   
+  cell *pos(cell *c, const sworddir& sd, bool rev) {
+    if(WDIM == 2) 
+      return pos2(c, sd.angle + (rev ? sword_angles/2 : 0));
+    else {
+      cell *best = NULL;
+      ld bdist = HUGE_VAL;
+      for(int i=0; i<S7; i++) {
+        ld dist = hdist(sd.T * xpush0(rev?-0.1:0.1), tC0(currentmap->relative_matrix(c->move(i)->master, c->master)));
+        if(dist < bdist) bdist = dist, best = c->move(i);
+        }
+      return best;
+      }
+    }
+  
   eItem orbof(bool rev) { return rev ? itOrbSword2 : itOrbSword; }
   int orbcount(bool rev) { return items[orbof(rev)]; }
   
   cell *pos(int id, bool rev) {
     if(!orbcount(rev)) return NULL;
-    return pos(playerpos(id), angle[id] + (rev ? sword_angles/2 : 0));
+    return pos(playerpos(id), dir[id], rev);
     }
   
   bool at(cell *where, bool noplayer) {
@@ -2673,19 +2690,29 @@ namespace sword {
     }
 
   // from c1 to c2
-  int shift(cell *c1, cell *c2, int angle) {
-    if(!c1 || !c2) return 0;
+  sworddir shift(cell *c1, cell *c2, sworddir d) {
+    if(!c1 || !c2) return d;
     int s1 = neighborId(c1, c2);
     int s2 = neighborId(c2, c1);
-    if(s1 < 0 || s2 < 0) return angle;
-    if(c1->c.mirror(s1))
-      return ((s2*sword_angles/c2->type - angle + s1*sword_angles/c1->type) + sword_angles/2) % sword_angles;
-    else
-      return ((s2*sword_angles/c2->type - s1*sword_angles/c1->type) + sword_angles/2 + angle) % sword_angles;
+    if(s1 < 0 || s2 < 0) return d;
+    if(WDIM == 2) {
+      if(c1->c.mirror(s1))
+        d.angle = ((s2*sword_angles/c2->type - d.angle + s1*sword_angles/c1->type) + sword_angles/2) % sword_angles;
+      else
+        d.angle = ((s2*sword_angles/c2->type - s1*sword_angles/c1->type) + sword_angles/2 + d.angle) % sword_angles;
+      }
+    else {
+      transmatrix T = currentmap->relative_matrix(c1->master, c2->master);
+      T = gpushxto0(tC0(T)) * T;
+      d.T = T * d.T;
+      fixmatrix(d.T);
+      }
+    return d;
     }
 
   void shuffle(int i) {
-    sword::angle[i] = euclid ? S7*hrand(6) : PURE ? 3*hrand(sword_angles/3)+1 : hrand(sword_angles);
+    dir[i].angle = hrand(sword_angles);
+    dir[i].T = Id;
     }
   
   void reset() {
@@ -3217,7 +3244,7 @@ auto ccm = addHook(clearmemory, 0, [] () {
     gd->store(prairie::enter);
     gd->store(prairie::tchoices);
     gd->store(prairie::beaststogen);
-    gd->store(sword::angle);
+    gd->store(sword::dir);
     gd->store(elec::haveelec);
     gd->store(elec::havecharge);
     gd->store(elec::lightningfast);
