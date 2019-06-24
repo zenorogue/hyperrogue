@@ -4853,6 +4853,7 @@ void draw_ceiling(cell *c, const transmatrix& V, int fd, color_t& fcol, color_t&
     case 3: {
       if(sky) sky->sky.emplace_back(c, V, 0);
       if(camera_level <= cgi.WALL) return;
+      if(c->land == laMercuryRiver) fcol = linf[laTerracotta].color, fd = 1;
       if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
       forCellIdEx(c2, i, c) 
         if(ceiling_category(c2) != 3) {
