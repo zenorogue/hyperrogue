@@ -3309,3 +3309,27 @@ Gameplay:
 - reduced the number of bird animation frames to save memory
 - fixed a bug where changing wall quality sometimes caused the textures to disappear
 - fixed a possible crash bug, and made the game use less memory for geometry cache
+
+2019-06-25 18:39 Version 11.1a:
+
+Dual Geometry mode:
+- fixed the Land of Storms not working correctly in dual geometry mode
+- added a message when trying to perform an impossible skip-turn
+- now works in (non-shmup) 3D geometries
+
+Other:
+- fixed a crash bug with Bulls pushing things offscreen
+- controller dead zones are now configured via number dialog
+
+2.5D/3D:
+- fixed the monster color in the minimap for Dragons etc
+- stereo mode: fixed incorrectly using Euclidean eye positioning; a bug with texturing; and issues with the sky
+- fixed panning in the shmup mode (Up/Down did weird thing and Left/Right did reverse thing)
+- up direction now remains fixed while scrolling
+- added a separate option for highlighting the forward cell
+- Orb of the Sword now works in 3D geometries (non-shmup)
+- Terracotta Army: fixed incorrect bridges on mercury rivers and sky over them, fixed the vertical placement of Jiangshi
+- shadow of the player character is always shown
+- improved Tortoise graphics in 3D, Baby Tortoises appear
+- camera level higher when riding dragon
+- keyboard/controller movement works better now in 2.5D; improved controller camera control
