@@ -2709,10 +2709,22 @@ namespace sword {
       }
     return d;
     }
+  
+  transmatrix initial_matrix() {
+    if(S7 == 6) return Id;
+    return cspin(0, 1, 0.1) * cspin(0, 2, 0.1) * cspin(1, 2, 0.1) * Id;
+    }
+
+  sworddir initial(cell *c) {
+    sworddir res;
+    res.angle = (sword::sword_angles / cwt.at->type + 1) / 2;
+    if(WDIM == 3) res.T = initial_matrix();
+    return res;
+    }
 
   void shuffle(int i) {
     dir[i].angle = hrand(sword_angles);
-    dir[i].T = Id;
+    if(WDIM == 3) dir[i].T = initial_matrix();
     }
   
   void reset() {

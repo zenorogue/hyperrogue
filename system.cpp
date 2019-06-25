@@ -210,10 +210,8 @@ void initgame() {
     }
     
   sword::determine_sword_angles();
-  for(int i=0; i<numplayers(); i++) {
-    sword::dir[i].angle = (sword::sword_angles / cwt.at->type + 1) / 2;
-    sword::dir[i].T = Id;
-    }
+  for(int i=0; i<numplayers(); i++) 
+    sword::dir[i] = sword::initial(cwt.at);
 
   #if CAP_DAILY
   daily::split();
