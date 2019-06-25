@@ -6860,7 +6860,7 @@ void drawMarkers() {
         }
       }
     
-    if(GDIM == 3 && !inHighQual && !shmup::on && vid.axes && playermoved) {
+    if(GDIM == 3 && !inHighQual && !shmup::on && vid.axes3 && playermoved) {
       cell *c = forwardcell();
       IG(c) queuecircleat(c, .8, getcs().uicolor);
       }

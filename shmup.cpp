@@ -395,9 +395,12 @@ struct shmup_configurer {
     if(players > 4)
       dialog::addItem(XLAT("configure player 5"), '5');
     else if(!shmup::on && !multi::alwaysuse) {
-      const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
-      dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'h');
-      dialog::add_action([] {vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; } );
+      if(GDIM == 2) {
+        const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
+        dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'h');
+        dialog::add_action([] {vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; } );
+        }
+      else dialog::addBreak(100);
       }
     else if(alwaysuse)
       dialog::addInfo(XLAT("multiplayer and shmup mode; some features"));

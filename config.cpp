@@ -160,6 +160,7 @@ void initConfig() {
   addsaver(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
   addsaver(vid.radarsize, "radarsize size", 120);
   addsaver(vid.axes, "movement help", 1);
+  addsaver(vid.axes3, "movement help3", false);
   addsaver(vid.shifttarget, "shift-targetting", 2);
   addsaver(vid.steamscore, "scores to Steam", 1);
   initcs(vid.cs); addsaver(vid.cs, "single");
@@ -1852,6 +1853,10 @@ void configureMouse() {
   dialog::addBoolItem_action(XLAT("reverse pointer control"), (vid.revcontrol), 'r');
   
   dialog::addBoolItem_action(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
+  
+  if(GDIM == 3) {
+    dialog::addBoolItem_action(XLAT("highlight the cell forward"), vid.axes3, 'f');
+    }
   
 #if ISMOBILE
   dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
