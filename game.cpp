@@ -4076,7 +4076,7 @@ void determinizeBull(cell *c, int *posdir, int& nc) {
   // use the previous PC's positions as the tiebreaker
   for(int k=0; k<SHSIZE && nc>1; k++) {
     int pts[MAX_EDGE];
-    for(int d=0; d<nc; d++) pts[d] = totalbulldistance(c->move(posdir[d]), k);
+    for(int d=0; d<nc; d++) pts[d] = totalbulldistance(c->cmove(posdir[d]), k);
 
     int bestpts = 1000;
     for(int d=0; d<nc; d++) if(pts[d] < bestpts) bestpts = pts[d];
