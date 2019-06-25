@@ -5558,5 +5558,6 @@ static const int PSEUDOKEY_MEMORY = 16397;
 static const color_t NOCOLOR = 0;
 
 extern int global_projection;
+void spinEdge(ld aspd);
 
 }

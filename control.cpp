@@ -582,8 +582,11 @@ void mainloopiter() {
   else {
     ors::check_orientation();
     if(cmode & sm::CENTER) {
+      ld aspd = (ticks - lastt) / 1000.0 * exp(vid.sspeed);
       if(playermoved && vid.sspeed > -4.99 && !outoffocus)
-        centerpc((ticks - lastt) / 1000.0 * exp(vid.sspeed));
+        centerpc(aspd);
+      else if(DIM == 3)
+        spinEdge(aspd);
 #if CAP_SDLJOY
       if(panjoyx || panjoyy) 
         checkpanjoy((ticks - lastt) / 1000.0);
