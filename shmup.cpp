@@ -341,12 +341,8 @@ struct joy_configurer {
       if(sym) {
         char xuni = uni | 96;
         if(xuni >= 'a' && xuni < 'a' + numaxeconfigs) {
-          if(configdead) {
-            int& dz = (*dzconfigs[xuni - 'a']);
-            dz += int(shiftmul * 100);
-            if(dz < 0) dz = 0;
-            if(dz > 65000) dz = 65000;
-            }
+          if(configdead) 
+            dialog::editNumber( (*dzconfigs[xuni - 'a']), 0, 65536, 100, 0, XLAT("Configure dead zones"), "");
           else {
             int v = (*axeconfigs[xuni - 'a']);
             v += (shiftmul>0?1:-1);
