@@ -146,6 +146,13 @@ const char* axemodes[SHMUPAXES] = {
   "player 7 spin"
   };
 
+const char* axemodes3[4] = {
+  "do nothing",
+  "camera forward",
+  "camera rotate X",
+  "camera rotate Y"
+  };
+
 int centerplayer = -1;
 
 char* axeconfigs[24]; int numaxeconfigs;
@@ -317,7 +324,9 @@ struct joy_configurer {
         axeconfigs[numaxeconfigs] = &(scfg.axeaction[j][ax]);
         dzconfigs[numaxeconfigs] = &(scfg.deadzoneval[j][ax]);
         char aa = *axeconfigs[numaxeconfigs];
-        string what = configdead ? its(scfg.deadzoneval[j][ax]) : XLAT(axemodes[aa%SHMUPAXES]);
+        string what = configdead ? its(scfg.deadzoneval[j][ax]) : 
+          (DIM == 3 && (aa%SHMUPAXES < 4)) ? XLAT(axemodes3[aa%SHMUPAXES]) :
+          XLAT(axemodes[aa%SHMUPAXES]);
         dialog::addSelItem(XLAT("Joystick %1, axis %2", cts('A'+j), its(ax)) + buf, 
           what, 'a'+numaxeconfigs);
         numaxeconfigs++;
@@ -446,7 +455,7 @@ struct shmup_configurer {
     #if CAP_SDL
     if(uni == '1') pushScreen(key_configurer(1, cmdlist));
     else if(uni == '2') pushScreen(key_configurer(2, cmdlist));
-    else if(uni == 'p') pushScreen(key_configurer(3, WDIM == 3 ? pancmds3 : pancmds));
+    else if(uni == 'p') pushScreen(key_configurer(3, GDIM == 3 ? pancmds3 : pancmds));
     else if(uni == '3') pushScreen(key_configurer(4, cmdlist));
     else if(uni == '4') pushScreen(key_configurer(5, cmdlist));
     else if(uni == '5') pushScreen(key_configurer(6, cmdlist));
@@ -689,11 +698,16 @@ void handleInput(int delta) {
   double panx = 
     actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
   double pany = 
-    actionspressed[50] - actionspressed[48] + axespressed[3] / 20000.0;
+    actionspressed[50] - actionspressed[48] + axespressed[3] / 32000.0;
     
-  double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
+  double panspin = actionspressed[52] - actionspressed[53];
   
-  double panmove = actionspressed[59] - actionspressed[60] + axespressed[4] / 20000.0;
+  double panmove = actionspressed[59] - actionspressed[60];
+  
+  if(DIM == 3)
+    panmove += axespressed[1] / 32000.0;
+  else
+    panspin += axespressed[1] / 32000.0;
   
   if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
 
@@ -722,12 +736,15 @@ void handleInput(int delta) {
     mouseaim_x = mouseaim_y = 0;
     }
 
-  if(panx || pany || panspin || (WDIM == 3 && panmove)) {
-    if(DIM == 2)
+  if(panx || pany || panspin || (GDIM == 3 && panmove)) {
+    if(DIM == 2) {
       View = xpush(-panx) * ypush(-pany) * spin(panspin) * View;
-    else
-      View = cspin(0, 2, -panx*2) * cspin(1, 2, -pany*2) * spin(panspin) * cpush(2, panmove*2) * View;
-    playermoved = false;
+      playermoved = false;
+      }
+    else {
+      View = cspin(0, 2, -panx) * cspin(1, 2, -pany) * spin(panspin) * cpush(2, panmove) * View;
+      if(panmove) playermoved = false;
+      }
     }
 #endif
   }
