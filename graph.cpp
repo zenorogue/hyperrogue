@@ -4731,6 +4731,12 @@ void dqi_sky::draw() {
   hyperpoint skypoint = cpush0(2, cgi.SKY);
   
   vector<glhr::colored_vertex> this_poly;
+  
+  // I am not sure why, but extra projection martix introduced in stereo
+  // causes some vertices to not be drawn. Thus we apply separately
+  transmatrix Tsh = Id;
+  if(global_projection)
+    Tsh = xpush(vid.ipd * global_projection/2);
 
   for(sky_item& si: sky) {
     auto c = si.c;
@@ -4747,7 +4753,7 @@ void dqi_sky::draw() {
           
         this_poly.clear();
   
-        transmatrix T1 = si.T;
+        transmatrix T1 = Tsh * si.T;
         do {
           this_poly.emplace_back(T1 * skypoint, colors[cw.at]);
           T1 = T1 * cellrelmatrix(cw.at, cw.spin);
@@ -4773,6 +4779,9 @@ void dqi_sky::draw() {
     if(global_projection && global_projection != ed) continue;
     glhr::switch_mode(glhr::gmVarColored, glhr::new_shader_projection);
     current_display->set_all(ed);
+    if(global_projection)
+      glhr::projection_multiply(glhr::tmtogl(xpush(-vid.ipd * global_projection/2)));
+    glapplymatrix(Id);
     glhr::prepare(skyvertices);
     glhr::set_fogbase(1.0 + 5 / sightranges[geometry]);
     glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
