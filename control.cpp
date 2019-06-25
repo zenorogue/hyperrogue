@@ -61,6 +61,7 @@ bool mouseout2() {
 movedir vectodir(const hyperpoint& P) {
 
   transmatrix U = ggmatrix(cwt.at);
+  if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
@@ -97,9 +98,9 @@ void remission() {
  }
 
 hyperpoint move_destination_vec(int d) {
-  if(GDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
-  else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
-  else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
+  if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
+  // else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
+  // else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
   else if(d&1) return cspin(0, 1, d > 4 ? M_PI/2 : -M_PI/2) * tC0(pushone());
   else return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   }
