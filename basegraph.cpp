@@ -297,8 +297,12 @@ void display_data::set_projection(int ed) {
       }
 
     
-    if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
-  
+    if(ed) {
+      if(pers3)
+        glhr::projection_multiply(glhr::tmtogl(xpush(vid.ipd * ed/2)));
+      else
+        glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
+      }  
 
     if(pers3) {
       glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));

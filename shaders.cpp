@@ -82,6 +82,14 @@ glmatrix scale(ld x, ld y, ld z) {
   return tmp;
   }
 
+glmatrix tmtogl(const transmatrix& T) {
+  glmatrix tmp;
+  for(int i=0; i<4; i++)
+  for(int j=0; j<4; j++)
+    tmp[i][j] = T[i][j];
+  return tmp;
+  }
+
 glmatrix ortho(ld x, ld y, ld z) {
   return scale(1/x, 1/y, 1/z);
   }

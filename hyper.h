@@ -4006,6 +4006,8 @@ namespace glhr {
   
   extern shader_projection new_shader_projection;
   
+  glmatrix tmtogl(const transmatrix& T);
+  
   void set_depthtest(bool b);
   glmatrix translate(ld x, ld y, ld z);
   void color2(color_t color, ld scale = 1);
