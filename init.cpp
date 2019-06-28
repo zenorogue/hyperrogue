@@ -109,6 +109,7 @@ bool lclicked = false, clicked = false;
 string lmouseovers;
 bool inmenu = false;
 
+bool wclick;
 bool longclick;
 bool verylongclick;
 
@@ -194,7 +195,11 @@ void handleclick(MOBPAR_FORMAL) {
       if(mouseover && targetclick && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
         ;
         }
-      else if(!forcetarget) movepcto(mousedest);
+      else if(!forcetarget) {
+        if(WDIM == 3 && wclick) movepcto(-1);
+        else if(DIM == 3) mousemovement();
+        else movepcto(mousedest); 
+        }
       }
 
     if(andmode == 10) {
@@ -274,6 +279,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   mouseoh = mouseh;
   gtouched = mousepressed = clicked;
 
+  wclick = lclicked && ticks > touchedAt + 250;
   longclick = lclicked && ticks > touchedAt + 500;
   verylongclick = longclick && ticks > touchedAt + 1000;
 

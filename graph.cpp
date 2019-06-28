@@ -7550,7 +7550,7 @@ void gamescreen(int _darken) {
       drawCircle(xfire, yb, rad/2, 0xFF0000FF);
       }
     else {
-      if(!haveMobileCompass()) displayabutton(-1, +1, XLAT(andmode == 0 && useRangedOrb ? "FIRE" : "MOVE"),  andmode == 0 ? BTON : BTOFF);
+      if(!haveMobileCompass()) displayabutton(-1, +1, XLAT(andmode == 0 && useRangedOrb ? "FIRE" : andmode == 0 && WDIM == 3 && wclick ? "WAIT" : "MOVE"),  andmode == 0 ? BTON : BTOFF);
       displayabutton(+1, +1, rug::rugged ? "RUG" : XLAT(andmode == 1 ? "BACK" : DIM == 3 ? "CAM" : "DRAG"),  andmode == 1 ? BTON : BTOFF);
       }
     displayabutton(-1, -1, XLAT("INFO"),  andmode == 12 ? BTON : BTOFF);
