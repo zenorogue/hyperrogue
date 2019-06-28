@@ -1878,8 +1878,10 @@ void configureMouse() {
     });
 
   #if CAP_ORIENTATION
-  dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
-  dialog::add_action_push(ors::show);
+  if(GDIM == 2) {
+    dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
+    dialog::add_action_push(ors::show);
+    }
   #endif
 
   dialog::addBack();
