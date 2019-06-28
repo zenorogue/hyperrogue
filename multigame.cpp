@@ -265,6 +265,7 @@ namespace dual {
     state = 0;
     }
   
+  #if CAP_COMMANDLINE
   int args() {
     using namespace arg;
              
@@ -288,6 +289,7 @@ namespace dual {
     }
   
   auto hook = addHook(hooks_args, 100, args);
+  #endif
   
   vector<int> landsides;
   

@@ -1102,6 +1102,7 @@ namespace euclid3 {
       }
     }
 
+  #if CAP_COMMANDLINE
   int euArgs() {
     using namespace arg;
              
@@ -1151,6 +1152,7 @@ namespace euclid3 {
     }
   
   auto euhook = addHook(hooks_args, 100, euArgs);
+  #endif
   }
 
 #endif
