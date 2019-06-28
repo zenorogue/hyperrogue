@@ -1882,6 +1882,7 @@ void configureMouse() {
   dialog::add_action_push(ors::show);
   #endif
 
+  dialog::addBack();
   dialog::display();
   }
 
