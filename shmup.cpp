@@ -448,8 +448,9 @@ struct shmup_configurer {
     auto& cmdlist = shmup::on ? (WDIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
     dialog::handleNavigation(sym, uni);
     
+    if(0) ;
     #if CAP_SDL
-    if(uni == '1') pushScreen(key_configurer(1, cmdlist));
+    else if(uni == '1') pushScreen(key_configurer(1, cmdlist));
     else if(uni == '2') pushScreen(key_configurer(2, cmdlist));
     else if(uni == 'p') pushScreen(key_configurer(3, GDIM == 3 ? pancmds3 : pancmds));
     else if(uni == '3') pushScreen(key_configurer(4, cmdlist));
