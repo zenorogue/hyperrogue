@@ -464,12 +464,10 @@ void dqi_poly::gldraw() {
 #endif
   
   if(tinf) {
-    #if CAP_TEXTURE
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
     glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
     ioffset = 0;
-    #endif
     }
   else { 
     glhr::be_nontextured();
