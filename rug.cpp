@@ -1621,7 +1621,7 @@ void actDraw() {
     last_orientation = getOrientation();
   else {
     transmatrix next_orientation = getOrientation();
-    apply_rotation(inverse(last_orientation) * next_orientation);
+    apply_rotation(inverse(next_orientation) * last_orientation);
     last_orientation = next_orientation;
     }        
   #endif
