@@ -156,7 +156,19 @@ void calcMousedest() {
   }
 
 void mousemovement() {
-  if(DIM == 3) return;
+  if(DIM == 3) {
+    if(WDIM == 2) {
+      if(View[2][2] < -0.75) 
+        movepcto(MD_DROP, 1);
+      else if(View[2][2] > 0.75) 
+        movepcto(-1, 1);
+      else
+        movepckeydir(6);
+      return;
+      }
+    movepckeydir(6);
+    return;
+    }
 
   if(protect_memory()) return;
 
