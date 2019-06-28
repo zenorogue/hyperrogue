@@ -5947,11 +5947,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 }
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, cgi.shWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                #if CAP_TEXTURE
                 if(texture::config.tstate == texture::tsActive && isize(texture::config.tinf3.tvertices)) {
                   poly.tinf = &texture::config.tinf3;
                   poly.offset_texture = 0;
                   }
-                else {
+                else 
+                #endif
+                {
                   poly.tinf = &floor_texture_vertices[qfi.fshape->id];
                   poly.offset_texture = 0;
                   }
