@@ -652,12 +652,15 @@ void drawStats() {
   string vers = VER;
   if(!nofps) vers += XLAT(" fps: ") + its(calcfps());
   
+  #if CAP_MEMORY_RESERVE
   if(reserve_limit && reserve_count < reserve_limit) {
     vers += " " + its(reserve_count) + "/" + its(reserve_limit) + " MB";
     if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, vers, 0xFF2020, 0, vid.fsize/2)) 
       getcstat = PSEUDOKEY_MEMORY, instat = true;
     }
-  else if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, vers, 0x202020, 0, vid.fsize/2)) {
+  else 
+  #endif
+  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, vers, 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
     getcstat = SDLK_F1,
     instat = true,

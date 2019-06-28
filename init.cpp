@@ -225,6 +225,7 @@ void shareScore(MOBPAR_FORMAL);
 
 void mobile_draw(MOBPAR_FORMAL) {
 
+  apply_memory_reserve();
   optimizeview();
 
   int lastt = ticks; ticks = SDL_GetTicks();

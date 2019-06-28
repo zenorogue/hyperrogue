@@ -496,4 +496,8 @@ union SDL_Event;
 #define CAP_FIELD (!(ISMINI))
 #endif
 
+#ifndef CAP_MEMORY_RESERVE
+#define CAP_MEMORY_RESERVE (!ISMOBILE)
+#endif
+
 #undef TRANSPARENT

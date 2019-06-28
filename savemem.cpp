@@ -195,6 +195,7 @@ void reserve_handler() {
   }
 
 void apply_memory_reserve() {
+#if CAP_MEMORY_RESERVE
   if(reserve_count > 0) std::set_new_handler(default_handler);
   if(reserve_limit > max_reserve) reserve_limit = max_reserve;
   if(reserve_limit < 0) reserve_limit = 0;
@@ -214,6 +215,7 @@ void apply_memory_reserve() {
   default_handler = std::get_new_handler();
   #endif
   if(reserve_count > 0) std::set_new_handler(reserve_handler);
+#endif
   }
 
 void memory_for_lib() {
@@ -250,6 +252,7 @@ void show_memory_menu() {
 
   dialog::addBoolItem_action(XLAT("show memory warnings"), show_memory_warning, 'w');
   
+#if CAP_MEMORY_RESERVE
   if(reserve_limit > 0 && reserve_count < reserve_limit) {
     dialog::addItem(XLAT("just let me find Orb of Safety or finish the game"), 'l');
     dialog::add_action([] { ignored_memory_warning = true; popScreen(); });
@@ -264,6 +267,7 @@ void show_memory_menu() {
     dialog::bound_up(max_reserve);
     dialog::reaction = apply_memory_reserve;
     });
+#endif
 
   dialog::addItem(XLAT("clear caches"), 'c');
   dialog::add_action([] { callhooks(hooks_clear_cache); });
@@ -273,6 +277,7 @@ void show_memory_menu() {
   }
 
 bool protect_memory() {
+  if(!CAP_MEMORY_RESERVE) return false;
   if(reserve_limit && reserve_count < reserve_limit && !ignored_memory_warning) {
     pushScreen(show_memory_menu);
     return true;
