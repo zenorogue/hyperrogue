@@ -471,18 +471,7 @@ void dqi_poly::gldraw() {
     }
   else { 
     glhr::be_nontextured();
-    
-    #if !ISANDROID
     glhr::vertices(v);
-    #else
-    if(glhr::current_vertices != &v[offset]) {
-      glhr::current_vertices = &v[offset];
-      glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[offset]);
-      // glVertexPointer(3, GL_FLOAT, sizeof(glvertex), &v[ps]);
-      // glhr::vertices(v);
-      }
-    offset = 0;
-    #endif
     }
 
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
