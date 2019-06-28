@@ -7389,7 +7389,7 @@ void calcparam() {
 
   current_display->sidescreen = false;
   
-  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual) {
+  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && pmodel != mdPerspective) {
     cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
     }
   else {
