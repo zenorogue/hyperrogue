@@ -387,13 +387,17 @@ void mobile_draw(MOBPAR_FORMAL) {
   displayTexts();
   #endif
 
+  static int lticks_rug;
+  
   if(clicked && lclicked && andmode == 1 && normal_reaction) {
-    if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50 && !rug::rugged) {
+    if(DIM == 3 && !rug::rugged) {
+      View = cpush(2, -(ticks - lticks_rug) / 2500.) * View;
+      playermoved = false;
+      }
+    else if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50 && !rug::rugged) {
       panning(mouseoh, mouseh);
       }
     }
-  
-  static int lticks_rug;
   
 #if CAP_RUG
   if(andmode == 1 && normal_reaction && rug::rugged && clicked)
