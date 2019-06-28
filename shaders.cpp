@@ -718,7 +718,7 @@ void vertices(const vector<glvertex>& v, int vshift = 0) {
   #if CAP_SHADER
   glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[vshift]);
   #else
-  glVertexPointer(3, GL_FLOAT, sizeof(glvertex), &v[0]);
+  glVertexPointer(SHDIM, GL_FLOAT, sizeof(glvertex), &v[0]);
   #endif
   #endif
   }
