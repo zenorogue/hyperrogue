@@ -5067,6 +5067,10 @@ template<class... T> void print(hstream& hs, const tuple<T...> & t) {
 inline void special_log(char c) { putchar(c); }
 #endif
 
+#if !CAP_SDL && !ISFAKEMOBILE
+int SDL_GetTicks();
+#endif
+
 struct logger : hstream {
   int indentation;
   bool doindent;
