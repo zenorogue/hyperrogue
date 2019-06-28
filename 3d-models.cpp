@@ -753,7 +753,11 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
   if(&eye == &shSkullEyes) 
     for(int i=eye.s; i<s; i++) hpc[i] = xpush(0.07 * scalefactor) * hpc[i];
   if(q == 2)
-    for(int i=eye.s; i<s; i++) hpcpush(MirrorY * hpc[i]);
+    for(int i=eye.s; i<s; i++) {
+      hpcpush(MirrorY * hpc[i]);
+      auto& utt = models_texture;
+      utt.tvertices.push_back(utt.tvertices[i - eye.s + eye.texture_offset]);
+      }
 
   finishshape();
   // eye.prio = PPR::SUPERLINE;
