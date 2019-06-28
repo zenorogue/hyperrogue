@@ -320,8 +320,16 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
     }
   }
 
+void disable(hpcshape& sh) {
+  sh.s = sh.e = 0;
+  }
+
 void geometry_information::make_armor_3d(hpcshape& sh, int kind) { 
 
+  if(BADMODEL) {
+    disable(sh);
+    return;
+    }
   auto body = get_shape(sh);
   vector<vector<array<ld, 2> >> pts(2);
   
@@ -374,8 +382,8 @@ void geometry_information::make_head_only() {
   
   bshape(shPHeadOnly, shPHeadOnly.prio);
   last->flags |= POLY_TRIANGLES;
-  for(int d=0; d<360; d+=30) 
-  for(int u=-90; u<=90; u+=30) {
+  for(int d=0; d<360; d+=(BADMODEL ? 60 : 30)) 
+  for(int u=-90; u<=90; u+=(BADMODEL ? 90 : 30)) {
     addpt(d, u);
     addpt(d+30, u);
     addpt(d, u+30);
@@ -480,7 +488,7 @@ void geometry_information::make_skeletal(hpcshape& sh, ld push) {
 void geometry_information::make_revolution(hpcshape& sh, int mx, ld push) {
   auto body = get_shape(sh);
   bshape(sh, PPR::MONSTER_BODY);
-  int step = (mx == 360 ? 24 : 10);
+  int step = (BADMODEL ? 60 : (mx == 360 ? 24 : 10));
   for(int i=0; i<isize(body); i++) {
     hyperpoint h0 = body[i];
     hyperpoint h1 = body[(i+1) % isize(body)];
@@ -543,11 +551,11 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
     }
   
   bshape(sh, PPR::MONSTER_BODY);
-  int step = 10;
+  int step = (BADMODEL ? 60 : 10);
   for(int i=0; i<n; i++) {
     for(int s=0; s<360; s+=step) {
-      auto& tbody = (s % each ? gbody : body);
-      auto& nbody = ((s+step) % each ? gbody : body);
+      auto& tbody = BADMODEL ? gbody : (s % each ? gbody : body);
+      auto& nbody = BADMODEL ? gbody : ((s+step) % each ? gbody : body);
       int i1 = (i+1) % isize(body);
       hyperpoint h0 = tbody[i];
       hyperpoint h1 = tbody[i1];
@@ -575,10 +583,6 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
       if(i % (2 * a) < a)
         utt.tvertices[i + shDogStripes.texture_offset][1] /= 4;
     }
-  }
-
-void disable(hpcshape& sh) {
-  sh.s = sh.e = 0;
   }
 
 void geometry_information::clone_shape(hpcshape& sh, hpcshape& target) {
@@ -667,14 +671,15 @@ void geometry_information::make_star(hpcshape& sh, ld rad) {
   bshape(sh, sh.prio);
   rad = sinh(rad);
   sh.flags |= POLY_TRIANGLES | POLY_INTENSE;
-  for(int a=0; a<64; a++) {
-    ld z0 = (a-32)/32.;
-    ld z1 = (a-31)/32.;
+  int steps = (BADMODEL ? 8 : 64);
+  for(int a=0; a<steps; a++) {
+    ld z0 = (a-steps/2)*2.0/steps;
+    ld z1 = (a-steps/2-1)*2.0/steps;
     ld r0 = sqrt(1 - z0*z0) * rad;
     ld r1 = sqrt(1 - z1*z1) * rad;
     z0 *= rad;
     z1 *= rad;
-    for(int b=0; b<360; b+=15) {
+    for(int b=0; b<360; b+=(BADMODEL?60:15)) {
       ld b0 = b * degree;
       ld b1 = (b+15) * degree;
       hpcsquare(

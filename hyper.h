@@ -4334,7 +4334,9 @@ void initShape(int sg, int id);
 
 extern int usershape_changes;
 
-static const int WINGS = 4;
+#define BADMODEL 0
+
+static const int WINGS = (BADMODEL ? 1 : 4);
 
 typedef array<hpcshape, WINGS+1> hpcshape_animated;
 
