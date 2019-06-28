@@ -7491,6 +7491,10 @@ void drawfullmap() {
   profile_stop(2);
   }
 
+#if ISMOBILE
+extern bool wclick;
+#endif
+
 void gamescreen(int _darken) {
 
   if(subscreens::split([=] () {
