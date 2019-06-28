@@ -123,6 +123,7 @@ using namespace hr;
 int main(int argc, char **argv) {
 
   initAll();
+  glhr::init();
   
   vid.xres = 800; vid.yres = 450;
   vid.usingGL = false;
