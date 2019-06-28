@@ -223,6 +223,31 @@ int touchedAt;
 void shareScore(MOBPAR_FORMAL);
 #endif
 
+#if CAP_ORIENTATION
+int first_check, last_check;
+transmatrix main_last_orientation;
+
+void apply_orientation() {
+  if(ticks > last_check + 2000) first_check = ticks;
+  last_check = ticks;
+  transmatrix T = MirrorX * hr::getOrientation() * MirrorX;
+  if(ticks < first_check + 500)
+    main_last_orientation = T;
+  else {
+    transmatrix next_orientation = T;
+    View = main_last_orientation * View;
+    if(WDIM == 2 && vid.fixed_yz) {
+     if(View[0][2] || View[1][2] || View[2][2]) {
+        View = cspin(0, 2, -atan2(View[0][2], View[2][2])) * View;
+        View = cspin(1, 2, -atan2(View[1][2], View[2][2])) * View;
+        }
+      }
+    View = inverse(next_orientation) * View;
+    main_last_orientation = next_orientation;
+    }        
+  }
+#endif
+
 void mobile_draw(MOBPAR_FORMAL) {
 
   apply_memory_reserve();
@@ -233,6 +258,9 @@ void mobile_draw(MOBPAR_FORMAL) {
   int tdiff = ticks - lastt;
 
   ors::check_orientation();
+
+  if(DIM == 3 && !shmup::on && !rug::rugged) 
+    apply_orientation();
 
   if(playermoved && vid.sspeed > -4.99)
     centerpc(tdiff / 1000.0 * exp(vid.sspeed));
@@ -339,7 +367,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(lclicked && !clicked) {
       if(rug::rugged)
         rug::select();
-      else if(ors::mode && !verylongclick)
+      else if((ors::mode || DIM == 3) && !verylongclick)
         normal_reaction = true;
       else
         pushScreen(showStereo);

@@ -1096,7 +1096,7 @@ void spinEdge(ld aspd) {
     while(downspin > +M_PI) downspin -= 2*M_PI;
     aspd = (1 + 2 * abs(downspin)) * aspd;
     }
-  else if(WDIM == 2 && GDIM == 3 && vid.fixed_yz) {  
+  else if(WDIM == 2 && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
     aspd = 999999;
     if(straightDownSeek) {
       if(straightDownPoint[0])
