@@ -1116,7 +1116,7 @@ void show() {
 
   dialog::addItem(XLAT("spherical VR"), 'v');
   dialog::add_action([] () { 
-    if(!sphere) set_geometry(gSphere);
+    if(!sphere) set_geometry(gSphere), start_game();
     mode = 0; fullcenter();
     mode = 2; sensitivity = 1;
     vid.stereo_mode = sLR; vid.ipd = 0.2;
