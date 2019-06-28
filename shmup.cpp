@@ -726,11 +726,13 @@ void handleInput(int delta) {
   panspin *= d;
   panmove *= d;
   
+  #if CAP_MOUSEGRAB
   if(lctrlclick) {
     panx += mouseaim_x / 2;
     pany += mouseaim_y / 2;
     mouseaim_x = mouseaim_y = 0;
     }
+  #endif
 
   if(panx || pany || panspin || (GDIM == 3 && panmove)) {
     if(DIM == 2) {
@@ -1717,12 +1719,14 @@ void movePlayer(monster *m, int delta) {
 
   bool blown = m->blowoff > curtime;
 
+  #if CAP_MOUSEGRAB
   if(WDIM == 2 && GDIM == 3 && !lctrlclick && cpid == 0) {
     if(!stdracing) playerturn[cpid] -= mouseaim_x;
     playerturny[cpid] -= mouseaim_y;
     mouseaim_x = 0;
     mouseaim_y = 0;
     }
+  #endif
     
   if(playerturn[cpid] && canmove && !blown && WDIM == 2) {
     m->swordangle -= playerturn[cpid];
@@ -1775,11 +1779,13 @@ void movePlayer(monster *m, int delta) {
     playerturn[cpid] = mgo * SCALE * delta / 200;
     playerturny[cpid] = mturn * SCALE * delta / 200;
 
+    #if CAP_MOUSEGRAB
     if(!lctrlclick && cpid == 0) {
       playerturn[cpid] += mouseaim_x;
       playerturny[cpid] += mouseaim_y;
       mouseaim_x = mouseaim_y = 0;
       }
+    #endif
     }
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
@@ -3295,12 +3301,18 @@ void turn(int delta) {
   if(racing::on && subscreens::split( [delta] () { turn(delta); })) return;
   
   int id = 0;
+  #if CAP_MOUSEGRAB
   ld maimx = mouseaim_x;
   ld maimy = mouseaim_y;
+  #else
+  ld maimx, maimy;
+  #endif
   
   if(dual::split( [&id, maimx, maimy, delta] () {
     turn(delta); id++; 
+    #if CAP_MOUSEGRAB
     if(id==1) mouseaim_x = maimx, mouseaim_y = maimy;
+    #endif
     })) return;
 
   if(callhandlers(false, hooks_turn, delta)) return;

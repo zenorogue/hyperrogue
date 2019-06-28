@@ -2591,7 +2591,10 @@ void initquickqueue();
 void quickqueue();
 int darkenedby(int c, int lev);
 extern int mousex, mousey;
-extern ld mouseaim_x, mouseaim_y, mouseaim_sensitivity;
+#if CAP_MOUSEGRAB
+extern ld mouseaim_x, mouseaim_y;
+#endif
+extern ld mouseaim_sensitivity;
 string generateHelpForItem(eItem it);
 bool graphglyph();
 extern bool hiliteclick;

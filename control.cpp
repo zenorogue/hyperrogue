@@ -30,7 +30,9 @@ bool mousemoved = false;
 bool actonrelease = false;
 
 bool mousepan, oldmousepan;
+#if CAP_MOUSEGRAB
 ld mouseaim_x, mouseaim_y;
+#endif
 ld mouseaim_sensitivity = 0.01;
 
 int timetowait;
@@ -561,6 +563,7 @@ void mainloopiter() {
   mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && DIM == 3 && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
+    #if CAP_MOUSEGRAB
     if(mousepan) {    
       SDL_WM_GrabInput(SDL_GRAB_ON);
       SDL_ShowCursor(SDL_DISABLE);
@@ -572,6 +575,7 @@ void mainloopiter() {
       SDL_WarpMouse(vid.xres/2, vid.yres/2);
       mouseaim_x = mouseaim_y = 0;      
       }
+    #endif
     }
 
 #if ISWEB
@@ -635,8 +639,10 @@ void mainloopiter() {
   DEBB(DF_GRAPH, ("polling for events\n"));
   
   if(DIM == 3 && !shmup::on && !rug::rugged) {
+    #if CAP_MOUSEGRAB
     View = cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y) * View;
     mouseaim_x = mouseaim_y = 0;
+    #endif
     }
   
   if(smooth_scrolling && !shmup::on && !rug::rugged) {

@@ -194,6 +194,10 @@
 #define CAP_ORIENTATION ISMOBILE
 #endif
 
+#ifndef CAP_MOUSEGRAB
+#define CAP_MOUSEGRAB (!ISMOBILE)
+#endif
+
 #ifndef CAP_COMMANDLINE
 #define CAP_COMMANDLINE (!ISMOBILE)
 #endif
