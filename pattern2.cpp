@@ -2117,34 +2117,34 @@ namespace linepatterns {
     
   vector<linepattern> patterns = {
 
-    {patDual, "dual grid", 0xFFFFFF00},
+    {patDual, "dual grid", 0xFFFFFF00, 1},
 
-    {patHepta, "heptagonal grid", 0x0000C000},
-    {patRhomb, "rhombic tesselation", 0x0000C000},
-    {patTrihepta, "triheptagonal tesselation", 0x0000C000},
-    {patNormal, "normal tesselation", 0x0000C000},
-    {patBigTriangles, "big triangular grid", 0x00606000},
-    {patBigRings, "big triangles: rings", 0x0000C000},
+    {patHepta, "heptagonal grid", 0x0000C000, 1},
+    {patRhomb, "rhombic tesselation", 0x0000C000, 1},
+    {patTrihepta, "triheptagonal tesselation", 0x0000C000, 1},
+    {patNormal, "normal tesselation", 0x0000C000, 1},
+    {patBigTriangles, "big triangular grid", 0x00606000, 1},
+    {patBigRings, "big triangles: rings", 0x0000C000, 1},
     
-    {patTree, "underlying tree", 0x00d0d000},
-    {patAltTree, "circle/horocycle tree", 0xd000d000},
+    {patTree, "underlying tree", 0x00d0d000, 1},
+    {patAltTree, "circle/horocycle tree", 0xd000d000, 1},
 
-    {patZebraTriangles, "zebra triangles", 0x40FF4000},
-    {patZebraLines, "zebra lines", 0xFF000000},
-    {patVine, "vineyard pattern", 0x8438A400},
-    {patPalacelike, "firewall lines", 0xFF400000},
-    {patPalace, "firewall lines: Palace", 0xFFD50000},
-    {patPower, "firewall lines: Power", 0xFFFF0000},
-    {patHorocycles, "horocycles", 0xd060d000},
+    {patZebraTriangles, "zebra triangles", 0x40FF4000, 1},
+    {patZebraLines, "zebra lines", 0xFF000000, 1},
+    {patVine, "vineyard pattern", 0x8438A400, 1},
+    {patPalacelike, "firewall lines", 0xFF400000, 1},
+    {patPalace, "firewall lines: Palace", 0xFFD50000, 1},
+    {patPower, "firewall lines: Power", 0xFFFF0000, 1},
+    {patHorocycles, "horocycles", 0xd060d000, 1},
 
-    {patTriRings, "triangle grid: rings", 0xFFFFFF00},
-    {patTriTree, "triangle grid: tree edges", 0xFFFFFF00},
-    {patTriOther, "triangle grid: other edges", 0xFFFFFF00},
+    {patTriRings, "triangle grid: rings", 0xFFFFFF00, 1},
+    {patTriTree, "triangle grid: tree edges", 0xFFFFFF00, 1},
+    {patTriOther, "triangle grid: other edges", 0xFFFFFF00, 1},
 
-    {patCircles, "circles", 0xFFFFFF00},
-    {patRadii, "radii", 0xFFFFFF00},
-    {patMeridians, "meridians", 0xFFFFFF00},
-    {patParallels, "parallels", 0xFFFFFF00},
+    {patCircles, "circles", 0xFFFFFF00, 1},
+    {patRadii, "radii", 0xFFFFFF00, 1},
+    {patMeridians, "meridians", 0xFFFFFF00, 1},
+    {patParallels, "parallels", 0xFFFFFF00, 1},
     };
 
   void clearAll() {
@@ -2414,14 +2414,17 @@ namespace linepatterns {
       
       for(auto& lp: patterns) {
         color_t col = lp.color;
+        vid.linewidth *= lp.multiplier;
         if(!(col & 255)) continue;        
         drawPattern(lp.id, col, c, V);
+        vid.linewidth /= lp.multiplier;
         }
       }
     
     transmatrix V = gmatrix[cwt.at];
     for(auto& lp: patterns) {
       color_t col = lp.color;  
+      vid.linewidth *= lp.multiplier;
       if(!(col & 255)) continue;        
       if(lp.id == patCircles) 
         for(int i=15; i<=180; i+=15) {
@@ -2457,12 +2460,15 @@ namespace linepatterns {
             }
           }
         }
+      vid.linewidth /= lp.multiplier;
       }
 
     vid.linewidth /= width;
     }
   
   int numpat = 0;
+  
+  bool indiv;
   
   void showMenu() {
     cmode = sm::SIDE | sm::MAYDARK;
@@ -2474,11 +2480,17 @@ namespace linepatterns {
     for(auto& lp: patterns) {
       string name = XLAT(lp.lpname);
       if(GOLDBERG && among(lp.id, patVine, patPower)) name = XLAT("Goldberg");
-      dialog::addColorItem(name, lp.color, 'a'+(id++));
-      dialog::add_action([&lp] () { 
-        dialog::openColorDialog(lp.color, NULL);
-        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
-        });
+      if(indiv) {
+        dialog::addColorItem(name, lp.color, 'a'+(id++));
+        dialog::add_action([&lp] () { 
+          dialog::openColorDialog(lp.color, NULL);
+          dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+          });
+        }
+      else {
+        dialog::addSelItem(name, fts(lp.multiplier), 'a'+(id++));
+        dialog::add_action([&lp] () { dialog::editNumber(lp.multiplier, 0, 10, 0.1, 1, XLAT("line width"), ""), dialog::scaleLog(); });
+        }
       }
   
     dialog::addBreak(50);
@@ -2488,6 +2500,8 @@ namespace linepatterns {
     dialog::add_action([] () { 
       dialog::editNumber(width, 0, 10, 1, 1, XLAT("line width"), "");
       });
+
+    dialog::addBoolItem_action("edit widths individually", indiv, 'I');
     
     dialog::addBreak(50);
     dialog::addInfo("change the alpha parameter to show the lines");
@@ -2542,6 +2556,20 @@ int read_pattern_args() {
       if(appears(lp.lpname, ss))
         lp.color = arghex();
     }
+
+  else if(argis("-palw")) {
+    PHASEFROM(2); 
+    shift(); string ss = args();
+    for(auto& lp: linepatterns::patterns)
+      if(appears(lp.lpname, ss)) {
+        shift_arg_formula(lp.multiplier);
+        return 0;
+        }
+    println(hlog, "linepattern not found in -palw: ", ss);
+    shift();  
+    }
+
+  else if(argis("-palgw")) shift_arg_formula(linepatterns::width);
 
   else if(argis("-noplayer")) mapeditor::drawplayer = !mapeditor::drawplayer;
   else if(argis("-pcol")) {

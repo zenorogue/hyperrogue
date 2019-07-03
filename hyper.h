@@ -2536,6 +2536,7 @@ namespace linepatterns {
     int id;
     const char *lpname;
     color_t color;
+    ld multiplier;
     };
 
   extern vector<linepattern> patterns;
