@@ -524,9 +524,12 @@ bool viewdists = false, use_color_codes = true, use_analyzer = true, show_distan
 int first_distance = 0, scrolltime = 0;
 bool scrolling_distances = false;
 
+map<int, color_t> expcolors;
+
 color_t distribute_color(int id) {
-  color_t v = 0xFFFFFF;
-  for(int z=0; z<24; z++) if(id & (1<<z)) part(v, (z%3)) &=~ (1<<(7-(z/3)));
+  if(expcolors.count(id)) return expcolors[id];
+  color_t v = forecolor; // 0xFFFFFF;
+  for(int z=0; z<24; z++) if(id & (1<<z)) part(v, (z%3)) ^= (1<<(7-(z/3)));
   return v; 
   }
 

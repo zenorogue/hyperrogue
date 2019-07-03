@@ -2552,6 +2552,7 @@ int read_pattern_args() {
       if(c == 't') ct = &nestcolors;
       else if(c == 'd') ct = &distcolors;
       else if(c == 'm') ct = &minecolors;
+      else if(c == 'E') { shift(); int d = argi(); shift(); expcolors[d] = arghex(); }
       else ct = &(colortables[patterns::whichCanvas]);
       shift();
       }
