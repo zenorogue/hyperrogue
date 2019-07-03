@@ -635,6 +635,7 @@ namespace conformal {
     if(DIM == 2 && pm == mdPerspective) return false;
     if(DIM == 2 && pm == mdEquivolume) return false;
     if(DIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
+    if(pm == mdCentralInversion && !euclid) return false;
     return true;
     }    
   
@@ -751,7 +752,7 @@ namespace conformal {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()]" [m]);
+        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()]['" [m]);
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();

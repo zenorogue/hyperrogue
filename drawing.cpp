@@ -958,6 +958,7 @@ void dqi_poly::draw() {
   if(pmodel == mdJoukowskyInverted && vid.skiprope) can_have_inverse = true;
   if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) can_have_inverse = true;
   if(pmodel == mdSpiral && vid.skiprope) can_have_inverse = true;
+  if(pmodel == mdCentralInversion) can_have_inverse = true;
     
   if(can_have_inverse && !(poly_flags & POLY_ISSIDE)) {
   
@@ -966,6 +967,7 @@ void dqi_poly::draw() {
         
     else {
       if(d < 0) poly_flags ^= POLY_INVERSE;  
+      if(pmodel == mdCentralInversion) poly_flags ^= POLY_INVERSE;
       compute_side_by_area();
       }
     

@@ -589,6 +589,7 @@ const modelinfo models[int(mdPolynomial)+1] = {
   {X3("spiral/ring"), mf::hyper_or_torus | mf::quasiband},
   {X3("native perspective"), 0},
   {X3("azimuthal equi-volume"), mf::azimuthal | mf::equivolume | mf::euc_boring},
+  {X3("central inversion"), mf::azimuthal | mf::conformal},
   {X3(""), 0},
   {X3(""), 0},
   {X3(""), 0},

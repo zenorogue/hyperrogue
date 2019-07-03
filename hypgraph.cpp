@@ -309,6 +309,15 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       return;
       }
     
+    case mdCentralInversion: {
+      ld tz = get_tz(H);
+      for(int d=0; d<DIM; d++) ret[d] = H[d] / tz;
+      ld r = 0;
+      for(int d=0; d<DIM; d++) r += ret[d]*ret[d];
+      for(int d=0; d<DIM; d++) ret[d] /= r;
+      return;
+      }
+    
     case mdHalfplane: {
       // Poincare to half-plane
       
