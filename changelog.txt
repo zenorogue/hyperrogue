@@ -3341,3 +3341,15 @@ Other:
 2019-06-28 13:49 Version 11.1c:
 
 - long touch to wait in 3D geometries
+
+2019-07-03 08:10 Version 11.1d:
+
+- fixed a bug with the incorrect starting tile in Euclidean Crossroads
+- fixed the OpenGL off mode, also should now work in OpenGL 1.0 on Windows (not all features)
+- onscreen keyboard in edit dialogs (crucial in mobile, also useful in general)
+- animation which combines translation and rotation
+- linepatterns now can have their widths set individually
+- fixed the black screen when resetting stereo modes in 3D
+- new projection: central inversion (for Euclidean geometry)
+- easier to edit IPD with mouse
+
