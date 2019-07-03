@@ -1240,7 +1240,7 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
     }
   }
 
-int wingphase(int period, int phase = 0) {
+int wingphase(int period, int phase) {
   ld t = fractick(period, phase);
   const int WINGS2 = WINGS * 2;
   int ti = int(t * WINGS2) % WINGS2;

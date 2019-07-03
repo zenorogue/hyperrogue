@@ -319,21 +319,6 @@ transmatrix cpush(int cid, ld alpha) {
 // push alpha units to the right
 transmatrix xpush(ld alpha) { return cpush(0, alpha); }
 
-inline hyperpoint cpush0(int c, ld x) { 
-  hyperpoint h = Hypc;
-  h[GDIM] = cos_auto(x);
-  h[c] = sin_auto(x);
-  return h;
-  }
-
-inline hyperpoint xspinpush0(ld alpha, ld x) { 
-  hyperpoint h = Hypc;
-  h[GDIM] = cos_auto(x);
-  h[0] = sin_auto(x) * cos(alpha);
-  h[1] = sin_auto(x) * -sin(alpha);
-  return h;
-  }
-
 bool eqmatrix(transmatrix A, transmatrix B, ld eps) {
   for(int i=0; i<MDIM; i++)
   for(int j=0; j<MDIM; j++)

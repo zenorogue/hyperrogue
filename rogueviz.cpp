@@ -27,10 +27,6 @@
 
 #include "rogueviz.h"
 
-#if MAXMDIM >= 4
-namespace hr { extern renderbuffer *floor_textures; }
-#endif
-
 namespace rogueviz {
 
 ld fat_edges = 0;

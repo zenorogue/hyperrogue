@@ -5573,4 +5573,23 @@ static const color_t NOCOLOR = 0;
 extern int global_projection;
 void spinEdge(ld aspd);
 
+inline hyperpoint cpush0(int c, ld x) { 
+  hyperpoint h = Hypc;
+  h[GDIM] = cos_auto(x);
+  h[c] = sin_auto(x);
+  return h;
+  }
+
+inline hyperpoint xspinpush0(ld alpha, ld x) { 
+  hyperpoint h = Hypc;
+  h[GDIM] = cos_auto(x);
+  h[0] = sin_auto(x) * cos(alpha);
+  h[1] = sin_auto(x) * -sin(alpha);
+  return h;
+  }
+
+extern renderbuffer *floor_textures;
+
+int wingphase(int period, int phase = 0); 
+
 }
