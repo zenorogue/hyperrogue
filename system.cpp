@@ -135,6 +135,8 @@ void initgame() {
   if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) 
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
+  clear_euland(specialland);
+
   cwt.at = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.at->land = firstland;
 
@@ -193,8 +195,6 @@ void initgame() {
   
   if(gamegen_failure) return;
   
-  clear_euland(specialland);
-
   if(euclid && specialland == laPrincessQuest) {
     cell *c = *euclideanAtCreate(pair_to_vec(EPX, EPY)).first;
     princess::generating = true;
