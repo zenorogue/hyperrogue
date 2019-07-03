@@ -172,7 +172,7 @@ namespace dialog {
     it.body = keys;
     it.color = dialogcolor;
     it.colors = 0xFF8000;
-    it.scale = 100;
+    it.scale = 150;
     items.push_back(it);
     }
 
@@ -728,7 +728,7 @@ namespace dialog {
 
   void formula_keyboard(bool lr) {
     addKeyboardItem("1234567890");
-    addKeyboardItem(".+-*/^()\x3");
+    addKeyboardItem("=+-*/^()\x3");
     addKeyboardItem("qwertyuiop");
     addKeyboardItem("asdfghjkl");
     addKeyboardItem("zxcvbnm,.\b");
@@ -763,6 +763,7 @@ namespace dialog {
 
     if(extra_options) extra_options();
     
+    addBreak(100);
     formula_keyboard(false);
     
     display();
