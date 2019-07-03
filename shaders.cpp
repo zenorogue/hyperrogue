@@ -826,5 +826,12 @@ void set_depthwrite(bool b) {
     }
   }
 
+void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
+  glhr::be_textured();
+  dynamicval<eModel> pm(pmodel, mdUnchanged);
+  if(!svg::in) current_display->set_all(0);
+  vertices_texture(v, t, 0, 0);
+  }
+
 }
 }
