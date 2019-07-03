@@ -4718,6 +4718,7 @@ void prepare_sky() {
 
 void dqi_sky::draw() {
 
+  if(!vid.usingGL || sky.empty()) return;
   vector<glhr::colored_vertex> skyvertices;
 
   int sk = get_skybrightness();

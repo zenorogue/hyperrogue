@@ -21,7 +21,19 @@ void glError(const char* GLcall, const char* file, const int line) {
 #define CAP_VERTEXBUFFER (ISWEB)
 #endif
 
+#if CAP_SHADER
+#define WITHSHADER(x, y) if(noshaders) y else x
+#else
+#define WITHSHADER(x, y) y
+#endif
+
 namespace glhr {
+
+#if CAP_SHADER
+bool noshaders = false;
+#else
+bool noshaders = true;
+#endif
 
 bool glew   = false;
 
@@ -121,52 +133,30 @@ glmatrix translate(ld x, ld y, ld z) {
 
 // ** legacy **
 
-#if !CAP_SHADER
-
-void new_projection() {
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  }
-
-void projection_multiply(const glmatrix& m) {
-  glMultMatrixf(m.as_array());
-  }
-
-void set_modelview(const glmatrix& m) {
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrixf(m.as_array());
-  }
-
-void id_modelview() {
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  }
-
-#endif
-
 // /* shaders */
-
-#if CAP_SHADER
 
 glmatrix projection;
 
 void new_projection() {
-  projection = id;
+  WITHSHADER({
+    projection = id;
+    }, {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    return;
+    });
   }
 
 void projection_multiply(const glmatrix& m) {
-  projection = m * projection;  
+  WITHSHADER({
+    projection = m * projection;  
+    }, {
+    glMatrixMode(GL_PROJECTION);
+    glMultMatrixf(m.as_array());
+    });
   }
-
-#define glMatrixMode DISABLED
-#define glLoadIdentity DISABLED
-#define glMultMatrixf DISABLED
-#define glScalef DISABLED
-#define glTranslatef DISABLED
-#define glPushMatrix DISABLED
-#define glPopMatrix DISABLED
 
 void init();
 
@@ -321,6 +311,11 @@ bool operator != (const glmatrix& m1, const glmatrix& m2) {
 bool uses_mvp(shader_projection sp) { return among(sp, shader_projection::standard, shader_projection::flatten); }
 
 void set_modelview(const glmatrix& modelview) {
+  if(noshaders) {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(modelview.as_array());
+    return;
+    }
   if(!current) return;
   if(!uses_mvp(current_shader_projection)) {
     if(modelview != current_modelview) {
@@ -345,6 +340,11 @@ void set_modelview(const glmatrix& modelview) {
   }
 
 void id_modelview() {
+  if(noshaders) {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    return;
+    }
   if(!current) return;
   if(!uses_mvp(current_shader_projection)) { set_modelview(id); return; }
   #if MINIMIZE_GL_CALLS
@@ -354,19 +354,18 @@ void id_modelview() {
   glUniformMatrix4fv(current->uMVP, 1, 0, projection.as_array());
   }
 
-#endif
-
 void color2(color_t color, ld scale) {
   GLfloat cols[4];
   for(int i=0; i<4; i++)
     cols[i] = part(color, 3-i) / 255.0 * scale;
-  #if CAP_SHADER
-  // glUniform4fv(current->uFog, 4, cols);
-  if(!current) return;
-  glUniform4f(current->uColor, cols[0], cols[1], cols[2], cols[3]);
-  #else
-  glColor4f(cols[0], cols[1], cols[2], cols[3]);
-  #endif
+    
+  WITHSHADER({
+    if(!current) return;
+    glUniform4f(current->uColor, cols[0], cols[1], cols[2], cols[3]);
+    }, {
+    glColor4f(cols[0], cols[1], cols[2], cols[3]);
+    }
+    )
   }
 
 void colorClear(color_t color) {
@@ -381,55 +380,55 @@ void switch_mode(eMode m, shader_projection sp) {
   if(m == mode && current_shader_projection == sp) return;
   reset_projection();
   GLERR("pre_switch_mode");
-  #if CAP_SHADER
-  programs[m][int(sp)]->enable();
-  GLERR("after_enable");
-  #endif
+  WITHSHADER({
+    programs[m][int(sp)]->enable();
+    GLERR("after_enable");
+    }, {})
   flagtype newflags = flags[m] &~ flags[mode];
   flagtype oldflags = flags[mode] &~ flags[m];
   if(newflags & GF_TEXTURE) {
     GLERR("xsm");
-    #if CAP_SHADER
-    glEnableVertexAttribArray(aTexture);
-    GLERR("xsm");
-    #else
-    glEnable(GL_TEXTURE_2D);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    GLERR("xsm");
-    #endif
+    WITHSHADER({
+      glEnableVertexAttribArray(aTexture);
+      GLERR("xsm");
+      }, {
+      glEnable(GL_TEXTURE_2D);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      GLERR("xsm");
+      })
     }
   if(oldflags & GF_TEXTURE) {
     GLERR("xsm");
-    #if CAP_SHADER
-    glDisableVertexAttribArray(aTexture);
-    GLERR("xsm");
-    #else
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisable(GL_TEXTURE_2D);
-    GLERR("xsm");
-    #endif
+    WITHSHADER({
+      glDisableVertexAttribArray(aTexture);
+      GLERR("xsm");
+      }, {
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      glDisable(GL_TEXTURE_2D);
+      GLERR("xsm");
+      });
     }
   if(newflags & GF_VARCOLOR) {
-    #if CAP_SHADER
-    GLERR("xsm");
-    glEnableVertexAttribArray(aColor);
-    #else
-    GLERR("xsm");
-    glEnableClientState(GL_COLOR_ARRAY);
-    GLERR("xsm");
-    #endif
+    WITHSHADER({
+      GLERR("xsm");
+      glEnableVertexAttribArray(aColor);
+      }, {
+      GLERR("xsm");
+      glEnableClientState(GL_COLOR_ARRAY);
+      GLERR("xsm");
+      });
     }
   if(oldflags & GF_VARCOLOR) {
-    #if CAP_SHADER
-    glDisableVertexAttribArray(aColor);
-    GLERR("xsm");
-    #else
-    glDisableClientState(GL_COLOR_ARRAY);
-    GLERR("xsm");
-    #endif
+    WITHSHADER({
+      glDisableVertexAttribArray(aColor);
+      GLERR("xsm");
+      }, {
+      glDisableClientState(GL_COLOR_ARRAY);
+      GLERR("xsm");
+      });
     }
   if(newflags & GF_LIGHTFOG) {
-#if !CAP_SHADER    
+    WITHSHADER({}, {
     /*GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -451,24 +450,23 @@ void switch_mode(eMode m, shader_projection sp) {
     glFogi(GL_FOG_MODE, GL_LINEAR);
     #endif
     glFogf(GL_FOG_START, 0);
-#endif
+    });
     }
   if(oldflags & GF_LIGHTFOG) {
-#if !CAP_SHADER
-    glDisable(GL_FOG);
-
-     /*
-    glDisable(GL_LIGHTING); */
-#endif
+    WITHSHADER({}, {glDisable(GL_FOG);});
     }
-  glUniform1f(current->uFogBase, 1); fogbase = 1;
+  WITHSHADER({
+    glUniform1f(current->uFogBase, 1); fogbase = 1;
+    }, {});
   mode = m;
   current_shader_projection = sp;
   GLERR("after_switch_mode");
   current_vertices = NULL;
-  current_matrix[0][0] = -1e8; // invalid
-  current_modelview[0][0] = -1e8;
-  current_projection[0][0] = -1e8;
+  WITHSHADER({
+    current_matrix[0][0] = -1e8; // invalid
+    current_modelview[0][0] = -1e8;
+    current_projection[0][0] = -1e8;
+    }, {});
   id_modelview();
   /* if(current_depthwrite) glDepthMask(GL_TRUE);
   else glDepthMask(GL_FALSE);
@@ -477,31 +475,34 @@ void switch_mode(eMode m, shader_projection sp) {
   }
 
 void fog_max(ld fogmax, color_t fogcolor) {
-  #if CAP_SHADER
-  glUniform1f(current->uFog, 1 / fogmax);
-
-  GLfloat cols[4];
-  for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
-  glUniform4f(current->uFogColor, cols[0], cols[1], cols[2], cols[3]);
-  #else
-  glFogf(GL_FOG_END, fogmax);
-  #endif
+  WITHSHADER({
+    glUniform1f(current->uFog, 1 / fogmax);
+  
+    GLfloat cols[4];
+    for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
+    glUniform4f(current->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+    }, {
+    glFogf(GL_FOG_END, fogmax);
+    });
   }
 
 void set_fogbase(ld _fogbase) {
-  #if CAP_SHADER
-  if(fogbase != _fogbase) {
-    fogbase = _fogbase;
-    glUniform1f(current->uFogBase, fogbase);
-    }
-  #endif
+  WITHSHADER({
+    if(fogbase != _fogbase) {
+      fogbase = _fogbase;
+      glUniform1f(current->uFogBase, fogbase);
+      }
+    }, {});
   }
 
 void set_ualpha(ld alpha) {
-  glUniform1f(current->uAlpha, alpha);
+  WITHSHADER({
+    glUniform1f(current->uAlpha, alpha);
+    }, {});
   }
 
 void init() {
+
   #if CAP_GLEW
     if(!glew) { 
       glew = true; 
@@ -512,12 +513,15 @@ void init() {
         printf("Failed to initialize GLEW\n");
         return;
         }
+      printf("CreateProgram = %p\n", __glewCreateProgram);
+      if(!__glewCreateProgram) noshaders = true;
       }
   #endif
   
   #if CAP_SHADER
   projection = id;
-      
+  
+  if(!noshaders)
   for(int i=0; i<gmMAX; i++) 
   for(int j=0; j<int(shader_projection::MAX); j++) {
     flagtype f = flags[i];
@@ -650,18 +654,14 @@ void init() {
     }
   
   switch_mode(gmColored, shader_projection::standard);
-  programs[gmColored][0]->enable();
+  if(!noshaders) programs[gmColored][0]->enable();
   #endif
 
   #if !CAP_SHADER
-  switch_mode(gmColored, 0);
+  switch_mode(gmColored, shader_projection::standard);
   #endif
 
-  #if CAP_SHADER
-  glEnableVertexAttribArray(aPosition);
-  #else
-  glEnableClientState(GL_VERTEX_ARRAY);
-  #endif
+  WITHSHADER(glEnableVertexAttribArray(aPosition);, glEnableClientState(GL_VERTEX_ARRAY);)
   // #endif
 
   #if CAP_VERTEXBUFFER
@@ -715,11 +715,10 @@ void vertices(const vector<glvertex>& v, int vshift = 0) {
   #else
   if(current_vertices == &v[vshift]) return;
   current_vertices = &v[vshift];
-  #if CAP_SHADER
-  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[vshift]);
-  #else
-  glVertexPointer(SHDIM, GL_FLOAT, sizeof(glvertex), &v[0]);
-  #endif
+  WITHSHADER(
+    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[vshift]);,
+    glVertexPointer(SHDIM, GL_FLOAT, sizeof(glvertex), &v[0]);
+    )
   #endif
   }
 
@@ -728,11 +727,10 @@ void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int 
   // not implemented!
   #else
   vertices(v, vshift);
-  #if CAP_SHADER
-  glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[tshift]);
-  #else
-  glTexCoordPointer(SHDIM, GL_FLOAT, 0, &t[tshift]);
-  #endif
+  WITHSHADER(
+    glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[tshift]);,
+    glTexCoordPointer(SHDIM, GL_FLOAT, 0, &t[tshift]);
+    )
   #endif
   }
 
@@ -744,13 +742,13 @@ void prepare(vector<colored_vertex>& v) {
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
-  #if CAP_SHADER
-  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].coords);
-  glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].color);
-  #else
-  glVertexPointer(SHDIM, GL_FLOAT, sizeof(colored_vertex), &v[0].coords);
-  glColorPointer(4, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
-  #endif
+  WITHSHADER({
+    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].coords);
+    glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].color);
+    }, {
+    glVertexPointer(SHDIM, GL_FLOAT, sizeof(colored_vertex), &v[0].coords);
+    glColorPointer(4, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
+    })
   #endif
   }
 
@@ -762,13 +760,13 @@ void prepare(vector<textured_vertex>& v) {
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
-  #if CAP_SHADER
-  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].coords);
-  glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
-  #else
-  glVertexPointer(SHDIM, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
-  glTexCoordPointer(2, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
-  #endif
+  WITHSHADER({
+    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].coords);
+    glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
+    }, {    
+    glVertexPointer(SHDIM, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
+    glTexCoordPointer(2, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
+    });    
   #endif
   // color2(col);
   }
@@ -782,15 +780,15 @@ void prepare(vector<ct_vertex>& v) {
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
-  #if CAP_SHADER
-  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].coords);
-  glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].color);
-  glVertexAttribPointer(aTexture, 2, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].texture);
-  #else
-  glVertexPointer(SHDIM, GL_FLOAT, sizeof(ct_vertex), &v[0].coords);
-  glTexCoordPointer(2, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
-  glColorPointer(4, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
-  #endif
+  WITHSHADER({
+    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].coords);
+    glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].color);
+    glVertexAttribPointer(aTexture, 2, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].texture);
+    }, {
+    glVertexPointer(SHDIM, GL_FLOAT, sizeof(ct_vertex), &v[0].coords);
+    glTexCoordPointer(2, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
+    glColorPointer(4, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
+    })
   #endif
   }
 
@@ -835,3 +833,12 @@ void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
 
 }
 }
+
+#define glMatrixMode DISABLED
+#define glLoadIdentity DISABLED
+#define glMultMatrixf DISABLED
+#define glScalef DISABLED
+#define glTranslatef DISABLED
+#define glPushMatrix DISABLED
+#define glPopMatrix DISABLED
+

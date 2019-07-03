@@ -2085,6 +2085,10 @@ int read_config_args() {
     }
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('f', vid.full, switchFullscreen())
+  else if(argis("-noshaders")) {
+    PHASE(1);
+    glhr::noshaders = true; 
+    }
   else if(argis("-d:sight")) {
     PHASEFROM(2); launch_dialog(); edit_sightrange();
     }

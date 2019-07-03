@@ -219,9 +219,10 @@ void display_data::set_projection(int ed) {
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
-  if(vid.consider_shader_projection) {
-    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 2)
-      shaderside_projection = true;
+
+  if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 2)
+    shaderside_projection = true;
+  else if(vid.consider_shader_projection && !glhr::noshaders) {
     if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 3 && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::ball;
     if(pmodel == mdBand && hyperbolic && apply_models)
@@ -585,18 +586,16 @@ int gl_width(int size, const char *s) {
   }
 
 namespace glhr { void texture_vertices(GLfloat *f, int qty, int stride = 2) {
-  #if CAP_SHADER
-  glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);
-  #else
-  glTexCoordPointer(stride, GL_FLOAT, 0, f);
-  #endif
+  WITHSHADER(
+    glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
+    glTexCoordPointer(stride, GL_FLOAT, 0, f);
+    )
   } 
  void oldvertices(GLfloat *f, int qty) {
-  #if CAP_SHADER
-  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);
-  #else
-  glVertexPointer(SHDIM, GL_FLOAT, 0, f);
-  #endif
+   WITHSHADER(
+    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
+    glVertexPointer(SHDIM, GL_FLOAT, 0, f);
+    )
   // #endif
   }
  }
