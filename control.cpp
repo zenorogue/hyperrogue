@@ -1078,7 +1078,7 @@ string choices[3] = {"OFF", "relative", "absolute"};
 
 #if CAP_ORIENTATION
 transmatrix getOrientation() {
-  return MirrorX * MirrorZ * hr::getOrientation() * MirrorX * MirrorZ;
+  return MirrorX * hr::getOrientation() * MirrorX;
   }
 #endif
 
@@ -1186,10 +1186,16 @@ void rerotate(transmatrix& T) {
   if(mode == 1) T = (relative_matrix) * T;
   }
 
+int first_check, last_check;
+
 void check_orientation() {
 #if CAP_ORIENTATION
   if(!mode) return;
-  if(ticks < when_enabled + 500) {
+
+  if(ticks > last_check + 2000) first_check = ticks;
+  last_check = ticks;
+
+  if(ticks < first_check + 500) {
     last_orientation = getOrientation();
     return;
     }
