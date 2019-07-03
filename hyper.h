@@ -1937,6 +1937,7 @@ namespace dialog {
   const static scaler identity = {identity_f, identity_f, false};
   const static scaler logarithmic = {log, exp, true};
   const static scaler asinhic = {asinh, sinh, false};
+  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false};
  
   struct numberEditor {
     ld *editwhat;
@@ -1981,6 +1982,7 @@ namespace dialog {
   void use_hexeditor();
   inline void scaleLog() { ne.sc = logarithmic; }
   inline void scaleSinh() { ne.sc = asinhic; }
+  inline void scaleSinh100() { ne.sc = asinhic100; }
   void bound_low(ld val);
   void bound_up(ld val);
 

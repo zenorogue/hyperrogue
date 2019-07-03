@@ -1221,7 +1221,7 @@ void showStereo() {
       dialog::editNumber(vid.ipd, -10, 10, 0.01, 0, XLAT("pupillary distance"),
         help3 + 
         XLAT("The distance between your eyes in the represented 3D object. This is given in absolute units.")
-        );
+        ), dialog::scaleSinh100();
       
     else if(uni == 'd' && vid.stereo_mode == sAnaglyph)
       dialog::editNumber(vid.anaglyph_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
