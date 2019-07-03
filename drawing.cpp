@@ -1442,6 +1442,7 @@ void drawqueue() {
     glClear(GL_DEPTH_BUFFER_BIT);
     global_projection = +1;
     draw_main();
+    global_projection = 0;
     }
   else {
     draw_main();
