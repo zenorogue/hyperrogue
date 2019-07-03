@@ -474,7 +474,7 @@ void menu() {
 namespace anims {
 
 enum eMovementAnimation {
-  maNone, maTranslation, maRotation, maCircle, maParabolic
+  maNone, maTranslation, maRotation, maCircle, maParabolic, maTranslationRotation
   };
 
 eMovementAnimation ma;
@@ -614,6 +614,14 @@ void apply() {
         View = spin(movement_angle * degree) * View;
         }
       break;
+    
+    case maTranslationRotation:
+      View = cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
+        cspin(0, DIM-1, -movement_angle * degree) * View;
+      moved();
+      View = spin(2 * M_PI * t / period) * View;
+      break;
+
     #if CAP_BT
     case maParabolic:
       reflect_view();
@@ -823,6 +831,7 @@ void show() {
     rotation_center_c = centerover;
     rotation_center_View = View;
     });
+  dialog::addBoolItem_choice(XLAT("translation")+"+"+XLAT("rotation"), ma, maTranslationRotation, '5');
   switch(ma) {
     case maCircle: {
       animator(XLAT("circle spins"), circle_spins, 'C');
@@ -853,6 +862,7 @@ void show() {
       break;
       }
     case maTranslation: 
+    case maTranslationRotation:
     case maParabolic: {
       if(ma == maTranslation && conformal::on)
         dialog::addBreak(300);
@@ -1009,6 +1019,12 @@ int readArgs() {
     }
   else if(argis("-animmove")) {
     ma = maTranslation; 
+    shift_arg_formula(cycle_length);
+    shift_arg_formula(shift_angle);
+    shift_arg_formula(movement_angle);
+    }
+  else if(argis("-animmoverot")) {
+    ma = maTranslationRotation; 
     shift_arg_formula(cycle_length);
     shift_arg_formula(shift_angle);
     shift_arg_formula(movement_angle);
