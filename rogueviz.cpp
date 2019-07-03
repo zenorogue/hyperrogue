@@ -1284,9 +1284,9 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   int i = m->pid;
   vertexdata& vd = vdata[i];
   
-  bool ghilite = false;
+  // bool ghilite = false;
   
-  if(vd.special && specialmark) ghilite = true;
+  // if(vd.special && specialmark) ghilite = true;
   
   if(!gmatrix.count(m->base)) printf("base not in gmatrix\n");
 
@@ -1307,7 +1307,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
     if(ei->weight < (hilite ? ei->type->visible_from_hi : ei->type->visible_from)) continue;
 
-    if(hilite) ghilite = true;
+    // if(hilite) ghilite = true;
     
     bool multidraw = quotient || euwrap;
         

@@ -47,7 +47,7 @@ namespace rogueviz {
     color_t color1, color2;
     char shade;
     shared_ptr<rvimage> img;
-    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = col; }
+    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; }
     };
   
   struct vertexdata {
