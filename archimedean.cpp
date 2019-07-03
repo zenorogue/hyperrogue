@@ -1067,6 +1067,11 @@ void show() {
     edited.compute_geometry();
     dialog::addSelItem(XLAT("edge length"), fts(edited.edgelength) + (edited.get_class() == gcEuclid ? XLAT(" (arbitrary)") : ""), 0);
     current.compute_geometry();
+
+    dialog::addBreak(100);
+    dialog::addKeyboardItem("1234567890");
+    dialog::addKeyboardItem("()[]lLhH,");
+    dialog::addKeyboardItem(" \t\b\x1\x2\n");
     dialog::addBreak(100);
     }
   else {

@@ -1911,7 +1911,7 @@ namespace dialog {
   extern color_t dialogcolor;
   extern int dfsize, dfspace;
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard};
 
   struct item {
     tDialogItem type;
@@ -1970,6 +1970,7 @@ namespace dialog {
   void addHelp(string body);
   void addInfo(string body, color_t color = dialogcolor);
   void addItem(string body, int key);
+  void addKeyboardItem(string keys);
   int addBreak(int val);  
   void addTitle(string body, color_t color, int scale);
   

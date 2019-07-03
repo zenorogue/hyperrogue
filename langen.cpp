@@ -295,6 +295,10 @@ int main() {
   allchars.insert("π");
   allchars.insert("Θ");
   allchars.insert("λ");
+  allchars.insert("⌫");
+  allchars.insert("⏎");
+  allchars.insert("←");
+  allchars.insert("→");
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();

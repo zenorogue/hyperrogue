@@ -166,6 +166,16 @@ namespace dialog {
     return c;
     }
 
+  void addKeyboardItem(string keys) {
+    item it;
+    it.type = diKeyboard;
+    it.body = keys;
+    it.color = dialogcolor;
+    it.colors = 0xFF8000;
+    it.scale = 100;
+    items.push_back(it);
+    }
+
   void addColorItem(string body, int value, int key) {
     item it;
     it.type = diItem;
@@ -416,6 +426,38 @@ namespace dialog {
           displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
           }
         if(xthis) getcstat = I.key, inslider = true;
+        }
+      else if(I.type == diKeyboard) {
+        int len = 0;
+        for(char c: I.body) 
+          if(c == ' ' || c == '\t') len += 3;
+          else len++;
+        int sl, sr;
+        if(current_display->sidescreen)
+          sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
+        else
+          sl = vid.xres/4, sr = vid.xres*3/4;
+        int pos = 0;
+        for(char c: I.body) {
+          string s = "";
+          s += c;
+          int nlen = 1;
+          if(c == ' ') s = "SPACE", nlen = 3;
+          if(c == '\b') s = "⌫", nlen = 1;
+          if(c == '\r' || c == '\n') s = "⏎", nlen = 1;
+          if(c == 1) s = "←", nlen = 1;
+          if(c == 2) s = "→", nlen = 1;
+          if(c == 3) s = "π";
+          if(c == '\t') s = "CLEAR", nlen = 3;
+          int xpos = sl + (sr-sl) * (pos + nlen/2.) / len;
+          if(displayfr(xpos, mid, 2, dfsize * I.scale/100, s, I.color, 8)) {
+            displayfr(xpos, mid, 2, dfsize * I.scale/100, s, I.colors, 8);
+            if(c == 1) getcstat = SDLK_LEFT;
+            else if(c == 2) getcstat = SDLK_RIGHT;
+            else getcstat = c;
+            }
+          pos += nlen;
+          }
         }
       }
     }
@@ -684,6 +726,15 @@ namespace dialog {
 
   int numberdark;
 
+  void formula_keyboard(bool lr) {
+    addKeyboardItem("1234567890");
+    addKeyboardItem(".+-*/^()\x3");
+    addKeyboardItem("qwertyuiop");
+    addKeyboardItem("asdfghjkl");
+    addKeyboardItem("zxcvbnm,.\b");
+    addKeyboardItem(lr ? " \t\x1\x2" : " \t");
+    }
+  
   void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
     gamescreen(numberdark);
@@ -712,12 +763,15 @@ namespace dialog {
 
     if(extra_options) extra_options();
     
+    formula_keyboard(false);
+    
     display();
     
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',') || (uni >= 'a' && uni <= 'z')) {
-        ne.s += uni;
+      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', 3) || (uni >= 'a' && uni <= 'z')) {
+        if(uni == 3) ne.s += "pi";
+        else ne.s += uni;
         apply_edit();
         }
       else if(uni == '\b' || uni == '\t') {
@@ -1071,6 +1125,8 @@ namespace dialog {
     gamescreen(numberdark);
     init(ne.title);
     addInfo(view_edited_string());
+    addBreak(100);
+    formula_keyboard(true);
     addBreak(100);
     dialog::addBack();
     addBreak(100);
