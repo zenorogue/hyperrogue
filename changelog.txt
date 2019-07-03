@@ -3333,3 +3333,11 @@ Other:
 - improved Tortoise graphics in 3D, Baby Tortoises appear
 - camera level higher when riding dragon
 - keyboard/controller movement works better now in 2.5D; improved controller camera control
+
+2019-06-28 13:49 Version 11.1b:
+- you can now move in 2.5D and 3D with mouseclick/touchscreen
+- 2.5D/3D/VR in the mobile versions
+
+2019-06-28 13:49 Version 11.1c:
+
+- long touch to wait in 3D geometries
