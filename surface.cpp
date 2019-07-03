@@ -261,6 +261,9 @@ dexp_data map_to_surface(hyperpoint p, const dexp_origin& dor) {
   direction[0] = d * h[0] / rad;
   direction[1] = d * h[1] / rad;
   direction[2] = 0;
+  #if MAXMDIM == 4
+  direction[3] = 0;
+  #endif
 
   return dexp(dor.zero, dor.M * direction);
   }
