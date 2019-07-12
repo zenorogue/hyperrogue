@@ -501,7 +501,7 @@ union SDL_Event;
 #endif
 
 #ifndef CAP_MEMORY_RESERVE
-#define CAP_MEMORY_RESERVE (!ISMOBILE)
+#define CAP_MEMORY_RESERVE (!ISMOBILE && !ISWEB)
 #endif
 
 #undef TRANSPARENT
