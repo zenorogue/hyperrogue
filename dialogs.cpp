@@ -740,6 +740,7 @@ namespace dialog {
   
   void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
+    if(numberdark < DONT_SHOW)
     gamescreen(numberdark);
     init(ne.title);
     addInfo(ne.s);
@@ -1126,6 +1127,7 @@ namespace dialog {
   
   void string_edit_dialog() {
     cmode = sm::NUMBER | dialogflags;
+    if(numberdark < DONT_SHOW)
     gamescreen(numberdark);
     init(ne.title);
     addInfo(view_edited_string());

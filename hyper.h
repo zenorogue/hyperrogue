@@ -2048,6 +2048,9 @@ namespace dialog {
   inline reaction_t add_confirmation(const reaction_t& act) {
     return [act] { do_if_confirmed(act); };
     }
+
+  extern int numberdark;
+  static const int DONT_SHOW = 16;
   }
 
 void checkStunKill(cell *dest);
