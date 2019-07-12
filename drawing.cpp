@@ -1161,7 +1161,7 @@ int curvestart = 0;
 bool keep_curvedata = false;
 
 void queuereset(eModel m, PPR prio) {
-  queueaction(prio, [m] () { pmodel = m; });
+  queueaction(prio, [m] () { glflush(); pmodel = m; });
   }
 
 void dqi_line::draw() {
