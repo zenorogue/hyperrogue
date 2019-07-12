@@ -732,6 +732,14 @@ void gdpush_utf8(const string& s) {
       u += (s[i] - 128) & 63;
       gdpush(u); q++;
       }
+    else if(uch >= 224 && uch < 240) {
+      int u = ((s[i] - 224)&15) << 12;
+      i++;
+      u += (s[i] & 63) << 6;
+      i++;
+      u += (s[i] & 63) << 0;
+      gdpush(u); q++;
+      }
     else
 #endif
       {
