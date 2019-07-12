@@ -1215,6 +1215,10 @@ void quickqueue() {
   int siz = isize(ptds);
   for(int i=0; i<siz; i++) ptds[i]->draw();
   ptds.clear();
+  if(!keep_curvedata) {
+    curvedata.clear();
+    curvestart = 0;
+    }
   }
 
 ld xintval(const hyperpoint& h) {
