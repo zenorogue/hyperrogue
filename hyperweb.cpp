@@ -17,6 +17,14 @@
 #define MAXMDIM 3
 #define CAP_COMPLEX2 0
 
+// we want newconformist, but we don't want CAP_GD there
+#define CAP_NCONF 1
+#define CAP_GD 0
+
+#ifndef EMSCRIPTEN
+#define EMSCRIPTEN
+#endif
+
 #ifndef CAP_ORIENTATION
 #define CAP_ORIENTATION 1
 #endif
