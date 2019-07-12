@@ -178,6 +178,8 @@ void emscripten_get_commandline() {
 #else
   char *str = (char*)EM_ASM_INT({
     var jsString = document.location.href;
+    if (typeof(default_arg) != 'undefined' && jsString.indexOf('?') == -1)
+      jsString = default_arg;
     var lengthBytes = lengthBytesUTF8(jsString)+1;
     var stringOnWasmHeap = _malloc(lengthBytes);
     stringToUTF8(jsString, stringOnWasmHeap, lengthBytes+1);
