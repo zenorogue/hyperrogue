@@ -449,7 +449,7 @@ void pick_algorithm() {
   dialog::addItem("visualize (fast)", 'b');
   dialog::add_action([] { nconf_prepare(true); popScreen(); });
   dialog::addSelItem("visualization speed", its(algo_speed), 'v');
-  dialog::add_action([] { dialog::editNumber(algo_speed, 100, 1000000, 0.1, 10000, "", ""), dialog::scaleLog(), dialog::dialogflags = 0, dialog::numberdark = DONT_SHOW; });
+  dialog::add_action([] { dialog::editNumber(algo_speed, 100, 1000000, 0.1, 10000, "", ""), dialog::scaleLog(), dialog::dialogflags = 0, dialog::numberdark = dialog::DONT_SHOW; });
   dialog::addBreak(50);
   dialog::addBoolItem_action("pretty corners", pretty, 'p');
   dialog::addBreak(50);
@@ -524,11 +524,15 @@ void draw_ncee() {
     curvepoint(h(x+1,y));
     curvepoint(h(x+1,y+1));
     curvepoint(h(x,y+1));
+    #if CAP_NCONF
     bool ineq = 
       in_visualization && fmap[y][x] == '1';
+    #endif
     queuecurve(0, 
+    #if CAP_NCONF
       (ineq && nconf::pts[y][x].state == 1) ? 0xFF8000FF :
       (ineq && nconf::pts[y][x].state == 2) ? 0x00FF00FF :
+    #endif
       (fmap[y][x] == '1' && show_mgrid && show_mapping) ? 0x404040FF : typecols[fmap[y][x] - '0'], PPR::LINE);
     }
 
@@ -577,13 +581,13 @@ void draw_ncee() {
         vmap[y][x] = hpxy(vx[y][x]/cscale * sca2 / 2, vy[y][x] * sca2 / 2+ map_ypos);
     for(int x=0; x<X-1; x++) for(int y=0; y<Y-1; y++) {
       if(y < Y-2 && fmap[y][x] > '0' && fmap[y+1][x] > '0') {
-        color_t col = (pair(x,y) == mpt || pair(x,y+1) == mpt) ? 0xFFFF00FF : gridcol;
+        color_t col = (make_pair(x,y) == mpt || make_pair(x,y+1) == mpt) ? 0xFFFF00FF : gridcol;
         dynamicval<ld> lw(vid.linewidth, vid.linewidth * (col == 0xFFFF00FF ? 4 : 1));
         queueline(hc(x, y), hc(x, y+1), col, 0, PPR::CIRCLE);
         queueline(vmap[y][x], vmap[y+1][x], col, 0, PPR::CIRCLE);
         }
       if(x < X-2 && fmap[y][x] > '0' && fmap[y][x+1] > '0') {
-        color_t col = (pair(x,y) == mpt || pair(x+1,y) == mpt) ? 0xFFFF00FF : gridcol;
+        color_t col = (make_pair(x,y) == mpt || make_pair(x+1,y) == mpt) ? 0xFFFF00FF : gridcol;
         dynamicval<ld> lw(vid.linewidth, vid.linewidth * (col == 0xFFFF00FF ? 4 : 1));
         queueline(hc(x, y), hc(x+1, y), col, 0, PPR::CIRCLE);
         queueline(vmap[y][x], vmap[y][x+1], col, 0, PPR::CIRCLE);
@@ -617,9 +621,11 @@ void ncee() {
   
   if(ncee_map_prepared < 5) { cmode = sm::NORMAL; ncee_map_prepared++; if(ncee_map_prepared == 5) prepare_ncee_map(); gamescreen(2); return; }
 
+  #if CAP_NCONF
   if(in_visualization) 
     nconf_run();
   else 
+  #endif
     iterate();
   
   draw_ncee();
@@ -689,7 +695,7 @@ void ncee() {
     if(uni == 's') show_mapping = !show_mapping;
     if(uni == 'g') show_mgrid = !show_mgrid;
     if(uni == 't') pushScreen(conf_shapes);
-    if(uni == 'y') dialog::editNumber(mapping_split, 0, 1, 0.05, 0.75, "", ""), dialog::dialogflags = 0, dialog::numberdark = DONT_SHOW;
+    if(uni == 'y') dialog::editNumber(mapping_split, 0, 1, 0.05, 0.75, "", ""), dialog::dialogflags = 0, dialog::numberdark = dialog::DONT_SHOW;
     if(uni == '-') {
       int x = (mousex - cd->xcenter - xc - x0) / siz;
       int y = (mousey - cd->ycenter - yc - y0) / siz;
@@ -701,7 +707,6 @@ void ncee() {
     };
   }
 
-#if ISWEB
 extern "C" {
   void nconf_view(int i) {
     if(i == 1) 
@@ -736,7 +741,6 @@ extern "C" {
       fmap = snake, reset_vxy();
     }
   }
-#endif
   
 int niceArgs() {
   using namespace arg;
