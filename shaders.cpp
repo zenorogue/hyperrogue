@@ -734,7 +734,13 @@ void vertices(const vector<glvertex>& v, int vshift = 0) {
 
 void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift = 0, int tshift = 0) {
   #if CAP_VERTEXBUFFER
-  // not implemented!
+  int q = min(isize(v)-vshift, isize(t)-tshift);
+  vector<textured_vertex> tv(q);
+  for(int i=0; i<q; i++)
+    tv[i].coords = v[vshift+i],
+    tv[i].texture[0] = t[tshift+i][0],
+    tv[i].texture[1] = t[tshift+i][1];
+  prepare(tv);
   #else
   vertices(v, vshift);
   WITHSHADER(
