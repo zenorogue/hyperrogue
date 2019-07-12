@@ -904,7 +904,7 @@ namespace dialog {
     #endif
     }
 
-  void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
+  void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {
     editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
     ne.animatable = false;

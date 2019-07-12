@@ -1979,7 +1979,8 @@ namespace dialog {
   void display();
 
   void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help);
-  void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help);
+  // step can be ld if we use scaleLog()
+  void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help);
   void use_hexeditor();
   inline void scaleLog() { ne.sc = logarithmic; }
   inline void scaleSinh() { ne.sc = asinhic; }
