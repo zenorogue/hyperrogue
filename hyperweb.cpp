@@ -130,8 +130,12 @@ void showDemo() {
     };
   }
 
+int bak_xres, bak_yres;
+
 EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fullscreenChangeEvent, void *userData) {
   if(fullscreenChangeEvent->isFullscreen) {
+    bak_xres = vid.xres;
+    bak_yres = vid.yres;
     vid.xres = vid.xscr = fullscreenChangeEvent->screenWidth;
     vid.yres = vid.yscr = fullscreenChangeEvent->screenHeight;
     vid.full = true;
@@ -139,8 +143,8 @@ EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fulls
     setvideomode();
     }
   else {
-    vid.xres = vid.xscr = 800;
-    vid.yres = vid.yscr = 600;
+    vid.xres = vid.xscr = bak_xres;
+    vid.yres = vid.yscr = bak_yres;
     vid.full = true;
     printf("reset to %d x %d\n", vid.xres, vid.yres);
     setvideomode();
