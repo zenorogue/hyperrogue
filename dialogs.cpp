@@ -449,14 +449,17 @@ namespace dialog {
           if(c == 2) s = "→", nlen = 1;
           if(c == 3) s = "π";
           if(c == '\t') s = "CLEAR", nlen = 3;
-          int xpos = sl + (sr-sl) * (pos + nlen/2.) / len;
-          if(displayfr(xpos, mid, 2, dfsize * I.scale/100, s, I.color, 8)) {
-            displayfr(xpos, mid, 2, dfsize * I.scale/100, s, I.colors, 8);
+          int left = sl + (sr-sl) * pos / len;
+          pos += nlen;
+          int right = sl + (sr-sl) * pos / len;
+          bool in = (mousex >= left && mousex <= right && mousey >= top && mousey < tothei);
+          int xpos = (left + right) / 2;
+          if(in) {
             if(c == 1) getcstat = SDLK_LEFT;
             else if(c == 2) getcstat = SDLK_RIGHT;
             else getcstat = c;
             }
-          pos += nlen;
+          displayfr(xpos, mid, 2, dfsize * I.scale/100, s, in ? I.colors : I.color, 8);
           }
         }
       }
