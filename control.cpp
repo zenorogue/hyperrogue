@@ -655,9 +655,6 @@ void mainloopiter() {
     View = cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y) * View;
     mouseaim_x = mouseaim_y = 0;
     #endif
-    #if CAP_ORIENTATION
-    apply_orientation();
-    #endif
     }
   
   if(smooth_scrolling && !shmup::on && !rug::rugged) {
