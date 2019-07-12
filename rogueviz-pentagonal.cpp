@@ -196,12 +196,17 @@ void run_snub(int v, int w) {
   rug::invert_depth = hyperbolic;
   }
 
+ld x, y;
+
 void create_model() {
+
+  if(!inHighQual) { 
+    x = (mousex - current_display->xcenter + .0) / vid.xres;
+    y = (mousey - current_display->ycenter + .0) / vid.yres;
+    }
 
   int v = global_v;
   rug::clear_model(); 
-  ld x = (mousex - current_display->xcenter + .0) / vid.xres;
-  ld y = (mousey - current_display->ycenter + .0) / vid.yres;
   
   ld alpha = atan2(y, x);
   ld h = hypot(x, y);
@@ -249,8 +254,10 @@ void create_model() {
     }
   
   // printf("idh = %d\n", idh);
+  
+  printf("createmodel with ticks = %d\n", ticks);
 
-  transmatrix t = hyperbolic ? rotmatrix(M_PI, 0, 2) * xpush(sin(ticks * M_PI / 8000.)) : rotmatrix(ticks * M_PI / 8000., 0, 2);
+  transmatrix t = hyperbolic ? rotmatrix(M_PI, 0, 2) * xpush(sin(ticks * M_PI * 2 / anims::period)) : rotmatrix(ticks * M_PI * 2 / anims::period, 0, 2);
   
   hyperpoint hs = hyperbolic ? hpxyz(0,0,-1) : hpxyz(0,0,0);
   
@@ -309,25 +316,25 @@ bool frame() {
 
 bool handleKey(int sym, int uni) {
   if(snubon) {
-    if(among(uni, '3', '4', '5', '6', '7', '8', '9'))  {
+    if(among(uni, '3', '4', '5', '6', '7', '8', '9') && (cmode & sm::NORMAL))  {
       run_snub(uni - '0', 3);
       return true;
       }
-    if(among(uni, '#', '$', '%', '&', '^'))  {
+    if(among(uni, '#', '$', '%', '&', '^') && (cmode & sm::NORMAL))  {
       if(uni == '^') uni = '&';
       run_snub(uni - 32, 4);
       return true;
       }
-    if(uni == 'a') {
+    if(uni == 'a' && (cmode & sm::NORMAL)) {
       rug::close();
       mapeditor::drawplayer = false;
       return true;
       }
-    if(uni == 's' && rug::rugged) {
+    if(uni == 's' && rug::rugged && (cmode & sm::NORMAL)) {
       vid.fov += 30;
       if(vid.fov >= 180) vid.fov = 60;
       }
-    if(uni == 'i' && rug::rugged) {
+    if(uni == 'i' && rug::rugged && (cmode & sm::NORMAL)) {
       rug::invert_depth = !rug::invert_depth;
       return true;
       }
