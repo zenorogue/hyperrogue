@@ -5598,4 +5598,6 @@ extern renderbuffer *floor_textures;
 
 int wingphase(int period, int phase = 0); 
 
+void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, color_t fillcolor = 0);
+
 }

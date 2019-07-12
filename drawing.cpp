@@ -1612,7 +1612,7 @@ void queuechr(int x, int y, int shift, int size, char chr, color_t col, int fram
   ptd.frame = frame ? (poly_outline & ~ 255) : 0;
   }
 
-void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, color_t fillcolor = 0) {
+void queuecircle(int x, int y, int size, color_t color, PPR prio, color_t fillcolor) {
   auto& ptd = queuea<dqi_circle>(prio);
   ptd.x = x;
   ptd.y = y;
