@@ -43,6 +43,7 @@ ld fogbase;
 typedef const void *constvoidptr;
 
 constvoidptr current_vertices, buffered_vertices;
+ld current_linewidth;
 
 GLuint buf_current, buf_buffered;
 
@@ -468,6 +469,7 @@ void switch_mode(eMode m, shader_projection sp) {
     current_projection[0][0] = -1e8;
     }, {});
   id_modelview();
+  current_linewidth = -1;
   /* if(current_depthwrite) glDepthMask(GL_TRUE);
   else glDepthMask(GL_FALSE);
   if(current_depthtest) glEnable(GL_DEPTH_TEST);
@@ -821,6 +823,13 @@ void set_depthwrite(bool b) {
     current_depthwrite = b;
     if(b) glDepthMask(GL_TRUE);
     else glDepthMask(GL_FALSE);
+    }
+  }
+
+void set_linewidth(ld lw) {
+  if(lw != current_linewidth) {
+    current_linewidth = lw;
+    glLineWidth(lw);
     }
   }
 

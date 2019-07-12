@@ -559,7 +559,7 @@ ld scale_at(const transmatrix& T) {
 
 ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
-  else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1) {
+  else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1 && !ISWEB) {
     double dz = h[DIM];
     if(dz < 1 || abs(dz-current_display->scrdist) < 1e-6) return 1;
     else {
@@ -576,6 +576,13 @@ ld linewidthat(const hyperpoint& h) {
     return scale_at(T);
     }
   return 1;
+  }
+
+void set_width(ld w) {
+  #if MINIMIZE_GL_CALLS
+  if(w != glhr::current_linewidth) glflush();
+  #endif
+  glhr::set_linewidth(w);
   }
 
 // -radius to +3radius
@@ -889,7 +896,7 @@ void dqi_poly::draw() {
 
 #if CAP_GL
   if(vid.usingGL && (current_display->set_all(global_projection), shaderside_projection)) {
-    glLineWidth(get_width(this));
+    set_width(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();
     return;
@@ -1024,7 +1031,7 @@ void dqi_poly::draw() {
       if(tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
-      glLineWidth(get_width(this));
+      set_width(get_width(this));
       dqi_poly npoly = (*this);
       npoly.V = Id;
       npoly.tab = &glcoords;
@@ -1253,11 +1260,11 @@ void sort_drawqueue() {
 
   #if MINIMIZE_GL_CALLS
   unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
-  for(auto& p: ptds) subqueue[p->prio == PPR::CIRCLE ? 0 : p->outline_group()].push_back(move(p));
+  for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->outline_group()].push_back(move(p));
   ptds.clear();
   for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
   subqueue.clear();
-  for(auto& p: ptds) subqueue[p->prio == PPR::CIRCLE ? 0 : p->color].push_back(move(p));
+  for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->color].push_back(move(p));
   ptds.clear();
   for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
   #endif
