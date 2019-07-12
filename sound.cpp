@@ -268,7 +268,9 @@ int read_sound_args() {
   return 0;
   }
 
+#if CAP_SDLAUDIO
 auto ah_sound = addHook(hooks_args, 0, read_sound_args) + addHook(hooks_clear_cache, 0, reuse_music_memory);
+#endif
 
 #endif
 
