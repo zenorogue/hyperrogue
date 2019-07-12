@@ -1346,6 +1346,7 @@ namespace mapeditor {
 struct renderbuffer;
 
 namespace rug {
+  extern bool display_warning;
   extern bool rugged;
   extern bool spatial_rug;
   extern bool computed;

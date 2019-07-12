@@ -1446,6 +1446,8 @@ void reopen() {
   if(!rugged) return;
   }
 
+bool display_warning = true;
+
 void init_model() {
   clear_model();
   genrug = true;
@@ -1478,7 +1480,7 @@ void init_model() {
     if(sphere && pmodel == mdDisk && vid.alpha > 1)
       valid = false;
     
-    if(!valid)
+    if(display_warning && !valid)
       gotoHelp(
         "Note: this mode is based on what you see on the screen -- but re-rendered in another way. "
         "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect "
