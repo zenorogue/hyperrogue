@@ -497,8 +497,10 @@ void check_cgi() {
     floor_textures = NULL;
     }
   
+  #if MAXMDIM >= 4
   if(!floor_textures && DIM == 3 && (cgi.state & 2)) 
     make_floor_textures();
+  #endif
 
   }
 
