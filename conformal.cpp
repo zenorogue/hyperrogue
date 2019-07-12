@@ -641,7 +641,7 @@ namespace conformal {
   
   bool model_has_orientation() {
     return
-      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral) || mdBandAny();
+      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid) || mdBandAny();
     }
   
   bool model_has_transition() {
@@ -752,7 +752,7 @@ namespace conformal {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()]['" [m]);
+        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()][{}'" [m]);
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
@@ -927,10 +927,10 @@ namespace conformal {
         });
       }
       
-    if(pmodel == mdTwoPoint) {
+    if(among(pmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) {
       dialog::addSelItem(XLAT("parameter"), fts(vid.twopoint_param), 'b');
       dialog::add_action([](){
-        dialog::editNumber(vid.twopoint_param, 0, 10, .1, 1, XLAT("parameter"), 
+        dialog::editNumber(vid.twopoint_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
           "This model maps the world so that the distances from two points "
           "are kept. This parameter gives the distance from the two points to "
           "the center."

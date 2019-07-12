@@ -256,11 +256,17 @@ struct landtacinfo { eLand l; int tries, multiplier; };
 
 enum eModel {
   mdDisk, mdHalfplane, mdBand, mdPolygonal, mdFormula,
+  // 5..8.
   mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
+  // 9..13
   mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
+  // 14..16
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
+  // 17..19
   mdRotatedHyperboles, mdSpiral, mdPerspective,
-  mdEquivolume, mdCentralInversion,
+  // 20..22
+  mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid,
+  // 24..
   mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial, mdRug, mdFlatten
   };
 
@@ -278,6 +284,7 @@ namespace mf {
   static const flagtype hyper_or_torus = 256;
   static const flagtype quasiband = 512;
   static const flagtype equivolume = 1024;
+  static const flagtype twopoint = 2048;
   };
   
 struct modelinfo {

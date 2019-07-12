@@ -257,6 +257,52 @@ hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
   return space_to_perspective(h, 1) / scale;
   }
 
+hyperpoint compute_hybrid(hyperpoint H, int rootid) {
+  auto& t = vid.twopoint_param;
+  hyperpoint Hl = xpush(+t) * H;
+  hyperpoint Hr = xpush(-t) * H;
+  ld g = (Hl[0] + 1e-7) / (Hl[1] + 1e-8);
+  ld d = hdist0(Hr);
+  
+  hyperpoint spinned = spintox(Hl) * xpush0(2*t);
+  if(Hl[0] < 0) spinned = pispin * spinned;
+
+  ld y = asin_auto(spinned[1]);
+  ld x = asin_auto_clamp(spinned[0] / cos_auto(y));
+
+  int sign = (Hl[0] > 0 ? 1 : -1) * hdist0(Hl) < x ? -1 : 1;
+  
+  switch(rootid & 3) {
+    case 1: sign = -sign; break;
+    case 2: sign = 1; break;
+    case 3: sign = -1; break;
+    }
+
+  // (x + t) / g = y
+  // yy + (x-t)(x-t) = dd
+  // (x+t)*(x+t)/g*g + x*x + t*t - 2*x*t = dd
+  
+  // x*x*(1+1/g*g) + t*t*(1+1/g*g) + 2xt (1/gg-1) = dd
+  // xx + 2xt (1/gg-1) / (1+1/gg) = dd / (1+1/gg) - tt
+  
+  ld b = t*(1/g/g - 1) / (1+1/g/g);
+  ld c = d*d / (1+1/g/g) - t*t;
+  
+  // xx + 2bx = c
+  // xx + 2bx + bb = c + bb
+  // (x+b)^2 = c+bb
+  // x = +/- sqrt(c+bb) - b
+  
+  ld a = c+b*b;
+  
+  hyperpoint ret;
+  ret[0] = (a > 0 ? sign * sqrt(a) : 0) - b;
+  ret[1] = (ret[0] + t) / g;
+  ret[2] = 0;
+  
+  return ret;
+  }
+
 void applymodel(hyperpoint H, hyperpoint& ret) {
 
   using namespace hyperpoint_vec;
@@ -433,6 +479,43 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       H[DIM] = zlev;
       ret = H / sqrt(1 + sqhypot_d(DIM+1, H));
       if(DIM == 3) ret[DIM] = zlev;
+      break;
+      }
+    
+    case mdSimulatedPerspective: {
+      conformal::apply_orientation_yz(H[1], H[2]);
+      conformal::apply_orientation(H[0], H[1]);
+      auto yz = move_z_to_y(H);
+      hyperpoint Hl = xpush(-vid.twopoint_param) * H;
+      hyperpoint Hr = xpush(+vid.twopoint_param) * H;
+      ld lyx = (Hl[1] + 1e-7) / (Hl[0] + 1e-8);
+      ld ryx = (Hr[1] + 1e-7) / (Hr[0] + 1e-8);
+      // (r.x + t) * lyx = (r.x - t) * ryx = r.y
+      // r.x * lyx + t * lyx = r.x * ryx - t * ryx
+      // r.x * (lyx-ryx) = - t * (ryx + lyx)
+      // r.x = -t * (ryx+lyx) / (lyx-ryx)
+      // r.x = - 2 * t * lyx * ryx / lyx / ryx
+      
+      ret[0] = -vid.twopoint_param * (ryx + lyx) / (lyx - ryx);
+      ret[1] = (ret[0] + vid.twopoint_param) * lyx;
+      ret[2] = 0;
+
+      move_y_to_z(ret, yz);      
+      conformal::apply_orientation(ret[0], ret[1]);
+      conformal::apply_orientation_yz(ret[2], ret[1]);
+      break;
+      }
+    
+    case mdTwoHybrid: {
+      conformal::apply_orientation_yz(H[1], H[2]);
+      conformal::apply_orientation(H[0], H[1]);
+      auto yz = move_z_to_y(H);
+      
+      ret = compute_hybrid(H, whateveri[0]); 
+      
+      move_y_to_z(ret, yz);      
+      conformal::apply_orientation(ret[0], ret[1]);
+      conformal::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
     
@@ -1394,8 +1477,33 @@ void draw_model_elements() {
       queuechr(current_display->xcenter, current_display->ycenter + current_display->radius * vid.alpha, 0, vid.fsize, 'X', ringcolor, 1, 8);
       return;
       }
+    
+    case mdTwoHybrid: {
+      queuereset(mdUnchanged, PPR::CIRCLE);
+      
+      for(int mode=0; mode<4; mode++) {
+        for(int s=-199; s<=199; s += 2) {
+          ld p = s / 200.;
+          ld a = vid.twopoint_param * (1+p);
+          ld b = vid.twopoint_param * (1-p);
+          ld h = ((mode & 2) ? -1 : 1) * sqrt(asin_auto(tan_auto(a) * tan_auto(b)));
+          
+          hyperpoint H = xpush(p * vid.twopoint_param) * ypush0(h);
+          
+          hyperpoint res = compute_hybrid(H, 2 | mode);
+          conformal::apply_orientation(res[0], res[1]);
+          conformal::apply_orientation_yz(res[2], res[1]);
+          using namespace hyperpoint_vec;
+          curvepoint(res * current_display->radius);
+          }
+        queuecurve(ringcolor, 0, PPR::CIRCLE);
+        }
 
-    case mdTwoPoint: {
+      queuereset(pmodel, PPR::CIRCLE);
+      /* fallthrough */
+      }
+
+    case mdTwoPoint: case mdSimulatedPerspective: {
       ld a = -conformal::model_orientation * degree;
       queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
       queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
