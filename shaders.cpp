@@ -21,10 +21,14 @@ void glError(const char* GLcall, const char* file, const int line) {
 #define CAP_VERTEXBUFFER (ISWEB)
 #endif
 
-#if CAP_SHADER
+#if CAP_SHADER && CAP_NOSHADER
 #define WITHSHADER(x, y) if(noshaders) y else x
 #else
-#define WITHSHADER(x, y) y
+#if CAP_NOSHADER
+#define WITHSHADER(x, y) if(1) y
+#else
+#define WITHSHADER(x, y) if(1) x
+#endif
 #endif
 
 namespace glhr {
@@ -147,7 +151,7 @@ void new_projection() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     return;
-    });
+    })
   }
 
 void projection_multiply(const glmatrix& m) {
@@ -156,7 +160,7 @@ void projection_multiply(const glmatrix& m) {
     }, {
     glMatrixMode(GL_PROJECTION);
     glMultMatrixf(m.as_array());
-    });
+    })
   }
 
 void init();
@@ -312,11 +316,13 @@ bool operator != (const glmatrix& m1, const glmatrix& m2) {
 bool uses_mvp(shader_projection sp) { return among(sp, shader_projection::standard, shader_projection::flatten); }
 
 void set_modelview(const glmatrix& modelview) {
+  #if CAP_NOSHADER
   if(noshaders) {
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(modelview.as_array());
     return;
     }
+  #endif
   if(!current) return;
   if(!uses_mvp(current_shader_projection)) {
     if(modelview != current_modelview) {
@@ -341,11 +347,13 @@ void set_modelview(const glmatrix& modelview) {
   }
 
 void id_modelview() {
+  #if CAP_NOSHADER
   if(noshaders) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     return;
     }
+  #endif
   if(!current) return;
   if(!uses_mvp(current_shader_projection)) { set_modelview(id); return; }
   #if MINIMIZE_GL_CALLS
@@ -407,7 +415,7 @@ void switch_mode(eMode m, shader_projection sp) {
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
       glDisable(GL_TEXTURE_2D);
       GLERR("xsm");
-      });
+      })
     }
   if(newflags & GF_VARCOLOR) {
     WITHSHADER({
@@ -417,7 +425,7 @@ void switch_mode(eMode m, shader_projection sp) {
       GLERR("xsm");
       glEnableClientState(GL_COLOR_ARRAY);
       GLERR("xsm");
-      });
+      })
     }
   if(oldflags & GF_VARCOLOR) {
     WITHSHADER({
@@ -426,7 +434,7 @@ void switch_mode(eMode m, shader_projection sp) {
       }, {
       glDisableClientState(GL_COLOR_ARRAY);
       GLERR("xsm");
-      });
+      })
     }
   if(newflags & GF_LIGHTFOG) {
     WITHSHADER({}, {
@@ -451,14 +459,14 @@ void switch_mode(eMode m, shader_projection sp) {
     glFogi(GL_FOG_MODE, GL_LINEAR);
     #endif
     glFogf(GL_FOG_START, 0);
-    });
+    })
     }
   if(oldflags & GF_LIGHTFOG) {
-    WITHSHADER({}, {glDisable(GL_FOG);});
+    WITHSHADER({}, {glDisable(GL_FOG);})
     }
   WITHSHADER({
     glUniform1f(current->uFogBase, 1); fogbase = 1;
-    }, {});
+    }, {})
   mode = m;
   current_shader_projection = sp;
   GLERR("after_switch_mode");
@@ -467,7 +475,7 @@ void switch_mode(eMode m, shader_projection sp) {
     current_matrix[0][0] = -1e8; // invalid
     current_modelview[0][0] = -1e8;
     current_projection[0][0] = -1e8;
-    }, {});
+    }, {})
   id_modelview();
   current_linewidth = -1;
   /* if(current_depthwrite) glDepthMask(GL_TRUE);
@@ -485,7 +493,7 @@ void fog_max(ld fogmax, color_t fogcolor) {
     glUniform4f(current->uFogColor, cols[0], cols[1], cols[2], cols[3]);
     }, {
     glFogf(GL_FOG_END, fogmax);
-    });
+    })
   }
 
 void set_fogbase(ld _fogbase) {
@@ -494,13 +502,13 @@ void set_fogbase(ld _fogbase) {
       fogbase = _fogbase;
       glUniform1f(current->uFogBase, fogbase);
       }
-    }, {});
+    }, {})
   }
 
 void set_ualpha(ld alpha) {
   WITHSHADER({
     glUniform1f(current->uAlpha, alpha);
-    }, {});
+    }, {})
   }
 
 void init() {
@@ -768,7 +776,7 @@ void prepare(vector<textured_vertex>& v) {
     }, {    
     glVertexPointer(SHDIM, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
     glTexCoordPointer(2, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
-    });    
+    })
   #endif
   // color2(col);
   }

@@ -80,6 +80,10 @@
 #define CAP_SHADER CAP_GL
 #endif
 
+#ifndef CAP_NOSHADER
+#define CAP_NOSHADER (!ISMOBILE && !ISWEB)
+#endif
+
 #ifndef CAP_ANIMATIONS
 #define CAP_ANIMATIONS (!ISMINI)
 #endif
