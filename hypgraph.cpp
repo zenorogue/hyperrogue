@@ -1483,8 +1483,8 @@ void draw_model_elements() {
       queuereset(mdUnchanged, PPR::CIRCLE);
       
       for(int mode=0; mode<4; mode++) {
-        for(int s=-199; s<=199; s += 2) {
-          ld p = s / 200.;
+        for(int s=-200; s<=200; s ++) {
+          ld p = tanh(s / 40.);
           ld a = vid.twopoint_param * (1+p);
           ld b = vid.twopoint_param * (1-p);
           ld h = ((mode & 2) ? -1 : 1) * sqrt(asin_auto(tan_auto(a) * tan_auto(b)));
