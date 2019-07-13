@@ -264,6 +264,8 @@ struct videopar {
   #define AA_MULTI     64
   #define AA_MULTI16   128 // not configurable
   ld linewidth;
+  
+  ld multiplier_grid, multiplier_ring;
 
   int joyvalue, joyvalue2, joypanthreshold;
   ld joypanspeed;

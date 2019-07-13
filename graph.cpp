@@ -4516,6 +4516,7 @@ void radar_grid(cell *c, const transmatrix& V) {
 void draw_grid_at(cell *c, const transmatrix& V) {
   dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
+  vid.linewidth *= vid.multiplier_grid;
   vid.linewidth *= cgi.scalefactor;
 
   // sphere: 0.3948

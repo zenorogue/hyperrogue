@@ -1471,6 +1471,7 @@ color_t modelcolor = 0;
 #if CAP_QUEUE
 void draw_model_elements() {
 
+  dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
   
     case mdRotatedHyperboles: {
@@ -1594,6 +1595,8 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 void draw_boundary(int w) {
 
   if(w == 1) return;
+
+  dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
 
   color_t lc = ringcolor;
   color_t fc = modelcolor;

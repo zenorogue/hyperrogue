@@ -287,9 +287,11 @@ void initConfig() {
   addsaver(forecolor, "color:foreground");
   addsaver(bordcolor, "color:borders");
   addsaver(ringcolor, "color:ring");
+  addsaver(vid.multiplier_ring, "mult:ring", 1);
   addsaver(modelcolor, "color:model");
   addsaver(periodcolor, "color:period");
   addsaver(stdgridcolor, "color:stdgrid"); 
+  addsaver(vid.multiplier_grid, "mult:grid", 1);
   addsaver(dialog::dialogcolor, "color:dialog");
   for(auto& p: colortables)
     savecolortable(p.second, s0+"canvas"+p.first);
@@ -1673,11 +1675,17 @@ void show_color_dialog() {
   dialog::addColorItem(XLAT("projection boundary"), ringcolor, 'r');
   dialog::add_action([] () { dialog::openColorDialog(ringcolor); dialog::dialogflags |= sm::SIDE; });
 
+  dialog::addSelItem(XLAT("boundary width multiplier"), fts(vid.multiplier_ring), 'R');
+  dialog::add_action([] () { dialog::editNumber(vid.multiplier_ring, 0, 10, 1, 1, XLAT("boundary width multiplier"), ""); });
+
   dialog::addColorItem(XLAT("projection background"), modelcolor, 'c');
   dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("standard grid color"), stdgridcolor, 'g');
   dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::dialogflags |= sm::SIDE; });
+  
+  dialog::addSelItem(XLAT("grid width multiplier"), fts(vid.multiplier_grid), 'G');
+  dialog::add_action([] () { dialog::editNumber(vid.multiplier_grid, 0, 10, 1, 1, XLAT("grid width multiplier"), ""); });
 
   dialog::addSelItem(XLAT("brightness behind the sphere"), fts(backbrightness), 'i');
   dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
@@ -1953,8 +1961,14 @@ int read_color_args() {
   else if(argis("-ring")) {
     PHASEFROM(2); shift(); ringcolor = arghex();
     }
+  else if(argis("-ringw")) {
+    PHASEFROM(2); shift_arg_formula(vid.multiplier_ring);
+    }
   else if(argis("-stdgrid")) {
     PHASEFROM(2); shift(); stdgridcolor = arghex();
+    }
+  else if(argis("-gridw")) {
+    PHASEFROM(2); shift_arg_formula(vid.multiplier_grid);
     }
   else if(argis("-period")) {
     PHASEFROM(2); shift(); periodcolor = arghex();
@@ -2201,6 +2215,8 @@ unordered_map<string, ld&> params = {
   #if CAP_SHOT
   {"gamma", shot::gamma},
   {"fade", shot::fade},
+  {"mgrid", vid.multiplier_grid},
+  {"mring", vid.multiplier_ring},
   #endif
   };
 
