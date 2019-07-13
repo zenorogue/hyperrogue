@@ -5497,6 +5497,7 @@ static const int POLY_FORCE_INVERTED = (1<<20); // force inverted
 static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
 static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
+static const int POLY_DEBUG = (1<<24);          // debug this shape
 
 void pregen();
 extern vector<eLand> currentlands;

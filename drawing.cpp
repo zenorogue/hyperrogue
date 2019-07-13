@@ -786,7 +786,10 @@ ld get_width(dqi_poly* p) {
     return linewidthat(tC0(p->V)) * p->linewidth;
   }
 
+void debug_this() { }
+
 void dqi_poly::draw() {
+  if(flags & POLY_DEBUG) debug_this();
 
   dynamicval<ld> bs(hr::band_shift, band_shift);
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
