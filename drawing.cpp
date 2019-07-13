@@ -772,7 +772,9 @@ void compute_side_by_area() {
   }
 
 ld get_width(dqi_poly* p) {
-  if(p->flags & POLY_PRECISE_WIDE) {
+  if((p->flags & POLY_FORCEWIDE) || pmodel == mdUnchanged)
+    return p->linewidth;
+  else if(p->flags & POLY_PRECISE_WIDE) {
     ld maxwidth = 0;
     for(int i=0; i<p->cnt; i++) {
       hyperpoint h1 = p->V * glhr::gltopoint((*p->tab)[p->offset+i]);
@@ -780,8 +782,6 @@ ld get_width(dqi_poly* p) {
       }
     return maxwidth * p->linewidth;
     }
-  else if(p->flags & POLY_FORCEWIDE)
-    return p->linewidth;
   else
     return linewidthat(tC0(p->V)) * p->linewidth;
   }
