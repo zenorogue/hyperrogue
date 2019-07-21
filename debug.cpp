@@ -352,6 +352,8 @@ struct debugScreen {
         "Extra value that is important in some lands. The specific meaning depends on the land."); });
       dialog::addSelItem("land param (hex)", itsh8(what->landparam), 0);
       dialog::addSelItem("land param (heat)", fts(HEAT(what)), 't');
+      dialog::addSelItem("cdata", 
+        its(getCdata(what, 0))+"/"+its(getCdata(what,1))+"/"+its(getCdata(what,2))+"/"+its(getCdata(what,3))+"/"+itsh(getBits(what)), 't');
       dialog::add_action([what] () { 
         static ld d = HEAT(what);
         dialog::editNumber(d, -2, 2, 0.1, d, "landparam",

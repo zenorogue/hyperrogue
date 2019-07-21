@@ -90,8 +90,9 @@ namespace binary {
   ld horohex_scale = 0.6;
   
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
-    auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsOrigin, d1);
+    auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsA, d1);
     h->distance = parent->distance + delta;
+    h->dm4 = parent->dm4 + delta;
     h->c7 = NULL;
     if(parent->c7) h->c7 = newCell(t, h);
     h->cdata = NULL;

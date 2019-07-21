@@ -685,6 +685,11 @@ enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 struct cell *createMov(struct cell *c, int d);
 struct heptagon *createStep(struct heptagon *c, int d);
 
+struct cdata {
+  int val[4];
+  int bits;
+  };
+
 // in bitruncated/irregular/Goldberg geometries, heptagons form the 
 // underlying regular tiling (not necessarily heptagonal); in pure
 // geometries, they correspond 1-1 to tiles; in 'masterless' geometries

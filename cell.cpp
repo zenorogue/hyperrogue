@@ -29,11 +29,6 @@ cell *newCell(int type, heptagon *master) {
   return c;
   }
 
-struct cdata {
-  int val[4];
-  int bits;
-  };
-
 // -- hrmap ---
 
 hrmap *currentmap;
@@ -603,6 +598,10 @@ bool randpatternMajority(cell *c, int ival, int iterations) {
 
 cdata orig_cdata;
 
+bool geometry_supports_cdata() {
+  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (archimedean && !sphere);
+  }
+
 void affect(cdata& d, short rv, signed char signum) {
   if(rv&1) d.val[0]+=signum; else d.val[0]-=signum;
   if(rv&2) d.val[1]+=signum; else d.val[1]-=signum;
@@ -620,12 +619,20 @@ void setHeptagonRval(heptagon *h) {
     }
   }
 
+bool dmeq(int a, int b) { return (a&3) == (b&3); }
+
 cdata *getHeptagonCdata(heptagon *h) {
   if(h->cdata) return h->cdata;
 
   if(sphere || quotient) h = currentmap->gamestart()->master;
+  
+  bool starting = h->s == hsOrigin;
+  if(binarytiling) {
+    if(binary::mapside(h) == 0) starting = true;
+    for(int i=0; i<h->type; i++) if(binary::mapside(h->cmove(i)) == 0) starting = true;
+    }
 
-  if(h == currentmap->gamestart()->master) {
+  if(starting) {
     h->cdata = new cdata(orig_cdata);
     for(int& v: h->cdata->val) v = 0;
     h->cdata->bits = reptilecheat ? (1 << 21) - 1 : 0;
@@ -633,56 +640,32 @@ cdata *getHeptagonCdata(heptagon *h) {
     return h->cdata;
     }
   
-  cdata mydata = *getHeptagonCdata(h->move(0));
+  int dir = binarytiling ? 5 : 0;
+  
+  cdata mydata = *getHeptagonCdata(h->cmove(dir));
 
-  for(int di=3; di<5; di++) {
-    heptspin hs(h, di, false);
-    int signum = +1;
-    while(true) {
-      heptspin hstab[15];
-      hstab[7] = hs;
-      
-      for(int i=8; i<12; i++) {
-        hstab[i] = hstab[i-1];
-        hstab[i] += ((i&1) ? 4 : 3);
-        hstab[i] += wstep;
-        hstab[i] += ((i&1) ? 3 : 4);
-        }
-
-      for(int i=6; i>=3; i--) {
-        hstab[i] = hstab[i+1];
-        hstab[i] += ((i&1) ? 3 : 4);
-        hstab[i] += wstep;
-        hstab[i] += ((i&1) ? 4 : 3);
-        }
-      
-      if(hstab[3].at->distance < hstab[7].at->distance) {
-        hs = hstab[3]; continue;
-        }
-
-      if(hstab[11].at->distance < hstab[7].at->distance) {
-        hs = hstab[11]; continue;
-        }
-      
-      int jj = 7;
-      for(int k=3; k<12; k++) if(hstab[k].at->distance < hstab[jj].at->distance) jj = k;
-      
-      int ties = 0, tiespos = 0;
-      for(int k=3; k<12; k++) if(hstab[k].at->distance == hstab[jj].at->distance) 
-        ties++, tiespos += (k-jj);
-        
-      // printf("ties=%d tiespos=%d jj=%d\n", ties, tiespos, jj);
-      if(ties == 2) jj += tiespos/2;
-      
-      if(jj&1) signum = -1;
-      hs = hstab[jj];
-      
-      break;
-      }
-    hs = hs + 3 + wstep;
+  if(S3 == 4) {
+    heptspin hs(h, 0);
+    while(dmeq((hs+1).cpeek()->dm4, (hs.at->dm4 - 1))) hs = hs + 1 + wstep + 1;
+    while(dmeq((hs-1).cpeek()->dm4, (hs.at->dm4 - 1))) hs = hs - 1 + wstep - 1;
     setHeptagonRval(hs.at);
-    
-    affect(mydata, hs.spin ? hs.at->rval0 : hs.at->rval1, signum);
+    affect(mydata, hs.at->rval0, 1); 
+    }
+  else for(int di: {0,1}) {
+    heptspin hs(h, dir, false);
+    hs -= di;
+    while(true) {
+      heptspin hs2 = hs + wstep + 1 + wstep - 1;
+      if(dmeq(hs2.at->dm4, hs.at->dm4 + 1)) break;
+      hs = hs2;
+      }
+    while(true) {
+      heptspin hs2 = hs + 1 + wstep - 1 + wstep;
+      if(dmeq(hs2.at->dm4, hs.at->dm4 + 1)) break;
+      hs = hs2;
+      }
+    setHeptagonRval(hs.at);
+    affect(mydata, hs.spin == dir ? hs.at->rval0 : hs.at->rval1, 1);
     }
 
   return h->cdata = new cdata(mydata);
@@ -696,8 +679,12 @@ cdata *getEuclidCdata(int h) {
     }
   
   int x, y;
-  hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
-  if(euc->eucdata.count(h)) return &(euc->eucdata[h]);
+  auto& data = 
+    archimedean ? ((arcm::hrmap_archimedean*) (currentmap))->eucdata :
+    ((hrmap_euclidean*) (currentmap))->eucdata;
+    
+  // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
+  if(data.count(h)) return &(data[h]);
   
   tie(x,y) = vec_to_pair(h);
 
@@ -705,7 +692,7 @@ cdata *getEuclidCdata(int h) {
     cdata xx;
     for(int i=0; i<4; i++) xx.val[i] = 0;
     xx.bits = 0;
-    return &(euc->eucdata[h] = xx);
+    return &(data[h] = xx);
     }
   int ord = 1, bid = 0;
   while(!((x|y)&ord)) ord <<= 1, bid++;
@@ -737,16 +724,36 @@ cdata *getEuclidCdata(int h) {
       if(gbit) xx.bits |= (1<<b);
       }
     
-    return &(euc->eucdata[h] = xx);
+    return &(data[h] = xx);
     }
   
   // impossible!
   return NULL;
   }
 
+int ld_to_int(ld x) {
+  return int(x + 1000000.5) - 1000000;
+  }
+
+int pseudocoords(cell *c) {
+  transmatrix T = arcm::archimedean_gmatrix[c->master].second;
+  return pair_to_vec(ld_to_int(T[0][GDIM]), ld_to_int((spin(60*degree) * T)[0][GDIM]));
+  }
+
+cdata *arcmCdata(cell *c) {
+  heptagon *h2 = arcm::archimedean_gmatrix[c->master].first;
+  dynamicval<eGeometry> g(geometry, gNormal); 
+  dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);  
+  return getHeptagonCdata(h2);
+  }
+
 int getCdata(cell *c, int j) {
   if(masterless) return getEuclidCdata(decodeId(c->master))->val[j];
-  else if(geometry) return 0;
+  else if(archimedean && euclid)
+    return getEuclidCdata(pseudocoords(c))->val[j];
+  else if(archimedean && hyperbolic) 
+    return arcmCdata(c)->val[j]*3;
+  else if(!geometry_supports_cdata()) return 0;
   else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
   else {
     int jj = 0;
@@ -759,8 +766,12 @@ int getCdata(cell *c, int j) {
 
 int getBits(cell *c) {
   if(masterless) return getEuclidCdata(decodeId(c->master))->bits;
-  else if(geometry) return 0;
-  else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
+  else if(archimedean && euclid)
+    return getEuclidCdata(pseudocoords(c))->bits;
+  else if(archimedean && hyperbolic) 
+    return arcmCdata(c)->bits;
+  else if(!geometry_supports_cdata()) return 0;
+  else if(c == c->master->c7) return getHeptagonCdata(c->master)->bits;
   else {
     auto ar = gp::get_masters(c);
     int b0 = getHeptagonCdata(ar[0])->bits;

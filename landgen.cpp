@@ -83,7 +83,7 @@ bool blizzard_no_escape(cell *c) {
 bool out_ruin(cell *c) {
   if(sphere)
     return getHemisphere(c, 0) > 0;
-  else if(stdhyperbolic) {
+  else if(geometry_supports_cdata()) {
     int cd = getCdata(c, 3);
     cd &= 31;
     return cd >= 16;
@@ -686,7 +686,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else {
           int i = archimedean ? hrand(50) : zebra40(c);
           if(i < 40) {
-            int cd = hyperbolic_37 ? getCdata(c, 3) : hrand(16);
+            int cd = geometry_supports_cdata() ? getCdata(c, 3) : hrand(16);
             cd &= 15;
             if(cd >= 4 && cd < 12) c->wall = waChasm;
             else {

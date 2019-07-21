@@ -647,6 +647,8 @@ namespace lv {
 
 int old_daily_id = 1000000;
 
+const int landscapes_when = 1000;
+
 // check if the given land should appear in lists
 land_validity_t& land_validity(eLand l) {
 
@@ -909,7 +911,7 @@ land_validity_t& land_validity(eLand l) {
     }
     
   // needs standard/Euclidean (needs fractal landscape)
-  if(among(l, laTortoise, laVariant) && !stdeuc)
+  if(among(l, laTortoise, laVariant) && !(old_daily_id < landscapes_when ? stdeuc : geometry_supports_cdata()))
     return not_implemented;
   
   // technical lands do not count

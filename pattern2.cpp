@@ -1546,7 +1546,7 @@ namespace patterns {
     dialog::addItem(XLAT("random colors"), 'r');
     dialog::addItem(XLAT("distance from origin"), 'M');
     
-    if(stdeuc) {
+    if(geometry_supports_cdata()) {
       dialog::addItem(XLAT("rainbow landscape"), 'l');
       dialog::addItem(XLAT("dark rainbow landscape"), 'd');
       }
