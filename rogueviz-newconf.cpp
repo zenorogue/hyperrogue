@@ -642,7 +642,7 @@ void ncee() {
     }
   
   if(showmenu) {
-    dialog::init(XLAT("conformal maps"));
+    dialog::init(XLAT("newconformist"));
     dialog::addBoolItem("edit shape", pointmode == 0, 'e');
     dialog::addBoolItem("set left end", pointmode == '6', 'a');
     dialog::addBoolItem("set right end", pointmode == '7', 'b');
