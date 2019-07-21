@@ -46,7 +46,8 @@ hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
 
 hrmap_hyperbolic::hrmap_hyperbolic() {
   // printf("Creating hyperbolic map: %p\n", this);
-  origin = tailored_alloc<heptagon> (S7);
+  int odegree = (WDIM == 2 && binarytiling) ? 6 : S7;
+  origin = tailored_alloc<heptagon> (odegree);
   heptagon& h = *origin;
   h.s = hsOrigin;
   h.emeraldval = a46 ? 0 : 98;
@@ -68,7 +69,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     binary::rxcode[1<<16] = &h;
     #endif
     h.zebraval = 0, h.emeraldval = 0,
-    h.c7 = newCell(WDIM == 3 ? S7 : 6, origin);
+    h.c7 = newCell(odegree, origin);
     }
   #endif
   #if CAP_IRR
@@ -356,7 +357,7 @@ void verifycell(cell *c) {
 
 void verifycells(heptagon *at) {
   if(GOLDBERG || IRREGULAR || archimedean) return;
-  for(int i=0; i<S7; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
+  for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
     }
   if(!sphere && !quotient) 
