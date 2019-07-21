@@ -14,6 +14,8 @@ ld hexf7 = 0.378077;
 
 // the distance between two hexagon centers
 
+bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
+
 void geometry_information::prepare_basics() {
 
   DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
@@ -142,10 +144,10 @@ void geometry_information::prepare_basics() {
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
-  if(WDIM == 3) scalefactor *= vid.creature_scale;
+  if(scale_used()) scalefactor *= vid.creature_scale;
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
-  if(WDIM == 3) zhexf *= vid.creature_scale;
+  if(scale_used()) zhexf *= vid.creature_scale;
   if(WDIM == 2 && GDIM == 3) zhexf *= 1.5, orbsize *= 1.2;
 
   floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
@@ -469,11 +471,10 @@ void check_cgi() {
 
   V("3D", ONOFF(vid.always3));
   
-  if(WDIM == 3) {
-    V("CS", fts(vid.creature_scale));
-    V("HTW", fts(vid.height_width));
-    }
+  if(scale_used()) V("CS", fts(vid.creature_scale));
   
+  if(WDIM == 3) V("HTW", fts(vid.height_width));
+
   V("LQ", its(vid.linequality));
   
   cgip = &cgis[s];

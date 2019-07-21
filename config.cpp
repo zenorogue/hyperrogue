@@ -1313,6 +1313,8 @@ void show3D() {
     dialog::addSelItem(XLAT("Human to wall ratio"), fts(vid.human_wall_ratio), 'h');
     dialog::addSelItem(XLAT("Level of water surface"), fts(vid.lake_top), 'l');
     dialog::addSelItem(XLAT("Level of water bottom"), fts(vid.lake_bottom), 'k');  
+    if(scale_used())
+      dialog::addSelItem(XLAT("Creature scale"), fts(vid.creature_scale), 'C');
     }
   else {
     dialog::addSelItem(XLAT("Creature scale"), fts(vid.creature_scale), 'c');
@@ -1520,6 +1522,8 @@ void show3D() {
     else if(uni == 'h' && WDIM == 3)
       dialog::editNumber(vid.height_width, 0, 1, .1, .7, XLAT("Height to width"), "");
     else if(uni == 'c' && WDIM == 3)
+      dialog::editNumber(vid.creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
+    else if(uni == 'C' && WDIM == 2 && scale_used())
       dialog::editNumber(vid.creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
 
     else if(uni == 'e')
