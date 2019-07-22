@@ -901,7 +901,7 @@ void draw_shape_for_texture(floorshape* sh) {
   hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0);
   hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0);
 
-  for(int a=0; a<8; a++)
+  for(int a=0; a<MAX_EDGE; a++)
     texture_order([&] (ld x, ld y) {
       hyperpoint h = center + v1 * x + v2 * y;
       hyperpoint inmodel;
