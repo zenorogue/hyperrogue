@@ -1226,6 +1226,10 @@ namespace conformal {
       PHASEFROM(2); 
       shift_arg_formula(conformal::top_z);
       }
+    else if(argis("-twopoint")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(vid.twopoint_param);
+      }
     else if(argis("-hp")) { 
       PHASEFROM(2); 
       shift_arg_formula(conformal::halfplane_scale);
