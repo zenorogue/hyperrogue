@@ -217,7 +217,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   hpcpush(hpc[last->s]);
   }
 
-void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
+void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size, cell *c) {
   
   fsh.b.resize(2);
   fsh.shadow.resize(2);
@@ -225,8 +225,6 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
   #if CAP_BT
   if(binarytiling) {
 
-    cell fc;
-    fc.type = 6+id;
     const int STEP = vid.texture_step;
     using namespace hyperpoint_vec;
     
@@ -238,8 +236,8 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
         bshape(fsh.shadow[id], fsh.prio);
       
       for(int i=0; i<sides; i++) {
-        hyperpoint h0 = binary::get_corner_horo_coordinates(&fc, i) * size;
-        hyperpoint h1 = binary::get_corner_horo_coordinates(&fc, i+1) * size;
+        hyperpoint h0 = binary::get_corner_horo_coordinates(c, i) * size;
+        hyperpoint h1 = binary::get_corner_horo_coordinates(c, i+1) * size;
         if(t) h0 *= SHADMUL, h1 *= SHADMUL;
         hyperpoint hd = (h1 - h0) / STEP;
         for(int j=0; j<STEP; j++)
@@ -250,14 +248,14 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
       }
     
     for(int k=0; k<SIDEPARS; k++) {
-      for(int i=0; i<fc.type; i++) {
+      for(int i=0; i<c->type; i++) {
         fsh.gpside[k][i].resize(2);
         bshape(fsh.gpside[k][i][id], PPR::LAKEWALL); 
-        hyperpoint h0 = binary::get_corner_horo_coordinates(&fc, i) * size;
-        hyperpoint h1 = binary::get_corner_horo_coordinates(&fc, i+1) * size;
+        hyperpoint h0 = binary::get_corner_horo_coordinates(c, i) * size;
+        hyperpoint h1 = binary::get_corner_horo_coordinates(c, i+1) * size;
         hyperpoint hd = (h1 - h0) / STEP;
         for(int j=0; j<=STEP; j++)
-          hpcpush(iddspin(&fc, i) * binary::get_horopoint(h0 + hd * j));
+          hpcpush(iddspin(c, i) * binary::get_horopoint(h0 + hd * j));
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
       }
@@ -313,22 +311,22 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       if(S3 == 4 && BITRUNCATED) b += S14;
   
       if(id == 1)
-        bshape_regular(fsh, 1, S7, td, heptside);
+        bshape_regular(fsh, 1, S7, td, heptside, c);
       
       else if(PURE) {
         if(&fsh == &shTriheptaFloor)
-          bshape_regular(fsh, 0, S7/2, 0, hexside);
+          bshape_regular(fsh, 0, S7/2, 0, hexside, c);
         else if(&fsh == &shBigTriangle)
-          bshape_regular(fsh, 0, S7/2, S12, hexside);
+          bshape_regular(fsh, 0, S7/2, S12, hexside, c);
         else
-          bshape_regular(fsh, 0, S7, td, heptside);
+          bshape_regular(fsh, 0, S7, td, heptside, c);
         }
       else if(&fsh == &shBigTriangle) 
-        bshape_regular(fsh, 0, S3, b+S14, hexside);
+        bshape_regular(fsh, 0, S3, b+S14, hexside, c);
       else if(&fsh == &shTriheptaFloor)
-        bshape_regular(fsh, 0, S3, b, hexside);
+        bshape_regular(fsh, 0, S3, b, hexside, c);
       else 
-        bshape_regular(fsh, 0, S6, S7, hexside);
+        bshape_regular(fsh, 0, S6, S7, hexside, c);
     
       
       continue;
@@ -426,18 +424,16 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     
     if(STDVAR && !binarytiling && !archimedean) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
-      if(PURE && geosupport_football() < 2 && fsh.shapeid2) {
-        if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
-        if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
+      if(PURE && geosupport_football() < 2) {
+        bshape2(fsh.b[id], fsh.prio, fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1, hept_matrices);
         }
       else {
         if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid0, hex_matrices);
         if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid1, hept_matrices);
         }
       generate_matrices_scale(fsh.scale * SHADMUL, fsh.noftype);
-      if(PURE && geosupport_football() < 2 && fsh.shapeid2) {
-        if(id == 0) bshape2(fsh.shadow[0], fsh.prio, fsh.shapeid2, hept_matrices);
-        if(id == 1) bshape2(fsh.shadow[1], fsh.prio, fsh.shapeid2, hept_matrices);
+      if(PURE && geosupport_football() < 2) {
+        bshape2(fsh.shadow[id], fsh.prio, fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1, hept_matrices);
         }
       else {
         if(id == 0) bshape2(fsh.shadow[0], fsh.prio, fsh.shapeid0, hex_matrices);
@@ -637,6 +633,23 @@ void geometry_information::generate_floorshapes() {
     }
   #endif
   
+  else if(geometry == gBinary4) {
+    heptagon modelh;
+    cell model;
+    model.master = &modelh;
+    model.type = S7; 
+    for(int i: {0,1}) {
+      modelh.zebraval = i;
+      generate_floorshapes_for(i, &model, 1, 0);
+      }
+    }
+
+  else if(PURE && geometry != gBinaryTiling && geosupport_football() < 2) {
+    cell model;
+    model.type = S7; 
+    generate_floorshapes_for(0, &model, 1, 0);
+    }
+
   else {
     cell model;
     model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
@@ -732,6 +745,19 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.usershape = -1;
   }
 
+int shvid(cell *c) {
+  if(geosupport_football() == 2)
+    return pseudohept(c);
+  else if(geometry == gBinaryTiling)
+    return c->type-6;
+  else if(geometry == gBinary4)
+    return c->master->zebraval;
+  else if(PURE)
+    return 0;
+  else
+    return ctof(c);
+  }
+
 dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
   if(!c) return &queuepolyat(V, shv[0], col, prio);
   else if(WDIM == 3) return NULL;
@@ -764,12 +790,8 @@ dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &s
     transmatrix D = applyPatterndir(c, si);    
     return &queuepolyat(V*D, shv[pseudohept(c)], col, prio);
     }
-  else if(geosupport_threecolor() == 2)
-    return &queuepolyat(V, shv[pseudohept(c)], col, prio);
-  else if(binarytiling)
-    return &queuepolyat(V, shv[c->type-6], col, prio);
-  else
-    return &queuepolyat(V, shv[ctof(c)], col, prio);
+  else 
+    return &queuepolyat(V, shv[shvid(c)], col, prio);
   }
 
 void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio = PPR::DEFAULT) {

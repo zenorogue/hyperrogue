@@ -361,11 +361,13 @@ double hexshiftat(cell *c) {
 
 transmatrix ddspin(cell *c, int d, ld bonus) {
   if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
+  if(WDIM == 2 && binarytiling) return spin(bonus) * rspintox(nearcorner(c, d));
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 transmatrix iddspin(cell *c, int d, ld bonus) {
   if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
+  if(WDIM == 2 && binarytiling) return spin(bonus) * spintox(nearcorner(c, d));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
@@ -3965,7 +3967,7 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t co
     return false;
     }
   
-  queuepolyat(V2, qfi.fshape->side[sidepar][pseudohept(c)], col, prio);
+  queuepolyat(V2, qfi.fshape->side[sidepar][shvid(c)], col, prio);
   return false;
   }
 #endif

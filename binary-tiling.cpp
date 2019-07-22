@@ -210,18 +210,16 @@ namespace binary {
         case gBinary4: {
           switch(d) {
             case 0: case 1:
-              return build(parent, d, 3, 5, 0, 1);
+              return build(parent, d, 3, 5, d, 1);
             case 3:
-              return build(parent, 3, nextdir(2), 5, 0, -1);
+              return build(parent, 3, parent->zebraval, 5, nextdir(2), -1);
             case 2:
-              parent->cmove(3);
-              if(parent->c.spin(3) == 0)
+              if(parent->zebraval == 0)
                 return path(h, 2, 4, {3, 1});
               else
                 return path(h, 2, 4, {3, 2, 0});
             case 4:
-              parent->cmove(3);
-              if(parent->c.spin(3) == 1)
+              if(parent->zebraval == 1)
                 return path(h, 4, 2, {3, 0});
               else
                 return path(h, 4, 2, {3, 4, 1});
@@ -481,13 +479,14 @@ namespace binary {
     }
   
   void build_tmatrix() {
+    if(geometry == gBinaryTiling) return; // unused
     use_direct = (1 << S7) - 1;
     if(geometry == gBinary4) {
       use_direct = 3;
-      direct_tmatrix[0] = xpush(-log(2)) * parabolic(-1);
-      direct_tmatrix[1] = xpush(-log(2)) * parabolic(+1);
-      direct_tmatrix[2] = parabolic(2);
-      direct_tmatrix[4] = parabolic(-2);
+      direct_tmatrix[0] = xpush(-log(2)) * parabolic(-0.5);
+      direct_tmatrix[1] = xpush(-log(2)) * parabolic(+0.5);
+      direct_tmatrix[2] = parabolic(1);
+      direct_tmatrix[4] = parabolic(-1);
       use_direct = 1+2+4+16;
       }
     if(geometry == gBinary3) {
@@ -840,7 +839,7 @@ hyperpoint get_corner_horo_coordinates(cell *c, int i) {
   ld yx = log(2) / 2;
   ld yy = yx;
   ld xx = 1 / sqrt(2)/2;
-  switch(gmod(i, c->type)) {
+  if(geometry == gBinaryTiling) switch(gmod(i, c->type)) {
     case 0: return point2(-yy, xx);
     case 1: return point2(yy, 2*xx);
     case 2: return point2(yy, xx);
@@ -850,8 +849,20 @@ hyperpoint get_corner_horo_coordinates(cell *c, int i) {
     case 6: return point2(-yy, 0);    
     default: return point2(0, 0);
     }
+  else switch(gmod(i, c->type)) {
+    case 0: return point2(yy, -2*xx);
+    case 1: return point2(yy, +0*xx);
+    case 2: return point2(yy, +2*xx);
+    case 3: return point2(-yy, xx);
+    case 4: return point2(-yy, -xx);
+    default: return point2(0, 0);
+    }
   }
 
+
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  if(binarytiling) build_tmatrix();
+  });
 
   }
 }

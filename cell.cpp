@@ -41,7 +41,7 @@ hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
 
 hrmap_hyperbolic::hrmap_hyperbolic() {
   // printf("Creating hyperbolic map: %p\n", this);
-  int odegree = (WDIM == 2 && binarytiling) ? 6 : S7;
+  int odegree = geometry == gBinaryTiling ? 6 : S7;
   origin = tailored_alloc<heptagon> (odegree);
   heptagon& h = *origin;
   h.s = hsOrigin;

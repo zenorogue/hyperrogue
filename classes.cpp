@@ -558,7 +558,7 @@ vector<geometryinfo> ginf = {
   {"bin{6,3}", "none",  "{6,3} on horospheres",                       "bin63",   14, 3, qBINARY,   gcHyperbolic, 0x40400, {{7, 3}}, eVariation::pure},
   {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF, gcHyperbolic, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, gcHyperbolic, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"binary4","none",    "standard binary tiling",                     "binary4",  5, 4, qBINARY,   gcHyperbolic,       0, {{6, 4}}, eVariation::pure},
+  {"binary4","none",    "standard binary tiling",                     "binary4",  5, 4, qBINARY,   gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

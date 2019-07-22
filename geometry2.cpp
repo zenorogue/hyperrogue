@@ -391,7 +391,7 @@ double cellgfxdist(cell *c, int i) {
     if(c->type == 8 && (i&1)) return cgi.crossf * sqrt(2);
     return cgi.crossf;
     }
-  if(NONSTDVAR || archimedean || WDIM == 3) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
+  if(NONSTDVAR || archimedean || WDIM == 3 || binarytiling) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
   return !BITRUNCATED ? cgi.tessf : (c->type == 6 && (i&1)) ? cgi.hexhexdist : cgi.crossf;
   }
 
@@ -510,6 +510,17 @@ hyperpoint nearcorner(cell *c, int i) {
     }
   #endif
   #if CAP_BT
+  if(geometry == gBinary4) {
+    ld yx = log(2) / 2;
+    ld yy = yx;
+    hyperpoint neis[5];
+    neis[0] = binary::get_horopoint(2*yy, -0.5);
+    neis[1] = binary::get_horopoint(2*yy, +0.5);
+    neis[2] = binary::get_horopoint(0, 1);
+    neis[3] = binary::get_horopoint(-2*yy, c->master->zebraval ? -0.25 : +0.25);
+    neis[4] = binary::get_horopoint(0, -1);
+    return neis[i];
+    }
   if(binarytiling) {
     if(WDIM == 3) {
       println(hlog, "nearcorner called");

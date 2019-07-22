@@ -138,7 +138,7 @@ void geometry_information::prepare_basics() {
   if(geometry == gHoroRec) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   #endif
   #if CAP_BT && MAXMDIM >= 4
-  if(binarytiling && WDIM == 3) binary::build_tmatrix();
+  if(binarytiling) binary::build_tmatrix();
   #endif
   
   scalefactor = crossf / hcrossf7;

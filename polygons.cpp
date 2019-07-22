@@ -88,6 +88,8 @@ transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * M_PI /
 
 void geometry_information::drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist);
+  if(geometry == gBinaryTiling) tlength *= 0.7;
+  if(geometry == gBinary4) tlength *= 0.45;
   #if CAP_ARCM
   if(archimedean) tlength = arcm::current.scale();
   #endif
