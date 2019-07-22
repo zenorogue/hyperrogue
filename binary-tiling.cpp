@@ -206,7 +206,27 @@ namespace binary {
           breakhere();
           return NULL;
           }
-        #if MAXMDIM >= 4
+        case gBinary4: {
+          switch(d) {
+            case 0: case 1:
+              return build(parent, d, 3, 5, 0, 1);
+            case 3:
+              return build(parent, 3, nextdir(2), 5, 0, -1);
+            case 2:
+              parent->cmove(3);
+              if(parent->c.spin(3) == 0)
+                return path(h, 2, 4, {3, 1});
+              else
+                return path(h, 2, 4, {3, 2, 0});
+            case 4:
+              parent->cmove(3);
+              if(parent->c.spin(3) == 1)
+                return path(h, 4, 2, {3, 0});
+              else
+                return path(h, 4, 2, {3, 4, 1});
+            }
+          }
+        #if MAXMDIM >= 4         
         case gBinary3: {
           switch(d) {
             case 0: case 1:
@@ -337,7 +357,7 @@ namespace binary {
         if(!do_draw(c, V)) continue;
         drawcell(c, V, 0, false);
   
-        if(WDIM == 2) {
+        if(geometry == gBinaryTiling) {
           dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
           dq::enqueue(h->move(bd_right), V * parabolic(1));
           dq::enqueue(h->move(bd_left), V * parabolic(-1));
@@ -365,9 +385,10 @@ namespace binary {
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
       transmatrix gm = Id, where = Id;
       while(h1 != h2) {
+        int up_step = geometry == gBinary4 ? 3 : S7-1;
         if(h1->distance <= h2->distance) {
-          if(WDIM == 3)
-            where = itmatrix(h2, S7-1) * where, h2 = may_create_step(h2, S7-1);
+          if(geometry != gBinaryTiling)
+            where = itmatrix(h2, S7-1) * where, h2 = may_create_step(h2, up_step);
           else {
             if(type_of(h2) == 6)
               h2 = may_create_step(h2, bd_down), where = xpush(-log(2)) * where;
@@ -378,8 +399,8 @@ namespace binary {
             }
           }
         else {
-          if(WDIM == 3)
-            gm = gm * tmatrix(h1, S7-1), h1 = may_create_step(h1, S7-1);
+          if(geometry != gBinaryTiling)
+            gm = gm * tmatrix(h1, S7-1), h1 = may_create_step(h1, up_step);
           else {
             if(type_of(h1) == 6)
               h1 = may_create_step(h1, bd_down), gm = gm * xpush(log(2));
@@ -451,11 +472,23 @@ namespace binary {
   transmatrix inverse_tmatrix[14];
 
   int use_direct;
-  // directions below 'use_direct' are taken from direct_tmatrix;
+  // directions in the 'use_direct' mask are taken from direct_tmatrix;
   // directions at/above are taken by checking spin and inverse_tmatrix based on that
+
+  bool use_direct_for(int dir) {
+    return (use_direct >> dir) & 1;
+    }
   
   void build_tmatrix() {
-    use_direct = S7-1;
+    use_direct = (1 << S7) - 1;
+    if(geometry == gBinary4) {
+      use_direct = 3;
+      direct_tmatrix[0] = xpush(-log(2)) * parabolic(-1);
+      direct_tmatrix[1] = xpush(-log(2)) * parabolic(+1);
+      direct_tmatrix[2] = parabolic(2);
+      direct_tmatrix[4] = parabolic(-2);
+      use_direct = 1+2+4+16;
+      }
     if(geometry == gBinary3) {
       direct_tmatrix[0] = xpush(-log(2)) * parabolic3(-1, -1);
       direct_tmatrix[1] = xpush(-log(2)) * parabolic3(1, -1);
@@ -508,28 +541,29 @@ namespace binary {
       t[11] = it * t[1];
 
       for(int a=0; a<12; a++) println(hlog, t[a]);
-      use_direct--;
+
+      use_direct >>= 1;
       }
-    for(int i=0; i<use_direct; i++)
+    for(int i=0; i<S7; i++) if(use_direct_for(i))
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
     }
   
   const transmatrix& tmatrix(heptagon *h, int dir) {
-    if(dir >= use_direct) {
+    if(use_direct_for(dir))
+      return direct_tmatrix[dir];
+    else {
       h->cmove(dir);
       return inverse_tmatrix[h->c.spin(dir)];
       }
-    else
-      return direct_tmatrix[dir];
     }
 
   const transmatrix& itmatrix(heptagon *h, int dir) {
-    if(dir >= use_direct) {
+    if(use_direct_for(dir))
+      return inverse_tmatrix[dir];
+    else {
       h->cmove(dir);
       return h->cmove(dir), direct_tmatrix[h->c.spin(dir)];
       }
-    else
-      return inverse_tmatrix[dir];
     }
   
   #if MAXMDIM == 4

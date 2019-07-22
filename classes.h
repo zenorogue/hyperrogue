@@ -200,6 +200,7 @@ enum eGeometry {
   gCell600, gECell600,
   gHoroTris, gHoroRec, gHoroHex,
   gField435, gField534,
+  gBinary4,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
