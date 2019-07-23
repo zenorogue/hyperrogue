@@ -223,6 +223,7 @@ void band_conformal(ld& x, ld& y) {
       x *= 2; y *= 2;
       break;
     case gcEuclid:
+    default:
       // y = y;
       y *= 2; x *= 2;
       break;
@@ -422,7 +423,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           break;
           }
           
-        case gcEuclid: {
+        case gcEuclid: default: {
           // stereographic projection to a sphere
           auto hd = hdist0(H) / vid.euclid_to_sphere;
           if(hd == 0) ret = hpxyz(0, 0, -1);

@@ -714,7 +714,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
     hyperpoint v2 = vertices[(a+1)%n] - center;
     texture_order([&] (ld x, ld y) {
       hyperpoint h = center + v1 * x + v2 * y;
-      if(!binarytiling) { hpcpush(normalize(h)); return; }
+      if(sol || !binarytiling) { hpcpush(normalize(h)); return; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       });
@@ -725,7 +725,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
-      if(!binarytiling) { hpcpush(normalize(h)); continue; }
+      if(sol || !binarytiling) { hpcpush(normalize(h)); continue; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       }
@@ -914,6 +914,21 @@ void geometry_information::create_wall3d() {
         vertices.push_back(reg3::cellshape[w*facesize+a]);
       make_wall(w, vertices, 0);
       }
+    }
+  
+  if(geometry == gSol) {
+    ld zstep = -log(2) / 2;
+    ld bwh = vid.binary_width * zstep;
+    auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
+    println(hlog, xpush(2) * zpush(log(2)) * ypush(3) * C0);
+    make_wall(0, {pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,00,+1), pt(-1,+1,+1), pt(-1,+1,-1)});
+    make_wall(1, {pt(-1,-1,-1), pt(00,-1,-1), pt(+1,-1,-1), pt(+1,-1,+1), pt(-1,-1,+1)});
+    make_wall(2, {pt(+1,+1,-1), pt(+1,-1,-1), pt(00,-1,-1), pt(00,+1,-1)});
+    make_wall(3, {pt(00,+1,-1), pt(00,-1,-1), pt(-1,-1,-1), pt(-1,+1,-1)});
+    make_wall(4, {pt(+1,-1,-1), pt(+1,-1,+1), pt(+1,00,+1), pt(+1,+1,+1), pt(+1,+1,-1)});
+    make_wall(5, {pt(-1,+1,-1), pt(00,+1,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(-1,+1,+1)});
+    make_wall(6, {pt(-1,+1,+1), pt(+1,+1,+1), pt(+1,00,+1), pt(-1,00,+1)});
+    make_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
     }
 
   if(DIM == 3) {

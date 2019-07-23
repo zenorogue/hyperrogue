@@ -2518,7 +2518,7 @@ void setdist(cell *c, int d, cell *from) {
   
   if(d >= BARLEV) {
   
-    if(binarytiling && WDIM == 3 && !c->land) {
+    if(binarytiling && WDIM == 3 && !c->land && !sol) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;

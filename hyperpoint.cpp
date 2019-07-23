@@ -38,7 +38,7 @@ ld inverse_tanh(ld x) { return log((1+x)/(1-x)) / 2; } */
 
 ld squar(ld x) { return x*x; }
 
-int sig(int z) { return (sphere || z<GDIM)?1:-1; }
+int sig(int z) { return (sphere || sol || z<GDIM)?1:-1; }
 
 int curvature() {
   switch(cgclass) {
@@ -116,7 +116,7 @@ ld atan_auto(ld x) {
     case gcEuclid: return x;
     case gcHyperbolic: return atanh(x);
     case gcSphere: return atan(x);
-    default: return 1;
+    default: return x;
     }
   }
 
@@ -125,7 +125,7 @@ ld atan2_auto(ld y, ld x) {
     case gcEuclid: return y/x;
     case gcHyperbolic: return atanh(y/x);
     case gcSphere: return atan2(y, x);
-    default: return 1;
+    default: return y/x;
     }
   }
 
@@ -142,11 +142,11 @@ ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
 // (this is analogous to representing a sphere with points such that x^2+y^2+z^2 == 1)
 
 hyperpoint hpxy(ld x, ld y) { 
-  return hpxyz(x,y,euclid ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
+  return hpxyz(x,y, eusol ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
   }
 
 hyperpoint hpxy3(ld x, ld y, ld z) { 
-  return hpxyz3(x,y,z, euclid ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
+  return hpxyz3(x,y,z, eusol ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
 // origin of the hyperbolic plane
@@ -201,7 +201,7 @@ ld dhypot_d(int d, const hyperpoint& a, const hyperpoint& b) {
   }
   
 ld zlevel(const hyperpoint &h) {
-  if(euclid) return h[GDIM];
+  if(eusol) return h[GDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
   else return (h[GDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
@@ -283,12 +283,14 @@ transmatrix eupush3(ld x, ld y, ld z) {
   T[0][GDIM] = x;
   T[1][GDIM] = y;
   if(GDIM == 3) T[2][GDIM] = z;
+  if(sol) T[0][0] = exp(-z), T[1][1] = exp(+z);
   return T;
   }
 
 transmatrix eupush(hyperpoint h) {
   transmatrix T = Id;
   for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
+  if(sol) T[0][0] = exp(-h[2]), T[1][1] = exp(+h[2]);
   return T;
   }
 
@@ -310,6 +312,12 @@ transmatrix euaffine(hyperpoint h) {
 
 transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
+  if(sol) {
+    T[cid][GDIM] = alpha;
+    if(cid == 2)
+      T[0][0] = exp(-alpha), T[1][1] = exp(+alpha);
+    return T;
+    }
   T[GDIM][GDIM] = T[cid][cid] = cos_auto(alpha);
   T[cid][GDIM] = sin_auto(alpha);
   T[GDIM][cid] = -curvature() * sin_auto(alpha);
@@ -331,7 +339,7 @@ bool eqmatrix(transmatrix A, transmatrix B, ld eps) {
 // in the 3D space, move the point h orthogonally to the (x,y) plane by z units
 hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
   if(!hyperbolic) return rgpushxto0(h) * cpush(2, z) * C0;
-  if(euclid) return hpxy3(h[0], h[1], h[2] + z);
+  if(eusol) return hpxy3(h[0], h[1], h[2] + z);
   ld u = 1;
   if(h[2]) z += asin_auto(h[2]), u /= acos_auto(z);
   u *= cos_auto(z);
@@ -473,7 +481,7 @@ transmatrix rpushxto0(const hyperpoint& H) {
   }
 
 transmatrix ggpushxto0(const hyperpoint& H, ld co) {
-  if(euclid) {
+  if(eusol) {
     using namespace hyperpoint_vec;
     return eupush(co * H);
     }
@@ -505,7 +513,8 @@ transmatrix rgpushxto0(const hyperpoint& H) {
 // (without using this, imprecision could accumulate)
 
 void fixmatrix(transmatrix& T) {
-  if(euclid) {
+  if(sol) ;
+  else if(euclid) {
     for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
       ld dp = 0;
       for(int z=0; z<GDIM; z++) dp += T[z][x] * T[z][y];
@@ -628,7 +637,7 @@ ld hdist0(const hyperpoint& mh) {
       return res;
       }
     default:
-      return 0;
+      return hypot_d(GDIM, mh);
     }
   }
 
@@ -641,7 +650,7 @@ ld circlelength(ld r) {
     case gcSphere:
       return 2 * M_PI * sin(r);
     default:
-      return 0;
+      return 2 * M_PI * r;
     }
   }
 
@@ -659,7 +668,8 @@ ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
     case gcSphere:
       return 2 * asin_auto_clamp(sqrt(iv) / 2);
     default:
-      return 0;
+      if(iv < 0) return 0;
+      return sqrt(iv);
     }
   }
 
