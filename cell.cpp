@@ -231,6 +231,7 @@ void initcells() {
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
   #if CAP_BT
+  else if(sol) currentmap = solv::new_map();
   else if(binarytiling) currentmap = binary::new_map();
   #endif
   else currentmap = new hrmap_hyperbolic;
@@ -851,7 +852,7 @@ int celldistance(cell *c1, cell *c2) {
   if(geometry == gCrystal) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient) {
+  if(masterless || archimedean || quotient || sol) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

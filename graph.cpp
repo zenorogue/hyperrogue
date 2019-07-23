@@ -4398,6 +4398,7 @@ int get_darkval(int d) {
   const int darkval_e14[14] = {0,0,0,4,6,4,6,0,0,0,6,4,6,4};
   const int darkval_hh[14] = {0,0,0,1,1,1,2,2,2,3,3,3,1,0};
   const int darkval_hrec[7] = {0,0,2,4,2,4,0};
+  const int darkval_sol[8] = {0,2,4,5,0,2,4,5};
   if(sphere) return darkval_s12[d];
   if(euclid && S7 == 6) return darkval_e6[d];
   if(euclid && S7 == 12) return darkval_e12[d];
@@ -4407,6 +4408,7 @@ int get_darkval(int d) {
   if(binarytiling) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];
+  if(sol) return darkval_sol[d];
   return 0;
   }
 
@@ -4475,7 +4477,7 @@ int noclipped;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clipping_planes.clear();
-  if(sphere) return;
+  if(sphere || sol) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     using namespace hyperpoint_vec;
     ld z1 = 1, z2 = 1;
@@ -4537,7 +4539,7 @@ void draw_grid_at(cell *c, const transmatrix& V) {
   else if(WDIM == 3) {
     for(int t=0; t<c->type; t++) {
       if(!c->move(t)) continue;
-      if(binarytiling && !among(t, 5, 6, 8)) continue;
+      if(binarytiling && !sol && !among(t, 5, 6, 8)) continue;
       if(!binarytiling && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       queuepoly(V, cgi.shWireframe3D[t], 0);
@@ -5943,7 +5945,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           int d = (wcol & 0xF0F0F0) >> 4;
           
           for(int a=0; a<c->type; a++)
-            if(c->move(a) && !isWall3(c->move(a), dummy)) {
+            if(c->move(a) && (sol || !isWall3(c->move(a), dummy))) {
               if(pmodel == mdPerspective && !sphere && !quotient) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;

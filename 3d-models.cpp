@@ -41,10 +41,6 @@ ld zc(ld z) {
   return cgi.human_height * (z - 0.5); 
   }
 
-transmatrix zpush(ld z) {
-  return cpush(2, z);
-  }
-
 void geometry_information::add_cone(ld z0, const vector<hyperpoint>& vh, ld z1) {
   last->flags |= POLY_TRIANGLES;
   for(int i=0; i<isize(vh); i++) {

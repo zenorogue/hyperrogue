@@ -559,6 +559,7 @@ vector<geometryinfo> ginf = {
   {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF, gcHyperbolic, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, gcHyperbolic, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"binary4","none",    "standard binary tiling",                     "binary4",  5, 4, qBINARY,   gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
+  {"sol",    "none",    "Sol",                                        "sol",      8, 4, qBINARY,   gcSol,              0, {{7, 5}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

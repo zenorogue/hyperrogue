@@ -342,6 +342,8 @@ hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
 // push alpha units vertically
 transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 
+transmatrix zpush(ld z) { return cpush(2, z); }
+
 transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
   #if MAXMDIM==3
   return transmatrix {{{a,b,c},{d,e,f},{g,h,i}}};

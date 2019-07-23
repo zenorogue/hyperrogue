@@ -110,7 +110,9 @@ void addMessage(string s, char spamtype = 0);
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
 #define sphere (cgclass == gcSphere)
+#define sol (cgclass == gcSol)
 #define hyperbolic (cgclass == gcHyperbolic)
+#define eusol (euclid || sol)
 #define nonorientable (ginf[geometry].flags & qNONORIENTABLE)
 #define elliptic (ginf[geometry].flags & qELLIPTIC)
 #define quotient (ginf[geometry].flags & qANYQ)
@@ -325,7 +327,7 @@ extern videopar vid;
 #if MAXMDIM == 3
 #define WDIM 2
 #else
-#define WDIM ((geometry >= gBinary3 && geometry < gBinary4) ? 3 : 2)
+#define WDIM ((geometry >= gBinary3 && geometry != gBinary4) ? 3 : 2)
 #endif
 #define GDIM (vid.always3 ? 3 : WDIM)
 #define DIM GDIM
