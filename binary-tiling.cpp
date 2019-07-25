@@ -89,6 +89,23 @@ namespace binary {
   ld hororec_scale = 0.25;
   ld horohex_scale = 0.6;
   
+  void make_binary_lands(heptagon *parent, heptagon *h) {
+    if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
+    eLand z = eLand(parent->emeraldval);
+    int chance = 0;
+    if(specialland == laCrossroads4 || parent->emeraldval == laCrossroads4) {
+      eLand x = parent->c7->land;
+      parent->c7->land = z;
+      chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));
+      parent->c7->land = x;
+      }
+    if(chaosmode) chance = 1000;
+    if(chance && hrand(40000) < chance)
+      h->emeraldval = getNewLand(z);
+    else
+      h->emeraldval = z;
+    }
+  
   heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsA, d1);
     h->distance = parent->distance + delta;
@@ -98,22 +115,13 @@ namespace binary {
     h->cdata = NULL;
     h->zebraval = side;
     h->emeraldval = 0;
-    if(WDIM == 3 && h->c7) {
-      if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
-      eLand z = eLand(parent->emeraldval);
-      int chance = 0;
-      if(specialland == laCrossroads4 || parent->emeraldval == laCrossroads4) {
-        eLand x = parent->c7->land;
-        parent->c7->land = z;
-        chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));
-        parent->c7->land = x;
-        }
-      if(chaosmode) chance = 1000;
-      if(chance && hrand(40000) < chance)
-        h->emeraldval = getNewLand(z);
+    if(geometry == gBinary4) {
+      if(d < 2)
+        h->emeraldval = (parent->emeraldval * 2 + d) % 15015;
       else
-        h->emeraldval = z;
+        h->emeraldval = ((parent->emeraldval - d1) * 7508) % 15015;
       }
+    if(WDIM == 3 && h->c7) make_binary_lands(parent, h);
     #if DEBUG_BINARY_TILING
     xcode[h] = expected_xcode(parent, d);
     if(rxcode.count(xcode[h])) {
@@ -901,10 +909,10 @@ namespace solv {
       h = tailored_alloc<heptagon> (S7);
       h->c7 = newCell(S7, h);
       coords[h] = make_pair(x, y);
-      h->distance = 0;
+      h->distance = x->distance;
       h->dm4 = 0;
-      h->zebraval = 0;
-      h->emeraldval = 0;
+      h->zebraval = x->emeraldval;
+      h->emeraldval = y->emeraldval;
       h->fieldval = 0;
       h->cdata = NULL;
       return h;
@@ -922,6 +930,8 @@ namespace solv {
         alt->cdata = NULL;
         alt->c7 = NULL;
         alt->zebraval = 0;
+        alt->distance = 0;
+        alt->emeraldval = 0;
         binary_map = binary::new_alt_map(alt);
         }
       

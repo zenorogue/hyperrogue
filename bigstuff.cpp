@@ -884,6 +884,11 @@ void clear_euland(eLand first) {
   euland3[0] = laCrossroads;
   }
 
+bool valid_wall_at(int c) {
+  if(sol) return true;
+  return short(c) % 3 == 0;
+  }
+  
 eLand switchable(eLand nearland, eLand farland, int c) {
   if(chaosmode) {
     if(hrand(6) == 0)
@@ -893,10 +898,12 @@ eLand switchable(eLand nearland, eLand farland, int c) {
   else if(specialland == laCrossroads4) {
     if((dual::state && nearland == laCrossroads4) || hrand(15) == 0)
       return getNewLand(nearland);
+    if(nearland == laCrossroads4 && sol && hrand(5) == 0)
+      return getNewLand(nearland);      
     return nearland;
     }
   else if(nearland == laCrossroads) {
-    if(hrand(4) == 0 && (short(c)%3==0))
+    if(hrand(4) == 0 && valid_wall_at(c))
       return laBarrier;
     return laCrossroads;
     }
@@ -904,7 +911,7 @@ eLand switchable(eLand nearland, eLand farland, int c) {
     return getNewLand(farland);
     }
   else {
-    if(hrand(20) == 0 && (short(c)%3==0))
+    if(hrand(20) == 0 && valid_wall_at(c))
       return laBarrier;
     return nearland;
     }
@@ -921,6 +928,27 @@ eLand getEuclidLand(int c) {
   if(get_euland(c+1)) return 
     la = switchable(get_euland(c+1), get_euland(c+2), c);
   return la = laCrossroads;
+  }
+
+void setLandSol(cell *c) {
+  setland(c, specialland);
+  switch(specialland) {
+    case laCrossroads4: case laCrossroads: case laCrossroads2:
+      setland(c, getEuclidLand(c->master->distance));
+      if(c->land == laBarrier && c->master->emeraldval % 3) c->wall = waBarrier;
+      break;
+    case laTerracotta:
+      if((c->master->distance & 15) == 1) {
+        setland(c, laMercuryRiver);
+        if(c->master->emeraldval % 3) c->wall = waMercury;
+        }
+      break;
+    case laOcean: case laIvoryTower: case laEndorian: case laDungeon:
+      if(c->master->distance <= 0) setland(c, laRlyeh);
+      else c->landparam = c->master->distance;
+      break;
+    default: ;
+    }
   }
 
 void setLandEuclid(cell *c) {
@@ -1209,7 +1237,7 @@ bool good_for_wall(cell *c) {
   }
   
 void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient || sol || penrose) return;
+  if(sphere || quotient || sol || (penrose && !binarytiling)) return;
   if(chaosmode > 1) return;
   bool deepOcean = deep_ocean_at(c, from);
   
@@ -1534,6 +1562,10 @@ void moreBigStuff(cell *c) {
           int i = 0;
           forCellCM(c2, c) if(celldistAlt(c2) < celldistAlt(c)) i++;
           if(i > 1) c->wall = waColumn;
+          }
+        else if(sol) {
+          if(c->master->emeraldval % 3 || c->master->zebraval % 3)
+            c->wall = waColumn;
           }
         else if(geometry == gHoroTris || geometry == gHoroRec) {
           if(c->c.spin(binary::updir()) != 0) c->wall = waColumn;

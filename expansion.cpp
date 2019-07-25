@@ -393,6 +393,7 @@ bool sizes_known() {
   if(binarytiling) return false;
   // not implemented
   if(archimedean) return false;
+  if(penrose) return false;
   return true;  
   }
 

@@ -152,6 +152,7 @@ struct hrmap_kite : hrmap {
   
   heptagon *hspawn(heptagon *of, int our, int their, pshape s) {
     auto h = newtile(s, of->distance + (our ? 1 : -1));
+    if(binarytiling) binary::make_binary_lands(of, h);
     of->c.connect(our, h, their, false);
     return h;
     }

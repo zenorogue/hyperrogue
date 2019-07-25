@@ -436,7 +436,7 @@ int celldistAlt(cell *c) {
     return euclidAlt(x, y);
     }
   #if CAP_BT
-  if(binarytiling) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
+  if(binarytiling || sol) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
   #endif
   #if CAP_CRYSTAL
   if(geometry == gCrystal) 
