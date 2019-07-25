@@ -164,9 +164,9 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[GDIM][GDIM] == 0) {
-    if(euwrap && centerover.at) 
+    if(euwrap && centerover.at && masterless) 
       t = calc_relative_matrix(c, centerover.at, C0);
-    else if(euclid && WDIM == 2) {
+    else if(masterless && WDIM == 2) {
       if(!centerover.at) centerover = cwt;
       t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
