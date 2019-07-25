@@ -480,7 +480,7 @@ namespace binary {
   
   void build_tmatrix() {
     if(among(geometry, gBinaryTiling, gSol)) return; // unused
-    use_direct = (1 << S7) - 1;
+    use_direct = (1 << (S7-1)) - 1;
     if(geometry == gBinary4) {
       use_direct = 3;
       direct_tmatrix[0] = xpush(-log(2)) * parabolic(-0.5);
