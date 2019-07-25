@@ -1285,10 +1285,10 @@ void centerpc(ld aspd) {
     aspd *= (1+R+(shmup::on?1:0));
 
     if(R < aspd) {
-      View = gpushxto0(H) * View;
+      View = solmul(gpushxto0(H), View);
       }
     else 
-      View = rspintox(H) * xpush(-aspd) * spintox(H) * View;
+      View = solmul(rspintox(H) * xpush(-aspd) * spintox(H), View);
       
     fixmatrix(View);
     spinEdge(aspd);

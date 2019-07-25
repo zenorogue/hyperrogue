@@ -283,10 +283,10 @@ void handlePanning(int sym, int uni) {
   
 #if !ISPANDORA
   if(sym == SDLK_END && DIM == 3) { 
-    View = cpush(2, -0.2*shiftmul) * View, didsomething = true, playermoved = false;
+    View = solmul(cpush(2, -0.2*shiftmul), View), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_HOME && DIM == 3) { 
-    View = cpush(2, 0.2*shiftmul) * View, didsomething = true, playermoved = false;
+    View = solmul(cpush(2, +0.2*shiftmul), View), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_RIGHT) { 
     if(conformal::on)

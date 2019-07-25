@@ -598,11 +598,12 @@ void apply() {
             fullcenter(); View = spin(rand() % 1000) * View;
             }
           }
-        View = cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-          cspin(0, DIM-1, -movement_angle * degree) * View;
+        View = solmul(cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
+          cspin(0, DIM-1, -movement_angle * degree), View);
         moved();
         }
       break;
+
     case maRotation:
       if(DIM == 3) {
         View = spin(-movement_angle * degree) * View;
@@ -616,8 +617,8 @@ void apply() {
       break;
     
     case maTranslationRotation:
-      View = cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-        cspin(0, DIM-1, -movement_angle * degree) * View;
+      View = solmul(cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
+        cspin(0, DIM-1, -movement_angle * degree), View);
       moved();
       View = spin(2 * M_PI * t / period) * View;
       break;
