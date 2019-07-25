@@ -4517,6 +4517,10 @@ void radar_grid(cell *c, const transmatrix& V) {
       addradar(V*get_corner_position(c, t%c->type), V*get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)));
   }
 
+int wall_offset(cell *c) {
+  return 0;
+  }
+
 void draw_grid_at(cell *c, const transmatrix& V) {
   dynamicval<ld> lw(vid.linewidth, vid.linewidth);
 
@@ -4537,12 +4541,13 @@ void draw_grid_at(cell *c, const transmatrix& V) {
   if(0);
   #if MAXMDIM == 4
   else if(WDIM == 3) {
+    int ofs = wall_offset(c);
     for(int t=0; t<c->type; t++) {
       if(!c->move(t)) continue;
       if(binarytiling && !sol && !among(t, 5, 6, 8)) continue;
       if(!binarytiling && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
-      queuepoly(V, cgi.shWireframe3D[t], 0);
+      queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
       }
     }
   #endif
@@ -5936,6 +5941,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       #if MAXMDIM >= 4
       if(WDIM == 3) {
         color_t dummy;        
+        int ofs = wall_offset(c);
         if(isWall3(c, wcol)) {
           color_t wcol2 = wcol;
           #if CAP_TEXTURE
@@ -5952,7 +5958,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
               if(qfi.fshape && wmescher) {
-                auto& poly = queuepoly(V, cgi.shWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                auto& poly = queuepoly(V, cgi.shWall3D[ofs + a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
                 #if CAP_TEXTURE
                 if(texture::config.tstate == texture::tsActive && isize(texture::config.tinf3.tvertices)) {
                   poly.tinf = &texture::config.tinf3;
@@ -5966,7 +5972,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                   }
                 }
               else
-                queuepoly(V, cgi.shPlainWall3D[a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                queuepoly(V, cgi.shPlainWall3D[ofs + a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
               }
           }
         else {
@@ -5974,7 +5980,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             color_t t = transcolor(c, c->move(a), wcol);
             if(t) {
               t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
-              queue_transparent_wall(V, cgi.shPlainWall3D[a], t);
+              queue_transparent_wall(V, cgi.shPlainWall3D[ofs + a], t);
               }
             }
           if(among(c->wall, waBoat, waStrandedBoat)) drawBoat(c, Vboat, V, V);
@@ -6713,8 +6719,9 @@ void queuecircleat(cell *c, double rad, color_t col) {
   if(!gmatrix.count(c)) return;
   if(WDIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
+    int ofs = wall_offset(c);
     for(int i=0; i<c->type; i++) {
-      queuepolyat(gmatrix[c], cgi.shWireframe3D[i], 0, PPR::SUPERLINE);
+      queuepolyat(gmatrix[c], cgi.shWireframe3D[ofs + i], 0, PPR::SUPERLINE);
       }
     return;
     }    

@@ -751,9 +751,10 @@ vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
   using namespace hyperpoint_vec;
-  shWall3D.resize(S7);
-  shPlainWall3D.resize(S7);
-  shWireframe3D.resize(S7);
+  int howmany = S7;
+  shWall3D.resize(howmany);
+  shPlainWall3D.resize(howmany);
+  shWireframe3D.resize(howmany);
   if(DIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
