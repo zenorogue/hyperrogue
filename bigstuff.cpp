@@ -591,6 +591,7 @@ void buildEquidistant(cell *c) {
     #if CAP_BT
     if(binarytiling) {
       int skip = geometry == gHoroRec ? 3 : 2;
+      int up = binary::updir();
       if(c->landparam == 1) 
         c->landflags = (hrand(100) < 20);
       else if(WDIM == 2 && c->type == 6 && (c->landparam % 2) && c->move(binary::bd_down) && c->move(binary::bd_down)->landflags)
@@ -600,9 +601,9 @@ void buildEquidistant(cell *c) {
           if(c->move(d) && c->move(d)->landflags)
             c->landflags = 1;
         }
-      else if(WDIM == 3 && c->landparam % skip != 1 && c->move(S7-1) && c->move(S7-1)->landflags)
+      else if(WDIM == 3 && c->landparam % skip != 1 && c->move(up) && c->move(up)->landflags)
         c->landflags = 1;
-      else if(WDIM == 3 && c->landparam % skip == 1 && c->move(S7-1) && c->move(S7-1)->c.spin(S7-1) == (c->c.spin(S7-1)) && c->move(S7-1)->move(S7-1)->landflags)
+      else if(WDIM == 3 && c->landparam % skip == 1 && c->move(up) && c->move(up)->c.spin(up) == (c->c.spin(up)) && c->move(up)->move(up)->landflags)
         c->landflags = 1;
       if(c->landflags) c->wall = (WDIM == 3 ? waTrunk3 : waTrunk);
       }
@@ -1535,7 +1536,7 @@ void moreBigStuff(cell *c) {
           if(i > 1) c->wall = waColumn;
           }
         else if(geometry == gHoroTris || geometry == gHoroRec) {
-          if(c->c.spin(S7-1) != 0) c->wall = waColumn;
+          if(c->c.spin(binary::updir()) != 0) c->wall = waColumn;
           }
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;

@@ -478,6 +478,24 @@ namespace binary {
     return (use_direct >> dir) & 1;
     }
   
+  ld expansion() {
+    switch(geometry) {
+      case gHoroRec:
+        return sqrt(2);
+      case gHoroHex:
+        return sqrt(3);
+      case gKiteDart3:
+        return (sqrt(5)+1)/2;
+      default:
+        return 2;
+      }
+    }
+  
+  int updir() {
+    if(penrose) return 4;
+    return S7-1;
+    }
+  
   void build_tmatrix() {
     if(among(geometry, gBinaryTiling, gSol)) return; // unused
     use_direct = (1 << (S7-1)) - 1;
