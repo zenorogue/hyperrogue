@@ -883,13 +883,13 @@ namespace solv {
       h = tailored_alloc<heptagon> (S7);
       h->c7 = newCell(S7, h);
       coords[h] = make_pair(x, y);
-      return h;
       h->distance = 0;
       h->dm4 = 0;
       h->zebraval = 0;
       h->emeraldval = 0;
       h->fieldval = 0;
       h->cdata = NULL;
+      return h;
       }
 
     hrmap_sol() {
