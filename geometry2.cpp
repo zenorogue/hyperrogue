@@ -387,7 +387,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
   }
 
 double cellgfxdist(cell *c, int i) {
-  if(euclid && !penrose) {
+  if(euclid && !penrose && !archimedean) {
     if(c->type == 8 && (i&1)) return cgi.crossf * sqrt(2);
     return cgi.crossf;
     }
