@@ -4361,6 +4361,8 @@ static const int WINGS = (BADMODEL ? 1 : 4);
 
 typedef array<hpcshape, WINGS+1> hpcshape_animated;
 
+extern vector<ld> equal_weights;
+
 struct geometry_information {
 
   /* basic geometry parameters */
@@ -4577,7 +4579,7 @@ hpcshape
   void pushShape(usershapelayer& ds);
   void make_sidewalls();
   void procedural_shapes();
-  void make_wall(int id, vector<hyperpoint> vertices, bool force_triangles = false);
+  void make_wall(int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
   void create_wall3d();
   void configure_floorshapes();
   

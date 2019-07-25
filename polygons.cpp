@@ -682,12 +682,11 @@ void geometry_information::procedural_shapes() {
 
 #if CAP_BT && MAXMDIM >= 4
 
-// Make a wall for horocycle-based honeycombs
-// flags:
-// 1 = first edge should be doubled
-// 2 = use POLY_TRIANGLES
-// 4 = this is is a triangular face; otherwise, the face is rectangular, and x1+x2-x0 is the fourth vertex
-void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool force_triangles) {
+// Make a wall
+
+vector<ld> equal_weights(20, 1);
+
+void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) {
   using namespace hyperpoint_vec;
 
   // orient correctly
@@ -697,7 +696,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
   set_column(T, 2, vertices[2]);
   set_column(T, 3, C0);
   if(det(T) < 0)
-    reverse(vertices.begin(), vertices.end());
+    reverse(vertices.begin(), vertices.end()),
+    reverse(weights.begin(), weights.end());
 
   ld yy = log(2) / 2;
 
@@ -705,9 +705,10 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, bool f
   last->flags |= POLY_TRIANGLES;
 
   hyperpoint center = Hypc;
-  for(auto v: vertices) center += v;
   int n = isize(vertices);
-  center /= n;
+  ld w = 0;
+  for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
+  center /= w;
 
   for(int a=0; a<n; a++) {
     hyperpoint v1 = vertices[a] - center;
@@ -765,10 +766,10 @@ void geometry_information::create_wall3d() {
     hyperpoint h22 = point3(+1,+1,-1);
     hyperpoint down = point3(0,0,2);
 
-    make_wall(0, make4(h11, h01, h10), true);
-    make_wall(1, make4(h11, h21, h10), true);
-    make_wall(2, make4(h11, h01, h12), true);
-    make_wall(3, make4(h11, h21, h12), true);
+    make_wall(0, make4(h11, h01, h10));
+    make_wall(1, make4(h11, h21, h10));
+    make_wall(2, make4(h11, h01, h12));
+    make_wall(3, make4(h11, h21, h12));
     make_wall(4, make5(h00, h02, h00+down));
     make_wall(5, make5(h20, h22, h20+down));
     make_wall(6, make5(h00, h20, h00+down));
@@ -790,9 +791,9 @@ void geometry_information::create_wall3d() {
     hyperpoint d1 = -2 * t1 + shift;
     hyperpoint d2 = -2 * t2 + shift;
 
-    make_wall(0, {t0, t1, t2}, true);
-    make_wall(1, {d0, t1, t2}, true);
-    make_wall(2, {t0, d1, t2}, true);
+    make_wall(0, {t0, t1, t2});
+    make_wall(1, {d0, t1, t2});
+    make_wall(2, {t0, d1, t2});
     make_wall(3, {t0, t1, d2});
     make_wall(4, make5(d2, d1, d2 + down));
     make_wall(5, make5(d0, d2, d0 + down));
@@ -813,8 +814,8 @@ void geometry_information::create_wall3d() {
 
     hyperpoint down = point3(0,0,1);
 
-    make_wall(0, make4(a00, a01, a10), true);
-    make_wall(1, make4(a10, a11, a20), true);
+    make_wall(0, make4(a00, a01, a10));
+    make_wall(1, make4(a10, a11, a20));
     make_wall(2, make5(a01, a21, a01+down));
     make_wall(3, make4(a21, a20, a21+down));
     make_wall(4, make5(a20, a00, a20+down));
@@ -846,7 +847,7 @@ void geometry_information::create_wall3d() {
       }
 
     make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
-    make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)}, true);
+    make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)});
     }
 
   if(DIM == 3 && euclid && S7 == 6) {
@@ -862,7 +863,7 @@ void geometry_information::create_wall3d() {
         int z = (y+2)%3;
         vertices.push_back(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
         }
-      make_wall(w, vertices, 0);
+      make_wall(w, vertices);
       }
     }
 
@@ -912,7 +913,7 @@ void geometry_information::create_wall3d() {
       vector<hyperpoint> vertices;
       for(int a=0; a<facesize; a++)
         vertices.push_back(reg3::cellshape[w*facesize+a]);
-      make_wall(w, vertices, 0);
+      make_wall(w, vertices);
       }
     }
   
