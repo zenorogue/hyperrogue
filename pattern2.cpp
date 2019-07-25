@@ -1126,11 +1126,13 @@ bool geosupport_chessboard() {
     (archimedean && PURE) ? arcm::current.support_chessboard() : 
     (archimedean && DUAL) ? arcm::current.support_threecolor_bitruncated() :
 #endif
+    (binarytiling || penrose) ? 0 :
     (VALENCE % 2 == 0);
   }
 
 int geosupport_threecolor() {
   if(IRREGULAR) return 0;
+  if(penrose || binarytiling) return 0;
   #if CAP_ARCM
   if(archimedean && PURE) return arcm::current.support_threecolor();
   if(archimedean && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
@@ -1150,6 +1152,7 @@ int geosupport_threecolor() {
 int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
+  if(binarytiling || penrose) return 0;
 
 #if CAP_ARCM  
   if(archimedean && DUAL) return false;
@@ -1293,6 +1296,7 @@ bool pseudohept(cell *c) {
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
   #if CAP_BT
+  if(penrose) return kite::getshape(c->master) == kite::pDart;
   if(binarytiling) return binary::pseudohept(c);
   #endif
   #if MAXMDIM == 4

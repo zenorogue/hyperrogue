@@ -1317,9 +1317,10 @@ void optimizeview() {
   if(0) ;
 
   #if CAP_BT || CAP_ARCM || MAXMDIM == 4
-  else if(binarytiling || archimedean || WDIM == 3) {
+  else if(binarytiling || archimedean || penrose || WDIM == 3) {
     turn = -1, best = hdist0(tC0(View));
-    for(int i=0; i<viewctr.at->c7->type; i++) {
+    for(int i=0; i<viewctr.at->type; i++) {
+      if(penrose && euclid && (i < 4 || i >= 8)) continue;
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
       transmatrix T = currentmap->relative_matrix(h2, viewctr.at);

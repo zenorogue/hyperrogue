@@ -93,6 +93,10 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->move(d)) return c->move(d);
+  #if CAP_BT
+  else if(penrose)
+    kite::find_cell_connection(c, d);
+  #endif
   #if CAP_IRR
   else if(IRREGULAR) {
     irr::link_cell(c, d);
@@ -222,6 +226,9 @@ void initcells() {
   #endif
   #if MAXMDIM >= 4
   else if(euclid && WDIM == 3) currentmap = euclid3::new_map();
+  #endif
+  #if CAP_BT
+  else if(penrose) currentmap = kite::new_map();
   #endif
   else if(fulltorus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
@@ -401,7 +408,7 @@ int celldist(cell *c) {
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
     return eudist(decodeId(c->master));
-  if(sphere || binarytiling || WDIM == 3 || geometry == gCrystal || sol) return celldistance(c, currentmap->gamestart());
+  if(sphere || binarytiling || WDIM == 3 || geometry == gCrystal || sol || penrose) return celldistance(c, currentmap->gamestart());
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -852,7 +859,7 @@ int celldistance(cell *c1, cell *c2) {
   if(geometry == gCrystal) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || sol) {
+  if(masterless || archimedean || quotient || sol || penrose) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

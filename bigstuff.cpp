@@ -1158,7 +1158,7 @@ int wallchance(cell *c, bool deepOcean) {
 
 bool horo_ok() {
   // do the horocycles work in the current geometry?
-  return hyperbolic && !binarytiling && !archimedean;
+  return hyperbolic && !binarytiling && !archimedean && !penrose;
   }
 
 bool gp_wall_test() {
@@ -1208,7 +1208,7 @@ bool good_for_wall(cell *c) {
   }
   
 void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient || sol) return;
+  if(sphere || quotient || sol || penrose) return;
   if(chaosmode > 1) return;
   bool deepOcean = deep_ocean_at(c, from);
   
@@ -1536,6 +1536,9 @@ void moreBigStuff(cell *c) {
           }
         else if(geometry == gHoroTris || geometry == gHoroRec) {
           if(c->c.spin(S7-1) != 0) c->wall = waColumn;
+          }
+        else if(geometry == gKiteDart3) {
+          if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
           }
         else if(WDIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;

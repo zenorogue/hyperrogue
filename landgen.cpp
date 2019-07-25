@@ -2523,7 +2523,7 @@ void setdist(cell *c, int d, cell *from) {
       cell *cseek = c;
       int step = 0;
       if(geometry == gHoroHex) z *= 2;
-      while(z < 3.999 && step < 10) cseek = cseek->cmove(S7-1), z *= 2;
+      while(z < 3.999 && step < 10) cseek = cseek->cmove(penrose ? 4 : S7-1), z *= 2;
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
   

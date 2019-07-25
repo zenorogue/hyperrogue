@@ -420,22 +420,24 @@ void geometry_information::procedural_shapes() {
   #endif
 
   else {
+    ld rad0 = floorrad0, rad1 = floorrad1;
+    if(penrose) rad0 /= 2, rad1 /= 2;
     bshape(shWall[0], PPR::WALL);
     for(int t=0; t<=S6; t++) {
-      hpcpush(ddi(S7 + t*S14, floorrad0) * C0);
-      if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad0 /4) * C0);
+      hpcpush(ddi(S7 + t*S14, rad0) * C0);
+      if(t != S6) hpcpush(ddi(S14 + t*S14, rad0 /4) * C0);
       }
 
     bshape(shWall[1], PPR::WALL);
     int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;
     if(S7 == 6 || S7 == 4) {
       for(int t=0; t<=S6; t++) {
-        hpcpush(ddi(S7 + t*S14, floorrad1) * C0);
-        if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad1/4) * C0);
+        hpcpush(ddi(S7 + t*S14, rad1) * C0);
+        if(t != S6) hpcpush(ddi(S14 + t*S14, rad1/4) * C0);
         }
       }
     else
-      for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, floorrad1) * C0);
+      for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, rad1) * C0);
     }
 
   bshape(shCross, PPR::WALL);
@@ -751,7 +753,7 @@ vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
   using namespace hyperpoint_vec;
-  int howmany = S7;
+  int howmany = penrose ? 22 : S7;
   shWall3D.resize(howmany);
   shPlainWall3D.resize(howmany);
   shWireframe3D.resize(howmany);
@@ -931,6 +933,15 @@ void geometry_information::create_wall3d() {
     make_wall(5, {pt(-1,+1,-1), pt(00,+1,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(-1,+1,+1)});
     make_wall(6, {pt(-1,+1,+1), pt(+1,+1,+1), pt(+1,00,+1), pt(-1,00,+1)});
     make_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
+    }
+  
+  if(penrose) {
+    auto kv = kite::make_walls();
+    for(auto& v: kv.first) for(auto& h: v) {
+      h = binary::deparabolic3(h);
+      h = point3(h[1], h[2], h[0] / (log(2)/2));
+      }
+    for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
     }
 
   if(DIM == 3) {

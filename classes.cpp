@@ -507,6 +507,7 @@ static const flagtype qsDOCKS           = qANYQ | qSMALL | qBOUNDED | qDOCKS;
 static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
 static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC;
+static const flagtype qsBP              = qBINARY | qPENROSE;
 
 vector<geometryinfo> ginf = {
   {"{7,3}", "none",     "{7,3} (standard HyperRogue map)",            "HR",       7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::bitruncated},
@@ -560,7 +561,9 @@ vector<geometryinfo> ginf = {
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, gcHyperbolic, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"binary4","none",    "standard binary tiling",                     "binary4",  5, 4, qBINARY,   gcHyperbolic,       0, {{7, 5}}, eVariation::pure},
   {"sol",    "none",    "Sol",                                        "sol",      8, 4, qBINARY,   gcSol,              0, {{7, 5}}, eVariation::pure},
-  };
+  {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qPENROSE,  gcEuclid,     0x48000, {{7, 7}}, eVariation::pure},
+  {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      gcHyperbolic, 0x48200, {{7, 3}}, eVariation::pure},
+  };                                                                                                                    
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

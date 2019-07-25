@@ -361,13 +361,13 @@ double hexshiftat(cell *c) {
 
 transmatrix ddspin(cell *c, int d, ld bonus) {
   if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->move(d), c, C0))) * cspin(2, 0, bonus);
-  if(WDIM == 2 && binarytiling) return spin(bonus) * rspintox(nearcorner(c, d));
+  if(WDIM == 2 && (binarytiling || penrose)) return spin(bonus) * rspintox(nearcorner(c, d));
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 transmatrix iddspin(cell *c, int d, ld bonus) {
   if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->move(d), c, C0)));
-  if(WDIM == 2 && binarytiling) return spin(bonus) * spintox(nearcorner(c, d));
+  if(WDIM == 2 && (binarytiling || penrose)) return spin(bonus) * spintox(nearcorner(c, d));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
@@ -3956,9 +3956,10 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t co
   else if(sidepar == SIDE_BTOI) prio = PPR::BELOWBOTTOM;
   else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
   
+  dynamicval<bool> ncor(approx_nearcorner, true);
   transmatrix V2 = V * ddspin(c, i);
  
-  if(binarytiling || archimedean || NONSTDVAR) {
+  if(binarytiling || archimedean || NONSTDVAR || penrose) {
     #if CAP_ARCM
     if(archimedean && !PURE)
       i = (i + arcm::parent_index_of(c->master)/DUALMUL + MODFIXER) % c->type;
@@ -4399,12 +4400,14 @@ int get_darkval(int d) {
   const int darkval_hh[14] = {0,0,0,1,1,1,2,2,2,3,3,3,1,0};
   const int darkval_hrec[7] = {0,0,2,4,2,4,0};
   const int darkval_sol[8] = {0,2,4,5,0,2,4,5};
+  const int darkval_penrose[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
   if(sphere) return darkval_s12[d];
   if(euclid && S7 == 6) return darkval_e6[d];
   if(euclid && S7 == 12) return darkval_e12[d];
   if(euclid && S7 == 14) return darkval_e14[d];
   if(geometry == gHoroHex) return darkval_hh[d];
   if(geometry == gHoroRec) return darkval_hrec[d];
+  if(penrose) return darkval_penrose[d];
   if(binarytiling) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];
@@ -4518,6 +4521,7 @@ void radar_grid(cell *c, const transmatrix& V) {
   }
 
 int wall_offset(cell *c) {
+  if(penrose && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;
   }
 
@@ -5952,7 +5956,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(pmodel == mdPerspective && !sphere && !quotient && !sol) {
+              if(pmodel == mdPerspective && !sphere && !quotient && !sol && !penrose) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;

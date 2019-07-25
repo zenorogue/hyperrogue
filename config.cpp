@@ -439,6 +439,8 @@ void initConfig() {
   addsaver(sightranges[gHoroTris], "sight-horotris", 2.9 + bonus);
   addsaver(sightranges[gHoroRec], "sight-hororec", 2.2 + bonus);
   addsaver(sightranges[gHoroHex], "sight-horohex", 2.75 + bonus);
+
+  addsaver(sightranges[gKiteDart3], "sight-kd3", 2.25 + bonus);
   
   addsaver(sightranges[gField435], "sight-field435", 4 + bonus);
   addsaver(sightranges[gField534], "sight-field534", 3.8 + bonus);

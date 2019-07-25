@@ -297,7 +297,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
-    if(STDVAR && !archimedean) {
+    if(STDVAR && !archimedean && !penrose) {
 
       // standard and binary
       ld hexside = fsh.rad0, heptside = fsh.rad1;
@@ -422,7 +422,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     sizeto(fsh.b, id);
     sizeto(fsh.shadow, id);
     
-    if(STDVAR && !binarytiling && !archimedean) {
+    if(STDVAR && !binarytiling && !archimedean && !penrose) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
       if(PURE && geosupport_football() < 2) {
         bshape2(fsh.b[id], fsh.prio, fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1, hept_matrices);
@@ -611,6 +611,20 @@ void geometry_information::generate_floorshapes() {
     
   else if(GOLDBERG) { /* will be generated on the fly */ }
   
+  #if CAP_BT
+  else if(penrose) {
+    dynamicval<bool> ncor(approx_nearcorner, true);
+    heptagon master;
+    cell model;
+    model.master = &master;
+    model.type = 4;
+    for(int i=0; i<2; i++) {
+      master.s = hstate(i); /* kite/dart shape */
+      generate_floorshapes_for(i, &model, 0, 0);
+      }
+    }
+  #endif
+  
   #if CAP_ARCM
   else if(archimedean) {
     heptagon master;
@@ -750,6 +764,8 @@ int shvid(cell *c) {
     return pseudohept(c);
   else if(geometry == gBinaryTiling)
     return c->type-6;
+  else if(penrose)
+    return kite::getshape(c->master);
   else if(geometry == gBinary4)
     return c->master->zebraval;
   else if(PURE)
@@ -782,9 +798,9 @@ dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &s
     return &queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
   #endif
-  else if((euclid || GOLDBERG) && ishex1(c)) 
+  else if((euclid || GOLDBERG) && ishex1(c) && !penrose) 
     return &queuepolyat(V * pispin, shv[0], col, prio);
-  else if(!(S7&1) && PURE) {
+  else if(!(S7&1) && PURE && !penrose) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
     transmatrix D = applyPatterndir(c, si);    

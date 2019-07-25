@@ -103,6 +103,7 @@ void addMessage(string s, char spamtype = 0);
 
 #define binarytiling (ginf[geometry].flags & qBINARY)
 #define archimedean (geometry == gArchimedean)
+#define penrose (ginf[geometry].flags & qPENROSE)
 
 // these geometries do not feature alternate structures for horocycles
 #define eubinary (euclid || binarytiling || geometry == gCrystal)
@@ -327,7 +328,7 @@ extern videopar vid;
 #if MAXMDIM == 3
 #define WDIM 2
 #else
-#define WDIM ((geometry >= gBinary3 && geometry != gBinary4) ? 3 : 2)
+#define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2) ? 3 : 2)
 #endif
 #define GDIM (vid.always3 ? 3 : WDIM)
 #define DIM GDIM
@@ -1609,7 +1610,7 @@ bool bearsCamelot(eLand l);
 extern bool safety;
 
 #define SAGEMELT .1
-#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex) ? 3 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : 6)
+#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex, gKiteDart3) ? 3 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
@@ -5613,4 +5614,14 @@ int wingphase(int period, int phase = 0);
 
 void queuecircle(int x, int y, int size, color_t color, PPR prio = PPR::CIRCLE, color_t fillcolor = 0);
 
+#if CAP_BT
+namespace kite {
+  hrmap *new_map();
+  void find_cell_connection(cell *c, int d);
+  enum pshape {pDart, pKite};
+  pshape getshape(heptagon *h);
+  pair<vector<vector<hyperpoint>>, vector<vector<ld>>> make_walls();
+  hyperpoint get_corner(cell *c, int d, ld cf);
+  }
+#endif
 }

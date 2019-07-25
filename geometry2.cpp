@@ -283,7 +283,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
     transmatrix bestV;
     
-    if(WDIM == 2 && !binarytiling) for(int d=0; d<S7; d++) {
+    if(WDIM == 2 && !binarytiling && !penrose) for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * cgi.invheptmove[d];
@@ -315,7 +315,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
         at = bestV * at;
         }
       else at = master_relative(base, true) * at;
-      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || WDIM == 3) {
+      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || WDIM == 3 || penrose) {
         while(true) {
           newbase = NULL;
           forCellCM(c2, base) {
@@ -387,16 +387,16 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
   }
 
 double cellgfxdist(cell *c, int i) {
-  if(euclid) {
+  if(euclid && !penrose) {
     if(c->type == 8 && (i&1)) return cgi.crossf * sqrt(2);
     return cgi.crossf;
     }
-  if(NONSTDVAR || archimedean || WDIM == 3 || binarytiling) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
+  if(NONSTDVAR || archimedean || WDIM == 3 || binarytiling || penrose) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
   return !BITRUNCATED ? cgi.tessf : (c->type == 6 && (i&1)) ? cgi.hexhexdist : cgi.crossf;
   }
 
 transmatrix cellrelmatrix(cell *c, int i) {
-  if(NONSTDVAR || archimedean) return calc_relative_matrix(c->move(i), c, i);
+  if(NONSTDVAR || archimedean || penrose) return calc_relative_matrix(c->move(i), c, i);
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
   if(c->c.mirror(i)) T = T * Mirror;
@@ -407,7 +407,7 @@ transmatrix cellrelmatrix(cell *c, int i) {
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 hyperpoint randomPointIn(int t) {
-  if(NONSTDVAR || archimedean) {
+  if(NONSTDVAR || archimedean || penrose) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
     return xspinpush0(2 * M_PI * randd(), asinh(randd() / 20));
@@ -432,6 +432,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     }
   #endif
   #if CAP_BT
+  if(penrose) return kite::get_corner(c, cid, cf);
   if(binarytiling) {
     if(WDIM == 3) {
       println(hlog, "get_corner_position called");
@@ -472,6 +473,8 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     }
   return C0;
   }
+
+bool approx_nearcorner = false;
 
 hyperpoint nearcorner(cell *c, int i) {
   if(GOLDBERG) {
@@ -520,6 +523,13 @@ hyperpoint nearcorner(cell *c, int i) {
     neis[3] = binary::get_horopoint(-2*yy, c->master->zebraval ? -0.25 : +0.25);
     neis[4] = binary::get_horopoint(0, -1);
     return neis[i];
+    }
+  if(penrose) {
+    using namespace hyperpoint_vec;
+    if(approx_nearcorner)
+      return kite::get_corner(c, i, 3) + kite::get_corner(c, i+1, 3) - C0;
+    else
+      return calc_relative_matrix(c->move(i), c, C0) * C0;
     }
   if(binarytiling) {
     if(WDIM == 3) {
@@ -577,7 +587,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     }
   #endif
   #if CAP_BT
-  if(binarytiling)
+  if(binarytiling || penrose)
     return nearcorner(c, (i+which) % c->type); // lazy
   #endif
   #if CAP_ARCM

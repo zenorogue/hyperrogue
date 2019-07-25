@@ -373,7 +373,7 @@ void ge_land_selection() {
 vector<eGeometry> tilinglist = {
   gTinySphere, gSmallSphere, gSphere, gEuclid, gNormal, gOctagon,
   gOctahedron, gEuclidSquare, g45, g46, g47,
-  gArchimedean, gBinary4, gBinaryTiling
+  gArchimedean, gBinary4, gBinaryTiling, gKiteDart2
   };
 
 vector<eGeometry> quotientlist = {
@@ -394,7 +394,7 @@ vector<eGeometry> list3d = {
   gCell24, gECell24,
   gCell16, gECell16,
   gCell8, gECell8,
-  gCell5
+  gCell5, gKiteDart3
   };
 
 void ge_select_tiling(const vector<eGeometry>& lst) {
@@ -635,7 +635,7 @@ void showEuclideanMenu() {
     extern void add_edit_wall_quality(char);
     add_edit_wall_quality('W');
     }
-  else if(WDIM == 3) dialog::addBreak(100);
+  else if(WDIM == 3 || penrose) dialog::addBreak(100);
   else {
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {
