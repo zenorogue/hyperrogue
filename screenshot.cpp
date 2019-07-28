@@ -574,6 +574,7 @@ void reflect_view() {
     }
   }
 
+bool clearup;
 
 void apply() {
   int t = ticks - lastticks;
@@ -601,6 +602,10 @@ void apply() {
         View = solmul(cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
           cspin(0, DIM-1, -movement_angle * degree), View);
         moved();
+        if(clearup) {
+          viewctr.at->c7->wall = waNone;
+          forCellEx(c1, viewctr.at->c7) c1->wall = waNone;
+          }
         }
       break;
 
@@ -620,7 +625,10 @@ void apply() {
       View = solmul(cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
         cspin(0, DIM-1, -movement_angle * degree), View);
       moved();
-      View = spin(2 * M_PI * t / period) * View;
+      View = cspin(0, DIM-1, 2 * M_PI * t / period) * View;
+      if(clearup) {
+        viewctr.at->c7->wall = waNone;
+        }
       break;
 
     #if CAP_BT
@@ -1036,6 +1044,7 @@ int readArgs() {
     shift_arg_formula(shift_angle);
     shift_arg_formula(movement_angle);
     }
+  else if(argis("-animclear")) { clearup = true; }
   else if(argis("-animrot")) {
     ma = maRotation;
     if(DIM == 3) {
