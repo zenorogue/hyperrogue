@@ -3353,3 +3353,26 @@ Other:
 - new projection: central inversion (for Euclidean geometry)
 - easier to edit IPD with mouse
 
+2019-07-28 12:30 Version 11.1e:
+
+Gameplay
+* unlocking Irradiated Fields no longer requires 60 treasure
+* disabled cyclic lands in the list in Euclidean/Sol
+* ambush restriction no longer considers friendly, slow, or multi-tile monsters
+* allies now prefer escaping unsafe locations to attacking
+* allies did not avoid 1-stunned lancers
+* fixed allies evading Demons incorrectly
+
+Graphics
+* fixed snakes in Archimedean
+* floor textures now work with >8 sides
+* creature_scale can now be changed in all geometries except standard non-cheater shmup
+* specific linewidth configurable for grid and model boundary
+* CLI arguments: -grotate, -twopoint, -animclear
+
+Geometries and projections
+* standard binary tiling
+* kite-and-dart tiling
+* kite-and-dart tiling on horospheres
+* Solv geometry
+* extra two-point projections
