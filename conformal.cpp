@@ -755,11 +755,13 @@ namespace conformal {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models & projections"));
+    string chars = "0123456789!@#$%^&*()][{}'\"";
+    int cpos = 0;
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()][{}'" [m]);
+        dialog::addBoolItem(get_model_name(m), pmodel == m, chars[cpos++]);
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
