@@ -287,7 +287,7 @@ void display_data::set_projection(int ed) {
         xbuffer[z][y][x] = glhr::makevertex(inverse_exp_table[z][y][x][0], inverse_exp_table[z][y][x][1], inverse_exp_table[z][y][x][2]);
       
       glTexImage3D(GL_TEXTURE_3D, 0, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ, 0, GL_RGBA, GL_FLOAT, xbuffer);
-      delete xbuffer;
+      delete[] xbuffer;
       
       }
     
