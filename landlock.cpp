@@ -438,13 +438,13 @@ eLand getNewLand(eLand old) {
 
     if(items[itIvory] >= U5 && !generatingEquidistant && items[itFeather] >= U5)
       tab[cnt++] = laWestWall;
-    
-    if(landUnlocked(laVariant)) {
-      tab[cnt++] = laVariant;
-      if(old == laRuins) LIKELY tab[cnt++] = laVariant;
-      if(old == laGraveyard) LIKELY tab[cnt++] = laVariant;
-      if(old == laEmerald) LIKELY tab[cnt++] = laVariant;
-      }
+    }
+
+  if(landUnlocked(laVariant)) {
+    tab[cnt++] = laVariant;
+    if(old == laRuins) LIKELY tab[cnt++] = laVariant;
+    if(old == laGraveyard) LIKELY tab[cnt++] = laVariant;
+    if(old == laEmerald) LIKELY tab[cnt++] = laVariant;
     }
   
   if(gold() >= R90) {
