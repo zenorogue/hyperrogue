@@ -223,7 +223,7 @@ struct hrmap_kite : hrmap {
   
   map<int, transmatrix> graphrules;
   
-  auto encode(pshape s0, int d0, pshape s1, int d1) {
+  int encode(pshape s0, int d0, pshape s1, int d1) {
     return d0 + d1 * 16 + s0 * 256 + s1 * 512;
     }
     
@@ -289,7 +289,7 @@ struct hrmap_kite : hrmap {
     auto c1 = c->cmove(dir);
     auto code = encode(getshape(c->master), dir, getshape(c1->master), c->c.spin(dir));
     if(!graphrules.count(code)) {
-      println(hlog, "rule missing: ", tuple(getshape(c->master), dir, getshape(c1->master), c->c.spin(dir)));
+      println(hlog, "rule missing: ", make_tuple(getshape(c->master), dir, getshape(c1->master), c->c.spin(dir)));
       throw 0;
       }
     return graphrules[code];

@@ -14,8 +14,8 @@ namespace solv {
   const ld SXY = 32.;
   const ld SZ = 8.;
   
-  using pt = hyperpoint;
-  using ptlow = array<float, 3>;
+  typedef hyperpoint pt;
+  typedef array<float, 3> ptlow;
 
   ptlow inverse_exp_table[PRECZ][PRECX][PRECX];
   
