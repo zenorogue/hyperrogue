@@ -158,6 +158,12 @@ int arg::readCommon() {
     shift(); ld b = argf();
     View = View * cspin(1, 2, M_PI * 2 * a / b);
     }
+  else if(argis("-grotate")) {
+    PHASE(3);  start_game();
+    shift(); int i = argi();
+    shift(); int j = argi();
+    shift(); View = View * cspin(i, j, argf());
+    }
   else if(argis("-exit")) {
     PHASE(3); printf("Success.\n");
     exit(0);
