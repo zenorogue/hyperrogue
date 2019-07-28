@@ -1,4 +1,8 @@
 
+// implementation of the binary tilings
+
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
 namespace hr {
 
 namespace binary {
