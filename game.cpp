@@ -5421,6 +5421,7 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     }
   else if(canAttack(c,m,c2,c2->monst,flags)) 
     val = 
+    (!passable_for(c->monst, c, NULL, P_MONSTER | P_MIRROR)) ? 100 :
     (m == moPrincessArmed && isPrincess(c2->monst)) ? 14000 : // jealousy!
     isActiveEnemy(c2,m) ? 12000 :
     among(c2->monst, moSkeleton, moMetalBeast, moReptile, moTortoise, moSalamander, moTerraWarrior, moBrownBug) ? -400 :
