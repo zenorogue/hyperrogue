@@ -1316,7 +1316,7 @@ bool monstersnear(stalemate1& sm) {
         if(!logical_adjacent(c3, c3->monst, c2) || !logical_adjacent(c2, c3->monst, c))
           continue;
       if(elec::affected(c3) || stalemate::isKilled(c3)) continue;
-      if(c3->stuntime) continue;
+      if(c3->stuntime > (sm.who == moPlayer ? 0 : 1)) continue;
       // speedwitches can only attack not-fastened monsters,
       // others can only attack if the move is not fastened
       if(c3->monst == moWitchSpeed && items[itOrbSpeed]) continue;
