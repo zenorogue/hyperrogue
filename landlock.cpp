@@ -680,6 +680,8 @@ land_validity_t& land_validity(eLand l) {
     if(l == laEmerald && hyperbolic && !binarytiling && S7 == 12) return lv::pattern_special;
     if(l == laZebra) return pattern_not_implemented_random;
     if(among(l, laWhirlpool, laPrairie, laWestWall, laBull)) return lv::not_3d;
+    if(l == laEndorian && geometry == gKiteDart3) return not_implemented;
+    if(l == laEndorian && sol) return not_implemented;
     if(l == laEndorian && hyperbolic && !quotient) return lv::pattern_special;
     if(l == laIvoryTower && hyperbolic && binarytiling) return lv::pattern_special;
     if(l == laDungeon || l == laBrownian) return not_implemented;
@@ -752,7 +754,14 @@ land_validity_t& land_validity(eLand l) {
   // mirrors do not work in gp
   if(among(l, laMirror, laMirrorOld) && (GOLDBERG && old_daily_id < 33))
     return dont_work;
+
+  // mirrors do not work in penrose and sol
+  if(among(l, laMirror, laMirrorOld) && (penrose || sol))
+    return dont_work;
   
+  if(isCrossroads(l) && geometry == gBinary4)
+    return not_implemented;
+
   if(binarytiling && among(l, laMirror, laMirrorOld))
     return dont_work;
 
@@ -812,6 +821,9 @@ land_validity_t& land_validity(eLand l) {
   if(archimedean && DUAL && l == laCrossroads4)
     return not_implemented;
   
+  if(geometry == gKiteDart3 && l == laGraveyard)
+    return lv::pattern_special;
+  
   // equidistant-based lands
   if(isEquidLand(l)) {
     // no equidistants supported in chaos mode
@@ -819,6 +831,9 @@ land_validity_t& land_validity(eLand l) {
       return not_in_chaos;
     // the algorithm fails in Archimedean DUAL
     if(archimedean && DUAL)
+      return not_implemented;
+    // the algorithm fails in Binary4
+    if(geometry == gBinary4)
       return not_implemented;
     // no equidistants supported in these geometries (big sphere is OK though)
     if(bounded && !bigsphere)
@@ -1033,8 +1048,14 @@ land_validity_t& land_validity(eLand l) {
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
-  if(euclid && !euwrap && (l == laCrossroads || l == laCrossroads4))
+  if(euclid && !euwrap && (l == laCrossroads || l == laCrossroads4) && !penrose)
     return full_game; 
+
+  if(sol && among(l, laCrossroads, laCrossroads4))
+    return full_game; 
+  
+  if(sol && l == laCamelot)
+    return not_implemented;
 
   if(euclid && euwrap && !fulltorus && l == laCrossroads && torusconfig::sdy == -2 * torusconfig::sdx)
     return full_game;
@@ -1069,10 +1090,10 @@ land_validity_t& land_validity(eLand l) {
       return needs_threecolor;
     else return specially_designed;
     }
-  
+
   if(l == laDocks && !randomPatternsMode) {
-    if(a38 && !GOLDBERG) return specially_designed;
-    if(a38) return pattern_not_implemented_weird;
+    if(a38 && !GOLDBERG && !sol) return specially_designed;
+    if(a38 && !sol) return pattern_not_implemented_weird;
     return pattern_not_implemented_exclude;
     }
   
