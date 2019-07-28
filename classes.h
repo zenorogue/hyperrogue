@@ -201,10 +201,10 @@ enum eGeometry {
   gHoroTris, gHoroRec, gHoroHex,
   gField435, gField534,
   gBinary4, gSol,
-  gKiteDart2, gKiteDart3,
+  gKiteDart2, gKiteDart3, PROD2(gProduct,)
   gGUARD};
 
-enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol };
+enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol, PROD(gcProduct) };
 
 enum class eVariation { bitruncated, pure, goldberg, irregular, dual };  
 

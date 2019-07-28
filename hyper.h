@@ -328,7 +328,7 @@ extern videopar vid;
 #if MAXMDIM == 3
 #define WDIM 2
 #else
-#define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2) ? 3 : 2)
+#define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2 PROD(&& geometry != gProduct)) ? 3 : 2)
 #endif
 #define GDIM (vid.always3 ? 3 : WDIM)
 #define DIM GDIM

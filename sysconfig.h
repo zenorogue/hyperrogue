@@ -504,4 +504,7 @@ union SDL_Event;
 #define CAP_MEMORY_RESERVE (!ISMOBILE && !ISWEB)
 #endif
 
+#define PROD(x) /* unimplemented */
+#define PROD2(x,y) /* unimplemented */
+
 #undef TRANSPARENT

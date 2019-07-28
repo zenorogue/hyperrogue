@@ -5005,6 +5005,8 @@ void drawcell_in_radar(cell *c, transmatrix V) {
 #endif
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
+ 
+  PROD( if(product::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; } )
 
   cells_drawn++;
 

@@ -93,6 +93,8 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->move(d)) return c->move(d);
+  PROD( else if(geometry == gProduct)
+    product::find_cell_connection(c, d); )
   #if CAP_BT
   else if(penrose)
     kite::find_cell_connection(c, d);
@@ -221,6 +223,7 @@ void initcells() {
   #if CAP_CRYSTAL
   else if(geometry == gCrystal) currentmap = crystal::new_map();
   #endif
+  PROD( else if(geometry == gProduct) currentmap = product::new_map(); )
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif

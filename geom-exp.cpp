@@ -802,6 +802,10 @@ void showEuclideanMenu() {
     case 3:
       dialog::addSelItem(XLAT("Curvature"), XLAT("Sol"), 0);
       break;
+
+    PROD( case gcProduct:
+      dialog::addSelItem(XLAT("Curvature"), XLAT("Product"), 0);
+      break; )
     }    
     
   dialog::display();
