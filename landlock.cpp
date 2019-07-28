@@ -709,7 +709,7 @@ land_validity_t& land_validity(eLand l) {
     if(isCyclic(l)) return not_implemented;
     }
   #endif
-  
+
   #if CAP_CRYSTAL
   if(geometry == gCrystal) {
     if(l == laCamelot) return interesting;
@@ -894,7 +894,7 @@ land_validity_t& land_validity(eLand l) {
         return special_chaos;
       return not_in_chaos;
       }
-    if(archimedean) return not_implemented;
+    if(archimedean || penrose) return not_implemented;
     if(bounded) return unbounded_only;
     }
   
