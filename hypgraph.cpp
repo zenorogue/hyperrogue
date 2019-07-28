@@ -1876,7 +1876,7 @@ bool do_draw(cell *c, const transmatrix& T) {
   PROD( if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); }); )
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    if(sol)
+    if(pmodel == mdSolPerspective)
       return solv::in_table_range(solv::ilocal_perspective * tC0(T));
     else if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;
