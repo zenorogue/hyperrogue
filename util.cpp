@@ -283,4 +283,25 @@ string parser_help() {
   }
 
 logger hlog;
+
+// kz: utility for printing
+// if it is close to 0, assume it is floating errors
+
+ld kz(ld x) {
+  if(abs(x) < 1e-6) return 0;
+  return x;
+  }
+
+hyperpoint kz(hyperpoint h) {
+  for(int d=0; d<MAXMDIM; d++) h[d] = kz(h[d]);
+  return h;
+  }
+
+transmatrix kz(transmatrix h) {
+  for(int d=0; d<MAXMDIM; d++) 
+  for(int e=0; e<MAXMDIM; e++)
+    h[d][e] = kz(h[d][e]);
+  return h;
+  }
+  
 }
