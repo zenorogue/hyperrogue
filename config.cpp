@@ -464,6 +464,8 @@ void initConfig() {
 
   addsaver(bounded_mine_percentage, "bounded_mine_percentage");
 
+  addsaver(solv::geodesic_movement, "solv_geodesic_movement", true);
+
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
@@ -1305,7 +1307,7 @@ void show3D() {
   
     if(GDIM == 2)
       dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'p');
-    else if(pmodel != mdPerspective)
+    else if(!in_perspective())
       dialog::addSelItem(XLAT("Projection distance"), fts(vid.alpha), 'p');
     
     dialog::addBreak(50);

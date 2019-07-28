@@ -18,8 +18,12 @@ int detaillevel = 0;
 
 bool first_cell_to_draw = true;
 
+bool in_perspective() {
+  return among(pmodel, mdPerspective, mdSolPerspective);
+  }
+
 bool hide_player() {
-  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && pmodel == mdPerspective && (first_cell_to_draw || elliptic) && (WDIM == 3 || vid.camera == 0) && !inmirrorcount
+  return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && in_perspective() && (first_cell_to_draw || elliptic) && (WDIM == 3 || vid.camera == 0) && !inmirrorcount
 #if CAP_RACING     
    && !(racing::on && !racing::standard_centering && !racing::player_relative)
 #endif
@@ -809,6 +813,7 @@ color_t kind_outline(eItem it) {
 
 transmatrix face_the_player(const transmatrix V) {
   if(DIM == 2) return V;
+  if(sol) return V * cspin(0, 2, ptick(618, 0));
   return rgpushxto0(tC0(V));
   }
 
@@ -863,7 +868,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
   
   if(DIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
     
-  if(WDIM == 3 && c == viewctr.at->c7 && pmodel == mdPerspective && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
+  if(WDIM == 3 && c == viewctr.at->c7 && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
   transmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
@@ -4586,7 +4591,7 @@ void draw_grid_at(cell *c, const transmatrix& V) {
 void queue_transparent_wall(const transmatrix& V, hpcshape& sh, color_t color) {
   auto& poly = queuepolyat(V, sh, color, PPR::TRANSPARENT_WALL);
   hyperpoint h = V * sh.intester;
-  if(pmodel == mdPerspective)
+  if(in_perspective())
     poly.subprio = int(hdist0(h) * 100000);
   else {
     hyperpoint h2;
@@ -7406,7 +7411,7 @@ void calcparam() {
 
   current_display->sidescreen = false;
   
-  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && pmodel != mdPerspective) {
+  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && !in_perspective()) {
     cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
     }
   else {
@@ -7421,7 +7426,7 @@ void calcparam() {
     }
 
   cd->radius = vid.scale * cd->scrsize;
-  if(DIM == 3 && pmodel == mdPerspective) cd->radius = cd->scrsize;
+  if(DIM == 3 && in_perspective()) cd->radius = cd->scrsize;
   realradius = min(realradius, cd->radius);
   
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }

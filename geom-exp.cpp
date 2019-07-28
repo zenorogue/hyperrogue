@@ -448,7 +448,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
   }
 
 string current_proj_name() {
-  if(pmodel != mdDisk)
+  if(pmodel != mdDisk || sol)
     return conformal::get_model_name(pmodel);
   else if(hyperbolic && vid.alpha == 1)
     return XLAT("Poincaré model");
@@ -724,6 +724,8 @@ void showEuclideanMenu() {
     dialog::add_action_push(show3D);
     }
   dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+  if(sol)
+    dialog::addBoolItem_action(XLAT("geodesic movement in Sol"), solv::geodesic_movement, 'G');
   dialog::add_action_push(conformal::model_menu);
   #if CAP_CRYSTAL && MAXMDIM >= 4
   crystal::add_crystal_transform('x');  

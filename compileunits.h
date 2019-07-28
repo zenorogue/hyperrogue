@@ -30,6 +30,7 @@
 #include "fieldpattern.cpp"
 #include "heptagon.cpp"
 #include "binary-tiling.cpp"
+#include "sol.cpp"
 #include "penrose.cpp"
 #include "archimedean.cpp"
 #include "euclid.cpp"

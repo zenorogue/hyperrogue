@@ -1152,14 +1152,18 @@ void set_geometry(eGeometry target) {
     if(binarytiling || WDIM == 3 || penrose) variation = eVariation::pure;
     #endif
     if(DIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
-    if(DIM == 2 && pmodel == mdPerspective) pmodel = mdDisk;
+    if(sol && old_DIM == 2) pmodel = mdSolPerspective;
+    if(DIM == 2 && among(pmodel, mdPerspective, mdSolPerspective)) pmodel = mdDisk;
+    if(sol && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
+    
+    if(sol && shmup::on) shmup::on = false, racing::on = false;
     }
   }
 
 void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
-    if(euclid6 || binarytiling) geometry = gNormal;
+    if(euclid6 || binarytiling || sol || penrose) geometry = gNormal;
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && geometry == gCrystal && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;
@@ -1250,7 +1254,7 @@ void switch_game_mode(char switchWhat) {
       inv::on = false;
       chaosmode = false;
       princess::challenge = false;
-      if(bounded) set_geometry(gNormal);
+      if(sol || bounded) set_geometry(gNormal);
       dual::disable();
       break;
 #endif
@@ -1272,6 +1276,7 @@ void switch_game_mode(char switchWhat) {
       shmup::on = !shmup::on;
       princess::challenge = false;
       if(!shmup::on) racing::on = false;
+      if(sol) set_geometry(gNormal);
       break;
     
     case rg::randpattern:

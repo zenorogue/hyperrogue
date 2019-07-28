@@ -4023,7 +4023,7 @@ namespace glhr {
   
   enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
     standardS30, standardS31, standardS32, standardS33, 
-    ball, halfplane3, band3, flatten,
+    ball, halfplane3, band3, flatten, standardSolv,
     MAX 
     };
   
@@ -5625,4 +5625,16 @@ namespace kite {
   hyperpoint get_corner(cell *c, int d, ld cf);
   }
 #endif
+
+namespace solv {
+  extern transmatrix local_perspective, ilocal_perspective;
+  hrmap *new_map();
+  bool inverse_exp(hyperpoint h, hyperpoint& res);
+
+  transmatrix get_solmul(const transmatrix T, const transmatrix V);
+  extern string solshader;
+  }
+
+bool in_perspective();
+
 }

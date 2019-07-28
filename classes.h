@@ -267,9 +267,9 @@ enum eModel {
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
   // 17..19
   mdRotatedHyperboles, mdSpiral, mdPerspective,
-  // 20..22
-  mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid,
-  // 24..
+  // 20..24
+  mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdSolPerspective,
+  // 25..
   mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial, mdRug, mdFlatten
   };
 

@@ -107,6 +107,14 @@ glmatrix tmtogl(const transmatrix& T) {
   return tmp;
   }
 
+glmatrix tmtogl_transpose(const transmatrix& T) {
+  glmatrix tmp;
+  for(int i=0; i<4; i++)
+  for(int j=0; j<4; j++)
+    tmp[i][j] = T[j][i];
+  return tmp;
+  }
+
 glmatrix ortho(ld x, ld y, ld z) {
   return scale(1/x, 1/y, 1/z);
   }
@@ -204,11 +212,13 @@ static const int aPosition = 0;
 static const int aColor = 3;
 static const int aTexture = 8;
 
+const int INVERSE_EXP_BINDING = 2;
+
 struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uFogColor, uColor, tTexture, uMV, uProjection, uAlpha, uFogBase;
+  GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uILP;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -263,8 +273,10 @@ struct GLprogram {
     uFogBase = glGetUniformLocation(_program, "uFogBase");
     uAlpha = glGetUniformLocation(_program, "uAlpha");
     uColor = glGetUniformLocation(_program, "uColor");
+    uILP = glGetUniformLocation(_program, "uILP");
     tTexture = glGetUniformLocation(_program, "tTexture");
-
+    tInvExpTable = glGetUniformLocation(_program, "tInvExpTable");
+    
     #if DEBUG_GL
     printf("uniforms: %d %d %d %d\n", uMVP, uFog, uColor, tTexture);
     #endif
@@ -546,6 +558,7 @@ void init() {
     bool band = among(sp, shader_projection::band, shader_projection::band3);
     bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
+    bool ssol = (sp == shader_projection::standardSolv);
     bool sr3 = (sp == shader_projection::standardR3);
     bool ss30 = (sp == shader_projection::standardS30);
     bool ss31 = (sp == shader_projection::standardS31);
@@ -553,7 +566,7 @@ void init() {
     bool ss33 = (sp == shader_projection::standardS33);
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
-    bool s3 = (sh3 || sr3 || ss3);
+    bool s3 = (sh3 || sr3 || ss3 || ssol);
     bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
@@ -601,6 +614,8 @@ void init() {
       1,       "float zlevel(vec4 h) {",
       1,       "  return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]);",
       1,       "  }",
+      
+      ssol,    solv::solshader,      
 
       1,       "void main() {",  
       texture,   "vTexCoord = aTexture;",
@@ -635,8 +650,10 @@ void init() {
       hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
+      ssol,      "t = inverse_exp(uILP * t);",
       sh3,       "float fogs = (uFogBase - acosh(t[3]) / uFog);",
       sr3,       "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
+      ssol,      "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
       
       ss30,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
       ss31,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
@@ -645,7 +662,7 @@ void init() {
 
       s3,        "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);",
 
-      sh3 || sr3 || ball,"t[3] = 1.0;",
+      sh3 || sr3 || ssol || ball,"t[3] = 1.0;",
       
       band || hp || s3 || ball,"gl_Position = uP * t;",
       dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0) + uFogColor.xyz * (0.5 + gl_Position.z / 2.0);",

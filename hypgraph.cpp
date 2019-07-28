@@ -318,6 +318,15 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[2] = 1;
       return;
       }
+
+    case mdSolPerspective: {
+      auto S = solv::inverse_exp(H);
+      ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
+      ret[0] = S[0]/S[2] * ratio;
+      ret[1] = S[1]/S[2] * ratio;
+      ret[2] = 1;
+      return;
+      }
       
     case mdUnchanged:
     case mdFlatten:
@@ -897,6 +906,7 @@ bool invalid_point(const transmatrix T) {
 
 bool in_smart_range(const transmatrix& T) {
   if(invalid_point(T)) return false;
+  if(pmodel == mdSolPerspective) return solv::in_table_range(solv::ilocal_perspective * tC0(T));
   hyperpoint h1;
   applymodel(tC0(T), h1);
   for(int i=0; i<DIM; i++) 
@@ -1863,7 +1873,9 @@ bool limited_generation(cell *c) {
 bool do_draw(cell *c, const transmatrix& T) {
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    if(vid.use_smart_range) {
+    if(sol)
+      return solv::in_table_range(solv::ilocal_perspective * tC0(T));
+    else if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;
       if(!limited_generation(c)) return false;
       }

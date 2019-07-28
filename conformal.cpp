@@ -630,6 +630,8 @@ namespace conformal {
 #endif
 
   bool model_available(eModel pm) {
+    if(sol) return among(pm, mdDisk, mdPerspective, mdSolPerspective);
+    if(pm == mdSolPerspective && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
     if(DIM == 2 && pm == mdPerspective) return false;
@@ -652,6 +654,11 @@ namespace conformal {
   
   string get_model_name(eModel m) {
     if(m == mdDisk && DIM == 3 && hyperbolic) return XLAT("ball model/Gans");
+    if(sol) {
+      if(m == mdDisk) return XLAT("simple model: projection");
+      if(m == mdPerspective) return XLAT("simple model: perspective");
+      if(m == mdSolPerspective) return XLAT("native perspective");
+      }
     if(m == mdDisk && DIM == 3) return XLAT("perspective in 4D");
     if(m == mdHalfplane && DIM == 3 && hyperbolic) return XLAT("half-space");
     if(sphere) 
@@ -770,6 +777,9 @@ namespace conformal {
       }
     
     dialog::addBreak(100);
+    
+    if(sol)
+      dialog::addBoolItem_action(XLAT("geodesic movement in Sol"), solv::geodesic_movement, 'G');
 
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
     if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
@@ -780,7 +790,7 @@ namespace conformal {
     dialog::add_action([] { edit_rotation(conformal::rotation); });
     
     // if(pmodel == mdBand && sphere)
-    if(pmodel != mdPerspective)
+    if(!in_perspective())
       dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
     
     if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere && pmodel != mdDisk) {

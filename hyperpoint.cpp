@@ -791,8 +791,8 @@ bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
-transmatrix solmul(transmatrix T, transmatrix V) {
-  if(sol) return V * eupush(inverse(V) * T * V * C0);
+transmatrix solmul(const transmatrix T, const transmatrix V) {
+  if(sol) return solv::get_solmul(T, V);
   else return T * V;
   }
 

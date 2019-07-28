@@ -233,10 +233,10 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane3;
     if(DIM == 3 && hyperbolic && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3, pers3 = true;
-    if(DIM == 3 && euclid && apply_models && pmodel == mdPerspective)
+    if(DIM == 3 && (euclid || sol) && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
-    if(DIM == 3 && sol && apply_models && pmodel == mdPerspective)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
+    if(DIM == 3 && apply_models && pmodel == mdSolPerspective)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
     if(DIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
       shaderside_projection = true; pers3 = true;
       int sp = spherephase & 3;
@@ -250,6 +250,54 @@ void display_data::set_projection(int ed) {
   
   start_projection(ed, shaderside_projection);
   if(pmodel == mdRug) return;
+  
+  if(glhr::new_shader_projection == glhr::shader_projection::standardSolv) {
+    
+    static bool toload = true;
+    
+    static GLuint invexpid = 0;
+    
+    if(toload) { // if(!has_table.count(_program)) {
+      solv::load_table();
+      if(!solv::table_loaded) { pmodel = mdPerspective; set_projection(ed); return; }
+
+      println(hlog, "installing table");
+      using namespace solv;
+      toload = false;
+      
+      if(invexpid == 0) glGenTextures(1, &invexpid);
+
+      glBindTexture( GL_TEXTURE_3D, invexpid);
+
+      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      // unsigned int loc = glGetUniformLocation(_program, "inv_exp_table");
+      // glUniform4fv(loc, PRECX*PRECX*PRECZ, &(xbuffer[0]));
+      
+      auto xbuffer = new glvertex[PRECZ][PRECX][PRECX];
+      
+      // for(int y=0; y<PRECX*PRECX*PRECZ; y++) xbuffer[y] = glvertex({inv_exp_table[0][0][y][0]/64, inv_exp_table[0][0][y][1]/64, inv_exp_table[0][0][y][2]/64, 1});
+      for(int z=0; z<PRECZ; z++)
+      for(int y=0; y<PRECX; y++)
+      for(int x=0; x<PRECX; x++)
+        xbuffer[z][y][x] = glvertex({inverse_exp_table[z][y][x][0], inverse_exp_table[z][y][x][1], inverse_exp_table[z][y][x][2], 1});
+      
+      glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, PRECX, PRECX, PRECZ, 0, GL_RGBA, GL_FLOAT, xbuffer);
+      delete xbuffer;
+      
+      }
+    
+    glUniformMatrix4fv(glhr::current->uILP, 1, 0, glhr::tmtogl_transpose(solv::ilocal_perspective).as_array());
+    glUniform1i(glhr::current->tInvExpTable, glhr::INVERSE_EXP_BINDING);
+    glActiveTexture(GL_TEXTURE0 + glhr::INVERSE_EXP_BINDING);
+    glBindTexture(GL_TEXTURE_3D, invexpid);
+
+    glActiveTexture(GL_TEXTURE0 + 0);
+    }
 
   auto cd = current_display;
 
@@ -284,6 +332,8 @@ void display_data::set_projection(int ed) {
     if(pers3) {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
+      if(glhr::new_shader_projection == glhr::shader_projection::standardSolv)
+        glhr::projection_multiply(glhr::tmtogl_transpose(solv::local_perspective));
       }
     else if(DIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
