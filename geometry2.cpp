@@ -529,7 +529,7 @@ hyperpoint nearcorner(cell *c, int i) {
     if(approx_nearcorner)
       return kite::get_corner(c, i, 3) + kite::get_corner(c, i+1, 3) - C0;
     else
-      return calc_relative_matrix(c->move(i), c, C0) * C0;
+      return calc_relative_matrix(c->cmove(i), c, C0) * C0;
     }
   if(binarytiling) {
     if(WDIM == 3) {

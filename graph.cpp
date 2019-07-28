@@ -365,13 +365,13 @@ double hexshiftat(cell *c) {
 
 transmatrix ddspin(cell *c, int d, ld bonus) {
   if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->cmove(d), c, C0))) * cspin(2, 0, bonus);
-  if(WDIM == 2 && (binarytiling || penrose)) return spin(bonus) * rspintox(nearcorner(c, d));
+  if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * rspintox(nearcorner(c, d));
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 transmatrix iddspin(cell *c, int d, ld bonus) {
   if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->cmove(d), c, C0)));
-  if(WDIM == 2 && (binarytiling || penrose)) return spin(bonus) * spintox(nearcorner(c, d));
+  if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * spintox(nearcorner(c, d));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
