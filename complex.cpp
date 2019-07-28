@@ -1061,6 +1061,7 @@ namespace whirlpool {
 namespace mirror {
 
   bool build(cell *c) {
+    if(penrose || sol) return false;
     #if CAP_GP
     if(GOLDBERG) {
       if(c == c->master->c7) {
@@ -1185,6 +1186,8 @@ namespace mirror {
   #endif
   
   void createMirrors(cellwalker cw, int cpid) {
+  
+    if(penrose || sol) return;
     
     #if CAP_ARCM
     if(archimedean) {
