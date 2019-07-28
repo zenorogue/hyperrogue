@@ -284,7 +284,7 @@ namespace solv {
     ld ix = asinh(h[0]) * SXY;
     ld iy = asinh(h[1]) * SXY;
     ld iz = h[2] * SZ / log(2);
-    return abs(ix) < PRECX && abs(iy) < PRECX && abs(iz) < PRECZ;
+    return abs(ix) <= PRECX && abs(iy) <= PRECX && abs(iz) <= PRECZ + 1e-2;
     }
 
   transmatrix get_solmul(const transmatrix T, const transmatrix V) {
