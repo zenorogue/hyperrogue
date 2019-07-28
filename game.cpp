@@ -6765,7 +6765,7 @@ int ambushSize(cell *c, eItem what) {
   bool restricted = false;
   for(cell *c2: dcal) {
     if(c2->cpdist > 3) break;
-    if(c2->monst) restricted = true;
+    if(c2->monst && !isFriendly(c2) && !slowMover(c2) && !isMultitile(c2)) restricted = true;
     }
 
   int qty = items[itHunting];
