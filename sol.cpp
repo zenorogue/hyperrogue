@@ -301,7 +301,7 @@ namespace solv {
 
     int steps = 100;
     
-    hyperpoint units[3] = { point3(1,0,0), point3(0,1,0), point3(0,0,1) };
+    // hyperpoint units[3] = { point3(1,0,0), point3(0,1,0), point3(0,0,1) };
     
     /*
     println(hlog, "shift = ", kz(shift));
@@ -331,11 +331,6 @@ namespace solv {
     println(hlog, "space_to_view = ", kz(space_to_view));
     */
 
-    for(int i=0; i<3; i++) for(int j=0; j<3; j++) {
-      print(hlog, (view_to_space*units[i] | view_to_space*units[j]), " | ");
-      }
-      println(hlog);
-    
     // println(hlog, "view_to_space = ", view_to_space);
     
     transmatrix npush = Id;
