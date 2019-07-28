@@ -3,8 +3,6 @@
 
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-#include "extra/solv/common.cpp"
-
 namespace hr {
 
 namespace solv {
