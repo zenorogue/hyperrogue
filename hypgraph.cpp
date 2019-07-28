@@ -1607,6 +1607,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 void draw_boundary(int w) {
 
   if(w == 1) return;
+  if(sol) return;
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
 
