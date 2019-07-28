@@ -100,6 +100,14 @@ ld frac(ld x) {
   return x;
   }
 
+ld lerp(ld a0, ld a1, ld x) {
+  return a0 + (a1-a0) * x;
+  }
+
+ld ilerp(ld a0, ld a1, ld x) {
+  return (x-a0) / (a1-a0);
+  }
+
 // debug utilities
 
 #if CAP_PROFILING
