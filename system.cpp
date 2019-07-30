@@ -72,6 +72,8 @@ void welcomeMessage() {
     addMessage(XLAT("Good luck in the elliptic plane!"));
   else if(sphere)
     addMessage(XLAT("Welcome to Spherogue!"));
+  else if(sol)
+    addMessage(XLAT("Welcome to SolvRogue!"));
   else if(PURE && geometry == gNormal && !cheater)
     addMessage(XLAT("Welcome to the Heptagonal Mode!"));
   else if(cheater || autocheat)

@@ -315,6 +315,16 @@ namespace solv {
     transmatrix push_back = eupush( tC0(inverse(V)) );
     transmatrix space_to_view = V * push_back;
     
+    for(int x=0; x<3; x++) for(int y=0; y<=x; y++) {
+      auto& T = space_to_view;
+      ld dp = 0;
+      for(int z=0; z<3; z++) dp += T[z][x] * T[z][y];
+      
+      if(y == x) dp = 1 - sqrt(1/dp);
+      
+      for(int z=0; z<3; z++) T[z][x] -= dp * T[z][y];
+      }
+    
     transmatrix view_to_space = inverse(space_to_view);
     using namespace hyperpoint_vec;
     hyperpoint shift = /* inverse(V) * T * V * C0; */ view_to_space * T * C0;

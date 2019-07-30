@@ -513,7 +513,7 @@ transmatrix rgpushxto0(const hyperpoint& H) {
 // (without using this, imprecision could accumulate)
 
 void fixmatrix(transmatrix& T) {
-  if(sol) ;
+  if(sol) ; // fixed inside solmul
   else if(euclid) {
     for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
       ld dp = 0;
