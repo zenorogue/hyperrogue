@@ -157,7 +157,7 @@ struct hrmap_kite : hrmap {
     return h;
     }
 
-  heptagon *create_step(heptagon *of, int dir) {
+  heptagon *create_step(heptagon *of, int dir) override {
     if(of->move(dir)) return of->move(dir);
     
     auto sh = getshape(of);
