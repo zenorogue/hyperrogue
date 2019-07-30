@@ -3376,3 +3376,20 @@ Geometries and projections
 * kite-and-dart tiling on horospheres
 * Solv geometry
 * extra two-point projections
+
+2019-07-30 13:54 Version 11.1f:
+
+General:
+- fixed prairie in chaos mode (hopefully)
+- fixed crash on displaying Rugs in inventory in 3D geometries
+- shmup: fixed a bug with recall+safety
+- shmup: collect items when bumping into them in a boat
+- fixed incorrect pushing in some geometries (also caused crash when next to Thumper in Solv)
+
+Solv geometry:
+- an improved renderer with better and configurable sight range
+- fixed crashes in some lands in Solv
+- crossed out Elemental Planes
+- special Vineyard
+- fixed minemarks obscuring the view
+- when you scroll, cells are generated on the way, and the matrix is no longer destroyed
