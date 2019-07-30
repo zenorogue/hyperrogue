@@ -299,6 +299,8 @@ int main() {
   allchars.insert("⏎");
   allchars.insert("←");
   allchars.insert("→");
+  allchars.insert("⁻");
+  allchars.insert("ᶻ");
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();

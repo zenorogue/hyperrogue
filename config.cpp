@@ -689,6 +689,17 @@ void add_cells_drawn(char c = 'C') {
     }
   }
 
+string solhelp() {
+  return XLAT(
+    "Solv (aka Sol) is a 3D space where directions work in different ways. It is described by the following metric:\n"
+    "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
+    "You are currently displaying Solv in the perspective projection based on native geodesics. You can control how "
+    "the fog effects depends on the geodesic distance, and how far object in X/Y/Z coordinates are rendered.\n\n"
+    "Cells with relative x,y coordinates both over %1 and z coordinate below %2 are not rendered for technical reasons"
+    " (geodesics to that points are too weird).", fts(solv::glitch_xy), fts(solv::glitch_z)
+    );
+  }
+
 void edit_sightrange() {
   if(vid.use_smart_range) {
     ld& det = WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
@@ -696,7 +707,7 @@ void edit_sightrange() {
     }
   else if(WDIM == 3) {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
-      XLAT(
+      pmodel == mdSolPerspective ? solhelp() : XLAT(
         "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
         "In spherical geometries, the sight range of 2? will let you see things behind you as if they were in front of you, "
         "and the sight range of ? (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
@@ -716,42 +727,68 @@ void edit_sightrange() {
     dialog::bound_up(allowIncreasedSight() ? euclid ? 99 : gp::dist_2() * 5 : 0);
     }
   dialog::extra_options = [] () {
-    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
-    dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
-    if(WDIM == 2 && allowIncreasedSight()) {
-      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
-      dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
-      }
-    if(allowChangeRange() && allowIncreasedSight()) {
-      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
-      dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
-      }
-    if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
-      dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
-      dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
-      dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
-      dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
-      }      
-    if(!allowChangeRange() || !allowIncreasedSight()) {
-      dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
-      dialog::add_action(enable_cheat);
-      }
-    if(WDIM == 3 && !vid.use_smart_range) {
-      dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
-      }
-    if(DIM == 3 && !vid.use_smart_range) {
-      dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
+    if(pmodel == mdSolPerspective) {
+      dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
       dialog::add_action([] {
-        dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
-          "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
-          );
+        auto xo = dialog::extra_options;
+        dialog::editNumber(sightranges[geometry], 0, 10, 0.5, M_PI, solhelp(), "");
+        dialog::extra_options = xo; popScreen();
         });
+      dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(solv::solrange_xy), 'X');
+      dialog::add_action([] {
+        auto xo = dialog::extra_options;
+        dialog::editNumber(solv::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
+        dialog::extra_options = xo; popScreen();
+        });
+      dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(solv::solrange_z), 'Z');
+      dialog::add_action([] {
+        auto xo = dialog::extra_options;
+        dialog::editNumber(solv::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
+        dialog::extra_options = xo; popScreen();
+        });
+      }
+    else {
+      dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
+      dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
+      if(WDIM == 2 && allowIncreasedSight()) {
+        dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
+        dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
+        }
+      if(allowChangeRange() && allowIncreasedSight()) {
+        dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
+        dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
+        }
+      if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
+        dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
+        dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
+        dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
+        dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
+        }      
+      if(!allowChangeRange() || !allowIncreasedSight()) {
+        dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
+        dialog::add_action(enable_cheat);
+        }
+      if(WDIM == 3 && !vid.use_smart_range) {
+        dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
+        }
+      if(DIM == 3 && !vid.use_smart_range) {
+        dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
+        dialog::add_action([] {
+          auto xo = dialog::extra_options;
+          dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
+            "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
+            );
+          dialog::extra_options = xo; popScreen();
+          });
+        }
       }
     add_cells_drawn('C');
     if(GDIM == 3 && WDIM == 2 && pmodel == mdPerspective) {
       dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
       dialog::add_action([] {
+        auto xo = dialog::extra_options;
         dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
+        dialog::extra_options = xo; popScreen();
         });
       };
     };
@@ -760,6 +797,8 @@ void edit_sightrange() {
 void menuitem_sightrange(char c) {
   if(vid.use_smart_range)
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
+  else if(pmodel == mdSolPerspective)
+    dialog::addSelItem(XLAT("3D sight range"), fts(solv::solrange_xy) + "x" + fts(solv::solrange_z), c);
   else if(WDIM == 3)
     dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);
   else

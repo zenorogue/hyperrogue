@@ -298,12 +298,15 @@ namespace solv {
     };
 
   hrmap *new_map() { return new hrmap_sol; }
+  
+  ld solrange_xy = 50;
+  ld solrange_z = 6;
+  
+  ld glitch_xy = 2, glitch_z = 0.6;
 
   bool in_table_range(hyperpoint h) {
-    ld ix = asinh(h[0]) * SXY;
-    ld iy = asinh(h[1]) * SXY;
-    ld iz = h[2] * SZ / log(2);
-    return abs(ix) <= PRECX && abs(iy) <= PRECX && abs(iz) <= PRECZ + 1e-2;
+    if(abs(h[0]) > glitch_xy && abs(h[1]) > glitch_xy && abs(h[2]) < glitch_z) return false;
+    return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
   transmatrix get_solmul(const transmatrix T, const transmatrix V) {
@@ -399,6 +402,24 @@ namespace solv {
     
     "return res;"
     "}";
+
+auto sol_config = addHook(hooks_args, 0, [] () {
+  using namespace arg;
+  if(argis("-solrange")) {
+    shift_arg_formula(solrange_xy);
+    shift_arg_formula(solrange_z);
+    return 0;
+    }
+  else if(argis("-fsol")) {
+    shift(); solfname = args();
+    return 0;
+    }
+  else if(argis("-solglitch")) {
+    shift_arg_formula(glitch_xy);
+    shift_arg_formula(glitch_z);
+    }
+  return 1;
+  });
   
   }
 
