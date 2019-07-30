@@ -3535,6 +3535,11 @@ void turn(int delta) {
     active.push_back(m);
   additional.clear();
   
+  if(delayed_safety) { 
+    activateSafety(pc[0]->base->land);
+    delayed_safety = false;
+    }
+
   // deactivate all monsters
   for(monster *m: active)
     if(m->dead && m->type != moPlayer) {
@@ -3549,11 +3554,6 @@ void turn(int delta) {
       }
     
   active.clear();
-
-  if(delayed_safety) { 
-    activateSafety(pc[0]->base->land);
-    delayed_safety = false;
-    }
   }
 
 void recall() {
