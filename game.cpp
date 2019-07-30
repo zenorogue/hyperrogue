@@ -4154,7 +4154,7 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
     }
   cellwalker push = who;
   push += wstep;
-  if(WDIM == 3 && binarytiling) {
+  if(WDIM == 3 && binarytiling && !sol) {
     for(int a=0; a<4; a++) {
       if(push.spin < 4) push.spin = 8;
       else if(push.spin >= 8) push.spin = a;
