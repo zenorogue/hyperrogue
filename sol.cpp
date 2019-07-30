@@ -180,7 +180,8 @@ namespace solv {
       h->emeraldval = y->emeraldval;
       h->fieldval = 0;
       h->cdata = NULL;
-      return h;
+      h->alt = NULL;
+      return h;      
       }
 
     hrmap_sol() {
