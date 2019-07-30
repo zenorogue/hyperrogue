@@ -1929,6 +1929,7 @@ void movePlayer(monster *m, int delta) {
         }
       else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR | reflectflag)) {
         if(boatGoesThrough(c2) && markOrb(itOrbWater)) {
+          collectItem(c2);
           c2->wall = isIcyLand(m->base) ? waLake : waSea;
           }
         else {
