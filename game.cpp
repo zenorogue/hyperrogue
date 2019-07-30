@@ -4143,6 +4143,49 @@ int pickDownDirection(cell *c, flagtype mf) {
   return downs[hrand(qdowns)];
   }
 
+vector<int> reverse_directions(cell *c, int dir) {
+  int d = c->degree();
+  switch(geometry) {
+    case gBinary3:
+      if(dir < 4) return {8};
+      else if(dir >= 8) return {0, 1, 2, 3};
+      else return {dir ^ 1};
+    
+    case gHoroTris:
+      if(dir < 4) return {7};
+      else if(dir == 4) return {5, 6};
+      else if(dir == 5) return {6, 4};
+      else if(dir == 6) return {4, 5};
+      else return {0, 1, 2, 3};
+    
+    case gHoroRec:
+      if(dir < 2) return {6};
+      else if(dir == 6) return {0, 1};
+      else return {dir^1};
+      
+    case gKiteDart3: {
+      if(dir < 4) return {dir ^ 2};
+      if(dir >= 6) return {4, 5};
+      vector<int> res;
+      for(int i=6; i<c->type; i++) res.push_back(i);
+      return res;
+      }
+    
+    case gHoroHex: {
+      if(dir < 6) return {12, 13};
+      if(dir >= 12) return {0, 1, 2, 3, 4, 5};
+      const int dt[] = {0,0,0,0,0,0,10,11,9,8,6,7,0,0};
+      return {dt[dir]};
+      }
+    
+    default:
+      if(d & 1)
+        return { gmod(dir + c->type/2, c->type), gmod(dir + (c->type+1)/2, c->type) };
+      else
+        return { gmod(dir + c->type/2, c->type) };
+    }
+  }
+
 template<class T> 
 cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& pushdir) {
   if(subdir != 1 && subdir != -1) {
@@ -4154,13 +4197,11 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
     }
   cellwalker push = who;
   push += wstep;
-  if(WDIM == 3 && binarytiling && !sol) {
-    for(int a=0; a<4; a++) {
-      if(push.spin < 4) push.spin = 8;
-      else if(push.spin >= 8) push.spin = a;
-      else push.spin ^= 1;
-      push += wstep;
-      if(valid(push.at)) return push.at;
+  if(binarytiling) {
+    auto rd = reverse_directions(push.at, push.spin);
+    for(int i: rd) {
+      push.spin = i;
+      if(valid(push.cpeek())) return push.cpeek();
       }
     return c2;
     }

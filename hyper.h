@@ -622,6 +622,11 @@ int hrand(int x);
 // automatically adjust monster generation for 3D geometries
 int hrand_monster(int x);
 
+vector<int> reverse_directions(struct cell *c, int i);
+
+// unused for heptagons
+vector<int> reverse_directions(struct heptagon *c, int i) { return {i}; }
+
 template<class T> struct walker {
   T *at;
   int spin;
@@ -648,13 +653,10 @@ template<class T> struct walker {
     return (*this);
     }
   walker<T>& operator += (rev_t) {
-    int d = at->degree();
-    if(WDIM == 3 && binarytiling) {
-      if(spin < 4) spin = 8;
-      else if(spin >= 8) spin = 0;
-      else spin ^= 1;
-      }
-    return (*this) += d/2 + ((d&1)?hrand(2):0);
+    auto rd = reverse_directions(at, spin);
+    if(rd.size() == 1) spin = rd[0];
+    else spin = rd[hrand(rd.size())];
+    return (*this);
     }
   walker<T>& operator += (revstep_t) {
     (*this) += rev; return (*this) += wstep; 
