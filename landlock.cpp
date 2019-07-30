@@ -727,7 +727,7 @@ land_validity_t& land_validity(eLand l) {
     // not good in Field quotient
     if(geometry == gZebraQuotient)
       return special_geo3;
-    if(quotient)
+    if(quotient || sol)
       return no_great_walls;
     if(weirdhyperbolic)
       return simplified_walls;
