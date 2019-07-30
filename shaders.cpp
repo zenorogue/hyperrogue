@@ -614,6 +614,8 @@ void init() {
       1,       "float acosh(float x) {",
       1,       "  return log(sqrt(x*x - 1.0) + x);",
       1,       "  }",
+      
+      1,       "float atanh(float x) { return (log(1.+x)-log(1.-x))/2.; }",
     
       1,       "float zlevel(vec4 h) {",
       1,       "  return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]);",
