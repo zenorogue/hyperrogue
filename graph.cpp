@@ -959,11 +959,14 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pti
       qfi.fshape = &cgi.shMFloor4;
       draw_shapevec(c, V2 * zpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
       }
-    else if(WDIM == 3) {
+    else if(WDIM == 3 && c) {
       transmatrix V2 = Vit * spin(ticks / 1500.);
       draw_floorshape(c, V2 * zpush(h/100), cgi.shMFloor3, 0xFFD500FF);
       draw_floorshape(c, V2 * zpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
       queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
+      }
+    else if(WDIM == 3 && !c) {
+      queuepoly(Vit, cgi.shGem[ct6], 0xFFD500FF);
       }
     else 
     #endif
