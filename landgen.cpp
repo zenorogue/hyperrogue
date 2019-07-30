@@ -2591,11 +2591,11 @@ void setdist(cell *c, int d, cell *from) {
     }
 
   #if CAP_FIELD
-  if(d >= BARLEV-1 && c->land == laPrairie)
+  if(d >= BARLEV-1 && c->land == laPrairie && !chaosmode)
     prairie::spread(c, from);
   #endif
 
-  if(d < BARLEV && c->land == laPrairie && !c->landparam) {
+  if(d < BARLEV && c->land == laPrairie && !c->landparam && !chaosmode) {
     printf("d=%d/%d\n", d, BARLEV);
     raiseBuggyGeneration(c, "No landparam set");
     return;
