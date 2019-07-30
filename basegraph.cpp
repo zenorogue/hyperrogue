@@ -275,16 +275,15 @@ void display_data::set_projection(int ed) {
       glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-      // unsigned int loc = glGetUniformLocation(_program, "inv_exp_table");
-      // glUniform4fv(loc, PRECX*PRECX*PRECZ, &(xbuffer[0]));
       
-      auto xbuffer = new glvertex[PRECZ][PRECX][PRECX];
+      auto xbuffer = new glvertex[PRECZ*PRECY*PRECX];
       
-      // for(int y=0; y<PRECX*PRECX*PRECZ; y++) xbuffer[y] = glvertex({inv_exp_table[0][0][y][0]/64, inv_exp_table[0][0][y][1]/64, inv_exp_table[0][0][y][2]/64, 1});
-      for(int z=0; z<PRECZ; z++)
-      for(int y=0; y<PRECX; y++)
-      for(int x=0; x<PRECX; x++)
-        xbuffer[z][y][x] = glhr::makevertex(inverse_exp_table[z][y][x][0], inverse_exp_table[z][y][x][1], inverse_exp_table[z][y][x][2]);
+      ld maxd = 0;
+      for(int z=0; z<PRECZ*PRECY*PRECX; z++) {
+        auto& t = inverse_exp_table[z];
+        xbuffer[z] = glhr::makevertex(t[0], t[1], t[2]);
+        }
+      println(hlog, "maxd = ", maxd);
       
       glTexImage3D(GL_TEXTURE_3D, 0, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ, 0, GL_RGBA, GL_FLOAT, xbuffer);
       delete[] xbuffer;
@@ -297,6 +296,10 @@ void display_data::set_projection(int ed) {
     glBindTexture(GL_TEXTURE_3D, invexpid);
 
     glActiveTexture(GL_TEXTURE0 + 0);
+    
+    glUniform1f(glhr::current->uPRECX, solv::PRECX);
+    glUniform1f(glhr::current->uPRECY, solv::PRECY);
+    glUniform1f(glhr::current->uPRECZ, solv::PRECZ);
     }
 
   auto cd = current_display;

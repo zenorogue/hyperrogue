@@ -7,26 +7,31 @@ namespace hr {
 
 namespace solv {
   
-  const int PRECX = 64;
-  const int PRECZ = 32;
-  const ld SXY = 32.;
-  const ld SZ = 8.;
+  int PRECX, PRECY, PRECZ;
   
   typedef hyperpoint pt;
   typedef array<float, 3> ptlow;
 
-  ptlow inverse_exp_table[PRECZ][PRECX][PRECX];
+  vector<ptlow> inverse_exp_table;
   
   bool table_loaded;
   
+  string solfname = "soltable-final.dat";
+  
+  pt inverse_exp(pt h);
+
   void load_table() {
     if(table_loaded) return;
-    FILE *f = fopen("soltable.dat", "rb");
-    if(!f) f = fopen("/usr/lib/soltable.dat", "rb");
+    FILE *f = fopen(solfname.c_str(), "rb");
+    // if(!f) f = fopen("/usr/lib/soltable.dat", "rb");
     if(!f) { addMessage(XLAT("geodesic table missing")); pmodel = mdPerspective; return; }
-    fread(inverse_exp_table, sizeof(inverse_exp_table), 1, f);
+    fread(&PRECX, 4, 1, f);
+    fread(&PRECY, 4, 1, f);
+    fread(&PRECZ, 4, 1, f);
+    inverse_exp_table.resize(PRECX * PRECY * PRECZ);
+    fread(&inverse_exp_table[0], sizeof(ptlow) * PRECX * PRECY * PRECZ, 1, f);
     fclose(f);
-    table_loaded = true;
+    table_loaded = true;    
     }
   
   void step2(ld& x, ld &y, ld &z, ld &vx, ld &vy, ld &vz) {
@@ -57,7 +62,11 @@ namespace solv {
     }
   
   pt direct_exp(pt v, int steps) {
-    pt at = hpxy(0, 0);
+    pt at;
+    at[0] = 0;
+    at[1] = 0;
+    at[2] = 0;
+    at[3] = 1;
     v[0] /= steps;
     v[1] /= steps;
     v[2] /= steps;
@@ -88,20 +97,35 @@ namespace solv {
       }
     return hpxy3(x, y, z);
     }
+
+  ld x_to_ix(ld u) {
+    if(u == 0.) return 0.;
+    ld diag = u*u/2.;
+ 
+    ld x = diag;
+    ld y = u;
+    ld z = diag+1.;
+  
+    x /= (1.+z);
+    y /= (1.+z);
+  
+    return 0.5 - atan((0.5-x) / y) / M_PI;
+    }
   
   pt inverse_exp(pt h) {
     load_table();
     
-    ld sx = 1, sy = 1;
-    bool nz = false;
+    ld ix = h[0] >= 0. ? x_to_ix(h[0]) : -x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? x_to_ix(h[1]) : -x_to_ix(-h[1]);
+    ld iz = tanh(h[2]);
     
-    ld ix = asinh(h[0]) * SXY;
-    ld iy = asinh(h[1]) * SXY;
-    ld iz = h[2] * SZ / log(2);
-
-    if(ix < 0) ix = -ix, sx = -sx;
-    if(iy < 0) iy = -iy, sy = -sy;
-    if(iz < 0) iz = -iz, nz = true, swap(ix, iy);
+    if(ix < 0.) ix = -ix;
+    if(iy < 0.) iy = -iy;
+    if(iz < 0.) { iz = -iz; ld s = ix; ix = iy; iy = s; }
+    
+    ix *= PRECX-1;
+    iy *= PRECY-1;
+    iz *= PRECZ-1;
 
     if(ix >= PRECX-1) ix = PRECX-2;
     if(iy >= PRECX-1) iy = PRECX-2;
@@ -112,26 +136,23 @@ namespace solv {
     int az = iz, bz = az+1;
     
     pt res;
-    
-    // println(hlog, "inv_table", make_tuple(iz,iy,ix), " = ", make_tuple(inverse_exp_table[z][y][x][0], inverse_exp_table[z][y][x][1], inverse_exp_table[z][y][x][2]));
-    
-    #define S0(x,y,z) inverse_exp_table[z][y][x][t]
+
+    #define S0(x,y,z) inverse_exp_table[(z*PRECY+y)*PRECX+x][t]
     #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
     #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
-  
+
     for(int t=0; t<3; t++)
       res[t] = S2(ax) * (bx-ix) + S2(bx) * (ix-ax);
-    if(nz) swap(res[0], res[1]), res[2] = -res[2];
-    res[0] *= sx; res[1] *= sy;
-    res[3] = 1;
-    
-    #undef S0
-    #undef S1
-    #undef S2
-    
-    // println(hlog, kz(h), " => ", kz(res), " => ", kz(direct_exp(res, 1000)), " [", ix, ",", iy, ",", iz, " | ", sx, "/", sy, "/", nz, "]");
+  
+    if(h[2] < 0.) { swap(res[0], res[1]); res[2] = -res[2]; }
+    if(h[0] < 0.) res[0] = -res[0];
+    if(h[1] < 0.) res[1] = -res[1];
     
     return res;
+
+    /* ld r = sqrt(res[0] * res[0] + res[1] * res[1] + res[2] * res[2]);
+    if(r == 0.) return res;
+    return res * atanh(r) / r; */
     }
 
   transmatrix local_perspective, ilocal_perspective;
@@ -344,20 +365,35 @@ namespace solv {
   string solshader = 
     "uniform mediump sampler3D tInvExpTable;"    
     "uniform mediump mat4 uILP;"
+    "uniform mediump float PRECX, PRECY, PRECZ;"
+
+    "float x_to_ix(float u) {"
+    "  if(u < 1e-6) return 0.;"
+    "  float diag = u*u/2.;"
+   
+    "  float x = diag;"
+    "  float y = u;"
+    "  float z = diag+1.;"
+    
+    "  x /= (1.+z);"
+    "  y /= (1.+z);"
+    
+    "  return 0.5 - atan((0.5-x) / y) / 3.1415926535897932384626433832795;"
+    "  }"
+
 
     "vec4 inverse_exp(vec4 h) {"
     
-    "float ix = asinh(h[0]) * 32.;"
-    "float iy = asinh(h[1]) * 32.;"
-    "float iz = h[2] * 8. / log(2.);"
+    "float ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);"
+    "float iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);"
+    "float iz = tanh(h[2]);"
     
-    "if(ix < 0.) ix = -ix;"
-    "if(iy < 0.) iy = -iy;"
-    "if(iz < 0.) { iz = -iz; float s = ix; ix = iy; iy = s; }"
+    "if(h[2] < 1e-6) { iz = -iz; float s = ix; ix = iy; iy = s; }"
+    "if(iz < 0.) iz = 0.;"
   
-    "vec4 res = texture3D(tInvExpTable, vec3((ix + 0.5) / 64., (iy + 0.5) / 64., (iz + 0.5) / 32.));"
+    "vec4 res = texture3D(tInvExpTable, vec3(ix*(1.-1./PRECX) + 0.5/PRECX, iy*(1.-1./PRECY) + .5/PRECY, iz*(1.-1./PRECZ) + .5/PRECZ));"
   
-    "if(h[2] < 0.) { res.xy = res.yx; res[2] = -res[2]; }"
+    "if(h[2] < 1e-6) { res.xy = res.yx; res[2] = -res[2]; }"
     "if(h[0] < 0.) res[0] = -res[0];"
     "if(h[1] < 0.) res[1] = -res[1];"
     
