@@ -2104,6 +2104,9 @@ int read_config_args() {
   else if(argis("-vlq")) { 
     PHASEFROM(2); shift(); vid.linequality = argi();
     }
+  else if(argis("-fov")) { 
+    PHASEFROM(2); shift_arg_formula(vid.fov);
+    }
   else if(argis("-r")) { 
     PHASEFROM(2);
     shift(); 
