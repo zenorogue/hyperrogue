@@ -16,7 +16,7 @@ namespace solv {
   
   bool table_loaded;
   
-  string solfname = "soltable-final.dat";
+  string solfname = "solv-geodesics.dat";
   
   pt inverse_exp(pt h);
 
