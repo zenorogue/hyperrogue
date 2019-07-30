@@ -631,6 +631,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
         #endif
+        else if(sol) {
+          if((c->master->distance & 1) == 1 && (c->master->emeraldval % 3))
+            c->wall = waVinePlant;
+          }
         else if(euclid && !archimedean) {
           int x,y;
           tie(x,y) = cell_to_pair(c);
@@ -666,9 +670,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waVinePlant && hrand(100) < (randomPatternsMode ? 2 : 10) && !peace::on && !reptilecheat)
         c->monst = moVineSpirit;
       ONEMPTY {
-        if(hrand(5000) < PT(100 + 2 * (kills[moVineBeast] + kills[moVineSpirit]), 200) && notDippingFor(itWine))
+        if(hrand(5000) < PT(100 + 2 * (kills[moVineBeast] + kills[moVineSpirit]), 200) && notDippingFor(itWine) && !reptilecheat)
           c->item = itWine;
-        if(hrand_monster(8000) < 12 * (items[itWine] + yendor::hardness()))
+        if(hrand_monster(8000) < 12 * (items[itWine] + yendor::hardness()) && !reptilecheat)
           c->monst = moVineBeast;
         }
       break;

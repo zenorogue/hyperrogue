@@ -979,10 +979,13 @@ land_validity_t& land_validity(eLand l) {
   if(among(l, laEmerald, laCamelot, laDryForest) && VALENCE != 3)
     return hedgehogs;  
 
+  if(l == laWineyard && sol)
+    return lv::pattern_special;
+  
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
   if(l == laWineyard && (NONSTDVAR || sphere) && !randomPatternsMode)
     return pattern_not_implemented_random;
-  
+
   if(l == laTrollheim && quotient == qFIELD)
     return not_enough_space;
       

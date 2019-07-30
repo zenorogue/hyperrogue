@@ -4380,6 +4380,8 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
     if(c2->land == laBarrier) return darkena3(lcolor(c), 0, 0x40);
     return darkena3(gradient(lcolor(c), lcolor(c2), 0, 1, 2), 0, 0x40);
     }
+  if(sol && c->land == laWineyard && c2->master->distance < c->master->distance)
+    return 0x00800040;
   if(isAlch(c) && !c->item && (c2->item || !isAlch(c2))) return darkena3(winf[c->wall].color, 0, 0x40);
   if(c->wall == c2->wall) return 0;
   if(isFire(c) && !isFire(c2)) return darkena3(wcol, 0, 0x30);
