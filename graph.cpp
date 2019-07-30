@@ -6009,10 +6009,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             firelimit++;
             }
           else if(c->wall == waMineOpen) {
-            int mines = countMinesAround(c);
-            if(mines >= 10)
-              queuepoly(face_the_player(V), cgi.shBigMineMark[0], darkena(minecolors[(mines/10)%10], 0, 0xFF));
-            queuepoly(face_the_player(V), cgi.shMineMark[0], darkena(minecolors[mines%10], 0, 0xFF));
+            if(pmodel == mdSolPerspective && hdist0(tC0(V)) < 1e-3) {
+              }
+            else {
+              int mines = countMinesAround(c);
+              if(mines >= 10)
+                queuepoly(face_the_player(V), cgi.shBigMineMark[0], darkena(minecolors[(mines/10)%10], 0, 0xFF));
+              queuepoly(face_the_player(V), cgi.shMineMark[0], darkena(minecolors[mines%10], 0, 0xFF));
+              }
             }
           
           else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder, waCanopy) || isWatery(c) || isSulphuric(c->wall)) ;
