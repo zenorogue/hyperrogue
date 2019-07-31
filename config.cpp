@@ -671,7 +671,7 @@ void loadConfig() {
 #endif
 
 void add_cells_drawn(char c = 'C') {
-  dialog::addSelItem(XLAT("cells drawn"), its(cells_drawn), c);
+  dialog::addSelItem(XLAT("cells drawn"), noclipped ? its(cells_drawn) + " (" + its(noclipped) + ")" : its(cells_drawn), c);
   dialog::add_action([] () { 
     popScreen();
     dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"), 
