@@ -801,9 +801,12 @@ transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
   else return Position * T;
   }
 
-transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
-  if(sol) return solv::spin_towards(Position, goal);
-  return Position * rspintox(inverse(Position) * goal);
+transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, int dir, int back) {
+  transmatrix T = sol ? solv::spin_towards(Position, goal) : rspintox(inverse(Position) * goal);
+  if(back < 0) T = T * spin(M_PI);
+  if(dir) T = T * cspin(dir, 0, -M_PI/2);
+  T = Position * T;
+  return T;
   }
 
 }

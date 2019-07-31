@@ -2407,6 +2407,10 @@ int speedfactor() {
   return items[itOrbSpeed]?2:1;
   }
 
+int bulletdir() { 
+  return (WDIM == 2) ? 0 : 2;
+  }
+  
 transmatrix frontpush(ld x) {
   if(WDIM == 2) return xpush(x);
   else return cpush(2, x);
@@ -2463,7 +2467,7 @@ void moveBullet(monster *m, int delta) {
     m->vel -= delta  / speedfactor() / 600000.0;
     if(m->vel < 0 && m->parent) {
       // return to the flailer!
-      nat = nat * rspintox(inverse(m->pat) * m->parent->pat * C0) * spin(M_PI);
+      nat = spin_towards(m->pat, m->parent->pat * C0, bulletdir(), -1);
       }
     }
   else m->vel = bullet_velocity(m->type);
@@ -2581,7 +2585,7 @@ void moveBullet(monster *m, int delta) {
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise || m2->type == moBrownBug || 
         m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
-        m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
+        m2->rebasePat(spin_towards(m2->pat, nat0 * C0, 0, 1));
         if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) 
           m2->hitpoints--;
         m->dead = true;
@@ -2632,7 +2636,7 @@ void moveBullet(monster *m, int delta) {
       // Knights reflect bullets
       if(m2->type == moKnight) {
         if(m->parent && m->parent != &arrowtrap_fakeparent) {
-          nat = nat * rspintox(inverse(m->pat) * m->parent->pat * C0);
+          nat = spin_towards(nat, tC0(m->parent->pat), bulletdir(), 1);
           m->rebasePat(nat);
           }
         m->parent = m2;
@@ -2668,7 +2672,7 @@ bool dragonbreath(cell *dragon) {
   int randplayer = hrand(numplayers());
   monster* bullet = new monster;
   bullet->base = dragon;
-  bullet->at = rspintox(inverse(gmatrix[dragon]) * pc[randplayer]->pat * C0);
+  bullet->at = spin_towards(Id, inverse(gmatrix[dragon]) * tC0(pc[randplayer]->pat), bulletdir(), 1);
   bullet->type = moFireball;
   bullet->parent = bullet;
   bullet->pid = randplayer;
@@ -2902,7 +2906,7 @@ void moveMonster(monster *m, int delta) {
       if(h[0] < fabsl(h[1])) return;
       }
     else if(!peace::on) {
-      nat = spin_towards(m->pat, tC0(goal));
+      nat = spin_towards(m->pat, tC0(goal), 0, 1);
       }
     }
   

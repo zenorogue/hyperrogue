@@ -383,8 +383,6 @@ namespace solv {
     }
   
   transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
-    // Position * rspintox(inverse(Position) * goal);
-    // Position * rspintox(inverse(back_Position) * back_goal);
 
     hyperpoint at = tC0(Position);
     transmatrix push_back = inverse(eupush(at));
@@ -393,7 +391,7 @@ namespace solv {
     
     transmatrix back_Position = push_back * Position;
 
-    return Position * rspintox(inverse(back_Position) * back_goal);
+    return rspintox(inverse(back_Position) * back_goal);
     }
 
   string solshader = 
