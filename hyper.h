@@ -5630,6 +5630,8 @@ namespace kite {
 
 namespace solv {
   extern transmatrix local_perspective;
+  bool local_perspective_used() { return sol; }
+  
   hrmap *new_map();
   hyperpoint inverse_exp(hyperpoint h, bool lazy);
 
