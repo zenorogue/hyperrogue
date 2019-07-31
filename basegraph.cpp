@@ -334,7 +334,7 @@ void display_data::set_projection(int ed) {
     if(pers3) {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
-      if(glhr::new_shader_projection == glhr::shader_projection::standardSolv)
+      if(solv::local_perspective_used())
         glhr::projection_multiply(glhr::tmtogl_transpose(solv::local_perspective));
       }
     else if(DIM == 3) {
