@@ -769,7 +769,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
 
-  if(solv::geodesic_movement) {
+  if(sol && solv::geodesic_movement) {
     h = solv::inverse_exp(h, true);
     ld r = hypot_d(3, h);
     if(r < 1) h = h * (atanh(r) / r);
