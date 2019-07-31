@@ -4476,12 +4476,12 @@ void shmup_gravity_floor(cell *c) {
 ld mousedist(transmatrix T) {
   if(GDIM == 2) return intval(mouseh, tC0(T));
   hyperpoint T1 = tC0(mscale(T, cgi.FLOOR));
-  if(mouseaim_sensitivity) return sqhypot_d(2, T1) + (invis_point(T1) ? 1e10 : 0);
+  if(mouseaim_sensitivity) return sqhypot_d(2, T1) + (point_behind(T1) ? 1e10 : 0);
   hyperpoint h1;
   applymodel(T1, h1);
   using namespace hyperpoint_vec;
   h1 = h1 - hpxy((mousex - current_display->xcenter) / current_display->radius, (mousey - current_display->ycenter) / current_display->radius);
-  return sqhypot_d(2, h1) + (invis_point(T1) ? 1e10 : 0);
+  return sqhypot_d(2, h1) + (point_behind(T1) ? 1e10 : 0);
   }
 
 vector<hyperpoint> clipping_planes;

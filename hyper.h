@@ -5359,7 +5359,7 @@ extern int cells_drawn;
 
 void menuitem_sightrange(char c = 'r');
 
-bool invis_point(const hyperpoint h);
+bool point_behind(const hyperpoint h);
 bool invalid_point(const hyperpoint h);
 bool invalid_point(const transmatrix T);
 bool in_smart_range(const transmatrix& T);

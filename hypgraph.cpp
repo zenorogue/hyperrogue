@@ -879,8 +879,11 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
-bool invis_point(const hyperpoint h) {
-  if(DIM == 2 || sphere || pmodel != mdPerspective) return false;
+bool point_behind(hyperpoint h) {
+  if(sphere) return false;
+  if(!in_perspective()) return false;
+  if(pmodel == mdSolPerspective) h = solv::inverse_exp(h, true);
+  if(solv::local_perspective_used()) h = solv::local_perspective * h;
   return h[2] < 0;
   }
 
@@ -900,17 +903,13 @@ bool invalid_point(const hyperpoint h) {
   return std::isnan(h[DIM]) || h[DIM] > 1e8 || std::isinf(h[DIM]);
   }
 
-bool invalid_point(const transmatrix T) {
-  return std::isnan(T[DIM][DIM]) || T[DIM][DIM] > 1e8 || std::isinf(T[DIM][DIM]);
-  }
-
 bool in_smart_range(const transmatrix& T) {
-  if(invalid_point(T)) return false;
-  if(pmodel == mdSolPerspective) return solv::in_table_range(tC0(T));
+  hyperpoint h = tC0(T);
+  if(invalid_point(h)) return false;
+  if(pmodel == mdSolPerspective) return solv::in_table_range(h);
   hyperpoint h1;
-  applymodel(tC0(T), h1);
-  for(int i=0; i<DIM; i++) 
-    if(std::isnan(h1[i]) || std::isinf(h1[i])) return false;
+  applymodel(h, h1);
+  if(invalid_point(h1)) return false;
   ld x = current_display->xcenter + current_display->radius * h1[0];
   ld y = current_display->ycenter + current_display->radius * h1[1] * vid.stretch;
 
