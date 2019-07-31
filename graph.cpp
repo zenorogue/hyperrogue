@@ -5973,6 +5973,18 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
+              if(sol && in_perspective()) {
+                ld b = vid.binary_width * log(2) / 2;
+                const ld l = log(2) / 2;
+                switch(a) {
+                  case 0: if(V[0][3] >= b) continue; break;
+                  case 1: if(V[1][3] >= b) continue; break;
+                  case 2: case 3: if (pmodel == mdPerspective && V[2][3] >= l) continue; break;
+                  case 4: if(V[0][3] <= -b) continue; break;
+                  case 5: if(V[1][3] <= -b) continue; break;
+                  case 6: case 7: if (pmodel == mdPerspective && V[2][3] <= -l) continue; break;
+                  }
+                }
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, cgi.shWall3D[ofs + a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
                 #if CAP_TEXTURE
