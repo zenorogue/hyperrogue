@@ -278,6 +278,7 @@ void show_memory_menu() {
 
 bool protect_memory() {
   if(!CAP_MEMORY_RESERVE) return false;
+  apply_memory_reserve();
   if(reserve_limit && reserve_count < reserve_limit && !ignored_memory_warning) {
     pushScreen(show_memory_menu);
     return true;
