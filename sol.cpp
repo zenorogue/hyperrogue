@@ -125,29 +125,32 @@ namespace solv {
     iy *= PRECY-1;
     iz *= PRECZ-1;
     
+    hyperpoint res = C0;
+
     if(lazy) {
-      auto r = inverse_exp_table[(iz*PRECY+iy)*PRECX+ix];
-      hyperpoint res = C0;
+      auto r = inverse_exp_table[(int(iz)*PRECY+int(iy))*PRECX+int(ix)];
       for(int i=0; i<3; i++) res[i] = r[i];
-      return res;
       }
-
-    if(ix >= PRECX-1) ix = PRECX-2;
-    if(iy >= PRECX-1) iy = PRECX-2;
-    if(iz >= PRECZ-1) iz = PRECZ-2;
     
-    int ax = ix, bx = ax+1;
-    int ay = iy, by = ay+1;
-    int az = iz, bz = az+1;
-    
-    pt res = C0;
+    else {
 
-    #define S0(x,y,z) inverse_exp_table[(z*PRECY+y)*PRECX+x][t]
-    #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
-    #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
-
-    for(int t=0; t<3; t++)
-      res[t] = S2(ax) * (bx-ix) + S2(bx) * (ix-ax);
+      if(ix >= PRECX-1) ix = PRECX-2;
+      if(iy >= PRECX-1) iy = PRECX-2;
+      if(iz >= PRECZ-1) iz = PRECZ-2;
+      
+      int ax = ix, bx = ax+1;
+      int ay = iy, by = ay+1;
+      int az = iz, bz = az+1;
+      
+      pt res = C0;
+  
+      #define S0(x,y,z) inverse_exp_table[(z*PRECY+y)*PRECX+x][t]
+      #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
+      #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
+  
+      for(int t=0; t<3; t++)
+        res[t] = S2(ax) * (bx-ix) + S2(bx) * (ix-ax);
+      }
   
     if(h[2] < 0.) { swap(res[0], res[1]); res[2] = -res[2]; }
     if(h[0] < 0.) res[0] = -res[0];
