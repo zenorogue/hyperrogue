@@ -1373,7 +1373,7 @@ void show3D() {
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
-  dialog::addSelItem(XLAT("camera rotation"), fts(vid.camera_angle), 's');
+  dialog::addSelItem(XLAT("camera rotation"), fts(vid.camera_angle), 'x');
   if(DIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
