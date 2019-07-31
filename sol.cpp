@@ -431,6 +431,7 @@ auto sol_config = addHook(hooks_args, 0, [] () {
   else if(argis("-solglitch")) {
     shift_arg_formula(glitch_xy);
     shift_arg_formula(glitch_z);
+    return 0;
     }
   return 1;
   });
