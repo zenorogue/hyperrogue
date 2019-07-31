@@ -4490,7 +4490,7 @@ int noclipped;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clipping_planes.clear();
-  if(sphere || sol) return;
+  if(sphere) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     using namespace hyperpoint_vec;
     ld z1 = 1, z2 = 1;
@@ -5041,12 +5041,22 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
   if(just_gmatrix) return;
 #if MAXMDIM >= 4
-  if(WDIM == 3 && pmodel == mdPerspective) {
+  if(pmodel == mdPerspective) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
       drawcell_in_radar(c, V);
       return;
+      }
+    noclipped++;
+    }
+  if(pmodel == mdSolPerspective) {
+    using namespace hyperpoint_vec;
+    hyperpoint H = tC0(V);
+    if(abs(H[0]) <= 1 && abs(H[1]) <= 1 && abs(H[2]) <= 1) ;
+    else {
+      hyperpoint H2 = solv::local_perspective * solv::inverse_exp(H, true);
+      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.2) return;
       }
     noclipped++;
     }
