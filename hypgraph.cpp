@@ -320,7 +320,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
 
     case mdSolPerspective: {
-      auto S = solv::inverse_exp(H);
+      auto S = solv::inverse_exp(H, false);
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       ret[0] = S[0]/S[2] * ratio;
       ret[1] = S[1]/S[2] * ratio;

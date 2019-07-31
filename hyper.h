@@ -5631,7 +5631,7 @@ namespace kite {
 namespace solv {
   extern transmatrix local_perspective;
   hrmap *new_map();
-  hyperpoint inverse_exp(hyperpoint h);
+  hyperpoint inverse_exp(hyperpoint h, bool lazy);
 
   transmatrix get_solmul(const transmatrix T, const transmatrix V);
   extern string solshader;

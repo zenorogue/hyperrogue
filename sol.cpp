@@ -111,21 +111,26 @@ namespace solv {
   
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
-  
-  pt inverse_exp(pt h) {
+
+  pt inverse_exp(pt h, bool lazy) {
     load_table();
     
-    ld ix = h[0] >= 0. ? x_to_ix(h[0]) : -x_to_ix(-h[0]);
-    ld iy = h[1] >= 0. ? x_to_ix(h[1]) : -x_to_ix(-h[1]);
+    ld ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);
     ld iz = tanh(h[2]);
     
-    if(ix < 0.) ix = -ix;
-    if(iy < 0.) iy = -iy;
-    if(iz < 0.) { iz = -iz; ld s = ix; ix = iy; iy = s; }
+    if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
     
     ix *= PRECX-1;
     iy *= PRECY-1;
     iz *= PRECZ-1;
+    
+    if(lazy) {
+      auto r = inverse_exp_table[(iz*PRECY+iy)*PRECX+ix];
+      hyperpoint res = C0;
+      for(int i=0; i<3; i++) res[i] = r[i];
+      return res;
+      }
 
     if(ix >= PRECX-1) ix = PRECX-2;
     if(iy >= PRECX-1) iy = PRECX-2;
@@ -135,7 +140,7 @@ namespace solv {
     int ay = iy, by = ay+1;
     int az = iz, bz = az+1;
     
-    pt res;
+    pt res = C0;
 
     #define S0(x,y,z) inverse_exp_table[(z*PRECY+y)*PRECX+x][t]
     #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
