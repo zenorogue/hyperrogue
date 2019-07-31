@@ -304,8 +304,8 @@ namespace solv {
 
   hrmap *new_map() { return new hrmap_sol; }
   
-  ld solrange_xy = 50;
-  ld solrange_z = 6;
+  ld solrange_xy = 15;
+  ld solrange_z = 4;
   
   ld glitch_xy = 2, glitch_z = 0.6;
 
