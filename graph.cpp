@@ -5047,7 +5047,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
   if(just_gmatrix) return;
 #if MAXMDIM >= 4
-  if(pmodel == mdPerspective) {
+  if(WDIM == 3 && pmodel == mdPerspective) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
