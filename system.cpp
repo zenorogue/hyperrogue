@@ -1157,8 +1157,6 @@ void set_geometry(eGeometry target) {
     if(sol && old_DIM == 2) pmodel = mdSolPerspective;
     if(DIM == 2 && among(pmodel, mdPerspective, mdSolPerspective)) pmodel = mdDisk;
     if(sol && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
-    
-    if(sol && shmup::on) shmup::on = false, racing::on = false;
     }
   }
 
@@ -1278,7 +1276,6 @@ void switch_game_mode(char switchWhat) {
       shmup::on = !shmup::on;
       princess::challenge = false;
       if(!shmup::on) racing::on = false;
-      if(sol) set_geometry(gNormal);
       break;
     
     case rg::randpattern:

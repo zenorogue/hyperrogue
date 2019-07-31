@@ -796,4 +796,14 @@ transmatrix solmul(const transmatrix T, const transmatrix V) {
   else return T * V;
   }
 
+transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
+  if(sol) return solv::get_solmul_pt(Position, T);
+  else return Position * T;
+  }
+
+transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
+  if(sol) return solv::spin_towards(Position, goal);
+  return Position * rspintox(inverse(Position) * goal);
+  }
+
 }

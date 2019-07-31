@@ -1877,18 +1877,18 @@ void movePlayer(monster *m, int delta) {
     if(inertia_based) {
       if(igo) { go = false; break; }
       ld r = hypot_d(WDIM, avg_inertia);
-      nat = nat * rspintox(avg_inertia) * xpush(r * delta) * spintox(avg_inertia);
+      nat = solmul_pt(nat, rspintox(avg_inertia) * xpush(r * delta)) * spintox(avg_inertia);
       if(WDIM == 3) nat = nat * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
       m->vel = r * (600/SCALE);
       }
     else if(WDIM == 3) {
-      nat = nat1 * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+      nat = solmul_pt(nat1, cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid])) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
       m->inertia[0] = playerstrafe[cpid] / delta;
       m->inertia[1] = 0;
       m->inertia[2] = playergo[cpid] / delta;
       }
     else if(playergo[cpid]) {
-      nat = nat1 * spin(playergoturn[cpid]) * xpush(playergo[cpid]) * spin(-playergoturn[cpid]);
+      nat = solmul_pt(nat1, spin(playergoturn[cpid]) * xpush(playergo[cpid])) * spin(-playergoturn[cpid]);
       m->inertia = spin(playergoturn[cpid]) * xpush0(playergo[cpid] / delta);
       }
     
@@ -2473,10 +2473,10 @@ void moveBullet(monster *m, int delta) {
 
   if(inertia_based) {
     ld r = hypot_d(WDIM, m->inertia);
-    nat = nat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
+    nat = solmul_pt(nat, rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia));
     }
   else 
-    nat = nat * frontpush(delta * SCALE * m->vel / speedfactor());
+    nat = solmul_pt(nat, frontpush(delta * SCALE * m->vel / speedfactor()));
   cell *c2 = m->findbase(nat);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -2902,7 +2902,7 @@ void moveMonster(monster *m, int delta) {
       if(h[0] < fabsl(h[1])) return;
       }
     else if(!peace::on) {
-      nat = nat * rspintox(inverse(m->pat) * goal * C0);
+      nat = spin_towards(m->pat, tC0(goal));
       }
     }
   
@@ -2951,14 +2951,14 @@ void moveMonster(monster *m, int delta) {
   if(inertia_based) {
     if(igo) return;
     ld r = hypot_d(WDIM, m->inertia);
-    nat = nat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
+    nat = solmul_pt(nat, rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia));
     }
   else if(WDIM == 3 && igo) {
     ld fspin = rand() % 1000;  
-    nat = nat0 * cspin(1,2,fspin) * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]) * cspin(2,1,fspin);
+    nat = solmul_pt(nat0, cspin(1,2,fspin) * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]) * cspin(2,1,fspin));
     }
   else {
-    nat = nat0 * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]); // * spintox(wherePC);
+    nat = solmul_pt(nat0, spin(igospan[igo]) * xpush(step) * spin(-igospan[igo])); // * spintox(wherePC);
     }
 
   if(m->type != moRagingBull && !peace::on)

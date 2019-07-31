@@ -5636,6 +5636,8 @@ namespace solv {
   hyperpoint inverse_exp(hyperpoint h, bool lazy);
 
   transmatrix get_solmul(const transmatrix T, const transmatrix V);
+  transmatrix get_solmul_pt(const transmatrix Position, const transmatrix T);
+  transmatrix spin_towards(const transmatrix Position, const hyperpoint goal);
   extern string solshader;
   }
 

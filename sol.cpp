@@ -380,6 +380,24 @@ namespace solv {
     return space_to_view * npush * push_to;
     }
 
+  transmatrix get_solmul_pt(const transmatrix Position, const transmatrix T) {
+    return inverse(get_solmul(inverse(T), inverse(Position)));
+    }
+  
+  transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
+    // Position * rspintox(inverse(Position) * goal);
+    // Position * rspintox(inverse(back_Position) * back_goal);
+
+    hyperpoint at = tC0(Position);
+    transmatrix push_back = inverse(eupush(at));
+    hyperpoint back_goal = push_back * goal;
+    back_goal = inverse_exp(back_goal, false);
+    
+    transmatrix back_Position = push_back * Position;
+
+    return Position * rspintox(inverse(back_Position) * back_goal);
+    }
+
   string solshader = 
     "uniform mediump sampler3D tInvExpTable;"    
     "uniform mediump float PRECX, PRECY, PRECZ;"
