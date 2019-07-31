@@ -272,10 +272,7 @@ namespace solv {
     void draw() override {
       dq::visited.clear();
 
-      transmatrix T = eupush( tC0(inverse(View)) );
-      local_perspective = View * T;
-
-      dq::enqueue(viewctr.at, inverse(local_perspective) * cview());
+      dq::enqueue(viewctr.at, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();

@@ -1261,7 +1261,6 @@ void centerpc(ld aspd) {
   
   transmatrix T = cwtV;
   #if MAXMDIM >= 4
-  if(pmodel == mdSolPerspective) T = solv::local_perspective * T;
   if(GDIM == 3 && WDIM == 2) {
     geom3::do_auto_eye();
     int sl = snakelevel(cwt.at);

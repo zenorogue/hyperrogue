@@ -5009,6 +5009,8 @@ void drawcell_in_radar(cell *c, transmatrix V) {
   }
 #endif
 
+transmatrix ilocal_perspective;
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
   PROD( if(product::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; } )
@@ -5966,23 +5968,25 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           int d = (wcol & 0xF0F0F0) >> 4;
           
+          hyperpoint h; if(sol) { if(pmodel == mdSolPerspective) h = tC0(V); else h = ilocal_perspective * tC0(V); }
+          
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(pmodel == mdPerspective && !sphere && !quotient && !sol && !penrose) {
+              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !sol) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
-              if(sol && in_perspective()) {
+              else if(sol && in_perspective()) {
                 ld b = vid.binary_width * log(2) / 2;
                 const ld l = log(2) / 2;
                 switch(a) {
-                  case 0: if(V[0][3] >= b) continue; break;
-                  case 1: if(V[1][3] >= b) continue; break;
-                  case 2: case 3: if (pmodel == mdPerspective && V[2][3] >= l) continue; break;
-                  case 4: if(V[0][3] <= -b) continue; break;
-                  case 5: if(V[1][3] <= -b) continue; break;
-                  case 6: case 7: if (pmodel == mdPerspective && V[2][3] <= -l) continue; break;
+                  case 0: if(h[0] >= b) continue; break;
+                  case 1: if(h[1] >= b) continue; break;
+                  case 2: case 3: if (pmodel == mdPerspective && h[2] >= l) continue; break;
+                  case 4: if(h[0] <= -b) continue; break;
+                  case 5: if(h[1] <= -b) continue; break;
+                  case 6: case 7: if (pmodel == mdPerspective && h[2] <= -l) continue; break;
                   }
                 }
               if(qfi.fshape && wmescher) {
@@ -7113,6 +7117,15 @@ void make_actual_view() {
   actual_view_transform = sphereflip;  
   if(vid.yshift && WDIM == 2) actual_view_transform = ypush(vid.yshift) * actual_view_transform;
   #if MAXMDIM >= 4
+  if(sol) {
+    transmatrix T = eupush( tC0(inverse(View)) );
+    solv::local_perspective = View * T;
+    if(pmodel == mdSolPerspective) {
+      actual_view_transform = inverse(solv::local_perspective) * actual_view_transform;
+      return;
+      }
+    else ilocal_perspective = inverse(solv::local_perspective);
+    }
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) 
