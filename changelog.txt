@@ -3393,3 +3393,13 @@ Solv geometry:
 - special Vineyard
 - fixed minemarks obscuring the view
 - when you scroll, cells are generated on the way, and the matrix is no longer destroyed
+
+2019-07-31 17:35 Version 11.1g:
+
+- memory warnings appearing incorrectly should be fixed
+- shmup: fixed Dragons/Knight/Flailguard bullets flying in wrong directions in 3D
+- shmup now compatible with Solv
+- fixed some key conflicts in 3D menu
+- optimized graphics in Solv, also reduced the default range
+- fixed a bug with sandworms exploding in 3D (when leaving the generated part of the world)
+- radar range in 3D geometries and Euclidean 2D FPP is now configurable
