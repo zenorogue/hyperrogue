@@ -313,6 +313,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   switch(pmodel) {
     case mdPerspective: {
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
+      if(solv::local_perspective_used()) H = solv::local_perspective * H;
       ret[0] = H[0]/H[2] * ratio;
       ret[1] = H[1]/H[2] * ratio;
       ret[2] = 1;
@@ -321,6 +322,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
     case mdSolPerspective: {
       auto S = solv::inverse_exp(H, false);
+      if(solv::local_perspective_used()) S = solv::local_perspective * S;
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       ret[0] = S[0]/S[2] * ratio;
       ret[1] = S[1]/S[2] * ratio;
@@ -343,6 +345,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdDisk: {
+      if(solv::local_perspective_used()) H = solv::local_perspective * H;
       ld tz = get_tz(H);
       if(!vid.camera_angle) {
         ret[0] = H[0] / tz;
