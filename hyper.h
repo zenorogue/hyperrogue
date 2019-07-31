@@ -5629,7 +5629,7 @@ namespace kite {
 #endif
 
 namespace solv {
-  extern transmatrix local_perspective, ilocal_perspective;
+  extern transmatrix local_perspective;
   hrmap *new_map();
   hyperpoint inverse_exp(hyperpoint h);
 

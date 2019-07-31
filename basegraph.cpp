@@ -290,7 +290,6 @@ void display_data::set_projection(int ed) {
       
       }
     
-    glUniformMatrix4fv(glhr::current->uILP, 1, 0, glhr::tmtogl_transpose(solv::ilocal_perspective).as_array());
     glUniform1i(glhr::current->tInvExpTable, glhr::INVERSE_EXP_BINDING);
     glActiveTexture(GL_TEXTURE0 + glhr::INVERSE_EXP_BINDING);
     glBindTexture(GL_TEXTURE_3D, invexpid);

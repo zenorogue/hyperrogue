@@ -155,7 +155,7 @@ namespace solv {
     return res * atanh(r) / r; */
     }
 
-  transmatrix local_perspective, ilocal_perspective;
+  transmatrix local_perspective;
   
   bool geodesic_movement = true;
 
@@ -274,9 +274,8 @@ namespace solv {
 
       transmatrix T = eupush( tC0(inverse(View)) );
       local_perspective = View * T;
-      ilocal_perspective = inverse(local_perspective);
 
-      dq::enqueue(viewctr.at, cview());
+      dq::enqueue(viewctr.at, inverse(local_perspective) * cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -378,7 +377,6 @@ namespace solv {
 
   string solshader = 
     "uniform mediump sampler3D tInvExpTable;"    
-    "uniform mediump mat4 uILP;"
     "uniform mediump float PRECX, PRECY, PRECZ;"
 
     "float x_to_ix(float u) {"

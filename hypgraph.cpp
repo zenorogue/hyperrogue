@@ -906,7 +906,7 @@ bool invalid_point(const transmatrix T) {
 
 bool in_smart_range(const transmatrix& T) {
   if(invalid_point(T)) return false;
-  if(pmodel == mdSolPerspective) return solv::in_table_range(solv::ilocal_perspective * tC0(T));
+  if(pmodel == mdSolPerspective) return solv::in_table_range(tC0(T));
   hyperpoint h1;
   applymodel(tC0(T), h1);
   for(int i=0; i<DIM; i++) 
@@ -1261,6 +1261,7 @@ void centerpc(ld aspd) {
   
   transmatrix T = cwtV;
   #if MAXMDIM >= 4
+  if(pmodel == mdSolPerspective) T = solv::local_perspective * T;
   if(GDIM == 3 && WDIM == 2) {
     geom3::do_auto_eye();
     int sl = snakelevel(cwt.at);
@@ -1877,7 +1878,7 @@ bool do_draw(cell *c, const transmatrix& T) {
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(pmodel == mdSolPerspective) {
-      if(!solv::in_table_range(solv::ilocal_perspective * tC0(T))) return false;
+      if(!solv::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
       }
     else if(vid.use_smart_range) {

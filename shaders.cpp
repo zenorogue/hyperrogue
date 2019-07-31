@@ -218,7 +218,7 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uILP, uPRECX, uPRECY, uPRECZ;
+  GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uPRECX, uPRECY, uPRECZ;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -273,7 +273,6 @@ struct GLprogram {
     uFogBase = glGetUniformLocation(_program, "uFogBase");
     uAlpha = glGetUniformLocation(_program, "uAlpha");
     uColor = glGetUniformLocation(_program, "uColor");
-    uILP = glGetUniformLocation(_program, "uILP");
     tTexture = glGetUniformLocation(_program, "tTexture");
     tInvExpTable = glGetUniformLocation(_program, "tInvExpTable");
 
@@ -656,7 +655,7 @@ void init() {
       hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
-      ssol,      "t = inverse_exp(uILP * t);",
+      ssol,      "t = inverse_exp(t);",
       ssol,      "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);",
       ssol,      "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.; ",
       ssol,      "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m; ",
