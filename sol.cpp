@@ -433,6 +433,16 @@ auto sol_config = addHook(hooks_args, 0, [] () {
     shift_arg_formula(glitch_z);
     return 0;
     }
+  else if(argis("-solgeo")) {
+    geodesic_movement = true;
+    pmodel = mdSolPerspective;
+    return 0;
+    }
+  else if(argis("-solnogeo")) {
+    geodesic_movement = false;
+    pmodel = mdPerspective;
+    return 0;
+    }
   return 1;
   });
   
