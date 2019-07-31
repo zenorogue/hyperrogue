@@ -439,6 +439,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(fulltorus) {
           c->wall = waCavefloor;
           }
+        else if(sol)
+          c->wall = (c->master->zebraval % 7 >= 5 || c->master->emeraldval % 7 >= 5) ? waCavewall : waCavefloor;
         else if(WDIM == 3 && hyperbolic && !binarytiling)
           c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
         #if MAXMDIM >= 4
