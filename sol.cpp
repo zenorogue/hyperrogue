@@ -142,8 +142,6 @@ namespace solv {
       int ay = iy, by = ay+1;
       int az = iz, bz = az+1;
       
-      pt res = C0;
-  
       #define S0(x,y,z) inverse_exp_table[(z*PRECY+y)*PRECX+x][t]
       #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
       #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
