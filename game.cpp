@@ -4541,6 +4541,9 @@ void moveWorm(cell *c) {
   
   if(mounted) mf ^= (MF_MOUNT | MF_PATHDIST);
   
+  // without this, in 3D geometries, Sandworms explode because no land around them is generated yet
+  forCellCM(c2, c) setdist(c2, 8, c);
+  
   int dir = pickMoveDirection(c, mf);
   
   if(c->wall == waRose) {
