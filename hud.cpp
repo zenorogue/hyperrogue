@@ -351,7 +351,6 @@ void drawMobileArrow(int i) {
 #endif
 
 bool nofps = false;
-extern ld max_eu_dist;
 
 void draw_radar(bool cornermode) {
 
@@ -405,7 +404,7 @@ void draw_radar(bool cornermode) {
     else if(hyp) 
       return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[3]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
     else
-      return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (max_eu_dist + cgi.scalefactor/4) * 0.8);
+      return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (vid.radarrange + cgi.scalefactor/4) * 0.8);
     };
   
   for(auto& r: radarlines) {

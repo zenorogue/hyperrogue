@@ -761,7 +761,6 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
 #endif
   }
 
-ld max_eu_dist = 0;
 transmatrix radar_transform;
 
 pair<bool, hyperpoint> makeradar(hyperpoint h) {
@@ -769,10 +768,18 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
 
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
-  if(d >= sightranges[geometry]) return {false, h};
+
+  if(solv::geodesic_movement) {
+    h = solv::inverse_exp(h, true);
+    ld r = hypot_d(3, h);
+    if(r < 1) h = h * (atanh(r) / r);
+    else return {false, h};
+    }
+  if(solv::local_perspective_used()) h = solv::local_perspective * h;
   
   if(WDIM == 3) {
-    if(d) h = h * (d / sightranges[geometry] / hypot_d(3, h));
+    if(d >= vid.radarrange) return {false, h};
+    if(d) h = h * (d / vid.radarrange / hypot_d(3, h));
     }
   else if(hyperbolic) {
     for(int a=0; a<3; a++) h[a] = h[a] / (1 + h[3]);
@@ -781,8 +788,8 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
     h[2] = h[3];
     }
   else {
-    if(d > max_eu_dist) max_eu_dist = d;
-    if(d) h = h * (d / (max_eu_dist + cgi.scalefactor/4) / hypot_d(3, h));
+    if(d > vid.radarrange) return {false, h};
+    if(d) h = h * (d / (vid.radarrange + cgi.scalefactor/4) / hypot_d(3, h));
     }
   return {true, h};
   }
@@ -7212,7 +7219,6 @@ void drawthemap() {
   if(DIM == 3) make_clipping_planes();
   radarpoints.clear();
   radarlines.clear();
-  if(!(cmode & sm::NORMAL)) max_eu_dist = 0;
   callhooks(hooks_drawmap);
 
   frameid++;

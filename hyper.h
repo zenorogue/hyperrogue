@@ -225,6 +225,7 @@ struct videopar {
   ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width, fixed_facing_dir;
   int mobilecompasssize;
   int radarsize; // radar for 3D geometries
+  ld radarrange;
   int aurastr, aurasmoothen;
   bool fixed_facing;
   bool fixed_yz;
@@ -5644,5 +5645,6 @@ namespace solv {
 bool in_perspective();
 
 extern int noclipped;
+void draw_radar(bool cornermode);
 
 }

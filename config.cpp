@@ -159,6 +159,7 @@ void initConfig() {
 
   addsaver(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
   addsaver(vid.radarsize, "radarsize size", 120);
+  addsaver(vid.radarrange, "radarrange", 2.5);
   addsaver(vid.axes, "movement help", 1);
   addsaver(vid.axes3, "movement help3", false);
   addsaver(vid.shifttarget, "shift-targetting", 2);
@@ -1397,6 +1398,15 @@ void show3D() {
     dialog::addSelItem(XLAT("radar size"), fts(vid.radarsize), 'r');
     dialog::add_action([] () {
       dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", XLAT("set to 0 to disable"));
+      dialog::extra_options = [] () { draw_radar(true); };
+      });
+    }
+
+  if(WDIM == 3 || (GDIM == 3 && euclid)) {
+    dialog::addSelItem(XLAT("radar range"), fts(vid.radarrange), 'R');
+    dialog::add_action([] () {
+      dialog::editNumber(vid.radarrange, 0, 10, 0.5, 2, "", XLAT(""));
+      dialog::extra_options = [] () { draw_radar(true); };
       });
     }
   if(DIM == 3) add_edit_wall_quality('W');
