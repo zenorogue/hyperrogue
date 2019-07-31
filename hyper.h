@@ -5639,4 +5639,6 @@ namespace solv {
 
 bool in_perspective();
 
+extern int noclipped;
+
 }
