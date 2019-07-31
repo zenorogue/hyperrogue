@@ -212,9 +212,14 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
 
 struct horo_distance {
   ld a, b;
-  horo_distance(hyperpoint h1) {
+
+  void become(hyperpoint h1) {
+    if(sol) {
+      a = abs(h1[2]);
+      b = hypot_d(2, h1);
+      }
     #if CAP_BT
-    if(binarytiling) {
+    else if(binarytiling) {
       b = intval(h1, C0);
       a = abs(binary::horo_level(h1));
       }
@@ -222,20 +227,19 @@ struct horo_distance {
     #endif
       a = 0, b = intval(h1, C0);
     }
+
+  horo_distance(hyperpoint h) { become(h); }
+    
   horo_distance(hyperpoint h1, const transmatrix& T) {
     #if CAP_BT
-    if(binarytiling) {
-      hyperpoint ih1 = inverse(T) * h1;
-      b = intval(ih1, C0);
-      a = abs(binary::horo_level(ih1));
-      }
+    if(binarytiling) become(inverse(T) * h1);
     else
   #endif
       a = 0, b = intval(h1, tC0(T));
     }
   bool operator < (const horo_distance z) {
     #if CAP_BT
-    if(binarytiling) {
+    if(binarytiling || sol) {
       if(a < z.a-1e-6) return true;
       if(a > z.a+1e-6) return false;
       }
