@@ -123,7 +123,7 @@ namespace binary {
       if(d < 2)
         h->emeraldval = (parent->emeraldval * 2 + d) % 15015;
       else
-        h->emeraldval = ((parent->emeraldval - d1) * 7508) % 15015;
+        h->emeraldval = ((parent->emeraldval - d1) * 7508 + 15015) % 15015;
       }
     if(WDIM == 3 && h->c7) make_binary_lands(parent, h);
     #if DEBUG_BINARY_TILING
