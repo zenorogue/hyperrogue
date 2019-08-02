@@ -685,7 +685,7 @@ bool set_view() {
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
-  if(racing::player_relative || quotient) {
+  if(racing::player_relative || quotient || (penrose && DIM == 3)) {
     View = inverse(at) * View;
     }
   else {
