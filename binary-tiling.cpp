@@ -504,7 +504,8 @@ namespace binary {
     }
   
   int updir() {
-    if(penrose) return 4;
+    if(geometry == gBinary4) return 3;
+    if(penrose) return 0;
     return S7-1;
     }
   
