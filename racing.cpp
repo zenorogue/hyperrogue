@@ -267,6 +267,10 @@ void generate_track() {
 
   setdist(s, 6, NULL);
   makeEmpty(s);
+  cview(); // needed for some virtualRebases
+  
+  if(euclid && (penrose || archimedean)) permanent_long_distances(s);
+    compute_saved_distances(s, 300, 1000000);
   
   map<cell*, cell*> parent;
   map<int, vector<cell*> > cellbydist;
@@ -302,6 +306,8 @@ void generate_track() {
       cellbydist[trackval(c1)].push_back(c1);
       }
     }
+
+  if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
 
   try {
     track = build_shortest_path(s, goal);
