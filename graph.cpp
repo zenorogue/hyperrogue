@@ -5135,7 +5135,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       mouseover2 = c;
       }
 
-    if(!euclid) {
+    if(!masterless) {
       double dfc = euclid ? intval(tC0(V), C0) : V[GDIM][GDIM];
     
       if(dfc < centdist) {
