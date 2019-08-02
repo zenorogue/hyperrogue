@@ -1296,6 +1296,7 @@ bool pseudohept(cell *c) {
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
   #if CAP_BT
+  if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
   if(penrose) return kite::getshape(c->master) == kite::pDart;
   if(binarytiling) return binary::pseudohept(c);
   #endif
