@@ -396,10 +396,10 @@ namespace binary {
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
       transmatrix gm = Id, where = Id;
       while(h1 != h2) {
-        int up_step = geometry == gBinary4 ? 3 : S7-1;
+        int up_step = updir();
         if(h1->distance <= h2->distance) {
           if(geometry != gBinaryTiling)
-            where = itmatrix(h2, S7-1) * where, h2 = may_create_step(h2, up_step);
+            where = itmatrix(h2, up_step) * where, h2 = may_create_step(h2, up_step);
           else {
             if(type_of(h2) == 6)
               h2 = may_create_step(h2, bd_down), where = xpush(-log(2)) * where;
@@ -411,7 +411,7 @@ namespace binary {
           }
         else {
           if(geometry != gBinaryTiling)
-            gm = gm * tmatrix(h1, S7-1), h1 = may_create_step(h1, up_step);
+            gm = gm * tmatrix(h1, up_step), h1 = may_create_step(h1, up_step);
           else {
             if(type_of(h1) == 6)
               h1 = may_create_step(h1, bd_down), gm = gm * xpush(log(2));
