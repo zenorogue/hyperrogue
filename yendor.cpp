@@ -240,7 +240,12 @@ namespace yendor {
             // make it challenging
             vector<int> ds;
             for(int d=0; d<ycw.at->type; d++) {
-              if(i < YDIST/2) {
+              bool increase;
+              if(sol)
+                increase = i < YDIST / 4 || i > 3 * YDIST / 4;
+              else
+                increase = i < YDIST/2;
+              if(increase) {
                 if(celldistAlt((ycw+d).cpeek()) < celldistAlt(ycw.at))
                   ds.push_back(d);
                 }
