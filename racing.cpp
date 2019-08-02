@@ -418,7 +418,7 @@ void generate_track() {
       }
     }
   
-  int byat[256];
+  int byat[65536];
   for(int a=0; a<16; a++) byat[a] = 0;
   for(const auto s: rti) byat[s.from_track]++;
   for(int a=0; a<16; a++) printf("%d: %d\n", a, byat[a]);
