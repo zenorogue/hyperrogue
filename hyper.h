@@ -5645,6 +5645,7 @@ namespace solv {
 bool in_perspective();
 
 extern int noclipped;
-void draw_radar(bool cornermode);
+void draw_radar(bool cornermode); 
+namespace binary { int updir(); }
 
 }

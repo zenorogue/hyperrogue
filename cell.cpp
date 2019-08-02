@@ -884,8 +884,8 @@ int heptdistance(heptagon *h1, heptagon *h2) {
     if(h1 == h2) return d;
     for(int i=0; i<S7; i++) if(h1->move(i) == h2) return d + 1;
     int d1 = h1->distance, d2 = h2->distance;
-    if(d1 >= d2) d++, h1 = createStep(h1, binarytiling ? 5 : 0);
-    if(d2 >  d1) d++, h2 = createStep(h2, binarytiling ? 5 : 0);
+    if(d1 >= d2) d++, h1 = createStep(h1, binary::updir());
+    if(d2 >  d1) d++, h2 = createStep(h2, binary::updir());
     }
   }
 
