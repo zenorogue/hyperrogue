@@ -411,6 +411,7 @@ int celldist(cell *c) {
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
     return eudist(decodeId(c->master));
+  if(euclid && (penrose || archimedean)) return celldistance(currentmap->gamestart(), c);
   if(sphere || binarytiling || WDIM == 3 || geometry == gCrystal || sol || penrose) return celldistance(c, currentmap->gamestart());
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
@@ -827,6 +828,45 @@ int heptdistance(cell *c1, cell *c2) {
 
 map<pair<cell*, cell*>, int> saved_distances;
 
+set<cell*> keep_distances_from;
+
+set<cell*> dists_computed;
+
+int perma_distances;
+
+void compute_saved_distances(cell *c1, int max_range, int climit) {
+    
+  celllister cl(c1, max_range, climit, NULL);
+
+  for(int i=0; i<isize(cl.lst); i++)
+    saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
+  }
+
+void permanent_long_distances(cell *c1) {
+  keep_distances_from.insert(c1);
+  if(racing::on)
+    compute_saved_distances(c1, 300, 1000000);
+  else
+    compute_saved_distances(c1, 120, 200000);
+  }
+
+void erase_saved_distances() {
+  saved_distances.clear(); dists_computed.clear();
+  
+  for(auto c: keep_distances_from) compute_saved_distances(c, 120, 200000);
+  perma_distances = isize(saved_distances);
+  }
+
+cell *random_in_distance(cell *c, int d) {
+  vector<cell*> choices;
+  for(auto& p: saved_distances) println(hlog, p);
+
+  for(auto& p: saved_distances) if(p.first.first == c && p.second == d) choices.push_back(p.first.second);
+  println(hlog, "choices = ", isize(choices));
+  if(choices.empty()) return NULL;
+  return choices[hrand(isize(choices))];
+  }
+
 int celldistance(cell *c1, cell *c2) {
   
   if((masterless) && (euclid6 || (euclid4 && PURE))) {
@@ -866,17 +906,17 @@ int celldistance(cell *c1, cell *c2) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
+    
+    if(dists_computed.count(c1)) return 64;
       
-    if(isize(saved_distances) > 1000000) saved_distances.clear();
-
-    celllister cl(c1, 64, 1000, c2);
-
-    for(int i=0; i<isize(cl.lst); i++)
-      saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
+    if(isize(saved_distances) > perma_distances + 1000000) erase_saved_distances();
+    compute_saved_distances(c1, 64, 1000);
+    
+   dists_computed.insert(c1);
 
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
-
+      
     return 64;
     }
 
@@ -953,6 +993,8 @@ void clearCellMemory() {
   allmaps.clear();
   last_cleared = NULL;
   saved_distances.clear();
+  dists_computed.clear();
+  keep_distances_from.clear(); perma_distances = 0;
   pd_from = NULL;
   }
 
