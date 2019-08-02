@@ -879,6 +879,7 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   #if CAP_BT
   if(binarytiling) return V;
   #endif
+  if(penrose) return V;
   return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
