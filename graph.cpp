@@ -6871,7 +6871,7 @@ void drawMarkers() {
           hyperpoint H = tC0(ggmatrix(keycell));
           #if CAP_QUEUE
           queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sintick(150)));
-          queuestr(H, vid.fsize, its(celldistance(cwt.at, yi[yii].key())), 0x10101 * int(128 - 100 * sintick(150)));
+          queuestr(H, vid.fsize, its(celldistance(yi[yii].key(), cwt.at)), 0x10101 * int(128 - 100 * sintick(150)));
           #endif
           addauraspecial(H, iinf[itOrbYendor].color, 0);
           }
