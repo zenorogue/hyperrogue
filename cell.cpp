@@ -973,7 +973,7 @@ int celldistance(cell *c1, cell *c2) {
   if(geometry == gCrystal) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || sol || penrose) {
+  if(masterless || archimedean || quotient || sol || (penrose && euclid)) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
