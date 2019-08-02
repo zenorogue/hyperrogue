@@ -5059,7 +5059,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(pmodel == mdSolPerspective) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
-    if(abs(H[0]) <= 1 && abs(H[1]) <= 1 && abs(H[2]) <= 1) ;
+    if(abs(H[0]) <= 2 && abs(H[1]) <= 2 && abs(H[2]) <= 2) ;
     else {
       hyperpoint H2 = solv::inverse_exp(H, true);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.2) return;
