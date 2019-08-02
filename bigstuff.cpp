@@ -1321,7 +1321,7 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !binarytiling && 
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !binarytiling && !(hyperbolic && WDIM == 3) && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on && !racing::on))) {
     int rtr = newRoundTableRadius();

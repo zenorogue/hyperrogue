@@ -574,6 +574,7 @@ bool isLandIngame(eLand l) {
   if(isElemental(l)) l = laElementalWall;
   if(dual::state == 2 && !dual::check_side(l)) return false;
   if((euclid || sol) && isCyclic(l) && l != specialland) return false;
+  if(l == laCamelot && hyperbolic && WDIM == 3) return false;
   return land_validity(l).flags & lv::appears_in_full;
   }
 
