@@ -633,7 +633,78 @@ void setHeptagonRval(heptagon *h) {
 
 bool dmeq(int a, int b) { return (a&3) == (b&3); }
 
+/* kept for compatibility: Racing etc. */
+cdata *getHeptagonCdata_legacy(heptagon *h) {
+  if(h->cdata) return h->cdata;
+
+  if(sphere || quotient) h = currentmap->gamestart()->master;
+
+  if(h == currentmap->gamestart()->master) {
+    h->cdata = new cdata(orig_cdata);
+    for(int& v: h->cdata->val) v = 0;
+    h->cdata->bits = reptilecheat ? (1 << 21) - 1 : 0;
+    if(yendor::on && specialland == laVariant) h->cdata->bits |= (1 << 8) | (1 << 9) | (1 << 12);
+    return h->cdata;
+    }
+  
+  cdata mydata = *getHeptagonCdata_legacy(h->move(0));
+
+  for(int di=3; di<5; di++) {
+    heptspin hs(h, di, false);
+    int signum = +1;
+    while(true) {
+      heptspin hstab[15];
+      hstab[7] = hs;
+      
+      for(int i=8; i<12; i++) {
+        hstab[i] = hstab[i-1];
+        hstab[i] += ((i&1) ? 4 : 3);
+        hstab[i] += wstep;
+        hstab[i] += ((i&1) ? 3 : 4);
+        }
+
+      for(int i=6; i>=3; i--) {
+        hstab[i] = hstab[i+1];
+        hstab[i] += ((i&1) ? 3 : 4);
+        hstab[i] += wstep;
+        hstab[i] += ((i&1) ? 4 : 3);
+        }
+      
+      if(hstab[3].at->distance < hstab[7].at->distance) {
+        hs = hstab[3]; continue;
+        }
+
+      if(hstab[11].at->distance < hstab[7].at->distance) {
+        hs = hstab[11]; continue;
+        }
+      
+      int jj = 7;
+      for(int k=3; k<12; k++) if(hstab[k].at->distance < hstab[jj].at->distance) jj = k;
+      
+      int ties = 0, tiespos = 0;
+      for(int k=3; k<12; k++) if(hstab[k].at->distance == hstab[jj].at->distance) 
+        ties++, tiespos += (k-jj);
+        
+      // printf("ties=%d tiespos=%d jj=%d\n", ties, tiespos, jj);
+      if(ties == 2) jj += tiespos/2;
+      
+      if(jj&1) signum = -1;
+      hs = hstab[jj];
+      
+      break;
+      }
+    hs = hs + 3 + wstep;
+    setHeptagonRval(hs.at);
+    
+    affect(mydata, hs.spin ? hs.at->rval0 : hs.at->rval1, signum);
+    }
+
+  return h->cdata = new cdata(mydata);
+  }
+
+
 cdata *getHeptagonCdata(heptagon *h) {
+  if(geometry == gNormal && BITRUNCATED) return getHeptagonCdata_legacy(h);
   if(h->cdata) return h->cdata;
 
   if(sphere || quotient) h = currentmap->gamestart()->master;
