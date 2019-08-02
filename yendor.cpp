@@ -179,7 +179,20 @@ namespace yendor {
       
       int odir = 0;
 
-      if(true) {
+      if(euclid && (penrose || archimedean)) {
+        permanent_long_distances(yendor);
+        auto at = random_in_distance(yendor, YDIST-1);
+        permanent_long_distances(at);
+        for(int a=YDIST-2; a>=0; a--) {
+          nyi.path[a+1] = at;
+          vector<cell*> prev;
+          forCellCM(c2, at) if(celldistance(yendor, c2) == a) prev.push_back(c2);
+          if(isize(prev))  at = prev[hrand(isize(prev))];
+          }
+        nyi.path[0] = yendor;
+        }
+      
+      else {
         int t = -1;
         bignum full_id;
         bool onlychild = true;
