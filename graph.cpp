@@ -6861,7 +6861,6 @@ void drawMarkers() {
         for(i=0; i<YDIST; i++) 
           if(yi[yii].path[i]->cpdist <= get_sightrange_ambush()) {
             keycell = yi[yii].path[i];
-            break;
             }
         if(keycell) {
           for(; i<YDIST; i++) {
