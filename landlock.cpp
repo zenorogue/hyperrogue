@@ -741,6 +741,9 @@ land_validity_t& land_validity(eLand l) {
   // not enough space
   if(l == laStorms && (old_daily_id < 35 ? !BITRUNCATED : PURE) && elliptic) 
     return not_enough_space;
+  
+  if(l == laStorms && WDIM == 3)
+    return not_in_full_game; /* uses too much memory */
 
   if(l == laStorms && S7 == 3) 
     return not_enough_space;
@@ -961,7 +964,7 @@ land_validity_t& land_validity(eLand l) {
   
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
   if(l == laWarpCoast && (S3==3) && geosupport_football() != 2 && !(old_daily_id >= 33 && geosupport_chessboard())) {
-    return ugly_version;
+    return ugly_version_infull;
     }
 
   if(l == laWarpCoast && quotient && geometry != gZebraQuotient && !randomPatternsMode) 
