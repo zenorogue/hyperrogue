@@ -690,7 +690,7 @@ bool set_view() {
     }
   else {
     int z = get_info(who->base).completion;
-    int steps = euclid ? 1000 : 20;
+    int steps = euclid ? 1000 : PURE ? 10 :  20;
     cell *c1 = racing::track[max(z-steps, 0)];
     cell *c2 = racing::track[min(z+steps, isize(racing::track)-1)];
     transmatrix T1 = ypush(-vid.yshift) * ggmatrix(c1);
@@ -704,6 +704,7 @@ bool set_view() {
     transmatrix Z = T1 * inverse(T) * xpush(x);
     View = inverse(Z) * View;
     if(GDIM == 3) View = cspin(2, 0, M_PI/2) * View;
+    fixmatrix(View);
     }
   if(GDIM == 3 && WDIM == 2)
     View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[multi::cpid]) * spin(-M_PI/2) * View;
