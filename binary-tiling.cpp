@@ -813,13 +813,29 @@ int celldistance3_hex(heptagon *c1, heptagon *c2) {
   return steps;
   }
 
+int celldistance3_approx(heptagon *c1, heptagon *c2) {
+  int d = 0;
+  while(true) {
+    if(d > 1000000) return d; /* sanity check */
+    if(c1 == c2) return d;
+    if(neighborId(c1->c7, c2->c7) >= 0) return d + 1;
+    forCellEx(c3, c1->c7) if(neighborId(c3, c2->c7) >= 0) return d + 2;
+    if(c1->distance > c2->distance) c1=c1->cmove(updir()), d++;
+    else c2=c2->cmove(updir()), d++;
+    }
+  }
+
 int celldistance3(heptagon *c1, heptagon *c2) {
   switch(geometry) {
     case gBinary3: return celldistance3_square(c1, c2);
     case gHoroTris: return celldistance3_tri(c1, c2);
     case gHoroRec: return celldistance3_rec(c1, c2);
     case gHoroHex: return celldistance3_hex(c1, c2);
-    default: println(hlog, "called celldistance3 for wrong geometry"); return 0;
+    default: 
+      if(sol || !binarytiling) {
+        println(hlog, "called celldistance3 for wrong geometry"); return 0;
+        }
+      return celldistance3_approx(c1, c2);
     }
   }
 
