@@ -2501,7 +2501,7 @@ void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && geometry != gCrystal && WDIM == 2) {
+  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && geometry != gCrystal && WDIM == 2 && hyperbolic) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {
