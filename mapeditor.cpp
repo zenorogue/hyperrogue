@@ -528,7 +528,7 @@ namespace mapstream {
     if(ds == 1 && dual::state == 0) dual::enable();
     if(ds == 0 && dual::state == 1) dual::disable();
     dual::split_or_do([&] { load_only_map(f); });
-    dual::assign_landsides();
+    if(dual::state) dual::assign_landsides();
     if(f.vernum >= 0xA61A) 
       load_usershapes(f);
     return true;
