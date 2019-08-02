@@ -6653,7 +6653,7 @@ void movecost(cell* from, cell *to, int phase) {
     achievement_final(false);
     }
   
-  if(celldist(to) == 0 && !usedSafety && gold() >= 100 && (phase & 2))
+  if(geometry == gNormal && celldist(to) == 0 && !usedSafety && gold() >= 100 && (phase & 2))
     achievement_gain("COMEBACK");
   
   bool tortoiseOK = 
