@@ -1014,16 +1014,19 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   if(euclid) {
     using namespace hyperpoint_vec;
     p.push_back(c1);
-    hyperpoint h = tC0(calc_relative_matrix(c2, c1, C0)) - C0;
+    hyperpoint h = tC0(calc_relative_matrix(c2, c1, C0));
     cell *x = c1;
-    hyperpoint h1 = C0; 
+    transmatrix T1 = rspintox(h);
     int d = celldistance(c1, c2);
-    for(int i=0; i<=d * 10; i++) {
-      h1 += h / d / 10.;
-      virtualRebase(x, h1,  true);
+    int steps = d * 10;
+    ld step = hdist0(h) / steps;
+    for(int i=0; i< steps; i++) {
+      T1 = T1 * xpush(step);
+      virtualRebase(x, T1,  true);
+      println(hlog, "x = ", x, "p length = ", isize(p), " dist = ", hdist0(tC0(T1)), " dist from end = ", hdist(tC0(T1), tC0(calc_relative_matrix(c2, x, C0))));
       while(x != p.back()) {
         forCellCM(c, p.back()) 
-          if(celldistance(c, x) < celldistance(p.back(), x)) {
+          if(celldistance(x, c) < celldistance(x, p.back())) {
             p.push_back(c);
             break;
             }
