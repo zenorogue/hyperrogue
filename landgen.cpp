@@ -2494,7 +2494,7 @@ void setland_randomwalk(cell *c) {
 void setdist(cell *c, int d, cell *from) {
   
   if(c->mpdist <= d) return;
-  if(c->mpdist > d+1 && d != BARLEV) setdist(c, d+1, from);
+  if(c->mpdist > d+1 && d < BARLEV) setdist(c, d+1, from);
   c->mpdist = d;
   // printf("setdist %p %d [%p]\n", c, d, from);
   
