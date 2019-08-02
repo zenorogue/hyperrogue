@@ -966,7 +966,7 @@ int celldistance(cell *c1, cell *c2) {
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
 
-    return 64;
+    return DISTANCE_UNKNOWN;
     }
   
   #if CAP_CRYSTAL
@@ -978,7 +978,7 @@ int celldistance(cell *c1, cell *c2) {
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
     
-    if(dists_computed.count(c1)) return 64;
+    if(dists_computed.count(c1)) return DISTANCE_UNKNOWN;
       
     if(isize(saved_distances) > perma_distances + 1000000) erase_saved_distances();
     compute_saved_distances(c1, 64, 1000);
@@ -988,7 +988,7 @@ int celldistance(cell *c1, cell *c2) {
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
       
-    return 64;
+    return DISTANCE_UNKNOWN;
     }
 
   #if CAP_BT && MAXMDIM >= 4

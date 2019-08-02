@@ -2567,6 +2567,7 @@ transmatrix iddspin(cell *c, int d, ld bonus = 0);
 bool doexiton(int sym, int uni);
 void switchFullscreen();
 string turnstring(int i);
+static const int DISTANCE_UNKNOWN = 127;
 int celldistance(cell *c1, cell *c2);
 int hyperbolic_celldistance(cell *c1, cell *c2);
 bool behindsphere(const transmatrix& V);
