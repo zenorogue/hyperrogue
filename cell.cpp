@@ -412,7 +412,7 @@ int celldist(cell *c) {
   if(masterless)
     return eudist(decodeId(c->master));
   if(euclid && (penrose || archimedean)) return celldistance(currentmap->gamestart(), c);
-  if(sphere || binarytiling || WDIM == 3 || geometry == gCrystal || sol || penrose) return celldistance(c, currentmap->gamestart());
+  if(sphere || binarytiling || WDIM == 3 || geometry == gCrystal || sol || penrose) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
