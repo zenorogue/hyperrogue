@@ -627,7 +627,8 @@ namespace lv {
   land_validity_t interesting = {3, q3, "Special interest."};
   land_validity_t better_version_exists = {0, q0, "Better version exists."};
   land_validity_t dont_work_but_ingame = {1, q0 | lv::appears_in_full, "Does not work in this geometry."};
-  land_validity_t ugly_version = {1, q1 | lv::appears_in_full, "Grid does not work in this geometry."};
+  land_validity_t ugly_version_infull = {1, q1 | lv::appears_in_full, "Grid does not work in this geometry."};
+  land_validity_t ugly_version_nofull = {1, q1, "Grid does not work in this geometry."};
   land_validity_t bad_graphics = {1, q1, "Graphics not implemented in this geometry."};
   land_validity_t some0 = {0, q0, "This land does not work in the current settings. Reason not available."};
   land_validity_t some1 = {1, q1, "This land does not work well in the current settings. Reason not available."};
@@ -676,7 +677,7 @@ land_validity_t& land_validity(eLand l) {
     }
 
   if(WDIM == 3) {
-    if(l == laWarpCoast) return ugly_version;
+    if(l == laWarpCoast) return ugly_version_nofull;
     if(l == laWineyard && hyperbolic && !binarytiling && S7 == 6) return lv::pattern_special;
     if(l == laEmerald && hyperbolic && !binarytiling && S7 == 12) return lv::pattern_special;
     if(l == laZebra) return pattern_not_implemented_random;
