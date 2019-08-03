@@ -322,7 +322,6 @@ void generate_track() {
   cview(); // needed for some virtualRebases
   
   if(euclid && (penrose || archimedean)) permanent_long_distances(s);
-    compute_saved_distances(s, 300, 1000000);
   
   if(sol && specialland == laCrossroads) {
     track.push_back(s);
