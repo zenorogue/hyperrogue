@@ -819,8 +819,13 @@ int celldistance3_approx(heptagon *c1, heptagon *c2) {
   while(true) {
     if(d > 1000000) return d; /* sanity check */
     if(c1 == c2) return d;
-    if(neighborId(c1->c7, c2->c7) >= 0) return d + 1;
-    forCellEx(c3, c1->c7) if(neighborId(c3, c2->c7) >= 0) return d + 2;
+    for(int i=0; i<c1->type; i++)
+      if(c1->move(i) == c2) return d + 1;
+    for(int i=0; i<c1->type; i++) {
+      heptagon *c3 = c1->move(i);
+      for(int j=0; j<c3->type; j++)
+        if(c3->move(j) == c2) return d+2;
+        }
     if(c1->distance > c2->distance) c1=c1->cmove(updir()), d++;
     else c2=c2->cmove(updir()), d++;
     }
