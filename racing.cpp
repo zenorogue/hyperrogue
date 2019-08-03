@@ -706,7 +706,7 @@ bool set_view() {
       });
     }
 
-  if(standard_centering) return false;
+  if(standard_centering || sol) return false;
   if(player_relative && specialland == laAsteroids) return false;
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
@@ -973,7 +973,7 @@ void race_projection() {
   
   if(true) {    
     dialog::addSelItem(XLAT("point of view"), XLAT(player_relative ? "player" : "track"), 'p');
-    if(quotient || racing::standard_centering)
+    if(quotient || racing::standard_centering || sol)
       dialog::lastItem().value = XLAT("N/A");
     dialog::add_action([] () { 
       player_relative = !player_relative; 
@@ -1000,6 +1000,7 @@ void race_projection() {
     });
 
   dialog::addBoolItem(XLAT("do not use special centering for racing"), standard_centering, 'C');
+  if(sol) dialog::lastItem().value = XLAT("N/A");
   dialog::add_action([] () {
     standard_centering = !standard_centering;
     });
