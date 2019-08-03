@@ -7119,11 +7119,11 @@ ld wall_radar(cell *c, transmatrix T, ld max) {
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
-    T = T * cpush(2, -step);
+    T = solmul_pt(T, cpush(2, -step));
     virtualRebase(c, T, false);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
-      T = T * cpush(2, step); 
+      T = solmul_pt(T, cpush(2, step));
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
       }
@@ -7138,17 +7138,17 @@ void make_actual_view() {
   actual_view_transform = sphereflip;  
   if(vid.yshift && WDIM == 2) actual_view_transform = ypush(vid.yshift) * actual_view_transform;
   #if MAXMDIM >= 4
-  if(sol) {
-    transmatrix T = eupush( tC0(inverse(View)) );
-    solv::local_perspective = View * T;
-    actual_view_transform = inverse(solv::local_perspective) * actual_view_transform;
-    return;
-    }
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) 
-      actual_view_transform = zpush(wall_radar((masterless ? centerover.at : viewctr.at->c7), inverse(View), max)) * actual_view_transform; 
+      actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewctr.at->c7), inverse(View), max)), actual_view_transform * View) * inverse(View); 
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
+    }
+  if(sol) {
+    transmatrix T = actual_view_transform * View;
+    transmatrix T2 = eupush( tC0(inverse(T)) );
+    solv::local_perspective = T * T2;
+    actual_view_transform = inverse(solv::local_perspective) * actual_view_transform;
     }
   #endif
   }
