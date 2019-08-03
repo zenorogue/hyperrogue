@@ -626,7 +626,7 @@ int hrand_monster(int x);
 vector<int> reverse_directions(struct cell *c, int i);
 
 // unused for heptagons
-vector<int> reverse_directions(struct heptagon *c, int i) { return {i}; }
+inline vector<int> reverse_directions(struct heptagon *c, int i) { return {i}; }
 
 template<class T> struct walker {
   T *at;
@@ -5632,7 +5632,7 @@ namespace kite {
 
 namespace solv {
   extern transmatrix local_perspective;
-  bool local_perspective_used() { return sol; }
+  inline bool local_perspective_used() { return sol; }
   
   hrmap *new_map();
   hyperpoint inverse_exp(hyperpoint h, bool lazy);
