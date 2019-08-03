@@ -3403,3 +3403,15 @@ Solv geometry:
 - optimized graphics in Solv, also reduced the default range
 - fixed a bug with sandworms exploding in 3D (when leaving the generated part of the world)
 - radar range in 3D geometries and Euclidean 2D FPP is now configurable
+
+2019-08-03 11:50 Version 11.1h:
+
+- Geodesic movement in Solv did not work correctly, this is now fixed.
+- fixed the Racing mode to work correctly in Euclidean Archimedean, kite-and-dart (both 2D and 3D), standard binary, and Solv.
+- fixed the Orb of Yendor to correctly generate the path in Euclidean Archimedean, kite-and-dart, and Solv. (Solv worked, but is more interesting now.)
+- third person perspective now works correctly in Solv.
+- Graveyard and Emerald Mine are now nice in Solv
+- removed Land of Storms, Warped Coast, and Camelot from full games in 3D geometries
+- fixed a crash when generating Rose Garden in 3D geometries
+- fixed the landscape generation discrepancy in the racing mode (affected ghosts in Dragon, Ruined City, and Crossroads)
+- fixed loading maps in the map editor
