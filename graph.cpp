@@ -7938,6 +7938,7 @@ cell *viewcenter() {
 bool inscreenrange(cell *c) {
   if(sphere) return true;
   if(euclid) return celldistance(viewcenter(), c) <= get_sightrange_ambush();
+  if(sol) return gmatrix.count(c);
   return heptdistance(viewcenter(), c) <= 8;
   }
 
