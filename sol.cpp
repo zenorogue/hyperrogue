@@ -393,7 +393,16 @@ namespace solv {
 
     return rspintox(inverse(back_Position) * back_goal);
     }
-
+  
+  int approx_distance(heptagon *h1, heptagon *h2) {
+    auto m = (hrmap_sol*) currentmap;
+    dynamicval<eGeometry> g(geometry, gBinary4); 
+    dynamicval<hrmap*> cm(currentmap, m->binary_map);
+    int d1 = binary::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
+    int d2 = binary::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
+    return d1 + d2 - abs(h1->distance - h2->distance);
+    }
+  
   string solshader = 
     "uniform mediump sampler3D tInvExpTable;"    
     "uniform mediump float PRECX, PRECY, PRECZ;"

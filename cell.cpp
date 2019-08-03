@@ -880,6 +880,7 @@ int heptdistance(heptagon *h1, heptagon *h2) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(h1->c7, h2->c7);
   #endif
+  if(sol) return solv::approx_distance(h1, h2);
   while(true) {
     if(h1 == h2) return d;
     for(int i=0; i<S7; i++) if(h1->move(i) == h2) return d + 1;
