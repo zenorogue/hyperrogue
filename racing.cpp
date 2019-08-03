@@ -1332,11 +1332,13 @@ void markers() {
     if(invalid_point(H)) return;
 
     queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+    int cd = celldistance(track.back(), cwt.at);
+    if(cd != DISTANCE_UNKNOWN)
     queuestr(H, vid.fsize, 
       #if CAP_CRYSTAL
       (geometry == gCrystal && !crystal::pure()) ? fts(crystal::space_distance(cwt.at, track.back())) :
       #endif
-      its(celldistance(track.back(), cwt.at)), 0x10101 * int(128 - 100 * sintick(150)));
+      its(cd), 0x10101 * int(128 - 100 * sintick(150)));
     addauraspecial(H, 0xFFD500, 0);
     }
   int ghosts_left = ghosts_to_show;
