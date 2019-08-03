@@ -312,74 +312,38 @@ namespace solv {
     return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
-  transmatrix get_solmul(const transmatrix T, const transmatrix V) {
-    if(!geodesic_movement) return V * eupush(inverse(V) * T * V * C0);
-
-    transmatrix push_back = eupush( tC0(inverse(V)) );
-    transmatrix space_to_view = V * push_back;
+  transmatrix spt(transmatrix Pos, transmatrix T) {
+  
+    hyperpoint h = tC0(T);
+    h[3] = 0;
+  
+    h = Pos * h;
     
-    for(int x=0; x<3; x++) for(int y=0; y<=x; y++) {
-      auto& T = space_to_view;
-      ld dp = 0;
-      for(int z=0; z<3; z++) dp += T[z][x] * T[z][y];
-      
-      if(y == x) dp = 1 - sqrt(1/dp);
-      
-      for(int z=0; z<3; z++) T[z][x] -= dp * T[z][y];
-      }
-    
-    transmatrix view_to_space = inverse(space_to_view);
-    using namespace hyperpoint_vec;
-    hyperpoint shift = /* inverse(V) * T * V * C0; */ view_to_space * T * C0;
-    
-    transmatrix push_to = inverse(push_back);
-
     int steps = 100;
-    
-    // hyperpoint units[3] = { point3(1,0,0), point3(0,1,0), point3(0,0,1) };
-    
-    /*
-    println(hlog, "shift = ", kz(shift));
-    println(hlog, "space_to_view = ", kz(space_to_view));
-
-    for(int i=0; i<3; i++)
-      println(hlog, "view_to_space[", i, "] = ", kz(view_to_space * units[i]));
-    */
-
-    for(int s=0; s<3; s++) shift[s] /= steps;
-    ld x = 0, y = 0, z = 0;
-    
-
+    using namespace hyperpoint_vec;
+    h /= steps;
+  
     for(int i=0; i<steps; i++) {
       for(int j=0; j<3; j++) 
-        parallel(x, y, z, shift[0], shift[1], shift[2], view_to_space[0][j], view_to_space[1][j], view_to_space[2][j], -1);
-      step2(x, y, z, shift[0], shift[1], shift[2]);
+        parallel(Pos[0][3], Pos[1][3], Pos[2][3], 
+          h[0], h[1], h[2],
+          Pos[0][j], Pos[1][j], Pos[2][j],
+          +1);
+      step2(Pos[0][3], Pos[1][3], Pos[2][3], h[0], h[1], h[2]);
       }
-    
-    space_to_view = inverse(view_to_space);
-    
-    /*
-    println(hlog, "arrive at = ", kz(pt({x, y, z})), " with vel = ", (shift * steps));
+                                                                                  
+    return Pos;
+    }
 
-    for(int i=0; i<3; i++)
-      println(hlog, "view_to_space[", i, "] = ", kz(view_to_space * units[i]));
-    println(hlog, "space_to_view = ", kz(space_to_view));
-    */
-
-    // println(hlog, "view_to_space = ", view_to_space);
+  transmatrix get_solmul(const transmatrix T, const transmatrix V) {
+    if(!geodesic_movement) return V * eupush(inverse(V) * T * V * C0);
     
-    transmatrix npush = Id;
-    npush[0][GDIM] = x;
-    npush[1][GDIM] = y;
-    npush[2][GDIM] = z;
-
-    // println(hlog, "result = ", space_to_view * npush * push_to);
-    // println(hlog, "naive = ", V * eupush(inverse(V) * T * V * C0));
-    return space_to_view * npush * push_to;
+    return inverse(spt(inverse(V), inverse(T)));
     }
 
   transmatrix get_solmul_pt(const transmatrix Position, const transmatrix T) {
-    return inverse(get_solmul(inverse(T), inverse(Position)));
+    if(!geodesic_movement) return Position * T;
+    return spt(Position, T);
     }
   
   transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
