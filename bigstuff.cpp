@@ -1248,8 +1248,8 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(top_land && celldist(c) < 3 && !GOLDBERG) {
-    if(c == cwt.at->master->move(3)->c7) {
+  if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
+    if(top_land && c == cwt.at->master->move(3)->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
     }
