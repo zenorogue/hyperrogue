@@ -312,7 +312,17 @@ namespace solv {
     return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
+  void fixmatrix(transmatrix& T) {
+    transmatrix push = eupush( tC0(T) );
+    transmatrix push_back = inverse(push);
+    transmatrix gtl = push_back * T;
+    { dynamicval<eGeometry> g(geometry, gSphere); hr::fixmatrix(gtl); }
+    T = push * gtl;
+    }
+  
   transmatrix spt(transmatrix Pos, transmatrix T) {
+  
+    solv::fixmatrix(Pos);
   
     hyperpoint h = tC0(T);
     h[3] = 0;
