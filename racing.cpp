@@ -237,6 +237,58 @@ int race_checksum;
 
 ld start_line_width;
 
+void find_track(cell *start, int sign, int len) {
+  int dl = 7 - getDistLimit() - genrange_bonus;
+  cell *goal;
+  map<cell*, cell*> parent;
+  map<int, vector<cell*> > cellbydist;
+  cellbydist[0].push_back(start);
+    
+  int traversed = 0;
+  
+  while(true) {
+    traversed++;
+    if(cellbydist.empty()) {
+      printf("reset after traversing %d\n", traversed);
+      race_try++;
+      gamegen_failure = true;
+      return;
+      }
+    auto it = cellbydist.end();
+    it--;
+    // if(hrand(100) < 85 && it != cellbydist.begin()) it--;
+    auto& v = it->second;
+    if(v.empty()) { cellbydist.erase(it); continue; }
+    int id = hrand(isize(v));
+    cell *c = v[id];
+    v[id] = v.back(); v.pop_back();    
+    if(it->first >= LENGTH) {
+      goal = c;
+      break;
+      }
+    setdist(c, (8 + dl) / 2, parent[c]);
+    forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
+      parent[c1] = c;
+      int id;
+      if(sol)
+        id = (start->master->distance - c1->master->distance) * sign;
+      else
+        id = trackval(c1);
+      cellbydist[id].push_back(c1);
+      }
+    }
+
+  if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
+  
+  if(sol) {
+    vector<cell*> p;
+    while(goal != start) p.push_back(goal), goal = parent[goal];
+    while(!p.empty()) track.push_back(p.back()), p.pop_back();
+    }
+  else
+    track = build_shortest_path(start, goal);  
+  }
+
 void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
@@ -272,45 +324,19 @@ void generate_track() {
   if(euclid && (penrose || archimedean)) permanent_long_distances(s);
     compute_saved_distances(s, 300, 1000000);
   
-  map<cell*, cell*> parent;
-  map<int, vector<cell*> > cellbydist;
-  cellbydist[0].push_back(s);
-  
-  cell *goal;
-  
-  int traversed = 0;
-  
-  while(true) {
-    traversed++;
-    if(cellbydist.empty()) {
-      printf("reset after traversing %d\n", traversed);
-      race_try++;
-      gamegen_failure = true;
-      return;
-      }
-    auto it = cellbydist.end();
-    it--;
-    // if(hrand(100) < 85 && it != cellbydist.begin()) it--;
-    auto& v = it->second;
-    if(v.empty()) { cellbydist.erase(it); continue; }
-    int id = hrand(isize(v));
-    cell *c = v[id];
-    v[id] = v.back(); v.pop_back();    
-    if(it->first >= LENGTH) {
-      goal = c;
-      break;
-      }
-    setdist(c, (8 + dl) / 2, parent[c]);
-    forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
-      parent[c1] = c;
-      cellbydist[trackval(c1)].push_back(c1);
-      }
+  if(sol && specialland == laCrossroads) {
+    track.push_back(s);
+    while(isize(track) < LENGTH)
+      track.push_back(track.back()->cmove((isize(track) & 1) ? 0 : 1));
     }
-
-  if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
-
-  try {
-    track = build_shortest_path(s, goal);
+  else if(sol) {
+    track.push_back(s);
+    find_track(s, 1, LENGTH/4);
+    find_track(track.back(), -1, LENGTH-2*(LENGTH/4));
+    find_track(track.back(), 1, LENGTH/4);
+    }
+  else try {
+    find_track(s, 0, LENGTH);
     }
   catch(hr_shortest_path_exception&) {
     addMessage("error: could not build path");
