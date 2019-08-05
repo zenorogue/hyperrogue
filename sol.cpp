@@ -9,7 +9,6 @@ namespace solv {
   
   int PRECX, PRECY, PRECZ;
   
-  typedef hyperpoint pt;
   typedef array<float, 3> ptlow;
 
   vector<ptlow> inverse_exp_table;
@@ -18,7 +17,7 @@ namespace solv {
   
   string solfname = "solv-geodesics.dat";
   
-  pt inverse_exp(pt h);
+  hyperpoint inverse_exp(hyperpoint h);
 
   void load_table() {
     if(table_loaded) return;
@@ -61,8 +60,8 @@ namespace solv {
     vz += az2;
     }
   
-  pt direct_exp(pt v, int steps) {
-    pt at;
+  hyperpoint direct_exp(hyperpoint v, int steps) {
+    hyperpoint at;
     at[0] = 0;
     at[1] = 0;
     at[2] = 0;
@@ -86,7 +85,7 @@ namespace solv {
     wz += dwz * t;
     }
 
-  pt direct_exp(pt v, int steps, vector<pt> transported) {
+  hyperpoint direct_exp(hyperpoint v, int steps, vector<hyperpoint> transported) {
     ld x = 0, y = 0, z = 0;
     v[0] /= steps;
     v[1] /= steps;
@@ -112,7 +111,7 @@ namespace solv {
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
 
-  pt inverse_exp(pt h, bool lazy) {
+  hyperpoint inverse_exp(hyperpoint h, bool lazy) {
     load_table();
     
     ld ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
