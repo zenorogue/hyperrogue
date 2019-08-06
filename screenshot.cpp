@@ -295,6 +295,7 @@ void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
       }
     }
   IMAGESAVE(sout, fname.c_str());
+  SDL_FreeSurface(sout);
   }
 #endif
 
