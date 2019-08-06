@@ -822,6 +822,25 @@ void setLandQuotient(cell *c) {
   if(specialland == laWestWall) c->land = laCrossroads4;
   }
 
+void elementalXY(cell *c, int x, int y, bool make_wall) {
+  if(x > 0 && y > 0) setland(c, laEFire);
+  else if(x > 0 && y < 0) setland(c, laEAir);
+  else if(x < 0 && y < 0) setland(c, laEWater);
+  else if(x < 0 && y > 0) setland(c, laEEarth);
+  else if(x > 0) 
+    c->land = laElementalWall, c->barleft = laEAir, c->barright = laEFire;
+  else if(x < 0) 
+    c->land = laElementalWall, c->barleft = laEEarth, c->barright = laEWater;
+  else if(y > 0) 
+    c->land = laElementalWall, c->barleft = laEEarth, c->barright = laEFire;
+  else if(y < 0) 
+    c->land = laElementalWall, c->barleft = laEAir, c->barright = laEWater;
+  if(x == 0 && y == 0)
+    c->land = laElementalWall, c->wall = waBarrier;
+  else if(c->land == laElementalWall && make_wall)
+    c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
+  }
+
 void setLandSphere(cell *c) {
   setland(c, specialland);
   if(specialland == laWarpCoast)
@@ -832,20 +851,7 @@ void setLandSphere(cell *c) {
   if(specialland == laElementalWall) {
     int x = getHemisphere(c, 1);
     int y = getHemisphere(c, 2);
-    if(x > 0 && y > 0) setland(c, laEFire);
-    else if(x > 0 && y < 0) setland(c, laEAir);
-    else if(x < 0 && y < 0) setland(c, laEWater);
-    else if(x < 0 && y > 0) setland(c, laEEarth);
-    else if(x > 0) 
-      c->land = laElementalWall, c->barleft = laEAir, c->barright = laEFire;
-    else if(x < 0) 
-      c->land = laElementalWall, c->barleft = laEEarth, c->barright = laEWater;
-    else if(y > 0) 
-      c->land = laElementalWall, c->barleft = laEEarth, c->barright = laEFire;
-    else if(y < 0) 
-      c->land = laElementalWall, c->barleft = laEAir, c->barright = laEWater;
-    if(c->land == laElementalWall && (c->type != 6 || GOLDBERG))
-      c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
+    elementalXY(c, x, y, (c->type != 6 || GOLDBERG));
     }
   if(!euwrap)
   if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3 || specialland == laTerracotta) {
