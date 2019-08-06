@@ -824,9 +824,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laIce:
-      if(d == 9 && !reptilecheat) {
+      if(d == 9) {
         if(randomPatternsMode) c->wall = RANDPAT ? waIcewall : waNone;
-        else if(hrand(100) < 5 && c->wall != waBarrier) {
+        else if(hrand(100) < 5 && c->wall != waBarrier && (WDIM == 3 || !reptilecheat)) {
           c->wall = waIcewall;
           for(int i=0; i<c->type; i++) if(hrand(100) < 50) {
             cell *c2 = createMov(c, i);
