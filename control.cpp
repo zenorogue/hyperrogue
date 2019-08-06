@@ -64,7 +64,7 @@ movedir vectodir(const hyperpoint& P) {
 
   transmatrix U = ggmatrix(cwt.at);
   if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
-  if(solv::local_perspective_used()) U = solv::local_perspective * U;
+  if(nisot::local_perspective_used()) U = nisot::local_perspective * U;
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);

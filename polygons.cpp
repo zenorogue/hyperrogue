@@ -909,7 +909,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(DIM == 3 && !euclid && !binarytiling) {
+  if(DIM == 3 && !euclid && !binarytiling && !nil) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
@@ -933,6 +933,10 @@ void geometry_information::create_wall3d() {
     make_wall(5, {pt(-1,+1,-1), pt(00,+1,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(-1,+1,+1)});
     make_wall(6, {pt(-1,+1,+1), pt(+1,+1,+1), pt(+1,00,+1), pt(-1,00,+1)});
     make_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
+    }
+  
+  if(geometry == gNil) {
+    for(int i=0; i<S7; i++) make_wall(i, nilv::facevertices[i]);
     }
   
   if(penrose) {

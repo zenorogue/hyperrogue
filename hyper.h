@@ -112,8 +112,10 @@ void addMessage(string s, char spamtype = 0);
 #define euclid (cgclass == gcEuclid)
 #define sphere (cgclass == gcSphere)
 #define sol (cgclass == gcSol)
+#define nil (cgclass == gcNil)
 #define hyperbolic (cgclass == gcHyperbolic)
-#define eusol (euclid || sol)
+#define nonisotropic (sol || nil)
+#define translatable (euclid || nonisotropic)
 #define nonorientable (ginf[geometry].flags & qNONORIENTABLE)
 #define elliptic (ginf[geometry].flags & qELLIPTIC)
 #define quotient (ginf[geometry].flags & qANYQ)
@@ -552,7 +554,7 @@ struct gcell {
 #define NOBARRIERS 127
 #define MODFIXER (2*10090080*17)
 
-#define MAX_EDGE 18
+#define MAX_EDGE 22
 
 template<class T> struct walker;
 
@@ -5639,17 +5641,30 @@ namespace kite {
   }
 #endif
 
-namespace solv {
+/* nonisotropic */
+namespace nisot {
   extern transmatrix local_perspective;
-  inline bool local_perspective_used() { return sol; }
-  
+  inline bool local_perspective_used() { return nonisotropic; }
   hrmap *new_map();
-  hyperpoint inverse_exp(hyperpoint h, bool lazy);
+  transmatrix translate(const hyperpoint h);
+  bool in_table_range(hyperpoint h);
+  
+  enum iePrecision { iLazy, iTable };
 
-  transmatrix get_solmul(const transmatrix T, const transmatrix V);
-  transmatrix get_solmul_pt(const transmatrix Position, const transmatrix T);
+  transmatrix parallel_transport(const transmatrix Position, const transmatrix T);
+  transmatrix transport_view(const transmatrix T, const transmatrix V);
   transmatrix spin_towards(const transmatrix Position, const hyperpoint goal);
+  hyperpoint inverse_exp(const hyperpoint h, iePrecision p);
+  }
+
+namespace solv {  
   extern string solshader;
+  }
+
+
+namespace nilv {
+  extern array<vector<hyperpoint>, 22> facevertices;
+  void software_renderer(dqi_poly *p);
   }
 
 bool in_perspective();

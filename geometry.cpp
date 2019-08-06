@@ -135,7 +135,7 @@ void geometry_information::prepare_basics() {
   #endif
   #if CAP_BT
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
-  if(geometry == gHoroRec || penrose || sol) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
+  if(geometry == gHoroRec || penrose || sol || nil) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   #endif
   #if CAP_BT && MAXMDIM >= 4
   if(binarytiling) binary::build_tmatrix();

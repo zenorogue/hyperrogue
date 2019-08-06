@@ -313,7 +313,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   switch(pmodel) {
     case mdPerspective: {
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
-      if(solv::local_perspective_used()) H = solv::local_perspective * H;
+      if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
       ret[0] = H[0]/H[2] * ratio;
       ret[1] = H[1]/H[2] * ratio;
       ret[2] = 1;
@@ -321,8 +321,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
 
     case mdSolPerspective: {
-      auto S = solv::inverse_exp(H, false);
-      if(solv::local_perspective_used()) S = solv::local_perspective * S;
+      auto S = nisot::inverse_exp(H, nisot::iTable);
+      if(nisot::local_perspective_used()) S = nisot::local_perspective * S;
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       ret[0] = S[0]/S[2] * ratio;
       ret[1] = S[1]/S[2] * ratio;
@@ -345,7 +345,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdDisk: {
-      if(solv::local_perspective_used()) H = solv::local_perspective * H;
+      if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
       ld tz = get_tz(H);
       if(!vid.camera_angle) {
         ret[0] = H[0] / tz;
@@ -886,8 +886,8 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
 bool point_behind(hyperpoint h) {
   if(sphere) return false;
   if(!in_perspective()) return false;
-  if(pmodel == mdSolPerspective) h = solv::inverse_exp(h, true);
-  if(solv::local_perspective_used()) h = solv::local_perspective * h;
+  if(pmodel == mdSolPerspective) h = nisot::inverse_exp(h, nisot::iLazy);
+  if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
   return h[2] < 0;
   }
 
@@ -910,6 +910,7 @@ bool invalid_point(const hyperpoint h) {
 bool in_smart_range(const transmatrix& T) {
   hyperpoint h = tC0(T);
   if(invalid_point(h)) return false;
+  if(nil) return cells_drawn < 2000;
   if(pmodel == mdSolPerspective) return solv::in_table_range(h);
   hyperpoint h1;
   applymodel(h, h1);
@@ -1610,7 +1611,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 void draw_boundary(int w) {
 
   if(w == 1) return;
-  if(sol) return;
+  if(nonisotropic || euclid) return;
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
 
@@ -1880,7 +1881,11 @@ bool do_draw(cell *c, const transmatrix& T) {
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(pmodel == mdSolPerspective) {
-      if(!solv::in_table_range(tC0(T))) return false;
+      if(!nisot::in_table_range(tC0(T))) return false;
+      if(!limited_generation(c)) return false;
+      }
+    else if(nil) {
+      if(!nisot::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
       }
     else if(vid.use_smart_range) {

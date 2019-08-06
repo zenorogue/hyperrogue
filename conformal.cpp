@@ -780,8 +780,8 @@ namespace conformal {
     
     dialog::addBreak(100);
     
-    if(sol)
-      dialog::addBoolItem_action(XLAT("geodesic movement in Sol"), solv::geodesic_movement, 'G');
+    if(nonisotropic)
+      dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
 
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
     if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");

@@ -233,7 +233,7 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane3;
     if(DIM == 3 && hyperbolic && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3, pers3 = true;
-    if(DIM == 3 && (euclid || sol) && apply_models && pmodel == mdPerspective)
+    if(DIM == 3 && (euclid || sol || nil) && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
     if(DIM == 3 && apply_models && pmodel == mdSolPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
@@ -334,8 +334,8 @@ void display_data::set_projection(int ed) {
     if(pers3) {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
-      if(solv::local_perspective_used())
-        glhr::projection_multiply(glhr::tmtogl_transpose(solv::local_perspective));
+      if(nisot::local_perspective_used())
+        glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
       }
     else if(DIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
@@ -344,6 +344,8 @@ void display_data::set_projection(int ed) {
       M[2][2] = 2 / (clip_max - clip_min);
       M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
       glhr::projection_multiply(M);
+      if(nisot::local_perspective_used())
+        glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
       }
     else {
       glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));

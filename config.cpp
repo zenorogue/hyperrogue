@@ -465,7 +465,7 @@ void initConfig() {
 
   addsaver(bounded_mine_percentage, "bounded_mine_percentage");
 
-  addsaver(solv::geodesic_movement, "solv_geodesic_movement", true);
+  addsaver(nisot::geodesic_movement, "solv_geodesic_movement", true);
 
 #if CAP_SHMUP  
   shmup::initConfig();

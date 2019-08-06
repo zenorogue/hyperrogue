@@ -1240,7 +1240,7 @@ bool good_for_wall(cell *c) {
   }
   
 void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient || sol || (penrose && !binarytiling)) return;
+  if(sphere || quotient || nonisotropic || (penrose && !binarytiling)) return;
   if(chaosmode > 1) return;
   bool deepOcean = deep_ocean_at(c, from);
   

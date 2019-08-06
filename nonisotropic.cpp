@@ -5,20 +5,37 @@
 
 namespace hr {
 
+namespace nisot {
+  typedef array<float, 3> ptlow;
+
+  transmatrix local_perspective;
+  
+  bool geodesic_movement = true;
+
+  transmatrix translate(hyperpoint h) {
+    transmatrix T = Id;
+    for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
+    if(sol) {
+      T[0][0] = exp(-h[2]);
+      T[1][1] = exp(+h[2]);
+      }
+    if(nil) 
+      T[2][1] = h[0];
+    return T;
+    }
+
+  }
+
 namespace solv {
   
   int PRECX, PRECY, PRECZ;
   
-  typedef array<float, 3> ptlow;
-
-  vector<ptlow> inverse_exp_table;
+  vector<nisot::ptlow> inverse_exp_table;
   
   bool table_loaded;
   
   string solfname = "solv-geodesics.dat";
   
-  hyperpoint inverse_exp(hyperpoint h);
-
   void load_table() {
     if(table_loaded) return;
     FILE *f = fopen(solfname.c_str(), "rb");
@@ -28,75 +45,20 @@ namespace solv {
     fread(&PRECY, 4, 1, f);
     fread(&PRECZ, 4, 1, f);
     inverse_exp_table.resize(PRECX * PRECY * PRECZ);
-    fread(&inverse_exp_table[0], sizeof(ptlow) * PRECX * PRECY * PRECZ, 1, f);
+    fread(&inverse_exp_table[0], sizeof(nisot::ptlow) * PRECX * PRECY * PRECZ, 1, f);
     fclose(f);
     table_loaded = true;    
     }
   
-  void step2(ld& x, ld &y, ld &z, ld &vx, ld &vy, ld &vz) {
-  
-    ld ax = -2 * vx * vz;
-    ld ay = 2 * vy * vz;
-    ld az = exp(2*z) * vx * vx - exp(-2*z) * vy * vy;
-  
-    // ld x2 = x + vx/2;
-    // ld y2 = y + vy/2;
-    ld z2 = z + vz/2;
-    
-    ld vx2 = vx + ax/2;
-    ld vy2 = vy + ay/2;
-    ld vz2 = vz + az/2;
-    
-    ld ax2 = -2 * vx2 * vz2;
-    ld ay2 = 2 * vy2 * vz2;
-    ld az2 = exp(2*z2) * vx2 * vx2 - exp(-2*z2) * vy2 * vy2;
-    
-    x += vx + ax/2;
-    y += vy + ay/2;
-    z += vz + az/2;
-    
-    vx += ax2;
-    vy += ay2;
-    vz += az2;
+  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+    return hpxyz3(
+      -velocity[2] * transported[0] - velocity[0] * transported[2],
+       velocity[2] * transported[1] + velocity[1] * transported[2],
+       velocity[0] * transported[0] * exp(2*at[2]) - velocity[1] * transported[1] * exp(-2*at[2]),
+       0
+       );
     }
   
-  hyperpoint direct_exp(hyperpoint v, int steps) {
-    hyperpoint at;
-    at[0] = 0;
-    at[1] = 0;
-    at[2] = 0;
-    at[3] = 1;
-    v[0] /= steps;
-    v[1] /= steps;
-    v[2] /= steps;
-    for(int i=0; i<steps; i++) step2(at[0], at[1], at[2], v[0],v[1],v[2]);
-    return at;
-    }
-
-  void parallel(ld x, ld y, ld z, ld vx, ld vy, ld vz, ld& wx, ld& wy, ld& wz, ld t) {
-    // ld dax = -dz * gxyz * ay;
-    
-    ld dwx = -vz * wx - vx * wz;
-    ld dwy =  vz * wy + vy * wz;
-    ld dwz = vx * wx * exp(2*z) - vy * wy * exp(-2*z);
-      
-    wx += dwx * t;
-    wy += dwy * t;
-    wz += dwz * t;
-    }
-
-  hyperpoint direct_exp(hyperpoint v, int steps, vector<hyperpoint> transported) {
-    ld x = 0, y = 0, z = 0;
-    v[0] /= steps;
-    v[1] /= steps;
-    v[2] /= steps;
-    for(int i=0; i<steps; i++) {
-      for(auto t: transported) parallel(x,y,z, v[0],v[1],v[2], t[0], t[1], t[2], 1);
-      step2(x,y,z, v[0],v[1],v[2]);
-      }
-    return hpxy3(x, y, z);
-    }
-
   ld x_to_ix(ld u) {
     if(u == 0.) return 0.;
     ld diag = u*u/2.;
@@ -111,7 +73,7 @@ namespace solv {
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
 
-  hyperpoint inverse_exp(hyperpoint h, bool lazy) {
+  hyperpoint get_inverse_exp(hyperpoint h, bool lazy) {
     load_table();
     
     ld ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
@@ -159,10 +121,6 @@ namespace solv {
     if(r == 0.) return res;
     return res * atanh(r) / r; */
     }
-
-  transmatrix local_perspective;
-  
-  bool geodesic_movement = true;
 
   struct hrmap_sol : hrmap {
     hrmap *binary_map;
@@ -299,7 +257,15 @@ namespace solv {
 
     };
 
-  hrmap *new_map() { return new hrmap_sol; }
+  pair<heptagon*,heptagon*> getcoord(heptagon *h) {
+    return ((hrmap_sol*)currentmap)->coords[h];
+    }
+
+  heptagon *get_at(heptagon *h1, heptagon *h2, bool gen) {
+    auto m = ((hrmap_sol*)currentmap);
+    if(!gen && !m->at.count(make_pair(h1, h2))) return nullptr;
+    return m->get_at(h1, h2);
+    }
   
   ld solrange_xy = 15;
   ld solrange_z = 4;
@@ -311,62 +277,6 @@ namespace solv {
     return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
-  void fixmatrix(transmatrix& T) {
-    transmatrix push = eupush( tC0(T) );
-    transmatrix push_back = inverse(push);
-    transmatrix gtl = push_back * T;
-    { dynamicval<eGeometry> g(geometry, gSphere); hr::fixmatrix(gtl); }
-    T = push * gtl;
-    }
-  
-  transmatrix spt(transmatrix Pos, transmatrix T) {
-  
-    solv::fixmatrix(Pos);
-  
-    hyperpoint h = tC0(T);
-    h[3] = 0;
-  
-    h = Pos * h;
-    
-    int steps = 100;
-    using namespace hyperpoint_vec;
-    h /= steps;
-  
-    for(int i=0; i<steps; i++) {
-      for(int j=0; j<3; j++) 
-        parallel(Pos[0][3], Pos[1][3], Pos[2][3], 
-          h[0], h[1], h[2],
-          Pos[0][j], Pos[1][j], Pos[2][j],
-          +1);
-      step2(Pos[0][3], Pos[1][3], Pos[2][3], h[0], h[1], h[2]);
-      }
-                                                                                  
-    return Pos;
-    }
-
-  transmatrix get_solmul(const transmatrix T, const transmatrix V) {
-    if(!geodesic_movement) return V * eupush(inverse(V) * T * V * C0);
-    
-    return inverse(spt(inverse(V), inverse(T)));
-    }
-
-  transmatrix get_solmul_pt(const transmatrix Position, const transmatrix T) {
-    if(!geodesic_movement) return Position * T;
-    return spt(Position, T);
-    }
-  
-  transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
-
-    hyperpoint at = tC0(Position);
-    transmatrix push_back = inverse(eupush(at));
-    hyperpoint back_goal = push_back * goal;
-    back_goal = inverse_exp(back_goal, false);
-    
-    transmatrix back_Position = push_back * Position;
-
-    return rspintox(inverse(back_Position) * back_goal);
-    }
-  
   int approx_distance(heptagon *h1, heptagon *h2) {
     auto m = (hrmap_sol*) currentmap;
     dynamicval<eGeometry> g(geometry, gBinary4); 
@@ -412,36 +322,335 @@ namespace solv {
     
     "return res;"
     "}";
+  }
 
-auto sol_config = addHook(hooks_args, 0, [] () {
-  using namespace arg;
-  if(argis("-solrange")) {
-    shift_arg_formula(solrange_xy);
-    shift_arg_formula(solrange_z);
-    return 0;
+namespace nilv {
+
+  hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported) {
+    ld x = Position[0];
+    return point3(
+      x * Velocity[1] * Transported[1] - 0.5 * (Velocity[1] * Transported[2] + Velocity[2] * Transported[1]),
+      -.5 * x * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2]),
+      -.5 * (x*x-1) * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * x * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2])
+      );
     }
-  else if(argis("-fsol")) {
-    shift(); solfname = args();
-    return 0;
+
+  hyperpoint formula_exp(hyperpoint v) {
+    // copying Modelling Nil-geometry in Euclidean Space with Software Presentation
+    // v[0] = c cos alpha
+    // v[1] = c sin alpha
+    // v[2] = w
+    
+    if(v[0] == 0 && v[1] == 0) return v;
+    
+    if(v[2] == 0) return point31(v[0], v[1], v[0] * v[1] / 2);
+    
+    ld alpha = atan2(v[1], v[0]);
+    ld w = v[2];
+    ld c = hypot(v[0], v[1]) / v[2];
+    
+    return point31(
+      2 * c * sin(w/2) * cos(w/2 + alpha), 
+      2 * c * sin(w/2) * sin(w/2 + alpha), 
+      w * (1 + (c*c/2) * ((1 - sin(w)/w) + (1-cos(w))/w * sin(w + 2 * alpha)))
+      );
     }
-  else if(argis("-solglitch")) {
-    shift_arg_formula(glitch_xy);
-    shift_arg_formula(glitch_z);
-    return 0;
-    }
-  else if(argis("-solgeo")) {
-    geodesic_movement = true;
-    pmodel = mdSolPerspective;
-    return 0;
-    }
-  else if(argis("-solnogeo")) {
-    geodesic_movement = false;
-    pmodel = mdPerspective;
-    return 0;
-    }
-  return 1;
-  });
   
+  hyperpoint get_inverse_exp(hyperpoint h, int iterations) {
+    ld wmin, wmax;
+    
+    ld side = h[2] - h[0] * h[1] / 2;
+    
+    if(hypot_d(2, h) < 1e-6) return h;
+    else if(side > 1e-6) {
+      wmin = 0, wmax = 2 * M_PI;
+      }
+    else if(side < -1e-6) {
+      wmin = - 2 * M_PI, wmax = 0;
+      }
+    else return point3(h[0], h[1], 0);
+    
+    ld alpha_total = atan2(h[1], h[0]);
+  
+    ld cmul;
+    if(abs(h[0]) > abs(h[1]))
+      cmul = h[0] / 2 / cos(alpha_total);
+    else
+      cmul = h[1] / 2 / sin(alpha_total);  
+    
+    ld sa = sin(2 * alpha_total);
+    
+    for(int it=0;; it++) {
+      ld w = (wmin + wmax) / 2;    
+      ld c = cmul / sin(w/2);
+      ld z = w * (1 + (c*c/2) * ((1 - sin(w)/w) + (1-cos(w))/w * sa));
+      
+      if(it == iterations) {
+        ld alpha = alpha_total - w/2;
+        return point3(c * w * cos(alpha), c * w * sin(alpha), w);
+        }
+      if(h[2] > z) wmin = w;
+      else wmax = w;    
+      }
+    }
+  
+  struct mvec : array<int, 3> {
+    
+    mvec() { }
+  
+    mvec(int x, int y, int z) { 
+      auto& a = *this;
+      a[0] = x; a[1] = y; a[2] = z;
+      }
+    mvec inverse() {  
+      auto& a = *this;
+      return mvec(-a[0], -a[1], -a[2]+a[1] * a[0]); 
+      }
+    mvec operator * (const mvec b) {
+      auto& a = *this;
+      return mvec(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1]);
+      }
+    };
+
+  static const mvec mvec_zero = mvec(0, 0, 0);
+
+  hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
+
+  array<mvec, 22> movevectors = {mvec(0,-1,-1), mvec(1,-1,-1), mvec(-1,0,-1), mvec(0,0,-1), mvec(1,0,-1), mvec(-1,1,-1), mvec(0,1,-1), mvec(-1,-1,0), mvec(0,-1,0), mvec(-1,0,0), mvec(1,1,0), mvec(0,1,1), mvec(-1,1,0), mvec(1,0,1), mvec(0,0,1), mvec(-1,0,1), mvec(1,-1,0), mvec(0,-1,1), mvec(1,1,1), mvec(0,1,0), mvec(1,0,0), mvec(-1,-1,1), };
+
+  array<vector<hyperpoint>, 22> facevertices = {{
+    {point31(0.434375,-0.5,-0.489063), point31(0.414062,-0.417969,-0.578125), point31(0.003125,-0.49375,-0.49375), point31(0.414062,-0.574219,-0.414062), },
+    {point31(0.434375,-0.5,-0.489063), point31(0.490451,-0.560764,-0.292535), point31(0.414062,-0.574219,-0.414062), },
+    {point31(-0.49375,0,-0.49375), point31(-0.575,-0.415625,-0.170313), point31(-0.500977,-0.433594,-0.270508), point31(-0.414062,-0.414062,-0.414062), },
+    {point31(0.414062,-0.417969,-0.578125), point31(0.498047,0.00585938,-0.492188), point31(0.414062,0.414062,-0.414062), point31(-0.0178571,0.5,-0.497768), point31(-0.414062,0.417969,-0.578125), point31(-0.49375,0,-0.49375), point31(-0.414062,-0.414062,-0.414062), point31(0.003125,-0.49375,-0.49375), },
+    {point31(0.498047,0.00585938,-0.492188), point31(0.575,0.415625,-0.170313), point31(0.503906,0.434896,-0.265625), point31(0.414062,0.414062,-0.414062), },
+    {point31(-0.414062,0.574219,-0.414062), point31(-0.489258,0.560547,-0.293945), point31(-0.435268,0.504464,-0.485491), },
+    {point31(-0.0178571,0.5,-0.497768), point31(-0.414062,0.574219,-0.414062), point31(-0.435268,0.504464,-0.485491), point31(-0.414062,0.417969,-0.578125), },
+    {point31(-0.575,-0.415625,-0.170313), point31(-0.558594,-0.491211,-0.0136719), point31(-0.500977,-0.433594,-0.270508), },
+    {point31(0.003125,-0.49375,-0.49375), point31(-0.414062,-0.414062,-0.414062), point31(-0.500977,-0.433594,-0.270508), point31(-0.558594,-0.491211,-0.0136719), point31(-0.489258,-0.560547,0.293945), point31(-0.414062,-0.574219,0.414062), point31(-0.00260417,-0.492188,0.497396), point31(0.414062,-0.414062,0.414062), point31(0.503906,-0.434896,0.265625), point31(0.558594,-0.491211,0.0136719), point31(0.490451,-0.560764,-0.292535), point31(0.414062,-0.574219,-0.414062), },
+    {point31(-0.575,-0.415625,-0.170313), point31(-0.558594,-0.491211,-0.0136719), point31(-0.489258,-0.560547,0.293945), point31(-0.434375,-0.5,0.489063), point31(-0.414062,-0.417969,0.578125), point31(-0.49375,0.0015625,0.495312), point31(-0.575,0.415625,0.170313), point31(-0.558594,0.492969,0.0109375), point31(-0.489258,0.560547,-0.293945), point31(-0.435268,0.504464,-0.485491), point31(-0.414062,0.417969,-0.578125), point31(-0.49375,0,-0.49375), },
+    {point31(0.575,0.415625,-0.170313), point31(0.558594,0.492969,-0.0109375), point31(0.503906,0.434896,-0.265625), },
+    {point31(0.435268,0.504464,0.485491), point31(0.414062,0.574219,0.414062), point31(0.0146484,0.499023,0.499023), point31(0.414062,0.417969,0.578125), },
+    {point31(-0.558594,0.492969,0.0109375), point31(-0.500977,0.433594,0.270508), point31(-0.575,0.415625,0.170313), },
+    {point31(0.503906,-0.434896,0.265625), point31(0.575,-0.415625,0.170313), point31(0.497396,-0.00390625,0.494792), point31(0.414062,-0.414062,0.414062), },
+    {point31(-0.00260417,-0.492188,0.497396), point31(-0.414062,-0.417969,0.578125), point31(-0.49375,0.0015625,0.495312), point31(-0.414062,0.414062,0.414062), point31(0.0146484,0.499023,0.499023), point31(0.414062,0.417969,0.578125), point31(0.497396,-0.00390625,0.494792), point31(0.414062,-0.414062,0.414062), },
+    {point31(-0.49375,0.0015625,0.495312), point31(-0.414062,0.414062,0.414062), point31(-0.500977,0.433594,0.270508), point31(-0.575,0.415625,0.170313), },
+    {point31(0.558594,-0.491211,0.0136719), point31(0.575,-0.415625,0.170313), point31(0.503906,-0.434896,0.265625), },
+    {point31(-0.414062,-0.574219,0.414062), point31(-0.434375,-0.5,0.489063), point31(-0.414062,-0.417969,0.578125), point31(-0.00260417,-0.492188,0.497396), },
+    {point31(0.490451,0.560764,0.292535), point31(0.414062,0.574219,0.414062), point31(0.435268,0.504464,0.485491), },
+    {point31(-0.0178571,0.5,-0.497768), point31(-0.414062,0.574219,-0.414062), point31(-0.489258,0.560547,-0.293945), point31(-0.558594,0.492969,0.0109375), point31(-0.500977,0.433594,0.270508), point31(-0.414062,0.414062,0.414062), point31(0.0146484,0.499023,0.499023), point31(0.414062,0.574219,0.414062), point31(0.490451,0.560764,0.292535), point31(0.558594,0.492969,-0.0109375), point31(0.503906,0.434896,-0.265625), point31(0.414062,0.414062,-0.414062), },
+    {point31(0.414062,-0.417969,-0.578125), point31(0.498047,0.00585938,-0.492188), point31(0.575,0.415625,-0.170313), point31(0.558594,0.492969,-0.0109375), point31(0.490451,0.560764,0.292535), point31(0.435268,0.504464,0.485491), point31(0.414062,0.417969,0.578125), point31(0.497396,-0.00390625,0.494792), point31(0.575,-0.415625,0.170313), point31(0.558594,-0.491211,0.0136719), point31(0.490451,-0.560764,-0.292535), point31(0.434375,-0.5,-0.489063), },
+    {point31(-0.414062,-0.574219,0.414062), point31(-0.434375,-0.5,0.489063), point31(-0.489258,-0.560547,0.293945), },
+    }};
+  
+  struct hrmap_nil : hrmap {
+    unordered_map<mvec, heptagon*> at;
+    unordered_map<heptagon*, mvec> coords;
+    
+    heptagon *getOrigin() override { return get_at(mvec_zero); }
+    
+    heptagon *get_at(mvec c) {
+      auto& h = at[c];
+      if(h) return h;
+      h = tailored_alloc<heptagon> (S7);
+      h->c7 = newCell(S7, h);
+      coords[h] = c;
+      h->dm4 = 0;
+      h->zebraval = c[0];
+      h->emeraldval = c[1];
+      h->fieldval = c[2];
+      h->cdata = NULL;
+      h->alt = NULL;
+      return h;      
+      }
+
+    heptagon *create_step(heptagon *parent, int d) override {
+      auto p = coords[parent];
+      auto q = p * movevectors[d];
+      auto child = get_at(q);
+      parent->c.connect(d, child, (d + 11) % 22, false);
+      return child;
+      }
+
+    transmatrix adjmatrix(int i) {
+      return nisot::translate(mvec_to_point(movevectors[i]));
+      }
+    
+    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
+      return nisot::translate(mvec_to_point(coords[h1].inverse() * coords[h2]));
+      }
+
+    void draw() override {
+      dq::visited.clear();
+
+      dq::enqueue(viewctr.at, cview());
+      
+      while(!dq::drawqueue.empty()) {
+        auto& p = dq::drawqueue.front();
+        heptagon *h = get<0>(p);
+        transmatrix V = get<1>(p);
+        dq::drawqueue.pop();
+        
+        cell *c = h->c7;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V, 0, false);
+
+        if(0) for(int t=0; t<c->type; t++) {
+          if(!c->move(t)) continue;
+          dynamicval<color_t> g(poly_outline, darkena((0x142968*t) & 0xFFFFFF, 0, 255) );
+          queuepoly(V, cgi.shWireframe3D[t], 0);
+          }
+  
+        for(int i=0; i<S7; i++) {
+          // note: need do cmove before c.spin
+          heptagon *h1 = h->cmove(i);
+          dq::enqueue(h1, V * adjmatrix(i));
+          }
+        }
+      }
+
+    };
+  }
+
+namespace nisot {
+
+  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+    if(sol) return solv::christoffel(at, velocity, transported);
+    else if(nil) return nilv::christoffel(at, velocity, transported);
+    else return point3(0, 0, 0);
+    }
+
+  bool in_table_range(hyperpoint h) {
+    if(sol) return solv::in_table_range(h);
+    return true;
+    }
+  
+  hyperpoint inverse_exp(const hyperpoint h, iePrecision p) {
+    if(sol) return solv::get_inverse_exp(h, p == iLazy);
+    if(nil) return nilv::get_inverse_exp(h, 10);
+    return point3(h[0], h[1], h[2]);
+    }
+
+  void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
+    using namespace hyperpoint_vec;
+    auto acc = christoffel(at, velocity, velocity);
+    
+    auto at2 = at + velocity / 2;
+    auto velocity2 = velocity + acc / 2;
+    
+    auto acc2 = christoffel(at2, velocity2, velocity2);
+    
+    at = at + velocity + acc2 / 2;
+    
+    velocity = velocity + acc;
+    }
+  
+  hyperpoint direct_exp(hyperpoint v, int steps) {
+    using namespace hyperpoint_vec;
+    hyperpoint at = point31(0, 0, 0);
+    v /= steps;
+    v[3] = 0;
+    for(int i=0; i<steps; i++) geodesic_step(at, v);
+    return at;
+    }
+
+  transmatrix transpose(transmatrix T) {
+    transmatrix result;
+    for(int i=0; i<MDIM; i++)
+      for(int j=0; j<MDIM; j++)
+        result[j][i] = T[i][j];
+    return result;
+    }
+  
+  transmatrix parallel_transport_bare(transmatrix Pos, transmatrix T) {
+  
+    hyperpoint h = tC0(T);
+    h[3] = 0;
+  
+    h = Pos * h;
+    
+    int steps = 100;
+    using namespace hyperpoint_vec;
+    h /= steps;
+  
+    auto tPos = transpose(Pos);
+  
+    for(int i=0; i<steps; i++) {
+      for(int j=0; j<3; j++)
+        tPos[j] += christoffel(tPos[3], h, tPos[j]);
+      geodesic_step(tPos[3], h);
+      }
+                                                                                  
+    return transpose(tPos);
+    }
+
+  void fixmatrix(transmatrix& T) {
+    transmatrix push = eupush( tC0(T) );
+    transmatrix push_back = inverse(push);
+    transmatrix gtl = push_back * T;
+    { dynamicval<eGeometry> g(geometry, gSphere); hr::fixmatrix(gtl); }
+    T = push * gtl;
+    }
+  
+  transmatrix parallel_transport(const transmatrix Position, const transmatrix T) {
+    if(!geodesic_movement) return Position * T;
+    auto P = Position;
+    nisot::fixmatrix(P);  
+    return parallel_transport_bare(P, T);
+    }
+  
+  transmatrix transport_view(const transmatrix T, const transmatrix V) {
+    if(!geodesic_movement) return V * eupush(inverse(V) * T * V * C0);
+    return inverse(parallel_transport(inverse(V), inverse(T)));
+    }
+
+  transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
+
+    hyperpoint at = tC0(Position);
+    transmatrix push_back = inverse(translate(at));
+    hyperpoint back_goal = push_back * goal;
+    back_goal = inverse_exp(back_goal, iTable);
+    
+    transmatrix back_Position = push_back * Position;
+
+    return rspintox(inverse(back_Position) * back_goal);
+    }
+  
+  hrmap *new_map() { 
+    if(sol) return new solv::hrmap_sol; 
+    if(nil) return new nilv::hrmap_nil;
+    return NULL;
+    }
+  
+  auto config = addHook(hooks_args, 0, [] () {
+    using namespace arg;
+    if(argis("-solrange")) {
+      shift_arg_formula(solv::solrange_xy);
+      shift_arg_formula(solv::solrange_z);
+      return 0;
+      }
+    else if(argis("-fsol")) {
+      shift(); solv::solfname = args();
+      return 0;
+      }
+    else if(argis("-solglitch")) {
+      shift_arg_formula(solv::glitch_xy);
+      shift_arg_formula(solv::glitch_z);
+      return 0;
+      }
+    else if(argis("-solgeo")) {
+      geodesic_movement = true;
+      pmodel = mdSolPerspective;
+      return 0;
+      }
+    else if(argis("-solnogeo")) {
+      geodesic_movement = false;
+      pmodel = mdPerspective;
+      return 0;
+      }
+    return 1;
+    });
+    
   }
 
 }

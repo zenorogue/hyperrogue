@@ -142,11 +142,11 @@ ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
 // (this is analogous to representing a sphere with points such that x^2+y^2+z^2 == 1)
 
 hyperpoint hpxy(ld x, ld y) { 
-  return hpxyz(x,y, eusol ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
+  return hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
   }
 
 hyperpoint hpxy3(ld x, ld y, ld z) { 
-  return hpxyz3(x,y,z, eusol ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
+  return hpxyz3(x,y,z, translatable ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
 // origin of the hyperbolic plane
@@ -201,7 +201,7 @@ ld dhypot_d(int d, const hyperpoint& a, const hyperpoint& b) {
   }
   
 ld zlevel(const hyperpoint &h) {
-  if(eusol) return h[GDIM];
+  if(translatable) return h[GDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
   else return (h[GDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
@@ -278,20 +278,15 @@ transmatrix eupush(ld x, ld y) {
   return T;
   }
 
-transmatrix eupush3(ld x, ld y, ld z) {
+transmatrix eupush(hyperpoint h) {
+  if(nonisotropic) return nisot::translate(h);
   transmatrix T = Id;
-  T[0][GDIM] = x;
-  T[1][GDIM] = y;
-  if(GDIM == 3) T[2][GDIM] = z;
-  if(sol) T[0][0] = exp(-z), T[1][1] = exp(+z);
+  for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
   return T;
   }
 
-transmatrix eupush(hyperpoint h) {
-  transmatrix T = Id;
-  for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
-  if(sol) T[0][0] = exp(-h[2]), T[1][1] = exp(+h[2]);
-  return T;
+transmatrix eupush3(ld x, ld y, ld z) {
+  return eupush(point3(x, y, z));
   }
 
 transmatrix euscalezoom(hyperpoint h) {
@@ -312,12 +307,8 @@ transmatrix euaffine(hyperpoint h) {
 
 transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
-  if(sol) {
-    T[cid][GDIM] = alpha;
-    if(cid == 2)
-      T[0][0] = exp(-alpha), T[1][1] = exp(+alpha);
-    return T;
-    }
+  if(sol || nil) 
+    return eupush3(cid == 0 ? alpha : 0, cid == 1 ? alpha : 0, cid == 2 ? alpha : 0);
   T[GDIM][GDIM] = T[cid][cid] = cos_auto(alpha);
   T[cid][GDIM] = sin_auto(alpha);
   T[GDIM][cid] = -curvature() * sin_auto(alpha);
@@ -339,7 +330,8 @@ bool eqmatrix(transmatrix A, transmatrix B, ld eps) {
 // in the 3D space, move the point h orthogonally to the (x,y) plane by z units
 hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
   if(!hyperbolic) return rgpushxto0(h) * cpush(2, z) * C0;
-  if(eusol) return hpxy3(h[0], h[1], h[2] + z);
+  if(nil) return nisot::translate(h) * cpush0(2, z);
+  if(translatable) return hpxy3(h[0], h[1], h[2] + z);
   ld u = 1;
   if(h[2]) z += asin_auto(h[2]), u /= acos_auto(z);
   u *= cos_auto(z);
@@ -473,7 +465,7 @@ transmatrix rpushxto0(const hyperpoint& H) {
   }
 
 transmatrix ggpushxto0(const hyperpoint& H, ld co) {
-  if(eusol) {
+  if(translatable) {
     using namespace hyperpoint_vec;
     return eupush(co * H);
     }
@@ -505,7 +497,7 @@ transmatrix rgpushxto0(const hyperpoint& H) {
 // (without using this, imprecision could accumulate)
 
 void fixmatrix(transmatrix& T) {
-  if(sol) ; // fixed inside solmul
+  if(nonisotropic) ; // T may be inverse... do not do that
   else if(euclid) {
     for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
       ld dp = 0;
@@ -784,17 +776,19 @@ bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
 transmatrix solmul(const transmatrix T, const transmatrix V) {
-  if(sol) return solv::get_solmul(T, V);
+  if(nonisotropic) return nisot::transport_view(T, V);
   else return T * V;
   }
 
 transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
-  if(sol) return solv::get_solmul_pt(Position, T);
+  if(nonisotropic) return nisot::parallel_transport(Position, T);
   else return Position * T;
   }
 
 transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, int dir, int back) {
-  transmatrix T = sol ? solv::spin_towards(Position, goal) : rspintox(inverse(Position) * goal);
+  transmatrix T = 
+    nonisotropic ? nisot::spin_towards(Position, goal) : 
+    rspintox(inverse(Position) * goal);
   if(back < 0) T = T * spin(M_PI);
   if(dir) T = T * cspin(dir, 0, -M_PI/2);
   T = Position * T;

@@ -725,8 +725,8 @@ void showEuclideanMenu() {
     }
   dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
   dialog::add_action_push(conformal::model_menu);
-  if(sol)
-    dialog::addBoolItem_action(XLAT("geodesic movement in Sol"), solv::geodesic_movement, 'G');
+  if(nonisotropic)
+    dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
   #if CAP_CRYSTAL && MAXMDIM >= 4
   crystal::add_crystal_transform('x');  
   #endif
@@ -801,6 +801,10 @@ void showEuclideanMenu() {
 
     case gcSol:
       dialog::addSelItem(XLAT("Curvature"), XLAT("Sol"), 0);
+      break;
+
+    case gcNil:
+      dialog::addSelItem(XLAT("Curvature"), XLAT("Nil"), 0);
       break;
 
     PROD( case gcProduct:

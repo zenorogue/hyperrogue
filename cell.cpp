@@ -220,6 +220,7 @@ void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
+  else if(nonisotropic) currentmap = nisot::new_map();
   #if CAP_CRYSTAL
   else if(geometry == gCrystal) currentmap = crystal::new_map();
   #endif
@@ -241,7 +242,6 @@ void initcells() {
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
   #if CAP_BT
-  else if(sol) currentmap = solv::new_map();
   else if(binarytiling) currentmap = binary::new_map();
   #endif
   else currentmap = new hrmap_hyperbolic;
@@ -407,6 +407,7 @@ int compdist(int dx[]) {
 int celldist(cell *c) {
   if(fulltorus && WDIM == 2) 
     return torusmap()->dists[decodeId(c->master)];
+  if(nil) return DISTANCE_UNKNOWN;
   if(euwrap)
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)

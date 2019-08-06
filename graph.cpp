@@ -769,13 +769,13 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
   using namespace hyperpoint_vec;
   ld d = hdist0(h);
 
-  if(sol && solv::geodesic_movement) {
-    h = solv::inverse_exp(h, true);
+  if(sol && nisot::geodesic_movement) {
+    h = nisot::inverse_exp(h, nisot::iLazy);
     ld r = hypot_d(3, h);
     if(r < 1) h = h * (atanh(r) / r);
     else return {false, h};
     }
-  if(solv::local_perspective_used()) h = solv::local_perspective * h;
+  if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
   
   if(WDIM == 3) {
     if(d >= vid.radarrange) return {false, h};
@@ -820,7 +820,7 @@ color_t kind_outline(eItem it) {
 
 transmatrix face_the_player(const transmatrix V) {
   if(DIM == 2) return V;
-  if(sol) return V * cspin(0, 2, ptick(618, 0));
+  if(nonisotropic) return V * cspin(0, 2, ptick(618, 0));
   return rgpushxto0(tC0(V));
   }
 
@@ -4429,6 +4429,7 @@ int get_darkval(int d) {
   if(binarytiling) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];
+  if(nil) return ((d % 11) * 3) % 7;
   return 0;
   }
 
@@ -4504,7 +4505,7 @@ void make_clipping_planes() {
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
     sx /= hypot_d(3, sx);
     sx[3] = 0;
-    if(solv::local_perspective_used()) sx = inverse(solv::local_perspective) * sx;
+    if(nisot::local_perspective_used()) sx = inverse(nisot::local_perspective) * sx;
     clipping_planes.push_back(sx);
     };
   ld tx = current_display->tanfov;
@@ -5047,7 +5048,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
   if(just_gmatrix) return;
 #if MAXMDIM >= 4
-  if(WDIM == 3 && pmodel == mdPerspective) {
+  if(WDIM == 3 && pmodel == mdPerspective && !nil) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
@@ -5061,7 +5062,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 2 && abs(H[1]) <= 2 && abs(H[2]) <= 2) ;
     else {
-      hyperpoint H2 = solv::inverse_exp(H, true);
+      hyperpoint H2 = nisot::inverse_exp(H, nisot::iLazy);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.2) return;
       }
     noclipped++;
@@ -5986,7 +5987,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !sol) {
+              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
@@ -7144,11 +7145,11 @@ void make_actual_view() {
       actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewctr.at->c7), inverse(View), max)), actual_view_transform * View) * inverse(View); 
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
-  if(sol) {
+  if(nonisotropic) {
     transmatrix T = actual_view_transform * View;
     transmatrix T2 = eupush( tC0(inverse(T)) );
-    solv::local_perspective = T * T2;
-    actual_view_transform = inverse(solv::local_perspective) * actual_view_transform;
+    nisot::local_perspective = T * T2;
+    actual_view_transform = inverse(nisot::local_perspective) * actual_view_transform;
     }
   #endif
   }
@@ -7938,7 +7939,7 @@ cell *viewcenter() {
 bool inscreenrange(cell *c) {
   if(sphere) return true;
   if(euclid) return celldistance(viewcenter(), c) <= get_sightrange_ambush();
-  if(sol) return gmatrix.count(c);
+  if(nonisotropic) return gmatrix.count(c);
   return heptdistance(viewcenter(), c) <= 8;
   }
 
