@@ -640,7 +640,7 @@ namespace nisot {
       }
     else if(argis("-solgeo")) {
       geodesic_movement = true;
-      pmodel = mdSolPerspective;
+      pmodel = mdGeodesic;
       return 0;
       }
     else if(argis("-solnogeo")) {

@@ -320,7 +320,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       return;
       }
 
-    case mdSolPerspective: {
+    case mdGeodesic: {
       auto S = nisot::inverse_exp(H, nisot::iTable);
       if(nisot::local_perspective_used()) S = nisot::local_perspective * S;
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
@@ -886,7 +886,7 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
 bool point_behind(hyperpoint h) {
   if(sphere) return false;
   if(!in_perspective()) return false;
-  if(pmodel == mdSolPerspective) h = nisot::inverse_exp(h, nisot::iLazy);
+  if(pmodel == mdGeodesic) h = nisot::inverse_exp(h, nisot::iLazy);
   if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
   return h[2] < 0;
   }
@@ -911,7 +911,7 @@ bool in_smart_range(const transmatrix& T) {
   hyperpoint h = tC0(T);
   if(invalid_point(h)) return false;
   if(nil) return cells_drawn < 2000;
-  if(pmodel == mdSolPerspective) return solv::in_table_range(h);
+  if(pmodel == mdGeodesic) return solv::in_table_range(h);
   hyperpoint h1;
   applymodel(h, h1);
   if(invalid_point(h1)) return false;
@@ -1880,7 +1880,7 @@ bool do_draw(cell *c, const transmatrix& T) {
   PROD( if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); }); )
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    if(pmodel == mdSolPerspective) {
+    if(pmodel == mdGeodesic) {
       if(!nisot::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
       }

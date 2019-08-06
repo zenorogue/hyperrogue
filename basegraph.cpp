@@ -235,7 +235,7 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3, pers3 = true;
     if(DIM == 3 && (euclid || sol || nil) && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
-    if(DIM == 3 && apply_models && pmodel == mdSolPerspective)
+    if(DIM == 3 && apply_models && pmodel == mdGeodesic)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
     if(DIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
       shaderside_projection = true; pers3 = true;

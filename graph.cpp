@@ -19,7 +19,7 @@ int detaillevel = 0;
 bool first_cell_to_draw = true;
 
 bool in_perspective() {
-  return among(pmodel, mdPerspective, mdSolPerspective);
+  return among(pmodel, mdPerspective, mdGeodesic);
   }
 
 bool hide_player() {
@@ -5057,7 +5057,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     noclipped++;
     }
-  if(pmodel == mdSolPerspective) {
+  if(pmodel == mdGeodesic) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 2 && abs(H[1]) <= 2 && abs(H[2]) <= 2) ;
@@ -6042,7 +6042,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             firelimit++;
             }
           else if(c->wall == waMineOpen) {
-            if(pmodel == mdSolPerspective && hdist0(tC0(V)) < 1e-3) {
+            if(pmodel == mdGeodesic && hdist0(tC0(V)) < 1e-3) {
               }
             else {
               int mines = countMinesAround(c);

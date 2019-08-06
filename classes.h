@@ -268,7 +268,7 @@ enum eModel {
   // 17..19
   mdRotatedHyperboles, mdSpiral, mdPerspective,
   // 20..24
-  mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdSolPerspective,
+  mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdGeodesic,
   // 25..
   mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial, mdRug, mdFlatten
   };

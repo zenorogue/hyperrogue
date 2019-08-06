@@ -630,8 +630,8 @@ namespace conformal {
 #endif
 
   bool model_available(eModel pm) {
-    if(sol) return among(pm, mdDisk, mdPerspective, mdSolPerspective);
-    if(pm == mdSolPerspective && !sol) return false;
+    if(sol) return among(pm, mdDisk, mdPerspective, mdGeodesic);
+    if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
     if(DIM == 2 && pm == mdPerspective) return false;
@@ -657,7 +657,7 @@ namespace conformal {
     if(sol) {
       if(m == mdDisk) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
-      if(m == mdSolPerspective) return XLAT("native perspective");
+      if(m == mdGeodesic) return XLAT("native perspective");
       }
     if(m == mdDisk && DIM == 3) return XLAT("perspective in 4D");
     if(m == mdHalfplane && DIM == 3 && hyperbolic) return XLAT("half-space");
