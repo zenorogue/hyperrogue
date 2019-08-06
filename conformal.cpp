@@ -654,7 +654,7 @@ namespace conformal {
   
   string get_model_name(eModel m) {
     if(m == mdDisk && DIM == 3 && hyperbolic) return XLAT("ball model/Gans");
-    if(sol) {
+    if(nonisotropic) {
       if(m == mdDisk) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");

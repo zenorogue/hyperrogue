@@ -448,7 +448,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
   }
 
 string current_proj_name() {
-  if(pmodel != mdDisk || sol)
+  if(pmodel != mdDisk || nonisotropic)
     return conformal::get_model_name(pmodel);
   else if(hyperbolic && vid.alpha == 1)
     return XLAT("Poincaré model");
