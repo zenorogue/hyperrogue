@@ -717,6 +717,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     hyperpoint v2 = vertices[(a+1)%n] - center;
     texture_order([&] (ld x, ld y) {
       hyperpoint h = center + v1 * x + v2 * y;
+      if(nil && (x || y))
+        h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
       if(sol || !binarytiling) { hpcpush(normalize(h)); return; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
@@ -728,6 +730,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
+      if(nil)
+        h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
       if(sol || !binarytiling) { hpcpush(normalize(h)); continue; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);

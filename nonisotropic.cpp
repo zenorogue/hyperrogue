@@ -526,6 +526,13 @@ namespace nilv {
       }
 
     };
+
+  hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
+    using namespace hyperpoint_vec;
+    hyperpoint local = inverse(nisot::translate(s0)) * s1;
+    hyperpoint h = get_inverse_exp(local, 100);
+    return nisot::translate(s0) * formula_exp(h * x);
+    }
   }
 
 namespace nisot {
