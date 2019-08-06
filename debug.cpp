@@ -728,6 +728,10 @@ int read_cheat_args() {
     PHASEFROM(2); 
     shift(); vid.cells_drawn_limit = argi();
     }
+  else if(argis("-genlimit")) {
+    PHASEFROM(2); 
+    shift(); vid.cells_generated_limit = argi();
+    }
   else if(argis("-sight3")) {
     PHASEFROM(2); 
     shift_arg_formula(sightranges[geometry]);
