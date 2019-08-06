@@ -550,7 +550,7 @@ namespace nisot {
   
   hyperpoint inverse_exp(const hyperpoint h, iePrecision p) {
     if(sol) return solv::get_inverse_exp(h, p == iLazy);
-    if(nil) return nilv::get_inverse_exp(h, 10);
+    if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
     return point3(h[0], h[1], h[2]);
     }
 
