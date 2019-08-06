@@ -307,7 +307,7 @@ transmatrix euaffine(hyperpoint h) {
 
 transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
-  if(sol || nil) 
+  if(nonisotropic) 
     return eupush3(cid == 0 ? alpha : 0, cid == 1 ? alpha : 0, cid == 2 ? alpha : 0);
   T[GDIM][GDIM] = T[cid][cid] = cos_auto(alpha);
   T[cid][GDIM] = sin_auto(alpha);
