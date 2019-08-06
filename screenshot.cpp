@@ -313,7 +313,6 @@ void take(string fname, const function<void()>& what) {
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<bool> v6(auraNOGL, true);
   dynamicval<bool> vn(nohud, nohud || hide_hud);
-  dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
 
   vid.smart_range_detail *= multiplier;
   darken = 0;
@@ -459,6 +458,7 @@ void menu() {
     static string svgfile = "svgshot.svg";
     string& file = make_svg ? svgfile : pngfile;
     dialog::openFileDialog(file, XLAT("screenshot"), make_svg ? ".svg" : ".png", [&file] () {
+      dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
       shot::take(file);
       return true;
       });
