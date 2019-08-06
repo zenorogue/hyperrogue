@@ -3338,8 +3338,6 @@ void turn(int delta) {
     return;
     }
 
-  timetowait = 0;
-
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
   
   if(delta > 1000) delta = 1000;

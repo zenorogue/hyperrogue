@@ -540,6 +540,8 @@ void resize_screen_to(int x, int y) {
   setvideomode();
   }
 
+int lastframe;
+
 void mainloopiter() {
 
   DEBB(DF_GRAPH, ("main loop\n"));
@@ -553,16 +555,17 @@ void mainloopiter() {
   
   conformal::configure();
 
+  lastt = ticks;
   ticks = SDL_GetTicks();
   callhooks(hooks_fixticks);
     
-  timetowait = lastt + 1000 / cframelimit - ticks;
+  timetowait = lastframe + 1000 / cframelimit - ticks;
 
   cframelimit = vid.framelimit;
   if(outoffocus && cframelimit > 10) cframelimit = 10;  
   
   bool normal = cmode & sm::NORMAL;
-
+  
   shmup::turn(ticks - lastt);
     
   if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
@@ -615,7 +618,7 @@ void mainloopiter() {
     if(!outoffocus) {
       drawscreen();
       }
-    lastt = ticks;
+    lastframe = ticks;
     }      
 
   Uint8 *keystate = SDL_GetKeyState(NULL);
