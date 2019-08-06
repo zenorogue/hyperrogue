@@ -341,7 +341,7 @@ namespace nilv {
     // v[1] = c sin alpha
     // v[2] = w
     
-    if(v[0] == 0 && v[1] == 0) return v;
+    if(v[0] == 0 && v[1] == 0) return point31(v[0], v[1], v[2]);
     
     if(v[2] == 0) return point31(v[0], v[1], v[0] * v[1] / 2);
     
@@ -361,7 +361,7 @@ namespace nilv {
     
     ld side = h[2] - h[0] * h[1] / 2;
     
-    if(hypot_d(2, h) < 1e-6) return h;
+    if(hypot_d(2, h) < 1e-6) return point3(h[0], h[1], h[2]);
     else if(side > 1e-6) {
       wmin = 0, wmax = 2 * M_PI;
       }
@@ -370,29 +370,59 @@ namespace nilv {
       }
     else return point3(h[0], h[1], 0);
     
-    ld alpha_total = atan2(h[1], h[0]);
+    ld alpha_total = h[0] ? atan(h[1] / h[0]) : M_PI/2;
   
-    ld cmul;
+    ld b;
     if(abs(h[0]) > abs(h[1]))
-      cmul = h[0] / 2 / cos(alpha_total);
+      b = h[0] / 2 / cos(alpha_total);
     else
-      cmul = h[1] / 2 / sin(alpha_total);  
+      b = h[1] / 2 / sin(alpha_total);  
     
-    ld sa = sin(2 * alpha_total);
+    ld s = sin(2 * alpha_total);
     
     for(int it=0;; it++) {
-      ld w = (wmin + wmax) / 2;    
-      ld c = cmul / sin(w/2);
-      ld z = w * (1 + (c*c/2) * ((1 - sin(w)/w) + (1-cos(w))/w * sa));
-      
+      ld w = (wmin + wmax) / 2;
+      ld z = b * b * (s + (sin(w) - w)/(cos(w) - 1)) + w;
+
       if(it == iterations) {
         ld alpha = alpha_total - w/2;
+        ld c = b / sin(w/2);
         return point3(c * w * cos(alpha), c * w * sin(alpha), w);
         }
       if(h[2] > z) wmin = w;
       else wmax = w;    
       }
     }
+  
+  string nilshader = 
+    "vec4 inverse_exp(vec4 h) {"
+      "float wmin, wmax;"
+      "float side = h[2] - h[0] * h[1] / 2.;"
+      "if(h[0]*h[0] + h[1]*h[1] < 1e-12) return vec4(h[0], h[1], h[2], 1);"
+      "if(side > 1e-6) { wmin = 0.; wmax = 2.*PI; }"
+      "else if(side < -1e-6) { wmin = -2.*PI; wmax = 0.; }"
+      "else return vec4(h[0], h[1], 0., 1.);"
+      "float at = h[0] != 0. ? atan(h[1] / h[0]) : PI/2.;"
+      "float b = abs(h[0]) > abs(h[1]) ? h[0] / 2. / cos(at) : h[1] / 2. / sin(at);"
+      "float s = sin(2. * at);"
+
+      "for(int it=0; it<50; it++) {"
+        "float w = (wmin + wmax) / 2.;"
+        "float z = b * b * (s + (sin(w) - w)/(cos(w) - 1.)) + w;"
+        "if(h[2] > z) wmin = w;"
+        "else wmax = w;"
+        "}"
+
+      "float w = (wmin + wmax) / 2.;"
+      "float alpha = at - w/2.;"
+      "float c = b / sin(w/2.);"
+      "return vec4(c*w*cos(alpha), c*w*sin(alpha), w, 1.);"
+
+      /* "float w = atan(side) * 4.;"
+          "float alpha = at - w/2.;"
+          "float c = b / sin(w/2.);"
+          "return vec4(c*w*cos(alpha), c*w*sin(alpha), w, 1.);" */
+      "}";
   
   struct mvec : array<int, 3> {
     

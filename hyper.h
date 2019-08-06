@@ -4038,7 +4038,7 @@ namespace glhr {
   
   enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
     standardS30, standardS31, standardS32, standardS33, 
-    ball, halfplane3, band3, flatten, standardSolv,
+    ball, halfplane3, band3, flatten, standardSolv, standardNil,
     MAX 
     };
   
@@ -5663,6 +5663,7 @@ namespace solv {
 
 
 namespace nilv {
+  extern string nilshader;
   extern array<vector<hyperpoint>, 22> facevertices;
   void software_renderer(dqi_poly *p);
   }

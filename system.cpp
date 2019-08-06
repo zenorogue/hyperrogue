@@ -1154,9 +1154,9 @@ void set_geometry(eGeometry target) {
     if(binarytiling || WDIM == 3 || penrose) variation = eVariation::pure;
     #endif
     if(DIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
-    if(sol && old_DIM == 2) pmodel = mdSolPerspective;
-    if(DIM == 2 && among(pmodel, mdPerspective, mdSolPerspective)) pmodel = mdDisk;
-    if(sol && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
+    if(nonisotropic && old_DIM == 2) pmodel = mdGeodesic;
+    if(DIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
+    if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     }
   }
 

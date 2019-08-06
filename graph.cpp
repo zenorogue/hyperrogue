@@ -5057,13 +5057,23 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     noclipped++;
     }
-  if(pmodel == mdGeodesic) {
+  if(pmodel == mdGeodesic && sol) {
     using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
-    if(abs(H[0]) <= 2 && abs(H[1]) <= 2 && abs(H[2]) <= 2) ;
+    if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
       hyperpoint H2 = nisot::inverse_exp(H, nisot::iLazy);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.2) return;
+      }
+    noclipped++;
+    }
+  if(pmodel == mdGeodesic && nil) {
+    using namespace hyperpoint_vec;
+    hyperpoint H = tC0(V);
+    if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
+    else {
+      hyperpoint H2 = nisot::inverse_exp(H, nisot::iLazy);
+      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -2) return;
       }
     noclipped++;
     }

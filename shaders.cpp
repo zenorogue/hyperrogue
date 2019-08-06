@@ -562,6 +562,7 @@ void init() {
     bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
     bool ssol = (sp == shader_projection::standardSolv);
+    bool snil = (sp == shader_projection::standardNil);
     bool sr3 = (sp == shader_projection::standardR3);
     bool ss30 = (sp == shader_projection::standardS30);
     bool ss31 = (sp == shader_projection::standardS31);
@@ -569,13 +570,14 @@ void init() {
     bool ss33 = (sp == shader_projection::standardS33);
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
-    bool s3 = (sh3 || sr3 || ss3 || ssol);
+    bool s3 = (sh3 || sr3 || ss3 || ssol || snil);
     bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
     bool flatten = (sp == shader_projection::flatten);
     
     programs[i][j] = new GLprogram(stringbuilder(
+      1,       "#define PI 3.14159265358979324\n",
 
       1,       "attribute mediump vec4 aPosition;",
       texture, "attribute mediump vec2 aTexture;",
@@ -621,6 +623,7 @@ void init() {
       1,       "  }",
       
       ssol,    solv::solshader,      
+      snil,    nilv::nilshader,
 
       1,       "void main() {",  
       texture,   "vTexCoord = aTexture;",
@@ -659,9 +662,10 @@ void init() {
       ssol,      "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);",
       ssol,      "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.; ",
       ssol,      "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m; ",
+      snil,      "t = inverse_exp(t);",
        
       sh3,       "float fogs = (uFogBase - acosh(t[3]) / uFog);",
-      sr3,       "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
+      sr3||snil, "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
       ssol,      "float fogs = (uFogBase - ad / uFog);",
       
       ss30,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
