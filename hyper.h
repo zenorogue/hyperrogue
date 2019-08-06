@@ -554,7 +554,7 @@ struct gcell {
 #define NOBARRIERS 127
 #define MODFIXER (2*10090080*17)
 
-#define MAX_EDGE 22
+#define MAX_EDGE 18
 
 template<class T> struct walker;
 
@@ -5664,8 +5664,8 @@ namespace solv {
 
 namespace nilv {
   extern string nilshader;
-  extern array<vector<hyperpoint>, 22> facevertices;
-  void software_renderer(dqi_poly *p);
+  static const int nilv_S7 = 8;
+  extern array<vector<hyperpoint>, nilv_S7> facevertices;
   }
 
 bool in_perspective();
