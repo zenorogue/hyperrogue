@@ -443,6 +443,7 @@ int celldistAlt(cell *c) {
   #if CAP_BT
   if(binarytiling || sol) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
   #endif
+  if(nil) return c->master->zebraval + abs(c->master->emeraldval) + (specialland == laCamelot && !tactic::on? 30 : 0);;
   #if CAP_CRYSTAL
   if(geometry == gCrystal) 
     return crystal::dist_alt(c);

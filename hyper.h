@@ -106,7 +106,7 @@ void addMessage(string s, char spamtype = 0);
 #define penrose (ginf[geometry].flags & qPENROSE)
 
 // these geometries do not feature alternate structures for horocycles
-#define eubinary (euclid || binarytiling || geometry == gCrystal)
+#define eubinary (euclid || binarytiling || geometry == gCrystal || nil)
 
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
@@ -3076,6 +3076,7 @@ void setLandWeird(cell *c);
 void moreBigStuff(cell *c);
 void setLandEuclid(cell *c);
 void setLandSol(cell *c);
+void setLandNil(cell *c);
 bool checkInTree(cell *c, int maxv);
 cell *findcompass(cell *c);
 int edgeDepth(cell *c);

@@ -885,13 +885,13 @@ eLand& get_euland(int c) {
 void clear_euland(eLand first) {
   euland.resize(max_vec);
   for(int i=0; i<max_vec; i++) euland[i] = laNone;
-  euland[0] = euland[1] = euland[max_vec-1] = first;
+  if(!nonisotropic) euland[0] = euland[1] = euland[max_vec-1] = first;
   euland3.clear();
   euland3[0] = laCrossroads;
   }
 
 bool valid_wall_at(int c) {
-  if(sol) return true;
+  if(nonisotropic) return true;
   return short(c) % 3 == 0;
   }
   
@@ -904,11 +904,11 @@ eLand switchable(eLand nearland, eLand farland, int c) {
   else if(specialland == laCrossroads4) {
     if((dual::state && nearland == laCrossroads4) || hrand(15) == 0)
       return getNewLand(nearland);
-    if(nearland == laCrossroads4 && sol)
-      return getNewLand(nearland);      
+    if(nearland == laCrossroads4 && nonisotropic)
+      return getNewLand(nearland);
     return nearland;
     }
-  else if(nearland == laCrossroads && sol) {
+  else if(nearland == laCrossroads && nonisotropic) {
     return laBarrier;
     }
   else if(nearland == laCrossroads) {
@@ -959,6 +959,60 @@ void setLandSol(cell *c) {
     case laOcean: case laIvoryTower: case laEndorian: case laDungeon:
       if(c->master->distance <= 0) setland(c, laRlyeh);
       else c->landparam = c->master->distance;
+      break;
+    default: ;
+    }
+  }
+
+void setLandNil(cell *c) {
+  setland(c, specialland);
+  
+  if(chaosmode) {
+    int hash = (((c->master->zebraval + 4) >> 3) << 16) + ((c->master->emeraldval + 4) >> 3);
+    auto& l = euland3_hash[hash];
+    if(l == laNone) l = getNewLand(laNone);
+    setland(c, l);
+    return;
+    }
+  
+  switch(specialland) {
+    case laCrossroads: case laCrossroads4:
+      setland(c, getEuclidLand(c->master->zebraval));
+      if(c->land == laBarrier && c->master->emeraldval % 3) c->wall = waBarrier;
+      break;
+    case laCrossroads2: 
+      setland(c, getEuclidLand(c->master->emeraldval));
+      if(c->land == laBarrier && c->master->zebraval % 3) c->wall = waBarrier;
+      break;
+    case laCrossroads3: {
+      int ox = c->master->zebraval - 8;
+      int oy = c->master->emeraldval - 8;
+      int hash = (((ox + 16) >> 5) << 16) + ((oy + 16) >> 5);
+      auto& l = euland3_hash[hash];
+      if(l == laNone) l = getNewLand(laCrossroads3);
+      if(ox % 16 == 0) setland(c, laBarrier);
+      else if(oy % 16 == 0) setland(c, laBarrier);
+      else setland(c, l);
+      if(c->land == laBarrier && ((c->master->zebraval & 3) || (c->master->emeraldval & 3))) c->wall = waBarrier;
+      break;
+      }
+    case laElementalWall: {
+      int ox = c->master->zebraval - 4;
+      int oy = c->master->emeraldval - 4;
+      int x = (ox & 7) ? ((ox & 8) ? 1 : -1) : 0;
+      int y = (oy & 7) ? ((oy & 8) ? 1 : -1) : 0;
+      elementalXY(c, x, y, (ox & 3) || (oy & 3));
+      break;
+      }      
+    case laTerracotta:
+      if((c->master->zebraval & 7) == 4 && (c->master->emeraldval & 7) == 4) {
+        setland(c, laMercuryRiver);
+        c->wall = waMercury;
+        }
+      break;
+    case laOcean: case laIvoryTower: case laEndorian: case laDungeon:
+      if(c->master->zebraval <= 0) setland(c, laRlyeh);
+      else c->landparam = c->master->zebraval;
       break;
     default: ;
     }
@@ -1523,7 +1577,7 @@ int masterAlt(cell *c) {
 
 void moreBigStuff(cell *c) {
 
-  if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
+  if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
   if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) 
     buildCamelot(c);
   

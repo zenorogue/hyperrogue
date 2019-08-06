@@ -235,7 +235,28 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || WDIM == 3) {
+      if(nil) {
+        if(fargen) {
+          int i = hrand(100);
+          if(c->master->zebraval % 4 == 2 || c->master->emeraldval % 4 == 2) {
+            if(i < 85)
+              c->wall = waPalace;
+            else if(i < 95)
+              c->wall = waClosedGate;
+            else
+              c->wall = waOpenGate;
+            }
+          else {
+            if(i < 10)
+              c->wall = waTrapdoor;
+            else if(i < 15)
+              c->wall = waClosePlate;
+            else if(i < 20)
+              c->wall = waOpenPlate;
+            }
+          }
+        }
+      else if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || WDIM == 3) {
         if(fargen) {
           int i = hrand(100);
           if(i < 10) 
@@ -439,6 +460,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(fulltorus) {
           c->wall = waCavefloor;
           }
+        else if(nil) {
+          int a = c->master->zebraval % 7;
+          int b = c->master->emeraldval % 7;
+          c->wall = (a-3.5) * (a-3.5) + (b-3.5) * (b-3.5) <= 12 ? waCavewall : waCavefloor;
+          }
         else if(sol)
           c->wall = (c->master->zebraval % 7 >= 5 || c->master->emeraldval % 7 >= 5) ? waCavewall : waCavefloor;
         else if(WDIM == 3 && hyperbolic && !binarytiling)
@@ -633,6 +659,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
         #endif
+        else if(nil) {
+          if((c->master->emeraldval & 1) == 1)
+            c->wall = waVinePlant;
+          }
         else if(sol) {
           if((c->master->distance & 1) == 1 && (c->master->emeraldval % 3))
             c->wall = waVinePlant;
@@ -2579,6 +2609,7 @@ void setdist(cell *c, int d, cell *from) {
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }
       else if(sol) setLandSol(c);
+      else if(nil) setLandNil(c);
       else if(weirdhyperbolic) setLandWeird(c);
       }
     
