@@ -708,7 +708,7 @@ void edit_sightrange() {
     }
   else if(WDIM == 3) {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
-      pmodel == mdGeodesic ? solhelp() : XLAT(
+      (pmodel == mdGeodesic && sol) ? solhelp() : XLAT(
         "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
         "In spherical geometries, the sight range of 2? will let you see things behind you as if they were in front of you, "
         "and the sight range of ? (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
@@ -728,7 +728,7 @@ void edit_sightrange() {
     dialog::bound_up(allowIncreasedSight() ? euclid ? 99 : gp::dist_2() * 5 : 0);
     }
   dialog::extra_options = [] () {
-    if(pmodel == mdGeodesic) {
+    if(pmodel == mdGeodesic && sol) {
       dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
       dialog::add_action([] {
         auto xo = dialog::extra_options;
@@ -798,7 +798,7 @@ void edit_sightrange() {
 void menuitem_sightrange(char c) {
   if(vid.use_smart_range)
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
-  else if(pmodel == mdGeodesic)
+  else if(pmodel == mdGeodesic && sol)
     dialog::addSelItem(XLAT("3D sight range"), fts(solv::solrange_xy) + "x" + fts(solv::solrange_z), c);
   else if(WDIM == 3)
     dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);

@@ -910,7 +910,7 @@ bool invalid_point(const hyperpoint h) {
 bool in_smart_range(const transmatrix& T) {
   hyperpoint h = tC0(T);
   if(invalid_point(h)) return false;
-  if(nil) return cells_drawn < 2000;
+  if(nil) return true;
   if(pmodel == mdGeodesic) return solv::in_table_range(h);
   hyperpoint h1;
   applymodel(h, h1);
@@ -1880,11 +1880,12 @@ bool do_draw(cell *c, const transmatrix& T) {
   PROD( if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); }); )
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    if(pmodel == mdGeodesic) {
-      if(!nisot::in_table_range(tC0(T))) return false;
-      if(!limited_generation(c)) return false;
+    if(nil && pmodel == mdGeodesic) {
+      ld dist = hdist0(nisot::inverse_exp(tC0(T), nisot::iLazy));
+      if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
+      if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
-    else if(nil) {
+    else if(pmodel == mdGeodesic && !nil) {
       if(!nisot::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
       }
