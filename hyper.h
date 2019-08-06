@@ -346,10 +346,14 @@ struct hyperpoint : array<ld, MAXMDIM> {
     }
   };
 
-struct transmatrix {
-  ld tab[MAXMDIM][MAXMDIM];
-  ld * operator [] (int i) { return tab[i]; }
-  const ld * operator [] (int i) const { return tab[i]; }
+struct transmatrix : array<hyperpoint, MAXMDIM> { 
+  transmatrix() {}
+  transmatrix(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint d) {
+    (*this)[0] = a;
+    (*this)[1] = b;
+    (*this)[2] = c;
+    (*this)[3] = d;
+    }
   };
 
 inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
@@ -371,12 +375,16 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   return R;
   }
 
-constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
-  #if MAXMDIM==3
-  return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
-  #else
-  return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
+inline transmatrix diag(ld a, ld b, ld c, ld d) {
+  transmatrix T;
+  for(int i=0; i<MAXMDIM; i++) for(int j=0; j<MAXMDIM; j++) T[i][j] = 0;
+  T[0][0] = a;
+  T[1][1] = b;
+  T[2][2] = c;  
+  #if MAXMDIM==4
+  T[3][3] = d;
   #endif
+  return T;
   }
 
 const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
@@ -406,6 +414,7 @@ const static transmatrix centralsym = diag(-1,-1,-1,-1);
 inline hyperpoint hpxyz(ld x, ld y, ld z) { return DIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
 inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return DIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
 inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
+inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
 inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 
 namespace hyperpoint_vec {

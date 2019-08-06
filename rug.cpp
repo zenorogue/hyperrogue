@@ -455,7 +455,12 @@ void buildTorusRug() {
   // 7,-17
   
   // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
-  transmatrix z1 = {{{(ld)solution.first.x,(ld)solution.second.x,0}, {(ld)solution.first.y,(ld)solution.second.y,0}, {0,0,1}}};
+  transmatrix z1(
+    point3(solution.first.x, solution.second.x, 0), 
+    point3(solution.first.y, solution.second.y, 0), 
+    point3(0, 0, 1),
+    point31(0, 0, 0)
+    );
   transmatrix z2 = inverse(z1);
   
   if(gwhere == gSphere) {

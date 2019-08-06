@@ -349,8 +349,8 @@ void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, color_t co
 
 #if CAP_TEXTURE
 void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_t col) {
-  transmatrix source = {{{ld(px[0]),ld(px[1]),ld(px[2])}, {ld(py[0]),ld(py[1]),ld(py[2])}, {1,1,1}}};
-  transmatrix target = {{{tv[0][0],tv[1][0],tv[2][0]}, {tv[0][1],tv[1][1],tv[2][1]}, {1,1,1}}};
+  transmatrix source( point3(px[0], px[1], px[2]), point3(py[0], py[1], py[2]), point3(1,1,1), point31(0,0,0) );
+  transmatrix target( point3(tv[0][0], tv[1][0], tv[2][0]), point3(tv[0][1],tv[1][1],tv[2][1]), point3(1,1,1), point31(0,0,0) );
   transmatrix isource = inverse(source);
   int minx = px[0], maxx = px[0];
   int miny = py[0], maxy = py[0];
