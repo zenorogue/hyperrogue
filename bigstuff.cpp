@@ -941,6 +941,10 @@ eLand getEuclidLand(int c) {
 
 void setLandSol(cell *c) {
   setland(c, specialland);
+  if(chaosmode) {
+    setland(c, getEuclidLand(c->master->distance));
+    return;
+    }
   switch(specialland) {
     case laCrossroads4: case laCrossroads: case laCrossroads2:
       setland(c, getEuclidLand(c->master->distance));
