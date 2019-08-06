@@ -787,19 +787,19 @@ void showEuclideanMenu() {
   else dialog::addBreak(200);
   
   switch(ginf[geometry].cclass) {
-    case 0:
+    case gcHyperbolic:
       dialog::addSelItem(XLAT("Curvature"), XLAT("hyperbolic"), 0);
       break;
     
-    case 1: 
+    case gcEuclid: 
       dialog::addSelItem(XLAT("Curvature"), XLAT("flat"), 0);
       break;
     
-    case 2:
+    case gcSphere:
       dialog::addSelItem(XLAT("Curvature"), XLAT("spherical"), 0);
       break;
 
-    case 3:
+    case gcSol:
       dialog::addSelItem(XLAT("Curvature"), XLAT("Sol"), 0);
       break;
 
