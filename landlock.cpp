@@ -1000,6 +1000,8 @@ land_validity_t& land_validity(eLand l) {
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
 
+  if(l == laReptile && sol) return ugly_version_nofull;
+
   if(l == laReptile) {
     if(old_daily_id <= 64) {
       if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && !euwrap && geometry != gZebraQuotient)))
