@@ -37,7 +37,7 @@ void bignum::addmul(const bignum& b, int factor) {
   int K = isize(b.digits);
   if(K > isize(digits)) digits.resize(K);
   int carry = 0;
-  for(int i=0; i<K || (carry > 0 && carry < -1) || (carry == -1 && i < isize(digits)); i++) {
+  for(int i=0; i<K || (carry > 0 || carry < -1) || (carry == -1 && i < isize(digits)); i++) {
     if(i >= isize(digits)) digits.push_back(0);
     long long l = digits[i];
     l += carry;
