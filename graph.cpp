@@ -4418,6 +4418,7 @@ int get_darkval(int d) {
   const int darkval_hrec[7] = {0,0,2,4,2,4,0};
   const int darkval_sol[8] = {0,2,4,4,0,2,4,4};
   const int darkval_penrose[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
+  const int darkval_nil[8] = {6,6,0,3,6,6,0,3};
   if(sphere) return darkval_s12[d];
   if(euclid && S7 == 6) return darkval_e6[d];
   if(euclid && S7 == 12) return darkval_e12[d];
@@ -4429,7 +4430,7 @@ int get_darkval(int d) {
   if(binarytiling) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];
-  if(nil) return ((d % 11) * 3) % 7;
+  if(nil) return darkval_nil[d];
   return 0;
   }
 
