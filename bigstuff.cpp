@@ -1615,7 +1615,7 @@ void moreBigStuff(cell *c) {
         c->wall = waColumn;
     }
   
-  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple)) {
+  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple && c->land == laRlyeh)) {
     if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
