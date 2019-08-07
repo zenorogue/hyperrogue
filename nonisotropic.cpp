@@ -417,11 +417,6 @@ namespace nilv {
       "float alpha = at - w/2.;"
       "float c = b / sin(w/2.);"
       "return vec4(c*w*cos(alpha), c*w*sin(alpha), w, 1.);"
-
-      /* "float w = atan(side) * 4.;"
-          "float alpha = at - w/2.;"
-          "float c = b / sin(w/2.);"
-          "return vec4(c*w*cos(alpha), c*w*sin(alpha), w, 1.);" */
       "}";
   
   struct mvec : array<int, 3> {
