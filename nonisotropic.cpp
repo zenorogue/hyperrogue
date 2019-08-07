@@ -408,7 +408,8 @@ namespace nilv {
 
       "for(int it=0; it<50; it++) {"
         "float w = (wmin + wmax) / 2.;"
-        "float z = b * b * (s + (sin(w) - w)/(cos(w) - 1.)) + w;"
+        // the formula after ':' produces visible numerical artifacts for w~0
+        "float z = b * b * (s + (abs(w) < .1 ? w/3. + w*w*w/90. + w*w*w*w*w/2520.: (sin(w) - w)/(cos(w) - 1.))) + w;"
         "if(h[2] > z) wmin = w;"
         "else wmax = w;"
         "}"
