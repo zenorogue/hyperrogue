@@ -612,14 +612,19 @@ namespace nisot {
     }
   
   transmatrix parallel_transport(const transmatrix Position, const transmatrix T) {
-    if(!geodesic_movement) return Position * T;
     auto P = Position;
     nisot::fixmatrix(P);  
+    if(!geodesic_movement) return inverse(eupush(Position * inverse(T) * inverse(Position) * C0)) * Position;
     return parallel_transport_bare(P, T);
     }
   
   transmatrix transport_view(const transmatrix T, const transmatrix V) {
-    if(!geodesic_movement) return V * eupush(inverse(V) * T * V * C0);
+    if(!geodesic_movement) {
+      transmatrix IV = inverse(V);
+      nisot::fixmatrix(IV);
+      const transmatrix V1 = inverse(IV);
+      return V1 * eupush(IV * T * V1 * C0);
+      }
     return inverse(parallel_transport(inverse(V), inverse(T)));
     }
 
