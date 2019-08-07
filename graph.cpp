@@ -4399,10 +4399,11 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
   if(isSulphuric(c->wall) && !isSulphuric(c2->wall)) return darkena3(winf[c->wall].color, 0, 0x40);
   if(among(c->wall, waCanopy, waSolidBranch, waWeakBranch) && !among(c2->wall, waCanopy, waSolidBranch, waWeakBranch)) return 0x00C00060;
   if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena3(0xFF00FF, 0, 0x80);
-  if(realred(c->wall) && realred(c2->wall) && c->wall != c2->wall) {
+  if(realred(c->wall) || realred(c2->wall)) {
     int l = snakelevel(c) - snakelevel(c2);
     if(l > 0) return darkena3(floorcolors[laRedRock], 0, 0x30 * l);
     }
+  if(among(c->wall, waRubble, waDeadfloor2) && !snakelevel(c2)) return darkena3(winf[c->wall].color, 0, 0x40);
   if(c->wall == waMagma && c2->wall != waMagma) return darkena3(magma_color(lavatide(c, -1)/4), 0, 0x80);
   return 0;
   }
@@ -6063,7 +6064,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               }
             }
           
-          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder, waCanopy) || isWatery(c) || isSulphuric(c->wall)) ;
+          else if(winf[c->wall].glyph == '.' || among(c->wall, waFloorA, waFloorB, waChasm, waLadder, waCanopy, waRed1, waRed2, waRed3, waRubble, waDeadfloor2) || isWatery(c) || isSulphuric(c->wall)) ;
           
           else if(c->wall == waBigBush || c->wall == waSolidBranch)
             queuepolyat(face_the_player(V), cgi.shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
