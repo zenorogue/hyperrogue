@@ -442,7 +442,7 @@ namespace nilv {
 
   hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
 
-  array<mvec, nilv_S7> movevectors = { mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) };
+  array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }};
 
   array<vector<hyperpoint>, nilv_S7> facevertices = {{
     { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,-0.25), },
