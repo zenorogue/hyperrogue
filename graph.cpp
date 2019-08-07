@@ -5596,9 +5596,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(wmblack) {
         set_floor(cgi.shBFloor[ct6]);
         int rd = rosedist(c);
-        if(rd == 1)
+        if(WDIM == 2 && rd == 1)
           queuepoly(Vf, cgi.shHeptaMarker, darkena(fcol, 0, 0x80));
-        else if(rd == 2)
+        else if(WDIM == 2 && rd == 2)
           queuepoly(Vf, cgi.shHeptaMarker, darkena(fcol, 0, 0x40));
         }
       
@@ -5968,7 +5968,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         set_floor(cgi.shMFloor);
         }
       
-      if(pseudohept(c) && (
+      if(WDIM == 2 && pseudohept(c) && (
         c->land == laRedRock || 
         vid.darkhepta ||
         (c->land == laClearing && !BITRUNCATED))) {
