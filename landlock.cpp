@@ -297,7 +297,7 @@ eLand getNewLand(eLand old) {
   if(racing::on && old != laElementalWall) {
     eLand l = old;
     using racing::race_lands;
-    while(l == old) l = race_lands[hrand(isize(race_lands))];
+    while(l == old) l = race_lands[hrand(16)]; // fixed at 16
     if(l == laElementalWall) l = randomElementalLand();
     if(l == laMirror) l = laCrossroads;
     return l;
