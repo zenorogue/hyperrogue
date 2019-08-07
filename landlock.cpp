@@ -675,6 +675,15 @@ land_validity_t& land_validity(eLand l) {
     if(!bounded) return bounded_only;
     return specially_designed;
     }
+  
+  if(nil) {
+    if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4))
+      return lv::full_game;
+    if(among(l, laPalace, laGraveyard, laWineyard, laElementalWall))
+      return lv::pattern_special;
+    if(among(l, laEndorian, laCaribbean, laHaunted, laVolcano, laClearing, laStorms, laBlizzard))
+      return lv::not_implemented;
+    }
 
   if(WDIM == 3) {
     if(l == laWarpCoast) return ugly_version_nofull;
@@ -786,7 +795,7 @@ land_validity_t& land_validity(eLand l) {
     return bounded_only;
   
   // Crystal World is designed for nice_dual geometries
-  if(l == laDual && !has_nice_dual())
+  if(l == laDual && (!has_nice_dual() || nonisotropic))
     return dont_work;
   
   if(l == laHaunted && chaosmode)
@@ -1102,8 +1111,8 @@ land_validity_t& land_validity(eLand l) {
     }
 
   if(l == laDocks && !randomPatternsMode) {
-    if(a38 && !GOLDBERG && !sol) return specially_designed;
-    if(a38 && !sol) return pattern_not_implemented_weird;
+    if(a38 && !GOLDBERG && !nonisotropic) return specially_designed;
+    if(a38 && !nonisotropic) return pattern_not_implemented_weird;
     return pattern_not_implemented_exclude;
     }
   
