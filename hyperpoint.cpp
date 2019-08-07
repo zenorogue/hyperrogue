@@ -345,14 +345,22 @@ transmatrix ypush(ld alpha) { return cpush(1, alpha); }
 transmatrix zpush(ld z) { return cpush(2, z); }
 
 transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
+  #if MAXMDIM==3
+  return transmatrix {{{a,b,c},{d,e,f},{g,h,i}}};
+  #else
   if(DIM == 2)
-    return transmatrix(hyperpoint(a,b,c,0), hyperpoint(d,e,f,0), hyperpoint(g,h,i,0), hyperpoint(0,0,0,1));
+    return transmatrix {{{a,b,c,0},{d,e,f,0},{g,h,i,0},{0,0,0,1}}};
   else
-    return transmatrix(hyperpoint(a,b,0,c), hyperpoint(d,e,0,f), hyperpoint(0,0,1,0), hyperpoint(g,h,0,i));
+    return transmatrix {{{a,b,0,c},{d,e,0,f},{0,0,1,0},{g,h,0,i}}};
+  #endif
   }
 
 transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld j, ld k, ld l, ld m, ld n, ld o, ld p) {
-  return transmatrix(hyperpoint(a,b,c,d), hyperpoint(e,f,g,h), hyperpoint(i,j,k,l), hyperpoint(m,n,o,p));
+  #if MAXMDIM==3
+  return transmatrix {{{a,b,d},{e,f,h},{m,n,p}}};
+  #else
+  return transmatrix {{{a,b,c,d},{e,f,g,h},{i,j,k,l},{m,n,o,p}}};
+  #endif
   }
 
 #if MAXMDIM >= 4

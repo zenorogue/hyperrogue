@@ -348,14 +348,10 @@ struct hyperpoint : array<ld, MAXMDIM> {
     }
   };
 
-struct transmatrix : array<hyperpoint, MAXMDIM> { 
-  transmatrix() {}
-  transmatrix(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint d) {
-    (*this)[0] = a;
-    (*this)[1] = b;
-    (*this)[2] = c;
-    (*this)[3] = d;
-    }
+struct transmatrix {
+  ld tab[MAXMDIM][MAXMDIM];
+  hyperpoint& operator [] (int i) { return (hyperpoint&)tab[i][0]; }
+  const ld * operator [] (int i) const { return tab[i]; }
   };
 
 inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
@@ -377,16 +373,12 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   return R;
   }
 
-inline transmatrix diag(ld a, ld b, ld c, ld d) {
-  transmatrix T;
-  for(int i=0; i<MAXMDIM; i++) for(int j=0; j<MAXMDIM; j++) T[i][j] = 0;
-  T[0][0] = a;
-  T[1][1] = b;
-  T[2][2] = c;  
-  #if MAXMDIM==4
-  T[3][3] = d;
+constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
+  #if MAXMDIM==3
+  return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
+  #else
+  return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
   #endif
-  return T;
   }
 
 const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
