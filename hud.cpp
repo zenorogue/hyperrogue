@@ -403,8 +403,8 @@ void draw_radar(bool cornermode) {
     auto compassdir = [&] (char dirname, hyperpoint h) {
       using namespace hyperpoint_vec;
       h = nisot::local_perspective * h * .8;
-      queueline(atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0x80400020, -1);
-      displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0x804000);
+      queueline(atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
+      displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0xA04010);
       };
     compassdir('E', point3(+1, 0, 0));
     compassdir('N', point3(0, +1, 0));
