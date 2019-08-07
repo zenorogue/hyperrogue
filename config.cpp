@@ -445,7 +445,11 @@ void initConfig() {
   
   addsaver(sightranges[gField435], "sight-field435", 4 + bonus);
   addsaver(sightranges[gField534], "sight-field534", 3.8 + bonus);
+  addsaver(sightranges[gSol], "sight-sol");
+  addsaver(sightranges[gNil], "sight-nil", 6.5 + bonus);
+
   addsaver(vid.sloppy_3d, "sloppy3d", true);
+
   addsaver(vid.texture_step, "wall-quality", 1);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
