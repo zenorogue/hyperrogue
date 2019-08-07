@@ -3415,3 +3415,18 @@ Solv geometry:
 - fixed a crash when generating Rose Garden in 3D geometries
 - fixed the landscape generation discrepancy in the racing mode (affected ghosts in Dragon, Ruined City, and Crossroads)
 - fixed loading maps in the map editor
+
+2019-08-08 00:35 Version 11.1i:
+- fixed desynchronization in racing Crossroads and Ruined City
+- Nil geometry (another nonisotropic geometry)
+- the radar now displays a compass in Nil and Sol
+- fixed a memory leak when taking postprocessed screenshots
+- Reptiles no longer appear in full game in Sol
+- reduced the frequency of Seeps/Parrots/VineSpirits in 3D modes
+- shmup mode no longer ignores frame limit (just sets it to at least 30)
+- fixed Chaos mode in Sol
+- fixed the 'targeted cell' in nonisotropic geometries
+- fixed the rotation in the orthogonal projection of model in nonisotropic geometries
+- fixed shmup not working correctly in the non-geodesic mode in nonisotropic geometries
+- disabled heptagon markers blocking the view in 3D geometries
+- improved Red Rock and other heights display in 3D geometries
