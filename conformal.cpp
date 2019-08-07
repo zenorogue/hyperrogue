@@ -630,7 +630,7 @@ namespace conformal {
 #endif
 
   bool model_available(eModel pm) {
-    if(sol) return among(pm, mdDisk, mdPerspective, mdGeodesic);
+    if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdGeodesic);
     if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
