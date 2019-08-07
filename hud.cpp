@@ -358,6 +358,7 @@ void draw_radar(bool cornermode) {
   bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
   bool sph = sphere;
+  bool scompass = nonisotropic;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdUnchanged);
@@ -396,6 +397,21 @@ void draw_radar(bool cornermode) {
   
   if(d3) for(auto& r: radarpoints) {    
     queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
+    }
+  
+  if(scompass) {
+    auto compassdir = [&] (char dirname, hyperpoint h) {
+      using namespace hyperpoint_vec;
+      h = nisot::local_perspective * h * .8;
+      queueline(atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0x80400020, -1);
+      displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0x804000);
+      };
+    compassdir('E', point3(+1, 0, 0));
+    compassdir('N', point3(0, +1, 0));
+    compassdir('W', point3(-1, 0, 0));
+    compassdir('S', point3(0, -1, 0));
+    compassdir('U', point3(0,  0,+1));
+    compassdir('D', point3(0,  0,-1));
     }
 
   auto locate = [&] (hyperpoint h) {
