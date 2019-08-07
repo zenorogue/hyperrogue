@@ -2194,15 +2194,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else {
           c->landparam = 2;
-          if(out_ruin(c)) 
+          if(out_ruin(c)) {
             c->landparam = 0;
-          else forCellEx(c2, c) if(out_ruin(c2))
-            c->landparam = 1;
-
-          if(c->landparam == 0 && hrand(100) < 3)
-            c->wall = waRuinWall, c->landparam = 1;
-          if(c->landparam == 1 && hrand(100) < 75)
-            c->wall = waRuinWall;
+            if(hrand(100) < 3)
+              c->wall = waRuinWall;
+            }
+          else if(hrand(100) < 75) {
+            forCellEx(c2, c) if(out_ruin(c2))
+              c->wall = waRuinWall, c->landparam = 1;
+            }
           }
         if(hrand_monster(40000) < kf && !c->monst && !c->wall && !shmup::on) {
           cell *c1 = c;
@@ -2214,6 +2214,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c2->mondir = neighborId(c2, c1);
           }
         }
+      if(d == 7 && c->landparam == 2) forCellEx(c2, c) if(out_ruin(c2)) c->landparam = 1;
       ONEMPTY {
         if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itRuins)) {
           c->item = itRuins;
