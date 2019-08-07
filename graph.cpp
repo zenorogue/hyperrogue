@@ -7192,7 +7192,8 @@ void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = viewctr.at->c7; 
     ld best = HUGE_VAL;
-    hyperpoint h = cpush(2, 1) * C0;
+    hyperpoint h = 
+      nisot::local_perspective_used() ? inverse(nisot::local_perspective) * cpush(2, 1) * C0 : cpush(2, 1) * C0;
     forCellEx(c1, mouseover2) {
       ld dist = hdist(tC0(ggmatrix(c1)), h);
       if(dist < best) mouseover = c1, best = dist;
