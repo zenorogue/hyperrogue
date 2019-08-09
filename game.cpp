@@ -2142,7 +2142,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   int pcount = fallanim ? 0 : 16; 
   if(m == moShadow) return;
 
-#ifdef HASLINEVIEW
+#if CAP_HISTORY
   if(!isBug(m) && !isAnyIvy(m)) {
     history::killhistory.push_back(make_pair(c,m));
     }
@@ -7286,7 +7286,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     }
   
   if(dopickup && c2->item) {
-#ifdef HASLINEVIEW
+#if CAP_HISTORY
     // temporary variable to avoid the "cannot bind bitfield" problem in C++11
     eItem dummy = c2->item;
     history::findhistory.emplace_back(c2, dummy);
@@ -7776,7 +7776,7 @@ EX void monstersTurn() {
   if(canmove) elec::checklightningfast();
 
 
-#ifdef HASLINEVIEW
+#if CAP_HISTORY
   for(int i=0; i<numplayers(); i++)
     if(multi::playerActive(i))
       history::movehistory.push_back(playerpos(i));

@@ -10,65 +10,113 @@ namespace hr {
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
 
-bool rug_failure = false;
+EX bool rug_failure = false;
 
-namespace rug {
+EX namespace rug {
 
-ld lwidth = 2;
+EX ld lwidth = 2;
 
-bool in_crystal() { return surface::sh == surface::dsCrystal; }
+EX bool in_crystal() { return surface::sh == surface::dsCrystal; }
 
 bool computed = false;
 
-vector<rugpoint*> points;
-vector<triangle> triangles;
+#if HDR
+  struct edge {
+    struct rugpoint *target;
+    ld len;
+    };
+  
+  struct dexp_data {
+    hyperpoint params;
+    hyperpoint cont;
+    ld remaining_distance;
+    };
+
+  struct rugpoint {
+    double x1, y1;
+    bool valid;
+    bool inqueue;
+    double dist;
+    hyperpoint h;    // point in the represented space
+    hyperpoint flat; // point in the native space, in azeq
+    hyperpoint precompute;
+    vector<edge> edges;
+    vector<edge> anticusp_edges;
+    // Find-Union algorithm
+    rugpoint *glue;
+    rugpoint *getglue() {
+      return glue ? (glue = glue->getglue()) : this;
+      }
+    hyperpoint& glueflat() {
+      return glue->flat;
+      }
+    rugpoint() { glue = NULL; }
+    void glueto(rugpoint *x) {
+      x = x->getglue();
+      auto y = getglue();
+      if(x != y) y->glue = x;
+      }
+    int dexp_id;
+    dexp_data surface_point;
+    };
+
+  struct triangle {
+    rugpoint *m[3];
+    triangle(rugpoint *m1, rugpoint *m2, rugpoint *m3) {
+      m[0] = m1; m[1] = m2; m[2] = m3;
+      }
+    };
+#endif
+
+EX vector<rugpoint*> points;
+EX vector<triangle> triangles;
 
 int when_enabled;
 
 struct rug_exception { };
 
-bool fast_euclidean = true;
-bool good_shape;
-bool subdivide_first = false;
-bool spatial_rug = false;
+EX bool fast_euclidean = true;
+EX bool good_shape;
+EX bool subdivide_first = false;
+EX bool spatial_rug = false;
 
-bool subdivide_further();
-void subdivide();
+EX bool subdivide_further();
+EX void subdivide();
 
-ld modelscale = 1;
-ld model_distance = 4;
+EX ld modelscale = 1;
+EX ld model_distance = 4;
 
-eGeometry gwhere = gEuclid;
+EX eGeometry gwhere = gEuclid;
 
 #define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, gwhere == gElliptic ? gSphere : gwhere)
 
 // hypersian rug datatypes and globals
 //-------------------------------------
 
-bool rugged = false;
+EX bool rugged = false;
 bool genrug = false;
 
-int vertex_limit = 20000;
+EX int vertex_limit = 20000;
 
-bool renderonce  = false;
-int renderlate  = 0;
-bool rendernogl  = false;
-int  texturesize = 1024;
-ld scale = 1;
-ld ruggo = 0;
+EX bool renderonce  = false;
+EX int renderlate  = 0;
+EX bool rendernogl  = false;
+EX int  texturesize = 1024;
+EX ld scale = 1;
+EX ld ruggo = 0;
 
-ld anticusp_factor = 1;
-ld anticusp_dist;
+EX ld anticusp_factor = 1;
+EX ld anticusp_dist;
 
-ld err_zero = 1e-3, err_zero_current, current_total_error;
+EX ld err_zero = 1e-3, err_zero_current, current_total_error;
 
 int queueiter, qvalid, dt;
 
-rugpoint *finger_center;
-ld finger_range = .1;
-ld finger_force = 1;
+EX rugpoint *finger_center;
+EX ld finger_range = .1;
+EX ld finger_force = 1;
 
-int rugdim;
+EX int rugdim;
 
 bool rug_perspective = ISANDROID;
 
@@ -183,7 +231,7 @@ void push_all_points(int coord, ld val) {
 
 int hyprand;
 
-rugpoint *addRugpoint(hyperpoint h, double dist) {
+EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   rugpoint *m = new rugpoint;
   m->h = h;
   
@@ -289,13 +337,13 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   return m;
   }
 
-rugpoint *findRugpoint(hyperpoint h) {
+EX rugpoint *findRugpoint(hyperpoint h) {
   for(int i=0; i<isize(points); i++) 
     if(sqhypot_d(rugdim, points[i]->h - h) < 1e-5) return points[i];
   return NULL;
   }
 
-rugpoint *findOrAddRugpoint(hyperpoint h, double dist) {
+EX rugpoint *findOrAddRugpoint(hyperpoint h, double dist) {
   rugpoint *r = findRugpoint(h);
   return r ? r : addRugpoint(h, dist);
   }
@@ -306,7 +354,7 @@ void addNewEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   e.target = e1; e2->edges.push_back(e);
   }
 
-bool edge_exists(rugpoint *e1, rugpoint *e2) {
+EX bool edge_exists(rugpoint *e1, rugpoint *e2) {
   for(auto& e: e1->edges)
     if(e.target == e2)
       return true;
@@ -326,7 +374,7 @@ void add_anticusp_edge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   e.target = e1; e2->anticusp_edges.push_back(e);
   }
 
-void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len) {
+EX void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len IS(1)) {
   addEdge(t1->getglue(), t2->getglue(), len); 
   addEdge(t2->getglue(), t3->getglue(), len); 
   addEdge(t3->getglue(), t1->getglue(), len);
@@ -374,7 +422,7 @@ void calcparam_rug() {
   cd->radius = cd->scrsize * vid.scale;
   }
 
-void buildTorusRug() {
+EX void buildTorusRug() {
   using namespace torusconfig;
 
   calcparam_rug();
@@ -581,7 +629,7 @@ void buildTorusRug() {
   return;
   }
 
-void verify() {
+EX void verify() {
   vector<ld> ratios;
   for(auto m: points)
     for(auto& e: m->edges) {
@@ -613,7 +661,7 @@ void comp(cell*& minimum, cell *next) {
     minimum = next;
   }
 
-void buildRug() {
+EX void buildRug() {
 
   need_mouseh = true;
   good_shape = false;
@@ -746,7 +794,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
 
 vector<pair<ld, rugpoint*> > preset_points;
 
-void preset(rugpoint *m) {
+EX void preset(rugpoint *m) {
   if(DIM == 3) return;
   int q = 0;
   hyperpoint h;
@@ -819,7 +867,7 @@ ld sse(const hyperpoint& h) {
   return sse;
   }
 
-void optimize(rugpoint *m, bool do_preset) {
+EX void optimize(rugpoint *m, bool do_preset) {
 
   if(do_preset) {
     preset(m);
@@ -847,13 +895,13 @@ void optimize(rugpoint *m, bool do_preset) {
 int divides = 0;
 bool stop = false;
 
-bool subdivide_further() {
+EX bool subdivide_further() {
   if(fulltorus) return false;
   if(DIM == 3) return false;
   return isize(points) * 4 < vertex_limit;
   }
 
-void subdivide() {
+EX void subdivide() {
   int N = isize(points);
   // if(euclid && gwhere == gEuclid) return;
   if(!subdivide_further()) {
@@ -905,7 +953,7 @@ void subdivide() {
   println(hlog, "result ", make_tuple(isize(points), isize(triangles)));
   }
 
-ld slow_modeldist(const hyperpoint& h1, const hyperpoint& h2) {
+EX ld slow_modeldist(const hyperpoint& h1, const hyperpoint& h2) {
   normalizer n(h1, h2);
   hyperpoint f1 = n(h1);
   hyperpoint f2 = n(h2);
@@ -923,7 +971,7 @@ hyperpoint4 azeq_to_4(const hyperpoint& h) {
   return res;
   }
 
-ld modeldist(const hyperpoint& h1, const hyperpoint& h2) {
+EX ld modeldist(const hyperpoint& h1, const hyperpoint& h2) {
   if(gwhere == gSphere) {
     hyperpoint4 coord[2] = { azeq_to_4(h1), azeq_to_4(h2) };
     ld edist = 0;
@@ -1022,7 +1070,7 @@ int detect_cusps() {
   return stats[2];
   }
   
-void addNewPoints() {
+EX void addNewPoints() {
 
   if(anticusp_factor && detect_cusps())
     return;
@@ -1052,7 +1100,7 @@ void addNewPoints() {
   if(qvalid != oqvalid) { println(hlog, "adding new points ", make_tuple(oqvalid, qvalid, isize(points), dist, dt, queueiter)); }
   }
 
-void physics() {
+EX void physics() {
 
   #if CAP_CRYSTAL
   if(in_crystal()) {
@@ -1274,9 +1322,9 @@ void drawTriangle(triangle& t) {
     (num==3?ct_array:cp_array).emplace_back(h[i], t.m[i]->x1, t.m[i]->y1, col);
   }
 
-renderbuffer *glbuf;
+EX struct renderbuffer *glbuf;
 
-void prepareTexture() {
+EX void prepareTexture() {
   resetbuffer rb;
   
   dynamicval<eStereo> d(vid.stereo_mode, sOFF);
@@ -1313,15 +1361,15 @@ void prepareTexture() {
 
 double xview, yview;
 
-bool no_fog;
+EX bool no_fog;
 
-ld lowrug = 1e-2, hirug = 1e3;
+EX ld lowrug = 1e-2, hirug = 1e3;
 
 GLuint alternate_texture;
 
 bool invert_depth;
 
-void drawRugScene() {
+EX void drawRugScene() {
   glbuf->use_as_texture();
   if(alternate_texture)
     glBindTexture( GL_TEXTURE_2D, alternate_texture);
@@ -1427,9 +1475,9 @@ void drawRugScene() {
 // organization
 //--------------
 
-transmatrix currentrot;
+EX transmatrix currentrot;
     
-void reopen() {
+EX void reopen() {
   if(rugged) return;
   rugdim = 2 * DIM - 1;
   when_enabled = ticks;
@@ -1445,9 +1493,9 @@ void reopen() {
   if(!rugged) return;
   }
 
-bool display_warning = true;
+EX bool display_warning = true;
 
-void init_model() {
+EX void init_model() {
   clear_model();
   genrug = true;
   drawthemap();
@@ -1493,20 +1541,20 @@ void init_model() {
     }
   }
 
-void init() {
+EX void init() {
   if(dual::state) return;
   reopen();
   if(rugged) init_model();
   }
 
-void clear_model() {
+EX void clear_model() {
   triangles.clear();
   for(int i=0; i<isize(points); i++) delete points[i];
   points.clear();
   pqueue = queue<rugpoint*> ();
   }
   
-void close() {
+EX void close() {
   if(!rugged) return;
   rugged = false;
   delete glbuf;
@@ -1517,7 +1565,7 @@ int lastticks;
 
 ld protractor = 0;
 
-void apply_rotation(const transmatrix& t) {
+EX void apply_rotation(const transmatrix& t) {
   if(!rug_perspective) currentrot = t * currentrot;
   #if CAP_CRYSTAL
   if(in_crystal()) crystal::apply_rotation(t);
@@ -1526,14 +1574,14 @@ void apply_rotation(const transmatrix& t) {
   for(auto p: points) p->flat = t * p->flat;
   }
 
-void move_forward(ld distance) {
+EX void move_forward(ld distance) {
   if(rug_perspective) push_all_points(2, distance);
   else model_distance /= exp(distance);
   }
 
 #define CAP_HOLDKEYS CAP_SDL // && !ISWEB)
 
-bool handlekeys(int sym, int uni) {
+EX bool handlekeys(int sym, int uni) {
   if(NUMBERKEY == '1') {
     ld bdist = 1e12;
     if(finger_center) 
@@ -1591,7 +1639,7 @@ bool handlekeys(int sym, int uni) {
   else return false;
   }
 
-void finger_on(int coord, ld val) {
+EX void finger_on(int coord, ld val) {
   for(auto p: points) {
     ld d = hdist(finger_center->h, p->getglue()->h);
     push_point(p->flat, coord, val * finger_force * exp( - sqr(d / finger_range)));
@@ -1601,9 +1649,9 @@ void finger_on(int coord, ld val) {
 
 transmatrix last_orientation;
 
-ld ruggospeed = 1;
+EX ld ruggospeed = 1;
 
-void actDraw() { 
+EX void actDraw() {
   try {
 
   if(!renderonce) prepareTexture();
@@ -1737,7 +1785,7 @@ void getco_pers(rugpoint *r, hyperpoint& p, int& spherepoints, bool& error) {
 static const ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
-hyperpoint gethyper(ld x, ld y) {
+EX hyperpoint gethyper(ld x, ld y) {
   double mx = (x - current_display->xcenter)/vid.xres * 2 * xview;
   double my = (current_display->ycenter - y)/vid.yres * 2 * yview;
   radar_distance = RADAR_INF;
@@ -1795,7 +1843,7 @@ hyperpoint gethyper(ld x, ld y) {
   return h;
   }
 
-string makehelp() {
+EX string makehelp() {
   return
     XLAT(
     "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
@@ -1813,7 +1861,7 @@ string makehelp() {
      ;
   }
 
-string geometry_name(eGeometry g) {
+EX string geometry_name(eGeometry g) {
   switch(g) {
     case gNormal: return XLAT("hyperbolic");
     case gEuclid: return XLAT("Euclidean");
@@ -1832,7 +1880,7 @@ void change_texturesize() {
 
 ld old_distance;
 
-void show() {
+EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
@@ -2018,7 +2066,7 @@ void show() {
     };
   }
 
-void select() {
+EX void select() {
   if(dual::state) return;
   pushScreen(rug::show);
   }

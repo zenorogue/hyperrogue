@@ -2,7 +2,7 @@ namespace hr {
 #if CAP_SHAPES
 
 EX vector<basic_textureinfo> floor_texture_vertices;
-EX renderbuffer *floor_textures;
+EX struct renderbuffer *floor_textures;
 
 void geometry_information::init_floorshapes() {
   all_escher_floorshapes.clear();

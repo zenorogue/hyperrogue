@@ -488,6 +488,10 @@ union SDL_Event;
 #define CAP_CRYSTAL CAP_GEOMETRY
 #endif
 
+#ifndef CAP_HISTORY
+#define CAP_HISTORY 1
+#endif
+
 #ifndef CAP_BT
 #define CAP_BT CAP_GEOMETRY
 #endif
