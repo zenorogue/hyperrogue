@@ -1458,7 +1458,7 @@ EX void makelava(cell *c, int i) {
   else if(makeflame(c, i, false)) orbused[itOrbLava] = true;
   }
 
-void orboflava(int i) {
+EX void orboflava(int i) {
   if(items[itOrbLava]) 
     for(cell *c: dcal) {
       if(c->cpdist > 5) break;

@@ -24,7 +24,7 @@ EX videopar vid;
 
 extern color_t floorcolors[landtypes];
 
-charstyle& getcs(int id) {
+EX charstyle& getcs(int id IS(multi::cpid)) {
   if(multi::players>1 && id >= 0 && id < multi::players)
     return multi::scs[id];
   else

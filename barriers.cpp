@@ -4,7 +4,7 @@
 
 namespace hr {
 
-EX bool checkBarriersFront(cellwalker bb, int q, bool cross) {
+EX bool checkBarriersFront(cellwalker bb, int q IS(5), bool cross IS(false)) {
 
   if(!ctof(bb.at)) 
     return false;
@@ -36,7 +36,7 @@ EX void preventbarriers(cell *c) {
   if(c && c->bardir == NODIR) c->bardir = NOBARRIERS;
   }
 
-EX bool checkBarriersBack(cellwalker bb, int q, bool cross) {
+EX bool checkBarriersBack(cellwalker bb, int q IS(5), bool cross IS(false)) {
   // printf("back, %p, s%d\n", bb.at, bb.spin);
 
   // if(mark) { printf("mpdist = %d [%d] bardir = %d spin=%d q=%d cross=%d\n", bb.at->mpdist, BARLEV, bb.at->bardir, bb.spin, q, cross); }
@@ -811,7 +811,7 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
   }
 #endif
 
-EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
+EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
 
   if(geometry == gBinary4) return false;
   #if MAXMDIM >= 4

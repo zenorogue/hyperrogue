@@ -19,8 +19,8 @@ EX int getcstat, lgetcstat;
 ld getcshift;
 EX bool inslider;
 
-function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
-function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;};
+EX function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
+EX function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;};
 
 
 // is the player using mouse? (used for auto-cross)
@@ -40,12 +40,12 @@ EX ld mouseaim_sensitivity = 0.01;
 EX int timetowait;
 
 #if CAP_SDLJOY
-int joyx, joyy, panjoyx, panjoyy; 
-movedir joydir;
+EX int joyx, joyy, panjoyx, panjoyy; 
+EX movedir joydir;
 #endif
 
-movedir mousedest;
-ld shiftmul = 1;
+EX movedir mousedest;
+EX ld shiftmul = 1;
 
 EX cell *mouseover, *mouseover2, *lmouseover;
 ld modist, modist2, centdist;
@@ -181,8 +181,8 @@ EX void mousemovement() {
   }
 
 #if CAP_SDLJOY
-SDL_Joystick* sticks[8];
-int numsticks;
+EX SDL_Joystick* sticks[8];
+EX int numsticks;
 
 EX void initJoysticks() {
   DEBB(DF_INIT, ("init joysticks"));
@@ -267,7 +267,7 @@ EX bool doexiton(int sym, int uni) {
   return false;
   }
 
-bool didsomething;
+EX bool didsomething;
 
 typedef SDL_Event eventtype;
 
@@ -523,9 +523,13 @@ EX void handlekey(int sym, int uni) {
   keyhandler(sym, uni);
   }
 
+EX void resize_screen_to(int x, int y);
+
 #if !CAP_SDL
 EX void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainloop = true; }
-#else
+#endif
+
+#if CAP_SDL
 
 // Warning: a very long function! todo: refactor
 

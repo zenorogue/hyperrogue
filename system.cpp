@@ -8,24 +8,24 @@ namespace hr {
 
 EX bool game_active;
 
-bool cblind;
-bool autocheat;
-bool canvas_invisible;
+EX bool cblind;
+EX bool autocheat;
+EX bool canvas_invisible;
 
-int truelotus;
-int gamecount;
+EX int truelotus;
+EX int gamecount;
 
-int asteroids_generated, asteroid_orbs_generated;
+EX int asteroids_generated, asteroid_orbs_generated;
 
-time_t timerstart, savetime;
-bool timerstopped;
+EX time_t timerstart, savetime;
+EX bool timerstopped;
 int savecount;
 EX bool showoff = false;
 EX bool doCross = false;
 
 bool gamegen_failure;
 
-eLand top_land;
+EX eLand top_land;
 
 bool verless(string v, string cmp) {
   if(isdigit(v[0]) && isdigit(v[1])) 
@@ -367,7 +367,7 @@ void applyBox(int& t) {
   else boxid++;
   }
 
-void applyBoxNum(int& i, string name) {
+EX void applyBoxNum(int& i, string name IS("")) {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
   monsbox[boxid] = false;

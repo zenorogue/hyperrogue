@@ -2924,8 +2924,8 @@ EX bool nogoSlow(cell *to, cell *from) {
   }
 
 // pathdist begin
-cell *pd_from;
-int pd_range;
+EX cell *pd_from;
+EX int pd_range;
 
 EX void onpath(cell *c, int d) {
   c->pathdist = d;
@@ -3014,6 +3014,27 @@ EX void computePathdist(eMonster param) {
       }
     }
   }
+
+#if HDR
+struct pathdata {
+  void checklock() { 
+    if(pd_from) pd_from = NULL, clear_pathdata();
+    if(pathlock) printf("path error\n"); 
+    pathlock++; 
+    }
+  ~pathdata() {
+    pathlock--;
+    clear_pathdata();
+    }
+  pathdata(eMonster m) { 
+    checklock();
+    computePathdist(m); 
+    }
+  pathdata(int i) { 
+    checklock();
+    }
+  };
+#endif
 // pathdist end
 
 vector<pair<cell*, int> > butterflies;
@@ -5113,8 +5134,8 @@ EX void movemutant() {
     }  
   }
 
-__typeof(shpos) shpos;
-int cshpos = 0;
+EX vector<array<cell*, MAXPLAYER>> shpos;
+EX int cshpos = 0;
 
 EX cell *lastmountpos[MAXPLAYER];
 

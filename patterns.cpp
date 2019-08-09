@@ -1027,13 +1027,13 @@ int nextfiftyval(int par, int gpar, int d) {
   exit(1);
   }
 
-int land50(int x) { return x&7; }
+EX int land50(int x) { return x&7; }
 
-bool polara50(int x) { return x&8; }
+EX bool polara50(int x) { return x&8; }
 
-bool polarb50(int x) { return x&16; }
+EX bool polarb50(int x) { return x&16; }
 
-int cdist50(int x) { 
+EX int cdist50(int x) { 
   x /= 32;
   if(x == 0) return 0;
   if(x < 8) return 2;

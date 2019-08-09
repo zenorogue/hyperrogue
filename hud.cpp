@@ -86,7 +86,7 @@ void updatesort() {
   glyph_lastticks = ticks;
   }
 
-void preparesort() {
+EX void preparesort() {
   for(int i=0; i<glyphs; i++) glyphorder[i] = i;
   for(int i=0; i<isize(land_over); i++) {
     eLand l = land_over[i];

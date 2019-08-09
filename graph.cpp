@@ -66,7 +66,7 @@ EX transmatrix spintick(int period, ld phase IS(0)) {
 int colorbar;
 
 EX bool inHighQual; // taking high quality screenshot
-bool auraNOGL;    // aura without GL
+EX bool auraNOGL;    // aura without GL
 
 // 
 int axestate;
@@ -77,10 +77,10 @@ int frameid;
 bool camelotcheat;
 EX bool nomap;
 
-eItem orbToTarget;
-eMonster monsterToSummon;
+EX eItem orbToTarget;
+EX eMonster monsterToSummon;
 
-int sightrange_bonus = 0;
+EX int sightrange_bonus = 0;
 
 EX string mouseovers;
 
@@ -161,7 +161,7 @@ color_t fc(int ph, color_t col, int z) {
   return col;
   }
 
-int lightat, safetyat;
+EX int lightat, safetyat;
 EX void drawLightning() { lightat = ticks; }
 EX void drawSafety() { safetyat = ticks; }
 
@@ -205,7 +205,7 @@ void drawSpeed(const transmatrix& V) {
 #endif
   }
 
-int ctof(cell *c) {
+EX int ctof(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::ctof(c);
   #endif
@@ -836,7 +836,7 @@ hpcshape& orbshape(eOrbshape s) {
      }
   }
 
-bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pticks, bool hidden) {
+EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pticks, bool hidden) {
 #if !CAP_SHAPES
   return it;
 #else
@@ -2298,7 +2298,7 @@ bool drawMonsterTypeDH(eMonster m, cell *where, const transmatrix& V, color_t co
   return b;
   }
 
-transmatrix playerV;
+EX transmatrix playerV;
 
 bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
   if(!animations[layer].count(c)) return false;
@@ -2823,9 +2823,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   return false;
   }
 
-cell *straightDownSeek;
-hyperpoint straightDownPoint;
-ld straightDownSpeed;
+EX cell *straightDownSeek;
+EX hyperpoint straightDownPoint;
+EX ld straightDownSpeed;
 
 #define AURA 180
 
@@ -2860,14 +2860,14 @@ void apply_joukowsky_aura(hyperpoint& h) {
     }
   }
 
-void addauraspecial(hyperpoint h, color_t col, int dir) {
+EX void addauraspecial(hyperpoint h, color_t col, int dir) {
   if(!haveaura()) return;
   apply_joukowsky_aura(h);
   int r = int(2*AURA + dir + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
   auraspecials.emplace_back(r, col);
   }
 
-void addaura(hyperpoint h, color_t col, int fd) {
+EX void addaura(hyperpoint h, color_t col, int fd) {
   if(!haveaura()) return;
   apply_joukowsky_aura(h);
 
@@ -3036,12 +3036,12 @@ bool bugsNearby(cell *c, int dist = 2) {
   return false;
   }
 
-colortable minecolors = {
+EX colortable minecolors = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
   0x60, 0x600000, 0x00C0C0, 0x000000, 0x808080, 0xFFD500
   };
 
-colortable distcolors = {
+EX colortable distcolors = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
   0xA0A000, 0xA000A0, 0x00A0A0, 0xFFD500
   };
@@ -3057,7 +3057,7 @@ const char* minetexts[8] = {
   "Seven mines next to you!"
   };
 
-int countMinesAround(cell *c) {
+EX int countMinesAround(cell *c) {
   int mines = 0;
   for(cell *c2: adj_minefield_cells(c))
     if(c2->wall == waMineMine)
@@ -5017,7 +5017,7 @@ void drawcell_in_radar(cell *c, transmatrix V) {
   }
 #endif
 
-void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
+EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
   PROD( if(product::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; } )
 
@@ -6824,13 +6824,13 @@ EX void queuecircleat(cell *c, double rad, color_t col) {
 #define MOBON true
 #endif
 
-cell *forwardcell() {
+EX cell *forwardcell() {
   movedir md = vectodir(move_destination_vec(6));
   cellwalker xc = cwt + md.d + wstep;
   return xc.at;
   }
 
-void drawMarkers() {
+EX void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
   
@@ -7092,7 +7092,7 @@ void drawFlashes() {
   #endif
   }
 
-bool allowIncreasedSight() {
+EX bool allowIncreasedSight() {
   if(cheater || autocheat) return true;
   if(peace::on) return true;
 #if CAP_TOUR
@@ -7105,7 +7105,7 @@ bool allowIncreasedSight() {
   return false;
   }
 
-bool allowChangeRange() {
+EX bool allowChangeRange() {
   if(cheater || peace::on || randomPatternsMode) return true;
 #if CAP_TOUR
   if(tour::on) return true;
@@ -7117,11 +7117,11 @@ bool allowChangeRange() {
   return false;
   }
 
-purehookset hooks_drawmap;
+EX purehookset hooks_drawmap;
 
-transmatrix actual_view_transform;
+EX transmatrix actual_view_transform;
 
-ld wall_radar(cell *c, transmatrix T, ld max) {
+EX ld wall_radar(cell *c, transmatrix T, ld max) {
   if(pmodel != mdPerspective || !vid.use_wall_radar) return max;
   ld step = max / 20;
   ld fixed_yshift = 0;
@@ -7139,7 +7139,7 @@ ld wall_radar(cell *c, transmatrix T, ld max) {
   return fixed_yshift;
   }
 
-void make_actual_view() {
+EX void make_actual_view() {
   sphereflip = Id;
   if(sphereflipped()) sphereflip[DIM][DIM] = -1;
   actual_view_transform = sphereflip;  
@@ -7160,7 +7160,7 @@ void make_actual_view() {
   #endif
   }
 
-transmatrix cview() {
+EX transmatrix cview() {
   make_actual_view();
   #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
@@ -7182,7 +7182,7 @@ transmatrix cview() {
   return actual_view_transform * View;
   }
 
-void precise_mouseover() {
+EX void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = viewctr.at->c7; 
     ld best = HUGE_VAL;
@@ -7686,7 +7686,7 @@ EX void normalscreen() {
 
 vector< function<void()> > screens = { normalscreen };
 
-int cmode;
+EX int cmode;
 
 EX void drawscreen() {
 
@@ -7927,7 +7927,7 @@ EX void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int
   animateMovement(&c1, a, layer, direction_hintb);
   }
 
-void drawBug(const cellwalker& cw, color_t col) {
+EX void drawBug(const cellwalker& cw, color_t col) {
 #if CAP_SHAPES
   initquickqueue();
   transmatrix V = ggmatrix(cw.at);

@@ -4,6 +4,29 @@
 namespace hr {
 // orbgen flags
 
+#if HDR
+enum eOrbLandRelation { 
+  olrForbidden, // never appears: forbidden
+  olrDangerous, // never appears: would be dangerous
+  olrUseless,   // never appears: useless here
+  olrNoPrizes,  // no prizes in this land
+  olrNoPrizeOrb,// orb not allowed as a prize
+  olrPrize25,   // prize for collecting 25
+  olrPrize3,    // prize for collecting 3
+  olrNative,    // native orb in this land
+  olrNative1,   // native orb in this land (1)
+  olrGuest,     // extra orb in this land
+  olrPNative,   // Land of Power: native
+  olrPBasic,    // Land of Power: basic orbs
+  olrPPrized,   // Land of Power: prized orbs
+  olrPNever,    // Land of Power: foreign orbs
+  olrHub,       // hub lands
+  olrMonster,   // available from a monster
+  olrAlways,    // always available
+  olrBurns      // burns
+  };
+#endif
+
 namespace orbgenflags {
   // generates in the given land from 10 treasures, in the classic mode
   static const int LOCAL10 = 1;
@@ -171,7 +194,7 @@ string olrDescriptions[] = {
   "would be destroyed in %the1"
   };
 
-eOrbLandRelation getOLR(eItem it, eLand l) {
+EX eOrbLandRelation getOLR(eItem it, eLand l) {
 
   if(l == laPower) {
     if(it == itOrbFire) return olrPNative;

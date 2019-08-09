@@ -851,11 +851,11 @@ ld spherity(const transmatrix& V) {
   return spherity(tC0(V));
   }
 
-bool confusingGeometry() {
+EX bool confusingGeometry() {
   return quotient;
   }
 
-ld master_to_c7_angle() {
+EX ld master_to_c7_angle() {
   ld alpha = 0;
   #if CAP_GP
   if(cgi.gpdata) alpha = cgi.gpdata->alpha;
@@ -863,7 +863,7 @@ ld master_to_c7_angle() {
   return (!BITRUNCATED && !binarytiling && !archimedean) ? M_PI + alpha : 0;
   }
 
-transmatrix actualV(const heptspin& hs, const transmatrix& V) {
+EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   if(WDIM == 3) return V;
   #if CAP_IRR
   if(IRREGULAR)
@@ -1406,7 +1406,7 @@ EX void resetview() {
   }
 
 
-void panning(hyperpoint hf, hyperpoint ht) {
+EX void panning(hyperpoint hf, hyperpoint ht) {
   View = 
     rgpushxto0(hf) * rgpushxto0(gpushxto0(hf) * ht) * gpushxto0(hf) * View;
   playermoved = false;

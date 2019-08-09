@@ -1,18 +1,20 @@
 // Hyperbolic Rogue -- Orb Strategy Mode
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-namespace hr { namespace inv {
+namespace hr { 
 
-  bool on;
-  array<int, ittypes> usedup;
-  array<int, ittypes> remaining;
+EX namespace inv {
+
+  EX bool on;
+  EX array<int, ittypes> usedup;
+  EX array<int, ittypes> remaining;
   array<int, ittypes> extra_orbs;
 
   int rseed;
-  bool usedForbidden;
+  EX bool usedForbidden;
 
     
-  void init() {
+  EX void init() {
     rseed = hrandpos();
     usedForbidden = false;
     for(int i=0; i<ittypes; i++) usedup[i] = 0;
@@ -257,7 +259,7 @@ namespace hr { namespace inv {
       extra += extraline(tr, itr >= at ? (its(at)+"!") : "10-50");
     }
   
-  void compute() {
+  EX void compute() {
     extra = "";
     orbinfoline = "";
 
@@ -445,9 +447,9 @@ namespace hr { namespace inv {
     return s;
     }
   
-  bool activating;
+  EX bool activating;
 
-  void show() {
+  EX void show() {
   
     if(remaining[itOrbSword]) items[itOrbSword]++;
     if(remaining[itOrbSword2]) items[itOrbSword2]++;
@@ -652,9 +654,9 @@ namespace hr { namespace inv {
     }
 #endif
   
-  int incheck;
+  EX int incheck;
   
-  void check(int delta) {
+  EX void check(int delta) {
     incheck += delta;
     for(int i=0; i<ittypes; i++) {
       eItem it = eItem(i);

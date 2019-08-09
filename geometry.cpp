@@ -175,7 +175,7 @@ transmatrix xspinpush(ld dir, ld dist) {
     return spin(dir) * xpush(dist) * spin(-dir);
   }
 
-purehookset hooks_swapdim;
+EX purehookset hooks_swapdim;
 
 namespace geom3 {
   

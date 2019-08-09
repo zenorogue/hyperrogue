@@ -10,7 +10,7 @@ EX int fontscale = 100;
 
 EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
 
-string s0;
+EX string s0;
 
 EX bool fixseed = false;
 EX int startseed = 0;

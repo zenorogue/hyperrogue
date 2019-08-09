@@ -468,7 +468,7 @@ string current_proj_name() {
     return XLAT("general perspective");
   }
 
-void showEuclideanMenu() {
+EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
   cmode = sm::SIDE | sm::MAYDARK;

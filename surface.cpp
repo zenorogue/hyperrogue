@@ -4,22 +4,28 @@
 // See http://webmath2.unito.it/paginepersonali/sergio.console/CurveSuperfici/AG15.pdf for a nice reference
 
 #if CAP_SURFACE
-namespace hr { namespace surface {
+namespace hr { 
+
+EX namespace surface {
 
 ld sech(ld d) { return 1 / cosh(d); }
+
+#if HDR
+enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere, dsCrystal };
+#endif
 
 string shape_name[] = { "hypersian rug", "tractricoid", "Dini's surface", "Kuen surface", "concave barrel",
   "hyperboloid", "hemisphere", "crystal" };
   
-eShape sh;
+EX eShape sh;
 
 hyperpoint unit_vector[3] = {hpxyz(1,0,0), hpxyz(0,1,0), hpxyz(0,0,1)};
 
 ld last_int_of = 0, last_int = 0;
 
-ld dini_b = .15;
+EX ld dini_b = .15;
 
-ld hyper_b = 1;
+EX ld hyper_b = 1;
 
 ld f(ld x) {
   return sqrt(1 - pow(hyper_b * sinh(x), 2));
@@ -579,7 +585,7 @@ void run_other() {
     }
   }
 
-void run_shape(eShape s) {
+EX void run_shape(eShape s) {
   coverage.clear();
   need_mouseh = true;
   sh = s;
@@ -663,7 +669,7 @@ void cancel_shape() {
 cell *coverage_center;
 transmatrix coverage_matrix;
 
-void show_surfaces() {
+EX void show_surfaces() {
   cmode = sm::SIDE;
   gamescreen(0);
   dialog::init(XLAT("constant curvature surfaces"), iinf[itPalace].color, 150, 0);

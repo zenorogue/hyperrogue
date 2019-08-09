@@ -31,6 +31,39 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 #endif
 #endif
 
+#if HDR
+struct renderbuffer {
+  bool valid;
+  int x, y;
+
+  #if CAP_GL
+  int tx, ty;
+  GLuint FramebufferName;
+  GLuint renderedTexture;
+  GLuint depth_stencil_rb;
+  Uint32 *expanded_data;
+  void use_as_texture();
+  #endif
+  #if CAP_SDL
+  SDL_Surface *srf;
+  void make_surface();
+  SDL_Surface *render();
+  #endif
+  
+  renderbuffer(int x, int y, bool gl);
+  ~renderbuffer();
+  void enable();
+  void clear(color_t col);
+  };
+
+struct resetbuffer {
+  GLint drawFboId, readFboId;
+  SDL_Surface *sreset;
+  resetbuffer();
+  void reset();
+  };
+#endif
+
 renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
 
   valid = false;

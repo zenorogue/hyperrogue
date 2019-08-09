@@ -2,9 +2,115 @@
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 #if CAP_TEXTURE
-namespace hr { namespace texture {
+namespace hr {
 
-cpatterntype cgroup;
+EX namespace texture {
+
+#if HDR
+enum eTextureState {
+  tsOff, tsAdjusting, tsActive
+  };
+
+struct texture_data {
+  GLuint textureid;
+
+  int twidth;
+  int tx, ty, origdim;
+  
+  texture_data() { textureid = 0; twidth = 2048; }
+
+  vector<color_t> texture_pixels;
+
+  color_t& get_texture_pixel(int x, int y) {
+    return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
+    }
+  
+  vector<pair<color_t*, color_t>> undos;
+  vector<tuple<cell*, hyperpoint, int> > pixels_to_draw;
+
+  bool loadTextureGL();
+  bool whitetexture();
+  bool readtexture(string tn);
+  void saveRawTexture(string tn);
+
+  void undo();
+  void undoLock();
+  void update();
+  };
+
+struct texture_config {
+  string texturename;
+  string configname;
+  color_t paint_color;
+  eTextureState tstate;
+  eTextureState tstate_max;
+
+  transmatrix itt;
+  
+  color_t grid_color;
+  color_t mesh_color;
+  color_t master_color;
+  color_t slave_color;
+  
+  int color_alpha;
+  
+  int gsplits;
+
+  int recolor(color_t col);
+
+  typedef tuple<eGeometry, eVariation, char, int, eModel, ld, ld> texture_parameters; 
+  texture_parameters orig_texture_parameters;
+  
+  map<int, textureinfo> texture_map, texture_map_orig;
+  set<cell*> models;
+  
+  basic_textureinfo tinf3;
+
+  bool texture_tuned;
+  string texture_tuner;
+  vector<hyperpoint*> tuned_vertices;
+
+  bool apply(cell *c, const transmatrix &V, color_t col);
+  void mark_triangles();
+
+  void clear_texture_map();
+  void perform_mapping();
+  void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits);
+  void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv) { mapTextureTriangle(mi, v, tv, gsplits); }
+  void mapTexture2(textureinfo& mi);
+  void finish_mapping();
+  void true_remap();
+  void remap();
+  bool correctly_mapped;
+  hyperpoint texture_coordinates(hyperpoint);
+
+  void drawRawTexture();
+  void saveFullTexture(string tn);
+
+  bool save();
+  bool load();
+  
+  texture_data data;
+
+  texture_config() {
+    // argh, no member initialization in some of my compilers
+    texturename = "textures/hyperrogue-texture.png";
+    configname = "textures/hyperrogue.txc";
+    itt = Id; 
+    paint_color = 0x000000FF;
+    grid_color = 0;
+    mesh_color = 0;
+    master_color = 0xFFFFFF30;
+    slave_color = 0xFF000008;
+    color_alpha = 128;
+    gsplits = 1;
+    texture_tuned = false;
+    }
+  
+  };
+#endif
+
+EX cpatterntype cgroup;
 
 #if CAP_PNG
 SDL_Surface *convertSurface(SDL_Surface* s) {
@@ -38,9 +144,9 @@ struct undo {
   unsigned last;
   };
 
-texture_config config;
+EX texture_config config;
 
-bool saving = false;
+EX bool saving = false;
 
 template<class T, class U> void scale_colorarray(int origdim, int targetdim, const T& src, const U& dest) {
   int ox = 0, tx = 0, partials[4];
@@ -323,9 +429,9 @@ int texture_config::recolor(color_t col) {
   return col;
   }
 
-bool texture_aura;
+EX bool texture_aura;
 
-bool using_aura() {
+EX bool using_aura() {
   return texture_aura && config.tstate == texture::tsActive;
   }
 
@@ -1081,7 +1187,7 @@ string texturehelp =
   "Again, tesselations can have their geometry changed.\n\n";
 
 #if CAP_EDIT
-void start_editor() {
+EX void start_editor() {
   addMessage("white");
   if(config.data.whitetexture() && config.data.loadTextureGL()) {
     config.tstate = config.tstate_max = tsActive;
@@ -1093,7 +1199,7 @@ void start_editor() {
   }
 #endif
 
-void showMenu() {
+EX void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);
   if(config.tstate == tsAdjusting) {
@@ -1319,7 +1425,7 @@ array<point, 3> ptc(const array<hyperpoint, 3>& h) {
   return make_array(ptc(h[0]), ptc(h[1]), ptc(h[2]));
   }
 
-ld penwidth = .02;
+EX ld penwidth = .02;
 
 int texture_distance(pair<int, int> p1, pair<int, int> p2) {
   return max(abs(p1.first-p2.first), abs(p1.second - p2.second));
@@ -1420,7 +1526,7 @@ void fillcircle(hyperpoint h, color_t col) {
     }
   }
 
-bool texturesym = false;
+EX bool texturesym = false;
 
 void actDrawPixel(cell *c, hyperpoint h, color_t col) {
   try {
@@ -1437,13 +1543,13 @@ void actDrawPixel(cell *c, hyperpoint h, color_t col) {
   catch(out_of_range&) {}
   }
   
-void drawPixel(cell *c, hyperpoint h, color_t col) {
+EX void drawPixel(cell *c, hyperpoint h, color_t col) {
   config.data.pixels_to_draw.emplace_back(c, h, col);
   }
 
-cell *where;
+EX cell *where;
 
-void drawPixel(hyperpoint h, color_t col) {
+EX void drawPixel(hyperpoint h, color_t col) {
   try {
     again:
     transmatrix g0 = gmatrix[where];
@@ -1465,7 +1571,7 @@ void drawPixel(hyperpoint h, color_t col) {
   catch(out_of_range&) {}
   }
 
-void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps) {
+EX void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps IS(10)) {
   if(steps > 0 && hdist(h1, h2) > penwidth / 3) {
     hyperpoint h3 = mid(h1, h2);
     drawLine(h1, h3, col, steps-1);

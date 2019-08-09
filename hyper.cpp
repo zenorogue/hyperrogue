@@ -40,9 +40,10 @@ void moreStack() {
   }
 #endif
 
-hr::hookset<bool(int argc, char** argv)> *hr::hooks_main;
+namespace hr {
+EX hookset<bool(int argc, char** argv)> *hooks_main;
 
-int hyper_main(int argc, char **argv) {
+EX int hyper_main(int argc, char **argv) {
   using namespace hr; 
 #if ISWEB
   emscripten_get_commandline();
@@ -76,10 +77,11 @@ int hyper_main(int argc, char **argv) {
   profile_info();
   return 0;
   }
+}
 
 #ifndef NOMAIN
 int main(int argc, char **argv) {
-  return hyper_main(argc, argv);
+  return hr::hyper_main(argc, argv);
   }
 #endif 
 #endif

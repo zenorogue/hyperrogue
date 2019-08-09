@@ -31,7 +31,72 @@ void glError(const char* GLcall, const char* file, const int line) {
 #endif
 #endif
 
-namespace glhr {
+EX namespace glhr {
+
+#if HDR
+struct glmatrix {
+  GLfloat a[4][4];
+  GLfloat* operator[] (int i) { return a[i]; }
+  const GLfloat* operator[] (int i) const { return a[i]; }
+  GLfloat* as_array() { return a[0]; }
+  const GLfloat* as_array() const { return a[0]; }
+  };
+
+glvertex pointtogl(const hyperpoint& t);
+
+enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
+  standardS30, standardS31, standardS32, standardS33, 
+  ball, halfplane3, band3, flatten, standardSolv, standardNil,
+  MAX 
+  };
+
+  inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
+    #if SHDIM == 3
+    return make_array(x, y, z);
+    #else
+    return make_array<GLfloat>(x, y, z, 1);
+    #endif
+    }
+  
+  struct colored_vertex {
+    glvertex coords;
+    glvec4 color;
+    colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
+      coords[0] = x;
+      coords[1] = y;
+      coords[2] = current_display->scrdist;
+      coords[3] = 1;
+      color[0] = r;
+      color[1] = g;
+      color[2] = b;
+      color[3] = 1;
+      }
+    colored_vertex(hyperpoint h, color_t col) {
+      coords = pointtogl(h);
+      for(int i=0; i<4; i++)
+        color[i] = part(col, 3-i) / 255.0;
+      }
+    };
+  
+  struct textured_vertex {
+    glvertex coords;
+    glvec2 texture;
+    };
+  
+  struct ct_vertex {
+    glvertex coords;
+    glvec4 color;
+    glvec2 texture;
+    ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
+      coords = pointtogl(h);
+      texture[0] = x1;
+      texture[1] = y1;
+      color[0] = color[1] = color[2] = col;
+      color[3] = 1;
+      }
+    };  
+
+#endif
 
 #if CAP_SHADER
 bool noshaders = false;
@@ -62,7 +127,7 @@ flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG |
 
 eMode mode;
 
-shader_projection current_shader_projection, new_shader_projection;
+EX shader_projection current_shader_projection, new_shader_projection;
 
 void switch_mode(eMode m, shader_projection sp);
 
@@ -99,7 +164,7 @@ glmatrix scale(ld x, ld y, ld z) {
   return tmp;
   }
 
-glmatrix tmtogl(const transmatrix& T) {
+EX glmatrix tmtogl(const transmatrix& T) {
   glmatrix tmp;
   for(int i=0; i<4; i++)
   for(int j=0; j<4; j++)
@@ -133,7 +198,7 @@ glmatrix frustum(ld x, ld y, ld vnear = 1e-3, ld vfar = 1e9) {
   return as_glmatrix(frustum);
   }
 
-glmatrix translate(ld x, ld y, ld z) {
+EX glmatrix translate(ld x, ld y, ld z) {
   glmatrix tmp;
   for(int i=0; i<4; i++)
   for(int j=0; j<4; j++)
@@ -330,7 +395,7 @@ bool operator != (const glmatrix& m1, const glmatrix& m2) {
 
 bool uses_mvp(shader_projection sp) { return among(sp, shader_projection::standard, shader_projection::flatten); }
 
-void set_modelview(const glmatrix& modelview) {
+EX void set_modelview(const glmatrix& modelview) {
   #if CAP_NOSHADER
   if(noshaders) {
     glMatrixMode(GL_MODELVIEW);
@@ -378,7 +443,7 @@ void id_modelview() {
   glUniformMatrix4fv(current->uMVP, 1, 0, projection.as_array());
   }
 
-void color2(color_t color, ld scale) {
+EX void color2(color_t color, ld scale IS(1)) {
   GLfloat cols[4];
   for(int i=0; i<4; i++)
     cols[i] = part(color, 3-i) / 255.0 * scale;
@@ -396,9 +461,9 @@ void colorClear(color_t color) {
   glClearColor(part(color, 3) / 255.0, part(color, 2) / 255.0, part(color, 1) / 255.0, part(color, 0) / 255.0);
 }
 
-void be_nontextured(shader_projection sp) { switch_mode(gmColored, sp); }
-void be_textured(shader_projection sp) { switch_mode(gmTextured, sp); }
-void use_projection(shader_projection sp) { switch_mode(mode, sp); }
+EX void be_nontextured(shader_projection sp IS(new_shader_projection)) { switch_mode(gmColored, sp); }
+EX void be_textured(shader_projection sp IS(new_shader_projection)) { switch_mode(gmTextured, sp); }
+EX void use_projection(shader_projection sp IS(new_shader_projection)) { switch_mode(mode, sp); }
 
 void switch_mode(eMode m, shader_projection sp) {
   if(m == mode && current_shader_projection == sp) return;
@@ -713,14 +778,14 @@ void init() {
   #endif
   }
 
-hyperpoint gltopoint(const glvertex& t) {
+EX hyperpoint gltopoint(const glvertex& t) {
   hyperpoint h;
   h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
   if(SHDIM == 4 && MAXMDIM == 4) h[3] = t[3];
   return h;
   }
 
-glvertex pointtogl(const hyperpoint& t) {
+EX glvertex pointtogl(const hyperpoint& t) {
   glvertex h;
   h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
   if(SHDIM == 4) h[3] = (DIM == 3) ? t[3] : 1;
@@ -780,7 +845,7 @@ void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int 
   #endif
   }
 
-void prepare(vector<colored_vertex>& v) {
+EX void prepare(vector<colored_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
   PTR(glhr::aPosition, SHDIM, coords);
@@ -798,7 +863,7 @@ void prepare(vector<colored_vertex>& v) {
   #endif
   }
 
-void prepare(vector<textured_vertex>& v) {
+EX void prepare(vector<textured_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
   PTR(glhr::aPosition, SHDIM, coords);
@@ -817,7 +882,7 @@ void prepare(vector<textured_vertex>& v) {
   // color2(col);
   }
 
-void prepare(vector<ct_vertex>& v) {
+EX void prepare(vector<ct_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
   PTR(glhr::aPosition, SHDIM, coords);
@@ -853,7 +918,7 @@ void store_in_buffer(vector<glvertex>& v) {
 #endif
   }
 
-void set_depthtest(bool b) {
+EX void set_depthtest(bool b) {
   if(b != current_depthtest) {
     current_depthtest = b;
     if(b) glEnable(GL_DEPTH_TEST);
@@ -862,7 +927,7 @@ void set_depthtest(bool b) {
   }
 
 
-void set_depthwrite(bool b) {
+EX void set_depthwrite(bool b) {
   if(b != current_depthwrite) { // <- this does not work ask intended for some reason...
     current_depthwrite = b;
     if(b) glDepthMask(GL_TRUE);
@@ -870,14 +935,14 @@ void set_depthwrite(bool b) {
     }
   }
 
-void set_linewidth(ld lw) {
+EX void set_linewidth(ld lw) {
   if(lw != current_linewidth) {
     current_linewidth = lw;
     glLineWidth(lw);
     }
   }
 
-void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
+EX void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
   glhr::be_textured();
   dynamicval<eModel> pm(pmodel, mdUnchanged);
   if(!svg::in) current_display->set_all(0);

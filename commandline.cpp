@@ -4,7 +4,7 @@
 namespace hr {
 
 #if CAP_COMMANDLINE
-const char *scorefile = "hyperrogue.log";
+EX const char *scorefile = "hyperrogue.log";
 
 namespace arg {
 eLand readland(const string& ss) {

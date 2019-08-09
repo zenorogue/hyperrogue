@@ -1,15 +1,17 @@
-namespace hr { namespace irr {
+namespace hr { 
 
-int irrid;
+EX namespace irr {
+
+EX int irrid;
 
 #if CAP_IRR
-ld density = 2;
-ld quality = .2;
-int place_attempts = 10;
-int rearrange_max_attempts = 50;
-int rearrange_less = 10;
+EX ld density = 2;
+EX ld quality = .2;
+EX int place_attempts = 10;
+EX int rearrange_max_attempts = 50;
+EX int rearrange_less = 10;
 
-int cellcount;
+EX int cellcount;
 
 struct cellinfo {
   cell *owner;
@@ -100,7 +102,8 @@ int rearrange_index;
 
 bool cell_sorting;
 
-int bitruncations_requested = 1, bitruncations_performed = 0;
+EX int bitruncations_requested = 1;
+EX int bitruncations_performed = 0;
 
 int black_adjacent, white_three;
 
@@ -550,7 +553,7 @@ struct heptinfo {
 
 map<heptagon*, heptinfo> periodmap;
 
-void link_to_base(heptagon *h, heptspin base) {
+EX void link_to_base(heptagon *h, heptspin base) {
   // printf("linking %p to %p/%d\n", h, base.at, base.spin);
   auto &hi = periodmap[h];
   hi.base = base;
@@ -562,7 +565,7 @@ void link_to_base(heptagon *h, heptspin base) {
   h->c7 = hi.subcells[0];
   }
 
-void clear_links(heptagon *h) {
+EX void clear_links(heptagon *h) {
   auto& hi = periodmap[h];
   for(cell *c: hi.subcells) {
     for(int i=0; i<c->type; i++) if(c->move(i)) c->move(i)->move(c->c.spin(i)) = NULL;
@@ -573,11 +576,11 @@ void clear_links(heptagon *h) {
   periodmap.erase(h);
   }
 
-void link_start(heptagon *h) {
+EX void link_start(heptagon *h) {
   link_to_base(h, heptspin(cells[0].owner->master, 0));
   }
 
-void link_next(heptagon *parent, int d) {
+EX void link_next(heptagon *parent, int d) {
   if(!periodmap.count(parent))
     link_to_base(parent, heptspin(cells[0].owner->master, 0));
   // printf("linking next: %p direction %d [s%d]\n", parent, d, parent->c.spin(d));
@@ -586,13 +589,13 @@ void link_next(heptagon *parent, int d) {
   link_to_base(h, hs);
   }
 
-void may_link_next(heptagon *parent, int d) {
+EX void may_link_next(heptagon *parent, int d) {
   if(!periodmap.count(parent->move(d)))
     link_next(parent, d);
   }
 
 
-void link_cell(cell *c, int d) {
+EX void link_cell(cell *c, int d) {
   // printf("linking cell: %p direction %d\n", c, d);
   int ci = cellindex[c];
   auto& sc = cells[ci];
@@ -775,7 +778,7 @@ void compute_horocycle(heptagon *alt) {
   last_on_horocycle[alt] = *(hs[LOOKUP/2].begin());
   }
 
-int celldist(cell *c, bool alts) {
+EX int celldist(cell *c, bool alts) {
   heptagon *master = c->master;
   auto &hi = periodmap[master];
   /* if(alts && master->alt->alt->s != hsOrigin && isize(hi.celldists[alts]) == 0) {
@@ -968,7 +971,7 @@ void show_gridmaker() {
     };
   }
 
-void visual_creator() {
+EX void visual_creator() {
   stop_game();
   orig_geometry = geometry;
   switch(geometry) {
@@ -1044,7 +1047,7 @@ int readArgs() {
   }
 #endif
 
-unsigned char density_code() {
+EX unsigned char density_code() {
   if(isize(cells) < 128) return isize(cells);
   else {
     int t = 127, a = isize(cells);
@@ -1053,19 +1056,19 @@ unsigned char density_code() {
     }
   }
 
-bool pseudohept(cell* c) {
+EX bool pseudohept(cell* c) {
   return cells[cellindex[c]].is_pseudohept;
   }
 
-bool ctof(cell* c) {
+EX bool ctof(cell* c) {
   return cells[cellindex[c]].patterndir == -1;
   }
 
-bool supports(eGeometry g) {
+EX bool supports(eGeometry g) {
   return among(g, gNormal, gKleinQuartic, gOctagon, gBolza2, gFieldQuotient, gSphere, gSmallSphere, gTinySphere);
   }
 
-array<heptagon*, 3> get_masters(cell *c) {
+EX array<heptagon*, 3> get_masters(cell *c) {
   int d = cells[cellindex[c]].patterndir;
   heptspin s = periodmap[c->master].base;
   heptspin s0 = heptspin(c->master, 0) + (d - s.spin);

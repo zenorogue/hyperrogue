@@ -529,19 +529,19 @@ struct animated_parameter {
 
 vector<animated_parameter> aps;
 
-void deanimate(ld &x) {
+EX void deanimate(ld &x) {
   for(int i=0; i<isize(aps); i++) 
     if(aps[i].value == &x)
       aps.erase(aps.begin() + (i--));
   }
 
-void get_parameter_animation(ld &x, string &s) {
+EX void get_parameter_animation(ld &x, string &s) {
   for(auto &ap: aps)
     if(ap.value == &x && ap.last == x)
       s = ap.formula;
   }
 
-void animate_parameter(ld &x, string f, const reaction_t& r) {
+EX void animate_parameter(ld &x, string f, const reaction_t& r) {
   deanimate(x);
   aps.emplace_back(animated_parameter{&x, x, f, r});
   }
@@ -775,7 +775,7 @@ void animator(string caption, ld& param, char key) {
     });
   }
 
-ld a, b;
+EX ld a, b;
 
 void list_animated_parameters() {
   dialog::addHelp(XLAT(

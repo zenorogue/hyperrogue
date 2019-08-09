@@ -12,6 +12,18 @@ EX const char *dnameof(eLand l) { return linf[l].name; }
 EX const char *dnameof(eWall w) { return winf[w].name; }
 EX const char *dnameof(eItem i) { return iinf[i].name; }
 
+#if HDR
+struct stringpar {
+  string v;
+  stringpar(string s) : v(s) { }
+  stringpar(const char* s) : v(s) { }
+  stringpar(eMonster m) { v= minf[m].name; }
+  stringpar(eLand l) { v= linf[l].name; }
+  stringpar(eWall w) { v= winf[w].name; }
+  stringpar(eItem i) { v= iinf[i].name; }  
+  };
+#endif
+
 /*
 string dnameofEnum(eItem i) {
   FILE *f = fopen("classes.cpp", "rt");

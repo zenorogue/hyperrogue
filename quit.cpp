@@ -274,7 +274,7 @@ hint hints[] = {
   {-1, []() { return false; }, noaction, noaction}
   }; 
 
-int hinttoshow;
+EX int hinttoshow;
 
 string contstr() {
   return XLAT(canmove ? "continue" : "see how it ended");

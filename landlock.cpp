@@ -5,7 +5,7 @@
 
 namespace hr {
 
-bool nodisplay(eMonster m) {
+EX bool nodisplay(eMonster m) {
   return 
     m == moIvyDead ||
     m == moDragonTail ||
@@ -15,7 +15,7 @@ bool nodisplay(eMonster m) {
   }    
 
 // returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear
-int isNative(eLand l, eMonster m) {
+EX int isNative(eLand l, eMonster m) {
   switch(l) {
     #define LAND(a,b,c,d,e,f,g) case c:
     #define NATIVE(x) return x;
@@ -28,13 +28,13 @@ int isNative(eLand l, eMonster m) {
 
 EX eItem treasureType(eLand l) { return linf[l].treasure; }
 
-eItem treasureTypeUnlock(eLand l, eItem u) {
+EX eItem treasureTypeUnlock(eLand l, eItem u) {
   if(u != itOrbLove && l == laPrincessQuest)
     return itPalace;
   return treasureType(l);
   }
 
-eLand landof(eItem it) {
+EX eLand landof(eItem it) {
   for(int i=0; i<landtypes; i++) if(treasureType(eLand(i)) == it) return eLand(i);
   return laNone;
   }
@@ -69,11 +69,11 @@ EX eLand oppositeElement(eLand l, eLand l2) {
 
 // land unlocking
 
-eLand firstland = laIce, specialland = laIce;
+EX eLand firstland = laIce, specialland = laIce;
 
-int chaosmode = 0;
+EX int chaosmode = 0;
 
-bool landUnlockedRPM(eLand n) {
+EX bool landUnlockedRPM(eLand n) {
   if(isRandland(n) == 2) return true;
   if(isRandland(n) == 1)
     return (autocheat || cheater || hiitemsMax(treasureType(n)) >= 10);
@@ -84,7 +84,7 @@ int variant_unlock_value() {
   return inv::on ? 75 : 30;
   }
 
-bool landUnlocked(eLand l) {
+EX bool landUnlocked(eLand l) {
   if(randomPatternsMode) {
     return landUnlockedRPM(l);
     }
@@ -116,7 +116,7 @@ bool landUnlocked(eLand l) {
   return false;
   }
 
-void countHyperstoneQuest(int& i1, int& i2) {
+EX void countHyperstoneQuest(int& i1, int& i2) {
   i1 = 0; i2 = 0;
   generateLandList(isLandIngame);
   for(eLand l: landlist) if(l != laCamelot && l != laPrincessQuest) {
@@ -127,7 +127,7 @@ void countHyperstoneQuest(int& i1, int& i2) {
     }
   }
 
-bool hyperstonesUnlocked() {
+EX bool hyperstonesUnlocked() {
   int i1, i2;
   if(tactic::on && isCrossroads(specialland) && !tactic::trailer) return true;
   countHyperstoneQuest(i1, i2);
@@ -135,14 +135,14 @@ bool hyperstonesUnlocked() {
   }
 
 // 2 = always available, 1 = highscore required, 0 = never available
-int isRandland(eLand l) {
+EX int isRandland(eLand l) {
   if(l == laIce || l == laDesert || l == laCaves || l == laWildWest || l == laDocks)
     return 2;
   for(eLand ll: randlands) if(l == ll) return 1;
   return 0;
   }
 
-bool incompatible1(eLand l1, eLand l2) {
+EX bool incompatible1(eLand l1, eLand l2) {
   if(isCrossroads(l1) && isCrossroads(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
   if(l1 == laMirrorOld && l2 == laMotion) return true;
@@ -165,18 +165,18 @@ bool incompatible1(eLand l1, eLand l2) {
   return false;
   }
 
-eLand randomElementalLand() {
+EX eLand randomElementalLand() {
   int i = hrand(4);
   eLand t[4] = { laEFire, laEWater, laEAir, laEEarth };
   return t[i];
   }
 
-int elementalKills() {
+EX int elementalKills() {
   return
     kills[moAirElemental] + kills[moWaterElemental] + kills[moEarthElemental] + kills[moFireElemental];
   }
 
-eLand randomElementalLandWeighted() {
+EX eLand randomElementalLandWeighted() {
   int i = hrand(elementalKills());
   i -= kills[moAirElemental]; if(i<0) return laEAir;
   i -= kills[moWaterElemental]; if(i<0) return laEWater;
@@ -186,11 +186,11 @@ eLand randomElementalLandWeighted() {
   return laElementalWall;
   }
 
-bool incompatible(eLand nw, eLand old) {
+EX bool incompatible(eLand nw, eLand old) {
   return (nw == old) || incompatible1(nw, old) || incompatible1(old, nw);
   }
 
-bool rlyehComplete() {
+EX bool rlyehComplete() {
   if(chaosmode) return items[itStatue] >= 1;
   return items[itStatue] >= 10 || items[itGrimoire] >= 10;
   }
@@ -209,7 +209,7 @@ eLand pickLandRPM(eLand old) {
     }
   }
 
-eLand pickluck(eLand l1, eLand l2) {
+EX eLand pickluck(eLand l1, eLand l2) {
   int t1 = items[treasureType(l1)];
   int t2 = items[treasureType(l2)];
   if(t1 < t2) return l1;
@@ -229,7 +229,7 @@ eLand pickluck(eLand l1, eLand l2) {
     l == laPrairie || l == laHalloween;
   } */
 
-eLand getNewSealand(eLand old) {
+EX eLand getNewSealand(eLand old) {
   while(true) {
     eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken, laDocks));
     if(p == laKraken && !landUnlocked(p)) continue;
@@ -241,7 +241,7 @@ eLand getNewSealand(eLand old) {
     }
   }
 
-bool createOnSea(eLand old) {
+EX bool createOnSea(eLand old) {
   return
     old == laWarpSea || old == laCaribbean || old == laKraken ||
     (old == laLivefjord && hrand(2)) || 
@@ -249,9 +249,9 @@ bool createOnSea(eLand old) {
     (old == laOcean && (chaosmode ? hrand(2) : !generatingEquidistant));
   }
 
-hookset<eLand(eLand)> *hooks_nextland;
+EX hookset<eLand(eLand)> *hooks_nextland;
 
-eLand getNewLand(eLand old) {
+EX eLand getNewLand(eLand old) {
 
   if(old == laMirror && !chaosmode && hrand(10) >= ((tactic::on || racing::on) ? 0 : markOrb(itOrbLuck) ? 5 : 2)) return laMirrored;
   if(old == laTerracotta && !chaosmode && hrand(5) >= ((tactic::on || racing::on) ? 0 : markOrb(itOrbLuck) ? 2 : 1) && !weirdhyperbolic) return laTerracotta;
@@ -557,7 +557,7 @@ template<class T> void generateLandList(T t) {
   for(auto l: land_over) if(t(l)) landlist.push_back(l);    
   }
 
-eLand getLandForList(cell *c) {
+EX eLand getLandForList(cell *c) {
   eLand l = c->land;
   if(isElemental(l)) return laElementalWall;
   if(l == laWarpSea) return laWarpCoast;
@@ -570,7 +570,7 @@ eLand getLandForList(cell *c) {
   return l;
   }
 
-bool isLandIngame(eLand l) {
+EX bool isLandIngame(eLand l) {
   if(isElemental(l)) l = laElementalWall;
   if(dual::state == 2 && !dual::check_side(l)) return false;
   if((euclid || sol) && isCyclic(l) && l != specialland) return false;
@@ -653,7 +653,7 @@ int old_daily_id = 1000000;
 const int landscapes_when = 1000;
 
 // check if the given land should appear in lists
-land_validity_t& land_validity(eLand l) {
+EX land_validity_t& land_validity(eLand l) {
 
   using namespace lv;
   

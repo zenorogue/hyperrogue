@@ -3,10 +3,22 @@
 
 namespace hr {
 
-int steplimit = 0;
-int cstep;
+EX int steplimit = 0;
+EX int cstep;
 
-vector<cell*> buggycells;
+EX vector<cell*> buggycells;
+
+#if HDR
+template<class... T>
+void limitgen(T... args) {
+  if(steplimit) {
+    cstep++;
+    printf("%6d ", cstep);
+    printf(args...);
+    if(cstep == steplimit) buggyGeneration = true;
+    }
+  }
+#endif
 
 cell *pathTowards(cell *pf, cell *pt) {
 
@@ -302,7 +314,7 @@ template<class T> string dnameof2(T x, int p) {
   return s + " (" + its(x) + "/" + its(p) + ")";
   }
 
-vector<pair<cellwalker,int> > drawbugs;
+EX vector<pair<cellwalker,int> > drawbugs;
 
 bool debugmode = false;
 
@@ -456,14 +468,14 @@ struct debugScreen {
     }
   };
 
-void push_debug_screen() {
+EX void push_debug_screen() {
   debugScreen ds;
   pushScreen(ds);
   }
 
 // -- cheat menu --
 
-void showCheatMenu() {
+EX void showCheatMenu() {
   gamescreen(1);
   dialog::init("cheat menu");
   dialog::addItem(XLAT("gain orb powers"), 'F');
@@ -505,7 +517,7 @@ void showCheatMenu() {
     };
   }
 
-void viewall() {
+EX void viewall() {
   celllister cl(cwt.at, 20, 2000, NULL);
   
   vector<eMonster> all_monsters;
@@ -540,7 +552,7 @@ void viewall() {
     }
   }
 
-void modalDebug(cell *c) {
+EX void modalDebug(cell *c) {
   viewctr.at = c->master;
   if(noGUI) {
     fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", c);

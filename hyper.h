@@ -1538,17 +1538,12 @@ void useup(cell *c); // useup thumpers/bonfires
 cell *playerpos(int i);
 
 bool makeflame(cell *c, int timeout, bool checkonly);
-void bfs();
 bool isPlayerInBoatOn(cell *c);
 bool isPlayerInBoatOn(cell *c, int i);
 void destroyBoats(cell *c, cell *cf, bool strandedToo);
-extern bool showoff;
 extern int lastexplore;
-extern int truelotus;
 extern int asteroids_generated, asteroid_orbs_generated;
 extern eLand lastland;
-extern time_t timerstart;
-extern bool timerstopped;
 bool againstRose(cell *cfrom, cell *cto);
 bool withRose(cell *cfrom, cell *cto);
 
@@ -2004,18 +1999,7 @@ color_t darkena(color_t c, int lev, int a);
 
 #define SHSIZE 16
 
-
-extern vector<array<cell*, MAXPLAYER>> shpos;
-extern int cshpos;
-
-#if CAP_ANIMATIONS
-namespace anims {
-  void animate_parameter(ld &x, string f, const reaction_t& r);
-  void deanimate(ld &x);
-  void get_parameter_animation(ld &x, string& f);
-  extern ld a, b;
-  }
-#endif
+namespace anims { void animate_parameter(ld &x, string f, const reaction_t& r); }
 
 extern bool timerghost;
 
@@ -2211,35 +2195,9 @@ extern char mousekey;
 extern char newmousekey;
 void displaymm(char c, int x, int y, int rad, int size, const string& title, int align);
 
-bool canPushThumperOn(cell *tgt, cell *thumper, cell *player);
-void pushThumper(cell *th, cell *cto);
-
 template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
 
-eLand getNewSealand(eLand old);
-bool createOnSea(eLand old);
-
-namespace inv {
-  extern bool on;
-  extern bool usedForbidden;
-  extern bool activating;
-  extern array<int, ittypes> remaining;
-  extern array<int, ittypes> usedup;
-  void compute();
-  void applyBox(eItem it);
-
-  extern int incheck;  
-  void check(int delta);
-  void show();
-  }
-
-bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int ticks, bool hidden);
-
 int darkenedby(int c, int lev);
-extern int mousex, mousey;
-#if CAP_MOUSEGRAB
-extern ld mouseaim_x, mouseaim_y;
-#endif
 extern ld mouseaim_sensitivity;
 string generateHelpForItem(eItem it);
 bool graphglyph();
@@ -2258,9 +2216,6 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config, hooks_tests, hooks_removecells, hooks_initgame, hooks_calcparam, hooks_mainmenu, hooks_startmenu, hooks_markers;
-extern purehookset hooks_swapdim;
-
 template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
   if(h) for(auto& p: *h) p.second(args...);
   }
@@ -2273,20 +2228,6 @@ template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&.
   return zero;
   }
 
-extern hookset<bool(int sym, int uni)> *hooks_handleKey;
-extern hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
-extern hookset<bool(int argc, char** argv)> *hooks_main;
-extern hookset<int()> *hooks_args;
-extern hookset<bool(cell*)> *hooks_mark;
-extern hookset<eLand(eLand)> *hooks_nextland;
-extern hookset<bool()> *hooks_welcome_message, *hooks_default_help;
-extern hookset<void(cell*)> *hooks_mouseover;
-extern hookset<struct hrmap*()> *hooks_newmap;
-
-extern ld shiftmul;
-void initcs(charstyle &cs);
-charstyle& getcs(int id = multi::cpid);
-
 struct msginfo {
   int stamp;
   time_t rtstamp;
@@ -2298,11 +2239,6 @@ struct msginfo {
   string msg;
   };
 
-extern vector<msginfo> msgs;
-void flashMessages();
-
-extern int lightat, safetyat;
-
 int watercolor(int phase);
 bool doHighlight();
 void buildHelpText();
@@ -2312,11 +2248,7 @@ bool quitsaves();
 
 extern const char* COLORBAR;
 
-int textwidth(int siz, const string &str);
 #define GLERR(call) glError(call, __FILE__, __LINE__)
-
-extern bool gtouched, mousepressed, mousemoved, actonrelease;
-extern bool inslider;
 
 struct colortable: vector<color_t> {
   color_t& operator [] (int i) { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }
@@ -2325,83 +2257,14 @@ struct colortable: vector<color_t> {
   colortable() : vector({0}) {}
   };
 
-extern bool outoffocus;
-extern int frames;
-extern transmatrix playerV;
-extern bool didsomething;
-extern void drawStats();
-extern int calcfps();
-extern colortable distcolors, minecolors;
-
-extern eItem orbToTarget;
-extern eMonster monsterToSummon;
-
-void panning(hyperpoint hf, hyperpoint ht);
-extern transmatrix sphereflip;
-
-void initConfig();
-void loadConfig();
-
-extern bool auraNOGL;
-
-#if CAP_SDLJOY
-extern void initJoysticks();
-extern bool autojoy;
-extern int joyx, joyy, panjoyx, panjoyy;
-extern movedir joydir;
-extern SDL_Joystick* sticks[8];
-extern int numsticks;
-void closeJoysticks();
-#endif
-
-void preparesort();
-
 #define SHMUPTITLE "shoot'em up mode"
-
-bool dodrawcell(cell *c);
-void drawcell(cell *c, transmatrix V, int spinv, bool mirrored);
-extern cell* straightDownSeek;
-extern hyperpoint straightDownPoint;
-extern ld straightDownSpeed;
-
-extern int frameid;
-extern bool leftclick;
-void clearMemory();
-
-extern function <void(int sym, int uni)> keyhandler;
-#if CAP_SDL
-extern function <bool(SDL_Event &ev)> joyhandler;
-#endif
-bool gmodekeys(int sym, int uni);
 
 // check for a plain number key
 #define NUMBERKEY (interpret_as_direction(sym, uni) ? 0 : uni)
 #define DKEY (get_direction_key(sym, uni))
 #define DIRECTIONKEY (interpret_as_direction(sym, uni) ? uni : 0)
 
-bool interpret_as_direction(int sym, int uni);
-int get_direction_key(int sym, int uni);
-
-void switchGL();
-void switchFullscreen();
-extern int cmode;
-
 namespace scores { void load(); }
-
-void gotoHelp(const string& h);
-void showCustomizeChar();
-void showCheatMenu();
-void showGraphQuickKeys();
-void showChangeMode();
-void showEuclideanMenu();
-void show3D();
-void gameoverscreen();
-void showJoyConfig();
-
-void gamescreen(int darken);
-void showMission();
-void handleKeyQuit(int sym, int uni);
-void handlePanning(int sym, int uni);
 
 #if ISMOBILE==1
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
@@ -2410,19 +2273,6 @@ namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 namespace mirror {
   cellwalker reflect(const cellwalker& cw);
   }
-
-bool inmirror(eLand l);
-bool inmirror(cell *c);
-bool inmirror(const cellwalker& cw);
-
-void check_total_victory();
-void applyBoxNum(int& i, string name = "");
-extern int hinttoshow;
-
-bool isShmupLifeOrb(eItem it);
-int orbcharges(eItem it);
-
-color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1);
 
 struct hint {
   time_t last;
@@ -2434,8 +2284,6 @@ struct hint {
 extern hint hints[];
 int counthints();
 
-void gainShard(cell *c2, const char *msg);
-
 int textwidth(int siz, const string &str);
 #if CAP_GL
 int gl_width(int size, const char *s);
@@ -2446,22 +2294,6 @@ extern int andmode;
 extern bool longclick;
 extern bool useRangedOrb;
 #endif
-
-void addaura(hyperpoint h, color_t col, int fd);
-void addauraspecial(hyperpoint h, color_t col, int dir);
-void drawaura();
-void clearaura();
-
-void drawBug(const cellwalker& cw, color_t col);
-
-void mainloop();
-void mainloopiter();
-extern bool showstartmenu;
-void selectLanguageScreen();
-
-bool inscreenrange(cell *c);
-bool allowIncreasedSight();
-bool allowChangeRange();
 
 static inline bool orbProtection(eItem it) { return false; } // not implemented
 
@@ -2479,69 +2311,9 @@ namespace windmap {
 
 extern int wavephase;
 
-void buildEquidistant(cell *c);
-void produceGhost(cell *c, eMonster victim, eMonster who);
-void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb);
-void sideAttack(cell *mf, int dir, eMonster who, int bonuskill);
-
-void orboflava(int i);
-
-void setland(cell *c, eLand l);
-
-eLand getNewLand(eLand old);
-
-extern bool randomPatternsMode;
-
-extern int isRandland(eLand l);
-
-extern vector<cell*> buggycells;
-
-extern bool landUnlocked(eLand l);
-
-extern void describeCell(cell*);
-extern bool rlyehComplete();
-
-extern int steplimit, cstep;
-
-template<class... T>
-void limitgen(T... args) {
-  if(steplimit) {
-    cstep++;
-    printf("%6d ", cstep);
-    printf(args...);
-    if(cstep == steplimit) buggyGeneration = true;
-    }
-  }
-
-eLand oppositeElement(eLand l, eLand l2);
-
-extern int hardness_empty();
-extern eWall getElementalWall(eLand l);
-
-void gainItem(eItem it);
-
-void destroyTrapsOn(cell *c);
-void destroyTrapsAround(cell *c);
-
-extern int messagelogpos;
-
-void showMessageLog();
-
 int getgametime();
 string getgametime_s(int timespent = getgametime());
 extern int stampbase;
-
-transmatrix cellrelmatrix(cell *c, int i);
-
-void terracottaAround(cell *c);
-
-double cellgfxdist(cell *c, int i);
-
-int ctof(cell *c);
-
-void modalDebug(cell *c);
-void push_debug_screen();
-int getDistLimit();
 
 #ifndef GL
 typedef float GLfloat;
@@ -2666,48 +2438,8 @@ extern int emeraldtable[100][7];
 const eLand NOWALLSEP = laNone;
 const eLand NOWALLSEP_USED = laWhirlpool;
 
-bool hasbardir(cell *c);
-
-bool buildBarrierNowall(cell *c, eLand l2, int forced_dir = NODIR);
-bool checkBarriersBack(cellwalker bb, int q=5, bool cross = false);
-bool checkBarriersFront(cellwalker bb, int q=5, bool cross = false);
-
-bool quickfind(eLand l);
-void beCIsland(cell *c);
-bool isOnCIsland(cell *c);
-void generateTreasureIsland(cell *c);
-bool openplains(cell *c);
-void buildBigStuff(cell *c, cell *from);
-void setLandQuotient(cell *c);
-void setLandSphere(cell *c);
-void setLandWeird(cell *c);
-void moreBigStuff(cell *c);
-void setLandEuclid(cell *c);
-void setLandSol(cell *c);
-void setLandNil(cell *c);
-bool checkInTree(cell *c, int maxv);
-cell *findcompass(cell *c);
-int edgeDepth(cell *c);
-int compassDist(cell *c);
-void buildCamelot(cell *c);
-
 #define HAUNTED_RADIUS getDistLimit()
 #define UNKNOWN 65535
-
-#if CAP_COMMANDLINE
-extern const char *scorefile;
-extern string levelfile;
-extern string picfile;
-extern const char *conffile;
-extern const char *musicfile;
-#endif
-
-extern string s0;
-extern int anthraxBonus;
-int celldistAlt(cell *c);
-int celldist(cell *c);
-int masterAlt(cell *c);
-int getHemisphere(cell *c, int which);
 
 namespace tactic {
   extern bool on;
@@ -2798,16 +2530,6 @@ namespace princess {
 #define GRAIL_FOUND 0x4000
 #define GRAIL_RADIUS_MASK 0x3FFF
 
-int eudist(int sx, int sy);
-
-bool ishept(cell *c);
-int cdist50(cell *c);
-bool polarb50(cell *c);
-
-bool isGravityLand(eLand l);
-bool isWarpedType(eLand l);
-bool isWarped(cell *c);
-
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
@@ -2861,35 +2583,6 @@ struct hrmap_hyperbolic : hrmap_standard {
     }
   void verify() override { verifycells(origin); }
   };
-
-namespace irr { 
-  #if CAP_IRR
-  extern ld density;
-  extern ld quality;
-  extern int cellcount;
-  extern int place_attempts;
-  extern int rearrange_max_attempts;
-  extern int rearrange_less;
-  extern int irrid;
-  void link_to_base(heptagon *h, heptspin base);
-  void link_start(heptagon *h);
-  void link_next(heptagon *h, int d);
-  void may_link_next(heptagon *h, int d);
-  void link_cell(cell *c, int d);
-  void clear_links(heptagon *h);
-  bool pseudohept(cell*);
-  array<heptagon*, 3> get_masters(cell *c);
-  bool ctof(cell* c);
-  bool supports(eGeometry g);
-  void visual_creator();
-  unsigned char density_code();
-  int celldist(cell *c, bool alts);
-  extern int bitruncations_requested, bitruncations_performed;
-  #endif
-  }
-
-extern hrmap *currentmap;
-extern vector<hrmap*> allmaps;
 
 // list all cells in distance at most maxdist, or until when maxcount cells are reached
 
@@ -2959,11 +2652,6 @@ int currfp_get_R();
 int currfp_get_X();
 #endif
 
-const char *dnameof(eMonster m);
-const char *dnameof(eLand l);
-const char *dnameof(eWall w);
-const char *dnameof(eItem i);
-
 void runGeometryExperiments();
 
 // z to close to this limit => do not draw
@@ -3000,9 +2688,7 @@ bool haveMobileCompass();
 bool handleCompass();
 
 inline bool sphereflipped() { return sphere && vid.alpha > 1.1 && DIM == 3; }
-bool hide_player();
 int cellcolor(cell *c);
-transmatrix screenpos(ld x, ld y);
 extern ld backbrightness;
 
 void initcells();
@@ -3023,21 +2709,11 @@ extern const char *musicfile;
 extern const char *loadlevel;
 #endif
 
-transmatrix spin(ld alpha);
-transmatrix xpush(ld alpha);
-transmatrix inverse(const transmatrix&);
-ld hdist(const hyperpoint& h1, const hyperpoint& h2);
-
 extern bool fixseed;
 extern eLand firstland0;
 extern int startseed;
 
 // heptspin hsstep(const heptspin &hs, int spin);
-
-extern void fixmatrix(transmatrix&);
-transmatrix rgpushxto0(const hyperpoint& H);
-
-string its(int i);
 
 ld hdist0(const hyperpoint& mh);
 
@@ -3050,8 +2726,6 @@ extern purehookset hooks_drawmap;
 extern hookset<bool(eLand&)> *hooks_music;
 extern hookset<bool()> *hooks_prestats;
 extern purehookset hooks_fixticks;
-
-ld realradius();
 
 void sdltogl(SDL_Surface *txt, struct glfont_t& f, int ch);
 
@@ -3071,133 +2745,6 @@ int inpair(cell *c, int colorpair);
 int snake_pair(cell *c);
 
 extern colortable nestcolors;
-
-#if CAP_TEXTURE
-namespace texture {
-  enum eTextureState {
-    tsOff, tsAdjusting, tsActive
-    };
-  
-  struct texture_data {
-    GLuint textureid;
-  
-    int twidth;
-    int tx, ty, origdim;
-    
-    texture_data() { textureid = 0; twidth = 2048; }
-  
-    vector<color_t> texture_pixels;
-  
-    color_t& get_texture_pixel(int x, int y) {
-      return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
-      }
-    
-    vector<pair<color_t*, color_t>> undos;
-    vector<tuple<cell*, hyperpoint, int> > pixels_to_draw;
-  
-    bool loadTextureGL();
-    bool whitetexture();
-    bool readtexture(string tn);
-    void saveRawTexture(string tn);
-  
-    void undo();
-    void undoLock();
-    void update();
-    };
-
-  struct texture_config {
-    string texturename;
-    string configname;
-    color_t paint_color;
-    eTextureState tstate;
-    eTextureState tstate_max;
-  
-    transmatrix itt;
-    
-    color_t grid_color;
-    color_t mesh_color;
-    color_t master_color;
-    color_t slave_color;
-    
-    int color_alpha;
-    
-    int gsplits;
-
-    int recolor(color_t col);
-  
-    typedef tuple<eGeometry, eVariation, char, int, eModel, ld, ld> texture_parameters; 
-    texture_parameters orig_texture_parameters;
-    
-    map<int, textureinfo> texture_map, texture_map_orig;
-    set<cell*> models;
-    
-    basic_textureinfo tinf3;
-  
-    bool texture_tuned;
-    string texture_tuner;
-    vector<hyperpoint*> tuned_vertices;
-  
-    bool apply(cell *c, const transmatrix &V, color_t col);
-    void mark_triangles();
-  
-    void clear_texture_map();
-    void perform_mapping();
-    void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits);
-    void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv) { mapTextureTriangle(mi, v, tv, gsplits); }
-    void mapTexture2(textureinfo& mi);
-    void finish_mapping();
-    void true_remap();
-    void remap();
-    bool correctly_mapped;
-    hyperpoint texture_coordinates(hyperpoint);
-  
-    void drawRawTexture();
-    void saveFullTexture(string tn);
-  
-    bool save();
-    bool load();
-    
-    texture_data data;
-
-    texture_config() {
-      // argh, no member initialization in some of my compilers
-      texturename = "textures/hyperrogue-texture.png";
-      configname = "textures/hyperrogue.txc";
-      itt = Id; 
-      paint_color = 0x000000FF;
-      grid_color = 0;
-      mesh_color = 0;
-      master_color = 0xFFFFFF30;
-      slave_color = 0xFF000008;
-      color_alpha = 128;
-      gsplits = 1;
-      texture_tuned = false;
-      }
-    
-    };
-
-  extern texture_config config;
-  
-  extern ld penwidth;
-  extern bool saving;
-  
-  void showMenu();
-  
-  void drawPixel(cell *c, hyperpoint h, color_t col);
-  extern cell *where;
-  // compute 'c' automatically, based on the hint in 'where'
-  void drawPixel(hyperpoint h, color_t col);
-  void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps = 10);
-  
-  extern bool texturesym;
-
-  extern cpatterntype cgroup;
-  
-  extern bool texture_aura;
-  bool using_aura();
-  void start_editor();
-  }
-#endif
 
 unsigned char& part(color_t& col, int i);
 
@@ -3251,8 +2798,6 @@ void fullcenter();
 void mainloop();
 void clearAnimations();
 
-transmatrix rotmatrix(double rotation, int c0, int c1);
-
 void destroycellcontents(cell *c);
 extern heptagon *last_cleared;
 
@@ -3264,41 +2809,6 @@ template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
 
 bool is_cell_removed(cell *c);
 void set_if_removed(cell*& c, cell *val);
-
-struct renderbuffer {
-  bool valid;
-  int x, y;
-
-  #if CAP_GL
-  int tx, ty;
-  GLuint FramebufferName;
-  GLuint renderedTexture;
-  GLuint depth_stencil_rb;
-  Uint32 *expanded_data;
-  void use_as_texture();
-  #endif
-  #if CAP_SDL
-  SDL_Surface *srf;
-  void make_surface();
-  SDL_Surface *render();
-  #endif
-  
-  renderbuffer(int x, int y, bool gl);
-  ~renderbuffer();
-  void enable();
-  void clear(color_t col);
-  };
-
-extern renderbuffer *floor_textures;
-
-struct resetbuffer {
-  GLint drawFboId, readFboId;
-  SDL_Surface *sreset;
-  resetbuffer();
-  void reset();
-  };
-
-double randd();
 
 #if CAP_ORIENTATION
 transmatrix getOrientation();
@@ -3337,28 +2847,6 @@ template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
 
 extern const hyperpoint Hypc;
-
-#if CAP_SURFACE
-namespace surface {
-
-  enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere, dsCrystal };
-  extern eShape sh;
-  void show_surfaces();
-  void run_shape(eShape);
-  extern ld hyper_b, dini_b;
-  
-  }
-#endif
-
-struct stringpar {
-  string v;
-  stringpar(string s) : v(s) { }
-  stringpar(const char* s) : v(s) { }
-  stringpar(eMonster m) { v= minf[m].name; }
-  stringpar(eLand l) { v= linf[l].name; }
-  stringpar(eWall w) { v= winf[w].name; }
-  stringpar(eItem i) { v= iinf[i].name; }  
-  };
 
 namespace gp {
   typedef pair<int, int> loc;
@@ -3505,87 +2993,6 @@ template<> struct saver<ld> : dsaver<ld> {
 
 #endif
 
-namespace glhr {
-
-  struct glmatrix {
-    GLfloat a[4][4];
-    GLfloat* operator[] (int i) { return a[i]; }
-    const GLfloat* operator[] (int i) const { return a[i]; }
-    GLfloat* as_array() { return a[0]; }
-    const GLfloat* as_array() const { return a[0]; }
-    };
-  
-  enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
-    standardS30, standardS31, standardS32, standardS33, 
-    ball, halfplane3, band3, flatten, standardSolv, standardNil,
-    MAX 
-    };
-  
-  extern shader_projection new_shader_projection;
-  
-  glmatrix tmtogl(const transmatrix& T);
-  
-  void set_depthtest(bool b);
-  glmatrix translate(ld x, ld y, ld z);
-  void color2(color_t color, ld scale = 1);
-  void be_nontextured(shader_projection sp = new_shader_projection);
-  void be_textured(shader_projection sp = new_shader_projection);
-  void use_projection(shader_projection sp = new_shader_projection);
-  void set_modelview(const glmatrix& m);  
-  hyperpoint gltopoint(const glvertex& t);
-  glvertex pointtogl(const hyperpoint& t);
-  
-  inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
-    #if SHDIM == 3
-    return make_array(x, y, z);
-    #else
-    return make_array<GLfloat>(x, y, z, 1);
-    #endif
-    }
-  
-  struct colored_vertex {
-    glvertex coords;
-    glvec4 color;
-    colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
-      coords[0] = x;
-      coords[1] = y;
-      coords[2] = current_display->scrdist;
-      coords[3] = 1;
-      color[0] = r;
-      color[1] = g;
-      color[2] = b;
-      color[3] = 1;
-      }
-    colored_vertex(hyperpoint h, color_t col) {
-      coords = pointtogl(h);
-      for(int i=0; i<4; i++)
-        color[i] = part(col, 3-i) / 255.0;
-      }
-    };
-  
-  struct textured_vertex {
-    glvertex coords;
-    glvec2 texture;
-    };
-  
-  struct ct_vertex {
-    glvertex coords;
-    glvec4 color;
-    glvec2 texture;
-    ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
-      coords = pointtogl(h);
-      texture[0] = x1;
-      texture[1] = y1;
-      color[0] = color[1] = color[2] = col;
-      color[3] = 1;
-      }
-    };  
-
-  void prepare(vector<textured_vertex>& v);
-  void prepare(vector<colored_vertex>& v);
-  void prepare(vector<ct_vertex>& v);
-  }
-
 #if CAP_SHAPES
 struct floorshape;
 
@@ -3613,26 +3020,6 @@ struct hpcshape {
 extern vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
 #endif
 
-cell *newCell(int type, heptagon *master);
-extern color_t qpixel_pixel_outside;
-
-int zebra3(cell *c);
-int geosupport_threecolor();
-int geosupport_football();
-bool geosupport_chessboard();
-bool ishex1(cell *c);
-namespace fieldpattern { int fieldval_uniq(cell *c);  int fieldval_uniq_rand(cell *c, int d); }
-bool warptype(cell *c);
-bool horo_ok();
-bool deep_ocean_at(cell *c, cell *from);
-int wallchance(cell *c, bool deepOcean);
-
-ld master_to_c7_angle();
-
-void resize_screen_to(int x, int y);
-extern bool canvas_invisible;
-extern cell *pd_from;
-
 namespace daily {
   extern bool on;
   extern int daily_id;
@@ -3646,27 +3033,6 @@ namespace daily {
   void handleQuit(int sev);
   void uploadscore(bool really_final);
   }
-
-enum eOrbLandRelation { 
-  olrForbidden, // never appears: forbidden
-  olrDangerous, // never appears: would be dangerous
-  olrUseless,   // never appears: useless here
-  olrNoPrizes,  // no prizes in this land
-  olrNoPrizeOrb,// orb not allowed as a prize
-  olrPrize25,   // prize for collecting 25
-  olrPrize3,    // prize for collecting 3
-  olrNative,    // native orb in this land
-  olrNative1,   // native orb in this land (1)
-  olrGuest,     // extra orb in this land
-  olrPNative,   // Land of Power: native
-  olrPBasic,    // Land of Power: basic orbs
-  olrPPrized,   // Land of Power: prized orbs
-  olrPNever,    // Land of Power: foreign orbs
-  olrHub,       // hub lands
-  olrMonster,   // available from a monster
-  olrAlways,    // always available
-  olrBurns      // burns
-  };
 
 namespace torusconfig {
   extern int sdx, sdy;
@@ -3731,7 +3097,6 @@ namespace fieldpattern {
 #endif
 
 bool incompatible(eLand l1, eLand l2);
-eOrbLandRelation getOLR(eItem it, eLand l);
 
 struct plainshape;
 void clear_plainshape(plainshape& gsh);
@@ -4126,25 +3491,6 @@ extern int pathlock;
 extern void computePathdist(eMonster m);
 extern void onpath(cell *c, int d);
 extern void clear_pathdata();
-
-struct pathdata {
-  void checklock() { 
-    if(pd_from) pd_from = NULL, clear_pathdata();
-    if(pathlock) printf("path error\n"); 
-    pathlock++; 
-    }
-  ~pathdata() {
-    pathlock--;
-    clear_pathdata();
-    }
-  pathdata(eMonster m) { 
-    checklock();
-    computePathdist(m); 
-    }
-  pathdata(int i) { 
-    checklock();
-    }
-  };
 
 extern int timetowait;
 

@@ -167,7 +167,7 @@ void save_memory() {
   removed_cells.clear();
   }
 
-purehookset hooks_removecells;
+EX purehookset hooks_removecells;
 
 bool is_cell_removed(cell *c) {
   return binary_search(removed_cells.begin(), removed_cells.end(), c);

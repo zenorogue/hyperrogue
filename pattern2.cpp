@@ -146,7 +146,7 @@ int land50(cell *c) {
     }
   }
 
-bool polara50(cell *c) {
+EX bool polara50(cell *c) {
   if(sphere || euclid || S7>7 || S6>6) return false;
   else if(NONSTDVAR) return polara50(fiftyval(c->master->c7));
   else if(ctof(c)) return polara50(fiftyval(c));
@@ -158,7 +158,7 @@ bool polara50(cell *c) {
     }
   }
 
-bool polarb50(cell *c) {
+EX bool polarb50(cell *c) {
   if(euclid) return true;
   if(sphere || euclid || S7>7 || S6>6) return true;
   else if(NONSTDVAR) return polarb50(fiftyval(c->master->c7));
@@ -175,7 +175,7 @@ int elhextable[28][3] = {
   {0,1,2}, {1,2,9}, {1,9,-1}, {1,8,-1}, {1,-1,-1}
   };
 
-int fiftyval049(heptagon *h) {
+EX int fiftyval049(heptagon *h) {
   int i = h->fiftyval / 32;
   if(i <= 7) return i;
   if(quotient) return 0;
@@ -191,7 +191,7 @@ int fiftyval049(heptagon *h) {
   return allcodes[0] + 7;
   }
 
-int fiftyval049(cell *c) {
+EX int fiftyval049(cell *c) {
   if(euclid) return fiftyval(c) / 32;
   else if(ctof(c)) return fiftyval049(c->master);
   else if(sphere) return 0;
@@ -228,7 +228,7 @@ int fiftyval049(cell *c) {
     }
   }
 
-int fiftyval200(cell *c) {
+EX int fiftyval200(cell *c) {
   int i = fiftyval049(c);
   i *= 4;
   if(polara50(c)) i|=1;
@@ -324,7 +324,7 @@ EX int zebra40(cell *c) {
     }
   }
 
-int zebra3(cell *c) {
+EX int zebra3(cell *c) {
   if(ctof(c)) return (c->master->zebraval/10)/4;
   else if(euclid || sphere || S7>7 || S6>6) return 0;
   else { 
@@ -1120,7 +1120,7 @@ namespace patterns {
 
   }
 
-bool geosupport_chessboard() {
+EX bool geosupport_chessboard() {
   return 
 #if CAP_ARCM
     (archimedean && PURE) ? arcm::current.support_chessboard() : 
@@ -1130,7 +1130,7 @@ bool geosupport_chessboard() {
     (VALENCE % 2 == 0);
   }
 
-int geosupport_threecolor() {
+EX int geosupport_threecolor() {
   if(IRREGULAR) return 0;
   if(penrose || binarytiling) return 0;
   #if CAP_ARCM
@@ -1149,7 +1149,7 @@ int geosupport_threecolor() {
   return 0;
   }
 
-int geosupport_football() {
+EX int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
   if(binarytiling || penrose) return 0;

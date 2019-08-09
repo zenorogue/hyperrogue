@@ -12,7 +12,7 @@ eLand lastland;
 
 int lastexplore;
 
-bool randomPatternsMode = false;
+EX bool randomPatternsMode = false;
 EX int randompattern[landtypes];
 
 int genrange_bonus = 0;
