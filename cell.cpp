@@ -12,8 +12,6 @@ int dirdiff(int dd, int t) {
   return dd;
   }
 
-int fixdir(int a, cell *c) { a %= c->type; if(a<0) a += c->type; return a; }
-
 int cellcount = 0;
 
 void initcell(cell *c); // from game.cpp

@@ -142,13 +142,13 @@ void calcMousedest() {
   
   for(int i=0; i<cwt.at->type; i++) if(dists[i] < mousedist) {
     mousedist = dists[i];
-    mousedest.d = fixdir(i - cwt.spin, cwt.at);
+    mousedest.d = cwt.at->c.fix(i - cwt.spin);
     
     mousedest.subdir =
-       dists[(i+1)%cwt.at->type] < dists[(i+cwt.at->type-1)%cwt.at->type] ? 1 : -1;
+       dists[cwt.at->c.fix(i+1)] < dists[cwt.at->c.fix(i-1)] ? 1 : -1;
 
     if(cwt.mirrored) 
-      mousedest.d = fixdir(-mousedest.d, cwt.at), 
+      mousedest.d = cwt.at->c.fix(-mousedest.d), 
       mousedest.subdir = -mousedest.subdir;
     }
   

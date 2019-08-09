@@ -232,8 +232,8 @@ namespace hr { namespace gp {
         }
       // c move 0 equals c' move spin(0)
       extend_map(c, d);
-      extend_map(c, fixdir(d-1, c));
-      extend_map(c, fixdir(d+1, c));
+      extend_map(c, c->c.fix(d-1));
+      extend_map(c, c->c.fix(d+1));
       if(S3 == 4 && !c->move(d))
         for(int i=0; i<S7; i++)
         for(int j=0; j<S7; j++)
@@ -837,7 +837,7 @@ namespace hr { namespace gp {
 
     auto dmain = master_function(cm);
     auto d0 = master_function(createStep(cm->master, i)->c7);
-    auto d1 = master_function(createStep(cm->master, fixdir(i+1, cm))->c7);
+    auto d1 = master_function(createStep(cm->master, cm->c.fix(i+1))->c7);
     
     if(S3 == 4) {
       heptspin hs(cm->master, i);

@@ -346,8 +346,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(int i=0; i<cor; i++) {
           int ri = i;
           if((i&1) == ((sidir+siid)&1)) ri--;
-          ri = fixdir(ri, c);
-          cornerlist.push_back(mid(get_corner_position(c, ri, 3.1), get_corner_position(c, (ri+1) % c->type, 3.1)));
+          ri = c->c.fix(ri);
+          cornerlist.push_back(mid(get_corner_position(c, ri, 3.1), get_corner_position(c, c->c.fix(ri+1), 3.1)));
           }
         }
       }
@@ -360,7 +360,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(int i=0; i<cor; i++) {
           int ri = i;
           if((i&1) != ((sidir+siid)&1)) ri--;
-          ri = fixdir(ri, c);
+          ri = c->c.fix(ri);
           hyperpoint nc = nearcorner(c, ri);
           cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
           }
@@ -701,8 +701,8 @@ namespace gp {
       siid = si.id>>2;
       // if(siid == 2) si.dir++;
       // if(siid != pattern_threecolor(c)) printf("threecolor mismatch\n");
-      // if(pattern_threecolor(createMov(c, fixdir(si.dir, c))) != (siid+1)%3) printf("threecolor mismatch direction\n");
-      sidir = fixdir(si.dir, c);
+      // if(pattern_threecolor(createMov(c, c->fixd(si.dir))) != (siid+1)%3) printf("threecolor mismatch direction\n");
+      sidir = c->c.fix(si.dir);
       }
     else if(geosupport_football() == 2) {
       siid = !pseudohept(c);

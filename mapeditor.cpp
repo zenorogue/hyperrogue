@@ -895,7 +895,7 @@ namespace mapeditor {
     for(cell* c2: cl.lst) {
       auto si2 = patterns::getpatterninfo0(c2);
       if(si2.id == si.id) {
-        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + si2.dir, c2) : -1), cl);
+        editAt(cellwalker(c2, cdir>=0 ? cdir + si2.dir : -1), cl);
         modelcell[si2.id] = c2;
         }
       }

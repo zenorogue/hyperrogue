@@ -921,8 +921,8 @@ namespace patterns {
       #endif
       #if CAP_GP
       else if(GOLDBERG) {
-        if(c == c->master->c7) si.id += (fixdir(si.dir, c) << 8);
-        else si.id += (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
+        if(c == c->master->c7) si.id += (c->c.fix(si.dir) << 8);
+        else si.id += (get_code(gp::get_local_info(c)) << 16) | (c->c.fix(si.dir) << 8);
         }
       #endif
       return si;
