@@ -468,19 +468,40 @@ namespace elec {
     }
 
   
+  }
+
+EX namespace princess {
+
+#if HDR
+#define EPX 39
+#define EPY 21
+
+#define OUT_OF_PRISON 200
+#define OUT_OF_PALACE 250
+#define PRADIUS0 (141)
+#define PRADIUS1 (150)
+
+struct info {
+  int id;         // id of this info
+  cell *prison;   // where was the Princess locked
+  heptagon *alt;  // alt of the prison
+  int bestdist;   // best dist achieved
+  int bestnear;   // best dist achieved, by the player
+  int value;      // number of Rugs at 120
+  cell *princess; // where is the Princess currently
   };
+    
+#endif
 
-namespace princess {
-
-  bool generating = false;
-  bool challenge = false;
-  bool saved = false;
-  bool everSaved = false;
+  EX bool generating = false;
+  EX bool challenge = false;
+  EX bool saved = false;
+  EX bool everSaved = false;
   
-  bool forceVizier = false;
-  bool forceMouse = false;
-  bool gotoPrincess = false;
-  bool nodungeon = false;
+  EX bool forceVizier = false;
+  EX bool forceMouse = false;
+  EX bool gotoPrincess = false;
+  EX bool nodungeon = false;
   bool squeaked = false;
 
   int saveHP = 0, saveArmedHP = 0;
@@ -493,7 +514,7 @@ namespace princess {
     if(i->alt) i->alt->emeraldval = i->id;
     }
   
-  int newInfo(cell *c) {
+  EX int newInfo(cell *c) {
     info *i = new info;
     i->prison = c;
     i->princess = c;
@@ -739,13 +760,20 @@ namespace princess {
       }
     }
     
-  }
+EX }
 
-namespace clearing {
+EX namespace clearing {
 
-  bool buggyplant = false;
+  #if HDR
+  struct clearingdata {
+    cell *root;
+    int dist;
+    };
+  #endif
+
+  EX bool buggyplant = false;
   
-  std::map<heptagon*, clearingdata> bpdata;
+  EX std::map<heptagon*, clearingdata> bpdata;
   
   cell *current_root;
   
@@ -920,7 +948,7 @@ namespace clearing {
       steps--; ds++;
       }
     }
-  }
+EX }
 
 namespace whirlpool {
 
@@ -2359,7 +2387,7 @@ void livecaves() {
 
 /* evolver */
 
-namespace tortoise {
+EX namespace tortoise {
   map<cell*, int> emap;
   map<cell*, int> babymap;
   int last;
@@ -2390,10 +2418,10 @@ namespace tortoise {
   
   int getBit(int bits, int id) { return (bits >> id) & 1; }
 
-  int getRandomBits() { return hrand(1 << numbits); }
+  EX int getRandomBits() { return hrand(1 << numbits); }
   
   bool seek() { return items[itBabyTortoise] % 5; }
-  int seekbits;
+  EX int seekbits;
   double seekval[numbits];
   double currval[numbits];
   
@@ -2438,7 +2466,7 @@ namespace tortoise {
   string measure(int bits) {
     return "(" + its(progress(bits)) + "/" + its(tortoise::numbits) + ")";
     }    
-  }
+EX }
 
 namespace dragon {
  
@@ -2622,11 +2650,18 @@ namespace dragon {
 
   }
 
-namespace sword {
+EX namespace sword {
+
+  #if HDR
+  struct sworddir {
+    int angle;
+    transmatrix T;
+    };
+  #endif
 
   int sword_angles;
   
-  array<sworddir, MAXPLAYER> dir;
+  EX array<sworddir, MAXPLAYER> dir;
 
   void possible_divisor(int s) { sword_angles *= s / gcd(sword_angles, s); }
 
@@ -2656,7 +2691,7 @@ namespace sword {
     return c->move(s);
     }
   
-  cell *pos(cell *c, const sworddir& sd, bool rev) {
+  EX cell *pos(cell *c, const sworddir& sd, bool rev) {
     if(WDIM == 2) 
       return pos2(c, sd.angle + (rev ? sword_angles/2 : 0));
     else {
@@ -2678,7 +2713,7 @@ namespace sword {
     return pos(playerpos(id), dir[id], rev);
     }
   
-  bool at(cell *where, bool noplayer) {
+  EX bool at(cell *where, bool noplayer IS(false)) {
     if(noplayer) return false;
     if(!orbcount(0) && !orbcount(1)) return false;
     for(int i=0; i<numplayers(); i++) if(multi::playerActive(i)) for(int b=0; b<2; b++)
@@ -2693,7 +2728,7 @@ namespace sword {
     }
 
   // from c1 to c2
-  sworddir shift(cell *c1, cell *c2, sworddir d) {
+  EX sworddir shift(cell *c1, cell *c2, sworddir d) {
     if(!c1 || !c2) return d;
     int s1 = neighborId(c1, c2);
     int s2 = neighborId(c2, c1);
@@ -2738,7 +2773,7 @@ namespace sword {
   void shuffle() {
     for(int i=0; i<MAXPLAYER; i++) shuffle(i);
     }
-  };
+EX }
 
 namespace kraken {
 
@@ -3427,7 +3462,7 @@ namespace windmap {
 
 // Halloween namespace
 
-namespace halloween {
+EX namespace halloween {
   cell *dragoncells[4];
   vector<cell*> srch;
 
@@ -3505,7 +3540,7 @@ namespace halloween {
     c->stuntime = 2;
     }
   
-  void getTreat(cell *where) {
+  EX void getTreat(cell *where) {
     if(!items[itTreat]) reset();
     gainItem(itTreat);
     farempty()->item = itTreat;
@@ -3668,7 +3703,7 @@ namespace halloween {
       items[itOrbShell] += 5;
       }
     }
-  }
+EX }
 
 // ... also includes the Ivory Tower
 

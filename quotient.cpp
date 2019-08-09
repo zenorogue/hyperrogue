@@ -5,7 +5,7 @@ namespace hr {
 
 // --- quotient geometry ---
 
-namespace quotientspace {
+EX namespace quotientspace {
   struct code {
     int c[MAX_EDGE+1];
     };

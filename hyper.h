@@ -1033,49 +1033,7 @@ template<class T> struct dynamicval {
   ~dynamicval() { where = backup; }
   };
 
-struct stalemate1 {
-  eMonster who;
-  cell *moveto;
-  cell *killed;
-  cell *pushto;
-  cell *comefrom;
-  cell *swordlast[2], *swordtransit[2], *swordnext[2];
-  bool isKilled(cell *c);
-  stalemate1(eMonster w, cell *mt, cell *ki, cell *pt, cell *cf) : who(w), moveto(mt), killed(ki), pushto(pt), comefrom(cf) {}
-  };
-
-namespace stalemate {
-  extern vector<stalemate1> moves;
-  extern bool  nextturn;
-  
-  bool isKilled(cell *c);
-
-  bool isMoveto(cell *c);
-  bool isKilledDirectlyAt(cell *c);
-  bool isPushto(cell *c);
-  };
-
-namespace tortoise {
-  extern int seekbits;
-  int getRandomBits();
-  }
-
 static const int MAXPLAYER = 7;
-
-namespace sword {
-
-  struct sworddir {
-    int angle;
-    transmatrix T;
-    };
-  
-  extern array<sworddir, MAXPLAYER> dir;
-
-  cell *pos(cell *c, const sworddir& sd, bool rev);
-  cell *pos(int id);
-  bool at(cell *where, bool noplayer = false);
-  sworddir shift(cell *c1, cell *c2, sworddir);
-  }
 
 #define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse && !(rug::rugged && rug::renderonce))
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
@@ -1089,40 +1047,6 @@ namespace sword {
 #define displayfrZ displayfr
 #define displayfrZH dialog::zoom::displayfr_highlight
 #endif
-
-namespace shot {
-  #if CAP_SHOT
-  extern int shotx, shoty, shotformat;
-  extern bool make_svg;
-  extern ld gamma, fade;
-  extern string caption;
-  extern bool transparent;
-  void menu();
-  void default_screenshot_content();
-  void take(string fname, const function<void()>& what = default_screenshot_content);
-  #endif
-  }
-
-#if CAP_SVG
-namespace svg {
-  void circle(int x, int y, int size, color_t col, color_t fillcolor, double linewidth);
-  void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth);
-  void text(int x, int y, int size, const string& str, bool frame, color_t col, int align);
-  extern bool in;
-  extern string link;
-  #if CAP_SHOT
-  void render(const string& fname, const function<void()>& what = shot::default_screenshot_content);
-  #endif
-  }
-#else
-namespace svg {
-  static const always_false in;
-  }
-#endif
-
-namespace halloween {
-  void getTreat(cell *where);
-  }
 
 // just in case if I change my mind about when Orbs lose their power
 #define ORBBASE 0
@@ -1220,14 +1144,6 @@ enum eGravity { gsNormal, gsLevitation, gsAnti };
 extern eGravity gravity_state, last_gravity_state;
 
 #define IFM(x) (mousing?"":x)
-
-namespace quotientspace {
-  void build();
-  void clear();
-  extern vector<int> connections;
-  }
-
-void killFriendlyIvy();
 
 #if CAP_SHAPES
 void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority);
@@ -1690,50 +1606,6 @@ const eLand NOWALLSEP_USED = laWhirlpool;
 
 #define HAUNTED_RADIUS getDistLimit()
 #define UNKNOWN 65535
-
-namespace clearing {
-
-  struct clearingdata {
-    cell *root;
-    int dist;
-    };
-  
-  extern bool buggyplant;
-  
-  extern std::map<heptagon*, clearingdata> bpdata;
-  }
-
-namespace princess {
-#define EPX 39
-#define EPY 21
-
-#define OUT_OF_PRISON 200
-#define OUT_OF_PALACE 250
-#define PRADIUS0 (141)
-#define PRADIUS1 (150)
-
-  extern bool generating;
-  extern bool gotoPrincess;
-  extern bool forceMouse;
-  extern bool challenge;
-  extern bool squeaked;
-  extern bool saved;
-  extern bool nodungeon;
-  extern int reviveAt;
-  extern bool forceVizier;
-
-  struct info {
-    int id;         // id of this info
-    cell *prison;   // where was the Princess locked
-    heptagon *alt;  // alt of the prison
-    int bestdist;   // best dist achieved
-    int bestnear;   // best dist achieved, by the player
-    int value;      // number of Rugs at 120
-    cell *princess; // where is the Princess currently
-    };
-    
-  int newInfo(cell *c);
-  }
 
 #define GRAIL_FOUND 0x4000
 #define GRAIL_RADIUS_MASK 0x3FFF

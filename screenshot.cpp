@@ -5,16 +5,20 @@ namespace hr {
 
 bool hide_hud = true;
 
+#if HDR
+namespace shot { void default_screenshot_content(); }
+#endif
+
 #if CAP_SVG
 // svg renderer
-namespace svg {
+EX namespace svg {
   #if ISWEB
   shstream f;
   #else
   fhstream f;
   #endif
   
-  bool in = false;
+  EX bool in = false;
   
   ld cta(color_t col) {
     // col >>= 24;
@@ -70,7 +74,7 @@ namespace svg {
     return buf;
     }
   
-  void circle(int x, int y, int size, color_t col, color_t fillcol, double linewidth) {
+  EX void circle(int x, int y, int size, color_t col, color_t fillcol, double linewidth) {
     if(!invisible(col) || !invisible(fillcol)) {
       if(vid.stretch == 1)
         println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col, linewidth), "/>");
@@ -79,7 +83,7 @@ namespace svg {
       }
     }
   
-  string link;
+  EX string link;
   
   void startstring() {
     if(link != "") print(f, "<a xlink:href=\"", link, "\" xlink:show=\"replace\">");
@@ -91,7 +95,7 @@ namespace svg {
 
   string font = "Times";
   
-  void text(int x, int y, int size, const string& str, bool frame, color_t col, int align) {
+  EX void text(int x, int y, int size, const string& str, bool frame, color_t col, int align) {
 
     double dfc = (x - current_display->xcenter) * (x - current_display->xcenter) + 
       (y - current_display->ycenter) * (y - current_display->ycenter);
@@ -132,7 +136,7 @@ namespace svg {
       }
     }
   
-  void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth) {
+  EX void polygon(int *polyx, int *polyy, int polyi, color_t col, color_t outline, double linewidth) {
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
@@ -151,7 +155,7 @@ namespace svg {
     println(f);
     }
   
-  void render(const string& fname, const function<void()>& what) {
+  EX void render(const string& fname, const function<void()>& what IS(shot::default_screenshot_content)) {
     dynamicval<bool> v2(in, true);
     dynamicval<bool> v3(vid.usingGL, false);
     
@@ -206,7 +210,7 @@ int read_args() {
 
 auto ah = addHook(hooks_args, 0, read_args);
 #endif
-  }
+EX }
 #endif
 
 #if CAP_PNG
@@ -218,17 +222,18 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
 #endif
 
 #if CAP_SHOT
-namespace shot {
+EX namespace shot {
 
 purehookset hooks_hqshot;
 
-int shotx = 2000, shoty = 2000;
-bool make_svg = false;
-bool transparent = true;
-ld gamma = 1;
-int shotformat = -1;
+EX int shotx = 2000;
+EX int shoty = 2000;
+EX bool make_svg = false;
+EX bool transparent = true;
+EX ld gamma = 1;
+EX int shotformat = -1;
 string caption;
-ld fade = 1;
+EX ld fade = 1;
 
 void set_shotx() {
   if(shotformat == -1) return;
@@ -245,7 +250,7 @@ void set_shotx() {
 int shot_aa = 1;
 #endif
 
-void default_screenshot_content() {
+EX void default_screenshot_content() {
   #if CAP_RUG
   if(rug::rugged) {
     if(rug::in_crystal()) rug::physics();
@@ -299,7 +304,7 @@ void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
   }
 #endif
 
-void take(string fname, const function<void()>& what) {
+EX void take(string fname, const function<void()>& what IS(default_screenshot_content)) {
 
   if(cheater) doOvergenerate();
 
@@ -395,7 +400,7 @@ int png_read_args() {
 auto ah_png = addHook(hooks_args, 0, png_read_args);
 #endif
 
-void menu() {
+EX void menu() {
   cmode = sm::SIDE; 
   gamescreen(0);
   if(!CAP_SVG) make_svg = false;
@@ -468,7 +473,7 @@ void menu() {
   dialog::display();
   }
 
-}
+EX }
 #endif
 
 #if CAP_ANIMATIONS

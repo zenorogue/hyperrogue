@@ -1185,6 +1185,19 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   return true;
   }
 
+#if HDR
+struct stalemate1 {
+  eMonster who;
+  cell *moveto;
+  cell *killed;
+  cell *pushto;
+  cell *comefrom;
+  cell *swordlast[2], *swordtransit[2], *swordnext[2];
+  bool isKilled(cell *c);
+  stalemate1(eMonster w, cell *mt, cell *ki, cell *pt, cell *cf) : who(w), moveto(mt), killed(ki), pushto(pt), comefrom(cf) {}
+  };
+#endif
+
 bool stalemate1::isKilled(cell *w) {
   if(w->monst == moNone || w == killed) return true;
   if(!moveto) return false;
@@ -1235,12 +1248,14 @@ bool stalemate1::isKilled(cell *w) {
   return false;
   }
 
-bool stalemate::isKilled(cell *w) {
-  for(int f=0; f<isize(moves); f++)
-    if(moves[f].isKilled(w)) return true;
-  
-  return false;
-  };
+EX namespace stalemate {
+  EX bool isKilled(cell *w) {
+    for(int f=0; f<isize(moves); f++)
+      if(moves[f].isKilled(w)) return true;
+    
+    return false;
+    };
+  EX }
 
 EX bool isNeighbor(cell *c1, cell *c2) {
   for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return true;
@@ -1290,25 +1305,25 @@ EX vector<cell*> gun_targets(cell *c) {
   return cl.lst;
   }
 
-namespace stalemate {
-  vector<stalemate1> moves;
-  bool  nextturn;
+EX namespace stalemate {
+  EX vector<stalemate1> moves;
+  EX bool  nextturn;
 
-  bool isMoveto(cell *c) {
+  EX bool isMoveto(cell *c) {
     for(int i=0; i<isize(moves); i++) if(moves[i].moveto == c) return true;
     return false;
     }
 
-  bool isKilledDirectlyAt(cell *c) {
+  EX bool isKilledDirectlyAt(cell *c) {
     for(int i=0; i<isize(moves); i++) if(moves[i].killed == c) return true;
     return false;
     }
   
-  bool isPushto(cell *c) {
+  EX bool isPushto(cell *c) {
     for(int i=0; i<isize(moves); i++) if(moves[i].pushto == c) return true;
     return false;
     }
-  }
+  EX }
 
 bool onboat(stalemate1& sm) {
   cell *c = sm.moveto;
