@@ -6,7 +6,7 @@
 namespace hr {
 
 EX namespace binary {
-#if EX CAP_BT
+#if CAP_BT
 
   enum bindir {
     bd_right = 0,

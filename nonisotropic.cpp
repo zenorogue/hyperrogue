@@ -9,7 +9,9 @@ EX namespace nisot {
   typedef array<float, 3> ptlow;
 
   EX transmatrix local_perspective;
-  //EX inline bool local_perspective_used() { return nonisotropic; }
+  #if HDR
+  inline bool local_perspective_used() { return nonisotropic; }
+  #endif
   
   EX bool geodesic_movement = true;
 
@@ -443,7 +445,9 @@ EX namespace nilv {
 
   hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
   
-  //EX static const int nilv_S7 = 8;
+  #if HDR
+  static const int nilv_S7 = 8;
+  #endif
 
   array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }};
 
@@ -546,7 +550,9 @@ EX namespace nisot {
     return true;
     }
   
-  //EX enum iePrecision { iLazy, iTable };
+  #if HDR
+  enum iePrecision { iLazy, iTable };
+  #endif
   
   EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p) {
     if(sol) return solv::get_inverse_exp(h, p == iLazy);

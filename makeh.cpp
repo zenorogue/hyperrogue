@@ -20,6 +20,7 @@ void mark_file() {
 
 bool do_endif;
 
+bool in_hdr;
 
 void gen(string s) {
   which_file = s;
@@ -28,16 +29,18 @@ void gen(string s) {
   while(getline(in, s)) {
     while(s != "" && s[0] == ' ') s = s.substr(1);
     while(s.back() == 10 || s.back() == 13) s = s.substr(0, s.size() - 1);
-    if(s.substr(0, 7) == "#if EX ") {
-      cout << ind() << s << "\n";
-      do_endif = true;
+    if(in_hdr) {
+      if(s == "#endif" && in_hdr) {
+        in_hdr = false;
+        }
+      else cout << ind() << s << "\n";
+      continue;
       }
-    if(s.substr(0, 4) == "//EX") {
-      auto t = s.substr(4);
-      while(t != "" && t[0] == ' ') t = t.substr(1);
-      cout << ind() << t << "\n";
+    if(s == "#if HDR") {
+      in_hdr = true;
       }
     if(s.substr(0, 4) == "EX }") {
+      mark_file();
       cout << ind() << "}\n";
       indent -= 2;
       }
@@ -49,6 +52,7 @@ void gen(string s) {
         indent += 2;
         }
       else {
+        mark_file();
         for(int i=0;; i++) {
           if(i == int(t.size())) { cerr << "Error: unrecognizable EX: " << s << "\n"; }
           else if(t[i] == '{') {
