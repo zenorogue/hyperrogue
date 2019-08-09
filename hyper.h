@@ -201,25 +201,6 @@ struct charstyle {
   bool lefthanded;
   };
 
-static const int MAXPLAYER = 7;
-static const int MAXJOY = 8;
-static const int MAXBUTTON = 64;
-static const int MAXAXE = 16;
-static const int MAXHAT = 4;
-
-namespace multi {
-
-  struct config {
-    char keyaction[512];
-    char joyaction[MAXJOY][MAXBUTTON];
-    char axeaction[MAXJOY][MAXAXE];
-    char hataction[MAXJOY][MAXHAT][4];
-    int  deadzoneval[MAXJOY][MAXAXE];
-    };
-
-  extern config scfg;  
-  }
-
 enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
 struct videopar {
@@ -1300,6 +1281,8 @@ namespace tortoise {
   int getRandomBits();
   }
 
+static const int MAXPLAYER = 7;
+
 namespace sword {
 
   struct sworddir {
@@ -2207,33 +2190,11 @@ template<class T> void hrandom_shuffle(T* x, int n) {
   for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]);
   }
 
-void resetModes(char leave = 'c');
-void activateSafety(eLand l);
-void showMainMenu();
-extern bool nomenukey;
-void resetConfig();
-void welcomeMessage();
-void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNone);
-extern bool canmove;
-
-void activateSafety(eLand l);
-extern bool childbug;
-
-void fullcenter();
-void mainloop();
-void clearAnimations();
-
-void destroycellcontents(cell *c);
-extern heptagon *last_cleared;
-
 template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
   for(int i=0; i<isize(data); i++)
     if(pred(data[i]))
       data[i] = data.back(), data.pop_back(), i--;
   }
-
-bool is_cell_removed(cell *c);
-void set_if_removed(cell*& c, cell *val);
 
 #if CAP_ORIENTATION
 transmatrix getOrientation();

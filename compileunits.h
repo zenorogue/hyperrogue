@@ -91,6 +91,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "menus.cpp"
 #include "geom-exp.cpp"
 #include "quit.cpp"
+#include "multi.cpp"
 #include "shmup.cpp"
 
 #if CAP_RACING

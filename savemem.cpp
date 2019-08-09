@@ -7,16 +7,16 @@ namespace hr {
 static const int PSEUDOKEY_MEMORY = 16397;
 #endif
 
-bool memory_saving_mode = true;
+EX bool memory_saving_mode = true;
 
 bool show_memory_warning = true;
 bool ignored_memory_warning;
 
 static const int LIM = 150;
 
-heptagon *last_cleared;
+EX heptagon *last_cleared;
 
-void destroycellcontents(cell *c) {
+EX void destroycellcontents(cell *c) {
   c->land = laMemory;
   c->wall = waChasm;
   c->item = itNone;
@@ -32,8 +32,7 @@ void degrade(cell *c) {
   destroycellcontents(c);
   }
 
-vector<cell*> removed_cells;
-  
+EX vector<cell*> removed_cells;  
 
 void slow_delete_cell(cell *c) {
   while(c->mpdist < BARLEV)
@@ -169,11 +168,11 @@ void save_memory() {
 
 EX purehookset hooks_removecells;
 
-bool is_cell_removed(cell *c) {
+EX bool is_cell_removed(cell *c) {
   return binary_search(removed_cells.begin(), removed_cells.end(), c);
   }
 
-void set_if_removed(cell*& c, cell *val) {
+EX void set_if_removed(cell*& c, cell *val) {
   if(is_cell_removed(c)) c = val;
   }
 

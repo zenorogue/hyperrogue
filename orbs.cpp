@@ -575,7 +575,7 @@ void teleportTo(cell *dest) {
   auto_teleport_charges();
   }
 
-void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
+EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   cell *from = cwt.at;
 

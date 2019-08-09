@@ -534,7 +534,7 @@ EX void reset_graph_settings() {
   vid.wallmode = DEFAULT_WALLMODE;
   }
 
-EX void resetModes(char leave) {
+EX void resetModes(char leave IS('c')) {
   while(game_active || gamestack::pushed()) {
     if(game_active) stop_game();
     if(gamestack::pushed()) gamestack::pop();
