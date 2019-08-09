@@ -102,7 +102,7 @@ bool trailer_safety = true;
 hookset<void()> *hooks_initgame;
 
 // initialize the game
-void initgame() {
+EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
   callhooks(hooks_initgame); 
 
@@ -834,7 +834,7 @@ void remove_emergency_save() {
 #endif
   }
 
-void saveStats(bool emergency = false) {
+EX void saveStats(bool emergency IS(false)) {
   DEBBI(DF_INIT, ("saveStats [%s]", scorefile));
 
   if(autocheat) return;
@@ -958,7 +958,7 @@ void saveStats(bool emergency = false) {
   }
 
 // load the save
-void loadsave() {
+EX void loadsave() {
   if(autocheat) return;
 #if CAP_TOUR
   if(tour::on) return;
@@ -1088,7 +1088,7 @@ void loadsave() {
   }
 #endif
 
-void stop_game() {
+EX void stop_game() {
   if(!game_active) return;
   if(dual::split(stop_game)) return;
   DEBBI(DF_INIT, ("stop_game"));
@@ -1125,7 +1125,7 @@ void stop_game() {
 #endif
   }
 
-void set_geometry(eGeometry target) {
+EX void set_geometry(eGeometry target) {
   if(geometry != target) {
     int old_DIM = DIM;
     stop_game();
@@ -1161,7 +1161,7 @@ void set_geometry(eGeometry target) {
     }
   }
 
-void set_variation(eVariation target) {
+EX void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
     if(euclid6 || binarytiling || sol || penrose) geometry = gNormal;
@@ -1182,7 +1182,7 @@ void stop_tour() {
     }
   }
 
-void switch_game_mode(char switchWhat) {
+EX void switch_game_mode(char switchWhat) {
   DEBBI(DF_INIT, ("switch_game_mode ", switchWhat));
   switch(switchWhat) {
     case rg::peace:
@@ -1312,7 +1312,7 @@ void switch_game_mode(char switchWhat) {
     }
   }
 
-void start_game() {
+EX void start_game() {
   if(game_active) return;
   DEBBI(DF_INIT, ("start_game"));
   if(dual::state == 1) dual::assign_landsides();  
@@ -1353,21 +1353,23 @@ void start_game() {
   subscreens::prepare();
   }
 
-void restart_game(char switchWhat) {
+// popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
+EX void restart_game(char switchWhat IS(rg::nothing)) {
   popScreenAll();  
   stop_game();
   switch_game_mode(switchWhat);
   start_game();
   }
 
-void stop_game_and_switch_mode(char switchWhat) {
+// stop_game + switch_game_mode
+EX void stop_game_and_switch_mode(char switchWhat IS(rg::nothing)) {
   stop_game();
   switch_game_mode(switchWhat);
   }
 
-purehookset clearmemory;
+EX purehookset clearmemory;
 
-void clearMemory() {
+EX void clearMemory() {
   callhooks(clearmemory);
   }
 

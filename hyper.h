@@ -3754,27 +3754,7 @@ bool score_loaded(int id);
 int score_default(int id);
 void handle_event(SDL_Event& ev);
 
-void start_game();
-void stop_game();
-void switch_game_mode(char switchWhat);
-
-void stop_game_and_switch_mode(char switchWhat = rg::nothing); // stop_game + switch_game_mode
-void restart_game(char switchWhat = rg::nothing); // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
-
-// these work as stop_game_and_switch_mode
-void set_variation(eVariation);
-void set_geometry(eGeometry);
-
 void generate_floorshapes();
-void drawArrowTraps();
-void drawBlizzards();
-
-struct blizzardcell;
-
-extern vector<cell*> arrowtraps;
-extern map<cell*, blizzardcell> blizzardcells;
-extern vector<blizzardcell*> bcells;
-void set_blizzard_frame(cell *c, int frameid);
 
 #define SIDE_SLEV 0
 #define SIDE_WTS3 3
@@ -4168,21 +4148,6 @@ struct pathdata {
 
 extern int timetowait;
 
-extern vector<pair<cell*, int> > airmap;
-extern void compute_graphical_distance();
-
-struct help_extension {
-  char key;
-  string text;
-  string subtext;
-  color_t color;
-  reaction_t action;
-  help_extension() { color = forecolor; }
-  help_extension(char k, string t, reaction_t a) : key(k), text(t), action(a) { color = forecolor; }
-  };
-
-extern vector<help_extension> help_extensions;
-
 #define RING(i) for(double i=0; i<=cgi.S84+1e-6; i+=SD3 * pow(.5, vid.linequality))
 #define REVRING(i) for(double i=cgi.S84; i>=-1e-6; i-=SD3 * pow(.5, vid.linequality))
 #define PRING(i) for(double i=0; i<=cgi.S84+1e-6; i+= pow(.5, vid.linequality))
@@ -4211,81 +4176,6 @@ namespace reg3 {
   cellwalker strafe(cellwalker cw, int j);
   }
 #endif
-
-namespace arcm {
-  #if CAP_ARCM
-
-  struct archimedean_tiling {
-  
-    int coloring;
-  
-    string symbol;
-    
-    vector<int> faces;
-    vector<int> adj;
-    vector<bool> invert;
-    vector<int> nflags;
-  
-    bool have_ph, have_line, have_symmetry;
-    int real_faces;
-    int real_face_type;
-  
-    int repetition;
-    int N;
-  
-    ld euclidean_angle_sum;
-  
-    vector<int> flags;
-  
-    vector<vector<pair<int, int>>> adjacent;
-    vector<vector<pair<ld, ld>>> triangles;
-    
-    void make_match(int a, int i, int b, int j);
-    void prepare();
-    void compute_geometry();
-    
-    void parse();
-    void parse(string s) { symbol = s; parse(); }
-  
-    ld edgelength;
-    
-    vector<ld> inradius, circumradius, alphas;
-    
-    int matches[30][30];
-    int periods[30];
-    int tilegroup[30], groupoffset[30], tilegroups;
-  
-    int errors;
-    string errormsg;
-  
-    pair<int, int>& get_adj(heptagon *h, int cid);
-    pair<int, int>& get_adj(heptspin hs) { return get_adj(hs.at, hs.spin); }
-    pair<ld, ld>& get_triangle(heptagon *h, int cid);
-    pair<ld, ld>& get_triangle(heptspin hs) { return get_triangle(hs.at, hs.spin); }
-    pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
-    pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
-  
-    int support_threecolor();
-    int support_threecolor_bitruncated();
-    int support_football();
-    bool support_chessboard();
-    void regroup();
-    string world_size();
-    
-    eGeometryClass get_class();
-    
-    ld scale();
-    };
-  
-  extern archimedean_tiling current;
-  
-  extern map<heptagon*, pair<heptagon*, transmatrix>> archimedean_gmatrix;
-
-  void initialize(heptagon *root);
-  short& id_of(heptagon *);
-  int fix(heptagon *h, int spin);
-  #endif
-  }
 
 namespace crystal {
   #if CAP_CRYSTAL
@@ -4328,140 +4218,7 @@ namespace crystal {
   #endif
   }
 
-struct bignum {
-  static const int BASE = 1000000000;
-  static const long long BASE2 = BASE * (long long)BASE;
-  vector<int> digits;
-  bignum() {}
-  bignum(int i) : digits() { digits.push_back(i); }
-  void be(int i) { digits.resize(1); digits[0] = i; }
-  bignum& operator +=(const bignum& b);
-  void addmul(const bignum& b, int factor);
-  string get_str(int max_length);
-  
-  bool operator < (const bignum&) const;
-
-  ld leading() const {
-    switch(isize(digits)) {
-      case 0:
-        return 0;
-      case 1:
-        return digits.back();
-      default:
-        return digits.back() + ld(digits[isize(digits)-2]) / BASE;
-      }
-    }
-
-  ld approx() const {
-    return leading() * pow(BASE, isize(digits) - 1);
-    }
-  
-  ld log_approx() const {
-    return log(leading()) * log(BASE) * (isize(digits) - 1);
-    }
-  
-  ld operator / (const bignum& b) const {
-    return leading() / b.leading() * pow(BASE, isize(digits) - isize(b.digits));
-    }
-  
-  int approx_int() const {
-    if(isize(digits) > 1) return BASE;
-    if(digits.empty()) return 0;
-    return digits[0];
-    }
-  
-  long long approx_ll() const {
-    if(isize(digits) > 2) return BASE2;
-    if(digits.empty()) return 0;
-    if(isize(digits) == 1) return digits[0];
-    return digits[0] + digits[1] * (long long) BASE;
-    }
-  
-  friend inline bignum operator +(bignum a, const bignum& b) { a.addmul(b, 1); return a; }
-  friend inline bignum operator -(bignum a, const bignum& b) { a.addmul(b, -1); return a; }
-  };
-
-struct expansion_analyzer {
-  vector<int> gettype(cell *c);
-  int N;
-  vector<cell*> samples;  
-  map<vector<int>, int> codeid;  
-  vector<vector<int> > children;  
-  int rootid, diskid;
-  int coefficients_known;
-  vector<int> coef;
-  int valid_from, tested_to;
-  ld growth;
-  
-  int sample_id(cell *c);
-  void preliminary_grouping();
-  void reduce_grouping();
-  vector<vector<bignum>> descendants;
-  bignum& get_descendants(int level);
-  bignum& get_descendants(int level, int type);
-  void find_coefficients();
-  void reset();
-  
-  expansion_analyzer() { reset(); }
-
-  string approximate_descendants(int d, int max_length);
-  void view_distances_dialog();
-  ld get_growth();
-
-  private:
-  bool verify(int id);
-  int valid(int v, int step);
-  };
-
-extern expansion_analyzer expansion;
-
 int towerval(cell *c, const cellfunction& cf);
-
-int parent_id(cell *c, int which, const cellfunction& cf);
-
-extern int sibling_limit;
-extern void set_sibling_limit();
-int type_in_reduced(expansion_analyzer& ea, cell *c, const function<int(cell*)>& f);
-
-namespace ts {
-  cell *verified_add(cell *c, int which, int bonus, const cellfunction& cf);
-  cell *add(cell *c, int which, int bonus, const cellfunction& cf);
-  
-  inline cell *left_parent(cell *c, const cellfunction& cf) { return verified_add(c, 1, 0, cf); }
-  inline cell *right_parent(cell *c, const cellfunction& cf) { return verified_add(c, -1, 0, cf); }
-  cell *left_of(cell *c, const cellfunction& cf);
-  cell *right_of(cell *c, const cellfunction& cf);
-  cell *child_number(cell *c, int id, const cellfunction& cf);
-  }
-
-struct exp_parser {
-  string s;
-  int at;
-  exp_parser() { at = 0; }
-  
-  map<string, cld> extra_params;
-
-  bool ok() { return at == isize(s); }
-  char next(int step=0) { if(at >= isize(s)-step || at == -1) return 0; else return s[at+step]; }
-  
-  bool eat(const char *c) {
-    int orig_at = at;
-    while(*c && *c == next()) at++, c++;
-    if(*c == 0) return true;
-    else at = orig_at;
-    return false;
-    }
-
-  cld parse(int prio = 0);
-
-  cld parsepar() {
-    cld res = parse();
-    if(next() != ')') { at = -1; return res; }
-    at++;
-    return res;
-    }
-
-  };
 
 #if CAP_COMPLEX2
 namespace brownian {
@@ -4481,10 +4238,6 @@ namespace brownian {
 #define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety && !reptilecheat)
 
 void menuitem_sightrange(char c = 'r');
-
-static const ld degree = M_PI / 180;
-
-extern unordered_map<string, ld&> params;
 
 namespace dq {
   extern queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
@@ -4514,42 +4267,12 @@ template <class T> void texture_order(const T& f) {
     }
   }
 
-struct gamedata {
-  // important parameters should be visible
-  eGeometry geo;
-  eVariation var;
-  eLand specland;
-  bool active;
-  // other properties are recorded
-  vector<char> record;
-  int index, mode;
-  void storegame();
-  void restoregame();
-  template<class T> void store(T& x) {
-    int ssize = sizeof(x);
-    if(ssize & 7) ssize = (ssize | 7) + 1;
-    if(mode == 0) {
-      record.resize(index+ssize);
-      T& at = *(new (&record[index]) T());
-      at = move(x);
-      }
-    else {
-      T& at = (T&) record[index];
-      x = move(at);
-      at.~T();
-      }
-    index += ssize;
-    }
-  };
-
 /* lastmovetype   uses lmSkip, lmMove, lmAttack, lmPush, lmTree */
 enum eLastmovetype { lmSkip, lmMove, lmAttack, lmPush, lmTree, lmInstant };
 extern eLastmovetype lastmovetype, nextmovetype;
 
 enum eForcemovetype { fmSkip, fmMove, fmAttack, fmInstant, fmActivate };
 extern eForcemovetype forcedmovetype;
-
-static const int PSEUDOKEY_MEMORY = 16397;
 
 static const color_t NOCOLOR = 0;
 

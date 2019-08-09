@@ -7,6 +7,61 @@ int subtype(cell *c) {
   return patterns::getpatterninfo(c, patterns::PAT_NONE, 0).id;
   }
 
+#if HDR
+struct bignum {
+  static const int BASE = 1000000000;
+  static const long long BASE2 = BASE * (long long)BASE;
+  vector<int> digits;
+  bignum() {}
+  bignum(int i) : digits() { digits.push_back(i); }
+  void be(int i) { digits.resize(1); digits[0] = i; }
+  bignum& operator +=(const bignum& b);
+  void addmul(const bignum& b, int factor);
+  string get_str(int max_length);
+  
+  bool operator < (const bignum&) const;
+
+  ld leading() const {
+    switch(isize(digits)) {
+      case 0:
+        return 0;
+      case 1:
+        return digits.back();
+      default:
+        return digits.back() + ld(digits[isize(digits)-2]) / BASE;
+      }
+    }
+
+  ld approx() const {
+    return leading() * pow(BASE, isize(digits) - 1);
+    }
+  
+  ld log_approx() const {
+    return log(leading()) * log(BASE) * (isize(digits) - 1);
+    }
+  
+  ld operator / (const bignum& b) const {
+    return leading() / b.leading() * pow(BASE, isize(digits) - isize(b.digits));
+    }
+  
+  int approx_int() const {
+    if(isize(digits) > 1) return BASE;
+    if(digits.empty()) return 0;
+    return digits[0];
+    }
+  
+  long long approx_ll() const {
+    if(isize(digits) > 2) return BASE2;
+    if(digits.empty()) return 0;
+    if(isize(digits) == 1) return digits[0];
+    return digits[0] + digits[1] * (long long) BASE;
+    }
+  
+  friend inline bignum operator +(bignum a, const bignum& b) { a.addmul(b, 1); return a; }
+  friend inline bignum operator -(bignum a, const bignum& b) { a.addmul(b, -1); return a; }
+  };
+#endif
+
 bignum& bignum::operator +=(const bignum& b) {
   int K = isize(b.digits);
   if(K > isize(digits)) digits.resize(K);
@@ -115,6 +170,40 @@ void canonicize(vector<int>& t) {
     if((t[i] & 3) == 1 && (t[i-1] & 3) != 1)
       std::rotate(t.begin()+1, t.begin()+i, t.end());
   }
+
+#if HDR
+struct expansion_analyzer {
+  vector<int> gettype(cell *c);
+  int N;
+  vector<cell*> samples;  
+  map<vector<int>, int> codeid;  
+  vector<vector<int> > children;  
+  int rootid, diskid;
+  int coefficients_known;
+  vector<int> coef;
+  int valid_from, tested_to;
+  ld growth;
+  
+  int sample_id(cell *c);
+  void preliminary_grouping();
+  void reduce_grouping();
+  vector<vector<bignum>> descendants;
+  bignum& get_descendants(int level);
+  bignum& get_descendants(int level, int type);
+  void find_coefficients();
+  void reset();
+  
+  expansion_analyzer() { reset(); }
+
+  string approximate_descendants(int d, int max_length);
+  void view_distances_dialog();
+  ld get_growth();
+
+  private:
+  bool verify(int id);
+  int valid(int v, int step);
+  };
+#endif
 
 vector<int> expansion_analyzer::gettype(cell *c) {
   vector<int> res;
@@ -445,7 +534,7 @@ int curr_dist(cell *c) {
 
 int position;
 
-int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
+EX int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   int a = ea.N;
   int t = type_in(ea, c, f);
   if(expansion.N != a) {
@@ -457,7 +546,7 @@ int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
 
 // which=1 => right, which=-1 => left
 
-int parent_id(cell *c, int which, const cellfunction& cf) {
+EX int parent_id(cell *c, int which, const cellfunction& cf) {
   int d = cf(c)-1;
   for(int i=0; i<c->type; i++) {
     
@@ -482,43 +571,49 @@ void generate_around(cell *c) {
   forCellCM(c2, c) if(c2->mpdist > BARLEV) setdist(c2, BARLEV, c);
   }
   
-namespace ts {
-  cell *verified_add(cell *c, int which, int bonus, const cellfunction& cf) {
+EX namespace ts {
+  EX cell *verified_add(cell *c, int which, int bonus, const cellfunction& cf) {
     int id = parent_id(c, which, cf);
     if(id == -1) return NULL;
     return c->cmodmove(id + bonus);
     }
 
-  cell *verified_add_gen(cell *c, int which, int bonus, const cellfunction& cf) {
+  EX cell *verified_add_gen(cell *c, int which, int bonus, const cellfunction& cf) {
     return verified_add(c, which, bonus, cf);
     }
   
-  cell *add(cell *c, int which, int bonus, const cellfunction& cf) {
+  EX cell *add(cell *c, int which, int bonus, const cellfunction& cf) {
     int pid = parent_id(c, which, cf);
     if(pid == -1) pid = 0;
     return c->cmodmove(pid + bonus);
     }
   
-  cell *left_of(cell *c, const cellfunction& cf) {
+  EX cell *left_of(cell *c, const cellfunction& cf) {
     int pid = parent_id(c, 1, cf);
     if(pid == -1) return c;
     if(VALENCE == 3) return c->cmodmove(pid+1);
     else return (cellwalker(c, pid) + wstep - 1).cpeek();
     }
 
-  cell *right_of(cell *c, const cellfunction& cf) {
+  EX cell *right_of(cell *c, const cellfunction& cf) {
     int pid = parent_id(c, -1, cf);
     if(pid == -1) return c;
     if(VALENCE == 3) return c->cmodmove(pid-1);
     else return (cellwalker(c, pid) + wstep + 1).cpeek();
     }
 
-  cell *child_number(cell *c, int id, const cellfunction& cf) { 
+  EX cell *child_number(cell *c, int id, const cellfunction& cf) { 
     int pid = parent_id(c, 1, cf);
     if(pid == -1) return c->cmove(id);
     return c->cmodmove(pid + (VALENCE == 3 ? 2 : 1) + id);
     }
-  }
+
+  #if HDR
+  inline cell *left_parent(cell *c, const cellfunction& cf) { return verified_add(c, 1, 0, cf); }
+  inline cell *right_parent(cell *c, const cellfunction& cf) { return verified_add(c, -1, 0, cf); }
+  #endif
+
+  EX }
 
 bool viewdists = false, use_color_codes = true, use_analyzer = true, show_distance_lists = true;
 
@@ -860,11 +955,11 @@ auto ea_hook = addHook(hooks_args, 100, expansion_readArgs);
 #endif
 #endif
 
-expansion_analyzer expansion;
+EX expansion_analyzer expansion;
 
-int sibling_limit = 0;
+EX int sibling_limit = 0;
 
-void set_sibling_limit() {
+EX void set_sibling_limit() {
   if(0) ;
   #if CAP_IRR
   else if(IRREGULAR) sibling_limit = 3;

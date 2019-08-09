@@ -103,6 +103,37 @@ EX bool appears(const string& haystack, const string& needle) {
   return simplify(haystack).find(simplify(needle)) != string::npos;
   }
 
+#if HDR
+struct exp_parser {
+  string s;
+  int at;
+  exp_parser() { at = 0; }
+  
+  map<string, cld> extra_params;
+
+  bool ok() { return at == isize(s); }
+  char next(int step=0) { if(at >= isize(s)-step || at == -1) return 0; else return s[at+step]; }
+  
+  bool eat(const char *c) {
+    int orig_at = at;
+    while(*c && *c == next()) at++, c++;
+    if(*c == 0) return true;
+    else at = orig_at;
+    return false;
+    }
+
+  cld parse(int prio = 0);
+
+  cld parsepar() {
+    cld res = parse();
+    if(next() != ')') { at = -1; return res; }
+    at++;
+    return res;
+    }
+
+  };
+#endif
+
 cld exp_parser::parse(int prio) {
   cld res;
   while(next() == ' ') at++;

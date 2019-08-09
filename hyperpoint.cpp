@@ -4,6 +4,10 @@
 
 namespace hr {
 
+#if HDR
+static const ld degree = M_PI / 180;
+#endif
+
 eGeometry geometry;
 eVariation variation;
 

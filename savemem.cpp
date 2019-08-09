@@ -3,6 +3,10 @@
 
 namespace hr {
 
+#if HDR
+static const int PSEUDOKEY_MEMORY = 16397;
+#endif
+
 bool memory_saving_mode = true;
 
 bool show_memory_warning = true;

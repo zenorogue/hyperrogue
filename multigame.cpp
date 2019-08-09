@@ -7,6 +7,36 @@
 
 namespace hr {
 
+#if HDR
+struct gamedata {
+  // important parameters should be visible
+  eGeometry geo;
+  eVariation var;
+  eLand specland;
+  bool active;
+  // other properties are recorded
+  vector<char> record;
+  int index, mode;
+  void storegame();
+  void restoregame();
+  template<class T> void store(T& x) {
+    int ssize = sizeof(x);
+    if(ssize & 7) ssize = (ssize | 7) + 1;
+    if(mode == 0) {
+      record.resize(index+ssize);
+      T& at = *(new (&record[index]) T());
+      at = move(x);
+      }
+    else {
+      T& at = (T&) record[index];
+      x = move(at);
+      at.~T();
+      }
+    index += ssize;
+    }
+  };
+#endif
+
 void gamedata_all(gamedata& gd) {
   gd.index = 0;
   gd.store(firstland);

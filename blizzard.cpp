@@ -12,6 +12,10 @@ struct snowball {
   snowball(int t) { T = rgpushxto0(randomPointIn(t)); phase = randd(); }
   };                                                                
 
+#if HDR
+struct blizzardcell;
+#endif
+
 struct blizzardcell {
   cell *c;
   int frame;
@@ -25,17 +29,17 @@ struct blizzardcell {
   ~blizzardcell() { for(auto i: inorder) delete i; }
   };
 
-map<cell*, blizzardcell> blizzardcells;
+EX map<cell*, blizzardcell> blizzardcells;
 
 EX void set_blizzard_frame(cell *c, int frameid) {
   blizzardcells[c].frame = frameid;
   }
 
-vector<blizzardcell*> bcells;
+EX vector<blizzardcell*> bcells;
 
 int blizzard_N;
 
-blizzardcell* getbcell(cell *c) {
+EX blizzardcell* getbcell(cell *c) {
   int i = c->listindex;
   if(i<0 || i >= blizzard_N) return NULL;
   if(bcells[i]->c != c) return NULL;
@@ -205,7 +209,7 @@ EX void drawBlizzards() {
   #endif
   }
        
-vector<cell*> arrowtraps;
+EX vector<cell*> arrowtraps;
 
 EX void drawArrowTraps() {
   for(cell *c: arrowtraps) {

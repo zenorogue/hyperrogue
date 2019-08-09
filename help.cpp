@@ -7,6 +7,18 @@ EX string help;
 
 EX function<void()> help_delegate;
 
+#if HDR
+struct help_extension {
+  char key;
+  string text;
+  string subtext;
+  color_t color;
+  reaction_t action;
+  help_extension() { color = forecolor; }
+  help_extension(char k, string t, reaction_t a) : key(k), text(t), action(a) { color = forecolor; }
+  };
+#endif
+
 EX vector<help_extension> help_extensions;
 
 vector<string> extra_keys = {
