@@ -47,13 +47,13 @@ int eupattern4(cell *c) {
   return (x&1) + ((y&1)) * 2;
   }
 
-bool ishept(cell *c) {
+EX bool ishept(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 0;
   else return c->type == S7;
   }
 
-bool ishex1(cell *c) {
+EX bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
   #if CAP_GP

@@ -2824,30 +2824,4 @@ static const color_t NOCOLOR = 0;
 
 namespace hr {
   inline bool movepcto(const movedir& md) { return movepcto(md.d, md.subdir); }
-
-  inline hyperpoint cpush0(int c, ld x) { 
-    hyperpoint h = Hypc;
-    h[GDIM] = cos_auto(x);
-    h[c] = sin_auto(x);
-    return h;
-    }
-  
-  inline hyperpoint xspinpush0(ld alpha, ld x) { 
-    hyperpoint h = Hypc;
-    h[GDIM] = cos_auto(x);
-    h[0] = sin_auto(x) * cos(alpha);
-    h[1] = sin_auto(x) * -sin(alpha);
-    return h;
-    }
-
-  inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
-  inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
-  inline void reset_projection() { new_projection_needed = true; }
-
-  // T * C0, optimized
-  inline hyperpoint tC0(const transmatrix &T) {
-    hyperpoint z;
-    for(int i=0; i<MDIM; i++) z[i] = T[i][DIM];
-    return z;
-    }
   }
