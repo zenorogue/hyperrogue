@@ -719,11 +719,6 @@ EX transmatrix mzscale(const transmatrix& t, double fac) {
 
 EX transmatrix pushone() { return xpush(sphere?.5 : 1); }
 
-bool operator == (hyperpoint h1, hyperpoint h2) {
-  for(int i=0; i<MDIM; i++) if(h1[i] != h2[i]) return false;
-  return true;
-  }
-
 // rotation matrix in R^3
 
 EX hyperpoint mid3(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
