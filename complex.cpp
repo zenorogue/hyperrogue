@@ -2472,7 +2472,7 @@ namespace dragon {
         c = c->move(i); goto findhead;
         }
     if(cmode & sm::MAP) return c;
-    if(!conformal::includeHistory) {
+    if(!history::includeHistory) {
       printf("dragon bug #3 (%p -> %p)\n", cor, c); 
       dragbugs = true;
       }
@@ -2543,7 +2543,7 @@ namespace dragon {
     int maxlen = 1000;
     while(maxlen-->0) {
       if(!isDragon(c->monst)) {
-        if(!conformal::includeHistory) printf("dragon bug #4\n");
+        if(!history::includeHistory) printf("dragon bug #4\n");
         return total; 
         }
       total += c->hitpoints;
@@ -2583,7 +2583,7 @@ namespace dragon {
       if(c->mondir == NODIR) { printf("dragon bug\n"); break; }
       c = c->move(c->mondir);
       if(!c) { 
-        if(!conformal::includeHistory) printf("dragon bug #2\n"); 
+        if(!history::includeHistory) printf("dragon bug #2\n"); 
         break; 
         }
       }

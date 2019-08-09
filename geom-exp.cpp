@@ -449,7 +449,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
 
 string current_proj_name() {
   if(pmodel != mdDisk || nonisotropic)
-    return conformal::get_model_name(pmodel);
+    return models::get_model_name(pmodel);
   else if(hyperbolic && vid.alpha == 1)
     return XLAT("Poincaré model");
   else if(hyperbolic && vid.alpha == 0)
@@ -724,7 +724,7 @@ EX void showEuclideanMenu() {
     dialog::add_action_push(show3D);
     }
   dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-  dialog::add_action_push(conformal::model_menu);
+  dialog::add_action_push(models::model_menu);
   if(nonisotropic)
     dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
   #if CAP_CRYSTAL && MAXMDIM >= 4

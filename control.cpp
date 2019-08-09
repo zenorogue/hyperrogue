@@ -296,32 +296,32 @@ EX void handlePanning(int sym, int uni) {
     View = solmul(cpush(2, +0.2*shiftmul), View), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_RIGHT) { 
-    if(conformal::on)
-      conformal::lvspeed += 0.1 * shiftmul;
+    if(history::on)
+      history::lvspeed += 0.1 * shiftmul;
     else if(DIM == 3)
       View = cspin(0, 2, -0.2*shiftmul) * View, didsomething = true;
     else
       View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
   if(sym == SDLK_LEFT) {
-    if(conformal::on)
-      conformal::lvspeed -= 0.1 * shiftmul;
+    if(history::on)
+      history::lvspeed -= 0.1 * shiftmul;
     else if(DIM == 3)
       View = cspin(0, 2, 0.2*shiftmul) * View, didsomething = true;
     else
       View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
   if(sym == SDLK_UP) {
-    if(conformal::on)
-      conformal::lvspeed += 0.1 * shiftmul;
+    if(history::on)
+      history::lvspeed += 0.1 * shiftmul;
     else if(DIM == 3)
       View = cspin(1, 2, 0.2*shiftmul) * View, didsomething = true;
     else
       View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
   if(sym == SDLK_DOWN) {
-    if(conformal::on)
-      conformal::lvspeed -= 0.1 * shiftmul;
+    if(history::on)
+      history::lvspeed -= 0.1 * shiftmul;
     else if(DIM == 3)
       View = cspin(1, 2, -0.2*shiftmul) * View, didsomething = true;
     else
@@ -329,14 +329,14 @@ EX void handlePanning(int sym, int uni) {
     }
 #endif
   if(sym == SDLK_PAGEUP) {
-    if(conformal::on)
-      conformal::rotation++;
+    if(history::on)
+      models::rotation++;
     else
       View = spin(M_PI/cgi.S21/2*shiftmul) * View, didsomething = true;
     }
   if(sym == SDLK_PAGEDOWN) {
-    if(conformal::on)
-      conformal::rotation++;
+    if(history::on)
+      models::rotation++;
     else
       View = spin(-M_PI/cgi.S21/2*shiftmul) * View, didsomething = true;
     }
@@ -563,7 +563,7 @@ EX void mainloopiter() {
 
   optimizeview();
   
-  conformal::configure();
+  models::configure();
 
   lastt = ticks;
   ticks = SDL_GetTicks();
@@ -689,14 +689,14 @@ EX void mainloopiter() {
     if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN))
       View = (DIM == 2 ? ypush(-t) : cspin(1, 2, -t)) * View, didsomething = true, playermoved = playermoved && DIM == 3;
     if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
-      if(conformal::on)
-        conformal::rotation+=t;
+      if(history::on)
+        models::rotation+=t;
       else
         View = spin(t) * View, didsomething = true;
       }
     if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) {
-      if(conformal::on)
-        conformal::rotation-=t;
+      if(history::on)
+        models::rotation-=t;
       else
         View = spin(-t) * View, didsomething = true;
       }

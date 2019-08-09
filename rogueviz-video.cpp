@@ -19,7 +19,7 @@ void rvvideo(const string &fname) {
     
     collatz::lookup(763, 60);
 
-    conformal::create_playerpath(), conformal::rotation = 1;
+    history::create_playerpath(), models::rotation = 1;
     // pmodel = mdBand;
 
 #define STORYCOUNT 24
@@ -98,8 +98,8 @@ struct storydata { int s; int e; const char *text; } story[] = {
       
       vid.grid = drawnet;
       
-      conformal::phase = 1 + (isize(conformal::v)-3) * i * .95 / FRAMECOUNT;
-      conformal::movetophase();
+      history::phase = 1 + (isize(history::v)-3) * i * .95 / FRAMECOUNT;
+      history::movetophase();
 
       char buf[500];
       snprintf(buf, 500, fname.c_str(), i);

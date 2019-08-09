@@ -771,8 +771,8 @@ void restore_time(int t) {
 bool akh(int sym, int uni) {
   if(uni == '1') { tstart = ticks; sview = viewctr; }
   else if(uni == '2') { tstop = ticks; }
-  else if(uni == '3') { conformal::model_orientation = 90; pmodel = mdBand; player_relative = false; }
-  else if(uni == '4') { conformal::model_orientation = 180; pmodel = mdHalfplane; conformal::halfplane_scale = 2; player_relative = false; }
+  else if(uni == '3') { models::model_orientation = 90; pmodel = mdBand; player_relative = false; }
+  else if(uni == '4') { models::model_orientation = 180; pmodel = mdHalfplane; models::halfplane_scale = 2; player_relative = false; }
   else if(uni == '5') { pmodel = mdDisk; player_relative = true; }
   else if(uni == '6') { vid.use_smart_range = true; vid.smart_range_detail = 2; }
   else if(uni == '7' && tstart && tstop) {
@@ -932,7 +932,7 @@ void race_projection() {
   dialog::addBoolItem(XLAT("band"), pmodel == mdBand, '2');
   dialog::add_action([] () {
     pmodel = mdBand;
-    conformal::model_orientation = race_angle;
+    models::model_orientation = race_angle;
     race_advance = 1;
     vid.yshift = 0;
     vid.camera_angle = 0;
@@ -946,7 +946,7 @@ void race_projection() {
   dialog::addBoolItem(XLAT("half-plane"), pmodel == mdHalfplane, '3');
   dialog::add_action([] () {
     pmodel = mdHalfplane;
-    conformal::model_orientation = race_angle + 90;
+    models::model_orientation = race_angle + 90;
     race_advance = 0.5;
     vid.yshift = 0;
     vid.camera_angle = 0;
@@ -988,8 +988,8 @@ void race_projection() {
     dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
-      int q = conformal::model_orientation - race_angle;
-      dialog::reaction = [q] () { conformal::model_orientation = race_angle + q; };
+      int q = models::model_orientation - race_angle;
+      dialog::reaction = [q] () { models::model_orientation = race_angle + q; };
       });
     }
 

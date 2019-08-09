@@ -2144,7 +2144,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
 
 #ifdef HASLINEVIEW
   if(!isBug(m) && !isAnyIvy(m)) {
-    conformal::killhistory.push_back(make_pair(c,m));
+    history::killhistory.push_back(make_pair(c,m));
     }
 #endif
   
@@ -7289,7 +7289,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
 #ifdef HASLINEVIEW
     // temporary variable to avoid the "cannot bind bitfield" problem in C++11
     eItem dummy = c2->item;
-    conformal::findhistory.emplace_back(c2, dummy);
+    history::findhistory.emplace_back(c2, dummy);
 #endif
 
     if(c2->item == itBombEgg && c2->land == laMinefield) {
@@ -7779,7 +7779,7 @@ EX void monstersTurn() {
 #ifdef HASLINEVIEW
   for(int i=0; i<numplayers(); i++)
     if(multi::playerActive(i))
-      conformal::movehistory.push_back(playerpos(i));
+      history::movehistory.push_back(playerpos(i));
 #endif
   }
 
@@ -8626,7 +8626,7 @@ EX void moveItem (cell *from, cell *to, bool activateYendor) {
   }
 
 EX void fixWormBug(cell *c) {
-  if(conformal::includeHistory) return;
+  if(history::includeHistory) return;
   printf("worm bug!\n");
   if(c->monst == moWormtail) c->monst = moWormwait;
   if(c->monst == moTentacletail || c->monst == moTentacleGhost) c->monst = moTentacle;

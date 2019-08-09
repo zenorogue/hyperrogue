@@ -456,8 +456,8 @@ EX void showCreative() {
   dialog::add_action_push(anims::show);
   #endif
 
-  dialog::addBoolItem(XLAT("history mode"), conformal::on || conformal::includeHistory, 'h');
-  dialog::add_action_push(conformal::history_menu);
+  dialog::addBoolItem(XLAT("history mode"), history::on || history::includeHistory, 'h');
+  dialog::add_action_push(history::history_menu);
 
 #if CAP_TEXTURE
   if(DIM == 2) {

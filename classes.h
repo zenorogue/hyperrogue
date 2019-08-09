@@ -306,6 +306,6 @@ struct modelinfo {
   const char* name;
   };
 
-extern const modelinfo models[int(mdPolynomial)+1];
+extern const modelinfo mdinf[int(mdPolynomial)+1];
 
 }

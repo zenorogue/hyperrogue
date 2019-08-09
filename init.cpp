@@ -328,7 +328,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     mousex = vid.xres/2, mousey = vid.yres/2, mouseh = sphereflip * C0;
 
   frames++;
-  conformal::configure();
+  models::configure();
   
   if(ticks > lastt) tortoise::updateVals(ticks - lastt);
 

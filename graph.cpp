@@ -865,7 +865,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
   if(DIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 
-  if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
+  if(c && history::includeHistory && history::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
 
   if(!mmitem && it) return true;
   
@@ -2399,7 +2399,7 @@ EX bool dont_face_pc = false;
 bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool mirrored, color_t asciicol) {
   #if CAP_SHAPES
 
-  bool darkhistory = conformal::includeHistory && conformal::inkillhistory.count(c);
+  bool darkhistory = history::includeHistory && history::inkillhistory.count(c);
   
   if(doHighlight())
     poly_outline = 
@@ -2481,7 +2481,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           }
         else {
           if(c->monst == moTentacleGhost) {
-            hyperpoint V0 = conformal::on ? tC0(Vs) : inverse(cwtV) * tC0(Vs);
+            hyperpoint V0 = history::on ? tC0(Vs) : inverse(cwtV) * tC0(Vs);
             hyperpoint V1 = spintox(V0) * V0;
             Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
             drawMonsterType(moGhost, c, Vs, col, footphase, asciicol);
@@ -2734,7 +2734,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
-  else if((hasFacing(c) && c->mondir != NODIR) || conformal::on || quotient || euwrap || dont_face_pc) {
+  else if((hasFacing(c) && c->mondir != NODIR) || history::on || quotient || euwrap || dont_face_pc) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
@@ -2818,7 +2818,7 @@ array<array<int,4>,AURA+1> aurac;
 EX bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
   if(sphere && mdAzimuthalEqui()) return true;
-  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && conformal::model_transition < 1) 
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && models::model_transition < 1) 
     return true;
   return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
   }
@@ -2836,7 +2836,7 @@ EX void clearaura() {
   }
 
 void apply_joukowsky_aura(hyperpoint& h) {
-  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && conformal::model_transition < 1;
+  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && models::model_transition < 1;
   if(joukowsky)  {
     hyperpoint ret;
     applymodel(h, ret);
@@ -2958,7 +2958,7 @@ void drawaura() {
   cmul[1] = cmul[0];
   
   bool inversion = vid.alpha <= -1 || pmodel == mdJoukowsky;
-  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && conformal::model_transition < 1;
+  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && models::model_transition < 1;
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
@@ -2970,11 +2970,11 @@ void drawaura() {
     if(joukowsky) {
       ld c1 = c, s1 = s;
       if(inversion)
-        conformal::apply_orientation(s1, c1);
+        models::apply_orientation(s1, c1);
       else        
-        conformal::apply_orientation(c1, s1);
+        models::apply_orientation(c1, s1);
 
-      ld& mt = conformal::model_transition;
+      ld& mt = models::model_transition;
       ld mt2 = 1 - mt;
 
       ld m = sqrt(c1*c1 + s1*s1 / mt2 / mt2);
@@ -3743,7 +3743,7 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
       }
     
     case waFloorA: case waFloorB: // isAlch
-      if(c->item && !(conformal::includeHistory && conformal::infindhistory.count(c)))
+      if(c->item && !(history::includeHistory && history::infindhistory.count(c)))
         fcol = wcol = iinf[c->item].color;
       else
         fcol = wcol;
@@ -5086,7 +5086,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   viewBuggyCells(c,V);
   #endif
   
-  if(conformal::on || inHighQual || WDIM == 3 || sightrange_bonus > gamerange_bonus) checkTide(c);
+  if(history::on || inHighQual || WDIM == 3 || sightrange_bonus > gamerange_bonus) checkTide(c);
   
   // save the player's view center
   if(isPlayerOn(c) && !shmup::on) {
@@ -5252,7 +5252,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     bool hidden = itemHidden(c);
     bool hiddens = itemHiddenFromSight(c);
     
-    if(conformal::includeHistory && conformal::infindhistory.count(c)) {
+    if(history::includeHistory && history::infindhistory.count(c)) {
       hidden = true;
       hiddens = false;
       }
@@ -5956,7 +5956,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           queuepoly((*Vdp), cgi.shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
-      if(conformal::includeHistory && conformal::inmovehistory.count(c))
+      if(history::includeHistory && history::inmovehistory.count(c))
         queuepoly((*Vdp), cgi.shHeptaMarker, 0x000000C0);
 
       char xch = winf[c->wall].glyph;
@@ -6620,7 +6620,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(0);
       
       #if CAP_BT
-      else if(binarytiling && conformal::do_rotate >= 2) {
+      else if(binarytiling && models::do_rotate >= 2) {
         if(!straightDownSeek || c->master->distance < straightDownSeek->master->distance) {
           usethis = true;
           spd = 1;
@@ -6631,7 +6631,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(isGravityLand(cwt.at->land) && cwt.at->land != laMountain) {
         if(cwt.at->land == laDungeon) side = 2;
         if(cwt.at->land == laWestWall) side = 1;
-        if(conformal::do_rotate >= 1)
+        if(models::do_rotate >= 1)
         if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
           usethis = true;
           spd = cwt.at->landparam / 10.;
@@ -6639,8 +6639,8 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       else if(c->master->alt && cwt.at->master->alt &&
-        ((cwt.at->land == laMountain && conformal::do_rotate >= 1)|| 
-        (conformal::do_rotate >= 2 && 
+        ((cwt.at->land == laMountain && models::do_rotate >= 1)|| 
+        (models::do_rotate >= 2 && 
           (cwt.at->land == laTemple || cwt.at->land == laWhirlpool || 
           (cheater && (cwt.at->land == laClearing || cwt.at->land == laCaribbean ||
           cwt.at->land == laCamelot || cwt.at->land == laPalace))) 
@@ -6653,7 +6653,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
   
-      else if(conformal::do_rotate >= 2 && cwt.at->land == laOcean && cwt.at->landparam < 25) {
+      else if(models::do_rotate >= 2 && cwt.at->land == laOcean && cwt.at->landparam < 25) {
         if(!straightDownSeek || coastval(c, laOcean) < coastval(straightDownSeek, laOcean)) {
           usethis = true;
           spd = cwt.at->landparam / 10;
@@ -7500,9 +7500,9 @@ EX void drawfullmap() {
 
   
   /*
-  if(conformal::on) {
+  if(models::on) {
     char ch = 'A';
-    for(auto& v: conformal::v) {
+    for(auto& v: history::v) {
       queuepoly(ggmatrix(v->base) * v->at, cgi.shTriangle, 0x306090C0);
       queuechr(ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
       }      
@@ -7587,7 +7587,7 @@ EX void gamescreen(int _darken) {
 
   darken = _darken;
   
-  if(conformal::includeHistory) conformal::restore();
+  if(history::includeHistory) history::restore();
 
   anims::apply();
 #if CAP_RUG
@@ -7598,7 +7598,7 @@ EX void gamescreen(int _darken) {
   wrap_drawfullmap();
   anims::rollback();
 
-  if(conformal::includeHistory) conformal::restoreBack();
+  if(history::includeHistory) history::restoreBack();
 
   poly_outline = OUTLINE_DEFAULT;
   

@@ -193,9 +193,9 @@ void eyewidth_translate(int ed) {
 glhr::glmatrix model_orientation_gl() {
   glhr::glmatrix s = glhr::id;
   for(int a=0; a<DIM; a++)
-    conformal::apply_orientation(s[a][1], s[a][0]);
+    models::apply_orientation(s[a][1], s[a][0]);
   if(DIM == 3) for(int a=0; a<DIM; a++)
-    conformal::apply_orientation_yz(s[a][2], s[a][1]);
+    models::apply_orientation_yz(s[a][2], s[a][1]);
   return s;
   }
 
@@ -344,8 +344,8 @@ void display_data::set_projection(int ed) {
       }
     else if(DIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
-      using conformal::clip_max; 
-      using conformal::clip_min;
+      using models::clip_max; 
+      using models::clip_min;
       M[2][2] = 2 / (clip_max - clip_min);
       M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
       glhr::projection_multiply(M);
@@ -382,7 +382,7 @@ void display_data::set_projection(int ed) {
       glhr::projection_multiply(model_orientation_gl());
       glhr::projection_multiply(glhr::translate(0, 1, 0));      
       glhr::projection_multiply(glhr::scale(-1, 1, 1));
-      glhr::projection_multiply(glhr::scale(conformal::halfplane_scale, conformal::halfplane_scale, DIM == 3 ? conformal::halfplane_scale : 1));
+      glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, DIM == 3 ? models::halfplane_scale : 1));
       glhr::projection_multiply(glhr::translate(0, 0.5, 0));
       }      
     }

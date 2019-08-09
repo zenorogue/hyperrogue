@@ -241,9 +241,9 @@ EX void initConfig() {
   addsaver(polygonal::SI, "polygon sides");
   addsaver(polygonal::STAR, "polygon star factor");
   addsaver(polygonal::deg, "polygonal degree");
-  addsaver(conformal::autobandhistory, "include history"); // check!
-  addsaver(conformal::lvspeed, "lineview speed");
-  addsaver(conformal::extra_line_steps, "lineview extension");
+  addsaver(history::autobandhistory, "include history"); // check!
+  addsaver(history::lvspeed, "lineview speed");
+  addsaver(history::extra_line_steps, "lineview extension");
   
   addsaver(polygonal::maxcoef, "polynomial degree");
   for(int i=0; i<polygonal::MSI; i++) {
@@ -251,22 +251,22 @@ EX void initConfig() {
     addsaver(polygonal::coefi[i], "polynomial "+its(i)+".imag");
     }
   
-  addsaver(conformal::bandhalf, "band width");
-  addsaver(conformal::bandsegment, "band segment");
-  addsaver(conformal::rotation, "conformal rotation");
-  addsaver(conformal::rotation_xz, "conformal rotation_xz");
-  addsaver(conformal::rotation_xy2, "conformal rotation_2");
-  addsaver(conformal::do_rotate, "conformal rotation mode", 1);
-  addsaver(conformal::model_orientation, "model orientation", 0);
-  addsaver(conformal::model_orientation_yz, "model orientation-yz", 0);
-  addsaver(conformal::top_z, "topz", 5);
-  addsaver(conformal::model_transition, "model transition", 1);
-  addsaver(conformal::halfplane_scale, "halfplane scale", 1);
-  addsaver(conformal::autoband, "automatic band");
-  addsaver(conformal::autobandhistory, "automatic band history");
-  addsaver(conformal::dospiral, "do spiral");
-  addsaver(conformal::clip_min, "clip-min", -1);
-  addsaver(conformal::clip_max, "clip-max", +1);
+  addsaver(history::bandhalf, "band width");
+  addsaver(history::bandsegment, "band segment");
+  addsaver(models::rotation, "conformal rotation");
+  addsaver(models::rotation_xz, "conformal rotation_xz");
+  addsaver(models::rotation_xy2, "conformal rotation_2");
+  addsaver(models::do_rotate, "conformal rotation mode", 1);
+  addsaver(models::model_orientation, "model orientation", 0);
+  addsaver(models::model_orientation_yz, "model orientation-yz", 0);
+  addsaver(models::top_z, "topz", 5);
+  addsaver(models::model_transition, "model transition", 1);
+  addsaver(models::halfplane_scale, "halfplane scale", 1);
+  addsaver(history::autoband, "automatic band");
+  addsaver(history::autobandhistory, "automatic band history");
+  addsaver(history::dospiral, "do spiral");
+  addsaver(models::clip_min, "clip-min", -1);
+  addsaver(models::clip_max, "clip-max", +1);
   
   addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
   // control
@@ -399,9 +399,9 @@ EX void initConfig() {
   
   addsaver(vid.skiprope, "mobius", 0);
   
-  addsaver(conformal::formula, "formula");
-  addsaverenum(conformal::basic_model, "basic model");
-  addsaver(conformal::use_atan, "use_atan");
+  addsaver(models::formula, "formula");
+  addsaverenum(models::basic_model, "basic model");
+  addsaver(models::use_atan, "use_atan");
   
   for(int i=0; i<isize(ginf); i++) {
     if(ginf[i].flags & qELLIPTIC)
@@ -1600,7 +1600,7 @@ EX void show3D() {
     else if(uni == 'b') 
       config_camera_rotation();
     else if(uni == 'M') 
-      pushScreen(conformal::model_menu);  
+      pushScreen(models::model_menu);  
     else if(doexiton(sym, uni)) 
       popScreen();
     };
@@ -1972,7 +1972,7 @@ EX void showSettings() {
   dialog::add_action_push(showGraphQuickKeys);
 
   dialog::addItem(XLAT("models & projections"), 'p');
-  dialog::add_action_push(conformal::model_menu);
+  dialog::add_action_push(models::model_menu);
 
   dialog::addItem(XLAT("colors & aura"), 'c');
   dialog::add_action_push(show_color_dialog);
@@ -2239,15 +2239,15 @@ EX unordered_map<string, ld&> params = {
   {"rug_model_distance", rug::model_distance},
   #endif
   {"star", polygonal::STAR},
-  {"lvspeed", conformal::lvspeed},
-  {"rotation", conformal::rotation},
-  {"mori", conformal::model_orientation},
-  {"mori_yz", conformal::model_orientation_yz},
-  {"clipmin", conformal::clip_min},
-  {"clipmax", conformal::clip_max},
-  {"topz", conformal::top_z},
-  {"mtrans", conformal::model_transition},
-  {"hp", conformal::halfplane_scale},
+  {"lvspeed", history::lvspeed},
+  {"rotation", models::rotation},
+  {"mori", models::model_orientation},
+  {"mori_yz", models::model_orientation_yz},
+  {"clipmin", models::clip_min},
+  {"clipmax", models::clip_max},
+  {"topz", models::top_z},
+  {"mtrans", models::model_transition},
+  {"hp", models::halfplane_scale},
   {"back", backbrightness},
   {"ipd", vid.ipd},
   {"lr", vid.lr_eyewidth},
@@ -2268,9 +2268,9 @@ EX unordered_map<string, ld&> params = {
   {"b", anims::b},
   #endif
   {"mobius", vid.skiprope},
-  {"sang", conformal::spiral_angle},
-  {"spiralx", conformal::spiral_x},
-  {"spiraly", conformal::spiral_y},
+  {"sang", models::spiral_angle},
+  {"spiralx", models::spiral_x},
+  {"spiraly", models::spiral_y},
   #if CAP_CRYSTAL
   {"cprob", crystal::compass_probability},
   #endif

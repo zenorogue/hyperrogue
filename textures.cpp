@@ -1060,7 +1060,7 @@ bool texture_config::load() {
   if(!data.readtexture(texturename)) return false;
   if(!data.loadTextureGL()) return false;
   calcparam();
-  conformal::configure();
+  models::configure();
   drawthemap();
   config.tstate = config.tstate_max = tsActive;
   string s = move(texture_tuner);
@@ -1582,7 +1582,7 @@ EX void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps IS(10)) {
   }
 
 void texture_config::true_remap() {
-  conformal::configure();
+  models::configure();
   drawthemap();
   if(DIM == 3) return;
   clear_texture_map();
@@ -1644,7 +1644,7 @@ void texture_config::remap() {
   else if(tstate == tsAdjusting) {
     printf("perform_mapping %d/%d\n", config.tstate, config.tstate_max);
     calcparam();
-    conformal::configure();
+    models::configure();
     drawthemap();
     perform_mapping();
     finish_mapping();

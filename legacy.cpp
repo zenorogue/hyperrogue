@@ -85,22 +85,22 @@ void loadOldConfig(FILE *f) {
   rug::model_distance = 2/rs;
   #endif
 
-  aa=conformal::autobandhistory;
-  double ps = polygonal::STAR, lv = conformal::lvspeed;
+  aa=history::autobandhistory;
+  double ps = polygonal::STAR, lv = history::lvspeed;
   int pmb = pmodel;
   err=fscanf(f, "%d%d%lf%d%d%lf",
     &pmb, &polygonal::SI, &ps, &polygonal::deg,
     &aa, &lv);
   pmodel = eModel(pmb);
-  conformal::autobandhistory = aa; polygonal::STAR = ps; conformal::lvspeed = lv;
+  history::autobandhistory = aa; polygonal::STAR = ps; history::lvspeed = lv;
   
-  aa=conformal::autoband; bb=conformal::autobandhistory; cc=conformal::dospiral;    
+  aa=history::autoband; bb=history::autobandhistory; cc=history::dospiral;    
   int crot;
   err=fscanf(f, "%d%d%d%d%d%d", 
-    &conformal::bandhalf, &conformal::bandsegment, &crot,
+    &history::bandhalf, &history::bandsegment, &crot,
     &aa, &bb, &cc);
-  conformal::autoband = aa; conformal::autobandhistory = bb; conformal::dospiral = cc;
-  conformal::rotation = crot * 90;
+  history::autoband = aa; history::autobandhistory = bb; history::dospiral = cc;
+  models::rotation = crot * 90;
   
   err=fscanf(f, "%d", &polygonal::maxcoef);
   if(polygonal::maxcoef < 0) polygonal::maxcoef = 0;

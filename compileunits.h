@@ -98,7 +98,8 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "racing.cpp"
 #endif
 
-#include "conformal.cpp"
+#include "models.cpp"
+#include "history.cpp"
 #include "rug.cpp"
 #include "control.cpp"
 #include "hud.cpp"

@@ -109,7 +109,7 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   ret[1] = ay;
   ret[2] = ax * sa;
   
-  conformal::apply_ball(ret[2], ret[1]);
+  models::apply_ball(ret[2], ret[1]);
   }
 
 void apply_depth(hyperpoint &f, ld z) {
@@ -189,8 +189,8 @@ void move_y_to_z(hyperpoint& H, pair<ld, ld> coef) {
 
 template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   ld zlev = find_zlev(H);
-  conformal::apply_orientation_yz(H[1], H[2]);
-  conformal::apply_orientation(H[0], H[1]);
+  models::apply_orientation_yz(H[1], H[2]);
+  models::apply_orientation(H[0], H[1]);
   auto r = move_z_to_y(H);
   
   ld x, y, yf, zf=0;
@@ -208,8 +208,8 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   ld yzf = y * zf; y *= yf;
   ret = hpxyz(x / M_PI, y / M_PI, 0);
   move_y_to_z(ret, r);
-  conformal::apply_orientation(ret[1], ret[0]);
-  conformal::apply_orientation_yz(ret[2], ret[1]);
+  models::apply_orientation(ret[1], ret[0]);
+  models::apply_orientation_yz(ret[2], ret[1]);
   if(zlev != 1 && current_display->stereo_active()) 
     apply_depth(ret, yzf / M_PI);
   return;
@@ -383,8 +383,8 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
       
-      conformal::apply_orientation_yz(H[1], H[2]);
-      conformal::apply_orientation(H[0], H[1]);
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
   
       H[1] += 1;
       double rad = sqhypot_d(DIM, H);
@@ -393,30 +393,30 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       
       if(DIM == 3) {
         // a bit simpler when we do not care about 3D
-        H *= conformal::halfplane_scale;
+        H *= models::halfplane_scale;
         ret[0] = -H[0];
         ret[1] = 1 + H[1];
         ret[2] = H[2];
         ret[3] = 1;
-        conformal::apply_orientation(ret[1], ret[0]);
-        conformal::apply_orientation_yz(ret[2], ret[1]);
+        models::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation_yz(ret[2], ret[1]);
         break;
         }
       
-      conformal::apply_orientation(H[0], H[1]);
+      models::apply_orientation(H[0], H[1]);
       
-      H *= conformal::halfplane_scale;
+      H *= models::halfplane_scale;
       
-      ret[0] = -conformal::osin - H[0];
+      ret[0] = -models::osin - H[0];
       if(zlev != 1) {
-        if(abs(conformal::ocos) > 1e-5)
-          H[1] = H[1] * pow(zlev, conformal::ocos);
-        if(abs(conformal::ocos) > 1e-5 && conformal::osin)
-          H[1] += H[0] * conformal::osin * (pow(zlev, conformal::ocos) - 1) / conformal::ocos;
-        else if(conformal::osin)
-          H[1] += H[0] * conformal::osin * log(zlev);
+        if(abs(models::ocos) > 1e-5)
+          H[1] = H[1] * pow(zlev, models::ocos);
+        if(abs(models::ocos) > 1e-5 && models::osin)
+          H[1] += H[0] * models::osin * (pow(zlev, models::ocos) - 1) / models::ocos;
+        else if(models::osin)
+          H[1] += H[0] * models::osin * log(zlev);
         }
-      ret[1] = conformal::ocos + H[1];
+      ret[1] = models::ocos + H[1];
       ret[2] = DIM == 3 ? H[2] : 0;
       if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && current_display->stereo_active()) 
@@ -457,7 +457,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       
       swap(ret[1], ret[2]);
       
-      conformal::apply_ball(ret[2], ret[1]);
+      models::apply_ball(ret[2], ret[1]);
       
       break;
       }
@@ -466,7 +466,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdHyperboloid: {
     
       if(pmodel == mdHyperboloid) {
-        ld& topz = conformal::top_z;
+        ld& topz = models::top_z;
         if(H[2] > topz) {
           ld scale = sqrt(topz*topz-1) / hypot_d(2, H);
           H *= scale;
@@ -482,7 +482,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[1] = (1 - H[2]) / 3;
       ret[2] = H[1] / 3;
       
-      conformal::apply_ball(ret[2], ret[1]);
+      models::apply_ball(ret[2], ret[1]);
       break;
       }
     
@@ -496,8 +496,8 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdSimulatedPerspective: {
-      conformal::apply_orientation_yz(H[1], H[2]);
-      conformal::apply_orientation(H[0], H[1]);
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
       auto yz = move_z_to_y(H);
       hyperpoint Hl = xpush(-vid.twopoint_param) * H;
       hyperpoint Hr = xpush(+vid.twopoint_param) * H;
@@ -514,29 +514,29 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[2] = 0;
 
       move_y_to_z(ret, yz);      
-      conformal::apply_orientation(ret[0], ret[1]);
-      conformal::apply_orientation_yz(ret[2], ret[1]);
+      models::apply_orientation(ret[0], ret[1]);
+      models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
     
     case mdTwoHybrid: {
-      conformal::apply_orientation_yz(H[1], H[2]);
-      conformal::apply_orientation(H[0], H[1]);
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
       auto yz = move_z_to_y(H);
       
       ret = compute_hybrid(H, whateveri[0]); 
       
       move_y_to_z(ret, yz);      
-      conformal::apply_orientation(ret[0], ret[1]);
-      conformal::apply_orientation_yz(ret[2], ret[1]);
+      models::apply_orientation(ret[0], ret[1]);
+      models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
     
     case mdJoukowsky: 
     case mdJoukowskyInverted: {
-      conformal::apply_orientation_yz(H[1], H[2]);
-      conformal::apply_orientation(H[0], H[1]);
-      // with equal speed skiprope: conformal::apply_orientation(H[1], H[0]);
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+      // with equal speed skiprope: models::apply_orientation(H[1], H[0]);
   
       if(vid.skiprope) {
         static ld last_skiprope = 0;
@@ -563,7 +563,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ld r = hypot_d(2, H);
       ld c = H[0] / r;
       ld s = H[1] / r;
-      ld& mt = conformal::model_transition;
+      ld& mt = models::model_transition;
       ld a = 1 - .5 * mt, b = .5 * mt;
       swap(a, b);
       
@@ -579,7 +579,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         ret[0] = ret[0] / r2;
         ret[1] = -ret[1] / r2;
         move_y_to_z(ret, yz);      
-        conformal::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation(ret[1], ret[0]);
         
         /*
   
@@ -593,9 +593,9 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       else {
         move_y_to_z(ret, yz);      
-        conformal::apply_orientation(ret[0], ret[1]);
+        models::apply_orientation(ret[0], ret[1]);
         }
-      conformal::apply_orientation_yz(ret[2], ret[1]);
+      models::apply_orientation_yz(ret[2], ret[1]);
   
       break;
       }
@@ -604,11 +604,11 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     
       H = space_to_perspective(H);
 
-      conformal::apply_orientation(H[0], H[1]);
+      models::apply_orientation(H[0], H[1]);
   
       pair<long double, long double> p = polygonal::compute(H[0], H[1]);
   
-      conformal::apply_orientation(p.second, p.first);
+      models::apply_orientation(p.second, p.first);
       ret[0] = p.first;
       ret[1] = p.second;
       ret[2] = 0;
@@ -616,12 +616,12 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }  
       
     case mdBand: 
-      if(conformal::model_transition != 1) {
-        ld& mt = conformal::model_transition;
+      if(models::model_transition != 1) {
+        ld& mt = models::model_transition;
         
         H = space_to_perspective(H);
         
-        conformal::apply_orientation(H[0], H[1]);
+        models::apply_orientation(H[0], H[1]);
     
         H[0] += 1;
         double rad = H[0]*H[0] + H[1]*H[1];
@@ -642,7 +642,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         ret[0] /= -(1-mt) * M_PI / 2;
         ret[1] /= (1-mt) * M_PI / 2;
         
-        conformal::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation(ret[1], ret[0]);
         }
       else 
         makeband(H, ret, band_conformal);
@@ -694,7 +694,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdRotatedHyperboles: {
       // ld zlev =  <- not implemented
       find_zlev(H); // + vid.depth;
-      conformal::apply_orientation(H[0], H[1]);
+      models::apply_orientation(H[0], H[1]);
       
       ld y = asin_auto(H[1]);
       ld x = asin_auto_clamp(H[0] / cos_auto(y));
@@ -706,7 +706,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ret[1] = cosh(x) * factor;
       ret[2] = 0;
       
-      if(conformal::use_atan) {
+      if(models::use_atan) {
         ret[0] = atan(ret[0]);
         ret[1] = atan(ret[1]);
         }
@@ -715,7 +715,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdFormula: {
-      dynamicval<eModel> m(pmodel, conformal::basic_model);
+      dynamicval<eModel> m(pmodel, models::basic_model);
       applymodel(H, ret);
       exp_parser ep;
       ep.extra_params["z"] = cld(ret[0], ret[1]);
@@ -725,7 +725,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ep.extra_params["ux"] = H[0];
       ep.extra_params["uy"] = H[1];
       ep.extra_params["uz"] = H[2];
-      ep.s = conformal::formula;
+      ep.s = models::formula;
       cld res = ep.parse();
       ret[0] = real(res);
       ret[1] = imag(res);
@@ -737,18 +737,18 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       cld z;
       if(hyperbolic || sphere) makeband(H, ret, band_conformal);
       else ret = H;
-      z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
+      z = cld(ret[0], ret[1]) * models::spiral_multiplier;
       
-      if(conformal::spiral_cone < 360) {
-        ld alpha = imag(z) * 360 / conformal::spiral_cone;
+      if(models::spiral_cone < 360) {
+        ld alpha = imag(z) * 360 / models::spiral_cone;
         ld r = real(z);
         r = exp(r);
         
         ret[0] = -sin(alpha) * r;
         ret[1] = cos(alpha) * r;
-        ret[2] = (r-1) * sqrt( pow(360/conformal::spiral_cone, 2) - 1);
+        ret[2] = (r-1) * sqrt( pow(360/models::spiral_cone, 2) - 1);
         
-        conformal::apply_ball(ret[2], ret[1]);
+        models::apply_ball(ret[2], ret[1]);
         }
       else {      
         z = exp(z);
@@ -923,8 +923,8 @@ EX bool in_smart_range(const transmatrix& T) {
   if(y > current_display->ytop + current_display->ysize * 2) return false;
   if(y < current_display->ytop - current_display->ysize * 1) return false;
   if(DIM == 3) {
-    if(-h1[2] < conformal::clip_min * 2 - conformal::clip_max) return false;
-    if(-h1[2] > conformal::clip_max * 2 - conformal::clip_min) return false;
+    if(-h1[2] < models::clip_min * 2 - models::clip_max) return false;
+    if(-h1[2] > models::clip_max * 2 - models::clip_min) return false;
     }
 
   ld epsilon = 0.01;
@@ -941,7 +941,7 @@ EX bool in_smart_range(const transmatrix& T) {
     }
   
   if(DIM == 3) { 
-    if(-h1[2] + 2 * dz < conformal::clip_min || -h1[2] - 2 * dz > conformal::clip_max) return false;
+    if(-h1[2] + 2 * dz < models::clip_min || -h1[2] - 2 * dz > models::clip_max) return false;
     sort(dh, dh+DIM); 
     ld scale = sqrt(dh[1] * dh[2]) * cgi.scalefactor * hcrossf7;
     if(scale <= (WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3)) return false;
@@ -1025,8 +1025,8 @@ bool in_multi = false;
 void hrmap_standard::draw() {
   if(sphere && pmodel == mdSpiral && !in_multi) {
     in_multi = true;
-    if(conformal::ring_not_spiral) {
-      int qty = ceil(1. / conformal::sphere_spiral_multiplier);
+    if(models::ring_not_spiral) {
+      int qty = ceil(1. / models::sphere_spiral_multiplier);
       if(qty > 100) qty = 100;
       for(int i=-qty; i < qty; i++) {
         band_shift = 2 * M_PI * i;
@@ -1205,7 +1205,7 @@ EX void spinEdge(ld aspd) {
     aspd = 999999;
     if(straightDownSeek) {
       if(straightDownPoint[0])
-        downspin = conformal::rotation * degree - atan2(straightDownPoint[0], straightDownPoint[1]);
+        downspin = models::rotation * degree - atan2(straightDownPoint[0], straightDownPoint[1]);
       }
     else {
       if(View[0][2]) 
@@ -1215,7 +1215,7 @@ EX void spinEdge(ld aspd) {
   else if(straightDownSeek) {
     downspin = atan2(straightDownPoint[1], straightDownPoint[0]);
     downspin -= M_PI/2;
-    downspin += conformal::rotation * degree;
+    downspin += models::rotation * degree;
     while(downspin < -M_PI) downspin += 2*M_PI;
     while(downspin > +M_PI) downspin -= 2*M_PI;
     downspin = downspin * min(straightDownSpeed, (double)1);
@@ -1396,7 +1396,7 @@ void ballgeometry() {
 
 EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
-  View = conformal::rotmatrix();
+  View = models::rotmatrix();
   // EUCLIDEAN
   if(!masterless) 
     viewctr.at = cwt.at->master,
@@ -1417,7 +1417,7 @@ EX void panning(hyperpoint hf, hyperpoint ht) {
 EX int cells_drawn, cells_generated;
 
 EX void fullcenter() {
-  conformal::path_for_lineanimation.clear();
+  history::path_for_lineanimation.clear();
   if(playerfound && false) centerpc(INF);
   else {
     bfs();
@@ -1506,8 +1506,8 @@ EX void draw_model_elements() {
           hyperpoint H = xpush(p * vid.twopoint_param) * ypush0(h);
           
           hyperpoint res = compute_hybrid(H, 2 | mode);
-          conformal::apply_orientation(res[0], res[1]);
-          conformal::apply_orientation_yz(res[2], res[1]);
+          models::apply_orientation(res[0], res[1]);
+          models::apply_orientation_yz(res[2], res[1]);
           curvepoint(res * current_display->radius);
           }
         queuecurve(ringcolor, 0, PPR::CIRCLE);
@@ -1518,7 +1518,7 @@ EX void draw_model_elements() {
       }
 
     case mdTwoPoint: case mdSimulatedPerspective: {
-      ld a = -conformal::model_orientation * degree;
+      ld a = -models::model_orientation * degree;
       queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
       queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
       return;
@@ -1537,12 +1537,12 @@ EX void draw_model_elements() {
         curvepoint(point3(0,0,-vid.alpha));
         queuecurve(ringcolor, 0, PPR::CIRCLE);
         
-        ld& tz = conformal::top_z;
+        ld& tz = models::top_z;
         ld z = acosh(tz);
     
         hyperpoint a = xpush0(z);
-        ld cb = conformal::cos_ball;
-        ld sb = conformal::sin_ball;
+        ld cb = models::cos_ball;
+        ld sb = models::sin_ball;
         
         a[1] = sb * a[2] / -cb;
         a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
@@ -1639,13 +1639,13 @@ EX void draw_boundary(int w) {
         ld x = sin(a * vid.twopoint_param * b / 90);
         ld y = 0;
         ld z = -sqrt(1 - x*x);
-        conformal::apply_orientation(y, x);
+        models::apply_orientation(y, x);
         hyperpoint h1;
         applymodel(hpxyz(x,y,z), h1);
         
-        conformal::apply_orientation(h1[0], h1[1]);      
+        models::apply_orientation(h1[0], h1[1]);      
         h1[1] = abs(h1[1]) * b;
-        conformal::apply_orientation(h1[1], h1[0]);
+        models::apply_orientation(h1[1], h1[0]);
         curvepoint(h1);
         }
   
@@ -1656,9 +1656,9 @@ EX void draw_boundary(int w) {
     
     case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: {
       if(DIM == 3) return;
-      if(pmodel == mdBand && conformal::model_transition != 1) return;
+      if(pmodel == mdBand && models::model_transition != 1) return;
       bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);
-      transmatrix T = spin(-conformal::model_orientation * degree);
+      transmatrix T = spin(-models::model_orientation * degree);
       ld right = M_PI/2 - 1e-5;
       if(bndband) 
         queuestraight(T * ypush0(hyperbolic ? 10 : right), 2, lc, fc, p);
@@ -1682,7 +1682,7 @@ EX void draw_boundary(int w) {
     
     case mdHalfplane: 
       if(hyperbolic && DIM == 2) {
-        queuestraight(xspinpush0(-conformal::model_orientation * degree - M_PI/2, fakeinf), 1, lc, fc, p);
+        queuestraight(xspinpush0(-models::model_orientation * degree - M_PI/2, fakeinf), 1, lc, fc, p);
         return;
         }
       break;
@@ -1692,7 +1692,7 @@ EX void draw_boundary(int w) {
         queuereset(mdUnchanged, p);
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (conformal::cos_ball * s >= 0 - 1e-6 ? 1 : abs(conformal::sin_ball)), 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (models::cos_ball * s >= 0 - 1e-6 ? 1 : abs(models::sin_ball)), 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1701,7 +1701,7 @@ EX void draw_boundary(int w) {
   
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * conformal::sin_ball, 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * models::sin_ball, 0));
           }
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
@@ -1719,10 +1719,10 @@ EX void draw_boundary(int w) {
     
     case mdHyperboloid: {
       if(hyperbolic) {
-        ld& tz = conformal::top_z;
+        ld& tz = models::top_z;
         ld mz = acosh(tz);
-        ld cb = conformal::cos_ball;
-        ld sb = conformal::sin_ball;
+        ld cb = models::cos_ball;
+        ld sb = models::sin_ball;
         
         if(abs(sb) <= abs(cb) + 1e-5) {
           ld step = .01 / (1 << vid.linequality);        
@@ -1771,9 +1771,9 @@ EX void draw_boundary(int w) {
 
     case mdSpiral: {
       if(euclid) return;
-      if(conformal::ring_not_spiral) return;
+      if(models::ring_not_spiral) return;
       // if(p == PPR::CIRCLE) p = PPR::OUTCIRCLE;
-      auto& sm = conformal::spiral_multiplier;
+      auto& sm = models::spiral_multiplier;
       ld u = hypot(1, imag(sm) / real(sm));
       if(real(sm)) {
         queuereset(mdUnchanged, p);
@@ -1806,10 +1806,10 @@ EX void draw_boundary(int w) {
 
 EX ld band_shift = 0;
 EX void fix_the_band(transmatrix& T) {
-  if(((models[pmodel].flags & mf::quasiband) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
+  if(((mdinf[pmodel].flags & mf::quasiband) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
     hyperpoint H = tC0(T);
     find_zlev(H);
-    conformal::apply_orientation(H[0], H[1]);
+    models::apply_orientation(H[0], H[1]);
     
     ld y = asin_auto(H[1]);
     ld x = asin_auto_clamp(H[0] / cos_auto(y));
@@ -1907,17 +1907,17 @@ EX bool do_draw(cell *c, const transmatrix& T) {
   if(euclid && pmodel == mdSpiral) {
     hyperpoint h = tC0(T);
     cld z(h[0], h[1]);
-    z = z * conformal::spiral_multiplier;
+    z = z * models::spiral_multiplier;
     ld iz = imag(z) + 1.14279e-2; // make it never fall exactly on PI
     if(iz < -M_PI || iz >= M_PI) return false;
     }
-  if(pmodel == mdSpiral && conformal::ring_not_spiral) {
+  if(pmodel == mdSpiral && models::ring_not_spiral) {
     cld z;
     hyperpoint H = tC0(T);
     hyperpoint ret;
     makeband(H, ret, band_conformal);
-    z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
-    if(imag(z) < -conformal::spiral_cone_rad/2-1e-5 || imag(z) >= conformal::spiral_cone_rad/2-1e-5) return false;
+    z = cld(ret[0], ret[1]) * models::spiral_multiplier;
+    if(imag(z) < -models::spiral_cone_rad/2-1e-5 || imag(z) >= models::spiral_cone_rad/2-1e-5) return false;
     }
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient || euwrap;
@@ -1930,10 +1930,10 @@ EX int cone_side(const hyperpoint H) {
   hyperpoint ret;
   if(hyperbolic) makeband(H, ret, band_conformal);
   else ret = H;
-  cld z = cld(ret[0], ret[1]) * conformal::spiral_multiplier;
+  cld z = cld(ret[0], ret[1]) * models::spiral_multiplier;
   
   auto zth = [&] (cld z) {
-    ld alpha = imag(z) * 360 / conformal::spiral_cone;
+    ld alpha = imag(z) * 360 / models::spiral_cone;
     ld r = real(z);
     r = exp(r);
     
@@ -1941,9 +1941,9 @@ EX int cone_side(const hyperpoint H) {
       
     ret[0] = -sin(alpha) * r;
     ret[1] = cos(alpha) * r;
-    ret[2] = (r-1) * sqrt( pow(360/conformal::spiral_cone, 2) - 1);
+    ret[2] = (r-1) * sqrt( pow(360/models::spiral_cone, 2) - 1);
     
-    conformal::apply_ball(ret[2], ret[1]);
+    models::apply_ball(ret[2], ret[1]);
     return ret;
     };
   

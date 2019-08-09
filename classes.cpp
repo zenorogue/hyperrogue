@@ -574,7 +574,7 @@ vector<geometryinfo> ginf = {
 
 #define X3(x) x, x, x
 
-const modelinfo models[int(mdPolynomial)+1] = {
+const modelinfo mdinf[int(mdPolynomial)+1] = {
   {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal},
   {"half-plane", "inversion", "half-plane", mf::conformal},
   {"band", "band", "Mercator", mf::band | mf::conformal},

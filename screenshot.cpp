@@ -321,7 +321,7 @@ void take(string fname, const function<void()>& what) {
   vid.xres = shotx * multiplier;
   vid.yres = shoty * multiplier;
   calcparam();
-  conformal::configure();
+  models::configure();
   
   if(make_svg) {
     #if CAP_SVG
@@ -583,9 +583,9 @@ EX void apply() {
 
   switch(ma) {
     case maTranslation:
-      if(conformal::on) {
-        conformal::phase = (isize(conformal::v) - 1) * ticks * 1. / period;
-        conformal::movetophase();        
+      if(history::on) {
+        history::phase = (isize(history::v) - 1) * ticks * 1. / period;
+        history::movetophase();        
         }
       else if(centerover.at) {
         reflect_view();
@@ -681,8 +681,8 @@ EX void apply() {
   vid.skiprope += skiprope_rotation * t * 2 * M_PI / period;
 
   if(ballangle_rotation) {
-    if(conformal::model_has_orientation())
-      conformal::model_orientation += ballangle_rotation * 360 * t / period;
+    if(models::model_has_orientation())
+      models::model_orientation += ballangle_rotation * 360 * t / period;
     else
       vid.ballangle += ballangle_rotation * 360 * t / period;
     }
@@ -690,11 +690,11 @@ EX void apply() {
     ld t = ticks / period;
     t = t - floor(t);
     if(pmodel == mdBand) {
-      conformal::model_transition = t * 4 - 1;
+      models::model_transition = t * 4 - 1;
       }
     else {
-      conformal::model_transition = t / 1.1;
-      vid.scale = (1 - conformal::model_transition) / 2.;
+      models::model_transition = t / 1.1;
+      vid.scale = (1 - models::model_transition) / 2.;
       }
     }
   apply_animated_parameters();
@@ -724,13 +724,13 @@ bool record_animation() {
     if(playermoved) centerpc(INF), optimizeview();
     dynamicval<bool> v2(inHighQual, true);
     apply();
-    conformal::configure();
-    if(conformal::on) {
-      ld len = (isize(conformal::v)-1) + 2 * conformal::extra_line_steps;
-      conformal::phase = len * i / (noframes-1);
-      if(conformal::lvspeed < 0) conformal::phase = len - conformal::phase;
-      conformal::phase -= conformal::extra_line_steps;
-      conformal::movetophase();
+    models::configure();
+    if(history::on) {
+      ld len = (isize(history::v)-1) + 2 * history::extra_line_steps;
+      history::phase = len * i / (noframes-1);
+      if(history::lvspeed < 0) history::phase = len - history::phase;
+      history::phase -= history::extra_line_steps;
+      history::movetophase();
       }
     
     char buf[1000];
@@ -874,7 +874,7 @@ EX void show() {
     case maTranslation: 
     case maTranslationRotation:
     case maParabolic: {
-      if(ma == maTranslation && conformal::on)
+      if(ma == maTranslation && history::on)
         dialog::addBreak(300);
       else if(ma == maTranslation) {
         dialog::addSelItem(XLAT("cycle length"), fts(cycle_length), 'c');
@@ -951,7 +951,7 @@ EX void show() {
       });
     }
   #endif
-  if(conformal::model_has_orientation())
+  if(models::model_has_orientation())
     animator(XLAT("model rotation"), ballangle_rotation, 'I');
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, '3');
@@ -968,8 +968,8 @@ EX void show() {
     dialog::extra_options = list_animated_parameters;
     });
 
-  dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'h');
-  dialog::add_action_push(conformal::history_menu);
+  dialog::addBoolItem(XLAT("history mode"), (history::on || history::includeHistory), 'h');
+  dialog::add_action_push(history::history_menu);
 
   #if CAP_FILES && CAP_SHOT
   dialog::addItem(XLAT("shot settings"), 's');
@@ -1081,7 +1081,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   ;
 
 EX bool any_animation() {
-  if(conformal::on) return true;
+  if(history::on) return true;
   if(ma) return true;
   if(ballangle_rotation || rug_rotation1 || rug_rotation2) return true;
   if(ap_changes) return true;
@@ -1089,7 +1089,7 @@ EX bool any_animation() {
   }
 
 EX bool any_on() {
-  return any_animation() || conformal::includeHistory;
+  return any_animation() || history::includeHistory;
   }
 
 EX bool center_music() {
@@ -1109,19 +1109,19 @@ EX void null_animation() {
 
 void joukowsky() {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
-  dynamicval<ld> dt(conformal::model_orientation, ticks / 25.);
+  dynamicval<ld> dt(models::model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
   dynamicval<ld> ds(vid.scale, 1/4.);
-  conformal::configure();
+  models::configure();
   dynamicval<color_t> dc(ringcolor, 0);  
   gamescreen(2);
   }
 
 void bandspin() {
   dynamicval<eModel> dm(pmodel, mdBand);
-  dynamicval<ld> dt(conformal::model_orientation, ticks / 25.);
+  dynamicval<ld> dt(models::model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
-  conformal::configure();
+  models::configure();
   gamescreen(2);
   }
 

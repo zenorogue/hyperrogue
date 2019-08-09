@@ -147,7 +147,7 @@ hint hints[] = {
       dialog::addItem(XLAT("special display modes"), 'z');
       },
     []() {
-      pushScreen(conformal::model_menu);
+      pushScreen(models::model_menu);
       }},
 
   {
@@ -212,15 +212,15 @@ hint hints[] = {
       popScreen();
       auto m = pmodel;
       pmodel = mdBand;
-      int r = conformal::rotation;
-      bool h = conformal::includeHistory;
-      conformal::rotation = 0;
-      conformal::includeHistory = true;
-      conformal::create_playerpath();
+      int r = models::rotation;
+      bool h = history::includeHistory;
+      models::rotation = 0;
+      history::includeHistory = true;
+      history::create_playerpath();
       cancel = [m,r,h] () { 
-        conformal::clear(); pmodel = m; 
-        conformal::rotation = r;
-        conformal::includeHistory = h;
+        history::clear(); pmodel = m; 
+        models::rotation = r;
+        history::includeHistory = h;
         fullcenter(); };
       }
     },

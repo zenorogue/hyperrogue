@@ -243,7 +243,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(NUMBERKEY == '8') {
-    conformal::includeHistory = !conformal::includeHistory;
+    history::includeHistory = !history::includeHistory;
     return true;
     }
   if(NUMBERKEY == '9') {
@@ -588,8 +588,8 @@ slide default_slides[] = {
       if(mode == 1) 
         pmodel = mdHalfplane, smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 2) 
-        conformal::rotation = cwt.at->land == laDungeon ? 0 : 2;
-      if(mode == 3) pmodel = mdDisk, conformal::rotation = 0, vid.use_smart_range = smart;
+        models::rotation = cwt.at->land == laDungeon ? 0 : 2;
+      if(mode == 3) pmodel = mdDisk, models::rotation = 0, vid.use_smart_range = smart;
       }
     },
   {"Curvature", 29, LEGAL_ANY,
@@ -737,21 +737,21 @@ slide default_slides[] = {
     "memory.",
     [] (presmode mode) {
       static int smart;
-      if(mode == 1) pmodel = mdBand, conformal::create_playerpath(), conformal::rotation = 0,
+      if(mode == 1) pmodel = mdBand, history::create_playerpath(), models::rotation = 0,
         smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 3) {
-        conformal::clear(), pmodel = mdDisk;
+        history::clear(), pmodel = mdDisk;
         resetview();
         drawthemap();
         centerpc(INF);
-        conformal::includeHistory = false;
+        history::includeHistory = false;
         vid.use_smart_range = smart;
         }
 #if CAP_SDL
       slidecommand = "render spiral";
-      if(mode == 4) conformal::createImage(true);
-      if(mode == 11) conformal::create_playerpath();
-      if(mode == 13) conformal::clear();
+      if(mode == 4) history::createImage(true);
+      if(mode == 11) history::create_playerpath();
+      if(mode == 13) history::clear();
 #endif
       }
     },

@@ -378,7 +378,7 @@ void buildTorusRug() {
   using namespace torusconfig;
 
   calcparam_rug();
-  conformal::configure();
+  models::configure();
 
   struct toruspoint {
     int x,y;
@@ -1281,7 +1281,7 @@ void prepareTexture() {
   
   dynamicval<eStereo> d(vid.stereo_mode, sOFF);
   calcparam_rug();
-  conformal::configure();
+  models::configure();
   
   glbuf->enable();
   glbuf->clear(0);
@@ -1788,7 +1788,7 @@ hyperpoint gethyper(ld x, ld y) {
   double px = rx1 * TEXTURESIZE, py = (1-ry1) * TEXTURESIZE;
 
   calcparam_rug();
-  conformal::configure();
+  models::configure();
   hyperpoint h = hr::gethyper(px, py);
   calcparam();
 

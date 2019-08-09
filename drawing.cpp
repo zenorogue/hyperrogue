@@ -177,7 +177,7 @@ EX bool two_sided_model() {
   if(pmodel == mdDisk) return sphere;
   if(pmodel == mdHemisphere) return true;
   if(pmodel == mdRotatedHyperboles) return true;
-  if(pmodel == mdSpiral && conformal::spiral_cone < 360) return true;
+  if(pmodel == mdSpiral && models::spiral_cone < 360) return true;
   return false;
   }
 
@@ -190,15 +190,15 @@ EX int get_side(const hyperpoint& H) {
   if(pmodel == mdRotatedHyperboles)
     return H[1] > 0 ? -1 : 1;
   if(pmodel == mdHyperboloid && hyperbolic)
-    return (conformal::sin_ball * H[2] > -conformal::cos_ball * H[1]) ? -1 : 1;
+    return (models::sin_ball * H[2] > -models::cos_ball * H[1]) ? -1 : 1;
   if(pmodel == mdHyperboloid && sphere)
-    return (conformal::sin_ball * H[2] > conformal::cos_ball * H[1]) ? -1 : 1;
+    return (models::sin_ball * H[2] > models::cos_ball * H[1]) ? -1 : 1;
   if(pmodel == mdHemisphere) {
     hyperpoint res;
     applymodel(H, res);
     return res[2] < 0 ? -1 : 1;
     }
-  if(pmodel == mdSpiral && conformal::spiral_cone < 360) {    
+  if(pmodel == mdSpiral && models::spiral_cone < 360) {    
     return cone_side(H);
     }
   return 0;
@@ -278,7 +278,7 @@ void addpoint(const hyperpoint& H) {
     else {
       Hscr[0] *= z;
       Hscr[1] *= z * vid.stretch;
-      Hscr[2] = 1 - 2 * (-Hscr[2] - conformal::clip_min) / (conformal::clip_max - conformal::clip_min);
+      Hscr[2] = 1 - 2 * (-Hscr[2] - models::clip_min) / (models::clip_max - models::clip_min);
       }
     add1(Hscr);
     }
@@ -453,11 +453,11 @@ void glapplymatrix(const transmatrix& V) {
   
   if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
   
-  if(conformal::model_has_orientation()) {
+  if(models::model_has_orientation()) {
     if(DIM == 3) for(int a=0; a<4; a++) 
-      conformal::apply_orientation_yz(mat[a*4+1], mat[a*4+2]);
+      models::apply_orientation_yz(mat[a*4+1], mat[a*4+2]);
     for(int a=0; a<4; a++) 
-      conformal::apply_orientation(mat[a*4], mat[a*4+1]);
+      models::apply_orientation(mat[a*4], mat[a*4+1]);
     }
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
@@ -633,9 +633,9 @@ void fixMercator(bool tinf) {
   else
     mercator_period = 2 * current_display->radius;
   
-  if(!conformal::model_straight)
+  if(!models::model_straight)
     for(auto& g: glcoords)
-      conformal::apply_orientation(g[0], g[1]);
+      models::apply_orientation(g[0], g[1]);
     
   if(pmodel == mdSinusoidal)
     for(int i = 0; i<isize(glcoords); i++) 
@@ -697,9 +697,9 @@ void fixMercator(bool tinf) {
     if(pmodel == mdSinusoidal)
       for(int i = 0; i<isize(glcoords); i++) 
         glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);    
-    if(!conformal::model_straight)
+    if(!models::model_straight)
       for(auto& g: glcoords)
-        conformal::apply_orientation(g[1], g[0]);
+        models::apply_orientation(g[1], g[0]);
     }
   else {
     if(tinf) { 
@@ -733,9 +733,9 @@ void fixMercator(bool tinf) {
       auto& v = glcoords[isize(glcoords)-u][1-mercator_coord];
       v = v < 0 ? dmin : dmax;
       }
-    if(!conformal::model_straight)
+    if(!models::model_straight)
       for(auto& g: glcoords)
-        conformal::apply_orientation(g[1], g[0]);
+        models::apply_orientation(g[1], g[0]);
     /* printf("cycling %d -> %d\n", base, qglcoords);
     for(int a=0; a<qglcoords; a++)
       printf("[%3d] %10.5lf %10.5lf\n", a, glcoords[a][0], glcoords[a][1]); */
@@ -899,8 +899,8 @@ void dqi_poly::draw() {
           hyperpoint h2 = V * glhr::gltopoint((*tab)[offset+(i+1)%cnt]);
           
           hyperpoint ah1 = h1, ah2 = h2;
-          conformal::apply_orientation(ah1[0], ah1[1]);
-          conformal::apply_orientation(ah2[0], ah2[1]);
+          models::apply_orientation(ah1[0], ah1[1]);
+          models::apply_orientation(ah2[0], ah2[1]);
           if(ah1[1] * ah2[1] > 0) continue;
           ld c1 = ah1[1], c2 = -ah2[1];
           if(c1 < 0) c1 = -c1, c2 = -c2;
@@ -1034,11 +1034,11 @@ void dqi_poly::draw() {
       for(int i=0; i<isize(glcoords); i++) {
         if(pmodel == mdSinusoidal) {
           ld y = glcoords[i][1], x = glcoords[i][0];
-          conformal::apply_orientation(x, y);
+          models::apply_orientation(x, y);
           mercator_period = 2 * current_display->radius * cos(y / current_display->radius / vid.stretch * M_PI);
           }
-        glcoords[i][mercator_coord] += conformal::ocos * mercator_period * (l - lastl);
-        glcoords[i][1-mercator_coord] += conformal::osin * mercator_period * (l - lastl);
+        glcoords[i][mercator_coord] += models::ocos * mercator_period * (l - lastl);
+        glcoords[i][1-mercator_coord] += models::osin * mercator_period * (l - lastl);
         }
       lastl = l;
       }

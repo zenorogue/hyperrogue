@@ -496,7 +496,7 @@ void run_kuen() {
     for(auto p: mesh) {
       auto px = map_to_surface(p->h, m);
       p->surface_point = px;
-      conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(captions[part]), its(p->dexp_id), its(isize(mesh))));
+      history::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(captions[part]), its(p->dexp_id), its(isize(mesh))));
       }
     for(auto p: mesh) {
       // make it a bit nicer by including the edges where only one endpoint is valid
@@ -568,7 +568,7 @@ void run_other() {
 
     p->surface_point = map_to_surface(h, dp);
     p->flat = coord(p->surface_point.params);
-    conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(shape_name[sh]), its(it), its(isize(rug::points))));
+    history::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(shape_name[sh]), its(it), its(isize(rug::points))));
     if(p->surface_point.remaining_distance == 0)
       coverage.emplace_back(h, rchar(it) + 256 * 7);
     }
@@ -597,7 +597,7 @@ EX void run_shape(eShape s) {
   rug::init();
   // if(!rug::rugged) rug::reopen();
   
-  pushScreen(conformal::progress_screen);
+  pushScreen(history::progress_screen);
   if(sh != dsNone) rug::good_shape = true;
 
   switch(sh) {
