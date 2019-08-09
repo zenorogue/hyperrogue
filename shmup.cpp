@@ -22,24 +22,25 @@ namespace shmupballs {
     }
   }
 
-namespace multi {
+EX namespace multi {
 
   config scfg;  
-  charstyle scs[MAXPLAYER];
+  EX charstyle scs[MAXPLAYER];
 
-  int players = 1;
-  cellwalker player[MAXPLAYER];
-  vector<int> revive_queue; // queue for revival
+  EX int players = 1;
+  EX cellwalker player[MAXPLAYER];
+  EX vector<int> revive_queue; // queue for revival
   
-  cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
+  EX cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
 
-  bool flipped[MAXPLAYER];
+  EX bool flipped[MAXPLAYER];
   
-  int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
+  // treasure collection, kill, and death statistics
+  EX int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
   
-  bool alwaysuse = false;
+  EX bool alwaysuse = false;
 
-  void recall() {
+  EX void recall() {
     for(int i=0; i<numplayers(); i++) {
         int idir = (3 * i) % cwt.at->type;
         cell *c2 = cwt.at->move(idir);
@@ -60,10 +61,10 @@ namespace multi {
   
   bool combo[MAXPLAYER];
 
-  int cpid; // player id -- an extra parameter for player-related functions
-  int cpid_edit; // cpid currently being edited
+  EX int cpid; // player id -- an extra parameter for player-related functions
+  EX int cpid_edit; // cpid currently being edited
   
-  movedir whereto[MAXPLAYER]; // player's target cell  
+  EX movedir whereto[MAXPLAYER]; // player's target cell  
 
   double mdx[MAXPLAYER], mdy[MAXPLAYER]; // movement vector for the next move
   
@@ -471,11 +472,11 @@ struct shmup_configurer {
     }
   };
 
-void configure() {
+EX void configure() {
   pushScreen(shmup_configurer());
   }
 
-void showConfigureMultiplayer() {
+EX void showConfigureMultiplayer() {
   gamescreen(1);
   dialog::init("multiplayer");
   
@@ -500,7 +501,7 @@ void showConfigureMultiplayer() {
       });
 
     dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
-    dialog::add_action(shmup::configure);
+    dialog::add_action(multi::configure);
     }
   else dialog::addBreak(200);
   
@@ -532,7 +533,7 @@ bool notremapped(int sym) {
   return k > multi::players;
   }
 
-void initConfig() {
+EX void initConfig() {
   
   char* t = scfg.keyaction;
   
@@ -750,26 +751,25 @@ void handleInput(int delta) {
 
   int tableid[7] = {1, 2, 4, 5, 6, 7, 8};
 
-
-  void leaveGame(int i) {
+  EX void leaveGame(int i) {
     multi::player[i].at = NULL;
     multi::deaths[i]++;
     revive_queue.push_back(i);
     checklastmove();
     }
 
-  bool playerActive(int p) {
+  EX bool playerActive(int p) {
     if(multi::players == 1 || shmup::on) return true;
     return player[p].at;
     }
   
-  int activePlayers() {
+  EX int activePlayers() {
     int q = 0;
     for(int i=0; i<players; i++) if(playerActive(i)) q++;
     return q;
     }
   
-  cell *multiPlayerTarget(int i) {
+  EX cell *multiPlayerTarget(int i) {
     cellwalker cwti = multi::player[i];
     if(!cwti.at) return NULL;
     int dir = multi::whereto[i].d;
@@ -780,7 +780,7 @@ void handleInput(int delta) {
     return cwti.at;
     }
   
-  void checklastmove() {
+  EX void checklastmove() {
     for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
       multi::cpid = i;
       cwt = multi::player[i]; break;
@@ -959,7 +959,7 @@ void handleInput(int delta) {
       ((countplayers == 2 && !countplayers_undecided) || countplayers_undecided >= 2);
     }
   
-  }
+  EX }
 
 /*
 const char *lastprofile = "";
@@ -976,7 +976,51 @@ void profile(const char *buf) {
 #define SCALE cgi.scalefactor
 #define SCALE2 (SCALE*SCALE)
 
-namespace shmup {
+EX namespace shmup {
+
+#if HDR
+struct monster {
+  eMonster type;
+  cell *base;
+  cell *torigin; 
+    // tortoises: origin
+    // butterflies: last position
+  transmatrix at;
+  transmatrix pat;
+  eMonster stk;
+  bool dead;
+  bool notpushed;
+  bool inBoat;
+  bool no_targetting;
+  monster *parent; // who shot this missile
+  eMonster parenttype; // type of the parent
+  int nextshot;    // when will it be able to shot (players/flailers)
+  int pid;         // player ID
+  int hitpoints;   // hitpoints; or time elapsed in Asteroids
+  int stunoff;
+  int blowoff;
+  double swordangle; // sword angle wrt at
+  double vel;        // velocity, for flail balls
+  double footphase;
+  bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
+  hyperpoint inertia;// for frictionless lands
+  
+  monster() { 
+    dead = false; inBoat = false; parent = NULL; nextshot = 0; 
+    stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
+    swordangle = 0; inertia = Hypc;
+    }
+  
+  void store();
+    
+  void findpat();
+
+  cell *findbase(const transmatrix& T);
+
+  void rebasePat(const transmatrix& new_pat);
+
+  };  
+#endif
 
 using namespace multi;
 
@@ -985,14 +1029,12 @@ eItem keyresult[MAXPLAYER];
 
 ld fabsl(ld x) { return x>0?x:-x; }
 
-bool on = false;
-bool delayed_safety = false;
+EX bool on = false;
+EX bool delayed_safety = false;
 
 bool lastdead = false;
 
-struct monster;
-
-multimap<cell*, monster*> monstersAt;
+EX multimap<cell*, monster*> monstersAt;
 
 typedef multimap<cell*, monster*>::iterator mit;
 
@@ -1110,9 +1152,9 @@ bool trackroute(monster *m, transmatrix goal, double spd) {
   return true;
   }
 
-monster *pc[MAXPLAYER], *mousetarget, *lmousetarget;
+EX monster *pc[MAXPLAYER], *mousetarget, *lmousetarget;
 
-int curtime, nextmove, nextdragon;
+EX int curtime, nextmove, nextdragon;
 
 bool isBullet(monster *m) { 
   return isBulletType(m->type);
@@ -1120,7 +1162,7 @@ bool isBullet(monster *m) {
 bool isPlayer(monster *m) { return m->type == moPlayer; }
 bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; }
 
-hookset<bool(shmup::monster*)> *hooks_kill;
+EX hookset<bool(shmup::monster*)> *hooks_kill;
 
 void killMonster(monster* m, eMonster who_kills, int flags = 0) {
   int tk = tkills();
@@ -1147,7 +1189,7 @@ void killMonster(monster* m, eMonster who_kills, int flags = 0) {
     multi::kills[multi::cpid] += tkills() - tk;
   }
 
-void pushmonsters() {
+EX void pushmonsters() {
   for(monster *m: nonvirtual) {
     m->notpushed = isPlayer(m) || m->dead || (m->base->monst && m->base->monst != m->type);
     if(!m->notpushed) {
@@ -1157,7 +1199,7 @@ void pushmonsters() {
     }
   }
 
-void popmonsters() {
+EX void popmonsters() {
   for(int i=isize(nonvirtual)-1; i>=0; i--) {
     monster *m = nonvirtual[i];
     if(!m->notpushed) {
@@ -1176,7 +1218,7 @@ void popmonsters() {
     }
   }
 
-void degradeDemons() {
+EX void degradeDemons() {
   for(monster* m: nonvirtual) {
     if(m->type == moGreater) m->type = moLesser;
     if(m->stk == moGreater) m->type = moLesser;
@@ -1232,7 +1274,7 @@ void awakenMimics(monster *m, cell *c2) {
 
 int visibleAt;
 
-void visibleFor(int t) {
+EX void visibleFor(int t) {
   visibleAt = max(visibleAt, curtime + t);
   }
 
@@ -1292,7 +1334,7 @@ void shootBullet(monster *m) {
     }
   }
 
-void killThePlayer(eMonster m) {
+EX void killThePlayer(eMonster m) {
   if(cpid >= 0 && cpid < MAXPLAYER && pc[cpid])
     pc[cpid]->dead = true;
   }
@@ -1497,7 +1539,7 @@ bool hornKills(eMonster m) {
 
 queue<pair<int, cell*>> traplist, firetraplist;
 
-void activateArrow(cell *c) {
+EX void activateArrow(cell *c) {
   if(isCentralTrap(c))
     traplist.emplace(ticks + 500, c);
   }
@@ -2203,7 +2245,7 @@ bool reflectmatrix(transmatrix& M, cell *c1, cell *c2, bool onlypos) {
   return true;
   }
 
-int reflect(cell*& c2, cell*& mbase, transmatrix& nat) {
+EX int reflect(cell*& c2, cell*& mbase, transmatrix& nat) {
   int reflections = 0;
   if(c2 != mbase && c2->wall == waMirrorWall && inmirror(c2)) {
     if(reflectmatrix(nat, mbase, c2, false)) {
@@ -2292,7 +2334,7 @@ monster *parentOrSelf(monster *m) {
   return m->parent ? m->parent : m;
   }
 
-bool verifyTeleport() {
+EX bool verifyTeleport() {
   if(!on) return true;
   if(playerCrash(pc[cpid], mouseh)) return false;
   return true;
@@ -2304,7 +2346,7 @@ void destroyMimics() {
       m->dead = true;
   }
 
-void teleported() {
+EX void teleported() {
   monster *m = pc[cpid];
   m->base = cwt.at;
   m->at = rgpushxto0(inverse(gmatrix[cwt.at]) * mouseh) * spin(rand() % 1000 * M_PI / 2000);
@@ -2357,7 +2399,7 @@ eItem targetRangedOrbKey(orbAction a) {
   return r;
   }
 
-eItem targetRangedOrb(orbAction a) {
+EX eItem targetRangedOrb(orbAction a) {
   if(!on) return itNone;
   monster *wpc = pc[cpid];
   if(a != roCheck && !wpc) return itNone;  
@@ -2664,7 +2706,7 @@ bool closer(monster *m1, monster *m2) {
   return intval(m1->pat*C0,  closerTo) < intval(m2->pat*C0, closerTo);
   }
 
-bool dragonbreath(cell *dragon) {
+EX bool dragonbreath(cell *dragon) {
   int randplayer = hrand(numplayers());
   monster* bullet = new monster;
   bullet->base = dragon;
@@ -3284,7 +3326,7 @@ void activateMonstersAt(cell *c) {
     }
   }
 
-void fixStorage() {
+EX void fixStorage() {
 
   vector<monster*> restore;
 
@@ -3296,9 +3338,9 @@ void fixStorage() {
   for(monster *m: restore) m->store();
   }
 
-hookset<bool(int)> *hooks_turn;
+EX hookset<bool(int)> *hooks_turn;
 
-void turn(int delta) {
+EX void turn(int delta) {
 
   if(racing::on && subscreens::split( [delta] () { turn(delta); })) return;
   
@@ -3554,7 +3596,7 @@ void turn(int delta) {
   active.clear();
   }
 
-void recall() {
+EX void recall() {
   for(int i=0; i<players; i++) {
     pc[i]->base = cwt.at;
     if(players == 1)
@@ -3568,7 +3610,7 @@ void recall() {
   destroyMimics();
   }
 
-void init() {
+EX void init() {
 
   for(int i=0; i<players; i++) pc[i] = NULL;
   
@@ -3598,7 +3640,7 @@ void init() {
   delayed_safety = false;
   }
 
-bool boatAt(cell *c) {
+EX bool boatAt(cell *c) {
   pair<mit, mit> p = 
     monstersAt.equal_range(c);
   for(mit it = p.first; it != p.second; it++) {
@@ -3608,7 +3650,7 @@ bool boatAt(cell *c) {
   return false;
   }
 
-hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
+EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
 
 bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, const transmatrix *Vdp) {
   #if CAP_SHAPES
@@ -3789,7 +3831,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
   return false;
   }
 
-void clearMonsters() {
+EX void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
     delete(it->second);
   for(monster *m: active) delete m;
@@ -3799,7 +3841,7 @@ void clearMonsters() {
   active.clear();
   }
 
-void clearMemory() {
+EX void clearMemory() {
   clearMonsters();
   gmatrix.clear();
   while(!traplist.empty()) traplist.pop();
@@ -3830,29 +3872,29 @@ void gamedata(hr::gamedata* gd) {
     }
   }
 
-cell *playerpos(int i) {
+EX cell *playerpos(int i) {
   if(!pc[i]) return NULL;
   return pc[i]->base;
   }
 
-bool playerInBoat(int i) {
+EX bool playerInBoat(int i) {
   if(!pc[i]) return false;
   return pc[i]->inBoat;
   }
 
-void destroyBoats(cell *c) {
+EX void destroyBoats(cell *c) {
   for(monster *m: active)
     if(m->base == c && m->inBoat)
       m->inBoat = false;
   }
 
-void virtualRebase(shmup::monster *m, bool tohex) {
+EX void virtualRebase(shmup::monster *m, bool tohex) {
   virtualRebase(m->base, m->at, tohex);
   }
 
-hookset<bool(shmup::monster*, string&)> *hooks_describe;
+EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
 
-void addShmupHelp(string& out) {
+EX void addShmupHelp(string& out) {
   if(shmup::mousetarget && intval(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
     if(callhandlers(false, hooks_describe, shmup::mousetarget, out)) return;
     out += XLAT1(minf[shmup::mousetarget->type].name);
@@ -3873,7 +3915,7 @@ auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
       }
     });
 
-void switch_shmup() { 
+EX void switch_shmup() { 
   stop_game();
   switch_game_mode(rg::shmup);
   resetScores();

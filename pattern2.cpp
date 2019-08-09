@@ -519,7 +519,45 @@ int getHemisphere(cell *c, int which) {
     }
   }
 
-namespace patterns {
+EX namespace patterns {
+
+  #if HDR
+  enum ePattern : char {
+    PAT_NONE = 0,
+    PAT_TYPES = 'T',
+    PAT_ZEBRA = 'z',
+    PAT_EMERALD = 'f',
+    PAT_PALACE = 'p',
+    PAT_FIELD = 'F',
+    PAT_DOWN = 'H',
+    PAT_COLORING = 'C',
+    PAT_SIBLING = 'S',
+    PAT_CHESS = 'c',
+    PAT_SINGLETYPE = 't'
+    };  
+
+  static const int SPF_ROT = 1;
+  static const int SPF_SYM01 = 2;
+  static const int SPF_SYM02 = 4;
+  static const int SPF_SYM03 = 8;
+  static const int SPF_CHANGEROT = 16;
+  static const int SPF_TWOCOL = 32;
+  static const int SPF_EXTRASYM = 64;
+  static const int SPF_ALTERNATE = 128;
+  static const int SPF_FOOTBALL = 256;
+  static const int SPF_FULLSYM = 512;
+  static const int SPF_DOCKS = 1024;
+  static const int SPF_NO_SUBCODES = 2048;
+
+  static const int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
+
+  struct patterninfo {
+    int id;
+    int dir;
+    bool reflect;
+    int symmetries;
+    };
+  #endif
 
   void valSibling(cell *c, patterninfo& si, int sub, int pat) {
     if(ctof(c)) {
@@ -651,7 +689,7 @@ namespace patterns {
       }
     }
   
-  void val38(cell *c, patterninfo &si, int sub, int pat) {
+  EX void val38(cell *c, patterninfo &si, int sub, int pat) {
     bool symRotation = sub & SPF_ROT;
 
     if(ctof(c)) {
@@ -879,9 +917,9 @@ namespace patterns {
     if(GOLDBERG && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = gmod(si.dir+3, S6);
     }
   
-  ePattern whichPattern = PAT_NONE;
+  EX ePattern whichPattern = PAT_NONE;
 
-  int subpattern_flags;
+  EX int subpattern_flags;
  
   void val_threecolors(cell *c, patterninfo& si, int sub) {
     int pcol = pattern_threecolor(c);
@@ -907,7 +945,7 @@ namespace patterns {
     applyAlt(si, sub, PAT_COLORING);
     }
   
-  patterninfo getpatterninfo(cell *c, ePattern pat, int sub) {
+  EX patterninfo getpatterninfo(cell *c, ePattern pat, int sub) {
     if(!(sub & SPF_NO_SUBCODES)) {
       auto si = getpatterninfo(c, pat, sub | SPF_NO_SUBCODES);
       if(1) ;
@@ -1118,7 +1156,13 @@ namespace patterns {
     return si;
     }
 
-  }
+  #if HDR
+  inline patterninfo getpatterninfo0(cell *c) {
+    return getpatterninfo(c, whichPattern, subpattern_flags);
+    }
+  #endif
+  
+  EX }
 
 EX bool geosupport_chessboard() {
   return 
@@ -1398,12 +1442,12 @@ color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
   return (base + col[0] + (col[1] << 8) + (col[2] << 16));
   }
 
-namespace patterns {
-  int canvasback = linf[laCanvas].color >> 2;
-  int subcanvas;
-  bool displaycodes;
-  char whichShape = 0;
-  char whichCanvas = 0;
+EX namespace patterns {
+  EX int canvasback = linf[laCanvas].color >> 2;
+  EX int subcanvas;
+  EX bool displaycodes;
+  EX char whichShape = 0;
+  EX char whichCanvas = 0;
   
   int sevenval(cell *c) {
     if(!euclid) return 0;
@@ -1445,7 +1489,7 @@ namespace patterns {
     return ep.parse();
     }
   
-  int generateCanvas(cell *c) {
+  EX int generateCanvas(cell *c) {
     switch(whichCanvas) {
       #if CAP_CRYSTAL
       case 'K':
@@ -1710,7 +1754,7 @@ namespace patterns {
 #define REMAP_TEXTURE (void)0
 #endif
   
-  void showPattern() {
+  EX void showPattern() {
     cmode = sm::SIDE | sm::MAYDARK;
     {
     dynamicval<bool> dc(displaycodes, whichPattern);
@@ -1886,7 +1930,7 @@ namespace patterns {
       };
     }
   
-  bool compatible(cpatterntype oldp, cpatterntype newp) {
+  EX bool compatible(cpatterntype oldp, cpatterntype newp) {
     // larges are not incompatible between themselves
     if(newp == cpLarge || newp == cpZebra) 
       return false;
@@ -1996,7 +2040,7 @@ namespace patterns {
       }}
     };
   
-  cpatterntype cgroup, old_cgroup;
+  EX cpatterntype cgroup, old_cgroup;
   
   void showChangeablePatterns() {
     cmode = sm::SIDE | sm::MAYDARK;
@@ -2067,7 +2111,7 @@ namespace patterns {
       };
     }
   
-  void computeCgroup() {
+  EX void computeCgroup() {
     cgroup = cpUnknown;
     if(whichPattern == PAT_SINGLETYPE) {
       cgroup = cpSingle;
@@ -2093,11 +2137,11 @@ namespace patterns {
     old_cgroup = cgroup;
     }
 
-  void pushChangeablePatterns() {
+  EX void pushChangeablePatterns() {
     pushScreen(showChangeablePatterns);
     computeCgroup(); 
     }
-  }
+  EX }
 
 bool is_master(cell *c) { 
   if(euclid) return pseudohept(c);

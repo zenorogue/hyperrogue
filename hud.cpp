@@ -3,6 +3,20 @@
 
 namespace hr {
 
+#if HDR
+struct radarpoint {
+  hyperpoint h;
+  char glyph;
+  color_t color;
+  color_t line;
+  };
+
+struct radarline {
+  hyperpoint h1, h2;
+  color_t line;
+  };
+#endif
+
 EX vector<radarpoint> radarpoints;
 EX vector<radarline> radarlines;
 

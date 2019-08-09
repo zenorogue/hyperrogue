@@ -311,7 +311,7 @@ EX void countLocalTreasure() {
     }
   }
 
-EX int gold(int no) {
+EX int gold(int no IS(0)) {
   int i = 0;
   if(!(no & NO_YENDOR)) i += items[itOrbYendor] * 50;
   if(!(no & NO_GRAIL)) i += items[itHolyGrail] * 10;

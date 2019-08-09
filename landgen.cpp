@@ -15,10 +15,10 @@ int lastexplore;
 EX bool randomPatternsMode = false;
 EX int randompattern[landtypes];
 
-int genrange_bonus = 0;
+EX int genrange_bonus = 0;
 
-bool chaosUnlocked = false;
-bool chaosAchieved = false;
+EX bool chaosUnlocked = false;
+EX bool chaosAchieved = false;
 
 void doOvergenerate() {
   for(int i=0; i<numplayers(); i++)

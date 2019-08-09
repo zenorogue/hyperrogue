@@ -472,7 +472,7 @@ EX void initConfig() {
   addsaver(nisot::geodesic_movement, "solv_geodesic_movement", true);
 
 #if CAP_SHMUP  
-  shmup::initConfig();
+  multi::initConfig();
 #endif
 
 #if CAP_CONFIG
@@ -1621,7 +1621,7 @@ EX void showCustomizeChar() {
   gamescreen(4);
   dialog::init(XLAT("Customize character"));
   
-  if(shmup::on || multi::players) shmup::cpid = shmup::cpid_edit % shmup::players;
+  if(shmup::on || multi::players) multi::cpid = multi::cpid_edit % multi::players;
   charstyle& cs = getcs();
   
   dialog::addSelItem(XLAT("character"), csname(cs), 'g');
@@ -1639,7 +1639,7 @@ EX void showCustomizeChar() {
 
   if(!shmup::on && multi::players == 1) dialog::addSelItem(XLAT("save whom"), XLAT1(minf[moPrincess].name), 'p');
   
-  if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(shmup::cpid+1), 'a');
+  if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(multi::cpid+1), 'a');
 
   dialog::addBoolItem(XLAT("left-handed"), cs.lefthanded, 'l');
   
@@ -1666,10 +1666,10 @@ EX void showCustomizeChar() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
   
-    if(shmup::on || multi::players) shmup::cpid = shmup::cpid_edit % shmup::players;
+    if(shmup::on || multi::players) multi::cpid = multi::cpid_edit % multi::players;
     charstyle& cs = getcs();
     bool cat = cs.charid >= 4;
-    if(uni == 'a') { shmup::cpid_edit++; shmup::cpid_edit %= 60; }
+    if(uni == 'a') { multi::cpid_edit++; multi::cpid_edit %= 60; }
     else if(uni == 'g') {
       cs.charid++;
       if(cs.charid == 2 && !princess::everSaved && !autocheat) cs.charid = 4;
@@ -1980,7 +1980,7 @@ EX void showSettings() {
 #if CAP_SHMUP
   if(CAP_SHMUP && !ISMOBILE) {
     dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
-    dialog::add_action(shmup::configure);
+    dialog::add_action(multi::configure);
     }
 #endif
 

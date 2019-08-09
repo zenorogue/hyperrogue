@@ -891,160 +891,15 @@ void initcs(charstyle& cs);
 
 extern bool flipplayer;
 
-namespace multi {
-
-  extern bool alwaysuse;
-  void recall();
-  extern cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
-  extern int players;
-  extern cellwalker player[MAXPLAYER];
-  extern bool flipped[MAXPLAYER];
-  cell *mplayerpos(int i);
-  
-  extern vector<int> revive_queue; // queue for revival
-
-  extern movedir whereto[MAXPLAYER]; // player's target cell
-
-  extern int cpid; // player id -- an extra parameter for player-related functions
-  extern int cpid_edit; // cpid currently being edited
-
-  // treasure collection, kill, and death statistics
-  extern int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
-
-  void saveConfig(FILE *f);
-  void loadConfig(FILE *f);
-  void initConfig();
-   
-  extern charstyle scs[MAXPLAYER];
-
-  bool playerActive(int p);
-  int activePlayers();
-  cell *multiPlayerTarget(int i);
-  void checklastmove();
-  void leaveGame(int i);
-  void configure();
-
-  void showConfigureMultiplayer();
-  }
-
 template<class T> class hookset : public map<int, function<T>> {};
 typedef hookset<void()> *purehookset;
 
-namespace shmup {
-  using namespace multi;
-  void recall();
-  extern bool on;
-  extern bool delayed_safety;
-  extern int curtime;
-  void clearMonsters();
-  void clearMemory();
-  void init();
-  void teleported();
-  
-  struct monster {
-    eMonster type;
-    cell *base;
-    cell *torigin; 
-      // tortoises: origin
-      // butterflies: last position
-    transmatrix at;
-    transmatrix pat;
-    eMonster stk;
-    bool dead;
-    bool notpushed;
-    bool inBoat;
-    bool no_targetting;
-    monster *parent; // who shot this missile
-    eMonster parenttype; // type of the parent
-    int nextshot;    // when will it be able to shot (players/flailers)
-    int pid;         // player ID
-    int hitpoints;   // hitpoints; or time elapsed in Asteroids
-    int stunoff;
-    int blowoff;
-    double swordangle; // sword angle wrt at
-    double vel;        // velocity, for flail balls
-    double footphase;
-    bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
-    hyperpoint inertia;// for frictionless lands
-    
-    monster() { 
-      dead = false; inBoat = false; parent = NULL; nextshot = 0; 
-      stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
-      swordangle = 0; inertia = Hypc;
-      }
-  
-    void store();
-      
-    void findpat();
-  
-    cell *findbase(const transmatrix& T);
-  
-    void rebasePat(const transmatrix& new_pat);
-  
-    };
-
-  extern struct monster* mousetarget;
-  extern monster *pc[MAXPLAYER];
-  extern eItem targetRangedOrb(orbAction a);
-  void degradeDemons();
-  void killThePlayer(eMonster m);
-  void killThePlayer(eMonster m, int i);
-  void visibleFor(int t);
-  bool verifyTeleport();
-  bool dragonbreath(cell *dragon);
-
-  void shmupDrownPlayers(cell *c);
-
-  cell *playerpos(int i);
-
-  bool playerInBoat(int i);
-  void destroyBoats(cell *c);
-  bool boatAt(cell *c);
-  
-  void fixStorage();
-  void addShmupHelp(string& out);
-  void activateArrow(cell *c);
-  
-  void pushmonsters();
-  void popmonsters();
-
-  extern hookset<bool(int)> *hooks_turn;
-  extern hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
-  extern hookset<bool(shmup::monster*)> *hooks_kill;
-  extern hookset<bool(shmup::monster*, string&)> *hooks_describe;
-
-  void turn(int);
-  extern monster *lmousetarget;
-  void virtualRebase(shmup::monster *m, bool tohex);
-
-  extern monster *pc[MAXPLAYER];
-  int reflect(cell*& c2, cell*& mbase, transmatrix& nat);
-
-  void switch_shmup();
-  }
-
 static const int NOHINT = -1;
-
-typedef color_t color_t;
-
-inline string ONOFF(bool b) { return XLAT(b ? "ON" : "OFF"); }
 
 typedef function<void()> reaction_t;
 typedef function<bool()> bool_reaction_t;
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
-
-struct radarpoint {
-  hyperpoint h;
-  char glyph;
-  color_t color;
-  color_t line;
-  };
-
-struct radarline {
-  hyperpoint h1, h2;
-  color_t line;
-  };
 
 extern vector< function<void()> > screens;
 
@@ -1094,75 +949,6 @@ extern display_data *current_display;
 #define gmatrix0 (current_display->old_cellmatrices)
 
 typedef function<int(cell*)> cellfunction;
-
-int coastvalEdge(cell *c);
-
-namespace patterns {
-  extern char whichShape;
-  extern int canvasback;
-
-  extern cpatterntype cgroup, old_cgroup;
-  
-  enum ePattern : char {
-    PAT_NONE = 0,
-    PAT_TYPES = 'T',
-    PAT_ZEBRA = 'z',
-    PAT_EMERALD = 'f',
-    PAT_PALACE = 'p',
-    PAT_FIELD = 'F',
-    PAT_DOWN = 'H',
-    PAT_COLORING = 'C',
-    PAT_SIBLING = 'S',
-    PAT_CHESS = 'c',
-    PAT_SINGLETYPE = 't'
-    };
-
-  extern ePattern whichPattern;
-
-  extern int subpattern_flags;
-  
-  static const int SPF_ROT = 1;
-  static const int SPF_SYM01 = 2;
-  static const int SPF_SYM02 = 4;
-  static const int SPF_SYM03 = 8;
-  static const int SPF_CHANGEROT = 16;
-  static const int SPF_TWOCOL = 32;
-  static const int SPF_EXTRASYM = 64;
-  static const int SPF_ALTERNATE = 128;
-  static const int SPF_FOOTBALL = 256;
-  static const int SPF_FULLSYM = 512;
-  static const int SPF_DOCKS = 1024;
-  static const int SPF_NO_SUBCODES = 2048;
-
-  static const int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
-  
-  extern char whichCanvas;
-
-  extern bool displaycodes;
-
-  int generateCanvas(cell *c);
-
-  struct patterninfo {
-    int id;
-    int dir;
-    bool reflect;
-    int symmetries;
-    };
-    
-  patterninfo getpatterninfo(cell *c, ePattern pat, int sub);
-
-  inline patterninfo getpatterninfo0(cell *c) {
-    return getpatterninfo(c, whichPattern, subpattern_flags);
-    }
-
-  bool compatible(cpatterntype oldp, cpatterntype newp);
-  extern void pushChangeablePatterns();
-  void computeCgroup();
-  void showPattern();
-  void val38(cell *c, patterninfo &si, int sub, int pat);
-
-  int downdir(cell *c, const cellfunction& cf = coastvalEdge);
-  }
 
 namespace mapeditor { 
 #if CAP_EDIT
@@ -1299,6 +1085,8 @@ extern ld ruggo;
 
 #define HASLINEVIEW
 
+namespace shmup { struct monster; }
+
 namespace conformal {
   extern bool on;
   extern vector<pair<cell*, eMonster> > killhistory;
@@ -1351,7 +1139,7 @@ namespace conformal {
   void apply();
   void movetophase();
   void renderAutoband();
-
+  
   extern vector<shmup::monster*> v;
   extern double phase;
   void applyIB();
@@ -1487,9 +1275,6 @@ static const int NO_TREASURE = 1;
 static const int NO_YENDOR = 2;
 static const int NO_GRAIL = 4;
 static const int NO_LOVE = 8;
-
-int gold(int no = 0);
-int tkills();
 
 bool markOrb(eItem it); // mark the orb as 'used', return true if exists
 bool markEmpathy(eItem it); // mark both the given orb and Empathy as 'used', return true if exists
@@ -1644,9 +1429,6 @@ bool isDragon(eMonster m);
 extern "C" { void *_Unwind_Resume = 0; }
 #endif
 
-extern bool autocheat;
-extern bool inHighQual;
-
 void mountmove(cell *c, int spin, bool fp);
 void mountmove(cell *c, int spin, bool fp, cell *ppos);
 void mountswap(cell *c1, int spin1, bool fp1, cell *c2, int spin2, bool fp2);
@@ -1749,8 +1531,6 @@ namespace svg {
   }
 #endif
 
-extern int sightrange_bonus, genrange_bonus, gamerange_bonus;
-
 namespace halloween {
   void getTreat(cell *where);
   }
@@ -1758,54 +1538,11 @@ namespace halloween {
 // just in case if I change my mind about when Orbs lose their power
 #define ORBBASE 0
 
-transmatrix mscale(const transmatrix& t, double fac);
-transmatrix mzscale(const transmatrix& t, double fac);
-extern bool ivoryz;
 #define mmscale(V, x) (mmspatial ? (ivoryz ? mzscale(V,x) : mscale(V, x)) : (V))
 
 #define SHADOW_WALL 0x60
 #define SHADOW_SL   0x18
 #define SHADOW_MON  0x30
-
-transmatrix face_the_player(const transmatrix V);
-void addradar(const transmatrix& V, char ch, color_t col, color_t outline);
-
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase, color_t asciicol);
-
-void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);
-
-// monster movement animations
-
-struct animation {
-  int ltick;
-  double footphase;
-  transmatrix wherenow;
-  int attacking;
-  transmatrix attackat;
-  bool mirrored;
-  };
-
-// we need separate animation layers for Orb of Domination and Tentacle+Ghost,
-// and also to mark Boats
-#define ANIMLAYERS 3
-#define LAYER_BIG   0 // for worms and krakens
-#define LAYER_SMALL 1 // for others
-#define LAYER_BOAT  2 // mark that a boat has moved
-
-extern array<map<cell*, animation>, ANIMLAYERS> animations;
-
-void animateAttack(cell *src, cell *tgt, int layer, int direction_hint);
-
-void animateMovement(cell *src, cell *tgt, int layer, int direction_hint);
-
-// for animations which might use the same locations,
-// such as replacements or multi-tile monsters
-void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint);
-void commitAnimations(int layer);
-
-void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb);
-void fallingFloorAnimation(cell *c, eWall w = waNone, eMonster m = moNone);
-void fallingMonsterAnimation(cell *c, eMonster m, int id = multi::cpid);
 
 // ranks:
 enum class PPR {
@@ -2002,6 +1739,8 @@ color_t darkena(color_t c, int lev, int a);
 namespace anims { void animate_parameter(ld &x, string f, const reaction_t& r); }
 
 extern bool timerghost;
+extern bool autocheat;
+extern int cheater;
 
 namespace arg {
 #if CAP_COMMANDLINE
@@ -2748,20 +2487,9 @@ extern colortable nestcolors;
 
 unsigned char& part(color_t& col, int i);
 
-transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
-
 int pattern_threecolor(cell *c);
 int fiftyval200(cell *c);
 
-// T * C0, optimized
-inline hyperpoint tC0(const transmatrix &T) {
-  hyperpoint z;
-  for(int i=0; i<MDIM; i++) z[i] = T[i][DIM];
-  return z;
-  }
-
-transmatrix actualV(const heptspin& hs, const transmatrix& V);
-transmatrix cview();
 bool isWall3(cell *c, color_t& wcol);
 extern transmatrix actual_view_transform, radar_transform;
 ld wall_radar(cell *c, transmatrix T);
@@ -3457,4 +3185,11 @@ namespace hr {
   inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
   inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
   inline void reset_projection() { new_projection_needed = true; }
+
+  // T * C0, optimized
+  inline hyperpoint tC0(const transmatrix &T) {
+    hyperpoint z;
+    for(int i=0; i<MDIM; i++) z[i] = T[i][DIM];
+    return z;
+    }
   }

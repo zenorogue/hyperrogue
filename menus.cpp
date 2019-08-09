@@ -822,7 +822,7 @@ EX void showStartMenu() {
       welcomeMessage();
       stampbase = ticks;
       if(uni == 's') 
-        shmup::configure();
+        multi::configure();
       }
     else if(uni == 'Z') {
       popScreenAll();
@@ -997,7 +997,7 @@ int read_menu_args() {
     PHASEFROM(2); launch_dialog(showChangeMode);
     }
   else if(argis("-d:shmup")) {
-    PHASEFROM(2); launch_dialog(); shmup::configure();
+    PHASEFROM(2); launch_dialog(); multi::configure();
     }
   else return 1;
   return 0;

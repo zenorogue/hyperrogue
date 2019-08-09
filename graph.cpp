@@ -377,7 +377,7 @@ EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) {
 
 #define UNTRANS (DIM == 3 ? 0x000000FF : 0)
 
-void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
+EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(!onplayer && !items[itOrbEmpathy]) return;
   if(items[itOrbShield] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShield);
   if(items[itOrbShell] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShell);
@@ -552,7 +552,7 @@ double footfun(double d) {
     d-1;
   }
 
-bool ivoryz;
+EX bool ivoryz;
                                  
 void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase) {
 #if CAP_SHAPES
@@ -793,7 +793,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
   return {true, h};
   }
 
-void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
+EX void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
   hyperpoint h = tC0(V);
   auto hp = makeradar(h);
   if(hp.first)
@@ -817,13 +817,13 @@ color_t kind_outline(eItem it) {
     return OUTLINE_OTHER;
   }
 
-transmatrix face_the_player(const transmatrix V) {
+EX transmatrix face_the_player(const transmatrix V) {
   if(DIM == 2) return V;
   if(nonisotropic) return V * cspin(0, 2, ptick(618, 0));
   return rgpushxto0(tC0(V));
   }
 
-hpcshape& orbshape(eOrbshape s) {
+EX hpcshape& orbshape(eOrbshape s) {
   switch(s) {
      case osLove: return cgi.shLoveRing;
      case osRanged: return cgi.shTargetRing;
@@ -1347,7 +1347,7 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
     }
   }
 
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col, double footphase, color_t asciicol) {
+EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t col, double footphase, color_t asciicol) {
 
 #if MAXMDIM >= 4
   if(DIM == 3 && m != moPlayer && asciicol != NOCOLOR)
@@ -3065,7 +3065,7 @@ EX int countMinesAround(cell *c) {
   return mines;
   }
 
-transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
+EX transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   if(NONSTDVAR || binarytiling) return Id;
   transmatrix V = ddspin(c, si.dir, M_PI);
   if(si.reflect) V = V * Mirror;
@@ -6754,14 +6754,14 @@ EX void drawFireParticles(cell *c, int qty, int maxspeed IS(100)) {
     for(int i=0; i<qty; i++)
       drawParticle(c, firegradient(i / (qty-1.)), maxspeed); 
   }
-void fallingFloorAnimation(cell *c, eWall w, eMonster m) {
+EX void fallingFloorAnimation(cell *c, eWall w IS(waNone), eMonster m IS(moNone)) {
   if(!wmspatial) return;
   fallanim& fa = fallanims[c];
   fa.t_floor = ticks;
   fa.walltype = w; fa.m = m;
   // drawParticles(c, darkenedby(linf[c->land].color, 1), 4, 50);
   }
-void fallingMonsterAnimation(cell *c, eMonster m, int id) {
+EX void fallingMonsterAnimation(cell *c, eMonster m, int id IS(multi::cpid)) {
   if(!mmspatial) return;
   fallanim& fa = fallanims[c];
   fa.t_mon = ticks;
@@ -7836,7 +7836,25 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 
 //=== animation
 
-array<map<cell*, animation>, ANIMLAYERS> animations;
+#if HDR
+struct animation {
+  int ltick;
+  double footphase;
+  transmatrix wherenow;
+  int attacking;
+  transmatrix attackat;
+  bool mirrored;
+  };
+
+// we need separate animation layers for Orb of Domination and Tentacle+Ghost,
+// and also to mark Boats
+#define ANIMLAYERS 3
+#define LAYER_BIG   0 // for worms and krakens
+#define LAYER_SMALL 1 // for others
+#define LAYER_BOAT  2 // mark that a boat has moved
+#endif
+
+EX array<map<cell*, animation>, ANIMLAYERS> animations;
 
 EX int revhint(cell *c, int hint) {
   if(hint >= 0 && hint < c->type) return c->c.spin(hint);
