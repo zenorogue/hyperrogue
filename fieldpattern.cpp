@@ -4,7 +4,22 @@
 #if CAP_FIELD
 namespace hr {
 
-namespace fieldpattern {
+EX namespace fieldpattern {
+
+#if HDR
+struct primeinfo {
+  int p;
+  int cells;
+  bool squared;
+  };  
+
+struct fgeomextra {
+  eGeometry base;
+  vector<primeinfo> primes;
+  int current_prime_id;
+  fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
+  };
+#endif
 
 extern int subpathid;
 extern int subpathorder;
@@ -760,7 +775,7 @@ fpattern& getcurrfp() {
 
 // extra information for field quotient extra configuration
 
-vector<fgeomextra> fgeomextras = {
+EX vector<fgeomextra> fgeomextras = {
   fgeomextra(gNormal, 3),
   fgeomextra(gOctagon, 1),
   fgeomextra(g45, 0),
@@ -773,7 +788,7 @@ vector<fgeomextra> fgeomextras = {
   fgeomextra(gTinySphere, 0) */
   };
 
-int current_extra = 0;
+EX int current_extra = 0;
 
 void nextPrime(fgeomextra& ex) {
   dynamicval<eGeometry> g(geometry, ex.base);
@@ -800,7 +815,7 @@ void nextPrimes(fgeomextra& ex) {
     nextPrime(ex);
   }
 
-void enableFieldChange() {
+EX void enableFieldChange() {
   fgeomextra& gxcur = fgeomextras[current_extra];
   fieldpattern::quotient_field_changed = true;
   nextPrimes(gxcur);

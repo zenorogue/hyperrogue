@@ -4,7 +4,7 @@
 
 namespace hr {
 
-namespace crystal {
+EX namespace crystal {
 #if CAP_CRYSTAL
 // Crystal can be bitruncated either by changing variation to bitruncated.
 // In case of the 4D Crystal, the standard HyperRogue bitruncation becomes
@@ -15,14 +15,23 @@ namespace crystal {
 
 // Function pure() checks for both kinds of bitruncation (or any other variations).
 
-bool pure() {
+#if HDR
+static const int MAXDIM = 7;
+typedef array<int, MAXDIM> coord;
+static const coord c0 = {};
+
+typedef array<ld, MAXDIM> ldcoord;
+static const ldcoord ldc0 = {};
+#endif
+
+EX bool pure() {
   return PURE && ginf[gCrystal].vertex == 4;
   }
 
-bool view_coordinates = false;
+EX bool view_coordinates = false;
 bool view_east = false;
 
-bool used_compass_inside;
+EX bool used_compass_inside;
 
 ldcoord told(coord c) { ldcoord a; for(int i=0; i<MAXDIM; i++) a[i] = c[i]; return a; }
 // strange number to prevent weird acting in case of precision errors
@@ -35,7 +44,7 @@ ldcoord operator / (ldcoord a, ld v) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[
 
 ld operator | (ldcoord a, ldcoord b) { ld r=0; for(int i=0; i<MAXDIM; i++) r += a[i] * b[i]; return r; }
 
-ld compass_probability = 1;
+EX ld compass_probability = 1;
 
 int tocode(int cname) { return (1 << (cname >> 1)); }
 
@@ -482,9 +491,9 @@ hrmap_crystal *crystal_map() {
   return (hrmap_crystal*) currentmap;
   } 
 
-heptagon *get_heptagon_at(coord c) { return crystal_map()->get_heptagon_at(c, S7); }
-coord get_coord(heptagon *h) { return crystal_map()->hcoords[h]; }
-ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
+EX heptagon *get_heptagon_at(coord c) { return crystal_map()->get_heptagon_at(c, S7); }
+EX coord get_coord(heptagon *h) { return crystal_map()->hcoords[h]; }
+EX ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
 
 bool is_bi(crystal_structure& cs, coord co) {
   for(int i=0; i<cs.dim; i++) if(co[i] & HALFSTEP) return true;
@@ -496,7 +505,7 @@ array<array<int,2>, MAX_EDGE> distlimit_table = {{
   {{6, 4}}, {{5, 3}}, {{4, 3}}, {{4, 3}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}
   }};
 
-color_t colorize(cell *c) {
+EX color_t colorize(cell *c) {
   auto m = crystal_map();
   ldcoord co = m->get_coord(c);
   color_t res;
@@ -506,14 +515,14 @@ color_t colorize(cell *c) {
   return res;
   }
 
-colortable coordcolors = {0xD04040, 0x40D040, 0x4040D0, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
+EX colortable coordcolors = {0xD04040, 0x40D040, 0x4040D0, 0xFFD500, 0xF000F0, 0x00F0F0, 0xF0F0F0 };
 
-ld compass_angle() {
+EX ld compass_angle() {
   bool bitr = ginf[gCrystal].vertex == 3;
   return (bitr ? M_PI/8 : 0) - master_to_c7_angle();
   }
       
-bool crystal_cell(cell *c, transmatrix V) {
+EX bool crystal_cell(cell *c, transmatrix V) {
 
   if(geometry != gCrystal) return false;
 
@@ -544,7 +553,7 @@ bool crystal_cell(cell *c, transmatrix V) {
   return false;
   }
 
-vector<cell*> build_shortest_path(cell *c1, cell *c2) {
+EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   auto m = crystal_map();
   ldcoord co1 = m->get_coord(c1);
   ldcoord co2 = m->get_coord(c2) - co1;
@@ -597,7 +606,7 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   return p;
   }
 
-int precise_distance(cell *c1, cell *c2) {
+EX int precise_distance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
   auto m = crystal_map();
   if(pure()) {
@@ -661,19 +670,19 @@ int precise_distance(cell *c1, cell *c2) {
   return 999999;
   }
 
-ld space_distance(cell *c1, cell *c2) {
+EX ld space_distance(cell *c1, cell *c2) {
   auto m = crystal_map();
   ldcoord co1 = m->get_coord(c1);
   ldcoord co2 = m->get_coord(c2);
   return sqrt(sqhypot2(m->cs, co1, co2));
   }
 
-ld space_distance_camelot(cell *c) {
+EX ld space_distance_camelot(cell *c) {
   auto m = crystal_map();
   return m->camelot_mul * sqrt(sqhypot2(m->cs, m->get_coord(c), m->camelot_coord));
   }
 
-int dist_relative(cell *c) {
+EX int dist_relative(cell *c) {
   auto m = crystal_map();
   auto& cc = m->camelot_center;
   int r = roundTableRadius(NULL);
@@ -796,7 +805,7 @@ void hrmap_crystal::prepare_east() {
   if(east.data.empty()) build_east(1);
   }
 
-int dist_alt(cell *c) {
+EX int dist_alt(cell *c) {
   auto m = crystal_map();
   if(specialland == laCamelot && m->camelot_center) {
     if(pure()) 
@@ -818,7 +827,7 @@ ldcoord rug_center;
 bool draw_cut = false;
 ld cut_level = 0;
 
-void init_rotation() {
+EX void init_rotation() {
   for(int i=0; i<MAXDIM; i++)
   for(int j=0; j<MAXDIM; j++)
     crug_rotation[i][j] = i == j ? 1/2. : 0;
@@ -839,7 +848,7 @@ void init_rotation() {
     }
   }
 
-void random_rotation() {
+EX void random_rotation() {
   auto& cs = crystal_map()->cs;
   for(int i=0; i<100; i++) {
     int a = hrand(cs.dim);
@@ -857,12 +866,12 @@ void random_rotation() {
   }
 
 
-void next_home_orientation() {
+EX void next_home_orientation() {
   ho++;
   init_rotation();
   }
 
-void flip_z() {
+EX void flip_z() {
   for(int i=0; i<MAXDIM; i++)
     crug_rotation[i][2] *= -1;
   }
@@ -877,7 +886,7 @@ hyperpoint coord_to_flat(ldcoord co, int dim = 3) {
   return res;
   }
 
-void switch_z_coordinate() {
+EX void switch_z_coordinate() {
   auto& cs = crystal_map()->cs;
   for(int i=0; i<cs.dim; i++) {
     ld tmp = crug_rotation[i][2];
@@ -886,7 +895,7 @@ void switch_z_coordinate() {
     }
   }
 
-void apply_rotation(const transmatrix t) {
+EX void apply_rotation(const transmatrix t) {
   auto& cs = crystal_map()->cs;
   for(int i=0; i<cs.dim; i++) {
     hyperpoint h;
@@ -896,7 +905,7 @@ void apply_rotation(const transmatrix t) {
     }
   }
 
-void centerrug(ld aspd) {
+EX void centerrug(ld aspd) {
   if(vid.sspeed >= 4.99) aspd = 1000;
   
   auto m = crystal_map();
@@ -941,7 +950,7 @@ void cut_triangle(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc,
     cut_triangle2(pb, pc, pa, hb, hc, ha);
   }
 
-void build_rugdata() {
+EX void build_rugdata() {
   using namespace rug;
   rug::clear_model(); 
   rug::good_shape = true;  
@@ -1000,7 +1009,7 @@ void build_rugdata() {
   println(hlog, "cut ", cut_level, "r ", crug_rotation);
   }
 
-void set_land(cell *c) {
+EX void set_land(cell *c) {
   setland(c, specialland); 
   auto m = crystal_map();
 
@@ -1103,11 +1112,11 @@ int readArgs() {
   }
 #endif
 
-hrmap *new_map() {
+EX hrmap *new_map() {
   return new hrmap_crystal;
   }
 
-string compass_help() {
+EX string compass_help() {
   return XLAT(
     "Lands in this geometry are usually built on North-South or West-East axis. "
     "Compasses always point North, and all the cardinal directions to the right from compass North are East (this is not "
@@ -1132,7 +1141,7 @@ string make_help() {
     );
   }
 
-void show() {
+EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
   dialog::init(XLAT("dimensional crystal"));
@@ -1234,7 +1243,7 @@ struct shift_data {
 
 shift_data shift_data_zero;
 
-string get_table_volume() {
+EX string get_table_volume() {
   if(!pure()) {
     auto m = crystal_map();
     bignum res;
@@ -1282,7 +1291,7 @@ string get_table_volume() {
     return (compute_volume(s/2, r-1) + compute_volume(s/2, r-2)).get_str(100);
   }
 
-string get_table_boundary() {
+EX string get_table_boundary() {
   if(!pure()) return "";
   int r = roundTableRadius(NULL);
   int s = ginf[gCrystal].sides;
@@ -1292,7 +1301,7 @@ string get_table_boundary() {
     return (compute_volume(s/2, r) - compute_volume(s/2, r-2)).get_str(100);
   }
 
-void may_place_compass(cell *c) {
+EX void may_place_compass(cell *c) {
   if(c != c->master->c7) return;
   auto m = crystal_map();
   auto co = m->hcoords[c->master];

@@ -7838,7 +7838,7 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 
 array<map<cell*, animation>, ANIMLAYERS> animations;
 
-int revhint(cell *c, int hint) {
+EX int revhint(cell *c, int hint) {
   if(hint >= 0 && hint < c->type) return c->c.spin(hint);
   else return hint;
   }

@@ -498,7 +498,7 @@ EX heptagon* encodeId(int id) {
 
 #if MAXMDIM == 4
 
-namespace euclid3 {
+EX namespace euclid3 {
 
   typedef long long coord; 
   static const long long COORDMAX = (1<<16);
@@ -551,7 +551,7 @@ namespace euclid3 {
     }
   
   coord canonicalize(coord x);
-  void build_torus3();
+  EX void build_torus3();
   coord twist(coord x, transmatrix& M);
   extern int twisted;
   extern intmatrix T0;
@@ -719,7 +719,7 @@ namespace euclid3 {
     return ((hrmap_euclid3*) currentmap);
     }
 
-  hrmap* new_map() {
+  EX hrmap* new_map() {
     return new hrmap_euclid3;
     }
 
@@ -814,7 +814,7 @@ namespace euclid3 {
     set_euland3(c, co[0]*120, co[1]*120, (co[1]+co[2]) / dv, hash);
     }
   
-  int dist_relative(cell *c) {
+  EX int dist_relative(cell *c) {
     auto m = cubemap();
     auto& cc = m->camelot_center;
     int r = roundTableRadius(NULL);
@@ -864,7 +864,7 @@ namespace euclid3 {
   int coords;
   int twisted, twisted0, twisted_edit;
   
-  void clear_torus3() {
+  EX void clear_torus3() {
     for(int i=0; i<3; i++) user_axes[i] = 0;
     }
   
@@ -1014,7 +1014,7 @@ namespace euclid3 {
     twisted_edit = twisted0;
     }
 
-  void show_torus3() {
+  EX void show_torus3() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(1);  
     dialog::init(XLAT("3D Euclidean spaces"));
@@ -1153,7 +1153,7 @@ namespace euclid3 {
   
   auto euhook = addHook(hooks_args, 100, euArgs);
   #endif
-  }
+  EX }
 
 #endif
 

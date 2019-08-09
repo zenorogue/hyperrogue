@@ -8,7 +8,12 @@
 
 namespace hr {
 
-namespace brownian {
+EX namespace brownian {
+
+  #if HDR
+  const int level = 5;
+  #endif
+
 
   map<cell*, vector<pair<cell*, int >> > futures;
   int centersteps = 0;
@@ -97,7 +102,7 @@ namespace brownian {
     else if(cellHalfvine(c)) destroyHalfvine(c, waNone, 4);
     }
   
-  void init(cell *c) {
+  EX void init(cell *c) {
     if(!hyperbolic) return;
     recurse(c, FAT);
     recurse(c, FAT);
@@ -148,7 +153,7 @@ namespace brownian {
       }
     }
 
-  void build(cell *c, int d) {
+  EX void build(cell *c, int d) {
   
     if(!hyperbolic) c->wall = waNone, c->landparam = 256;
 

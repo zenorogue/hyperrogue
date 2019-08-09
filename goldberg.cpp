@@ -1,13 +1,29 @@
-namespace hr { namespace gp {
-  loc operator+(loc e1, loc e2) {
+namespace hr { 
+
+EX namespace gp {
+
+  #if HDR
+  typedef pair<int, int> loc;
+
+  struct local_info {
+    int last_dir;
+    loc relative;
+    int first_dir;
+    int total_dir;
+    };
+  #endif
+
+  EX local_info draw_li;
+  
+  EX loc operator+(loc e1, loc e2) {
     return make_pair(e1.first+e2.first, e1.second+e2.second);
     }
   
-  loc operator-(loc e1, loc e2) {
+  EX loc operator-(loc e1, loc e2) {
     return make_pair(e1.first-e2.first, e1.second-e2.second);
     }
   
-  loc operator*(loc e1, loc e2) {
+  EX loc operator*(loc e1, loc e2) {
     return make_pair(e1.first*e2.first-e1.second*e2.second, 
       e1.first*e2.second + e2.first*e1.second + (S3 == 3 ? e1.second*e2.second : 0));
     }
@@ -16,7 +32,7 @@ namespace hr { namespace gp {
     return loc(e1.first*i, e1.second*i);
     }
   
-  loc eudir(int d) {
+  EX loc eudir(int d) {
     if(S3 == 3) {
       d %= 6; if (d < 0) d += 6;
       switch(d) {
@@ -38,12 +54,12 @@ namespace hr { namespace gp {
       }
     }
   
-  int length(loc p) {
+  EX int length(loc p) {
     return eudist(p.first, p.second);
     }
   
 #if CAP_GP
-  loc param(1, 0);
+  EX loc param = loc(1, 0);
 
   hyperpoint next;
   
@@ -64,7 +80,7 @@ namespace hr { namespace gp {
       ((li.last_dir & 15) << 12);
     }
   
-  local_info get_local_info(cell *c) {
+  EX local_info get_local_info(cell *c) {
     local_info li;
     if(c == c->master->c7) {
       li.relative = loc(0,0);
@@ -96,15 +112,15 @@ namespace hr { namespace gp {
     return li;
     }
     
-  int last_dir(cell *c) {
+  EX int last_dir(cell *c) {
     return get_local_info(c).last_dir;
     }
 
-  loc get_coord(cell *c) {
+  EX loc get_coord(cell *c) {
     return get_local_info(c).relative;
     }
   
-  int pseudohept_val(cell *c) {
+  EX int pseudohept_val(cell *c) {
     loc v = get_coord(c);
     return (v.first - v.second + MODFIXER)%3;
     }
@@ -222,7 +238,7 @@ namespace hr { namespace gp {
     return ac0;
     }
 
-  void extend_map(cell *c, int d) {
+  EX void extend_map(cell *c, int d) {
     DEBB(DF_GP, ("EXTEND ",c, " ", d));
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
@@ -549,7 +565,7 @@ namespace hr { namespace gp {
     
   map<pair<int, int>, loc> center_locs;
   
-  void compute_geometry() {
+  EX void compute_geometry() {
     center_locs.clear();
     if(GOLDBERG) {
       if(!cgi.gpdata) cgi.gpdata = make_shared<geometry_information::gpdata_t>();
@@ -739,20 +755,20 @@ namespace hr { namespace gp {
       };
     }
   
-  loc univ_param() {
+  EX loc univ_param() {
     if(GOLDBERG) return param;
     else if(PURE) return loc(1,0);
     else return loc(1,1);
     }
   
-  void configure() {
+  EX void configure() {
     auto l = univ_param();
     param = l;
     config = human_representation(l);
     pushScreen(gp::show);
     }
   
-  void be_in_triangle(local_info& li) {
+  EX void be_in_triangle(local_info& li) {
     int sp = 0;
     auto& at = li.relative;
     again:
@@ -769,7 +785,7 @@ namespace hr { namespace gp {
   // from some point X, (0,0) is in distance dmain, param is in distance d0, and param*z is in distance d1
   // what is the distance of at from X?
 
-  int solve_triangle(int dmain, int d0, int d1, loc at) {
+  EX int solve_triangle(int dmain, int d0, int d1, loc at) {
     loc centerloc(0, 0);
     auto rel = make_pair(d0-dmain, d1-dmain);
     if(center_locs.count(rel))
@@ -820,13 +836,13 @@ namespace hr { namespace gp {
     return dmain + length(centerloc-at) - length(centerloc);
     }
   
-  hyperpoint get_master_coordinates(cell *c) {
+  EX hyperpoint get_master_coordinates(cell *c) {
     auto li = get_local_info(c);
     be_in_triangle(li);
     return cgi.gpdata->corners * loctoh_ort(li.relative);
     }
   
-  int compute_dist(cell *c, int master_function(cell*)) {
+  EX int compute_dist(cell *c, int master_function(cell*)) {
     auto li = get_local_info(c);
     be_in_triangle(li);
     
@@ -849,24 +865,24 @@ namespace hr { namespace gp {
     return solve_triangle(dmain, d0, d1, at);
     }
   
-  int dist_2() {
+  EX int dist_2() {
     return length(univ_param());
     }
 
-  int dist_3() {
+  EX int dist_3() {
     return length(univ_param() * loc(1,1));
     }
   
-  int dist_1() {
+  EX int dist_1() {
     return dist_3() - dist_2();
     }
 #else
-  int dist_1() { return 1; }
-  int dist_2() { return BITRUNCATED ? 2 : 1; }
-  int dist_3() { return BITRUNCATED ? 3 : 2; }  
+  EX int dist_1() { return 1; }
+  EX int dist_2() { return BITRUNCATED ? 2 : 1; }
+  EX int dist_3() { return BITRUNCATED ? 3 : 2; }  
 #endif
 
-  array<heptagon*, 3> get_masters(cell *c) {
+  EX array<heptagon*, 3> get_masters(cell *c) {
     if(0);
     #if CAP_GP
     else if(GOLDBERG) {
@@ -885,7 +901,7 @@ namespace hr { namespace gp {
       return make_array(c->move(0)->master, c->move(2)->master, c->move(4)->master);
     }
 
-  string operation_name() {
+  EX string operation_name() {
     if(0);
     #if CAP_IRR
     else if(IRREGULAR) 

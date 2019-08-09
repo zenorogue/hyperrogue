@@ -16,11 +16,15 @@ namespace binary {
   hyperpoint deparabolic3(hyperpoint h);
   }
 
-namespace reg3 {
+EX namespace reg3 {
+
+  #if HDR
+  inline short& altdist(heptagon *h) { return h->emeraldval; }
+  #endif
 
   map<int, int> close_distances;
 
-  int bucketer(ld x) {
+  EX int bucketer(ld x) {
     return int(x * 10 + 100000.5) - 100000;
     }
   
@@ -30,13 +34,13 @@ namespace reg3 {
   
   int loop, face;
 
-  vector<hyperpoint> cellshape;
+  EX vector<hyperpoint> cellshape;
   vector<hyperpoint> vertices_only;
   
-  transmatrix spins[12], adjmoves[12];
+  EX transmatrix spins[12], adjmoves[12];
 
   ld adjcheck, strafedist;
-  bool dirs_adjacent[16][16];
+  EX bool dirs_adjacent[16][16];
 
   template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
     for(int i=0; i<200; i++) {
@@ -47,7 +51,7 @@ namespace reg3 {
     return dmin;
     } 
 
-  void generate() {
+  EX void generate() {
   
     if(S7 == 4) face = 3;
     if(S7 == 6) face = 4;
@@ -805,7 +809,7 @@ namespace reg3 {
       }
     };
   
-hrmap* new_map() {
+EX hrmap* new_map() {
   if(quotient) return new hrmap_field3;
   return new hrmap_reg3;
   }
@@ -814,7 +818,7 @@ hrmap_reg3* regmap() {
   return ((hrmap_reg3*) currentmap);
   }
 
-int celldistance(cell *c1, cell *c2) {
+EX int celldistance(cell *c1, cell *c2) {
   if(c1 == c2) return 0;
   if(c1 == currentmap->gamestart()) return c2->master->distance;
   if(c2 == currentmap->gamestart()) return c1->master->distance;
@@ -829,7 +833,7 @@ int celldistance(cell *c1, cell *c2) {
   return 20 + binary::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
   }
 
-bool pseudohept(cell *c) {
+EX bool pseudohept(cell *c) {
   auto m = regmap();
   if(sphere) {
     hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin));
@@ -958,7 +962,7 @@ int dist_alt(cell *c) {
 // as possible to cw.spin. Assume that j and cw.spin are adjacent
 
 #if MAXMDIM >= 4
-cellwalker strafe(cellwalker cw, int j) {
+EX cellwalker strafe(cellwalker cw, int j) {
   hyperpoint hfront = tC0(adjmoves[cw.spin]);
   transmatrix T = currentmap->relative_matrix(cw.at->cmove(j)->master, cw.at->master);
   for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))

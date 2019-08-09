@@ -971,8 +971,6 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   } */
   
-  gp::local_info draw_li;
-
   bool drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) { 
     bool res = false;
     transmatrix V1 = V * cgi.gpdata->Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
@@ -1829,19 +1827,19 @@ struct bandfixer {
   };
 #endif
 
-namespace dq {
-  queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
+EX namespace dq {
+  EX queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
 
-  set<heptagon*> visited;
-  void enqueue(heptagon *h, const transmatrix& T) {
+  EX set<heptagon*> visited;
+  EX void enqueue(heptagon *h, const transmatrix& T) {
     if(!h || visited.count(h)) { return; }
     visited.insert(h);
     drawqueue.emplace(h, T, band_shift);
     }  
 
   #if MAXMDIM >= 4
-  set<int> visited_by_matrix;
-  void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
+  EX set<int> visited_by_matrix;
+  EX void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
     if(!h) return;
     int b = reg3::bucketer(tC0(T));
     if(visited_by_matrix.count(b)) { return; }
@@ -1849,7 +1847,7 @@ namespace dq {
     drawqueue.emplace(h, T, band_shift);
     }
   #endif
-  }
+  EX }
 
 EX bool do_draw(cell *c) {
   // do not display out of range cells, unless on torus

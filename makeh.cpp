@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -28,7 +29,11 @@ void mark_file() {
 
 int in_hdr;
 
+set<string> seen;
+
 void gen(string s) {
+  if(seen.count(s)) return;
+  seen.insert(s);
   which_file = s;
   ifstream in(s);
   while(getline(in, s)) {

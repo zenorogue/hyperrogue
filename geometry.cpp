@@ -431,14 +431,18 @@ EX void switch_always3() {
 
   EX }
 
-geometry_information *cgip;
-map<string, geometry_information> cgis;
+EX geometry_information *cgip;
+EX map<string, geometry_information> cgis;
+
+#if HDR
+#define cgi (*cgip)
+#endif
 
 int last_texture_step;
 
 int ntimestamp;
 
-void check_cgi() {
+EX void check_cgi() {
   string s;
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
   V("GEO", its(int(geometry)));

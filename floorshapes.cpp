@@ -998,7 +998,7 @@ void geometry_information::make_floor_textures_here() {
   last_texture_step = vid.texture_step;
   }
 
-void make_floor_textures() {
+EX void make_floor_textures() {
   DEBBI(DF_POLY, ("make_floor_textures"));
   dynamicval<eGeometry> g(geometry, gEuclidSquare);
   dynamicval<eModel> gm(pmodel, mdDisk);

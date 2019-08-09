@@ -5,6 +5,14 @@
 
 namespace hr {
 
+#if HDR
+enum eLastmovetype { lmSkip, lmMove, lmAttack, lmPush, lmTree, lmInstant };
+extern eLastmovetype lastmovetype, nextmovetype;
+
+enum eForcemovetype { fmSkip, fmMove, fmAttack, fmInstant, fmActivate };
+extern eForcemovetype forcedmovetype;
+#endif
+
 EX int lastsafety;
 EX int mutantphase;
 EX int turncount;
@@ -2945,7 +2953,7 @@ EX void clear_pathdata() {
   reachedfrom.clear(); 
   }
 
-int pathlock = 0;
+EX int pathlock = 0;
 
 EX void compute_graphical_distance() {
   if(pathlock) { printf("path error: compute_graphical_distance\n"); }

@@ -799,7 +799,7 @@ EX void edit_sightrange() {
     };
   }
 
-EX void menuitem_sightrange(char c) {
+EX void menuitem_sightrange(char c IS('c')) {
   if(vid.use_smart_range)
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
   else if(pmodel == mdGeodesic && sol)

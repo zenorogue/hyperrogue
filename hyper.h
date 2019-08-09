@@ -2848,49 +2848,6 @@ template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1
 
 extern const hyperpoint Hypc;
 
-namespace gp {
-  typedef pair<int, int> loc;
-
-  loc operator+(loc e1, loc e2);
-  loc operator-(loc e1, loc e2);
-  loc operator*(loc e1, loc e2);
-  extern loc eudir(int dir);
-  int length(loc p);
-
-  #if CAP_GP
-  void compute_geometry();
-  void extend_map(cell *c, int d);  
-  extern loc param;
-  extern int pseudohept_val(cell *);
-  extern int last_dir(cell *c);
-  extern void configure();
-
-  struct local_info {
-    int last_dir;
-    loc relative;
-    int first_dir;
-    int total_dir;
-    };
-
-  extern local_info draw_li;
-  
-  local_info get_local_info(cell *c);
-  const char *disp(loc at);
-
-  void be_in_triangle(local_info& li);
-
-  int compute_dist(cell *c, int master_function(cell*));
-  
-  int solve_triangle(int dmain, int d0, int d1, loc at);
-
-  hyperpoint get_master_coordinates(cell *c);
-  loc univ_param();
-  #endif
-  int dist_1(), dist_2(), dist_3();
-  array<heptagon*, 3> get_masters(cell *c);
-  extern string operation_name();
-  }
-
 struct supersaver {
   string name;
   virtual string save() = 0;
@@ -2980,7 +2937,6 @@ template<> struct saver<string> : dsaver<string> {
 
 string fts(ld val, int prec);
 string itsh(int x);
-extern int debugflags;
 
 template<> struct saver<ld> : dsaver<ld> {
   saver<ld>(ld& val) : dsaver<ld>(val) { }
@@ -3074,35 +3030,8 @@ namespace torusconfig {
   flagtype tmflags();
   }
 
-#if CAP_FIELD
-namespace fieldpattern {
-  extern int current_extra;
-
-  struct primeinfo {
-    int p;
-    int cells;
-    bool squared;
-    };  
-  
-  struct fgeomextra {
-    eGeometry base;
-    vector<primeinfo> primes;
-    int current_prime_id;
-    fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
-    };
-
-  extern vector<fgeomextra> fgeomextras;
-  extern void enableFieldChange();
-  }
-#endif
-
-bool incompatible(eLand l1, eLand l2);
-
 struct plainshape;
 void clear_plainshape(plainshape& gsh);
-#if CAP_GP
-void build_plainshape(plainshape& gsh, gp::local_info& li);
-#endif
 
 namespace gp {
   void clear_plainshapes();
@@ -3467,133 +3396,12 @@ hpcshape
   int timestamp;
   };
 
-#if MAXMDIM >= 4
-void make_floor_textures();
-#endif
-
-extern map<string, geometry_information> cgis;
-extern geometry_information *cgip;
-void check_cgi();
-#define cgi (*cgip)  
-
-#if ISMOBILE
-bool buttonclicked;
-void gdpush(int t);
-#endif
-
-extern int fontscale;
-
-bool confusingGeometry();
-
-int revhint(cell *c, int hint);
-
-extern int pathlock;
-extern void computePathdist(eMonster m);
-extern void onpath(cell *c, int d);
-extern void clear_pathdata();
-
-extern int timetowait;
-
 #define RING(i) for(double i=0; i<=cgi.S84+1e-6; i+=SD3 * pow(.5, vid.linequality))
 #define REVRING(i) for(double i=cgi.S84; i>=-1e-6; i-=SD3 * pow(.5, vid.linequality))
 #define PRING(i) for(double i=0; i<=cgi.S84+1e-6; i+= pow(.5, vid.linequality))
 #define REVPRING(i) for(double i=cgi.S84; i>=-1e-6; i-=pow(.5, vid.linequality))
 
-#if MAXMDIM == 4
-namespace euclid3 {
-  hrmap* new_map();
-  void draw();
-  int dist_relative(cell *c);
-  void build_torus3();
-  void clear_torus3();
-  void show_torus3();
-  }
-
-namespace reg3 {
-  void generate();
-  hrmap* new_map();
-  extern vector<hyperpoint> cellshape;
-  int celldistance(cell *c1, cell *c2);
-  bool pseudohept(cell *c);
-  inline short& altdist(heptagon *h) { return h->emeraldval; }
-  extern transmatrix spins[12], adjmoves[12];
-  int bucketer(hyperpoint h);
-  extern bool dirs_adjacent[16][16];
-  cellwalker strafe(cellwalker cw, int j);
-  }
-#endif
-
-namespace crystal {
-  #if CAP_CRYSTAL
-  static const int MAXDIM = 7;
-  typedef array<int, MAXDIM> coord;
-  static const coord c0 = {};
-  
-  typedef array<ld, MAXDIM> ldcoord;
-  static const ldcoord ldc0 = {};
-
-  heptagon *get_heptagon_at(coord c);
-  coord get_coord(heptagon *h);
-  ldcoord get_ldcoord(cell *c);
-  
-  extern colortable coordcolors;
-  extern ld compass_probability;
-  extern bool view_coordinates;
-  color_t colorize(cell *c);
-  int precise_distance(cell *c1, cell *c2);
-  ld space_distance(cell *c1, cell *c2);
-  hrmap *new_map();
-  void build_rugdata();
-  void apply_rotation(const transmatrix t);
-  void switch_z_coordinate();
-  void next_home_orientation();
-  void flip_z();
-  void set_land(cell *c);
-  int dist_alt(cell *c);
-  int dist_relative(cell *c);
-  void show();
-  void init_rotation();
-  string get_table_volume();
-  string get_table_boundary();
-  bool pure();
-  ld compass_angle();
-  string compass_help();
-  void may_place_compass(cell *c);
-  void centerrug(ld aspd);
-  vector<cell*> build_shortest_path(cell *c1, cell *c2);
-  #endif
-  }
-
-int towerval(cell *c, const cellfunction& cf);
-
-#if CAP_COMPLEX2
-namespace brownian {
-  const int level = 5;
-  void init(cell *c);
-  void build(cell *c, int d);
-  void explosion(cell *c, int x);
-  };
-#else
-namespace brownian {
-  inline void dissolve_brownian(cell*, int) {};
-  inline void build(cell *c, int d) {}
-  inline void init(cell *c) {}
-  }
-#endif
-
 #define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety && !reptilecheat)
-
-void menuitem_sightrange(char c = 'r');
-
-namespace dq {
-  extern queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
-
-  extern set<heptagon*> visited;
-  void enqueue(heptagon *h, const transmatrix& T);
-
-  extern set<int> visited_by_matrix;
-  void enqueue_by_matrix(heptagon *h, const transmatrix& T);
-  }
 
 template <class T> void texture_order(const T& f) {
   const int STEP = vid.texture_step;
@@ -3612,13 +3420,6 @@ template <class T> void texture_order(const T& f) {
        }
     }
   }
-
-/* lastmovetype   uses lmSkip, lmMove, lmAttack, lmPush, lmTree */
-enum eLastmovetype { lmSkip, lmMove, lmAttack, lmPush, lmTree, lmInstant };
-extern eLastmovetype lastmovetype, nextmovetype;
-
-enum eForcemovetype { fmSkip, fmMove, fmAttack, fmInstant, fmActivate };
-extern eForcemovetype forcedmovetype;
 
 static const color_t NOCOLOR = 0;
 
