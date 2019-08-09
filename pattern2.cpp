@@ -876,7 +876,7 @@ namespace patterns {
         }
       }
     
-    if(GOLDBERG && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
+    if(GOLDBERG && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = gmod(si.dir+3, S6);
     }
   
   ePattern whichPattern = PAT_NONE;
@@ -1194,9 +1194,9 @@ int pattern_threecolor(cell *c) {
     if(rel == 0)
       return pattern_threecolor(c->master->c7);
     else if(rel == par)
-      return pattern_threecolor(createStep(c->master, li.last_dir)->c7);
+      return pattern_threecolor(c->master->cmove(li.last_dir)->c7);
     else
-      return pattern_threecolor(createStep(c->master, fix7(li.last_dir+1))->c7);
+      return pattern_threecolor(c->master->cmodmove(li.last_dir+1)->c7);
     }
   #endif
   if(a38) {

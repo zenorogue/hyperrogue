@@ -5,9 +5,6 @@
 
 namespace hr {
 
-int fix6(int a) { return (a+MODFIXER)%S6; }
-int fix7(int a) { return (a+MODFIXER)%S7; }
-
 int dirdiff(int dd, int t) {
   dd %= t;
   if(dd<0) dd += t;

@@ -763,7 +763,7 @@ namespace hr { namespace gp {
       goto again;
       }
     if(sp>SG3) sp -= SG6;
-    li.last_dir = fix7(li.last_dir - sp);
+    li.last_dir = gmod(li.last_dir - sp, S7);
     }
 
   // from some point X, (0,0) is in distance dmain, param is in distance d0, and param*z is in distance d1
@@ -874,7 +874,7 @@ namespace hr { namespace gp {
       be_in_triangle(li);      
       auto cm = c->master;
       int i = li.last_dir;
-      return make_array(cm, createStep(cm, i), createStep(cm, fix7(i+1)));
+      return make_array(cm, cm->cmove(i), cm->cmodmove(i+1));
       }
     #endif
     #if CAP_IRR

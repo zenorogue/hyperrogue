@@ -978,7 +978,7 @@ void drawrec(cell *c, const transmatrix& V) {
     transmatrix V1 = V * cgi.gpdata->Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
     if(do_draw(c, V1)) {
       /* auto li = get_local_info(c);
-      if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
+      if((dir - li.total_dir) % S6) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
       draw_li.relative = at;
@@ -1163,7 +1163,7 @@ transmatrix eumovedir(int d) {
       }
     }
   else {
-    d = fix6(d);
+    d = gmod(d, S6);
     switch(d) {
       case 0: return eumove(1,0);
       case 1: return eumove(0,1);

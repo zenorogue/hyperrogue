@@ -423,7 +423,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
 #if CAP_GP
   if(GOLDBERG) {
     gp::local_info li = gp::get_local_info(c);
-    id = (li.relative.first & 15) + (li.relative.second & 15) * 16 + fix6(li.total_dir) * 256;
+    id = (li.relative.first & 15) + (li.relative.second & 15) * 16 + gmod(li.total_dir, S6) * 256;
     // ld = li.last_dir;
     }
 #else

@@ -4133,8 +4133,6 @@ struct hpcshape {
 extern vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
 #endif
 
-int fix6(int a);
-int fix7(int a);
 int fixdir(int a, cell *c);
 cell *newCell(int type, heptagon *master);
 extern color_t qpixel_pixel_outside;
