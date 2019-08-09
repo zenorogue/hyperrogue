@@ -5,7 +5,35 @@
 
 namespace hr {
 
-unsigned char& part(color_t& col, int i) {
+#if HDR
+static const int POLY_DRAWLINES = 1;            // draw the lines
+static const int POLY_DRAWAREA = 2;             // draw the area
+static const int POLY_INVERSE = 4;              // draw the inverse -- useful in stereographic projection
+static const int POLY_ISSIDE = 8;               // never draw in inverse
+static const int POLY_BEHIND = 16;              // there are points behind the camera
+static const int POLY_TOOLARGE = 32;            // some coordinates are too large -- best not to draw to avoid glitches
+static const int POLY_INFRONT = 64;             // on the sphere (orthogonal projection), do not draw without any points in front
+static const int POLY_HASWALLS = 128;           // floor shapes which have their sidewalls
+static const int POLY_PLAIN = 256;              // plain floors
+static const int POLY_FULL = 512;               // full floors
+static const int POLY_HASSHADOW = 1024;         // floor shapes which have their shadows, or can use shFloorShadow
+static const int POLY_GP = 2048;                // Goldberg shapes
+static const int POLY_VCONVEX = 4096;           // Convex shape (vertex)
+static const int POLY_CCONVEX = 8192;           // Convex shape (central)
+static const int POLY_CENTERIN = 16384;         // new system of side checking 
+static const int POLY_FORCEWIDE = (1<<15);      // force wide lines
+static const int POLY_NOTINFRONT = (1<<16);     // points not in front
+static const int POLY_NIF_ERROR = (1<<17);      // points moved to the outline cross the image, disable
+static const int POLY_BADCENTERIN = (1<<18);    // new system of side checking 
+static const int POLY_PRECISE_WIDE = (1<<19);   // precise width calculation
+static const int POLY_FORCE_INVERTED = (1<<20); // force inverted
+static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
+static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
+static const int POLY_INTENSE = (1<<23);        // extra intense colors
+static const int POLY_DEBUG = (1<<24);          // debug this shape
+#endif
+
+EX unsigned char& part(color_t& col, int i) {
   unsigned char* c = (unsigned char*) &col;
 #if ISMOBILE
   return c[i];
@@ -20,11 +48,11 @@ unsigned char& part(color_t& col, int i) {
 
 bool fatborder;
 
-color_t poly_outline;
+EX color_t poly_outline;
 
 // #define STLSORT
 
-vector<unique_ptr<drawqueueitem>> ptds;
+EX vector<unique_ptr<drawqueueitem>> ptds;
 
 #if CAP_GL
 color_t text_color;
@@ -42,7 +70,7 @@ vector<glvertex> line_vertices;
 void glapplymatrix(const transmatrix& V);
 #endif
 
-void glflush() {
+EX void glflush() {
   #if MINIMIZE_GL_CALLS
   if(isize(triangle_vertices)) {
     // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
@@ -104,7 +132,7 @@ SDL_Surface *aux;
 #if CAP_POLY
 #define POLYMAX 60000
 
-vector<glvertex> glcoords;
+EX vector<glvertex> glcoords;
 
 #endif
 
@@ -142,7 +170,7 @@ bool knowgood;
 hyperpoint goodpoint;
 vector<pair<int, hyperpoint>> tofix;
 
-bool two_sided_model() {
+EX bool two_sided_model() {
   if(DIM == 3) return false;
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
@@ -153,7 +181,7 @@ bool two_sided_model() {
   return false;
   }
 
-int get_side(const hyperpoint& H) {
+EX int get_side(const hyperpoint& H) {
   if(pmodel == mdDisk && sphere) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / vid.alpha;
@@ -176,7 +204,7 @@ int get_side(const hyperpoint& H) {
   return 0;
   }
 
-bool correct_side(const hyperpoint& H) {
+EX bool correct_side(const hyperpoint& H) {
   return get_side(H) == spherespecial;
   }
 
@@ -435,7 +463,7 @@ void glapplymatrix(const transmatrix& V) {
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
-int global_projection;
+EX int global_projection;
 
 #if MAXMDIM >= 4
 extern renderbuffer *floor_textures;
@@ -555,7 +583,7 @@ void dqi_poly::gldraw() {
   }
 #endif
 
-ld scale_at(const transmatrix& T) {
+EX ld scale_at(const transmatrix& T) {
   if(DIM == 3 && pmodel == mdPerspective) return 1 / abs((tC0(T))[2]);
   if(sol) return 1;
   hyperpoint h1, h2, h3;
@@ -565,7 +593,7 @@ ld scale_at(const transmatrix& T) {
   return sqrt(hypot_d(2, h2-h1) * hypot_d(2, h3-h1) / .0001);
   }
 
-ld linewidthat(const hyperpoint& h) {
+EX ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1 && !ISWEB) {
     double dz = h[DIM];
@@ -585,7 +613,7 @@ ld linewidthat(const hyperpoint& h) {
   return 1;
   }
 
-void set_width(ld w) {
+EX void set_width(ld w) {
   #if MINIMIZE_GL_CALLS
   if(w != glhr::current_linewidth) glflush();
   #endif
@@ -1111,11 +1139,11 @@ void dqi_poly::draw() {
 
 vector<glvertex> prettylinepoints;
 
-void prettypoint(const hyperpoint& h) {
+EX void prettypoint(const hyperpoint& h) {
   prettylinepoints.push_back(glhr::pointtogl(h));
   }
 
-void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
+EX void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
   if(lev >= 0) {
     hyperpoint h3 = midz(h1, h2);
     prettylinesub(h1, h3, lev-1);
@@ -1124,7 +1152,7 @@ void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
   else prettypoint(h2);
   }
 
-void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags, PPR prio) {
+EX void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags, PPR prio) {
   prettylinepoints.clear();
   prettypoint(h1);
   prettylinesub(h1, h2, lev);
@@ -1144,7 +1172,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, color_t col, int lev, int flags, P
   ptd.draw();
   }
 
-void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, int lev) {
+EX void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol, int lev) {
   prettylinepoints.clear();
   prettypoint(t[0]);
   for(int i=0; i<isize(t); i++)
@@ -1168,7 +1196,7 @@ vector<glvertex> curvedata;
 int curvestart = 0;
 bool keep_curvedata = false;
 
-void queuereset(eModel m, PPR prio) {
+EX void queuereset(eModel m, PPR prio) {
   queueaction(prio, [m] () { glflush(); pmodel = m; });
   }
 
@@ -1203,12 +1231,12 @@ void dqi_circle::draw() {
   drawCircle(x, y, size, color, fillcolor);
   }
         
-void initquickqueue() {
+EX void initquickqueue() {
   ptds.clear();
   poly_outline = OUTLINE_NONE;
   }
 
-void sortquickqueue() {
+EX void sortquickqueue() {
   for(int i=1; i<isize(ptds);)
     if(i && ptds[i]->prio < ptds[i-1]->prio) {
       swap(ptds[i], ptds[i-1]);
@@ -1217,7 +1245,7 @@ void sortquickqueue() {
     else i++;
   }
 
-void quickqueue() {
+EX void quickqueue() {
   spherespecial = 0; 
   reset_projection(); current_display->set_all(0);
   int siz = isize(ptds);
@@ -1264,7 +1292,7 @@ void dqi_line::draw_back() {
   draw();
   }
 
-void sort_drawqueue() {
+EX void sort_drawqueue() {
   
   for(int a=0; a<PMAX; a++) qp[a] = 0;
   
@@ -1303,18 +1331,18 @@ void sort_drawqueue() {
   swap(ptds, ptds2);
   }
 
-void reverse_priority(PPR p) {
+EX void reverse_priority(PPR p) {
   reverse(ptds.begin()+qp0[int(p)], ptds.begin()+qp[int(p)]);
   }
 
-void reverse_side_priorities() {
+EX void reverse_side_priorities() {
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
     PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM})
       reverse_priority(p);
   }
 
 // on the sphere, parts on the back are drawn first
-void draw_backside() {  
+EX void draw_backside() {
   if(pmodel == mdHyperboloid && hyperbolic) {
     dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
     for(auto& ptd: ptds) 
@@ -1348,12 +1376,12 @@ void draw_backside() {
 
 extern bool lshiftclick, lctrlclick;
 
-void reverse_transparent_walls() {
+EX void reverse_transparent_walls() {
   int pt = int(PPR::TRANSPARENT_WALL);
   reverse(&ptds[qp0[pt]], &ptds[qp[pt]]);
   }
 
-void draw_main() {
+EX void draw_main() {
   if(sphere && DIM == 3 && pmodel == mdPerspective) {
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
@@ -1402,7 +1430,7 @@ void draw_main() {
   }
 
   
-void drawqueue() {
+EX void drawqueue() {
   callhooks(hook_drawqueue);
   reset_projection();
   // reset_projection() is not sufficient here, because we need to know shaderside_projection
@@ -1501,7 +1529,7 @@ template<class T, class... U> T& queuea(PPR prio, U... u) {
   }
 
 #if CAP_SHAPES
-dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
+EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
   if(prio == PPR::DEFAULT) prio = h.prio;
 
   auto& ptd = queuea<dqi_poly> (prio);
@@ -1540,7 +1568,7 @@ void addfloats(vector<GLfloat>& v, hyperpoint h) {
   for(int i=0; i<3; i++) v.push_back(h[i]);
   }
 
-dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, color_t linecol, color_t fillcol, PPR prio) {
+EX dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, color_t linecol, color_t fillcol, PPR prio) {
  
   auto& ptd = queuea<dqi_poly> (prio);
 
@@ -1559,7 +1587,7 @@ dqi_poly& queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, c
   }
 
 #if CAP_SHAPES
-dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col) {
+EX dqi_poly& queuepoly(const transmatrix& V, const hpcshape& h, color_t col) {
   return queuepolyat(V,h,col,h.prio);
   }
 
@@ -1568,22 +1596,22 @@ void queuepolyb(const transmatrix& V, const hpcshape& h, color_t col, int b) {
   }
 #endif
 
-void curvepoint(const hyperpoint& H1) {
+EX void curvepoint(const hyperpoint& H1) {
   curvedata.push_back(glhr::pointtogl(H1));
   }
 
-dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio) {
+EX dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio) {
   auto &res = queuetable(Id, curvedata, isize(curvedata)-curvestart, linecol, fillcol, prio);
   res.offset = curvestart;
   curvestart = isize(curvedata);
   return res;
   }
 
-dqi_action& queueaction(PPR prio, const reaction_t& action) {
+EX dqi_action& queueaction(PPR prio, const reaction_t& action) {
   return queuea<dqi_action> (prio, action);
   }
 
-dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int prf, PPR prio) {
+EX dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int prf IS(0), PPR prio IS(PPR::LINE)) {
   auto& ptd = queuea<dqi_line> (prio);
 
   ptd.H1 = H1;
@@ -1596,7 +1624,7 @@ dqi_line& queueline(const hyperpoint& H1, const hyperpoint& H2, color_t col, int
   return ptd;
   }
 
-void queuestr(int x, int y, int shift, int size, string str, color_t col, int frame, int align) {
+EX void queuestr(int x, int y, int shift, int size, string str, color_t col, int frame IS(0), int align IS(8)) {
   auto& ptd = queuea<dqi_string> (PPR::TEXT);
   ptd.x = x;
   ptd.y = y;
@@ -1608,7 +1636,7 @@ void queuestr(int x, int y, int shift, int size, string str, color_t col, int fr
   ptd.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
   }
 
-void queuechr(int x, int y, int shift, int size, char chr, color_t col, int frame, int align) {
+EX void queuechr(int x, int y, int shift, int size, char chr, color_t col, int frame IS(0), int align IS(8)) {
   auto& ptd = queuea<dqi_string> (PPR::TEXT);
   ptd.x = x;
   ptd.y = y;
@@ -1620,7 +1648,7 @@ void queuechr(int x, int y, int shift, int size, char chr, color_t col, int fram
   ptd.frame = frame ? (poly_outline & ~ 255) : 0;
   }
 
-void queuecircle(int x, int y, int size, color_t color, PPR prio, color_t fillcolor) {
+EX void queuecircle(int x, int y, int size, color_t color, PPR prio IS(PPR::CIRCLE), color_t fillcolor IS(0)) {
   auto& ptd = queuea<dqi_circle>(prio);
   ptd.x = x;
   ptd.y = y;
@@ -1630,7 +1658,7 @@ void queuecircle(int x, int y, int size, color_t color, PPR prio, color_t fillco
   ptd.linewidth = vid.linewidth;
   }
 
-void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
+EX void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   hyperpoint hscr;
   applymodel(h, hscr);
   xc = current_display->xcenter + current_display->radius * hscr[0];
@@ -1639,49 +1667,49 @@ void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   // EYETODO sc = vid.eye * current_display->radius * hscr[2];
   }
 
-ld scale_in_pixels(const transmatrix& V) {
+EX ld scale_in_pixels(const transmatrix& V) {
   return scale_at(V) * cgi.scalefactor * current_display->radius / 2.5;
   }
 
-bool getcoord0_checked(const hyperpoint& h, int& xc, int &yc, int &zc) {
+EX bool getcoord0_checked(const hyperpoint& h, int& xc, int &yc, int &zc) {
   if(invalid_point(h)) return false;
   if(point_behind(h)) return false;
   getcoord0(h, xc, yc, zc);
   return true;
   }
 
-void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame) {
+EX void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame IS(0)) {
   int xc, yc, sc;
   if(getcoord0_checked(h, xc, yc, sc))
     queuechr(xc, yc, sc, size, chr, col, frame);
   }
 
-void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame) {
+EX void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame IS(0)) {
   int xc, yc, sc; 
   if(getcoord0_checked(tC0(V), xc, yc, sc))
     queuechr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame);
   }
   
-void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame) {
+EX void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame IS(0)) {
   int xc, yc, sc; 
   if(getcoord0_checked(h, xc, yc, sc))
     queuestr(xc, yc, sc, size, chr, col, frame);
   }
   
-void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame, int align) {
+EX void queuestr(const transmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
   int xc, yc, sc; 
   if(getcoord0_checked(tC0(V), xc, yc, sc))
     queuestr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame, align);
   }
   
-void queuecircle(const transmatrix& V, double size, color_t col) {
+EX void queuecircle(const transmatrix& V, double size, color_t col) {
   int xc, yc, sc; 
   if(!getcoord0_checked(tC0(V), xc, yc, sc)) return;
   int xs, ys, ss; getcoord0(V * xpush0(.01), xs, ys, ss);  
   queuecircle(xc, yc, scale_in_pixels(V) * size, col);
   }
 
-void queuemarkerat(const transmatrix& V, color_t col) {
+EX void queuemarkerat(const transmatrix& V, color_t col) {
 #if CAP_SHAPES
   queuepolyat(V, cgi.shTriangle, col, PPR::LINE);
 #endif

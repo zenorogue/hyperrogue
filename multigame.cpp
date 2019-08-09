@@ -50,37 +50,38 @@ void gamedata::restoregame() {
   gamedata_all(*this);
   }
 
-hookset<void(gamedata*)> *hooks_gamedata;
+EX hookset<void(gamedata*)> *hooks_gamedata;
 
-namespace gamestack {
+EX namespace gamestack {
 
   vector<gamedata> gd;
   
-  bool pushed() { return isize(gd); }
+  EX bool pushed() { return isize(gd); }
   
-  void push() {
+  EX void push() {
     gd.emplace_back();
     gd.back().storegame();
     }
     
-  void pop() {
+  EX void pop() {
     if(!pushed()) return;
     if(game_active) stop_game();
     gd.back().restoregame();
     gd.pop_back();
     }
   
-  };
+EX }
 
-namespace dual {
-  int state;
-
-  int currently_loaded;
-  int main_side;
-  bool affect_both;
+EX namespace dual {
+  // 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames)
+  EX int state;
+  
+  EX int currently_loaded;
+  EX int main_side;
+  EX bool affect_both;
 
   gamedata dgd[2];
-  transmatrix player_orientation[2];
+  EX transmatrix player_orientation[2];
   
   hyperpoint which_dir;
   
@@ -101,7 +102,7 @@ namespace dual {
     return d;
     }
   
-  transmatrix get_orientation() {
+  EX transmatrix get_orientation() {
     if(WDIM == 2)
       return gpushxto0(tC0(cwtV)) * cwtV;
     else if(cwt.at)
@@ -110,7 +111,7 @@ namespace dual {
       return Id;
     }
   
-  void switch_to(int k) {
+  EX void switch_to(int k) {
     if(k != currently_loaded) {
       // gamedata has shmup::on because tutorial needs changing it, but dual should keep it fixed
       dynamicval<bool> smon(shmup::on);
@@ -121,7 +122,7 @@ namespace dual {
       }
     }
   
-  bool movepc(int d, int subdir, bool checkonly) {
+  EX bool movepc(int d, int subdir, bool checkonly) {
     dynamicval<int> dm(dual::state, 2);
     int cg = currently_loaded;
       
@@ -202,13 +203,13 @@ namespace dual {
     return false;
     }
   
-  void in_subscreen(reaction_t what) {
+  EX void in_subscreen(reaction_t what) {
     dynamicval<ld> xmax(current_display->xmax, 0.5 * (currently_loaded+1));
     dynamicval<ld> xmin(current_display->xmin, 0.5 * (currently_loaded));
     what();
     }
   
-  bool split(reaction_t what) {
+  EX bool split(reaction_t what) {
     if(state != 1) return false;
     state = 2;
     
@@ -221,7 +222,7 @@ namespace dual {
     return true;    
     }
   
-  void enable() {
+  EX void enable() {
     if(dual::state) return;
     stop_game();
     eGeometry b = geometry;
@@ -259,7 +260,7 @@ namespace dual {
     state = 1;
     }
   
-  void disable() {
+  EX void disable() {
     if(!dual::state) return;
     stop_game();
     state = 0;
@@ -293,11 +294,11 @@ namespace dual {
   
   vector<int> landsides;
   
-  bool check_side(eLand l) {
+  EX bool check_side(eLand l) {
     return landsides[l] == currently_loaded || landsides[l] == 2;
     }
 
-  void assign_landsides() {
+  EX void assign_landsides() {
     landsides.resize(landtypes);
     int which_hyperbolic = -1;
     if(ginf[dgd[0].geo].cclass == gcHyperbolic && ginf[dgd[1].geo].cclass != gcHyperbolic)
@@ -360,7 +361,7 @@ namespace dual {
     }
 
   
-  void add_choice() {
+  EX void add_choice() {
     if(!state) return;
     dialog::addSelItem(XLAT("subgame affected"), 
       XLAT(affect_both ? "both" : main_side == 0 ? "left" : "right"), '`');
@@ -373,12 +374,12 @@ namespace dual {
       });
     }
   
-  void split_or_do(reaction_t what) {
+  EX void split_or_do(reaction_t what) {
     if(split(what)) return;
     else what();
     }
 
-  bool may_split(reaction_t what) {
+  EX bool may_split(reaction_t what) {
     if(state == 1 && affect_both) {
       split(what);
       return true;
@@ -386,12 +387,17 @@ namespace dual {
     return false;
     }
 
-  void may_split_or_do(reaction_t what) {
+  EX void may_split_or_do(reaction_t what) {
     if(state == 1 && affect_both) {
       split(what);
       }
     else what();
     }
   }
+
+  #if HDR
+  inline reaction_t mayboth(reaction_t what) { return [=] { may_split_or_do(what); }; }
+  #endif
+
 
 }

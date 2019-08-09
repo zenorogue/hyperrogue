@@ -10,13 +10,13 @@ namespace hr {
 // NOTE: patterns assume that pair_to_vec(0,1) % 3 == 2!
 // Thus, pair_to_vec(0,1) must not be e.g. a power of four
 
-int cell_to_vec(cell *c);
+EX int cell_to_vec(cell *c);
 
-int pair_to_vec(int x, int y) {
+EX int pair_to_vec(int x, int y) {
   return x + (y << 15);
   }
 
-pair<int, int> vec_to_pair(int vec) {
+EX pair<int, int> vec_to_pair(int vec) {
   int x = vec & ((1<<15)-1);
   int y = (vec >> 15);
   if(x >= (1<<14)) x -= (1<<15), y++;
@@ -468,13 +468,13 @@ int cellwalker_to_vec(cellwalker cw) {
   return torusconfig::id_to_vec(id, cw.mirrored);
   }
 
-int cell_to_vec(cell *c) {
+EX int cell_to_vec(cell *c) {
   int id = decodeId(c->master);
   if(!fulltorus) return id;
   return torusconfig::id_to_vec(id, false);
   }
 
-pair<int, int> cell_to_pair(cell *c) {
+EX pair<int, int> cell_to_pair(cell *c) {
   return vec_to_pair(cell_to_vec(c));
   }
 
@@ -483,12 +483,12 @@ union heptacoder {
   int id;
   };
 
-int decodeId(heptagon* h) {
+EX int decodeId(heptagon* h) {
   heptacoder u;
   u.h = h; return u.id;
   }
 
-heptagon* encodeId(int id) {
+EX heptagon* encodeId(int id) {
   heptacoder u;
   u.id = id;
   return u.h;
@@ -1157,7 +1157,7 @@ namespace euclid3 {
 
 #endif
 
-ld matrixnorm(const transmatrix& Mat) {
+EX ld matrixnorm(const transmatrix& Mat) {
   return Mat[0][DIM] * Mat[0][DIM] + Mat[1][DIM] * Mat[1][DIM] + Mat[2][DIM] * Mat[2][DIM];
   }
   

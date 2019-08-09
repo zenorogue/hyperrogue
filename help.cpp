@@ -3,11 +3,11 @@
 
 namespace hr {
 
-string help;
+EX string help;
 
-function<void()> help_delegate;
+EX function<void()> help_delegate;
 
-vector<help_extension> help_extensions;
+EX vector<help_extension> help_extensions;
 
 vector<string> extra_keys = {
   "1 = orthogonal/Gans model",
@@ -726,9 +726,9 @@ void appendHelp(string s) {
 unsigned char lastval;
 int windtotal;
 
-hookset<void(cell*)> *hooks_mouseover;
+EX hookset<void(cell*)> *hooks_mouseover;
 
-void describeMouseover() {
+EX void describeMouseover() {
   DEBBI(DF_GRAPH, ("describeMouseover"));
 
   cell *c = mousing ? mouseover : playermoved ? NULL : centerover.at;
@@ -884,7 +884,7 @@ void describeMouseover() {
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
   }
 
-void showHelp() {
+EX void showHelp() {
   cmode = sm::HELP | sm::DOTOUR;
   getcstat = SDLK_ESCAPE;
   if(help == "HELPFUN") {
@@ -937,10 +937,9 @@ void showHelp() {
     };
   }
 
-
 hookset<bool()> *hooks_default_help;
 
-void gotoHelp(const string& h) {
+EX void gotoHelp(const string& h) {
   help = h;
   help_extensions.clear();
   pushScreen(showHelp);
@@ -962,7 +961,7 @@ void gotoHelp(const string& h) {
   if(help == "HELPGEN") helpgenerator();
   }
 
-void subhelp(const string& h) {
+EX void subhelp(const string& h) {
   string oldhelp = help;
   auto ext = help_extensions;
   reaction_t back = [oldhelp, ext] () {
@@ -975,7 +974,7 @@ void subhelp(const string& h) {
   help_extensions.push_back(help_extension{'z', XLAT("back"), back});
   }
 
-void gotoHelpFor(eLand l) {
+EX void gotoHelpFor(eLand l) {
   help = generateHelpForLand(l);
   
   int beastcount = 0;

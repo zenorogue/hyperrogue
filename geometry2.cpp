@@ -19,7 +19,7 @@ void fixelliptic(hyperpoint& h) {
     for(int i=0; i<MDIM; i++) h[i] = -h[i];
   }
 
-transmatrix master_relative(cell *c, bool get_inverse) {
+EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
   if(0) ;
   #if CAP_IRR  
   else if(IRREGULAR) {
@@ -52,11 +52,11 @@ transmatrix master_relative(cell *c, bool get_inverse) {
     return pispin * Id;
   }
 
-transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
+EX transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
   return calc_relative_matrix(c2, c1, ddspin(c1, direction_hint) * xpush0(1e-2));
   }
 
-transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+EX transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
   return currentmap->relative_matrix(c2, c1, point_hint);
   }
 
@@ -161,7 +161,7 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
   return gm * where;
   }
 
-transmatrix &ggmatrix(cell *c) {
+EX transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[GDIM][GDIM] == 0) {
     if(euwrap && centerover.at && masterless) 
@@ -176,7 +176,7 @@ transmatrix &ggmatrix(cell *c) {
   return t;
   }
 
-transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
+EX transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
@@ -342,11 +342,11 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
 
   }
 
-void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
+EX void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
   virtualRebase(base, at, tohex, tC0);
   }
 
-void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
+EX void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
   // we perform fixing in check, so that it works with larger range
   virtualRebase(base, h, tohex, [] (const hyperpoint& h) { 
     if(hyperbolic && GDIM == 2) return hpxy(h[0], h[1]);
@@ -356,7 +356,7 @@ void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
   }
 
 // works only in geometries similar to the standard one, and only on heptagons
-void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
+EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
@@ -390,7 +390,7 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
     }
   }
 
-double cellgfxdist(cell *c, int i) {
+EX double cellgfxdist(cell *c, int i) {
   if(euclid && !penrose && !archimedean) {
     if(c->type == 8 && (i&1)) return cgi.crossf * sqrt(2);
     return cgi.crossf;
@@ -399,7 +399,7 @@ double cellgfxdist(cell *c, int i) {
   return !BITRUNCATED ? cgi.tessf : (c->type == 6 && (i&1)) ? cgi.hexhexdist : cgi.crossf;
   }
 
-transmatrix cellrelmatrix(cell *c, int i) {
+EX transmatrix cellrelmatrix(cell *c, int i) {
   if(NONSTDVAR || archimedean || penrose) return calc_relative_matrix(c->move(i), c, i);
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
@@ -408,9 +408,9 @@ transmatrix cellrelmatrix(cell *c, int i) {
   return T;
   }
 
-double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
+EX double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
-hyperpoint randomPointIn(int t) {
+EX hyperpoint randomPointIn(int t) {
   if(NONSTDVAR || archimedean || penrose) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
@@ -425,7 +425,7 @@ hyperpoint randomPointIn(int t) {
     }
   }
 
-hyperpoint get_corner_position(cell *c, int cid, ld cf) {
+EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
   #endif
@@ -478,9 +478,9 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   return C0;
   }
 
-bool approx_nearcorner = false;
+EX bool approx_nearcorner = false;
 
-hyperpoint nearcorner(cell *c, int i) {
+EX hyperpoint nearcorner(cell *c, int i) {
   if(GOLDBERG) {
     cellwalker cw(c, i);
     cw += wstep;
@@ -560,7 +560,7 @@ hyperpoint nearcorner(cell *c, int i) {
   return ddspin(c, i) * xpush0(d);
   }
 
-hyperpoint farcorner(cell *c, int i, int which) {
+EX hyperpoint farcorner(cell *c, int i, int which) {
   #if CAP_GP
   if(GOLDBERG) {
     cellwalker cw(c, i);
@@ -623,13 +623,13 @@ hyperpoint farcorner(cell *c, int i, int which) {
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
   }
 
-hyperpoint midcorner(cell *c, int i, ld v) {
+EX hyperpoint midcorner(cell *c, int i, ld v) {
   auto hcor = farcorner(c, i, 0);
   auto tcor = get_corner_position(c, i, 3);
   return mid_at(tcor, hcor, v);
   }
 
-hyperpoint get_warp_corner(cell *c, int cid) {
+EX hyperpoint get_warp_corner(cell *c, int cid) {
   // midcorner(c, cid, .5) but sometimes easier versions exist
   #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, 2);

@@ -3,12 +3,12 @@
 
 namespace hr {
 
-display_data default_display;
-display_data *current_display = &default_display;
+EX display_data default_display;
+EX display_data *current_display = &default_display;
 
-unsigned backcolor = 0;
-unsigned bordcolor = 0;
-unsigned forecolor = 0xFFFFFF;
+EX unsigned backcolor = 0;
+EX unsigned bordcolor = 0;
+EX unsigned forecolor = 0xFFFFFF;
 
 int utfsize(char c) {
   unsigned char cu = c;
@@ -18,8 +18,8 @@ int utfsize(char c) {
   return 4;
   }
 
-int get_sightrange() { return getDistLimit() + sightrange_bonus; }
-int get_sightrange_ambush() { return max(get_sightrange(), ambush_distance); }
+EX int get_sightrange() { return getDistLimit() + sightrange_bonus; }
+EX int get_sightrange_ambush() { return max(get_sightrange(), ambush_distance); }
 
 namespace stereo {
   eStereo mode;
@@ -66,11 +66,12 @@ TTF_Font *font[256];
 #endif
 
 #if CAP_SDL
-SDL_Surface *s, *s_screen;
+EX SDL_Surface *s;
+EX SDL_Surface *s_screen;
 
 color_t qpixel_pixel_outside;
 
-color_t& qpixel(SDL_Surface *surf, int x, int y) {
+EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
   if(x<0 || y<0 || x >= surf->w || y >= surf->h) return qpixel_pixel_outside;
   char *p = (char*) surf->pixels;
   p += y * surf->pitch;
@@ -137,7 +138,7 @@ bool fading = false;
 
 ld fadeout = 1;
 
-color_t darkened(color_t c) {
+EX color_t darkened(color_t c) {
   if(inmirrorcount&1)
     c = gradient(c, winf[waMirror].color, 0, 0.5, 1);
   else if(inmirrorcount)
@@ -152,21 +153,23 @@ color_t darkened(color_t c) {
   return c;
   }
 
-color_t darkena3(color_t c, int lev, int a) {
+EX color_t darkena3(color_t c, int lev, int a) {
   return (darkenedby(c, lev) << 8) + a;
   }
 
-color_t darkena(color_t c, int lev, int a) {
+EX color_t darkena(color_t c, int lev, int a) {
   return darkena3(c, lev, DIM == 3 ? 255 : a);
   }
 
 #if !CAP_GL
 void setcameraangle(bool b) { }
-#else
+#endif
 
-bool shaderside_projection;
+#if CAP_GL
 
-void start_projection(int ed, bool perspective) {
+EX bool shaderside_projection;
+
+EX void start_projection(int ed, bool perspective) {
   glhr::use_projection();
   glhr::new_projection();
   shaderside_projection = perspective;
@@ -197,7 +200,7 @@ glhr::glmatrix model_orientation_gl() {
   }
 
 tuple<int, eModel, display_data*, int> last_projection;
-bool new_projection_needed;
+EX bool new_projection_needed;
 
 void display_data::set_all(int ed) {
   auto t = this;
@@ -426,11 +429,11 @@ void display_data::set_viewport(int ed) {
   glViewport(xtop, ytop, xsize, ysize);
   }
 
-bool model_needs_depth() {
+EX bool model_needs_depth() {
   return DIM == 3 || pmodel == mdBall;
   }
 
-void setGLProjection(color_t col) {
+EX void setGLProjection(color_t col IS(backcolor)) {
   DEBBI(DF_GRAPH, ("setGLProjection"));
   GLERR("pre_setGLProjection");
 
@@ -643,20 +646,20 @@ int gl_width(int size, const char *s) {
   return x;
   }
 
-namespace glhr { void texture_vertices(GLfloat *f, int qty, int stride = 2) {
-  WITHSHADER(
-    glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
-    glTexCoordPointer(stride, GL_FLOAT, 0, f);
-    )
-  } 
- void oldvertices(GLfloat *f, int qty) {
-   WITHSHADER(
-    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
-    glVertexPointer(SHDIM, GL_FLOAT, 0, f);
-    )
-  // #endif
+namespace glhr { 
+  void texture_vertices(GLfloat *f, int qty, int stride = 2) {
+    WITHSHADER(
+      glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
+      glTexCoordPointer(stride, GL_FLOAT, 0, f);
+      )
+    } 
+  void oldvertices(GLfloat *f, int qty) {
+    WITHSHADER(
+     glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
+     glVertexPointer(SHDIM, GL_FLOAT, 0, f);
+     )
+    }
   }
- }
 
 vector<glhr::textured_vertex> tver;
 
@@ -737,9 +740,9 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 
 #endif
 
-purehookset hooks_resetGL;
+EX purehookset hooks_resetGL;
 
-void resetGL() {
+EX void resetGL() {
   DEBBI(DF_INIT | DF_GRAPH, ("reset GL"))
   callhooks(hooks_resetGL);
 #if CAP_GLFONT
@@ -828,7 +831,7 @@ bool displaystr(int x, int y, int shift, int size, char const *s, color_t color,
   }
 
 #else
-bool displaystr(int x, int y, int shift, int size, const char *str, color_t color, int align) {
+EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t color, int align) {
 
   if(strlen(str) == 0) return false;
 
@@ -891,11 +894,11 @@ bool displaystr(int x, int y, int shift, int size, const char *str, color_t colo
 #endif
   }
                   
-bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
+EX bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
   return displaystr(x, y, shift, size, s.c_str(), color, align);
   }
 
-bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t color, int align, int p) {
+EX bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t color, int align, int p) {
   if(b) {
     displaystr(x-b, y, 0, size, s, p, align);
     displaystr(x+b, y, 0, size, s, p, align);
@@ -912,11 +915,11 @@ bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, color_t
   return displaystr(x, y, 0, size, s, color, align);
   }
 
-bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
+EX bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
   return displayfrSP(x, y, 0, b, size, s, color, align, poly_outline>>8);
   }
 
-bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
+EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
 
   char buf[2];
   buf[0] = chr; buf[1] = 0;
@@ -928,7 +931,7 @@ vector<msginfo> msgs;
 
 vector<msginfo> gamelog;
 
-void flashMessages() {
+EX void flashMessages() {
   for(int i=0; i<isize(msgs); i++) 
     if(msgs[i].stamp < ticks - 1000 && !msgs[i].flashout) {
       msgs[i].flashout = true;
@@ -960,9 +963,9 @@ void addMessageToLog(msginfo& m, vector<msginfo>& log) {
     }
   }
 
-void clearMessages() { msgs.clear(); }
+EX void clearMessages() { msgs.clear(); }
 
-void addMessage(string s, char spamtype) {
+EX void addMessage(string s, char spamtype) {
   DEBB(DF_MSG, ("addMessage: ", s));
 
   msginfo m;
@@ -976,15 +979,15 @@ void addMessage(string s, char spamtype) {
   addMessageToLog(m, msgs);
   }
 
-color_t colormix(color_t a, color_t b, color_t c) {
+EX color_t colormix(color_t a, color_t b, color_t c) {
   for(int p=0; p<3; p++)
     part(a, p) = part(a,p) + (part(b,p) - part(a,p)) * part(c,p) / 255;
   return a;
   }
 
-int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
+EX int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 
-ld realradius() {
+EX ld realradius() {
   ld vradius = current_display->radius;
   if(sphere) {
     if(sphereflipped()) 
@@ -998,7 +1001,7 @@ ld realradius() {
   return vradius;
   }
 
-void drawmessage(const string& s, int& y, color_t col) {
+EX void drawmessage(const string& s, int& y, color_t col) {
   int rrad = (int) realradius();
   int space;
   if(dual::state)
@@ -1034,7 +1037,7 @@ void drawmessage(const string& s, int& y, color_t col) {
   return;
   }
 
-void drawmessages() {
+EX void drawmessages() {
   DEBBI(DF_GRAPH, ("draw messages"));
   int i = 0;
   int t = ticks;
@@ -1069,7 +1072,7 @@ void drawmessages() {
     }
   }
 
-color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
+EX color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   int vv = int(256 * ((v-v0) / (v1-v0)));
   color_t c = 0;
   for(int a=0; a<3; a++) {
@@ -1080,7 +1083,7 @@ color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   return c;
   }
 
-void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
+EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0)) {
   if(size < 0) size = -size;
   #if CAP_GL && CAP_POLY
   if(vid.usingGL) {
@@ -1131,7 +1134,7 @@ void drawCircle(int x, int y, int size, color_t color, color_t fillcolor) {
 #endif
   }
 
-void displayButton(int x, int y, const string& name, int key, int align, int rad) {
+EX void displayButton(int x, int y, const string& name, int key, int align, int rad IS(0)) {
   if(displayfr(x, y, rad, vid.fsize, name, 0x808080, align)) {
     displayfr(x, y, rad, vid.fsize, name, 0xFFFF00, align);
     getcstat = key;
@@ -1141,14 +1144,14 @@ void displayButton(int x, int y, const string& name, int key, int align, int rad
 char mousekey = 'n';
 char newmousekey;
 
-void displaymm(char c, int x, int y, int rad, int size, const string& title, int align) {
+EX void displaymm(char c, int x, int y, int rad, int size, const string& title, int align) {
   if(displayfr(x, y, rad, size, title, c == mousekey ? 0xFF8000 : 0xC0C0C0, align)) {
     displayfr(x, y, rad, size, title, 0xFFFF00, align);
     getcstat = SETMOUSEKEY, newmousekey = c;
     }
   }  
 
-bool displayButtonS(int x, int y, const string& name, color_t col, int align, int size) {
+EX bool displayButtonS(int x, int y, const string& name, color_t col, int align, int size) {
   if(displaystr(x, y, 0, size, name, col, align)) {
     displaystr(x, y, 0, size, name, 0xFFFF00, align);
     return true;
@@ -1156,7 +1159,7 @@ bool displayButtonS(int x, int y, const string& name, color_t col, int align, in
   else return false;
   }
 
-void displayColorButton(int x, int y, const string& name, int key, int align, int rad, color_t color, color_t color2) {
+EX void displayColorButton(int x, int y, const string& name, int key, int align, int rad, color_t color, color_t color2 IS(0)) {
   if(displayfr(x, y, rad, vid.fsize, name, color, align)) {
     if(color2) displayfr(x, y, rad, vid.fsize, name, color2, align);
     getcstat = key;
@@ -1171,22 +1174,22 @@ ld textscale() {
 
 bool setfsize = true;
 
-bool vsync_off;
+EX bool vsync_off;
 
-void do_setfsize() {
+EX void do_setfsize() {
   dual::split_or_do([&] {
     vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
     });
   }
 
-void disable_vsync() {
+EX void disable_vsync() {
 #if !ISMOBWEB
   SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
 #endif
   }
   
 #if CAP_SDL
-void setvideomode() {
+EX void setvideomode() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("setvideomode"));
   
@@ -1251,9 +1254,9 @@ void setvideomode() {
   }
 #endif
 
-bool noGUI = false;
+EX bool noGUI = false;
 
-void initgraph() {
+EX void initgraph() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("initgraph"));
   
@@ -1334,7 +1337,7 @@ void initgraph() {
     
   }
 
-void cleargraph() {
+EX void cleargraph() {
   DEBBI(DF_INIT, ("clear graph"));
 #if CAP_SDLTTF
   for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
@@ -1350,7 +1353,7 @@ void cleargraph() {
 #endif
   }
 
-int calcfps() {
+EX int calcfps() {
   #define CFPS 30
   static int last[CFPS], lidx = 0;
   int ct = ticks;
@@ -1361,18 +1364,18 @@ int calcfps() {
   return (1000 * CFPS) / ret;
   }
 
-namespace subscreens {
+EX namespace subscreens {
 
   vector<display_data> player_displays;
   bool in;
-  int current_player;
+  EX int current_player;
   
-  bool is_current_player(int id) {
+  EX bool is_current_player(int id) {
     if(!in) return true;
     return id == current_player;
     }
 
-  void prepare() {
+  EX void prepare() {
     int N = multi::players;
     if(N > 1) {
       player_displays.resize(N, *current_display);
@@ -1392,7 +1395,7 @@ namespace subscreens {
       }
     }
 
-  bool split(reaction_t what) {
+  EX bool split(reaction_t what) {
     using namespace racing;
     if(in) return false;
     if(!racing::on && !(shmup::on && DIM == 3)) return false;

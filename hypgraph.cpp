@@ -22,7 +22,7 @@ void camrotate(ld& hx, ld& hy) {
 
 hyperpoint perspective_to_space(hyperpoint h, ld alpha = vid.alpha, eGeometryClass geo = ginf[geometry].cclass);
 
-bool non_spatial_model() {
+EX bool non_spatial_model() {
   if(among(pmodel, mdRotatedHyperboles, mdJoukowsky, mdJoukowskyInverted, mdPolygonal, mdPolynomial))
     return true;
   if(pmodel == mdSpiral && euclid)
@@ -78,7 +78,7 @@ hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
   return z;
   }
 
-hyperpoint gethyper(ld x, ld y) {
+EX hyperpoint gethyper(ld x, ld y) {
 
   ld hx = (x - current_display->xcenter) / current_display->radius;
   ld hy = (y - current_display->ycenter) / current_display->radius / vid.stretch;
@@ -163,7 +163,7 @@ ld get_tz(hyperpoint H) {
   return tz;
   }
 
-ld atan2(hyperpoint h) {
+EX ld atan2(hyperpoint h) {
   return atan2(h[1], h[0]);
   }
 
@@ -302,7 +302,7 @@ hyperpoint compute_hybrid(hyperpoint H, int rootid) {
   return ret;
   }
 
-void applymodel(hyperpoint H, hyperpoint& ret) {
+EX void applymodel(hyperpoint H, hyperpoint& ret) {
 
   hyperpoint H_orig = H;
   
@@ -764,12 +764,12 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
 // game-related graphics
 
-transmatrix sphereflip; // on the sphere, flip
-bool playerfound; // has player been found in the last drawing?
+EX transmatrix sphereflip; // on the sphere, flip
+EX bool playerfound; // has player been found in the last drawing?
 
 double q3 = sqrt(double(3));
 
-bool outofmap(hyperpoint h) {
+EX bool outofmap(hyperpoint h) {
   if(GDIM == 3)
     return false;
   else if(euclid) 
@@ -807,7 +807,7 @@ double zgrad0(double l1, double l2, int nom, int den) {
   return lev_to_factor(l1 + (l2-l1) * nom / den);
   }
 
-bool behindsphere(const hyperpoint& h) {
+EX bool behindsphere(const hyperpoint& h) {
   if(!sphere) return false;
 
   if(mdBandAny()) return false;
@@ -843,7 +843,7 @@ ld spherity(const hyperpoint& h) {
   return 1;
   }
 
-bool behindsphere(const transmatrix& V) {
+EX bool behindsphere(const transmatrix& V) {
   return behindsphere(tC0(V));
   }
 
@@ -879,7 +879,7 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
-bool point_behind(hyperpoint h) {
+EX bool point_behind(hyperpoint h) {
   if(sphere) return false;
   if(!in_perspective()) return false;
   if(pmodel == mdGeodesic) h = nisot::inverse_exp(h, nisot::iLazy);
@@ -891,7 +891,7 @@ void raise_error() {
   println(hlog, "something wrong");
   }
   
-bool invalid_matrix(const transmatrix T) {
+EX bool invalid_matrix(const transmatrix T) {
   for(int i=0; i<DIM; i++) for(int j=0; j<DIM; j++)
     if(std::isnan(T[i][j]) || T[i][j] > 1e8 || T[i][j] < -1e8 || std::isinf(T[i][j]))
       return true;
@@ -899,11 +899,11 @@ bool invalid_matrix(const transmatrix T) {
   return true;
   }
   
-bool invalid_point(const hyperpoint h) {
+EX bool invalid_point(const hyperpoint h) {
   return std::isnan(h[DIM]) || h[DIM] > 1e8 || std::isinf(h[DIM]);
   }
 
-bool in_smart_range(const transmatrix& T) {
+EX bool in_smart_range(const transmatrix& T) {
   hyperpoint h = tC0(T);
   if(invalid_point(h)) return false;
   if(nil) return true;
@@ -1176,7 +1176,7 @@ transmatrix eumovedir(int d) {
   return eumove(0,0);
   }
 
-void spinEdge(ld aspd) { 
+EX void spinEdge(ld aspd) { 
   ld downspin = 0;
   if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
     transmatrix our   = dual::get_orientation();
@@ -1223,7 +1223,7 @@ void spinEdge(ld aspd) {
   View = spin(downspin) * View;  
   }
 
-void centerpc(ld aspd) { 
+EX void centerpc(ld aspd) { 
   
   if(subscreens::split([=] () {centerpc(aspd);})) return;
   if(dual::split([=] () { centerpc(aspd); })) return;
@@ -1307,7 +1307,7 @@ void centerpc(ld aspd) {
   ors::rerotate(cwtV); ors::rerotate(View);
   }
 
-void optimizeview() {
+EX void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
@@ -1392,7 +1392,7 @@ void ballgeometry() {
   queuereset(pmodel, PPR::CIRCLE);
   }
 
-void resetview() {
+EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   View = conformal::rotmatrix();
   // EUCLIDEAN
@@ -1412,9 +1412,9 @@ void panning(hyperpoint hf, hyperpoint ht) {
   playermoved = false;
   }
 
-int cells_drawn, cells_generated;
+EX int cells_drawn, cells_generated;
 
-void fullcenter() {
+EX void fullcenter() {
   conformal::path_for_lineanimation.clear();
   if(playerfound && false) centerpc(INF);
   else {
@@ -1434,7 +1434,7 @@ transmatrix screenpos(ld x, ld y) {
   return V;
   }
 
-transmatrix atscreenpos(ld x, ld y, ld size) {
+EX transmatrix atscreenpos(ld x, ld y, ld size) {
   transmatrix V = Id;
   
   if(pmodel == mdFlatten) {
@@ -1481,7 +1481,7 @@ color_t ringcolor = darkena(0xFF, 0, 0xFF);
 color_t modelcolor = 0;
 
 #if CAP_QUEUE
-void draw_model_elements() {
+EX void draw_model_elements() {
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
@@ -1602,7 +1602,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
     } */
   }
 
-void draw_boundary(int w) {
+EX void draw_boundary(int w) {
 
   if(w == 1) return;
   if(nonisotropic || euclid) return;
@@ -1802,8 +1802,8 @@ void draw_boundary(int w) {
   }
 #endif
 
-ld band_shift = 0;
-void fix_the_band(transmatrix& T) {
+EX ld band_shift = 0;
+EX void fix_the_band(transmatrix& T) {
   if(((models[pmodel].flags & mf::quasiband) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
     hyperpoint H = tC0(T);
     find_zlev(H);
@@ -1821,6 +1821,13 @@ void fix_the_band(transmatrix& T) {
     // todo orientation
     }
   }
+
+#if HDR
+struct bandfixer {
+  dynamicval<ld> bw;
+  bandfixer(transmatrix& T) : bw(band_shift, band_shift) { fix_the_band(T); }
+  };
+#endif
 
 namespace dq {
   queue<tuple<heptagon*, transmatrix, ld>> drawqueue;
@@ -1844,7 +1851,7 @@ namespace dq {
   #endif
   }
 
-bool do_draw(cell *c) {
+EX bool do_draw(cell *c) {
   // do not display out of range cells, unless on torus
   if(c->pathdist == PINFD && geometry != gTorus && vid.use_smart_range == 0)
     return false;
@@ -1856,7 +1863,7 @@ bool do_draw(cell *c) {
   return true;
   }  
 
-ld extra_generation_distance = 99;
+EX ld extra_generation_distance = 99;
 
 // returns false if limited
 bool limited_generation(cell *c) {
@@ -1867,7 +1874,7 @@ bool limited_generation(cell *c) {
   return true;
   }
 
-bool do_draw(cell *c, const transmatrix& T) {
+EX bool do_draw(cell *c, const transmatrix& T) {
 
   PROD( if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); }); )
   if(WDIM == 3) {
@@ -1917,7 +1924,7 @@ bool do_draw(cell *c, const transmatrix& T) {
   return true; 
   }
 
-int cone_side(const hyperpoint H) {
+EX int cone_side(const hyperpoint H) {
   hyperpoint ret;
   if(hyperbolic) makeband(H, ret, band_conformal);
   else ret = H;

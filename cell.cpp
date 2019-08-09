@@ -5,18 +5,16 @@
 
 namespace hr {
 
-int dirdiff(int dd, int t) {
+EX int dirdiff(int dd, int t) {
   dd %= t;
   if(dd<0) dd += t;
   if(t-dd < dd) dd = t-dd;
   return dd;
   }
 
-int cellcount = 0;
+EX int cellcount = 0;
 
-void initcell(cell *c); // from game.cpp
-
-cell *newCell(int type, heptagon *master) {
+EX cell *newCell(int type, heptagon *master) {
   cell *c = tailored_alloc<cell> (type);
   c->type = type;
   c->master = master;
@@ -26,10 +24,10 @@ cell *newCell(int type, heptagon *master) {
 
 // -- hrmap ---
 
-hrmap *currentmap;
-vector<hrmap*> allmaps;
+EX hrmap *currentmap;
+EX vector<hrmap*> allmaps;
 
-hrmap *newAltMap(heptagon *o) { return new hrmap_hyperbolic(o); }
+EX hrmap *newAltMap(heptagon *o) { return new hrmap_hyperbolic(o); }
 // --- hyperbolic geometry ---
 
 hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
@@ -71,7 +69,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   }
 
 // very similar to createMove in heptagon.cpp
-cell *createMov(cell *c, int d) {
+EX cell *createMov(cell *c, int d) {
   if(d<0 || d>= c->type) {
     printf("ERROR createmov\n");
     }
@@ -159,7 +157,7 @@ cell *createMov(cell *c, int d) {
   return c->move(d);
   }
 
-void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
+EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
   if(!c2) return;
   c1->move(s1) = c2; c1->c.setspin(s1, s2, mirror);
   c2->move(s2) = c1; c2->c.setspin(s2, s1, mirror);
@@ -167,13 +165,13 @@ void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
-euc_pointer euclideanAt(int vec) {
+EX euc_pointer euclideanAt(int vec) {
   if(fulltorus) { printf("euclideanAt called\n"); exit(1); }
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   return euc->at(vec);
   }
 
-euc_pointer euclideanAtCreate(int vec) {
+EX euc_pointer euclideanAtCreate(int vec) {
   euc_pointer ep = euclideanAt(vec);
   cell*& c = *ep.first;
   if(!c) {
@@ -200,7 +198,7 @@ euc_pointer euclideanAtCreate(int vec) {
 hookset<hrmap*()> *hooks_newmap;
 
 // initializer (also inits origin from heptagon.cpp)
-void initcells() {
+EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
@@ -240,7 +238,7 @@ void initcells() {
   // origin->emeraldval = 
   }
 
-void clearcell(cell *c) {
+EX void clearcell(cell *c) {
   if(!c) return;
   DEBB(DF_MEMORY, (format("c%d %p\n", c->type, c)));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
@@ -256,7 +254,7 @@ void clearcell(cell *c) {
   tailored_delete(c);
   }
 
-heptagon deletion_marker;
+EX heptagon deletion_marker;
 
 template<class T> void subcell(cell *c, const T& t) {
   if(GOLDBERG) {
@@ -269,7 +267,7 @@ template<class T> void subcell(cell *c, const T& t) {
   t(c);
   }
 
-void clearHexes(heptagon *at) {
+EX void clearHexes(heptagon *at) {
   if(at->c7 && at->cdata) {
     delete at->cdata;
     at->cdata = NULL;
@@ -288,7 +286,7 @@ void unlink_cdata(heptagon *h) {
     }
   }
 
-void clearfrom(heptagon *at) {
+EX void clearfrom(heptagon *at) {
   if(!at) return;
   queue<heptagon*> q;
   unlink_cdata(at);
@@ -332,7 +330,7 @@ void clearfrom(heptagon *at) {
 //printf("maxq = %d\n", maxq);
   }
 
-void verifycell(cell *c) {
+EX void verifycell(cell *c) {
   int t = c->type;
   for(int i=0; i<t; i++) {
     cell *c2 = c->move(i);
@@ -346,7 +344,7 @@ void verifycell(cell *c) {
     }
   }
 
-void verifycells(heptagon *at) {
+EX void verifycells(heptagon *at) {
   if(GOLDBERG || IRREGULAR || archimedean) return;
   for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
@@ -357,7 +355,7 @@ void verifycells(heptagon *at) {
   verifycell(at->c7);
   }
 
-int eudist(int sx, int sy) {
+EX int eudist(int sx, int sy) {
   int z0 = abs(sx);
   int z1 = abs(sy);
   if(a4 && BITRUNCATED)
@@ -367,12 +365,12 @@ int eudist(int sx, int sy) {
   return max(max(z0,z1), z2);
   }
 
-int eudist(int vec) {
+EX int eudist(int vec) {
   auto p = vec_to_pair(vec);
   return eudist(p.first, p.second);
   }
 
-int compdist(int dx[]) {
+EX int compdist(int dx[]) {
   int mi = dx[0];
   for(int u=0; u<S3; u++) mi = min(mi, dx[u]);
   for(int u=0; u<S3; u++) 
@@ -389,7 +387,7 @@ int compdist(int dx[]) {
   return mi;
   }
 
-int celldist(cell *c) {
+EX int celldist(cell *c) {
   if(fulltorus && WDIM == 2) 
     return torusmap()->dists[decodeId(c->master)];
   if(nil) return DISTANCE_UNKNOWN;
@@ -412,12 +410,13 @@ int celldist(cell *c) {
   return compdist(dx);
   }
 
-#define ALTDIST_BOUNDARY 99999
-#define ALTDIST_UNKNOWN 99998
+#if HDR
+static const int ALTDIST_BOUNDARY = 99999;
+static const int ALTDIST_UNKNOWN = 99998;
+static const int ALTDIST_ERROR = 90000;
+#endif
 
-#define ALTDIST_ERROR 90000
-
-int celldistAlt(cell *c) {
+EX int celldistAlt(cell *c) {
   if(masterless) {
     if(fulltorus) return celldist(c);
     if(euwrap) return cylinder_alt(c);
@@ -463,20 +462,19 @@ int celldistAlt(cell *c) {
   return mi;
   }
 
-int dirfromto(cell *cfrom, cell *cto) {
+EX int dirfromto(cell *cfrom, cell *cto) {
   for(int i=0; i<cfrom->type; i++) if(cfrom->move(i) == cto) return i;
   return -1;
   }
 
-#define RPV_MODULO 5
-
-#define RPV_RAND 0
-#define RPV_ZEBRA 1
-#define RPV_EMERALD 2
-#define RPV_PALACE 3
-#define RPV_CYCLE 4
-
-int getCdata(cell *c, int j);
+#if HDR
+static const int RPV_MODULO = 5;
+static const int RPV_RAND = 0;
+static const int RPV_ZEBRA = 1;
+static const int RPV_EMERALD = 2;
+static const int RPV_PALACE = 3;
+static const int RPV_CYCLE = 4;
+#endif
 
 // x mod 5 = pattern type
 // x mod (powers of 2) = pattern type specific
@@ -484,7 +482,7 @@ int getCdata(cell *c, int j);
 // x mod 7 = chance of pattern-specific pic
 // whole = randomization
 
-bool randpattern(cell *c, int rval) {
+EX bool randpattern(cell *c, int rval) {
   int i, sw=0;
   switch(rval%5) {
     case 0:
@@ -527,7 +525,7 @@ bool randpattern(cell *c, int rval) {
   return 0;
   }
 
-string describeRPM(eLand l) {
+EX string describeRPM(eLand l) {
   int rval = randompattern[l];
   switch(rval%5) {
     case 0:
@@ -547,7 +545,7 @@ string describeRPM(eLand l) {
   return "?";
   }
 
-int randpatternCode(cell *c, int rval) {
+EX int randpatternCode(cell *c, int rval) {
   switch(rval % RPV_MODULO) {
     case 1:
       return zebra40(c);
@@ -565,12 +563,12 @@ int randpatternCode(cell *c, int rval) {
 
 char rpm_memoize[3][256][RANDITER+1];
 
-void clearMemoRPM() {
+EX void clearMemoRPM() {
   for(int a=0; a<3; a++) for(int b=0; b<256; b++) for(int i=0; i<RANDITER+1; i++)
     rpm_memoize[a][b][i] = 2;
   }
 
-bool randpatternMajority(cell *c, int ival, int iterations) {
+EX bool randpatternMajority(cell *c, int ival, int iterations) {
   int rval = 0;
   if(ival == 0) rval = randompattern[laCaves];
   if(ival == 1) rval = randompattern[laLivefjord];
@@ -597,7 +595,7 @@ bool randpatternMajority(cell *c, int ival, int iterations) {
 
 cdata orig_cdata;
 
-bool geometry_supports_cdata() {
+EX bool geometry_supports_cdata() {
   return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (archimedean && !sphere);
   }
 
@@ -618,7 +616,7 @@ void setHeptagonRval(heptagon *h) {
     }
   }
 
-bool dmeq(int a, int b) { return (a&3) == (b&3); }
+EX bool dmeq(int a, int b) { return (a&3) == (b&3); }
 
 /* kept for compatibility: Racing etc. */
 cdata *getHeptagonCdata_legacy(heptagon *h) {
@@ -805,19 +803,19 @@ int ld_to_int(ld x) {
   return int(x + 1000000.5) - 1000000;
   }
 
-int pseudocoords(cell *c) {
+EX int pseudocoords(cell *c) {
   transmatrix T = arcm::archimedean_gmatrix[c->master].second;
   return pair_to_vec(ld_to_int(T[0][GDIM]), ld_to_int((spin(60*degree) * T)[0][GDIM]));
   }
 
-cdata *arcmCdata(cell *c) {
+EX cdata *arcmCdata(cell *c) {
   heptagon *h2 = arcm::archimedean_gmatrix[c->master].first;
   dynamicval<eGeometry> g(geometry, gNormal); 
   dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);  
   return getHeptagonCdata(h2);
   }
 
-int getCdata(cell *c, int j) {
+EX int getCdata(cell *c, int j) {
   if(masterless) return getEuclidCdata(decodeId(c->master))->val[j];
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
@@ -834,7 +832,7 @@ int getCdata(cell *c, int j) {
     }
   }
 
-int getBits(cell *c) {
+EX int getBits(cell *c) {
   if(masterless) return getEuclidCdata(decodeId(c->master))->bits;
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
@@ -851,7 +849,7 @@ int getBits(cell *c) {
     }
   }
 
-cell *heptatdir(cell *c, int d) {
+EX cell *heptatdir(cell *c, int d) {
   if(d&1) {
     cell *c2 = createMov(c, d);
     int s = c->c.spin(d);
@@ -861,7 +859,7 @@ cell *heptatdir(cell *c, int d) {
   else return createMov(c, d);
   }
 
-int heptdistance(heptagon *h1, heptagon *h2) {
+EX int heptdistance(heptagon *h1, heptagon *h2) {
   // very rough distance
   int d = 0;
   #if CAP_CRYSTAL
@@ -877,7 +875,7 @@ int heptdistance(heptagon *h1, heptagon *h2) {
     }
   }
 
-int heptdistance(cell *c1, cell *c2) {
+EX int heptdistance(cell *c1, cell *c2) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::space_distance(c1, c2);
   #endif
@@ -893,7 +891,7 @@ set<cell*> dists_computed;
 
 int perma_distances;
 
-void compute_saved_distances(cell *c1, int max_range, int climit) {
+EX void compute_saved_distances(cell *c1, int max_range, int climit) {
     
   celllister cl(c1, max_range, climit, NULL);
 
@@ -901,7 +899,7 @@ void compute_saved_distances(cell *c1, int max_range, int climit) {
     saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
   }
 
-void permanent_long_distances(cell *c1) {
+EX void permanent_long_distances(cell *c1) {
   keep_distances_from.insert(c1);
   if(racing::on)
     compute_saved_distances(c1, 300, 1000000);
@@ -909,14 +907,14 @@ void permanent_long_distances(cell *c1) {
     compute_saved_distances(c1, 120, 200000);
   }
 
-void erase_saved_distances() {
+EX void erase_saved_distances() {
   saved_distances.clear(); dists_computed.clear();
   
   for(auto c: keep_distances_from) compute_saved_distances(c, 120, 200000);
   perma_distances = isize(saved_distances);
   }
 
-cell *random_in_distance(cell *c, int d) {
+EX cell *random_in_distance(cell *c, int d) {
   vector<cell*> choices;
   for(auto& p: saved_distances) println(hlog, p);
 
@@ -926,7 +924,7 @@ cell *random_in_distance(cell *c, int d) {
   return choices[hrand(isize(choices))];
   }
 
-int celldistance(cell *c1, cell *c2) {
+EX int celldistance(cell *c1, cell *c2) {
   
   if((masterless) && (euclid6 || (euclid4 && PURE))) {
     if(!euwrap)
@@ -994,7 +992,7 @@ int celldistance(cell *c1, cell *c2) {
   return hyperbolic_celldistance(c1, c2);
   }
 
-vector<cell*> build_shortest_path(cell *c1, cell *c2) {
+EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   #if CAP_CRYSTAL
   if(geometry == gCrystal) return crystal::build_shortest_path(c1, c2);
   #endif
@@ -1047,7 +1045,7 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   return p;
   }
 
-void clearCellMemory() {
+EX void clearCellMemory() {
   for(int i=0; i<isize(allmaps); i++) 
     if(allmaps[i])
       delete allmaps[i];

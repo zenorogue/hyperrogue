@@ -27,7 +27,7 @@ struct blizzardcell {
 
 map<cell*, blizzardcell> blizzardcells;
 
-void set_blizzard_frame(cell *c, int frameid) {
+EX void set_blizzard_frame(cell *c, int frameid) {
   blizzardcells[c].frame = frameid;
   }
 
@@ -42,7 +42,7 @@ blizzardcell* getbcell(cell *c) {
   return bcells[i];
   }
 
-void drawBlizzards() {
+EX void drawBlizzards() {
   #if CAP_SHAPES && CAP_FIELD
   poly_outline = OUTLINE_NONE;
   auto it = blizzardcells.begin();
@@ -207,7 +207,7 @@ void drawBlizzards() {
        
 vector<cell*> arrowtraps;
 
-void drawArrowTraps() {
+EX void drawArrowTraps() {
   for(cell *c: arrowtraps) {
     auto r = traplimits(c);
     

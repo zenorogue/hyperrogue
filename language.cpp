@@ -7,10 +7,10 @@
 
 namespace hr {
 
-const char *dnameof(eMonster m) { return minf[m].name; }
-const char *dnameof(eLand l) { return linf[l].name; }
-const char *dnameof(eWall w) { return winf[w].name; }
-const char *dnameof(eItem i) { return iinf[i].name; }
+EX const char *dnameof(eMonster m) { return minf[m].name; }
+EX const char *dnameof(eLand l) { return linf[l].name; }
+EX const char *dnameof(eWall w) { return winf[w].name; }
+EX const char *dnameof(eItem i) { return iinf[i].name; }
 
 /*
 string dnameofEnum(eItem i) {
@@ -112,13 +112,9 @@ string choose4(int g, string a, string b, string c, string d) {
   return "unknown genus";
   }
 
-int playergender();
-int princessgender();
-int lang();
-
 set<string> warnshown;
 
-void basicrep(string& x) { 
+void basicrep(string& x) {
 
 #if CAP_TRANS
   const sentence *s = findInHashTable(x, all_sentences);
@@ -324,25 +320,25 @@ void parrep(string& x, string w, stringpar p) {
 void postrep(string& s) {
   }
 
-string XLAT(string x) { 
+EX string XLAT(string x) { 
   basicrep(x);
   postrep(x);
   return x;
   }
-string XLAT(string x, stringpar p1) { 
+EX string XLAT(string x, stringpar p1) { 
   basicrep(x);
   parrep(x,"1",p1.v);
   postrep(x);
   return x;
   }
-string XLAT(string x, stringpar p1, stringpar p2) { 
+EX string XLAT(string x, stringpar p1, stringpar p2) { 
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
   postrep(x);
   return x;
   }
-string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) { 
+EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) { 
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
@@ -350,7 +346,7 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) {
   postrep(x);
   return x;
   }
-string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) { 
+EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) { 
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
@@ -359,7 +355,7 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) {
   postrep(x);
   return x;
   }
-string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5) { 
+EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5) { 
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
@@ -371,7 +367,7 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, st
   }
 
 
-string XLATN(string x) { 
+EX string XLATN(string x) { 
 #if CAP_TRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);
@@ -381,7 +377,7 @@ string XLATN(string x) {
   return x;
   }
 
-string XLAT1(string x) { 
+EX string XLAT1(string x) {
 #if CAP_TRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);
@@ -391,6 +387,6 @@ string XLAT1(string x) {
   return x;
   }
 
-string XLATT1(stringpar p) { return XLAT1(p.v); }
+EX string XLATT1(stringpar p) { return XLAT1(p.v); }
 
 }

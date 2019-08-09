@@ -7,8 +7,8 @@
 #define REDDISH 0x400000
 
 namespace hr {
-ld whatever[16];
-int whateveri[16];
+EX ld whatever[16];
+EX int whateveri[16];
 
 int PREC(ld x) {
   ld sh = shiftmul;
@@ -16,7 +16,7 @@ int PREC(ld x) {
   return int(shiftmul * x);
   }
 
-void showOverview() {
+EX void showOverview() {
   cmode = sm::ZOOMABLE | sm::OVERVIEW;  
   DEBBI(DF_GRAPH, ("show overview"));
 
@@ -201,9 +201,9 @@ void showOverview() {
 
 // -- main menu --
 
-purehookset hooks_mainmenu;
+EX purehookset hooks_mainmenu;
 
-void showMainMenu() {
+EX void showMainMenu() {
   gamescreen(2);
 
   getcstat = ' ';
@@ -320,13 +320,13 @@ void showMainMenu() {
 
 // -- display modes --
 
-void editScale() {
+EX void editScale() {
   dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
     XLAT("Scale the displayed model."));
   dialog::scaleSinh();
   }
 
-void showGraphQuickKeys() {
+EX void showGraphQuickKeys() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
 
@@ -370,7 +370,7 @@ void showGraphQuickKeys() {
     };
   }
 
-void enable_cheat() {
+EX void enable_cheat() {
   if(tactic::on && gold()) {
     addMessage(XLAT("Not available in the pure tactics mode!"));
     }
@@ -394,7 +394,7 @@ void enable_cheat() {
   
 // -- game modes -- 
 
-void switchHardcore() {
+EX void switchHardcore() {
   if(hardcore && !canmove) { 
     restart_game();
     hardcore = false;
@@ -408,7 +408,7 @@ void switchHardcore() {
   if(pureHardcore()) popScreenAll();
   }
 
-void showCreative() {
+EX void showCreative() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(3);
   dialog::init(XLAT("creative mode"));
@@ -476,7 +476,7 @@ void showCreative() {
   dialog::display();
   }
 
-void show_chaos() {
+EX void show_chaos() {
   gamescreen(3);
   dialog::init(XLAT("Chaos mode"));
   chaosUnlocked = chaosUnlocked || autocheat;
@@ -515,7 +515,7 @@ void show_chaos() {
   dialog::display();
   }
   
-void showChangeMode() {
+EX void showChangeMode() {
   gamescreen(3);
   dialog::init(XLAT("special modes"));
                                // gameplay modes
@@ -624,9 +624,9 @@ void showChangeMode() {
     };
   }
 
-bool showstartmenu;
+EX bool showstartmenu;
 
-bool showHalloween() {
+EX bool showHalloween() {
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
   int month = tm.tm_mon + 1;
@@ -640,7 +640,7 @@ int daily_mode;
 
 purehookset hooks_startmenu;
 
-void showStartMenu() {
+EX void showStartMenu() {
   if(!daily_mode) {
     daily_mode = hrand(10) + 1;
     if(showHalloween())
@@ -873,9 +873,14 @@ void showStartMenu() {
  
 // -- overview --
 
-hookset<named_functionality()> *hooks_o_key;
+#if HDR
+typedef pair<string, reaction_t> named_functionality;
+inline named_functionality named_dialog(string x, reaction_t dialog) { return named_functionality(x, [dialog] () { pushScreen(dialog); }); }
+#endif
 
-named_functionality get_o_key() {
+EX hookset<named_functionality()> *hooks_o_key;
+
+EX named_functionality get_o_key() {
 
   if(hooks_o_key) for(auto& h: *hooks_o_key) {
     auto res = h.second();
@@ -917,7 +922,7 @@ int messagelogpos;
 int timeformat;
 int stampbase;
 
-string gettimestamp(msginfo& m) {
+EX string gettimestamp(msginfo& m) {
   char buf[128]; 
   switch(timeformat) {
     case 0:
@@ -941,7 +946,7 @@ string gettimestamp(msginfo& m) {
   return "";
   }
   
-void showMessageLog() {
+EX void showMessageLog() {
   DEBBI(DF_GRAPH, ("show message log"));
 
   int lines = vid.yres / vid.fsize - 2;

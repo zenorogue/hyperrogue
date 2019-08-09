@@ -36,7 +36,7 @@ eMonster readMonster(const string& ss) {
   }
 }
 
-void initializeCLI() {
+EX void initializeCLI() {
   printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
 
 #if !NOLICENSE
@@ -277,9 +277,9 @@ int arg::readCommon() {
   return 0;
   }
 
-purehookset hooks_config;
+EX purehookset hooks_config;
 
-hookset<int()> *hooks_args;
+EX hookset<int()> *hooks_args;
 
 namespace arg {
   int curphase;

@@ -4,14 +4,14 @@
 
 namespace hr {
 
-ld bounded_mine_percentage = 0.1;
-int bounded_mine_quantity, bounded_mine_max;
+EX ld bounded_mine_percentage = 0.1;
+EX int bounded_mine_quantity, bounded_mine_max;
 
 const char *conffile = "hyperrogue.ini";
 
-array<ld, gGUARD> sightranges;
+EX array<ld, gGUARD> sightranges;
 
-videopar vid;
+EX videopar vid;
 
 #define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
 #define DEFAULT_MONMODE  (ISMOBILE ? 2 : 4)
@@ -62,7 +62,7 @@ void hwrite(hstream& hs, const charstyle& cs) {
 // void hread(hstream& hs, charstyle& cs) { hread_raw(hs, cs); }
 // void hwrite(hstream& hs, const charstyle& cs) { hwrite_raw(hs, cs); }
 
-string csnameid(int id) {
+EX string csnameid(int id) {
   if(id == 0) return XLAT("male");
   if(id == 1) return XLAT("female");
   if(id == 2) return XLAT("Prince");
@@ -73,22 +73,22 @@ string csnameid(int id) {
   return XLAT("none");
   }
 
-string csname(charstyle& cs) {
+EX string csname(charstyle& cs) {
   return csnameid(cs.charid);
   }
 
-int playergender() {
+EX int playergender() {
   return (getcs().charid >= 0 && (getcs().charid&1)) ? GEN_F : GEN_M; 
   }
-int princessgender() {
+EX int princessgender() {
   int g = playergender();
   if(vid.samegender) return g;
   return g == GEN_M ? GEN_F : GEN_M;
   }
 
-int default_language;
+EX int default_language;
 
-int lang() { 
+EX int lang() { 
   if(vid.language >= 0)
     return vid.language; 
   return default_language;
@@ -131,7 +131,7 @@ unsigned int dresscolors2[] = { 7, 0x8080FFC0, 0x80FF80C0, 0xFF8080C0, 0xFFFF80C
 unsigned int swordcolors[] = { 6, 0xC0C0C0FF, 0xFFFFFFFF, 0xFFC0C0FF, 0xC0C0FFFF, 0x808080FF, 0x202020FF };
 unsigned int eyecolors[] = { 4, 0x00C000FF, 0x0000C0FF, 0xC00000FF, 0xC0C000FF, 0x804010FF, 0x00C000FF };
 
-void initcs(charstyle &cs) {
+EX void initcs(charstyle &cs) {
   cs.charid     = 0;
   cs.skincolor  = 0xD0D0D0FF;
   cs.haircolor  = 0x686868FF;
@@ -143,12 +143,12 @@ void initcs(charstyle &cs) {
   cs.lefthanded = false;
   }
 
-void savecolortable(colortable& ct, string name) {
+EX void savecolortable(colortable& ct, string name) {
   for(int i=0; i<isize(ct); i++)
     addsaver(ct[i], "color:" + name + ":" + its(i));
   }
 
-void initConfig() {
+EX void initConfig() {
   
   // basic config
   addsaver(vid.flashtime, "flashtime", 8);
@@ -480,7 +480,7 @@ void initConfig() {
 #endif
   }
 
-bool inSpecialMode() {
+EX bool inSpecialMode() {
   return chaosmode || !BITRUNCATED || peace::on || 
   #if CAP_TOUR
     tour::on ||
@@ -491,7 +491,7 @@ bool inSpecialMode() {
     vid.wallmode != DEFAULT_WALLMODE;
   }
 
-bool have_current_settings() {
+EX bool have_current_settings() {
   int modecount = 0;
   if(inv::on) modecount++;
   if(shmup::on) modecount += 10;
@@ -512,7 +512,7 @@ bool have_current_settings() {
   return false;
   }
 
-bool have_current_graph_settings() {
+EX bool have_current_graph_settings() {
   if(vid.xposition || vid.yposition || vid.alpha != 1 || vid.scale != 1)
     return true;
   if(pmodel != mdDisk || vid.monmode != DEFAULT_MONMODE || vid.wallmode != DEFAULT_WALLMODE)
@@ -523,7 +523,7 @@ bool have_current_graph_settings() {
   return false;
   }
 
-void reset_graph_settings() {
+EX void reset_graph_settings() {
   pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
   vid.xposition = vid.yposition = 0;
   #if CAP_RUG
@@ -534,7 +534,7 @@ void reset_graph_settings() {
   vid.wallmode = DEFAULT_WALLMODE;
   }
 
-void resetModes(char leave) {
+EX void resetModes(char leave) {
   while(game_active || gamestack::pushed()) {
     if(game_active) stop_game();
     if(gamestack::pushed()) gamestack::pop();
@@ -565,7 +565,7 @@ void resetModes(char leave) {
   }
 
 #if CAP_CONFIG  
-void resetConfig() {
+EX void resetConfig() {
   dynamicval<int> rx(vid.xres, 0);
   dynamicval<int> ry(vid.yres, 0);
   dynamicval<int> rf(vid.fsize, 0);
@@ -577,7 +577,7 @@ void resetConfig() {
 #endif
 
 #if CAP_CONFIG
-void saveConfig() {
+EX void saveConfig() {
   DEBB(DF_INIT, ("save config\n"));
   FILE *f = fopen(conffile, "wt");
   if(!f) {
@@ -617,7 +617,7 @@ void readf(FILE *f, ld& x) {
 
 map<string, shared_ptr<supersaver> > allconfigs;
 
-void parseline(const string& str) {
+EX void parseline(const string& str) {
   if(str[0] == '#') return;
   for(int i=0; i<isize(str); i++) if(str[i] == '=') {
     string cname = str.substr(0, i);
@@ -632,7 +632,7 @@ void parseline(const string& str) {
   printf("Warning: config line without equality sign: %s\n", str.c_str());
   }
 
-void loadNewConfig(FILE *f) {
+EX void loadNewConfig(FILE *f) {
   for(auto& c: savers) allconfigs[c->name] = c;
   string rd;
   while(true) {
@@ -647,7 +647,7 @@ void loadNewConfig(FILE *f) {
   allconfigs.clear();
   }
 
-void loadConfig() {
+EX void loadConfig() {
  
   DEBB(DF_INIT, ("load config"));
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
@@ -675,7 +675,7 @@ void loadConfig() {
   }
 #endif
 
-void add_cells_drawn(char c = 'C') {
+EX void add_cells_drawn(char c IS('C')) {
   dialog::addSelItem(XLAT("cells drawn"), (noclipped ? its(cells_drawn) + " (" + its(noclipped) + ")" : its(cells_drawn)) + " / " + its(vid.cells_drawn_limit), c);
   dialog::add_action([] () { 
     popScreen();
@@ -705,7 +705,7 @@ string solhelp() {
     );
   }
 
-void edit_sightrange() {
+EX void edit_sightrange() {
   if(vid.use_smart_range) {
     ld& det = WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
     dialog::editNumber(det, 1, 50, 1, WDIM == 2 ? 8 : 30, XLAT("minimum visible cell in pixels"), "");
@@ -799,7 +799,7 @@ void edit_sightrange() {
     };
   }
 
-void menuitem_sightrange(char c) {
+EX void menuitem_sightrange(char c) {
   if(vid.use_smart_range)
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
   else if(pmodel == mdGeodesic && sol)
@@ -811,7 +811,7 @@ void menuitem_sightrange(char c) {
   dialog::add_action(edit_sightrange);
   }
   
-void showGraphConfig() {
+EX void showGraphConfig() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
 
@@ -933,7 +933,7 @@ void showGraphConfig() {
     };
   }
   
-void switchFullscreen() {
+EX void switchFullscreen() {
   vid.full = !vid.full;
 #if ISANDROID
   addMessage(XLAT("Reenter HyperRogue to apply this setting"));
@@ -950,7 +950,7 @@ void switchFullscreen() {
 #endif
   }
 
-void switchGL() {
+EX void switchGL() {
   vid.usingGL = !vid.usingGL;
   if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
   if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
@@ -963,9 +963,7 @@ void switchGL() {
 #endif
   }
 
-void resetConfigMenu();
-
-void edit_whatever(char type, int index) {
+EX void edit_whatever(char type, int index) {
   if(type == 'f') {
     dialog::editNumber(whatever[index], -10, 10, 1, 0, XLAT("whatever"), 
       "f:" + its(index));
@@ -986,7 +984,7 @@ void edit_whatever(char type, int index) {
     };
   }
 
-void configureOther() {
+EX void configureOther() {
   gamescreen(3);
 
   dialog::init(XLAT("other settings"));
@@ -1047,7 +1045,7 @@ void configureOther() {
   dialog::display();
   }
 
-void configureInterface() {
+EX void configureInterface() {
   gamescreen(3);
   dialog::init(XLAT("interface"));
 
@@ -1112,7 +1110,7 @@ void configureInterface() {
   }
 
 #if CAP_SDLJOY
-void showJoyConfig() {
+EX void showJoyConfig() {
   gamescreen(4);
 
   dialog::init(XLAT("joystick configuration"));
@@ -1160,7 +1158,7 @@ void showJoyConfig() {
   }
 #endif
 
-void projectionDialog() {
+EX void projectionDialog() {
   vid.tc_alpha = ticks;
   dialog::editNumber(vid.alpha, -5, 5, .1, 1,
     XLAT("projection"),
@@ -1194,7 +1192,7 @@ void projectionDialog() {
     };
   }
 
-void explain_detail() {
+EX void explain_detail() {
   dialog::addHelp(XLAT(
     "Objects at distance less than %1 absolute units "
     "from the center will be displayed with high "
@@ -1203,7 +1201,7 @@ void explain_detail() {
     ));
   }
 
-void add_edit_fov(char key = 'f') {
+EX void add_edit_fov(char key IS('f')) {
   dialog::addSelItem(XLAT("field of view"), fts(vid.fov) + "°", key);
   dialog::add_action([] {
     dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
@@ -1217,7 +1215,7 @@ void add_edit_fov(char key = 'f') {
     });
   }
 
-void showStereo() {
+EX void showStereo() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("stereo vision config"));
@@ -1287,7 +1285,7 @@ void showStereo() {
     };
   }
 
-void config_camera_rotation() {
+EX void config_camera_rotation() {
   dialog::editNumber(vid.ballangle, 0, 90, 5, 0, XLAT("camera rotation in 3D models"), 
     "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
     "Note that hyperboloid and hemisphere models are also available in the "
@@ -1298,7 +1296,7 @@ void config_camera_rotation() {
     );
   }
 
-void add_edit_wall_quality(char c) {
+EX void add_edit_wall_quality(char c) {
   dialog::addSelItem(XLAT("wall quality"), its(vid.texture_step), c);
   dialog::add_action([] {
     dialog::editNumber(vid.texture_step, 1, 16, 1, 1, XLAT("wall quality"), 
@@ -1324,7 +1322,7 @@ void add_edit_wall_quality(char c) {
     });
   }
 
-void show3D() {
+EX void show3D() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("3D configuration"));
@@ -1608,14 +1606,14 @@ void show3D() {
     };
   }
 
-void switchcolor(unsigned int& c, unsigned int* cs) {
+EX void switchcolor(unsigned int& c, unsigned int* cs) {
   dialog::openColorDialog(c, cs);
   }
 
 double cc_footphase;
 int lmousex, lmousey;
 
-void showCustomizeChar() {
+EX void showCustomizeChar() {
 
   cc_footphase += hypot(mousex - lmousex, mousey - lmousey);
   lmousex = mousex; lmousey = mousey;
@@ -1690,7 +1688,7 @@ void showCustomizeChar() {
     };
   }
 
-void refresh_canvas() {
+EX void refresh_canvas() {
   manual_celllister cl;
   cl.add(cwt.at);
     
@@ -1704,7 +1702,7 @@ void refresh_canvas() {
     }
   }
 
-void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
+EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t())) {
   cmode = sm::SIDE;
   gamescreen(0);
   dialog::init(XLAT("colors & aura"));
@@ -1718,7 +1716,7 @@ void edit_color_table(colortable& ct, const reaction_t& r = reaction_t()) {
   dialog::display();
   }
 
-void show_color_dialog() {
+EX void show_color_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   getcstat = '-';
   gamescreen(0);
@@ -1825,7 +1823,7 @@ void show_color_dialog() {
   }
 
 #if CAP_CONFIG
-void resetConfigMenu() {
+EX void resetConfigMenu() {
   dialog::init(XLAT("reset all configuration"));
   dialog::addInfo("Are you sure?");
   dialog::addItem("yes, and delete the config file", 'd');
@@ -1857,7 +1855,7 @@ void resetConfigMenu() {
 #endif
 
 #if CAP_TRANS
-void selectLanguageScreen() {
+EX void selectLanguageScreen() {
   gamescreen(4);
   dialog::init("select language"); // intentionally not translated
 
@@ -1915,7 +1913,7 @@ void selectLanguageScreen() {
   }
 #endif
 
-void configureMouse() {
+EX void configureMouse() {
   gamescreen(1);
   dialog::init(XLAT("mouse & touchscreen"));
 
@@ -1957,7 +1955,7 @@ void configureMouse() {
   dialog::display();
   }
 
-void showSettings() {
+EX void showSettings() {
   gamescreen(1);
   dialog::init(XLAT("settings"));
 
@@ -2010,7 +2008,7 @@ void showSettings() {
 
 #if CAP_COMMANDLINE
 
-int read_color_args() {
+EX int read_color_args() {
   using namespace arg;
 
   if(argis("-back")) {
@@ -2049,7 +2047,7 @@ int read_color_args() {
   return 0;
   }
 
-int read_config_args() {
+EX int read_config_args() {
   using namespace arg;
 
   if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
@@ -2194,7 +2192,7 @@ int read_config_args() {
 
 // mode changes:
 
-int read_gamemode_args() {
+EX int read_gamemode_args() {
   using namespace arg;
 
   if(argis("-P")) { 

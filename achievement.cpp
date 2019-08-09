@@ -5,9 +5,9 @@ namespace hr {
 
 #define NUMLEADER 82
 
-bool offlineMode = false;
+EX bool offlineMode = false;
 
-const char* leadernames[NUMLEADER] = {
+EX const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
@@ -73,13 +73,14 @@ const char* leadernames[NUMLEADER] = {
 #define LB_HALLOWEEN  63
 #define LB_RACING 81
 
-void upload_score(int id, int v);
+EX void upload_score(int id, int v);
 
 string achievementMessage[3];
 int achievementTimer;
-vector<string> achievementsReceived;
+// achievements received this game
+EX vector<string> achievementsReceived;
 
-bool wrongMode(char flags) {
+EX bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == rg::global) return false;
 
@@ -106,7 +107,7 @@ bool wrongMode(char flags) {
   return false;
   }
 
-void achievement_log(const char* s, char flags) {
+EX void achievement_log(const char* s, char flags) {
 
 #ifdef PRINT_ACHIEVEMENTS
   printf("achievement = %s [%d]\n", s, wrongMode(flags));
@@ -136,6 +137,14 @@ void achievement_log(const char* s, char flags) {
 #endif
   }
 
+EX void achievement_init();
+EX string myname();
+EX void achievement_close();
+// gain the achievement with the given name.
+// flags: 'e' - for Euclidean, 's' - for Shmup, '7' - for heptagonal
+// Only awarded if special modes are matched exactly.
+EX void achievement_gain(const char* s, char flags IS(0));
+
 #if ISSTEAM
 void improveItemScores();
 #include "private/hypersteam.cpp"
@@ -143,12 +152,16 @@ void improveItemScores();
 void achievement_init() {}
 string myname() { return "Rogue"; }
 void achievement_close() {}
-void achievement_gain(const char* s, char flags) {
+// gain the achievement with the given name.
+// flags: 'e' - for Euclidean, 's' - for Shmup, '7' - for heptagonal
+// Only awarded if special modes are matched exactly.
+void achievement_gain(const char* s, char flags IS(0)) {
   achievement_log(s, flags);
   }
 #endif
 
-void achievement_collection(eItem it, int prevgold, int newgold) {
+// gain the achievement for collecting a number of 'it'.
+EX void achievement_collection(eItem it, int prevgold, int newgold) {
   if(cheater) return;
   if(randomPatternsMode) return;
   int q = items[it];
@@ -456,7 +469,8 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     }
   }
 
-void achievement_count(const string& s, int current, int prev) {
+// this is used for 'counting' achievements, such as kill 10 monsters at the same time.
+EX void achievement_count(const string& s, int current, int prev) {
   if(cheater) return;
   if(shmup::on) return;
   if(randomPatternsMode) return;
@@ -503,7 +517,7 @@ void achievement_count(const string& s, int current, int prev) {
 int specific_improved = 0;
 int specific_what = 0;
 
-void improve_score(int i, eItem what) {
+EX void improve_score(int i, eItem what) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(haveLeaderboard(i)) updateHi(what, get_currentscore(i));
@@ -516,7 +530,8 @@ void improve_score(int i, eItem what) {
 #endif
   }
 
-void achievement_score(int cat, int number) {
+// scores for special challenges
+EX void achievement_score(int cat, int number) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
@@ -537,7 +552,7 @@ void achievement_score(int cat, int number) {
 #endif
   }
 
-void improveItemScores() {
+EX void improveItemScores() {
   for(int i=1; i<=12; i++) improve_score(i, eItem(i));
   improve_score(17, itOrbYendor);
   improve_score(18, itFernFlower);
@@ -600,7 +615,9 @@ void improveItemScores() {
 
 int next_stat_tick;
 
-void achievement_final(bool really_final) {
+// gain the final achievements. Called with really=false whenever the user
+// looks at their score, and really=true when the game really ends.
+EX void achievement_final(bool really_final) {
   if(offlineMode) return;
 
 #ifdef HAVE_ACHIEVEMENTS
@@ -703,9 +720,9 @@ void achievement_final(bool really_final) {
 #endif
   }
 
-bool hadtotalvictory;
+EX bool hadtotalvictory;
 
-void check_total_victory() {
+EX void check_total_victory() {
   if(!inv::on) return;
   if(hadtotalvictory) return;
   if(!items[itOrbYendor]) return;
@@ -716,7 +733,9 @@ void check_total_victory() {
   achievement_gain("TOTALVICTORY");
   }
   
-void achievement_victory(bool hyper) {
+// gain the victory achievements. Set 'hyper' to true for
+// the Hyperstone victory, and false for the Orb of Yendor victory.
+EX void achievement_victory(bool hyper) {
   DEBBI(DF_STEAM, ("achievement_victory"))
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
@@ -786,13 +805,15 @@ void achievement_victory(bool hyper) {
 #endif
   }
 
-void achievement_pump();
+// call the achievement callbacks
+EX void achievement_pump();
 
 #ifndef HAVE_ACHIEVEMENTS
 void achievement_pump() {}
 #endif
 
-void achievement_display() {
+// display the last achievement gained.
+EX void achievement_display() {
   #ifdef HAVE_ACHIEVEMENTS
   if(achievementTimer) {
     int col = (ticks - achievementTimer);
@@ -814,18 +835,18 @@ void achievement_display() {
   #endif
   }
 
-bool isAscending(int i) { 
+EX bool isAscending(int i) { 
   return i == 13 || i == 14 || i == 15 || i == 16 || i == 29 || i == 30 || i == 45;
   };
 
-int score_default(int i) {
+EX int score_default(int i) {
   if(isAscending(i)) return 1999999999;
   else return 0;
   }
 
 #ifndef HAVE_ACHIEVEMENTS
-int get_sync_status() { return 0; }
-void set_priority_board(int) { }
+EX int get_sync_status() { return 0; }
+EX void set_priority_board(int) { }
 #endif
 
 }

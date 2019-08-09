@@ -266,7 +266,7 @@ int dir_bitrunc457(cell *c) {
 
 int val46(cell *c);
 
-int zebra40(cell *c) {
+EX int zebra40(cell *c) {
   if(euclid) return eupattern(c);
   else if(IRREGULAR) return c->master->zebraval/10;
   else if(a46) {

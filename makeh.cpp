@@ -45,6 +45,10 @@ void gen(string s) {
       in_hdr = true;
       continue;
       }
+    if(s == "#if CU_INIT") {
+      if_stack.push_back("#if 1");
+      continue;
+      }
     if(s.substr(0, 3) == "#if" || s.substr(0, 4) == "# if") {
       if_stack.push_back(s);
       }

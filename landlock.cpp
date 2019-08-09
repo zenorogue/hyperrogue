@@ -26,7 +26,7 @@ int isNative(eLand l, eMonster m) {
   return false;
   }
 
-eItem treasureType(eLand l) { return linf[l].treasure; }
+EX eItem treasureType(eLand l) { return linf[l].treasure; }
 
 eItem treasureTypeUnlock(eLand l, eItem u) {
   if(u != itOrbLove && l == laPrincessQuest)
@@ -39,25 +39,25 @@ eLand landof(eItem it) {
   return laNone;
   }
 
-int landMultiplier(eLand l) {
+EX int landMultiplier(eLand l) {
   if(l == laCamelot || l == laPrincessQuest) return 10;
   return 1;
   }
 
-bool isCrossroads(eLand l) {
+EX bool isCrossroads(eLand l) {
   return l == laCrossroads || l == laCrossroads2 || l == laCrossroads3 ||
     l == laCrossroads4 || l == laCrossroads5;
   }
 
-bool bearsCamelot(eLand l) {
+EX bool bearsCamelot(eLand l) {
   return isCrossroads(l) && l != laCrossroads2 && l != laCrossroads5;
   }
 
-bool inmirror(const cellwalker& cw) {
+EX bool inmirror(const cellwalker& cw) {
   return inmirror(cw.at->land);
   }
 
-eLand oppositeElement(eLand l, eLand l2) {
+EX eLand oppositeElement(eLand l, eLand l2) {
   if(l == laEFire) return laEWater;
   if(l == laEWater) return laEFire;
   if(l == laEAir) return laEEarth;

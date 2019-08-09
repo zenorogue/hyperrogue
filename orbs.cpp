@@ -6,48 +6,48 @@
 
 namespace hr {
 
-bool markOrb(eItem it) {
+EX bool markOrb(eItem it) {
   if(!items[it]) return false;
   orbused[it] = true;
   return true;
   }
 
-bool markEmpathy(eItem it) {
+EX bool markEmpathy(eItem it) {
   if(!items[itOrbEmpathy]) return false;
   if(!markOrb(it)) return false;
   markOrb(itOrbEmpathy);
   return true;
   }
 
-bool markEmpathy2(eItem it) {
+EX bool markEmpathy2(eItem it) {
   if(items[itOrbEmpathy] < 2) return false;
   if(!markOrb2(it)) return false;
   markOrb2(itOrbEmpathy);
   return true;
   }
 
-bool markOrb2(eItem it) {
+EX bool markOrb2(eItem it) {
   return markOrb(it);
   /* if(!items[it]) return false;
   orbused[it] = true;
   return items[it] > 1; */
   }
 
-int fixpower(int qty) {
+EX int fixpower(int qty) {
   if(markOrb(itOrbEnergy)) qty = (qty+1)/2;
   return qty;
   }
 
-void useupOrb(eItem it, int qty) {
+EX void useupOrb(eItem it, int qty) {
   items[it] -= fixpower(qty);
   if(items[it] < 0) items[it] = 0;
   }
 
-void drainOrb(eItem it, int target) {
+EX void drainOrb(eItem it, int target) {
   if(items[it] > target) useupOrb(it, items[it] - target);
   }
 
-void empathyMove(cell *c, cell *cto, int dir) {
+EX void empathyMove(cell *c, cell *cto, int dir) {
   if(!items[itOrbEmpathy]) return;
 
   if(items[itOrbFire]) {
@@ -67,7 +67,7 @@ void empathyMove(cell *c, cell *cto, int dir) {
     }
   }
 
-bool reduceOrbPower(eItem it, int cap) {
+EX bool reduceOrbPower(eItem it, int cap) {
   if(items[it] && (lastorbused[it] || (it == itOrbShield && items[it]>3) || !markOrb(itOrbTime))) {
     items[it] -= multi::activePlayers();
     if(isHaunted(cwt.at->land)) survivalist = false;
@@ -83,14 +83,14 @@ bool reduceOrbPower(eItem it, int cap) {
   return false;
   }
 
-void reduceOrbPowerAlways(eItem it) {
+EX void reduceOrbPowerAlways(eItem it) {
   if(items[it]) {
     items[it] -= multi::activePlayers();
     if(items[it] < 0) items[it] = 0;
     }
   }
 
-void reduceOrbPowers() {
+EX void reduceOrbPowers() {
   if(haveMount()) markOrb(itOrbDomination);
   for(int i=0; i<ittypes; i++) 
     lastorbused[i] = orbused[i], orbused[i] = false;
@@ -159,7 +159,7 @@ void reduceOrbPowers() {
   items[itWarning] = 0;
   }
 
-void flashAlchemist(cell *c) {
+EX void flashAlchemist(cell *c) {
   if(isAlch(c)) {
     if(isAlch(cwt.at))
       c->wall = cwt.at->wall;
@@ -168,7 +168,7 @@ void flashAlchemist(cell *c) {
     }
   }
 
-void flashCell(cell *c, eMonster killer, flagtype flags) {
+EX void flashCell(cell *c, eMonster killer, flagtype flags) {
   eWall ow = c->wall;
   flashAlchemist(c);
   if((flags & AF_MSG) && c->monst && !isWorm(c) && c->monst != moShadow)
@@ -228,7 +228,7 @@ void flashCell(cell *c, eMonster killer, flagtype flags) {
     activateActiv(c, false);
   }
 
-void activateFlashFrom(cell *cf, eMonster who, flagtype flags) {
+EX void activateFlashFrom(cell *cf, eMonster who, flagtype flags) {
   drawFlash(cf);
   playSound(cf, "storm");
   for(int i=0; i<isize(dcal); i++) {
@@ -244,7 +244,7 @@ void activateFlashFrom(cell *cf, eMonster who, flagtype flags) {
     }
   }
 
-bool distanceBound(cell *c1, cell *c2, int d) {
+EX bool distanceBound(cell *c1, cell *c2, int d) {
   if(!c1 || !c2) return false;
   if(d == 0) return c1 == c2;
   for(int i=0; i<c2->type; i++)
@@ -252,7 +252,7 @@ bool distanceBound(cell *c1, cell *c2, int d) {
   return false;
   }
 
-void checkFreedom(cell *cf) {
+EX void checkFreedom(cell *cf) {
   manual_celllister cl;
   cl.add(cf);
   for(int i=0; i<isize(cl.lst); i++) {
@@ -286,7 +286,7 @@ void checkFreedom(cell *cf) {
     }
   }
 
-void activateFlash() {
+EX void activateFlash() {
   int tk = tkills();
 
   for(int i=0; i<numplayers(); i++) 
@@ -303,14 +303,14 @@ void activateFlash() {
   achievement_count("FLASH", tkills(), tk);
   }
 
-bool reflectingBarrierAt(cell *c) {
+EX bool reflectingBarrierAt(cell *c) {
   return 
     c->wall == waBarrier || c->wall == waCamelot || 
     c->wall == waPalace || c->wall == waPlatform ||
     c->wall == waTempWall || c->wall == waWarpGate || c->wall == waBarrowDig || c->wall == waBarrowWall;
   }
 
-bool reflectingBarrierAt(cellwalker& c, int d) {
+EX bool reflectingBarrierAt(cellwalker& c, int d) {
   if(d >= 3) return true;
   if(d <= -3) return true;
   d = c.spin + d + MODFIXER;
@@ -327,7 +327,7 @@ bool reflectingBarrierAt(cellwalker& c, int d) {
   // return false;
   }
 
-void killAdjacentSharks(cell *c) {
+EX void killAdjacentSharks(cell *c) {
   for(int i=0; i<c->type; i++) {
     cell *c2 = c->move(i);
     if(!c2) continue;
@@ -348,7 +348,7 @@ void killAdjacentSharks(cell *c) {
     }
   }
 
-void castLightningBolt(cellwalker lig) {
+EX void castLightningBolt(cellwalker lig) {
   int bnc = 0;
   int counter = 1000;
   while(true) {
@@ -475,11 +475,11 @@ void castLightningBolt(cellwalker lig) {
     }
   }
 
-void castLightningBoltFrom(cell *c) {
+EX void castLightningBoltFrom(cell *c) {
   for(int i=0; i<c->type; i++) castLightningBolt(cellwalker(c, i));
   }
 
-void activateLightning() {
+EX void activateLightning() {
   int tk = tkills();
   drawLightning();
   addMessage(XLAT("You activate the Lightning spell!"));
@@ -503,7 +503,7 @@ void activateLightning() {
 // roMouse/roKeyboard: 
 //    return orb type if successful, eItem(-1) if do nothing, 0 otherwise
 
-bool haveRangedTarget() {
+EX bool haveRangedTarget() {
   if(!haveRangedOrb())
     return false;
   for(int i=0; i<isize(dcal); i++) {
@@ -687,7 +687,7 @@ void telekinesis(cell *dest) {
   if(!shmup::on) checkmoveO();
   }
 
-eMonster summonedAt(cell *dest) {
+EX eMonster summonedAt(cell *dest) {
   if(dest->monst) return moNone;
   if(dest->wall == waVineHalfA || dest->wall == waVineHalfB || dest->wall == waVinePlant)
     return moVineSpirit;
@@ -882,7 +882,7 @@ void gun_attack(cell *dest) {
   monstersTurn();
   }
 
-void checkStunKill(cell *dest) {
+EX void checkStunKill(cell *dest) {
   if(isBird(dest->monst)) {
     moveEffect(dest, dest, moDeadBird, NOHINT);
     doesFall(dest);
@@ -1001,10 +1001,10 @@ bool monstersnearO(orbAction a, cell *c, cell *nocount, eMonster who, cell *push
   else return monstersnear(c, nocount, who, pushto, comefrom);
   }
 
-bool isCheck(orbAction a) { return a == roCheck || a == roMultiCheck; }
-bool isWeakCheck(orbAction a) { return a == roCheck || a == roMultiCheck || a == roMouse; }
+EX bool isCheck(orbAction a) { return a == roCheck || a == roMultiCheck; }
+EX bool isWeakCheck(orbAction a) { return a == roCheck || a == roMultiCheck || a == roMouse; }
 
-cell *blowoff_destination(cell *c, int& di) {
+EX cell *blowoff_destination(cell *c, int& di) {
   int d = 0;
   for(; d<c->type; d++) if(c->move(d) && c->move(d)->cpdist < c->cpdist) break;
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
@@ -1015,7 +1015,7 @@ cell *blowoff_destination(cell *c, int& di) {
   return NULL;
   }
 
-eItem targetRangedOrb(cell *c, orbAction a) {
+EX eItem targetRangedOrb(cell *c, orbAction a) {
 
   if(!haveRangedOrb()) {
     return itNone;
@@ -1351,7 +1351,7 @@ eItem targetRangedOrb(cell *c, orbAction a) {
   return eItem(-1);
   }
 
-int orbcharges(eItem it) {
+EX int orbcharges(eItem it) {
   switch(it) {
     case itRevolver: //pickup-key
       return 6 - items[itRevolver];
@@ -1442,7 +1442,7 @@ int orbcharges(eItem it) {
     }
   }
 
-bool isShmupLifeOrb(eItem it) {
+EX bool isShmupLifeOrb(eItem it) {
   return 
     it == itOrbLife || it == itOrbFriend ||
     it == itOrbNature || it == itOrbEmpathy ||
@@ -1450,7 +1450,7 @@ bool isShmupLifeOrb(eItem it) {
     it == itOrbDomination || it == itOrbGravity; 
   }
 
-void makelava(cell *c, int i) {
+EX void makelava(cell *c, int i) {
   if(!pseudohept(c)) return;
   if(isPlayerOn(c)) return;
   if(c->wall == waFire && c->wparam < i)

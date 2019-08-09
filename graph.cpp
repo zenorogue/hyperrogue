@@ -8,21 +8,21 @@ namespace hr {
 
 int last_firelimit, firelimit;
 
-int inmirrorcount = 0;
+EX int inmirrorcount = 0;
 
 bool spatial_graphics;
 bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 bool mmspatial, mmhigh, mmmon, mmitem;
 
-int detaillevel = 0;
+EX int detaillevel = 0;
 
-bool first_cell_to_draw = true;
+EX bool first_cell_to_draw = true;
 
-bool in_perspective() {
+EX bool in_perspective() {
   return among(pmodel, mdPerspective, mdGeodesic);
   }
 
-bool hide_player() {
+EX bool hide_player() {
   return DIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && in_perspective() && (first_cell_to_draw || elliptic) && (WDIM == 3 || vid.camera == 0) && !inmirrorcount
 #if CAP_RACING     
    && !(racing::on && !racing::standard_centering && !racing::player_relative && !sol)
@@ -30,30 +30,30 @@ bool hide_player() {
      ;
   }
 
-hookset<bool(int sym, int uni)> *hooks_handleKey;
-hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
-purehookset hooks_frame, hooks_markers;
+EX hookset<bool(int sym, int uni)> *hooks_handleKey;
+EX hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
+EX purehookset hooks_frame, hooks_markers;
 
-ld animation_factor = 1;
-int animation_lcm = 0;
+EX ld animation_factor = 1;
+EX int animation_lcm = 0;
 
-ld ptick(int period, ld phase) {
+EX ld ptick(int period, ld phase IS(0)) {
   if(animation_lcm) animation_lcm = animation_lcm * (period / gcd(animation_lcm, period));
   return (ticks * animation_factor) / period + phase * 2 * M_PI;
   }
 
-ld fractick(int period, ld phase = 0) {
+EX ld fractick(int period, ld phase IS(0)) {
   ld t = ptick(period, phase) / 2 / M_PI;
   t -= floor(t);
   if(t<0) t++;
   return t;
   }
   
-ld sintick(int period, ld phase) {
+EX ld sintick(int period, ld phase IS(0)) {
   return sin(ptick(period, phase));
   }
 
-transmatrix spintick(int period, ld phase = 0) {
+EX transmatrix spintick(int period, ld phase IS(0)) {
   return spin(ptick(period, phase));
   }
 
@@ -65,26 +65,26 @@ transmatrix spintick(int period, ld phase = 0) {
 
 int colorbar;
 
-bool inHighQual; // taking high quality screenshot
+EX bool inHighQual; // taking high quality screenshot
 bool auraNOGL;    // aura without GL
 
 // 
 int axestate;
 
-int ticks;
+EX int ticks;
 int frameid;
 
 bool camelotcheat;
-bool nomap;
+EX bool nomap;
 
 eItem orbToTarget;
 eMonster monsterToSummon;
 
 int sightrange_bonus = 0;
 
-string mouseovers;
+EX string mouseovers;
 
-int darken = 0;
+EX int darken = 0;
 
 struct fallanim {
   int t_mon, t_floor, pid;
@@ -95,7 +95,7 @@ struct fallanim {
 
 map<cell*, fallanim> fallanims;
 
-bool doHighlight() {
+EX bool doHighlight() {
   return (hiliteclick && darken < 2) ? !mmhigh : mmhigh;
   }
 
@@ -106,7 +106,7 @@ ld spina(cell *c, int dir) {
   }
 
 // cloak color 
-int cloakcolor(int rtr) {
+EX int cloakcolor(int rtr) {
   rtr -= 28;
   rtr /= 2;
   rtr %= 10;
@@ -123,19 +123,19 @@ int firegradient(double p) {
   return gradient(0xFFFF00, 0xFF0000, 0, p, 1);
   }
   
-int firecolor(int phase, int mul) {
+EX int firecolor(int phase IS(0), int mul IS(1)) {
   return gradient(0xFFFF00, 0xFF0000, -1, sintick(100*mul, phase/200./M_PI), 1);
   }
 
-int watercolor(int phase) {
+EX int watercolor(int phase) {
   return 0x0080C0FF + 256 * int(63 * sintick(50, phase/100./M_PI));
   }
 
-int aircolor(int phase) {
+EX int aircolor(int phase) {
   return 0x8080FF00 | int(32 + 32 * sintick(200, phase * 1. / cgi.S21));
   }
 
-int fghostcolor(cell *c) {
+EX int fghostcolor(cell *c) {
   int phase = int(fractick(650, (int)(size_t)c) * 4000);
   if(phase < 1000)      return gradient(0xFFFF80, 0xA0C0FF,    0, phase, 1000);
   else if(phase < 2000) return gradient(0xA0C0FF, 0xFF80FF, 1000, phase, 2000);
@@ -144,7 +144,7 @@ int fghostcolor(cell *c) {
   return 0xFFD500;
   }
 
-int weakfirecolor(int phase) {
+EX int weakfirecolor(int phase) {
   return gradient(0xFF8000, 0xFF0000, -1, sintick(500, phase/1000./M_PI), 1);
   }
 
@@ -162,8 +162,8 @@ color_t fc(int ph, color_t col, int z) {
   }
 
 int lightat, safetyat;
-void drawLightning() { lightat = ticks; }
-void drawSafety() { safetyat = ticks; }
+EX void drawLightning() { lightat = ticks; }
+EX void drawSafety() { safetyat = ticks; }
 
 void drawShield(const transmatrix& V, eItem it) {
 #if CAP_CURVE
@@ -315,7 +315,7 @@ void drawLightning(const transmatrix& V) {
 #endif
   }
 
-ld displayspin(cell *c, int d) {
+EX ld displayspin(cell *c, int d) {
   if(0);
   #if CAP_ARCM
   else if(archimedean) {
@@ -363,13 +363,13 @@ double hexshiftat(cell *c) {
   return 0;
   }
 
-transmatrix ddspin(cell *c, int d, ld bonus) {
+EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) {
   if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->cmove(d), c, C0))) * cspin(2, 0, bonus);
   if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * rspintox(nearcorner(c, d));
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
-transmatrix iddspin(cell *c, int d, ld bonus) {
+EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) {
   if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->cmove(d), c, C0)));
   if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * spintox(nearcorner(c, d));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
@@ -617,7 +617,7 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
 #endif
   }
 
-bool noshadow;
+EX bool noshadow;
 
 #if CAP_SHAPES
 void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
@@ -1256,7 +1256,7 @@ void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, doub
     }
   }
 
-int wingphase(int period, int phase) {
+EX int wingphase(int period, int phase IS(0)) {
   ld t = fractick(period, phase);
   const int WINGS2 = WINGS * 2;
   int ti = int(t * WINGS2) % WINGS2;
@@ -2410,7 +2410,7 @@ void drawWormSegments() {
   last_wormsegment = -1;
   }
 
-bool dont_face_pc = false;
+EX bool dont_face_pc = false;
 
 bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool mirrored, color_t asciicol) {
   #if CAP_SHAPES
@@ -2831,7 +2831,7 @@ ld straightDownSpeed;
 
 array<array<int,4>,AURA+1> aurac;
 
-bool haveaura() {
+EX bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
   if(sphere && mdAzimuthalEqui()) return true;
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && conformal::model_transition < 1) 
@@ -2843,7 +2843,7 @@ vector<pair<int, int> > auraspecials;
 
 int auramemo;
 
-void clearaura() { 
+EX void clearaura() { 
   if(!haveaura()) return;
   for(int a=0; a<AURA; a++) for(int b=0; b<4; b++) 
     aurac[a][b] = 0;
@@ -3858,7 +3858,7 @@ bool noAdjacentChasms(cell *c) {
   }
 
 // does the current geometry allow nice duals
-bool has_nice_dual() {
+EX bool has_nice_dual() {
   #if CAP_IRR
   if(IRREGULAR) return irr::bitruncations_performed > 0;
   #endif
@@ -3878,11 +3878,11 @@ bool has_nice_dual() {
   }
 
 // does the current geometry allow nice duals
-bool is_nice_dual(cell *c) {
+EX bool is_nice_dual(cell *c) {
   return c->land == laDual && has_nice_dual();
   }
 
-bool use_swapped_duals() {
+EX bool use_swapped_duals() {
   return (masterless && !a4) || GOLDBERG;
   }
 
@@ -4104,7 +4104,7 @@ bool allemptynear(cell *c) {
 static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
-bool bright;
+EX bool bright;
 
 // how much to darken
 int getfd(cell *c) {
@@ -4493,7 +4493,7 @@ ld mousedist(transmatrix T) {
   }
 
 vector<hyperpoint> clipping_planes;
-int noclipped;
+EX int noclipped;
 
 void make_clipping_planes() {
 #if MAXMDIM >= 4
@@ -4516,7 +4516,7 @@ void make_clipping_planes() {
 #endif
   }
 
-void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
+EX void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
 #if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     ld eps = cgi.human_height/100;
@@ -4528,7 +4528,7 @@ void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2,
     queueline(V1*h1, V2*h2, col, prec);
   }
 
-void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
+EX void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
   gridline(V, h1, V, h2, col, prec);
   }
 
@@ -6731,25 +6731,25 @@ struct flashdata {
 
 vector<flashdata> flashes;
 
-void drawFlash(cell *c) {
+EX void drawFlash(cell *c) {
   flashes.push_back(flashdata(ticks, 1000, c, iinf[itOrbFlash].color, 0)); 
   }
-void drawBigFlash(cell *c) { 
+EX void drawBigFlash(cell *c) { 
   flashes.push_back(flashdata(ticks, 2000, c, 0xC0FF00, 0)); 
   }
 
-void drawParticleSpeed(cell *c, color_t col, int speed) {
+EX void drawParticleSpeed(cell *c, color_t col, int speed) {
   if(vid.particles && !confusingGeometry())
     flashes.push_back(flashdata(ticks, rand() % 16, c, col, speed)); 
   }
-void drawParticle(cell *c, color_t col, int maxspeed) {
+EX void drawParticle(cell *c, color_t col, int maxspeed IS(100)) {
   drawParticleSpeed(c, col, 1 + rand() % maxspeed);
   }
-void drawParticles(cell *c, color_t col, int qty, int maxspeed) { 
+EX void drawParticles(cell *c, color_t col, int qty, int maxspeed IS(100)) { 
   if(vid.particles)
     while(qty--) drawParticle(c,col, maxspeed); 
   }
-void drawFireParticles(cell *c, int qty, int maxspeed) { 
+EX void drawFireParticles(cell *c, int qty, int maxspeed IS(100)) { 
   if(vid.particles)
     for(int i=0; i<qty; i++)
       drawParticle(c, firegradient(i / (qty-1.)), maxspeed); 
@@ -6771,7 +6771,7 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id) {
   }
 
 #if CAP_QUEUE
-void queuecircleat(cell *c, double rad, color_t col) {
+EX void queuecircleat(cell *c, double rad, color_t col) {
   if(!c) return;
   if(!gmatrix.count(c)) return;
   if(WDIM == 3) {
@@ -7221,7 +7221,7 @@ void precise_mouseover() {
   mouseover = omouseover;
   }
 
-void drawthemap() {
+EX void drawthemap() {
   check_cgi();
   cgi.require_shapes();
 
@@ -7389,7 +7389,7 @@ void drawthemap() {
   profile_stop(0);
   }
 
-void drawmovestar(double dx, double dy) {
+EX void drawmovestar(double dx, double dy) {
 
   DEBBI(DF_GRAPH, ("draw movestar"));
   if(viewdists) return;
@@ -7449,7 +7449,7 @@ bool dronemode;
 
 purehookset hooks_calcparam;
 
-void calcparam() {
+EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
   auto cd = current_display;
@@ -7509,7 +7509,7 @@ function<void()> wrap_drawfullmap = drawfullmap;
 
 bool force_sphere_outline = false;
 
-void drawfullmap() {
+EX void drawfullmap() {
 
   DEBBI(DF_GRAPH, ("draw full map"));
     
@@ -7577,7 +7577,7 @@ void drawfullmap() {
 extern bool wclick;
 #endif
 
-void gamescreen(int _darken) {
+EX void gamescreen(int _darken) {
 
   if(subscreens::split([=] () {
     calcparam();
@@ -7653,9 +7653,9 @@ void gamescreen(int _darken) {
 #endif
   }
 
-bool nohelp;
+EX bool nohelp;
 
-void normalscreen() {
+EX void normalscreen() {
   help = "@";
 
   mouseovers = XLAT("Press F1 or right click for help");
@@ -7688,7 +7688,7 @@ vector< function<void()> > screens = { normalscreen };
 
 int cmode;
 
-void drawscreen() {
+EX void drawscreen() {
 
   DEBBI(DF_GRAPH, ("drawscreen"));
 
@@ -7713,6 +7713,8 @@ void drawscreen() {
     SDL_FillRect(s, NULL, backcolor);
   #endif
    
+  // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.at), ":");
+  
   lgetcstat = getcstat;
   getcstat = 0; inslider = false;
   
@@ -7792,7 +7794,7 @@ void drawscreen() {
 //printf("\ec");
   }
 
-void restartGraph() {
+EX void restartGraph() {
   DEBBI(DF_INIT, ("restartGraph"));
   
   View = Id;
@@ -7810,7 +7812,7 @@ void restartGraph() {
     }
   }
 
-void clearAnimations() {
+EX void clearAnimations() {
   for(int i=0; i<ANIMLAYERS; i++) animations[i].clear();
   flashes.clear();
   fallanims.clear();
@@ -7841,7 +7843,7 @@ int revhint(cell *c, int hint) {
   else return hint;
   }
 
-bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T) {
+EX bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T) {
   if(confusingGeometry()) {
     T = calc_relative_matrix(src, tgt, revhint(src, direction_hint));
     }
@@ -7855,7 +7857,7 @@ bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T
   }
 
 
-void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
+EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T;
   if(!compute_relamatrix(src, tgt, direction_hint, T)) return;
@@ -7878,7 +7880,7 @@ void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
     }
   }
 
-void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
+EX void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T;
   if(!compute_relamatrix(src, tgt, direction_hint, T)) return;
@@ -7891,7 +7893,7 @@ void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
 
 vector<pair<cell*, animation> > animstack;
 
-void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
+EX void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
   if(animations[layer].count(tgt)) {
     animation res = animations[layer][tgt];
@@ -7910,13 +7912,13 @@ void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
     }
   }
 
-void commitAnimations(int layer) {
+EX void commitAnimations(int layer) {
   for(int i=0; i<isize(animstack); i++)
     animations[layer][animstack[i].first] = animstack[i].second;
   animstack.clear();
   }
 
-void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb) {
+EX void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb) {
   if(vid.mspeed >= 5) return; // no animations!
   static cell c1;
   gmatrix[&c1] = gmatrix[b]; c1.master = b->master;
@@ -7935,12 +7937,12 @@ void drawBug(const cellwalker& cw, color_t col) {
 #endif
   }
 
-cell *viewcenter() {
+EX cell *viewcenter() {
   if(masterless) return centerover.at;
   else return viewctr.at->c7;
   }
 
-bool inscreenrange(cell *c) {
+EX bool inscreenrange(cell *c) {
   if(sphere) return true;
   if(euclid) return celldistance(viewcenter(), c) <= get_sightrange_ambush();
   if(nonisotropic) return gmatrix.count(c);

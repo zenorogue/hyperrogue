@@ -6,14 +6,14 @@ namespace hr {
 
 // land generation routines
 
-bool safety = false;
+EX bool safety = false;
 
 eLand lastland;
 
 int lastexplore;
 
 bool randomPatternsMode = false;
-int randompattern[landtypes];
+EX int randompattern[landtypes];
 
 int genrange_bonus = 0;
 
@@ -25,7 +25,7 @@ void doOvergenerate() {
     setdist(playerpos(i), 7 - getDistLimit() - genrange_bonus, NULL);
   }
 
-bool notDippingFor(eItem i) {
+EX bool notDippingFor(eItem i) {
   if(peace::on) return false;
   if(chaosmode > 1) return true;
   int v = items[i] - currentLocalTreasure;
@@ -58,7 +58,7 @@ void buildRedWall(cell *c, int gemchance) {
 #define RANDPAT3(i) (randpatternMajority(c,i,RANDITER))
 #define RANDPATV(x) (randpattern(c,randompattern[x]))
 
-bool reptilecheat = false;
+EX bool reptilecheat = false;
 
 bool blizzard_no_escape1(cell *c, manual_celllister &cl) {
   if(!cl.add(c)) return true;
@@ -111,7 +111,7 @@ eMonster genRuinMonster(cell *c) {
 
 void gen_brownian(cell *c);
 
-void createArrowTrapAt(cell *c, eLand land) {
+EX void createArrowTrapAt(cell *c, eLand land) {
   cellwalker cw(c, hrand(c->type));
   cell* cc[5];
   cc[2] = c;
@@ -137,7 +137,7 @@ void createArrowTrapAt(cell *c, eLand land) {
     }
   }
 
-void build_pool(cell *c, bool with_boat) {
+EX void build_pool(cell *c, bool with_boat) {
   bool vacant = true;
   if(c->monst || !among(c->wall, waNone, waSea, waBoat)) vacant = false;
   forCellCM(c1, c) if(!among(c1->land, laNone, laVariant) || c1->monst || !among(c1->wall, waNone, waSea, waBoat)) vacant = false;
@@ -148,14 +148,15 @@ void build_pool(cell *c, bool with_boat) {
     }  
   }
 
-void place_elemental_wall(cell *c) {
+EX void place_elemental_wall(cell *c) {
   if(c->land == laEFire) c->wall = waEternalFire;
   else if(c->land == laEWater) c->wall = waSea;
   else if(c->land == laEAir) c->wall = waChasm;
   else if(c->land == laEEarth) c->wall = waStone;
   }
 
-int hrand_monster(int x) {
+// automatically adjust monster generation for 3D geometries
+EX int hrand_monster(int x) {
   // dual geometry mode is much harder, so generate less monsters to balance it
   if(dual::state) x *= 3;
   // in 3D monster generation depends on the sight range
@@ -166,7 +167,7 @@ int hrand_monster(int x) {
   return hrand(x);
   }
 
-void giantLandSwitch(cell *c, int d, cell *from) {
+EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == min(BARLEV, 9);
   switch(c->land) {
 
@@ -2460,7 +2461,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
 // repair the buggy walls flowing in from another land, like ice walls flowing into the Caves
 
-void repairLandgen(cell *c) {
+EX void repairLandgen(cell *c) {
   if(c->land == laCaves && c->wall != waCavewall && c->wall != waCavefloor)
     c->wall = waCavefloor;
   
@@ -2512,7 +2513,7 @@ void repairLandgen(cell *c) {
     }
   }
 
-void setland_randomwalk(cell *c) {
+EX void setland_randomwalk(cell *c) {
   if(c->land) return;
   if(hrand(10) == 0) setland(c, currentlands[hrand(isize(currentlands))]);
   else {
@@ -2522,7 +2523,7 @@ void setland_randomwalk(cell *c) {
     }
   }
 
-void setdist(cell *c, int d, cell *from) {
+EX void setdist(cell *c, int d, cell *from) {
   
   if(c->mpdist <= d) return;
   if(c->mpdist > d+1 && d < BARLEV) setdist(c, d+1, from);

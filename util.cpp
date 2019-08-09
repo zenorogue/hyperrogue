@@ -24,17 +24,17 @@ int SDL_GetTicks() {
 #endif
 #endif
 
-long double sqr(long double x) { return x*x; }
-string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
+EX long double sqr(long double x) { return x*x; }
+EX string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
 
-string fts(ld x, int prec) {
+EX string fts(ld x, int prec IS(6)) {
   std::stringstream ss;
   ss.precision(prec);
   ss << x;
   return ss.str();
   }
 
-string fts_fixed(ld x, int prec) {
+EX string fts_fixed(ld x, int prec IS(6)) {
   std::stringstream ss;
   ss.precision(prec);
   ss << std::fixed << x;
@@ -70,41 +70,41 @@ string fts_smartdisplay(ld x, int maxdisplay) {
     }
   } */
 
-string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
-string llts(long long i) {
+EX string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
+EX string llts(long long i) {
     // sprintf does not work on Windows IIRC
     if(i < 0) return "-" + llts(-i);
     if(i < 10) return its((int) i);
     return llts(i/10) + its(i%10);
 }
-string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
-string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
-string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }
+EX string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
+EX string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
+EX string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }
 
-int gcd(int i, int j) {
+EX int gcd(int i, int j) {
   return i ? gcd(j%i, i) : j;
   }
 
-int gmod(int i, int j) {
+EX int gmod(int i, int j) {
   i %= j; if(i<0) i += j;
   return i;
   }
 
-int gdiv(int i, int j) {
+EX int gdiv(int i, int j) {
   return (i - gmod(i, j)) / j;
   }
 
-ld frac(ld x) {
+EX ld frac(ld x) {
   x -= int(x);
   if(x < 0) x++;
   return x;
   }
 
-ld lerp(ld a0, ld a1, ld x) {
+EX ld lerp(ld a0, ld a1, ld x) {
   return a0 + (a1-a0) * x;
   }
 
-ld ilerp(ld a0, ld a1, ld x) {
+EX ld ilerp(ld a0, ld a1, ld x) {
   return (x-a0) / (a1-a0);
   }
 
@@ -148,13 +148,13 @@ void profile_info() {
 
 purehookset hooks_tests;
 
-string simplify(const string& s) {
+EX string simplify(const string& s) {
   string res;
   for(char c: s) if(isalnum(c)) res += c;
   return res;
   }
 
-bool appears(const string& haystack, const string& needle) {
+EX bool appears(const string& haystack, const string& needle) {
   return simplify(haystack).find(simplify(needle)) != string::npos;
   }
 
@@ -271,13 +271,13 @@ cld exp_parser::parse(int prio) {
   return res;
   }
 
-ld parseld(const string& s) {
+EX ld parseld(const string& s) {
   exp_parser ep;
   ep.s = s;
   return real(ep.parse());
   }
 
-string parser_help() {
+EX string parser_help() {
   return XLAT("Functions available: %1", 
     "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation], to01, ifp(a,v,w) [if positive]");
   }
@@ -287,17 +287,17 @@ logger hlog;
 // kz: utility for printing
 // if it is close to 0, assume it is floating errors
 
-ld kz(ld x) {
+EX ld kz(ld x) {
   if(abs(x) < 1e-6) return 0;
   return x;
   }
 
-hyperpoint kz(hyperpoint h) {
+EX hyperpoint kz(hyperpoint h) {
   for(int d=0; d<MAXMDIM; d++) h[d] = kz(h[d]);
   return h;
   }
 
-transmatrix kz(transmatrix h) {
+EX transmatrix kz(transmatrix h) {
   for(int d=0; d<MAXMDIM; d++) 
   for(int e=0; e<MAXMDIM; e++)
     h[d][e] = kz(h[d][e]);

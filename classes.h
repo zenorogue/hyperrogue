@@ -250,6 +250,7 @@ extern itemtype iinf[ittypes];
 
 extern const landtype linf[landtypes];
 extern color_t floorcolors[landtypes];
+extern walltype winf[walltypes];
 
 enum cpatterntype { 
   cpFootball, cpThree, cpChess, cpSingle, cpSingleSym, cpOddEven, cpLarge, cpZebra, cpUnknown

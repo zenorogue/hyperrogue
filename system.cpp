@@ -6,7 +6,7 @@
 
 namespace hr {
 
-bool game_active;
+EX bool game_active;
 
 bool cblind;
 bool autocheat;
@@ -20,7 +20,8 @@ int asteroids_generated, asteroid_orbs_generated;
 time_t timerstart, savetime;
 bool timerstopped;
 int savecount;
-bool showoff = false, doCross = false;
+EX bool showoff = false;
+EX bool doCross = false;
 
 bool gamegen_failure;
 

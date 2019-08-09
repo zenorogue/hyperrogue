@@ -130,7 +130,7 @@ const vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 
-eItem nativeOrbType(eLand l) {
+EX eItem nativeOrbType(eLand l) {
   if(isElemental(l)) l = laElementalWall;
   if(inv::on && (l == laMirror || l == laMirrorOld || isCrossroads(l)))
     return itOrbMirror;
@@ -352,7 +352,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   return olrPrize25;
   }
 
-int orbsUnlocked() {
+EX int orbsUnlocked() {
   int i = 0;
   for(int t=0; t<ittypes; t++) 
     if(itemclass(eItem(t)) == IC_TREASURE && items[t] >= R10)
@@ -360,20 +360,20 @@ int orbsUnlocked() {
   return i;
   }
 
-ld orbprizefun(int tr) {
+EX ld orbprizefun(int tr) {
   if(tactic::on) return 1;
   if(tr < 10) return 0;
   return .6 + .4 * log(tr/25.) / log(2);
   }
 
-ld orbcrossfun(int tr) {
+EX ld orbcrossfun(int tr) {
   if(tactic::on) return 1;
   if(tr < 10) return 0;
   if(tr > 25) return 1;
   return (tr*2 + 50) / 100.;
   }
 
-bool buildPrizeMirror(cell *c, int freq) {
+EX bool buildPrizeMirror(cell *c, int freq) {
   if(inv::on) return false;
   if(items[itShard] < 25) return false;
   if(freq && hrand(freq * 100 / orbprizefun(items[itShard])) >= 100)
@@ -381,7 +381,7 @@ bool buildPrizeMirror(cell *c, int freq) {
   return mirror::build(c);
   }                    
 
-eLand getPrizeLand(cell *c = cwt.at) {
+EX eLand getPrizeLand(cell *c IS(cwt.at)) {
   eLand l = c->land;
   if(isElemental(l)) l = laElementalWall;
   if(l == laPalace && princess::dist(c) < OUT_OF_PRISON)
@@ -389,7 +389,7 @@ eLand getPrizeLand(cell *c = cwt.at) {
   return l;
   }
 
-void placePrizeOrb(cell *c) {
+EX void placePrizeOrb(cell *c) {
   if(peace::on) return;
   if(daily::on) return;
   
@@ -439,11 +439,11 @@ void placePrizeOrb(cell *c) {
   }
 
 // 10 not in chaos, less in chaos
-int treasureForLocal() {
+EX int treasureForLocal() {
   return (chaosmode ? 1+hrand(10) : 10);
   }
 
-bool extra_safety_for_memory(cell *c) {
+EX bool extra_safety_for_memory(cell *c) {
   if(hyperbolic && (archimedean || S3 > 3) && !quotient && !tactic::on && in_full_game()) {
     if(hrand(1000) < 1) {
       c->item = itOrbSafety;
@@ -453,7 +453,7 @@ bool extra_safety_for_memory(cell *c) {
   return false;
   }
 
-void placeLocalOrbs(cell *c) {
+EX void placeLocalOrbs(cell *c) {
   eLand l = c->land;
   if(l == laZebra && c->wall == waTrapdoor) return;
   if(isGravityLand(l) && l != laWestWall && cellEdgeUnstable(c)) return;
@@ -495,7 +495,7 @@ void placeLocalOrbs(cell *c) {
     }
   }
 
-void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
+EX void placeLocalSpecial(cell *c, int outof, int loc IS(1), int priz IS(1)) {
   if(safety || daily::on || extra_safety_for_memory(c) || peace::on) return;
   int i = hrand(outof);
   if(i < loc && items[treasureType(c->land)] >= treasureForLocal() && !inv::on) 
@@ -504,7 +504,7 @@ void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
     placePrizeOrb(c);
   }
 
-void placeCrossroadOrbs(cell *c) {  
+EX void placeCrossroadOrbs(cell *c) {
   if(peace::on) return;
   if(daily::on) return;
   for(auto& oi: orbinfos) {
@@ -540,7 +540,7 @@ void placeCrossroadOrbs(cell *c) {
     }
   }
 
-void placeOceanOrbs(cell *c) {  
+EX void placeOceanOrbs(cell *c) {
   if(peace::on) return;
   for(auto& oi: orbinfos) {
     if(!(oi.flags & orbgenflags::CROSS10)) continue;

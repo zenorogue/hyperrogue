@@ -4,7 +4,7 @@
 
 namespace hr {
 
-namespace arcm {
+EX namespace arcm {
 
 #if CAP_ARCM
 
@@ -14,30 +14,30 @@ static const int sfCHESS = 4;
 static const int sfTHREE = 8;
 static const int sfSEMILINE = 16;
 
-archimedean_tiling current;
+EX archimedean_tiling current;
 
 // id of vertex in the archimedean tiling
 // odd numbers = reflected tiles
 // 0, 2, ..., 2(N-1) = as in the symbol
 // 2N = bitruncated tile
 
-short& id_of(heptagon *h) {
+EX short& id_of(heptagon *h) {
   return h->zebraval;
   }
 
 // which index in id_of's neighbor list does h->move[0] have
 
-short& parent_index_of(heptagon *h) {
+EX short& parent_index_of(heptagon *h) {
   return h->emeraldval;
   }
 
 // total number of neighbors
 
-int neighbors_of(heptagon *h) {
+EX int neighbors_of(heptagon *h) {
   return isize(current.triangles[id_of(h)]);
   }
 
-int gcd(int x, int y) { return x ? gcd(y%x, x) : y < 0 ? -y : y; }
+EX int gcd(int x, int y) { return x ? gcd(y%x, x) : y < 0 ? -y : y; }
 
 void archimedean_tiling::make_match(int a, int i, int b, int j) {
   if(isize(adjacent[a]) != isize(adjacent[b])) {
@@ -583,7 +583,7 @@ struct hrmap_archimedean : hrmap {
   
   };
 
-hrmap *new_map() { return new hrmap_archimedean; }
+EX hrmap *new_map() { return new hrmap_archimedean; }
 
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
@@ -774,8 +774,6 @@ void archimedean_tiling::parse() {
   }
 
 #if CAP_COMMANDLINE  
-void show();
-
 int readArgs() {
   using namespace arg;
            
@@ -838,7 +836,7 @@ bool archimedean_tiling::support_chessboard() {
   return N % 2 == 0;
   }
 
-bool pseudohept(cell *c) {
+EX bool pseudohept(cell *c) {
   if(DUAL)
     return !(c->master->rval0 & 3);
   int id = id_of(c->master);
@@ -849,17 +847,17 @@ bool pseudohept(cell *c) {
   return false;
   }
 
-bool chessvalue(cell *c) {
+EX bool chessvalue(cell *c) {
   if(DUAL)
     return c->master->rval1 - 1;
   return c->master->fieldval & 1;
   }
 
-bool linespattern(cell *c) {
+EX bool linespattern(cell *c) {
   return current.flags[id_of(c->master)] & arcm::sfLINE;
   }
 
-int threecolor(cell *c) {
+EX int threecolor(cell *c) {
   if(current.have_ph)
     return !arcm::pseudohept(c);
   else if(PURE)
@@ -991,7 +989,7 @@ void next_variation() {
   start_game();
   }
 
-void enable(archimedean_tiling& arct) {
+EX void enable(archimedean_tiling& arct) {
   stop_game();
   if(!archimedean) set_variation(eVariation::pure);
   set_geometry(gArchimedean);
@@ -1029,7 +1027,7 @@ function<void()> setcanvas(char c) {
     };
   };
 
-void show() {
+EX void show() {
   if(lastsample < isize(samples)) {
     string s = samples[lastsample].first;
     int col = samples[lastsample].second;
@@ -1217,15 +1215,15 @@ string archimedean_tiling::world_size() {
   return s;
   }
 
-int degree(heptagon *h) {
+EX int degree(heptagon *h) {
   return isize(current.adjacent[id_of(h)]);
   }
 
-bool is_vertex(heptagon *h) {
+EX bool is_vertex(heptagon *h) {
   return id_of(h) >= 2 * current.N;
   }
 
-int valence() {
+EX int valence() {
   if(PURE) return arcm::current.N;
   if(BITRUNCATED) return 3;
   // in DUAL, usually valence would depend on the vertex.

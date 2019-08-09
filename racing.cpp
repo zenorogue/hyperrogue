@@ -7,28 +7,28 @@
 
 namespace hr {
 
-namespace racing {
+EX namespace racing {
 
 void set_race_configurer();
 
-bool guiding = false;
+EX bool guiding = false;
 
-bool on;
-bool player_relative = false;
-bool standard_centering = false;
-bool track_ready;
+EX bool on;
+EX bool player_relative = false;
+EX bool standard_centering = false;
+EX bool track_ready;
 
 bool official_race = false;
 
 int TWIDTH;
 
-ld race_advance = 0;
+EX ld race_advance = 0;
 
 static const int LENGTH = 250;
 static const int DROP = 1;
 
-int ghosts_to_show = 5;
-int ghosts_to_save = 10;
+EX int ghosts_to_show = 5;
+EX int ghosts_to_save = 10;
 
 struct race_cellinfo {
   cell *c;
@@ -38,24 +38,24 @@ struct race_cellinfo {
   };  
 
 vector<race_cellinfo> rti;
-vector<cell*> track;
+EX vector<cell*> track;
 map<cell*, int> rti_id;
 
 int trophy[MAXPLAYER];
 
-string track_code = "OFFICIAL";
+EX string track_code = "OFFICIAL";
 
 transmatrix straight;
 
 int race_try;
 
-void apply_seed() {
+EX void apply_seed() {
   int s = race_try;
   for(char c: track_code) s = 713 * s + c;
   shrand(s);
   }
 
-int race_start_tick, race_finish_tick[MAXPLAYER];
+EX int race_start_tick, race_finish_tick[MAXPLAYER];
 
 typedef unsigned char uchar;
 
@@ -289,7 +289,7 @@ void find_track(cell *start, int sign, int len) {
     track = build_shortest_path(start, goal);  
   }
 
-void generate_track() {
+EX void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
   if(TWIDTH == 1) TWIDTH = 2;
@@ -682,7 +682,7 @@ void generate_track() {
 
 bool inrec = false;
 
-ld race_angle = 90;
+EX ld race_angle = 90;
 
 bool set_view() {
 
@@ -823,7 +823,7 @@ auto hook =
   ;
 #endif
 
-vector<eLand> race_lands = {
+EX vector<eLand> race_lands = {
   laHunting,
   laCrossroads,
   laJungle,
@@ -850,7 +850,7 @@ vector<string> playercmds_race = {
   "", "change camera", "", ""
   };
 
-string racetimeformat(int t) {
+EX string racetimeformat(int t) {
   string times = "";
   int digits = 0;
   bool minus = (t < 0);
@@ -1130,7 +1130,7 @@ void race_projection() {
     }
 /*  }; */
 
-void configure_race() { 
+EX void configure_race() { 
   set_race_configurer();
 
   pushScreen(raceconfigurer);
@@ -1157,7 +1157,7 @@ void uploadScore() {
   achievement_score(LB_RACING, tscore);
   }
 
-void displayScore(eLand l) {
+EX void displayScore(eLand l) {
   int vf = min((vid.yres-64) / 70, vid.xres/80);
   int x = vid.xres / 4;
   
@@ -1179,7 +1179,7 @@ void displayScore(eLand l) {
     }
   }
 
-void race_won() {
+EX void race_won() {
   if(!race_finish_tick[multi::cpid]) {
     int result = ticks - race_start_tick;
     int losers = 0;
@@ -1358,7 +1358,7 @@ void markers() {
     }
   }
 
-void add_debug(cell *c) { 
+EX void add_debug(cell *c) { 
   if(racing::on && racing::rti_id[c]) {
     auto& r = racing::get_info(c);
     dialog::addSelItem("from_track", its(r.from_track), 0);

@@ -5,15 +5,15 @@ namespace hr {
 
 bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !archimedean); }
 
-bool needConfirmationEvenIfSaved() {
+EX bool needConfirmationEvenIfSaved() {
   return canmove && (gold() >= 30 || tkills() >= 50) && !cheater;
   }
 
-bool needConfirmation() {
+EX bool needConfirmation() {
   return needConfirmationEvenIfSaved() && !quitsaves();
   }
 
-int getgametime() {
+EX int getgametime() {
   return (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
   }
 
@@ -289,7 +289,7 @@ eLand nextHyperstone() {
   return laCrossroads;
   }
 
-void showMission() {
+EX void showMission() {
 
   cmode = sm::DOTOUR | sm::MISSION | sm::CENTER;
   gamescreen(1); drawStats();
@@ -456,7 +456,7 @@ void showMission() {
   dialog::display();
   }
 
-void handleKeyQuit(int sym, int uni) {
+EX void handleKeyQuit(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
   // ignore the camera movement keys
 
@@ -511,7 +511,7 @@ int counthints() {
   for(int h=0;; h++) if(hints[h].last < 0) return h;
   }
 
-void showMissionScreen() {
+EX void showMissionScreen() {
   cancel(); cancel = noaction;
   popScreenAll();
   achievement_final(false);

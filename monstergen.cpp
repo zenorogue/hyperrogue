@@ -6,10 +6,10 @@
 
 namespace hr {
 
-bool timerghost = true;
-bool gen_wandering = true;
+EX bool timerghost = true;
+EX bool gen_wandering = true;
 
-int buildIvy(cell *c, int children, int minleaf) {
+EX int buildIvy(cell *c, int children, int minleaf) {
   if(c->monst) return 0;
   c->mondir = NODIR;
   c->monst = moIvyRoot;
@@ -42,7 +42,7 @@ int buildIvy(cell *c, int children, int minleaf) {
 
 // the 'chasmify' functions create a simulation of the path the monster came by
 
-void chasmify(cell *c) {
+EX void chasmify(cell *c) {
   c->wall = waChasm; c->item = itNone;
   int q = 0;
   cell *c2[10];
@@ -54,7 +54,7 @@ void chasmify(cell *c) {
     }
   }
 
-void chasmifyEarth(cell *c) {
+EX void chasmifyEarth(cell *c) {
   int q = 0;
   int d2[10];
   for(int i=2; i<=c->type-2; i++) {
@@ -79,7 +79,7 @@ void chasmifyEarth(cell *c) {
   earthWall(c); c->item = itNone;
   }
 
-void chasmifyElemental(cell *c) {
+EX void chasmifyElemental(cell *c) {
   int q = 0;
   int d2[10];
   for(int i=2; i<=c->type-2; i++) {
@@ -106,7 +106,7 @@ void chasmifyElemental(cell *c) {
 
 // an appropriate monster for the Crossroads
 
-eMonster crossroadsMonster() {
+EX eMonster crossroadsMonster() {
 
   static eMonster weak[9] = {
     moYeti, moGoblin, moRanger, moOrangeDog, moRunDog, moMonkey, moZombie,
@@ -132,14 +132,14 @@ eMonster crossroadsMonster() {
   return mo;
   }
 
-eMonster wanderingCrossroadsMonster() {
+EX eMonster wanderingCrossroadsMonster() {
   while(true) {
     eMonster m = crossroadsMonster();
     if(!isIvy(m) && m != moTentacle) return m;
     }
   }
 
-int palaceHP() {
+EX int palaceHP() {
   if(tactic::on && isCrossroads(firstland))
     return 4;
   if(items[itPalace] < 3) // 1+2
@@ -155,32 +155,32 @@ int palaceHP() {
   else return 7;
   }
 
-int hardness_empty() {
+EX int hardness_empty() {
   return yendor::hardness() * (yendor::hardness() * 3/5 - 2);
   }
 
-bool redtrolls(cell *c) {
+EX bool redtrolls(cell *c) {
   return false; /*
   int cd = getCdata(c, 2);
   cd &= 63;
   return cd < 32; */
   }
 
-eMonster pickTroll(cell *c) { 
+EX eMonster pickTroll(cell *c) { 
   if(redtrolls(c))
     return pick(moTroll,moDarkTroll,moRedTroll);
   else
     return pick(moForestTroll, moStormTroll, moFjordTroll);
   }
 
-void dieTroll(cell *c, eMonster m) {
+EX void dieTroll(cell *c, eMonster m) {
   if(m == moTroll) c->wall = waDeadTroll;
   else if(m == moDarkTroll) c->wall = waDeadfloor2;
   else if(m == moRedTroll) c->wall = waRed1;
   else c->wall = waDeadTroll2, c->wparam = m;
   }
 
-int reptilemax() {
+EX int reptilemax() {
   int i = items[itDodeca] + yendor::hardness();
   if(i >= 245) return 5;
   int r = (250 - i);
@@ -225,7 +225,7 @@ void wanderingZebra(cell *start) {
     }
   }
 
-int getGhostTimer() {
+EX int getGhostTimer() {
   return shmup::on ? (shmup::curtime - lastexplore) / 350 : turncount - lastexplore;
   }
 
@@ -261,7 +261,7 @@ bool canReachPlayer(cell *cf, eMonster m) {
   return false;
   }
 
-bool haveOrbPower() {
+EX bool haveOrbPower() {
   for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_ORB && items[i]) return true;
   if(quotient) for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
@@ -275,7 +275,7 @@ bool haveOrbPower() {
   return false;
   }
 
-bool haveKraken() {
+EX bool haveKraken() {
   for(int i=0; i<spherecells(); i++) {
     cell *c = getDodecahedron(i)->c7;
     if(c->monst == moKrakenH || c->monst == moKrakenT) return true;
@@ -283,7 +283,7 @@ bool haveKraken() {
   return false;
   }
 
-eItem wanderingTreasure(cell *c) {
+EX eItem wanderingTreasure(cell *c) {
   eLand l = c->land;
   #if CAP_DAILY
   if(daily::on && daily::prevent_spawn_treasure_on(c)) return itNone;
@@ -305,7 +305,7 @@ eItem wanderingTreasure(cell *c) {
   return treasureType(l);
   }
 
-void wandering() {
+EX void wandering() {
   if(bounded && specialland == laMinefield) {
     kills[moBomberbird] = 0;
     kills[moTameBomberbird] = 0;
@@ -728,7 +728,7 @@ void wandering() {
     }
   }
 
-void generateSnake(cell *c, int i, int snakecolor) {
+EX void generateSnake(cell *c, int i, int snakecolor) {
   c->monst = moHexSnake;
   c->hitpoints = snakecolor;
   int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->move(i)));

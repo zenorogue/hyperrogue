@@ -3,18 +3,18 @@
 
 namespace hr {
 
-vector<radarpoint> radarpoints;
-vector<radarline> radarlines;
+EX vector<radarpoint> radarpoints;
+EX vector<radarline> radarlines;
 
-purehookset hooks_stats;
+EX purehookset hooks_stats;
 
-int monsterclass(eMonster m) {
+EX int monsterclass(eMonster m) {
   if(isFriendly(m) || m == moTortoise) return 1;
   else if(isMonsterPart(m)) return 2;
   else return 0;
   }
 
-int glyphclass(int i) {
+EX int glyphclass(int i) {
   if(i < ittypes) {
     eItem it = eItem(i);
     return itemclass(it) == IC_TREASURE ? 0 : 1; 
@@ -25,7 +25,7 @@ int glyphclass(int i) {
     }
   }
 
-int subclass(int i) {
+EX int subclass(int i) {
   if(i < ittypes) 
     return itemclass(eItem(i)); 
   else 
@@ -304,9 +304,9 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
     }
   }
 
-bool nohud, nomenukey;
+EX bool nohud, nomenukey;
 
-hookset<bool()> *hooks_prestats;
+EX hookset<bool()> *hooks_prestats;
 
 #if CAP_SHAPES
 void drawMobileArrow(int i) {
@@ -350,9 +350,9 @@ void drawMobileArrow(int i) {
   }
 #endif
 
-bool nofps = false;
+EX bool nofps = false;
 
-void draw_radar(bool cornermode) {
+EX void draw_radar(bool cornermode) {
 
   if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
   bool d3 = WDIM == 3;
@@ -442,7 +442,7 @@ void draw_radar(bool cornermode) {
     }
   }
 
-void drawStats() {
+EX void drawStats() {
   if(nohud || vid.stereo_mode == sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
   if(viewdists && show_distance_lists) 

@@ -4,7 +4,7 @@
 
 namespace hr {
 
-bool checkBarriersFront(cellwalker bb, int q, bool cross) {
+EX bool checkBarriersFront(cellwalker bb, int q, bool cross) {
 
   if(!ctof(bb.at)) 
     return false;
@@ -28,15 +28,15 @@ bool checkBarriersFront(cellwalker bb, int q, bool cross) {
   return checkBarriersBack(bb, q);
   }
 
-bool hasbardir(cell *c) {
+EX bool hasbardir(cell *c) {
   return c->bardir != NODIR && c->bardir != NOBARRIERS;
   }
 
-void preventbarriers(cell *c) {
+EX void preventbarriers(cell *c) {
   if(c && c->bardir == NODIR) c->bardir = NOBARRIERS;
   }
 
-bool checkBarriersBack(cellwalker bb, int q, bool cross) {
+EX bool checkBarriersBack(cellwalker bb, int q, bool cross) {
   // printf("back, %p, s%d\n", bb.at, bb.spin);
 
   // if(mark) { printf("mpdist = %d [%d] bardir = %d spin=%d q=%d cross=%d\n", bb.at->mpdist, BARLEV, bb.at->bardir, bb.spin, q, cross); }
@@ -61,11 +61,11 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
   }
 
 // warp coasts use a different algorithm when has_nice_dual() is on
-bool warped_version(eLand l1, eLand l2) {
+EX bool warped_version(eLand l1, eLand l2) {
   return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || (VALENCE == 3);
   }
 
-bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
+EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1 IS(laNone), eLand l2 IS(laNone)) {
   if(bb.at->mpdist < BARLEV && l1 == l2) return false;
   if(bb.cpeek()->bardir != NODIR && l1 == l2) return false;
   if(bb.at->bardir != NODIR && l1 == l2) return false;
@@ -106,7 +106,7 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
   return checkBarriersNowall(bb, q+1, -dir, l2, l1);
   }
 
-eWall getElementalWall(eLand l) {
+EX eWall getElementalWall(eLand l) {
   if(l == laEAir) return waChasm;
   if(l == laEEarth) return waStone;
   if(l == laEFire) return waEternalFire;
@@ -114,7 +114,7 @@ eWall getElementalWall(eLand l) {
   return waNone;
   }
 
-void setbarrier(cell *c) {
+EX void setbarrier(cell *c) {
   if(isSealand(c->barleft) && isSealand(c->barright)) {
     bool setbar = ctof(c);
     if(c->barleft == laKraken || c->barright == laKraken)
@@ -144,7 +144,7 @@ void setbarrier(cell *c) {
     }
   }
 
-void setland(cell *c, eLand l) {
+EX void setland(cell *c, eLand l) {
   if(c->land != l)  {
     c->landparam = 0;  
     }
@@ -154,18 +154,18 @@ void setland(cell *c, eLand l) {
   c->land = l;
   }
 
-void extendcheck(cell *c) {
+EX void extendcheck(cell *c) {
   return;
   if(BITRUNCATED && c->landparam == 0 && c->barleft != NOWALLSEP) {
     raiseBuggyGeneration(c, "extend error");
     }
   }
 
-bool mirrorwall(cell *c) {
+EX bool mirrorwall(cell *c) {
   return c->barleft == laMirrored || c->barright == laMirrored;
   }
   
-void extendBarrierFront(cell *c) {
+EX void extendBarrierFront(cell *c) {
   limitgen("extend front %p\n", c); 
   if(buggyGeneration) return;
   int ht = c->landparam;
@@ -215,7 +215,7 @@ void extendBarrierFront(cell *c) {
     }
   }
 
-void extendBarrierBack(cell *c) {
+EX void extendBarrierBack(cell *c) {
   limitgen("extend back %p\n", c); 
   if(buggyGeneration) return;
   int ht = c->landparam;
@@ -247,7 +247,7 @@ void extendBarrierBack(cell *c) {
   extendBarrier(bb.at);
   }
 
-void extendNowall(cell *c) {
+EX void extendNowall(cell *c) {
 
   c->barleft = NOWALLSEP_USED;
   cellwalker cw(c, c->bardir);
@@ -304,7 +304,7 @@ void extendNowall(cell *c) {
 
 bool gotit = false;
 
-void extendCR5(cell *c) {
+EX void extendCR5(cell *c) {
   if(!BITRUNCATED) return;
 // if(c->barright == laCrossroads5) extendCR5(c);
   eLand forbidden = c->barleft;
@@ -329,16 +329,14 @@ void extendCR5(cell *c) {
     }
   }
 
-bool isbar4(cell *c) {
+EX bool isbar4(cell *c) {
   return
     c->wall == waBarrier || c->land == laElementalWall || 
     c->land == laMirrorWall || c->land == laMirrorWall2 ||
     c->land == laMercuryRiver;
   }  
 
-void extend3D(cell *c);
-
-void extendBarrier(cell *c) {
+EX void extendBarrier(cell *c) {
   limitgen("extend barrier %p\n", c); 
   if(buggyGeneration) return;
   
@@ -425,7 +423,7 @@ void extendBarrier(cell *c) {
   if(c->barright == laCrossroads5) extendCR5(c);
   }
 
-void buildBarrierForce(cell *c, int d, eLand l) {
+EX void buildBarrierForce(cell *c, int d, eLand l) {
   c->bardir = d;
   eLand oldland = c->land;
   if(oldland == laNone) {
@@ -440,7 +438,7 @@ void buildBarrierForce(cell *c, int d, eLand l) {
   extendcheck(c);
   }
 
-void buildBarrier(cell *c, int d, eLand l) {
+EX void buildBarrier(cell *c, int d, eLand l IS(laNone)) {
   d %= 7;
   cellwalker bb(c, d);
   
@@ -448,7 +446,7 @@ void buildBarrier(cell *c, int d, eLand l) {
     buildBarrierForce(c, d, l);
   }
 
-bool buildBarrier6(cellwalker cw, int type) {
+EX bool buildBarrier6(cellwalker cw, int type) {
   limitgen("build6 %p/%d (%d)\n", cw.at, cw.spin, type); 
   
   cellwalker b[4];
@@ -559,9 +557,7 @@ bool buildBarrier6(cellwalker cw, int type) {
   return true;
   }
   
-  
-
-bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
+EX bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   limitgen("build4 %p\n", c); 
   if(buggyGeneration) return true;
   d %= 7;
@@ -622,7 +618,7 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   return true;
   }    
 
-void buildBarrierStrong(cell *c, int d, bool oldleft, eLand newland) {
+EX void buildBarrierStrong(cell *c, int d, bool oldleft, eLand newland) {
   d %= 7;
   cellwalker bb(c, d);
 
@@ -635,11 +631,11 @@ void buildBarrierStrong(cell *c, int d, bool oldleft, eLand newland) {
   extendcheck(bb.at);
   }
 
-void buildBarrierStrong(cell *c, int d, bool oldleft) {
+EX void buildBarrierStrong(cell *c, int d, bool oldleft) {
   buildBarrierStrong(c, d, oldleft, getNewLand(c->land));
   }
 
-void buildCrossroads2(cell *c) {
+EX void buildCrossroads2(cell *c) {
 
   if(buggyGeneration) return;
 
@@ -735,7 +731,7 @@ void buildCrossroads2(cell *c) {
   }
 
 #if MAXMDIM >= 4
-void extend3D(cell *c) {
+EX void extend3D(cell *c) {
   eLand l1 = c->land;
   c->barleft = NOWALLSEP_USED;
   
@@ -772,7 +768,7 @@ void extend3D(cell *c) {
 
 bool built = false;
 
-bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
+EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
   if(forced_dir == NODIR) {
     for(int t=0; t<S7; t++) if((!c->move(t) || c->move(t)->mpdist > c->mpdist) && buildBarrier3D(c, l2, t)) return true;
     return false;
@@ -815,7 +811,7 @@ bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
   }
 #endif
 
-bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
+EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
 
   if(geometry == gBinary4) return false;
   #if MAXMDIM >= 4

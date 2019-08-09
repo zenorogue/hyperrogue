@@ -6,36 +6,38 @@ namespace hr {
 int frames;
 bool outoffocus = false;
 
-int mousex, mousey;
-hyperpoint mouseh, mouseoh;
+EX int mousex, mousey;
+EX hyperpoint mouseh, mouseoh;
 
-bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick,
-  forcetarget, lshiftclick, lctrlclick, numlock_on;
-bool gtouched;
+EX bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick;
+EX bool forcetarget, lshiftclick, lctrlclick, numlock_on;
+EX bool gtouched;
 
 bool holdmouse;
 
-int getcstat, lgetcstat; ld getcshift; bool inslider;
+EX int getcstat, lgetcstat;
+ld getcshift;
+EX bool inslider;
 
 function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
 function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;};
 
 
 // is the player using mouse? (used for auto-cross)
-bool mousing = true;
+EX bool mousing = true;
 
 // is the mouse button pressed?
-bool mousepressed = false;
-bool mousemoved = false;
-bool actonrelease = false;
+EX bool mousepressed = false;
+EX bool mousemoved = false;
+EX bool actonrelease = false;
 
 bool mousepan, oldmousepan;
 #if CAP_MOUSEGRAB
-ld mouseaim_x, mouseaim_y;
+EX ld mouseaim_x, mouseaim_y;
 #endif
-ld mouseaim_sensitivity = 0.01;
+EX ld mouseaim_sensitivity = 0.01;
 
-int timetowait;
+EX int timetowait;
 
 #if CAP_SDLJOY
 int joyx, joyy, panjoyx, panjoyy; 
@@ -45,22 +47,22 @@ movedir joydir;
 movedir mousedest;
 ld shiftmul = 1;
 
-cell *mouseover, *mouseover2, *lmouseover;
+EX cell *mouseover, *mouseover2, *lmouseover;
 ld modist, modist2, centdist;
 
 int lastt;
 
-bool mouseout() {
+EX bool mouseout() {
   if((getcstat != '-' && getcstat) || (lgetcstat && lgetcstat != '-')) return true;
   return outofmap(mouseh);
   }
 
-bool mouseout2() {
+EX bool mouseout2() {
   if((getcstat && getcstat != '-') || (lgetcstat && lgetcstat != '-')) return true;
   return outofmap(mouseh) || outofmap(mouseoh);
   }
 
-movedir vectodir(const hyperpoint& P) {
+EX movedir vectodir(const hyperpoint& P) {
 
   transmatrix U = ggmatrix(cwt.at);
   if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
@@ -96,11 +98,11 @@ movedir vectodir(const hyperpoint& P) {
   return res;
   }
 
-void remission() {
+EX void remission() {
   if(!canmove && (cmode & sm::NORMAL)) showMissionScreen();
  }
 
-hyperpoint move_destination_vec(int d) {
+EX hyperpoint move_destination_vec(int d) {
   if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
   // else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   // else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
@@ -108,7 +110,7 @@ hyperpoint move_destination_vec(int d) {
   else return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   }
 
-void movepckeydir(int d) {
+EX void movepckeydir(int d) {
   DEBB(DF_GRAPH, ("movepckeydir\n"));
   // EUCLIDEAN
   
@@ -119,7 +121,7 @@ void movepckeydir(int d) {
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
 
-void calcMousedest() {
+EX void calcMousedest() {
   if(mouseout()) return;
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
   ld mousedist = intval(mouseh, tC0(ggmatrix(cwt.at)));
@@ -156,7 +158,7 @@ void calcMousedest() {
   cwt = bcwt;
   }
 
-void mousemovement() {
+EX void mousemovement() {
   if(DIM == 3) {
     if(WDIM == 2) {
       if(View[2][2] < -0.75) 
@@ -182,7 +184,7 @@ void mousemovement() {
 SDL_Joystick* sticks[8];
 int numsticks;
 
-void initJoysticks() {
+EX void initJoysticks() {
   DEBB(DF_INIT, ("init joysticks"));
   numsticks = SDL_NumJoysticks();
   if(numsticks > 8) numsticks = 8;
@@ -197,7 +199,7 @@ void initJoysticks() {
     }
   }
 
-void closeJoysticks() {
+EX void closeJoysticks() {
   DEBB(DF_INIT, ("close joysticks"));
   for(int i=0; i<numsticks; i++) {
     SDL_JoystickClose(sticks[i]), sticks[i] = NULL;
@@ -205,7 +207,7 @@ void closeJoysticks() {
   numsticks = 0;
   }
 
-void checkjoy() {
+EX void checkjoy() {
   DEBB(DF_GRAPH, ("check joy"));
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
@@ -230,7 +232,7 @@ void checkjoy() {
   joydir = vectodir(hpxy(jx, jy));
   }
 
-void checkpanjoy(double t) {
+EX void checkpanjoy(double t) {
   if(shmup::on) return;
   
   if(vid.joypanspeed < 1e-7) return;
@@ -249,7 +251,7 @@ void checkpanjoy(double t) {
 
 bool quitmainloop = false;
 
-bool doexiton(int sym, int uni) {
+EX bool doexiton(int sym, int uni) {
   if(sym == SDLK_ESCAPE) return true;
   if(sym == SDLK_F10) return true;
   if(sym == PSEUDOKEY_RELEASE) return false;
@@ -269,9 +271,9 @@ bool didsomething;
 
 typedef SDL_Event eventtype;
 
-bool smooth_scrolling = false;
+EX bool smooth_scrolling = false;
 
-void handlePanning(int sym, int uni) {
+EX void handlePanning(int sym, int uni) {
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
   if(DIM == 3) {
     if(sym == PSEUDOKEY_WHEELUP) View = cpush(2, -0.05*shiftmul) * View, didsomething = true, playermoved = false;
@@ -369,9 +371,9 @@ bool handleTune(int sym, int uni) {
   }
 #endif
 
-purehookset hooks_fixticks;
+EX purehookset hooks_fixticks;
   
-void handleKeyNormal(int sym, int uni) {
+EX void handleKeyNormal(int sym, int uni) {
 
   if(cheater && sym < 256 && sym > 0) {
     if(applyCheat(uni, mouseover))
@@ -493,9 +495,9 @@ void handleKeyNormal(int sym, int uni) {
   if(sym == PSEUDOKEY_MEMORY) pushScreen(show_memory_menu);
   }
 
-bool need_mouseh = false;
+EX bool need_mouseh = false;
 
-void fix_mouseh() {
+EX void fix_mouseh() {
   if(!need_mouseh) ;
 #if CAP_RUG
   else if(rug::rugged)
@@ -514,7 +516,7 @@ void fix_mouseh() {
   need_mouseh = false;
   }
 
-void handlekey(int sym, int uni) {
+EX void handlekey(int sym, int uni) {
 
   if(callhandlers(false, hooks_handleKey, sym, uni)) return;
 
@@ -522,14 +524,14 @@ void handlekey(int sym, int uni) {
   }
 
 #if !CAP_SDL
-void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainloop = true; }
+EX void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainloop = true; }
 #else
 
 // Warning: a very long function! todo: refactor
 
 int cframelimit = 1000;
 
-void resize_screen_to(int x, int y) {
+EX void resize_screen_to(int x, int y) {
   dual::split_or_do([&] {
     vid.xres = x;
     vid.yres = y;
@@ -542,7 +544,7 @@ void resize_screen_to(int x, int y) {
 
 int lastframe;
 
-void mainloopiter() {
+EX void mainloopiter() {
 
   DEBB(DF_GRAPH, ("main loop\n"));
 
@@ -697,7 +699,7 @@ void mainloopiter() {
   fix_mouseh();
   }
   
-void handle_event(SDL_Event& ev) {
+EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
   Uint8 *keystate = SDL_GetKeyState(NULL);
 
@@ -939,7 +941,7 @@ void handle_event(SDL_Event& ev) {
     }
 #endif
 
-void mainloop() {
+EX void mainloop() {
   if(noGUI) return;
   lastt = 0;
 #if ISWEB
@@ -951,7 +953,7 @@ void mainloop() {
   }
 
 #if ISMOBILE==1
-void displayabutton(int px, int py, string s, int col) {
+EX void displayabutton(int px, int py, string s, int col) {
   // TMP
   int siz = vid.yres > vid.xres ? vid.fsize*2 : vid.fsize * 3/2;
   int rad = (int) realradius();
@@ -973,7 +975,7 @@ void displayabutton(int px, int py, string s, int col) {
   }
 #endif
 
-bool interpret_as_direction(int sym, int uni) {
+EX bool interpret_as_direction(int sym, int uni) {
   #ifdef FAKE_SDL
   return false;
   #else
@@ -981,7 +983,7 @@ bool interpret_as_direction(int sym, int uni) {
   #endif
   }
 
-int get_direction_key(int sym, int uni) {
+EX int get_direction_key(int sym, int uni) {
   if(interpret_as_direction(sym, uni)) {
     #ifndef FAKE_SDL
     if(sym == SDLK_KP1) return SDLK_END;
@@ -998,7 +1000,7 @@ int get_direction_key(int sym, int uni) {
   return sym;
   }
 
-bool gmodekeys(int sym, int uni) {
+EX bool gmodekeys(int sym, int uni) {
   #if CAP_RUG
   if(rug::rugged && rug::handlekeys(sym, uni)) return true;
   #endif
@@ -1031,7 +1033,7 @@ bool gmodekeys(int sym, int uni) {
     }
   }
 
-bool haveMobileCompass() {
+EX bool haveMobileCompass() {
 #if ISMOBILE
   if(longclick) return false;
 #else
@@ -1041,7 +1043,7 @@ bool haveMobileCompass() {
   return canmove && !shmup::on && vid.mobilecompasssize > 0 && isize(screens) == 1;
   }
   
-bool handleCompass() {
+EX bool handleCompass() {
   if(!haveMobileCompass()) return false;
   
   using namespace shmupballs;
@@ -1066,7 +1068,7 @@ bool handleCompass() {
   }
 
 // orientation sensitivity
-namespace ors {
+EX namespace ors {
 
 int mode;
 double sensitivity = 1;
@@ -1083,7 +1085,7 @@ transmatrix getOrientation() {
   }
 #endif
 
-void reset() {
+EX void reset() {
 #if CAP_ORIENTATION
   if(mode) last_orientation = getOrientation();
   relative_matrix = Id;
@@ -1096,7 +1098,7 @@ void delayed_reset() {
 #endif
   }
 
-void show() {
+EX void show() {
 #if CAP_ORIENTATION
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1189,7 +1191,7 @@ void rerotate(transmatrix& T) {
 
 int first_check, last_check;
 
-void check_orientation() {
+EX void check_orientation() {
 #if CAP_ORIENTATION
   if(!mode) return;
 
@@ -1209,6 +1211,6 @@ void check_orientation() {
 #endif
   }
 
-}
+EX }
 
 }

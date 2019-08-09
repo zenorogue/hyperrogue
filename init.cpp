@@ -6,18 +6,18 @@
 namespace hr {
 
 #if CU_INIT
-int fontscale = 100;
+EX int fontscale = 100;
 
-int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
+EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
 
 string s0;
 
-bool fixseed = false;
-int startseed = 0;
+EX bool fixseed = false;
+EX int startseed = 0;
 
 eLand firstland0;
 
-void initAll() {
+EX void initAll() {
   init_floorcolors();
   showstartmenu = true;
   ca::init();
@@ -50,7 +50,7 @@ void initAll() {
   polygonal::solve();
   }
 
-void finishAll() {
+EX void finishAll() {
   achievement_final(!items[itOrbSafety]);
   
 #if CAP_SAVE

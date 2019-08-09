@@ -472,7 +472,7 @@ void menu() {
 #endif
 
 #if CAP_ANIMATIONS
-namespace anims {
+EX namespace anims {
 
 enum eMovementAnimation {
   maNone, maTranslation, maRotation, maCircle, maParabolic, maTranslationRotation
@@ -480,19 +480,19 @@ enum eMovementAnimation {
 
 eMovementAnimation ma;
 
-ld shift_angle, movement_angle;
-ld normal_angle = 90;
-ld period = 10000;
-int noframes = 30;
-ld cycle_length = 2 * M_PI;
-ld parabolic_length = 1;
-ld skiprope_rotation;
+EX ld shift_angle, movement_angle;
+EX ld normal_angle = 90;
+EX ld period = 10000;
+EX int noframes = 30;
+EX ld cycle_length = 2 * M_PI;
+EX ld parabolic_length = 1;
+EX ld skiprope_rotation;
 
 int lastticks, bak_turncount;
 
-ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
-bool env_shmup;
-ld rug_angle;
+EX ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
+EX bool env_shmup;
+EX ld rug_angle;
 
 heptspin rotation_center_h;
 cellwalker rotation_center_c;
@@ -500,7 +500,7 @@ transmatrix rotation_center_View;
 
 color_t circle_display_color = 0x00FF00FF;
 
-ld circle_radius = acosh(2.), circle_spins = 1;
+EX ld circle_radius = acosh(2.), circle_spins = 1;
 
 void moved() {
   optimizeview();
@@ -577,7 +577,7 @@ void reflect_view() {
 
 bool clearup;
 
-void apply() {
+EX void apply() {
   int t = ticks - lastticks;
   lastticks = ticks;
 
@@ -701,14 +701,14 @@ void apply() {
   calcparam();
   }
 
-void rollback() {
+EX void rollback() {
   if(env_volcano) {
     turncount = bak_turncount;
     }
   }
 
 #if CAP_FILES && CAP_SHOT
-string animfile = "animation-%04d.png";
+EX string animfile = "animation-%04d.png";
 
 int min_frame = 0, max_frame = 999999;
 
@@ -796,7 +796,7 @@ void list_animated_parameters() {
 
 ld animation_period;
 
-void show() {
+EX void show() {
   cmode = sm::SIDE; needs_highqual = false;
   animation_lcm = 1;
   gamescreen(0);
@@ -1080,7 +1080,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   #endif
   ;
 
-bool any_animation() {
+EX bool any_animation() {
   if(conformal::on) return true;
   if(ma) return true;
   if(ballangle_rotation || rug_rotation1 || rug_rotation2) return true;
@@ -1088,22 +1088,22 @@ bool any_animation() {
   return false;
   }
 
-bool any_on() {
+EX bool any_on() {
   return any_animation() || conformal::includeHistory;
   }
 
-bool center_music() {
+EX bool center_music() {
   return among(ma, maParabolic, maTranslation);
   }
 
-}
+EX }
 #endif
 
-namespace startanims {
+EX namespace startanims {
 
 int ticks_start = 0;
 
-void null_animation() {
+EX void null_animation() {
   gamescreen(2);  
   }
 
@@ -1240,9 +1240,9 @@ void fib_ghosts() {
 // - fly a ghost around center, in Gans model
 // - triangle edges?
 
-reaction_t current = null_animation;
+EX reaction_t current = null_animation;
 
-void pick() {
+EX void pick() {
   if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || vid.always3 || pmodel || rug::rugged || vid.wallmode < 2 || vid.monmode < 2 || glhr::noshaders || !vid.usingGL) {
     current = null_animation;
     return;
@@ -1257,5 +1257,5 @@ void pick() {
 auto sanimhook = addHook(hooks_frame, 100, []() { if(add_to_frame) add_to_frame(); });
 #endif
 
-}
+EX }
 }

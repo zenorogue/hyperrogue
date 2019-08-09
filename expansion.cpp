@@ -905,7 +905,7 @@ int sibling_distance(cell *a, cell *b, int limit) {
     }
   }
 
-int hyperbolic_celldistance(cell *c1, cell *c2) {  
+EX int hyperbolic_celldistance(cell *c1, cell *c2) {  
   int found_distance = INF;
   
   int d = 0, d1 = celldist0(c1), d2 = celldist0(c2), sl_used = 0;

@@ -3,8 +3,12 @@
 
 namespace hr {
 
-namespace kite {
+EX namespace kite {
 #if CAP_BT
+
+#if HDR
+enum pshape {pDart, pKite};
+#endif
 
 transmatrix meuscale(ld z) {
   if(euclid) {
@@ -47,9 +51,9 @@ const ld up = 1 / tan(72 * degree);
 const ld dart_center = (down + 2 * up) / 3;
 const ld kite_center = up;
 
-pshape getshape(heptagon *h) { return pshape(h->s); }
+EX pshape getshape(heptagon *h) { return pshape(h->s); }
 
-hyperpoint get_corner(cell *c, int d, ld cf) {
+EX hyperpoint get_corner(cell *c, int d, ld cf) {
   bool kite = getshape(c->master) == pKite;
   int t = kite ? 1 : -1;
   ld shf = kite ? kite_center : dart_center;
@@ -66,7 +70,7 @@ hyperpoint get_corner(cell *c, int d, ld cf) {
   return C0; /* unreachable! */
   }
 
-pair<vector<vector<hyperpoint>>, vector<vector<ld>>> make_walls() {
+EX pair<vector<vector<hyperpoint>>, vector<vector<ld>>> make_walls() {
   
   vector<vector<hyperpoint>> kv;
   vector<vector<ld>> weights;
@@ -365,14 +369,14 @@ struct hrmap_kite : hrmap {
 
   };
 
-hrmap *new_map() { return new hrmap_kite; }
+EX hrmap *new_map() { return new hrmap_kite; }
 hrmap_kite *kite_map() { return (hrmap_kite*) currentmap; }
 
 void con(cell *c0, int d0, cell *c1, int d1) {
   c0->c.connect(d0, c1, d1, false);
   }
 
-void find_cell_connection(cell *c, int d) {
+EX void find_cell_connection(cell *c, int d) {
   auto h0 = c->master;
   auto sh = getshape(h0);  
   auto crule = [&] (pshape s0, int d0, pshape s1, int d1, pshape sparent, int child, int sibling, int rsibling) {

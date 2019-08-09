@@ -126,7 +126,7 @@ SDL_Surface *renderbuffer::render() {
   }
 #endif
 
-int current_rbuffer = -1;
+EX int current_rbuffer = -1;
 
 void renderbuffer::enable() {
   #if CAP_GL

@@ -356,9 +356,9 @@ namespace geom3 {
       }
     }    
 
-namespace geom3 {
+EX namespace geom3 {
   #if MAXMDIM >= 4
-void switch_always3() {
+EX void switch_always3() {
     if(dual::split(switch_always3)) return;
     if(rug::rugged) rug::close();
     vid.always3 = !vid.always3;
@@ -367,7 +367,7 @@ void switch_always3() {
     }
 #endif
 
-  void switch_tpp() {
+  EX void switch_tpp() {
     if(dual::split(switch_fpp)) return;
     if(pmodel == mdDisk && vid.camera_angle) {
       vid.yshift = 0;
@@ -388,7 +388,7 @@ void switch_always3() {
       }
     }
     
-  void switch_fpp() {
+  EX void switch_fpp() {
 #if MAXMDIM >= 4
     if(rug::rugged) rug::close();
     if(dual::split(switch_fpp)) return;
@@ -429,7 +429,7 @@ void switch_always3() {
 #endif
     }
 
-  }
+  EX }
 
 geometry_information *cgip;
 map<string, geometry_information> cgis;

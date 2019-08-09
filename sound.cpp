@@ -7,16 +7,16 @@ const char *musicfile = "";
 bool audio;
 string musiclicense;
 string musfname[landtypes];
-int musicvolume = 60, effvolume = 60;
+EX int musicvolume = 60, effvolume = 60;
 
-eLand getCurrentLandForMusic() {
+EX eLand getCurrentLandForMusic() {
   eLand id = ((anims::center_music()) && centerover.at) ? centerover.at->land : cwt.at->land;
   if(isHaunted(id)) id = laHaunted;
   if(id == laWarpSea) id = laWarpCoast;
   return id;
   }
 
-void playSeenSound(cell *c) {
+EX void playSeenSound(cell *c) {
   if(!c->monst) return;
   bool nearme = c->cpdist <= 7;
   forCellEx(c2, c) if(c2->cpdist <= 7) nearme = true; 
@@ -73,7 +73,7 @@ eLand cid = laNone;
 
 hookset<bool(eLand&)> *hooks_music;
 
-void handlemusic() {
+EX void handlemusic() {
   DEBBI(DF_GRAPH, ("handle music"));
   if(audio && musicvolume) {
     eLand id = getCurrentLandForMusic();
@@ -117,7 +117,7 @@ void handlemusic() {
 
 hookset<bool(eLand&)> *hooks_resetmusic;
 
-void resetmusic() {
+EX void resetmusic() {
   if(audio && musicvolume) {
     Mix_FadeOutMusic(3000);
     cid = laNone;
@@ -126,7 +126,7 @@ void resetmusic() {
     }
   }
 
-bool loadMusicInfo(string dir) {
+EX bool loadMusicInfo(string dir) {
   DEBBI(DF_INIT, ("load music info"));
   if(dir == "") return false;
   FILE *f = fopen(dir.c_str(), "rt");
@@ -164,7 +164,7 @@ bool loadMusicInfo(string dir) {
   return false;
   }
 
-bool loadMusicInfo() {
+EX bool loadMusicInfo() {
   return
     loadMusicInfo(musicfile)
     || loadMusicInfo(HYPERPATH "hyperrogue-music.txt") 
@@ -181,7 +181,7 @@ bool loadMusicInfo() {
     ;
   }
 
-void initAudio() {
+EX void initAudio() {
   audio = loadMusicInfo();
 
   if(audio) {
@@ -206,7 +206,7 @@ string wheresounds = HYPERPATH "sounds/";
 
 hookset<bool(const string& s, int vol)> *hooks_sound;
 
-void playSound(cell *c, const string& fname, int vol) {
+EX void playSound(cell *c, const string& fname, int vol) {
   if(effvolume == 0) return;
   if(callhandlers(false, hooks_sound, fname, vol)) return;
   // printf("Play sound: %s\n", fname.c_str());
@@ -224,7 +224,7 @@ void playSound(cell *c, const string& fname, int vol) {
     }
   }
 
-void reuse_music_memory() {
+EX void reuse_music_memory() {
   for(int i=0; i<landtypes; i++)
     if(music[i] && music[i] != music[cid]) {
       Mix_Music *which = music[i];
@@ -253,7 +253,7 @@ void reuse_music_memory() {
   }
 
 #else
-void resetmusic() {}
+EX void resetmusic() {}
 #endif
 
 #if CAP_COMMANDLINE

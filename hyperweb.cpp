@@ -54,12 +54,13 @@ namespace hr {
 
 // -- demo --
 
-void open_url(string s) {
+#if CAP_URL
+EX void open_url(string s) {
   EM_ASM_({
     window.open(UTF8ToString($0, 1000));
     }, s.c_str());
   }
-
+#endif
 
 //    window.open(Pointer_stringify($0));
 bool demoanim;
