@@ -726,15 +726,6 @@ bool operator == (hyperpoint h1, hyperpoint h2) {
 
 // rotation matrix in R^3
 
-EX transmatrix rotmatrix(double rotation, int c0, int c1) {
-  transmatrix t = Id;
-  t[c0][c0] = cos(rotation);
-  t[c1][c1] = cos(rotation);
-  t[c0][c1] = sin(rotation);
-  t[c1][c0] = -sin(rotation);
-  return t;
-  }
-
 EX hyperpoint mid3(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
   return mid(h1+h2+h3, h1+h2+h3);
   }

@@ -32,10 +32,10 @@ transmatrix getOrientation() {
   lasttick = curtick;
   Uint8 *keystate = SDL_GetKeyState(NULL);
   if(keystate[SDLK_LCTRL]) {
-    if(keystate['s']) Orient = Orient * rotmatrix(t, 2, 1);
-    if(keystate['w']) Orient = Orient * rotmatrix(t, 1, 2);
-    if(keystate['a']) Orient = Orient * rotmatrix(t, 2, 0);
-    if(keystate['d']) Orient = Orient * rotmatrix(t, 0, 2);
+    if(keystate['s']) Orient = Orient * cspin(2, 1, t);
+    if(keystate['w']) Orient = Orient * cspin(1, 2, t);
+    if(keystate['a']) Orient = Orient * cspin(2, 0, t);
+    if(keystate['d']) Orient = Orient * cspin(0, 2, t);
     }
   return Orient;
   }

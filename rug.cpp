@@ -1554,7 +1554,7 @@ bool handlekeys(int sym, int uni) {
       crystal::switch_z_coordinate();
     else
     #endif
-      apply_rotation(rotmatrix(M_PI, 0, 2));
+      apply_rotation(cspin(0, 2, M_PI));
     return true;
     }
   else if(NUMBERKEY == '3') {
@@ -1563,7 +1563,7 @@ bool handlekeys(int sym, int uni) {
       crystal::flip_z();
     else
     #endif
-      apply_rotation(rotmatrix(M_PI/2, 0, 2));
+      apply_rotation(cspin(0, 2, M_PI/2));
     return true;
     }
   #if CAP_CRYSTAL
@@ -1581,12 +1581,12 @@ bool handlekeys(int sym, int uni) {
     move_forward(-.1);
     return true;
     }
-  else if(sym == SDLK_HOME)  { apply_rotation(rotmatrix(.1, 0, 1)); return true; }
-  else if(sym == SDLK_END)   { apply_rotation(rotmatrix(.1, 1, 0)); return true; }
-  else if(sym == SDLK_DOWN)  { apply_rotation(rotmatrix(.1, 2, 1)); return true; }
-  else if(sym == SDLK_UP)    { apply_rotation(rotmatrix(.1, 1, 2)); return true; }
-  else if(sym == SDLK_LEFT)  { apply_rotation(rotmatrix(.1, 2, 0)); return true; }
-  else if(sym == SDLK_RIGHT) { apply_rotation(rotmatrix(.1, 0, 2)); return true; }
+  else if(sym == SDLK_HOME)  { apply_rotation(cspin(0, 1, .1)); return true; }
+  else if(sym == SDLK_END)   { apply_rotation(cspin(1, 0, .1)); return true; }
+  else if(sym == SDLK_DOWN)  { apply_rotation(cspin(2, 1, .1)); return true; }
+  else if(sym == SDLK_UP)    { apply_rotation(cspin(1, 2, .1)); return true; }
+  else if(sym == SDLK_LEFT)  { apply_rotation(cspin(2, 0, .1)); return true; }
+  else if(sym == SDLK_RIGHT) { apply_rotation(cspin(0, 2, .1)); return true; }
 #endif
   else return false;
   }
@@ -1659,13 +1659,13 @@ void actDraw() {
     if(finger_center) 
       perform_finger();
     else {
-      if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1), protractor += alpha;
-      if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0), protractor -= alpha;
+      if(keystate[SDLK_HOME]) qm++, t = t * cspin(0, 1, alpha), protractor += alpha;
+      if(keystate[SDLK_END]) qm++, t = t * cspin(1, 0, alpha), protractor -= alpha;
       if(!keystate[SDLK_LSHIFT]) {
-        if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 2, 1), protractor += alpha;
-        if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 1, 2), protractor -= alpha;
-        if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 2, 0), protractor += alpha;
-        if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 0, 2), protractor -= alpha;
+        if(keystate[SDLK_DOWN]) qm++, t = t * cspin(2, 1, alpha), protractor += alpha;
+        if(keystate[SDLK_UP]) qm++, t =  t * cspin(1, 2, alpha), protractor -= alpha;
+        if(keystate[SDLK_LEFT]) qm++, t = t * cspin(2, 0, alpha), protractor += alpha;
+        if(keystate[SDLK_RIGHT]) qm++, t =  t * cspin(0, 2, alpha), protractor -= alpha;
         }
       if(keystate[SDLK_PAGEDOWN]) push -= alpha;
       if(keystate[SDLK_PAGEUP]) push += alpha;
@@ -1698,13 +1698,13 @@ void actDraw() {
       if(keystate[SDLK_HOME] && !in_crystal()) qm++, t = inverse(currentrot);
       if(keystate[SDLK_END]) {
         qm++;
-        if(in_crystal()) t = t * rotmatrix(alpha, 0, 1);
-        else t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
+        if(in_crystal()) t = t * cspin(0, 1, alpha);
+        else t = currentrot * cspin(0, 1, alpha) * inverse(currentrot);
         }
-      if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 1, 2);
-      if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
-      if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
-      if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
+      if(keystate[SDLK_DOWN]) qm++, t = t * cspin(1, 2, alpha);
+      if(keystate[SDLK_UP]) qm++, t =  t * cspin(2, 1, alpha);
+      if(keystate[SDLK_LEFT]) qm++, t = t * cspin(0, 2, alpha);
+      if(keystate[SDLK_RIGHT]) qm++, t =  t * cspin(2, 0, alpha);
       if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha * ruggospeed);
       if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha * ruggospeed);
       }

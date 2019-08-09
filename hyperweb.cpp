@@ -175,9 +175,9 @@ transmatrix getOrientation() {
   beta = EM_ASM_DOUBLE({ return rotation_beta; });
   gamma = EM_ASM_DOUBLE({ return rotation_gamma; });
   return 
-    rotmatrix(alpha * degree, 0, 1) *
-    rotmatrix(beta * degree, 1, 2) *
-    rotmatrix(gamma * degree, 0, 2);
+    cspin(0, 1, alpha * degree) *
+    cspin(1, 2, beta * degree) *
+    cspin(0, 2, gamma * degree);
   }
 #endif
 

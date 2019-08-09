@@ -669,12 +669,12 @@ EX void apply() {
   #if CAP_RUG
   if(rug::rugged) {
     if(rug_rotation1) {
-      rug::apply_rotation(rotmatrix(rug_angle * degree, 1, 2));
-      rug::apply_rotation(rotmatrix(rug_rotation1 * 2 * M_PI * t / period, 0, 2));
-      rug::apply_rotation(rotmatrix(-rug_angle * degree, 1, 2));
+      rug::apply_rotation(cspin(1, 2, rug_angle * degree));
+      rug::apply_rotation(cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period));
+      rug::apply_rotation(cspin(1, 2, -rug_angle * degree));
       }
     if(rug_rotation2) {
-      rug::apply_rotation(rug::currentrot * rotmatrix(rug_rotation2 * 2 * M_PI * t / period, 0, 1) * inverse(rug::currentrot));
+      rug::apply_rotation(rug::currentrot * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period) * inverse(rug::currentrot));
       }
     }
   #endif
@@ -1141,9 +1141,9 @@ void perspective() {
 void rug() {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
-  rug::apply_rotation(rotmatrix(ticks / 3000., 1, 2));
+  rug::apply_rotation(cspin(1, 2, ticks / 3000.));
   gamescreen(2);
-  rug::apply_rotation(rotmatrix(-ticks / 3000., 1, 2));
+  rug::apply_rotation(cspin(1, 2, -ticks / 3000.));
   }
 #endif
 

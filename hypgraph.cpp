@@ -256,7 +256,7 @@ void make_twopoint(ld& x, ld& y) {
 
 hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
   h = perspective_to_space(h * scale, 1, gcSphere);
-  h = rotmatrix(angle * degree, 1, 2) * h;
+  h = cspin(1, 2, angle * degree) * h;
   return space_to_perspective(h, 1) / scale;
   }
 
