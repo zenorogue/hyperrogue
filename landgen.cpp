@@ -1736,15 +1736,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(ishept(c) && hrand(100) < (doCross?20:8) && !c->monst) {
           buildRedWall(c, 80);
-          int i = hrand(S7);
-          buildRedWall(createMovR(c, i), 33);
+          cellwalker cw(c, hrand(S7));
+          buildRedWall(cw.cpeek(), 33);
           if(hrand(2) == 0) 
-            buildRedWall(createMovR(createMovR(c, i), c->c.spin(i)+(hrand(2)?2:4)), 20);
-          i = (i + 3 + hrand(2)) % S7;
+            buildRedWall((cw + wstep + (hrand(2)?2:4)).cpeek(), 20);
+          cw += rev;
           if(hrand(6) < 4)
-            buildRedWall(createMovR(c, i), 33);
+            buildRedWall(cw.cpeek(), 33);
           if(hrand(2) == 0) 
-            buildRedWall(createMovR(createMovR(c, i), c->c.spin(i)+(hrand(2)?2:4)), 20);
+            buildRedWall((cw + wstep + (hrand(2)?2:4)).cpeek(), 20);
           }
         }
       if(d == 7 && c->wall == waNone)

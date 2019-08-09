@@ -289,14 +289,14 @@ void generateTreasureIsland(cell *c) {
       qlo = i; qhi = i;
       while(true && qc < MAX_EDGE) {
         qlo--;
-        c2 = createMovR(c, qlo);
+        c2 = c->cmodmove(qlo);
         if(!eubinary && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab[qc++] = c2;
         }
       while(true && qc < MAX_EDGE) {
         qhi++;
-        c2 = createMovR(c, qhi);
+        c2 = c->cmodmove(qhi);
         if(!eubinary && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab[qc++] = c2;
@@ -310,7 +310,7 @@ void generateTreasureIsland(cell *c) {
     printf("vs %d\n", celldistAlt(c));
     return; 
     }
-  cell* c2 = createMovR(c, (qlo+qhi)/2);
+  cell* c2 = c->cmodmove((qlo+qhi)/2);
   generateTreasureIsland(c2);
   if(!src) {
     c->wall = c2->wall;
@@ -553,7 +553,7 @@ void buildEquidistant(cell *c) {
         int q = (bsid+j+42) % c2->type;
         cell *c3 = c2->move(q);
         if(coastval(c3, b) < mcv) {
-          cell *c4 = createMovR(c2, bsid+1);
+          cell *c4 = c2->cmodmove(bsid+1);
           if(c4->land == laNone && c2->mpdist <= BARLEV) setdist(c4, BARLEV, c2);
           buildEquidistant(c4);
           mcv2 = coastval(c4, b);
@@ -562,7 +562,7 @@ void buildEquidistant(cell *c) {
         q = (bsid-j+MODFIXER) % c2->type;
         c3 = c2->move(q);
         if(coastval(c3, b) < mcv) {
-          cell *c4 = createMovR(c2, bsid-1);
+          cell *c4 = c2->cmodmove(bsid-1);
           if(c4->land == laNone && c2->mpdist <= BARLEV) setdist(c4, BARLEV, c2);
           buildEquidistant(c4);
           mcv2 = coastval(c4, b);

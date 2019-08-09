@@ -1946,7 +1946,7 @@ void movePlayer(monster *m, int delta) {
         double bestd = 9999;
         pushmonsters();
         for(int di=-1; di<2; di+=2) {
-          cell *c = getMovR(c2, sd+di);
+          cell *c = c2->modmove(sd+di);
           if(!c) continue;
           if(m->isVirtual || !gmatrix.count(c)) continue;
           double d = intval(gmatrix[c] * C0, m->pat * C0);
@@ -2227,8 +2227,8 @@ int reflect(cell*& c2, cell*& mbase, transmatrix& nat) {
     int d = mirror::mirrordir(c2);
     if(d != -1) {
       for(int k=0; k<7; k++) {
-        cell *ca = createMovR(c2, d-k);
-        cell *cb = createMovR(c2, d+k);
+        cell *ca = c2->cmodmove(d-k);
+        cell *cb = c2->cmodmove(d+k);
         if(ca->land == laMirror && inmirror(cb)) {
           reflectmatrix(nat, ca, cb, true);
           reflections++;
@@ -2238,11 +2238,11 @@ int reflect(cell*& c2, cell*& mbase, transmatrix& nat) {
       }
     else {
       for(int k=0; k<6; k++) {
-        cell *cb = createMovR(c2, k+1);
-        cell *cc = createMovR(c2, k+2);
+        cell *cb = c2->cmodmove(k+1);
+        cell *cc = c2->cmodmove(k+2);
         if(cb->land != laMirrorWall || cc->land != laMirrorWall) continue;
-        cell *ca = createMovR(c2, k);
-        cell *cd = createMovR(c2, k+3);
+        cell *ca = c2->cmodmove(k);
+        cell *cd = c2->cmodmove(k+3);
         if(reflectmatrix(nat, cc, ca, true)) reflections++;
         for(int limit=0; limit<10 && reflectmatrix(nat, cb, cd, true) && (reflections++, reflectmatrix(nat, cc, ca, true)); limit++) reflections+=2;
         }

@@ -161,16 +161,6 @@ cell *createMov(cell *c, int d) {
   return c->move(d);
   }
 
-cell *createMovR(cell *c, int d) {
-  d %= MODFIXER; d += MODFIXER; d %= c->type;
-  return createMov(c, d);
-  }
-
-cell *getMovR(cell *c, int d) {
-  d %= MODFIXER; d += MODFIXER; d %= c->type;
-  return c->move(d);
-  }
-
 void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
   if(!c2) return;
   c1->move(s1) = c2; c1->c.setspin(s1, s2, mirror);

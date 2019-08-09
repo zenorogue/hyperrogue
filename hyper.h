@@ -3184,8 +3184,6 @@ namespace princess {
 
 int eudist(int sx, int sy);
 
-cell *createMovR(cell *c, int d);
-
 bool ishept(cell *c);
 int cdist50(cell *c);
 bool polarb50(cell *c);

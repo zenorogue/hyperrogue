@@ -5275,7 +5275,7 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
   if(!items[orb]) return;
   if(who != moPlayer && !items[itOrbEmpathy]) return;
   for(int k: {-1, 1}) {
-    cell *mt = getMovR(mf, dir + k*bonus);
+    cell *mt = mf->modmove(dir + k*bonus);
     eMonster m = mt->monst;
     flagtype f = AF_SIDE;
     if(items[itOrbSlaying]) f|= AF_CRUSH;
