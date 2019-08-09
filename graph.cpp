@@ -7713,8 +7713,6 @@ void drawscreen() {
     SDL_FillRect(s, NULL, backcolor);
   #endif
    
-  // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.at), ":");
-  
   lgetcstat = getcstat;
   getcstat = 0; inslider = false;
   

@@ -924,19 +924,6 @@ bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
   }
 #endif
 
-bool displaynum(int x, int y, int shift, int size, color_t col, int val, string title) {
-  char buf[64];
-  sprintf(buf, "%d", val);
-  bool b1 = displayfr(x-8, y, 1, size, buf, col, 16);
-  bool b2 = displayfr(x, y, 1, size, title, col, 0);
-  if((b1 || b2) && gtouched) {
-    col ^= 0x00FFFF;
-    displayfr(x-8, y, 1, size, buf, col, 16);
-    displayfr(x, y, 1, size, title, col, 0);
-    }
-  return b1 || b2;
-  }
-
 vector<msginfo> msgs;
 
 vector<msginfo> gamelog;
