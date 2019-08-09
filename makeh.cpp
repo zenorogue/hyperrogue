@@ -26,7 +26,7 @@ void mark_file() {
     cout << ind() << "#endif\n", ifs_level--;
   }
 
-bool in_hdr;
+int in_hdr;
 
 void gen(string s) {
   which_file = s;
@@ -35,10 +35,12 @@ void gen(string s) {
     while(s != "" && s[0] == ' ') s = s.substr(1);
     while(s.back() == 10 || s.back() == 13) s = s.substr(0, s.size() - 1);
     if(in_hdr) {
-      if(s == "#endif" && in_hdr) {
-        in_hdr = false;
-        }
-      else cout << ind() << s << "\n";
+      if(s == "#endif")
+        in_hdr--;
+      if(s.substr(0, 3) == "#if")
+        in_hdr++;
+      if(in_hdr)
+        cout << ind() << s << "\n";
       continue;
       }
     if(s == "#if HDR") {
