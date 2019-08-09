@@ -3,7 +3,12 @@
 
 namespace hr {
 
-namespace mapeditor {
+EX namespace mapeditor {
+
+  #if HDR
+  enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
+  static const int USERSHAPEGROUPS = 5;
+  #endif
 
   hyperpoint lstart;
   cell *lstartcell;
@@ -53,11 +58,11 @@ namespace mapeditor {
      }
   
 #if CAP_EDIT
-  map<int, cell*> modelcell;
+  EX map<int, cell*> modelcell;
 
   void handleKeyMap(int sym, int uni);
 
-  void applyModelcell(cell *c) {
+  EX void applyModelcell(cell *c) {
     if(patterns::whichPattern == 'H') return;
     auto si = patterns::getpatterninfo0(c);
     cell *c2 = modelcell[si.id];
@@ -539,9 +544,9 @@ namespace mapstream {
 
 namespace mapeditor {
 
-  bool drawplayer = true;
+  EX bool drawplayer = true;
 
-  cell *drawcell;
+  EX cell *drawcell;
 
 #if CAP_EDIT
   int paintwhat = 0;
@@ -672,7 +677,7 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
 
-  void showMapEditor() {
+  EX void showMapEditor() {
     cmode = sm::MAP;
     gamescreen(0);
   
@@ -708,7 +713,7 @@ namespace mapeditor {
     return 1;
     }
   
-  eShapegroup drawcellShapeGroup() {
+  EX eShapegroup drawcellShapeGroup() {
     if(drawcell == cwt.at && drawplayer) return sgPlayer;
     if(drawcell->wall == waEditStatue) return sgWall;
     if(drawcell->monst) return sgMonster;
@@ -716,7 +721,7 @@ namespace mapeditor {
     return sgFloor;
     }
   
-  int drawcellShapeID() {
+  EX int drawcellShapeID() {
     if(drawcell == cwt.at && drawplayer) return vid.cs.charid;
     if(drawcell->wall == waEditStatue) return drawcell->wparam;
     if(drawcell->monst) return drawcell->monst;
@@ -1234,7 +1239,7 @@ namespace mapeditor {
 
 #define EDITING_TRIANGLES (DIM == 3)
 
-  void showDrawEditor() {
+  EX void showDrawEditor() {
 #if CAP_POLY
     cmode = sm::DRAW;
     gamescreen(0);
@@ -1994,7 +1999,7 @@ namespace mapeditor {
     });;;  
 #endif
 
-  void initdraw(cell *c) {
+  EX void initdraw(cell *c) {
     #if CAP_EDIT
     mapeditor::drawcell = c;
     ew.c = c;
@@ -2071,7 +2076,7 @@ namespace mapeditor {
 #endif
 
 #if CAP_POLY
-  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio) {
+  EX bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio IS(PPR::DEFAULT)) {
   #if !CAP_EDIT
     return false;
   #else
@@ -2212,7 +2217,7 @@ namespace mapeditor {
     }
 #endif
 
-  void map_settings() {
+  EX void map_settings() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(1);
   
@@ -2241,7 +2246,7 @@ namespace mapeditor {
     dialog::addBack();
     dialog::display();
     }
-  }
+EX }
 
 #if CAP_EDIT
 EX string levelfile = "hyperrogue.lev";

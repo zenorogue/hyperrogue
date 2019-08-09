@@ -880,12 +880,6 @@ typedef function<bool()> bool_reaction_t;
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
-extern vector< function<void()> > screens;
-
-template<class T> void pushScreen(const T& x) { screens.push_back(x); } 
-inline void popScreen() { if(isize(screens)>1) screens.pop_back(); }
-inline void popScreenAll() { while(isize(screens)>1) popScreen(); }
-
 struct display_data {
   transmatrix view_matrix; // current rotation, relative to viewctr
   transmatrix player_matrix; // player-relative view
@@ -928,29 +922,6 @@ extern display_data *current_display;
 #define gmatrix0 (current_display->old_cellmatrices)
 
 typedef function<int(cell*)> cellfunction;
-
-namespace mapeditor { 
-#if CAP_EDIT
-  extern map<int, cell*> modelcell;
-#endif
-
-  extern bool drawplayer; 
-  void applyModelcell(cell *c);
-  
-  extern cell *drawcell;
-  void initdraw(cell *c); 
-  #if CAP_EDIT
-  void showMapEditor();
-  void showDrawEditor();
-  #endif
-  
-  enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
-  static const int USERSHAPEGROUPS = 5;
-
-  bool haveUserShape(eShapegroup group, int id);  
-  void draw_texture_ghosts(cell *c, const transmatrix& V);  
-  void map_settings();
-  }
 
 // passable flags
 
@@ -1226,10 +1197,6 @@ enum class PPR {
 inline PPR operator + (PPR x, int y) { return PPR(int(x) + y); }
 inline PPR operator - (PPR x, int y) { return PPR(int(x) - y); }
 inline int operator - (PPR x, PPR y) { return int(x) - int(y); }
-
-namespace mapeditor {
-  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio = PPR::DEFAULT);
-  }
 
 #define OUTLINE_NONE     0x000000FF
 #define OUTLINE_FRIEND   0x00FF00FF
@@ -2296,7 +2263,6 @@ static const int USERLAYERS = 32;
 
 struct usershape { usershapelayer d[USERLAYERS]; };
 
-extern array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
 void initShape(int sg, int id);
 
 extern int usershape_changes;
@@ -2623,14 +2589,13 @@ static const color_t NOCOLOR = 0;
   static const int max_vec = (1<<14);
   extern bool needConfirmationEvenIfSaved();
 
-#define EX
-#define EXT(z)
 }
 
 #define IS(z) = z
 #include "autohdr.h"
 #undef IS
 #define IS(z)
+#define EX
 
 namespace hr {
   inline bool movepcto(const movedir& md) { return movepcto(md.d, md.subdir); }
