@@ -205,22 +205,6 @@ void drawSpeed(const transmatrix& V) {
 #endif
   }
 
-EX int ctof(cell *c) {
-  #if CAP_IRR
-  if(IRREGULAR) return irr::ctof(c);
-  #endif
-  if(PURE) return 1;
-  // if(euclid) return 0;
-  if(!c) return 1;
-  if(binarytiling) return c->type == 7;
-  return ishept(c) ? 1 : 0;
-  // c->type == 6 ? 0 : 1;
-  }
-
-int ctof012(cell *c) {
-  return ishept(c)?1:ishex1(c)?0:2;
-  }
-
 void drawSafety(const transmatrix& V, int ct) {
 #if CAP_QUEUE
   ld ds = ptick(50);

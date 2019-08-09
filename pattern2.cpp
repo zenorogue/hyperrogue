@@ -4,6 +4,22 @@
 
 namespace hr {
 
+EX int ctof(cell *c) {
+  #if CAP_IRR
+  if(IRREGULAR) return irr::ctof(c);
+  #endif
+  if(PURE) return 1;
+  // if(euclid) return 0;
+  if(!c) return 1;
+  if(binarytiling) return c->type == 7;
+  return ishept(c) ? 1 : 0;
+  // c->type == 6 ? 0 : 1;
+  }
+
+EX int ctof012(cell *c) {
+  return ishept(c)?1:ishex1(c)?0:2;
+  }
+
 int gp_threecolor() {
   if(!GOLDBERG) return 0;
   #if CAP_GP
