@@ -635,7 +635,7 @@ template<class T> struct walker {
   T *at;
   int spin;
   bool mirrored;
-  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { }
+  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { if(at) s = at->c.fix(s); }
   walker<T>& operator += (int i) {
     spin = at->c.fix(spin+(mirrored?-i:i));
     return (*this);
