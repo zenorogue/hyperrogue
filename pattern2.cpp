@@ -1335,7 +1335,7 @@ int pattern_threecolor(cell *c) {
 // returns ishept in the normal tiling;
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
-bool pseudohept(cell *c) {
+EX bool pseudohept(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
   #endif

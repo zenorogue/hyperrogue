@@ -3,11 +3,12 @@
 
 namespace hr {
 
-const char *musicfile = "";
-bool audio;
-string musiclicense;
-string musfname[landtypes];
-EX int musicvolume = 60, effvolume = 60;
+EX const char *musicfile = "";
+EX bool audio;
+EX string musiclicense;
+EX string musfname[landtypes];
+EX int musicvolume = 60;
+EX int effvolume = 60;
 
 EX eLand getCurrentLandForMusic() {
   eLand id = ((anims::center_music()) && centerover.at) ? centerover.at->land : cwt.at->land;
@@ -206,7 +207,7 @@ string wheresounds = HYPERPATH "sounds/";
 
 hookset<bool(const string& s, int vol)> *hooks_sound;
 
-EX void playSound(cell *c, const string& fname, int vol) {
+EX void playSound(cell *c, const string& fname, int vol IS(100)) {
   if(effvolume == 0) return;
   if(callhandlers(false, hooks_sound, fname, vol)) return;
   // printf("Play sound: %s\n", fname.c_str());

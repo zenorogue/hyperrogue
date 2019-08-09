@@ -43,7 +43,7 @@ EX void useupOrb(eItem it, int qty) {
   if(items[it] < 0) items[it] = 0;
   }
 
-EX void drainOrb(eItem it, int target) {
+EX void drainOrb(eItem it, int target IS(0)) {
   if(items[it] > target) useupOrb(it, items[it] - target);
   }
 

@@ -8,9 +8,9 @@ namespace hr {
 
 EX bool safety = false;
 
-eLand lastland;
+EX eLand lastland;
 
-int lastexplore;
+EX int lastexplore;
 
 EX bool randomPatternsMode = false;
 EX int randompattern[landtypes];
@@ -34,7 +34,7 @@ EX bool notDippingFor(eItem i) {
   return v >= hrand(10) + 10;
   }
 
-bool notDippingForExtra(eItem i, eItem x) {
+EX bool notDippingForExtra(eItem i, eItem x) {
   if(peace::on) return false;
   if(chaosmode > 1) return true;
   int v = items[i] - min(items[x], currentLocalTreasure);

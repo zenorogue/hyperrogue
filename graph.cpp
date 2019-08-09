@@ -10,9 +10,9 @@ int last_firelimit, firelimit;
 
 EX int inmirrorcount = 0;
 
-bool spatial_graphics;
-bool wmspatial, wmescher, wmplain, wmblack, wmascii;
-bool mmspatial, mmhigh, mmmon, mmitem;
+EX bool spatial_graphics;
+EX bool wmspatial, wmescher, wmplain, wmblack, wmascii;
+EX bool mmspatial, mmhigh, mmmon, mmitem;
 
 EX int detaillevel = 0;
 
@@ -620,7 +620,7 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
 EX bool noshadow;
 
 #if CAP_SHAPES
-void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
+EX void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio IS(PPR::MONSTER_SHADOW)) {
   if(WDIM == 2 && GDIM == 3 && bp.shs != bp.she) {
     auto& p = queuepolyat(V, bp, 0x18, PPR::TRANSPARENT_SHADOW); 
     p.outline = 0;

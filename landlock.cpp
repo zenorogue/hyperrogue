@@ -69,7 +69,8 @@ EX eLand oppositeElement(eLand l, eLand l2) {
 
 // land unlocking
 
-EX eLand firstland = laIce, specialland = laIce;
+EX eLand firstland = laIce;
+EX eLand specialland = laIce;
 
 EX int chaosmode = 0;
 

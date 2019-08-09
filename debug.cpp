@@ -5,6 +5,7 @@ namespace hr {
 
 EX int steplimit = 0;
 EX int cstep;
+EX bool buggyGeneration = false;
 
 EX vector<cell*> buggycells;
 
@@ -33,8 +34,6 @@ cell *pathTowards(cell *pf, cell *pt) {
   forCellEx(pn2, pt) if(celldist(pn2) < celldist(pt)) return pn2;
   return NULL;
   }
-
-bool buggyGeneration = false;
 
 bool errorReported = false;
 
@@ -575,7 +574,7 @@ void test_distances(int max) {
   println(hlog, "ok=", ok, " bad=", bad);
   }
 
-void raiseBuggyGeneration(cell *c, const char *s) {
+EX void raiseBuggyGeneration(cell *c, const char *s) {
 
   printf("procgen error (%p): %s\n", c, s);
   

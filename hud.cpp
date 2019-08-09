@@ -58,7 +58,16 @@ EX int subclass(int i) {
 #define GLYPH_TARGET     512
 #define GLYPH_INSQUARE   1024
 
-eGlyphsortorder glyphsortorder;
+#if HDR
+enum eGlyphsortorder {
+  gsoFirstTop, gsoFirstBottom,
+  gsoLastTop, gsoLastBottom,
+  gsoLand, gsoValue,
+  gsoMAX
+  };
+#endif
+
+EX eGlyphsortorder glyphsortorder;
   
 int zero = 0;
 

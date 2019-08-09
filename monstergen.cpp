@@ -229,7 +229,7 @@ EX int getGhostTimer() {
   return shmup::on ? (shmup::curtime - lastexplore) / 350 : turncount - lastexplore;
   }
 
-int getGhostcount() {
+EX int getGhostcount() {
   if(peace::on) return 0;
   int t = getGhostTimer();
   int ghostcount = 0;

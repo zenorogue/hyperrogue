@@ -1165,64 +1165,6 @@ namespace polygonal {
 
 // passable flags
 
-#define P_MONSTER    Flag(0)  // can move through monsters
-#define P_MIRROR     Flag(1)  // can move through mirrors
-#define P_REVDIR     Flag(2)  // reverse direction movement
-#define P_WIND       Flag(3)  // can move against the wind
-#define P_GRAVITY    Flag(4)  // can move against the gravity
-#define P_ISPLAYER   Flag(5)  // player-only moves (like the Round Table jump)
-#define P_ONPLAYER   Flag(6)  // always can step on the player
-#define P_FLYING     Flag(7)  // is flying
-#define P_BULLET     Flag(8)  // bullet can fly through more things
-#define P_MIRRORWALL Flag(9)  // mirror images go through mirror walls
-#define P_JUMP1      Flag(10) // first part of a jump
-#define P_JUMP2      Flag(11) // second part of a jump
-#define P_TELE       Flag(12) // teleport onto
-#define P_BLOW       Flag(13) // Orb of Air -- blow, or push
-#define P_AETHER     Flag(14) // aethereal
-#define P_FISH       Flag(15) // swimming
-#define P_WINTER     Flag(16) // fire resistant
-#define P_USEBOAT    Flag(17) // can use boat
-#define P_NOAETHER   Flag(18) // disable AETHER
-#define P_FRIENDSWAP Flag(19) // can move on friends (to swap with tem)
-#define P_ISFRIEND   Flag(20) // is a friend (can use Empathy + Winter/Aether/Fish combo)
-#define P_LEADER     Flag(21) // can push statues and use boats
-#define P_MARKWATER  Flag(22) // mark Orb of Water as used
-#define P_EARTHELEM  Flag(23) // Earth Elemental
-#define P_WATERELEM  Flag(24) // Water Elemental
-#define P_IGNORE37   Flag(25) // ignore the triheptagonal board
-#define P_CHAIN      Flag(26) // for chaining moves with boats
-#define P_DEADLY     Flag(27) // suicide moves allowed
-#define P_ROSE       Flag(28) // rose smell
-#define P_CLIMBUP    Flag(29) // allow climbing up
-#define P_CLIMBDOWN  Flag(30) // allow climbing down
-#define P_REPTILE    Flag(31) // is reptile
-#define P_VOID       Flag(32) // void beast
-#define P_PHASE      Flag(33) // phasing movement
-#define P_PULLMAGNET Flag(34) // pull the other part of the magnet
-
-bool passable(cell *w, cell *from, flagtype flags);
-
-bool anti_alchemy(cell *w, cell *from);
-bool isElemental(eLand l);
-int coastval(cell *c, eLand base);
-int getHauntedDepth(cell *c);
-eLand randomElementalLand();
-bool notDippingForExtra(eItem i, eItem x);
-void placePrizeOrb(cell *c);
-void wandering();
-bool isSealand(eLand l);
-int newRoundTableRadius();
-bool grailWasFound(cell *c);
-extern bool buggyGeneration;
-int buildIvy(cell *c, int children, int minleaf);
-int celldistAltRelative(cell *c);
-int roundTableRadius(cell *c);
-eLand pickLandRPM(eLand old);
-bool bearsCamelot(eLand l);
-
-extern bool safety;
-
 #define SAGEMELT .1
 #define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex, gKiteDart3) ? 3 : (sol && binarytiling) ? 6 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
@@ -1240,58 +1182,10 @@ extern bool safety;
 #define BUGLEV 15
 // #define BARLEV 9
 
-bool isKillable(cell *c);
-bool isKillableSomehow(cell *c);
-
-bool isAlchAny(eWall w);
-bool isAlchAny(cell *c);
-
 #define YDIST 101
 #define MODECODES (1ll<<61)
   
-extern cellwalker cwt; // player character position
-
-extern array<int, ittypes> items;
-extern array<int, motypes> kills;
-
-extern int explore[10], exploreland[10][landtypes], landcount[landtypes];
-
 typedef flagtype modecode_t;
-extern map<modecode_t, array<int, ittypes> > hiitems;
-
-extern eLand firstland, specialland;
-bool pseudohept(cell *c);
-bool pureHardcore();
-extern int cheater;
-int airdist(cell *c);
-bool eq(short a, short b);
-extern vector<cell*> dcal;   // queue for cpdist
-bool isPlayerOn(cell *c);
-bool isFriendly(eMonster m);
-bool isFriendly(cell *c);
-bool isChild(cell *w, cell *killed); // is w killed if killed is killed?
-
-static const int NO_TREASURE = 1;
-static const int NO_YENDOR = 2;
-static const int NO_GRAIL = 4;
-static const int NO_LOVE = 8;
-
-bool markOrb(eItem it); // mark the orb as 'used', return true if exists
-bool markEmpathy(eItem it); // mark both the given orb and Empathy as 'used', return true if exists
-bool markEmpathy2(eItem it); // as above, but next turn
-
-bool isMimic(eMonster m);
-bool isMimic(cell *c);
-
-void fallMonster(cell *c, flagtype flags = 0); // kill monster due to terrain
-
-bool attackMonster(cell *c, flagtype flags, eMonster killer);
-
-bool isWorm(eMonster m);
-bool isWorm(cell *c);
-void empathyMove(cell *c, cell *cto, int dir);
-bool isIvy(eMonster m);
-bool isIvy(cell *c);
 
 #define GUNRANGE 3
 
@@ -1300,41 +1194,6 @@ bool isIvy(cell *c);
 #define IC_OTHER 1
 #define IC_ORB 2
 #define IC_NAI 3
-
-bool playerInPower();
-void activateFlash();
-void activateLightning();
-bool markOrb(eItem it);
-bool markOrb2(eItem it);
-void drainOrb(eItem it, int target = 0);
-void useupOrb(eItem it, int qty);
-
-void initgame();
-bool haveRangedTarget();
-eItem targetRangedOrb(cell *c, orbAction a);
-void reduceOrbPowers();
-int realstuntime(cell *c);
-
-extern bool invismove, invisfish;
-bool attackingForbidden(cell *c, cell *c2);
-void killOrStunMonster(cell *c2, eMonster who_killed);
-
-void useup(cell *c); // useup thumpers/bonfires
-cell *playerpos(int i);
-
-bool makeflame(cell *c, int timeout, bool checkonly);
-bool isPlayerInBoatOn(cell *c);
-bool isPlayerInBoatOn(cell *c, int i);
-void destroyBoats(cell *c, cell *cf, bool strandedToo);
-extern int lastexplore;
-extern int asteroids_generated, asteroid_orbs_generated;
-extern eLand lastland;
-bool againstRose(cell *cfrom, cell *cto);
-bool withRose(cell *cfrom, cell *cto);
-
-extern ld bounded_mine_percentage;
-extern int bounded_mine_quantity, bounded_mine_max;
-void generate_mines();
 
 // loops
 
@@ -1387,17 +1246,6 @@ void generate_mines();
 #define AF_SIDE              Flag(30)   // side attack
 #define AF_CRUSH             Flag(31)   // Crusher's delayed attack
 
-bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags);
-
-extern int chaosmode;
-extern bool chaosUnlocked;
-extern bool chaosAchieved;
-bool isTechnicalLand(eLand l);
-int getGhostcount();
-
-void raiseBuggyGeneration(cell *c, const char *s);
-void verifyMutantAround(cell *c);
-
 #if CAP_SDL
 
 #if CAP_PNG
@@ -1411,27 +1259,11 @@ void IMAGESAVE(SDL_Surface *s, const char *fname);
 
 #endif
 
-void drawscreen();
-
-void buildAirmap();
-
-// currently works for worms only
-bool sameMonster(cell *c1, cell *c2);
-cell *wormhead(cell *c);
-eMonster getMount(int player_id);
-eMonster haveMount();
-
-bool isDragon(eMonster m);
-
 // for some reason I need this to compile under OSX
 
 #if ISMAC
 extern "C" { void *_Unwind_Resume = 0; }
 #endif
-
-void mountmove(cell *c, int spin, bool fp);
-void mountmove(cell *c, int spin, bool fp, cell *ppos);
-void mountswap(cell *c1, int spin1, bool fp1, cell *c2, int spin2, bool fp2);
 
 template<class T> struct dynamicval {
   T& where;
@@ -1462,11 +1294,6 @@ namespace stalemate {
   bool isKilledDirectlyAt(cell *c);
   bool isPushto(cell *c);
   };
-
-extern int turncount;
-
-bool reduceOrbPower(eItem it, int cap);
-bool checkOrb(eMonster m1, eItem orb);
 
 namespace tortoise {
   extern int seekbits;
@@ -1613,10 +1440,6 @@ namespace mapeditor {
   bool drawUserShape(const transmatrix& V, eShapegroup group, int id, color_t color, cell *c, PPR prio = PPR::DEFAULT);
   }
 
-#if CAP_SHAPES
-void ShadowV(const transmatrix& V, const struct hpcshape& bp, PPR prio = PPR::MONSTER_SHADOW);
-#endif
-
 #define OUTLINE_NONE     0x000000FF
 #define OUTLINE_FRIEND   0x00FF00FF
 #define OUTLINE_ENEMY    0xFF0000FF
@@ -1629,45 +1452,14 @@ void ShadowV(const transmatrix& V, const struct hpcshape& bp, PPR prio = PPR::MO
 #define OUTLINE_FORE     ((forecolor << 8) + 0xFF)
 #define OUTLINE_BACK     ((backcolor << 8) + 0xFF)
 
-extern bool audio;
-extern string musiclicense;
-extern string musfname[landtypes];
-extern int musicvolume, effvolume;
-void initAudio();
-bool loadMusicInfo();
-void handlemusic();
-void playSeenSound(cell *c);
-void playSound(cell *c, const string& fname, int vol = 100);
-
 inline string pick123() { return cts('1' + rand() % 3); }
 inline string pick12() { return cts('1' + rand() % 2); }
 
-bool playerInBoat(int i);
-
 extern int lowfar;
-extern bool wmspatial, wmescher, wmplain, wmblack, wmascii;
-extern bool mmspatial, mmhigh, mmmon, mmitem;
-extern bool spatial_graphics;
 extern int maxreclevel, reclevel;
-
-string explain3D(ld *param);
 
 extern int detaillevel;
 extern bool quitmainloop;
-
-enum eGlyphsortorder {
-  gsoFirstTop, gsoFirstBottom,
-  gsoLastTop, gsoLastBottom,
-  gsoLand, gsoValue,
-  gsoMAX
-  };
-
-extern eGlyphsortorder glyphsortorder;
-
-void explodeMine(cell *c);
-bool mayExplodeMine(cell *c, eMonster who);
-void explosion(cell *c, int power, int central);
-void explodeBarrel(cell *c);
 
 enum eGravity { gsNormal, gsLevitation, gsAnti };
 extern eGravity gravity_state, last_gravity_state;
@@ -2269,6 +2061,8 @@ namespace princess {
 #define GRAIL_FOUND 0x4000
 #define GRAIL_RADIUS_MASK 0x3FFF
 
+extern vector<cell*> dcal;
+
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
@@ -2679,6 +2473,8 @@ template<> struct saver<ld> : dsaver<ld> {
 
 #if CAP_SHAPES
 struct floorshape;
+
+struct hpcshape;
 
 struct qfloorinfo {
   transmatrix spin;

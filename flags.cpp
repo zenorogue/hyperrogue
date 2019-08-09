@@ -315,13 +315,13 @@ bool survivesFall(eMonster m) {
   return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow || isGhostAether(m);
   }
 
-bool checkOrb(eMonster m1, eItem orb) {
+EX bool checkOrb(eMonster m1, eItem orb) {
   if(m1 == moPlayer) return markOrb(orb);
   if(isFriendly(m1)) return markEmpathy(orb);
   return false;
   }
 
-bool checkOrb2(eMonster m1, eItem orb) {
+EX bool checkOrb2(eMonster m1, eItem orb) {
   if(m1 == moPlayer) return markOrb2(orb);
   if(isFriendly(m1)) return markEmpathy2(orb);
   return false;

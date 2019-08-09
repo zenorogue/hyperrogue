@@ -87,7 +87,8 @@ int safetyseed;
 
 int showid = 0;
 
-bool invismove = false, invisfish = false; // last move was invisible [due to Fish]
+EX bool invismove = false;
+EX bool invisfish = false; // last move was invisible [due to Fish]
 
 int noiseuntil; // noise until the given turn
 
@@ -107,8 +108,8 @@ bool eq(short a, short b) { return a==b; }
 EX array<int, ittypes> items;
 EX array<int, motypes> kills;
 
-int explore[10], exploreland[10][landtypes], landcount[landtypes];
-map<modecode_t, array<int, ittypes> > hiitems;
+EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
+EX map<modecode_t, array<int, ittypes> > hiitems;
 bool orbused[ittypes], lastorbused[ittypes];
 EX bool playermoved = true;  // center on the PC?
 bool flipplayer = true;   // flip the player image after move, do not flip after attack
@@ -142,7 +143,7 @@ vector<cell*> movesofgood[MAX_EDGE+1];
 
 int first7;           // the position of the first monster at distance 7 in dcal
 
-cellwalker cwt;       // single player character position
+EX cellwalker cwt;    // single player character position
 
 EX inline cell*& singlepos() { return cwt.at; }
 EX inline bool singleused() { return !(shmup::on || multi::players > 1); }
@@ -310,6 +311,13 @@ EX void countLocalTreasure() {
       currentLocalTreasure = items[i2];
     }
   }
+
+#if HDR
+static const int NO_TREASURE = 1;
+static const int NO_YENDOR = 2;
+static const int NO_GRAIL = 4;
+static const int NO_LOVE = 8;
+#endif
 
 EX int gold(int no IS(0)) {
   int i = 0;
@@ -564,6 +572,44 @@ EX bool anti_alchemy(cell *w, cell *from) {
   alch1 |= w->wall == waFloorB && from && from->wall == waFloorA && !w->item && !from->item;
   return alch1;
   }
+
+#if HDR
+#define P_MONSTER    Flag(0)  // can move through monsters
+#define P_MIRROR     Flag(1)  // can move through mirrors
+#define P_REVDIR     Flag(2)  // reverse direction movement
+#define P_WIND       Flag(3)  // can move against the wind
+#define P_GRAVITY    Flag(4)  // can move against the gravity
+#define P_ISPLAYER   Flag(5)  // player-only moves (like the Round Table jump)
+#define P_ONPLAYER   Flag(6)  // always can step on the player
+#define P_FLYING     Flag(7)  // is flying
+#define P_BULLET     Flag(8)  // bullet can fly through more things
+#define P_MIRRORWALL Flag(9)  // mirror images go through mirror walls
+#define P_JUMP1      Flag(10) // first part of a jump
+#define P_JUMP2      Flag(11) // second part of a jump
+#define P_TELE       Flag(12) // teleport onto
+#define P_BLOW       Flag(13) // Orb of Air -- blow, or push
+#define P_AETHER     Flag(14) // aethereal
+#define P_FISH       Flag(15) // swimming
+#define P_WINTER     Flag(16) // fire resistant
+#define P_USEBOAT    Flag(17) // can use boat
+#define P_NOAETHER   Flag(18) // disable AETHER
+#define P_FRIENDSWAP Flag(19) // can move on friends (to swap with tem)
+#define P_ISFRIEND   Flag(20) // is a friend (can use Empathy + Winter/Aether/Fish combo)
+#define P_LEADER     Flag(21) // can push statues and use boats
+#define P_MARKWATER  Flag(22) // mark Orb of Water as used
+#define P_EARTHELEM  Flag(23) // Earth Elemental
+#define P_WATERELEM  Flag(24) // Water Elemental
+#define P_IGNORE37   Flag(25) // ignore the triheptagonal board
+#define P_CHAIN      Flag(26) // for chaining moves with boats
+#define P_DEADLY     Flag(27) // suicide moves allowed
+#define P_ROSE       Flag(28) // rose smell
+#define P_CLIMBUP    Flag(29) // allow climbing up
+#define P_CLIMBDOWN  Flag(30) // allow climbing down
+#define P_REPTILE    Flag(31) // is reptile
+#define P_VOID       Flag(32) // void beast
+#define P_PHASE      Flag(33) // phasing movement
+#define P_PULLMAGNET Flag(34) // pull the other part of the magnet
+#endif
 
 EX bool passable(cell *w, cell *from, flagtype flags) {
   bool revdir = (flags&P_REVDIR);
@@ -2514,7 +2560,7 @@ EX void fightmessage(eMonster victim, eMonster attacker, bool stun, flagtype fla
     }
   }
 
-EX void fallMonster(cell *c, flagtype flags) {
+EX void fallMonster(cell *c, flagtype flags IS(0)) {
   attackMonster(c, flags, moNone);
   }
 
