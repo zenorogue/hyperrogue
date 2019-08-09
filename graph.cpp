@@ -2365,7 +2365,7 @@ bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, ld bonus, const tr
 // based on cell c and transmatrix V
 // do change the zoom factor? do change the priorities?
 
-int cellcolor(cell *c) {
+EX int cellcolor(cell *c) {
   if(isPlayerOn(c) || isFriendly(c)) return OUTLINE_FRIEND;
   if(noHighlight(c->monst)) return OUTLINE_NONE;
   if(c->monst) return OUTLINE_ENEMY;
@@ -3886,8 +3886,6 @@ EX bool use_swapped_duals() {
   return (masterless && !a4) || GOLDBERG;
   }
 
-int wavephase;
-
 #if CAP_SHAPES
 void floorShadow(cell *c, const transmatrix& V, color_t col) {
   if(model_needs_depth() || noshadow) 
@@ -3993,7 +3991,7 @@ bool openorsafe(cell *c) {
 
 #define Dark(x) darkena(x,0,0xFF)
 
-color_t stdgridcolor = 0x202020FF;
+EX color_t stdgridcolor = 0x202020FF;
 
 int gridcolor(cell *c1, cell *c2) {
   if(cmode & sm::DRAW) return Dark(forecolor);
@@ -7241,8 +7239,6 @@ EX void drawthemap() {
   noclipped = 0;
   first_cell_to_draw = true;
   
-  wavephase = (-(ticks / 100)) & 7;
-
   if(sightrange_bonus > 0 && !allowIncreasedSight()) 
     sightrange_bonus = 0;
   

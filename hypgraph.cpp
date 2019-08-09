@@ -6,6 +6,10 @@ namespace hr {
 ld ghx, ghy, ghgx, ghgy;
 hyperpoint ghpm = C0;
 
+#if HDR
+inline bool sphereflipped() { return sphere && vid.alpha > 1.1 && DIM == 3; }
+#endif
+
 void ghcheck(hyperpoint &ret, const hyperpoint &H) {
   if(hypot(ret[0]-ghx, ret[1]-ghy) < hypot(ghgx-ghx, ghgy-ghy)) {
     ghpm = H; ghgx = ret[0]; ghgy = ret[1];
@@ -780,12 +784,12 @@ EX bool outofmap(hyperpoint h) {
     return h[2] < .5;
   }
 
-hyperpoint mirrorif(const hyperpoint& V, bool b) {
+EX hyperpoint mirrorif(const hyperpoint& V, bool b) {
   if(b) return Mirror*V;
   else return V;
   }
 
-transmatrix mirrorif(const transmatrix& V, bool b) {
+EX transmatrix mirrorif(const transmatrix& V, bool b) {
   if(b) return V*Mirror;
   else return V;
   }
@@ -1120,7 +1124,7 @@ void hrmap_standard::draw() {
 
 int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
   
-transmatrix eumove(ld x, ld y) {
+EX transmatrix eumove(ld x, ld y) {
   transmatrix Mat = Id;
   Mat[DIM][DIM] = 1;
   
@@ -1144,13 +1148,13 @@ transmatrix eumove(ld x, ld y) {
   return Mat;
   }
 
-transmatrix eumove(int vec) {
+EX transmatrix eumove(int vec) {
   int x, y;
   tie(x,y) = vec_to_pair(vec);
   return eumove(x, y);
   }
 
-transmatrix eumovedir(int d) {
+EX transmatrix eumovedir(int d) {
   if(a4) {
     d = d & 3;
     switch(d) {
@@ -1474,9 +1478,9 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
   #endif
   }
 
-color_t periodcolor = 0x00FF0080;
-color_t ringcolor = darkena(0xFF, 0, 0xFF);
-color_t modelcolor = 0;
+EX color_t periodcolor = 0x00FF0080;
+EX color_t ringcolor = darkena(0xFF, 0, 0xFF);
+EX color_t modelcolor = 0;
 
 #if CAP_QUEUE
 EX void draw_model_elements() {

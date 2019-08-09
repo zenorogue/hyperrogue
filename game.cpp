@@ -6489,7 +6489,7 @@ EX void placeItems(int qty, eItem it) {
     }
   }
 
-cellwalker recallCell;
+EX cellwalker recallCell;
 
 EX bool activateRecall() {
   if(!recallCell.at) {

@@ -2244,9 +2244,9 @@ namespace mapeditor {
   }
 
 #if CAP_EDIT
-string levelfile = "hyperrogue.lev";
-const char *loadlevel = NULL;
-string picfile = "hyperrogue.pic";
+EX string levelfile = "hyperrogue.lev";
+EX const char *loadlevel = NULL;
+EX string picfile = "hyperrogue.pic";
 
 #if CAP_COMMANDLINE
 

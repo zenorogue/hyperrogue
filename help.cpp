@@ -280,7 +280,7 @@ string forbidden_unmarked() {
   return XLAT("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.");
   }
 
-string generateHelpForItem(eItem it) {
+EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
    

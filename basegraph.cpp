@@ -128,7 +128,7 @@ int textwidth(int siz, const string &str) {
   }
 #endif
 
-int darkenedby(int c, int lev) {
+EX int darkenedby(int c, int lev) {
   for(int i=0; i<lev; i++)
     c = ((c & 0xFEFEFE) >> 1);
   return c;

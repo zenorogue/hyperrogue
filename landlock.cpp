@@ -530,7 +530,7 @@ EX eLand getNewLand(eLand old) {
   return n;  
   }
 
-vector<eLand> land_over = {
+EX vector<eLand> land_over = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
   laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
@@ -551,12 +551,14 @@ vector<eLand> land_over = {
   laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA, laAsteroids
   };
 
-vector<eLand> landlist;
+EX vector<eLand> landlist;
 
+#if HDR
 template<class T> void generateLandList(T t) {
   landlist.clear();
   for(auto l: land_over) if(t(l)) landlist.push_back(l);    
   }
+#endif
 
 EX eLand getLandForList(cell *c) {
   eLand l = c->land;

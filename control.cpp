@@ -13,15 +13,19 @@ EX bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelcli
 EX bool forcetarget, lshiftclick, lctrlclick, numlock_on;
 EX bool gtouched;
 
-bool holdmouse;
+EX bool holdmouse;
 
 EX int getcstat, lgetcstat;
-ld getcshift;
+EX ld getcshift;
 EX bool inslider;
 
 EX function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
 EX function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;};
 
+#if HDR
+// what part of the compass does 'skip turn'
+static const auto SKIPFAC = .4;
+#endif
 
 // is the player using mouse? (used for auto-cross)
 EX bool mousing = true;

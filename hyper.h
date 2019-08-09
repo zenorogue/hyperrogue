@@ -1455,38 +1455,13 @@ namespace mapeditor {
 inline string pick123() { return cts('1' + rand() % 3); }
 inline string pick12() { return cts('1' + rand() % 2); }
 
-extern int lowfar;
-extern int maxreclevel, reclevel;
-
 extern int detaillevel;
 extern bool quitmainloop;
 
 enum eGravity { gsNormal, gsLevitation, gsAnti };
 extern eGravity gravity_state, last_gravity_state;
 
-int gravityLevel(cell *c);
-int gravityLevelDiff(cell *c, cell *f);
-void fullcenter();
-void movecost(cell* from, cell *to, int phase); // 1 = pre-collect, 2 = post-collect, 3 = both
-void checkmove();
-
-transmatrix eumove(ld x, ld y);
-transmatrix eumove(int vec);
-transmatrix eumovedir(int d);
-
-int reptilemax();
-
-extern bool mousing;
 #define IFM(x) (mousing?"":x)
-
-extern cellwalker recallCell;
-
-extern eLand cheatdest;
-void cheatMoveTo(eLand l);
-
-void doOvergenerate();
-
-void collectMessage(cell *c2, eItem which);
 
 namespace quotientspace {
   void build();
@@ -1717,24 +1692,12 @@ namespace linepatterns {
 
 static const int DISTANCE_UNKNOWN = 127;
 
-transmatrix atscreenpos(ld x, ld y, ld size);
-
-hyperpoint mirrorif(const hyperpoint& V, bool b);
-
 #define SETMOUSEKEY 5000
 extern char mousekey;
 extern char newmousekey;
 void displaymm(char c, int x, int y, int rad, int size, const string& title, int align);
 
 template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
-
-int darkenedby(int c, int lev);
-extern ld mouseaim_sensitivity;
-string generateHelpForItem(eItem it);
-bool graphglyph();
-extern bool hiliteclick;
-extern int antialiaslines;
-extern color_t ringcolor, periodcolor, modelcolor, stdgridcolor;
 
 #include <functional>
 
@@ -1839,8 +1802,6 @@ namespace windmap {
   int at(cell *c);
   }
 #endif
-
-extern int wavephase;
 
 int getgametime();
 string getgametime_s(int timespent = getgametime());
@@ -2206,67 +2167,9 @@ struct land_validity_t {
   string msg;
   };
 
-extern vector<eLand> landlist;
-template<class T> void generateLandList(T t);
-land_validity_t& land_validity(eLand l);
-bool isLandIngame(eLand l);
-
-bool inmirrororwall(eLand l);
-extern bool holdmouse;
-
-// what part of the compass does 'skip turn'
-static const auto SKIPFAC = .4;
-
-bool haveMobileCompass();
-bool handleCompass();
-
-inline bool sphereflipped() { return sphere && vid.alpha > 1.1 && DIM == 3; }
-int cellcolor(cell *c);
-extern ld backbrightness;
-
-void initcells();
 extern const hyperpoint C02, C03;
 
 #define C0 (DIM == 2 ? C02 : C03)
-
-extern long long circlesize[100], disksize[100];
-extern ld circlesizeD[10000];
-void computeSizes();
-
-#if CAP_FILES
-extern const char *scorefile;
-extern const char *conffile;
-extern string levelfile;
-extern string picfile;
-extern const char *musicfile;
-extern const char *loadlevel;
-#endif
-
-extern bool fixseed;
-extern eLand firstland0;
-extern int startseed;
-
-// heptspin hsstep(const heptspin &hs, int spin);
-
-ld hdist0(const hyperpoint& mh);
-
-extern bool fading;
-extern ld fadeout;
-int itemclass(eItem i);
-int monsterclass(eMonster m);
-
-extern purehookset hooks_drawmap;
-extern hookset<bool(eLand&)> *hooks_music;
-extern hookset<bool()> *hooks_prestats;
-extern purehookset hooks_fixticks;
-
-void sdltogl(SDL_Surface *txt, struct glfont_t& f, int ch);
-
-void showStartMenu();
-
-bool polara50(int x);
-bool polara50(cell *c);
-int fiftyval049(cell *c);
 
 namespace fieldpattern {
   pair<int, bool> fieldval(cell *c);

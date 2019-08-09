@@ -185,7 +185,7 @@ int glyphflags(int gid) {
   return f;
   }
 
-bool graphglyph() {
+EX bool graphglyph() {
   // if(DIM == 3) return false;
   return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
   }

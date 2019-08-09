@@ -86,7 +86,7 @@ eItem randomTreasure2(int cv) {
   return best;
   }
 
-eLand cheatdest;
+EX eLand cheatdest;
 
 void cheatMoveTo(eLand l) {
   cheatdest = l;
@@ -212,7 +212,6 @@ bool applyCheat(char u, cell *c = NULL) {
     cwt++;
     mirror::act(1, mirror::SPINSINGLE);
 
-    wavephase = (1+wavephase) & 7;
     if(shmup::on) shmup::pc[0]->at = Id;
     return true;
     }

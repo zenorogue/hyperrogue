@@ -15,7 +15,7 @@ EX string s0;
 EX bool fixseed = false;
 EX int startseed = 0;
 
-eLand firstland0;
+EX eLand firstland0;
 
 EX void initAll() {
   init_floorcolors();
