@@ -208,7 +208,7 @@ EX namespace dialog {
     addSelItem(body, ONOFF(value), key);
     }
   
-  EX int displaycolor(unsigned col) {
+  EX int displaycolor(color_t col) {
     int c = col >> 8;
     if(!c) return 0x181818;
     return c;
