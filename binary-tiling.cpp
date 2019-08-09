@@ -428,7 +428,6 @@ namespace binary {
     vector<hyperpoint> get_vertices(cell* c) override {
       vector<hyperpoint> res;
       ld yy = log(2) / 2;
-      using namespace hyperpoint_vec;
       auto add = [&] (hyperpoint h) { 
         res.push_back(binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
         };
@@ -644,7 +643,6 @@ namespace binary {
 
   // on which horocycle are we
   ld horo_level(hyperpoint h) {
-    using namespace hyperpoint_vec;
     h /= (1 + h[GDIM]);
     h[0] -= 1;
     h /= sqhypot_d(GDIM, h);
@@ -653,7 +651,6 @@ namespace binary {
     }
   
   hyperpoint deparabolic3(hyperpoint h) {
-    using namespace hyperpoint_vec;
     h /= (1 + h[3]);
     hyperpoint one = point3(1,0,0);
     h -= one;

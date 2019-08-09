@@ -524,7 +524,6 @@ namespace nilv {
     };
 
   hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
-    using namespace hyperpoint_vec;
     hyperpoint local = inverse(nisot::translate(s0)) * s1;
     hyperpoint h = get_inverse_exp(local, 100);
     return nisot::translate(s0) * formula_exp(h * x);
@@ -551,7 +550,6 @@ namespace nisot {
     }
 
   void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
-    using namespace hyperpoint_vec;
     auto acc = christoffel(at, velocity, velocity);
     
     auto at2 = at + velocity / 2;
@@ -565,7 +563,6 @@ namespace nisot {
     }
   
   hyperpoint direct_exp(hyperpoint v, int steps) {
-    using namespace hyperpoint_vec;
     hyperpoint at = point31(0, 0, 0);
     v /= steps;
     v[3] = 0;
@@ -589,7 +586,6 @@ namespace nisot {
     h = Pos * h;
     
     int steps = 100;
-    using namespace hyperpoint_vec;
     h /= steps;
   
     auto tPos = transpose(Pos);

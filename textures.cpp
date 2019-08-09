@@ -462,7 +462,6 @@ void texture_config::finish_mapping() {
   tinf3.texture_id = config.data.textureid;
   if(isize(texture_map) && isize(texture_map.begin()->second.triangles)) {
     auto& tris = texture_map.begin()->second.triangles;
-    using namespace hyperpoint_vec;
 
     for(int a=0; a<8; a++) {
       auto& tri = tris[a % isize(tris)];
@@ -645,7 +644,6 @@ ld magic_quality() {
     applymodel(ggmatrix(p.c) * p.cell_relative, inmodel);
     inmodel[0] *= current_display->radius * 1. / current_display->scrsize;
     inmodel[1] *= current_display->radius * 1. / current_display->scrsize;
-    using namespace hyperpoint_vec;
     q += sqhypot_d(2, inmodel - p.texture_coords);
     }
   return q;

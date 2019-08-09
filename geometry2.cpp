@@ -529,7 +529,6 @@ hyperpoint nearcorner(cell *c, int i) {
     return neis[i];
     }
   if(penrose) {
-    using namespace hyperpoint_vec;
     if(approx_nearcorner)
       return kite::get_corner(c, i, 3) + kite::get_corner(c, i+1, 3) - C0;
     else

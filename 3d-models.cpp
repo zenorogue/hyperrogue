@@ -30,7 +30,6 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
 
 hyperpoint get_center(const vector<hyperpoint>& vh) {
   hyperpoint h = Hypc;
-  using namespace hyperpoint_vec;
   for(auto h1: vh) h = h + h1;
   return normalize(h);
   }
@@ -124,7 +123,6 @@ void geometry_information::add_texture(hpcshape& sh) {
 
 vector<hyperpoint> scaleshape(const vector<hyperpoint>& vh, ld s) {
   vector<hyperpoint> res;
-  using namespace hyperpoint_vec;
   for(hyperpoint h: vh) res.push_back(normalize(h * s + shcenter * (1-s)));
   return res;
   }
@@ -542,7 +540,6 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   for(int i=0; i<n; i++) if(!stillin[i] && !stillin[lastid[i]]) lastid[i] = lastid[lastid[i]];
 
   for(int i=0; i<n; i++) {
-    using namespace hyperpoint_vec;
     if(!stillin[i]) gbody[i] = normalize(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
     }
   
@@ -609,7 +606,6 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
 void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   dynamicval<int> d(vid.texture_step, 8);
   texture_order([&] (ld x, ld y) {
-    using namespace hyperpoint_vec;
     ld z = 1-x-y;
     ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8);
     hyperpoint h = rspintox(a*x+b*y+c*z) * xpush0(r);
@@ -709,7 +705,6 @@ hyperpoint psmin(hyperpoint H) {
   }
 
 void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom) {
-  using namespace hyperpoint_vec;
   hyperpoint center = Hypc;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
   center = normalize(center);
@@ -785,7 +780,6 @@ void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
   auto line = [&] (transmatrix A, transmatrix B) {
     hyperpoint h0 = A * xpush0(1);
     hyperpoint h1 = B * xpush0(1);
-    using namespace hyperpoint_vec;
     for(int i=0; i<=8; i++)
       curvepoint(V1 * rspintox(normalize(h0*(8-i) + h1*i)) * xpush0(rad));
     queuecurve(col, 0, PPR::LINE);
@@ -899,7 +893,6 @@ void geometry_information::make_3d_models() {
   
   hyperpoint front_leg = Hypc;
   hyperpoint rear_leg = Hypc;
-  using namespace hyperpoint_vec;
   for(int i=shDogFrontPaw.s; i<shDogFrontPaw.e; i++) front_leg += hpc[i];
   for(int i=shDogRearPaw.s; i<shDogRearPaw.e; i++) rear_leg += hpc[i];
   front_leg = normalize(front_leg);
@@ -1178,7 +1171,6 @@ void geometry_information::make_3d_models() {
     for(int t=0; t<S7; t++) {
       dynamicval<int> dv(vid.texture_step, 16);
       texture_order([&] (ld x, ld y) {
-        using namespace hyperpoint_vec;
         ld z = 1-x-y;
         ld rad = 2.1 - i * 0.2;
         hyperpoint hx = ddi(t*12, -zhexf*rad) * C0;

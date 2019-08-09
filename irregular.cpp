@@ -37,7 +37,6 @@ ld inner(hyperpoint h1, hyperpoint h2) {
   }
 
 hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
-  using namespace hyperpoint_vec;
   hyperpoint h = C0;
 
   b = b - a;
@@ -207,7 +206,6 @@ int rearrange(bool total, ld minedge) {
   int tooshort = 0;
   for(int i=0; i<isize(cells); i++) {
     auto& p1 = cells[i];
-    using namespace hyperpoint_vec;
     hyperpoint h = Hypc;
     for(auto v: p1.vertices) h = h + v;
     

@@ -1015,7 +1015,6 @@ vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   #endif
   vector<cell*> p;
   if(euclid) {
-    using namespace hyperpoint_vec;
     p.push_back(c1);
     hyperpoint h = tC0(calc_relative_matrix(c2, c1, C0));
     cell *x = c1;

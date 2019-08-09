@@ -766,7 +766,6 @@ transmatrix radar_transform;
 pair<bool, hyperpoint> makeradar(hyperpoint h) {
   if(GDIM == 3 && WDIM == 2) h = radar_transform * h;
 
-  using namespace hyperpoint_vec;
   ld d = hdist0(h);
 
   if(sol && nisot::geodesic_movement) {
@@ -4489,7 +4488,6 @@ ld mousedist(transmatrix T) {
   if(mouseaim_sensitivity) return sqhypot_d(2, T1) + (point_behind(T1) ? 1e10 : 0);
   hyperpoint h1;
   applymodel(T1, h1);
-  using namespace hyperpoint_vec;
   h1 = h1 - hpxy((mousex - current_display->xcenter) / current_display->radius, (mousey - current_display->ycenter) / current_display->radius);
   return sqhypot_d(2, h1) + (point_behind(T1) ? 1e10 : 0);
   }
@@ -4502,7 +4500,6 @@ void make_clipping_planes() {
   clipping_planes.clear();
   if(sphere) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
-    using namespace hyperpoint_vec;
     ld z1 = 1, z2 = 1;
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
     sx /= hypot_d(3, sx);
@@ -5051,7 +5048,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(just_gmatrix) return;
 #if MAXMDIM >= 4
   if(WDIM == 3 && pmodel == mdPerspective && !nil) {
-    using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
       drawcell_in_radar(c, V);
@@ -5060,7 +5056,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     noclipped++;
     }
   if(pmodel == mdGeodesic && sol) {
-    using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
@@ -5070,7 +5065,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     noclipped++;
     }
   if(pmodel == mdGeodesic && nil) {
-    using namespace hyperpoint_vec;
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
@@ -7210,7 +7204,6 @@ void precise_mouseover() {
     for(int i=0; i<mouseover->type; i++) {
       hyperpoint h1 = get_corner_position(mouseover, (i+mouseover->type-1) % mouseover->type);
       hyperpoint h2 = get_corner_position(mouseover, i);
-      using namespace hyperpoint_vec;
       hyperpoint hx = r_mouseh - h1;
       h2 = h2 - h1;
       ld z = h2[1] * hx[0] - h2[0] * hx[1];

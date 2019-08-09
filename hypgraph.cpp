@@ -149,7 +149,6 @@ ld find_zlev(hyperpoint& H) {
 
   if(spatial_graphics) {
     ld zlev = zlevel(H);
-    using namespace hyperpoint_vec;
     if(zlev > 1-1e-6 && zlev < 1+1e-6) return 1;
     H /= zlev;
     return zlev;
@@ -252,7 +251,6 @@ void make_twopoint(ld& x, ld& y) {
   }
 
 hyperpoint mobius(hyperpoint h, ld angle, ld scale = 1) {
-  using namespace hyperpoint_vec;
   h = perspective_to_space(h * scale, 1, gcSphere);
   h = rotmatrix(angle * degree, 1, 2) * h;
   return space_to_perspective(h, 1) / scale;
@@ -306,8 +304,6 @@ hyperpoint compute_hybrid(hyperpoint H, int rootid) {
 
 void applymodel(hyperpoint H, hyperpoint& ret) {
 
-  using namespace hyperpoint_vec;
-  
   hyperpoint H_orig = H;
   
   switch(pmodel) {
@@ -1510,7 +1506,6 @@ void draw_model_elements() {
           hyperpoint res = compute_hybrid(H, 2 | mode);
           conformal::apply_orientation(res[0], res[1]);
           conformal::apply_orientation_yz(res[2], res[1]);
-          using namespace hyperpoint_vec;
           curvepoint(res * current_display->radius);
           }
         queuecurve(ringcolor, 0, PPR::CIRCLE);
@@ -1582,7 +1577,6 @@ void draw_model_elements() {
  
 void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 
-  using namespace hyperpoint_vec;
   hyperpoint H;
   applymodel(X, H);
   H *= current_display->radius;
@@ -1640,7 +1634,6 @@ void draw_boundary(int w) {
   
       for(int b=-1; b<=1; b+=2)
       for(ld a=-90; a<=90+1e-6; a+=pow(.5, vid.linequality)) {
-        using namespace hyperpoint_vec;
         ld x = sin(a * vid.twopoint_param * b / 90);
         ld y = 0;
         ld z = -sqrt(1 - x*x);
@@ -1775,7 +1768,6 @@ void draw_boundary(int w) {
       }
 
     case mdSpiral: {
-      using namespace hyperpoint_vec;
       if(euclid) return;
       if(conformal::ring_not_spiral) return;
       // if(p == PPR::CIRCLE) p = PPR::OUTCIRCLE;

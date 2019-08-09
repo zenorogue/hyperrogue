@@ -339,39 +339,85 @@ extern videopar vid;
 
 extern array<ld, gGUARD> sightranges;
 
+#define self (*this)
+
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
   
   hyperpoint(ld x, ld y, ld z, ld w) { 
-    (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; 
-    if(MAXMDIM == 4) (*this)[3] = w;
+    self[0] = x; self[1] = y; self[2] = z; 
+    if(MAXMDIM == 4) self[3] = w;
     }
+
+  inline hyperpoint& operator *= (ld d) {
+    for(int i=0; i<MDIM; i++) self[i] *= d;
+    return self;
+    }
+  
+  inline hyperpoint& operator /= (ld d) { 
+    for(int i=0; i<MDIM; i++) self[i] /= d;
+    return self;
+    }
+  
+  inline hyperpoint& operator += (const hyperpoint h2) { 
+    for(int i=0; i<MDIM; i++) self[i] += h2[i];
+    return self;
+    }
+
+  inline hyperpoint& operator -= (const hyperpoint h2) { 
+    for(int i=0; i<MDIM; i++) self[i] -= h2[i];
+    return self;
+    }
+
+  inline friend hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
+  inline friend hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
+  inline friend hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
+  inline friend hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
+  inline friend hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
+
+  // cross product  
+  inline friend hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
+    return hyperpoint(
+      h1[1] * h2[2] - h1[2] * h2[1],
+      h1[2] * h2[0] - h1[0] * h2[2],
+      h1[0] * h2[1] - h1[1] * h2[0],
+      0
+      );
+    }
+
+  // inner product
+  inline friend ld operator | (hyperpoint h1, hyperpoint h2) {
+    ld sum = 0;
+    for(int i=0; i<MDIM; i++) sum += h1[i] * h2[i];
+    return sum;
+    }    
   };
 
 struct transmatrix {
   ld tab[MAXMDIM][MAXMDIM];
   hyperpoint& operator [] (int i) { return (hyperpoint&)tab[i][0]; }
   const ld * operator [] (int i) const { return tab[i]; }
+  
+  inline friend hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
+    hyperpoint z;
+    for(int i=0; i<MDIM; i++) {
+      z[i] = 0;
+      for(int j=0; j<MDIM; j++) z[i] += T[i][j] * H[j];
+      }
+    return z;
+    }
+
+  inline friend transmatrix operator * (const transmatrix& T, const transmatrix& U) {
+    transmatrix R;
+    for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) {
+      R[i][j] = 0;
+      for(int k=0; k<MDIM; k++)
+        R[i][j] += T[i][k] * U[k][j];
+      }
+    return R;
+    }  
   };
 
-inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
-  hyperpoint z;
-  for(int i=0; i<MDIM; i++) {
-    z[i] = 0;
-    for(int j=0; j<MDIM; j++) z[i] += T[i][j] * H[j];
-    }
-  return z;
-  }
-
-inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
-  transmatrix R;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) {
-    R[i][j] = 0;
-    for(int k=0; k<MDIM; k++)
-      R[i][j] += T[i][k] * U[k][j];
-    }
-  return R;
-  }
 
 constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
   #if MAXMDIM==3
@@ -410,52 +456,6 @@ inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return DIM == 2 ? hyperpoint(
 inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
 inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
 inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
-
-namespace hyperpoint_vec {
-
-  inline hyperpoint& operator *= (hyperpoint& h, ld d) {
-    for(int i=0; i<MDIM; i++) h[i] *= d;
-    return h;
-    }
-  
-  inline hyperpoint& operator /= (hyperpoint& h, ld d) { 
-    for(int i=0; i<MDIM; i++) h[i] /= d;
-    return h;
-    }
-  
-  inline hyperpoint operator += (hyperpoint& h, hyperpoint h2) { 
-    for(int i=0; i<MDIM; i++) h[i] += h2[i];
-    return h;
-    }
-
-  inline hyperpoint operator -= (hyperpoint& h, hyperpoint h2) { 
-    for(int i=0; i<MDIM; i++) h[i] -= h2[i];
-    return h;
-    }
-
-  inline hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
-  inline hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
-  inline hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
-  inline hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
-  inline hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
-
-  // cross product  
-  inline hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
-    return hpxyz(
-      h1[1] * h2[2] - h1[2] * h2[1],
-      h1[2] * h2[0] - h1[0] * h2[2],
-      h1[0] * h2[1] - h1[1] * h2[0]
-      );
-    }
-
-  // inner product (in R^3)
-  inline ld operator | (hyperpoint h1, hyperpoint h2) {
-    ld sum = 0;
-    for(int i=0; i<MDIM; i++) sum += h1[i] * h2[i];
-    return sum;
-    }    
-  }
-
 
 extern int cellcount, heptacount;
 

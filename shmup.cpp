@@ -1286,7 +1286,6 @@ void shootBullet(monster *m) {
     bullet->pid = m->pid;
     bullet->parenttype = m->type;
     bullet->hitpoints = 0;
-    using namespace hyperpoint_vec;
     bullet->inertia = cspin(0, WDIM-1, -M_PI/4 * i) * m->inertia;
     bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
     additional.push_back(bullet);
@@ -1815,7 +1814,6 @@ void movePlayer(monster *m, int delta) {
   hyperpoint avg_inertia;
   
   if(inertia_based && canmove) {
-    using namespace hyperpoint_vec;
     avg_inertia = m->inertia;
     ld coef = m->base->land == laWestWall ? 0.65 : falling ? 0.15 : 1;
     coef /= 1000;
@@ -1981,7 +1979,6 @@ void movePlayer(monster *m, int delta) {
   if(!go || abs(playergo[cpid]) < 1e-3 || abs(playerturn[cpid]) > 1e-3) bulltime[cpid] = curtime;
   
   if(!go) {
-    using namespace hyperpoint_vec;
     playergo[cpid] = playergoturn[cpid] = playerstrafe[cpid] = 0;
     if(WDIM == 3) playerturn[cpid] = playerturny[cpid] = 0;
     if(falling) m->inertia = m->inertia * -1;
@@ -2429,7 +2426,6 @@ void spawn_asteroids(monster *bullet, monster *target) {
   hyperpoint bullet_inertia = inverse(target->pat) * bullet->pat * bullet->inertia;
 
   for(int i=0; i<2; i++) {
-    using namespace hyperpoint_vec;
     monster* child = new monster;
     child->base = target->base;
     child->at = target->at;

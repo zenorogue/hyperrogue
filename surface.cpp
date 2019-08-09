@@ -6,8 +6,6 @@
 #if CAP_SURFACE
 namespace hr { namespace surface {
 
-using namespace hyperpoint_vec;
-
 ld sech(ld d) { return 1 / cosh(d); }
 
 string shape_name[] = { "hypersian rug", "tractricoid", "Dini's surface", "Kuen surface", "concave barrel",

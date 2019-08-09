@@ -1532,7 +1532,6 @@ namespace mapeditor {
         ld dist = HUGE_VAL;
         for(auto& layer: usershapes[sg][id]->d)
         for(const hyperpoint& h: layer.list) {
-          using namespace hyperpoint_vec;
           hyperpoint h1;
           applymodel(drawtrans * h, h1);
           ld d = sqhypot_d(2, h1 - onscr);

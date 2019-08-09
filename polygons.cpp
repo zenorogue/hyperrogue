@@ -44,7 +44,6 @@ void geometry_information::chasmifyPoly(double fac, double fac2, int k) {
     last->flags |= POLY_TRIANGLES;
     last->texture_offset = 0;
     last->s = isize(hpc);
-    using namespace hyperpoint_vec;
     auto at = [&] (ld x, ld y) {
       x *= (isize(points) - 1);
       int zf = int(x);
@@ -121,7 +120,6 @@ void geometry_information::finishshape() {
   if(area >= 0) last->flags |= POLY_INVERSE;
 
   if(DIM == 3) {
-    using namespace hyperpoint_vec;
     last->intester = Hypc;
     for(int i=last->s; i<last->e; i++) last->intester += hpc[i];
     if(last->s != last->e) last->intester /= last->e-last->s;
@@ -689,7 +687,6 @@ void geometry_information::procedural_shapes() {
 vector<ld> equal_weights(20, 1);
 
 void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) {
-  using namespace hyperpoint_vec;
 
   // orient correctly
   transmatrix T;
@@ -745,18 +742,15 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   }
 
 vector<hyperpoint> make4(hyperpoint a, hyperpoint b, hyperpoint c) {
-  using namespace hyperpoint_vec;
   return {a, b, b+c-a, c};
   }
 
 vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
-  using namespace hyperpoint_vec;
   return {a, (a+b)/2, b, b+c-a, c};
   }
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  using namespace hyperpoint_vec;
   int howmany = penrose ? 22 : S7;
   shWall3D.resize(howmany);
   shPlainWall3D.resize(howmany);
@@ -875,7 +869,6 @@ void geometry_information::create_wall3d() {
     }
 
   if(DIM == 3 && euclid && S7 == 12) {
-    using namespace hyperpoint_vec;
     auto v = euclid3::get_shifttable();
     for(int w=0; w<12; w++) {
       auto co = euclid3::getcoord(v[w]);
@@ -889,7 +882,6 @@ void geometry_information::create_wall3d() {
     }
 
   if(DIM == 3 && euclid && S7 == 14) {
-    using namespace hyperpoint_vec;
     auto v = euclid3::get_shifttable();
     for(int w=0; w<14; w++) {
       bshape(shWall3D[w], PPR::WALL);

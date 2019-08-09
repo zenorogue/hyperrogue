@@ -490,7 +490,7 @@ namespace hr { namespace gp {
   hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
     int sp = 0;
     again:
-    auto corner = corners * hyperpoint_vec::operator+ (loctoh_ort(at), hyperpoint_vec::operator/ (corner_coords[cornerid], cf));
+    auto corner = corners * (loctoh_ort(at) + (corner_coords[cornerid] / cf));
     if(corner[1] < -1e-6 || corner[2] < -1e-6) {
       at = at * eudir(1);
       if(cornerid < SG6) cornerid = (1 + cornerid) % SG6;

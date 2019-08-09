@@ -913,9 +913,6 @@ void centerrug(ld aspd) {
   }
   
 void cut_triangle2(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc, const hyperpoint ha, const hyperpoint hb, const hyperpoint hc) {
-  using namespace hyperpoint_vec;
-  using hyperpoint_vec::operator *;
-  using hyperpoint_vec::operator +;
   ld zac = pc[3] / (pc[3] - pa[3]);
   hyperpoint pac = pa * zac + pc * (1-zac);
   hyperpoint hac = ha * zac + hc * (1-zac);

@@ -49,8 +49,6 @@ namespace reg3 {
 
   void generate() {
   
-    using namespace hyperpoint_vec;
-
     if(S7 == 4) face = 3;
     if(S7 == 6) face = 4;
     if(S7 == 12) face = 5;

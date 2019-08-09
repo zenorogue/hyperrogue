@@ -2179,7 +2179,6 @@ namespace linepatterns {
       hyperpoint vh1 = V1 * h1;
       hyperpoint vh2 = V2 * h2;
       ld cros = vh1[0]*vh2[0] + vh1[1]*vh2[1] + vh1[2]*vh2[2];
-      using namespace hyperpoint_vec;
       if(cros > 0)
         gridline(V1, h1, V2, h2, col, par),
         gridline(V1, -1*h1, V2, -1*h2, col, par);

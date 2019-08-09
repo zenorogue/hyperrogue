@@ -126,7 +126,6 @@ bool is_behind(const hyperpoint& H) {
   }
 
 hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {
-  using namespace hyperpoint_vec;
   // H1[2] * t + H2[2] * (1-t) == BEHIND_LIMIT - vid.alpha
   // H2[2]- BEHIND_LIMIT + vid.alpha = t * (H2[2] - H1[2])
   ld t = (H2[2] - BEHIND_LIMIT + vid.alpha) / (H2[2] - H1[2]);
@@ -236,7 +235,6 @@ void addpoint(const hyperpoint& H) {
         hyperpoint Hscr1;
         band_shift += 2 * M_PI;
         applymodel(H, Hscr1);
-        using namespace hyperpoint_vec;
         if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
         band_shift -= 4 * M_PI;
         applymodel(H, Hscr1);
@@ -312,7 +310,6 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
         if(correct_side(mid)) Hy = mid;
         else Hx = mid;
         }
-      using namespace hyperpoint_vec;
       goodpoint = midz(Hy, goodpoint);
       }
     
@@ -561,7 +558,6 @@ void dqi_poly::gldraw() {
 ld scale_at(const transmatrix& T) {
   if(DIM == 3 && pmodel == mdPerspective) return 1 / abs((tC0(T))[2]);
   if(sol) return 1;
-  using namespace hyperpoint_vec;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
   applymodel(T * xpush0(.01), h2);
@@ -582,7 +578,6 @@ ld linewidthat(const hyperpoint& h) {
       }
     }
   else if(svg::in || inHighQual) {
-    using namespace hyperpoint_vec;
     hyperpoint h0 = h / zlevel(h);
     transmatrix T = rgpushxto0(h0);
     return scale_at(T);
@@ -839,7 +834,6 @@ void dqi_poly::draw() {
         for(int j=0; j<MAX_PHASE; j++) {
           twopoint_sphere_flips = j;
           hyperpoint h2; applymodel(h1, h2);
-          using namespace hyperpoint_vec;
           glvertex h = glhr::pointtogl(h2 * current_display->radius); h[1] *= vid.stretch;
           if(i == 0)
             phases[j].push_back(h);
@@ -866,7 +860,6 @@ void dqi_poly::draw() {
         // lin(a,b) is of form (x, 0, z)
         int cpha = 0;
         for(int i=0; i<cnt; i++) {
-          using namespace hyperpoint_vec;
 
           hyperpoint h1 = V * glhr::gltopoint((*tab)[offset+i]);
           hyperpoint mh1; applymodel(h1, mh1); mh1[1] *= vid.stretch;

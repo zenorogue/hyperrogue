@@ -177,7 +177,6 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
     }
   
   hyperpoint lstmid = hpxyz(0,0,0);
-  using namespace hyperpoint_vec;
   for(auto pp: lst) lstmid += pp;
   transmatrix T = spin(-m.o.bspi);
   while((spin(2*M_PI / rots) * T* lstmid)[0] < (T*lstmid)[0])
@@ -226,7 +225,6 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
   if(binarytiling) {
 
     const int STEP = vid.texture_step;
-    using namespace hyperpoint_vec;
     
     for(int t=0; t<2; t++) {
     
@@ -500,7 +498,6 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         if(binarytiling) 
           for(int t=0; t<c->type; t++)
             texture_order([&] (ld x, ld y) {
-              using namespace hyperpoint_vec;
               hyperpoint left = binary::get_corner_horo_coordinates(c, t);
               hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
               hpcpush(orthogonal_move(binary::get_horopoint(left * x + right * y), dfloor_table[k]));
@@ -511,7 +508,6 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           int s = fsh.b[id].s;
           int e = fsh.b[id].e-1;        
           for(int t=0; t<e-s; t++) {
-            using namespace hyperpoint_vec;
             hyperpoint v1 = hpc[s+t] - C0;
             hyperpoint v2 = hpc[s+t+1] - C0;
             texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), dfloor_table[k])); });
@@ -531,7 +527,6 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         if(binarytiling)
           for(int t=0; t<c->type; t++)
             texture_order([&] (ld x, ld y) {
-              using namespace hyperpoint_vec;
               hyperpoint left = binary::get_corner_horo_coordinates(c, t);
               hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
               hpcpush(orthogonal_move(binary::get_horopoint(left * x + right * y), top + h * (x+y)));
@@ -542,7 +537,6 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           int s = fsh.b[id].s;
           int e = fsh.b[id].e-1;        
           for(int t=0; t<e-s; t++) {
-            using namespace hyperpoint_vec;
             hyperpoint v1 = hpc[s+t] - C0;
             hyperpoint v2 = hpc[s+t+1] - C0;
             texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), top + h * (x+y))); });
@@ -912,7 +906,6 @@ void draw_shape_for_texture(floorshape* sh) {
   ftv.tvertices.clear();
   ftv.texture_id = floor_textures->renderedTexture;
   
-  using namespace hyperpoint_vec;
   hyperpoint center = eupush(gx, gy) * C0;
   hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0);
   hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0);

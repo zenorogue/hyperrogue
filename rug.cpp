@@ -79,7 +79,6 @@ bool rug_perspective = ISANDROID;
 // such that inverse(M) * h1 = ( |h1|, 0, 0) and inverse(M) * h2 = ( .., .., 0)
 
 transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
-  using namespace hyperpoint_vec;
 
   hyperpoint vec[3] = {h1, h2, h1 ^ h2};
   
@@ -200,8 +199,6 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->y1 = (1 - onscreen[1] * vid.scale) / 2;
   m->valid = false;
 
-  using namespace hyperpoint_vec;
-  
   if(euwrap && !bounded) {
     hyperpoint h1 = eumove(torusconfig::sdx, torusconfig::sdy) * C0;
     h1 /= sqhypot_d(2, h1);
@@ -293,7 +290,6 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   }
 
 rugpoint *findRugpoint(hyperpoint h) {
-  using namespace hyperpoint_vec;
   for(int i=0; i<isize(points); i++) 
     if(sqhypot_d(rugdim, points[i]->h - h) < 1e-5) return points[i];
   return NULL;
@@ -718,7 +714,6 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
   if(gwhere == gEuclid && fast_euclidean) {
     return force_euclidean(m1, m2, rd, is_anticusp, d1, d2);
     }
-  using namespace hyperpoint_vec;
   normalizer n(m1.flat, m2.flat);
   hyperpoint f1 = n(m1.flat);
   hyperpoint f2 = n(m2.flat);
@@ -756,7 +751,6 @@ void preset(rugpoint *m) {
   int q = 0;
   hyperpoint h;
   for(int i=0; i<3; i++) h[i] = 0;
-  using namespace hyperpoint_vec;
   
   preset_points.clear();
   
@@ -891,7 +885,6 @@ void subdivide() {
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[make_pair(m, m2)] = mm;
       if(!good_shape) {
-        using namespace hyperpoint_vec;
         normalizer n(m->flat, m2->flat);
         hyperpoint h1 = n(m->flat);
         hyperpoint h2 = n(m2->flat);
@@ -1101,7 +1094,6 @@ void physics() {
 bool use_precompute;
 
 void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
-  using namespace hyperpoint_vec;
   h = use_precompute ? m->getglue()->precompute : m->getglue()->flat;
   if(rug_perspective && gwhere >= gSphere) {
     if(h[2] > 0) {
@@ -1141,7 +1133,6 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   if(eye) tanalpha = -tanalpha;
   if(!sphere) tanalpha = -tanalpha;
   
-  using namespace hyperpoint_vec;  
   ld d = hypot_d(3, azeq);
   ld sindbd = sin_auto(d)/d, cosd = cos_auto(d);
   
@@ -1190,7 +1181,6 @@ vector<glhr::ct_vertex> cp_array;
 
 void drawTriangle(triangle& t) {
   int num = t.m[2] ? 3 : 2;
-  using namespace hyperpoint_vec;  
   for(int i=0; i<num; i++) {
     if(!t.m[i]->valid) return;
     // if(t.m[i]->dist >= get_sightrange()+.51) return;
@@ -1969,7 +1959,6 @@ void show() {
           if(!camera_center) push_all_points(2, model_distance);
           for(auto p:points) {
             if(adjust_edges) for(auto& e: p->edges) e.len *= modelscale / last;
-            using namespace hyperpoint_vec;
             if(adjust_points) p->flat *= modelscale / last;
             enqueue(p);
             }

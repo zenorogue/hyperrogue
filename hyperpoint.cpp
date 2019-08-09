@@ -228,13 +228,11 @@ hyperpoint normalize(hyperpoint H) {
 
 // get the center of the line segment from H1 to H2
 hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
-  using namespace hyperpoint_vec;
   return normalize(H1 + H2);
   }
 
 // like mid, but take 3D into account
 hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
-  using namespace hyperpoint_vec;
   hyperpoint H3 = H1 + H2;
   
   ld Z = 2;
@@ -474,7 +472,6 @@ transmatrix rpushxto0(const hyperpoint& H) {
 
 transmatrix ggpushxto0(const hyperpoint& H, ld co) {
   if(translatable) {
-    using namespace hyperpoint_vec;
     return eupush(co * H);
     }
   transmatrix res = Id;
@@ -735,24 +732,20 @@ transmatrix rotmatrix(double rotation, int c0, int c1) {
   }
 
 hyperpoint mid3(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
-  using namespace hyperpoint_vec;
   return mid(h1+h2+h3, h1+h2+h3);
   }
 
 hyperpoint mid_at(hyperpoint h1, hyperpoint h2, ld v) {
-  using namespace hyperpoint_vec;
   hyperpoint h = h1 * (1-v) + h2 * v;
   return mid(h, h);
   }  
 
 hyperpoint mid_at_actual(hyperpoint h, ld v) {
-  using namespace hyperpoint_vec;
   return rspintox(h) * xpush0(hdist0(h) * v);
   }
 
 // in 3D, an orthogonal projection of C0 on the given triangle
 hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
-  using namespace hyperpoint_vec;
   h0 /= h0[3];
   h1 /= h1[3];
   h2 /= h2[3];
