@@ -791,6 +791,14 @@ EX ld ortho_error(transmatrix T) {
   return err;      
   }
 
+EX transmatrix transpose(transmatrix T) {
+  transmatrix result;
+  for(int i=0; i<MDIM; i++)
+    for(int j=0; j<MDIM; j++)
+      result[j][i] = T[i][j];
+  return result;
+  }
+
 #if HDR
 inline hyperpoint cpush0(int c, ld x) { 
   hyperpoint h = Hypc;

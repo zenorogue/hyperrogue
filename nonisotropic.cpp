@@ -581,14 +581,6 @@ EX namespace nisot {
     return at;
     }
 
-  EX transmatrix transpose(transmatrix T) {
-    transmatrix result;
-    for(int i=0; i<MDIM; i++)
-      for(int j=0; j<MDIM; j++)
-        result[j][i] = T[i][j];
-    return result;
-    }
-  
   EX transmatrix parallel_transport_bare(transmatrix Pos, transmatrix T) {
   
     hyperpoint h = tC0(T);
