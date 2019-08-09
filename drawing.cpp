@@ -1709,12 +1709,6 @@ EX void queuecircle(const transmatrix& V, double size, color_t col) {
   queuecircle(xc, yc, scale_in_pixels(V) * size, col);
   }
 
-EX void queuemarkerat(const transmatrix& V, color_t col) {
-#if CAP_SHAPES
-  queuepolyat(V, cgi.shTriangle, col, PPR::LINE);
-#endif
-  }
-
 #endif
 
 }
