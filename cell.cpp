@@ -462,11 +462,6 @@ EX int celldistAlt(cell *c) {
   return mi;
   }
 
-EX int dirfromto(cell *cfrom, cell *cto) {
-  for(int i=0; i<cfrom->type; i++) if(cfrom->move(i) == cto) return i;
-  return -1;
-  }
-
 #if HDR
 static const int RPV_MODULO = 5;
 static const int RPV_RAND = 0;

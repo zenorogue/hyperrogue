@@ -1032,7 +1032,7 @@ void movePlayer(monster *m, int delta) {
           }
         else {
           if(isWatery(m->base)) 
-            m->base->wall = waBoat, m->base->mondir = dirfromto(m->base, c2);
+            m->base->wall = waBoat, m->base->mondir = neighborId(m->base, c2);
           else if(boatStrandable(m->base))
             m->base->wall = waStrandedBoat;
           else if(boatStrandable(c2))
@@ -1041,7 +1041,7 @@ void movePlayer(monster *m, int delta) {
           }
         }
       else if(isPushable(c2->wall) && !nonAdjacent(c2, m->base)) {
-        int sd = dirfromto(c2, m->base);
+        int sd = neighborId(c2, m->base);
         int subdir = 1;
         double bestd = 9999;
         pushmonsters();
@@ -1053,7 +1053,7 @@ void movePlayer(monster *m, int delta) {
           if(d<bestd) bestd=d, subdir = di;
           }
         visibleFor(300);
-        cellwalker push(c2, dirfromto(c2, m->base));
+        cellwalker push(c2, neighborId(c2, m->base));
         push = push + 3 * (-subdir) + wstep;
         if(!canPushThumperOn(push.at, c2, m->base) && c2->type == 7) {
           push = push + wstep - subdir + wstep;
@@ -1109,7 +1109,7 @@ void movePlayer(monster *m, int delta) {
       
       if(items[itOrbDigging]) {
         visibleFor(400);
-        int d = dirfromto(m->base, c2);
+        int d = neighborId(m->base, c2);
         if(d >= 0 && earthMove(m->base, d)) markOrb(itOrbDigging);
         }
       
@@ -2171,7 +2171,7 @@ void moveMonster(monster *m, int delta) {
   if(c2 != m->base && m->type == moFireElemental) makeflame(m->base, 20, false);
   if(c2 != m->base && m->type == moWaterElemental) placeWater(c2, m->base);
   if(c2 != m->base && m->type == moEarthElemental) {
-    int d = dirfromto(m->base, c2);
+    int d = neighborId(m->base, c2);
     if(d >= 0) earthMove(m->base, d);
     }
   
@@ -2194,7 +2194,7 @@ void moveMonster(monster *m, int delta) {
   if(c2 != m->base && m->type == moNecromancer && !c2->monst) {
     for(int i=0; i<m->base->type; i++) {
       cell *c3 = m->base->move(i);
-      if(dirfromto(c3, c2) != -1 && c3->wall == waFreshGrave && gmatrix.count(c3)) {
+      if(neighborId(c3, c2) != -1 && c3->wall == waFreshGrave && gmatrix.count(c3)) {
         bool monstersNear = false;
         for(monster *m2: nonvirtual) {
           if(m2 != m && intval(m2->pat*C0, gmatrix[c3]*C0) < SCALE2 * .3)
@@ -2251,7 +2251,7 @@ void moveMonster(monster *m, int delta) {
         }
       if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER | reflectflag) && !isWatery(c2) && m->inBoat) {
         if(isWatery(m->base)) 
-          m->base->wall = waBoat, m->base->mondir = dirfromto(m->base, c2);
+          m->base->wall = waBoat, m->base->mondir = neighborId(m->base, c2);
         else if(boatStrandable(c2)) c2->wall = waStrandedBoat;
         else if(boatStrandable(m->base)) m->base->wall = waStrandedBoat;
         m->inBoat = false;

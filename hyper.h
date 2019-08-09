@@ -849,8 +849,6 @@ namespace mirror {
   void act(int dir, int flags);
   }
 
-int neighborId(cell *c1, cell *c2);
-
 struct movedir { 
   int d; 
   // non-negative numbers denote 'rotate +d steps and act in this direction

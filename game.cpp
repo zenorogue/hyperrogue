@@ -835,7 +835,7 @@ bool ghostmove(eMonster m, cell* to, cell* from) {
 
 bool slimepassable(cell *w, cell *c) {
   if(w == c || !c) return true;
-  int u = dirfromto(c, w);
+  int u = neighborId(c, w);
   if(nonAdjacent(w,c)) return false;
   if(isPlayerOn(w)) return true;
   int group = slimegroup(c);
