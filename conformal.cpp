@@ -9,25 +9,29 @@ typedef double precise;
 typedef long double precise;
 #endif
 
-namespace polygonal {
+EX namespace polygonal {
+
+  #if HDR
+  static const int MSI = 120;
+  #endif
 
   typedef long double xld;
 
   typedef complex<xld> cxld;
 
-  int SI = 4;
-  ld  STAR = 0;
+  EX int SI = 4;
+  EX ld  STAR = 0;
   
-  int deg = ISMOBWEB ? 2 : 20;
+  EX int deg = ISMOBWEB ? 2 : 20;
 
   precise matrix[MSI][MSI];
   precise ans[MSI];
   
   cxld coef[MSI];
-  ld coefr[MSI], coefi[MSI]; 
-  int maxcoef, coefid;
+  EX ld coefr[MSI], coefi[MSI]; 
+  EX int maxcoef, coefid;
   
-  void solve() {
+  EX void solve() {
     if(pmodel == mdPolynomial) {
       for(int i=0; i<MSI; i++) coef[i] = cxld(coefr[i], coefi[i]);
       return;
@@ -67,7 +71,7 @@ namespace polygonal {
       }
     }
   
-  pair<ld, ld> compute(ld x, ld y, int prec) {
+  EX pair<ld, ld> compute(ld x, ld y, int prec) {
     if(x*x+y*y > 1) {
       xld r  = hypot(x,y);
       x /= r;
@@ -93,7 +97,7 @@ namespace polygonal {
     }
 
   pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
-  }
+  EX }
 
 #if CAP_SDL
 namespace spiral {
@@ -233,21 +237,21 @@ namespace spiral {
 
 bool isbad(ld z) { return !isfinite(z) || fabs(z) > 1e6; }
 
-namespace conformal {
+EX namespace conformal {
 
-  string formula = "z^2";
-  eModel basic_model;
+  EX string formula = "z^2";
+  EX eModel basic_model;
 
   void handleKeyC(int sym, int uni);
   
   int lastprogress;
   
-  void progress_screen() {
+  EX void progress_screen() {
     gamescreen(0);
     mouseovers = "";
     }
 
-  void progress(string str) {
+  EX void progress(string str) {
 #if CAP_SDL
     int tick = SDL_GetTicks();
     if(tick > lastprogress + 250) {
@@ -259,47 +263,58 @@ namespace conformal {
 #endif
     }
   
-  bool on;
-  vector<shmup::monster*> v;
+  EX bool on;
+  EX vector<shmup::monster*> v;
   int llv;
-  double phase;
+  EX double phase;
   
-  vector<pair<cell*, eMonster> > killhistory;
-  vector<pair<cell*, eItem> > findhistory;
-  vector<cell*> movehistory;
+  EX vector<pair<cell*, eMonster> > killhistory;
+  EX vector<pair<cell*, eItem> > findhistory;
+  EX vector<cell*> movehistory;
   
-  bool includeHistory;
-  ld lvspeed = 1;
-  int bandhalf = 200;
-  int bandsegment = 16000;
-  ld rotation = 0;
-  ld rotation_xz = 90;
-  ld rotation_xy2 = 90;
-  int do_rotate = 1;
-  ld model_orientation, halfplane_scale, model_orientation_yz;
-  ld clip_min, clip_max;
-  ld ocos, osin, ocos_yz, osin_yz;
-  ld cos_ball, sin_ball;
-  bool model_straight, model_straight_yz;
-  ld top_z = 5;
-  ld model_transition = 1;
+  EX bool includeHistory;
+  EX ld lvspeed = 1;
+  EX int bandhalf = 200;
+  EX int bandsegment = 16000;
+  EX ld rotation = 0;
+  EX ld rotation_xz = 90;
+  EX ld rotation_xy2 = 90;
+  EX int do_rotate = 1;
+  EX ld model_orientation, halfplane_scale, model_orientation_yz;
+  EX ld clip_min, clip_max;
+  EX ld ocos, osin, ocos_yz, osin_yz;
+  EX ld cos_ball, sin_ball;
+  EX bool model_straight, model_straight_yz;
+  EX ld top_z = 5;
+  EX ld model_transition = 1;
 
-  bool autoband = false;
-  bool autobandhistory = false;
-  bool dospiral = true;
+  EX bool autoband = false;
+  EX bool autobandhistory = false;
+  EX bool dospiral = true;
   
-  ld extra_line_steps = 0;
+  #if HDR
+    // screen coordinates to logical coordinates: apply_orientation(x,y)
+  // logical coordinates back to screen coordinates: apply_orientation(y,x)
+  template<class A>
+  void apply_orientation(A& x, A& y) { if(!model_straight) tie(x,y) = make_pair(x*ocos + y*osin, y*ocos - x*osin); }
+  template<class A>
+  void apply_orientation_yz(A& x, A& y) { if(!model_straight_yz) tie(x,y) = make_pair(x*ocos_yz + y*osin_yz, y*ocos_yz - x*osin_yz); }
+  template<class A>
+  void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
+  #endif
   
-  vector<cell*> path_for_lineanimation;
+  EX ld extra_line_steps = 0;
+  
+  EX vector<cell*> path_for_lineanimation;
 
-  void clear() {
+  EX void clear() {
     on = false;
     int N = isize(v);
     for(int i=0; i<N; i++) delete v[i];
     v.resize(0);
     }
 
-  void create(cell *start, cell *target, transmatrix last) {
+  EX void create(cell *start, cell *target, transmatrix last) {
     
     if(target == start && !(quotient && isize(path_for_lineanimation) > 1)) {
       addMessage("Must go a distance from the starting point");
@@ -358,21 +373,21 @@ namespace conformal {
     phase = 0;
     }
 
-  void create_playerpath() {
+  EX void create_playerpath() {
     create(currentmap->gamestart(), cwt.at, Id);
     }
   
-  void create_recenter_to_view(bool precise) {
+  EX void create_recenter_to_view(bool precise) {
     cell *c = centerover.at ? centerover.at : cwt.at;
     create(path_for_lineanimation[0], c, precise ? inverse(ggmatrix(c)) : Id);
     }
   
-  transmatrix rotmatrix() {
+  EX transmatrix rotmatrix() {
     if(DIM == 2) return spin(rotation * degree);
     return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
     }
   
-  void movetophase() {
+  EX void movetophase() {
     
     int ph = int(phase);
     int siz = isize(v);
@@ -415,7 +430,7 @@ namespace conformal {
     compute_graphical_distance();
     }
   
-  void apply() {
+  EX void apply() {
     int t = ticks;
     phase += (t-llv) * lvspeed / 400.;
     llv = t;
@@ -428,19 +443,21 @@ namespace conformal {
     movetophase();
     }
   
-  ld spiral_angle = 70, spiral_x = 10, spiral_y = 7;
+  EX ld spiral_angle = 70;
+  EX ld spiral_x = 10;
+  EX ld spiral_y = 7;
   int spiral_id = 7;
-  bool use_atan = false;
+  EX bool use_atan = false;
   
   cld spiral_multiplier;
   ld right_spiral_multiplier = 1;
   ld any_spiral_multiplier = 1;
   ld sphere_spiral_multiplier = 2;
-  ld spiral_cone = 360;
+  EX ld spiral_cone = 360;
   ld spiral_cone_rad;
   bool ring_not_spiral;
 
-  void configure() {
+  EX void configure() {
     ld ball = -vid.ballangle * degree;
     cos_ball = cos(ball), sin_ball = sin(ball);
     ocos = cos(model_orientation * degree);
@@ -629,7 +646,7 @@ namespace conformal {
     }
 #endif
 
-  bool model_available(eModel pm) {
+  EX bool model_available(eModel pm) {
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdGeodesic);
     if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
@@ -641,18 +658,18 @@ namespace conformal {
     return true;
     }    
   
-  bool model_has_orientation() {
+  EX bool model_has_orientation() {
     return
       among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid) || mdBandAny();
     }
   
-  bool model_has_transition() {
+  EX bool model_has_transition() {
     return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && DIM == 2;
     }
   
   int editpos = 0;
   
-  string get_model_name(eModel m) {
+  EX string get_model_name(eModel m) {
     if(m == mdDisk && DIM == 3 && hyperbolic) return XLAT("ball model/Gans");
     if(nonisotropic) {
       if(m == mdDisk) return XLAT("simple model: projection");
@@ -697,7 +714,7 @@ namespace conformal {
     dialog::bound_up(isize(torus_zeros)-1);
     }
   
-  void edit_formula() {
+  EX void edit_formula() {
     if(pmodel != mdFormula) basic_model = pmodel;
     dialog::edit_string(formula, "formula", 
       XLAT(
@@ -727,7 +744,7 @@ namespace conformal {
       };
     }
   
-  void edit_rotation(ld& which) {
+  EX void edit_rotation(ld& which) {
     dialog::editNumber(which, 0, 360, 90, 0, XLAT("rotation"), 
       "This controls the automatic rotation of the world. "
       "It affects the line animation in the history mode, and "
@@ -751,7 +768,7 @@ namespace conformal {
       };
     }
   
-  void model_menu() {
+  EX void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models & projections"));
@@ -1060,11 +1077,11 @@ namespace conformal {
       };
     }
 
-  bool band_renderable_now() {
+  EX bool band_renderable_now() {
     return on && (pmodel == mdBand || pmodel == mdBandEquidistant || pmodel == mdBandEquiarea) && !euclid && !sphere;
     }
   
-  void history_menu() {
+  EX void history_menu() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(0);
     
@@ -1159,7 +1176,7 @@ namespace conformal {
   
   set<cell*> inmovehistory, inkillhistory, infindhistory;
   
-  void restore() {
+  EX void restore() {
     inmovehistory.clear();
     inkillhistory.clear();
     infindhistory.clear();
@@ -1181,7 +1198,7 @@ namespace conformal {
       }
     }
 
-  void restoreBack() {
+  EX void restoreBack() {
     int sk = isize(killhistory);
     for(int i=sk-1; i>=0; i--) {
       eMonster m = killhistory[i].second;
@@ -1196,7 +1213,7 @@ namespace conformal {
       }
     }
   
-  void renderAutoband() {
+  EX void renderAutoband() {
 #if CAP_SDL
     if(!cwt.at || celldist(cwt.at) <= 7) return;
     if(!autoband) return;
