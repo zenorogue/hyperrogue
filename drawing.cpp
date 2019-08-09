@@ -31,6 +31,66 @@ static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
 static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
 static const int POLY_DEBUG = (1<<24);          // debug this shape
+
+struct drawqueueitem {
+  PPR prio;
+  color_t color;
+  int subprio;
+  virtual void draw() = 0;
+  virtual void draw_back() {}
+  virtual void draw_pre() {}
+  virtual ~drawqueueitem() {}
+  void draw_darker();
+  virtual color_t outline_group() = 0;
+  };
+
+struct dqi_poly : drawqueueitem {
+  ld band_shift;
+  transmatrix V;
+  const vector<glvertex> *tab;
+  int offset, cnt, offset_texture;
+  color_t outline;
+  double linewidth;
+  int flags;
+  struct basic_textureinfo *tinf;
+  hyperpoint intester;
+  void draw();
+  void gldraw();
+  void draw_back();
+  virtual color_t outline_group() { return outline; }
+  };
+
+struct dqi_line : drawqueueitem {
+  ld band_shift;
+  hyperpoint H1, H2;
+  int prf;
+  double width;
+  void draw();
+  void draw_back();
+  virtual color_t outline_group() { return color; }
+  };
+      
+struct dqi_string : drawqueueitem {
+  string str;
+  int x, y, shift, size, frame;
+  int align;
+  void draw();
+  virtual color_t outline_group() { return 1; }
+  };
+
+struct dqi_circle : drawqueueitem {
+  int x, y, size, fillcolor;
+  double linewidth;
+  void draw();
+  virtual color_t outline_group() { return 2; }
+  };
+
+struct dqi_action : drawqueueitem {
+  reaction_t action;
+  dqi_action(const reaction_t& a) : action(a) {}
+  void draw() { action(); }
+  virtual color_t outline_group() { return 2; }
+  };
 #endif
 
 EX unsigned char& part(color_t& col, int i) {

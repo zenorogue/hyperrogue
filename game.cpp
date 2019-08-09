@@ -176,6 +176,11 @@ EX int hrand(int i) {
   return hrand(i);
   }
 
+#if HDR
+template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
+template<class T> void hrandom_shuffle(T* x, int n) { for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]); }
+#endif
+
 EX ld hrandf() { 
   return (hrngen() - hrngen.min()) / (hrngen.max() + 1.0 - hrngen.min());
   }

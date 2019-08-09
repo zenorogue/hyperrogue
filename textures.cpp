@@ -4,6 +4,30 @@
 #if CAP_TEXTURE
 namespace hr {
 
+#if HDR
+struct texture_triangle {
+  array<hyperpoint, 3> v;
+  array<hyperpoint, 3> tv;
+  texture_triangle(array<hyperpoint, 3> _v, array<hyperpoint, 3> _tv) : v(_v), tv(_tv) {}
+  };
+
+struct basic_textureinfo {
+  int texture_id;
+  vector<glvertex> tvertices; 
+  };
+  
+struct textureinfo : basic_textureinfo {
+  transmatrix M;
+  vector<texture_triangle> triangles;
+  vector<glvertex> vertices;
+  cell *c;
+  vector<transmatrix> matrices;
+  
+  // these are required to adjust to geometry changes
+  int current_type, symmetries;
+  };
+#endif
+
 EX namespace texture {
 
 #if HDR

@@ -14,6 +14,128 @@ eVariation variation;
 
 // hyperbolic points and matrices
 
+#if HDR
+struct hyperpoint : array<ld, MAXMDIM> {
+  hyperpoint() {}
+  
+  hyperpoint(ld x, ld y, ld z, ld w) { 
+    self[0] = x; self[1] = y; self[2] = z; 
+    if(MAXMDIM == 4) self[3] = w;
+    }
+
+  inline hyperpoint& operator *= (ld d) {
+    for(int i=0; i<MDIM; i++) self[i] *= d;
+    return self;
+    }
+  
+  inline hyperpoint& operator /= (ld d) { 
+    for(int i=0; i<MDIM; i++) self[i] /= d;
+    return self;
+    }
+  
+  inline hyperpoint& operator += (const hyperpoint h2) { 
+    for(int i=0; i<MDIM; i++) self[i] += h2[i];
+    return self;
+    }
+
+  inline hyperpoint& operator -= (const hyperpoint h2) { 
+    for(int i=0; i<MDIM; i++) self[i] -= h2[i];
+    return self;
+    }
+
+  inline friend hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
+  inline friend hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
+  inline friend hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
+  inline friend hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
+  inline friend hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
+
+  // cross product  
+  inline friend hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
+    return hyperpoint(
+      h1[1] * h2[2] - h1[2] * h2[1],
+      h1[2] * h2[0] - h1[0] * h2[2],
+      h1[0] * h2[1] - h1[1] * h2[0],
+      0
+      );
+    }
+
+  // inner product
+  inline friend ld operator | (hyperpoint h1, hyperpoint h2) {
+    ld sum = 0;
+    for(int i=0; i<MDIM; i++) sum += h1[i] * h2[i];
+    return sum;
+    }    
+  };
+
+struct transmatrix {
+  ld tab[MAXMDIM][MAXMDIM];
+  hyperpoint& operator [] (int i) { return (hyperpoint&)tab[i][0]; }
+  const ld * operator [] (int i) const { return tab[i]; }
+  
+  inline friend hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
+    hyperpoint z;
+    for(int i=0; i<MDIM; i++) {
+      z[i] = 0;
+      for(int j=0; j<MDIM; j++) z[i] += T[i][j] * H[j];
+      }
+    return z;
+    }
+
+  inline friend transmatrix operator * (const transmatrix& T, const transmatrix& U) {
+    transmatrix R;
+    for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) {
+      R[i][j] = 0;
+      for(int k=0; k<MDIM; k++)
+        R[i][j] += T[i][k] * U[k][j];
+      }
+    return R;
+    }  
+  };
+
+
+constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
+  #if MAXMDIM==3
+  return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
+  #else
+  return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
+  #endif
+  }
+
+const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
+
+// identity matrix
+const static transmatrix Id = diag(1,1,1,1);
+
+// zero matrix
+const static transmatrix Zero = diag(0,0,0,0);
+
+// mirror image
+const static transmatrix Mirror = diag(1,-1,1,1);
+const static transmatrix MirrorY = diag(1,-1,1,1);
+
+// mirror image
+const static transmatrix MirrorX = diag(-1,1,1,1);
+
+// mirror image
+const static transmatrix MirrorZ = diag(1,1,-1,1);
+
+// rotate by PI
+const static transmatrix pispin = diag(-1,-1,1,1);
+
+// central symmetry
+const static transmatrix centralsym = diag(-1,-1,-1,-1);
+
+inline hyperpoint hpxyz(ld x, ld y, ld z) { return DIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
+inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return DIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
+inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
+inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
+inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
+
+extern const hyperpoint C02, C03;
+
+#define C0 (DIM == 2 ? C02 : C03)
+#endif
+
 // basic functions and types
 //===========================
 
@@ -817,7 +939,6 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
 
 inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
 inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
-inline void reset_projection() { new_projection_needed = true; }
 
 // T * C0, optimized
 inline hyperpoint tC0(const transmatrix &T) {

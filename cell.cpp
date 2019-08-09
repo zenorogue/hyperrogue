@@ -5,6 +5,62 @@
 
 namespace hr {
 
+#if HDR
+struct hrmap {
+  virtual heptagon *getOrigin() { return NULL; }
+  virtual cell *gamestart() { return getOrigin()->c7; }
+  virtual ~hrmap() { };
+  virtual vector<cell*>& allcells() { return dcal; }
+  virtual void verify() { }
+  virtual void link_alt(const cellwalker& hs) { }
+  virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
+  heptagon *may_create_step(heptagon *h, int direction) {
+    if(h->move(direction)) return h->move(direction);
+    return create_step(h, direction);
+    }
+  virtual heptagon *create_step(heptagon *h, int direction) {
+    printf("create_step called unexpectedly\n"); exit(1);
+    return NULL;
+    }
+  virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+    printf("relative_matrix called unexpectedly\n"); 
+    return Id;
+    }
+  virtual struct transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) {
+    return relative_matrix(c2->master, c1->master);
+    }
+  virtual void draw() {
+    printf("undrawable\n");
+    }
+  virtual vector<hyperpoint> get_vertices(cell*);
+  };
+
+// hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient 
+struct hrmap_standard : hrmap {
+  void draw() override;
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
+  heptagon *create_step(heptagon *h, int direction) override;
+  };
+
+void clearfrom(heptagon*);
+void verifycells(heptagon*);
+
+struct hrmap_hyperbolic : hrmap_standard {
+  heptagon *origin;
+  eVariation mvar;
+  hrmap_hyperbolic();
+  hrmap_hyperbolic(heptagon *origin);
+  heptagon *getOrigin() override { return origin; }
+  ~hrmap_hyperbolic() {
+    // verifycells(origin);
+    // printf("Deleting hyperbolic map: %p\n", this);
+    dynamicval<eVariation> ph(variation, mvar);
+    clearfrom(origin);
+    }
+  void verify() override { verifycells(origin); }
+  };
+#endif
+
 EX int dirdiff(int dd, int t) {
   dd %= t;
   if(dd<0) dd += t;

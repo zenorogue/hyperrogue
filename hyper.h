@@ -320,122 +320,6 @@ extern videopar vid;
 
 #define self (*this)
 
-struct hyperpoint : array<ld, MAXMDIM> {
-  hyperpoint() {}
-  
-  hyperpoint(ld x, ld y, ld z, ld w) { 
-    self[0] = x; self[1] = y; self[2] = z; 
-    if(MAXMDIM == 4) self[3] = w;
-    }
-
-  inline hyperpoint& operator *= (ld d) {
-    for(int i=0; i<MDIM; i++) self[i] *= d;
-    return self;
-    }
-  
-  inline hyperpoint& operator /= (ld d) { 
-    for(int i=0; i<MDIM; i++) self[i] /= d;
-    return self;
-    }
-  
-  inline hyperpoint& operator += (const hyperpoint h2) { 
-    for(int i=0; i<MDIM; i++) self[i] += h2[i];
-    return self;
-    }
-
-  inline hyperpoint& operator -= (const hyperpoint h2) { 
-    for(int i=0; i<MDIM; i++) self[i] -= h2[i];
-    return self;
-    }
-
-  inline friend hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
-  inline friend hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
-  inline friend hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
-  inline friend hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
-  inline friend hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
-
-  // cross product  
-  inline friend hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
-    return hyperpoint(
-      h1[1] * h2[2] - h1[2] * h2[1],
-      h1[2] * h2[0] - h1[0] * h2[2],
-      h1[0] * h2[1] - h1[1] * h2[0],
-      0
-      );
-    }
-
-  // inner product
-  inline friend ld operator | (hyperpoint h1, hyperpoint h2) {
-    ld sum = 0;
-    for(int i=0; i<MDIM; i++) sum += h1[i] * h2[i];
-    return sum;
-    }    
-  };
-
-struct transmatrix {
-  ld tab[MAXMDIM][MAXMDIM];
-  hyperpoint& operator [] (int i) { return (hyperpoint&)tab[i][0]; }
-  const ld * operator [] (int i) const { return tab[i]; }
-  
-  inline friend hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
-    hyperpoint z;
-    for(int i=0; i<MDIM; i++) {
-      z[i] = 0;
-      for(int j=0; j<MDIM; j++) z[i] += T[i][j] * H[j];
-      }
-    return z;
-    }
-
-  inline friend transmatrix operator * (const transmatrix& T, const transmatrix& U) {
-    transmatrix R;
-    for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) {
-      R[i][j] = 0;
-      for(int k=0; k<MDIM; k++)
-        R[i][j] += T[i][k] * U[k][j];
-      }
-    return R;
-    }  
-  };
-
-
-constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
-  #if MAXMDIM==3
-  return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
-  #else
-  return transmatrix{{{a,0,0,0}, {0,b,0,0}, {0,0,c,0}, {0,0,0,d}}};
-  #endif
-  }
-
-const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
-
-// identity matrix
-const static transmatrix Id = diag(1,1,1,1);
-
-// zero matrix
-const static transmatrix Zero = diag(0,0,0,0);
-
-// mirror image
-const static transmatrix Mirror = diag(1,-1,1,1);
-const static transmatrix MirrorY = diag(1,-1,1,1);
-
-// mirror image
-const static transmatrix MirrorX = diag(-1,1,1,1);
-
-// mirror image
-const static transmatrix MirrorZ = diag(1,1,-1,1);
-
-// rotate by PI
-const static transmatrix pispin = diag(-1,-1,1,1);
-
-// central symmetry
-const static transmatrix centralsym = diag(-1,-1,-1,-1);
-
-inline hyperpoint hpxyz(ld x, ld y, ld z) { return DIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
-inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return DIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
-inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
-inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
-inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
-
 extern int cellcount, heptacount;
 extern color_t forecolor;
 extern ld band_shift;
@@ -601,15 +485,10 @@ static const struct wmirror_t { wmirror_t() {}} wmirror;
 static const struct rev_t { rev_t() {} } rev;
 static const struct revstep_t { revstep_t() {}} revstep;
 
-int hrand(int x);
-
-// automatically adjust monster generation for 3D geometries
-int hrand_monster(int x);
-
-vector<int> reverse_directions(struct cell *c, int i);
-
 // unused for heptagons
 inline vector<int> reverse_directions(struct heptagon *c, int i) { return {i}; }
+
+int hrand(int);
 
 template<class T> struct walker {
   T *at;
@@ -880,47 +759,6 @@ typedef function<bool()> bool_reaction_t;
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
-struct display_data {
-  transmatrix view_matrix; // current rotation, relative to viewctr
-  transmatrix player_matrix; // player-relative view
-  heptspin view_center;
-  cellwalker precise_center;
-  unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
-  ld xmin, ymin, xmax, ymax; // relative
-  ld xtop, ytop, xsize, ysize; // in pixels
-  display_data() { xmin = ymin = 0; xmax = ymax = 1; }
-
-  // paramaters calculated from the above
-  int xcenter, ycenter;
-  ld radius;
-  int scrsize;  
-  bool sidescreen;
-
-  ld tanfov;
-
-  GLfloat scrdist, scrdist_text;
-
-  ld eyewidth();
-  bool stereo_active();
-  bool in_anaglyph();
-
-  void set_viewport(int ed);
-  void set_projection(int ed);
-  void set_mask(int ed);
-
-  void set_all(int ed);
-  };
-
-extern display_data default_display;
-extern display_data *current_display;
-
-#define View (current_display->view_matrix)
-#define cwtV (current_display->player_matrix)
-#define viewctr (current_display->view_center)
-#define centerover (current_display->precise_center)
-#define gmatrix (current_display->cellmatrices)
-#define gmatrix0 (current_display->old_cellmatrices)
-
 typedef function<int(cell*)> cellfunction;
 
 // passable flags
@@ -1145,10 +983,6 @@ extern eGravity gravity_state, last_gravity_state;
 
 #define IFM(x) (mousing?"":x)
 
-#if CAP_SHAPES
-void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority);
-#endif
-
 extern bool viewdists;
 
 void preventbarriers(cell *c);
@@ -1371,8 +1205,6 @@ extern char mousekey;
 extern char newmousekey;
 void displaymm(char c, int x, int y, int rad, int size, const string& title, int align);
 
-template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
-
 #include <functional>
 
 template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
@@ -1497,106 +1329,6 @@ typedef glvec4 glvertex;
 typedef glvec3 glvertex;
 #endif
 
-struct texture_triangle {
-  array<hyperpoint, 3> v;
-  array<hyperpoint, 3> tv;
-  texture_triangle(array<hyperpoint, 3> _v, array<hyperpoint, 3> _tv) : v(_v), tv(_tv) {}
-  };
-
-struct basic_textureinfo {
-  int texture_id;
-  vector<glvertex> tvertices; 
-  };
-  
-struct textureinfo : basic_textureinfo {
-  transmatrix M;
-  vector<texture_triangle> triangles;
-  vector<glvertex> vertices;
-  cell *c;
-  vector<transmatrix> matrices;
-  
-  // these are required to adjust to geometry changes
-  int current_type, symmetries;
-  };
-
-struct drawqueueitem {
-  PPR prio;
-  color_t color;
-  int subprio;
-  virtual void draw() = 0;
-  virtual void draw_back() {}
-  virtual void draw_pre() {}
-  virtual ~drawqueueitem() {}
-  void draw_darker();
-  virtual color_t outline_group() = 0;
-  };
-
-struct dqi_poly : drawqueueitem {
-  ld band_shift;
-  transmatrix V;
-  const vector<glvertex> *tab;
-  int offset, cnt, offset_texture;
-  color_t outline;
-  double linewidth;
-  int flags;
-  basic_textureinfo *tinf;
-  hyperpoint intester;
-  void draw();
-  void gldraw();
-  void draw_back();
-  virtual color_t outline_group() { return outline; }
-  };
-
-struct dqi_line : drawqueueitem {
-  ld band_shift;
-  hyperpoint H1, H2;
-  int prf;
-  double width;
-  void draw();
-  void draw_back();
-  virtual color_t outline_group() { return color; }
-  };
-      
-struct dqi_string : drawqueueitem {
-  string str;
-  int x, y, shift, size, frame;
-  int align;
-  void draw();
-  virtual color_t outline_group() { return 1; }
-  };
-
-struct dqi_circle : drawqueueitem {
-  int x, y, size, fillcolor;
-  double linewidth;
-  void draw();
-  virtual color_t outline_group() { return 2; }
-  };
-
-struct dqi_action : drawqueueitem {
-  reaction_t action;
-  dqi_action(const reaction_t& a) : action(a) {}
-  void draw() { action(); }
-  virtual color_t outline_group() { return 2; }
-  };
-
-struct sky_item {
-  cell *c;
-  transmatrix T;
-  color_t color;
-  sky_item(cell *_c, const transmatrix _T, color_t _color) : c(_c), T(_T), color(_color) {}
-  };
-
-extern struct dqi_sky *sky;
-
-struct dqi_sky : drawqueueitem {
-  vector<sky_item> sky;
-  void draw();
-  virtual color_t outline_group() { return 3; }
-  // singleton
-  dqi_sky() { hr::sky = this; }
-  ~dqi_sky() { hr::sky = NULL; }
-  };
-  
 extern int emeraldtable[100][7];
 
 // extern cell *cwpeek(cellwalker cw, int dir);
@@ -1611,60 +1343,6 @@ const eLand NOWALLSEP_USED = laWhirlpool;
 #define GRAIL_RADIUS_MASK 0x3FFF
 
 extern vector<cell*> dcal;
-
-struct hrmap {
-  virtual heptagon *getOrigin() { return NULL; }
-  virtual cell *gamestart() { return getOrigin()->c7; }
-  virtual ~hrmap() { };
-  virtual vector<cell*>& allcells() { return dcal; }
-  virtual void verify() { }
-  virtual void link_alt(const cellwalker& hs) { }
-  virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
-  heptagon *may_create_step(heptagon *h, int direction) {
-    if(h->move(direction)) return h->move(direction);
-    return create_step(h, direction);
-    }
-  virtual heptagon *create_step(heptagon *h, int direction) {
-    printf("create_step called unexpectedly\n"); exit(1);
-    return NULL;
-    }
-  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
-    printf("relative_matrix called unexpectedly\n"); 
-    return Id;
-    }
-  virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
-    return relative_matrix(c2->master, c1->master);
-    }
-  virtual void draw() {
-    printf("undrawable\n");
-    }
-  virtual vector<hyperpoint> get_vertices(cell*);
-  };
-
-// hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient 
-struct hrmap_standard : hrmap {
-  void draw() override;
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
-  heptagon *create_step(heptagon *h, int direction) override;
-  };
-
-void clearfrom(heptagon*);
-void verifycells(heptagon*);
-
-struct hrmap_hyperbolic : hrmap_standard {
-  heptagon *origin;
-  eVariation mvar;
-  hrmap_hyperbolic();
-  hrmap_hyperbolic(heptagon *origin);
-  heptagon *getOrigin() override { return origin; }
-  ~hrmap_hyperbolic() {
-    // verifycells(origin);
-    // printf("Deleting hyperbolic map: %p\n", this);
-    dynamicval<eVariation> ph(variation, mvar);
-    clearfrom(origin);
-    }
-  void verify() override { verifycells(origin); }
-  };
 
 // list all cells in distance at most maxdist, or until when maxcount cells are reached
 
@@ -1716,8 +1394,6 @@ struct celllister : manual_celllister {
   int getdist(cell *c) { return dists[c->listindex]; }
   };
 
-hrmap *newAltMap(heptagon *o);
-
 #if CAP_FIELD
 #define currfp fieldpattern::getcurrfp()
 namespace fieldpattern {
@@ -1755,10 +1431,6 @@ struct land_validity_t {
   string msg;
   };
 
-extern const hyperpoint C02, C03;
-
-#define C0 (DIM == 2 ? C02 : C03)
-
 namespace fieldpattern {
   pair<int, bool> fieldval(cell *c);
   }
@@ -1776,8 +1448,6 @@ int pattern_threecolor(cell *c);
 int fiftyval200(cell *c);
 
 bool isWall3(cell *c, color_t& wcol);
-extern transmatrix actual_view_transform, radar_transform;
-ld wall_radar(cell *c, transmatrix T);
 
 extern string bitruncnames[5];
 extern bool need_mouseh;
@@ -1790,10 +1460,6 @@ bool cannotPickupItem(cell *c, bool telekinesis);
 bool canPickupItemWithMagnetism(cell *c, cell *from);
 void pickupMovedItems(cell *c);
 eMonster genRuinMonster(cell *c);
-
-template<class T> void hrandom_shuffle(T* x, int n) {
-  for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]);
-  }
 
 template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
   for(int i=0; i<isize(data); i++)
@@ -1836,8 +1502,6 @@ namespace elec { extern int lightningfast; }
 template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0] = a; x[1] = b; x[2] = c; x[3] = d; return x; }
 template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
-
-extern const hyperpoint Hypc;
 
 struct supersaver {
   string name;
@@ -1940,35 +1604,6 @@ template<> struct saver<ld> : dsaver<ld> {
 
 #endif
 
-#if CAP_SHAPES
-struct floorshape;
-
-struct hpcshape;
-
-struct qfloorinfo {
-  transmatrix spin;
-  const hpcshape *shape;
-  floorshape *fshape;
-  textureinfo *tinf;
-  int usershape;
-  };
-
-extern qfloorinfo qfi;
-
-struct hpcshape {
-  int s, e;
-  PPR prio;
-  int flags;
-  hyperpoint intester;
-  basic_textureinfo *tinf;
-  int texture_offset;
-  int shs, she;
-  void clear() { s = e = shs = she = texture_offset = 0; prio = PPR::ZERO; tinf = NULL; flags = 0; }
-  };
-
-extern vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
-#endif
-
 namespace daily {
   extern bool on;
   extern int daily_id;
@@ -2054,339 +1689,13 @@ void generate_floorshapes();
 #define SIDE_HIGH2 10
 #define SIDEPARS  11
 
-#if CAP_SHAPES
-struct floorshape {
-  bool is_plain;
-  int shapeid;
-  int id;
-  int pstrength; // pattern strength in 3D
-  int fstrength; // frame strength in 3D
-  PPR prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE], levels[SIDEPARS], cone[2];
-  floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
-  };
-
-struct plain_floorshape : floorshape {
-  ld rad0, rad1;
-  void configure(ld r0, ld r1) { rad0 = r0; rad1 = r1; }
-  };
-
-// noftype: 0 (shapeid2 is heptagonal or just use shapeid1), 1 (shapeid2 is pure heptagonal), 2 (shapeid2 is Euclidean), 3 (shapeid2 is hexagonal)
-struct escher_floorshape : floorshape {
-  int shapeid0, shapeid1, noftype, shapeid2;
-  ld scale;
-  };
-#endif
-
-struct usershapelayer {
-  vector<hyperpoint> list;
-  bool sym;
-  int rots;
-  color_t color;
-  hyperpoint shift, spin;
-  ld zlevel;
-  int texture_offset;
-  PPR prio;
-  };
-
-static const int USERLAYERS = 32;
-
-struct usershape { usershapelayer d[USERLAYERS]; };
-
 void initShape(int sg, int id);
 
 extern int usershape_changes;
 
 #define BADMODEL 0
 
-static const int WINGS = (BADMODEL ? 1 : 4);
-
-typedef array<hpcshape, WINGS+1> hpcshape_animated;
-
 extern vector<ld> equal_weights;
-
-struct geometry_information {
-
-  /* basic geometry parameters */
-
-  // tessf: distance from heptagon center to another heptagon center
-  // hexf: distance from heptagon center to small heptagon vertex
-  // hcrossf: distance from heptagon center to big heptagon vertex
-  // crossf: distance from heptagon center to adjacent cell center (either hcrossf or tessf)
-  // hexhexdist: distance between adjacent hexagon vertices
-  // hexvdist: distance between hexagon vertex and hexagon center
-  // hepvdist: distance between heptagon vertex and hexagon center (either hcrossf or something else)
-  // rhexf: distance from heptagon center to heptagon vertex (either hexf or hcrossf)
-  ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
-
-  transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
-  transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
-
-  int base_distlimit;
-
-  /* shape parameters */
-  ld sword_size;
-  ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
-  ld corner_bonus;
-  ld hexshift;
-  ld asteroid_size[8];
-  ld wormscale;
-  ld tentacle_length;
-  
-  /* 3D parameters */
-  ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
-    SLEV[4], FLATEYE,
-    LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
-    BODY, BODY1, BODY2, BODY3,
-    NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
-    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2;
-  ld human_height, slev;
-
-  ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
-
-#if CAP_SHAPES
-hpcshape 
-  shSemiFloorSide[SIDEPARS],
-  shBFloor[2],
-  shWave[8][2],  
-  shCircleFloor,
-  shBarrel,
-  shWall[2], shMineMark[2], shBigMineMark[2], shFan,
-  shZebra[5],
-  shSwitchDisk,
-  shTower[11],
-  shEmeraldFloor[6],
-  shSemiFeatherFloor[2], 
-  shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
-  shMercuryBridge[2],
-  shTriheptaSpecial[14], 
-  shCross, shGiantStar[2], shLake, shMirror,
-  shHalfFloor[6], shHalfMirror[3],
-  shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
-  shTinyBird, shTinyShark,
-  shEgg,
-  shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
-  shSpearRing, shLoveRing,
-  shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
-  shGun,
-  shFigurine, shTreat,
-  shElementalShard,
-  // shBranch, 
-  shIBranch, shTentacle, shTentacleX, shILeaf[2], 
-  shMovestar,
-  shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
-  shFoxTail1, shFoxTail2,
-  shDogBody, shDogHead, shDogFrontLeg, shDogRearLeg, shDogFrontPaw, shDogRearPaw,
-  shDogTorso,
-  shHawk,
-  shCatBody, shCatLegs, shCatHead, shFamiliarHead, shFamiliarEye,
-  shWolf1, shWolf2, shWolf3,
-  shRatEye1, shRatEye2, shRatEye3,
-  shDogStripes,
-  shPBody, shPSword, shPKnife,
-  shFerocityM, shFerocityF, 
-  shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
-  shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
-  shArrow,
-  shPHead, shPFace, shGolemhead, shHood, shArmor, 
-  shAztecHead, shAztecCap,
-  shSabre, shTurban1, shTurban2, shVikingHelmet, shRaiderHelmet, shRaiderArmor, shRaiderBody, shRaiderShirt,
-  shWestHat1, shWestHat2, shGunInHand,
-  shKnightArmor, shKnightCloak, shWightCloak,
-  shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
-  shSlimeEyes, shDragonEyes, shWormEyes, shGhostEyes,
-  shMiniGhost, shMiniEyes,
-  shHedgehogBlade, shHedgehogBladePlayer,
-  shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
-  shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
-  shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
-  shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders, shTrophy,
-  shBugBody, shBugArmor, shBugLeg, shBugAntenna,
-  shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain, shHammerHead,
-  shBook, shBookCover, shGrail,
-  shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
-  shKnife, shTongue, shFlailMissile, shTrapArrow,
-  shPirateHook, shPirateHood, shEyepatch, shPirateX,
-  // shScratch, 
-  shHeptaMarker, shSnowball, shSun, shNightStar, shEuclideanSky,
-  shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
-  shPalaceGate, shFishTail,
-  shMouse, shMouseLegs, shMouseEyes,
-  shPrincessDress, shPrinceDress,
-  shWizardCape1, shWizardCape2,
-  shBigCarpet1, shBigCarpet2, shBigCarpet3,
-  shGoatHead, shRose, shRoseItem, shThorns,
-  shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
-  shWizardHat1, shWizardHat2,
-  shTortoise[13][6],
-  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril, 
-  shDragonWings, 
-  shSolidBranch, shWeakBranch, shBead0, shBead1,
-  shBatWings, shBatBody, shBatMouth, shBatFang, shBatEye,
-  shParticle[16], shAsteroid[8],
-  shReptile[5][4],
-  shReptileBody, shReptileHead, shReptileFrontFoot, shReptileRearFoot,
-  shReptileFrontLeg, shReptileRearLeg, shReptileTail, shReptileEye,
-
-  shTrylobite, shTrylobiteHead, shTrylobiteBody,
-  shTrylobiteFrontLeg, shTrylobiteRearLeg, shTrylobiteFrontClaw, shTrylobiteRearClaw,
-  
-  shBullBody, shBullHead, shBullHorn, shBullRearHoof, shBullFrontHoof,
-  
-  shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
-
-  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
-  shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
-  
-  shAsymmetric,
-  
-  shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
-  
-  shDodeca;
-  
-  hpcshape_animated 
-    shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
-    shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;  
-
-  vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
-
-  vector<plain_floorshape*> all_plain_floorshapes;
-  vector<escher_floorshape*> all_escher_floorshapes;
-
-  plain_floorshape
-    shFloor, 
-    shMFloor, shMFloor2, shMFloor3, shMFloor4, shFullFloor,
-    shBigTriangle, shTriheptaFloor, shBigHepta;
-  
-  escher_floorshape    
-    shStarFloor, shCloudFloor, shCrossFloor, shChargedFloor,
-    shSStarFloor, shOverFloor, shTriFloor, shFeatherFloor,
-    shBarrowFloor, shNewFloor, shTrollFloor, shButterflyFloor,
-    shLavaFloor, shLavaSeabed, shSeabed, shCloudSeabed,
-    shCaveSeabed, shPalaceFloor, shDemonFloor, shCaveFloor,
-    shDesertFloor, shPowerFloor, shRoseFloor, shSwitchFloor,
-    shTurtleFloor, shRedRockFloor[3], shDragonFloor;
-
-  ld dlow_table[SIDEPARS], dhi_table[SIDEPARS], dfloor_table[SIDEPARS];
-
-  int prehpc;
-  vector<hyperpoint> hpc;
-  bool first;
-
-  bool validsidepar[SIDEPARS];
-
-  vector<glvertex> ourshape;
-#endif  
-
-  hpcshape shFullCross[2];
-  hpcshape *last;
-
-  int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
-  
-  vector<array<int, 3>> symmetriesAt;
-  
-  #ifndef SCALETUNER
-  static constexpr
-  #endif
-  double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
-  
-  vector<hpcshape*> allshapes;
-  
-  transmatrix shadowmulmatrix;
-  
-  map<usershapelayer*, hpcshape> ushr;
-  
-  void prepare_basics();
-  void prepare_compute3();
-  void prepare_shapes();
-  void prepare_usershapes();
-
-  void hpcpush(hyperpoint h);
-  void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
-  void chasmifyPoly(double fac, double fac2, int k);
-  void shift(hpcshape& sh, double dx, double dy, double dz);
-  void initPolyForGL();
-  void extra_vertices();
-  transmatrix ddi(int a, ld x);
-  void drawTentacle(hpcshape &h, ld rad, ld var, ld divby);
-  hyperpoint hpxyzsc(double x, double y, double z);
-  hyperpoint turtlevertex(int u, double x, double y, double z);
-  
-  void bshape(hpcshape& sh, PPR prio);
-  void finishshape();
-  void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0);
-  
-  void copyshape(hpcshape& sh, hpcshape& orig, PPR prio);
-  void zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio);
-  void pushShape(usershapelayer& ds);
-  void make_sidewalls();
-  void procedural_shapes();
-  void make_wall(int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
-  void create_wall3d();
-  void configure_floorshapes();
-  
-  void init_floorshapes();
-  void bshape2(hpcshape& sh, PPR prio, int shapeid, struct matrixlist& m);
-  void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size, cell *model);
-  void generate_floorshapes_for(int id, cell *c, int siid, int sidir);
-  void generate_floorshapes();
-  void make_floor_textures_here();
-
-  vector<hyperpoint> get_shape(hpcshape sh);
-  void add_cone(ld z0, const vector<hyperpoint>& vh, ld z1);
-  void add_prism_sync(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1);
-  void add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1);
-  void shift_last(ld z);
-  void shift_shape(hpcshape& sh, ld z);
-  void shift_shape_orthogonally(hpcshape& sh, ld z);
-  void add_texture(hpcshape& sh);
-  void make_ha_3d(hpcshape& sh, bool isarmor, ld scale);
-  void make_humanoid_3d(hpcshape& sh);
-  void addtri(array<hyperpoint, 3> hs, int kind);
-  void make_armor_3d(hpcshape& sh, int kind = 1); 
-  void make_foot_3d(hpcshape& sh);
-  void make_head_only();
-  void make_head_3d(hpcshape& sh);
-  void make_paw_3d(hpcshape& sh, hpcshape& legsh);
-  void make_abody_3d(hpcshape& sh, ld tail);
-  void make_ahead_3d(hpcshape& sh);
-  void make_skeletal(hpcshape& sh, ld push = 0);
-  void make_revolution(hpcshape& sh, int mx = 180, ld push = 0);
-  void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 99);
-  void clone_shape(hpcshape& sh, hpcshape& target);
-  void animate_bird(hpcshape& orig, hpcshape_animated& animated, ld body);
-  void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
-  void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
-  void make_ball(hpcshape& sh, ld rad, int lev);
-  void make_star(hpcshape& sh, ld rad);
-  void make_euclidean_sky();
-  void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1);
-  void shift_last_straight(ld z);
-  void queueball(const transmatrix& V, ld rad, color_t col, eItem what);
-  void make_shadow(hpcshape& sh);
-  void make_3d_models();
-  
-  /* Goldberg parameters */
-  #if CAP_GP
-  struct gpdata_t {
-    transmatrix Tf[MAX_EDGE][32][32][6];
-    transmatrix corners;
-    ld alpha;
-    int area;
-    };
-  shared_ptr<gpdata_t> gpdata;
-  #endif
-  
-  int state;
-  int usershape_state;
-  
-  geometry_information() { last = NULL; state = usershape_state = 0; gpdata = NULL; }
-  
-  void require_basics() { if(state & 1) return; state |= 1; prepare_basics(); }
-  void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }
-  void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
-  int timestamp;
-  };
 
 #define RING(i) for(double i=0; i<=cgi.S84+1e-6; i+=SD3 * pow(.5, vid.linequality))
 #define REVRING(i) for(double i=cgi.S84; i>=-1e-6; i-=SD3 * pow(.5, vid.linequality))

@@ -5,6 +5,344 @@
 
 namespace hr {
 
+#if HDR
+struct usershapelayer {
+  vector<hyperpoint> list;
+  bool sym;
+  int rots;
+  color_t color;
+  hyperpoint shift, spin;
+  ld zlevel;
+  int texture_offset;
+  PPR prio;
+  };
+
+static const int USERLAYERS = 32;
+
+struct usershape { usershapelayer d[USERLAYERS]; };
+
+struct hpcshape {
+  int s, e;
+  PPR prio;
+  int flags;
+  hyperpoint intester;
+  struct basic_textureinfo *tinf;
+  int texture_offset;
+  int shs, she;
+  void clear() { s = e = shs = she = texture_offset = 0; prio = PPR::ZERO; tinf = NULL; flags = 0; }
+  };
+
+static const int WINGS = (BADMODEL ? 1 : 4);
+
+typedef array<hpcshape, WINGS+1> hpcshape_animated;
+
+extern vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
+
+struct floorshape {
+  bool is_plain;
+  int shapeid;
+  int id;
+  int pstrength; // pattern strength in 3D
+  int fstrength; // frame strength in 3D
+  PPR prio;
+  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE], levels[SIDEPARS], cone[2];
+  floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
+  };
+
+struct plain_floorshape : floorshape {
+  ld rad0, rad1;
+  void configure(ld r0, ld r1) { rad0 = r0; rad1 = r1; }
+  };
+
+// noftype: 0 (shapeid2 is heptagonal or just use shapeid1), 1 (shapeid2 is pure heptagonal), 2 (shapeid2 is Euclidean), 3 (shapeid2 is hexagonal)
+struct escher_floorshape : floorshape {
+  int shapeid0, shapeid1, noftype, shapeid2;
+  ld scale;
+  };
+struct geometry_information {
+
+  /* basic geometry parameters */
+
+  // tessf: distance from heptagon center to another heptagon center
+  // hexf: distance from heptagon center to small heptagon vertex
+  // hcrossf: distance from heptagon center to big heptagon vertex
+  // crossf: distance from heptagon center to adjacent cell center (either hcrossf or tessf)
+  // hexhexdist: distance between adjacent hexagon vertices
+  // hexvdist: distance between hexagon vertex and hexagon center
+  // hepvdist: distance between heptagon vertex and hexagon center (either hcrossf or something else)
+  // rhexf: distance from heptagon center to heptagon vertex (either hexf or hcrossf)
+  ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
+
+  transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
+  transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
+
+  int base_distlimit;
+
+  /* shape parameters */
+  ld sword_size;
+  ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
+  ld corner_bonus;
+  ld hexshift;
+  ld asteroid_size[8];
+  ld wormscale;
+  ld tentacle_length;
+  
+  /* 3D parameters */
+  ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
+    SLEV[4], FLATEYE,
+    LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
+    BODY, BODY1, BODY2, BODY3,
+    NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
+    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2;
+  ld human_height, slev;
+
+  ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
+
+#if CAP_SHAPES
+hpcshape 
+  shSemiFloorSide[SIDEPARS],
+  shBFloor[2],
+  shWave[8][2],  
+  shCircleFloor,
+  shBarrel,
+  shWall[2], shMineMark[2], shBigMineMark[2], shFan,
+  shZebra[5],
+  shSwitchDisk,
+  shTower[11],
+  shEmeraldFloor[6],
+  shSemiFeatherFloor[2], 
+  shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
+  shMercuryBridge[2],
+  shTriheptaSpecial[14], 
+  shCross, shGiantStar[2], shLake, shMirror,
+  shHalfFloor[6], shHalfMirror[3],
+  shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
+  shTinyBird, shTinyShark,
+  shEgg,
+  shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
+  shSpearRing, shLoveRing,
+  shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
+  shGun,
+  shFigurine, shTreat,
+  shElementalShard,
+  // shBranch, 
+  shIBranch, shTentacle, shTentacleX, shILeaf[2], 
+  shMovestar,
+  shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
+  shFoxTail1, shFoxTail2,
+  shDogBody, shDogHead, shDogFrontLeg, shDogRearLeg, shDogFrontPaw, shDogRearPaw,
+  shDogTorso,
+  shHawk,
+  shCatBody, shCatLegs, shCatHead, shFamiliarHead, shFamiliarEye,
+  shWolf1, shWolf2, shWolf3,
+  shRatEye1, shRatEye2, shRatEye3,
+  shDogStripes,
+  shPBody, shPSword, shPKnife,
+  shFerocityM, shFerocityF, 
+  shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
+  shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
+  shArrow,
+  shPHead, shPFace, shGolemhead, shHood, shArmor, 
+  shAztecHead, shAztecCap,
+  shSabre, shTurban1, shTurban2, shVikingHelmet, shRaiderHelmet, shRaiderArmor, shRaiderBody, shRaiderShirt,
+  shWestHat1, shWestHat2, shGunInHand,
+  shKnightArmor, shKnightCloak, shWightCloak,
+  shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
+  shSlimeEyes, shDragonEyes, shWormEyes, shGhostEyes,
+  shMiniGhost, shMiniEyes,
+  shHedgehogBlade, shHedgehogBladePlayer,
+  shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
+  shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
+  shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
+  shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders, shTrophy,
+  shBugBody, shBugArmor, shBugLeg, shBugAntenna,
+  shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain, shHammerHead,
+  shBook, shBookCover, shGrail,
+  shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
+  shKnife, shTongue, shFlailMissile, shTrapArrow,
+  shPirateHook, shPirateHood, shEyepatch, shPirateX,
+  // shScratch, 
+  shHeptaMarker, shSnowball, shSun, shNightStar, shEuclideanSky,
+  shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
+  shPalaceGate, shFishTail,
+  shMouse, shMouseLegs, shMouseEyes,
+  shPrincessDress, shPrinceDress,
+  shWizardCape1, shWizardCape2,
+  shBigCarpet1, shBigCarpet2, shBigCarpet3,
+  shGoatHead, shRose, shRoseItem, shThorns,
+  shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
+  shWizardHat1, shWizardHat2,
+  shTortoise[13][6],
+  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril, 
+  shDragonWings, 
+  shSolidBranch, shWeakBranch, shBead0, shBead1,
+  shBatWings, shBatBody, shBatMouth, shBatFang, shBatEye,
+  shParticle[16], shAsteroid[8],
+  shReptile[5][4],
+  shReptileBody, shReptileHead, shReptileFrontFoot, shReptileRearFoot,
+  shReptileFrontLeg, shReptileRearLeg, shReptileTail, shReptileEye,
+
+  shTrylobite, shTrylobiteHead, shTrylobiteBody,
+  shTrylobiteFrontLeg, shTrylobiteRearLeg, shTrylobiteFrontClaw, shTrylobiteRearClaw,
+  
+  shBullBody, shBullHead, shBullHorn, shBullRearHoof, shBullFrontHoof,
+  
+  shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
+
+  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
+  shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
+  
+  shAsymmetric,
+  
+  shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
+  
+  shDodeca;
+  
+  hpcshape_animated 
+    shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
+    shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;  
+
+  vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
+
+  vector<struct plain_floorshape*> all_plain_floorshapes;
+  vector<struct escher_floorshape*> all_escher_floorshapes;
+
+  plain_floorshape
+    shFloor, 
+    shMFloor, shMFloor2, shMFloor3, shMFloor4, shFullFloor,
+    shBigTriangle, shTriheptaFloor, shBigHepta;
+  
+  escher_floorshape    
+    shStarFloor, shCloudFloor, shCrossFloor, shChargedFloor,
+    shSStarFloor, shOverFloor, shTriFloor, shFeatherFloor,
+    shBarrowFloor, shNewFloor, shTrollFloor, shButterflyFloor,
+    shLavaFloor, shLavaSeabed, shSeabed, shCloudSeabed,
+    shCaveSeabed, shPalaceFloor, shDemonFloor, shCaveFloor,
+    shDesertFloor, shPowerFloor, shRoseFloor, shSwitchFloor,
+    shTurtleFloor, shRedRockFloor[3], shDragonFloor;
+
+  ld dlow_table[SIDEPARS], dhi_table[SIDEPARS], dfloor_table[SIDEPARS];
+
+  int prehpc;
+  vector<hyperpoint> hpc;
+  bool first;
+
+  bool validsidepar[SIDEPARS];
+
+  vector<glvertex> ourshape;
+#endif
+
+  hpcshape shFullCross[2];
+  hpcshape *last;
+
+  int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
+  
+  vector<array<int, 3>> symmetriesAt;
+  
+  #ifndef SCALETUNER
+  static constexpr
+  #endif
+  double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
+  
+  vector<hpcshape*> allshapes;
+  
+  transmatrix shadowmulmatrix;
+  
+  map<usershapelayer*, hpcshape> ushr;
+  
+  void prepare_basics();
+  void prepare_compute3();
+  void prepare_shapes();
+  void prepare_usershapes();
+
+  void hpcpush(hyperpoint h);
+  void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
+  void chasmifyPoly(double fac, double fac2, int k);
+  void shift(hpcshape& sh, double dx, double dy, double dz);
+  void initPolyForGL();
+  void extra_vertices();
+  transmatrix ddi(int a, ld x);
+  void drawTentacle(hpcshape &h, ld rad, ld var, ld divby);
+  hyperpoint hpxyzsc(double x, double y, double z);
+  hyperpoint turtlevertex(int u, double x, double y, double z);
+  
+  void bshape(hpcshape& sh, PPR prio);
+  void finishshape();
+  void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0);
+  
+  void copyshape(hpcshape& sh, hpcshape& orig, PPR prio);
+  void zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio);
+  void pushShape(usershapelayer& ds);
+  void make_sidewalls();
+  void procedural_shapes();
+  void make_wall(int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
+  void create_wall3d();
+  void configure_floorshapes();
+  
+  void init_floorshapes();
+  void bshape2(hpcshape& sh, PPR prio, int shapeid, struct matrixlist& m);
+  void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size, cell *model);
+  void generate_floorshapes_for(int id, cell *c, int siid, int sidir);
+  void generate_floorshapes();
+  void make_floor_textures_here();
+
+  vector<hyperpoint> get_shape(hpcshape sh);
+  void add_cone(ld z0, const vector<hyperpoint>& vh, ld z1);
+  void add_prism_sync(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1);
+  void add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vector<hyperpoint> vh1);
+  void shift_last(ld z);
+  void shift_shape(hpcshape& sh, ld z);
+  void shift_shape_orthogonally(hpcshape& sh, ld z);
+  void add_texture(hpcshape& sh);
+  void make_ha_3d(hpcshape& sh, bool isarmor, ld scale);
+  void make_humanoid_3d(hpcshape& sh);
+  void addtri(array<hyperpoint, 3> hs, int kind);
+  void make_armor_3d(hpcshape& sh, int kind = 1); 
+  void make_foot_3d(hpcshape& sh);
+  void make_head_only();
+  void make_head_3d(hpcshape& sh);
+  void make_paw_3d(hpcshape& sh, hpcshape& legsh);
+  void make_abody_3d(hpcshape& sh, ld tail);
+  void make_ahead_3d(hpcshape& sh);
+  void make_skeletal(hpcshape& sh, ld push = 0);
+  void make_revolution(hpcshape& sh, int mx = 180, ld push = 0);
+  void make_revolution_cut(hpcshape &sh, int each = 180, ld push = 0, ld width = 99);
+  void clone_shape(hpcshape& sh, hpcshape& target);
+  void animate_bird(hpcshape& orig, hpcshape_animated& animated, ld body);
+  void slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
+  void balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev);
+  void make_ball(hpcshape& sh, ld rad, int lev);
+  void make_star(hpcshape& sh, ld rad);
+  void make_euclidean_sky();
+  void adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom=1);
+  void shift_last_straight(ld z);
+  void queueball(const transmatrix& V, ld rad, color_t col, eItem what);
+  void make_shadow(hpcshape& sh);
+  void make_3d_models();
+  
+  /* Goldberg parameters */
+  #if CAP_GP
+  struct gpdata_t {
+    transmatrix Tf[MAX_EDGE][32][32][6];
+    transmatrix corners;
+    ld alpha;
+    int area;
+    };
+  shared_ptr<gpdata_t> gpdata;
+  #endif
+  
+  int state;
+  int usershape_state;
+  
+  geometry_information() { last = NULL; state = usershape_state = 0; gpdata = NULL; }
+  
+  void require_basics() { if(state & 1) return; state |= 1; prepare_basics(); }
+  void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }
+  void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
+  int timestamp;
+  };
+#endif
+
 // the results are:
 // hexf = 0.378077 hcrossf = 0.620672 tessf = 1.090550
 // hexhexdist = 0.566256

@@ -1,6 +1,18 @@
 namespace hr {
 #if CAP_SHAPES
 
+#if HDR
+struct qfloorinfo {
+  transmatrix spin;
+  const struct hpcshape *shape;
+  floorshape *fshape;
+  struct textureinfo *tinf;
+  int usershape;
+  };
+
+extern qfloorinfo qfi;
+#endif
+
 EX vector<basic_textureinfo> floor_texture_vertices;
 EX struct renderbuffer *floor_textures;
 

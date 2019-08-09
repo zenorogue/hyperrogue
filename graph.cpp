@@ -745,7 +745,7 @@ bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
 #endif
   }
 
-transmatrix radar_transform;
+EX transmatrix radar_transform;
 
 pair<bool, hyperpoint> makeradar(hyperpoint h) {
   if(GDIM == 3 && WDIM == 2) h = radar_transform * h;
@@ -4001,7 +4001,7 @@ int gridcolor(cell *c1, cell *c2) {
   }
 
 #if CAP_SHAPES
-void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority) {
+EX void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, bool repriority) {
  
   #if MAXMDIM >= 4
   if(GDIM == 3) {
@@ -4714,7 +4714,23 @@ int get_skybrightness(int mul = 1) {
   return int(s * 255);
   }
 
-dqi_sky *sky;
+struct sky_item {
+  cell *c;
+  transmatrix T;
+  color_t color;
+  sky_item(cell *_c, const struct transmatrix _T, color_t _color) : c(_c), T(_T), color(_color) {}
+  };
+
+struct dqi_sky : drawqueueitem {
+  vector<sky_item> sky;
+  void draw();
+  virtual color_t outline_group() { return 3; }
+  // singleton
+  dqi_sky() { hr::sky = this; }
+  ~dqi_sky() { hr::sky = NULL; }
+  };
+  
+EX struct dqi_sky *sky;
 
 void prepare_sky() {
   sky = NULL;

@@ -3,6 +3,47 @@
 
 namespace hr {
 
+#if HDR
+struct display_data {
+  transmatrix view_matrix; // current rotation, relative to viewctr
+  transmatrix player_matrix; // player-relative view
+  heptspin view_center;
+  cellwalker precise_center;
+  unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
+  ld xmin, ymin, xmax, ymax; // relative
+  ld xtop, ytop, xsize, ysize; // in pixels
+  display_data() { xmin = ymin = 0; xmax = ymax = 1; }
+
+  // paramaters calculated from the above
+  int xcenter, ycenter;
+  ld radius;
+  int scrsize;  
+  bool sidescreen;
+
+  ld tanfov;
+
+  GLfloat scrdist, scrdist_text;
+
+  ld eyewidth();
+  bool stereo_active();
+  bool in_anaglyph();
+
+  void set_viewport(int ed);
+  void set_projection(int ed);
+  void set_mask(int ed);
+
+  void set_all(int ed);
+  };
+
+#define View (current_display->view_matrix)
+#define cwtV (current_display->player_matrix)
+#define viewctr (current_display->view_center)
+#define centerover (current_display->precise_center)
+#define gmatrix (current_display->cellmatrices)
+#define gmatrix0 (current_display->old_cellmatrices)
+
+#endif
+
 EX display_data default_display;
 EX display_data *current_display = &default_display;
 
@@ -201,6 +242,9 @@ glhr::glmatrix model_orientation_gl() {
 
 tuple<int, eModel, display_data*, int> last_projection;
 EX bool new_projection_needed;
+#if HDR
+inline void reset_projection() { new_projection_needed = true; }
+#endif
 
 void display_data::set_all(int ed) {
   auto t = this;
