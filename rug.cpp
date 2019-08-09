@@ -589,7 +589,7 @@ void verify() {
       ld l = e.len;
       
       ld l0;
-      if(fast_euclidean) l0 = sqdhypot_d(rugdim, m->flat, m2->flat);
+      if(fast_euclidean) l0 = sqhypot_d(rugdim, m->flat - m2->flat);
       else {      
         normalizer n(m->flat, m2->flat);
         hyperpoint h1 = n(m->flat);
@@ -694,7 +694,7 @@ void enqueue(rugpoint *m) {
 bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = false, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return false;
   // double rd = hdist(m1.h, m2.h) * xd;
-  double t = sqdhypot_d(rugdim, m1.flat, m2.flat);
+  double t = sqhypot_d(rugdim, m1.flat - m2.flat);
   if(is_anticusp && t > rd*rd) return false;
   t = sqrt(t);
   current_total_error += (t-rd) * (t-rd);
@@ -806,7 +806,7 @@ ld sse(const hyperpoint& h) {
     ld l = p.first;
     ld l0;
     if(fast_euclidean) 
-      l0 = dhypot_d(rugdim, h, p.second->flat);
+      l0 = hypot_d(rugdim, h - p.second->flat);
     else {
       normalizer n(h, p.second->flat);
       hyperpoint h1 = n(h);

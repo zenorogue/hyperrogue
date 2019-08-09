@@ -194,16 +194,6 @@ EX ld hypot_d(int d, const hyperpoint& h) {
   return sqrt(sqhypot_d(d, h));
   }
   
-EX ld sqdhypot_d(int d, const hyperpoint& a, const hyperpoint& b) {
-  ld sum = 0;
-  for(int i=0; i<d; i++) sum += (a[i]-b[i])*(a[i]-b[i]);
-  return sum;
-  }
-  
-EX ld dhypot_d(int d, const hyperpoint& a, const hyperpoint& b) {
-  return sqrt(sqdhypot_d(d, a, b));
-  }
-  
 EX ld zlevel(const hyperpoint &h) {
   if(translatable) return h[GDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
