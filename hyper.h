@@ -4761,19 +4761,6 @@ bool saved_tortoise_on(cell *c);
 #define REVRING(i) for(double i=cgi.S84; i>=-1e-6; i-=SD3 * pow(.5, vid.linequality))
 #define PRING(i) for(double i=0; i<=cgi.S84+1e-6; i+= pow(.5, vid.linequality))
 #define REVPRING(i) for(double i=cgi.S84; i>=-1e-6; i-=pow(.5, vid.linequality))
-#if CAP_BT
-
-namespace binary {
-  transmatrix parabolic(ld u);
-  transmatrix parabolic3(ld u, ld v);
-  extern ld btrange, btrange_cosh;
-  hrmap *new_map();
-  hrmap *new_alt_map(heptagon *o);
-  hyperpoint get_horopoint(ld y, ld x);
-  hyperpoint get_horopoint3(ld y, ld x, ld z);
-  hyperpoint get_horopoint(hyperpoint h);
-  }
-#endif
 
 #if MAXMDIM == 4
 namespace euclid3 {
@@ -5662,4 +5649,8 @@ extern int noclipped;
 void draw_radar(bool cornermode); 
 namespace binary { int updir(); }
 
+#define EX
+#define EXT(z)
 }
+
+#include "autohdr.h"

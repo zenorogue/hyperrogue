@@ -5,8 +5,8 @@
 
 namespace hr {
 
-namespace binary {
-#if CAP_BT
+EX namespace binary {
+#if EX CAP_BT
 
   enum bindir {
     bd_right = 0,
@@ -19,12 +19,12 @@ namespace binary {
     bd_down_right = 6 /* for cells of degree 7 */
     };
   
-  int type_of(heptagon *h) {
+  EX int type_of(heptagon *h) {
     return h->c7->type;
     }
 
   // 0 - central, -1 - left, +1 - right
-  int mapside(heptagon *h) {
+  EX int mapside(heptagon *h) {
     return h->zebraval;
     }
   
@@ -50,10 +50,7 @@ namespace binary {
     exit(1);
     }
 
-  const transmatrix& tmatrix(heptagon *h, int dir);
-  const transmatrix& itmatrix(heptagon *h, int dir);
-  
-  heptagon *path(heptagon *h, int d, int d1, std::initializer_list<int> p) {
+  EX heptagon *path(heptagon *h, int d, int d1, std::initializer_list<int> p) {
     static int rec = 0;
     rec++; if(rec>100) exit(1);
     // printf("{generating path from %p (%d/%d) dir %d:", h, type_of(h), mapside(h), d);
@@ -84,16 +81,16 @@ namespace binary {
     return h1;
     }
 
-  heptagon *pathc(heptagon *h, int d, int d1, std::vector<std::initializer_list<int>> p) {
+  EX heptagon *pathc(heptagon *h, int d, int d1, std::vector<std::initializer_list<int>> p) {
     h->cmove(S7-1);
     int z = h->c.spin(S7-1);
     return path(h, d, d1, p[z]);
     }
     
-  ld hororec_scale = 0.25;
-  ld horohex_scale = 0.6;
+  EX ld hororec_scale = 0.25;
+  EX ld horohex_scale = 0.6;
   
-  void make_binary_lands(heptagon *parent, heptagon *h) {
+  EX void make_binary_lands(heptagon *parent, heptagon *h) {
     if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
     eLand z = eLand(parent->emeraldval);
     int chance = 0;
@@ -110,7 +107,7 @@ namespace binary {
       h->emeraldval = z;
     }
   
-  heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
+  EX heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
     auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsA, d1);
     h->distance = parent->distance + delta;
     h->dm4 = parent->dm4 + delta;
@@ -138,7 +135,7 @@ namespace binary {
     }
 
   #if MAXMDIM==4
-  heptagon *build3(heptagon *parent, int d, int d1, int delta) {
+  EX heptagon *build3(heptagon *parent, int d, int d1, int delta) {
     int side = 0;
     if(geometry == gBinary3) {
       if(d < 4) side = (parent->zebraval * 2 + d) % 5;
@@ -468,7 +465,7 @@ namespace binary {
       }
     };
 
-  hrmap *new_map() { return new hrmap_binary; }
+  EX hrmap *new_map() { return new hrmap_binary; }
   
   struct hrmap_alternate_binary : hrmap_binary {
     heptagon *origin;
@@ -476,7 +473,7 @@ namespace binary {
     ~hrmap_alternate_binary() { clearfrom(origin); }
     };
 
-  hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
+  EX hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
 
   transmatrix direct_tmatrix[14];
   transmatrix inverse_tmatrix[14];
@@ -485,11 +482,11 @@ namespace binary {
   // directions in the 'use_direct' mask are taken from direct_tmatrix;
   // directions at/above are taken by checking spin and inverse_tmatrix based on that
 
-  bool use_direct_for(int dir) {
+  EX bool use_direct_for(int dir) {
     return (use_direct >> dir) & 1;
     }
   
-  ld expansion() {
+  EX ld expansion() {
     switch(geometry) {
       case gHoroRec:
         return sqrt(2);
@@ -502,14 +499,14 @@ namespace binary {
       }
     }
   
-  int updir() {
+  EX int updir() {
     if(geometry == gBinary4) return 3;
     if(geometry == gBinaryTiling) return 5;
     if(penrose) return 0;
     return S7-1;
     }
   
-  void build_tmatrix() {
+  EX void build_tmatrix() {
     if(among(geometry, gBinaryTiling, gSol)) return; // unused
     use_direct = (1 << (S7-1)) - 1;
     if(geometry == gBinary4) {
@@ -579,7 +576,7 @@ namespace binary {
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
     }
   
-  const transmatrix& tmatrix(heptagon *h, int dir) {
+  EX const transmatrix& tmatrix(heptagon *h, int dir) {
     if(use_direct_for(dir))
       return direct_tmatrix[dir];
     else {
@@ -588,7 +585,7 @@ namespace binary {
       }
     }
 
-  const transmatrix& itmatrix(heptagon *h, int dir) {
+  EX const transmatrix& itmatrix(heptagon *h, int dir) {
     if(use_direct_for(dir))
       return inverse_tmatrix[dir];
     else {
@@ -599,7 +596,7 @@ namespace binary {
   
   #if MAXMDIM == 4
 
-  void queuecube(const transmatrix& V, ld size, color_t linecolor, color_t facecolor) {
+  EX void queuecube(const transmatrix& V, ld size, color_t linecolor, color_t facecolor) {
     ld yy = log(2) / 2;
     const int STEP=3;
     const ld MUL = 1. / STEP;
@@ -632,17 +629,17 @@ namespace binary {
     }
   #endif
 
-  transmatrix parabolic(ld u) {
+  EX transmatrix parabolic(ld u) {
     return parabolic1(u * vid.binary_width / log(2) / 2);
     }
 
-  transmatrix parabolic3(ld y, ld z) {
+  EX transmatrix parabolic3(ld y, ld z) {
     ld co = vid.binary_width / log(2) / 4;
     return hr::parabolic13(y * co, z * co);
     }
 
   // on which horocycle are we
-  ld horo_level(hyperpoint h) {
+  EX ld horo_level(hyperpoint h) {
     h /= (1 + h[GDIM]);
     h[0] -= 1;
     h /= sqhypot_d(GDIM, h);
@@ -650,7 +647,7 @@ namespace binary {
     return log(2) + log(-h[0]);
     }
   
-  hyperpoint deparabolic3(hyperpoint h) {
+  EX hyperpoint deparabolic3(hyperpoint h) {
     h /= (1 + h[3]);
     hyperpoint one = point3(1,0,0);
     h -= one;
@@ -671,7 +668,7 @@ auto bt_config = addHook(hooks_args, 0, [] () {
   });
 #endif
 
-bool pseudohept(cell *c) {
+EX bool pseudohept(cell *c) {
   if(WDIM == 2)
     return c->type & c->master->distance & 1;
   else if(geometry == gHoroRec)
@@ -682,14 +679,14 @@ bool pseudohept(cell *c) {
     return (c->master->zebraval == 1) && (c->master->distance & 1);
   }
 
-pair<gp::loc, gp::loc> gpvalue(heptagon *h) {
+EX pair<gp::loc, gp::loc> gpvalue(heptagon *h) {
   int d = h->c.spin(S7-1);
   if(d == 0) return make_pair(gp::loc(0,0), gp::loc(-1,0));
   else return make_pair(gp::eudir((d-1)*2), gp::loc(1,0));
   }
 
 // distance in a triangular grid
-int tridist(gp::loc v) {
+EX int tridist(gp::loc v) {
   using namespace gp;
   int d = v.first - v.second;
   int d0 = d % 3;
@@ -698,7 +695,7 @@ int tridist(gp::loc v) {
   return length(v * loc(1,1)) * 2 / 3;
   }
 
-int equalize(heptagon*& c1, heptagon*& c2) {
+EX int equalize(heptagon*& c1, heptagon*& c2) {
   int steps = 0;
   int d1 = c1->distance;
   int d2 = c2->distance;
@@ -707,7 +704,7 @@ int equalize(heptagon*& c1, heptagon*& c2) {
   return steps;
   }  
 
-int celldistance3_tri(heptagon *c1, heptagon *c2) {
+EX int celldistance3_tri(heptagon *c1, heptagon *c2) {
   using namespace gp;
   int steps = equalize(c1, c2);
   vector<pair<loc, loc> > m1, m2;
@@ -734,7 +731,7 @@ int celldistance3_tri(heptagon *c1, heptagon *c2) {
   return steps;
   }
 
-int celldistance3_rec(heptagon *c1, heptagon *c2) {
+EX int celldistance3_rec(heptagon *c1, heptagon *c2) {
   int steps = equalize(c1, c2);
   vector<int> dx;
   while(c1 != c2) {
@@ -755,7 +752,7 @@ int celldistance3_rec(heptagon *c1, heptagon *c2) {
   return steps;
   }
 
-int celldistance3_square(heptagon *c1, heptagon *c2) {
+EX int celldistance3_square(heptagon *c1, heptagon *c2) {
   int steps = equalize(c1, c2);
   vector<int> dx, dy;
   while(c1 != c2) {
@@ -780,7 +777,7 @@ int celldistance3_square(heptagon *c1, heptagon *c2) {
   }
 
 // this algorithm is wrong: it never considers the "narrow gap" moves
-int celldistance3_hex(heptagon *c1, heptagon *c2) {
+EX int celldistance3_hex(heptagon *c1, heptagon *c2) {
   int steps = equalize(c1, c2);
   vector<int> d1, d2;
   while(c1 != c2) {
@@ -811,7 +808,7 @@ int celldistance3_hex(heptagon *c1, heptagon *c2) {
   return steps;
   }
 
-int celldistance3_approx(heptagon *c1, heptagon *c2) {
+EX int celldistance3_approx(heptagon *c1, heptagon *c2) {
   int d = 0;
   while(true) {
     if(d > 1000000) return d; /* sanity check */
@@ -828,7 +825,7 @@ int celldistance3_approx(heptagon *c1, heptagon *c2) {
     }
   }
 
-int celldistance3(heptagon *c1, heptagon *c2) {
+EX int celldistance3(heptagon *c1, heptagon *c2) {
   switch(geometry) {
     case gBinary3: return celldistance3_square(c1, c2);
     case gHoroTris: return celldistance3_tri(c1, c2);
@@ -842,9 +839,9 @@ int celldistance3(heptagon *c1, heptagon *c2) {
     }
   }
 
-int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
+EX int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
 
-void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
+EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
@@ -877,15 +874,15 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
   }
 #endif
 
-hyperpoint get_horopoint(ld y, ld x) {
+EX hyperpoint get_horopoint(ld y, ld x) {
   return xpush(-y) * binary::parabolic(x) * C0;
   }
 
-hyperpoint get_horopoint(hyperpoint h) {
+EX hyperpoint get_horopoint(hyperpoint h) {
   return get_horopoint(h[0], h[1]);
   }
 
-hyperpoint get_corner_horo_coordinates(cell *c, int i) {
+EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
   ld yx = log(2) / 2;
   ld yy = yx;
   ld xx = 1 / sqrt(2)/2;
