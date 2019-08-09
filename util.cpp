@@ -25,61 +25,6 @@ int SDL_GetTicks() {
 #endif
 
 EX long double sqr(long double x) { return x*x; }
-EX string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
-
-EX string fts(ld x, int prec IS(6)) {
-  std::stringstream ss;
-  ss.precision(prec);
-  ss << x;
-  return ss.str();
-  }
-
-EX string fts_fixed(ld x, int prec IS(6)) {
-  std::stringstream ss;
-  ss.precision(prec);
-  ss << std::fixed << x;
-  return ss.str();
-  }
-
-bool scan(fhstream& hs, int& i) { return fscanf(hs.f, "%d", &i) == 1; }
-bool scan(fhstream& hs, color_t& c) { return fscanf(hs.f, "%x", &c) == 1; }
-bool scan(fhstream& hs, ld& x) { return fscanf(hs.f, "%lf", &x) == 1; }
-bool scan(fhstream& hs, string& s) { char t[10000]; t[0] = 0; int err = fscanf(hs.f, "%9500s", t); s = t; return err == 1 && t[0]; }
-string scanline(fhstream& hs) { char buf[10000]; buf[0] = 0; fgets(buf, 10000, hs.f); return buf; }
-
-/*
-string fts_smartdisplay(ld x, int maxdisplay) {
-  string rv;
-  if(x > 1e9 || x < -1e9) retrun fts(x);
-  if(x<0) { rv = "-"; x = -x; }
-  int i = int(x);
-  rv += its(i);
-  x -= i;
-  bool nonzero = i;
-  if(x == 0) return rv;
-  if(x < 1e-9 && nonzero) return rv;
-  rv += ".";
-  while(maxdisplay > 0) {
-    x *= 10;
-    rv += '0' + int(x);
-    if(int(x)) nonzero = true;
-    x -= int(x);
-    if(x == 0) return rv;
-    if(x < 1e-9 && nonzero) return rv;
-    maxdisplay--;
-    }
-  } */
-
-EX string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
-EX string llts(long long i) {
-    // sprintf does not work on Windows IIRC
-    if(i < 0) return "-" + llts(-i);
-    if(i < 10) return its((int) i);
-    return llts(i/10) + its(i%10);
-}
-EX string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
-EX string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
-EX string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }
 
 EX int gcd(int i, int j) {
   return i ? gcd(j%i, i) : j;
@@ -282,26 +227,4 @@ EX string parser_help() {
     "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation], to01, ifp(a,v,w) [if positive]");
   }
 
-logger hlog;
-
-// kz: utility for printing
-// if it is close to 0, assume it is floating errors
-
-EX ld kz(ld x) {
-  if(abs(x) < 1e-6) return 0;
-  return x;
-  }
-
-EX hyperpoint kz(hyperpoint h) {
-  for(int d=0; d<MAXMDIM; d++) h[d] = kz(h[d]);
-  return h;
-  }
-
-EX transmatrix kz(transmatrix h) {
-  for(int d=0; d<MAXMDIM; d++) 
-  for(int e=0; e<MAXMDIM; e++)
-    h[d][e] = kz(h[d][e]);
-  return h;
-  }
-  
 }
