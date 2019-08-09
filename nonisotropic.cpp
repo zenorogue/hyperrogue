@@ -5,14 +5,15 @@
 
 namespace hr {
 
-namespace nisot {
+EX namespace nisot {
   typedef array<float, 3> ptlow;
 
-  transmatrix local_perspective;
+  EX transmatrix local_perspective;
+  //EX inline bool local_perspective_used() { return nonisotropic; }
   
-  bool geodesic_movement = true;
+  EX bool geodesic_movement = true;
 
-  transmatrix translate(hyperpoint h) {
+  EX transmatrix translate(hyperpoint h) {
     transmatrix T = Id;
     for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
     if(sol) {
@@ -24,9 +25,9 @@ namespace nisot {
     return T;
     }
 
-  }
+  EX }
 
-namespace solv {
+EX namespace solv {
   
   int PRECX, PRECY, PRECZ;
   
@@ -34,9 +35,9 @@ namespace solv {
   
   bool table_loaded;
   
-  string solfname = "solv-geodesics.dat";
+  EX string solfname = "solv-geodesics.dat";
   
-  void load_table() {
+  EX void load_table() {
     if(table_loaded) return;
     FILE *f = fopen(solfname.c_str(), "rb");
     // if(!f) f = fopen("/usr/lib/soltable.dat", "rb");
@@ -257,27 +258,27 @@ namespace solv {
 
     };
 
-  pair<heptagon*,heptagon*> getcoord(heptagon *h) {
+  EX pair<heptagon*,heptagon*> getcoord(heptagon *h) {
     return ((hrmap_sol*)currentmap)->coords[h];
     }
 
-  heptagon *get_at(heptagon *h1, heptagon *h2, bool gen) {
+  EX heptagon *get_at(heptagon *h1, heptagon *h2, bool gen) {
     auto m = ((hrmap_sol*)currentmap);
     if(!gen && !m->at.count(make_pair(h1, h2))) return nullptr;
     return m->get_at(h1, h2);
     }
   
-  ld solrange_xy = 15;
-  ld solrange_z = 4;
+  EX ld solrange_xy = 15;
+  EX ld solrange_z = 4;
   
-  ld glitch_xy = 2, glitch_z = 0.6;
+  EX ld glitch_xy = 2, glitch_z = 0.6;
 
-  bool in_table_range(hyperpoint h) {
+  EX bool in_table_range(hyperpoint h) {
     if(abs(h[0]) > glitch_xy && abs(h[1]) > glitch_xy && abs(h[2]) < glitch_z) return false;
     return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
-  int approx_distance(heptagon *h1, heptagon *h2) {
+  EX int approx_distance(heptagon *h1, heptagon *h2) {
     auto m = (hrmap_sol*) currentmap;
     dynamicval<eGeometry> g(geometry, gBinary4); 
     dynamicval<hrmap*> cm(currentmap, m->binary_map);
@@ -286,7 +287,7 @@ namespace solv {
     return d1 + d2 - abs(h1->distance - h2->distance);
     }
   
-  string solshader = 
+  EX string solshader = 
     "uniform mediump sampler3D tInvExpTable;"    
     "uniform mediump float PRECX, PRECY, PRECZ;"
 
@@ -322,9 +323,9 @@ namespace solv {
     
     "return res;"
     "}";
-  }
+EX }
 
-namespace nilv {
+EX namespace nilv {
 
   hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported) {
     ld x = Position[0];
@@ -335,7 +336,7 @@ namespace nilv {
       );
     }
 
-  hyperpoint formula_exp(hyperpoint v) {
+  EX hyperpoint formula_exp(hyperpoint v) {
     // copying Modelling Nil-geometry in Euclidean Space with Software Presentation
     // v[0] = c cos alpha
     // v[1] = c sin alpha
@@ -356,7 +357,7 @@ namespace nilv {
       );
     }
   
-  hyperpoint get_inverse_exp(hyperpoint h, int iterations) {
+  EX hyperpoint get_inverse_exp(hyperpoint h, int iterations) {
     ld wmin, wmax;
     
     ld side = h[2] - h[0] * h[1] / 2;
@@ -394,7 +395,7 @@ namespace nilv {
       }
     }
   
-  string nilshader = 
+  EX string nilshader = 
     "vec4 inverse_exp(vec4 h) {"
       "float wmin, wmax;"
       "float side = h[2] - h[0] * h[1] / 2.;"
@@ -441,10 +442,12 @@ namespace nilv {
   static const mvec mvec_zero = mvec(0, 0, 0);
 
   hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
+  
+  //EX static const int nilv_S7 = 8;
 
   array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }};
 
-  array<vector<hyperpoint>, nilv_S7> facevertices = {{
+  EX array<vector<hyperpoint>, nilv_S7> facevertices = {{
     { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,-0.25), },
     { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), },
     { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
@@ -523,33 +526,35 @@ namespace nilv {
 
     };
 
-  hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
+  EX hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
     hyperpoint local = inverse(nisot::translate(s0)) * s1;
     hyperpoint h = get_inverse_exp(local, 100);
     return nisot::translate(s0) * formula_exp(h * x);
     }
-  }
+EX }
 
-namespace nisot {
+EX namespace nisot {
 
-  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+  EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
     if(sol) return solv::christoffel(at, velocity, transported);
     else if(nil) return nilv::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
     }
 
-  bool in_table_range(hyperpoint h) {
+  EX bool in_table_range(hyperpoint h) {
     if(sol) return solv::in_table_range(h);
     return true;
     }
   
-  hyperpoint inverse_exp(const hyperpoint h, iePrecision p) {
+  //EX enum iePrecision { iLazy, iTable };
+  
+  EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p) {
     if(sol) return solv::get_inverse_exp(h, p == iLazy);
     if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
     return point3(h[0], h[1], h[2]);
     }
 
-  void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
+  EX void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
     auto acc = christoffel(at, velocity, velocity);
     
     auto at2 = at + velocity / 2;
@@ -562,7 +567,7 @@ namespace nisot {
     velocity = velocity + acc;
     }
   
-  hyperpoint direct_exp(hyperpoint v, int steps) {
+  EX hyperpoint direct_exp(hyperpoint v, int steps) {
     hyperpoint at = point31(0, 0, 0);
     v /= steps;
     v[3] = 0;
@@ -570,7 +575,7 @@ namespace nisot {
     return at;
     }
 
-  transmatrix transpose(transmatrix T) {
+  EX transmatrix transpose(transmatrix T) {
     transmatrix result;
     for(int i=0; i<MDIM; i++)
       for(int j=0; j<MDIM; j++)
@@ -578,7 +583,7 @@ namespace nisot {
     return result;
     }
   
-  transmatrix parallel_transport_bare(transmatrix Pos, transmatrix T) {
+  EX transmatrix parallel_transport_bare(transmatrix Pos, transmatrix T) {
   
     hyperpoint h = tC0(T);
     h[3] = 0;
@@ -599,7 +604,7 @@ namespace nisot {
     return transpose(tPos);
     }
 
-  void fixmatrix(transmatrix& T) {
+  EX void fixmatrix(transmatrix& T) {
     transmatrix push = eupush( tC0(T) );
     transmatrix push_back = inverse(push);
     transmatrix gtl = push_back * T;
@@ -607,14 +612,14 @@ namespace nisot {
     T = push * gtl;
     }
   
-  transmatrix parallel_transport(const transmatrix Position, const transmatrix T) {
+  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix T) {
     auto P = Position;
     nisot::fixmatrix(P);  
     if(!geodesic_movement) return inverse(eupush(Position * inverse(T) * inverse(Position) * C0)) * Position;
     return parallel_transport_bare(P, T);
     }
   
-  transmatrix transport_view(const transmatrix T, const transmatrix V) {
+  EX transmatrix transport_view(const transmatrix T, const transmatrix V) {
     if(!geodesic_movement) {
       transmatrix IV = inverse(V);
       nisot::fixmatrix(IV);
@@ -624,7 +629,7 @@ namespace nisot {
     return inverse(parallel_transport(inverse(V), inverse(T)));
     }
 
-  transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
+  EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
 
     hyperpoint at = tC0(Position);
     transmatrix push_back = inverse(translate(at));
@@ -636,7 +641,7 @@ namespace nisot {
     return rspintox(inverse(back_Position) * back_goal);
     }
   
-  hrmap *new_map() { 
+  EX hrmap *new_map() { 
     if(sol) return new solv::hrmap_sol; 
     if(nil) return new nilv::hrmap_nil;
     return NULL;

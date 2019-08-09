@@ -5616,33 +5616,6 @@ namespace kite {
   }
 #endif
 
-/* nonisotropic */
-namespace nisot {
-  extern transmatrix local_perspective;
-  inline bool local_perspective_used() { return nonisotropic; }
-  hrmap *new_map();
-  transmatrix translate(const hyperpoint h);
-  bool in_table_range(hyperpoint h);
-  
-  enum iePrecision { iLazy, iTable };
-
-  transmatrix parallel_transport(const transmatrix Position, const transmatrix T);
-  transmatrix transport_view(const transmatrix T, const transmatrix V);
-  transmatrix spin_towards(const transmatrix Position, const hyperpoint goal);
-  hyperpoint inverse_exp(const hyperpoint h, iePrecision p);
-  }
-
-namespace solv {  
-  extern string solshader;
-  }
-
-
-namespace nilv {
-  extern string nilshader;
-  static const int nilv_S7 = 8;
-  extern array<vector<hyperpoint>, nilv_S7> facevertices;
-  }
-
 bool in_perspective();
 
 extern int noclipped;

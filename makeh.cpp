@@ -27,11 +27,21 @@ void gen(string s) {
   ifstream in(s);
   while(getline(in, s)) {
     while(s != "" && s[0] == ' ') s = s.substr(1);
+    while(s.back() == 10 || s.back() == 13) s = s.substr(0, s.size() - 1);
     if(s.substr(0, 7) == "#if EX ") {
       cout << ind() << s << "\n";
       do_endif = true;
       }
-    if(s.substr(0, 3) == "EX ") {
+    if(s.substr(0, 4) == "//EX") {
+      auto t = s.substr(4);
+      while(t != "" && t[0] == ' ') t = t.substr(1);
+      cout << ind() << t << "\n";
+      }
+    if(s.substr(0, 4) == "EX }") {
+      cout << ind() << "}\n";
+      indent -= 2;
+      }
+    else if(s.substr(0, 3) == "EX ") {
       string t = s.substr(3);
       if(t.substr(0, 10) == "namespace ") {
         mark_file();
@@ -40,7 +50,7 @@ void gen(string s) {
         }
       else {
         for(int i=0;; i++) {
-          if(i == int(t.size())) { cerr << "Error: unrecognizable EX\n"; }
+          if(i == int(t.size())) { cerr << "Error: unrecognizable EX: " << s << "\n"; }
           else if(t[i] == '{') {
             while(i && t[i-1] == ' ') i--;
             cout << ind() << t.substr(0, i) << ";\n";
