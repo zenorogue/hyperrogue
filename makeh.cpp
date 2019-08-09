@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -11,20 +12,24 @@ string ind() { string s; for(int i=0; i<indent; i++) s += ' '; return s; }
 
 string which_file;
 
+vector<string> if_stack;
+int ifs_level;
+
 void mark_file() {
   if(which_file != "") {
     cout << "\n" << ind() << "// implemented in: " << which_file << "\n\n";
     which_file = "";
     }
+  while(ifs_level < (int) if_stack.size())
+    cout << ind() << if_stack[ifs_level++] << "\n";
+  while(ifs_level > (int) if_stack.size())
+    cout << ind() << "#endif\n", ifs_level--;
   }
-
-bool do_endif;
 
 bool in_hdr;
 
 void gen(string s) {
   which_file = s;
-  do_endif = false;
   ifstream in(s);
   while(getline(in, s)) {
     while(s != "" && s[0] == ' ') s = s.substr(1);
@@ -38,6 +43,14 @@ void gen(string s) {
       }
     if(s == "#if HDR") {
       in_hdr = true;
+      continue;
+      }
+    if(s.substr(0, 3) == "#if" || s.substr(0, 4) == "# if") {
+      if_stack.push_back(s);
+      }
+    if(s.substr(0, 6) == "#endif") {
+      if(if_stack.empty()) { cerr << "if_stack error " << which_file << ", " << s << "\n"; exit(1); }
+      if_stack.pop_back();
       }
     if(s.substr(0, 4) == "EX }") {
       mark_file();
@@ -74,10 +87,8 @@ void gen(string s) {
       }
     }
   
-  if(do_endif) {
-    cout << ind() << "#endif\n";
-    do_endif = false;
-    }
+  while(ifs_level > (int) if_stack.size())
+    cout << ind() << "#endif\n", ifs_level--;
 
   while(indent > 2) {
     cout << ind() << "}\n";
