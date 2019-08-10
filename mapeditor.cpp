@@ -1406,13 +1406,20 @@ namespace mapeditor {
 #endif
 
     if(!mouseout()) {
-      transmatrix T = inverse(drawtrans * rgpushxto0(ccenter));
-      hyperpoint mh = spintox(gpushxto0(ccenter) * coldcenter) * T * mouseh;
+      hyperpoint mh;
+      if(DIM == 2) {
+        transmatrix T = inverse(drawtrans * rgpushxto0(ccenter));
+        mh = spintox(gpushxto0(ccenter) * coldcenter) * T * mouseh;
+        }
+      else
+        mh = inverse(drawtrans) * find_mouseh3();
+        
       displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],4)), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],4)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)) + (DIM == 3 ? "/" + fts(mh[3], 4) : ""), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
       if(DIM == 3)
         displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
+      if(nonisotropic) mh = nisot::inverse_exp(mh, nisot::iTable, true);
       displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hdist0(mh),4)), 0xC0C0C0, 16);
       if(DIM == 3) {
         displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
