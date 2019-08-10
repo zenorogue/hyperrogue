@@ -307,11 +307,11 @@ EX namespace models {
       dialog::addBoolItem_choice("all directional lands", models::do_rotate, 2, 'D');
       if(DIM == 3) {
         dialog::addBreak(100);
-        dialog::addSelItem(XLAT("XY plane"), fts(models::rotation) + "°", 'A');
+        dialog::addSelItem(XLAT("XY plane"), fts(models::rotation) + "Â°", 'A');
         dialog::add_action([] { popScreen(); edit_rotation(models::rotation); });
-        dialog::addSelItem(XLAT("XZ plane"), fts(models::rotation_xz) + "°", 'B');
+        dialog::addSelItem(XLAT("XZ plane"), fts(models::rotation_xz) + "Â°", 'B');
         dialog::add_action([] { popScreen(); edit_rotation(models::rotation_xz); });
-        dialog::addSelItem(XLAT("XY plane #2"), fts(models::rotation_xy2) + "°", 'C');
+        dialog::addSelItem(XLAT("XY plane #2"), fts(models::rotation_xy2) + "Â°", 'C');
         dialog::add_action([] { popScreen(); edit_rotation(models::rotation_xy2); });
         }
       };
@@ -352,9 +352,9 @@ EX namespace models {
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
     if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
     if(DIM == 2)
-      dialog::lastItem().value += " " + its(rotation) + "°";
+      dialog::lastItem().value += " " + its(rotation) + "Â°";
     else
-      dialog::lastItem().value += " " + its(rotation) + "°" + its(rotation_xz) + "°" + its(rotation_xy2) + "°";
+      dialog::lastItem().value += " " + its(rotation) + "Â°" + its(rotation_xz) + "Â°" + its(rotation_xy2) + "Â°";
     dialog::add_action([] { edit_rotation(models::rotation); });
     
     // if(pmodel == mdBand && sphere)
@@ -363,7 +363,7 @@ EX namespace models {
     
     if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere && pmodel != mdDisk) {
       dialog::addBreak(50);
-      dialog::addInfo("NOTE: this works 'correctly' only if the Poincaré model/stereographic projection is used.");
+      dialog::addInfo("NOTE: this works 'correctly' only if the PoincarÃ© model/stereographic projection is used.");
       dialog::addBreak(50);
       }
     
@@ -373,12 +373,12 @@ EX namespace models {
       }
                                   
     if(model_has_orientation()) {
-      dialog::addSelItem(XLAT("model orientation"), fts(model_orientation) + "°", 'l');
+      dialog::addSelItem(XLAT("model orientation"), fts(model_orientation) + "Â°", 'l');
       dialog::add_action([] () {
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
         });
       if(DIM == 3) {
-        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz) + "°", 'L');
+        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz) + "Â°", 'L');
         dialog::add_action([] () {
           dialog::editNumber(model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
           });
@@ -468,7 +468,7 @@ EX namespace models {
       }
     
     if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360)) {
-      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vid.ballangle) + "°", 'b');
+      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vid.ballangle) + "Â°", 'b');
       dialog::add_action(config_camera_rotation);
       }
     
@@ -489,9 +489,9 @@ EX namespace models {
       }
 
     if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && DIM == 2) {
-      dialog::addSelItem(XLAT("Möbius transformations"), fts(vid.skiprope) + "°", 'S');
+      dialog::addSelItem(XLAT("MÃ¶bius transformations"), fts(vid.skiprope) + "Â°", 'S');
       dialog::add_action([](){
-        dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
+        dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("MÃ¶bius transformations"), "");
         });
       }
     
@@ -518,10 +518,10 @@ EX namespace models {
       }
     
     if(pmodel == mdSpiral && !euclid) {
-      dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle) + "°", 'x');
+      dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle) + "Â°", 'x');
       dialog::add_action([](){
         dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), 
-          XLAT("set to 90° for the ring projection")
+          XLAT("set to 90Â° for the ring projection")
           );
         });
 
@@ -530,19 +530,19 @@ EX namespace models {
         ring_not_spiral ? right_spiral_multiplier :
         any_spiral_multiplier;
                 
-      dialog::addSelItem(XLAT("spiral multiplier"), fts(which) + "°", 'M');
+      dialog::addSelItem(XLAT("spiral multiplier"), fts(which) + "Â°", 'M');
       dialog::add_action([&which](){
         dialog::editNumber(which, 0, 10, -.1, 1, XLAT("spiral multiplier"), 
           XLAT(
             "This parameter has a bit different scale depending on the settings:\n"
-            "(1) in spherical geometry (with spiral angle=90°, 1 produces a stereographic projection)\n"
-            "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
+            "(1) in spherical geometry (with spiral angle=90Â°, 1 produces a stereographic projection)\n"
+            "(2) in hyperbolic geometry, with spiral angle being +90Â° or -90Â°\n"
             "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)"
             )
           );
         });
 
-      dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone) + "°", 'C');
+      dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone) + "Â°", 'C');
       dialog::add_action([](){
         dialog::editNumber(spiral_cone, 0, 360, -45, 360, XLAT("spiral cone"), "");
         });
@@ -610,7 +610,7 @@ EX namespace models {
             // cos(phi) * cos(phi) = 1/K
             if(sphere && vid.stretch >= 1) {
               ld phi = acos(sqrt(1/vid.stretch));
-              dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
+              dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2Â°).", fts(phi), fts(phi / degree)));
               }
             else if(hyperbolic && abs(vid.stretch) <= 1 && abs(vid.stretch) >= 1e-9) {
               ld phi = acosh(abs(sqrt(1/vid.stretch)));
