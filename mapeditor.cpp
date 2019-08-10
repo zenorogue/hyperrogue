@@ -666,9 +666,13 @@ namespace mapeditor {
     }
 
   bool choosefile = false;
+  
+  int editor_fsize() {
+    return min(vid.fsize + 5, (vid.yres - 16) /32 );
+    }
 
   void displayFunctionKeys() {
-    int fs = min(vid.fsize + 5, vid.yres/26);
+    int fs = editor_fsize();
     displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
     displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
     displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
@@ -685,7 +689,7 @@ namespace mapeditor {
     cmode = sm::MAP;
     gamescreen(0);
   
-    int fs = min(vid.fsize + 5, vid.yres/26);
+    int fs = editor_fsize();
     
     getcstat = '-';
 
@@ -1309,7 +1313,7 @@ namespace mapeditor {
       us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
       }
     
-    int fs = min(vid.fsize + 5, vid.yres/28);
+    int fs = editor_fsize();
 
     // displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
