@@ -804,7 +804,7 @@ color_t kind_outline(eItem it) {
 
 EX transmatrix face_the_player(const transmatrix V) {
   if(DIM == 2) return V;
-  if(nonisotropic) return V * cspin(0, 2, ptick(618, 0));
+  if(nonisotropic) return spin_towards(V, C0, 2, 0);
   return rgpushxto0(tC0(V));
   }
 
