@@ -1,3 +1,13 @@
+// Hyperbolic Rogue -- models of hyperbolic geometry
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file models.cpp
+ *  \brief models of hyperbolic geometry: their properties, projection menu
+ *
+ *  The actual models are implemented in hypgraph.cpp. Also shaders.cpp, 
+ *  drawing.cpp, and basegraph.cpp are important.
+ */
+
 namespace hr {
 
 EX namespace polygonal {

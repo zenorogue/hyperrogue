@@ -1,7 +1,9 @@
 // HyperRogue
-// This file contains the routines to convert HyperRogue's old vector graphics into 3D models
-
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file 3d-models.cpp 
+ *  \brief This file contains the routines to convert HyperRogue's old vector graphics into 3D models
+ */
 
 #include "earcut.hpp"
 
@@ -220,11 +222,6 @@ void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   add_texture(sh);
   shift_last(-BODY);
   }
-
-/*
-void make_humanoid_3d(hpcshape& sh) { make_ha_3d(sh, false, 0.90); }
-void make_armor_3d(hpcshape& sh, ld scale = 1) { make_ha_3d(sh, true, scale); }
-*/
 
 void geometry_information::make_humanoid_3d(hpcshape& sh) { make_ha_3d(sh, false, 1); }
 

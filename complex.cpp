@@ -1,9 +1,11 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- Complex features
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// namespaces for complex features (whirlwind, whirlpool, elec, princess, clearing, 
-// mirror, hive, heat + livecaves, etc.)
-
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file complex.cpp 
+ *  \brief This file implements the gameplay/generation for the more complex lands and mechanics.
+ *
+ *  Includes: whirlwind, whirlpool, elec, princess, clearing, mirror, hive, heat + livecaves, etc.
+ */
 
 namespace hr {
 
@@ -1543,7 +1545,7 @@ EX namespace mirror {
     for(int i=0; i<CACHESIZE; i++) cache[i].first = NULL;
     }
 
-  cellwalker reflect(const cellwalker& cw) {
+  EX cellwalker reflect(const cellwalker& cw) {
     if(!cw.at) return cw;
     if((cw.at->landparam & 255) == 0) {
       bool cando = false;

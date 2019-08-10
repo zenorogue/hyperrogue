@@ -1,9 +1,16 @@
-// This file implements:
-// * routines related to (horo)cycles
-// * routines related to equidistants
-// * 'setland' routines for other geometries
-// * the buildBigStuff function which calls equidistant/(horo)cycle/barrier generators.
+// Hyperbolic Rogue -- Big Stuff
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file bigstuff.cpp 
+ *  \brief Large map structures, such as (horo)cycles and equidistants.
+ *
+ *   This file implements:
+ *   * routines related to (horo)cycles
+ *   * routines related to equidistants
+ *   * 'setland' routines for other geometries
+ *   * the buildBigStuff function which calls equidistant/(horo)cycle/barrier generators.
+ *  This routines are general, i.e., not necessarily Steam-specific.
+ */
 
 // horocycles
 

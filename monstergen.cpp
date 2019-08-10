@@ -1,8 +1,9 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- monster generation
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-
-// Routines concentrating on monster generation.
+/** \file monstergen.cpp
+ *  \brief monster generation
+ */
 
 namespace hr {
 
@@ -40,8 +41,7 @@ EX int buildIvy(cell *c, int children, int minleaf) {
   else return leaf;
   }
 
-// the 'chasmify' functions create a simulation of the path the monster came by
-
+/** the 'chasmify' functions create a simulation of the path the monster came by */
 EX void chasmify(cell *c) {
   c->wall = waChasm; c->item = itNone;
   int q = 0;
@@ -104,7 +104,7 @@ EX void chasmifyElemental(cell *c) {
   c->wparam = 100; c->item = itNone;
   }
 
-// an appropriate monster for the Crossroads
+/** generate a monster appropriate for the Crossroads */
 
 EX eMonster crossroadsMonster() {
 
@@ -305,6 +305,7 @@ EX eItem wanderingTreasure(cell *c) {
   return treasureType(l);
   }
 
+/** generate the wandering monsters */
 EX void wandering() {
   if(bounded && specialland == laMinefield) {
     kills[moBomberbird] = 0;

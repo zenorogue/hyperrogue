@@ -1,7 +1,9 @@
-
-// HyperRogue, shapes used for the vector graphics
-
+// Hyperbolic Rogue -- shapes used for the vector graphics
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file polygons.cpp
+ *  \brief shapes used for the vector graphics, mostly hand-drawn (the vector data is here), some procedurally generated
+ */
 
 #if CAP_SHAPES
 

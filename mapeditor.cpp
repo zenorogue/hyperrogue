@@ -1,5 +1,9 @@
-// HyperRogue map editor
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- map editor and vector graphics editor
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file mapedit.cpp
+ *  \brief HyperRogue editors (map and vector graphics)
+ */
 
 namespace hr {
 

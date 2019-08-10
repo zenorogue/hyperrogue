@@ -1,6 +1,12 @@
-// Hyperbolic Rogue -- basic GL transformations
-// If CAP_SHADER is 0, OpenGL 1.0 is used.
-// If CAP_SHADER is 1, GLSL is used.
+// Hyperbolic Rogue -- low-level OpenGL routines
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file shaders.cpp
+ *  \brief low-level OpenGL routines
+ *
+ *  If CAP_SHADER is 0, OpenGL 1.0 is used.
+ *  If CAP_SHADER is 1, we are using GLSL shaders.
+ */
 
 namespace hr {
 

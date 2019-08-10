@@ -1,6 +1,11 @@
-// Hyperbolic Rogue
-// This file implements the 'Archimedean tilings' geometry.
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- Archimedean Tilings
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file archimedean.cpp 
+ *  \brief Archimedean tilings
+ *
+ *  These are tilings available in the 'Archimedean' option in Geometry Experiments; simpler Archimedean tilings are defined in other files.
+ */
 
 namespace hr {
 
@@ -80,22 +85,23 @@ static const int sfSEMILINE = 16;
 
 EX archimedean_tiling current;
 
-// id of vertex in the archimedean tiling
-// odd numbers = reflected tiles
-// 0, 2, ..., 2(N-1) = as in the symbol
-// 2N = bitruncated tile
+/** id of vertex in the archimedean tiling
+ *  odd numbers = reflected tiles
+ *  0, 2, ..., 2(N-1) = as in the symbol
+ *  2N = bitruncated tile
+ */
 
 EX short& id_of(heptagon *h) {
   return h->zebraval;
   }
 
-// which index in id_of's neighbor list does h->move[0] have
+/** which index in id_of's neighbor list does h->move(0) have */
 
 EX short& parent_index_of(heptagon *h) {
   return h->emeraldval;
   }
 
-// total number of neighbors
+/** total number of neighbors */
 
 EX int neighbors_of(heptagon *h) {
   return isize(current.triangles[id_of(h)]);
@@ -726,7 +732,7 @@ void connectHeptagons(heptspin hi, heptspin hs) {
   // heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
   }
 
-// T and X are supposed to be equal -- move T so that it is closer to X
+/** T and X are supposed to be equal -- move T so that it is closer to X */
 void fixup_matrix(transmatrix& T, const transmatrix& X, ld step) {
   for(int i=0; i<MDIM; i++)
   for(int j=0; j<MDIM; j++)

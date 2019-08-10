@@ -1,7 +1,11 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue - Hypersian Rug mode
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-// implementation of the Hypersian Rug mode
+/** \file rug.cpp
+ *  \brief Hypersian Rug mode
+ *
+ *  See also surface.cpp for constant curvature surfaces.
+ */
 
 namespace hr {
 

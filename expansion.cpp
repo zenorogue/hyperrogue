@@ -1,5 +1,12 @@
-// HyperRogue -- expansion_analyzer
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- expansion analyzer
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file expansion.cpp
+ *  \brief exponential growth of hyperbolic geometries
+ *
+ *  Calculations related to this exponential growth.
+ *  Screens which display this exponential growth (e.g. 'size of the world' in geometry experiments) are also implemented here.
+ */
 
 namespace hr {
 

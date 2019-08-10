@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- initialization, and stuff related to mobiles
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file init.cpp
+ *  \brief initialization, and stuff related to mobiles
+ */
+
 #include "compileunits.h"
 
 namespace hr {

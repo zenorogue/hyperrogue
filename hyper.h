@@ -1,5 +1,13 @@
-// This is the main header file of HyperRogue. Mostly everything is dumped here.
-// It is quite chaotic.
+// Hyperbolic Rogue -- main header file
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file Hyper.h
+ *  \brief The main header file of HyperRogue
+ *
+ *  Contains general utility macros, various value macros, using clauses for standard library functions,
+ *  implementation of the basic connection_table, walker, cell and heptagon classes,
+ *  and general routines which did not fit elsewhere
+ */
 
 // version numbers
 #define VER "11.1i"
@@ -320,331 +328,7 @@ extern videopar vid;
 
 #define self (*this)
 
-extern int cellcount, heptacount;
-// cell information for the game
-
-struct gcell {
-
-#if CAP_BITFIELD
-  // main fields
-  eLand land : 8;
-  eWall wall : 8;
-  eMonster monst : 8;
-  eItem item : 8;
-
-  // if this is a barrier, what lands on are on the sides?
-  eLand barleft : 8, barright : 8; 
-
-  unsigned ligon : 1;    // is it sparkling with lightning?
-
-  signed 
-    mpdist : 7,
-    pathdist : 8,       // player distance wrt usual movement
-    cpdist : 8;         // current/minimum player distance
-
-  unsigned 
-    mondir : 8,         // monster direction, for multi-tile monsters and graphics
-    bardir : 8,         // barrier direction
-    stuntime : 8,       // stun time left (for Palace Guards and Skeletons)
-    hitpoints : 7,      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
-    monmirror : 1;      // monster mirroring state for nonorientable geometries
-  
-  unsigned landflags : 8;      // extra flags for land
-#else
-  eLand land;
-  eWall wall;
-  eMonster monst;
-  eItem item;
-  eLand barleft, barright;
-  bool ligon, monmirror;
-  signed char pathdist, cpdist, mpdist;
-  
-  unsigned char mondir, bardir, stuntime, hitpoints;
-  unsigned char landflags;
-#endif
-  
-  // 'landparam' is used for: 
-  // heat in Icy/Cocytus; 
-  // heat in Dry (0..10); 
-  // CR2 structure; 
-  // hive Weird Rock color / pheromones;
-  // Ocean/coast depth;
-  // Bomberbird Egg hatch time / mine marking;
-  // number of Ancient Jewelry;
-  // improved tracking in Trollheim
-  union { 
-    int32_t landpar; 
-    unsigned int landpar_color;
-    float heat; 
-    char bytes[4]; 
-    struct fieldinfo { 
-      uint16_t fieldval;
-      unsigned rval : 4;
-      unsigned flowerdist : 4;
-      unsigned walldist : 4;
-      unsigned walldist2 : 4;
-      } fi;
-  
-  } LHU;
-  
-  #ifdef CELLID
-  int cellid;
-  #endif
-  
-  gcell() { cellcount++; 
-    #ifdef CELLID
-    cellid = cellcount;  
-    #endif
-    }
-  ~gcell() { cellcount--; }
-  };
-
-#define landparam LHU.landpar
-#define landparam_color LHU.landpar_color
-
-#define fval LHU.fi.fieldval
-
-#define NODIR 126
-#define NOBARRIERS 127
 #define MODFIXER (2*10090080*17)
-
-#define MAX_EDGE 18
-
-template<class T> struct walker;
-
-template<class T> struct connection_table {
-
-  // Assumption: class T has a field c of type connection_table<T>.
-
-  // NOTE: since aconnection_table may be allocated with
-  // less than MAX_EDGE neighbors (see tailored_alloc),
-  // the order of fields matters.
-
-  T* move_table[MAX_EDGE + (MAX_EDGE + sizeof(char*) - 1) / sizeof(char*)];
-  
-  unsigned char *spintable() { return (unsigned char*) (&move_table[full()->degree()]); }
-
-  T* full() { T* x = (T*) this; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
-  void setspin(int d, int spin, bool mirror) { 
-    unsigned char& c = spintable() [d];
-    c = spin;
-    if(mirror) c |= 128;
-    }
-  // we are spin(i)-th neighbor of move[i]
-  int spin(int d) { return spintable() [d] & 127; }
-  bool mirror(int d) { return spintable() [d] & 128; }  
-  int fix(int d) { return (d + MODFIXER) % full()->degree(); }
-  T*& modmove(int i) { return move(fix(i)); }
-  T*& move(int i) { return move_table[i]; }
-  unsigned char modspin(int i) { return spin(fix(i)); }
-  void fullclear() { 
-    for(int i=0; i<full()->degree(); i++) move_table[i] = NULL;
-    }
-  void connect(int d0, T* c1, int d1, bool m) {
-    move(d0) = c1;
-    c1->move(d1) = full();
-    setspin(d0, d1, m);
-    c1->c.setspin(d1, d0, m);    
-    }
-  void connect(int d0, walker<T> hs) {
-    connect(d0, hs.at, hs.spin, hs.mirrored);
-    }
-  };
-
-// Allocate a class T with a connection_table, but 
-// with only `degree` connections. Also set yet
-// unknown connections to NULL.
-
-// Generating the hyperbolic world consumes lots of
-// RAM, so we really need to be careful on low memory devices. 
-
-template<class T> T* tailored_alloc(int degree) {
-  const T* sample = (T*) &degree;
-  T* result;
-#ifndef NO_TAILORED_ALLOC
-  int b = (char*)&sample->c.move_table[degree] + degree - (char*) sample;
-  result = (T*) new char[b];
-  new (result) T();
-#else
-  result = new T;
-#endif
-  result->type = degree;
-  for(int i=0; i<degree; i++) result->c.move_table[i] = NULL;
-  return result;
-  }
-
-template<class T> void tailored_delete(T* x) {
-  x->~T();  
-  delete[] ((char*) (x));
-  }
-
-static const struct wstep_t { wstep_t() {} } wstep;
-static const struct wmirror_t { wmirror_t() {}} wmirror;
-static const struct rev_t { rev_t() {} } rev;
-static const struct revstep_t { revstep_t() {}} revstep;
-
-// unused for heptagons
-inline vector<int> reverse_directions(struct heptagon *c, int i) { return {i}; }
-
-int hrand(int);
-
-template<class T> struct walker {
-  T *at;
-  int spin;
-  bool mirrored;
-  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { if(at) s = at->c.fix(s); }
-  walker<T>& operator += (int i) {
-    spin = at->c.fix(spin+(mirrored?-i:i));
-    return (*this);
-    }
-  walker<T>& operator -= (int i) {
-    spin = at->c.fix(spin-(mirrored?-i:i));
-    return (*this);
-    }
-  walker<T>& operator += (wmirror_t) {
-    mirrored = !mirrored;
-    return (*this);
-    }
-  walker<T>& operator += (wstep_t) {
-    at->cmove(spin);
-    int nspin = at->c.spin(spin);
-    if(at->c.mirror(spin)) mirrored = !mirrored;
-    at = at->move(spin);
-    spin = nspin;
-    return (*this);
-    }
-  walker<T>& operator += (rev_t) {
-    auto rd = reverse_directions(at, spin);
-    if(rd.size() == 1) spin = rd[0];
-    else spin = rd[hrand(rd.size())];
-    return (*this);
-    }
-  walker<T>& operator += (revstep_t) {
-    (*this) += rev; return (*this) += wstep; 
-    }
-  bool operator != (const walker<T>& x) const {
-    return at != x.at || spin != x.spin || mirrored != x.mirrored;
-    }
-  bool operator == (const walker<T>& x) const {
-    return at == x.at && spin == x.spin && mirrored == x.mirrored;
-    }
-
-  bool operator < (const walker<T>& cw2) const {
-    return tie(at, spin, mirrored) < tie(cw2.at, cw2.spin, cw2.mirrored);
-    }
-
-  walker<T>& operator ++ (int) { return (*this) += 1; }
-  walker<T>& operator -- (int) { return (*this) -= 1; }
-  template<class U> walker operator + (U t) const { walker<T> w = *this; w += t; return w; }
-  template<class U> walker operator - (U t) const { walker<T> w = *this; w += (-t); return w; }
-  T*& peek() { return at->move(spin); }
-  T* cpeek() { return at->cmove(spin); }
-  bool creates() { return !peek(); }
-  walker<T> mirrorat(int d) { return walker<T> (at, at->c.fix(d+d - spin), !mirrored); }
-  };
-
-struct cell;
-
-// automaton state
-enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
-
-struct cell *createMov(struct cell *c, int d);
-struct heptagon *createStep(struct heptagon *c, int d);
-
-struct cdata {
-  int val[4];
-  int bits;
-  };
-
-// in bitruncated/irregular/Goldberg geometries, heptagons form the 
-// underlying regular tiling (not necessarily heptagonal); in pure
-// geometries, they correspond 1-1 to tiles; in 'masterless' geometries
-// heptagons are unused
-
-struct heptagon {
-  // automaton state
-  hstate s : 6;
-  unsigned int dm4: 2;
-  // distance from the origin
-  short distance;
-  // note: all the 'val' values may have different meaning in other geometries
-  // emerald/wineyard generator
-  short emeraldval;
-  // fifty generator
-  short fiftyval;
-  // zebra generator (1B actually)
-  short zebraval;
-  // field id
-  int fieldval : 24;
-  // degree
-  unsigned char type : 8;
-  // data for fractal landscapes
-  short rval0, rval1;
-  // for alternate structures, cdata contains the pointer to the original
-  // for the main map, it contains the fractal landscape data
-  struct cdata *cdata;
-  // central cell of this underlying tiling
-  cell *c7;
-  // associated generator of alternate structure, for Camelot and horocycles
-  heptagon *alt;
-  // connection table
-  connection_table<heptagon> c;
-  heptagon*& move(int d) { return c.move(d); }
-  heptagon*& modmove(int d) { return c.modmove(d); }
-  // functions
-  heptagon () { heptacount++; }
-  ~heptagon () { heptacount--; }
-  heptagon *cmove(int d) { return createStep(this, d); }
-  heptagon *cmodmove(int d) { return createStep(this, c.fix(d)); }
-  inline int degree() { return type; }
-
-  // prevent accidental copying
-  heptagon(const heptagon&) = delete;
-  heptagon& operator=(const heptagon&) = delete;
-  // do not add any fields after connection_table (see tailored_alloc)
-  };
-
-struct cell : gcell {
-  char type; int degree() { return type; }
-
-  // wall parameter, used for remaining power of Bonfires and Thumpers
-  char wparam;
-
-  // used by celllister
-  int listindex;
-
-  // heptagon who owns us; for 'masterless' tilings it contains coordinates instead
-  heptagon *master;
-
-  connection_table<cell> c;
-  cell*& move(int d) { return c.move(d); }
-  cell*& modmove(int d) { return c.modmove(d); }
-  cell* cmove(int d) { return createMov(this, d); }
-  cell* cmodmove(int d) { return createMov(this, c.fix(d)); }
-  cell() {}
-
-  // prevent accidental copying
-  cell(const cell&) = delete;
-  heptagon& operator=(const cell&) = delete;
-  // do not add any fields after connection_table (see tailored_alloc)
-  };
-
-/*
-namespace arcm { int degree(heptagon *h); int valence(); }
-
-int heptagon::degree() { 
-  #if CAP_ARCM
-  if(archimedean) return arcm::degree(this); else 
-  #endif
-  return S7; 
-  } */
-
-typedef walker<heptagon> heptspin;
-typedef walker<cell> cellwalker;
-
-static const struct cth_t { cth_t() {}} cth;
-inline heptspin operator+ (cellwalker cw, cth_t) { return heptspin(cw.at->master, cw.spin * DUALMUL, cw.mirrored); }
-inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, hs.spin / DUALMUL, hs.mirrored); }
 
 #define BUGCOLORS 3
 
@@ -689,7 +373,7 @@ struct movedir {
   #define MD_UNDECIDED (-3)
   #define MD_USE_ORB (-4)
   int subdir; // for normal movement (0+): turn left or right
-  cell *tgt;  // for MD_USE_ORB: target cell
+  struct cell *tgt;  // for MD_USE_ORB: target cell
   };
 
 // shmup
@@ -704,7 +388,7 @@ typedef function<bool()> bool_reaction_t;
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
-typedef function<int(cell*)> cellfunction;
+typedef function<int(struct cell*)> cellfunction;
 
 // passable flags
 
@@ -968,10 +652,6 @@ namespace scores { void load(); }
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
 
-namespace mirror {
-  cellwalker reflect(const cellwalker& cw);
-  }
-
 struct hint {
   time_t last;
   function<bool()> usable;
@@ -1025,56 +705,6 @@ const eLand NOWALLSEP_USED = laWhirlpool;
 #define GRAIL_RADIUS_MASK 0x3FFF
 
 extern vector<cell*> dcal;
-
-// list all cells in distance at most maxdist, or until when maxcount cells are reached
-
-struct manual_celllister {
-  vector<cell*> lst;
-  vector<int> tmps;
-
-  bool listed(cell *c) {
-    return c->listindex >= 0 && c->listindex < isize(lst) && lst[c->listindex] == c;
-    }
-  
-  bool add(cell *c) {
-    if(listed(c)) return false;
-    tmps.push_back(c->listindex);
-    c->listindex = isize(lst);
-    lst.push_back(c);
-    return true;
-    }
-
-  ~manual_celllister() {     
-    for(int i=0; i<isize(lst); i++) lst[i]->listindex = tmps[i];
-    }  
-  };
-  
-
-struct celllister : manual_celllister {
-  vector<int> dists;
-  
-  void add_at(cell *c, int d) {
-    if(add(c)) dists.push_back(d);
-    }
-  
-  celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
-    add_at(orig, 0);
-    cell *last = orig;
-    for(int i=0; i<isize(lst); i++) {
-      cell *c = lst[i];
-      if(maxdist) forCellCM(c2, c) {
-        add_at(c2, dists[i]+1);
-        if(c2 == breakon) return;
-        }
-      if(c == last) {
-        if(isize(lst) >= maxcount || dists[i]+1 == maxdist) break;
-        last = lst[isize(lst)-1];
-        }
-      }
-    }
-
-  int getdist(cell *c) { return dists[c->listindex]; }
-  };
 
 // z to close to this limit => do not draw
 

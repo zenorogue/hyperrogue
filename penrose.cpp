@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- Kite-and-dart tiling
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file penrose.cpp
+ *  \brief Kite-and-dart tiling, both in R^2 and H^3
+ */
+
 namespace hr {
 
 EX namespace kite {

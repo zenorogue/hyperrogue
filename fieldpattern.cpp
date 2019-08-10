@@ -1,5 +1,9 @@
-// Hyperbolic Rogue -- implementation of the quotient geometries based on fields
+// Hyperbolic Rogue -- Field Quotient geometry
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file fieldpattern.cpp
+ *  \brief Field Quotient geometry
+ */
 
 #if CAP_FIELD
 namespace hr {

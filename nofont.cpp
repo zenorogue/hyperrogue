@@ -1,11 +1,15 @@
 // Hyperbolic Rogue -- built-in font
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file nofont.cpp
+ *  \brief built-in font (used e.g. in the web version)
+ */
 
 namespace hr {
 
 #if CAP_TABFONT
-// compile with -DCAP_CREATEFONT=1 to generate this table
-// this variant has been created for non-translated HyperRogue
+/** compile with -DCAP_CREATEFONT=1 to generate this table
+ * this variant has been created for non-translated HyperRogue */
 unsigned char fonttable[] = {
 43,13,0,255,0,255,0,49,
 43,16,0,133,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,243,255,5,95,0,9,223,255,5,74,0,9,191,255,5,42,0,9,159,255,5,11,0,9,128,255,4,235,0,10,96,255,4,203,0,10,64,255,4,171,0,10,32,255,4,139,0,58,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,9,244,255,5,96,0,148,

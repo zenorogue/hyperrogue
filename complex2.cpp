@@ -1,8 +1,11 @@
-// Hyperbolic Rogue
-
-// namespaces for new complex lands for HR11
-
+// Hyperbolic Rogue - Complex features part II
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file complex2.cpp 
+ *  \brief Continuation of complex.cpp
+ *
+ *  Includes: Brownian, Irradiated, Free Fall
+ */
 
 #ifdef CAP_COMPLEX2
 

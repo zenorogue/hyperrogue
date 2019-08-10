@@ -1,3 +1,11 @@
+// Hyperbolic Rogue - Floor Shapes
+
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file floorshapes.cpp
+ *  \brief Adjusting the floor shapes to various geometries.
+ */
+
 namespace hr {
 #if CAP_SHAPES
 

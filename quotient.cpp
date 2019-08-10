@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- quotient spaces
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file quotient.cpp
+ *  \brief quotient spaces
+ */
+
 namespace hr {
 
 // --- quotient geometry ---

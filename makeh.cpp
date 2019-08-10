@@ -1,3 +1,4 @@
+// generate autohdr.h based on the `EX` and `#if HDR` in *.cpp files
 #include <cstdio>
 #include <iostream>
 #include <fstream>

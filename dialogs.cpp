@@ -1,18 +1,9 @@
 // Hyperbolic Rogue -- dialogs
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-/* Missing.
-
-#if ISMOBILE==0
-  dialog::addItemHelp(16, XLAT("use Shift to decrease and Ctrl to fine tune "));
-  dialog::addItemHelp(17, XLAT("(e.g. Shift+Ctrl+Z)"));
-#endif
-
-  if(xuni == 'i') {
-    }
-  
-
-*/
+/** \file dialogs.cpp
+ *  \brief Implementation of various generic dialogs and elements of dialog windows
+ */
 
 namespace hr {
 

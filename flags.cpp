@@ -1,26 +1,10 @@
-// Hyperbolic Rogue
-// implementation of various simple flags for lands, items, monsters, and walls
+// Hyperbolic Rogue - Flags
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-
-/*
-rewritten
-*/
-
-// itemclass
-// slimegroup (wall)
-
-/*
-      it == itOrbLove ? shLoveRing :
-      isRangedOrb(it) ? shTargetRing :
-      isOffensiveOrb(it) ? shSawRing :
-      isFriendOrb(it) ? shPeaceRing :
-      isUtilityOrb(it) ? shGearRing :
-      isDirectionalOrb(it) ? shSpearRing :
-      among(it, itOrb37, itOrbGravity) ? shHeptaRing :
-      shRing;
-*/
+/** \file flags.cpp
+ *  \brief Implementation of various simple flags for lands, items, monsters, and walls.
+ */
 
 namespace hr {
 

@@ -1,5 +1,11 @@
-// Hyperbolic Rogue -- achievements
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- Achievements
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file achievements.cpp 
+ *  \brief This file implements routines related to achievements and leaderboards
+ *
+ *  This routines are general, i.e., not necessarily Steam-specific.
+ */
 
 namespace hr {
 
@@ -84,9 +90,12 @@ EX void upload_score(int id, int v);
 
 string achievementMessage[3];
 int achievementTimer;
-// achievements received this game
+/** achievements received this game */
 EX vector<string> achievementsReceived;
 
+/** Returns true if the given achievement cannot be obtained in the current mode.
+ *  @param flags Mode requested by the achievement. 
+ */
 EX bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == rg::global) return false;
@@ -147,9 +156,11 @@ EX void achievement_log(const char* s, char flags) {
 EX void achievement_init();
 EX string myname();
 EX void achievement_close();
-// gain the achievement with the given name.
-// flags: 'e' - for Euclidean, 's' - for Shmup, '7' - for heptagonal
-// Only awarded if special modes are matched exactly.
+
+/** gain the given achievement.
+ * @param s name of the achievement, e.g., DIAMOND1
+ * @param flags one of the constants from namespace rg. The achievement is only awarded if special modes are matched exactly.
+ */
 EX void achievement_gain(const char* s, char flags IS(0));
 
 #if ISSTEAM
@@ -476,7 +487,12 @@ EX void achievement_collection(eItem it, int prevgold, int newgold) {
     }
   }
 
-// this is used for 'counting' achievements, such as kill 10 monsters at the same time.
+/** This function awards 'counting' achievements, such as kill 10 monsters at the same time.
+ *  @param s name of the group of achievements, e.g. GOLEM.
+ *  @param current our score, e.g., the the achievement GOLEM2 will be awared with current >= 5.
+ *  @param prev previous value of the score.
+ */
+
 EX void achievement_count(const string& s, int current, int prev) {
   if(cheater) return;
   if(shmup::on) return;
@@ -622,8 +638,9 @@ EX void improveItemScores() {
 
 int next_stat_tick;
 
-// gain the final achievements. Called with really=false whenever the user
-// looks at their score, and really=true when the game really ends.
+/** gain the final achievements. 
+ *  @param really false: the user is simply looking at the score; true: the game really ended.
+ */
 EX void achievement_final(bool really_final) {
   if(offlineMode) return;
 
@@ -740,8 +757,9 @@ EX void check_total_victory() {
   achievement_gain("TOTALVICTORY");
   }
   
-// gain the victory achievements. Set 'hyper' to true for
-// the Hyperstone victory, and false for the Orb of Yendor victory.
+/** gain the victory achievements. 
+ *  @param hyper true for the Hyperstone victory, and false for the Orb of Yendor victory.
+ */
 EX void achievement_victory(bool hyper) {
   DEBBI(DF_STEAM, ("achievement_victory"))
   if(offlineMode) return;
@@ -812,14 +830,14 @@ EX void achievement_victory(bool hyper) {
 #endif
   }
 
-// call the achievement callbacks
+/** call the achievement callbacks */
 EX void achievement_pump();
 
 #ifndef HAVE_ACHIEVEMENTS
 void achievement_pump() {}
 #endif
 
-// display the last achievement gained.
+/** display the last achievement gained. */
 EX void achievement_display() {
   #ifdef HAVE_ACHIEVEMENTS
   if(achievementTimer) {

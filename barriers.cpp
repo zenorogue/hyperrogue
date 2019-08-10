@@ -1,6 +1,9 @@
 // Hyperbolic Rogue -- Barriers
-// This file implements routines related to barriers (Great Walls and similar).
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file barriers.cpp 
+ *  \brief This file implements routines related to barriers (Great Walls and similar).
+ */
 
 namespace hr {
 
@@ -32,6 +35,7 @@ EX bool hasbardir(cell *c) {
   return c->bardir != NODIR && c->bardir != NOBARRIERS;
   }
 
+/** return true if the cell c is not allowed to generate barriers because of other large things already existing nearby. */
 EX void preventbarriers(cell *c) {
   if(c && c->bardir == NODIR) c->bardir = NOBARRIERS;
   }
@@ -60,7 +64,7 @@ EX bool checkBarriersBack(cellwalker bb, int q IS(5), bool cross IS(false)) {
   return checkBarriersFront(bb, q);
   }
 
-// warp coasts use a different algorithm when has_nice_dual() is on
+/** warp coasts use a different algorithm for nowall barriers when has_nice_dual() is on. Check whether we should use this different algorithm when the lands are l1 and l2 */
 EX bool warped_version(eLand l1, eLand l2) {
   return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || (VALENCE == 3);
   }

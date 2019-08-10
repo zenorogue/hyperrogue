@@ -1,7 +1,9 @@
-
-// implementation of the binary tilings
-
+// Hyperbolic Rogue -- binary tilings
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file binary-tiling.cpp 
+ *  \brief Binary tilings in 2D and 3D
+ */
 
 namespace hr {
 

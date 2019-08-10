@@ -1,19 +1,14 @@
-// Hyperbolic Rogue
-// This file implements the multi-dimensional (aka crystal) geometries.
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- Crystal geometries
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file crystal.cpp
+ *  \brief Multi-dimensional (aka crystal) geometries. 
+ */
 
 namespace hr {
 
 EX namespace crystal {
 #if CAP_CRYSTAL
-// Crystal can be bitruncated either by changing variation to bitruncated.
-// In case of the 4D Crystal, the standard HyperRogue bitruncation becomes
-// confused by having both the original and new vertices of degree 8.
-// Hence Crystal implements its own bitruncation, which is selected/checked
-// by setting ginf[gCrystal].vertex to 3. Additionally, this lets us double
-// bitruncate.
-
-// Function pure() checks for both kinds of bitruncation (or any other variations).
 
 #if HDR
 static const int MAXDIM = 7;
@@ -23,6 +18,15 @@ static const coord c0 = {};
 typedef array<ld, MAXDIM> ldcoord;
 static const ldcoord ldc0 = {};
 #endif
+
+/** Crystal can be bitruncated either by changing variation to bitruncated.
+ *  In case of the 4D Crystal, the standard HyperRogue bitruncation becomes
+ *  confused by having both the original and new vertices of degree 8.
+ *  Hence Crystal implements its own bitruncation, which is selected/checked
+ *  by setting ginf[gCrystal].vertex to 3. Additionally, this lets us double
+ *  bitruncate.
+ *  Function pure() checks for both kinds of bitruncation (or any other variations).
+ */
 
 EX bool pure() {
   return PURE && ginf[gCrystal].vertex == 4;
@@ -54,14 +58,14 @@ void resize2(vector<vector<int>>& v, int a, int b, int z) {
   for(auto& w: v) w.resize(b, z);
   }
 
-// in the "pure" form, the adjacent vertices are internaly spaced by 2...
+/** in the "pure" form, the adjacent vertices are internaly spaced by 2 */
 const int FULLSTEP = 2;
 
-// ... to make space for the additional vertices which are added in the bitruncated version
+/** to make space for the additional vertices which are added in the bitruncated version */
 const int HALFSTEP = 1;
 
-// with variations, the connections of the vertex at coordinate v+FULLSTEP mirror the connections
-// of the vertex at coordinate v. Therefore, the period of our construction is actually 2*FULLSTEP.
+/** with variations, the connections of the vertex at coordinate v+FULLSTEP mirror the connections
+ *  of the vertex at coordinate v. Therefore, the period of our construction is actually 2*FULLSTEP. */
 const int PERIOD = 2 * FULLSTEP;
 
 struct crystal_structure {
@@ -347,19 +351,6 @@ int fiftyrule(coord c) {
   if(res[index] == -1) exit(1);
   
   return res[index];
-  
-  /*  
-  int res = 0;
-  int d = (c[0]&1) + 2 * (c[1]&1) + 4 * (c[2]&1) + 8 * (c[3]&1);
-  if(d == 0) res = 0;
-  else if(d == 3 || d == 12) res = 2;
-  else if(d == 6 || d == 9) res = 4;
-  else return -1;
-  bool odd = (c[0]^c[1]^c[2]^c[3])&2;
-  if(odd)
-    res ^= 32;
-  // the '1' bit set by hand
-  */
   }
 
 bool is_bi(crystal_structure& cs, coord co);

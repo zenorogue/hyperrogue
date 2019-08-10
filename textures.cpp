@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- texture mode
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file textures.cpp
+ *  \brief texture mode, also the basic definitions of textures, used in 3D mode
+ */
+
 #if CAP_TEXTURE
 namespace hr {
 

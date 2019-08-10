@@ -1,3 +1,10 @@
+// Hyperbolic Rogue -- Irregular (Voronoi) tilings
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file irregular.cpp
+ *  \brief Irregular (Voronoi) tilings
+ */
+
 namespace hr { 
 
 EX namespace irr {

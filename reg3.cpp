@@ -1,7 +1,13 @@
 // Hyperbolic Rogue -- regular honeycombs
-// works with spherical and hyperbolic ones -- Euclidean cubic tiling implemented in euclid.cpp
-// hyperbolic honeycombs rely on binary:: to deal with floating point errors (just like archimedean)
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file reg3.cpp
+ *  \brief regular honeycombs
+ *
+ *  works with spherical and hyperbolic ones -- Euclidean cubic tiling implemented in euclid.cpp
+ *  includes non-quotient spaces as well as field quotient and elliptic spaces
+ *  hyperbolic honeycombs rely on binary:: to deal with floating point errors (just like archimedean)
+ */
 
 namespace hr {
 #if MAXMDIM >= 4

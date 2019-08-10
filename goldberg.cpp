@@ -1,3 +1,12 @@
+// Hyperbolic Rogue -- Goldberg-Coxeter construction
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file goldberg.cpp
+ *  \brief Goldberg-Coxeter construction
+ *
+ *  This is generally not used for standard pure and bitruncated tilings, even though they are technically Goldberg too.
+ */
+
 namespace hr { 
 
 EX namespace gp {

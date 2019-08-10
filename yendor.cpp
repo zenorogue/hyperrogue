@@ -1,9 +1,9 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- minor modes
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-
-// Yendor Quest, together with the Yendor Challenge
-// also, the Pure Tactics Mode and the Peace Mode
+/** \file yendor.cpp
+ *  \brief Yendor Quest/Challenge, Pure Tactics Mode, Peace Mode
+ */
 
 namespace hr {
 

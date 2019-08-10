@@ -1,5 +1,9 @@
-// HyperRogue menus
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- menus
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file menus.cpp
+ *  \brief generic menus (start menu, main menu, Overview, etc.)
+ */
 
 // -- overview --
 

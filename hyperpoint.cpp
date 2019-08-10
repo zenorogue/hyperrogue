@@ -1,6 +1,13 @@
-// Hyperbolic Rogue
-// This file contains hyperbolic points and matrices.
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- basic computations in non-Euclidean geometry
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file hyperpoint.cpp
+ *  \brief basic computations in non-Euclidean geometry
+ *
+ *  This implements hyperpoint (a point in non-Euclidean space), transmatrix (a transformation matrix),
+ *  and various basic routines related to them: rotations, translations, inverses and determinants, etc.
+ *  For nonisotropic geometries, it rather refers to nonisotropic.cpp.
+ */
 
 namespace hr {
 

@@ -1,7 +1,11 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- surfaces of constant negative curvature
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-// This file implements the surfaces of constant negative curvature
-// See http://webmath2.unito.it/paginepersonali/sergio.console/CurveSuperfici/AG15.pdf for a nice reference
+
+/** \file surface.cpp
+ *  \brief surfaces of constant negative curvature
+ *
+ *  See http://webmath2.unito.it/paginepersonali/sergio.console/CurveSuperfici/AG15.pdf for a nice reference
+ */
 
 #if CAP_SURFACE
 namespace hr { 

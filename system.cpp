@@ -1,8 +1,9 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- starting and ending games
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-
-// routines for: initializing/closing, loading/saving, and cheating
+/** \file system.cpp
+ *  \brief changing game modes, starting, closing, loading and saving games
+ */
 
 namespace hr {
 

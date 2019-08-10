@@ -1,8 +1,11 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- Heptagon
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-// heptagon here refers to underlying heptagonal tesselation
-// (which you can see by changing the conditions in graph.cpp)
+/** \file heptagon.cpp
+ *  \brief implementation of Heptagons
+ *
+ *  Start with locations.cpp
+ */
 
 namespace hr {
 
@@ -13,13 +16,12 @@ int heptacount = 0;
 struct cell;
 cell *newCell(int type, heptagon *master);
 
-// spintable functions
-
-// the automaton is used to generate each heptagon in an unique way
-// (you can see the tree obtained by changing the conditions in graph.cpp)
-// from the origin we can go further in any direction, and from other heptagons
-// we can go in directions 3 and 4 (0 is back to origin, so 3 and 4 go forward),
-// and sometimes in direction 5
+/** the automaton is used to generate each heptagon in an unique way.
+ *  See http://roguetemple.com/z/dev.php for more help.
+ *  From the origin we can go further in any direction, and from other heptagons
+ *  we can go in directions 3 and 4 (0 is back to origin, so 3 and 4 go forward),
+ *  and sometimes in direction 5
+ */
 
 hstate transition(hstate s, int dir) {
   if(sphere) {
@@ -210,11 +212,9 @@ void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
 
 extern int hrand(int);
 
-// a structure used to walk on the heptagonal tesselation
-// (remembers not only the heptagon, but also direction)
+EX hookset<void(heptagon*, int)> *hooks_createStep;
 
-hookset<void(heptagon*, int)> *hooks_createStep;
-
+// create h->move(d) if not created yet
 heptagon *createStep(heptagon *h, int d) {
   d = h->c.fix(d);
   if(h->move(d)) return h->move(d);
@@ -281,8 +281,5 @@ void backtrace(heptagon *pos) {
 void hsshow(const heptspin& t) {
   printf("ORIGIN"); backtrace(t.at); printf(" (spin %d)\n", t.spin);
   }
-
-// create h->move(d) if not created yet
-heptagon *createStep(heptagon *h, int d);
 
 }

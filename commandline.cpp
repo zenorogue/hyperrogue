@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- commandline options
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file commandline.cpp 
+ *  \brief Commandline options support
+ */
+
 namespace hr {
 
 #if CAP_COMMANDLINE

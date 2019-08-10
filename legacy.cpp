@@ -1,5 +1,5 @@
-// old config file format (disabled by default)
-// Copyright (C) 2017-2019 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- old config file format (disabled by default)
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
 #if CAP_LEGACY
 namespace hr {

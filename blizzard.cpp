@@ -1,5 +1,9 @@
-// Hyperbolic Rogue -- special graphical effects, such as the Blizzard
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- Blizzard
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file blizzard.cpp 
+ *  \brief special graphical effects, such as the Blizzard and arrow traps
+ */
 
 namespace hr {
 

@@ -1,5 +1,9 @@
-// Hyperbolic Rogue -- local score system
+// Hyperbolic Rogue -- local highscore lists
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file scores.cpp
+ *  \brief local highscore lists
+ */
 
 #if CAP_SAVE
 

@@ -1,7 +1,9 @@
-
-// implementation of the Solv space
-
+// Hyperbolic Rogue -- nonisotropic spaces (Solv and Nil)
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file nonisotropic.cpp
+ *  \brief nonisotropic spaces (Solv and Nil)
+ */
 
 namespace hr {
 

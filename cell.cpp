@@ -1,7 +1,11 @@
 // Hyperbolic Rogue -- cells
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// cells the game is played on
+/** \file cell.cpp 
+ *  \brief General cells and maps
+ *
+ *  Start with locations.cpp
+ */
 
 namespace hr {
 
@@ -35,7 +39,7 @@ struct hrmap {
   virtual vector<hyperpoint> get_vertices(cell*);
   };
 
-// hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient 
+/** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient */
 struct hrmap_standard : hrmap {
   void draw() override;
   transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
@@ -124,7 +128,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
     h.c7 = newCell(S7, origin);
   }
 
-// very similar to createMove in heptagon.cpp
+/** very similar to createMove in heptagon.cpp */
 EX cell *createMov(cell *c, int d) {
   if(d<0 || d>= c->type) {
     printf("ERROR createmov\n");
@@ -253,7 +257,7 @@ EX euc_pointer euclideanAtCreate(int vec) {
 
 hookset<hrmap*()> *hooks_newmap;
 
-// initializer (also inits origin from heptagon.cpp)
+/** create a map in the current geometry */
 EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
   

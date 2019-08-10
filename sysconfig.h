@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- set compiler flags, and include all the required system headers
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file sysconfig.h
+ *  \brief set compiler flags, and include all the required system headers
+ */
+
 #ifdef MAC
 #define ISMAC 1
 #endif

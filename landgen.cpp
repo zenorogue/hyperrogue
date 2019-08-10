@@ -1,6 +1,11 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- land generation
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file landgen.cpp
+ *  \brief generating various lands
+ *
+ *  See also bigstuff.cpp (for larger structures) and complex.cpp (for more complex land generation)
+ */
 
 namespace hr {
 

@@ -1,8 +1,9 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- multiplayer features
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-
-// implementation of the multiplayer features
+/** \file multi.cpp
+ *  \brief multiplayer features, also input configuration
+ */
 
 namespace hr {
 

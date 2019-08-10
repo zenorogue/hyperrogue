@@ -1,6 +1,9 @@
 // Hyperbolic Rogue -- configuration
-
 // Copyright (C) 2017-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file config.cpp 
+ *  \brief Configuration -- initial settings, saving/loading ini files, menus, etc.
+ */
 
 namespace hr {
 

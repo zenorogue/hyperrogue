@@ -1,7 +1,9 @@
-// Hyperbolic Rogue
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- land availability
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// land statistics and flags
+/** \file landlock.cpp
+ *  \brief unlocking lands, which lands could be found beyond the wall, validity of various lands depending on the settings
+ */
 
 namespace hr {
 
@@ -14,7 +16,7 @@ EX bool nodisplay(eMonster m) {
     m == moIvyDead;
   }    
 
-// returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear
+/** returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear */
 EX int isNative(eLand l, eMonster m) {
   switch(l) {
     #define LAND(a,b,c,d,e,f,g) case c:

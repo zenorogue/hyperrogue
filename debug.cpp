@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- debugging routines
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file debug.cpp
+ *  \brief Debugging and cheating
+ */
+
 namespace hr {
 
 EX int steplimit = 0;
@@ -471,8 +475,7 @@ EX void push_debug_screen() {
   pushScreen(ds);
   }
 
-// -- cheat menu --
-
+/** show the cheat menu */
 EX void showCheatMenu() {
   gamescreen(1);
   dialog::init("cheat menu");
@@ -515,6 +518,7 @@ EX void showCheatMenu() {
     };
   }
 
+/** view all the monsters and items */
 EX void viewall() {
   celllister cl(cwt.at, 20, 2000, NULL);
   
@@ -550,6 +554,7 @@ EX void viewall() {
     }
   }
 
+/** launch a debugging screen, and continue normal working only after this screen is closed */
 EX void modalDebug(cell *c) {
   viewctr.at = c->master;
   if(noGUI) {

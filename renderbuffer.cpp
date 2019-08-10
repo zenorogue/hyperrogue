@@ -1,9 +1,13 @@
-// Hyperbolic Rogue
-// This file implements the 'renderbuffer', which is an object 
-// that can be used to draw a HyperRogue screen into, 
-// and then either used as a OpenGL texture, or saved.
+// Hyperbolic Rogue -- drawing screens to buffers
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file renderbuffer.cpp
+ *  \brief drawing screens to buffers
+ *
+ *  This file implements the 'renderbuffer', which is an object 
+ *  that can be used to draw a HyperRogue screen into, 
+ *  and then either used as a OpenGL texture (e.g. in the Hypersian Rug mode), or saved.
+ */
 
 namespace hr {
 

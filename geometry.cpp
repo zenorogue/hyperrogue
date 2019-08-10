@@ -1,7 +1,9 @@
-// Hyperbolic Rogue
-// geometrical constants
+// Hyperbolic Rogue -- basic geometry
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file geometry.cpp
+ *  \brief Calculation of basic, and less basic, constants in each geometry
+ */
 
 namespace hr {
 
@@ -76,35 +78,51 @@ struct escher_floorshape : floorshape {
   int shapeid0, shapeid1, noftype, shapeid2;
   ld scale;
   };
+
+/** basic geometry parameters */
 struct geometry_information {
 
-  /* basic geometry parameters */
+  /** distance from heptagon center to another heptagon center */
+  ld tessf;
 
-  // tessf: distance from heptagon center to another heptagon center
-  // hexf: distance from heptagon center to small heptagon vertex
-  // hcrossf: distance from heptagon center to big heptagon vertex
-  // crossf: distance from heptagon center to adjacent cell center (either hcrossf or tessf)
-  // hexhexdist: distance between adjacent hexagon vertices
-  // hexvdist: distance between hexagon vertex and hexagon center
-  // hepvdist: distance between heptagon vertex and hexagon center (either hcrossf or something else)
-  // rhexf: distance from heptagon center to heptagon vertex (either hexf or hcrossf)
-  ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
+  /** distance from heptagon center to adjacent cell center (either hcrossf or tessf) */
+  ld crossf;
+  
+  /** distance from heptagon center to small heptagon vertex */
+  ld hexf;
+  
+  /** distance from heptagon center to big heptagon vertex */
+  ld hcrossf;
+  
+  /** distance between adjacent hexagon vertices */
+  ld hexhexdist;
+  
+  /** distance between hexagon vertex and hexagon center */
+  ld hexvdist;
+  
+  /** distance between heptagon vertex and hexagon center (either hcrossf or something else) */
+  ld hepvdist;
+
+  /** distance from heptagon center to heptagon vertex (either hexf or hcrossf) */
+  ld rhexf;
 
   transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
   transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
   int base_distlimit;
 
-  /* shape parameters */
+  /** size of the Sword (from Orb of the Sword), used in the shmup mode */
   ld sword_size;
-  ld scalefactor, orbsize, floorrad0, floorrad1, zhexf;
+  /** scale factor for the graphics of most things*/
+  ld scalefactor;
+  ld orbsize, floorrad0, floorrad1, zhexf;
   ld corner_bonus;
   ld hexshift;
   ld asteroid_size[8];
   ld wormscale;
   ld tentacle_length;
   
-  /* 3D parameters */
+  /** various parameters related to the 3D view */
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
     SLEV[4], FLATEYE,
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
@@ -360,14 +378,12 @@ hpcshape
   };
 #endif
 
-// the results are:
-// hexf = 0.378077 hcrossf = 0.620672 tessf = 1.090550
-// hexhexdist = 0.566256
+/** values of hcrossf and hexf for the standard geometry. Since polygons are 
+ *  usually drawn in this geometry, the scale in other geometries is usually
+ *  based on comparing these values to the values in the other geometry.
+ */
 
-ld hcrossf7 = 0.620672;
-ld hexf7 = 0.378077;
-
-// the distance between two hexagon centers
+ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
 
 bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
 

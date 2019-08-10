@@ -1,5 +1,9 @@
-// Hyperbolic Rogue language support
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- language support
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file language.cpp
+ *  \brief localization support
+ */
 
 // #define CHECKTRANS
 
@@ -23,28 +27,6 @@ struct stringpar {
   stringpar(eItem i) { v= iinf[i].name; }  
   };
 #endif
-
-/*
-string dnameofEnum(eItem i) {
-  FILE *f = fopen("classes.cpp", "rt");
-  while(!feof(f)) {
-    char buf[256];
-    fgets(buf, 256, f);
-    if(strstr(buf, "eItem")) {
-      string ret;
-      int qty = i;
-      while(qty > -1) {
-        char c = fgetc(f);
-        if(c == ' ' || c == '\n' || c == '\r') continue;
-        else if(c == ',') qty--;
-        else if(!qty) ret += c;
-        }
-      return ret;
-      }
-    }
-  return "?";
-  }
-*/
 
 void rep(string& pattern, string what, string to) {
   while(true) {
@@ -332,6 +314,7 @@ void parrep(string& x, string w, stringpar p) {
 void postrep(string& s) {
   }
 
+/** translate the string @x */
 EX string XLAT(string x) { 
   basicrep(x);
   postrep(x);

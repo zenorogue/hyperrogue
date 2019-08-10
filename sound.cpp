@@ -1,5 +1,9 @@
-// Hyperbolic Rogue -- routines related to sounds
+// Hyperbolic Rogue -- sound effects and music
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file sound.cpp
+ *  \brief sound effects and music
+ */
 
 namespace hr {
 

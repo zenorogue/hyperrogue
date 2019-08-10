@@ -1,7 +1,9 @@
-// Hyperbolic Rogue
-// main game routines: movement etc.
+// Hyperbolic Rogue - Game routines
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file game.cpp
+ *  \brief Routines for game itself: movement of PC and monsters, basic mechanics, etc.
+ */
 
 namespace hr {
 
@@ -78,7 +80,7 @@ EX bool canmove = true;
 
 int sagephase = 0;
 
-// number of Grails collected, to show you as a knight
+/** number of Grails collected, to show you as a knight */
 int knighted = 0;
 
 bool usedSafety = false;
@@ -87,8 +89,10 @@ int safetyseed;
 
 int showid = 0;
 
+/** last move was invisible */
 EX bool invismove = false;
-EX bool invisfish = false; // last move was invisible [due to Fish]
+/** last move was invisible due to Orb of Fish (thus Fish still see you)*/
+EX bool invisfish = false;
 
 int noiseuntil; // noise until the given turn
 
@@ -104,69 +108,86 @@ bool landvisited[landtypes];
 
 bool eq(short a, short b) { return a==b; }
 
-// game state
+/** for treasures, the number collected; for orbs, the number of charges */
 EX array<int, ittypes> items;
+/** how many instances of each monster type has been killed */
 EX array<int, motypes> kills;
 
 EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
 EX map<modecode_t, array<int, ittypes> > hiitems;
 bool orbused[ittypes], lastorbused[ittypes];
-EX bool playermoved = true;  // center on the PC?
-EX bool flipplayer = true;   // flip the player image after move, do not flip after attack
-EX int  cheater = 0;         // did the player cheat?
+/** should we center the screen on the PC? */
+EX bool playermoved = true;
+/** if false, make the PC look in direction cwt.spin (after attack); otherwise, make them look the other direction (after move) */
+EX bool flipplayer = true;
+/** did the player cheat? how many times? */
+EX int  cheater = 0;
 
-int anthraxBonus = 0;     // for using Safety in tactical Camelot
+/** this value is used when using Orb of Safety in the Camelot in Pure Tactics Mode */
+int anthraxBonus = 0;
 
-EX vector<cell*> dcal;   // queue for cpdist
-vector<cell*> pathq;  // queue for pathdist
+/** the list of all nearby cells, according to cpdist */
+EX vector<cell*> dcal;
+/** the list of all nearby cells, according to current pathdist */
+vector<cell*> pathq;
 
-vector<cell*> offscreen; // offscreen cells to take care off
+/** offscreen cells to take care off */
+vector<cell*> offscreen;
 
-vector<cell*> pathqm; // list of monsters to move (pathq restriced to monsters)
-             
-vector<cell*> targets; // list of monster targets
+/** list of monsters to move (pathq restriced to monsters) */
+vector<cell*> pathqm;
 
-// monsters of specific types to move
+/** list of cells that the monsters are targetting (PCs, allies, Thumpers, etc.) */
+vector<cell*> targets;
+
+/** monsters of specific types to move */
 vector<cell*> worms, ivies, ghosts, golems, hexsnakes;
 
 /** temporary changes during bfs */
 vector<pair<cell*, eMonster>> tempmonsters;
 
-// a bit nicer way of DFS
+/** additional direction information for BFS algorithms.
+ *  It remembers from where we have got to this location
+ *  the opposite cell will be added to the queue first,
+ *  which helps the AI.
+ **/
 vector<int> reachedfrom;
 
-// additional direction information for BFS algorithms
-// it remembers from where we have got to this location
-// the opposite cell will be added to the queue first,
-// which helps the AI
+/** monsters to move, ordered by the number of possible good moves */
 vector<cell*> movesofgood[MAX_EDGE+1];
 
-int first7;           // the position of the first monster at distance 7 in dcal
+/** The position of the first cell in dcal in distance 7. New wandering monsters can be generated in dcal[first7..]. */
+int first7;           
 
-EX cellwalker cwt;    // single player character position
+/** Cellwalker describing the single player. Also used temporarily in shmup and multiplayer modes. */
+EX cellwalker cwt;
 
 EX inline cell*& singlepos() { return cwt.at; }
 EX inline bool singleused() { return !(shmup::on || multi::players > 1); }
 
-// the main random number generator for the game
-// all the random calls related to the game mechanics (land generation, AI...) should use hrngen
-// random calls not related to the game mechanics (graphical effects) should not use hrngen
-// this ensures that the game should unfold exactly the same if given the same seed and the same input
+/** the main random number generator for the game
+ *  all the random calls related to the game mechanics (land generation, AI...) should use hrngen
+ *  random calls not related to the game mechanics (graphical effects) should not use hrngen
+ * this ensures that the game should unfold exactly the same if given the same seed and the same input 
+ */
 
 std::mt19937 hrngen;
 
+/** initialize hrngen @see hrngen */
 EX void shrand(int i) {
   hrngen.seed(i);
   }
 
+/** generate a large number with hrngen */
 EX int hrandpos() { return hrngen() & HRANDMAX; }
 
-// using our own implementations rather than ones from <random>,
-// to make sure that they return the same values on different compilers
+/** A random integer from [0..i), generated from hrngen.
+ *  We are using our own implementations rather than ones from <random>,
+ *  to make sure that they return the same values on different compilers.
+m * 
+ * @see hrngen
+ **/
 
-// a random integer from [0..i), generated by the game's main generator
-// we want the same world to be generated if the seed is the same. For this purpose,
-// hrand should be used for all the game-related generation, and nowhere else
 EX int hrand(int i) { 
   unsigned d = hrngen() - hrngen.min();
   long long m = (long long) (hrngen.max() - hrngen.min()) + 1;
@@ -181,10 +202,17 @@ template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i =
 template<class T> void hrandom_shuffle(T* x, int n) { for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]); }
 #endif
 
+/** Use hrngen to generate a floating point number between 0 and 1.
+ * @see hrngen
+ */
+
 EX ld hrandf() { 
   return (hrngen() - hrngen.min()) / (hrngen.max() + 1.0 - hrngen.min());
   }
 
+/** Returns an integer corresponding to the current state of hrngen.
+ *  @see hrngen
+ */
 EX int hrandstate() {
   std::mt19937 r2 = hrngen;
   return r2() & HRANDMAX;
@@ -1059,7 +1087,7 @@ EX int realstuntime(cell *c) {
 
 bool childbug = false;
 
-// is w killed if killed is killed?
+/** Is `w` killed if the part of an ivy `killed` is killed? */
 EX bool isChild(cell *w, cell *killed) {
   if(isAnyIvy(w->monst)) {
     int lim = 0;
@@ -2929,12 +2957,14 @@ EX void buildAirmap() {
   sort(airmap.begin(), airmap.end());  
   }
 
+/** current state of the rose scent
+ *  rosemap[c] &3 can be:
+ *  0 - wave not reached
+ *  1 - wave expanding
+ *  2 - wave phase 1
+ *  3 - wave phase 2
+ */
 map<cell*, int> rosemap;
-// rosemap&3:
-// 0 - wave not reached
-// 1 - wave expanding
-// 2 - wave phase 1
-// 3 - wave phase 2
 
 EX int rosedist(cell *c) {
   if(!(havewhat&HF_ROSE)) return 0;
@@ -3126,7 +3156,7 @@ EX void addButterfly(cell *c) {
   butterflies.push_back(make_pair(c, 0));
   }
 
-// calculate cpdist, 'have' flags, and do general fixings
+/** calculate cpdist, 'have' flags, and do general fixings */
 EX void bfs() {
 
   calcTidalPhase(); 
@@ -3541,9 +3571,10 @@ EX void activateArrowTrap(cell *c) {
   }
 
 
-// effect of moving monster m from cf to ct
-// this is called from moveMonster, or separately from moveIvy/moveWorm,
-// or when a dead bird falls (then m == moDeadBird)
+/** effect of moving monster m from cf to ct
+ *  this is called from moveMonster, or separately from moveIvy/moveWorm,
+ *  or when a dead bird falls (then m == moDeadBird)
+ */
 
 EX void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
 
@@ -4008,7 +4039,10 @@ EX int landheattype(cell *c) {
   return 1;
   }
 
-// move value
+/** for the monster at c1, evaluation of the move to c2
+ *  @param mf what moves are allowed
+ */
+
 EX int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   if(!c2) return -5000;
   
@@ -5539,12 +5573,11 @@ EX bool cellDangerous(cell *c) {
   return cellUnstableOrChasm(c) || isFire(c) || c->wall == waClosedGate;
   }
 
-// negative: die, attack friend, stay against rose, hit a wall, move against rose, hit the player
-
 EX bool hasPrincessWeapon(eMonster m) {
   return m == moPalace || m == moFatGuard;
   }
 
+/** for an ally m at c, evaluate staying in place */
 EX int stayvalue(eMonster m, cell *c) {
   if(!passable_for(c->monst, c, NULL, P_MONSTER | P_MIRROR))
     return -1501;
@@ -5554,7 +5587,7 @@ EX int stayvalue(eMonster m, cell *c) {
   return 100;
   }
 
-// friendly version of moveval
+/** for an ally m at c, evaluate moving to c2 */
 EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
   int val = 0;
   
@@ -5758,9 +5791,10 @@ EX int nearestPathPlayer(cell *c) {
   return 0;
   }
 
-// note: butterflies don't use moveNormal for two reasons:
-// 1) to make sure that they move AFTER bulls
-// 2) to make sure that they move offscreen
+/** note: butterflies don't use moveNormal for two reasons:
+ *  1) to make sure that they move AFTER bulls
+ *  2) to make sure that they move offscreen
+ */
 EX void moveButterflies() {
   int j = 0;
   for(int i=0; i<isize(butterflies); i++) {

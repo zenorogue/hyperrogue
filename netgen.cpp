@@ -1,5 +1,9 @@
-// HyperRogue paper model generator
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- paper model generator
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file netgen.cpp
+ *  \brief paper model generator
+ */
 
 #if CAP_MODEL
 namespace hr { namespace netgen {

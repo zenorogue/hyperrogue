@@ -1,5 +1,9 @@
-// Hyperbolic Rogue -- Euclidean geometry, including 2D, 3D, and quotient spaces
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- Euclidean geometry
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file euclid.cpp
+ *  \brief Euclidean geometry, including 2D, 3D, and quotient spaces
+ */
 
 namespace hr {
 

@@ -1,20 +1,21 @@
-// Hyperbolic Rogue
+// Hyperbolic Rogue -- multi-game features
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-
-// gamedata structure, for recording the game data in memory temporarily
-// namespace dual (dual mode)
+/** \file multi.cpp
+ *  \brief running several games at once -- used in the Tutorial and Dual Geometry mode
+ */
 
 namespace hr {
 
 #if HDR
+/** gamedata structure, for recording the game data in memory temporarily */
 struct gamedata {
-  // important parameters should be visible
+  /** important parameters should be visible */
   eGeometry geo;
   eVariation var;
   eLand specland;
   bool active;
-  // other properties are recorded
+  /** other properties are recorded here */
   vector<char> record;
   int index, mode;
   void storegame();
@@ -103,7 +104,7 @@ EX namespace gamestack {
 EX }
 
 EX namespace dual {
-  // 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames)
+  /** 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames) */
   EX int state;
   
   EX int currently_loaded;

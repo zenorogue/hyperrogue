@@ -1,7 +1,11 @@
 // Hyperbolic Rogue -- the 'experiments with geometry' menu
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// -- geometry menu --
+/** \file geom-exp.cpp
+ *  \brief The 'experiments with geometry' menu
+ *
+ *  Implementation of this menu, and computation of the statistics shown there
+ */
 
 namespace hr {
 

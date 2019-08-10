@@ -1,5 +1,9 @@
-// Hyperbolic Rogue -- heads-up display
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- Heads-Up Display
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file hud.cpp
+ *  \brief Heads-Up display: items collected, monsters killed, radar, etc.
+ */
 
 namespace hr {
 

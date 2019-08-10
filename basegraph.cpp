@@ -1,20 +1,34 @@
 // Hyperbolic Rogue -- basic graphics
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file basegraph.cpp 
+ *  \brief This file implements the basic graphical routines
+ */
+
 namespace hr {
 
 #if HDR
+/** configuration of the current view */
 struct display_data {
-  transmatrix view_matrix; // current rotation, relative to viewctr
-  transmatrix player_matrix; // player-relative view
+  /** This specifies the heptagon the view is currently centered on. 
+   *  Unused in masterless tilings -- precise_center is used there.
+   */
   heptspin view_center;
+  /** The current rotation, relative to viewctr. */
+  transmatrix view_matrix;
+  /** The view relative to the player character. */
+  transmatrix player_matrix;
+  /** The cell which is precisely in the center. */
   cellwalker precise_center;
+  /** On-screen coordinates for all the visible cells. */
   unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
-  ld xmin, ymin, xmax, ymax; // relative
-  ld xtop, ytop, xsize, ysize; // in pixels
+  /** Position of the current map view, relative to the screen (0 to 1). */
+  ld xmin, ymin, xmax, ymax;
+  /** Position of the current map view, in pixels. */
+  ld xtop, ytop, xsize, ysize;
   display_data() { xmin = ymin = 0; xmax = ymax = 1; }
 
-  // paramaters calculated from the above
+  /** Center of the current map view, in pixels. */
   int xcenter, ycenter;
   ld radius;
   int scrsize;  
@@ -47,6 +61,7 @@ struct display_data {
 EX display_data default_display;
 EX display_data *current_display = &default_display;
 
+/** Color of the background. */
 EX unsigned backcolor = 0;
 EX unsigned bordcolor = 0;
 EX unsigned forecolor = 0xFFFFFF;
@@ -1232,8 +1247,6 @@ ld textscale() {
   return vid.fsize / (current_display->radius * cgi.crossf) * (1+vid.alpha) * 2;
   }
   
-// bool notgl = false;
-
 bool setfsize = true;
 
 EX bool vsync_off;

@@ -1,7 +1,9 @@
-
-// implementation of the rendering queue
-
+// Hyperbolic Rogue -- rendering
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file drawing.cpp
+ *  \brief Rendering shapes (dqi_draw), queue of shapes to render (ptds), etc.
+ */
 
 namespace hr {
 
@@ -109,8 +111,6 @@ EX unsigned char& part(color_t& col, int i) {
 bool fatborder;
 
 EX color_t poly_outline;
-
-// #define STLSORT
 
 EX vector<unique_ptr<drawqueueitem>> ptds;
 

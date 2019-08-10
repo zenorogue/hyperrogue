@@ -1,6 +1,12 @@
-// HyperRogue patterns: compute codes for actual cells
+// Hyperbolic Rogue -- patterns
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file pattern2.cpp
+ *  \brief various functions computing the standings of individual cells with respect to various patterns
+ *
+ *  Patterns include simple ones (hexagon or heptagon, three-colorings, Chessboard)
+ *  as well as more complex ones (Emerald, Palace, Field Pattern)
+ */
 
 namespace hr {
 

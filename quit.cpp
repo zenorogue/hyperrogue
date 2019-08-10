@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- the mission screen
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file quit.cpp
+ *  \brief the mission screen, and routines related to it
+ */
+
 namespace hr {
 
 EX bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !archimedean); }

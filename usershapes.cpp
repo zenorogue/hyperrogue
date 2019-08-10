@@ -1,8 +1,11 @@
-#if CAP_SHAPES
-
-// HyperRogue, some functions for user-defined shapes
-
+// HyperRogue -- user-defined shapes
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file usershapes.cpp
+ *  \brief user-defined shapes
+ */
+
+#if CAP_SHAPES
 
 namespace hr {
 

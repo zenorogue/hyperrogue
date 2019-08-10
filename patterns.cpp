@@ -1,6 +1,9 @@
-// HyperRogue patterns: tables to give codes to heptagons
+// Hyperbolic Rogue -- pattern tables
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file patterns.cpp
+ *  \brief tables that the complex patterns (Emerald, Palace, Field Pattern) are based on
+ */
 
 namespace hr {
 

@@ -1,7 +1,9 @@
-// Hyperbolic Rogue
-// advanced geometry
+// Hyperbolic Rogue -- advanced geometry
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+/** \file geometry2.cpp
+ *  \brief Matrices to transform between coordinates of various cells, coordinates of cell corners, etc.
+ */
 
 namespace hr {
 
@@ -148,16 +150,6 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
       gm = gm * cgi.invheptmove[sp];
       }
     }
-/*if(hsol) {
-    transmatrix sol2 = gm * where;
-    for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-      if(fabs(sol2[i][j]-sol[i][j] > 1e-3)) {
-        printf("ERROR\n");
-        display(sol);
-        display(sol2);
-        exit(1);
-        }
-    } */
   return gm * where;
   }
 

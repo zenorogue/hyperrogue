@@ -1,6 +1,10 @@
 // Hyperbolic Rogue -- help routines
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file help.cpp
+ *  \brief Building and displaying help text
+ */
+
 namespace hr {
 
 EX string help;
