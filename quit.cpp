@@ -3,7 +3,7 @@
 
 namespace hr {
 
-bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !archimedean); }
+EX bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !archimedean); }
 
 EX bool needConfirmationEvenIfSaved() {
   return canmove && (gold() >= 30 || tkills() >= 50) && !cheater;

@@ -253,7 +253,7 @@ EX void checkpanjoy(double t) {
 
 #endif
 
-bool quitmainloop = false;
+EX bool quitmainloop = false;
 
 EX bool doexiton(int sym, int uni) {
   if(sym == SDLK_ESCAPE) return true;

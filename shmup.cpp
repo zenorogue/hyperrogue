@@ -82,7 +82,7 @@ struct monster {
 
 using namespace multi;
 
-eItem targetRangedOrbKey(orbAction a);
+eItem targetRangedOrbKey(enum orbAction a);
 eItem keyresult[MAXPLAYER];
 
 ld fabsl(ld x) { return x>0?x:-x; }

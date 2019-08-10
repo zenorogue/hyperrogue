@@ -6,6 +6,33 @@
 
 namespace hr {
 
+#if HDR
+namespace rg {
+  // possible parameters e.g. for restart_game and wrongmode
+  static const char nothing = 0;
+  static const char peace = 'P';
+  static const char inv = 'i';
+  static const char chaos = 'C';
+  static const char tactic = 't';
+  static const char tour = 'T';
+  static const char yendor = 'y';
+  static const char shmup = 's';
+  static const char randpattern = 'r';
+  static const char princess = 'p';
+  static const char daily = 'd';
+  static const char daily_off = 'D';
+  static const char racing = 'R';
+  static const char dualmode = 'U';
+  
+  // wrongmode only -- marks 'global' achievements not related to the current mode
+  static const char global = 'x'; 
+  // wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead
+  static const char multi = 'm';
+  // wrongmode only -- mark achievements for special geometries/variations
+  static const char special_geometry = 'g';
+  }
+#endif
+
 EX bool game_active;
 
 EX bool cblind;

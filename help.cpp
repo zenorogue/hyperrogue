@@ -173,7 +173,7 @@ void buildHelpText() {
 #endif
   }
 
-void buildCredits() {
+EX void buildCredits() {
   help = "";
   help += XLAT("game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n");
   if(lang() != 0)

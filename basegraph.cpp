@@ -971,6 +971,19 @@ EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
   }
 #endif
 
+#if HDR
+struct msginfo {
+  int stamp;
+  time_t rtstamp;
+  int gtstamp;
+  int turnstamp;
+  char flashout;
+  char spamtype;
+  int quantity;
+  string msg;
+  };
+#endif
+
 vector<msginfo> msgs;
 
 vector<msginfo> gamelog;

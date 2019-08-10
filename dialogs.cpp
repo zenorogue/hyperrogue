@@ -16,7 +16,7 @@
 
 namespace hr {
 
-const char* COLORBAR = "###";
+EX const char* COLORBAR = "###";
 
 EX namespace dialog {
 

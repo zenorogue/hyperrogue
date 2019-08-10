@@ -6,8 +6,8 @@ namespace hr {
 #if CAP_COMMANDLINE
 EX const char *scorefile = "hyperrogue.log";
 
-namespace arg {
-eLand readland(const string& ss) {
+EX namespace arg {
+EX eLand readland(const string& ss) {
   if(ss == "II") return laCrossroads2;
   if(ss == "III") return laCrossroads3;
   if(ss == "IV") return laCrossroads4;
@@ -19,7 +19,7 @@ eLand readland(const string& ss) {
   return laNone;
   }
 
-eItem readItem(const string& ss) {
+EX eItem readItem(const string& ss) {
   for(int i=0; i<ittypes; i++) if(appears(iinf[i].name, ss)) {
     return eItem(i);
     break;
@@ -27,14 +27,14 @@ eItem readItem(const string& ss) {
   return itNone;
   }
 
-eMonster readMonster(const string& ss) {
+EX eMonster readMonster(const string& ss) {
   for(int i=0; i<motypes; i++) if(appears(minf[i].name, ss)) {
     return eMonster(i);
     break;
     }
   return moNone;
   }
-}
+EX }
 
 EX void initializeCLI() {
   printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
@@ -55,36 +55,60 @@ EX void initializeCLI() {
   #endif
   }
 
-namespace arg {
-  vector<string> argument;
-  int pos;
+EX namespace arg {
+  EX int curphase;
 
-  void lshift() { pos++; }
+  vector<string> argument;
+  EX int pos;
+
+  EX void lshift() { pos++; }
   void unshift() { pos--; }
 
-  void shift() {
+  EX void shift() {
     lshift(); if(pos >= isize(argument)) { printf("Missing parameter\n"); exit(1); }
     }
   
-  bool nomore() { return pos >= isize(argument); }
+  EX bool nomore() { return pos >= isize(argument); }
   
-  const string& args() { return argument[pos]; }
-  const char* argcs() { return args().c_str(); }
-  int argi() { return atoi(argcs()); }
-  unsigned arghex() { return strtoll(argcs(), NULL, 16); }
-  ld argf() { return parseld(args()); }
-  bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
+  EX const string& args() { return argument[pos]; }
+  EX const char* argcs() { return args().c_str(); }
+  EX int argi() { return atoi(argcs()); }
+  EX unsigned arghex() { return strtoll(argcs(), NULL, 16); }
+  EX ld argf() { return parseld(args()); }
+  EX bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
   
-  void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); lshift(); }
+  EX void shift_arg_formula(ld& x, const reaction_t& r IS(reaction_t())) {
+    shift(); x = argf(); 
+    #if CAP_ANIMATIONS
+    anims::animate_parameter(x, args(), r); 
+    #endif
+    }
+  
+  #if HDR
+
+  // an useful macro
+  #define PHASE(x) { if(arg::curphase > x) arg::phaseerror(x); else if(arg::curphase < x) return 2; }
+  #define PHASEFROM(x) { if(arg::curphase < x) return 2; }
+
+  #define TOGGLE(x, param, act) \
+  else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASEFROM(2); showstartmenu = false; act; } \
+  else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASEFROM(2); showstartmenu = false; if(!param) act; } \
+  else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); showstartmenu = false; if(param) act; }
+
+  #endif
+
+  EX void cheat() { autocheat = true; cheater++; timerghost = false; }
+  
+  EX void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); lshift(); }
  
-  void phaseerror(int x) {
+  EX void phaseerror(int x) {
     printf("Command line error: cannot read command '%s' from phase %d in phase %d\n", args().c_str(), x, curphase);
     exit(1);
     }
 
   bool dialog_launched = false;
   
-  void launch_dialog(const reaction_t& r) {
+  EX void launch_dialog(const reaction_t& r IS(reaction_t())) {
     if(!dialog_launched) {
       popScreenAll();
       showstartmenu = false;
@@ -93,7 +117,10 @@ namespace arg {
     if(r) pushScreen(r);
     }
 
-  }
+  EX int readCommon();
+  EX int readLocal();  
+  EX void read(int phase);
+EX }
 
 
 int arg::readCommon() {
@@ -282,7 +309,6 @@ EX purehookset hooks_config;
 EX hookset<int()> *hooks_args;
 
 namespace arg {
-  int curphase;
 
   auto ah = addHook(hooks_args, 0, readCommon);
   

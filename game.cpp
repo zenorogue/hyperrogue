@@ -112,7 +112,7 @@ EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
 EX map<modecode_t, array<int, ittypes> > hiitems;
 bool orbused[ittypes], lastorbused[ittypes];
 EX bool playermoved = true;  // center on the PC?
-bool flipplayer = true;   // flip the player image after move, do not flip after attack
+EX bool flipplayer = true;   // flip the player image after move, do not flip after attack
 EX int  cheater = 0;         // did the player cheat?
 
 int anthraxBonus = 0;     // for using Safety in tactical Camelot
@@ -415,7 +415,10 @@ EX int killtypes() {
   return res;
   }
 
-eGravity gravity_state, last_gravity_state;
+#if HDR
+enum eGravity { gsNormal, gsLevitation, gsAnti };
+#endif
+EX eGravity gravity_state, last_gravity_state;
 
 bool bird_disruption(cell *c) {
   return c->cpdist <= 5 && items[itOrbGravity];
@@ -8601,6 +8604,10 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   DEBB(DF_TURN, ("done"));
   return true;
   }
+
+#if HDR
+inline bool movepcto(const movedir& md) { return movepcto(md.d, md.subdir); }
+#endif
 
 /* bool isPsiTarget(cell *dst) {
   return 

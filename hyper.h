@@ -674,13 +674,6 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 // kill count for Graveyard/Hive
 #define R100 (big_unlock ? 500 : 100)
 
-string XLAT(string x);    // translate the sentence x
-string XLATN(string x);   // translate the sentence x
-string cts(char c);       // character to string
-string its(int i);        // int to string
-string itsh8(int i);      // int to string (8 hex digits)
-string itsh(int i);       // int to string
-
 // size casted to int, to prevent warnings and actual errors caused by the unsignedness of x.size()
 template<class T> int isize(const T& x) {return x.size(); }
 
@@ -688,33 +681,6 @@ template<class T> int isize(const T& x) {return x.size(); }
 
 namespace anticheat { extern bool tampered; }
 #define HRANDMAX 0x7FFFFFFF
-
-namespace rg {
-  // possible parameters e.g. for restart_game and wrongmode
-  static const char nothing = 0;
-  static const char peace = 'P';
-  static const char inv = 'i';
-  static const char chaos = 'C';
-  static const char tactic = 't';
-  static const char tour = 'T';
-  static const char yendor = 'y';
-  static const char shmup = 's';
-  static const char randpattern = 'r';
-  static const char princess = 'p';
-  static const char daily = 'd';
-  static const char daily_off = 'D';
-  static const char racing = 'R';
-  static const char dualmode = 'U';
-  
-  // wrongmode only -- marks 'global' achievements not related to the current mode
-  static const char global = 'x'; 
-  // wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead
-  static const char multi = 'm';
-  // wrongmode only -- mark achievements for special geometries/variations
-  static const char special_geometry = 'g';
-  }
-
-enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMultiGo };
 
 namespace hive { void createBugArmy(cell *c); }
 namespace whirlpool { void generate(cell *wto); }
@@ -740,14 +706,7 @@ struct movedir {
   cell *tgt;  // for MD_USE_ORB: target cell
   };
 
-void activateActiv(cell *c, bool msg);
-
 // shmup
-
-string csname(charstyle& cs);
-void initcs(charstyle& cs);
-
-extern bool flipplayer;
 
 template<class T> class hookset : public map<int, function<T>> {};
 typedef hookset<void()> *purehookset;
@@ -972,105 +931,19 @@ inline int operator - (PPR x, PPR y) { return int(x) - int(y); }
 #define OUTLINE_FORE     ((forecolor << 8) + 0xFF)
 #define OUTLINE_BACK     ((backcolor << 8) + 0xFF)
 
-inline string pick123() { return cts('1' + rand() % 3); }
-inline string pick12() { return cts('1' + rand() % 2); }
-
-extern int detaillevel;
-extern bool quitmainloop;
-
-enum eGravity { gsNormal, gsLevitation, gsAnti };
-extern eGravity gravity_state, last_gravity_state;
-
 #define IFM(x) (mousing?"":x)
 
-extern bool viewdists;
-
-void preventbarriers(cell *c);
-
-bool passable_for(eMonster m, cell *w, cell *from, flagtype extra);
-
-void beastcrash(cell *c, cell *beast);
-
-int angledist(int t, int d1, int d2);
-int angledist(cell *c, int d1, int d2);
-
-void setcameraangle(bool b);
+enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMultiGo };
 
 #define MODELCOUNT ((int) mdGUARD)
 
 void drawShape(pair<ld,ld>* coords, int qty, color_t color);
 
 #define pmodel (vid.vpmodel)
-string current_proj_name();
-
-inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
-
-inline bool mdBandAny() { return among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal); }
 
 color_t darkena(color_t c, int lev, int a);
 
 #define SHSIZE 16
-
-namespace anims { void animate_parameter(ld &x, string f, const reaction_t& r); }
-
-extern bool timerghost;
-extern bool autocheat;
-extern int cheater;
-
-namespace arg {
-#if CAP_COMMANDLINE
-  
-  void lshift();
-  void unshift();
-
-  void shift();
-
-  const string& args();
-  const char* argcs();
-  int argi();
-  ld argf();
-  bool argis(const string& s);
-  bool nomore();
-  unsigned arghex();
-
-  inline void shift_arg_formula(ld& x, const reaction_t& r = reaction_t()) { shift(); x = argf(); 
-    #if CAP_ANIMATIONS
-    anims::animate_parameter(x, args(), r); 
-    #endif
-    }
-  
-  void init(int _argc, char **_argv);
-  
-  void launch_dialog(const reaction_t& r = reaction_t());
-  
-  extern int curphase;
-  
-  void phaseerror(int x);
-  
-  // returned values: 0 = ok, 1 = not recognized, 2 = shift phase
-  int readCommon();
-  int readLocal();
-
-// an useful macro
-#define PHASE(x) { if(arg::curphase > x) arg::phaseerror(x); else if(arg::curphase < x) return 2; }
-#define PHASEFROM(x) { if(arg::curphase < x) return 2; }
-
-  inline void cheat() { autocheat = true; cheater++; timerghost = false; }
-
-#define TOGGLE(x, param, act) \
-else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASEFROM(2); showstartmenu = false; act; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASEFROM(2); showstartmenu = false; if(!param) act; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); showstartmenu = false; if(param) act; }
-
-  
-  void read(int phase);
-
-  eLand readland(const string& ss);
-  eItem readItem(const string& ss);
-  eMonster readMonster(const string& ss);
-    
-#endif
-  }
 
 #if CAP_TOUR
 namespace tour {
@@ -1228,25 +1101,7 @@ template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&.
   return zero;
   }
 
-struct msginfo {
-  int stamp;
-  time_t rtstamp;
-  int gtstamp;
-  int turnstamp;
-  char flashout;
-  char spamtype;
-  int quantity;
-  string msg;
-  };
-
-int watercolor(int phase);
-bool doHighlight();
-void buildHelpText();
-void buildCredits();
-void setAppropriateOverview();
-bool quitsaves();
-
-extern const char* COLORBAR;
+string XLAT(string);
 
 #define GLERR(call) glError(call, __FILE__, __LINE__)
 
@@ -1503,107 +1358,6 @@ template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0
 template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
 
-struct supersaver {
-  string name;
-  virtual string save() = 0;
-  virtual void load(const string& s) = 0;
-  virtual bool dosave() = 0;
-  virtual void reset() = 0;
-  virtual ~supersaver() {};
-  };
-
-typedef vector<shared_ptr<supersaver>> saverlist;
-
-extern saverlist savers;
-
-#if CAP_CONFIG
-
-template<class T> struct dsaver : supersaver {
-  T& val;
-  T dft;
-  bool dosave() { return val != dft; }
-  void reset() { val = dft; }
-  dsaver(T& val) : val(val) { }
-  };
-
-template<class T> struct saver : dsaver<T> {};
-
-template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
-  auto s = make_shared<saver<T>> (i);
-  s->dft = dft;
-  s->name = name;
-  savers.push_back(s);
-  }
-
-template<class T> void addsaver(T& i, string name) {
-  addsaver(i, name, i);
-  }
-
-template<class T> struct saverenum : supersaver {
-  T& val;
-  T dft;
-  bool dosave() { return val != dft; }
-  void reset() { val = dft; }
-  saverenum<T>(T& v) : val(v) { }
-  string save() { return its(int(val)); }
-  void load(const string& s) { val = (T) atoi(s.c_str()); }
-  };
-
-template<class T, class U> void addsaverenum(T& i, U name, T dft) {
-  auto s = make_shared<saverenum<T>> (i);
-  s->dft = dft;
-  s->name = name;
-  savers.push_back(s);
-  }
-
-template<class T, class U> void addsaverenum(T& i, U name) {
-  addsaverenum(i, name, i);
-  }
-
-template<> struct saver<int> : dsaver<int> {
-  saver<int>(int& val) : dsaver<int>(val) { }
-  string save() { return its(val); }
-  void load(const string& s) { val = atoi(s.c_str()); }
-  };
-
-template<> struct saver<char> : dsaver<char> {
-  saver<char>(char& val) : dsaver<char>(val) { }
-  string save() { return its(val); }
-  void load(const string& s) { val = atoi(s.c_str()); }
-  };
-
-template<> struct saver<bool> : dsaver<bool> {
-  saver<bool>(bool& val) : dsaver<bool>(val) { }
-  string save() { return val ? "yes" : "no"; }
-  void load(const string& s) { val = isize(s) && s[0] == 'y'; }
-  };
-
-template<> struct saver<unsigned> : dsaver<unsigned> {
-  saver<unsigned>(unsigned& val) : dsaver<unsigned>(val) { }
-  string save() { return itsh(val); }
-  void load(const string& s) { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
-  };
-
-template<> struct saver<string> : dsaver<string> {
-  saver<string>(string& val) : dsaver<string>(val) { }
-  string save() { return val; }
-  void load(const string& s) { val = s; }
-  };
-
-string fts(ld val, int prec);
-string itsh(int x);
-
-template<> struct saver<ld> : dsaver<ld> {
-  saver<ld>(ld& val) : dsaver<ld>(val) { }
-  string save() { return fts(val, 10); }
-  void load(const string& s) { 
-    if(s == "0.0000000000e+000") ; // ignore!
-    else val = atof(s.c_str()); 
-    }
-  };
-
-#endif
-
 namespace daily {
   extern bool on;
   extern int daily_id;
@@ -1736,6 +1490,3 @@ static const color_t NOCOLOR = 0;
 #define IS(z)
 #define EX
 
-namespace hr {
-  inline bool movepcto(const movedir& md) { return movepcto(md.d, md.subdir); }
-  }

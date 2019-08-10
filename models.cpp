@@ -96,6 +96,11 @@ EX namespace polygonal {
   pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
   EX }
 
+#if HDR
+inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
+inline bool mdBandAny() { return among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal); }
+#endif
+
 EX namespace models {
 
   EX string formula = "z^2";

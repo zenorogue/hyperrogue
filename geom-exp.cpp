@@ -447,7 +447,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
   dialog::display();
   }
 
-string current_proj_name() {
+EX string current_proj_name() {
   if(pmodel != mdDisk || nonisotropic)
     return models::get_model_name(pmodel);
   else if(hyperbolic && vid.alpha == 1)
