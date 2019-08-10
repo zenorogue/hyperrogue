@@ -17,7 +17,7 @@ EX int getgametime() {
   return (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
   }
 
-string getgametime_s(int timespent) {
+EX string getgametime_s(int timespent IS(getgametime())) {
   char buf[20];
   sprintf(buf, "%d:%02d", timespent/60, timespent % 60);
   return buf;

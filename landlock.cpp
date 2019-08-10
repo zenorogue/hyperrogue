@@ -560,6 +560,23 @@ template<class T> void generateLandList(T t) {
   }
 #endif
 
+#if HDR
+namespace lv {
+  static const flagtype appears_in_geom_exp = 1;
+  static const flagtype display_error_message = 2;
+  static const flagtype appears_in_full = 4;
+  static const flagtype appears_in_ptm = 8;
+  static const flagtype display_in_help = 16;
+  static const flagtype one_and_half = 32;
+  };
+
+struct land_validity_t {
+  int quality_level; // 0 (dont show), 1 (1/2), 2 (ok), 3(1!)
+  flagtype flags;
+  string msg;
+  };
+#endif
+
 EX eLand getLandForList(cell *c) {
   eLand l = c->land;
   if(isElemental(l)) return laElementalWall;

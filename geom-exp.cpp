@@ -265,7 +265,7 @@ void showTorusConfig() {
   dialog::display();
   }
 
-string bitruncnames[5] = {" (b)", " (n)", " (g)", " (i)", " (d)"};
+EX string bitruncnames[5] = {" (b)", " (n)", " (g)", " (i)", " (d)"};
 
 void validity_info() {
   int vccolors[4] = {0xFF0000, 0xFF8000, 0xFFFF00, 0x00FF00};
@@ -815,7 +815,7 @@ EX void showEuclideanMenu() {
   dialog::display();
   }
 
-void runGeometryExperiments() {
+EX void runGeometryExperiments() {
   if(!geometry && specialland == laIce)
     specialland = getLandForList(cwt.at);
   pushScreen(showEuclideanMenu);

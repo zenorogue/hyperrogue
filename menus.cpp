@@ -920,7 +920,7 @@ EX named_functionality get_o_key() {
 
 int messagelogpos;
 int timeformat;
-int stampbase;
+EX int stampbase;
 
 EX string gettimestamp(msginfo& m) {
   char buf[128]; 

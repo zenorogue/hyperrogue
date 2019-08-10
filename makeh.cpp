@@ -23,8 +23,6 @@ void mark_file() {
     }
   while(ifs_level < (int) if_stack.size())
     cout << ind() << if_stack[ifs_level++] << "\n";
-  while(ifs_level > (int) if_stack.size())
-    cout << ind() << "#endif\n", ifs_level--;
   }
 
 int in_hdr;
@@ -49,6 +47,7 @@ void gen(string s) {
       continue;
       }
     if(s == "#if HDR") {
+      mark_file();
       in_hdr = true;
       continue;
       }
@@ -62,6 +61,8 @@ void gen(string s) {
     if(s.substr(0, 6) == "#endif") {
       if(if_stack.empty()) { cerr << "if_stack error " << which_file << ", " << s << "\n"; exit(1); }
       if_stack.pop_back();
+      while(ifs_level > (int) if_stack.size())
+        cout << ind() << "#endif\n", ifs_level--;
       }
     if(s.substr(0, 4) == "EX }") {
       mark_file();

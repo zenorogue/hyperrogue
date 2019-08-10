@@ -7,6 +7,8 @@ namespace hr {
 EX namespace fieldpattern {
 
 #if HDR
+#define currfp fieldpattern::getcurrfp()
+
 struct primeinfo {
   int p;
   int cells;
@@ -743,7 +745,7 @@ void info() {
 fpattern current_quotient_field(0), fp_invalid(0);
 bool quotient_field_changed;
 
-fpattern& getcurrfp() {
+EX struct fpattern& getcurrfp() {
   if(geometry == gFieldQuotient && quotient_field_changed)
     return current_quotient_field;  
   if(WDIM == 3) {
@@ -831,13 +833,13 @@ EX void enableFieldChange() {
 
 #define currfp fieldpattern::getcurrfp()
 
-int currfp_gmul(int a, int b) { return currfp.gmul(a,b); }
-int currfp_inverses(int i) { return currfp.inverses[i]; }
-int currfp_distwall(int i) { return currfp.distwall[i]; }
-int currfp_n() { return isize(currfp.matrices); }
-int currfp_get_R() { return currfp.matcode[currfp.R]; }
-int currfp_get_P() { return currfp.matcode[currfp.P]; }
-int currfp_get_X() { return currfp.matcode[currfp.X]; }
+EX int currfp_gmul(int a, int b) { return currfp.gmul(a,b); }
+EX int currfp_inverses(int i) { return currfp.inverses[i]; }
+EX int currfp_distwall(int i) { return currfp.distwall[i]; }
+EX int currfp_n() { return isize(currfp.matrices); }
+EX int currfp_get_R() { return currfp.matcode[currfp.R]; }
+EX int currfp_get_P() { return currfp.matcode[currfp.P]; }
+EX int currfp_get_X() { return currfp.matcode[currfp.X]; }
 
 }
 #endif

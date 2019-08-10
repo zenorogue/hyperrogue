@@ -854,7 +854,7 @@ void gdpush_utf8(const string& s) {
   graphdata[g] = q;
   }
 
-bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
+EX bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
   gdpush(2); gdpush(x); gdpush(y); gdpush(align);
   gdpush(color); gdpush(size); gdpush(b);
   gdpush_utf8(s);
@@ -866,15 +866,16 @@ bool displayfr(int x, int y, int b, int size, const string &s, color_t color, in
     my >= -size*3/4 && my <= +size*3/4;
   }
 
-bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
+EX bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
   return displayfr(x,y,0,size,s,color,align);
   }
 
-bool displaystr(int x, int y, int shift, int size, char const *s, color_t color, int align) {
+EX bool displaystr(int x, int y, int shift, int size, char const *s, color_t color, int align) {
   return displayfr(x,y,0,size,s,color,align);
   }
 
-#else
+#endif
+#if !CAP_XGD
 EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t color, int align) {
 
   if(strlen(str) == 0) return false;
@@ -1198,8 +1199,12 @@ EX void displayButton(int x, int y, const string& name, int key, int align, int 
     }
   }
 
-char mousekey = 'n';
-char newmousekey;
+#if HDR
+#define SETMOUSEKEY 5000
+#endif
+
+EX char mousekey = 'n';
+EX char newmousekey;
 
 EX void displaymm(char c, int x, int y, int rad, int size, const string& title, int align) {
   if(displayfr(x, y, rad, size, title, c == mousekey ? 0xFF8000 : 0xC0C0C0, align)) {

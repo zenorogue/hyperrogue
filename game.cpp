@@ -5211,6 +5211,10 @@ EX void movemutant() {
     }  
   }
 
+#if HDR
+#define SHSIZE 16
+#endif
+
 EX vector<array<cell*, MAXPLAYER>> shpos;
 EX int cshpos = 0;
 
@@ -7726,7 +7730,7 @@ EX void terracotta() {
       }
   }
 
-eMonster passive_switch = moSwitch2;
+EX eMonster passive_switch = moSwitch2;
 
 EX void checkSwitch() {
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;

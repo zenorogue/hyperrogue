@@ -3288,7 +3288,7 @@ ld wavefun(ld x) {
   else return 0; */
   }
 
-colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
+EX colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
 
 color_t floorcolors[landtypes];
 
@@ -4264,7 +4264,7 @@ void draw_wall(cell *c, const transmatrix& V, color_t wcol, color_t& zcol, int c
   }
 #endif
 
-bool just_gmatrix;
+EX bool just_gmatrix;
 
 int colorhash(color_t i) {
   return (i * 0x471211 + i*i*0x124159 + i*i*i*0x982165) & 0xFFFFFF;
@@ -4342,7 +4342,7 @@ void draw_gravity_particles(cell *c, const transmatrix V) {
     }
   }
 
-bool isWall3(cell *c, color_t& wcol) {
+EX bool isWall3(cell *c, color_t& wcol) {
   if(isWall(c)) return true;
   if(c->wall == waChasm && c->land == laMemory) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
@@ -7686,6 +7686,28 @@ EX vector< function<void()> > screens = { normalscreen };
 template<class T> void pushScreen(const T& x) { screens.push_back(x); } 
 inline void popScreen() { if(isize(screens)>1) screens.pop_back(); }
 inline void popScreenAll() { while(isize(screens)>1) popScreen(); }
+#endif
+
+#if HDR
+namespace sm {
+  static const int NORMAL = 1;
+  static const int MISSION = 2;
+  static const int HELP = 4;
+  static const int MAP = 8;
+  static const int DRAW = 16;
+  static const int NUMBER = 32;
+  static const int SHMUPCONFIG = 64;
+  static const int OVERVIEW = 128;
+  static const int SIDE = 256;
+  static const int DOTOUR = 512;
+  static const int CENTER = 1024;
+  static const int ZOOMABLE = 4096;
+  static const int TORUSCONFIG = 8192;
+  static const int MAYDARK = 16384;
+  static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
+  static const int EXPANSION = (1<<16);
+  static const int HEXEDIT = (1<<17);
+  };
 #endif
 
 EX int cmode;

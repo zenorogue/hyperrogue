@@ -23,7 +23,7 @@ EX pair<int, int> vec_to_pair(int vec) {
   return {x, y};
   }
 
-namespace torusconfig {
+EX namespace torusconfig {
   // the configuration of the torus topology.
   // torus cells are indexed [0..qty),
   // where the cell to the right from i is indexed i+dx,
@@ -37,13 +37,45 @@ namespace torusconfig {
   int def_qty = 127*3, dx = 1, def_dy = -11*2;
   int qty = def_qty, dy = def_dy;
   
-  int sdx = 12, sdy = 12;
+  EX int sdx = 12;
+  EX int sdy = 12;
+  
+  #if HDR
+  enum eTorusMode : char { 
+    tmSingleHex, 
+    tmSingle, 
+    tmSlantedHex, 
+    tmStraight, 
+    tmStraightHex,
+    tmKlein,
+    tmKleinHex,
+    tmCylinder,
+    tmCylinderHex,
+    tmMobius,
+    tmMobiusHex,
+    };
+
+  struct torusmode_info {
+    string name;
+    flagtype flags;
+    };
+
+  enum : flagtype {
+    TF_SINGLE = 1,
+    TF_SIMPLE = 2,
+    TF_WEIRD  = 4,
+    TF_HEX    = 16,
+    TF_SQUARE = 32,
+    TF_CYL    = 64,
+    TF_KLEIN = 256,
+    };
+  #endif
 
   // new values to change
   int newqty, newdy, newsdx, newsdy;
   int torus_cx, torus_cy;
   
-  vector<torusmode_info> tmodes = {
+  EX vector<torusmode_info> tmodes = {
     {"single row (hex)", TF_SINGLE | TF_HEX},
     {"single row (squares)", TF_SINGLE | TF_SQUARE},
     {"parallelogram (hex)", TF_SIMPLE | TF_HEX},
@@ -57,8 +89,9 @@ namespace torusconfig {
     {"Möbius band (hex)", TF_SIMPLE | TF_CYL | TF_HEX | TF_KLEIN},
     };
   
-  eTorusMode torus_mode, newmode;
-  flagtype tmflags() { return tmodes[torus_mode].flags; }
+  EX eTorusMode torus_mode;
+  eTorusMode newmode;
+  EX flagtype tmflags() { return tmodes[torus_mode].flags; }
   
   int getqty() {
     if(tmflags() & TF_SINGLE)
@@ -139,7 +172,7 @@ namespace torusconfig {
 
   int tester = addHook(hooks_tests, 0, torus_test);
   
-  void activate() {
+  EX void activate() {
     auto& gi(ginf[gTorus]);
 
     if(tmflags() & TF_HEX)
@@ -262,7 +295,7 @@ namespace torusconfig {
     
     return dist;
     }
-  }
+  EX }
 
 int euclid_getvec(int dx, int dy) {
   if(euwrap) return torusconfig::getvec(dx, dy);

@@ -99,6 +99,12 @@ static const flagtype IF_RANGED = Flag(4);
 static const flagtype IF_SHMUPLIFE = Flag(5);
 static const flagtype IF_REVIVAL = Flag(6);
 
+// 0 = basic treasure, 1 = other item, 2 = power orb, 3 = not an item
+#define IC_TREASURE 0
+#define IC_OTHER 1
+#define IC_ORB 2
+#define IC_NAI 3
+
 struct itemtype {
   char  glyph;
   color_t color;

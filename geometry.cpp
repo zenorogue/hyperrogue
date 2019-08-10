@@ -17,6 +17,8 @@ struct usershapelayer {
   PPR prio;
   };
 
+extern int usershape_changes;
+
 static const int USERLAYERS = 32;
 
 struct usershape { usershapelayer d[USERLAYERS]; };
@@ -31,6 +33,19 @@ struct hpcshape {
   int shs, she;
   void clear() { s = e = shs = she = texture_offset = 0; prio = PPR::ZERO; tinf = NULL; flags = 0; }
   };
+
+#define SIDE_SLEV 0
+#define SIDE_WTS3 3
+#define SIDE_WALL 4
+#define SIDE_LAKE 5
+#define SIDE_LTOB 6
+#define SIDE_BTOI 7
+#define SIDE_SKY  8
+#define SIDE_HIGH 9
+#define SIDE_HIGH2 10
+#define SIDEPARS  11
+
+#define BADMODEL 0
 
 static const int WINGS = (BADMODEL ? 1 : 4);
 
@@ -53,6 +68,8 @@ struct plain_floorshape : floorshape {
   ld rad0, rad1;
   void configure(ld r0, ld r1) { rad0 = r0; rad1 = r1; }
   };
+
+extern vector<ld> equal_weights;
 
 // noftype: 0 (shapeid2 is heptagonal or just use shapeid1), 1 (shapeid2 is pure heptagonal), 2 (shapeid2 is Euclidean), 3 (shapeid2 is hexagonal)
 struct escher_floorshape : floorshape {

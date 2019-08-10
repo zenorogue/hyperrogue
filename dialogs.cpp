@@ -21,6 +21,8 @@ EX const char* COLORBAR = "###";
 EX namespace dialog {
 
 #if HDR
+  #define IFM(x) (mousing?"":x)
+
   static const int DONT_SHOW = 16;
 
   enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard};

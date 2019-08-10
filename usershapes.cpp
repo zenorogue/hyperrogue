@@ -6,10 +6,10 @@
 
 namespace hr {
 
-int usershape_changes;
+EX int usershape_changes;
 
 array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
-void initShape(int sg, int id) {
+EX void initShape(int sg, int id) {
 
   if(!usershapes[sg][id]) {
     usershape *us = new usershape;

@@ -1,24 +1,44 @@
 // Hyperbolic Rogue -- the Tutorial/presentation
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-namespace hr { namespace tour {
+namespace hr { 
 
-bool on;
+EX namespace tour {
+
+EX bool on;
 
 bool texts = true;
 
-string tourhelp;
+EX string tourhelp;
 
-int currentslide;
+EX int currentslide;
 
-// modes: 
-//   1 - enter the slide
-//   2 - each frame
-//   3 - leave the slide
-//   4 - quicken or modify the slide
-//   5 - on initgame
+#if HDR
+enum presmode { 
+  pmStartAll = 0,
+  pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
+  pmAfterFrame = 6,
+  pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
+  };
 
-void setCanvas(presmode mode, char canv) {
+struct slide { 
+  const char *name; int unused_id; int flags; const char *help; 
+  function<void(presmode mode)> action;
+  };  
+
+static const int LEGAL_NONE=0;
+static const int LEGAL_UNLIMITED=1;
+static const int LEGAL_HYPERBOLIC=2;
+static const int LEGAL_ANY=3;
+static const int LEGAL_NONEUC=4;
+static const int QUICKSKIP=8;
+static const int FINALSLIDE=16;
+static const int QUICKGEO=32;
+static const int SIDESCREEN = 64;
+static const int USE_SLIDE_NAME = 128;
+#endif
+
+EX void setCanvas(presmode mode, char canv) {
   static char wc;
   static eLand ld;
   if(mode == pmStart) {
@@ -39,19 +59,19 @@ void setCanvas(presmode mode, char canv) {
 
 bool sickmode;
 
-function<eLand(eLand)> getNext;
-function<bool(eLand)> quickfind;
-function<bool(eLand)> showland;
+EX function<eLand(eLand)> getNext;
+EX function<bool(eLand)> quickfind;
+EX function<bool(eLand)> showland;
 
 #define GETNEXT getNext = [](eLand old)
 #define QUICKFIND quickfind = [](eLand l)
 #define SHOWLAND(f) showland = [](eLand l) { return f; }
 
-string slidecommand;
+EX string slidecommand;
 
-hookset<void(int)> *hooks_slide;
+EX hookset<void(int)> *hooks_slide;
 
-void presentation(presmode mode) {
+EX void presentation(presmode mode) {
 
   cheater = 0;
   
@@ -68,7 +88,7 @@ void presentation(presmode mode) {
   callhooks(hooks_slide, mode);
   }
 
-void slidehelp() {
+EX void slidehelp() {
   if(texts && slides[currentslide].help[0])
     gotoHelp(
       help = 
@@ -258,7 +278,7 @@ bool handleKeyTour(int sym, int uni) {
   return false;
   }
 
-void checkGoodLand(eLand l) {
+EX void checkGoodLand(eLand l) {
   if(!showland(l) && texts) 
     gotoHelp(XLAT(
       "This tutorial is different than most other game tutorials -- "
@@ -273,18 +293,18 @@ void checkGoodLand(eLand l) {
       );
   }
 
-namespace ss {
+EX namespace ss {
   vector<slide*> slideshows;
   slide *wts;
 
-  void list(slide *ss) {
+  EX void list(slide *ss) {
     for(auto s: slideshows) if (s == ss) return;
     slideshows.push_back(ss);
     }
 
   string slidechars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
    
-  void showMenu() {
+  EX void showMenu() {
     if(!wts) wts = slides; 
 
     dialog::init(XLAT("slides"), forecolor, 150, 100);
@@ -324,9 +344,9 @@ namespace ss {
     dialog::display();
     }
 
-  }
+  EX }
   
-void start() {
+EX void start() {
   ss::list(default_slides);
   currentslide = 0;
   vid.scale = 1;
@@ -345,7 +365,7 @@ void start() {
     }
   }
 
-slide default_slides[] = {
+EX slide default_slides[] = {
 #if ISMOBILE
   {"Note for mobiles", 10, LEGAL_NONE | QUICKSKIP,
     "This tutorial is designed for computers, "
@@ -797,7 +817,7 @@ slide default_slides[] = {
     }
   };
 
-slide *slides = default_slides;
+EX slide *slides = default_slides;
 
 auto a1 = addHook(hooks_frame, 100, [] () { if(tour::on) tour::presentation(tour::pmFrame); });
 auto a2 = addHook(hooks_handleKey, 100, handleKeyTour);

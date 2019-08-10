@@ -80,9 +80,9 @@ int chessvalue(cell *c) {
     return celldist(c) & 1;
   }
 
-int emeraldval(heptagon *h) { return h->emeraldval >> 3; }
+EX int emeraldval(heptagon *h) { return h->emeraldval >> 3; }
 
-int emeraldval(cell *c) {
+EX int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
   if(sphere) return 0;
   if(ctof(c))
@@ -357,14 +357,14 @@ EX int zebra3(cell *c) {
   }
 
 #if CAP_FIELD
-namespace fieldpattern {
+EX namespace fieldpattern {
 
-pair<int, bool> fieldval(cell *c) {
+EX pair<int, bool> fieldval(cell *c) {
   if(ctof(c)) return make_pair(int(c->master->fieldval), false);
   else return make_pair(btspin(c->master->fieldval, c->c.spin(0)), true);
   }
 
-int fieldval_uniq(cell *c) {
+EX int fieldval_uniq(cell *c) {
   if(sphere) {
     if(archimedean) return c->master->fiftyval;
     #if CAP_IRR
@@ -395,7 +395,7 @@ int fieldval_uniq(cell *c) {
     }
   }
 
-int fieldval_uniq_rand(cell *c, int randval) {
+EX int fieldval_uniq_rand(cell *c, int randval) {
   if(sphere || euclid || NONSTDVAR) 
     // we do not care in these cases
     return fieldval_uniq(c);
@@ -432,7 +432,7 @@ pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = s
     }
   }
 
-}
+EX }
 #endif
 
 int getHemisphere(heptagon *h, int which) {
@@ -1236,7 +1236,7 @@ EX int geosupport_football() {
   return 0;
   }
 
-int pattern_threecolor(cell *c) {
+EX int pattern_threecolor(cell *c) {
   #if CAP_ARCM
   if(archimedean) {
     if(PURE)
@@ -2164,7 +2164,42 @@ bool is_master(cell *c) {
   else return c->master->c7 == c;
   }
 
-namespace linepatterns {
+EX namespace linepatterns {
+
+  #if HDR
+  enum ePattern {
+    patPalacelike,
+    patPalace,
+    patZebraTriangles,
+    patZebraLines,
+    patTriTree,
+    patTriRings,
+    patHepta,
+    patRhomb,
+    patTree,
+    patAltTree,
+    patVine,
+    patPower,
+    patNormal,
+    patTrihepta,
+    patBigTriangles,
+    patBigRings,
+    patHorocycles,
+    patTriOther,
+    patDual,
+    patMeridians,
+    patParallels,
+    patCircles,
+    patRadii
+    };
+
+  struct linepattern {
+    int id;
+    const char *lpname;
+    color_t color;
+    ld multiplier;
+    };
+  #endif
 
   color_t lessalpha(color_t col, int m) {
     part(col, 0) /= m;
@@ -2181,7 +2216,7 @@ namespace linepatterns {
     return col;
     }
     
-  vector<linepattern> patterns = {
+  EX vector<linepattern> patterns = {
 
     {patDual, "dual grid", 0xFFFFFF00, 1},
 
@@ -2222,12 +2257,12 @@ namespace linepatterns {
     return false;
     }
 
-  void setColor(ePattern id, color_t col) {
+  EX void setColor(ePattern id, color_t col) {
     for(auto& lp: patterns)
       if(lp.id == id) lp.color = col;
     }
   
-  void switchAlpha(ePattern id, color_t col) {
+  EX void switchAlpha(ePattern id, color_t col) {
     for(auto& lp: patterns)
       if(lp.id == id) lp.color ^= col;
     }
@@ -2467,9 +2502,9 @@ namespace linepatterns {
       }
     }  
 
-  ld width = 1;
+  EX ld width = 1;
 
-  void drawAll() {
+  EX void drawAll() {
   
     vid.linewidth *= width;
 
@@ -2535,7 +2570,7 @@ namespace linepatterns {
   
   bool indiv;
   
-  void showMenu() {
+  EX void showMenu() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(0);
 

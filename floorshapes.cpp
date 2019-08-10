@@ -678,11 +678,11 @@ void geometry_information::generate_floorshapes() {
   }
 
 #if CAP_GP
-namespace gp {
+EX namespace gp {
   int pshid[3][8][32][32][8];
   int nextid;
   
-  void clear_plainshapes() {
+  EX void clear_plainshapes() {
     for(int m=0; m<3; m++)
     for(int sd=0; sd<8; sd++)
     for(int i=0; i<32; i++)
@@ -731,7 +731,7 @@ namespace gp {
     if(id == -1) build_plainshape(id, draw_li, c, siid, sidir);
     return id;
     }
-  }
+  EX }
 #endif
 
 qfloorinfo qfi;

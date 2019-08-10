@@ -73,6 +73,13 @@ EX const char* leadernames[NUMLEADER] = {
 #define LB_HALLOWEEN  63
 #define LB_RACING 81
 
+EX bool haveLeaderboard(int id);
+EX int get_currentscore(int id);
+EX void set_priority_board(int id);
+EX int get_sync_status();
+EX bool score_loaded(int id);
+EX int score_default(int id);
+
 EX void upload_score(int id, int v);
 
 string achievementMessage[3];

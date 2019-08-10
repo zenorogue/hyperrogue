@@ -321,8 +321,6 @@ extern videopar vid;
 #define self (*this)
 
 extern int cellcount, heptacount;
-extern color_t forecolor;
-extern ld band_shift;
 // cell information for the game
 
 struct gcell {
@@ -682,18 +680,6 @@ template<class T> int isize(const T& x) {return x.size(); }
 namespace anticheat { extern bool tampered; }
 #define HRANDMAX 0x7FFFFFFF
 
-namespace hive { void createBugArmy(cell *c); }
-namespace whirlpool { void generate(cell *wto); }
-namespace whirlwind { void generate(cell *wto); }
-namespace mirror { 
-  static const int SPINSINGLE = 1;
-  static const int SPINMULTI = 2;
-  static const int GO = 4;
-  static const int ATTACK = 8;
-    
-  void act(int dir, int flags);
-  }
-
 struct movedir { 
   int d; 
   // non-negative numbers denote 'rotate +d steps and act in this direction
@@ -745,12 +731,6 @@ typedef function<int(cell*)> cellfunction;
 typedef flagtype modecode_t;
 
 #define GUNRANGE 3
-
-// 0 = basic treasure, 1 = other item, 2 = power orb, 3 = not an item
-#define IC_TREASURE 0
-#define IC_OTHER 1
-#define IC_ORB 2
-#define IC_NAI 3
 
 // loops
 
@@ -931,152 +911,15 @@ inline int operator - (PPR x, PPR y) { return int(x) - int(y); }
 #define OUTLINE_FORE     ((forecolor << 8) + 0xFF)
 #define OUTLINE_BACK     ((backcolor << 8) + 0xFF)
 
-#define IFM(x) (mousing?"":x)
-
 enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMultiGo };
 
 #define MODELCOUNT ((int) mdGUARD)
-
-void drawShape(pair<ld,ld>* coords, int qty, color_t color);
 
 #define pmodel (vid.vpmodel)
 
 color_t darkena(color_t c, int lev, int a);
 
-#define SHSIZE 16
-
-#if CAP_TOUR
-namespace tour {
-  extern bool on;
-  extern string tourhelp;
-  extern string slidecommand;
-  extern int currentslide;
-  
-  enum presmode { 
-    pmStartAll = 0,
-    pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
-    pmAfterFrame = 6,
-    pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
-    };
-
-  void setCanvas(presmode mode, char canv);
-
-  void presentation(presmode mode);
-  void checkGoodLand(eLand l);
-  int getid();
-  
-  extern function<eLand(eLand)> getNext;
-  extern function<bool(eLand)> quickfind;
-  extern function<bool(eLand)> showland;
-
-  void start();
-
-  struct slide { 
-    const char *name; int unused_id; int flags; const char *help; 
-    function<void(presmode mode)> action;
-    } ;
-  
-  extern slide *slides;
-  extern slide default_slides[];
-
-  static const int LEGAL_NONE=0;
-  static const int LEGAL_UNLIMITED=1;
-  static const int LEGAL_HYPERBOLIC=2;
-  static const int LEGAL_ANY=3;
-  static const int LEGAL_NONEUC=4;
-  static const int QUICKSKIP=8;
-  static const int FINALSLIDE=16;
-  static const int QUICKGEO=32;
-  static const int SIDESCREEN = 64;
-  static const int USE_SLIDE_NAME = 128;
-  
-  extern slide slideHypersian;
-  extern slide slideExpansion;
-
-  namespace ss {
-    void showMenu();
-    void list(slide*);
-    }
-
-  extern hookset<void(int)> *hooks_slide;
-  };
-#else
-namespace tour {
-  static const always_false on;
-  }
-#endif
-
-namespace sm {
-  static const int NORMAL = 1;
-  static const int MISSION = 2;
-  static const int HELP = 4;
-  static const int MAP = 8;
-  static const int DRAW = 16;
-  static const int NUMBER = 32;
-  static const int SHMUPCONFIG = 64;
-  static const int OVERVIEW = 128;
-  static const int SIDE = 256;
-  static const int DOTOUR = 512;
-  static const int CENTER = 1024;
-  static const int ZOOMABLE = 4096;
-  static const int TORUSCONFIG = 8192;
-  static const int MAYDARK = 16384;
-  static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
-  static const int EXPANSION = (1<<16);
-  static const int HEXEDIT = (1<<17);
-  };
-
-namespace linepatterns {
-
-  enum ePattern {
-    patPalacelike,
-    patPalace,
-    patZebraTriangles,
-    patZebraLines,
-    patTriTree,
-    patTriRings,
-    patHepta,
-    patRhomb,
-    patTree,
-    patAltTree,
-    patVine,
-    patPower,
-    patNormal,
-    patTrihepta,
-    patBigTriangles,
-    patBigRings,
-    patHorocycles,
-    patTriOther,
-    patDual,
-    patMeridians,
-    patParallels,
-    patCircles,
-    patRadii
-    };
-  
-  void clearAll();
-  void setColor(ePattern id, color_t col);
-  void drawAll();
-  void showMenu();
-  void switchAlpha(ePattern id, color_t col);
-
-  struct linepattern {
-    int id;
-    const char *lpname;
-    color_t color;
-    ld multiplier;
-    };
-
-  extern vector<linepattern> patterns;
-  extern ld width;
-  };
-
 static const int DISTANCE_UNKNOWN = 127;
-
-#define SETMOUSEKEY 5000
-extern char mousekey;
-extern char newmousekey;
-void displaymm(char c, int x, int y, int rad, int size, const string& title, int align);
 
 #include <functional>
 
@@ -1151,22 +994,6 @@ extern bool useRangedOrb;
 #endif
 
 static inline bool orbProtection(eItem it) { return false; } // not implemented
-
-#if CAP_FIELD
-namespace windmap {
-  void create();
-
-  static const int NOWINDBELOW = 8;
-  static const int NOWINDFROM = 120;
-
-  int getId(cell *c);
-  int at(cell *c);
-  }
-#endif
-
-int getgametime();
-string getgametime_s(int timespent = getgametime());
-extern int stampbase;
 
 #ifndef GL
 typedef float GLfloat;
@@ -1249,72 +1076,9 @@ struct celllister : manual_celllister {
   int getdist(cell *c) { return dists[c->listindex]; }
   };
 
-#if CAP_FIELD
-#define currfp fieldpattern::getcurrfp()
-namespace fieldpattern {
-  struct fpattern& getcurrfp();
-  }
-
-int currfp_gmul(int a, int b);
-int currfp_inverses(int i);
-int currfp_distwall(int i);
-
-int currfp_n();
-int currfp_get_P();
-int currfp_get_R();
-int currfp_get_X();
-#endif
-
-void runGeometryExperiments();
-
 // z to close to this limit => do not draw
 
 #define BEHIND_LIMIT 1e-6
-
-namespace lv {
-  static const flagtype appears_in_geom_exp = 1;
-  static const flagtype display_error_message = 2;
-  static const flagtype appears_in_full = 4;
-  static const flagtype appears_in_ptm = 8;
-  static const flagtype display_in_help = 16;
-  static const flagtype one_and_half = 32;
-  };
-
-struct land_validity_t {
-  int quality_level; // 0 (dont show), 1 (1/2), 2 (ok), 3(1!)
-  flagtype flags;
-  string msg;
-  };
-
-namespace fieldpattern {
-  pair<int, bool> fieldval(cell *c);
-  }
-
-int emeraldval(cell *c);
-
-int inpair(cell *c, int colorpair);
-int snake_pair(cell *c);
-
-extern colortable nestcolors;
-
-unsigned char& part(color_t& col, int i);
-
-int pattern_threecolor(cell *c);
-int fiftyval200(cell *c);
-
-bool isWall3(cell *c, color_t& wcol);
-
-extern string bitruncnames[5];
-extern bool need_mouseh;
-
-void clear_euland(eLand first);
-
-extern eMonster passive_switch;
-
-bool cannotPickupItem(cell *c, bool telekinesis);
-bool canPickupItemWithMagnetism(cell *c, cell *from);
-void pickupMovedItems(cell *c);
-eMonster genRuinMonster(cell *c);
 
 template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
   for(int i=0; i<isize(data); i++)
@@ -1324,34 +1088,6 @@ template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
 
 #if CAP_ORIENTATION
 transmatrix getOrientation();
-#endif
-
-namespace elec { extern int lightningfast; }
-
-#define DF_INIT              1 // always display these
-#define DF_MSG               2 // always display these
-#define DF_WARN              4 // always display these
-#define DF_ERROR             8 // always display these
-#define DF_STEAM            16
-#define DF_GRAPH            32
-#define DF_TURN             64
-#define DF_FIELD           128
-#define DF_GEOM            256
-#define DF_MEMORY          512
-#define DF_TIME           1024 // a flag to display timestamps
-#define DF_GP             2048
-#define DF_POLY           4096
-#define DF_LOG            8192
-#define DF_KEYS "imwesxufgbtopl"
-
-#if ISANDROID
-#define DEBB(r,x)
-#define DEBB0(r,x)
-#define DEBBI(r,x)
-#else
-#define DEBB(r,x) { if(debugflags & (r)) { println_log x; } }
-#define DEBB0(r,x) { if(debugflags & (r)) { print_log x; } }
-#define DEBBI(r,x) { if(debugflags & (r)) { println_log x; } } indenter_finish _debbi(debugflags & (r));
 #endif
 
 template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0] = a; x[1] = b; x[2] = c; x[3] = d; return x; }
@@ -1371,85 +1107,6 @@ namespace daily {
   void handleQuit(int sev);
   void uploadscore(bool really_final);
   }
-
-namespace torusconfig {
-  extern int sdx, sdy;
-  
-  enum eTorusMode : char { 
-    tmSingleHex, 
-    tmSingle, 
-    tmSlantedHex, 
-    tmStraight, 
-    tmStraightHex,
-    tmKlein,
-    tmKleinHex,
-    tmCylinder,
-    tmCylinderHex,
-    tmMobius,
-    tmMobiusHex,
-    };
-  
-  extern eTorusMode torus_mode;
-  extern void activate();
-
-  struct torusmode_info {
-    string name;
-    flagtype flags;
-    };
-  
-  extern vector<torusmode_info> tmodes;
-
-  enum : flagtype {
-    TF_SINGLE = 1,
-    TF_SIMPLE = 2,
-    TF_WEIRD  = 4,
-    TF_HEX    = 16,
-    TF_SQUARE = 32,
-    TF_CYL    = 64,
-    TF_KLEIN = 256,
-    };
-
-  flagtype tmflags();
-  }
-
-struct plainshape;
-void clear_plainshape(plainshape& gsh);
-
-namespace gp {
-  void clear_plainshapes();
-  plainshape& get_plainshape();
-  }
-
-extern bool just_gmatrix;
-
-bool haveLeaderboard(int id);
-int get_currentscore(int id);
-void set_priority_board(int id);
-int get_sync_status();
-bool score_loaded(int id);
-int score_default(int id);
-void handle_event(SDL_Event& ev);
-
-void generate_floorshapes();
-
-#define SIDE_SLEV 0
-#define SIDE_WTS3 3
-#define SIDE_WALL 4
-#define SIDE_LAKE 5
-#define SIDE_LTOB 6
-#define SIDE_BTOI 7
-#define SIDE_SKY  8
-#define SIDE_HIGH 9
-#define SIDE_HIGH2 10
-#define SIDEPARS  11
-
-void initShape(int sg, int id);
-
-extern int usershape_changes;
-
-#define BADMODEL 0
-
-extern vector<ld> equal_weights;
 
 #define RING(i) for(double i=0; i<=cgi.S84+1e-6; i+=SD3 * pow(.5, vid.linequality))
 #define REVRING(i) for(double i=cgi.S84; i>=-1e-6; i-=SD3 * pow(.5, vid.linequality))
