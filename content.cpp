@@ -1,8 +1,13 @@
-// Hyperbolic Rogue
-// X-macros for items, monsters, walls, and lands
-// add new content at 'add new content here' so that constants do not change
-// old things are sorted according to type, but this is not necessary for new content
+// Hyperbolic Rogue -- items, monsters, walls, and lands
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file content.cpp
+ *  \brief X-macros for items, monsters, walls, and lands
+ *
+ *  Add new content at 'add new content here' so that constants do not change.
+ *  Old things are sorted according to type, but this is not necessary for new content.
+ */
+
 
 #ifndef MONSTER
 #define MONSTER(a,b,c,d,e,f,g,h)

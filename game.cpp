@@ -165,27 +165,27 @@ EX cellwalker cwt;
 EX inline cell*& singlepos() { return cwt.at; }
 EX inline bool singleused() { return !(shmup::on || multi::players > 1); }
 
-/** the main random number generator for the game
- *  all the random calls related to the game mechanics (land generation, AI...) should use hrngen
- *  random calls not related to the game mechanics (graphical effects) should not use hrngen
- * this ensures that the game should unfold exactly the same if given the same seed and the same input 
+/** the main random number generator for the game.
+ *  
+ * All the random calls related to the game mechanics (land generation, AI...) should use hrngen.
+ *
+ * Random calls not related to the game mechanics (graphical effects) should not use hrngen.
+ *
+ * This ensures that the game should unfold exactly the same if given the same seed and the same input.
  */
-
 std::mt19937 hrngen;
 
-/** initialize hrngen @see hrngen */
+/** initialize \link hrngen \endlink */
 EX void shrand(int i) {
   hrngen.seed(i);
   }
 
-/** generate a large number with hrngen */
+/** generate a large number with \link hrngen \endlink */
 EX int hrandpos() { return hrngen() & HRANDMAX; }
 
-/** A random integer from [0..i), generated from hrngen.
+/** A random integer from [0..i), generated from \link hrngen \endlink.
  *  We are using our own implementations rather than ones from <random>,
  *  to make sure that they return the same values on different compilers.
-m * 
- * @see hrngen
  **/
 
 EX int hrand(int i) { 
@@ -202,16 +202,14 @@ template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i =
 template<class T> void hrandom_shuffle(T* x, int n) { for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]); }
 #endif
 
-/** Use hrngen to generate a floating point number between 0 and 1.
- * @see hrngen
+/** Use \link hrngen \endlink to generate a floating point number between 0 and 1.
  */
 
 EX ld hrandf() { 
   return (hrngen() - hrngen.min()) / (hrngen.max() + 1.0 - hrngen.min());
   }
 
-/** Returns an integer corresponding to the current state of hrngen.
- *  @see hrngen
+/** Returns an integer corresponding to the current state of \link hrngen \endlink.
  */
 EX int hrandstate() {
   std::mt19937 r2 = hrngen;

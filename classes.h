@@ -1,3 +1,10 @@
+// Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file classes.h
+ *  \brief header file for content
+ */
+
 namespace hr {
 
 typedef unsigned color_t;

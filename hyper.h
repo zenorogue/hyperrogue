@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- main header file
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file Hyper.h
+/** \file hyper.h
  *  \brief The main header file of HyperRogue
  *
  *  Contains general utility macros, various value macros, using clauses for standard library functions,

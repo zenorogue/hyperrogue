@@ -1,6 +1,12 @@
 // Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+/** \file classes.cpp
+ *  \brief items, monsters, walls, lands, descriptions, etc.
+ *
+ *  See content.cpp for actual items, monsters, walls and lands.
+ */
+
 namespace hr {
 
 // --- help ---
@@ -509,6 +515,7 @@ static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC;
 static const flagtype qsBP              = qBINARY | qPENROSE;
 
+/** list of available geometries */
 vector<geometryinfo> ginf = {
   {"{7,3}", "none",     "{7,3} (standard HyperRogue map)",            "HR",       7, 3, 0,         gcHyperbolic,       0, {{7, 5}}, eVariation::bitruncated},
   {"{6,3}", "none",     "{6,3} (euclidean Hex grid)",                 "euclid",   6, 3, 0,         gcEuclid,           0, {{7, FORBIDDEN}}, eVariation::bitruncated},
@@ -574,6 +581,7 @@ vector<geometryinfo> ginf = {
 
 #define X3(x) x, x, x
 
+/** list of available models (i.e., projections) */
 const modelinfo mdinf[int(mdPolynomial)+1] = {
   {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal},
   {"half-plane", "inversion", "half-plane", mf::conformal},

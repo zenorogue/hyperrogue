@@ -190,7 +190,7 @@ template<class T> T* tailored_alloc(int degree) {
   return result;
   }
 
-/** Counterpart to @see tailored_alloc. */
+/** Counterpart to tailored_alloc(). */
 template<class T> void tailored_delete(T* x) {
   x->~T();  
   delete[] ((char*) (x));
@@ -206,7 +206,7 @@ extern int hrand(int);
 /** reverse directions are currently not implemented for heptagons */
 inline vector<int> reverse_directions(struct heptagon *c, int i) { throw "unimplemented"; }
 
-/** the walker structure is used for walking on surfaces defined via @see connection_table. @connection_table */
+/** the walker structure is used for walking on surfaces defined via \ref connection_table. */
 template<class T> struct walker {
   /** where we are at */
   T *at;
