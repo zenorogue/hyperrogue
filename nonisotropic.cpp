@@ -78,7 +78,7 @@ EX namespace solv {
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
 
-  hyperpoint get_inverse_exp(hyperpoint h, bool lazy) {
+  hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
     load_table();
     
     ld ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
@@ -120,11 +120,13 @@ EX namespace solv {
     if(h[0] < 0.) res[0] = -res[0];
     if(h[1] < 0.) res[1] = -res[1];
     
-    return res;
+    if(!just_direction) {
+      ld r = hypot_d(3, res);
+      if(r == 0.) return res;
+      return res * atanh(r) / r;
+      }
 
-    /* ld r = sqrt(res[0] * res[0] + res[1] * res[1] + res[2] * res[2]);
-    if(r == 0.) return res;
-    return res * atanh(r) / r; */
+    return res;
     }
 
   struct hrmap_sol : hrmap {
@@ -556,10 +558,15 @@ EX namespace nisot {
   enum iePrecision { iLazy, iTable };
   #endif
   
-  EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p) {
-    if(sol) return solv::get_inverse_exp(h, p == iLazy);
+  EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
+    if(sol) return solv::get_inverse_exp(h, p == iLazy, just_direction);
     if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
     return point3(h[0], h[1], h[2]);
+    }
+  
+  EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, iePrecision p) {
+    if(!nonisotropic) return hdist(h1, h2);
+    return hypot_d(3, inverse_exp(inverse(translate(h1)) * h2, p, false));
     }
 
   EX void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
@@ -581,6 +588,12 @@ EX namespace nisot {
     v[3] = 0;
     for(int i=0; i<steps; i++) geodesic_step(at, v);
     return at;
+    }
+
+  EX hyperpoint get_exp(hyperpoint v, int steps) {
+    if(sol) return direct_exp(v, steps);
+    if(nil) return nilv::formula_exp(v);
+    return v;
     }
 
   EX transmatrix parallel_transport_bare(transmatrix Pos, transmatrix T) {
