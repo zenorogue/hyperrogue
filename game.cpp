@@ -6815,7 +6815,7 @@ EX bool cantGetGrimoire(cell *c2, bool verbose IS(true)) {
 
 EX void gainLife() {
   items[itOrbLife] ++;
-  if(items[itOrbLife] > 5 && !shmup::on) items[itOrbLife] = 5;
+  if(items[itOrbLife] > 5 && !inv::on) items[itOrbLife] = 5;
   }
 
 EX void collectMessage(cell *c2, eItem which) {
