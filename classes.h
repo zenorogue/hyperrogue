@@ -249,6 +249,8 @@ static const flagtype qELLIPTIC        = 128;
 static const flagtype qBINARY          = 256;
 static const flagtype qPENROSE         = 512;
 
+static const flagtype qEXPERIMENTAL    = 32768;
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 static const int FORBIDDEN = -1;

@@ -371,7 +371,8 @@ EX pair<int, bool> fieldval(cell *c) {
   }
 
 EX int fieldval_uniq(cell *c) {
-  if(sphere) {
+  if(experimental) return 0;
+  else if(sphere) {
     if(archimedean) return c->master->fiftyval;
     #if CAP_IRR
     else if(IRREGULAR) return irr::cellindex[c];

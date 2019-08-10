@@ -448,6 +448,7 @@ EX int compdist(int dx[]) {
   }
 
 EX int celldist(cell *c) {
+  if(experimental) return 0;
   if(fulltorus && WDIM == 2) 
     return torusmap()->dists[decodeId(c->master)];
   if(nil) return DISTANCE_UNKNOWN;
@@ -477,6 +478,7 @@ static const int ALTDIST_ERROR = 90000;
 #endif
 
 EX int celldistAlt(cell *c) {
+  if(experimental) return 0;
   if(masterless) {
     if(fulltorus) return celldist(c);
     if(euwrap) return cylinder_alt(c);
@@ -1014,7 +1016,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(geometry == gCrystal) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || sol || (penrose && euclid)) {
+  if(masterless || archimedean || quotient || sol || (penrose && euclid) || experimental) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

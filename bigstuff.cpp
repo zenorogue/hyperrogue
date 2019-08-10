@@ -1259,7 +1259,7 @@ EX int wallchance(cell *c, bool deepOcean) {
 
 EX bool horo_ok() {
   // do the horocycles work in the current geometry?
-  return hyperbolic && !binarytiling && !archimedean && !penrose;
+  return hyperbolic && !binarytiling && !archimedean && !penrose && !experimental;
   }
 
 EX bool gp_wall_test() {
@@ -1309,7 +1309,7 @@ EX bool good_for_wall(cell *c) {
   }
   
 EX void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient || nonisotropic || (penrose && !binarytiling)) return;
+  if(sphere || quotient || nonisotropic || (penrose && !binarytiling) || experimental) return;
   if(chaosmode > 1) return;
   bool deepOcean = deep_ocean_at(c, from);
   

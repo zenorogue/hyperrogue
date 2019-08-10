@@ -113,6 +113,9 @@ void addMessage(string s, char spamtype = 0);
 #define archimedean (geometry == gArchimedean)
 #define penrose (ginf[geometry].flags & qPENROSE)
 
+/** convenience flag for geometries with major aspects missing */
+#define experimental (ginf[geometry].flags & qEXPERIMENTAL)
+
 // these geometries do not feature alternate structures for horocycles
 #define eubinary (euclid || binarytiling || geometry == gCrystal || nil)
 
