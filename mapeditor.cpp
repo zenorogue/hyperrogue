@@ -1454,7 +1454,7 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
       if(DIM == 3)
         displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
-      if(nonisotropic) mh = nisot::inverse_exp(mh, nisot::iTable, true);
+      if(nonisotropic) mh = nisot::inverse_exp(mh, nisot::iTable, false);
       displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hdist0(mh),4)), 0xC0C0C0, 16);
       if(DIM == 3) {
         displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
