@@ -17,7 +17,7 @@ EX namespace mapeditor {
   hyperpoint lstart;
   cell *lstartcell;
   ld front_edit = 0.5;
-  enum class eFront { sphere_camera, sphere_center, equidistants };
+  enum class eFront { sphere_camera, sphere_center, equidistants, const_x, const_y };
   eFront front_config;
   ld front_step = 0.1;
 
@@ -1113,32 +1113,51 @@ namespace mapeditor {
   
   unsigned gridcolor = 0xC0C0C040;
   
+  hyperpoint in_front_dist(ld d) {
+    hyperpoint h = cpush0(2, d);
+    if(nonisotropic && nisot::geodesic_movement) h = nisot::get_exp(inverse(nisot::local_perspective) * h, 100);
+    return h;
+    }
+  
   hyperpoint find_mouseh3() {
     if(front_config == eFront::sphere_camera)
-      return cpush0(2, front_edit);
+      return in_front_dist(front_edit);
     ld step = 0.01;
     ld cdist = 0;
     
     auto idt = inverse(drawtrans);
 
     auto qu = [&] (ld d) { 
+      ld d1 = front_edit;
+      hyperpoint h1 = in_front_dist(d);
       if(front_config == eFront::sphere_center) 
-        return pow(hdist(drawtrans * C0, cpush0(2, d)) - front_edit, 2); 
+        d1 = nisot::geo_dist(drawtrans * C0, h1, nisot::iTable);
       if(front_config == eFront::equidistants) {
-        hyperpoint h = idt * cpush0(2, d);
-        return pow(asin_auto(h[2]) - front_edit, 2);
+        hyperpoint h = idt * in_front_dist(d);
+        d1 = asin_auto(h[2]);
         }
-      return ld(0);
+      if(front_config == eFront::const_x) {
+        hyperpoint h = idt * in_front_dist(d);
+        d1 = asin_auto(h[0]);
+        }
+      if(front_config == eFront::const_y) {
+        hyperpoint h = idt * in_front_dist(d);
+        d1 = asin_auto(h[1]);
+        }
+      return pow(d1 - front_edit, 2);
       };
     
     ld bq = qu(cdist);
-    while(step > 1e-10) {
+    while(abs(step) > 1e-10) {
       ld cq = qu(cdist + step);
       if(cq < bq) cdist += step, bq = cq;
-      else step /= 2;
+      else step *= -.5;
       }
-    return cpush0(2, cdist);
+    return in_front_dist(cdist);
     }
+  
+  int parallels = 12, meridians = 6;
+  ld equi_range = 1;
     
   void drawGrid() {
     color_t lightgrid = gridcolor;
@@ -1151,27 +1170,39 @@ namespace mapeditor {
       if(true) {
         transmatrix t = rgpushxto0(find_mouseh3());
         for(int i=0; i<4; i++)
-          queueline(t * cpush0(i&1, 0.1), cpush(2, front_edit) * cpush0(i&1, -0.1), cols[i], -1, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+          queueline(t * cpush0(i&1, 0.1), t * cpush0(i&1, -0.1), cols[i], -1, i < 2 ? PPR::LINE : PPR::SUPERLINE);
         }
       if(front_config == eFront::sphere_center) for(int i=0; i<4; i+=2) {
-        for(int a=0; a<360; a+=30) {
-          for(int b=-90; b<90; b+=5) curvepoint(d2 * spin(a*degree) * cspin(0, 2, b*degree) * xpush0(front_edit));
-          queuecurve(cols[i + (a % 90 != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+        auto pt = [&] (ld a, ld b) {
+          hyperpoint h = spin(a*degree) * cspin(0, 2, b*degree) * xpush0(front_edit);;
+          if(nonisotropic && nisot::geodesic_movement) return d2 * nisot::get_exp(h, 100);
+          return d2 * h;
+          };
+        for(int ai=0; ai<parallels; ai++) {
+          ld a = ai * 360 / parallels;
+          for(int b=-90; b<90; b+=5) curvepoint(pt(a,b));
+          queuecurve(cols[i + ((ai*4) % parallels != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
-        for(int b=-60; b<=60; b+=30) {
-          for(int a=0; a<=360; a+=5) curvepoint(d2 * spin(a*degree) * cspin(0, 2, b*degree) * xpush0(front_edit));
-          queuecurve(cols[i + (b != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
+        for(int bi=1-meridians; bi<meridians; bi++) {
+          ld b = 90 * bi / meridians;
+          for(int a=0; a<=360; a+=5) curvepoint(pt(a, b));
+          queuecurve(cols[i + (bi != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
         }
-      if(front_config == eFront::equidistants) for(int i=0; i<4; i+=2) {
+      transmatrix T;
+      if(front_config == eFront::equidistants) T = Id;
+      else if(front_config == eFront::const_x) T = cspin(2, 0, M_PI/2);
+      else if(front_config == eFront::const_y) T = cspin(2, 1, M_PI/2);
+      else return;
+      for(int i=0; i<4; i+=2) {
         for(int u=2; u<=20; u++) {
           PRING(d) {
-            curvepoint(d2 * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
+            curvepoint(d2 * T * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
             }
           queuecurve(cols[i + (u%5 != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
         for(int d=0; d<cgi.S84; d++) {
-          for(int u=0; u<=20; u++) curvepoint(d2 * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
+          for(int u=0; u<=20; u++) curvepoint(d2 * T * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
           queuecurve(cols[i + (d % (cgi.S84/drawcell->type) != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
         }
@@ -1388,7 +1419,11 @@ namespace mapeditor {
       }
     
     if(DIM == 3)
-      displayfr(8, 8+fs*19, 2, vid.fsize, XLAT(front_config == eFront::sphere_camera ? "z = camera" : front_config == eFront::sphere_center ? "z = spheres" : "z = equi"), 0xC0C0C0, 0);
+      displayfr(8, 8+fs*19, 2, vid.fsize, XLAT(front_config == eFront::sphere_camera ? "z = camera" : front_config == eFront::sphere_center ? "z = spheres" : 
+        nonisotropic && front_config == eFront::equidistants ? "Z =" :
+        nonisotropic && front_config == eFront::const_x ? "X =" :
+        nonisotropic && front_config == eFront::const_y ? "Y =" :
+        "z = equi") + " " + fts(front_edit), 0xC0C0C0, 0);
 
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
@@ -1843,13 +1878,38 @@ namespace mapeditor {
         dialog::add_action([] { front_config = eFront::sphere_camera; });
         dialog::addBoolItem(XLAT("place points at fixed radius"), front_config == eFront::sphere_center, 'B');
         dialog::add_action([] { front_config = eFront::sphere_center; });
-        dialog::addBoolItem(XLAT("place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
+        dialog::addBoolItem(XLAT(nonisotropic ? "place points on surfaces of const Z" : "place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
         dialog::add_action([] { front_config = eFront::equidistants; });
+        if(nonisotropic) {
+          dialog::addBoolItem(XLAT("place points on surfaces of const X"), front_config == eFront::const_x, 'D');
+          dialog::add_action([] { front_config = eFront::const_x; });
+          dialog::addBoolItem(XLAT("place points on surfaces of const Y"), front_config == eFront::const_y, 'E');
+          dialog::add_action([] { front_config = eFront::const_y; });
+          }
         dialog::addSelItem(XLAT("mousewheel step"), fts(front_step), 'S');
         dialog::add_action([] {
           popScreen();
           dialog::editNumber(front_step, -10, 10, 0.1, 0.1, XLAT("mousewheel step"), "hint: shift for finer steps");
           });
+        if(front_config == eFront::sphere_center) {
+          dialog::addSelItem(XLAT("parallels to draw"), its(parallels), 'P');
+          dialog::add_action([] {
+            popScreen();
+            dialog::editNumber(parallels, 0, 72, 1, 12, XLAT("parallels to draw"), "");
+            });
+          dialog::addSelItem(XLAT("meridians to draw"), its(meridians), 'M');
+          dialog::add_action([] {
+            popScreen();
+            dialog::editNumber(meridians, 0, 72, 1, 12, XLAT("meridians to draw"), "");
+            });
+          }
+        else if(front_config != eFront::sphere_camera) {
+          dialog::addSelItem(XLAT("range of grid to draw"), fts(equi_range), 'R');
+          dialog::add_action([] {
+            popScreen();
+            dialog::editNumber(equi_range, 0, 5, 0.1, 1, XLAT("range of grid to draw"), "");
+            });
+          }
         };
       }
     
