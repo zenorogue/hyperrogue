@@ -149,7 +149,30 @@ int arg::readCommon() {
     for(char c: s) {
       for(int i=0; i<int(strlen(DF_KEYS)); i++) {
         if(DF_KEYS[i] == c) debugflags |= (1<<i);
-        if(DF_KEYS[i] == (c ^ 32)) debugflags &= ~(1<<i);
+        else if(DF_KEYS[i] == (c ^ 32)) debugflags &= ~(1<<i);
+        }
+      if(c >= '0' && c <= '9') {
+        debugflags &= DF_TIME;
+        if(c >= '1')
+          debugflags |= DF_INIT | DF_WARN | DF_MSG | DF_ERROR;
+        if(c >= '2')
+          debugflags |= DF_GEOM | DF_GP | DF_LOG | DF_FIELD | DF_POLY;
+        if(c >= '3')
+          debugflags |= DF_TURN | DF_STEAM;
+        if(c >= '4')
+          debugflags |= DF_GRAPH | DF_MEMORY;
+        }
+      else if(c == '+') {
+        if(debugfile) fclose(debugfile);
+        shift(); 
+        println(hlog, "writing to ", argcs());
+        debugfile = fopen(argcs(), "at");  
+        }
+      else if(c == '@') {
+        if(debugfile) fclose(debugfile);
+        shift(); 
+        println(hlog, "writing to ", argcs());
+        debugfile = fopen(argcs(), "wt");  
         }
       }
     }
