@@ -3430,3 +3430,15 @@ Solv geometry:
 - fixed shmup not working correctly in the non-geodesic mode in nonisotropic geometries
 - disabled heptagon markers blocking the view in 3D geometries
 - improved Red Rock and other heights display in 3D geometries
+
+2019-08-10 22:41 Version 11.1j:
+- fixed Racing desync in Crossroads
+- the life limit in the shmup mode is working again (it was to be removed in the Orb Strategy mode but it was removed altogether)
+- items now correctly face the player in nonisotropic geometries
+- ability to write a debug log file
+- mapeditor:: geodesic spheres and constant X/Y/Z in nonisotropic, also the grid is configurable
+- mapeditor:: geodesic spherical coordinates in nisot, works correctly in 3D
+- cleanup of the source code, and started documentation
+- fixed UI elements crashing into each other in some resolutions in the Vector Graphics editor
+- in Vector Graphics editor in nonisotropic geometries, you can now draw geodesic spheres and constant X/Y/Z surfaces, and put points on them (the 'z' key)
+- furthermore, the coordinates are displayed correctly in model and geodesic spherical
