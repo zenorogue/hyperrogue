@@ -129,8 +129,8 @@ vector<cell*> targets; // list of monster targets
 // monsters of specific types to move
 vector<cell*> worms, ivies, ghosts, golems, hexsnakes;
 
-vector<cell*> temps;  // temporary changes during bfs
-vector<eMonster> tempval;  // restore temps
+/** temporary changes during bfs */
+vector<pair<cell*, eMonster>> tempmonsters;
 
 // a bit nicer way of DFS
 vector<int> reachedfrom;
@@ -2754,7 +2754,8 @@ EX bool cellEdgeUnstable(cell *c, flagtype flags IS(0)) {
 
 // find worms and ivies
 EX void settemp(cell *c) {
-  temps.push_back(c); tempval.push_back(c->monst); c->monst = moNone;
+  tempmonsters.emplace_back(c, (eMonster) c->monst);
+  c->monst = moNone;
   }
 
 EX void findWormIvy(cell *c) {
@@ -3135,7 +3136,7 @@ EX void bfs() {
   int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) dcal[i]->cpdist = INFD;
   worms.clear(); ivies.clear(); ghosts.clear(); golems.clear(); 
-  temps.clear(); tempval.clear(); targets.clear(); 
+  tempmonsters.clear(); targets.clear(); 
   statuecount = 0;
   hexsnakes.clear(); 
 
@@ -3368,8 +3369,7 @@ EX void bfs() {
     for(int i=0; i<isize(dcal); i++) checkTide(dcal[i]);
     }    
   
-  int qtemp = isize(temps);
-  for(int i=0; i<qtemp; i++) temps[i]->monst = tempval[i];
+  for(auto& t: tempmonsters) t.first->monst = t.second;
   
   buildAirmap();
   }
