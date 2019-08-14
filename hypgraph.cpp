@@ -677,6 +677,31 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         });
       break;
     
+    case mdCentralCyl: 
+      makeband(H, ret, [] (ld& x, ld& y) { y = tan_auto(y); });
+      break;
+
+    case mdCollignon: 
+      find_zlev(H); /* does not look nicely otherwise */
+      if(hyperbolic) H = ypush(-1) * H;
+      makeband(H, ret, [] (ld& x, ld& y) { 
+        auto signed_sqrt = [] (ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); };
+/*
+        if(sphere) {
+          y = M_PI / 2 - y;
+          x = sin_auto(y/2) * x;
+          y = (sin_auto(y/2) - .5) * M_PI;
+          }
+        if(hyperbolic) {
+          ld mul = signed_sqrt(sinh(y) + 1); 
+          x *= mul;
+          y = mul + signed_sqrt(sinh(1) + 1);
+          }*/
+        y = signed_sqrt(sin_auto(y) + whatever[0]);
+        x *= y;
+        });
+      break;
+    
     case mdBandEquiarea: 
       makeband(H, ret, [] (ld& x, ld& y) { y = sin_auto(y); });
       break;
@@ -1679,7 +1704,7 @@ EX void draw_boundary(int w) {
       return;
       }
     
-    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: {
+    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: case mdCentralCyl: case mdCollignon: {
       if(DIM == 3) return;
       if(pmodel == mdBand && models::model_transition != 1) return;
       bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);

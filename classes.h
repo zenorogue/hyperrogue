@@ -286,7 +286,7 @@ enum eModel {
   // 20..24
   mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdGeodesic,
   // 25
-  mdMollweide,
+  mdMollweide, mdCentralCyl, mdCollignon,
   // 26..
   mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial, mdRug, mdFlatten
   };

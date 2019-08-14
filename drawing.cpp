@@ -698,6 +698,9 @@ ld period_at(ld y) {
       return m * 2 * cos(y * M_PI);
     case mdMollweide:
       return (abs(y) > .5-1e-6) ? m * 2 : m * 2 * sqrt(1 - y*y*4);
+    case mdCollignon:
+//      return (y < -.499999) ? m*2 : m*(1+2*y);
+      return (abs(y) < 1e-6) ? m*2 : m*2*y; //  y = signed_sqrt(sin_auto(y) + whatever[0]);
     default:
       return m * 2;
     }     

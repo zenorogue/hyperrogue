@@ -609,6 +609,8 @@ const modelinfo mdinf[int(mdPolynomial)+1] = {
   {X3("two-point hybrid"), mf::euc_boring | mf::twopoint},
   {X3("geodesic"), 0},
   {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea },
+  {X3("central cylindrical"), mf::euc_boring | mf::band },
+  {X3("Collignon"), mf::pseudoband | mf::equiarea },
   {X3(""), 0},
   {X3("polynomial"), mf::conformal}
   };
