@@ -685,12 +685,7 @@ EX void set_width(ld w) {
 namespace cyl {
 
 int loop_min = 0, loop_max = 0;
-ld period;
-
-auto pzero(ld t) {
-  if(abs(t) < 1e-6) return 2 * current_display->radius;
-  return t;
-  }
+vector<ld> periods;
 
 ld period_at(ld y) {
   
@@ -701,13 +696,13 @@ ld period_at(ld y) {
     case mdBand:
       return m * 4;
     case mdSinusoidal:
-      return pzero(m * 2 * cos(y * M_PI));
+      return m * 2 * cos(y * M_PI);
     case mdMollweide:
-      return pzero(m * 2 * sqrt(1 - y*y*4));
+      return m * 2 * sqrt(1 - y*y*4);
     case mdCollignon: {
       if(vid.collignon_reflected && y > 0) y = -y;
       y += signed_sqrt(vid.collignon_parameter);
-      return pzero(abs(m*y*2/1.2));
+      return abs(m*y*2/1.2);
       }
     default:
       return m * 2;
@@ -716,90 +711,91 @@ ld period_at(ld y) {
 
 void adjust(bool tinf) {
 
-  period = period_at(0);
+  periods.resize(isize(glcoords));
   
   if(!models::model_straight)
     for(auto& g: glcoords)
       models::apply_orientation(g[0], g[1]);
-    
-  if(mdPseudocylindrical())
-    for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][0] *= period / period_at(glcoords[i][1]);
 
+  for(int i = 0; i<isize(glcoords); i++) periods[i] = period_at(glcoords[i][1]);  
+    
   auto dist = [] (ld a, ld b) { return max(b, a-b); };
   
   ld chypot = hypot(dist(vid.xres, current_display->xcenter), dist(vid.yres, current_display->ycenter));
   
   ld cmin = -chypot/2, cmax = chypot/2, dmin = -chypot, dmax = chypot;
+  
+  ld z = vid.stretch * current_display->radius;
 
-  if(pmodel == mdSinusoidal)
-    dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
-  if(pmodel == mdBandEquidistant)
-    dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
-  if(pmodel == mdBandEquiarea)
-    dmin = -vid.stretch * current_display->radius / M_PI, dmax = vid.stretch * current_display->radius / M_PI;
+  switch(pmodel) {
+    case mdSinusoidal: case mdBandEquidistant: case mdMollweide:
+      dmax = z/2, dmin = -dmax;
+      break;
 
-  glcoords[0][0] -= round_nearest(glcoords[0][0], period);
+    case mdBandEquiarea:
+      dmax = z/M_PI, dmin = -dmax;
+      break;
+
+    case mdCollignon:      
+      dmin = z * (signed_sqrt(vid.collignon_parameter - 1) - signed_sqrt(vid.collignon_parameter));      
+      if(vid.collignon_reflected) dmax = -dmin;
+      else dmax = z * (signed_sqrt(vid.collignon_parameter + 1) - signed_sqrt(vid.collignon_parameter));
+      break;
     
-  ld first = glcoords[0][0];
-  ld next = first;
-  
-  ld mincoord = first, maxcoord = first;
+    default: ;
+    }
 
-  for(int i = 0; i<isize(glcoords); i++) {
-    glcoords[i][0] -= round_nearest(glcoords[i][0]-next, period);
-    next = glcoords[i][0];
-    mincoord = min<ld>(mincoord, glcoords[i][0]);
-    maxcoord = max<ld>(maxcoord, glcoords[i][0]);
+  bool had = false;
+  ld first, next;
+    
+  for(int i = 0; i<isize(glcoords); i++) if(periods[i] > 1) {
+    if(!had) {
+      next = first = glcoords[i][0] / periods[i];
+      had = true;
+      }
+    else {
+      glcoords[i][0] /= periods[i];
+      glcoords[i][0] -= round_nearest(glcoords[i][0]-next);
+      next = glcoords[i][0];
+      glcoords[i][0] *= periods[i];
+      }
+    loop_min = min<int>(loop_min, floor((cmin - glcoords[i][0]) / periods[i]));
+    loop_max = max<int>(loop_max, ceil((cmax - glcoords[i][0]) / periods[i]));
     }
   
-  if(abs(mincoord) > 50000 || abs(maxcoord) > 50000 || std::isnan(mincoord) || std::isnan(maxcoord)) {
-    loop_max--;
-    return;
-    }
+  if(!had) return;
   
-  ld last = first - round_nearest(first-next, period);
+  ld last = first - round_nearest(first-next);
+  
+  if(loop_max > 100) loop_max = 100;
+  if(loop_min < -100) loop_min = -100;
     
   if(abs(first - last) < 1e-6) {
-    while(mincoord > cmin && loop_min > -100)
-      loop_min--, mincoord -= period;
-    while(maxcoord < cmax && loop_max < +100)
-      loop_max++, maxcoord += period;
-    if(mdPseudocylindrical())
-      for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][0] *= period_at(glcoords[i][1]) / period;
     if(!models::model_straight)
       for(auto& g: glcoords)
         models::apply_orientation(g[1], g[0]);
     }
   else {
     if(tinf) { 
-      // this cannot work in Mercator
-      loop_max--; return; 
+      // this cannot work after cycled
+      loop_min = 1; loop_max = 0; return; 
       }
     if(last < first) {
       reverse(glcoords.begin(), glcoords.end());
+      reverse(periods.begin(), periods.end());
       swap(first, last);
       }
-    int steps = floor((maxcoord - cmin) / period);
-    if(steps) {
-      for(int i=0; i<isize(glcoords); i++) glcoords[i][0] -= period * steps;
-      first -= period * steps; last -= period * steps;
-      mincoord -= period * steps; maxcoord -= period * steps;
-      }
-    int base = isize(glcoords);
-    int minto = mincoord;
-    while(minto < cmax) {
-      for(int i=0; i<base; i++) {
-        glcoords.push_back(glcoords[isize(glcoords)-base]);
-        glcoords.back()[0] += period;
-        }
-      minto += period;
-      }
-    if(mdPseudocylindrical())
-      for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][0] *= period_at(glcoords[i][1]) / period;
 
+    for(int i=0; i<isize(glcoords); i++) glcoords[i][0] += periods[i] * loop_min;
+
+    int base = isize(glcoords);
+
+    for(int i=loop_min; i<loop_max; i++) {
+      for(int j=0; j<base; j++) {
+        glcoords.push_back(glcoords[isize(glcoords)-base]);
+        glcoords.back()[0] += periods[j];
+        }
+      }
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
@@ -809,12 +805,9 @@ void adjust(bool tinf) {
     if(!models::model_straight)
       for(auto& g: glcoords)
         models::apply_orientation(g[1], g[0]);
-    /* printf("cycling %d -> %d\n", base, qglcoords);
-    for(int a=0; a<qglcoords; a++)
-      printf("[%3d] %10.5lf %10.5lf\n", a, glcoords[a][0], glcoords[a][1]); */
+    // we have already looped
+    loop_min = loop_max = 0;  
     }
-
-    
   }
 }
   
@@ -1106,13 +1099,8 @@ void dqi_poly::draw() {
   
     if(l || lastl) { 
       for(int i=0; i<isize(glcoords); i++) {
-        if(mdPseudocylindrical()) {
-          ld y = glcoords[i][1], x = glcoords[i][0];
-          models::apply_orientation(x, y);
-          cyl::period = cyl::period_at(y);
-          }
-        glcoords[i][0] += models::ocos * cyl::period * (l - lastl);
-        glcoords[i][1] += models::osin * cyl::period * (l - lastl);
+        glcoords[i][0] += models::ocos * cyl::periods[i] * (l - lastl);
+        glcoords[i][1] += models::osin * cyl::periods[i] * (l - lastl);
         }
       lastl = l;
       }
