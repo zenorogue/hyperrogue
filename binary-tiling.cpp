@@ -505,6 +505,7 @@ EX namespace binary {
     if(geometry == gBinary4) return 3;
     if(geometry == gBinaryTiling) return 5;
     if(penrose) return 0;
+    if(!binarytiling) return 0;
     return S7-1;
     }
   
