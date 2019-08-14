@@ -686,6 +686,11 @@ int mercator_coord;
 int mercator_loop_min = 0, mercator_loop_max = 0;
 ld mercator_period;
 
+auto pzero(ld t) {
+  if(abs(t) < 1e-6) return 2 * current_display->radius;
+  return t;
+  }
+
 ld period_at(ld y) {
   
   ld m = current_display->radius;
@@ -695,12 +700,14 @@ ld period_at(ld y) {
     case mdBand:
       return m * 4;
     case mdSinusoidal:
-      return m * 2 * cos(y * M_PI);
+      return pzero(m * 2 * cos(y * M_PI));
     case mdMollweide:
-      return (abs(y) > .5-1e-6) ? m * 2 : m * 2 * sqrt(1 - y*y*4);
-    case mdCollignon:
-//      return (y < -.499999) ? m*2 : m*(1+2*y);
-      return (abs(y) < 1e-6) ? m*2 : m*2*y; //  y = signed_sqrt(sin_auto(y) + whatever[0]);
+      return pzero(m * 2 * sqrt(1 - y*y*4));
+    case mdCollignon: {
+      if(vid.collignon_reflected && y > 0) y = -y;
+      y += signed_sqrt(vid.collignon_parameter);
+      return pzero(abs(m*y*2/1.2));
+      }
     default:
       return m * 2;
     }     

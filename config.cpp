@@ -439,6 +439,8 @@ EX void initConfig() {
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
   addsaver(vid.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
+  addsaver(vid.collignon_parameter, "collignon-parameter", 1);
+  addsaver(vid.collignon_reflected, "collignon-reflect", false);
 
   addsaver(vid.creature_scale, "3d-creaturescale", 1);
   addsaver(vid.height_width, "3d-heightwidth", 1.5);
@@ -2382,6 +2384,7 @@ EX unordered_map<string, ld&> params = {
   {"fade", shot::fade},
   {"mgrid", vid.multiplier_grid},
   {"mring", vid.multiplier_ring},
+  {"collignon", vid.collignon_parameter},
   #endif
   };
 

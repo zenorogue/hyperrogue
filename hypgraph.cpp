@@ -310,6 +310,8 @@ hyperpoint compute_hybrid(hyperpoint H, int rootid) {
   return ret;
   }
 
+EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); };
+
 EX void applymodel(hyperpoint H, hyperpoint& ret) {
 
   hyperpoint H_orig = H;
@@ -682,23 +684,15 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
 
     case mdCollignon: 
-      find_zlev(H); /* does not look nicely otherwise */
-      if(hyperbolic) H = ypush(-1) * H;
+      find_zlev(H);
       makeband(H, ret, [] (ld& x, ld& y) { 
-        auto signed_sqrt = [] (ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); };
-/*
-        if(sphere) {
-          y = M_PI / 2 - y;
-          x = sin_auto(y/2) * x;
-          y = (sin_auto(y/2) - .5) * M_PI;
-          }
-        if(hyperbolic) {
-          ld mul = signed_sqrt(sinh(y) + 1); 
-          x *= mul;
-          y = mul + signed_sqrt(sinh(1) + 1);
-          }*/
-        y = signed_sqrt(sin_auto(y) + whatever[0]);
-        x *= y;
+        ld sgn = 1;
+        if(vid.collignon_reflected && y > 0) y = -y, sgn = -1;
+        y = signed_sqrt(sin_auto(y) + vid.collignon_parameter);
+        x *= y / 1.2;
+        y -= signed_sqrt(vid.collignon_parameter);
+        y *= sgn;
+        y *= M_PI;
         });
       break;
     

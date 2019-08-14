@@ -554,6 +554,18 @@ EX namespace models {
         });
       }
     
+    if(pmodel == mdCollignon) {
+      dialog::addSelItem(XLAT("parameter"), fts(vid.collignon_parameter) + (vid.collignon_reflected ? " (r)" : ""), 'b');
+      dialog::add_action([](){
+        dialog::editNumber(vid.collignon_parameter, -1, 1, .1, 1, XLAT("parameter"), 
+          ""
+          );
+        dialog::extra_options = [] {
+          dialog::addBoolItem_action(XLAT("reflect"), vid.collignon_reflected, 'R');
+          };
+        });
+      }
+    
     if(pmodel == mdSpiral && !euclid) {
       dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle) + "°", 'x');
       dialog::add_action([](){
