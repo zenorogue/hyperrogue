@@ -197,7 +197,7 @@ EX namespace models {
     }
   
   EX bool model_available(eModel pm) {
-    if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdGeodesic);
+    if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdGeodesic, mdEquidistant);
     if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
@@ -225,6 +225,7 @@ EX namespace models {
       if(m == mdDisk) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");
+      if(m == mdEquidistant) return XLAT(mdinf[m].name_hyperbolic);
       }
     if(m == mdDisk && DIM == 3) return XLAT("perspective in 4D");
     if(m == mdHalfplane && DIM == 3 && hyperbolic) return XLAT("half-space");

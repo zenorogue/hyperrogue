@@ -708,6 +708,12 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
     
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
+      if(nonisotropic) {
+        H = nisot::inverse_exp(H, nisot::iTable, false);
+        if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
+        ret = H; ret[3] = 1;
+        break;
+        }
       ld zlev = find_zlev(H);
 
       ld rad = hypot_d(DIM, H);
