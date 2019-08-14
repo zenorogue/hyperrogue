@@ -225,7 +225,7 @@ EX void showMainMenu() {
   if(cheater)
     dialog::addItem(XLAT("cheats"), 'c');
   else dialog::addBreak(100);
-  dialog::addItem(XLAT("restart game"), 'r'); dialog::lastItem().keycaption += " / F5";
+  dialog::addItem(XLAT("restart game"), 'r');
 
   dialog::addItem(XLAT(inSpecialMode() ? "reset special modes" : "back to the start menu"), 'R');
   
@@ -235,7 +235,7 @@ EX void showMainMenu() {
   #else
   q = quitsaves() ? "save" : "quit"; 
   q = q + " the game";
-  dialog::addItem(XLAT(q), 'q'); dialog::lastItem().keycaption += " / F10";
+  dialog::addItem(XLAT(q), 'q');
   #endif
 
   if(canmove)                                     

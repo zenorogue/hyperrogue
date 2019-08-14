@@ -22,7 +22,6 @@ EX namespace dialog {
     tDialogItem type;
     string body;
     string value;
-    string keycaption;
     int key;
     color_t color, colorv, colork, colors, colorc;
     int scale;
@@ -122,12 +121,16 @@ EX namespace dialog {
   EX map<int, reaction_t> key_actions;
   
   EX void add_key_action(int key, const reaction_t& action) {
-    while(key_actions.count(key)) key++;
     key_actions[key] = action;
     }
-
+  
+  EX void add_key_action_adjust(int& key, const reaction_t& action) {
+    while(key_actions.count(key)) key++;
+    add_key_action(key, action);
+    }
+  
   EX void add_action(const reaction_t& action) {
-    add_key_action(lastItem().key, action);
+    add_key_action_adjust(lastItem().key, action);
     }
   
   EX void add_action_push(const reaction_t& action) { add_action([action] { pushScreen(action); }); }
@@ -184,7 +187,6 @@ EX namespace dialog {
     it.type = diItem;
     it.body = body;
     it.value = value;
-    it.keycaption = keyname(key);
     it.key = key;
     it.color = dialogcolor;
     it.colork = 0x808080;
@@ -222,7 +224,6 @@ EX namespace dialog {
     it.type = diItem;
     it.body = body;
     it.value = COLORBAR;
-    it.keycaption = keyname(key);
     it.key = key;
     it.color = it.colorv = displaycolor(value);
     it.colors = it.color ^ 0x404040;
@@ -256,7 +257,6 @@ EX namespace dialog {
     item it;
     it.type = diItem;
     it.body = body;
-    it.keycaption = keyname(key);
     it.key = key;
     it.color = dialogcolor;
     it.colork = 0x808080;
@@ -270,7 +270,6 @@ EX namespace dialog {
     item it;
     it.type = diBigItem;
     it.body = body;
-    it.keycaption = keyname(key);
     it.key = key;
     it.color = 0xC06000;
     it.colors = 0xFFD500;
@@ -440,7 +439,7 @@ EX namespace dialog {
           }
         else {
           if(!mousing)
-            displayfr(keyx, mid, 2, dfsize * I.scale/100, I.keycaption, I.colork, 16);
+            displayfr(keyx, mid, 2, dfsize * I.scale/100, keyname(I.key), I.colork, 16);
           displayfr(itemx, mid, 2, dfsize * I.scale/100, I.body, I.color, 0);
           displayfr(valuex, mid, 2, dfsize * I.scale/100, I.value, I.colorv, 0);
           }
