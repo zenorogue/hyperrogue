@@ -340,6 +340,7 @@ EX namespace models {
             vid.scale = .3;
           if(pmodel == mdDisk && sphere)
             vid.scale = .4;
+          popScreen();
           });
         }
       }
