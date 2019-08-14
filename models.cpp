@@ -108,7 +108,7 @@ EX namespace polygonal {
 
 #if HDR
 inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
-inline bool mdBandAny() { return among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal); }
+inline bool mdBandAny() { return among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide); }
 #endif
 
 EX namespace models {

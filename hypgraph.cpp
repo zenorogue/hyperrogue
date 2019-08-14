@@ -656,6 +656,27 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       makeband(H, ret, make_twopoint);
       break;
     
+    case mdMollweide: 
+      makeband(H, ret, [] (ld& x, ld& y) { 
+        ld theta = 
+          hyperbolic ? min(y / 2 + 0.572365, y * 0.78509) :
+          euclid ? y :
+          y > 0 ? max(y * 0.012/0.015, M_PI/2 - (M_PI/2-y) * 0.066262/0.015708) :
+          min(y * 0.012/0.015, -M_PI/2 + (M_PI/2+y) * 0.066262/0.015708);
+          
+        if(sphere && abs(theta) >= M_PI/2 - 1e-6) ;
+        else {
+          for(int it=0; it<4; it++) {
+            auto a = (sin_auto(2*theta) +2*theta - M_PI * sin_auto(y));
+            auto b = (2 + 2 * cos_auto(2*theta));
+            theta = theta - a / b;
+            // theta = theta - (sinh(2*theta) +2*K*theta - M_PI * sinh(y)) / (2 * K + 2 * cosh(2*theta));
+          } }
+        y = M_PI * sin_auto(theta) / 2;
+        x = x * cos_auto(theta); 
+        });
+      break;
+    
     case mdBandEquiarea: 
       makeband(H, ret, [] (ld& x, ld& y) { y = sin_auto(y); });
       break;
@@ -1629,7 +1650,7 @@ EX void draw_boundary(int w) {
   dynamicval<ld> dw(vid.linewidth, vid.linewidth * (svg::in ? svg::divby : 1));
   #endif
 
-  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal))
+  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide))
     circle_around_center(M_PI/2, periodcolor, 0, PPR::CIRCLE);
   
   switch(pmodel) {
@@ -1658,7 +1679,7 @@ EX void draw_boundary(int w) {
       return;
       }
     
-    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: {
+    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: {
       if(DIM == 3) return;
       if(pmodel == mdBand && models::model_transition != 1) return;
       bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);

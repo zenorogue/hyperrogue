@@ -686,20 +686,34 @@ int mercator_coord;
 int mercator_loop_min = 0, mercator_loop_max = 0;
 ld mercator_period;
 
+ld period_at(ld y) {
+  
+  ld m = current_display->radius;
+  y /= (m * vid.stretch);
+  
+  switch(pmodel) {
+    case mdBand:
+      return m * 4;
+    case mdSinusoidal:
+      return m * 2 * cos(y * M_PI);
+    case mdMollweide:
+      return (abs(y) > .5-1e-6) ? m * 2 : m * 2 * sqrt(1 - y*y*4);
+    default:
+      return m * 2;
+    }     
+  }
+
 void fixMercator(bool tinf) {
 
-  if(pmodel == mdBand)
-    mercator_period = 4 * current_display->radius;
-  else
-    mercator_period = 2 * current_display->radius;
+  mercator_period = period_at(0);
   
   if(!models::model_straight)
     for(auto& g: glcoords)
       models::apply_orientation(g[0], g[1]);
     
-  if(pmodel == mdSinusoidal)
+  if(among(pmodel, mdSinusoidal, mdMollweide))
     for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);
+      glcoords[i][mercator_coord] *= mercator_period / period_at(glcoords[i][1-mercator_coord]);
 
   ld hperiod = mercator_period / 2;
     
@@ -720,10 +734,10 @@ void fixMercator(bool tinf) {
   if(pmodel == mdBandEquiarea)
     dmin = -vid.stretch * current_display->radius / M_PI, dmax = vid.stretch * current_display->radius / M_PI;
 
-  for(int i = 0; i<isize(glcoords); i++) {
-    while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
-    while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= mercator_period;
-    }
+ // for(int i = 0; i<isize(glcoords); i++) {
+  while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
+  while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= mercator_period;
+ //   }
     
   ld first = glcoords[0][mercator_coord];
   ld next = first;
@@ -754,9 +768,9 @@ void fixMercator(bool tinf) {
       mercator_loop_min--, mincoord -= mercator_period;
     while(maxcoord < cmax)
       mercator_loop_max++, maxcoord += mercator_period;
-    if(pmodel == mdSinusoidal)
+    if(among(pmodel, mdSinusoidal, mdMollweide))
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);    
+        glcoords[i][mercator_coord] *= period_at(glcoords[i][1-mercator_coord]) / mercator_period;
     if(!models::model_straight)
       for(auto& g: glcoords)
         models::apply_orientation(g[1], g[0]);
@@ -784,9 +798,10 @@ void fixMercator(bool tinf) {
         }
       minto += mercator_period;
       }
-    if(pmodel == mdSinusoidal)
+    if(among(pmodel, mdSinusoidal, mdMollweide))
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / current_display->radius / vid.stretch * M_PI);
+        glcoords[i][mercator_coord] *= period_at(glcoords[i][1-mercator_coord]) / mercator_period;
+
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
@@ -1092,10 +1107,10 @@ void dqi_poly::draw() {
   
     if(l || lastl) { 
       for(int i=0; i<isize(glcoords); i++) {
-        if(pmodel == mdSinusoidal) {
+        if(among(pmodel, mdSinusoidal, mdMollweide)) {
           ld y = glcoords[i][1], x = glcoords[i][0];
           models::apply_orientation(x, y);
-          mercator_period = 2 * current_display->radius * cos(y / current_display->radius / vid.stretch * M_PI);
+          mercator_period = period_at(y);
           }
         glcoords[i][mercator_coord] += models::ocos * mercator_period * (l - lastl);
         glcoords[i][1-mercator_coord] += models::osin * mercator_period * (l - lastl);

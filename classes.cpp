@@ -607,8 +607,8 @@ const modelinfo mdinf[int(mdPolynomial)+1] = {
   {X3("central inversion"), mf::azimuthal | mf::conformal},
   {X3("two-point azimuthal"), mf::euc_boring | mf::twopoint},
   {X3("two-point hybrid"), mf::euc_boring | mf::twopoint},
-  {X3(""), 0},
-  {X3(""), 0},
+  {X3("geodesic"), 0},
+  {X3("Mollweide"), mf::euc_boring | mf::quasiband | mf::equiarea },
   {X3(""), 0},
   {X3("polynomial"), mf::conformal}
   };
