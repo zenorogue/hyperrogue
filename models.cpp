@@ -345,7 +345,33 @@ EX namespace models {
     
     dialog::display();
     }
-  
+      
+  void edit_stretch() {
+    dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
+      "Vertical stretch factor."
+      );
+    dialog::extra_options = [] () {
+      dialog::addBreak(100);
+      if(sphere && pmodel == mdBandEquiarea) {
+        dialog::addBoolItem("Gall-Peters", vid.stretch == 2, 'O');
+        dialog::add_action([] { vid.stretch = 2; dialog::ne.s = "2"; });
+        }
+      if(pmodel == mdBandEquiarea) {
+        // y = K * sin(phi)
+        // cos(phi) * cos(phi) = 1/K
+        if(sphere && vid.stretch >= 1) {
+          ld phi = acos(sqrt(1/vid.stretch));
+          dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
+          }
+        else if(hyperbolic && abs(vid.stretch) <= 1 && abs(vid.stretch) >= 1e-9) {
+          ld phi = acosh(abs(sqrt(1/vid.stretch)));
+          dialog::addInfo(XLAT("The current value makes the map conformal %1 units from the main line.", fts(phi)));
+          }
+        else dialog::addInfo("");
+        }
+      };
+    }
+
   EX void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
@@ -366,8 +392,10 @@ EX namespace models {
     dialog::add_action([] { edit_rotation(models::rotation); });
     
     // if(pmodel == mdBand && sphere)
-    if(!in_perspective())
+    if(!in_perspective()) {
       dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+      dialog::add_action(editScale);
+      }
     
     if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere && pmodel != mdDisk) {
       dialog::addBreak(50);
@@ -376,8 +404,8 @@ EX namespace models {
       }
     
     if(among(pmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
-      dialog::addSelItem(XLAT("projection distance"), 
-      fts(vid.alpha) + " (" + current_proj_name() + ")", 'p');
+      dialog::addSelItem(XLAT("projection distance"), fts(vid.alpha) + " (" + current_proj_name() + ")", 'p');
+      dialog::add_action(projectionDialog);
       }
                                   
     if(model_has_orientation()) {
@@ -572,6 +600,7 @@ EX namespace models {
       }
 
     dialog::addSelItem(XLAT("vertical stretch"), fts(vid.stretch), 's');
+    dialog::add_action(edit_stretch);
 
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
     if(vid.consider_shader_projection && !shaderside_projection)
@@ -584,54 +613,17 @@ EX namespace models {
       
     dialog::addBreak(100);
     dialog::addItem(XLAT("history mode"), 'a');
+    dialog::add_action_push(history::history_menu);
 #if CAP_RUG
-    if(GDIM == 2) dialog::addItem(XLAT("hypersian rug mode"), 'u');
+    if(GDIM == 2) {
+      dialog::addItem(XLAT("hypersian rug mode"), 'u');
+      dialog::add_action_push(rug::show);
+      }
 #endif
     dialog::addBack();
 
     dialog::display();
     mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/models.php");
-    
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      
-      if(uni == 'z')
-        editScale();
-      else if(uni == 'p')
-        projectionDialog();
-#if CAP_RUG
-      else if(uni == 'u' && DIM == 2)
-        pushScreen(rug::show);
-#endif
-      else if(uni == 's') {
-        dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
-          "Vertical stretch factor."
-          );
-        dialog::extra_options = [] () {
-          dialog::addBreak(100);
-          if(sphere && pmodel == mdBandEquiarea) {
-            dialog::addBoolItem("Gall-Peters", vid.stretch == 2, 'O');
-            dialog::add_action([] { vid.stretch = 2; dialog::ne.s = "2"; });
-            }
-          if(pmodel == mdBandEquiarea) {
-            // y = K * sin(phi)
-            // cos(phi) * cos(phi) = 1/K
-            if(sphere && vid.stretch >= 1) {
-              ld phi = acos(sqrt(1/vid.stretch));
-              dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
-              }
-            else if(hyperbolic && abs(vid.stretch) <= 1 && abs(vid.stretch) >= 1e-9) {
-              ld phi = acosh(abs(sqrt(1/vid.stretch)));
-              dialog::addInfo(XLAT("The current value makes the map conformal %1 units from the main line.", fts(phi)));
-              }
-            else dialog::addInfo("");
-            }
-          };
-        }
-      else if(uni == 'a')
-        pushScreen(history::history_menu);
-      else if(doexiton(sym, uni)) popScreen();
-      };
     }
 
   #if CAP_COMMANDLINE
