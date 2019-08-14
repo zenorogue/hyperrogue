@@ -316,18 +316,17 @@ EX namespace models {
         }
       };
     }
-  
-  EX void model_menu() {
+
+  EX void model_list() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models & projections"));
-    string chars = "0123456789!@#$%^&*()][{}'\"";
-    int cpos = 0;
+
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, chars[cpos++]);
+        dialog::addBoolItem(get_model_name(m), pmodel == m, (i < 26 ? 'a'+i : 'A'+i-26));
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
@@ -344,7 +343,16 @@ EX namespace models {
         }
       }
     
-    dialog::addBreak(100);
+    dialog::display();
+    }
+  
+  EX void model_menu() {
+    cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
+    gamescreen(0);
+    dialog::init(XLAT("models & projections"));
+    
+    dialog::addSelItem(XLAT("projection type"), get_model_name(pmodel), 'm');
+    dialog::add_action_push(model_list);
     
     if(nonisotropic)
       dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
