@@ -109,6 +109,7 @@ EX namespace polygonal {
 #if HDR
 inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
 inline bool mdBandAny() { return mdinf[pmodel].flags & mf::pseudoband; }
+inline bool mdPseudocylindrical() { return mdBandAny() && !(mdinf[pmodel].flags & mf::cylindrical); }
 #endif
 
 EX namespace models {
