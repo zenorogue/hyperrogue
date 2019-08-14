@@ -679,7 +679,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
     
     case mdCentralCyl: 
-      makeband(H, ret, [] (ld& x, ld& y) { y = tan_auto(y); });
+      makeband(H, ret, [] (ld& x, ld& y) { y = tan_auto(y); ld top = vid.yres * M_PI / current_display->radius; if(y>top) y=top; if(y<-top) y=-top; });
       break;
 
     case mdCollignon: 
