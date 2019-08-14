@@ -672,7 +672,6 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
             auto a = (sin_auto(2*theta) +2*theta - M_PI * sin_auto(y));
             auto b = (2 + 2 * cos_auto(2*theta));
             theta = theta - a / b;
-            // theta = theta - (sinh(2*theta) +2*K*theta - M_PI * sinh(y)) / (2 * K + 2 * cosh(2*theta));
           } }
         y = M_PI * sin_auto(theta) / 2;
         x = x * cos_auto(theta); 
