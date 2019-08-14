@@ -681,7 +681,7 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
 
   if(sphere || quotient) h = currentmap->gamestart()->master;
 
-  if(h == currentmap->gamestart()->master) {
+  if(h == currentmap->getOrigin()) {
     h->cdata = new cdata(orig_cdata);
     for(int& v: h->cdata->val) v = 0;
     h->cdata->bits = reptilecheat ? (1 << 21) - 1 : 0;
