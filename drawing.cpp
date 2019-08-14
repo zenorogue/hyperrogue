@@ -680,11 +680,12 @@ EX void set_width(ld w) {
   glhr::set_linewidth(w);
   }
 
-// -radius to +3radius
+// this part makes cylindrical projections on the sphere work
 
-int mercator_coord;
-int mercator_loop_min = 0, mercator_loop_max = 0;
-ld mercator_period;
+namespace cyl {
+
+int loop_min = 0, loop_max = 0;
+ld period;
 
 auto pzero(ld t) {
   if(abs(t) < 1e-6) return 2 * current_display->radius;
@@ -713,9 +714,9 @@ ld period_at(ld y) {
     }     
   }
 
-void fixMercator(bool tinf) {
+void adjust(bool tinf) {
 
-  mercator_period = period_at(0);
+  period = period_at(0);
   
   if(!models::model_straight)
     for(auto& g: glcoords)
@@ -723,18 +724,14 @@ void fixMercator(bool tinf) {
     
   if(mdPseudocylindrical())
     for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][mercator_coord] *= mercator_period / period_at(glcoords[i][1-mercator_coord]);
+      glcoords[i][0] *= period / period_at(glcoords[i][1]);
 
-  mercator_coord = 0;
-  
   auto dist = [] (ld a, ld b) { return max(b, a-b); };
   
   ld chypot = hypot(dist(vid.xres, current_display->xcenter), dist(vid.yres, current_display->ycenter));
   
   ld cmin = -chypot/2, cmax = chypot/2, dmin = -chypot, dmax = chypot;
 
-  if(mercator_coord)
-    swap(cmin, dmin), swap(cmax, dmax);
   if(pmodel == mdSinusoidal)
     dmin = -vid.stretch * current_display->radius / 2, dmax = vid.stretch * current_display->radius / 2;
   if(pmodel == mdBandEquidistant)
@@ -742,35 +739,35 @@ void fixMercator(bool tinf) {
   if(pmodel == mdBandEquiarea)
     dmin = -vid.stretch * current_display->radius / M_PI, dmax = vid.stretch * current_display->radius / M_PI;
 
-  glcoords[0][mercator_coord] -= round_nearest(glcoords[0][mercator_coord], mercator_period);
+  glcoords[0][0] -= round_nearest(glcoords[0][0], period);
     
-  ld first = glcoords[0][mercator_coord];
+  ld first = glcoords[0][0];
   ld next = first;
   
   ld mincoord = first, maxcoord = first;
 
   for(int i = 0; i<isize(glcoords); i++) {
-    glcoords[i][mercator_coord] -= round_nearest(glcoords[i][mercator_coord]-next, mercator_period);
-    next = glcoords[i][mercator_coord];
-    mincoord = min<ld>(mincoord, glcoords[i][mercator_coord]);
-    maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
+    glcoords[i][0] -= round_nearest(glcoords[i][0]-next, period);
+    next = glcoords[i][0];
+    mincoord = min<ld>(mincoord, glcoords[i][0]);
+    maxcoord = max<ld>(maxcoord, glcoords[i][0]);
     }
   
   if(abs(mincoord) > 50000 || abs(maxcoord) > 50000 || std::isnan(mincoord) || std::isnan(maxcoord)) {
-    mercator_loop_max--;
+    loop_max--;
     return;
     }
   
-  ld last = first - round_nearest(first-next, mercator_period);
+  ld last = first - round_nearest(first-next, period);
     
   if(abs(first - last) < 1e-6) {
-    while(mincoord > cmin && mercator_loop_min > -100)
-      mercator_loop_min--, mincoord -= mercator_period;
-    while(maxcoord < cmax && mercator_loop_max < +100)
-      mercator_loop_max++, maxcoord += mercator_period;
+    while(mincoord > cmin && loop_min > -100)
+      loop_min--, mincoord -= period;
+    while(maxcoord < cmax && loop_max < +100)
+      loop_max++, maxcoord += period;
     if(mdPseudocylindrical())
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= period_at(glcoords[i][1-mercator_coord]) / mercator_period;
+        glcoords[i][0] *= period_at(glcoords[i][1]) / period;
     if(!models::model_straight)
       for(auto& g: glcoords)
         models::apply_orientation(g[1], g[0]);
@@ -778,35 +775,35 @@ void fixMercator(bool tinf) {
   else {
     if(tinf) { 
       // this cannot work in Mercator
-      mercator_loop_max--; return; 
+      loop_max--; return; 
       }
     if(last < first) {
       reverse(glcoords.begin(), glcoords.end());
       swap(first, last);
       }
-    int steps = floor((maxcoord - cmin) / mercator_period);
+    int steps = floor((maxcoord - cmin) / period);
     if(steps) {
-      for(int i=0; i<isize(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period * steps;
-      first -= mercator_period * steps; last -= mercator_period * steps;
-      mincoord -= mercator_period * steps; maxcoord -= mercator_period * steps;
+      for(int i=0; i<isize(glcoords); i++) glcoords[i][0] -= period * steps;
+      first -= period * steps; last -= period * steps;
+      mincoord -= period * steps; maxcoord -= period * steps;
       }
     int base = isize(glcoords);
     int minto = mincoord;
     while(minto < cmax) {
       for(int i=0; i<base; i++) {
         glcoords.push_back(glcoords[isize(glcoords)-base]);
-        glcoords.back()[mercator_coord] += mercator_period;
+        glcoords.back()[0] += period;
         }
-      minto += mercator_period;
+      minto += period;
       }
     if(mdPseudocylindrical())
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= period_at(glcoords[i][1-mercator_coord]) / mercator_period;
+        glcoords[i][0] *= period_at(glcoords[i][1]) / period;
 
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
-      auto& v = glcoords[isize(glcoords)-u][1-mercator_coord];
+      auto& v = glcoords[isize(glcoords)-u][1];
       v = v < 0 ? dmin : dmax;
       }
     if(!models::model_straight)
@@ -819,6 +816,7 @@ void fixMercator(bool tinf) {
 
     
   }
+}
   
 bool in_twopoint = false;
 
@@ -1038,9 +1036,9 @@ void dqi_poly::draw() {
   if(poly_flags & POLY_BEHIND) return;
   if(isize(glcoords) <= 1) return;
   
-  mercator_loop_min = mercator_loop_max = 0;
+  cyl::loop_min = cyl::loop_max = 0;
   if(sphere && mdBandAny())
-    fixMercator(tinf);
+    cyl::adjust(tinf);
     
   int poly_limit = max(vid.xres, vid.yres) * 2;
   
@@ -1104,17 +1102,17 @@ void dqi_poly::draw() {
     
   int lastl = 0;
 
-  for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
+  for(int l=cyl::loop_min; l <= cyl::loop_max; l++) {
   
     if(l || lastl) { 
       for(int i=0; i<isize(glcoords); i++) {
         if(mdPseudocylindrical()) {
           ld y = glcoords[i][1], x = glcoords[i][0];
           models::apply_orientation(x, y);
-          mercator_period = period_at(y);
+          cyl::period = cyl::period_at(y);
           }
-        glcoords[i][mercator_coord] += models::ocos * mercator_period * (l - lastl);
-        glcoords[i][1-mercator_coord] += models::osin * mercator_period * (l - lastl);
+        glcoords[i][0] += models::ocos * cyl::period * (l - lastl);
+        glcoords[i][1] += models::osin * cyl::period * (l - lastl);
         }
       lastl = l;
       }
