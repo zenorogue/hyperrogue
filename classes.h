@@ -295,7 +295,7 @@ typedef unsigned long long flagtype;
 
 namespace mf {
   static const flagtype azimuthal = 1;
-  static const flagtype band = 2 + 512;
+  static const flagtype cylindrical = 2;
   static const flagtype equiarea = 4;
   static const flagtype equidistant = 8;
   static const flagtype conformal = 16;
@@ -303,9 +303,13 @@ namespace mf {
   static const flagtype space = 64;
   static const flagtype hyper_only = 128;
   static const flagtype hyper_or_torus = 256;
-  static const flagtype quasiband = 512;
+  static const flagtype pseudocylindrical = 512; /* includes cylindrical */
   static const flagtype equivolume = 1024;
   static const flagtype twopoint = 2048;
+  static const flagtype uses_bandshift = 4096;
+  
+  static const flagtype band = (cylindrical | pseudocylindrical | uses_bandshift);
+  static const flagtype pseudoband = (pseudocylindrical | uses_bandshift);
   };
   
 struct modelinfo {

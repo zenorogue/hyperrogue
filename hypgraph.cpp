@@ -1831,7 +1831,7 @@ EX void draw_boundary(int w) {
 
 EX ld band_shift = 0;
 EX void fix_the_band(transmatrix& T) {
-  if(((mdinf[pmodel].flags & mf::quasiband) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
+  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
     hyperpoint H = tC0(T);
     find_zlev(H);
     models::apply_orientation(H[0], H[1]);
