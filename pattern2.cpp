@@ -2587,7 +2587,7 @@ EX namespace linepatterns {
     for(auto& lp: patterns) {
       string name = XLAT(lp.lpname);
       if(GOLDBERG && among(lp.id, patVine, patPower)) name = XLAT("Goldberg");
-      if(indiv) {
+      if(!indiv) {
         dialog::addColorItem(name, lp.color, 'a'+(id++));
         dialog::add_action([&lp] () { 
           dialog::openColorDialog(lp.color, NULL);
@@ -2596,7 +2596,7 @@ EX namespace linepatterns {
         }
       else {
         dialog::addSelItem(name, fts(lp.multiplier), 'a'+(id++));
-        dialog::add_action([&lp] () { dialog::editNumber(lp.multiplier, 0, 10, 0.1, 1, XLAT("line width"), ""), dialog::scaleLog(); });
+        dialog::add_action([&lp] () { dialog::editNumber(lp.multiplier, 0.001, 10, 0.1, 1, XLAT("line width"), ""), dialog::scaleLog(); });
         }
       }
   
