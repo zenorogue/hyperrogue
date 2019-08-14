@@ -718,8 +718,6 @@ void fixMercator(bool tinf) {
     for(int i = 0; i<isize(glcoords); i++) 
       glcoords[i][mercator_coord] *= mercator_period / period_at(glcoords[i][1-mercator_coord]);
 
-  ld hperiod = mercator_period / 2;
-    
   mercator_coord = 0;
   
   auto dist = [] (ld a, ld b) { return max(b, a-b); };
@@ -737,10 +735,7 @@ void fixMercator(bool tinf) {
   if(pmodel == mdBandEquiarea)
     dmin = -vid.stretch * current_display->radius / M_PI, dmax = vid.stretch * current_display->radius / M_PI;
 
- // for(int i = 0; i<isize(glcoords); i++) {
-  while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
-  while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= mercator_period;
- //   }
+  glcoords[0][mercator_coord] -= round_nearest(glcoords[0][mercator_coord], mercator_period);
     
   ld first = glcoords[0][mercator_coord];
   ld next = first;
@@ -748,10 +743,7 @@ void fixMercator(bool tinf) {
   ld mincoord = first, maxcoord = first;
 
   for(int i = 0; i<isize(glcoords); i++) {
-    while(glcoords[i][mercator_coord] < next - hperiod)
-      glcoords[i][mercator_coord] += mercator_period;
-    while(glcoords[i][mercator_coord] > next + hperiod)
-      glcoords[i][mercator_coord] -= mercator_period;
+    glcoords[i][mercator_coord] -= round_nearest(glcoords[i][mercator_coord]-next, mercator_period);
     next = glcoords[i][mercator_coord];
     mincoord = min<ld>(mincoord, glcoords[i][mercator_coord]);
     maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
@@ -762,14 +754,12 @@ void fixMercator(bool tinf) {
     return;
     }
   
-  ld last = first;
-  while(last < next - hperiod) last += mercator_period;
-  while(last > next + hperiod) last -= mercator_period;
+  ld last = first - round_nearest(first-next, mercator_period);
     
-  if(first == last) {
-    while(mincoord > cmin)
+  if(abs(first - last) < 1e-6) {
+    while(mincoord > cmin && mercator_loop_min > -100)
       mercator_loop_min--, mincoord -= mercator_period;
-    while(maxcoord < cmax)
+    while(maxcoord < cmax && mercator_loop_max < +100)
       mercator_loop_max++, maxcoord += mercator_period;
     if(mdPseudocylindrical())
       for(int i = 0; i<isize(glcoords); i++) 
@@ -787,10 +777,11 @@ void fixMercator(bool tinf) {
       reverse(glcoords.begin(), glcoords.end());
       swap(first, last);
       }
-    while(maxcoord > cmin) {
-      for(int i=0; i<isize(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period;
-      first -= mercator_period; last -= mercator_period;
-      mincoord -= mercator_period; maxcoord -= mercator_period;
+    int steps = floor((maxcoord - cmin) / mercator_period);
+    if(steps) {
+      for(int i=0; i<isize(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period * steps;
+      first -= mercator_period * steps; last -= mercator_period * steps;
+      mincoord -= mercator_period * steps; maxcoord -= mercator_period * steps;
       }
     int base = isize(glcoords);
     int minto = mincoord;

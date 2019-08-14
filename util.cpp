@@ -28,6 +28,9 @@ int SDL_GetTicks() {
 
 EX long double sqr(long double x) { return x*x; }
 
+EX ld round_nearest(ld x) { if(x > 0) return int(x+.5); else return -int(.5-x); }
+EX ld round_nearest(ld x, ld multiple_of) { return multiple_of * round_nearest(x / multiple_of); }
+
 EX int gcd(int i, int j) {
   return i ? gcd(j%i, i) : j;
   }
