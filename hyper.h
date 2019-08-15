@@ -10,8 +10,8 @@
  */
 
 // version numbers
-#define VER "11.1j"
-#define VERNUM_HEX 0xA70A
+#define VER "11.1k"
+#define VERNUM_HEX 0xA70B
 
 #include <stdarg.h>
 #include "hyper_function.h"

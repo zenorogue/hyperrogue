@@ -3436,9 +3436,17 @@ Solv geometry:
 - the life limit in the shmup mode is working again (it was to be removed in the Orb Strategy mode but it was removed altogether)
 - items now correctly face the player in nonisotropic geometries
 - ability to write a debug log file
-- mapeditor:: geodesic spheres and constant X/Y/Z in nonisotropic, also the grid is configurable
-- mapeditor:: geodesic spherical coordinates in nisot, works correctly in 3D
-- cleanup of the source code, and started documentation
+- cleanup of the source code, and started improving the documentation [ http://www.roguetemple.com/z/hyper/doc/ ]
 - fixed UI elements crashing into each other in some resolutions in the Vector Graphics editor
 - in Vector Graphics editor in nonisotropic geometries, you can now draw geodesic spheres and constant X/Y/Z surfaces, and put points on them (the 'z' key)
 - furthermore, the coordinates are displayed correctly in model and geodesic spherical
+
+2019-08-14 21:12 Version 11.1k:
+- fixed a bug with Archimedean hyperbolic tilings
+- added new (pseudo)cylindrical projections: Mollweide, Collignon, central cylindrical; also pseudocylindrical projections work better now
+- azimuthal equidistant projection is now available in nonisotropic geometries
+- split the projection screen into two
+- disabled clipping test in simple perspective in sol
+- fixed 'individual width' option in line pattern working incorrectly, and displayed incorrectly when editing
+- fixed a bug in approximate distance calculation (which caused the 'X' mark in Caribbean to be shown incorrectly)
+
