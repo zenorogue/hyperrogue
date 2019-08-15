@@ -2821,7 +2821,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           }
         else {
           transmatrix t = view * spin(curtime / 50.0);
-          queuepoly(WDIM == 3 ? t : DIM == 3 ? mscale(t, cgi.BODY) : mmscale(t, 1.15), cgi.shKnife, col);
+          queuepoly(WDIM == 3 ? t : GDIM == 3 ? mscale(t, cgi.BODY) : mmscale(t, 1.15), cgi.shKnife, col);
           ShadowV(t, cgi.shKnife);
           }
         break;
@@ -2848,7 +2848,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         break;        
         }
       case moAsteroid: {
-        if(DIM == 3) addradar(view, '*', 0xFFFFFF, 0xC0C0C0FF);
+        if(GDIM == 3) addradar(view, '*', 0xFFFFFF, 0xC0C0C0FF);
         transmatrix t = view;
         if(WDIM == 3) t = face_the_player(t);
         t = t * spin(curtime / 500.0);
@@ -2875,9 +2875,9 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
         if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin);
-        /* if(m->type == moMimic && DIM == 3)
+        /* if(m->type == moMimic && GDIM == 3)
           drawMonsterType(m->type, c, view * spin(-M_PI/2), col, m->footphase); */
-        /* else if(DIM == 3)
+        /* else if(GDIM == 3)
           drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase); */
         /* else */
           drawMonsterType(m->type, c, view, col, m->footphase, col);

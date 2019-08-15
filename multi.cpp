@@ -326,7 +326,7 @@ struct joy_configurer {
         dzconfigs[numaxeconfigs] = &(scfg.deadzoneval[j][ax]);
         char aa = *axeconfigs[numaxeconfigs];
         string what = configdead ? its(scfg.deadzoneval[j][ax]) : 
-          (DIM == 3 && (aa%SHMUPAXES < 4)) ? XLAT(axemodes3[aa%SHMUPAXES]) :
+          (GDIM == 3 && (aa%SHMUPAXES < 4)) ? XLAT(axemodes3[aa%SHMUPAXES]) :
           XLAT(axemodes[aa%SHMUPAXES]);
         dialog::addSelItem(XLAT("Joystick %1, axis %2", cts('A'+j), its(ax)) + buf, 
           what, 'a'+numaxeconfigs);
@@ -702,7 +702,7 @@ void handleInput(int delta) {
   
   double panmove = actionspressed[59] - actionspressed[60];
   
-  if(DIM == 3)
+  if(GDIM == 3)
     panmove += axespressed[1] / 32000.0;
   else
     panspin += axespressed[1] / 32000.0;
@@ -737,7 +737,7 @@ void handleInput(int delta) {
   #endif
 
   if(panx || pany || panspin || (GDIM == 3 && panmove)) {
-    if(DIM == 2) {
+    if(GDIM == 2) {
       View = xpush(-panx) * ypush(-pany) * spin(panspin) * View;
       playermoved = false;
       }

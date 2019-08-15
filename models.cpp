@@ -141,7 +141,7 @@ EX namespace models {
   #endif
 
   EX transmatrix rotmatrix() {
-    if(DIM == 2) return spin(rotation * degree);
+    if(GDIM == 2) return spin(rotation * degree);
     return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
     }
   
@@ -167,7 +167,7 @@ EX namespace models {
     ocos_yz = cos(model_orientation_yz * degree);
     osin_yz = sin(model_orientation_yz * degree);
     model_straight = (ocos > 1 - 1e-9);
-    model_straight_yz = DIM == 2 || (ocos_yz > 1-1e-9);
+    model_straight_yz = GDIM == 2 || (ocos_yz > 1-1e-9);
     if(history::on) history::apply();
     
     if(!euclid) {
@@ -201,9 +201,9 @@ EX namespace models {
     if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
-    if(DIM == 2 && pm == mdPerspective) return false;
-    if(DIM == 2 && pm == mdEquivolume) return false;
-    if(DIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
+    if(GDIM == 2 && pm == mdPerspective) return false;
+    if(GDIM == 2 && pm == mdEquivolume) return false;
+    if(GDIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
     if(pm == mdCentralInversion && !euclid) return false;
     return true;
     }    
@@ -214,21 +214,21 @@ EX namespace models {
     }
   
   EX bool model_has_transition() {
-    return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && DIM == 2;
+    return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && GDIM == 2;
     }
   
   int editpos = 0;
   
   EX string get_model_name(eModel m) {
-    if(m == mdDisk && DIM == 3 && hyperbolic) return XLAT("ball model/Gans");
+    if(m == mdDisk && GDIM == 3 && hyperbolic) return XLAT("ball model/Gans");
     if(nonisotropic) {
       if(m == mdDisk) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");
       if(m == mdEquidistant) return XLAT(mdinf[m].name_hyperbolic);
       }
-    if(m == mdDisk && DIM == 3) return XLAT("perspective in 4D");
-    if(m == mdHalfplane && DIM == 3 && hyperbolic) return XLAT("half-space");
+    if(m == mdDisk && GDIM == 3) return XLAT("perspective in 4D");
+    if(m == mdHalfplane && GDIM == 3 && hyperbolic) return XLAT("half-space");
     if(sphere) 
       return XLAT(mdinf[m].name_spherical);
     if(euclid) 
@@ -307,7 +307,7 @@ EX namespace models {
       dialog::addBoolItem_choice("line animation only", models::do_rotate, 0, 'N');
       dialog::addBoolItem_choice("gravity lands", models::do_rotate, 1, 'G');
       dialog::addBoolItem_choice("all directional lands", models::do_rotate, 2, 'D');
-      if(DIM == 3) {
+      if(GDIM == 3) {
         dialog::addBreak(100);
         dialog::addSelItem(XLAT("XY plane"), fts(models::rotation) + "°", 'A');
         dialog::add_action([] { popScreen(); edit_rotation(models::rotation); });
@@ -388,7 +388,7 @@ EX namespace models {
 
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
     if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
-    if(DIM == 2)
+    if(GDIM == 2)
       dialog::lastItem().value += " " + its(rotation) + "°";
     else
       dialog::lastItem().value += " " + its(rotation) + "°" + its(rotation_xz) + "°" + its(rotation_xy2) + "°";
@@ -416,7 +416,7 @@ EX namespace models {
       dialog::add_action([] () {
         dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
         });
-      if(DIM == 3) {
+      if(GDIM == 3) {
         dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz) + "°", 'L');
         dialog::add_action([] () {
           dialog::editNumber(model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
@@ -424,7 +424,7 @@ EX namespace models {
         }
       }
         
-  if(DIM == 3 && pmodel != mdPerspective) {
+  if(GDIM == 3 && pmodel != mdPerspective) {
     const string cliphelp = XLAT(
       "Your view of the 3D model is naturally bounded from four directions by your window. "
       "Here, you can also set up similar bounds in the Z direction. Radius of the ball/band "
@@ -527,7 +527,7 @@ EX namespace models {
         });
       }
 
-    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && DIM == 2) {
+    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && GDIM == 2) {
       dialog::addSelItem(XLAT("Möbius transformations"), fts(vid.skiprope) + "°", 'S');
       dialog::add_action([](){
         dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
@@ -687,8 +687,8 @@ EX namespace models {
     else if(argis("-crot")) { 
       PHASEFROM(2); 
       shift_arg_formula(models::rotation);
-      if(DIM == 3) shift_arg_formula(models::rotation_xz);
-      if(DIM == 3) shift_arg_formula(models::rotation_xy2);
+      if(GDIM == 3) shift_arg_formula(models::rotation_xz);
+      if(GDIM == 3) shift_arg_formula(models::rotation_xy2);
       }
     else if(argis("-clip")) { 
       PHASEFROM(2); 

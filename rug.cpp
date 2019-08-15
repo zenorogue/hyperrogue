@@ -326,8 +326,8 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   
   else {
     m->flat = h;
-    ld hd = h[DIM];
-    for(int d=DIM; d<rugdim; d++)
+    ld hd = h[GDIM];
+    for(int d=GDIM; d<rugdim; d++)
       m->flat[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
     }
 
@@ -799,7 +799,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
 vector<pair<ld, rugpoint*> > preset_points;
 
 EX void preset(rugpoint *m) {
-  if(DIM == 3) return;
+  if(GDIM == 3) return;
   int q = 0;
   hyperpoint h;
   for(int i=0; i<3; i++) h[i] = 0;
@@ -878,7 +878,7 @@ EX void optimize(rugpoint *m, bool do_preset) {
     // int ed0 = isize(preset_points);
     for(auto& e: m->edges) if(e.target->valid) 
       preset_points.emplace_back(e.len, e.target);
-    if(gwhere >= gSphere || DIM == 3) {
+    if(gwhere >= gSphere || GDIM == 3) {
       ld cur = sse(m->flat);
       for(int it=0; it<500; it++) {
         ld ex = exp(-it/60);
@@ -901,7 +901,7 @@ bool stop = false;
 
 EX bool subdivide_further() {
   if(fulltorus) return false;
-  if(DIM == 3) return false;
+  if(GDIM == 3) return false;
   return isize(points) * 4 < vertex_limit;
   }
 
@@ -1483,7 +1483,7 @@ EX transmatrix currentrot;
     
 EX void reopen() {
   if(rugged) return;
-  rugdim = 2 * DIM - 1;
+  rugdim = 2 * GDIM - 1;
   when_enabled = ticks;
   GLERR("before init");
   glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);

@@ -1217,10 +1217,10 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     cgi.shDisk;
   
   if(vertex_shape == 0) ;
-  else if(DIM == 3 && among(cp.shade, 'b', 'f', 'g', 'B', 'F', 'G')) {
+  else if(GDIM == 3 && among(cp.shade, 'b', 'f', 'g', 'B', 'F', 'G')) {
     V1 = V;
     }
-  else if(DIM == 3) {
+  else if(GDIM == 3) {
     V1 = face_the_player(V);
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
     queuepolyat(V1, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
@@ -1245,10 +1245,10 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
     case 's': queuepoly(V1, cgi.shDiskS, darken_a(cp.color2)); return;
     case 'q': queuepoly(V1, cgi.shDiskSq, darken_a(cp.color2)); return;
     case 'm': queuepoly(V1, cgi.shDiskM, darken_a(cp.color2)); return;
-    case 'b': queuepoly(V1, DIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, darken_a(cp.color2)); return;
+    case 'b': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, darken_a(cp.color2)); return;
     case 'f': queuepoly(V1, cgi.shTinyShark, darken_a(cp.color2)); return;
     case 'g': queuepoly(V1, cgi.shMiniGhost, darken_a(cp.color2)); return;
-    case 'B': queuepoly(V1, DIM == 3 ? cgi.shAnimatedEagle[wingphase(100)] : cgi.shEagle, darken_a(cp.color2)); return;
+    case 'B': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedEagle[wingphase(100)] : cgi.shEagle, darken_a(cp.color2)); return;
     case 'F': queuepoly(V1, cgi.shShark, darken_a(cp.color2)); return;
     case 'G': queuepoly(V1, cgi.shGhost, darken_a(cp.color2)); return;
     }
@@ -1453,7 +1453,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     
     hyperpoint h = tC0(V * m->at);
-    transmatrix V2 = DIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
+    transmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
@@ -1747,9 +1747,9 @@ bool turn(int delta) {
 #endif
 
 int dimid(char x) {
-  if(x >= 'a' && x < 'a' + DIM) return x - 'a';
-  else if(x >= '0' && x < '0' + DIM) return x - '0';
-  else if(x >= 'x' && x < 'x' + DIM) return x - 'x';
+  if(x >= 'a' && x < 'a' + GDIM) return x - 'a';
+  else if(x >= '0' && x < '0' + GDIM) return x - '0';
+  else if(x >= 'x' && x < 'x' + GDIM) return x - 'x';
   else {
     println(hlog, "incorrect dimension ID");
     throw hr_exception();

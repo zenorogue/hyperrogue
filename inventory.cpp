@@ -480,7 +480,7 @@ EX namespace inv {
     int j = 0, oc = 6;
 
     if(1) {
-    dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
+    dynamicval<eModel> pm(pmodel, GDIM == 3 ? mdFlatten : mdDisk);
     // dynamicval<videopar> v(vid, vid);
     // vid.alpha = vid.scale = 1;
     dynamicval<ld> va(vid.alpha, 1);

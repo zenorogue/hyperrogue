@@ -132,15 +132,15 @@ const static transmatrix pispin = diag(-1,-1,1,1);
 // central symmetry
 const static transmatrix centralsym = diag(-1,-1,-1,-1);
 
-inline hyperpoint hpxyz(ld x, ld y, ld z) { return DIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
-inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return DIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
+inline hyperpoint hpxyz(ld x, ld y, ld z) { return GDIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
+inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return GDIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
 inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
 inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
 inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 
 extern const hyperpoint C02, C03;
 
-#define C0 (DIM == 2 ? C02 : C03)
+#define C0 (GDIM == 2 ? C02 : C03)
 #endif
 
 // basic functions and types
@@ -469,7 +469,7 @@ EX transmatrix matrix3(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i) {
   #if MAXMDIM==3
   return transmatrix {{{a,b,c},{d,e,f},{g,h,i}}};
   #else
-  if(DIM == 2)
+  if(GDIM == 2)
     return transmatrix {{{a,b,c,0},{d,e,f,0},{g,h,i,0},{0,0,0,1}}};
   else
     return transmatrix {{{a,b,0,c},{d,e,0,f},{0,0,1,0},{g,h,0,i}}};
@@ -488,7 +488,7 @@ EX transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld 
 EX void swapmatrix(transmatrix& T) {
   for(int i=0; i<4; i++) swap(T[i][2], T[i][3]);
   for(int i=0; i<4; i++) swap(T[2][i], T[3][i]);
-  if(DIM == 3) {
+  if(GDIM == 3) {
     for(int i=0; i<4; i++) T[i][2] = T[2][i] = 0;
     T[2][2] = 1;
     }
@@ -795,7 +795,7 @@ EX hyperpoint mscale(const hyperpoint& t, double fac) {
 
 EX transmatrix mscale(const transmatrix& t, double fac) {
   if(GDIM == 3) {
-    // if(pmodel == mdFlatten) { transmatrix u = t; u[2][DIM] -= fac; return u; }
+    // if(pmodel == mdFlatten) { transmatrix u = t; u[2][GDIM] -= fac; return u; }
     return t * cpush(2, fac);
     }
   transmatrix res;
@@ -869,7 +869,7 @@ EX hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
   }
 
 EX hyperpoint zshift(hyperpoint x, ld z) {
-  if(DIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
+  if(GDIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
   else return mscale(x, z);
   }
 
@@ -950,7 +950,7 @@ inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
 // T * C0, optimized
 inline hyperpoint tC0(const transmatrix &T) {
   hyperpoint z;
-  for(int i=0; i<MDIM; i++) z[i] = T[i][DIM];
+  for(int i=0; i<MDIM; i++) z[i] = T[i][GDIM];
   return z;
   }
 #endif

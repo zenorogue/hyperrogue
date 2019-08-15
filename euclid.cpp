@@ -617,7 +617,7 @@ EX namespace euclid3 {
       tmatrix.resize(S7);
       for(int i=0; i<S7; i++) tmatrix[i] = Id;
       for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
-        tmatrix[i][j][DIM] = getcoord(shifttable[i])[j];
+        tmatrix[i][j][GDIM] = getcoord(shifttable[i])[j];
       camelot_center = NULL;
       build_torus3();
       }
@@ -1195,7 +1195,7 @@ EX namespace euclid3 {
 #endif
 
 EX ld matrixnorm(const transmatrix& Mat) {
-  return Mat[0][DIM] * Mat[0][DIM] + Mat[1][DIM] * Mat[1][DIM] + Mat[2][DIM] * Mat[2][DIM];
+  return Mat[0][GDIM] * Mat[0][GDIM] + Mat[1][GDIM] * Mat[1][GDIM] + Mat[2][GDIM] * Mat[2][GDIM];
   }
   
 void hrmap_euclid_any::draw() {

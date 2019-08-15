@@ -1241,11 +1241,11 @@ EX void showMenu() {
     dialog::addItem(XLAT("select geometry/pattern"), 'r');
     if(config.tstate_max == tsAdjusting || config.tstate_max == tsActive)
       dialog::addItem(XLAT("reactivate the texture"), 't');
-    if(DIM == 2 && !rug::rugged) dialog::addItem(XLAT("open PNG as texture"), 'o');
+    if(GDIM == 2 && !rug::rugged) dialog::addItem(XLAT("open PNG as texture"), 'o');
     dialog::addItem(XLAT("load texture config"), 'l');
     dialog::addSelItem(XLAT("texture size"), its(config.data.twidth), 'w');
 #if CAP_EDIT
-    if(DIM == 2) dialog::addItem(XLAT("paint a new texture"), 'n');
+    if(GDIM == 2) dialog::addItem(XLAT("paint a new texture"), 'n');
 #endif
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
 
@@ -1309,7 +1309,7 @@ EX void showMenu() {
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
     dialog::addBoolItem_action(XLAT("aura from texture"), texture_aura, 'a');
 #if CAP_EDIT
-    if(DIM == 2) dialog::addItem(XLAT("edit the texture"), 'e');
+    if(GDIM == 2) dialog::addItem(XLAT("edit the texture"), 'e');
 #endif
 #if CAP_SHOT
     dialog::addItem(XLAT("save the full texture image"), 'S');
@@ -1612,7 +1612,7 @@ EX void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps IS(10)) {
 void texture_config::true_remap() {
   models::configure();
   drawthemap();
-  if(DIM == 3) return;
+  if(GDIM == 3) return;
   clear_texture_map();
   missing_cells_known.clear();
   for(cell *c: dcal) {

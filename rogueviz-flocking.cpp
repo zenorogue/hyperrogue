@@ -255,7 +255,7 @@ namespace flocking {
         gmatrix.clear();
         vdata[0].m->pat = View * calc_relative_matrix(vdata[0].m->base, viewctr.at->c7, C0) * vdata[0].m->at;
         View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
-        if(DIM == 3) {
+        if(GDIM == 3) {
           View = hr::cspin(1, 2, 90 * degree) * View;
           }
         }

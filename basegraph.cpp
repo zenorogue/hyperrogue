@@ -214,7 +214,7 @@ EX color_t darkena3(color_t c, int lev, int a) {
   }
 
 EX color_t darkena(color_t c, int lev, int a) {
-  return darkena3(c, lev, DIM == 3 ? 255 : a);
+  return darkena3(c, lev, GDIM == 3 ? 255 : a);
   }
 
 #if !CAP_GL
@@ -248,9 +248,9 @@ void eyewidth_translate(int ed) {
 
 glhr::glmatrix model_orientation_gl() {
   glhr::glmatrix s = glhr::id;
-  for(int a=0; a<DIM; a++)
+  for(int a=0; a<GDIM; a++)
     models::apply_orientation(s[a][1], s[a][0]);
-  if(DIM == 3) for(int a=0; a<DIM; a++)
+  if(GDIM == 3) for(int a=0; a<GDIM; a++)
     models::apply_orientation_yz(s[a][2], s[a][1]);
   return s;
   }
@@ -282,26 +282,26 @@ void display_data::set_projection(int ed) {
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
 
-  if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 2)
+  if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 2)
     shaderside_projection = true;
   else if(vid.consider_shader_projection && !glhr::noshaders) {
-    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && DIM == 3 && apply_models)
+    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 3 && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::ball;
     if(pmodel == mdBand && hyperbolic && apply_models)
-      shaderside_projection = true, glhr::new_shader_projection = (DIM == 2 ? glhr::shader_projection::band : glhr::shader_projection::band3);
-    if(pmodel == mdHalfplane && hyperbolic && apply_models && DIM == 2)
+      shaderside_projection = true, glhr::new_shader_projection = (GDIM == 2 ? glhr::shader_projection::band : glhr::shader_projection::band3);
+    if(pmodel == mdHalfplane && hyperbolic && apply_models && GDIM == 2)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
-    if(pmodel == mdHalfplane && hyperbolic && apply_models && DIM == 3 && vid.alpha == 1)
+    if(pmodel == mdHalfplane && hyperbolic && apply_models && GDIM == 3 && vid.alpha == 1)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane3;
-    if(DIM == 3 && hyperbolic && apply_models && pmodel == mdPerspective)
+    if(GDIM == 3 && hyperbolic && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3, pers3 = true;
-    if(DIM == 3 && translatable && apply_models && pmodel == mdPerspective)
+    if(GDIM == 3 && translatable && apply_models && pmodel == mdPerspective)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
-    if(DIM == 3 && apply_models && pmodel == mdGeodesic && sol)
+    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sol)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
-    if(DIM == 3 && apply_models && pmodel == mdGeodesic && nil)
+    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nil)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardNil, pers3 = true;
-    if(DIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
+    if(GDIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
       shaderside_projection = true; pers3 = true;
       int sp = spherephase & 3;
       if(sp == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
@@ -368,7 +368,7 @@ void display_data::set_projection(int ed) {
   auto cd = current_display;
 
   if(!shaderside_projection || glhr::new_shader_projection == glhr::shader_projection::flatten) {
-    if(DIM == 3 && apply_models) {
+    if(GDIM == 3 && apply_models) {
       glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, 1));
       glhr::id_modelview();
       }
@@ -384,7 +384,7 @@ void display_data::set_projection(int ed) {
     }
   else {
 
-    if(hyperbolic && vid.alpha > -1 && DIM == 2) {
+    if(hyperbolic && vid.alpha > -1 && GDIM == 2) {
       // Because of the transformation from H3 to the Minkowski hyperboloid,
       // points with negative Z can be generated in some 3D settings.
       // This happens for points below the camera, but above the plane.
@@ -401,7 +401,7 @@ void display_data::set_projection(int ed) {
       if(nisot::local_perspective_used())
         glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
       }
-    else if(DIM == 3) {
+    else if(GDIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
       using models::clip_max; 
       using models::clip_min;
@@ -434,14 +434,14 @@ void display_data::set_projection(int ed) {
     
     if(among(glhr::new_shader_projection, glhr::shader_projection::band, glhr::shader_projection::band3)) {
       glhr::projection_multiply(model_orientation_gl());
-      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, DIM == 3 ? 2/M_PI : 1));
+      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, GDIM == 3 ? 2/M_PI : 1));
       }
 
     if(among(glhr::new_shader_projection, glhr::shader_projection::halfplane, glhr::shader_projection::halfplane3)) {
       glhr::projection_multiply(model_orientation_gl());
       glhr::projection_multiply(glhr::translate(0, 1, 0));      
       glhr::projection_multiply(glhr::scale(-1, 1, 1));
-      glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, DIM == 3 ? models::halfplane_scale : 1));
+      glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, GDIM == 3 ? models::halfplane_scale : 1));
       glhr::projection_multiply(glhr::translate(0, 0.5, 0));
       }      
     }
@@ -489,7 +489,7 @@ void display_data::set_viewport(int ed) {
   }
 
 EX bool model_needs_depth() {
-  return DIM == 3 || pmodel == mdBall;
+  return GDIM == 3 || pmodel == mdBall;
   }
 
 EX void setGLProjection(color_t col IS(backcolor)) {
@@ -819,7 +819,7 @@ EX void resetGL() {
   check_cgi();
   cgi.require_shapes();
   #if MAXMDIM >= 4
-  if(DIM == 3 && !floor_textures) make_floor_textures();
+  if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
   cgi.initPolyForGL();
   }
@@ -1473,7 +1473,7 @@ EX namespace subscreens {
   EX bool split(reaction_t what) {
     using namespace racing;
     if(in) return false;
-    if(!racing::on && !(shmup::on && DIM == 3)) return false;
+    if(!racing::on && !(shmup::on && GDIM == 3)) return false;
     if(!player_displays.empty()) {
       in = true;
       int& p = current_player;

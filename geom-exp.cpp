@@ -220,7 +220,7 @@ void showTorusConfig() {
   dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
 
 #if CAP_RUG
-  if(DIM == 2) dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
+  if(GDIM == 2) dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
 #endif
 
   dialog::addItem("activate", 'a');
@@ -260,7 +260,7 @@ void showTorusConfig() {
       });
     else if(uni == 'z') editScale();
 #if CAP_RUG
-    else if(uni == 'u' && DIM == 2) rug::select();
+    else if(uni == 'u' && GDIM == 2) rug::select();
 #endif
     else if(doexiton(sym, uni))
       popScreen();

@@ -384,7 +384,7 @@ namespace mapstream {
         
         // spinval becomes xspinval
         rspin = (c2->c.spin(dir) - f.read_char() + MODFIXER) % c->type;
-        if(DIM == 3 && rspin) {
+        if(GDIM == 3 && rspin) {
           println(hlog, "rspin in 3D");
           throw hstream_exception();
           }
@@ -823,7 +823,7 @@ namespace mapeditor {
         break;
       case 6:
         c->land = laCanvas;
-        c->wall = DIM == 3 ? waWaxWall : waNone;
+        c->wall = GDIM == 3 ? waWaxWall : waNone;
         c->landparam = paintwhat >> 8;
         break;
       case 4:
@@ -1164,7 +1164,7 @@ namespace mapeditor {
     lightgrid -= (lightgrid & 0xFF) / 2;
     transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
 
-    if(DIM == 3) {
+    if(GDIM == 3) {
       queuecircleat(mapeditor::drawcell, 1, 0x80D080FF);
       color_t cols[4] = { 0x80D080FF, 0x80D080FF, 0xFFFFFF40, 0x00000040 };
       if(true) {
@@ -1276,7 +1276,7 @@ namespace mapeditor {
     return area;
     }
 
-#define EDITING_TRIANGLES (DIM == 3)
+#define EDITING_TRIANGLES (GDIM == 3)
 
   EX void showDrawEditor() {
 #if CAP_POLY
@@ -1327,7 +1327,7 @@ namespace mapeditor {
           break;
         
         case sgFloor:
-          line1 = DIM == 3 ? XLAT("pick something") : XLAT("floor");
+          line1 = GDIM == 3 ? XLAT("pick something") : XLAT("floor");
           line2 = "#" + its(drawcellShapeID());
           /* line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
             ishex1(drawcell) ? "hexagonal #1" : "hexagonal"); */
@@ -1354,7 +1354,7 @@ namespace mapeditor {
         displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
       else
         displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
-      displayButton(8, 8+fs*3, XLAT(DIM == 3 ? "l = color group: %1" : "l = layers: %1", its(dslayer)), 'l', 0);
+      displayButton(8, 8+fs*3, XLAT(GDIM == 3 ? "l = color group: %1" : "l = layers: %1", its(dslayer)), 'l', 0);
       }
 
     if(us && isize(us->d[dslayer].list)) {
@@ -1383,7 +1383,7 @@ namespace mapeditor {
         displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("d = delete"), 0xC0C0C0, 0);
         }
 
-      if(DIM == 2) {
+      if(GDIM == 2) {
         displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
         displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
         }
@@ -1391,7 +1391,7 @@ namespace mapeditor {
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
         displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
-      if(DIM == 2) 
+      if(GDIM == 2) 
         displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
 
       }
@@ -1418,7 +1418,7 @@ namespace mapeditor {
         mousekey == 'c') mousekey = 'n';
       }
     
-    if(DIM == 3)
+    if(GDIM == 3)
       displayfr(8, 8+fs*19, 2, vid.fsize, XLAT(front_config == eFront::sphere_camera ? "z = camera" : front_config == eFront::sphere_center ? "z = spheres" : 
         nonisotropic && front_config == eFront::equidistants ? "Z =" :
         nonisotropic && front_config == eFront::const_x ? "X =" :
@@ -1442,7 +1442,7 @@ namespace mapeditor {
 
     if(!mouseout()) {
       hyperpoint mh;
-      if(DIM == 2) {
+      if(GDIM == 2) {
         transmatrix T = inverse(drawtrans * rgpushxto0(ccenter));
         mh = spintox(gpushxto0(ccenter) * coldcenter) * T * mouseh;
         }
@@ -1452,11 +1452,11 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],4)), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],4)), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
-      if(DIM == 3)
+      if(GDIM == 3)
         displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
       if(nonisotropic) mh = nisot::inverse_exp(mh, nisot::iTable, false);
       displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hdist0(mh),4)), 0xC0C0C0, 16);
-      if(DIM == 3) {
+      if(GDIM == 3) {
         displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
         displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
         }
@@ -1569,7 +1569,7 @@ namespace mapeditor {
     if(uni == 'u') 
       loadShapes(sg, id);
     
-    if(uni == 'z' && haveshape && DIM == 2)
+    if(uni == 'z' && haveshape && GDIM == 2)
       dialog::editNumber(dsCur->zlevel, -10, +10, 0.1, 0, XLAT("z-level"),
         XLAT("Changing the z-level will make this layer affected by the parallax effect."));
 
@@ -1812,11 +1812,11 @@ namespace mapeditor {
 
   void drawHandleKey(int sym, int uni) {
 
-    if(uni == PSEUDOKEY_WHEELUP && DIM == 3 && front_step) {
+    if(uni == PSEUDOKEY_WHEELUP && GDIM == 3 && front_step) {
       front_edit += front_step * shiftmul; return;
       }
 
-    if(uni == PSEUDOKEY_WHEELDOWN && DIM == 3 && front_step) {
+    if(uni == PSEUDOKEY_WHEELDOWN && GDIM == 3 && front_step) {
       front_edit -= front_step * shiftmul; return;
       }
 
@@ -1837,7 +1837,7 @@ namespace mapeditor {
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
     
-    hyperpoint mh = DIM == 2 ? mouseh : find_mouseh3();
+    hyperpoint mh = GDIM == 2 ? mouseh : find_mouseh3();
     mh = inverse(drawtrans) * mh;
 
     bool clickused = false;
@@ -1871,7 +1871,7 @@ namespace mapeditor {
       pushScreen(showMapEditor);
       }
 
-    if(uni == 'z' && DIM == 3) {
+    if(uni == 'z' && GDIM == 3) {
       dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"), "");
       dialog::extra_options = [] () {
         dialog::addBoolItem(XLAT("The distance from the camera to added points."), front_config == eFront::sphere_camera, 'A');
@@ -2020,7 +2020,7 @@ namespace mapeditor {
             println(hlog, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
             print(hlog, " ID, ", us->d[l].rots, ", ", us->d[l].sym?2:1, ", "); 
             for(int i=0; i<isize(us->d[l].list); i++) {
-              for(int d=0; d<DIM; d++) print(hlog, fts(us->d[l].list[i][d]), ", ");
+              for(int d=0; d<GDIM; d++) print(hlog, fts(us->d[l].list[i][d]), ", ");
               print(hlog, " ");
               }
             println(hlog);
@@ -2169,8 +2169,8 @@ namespace mapeditor {
         hpcshape& sh(cgi.ushr[&ds]);
     
         if(sh.s != sh.e) {
-          auto& last = queuepolyat(mmscale(V, DIM == 3 ? 0 : geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);
-          if(DIM == 3) {
+          auto& last = queuepolyat(mmscale(V, GDIM == 3 ? 0 : geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);
+          if(GDIM == 3) {
             last.tinf = &user_triangles_texture;
             last.offset_texture = ds.texture_offset;
             }

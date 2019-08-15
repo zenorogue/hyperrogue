@@ -167,7 +167,7 @@ EX void calcMousedest() {
   }
 
 EX void mousemovement() {
-  if(DIM == 3) {
+  if(GDIM == 3) {
     if(WDIM == 2) {
       if(View[2][2] < -0.75) 
         movepcto(MD_DROP, 1);
@@ -283,7 +283,7 @@ EX bool smooth_scrolling = false;
 
 EX void handlePanning(int sym, int uni) {
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
-  if(DIM == 3) {
+  if(GDIM == 3) {
     if(sym == PSEUDOKEY_WHEELUP) View = cpush(2, -0.05*shiftmul) * View, didsomething = true, playermoved = false;
     if(sym == PSEUDOKEY_WHEELDOWN) View = cpush(2, 0.05*shiftmul) * View, didsomething = true, playermoved = false;
     }
@@ -293,16 +293,16 @@ EX void handlePanning(int sym, int uni) {
     }
   
 #if !ISPANDORA
-  if(sym == SDLK_END && DIM == 3) { 
+  if(sym == SDLK_END && GDIM == 3) { 
     View = solmul(cpush(2, -0.2*shiftmul), View), didsomething = true, playermoved = false;
     }
-  if(sym == SDLK_HOME && DIM == 3) { 
+  if(sym == SDLK_HOME && GDIM == 3) { 
     View = solmul(cpush(2, +0.2*shiftmul), View), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_RIGHT) { 
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
-    else if(DIM == 3)
+    else if(GDIM == 3)
       View = cspin(0, 2, -0.2*shiftmul) * View, didsomething = true;
     else
       View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
@@ -310,7 +310,7 @@ EX void handlePanning(int sym, int uni) {
   if(sym == SDLK_LEFT) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
-    else if(DIM == 3)
+    else if(GDIM == 3)
       View = cspin(0, 2, 0.2*shiftmul) * View, didsomething = true;
     else
       View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
@@ -318,7 +318,7 @@ EX void handlePanning(int sym, int uni) {
   if(sym == SDLK_UP) {
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
-    else if(DIM == 3)
+    else if(GDIM == 3)
       View = cspin(1, 2, 0.2*shiftmul) * View, didsomething = true;
     else
       View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
@@ -326,7 +326,7 @@ EX void handlePanning(int sym, int uni) {
   if(sym == SDLK_DOWN) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
-    else if(DIM == 3)
+    else if(GDIM == 3)
       View = cspin(1, 2, -0.2*shiftmul) * View, didsomething = true;
     else
       View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
@@ -348,7 +348,7 @@ EX void handlePanning(int sym, int uni) {
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
     if(isGravityLand(cwt.at->land)) playermoved = false;
 
-  if(sym == PSEUDOKEY_WHEELUP && DIM == 2) {
+  if(sym == PSEUDOKEY_WHEELUP && GDIM == 2) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
     playermoved = false;
@@ -433,7 +433,7 @@ EX void handleKeyNormal(int sym, int uni) {
         cell *c = whirlwind::jumpDestination(cwt.at);
         if(c) centerover.at = c;
         }
-      targetRangedOrb(DIM == 3 ? mouseover : centerover.at, roKeyboard);
+      targetRangedOrb(GDIM == 3 ? mouseover : centerover.at, roKeyboard);
       sym = 0; uni = 0;
       }
     }
@@ -472,7 +472,7 @@ EX void handleKeyNormal(int sym, int uni) {
     pushScreen(inv::show);
 #endif
   
-  if(((sym == SDLK_HOME && DIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
+  if(((sym == SDLK_HOME && GDIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
     fullcenter();
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
@@ -590,7 +590,7 @@ EX void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
   
-  mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && DIM == 3 && mouseaim_sensitivity;
+  mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && GDIM == 3 && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
     #if CAP_MOUSEGRAB
@@ -620,7 +620,7 @@ EX void mainloopiter() {
       ld aspd = (ticks - lastt) / 1000.0 * exp(vid.sspeed);
       if(playermoved && vid.sspeed > -4.99 && !outoffocus)
         centerpc(aspd);
-      else if(DIM == 3)
+      else if(GDIM == 3)
         spinEdge(aspd);
 #if CAP_SDLJOY
       if(panjoyx || panjoyy) 
@@ -668,7 +668,7 @@ EX void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, ("polling for events\n"));
   
-  if(DIM == 3 && !shmup::on && !rug::rugged) {
+  if(GDIM == 3 && !shmup::on && !rug::rugged) {
     #if CAP_MOUSEGRAB
     View = cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y) * View;
     mouseaim_x = mouseaim_y = 0;
@@ -680,18 +680,18 @@ EX void mainloopiter() {
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
     Uint8 *keystate = SDL_GetKeyState(NULL);
-    if(keystate[SDLK_END] && DIM == 3 && DEFAULTNOR(SDLK_END))
+    if(keystate[SDLK_END] && GDIM == 3 && DEFAULTNOR(SDLK_END))
       View = cpush(2, -t) * View, didsomething = true, playermoved = false;
-    if(keystate[SDLK_HOME] && DIM == 3 && DEFAULTNOR(SDLK_HOME))
+    if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME))
       View = cpush(2, t) * View, didsomething = true, playermoved = false;
     if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT))
-      View = (DIM == 2 ? xpush(-t) : cspin(0, 2, -t)) * View, didsomething = true, playermoved = playermoved && DIM == 3;
+      View = (GDIM == 2 ? xpush(-t) : cspin(0, 2, -t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT))
-      View = (DIM == 2 ? xpush(t) : cspin(0, 2, t)) * View, didsomething = true, playermoved = playermoved && DIM == 3;
+      View = (GDIM == 2 ? xpush(t) : cspin(0, 2, t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP))
-      View = (DIM == 2 ? ypush(t) : cspin(1, 2, t)) * View, didsomething = true, playermoved = playermoved && DIM == 3;
+      View = (GDIM == 2 ? ypush(t) : cspin(1, 2, t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN))
-      View = (DIM == 2 ? ypush(-t) : cspin(1, 2, -t)) * View, didsomething = true, playermoved = playermoved && DIM == 3;
+      View = (GDIM == 2 ? ypush(-t) : cspin(1, 2, -t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
       if(history::on)
         models::rotation+=t;
@@ -847,13 +847,13 @@ EX void handle_event(SDL_Event& ev) {
         }
       
       else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
-        if(anyctrl && anyshift && !rug::rugged && DIM == 2) {
+        if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
           mapeditor::scaleall(1/1.2);
           vid.alpha /= 1.2;
           }
-        else if(anyctrl && !rug::rugged && DIM == 2)
+        else if(anyctrl && !rug::rugged && GDIM == 2)
           mapeditor::scaleall(pow(2, -.25));
-        else if(anyshift && !rug::rugged && DIM == 2)
+        else if(anyshift && !rug::rugged && GDIM == 2)
           vid.alpha -= 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
@@ -863,13 +863,13 @@ EX void handle_event(SDL_Event& ev) {
           }
         }
       if(ev.button.button==SDL_BUTTON_WHEELUP) {
-        if(anyctrl && anyshift && !rug::rugged && DIM == 2) {
+        if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
           mapeditor::scaleall(1.2);
           vid.alpha *= 1.2;
           }
-        else if(anyctrl && !rug::rugged && DIM == 2)
+        else if(anyctrl && !rug::rugged && GDIM == 2)
           mapeditor::scaleall(pow(2, .25));
-        else if(anyshift && !rug::rugged && DIM == 2)
+        else if(anyshift && !rug::rugged && GDIM == 2)
           vid.alpha += 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
@@ -907,7 +907,7 @@ EX void handle_event(SDL_Event& ev) {
           vid.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
           vid.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
-        else if(mouseh[DIM] < 50 && mouseoh[DIM] < 50) {
+        else if(mouseh[GDIM] < 50 && mouseoh[GDIM] < 50) {
           panning(mouseoh, mouseh);
           }
         }
@@ -1020,7 +1020,7 @@ EX bool gmodekeys(int sym, int uni) {
   if(NUMBERKEY == '6') { vid.grid = !vid.grid; return true; }
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }
 
-  if(DIM == 2) {
+  if(GDIM == 2) {
     if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
@@ -1051,7 +1051,7 @@ EX bool haveMobileCompass() {
 #else
   if(forcetarget) return false;
 #endif
-  if(DIM == 3) return false;
+  if(GDIM == 3) return false;
   return canmove && !shmup::on && vid.mobilecompasssize > 0 && isize(screens) == 1;
   }
   

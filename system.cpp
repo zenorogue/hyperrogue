@@ -1155,7 +1155,7 @@ EX void stop_game() {
 
 EX void set_geometry(eGeometry target) {
   if(geometry != target) {
-    int old_DIM = DIM;
+    int old_DIM = GDIM;
     stop_game();
     ors::reset();
     geometry = target;
@@ -1182,9 +1182,9 @@ EX void set_geometry(eGeometry target) {
     #if CAP_BT
     if(binarytiling || WDIM == 3 || penrose) variation = eVariation::pure;
     #endif
-    if(DIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
+    if(GDIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
     if(nonisotropic && old_DIM == 2) pmodel = mdGeodesic;
-    if(DIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
+    if(GDIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
     if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     }
   }

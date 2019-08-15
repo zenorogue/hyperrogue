@@ -11,7 +11,7 @@ ld ghx, ghy, ghgx, ghgy;
 hyperpoint ghpm = C0;
 
 #if HDR
-inline bool sphereflipped() { return sphere && vid.alpha > 1.1 && DIM == 3; }
+inline bool sphereflipped() { return sphere && vid.alpha > 1.1 && GDIM == 3; }
 #endif
 
 void ghcheck(hyperpoint &ret, const hyperpoint &H) {
@@ -66,7 +66,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   hyperpoint H;
   H[0] = hx * (hz+vid.alpha);
   H[1] = hy * (hz+vid.alpha);
-  H[DIM] = hz;
+  H[GDIM] = hz;
   
   return H;  
   }
@@ -74,10 +74,10 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
 hyperpoint space_to_perspective(hyperpoint z, ld alpha = vid.alpha);
 
 hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
-  ld s = 1 / (alpha + z[DIM]);
+  ld s = 1 / (alpha + z[GDIM]);
   z[0] *= s;
   z[1] *= s;
-  if(DIM == 3) {
+  if(GDIM == 3) {
     z[2] *= s;
     z[3] = 0;
     }
@@ -103,7 +103,7 @@ EX hyperpoint gethyper(ld x, ld y) {
 
 void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   hyperpoint H = ypush(vid.camera) * xpush(d) * ypush(zl) * C0;
-  ld tzh = vid.ballproj + H[DIM];
+  ld tzh = vid.ballproj + H[GDIM];
   ld ax = H[0] / tzh;
   ld ay = H[1] / tzh;
   
@@ -166,7 +166,7 @@ ld find_zlev(hyperpoint& H) {
   }
 
 ld get_tz(hyperpoint H) {
-  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[DIM];
+  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[GDIM];
   if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   return tz;
   }
@@ -176,7 +176,7 @@ EX ld atan2(hyperpoint h) {
   }
 
 pair<ld, ld> move_z_to_y(hyperpoint& H) {
-  if(DIM == 2) return make_pair(0, 0);
+  if(GDIM == 2) return make_pair(0, 0);
   ld R = hypot(H[1], H[2]);
   pair<ld, ld> res = { H[1] / R, H[2] / R };
   H[1] = R; H[2] = 0;
@@ -184,7 +184,7 @@ pair<ld, ld> move_z_to_y(hyperpoint& H) {
   }
 
 void move_y_to_z(hyperpoint& H, pair<ld, ld> coef) {
-  if(DIM == 3) {
+  if(GDIM == 3) {
     H[2] = H[1] * coef.second;
     H[1] = H[1] * coef.first;
     H[3] = 1;
@@ -201,8 +201,8 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   y = asin_auto(H[1]);
   x = asin_auto_clamp(H[0] / cos_auto(y));
   if(sphere) {
-    if(H[DIM] < 0 && x > 0) x = M_PI - x;
-    else if(H[DIM] < 0 && x <= 0) x = -M_PI - x;
+    if(H[GDIM] < 0 && x > 0) x = M_PI - x;
+    else if(H[GDIM] < 0 && x <= 0) x = -M_PI - x;
     }
   x += band_shift;
   hypot_zlev(zlev, y, yf, zf);
@@ -356,7 +356,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       if(!vid.camera_angle) {
         ret[0] = H[0] / tz;
         ret[1] = H[1] / tz;
-        if(DIM == 3) ret[2] = H[2] / tz;
+        if(GDIM == 3) ret[2] = H[2] / tz;
         else ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / tz / 2;
         if(MAXMDIM == 4) ret[3] = 1;
         }
@@ -376,10 +376,10 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdCentralInversion: {
       ld tz = get_tz(H);
-      for(int d=0; d<DIM; d++) ret[d] = H[d] / tz;
+      for(int d=0; d<GDIM; d++) ret[d] = H[d] / tz;
       ld r = 0;
-      for(int d=0; d<DIM; d++) r += ret[d]*ret[d];
-      for(int d=0; d<DIM; d++) ret[d] /= r;
+      for(int d=0; d<GDIM; d++) r += ret[d]*ret[d];
+      for(int d=0; d<GDIM; d++) ret[d] /= r;
       return;
       }
     
@@ -393,11 +393,11 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       models::apply_orientation(H[0], H[1]);
   
       H[1] += 1;
-      double rad = sqhypot_d(DIM, H);
+      double rad = sqhypot_d(GDIM, H);
       H /= -rad;
       H[1] += .5;
       
-      if(DIM == 3) {
+      if(GDIM == 3) {
         // a bit simpler when we do not care about 3D
         H *= models::halfplane_scale;
         ret[0] = -H[0];
@@ -423,7 +423,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
           H[1] += H[0] * models::osin * log(zlev);
         }
       ret[1] = models::ocos + H[1];
-      ret[2] = DIM == 3 ? H[2] : 0;
+      ret[2] = GDIM == 3 ? H[2] : 0;
       if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, -H[1] * geom3::factor_to_lev(zlev));
@@ -495,9 +495,9 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdFisheye: {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
-      H[DIM] = zlev;
-      ret = H / sqrt(1 + sqhypot_d(DIM+1, H));
-      if(DIM == 3) ret[DIM] = zlev;
+      H[GDIM] = zlev;
+      ret = H / sqrt(1 + sqhypot_d(GDIM+1, H));
+      if(GDIM == 3) ret[GDIM] = zlev;
       break;
       }
     
@@ -716,7 +716,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       ld zlev = find_zlev(H);
 
-      ld rad = hypot_d(DIM, H);
+      ld rad = hypot_d(GDIM, H);
       if(rad == 0) rad = 1;
       ld d = hdist0(H);
       ld df, zf;
@@ -732,7 +732,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         d = sqrt(2*(cosh(d) - 1)) / 1.5;
 
       ret = H * (d * df / rad / M_PI);
-      if(DIM == 2) ret[2] = 0; 
+      if(GDIM == 2) ret[2] = 0; 
       if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, d * zf / M_PI);
@@ -866,11 +866,11 @@ EX bool behindsphere(const hyperpoint& h) {
   if(mdBandAny()) return false;
 
   if(vid.alpha > 1) {
-     if(h[DIM] > -1/vid.alpha) return true;
+     if(h[GDIM] > -1/vid.alpha) return true;
      }  
   
   if(vid.alpha <= 1) {
-    if(h[DIM] < .2-vid.alpha) return true;
+    if(h[GDIM] < .2-vid.alpha) return true;
     }
   
   return false;
@@ -945,15 +945,15 @@ void raise_error() {
   }
   
 EX bool invalid_matrix(const transmatrix T) {
-  for(int i=0; i<DIM; i++) for(int j=0; j<DIM; j++)
+  for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++)
     if(std::isnan(T[i][j]) || T[i][j] > 1e8 || T[i][j] < -1e8 || std::isinf(T[i][j]))
       return true;
-  for(int i=0; i<DIM; i++) for(int j=0; j<DIM; j++) if(T[i][j] > .5 || T[i][j] < -.5) return false;
+  for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++) if(T[i][j] > .5 || T[i][j] < -.5) return false;
   return true;
   }
   
 EX bool invalid_point(const hyperpoint h) {
-  return std::isnan(h[DIM]) || h[DIM] > 1e8 || std::isinf(h[DIM]);
+  return std::isnan(h[GDIM]) || h[GDIM] > 1e8 || std::isinf(h[GDIM]);
   }
 
 EX bool in_smart_range(const transmatrix& T) {
@@ -971,7 +971,7 @@ EX bool in_smart_range(const transmatrix& T) {
   if(x < current_display->xtop - current_display->xsize * 1) return false;
   if(y > current_display->ytop + current_display->ysize * 2) return false;
   if(y < current_display->ytop - current_display->ysize * 1) return false;
-  if(DIM == 3) {
+  if(GDIM == 3) {
     if(-h1[2] < models::clip_min * 2 - models::clip_max) return false;
     if(-h1[2] > models::clip_max * 2 - models::clip_min) return false;
     }
@@ -979,19 +979,19 @@ EX bool in_smart_range(const transmatrix& T) {
   ld epsilon = 0.01;
   
   ld dx = 0, dy = 0, dz = 0, dh[MAXMDIM];
-  for(int i=0; i<DIM; i++) {    
+  for(int i=0; i<GDIM; i++) {    
     hyperpoint h2;
     applymodel(T * cpush0(i, epsilon), h2);
     ld x1 = current_display->radius * abs(h2[0] - h1[0]) / epsilon;
     ld y1 = current_display->radius * abs(h2[1] - h1[1]) * vid.stretch / epsilon;
     dx = max(dx, x1); dy = max(dy, y1);
-    if(DIM == 3) dz = max(dz, abs(h2[2] - h1[2]));
+    if(GDIM == 3) dz = max(dz, abs(h2[2] - h1[2]));
     dh[i] = hypot(x1, y1);
     }
   
-  if(DIM == 3) { 
+  if(GDIM == 3) { 
     if(-h1[2] + 2 * dz < models::clip_min || -h1[2] - 2 * dz > models::clip_max) return false;
-    sort(dh, dh+DIM); 
+    sort(dh, dh+GDIM); 
     ld scale = sqrt(dh[1] * dh[2]) * cgi.scalefactor * hcrossf7;
     if(scale <= (WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3)) return false;
     }
@@ -1175,25 +1175,25 @@ int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
   
 EX transmatrix eumove(ld x, ld y) {
   transmatrix Mat = Id;
-  Mat[DIM][DIM] = 1;
+  Mat[GDIM][GDIM] = 1;
   
   if(a4) {
-    Mat[0][DIM] += x * cgi.crossf;
-    Mat[1][DIM] += y * cgi.crossf;
+    Mat[0][GDIM] += x * cgi.crossf;
+    Mat[1][GDIM] += y * cgi.crossf;
     }
   else {
-    Mat[0][DIM] += (x + y * .5) * cgi.crossf;
-    // Mat[DIM][0] += (x + y * .5) * cgi.crossf;
-    Mat[1][DIM] += y * q3 /2 * cgi.crossf;
-    // Mat[DIM][1] += y * q3 /2 * cgi.crossf;
+    Mat[0][GDIM] += (x + y * .5) * cgi.crossf;
+    // Mat[GDIM][0] += (x + y * .5) * cgi.crossf;
+    Mat[1][GDIM] += y * q3 /2 * cgi.crossf;
+    // Mat[GDIM][1] += y * q3 /2 * cgi.crossf;
     }
   
   ld v = a4 ? 1 : q3;
 
-  while(Mat[0][DIM] <= -16384 * cgi.crossf) Mat[0][DIM] += 32768 * cgi.crossf;
-  while(Mat[0][DIM] >= 16384 * cgi.crossf) Mat[0][DIM] -= 32768 * cgi.crossf;
-  while(Mat[1][DIM] <= -16384 * v * cgi.crossf) Mat[1][DIM] += 32768 * v * cgi.crossf;
-  while(Mat[1][DIM] >= 16384 * v * cgi.crossf) Mat[1][DIM] -= 32768 * v * cgi.crossf;
+  while(Mat[0][GDIM] <= -16384 * cgi.crossf) Mat[0][GDIM] += 32768 * cgi.crossf;
+  while(Mat[0][GDIM] >= 16384 * cgi.crossf) Mat[0][GDIM] -= 32768 * cgi.crossf;
+  while(Mat[1][GDIM] <= -16384 * v * cgi.crossf) Mat[1][GDIM] += 32768 * v * cgi.crossf;
+  while(Mat[1][GDIM] >= 16384 * v * cgi.crossf) Mat[1][GDIM] -= 32768 * v * cgi.crossf;
   return Mat;
   }
 
@@ -1234,7 +1234,7 @@ EX void spinEdge(ld aspd) {
     transmatrix their = dual::player_orientation[dual::main_side];
     fixmatrix(our);
     fixmatrix(their);
-    if(DIM == 2) {
+    if(GDIM == 2) {
       transmatrix T = their * inverse(our);
       hyperpoint H = T * xpush0(1);
       downspin = -atan2(H[1], H[0]);
@@ -1289,7 +1289,7 @@ EX void centerpc(ld aspd) {
   #endif
 
   #if MAXMDIM >= 4
-  if(shmup::on && vid.sspeed > -5 && DIM == 3) {
+  if(shmup::on && vid.sspeed > -5 && GDIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
     if(masterless) centerover = shmup::pc[id]->base;
     else viewctr = shmup::pc[id]->base->master;
@@ -1320,7 +1320,7 @@ EX void centerpc(ld aspd) {
     }
   #endif
   hyperpoint H = inverse(actual_view_transform) * tC0(T);
-  ld R = zero_d(DIM, H) ? 0 : hdist0(H);
+  ld R = zero_d(GDIM, H) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
     /* if(playerfoundL && playerfoundR) {
@@ -1337,8 +1337,8 @@ EX void centerpc(ld aspd) {
     aspd *= (2+3*R*R);
     if(aspd > R) aspd = R;
     
-    for(int i=0; i<DIM; i++)
-      View[i][DIM] -= H[i] * aspd / R;
+    for(int i=0; i<GDIM; i++)
+      View[i][GDIM] -= H[i] * aspd / R;
         
     }
   
@@ -1408,7 +1408,7 @@ EX void optimizeview() {
       ld trot = -i * M_PI * 2 / (S7+.0);
       transmatrix T = i < 0 ? Id : spin(trot) * xpush(cgi.tessf) * pispin;
       hyperpoint H = View * tC0(T);
-      if(H[DIM] < best) best = H[DIM], turn = i, TB = T;
+      if(H[GDIM] < best) best = H[GDIM], turn = i, TB = T;
       }
   
     if(turn >= 0) {
@@ -1704,7 +1704,7 @@ EX void draw_boundary(int w) {
       }
     
     case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: case mdCentralCyl: case mdCollignon: {
-      if(DIM == 3) return;
+      if(GDIM == 3) return;
       if(pmodel == mdBand && models::model_transition != 1) return;
       bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);
       transmatrix T = spin(-models::model_orientation * degree);
@@ -1730,7 +1730,7 @@ EX void draw_boundary(int w) {
       }
     
     case mdHalfplane: 
-      if(hyperbolic && DIM == 2) {
+      if(hyperbolic && GDIM == 2) {
         queuestraight(xspinpush0(-models::model_orientation * degree - M_PI/2, fakeinf), 1, lc, fc, p);
         return;
         }
@@ -1855,7 +1855,7 @@ EX void draw_boundary(int w) {
 
 EX ld band_shift = 0;
 EX void fix_the_band(transmatrix& T) {
-  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[DIM][DIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
+  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[GDIM][GDIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
     hyperpoint H = tC0(T);
     find_zlev(H);
     models::apply_orientation(H[0], H[1]);
@@ -1863,8 +1863,8 @@ EX void fix_the_band(transmatrix& T) {
     ld y = asin_auto(H[1]);
     ld x = asin_auto_clamp(H[0] / cos_auto(y));
     if(sphere) {
-      if(H[DIM] < 0 && x > 0) x = M_PI - x;
-      else if(H[DIM] < 0 && x <= 0) x = -M_PI - x;
+      if(H[GDIM] < 0 && x > 0) x = M_PI - x;
+      else if(H[GDIM] < 0 && x <= 0) x = -M_PI - x;
       }
     band_shift += x;
     T = xpush(-x) * T;

@@ -201,7 +201,7 @@ void handleclick(MOBPAR_FORMAL) {
         }
       else if(!forcetarget) {
         if(WDIM == 3 && wclick) movepcto(-1);
-        else if(DIM == 3) mousemovement();
+        else if(GDIM == 3) mousemovement();
         else movepcto(mousedest); 
         }
       }
@@ -268,7 +268,7 @@ void mobile_draw(MOBPAR_FORMAL) {
 
   ors::check_orientation();
 
-  if(DIM == 3 && !shmup::on && !rug::rugged) 
+  if(GDIM == 3 && !shmup::on && !rug::rugged) 
     apply_orientation();
 
   if(playermoved && vid.sspeed > -4.99)
@@ -377,7 +377,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(lclicked && !clicked) {
       if(rug::rugged)
         rug::select();
-      else if((ors::mode || DIM == 3) && !verylongclick)
+      else if((ors::mode || GDIM == 3) && !verylongclick)
         normal_reaction = true;
       else
         pushScreen(showStereo);
@@ -400,7 +400,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   static int lticks_rug;
   
   if(clicked && lclicked && andmode == 1 && normal_reaction) {
-    if(DIM == 3 && !rug::rugged) {
+    if(GDIM == 3 && !rug::rugged) {
       View = cpush(2, -(ticks - lticks_rug) / 2500.) * View;
       playermoved = false;
       }

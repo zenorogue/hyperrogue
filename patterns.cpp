@@ -366,7 +366,7 @@ int emerald_heptagon(int parent, int dir) {
   
   #undef RULE
 
-  if(weirdhyperbolic || DIM == 3) return 0;
+  if(weirdhyperbolic || GDIM == 3) return 0;
   printf("HEPTAGONAL RULE MISSING for (%d,%d)\n", parent,dir);
   exit(1);
   }

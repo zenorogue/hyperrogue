@@ -410,7 +410,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
 map<int, cellcrawler> scc;
 
 pair<int, int> get_cellcrawler_id(cell *c) {
-  if(among(geometry, gZebraQuotient, gMinimal, gField435, gField534) || (euwrap && !fulltorus) || IRREGULAR || (DIM == 3 && sphere)) {
+  if(among(geometry, gZebraQuotient, gMinimal, gField435, gField534) || (euwrap && !fulltorus) || IRREGULAR || (GDIM == 3 && sphere)) {
     // Zebra Quotient does exhibit some symmetries,
     // but these are so small anyway that it is safer to just build
     // a crawler for every neuron

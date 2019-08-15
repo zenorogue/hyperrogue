@@ -328,8 +328,7 @@ extern videopar vid;
 #define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2 PROD(&& geometry != gProduct)) ? 3 : 2)
 #endif
 #define GDIM (vid.always3 ? 3 : WDIM)
-#define DIM GDIM
-#define MDIM (DIM+1)
+#define MDIM (GDIM+1)
 
 #define self (*this)
 

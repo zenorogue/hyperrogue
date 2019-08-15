@@ -231,7 +231,7 @@ hyperpoint goodpoint;
 vector<pair<int, hyperpoint>> tofix;
 
 EX bool two_sided_model() {
-  if(DIM == 3) return false;
+  if(GDIM == 3) return false;
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
@@ -331,7 +331,7 @@ void addpoint(const hyperpoint& H) {
         }
       Hlast = Hscr;
       }
-    if(DIM == 2) {
+    if(GDIM == 2) {
       for(int i=0; i<3; i++) Hscr[i] *= z;
       Hscr[1] *= vid.stretch;
       }
@@ -478,7 +478,7 @@ void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
 
-  if(in_perspective() && DIM == 3) {
+  if(in_perspective() && GDIM == 3) {
     if(spherephase & 4) {
       for(int y=0; y<4; y++) {
         for(int x=0; x<4; x++) mat[id++] = -V[x][y];
@@ -493,7 +493,7 @@ void glapplymatrix(const transmatrix& V) {
     return;
     }
   
-  if(DIM == 3) {
+  if(GDIM == 3) {
     for(int y=0; y<4; y++) 
       for(int x=0; x<4; x++) mat[id++] = V[x][y];
     }
@@ -514,7 +514,7 @@ void glapplymatrix(const transmatrix& V) {
   if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
   
   if(models::model_has_orientation()) {
-    if(DIM == 3) for(int a=0; a<4; a++) 
+    if(GDIM == 3) for(int a=0; a<4; a++) 
       models::apply_orientation_yz(mat[a*4+1], mat[a*4+2]);
     for(int a=0; a<4; a++) 
       models::apply_orientation(mat[a*4], mat[a*4+1]);
@@ -644,7 +644,7 @@ void dqi_poly::gldraw() {
 #endif
 
 EX ld scale_at(const transmatrix& T) {
-  if(DIM == 3 && pmodel == mdPerspective) return 1 / abs((tC0(T))[2]);
+  if(GDIM == 3 && pmodel == mdPerspective) return 1 / abs((tC0(T))[2]);
   if(sol) return 1;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
@@ -656,7 +656,7 @@ EX ld scale_at(const transmatrix& T) {
 EX ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1 && !ISWEB) {
-    double dz = h[DIM];
+    double dz = h[GDIM];
     if(dz < 1 || abs(dz-current_display->scrdist) < 1e-6) return 1;
     else {
       double dx = sqrt(dz * dz - 1);
@@ -903,7 +903,7 @@ void dqi_poly::draw() {
     if(!any) return;
     }
   
-  if(sphere && tinf && DIM == 2 && cnt > 3) {
+  if(sphere && tinf && GDIM == 2 && cnt > 3) {
     int i = cnt;
     cnt = 3;
     for(int j=0; j<i; j+=3) {
@@ -1444,7 +1444,7 @@ EX void reverse_transparent_walls() {
   }
 
 EX void draw_main() {
-  if(sphere && DIM == 3 && pmodel == mdPerspective) {
+  if(sphere && GDIM == 3 && pmodel == mdPerspective) {
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
       glhr::set_depthwrite(true);
@@ -1508,7 +1508,7 @@ EX void drawqueue() {
   
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
     PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
-  if(DIM == 2) sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+  if(GDIM == 2) sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
     [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
       auto ap1 = (dqi_poly&) *p1;
       auto ap2 = (dqi_poly&) *p2;

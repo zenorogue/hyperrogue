@@ -16,7 +16,7 @@ extern long double polydata[];
 
 void geometry_information::hpcpush(hyperpoint h) {
   if(sphere) h = mid(h,h);
-  ld threshold = (DIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
+  ld threshold = (GDIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
   if(/*vid.usingGL && */!first) {
     ld i = intval(hpc.back(), h);
     if(i > threshold && i < 10) {
@@ -121,7 +121,7 @@ void geometry_information::finishshape() {
   if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
 
-  if(DIM == 3) {
+  if(GDIM == 3) {
     last->intester = Hypc;
     for(int i=last->s; i<last->e; i++) last->intester += hpc[i];
     if(last->s != last->e) last->intester /= last->e-last->s;
@@ -151,7 +151,7 @@ void geometry_information::finishshape() {
       if(asign(y1, y2)) {
         ld x = xcross(x1, y1, x2, y2);
         if(abs(x) < 1e-3 && !(last->flags & POLY_ISSIDE)) {
-          if(s >= 2 && DIM == 2) println(hlog, "close call [", s, "], x = ", fts(x));
+          if(s >= 2 && GDIM == 2) println(hlog, "close call [", s, "], x = ", fts(x));
           last->flags |= POLY_BADCENTERIN;
           }
         if(x < 0) last->flags ^= POLY_CENTERIN;
@@ -671,8 +671,8 @@ void geometry_information::procedural_shapes() {
     }
 
   for(int i=0; i<8; i++) {
-    asteroid_size[i] = scalefactor * 0.1 * pow(2, (i-1) * 1. / DIM);
-    if(DIM == 3) asteroid_size[i] *= 7;
+    asteroid_size[i] = scalefactor * 0.1 * pow(2, (i-1) * 1. / GDIM);
+    if(GDIM == 3) asteroid_size[i] *= 7;
     bshape(shAsteroid[i], PPR::PARTICLE);
     for(int t=0; t<12; t++)
       hpcpush(xspinpush0(M_PI * t / 6, asteroid_size[i] * (1 - randd() * .2)));
@@ -757,7 +757,7 @@ void geometry_information::create_wall3d() {
   shWall3D.resize(howmany);
   shPlainWall3D.resize(howmany);
   shWireframe3D.resize(howmany);
-  if(DIM == 3 && binarytiling && geometry == gBinary3) {
+  if(GDIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
     hyperpoint h02 = point3(-1,+1,-1);
@@ -780,7 +780,7 @@ void geometry_information::create_wall3d() {
     make_wall(8, make4(h22+down, h02+down, h20+down));
     }
 
-  if(DIM == 3 && binarytiling && geometry == gHoroTris) {
+  if(GDIM == 3 && binarytiling && geometry == gHoroTris) {
     ld r = sqrt(3)/6;
     ld r1 = r;
     ld r2 = r * 2;
@@ -853,7 +853,7 @@ void geometry_information::create_wall3d() {
     make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)});
     }
 
-  if(DIM == 3 && euclid && S7 == 6) {
+  if(GDIM == 3 && euclid && S7 == 6) {
     for(int w=0; w<6; w++) {
       vector<hyperpoint> vertices;
       for(int a=0; a<4; a++) {
@@ -870,7 +870,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(DIM == 3 && euclid && S7 == 12) {
+  if(GDIM == 3 && euclid && S7 == 12) {
     auto v = euclid3::get_shifttable();
     for(int w=0; w<12; w++) {
       auto co = euclid3::getcoord(v[w]);
@@ -883,7 +883,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(DIM == 3 && euclid && S7 == 14) {
+  if(GDIM == 3 && euclid && S7 == 14) {
     auto v = euclid3::get_shifttable();
     for(int w=0; w<14; w++) {
       bshape(shWall3D[w], PPR::WALL);
@@ -907,7 +907,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(DIM == 3 && !euclid && !binarytiling && !nil) {
+  if(GDIM == 3 && !euclid && !binarytiling && !nil) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
@@ -946,7 +946,7 @@ void geometry_information::create_wall3d() {
     for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
     }
 
-  if(DIM == 3) {
+  if(GDIM == 3) {
     shMiniWall3D.resize(isize(shWall3D));
     for(int i=0; i<isize(shWall3D); i++) {
       bshape(shMiniWall3D[i], PPR::WALL);
@@ -1023,7 +1023,7 @@ void geometry_information::configure_floorshapes() {
 void geometry_information::prepare_shapes() {
   require_basics();
   #if MAXMDIM >= 4
-  if(DIM == 3 && !floor_textures) make_floor_textures();
+  if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
 
   symmetriesAt.clear();
@@ -1216,7 +1216,7 @@ void geometry_information::prepare_shapes() {
   bshape(shKrakenEye2, PPR::ONTENTACLE_EYES2, ksc, 249);
 
   // monsters
-  bshape(shGhost, DIM == 3 ? PPR::SUPERLINE : PPR::MONSTER_BODY, scalefactor, 69);
+  bshape(shGhost, GDIM == 3 ? PPR::SUPERLINE : PPR::MONSTER_BODY, scalefactor, 69);
   bshape(shMiniGhost, PPR::MONSTER_BODY, scalefactor/3, 69);
   bshape(shGargoyleWings, PPR::MONSTER_CLOAK, scalefactor, 70);
   bshape(shGargoyleBody, PPR::MONSTER_BODY, scalefactor, 71);

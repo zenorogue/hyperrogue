@@ -2676,7 +2676,7 @@ EX namespace sword {
 
   void determine_sword_angles() {
     sword_angles = 2;
-    if(DIM == 3) sword_angles = 1;
+    if(GDIM == 3) sword_angles = 1;
     else if(IRREGULAR) sword_angles = 840;
     else if(binarytiling) sword_angles = 42;
     else if(archimedean) {

@@ -36,11 +36,11 @@ basic_textureinfo user_triangles_texture;
 void geometry_information::pushShape(usershapelayer& ds) {
 
   if(ds.list.empty()) return;
-  if(DIM == 3) last->flags |= POLY_TRIANGLES;
+  if(GDIM == 3) last->flags |= POLY_TRIANGLES;
 
   transmatrix T = rgpushxto0(ds.shift) * rspintox(ds.spin);
   
-  int z = DIM == 3 ? 3 : 1;
+  int z = GDIM == 3 ? 3 : 1;
   
   for(int r=0; r<ds.rots; r++) {
     for(int i=0; i<isize(ds.list)/z*z; i++)
@@ -54,10 +54,10 @@ void geometry_information::pushShape(usershapelayer& ds) {
       }
     }
   
-  if(DIM == 2) hpcpush(T * ds.list[0]);
+  if(GDIM == 2) hpcpush(T * ds.list[0]);
 
   #if MAXMDIM >= 4
-  if(DIM == 3) {
+  if(GDIM == 3) {
     auto& utt = user_triangles_texture;
     utt.texture_id = floor_textures->renderedTexture;
     ds.texture_offset = isize(utt.tvertices);

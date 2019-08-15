@@ -881,7 +881,7 @@ EX void edit_sightrange() {
       if(WDIM == 3 && !vid.use_smart_range) {
         dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
         }
-      if(DIM == 3 && !vid.use_smart_range) {
+      if(GDIM == 3 && !vid.use_smart_range) {
         dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
         dialog::add_action([] {
           auto xo = dialog::extra_options;
@@ -1438,7 +1438,7 @@ EX void show3D() {
     dialog::add_action(geom3::switch_always3);
     }
 #endif
-  if(vid.use_smart_range == 0 && DIM == 2) {
+  if(vid.use_smart_range == 0 && GDIM == 2) {
     dialog::addSelItem(XLAT("High detail range"), fts(vid.highdetail), 'n');
     dialog::addSelItem(XLAT("Mid detail range"), fts(vid.middetail), 'm');
     dialog::addBreak(50);
@@ -1474,15 +1474,15 @@ EX void show3D() {
     }
 
   dialog::addBreak(50);
-  dialog::addSelItem(XLAT(DIM == 3 && WDIM == 2 ? "Y shift" : "third person perspective"), fts(vid.yshift), 'y');
-  if(DIM == 3) {
+  dialog::addSelItem(XLAT(GDIM == 3 && WDIM == 2 ? "Y shift" : "third person perspective"), fts(vid.yshift), 'y');
+  if(GDIM == 3) {
     dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
   dialog::addSelItem(XLAT("camera rotation"), fts(vid.camera_angle), 'x');
-  if(DIM == 2) {
+  if(GDIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
       if(vid.fixed_facing) {
@@ -1500,8 +1500,8 @@ EX void show3D() {
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
     }
   #if MAXMDIM >= 4
-  if(DIM == 3) add_edit_fov('f');
-  if(DIM == 3) {
+  if(GDIM == 3) add_edit_fov('f');
+  if(GDIM == 3) {
     dialog::addSelItem(XLAT("radar size"), fts(vid.radarsize), 'r');
     dialog::add_action([] () {
       dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", XLAT("set to 0 to disable"));
@@ -1516,7 +1516,7 @@ EX void show3D() {
       dialog::extra_options = [] () { draw_radar(true); };
       });
     }
-  if(DIM == 3) add_edit_wall_quality('W');
+  if(GDIM == 3) add_edit_wall_quality('W');
   #endif
   
   dialog::addBreak(50);
@@ -1532,7 +1532,7 @@ EX void show3D() {
   
 #if MAXMDIM >=4
   if(WDIM == 2) {
-    dialog::addBoolItem(XLAT("configure FPP automatically"), DIM == 3, 'F');
+    dialog::addBoolItem(XLAT("configure FPP automatically"), GDIM == 3, 'F');
     dialog::add_action(geom3::switch_fpp);
     }
 #endif
@@ -1559,14 +1559,14 @@ EX void show3D() {
     using namespace geom3;
     dialog::handleNavigation(sym, uni);
     
-    if(uni == 'n' && DIM == 2) {
+    if(uni == 'n' && GDIM == 2) {
       dialog::editNumber(vid.highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
       dialog::extra_options = explain_detail;
       dialog::reaction = [] () {
         if(vid.highdetail > vid.middetail) vid.middetail = vid.highdetail;
         };
       }
-    else if(uni == 'm' && DIM == 2) {
+    else if(uni == 'm' && GDIM == 2) {
       dialog::editNumber(vid.middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
       dialog::extra_options = explain_detail;
       dialog::reaction = [] () {
@@ -1588,7 +1588,7 @@ EX void show3D() {
           fts(vid.depth),
           fts(atan(1/cosh(vid.camera))*2/degree),
           fts(1/cosh(vid.camera))) : XLAT("Look from behind."));
-        if(DIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
+        if(GDIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
           dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
           };
         };
@@ -1755,7 +1755,7 @@ EX void showCustomizeChar() {
   int firsty = dialog::items[0].position / 2;
   int scale = firsty - 2 * vid.fsize;
   
-  dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
+  dynamicval<eModel> pm(pmodel, GDIM == 3 ? mdFlatten : mdDisk);
   dynamicval<ld> va(vid.alpha, 1);
   dynamicval<ld> vs(vid.scale, 1);
   dynamicval<ld> vc(vid.camera_angle, 0);

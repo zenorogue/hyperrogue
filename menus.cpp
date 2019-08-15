@@ -336,7 +336,7 @@ EX void showGraphQuickKeys() {
 
   dialog::init(XLAT("quick options"));
 
-  if(DIM == 2) {
+  if(GDIM == 2) {
     dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
     dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
     dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
@@ -444,7 +444,7 @@ EX void showCreative() {
 
   // display modes  
 #if CAP_MODEL
-  if(DIM == 2) {
+  if(GDIM == 2) {
     dialog::addItem(XLAT("paper model creator"), 'n');
     dialog::add_action([] { netgen::run(); });
     }
@@ -464,7 +464,7 @@ EX void showCreative() {
   dialog::add_action_push(history::history_menu);
 
 #if CAP_TEXTURE
-  if(DIM == 2) {
+  if(GDIM == 2) {
     dialog::addBoolItem(XLAT("texture mode"), texture::config.tstate == texture::tsActive, 't');
     dialog::add_action_push(texture::showMenu);
     }

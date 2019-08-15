@@ -474,7 +474,7 @@ EX void generate_track() {
   
   for(cell *sc: track) {
     straight = calc_relative_matrix(sc, track[0], C0);
-    if(straight[DIM][DIM] > 1e8) break;
+    if(straight[GDIM][GDIM] > 1e8) break;
     }
   straight = rspintox(straight * C0);
   
@@ -710,7 +710,7 @@ bool set_view() {
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
-  if(racing::player_relative || quotient || (penrose && DIM == 3)) {
+  if(racing::player_relative || quotient || (penrose && GDIM == 3)) {
     View = inverse(at) * View;
     }
   else {
@@ -984,7 +984,7 @@ void race_projection() {
     }
   else dialog::addBreak(100);
         
-  if(DIM == 2) {
+  if(GDIM == 2) {
     dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
@@ -1289,7 +1289,7 @@ void drawStats() {
 
   if(!racing::on) return;
   
-  dynamicval<eModel> pm(pmodel, DIM == 3 ? mdFlatten : mdDisk);
+  dynamicval<eModel> pm(pmodel, GDIM == 3 ? mdFlatten : mdDisk);
   initquickqueue();
   
   int bsize = vid.fsize * 2;

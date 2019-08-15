@@ -609,8 +609,8 @@ EX void apply() {
             fullcenter(); View = spin(rand() % 1000) * View;
             }
           }
-        View = solmul(cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-          cspin(0, DIM-1, -movement_angle * degree), View);
+        View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
+          cspin(0, GDIM-1, -movement_angle * degree), View);
         moved();
         if(clearup) {
           viewctr.at->c7->wall = waNone;
@@ -620,22 +620,22 @@ EX void apply() {
       break;
 
     case maRotation:
-      if(DIM == 3) {
+      if(GDIM == 3) {
         View = spin(-movement_angle * degree) * View;
         View = cspin(1, 2, normal_angle * degree) * View;
         }
       View = spin(2 * M_PI * t / period) * View;
-      if(DIM == 3) {
+      if(GDIM == 3) {
         View = cspin(2, 1, normal_angle * degree) * View;
         View = spin(movement_angle * degree) * View;
         }
       break;
     
     case maTranslationRotation:
-      View = solmul(cspin(0, DIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-        cspin(0, DIM-1, -movement_angle * degree), View);
+      View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
+        cspin(0, GDIM-1, -movement_angle * degree), View);
       moved();
-      View = cspin(0, DIM-1, 2 * M_PI * t / period) * View;
+      View = cspin(0, GDIM-1, 2 * M_PI * t / period) * View;
       if(clearup) {
         viewctr.at->c7->wall = waNone;
         }
@@ -645,7 +645,7 @@ EX void apply() {
     case maParabolic:
       reflect_view();
       View = ypush(-shift_angle * degree) * spin(-movement_angle * degree) * View;
-      if(DIM == 2)
+      if(GDIM == 2)
         View = binary::parabolic(parabolic_length * t / period) * View;
       else
         View = binary::parabolic3(parabolic_length * t / period, 0) * View;
@@ -916,7 +916,7 @@ EX void show() {
       break;
       }
     case maRotation:
-      if(DIM == 3) {
+      if(GDIM == 3) {
         dialog::addSelItem(XLAT("angle to screen normal"), fts(normal_angle) + "°", 'C');
         dialog::add_action([] () { 
           dialog::editNumber(normal_angle, 0, 360, 15, 0, XLAT("angle to screen normal"), ""); 
@@ -1057,7 +1057,7 @@ int readArgs() {
   else if(argis("-animclear")) { clearup = true; }
   else if(argis("-animrot")) {
     ma = maRotation;
-    if(DIM == 3) {
+    if(GDIM == 3) {
       shift_arg_formula(movement_angle);
       shift_arg_formula(normal_angle);
       }

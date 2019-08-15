@@ -586,7 +586,7 @@ namespace geom3 {
     return projection_to_factor(lev_to_projection(lev)); 
     }
   ld factor_to_lev(ld fac) { 
-    if(DIM == 3) return fac;
+    if(GDIM == 3) return fac;
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
     }
   
@@ -702,7 +702,7 @@ namespace geom3 {
       HEAD2 = lev_to_factor(human_height * .99 - reduce);
       HEAD3 = lev_to_factor(human_height - reduce);
       
-      reduce = (DIM == 3 ? human_height * .3 : 0);
+      reduce = (GDIM == 3 ? human_height * .3 : 0);
       
       STUFF = lev_to_factor(0) - max(orbsize * 0.3, zhexf * .6);
       
@@ -826,7 +826,7 @@ EX void check_cgi() {
   
   if(geometry == gCrystal) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   
-  if(binarytiling || DIM == 3) V("WQ", its(vid.texture_step));
+  if(binarytiling || GDIM == 3) V("WQ", its(vid.texture_step));
   
   if(binarytiling) V("BT", fts(vid.binary_width));
   
@@ -874,7 +874,7 @@ EX void check_cgi() {
     }
   
   #if MAXMDIM >= 4
-  if(!floor_textures && DIM == 3 && (cgi.state & 2)) 
+  if(!floor_textures && GDIM == 3 && (cgi.state & 2)) 
     make_floor_textures();
   #endif
 

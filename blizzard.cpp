@@ -239,7 +239,7 @@ EX void drawArrowTraps() {
           hyperpoint trel = inverse(tu) * tC0(tv);
           transmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
           tpartial = tpartial * ypush(.05);
-          if(DIM == 3) tpartial = tpartial * cspin(1, 2, M_PI/2);
+          if(GDIM == 3) tpartial = tpartial * cspin(1, 2, M_PI/2);
           queuepoly(tpartial, cgi.shTrapArrow, 0xFFFFFFFF);
           }
         }
