@@ -11,10 +11,7 @@
 
 namespace hr {
 #if MAXMDIM >= 4
-transmatrix cpush(int cid, ld alpha);
-transmatrix cspin(int a, int b, ld alpha);
-extern
-vector<hpcshape> shWall3D, shMiniWall3D;
+
 namespace binary {   
   void build_tmatrix(); 
   void virtualRebaseSimple(heptagon*& base, transmatrix& at);
