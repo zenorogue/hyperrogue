@@ -7984,6 +7984,7 @@ EX void drawBug(const cellwalker& cw, color_t col) {
 
 EX cell *viewcenter() {
   if(masterless) return centerover.at;
+  else if(prod) return product::get_at(viewctr.at->c7, 0);
   else return viewctr.at->c7;
   }
 
