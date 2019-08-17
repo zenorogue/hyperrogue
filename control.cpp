@@ -286,8 +286,8 @@ EX bool smooth_scrolling = false;
 EX void handlePanning(int sym, int uni) {
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
   if(GDIM == 3) {
-    if(sym == PSEUDOKEY_WHEELUP) View = cpush(2, -0.05*shiftmul) * View, didsomething = true, playermoved = false;
-    if(sym == PSEUDOKEY_WHEELDOWN) View = cpush(2, 0.05*shiftmul) * View, didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELUP) View = solmul(cpush(2, -0.05*shiftmul), View), didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELDOWN) View = solmul(cpush(2, 0.05*shiftmul), View), didsomething = true, playermoved = false;
     }
 
   if(rug::rugged || smooth_scrolling) {
