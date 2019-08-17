@@ -30,12 +30,16 @@ int in_hdr;
 
 set<string> seen;
 
-void gen(string s) {
-  if(seen.count(s)) return;
-  seen.insert(s);
-  which_file = s;
-  ifstream in(s);
+int lineid;
+
+void gen(string sf) {
+  if(seen.count(sf)) return;
+  seen.insert(sf);
+  which_file = sf; lineid = -1;
+  ifstream in(sf);
+  string s;
   while(getline(in, s)) {
+    lineid++;
     while(s != "" && s[0] == ' ') s = s.substr(1);
     while(s.back() == 10 || s.back() == 13) s = s.substr(0, s.size() - 1);
     if(in_hdr) {
@@ -49,6 +53,7 @@ void gen(string s) {
       }
     if(s == "#if HDR") {
       mark_file();
+      cout << "#line " << lineid << " \"" << sf << "\"\n";
       in_hdr = true;
       continue;
       }
