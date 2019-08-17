@@ -2687,7 +2687,14 @@ int read_pattern_args() {
       if(c == 't') ct = &nestcolors;
       else if(c == 'd') ct = &distcolors;
       else if(c == 'm') ct = &minecolors;
-      else if(c == 'E') { shift(); int d = argi(); shift(); expcolors[d] = arghex(); }
+      else if(c == 'E') { shift(); int d = argi(); shift(); expcolors[d] = arghex(); return 0; }      
+      else if(c == 'P') { 
+        shift(); int d = argi(); shift();
+        color_t h = arghex();
+        if(d >= 0 && d < 7)
+          ((color_t*)(&vid.cs.skincolor)) [d] = h;
+        return 0;
+        }
       else ct = &(colortables[patterns::whichCanvas]);
       shift();
       }

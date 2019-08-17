@@ -2291,6 +2291,15 @@ EX int read_config_args() {
   else if(argis("-tstep")) {
     PHASEFROM(2); shift(); vid.texture_step = argi();
     }
+  else if(argis("-csc")) {
+    PHASEFROM(2); shift_arg_formula(vid.creature_scale);
+    }
+  else if(argis("-char")) {
+    auto& cs = vid.cs;
+    shift(); cs.charid = argi();
+    cs.lefthanded = cs.charid >= 10;
+    cs.charid %= 10;
+    }
   else return 1;
   return 0;
   }
