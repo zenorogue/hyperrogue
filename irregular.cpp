@@ -41,8 +41,8 @@ vector<cellinfo> cells;
 
 ld inner(hyperpoint h1, hyperpoint h2) {
   return 
-    hyperbolic ? h1[GDIM] * h2[GDIM] - h1[0] * h2[0] - h1[1] * h2[1] :
-    h1[GDIM] * h2[GDIM] + h1[0] * h2[0] + h1[1] * h2[1];
+    hyperbolic ? h1[LDIM] * h2[LDIM] - h1[0] * h2[0] - h1[1] * h2[1] :
+    h1[LDIM] * h2[LDIM] + h1[0] * h2[0] + h1[1] * h2[1];
   }
 
 hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
@@ -71,7 +71,7 @@ hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
     h = h - c * inner(h, c);
     }
   
-  if(h[GDIM] < 0) h[0] = -h[0], h[1] = -h[1], h[GDIM] = -h[GDIM];
+  if(h[LDIM] < 0) h[0] = -h[0], h[1] = -h[1], h[LDIM] = -h[LDIM];
 
   ld i = inner(h, h);
   if(i > 0) h /= sqrt(i);
@@ -328,7 +328,7 @@ bool step(int delta) {
           hyperpoint best_h;
           for(int k=0; k<isize(cells); k++) if(k != i && k != j && k != oldj) {
             hyperpoint h = circumscribe(C0, p1.jpoints[j], p1.jpoints[k]);
-            if(h[GDIM] < 0) continue;
+            if(h[LDIM] < 0) continue;
             if(!clockwise(t, h)) continue;
             if(best_k == -1)
               best_k = k, best_h = h;
@@ -839,7 +839,7 @@ bool save_map(const string& fname) {
     println(f, origcells);
     for(auto i: cells_of_heptagon[h->master]) if(cells[i].generation == 0) {
       auto &ci = cells[i];
-      println(f, spaced(ci.p[0], ci.p[1], ci.p[GDIM]));
+      println(f, spaced(ci.p[0], ci.p[1], ci.p[LDIM]));
       }
     }
   return true;

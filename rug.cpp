@@ -326,7 +326,7 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   
   else {
     m->flat = h;
-    ld hd = h[GDIM];
+    ld hd = h[LDIM];
     for(int d=GDIM; d<rugdim; d++)
       m->flat[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
     }
@@ -997,7 +997,7 @@ bincode acd_bin(ld x) {
 
 bincode get_bincode(hyperpoint h) {
   switch(ginf[gwhere].cclass) {
-    case gcEuclid: case gcSol: case gcNil: PROD( case gcProduct: )
+    case gcEuclid: case gcSol: case gcNil: case gcProduct:
       return acd_bin(h[0]) + acd_bin(h[1]) * sY + acd_bin(h[2]) * sZ;
     case gcHyperbolic:
       return acd_bin(hypot_d(3, h));

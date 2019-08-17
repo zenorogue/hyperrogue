@@ -10,14 +10,14 @@ namespace hr {
 transmatrix &ggmatrix(cell *c);
 
 void fixelliptic(transmatrix& at) {
-  if(elliptic && at[GDIM][GDIM] < 0) {
+  if(elliptic && at[LDIM][LDIM] < 0) {
     for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
       at[i][j] = -at[i][j];
     }
   }
 
 void fixelliptic(hyperpoint& h) {
-  if(elliptic && h[GDIM] < 0)
+  if(elliptic && h[LDIM] < 0)
     for(int i=0; i<MDIM; i++) h[i] = -h[i];
   }
 
@@ -155,7 +155,7 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
 
 EX transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
-  if(t[GDIM][GDIM] == 0) {
+  if(t[LDIM][LDIM] == 0) {
     if(euwrap && centerover.at && masterless) 
       t = calc_relative_matrix(c, centerover.at, C0);
     else if(masterless && WDIM == 2) {
@@ -352,7 +352,7 @@ EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
-    double currz = at[GDIM][GDIM];
+    double currz = at[LDIM][LDIM];
     
     heptagon *h = base;
     
@@ -364,7 +364,7 @@ EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * cgi.invheptmove[d] * at;
-      double newz = V2[GDIM][GDIM];
+      double newz = V2[LDIM][LDIM];
       if(newz < currz) {
         currz = newz;
         bestV = V2;

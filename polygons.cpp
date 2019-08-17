@@ -718,6 +718,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = center + v1 * x + v2 * y;
       if(nil && (x || y))
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
+      if(prod) { hpcpush(h); return; }
       if(sol || !binarytiling) { hpcpush(normalize(h)); return; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
@@ -729,6 +730,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
+      if(prod) { hpcpush(h); continue; }
       if(nil)
         h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
       if(sol || !binarytiling) { hpcpush(normalize(h)); continue; }
@@ -852,6 +854,20 @@ void geometry_information::create_wall3d() {
     make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
     make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)});
     }
+  
+  if(prod) {
+    cell model;
+    model.type = S7-2;
+    for(int i=0; i<S7-2; i++)
+      make_wall(i, {product::get_corner(&model, i, -1), product::get_corner(&model, i, +1), product::get_corner(&model, i+1, +1), product::get_corner(&model, i+1, -1)});
+    for(int a: {0,1}) {
+      vector<hyperpoint> l;
+      int z = a ? 1 : -1;
+      for(int i=0; i<S7-2; i++)
+        l.push_back(product::get_corner(&model, i, z));
+      make_wall(S7-2+a, l);
+      }    
+    }
 
   if(GDIM == 3 && euclid && S7 == 6) {
     for(int w=0; w<6; w++) {
@@ -907,7 +923,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(GDIM == 3 && !euclid && !binarytiling && !nil) {
+  if(GDIM == 3 && !euclid && !binarytiling && !nil && !prod) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {

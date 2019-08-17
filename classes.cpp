@@ -571,7 +571,7 @@ vector<geometryinfo> ginf = {
   {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qPENROSE,  gcEuclid,     0x48000, {{7, 7}}, eVariation::pure},
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      gcHyperbolic, 0x48200, {{7, 3}}, eVariation::pure},
   {"nil",    "none",    "Nil geometry",                               "nil",      8, 3, 0,         gcNil,        0x48600, {{7, 5}}, eVariation::pure},
-//{"product","none",    "product space",                              "product",  7, 3, 0,         gcProduct,    0x48400, {{7, 3}}, eVariation::pure},
+  {"product","none",    "product space",                              "product",  7, 3, 0,         gcProduct,    0x48400, {{7, 3}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

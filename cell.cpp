@@ -146,8 +146,8 @@ EX cell *createMov(cell *c, int d) {
     }
   
   if(c->move(d)) return c->move(d);
-  PROD( else if(geometry == gProduct)
-    product::find_cell_connection(c, d); )
+  else if(geometry == gProduct)
+    product::find_cell_connection(c, d);
   #if CAP_BT
   else if(penrose)
     kite::find_cell_connection(c, d);
@@ -263,11 +263,10 @@ EX void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
-  else if(nonisotropic) currentmap = nisot::new_map();
+  else if(nonisotropic || prod) currentmap = nisot::new_map();
   #if CAP_CRYSTAL
   else if(geometry == gCrystal) currentmap = crystal::new_map();
   #endif
-  PROD( else if(geometry == gProduct) currentmap = product::new_map(); )
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif
@@ -862,7 +861,7 @@ int ld_to_int(ld x) {
 
 EX int pseudocoords(cell *c) {
   transmatrix T = arcm::archimedean_gmatrix[c->master].second;
-  return pair_to_vec(ld_to_int(T[0][GDIM]), ld_to_int((spin(60*degree) * T)[0][GDIM]));
+  return pair_to_vec(ld_to_int(T[0][LDIM]), ld_to_int((spin(60*degree) * T)[0][LDIM]));
   }
 
 EX cdata *arcmCdata(cell *c) {

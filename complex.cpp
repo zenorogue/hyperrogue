@@ -2742,7 +2742,7 @@ EX namespace sword {
     int s1 = neighborId(c1, c2);
     int s2 = neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return d;
-    if(WDIM == 2) {
+    if(WDIM == 2 || prod) {
       if(c1->c.mirror(s1))
         d.angle = ((s2*sword_angles/c2->type - d.angle + s1*sword_angles/c1->type) + sword_angles/2) % sword_angles;
       else

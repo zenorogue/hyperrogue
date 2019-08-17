@@ -86,7 +86,7 @@ EX movedir vectodir(const hyperpoint& P) {
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T;
     if(compute_relamatrix((cwt+i).peek(), cwt.at, i, T)) {
-      dirdist[i] = intval(U * T * C0, Centered * P);
+      dirdist[i] = quickdist(U * T * C0, Centered * P);
       }
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
@@ -115,6 +115,8 @@ EX hyperpoint move_destination_vec(int d) {
   // else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   // else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
   else if(d&1) return cspin(0, 1, d > 4 ? M_PI/2 : -M_PI/2) * tC0(pushone());
+  else if(prod && d == 6) return zshift(C0, product::plevel);
+  else if(prod && d == 2) return zshift(C0, -product::plevel);
   else return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   }
 
@@ -907,7 +909,7 @@ EX void handle_event(SDL_Event& ev) {
           vid.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
           vid.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
-        else if(mouseh[GDIM] < 50 && mouseoh[GDIM] < 50) {
+        else if(mouseh[LDIM] < 50 && mouseoh[LDIM] < 50) {
           panning(mouseoh, mouseh);
           }
         }

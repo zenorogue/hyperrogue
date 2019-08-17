@@ -124,6 +124,7 @@ void addMessage(string s, char spamtype = 0);
 #define sphere (cgclass == gcSphere)
 #define sol (cgclass == gcSol)
 #define nil (cgclass == gcNil)
+#define prod (cgclass == gcProduct)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (sol || nil)
 #define translatable (euclid || nonisotropic)
@@ -325,10 +326,11 @@ extern videopar vid;
 #if MAXMDIM == 3
 #define WDIM 2
 #else
-#define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2 PROD(&& geometry != gProduct)) ? 3 : 2)
+#define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2) ? 3 : 2)
 #endif
 #define GDIM (vid.always3 ? 3 : WDIM)
-#define MDIM (GDIM+1)
+#define MDIM (prod ? 3 : GDIM+1)
+#define LDIM (MDIM-1)
 
 #define self (*this)
 

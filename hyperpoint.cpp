@@ -140,7 +140,7 @@ inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 
 extern const hyperpoint C02, C03;
 
-#define C0 (GDIM == 2 ? C02 : C03)
+#define C0 (MDIM == 3 ? C02 : C03)
 #endif
 
 // basic functions and types
@@ -171,13 +171,14 @@ ld inverse_tanh(ld x) { return log((1+x)/(1-x)) / 2; } */
 
 EX ld squar(ld x) { return x*x; }
 
-EX int sig(int z) { return (sphere || sol || z<GDIM)?1:-1; }
+EX int sig(int z) { return prod ? (z<2?1:-1) : (sphere || sol || z<GDIM)?1:-1; }
 
 EX int curvature() {
   switch(cgclass) {
     case gcEuclid: return 0;
     case gcHyperbolic: return -1;
     case gcSphere: return 1;
+    case gcProduct: return PIU(curvature());
     default: return 0;
     }
   }
@@ -187,6 +188,7 @@ EX ld sin_auto(ld x) {
     case gcEuclid: return x;
     case gcHyperbolic: return sinh(x);
     case gcSphere: return sin(x);
+    case gcProduct: return PIU(sin_auto(x));
     default: return x;
     }
   }
@@ -196,6 +198,7 @@ EX ld asin_auto(ld x) {
     case gcEuclid: return x;
     case gcHyperbolic: return asinh(x);
     case gcSphere: return asin(x);
+    case gcProduct: return PIU(asin_auto(x));
     default: return x;
     }
   }
@@ -204,6 +207,7 @@ EX ld acos_auto(ld x) {
   switch(cgclass) {
     case gcHyperbolic: return acosh(x);
     case gcSphere: return acos(x);
+    case gcProduct: return PIU(acos_auto(x));
     default: return x;
     }
   }
@@ -231,6 +235,7 @@ EX ld cos_auto(ld x) {
     case gcEuclid: return 1;
     case gcHyperbolic: return cosh(x);
     case gcSphere: return cos(x);
+    case gcProduct: return PIU(cos_auto(x));
     default: return 1;
     }
   }
@@ -240,6 +245,7 @@ EX ld tan_auto(ld x) {
     case gcEuclid: return x;
     case gcHyperbolic: return tanh(x);
     case gcSphere: return tan(x);
+    case gcProduct: return PIU(tan_auto(x));
     default: return 1;
     }
   }
@@ -249,6 +255,7 @@ EX ld atan_auto(ld x) {
     case gcEuclid: return x;
     case gcHyperbolic: return atanh(x);
     case gcSphere: return atan(x);
+    case gcProduct: return PIU(atan_auto(x));
     default: return x;
     }
   }
@@ -258,6 +265,7 @@ EX ld atan2_auto(ld y, ld x) {
     case gcEuclid: return y/x;
     case gcHyperbolic: return atanh(y/x);
     case gcSphere: return atan2(y, x);
+    case gcProduct: return PIU(atan2_auto(y, x));
     default: return y/x;
     }
   }
@@ -313,6 +321,11 @@ EX ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   return res;
   }
 
+EX ld quickdist(const hyperpoint &h1, const hyperpoint &h2) {
+  if(prod) return hdist(h1, h2);
+  return intval(h1, h2);
+  }
+
 EX ld sqhypot_d(int d, const hyperpoint& h) {
   ld sum = 0;
   for(int i=0; i<d; i++) sum += h[i]*h[i];
@@ -324,9 +337,10 @@ EX ld hypot_d(int d, const hyperpoint& h) {
   }
   
 EX ld zlevel(const hyperpoint &h) {
-  if(translatable) return h[GDIM];
+  if(translatable) return h[LDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
-  else return (h[GDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
+  else if(prod) return log(sqrt(-intval(h, Hypc)));
+  else return (h[LDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
 
 EX ld hypot_auto(ld x, ld y) {
@@ -344,6 +358,7 @@ EX ld hypot_auto(ld x, ld y) {
 
 // move H back to the sphere/hyperboloid/plane
 EX hyperpoint normalize(hyperpoint H) {
+  if(prod) return H;
   ld Z = zlevel(H);
   for(int c=0; c<MDIM; c++) H[c] /= Z;
   return H;
@@ -351,11 +366,17 @@ EX hyperpoint normalize(hyperpoint H) {
 
 // get the center of the line segment from H1 to H2
 hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
+  if(prod) {
+    auto d1 = product_decompose(H1);
+    auto d2 = product_decompose(H2);
+    return zshift(PIU( mid(d1.second, d2.second) ), (d1.first + d2.first) / 2);
+    }
   return normalize(H1 + H2);
   }
 
 // like mid, but take 3D into account
 EX hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
+  if(prod) return mid(H1, H2);
   hyperpoint H3 = H1 + H2;
   
   ld Z = 2;
@@ -394,15 +415,15 @@ EX transmatrix random_spin() {
 
 EX transmatrix eupush(ld x, ld y) {
   transmatrix T = Id;
-  T[0][GDIM] = x;
-  T[1][GDIM] = y;
+  T[0][LDIM] = x;
+  T[1][LDIM] = y;
   return T;
   }
 
 EX transmatrix eupush(hyperpoint h) {
   if(nonisotropic) return nisot::translate(h);
   transmatrix T = Id;
-  for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
+  for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i];
   return T;
   }
 
@@ -430,9 +451,9 @@ EX transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
   if(nonisotropic) 
     return eupush3(cid == 0 ? alpha : 0, cid == 1 ? alpha : 0, cid == 2 ? alpha : 0);
-  T[GDIM][GDIM] = T[cid][cid] = cos_auto(alpha);
-  T[cid][GDIM] = sin_auto(alpha);
-  T[GDIM][cid] = -curvature() * sin_auto(alpha);
+  T[LDIM][LDIM] = T[cid][cid] = cos_auto(alpha);
+  T[cid][LDIM] = sin_auto(alpha);
+  T[LDIM][cid] = -curvature() * sin_auto(alpha);
   return T;
   }
 
@@ -550,7 +571,7 @@ EX transmatrix rspintoc(const hyperpoint& H, int t, int f) {
 
 // rotate the hyperbolic plane around C0 such that H[1] == 0 and H[0] >= 0
 EX transmatrix spintox(const hyperpoint& H) {
-  if(GDIM == 2) return spintoc(H, 0, 1); 
+  if(GDIM == 2 || prod) return spintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return spintoc(T1*H, 0, 2) * T1;
   }
@@ -572,7 +593,7 @@ EX transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpo
 
 // reverse of spintox(H)
 EX transmatrix rspintox(const hyperpoint& H) {
-  if(GDIM == 2) return rspintoc(H, 0, 1); 
+  if(GDIM == 2 || prod) return rspintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
   }
@@ -580,16 +601,16 @@ EX transmatrix rspintox(const hyperpoint& H) {
 // for H such that H[1] == 0, this matrix pushes H to C0
 EX transmatrix pushxto0(const hyperpoint& H) {
   transmatrix T = Id;
-  T[0][0] = +H[GDIM]; T[0][GDIM] = -H[0];
-  T[GDIM][0] = curvature() * H[0]; T[GDIM][GDIM] = +H[GDIM];
+  T[0][0] = +H[LDIM]; T[0][LDIM] = -H[0];
+  T[LDIM][0] = curvature() * H[0]; T[LDIM][LDIM] = +H[LDIM];
   return T;
   }
 
 // reverse of pushxto0(H)
 EX transmatrix rpushxto0(const hyperpoint& H) {
   transmatrix T = Id;
-  T[0][0] = +H[GDIM]; T[0][GDIM] = H[0];
-  T[GDIM][0] = -curvature() * H[0]; T[GDIM][GDIM] = +H[GDIM];
+  T[0][0] = +H[LDIM]; T[0][LDIM] = H[0];
+  T[LDIM][0] = -curvature() * H[0]; T[LDIM][LDIM] = +H[LDIM];
   return T;
   }
 
@@ -597,17 +618,21 @@ EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
   if(translatable) {
     return eupush(co * H);
     }
+  if(prod) {
+    auto d = product_decompose(H);
+    return mscale(PIU(ggpushxto0(d.second, co)), exp(d.first * co));
+    }
   transmatrix res = Id;
   if(sqhypot_d(GDIM, H) < 1e-12) return res;
-  ld fac = (H[GDIM]-1) / sqhypot_d(GDIM, H);
+  ld fac = (H[LDIM]-1) / sqhypot_d(GDIM, H);
   for(int i=0; i<GDIM; i++)
   for(int j=0; j<GDIM; j++)
     res[i][j] += H[i] * H[j] * fac;
     
   for(int d=0; d<GDIM; d++)
-    res[d][GDIM] = co * H[d],
-    res[GDIM][d] = -curvature() * co * H[d];
-  res[GDIM][GDIM] = H[GDIM];
+    res[d][LDIM] = co * H[d],
+    res[LDIM][d] = -curvature() * co * H[d];
+  res[LDIM][LDIM] = H[LDIM];
   
   return res;
   }
@@ -626,6 +651,7 @@ EX transmatrix rgpushxto0(const hyperpoint& H) {
 
 EX void fixmatrix(transmatrix& T) {
   if(nonisotropic) ; // T may be inverse... do not do that
+  else if(prod) ;
   else if(euclid) {
     for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
       ld dp = 0;
@@ -635,8 +661,8 @@ EX void fixmatrix(transmatrix& T) {
       
       for(int z=0; z<GDIM; z++) T[z][x] -= dp * T[z][y];
       }
-    for(int x=0; x<GDIM; x++) T[GDIM][x] = 0;
-    T[GDIM][GDIM] = 1;
+    for(int x=0; x<GDIM; x++) T[LDIM][x] = 0;
+    T[LDIM][LDIM] = 1;
     }
   else for(int x=0; x<MDIM; x++) for(int y=0; y<=x; y++) {
     ld dp = 0;
@@ -734,19 +760,28 @@ EX transmatrix inverse(const transmatrix& T) {
     }
   }
 
+EX pair<ld, hyperpoint> product_decompose(hyperpoint h) {
+  ld z = zlevel(h);
+  return make_pair(z, mscale(h, exp(-z)));
+  }
+
 // distance between mh and 0
 EX ld hdist0(const hyperpoint& mh) {
   switch(cgclass) {
     case gcHyperbolic:
-      if(mh[GDIM] < 1) return 0;
-      return acosh(mh[GDIM]);
+      if(mh[LDIM] < 1) return 0;
+      return acosh(mh[LDIM]);
     case gcEuclid: {
       return hypot_d(GDIM, mh);
       }
     case gcSphere: {
-      ld res = mh[GDIM] >= 1 ? 0 : mh[GDIM] <= -1 ? M_PI : acos(mh[GDIM]);
+      ld res = mh[LDIM] >= 1 ? 0 : mh[LDIM] <= -1 ? M_PI : acos(mh[LDIM]);
       if(elliptic && res > M_PI/2) res = M_PI-res;
       return res;
+      }
+    case gcProduct: {
+      auto d1 = product_decompose(mh);
+      return hypot(PIU(hdist0(d1.second)), d1.first);
       }
     default:
       return hypot_d(GDIM, mh);
@@ -779,6 +814,11 @@ EX ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
       return 2 * asinh(sqrt(iv) / 2);
     case gcSphere:
       return 2 * asin_auto_clamp(sqrt(iv) / 2);
+    case gcProduct: {
+      auto d1 = product_decompose(h1);
+      auto d2 = product_decompose(h2);
+      return hypot(PIU(hdist(d1.second, d2.second)), d1.first - d2.first);
+      }
     default:
       if(iv < 0) return 0;
       return sqrt(iv);
@@ -786,7 +826,7 @@ EX ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
   }
 
 EX hyperpoint mscale(const hyperpoint& t, double fac) {
-  if(GDIM == 3) return cpush(2, fac) * t;
+  if(GDIM == 3 && !prod) return cpush(2, fac) * t;
   hyperpoint res;
   for(int i=0; i<MDIM; i++) 
     res[i] = t[i] * fac;
@@ -794,8 +834,8 @@ EX hyperpoint mscale(const hyperpoint& t, double fac) {
   }
 
 EX transmatrix mscale(const transmatrix& t, double fac) {
-  if(GDIM == 3) {
-    // if(pmodel == mdFlatten) { transmatrix u = t; u[2][GDIM] -= fac; return u; }
+  if(GDIM == 3 && !prod) {
+    // if(pmodel == mdFlatten) { transmatrix u = t; u[2][LDIM] -= fac; return u; }
     return t * cpush(2, fac);
     }
   transmatrix res;
@@ -816,7 +856,7 @@ EX transmatrix xyzscale(const transmatrix& t, double fac, double facz) {
   for(int i=0; i<MDIM; i++) for(int j=0; j<GDIM; j++)
     res[i][j] = t[i][j] * fac;
   for(int i=0; i<MDIM; i++) 
-    res[i][GDIM] = t[i][GDIM] * facz;
+    res[i][LDIM] = t[i][LDIM] * facz;
   return res;
   }
 
@@ -870,6 +910,7 @@ EX hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
 
 EX hyperpoint zshift(hyperpoint x, ld z) {
   if(GDIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
+  else if(prod) return mscale(x, exp(z));
   else return mscale(x, z);
   }
 
@@ -931,14 +972,14 @@ EX transmatrix transpose(transmatrix T) {
 #if HDR
 inline hyperpoint cpush0(int c, ld x) { 
   hyperpoint h = Hypc;
-  h[GDIM] = cos_auto(x);
+  h[LDIM] = cos_auto(x);
   h[c] = sin_auto(x);
   return h;
   }
 
 inline hyperpoint xspinpush0(ld alpha, ld x) { 
   hyperpoint h = Hypc;
-  h[GDIM] = cos_auto(x);
+  h[LDIM] = cos_auto(x);
   h[0] = sin_auto(x) * cos(alpha);
   h[1] = sin_auto(x) * -sin(alpha);
   return h;
@@ -950,7 +991,7 @@ inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
 // T * C0, optimized
 inline hyperpoint tC0(const transmatrix &T) {
   hyperpoint z;
-  for(int i=0; i<MDIM; i++) z[i] = T[i][GDIM];
+  for(int i=0; i<MDIM; i++) z[i] = T[i][LDIM];
   return z;
   }
 #endif

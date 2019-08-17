@@ -643,7 +643,7 @@ EX namespace binary {
 
   // on which horocycle are we
   EX ld horo_level(hyperpoint h) {
-    h /= (1 + h[GDIM]);
+    h /= (1 + h[LDIM]);
     h[0] -= 1;
     h /= sqhypot_d(GDIM, h);
     h[0] += .5;
@@ -848,7 +848,7 @@ EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
-    double currz = at[GDIM][GDIM];
+    double currz = at[LDIM][LDIM];
     
     heptagon *h = base;
     
@@ -858,7 +858,7 @@ EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
     
     for(int d=0; d<S7; d++) {
       transmatrix V2 = itmatrix(h, d) * at;
-      double newz = V2[GDIM][GDIM];
+      double newz = V2[LDIM][LDIM];
       if(newz < currz) {
         currz = newz;
         bestV = V2;

@@ -19,7 +19,7 @@ EX namespace nisot {
 
   EX transmatrix translate(hyperpoint h) {
     transmatrix T = Id;
-    for(int i=0; i<GDIM; i++) T[i][GDIM] = h[i];
+    for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i];
     if(sol) {
       T[0][0] = exp(-h[2]);
       T[1][1] = exp(+h[2]);
@@ -541,6 +541,136 @@ EX namespace nilv {
     }
 EX }
 
+EX namespace product {
+
+  EX eGeometry underlying;
+  EX geometry_information *underlying_cgip;
+  
+  void configure() {
+    check_cgi();
+    cgi.prepare_basics();
+    underlying = geometry;
+    underlying_cgip = cgip;
+    geometry = gProduct;
+    ginf[gProduct] = ginf[underlying];
+    ginf[gProduct].sides += 2;
+    ginf[gProduct].cclass = gcProduct;
+    ginf[gProduct].flags |= qEXPERIMENTAL;
+    pmodel = mdPerspective;
+    }
+  
+  EX ld plevel = 1;
+  
+  hrmap *pmap;
+  geometry_information *pcgip;
+  
+  template<class T> auto in_actual(const T& t) {
+    dynamicval<eGeometry> g(geometry, gProduct);
+    dynamicval<geometry_information*> gc(cgip, pcgip);
+    dynamicval<hrmap*> gu(currentmap, pmap);
+    dynamicval<hrmap*> gup(pmap, NULL);
+    return t();  
+    }
+  
+  struct hrmap_product : hrmap {
+    
+    hrmap *underlying_map;
+    
+    map<pair<cell*, int>, cell*> at;
+    map<cell*, pair<cell*, int>> where;
+    
+    heptagon *getOrigin() override { return underlying_map->getOrigin(); }
+    
+    template<class T> auto in_underlying(const T& t) {
+      pcgip = cgip; pmap = this;
+      dynamicval<eGeometry> g(geometry, underlying);
+      dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+      dynamicval<hrmap*> gu(currentmap, underlying_map);
+      return t();
+      }
+    
+    cell *getCell(cell *u, int h) {
+      cell*& c = at[{u, h}];
+      if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
+      return c;
+      }
+  
+    cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
+  
+    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, exp(plevel * (where[c2].second - where[c1].second)));
+      }
+  
+    hrmap_product() {
+      in_underlying([this] { initcells(); underlying_map = currentmap; });
+      }
+  
+    void draw() override {
+      in_underlying([this] { currentmap->draw(); });
+      }
+    };
+  
+  cell *get_at(cell *base, int level) {
+    return ((hrmap_product*)currentmap)->getCell(base, level);
+    }
+  
+  void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
+    in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, z), V * mscale(Id, exp(plevel * z)), spinv, mirrored); });
+    }
+  
+  void find_cell_connection(cell *c, int d) {
+    auto m = (hrmap_product*)currentmap;
+    if(d >= c->type - 2) {
+      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? 1 : -1));
+      c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
+      }
+    else {
+      auto cu = m->where[c].first;
+      auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
+      cell *c1 = get_at(cu1, m->where[c].second);
+      c->c.connect(d, c1, cu->c.spin(d), cu->c.mirror(d));
+      }
+    }
+  
+  EX hyperpoint get_corner(cell *c, int i, ld z) {
+    dynamicval<eGeometry> g(geometry, underlying);
+    dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+    return mscale(get_corner_position(c, i), exp(plevel * z/2));
+    }
+  
+  EX hyperpoint where(hyperpoint h) {
+    hyperpoint res;
+    res[2] = zlevel(h);
+    h = mscale(h, exp(-res[2]));
+    ld r = hypot_d(2, h);
+    if(r < 1e-6 || h[2] < 1) {
+      res[0] = h[0];
+      res[1] = h[1];
+      }
+    else {
+      r = acosh(h[2]) / r;
+      res[0] = h[0] * r;
+      res[1] = h[1] * r;
+      }
+    return res;
+    }
+  
+  EX void in_underlying_map(const reaction_t& f) {
+    ((hrmap_product*)currentmap)->in_underlying(f);
+    }
+
+  #if HDR
+  template<class T> auto in_underlying_geometry(const T& f) {
+    dynamicval<eGeometry> g(geometry, underlying);
+    dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+    return f();
+    }
+  
+  #define PIU(x) hr::product::in_underlying_geometry([&] { return (x); })
+  #endif
+  
+EX }
+
 EX namespace nisot {
 
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
@@ -657,6 +787,7 @@ EX namespace nisot {
   EX hrmap *new_map() { 
     if(sol) return new solv::hrmap_sol; 
     if(nil) return new nilv::hrmap_nil;
+    if(geometry == gProduct) return new product::hrmap_product;
     return NULL;
     }
   
@@ -684,6 +815,12 @@ EX namespace nisot {
     else if(argis("-solnogeo")) {
       geodesic_movement = false;
       pmodel = mdPerspective;
+      return 0;
+      }
+    else if(argis("-product")) {
+      PHASEFROM(2);
+      stop_game();
+      product::configure();
       return 0;
       }
     return 1;

@@ -349,12 +349,14 @@ double hexshiftat(cell *c) {
   }
 
 EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) {
+  if(prod) return PIU( ddspin(c, d, bonus) );
   if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->cmove(d), c, C0))) * cspin(2, 0, bonus);
   if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * rspintox(nearcorner(c, d));
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) {
+  if(prod) return PIU( iddspin(c, d, bonus) );
   if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->cmove(d), c, C0)));
   if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * spintox(nearcorner(c, d));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
@@ -5018,7 +5020,7 @@ void drawcell_in_radar(cell *c, transmatrix V) {
 
 EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
-  PROD( if(product::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; } )
+  if(product::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; }
 
   cells_drawn++;
 
@@ -5037,10 +5039,10 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(!inmirrorcount) {
     transmatrix& gm = gmatrix[c];
     orig = 
-      gm[GDIM][GDIM] == 0 ? true : 
+      gm[LDIM][LDIM] == 0 ? true : 
       euwrap ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
-      sphereflipped() ? fabs(gm[GDIM][GDIM]-1) <= fabs(V[GDIM][GDIM]-1) :
-      fabs(gm[GDIM][GDIM]-1) >= fabs(V[GDIM][GDIM]-1) - 1e-8;
+      sphereflipped() ? fabs(gm[LDIM][LDIM]-1) <= fabs(V[LDIM][LDIM]-1) :
+      fabs(gm[LDIM][LDIM]-1) >= fabs(V[LDIM][LDIM]-1) - 1e-8;
 
     if(orig) gm = V;
     }
@@ -5142,7 +5144,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     if(!masterless) {
-      double dfc = euclid ? intval(tC0(V), C0) : V[GDIM][GDIM];
+      double dfc = euclid ? intval(tC0(V), C0) : V[LDIM][LDIM];
     
       if(dfc < centdist) {
         centdist = dfc;
@@ -6001,12 +6003,12 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 ld b = vid.binary_width * log(2) / 2;
                 const ld l = log(2) / 2;
                 switch(a) {
-                  case 0: if(V[0][GDIM] >= b) continue; break;
-                  case 1: if(V[1][GDIM] >= b) continue; break;
-                  case 2: case 3: if (pmodel == mdPerspective && V[2][GDIM] >= l) continue; break;
-                  case 4: if(V[0][GDIM] <= -b) continue; break;
-                  case 5: if(V[1][GDIM] <= -b) continue; break;
-                  case 6: case 7: if (pmodel == mdPerspective && V[2][GDIM] <= -l) continue; break;
+                  case 0: if(V[0][LDIM] >= b) continue; break;
+                  case 1: if(V[1][LDIM] >= b) continue; break;
+                  case 2: case 3: if (pmodel == mdPerspective && V[2][LDIM] >= l) continue; break;
+                  case 4: if(V[0][LDIM] <= -b) continue; break;
+                  case 5: if(V[1][LDIM] <= -b) continue; break;
+                  case 6: case 7: if (pmodel == mdPerspective && V[2][LDIM] <= -l) continue; break;
                   }
                 }
               if(qfi.fshape && wmescher) {
@@ -7140,7 +7142,7 @@ EX ld wall_radar(cell *c, transmatrix T, ld max) {
 
 EX void make_actual_view() {
   sphereflip = Id;
-  if(sphereflipped()) sphereflip[GDIM][GDIM] = -1;
+  if(sphereflipped()) sphereflip[LDIM][LDIM] = -1;
   actual_view_transform = sphereflip;  
   if(vid.yshift && WDIM == 2) actual_view_transform = ypush(vid.yshift) * actual_view_transform;
   #if MAXMDIM >= 4

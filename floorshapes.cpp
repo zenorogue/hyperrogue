@@ -224,7 +224,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
       int mapped = 0;
       for(auto& m: matrices) {        
         hyperpoint z = m.first * h;
-        if(z[0] > -1e-5 && z[1] > -1e-5 && z[GDIM] > -1e-5) {
+        if(z[0] > -1e-5 && z[1] > -1e-5 && z[LDIM] > -1e-5) {
           nh = m.second[r] * z, mapped++;
           }
         }

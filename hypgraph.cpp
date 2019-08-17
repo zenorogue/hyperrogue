@@ -66,7 +66,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   hyperpoint H;
   H[0] = hx * (hz+vid.alpha);
   H[1] = hy * (hz+vid.alpha);
-  H[GDIM] = hz;
+  H[LDIM] = hz;
   
   return H;  
   }
@@ -74,7 +74,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
 hyperpoint space_to_perspective(hyperpoint z, ld alpha = vid.alpha);
 
 hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
-  ld s = 1 / (alpha + z[GDIM]);
+  ld s = 1 / (alpha + z[LDIM]);
   z[0] *= s;
   z[1] *= s;
   if(GDIM == 3) {
@@ -103,7 +103,7 @@ EX hyperpoint gethyper(ld x, ld y) {
 
 void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   hyperpoint H = ypush(vid.camera) * xpush(d) * ypush(zl) * C0;
-  ld tzh = vid.ballproj + H[GDIM];
+  ld tzh = vid.ballproj + H[LDIM];
   ld ax = H[0] / tzh;
   ld ay = H[1] / tzh;
   
@@ -166,7 +166,7 @@ ld find_zlev(hyperpoint& H) {
   }
 
 ld get_tz(hyperpoint H) {
-  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[GDIM];
+  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[LDIM];
   if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   return tz;
   }
@@ -201,8 +201,8 @@ template<class T> void makeband(hyperpoint H, hyperpoint& ret, const T& f) {
   y = asin_auto(H[1]);
   x = asin_auto_clamp(H[0] / cos_auto(y));
   if(sphere) {
-    if(H[GDIM] < 0 && x > 0) x = M_PI - x;
-    else if(H[GDIM] < 0 && x <= 0) x = -M_PI - x;
+    if(H[LDIM] < 0 && x > 0) x = M_PI - x;
+    else if(H[LDIM] < 0 && x <= 0) x = -M_PI - x;
     }
   x += band_shift;
   hypot_zlev(zlev, y, yf, zf);
@@ -495,9 +495,9 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdFisheye: {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
-      H[GDIM] = zlev;
+      H[LDIM] = zlev;
       ret = H / sqrt(1 + sqhypot_d(GDIM+1, H));
-      if(GDIM == 3) ret[GDIM] = zlev;
+      if(GDIM == 3) ret[LDIM] = zlev;
       break;
       }
     
@@ -866,11 +866,11 @@ EX bool behindsphere(const hyperpoint& h) {
   if(mdBandAny()) return false;
 
   if(vid.alpha > 1) {
-     if(h[GDIM] > -1/vid.alpha) return true;
+     if(h[LDIM] > -1/vid.alpha) return true;
      }  
   
   if(vid.alpha <= 1) {
-    if(h[GDIM] < .2-vid.alpha) return true;
+    if(h[LDIM] < .2-vid.alpha) return true;
     }
   
   return false;
@@ -948,12 +948,16 @@ EX bool invalid_matrix(const transmatrix T) {
   for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++)
     if(std::isnan(T[i][j]) || T[i][j] > 1e8 || T[i][j] < -1e8 || std::isinf(T[i][j]))
       return true;
-  for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++) if(T[i][j] > .5 || T[i][j] < -.5) return false;
+  if(prod) {
+    for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++) if(abs(T[i][j]) > 1e-6) return false;
+    }
+  else 
+    for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++) if(T[i][j] > .5 || T[i][j] < -.5) return false;
   return true;
   }
   
 EX bool invalid_point(const hyperpoint h) {
-  return std::isnan(h[GDIM]) || h[GDIM] > 1e8 || std::isinf(h[GDIM]);
+  return std::isnan(h[LDIM]) || h[LDIM] > 1e8 || std::isinf(h[LDIM]);
   }
 
 EX bool in_smart_range(const transmatrix& T) {
@@ -1175,25 +1179,25 @@ int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
   
 EX transmatrix eumove(ld x, ld y) {
   transmatrix Mat = Id;
-  Mat[GDIM][GDIM] = 1;
+  Mat[LDIM][LDIM] = 1;
   
   if(a4) {
-    Mat[0][GDIM] += x * cgi.crossf;
-    Mat[1][GDIM] += y * cgi.crossf;
+    Mat[0][LDIM] += x * cgi.crossf;
+    Mat[1][LDIM] += y * cgi.crossf;
     }
   else {
-    Mat[0][GDIM] += (x + y * .5) * cgi.crossf;
-    // Mat[GDIM][0] += (x + y * .5) * cgi.crossf;
-    Mat[1][GDIM] += y * q3 /2 * cgi.crossf;
-    // Mat[GDIM][1] += y * q3 /2 * cgi.crossf;
+    Mat[0][LDIM] += (x + y * .5) * cgi.crossf;
+    // Mat[LDIM][0] += (x + y * .5) * cgi.crossf;
+    Mat[1][LDIM] += y * q3 /2 * cgi.crossf;
+    // Mat[LDIM][1] += y * q3 /2 * cgi.crossf;
     }
   
   ld v = a4 ? 1 : q3;
 
-  while(Mat[0][GDIM] <= -16384 * cgi.crossf) Mat[0][GDIM] += 32768 * cgi.crossf;
-  while(Mat[0][GDIM] >= 16384 * cgi.crossf) Mat[0][GDIM] -= 32768 * cgi.crossf;
-  while(Mat[1][GDIM] <= -16384 * v * cgi.crossf) Mat[1][GDIM] += 32768 * v * cgi.crossf;
-  while(Mat[1][GDIM] >= 16384 * v * cgi.crossf) Mat[1][GDIM] -= 32768 * v * cgi.crossf;
+  while(Mat[0][LDIM] <= -16384 * cgi.crossf) Mat[0][LDIM] += 32768 * cgi.crossf;
+  while(Mat[0][LDIM] >= 16384 * cgi.crossf) Mat[0][LDIM] -= 32768 * cgi.crossf;
+  while(Mat[1][LDIM] <= -16384 * v * cgi.crossf) Mat[1][LDIM] += 32768 * v * cgi.crossf;
+  while(Mat[1][LDIM] >= 16384 * v * cgi.crossf) Mat[1][LDIM] -= 32768 * v * cgi.crossf;
   return Mat;
   }
 
@@ -1320,7 +1324,7 @@ EX void centerpc(ld aspd) {
     }
   #endif
   hyperpoint H = inverse(actual_view_transform) * tC0(T);
-  ld R = zero_d(GDIM, H) ? 0 : hdist0(H);
+  ld R = (zero_d(GDIM, H) && !prod) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
     /* if(playerfoundL && playerfoundR) {
@@ -1338,12 +1342,20 @@ EX void centerpc(ld aspd) {
     if(aspd > R) aspd = R;
     
     for(int i=0; i<GDIM; i++)
-      View[i][GDIM] -= H[i] * aspd / R;
+      View[i][LDIM] -= H[i] * aspd / R;
         
     }
   
   else {
     aspd *= (1+R+(shmup::on?1:0));
+    
+    if(prod) {
+      auto d = product_decompose(H);
+      ld dist = -d.first / R * aspd;
+      if(abs(dist) > abs(d.first)) dist = -d.first;
+      View = mscale(View, exp(dist));
+      aspd *= sqrt(R*R - d.first * d.first) / R;
+      }
 
     if(R < aspd) {
       View = solmul(gpushxto0(H), View);
@@ -1363,6 +1375,14 @@ EX void optimizeview() {
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
   
+  if(prod) {
+    ld z = zlevel(tC0(View));
+    View = mscale(View, exp(-z));
+    product::in_underlying_geometry(optimizeview);
+    View = mscale(View, exp(z));
+    return;
+    }
+  
   #if CAP_ANIMATIONS
   if(centerover.at && inmirror(centerover.at)) {
     anims::reflect_view();
@@ -1375,7 +1395,7 @@ EX void optimizeview() {
   
   transmatrix TB = Id;
   
-  if(0) ;
+  if(false) ;
 
   #if CAP_BT || CAP_ARCM || MAXMDIM == 4
   else if(binarytiling || archimedean || penrose || WDIM == 3) {
@@ -1408,7 +1428,7 @@ EX void optimizeview() {
       ld trot = -i * M_PI * 2 / (S7+.0);
       transmatrix T = i < 0 ? Id : spin(trot) * xpush(cgi.tessf) * pispin;
       hyperpoint H = View * tC0(T);
-      if(H[GDIM] < best) best = H[GDIM], turn = i, TB = T;
+      if(H[LDIM] < best) best = H[LDIM], turn = i, TB = T;
       }
   
     if(turn >= 0) {
@@ -1665,7 +1685,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 EX void draw_boundary(int w) {
 
   if(w == 1) return;
-  if(nonisotropic || euclid) return;
+  if(nonisotropic || euclid || prod) return;
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
 
@@ -1864,7 +1884,7 @@ EX void draw_boundary(int w) {
 
 EX ld band_shift = 0;
 EX void fix_the_band(transmatrix& T) {
-  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[GDIM][GDIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
+  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[LDIM][LDIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
     hyperpoint H = tC0(T);
     find_zlev(H);
     models::apply_orientation(H[0], H[1]);
@@ -1872,8 +1892,8 @@ EX void fix_the_band(transmatrix& T) {
     ld y = asin_auto(H[1]);
     ld x = asin_auto_clamp(H[0] / cos_auto(y));
     if(sphere) {
-      if(H[GDIM] < 0 && x > 0) x = M_PI - x;
-      else if(H[GDIM] < 0 && x <= 0) x = -M_PI - x;
+      if(H[LDIM] < 0 && x > 0) x = M_PI - x;
+      else if(H[LDIM] < 0 && x <= 0) x = -M_PI - x;
       }
     band_shift += x;
     T = xpush(-x) * T;
@@ -1936,7 +1956,7 @@ bool limited_generation(cell *c) {
 
 EX bool do_draw(cell *c, const transmatrix& T) {
 
-  PROD( if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); }); )
+  if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); });
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(nil && pmodel == mdGeodesic) {

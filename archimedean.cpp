@@ -555,7 +555,7 @@ struct hrmap_archimedean : hrmap {
       }
     
     if(euclid) 
-      alt = encodeId(pair_to_vec(int(T[0][GDIM]), int(T[1][GDIM])));
+      alt = encodeId(pair_to_vec(int(T[0][LDIM]), int(T[1][LDIM])));
       
     DEBB(DF_GEOM, ("look for: ", alt, " / ", T * C0));
   

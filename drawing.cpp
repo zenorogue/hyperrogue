@@ -656,7 +656,7 @@ EX ld scale_at(const transmatrix& T) {
 EX ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1 && !ISWEB) {
-    double dz = h[GDIM];
+    double dz = h[LDIM];
     if(dz < 1 || abs(dz-current_display->scrdist) < 1e-6) return 1;
     else {
       double dx = sqrt(dz * dz - 1);
@@ -892,6 +892,21 @@ void debug_this() { }
 
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
+
+  if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection)) {
+    auto npoly = *this;
+    glcoords.clear();
+    for(int i=0; i<cnt; i++)
+      glcoords.push_back(glhr::pointtogl(product::where(V * glhr::gltopoint( (*tab)[offset+i]))));
+      
+    npoly.offset = 0;
+    npoly.tab = &glcoords;
+    npoly.V = Id;
+    set_width(1);
+    npoly.gldraw();
+    return;
+    }
+
 
   dynamicval<ld> bs(hr::band_shift, band_shift);
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
