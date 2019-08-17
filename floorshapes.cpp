@@ -814,7 +814,7 @@ dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &s
   #endif
   else if((euclid || GOLDBERG) && ishex1(c) && !penrose) 
     return &queuepolyat(V * pispin, shv[0], col, prio);
-  else if(!(S7&1) && PURE && !penrose) {
+  else if(!(S7&1) && PURE && !penrose && !a4) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
     transmatrix D = applyPatterndir(c, si);    
