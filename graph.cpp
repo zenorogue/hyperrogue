@@ -861,7 +861,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
   
   if(GDIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
     
-  if(WDIM == 3 && c == viewctr.at->c7 && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
+  if(WDIM == 3 && c == viewcenter() && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
   transmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
@@ -5995,8 +5995,8 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
               if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic) {
-                if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
-                else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewctr.at->c7)) continue;
+                if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
+                else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
               else if(sol && in_perspective()) {
@@ -7149,7 +7149,7 @@ EX void make_actual_view() {
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) 
-      actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewctr.at->c7), inverse(View), max)), actual_view_transform * View) * inverse(View); 
+      actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewcenter()), inverse(View), max)), actual_view_transform * View) * inverse(View); 
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
   if(nonisotropic) {
@@ -7185,7 +7185,7 @@ EX transmatrix cview() {
 
 EX void precise_mouseover() {
   if(WDIM == 3) { 
-    mouseover2 = mouseover = viewctr.at->c7; 
+    mouseover2 = mouseover = viewcenter();
     ld best = HUGE_VAL;
     hyperpoint h = 
       nisot::local_perspective_used() ? inverse(nisot::local_perspective) * cpush(2, 1) * C0 : cpush(2, 1) * C0;

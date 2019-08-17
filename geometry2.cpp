@@ -163,7 +163,7 @@ EX transmatrix &ggmatrix(cell *c) {
       t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else 
-      t = actualV(viewctr, actual_view_transform * View) * calc_relative_matrix(c, viewctr.at->c7, C0);
+      t = actualV(viewctr, actual_view_transform * View) * calc_relative_matrix(c, viewcenter(), C0);
     }
   return t;
   }

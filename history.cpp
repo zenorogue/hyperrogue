@@ -444,7 +444,7 @@ EX namespace history {
             xpos += bwidth;      
             }
           
-          last_base = viewctr.at->c7;
+          last_base = viewcenter();
           last_relative = inverse(ggmatrix(last_base)) * C0;        
           }
         }

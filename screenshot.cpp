@@ -524,7 +524,7 @@ void moved() {
       save_memory();
       return;
       }
-    setdist(masterless ? centerover.at : viewctr.at->c7, 7 - getDistLimit() - genrange_bonus, NULL);
+    setdist(viewcenter(), 7 - getDistLimit() - genrange_bonus, NULL);
     }
   playermoved = false;
   }
@@ -613,8 +613,8 @@ EX void apply() {
           cspin(0, GDIM-1, -movement_angle * degree), View);
         moved();
         if(clearup) {
-          viewctr.at->c7->wall = waNone;
-          forCellEx(c1, viewctr.at->c7) c1->wall = waNone;
+          viewcenter()->wall = waNone;
+          forCellEx(c1, viewcenter()) c1->wall = waNone;
           }
         }
       break;
@@ -637,7 +637,7 @@ EX void apply() {
       moved();
       View = cspin(0, GDIM-1, 2 * M_PI * t / period) * View;
       if(clearup) {
-        viewctr.at->c7->wall = waNone;
+        viewcenter()->wall = waNone;
         }
       break;
 
