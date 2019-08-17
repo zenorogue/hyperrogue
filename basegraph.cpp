@@ -400,8 +400,13 @@ void display_data::set_projection(int ed) {
     if(pers3) {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
-      if(nisot::local_perspective_used())
+      if(nisot::local_perspective_used()) {
+        if(prod) {
+          for(int i=0; i<3; i++) nisot::local_perspective[3][i] = nisot::local_perspective[i][3] = 0;
+          nisot::local_perspective[3][3] = 1;
+          }
         glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
+        }
       }
     else if(GDIM == 3) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);

@@ -897,7 +897,7 @@ void dqi_poly::draw() {
     auto npoly = *this;
     glcoords.clear();
     for(int i=0; i<cnt; i++)
-      glcoords.push_back(glhr::pointtogl(product::where(V * glhr::gltopoint( (*tab)[offset+i]))));
+      glcoords.push_back(glhr::pointtogl(product::inverse_exp(V * glhr::gltopoint( (*tab)[offset+i]))));
       
     npoly.offset = 0;
     npoly.tab = &glcoords;

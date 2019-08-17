@@ -449,6 +449,8 @@ EX transmatrix euaffine(hyperpoint h) {
 
 EX transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
+  if(prod && cid == 2)
+    return mscale(Id, exp(alpha));
   if(nonisotropic) 
     return eupush3(cid == 0 ? alpha : 0, cid == 1 ? alpha : 0, cid == 2 ? alpha : 0);
   T[LDIM][LDIM] = T[cid][cid] = cos_auto(alpha);
@@ -926,8 +928,8 @@ bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
-EX transmatrix solmul(const transmatrix T, const transmatrix V) {
-  if(nonisotropic) return nisot::transport_view(T, V);
+EX transmatrix solmul(const transmatrix T, const transmatrix LPe, const transmatrix V) {
+  if(nonisotropic || prod) return nisot::transport_view(T, LPe, V);
   else return T * V;
   }
 

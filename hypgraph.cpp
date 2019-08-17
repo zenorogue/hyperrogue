@@ -1358,10 +1358,10 @@ EX void centerpc(ld aspd) {
       }
 
     if(R < aspd) {
-      View = solmul(gpushxto0(H), View);
+      View = solmul(gpushxto0(H), Id, View);
       }
     else 
-      View = solmul(rspintox(H) * xpush(-aspd) * spintox(H), View);
+      View = solmul(rspintox(H) * xpush(-aspd) * spintox(H), Id, View);
       
     fixmatrix(View);
     spinEdge(aspd);
@@ -1472,6 +1472,7 @@ EX void resetview() {
     viewctr.spin = cwt.spin;
   else centerover = cwt;
   cwtV = View;
+  nisot::local_perspective = Id;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }

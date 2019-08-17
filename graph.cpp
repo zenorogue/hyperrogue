@@ -4483,7 +4483,7 @@ EX int noclipped;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clipping_planes.clear();
-  if(sphere) return;
+  if(sphere || prod) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     ld z1 = 1, z2 = 1;
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
@@ -5994,7 +5994,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic) {
+              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !prod) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
@@ -7149,7 +7149,7 @@ EX void make_actual_view() {
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) 
-      actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewcenter()), inverse(View), max)), actual_view_transform * View) * inverse(View); 
+      actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewcenter()), inverse(View), max)), nisot::local_perspective, actual_view_transform * View) * inverse(View); 
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
   if(nonisotropic) {

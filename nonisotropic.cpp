@@ -12,7 +12,7 @@ EX namespace nisot {
 
   EX transmatrix local_perspective;
   #if HDR
-  inline bool local_perspective_used() { return nonisotropic; }
+  inline bool local_perspective_used() { return nonisotropic || prod; }
   #endif
   
   EX bool geodesic_movement = true;
@@ -582,7 +582,8 @@ EX namespace product {
     heptagon *getOrigin() override { return underlying_map->getOrigin(); }
     
     template<class T> auto in_underlying(const T& t) {
-      pcgip = cgip; pmap = this;
+      pcgip = cgip; 
+      dynamicval<hrmap*> gpm(pmap, this);
       dynamicval<eGeometry> g(geometry, underlying);
       dynamicval<geometry_information*> gc(cgip, underlying_cgip);
       dynamicval<hrmap*> gu(currentmap, underlying_map);
@@ -638,10 +639,10 @@ EX namespace product {
     return mscale(get_corner_position(c, i), exp(plevel * z/2));
     }
   
-  EX hyperpoint where(hyperpoint h) {
+  EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
     res[2] = zlevel(h);
-    h = mscale(h, exp(-res[2]));
+    h = zshift(h, -res[2]);
     ld r = hypot_d(2, h);
     if(r < 1e-6 || h[2] < 1) {
       res[0] = h[0];
@@ -653,6 +654,16 @@ EX namespace product {
       res[1] = h[1] * r;
       }
     return res;
+    }
+  
+  EX hyperpoint direct_exp(hyperpoint h) {
+    hyperpoint res;
+    ld d = hypot_d(2, h);
+    ld cd = d == 0 ? 0 : sinh(d) / d;
+    res[0] = h[0] * cd;
+    res[1] = h[1] * cd;
+    res[2] = cosh(d);
+    return zshift(res, h[2]);
     }
   
   EX void in_underlying_map(const reaction_t& f) {
@@ -762,7 +773,11 @@ EX namespace nisot {
     return parallel_transport_bare(P, T);
     }
   
-  EX transmatrix transport_view(const transmatrix T, const transmatrix V) {
+  EX transmatrix transport_view(const transmatrix T, const transmatrix LPe, const transmatrix V) {
+    if(prod) {
+      hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(tC0(T)));
+      return rgpushxto0(h) * V;
+      }
     if(!geodesic_movement) {
       transmatrix IV = inverse(V);
       nisot::fixmatrix(IV);

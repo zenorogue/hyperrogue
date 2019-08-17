@@ -794,7 +794,7 @@ EX hyperpoint gltopoint(const glvertex& t) {
 EX glvertex pointtogl(const hyperpoint& t) {
   glvertex h;
   h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
-  if(SHDIM == 4) h[3] = (GDIM == 3) ? t[3] : 1;
+  if(SHDIM == 4) h[3] = (MDIM == 4) ? t[3] : 1;
   return h;
   }
 

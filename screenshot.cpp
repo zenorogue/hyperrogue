@@ -610,7 +610,7 @@ EX void apply() {
             }
           }
         View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-          cspin(0, GDIM-1, -movement_angle * degree), View);
+          cspin(0, GDIM-1, -movement_angle * degree), nisot::local_perspective, View);
         moved();
         if(clearup) {
           viewcenter()->wall = waNone;
@@ -633,7 +633,7 @@ EX void apply() {
     
     case maTranslationRotation:
       View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-        cspin(0, GDIM-1, -movement_angle * degree), View);
+        cspin(0, GDIM-1, -movement_angle * degree), nisot::local_perspective, View);
       moved();
       View = cspin(0, GDIM-1, 2 * M_PI * t / period) * View;
       if(clearup) {

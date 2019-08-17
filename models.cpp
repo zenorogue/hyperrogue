@@ -141,7 +141,7 @@ EX namespace models {
   #endif
 
   EX transmatrix rotmatrix() {
-    if(GDIM == 2) return spin(rotation * degree);
+    if(GDIM == 2 || prod) return spin(rotation * degree);
     return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
     }
   
