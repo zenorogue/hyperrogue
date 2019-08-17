@@ -1628,20 +1628,29 @@ EX void draw_model_elements() {
  
 void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 
-  hyperpoint H;
-  applymodel(X, H);
-  H *= current_display->radius;
-  ld mul = hypot(vid.xres, vid.yres) / hypot_d(2, H);
-  ld m = style == 1 ? -mul : -1;
+  hyperpoint H0, H1;
+  applymodel(X, H0);
+  H0 *= current_display->radius;
+  ld mul0 = hypot(vid.xres, vid.yres) / hypot_d(2, H0);
+  
+  if(style == 1) {
+    H1 = H0 * -mul0;
+    }
+  else {
+    applymodel(pispin * X, H1);
+    H1 *= current_display->radius;
+    }
+
+  ld mul1 = hypot(vid.xres, vid.yres) / hypot_d(2, H1);
   
   queuereset(mdUnchanged, p);
-  curvepoint(H + spin(M_PI/2) * H * mul);
-  curvepoint(H - spin(M_PI/2) * H * mul);
-  curvepoint(m * H - spin(M_PI/2) * H * mul);
-  curvepoint(m * H + spin(M_PI/2) * H * mul);
-  curvepoint(H + spin(M_PI/2) * H * mul);
-
-  queuecurve(lc, fc, p).flags |= POLY_ALWAYS_IN;
+  curvepoint(H0 + spin(M_PI/2) * H0 * mul0);
+  curvepoint(H0 - spin(M_PI/2) * H0 * mul0);
+  curvepoint(H1 + spin(M_PI/2) * H1 * mul1);
+  curvepoint(H1 - spin(M_PI/2) * H1 * mul1);
+  curvepoint(H0 + spin(M_PI/2) * H0 * mul0);
+  
+  queuecurve(lc, fc, p).flags |= POLY_ALWAYS_IN | POLY_FORCEWIDE;
   queuereset(pmodel, p);
   /*
   for(int i=0; i<1; i++) {
@@ -1674,7 +1683,7 @@ EX void draw_boundary(int w) {
   dynamicval<ld> dw(vid.linewidth, vid.linewidth * (svg::in ? svg::divby : 1));
   #endif
 
-  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide))
+  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide, mdCollignon))
     circle_around_center(M_PI/2, periodcolor, 0, PPR::CIRCLE);
   
   switch(pmodel) {
@@ -1698,7 +1707,7 @@ EX void draw_boundary(int w) {
         curvepoint(h1);
         }
   
-      queuecurve(lc, fc, p);
+      queuecurve(lc, fc, p).flags |= POLY_FORCEWIDE;
       queuereset(pmodel, p);
       return;
       }
@@ -1706,7 +1715,7 @@ EX void draw_boundary(int w) {
     case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: case mdCentralCyl: case mdCollignon: {
       if(GDIM == 3) return;
       if(pmodel == mdBand && models::model_transition != 1) return;
-      bool bndband = ((pmodel == mdBand) ? hyperbolic : sphere);
+      bool bndband = (among(pmodel, mdBand, mdCentralCyl) ? hyperbolic : sphere);
       transmatrix T = spin(-models::model_orientation * degree);
       ld right = M_PI/2 - 1e-5;
       if(bndband) 
@@ -1724,7 +1733,7 @@ EX void draw_boundary(int w) {
           curvepoint(T * xpush(-xperiod) * ypush0(-a * adegree));
           }
         curvepoint(T * xpush(xperiod) * ypush0(-90 * adegree));
-        queuecurve(periodcolor, 0, PPR::CIRCLE);
+        queuecurve(periodcolor, 0, PPR::CIRCLE).flags |= POLY_FORCEWIDE;
         }
       return;
       }
