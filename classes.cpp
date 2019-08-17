@@ -1027,7 +1027,7 @@ itemtype iinf[ittypes] = {
     "often has its uses."
     },
   { 'o', 0x306090, "Orb of Matter", 
-    "This Orb allows to temporarily create impassable matter, either to block paths or "
+    "This Orb allows one to temporarily create impassable matter, either to block paths or "
     "to build bridges across chasms and waters."},
   { '*', 0xF0F000, "Bounty", wildwestdesc},
   { '[', 0xC0C0C0, "Revolver", wildwestdesc},

@@ -2709,7 +2709,7 @@ S("You can use this ladder to climb the Tower.",
 
 Orb("Matter", "Hmoty")
 
-S("This Orb allows to temporarily create impassable matter, either to block paths or "
+S("This Orb allows one to temporarily create impassable matter, either to block paths or "
   "to build bridges across chasms and waters.",
   "Tato Sféra ti umožňuje dočasně vytvářet neprostupnou hmotu, kterou můžeš zatarasit "
   "cestu nebo využít jako most přes propasti nebo přes vodu.")
@@ -5373,7 +5373,7 @@ S(
   "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
   "always be facing in the same direction whatever you do, and it appears that "
   "you have to rotate the sword to excavate the treasures; "
-  "yet, it is possible to excavate them! You migth have already noticed "
+  "yet, it is possible to excavate them! You might have already noticed "
   "that the world rotates after you move around a loop and return to an old "
   "place.\n\n"
   "This is related to the fact that the world of HyperRogue is curved, and "
