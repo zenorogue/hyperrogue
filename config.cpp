@@ -508,6 +508,8 @@ EX void initConfig() {
   addsaverenum(models::basic_model, "basic model");
   addsaver(models::use_atan, "use_atan");
   
+  addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
+  
   for(int i=0; i<isize(ginf); i++) {
     if(ginf[i].flags & qELLIPTIC)
       sightranges[i] = M_PI;

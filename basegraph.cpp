@@ -1377,6 +1377,7 @@ EX void initgraph() {
 #if CAP_CONFIG
   loadConfig();
 #endif
+  arcm::current.parse();
 
 #if CAP_COMMANDLINE
   arg::read(2);
