@@ -663,7 +663,12 @@ EX transmatrix rgpushxto0(const hyperpoint& H) {
 
 EX void fixmatrix(transmatrix& T) {
   if(nonisotropic) ; // T may be inverse... do not do that
-  else if(prod) ;
+  else if(prod) {
+    auto z = zlevel(tC0(T));
+    T = mscale(T, -z);
+    PIU(fixmatrix(T));
+    T = mscale(T, +z);
+    }
   else if(euclid) {
     for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
       ld dp = 0;
