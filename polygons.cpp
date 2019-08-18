@@ -704,13 +704,28 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
 
   bshape(shWall3D[id], PPR::WALL);
   last->flags |= POLY_TRIANGLES;
-
+  
   hyperpoint center = Hypc;
   int n = isize(vertices);
+
+  vector<ld> altitudes;
+  if(prod) {
+    altitudes.resize(n);
+    for(int i=0; i<n; i++) {
+      auto d = product_decompose(vertices[i]);
+      altitudes[i] = d.first;
+      vertices[i] = d.second;
+      }
+    }
+
   ld w = 0;
   for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
-  center /= w;
-
+  if(prod) center = normalize_flat(center);
+  else center /= w;
+  
+  ld center_altitude = 0;
+  if(prod) for(int i=0; i<n; i++) center_altitude += altitudes[i] * weights[i] / w;
+  
   for(int a=0; a<n; a++) {
     hyperpoint v1 = vertices[a] - center;
     hyperpoint v2 = vertices[(a+1)%n] - center;
@@ -718,7 +733,10 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = center + v1 * x + v2 * y;
       if(nil && (x || y))
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
-      if(prod) { hpcpush(h); return; }
+      if(prod) { 
+        h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[(a+1)%n] * y);
+        hpcpush(h); return; 
+        }
       if(sol || !binarytiling) { hpcpush(normalize(h)); return; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
@@ -730,7 +748,10 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
-      if(prod) { hpcpush(h); continue; }
+      if(prod) { 
+        h = zshift(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
+        hpcpush(h); continue; 
+        }
       if(nil)
         h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
       if(sol || !binarytiling) { hpcpush(normalize(h)); continue; }

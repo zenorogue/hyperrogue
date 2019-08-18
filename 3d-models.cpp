@@ -30,7 +30,7 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
   return res;  
   }
 
-hyperpoint normalize_flat(hyperpoint h) {
+EX hyperpoint normalize_flat(hyperpoint h) {
   if(prod) return product_decompose(h).second;
   return normalize(h);
   }

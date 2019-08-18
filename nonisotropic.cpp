@@ -842,6 +842,7 @@ EX namespace nisot {
       PHASEFROM(2);
       stop_game();
       product::configure();
+      if(vid.texture_step < 4) vid.texture_step = 4;
       return 0;
       }
     return 1;
