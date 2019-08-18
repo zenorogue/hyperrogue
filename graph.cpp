@@ -865,7 +865,10 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
 
   transmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
-  if(GDIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);
+  if(c && prod)
+    Vit = mscale(Vit, sin(ptick(750)) * cgi.plevel / 4);
+  else
+    if(GDIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
 
   if(c && history::includeHistory && history::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;

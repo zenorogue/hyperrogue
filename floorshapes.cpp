@@ -780,6 +780,12 @@ EX int shvid(cell *c) {
     product::in_underlying_map([&] { d = shvid(c1); });
     return d;
     }
+  else if(GOLDBERG)
+    return gp::get_plainshape_id(c);
+  else if(IRREGULAR)
+    return irr::cellindex[c];
+  else if(archimedean)
+    return arcm::id_of(c->master);
   else if(geosupport_football() == 2)
     return pseudohept(c);
   else if(geometry == gBinaryTiling)
