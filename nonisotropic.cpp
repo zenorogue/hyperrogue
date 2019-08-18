@@ -617,7 +617,15 @@ EX namespace product {
   
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
-    in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, current_view_level+z), V * mscale(Id, cgi.plevel * z), spinv, mirrored); });
+    in_actual([&] { 
+      int flat_distance = hdist0(product_decompose(tC0(V)).second);
+      int max_z = flat_distance > sightranges[gProduct] ? 0 : sqrt(sightranges[gProduct] * sightranges[gProduct] - flat_distance * flat_distance) + 1;
+      for(int z=-max_z; z<=max_z; z++) {
+        cell *c1 = get_at(c, current_view_level+z);
+        setdist(c1, 7, NULL);
+        drawcell(c1, V * mscale(Id, cgi.plevel * z), spinv, mirrored); 
+        }
+      });
     }
   
   void find_cell_connection(cell *c, int d) {
