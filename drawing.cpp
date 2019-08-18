@@ -994,22 +994,16 @@ void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
-  if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection)) {
+  if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection) && product::product_sphere()) {
     auto npoly = *this;
     npoly.offset = 0;
     npoly.tab = &glcoords;
     npoly.V = Id;
     set_width(1);
     glcoords.clear();
-    if(product::product_sphere()) 
-      draw_s2xe(this, &npoly);
-    else {
-      for(int i=0; i<cnt; i++) glcoords.push_back(glhr::pointtogl(product::inverse_exp(V * glhr::gltopoint( (*tab)[offset+i]))));
-      npoly.gldraw();
-      }
+    draw_s2xe(this, &npoly);
     return;
     }
-
 
   dynamicval<ld> bs(hr::band_shift, band_shift);
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {

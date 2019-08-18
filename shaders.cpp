@@ -53,6 +53,7 @@ glvertex pointtogl(const hyperpoint& t);
 enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
   standardS30, standardS31, standardS32, standardS33, 
   ball, halfplane3, band3, flatten, standardSolv, standardNil,
+  standardEH2,
   MAX 
   };
 
@@ -639,9 +640,10 @@ void init() {
     bool ss31 = (sp == shader_projection::standardS31);
     bool ss32 = (sp == shader_projection::standardS32);
     bool ss33 = (sp == shader_projection::standardS33);
+    bool seh2 = (sp == shader_projection::standardEH2);
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
-    bool s3 = (sh3 || sr3 || ss3 || ssol || snil);
+    bool s3 = (sh3 || sr3 || ss3 || ssol || snil || seh2);
     bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
@@ -734,10 +736,21 @@ void init() {
       ssol,      "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.; ",
       ssol,      "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m; ",
       snil,      "t = inverse_exp(t);",
-       
+
+      seh2,      "float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;",
+      seh2,      "float r = sqrt(t[0] * t[0] + t[1] * t[1]);",
+      seh2,      "float t2 = t[2] / exp(z);",
+      seh2,      "float d = t2 >= 1. ? acosh(t2) : 0.;",
+      seh2,      "if(r != 0.) r = d / r;",
+      seh2,      "t[0] = t[0] * r;",
+      seh2,      "t[1] = t[1] * r;",
+      seh2,      "t[2] = z;",
+
       sh3,       "float fogs = (uFogBase - acosh(t[3]) / uFog);",
       sr3||snil, "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
       ssol,      "float fogs = (uFogBase - ad / uFog);",
+
+      seh2,      "float fogs = (uFogBase - sqrt(z*z+d*d) / uFog);",
       
       ss30,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
       ss31,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
@@ -746,7 +759,7 @@ void init() {
 
       s3,        "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);",
 
-      sh3 || sr3 || ssol || ball,"t[3] = 1.0;",
+      sh3 || sr3 || ssol || ball || seh2,"t[3] = 1.0;",
       
       band || hp || s3 || ball,"gl_Position = uP * t;",
       dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0) + uFogColor.xyz * (0.5 + gl_Position.z / 2.0);",
