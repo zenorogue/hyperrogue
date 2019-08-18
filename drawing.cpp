@@ -983,7 +983,23 @@ void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
       if(c1.distance > M_PI/2 && c0.distance > M_PI/2 && crossdot(c0.direction, c1.direction).second < 0) return;
       if(c1.bad == 2) return;
       if(c1.bad == 1) no_gens = true;
-      if(npoly->color && c1.distance > M_PI/2) npoly->color = 0;
+      }
+    
+    if(!no_gens) {
+
+      vector<ld> angles(p->cnt);
+      for(int i=0; i<p->cnt; i++) {
+        angles[i] = atan2(pd[i].direction[1], pd[i].direction[0]);
+        }
+      sort(angles.begin(), angles.end());
+      angles.push_back(angles[0] + 2 * M_PI);
+      bool ok = false;
+      for(int i=1; i<isize(angles); i++)
+        if(angles[i] >= angles[i-1] + M_PI) ok = true;
+      if(!ok) {
+        for(auto &c: pd) if(c.distance > M_PI/2) return;
+        no_gens = true;
+        }
       }
     
     int g = no_gens ? 0 : maxgen;
