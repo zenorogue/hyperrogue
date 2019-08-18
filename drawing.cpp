@@ -988,8 +988,7 @@ void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
     
     int g = no_gens ? 0 : maxgen;
 
-    for(int gen=g; gen<=g; gen++) {
-      if(gen && no_gens) continue;
+    for(int gen=-g; gen<=g; gen++) {
       for(int i=0; i<p->cnt; i++) {
         auto& cur = pd[i];
         ld d = cur.distance + 2 * M_PI * gen;
