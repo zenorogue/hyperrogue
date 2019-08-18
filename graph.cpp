@@ -4524,6 +4524,7 @@ void radar_grid(cell *c, const transmatrix& V) {
   }
 
 int wall_offset(cell *c) {
+  if(prod) return product::wall_offset(c);
   if(penrose && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;
   }

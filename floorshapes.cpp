@@ -773,8 +773,14 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.usershape = -1;
   }
 
-int shvid(cell *c) {
-  if(geosupport_football() == 2)
+EX int shvid(cell *c) {
+  if(prod) {
+    int d;
+    cell *c1 = product::get_where(c).first; 
+    product::in_underlying_map([&] { d = shvid(c1); });
+    return d;
+    }
+  else if(geosupport_football() == 2)
     return pseudohept(c);
   else if(geometry == gBinaryTiling)
     return c->type-6;

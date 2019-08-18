@@ -781,13 +781,16 @@ vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
   return {a, (a+b)/2, b, b+c-a, c};
   }
 
+void geometry_information::reserve_wall3d(int i) {
+  shWall3D.resize(i);
+  shPlainWall3D.resize(i);
+  shWireframe3D.resize(i);
+  shMiniWall3D.resize(i);
+  }
+
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  int howmany = penrose ? 22 : prod ? S7+2 : S7;
-  shWall3D.resize(howmany);
-  shPlainWall3D.resize(howmany);
-  shWireframe3D.resize(howmany);
-  shMiniWall3D.resize(howmany);
+  reserve_wall3d(penrose ? 22 : prod ? 0 : S7);
   if(GDIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -885,17 +888,7 @@ void geometry_information::create_wall3d() {
     }
   
   if(prod) {
-    cell model;
-    model.type = S7;
-    for(int i=0; i<S7; i++)
-      make_wall(i, {product::get_corner(&model, i, -1), product::get_corner(&model, i, +1), product::get_corner(&model, i+1, +1), product::get_corner(&model, i+1, -1)});
-    for(int a: {0,1}) {
-      vector<hyperpoint> l;
-      int z = a ? 1 : -1;
-      for(int i=0; i<S7; i++)
-        l.push_back(product::get_corner(&model, i, z));
-      make_wall(S7+a, l);
-      }    
+    walloffsets.clear();
     }
 
   if(GDIM == 3 && euclid && S7 == 6) {
@@ -991,6 +984,10 @@ void geometry_information::create_wall3d() {
     for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
     }
 
+  compute_cornerbonus();
+  }
+
+void geometry_information::compute_cornerbonus() {
   corner_bonus = 0;
   for(hpcshape sh: shWall3D) for(int i=sh.s; i<sh.e; i++)
     corner_bonus = max(corner_bonus, hdist0(hpc[i]));

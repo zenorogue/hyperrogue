@@ -641,6 +641,36 @@ EX namespace product {
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
     return mscale(get_corner_position(c, i), exp(plevel * z/2));
     }
+  
+  EX int wall_offset(cell *c) {
+    int id = shvid(c);
+    if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
+    int &wo = cgi.walloffsets[id];
+    if(wo == -1) {
+      cell *c1 = get_where(c).first;
+      wo = isize(cgi.shWall3D);
+      println(hlog, "generating a model for ", c->type-2, "+2");
+      int won = wo + c->type;
+      cgi.shWall3D.resize(won);
+      cgi.shPlainWall3D.resize(won);
+      cgi.shWireframe3D.resize(won);
+      cgi.shMiniWall3D.resize(won);
+
+      for(int i=0; i<c1->type; i++)
+       cgi.make_wall(wo + i, {product::get_corner(c1, i, -1), product::get_corner(c1, i, +1), product::get_corner(c1, i+1, +1), product::get_corner(c1, i+1, -1)});
+      for(int a: {0,1}) {
+        vector<hyperpoint> l;
+        int z = a ? 1 : -1;
+        for(int i=0; i<c1->type; i++)
+          l.push_back(product::get_corner(c1, i, z));
+        cgi.make_wall(won-2+a, l);
+        }
+
+      cgi.compute_cornerbonus();
+      cgi.extra_vertices();
+      }
+    return wo;
+    }
 
   EX bool product_sphere() { return ginf[underlying].cclass == gcSphere; }
   

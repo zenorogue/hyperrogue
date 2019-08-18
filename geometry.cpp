@@ -272,6 +272,8 @@ hpcshape
 
   int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
   
+  vector<int> walloffsets;
+  
   vector<array<int, 3>> symmetriesAt;
   
   #ifndef SCALETUNER
@@ -311,6 +313,9 @@ hpcshape
   void make_sidewalls();
   void procedural_shapes();
   void make_wall(int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
+  
+  void reserve_wall3d(int i);
+  void compute_cornerbonus();
   void create_wall3d();
   void configure_floorshapes();
   
