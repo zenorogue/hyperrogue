@@ -319,6 +319,7 @@ struct videopar {
   bool auto_eye;
 
   ld collignon_parameter; bool collignon_reflected;
+  ld plevel_factor;
   };
 
 extern videopar vid;

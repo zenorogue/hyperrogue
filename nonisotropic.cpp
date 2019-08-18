@@ -557,8 +557,6 @@ EX namespace product {
     pmodel = mdPerspective;
     }
   
-  EX ld plevel = 1;
-  
   EX int current_view_level;
   
   hrmap *pmap;
@@ -599,7 +597,7 @@ EX namespace product {
     cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
   
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, plevel * (where[c2].second - where[c1].second));
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * (where[c2].second - where[c1].second));
       }
   
     hrmap_product() {
@@ -619,7 +617,7 @@ EX namespace product {
   
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
-    in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, current_view_level+z), V * mscale(Id, plevel * z), spinv, mirrored); });
+    in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, current_view_level+z), V * mscale(Id, cgi.plevel * z), spinv, mirrored); });
     }
   
   void find_cell_connection(cell *c, int d) {
@@ -639,7 +637,7 @@ EX namespace product {
   EX hyperpoint get_corner(cell *c, int i, ld z) {
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
-    return mscale(get_corner_position(c, i), exp(plevel * z/2));
+    return mscale(get_corner_position(c, i), exp(cgi.plevel * z/2));
     }
   
   EX int wall_offset(cell *c) {

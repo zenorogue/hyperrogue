@@ -442,6 +442,8 @@ EX void initConfig() {
   addsaver(vid.collignon_parameter, "collignon-parameter", 1);
   addsaver(vid.collignon_reflected, "collignon-reflect", false);
 
+  addsaver(vid.plevel_factor, "plevel_factor", 1);
+
   addsaver(vid.creature_scale, "3d-creaturescale", 1);
   addsaver(vid.height_width, "3d-heightwidth", 1.5);
 

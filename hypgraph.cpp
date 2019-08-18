@@ -1379,8 +1379,8 @@ EX void optimizeview() {
     ld z = zlevel(tC0(View));
     View = mscale(View, -z);
     product::in_underlying_map(optimizeview);
-    if(z > product::plevel / 2) { product::current_view_level--; z -= product::plevel; }
-    if(z < -product::plevel / 2) { product::current_view_level++; z += product::plevel; }
+    if(z > cgi.plevel / 2) { product::current_view_level--; z -= cgi.plevel; }
+    if(z < -cgi.plevel / 2) { product::current_view_level++; z += cgi.plevel; }
     View = mscale(View, z);
     return;
     }

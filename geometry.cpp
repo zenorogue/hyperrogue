@@ -121,6 +121,8 @@ struct geometry_information {
   ld asteroid_size[8];
   ld wormscale;
   ld tentacle_length;
+  /** level in product geometries */
+  ld plevel;
   
   /** various parameters related to the 3D view */
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
@@ -552,6 +554,8 @@ void geometry_information::prepare_basics() {
       floorrad0 = hexvdist * (GDIM == 3 ? 1 : .9),
       floorrad1 = rhexf * (GDIM == 3 ? 1 : .8);
     }
+  
+  plevel = vid.plevel_factor * scalefactor;
   
   set_sibling_limit();
   
