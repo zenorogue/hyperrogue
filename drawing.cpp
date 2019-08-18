@@ -477,8 +477,21 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
 void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
+  
+  if(prod && pmodel == mdPerspective) {
+    for(int y=0; y<3; y++) {
+      for(int x=0; x<3; x++) mat[id++] = V[x][y];
+      mat[id++] = 0;
+      }
+    mat[12] = 0;
+    mat[13] = 0;
+    mat[14] = 0;
+    mat[15] = 1;
+    glhr::set_modelview(glhr::as_glmatrix(mat));
+    return;
+    }
 
-  if(in_perspective() && GDIM == 3) {
+  if(in_perspective() && MDIM == 4) {
     if(spherephase & 4) {
       for(int y=0; y<4; y++) {
         for(int x=0; x<4; x++) mat[id++] = -V[x][y];
