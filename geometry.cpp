@@ -635,6 +635,7 @@ namespace geom3 {
   string invalid;
   
   ld actual_wall_height() {
+      if(prod) return cgi.plevel;
       #if CAP_GP
       if(GOLDBERG && vid.gp_autoscale_heights) 
         return vid.wall_height * min<ld>(4 / hypot_d(2, gp::next), 1);
@@ -706,6 +707,7 @@ namespace geom3 {
       
       human_height = vid.human_wall_ratio * wh;
       if(WDIM == 3) human_height = scalefactor * vid.height_width / 2;
+      if(prod) human_height = min(human_height, cgi.plevel * .9);
       
       ld reduce = (WDIM == 3 ? human_height / 2 : 0);
       
