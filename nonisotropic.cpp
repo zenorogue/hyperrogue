@@ -618,6 +618,7 @@ EX namespace product {
   EX pair<cell*, int> get_where(cell *c) { return ((hrmap_product*)currentmap)->where[c]; }
   
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
+    if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, current_view_level+z), V * mscale(Id, plevel * z), spinv, mirrored); });
     }
   
