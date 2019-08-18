@@ -2311,10 +2311,20 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
     return false;
     }
   else {
-    if(a.attacking == 1) 
-      a.wherenow = a.wherenow * rspintox(tC0(inverse(a.wherenow) * a.attackat));
+    hyperpoint wnow;
+    if(a.attacking == 1)
+      wnow = tC0(inverse(a.wherenow) * a.attackat);
     else
-      a.wherenow = a.wherenow * rspintox(tC0(inverse(a.wherenow)));
+      wnow = tC0(inverse(a.wherenow));
+    
+    if(prod) {
+      auto d = product_decompose(wnow);
+      ld dist = d.first / R * aspd;
+      if(abs(dist) > abs(d.first)) dist = -d.first;
+      a.wherenow = mscale(a.wherenow, dist);
+      aspd *= sqrt(R*R - d.first * d.first) / R;
+      }
+    a.wherenow = a.wherenow * rspintox(wnow);
     a.wherenow = a.wherenow * xpush(aspd);
     fixmatrix(a.wherenow);
     a.footphase += a.attacking == 2 ? -aspd : aspd;
