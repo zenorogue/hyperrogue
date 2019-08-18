@@ -855,6 +855,8 @@ EX void check_cgi() {
   
   if(binarytiling || GDIM == 3) V("WQ", its(vid.texture_step));
   
+  if(prod) V("PL", fts(vid.plevel_factor));
+  
   if(binarytiling) V("BT", fts(vid.binary_width));
   
   if(GDIM == 2) { 

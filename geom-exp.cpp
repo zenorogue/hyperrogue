@@ -398,7 +398,7 @@ vector<eGeometry> list3d = {
   gCell24, gECell24,
   gCell16, gECell16,
   gCell8, gECell8,
-  gCell5, gKiteDart3, gSol, gNil
+  gCell5, gKiteDart3, gSol, gNil, gProduct
   };
 
 void ge_select_tiling(const vector<eGeometry>& lst) {
@@ -417,7 +417,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     if(archimedean && !CAP_ARCM) continue;
     if(geometry == gCrystal && !CAP_CRYSTAL) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
-    dialog::addBoolItem(XLAT(ginf[i].menu_displayed_name), on, letter++);
+    dialog::addBoolItem(XLAT((geometry == gProduct && !on) ? XLAT("current geometry x E") : ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action(dual::mayboth([i] {
       eGeometry targetgeometry = eGeometry(i);
@@ -431,6 +431,10 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
         pushScreen(arcm::show);
       #endif
       else dialog::do_if_confirmed([targetgeometry] () {
+        if(targetgeometry == gProduct && (WDIM == 3 || euclid)) {
+          addMessage(XLAT("Only works with 2D non-Euclidean geometries"));
+          return;
+          }
         set_geometry(targetgeometry);
         start_game();
         if(euwrap) {
@@ -624,7 +628,13 @@ EX void showEuclideanMenu() {
     }
   #endif
   
-  if(ts == 6 && tv == 3)
+  if(prod) {
+    dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
+    dialog::add_action([] {
+      dialog::editNumber(vid.plevel_factor, 0, 2, 0.1, 0.7, XLAT("Z-level height factor"), "");
+      });
+    }
+  else if(ts == 6 && tv == 3)
     dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
   else if(binarytiling) {
     dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
