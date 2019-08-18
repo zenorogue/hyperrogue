@@ -643,7 +643,7 @@ EX namespace product {
 
   EX bool product_sphere() { return ginf[underlying].cclass == gcSphere; }
   
-  EX hyperpoint inverse_exp(hyperpoint h, int gen IS(0)) {
+  EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
     res[2] = zlevel(h);
     h = zshift(h, -res[2]);
@@ -654,7 +654,6 @@ EX namespace product {
       }
     else {
       auto c = acos_auto_clamp(h[2]);
-      c += 2 * M_PI * gen;
       r = c / r;
       res[0] = h[0] * r;
       res[1] = h[1] * r;

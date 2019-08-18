@@ -892,6 +892,105 @@ void debug_this() { }
 
 glvertex junk = glhr::makevertex(0,0,1);
 
+struct point_data {
+  hyperpoint direction;
+  ld distance;
+  ld z;
+  int bad;
+  };
+
+void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
+  int maxgen = sightranges[geometry] / (2 * M_PI) + 1;
+  
+  auto crossdot = [&] (const hyperpoint h1, const hyperpoint h2) { return make_pair(h1[0] * h2[1] - h1[1] * h2[0], h1[0] * h2[0] + h1[1] * h2[1]); };
+  vector<point_data> pd;
+  for(int i=0; i<p->cnt; i++) {
+    hyperpoint h = p->V * glhr::gltopoint( (*p->tab)[p->offset+i]);
+    auto& next = pd.emplace_back();
+    auto dp = product_decompose(h);
+    next.direction = dp.second;
+    next.z = dp.first;
+    // next.tpoint = p->tinf ? p->tinf->tvertices[p->offset+i] : glvertex();
+    ld hyp = hypot_d(2, next.direction);
+    next.distance = acos_auto_clamp(next.direction[2]);
+    if(hyp == 0) {
+      next.direction = point2(1, 0);
+      }
+    else {
+      next.direction[0] /= hyp;
+      next.direction[1] /= hyp;
+      }
+    if(next.distance < 1e-3) next.bad = 1;
+    else if(next.distance > M_PI - 1e-3) next.bad = 2;
+    else next.bad = 0;
+    }
+  
+  glcoords.resize(p->cnt);
+  if(p->flags & POLY_TRIANGLES) {
+    for(int i=0; i<p->cnt; i+=3) {
+      int nbad = 0;
+      for(int j=i; j<i+3; j++) {
+        if(pd[j].bad >= 1) nbad = max(nbad, 0);
+        if(pd[j].bad >= 2) nbad = 2;
+        }
+      
+      int g = (pd[i].distance > M_PI/2 || pd[i+1].distance >= M_PI/2 || pd[i+2].distance >= M_PI/2) ? 2 : 1;
+        
+      auto c1 = crossdot(pd[i+0].direction, pd[i+1].direction);
+      auto c2 = crossdot(pd[i+1].direction, pd[i+2].direction);
+      auto c3 = crossdot(pd[i+2].direction, pd[i+0].direction);
+      if(c1.second < 0 || c2.second < 0 || c3.second < 0) nbad = max(nbad, g);
+      if(c1.first > 0 && c2.first > 0 && c3.first > 0) nbad = max(nbad, g);
+      if(c1.first < 0 && c2.first < 0 && c3.first < 0) nbad = max(nbad, g);
+      pd[i].bad = pd[i+1].bad = pd[i+2].bad = nbad;
+      }
+    
+    for(int gen=-maxgen; gen<=maxgen; gen++) {
+      for(int i=0; i<p->cnt; i++) {
+        auto& cur = pd[i];
+        if(cur.bad >= (gen ? 1 : 2)) glcoords[i] = junk;
+        else {
+          hyperpoint h;
+          ld d = cur.distance + 2 * M_PI * gen;
+          h[0] = cur.direction[0] * d;
+          h[1] = cur.direction[1] * d;
+          h[2] = cur.z;
+          glcoords[i] = glhr::pointtogl(h);
+          }
+        }
+      npoly->gldraw();
+      }
+    }
+  else {
+    for(auto c: pd) if(c.bad == 2) return;
+    bool no_gens = false;
+    for(int i=0; i<p->cnt; i++) {
+      auto &c1 = pd[i];
+      auto &c0 = pd[i==0?p->cnt-1 : i-1];
+      if(c1.distance > M_PI/2 && c0.distance > M_PI/2 && crossdot(c0.direction, c1.direction).second < 0) return;
+      if(c1.bad == 2) return;
+      if(c1.bad == 1) no_gens = true;
+      if(npoly->color && c1.distance > M_PI/2) npoly->color = 0;
+      }
+    
+    int g = no_gens ? 0 : maxgen;
+
+    for(int gen=g; gen<=g; gen++) {
+      if(gen && no_gens) continue;
+      for(int i=0; i<p->cnt; i++) {
+        auto& cur = pd[i];
+        ld d = cur.distance + 2 * M_PI * gen;
+        hyperpoint h;
+        h[0] = cur.direction[0] * d;
+        h[1] = cur.direction[1] * d;
+        h[2] = cur.z;
+        glcoords[i] = glhr::pointtogl(h);
+        }
+      npoly->gldraw();
+      }
+    }
+  }
+
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
@@ -901,27 +1000,10 @@ void dqi_poly::draw() {
     npoly.tab = &glcoords;
     npoly.V = Id;
     set_width(1);
-    if(product::product_sphere()) {
-      for(int gen=-5; gen<=5; gen++) {
-        glcoords.clear();
-        int junks = 0;
-        for(int i=0; i<cnt; i++) {
-          hyperpoint h = V * glhr::gltopoint( (*tab)[offset+i]);
-          if(hypot_d(2, h) < 1e-6 && (gen || h[2] < 0)) {
-            junks = 3 - (i % 3);
-            }
-          if(junks == 3)
-            glcoords.push_back(junk), junks--;
-          else if(junks)
-            glcoords.push_back(glcoords.back()), junks--;
-          else        
-            glcoords.push_back(glhr::pointtogl(product::inverse_exp(h, gen)));
-          }
-        npoly.gldraw();
-        }
-      }
+    glcoords.clear();
+    if(product::product_sphere()) 
+      draw_s2xe(this, &npoly);
     else {
-      glcoords.clear();
       for(int i=0; i<cnt; i++) glcoords.push_back(glhr::pointtogl(product::inverse_exp(V * glhr::gltopoint( (*tab)[offset+i]))));
       npoly.gldraw();
       }
