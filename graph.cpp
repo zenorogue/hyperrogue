@@ -4396,7 +4396,10 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
   }
 
 // how much should be the d-th wall darkened in 3D
-int get_darkval(int d) {
+int get_darkval(cell *c, int d) {
+  if(prod) {
+    return d >= c->type - 2 ? 4 : 0;
+    }
   const int darkval_hbt[9] = {0,2,2,0,6,6,8,8,0};
   const int darkval_s12[12] = {0,1,2,3,4,5,0,1,2,3,4,5};
   const int darkval_e6[6] = {0,4,6,0,4,6};
@@ -6016,7 +6019,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                   }
                 }
               if(qfi.fshape && wmescher) {
-                auto& poly = queuepoly(V, cgi.shWall3D[ofs + a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                auto& poly = queuepoly(V, cgi.shWall3D[ofs + a], darkena(wcol2 - d * get_darkval(c, a), 0, 0xFF));
                 #if CAP_TEXTURE
                 if(texture::config.tstate == texture::tsActive && isize(texture::config.tinf3.tvertices)) {
                   poly.tinf = &texture::config.tinf3;
@@ -6030,14 +6033,14 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                   }
                 }
               else
-                queuepoly(V, cgi.shPlainWall3D[ofs + a], darkena(wcol2 - d * get_darkval(a), 0, 0xFF));
+                queuepoly(V, cgi.shPlainWall3D[ofs + a], darkena(wcol2 - d * get_darkval(c, a), 0, 0xFF));
               }
           }
         else {
           for(int a=0; a<c->type; a++) if(c->move(a)) {
             color_t t = transcolor(c, c->move(a), wcol);
             if(t) {
-              t = t - get_darkval(a) * ((t & 0xF0F0F000) >> 4);
+              t = t - get_darkval(c, a) * ((t & 0xF0F0F000) >> 4);
               queue_transparent_wall(V, cgi.shPlainWall3D[ofs + a], t);
               }
             }
