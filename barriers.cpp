@@ -31,12 +31,13 @@ EX bool checkBarriersFront(cellwalker bb, int q IS(5), bool cross IS(false)) {
   return checkBarriersBack(bb, q);
   }
 
+/** return true if the cell c is not allowed to generate barriers because of other large things already existing nearby. */
 EX bool hasbardir(cell *c) {
   return c->bardir != NODIR && c->bardir != NOBARRIERS;
   }
 
-/** return true if the cell c is not allowed to generate barriers because of other large things already existing nearby. */
 EX void preventbarriers(cell *c) {
+  if(prod) c = product::get_where(c).first;
   if(c && c->bardir == NODIR) c->bardir = NOBARRIERS;
   }
 

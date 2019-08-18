@@ -2549,6 +2549,13 @@ EX void setdist(cell *c, int d, cell *from) {
     }
 
   if(d <= 10 - getDistLimit()) lastexplore = shmup::on ? shmup::curtime : turncount;
+  
+  if(prod) {
+    auto wc = product::get_where(c).first;
+    auto wf = from ? product::get_where(from).first : NULL;
+    if(c->land && !wc->land) wc->land = c->land;
+    product::in_underlying_map([&] { setdist(wc, d, wf); });
+    }
 
   if(buggyGeneration) {
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
@@ -2612,6 +2619,7 @@ EX void setdist(cell *c, int d, cell *from) {
       #if MAXMDIM == 4
       else if(euclid && WDIM == 3) euclid3::set_land(c);
       #endif
+      else if(prod) setLandProduct(c);
       else if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }

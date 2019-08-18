@@ -372,6 +372,7 @@ EX pair<int, bool> fieldval(cell *c) {
 
 EX int fieldval_uniq(cell *c) {
   if(experimental) return 0;
+  else if(prod) { auto c1 = product::get_where(c).first; return PIU(fieldval_uniq(c1)); }
   else if(sphere) {
     if(archimedean) return c->master->fiftyval;
     #if CAP_IRR
@@ -1362,6 +1363,7 @@ EX bool pseudohept(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
+  if(prod) { auto d = product::get_where(c); return (d.second & 1) && PIU(pseudohept(d.first)); }
   #if CAP_BT
   if(nil) return c->master->zebraval & c->master->emeraldval & c->master->fieldval & 1;
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);

@@ -554,7 +554,6 @@ EX namespace product {
     geometry = gProduct;
     ginf[gProduct] = ginf[underlying];
     ginf[gProduct].cclass = gcProduct;
-    ginf[gProduct].flags |= qEXPERIMENTAL;
     pmodel = mdPerspective;
     }
   

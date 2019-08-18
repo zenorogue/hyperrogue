@@ -132,6 +132,7 @@ EX bool grailWasFound(cell *c) {
   }
 
 void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
+  if(prod) { product::in_underlying_map([&] { generateAlts(h, levs, link_cdata); }); }
   if(!h->alt) return;
   preventbarriers(h->c7);
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
@@ -181,6 +182,13 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   }
 
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
+
+  if(prod) {
+    c = product::get_where(c).first;
+    heptagon *res;
+    product::in_underlying_map([&] { res = createAlternateMap(c, rad, firststate, special); });
+    return res;
+    }
 
   // check for direction
   int gdir = -1;
@@ -969,6 +977,16 @@ EX void setLandSol(cell *c) {
     }
   }
 
+EX void setLandProduct(cell *c) {
+  auto wc = product::get_where(c).first;
+  c->barleft = wc->barleft;
+  c->barright = wc->barright;
+  c->bardir = wc->bardir;
+  if(wc->land) setland(c, wc->land);
+  if(among(wc->wall, waBarrier, waMercury) || wc->land == laElementalWall)
+    c->wall = wc->wall;
+  }
+
 EX void setLandNil(cell *c) {
   setland(c, specialland);
   
@@ -1257,9 +1275,9 @@ EX int wallchance(cell *c, bool deepOcean) {
     50;
   }
 
-EX bool horo_ok() {
-  // do the horocycles work in the current geometry?
-  return hyperbolic && !binarytiling && !archimedean && !penrose && !experimental;
+/** should we generate the horocycles in the current geometry? */
+EX bool horo_ok() {  
+  return hyperbolic && !binarytiling && !archimedean && !penrose && !experimental && !prod;
   }
 
 EX bool gp_wall_test() {
@@ -1317,7 +1335,9 @@ EX void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
+  if(prod) ;  /* Great Walls generated via the underlying geometry */
+  
+  else if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
     if(top_land && c == cwt.at->master->move(3)->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
@@ -1644,6 +1664,10 @@ EX void moreBigStuff(cell *c) {
           }
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
+          }
+        else if(prod) {
+          auto d = product::get_where(c);
+          if(d.first->wall == waColumn || (d.second&1)) c->wall = waColumn;
           }
         else if(WDIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;
