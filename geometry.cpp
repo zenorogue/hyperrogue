@@ -873,7 +873,6 @@ EX void check_cgi() {
   if(prod) product::underlying_cgip->timestamp = ntimestamp;
   
   if(isize(cgis) > 4) {
-    cgi.timestamp = ticks;
     vector<pair<int, string>> timestamps;
     for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());
