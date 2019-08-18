@@ -870,6 +870,7 @@ EX void check_cgi() {
   
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
+  if(prod) product::underlying_cgip->timestamp = ntimestamp;
   
   if(isize(cgis) > 4) {
     cgi.timestamp = ticks;
