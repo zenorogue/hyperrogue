@@ -1345,7 +1345,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
   char xch = minf[m].glyph;
   
   transmatrix V = V1;
-  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where) V = V1 * cspin(0, 2, M_PI/2);
+  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !prod) V = V1 * cspin(0, 2, M_PI/2);
 
   // if(GDIM == 3) V = V * cspin(0, 2, M_PI/2);
 
@@ -2749,7 +2749,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   else {
     // other monsters face the player
     
-    if(!nospins) {
+    if(!nospins && !prod) {
       if(WDIM == 2) {
         hyperpoint V0 = inverse(cwtV) * tC0(Vs);
         hyperpoint V1 = spintox(V0) * V0;

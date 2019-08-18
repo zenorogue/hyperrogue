@@ -1353,7 +1353,7 @@ EX void centerpc(ld aspd) {
       auto d = product_decompose(H);
       ld dist = -d.first / R * aspd;
       if(abs(dist) > abs(d.first)) dist = -d.first;
-      View = mscale(View, exp(dist));
+      View = mscale(View, dist);
       aspd *= sqrt(R*R - d.first * d.first) / R;
       }
 
@@ -1377,9 +1377,11 @@ EX void optimizeview() {
   
   if(prod) {
     ld z = zlevel(tC0(View));
-    View = mscale(View, exp(-z));
+    View = mscale(View, -z);
     product::in_underlying_geometry(optimizeview);
-    View = mscale(View, exp(z));
+    if(z > product::plevel / 2) { product::current_view_level--; z -= product::plevel; }
+    if(z < -product::plevel / 2) { product::current_view_level++; z += product::plevel; }
+    View = mscale(View, z);
     return;
     }
   
@@ -1473,6 +1475,7 @@ EX void resetview() {
   else centerover = cwt;
   cwtV = View;
   nisot::local_perspective = Id;
+  if(prod) product::current_view_level = product::get_where(cwt.at).second;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }

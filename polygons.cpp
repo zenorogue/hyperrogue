@@ -755,7 +755,7 @@ vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  int howmany = penrose ? 22 : S7;
+  int howmany = penrose ? 22 : prod ? S7+2 : S7;
   shWall3D.resize(howmany);
   shPlainWall3D.resize(howmany);
   shWireframe3D.resize(howmany);
@@ -857,15 +857,15 @@ void geometry_information::create_wall3d() {
   
   if(prod) {
     cell model;
-    model.type = S7-2;
-    for(int i=0; i<S7-2; i++)
+    model.type = S7;
+    for(int i=0; i<S7; i++)
       make_wall(i, {product::get_corner(&model, i, -1), product::get_corner(&model, i, +1), product::get_corner(&model, i+1, +1), product::get_corner(&model, i+1, -1)});
     for(int a: {0,1}) {
       vector<hyperpoint> l;
       int z = a ? 1 : -1;
-      for(int i=0; i<S7-2; i++)
+      for(int i=0; i<S7; i++)
         l.push_back(product::get_corner(&model, i, z));
-      make_wall(S7-2+a, l);
+      make_wall(S7+a, l);
       }    
     }
 

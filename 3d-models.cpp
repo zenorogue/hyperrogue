@@ -30,10 +30,15 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
   return res;  
   }
 
+hyperpoint normalize_flat(hyperpoint h) {
+  if(prod) return product_decompose(h).second;
+  return normalize(h);
+  }
+
 hyperpoint get_center(const vector<hyperpoint>& vh) {
   hyperpoint h = Hypc;
   for(auto h1: vh) h = h + h1;
-  return normalize(h);
+  return normalize_flat(h);
   }
 
 ld zc(ld z) { 
@@ -125,7 +130,7 @@ void geometry_information::add_texture(hpcshape& sh) {
 
 vector<hyperpoint> scaleshape(const vector<hyperpoint>& vh, ld s) {
   vector<hyperpoint> res;
-  for(hyperpoint h: vh) res.push_back(normalize(h * s + shcenter * (1-s)));
+  for(hyperpoint h: vh) res.push_back(normalize_flat(h * s + shcenter * (1-s)));
   return res;
   }
 
@@ -326,8 +331,8 @@ void geometry_information::make_armor_3d(hpcshape& sh, int kind) {
   
   for(hyperpoint h: body) {
     array<ld, 2> p;
-    p[0] = h[0] / h[3];
-    p[1] = h[1] / h[3];
+    p[0] = h[0] / h[LDIM];
+    p[1] = h[1] / h[LDIM];
     pts[0].emplace_back(p);
     }
   
@@ -394,8 +399,8 @@ void geometry_information::make_head_3d(hpcshape& sh) {
   
   for(hyperpoint h: head) {
     array<ld, 2> p;
-    p[0] = h[0] / h[3];
-    p[1] = h[1] / h[3];
+    p[0] = h[0] / h[LDIM];
+    p[1] = h[1] / h[LDIM];
     pts[0].emplace_back(p);
     }
   
@@ -476,6 +481,11 @@ void geometry_information::make_skeletal(hpcshape& sh, ld push) {
   shift_last(-push);
   }
 
+hyperpoint yzspin(ld alpha, hyperpoint h) {
+  if(prod) return product::direct_exp(cspin(1, 2, alpha) * product::inverse_exp(h));
+  else return cspin(1, 2, alpha) * h;
+  }
+
 void geometry_information::make_revolution(hpcshape& sh, int mx, ld push) {
   auto body = get_shape(sh);
   bshape(sh, PPR::MONSTER_BODY);
@@ -484,12 +494,12 @@ void geometry_information::make_revolution(hpcshape& sh, int mx, ld push) {
     hyperpoint h0 = body[i];
     hyperpoint h1 = body[(i+1) % isize(body)];
     for(int s=0; s<mx; s+=step) {
-      hpcpush(cspin(1, 2, s * degree) * h0);
-      hpcpush(cspin(1, 2, s * degree) * h1);
-      hpcpush(cspin(1, 2, (s+step) * degree) * h0);
-      hpcpush(cspin(1, 2, s * degree) * h1);
-      hpcpush(cspin(1, 2, (s+step) * degree) * h0);
-      hpcpush(cspin(1, 2, (s+step) * degree) * h1);
+      hpcpush(yzspin(s * degree, h0));
+      hpcpush(yzspin(s * degree, h1));
+      hpcpush(yzspin((s+step) * degree, h0));
+      hpcpush(yzspin(s * degree, h1));
+      hpcpush(yzspin((s+step) * degree, h0));
+      hpcpush(yzspin((s+step) * degree, h1));
       }
     }
   last->flags |= POLY_TRIANGLES;
@@ -537,7 +547,7 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   for(int i=0; i<n; i++) if(!stillin[i] && !stillin[lastid[i]]) lastid[i] = lastid[lastid[i]];
 
   for(int i=0; i<n; i++) {
-    if(!stillin[i]) gbody[i] = normalize(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
+    if(!stillin[i]) gbody[i] = normalize_flat(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
     }
   
   bshape(sh, PPR::MONSTER_BODY);
@@ -551,12 +561,12 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
       hyperpoint h1 = tbody[i1];
       hyperpoint hs0 = nbody[i];
       hyperpoint hs1 = nbody[i1];
-      hpcpush(cspin(1, 2, s * degree) * h0);
-      hpcpush(cspin(1, 2, s * degree) * h1);
-      hpcpush(cspin(1, 2, (s+step) * degree) * hs0);
-      hpcpush(cspin(1, 2, s * degree) * h1);
-      hpcpush(cspin(1, 2, (s+step) * degree) * hs0);
-      hpcpush(cspin(1, 2, (s+step) * degree) * hs1);
+      hpcpush(yzspin(s * degree, h0));
+      hpcpush(yzspin(s * degree, h1));
+      hpcpush(yzspin((s+step) * degree, hs0));
+      hpcpush(yzspin(s * degree, h1));
+      hpcpush(yzspin((s+step) * degree, hs0));
+      hpcpush(yzspin((s+step) * degree, hs1));
       }
     }
   last->flags |= POLY_TRIANGLES;
@@ -600,26 +610,40 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
   // shift_shape(orig, BIRD);
   }
 
+EX hyperpoint forward_dir(ld x) { return prod ? point3(x, 0, 0) : xpush0(x); }
+
+EX hyperpoint dir_to_point(hyperpoint h) { return prod ? product::direct_exp(h) : h; }
+
+EX hyperpoint dir_setlength(hyperpoint dir, ld length) {
+  if(dir[0] == 0 && dir[1] == 0 && dir[2] == 0) return dir;
+  if(prod) return dir * (length / hypot_d(3, dir));
+  return rspintox(dir) * xpush0(length);
+  }
+
 void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   dynamicval<int> d(vid.texture_step, 8);
   texture_order([&] (ld x, ld y) {
     ld z = 1-x-y;
-    ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8);
-    hyperpoint h = rspintox(a*x+b*y+c*z) * xpush0(r);
+    ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8) * (prod ? .5 : 1);
+    hyperpoint h = dir_to_point(dir_setlength(a*x+b*y+c*z, r));
     hpcpush(h);
     });  
   }
 
 void geometry_information::balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   if(lev == 0) {
-    hpcpush(a);
-    hpcpush(b);
-    hpcpush(c);
+    hpcpush(dir_to_point(a));
+    hpcpush(dir_to_point(b));
+    hpcpush(dir_to_point(c));
     }
   else {
-    hyperpoint cx = rspintox(mid(a,b)) * xpush0(rad);
-    hyperpoint ax = rspintox(mid(b,c)) * xpush0(rad);
-    hyperpoint bx = rspintox(mid(c,a)) * xpush0(rad);
+    auto midpoint = [&] (hyperpoint h1, hyperpoint h2) {
+      if(prod) return dir_setlength(h1+h2, rad);
+      else return rspintox(mid(h1,h2)) * xpush0(rad);
+      };
+    hyperpoint cx = midpoint(a, b);
+    hyperpoint ax = midpoint(b, c);
+    hyperpoint bx = midpoint(c, a);
     balltriangle(ax, bx, cx, rad, lev-1);
     balltriangle(ax, bx, c , rad, lev-1);
     balltriangle(ax, b , cx, rad, lev-1);
@@ -630,8 +654,8 @@ void geometry_information::balltriangle(hyperpoint a, hyperpoint b, hyperpoint c
 void geometry_information::make_ball(hpcshape& sh, ld rad, int lev) {
   bshape(sh, sh.prio);
   sh.flags |= POLY_TRIANGLES;
-  hyperpoint tip = xpush0(rad);
-  hyperpoint atip = xpush0(-rad);
+  hyperpoint tip = forward_dir(rad);
+  hyperpoint atip = forward_dir(-rad);
   ld z = 63.43 * degree;
   for(int i=0; i<5; i++) {
     hyperpoint a = cspin(1, 2, (72 * i   ) * degree) * spin(z) * tip;
@@ -691,7 +715,13 @@ void geometry_information::make_euclidean_sky() {
       );
   }
 
+/** res[0] and res[1] place H on the plane, while res[2] is the altitude */
 hyperpoint psmin(hyperpoint H) {
+  if(prod) {
+    auto d = product_decompose(H);
+    d.second[2] = d.first;
+    return d.second;
+    }
   hyperpoint res;
   res[2] = asin_auto(H[2]);
   ld cs = pow(cos_auto(res[2]), 2);
@@ -704,7 +734,7 @@ hyperpoint psmin(hyperpoint H) {
 void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom) {
   hyperpoint center = Hypc;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
-  center = normalize(center);
+  center = normalize_flat(center);
   // center /= (eye.e - eye.s);
   ld rad = 0;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) rad += hdist(center, hpc[i]);
@@ -724,7 +754,7 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
   zmid /= isize(pss);
   
   ld mindist = 1e9;
-  for(int i=0; i<isize(pss); i+=3) if(pss[i][2] < zmid || WDIM == 3) {
+  for(int i=0; i<isize(pss); i+=3) if(prod ? pss[i][2] > zmid : (pss[i][2] < zmid || (WDIM == 3 && !prod))) {
     ld d = sqhypot_d(2, pss[i]-pscenter) + sqhypot_d(2, pss[i+1]-pscenter) + sqhypot_d(2, pss[i+2]-pscenter);
     if(d < mindist) mindist = d, pos = min(min(pss[i][2], pss[i+1][2]), pss[i+2][2]), qty++;
     qtyall++;
@@ -1086,10 +1116,10 @@ void geometry_information::make_3d_models() {
   hyperpoint atip = xpush0(-1);
   ld z = 63.43 * degree;
   for(int i=0; i<5; i++) {
-    auto a = cspin(1, 2, (72 * i   ) * degree) * spin(z) * xpush0(1);
-    auto b = cspin(1, 2, (72 * i-72) * degree) * spin(z) * xpush0(1);
-    auto c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-z) * xpush0(1);
-    auto d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-z) * xpush0(1);
+    auto a = cspin(1, 2, (72 * i   ) * degree) * spin(z) * forward_dir(1);
+    auto b = cspin(1, 2, (72 * i-72) * degree) * spin(z) * forward_dir(1);
+    auto c = cspin(1, 2, (72 * i+36) * degree) * spin(M_PI-z) * forward_dir(1);
+    auto d = cspin(1, 2, (72 * i-36) * degree) * spin(M_PI-z) * forward_dir(1);
     slimetriangle(tip, a, b, 1, 0);
     slimetriangle(a, b, c, 1, 0);
     slimetriangle(b, c, d, 1, 0);

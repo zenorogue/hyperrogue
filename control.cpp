@@ -113,7 +113,7 @@ EX void remission() {
  }
 
 EX hyperpoint move_destination_vec(int d) {
-  hyperpoint Forward = prod ? hpxy3(1,0,0) : tC0(pushone());
+  hyperpoint Forward = prod ? forward_dir(1) : tC0(pushone());
   if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
   // else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   // else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());

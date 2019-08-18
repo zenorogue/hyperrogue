@@ -553,13 +553,14 @@ EX namespace product {
     underlying_cgip = cgip;
     geometry = gProduct;
     ginf[gProduct] = ginf[underlying];
-    ginf[gProduct].sides += 2;
     ginf[gProduct].cclass = gcProduct;
     ginf[gProduct].flags |= qEXPERIMENTAL;
     pmodel = mdPerspective;
     }
   
   EX ld plevel = 1;
+  
+  EX int current_view_level;
   
   hrmap *pmap;
   geometry_information *pcgip;
@@ -599,7 +600,7 @@ EX namespace product {
     cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
   
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, exp(plevel * (where[c2].second - where[c1].second)));
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, plevel * (where[c2].second - where[c1].second));
       }
   
     hrmap_product() {
@@ -611,12 +612,14 @@ EX namespace product {
       }
     };
   
-  cell *get_at(cell *base, int level) {
+  EX cell *get_at(cell *base, int level) {
     return ((hrmap_product*)currentmap)->getCell(base, level);
     }
   
+  EX pair<cell*, int> get_where(cell *c) { return ((hrmap_product*)currentmap)->where[c]; }
+  
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
-    in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, z), V * mscale(Id, exp(plevel * z)), spinv, mirrored); });
+    in_actual([&] { for(int z=-5; z<=5; z++) drawcell(get_at(c, current_view_level+z), V * mscale(Id, plevel * z), spinv, mirrored); });
     }
   
   void find_cell_connection(cell *c, int d) {

@@ -437,6 +437,20 @@ void geometry_information::prepare_basics() {
     goto finish;
     }
   
+  if(prod) {
+    auto t = this;
+    product::in_underlying_geometry([&] {
+      t->rhexf = cgi.rhexf;
+      t->hexf = cgi.hexf;
+      t->crossf = cgi.crossf;
+      t->hcrossf = cgi.crossf;
+      t->tessf = cgi.tessf;
+      t->hexhexdist = cgi.hexhexdist;
+      t->base_distlimit = cgi.base_distlimit-1;
+      });
+    goto prod_finish;
+    }
+  
   if((sphere || hyperbolic) && WDIM == 3 && !binarytiling) {
     rhexf = hexf = 0.378077;
     crossf = hcrossf = 0.620672;
@@ -511,6 +525,8 @@ void geometry_information::prepare_basics() {
   #if CAP_BT && MAXMDIM >= 4
   if(binarytiling) binary::build_tmatrix();
   #endif
+  
+  prod_finish:
   
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;

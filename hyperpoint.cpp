@@ -132,8 +132,8 @@ const static transmatrix pispin = diag(-1,-1,1,1);
 // central symmetry
 const static transmatrix centralsym = diag(-1,-1,-1,-1);
 
-inline hyperpoint hpxyz(ld x, ld y, ld z) { return GDIM == 2 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
-inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return GDIM == 2 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
+inline hyperpoint hpxyz(ld x, ld y, ld z) { return MDIM == 3 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
+inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return MDIM == 3 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
 inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
 inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
 inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
@@ -450,7 +450,7 @@ EX transmatrix euaffine(hyperpoint h) {
 EX transmatrix cpush(int cid, ld alpha) {
   transmatrix T = Id;
   if(prod && cid == 2)
-    return mscale(Id, exp(alpha));
+    return mscale(Id, alpha);
   if(nonisotropic) 
     return eupush3(cid == 0 ? alpha : 0, cid == 1 ? alpha : 0, cid == 2 ? alpha : 0);
   T[LDIM][LDIM] = T[cid][cid] = cos_auto(alpha);
@@ -473,6 +473,7 @@ EX bool eqmatrix(transmatrix A, transmatrix B, ld eps IS(.01)) {
 #if MAXMDIM >= 4
 // in the 3D space, move the point h orthogonally to the (x,y) plane by z units
 EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
+  if(prod) return zshift(h, z);
   if(!hyperbolic) return rgpushxto0(h) * cpush(2, z) * C0;
   if(nil) return nisot::translate(h) * cpush0(2, z);
   if(translatable) return hpxy3(h[0], h[1], h[2] + z);
@@ -622,7 +623,7 @@ EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
     }
   if(prod) {
     auto d = product_decompose(H);
-    return mscale(PIU(ggpushxto0(d.second, co)), exp(d.first * co));
+    return mscale(PIU(ggpushxto0(d.second, co)), d.first * co);
     }
   transmatrix res = Id;
   if(sqhypot_d(GDIM, H) < 1e-12) return res;
@@ -764,7 +765,7 @@ EX transmatrix inverse(const transmatrix& T) {
 
 EX pair<ld, hyperpoint> product_decompose(hyperpoint h) {
   ld z = zlevel(h);
-  return make_pair(z, mscale(h, exp(-z)));
+  return make_pair(z, mscale(h, -z));
   }
 
 // distance between mh and 0
@@ -829,6 +830,7 @@ EX ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
 
 EX hyperpoint mscale(const hyperpoint& t, double fac) {
   if(GDIM == 3 && !prod) return cpush(2, fac) * t;
+  if(prod) fac = exp(fac);
   hyperpoint res;
   for(int i=0; i<MDIM; i++) 
     res[i] = t[i] * fac;
@@ -840,6 +842,7 @@ EX transmatrix mscale(const transmatrix& t, double fac) {
     // if(pmodel == mdFlatten) { transmatrix u = t; u[2][LDIM] -= fac; return u; }
     return t * cpush(2, fac);
     }
+  if(prod) fac = exp(fac);
   transmatrix res;
   for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
     res[i][j] = t[i][j] * fac;
@@ -912,7 +915,7 @@ EX hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
 
 EX hyperpoint zshift(hyperpoint x, ld z) {
   if(GDIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
-  else if(prod) return mscale(x, exp(z));
+  else if(prod) return mscale(x, z);
   else return mscale(x, z);
   }
 
