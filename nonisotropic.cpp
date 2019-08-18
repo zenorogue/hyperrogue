@@ -640,18 +640,22 @@ EX namespace product {
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
     return mscale(get_corner_position(c, i), exp(plevel * z/2));
     }
+
+  EX bool product_sphere() { return ginf[underlying].cclass == gcSphere; }
   
-  EX hyperpoint inverse_exp(hyperpoint h) {
+  EX hyperpoint inverse_exp(hyperpoint h, int gen IS(0)) {
     hyperpoint res;
     res[2] = zlevel(h);
     h = zshift(h, -res[2]);
     ld r = hypot_d(2, h);
-    if(r < 1e-6 || h[2] < 1) {
+    if(r < 1e-6) {
       res[0] = h[0];
       res[1] = h[1];
       }
     else {
-      r = acosh(h[2]) / r;
+      auto c = acos_auto_clamp(h[2]);
+      c += 2 * M_PI * gen;
+      r = c / r;
       res[0] = h[0] * r;
       res[1] = h[1] * r;
       }

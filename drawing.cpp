@@ -890,20 +890,41 @@ ld get_width(dqi_poly* p) {
 
 void debug_this() { }
 
+glvertex junk = glhr::makevertex(0,0,1);
+
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
   if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection)) {
     auto npoly = *this;
-    glcoords.clear();
-    for(int i=0; i<cnt; i++)
-      glcoords.push_back(glhr::pointtogl(product::inverse_exp(V * glhr::gltopoint( (*tab)[offset+i]))));
-      
     npoly.offset = 0;
     npoly.tab = &glcoords;
     npoly.V = Id;
     set_width(1);
-    npoly.gldraw();
+    if(product::product_sphere()) {
+      for(int gen=-5; gen<=5; gen++) {
+        glcoords.clear();
+        int junks = 0;
+        for(int i=0; i<cnt; i++) {
+          hyperpoint h = V * glhr::gltopoint( (*tab)[offset+i]);
+          if(hypot_d(2, h) < 1e-6 && (gen || h[2] < 0)) {
+            junks = 3 - (i % 3);
+            }
+          if(junks == 3)
+            glcoords.push_back(junk), junks--;
+          else if(junks)
+            glcoords.push_back(glcoords.back()), junks--;
+          else        
+            glcoords.push_back(glhr::pointtogl(product::inverse_exp(h, gen)));
+          }
+        npoly.gldraw();
+        }
+      }
+    else {
+      glcoords.clear();
+      for(int i=0; i<cnt; i++) glcoords.push_back(glhr::pointtogl(product::inverse_exp(V * glhr::gltopoint( (*tab)[offset+i]))));
+      npoly.gldraw();
+      }
     return;
     }
 

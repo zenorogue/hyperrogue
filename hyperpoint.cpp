@@ -171,7 +171,7 @@ ld inverse_tanh(ld x) { return log((1+x)/(1-x)) / 2; } */
 
 EX ld squar(ld x) { return x*x; }
 
-EX int sig(int z) { return prod ? (z<2?1:-1) : (sphere || sol || z<GDIM)?1:-1; }
+EX int sig(int z) { return prod ? PIU(sig(z)) : (sphere || sol || z<GDIM)?1:-1; }
 
 EX int curvature() {
   switch(cgclass) {
@@ -226,6 +226,15 @@ EX ld asin_auto_clamp(ld x) {
     case gcEuclid: return x;
     case gcHyperbolic: return asinh(x);
     case gcSphere: return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : std::isnan(x) ? 0 : asin(x);
+    default: return x;
+    }
+  }
+
+EX ld acos_auto_clamp(ld x) {
+  switch(cgclass) {
+    case gcHyperbolic: return x < 1 ? 0 : acosh(x);
+    case gcSphere: return x > 1 ? 0 : x < -1 ? M_PI : acos(x);
+    case gcProduct: return PIU(acos_auto_clamp(x));
     default: return x;
     }
   }
@@ -339,7 +348,7 @@ EX ld hypot_d(int d, const hyperpoint& h) {
 EX ld zlevel(const hyperpoint &h) {
   if(translatable) return h[LDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
-  else if(prod) return log(sqrt(-intval(h, Hypc)));
+  else if(prod) return log(sqrt(abs(intval(h, Hypc)))); /* abs works with both underlying spherical and hyperbolic */
   else return (h[LDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
 
