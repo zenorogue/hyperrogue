@@ -1960,7 +1960,7 @@ bool limited_generation(cell *c) {
 
 EX bool do_draw(cell *c, const transmatrix& T) {
 
-  if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::plevel), T); });
+  if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, 0), T); });
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(nil && pmodel == mdGeodesic) {
