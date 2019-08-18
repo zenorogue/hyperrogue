@@ -448,7 +448,11 @@ EX int compdist(int dx[]) {
 
 EX int celldist(cell *c) {
   if(experimental) return 0;
-  if(prod) { auto w = product::get_where(c); return PIU(celldist(w.first)) + abs(w.second); }
+  if(prod) { auto w = product::get_where(c); 
+    int d; 
+    product::in_underlying_map([&] { d = celldist(w.first) + abs(w.second); }); 
+    return d;
+    }
   if(fulltorus && WDIM == 2) 
     return torusmap()->dists[decodeId(c->master)];
   if(nil) return DISTANCE_UNKNOWN;
@@ -479,7 +483,11 @@ static const int ALTDIST_ERROR = 90000;
 
 EX int celldistAlt(cell *c) {
   if(experimental) return 0;
-  if(prod) { auto w = product::get_where(c); return PIU(celldistAlt(w.first)) + abs(w.second); }
+  if(prod) { auto w = product::get_where(c); 
+    int d = 0;
+    product::in_underlying_map([&] { d = celldistAlt(w.first) + abs(w.second); });
+    return d;
+    }
   if(masterless) {
     if(fulltorus) return celldist(c);
     if(euwrap) return cylinder_alt(c);
@@ -984,7 +992,11 @@ EX cell *random_in_distance(cell *c, int d) {
 
 EX int celldistance(cell *c1, cell *c2) {
 
-  if(prod) { auto w1 = product::get_where(c1), w2 = product::get_where(c2); return PIU(celldistance(w1.first, w2.first) + abs(w1.second - w2.second)); }
+  if(prod) { auto w1 = product::get_where(c1), w2 = product::get_where(c2); 
+    int d;
+    product::in_underlying_map([&] { d = celldistance(w1.first, w2.first) + abs(w1.second - w2.second); });
+    return d;
+    }
   
   if((masterless) && (euclid6 || (euclid4 && PURE))) {
     if(!euwrap)
