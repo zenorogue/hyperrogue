@@ -35,7 +35,7 @@ int lineid;
 void gen(string sf) {
   if(seen.count(sf)) return;
   seen.insert(sf);
-  which_file = sf; lineid = -1;
+  which_file = sf; lineid = 1;
   ifstream in(sf);
   string s;
   while(getline(in, s)) {
