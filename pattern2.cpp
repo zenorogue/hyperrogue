@@ -372,7 +372,12 @@ EX pair<int, bool> fieldval(cell *c) {
 
 EX int fieldval_uniq(cell *c) {
   if(experimental) return 0;
-  else if(prod) { auto c1 = product::get_where(c).first; return PIU(fieldval_uniq(c1)); }
+  else if(prod) { 
+    auto c1 = product::get_where(c).first; 
+    int res;
+    product::in_underlying_map([&] { res = fieldval_uniq(c1); });
+    return res; 
+    }
   else if(sphere) {
     if(archimedean) return c->master->fiftyval;
     #if CAP_IRR
