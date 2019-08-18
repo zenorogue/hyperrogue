@@ -56,7 +56,7 @@ int eupattern4(cell *c) {
 EX bool ishept(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 0;
-  else return c->type == S7;
+  else return c->type == S7 + (prod ? 2 : 0);
   }
 
 EX bool ishex1(cell *c) {
