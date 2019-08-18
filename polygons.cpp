@@ -761,6 +761,13 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     hpcpush(hpc[last->s]);
     }
 
+  bshape(shMiniWall3D[id], PPR::WALL);
+  bshape(shMiniWall3D[id], PPR::WALL);
+  for(int a=shWall3D[id].s; a < shWall3D[id].e; a++)
+    hpcpush(mid(C0, hpc[a]));
+  if(shWall3D[id].flags & POLY_TRIANGLES)
+    last->flags |= POLY_TRIANGLES;
+
   finishshape();
 
   shPlainWall3D[id] = shWall3D[id]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
@@ -780,6 +787,7 @@ void geometry_information::create_wall3d() {
   shWall3D.resize(howmany);
   shPlainWall3D.resize(howmany);
   shWireframe3D.resize(howmany);
+  shMiniWall3D.resize(howmany);
   if(GDIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -981,17 +989,6 @@ void geometry_information::create_wall3d() {
       h = point3(h[1], h[2], h[0] / (log(2)/2));
       }
     for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
-    }
-
-  if(GDIM == 3) {
-    shMiniWall3D.resize(isize(shWall3D));
-    for(int i=0; i<isize(shWall3D); i++) {
-      bshape(shMiniWall3D[i], PPR::WALL);
-      for(int a=shWall3D[i].s; a < shWall3D[i].e; a++)
-        hpcpush(mid(C0, hpc[a]));
-      if(shWall3D[i].flags & POLY_TRIANGLES)
-        last->flags |= POLY_TRIANGLES;
-      }
     }
 
   corner_bonus = 0;
