@@ -213,6 +213,7 @@ EX namespace solv {
 
     ~hrmap_sol() {
       delete binary_map;
+      for(auto& p: at) clear_heptagon(p.second);
       }
     
     transmatrix adjmatrix(int i, int j) {
@@ -472,6 +473,10 @@ EX namespace nilv {
     
     heptagon *getOrigin() override { return get_at(mvec_zero); }
     
+    ~hrmap_nil() {
+      for(auto& p: at) clear_heptagon(p.second);
+      }
+
     heptagon *get_at(mvec c) {
       auto& h = at[c];
       if(h) return h;
@@ -601,6 +606,12 @@ EX namespace product {
   
     hrmap_product() {
       in_underlying([this] { initcells(); underlying_map = currentmap; });
+      for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
+      }
+    
+    ~hrmap_product() {
+      in_underlying([this] { delete currentmap; });
+      for(auto& p: at) tailored_delete(p.second);
       }
   
     void draw() override {

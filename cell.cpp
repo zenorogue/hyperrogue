@@ -345,6 +345,11 @@ void unlink_cdata(heptagon *h) {
     }
   }
 
+EX void clear_heptagon(heptagon *at) {
+  clearHexes(at);
+  tailored_delete(at);
+  }
+
 EX void clearfrom(heptagon *at) {
   if(!at) return;
   queue<heptagon*> q;
