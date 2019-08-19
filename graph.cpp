@@ -761,6 +761,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
     if(r < 1) h = h * (atanh(r) / r);
     else return {false, h};
     }
+  if(prod) h = product::inverse_exp(h);
   if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
   
   if(WDIM == 3) {
