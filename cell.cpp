@@ -489,8 +489,9 @@ static const int ALTDIST_ERROR = 90000;
 EX int celldistAlt(cell *c) {
   if(experimental) return 0;
   if(prod) { auto w = product::get_where(c); 
-    int d = 0;
-    product::in_underlying_map([&] { d = celldistAlt(w.first) + abs(w.second); });
+    int d = c->master->alt && c->master->alt->alt ? c->master->alt->alt->fieldval : 0;
+    d = abs(w.second - d);
+    product::in_underlying_map([&] { d += celldistAlt(w.first); });
     return d;
     }
   if(masterless) {
