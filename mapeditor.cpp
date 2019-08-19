@@ -1114,7 +1114,7 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   hyperpoint in_front_dist(ld d) {
-    hyperpoint h = cpush0(2, d);
+    hyperpoint h = prod ? product::direct_exp( inverse(nisot::local_perspective) * cspin(2, 0, M_PI/2) * forward_dir(d) ) : cpush0(2, d);
     if(nonisotropic && nisot::geodesic_movement) h = nisot::get_exp(inverse(nisot::local_perspective) * h, 100);
     return h;
     }
@@ -1174,7 +1174,7 @@ namespace mapeditor {
         }
       if(front_config == eFront::sphere_center) for(int i=0; i<4; i+=2) {
         auto pt = [&] (ld a, ld b) {
-          hyperpoint h = spin(a*degree) * cspin(0, 2, b*degree) * xpush0(front_edit);;
+          hyperpoint h = dir_to_point(spin(a*degree) * cspin(0, 2, b*degree) * forward_dir(front_edit));
           if(nonisotropic && nisot::geodesic_movement) return d2 * nisot::get_exp(h, 100);
           return d2 * h;
           };
@@ -1452,10 +1452,11 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],4)), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],4)), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
-      if(GDIM == 3)
+      if(MDIM == 4)
         displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
-      if(nonisotropic) mh = nisot::inverse_exp(mh, nisot::iTable, false);
-      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hdist0(mh),4)), 0xC0C0C0, 16);
+      if(prod) mh = product::inverse_exp(mh);
+      else if(nonisotropic) mh = nisot::inverse_exp(mh, nisot::iTable, false);
+      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(prod ? hypot_d(3, mh) : hdist0(mh),4)), 0xC0C0C0, 16);
       if(GDIM == 3) {
         displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
         displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
