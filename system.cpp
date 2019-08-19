@@ -1188,6 +1188,7 @@ EX void set_geometry(eGeometry target) {
     if(GDIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
     if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
+    if(prod && shmup::on) shmup::on = false;
     }
   }
 
@@ -1286,6 +1287,7 @@ EX void switch_game_mode(char switchWhat) {
       chaosmode = false;
       princess::challenge = false;
       if(sol || bounded) set_geometry(gNormal);
+      if(prod) set_geometry(product::underlying);
       dual::disable();
       break;
 #endif
@@ -1307,6 +1309,7 @@ EX void switch_game_mode(char switchWhat) {
       shmup::on = !shmup::on;
       princess::challenge = false;
       if(!shmup::on) racing::on = false;
+      if(prod) set_geometry(product::underlying);
       break;
     
     case rg::randpattern:
