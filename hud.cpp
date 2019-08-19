@@ -487,6 +487,7 @@ EX void drawStats() {
   dynamicval<ld> va(vid.alpha, 1);
   dynamicval<ld> vs(vid.scale, 1);
   dynamicval<ld> vc(vid.camera_angle, 0);
+  if(prod) vid.alpha = 30, vid.scale = 30;
 
   calcparam();
   
