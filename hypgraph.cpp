@@ -321,6 +321,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       if(prod) H = product::inverse_exp(H);
       if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
+      if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 1; return; }
       ret[0] = H[0]/H[2] * ratio;
       ret[1] = H[1]/H[2] * ratio;
       ret[2] = 1;
@@ -937,8 +938,9 @@ EX bool point_behind(hyperpoint h) {
   if(sphere) return false;
   if(!in_perspective()) return false;
   if(pmodel == mdGeodesic) h = nisot::inverse_exp(h, nisot::iLazy);
+  if(pmodel == mdPerspective && prod) h = product::inverse_exp(h);
   if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
-  return h[2] < 0;
+  return h[2] < 1e-8;
   }
 
 void raise_error() {
