@@ -637,6 +637,14 @@ void geometry_information::procedural_shapes() {
       }
     }
 
+  bshape(shILeaf[2], PPR::ONTENTACLE);
+  hpcpush(xpush0(zhexf * .8));
+  hpcpush(cpush(2, cgi.plevel * .1) * xpush0(zhexf * .2));
+  hpcpush(cpush0(2, cgi.plevel * .4));
+  hpcpush(cpush0(2, cgi.plevel * -.4));
+  hpcpush(cpush(2, cgi.plevel * -.1) * xpush0(zhexf * .2));
+  hpcpush(xpush0(zhexf * .8));
+
   bshape(shSlime, PPR::MONSTER_BODY);
   PRING(i)
     hpcpush(ddi(i, scalefactor * hcrossf7 * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);

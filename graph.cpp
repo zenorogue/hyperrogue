@@ -2544,7 +2544,12 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
 
     if(mmmon) {
       if(isAnyIvy(c)) {
-        if(GDIM == 3) {
+        if(prod) {
+          queuepoly(Vb, cgi.shILeaf[ctof(c)], darkena(col, 0, 0xFF));
+          for(int a=0; a<c->type-2; a++)
+            queuepoly(Vb * spin(a * 2 * M_PI / (c->type-2)), cgi.shILeaf[2], darkena(col, 0, 0xFF));
+          }
+        else if(GDIM == 3) {
           hyperpoint V0 = tC0(Vb);
           transmatrix Vs = rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI/2);
           queuepoly(Vs, cgi.shILeaf[1], darkena(col, 0, 0xFF));

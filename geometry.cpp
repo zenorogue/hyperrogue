@@ -163,7 +163,7 @@ hpcshape
   shFigurine, shTreat,
   shElementalShard,
   // shBranch, 
-  shIBranch, shTentacle, shTentacleX, shILeaf[2], 
+  shIBranch, shTentacle, shTentacleX, shILeaf[3], 
   shMovestar,
   shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
   shFoxTail1, shFoxTail2,
