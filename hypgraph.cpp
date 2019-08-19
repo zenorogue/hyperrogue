@@ -319,6 +319,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
   switch(pmodel) {
     case mdPerspective: {
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
+      if(prod) H = product::inverse_exp(H);
       if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
       ret[0] = H[0]/H[2] * ratio;
       ret[1] = H[1]/H[2] * ratio;
