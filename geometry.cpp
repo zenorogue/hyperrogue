@@ -606,11 +606,13 @@ namespace geom3 {
     }
   
   ld lev_to_factor(ld lev) { 
+    if(prod) return -lev;
     if(WDIM == 3) return lev;
     if(GDIM == 3) return vid.depth - lev;
     return projection_to_factor(lev_to_projection(lev)); 
     }
   ld factor_to_lev(ld fac) { 
+    if(prod) return -fac;
     if(GDIM == 3) return fac;
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
     }

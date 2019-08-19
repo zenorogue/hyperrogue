@@ -16,7 +16,7 @@ ld eyepos;
 #define S (cgi.scalefactor / 0.805578)
 #define SH (cgi.scalefactor / 0.805578 * vid.height_width / 1.5)
 
-#define revZ (WDIM == 2 ? -1 : 1)
+#define revZ ((WDIM == 2 || prod) ? -1 : 1)
 
 hyperpoint shcenter;
 
@@ -44,7 +44,7 @@ hyperpoint get_center(const vector<hyperpoint>& vh) {
 ld zc(ld z) { 
   if(WDIM == 2 && GDIM == 3)
     return geom3::lev_to_factor(cgi.human_height * z);
-  return cgi.human_height * (z - 0.5); 
+  return cgi.human_height * (z - 0.5) * revZ;
   }
 
 void geometry_information::add_cone(ld z0, const vector<hyperpoint>& vh, ld z1) {
@@ -760,7 +760,7 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
   zmid /= isize(pss);
   
   ld mindist = 1e9;
-  for(int i=0; i<isize(pss); i+=3) if(prod ? pss[i][2] > zmid : (pss[i][2] < zmid || (WDIM == 3 && !prod))) {
+  for(int i=0; i<isize(pss); i+=3) if(pss[i][2] < zmid || (WDIM == 3 && !prod)) {
     ld d = sqhypot_d(2, pss[i]-pscenter) + sqhypot_d(2, pss[i+1]-pscenter) + sqhypot_d(2, pss[i+2]-pscenter);
     if(d < mindist) mindist = d, pos = min(min(pss[i][2], pss[i+1][2]), pss[i+2][2]), qty++;
     qtyall++;
