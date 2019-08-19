@@ -1261,8 +1261,10 @@ EX void spinEdge(ld aspd) {
   else if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
     aspd = 999999;
     if(straightDownSeek) {
-      if(straightDownPoint[0])
-        downspin = models::rotation * degree - atan2(straightDownPoint[0], straightDownPoint[1]);
+      auto sdp = straightDownPoint;
+      if(prod) sdp = LPV * product::inverse_exp(sdp);
+      if(sdp[0])
+        downspin = models::rotation * degree - atan2(sdp[0], sdp[1]);
       }
     else {
       if(LPV[0][2]) 
