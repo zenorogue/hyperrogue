@@ -1289,7 +1289,8 @@ void drawStats() {
 
   if(!racing::on) return;
   
-  dynamicval<eModel> pm(pmodel, GDIM == 3 ? mdFlatten : mdDisk);
+  dynamicval<eModel> pm(pmodel, flat_model());
+  glClear(GL_DEPTH_BUFFER_BIT);
   initquickqueue();
   
   int bsize = vid.fsize * 2;

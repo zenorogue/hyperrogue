@@ -1509,6 +1509,8 @@ transmatrix screenpos(ld x, ld y) {
   return V;
   }
 
+EX eModel flat_model() { return MDIM == 4 ? mdFlatten : mdDisk; }
+
 EX transmatrix atscreenpos(ld x, ld y, ld size) {
   transmatrix V = Id;
   

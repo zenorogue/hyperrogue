@@ -505,8 +505,8 @@ void glapplymatrix(const transmatrix& V) {
     glhr::set_modelview(glhr::as_glmatrix(mat));
     return;
     }
-  
-  if(GDIM == 3) {
+
+  if(MDIM == 4) {
     for(int y=0; y<4; y++) 
       for(int x=0; x<4; x++) mat[id++] = V[x][y];
     }

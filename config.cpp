@@ -1759,7 +1759,8 @@ EX void showCustomizeChar() {
   int firsty = dialog::items[0].position / 2;
   int scale = firsty - 2 * vid.fsize;
   
-  dynamicval<eModel> pm(pmodel, GDIM == 3 ? mdFlatten : mdDisk);
+  dynamicval<eModel> pm(pmodel, flat_model());
+  glClear(GL_DEPTH_BUFFER_BIT);
   dynamicval<ld> va(vid.alpha, 1);
   dynamicval<ld> vs(vid.scale, 1);
   dynamicval<ld> vc(vid.camera_angle, 0);

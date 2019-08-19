@@ -282,7 +282,7 @@ void display_data::set_projection(int ed) {
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
 
-  if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 2)
+  if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && MDIM == 3)
     shaderside_projection = true;
   else if(vid.consider_shader_projection && !glhr::noshaders) {
     if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 3 && apply_models)
@@ -410,7 +410,7 @@ void display_data::set_projection(int ed) {
         glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
         }
       }
-    else if(GDIM == 3) {
+    else if(MDIM == 4) {
       glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
       using models::clip_max; 
       using models::clip_min;
