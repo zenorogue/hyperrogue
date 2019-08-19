@@ -1236,6 +1236,7 @@ EX transmatrix eumovedir(int d) {
 
 EX void spinEdge(ld aspd) { 
   ld downspin = 0;
+  auto& LPV = prod ? nisot::local_perspective : View;
   if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
     transmatrix our   = dual::get_orientation();
     transmatrix their = dual::player_orientation[dual::main_side];
@@ -1246,7 +1247,7 @@ EX void spinEdge(ld aspd) {
       hyperpoint H = T * xpush0(1);
       downspin = -atan2(H[1], H[0]);
       }
-    else View = their * inverse(our) * View;
+    else LPV = their * inverse(our) * LPV;
     }
   else if(playerfound && vid.fixed_facing) {
     hyperpoint H = gpushxto0(playerV * C0) * playerV * xpush0(5);
@@ -1257,15 +1258,15 @@ EX void spinEdge(ld aspd) {
     while(downspin > +M_PI) downspin -= 2*M_PI;
     aspd = (1 + 2 * abs(downspin)) * aspd;
     }
-  else if(WDIM == 2 && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
+  else if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
     aspd = 999999;
     if(straightDownSeek) {
       if(straightDownPoint[0])
         downspin = models::rotation * degree - atan2(straightDownPoint[0], straightDownPoint[1]);
       }
     else {
-      if(View[0][2]) 
-        downspin = -atan2(View[0][2], View[1][2]);
+      if(LPV[0][2]) 
+        downspin = -atan2(LPV[0][2], LPV[1][2]);
       }
     }
   else if(straightDownSeek) {
@@ -1278,7 +1279,7 @@ EX void spinEdge(ld aspd) {
     }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
-  View = spin(downspin) * View;  
+  LPV = spin(downspin) * LPV;
   }
 
 EX void centerpc(ld aspd) { 
