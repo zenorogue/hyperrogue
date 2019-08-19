@@ -991,6 +991,10 @@ EX transmatrix transpose(transmatrix T) {
 #if HDR
 inline hyperpoint cpush0(int c, ld x) { 
   hyperpoint h = Hypc;
+  if(c == 2 && prod) {
+    h[2] = exp(x);
+    return h;
+    }
   h[LDIM] = cos_auto(x);
   h[c] = sin_auto(x);
   return h;
