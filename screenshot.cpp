@@ -590,6 +590,8 @@ EX void apply() {
   int t = ticks - lastticks;
   lastticks = ticks;
 
+  auto& LPV = prod ? nisot::local_perspective : View;
+
   switch(ma) {
     case maTranslation:
       if(history::on) {
@@ -621,13 +623,13 @@ EX void apply() {
 
     case maRotation:
       if(GDIM == 3) {
-        View = spin(-movement_angle * degree) * View;
-        View = cspin(1, 2, normal_angle * degree) * View;
+        LPV = spin(-movement_angle * degree) * LPV;
+        LPV = cspin(1, 2, normal_angle * degree) * LPV;
         }
-      View = spin(2 * M_PI * t / period) * View;
+      LPV = spin(2 * M_PI * t / period) * LPV;
       if(GDIM == 3) {
-        View = cspin(2, 1, normal_angle * degree) * View;
-        View = spin(movement_angle * degree) * View;
+        LPV = cspin(2, 1, normal_angle * degree) * LPV;
+        LPV = spin(movement_angle * degree) * LPV;
         }
       break;
     
@@ -635,7 +637,7 @@ EX void apply() {
       View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
         cspin(0, GDIM-1, -movement_angle * degree), nisot::local_perspective, View);
       moved();
-      View = cspin(0, GDIM-1, 2 * M_PI * t / period) * View;
+      LPV = cspin(0, GDIM-1, 2 * M_PI * t / period) * LPV;
       if(clearup) {
         viewcenter()->wall = waNone;
         }
@@ -844,12 +846,14 @@ EX void show() {
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
     animator(XLAT("Möbius transformations"), skiprope_rotation, 'S');
     }
-  dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
-  dialog::add_action([] () { ma = maCircle; 
-    rotation_center_h = viewctr;
-    rotation_center_c = centerover;
-    rotation_center_View = View;
-    });
+  if(!prod) {
+    dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
+    dialog::add_action([] () { ma = maCircle; 
+      rotation_center_h = viewctr;
+      rotation_center_c = centerover;
+      rotation_center_View = View;
+      });
+    }
   dialog::addBoolItem_choice(XLAT("translation")+"+"+XLAT("rotation"), ma, maTranslationRotation, '5');
   switch(ma) {
     case maCircle: {
