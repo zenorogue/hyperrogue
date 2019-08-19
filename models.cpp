@@ -197,6 +197,7 @@ EX namespace models {
     }
   
   EX bool model_available(eModel pm) {
+    if(prod) return pm == mdPerspective;
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdGeodesic, mdEquidistant);
     if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
@@ -221,6 +222,7 @@ EX namespace models {
   
   EX string get_model_name(eModel m) {
     if(m == mdDisk && GDIM == 3 && hyperbolic) return XLAT("ball model/Gans");
+    if(m == mdPerspective && prod) return XLAT("native perspective");
     if(nonisotropic) {
       if(m == mdDisk) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
