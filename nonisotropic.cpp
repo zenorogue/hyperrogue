@@ -654,7 +654,6 @@ EX namespace product {
   
   EX hyperpoint get_corner(cell *c, int i, ld z) {
     ld lev = cgi.plevel * z / 2;
-    println(hlog, "getcorner ", i, " @ ", lev);
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
     return mscale(get_corner_position(c, i), exp(lev));
@@ -667,7 +666,6 @@ EX namespace product {
     if(wo == -1) {
       cell *c1 = get_where(c).first;
       wo = isize(cgi.shWall3D);
-      println(hlog, "generating a model for ", c->type-2, "+2", " while plevel is ", cgi.plevel);
       int won = wo + c->type;
       cgi.shWall3D.resize(won);
       cgi.shPlainWall3D.resize(won);
