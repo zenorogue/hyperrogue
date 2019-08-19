@@ -2666,6 +2666,10 @@ EX namespace sword {
     int angle;
     transmatrix T;
     };
+  
+  /** dimensions available to the Sword */
+  #define SWORDDIM (prod ? 2 : WDIM)
+    
   #endif
 
   int sword_angles;
@@ -2676,7 +2680,7 @@ EX namespace sword {
 
   void determine_sword_angles() {
     sword_angles = 2;
-    if(GDIM == 3) sword_angles = 1;
+    if(SWORDDIM == 3) sword_angles = 1;
     else if(IRREGULAR) sword_angles = 840;
     else if(binarytiling) sword_angles = 42;
     else if(archimedean) {
@@ -2691,6 +2695,7 @@ EX namespace sword {
   
   cell *pos2(cell *c, int s) {
     int t = c->type;
+    if(prod) t -= 2;
     s *= 2;
     s += sword_angles/t;
     s %= (2 * sword_angles);
@@ -2701,7 +2706,7 @@ EX namespace sword {
     }
   
   EX cell *pos(cell *c, const sworddir& sd, bool rev) {
-    if(WDIM == 2) 
+    if(SWORDDIM == 2) 
       return pos2(c, sd.angle + (rev ? sword_angles/2 : 0));
     else {
       cell *best = NULL;
@@ -2742,11 +2747,14 @@ EX namespace sword {
     int s1 = neighborId(c1, c2);
     int s2 = neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return d;
-    if(WDIM == 2 || prod) {
+    if(SWORDDIM == 2) {
+      int sub = prod ? 2 : 0;
+      int t2 = c2->type - sub;
+      int t1 = c1->type - sub;
       if(c1->c.mirror(s1))
-        d.angle = ((s2*sword_angles/c2->type - d.angle + s1*sword_angles/c1->type) + sword_angles/2) % sword_angles;
+        d.angle = ((s2*sword_angles/t2 - d.angle + s1*sword_angles/t1) + sword_angles/2) % sword_angles;
       else
-        d.angle = ((s2*sword_angles/c2->type - s1*sword_angles/c1->type) + sword_angles/2 + d.angle) % sword_angles;
+        d.angle = ((s2*sword_angles/t2 - s1*sword_angles/t1) + sword_angles/2 + d.angle) % sword_angles;
       }
     else {
       transmatrix T = currentmap->relative_matrix(c1->master, c2->master);
@@ -2765,13 +2773,13 @@ EX namespace sword {
   sworddir initial(cell *c) {
     sworddir res;
     res.angle = (sword::sword_angles / cwt.at->type + 1) / 2;
-    if(WDIM == 3) res.T = initial_matrix();
+    if(SWORDDIM == 3) res.T = initial_matrix();
     return res;
     }
 
   void shuffle(int i) {
     dir[i].angle = hrand(sword_angles);
-    if(WDIM == 3) dir[i].T = initial_matrix();
+    if(SWORDDIM == 3) dir[i].T = initial_matrix();
     }
   
   void reset() {

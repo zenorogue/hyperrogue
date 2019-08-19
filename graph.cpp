@@ -374,7 +374,7 @@ EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
   
-    if(shmup::on && WDIM == 2) {
+    if(shmup::on && SWORDDIM == 2) {
 #if CAP_SHAPES
       if(items[itOrbSword])
         queuepoly(V*spin(shmup::pc[multi::cpid]->swordangle), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
@@ -384,7 +384,7 @@ EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
 #endif
       }                  
 
-    else if(WDIM == 3) {
+    else if(SWORDDIM == 3) {
 #if CAP_SHAPES
       transmatrix Vsword = 
         shmup::on ? V * shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) 
@@ -409,7 +409,7 @@ EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
 #if CAP_QUEUE
-      if(!euclid) for(int a=0; a<sword_angles; a++) {
+      if(!euclid && !prod) for(int a=0; a<sword_angles; a++) {
         if(a == ang && items[itOrbSword]) continue;
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos2(cwt.at, a-1) != sword::pos2(cwt.at, a+1);
@@ -6979,7 +6979,20 @@ EX void drawMarkers() {
     
     #endif
 
-    if(WDIM == 3 && !shmup::on) {
+    if(prod && !shmup::on) {
+
+      using namespace sword;
+      int& ang = sword::dir[multi::cpid].angle;
+      ang %= sword_angles;
+
+      int adj = 1 - ((sword_angles/cwt.at->type)&1);
+      
+      if(items[itOrbSword])
+        queuechr(gmatrix[cwt.at] * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
+      if(items[itOrbSword2])
+        queuechr(gmatrix[cwt.at] * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
+      }
+    if(SWORDDIM == 3 && !shmup::on) {
       if(items[itOrbSword])
         queuechr(gmatrix[cwt.at] * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
       if(items[itOrbSword2])
