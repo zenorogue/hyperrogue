@@ -1064,7 +1064,7 @@ void geometry_information::prepare_shapes() {
   #endif
   DEBBI(DF_POLY, ("buildpolys"));
 
-  if(WDIM == 3) {
+  if(WDIM == 3 && !prod) {
     if(sphere) SD3 = 3, SD7 = 5;
     else SD3 = SD7 = 4;
     }
