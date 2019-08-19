@@ -452,6 +452,7 @@ void geometry_information::prepare_basics() {
       t->crossf = cgi.crossf;
       t->hcrossf = cgi.crossf;
       t->tessf = cgi.tessf;
+      t->hexvdist = cgi.hexvdist;
       t->hexhexdist = cgi.hexhexdist;
       t->base_distlimit = cgi.base_distlimit-1;
       });
