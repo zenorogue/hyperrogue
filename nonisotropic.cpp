@@ -566,7 +566,7 @@ EX namespace product {
   hrmap *pmap;
   geometry_information *pcgip;
   
-  template<class T> auto in_actual(const T& t) {
+  template<class T> auto in_actual(const T& t) -> decltype(t()) {
     dynamicval<eGeometry> g(geometry, gProduct);
     dynamicval<geometry_information*> gc(cgip, pcgip);
     dynamicval<hrmap*> gu(currentmap, pmap);
@@ -583,7 +583,7 @@ EX namespace product {
     
     heptagon *getOrigin() override { return underlying_map->getOrigin(); }
     
-    template<class T> auto in_underlying(const T& t) {
+    template<class T> auto in_underlying(const T& t) -> decltype(t()) {
       pcgip = cgip; 
       dynamicval<hrmap*> gpm(pmap, this);
       dynamicval<eGeometry> g(geometry, underlying);
@@ -593,7 +593,7 @@ EX namespace product {
       }
     
     cell *getCell(cell *u, int h) {
-      cell*& c = at[{u, h}];
+      cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
       return c;
       }
@@ -724,7 +724,7 @@ EX namespace product {
     }
 
   #if HDR
-  template<class T> auto in_underlying_geometry(const T& f) {
+  template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!prod) return f();
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);

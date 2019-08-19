@@ -919,7 +919,8 @@ void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
   vector<point_data> pd;
   for(int i=0; i<p->cnt; i++) {
     hyperpoint h = p->V * glhr::gltopoint( (*p->tab)[p->offset+i]);
-    auto& next = pd.emplace_back();
+    pd.emplace_back();
+    auto& next = pd.back();
     auto dp = product_decompose(h);
     next.direction = dp.second;
     next.z = dp.first;
