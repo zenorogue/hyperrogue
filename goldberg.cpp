@@ -907,7 +907,7 @@ EX namespace gp {
       return irr::get_masters(c);
     #endif
     else
-      return make_array(c->move(0)->master, c->move(2)->master, c->move(4)->master);
+      return make_array(c->cmove(0)->master, c->cmove(2)->master, c->cmove(4)->master);
     }
 
   EX string operation_name() {
