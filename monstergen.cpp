@@ -747,12 +747,14 @@ EX void generateSnake(cell *c, int i, int snakecolor) {
     if(c3->monst || c3->bardir != NODIR || c3->wall) break;
     c2 = c3;
     c2->monst = moHexSnakeTail; c2->hitpoints = snakecolor;
-    i = (j + (c2->type%4 == 0 ? c2->type/2 : (len%2 ? 2 : c2->type - 2))) % c2->type;
+    int t = c2->type;
+    if(prod) t -= 2;
+    i = (j + (t%4 == 0 ? t/2 : (len%2 ? 2 : t - 2))) % t;
     createMov(c2, i);
     if(!inpair(c2->move(i), cpair)) {
       vector<int> goodsteps;
-      {for(int i=0; i<c2->type; i++)
-        if(inpair(c2->move(i), cpair))
+      {for(int i=0; i<t; i++)
+        if(inpair(c2->cmove(i), cpair))
         goodsteps.push_back(i);}
       if(!isize(goodsteps)) break;
       i = goodsteps[hrand(isize(goodsteps))];

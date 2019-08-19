@@ -262,7 +262,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
         }
-      else if(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || WDIM == 3) {
+      else if(PIU(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || WDIM == 3)) {
         if(fargen) {
           int i = hrand(100);
           if(i < 10) 
@@ -314,12 +314,17 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
     
         if(d == 8 && !sphere) {
+
+          if(prod && polarb50(c) && (product::get_where(c).second & 3) == 2) {
+            c->wall = waPalace;
+            break;
+            }          
         
           // note: Princess Challenge brings back the normal Palace generation
           bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge;
           
           bool pgate = false;
-          if(PURE) {
+          if(PURE || GOLDBERG) {
             int i = fiftyval049(c->master->c7);
             if(i >= 8 && i <= 14 && !polarb50(c->master->c7)) pgate = true;
             if(GOLDBERG) {
@@ -348,17 +353,19 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             if(GOLDBERG) ; 
             else {
               int q = 0, s = 0;
-              if(!ishept(c)) for(int i=0; i<c->type; i++)
+              if(!ishept(c)) for(int i=0; i<c->type - (prod ? 2 : 0); i++)
                 if(cdist50(c->move(i)) == 3 && polarb50(c->move(i)) && !ishept(c->move(i)))
                   q++, s += i;
               if(q == 1 && c->move(s)->land == laPalace) {
                 switch(princess::generating ? 0 : hrand(2)) {
                   case 0: 
                     c->wall = waClosedGate;
+                    if(prod) toggleGates(c, waClosePlate, 1);
                     c->move(s)->wall = waClosedGate;
                     break;
                   case 1:
                     c->wall = waOpenGate;
+                    if(prod) toggleGates(c, waOpenPlate, 1);
                     c->move(s)->wall = waOpenGate;
                     break;
                   }
@@ -697,6 +704,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             else if(v == 25 || v == 59 || v == 27 || v == 57)
               c->wall = waVineHalfB;
             else c->wall = waNone;
+            if(prod && cellHalfvine(c)) c->wall = waNone;
             if(NONSTDVAR && cellHalfvine(c)) {
               c->wall = waNone;
               forCellCM(c2, c) if(emeraldval(c2) == (v^1))
@@ -1257,7 +1265,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laStorms: {
-      bool randstorm = hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient);
+      bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient));
       if(fargen) {
       
         if(fulltorus) {
@@ -1322,6 +1330,13 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int b = 0;
           while(i) { if(i&1) b++; i>>=1; }
           if(ctof(c) && (b&1) && hrand(100) < 20)  c->wall = (z&2) ? waCharged : waGrounded;
+          }
+        else if(prod) {
+          cell *c1 = product::get_where(c).first;
+          if(among(c1->wall, waCharged, waGrounded))
+            c->wall = c1->wall;
+          else if(hrand(100) < 15)
+            c->wall = waSandstone;
           }
         else {
           int i = zebra40(c);
