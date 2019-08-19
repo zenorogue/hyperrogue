@@ -719,11 +719,13 @@ EX namespace product {
     }
   
   EX void in_underlying_map(const reaction_t& f) {
-    ((hrmap_product*)currentmap)->in_underlying(f);
+    if(!prod) f();
+    else ((hrmap_product*)currentmap)->in_underlying(f);
     }
 
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) {
+    if(!prod) return f();
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
     return f();
