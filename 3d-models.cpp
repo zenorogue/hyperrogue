@@ -122,6 +122,7 @@ void geometry_information::add_texture(hpcshape& sh) {
   sh.texture_offset = isize(utt.tvertices);
   for(int i=sh.s; i<isize(hpc); i++) {
     hyperpoint h = hpc[i];
+    if(prod) h = product::inverse_exp(h);
     ld rad = hypot_d(3, h);
     ld factor = 0.50 + (0.17 * h[2] + 0.13 * h[1] + 0.15 * h[0]) / rad;
     utt.tvertices.push_back(glhr::makevertex(0, factor, 0));
