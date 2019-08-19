@@ -254,8 +254,9 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
     ld hsh[3];
     ld shi[3];
     bool ok = true;
+    ld zzes[3];
     for(int s=0; s<3; s++) {
-      hs[s] = normalize(hs[s]);
+      hs[s] = normalize_flat(hs[s]);
       hyperpoint h = hs[s];
       ld zz = zc(0.78);
       hsh[s] = abs(h[1]);
@@ -263,11 +264,12 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
       zz -= h[0] * h[0] / 0.10 / 0.10 * 0.01 / S / S * SH;
       if(abs(h[1]) > 0.14*S) ok = false, zz -= revZ * (abs(h[1])/S - 0.14) * SH;
       if(abs(h[0]) > 0.08*S) ok = false, zz -= revZ * (abs(h[0])/S - 0.08) * (abs(h[0])/S - 0.08) * 25 * SH;
-      h = normalize(h);
-      ht[s] = zpush(zz) * h;
+      h = normalize_flat(h);
+      if(!prod) ht[s] = zpush(zz) * h;
       if(hsh[s] < 0.1*S) shi[s] = 0.5;
       else if(hsh[s] < 0.12*S) shi[s] = 0.1 + 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
       else shi[s] = 0.1;
+      zzes[s] = zz;
       }
     if(ok && kind == 1) {
       array<array<hyperpoint, 3>, 6> htx;
@@ -279,7 +281,10 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
         htx[2][i][1] *= 1.7;
         htx[4][i][0] = htx[4][i][0] * 0.4 + scalefactor * 0.1;
         htx[5][i][0] = htx[5][i][0] * 0.3 + scalefactor * 0.1;
-        for(int a=0; a<6; a++) htx[a][i] = hpxy3(htx[a][i][0], htx[a][i][1], htx[a][i][2]);
+        if(!prod)
+          for(int a=0; a<6; a++) htx[a][i] = hpxy3(htx[a][i][0], htx[a][i][1], htx[a][i][2]);
+        else
+          for(int a=0; a<6; a++) htx[a][i] = zpush(zzes[i]) * hpxy(htx[a][i][0], htx[a][i][1]);
         }
       ld levels[6] = {0, 0.125, 0.125, 0.250, 0.375, 0.5};
       for(int a=0; a<6; a++) for(int i=0; i<3; i++) 
