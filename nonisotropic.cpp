@@ -754,6 +754,7 @@ EX namespace nisot {
   EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
     if(sol) return solv::get_inverse_exp(h, p == iLazy, just_direction);
     if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
+    if(prod) return product::inverse_exp(h);
     return point3(h[0], h[1], h[2]);
     }
   
@@ -786,6 +787,7 @@ EX namespace nisot {
   EX hyperpoint get_exp(hyperpoint v, int steps) {
     if(sol) return direct_exp(v, steps);
     if(nil) return nilv::formula_exp(v);
+    if(prod) return product::direct_exp(v);
     return v;
     }
 
