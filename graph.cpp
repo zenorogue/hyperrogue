@@ -6075,6 +6075,8 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           else if(c->wall == waMineOpen) {
             if(pmodel == mdGeodesic && hdist0(tC0(V)) < 1e-3) {
               }
+            else if(prod && hdist0(tC0(V)) < 1e-3) {
+              }
             else {
               int mines = countMinesAround(c);
               if(mines >= 10)
