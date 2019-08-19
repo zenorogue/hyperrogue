@@ -511,6 +511,7 @@ EX void initConfig() {
   addsaver(models::use_atan, "use_atan");
   
   addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
+  addsaverenum(product::underlying, "product-underlying");
   
   for(int i=0; i<isize(ginf); i++) {
     if(ginf[i].flags & qELLIPTIC)
