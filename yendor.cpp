@@ -219,6 +219,11 @@ EX namespace yendor {
         nyi.path[0] = yendor;
         }
       
+      else if(prod) {
+        /* I am lazy */
+        for(int i=1; i<=YDIST-1; i++) nyi.path[i] = nyi.path[i-1]->cmove(nyi.path[i-1]->type-1);
+        }
+      
       else {
         int t = -1;
         bignum full_id;
