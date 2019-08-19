@@ -650,7 +650,7 @@ EX namespace product {
     }
   
   EX int wall_offset(cell *c) {
-    int id = shvid(c);
+    int id = underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
     int &wo = cgi.walloffsets[id];
     if(wo == -1) {
