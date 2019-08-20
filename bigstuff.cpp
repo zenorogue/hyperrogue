@@ -1575,7 +1575,7 @@ EX void buildCamelot(cell *c) {
       }
     if(d == 1) {
       // roughly as many knights as table cells
-      if(hrand(1000000) < 1000000 / expansion.get_growth())
+      if(hrand(1000000) < 1000000 / expansion.get_growth() && !reptilecheat)
         c->monst = moKnight;
       if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
       for(int i=0; i<c->type; i++) 
