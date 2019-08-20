@@ -7198,10 +7198,6 @@ EX void make_actual_view() {
     actual_view_transform = inverse(nisot::local_perspective) * actual_view_transform;
     }
   #endif
-  }
-
-EX transmatrix cview() {
-  make_actual_view();
   #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
     transmatrix T = actual_view_transform * View;
@@ -7218,7 +7214,9 @@ EX transmatrix cview() {
     radar_transform = T * U;
     }
   #endif
-  
+  }
+
+EX transmatrix cview() {
   return actual_view_transform * View;
   }
 
@@ -7354,6 +7352,7 @@ EX void drawthemap() {
   arrowtraps.clear();
 
   profile_start(1);
+  make_actual_view();
   currentmap->draw();
   drawWormSegments();
   drawBlizzards();
