@@ -714,7 +714,7 @@ EX namespace product {
     ld cd = d == 0 ? 0 : sinh(d) / d;
     res[0] = h[0] * cd;
     res[1] = h[1] * cd;
-    res[2] = cosh(d);
+    res[2] = cos_auto(d);
     return zshift(res, h[2]);
     }
   
