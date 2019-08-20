@@ -912,7 +912,8 @@ void geometry_information::make_3d_models() {
   make_armor_3d(shWightCloak, 2); 
   make_armor_3d(shRaiderArmor); 
   make_armor_3d(shRaiderShirt); 
-  make_armor_3d(shArmor); 
+  if(prod) disable(shArmor);
+  else make_armor_3d(shArmor); 
   make_armor_3d(shRatCape2, 2); 
   
   make_armor_3d(shHood, 2);
