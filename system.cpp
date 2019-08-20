@@ -902,7 +902,7 @@ EX void saveStats(bool emergency IS(false)) {
   if((tactic::on || yendor::on) && !items[itOrbSafety] && !cheater) {
     int t = (int) (timer - timerstart);
 
-    ll xcode = modecode();
+    modecode_t xcode = modecode();
 
     if(tactic::on) {
       int score = items[treasureType(specialland)];
@@ -913,7 +913,7 @@ EX void saveStats(bool emergency IS(false)) {
             int(xcode)*999 + tactic::id + 256 * score + (xcode>>32)*7);
         fprintf(f, "TACTICS %s %d %d %d %d %d %d %d %d date: %s\n", VER,
           tactic::id, specialland, score, turncount, t, int(timerstart), 
-          c, xcode, buf);
+          c, int(xcode), buf);
         tactic::record(specialland, score);
         anticheat::nextid(tactic::id, VER, c);
         }
@@ -924,7 +924,7 @@ EX void saveStats(bool emergency IS(false)) {
         yendor::lastchallenge, items[itOrbYendor], yendor::won, turncount, t, int(timerstart), 
         anticheat::certify(yendor::won ? "WON" : "LOST", turncount, t, (int) timerstart,
           int(xcode)*999 + yendor::lastchallenge + 256 * items[itOrbYendor] + (xcode>>32)*7),
-        xcode,
+        int(xcode),
         buf);
 
     fclose(f);

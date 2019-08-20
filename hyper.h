@@ -419,8 +419,6 @@ typedef function<int(struct cell*)> cellfunction;
 #define YDIST 101
 #define MODECODES (1ll<<61)
   
-typedef flagtype modecode_t;
-
 #define GUNRANGE 3
 
 // loops

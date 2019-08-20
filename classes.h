@@ -221,6 +221,8 @@ enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol, gcNil, gcProduct 
 
 enum class eVariation { bitruncated, pure, goldberg, irregular, dual };  
 
+typedef flagtype modecode_t;
+
 struct geometryinfo {
   const char* tiling_name;
   const char* quotient_name;
