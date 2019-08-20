@@ -202,7 +202,7 @@ void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
     int arm1 = isize(hpc);
     for(int i=arm0; i<arm1; i++) {
       hyperpoint h = hpc[i];
-      ld zl = asinh(h[2]);
+      ld zl = prod ? zlevel(h) : asin_auto(h[2]);
       h = zpush(-zl) * h;
       ld rad = hdist0(h);
       rad = (rad - 0.1124*S) / (0.2804*S - 0.1124*S);
