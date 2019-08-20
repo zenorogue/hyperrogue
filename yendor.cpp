@@ -15,7 +15,7 @@ int hiitemsMax(eItem it) {
   return mx;
   }
 
-int modecode();
+modecode_t modecode();
 
 typedef vector<pair<int, string> > subscoreboard;
 
@@ -1053,7 +1053,7 @@ int modecodetable[42][6] = {
   };
 // unused codes: 6 (cheat/tampered), 25, 254, 255
 
-int modecode() {
+modecode_t modecode() {
 #if CAP_SAVE
   if(anticheat::tampered || cheater || geometry >= gGUARD) return 6;
 #endif
@@ -1077,9 +1077,9 @@ int modecode() {
   int np = numplayers()-1; if(np<0 || np>5) np=5;
   
   // bits: 0 to 7
-  int mct = modecodetable[xcode][np];
+  modecode_t mct = modecodetable[xcode][np];
 
-  // bits: 9, 10, 15, 16, (reserved for later) 17, 18
+  // bits: 9, 10, 15, 16, 17, 18
   mct += ginf[geometry].xcode;
   
 #if CAP_INV

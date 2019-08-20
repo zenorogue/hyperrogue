@@ -230,7 +230,7 @@ struct geometryinfo {
   int vertex;
   flagtype flags;
   eGeometryClass cclass;
-  int xcode;
+  modecode_t xcode;
   std::array<int,2> distlimit; // bitrunc, non-bitrunc
   eVariation default_variation;
   };
