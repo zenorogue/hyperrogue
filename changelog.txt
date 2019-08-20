@@ -3450,3 +3450,11 @@ Solv geometry:
 - fixed 'individual width' option in line pattern working incorrectly, and displayed incorrectly when editing
 - fixed a bug in approximate distance calculation (which caused the 'X' mark in Caribbean to be shown incorrectly)
 
+2019-08-19 15:48 Version 11.1l:
+- product geometries (select any non-Euclidean 2D geometry, then select "current x E" in experiments -> 3 dimensions)
+- mousewheel worked incorrectly in nonisotropic spaces
+- no more crash when saving config in Archimedean
+- better projection boundaries
+- fixed a crash in pure {4,4}
+- CLI arguments for creaturescale and character selection
+
