@@ -872,6 +872,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(randomPatternsMode) return;
   if(dual::state) return;
   if(archimedean) return;
+  if(prod) return;
   if(daily::on) return;
   if(peace::on) return;
   if(!gold()) return;
