@@ -7161,16 +7161,16 @@ EX purehookset hooks_drawmap;
 
 EX transmatrix actual_view_transform;
 
-EX ld wall_radar(cell *c, transmatrix T, ld max) {
+EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   if(pmodel != mdPerspective || !vid.use_wall_radar) return max;
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
-    T = solmul_pt(T, cpush(2, -step));
-    virtualRebase(c, T, false);
+    T = solmul_pt(T, LPe, zpush(-step));
+    virtualRebase(c, T, true);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
-      T = solmul_pt(T, cpush(2, step));
+      T = solmul_pt(T, LPe, zpush(step));
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
       }
@@ -7187,8 +7187,11 @@ EX void make_actual_view() {
   #if MAXMDIM >= 4
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
-    if(max) 
-      actual_view_transform = solmul(zpush(wall_radar((masterless ? centerover.at : viewcenter()), inverse(View), max)), nisot::local_perspective, actual_view_transform * View) * inverse(View); 
+    if(max) {
+      transmatrix Start = inverse(actualV(viewctr, actual_view_transform * View));
+      ld d = wall_radar(viewcenter(), Start, nisot::local_perspective, max);
+      actual_view_transform = solmul(zpush(d), nisot::local_perspective, actual_view_transform * View) * inverse(View); 
+      }
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
   if(nonisotropic) {

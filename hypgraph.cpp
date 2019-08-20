@@ -911,6 +911,7 @@ EX bool confusingGeometry() {
   }
 
 EX ld master_to_c7_angle() {
+  if(prod) return product::in_underlying_geometry(master_to_c7_angle);
   ld alpha = 0;
   #if CAP_GP
   if(cgi.gpdata) alpha = cgi.gpdata->alpha;
@@ -919,6 +920,7 @@ EX ld master_to_c7_angle() {
   }
 
 EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
+  if(prod) return PIU(actualV(hs, V));
   if(WDIM == 3) return V;
   #if CAP_IRR
   if(IRREGULAR)

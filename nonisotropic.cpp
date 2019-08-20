@@ -821,8 +821,12 @@ EX namespace nisot {
     { dynamicval<eGeometry> g(geometry, gSphere); hr::fixmatrix(gtl); }
     T = push * gtl;
     }
-  
-  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix T) {
+
+  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix LPe, const transmatrix T) {
+    if(prod) {
+      hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(tC0(T)));
+      return Position * rgpushxto0(h);
+      }
     auto P = Position;
     nisot::fixmatrix(P);  
     if(!geodesic_movement) return inverse(eupush(Position * inverse(T) * inverse(Position) * C0)) * Position;
@@ -840,7 +844,7 @@ EX namespace nisot {
       const transmatrix V1 = inverse(IV);
       return V1 * eupush(IV * T * V1 * C0);
       }
-    return inverse(parallel_transport(inverse(V), inverse(T)));
+    return inverse(parallel_transport(inverse(V), Id, inverse(T)));
     }
 
   EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {

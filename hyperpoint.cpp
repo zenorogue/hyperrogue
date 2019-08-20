@@ -951,7 +951,12 @@ EX transmatrix solmul(const transmatrix T, const transmatrix LPe, const transmat
   }
 
 EX transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
-  if(nonisotropic) return nisot::parallel_transport(Position, T);
+  if(nonisotropic) return nisot::parallel_transport(Position, Id, T);
+  else return Position * T;
+  }
+
+EX transmatrix solmul_pt(const transmatrix Position, const transmatrix LPe, const transmatrix T) {
+  if(nonisotropic || prod) return nisot::parallel_transport(Position, LPe, T);
   else return Position * T;
   }
 
