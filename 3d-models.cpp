@@ -264,7 +264,8 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
       if(abs(h[1]) > 0.14*S) ok = false, zz -= revZ * (abs(h[1])/S - 0.14) * SH;
       if(abs(h[0]) > 0.08*S) ok = false, zz -= revZ * (abs(h[0])/S - 0.08) * (abs(h[0])/S - 0.08) * 25 * SH;
       h = normalize_flat(h);
-      if(!prod) ht[s] = zpush(zz) * h;
+      if(!prod || kind != 1) ht[s] = zpush(zz) * h;
+      else ht[s] = h;
       if(hsh[s] < 0.1*S) shi[s] = 0.5;
       else if(hsh[s] < 0.12*S) shi[s] = 0.1 + 0.4 * (hsh[s]/S - 0.1) / (0.12 - 0.1);
       else shi[s] = 0.1;
@@ -913,8 +914,7 @@ void geometry_information::make_3d_models() {
   make_armor_3d(shWightCloak, 2); 
   make_armor_3d(shRaiderArmor); 
   make_armor_3d(shRaiderShirt); 
-  if(prod) disable(shArmor);
-  else make_armor_3d(shArmor); 
+  make_armor_3d(shArmor); 
   make_armor_3d(shRatCape2, 2); 
   
   make_armor_3d(shHood, 2);
