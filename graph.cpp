@@ -2324,7 +2324,8 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
       ld dist = d.first / R * aspd;
       if(abs(dist) > abs(d.first)) dist = -d.first;
       a.wherenow = mscale(a.wherenow, dist);
-      aspd *= sqrt(R*R - d.first * d.first) / R;
+      /* signed_sqrt to prevent precision errors */
+      aspd *= signed_sqrt(R*R - d.first * d.first) / R;
       }
     a.wherenow = a.wherenow * rspintox(wnow);
     a.wherenow = a.wherenow * xpush(aspd);
