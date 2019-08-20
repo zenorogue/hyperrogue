@@ -1010,6 +1010,7 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
 
 inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
 inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
+inline hyperpoint zpush0(ld x) { return cpush0(2, x); }
 
 // T * C0, optimized
 inline hyperpoint tC0(const transmatrix &T) {

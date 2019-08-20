@@ -1114,7 +1114,7 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   hyperpoint in_front_dist(ld d) {
-    hyperpoint h = prod ? product::direct_exp( inverse(nisot::local_perspective) * cspin(2, 0, M_PI/2) * forward_dir(d) ) : cpush0(2, d);
+    hyperpoint h = prod ? product::direct_exp( inverse(nisot::local_perspective) * zforward_dir(d) ) : zpush0(d);
     if(nonisotropic && nisot::geodesic_movement) h = nisot::get_exp(inverse(nisot::local_perspective) * h, 100);
     return h;
     }
