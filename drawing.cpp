@@ -912,7 +912,15 @@ struct point_data {
   int bad;
   };
 
-void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
+void draw_s2xe(dqi_poly *p) {
+  if(!p->cnt) return;
+  dqi_poly npoly = *p;
+  npoly.offset = 0;
+  npoly.tab = &glcoords;
+  npoly.V = Id;
+  set_width(1);
+  glcoords.clear();
+
   int maxgen = sightranges[geometry] / (2 * M_PI) + 1;
   
   auto crossdot = [&] (const hyperpoint h1, const hyperpoint h2) { return make_pair(h1[0] * h2[1] - h1[1] * h2[0], h1[0] * h2[0] + h1[1] * h2[1]); };
@@ -972,7 +980,7 @@ void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
           glcoords[i] = glhr::pointtogl(h);
           }
         }
-      npoly->gldraw();
+      npoly.gldraw();
       }
     }
   else {
@@ -1015,7 +1023,7 @@ void draw_s2xe(dqi_poly *p, dqi_poly *npoly) {
         h[2] = cur.z;
         glcoords[i] = glhr::pointtogl(h);
         }
-      npoly->gldraw();
+      npoly.gldraw();
       }
     }
   }
@@ -1024,13 +1032,7 @@ void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
   if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection) && product::product_sphere()) {
-    auto npoly = *this;
-    npoly.offset = 0;
-    npoly.tab = &glcoords;
-    npoly.V = Id;
-    set_width(1);
-    glcoords.clear();
-    draw_s2xe(this, &npoly);
+    draw_s2xe(this);
     return;
     }
 
