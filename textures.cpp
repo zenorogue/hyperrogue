@@ -15,11 +15,6 @@ struct texture_triangle {
   texture_triangle(array<hyperpoint, 3> _v, array<hyperpoint, 3> _tv) : v(_v), tv(_tv) {}
   };
 
-struct basic_textureinfo {
-  int texture_id;
-  vector<glvertex> tvertices; 
-  };
-  
 struct textureinfo : basic_textureinfo {
   transmatrix M;
   vector<texture_triangle> triangles;

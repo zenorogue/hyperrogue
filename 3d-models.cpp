@@ -113,8 +113,6 @@ void geometry_information::shift_shape_orthogonally(hpcshape& sh, ld z) {
 
 extern renderbuffer *floor_textures;
 
-basic_textureinfo models_texture;
-
 void geometry_information::add_texture(hpcshape& sh) {
   if(!floor_textures) return;
   auto& utt = models_texture;

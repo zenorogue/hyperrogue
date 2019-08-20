@@ -79,6 +79,11 @@ struct escher_floorshape : floorshape {
   ld scale;
   };
 
+struct basic_textureinfo {
+  int texture_id;
+  vector<glvertex> tvertices; 
+  };
+
 /** basic geometry parameters */
 struct geometry_information {
 
@@ -375,6 +380,9 @@ hpcshape
   
   int state;
   int usershape_state;
+
+  /** contains the texture point coordinates for 3D models */
+  basic_textureinfo models_texture;
   
   geometry_information() { last = NULL; state = usershape_state = 0; gpdata = NULL; }
   

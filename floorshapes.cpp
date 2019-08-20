@@ -1045,6 +1045,8 @@ EX void make_floor_textures() {
   dynamicval<int> vgp(global_projection, 0);
   check_cgi();
   cgi.make_floor_textures_here();
+  /* update texture ID in existing cgi's */
+  for(auto& c: cgis) c.second.models_texture.texture_id = floor_textures->renderedTexture;
   }
 
 
