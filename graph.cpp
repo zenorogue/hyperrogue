@@ -2769,12 +2769,22 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
   else {
     // other monsters face the player
     
-    if(!nospins && !prod) {
-      if(WDIM == 2) {
+    if(!nospins) {
+      if(WDIM == 2 || prod) {
         hyperpoint V0 = inverse(cwtV) * tC0(Vs);
+        ld z = 0;
+        if(prod) {
+          auto d = product_decompose(V0);
+          z = d.first;
+          V0 = d.second;
+          }
+          
         hyperpoint V1 = spintox(V0) * V0;
   
-        Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
+        if(hypot_d(2, tC0(Vs)) > 1e-3) {
+          Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
+          if(prod) Vs = mscale(Vs, z);
+          }
         }
       else {
         hyperpoint V0 = inverse(cwtV) * tC0(Vs);
@@ -2782,7 +2792,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
-        Vs = Vs * cspin(WDIM-2, WDIM-1, M_PI);
+        Vs = Vs * (prod ? spin(M_PI) : cspin(WDIM-2, WDIM-1, M_PI));
       }
     if(c->monmirror) Vs = Vs * Mirror;
     
