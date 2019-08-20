@@ -30,7 +30,7 @@ struct fgeomextra {
 extern int subpathid;
 extern int subpathorder;
 
-#define MWDIM (WDIM+1)
+#define MWDIM (prod ? 3 : WDIM+1)
 
 bool isprime(int n) {
   for(int k=2; k<n; k++) if(n%k == 0) return false;

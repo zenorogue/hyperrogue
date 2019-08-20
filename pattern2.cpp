@@ -409,6 +409,12 @@ EX int fieldval_uniq(cell *c) {
   }
 
 EX int fieldval_uniq_rand(cell *c, int randval) {
+  if(prod) { 
+    auto c1 = product::get_where(c).first; 
+    int res;
+    product::in_underlying_map([&] { res = fieldval_uniq_rand(c1, randval); });
+    return res; 
+    }
   if(sphere || euclid || NONSTDVAR) 
     // we do not care in these cases
     return fieldval_uniq(c);
