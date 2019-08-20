@@ -7,6 +7,8 @@
 
 namespace hr {
 
+EX FILE *debugfile;
+
 #if HDR
 #define DF_INIT              1 // always display these
 #define DF_MSG               2 // always display these
@@ -193,8 +195,6 @@ template<class... T> void print(hstream& hs, const tuple<T...> & t) {
   for_each_in_tuple(t, p);
   print(hs, ")");
   }
-
-FILE *debugfile;
 
 #ifndef SPECIAL_LOGGER
 inline void special_log(char c) { if(debugfile) fputc(c, debugfile); putchar(c); }
