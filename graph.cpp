@@ -778,6 +778,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
     if(d > vid.radarrange) return {false, h};
     if(d) h = h * (d / (vid.radarrange + cgi.scalefactor/4) / hypot_d(3, h));
     }
+  if(invalid_point(h)) return {false, h};
   return {true, h};
   }
 
