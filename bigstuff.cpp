@@ -758,10 +758,10 @@ EX void buildEquidistant(cell *c) {
       chance = hrand(100) < 10;
     }
   
-  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5 && chance) 
+  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !prod && hrand(10) < 5 && chance) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (PURE?25:5) && items[itBone] >= 10 && chance) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !prod && hrand(100) < (PURE?25:5) && items[itBone] >= 10 && chance) 
     buildAnotherEquidistant(c);
   }
 
