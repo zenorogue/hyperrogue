@@ -794,6 +794,7 @@ void geometry_information::reserve_wall3d(int i) {
   shPlainWall3D.resize(i);
   shWireframe3D.resize(i);
   shMiniWall3D.resize(i);
+  walltester.resize(i);
   }
 
 void geometry_information::create_wall3d() {

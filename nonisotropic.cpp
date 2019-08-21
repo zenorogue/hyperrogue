@@ -625,12 +625,30 @@ EX namespace product {
   
   EX pair<cell*, int> get_where(cell *c) { return ((hrmap_product*)currentmap)->where[c]; }
   
+  EX int cwall_offset, cwall_mask;
+  
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
+    bool s = sphere;
     in_actual([&] { 
+      cell *c0 = get_at(c, current_view_level);
+      cwall_offset = wall_offset(c0);
+      if(s) cwall_mask = (1<<c->type) - 1;
+      else {
+        cwall_mask = 0;
+        ld d = V[2][2];
+        for(int i=0; i<c->type; i++) {
+          ld d1 = (V * cgi.walltester[cwall_offset + i])[2];
+          if(c0->item == itGold) println(hlog, i, ": ", d, " vs ", d1);
+          if(d1 < d - 1e-6) cwall_mask |= (1<<i);
+          }
+        }
+      cwall_mask |= (2<<c->type);
       int flat_distance = hdist0(product_decompose(tC0(V)).second);
       int max_z = flat_distance > sightranges[gProduct] ? 0 : sqrt(sightranges[gProduct] * sightranges[gProduct] - flat_distance * flat_distance) + 1;
       for(int z=-max_z; z<=max_z; z++) {
+        if(z == 0) cwall_mask ^= (2<<c->type);
+        if(z == 1) cwall_mask ^= (1<<c->type);
         cell *c1 = get_at(c, current_view_level+z);
         setdist(c1, 7, NULL);
         drawcell(c1, V * mscale(Id, cgi.plevel * z), spinv, mirrored); 
@@ -667,10 +685,22 @@ EX namespace product {
       cell *c1 = get_where(c).first;
       wo = isize(cgi.shWall3D);
       int won = wo + c->type;
-      cgi.shWall3D.resize(won);
-      cgi.shPlainWall3D.resize(won);
-      cgi.shWireframe3D.resize(won);
-      cgi.shMiniWall3D.resize(won);
+      cgi.reserve_wall3d(won);
+      
+      for(int i=0; i<c1->type; i++) {
+        hyperpoint w;
+        in_underlying_geometry([&] { 
+          /* mirror image of C0 in the axis h1-h2 */
+          hyperpoint h1 = get_corner_position(c1, i);
+          hyperpoint h2 = get_corner_position(c1, i+1);
+          transmatrix T = gpushxto0(h1);
+          T = spintox(T * h2) * T;
+          w = T * C0;
+          w[1] = -w[1];
+          w = inverse(T) * w;
+          });
+        cgi.walltester[wo + i] = w;
+        } 
 
       for(int i=0; i<c1->type; i++)
        cgi.make_wall(wo + i, {product::get_corner(c1, i, -1), product::get_corner(c1, i, +1), product::get_corner(c1, i+1, +1), product::get_corner(c1, i+1, -1)});

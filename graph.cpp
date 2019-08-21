@@ -4559,7 +4559,7 @@ void radar_grid(cell *c, const transmatrix& V) {
   }
 
 int wall_offset(cell *c) {
-  if(prod) return product::wall_offset(c);
+  if(prod) return product::cwall_offset;
   if(penrose && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;
   }
@@ -6047,6 +6047,9 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                   case 5: if(V[1][LDIM] <= -b) continue; break;
                   case 6: case 7: if (pmodel == mdPerspective && V[2][LDIM] <= -l) continue; break;
                   }
+                }
+              else if(prod) {
+                if(!((product::cwall_mask >> a) & 1)) continue;
                 }
               if(qfi.fshape && wmescher) {
                 auto& poly = queuepoly(V, cgi.shWall3D[ofs + a], darkena(wcol2 - d * get_darkval(c, a), 0, 0xFF));
