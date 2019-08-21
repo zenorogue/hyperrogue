@@ -687,7 +687,7 @@ int read_cheat_args() {
     }
   else if(argis("-each")) {
     PHASEFROM(2); start_game();
-    shift(); int q = argi(); autocheat = true;
+    shift(); int q = argi(); cheat();
     for(int i=0; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_TREASURE)
         items[i] = q;
