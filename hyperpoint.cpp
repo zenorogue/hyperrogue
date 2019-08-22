@@ -19,9 +19,30 @@ eGeometry geometry;
 eVariation variation;
 
 
-// hyperbolic points and matrices
-
 #if HDR
+/** \brief A point in our continuous space
+ *  Originally used for representing points in the hyperbolic plane.
+ *  Currently used for all kinds of supported spaces, as well as
+ *  for all vector spaces (up to 4 dimensions). We are using
+ *  the normalized homogeneous coordinates, which allows us to work with most
+ *  geometries in HyperRogue in a uniform way.
+
+ *  In the hyperbolic plane, this is the Minkowski hyperboloid model:
+ *  (x,y,z) such that x*x+y*y-z*z == -1 and z > 0.
+ *
+ *  In spherical geometry, we have x*x+y*y+z*z == 1.
+ *
+ *  In Euclidean geometry, we have z = 1.
+ *
+ *  In isotropic 3D geometries an extra coordinate is added.
+ *
+ *  In nonisotropic coordinates h[3] == 1.
+ *
+ *  In product geometries the 'z' coordinate is modelled by multiplying all 
+ *  three coordinates with exp(z).
+ *
+ */
+
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
   
@@ -74,6 +95,12 @@ struct hyperpoint : array<ld, MAXMDIM> {
     }    
   };
 
+/** \brief A matrix acting on hr::hyperpoint 
+ *  Since we are using homogeneous coordinates for hr::hyperpoint,
+ *  rotations and translations can be represented
+ *  as matrix multiplications. Other applications of matrices in HyperRogue 
+ *  (in dimension up to 4) are also implemented using transmatrix.
+ */
 struct transmatrix {
   ld tab[MAXMDIM][MAXMDIM];
   hyperpoint& operator [] (int i) { return (hyperpoint&)tab[i][0]; }
@@ -99,7 +126,7 @@ struct transmatrix {
     }  
   };
 
-
+/** returns a diagonal matrix */
 constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
   #if MAXMDIM==3
   return transmatrix{{{a,0,0}, {0,b,0}, {0,0,c}}};
@@ -110,26 +137,28 @@ constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
 
 const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
 
-// identity matrix
+/** identity matrix */
 const static transmatrix Id = diag(1,1,1,1);
 
-// zero matrix
+/** zero matrix */
 const static transmatrix Zero = diag(0,0,0,0);
 
-// mirror image
+/** mirror image */
 const static transmatrix Mirror = diag(1,-1,1,1);
+
+/** mirror image: flip in the Y coordinate */
 const static transmatrix MirrorY = diag(1,-1,1,1);
 
-// mirror image
+/** mirror image: flip in the X coordinate */
 const static transmatrix MirrorX = diag(-1,1,1,1);
 
-// mirror image
+/** mirror image: flip in the Z coordinate */
 const static transmatrix MirrorZ = diag(1,1,-1,1);
 
-// rotate by PI
+/** rotate by PI in the XY plane */
 const static transmatrix pispin = diag(-1,-1,1,1);
 
-// central symmetry
+/** central symmetry matrix */
 const static transmatrix centralsym = diag(-1,-1,-1,-1);
 
 inline hyperpoint hpxyz(ld x, ld y, ld z) { return MDIM == 3 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
@@ -140,31 +169,13 @@ inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 
 extern const hyperpoint C02, C03;
 
+/** C0 is the origin in our space */
 #define C0 (MDIM == 3 ? C02 : C03)
 #endif
 
 // basic functions and types
 //===========================
 
-#ifdef SINHCOSH
-// ld sinh(ld alpha) { return (exp(alpha) - exp(-alpha)) / 2; }
-// ld cosh(ld alpha) { return (exp(alpha) + exp(-alpha)) / 2; }
-
-/* ld inverse_sinh(ld z) {
-  return log(z+sqrt(1+z*z));
-  }
- 
-double inverse_cos(double c) {
-  double s = sqrt(1-c*c);
-  double r = atan(s/c);
-  if(r < 0) r = -r;
-  return r;
-  }
-
-// ld tanh(ld x) { return sinh(x) / cosh(x); }
-ld inverse_tanh(ld x) { return log((1+x)/(1-x)) / 2; } */
-
-#endif
 #ifndef M_PI
 #define M_PI 3.14159265358979
 #endif
@@ -279,17 +290,12 @@ EX ld atan2_auto(ld y, ld x) {
     }
   }
 
-// cosine rule -- edge opposite alpha
+/** This function returns the length of the edge opposite the angle alpha in 
+ *  a triangle with angles alpha, beta, gamma. This is called the cosine rule,
+ *  and of course works only in non-Euclidean geometry. */ 
 EX ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
   return acos_auto((cos(alpha) + cos(beta) * cos(gamma)) / (sin(beta) * sin(gamma)));
   }
-
-// hyperbolic point:
-//===================
-
-// we represent the points on the hyperbolic plane
-// by points in 3D space (Minkowski space) such that x^2+y^2-z^2 == -1, z > 0
-// (this is analogous to representing a sphere with points such that x^2+y^2+z^2 == 1)
 
 hyperpoint hpxy(ld x, ld y) { 
   return hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
@@ -314,10 +320,11 @@ EX bool zero_d(int d, hyperpoint h) {
   return true;
   }
 
-// this function returns approximate square of distance between two points
-// (in the spherical analogy, this would be the distance in the 3D space,
-// through the interior, not on the surface)
-// also used to verify whether a point h1 is on the hyperbolic plane by using Hypc for h2
+/** this function returns approximate square of distance between two points
+ *  (in the spherical analogy, this would be the distance in the 3D space,
+ *  through the interior, not on the surface)
+ *  also used to verify whether a point h1 is on the hyperbolic plane by using Hypc for h2
+ */
 
 EX ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   ld res = 0;
@@ -335,12 +342,14 @@ EX ld quickdist(const hyperpoint &h1, const hyperpoint &h2) {
   return intval(h1, h2);
   }
 
+/** square Euclidean hypotenuse in the first d dimensions */
 EX ld sqhypot_d(int d, const hyperpoint& h) {
   ld sum = 0;
   for(int i=0; i<d; i++) sum += h[i]*h[i];
   return sum;
   }
   
+/** Euclidean hypotenuse in the first d dimensions */
 EX ld hypot_d(int d, const hyperpoint& h) {
   return sqrt(sqhypot_d(d, h));
   }
@@ -365,7 +374,7 @@ EX ld hypot_auto(ld x, ld y) {
     }
   }
 
-// move H back to the sphere/hyperboloid/plane
+/** normalize the homogeneous coordinates */
 EX hyperpoint normalize(hyperpoint H) {
   if(prod) return H;
   ld Z = zlevel(H);
@@ -373,7 +382,7 @@ EX hyperpoint normalize(hyperpoint H) {
   return H;
   }
 
-// get the center of the line segment from H1 to H2
+/** get the center of the line segment from H1 to H2 */
 hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
   if(prod) {
     auto d1 = product_decompose(H1);
@@ -383,7 +392,7 @@ hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
   return normalize(H1 + H2);
   }
 
-// like mid, but take 3D into account
+/** like mid, but take 3D into account */
 EX hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
   if(prod) return mid(H1, H2);
   hyperpoint H3 = H1 + H2;
@@ -399,10 +408,7 @@ EX hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
 // matrices
 //==========
 
-// matrices represent isometries of the hyperbolic plane
-// (just like isometries of the sphere are represented by rotation matrices)
-
-// rotate by alpha degrees
+/** rotate by alpha degrees in the coordinates a, b */
 EX transmatrix cspin(int a, int b, ld alpha) {
   transmatrix T = Id;
   T[a][a] = +cos(alpha); T[a][b] = +sin(alpha);
@@ -410,6 +416,7 @@ EX transmatrix cspin(int a, int b, ld alpha) {
   return T;
   }
 
+/** rotate by alpha degrees in the XY plane */
 EX transmatrix spin(ld alpha) { return cspin(0, 1, alpha); }
 
 EX transmatrix random_spin() {
@@ -571,6 +578,10 @@ EX transmatrix spintoc(const hyperpoint& H, int t, int f) {
   return T;
   }
 
+/** an Euclidean rotation in the axes (t,f) which rotates
+ *  the point H to the positive 't' axis 
+ */
+
 EX transmatrix rspintoc(const hyperpoint& H, int t, int f) {
   transmatrix T = Id;
   ld R = hypot(H[f], H[t]);
@@ -581,18 +592,41 @@ EX transmatrix rspintoc(const hyperpoint& H, int t, int f) {
   return T;
   }
 
-// rotate the hyperbolic plane around C0 such that H[1] == 0 and H[0] >= 0
+/** an isometry which takes the point H to the positive X axis 
+ *  \see rspintox 
+ */
 EX transmatrix spintox(const hyperpoint& H) {
   if(GDIM == 2 || prod) return spintoc(H, 0, 1); 
   transmatrix T1 = spintoc(H, 0, 1);
   return spintoc(T1*H, 0, 2) * T1;
   }
 
+/** inverse of hr::spintox 
+ */
+EX transmatrix rspintox(const hyperpoint& H) {
+  if(GDIM == 2 || prod) return rspintoc(H, 0, 1); 
+  transmatrix T1 = spintoc(H, 0, 1);
+  return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
+  }
+
+/** for H on the X axis, this matrix pushes H to C0 
+ *  \see gpushxto0
+ */
+
+EX transmatrix pushxto0(const hyperpoint& H) {
+  transmatrix T = Id;
+  T[0][0] = +H[LDIM]; T[0][LDIM] = -H[0];
+  T[LDIM][0] = curvature() * H[0]; T[LDIM][LDIM] = +H[LDIM];
+  return T;
+  }
+
+/** set the i-th column of T to H */
 EX void set_column(transmatrix& T, int i, const hyperpoint& H) {
   for(int j=0; j<MDIM; j++)
     T[j][i] = H[j];
   }
 
+/** build a matrix using the given vectors as columns */
 EX transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4) {
   transmatrix T;
   for(int i=0; i<MDIM; i++)
@@ -603,22 +637,10 @@ EX transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpo
   return T;
   }
 
-// reverse of spintox(H)
-EX transmatrix rspintox(const hyperpoint& H) {
-  if(GDIM == 2 || prod) return rspintoc(H, 0, 1); 
-  transmatrix T1 = spintoc(H, 0, 1);
-  return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
-  }
+/** for H on the X axis, this matrix pushes C0 to H
+ *  \see rgpushxto0
+ */
 
-// for H such that H[1] == 0, this matrix pushes H to C0
-EX transmatrix pushxto0(const hyperpoint& H) {
-  transmatrix T = Id;
-  T[0][0] = +H[LDIM]; T[0][LDIM] = -H[0];
-  T[LDIM][0] = curvature() * H[0]; T[LDIM][LDIM] = +H[LDIM];
-  return T;
-  }
-
-// reverse of pushxto0(H)
 EX transmatrix rpushxto0(const hyperpoint& H) {
   transmatrix T = Id;
   T[0][0] = +H[LDIM]; T[0][LDIM] = H[0];
@@ -649,17 +671,21 @@ EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
   return res;
   }
 
-// generalization: H[1] can be non-zero
+/** a translation matrix which takes H to 0 */
 EX transmatrix gpushxto0(const hyperpoint& H) {
   return ggpushxto0(H, -1);
   }
 
+/** a translation matrix which takes 0 to H */
 EX transmatrix rgpushxto0(const hyperpoint& H) {
   return ggpushxto0(H, 1);
   }
 
-// fix the matrix T so that it is indeed an isometry
-// (without using this, imprecision could accumulate)
+/** \brief Fix the numerical inaccuracies in the isometry T
+ *  The nature of hyperbolic geometry makes the computations numerically unstable.
+ *  The numerical errors tend to accumulate, eventually destroying the projection.
+ *  This function fixes this problem by replacing T with a 'correct' isometry.
+ */
 
 EX void fixmatrix(transmatrix& T) {
   if(nonisotropic) ; // T may be inverse... do not do that
@@ -691,8 +717,7 @@ EX void fixmatrix(transmatrix& T) {
     }
   }
 
-// show the matrix on screen
-
+/** determinant */
 EX ld det(const transmatrix& T) {
   if(GDIM == 2) {
     ld det = 0;
@@ -723,10 +748,12 @@ EX ld det(const transmatrix& T) {
     }
   }
 
+/** warning about incorrect inverse */
 void inverse_error(const transmatrix& T) {
   println(hlog, "Warning: inverting a singular matrix: ", T);
   }
 
+/** inverse */
 EX transmatrix inverse(const transmatrix& T) {
   if(GDIM == 2) {
     ld d = det(T);
@@ -782,7 +809,7 @@ EX pair<ld, hyperpoint> product_decompose(hyperpoint h) {
   return make_pair(z, mscale(h, -z));
   }
 
-// distance between mh and 0
+/** distance from mh and 0 */
 EX ld hdist0(const hyperpoint& mh) {
   switch(cgclass) {
     case gcHyperbolic:
@@ -805,6 +832,7 @@ EX ld hdist0(const hyperpoint& mh) {
     }
   }
 
+/** length of a circle of radius r */
 EX ld circlelength(ld r) {
   switch(cgclass) {
     case gcEuclid:
@@ -818,9 +846,8 @@ EX ld circlelength(ld r) {
     }
   }
 
-// distance between two points
+/* distance between h1 and h2 */
 EX ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
-  // return hdist0(gpushxto0(h1) * h2);
   ld iv = intval(h1, h2);
   switch(cgclass) {
     case gcEuclid:
@@ -879,8 +906,6 @@ EX transmatrix xyzscale(const transmatrix& t, double fac, double facz) {
   return res;
   }
 
-// double downspin_zivory;
-
 EX transmatrix mzscale(const transmatrix& t, double fac) {
   if(GDIM == 3) return t * cpush(2, fac);
   // take only the spin
@@ -897,8 +922,6 @@ EX transmatrix mzscale(const transmatrix& t, double fac) {
 
 EX transmatrix pushone() { return xpush(sphere?.5 : 1); }
 
-// rotation matrix in R^3
-
 EX hyperpoint mid3(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
   return mid(h1+h2+h3, h1+h2+h3);
   }
@@ -912,7 +935,7 @@ EX hyperpoint mid_at_actual(hyperpoint h, ld v) {
   return rspintox(h) * xpush0(hdist0(h) * v);
   }
 
-// in 3D, an orthogonal projection of C0 on the given triangle
+/** in 3D, an orthogonal projection of C0 on the given triangle */
 EX hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
   h0 /= h0[3];
   h1 /= h1[3];
@@ -1017,7 +1040,7 @@ inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
 inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
 inline hyperpoint zpush0(ld x) { return cpush0(2, x); }
 
-// T * C0, optimized
+/** T * C0, optimized */
 inline hyperpoint tC0(const transmatrix &T) {
   hyperpoint z;
   for(int i=0; i<MDIM; i++) z[i] = T[i][LDIM];
