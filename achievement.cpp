@@ -264,9 +264,9 @@ EX void achievement_collection(eItem it, int prevgold, int newgold) {
     if(PURE && geometry == gNormal)
       achievement_gain("GRAILH", rg::special_geometry);
     #if CAP_CRYSTAL
-    if(PURE && geometry == gCrystal && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside)
+    if(PURE && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside)
       achievement_gain("GRAIL4D", rg::special_geometry);
-    if(BITRUNCATED && geometry == gCrystal && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside)
+    if(BITRUNCATED && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside)
       achievement_gain("GRAIL4D2", rg::special_geometry);
     #endif
     if(q == 3) achievement_gain("GRAIL3");

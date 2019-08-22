@@ -45,7 +45,7 @@ EX int roundTableRadius(cell *c) {
 
 EX int celldistAltRelative(cell *c) {
   #if CAP_CRYSTAL
-  if(geometry == gCrystal) return crystal::dist_relative(c);
+  if(cryst) return crystal::dist_relative(c);
   #endif
   #if MAXMDIM >= 4
   if(euclid && WDIM == 3) return euclid3::dist_relative(c);

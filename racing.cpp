@@ -198,14 +198,14 @@ bool bad(cell *c2, cell *c) {
 
 int rcelldist(cell *c) {
   #if CAP_CRYSTAL
-  if(geometry == gCrystal) return crystal::space_distance(c, currentmap->gamestart());
+  if(cryst) return crystal::space_distance(c, currentmap->gamestart());
   #endif
   return celldist(c);
   }
 
 int pcelldist(cell *c) {
   #if CAP_CRYSTAL
-  if(geometry == gCrystal) return crystal::precise_distance(c, currentmap->gamestart());
+  if(cryst) return crystal::precise_distance(c, currentmap->gamestart());
   #endif
   return celldist(c);
   }
@@ -1336,7 +1336,7 @@ void markers() {
     if(cd != DISTANCE_UNKNOWN)
     queuestr(H, vid.fsize, 
       #if CAP_CRYSTAL
-      (geometry == gCrystal && !crystal::pure()) ? fts(crystal::space_distance(cwt.at, track.back())) :
+      (cryst && !crystal::pure()) ? fts(crystal::space_distance(cwt.at, track.back())) :
       #endif
       its(cd), 0x10101 * int(128 - 100 * sintick(150)));
     addauraspecial(H, 0xFFD500, 0);

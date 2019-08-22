@@ -1509,7 +1509,7 @@ EX void init_model() {
   err_zero_current = err_zero;
   
   #if CAP_CRYSTAL
-  if(geometry == gCrystal && surface::sh == surface::dsNone) {
+  if(cryst && surface::sh == surface::dsNone) {
     surface::sh = surface::dsCrystal;
     crystal::init_rotation();
     good_shape = true;

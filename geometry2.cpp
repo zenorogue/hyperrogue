@@ -123,7 +123,7 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
       h2 = h2->move(bestd);
       }
     #if CAP_CRYSTAL
-    else if(geometry == gCrystal) {
+    else if(cryst) {
       for(int d3=0; d3<S7; d3++) {
         auto h3 = h2->cmove(d3);
         if(visited.count(h3)) continue;

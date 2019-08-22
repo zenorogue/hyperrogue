@@ -1292,7 +1292,7 @@ EX void centerpc(ld aspd) {
   if(dual::split([=] () { centerpc(aspd); })) return;
 
   #if CAP_CRYSTAL
-  if(geometry == gCrystal)
+  if(cryst)
     crystal::centerrug(aspd);
   #endif
   

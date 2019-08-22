@@ -1144,7 +1144,7 @@ modecode_t modecode() {
   #endif
   
   #if CAP_CRYSTAL
-  if(geometry == gCrystal) {
+  if(cryst) {
     mct += ll(ginf[geometry].sides) << 29;
     mct += ll(ginf[geometry].vertex) << 37;
     }

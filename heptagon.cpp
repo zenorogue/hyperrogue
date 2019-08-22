@@ -223,7 +223,7 @@ heptagon *createStep(heptagon *h, int d) {
   }
 
 heptagon *hrmap_standard::create_step(heptagon *h, int d) {
-  if(!h->move(0) && h->s != hsOrigin && !binarytiling && (geometry != gCrystal)) {
+  if(!h->move(0) && h->s != hsOrigin && !binarytiling && !cryst) {
     // cheating: 
     int pard=0;
     if(S3 == 3) 

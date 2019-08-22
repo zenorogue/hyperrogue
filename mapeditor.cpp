@@ -146,7 +146,7 @@ namespace mapstream {
       }
     #endif
     #if CAP_CRYSTAL
-    if(geometry == gCrystal) {
+    if(cryst) {
       f.write(ginf[gCrystal].sides);
       if(ginf[gCrystal].sides == 8)
         f.write(ginf[gCrystal].vertex);
@@ -293,7 +293,7 @@ namespace mapstream {
         torusconfig::activate();
         }
       #if CAP_CRYSTAL
-      if(geometry == gCrystal && f.vernum >= 10504) {
+      if(cryst && f.vernum >= 10504) {
         int sides;
         f.read(sides);
         #if CAP_CRYSTAL

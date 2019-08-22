@@ -1198,7 +1198,7 @@ EX void set_variation(eVariation target) {
     stop_game();
     if(euclid6 || binarytiling || sol || penrose) geometry = gNormal;
     auto& cd = ginf[gCrystal];
-    if(target == eVariation::bitruncated && geometry == gCrystal && cd.sides == 8 && cd.vertex == 4) {
+    if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;
       cd.tiling_name = "{8,3}";
       target = eVariation::pure;

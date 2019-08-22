@@ -515,7 +515,7 @@ EX ld compass_angle() {
       
 EX bool crystal_cell(cell *c, transmatrix V) {
 
-  if(geometry != gCrystal) return false;
+  if(!cryst) return false;
 
   if(view_east && cheater) {
     int d = dist_alt(c);
@@ -1140,7 +1140,7 @@ EX void show() {
     string s;
     if(i % 2) s = its(i/2) + ".5D";
     else s = its(i/2) + "D";
-    dialog::addBoolItem(s, geometry == gCrystal && ginf[gCrystal].sides == i && ginf[gCrystal].vertex == 4, 'a' + i - 5);
+    dialog::addBoolItem(s, cryst && ginf[gCrystal].sides == i && ginf[gCrystal].vertex == 4, 'a' + i - 5);
     dialog::add_action(dialog::add_confirmation([i]() { set_crystal(i); start_game(); }));
     }
   dialog::addBoolItem(XLAT("4D double bitruncated"), ginf[gCrystal].vertex == 3, 'D');
@@ -1152,13 +1152,13 @@ EX void show() {
     dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); 
     dialog::bound_low(0);
     });
-  if(geometry == gCrystal) {
+  if(cryst) {
     dialog::addBoolItem(XLAT("3D display"), rug::rugged, 'r');
     dialog::add_action_push(rug::show);
     }
   else
     dialog::addBreak(100);
-  if(rug::rugged && geometry == gCrystal && ginf[gCrystal].sides == 8) {
+  if(rug::rugged && cryst && ginf[gCrystal].sides == 8) {
     dialog::addBoolItem(XLAT("render a cut"), draw_cut, 'x');
     dialog::add_action([]() { 
       draw_cut = true;
@@ -1451,7 +1451,7 @@ void transform_euclid_to_crystal () {
 
 void add_crystal_transform(char c) {
   if(shmup::on) return;
-  if(geometry == gCrystal && ginf[gCrystal].sides == 6) {
+  if(cryst && ginf[gCrystal].sides == 6) {
     dialog::addItem("convert Crystal to 3D", c);
     dialog::add_action(transform_crystal_to_euclid);
     }

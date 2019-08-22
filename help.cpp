@@ -289,7 +289,7 @@ EX string generateHelpForItem(eItem it) {
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
    
    #if CAP_CRYSTAL
-   if(it == itCompass && geometry == gCrystal)
+   if(it == itCompass && cryst)
      help += crystal::compass_help();
    else
    #endif
@@ -680,7 +680,7 @@ string generateHelpForLand(eLand l) {
     }
 
   #if CAP_CRYSTAL
-  if(l == laCamelot && geometry == gCrystal) {
+  if(l == laCamelot && cryst) {
     if(!crystal::used_compass_inside) s += XLAT("\nSpecial conduct (still valid)\n");
     else s += XLAT("\nSpecial conduct failed:\n");
     

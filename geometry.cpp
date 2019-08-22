@@ -885,7 +885,7 @@ EX void check_cgi() {
 
   if(geometry == gArchimedean) V("ARCM", arcm::current.symbol);
   
-  if(geometry == gCrystal) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
+  if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   
   if(binarytiling || GDIM == 3) V("WQ", its(vid.texture_step));
   

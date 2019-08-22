@@ -733,7 +733,7 @@ EX land_validity_t& land_validity(eLand l) {
     }
   
   if(l == laBrownian) {
-    if(quotient || !hyperbolic || geometry == gCrystal) return dont_work;
+    if(quotient || !hyperbolic || cryst) return dont_work;
     }
   
   if(binarytiling) {
@@ -753,7 +753,7 @@ EX land_validity_t& land_validity(eLand l) {
   #endif
 
   #if CAP_CRYSTAL
-  if(geometry == gCrystal) {
+  if(cryst) {
     if(l == laCamelot) return interesting;
     if(isCrossroads(l)) return full_game;
     }

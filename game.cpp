@@ -2420,7 +2420,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(m == moPirate && isOnCIsland(c) && c->item == itNone && (
       eubinary ||
       (c->master->alt && celldistAlt(c) <= 2-getDistLimit()) ||
-      isHaunted(c->land)) && geometry != gCrystal) {
+      isHaunted(c->land)) && !cryst) {
     bool toomany = false;
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
@@ -7459,7 +7459,7 @@ EX bool in_full_game() {
   if(chaosmode) return true;
   if(euclid && isCrossroads(specialland)) return true;
   if(weirdhyperbolic && specialland == laCrossroads4) return true;
-  if(geometry == gCrystal && isCrossroads(specialland)) return true;
+  if(cryst && isCrossroads(specialland)) return true;
   if(geometry == gNormal && !NONSTDVAR) return true;
   return false;
   }
@@ -7495,7 +7495,7 @@ EX void knightFlavorMessage(cell *c2) {
     addMessage(XLAT("\"The Holy Grail is in the center of the Round Table.\""));
     }
   #if CAP_CRYSTAL
-  else if(msgid == 3 && geometry == gCrystal) {
+  else if(msgid == 3 && cryst) {
     if(crystal::pure())
       addMessage(XLAT("\"Each piece of the Round Table is exactly %1 steps away from the Holy Grail.\"", its(roundTableRadius(c2))));
     else
@@ -7521,7 +7521,7 @@ EX void knightFlavorMessage(cell *c2) {
     string s = "";
     if(0) ;
     #if CAP_CRYSTAL
-    else if(geometry == gCrystal)
+    else if(cryst)
       s = crystal::get_table_boundary();
     #endif
     else if(!quotient)
@@ -7533,7 +7533,7 @@ EX void knightFlavorMessage(cell *c2) {
     string s = "";
     if(0);
     #if CAP_CRYSTAL
-    else if(geometry == gCrystal)
+    else if(cryst)
       s = crystal::get_table_volume();
     #endif
     else if(!quotient)

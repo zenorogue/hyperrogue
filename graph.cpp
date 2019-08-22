@@ -901,7 +901,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
   else if(it == itCompass) {
     transmatrix V2;
     #if CAP_CRYSTAL
-    if(geometry == gCrystal) {
+    if(cryst) {
       if(crystal::compass_probability <= 0) return true;
       if(cwt.at->land == laCamelot && celldistAltRelative(cwt.at) < 0) crystal::used_compass_inside = true;
       V2 = V * spin(crystal::compass_angle() + M_PI);

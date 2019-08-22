@@ -1885,7 +1885,7 @@ EX void show_color_dialog() {
     }
   
   #if CAP_CRYSTAL
-  if(geometry == gCrystal && cheater) {
+  if(cryst && cheater) {
     dialog::addItem(XLAT("crystal coordinate colors"), 'C');
     dialog::add_action([] () { crystal::view_coordinates = true; pushScreen([] () { edit_color_table(crystal::coordcolors); });});
     }

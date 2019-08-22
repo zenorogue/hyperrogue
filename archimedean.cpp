@@ -69,7 +69,8 @@ struct archimedean_tiling {
   void regroup();
   string world_size();
   
-  eGeometryClass get_class();
+  geometryinfo1& get_geometry();
+  eGeometryClass get_class() { return get_geometry().kind; }
   
   ld scale();
   };
@@ -311,14 +312,14 @@ void archimedean_tiling::regroup() {
     }
   }
 
-eGeometryClass archimedean_tiling::get_class() {
-  if(euclidean_angle_sum < 1.999999) return gcSphere;
-  else if(euclidean_angle_sum > 2.000001) return gcHyperbolic;
-  else return gcEuclid;
+geometryinfo1& archimedean_tiling::get_geometry() {
+  if(euclidean_angle_sum < 1.999999) return ginf[gSphere].g;
+  else if(euclidean_angle_sum > 2.000001) return ginf[gNormal].g;
+  else return ginf[gEuclid].g;
   }
 
 void archimedean_tiling::compute_geometry() {
-  ginf[gArchimedean].cclass = get_class();
+  ginf[gArchimedean].g = get_geometry();
   set_flag(ginf[gArchimedean].flags, qBOUNDED, get_class() == gcSphere);
   
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));

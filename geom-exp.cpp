@@ -415,7 +415,7 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     bool on = geometry == i;
     dynamicval<eGeometry> cg(geometry, eGeometry(i));
     if(archimedean && !CAP_ARCM) continue;
-    if(geometry == gCrystal && !CAP_CRYSTAL) continue;
+    if(cryst && !CAP_CRYSTAL) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     dialog::addBoolItem(XLAT((geometry == gProduct && !on) ? XLAT("current geometry x E") : ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
@@ -670,7 +670,7 @@ EX void showEuclideanMenu() {
 
         
   
-  if(euwrap || geometry == gFieldQuotient || geometry == gCrystal || archimedean || (euclid && WDIM == 3)) {
+  if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3)) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 
@@ -679,7 +679,7 @@ EX void showEuclideanMenu() {
         pushScreen(arcm::show);
       #endif
       #if CAP_CRYSTAL
-      else if(geometry == gCrystal)
+      else if(cryst)
         pushScreen(crystal::show);
       #endif
       #if MAXMDIM == 4
@@ -774,7 +774,7 @@ EX void showEuclideanMenu() {
     (archimedean && sphere) ? its(isize(currentmap->allcells())) :
     #endif
     #if CAP_CRYSTAL
-    geometry == gCrystal ? "∞^" + its(ts/2) :
+    cryst ? "∞^" + its(ts/2) :
     #endif
     WDIM == 3 && bounded ? its(isize(currentmap->allcells())) :
     WDIM == 3 && euclid ? "∞" :

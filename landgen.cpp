@@ -497,7 +497,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
-        else if(a4 || archimedean || geometry == gCrystal)
+        else if(a4 || archimedean || cryst)
           c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
         else if(!BITRUNCATED) {
           if(polarb50(c)) 
@@ -1661,7 +1661,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waCTree && hrand_monster(GDIM == 2 ? 5000 : 50000) < 100 + items[itPirate] + yendor::hardness())
         c->monst = moParrot;    
       ONEMPTY {
-        if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on && geometry != gCrystal)
+        if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on && !cryst)
           c->item = itCompass;
         if(hrand_monster(16000) < 40 + (items[itPirate] + yendor::hardness()))
           c->monst = moPirate;
@@ -2552,7 +2552,7 @@ EX void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && geometry != gCrystal && WDIM == 2 && hyperbolic) {
+  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !archimedean && !cryst && WDIM == 2 && hyperbolic) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {
@@ -2629,7 +2629,7 @@ EX void setdist(cell *c, int d, cell *from) {
       if(0);
       else if(chaosmode > 1) ;
       #if CAP_CRYSTAL
-      else if(geometry == gCrystal) crystal::set_land(c);
+      else if(cryst) crystal::set_land(c);
       #endif
       #if MAXMDIM == 4
       else if(euclid && WDIM == 3) euclid3::set_land(c);
@@ -2716,7 +2716,7 @@ EX void setdist(cell *c, int d, cell *from) {
     else
       placeLocalOrbs(c);
     #if CAP_CRYSTAL
-    if(geometry == gCrystal && c->land != laMinefield)
+    if(cryst && c->land != laMinefield)
       crystal::may_place_compass(c);
     #endif
     }

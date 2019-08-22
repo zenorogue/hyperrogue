@@ -1672,7 +1672,7 @@ EX namespace patterns {
     if(archimedean)
       dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
 
-    if(geometry == gCrystal)
+    if(cryst)
       dialog::addSelItem(XLAT("Crystal coordinates"), "Crystal", 'K');
 
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
