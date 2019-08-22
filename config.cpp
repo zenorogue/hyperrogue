@@ -779,6 +779,7 @@ EX void loadConfig() {
     DEBB(DF_INIT, ("Loaded configuration: %s\n", conffile));
     }
 
+  geom3::apply_always3();
   polygonal::solve();
   check_cgi();
   cgi.prepare_basics();

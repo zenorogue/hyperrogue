@@ -171,7 +171,7 @@ ld inverse_tanh(ld x) { return log((1+x)/(1-x)) / 2; } */
 
 EX ld squar(ld x) { return x*x; }
 
-EX int sig(int z) { return prod ? PIU(sig(z)) : (sphere || sol || z<GDIM)?1:-1; }
+EX int sig(int z) { return ginf[geometry].g.sig[z]; }
 
 EX int curvature() {
   switch(cgclass) {

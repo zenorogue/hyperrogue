@@ -1035,6 +1035,8 @@ EX void make_floor_textures() {
   dynamicval<eGeometry> g(geometry, gEuclidSquare);
   dynamicval<eModel> gm(pmodel, mdDisk);
   dynamicval<eVariation> va(variation, eVariation::pure);
+  dynamicval<geometryinfo1> gie(ginf[geometry].g, giEuclid2);
+  dynamicval<geometryinfo1> gih(ginf[gNormal].g, giHyperb2);
   dynamicval<bool> a3(vid.always3, false);
   dynamicval<bool> hq(inHighQual, true);
   dynamicval<int> hd(darken, 0);

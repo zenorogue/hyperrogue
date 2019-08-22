@@ -454,7 +454,7 @@ namespace mapstream {
     cheater = 1;
     
     dynamicval<bool> a3(vid.always3, vid.always3);
-    if(f.vernum >= 0xA616) f.read(vid.always3);
+    if(f.vernum >= 0xA616) { f.read(vid.always3); geom3::apply_always3(); }
     
     if(f.vernum < 0xA61A) load_usershapes(f);
 

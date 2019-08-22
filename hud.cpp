@@ -390,6 +390,7 @@ EX void draw_radar(bool cornermode) {
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdUnchanged);
   dynamicval<bool> ga(vid.always3, false);
+  dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
   initquickqueue();
   int rad = vid.radarsize;
   if(dual::state) rad /= 2; 

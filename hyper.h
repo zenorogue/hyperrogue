@@ -324,14 +324,11 @@ struct videopar {
 
 extern videopar vid;
 
-#if MAXMDIM == 3
-#define WDIM 2
-#else
-#define WDIM ((geometry >= gBinary3 && geometry != gBinary4 && geometry != gKiteDart2) ? 3 : 2)
-#endif
-#define GDIM (vid.always3 ? 3 : WDIM)
-#define MDIM (prod ? 3 : GDIM+1)
+#define WDIM ginf[geometry].g.gameplay_dimension
+#define GDIM ginf[geometry].g.graphical_dimension
+#define MDIM ginf[geometry].g.homogeneous_dimension
 #define LDIM (MDIM-1)
+#define cclass g.kind
 
 #define self (*this)
 

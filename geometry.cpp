@@ -767,11 +767,31 @@ namespace geom3 {
     }    
 
 EX namespace geom3 {
+  
+EX void apply_always3() {
+    for(geometryinfo& gi: ginf) {
+      auto &g = gi.g;
+      if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
+        g.graphical_dimension++;
+        g.homogeneous_dimension++;
+        g.sig[3] = g.sig[2];
+        g.sig[2] = g.sig[1];
+        }
+      if(!vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 3) {
+        g.graphical_dimension--;
+        g.homogeneous_dimension--;
+        g.sig[1] = g.sig[2];
+        g.sig[2] = g.sig[3];
+        }
+      }
+    }
+    
   #if MAXMDIM >= 4
 EX void switch_always3() {
     if(dual::split(switch_always3)) return;
     if(rug::rugged) rug::close();
     vid.always3 = !vid.always3;
+    apply_always3();
     swapmatrix(View);
     callhooks(hooks_swapdim);
     }
@@ -806,6 +826,7 @@ EX void switch_always3() {
     View = inverse(models::rotmatrix()) * View;
     if(!vid.always3) {
       vid.always3 = true;
+      apply_always3();
       ld ms = min<ld>(cgi.scalefactor, 1);
       vid.wall_height = 1.5 * ms;
       if(sphere) {
@@ -827,6 +848,7 @@ EX void switch_always3() {
       }
     else {
       vid.always3 = false;
+      apply_always3();
       vid.wall_height = .3;
       vid.human_wall_ratio = .7;
       vid.camera = 1;

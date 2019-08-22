@@ -552,6 +552,7 @@ EX namespace product {
   EX geometry_information *underlying_cgip;
   
   void configure() {
+    if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
     check_cgi();
     cgi.prepare_basics();
     underlying = geometry;
@@ -559,6 +560,8 @@ EX namespace product {
     geometry = gProduct;
     ginf[gProduct] = ginf[underlying];
     ginf[gProduct].cclass = gcProduct;
+    ginf[gProduct].g.gameplay_dimension++;
+    ginf[gProduct].g.graphical_dimension++;
     }
   
   EX int current_view_level;

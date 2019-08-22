@@ -223,6 +223,20 @@ enum class eVariation { bitruncated, pure, goldberg, irregular, dual };
 
 typedef flagtype modecode_t;
 
+/** only the actual geometry */
+struct geometryinfo1 {
+  /** geometry class */
+  eGeometryClass kind;
+  /** dimension of the gameplay (2 for crystal) */
+  int gameplay_dimension;
+  /** dimension of the graphics, may be greater than gameplay_dimension with vid.always3 on */
+  int graphical_dimension;
+  /** dimension of the homogeneous vector space used, usually graphical_dimension+1, but 3 in product */
+  int homogeneous_dimension;
+  /** signature of the scalar product used */
+  int sig[4];
+  };
+
 struct geometryinfo {
   const char* tiling_name;
   const char* quotient_name;
@@ -231,7 +245,7 @@ struct geometryinfo {
   int sides;
   int vertex;
   flagtype flags;
-  eGeometryClass cclass;
+  geometryinfo1 g;
   modecode_t xcode;
   std::array<int,2> distlimit; // bitrunc, non-bitrunc
   eVariation default_variation;
