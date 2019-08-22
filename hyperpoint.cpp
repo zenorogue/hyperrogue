@@ -755,7 +755,7 @@ void inverse_error(const transmatrix& T) {
 
 /** inverse */
 EX transmatrix inverse(const transmatrix& T) {
-  if(GDIM == 2) {
+  if(MDIM == 3) {
     ld d = det(T);
     transmatrix T2;
     if(d == 0) {
