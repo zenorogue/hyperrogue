@@ -320,7 +320,7 @@ int main() {
     if(isize(elt) >= 2) { javastring += elt; vchars.push_back(elt); }
     }
   printf("\n");
-  printf("#define NUMEXTRA %zu\n", vchars.size());
+  printf("#define NUMEXTRA %d\n", isize(vchars));
   printf("#define NATCHARS {");
   for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
   printf("};\n");
@@ -340,7 +340,7 @@ int main() {
     nouns[0][elt.first] = n;
     }
 
-  printf("// total: %5zu nouns, %5zu sentences\n", nouns[1].m.size(), d[1].m.size());
+  printf("// total: %5d nouns, %5d sentences\n", isize(nouns[1].m), isize(d[1].m));
 
   for(int i=0; i<NUMLAN; i++) {
     size_t bnouns = 0;
@@ -356,8 +356,8 @@ int main() {
       bnouns += n.abl.size();
       }
 
-    printf("// %s: %5zuB nouns, %5zuB sentences\n",
-      d[i]["EN"].c_str(), bnouns, bdict);
+    printf("// %s: %5dB nouns, %5dB sentences\n",
+      d[i]["EN"].c_str(), int(bnouns), int(bdict));
     }
   
   std::set<std::string> allsent;
