@@ -583,7 +583,7 @@ vector<geometryinfo> ginf = {
   {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY,   giSol,     0x41600, {{7, 5}}, eVariation::pure},
   {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qPENROSE,  giEuclid2, 0x48000, {{7, 7}}, eVariation::pure},
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      giHyperb3, 0x48200, {{7, 3}}, eVariation::pure},
-  {"nil",    "none",    "Nil geometry",                               "nil",      8, 3, 0,         giNil,     0x48600, {{7, 5}}, eVariation::pure},
+  {"nil",    "none",    "Nil geometry",                               "nil",      6, 3, 0,         giNil,     0x48600, {{7, 5}}, eVariation::pure},
   {"product","none",    "product space",                              "product",  7, 3, 0,         giProduct, 0x48400, {{7, 3}}, eVariation::pure},
   {"psl2",   "psl2",    "PSL(2,R)",                                   "psl2",     7, 3, qEXPERIMENTAL, giSL2, 0x49000, {{6, 4}}, eVariation::pure},
   };

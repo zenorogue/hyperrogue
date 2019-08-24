@@ -453,9 +453,10 @@ EX namespace nilv {
   hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
   
   #if HDR
-  static const int nilv_S7 = 8;
+  static const int nilv_S7 = 6;
   #endif
 
+/*
   array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }};
 
   EX array<vector<hyperpoint>, nilv_S7> facevertices = {{
@@ -468,6 +469,19 @@ EX namespace nilv {
     { point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), },
     { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), },
     }};
+*/
+  
+  array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(0,1,0), mvec(0,0,1) }};
+  
+  EX array<vector<hyperpoint>, nilv_S7> facevertices = {{
+    { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.25), point31(-0.5,0.5,-0.75), },
+    { point31(0.5,-0.5,-0.5), point31(0.5,-0.5,0.5), point31(-0.5,-0.5,0.5), point31(-0.5,-0.5,-0.5), },
+    { point31(0,0,-0.5), point31(-0.5,0.5,-0.75), point31(-0.5,-0.5,-0.25), point31(0,0,-0.5), point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,-0.5), point31(0,0,-0.5), point31(-0.5,-0.5,-0.5), point31(0.5,-0.5,-0.5), point31(0,0,-0.5), point31(0.5,-0.5,-0.5), point31(0.5,-0.5,-0.75), point31(0,0,-0.5), point31(0.5,-0.5,-0.75), point31(0.5,0.5,-0.25), point31(0,0,-0.5), point31(0.5,0.5,-0.25), point31(0.5,0.5,-0.5), point31(0,0,-0.5), point31(0.5,0.5,-0.5), point31(-0.5,0.5,-0.5), point31(0,0,-0.5), point31(-0.5,0.5,-0.5), point31(-0.5,0.5,-0.75), },
+    { point31(0.5,0.5,-0.25), point31(0.5,0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
+    { point31(-0.5,0.5,-0.5), point31(-0.5,0.5,0.5), point31(0.5,0.5,0.5), point31(0.5,0.5,-0.5), },
+    { point31(0,0,0.5), point31(-0.5,0.5,0.25), point31(-0.5,-0.5,0.75), point31(0,0,0.5), point31(-0.5,-0.5,0.75), point31(-0.5,-0.5,0.5), point31(0,0,0.5), point31(-0.5,-0.5,0.5), point31(0.5,-0.5,0.5), point31(0,0,0.5), point31(0.5,-0.5,0.5), point31(0.5,-0.5,0.25), point31(0,0,0.5), point31(0.5,-0.5,0.25), point31(0.5,0.5,0.75), point31(0,0,0.5), point31(0.5,0.5,0.75), point31(0.5,0.5,0.5), point31(0,0,0.5), point31(0.5,0.5,0.5), point31(-0.5,0.5,0.5), point31(0,0,0.5), point31(-0.5,0.5,0.5), point31(-0.5,0.5,0.25), },
+    }};
+
   
   struct hrmap_nil : hrmap {
     unordered_map<mvec, heptagon*> at;

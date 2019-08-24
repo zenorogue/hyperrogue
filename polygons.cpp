@@ -704,7 +704,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   set_column(T, 1, vertices[1]);
   set_column(T, 2, vertices[2]);
   set_column(T, 3, C0);
-  if(det(T) < 0 && !sl2)
+  if(det(T) < 0 && !sl2 && !nil)
     reverse(vertices.begin(), vertices.end()),
     reverse(weights.begin(), weights.end());
 
