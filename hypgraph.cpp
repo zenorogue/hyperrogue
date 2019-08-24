@@ -1301,14 +1301,21 @@ EX void centerpc(ld aspd) {
   #if MAXMDIM >= 4
   if(shmup::on && vid.sspeed > -5 && GDIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
-    if(masterless) centerover = shmup::pc[id]->base;
-    else viewctr = shmup::pc[id]->base->master;
-    transmatrix T = shmup::pc[id]->at;
-    if(WDIM == 2 && !masterless) T = master_relative(shmup::pc[id]->base) * T;
+    auto& pc = shmup::pc[id];
+    if(masterless) centerover = pc->base;
+    else viewctr = pc->base->master;
+    transmatrix T = pc->at;
+    if(hybri) {
+      hybrid::current_view_level = hybrid::get_where(pc->base).second;
+      println(hlog, "base = ", pc->base, " at level ", hybrid::current_view_level);
+      cell *cc = hybrid::get_at(viewctr.at->c7, hybrid::current_view_level);
+      T = currentmap->relative_matrix(pc->base, cc, C0) * T;
+      }      
+    if(WDIM == 2 && !masterless) T = master_relative(pc->base) * T;
     int sl = snakelevel(cwt.at);
-    if(sl) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
+    if(sl && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     View = inverse(T);
-    if(WDIM == 2) View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) * View;
+    if(WDIM == 2) rotate_view( cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) );
     return;
     }
   #endif
