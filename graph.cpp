@@ -6748,7 +6748,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
     
     if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
-      c->barleft != NOWALLSEP_USED) {
+      c->barleft != NOWALLSEP_USED && GDIM == 2) {
       color_t col = darkena(0x505050, 0, 0xFF);
       queueline(tC0(V), V*tC0(cgi.heptmove[c->bardir]), col, 2 + vid.linequality);
       queueline(tC0(V), V*tC0(cgi.hexmove[c->bardir]), col, 2 + vid.linequality);
