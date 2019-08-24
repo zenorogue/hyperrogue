@@ -685,7 +685,6 @@ EX namespace product {
         ld d = V[2][2];
         for(int i=0; i<c->type; i++) {
           ld d1 = (V * cgi.walltester[cwall_offset + i])[2];
-          if(c0->item == itGold) println(hlog, i, ": ", d, " vs ", d1);
           if(d1 < d - 1e-6) cwall_mask |= (1<<i);
           }
         }
