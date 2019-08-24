@@ -526,6 +526,7 @@ geometryinfo1 giSphere3 = { gcSphere,     3, 3, 4, {1,1, 1,+1} };
 geometryinfo1 giSol     = { gcSol,        3, 3, 4, {1,1, 1,0 } };
 geometryinfo1 giNil     = { gcNil,        3, 3, 4, {1,1, 1,0 } };
 geometryinfo1 giProduct = { /* will be filled in product::configure() */ };
+geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
 
 /** list of available geometries */
 vector<geometryinfo> ginf = {
@@ -584,6 +585,7 @@ vector<geometryinfo> ginf = {
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      giHyperb3, 0x48200, {{7, 3}}, eVariation::pure},
   {"nil",    "none",    "Nil geometry",                               "nil",      8, 3, 0,         giNil,     0x48600, {{7, 5}}, eVariation::pure},
   {"product","none",    "product space",                              "product",  7, 3, 0,         giProduct, 0x48400, {{7, 3}}, eVariation::pure},
+  {"psl2",   "psl2",    "PSL(2,R)",                                   "psl2",     7, 3, qEXPERIMENTAL, giSL2, 0x49000, {{6, 4}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

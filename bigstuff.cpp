@@ -246,7 +246,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   alt->emeraldval = 0;
   alt->zebraval = 0;
   alt->distance = 0;
-  alt->fieldval = product::current_view_level;
+  alt->fieldval = nisot::current_view_level;
   alt->c7 = NULL;
   alt->alt = alt;
   h->alt = alt;

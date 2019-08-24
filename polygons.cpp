@@ -704,7 +704,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   set_column(T, 1, vertices[1]);
   set_column(T, 2, vertices[2]);
   set_column(T, 3, C0);
-  if(det(T) < 0)
+  if(det(T) < 0 && !sl2)
     reverse(vertices.begin(), vertices.end()),
     reverse(weights.begin(), weights.end());
 
@@ -715,6 +715,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   
   hyperpoint center = Hypc;
   int n = isize(vertices);
+
+  bool triangles = n > 3 && hypot_d(MDIM, vertices[0] - vertices[3]) < 1e-5;
 
   vector<ld> altitudes;
   if(prod) {
@@ -735,6 +737,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   if(prod) for(int i=0; i<n; i++) center_altitude += altitudes[i] * weights[i] / w;
   
   for(int a=0; a<n; a++) {
+    if(triangles) center = normalize(vertices[a/3*3] * 5 + vertices[a/3*3+1] + vertices[a/3*3+2]);
     hyperpoint v1 = vertices[a] - center;
     hyperpoint v2 = vertices[(a+1)%n] - center;
     texture_order([&] (ld x, ld y) {
@@ -755,6 +758,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   if(true) {
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
+      if(triangles && (a%3 != 1)) continue;
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
       if(prod) { 
         h = zshift(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
@@ -799,7 +803,7 @@ void geometry_information::reserve_wall3d(int i) {
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  reserve_wall3d(penrose ? 22 : prod ? 0 : S7);
+  reserve_wall3d(penrose ? 22 : prod ? 0 : sl2 ? 9 : S7);
   if(GDIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -954,7 +958,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(GDIM == 3 && !euclid && !binarytiling && !nil && !prod) {
+  if(GDIM == 3 && !euclid && !binarytiling && !nil && !prod && !sl2) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
@@ -963,6 +967,42 @@ void geometry_information::create_wall3d() {
         vertices.push_back(reg3::cellshape[w*facesize+a]);
       make_wall(w, vertices);
       }
+    }
+
+  if(geometry == gSL2) {
+    ld zs = 2 * M_PI / 28;
+    ld a = 2 * M_PI/7;
+    ld tf = tessf7 / 4;
+    ld halfedge = 0.283128;
+    ld he = halfedge / 2;
+    hyperpoint right_u = xpush(tf) * ypush(-he) * zpush0(zs/2);
+    hyperpoint right_d = xpush(tf) * ypush(-he) * zpush0(-zs/2);
+    hyperpoint left_u  = xpush(tf) * ypush(+he) * zpush0(zs/2);
+    hyperpoint left_d  = xpush(tf) * ypush(+he) * zpush0(-zs/2);
+    hyperpoint center_u = zpush0(zs/2);
+    hyperpoint center_d = zpush0(-zs/2);
+    for(int i=0; i<7; i++) {
+      auto s =spin(a * i);
+      make_wall(i, {s * right_u, s * right_d, s * left_d, s * left_u});
+      }
+    vector<hyperpoint> top, bot;
+    for(int i=0; i<7; i++) {
+      bot.push_back(center_d);
+      bot.push_back(spin(a*i) * left_d);
+      bot.push_back(spin(a*i) * right_d);
+      bot.push_back(center_d);
+      bot.push_back(spin(a*i) * right_d);
+      bot.push_back(spin(a*(i+1)) * left_d);
+
+      top.push_back(center_u);
+      top.push_back(spin(a*i) * left_u);
+      top.push_back(spin(a*i) * right_u);
+      top.push_back(center_u);
+      top.push_back(spin(a*i) * right_u);
+      top.push_back(spin(a*(i+1)) * left_u);
+      }
+    make_wall(7, bot);
+    make_wall(8, top);
     }
   
   if(geometry == gSol) {

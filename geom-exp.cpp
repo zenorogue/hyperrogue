@@ -821,6 +821,10 @@ EX void showEuclideanMenu() {
       dialog::addSelItem(XLAT("Curvature"), XLAT("Nil"), 0);
       break;
 
+    case gcSL2:
+      dialog::addSelItem(XLAT("Curvature"), XLAT("~SL2(R)~"), 0);
+      break;
+
     case gcProduct:
       dialog::addSelItem(XLAT("Curvature"), XLAT("Product"), 0);
       break;

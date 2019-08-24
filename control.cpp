@@ -284,6 +284,13 @@ typedef SDL_Event eventtype;
 
 EX bool smooth_scrolling = false;
 
+transmatrix zforward_push(ld z) {
+  if(!sl2) return zpush(z);
+  transmatrix T = Id;
+  T[2][3] = z;
+  return T;
+  }
+
 EX void handlePanning(int sym, int uni) {
   auto& LPe = nisot::local_perspective;
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
@@ -300,10 +307,10 @@ EX void handlePanning(int sym, int uni) {
   
 #if !ISPANDORA
   if(sym == SDLK_END && GDIM == 3) { 
-    View = solmul(cpush(2, -0.2*shiftmul), LPe, View), didsomething = true, playermoved = false;
+    View = solmul(zforward_push(-0.2*shiftmul), LPe, View), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_HOME && GDIM == 3) { 
-    View = solmul(cpush(2, +0.2*shiftmul), LPe, View), didsomething = true, playermoved = false;
+    View = solmul(zforward_push(+0.2*shiftmul), LPe, View), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_RIGHT) { 
     if(history::on)

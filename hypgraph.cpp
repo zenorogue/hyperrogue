@@ -1382,13 +1382,30 @@ EX void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
+
+  if(sl2) {
+    cell *c = viewcenter();
+    cell *cbest = NULL;
+    ld best = hdist0(tC0(gmatrix[c]));
+    if(isnan(best)) return;
+    forCellEx(c2, c) {
+      ld quality = hdist0(tC0(gmatrix[c2]));
+      if(quality < best) best = quality, cbest = c2;
+      }
+    if(cbest) {
+      View = View * currentmap->relative_matrix(cbest, c, C0);
+      viewctr.at = cbest->master;
+      nisot::current_view_level = slr::get_where(cbest).second;
+      }
+    return;
+    }
   
   if(prod) {
     ld z = zlevel(tC0(View));
     View = mscale(View, -z);
     product::in_underlying_map(optimizeview);
-    if(z > cgi.plevel / 2) { product::current_view_level--; z -= cgi.plevel; }
-    if(z < -cgi.plevel / 2) { product::current_view_level++; z += cgi.plevel; }
+    if(z > cgi.plevel / 2) { nisot::current_view_level--; z -= cgi.plevel; }
+    if(z < -cgi.plevel / 2) { nisot::current_view_level++; z += cgi.plevel; }
     View = mscale(View, z);
     return;
     }
@@ -1483,7 +1500,7 @@ EX void resetview() {
   else centerover = cwt;
   cwtV = View;
   nisot::local_perspective = Id;
-  if(prod) product::current_view_level = product::get_where(cwt.at).second;
+  if(prod || sl2) nisot::current_view_level = product::get_where(cwt.at).second;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
@@ -1970,7 +1987,7 @@ bool limited_generation(cell *c) {
 
 EX bool do_draw(cell *c, const transmatrix& T) {
 
-  if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, product::current_view_level), T); });
+  if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, nisot::current_view_level), T); });
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(nil && pmodel == mdGeodesic) {
@@ -1978,7 +1995,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
-    else if(pmodel == mdGeodesic && !nil) {
+    else if(pmodel == mdGeodesic && sol) {
       if(!nisot::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
       }

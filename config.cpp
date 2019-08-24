@@ -520,6 +520,8 @@ EX void initConfig() {
       sightranges[i] = 2 * M_PI;
     else if(ginf[i].cclass == gcEuclid)
       sightranges[i] = 10;
+    else if(ginf[i].cclass == gcSL2)
+      sightranges[i] = 1.5;
     else
       sightranges[i] = 5;
     sightranges[gArchimedean] = 10;

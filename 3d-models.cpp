@@ -615,8 +615,8 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
   // shift_shape(orig, BIRD);
   }
 
-EX hyperpoint forward_dir(ld x) { return prod ? point3(x, 0, 0) : xpush0(x); }
-EX hyperpoint zforward_dir(ld z) { return prod ? point3(0, 0, z) : zpush0(z); }
+EX hyperpoint forward_dir(ld x) { return (prod || sl2) ? point3(x, 0, 0) : xpush0(x); }
+EX hyperpoint zforward_dir(ld z) { return (prod || sl2) ? point3(0, 0, z) : zpush0(z); }
 
 EX hyperpoint dir_to_point(hyperpoint h) { return prod ? product::direct_exp(h) : h; }
 

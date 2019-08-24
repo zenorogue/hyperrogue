@@ -148,6 +148,8 @@ EX cell *createMov(cell *c, int d) {
   if(c->move(d)) return c->move(d);
   else if(geometry == gProduct)
     product::find_cell_connection(c, d);
+  else if(sl2)
+    slr::find_cell_connection(c, d);
   #if CAP_BT
   else if(penrose)
     kite::find_cell_connection(c, d);

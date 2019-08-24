@@ -10,6 +10,7 @@ namespace hr {
 EX namespace nisot {
   typedef array<float, 3> ptlow;
 
+  EX int current_view_level;  
   EX transmatrix local_perspective;
   #if HDR
   inline bool local_perspective_used() { return nonisotropic || prod; }
@@ -18,6 +19,8 @@ EX namespace nisot {
   EX bool geodesic_movement = true;
 
   EX transmatrix translate(hyperpoint h) {
+    if(sl2)
+      return slr::translate(h);
     transmatrix T = Id;
     for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i];
     if(sol) {
@@ -564,8 +567,6 @@ EX namespace product {
     ginf[gProduct].g.graphical_dimension++;
     }
   
-  EX int current_view_level;
-  
   hrmap *pmap;
   geometry_information *pcgip;
   
@@ -634,7 +635,7 @@ EX namespace product {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere;
     in_actual([&] { 
-      cell *c0 = get_at(c, current_view_level);
+      cell *c0 = get_at(c, nisot::current_view_level);
       cwall_offset = wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
       else {
@@ -652,7 +653,7 @@ EX namespace product {
       for(int z=-max_z; z<=max_z; z++) {
         if(z == 0) cwall_mask ^= (2<<c->type);
         if(z == 1) cwall_mask ^= (1<<c->type);
-        cell *c1 = get_at(c, current_view_level+z);
+        cell *c1 = get_at(c, nisot::current_view_level+z);
         setdist(c1, 7, NULL);
         drawcell(c1, V * mscale(Id, cgi.plevel * z), spinv, mirrored); 
         }
@@ -769,11 +770,360 @@ EX namespace product {
   
 EX }
 
+EX namespace slr {
+
+  /* This implementation is based on:
+  // https://pdfs.semanticscholar.org/bf46/824df892593a1b6d1c84a5f99e90eece7c54.pdf
+  // However, to make it consistent with the conventions in HyperRogue,
+  // coordinates 0<->2 and 1<->3 are swapped,
+  // then coordinates 2<->3 are swapped
+  */
+
+  EX hyperpoint from_phigans(hyperpoint h) {
+    ld r = asinh(hypot_d(2, h));
+    ld x = h[0];
+    ld y = h[1];
+    ld z = h[2];
+    return hyperpoint(x * cos(z) + y * sin(z), y * cos(z) - x * sin(z), cosh(r) * sin(z), cosh(r) * cos(z));
+    }
+  
+  EX hyperpoint to_phigans(hyperpoint h) {
+    ld z = atan2(h[2], h[3]);
+    ld x = h[0];
+    ld y = h[1];
+    return point31(x * cos(z) - y * sin(z), y * cos(z) + x * sin(z), z);
+    }
+
+  /** in the 'phigans' model */
+  hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported) {
+    ld x = Position[0];
+    ld y = Position[1];
+    ld s = x*x + y*y + 1;
+    ld x2 = x * x;
+    ld y2 = y * y;
+    ld x4 = x2 * x2;
+    ld y4 = y2 * y2;
+    return point3(
+     + Velocity[ 0 ] * Transported[ 0 ] * (x*(4*x2*y2 + 4*y4 + 9*y2 + 1))
+     + Velocity[ 0 ] * Transported[ 1 ] * (-y*(4*x4 + 4*x2*y2 + 9*x2 + 2))
+     + Velocity[ 0 ] * Transported[ 2 ] * (-x*y*(x2 + y2 + 2))
+     + Velocity[ 1 ] * Transported[ 0 ] * (-y*(4*x4 + 4*x2*y2 + 9*x2 + 2))
+     + Velocity[ 1 ] * Transported[ 1 ] * (x*(4*x4 + 4*x2*y2 + 9*x2 + 5))
+     + Velocity[ 1 ] * Transported[ 2 ] * (x4 + x2*y2 + 2*x2 + 1)
+     + Velocity[ 2 ] * Transported[ 0 ] * (-x*y*(x2 + y2 + 2))
+     + Velocity[ 2 ] * Transported[ 1 ] * (x4 + x2*y2 + 2*x2 + 1),
+  
+     + Velocity[ 0 ] * Transported[ 0 ] *  (y*(4*x2*y2 + 4*y4 + 9*y2 + 5))
+     + Velocity[ 0 ] * Transported[ 1 ] *  (-x*(4*x2*y2 + 4*y4 + 9*y2 + 2))
+     + Velocity[ 0 ] * Transported[ 2 ] *  (-x2*y2 - y4 - 2*y2 - 1)
+     + Velocity[ 1 ] * Transported[ 0 ] *  (-x*(4*x2*y2 + 4*y4 + 9*y2 + 2))
+     + Velocity[ 1 ] * Transported[ 1 ] *  (y*(4*x4 + 4*x2*y2 + 9*x2 + 1))
+     + Velocity[ 1 ] * Transported[ 2 ] *  (x*y*(x2 + y2 + 2))
+     + Velocity[ 2 ] * Transported[ 0 ] *  (-x2*y2 - y4 - 2*y2 - 1)
+     + Velocity[ 2 ] * Transported[ 1 ] *  (x*y*(x2 + y2 + 2)),
+  
+     + Velocity[ 0 ] * Transported[ 0 ] *  (-4*x*y)
+     + Velocity[ 0 ] * Transported[ 1 ] *  (2*x2 - 2*y2)
+     + Velocity[ 0 ] * Transported[ 2 ] *  x
+     + Velocity[ 1 ] * Transported[ 0 ] *  (2*x2 - 2*y2)
+     + Velocity[ 1 ] * Transported[ 1 ] *  4*x*y
+     + Velocity[ 1 ] * Transported[ 2 ] *  y
+     + Velocity[ 2 ] * Transported[ 0 ] *  x
+     + Velocity[ 2 ] * Transported[ 1 ] *  y
+       ) / s;
+    }
+
+  EX transmatrix translate(hyperpoint h) {
+    return matrix4(
+      h[3], -h[2],  h[1],  h[0],
+      h[2],  h[3], -h[0],  h[1],
+      h[1], -h[0],  h[3],  h[2],
+      h[0],  h[1], -h[2],  h[3]
+      );
+    }
+  
+  EX hyperpoint polar(ld r, ld theta, ld phi) {
+    return hyperpoint(sinh(r) * cos(theta-phi), sinh(r) * sin(theta-phi), cosh(r) * sin(phi), cosh(r) * cos(phi));
+    }
+  
+  EX hyperpoint xyz_point(ld x, ld y, ld z) {
+    ld r = hypot(x, y);
+    ld f = r ? sinh(r) / r : 1;
+    return hyperpoint(x * f * cos(z) + y * f * sin(z), y * f * cos(z) - x * f * sin(z), cosh(r) * sin(z), cosh(r) * cos(z));
+    }
+  
+  ld rootsin(ld square, ld s) {
+    if(square > 0) return sinh(sqrt(square) * s) / sqrt(square);
+    else if(square < 0) return sin(sqrt(-square) * s) / sqrt(-square);
+    else return s;
+    }
+  
+  /** it==0 is standard asin, it==1 is the next solution (PI-asin) */
+  ld asin_it(ld z, int it) {
+    auto ans = asin(z);
+    if(it & 1) ans = M_PI - ans;
+    return ans;
+    }
+  
+  ld arootsin(ld square, ld v, int it) {
+    if(square > 0) return asinh(v * sqrt(square)) / sqrt(square);
+    else if(square < 0) return asin_it(v * sqrt(-square), it) / sqrt(-square);
+    else return v;
+    }
+  
+  ld roottan(ld square, ld s) {
+    if(square > 0) return tanh(sqrt(square) * s) / sqrt(square);
+    else if(square < 0) return tan(sqrt(-square) * s) / sqrt(-square);
+    else return s;
+    }
+
+  hyperpoint geodesic_polar(ld alpha, ld beta, ld s) {
+    auto c = cos(2*alpha);
+    
+    ld t;
+    if(c > 0) 
+      t = atan(sin(alpha) * tanh(sqrt(c) * s) / sqrt(c));
+    else if(c < 0) {
+      /* the formula in the paper is roughly atan(k*tan(s))
+       * however, atan is not always to be taken in [-PI/2,PI/2]:
+       * if s is in [kPI-PI/2, kPI+PI/2], we should also increase the result by kPI
+       */
+      ld x = sqrt(-c) * s;
+      ld steps = floor(x/M_PI + 0.5);
+      t = atan(sin(alpha) * tan(sqrt(-c) * s) / sqrt(-c)) + M_PI * steps;
+      }
+    else t = atan(sin(alpha) * s);
+    
+    return polar(
+      asinh(cos(alpha) * rootsin(c, s)),
+      beta - t,
+      2*sin(alpha)*s - t
+      );
+    }
+
+  EX hyperpoint formula_exp(hyperpoint h) {
+    ld s = hypot_d(3, h);
+    ld beta = atan2(h[1], h[0]);
+    ld alpha = asin(h[2] / s);
+    return geodesic_polar(alpha, beta, s);
+    }
+
+  void find_alpha(ld phi, ld r, ld theta, ld &alpha, ld &s, ld &beta) {
+    if(phi < 0) { find_alpha(-phi, r, -theta, alpha, s, beta); alpha = -alpha; beta = -beta; return; }
+    ld mina = 0, maxa = M_PI/2;
+  
+    bool next_nan;
+    ld c;
+    
+    for(int it=0; it<40; it++) {
+      alpha = (mina + maxa) / 2;
+  
+      c = cos(2 * alpha);    
+      s = arootsin(c, sinh(r) / cos(alpha), 0);
+      if(isnan(s)) { next_nan = true, maxa = alpha; continue; }
+      ld got_phi = 2*sin(alpha)*s - atan(sin(alpha) * roottan(c, s));
+      if(got_phi > phi) next_nan = false, maxa = alpha;
+      else mina = alpha;
+      }
+    
+    if(next_nan) {
+      mina = M_PI/4;
+  
+      for(int it=0; it<40; it++) {
+        alpha = (mina + maxa) / 2;
+        c = cos(2 * alpha);    
+        s = arootsin(c, sinh(r) / cos(alpha), 1);
+        ld got_phi = 2*sin(alpha)*s - atan(sin(alpha) * roottan(c, s)) - M_PI;
+        if(got_phi < phi) maxa = alpha;
+        else mina = alpha;
+        }
+      beta = theta + atan(sin(alpha) * roottan(c, s)) + M_PI;
+      }
+    else beta = theta + atan(sin(alpha) * roottan(c, s));
+    }
+
+  EX hyperpoint get_inverse_exp(hyperpoint h) {
+    if(sqhypot_d(2, h) < 1e-12) return point3(0, 0, atan2(h[2], h[3]));
+    ld r = asinh(hypot_d(2, h));
+    ld phi = atan2(h[2], h[3]);
+    ld theta = atan2(h[1], h[0]) + phi;
+    
+    ld alpha, s, beta;
+    find_alpha(phi, r, theta, alpha, s, beta);
+    
+    return point3(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha));
+    }
+
+  EX string slshader = 
+    "float atan2(float y, float x) {"
+    "  if(x == 0.) return y > 0. ? PI/2. : -PI/2.;"
+    "  if(x > 0.) return atan(y / x);"
+    "  if(y >= 0.) return atan(y / x) + PI;"
+    "  if(y < 0.) return atan(y / x) - PI;"
+    "  }"
+    
+    "vec4 inverse_exp(vec4 h) {"
+      "if(h[0]*h[0] + h[1] * h[1] < 1e-6) return vec4(0, 0, atan(h[2], h[3]), 1);"
+      "float r = asinh(sqrt(h[0] * h[0] + h[1] * h[1]));"
+      "float phi = atan2(h[2], h[3]);"
+      "float theta = atan2(h[1], h[0]) + phi;"
+      "float alpha;"
+      "float s;"
+      "float beta;"
+      "float sgn = 1.;"
+      "if(phi < 0.) { phi = -phi; theta = -theta; sgn = -1.; }"
+      "float c;"
+      "s = sinh(r) / cos(PI/4.);"
+      "float gphi = 2.*sin(PI/4.)*s - atan(sin(PI/4.) * s);"
+      "if(gphi > phi) {"
+      "  float mina = 0.;"
+      "  float maxa = PI/4.;"
+      "  for(int it=0; it<40; it++) {"
+      "    alpha = (mina + maxa) / 2.;"
+      "    c = sqrt(cos(2. * alpha));"
+      "    s = asinh(sinh(r) / cos(alpha) * c) / c;"
+      "    gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tanh(c * s) / c);"
+      "    if(gphi > phi) maxa = alpha;"
+      "    else mina = alpha;"
+      "    }"
+      "  beta = theta + atan(sin(alpha) * tanh(c * s) / c);"
+      "  }"
+      "else {"
+      "  int next_nan = 1;"
+      "  float mina = PI/4.;"
+      "  float maxa = PI/2.;"
+      "  for(int it=0; it<40; it++) {"
+      "    alpha = (mina + maxa) / 2.;"
+      "    c = sqrt(-cos(2. * alpha));"
+      "    if(sinh(r) * c > cos(alpha)) { next_nan = 1; maxa = alpha; continue; }"
+      "    s = asin(sinh(r) * c / cos(alpha)) / c;"
+      "    gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(c*s) / c);"
+      "    if(gphi > phi) { next_nan = 0; maxa = alpha; }"
+      "    else mina = alpha;"
+      "    }"
+      "  if(next_nan != 0) {"
+      "    mina = PI/4.;"
+      "    for(int it=0; it<10; it++) {"
+      "      alpha = (mina + maxa) / 2.;"
+      "      c = sqrt(-cos(2. * alpha));"
+      "      s = PI - asin(sinh(r) * c / cos(alpha)) / c;"
+      "      gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(c*s) / c) - PI;"
+      "      if(gphi < phi) maxa = alpha; else mina = alpha;"
+      "      }"
+      "    beta = theta + atan(sin(alpha) * tanh(c * s) / c) + PI;"
+      "    }"
+      "  else beta = theta + atan(sin(alpha) * tanh(c * s) / c);"
+      "  }"
+      "alpha = alpha * sgn; beta = beta * sgn;"
+      "return vec4(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha), 1);"
+      "}";
+
+  EX transmatrix adjmatrix(int i, int j) {
+    ld zs = 2 * M_PI / 28;
+    if(i == 7) return zpush(-zs) * spin(-2*zs);
+    if(i == 8) return zpush(+zs) * spin(+2*zs);
+    return spin(2 * M_PI * i / 7) * xpush(tessf7/2) * spin(M_PI - 2 * M_PI * j / 7);
+    }
+  
+  struct hrmap_psl2 : hrmap {
+    
+    hrmap *underlying_map;
+    
+    map<pair<cell*, int>, cell*> at;
+    map<cell*, pair<cell*, int>> where;
+    
+    heptagon *getOrigin() override { return underlying_map->getOrigin(); }
+    
+    template<class T> auto in_underlying(const T& t) -> decltype(t()) {
+      dynamicval<eGeometry> g(geometry, gNormal);
+      dynamicval<hrmap*> gu(currentmap, underlying_map);
+      return t();
+      }
+    
+    cell *getCell(cell *u, int h) {
+      h = gmod(h, 14);
+      cell*& c = at[make_pair(u, h)];
+      if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
+      return c;
+      }
+  
+    cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
+  
+    virtual transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) override { 
+      for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adjmatrix(i, c1->c.spin(i));
+      if(gmatrix0.count(c2) && gmatrix0.count(c1))
+        return inverse(gmatrix0[c1]) * gmatrix0[c2];
+      return Id; // not implemented yet
+      }
+
+    void draw() override {
+      set<cell*> visited;
+      
+      cell* start = viewcenter();
+      vector<pair<cell*, transmatrix>> dq;
+      
+      visited.insert(start);
+      dq.emplace_back(start, cview());
+      
+      for(int i=0; i<isize(dq); i++) {
+        cell *c = dq[i].first;
+        transmatrix V = dq[i].second;
+        
+        if(V[3][3] < 0) V = centralsym * V;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V, 0, false);
+
+        for(int i=0; i<9; i++) {
+          // note: need do cmove before c.spin
+          cell *c1 = c->cmove(i);
+          if(visited.count(c1)) continue;
+          visited.insert(c1);
+          dq.emplace_back(c1, V * adjmatrix(i, c->c.spin(i)));
+          }
+        }
+      }
+
+    hrmap_psl2() {
+      in_underlying([this] { initcells(); underlying_map = currentmap; });
+      for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
+      }
+    
+    ~hrmap_psl2() {
+      in_underlying([this] { delete currentmap; });
+      for(auto& p: at) tailored_delete(p.second);
+      }
+  
+    };
+
+  EX cell *get_at(cell *base, int level) {
+    return ((hrmap_psl2*)currentmap)->getCell(base, level);
+    }
+  
+  EX pair<cell*, int> get_where(cell *c) { return ((hrmap_psl2*)currentmap)->where[c]; }
+  
+  void find_cell_connection(cell *c, int d) {
+    auto m = (hrmap_psl2*)currentmap;
+    if(d >= c->type - 2) {
+      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? 1 : -1));
+      c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
+      }
+    else {
+      auto cu = m->where[c].first;
+      auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
+      int d1 = cu->c.spin(d);
+      cell *c1 = get_at(cu1, m->where[c].second - d1*2 + d*2 + 7);
+      c->c.connect(d, c1, d1, false);
+      }
+    }
+
+EX }
+
 EX namespace nisot {
 
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
     if(sol) return solv::christoffel(at, velocity, transported);
     else if(nil) return nilv::christoffel(at, velocity, transported);
+    else if(sl2) return slr::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
     }
 
@@ -789,6 +1139,7 @@ EX namespace nisot {
   EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
     if(sol) return solv::get_inverse_exp(h, p == iLazy, just_direction);
     if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
+    if(sl2) return slr::get_inverse_exp(h);
     if(prod) return product::inverse_exp(h);
     return point3(h[0], h[1], h[2]);
     }
@@ -822,6 +1173,7 @@ EX namespace nisot {
   EX hyperpoint get_exp(hyperpoint v, int steps) {
     if(sol) return direct_exp(v, steps);
     if(nil) return nilv::formula_exp(v);
+    if(sl2) return slr::formula_exp(v);
     if(prod) return product::direct_exp(v);
     return v;
     }
@@ -831,19 +1183,35 @@ EX namespace nisot {
     hyperpoint h = tC0(T);
     h[3] = 0;
   
-    h = Pos * h;
+    auto tPos = transpose(Pos);
     
+    const ld eps = 1e-4;
+
+    if(sl2) {
+      hyperpoint p = slr::to_phigans(tPos[3]);
+      for(int i=0; i<3; i++)
+        tPos[i] = (slr::to_phigans(tPos[3] + tPos[i] * eps) - p) / eps;
+      tPos[3] = p; 
+      h = transpose(tPos) * h;
+      }
+    else h = Pos * h;
+
     int steps = 100;
     h /= steps;
-  
-    auto tPos = transpose(Pos);
-  
+    
     for(int i=0; i<steps; i++) {
       for(int j=0; j<3; j++)
         tPos[j] += christoffel(tPos[3], h, tPos[j]);
       geodesic_step(tPos[3], h);
       }
                                                                                   
+    if(sl2) {
+      hyperpoint p = slr::from_phigans(tPos[3]);
+      for(int i=0; i<3; i++)
+        tPos[i] = (slr::from_phigans(tPos[3] + tPos[i] * eps) - p) / eps;
+      tPos[3] = p;
+      }
+
     return transpose(tPos);
     }
 
@@ -895,6 +1263,7 @@ EX namespace nisot {
   EX hrmap *new_map() { 
     if(sol) return new solv::hrmap_sol; 
     if(nil) return new nilv::hrmap_nil;
+    if(sl2) return new slr::hrmap_psl2;
     if(geometry == gProduct) return new product::hrmap_product;
     return NULL;
     }

@@ -303,6 +303,8 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardEH2, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sol)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
+    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sl2)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSL2, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nil)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardNil, pers3 = true;
     if(GDIM == 3 && sphere && apply_models && pmodel == mdPerspective) {

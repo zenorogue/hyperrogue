@@ -355,7 +355,8 @@ EX ld hypot_d(int d, const hyperpoint& h) {
   }
   
 EX ld zlevel(const hyperpoint &h) {
-  if(translatable) return h[LDIM];
+  if(sl2) return sqrt(-intval(h, Hypc));
+  else if(translatable) return h[LDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
   else if(prod) return log(sqrt(abs(intval(h, Hypc)))); /* abs works with both underlying spherical and hyperbolic */
   else return (h[LDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
@@ -444,6 +445,7 @@ EX transmatrix eupush(hyperpoint h) {
   }
 
 EX transmatrix eupush3(ld x, ld y, ld z) {
+  if(sl2) return slr::translate(slr::xyz_point(x, y, z));
   return eupush(point3(x, y, z));
   }
 
@@ -827,6 +829,11 @@ EX ld hdist0(const hyperpoint& mh) {
       auto d1 = product_decompose(mh);
       return hypot(PIU(hdist0(d1.second)), d1.first);
       }
+    case gcSL2: {
+      auto cosh_r = hypot(mh[2], mh[3]);
+      auto phi = atan2(mh[2], mh[3]);
+      return hypot(cosh_r < 1 ? 0 : acosh(cosh_r), phi);
+      }
     default:
       return hypot_d(GDIM, mh);
     }
@@ -1017,8 +1024,14 @@ EX transmatrix transpose(transmatrix T) {
   }
 
 #if HDR
+namespace slr { 
+  hyperpoint xyz_point(ld x, ld y, ld z); 
+  hyperpoint polar(ld r, ld theta, ld phi); 
+  }
+
 inline hyperpoint cpush0(int c, ld x) { 
   hyperpoint h = Hypc;
+  if(sl2) return slr::xyz_point(c==0?x:0, c==1?x:0, c==2?x:0);
   if(c == 2 && prod) {
     h[2] = exp(x);
     return h;
@@ -1029,6 +1042,7 @@ inline hyperpoint cpush0(int c, ld x) {
   }
 
 inline hyperpoint xspinpush0(ld alpha, ld x) { 
+  if(sl2) return slr::polar(x, -alpha, 0);
   hyperpoint h = Hypc;
   h[LDIM] = cos_auto(x);
   h[0] = sin_auto(x) * cos(alpha);

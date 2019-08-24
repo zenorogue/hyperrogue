@@ -399,7 +399,9 @@ hpcshape
  *  based on comparing these values to the values in the other geometry.
  */
 
-ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
+#if HDR
+static const ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
+#endif
 
 bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
 
@@ -465,6 +467,22 @@ void geometry_information::prepare_basics() {
       t->hexhexdist = cgi.hexhexdist;
       t->base_distlimit = cgi.base_distlimit-1;
       });
+    goto prod_finish;
+    }
+
+  if(sl2) {
+    dynamicval<eGeometry> g(geometry, gNormal);
+    check_cgi();
+    cgi.prepare_basics();
+    rhexf = cgi.rhexf/2;
+    hexf = cgi.hexf/2;
+    crossf = cgi.crossf/2;
+    hcrossf = cgi.hcrossf/2;
+    tessf = cgi.tessf/2;
+    hexvdist = cgi.hexvdist/2;
+    hexhexdist = cgi.hexhexdist/2;
+    base_distlimit = cgi.base_distlimit-1;
+    cgip = this;
     goto prod_finish;
     }
   

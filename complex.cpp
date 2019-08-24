@@ -2668,7 +2668,7 @@ EX namespace sword {
     };
   
   /** dimensions available to the Sword */
-  #define SWORDDIM (prod ? 2 : WDIM)
+  #define SWORDDIM ((prod || sl2) ? 2 : WDIM)
     
   #endif
 
@@ -2695,7 +2695,7 @@ EX namespace sword {
   
   cell *pos2(cell *c, int s) {
     int t = c->type;
-    if(prod) t -= 2;
+    if(prod || sl2) t -= 2;
     s *= 2;
     s += sword_angles/t;
     s %= (2 * sword_angles);
@@ -2748,7 +2748,7 @@ EX namespace sword {
     int s2 = neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return d;
     if(SWORDDIM == 2) {
-      int sub = prod ? 2 : 0;
+      int sub = (prod || sl2) ? 2 : 0;
       int t2 = c2->type - sub;
       int t1 = c1->type - sub;
       if(c1->c.mirror(s1))
