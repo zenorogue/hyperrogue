@@ -46,9 +46,13 @@ eVariation variation;
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
   
-  hyperpoint(ld x, ld y, ld z, ld w) { 
-    self[0] = x; self[1] = y; self[2] = z; 
-    if(MAXMDIM == 4) self[3] = w;
+  #if MAXMDIM == 4
+  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> {{x, y, z, w}} { 
+  #else
+  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> {{x, y, z}} { 
+  #endif
+    // self[0] = x; self[1] = y; self[2] = z; 
+    // if(MAXMDIM == 4) self[3] = w;
     }
 
   inline hyperpoint& operator *= (ld d) {
@@ -135,39 +139,40 @@ constexpr transmatrix diag(ld a, ld b, ld c, ld d) {
   #endif
   }
 
-const static hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
+constexpr hyperpoint Hypc = hyperpoint(0, 0, 0, 0);
 
 /** identity matrix */
-const static transmatrix Id = diag(1,1,1,1);
+constexpr transmatrix Id = diag(1,1,1,1);
 
 /** zero matrix */
-const static transmatrix Zero = diag(0,0,0,0);
+constexpr transmatrix Zero = diag(0,0,0,0);
 
 /** mirror image */
-const static transmatrix Mirror = diag(1,-1,1,1);
+constexpr transmatrix Mirror = diag(1,-1,1,1);
 
 /** mirror image: flip in the Y coordinate */
-const static transmatrix MirrorY = diag(1,-1,1,1);
+constexpr transmatrix MirrorY = diag(1,-1,1,1);
 
 /** mirror image: flip in the X coordinate */
-const static transmatrix MirrorX = diag(-1,1,1,1);
+constexpr transmatrix MirrorX = diag(-1,1,1,1);
 
 /** mirror image: flip in the Z coordinate */
-const static transmatrix MirrorZ = diag(1,1,-1,1);
+constexpr transmatrix MirrorZ = diag(1,1,-1,1);
 
 /** rotate by PI in the XY plane */
-const static transmatrix pispin = diag(-1,-1,1,1);
+constexpr transmatrix pispin = diag(-1,-1,1,1);
 
 /** central symmetry matrix */
-const static transmatrix centralsym = diag(-1,-1,-1,-1);
+constexpr transmatrix centralsym = diag(-1,-1,-1,-1);
 
 inline hyperpoint hpxyz(ld x, ld y, ld z) { return MDIM == 3 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
 inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return MDIM == 3 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
-inline hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
-inline hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
-inline hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
+constexpr hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
+constexpr hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
+constexpr hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 
-extern const hyperpoint C02, C03;
+constexpr hyperpoint C02 = hyperpoint(0,0,1,0);
+constexpr hyperpoint C03 = hyperpoint(0,0,0,1);
 
 /** C0 is the origin in our space */
 #define C0 (MDIM == 3 ? C02 : C03)
@@ -305,13 +310,9 @@ hyperpoint hpxy3(ld x, ld y, ld z) {
   return hpxyz3(x,y,z, translatable ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
-// origin of the hyperbolic plane
-const hyperpoint C02 = hyperpoint(0,0,1,0);
-const hyperpoint C03 = hyperpoint(0,0,0,1);
-
 // a point (I hope this number needs no comments ;) )
-const hyperpoint Cx12 = hyperpoint(1,0,1.41421356237,0);
-const hyperpoint Cx13 = hyperpoint(1,0,0,1.41421356237);
+constexpr hyperpoint Cx12 = hyperpoint(1,0,1.41421356237,0);
+constexpr hyperpoint Cx13 = hyperpoint(1,0,0,1.41421356237);
 
 #define Cx1 (GDIM==2?Cx12:Cx13)
 
