@@ -16,7 +16,7 @@ ld eyepos;
 #define S (cgi.scalefactor / 0.805578)
 #define SH (cgi.scalefactor / 0.805578 * vid.height_width / 1.5)
 
-#define revZ ((WDIM == 2 || prod) ? -1 : 1)
+#define revZ ((WDIM == 2 || hybri) ? -1 : 1)
 
 hyperpoint shcenter;
 
