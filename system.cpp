@@ -872,7 +872,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(randomPatternsMode) return;
   if(dual::state) return;
   if(archimedean) return;
-  if(prod) return;
+  if(hybri) return;
   if(daily::on) return;
   if(peace::on) return;
   if(!gold()) return;
@@ -1159,7 +1159,7 @@ EX void set_geometry(eGeometry target) {
     int old_DIM = GDIM;
     stop_game();
     ors::reset();
-    if(target == gProduct) product::configure();
+    if(among(target, gProduct, gSL2)) hybrid::configure(target);
     geometry = target;
   
     if(chaosmode && bounded) chaosmode = false;
@@ -1288,7 +1288,7 @@ EX void switch_game_mode(char switchWhat) {
       chaosmode = false;
       princess::challenge = false;
       if(sol || bounded) set_geometry(gNormal);
-      if(prod) set_geometry(product::underlying);
+      if(prod) set_geometry(hybrid::underlying);
       dual::disable();
       break;
 #endif
@@ -1310,7 +1310,7 @@ EX void switch_game_mode(char switchWhat) {
       shmup::on = !shmup::on;
       princess::challenge = false;
       if(!shmup::on) racing::on = false;
-      if(prod) set_geometry(product::underlying);
+      if(prod) set_geometry(hybrid::underlying);
       break;
     
     case rg::randpattern:

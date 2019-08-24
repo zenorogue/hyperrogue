@@ -774,10 +774,10 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   }
 
 EX int shvid(cell *c) {
-  if(prod) {
+  if(hybri) {
     int d;
-    cell *c1 = product::get_where(c).first; 
-    product::in_underlying_map([&] { d = shvid(c1); });
+    cell *c1 = hybrid::get_where(c).first; 
+    hybrid::in_underlying_map([&] { d = shvid(c1); });
     return d;
     }
   else if(GOLDBERG)

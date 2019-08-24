@@ -243,14 +243,14 @@ struct horo_distance {
 template<class T, class U> 
 void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   if(prod) {
-    auto w = product::get_where(base);
+    auto w = hybrid::get_where(base);
     auto d = product_decompose(check(at)).first;
     at = mscale(at, -d);
-    product::in_underlying_map([&] { virtualRebase(w.first, at, tohex, check); });
+    hybrid::in_underlying_map([&] { virtualRebase(w.first, at, tohex, check); });
     if(d > cgi.plevel / 2) { w.second++; d -= cgi.plevel; }
     if(d < -cgi.plevel / 2) { w.second--; d += cgi.plevel; }
     at = mscale(at, +d);
-    base = product::get_at(w.first, w.second);
+    base = hybrid::get_at(w.first, w.second);
     return;
     }
   if((euclid || sphere) && WDIM == 2) {

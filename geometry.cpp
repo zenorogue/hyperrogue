@@ -455,37 +455,22 @@ void geometry_information::prepare_basics() {
     goto finish;
     }
   
-  if(prod) {
+  if(hybri) {
     auto t = this;
-    product::in_underlying_geometry([&] {
-      t->rhexf = cgi.rhexf;
-      t->hexf = cgi.hexf;
-      t->crossf = cgi.crossf;
-      t->hcrossf = cgi.crossf;
-      t->tessf = cgi.tessf;
-      t->hexvdist = cgi.hexvdist;
-      t->hexhexdist = cgi.hexhexdist;
+    ld d = sl2 ? 2 : 1;
+    hybrid::in_underlying_geometry([&] {
+      t->rhexf = cgi.rhexf / d;
+      t->hexf = cgi.hexf / d;
+      t->crossf = cgi.crossf / d;
+      t->hcrossf = cgi.crossf / d;
+      t->tessf = cgi.tessf / d;
+      t->hexvdist = cgi.hexvdist / d;
+      t->hexhexdist = cgi.hexhexdist / d;
       t->base_distlimit = cgi.base_distlimit-1;
       });
-    goto prod_finish;
+    goto hybrid_finish;
     }
 
-  if(sl2) {
-    dynamicval<eGeometry> g(geometry, gNormal);
-    check_cgi();
-    cgi.prepare_basics();
-    rhexf = cgi.rhexf/2;
-    hexf = cgi.hexf/2;
-    crossf = cgi.crossf/2;
-    hcrossf = cgi.hcrossf/2;
-    tessf = cgi.tessf/2;
-    hexvdist = cgi.hexvdist/2;
-    hexhexdist = cgi.hexhexdist/2;
-    base_distlimit = cgi.base_distlimit-1;
-    cgip = this;
-    goto prod_finish;
-    }
-  
   if((sphere || hyperbolic) && WDIM == 3 && !binarytiling) {
     rhexf = hexf = 0.378077;
     crossf = hcrossf = 0.620672;
@@ -561,7 +546,7 @@ void geometry_information::prepare_basics() {
   if(binarytiling) binary::build_tmatrix();
   #endif
   
-  prod_finish:
+  hybrid_finish:
   
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
@@ -935,7 +920,7 @@ EX void check_cgi() {
   
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
-  if(prod) product::underlying_cgip->timestamp = ntimestamp;
+  if(hybri) hybrid::underlying_cgip->timestamp = ntimestamp;
   
   if(isize(cgis) > 4) {
     vector<pair<int, string>> timestamps;

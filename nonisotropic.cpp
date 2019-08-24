@@ -10,7 +10,6 @@ namespace hr {
 EX namespace nisot {
   typedef array<float, 3> ptlow;
 
-  EX int current_view_level;  
   EX transmatrix local_perspective;
   #if HDR
   inline bool local_perspective_used() { return nonisotropic || prod; }
@@ -549,24 +548,26 @@ EX namespace nilv {
     }
 EX }
 
-EX namespace product {
+EX namespace hybrid {
 
+  EX int current_view_level;  
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
   
-  void configure() {
+  EX void configure(eGeometry g) {
+    if(g == gSL2) variation = eVariation::pure;
     if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
     check_cgi();
     cgi.prepare_basics();
     underlying = geometry;
     underlying_cgip = cgip;
-    geometry = gProduct;
+    geometry = g;
     ginf[gProduct] = ginf[underlying];
     ginf[gProduct].cclass = gcProduct;
     ginf[gProduct].g.gameplay_dimension++;
     ginf[gProduct].g.graphical_dimension++;
     }
-  
+
   hrmap *pmap;
   geometry_information *pcgip;
   
@@ -578,7 +579,7 @@ EX namespace product {
     return t();  
     }
   
-  struct hrmap_product : hrmap {
+  struct hrmap_hybrid : hrmap {
     
     hrmap *underlying_map;
     
@@ -597,6 +598,7 @@ EX namespace product {
       }
     
     cell *getCell(cell *u, int h) {
+      if(sl2) h = gmod(h, 14);
       cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
       return c;
@@ -604,38 +606,78 @@ EX namespace product {
   
     cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
   
-    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * (where[c2].second - where[c1].second));
-      }
-  
-    hrmap_product() {
+    hrmap_hybrid() {
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }
     
-    ~hrmap_product() {
+    ~hrmap_hybrid() {
       in_underlying([this] { delete currentmap; });
       for(auto& p: at) tailored_delete(p.second);
+      }
+  
+    };
+  
+  hrmap_hybrid* hmap() { return (hrmap_hybrid*) currentmap; }
+  
+  EX cell *get_at(cell *base, int level) {
+    return hmap()->getCell(base, level);
+    }
+  
+  EX pair<cell*, int> get_where(cell *c) { return hmap()->where[c]; }
+
+  void find_cell_connection(cell *c, int d) {
+    auto m = hmap();
+    if(d >= c->type - 2) {
+      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? 1 : -1));
+      c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
+      }
+    else {
+      auto cu = m->where[c].first;
+      auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
+      int d1 = cu->c.spin(d);
+      int s = sl2 ? - d1*2 + d*2 + 7 : 0;
+      cell *c1 = get_at(cu1, m->where[c].second + s);
+      c->c.connect(d, c1, d1, cu->c.mirror(d));
+      }
+    }  
+
+  EX void in_underlying_map(const reaction_t& f) {
+    if(!hybri) f();
+    else hmap()->in_underlying(f);
+    }
+
+  #if HDR
+  template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
+    if(!hybri) return f();
+    dynamicval<eGeometry> g(geometry, underlying);
+    dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+    return f();
+    }
+  
+  #define PIU(x) hr::hybrid::in_underlying_geometry([&] { return (x); })
+  #endif
+EX }
+  
+EX namespace product {
+
+  struct hrmap_product : hybrid::hrmap_hybrid {
+    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * (where[c2].second - where[c1].second));
       }
   
     void draw() override {
       in_underlying([this] { currentmap->draw(); });
       }
     };
-  
-  EX cell *get_at(cell *base, int level) {
-    return ((hrmap_product*)currentmap)->getCell(base, level);
-    }
-  
-  EX pair<cell*, int> get_where(cell *c) { return ((hrmap_product*)currentmap)->where[c]; }
-  
+
   EX int cwall_offset, cwall_mask;
   
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere;
-    in_actual([&] { 
-      cell *c0 = get_at(c, nisot::current_view_level);
+    hybrid::in_actual([&] { 
+      cell *c0 = hybrid::get_at(c, hybrid::current_view_level);
       cwall_offset = wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
       else {
@@ -653,47 +695,33 @@ EX namespace product {
       for(int z=-max_z; z<=max_z; z++) {
         if(z == 0) cwall_mask ^= (2<<c->type);
         if(z == 1) cwall_mask ^= (1<<c->type);
-        cell *c1 = get_at(c, nisot::current_view_level+z);
+        cell *c1 = hybrid::get_at(c, hybrid::current_view_level+z);
         setdist(c1, 7, NULL);
         drawcell(c1, V * mscale(Id, cgi.plevel * z), spinv, mirrored); 
         }
       });
     }
   
-  void find_cell_connection(cell *c, int d) {
-    auto m = (hrmap_product*)currentmap;
-    if(d >= c->type - 2) {
-      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? 1 : -1));
-      c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
-      }
-    else {
-      auto cu = m->where[c].first;
-      auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
-      cell *c1 = get_at(cu1, m->where[c].second);
-      c->c.connect(d, c1, cu->c.spin(d), cu->c.mirror(d));
-      }
-    }
-  
   EX hyperpoint get_corner(cell *c, int i, ld z) {
     ld lev = cgi.plevel * z / 2;
-    dynamicval<eGeometry> g(geometry, underlying);
-    dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+    dynamicval<eGeometry> g(geometry, hybrid::underlying);
+    dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
     return mscale(get_corner_position(c, i), exp(lev));
     }
   
   EX int wall_offset(cell *c) {
-    int id = underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
+    int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
     int &wo = cgi.walloffsets[id];
     if(wo == -1) {
-      cell *c1 = get_where(c).first;
+      cell *c1 = hybrid::get_where(c).first;
       wo = isize(cgi.shWall3D);
       int won = wo + c->type;
       cgi.reserve_wall3d(won);
       
       for(int i=0; i<c1->type; i++) {
         hyperpoint w;
-        in_underlying_geometry([&] { 
+        hybrid::in_underlying_geometry([&] { 
           /* mirror image of C0 in the axis h1-h2 */
           hyperpoint h1 = get_corner_position(c1, i);
           hyperpoint h2 = get_corner_position(c1, i+1);
@@ -722,7 +750,7 @@ EX namespace product {
     return wo;
     }
 
-  EX bool product_sphere() { return ginf[underlying].cclass == gcSphere; }
+  EX bool product_sphere() { return ginf[hybrid::underlying].cclass == gcSphere; }
   
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
@@ -751,22 +779,6 @@ EX namespace product {
     res[2] = cos_auto(d);
     return zshift(res, h[2]);
     }
-  
-  EX void in_underlying_map(const reaction_t& f) {
-    if(!prod) f();
-    else ((hrmap_product*)currentmap)->in_underlying(f);
-    }
-
-  #if HDR
-  template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
-    if(!prod) return f();
-    dynamicval<eGeometry> g(geometry, underlying);
-    dynamicval<geometry_information*> gc(cgip, underlying_cgip);
-    return f();
-    }
-  
-  #define PIU(x) hr::product::in_underlying_geometry([&] { return (x); })
-  #endif
   
 EX }
 
@@ -1025,30 +1037,8 @@ EX namespace slr {
     return spin(2 * M_PI * i / 7) * xpush(tessf7/2) * spin(M_PI - 2 * M_PI * j / 7);
     }
   
-  struct hrmap_psl2 : hrmap {
+  struct hrmap_psl2 : hybrid::hrmap_hybrid {
     
-    hrmap *underlying_map;
-    
-    map<pair<cell*, int>, cell*> at;
-    map<cell*, pair<cell*, int>> where;
-    
-    heptagon *getOrigin() override { return underlying_map->getOrigin(); }
-    
-    template<class T> auto in_underlying(const T& t) -> decltype(t()) {
-      dynamicval<eGeometry> g(geometry, gNormal);
-      dynamicval<hrmap*> gu(currentmap, underlying_map);
-      return t();
-      }
-    
-    cell *getCell(cell *u, int h) {
-      h = gmod(h, 14);
-      cell*& c = at[make_pair(u, h)];
-      if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
-      return c;
-      }
-  
-    cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
-  
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) override { 
       for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adjmatrix(i, c1->c.spin(i));
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
@@ -1082,39 +1072,7 @@ EX namespace slr {
           }
         }
       }
-
-    hrmap_psl2() {
-      in_underlying([this] { initcells(); underlying_map = currentmap; });
-      for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
-      }
-    
-    ~hrmap_psl2() {
-      in_underlying([this] { delete currentmap; });
-      for(auto& p: at) tailored_delete(p.second);
-      }
-  
     };
-
-  EX cell *get_at(cell *base, int level) {
-    return ((hrmap_psl2*)currentmap)->getCell(base, level);
-    }
-  
-  EX pair<cell*, int> get_where(cell *c) { return ((hrmap_psl2*)currentmap)->where[c]; }
-  
-  void find_cell_connection(cell *c, int d) {
-    auto m = (hrmap_psl2*)currentmap;
-    if(d >= c->type - 2) {
-      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? 1 : -1));
-      c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
-      }
-    else {
-      auto cu = m->where[c].first;
-      auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
-      int d1 = cu->c.spin(d);
-      cell *c1 = get_at(cu1, m->where[c].second - d1*2 + d*2 + 7);
-      c->c.connect(d, c1, d1, false);
-      }
-    }
 
 EX }
 

@@ -37,7 +37,7 @@ EX bool hasbardir(cell *c) {
   }
 
 EX void preventbarriers(cell *c) {
-  if(prod) c = product::get_where(c).first;
+  if(hybri) c = hybrid::get_where(c).first;
   if(c && c->bardir == NODIR) c->bardir = NOBARRIERS;
   }
 

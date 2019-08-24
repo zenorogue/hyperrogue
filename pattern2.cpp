@@ -56,7 +56,7 @@ int eupattern4(cell *c) {
 EX bool ishept(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 0;
-  else return c->type == S7 + (prod ? 2 : 0);
+  else return c->type == S7 + (hybri ? 2 : 0);
   }
 
 EX bool ishex1(cell *c) {
@@ -372,10 +372,10 @@ EX pair<int, bool> fieldval(cell *c) {
 
 EX int fieldval_uniq(cell *c) {
   if(experimental) return 0;
-  else if(prod) { 
-    auto c1 = product::get_where(c).first; 
+  else if(hybri) { 
+    auto c1 = hybrid::get_where(c).first; 
     int res;
-    product::in_underlying_map([&] { res = fieldval_uniq(c1); });
+    hybrid::in_underlying_map([&] { res = fieldval_uniq(c1); });
     return res; 
     }
   else if(sphere) {
@@ -409,10 +409,10 @@ EX int fieldval_uniq(cell *c) {
   }
 
 EX int fieldval_uniq_rand(cell *c, int randval) {
-  if(prod) { 
-    auto c1 = product::get_where(c).first; 
+  if(hybri) { 
+    auto c1 = hybrid::get_where(c).first; 
     int res;
-    product::in_underlying_map([&] { res = fieldval_uniq_rand(c1, randval); });
+    hybrid::in_underlying_map([&] { res = fieldval_uniq_rand(c1, randval); });
     return res; 
     }
   if(sphere || euclid || NONSTDVAR) 
@@ -1374,7 +1374,7 @@ EX bool pseudohept(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
-  if(prod) { auto d = product::get_where(c); return (d.second & 1) && PIU(pseudohept(d.first)); }
+  if(hybri) { auto d = hybrid::get_where(c); return (sl2 ? true : (d.second & 1)) && PIU(pseudohept(d.first)); }
   #if CAP_BT
   if(nil) return c->master->zebraval & c->master->emeraldval & c->master->fieldval & 1;
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);

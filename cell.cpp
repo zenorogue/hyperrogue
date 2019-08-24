@@ -146,10 +146,8 @@ EX cell *createMov(cell *c, int d) {
     }
   
   if(c->move(d)) return c->move(d);
-  else if(geometry == gProduct)
-    product::find_cell_connection(c, d);
-  else if(sl2)
-    slr::find_cell_connection(c, d);
+  else if(hybri)
+    hybrid::find_cell_connection(c, d);
   #if CAP_BT
   else if(penrose)
     kite::find_cell_connection(c, d);
@@ -455,9 +453,11 @@ EX int compdist(int dx[]) {
 
 EX int celldist(cell *c) {
   if(experimental) return 0;
-  if(prod) { auto w = product::get_where(c); 
+  if(hybri) { 
+    auto w = hybrid::get_where(c); 
+    if(sl2) w.second = 0;
     int d; 
-    product::in_underlying_map([&] { d = celldist(w.first) + abs(w.second); }); 
+    hybrid::in_underlying_map([&] { d = celldist(w.first) + abs(w.second); }); 
     return d;
     }
   if(fulltorus && WDIM == 2) 
@@ -490,10 +490,11 @@ static const int ALTDIST_ERROR = 90000;
 
 EX int celldistAlt(cell *c) {
   if(experimental) return 0;
-  if(prod) { auto w = product::get_where(c); 
+  if(hybri) { 
+    auto w = hybrid::get_where(c); 
     int d = c->master->alt && c->master->alt->alt ? c->master->alt->alt->fieldval : 0;
-    d = abs(w.second - d);
-    product::in_underlying_map([&] { d += celldistAlt(w.first); });
+    d = sl2 ? 0 : abs(w.second - d);
+    hybrid::in_underlying_map([&] { d += celldistAlt(w.first); });
     return d;
     }
   if(masterless) {
@@ -1000,9 +1001,10 @@ EX cell *random_in_distance(cell *c, int d) {
 
 EX int celldistance(cell *c1, cell *c2) {
 
-  if(prod) { auto w1 = product::get_where(c1), w2 = product::get_where(c2); 
+  if(prod) {
+    auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
     int d;
-    product::in_underlying_map([&] { d = celldistance(w1.first, w2.first) + abs(w1.second - w2.second); });
+    hybrid::in_underlying_map([&] { d = celldistance(w1.first, w2.first) + abs(w1.second - w2.second); });
     return d;
     }
   
@@ -1039,7 +1041,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || sol || (penrose && euclid) || experimental) {
+  if(masterless || archimedean || quotient || sol || (penrose && euclid) || experimental || sl2) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

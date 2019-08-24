@@ -219,7 +219,7 @@ EX namespace yendor {
         nyi.path[0] = yendor;
         }
       
-      else if(prod) {
+      else if(hybri) {
         /* I am lazy */
         for(int i=1; i<=YDIST-1; i++) nyi.path[i] = nyi.path[i-1]->cmove(nyi.path[i-1]->type-1);
         }
@@ -1055,7 +1055,7 @@ int modecodetable[42][6] = {
 
 modecode_t modecode() {
   // bit 61: product
-  if(prod) return PIU(modecode()) | (1ll << 61);
+  if(hybri) return PIU(modecode()) | (1ll << 61);
 #if CAP_SAVE
   if(anticheat::tampered || cheater || geometry >= gGUARD) return 6;
 #endif

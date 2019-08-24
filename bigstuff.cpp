@@ -132,7 +132,7 @@ EX bool grailWasFound(cell *c) {
   }
 
 void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
-  if(prod) { product::in_underlying_map([&] { generateAlts(h, levs, link_cdata); }); }
+  if(hybri) { hybrid::in_underlying_map([&] { generateAlts(h, levs, link_cdata); }); }
   if(!h->alt) return;
   preventbarriers(h->c7);
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
@@ -183,10 +183,10 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
 
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
-  if(prod) {
-    c = product::get_where(c).first;
+  if(hybri) {
+    c = hybrid::get_where(c).first;
     heptagon *res;
-    product::in_underlying_map([&] { res = createAlternateMap(c, rad, firststate, special); });
+    hybrid::in_underlying_map([&] { res = createAlternateMap(c, rad, firststate, special); });
     return res;
     }
 
@@ -246,7 +246,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   alt->emeraldval = 0;
   alt->zebraval = 0;
   alt->distance = 0;
-  alt->fieldval = nisot::current_view_level;
+  alt->fieldval = hybrid::current_view_level;
   alt->c7 = NULL;
   alt->alt = alt;
   h->alt = alt;
@@ -758,10 +758,10 @@ EX void buildEquidistant(cell *c) {
       chance = hrand(100) < 10;
     }
   
-  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !prod && hrand(10) < 5 && chance) 
+  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !hybri && hrand(10) < 5 && chance) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !prod && hrand(100) < (PURE?25:5) && items[itBone] >= 10 && chance) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !hybri && hrand(100) < (PURE?25:5) && items[itBone] >= 10 && chance) 
     buildAnotherEquidistant(c);
   }
 
@@ -978,8 +978,8 @@ EX void setLandSol(cell *c) {
     }
   }
 
-EX void setLandProduct(cell *c) {
-  auto wc = product::get_where(c).first;
+EX void setLandHybrid(cell *c) {
+  auto wc = hybrid::get_where(c).first;
   c->barleft = wc->barleft;
   c->barright = wc->barright;
   c->bardir = wc->bardir;
@@ -1278,7 +1278,7 @@ EX int wallchance(cell *c, bool deepOcean) {
 
 /** should we generate the horocycles in the current geometry? */
 EX bool horo_ok() {  
-  return hyperbolic && !binarytiling && !archimedean && !penrose && !experimental && !prod;
+  return hyperbolic && !binarytiling && !archimedean && !penrose && !experimental && !hybri;
   }
 
 EX bool gp_wall_test() {
@@ -1336,7 +1336,7 @@ EX void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(prod) ;  /* Great Walls generated via the underlying geometry */
+  if(hybri) ;  /* Great Walls generated via the underlying geometry */
   
   else if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
     if(top_land && c == cwt.at->master->move(3)->c7) {
@@ -1666,8 +1666,8 @@ EX void moreBigStuff(cell *c) {
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
           }
-        else if(prod) {
-          auto d = product::get_where(c);
+        else if(hybri) {
+          auto d = hybrid::get_where(c);
           if(d.first->wall == waColumn || (d.second&1)) c->wall = waColumn;
           }
         else if(WDIM == 3) {

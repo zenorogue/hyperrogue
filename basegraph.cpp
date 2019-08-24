@@ -1389,7 +1389,7 @@ EX void initgraph() {
   loadConfig();
 #endif
   arcm::current.parse();
-  if(geometry == gProduct) geometry = product::underlying;
+  if(hybri) geometry = hybrid::underlying;
 
 #if CAP_COMMANDLINE
   arg::read(2);

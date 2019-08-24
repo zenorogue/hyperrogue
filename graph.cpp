@@ -409,7 +409,7 @@ EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
 #if CAP_QUEUE
-      if(!euclid && !prod) for(int a=0; a<sword_angles; a++) {
+      if(!euclid && !hybri) for(int a=0; a<sword_angles; a++) {
         if(a == ang && items[itOrbSword]) continue;
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos2(cwt.at, a-1) != sword::pos2(cwt.at, a+1);
@@ -4426,7 +4426,7 @@ color_t transcolor(cell *c, cell *c2, color_t wcol) {
 
 // how much should be the d-th wall darkened in 3D
 int get_darkval(cell *c, int d) {
-  if(prod || sl2) {
+  if(hybri) {
     return d >= c->type - 2 ? 4 : 0;
     }
   const int darkval_hbt[9] = {0,2,2,0,6,6,8,8,0};
@@ -5056,7 +5056,7 @@ void drawcell_in_radar(cell *c, transmatrix V) {
 
 EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
-  if(product::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; }
+  if(hybrid::pmap) { product::drawcell_stack(c, V, spinv, mirrored); return; }
 
   cells_drawn++;
 
@@ -6031,7 +6031,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !prod && !experimental) {
+              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !hybri && !experimental) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
@@ -6999,7 +6999,7 @@ EX void drawMarkers() {
     
     #endif
 
-    if(prod && !shmup::on) {
+    if(hybri && !shmup::on) {
 
       using namespace sword;
       int& ang = sword::dir[multi::cpid].angle;
@@ -8043,8 +8043,7 @@ EX void drawBug(const cellwalker& cw, color_t col) {
 
 EX cell *viewcenter() {
   if(masterless) return centerover.at;
-  else if(prod) return product::get_at(viewctr.at->c7, nisot::current_view_level);
-  else if(sl2) return slr::get_at(viewctr.at->c7, nisot::current_view_level);
+  else if(hybri) return hybrid::get_at(viewctr.at->c7, hybrid::current_view_level);
   else return viewctr.at->c7;
   }
 

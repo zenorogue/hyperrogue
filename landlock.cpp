@@ -679,13 +679,13 @@ EX land_validity_t& land_validity(eLand l) {
 
   using namespace lv;
   
-  if(prod || product::pmap) {
+  if(hybri || hybrid::pmap) {
     if(among(l, laPrincessQuest, laPrairie, laMirrorOld, laMirror, laDual, laWarpCoast, laKraken, laBrownian, laWhirlpool, laWestWall, laHive, laClearing, laWhirlwind, laBlizzard, laBull, laTerracotta, laCrossroads5,
       laEndorian, laDungeon, laMountain))
       return lv::not_implemented;
     if(among(l, laReptile, laDragon, laTortoise))
       return lv::bad_graphics;
-    if(prod) return *PIU(&land_validity(l));
+    if(hybri) return *PIU(&land_validity(l));
     }
   
   #if !CAP_FIELD

@@ -911,7 +911,7 @@ EX bool confusingGeometry() {
   }
 
 EX ld master_to_c7_angle() {
-  if(prod) return product::in_underlying_geometry(master_to_c7_angle);
+  if(prod) return hybrid::in_underlying_geometry(master_to_c7_angle);
   ld alpha = 0;
   #if CAP_GP
   if(cgi.gpdata) alpha = cgi.gpdata->alpha;
@@ -1395,7 +1395,7 @@ EX void optimizeview() {
     if(cbest) {
       View = View * currentmap->relative_matrix(cbest, c, C0);
       viewctr.at = cbest->master;
-      nisot::current_view_level = slr::get_where(cbest).second;
+      hybrid::current_view_level = hybrid::get_where(cbest).second;
       }
     return;
     }
@@ -1403,9 +1403,9 @@ EX void optimizeview() {
   if(prod) {
     ld z = zlevel(tC0(View));
     View = mscale(View, -z);
-    product::in_underlying_map(optimizeview);
-    if(z > cgi.plevel / 2) { nisot::current_view_level--; z -= cgi.plevel; }
-    if(z < -cgi.plevel / 2) { nisot::current_view_level++; z += cgi.plevel; }
+    hybrid::in_underlying_map(optimizeview);
+    if(z > cgi.plevel / 2) { hybrid::current_view_level--; z -= cgi.plevel; }
+    if(z < -cgi.plevel / 2) { hybrid::current_view_level++; z += cgi.plevel; }
     View = mscale(View, z);
     return;
     }
@@ -1500,7 +1500,7 @@ EX void resetview() {
   else centerover = cwt;
   cwtV = View;
   nisot::local_perspective = Id;
-  if(prod || sl2) nisot::current_view_level = product::get_where(cwt.at).second;
+  if(hybri) hybrid::current_view_level = hybrid::get_where(cwt.at).second;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
@@ -1987,7 +1987,7 @@ bool limited_generation(cell *c) {
 
 EX bool do_draw(cell *c, const transmatrix& T) {
 
-  if(product::pmap) return product::in_actual([&] { return do_draw(product::get_at(c, nisot::current_view_level), T); });
+  if(hybrid::pmap) return hybrid::in_actual([&] { return do_draw(hybrid::get_at(c, hybrid::current_view_level), T); });
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(nil && pmodel == mdGeodesic) {

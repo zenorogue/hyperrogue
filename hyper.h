@@ -127,6 +127,7 @@ void addMessage(string s, char spamtype = 0);
 #define nil (cgclass == gcNil)
 #define sl2 (cgclass == gcSL2)
 #define prod (cgclass == gcProduct)
+#define hybri (prod || sl2)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (sol || nil || sl2)
 #define translatable (euclid || nonisotropic)

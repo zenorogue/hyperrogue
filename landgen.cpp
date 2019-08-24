@@ -315,7 +315,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
         if(d == 8 && !sphere) {
 
-          if(prod && polarb50(c) && (product::get_where(c).second & 3) == 2) {
+          if(prod && polarb50(c) && (hybrid::get_where(c).second & 3) == 2) {
             c->wall = waPalace;
             break;
             }          
@@ -353,19 +353,19 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             if(GOLDBERG) ; 
             else {
               int q = 0, s = 0;
-              if(!ishept(c)) for(int i=0; i<c->type - (prod ? 2 : 0); i++)
+              if(!ishept(c)) for(int i=0; i<c->type - (hybri ? 2 : 0); i++)
                 if(cdist50(c->move(i)) == 3 && polarb50(c->move(i)) && !ishept(c->move(i)))
                   q++, s += i;
               if(q == 1 && c->move(s)->land == laPalace) {
                 switch(princess::generating ? 0 : hrand(2)) {
                   case 0: 
                     c->wall = waClosedGate;
-                    if(prod) toggleGates(c, waClosePlate, 1);
+                    if(hybri) toggleGates(c, waClosePlate, 1);
                     c->move(s)->wall = waClosedGate;
                     break;
                   case 1:
                     c->wall = waOpenGate;
-                    if(prod) toggleGates(c, waOpenPlate, 1);
+                    if(hybri) toggleGates(c, waOpenPlate, 1);
                     c->move(s)->wall = waOpenGate;
                     break;
                   }
@@ -704,7 +704,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             else if(v == 25 || v == 59 || v == 27 || v == 57)
               c->wall = waVineHalfB;
             else c->wall = waNone;
-            if(prod && cellHalfvine(c)) c->wall = waNone;
+            if(hybri && cellHalfvine(c)) c->wall = waNone;
             if(NONSTDVAR && cellHalfvine(c)) {
               c->wall = waNone;
               forCellCM(c2, c) if(emeraldval(c2) == (v^1))
@@ -1331,8 +1331,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           while(i) { if(i&1) b++; i>>=1; }
           if(ctof(c) && (b&1) && hrand(100) < 20)  c->wall = (z&2) ? waCharged : waGrounded;
           }
-        else if(prod) {
-          cell *c1 = product::get_where(c).first;
+        else if(hybri) {
+          cell *c1 = hybrid::get_where(c).first;
           if(among(c1->wall, waCharged, waGrounded))
             c->wall = c1->wall;
           else if(hrand(100) < 15)
@@ -2565,11 +2565,11 @@ EX void setdist(cell *c, int d, cell *from) {
 
   if(d <= 10 - getDistLimit()) lastexplore = shmup::on ? shmup::curtime : turncount;
   
-  if(prod) {
-    auto wc = product::get_where(c).first;
-    auto wf = from ? product::get_where(from).first : NULL;
+  if(hybri) {
+    auto wc = hybrid::get_where(c).first;
+    auto wf = from ? hybrid::get_where(from).first : NULL;
     if(c->land && !wc->land) wc->land = c->land;
-    product::in_underlying_map([&] { setdist(wc, d, wf); });
+    hybrid::in_underlying_map([&] { setdist(wc, d, wf); });
     }
 
   if(buggyGeneration) {
@@ -2634,7 +2634,7 @@ EX void setdist(cell *c, int d, cell *from) {
       #if MAXMDIM == 4
       else if(euclid && WDIM == 3) euclid3::set_land(c);
       #endif
-      else if(prod) setLandProduct(c);
+      else if(hybri) setLandHybrid(c);
       else if(sphere || fulltorus) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }
