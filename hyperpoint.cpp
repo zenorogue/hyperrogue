@@ -1118,6 +1118,6 @@ hyperpoint lp_apply(const hyperpoint h) {
   return nisot::local_perspective_used() ? nisot::local_perspective * h : h;
   }
 
-EX hyperpoint smalltangent() { return xtangent((sphere || hybri) ?.5 : 1); }
+EX hyperpoint smalltangent() { return xtangent(.1); }
 
 }

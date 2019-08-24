@@ -87,7 +87,9 @@ EX movedir vectodir(hyperpoint P) {
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T;
     if(compute_relamatrix((cwt+i).peek(), cwt.at, i, T)) {
-      dirdist[i] = quickdist(U * T * C0, Centered * P);
+      ld d1 = geo_dist(U * T * C0, Centered * P, iTable);
+      ld d2 = geo_dist(U * T * C0, Centered * C0, iTable);
+      dirdist[i] = d1 - d2;
       }
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
@@ -238,7 +240,7 @@ EX void checkjoy() {
     if(sq < joyvalue1) { joydir.d = -1; return; }
     }
   
-  joydir = vectodir(hpxy(jx, jy));
+  joydir = vectodir(tangent_length(point2(jx, jy), 0.01));
   }
 
 EX void checkpanjoy(double t) {
@@ -1074,7 +1076,7 @@ EX bool handleCompass() {
   if(h < rad) {
     if(h < rad*SKIPFAC) movepcto(MD_WAIT);
     else {
-      hyperpoint param = hpxy(dx * 1. / rad, dy * 1. / rad);
+      hyperpoint param = tangent_length(point2(dx, dy), .01);
 
       movedir md = vectodir(param);
     

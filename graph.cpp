@@ -7246,9 +7246,10 @@ EX void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = viewcenter();
     ld best = HUGE_VAL;
-    hyperpoint h = direct_exp(lp_iapply(ztangent(1)), 100);
+    hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)), 100);
     forCellEx(c1, mouseover2) {
-      ld dist = hdist(tC0(ggmatrix(c1)), h);
+      hyperpoint h1 = tC0(ggmatrix(c1));
+      ld dist = geo_dist(h1, h, iTable) - geo_dist(C0, h1, iTable);
       if(dist < best) mouseover = c1, best = dist;
       }
     return; 
