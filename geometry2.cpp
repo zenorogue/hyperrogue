@@ -215,8 +215,10 @@ struct horo_distance {
       b = intval(h1, C0);
       a = abs(binary::horo_level(h1));
       }
-    else
     #endif
+    else if(hybri)
+      a = 0, b = hdist(h1, C0);
+    else
       a = 0, b = intval(h1, C0);
     }
 
@@ -227,6 +229,8 @@ struct horo_distance {
     if(binarytiling) become(inverse(T) * h1);
     else
   #endif
+    if(sol || hybri) become(inverse(T) * h1);
+    else
       a = 0, b = intval(h1, tC0(T));
     }
   bool operator < (const horo_distance z) {

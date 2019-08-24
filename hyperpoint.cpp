@@ -305,11 +305,11 @@ EX ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
   }
 
 hyperpoint hpxy(ld x, ld y) { 
-  return hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
+  return hpxyz(x,y, sl2 ? sqrt(1+x*x+y*y) : translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
   }
 
 hyperpoint hpxy3(ld x, ld y, ld z) { 
-  return hpxyz3(x,y,z, translatable ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
+  return hpxyz3(x,y,z, sl2 ? sqrt(1+x*x+y*y-z*z) :translatable ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
 // a point (I hope this number needs no comments ;) )
@@ -874,6 +874,8 @@ EX ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
       auto d2 = product_decompose(h2);
       return hypot(PIU(hdist(d1.second, d2.second)), d1.first - d2.first);
       }
+    case gcSL2: 
+      return hdist0(inverse(slr::translate(h1)) * h2);
     default:
       if(iv < 0) return 0;
       return sqrt(iv);

@@ -1039,6 +1039,7 @@ EX namespace slr {
   struct hrmap_psl2 : hybrid::hrmap_hybrid {
     
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) override { 
+      if(c1 == c2) return Id;
       for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adjmatrix(i, c1->c.spin(i));
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse(gmatrix0[c1]) * gmatrix0[c2];
