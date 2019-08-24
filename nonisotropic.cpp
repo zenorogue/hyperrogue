@@ -80,7 +80,7 @@ EX namespace solv {
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
 
-  hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
+  EX hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
     load_table();
     
     ld ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
@@ -1089,23 +1089,6 @@ EX namespace nisot {
     return true;
     }
   
-  #if HDR
-  enum iePrecision { iLazy, iTable };
-  #endif
-  
-  EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
-    if(sol) return solv::get_inverse_exp(h, p == iLazy, just_direction);
-    if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
-    if(sl2) return slr::get_inverse_exp(h);
-    if(prod) return product::inverse_exp(h);
-    return point3(h[0], h[1], h[2]);
-    }
-  
-  EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, iePrecision p) {
-    if(!nonisotropic) return hdist(h1, h2);
-    return hypot_d(3, inverse_exp(inverse(translate(h1)) * h2, p, false));
-    }
-
   EX void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
     auto acc = christoffel(at, velocity, velocity);
     
@@ -1119,7 +1102,7 @@ EX namespace nisot {
     velocity = velocity + acc;
     }
   
-  EX hyperpoint direct_exp(hyperpoint v, int steps) {
+  EX hyperpoint numerical_exp(hyperpoint v, int steps) {
     hyperpoint at = point31(0, 0, 0);
     v /= steps;
     v[3] = 0;
@@ -1127,17 +1110,8 @@ EX namespace nisot {
     return at;
     }
 
-  EX hyperpoint get_exp(hyperpoint v, int steps) {
-    if(sol) return direct_exp(v, steps);
-    if(nil) return nilv::formula_exp(v);
-    if(sl2) return slr::formula_exp(v);
-    if(prod) return product::direct_exp(v);
-    return v;
-    }
-
-  EX transmatrix parallel_transport_bare(transmatrix Pos, transmatrix T) {
+  EX transmatrix parallel_transport_bare(transmatrix Pos, hyperpoint h) {
   
-    hyperpoint h = tC0(T);
     h[3] = 0;
   
     auto tPos = transpose(Pos);
@@ -1180,31 +1154,17 @@ EX namespace nisot {
     T = push * gtl;
     }
 
-  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix LPe, const transmatrix T) {
+  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix LPe, hyperpoint h) {
     if(prod) {
-      hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(tC0(T)));
+      hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(h));
       return Position * rgpushxto0(h);
       }
     auto P = Position;
     nisot::fixmatrix(P);  
-    if(!geodesic_movement) return inverse(eupush(Position * inverse(T) * inverse(Position) * C0)) * Position;
-    return parallel_transport_bare(P, T);
+    if(!geodesic_movement) return inverse(eupush(Position * translate(-h) * inverse(Position) * C0)) * Position;
+    return parallel_transport_bare(P, h);
     }
   
-  EX transmatrix transport_view(const transmatrix T, const transmatrix LPe, const transmatrix V) {
-    if(prod) {
-      hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(tC0(T)));
-      return rgpushxto0(h) * V;
-      }
-    if(!geodesic_movement) {
-      transmatrix IV = inverse(V);
-      nisot::fixmatrix(IV);
-      const transmatrix V1 = inverse(IV);
-      return V1 * eupush(IV * T * V1 * C0);
-      }
-    return inverse(parallel_transport(inverse(V), Id, inverse(T)));
-    }
-
   EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
 
     hyperpoint at = tC0(Position);

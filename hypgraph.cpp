@@ -320,7 +320,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdPerspective: {
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       if(prod) H = product::inverse_exp(H);
-      if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
+      H = lp_apply(H);
       if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 1; return; }
       ret[0] = H[0]/H[2] * ratio;
       ret[1] = H[1]/H[2] * ratio;
@@ -329,8 +329,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }
 
     case mdGeodesic: {
-      auto S = nisot::inverse_exp(H, nisot::iTable);
-      if(nisot::local_perspective_used()) S = nisot::local_perspective * S;
+      auto S = lp_apply(inverse_exp(H, iTable));
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       ret[0] = S[0]/S[2] * ratio;
       ret[1] = S[1]/S[2] * ratio;
@@ -711,9 +710,8 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
       if(nonisotropic) {
-        H = nisot::inverse_exp(H, nisot::iTable, false);
-        if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
-        ret = H; ret[3] = 1;
+        ret = lp_apply(inverse_exp(H, iTable, false));
+        ret[3] = 1;
         break;
         }
       ld zlev = find_zlev(H);
@@ -939,9 +937,9 @@ EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
 EX bool point_behind(hyperpoint h) {
   if(sphere) return false;
   if(!in_perspective()) return false;
-  if(pmodel == mdGeodesic) h = nisot::inverse_exp(h, nisot::iLazy);
+  if(pmodel == mdGeodesic) h = inverse_exp(h, iLazy);
   if(pmodel == mdPerspective && prod) h = product::inverse_exp(h);
-  if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
+  h = lp_apply(h);
   return h[2] < 1e-8;
   }
 
@@ -1238,7 +1236,6 @@ EX transmatrix eumovedir(int d) {
 
 EX void spinEdge(ld aspd) { 
   ld downspin = 0;
-  auto& LPV = prod ? nisot::local_perspective : View;
   if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
     transmatrix our   = dual::get_orientation();
     transmatrix their = dual::player_orientation[dual::main_side];
@@ -1249,7 +1246,7 @@ EX void spinEdge(ld aspd) {
       hyperpoint H = T * xpush0(1);
       downspin = -atan2(H[1], H[0]);
       }
-    else LPV = their * inverse(our) * LPV;
+    else rotate_view(their * inverse(our));
     }
   else if(playerfound && vid.fixed_facing) {
     hyperpoint H = gpushxto0(playerV * C0) * playerV * xpush0(5);
@@ -1262,15 +1259,16 @@ EX void spinEdge(ld aspd) {
     }
   else if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
     aspd = 999999;
+    auto& vo = get_view_orientation();
     if(straightDownSeek) {
       auto sdp = straightDownPoint;
-      if(prod) sdp = LPV * product::inverse_exp(sdp);
+      if(prod) sdp = vo * product::inverse_exp(sdp);
       if(sdp[0])
         downspin = models::rotation * degree - atan2(sdp[0], sdp[1]);
       }
     else {
-      if(LPV[0][2]) 
-        downspin = -atan2(LPV[0][2], LPV[1][2]);
+      if(vo[0][2]) 
+        downspin = -atan2(vo[0][2], vo[1][2]);
       }
     }
   else if(straightDownSeek) {
@@ -1283,7 +1281,7 @@ EX void spinEdge(ld aspd) {
     }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
-  LPV = spin(downspin) * LPV;
+  rotate_view(spin(downspin));
   }
 
 EX void centerpc(ld aspd) { 
@@ -1365,11 +1363,10 @@ EX void centerpc(ld aspd) {
       aspd *= sqrt(R*R - d.first * d.first) / R;
       }
 
-    if(R < aspd) {
-      View = solmul(gpushxto0(H), Id, View);
-      }
+    if(R < aspd) 
+      shift_view_to(H);
     else 
-      View = solmul(rspintox(H) * xpush(-aspd) * spintox(H), Id, View);
+      shift_view_towards(H, aspd);
       
     fixmatrix(View);
     spinEdge(aspd);
@@ -1991,7 +1988,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(nil && pmodel == mdGeodesic) {
-      ld dist = hdist0(nisot::inverse_exp(tC0(T), nisot::iLazy));
+      ld dist = hypot_d(3, inverse_exp(tC0(T), iLazy));
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
@@ -2061,6 +2058,56 @@ EX int cone_side(const hyperpoint H) {
   hyperpoint ret2 = zth(z + cld(0, 1e-3));
 
   return (ret1[1] - ret0[1]) * (ret2[0] - ret0[0]) < (ret2[1] - ret0[1]) * (ret1[0] - ret0[0]) ? 1 : -1;
+  }
+
+/** get the current orientation of the view */
+EX transmatrix& get_view_orientation() {
+  return prod ? nisot::local_perspective : View;
+  }
+
+/** rotate the view using the given rotation matrix */
+EX void rotate_view(transmatrix T) {
+  transmatrix& which = get_view_orientation();
+  which = T * which;
+  }
+
+/** shift the view according to the given tangent vector */
+EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
+  if(prod) {
+    hyperpoint h = product::direct_exp(inverse(nisot::local_perspective) * H);
+    return rgpushxto0(h) * V;
+    }
+  else if(!nonisotropic) {
+    return gpushxto0(direct_exp(H, 100)) * V;
+    }
+  else if(!nisot::geodesic_movement) {
+    transmatrix IV = inverse(V);
+    nisot::fixmatrix(IV);
+    const transmatrix V1 = inverse(IV);
+    return V1 * eupush(IV * eupush(H) * V1 * C0);
+    }
+  else {
+    return inverse(nisot::parallel_transport(inverse(V), Id, -H));
+    }
+  }
+
+/** shift the view according to the given tangent vector */
+EX void shift_view(hyperpoint H) {
+  View = get_shift_view_of(H, View);
+  }
+
+EX void shift_view_to(hyperpoint H) {
+  if(!nonisotropic) View = gpushxto0(H) * View;
+  else shift_view(-inverse_exp(H, iTable, false));
+  }
+
+EX void shift_view_towards(hyperpoint H, ld l) {
+  if(!nonisotropic && !prod) 
+    View = rspintox(H) * xpush(-l) * spintox(H) * View;
+  else {
+    hyperpoint ie = nisot::geodesic_movement ? inverse_exp(H, iTable, false) : H-C0;
+    shift_view(tangent_length(ie, -l));
+    }
   }
 
 }

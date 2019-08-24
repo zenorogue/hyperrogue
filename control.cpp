@@ -75,8 +75,7 @@ EX movedir vectodir(hyperpoint P) {
   transmatrix U = ggmatrix(cwt.at);
   if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
 
-  if(nisot::local_perspective_used()) P = inverse(nisot::local_perspective) * P;
-  if(prod) P = product::direct_exp(P);
+  P = direct_exp(lp_iapply(P), 100);
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
@@ -113,12 +112,11 @@ EX void remission() {
  }
 
 EX hyperpoint move_destination_vec(int d) {
-  hyperpoint Forward = prod ? forward_dir(.5) : tC0(pushone());
-  if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
+  if(WDIM == 2) return spin(-d * M_PI/4) * smalltangent();
   // else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
   // else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
-  else if(d&1) return cspin(0, 1, d > 4 ? M_PI/2 : -M_PI/2) * Forward;
-  else return cspin(0, 2, d * M_PI/4) * Forward;
+  else if(d&1) return cspin(0, 1, d > 4 ? M_PI/2 : -M_PI/2) * smalltangent();
+  else return cspin(0, 2, d * M_PI/4) * smalltangent();
   }
 
 EX void movepckeydir(int d) {
@@ -292,31 +290,28 @@ transmatrix zforward_push(ld z) {
   }
 
 EX void handlePanning(int sym, int uni) {
-  auto& LPe = nisot::local_perspective;
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
   if(GDIM == 3) {
-    if(sym == PSEUDOKEY_WHEELUP) View = solmul(cpush(2, -0.05*shiftmul), LPe, View), didsomething = true, playermoved = false;
-    if(sym == PSEUDOKEY_WHEELDOWN) View = solmul(cpush(2, 0.05*shiftmul), LPe, View), didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELUP) shift_view(ztangent(-0.05*shiftmul)), didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELDOWN) shift_view(ztangent(0.05*shiftmul)), didsomething = true, playermoved = false;
     }
 
   if(rug::rugged || smooth_scrolling) {
     return;
     }
     
-  auto& LPV = prod ? nisot::local_perspective : View;
-  
 #if !ISPANDORA
   if(sym == SDLK_END && GDIM == 3) { 
-    View = solmul(zforward_push(-0.2*shiftmul), LPe, View), didsomething = true, playermoved = false;
+    shift_view(ztangent(-0.2*shiftmul)), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_HOME && GDIM == 3) { 
-    View = solmul(zforward_push(+0.2*shiftmul), LPe, View), didsomething = true, playermoved = false;
+    shift_view(ztangent(+0.2*shiftmul)), didsomething = true, playermoved = false;
     }
   if(sym == SDLK_RIGHT) { 
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
     else if(GDIM == 3)
-      LPV = cspin(0, 2, -0.2*shiftmul) * LPV, didsomething = true;
+      rotate_view(cspin(0, 2, -0.2*shiftmul)), didsomething = true;
     else
       View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
@@ -324,7 +319,7 @@ EX void handlePanning(int sym, int uni) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
     else if(GDIM == 3)
-      LPV = cspin(0, 2, 0.2*shiftmul) * LPV, didsomething = true;
+      rotate_view(cspin(0, 2, 0.2*shiftmul)), didsomething = true;
     else
       View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
@@ -332,7 +327,7 @@ EX void handlePanning(int sym, int uni) {
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
     else if(GDIM == 3)
-      LPV = cspin(1, 2, 0.2*shiftmul) * LPV, didsomething = true;
+      rotate_view(cspin(1, 2, 0.2*shiftmul)), didsomething = true;
     else
       View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
@@ -340,7 +335,7 @@ EX void handlePanning(int sym, int uni) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
     else if(GDIM == 3)
-      LPV = cspin(1, 2, -0.2*shiftmul) * LPV, didsomething = true;
+      rotate_view(cspin(1, 2, -0.2*shiftmul)), didsomething = true;
     else
       View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
     }
@@ -349,13 +344,13 @@ EX void handlePanning(int sym, int uni) {
     if(history::on)
       models::rotation++;
     else
-      LPV = spin(M_PI/cgi.S21/2*shiftmul) * LPV, didsomething = true;
+      rotate_view(spin(M_PI/cgi.S21/2*shiftmul)), didsomething = true;
     }
   if(sym == SDLK_PAGEDOWN) {
     if(history::on)
       models::rotation++;
     else
-      LPV = spin(-M_PI/cgi.S21/2*shiftmul) * LPV, didsomething = true;
+      rotate_view(spin(-M_PI/cgi.S21/2*shiftmul)), didsomething = true;
     }
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
@@ -683,8 +678,7 @@ EX void mainloopiter() {
   
   if(GDIM == 3 && !shmup::on && !rug::rugged) {
     #if CAP_MOUSEGRAB
-    auto &LPV = prod ? nisot::local_perspective : View;
-    LPV = cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y) * LPV;
+    rotate_view(cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y));
     mouseaim_x = mouseaim_y = 0;
     #endif
     }

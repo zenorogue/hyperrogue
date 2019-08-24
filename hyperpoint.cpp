@@ -81,6 +81,8 @@ struct hyperpoint : array<ld, MAXMDIM> {
   inline friend hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
   inline friend hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
 
+  inline friend hyperpoint operator - (hyperpoint h) { return h * -1; }
+
   // cross product  
   inline friend hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
     return hyperpoint(
@@ -929,8 +931,6 @@ EX transmatrix mzscale(const transmatrix& t, double fac) {
   return res;
   }
 
-EX transmatrix pushone() { return xpush(sphere?.5 : 1); }
-
 EX hyperpoint mid3(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
   return mid(h1+h2+h3, h1+h2+h3);
   }
@@ -978,18 +978,13 @@ bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
-EX transmatrix solmul(const transmatrix T, const transmatrix LPe, const transmatrix V) {
-  if(nonisotropic || prod) return nisot::transport_view(T, LPe, V);
-  else return T * V;
-  }
-
 EX transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
-  if(nonisotropic) return nisot::parallel_transport(Position, Id, T);
+  if(nonisotropic) return nisot::parallel_transport(Position, Id, tC0(T));
   else return Position * T;
   }
 
 EX transmatrix solmul_pt(const transmatrix Position, const transmatrix LPe, const transmatrix T) {
-  if(nonisotropic || prod) return nisot::parallel_transport(Position, LPe, T);
+  if(nonisotropic || prod) return nisot::parallel_transport(Position, LPe, tC0(T));
   else return Position * T;
   }
 
@@ -1064,5 +1059,65 @@ inline hyperpoint tC0(const transmatrix &T) {
   return z;
   }
 #endif
+
+/** tangent vector in the given direction */
+EX hyperpoint ctangent(int c, ld x) { return point3(c==0?x:0, c==1?x:0, c==2?x:0); }
+
+/** tangent vector in direction X */
+EX hyperpoint xtangent(ld x) { return ctangent(0, x); }
+
+/** tangent vector in direction Y */
+EX hyperpoint ztangent(ld z) { return ctangent(2, z); }
+
+/** change the length of the targent vector */
+EX hyperpoint tangent_length(hyperpoint dir, ld length) {
+  ld r = hypot_d(GDIM, dir);
+  if(!r) return dir;
+  return dir * (length / r);
+  }
+
+/** exponential function: follow the geodesic given by v */
+EX hyperpoint direct_exp(hyperpoint v, int steps) {
+  if(sol) return nisot::numerical_exp(v, steps);
+  if(nil) return nilv::formula_exp(v);
+  if(sl2) return slr::formula_exp(v);
+  if(prod) return product::direct_exp(v);
+  ld d = hypot_d(GDIM, v);
+  if(d > 0) for(int i=0; i<GDIM; i++) v[i] = v[i] * sin_auto(d) / d;
+  v[3] = cos_auto(d);
+  return v;
+  }
+
+#if HDR
+enum iePrecision { iLazy, iTable };
+#endif
+  
+/** inverse exponential function \see hr::direct_exp */
+EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
+  if(sol) return solv::get_inverse_exp(h, p == iLazy, just_direction);
+  if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
+  if(sl2) return slr::get_inverse_exp(h);
+  if(prod) return product::inverse_exp(h);
+  ld d = acos_auto_clamp(h[GDIM]);
+  hyperpoint v;
+  if(d && sin_auto(d)) for(int i=0; i<GDIM; i++) v[i] = h[i] * d / sin_auto(d);
+  v[3] = 0;
+  return v;
+  }
+
+EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, iePrecision p) {
+  if(!nonisotropic) return hdist(h1, h2);
+  return hypot_d(3, inverse_exp(inverse(nisot::translate(h1)) * h2, p, false));
+  }
+
+hyperpoint lp_iapply(const hyperpoint h) {
+  return nisot::local_perspective_used() ? inverse(nisot::local_perspective) * h : h;
+  }
+
+hyperpoint lp_apply(const hyperpoint h) {
+  return nisot::local_perspective_used() ? nisot::local_perspective * h : h;
+  }
+
+EX hyperpoint smalltangent() { return xtangent((sphere || hybri) ?.5 : 1); }
 
 }

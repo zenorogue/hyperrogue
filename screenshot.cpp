@@ -590,8 +590,6 @@ EX void apply() {
   int t = ticks - lastticks;
   lastticks = ticks;
 
-  auto& LPV = prod ? nisot::local_perspective : View;
-
   switch(ma) {
     case maTranslation:
       if(history::on) {
@@ -611,8 +609,9 @@ EX void apply() {
             fullcenter(); View = spin(rand() % 1000) * View;
             }
           }
-        View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-          cspin(0, GDIM-1, -movement_angle * degree), nisot::local_perspective, View);
+        shift_view(
+          cspin(0, GDIM-1, movement_angle * degree) * spin(shift_angle * degree) * xtangent(cycle_length * t / period)
+          );
         moved();
         if(clearup) {
           viewcenter()->wall = waNone;
@@ -623,21 +622,22 @@ EX void apply() {
 
     case maRotation:
       if(GDIM == 3) {
-        LPV = spin(-movement_angle * degree) * LPV;
-        LPV = cspin(1, 2, normal_angle * degree) * LPV;
+        rotate_view(spin(-movement_angle * degree));
+        rotate_view(cspin(1, 2, normal_angle * degree));
         }
-      LPV = spin(2 * M_PI * t / period) * LPV;
+      rotate_view(spin(2 * M_PI * t / period));
       if(GDIM == 3) {
-        LPV = cspin(2, 1, normal_angle * degree) * LPV;
-        LPV = spin(movement_angle * degree) * LPV;
+        rotate_view(cspin(2, 1, normal_angle * degree));
+        rotate_view(spin(movement_angle * degree));
         }
       break;
     
     case maTranslationRotation:
-      View = solmul(cspin(0, GDIM-1, movement_angle * degree) * ypush(shift_angle * degree) * xpush(cycle_length * t / period) * ypush(-shift_angle * degree) * 
-        cspin(0, GDIM-1, -movement_angle * degree), nisot::local_perspective, View);
+      shift_view(
+        cspin(0, GDIM-1, movement_angle * degree) * spin(shift_angle * degree) * xtangent(cycle_length * t / period)
+        );
       moved();
-      LPV = cspin(0, GDIM-1, 2 * M_PI * t / period) * LPV;
+      rotate_view(cspin(0, GDIM-1, 2 * M_PI * t / period));
       if(clearup) {
         viewcenter()->wall = waNone;
         }

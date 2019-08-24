@@ -756,7 +756,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
   ld d = hdist0(h);
 
   if(sol && nisot::geodesic_movement) {
-    h = nisot::inverse_exp(h, nisot::iLazy);
+    h = inverse_exp(h, iLazy);
     ld r = hypot_d(3, h);
     if(r < 1) h = h * (atanh(r) / r);
     else return {false, h};
@@ -3270,7 +3270,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
 
   for(int d=0; d<8; d++) {
   
-    movedir md = vectodir(spin(-d * M_PI/4) * tC0(pushone()));
+    movedir md = vectodir(spin(-d * M_PI/4) * smalltangent());
     int u = md.d;
     cellwalker xc = cwt + u + wstep;
     if(xc.at == c) {
@@ -5100,7 +5100,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
-      hyperpoint H2 = nisot::inverse_exp(H, nisot::iLazy);
+      hyperpoint H2 = inverse_exp(H, iLazy);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.2) return;
       }
     noclipped++;
@@ -5109,7 +5109,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
-      hyperpoint H2 = nisot::inverse_exp(H, nisot::iLazy);
+      hyperpoint H2 = inverse_exp(H, iLazy);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -2) return;
       }
     noclipped++;
@@ -7209,7 +7209,7 @@ EX void make_actual_view() {
     if(max) {
       transmatrix Start = inverse(actualV(viewctr, actual_view_transform * View));
       ld d = wall_radar(viewcenter(), Start, nisot::local_perspective, max);
-      actual_view_transform = solmul(zpush(d), nisot::local_perspective, actual_view_transform * View) * inverse(View); 
+      actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * inverse(View); 
       }
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
     }
@@ -7246,10 +7246,7 @@ EX void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = viewcenter();
     ld best = HUGE_VAL;
-    hyperpoint h = 
-      prod ? product::direct_exp( inverse(nisot::local_perspective) * zforward_dir(1) ) :
-      
-      nisot::local_perspective_used() ? inverse(nisot::local_perspective) * zpush0(1) : zpush0(1);
+    hyperpoint h = direct_exp(lp_iapply(ztangent(1)), 100);
     forCellEx(c1, mouseover2) {
       ld dist = hdist(tC0(ggmatrix(c1)), h);
       if(dist < best) mouseover = c1, best = dist;
