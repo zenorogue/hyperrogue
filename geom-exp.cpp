@@ -398,7 +398,7 @@ vector<eGeometry> list3d = {
   gCell24, gECell24,
   gCell16, gECell16,
   gCell8, gECell8,
-  gCell5, gKiteDart3, gSol, gNil, gProduct
+  gCell5, gKiteDart3, gSol, gNil, gProduct, gSL2
   };
 
 void ge_select_tiling(const vector<eGeometry>& lst) {

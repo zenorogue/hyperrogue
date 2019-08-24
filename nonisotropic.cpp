@@ -569,7 +569,7 @@ EX namespace hybrid {
   EX geometry_information *underlying_cgip;
   
   EX void configure(eGeometry g) {
-    if(g == gSL2) variation = eVariation::pure;
+    if(g == gSL2) variation = eVariation::pure, geometry = gNormal;
     if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
     check_cgi();
     cgi.prepare_basics();
