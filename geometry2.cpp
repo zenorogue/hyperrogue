@@ -245,6 +245,28 @@ struct horo_distance {
   };
 
 template<class T, class U> 
+void virtualRebase_cell(cell*& base, T& at, const U& check) {
+  horo_distance currz(check(at));
+  T best_at = at;
+  while(true) {
+    cell *newbase = NULL;
+    forCellCM(c2, base) {
+      transmatrix V2 = calc_relative_matrix(base, c2, C0);
+      T cand_at = V2 * at;
+      horo_distance newz(check(cand_at));
+      if(newz < currz) {
+        currz = newz;
+        best_at = cand_at;
+        newbase = c2;
+        }
+      }
+    if(!newbase) break;
+    base = newbase;
+    at = best_at;
+    }
+  }
+
+template<class T, class U> 
 void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   if(prod) {
     auto w = hybrid::get_where(base);
@@ -255,6 +277,10 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     if(d < -cgi.plevel / 2) { w.second--; d += cgi.plevel; }
     at = mscale(at, +d);
     base = hybrid::get_at(w.first, w.second);
+    return;
+    }
+  if(sl2) {
+    virtualRebase_cell(base, at, check);
     return;
     }
   if((euclid || sphere) && WDIM == 2) {
@@ -326,23 +352,8 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
         at = bestV * at;
         }
       else at = master_relative(base, true) * at;
-      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || WDIM == 3 || penrose) {
-        while(true) {
-          newbase = NULL;
-          forCellCM(c2, base) {
-            transmatrix V2 = calc_relative_matrix(base, c2, C0);
-            horo_distance newz(check(V2 * at));
-            if(newz < currz) {
-              currz = newz;
-              bestV = V2;
-              newbase = c2;
-              }
-            }
-          if(!newbase) break;
-          base = newbase;
-          at = bestV * at;
-          }
-        }
+      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || WDIM == 3 || penrose)
+        virtualRebase_cell(base, at, check);
       break;
       }
     }
