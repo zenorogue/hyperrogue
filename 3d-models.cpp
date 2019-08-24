@@ -32,6 +32,7 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
 
 EX hyperpoint normalize_flat(hyperpoint h) {
   if(prod) return product_decompose(h).second;
+  if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
   return normalize(h);
   }
 
@@ -133,6 +134,12 @@ vector<hyperpoint> scaleshape(const vector<hyperpoint>& vh, ld s) {
   return res;
   }
 
+ld get_zlevel(hyperpoint h) {
+  if(prod) return zlevel(h);
+  if(sl2) return atan2(h[2], h[3]);
+  return asin_auto(h[2]);
+  }
+
 void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   shcenter = C0;
 
@@ -202,7 +209,7 @@ void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
     int arm1 = isize(hpc);
     for(int i=arm0; i<arm1; i++) {
       hyperpoint h = hpc[i];
-      ld zl = prod ? zlevel(h) : asin_auto(h[2]);
+      ld zl = get_zlevel(h);
       h = zpush(-zl) * h;
       ld rad = hdist0(h);
       rad = (rad - 0.1124*S) / (0.2804*S - 0.1124*S);
@@ -615,10 +622,10 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
   // shift_shape(orig, BIRD);
   }
 
-EX hyperpoint forward_dir(ld x) { return (prod || sl2) ? point3(x, 0, 0) : xpush0(x); }
-EX hyperpoint zforward_dir(ld z) { return (prod || sl2) ? point3(0, 0, z) : zpush0(z); }
+EX hyperpoint forward_dir(ld x) { return hybri ? point3(x, 0, 0) : xpush0(x); }
+EX hyperpoint zforward_dir(ld z) { return hybri ? point3(0, 0, z) : zpush0(z); }
 
-EX hyperpoint dir_to_point(hyperpoint h) { return prod ? product::direct_exp(h) : h; }
+EX hyperpoint dir_to_point(hyperpoint h) { return hybri ? nisot::direct_exp(h, 100) : h; }
 
 EX hyperpoint dir_setlength(hyperpoint dir, ld length) {
   if(dir[0] == 0 && dir[1] == 0 && dir[2] == 0) return dir;
@@ -630,7 +637,7 @@ void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint 
   dynamicval<int> d(vid.texture_step, 8);
   texture_order([&] (ld x, ld y) {
     ld z = 1-x-y;
-    ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8) * (prod ? .5 : 1);
+    ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8) * (hybri ? .5 : 1);
     hyperpoint h = dir_to_point(dir_setlength(a*x+b*y+c*z, r));
     hpcpush(h);
     });  

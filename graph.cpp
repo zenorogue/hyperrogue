@@ -349,14 +349,14 @@ double hexshiftat(cell *c) {
   }
 
 EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) {
-  if(prod) return PIU( ddspin(c, d, bonus) );
+  if(hybri) return PIU( ddspin(c, d, bonus) );
   if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->cmove(d), c, C0))) * cspin(2, 0, bonus);
   if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * rspintox(nearcorner(c, d));
   return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
 EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) {
-  if(prod) return PIU( iddspin(c, d, bonus) );
+  if(hybri) return PIU( iddspin(c, d, bonus) );
   if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->cmove(d), c, C0)));
   if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * spintox(nearcorner(c, d));
   return spin(hexshiftat(c) - displayspin(c, d) + bonus);
@@ -808,6 +808,7 @@ color_t kind_outline(eItem it) {
 
 EX transmatrix face_the_player(const transmatrix V) {
   if(GDIM == 2) return V;
+  if(sl2) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   if(prod) return mscale(V, cos(ptick(750)) * cgi.plevel / 16);
   if(nonisotropic) return spin_towards(V, C0, 2, 0);
   return rgpushxto0(tC0(V));
@@ -870,6 +871,8 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
   if(c && prod)
     Vit = mscale(Vit, sin(ptick(750)) * cgi.plevel / 4);
+  else if(c && sl2)
+    Vit = Vit * zpush(sin(ptick(750)) * cgi.plevel / 4);
   else
     if(GDIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
@@ -1351,7 +1354,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
   char xch = minf[m].glyph;
   
   transmatrix V = V1;
-  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !prod) V = V1 * cspin(0, 2, M_PI/2);
+  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !hybri) V = V1 * cspin(0, 2, M_PI/2);
 
   // if(GDIM == 3) V = V * cspin(0, 2, M_PI/2);
 
@@ -2548,7 +2551,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
 
     if(mmmon) {
       if(isAnyIvy(c)) {
-        if(prod) {
+        if(hybri) {
           queuepoly(Vb, cgi.shILeaf[ctof(c)], darkena(col, 0, 0xFF));
           for(int a=0; a<c->type-2; a++)
             queuepoly(Vb * spin(a * 2 * M_PI / (c->type-2)), cgi.shILeaf[2], darkena(col, 0, 0xFF));
@@ -2788,13 +2791,13 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
           if(prod) Vs = mscale(Vs, z);
           }
         }
-      else {
+      else if(!sl2) {
         hyperpoint V0 = inverse(cwtV) * tC0(Vs);
         Vs = cwtV * rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI);
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
-        Vs = Vs * (prod ? spin(M_PI) : cspin(WDIM-2, WDIM-1, M_PI));
+        Vs = Vs * (hybri ? spin(M_PI) : cspin(WDIM-2, WDIM-1, M_PI));
       }
     if(c->monmirror) Vs = Vs * Mirror;
     

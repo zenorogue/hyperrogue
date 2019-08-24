@@ -493,6 +493,7 @@ EX bool eqmatrix(transmatrix A, transmatrix B, ld eps IS(.01)) {
 // in the 3D space, move the point h orthogonally to the (x,y) plane by z units
 EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
   if(prod) return zshift(h, z);
+  if(sl2) return slr::translate(h) * cpush0(2, z);
   if(!hyperbolic) return rgpushxto0(h) * cpush(2, z) * C0;
   if(nil) return nisot::translate(h) * cpush0(2, z);
   if(translatable) return hpxy3(h[0], h[1], h[2] + z);
@@ -960,6 +961,7 @@ EX hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
 
 EX hyperpoint zshift(hyperpoint x, ld z) {
   if(GDIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
+  else if(sl2) return mscale(x, z);
   else if(prod) return mscale(x, z);
   else return mscale(x, z);
   }
