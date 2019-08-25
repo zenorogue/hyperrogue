@@ -804,7 +804,7 @@ EX namespace slr {
   // then coordinates 2<->3 are swapped
   */
 
-  EX ld range_xy = 3;
+  EX ld range_xy = 2;
   EX int steps = 15;
 
   EX hyperpoint from_phigans(hyperpoint h) {
