@@ -1086,7 +1086,7 @@ EX hyperpoint direct_exp(hyperpoint v, int steps) {
   if(prod) return product::direct_exp(v);
   ld d = hypot_d(GDIM, v);
   if(d > 0) for(int i=0; i<GDIM; i++) v[i] = v[i] * sin_auto(d) / d;
-  v[3] = cos_auto(d);
+  v[LDIM] = cos_auto(d);
   return v;
   }
 
