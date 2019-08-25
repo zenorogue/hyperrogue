@@ -1187,7 +1187,7 @@ EX void set_geometry(eGeometry target) {
     if(GDIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
     if(nonisotropic && old_DIM == 2) pmodel = mdGeodesic;
     if(GDIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
-    if(nonisotropic && old_DIM == 2 && vid.texture_step < 4 && !sl2) vid.texture_step = 4;
+    if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
     if(prod && shmup::on) shmup::on = false;
     }
