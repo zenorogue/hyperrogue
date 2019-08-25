@@ -1193,7 +1193,7 @@ EX namespace nisot {
     T = push * gtl;
     }
 
-  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix LPe, hyperpoint h) {
+  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix LPe, const hyperpoint h) {
     if(prod) {
       hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(h));
       return Position * rgpushxto0(h);

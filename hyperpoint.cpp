@@ -985,9 +985,9 @@ EX transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
   else return Position * T;
   }
 
-EX transmatrix solmul_pt(const transmatrix Position, const transmatrix LPe, const transmatrix T) {
-  if(nonisotropic || prod) return nisot::parallel_transport(Position, LPe, tC0(T));
-  else return Position * T;
+EX transmatrix solmul_pt(const transmatrix Position, const transmatrix LPe, const hyperpoint h) {
+  if(nonisotropic || prod) return nisot::parallel_transport(Position, LPe, h);
+  else return Position * rgpushxto0(direct_exp(h, 100));
   }
 
 EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, int dir, int back) {

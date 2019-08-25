@@ -7181,15 +7181,15 @@ EX purehookset hooks_drawmap;
 EX transmatrix actual_view_transform;
 
 EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
-  if(pmodel != mdPerspective || !vid.use_wall_radar) return max;
+  if(!in_perspective() || !vid.use_wall_radar) return max;
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
-    T = solmul_pt(T, LPe, zpush(-step));
+    T = solmul_pt(T, LPe, ztangent(-step));
     virtualRebase(c, T, true);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
-      T = solmul_pt(T, LPe, zpush(step));
+      T = solmul_pt(T, LPe, ztangent(step));
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
       }

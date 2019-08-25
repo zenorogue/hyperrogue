@@ -2089,7 +2089,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
     return rgpushxto0(h) * V;
     }
   else if(!nonisotropic) {
-    return gpushxto0(direct_exp(H, 100)) * V;
+    return rgpushxto0(direct_exp(H, 100)) * V;
     }
   else if(!nisot::geodesic_movement) {
     transmatrix IV = inverse(V);
