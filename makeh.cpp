@@ -84,6 +84,7 @@ void gen(string sf) {
         }
       else {
         mark_file();
+        cout << "#line " << lineid << " \"" << sf << "\"\n";
         for(int i=0;; i++) {
           if(i == int(t.size())) { cerr << "Error: unrecognizable EX: " << s << "\n"; }
           else if(t[i] == '{') {
