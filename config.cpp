@@ -880,7 +880,7 @@ EX void edit_sightrange() {
       dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'X');
       dialog::add_action([] {
         auto xo = dialog::extra_options;
-        dialog::editNumber(solv::solrange_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
+        dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
         dialog::extra_options = xo; popScreen();
         });
       dialog::addSelItem(XLAT("steps"), its(slr::steps), 'Z');
