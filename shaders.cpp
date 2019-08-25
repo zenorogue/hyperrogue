@@ -293,7 +293,10 @@ struct GLprogram {
   GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase;
   GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations;
   
+  string _vsh, _fsh;
+  
   GLprogram(string vsh, string fsh) {
+    _vsh = vsh; _fsh = fsh;
     _program = glCreateProgram();
     
     #ifndef GLES_ONLY
@@ -474,6 +477,17 @@ void colorClear(color_t color) {
 EX void be_nontextured(shader_projection sp IS(new_shader_projection)) { switch_mode(gmColored, sp); }
 EX void be_textured(shader_projection sp IS(new_shader_projection)) { switch_mode(gmTextured, sp); }
 EX void use_projection(shader_projection sp IS(new_shader_projection)) { switch_mode(mode, sp); }
+
+EX pair<string, string> get_shaders() {
+  auto p = programs[mode][int(current_shader_projection)];
+  return make_pair(p->_vsh, p->_fsh);
+  }
+
+EX void install_shaders(string vsh, string fsh) {
+  delete programs[mode][int(current_shader_projection)];
+  programs[mode][int(current_shader_projection)] = new GLprogram(vsh, fsh);
+  mode = eMode(-1);
+  }
 
 void switch_mode(eMode m, shader_projection sp) {
   if(m == mode && current_shader_projection == sp) return;
