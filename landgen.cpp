@@ -527,7 +527,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand_monster(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) {
           static eMonster emeraldmonsters[4] = { moHedge, moLancer, moFlailer, moMiner };
           c->monst = emeraldmonsters[hrand(4)];
-          if(c->monst == moHedge && S3 != 3)
+          if(c->monst == moHedge && (S3 != 3 || sl2))
             c->monst = moFlailer;
           }
         if(sphere && c->type != 6 && c->master->fiftyval == 5) {
