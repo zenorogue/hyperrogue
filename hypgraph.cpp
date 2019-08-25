@@ -2003,6 +2003,10 @@ EX bool do_draw(cell *c, const transmatrix& T) {
       if(!nisot::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
       }
+    else if(pmodel == mdGeodesic && sl2) {
+      if(hypot(tC0(T)[2], tC0(T)[3]) > cosh(slr::range_xy)) return false;
+      if(!limited_generation(c)) return false;
+      }
     else if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;
       if(!limited_generation(c)) return false;

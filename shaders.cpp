@@ -290,7 +290,8 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
   
-  GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uPRECX, uPRECY, uPRECZ;
+  GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase;
+  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -351,6 +352,8 @@ struct GLprogram {
     uPRECX = glGetUniformLocation(_program, "PRECX");
     uPRECY = glGetUniformLocation(_program, "PRECY");
     uPRECZ = glGetUniformLocation(_program, "PRECZ");
+    uIndexSL = glGetUniformLocation(_program, "uIndexSL");
+    uIterations = glGetUniformLocation(_program, "uIterations");
     
     #if DEBUG_GL
     printf("uniforms: %d %d %d %d\n", uMVP, uFog, uColor, tTexture);

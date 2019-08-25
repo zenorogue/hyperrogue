@@ -804,6 +804,9 @@ EX namespace slr {
   // then coordinates 2<->3 are swapped
   */
 
+  EX ld range_xy = 3;
+  EX int steps = 15;
+
   EX hyperpoint from_phigans(hyperpoint h) {
     ld r = asinh(hypot_d(2, h));
     ld x = h[0];
@@ -967,11 +970,11 @@ EX namespace slr {
     else beta = theta + atan(sin(alpha) * roottan(c, s));
     }
 
-  EX hyperpoint get_inverse_exp(hyperpoint h) {
-    if(sqhypot_d(2, h) < 1e-12) return point3(0, 0, atan2(h[2], h[3]));
+  EX hyperpoint get_inverse_exp(hyperpoint h, ld index IS(0)) {
+    if(sqhypot_d(2, h) < 1e-12) return point3(0, 0, atan2(h[2], h[3]) + index);
     ld r = asinh(hypot_d(2, h));
-    ld phi = atan2(h[2], h[3]);
-    ld theta = atan2(h[1], h[0]) + phi;
+    ld phi = atan2(h[2], h[3]) + index;
+    ld theta = atan2(h[1], h[0]) + phi + index;
     
     ld alpha, s, beta;
     find_alpha(phi, r, theta, alpha, s, beta);
@@ -986,61 +989,80 @@ EX namespace slr {
     "  if(y >= 0.) return atan(y / x) + PI;"
     "  if(y < 0.) return atan(y / x) - PI;"
     "  }"
+
+    "uniform mediump float uIndexSL;"
+    "uniform mediump int uIterations;"
     
     "vec4 inverse_exp(vec4 h) {"
-      "if(h[0]*h[0] + h[1] * h[1] < 1e-6) return vec4(0, 0, atan(h[2], h[3]), 1);"
+      "if(h[0]*h[0] + h[1] * h[1] < 1e-6) return vec4(0, 0, atan(h[2], h[3]) + uIndexSL, 1);"
       "float r = asinh(sqrt(h[0] * h[0] + h[1] * h[1]));"
-      "float phi = atan2(h[2], h[3]);"
-      "float theta = atan2(h[1], h[0]) + phi;"
+      "float phi = atan2(h[2], h[3]) + uIndexSL;"
+      "float theta = atan2(h[1], h[0]) + phi + uIndexSL;"
       "float alpha;"
       "float s;"
       "float beta;"
       "float sgn = 1.;"
+      "float bound = .999;"
       "if(phi < 0.) { phi = -phi; theta = -theta; sgn = -1.; }"
       "float c;"
       "s = sinh(r) / cos(PI/4.);"
       "float gphi = 2.*sin(PI/4.)*s - atan(sin(PI/4.) * s);"
+      "float lo_gphi = gphi;"
+      "float lo_s = s;"
+      "float lo_alpha = PI/4.;"
+      "float hi_gphi = gphi;"
+      "float hi_s = s;"
+      "float hi_alpha = PI/4.;"
       "if(gphi > phi) {"
       "  float mina = 0.;"
       "  float maxa = PI/4.;"
-      "  for(int it=0; it<40; it++) {"
+      "  lo_gphi = 0.; lo_s = r; lo_alpha = 0.;"
+      "  for(int it=0; it<uIterations; it++) {"
       "    alpha = (mina + maxa) / 2.;"
       "    c = sqrt(cos(2. * alpha));"
       "    s = asinh(sinh(r) / cos(alpha) * c) / c;"
       "    gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tanh(c * s) / c);"
-      "    if(gphi > phi) maxa = alpha;"
-      "    else mina = alpha;"
+      "    if(gphi > phi) { maxa = alpha; hi_alpha = alpha; hi_s = s; hi_gphi = gphi; }"
+      "    else { mina = alpha; lo_alpha = alpha; lo_s = s; lo_gphi = gphi; }"
       "    }"
-      "  beta = theta + atan(sin(alpha) * tanh(c * s) / c);"
       "  }"
       "else {"
+      "  hi_gphi = phi; hi_s = phi; hi_alpha = 9;"
       "  int next_nan = 1;"
       "  float mina = PI/4.;"
       "  float maxa = PI/2.;"
-      "  for(int it=0; it<40; it++) {"
+      "  for(int it=0; it<uIterations; it++) {"
       "    alpha = (mina + maxa) / 2.;"
       "    c = sqrt(-cos(2. * alpha));"
-      "    if(sinh(r) * c > cos(alpha)) { next_nan = 1; maxa = alpha; continue; }"
+      "    if(sinh(r) * c > bound * cos(alpha)) { next_nan = 1; maxa = alpha; continue; }"
       "    s = asin(sinh(r) * c / cos(alpha)) / c;"
       "    gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(c*s) / c);"
-      "    if(gphi > phi) { next_nan = 0; maxa = alpha; }"
-      "    else mina = alpha;"
+      "    if(gphi > phi) { next_nan = 0; maxa = alpha; hi_gphi = gphi; hi_s = s; hi_alpha = alpha; }"
+      "    else { mina = alpha; lo_gphi = gphi; lo_s = s; lo_alpha = alpha; }"
       "    }"
       "  if(next_nan != 0) {"
-      "    mina = PI/4.;"
-      "    for(int it=0; it<10; it++) {"
+      "    mina = PI/4.; "
+      "    for(int it=0; it<uIterations; it++) {"
       "      alpha = (mina + maxa) / 2.;"
       "      c = sqrt(-cos(2. * alpha));"
-      "      s = PI - asin(sinh(r) * c / cos(alpha)) / c;"
-      "      gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(c*s) / c) - PI;"
-      "      if(gphi < phi) maxa = alpha; else mina = alpha;"
+      "      float z = sinh(r) * c / cos(alpha);"
+      "      if(z>bound) { maxa = alpha; next_nan = 1; continue; }"
+      "      float s1 = PI - asin(z);"
+      "      s = s1 / c;"
+      "      gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(s1) / c) - PI;"
+      "      if(gphi < phi) { next_nan = 0; maxa = alpha; hi_gphi = gphi; hi_s = s; hi_alpha = alpha; }"
+      "      else { mina = alpha; lo_gphi = gphi; lo_s = s; lo_alpha = alpha; }"
       "      }"
-      "    beta = theta + atan(sin(alpha) * tanh(c * s) / c) + PI;"
       "    }"
-      "  else beta = theta + atan(sin(alpha) * tanh(c * s) / c);"
       "  }"
+      "if(hi_alpha < 9) {"
+        "float fr = (phi-lo_gphi) / (hi_gphi-lo_gphi);"
+        "alpha = lo_alpha + (hi_alpha-lo_alpha) * fr;"
+        "s = lo_s + (hi_s-lo_s) * fr;"
+        "}"
+      "beta = theta - phi + 2.*sin(alpha)*s;"
       "alpha = alpha * sgn; beta = beta * sgn;"
-      "return vec4(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha), 1);"
+      "return vec4(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha), 1.);"
       "}";
 
   EX transmatrix adjmatrix(int i, int j) {

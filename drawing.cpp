@@ -538,6 +538,8 @@ void glapplymatrix(const transmatrix& V) {
 
 EX int global_projection;
 
+int min_slr, max_slr = 0;
+
 #if MAXMDIM >= 4
 extern renderbuffer *floor_textures;
 #endif
@@ -582,6 +584,8 @@ void dqi_poly::gldraw() {
     glhr::be_nontextured();
     glhr::vertices(v);
     }
+  
+  next_slr:
 
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
@@ -652,6 +656,12 @@ void dqi_poly::gldraw() {
       glhr::set_fogbase(prio == PPR::SKY ? 1.0 + (euclid ? 20 : 5 / sightranges[geometry]) : 1.0);
       glDrawArrays(GL_LINE_STRIP, offset, cnt);
       }
+    }
+
+  if(min_slr < max_slr) {
+    min_slr++;
+    glUniform1f(glhr::current->uIndexSL, M_PI * min_slr);
+    goto next_slr;
     }
   }
 #endif
@@ -1142,6 +1152,14 @@ void dqi_poly::draw() {
 
 #if CAP_GL
   if(vid.usingGL && (current_display->set_all(global_projection), shaderside_projection)) {
+    if(sl2 && pmodel == mdGeodesic) {
+      ld z = atan2(V[2][3], V[3][3]);
+      auto zr = sightranges[geometry];
+      min_slr = ceil((-zr - z) / M_PI);
+      max_slr = floor((zr - z) / M_PI);
+      if(min_slr > max_slr) return;
+      glUniform1f(glhr::current->uIndexSL, M_PI * min_slr);
+      }
     set_width(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();

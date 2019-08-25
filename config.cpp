@@ -504,6 +504,11 @@ EX void initConfig() {
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   addsaver(vid.cells_generated_limit, "limit on cells generated", 25);
   
+  addsaver(solv::solrange_xy, "solrange-xy");
+  addsaver(solv::solrange_z, "solrange-z");
+  addsaver(slr::steps, "slr-steps");
+  addsaver(slr::range_xy, "slr-range-xy");
+  
   addsaver(vid.skiprope, "mobius", 0);
   
   addsaver(models::formula, "formula");
@@ -862,6 +867,26 @@ EX void edit_sightrange() {
       dialog::add_action([] {
         auto xo = dialog::extra_options;
         dialog::editNumber(solv::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
+        dialog::extra_options = xo; popScreen();
+        });
+      }
+    else if(pmodel == mdGeodesic && sl2) {
+      dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
+      dialog::add_action([] {
+        auto xo = dialog::extra_options;
+        dialog::editNumber(sightranges[geometry], 0, 10, 0.5, M_PI, "", "");
+        dialog::extra_options = xo; popScreen();
+        });
+      dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'X');
+      dialog::add_action([] {
+        auto xo = dialog::extra_options;
+        dialog::editNumber(solv::solrange_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
+        dialog::extra_options = xo; popScreen();
+        });
+      dialog::addSelItem(XLAT("steps"), its(slr::steps), 'Z');
+      dialog::add_action([] {
+        auto xo = dialog::extra_options;
+        dialog::editNumber(slr::steps, 0, 50, 1, 10, "", "");
         dialog::extra_options = xo; popScreen();
         });
       }

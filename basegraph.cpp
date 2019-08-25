@@ -371,6 +371,11 @@ void display_data::set_projection(int ed) {
     glUniform1f(glhr::current->uPRECZ, solv::PRECZ);
     }
 
+  if(glhr::new_shader_projection == glhr::shader_projection::standardSL2) {
+    glUniform1f(glhr::current->uIndexSL, 0);
+    glUniform1i(glhr::current->uIterations, slr::steps);
+    }
+
   auto cd = current_display;
 
   if(!shaderside_projection || glhr::new_shader_projection == glhr::shader_projection::flatten) {
