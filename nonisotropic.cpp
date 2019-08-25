@@ -584,9 +584,10 @@ EX namespace hybrid {
 
   hrmap *pmap;
   geometry_information *pcgip;
+  geometry actual_geometry;
   
   template<class T> auto in_actual(const T& t) -> decltype(t()) {
-    dynamicval<eGeometry> g(geometry, gProduct);
+    dynamicval<eGeometry> g(geometry, actual_geometry);
     dynamicval<geometry_information*> gc(cgip, pcgip);
     dynamicval<hrmap*> gu(currentmap, pmap);
     dynamicval<hrmap*> gup(pmap, NULL);
@@ -605,6 +606,7 @@ EX namespace hybrid {
     template<class T> auto in_underlying(const T& t) -> decltype(t()) {
       pcgip = cgip; 
       dynamicval<hrmap*> gpm(pmap, this);
+      dynamicval<hrmap*> gag(actual_geometry, geometry);
       dynamicval<eGeometry> g(geometry, underlying);
       dynamicval<geometry_information*> gc(cgip, underlying_cgip);
       dynamicval<hrmap*> gu(currentmap, underlying_map);
