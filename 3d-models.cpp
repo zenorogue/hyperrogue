@@ -1151,6 +1151,8 @@ void geometry_information::make_3d_models() {
 
   adjust_eye(shWolf1, shDogHead, AHEAD, AHEAD, 1); 
   adjust_eye(shWolf2, shDogHead, AHEAD, AHEAD, 1); 
+  for(int i=0; i<shWolf1.e-shWolf1.s; i++)
+    hpc[shWolf2.s+i] = MirrorY * hpc[shWolf1.s+i];
   adjust_eye(shWolf3, shDogHead, AHEAD, AHEAD, 1);
   adjust_eye(shFamiliarEye, shWolfHead, AHEAD, AHEAD, 1);
 
