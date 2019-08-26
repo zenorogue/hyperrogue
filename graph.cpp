@@ -631,7 +631,7 @@ EX void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio IS(PPR::MONST
 #if CAP_SHAPES
 transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, double footphase) {
 
-#define VFOOT (GDIM == 2 ? V : mmscale(V, cgi.LEG0))
+#define VFOOT ((GDIM == 2 || prod) ? V : mmscale(V, cgi.LEG0))
 #define VLEG mmscale(V, cgi.LEG)
 #define VGROIN mmscale(V, cgi.GROIN)
 #define VBODY mmscale(V, cgi.BODY)
