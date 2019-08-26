@@ -1362,14 +1362,6 @@ EX void centerpc(ld aspd) {
   else {
     aspd *= (1+R+(shmup::on?1:0));
     
-    if(prod) {
-      auto d = product_decompose(H);
-      ld dist = -d.first / R * aspd;
-      if(abs(dist) > abs(d.first)) dist = -d.first;
-      View = mscale(View, dist);
-      aspd *= sqrt(R*R - d.first * d.first) / R;
-      }
-
     if(R < aspd) 
       shift_view_to(H);
     else 
@@ -2084,12 +2076,8 @@ EX void rotate_view(transmatrix T) {
 
 /** shift the view according to the given tangent vector */
 EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
-  if(prod) {
-    hyperpoint h = product::direct_exp(inverse(nisot::local_perspective) * H);
-    return rgpushxto0(h) * V;
-    }
-  else if(!nonisotropic) {
-    return rgpushxto0(direct_exp(H, 100)) * V;
+  if(!nonisotropic) {
+    return rgpushxto0(direct_exp(lp_iapply(H), 100)) * V;
     }
   else if(!nisot::geodesic_movement) {
     transmatrix IV = inverse(V);
@@ -2115,9 +2103,11 @@ EX void shift_view_to(hyperpoint H) {
 EX void shift_view_towards(hyperpoint H, ld l) {
   if(!nonisotropic && !prod) 
     View = rspintox(H) * xpush(-l) * spintox(H) * View;
+  else if(nonisotropic && !nisot::geodesic_movement)
+    shift_view(tangent_length(H-C0, -l));
   else {
-    hyperpoint ie = nisot::geodesic_movement ? inverse_exp(H, iTable, false) : H-C0;
-    shift_view(tangent_length(ie, -l));
+    hyperpoint ie = inverse_exp(H, iTable, true);
+    shift_view(tangent_length(lp_apply(ie), -l));
     }
   }
 
