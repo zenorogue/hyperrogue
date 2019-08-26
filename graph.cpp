@@ -810,7 +810,8 @@ EX transmatrix face_the_player(const transmatrix V) {
   if(GDIM == 2) return V;
   if(sl2) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   if(prod) return mscale(V, cos(ptick(750)) * cgi.plevel / 16);
-  if(nonisotropic) return spin_towards(V, C0, 2, 0);
+  transmatrix dummy; /* used only in prod anyways */
+  if(nonisotropic) return spin_towards(V, dummy, C0, 2, 0);
   return rgpushxto0(tC0(V));
   }
 
@@ -7182,14 +7183,16 @@ EX transmatrix actual_view_transform;
 
 EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   if(!in_perspective() || !vid.use_wall_radar) return max;
+  transmatrix ori;
+  if(prod) ori = inverse(LPe);
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
-    T = solmul_pt(T, LPe, ztangent(-step));
+    T = parallel_transport(T, ori, ztangent(-step));
     virtualRebase(c, T, true);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
-      T = solmul_pt(T, LPe, ztangent(step));
+      T = parallel_transport(T, ori, ztangent(step));
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
       }

@@ -1193,15 +1193,11 @@ EX namespace nisot {
     T = push * gtl;
     }
 
-  EX transmatrix parallel_transport(const transmatrix Position, const transmatrix LPe, const hyperpoint h) {
-    if(prod) {
-      hyperpoint h = product::direct_exp(inverse(LPe) * product::inverse_exp(h));
-      return Position * rgpushxto0(h);
-      }
+  EX transmatrix parallel_transport(const transmatrix Position, const hyperpoint direction) {
     auto P = Position;
     nisot::fixmatrix(P);  
-    if(!geodesic_movement) return inverse(eupush(Position * translate(-h) * inverse(Position) * C0)) * Position;
-    return parallel_transport_bare(P, h);
+    if(!geodesic_movement) return inverse(eupush(Position * translate(-direction) * inverse(Position) * C0)) * Position;
+    return parallel_transport_bare(P, direction);
     }
   
   EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {

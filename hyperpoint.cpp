@@ -239,11 +239,13 @@ EX ld volume_auto(ld r) {
     }
   }
 
+EX ld asin_clamp(ld x) { return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : std::isnan(x) ? 0 : asin(x); }
+
 EX ld asin_auto_clamp(ld x) {
   switch(cgclass) {
     case gcEuclid: return x;
     case gcHyperbolic: return asinh(x);
-    case gcSphere: return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : std::isnan(x) ? 0 : asin(x);
+    case gcSphere: return asin_clamp(x);
     default: return x;
     }
   }
@@ -980,21 +982,43 @@ bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
-EX transmatrix solmul_pt(const transmatrix Position, const transmatrix T) {
-  if(nonisotropic) return nisot::parallel_transport(Position, Id, tC0(T));
-  else return Position * T;
+EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
+  if(nonisotropic) return nisot::parallel_transport(Position, direction);
+  else if(prod) {
+    hyperpoint h = product::direct_exp(ori * direction);
+    return Position * rgpushxto0(h);
+    }
+  else return Position * rgpushxto0(direct_exp(direction, 100));
   }
 
-EX transmatrix solmul_pt(const transmatrix Position, const transmatrix LPe, const hyperpoint h) {
-  if(nonisotropic || prod) return nisot::parallel_transport(Position, LPe, h);
-  else return Position * rgpushxto0(direct_exp(h, 100));
+EX void apply_parallel_transport(transmatrix& Position, const transmatrix orientation, const hyperpoint direction) {
+  Position = parallel_transport(Position, orientation, direction);
   }
 
-EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, int dir, int back) {
-  transmatrix T = 
-    nonisotropic ? nisot::spin_towards(Position, goal) : 
-    rspintox(inverse(Position) * goal);
-  if(back < 0) T = T * spin(M_PI);
+EX void rotate_object(transmatrix& Position, transmatrix& orientation, transmatrix R) {
+  if(prod) orientation = orientation * R;
+  else Position = Position * R;
+  }
+
+EX transmatrix spin_towards(const transmatrix Position, transmatrix& ori, const hyperpoint goal, int dir, int back) {
+  transmatrix T;
+  ld alpha = 0;
+  if(nonisotropic)
+    T = nisot::spin_towards(Position, goal);
+  else { 
+    hyperpoint U = inverse(Position) * goal;
+    if(prod) {
+      hyperpoint h = product::inverse_exp(U);
+      alpha = asin_clamp(h[2] / hypot_d(3, h));
+      U = product_decompose(U).second;
+      }
+    T = rspintox(U);
+    }
+  if(back < 0) T = T * spin(M_PI), alpha = -alpha;
+  if(prod) {
+    if(dir == 0) ori = cspin(2, 0, alpha);
+    if(dir == 2) ori = cspin(2, 0, alpha - M_PI/2), dir = 0;
+    }
   if(dir) T = T * cspin(dir, 0, -M_PI/2);
   T = Position * T;
   return T;

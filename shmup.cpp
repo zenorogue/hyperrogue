@@ -46,6 +46,8 @@ struct monster {
     // butterflies: last position
   transmatrix at;
   transmatrix pat;
+  /** orientation for the product geometry */
+  transmatrix ori;
   eMonster stk;
   bool dead;
   bool notpushed;
@@ -67,7 +69,7 @@ struct monster {
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
     stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
-    swordangle = 0; inertia = Hypc;
+    swordangle = 0; inertia = Hypc; if(prod) ori = Id;
     }
   
   void store();
@@ -363,6 +365,7 @@ void shootBullet(monster *m) {
   bullet->base = m->base;
   bullet->at = m->at;
   if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
+  if(prod) bullet->ori = m->ori;
   bullet->type = moBullet;
   bullet->parent = m;
   bullet->pid = m->pid;
@@ -381,6 +384,7 @@ void shootBullet(monster *m) {
     monster* bullet = new monster;
     bullet->base = m->base;
     bullet->at = m->at * cspin(0, WDIM-1, M_PI/4*i);
+    if(prod) bullet->ori = m->ori;
     if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
     bullet->type = moBullet;
     bullet->parent = m;
@@ -831,7 +835,7 @@ void movePlayer(monster *m, int delta) {
     
   if(playerturn[cpid] && canmove && !blown && WDIM == 2) {
     m->swordangle -= playerturn[cpid];
-    nat = nat * spin(playerturn[cpid]);
+    rotate_object(nat, m->ori, spin(playerturn[cpid]));
     if(inertia_based) m->inertia = spin(-playerturn[cpid]) * m->inertia;
     }
   transmatrix nat0 = nat;
@@ -976,19 +980,20 @@ void movePlayer(monster *m, int delta) {
     if(inertia_based) {
       if(igo) { go = false; break; }
       ld r = hypot_d(WDIM, avg_inertia);
-      nat = solmul_pt(nat, rspintox(avg_inertia) * xpush(r * delta)) * spintox(avg_inertia);
-      if(WDIM == 3) nat = nat * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+      apply_parallel_transport(nat, m->ori, rspintox(avg_inertia) * xtangent(r * delta));
+      if(WDIM == 3) rotate_object(nat, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
       m->vel = r * (600/SCALE);
       }
     else if(WDIM == 3) {
-      nat = solmul_pt(nat1, cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid])) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+      nat = parallel_transport(nat1, m->ori, point3(playerstrafe[cpid], 0, playergo[cpid]));
+      rotate_object(nat, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
       m->inertia[0] = playerstrafe[cpid] / delta;
       m->inertia[1] = 0;
       m->inertia[2] = playergo[cpid] / delta;
       }
     else if(playergo[cpid]) {
-      nat = solmul_pt(nat1, spin(playergoturn[cpid]) * xpush(playergo[cpid])) * spin(-playergoturn[cpid]);
-      m->inertia = spin(playergoturn[cpid]) * xpush0(playergo[cpid] / delta);
+      nat = parallel_transport(nat1, m->ori, spin(playergoturn[cpid]) * xtangent(playergo[cpid]));
+      m->inertia = spin(playergoturn[cpid]) * xtangent(playergo[cpid] / delta);
       }
     
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
@@ -1417,6 +1422,7 @@ void shoot(eItem it, monster *m) {
   monster* bullet = new monster;
   bullet->base = m->base;
   bullet->at = m->at * rspintox(inverse(m->pat) * mouseh);
+  /* ori */
   if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
   bullet->type = it == itOrbDragon ? moFireball : it == itOrbAir ? moAirball : moBullet;
   bullet->parent = m;
@@ -1509,9 +1515,9 @@ int bulletdir() {
   return (WDIM == 2) ? 0 : 2;
   }
   
-transmatrix frontpush(ld x) {
-  if(WDIM == 2) return xpush(x);
-  else return cpush(2, x);
+hyperpoint fronttangent(ld x) {
+  if(WDIM == 2) return xtangent(x);
+  else return ztangent(x);
   }
 
 ld collision_distance(monster *bullet, monster *target) {
@@ -1530,6 +1536,7 @@ void spawn_asteroids(monster *bullet, monster *target) {
     monster* child = new monster;
     child->base = target->base;
     child->at = target->at;
+    child->ori = target->ori;
     child->type = target->type;
     child->parent = NULL;
     child->pid = target->pid;
@@ -1564,7 +1571,7 @@ void moveBullet(monster *m, int delta) {
     m->vel -= delta  / speedfactor() / 600000.0;
     if(m->vel < 0 && m->parent) {
       // return to the flailer!
-      nat = spin_towards(m->pat, m->parent->pat * C0, bulletdir(), -1);
+      nat = spin_towards(m->pat, m->ori, m->parent->pat * C0, bulletdir(), -1);
       }
     }
   else m->vel = bullet_velocity(m->type);
@@ -1573,11 +1580,10 @@ void moveBullet(monster *m, int delta) {
     m->dead = true;
 
   if(inertia_based) {
-    ld r = hypot_d(WDIM, m->inertia);
-    nat = solmul_pt(nat, rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia));
+    nat = parallel_transport(nat, m->ori, m->inertia * delta);
     }
   else 
-    nat = solmul_pt(nat, frontpush(delta * SCALE * m->vel / speedfactor()));
+    nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
   cell *c2 = m->findbase(nat);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -1682,7 +1688,7 @@ void moveBullet(monster *m, int delta) {
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise || m2->type == moBrownBug || 
         m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
-        m2->rebasePat(spin_towards(m2->pat, nat0 * C0, 0, 1));
+        m2->rebasePat(spin_towards(m2->pat, m->ori, nat0 * C0, 0, 1));
         if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) 
           m2->hitpoints--;
         m->dead = true;
@@ -1733,7 +1739,7 @@ void moveBullet(monster *m, int delta) {
       // Knights reflect bullets
       if(m2->type == moKnight) {
         if(m->parent && m->parent != &arrowtrap_fakeparent) {
-          nat = spin_towards(nat, tC0(m->parent->pat), bulletdir(), 1);
+          nat = spin_towards(nat, m->ori, tC0(m->parent->pat), bulletdir(), 1);
           m->rebasePat(nat);
           }
         m->parent = m2;
@@ -1769,7 +1775,7 @@ EX bool dragonbreath(cell *dragon) {
   int randplayer = hrand(numplayers());
   monster* bullet = new monster;
   bullet->base = dragon;
-  bullet->at = spin_towards(Id, inverse(gmatrix[dragon]) * tC0(pc[randplayer]->pat), bulletdir(), 1);
+  bullet->at = spin_towards(Id, bullet->ori, inverse(gmatrix[dragon]) * tC0(pc[randplayer]->pat), bulletdir(), 1);
   bullet->type = moFireball;
   bullet->parent = bullet;
   bullet->pid = randplayer;
@@ -2003,7 +2009,7 @@ void moveMonster(monster *m, int delta) {
       if(h[0] < fabsl(h[1])) return;
       }
     else if(!peace::on) {
-      nat = spin_towards(m->pat, tC0(goal), 0, 1);
+      nat = spin_towards(m->pat, m->ori, tC0(goal), 0, 1);
       }
     }
   
@@ -2051,15 +2057,14 @@ void moveMonster(monster *m, int delta) {
   
   if(inertia_based) {
     if(igo) return;
-    ld r = hypot_d(WDIM, m->inertia);
-    nat = solmul_pt(nat, rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia));
+    nat = parallel_transport(nat, m->ori, m->inertia * delta);
     }
   else if(WDIM == 3 && igo) {
     ld fspin = rand() % 1000;  
-    nat = solmul_pt(nat0, cspin(1,2,fspin) * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]) * cspin(2,1,fspin));
+    nat = parallel_transport(nat0, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step));
     }
   else {
-    nat = solmul_pt(nat0, spin(igospan[igo]) * xpush(step) * spin(-igospan[igo])); // * spintox(wherePC);
+    nat = parallel_transport(nat0, m->ori, spin(igospan[igo]) * xtangent(step));
     }
 
   if(m->type != moRagingBull && !peace::on)
@@ -2134,6 +2139,7 @@ void moveMonster(monster *m, int delta) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
+      bullet->ori = m->ori;
       bullet->type = moTongue;
       bullet->parent = m;
       bullet->parenttype = m->type;
@@ -2287,6 +2293,7 @@ void moveMonster(monster *m, int delta) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
+      bullet->ori = m->ori;
       bullet->type = moFireball;
       bullet->parent = m;
       additional.push_back(bullet);
@@ -2300,6 +2307,7 @@ void moveMonster(monster *m, int delta) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
+      bullet->ori = m->ori;
       bullet->type = moBullet;
       bullet->parent = m;
       bullet->parenttype = moOutlaw;
@@ -2312,6 +2320,7 @@ void moveMonster(monster *m, int delta) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
+      bullet->ori = m->ori;
       bullet->type = moAirball;
       bullet->parent = m;
       bullet->pid = i;
@@ -2331,6 +2340,7 @@ void moveMonster(monster *m, int delta) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
+      bullet->ori = m->ori;
       bullet->type = moFlailBullet;
       bullet->parent = m;
       bullet->vel = 1/400.0;
@@ -2344,6 +2354,7 @@ void moveMonster(monster *m, int delta) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
+      bullet->ori = m->ori;
       bullet->type = moCrushball;
       bullet->parent = m;
       bullet->pid = i;

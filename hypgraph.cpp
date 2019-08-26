@@ -1315,6 +1315,7 @@ EX void centerpc(ld aspd) {
     int sl = snakelevel(cwt.at);
     if(sl && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     View = inverse(T);
+    if(prod) nisot::local_perspective = inverse(pc->ori);
     if(WDIM == 2) rotate_view( cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) );
     return;
     }
@@ -2086,7 +2087,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
     return V1 * eupush(IV * eupush(H) * V1 * C0);
     }
   else {
-    return inverse(nisot::parallel_transport(inverse(V), Id, -H));
+    return inverse(nisot::parallel_transport(inverse(V), -H));
     }
   }
 
