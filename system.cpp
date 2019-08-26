@@ -235,9 +235,11 @@ EX void initgame() {
     }
 
   if(cwt.at->land == laCrossroads2) {
-    cwt.at->landparam = 12;
-    createMov(cwt.at, 0)->landparam = 44;
-    createMov(cwt.at, 0)->land = laCrossroads2;
+    cell *c = cwt.at;
+    if(hybri) { c = hybrid::get_where(c).first; hybrid::in_underlying_map([&] { c->cmove(0); }); }
+    c->landparam = 12;
+    c->cmove(0)->landparam = 44;
+    c->cmove(0)->land = laCrossroads2;
     }
     
   sword::determine_sword_angles();
