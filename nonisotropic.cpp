@@ -1279,6 +1279,10 @@ EX namespace nisot {
       shift_arg_formula(solv::solrange_z);
       return 0;
       }
+    if(argis("-slrange")) {
+      shift_arg_formula(slr::range_xy);
+      return 0;
+      }
     else if(argis("-fsol")) {
       shift(); solv::solfname = args();
       return 0;
