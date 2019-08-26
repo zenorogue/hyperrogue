@@ -683,11 +683,12 @@ EX namespace product {
       }
   
     void draw() override {
+      actual_view_level = hybrid::current_view_level - floor(zlevel(tC0(cview())) / cgi.plevel + .5);
       in_underlying([this] { currentmap->draw(); });
       }
     };
 
-  EX int cwall_offset, cwall_mask;
+  EX int cwall_offset, cwall_mask, actual_view_level;
   
   void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
@@ -710,9 +711,9 @@ EX namespace product {
       for(int z=-max_z; z<=max_z; z++) {
         if(z == 0) cwall_mask ^= (2<<c->type);
         if(z == 1) cwall_mask ^= (1<<c->type);
-        cell *c1 = hybrid::get_at(c, hybrid::current_view_level+z);
+        cell *c1 = hybrid::get_at(c, actual_view_level+z);
         setdist(c1, 7, NULL);
-        drawcell(c1, V * mscale(Id, cgi.plevel * z), spinv, mirrored); 
+        drawcell(c1, V * mscale(Id, cgi.plevel * (z+actual_view_level - hybrid::current_view_level)), spinv, mirrored); 
         }
       });
     }
