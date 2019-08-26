@@ -764,6 +764,7 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
 
 
 cdata *getHeptagonCdata(heptagon *h) {
+  if(hybri) { cdata *x; hybrid::in_underlying_map([&] { x = getHeptagonCdata(h); }); return x; }
   if(geometry == gNormal && BITRUNCATED) return getHeptagonCdata_legacy(h);
   if(h->cdata) return h->cdata;
 
