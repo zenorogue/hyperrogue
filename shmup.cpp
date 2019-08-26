@@ -20,6 +20,11 @@ namespace shmupballs {
     }
   }
 
+ld sqdist(hyperpoint a, hyperpoint b) {
+  if(prod) return pow(hdist(a, b), 2);
+  else return intval(a, b);
+  }
+
 /*
 const char *lastprofile = "";
 int lt = 0;
@@ -408,7 +413,7 @@ monster *playerCrash(monster *who, hyperpoint where) {
   if(racing::on) return NULL;
   for(int j=0; j<players; j++) if(pc[j] && pc[j]!=who) {
     if(pc[j]->isVirtual) continue;
-    double d = intval(pc[j]->pat*C0, where);
+    double d = sqdist(pc[j]->pat*C0, where);
     if(d < 0.1 * SCALE2 || d > 100 || (WDIM == 3 && hdist(tC0(pc[j]->pat), where) > sightranges[geometry]/2)) return pc[j];
     }
   return NULL;
@@ -1008,7 +1013,7 @@ void movePlayer(monster *m, int delta) {
     if(!m->isVirtual) {
       crashintomon = playerCrash(m, nat*C0);
       for(monster *m2: nonvirtual) if(m2!=m && m2->type == passive_switch) {
-        double d = intval(m2->pat*C0, nat*C0);
+        double d = sqdist(m2->pat*C0, nat*C0);
         if(d < SCALE2 * 0.2) crashintomon = m2;
         }
       }
@@ -1055,7 +1060,7 @@ void movePlayer(monster *m, int delta) {
           cell *c = c2->modmove(sd+di);
           if(!c) continue;
           if(m->isVirtual || !gmatrix.count(c)) continue;
-          double d = intval(gmatrix[c] * C0, m->pat * C0);
+          double d = sqdist(gmatrix[c] * C0, m->pat * C0);
           if(d<bestd) bestd=d, subdir = di;
           }
         visibleFor(300);
@@ -1204,7 +1209,7 @@ void movePlayer(monster *m, int delta) {
     for(monster *m2: nonvirtual) {
       if(m2 == m) continue;
       
-      double d = intval(m2->pat*C0, H);
+      double d = sqdist(m2->pat*C0, H);
     
       if(d < SCALE2 * 0.1) {
         if(hornKills(m2->type))
@@ -1223,7 +1228,7 @@ void movePlayer(monster *m, int delta) {
       for(monster *m2: nonvirtual) {
         if(m2 == m) continue;
         
-        double d = intval(m2->pat*C0, H);
+        double d = sqdist(m2->pat*C0, H);
       
         if(d < SCALE2 * 0.1) {
           if(swordKills(m2->type) && !(isBullet(m2) && m2->pid == cpid))
@@ -1451,7 +1456,7 @@ eItem targetRangedOrbKey(orbAction a) {
   for(monster *m2: nonvirtual) {
     if(m2->dead) continue;
     if(m2->no_targetting) continue;
-    if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m2->pat*C0)) 
+    if(!mousetarget || sqdist(mouseh, mousetarget->pat*C0) > sqdist(mouseh, m2->pat*C0)) 
       mousetarget = m2;
     }
 
@@ -1469,7 +1474,7 @@ EX eItem targetRangedOrb(orbAction a) {
   monster *wpc = pc[cpid];
   if(a != roCheck && !wpc) return itNone;  
   
-  if(items[itOrbPsi] && shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
+  if(items[itOrbPsi] && shmup::mousetarget && sqdist(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
     if(a == roCheck) return itOrbPsi;
     addMessage(XLAT("You kill %the1 with a mental blast!", mousetarget->type));
     killMonster(mousetarget, moNone);
@@ -1478,7 +1483,7 @@ EX eItem targetRangedOrb(orbAction a) {
     return itOrbPsi;
     }
   
-  if(items[itOrbStunning] && shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
+  if(items[itOrbStunning] && shmup::mousetarget && sqdist(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
     if(a == roCheck) return itOrbStunning;
     mousetarget->stunoff = curtime + 1000;
     items[itOrbStunning] -= 10;
@@ -1576,7 +1581,7 @@ void moveBullet(monster *m, int delta) {
     }
   else m->vel = bullet_velocity(m->type);
   
-  if(m->type == moTongue && (m->isVirtual || !m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4))
+  if(m->type == moTongue && (m->isVirtual || !m->parent || sqdist(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4))
     m->dead = true;
 
   if(inertia_based) {
@@ -1768,7 +1773,7 @@ void moveBullet(monster *m, int delta) {
 hyperpoint closerTo;
 
 bool closer(monster *m1, monster *m2) {
-  return intval(m1->pat*C0,  closerTo) < intval(m2->pat*C0, closerTo);
+  return sqdist(m1->pat*C0,  closerTo) < sqdist(m2->pat*C0, closerTo);
   }
 
 EX bool dragonbreath(cell *dragon) {
@@ -1854,7 +1859,7 @@ void moveMonster(monster *m, int delta) {
   if(items[itOrbBeauty] && !m->isVirtual) {
     bool nearplayer = false;
     for(int pid=0; pid<players; pid++) if(!pc[pid]->isVirtual) {
-      double dist = intval(pc[pid]->pat*C0, m->pat*C0);
+      double dist = sqdist(pc[pid]->pat*C0, m->pat*C0);
       if(dist < SCALE2) nearplayer = true;
       }
     if(nearplayer) markOrb(itOrbBeauty), step /= 2;
@@ -1894,7 +1899,7 @@ void moveMonster(monster *m, int delta) {
   
     if(m->type == moSleepBull && !m->isVirtual) {
       for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
-        double d = intval(m2->pat*C0, nat*C0);
+        double d = sqdist(m2->pat*C0, nat*C0);
         if(d < SCALE2*3 && m2->type == moPlayer) m->type = moRagingBull;
         }
       }
@@ -1902,9 +1907,9 @@ void moveMonster(monster *m, int delta) {
     if(m->type == moWitchFlash) for(int pid=0; pid<players; pid++) {
       if(pc[pid]->isVirtual) continue;
       if(m->isVirtual) continue;
-      bool okay = intval(pc[pid]->pat*C0, m->pat*C0) < 2 * SCALE2;
+      bool okay = sqdist(pc[pid]->pat*C0, m->pat*C0) < 2 * SCALE2;
       for(monster *m2: nonvirtual) {
-        if(m2 != m && isWitch(m2->type) && intval(m2->pat*C0, m->pat*C0) < 2 * SCALE2)
+        if(m2 != m && isWitch(m2->type) && sqdist(m2->pat*C0, m->pat*C0) < 2 * SCALE2)
           okay = false;
         }
       if(okay) {
@@ -1976,7 +1981,7 @@ void moveMonster(monster *m, int delta) {
       }
     else if(!direct && !invismove && !peace::on) {
       for(int i=0; i<players; i++) 
-        if(step && trackroute(m, pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
+        if(step && trackroute(m, pc[i]->pat, step) && (!direct || sqdist(pc[i]->pat*C0, m->pat*C0) < sqdist(goal*C0,m->pat*C0))) {
           goal = pc[i]->pat;
           direct = true;
           directi = i;
@@ -2014,7 +2019,7 @@ void moveMonster(monster *m, int delta) {
     }
   
   if(m->type == moVampire && !m->isVirtual) for(int i=0; i<players; i++) 
-  if(!pc[i]->isVirtual && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
+  if(!pc[i]->isVirtual && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
     for(int i=0; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_ORB && items[i] && items[itOrbTime] && !orbused[i])
         orbused[i] = true;
@@ -2068,13 +2073,13 @@ void moveMonster(monster *m, int delta) {
     }
 
   if(m->type != moRagingBull && !peace::on)
-  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried && !inertia_based) {
+  if(sqdist(nat*C0, goal*C0) >= sqdist(m->pat*C0, goal*C0) && !stunned && !carried && !inertia_based) {
     igo++; goto igo_retry; }
 
   for(int i=0; i<multi::players; i++) for(int b=0; b<2; b++) if(sword::orbcount(b)) {  
     if(pc[i]->isVirtual) continue;
     hyperpoint H = swordpos(i, b, 1);
-    double d = intval(H, nat*C0);
+    double d = sqdist(H, nat*C0);
     if(d < SCALE2 * 0.12) { igo++; goto igo_retry; }
     }
 
@@ -2083,7 +2088,7 @@ void moveMonster(monster *m, int delta) {
   monster* crashintomon = NULL;
   
   if(!m->isVirtual && m->type != moAsteroid) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
-    double d = intval(m2->pat*C0, nat*C0);
+    double d = sqdist(m2->pat*C0, nat*C0);
     if(d < SCALE2 * 0.1) crashintomon = m2;
     }
   
@@ -2204,9 +2209,9 @@ void moveMonster(monster *m, int delta) {
       if(neighborId(c3, c2) != -1 && c3->wall == waFreshGrave && gmatrix.count(c3)) {
         bool monstersNear = false;
         for(monster *m2: nonvirtual) {
-          if(m2 != m && intval(m2->pat*C0, gmatrix[c3]*C0) < SCALE2 * .3)
+          if(m2 != m && sqdist(m2->pat*C0, gmatrix[c3]*C0) < SCALE2 * .3)
             monstersNear = true;
-          if(m2 != m && intval(m2->pat*C0, gmatrix[c2]*C0) < SCALE2 * .3)
+          if(m2 != m && sqdist(m2->pat*C0, gmatrix[c2]*C0) < SCALE2 * .3)
             monstersNear = true;
           }
         if(!monstersNear) {
@@ -2316,7 +2321,7 @@ void moveMonster(monster *m, int delta) {
       m->nextshot = curtime + 1500;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
-    if((m->type == moAirElemental) && curtime >= m->nextshot && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
+    if((m->type == moAirElemental) && curtime >= m->nextshot && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
@@ -2328,14 +2333,14 @@ void moveMonster(monster *m, int delta) {
       m->nextshot = curtime + 1500;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
-      if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->torigin)) && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
+      if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->torigin)) && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
         items[itBabyTortoise] += 4;
         m->dead = true;
         addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
         }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
     if(m->type == moFlailer && curtime >= m->nextshot && 
-      intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
+      sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       m->nextshot = curtime + 3500;
       monster* bullet = new monster;
       bullet->base = m->base;
@@ -2349,7 +2354,7 @@ void moveMonster(monster *m, int delta) {
       break;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
-    if(m->type == moCrusher && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * .75) {    
+    if(m->type == moCrusher && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * .75) {    
       m->stunoff = curtime + 1500;
       monster* bullet = new monster;
       bullet->base = m->base;
@@ -2432,7 +2437,7 @@ EX void turn(int delta) {
   if(callhandlers(false, hooks_turn, delta)) return;
 
   lmousetarget = NULL;
-  if(mousetarget && !mousetarget->isVirtual && intval(mouseh, mousetarget->pat*C0) < 0.1)
+  if(mousetarget && !mousetarget->isVirtual && sqdist(mouseh, mousetarget->pat*C0) < 0.1)
     lmousetarget = mousetarget;
 
   if(!shmup::on) return;  
@@ -2742,7 +2747,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     if(!mouseout()) {
       if(m->no_targetting) ; else
       if(mapeditor::drawplayer || m->type != moPlayer)
-      if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m->pat*C0)) 
+      if(!mousetarget || sqdist(mouseh, mousetarget->pat*C0) > sqdist(mouseh, m->pat*C0)) 
         mousetarget = m;
       }
     
@@ -2965,7 +2970,7 @@ EX void virtualRebase(shmup::monster *m, bool tohex) {
 EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
 
 EX void addShmupHelp(string& out) {
-  if(shmup::mousetarget && intval(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
+  if(shmup::mousetarget && sqdist(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
     if(callhandlers(false, hooks_describe, shmup::mousetarget, out)) return;
     out += XLAT1(minf[shmup::mousetarget->type].name);
     help = generateHelpForMonster(shmup::mousetarget->type);
