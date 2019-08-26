@@ -68,6 +68,7 @@ struct archimedean_tiling {
   bool support_chessboard();
   void regroup();
   string world_size();
+  void get_nom_denom(int& anom, int& adenom);
   
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -1253,16 +1254,14 @@ EX void show() {
     };
   }
 
-string archimedean_tiling::world_size() {
-  if(get_class() == gcEuclid) return "∞";
-
+void archimedean_tiling::get_nom_denom(int& anom, int& adenom) {
   int nom = 2 - N, denom = 2;
   for(int f: faces) {
     int g = gcd(denom, f);
     nom = (nom * f + denom) / g;
     denom = denom / g * f;
     }
-  int anom = 0, adenom = 1;
+  anom = 0, adenom = 1;
   if(BITRUNCATED || DUAL) anom = 1, adenom = 1;
   if(!DUAL) for(int f: faces) {
     int g = gcd(adenom, f);
@@ -1275,6 +1274,14 @@ string archimedean_tiling::world_size() {
     anom /= g; adenom /= g;
     }
   if(adenom < 0) anom = -anom, adenom = -adenom;
+  }
+
+string archimedean_tiling::world_size() {
+  if(get_class() == gcEuclid) return "∞";
+  
+  int anom, adenom;
+  get_nom_denom(anom, adenom);
+
   string s;
   bool hyp = (anom < 0);
   if(hyp) anom = -anom;
