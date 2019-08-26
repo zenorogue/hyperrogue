@@ -1103,7 +1103,8 @@ EX namespace slr {
     transmatrix relative_matrix(cell *c1, int i) {
       if(i == c1->type-2) return zpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return zpush(+cgi.plevel) * spin(+2*cgi.plevel);
-      if(PURE && !archimedean) {
+      if(PURE && hybrid::underlying != gArchimedean) {
+        /* todo: always do something like this! */
         int j = c1->c.spin(i);
         ld A = master_to_c7_angle();
         transmatrix Q = spin(-A + 2 * M_PI * i / S7) * xpush(cgi.tessf) * spin(M_PI - 2 * M_PI * j / S7 + A);
