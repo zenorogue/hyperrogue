@@ -128,6 +128,10 @@ struct geometry_information {
   ld tentacle_length;
   /** level in product geometries */
   ld plevel;
+  /** level for a z-step */
+  int single_step;
+  /** the number of levels in SL2 */
+  int steps;
   
   /** various parameters related to the 3D view */
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
@@ -465,7 +469,7 @@ void geometry_information::prepare_basics() {
       t->hcrossf = cgi.crossf / d;
       t->tessf = cgi.tessf / d;
       t->hexvdist = cgi.hexvdist / d;
-      t->hexhexdist = cgi.hexhexdist / d;
+      t->hexhexdist = hdist(xpush0(cgi.hcrossf), xspinpush0(M_PI*2/S7, cgi.hcrossf)) / d;
       t->base_distlimit = cgi.base_distlimit-1;
       });
     goto hybrid_finish;
@@ -569,7 +573,15 @@ void geometry_information::prepare_basics() {
     }
   
   plevel = vid.plevel_factor * scalefactor;
-  if(sl2) plevel = M_PI / 14;
+  steps = 0;
+  single_step = 1;
+  if(sl2) {
+    single_step = S3 * S7 - 2 * S7 - 2 * S3;
+    steps = 2 * S7;    
+    println(hlog, "steps = ", steps, " / ", single_step);
+    if(BITRUNCATED) steps *= S3;
+    plevel = M_PI * single_step / steps;
+    }
   
   set_sibling_limit();
   

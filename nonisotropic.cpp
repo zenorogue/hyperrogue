@@ -569,17 +569,20 @@ EX namespace hybrid {
   EX geometry_information *underlying_cgip;
   
   EX void configure(eGeometry g) {
-    if(g == gSL2) variation = eVariation::pure, geometry = gNormal;
+    if(g == gSL2) variation = eVariation::pure;
     if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
     check_cgi();
     cgi.prepare_basics();
     underlying = geometry;
     underlying_cgip = cgip;
     geometry = g;
-    ginf[gProduct] = ginf[underlying];
-    ginf[gProduct].cclass = gcProduct;
-    ginf[gProduct].g.gameplay_dimension++;
-    ginf[gProduct].g.graphical_dimension++;
+    ginf[g] = ginf[underlying];
+    if(g == gSL2) ginf[g].g = giSL2;
+    else {
+      ginf[g].cclass = g == gSL2 ? gcSL2 : gcProduct;
+      ginf[g].g.gameplay_dimension++;
+      ginf[g].g.graphical_dimension++;
+      }
     }
 
   hrmap *pmap;
@@ -614,7 +617,7 @@ EX namespace hybrid {
       }
     
     cell *getCell(cell *u, int h) {
-      if(sl2) h = gmod(h, 14);
+      if(sl2) h = gmod(h, cgi.steps);
       cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
       return c;
@@ -645,14 +648,15 @@ EX namespace hybrid {
   void find_cell_connection(cell *c, int d) {
     auto m = hmap();
     if(d >= c->type - 2) {
-      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? 1 : -1));
+      int s = cgi.single_step;
+      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? s : -s));
       c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
       }
     else {
       auto cu = m->where[c].first;
       auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
       int d1 = cu->c.spin(d);
-      int s = sl2 ? - d1*2 + d*2 + 7 : 0;
+      int s = sl2 ? d*cgi.steps / cu->type - d1*cgi.steps / cu1->type + cgi.steps/2 : 0;
       cell *c1 = get_at(cu1, m->where[c].second + s);
       c->c.connect(d, c1, d1, cu->c.mirror(d));
       }
@@ -1068,20 +1072,41 @@ EX namespace slr {
       "return vec4(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha), 1.);"
       "}";
 
-  EX transmatrix adjmatrix(int i, int j) {
-    ld zs = 2 * M_PI / 28;
-    if(i == 7) return zpush(-zs) * spin(-2*zs);
-    if(i == 8) return zpush(+zs) * spin(+2*zs);
-    return spin(2 * M_PI * i / 7) * xpush(tessf7/2) * spin(M_PI - 2 * M_PI * j / 7);
-    }
-  
   struct hrmap_psl2 : hybrid::hrmap_hybrid {
+
+    transmatrix relative_matrix(cell *c1, int i) {
+      if(i == c1->type-2) return zpush(-cgi.plevel) * spin(-2*cgi.plevel);
+      if(i == c1->type-1) return zpush(+cgi.plevel) * spin(+2*cgi.plevel);
+      if(PURE && !archimedean) {
+        int j = c1->c.spin(i);
+        ld A = master_to_c7_angle();
+        transmatrix Q = spin(-A + 2 * M_PI * i / S7) * xpush(cgi.tessf) * spin(M_PI - 2 * M_PI * j / S7 + A);
+        return Q;
+        /* if(!eqmatrix(Q, R)) {
+          println(hlog, "matrix discrepancy");
+          println(hlog, Q);
+          println(hlog, R);
+          } */
+        }
+      transmatrix Spin;
+      hyperpoint d;
+      cell *c2 = where[c1].first;
+      in_underlying([&] {
+        transmatrix T = cellrelmatrix(c2, i);
+        hyperpoint h = tC0(T);
+        Spin = inverse(gpushxto0(h) * T);
+        d = hr::inverse_exp(h, iTable);
+        });
+      for(int k=0; k<3; k++) Spin[3][k] = Spin[k][3] = 0; Spin[3][3] = 1;
+      transmatrix R = eupush3(d[0]/2, -d[1]/2, 0) * Spin;
+      return R;
+      }
     
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) override { 
       if(c1 == c2) return Id;
-      for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adjmatrix(i, c1->c.spin(i));
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse(gmatrix0[c1]) * gmatrix0[c2];
+      for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return relative_matrix(c1, i);
       return Id; // not implemented yet
       }
 
@@ -1102,12 +1127,12 @@ EX namespace slr {
         if(!do_draw(c, V)) continue;
         drawcell(c, V, 0, false);
 
-        for(int i=0; i<9; i++) {
+        for(int i=0; i<c->type; i++) {
           // note: need do cmove before c.spin
           cell *c1 = c->cmove(i);
           if(visited.count(c1)) continue;
           visited.insert(c1);
-          dq.emplace_back(c1, V * adjmatrix(i, c->c.spin(i)));
+          dq.emplace_back(c1, V * relative_matrix(c, i));
           }
         }
       }

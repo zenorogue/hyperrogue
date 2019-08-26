@@ -909,7 +909,7 @@ EX bool confusingGeometry() {
   }
 
 EX ld master_to_c7_angle() {
-  if(prod) return hybrid::in_underlying_geometry(master_to_c7_angle);
+  if(hybri) return hybrid::in_underlying_geometry(master_to_c7_angle);
   ld alpha = 0;
   #if CAP_GP
   if(cgi.gpdata) alpha = cgi.gpdata->alpha;
