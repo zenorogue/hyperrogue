@@ -1379,7 +1379,7 @@ EX void optimizeview() {
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
 
-  if(sl2) {
+  if(hybri && !prod) {
     cell *c = viewcenter();
     cell *cbest = NULL;
     ld best = hdist0(tC0(gmatrix[c]));

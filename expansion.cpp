@@ -857,7 +857,7 @@ int expansion_hook = addHook(hooks_handleKey, 0, expansion_handleKey);
 
 #if !ISMINI
 void compute_coefficients() {
-  printf("%s %s\n", gp::operation_name().c_str(), ginf[geometry].tiling_name);
+  println(hlog, gp::operation_name(), " ", ginf[geometry].tiling_name);
   start_game();
   
     printf("  sizes:");

@@ -576,12 +576,20 @@ EX namespace hybrid {
     underlying_cgip = cgip;
     geometry = g;
     ginf[g] = ginf[underlying];
-    if(g == gSL2) ginf[g].g = giSL2;
+    if(g == gSL2) {
+      ginf[g].g = giSL2;
+      ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";
+      string& qn = ginf[g].quotient_name;
+      if(qn == "none") qn = "PSL(2,R)";
+      else qn = qn + "/PSL(2,R)";
+      }
     else {
       ginf[g].cclass = g == gSL2 ? gcSL2 : gcProduct;
       ginf[g].g.gameplay_dimension++;
       ginf[g].g.graphical_dimension++;
+      ginf[g].tiling_name += "xZ";
       }
+    ginf[g].flags |= qHYBRID;
     }
 
   hrmap *pmap;
@@ -616,7 +624,7 @@ EX namespace hybrid {
       }
     
     cell *getCell(cell *u, int h) {
-      if(sl2) h = gmod(h, cgi.steps);
+      if(cgi.steps) h = gmod(h, cgi.steps);
       cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
       return c;
@@ -655,7 +663,7 @@ EX namespace hybrid {
       auto cu = m->where[c].first;
       auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
       int d1 = cu->c.spin(d);
-      int s = sl2 ? d*cgi.steps / cu->type - d1*cgi.steps / cu1->type + cgi.steps/2 : 0;
+      int s = cgi.steps ? d*cgi.steps / cu->type - d1*cgi.steps / cu1->type + cgi.steps/2 : 0;
       cell *c1 = get_at(cu1, m->where[c].second + s);
       c->c.connect(d, c1, d1, cu->c.mirror(d));
       }
@@ -1268,8 +1276,8 @@ EX namespace nisot {
   EX hrmap *new_map() { 
     if(sol) return new solv::hrmap_sol; 
     if(nil) return new nilv::hrmap_nil;
-    if(sl2) return new slr::hrmap_psl2;
     if(geometry == gProduct) return new product::hrmap_product;
+    if(hybri) return new slr::hrmap_psl2;
     return NULL;
     }
   

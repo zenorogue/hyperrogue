@@ -1374,7 +1374,7 @@ EX bool pseudohept(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
-  if(hybri) { auto d = hybrid::get_where(c); return (sl2 ? true : (d.second & 1)) && PIU(pseudohept(d.first)); }
+  if(hybri) { auto d = hybrid::get_where(c); return ((!prod) || (d.second & 1)) && PIU(pseudohept(d.first)); }
   #if CAP_BT
   if(nil) return c->master->zebraval & c->master->emeraldval & c->master->fieldval & 1;
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);

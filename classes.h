@@ -238,8 +238,8 @@ struct geometryinfo1 {
   };
 
 struct geometryinfo {
-  const char* tiling_name;
-  const char* quotient_name;
+  std::string tiling_name;
+  std::string quotient_name;
   const char* menu_displayed_name;
   const char* shortname;
   int sides;
@@ -264,6 +264,11 @@ static const flagtype qELLIPTIC        = 128;
 
 static const flagtype qBINARY          = 256;
 static const flagtype qPENROSE         = 512;
+
+static const flagtype qREGULAR         = 1024; /* not set! */
+static const flagtype qARCHI           = 2048;
+static const flagtype qHYBRID          = 4096;
+static const flagtype qCRYSTAL         = 8192;
 
 static const flagtype qEXPERIMENTAL    = 32768;
 

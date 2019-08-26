@@ -110,8 +110,8 @@ void addMessage(string s, char spamtype = 0);
 #define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
 
 #define binarytiling (ginf[geometry].flags & qBINARY)
-#define archimedean (geometry == gArchimedean)
-#define cryst (geometry == gCrystal)
+#define archimedean (ginf[geometry].flags & qARCHI)
+#define cryst (ginf[geometry].flags & qCRYSTAL)
 #define penrose (ginf[geometry].flags & qPENROSE)
 
 /** convenience flag for geometries with major aspects missing */
@@ -127,7 +127,7 @@ void addMessage(string s, char spamtype = 0);
 #define nil (cgclass == gcNil)
 #define sl2 (cgclass == gcSL2)
 #define prod (cgclass == gcProduct)
-#define hybri (prod || sl2)
+#define hybri (ginf[geometry].flags & qHYBRID)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (sol || nil || sl2)
 #define translatable (euclid || nonisotropic)

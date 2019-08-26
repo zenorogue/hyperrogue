@@ -417,7 +417,10 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     if(archimedean && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
-    dialog::addBoolItem(XLAT((geometry == gProduct && !on) ? XLAT("current geometry x E") : ginf[i].menu_displayed_name), on, letter++);
+    dialog::addBoolItem(XLAT(
+      (geometry == gProduct && !on) ? XLAT("current geometry x E") : 
+      (geometry == gSL2 && !on) ? XLAT("isometries of current geometry") : 
+      ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action(dual::mayboth([i] {
       eGeometry targetgeometry = eGeometry(i);
@@ -830,7 +833,7 @@ EX void showEuclideanMenu() {
       break;
 
     case gcSL2:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("~SL2(R)~"), 0);
+      dialog::addSelItem(XLAT("Curvature"), XLAT("~SL(2,R)~"), 0);
       break;
 
     case gcProduct:

@@ -808,8 +808,8 @@ color_t kind_outline(eItem it) {
 
 EX transmatrix face_the_player(const transmatrix V) {
   if(GDIM == 2) return V;
-  if(sl2) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   if(prod) return mscale(V, cos(ptick(750)) * cgi.plevel / 16);
+  if(hybri) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   transmatrix dummy; /* used only in prod anyways */
   if(nonisotropic) return spin_towards(V, dummy, C0, 2, 0);
   return rgpushxto0(tC0(V));
@@ -4564,7 +4564,7 @@ void radar_grid(cell *c, const transmatrix& V) {
 
 int wall_offset(cell *c) {
   if(prod) return product::cwall_offset;
-  if(sl2) return hybrid::wall_offset(c);
+  if(hybri) return hybrid::wall_offset(c);
   if(penrose && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;
   }

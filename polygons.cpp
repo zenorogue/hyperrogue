@@ -803,7 +803,7 @@ void geometry_information::reserve_wall3d(int i) {
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  reserve_wall3d(penrose ? 22 : prod ? 0 : sl2 ? 0 : S7);
+  reserve_wall3d(penrose ? 22 : hybri ? 0 : S7);
   if(GDIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -958,7 +958,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(GDIM == 3 && !euclid && !binarytiling && !nil && !prod && !sl2) {
+  if(GDIM == 3 && !euclid && !binarytiling && !nonisotropic && !hybri && !penrose) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
