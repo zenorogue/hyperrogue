@@ -1307,7 +1307,6 @@ EX void centerpc(ld aspd) {
     transmatrix T = pc->at;
     if(hybri) {
       hybrid::current_view_level = hybrid::get_where(pc->base).second;
-      println(hlog, "base = ", pc->base, " at level ", hybrid::current_view_level);
       cell *cc = hybrid::get_at(viewctr.at->c7, hybrid::current_view_level);
       T = currentmap->relative_matrix(pc->base, cc, C0) * T;
       }      
