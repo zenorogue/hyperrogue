@@ -803,7 +803,7 @@ void geometry_information::reserve_wall3d(int i) {
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  reserve_wall3d(penrose ? 22 : prod ? 0 : sl2 ? S7+2 : S7);
+  reserve_wall3d(penrose ? 22 : prod ? 0 : sl2 ? 0 : S7);
   if(GDIM == 3 && binarytiling && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -969,42 +969,6 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(geometry == gSL2) {
-    ld zs = cgi.plevel;
-    ld a = 2 * M_PI/ S7;
-    ld tf = cgi.tessf / 2;
-    ld he = cgi.hexhexdist / 2;
-    ld A = master_to_c7_angle();
-    hyperpoint right_u = spin(A) * xpush(tf) * ypush(-he) * zpush0(zs/2);
-    hyperpoint right_d = spin(A) * xpush(tf) * ypush(-he) * zpush0(-zs/2);
-    hyperpoint left_u  = spin(A) * xpush(tf) * ypush(+he) * zpush0(zs/2);
-    hyperpoint left_d  = spin(A) * xpush(tf) * ypush(+he) * zpush0(-zs/2);
-    hyperpoint center_u = zpush0(zs/2);
-    hyperpoint center_d = zpush0(-zs/2);
-    for(int i=0; i<S7; i++) {
-      auto s =spin(a * i);
-      make_wall(i, {s * right_u, s * right_d, s * left_d, s * left_u});
-      }
-    vector<hyperpoint> top, bot;
-    for(int i=0; i<S7; i++) {
-      bot.push_back(center_d);
-      bot.push_back(spin(a*i) * left_d);
-      bot.push_back(spin(a*i) * right_d);
-      bot.push_back(center_d);
-      bot.push_back(spin(a*i) * right_d);
-      bot.push_back(spin(a*(i+1)) * left_d);
-
-      top.push_back(center_u);
-      top.push_back(spin(a*i) * left_u);
-      top.push_back(spin(a*i) * right_u);
-      top.push_back(center_u);
-      top.push_back(spin(a*i) * right_u);
-      top.push_back(spin(a*(i+1)) * left_u);
-      }
-    make_wall(S7, bot);
-    make_wall(S7+1, top);
-    }
-  
   if(geometry == gSol) {
     ld zstep = -log(2) / 2;
     ld bwh = vid.binary_width * zstep;

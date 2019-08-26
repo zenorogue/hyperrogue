@@ -1384,9 +1384,18 @@ EX void optimizeview() {
     cell *cbest = NULL;
     ld best = hdist0(tC0(gmatrix[c]));
     if(isnan(best)) return;
-    forCellEx(c2, c) {
-      ld quality = hdist0(tC0(gmatrix[c2]));
-      if(quality < best) best = quality, cbest = c2;
+    forCellIdEx(c2, i2, c) {
+      if(!gmatrix.count(c2)) return;
+      if(PURE || i2 >= c->type-2) {
+        ld quality = hdist0(tC0(gmatrix[c2]));
+        if(quality < best) best = quality, cbest = c2;
+        }
+      else forCellIdEx(c3, i3, c2) if(i3%2 == 0 && i3 < c2->type-2 && gmatrix.count(c3)) {
+        // cell *w = hybrid::get_where(c3).first;
+        // assert (w->master->c7 != w)
+        ld quality = hdist0(tC0(gmatrix[c3]));
+        if(quality < best) best = quality, cbest = c3;
+        }
       }
     if(cbest) {
       View = View * currentmap->relative_matrix(cbest, c, C0);

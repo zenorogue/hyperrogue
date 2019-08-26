@@ -578,8 +578,8 @@ void geometry_information::prepare_basics() {
   if(sl2) {
     single_step = S3 * S7 - 2 * S7 - 2 * S3;
     steps = 2 * S7;    
-    println(hlog, "steps = ", steps, " / ", single_step);
     if(BITRUNCATED) steps *= S3;
+    DEBB(DF_GEOM | DF_POLY, ("steps = ", steps, " / ", single_step));
     plevel = M_PI * single_step / steps;
     }
   

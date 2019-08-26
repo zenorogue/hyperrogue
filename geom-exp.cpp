@@ -431,9 +431,17 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
         pushScreen(arcm::show);
       #endif
       else dialog::do_if_confirmed([targetgeometry] () {
-        if(targetgeometry == gProduct && (WDIM == 3 || euclid)) {
+        bool th = among(targetgeometry, gProduct, gSL2);
+        if(th && (WDIM == 3 || euclid)) {
           addMessage(XLAT("Only works with 2D non-Euclidean geometries"));
           return;
+          }
+        if(targetgeometry == gSL2) {
+          bool ok = true;
+          if(archimedean) ok = PURE;
+          else if(binarytiling || penrose) ok = false;
+          else ok = PURE || BITRUNCATED;
+          if(!ok) addMessage(XLAT("Only works with (semi-)regular tilings"));
           }
         set_geometry(targetgeometry);
         start_game();

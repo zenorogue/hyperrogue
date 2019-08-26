@@ -1182,7 +1182,7 @@ EX void set_geometry(eGeometry target) {
     if(DUAL && geometry != gArchimedean) 
       variation = ginf[geometry].default_variation;
     #if CAP_BT
-    if(binarytiling || WDIM == 3 || penrose) if(!prod) variation = eVariation::pure;
+    if(binarytiling || WDIM == 3 || penrose) if(!hybri) variation = eVariation::pure;
     #endif
     if(GDIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
     if(nonisotropic && old_DIM == 2) pmodel = mdGeodesic;

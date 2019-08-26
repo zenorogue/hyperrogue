@@ -569,7 +569,6 @@ EX namespace hybrid {
   EX geometry_information *underlying_cgip;
   
   EX void configure(eGeometry g) {
-    if(g == gSL2) variation = eVariation::pure;
     if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
     check_cgi();
     cgi.prepare_basics();
@@ -677,6 +676,81 @@ EX namespace hybrid {
   
   #define PIU(x) hr::hybrid::in_underlying_geometry([&] { return (x); })
   #endif
+
+  EX hyperpoint get_corner(cell *c, int i, int next, ld z) {
+    ld lev = cgi.plevel * z / 2;
+    if(prod) {
+      dynamicval<eGeometry> g(geometry, hybrid::underlying);
+      dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
+      return mscale(get_corner_position(c, i+next), exp(lev));
+      }
+    else {
+      ld tf, he;
+      transmatrix Spin;
+      in_underlying_map([&] {
+        hyperpoint h1 = get_corner_position(c, i);
+        hyperpoint h2 = get_corner_position(c, i+1);
+        hyperpoint hm = mid(h1, h2);
+        tf = hdist0(hm)/2;
+        he = hdist(hm, h2)/2;
+        Spin = spintox(hm); /* inverse! */
+        });
+      return Spin * xpush(tf) * ypush(next?he:-he) * zpush0(lev);
+      }
+    }
+  
+  EX int wall_offset(cell *c) {
+    int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
+    if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
+    int &wo = cgi.walloffsets[id];
+    if(wo == -1) {
+      cell *c1 = hybrid::get_where(c).first;
+      wo = isize(cgi.shWall3D);
+      int won = wo + c->type;
+      cgi.reserve_wall3d(won);
+      
+      if(prod) for(int i=0; i<c1->type; i++) {
+        hyperpoint w;
+        hybrid::in_underlying_geometry([&] { 
+          /* mirror image of C0 in the axis h1-h2 */
+          hyperpoint h1 = get_corner_position(c1, i);
+          hyperpoint h2 = get_corner_position(c1, i+1);
+          transmatrix T = gpushxto0(h1);
+          T = spintox(T * h2) * T;
+          w = T * C0;
+          w[1] = -w[1];
+          w = inverse(T) * w;
+          });
+        cgi.walltester[wo + i] = w;
+        } 
+
+      for(int i=0; i<c1->type; i++)
+       cgi.make_wall(wo + i, {hybrid::get_corner(c1, i, 0, -1), hybrid::get_corner(c1, i, 0, +1), hybrid::get_corner(c1, i, 1, +1), hybrid::get_corner(c1, i, 1, -1)});
+
+      for(int a: {0,1}) {
+        vector<hyperpoint> l;
+        int z = a ? 1 : -1;
+        hyperpoint ctr = zpush0(z * cgi.plevel/2);
+        for(int i=0; i<c1->type; i++)
+          if(prod)
+            l.push_back(hybrid::get_corner(c1, i, 0, z));
+          else {
+            l.push_back(ctr);
+            l.push_back(hybrid::get_corner(c1, i, 0, z));
+            l.push_back(hybrid::get_corner(c1, i+1, 1, z));
+            l.push_back(ctr);
+            l.push_back(hybrid::get_corner(c1, i, 1, z));
+            l.push_back(hybrid::get_corner(c1, i, 0, z));
+            }
+        cgi.make_wall(won-2+a, l);
+        }
+
+      cgi.compute_cornerbonus();
+      cgi.extra_vertices();
+      }
+    return wo;
+    }
+
 EX }
   
 EX namespace product {
@@ -699,7 +773,7 @@ EX namespace product {
     bool s = sphere;
     hybrid::in_actual([&] { 
       cell *c0 = hybrid::get_at(c, hybrid::current_view_level);
-      cwall_offset = wall_offset(c0);
+      cwall_offset = hybrid::wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
       else {
         cwall_mask = 0;
@@ -722,54 +796,6 @@ EX namespace product {
       });
     }
   
-  EX hyperpoint get_corner(cell *c, int i, ld z) {
-    ld lev = cgi.plevel * z / 2;
-    dynamicval<eGeometry> g(geometry, hybrid::underlying);
-    dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
-    return mscale(get_corner_position(c, i), exp(lev));
-    }
-  
-  EX int wall_offset(cell *c) {
-    int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
-    if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
-    int &wo = cgi.walloffsets[id];
-    if(wo == -1) {
-      cell *c1 = hybrid::get_where(c).first;
-      wo = isize(cgi.shWall3D);
-      int won = wo + c->type;
-      cgi.reserve_wall3d(won);
-      
-      for(int i=0; i<c1->type; i++) {
-        hyperpoint w;
-        hybrid::in_underlying_geometry([&] { 
-          /* mirror image of C0 in the axis h1-h2 */
-          hyperpoint h1 = get_corner_position(c1, i);
-          hyperpoint h2 = get_corner_position(c1, i+1);
-          transmatrix T = gpushxto0(h1);
-          T = spintox(T * h2) * T;
-          w = T * C0;
-          w[1] = -w[1];
-          w = inverse(T) * w;
-          });
-        cgi.walltester[wo + i] = w;
-        } 
-
-      for(int i=0; i<c1->type; i++)
-       cgi.make_wall(wo + i, {product::get_corner(c1, i, -1), product::get_corner(c1, i, +1), product::get_corner(c1, i+1, +1), product::get_corner(c1, i+1, -1)});
-      for(int a: {0,1}) {
-        vector<hyperpoint> l;
-        int z = a ? 1 : -1;
-        for(int i=0; i<c1->type; i++)
-          l.push_back(product::get_corner(c1, i, z));
-        cgi.make_wall(won-2+a, l);
-        }
-
-      cgi.compute_cornerbonus();
-      cgi.extra_vertices();
-      }
-    return wo;
-    }
-
   EX bool product_sphere() { return ginf[hybrid::underlying].cclass == gcSphere; }
   
   EX hyperpoint inverse_exp(hyperpoint h) {
