@@ -422,7 +422,8 @@ EX transmatrix cellrelmatrix(cell *c, int i) {
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
   if(c->c.mirror(i)) T = T * Mirror;
-  T = T * iddspin(c->move(i), c->c.spin(i), M_PI);
+  cell *c1 = c->cmove(i);
+  T = T * iddspin(c1, c->c.spin(i), M_PI);
   return T;
   }
 
