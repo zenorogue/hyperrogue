@@ -683,7 +683,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 
   transmatrix Tright, Tleft;
   
-  if(GDIM == 2) {
+  if(GDIM == 2 || hybri) {
     Tright = VFOOT * xpush(rightfoot);
     Tleft = VFOOT * Mirror * xpush(-rightfoot);
     }
