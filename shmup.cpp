@@ -886,8 +886,8 @@ void movePlayer(monster *m, int delta) {
       playergo[cpid] = -mdy * SCALE * delta / 600;
       playerstrafe[cpid] = mdx * SCALE * delta / 600;
       }
-    playerturn[cpid] = mgo * SCALE * delta / 200;
-    playerturny[cpid] = mturn * SCALE * delta / 200;
+    playerturn[cpid] = -mturn * SCALE * delta / 200;
+    playerturny[cpid] = -mgo * SCALE * delta / 200;
 
     #if CAP_MOUSEGRAB
     if(!lctrlclick && cpid == 0) {
