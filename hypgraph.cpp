@@ -2107,7 +2107,8 @@ EX void shift_view_towards(hyperpoint H, ld l) {
     shift_view(tangent_length(H-C0, -l));
   else {
     hyperpoint ie = inverse_exp(H, iTable, true);
-    shift_view(tangent_length(lp_apply(ie), -l));
+    if(prod) ie = lp_apply(ie);
+    shift_view(tangent_length(ie, -l));
     }
   }
 
