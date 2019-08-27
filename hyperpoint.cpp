@@ -1003,7 +1003,7 @@ EX void rotate_object(transmatrix& Position, transmatrix& orientation, transmatr
 EX transmatrix spin_towards(const transmatrix Position, transmatrix& ori, const hyperpoint goal, int dir, int back) {
   transmatrix T;
   ld alpha = 0;
-  if(nonisotropic)
+  if(nonisotropic && nisot::geodesic_movement)
     T = nisot::spin_towards(Position, goal);
   else { 
     hyperpoint U = inverse(Position) * goal;
