@@ -461,7 +461,7 @@ void geometry_information::prepare_basics() {
   
   if(hybri) {
     auto t = this;
-    ld d = sl2 ? 2 : 1;
+    ld d = prod ? 1 : 2;
     hybrid::in_underlying_geometry([&] {
       t->rhexf = cgi.rhexf / d;
       t->hexf = cgi.hexf / d;
@@ -575,17 +575,18 @@ void geometry_information::prepare_basics() {
   plevel = vid.plevel_factor * scalefactor;
   steps = 0;
   single_step = 1;
-  if(sl2) {
+  if(hybri && !prod) {
     if(hybrid::underlying == gArchimedean) {
       ld s = arcm::current.euclidean_angle_sum - 2;
       single_step = 2;
       DEBB(DF_GEOM | DF_POLY, ("1/s = ", 1/s));
-      steps = 4/s + .5;
+      steps = 4/abs(s) + .5;
       }
     else {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
       steps = 2 * S7;    
       if(BITRUNCATED) steps *= S3;
+      if(single_step < 0) single_step = -single_step;
       }
     DEBB(DF_GEOM | DF_POLY, ("steps = ", steps, " / ", single_step));
     plevel = M_PI * single_step / steps;

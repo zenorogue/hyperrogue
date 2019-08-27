@@ -263,7 +263,7 @@ EX void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
-  else if(nonisotropic || prod) currentmap = nisot::new_map();
+  else if(nonisotropic || hybri) currentmap = nisot::new_map();
   #if CAP_CRYSTAL
   else if(cryst) currentmap = crystal::new_map();
   #endif

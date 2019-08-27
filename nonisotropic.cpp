@@ -574,14 +574,19 @@ EX namespace hybrid {
     cgi.prepare_basics();
     underlying = geometry;
     underlying_cgip = cgip;
+    bool sph = sphere;
     geometry = g;
+    auto keep = ginf[g].menu_displayed_name;
     ginf[g] = ginf[underlying];
+    ginf[g].menu_displayed_name = keep;
     if(g == gSL2) {
-      ginf[g].g = giSL2;
+      ginf[g].g = sph ? giSphere3 : giSL2;
       ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";
       string& qn = ginf[g].quotient_name;
-      if(qn == "none") qn = "PSL(2,R)";
-      else qn = qn + "/PSL(2,R)";
+      string qplus = sph ? "elliptic" : qn;
+      if(qn == "none" || qn == "elliptic") qn = qplus;
+      else qn = qn + "/" + qplus;
+      if(sph) ginf[g].flags |= qELLIPTIC;
       }
     else {
       ginf[g].cclass = g == gSL2 ? gcSL2 : gcProduct;
@@ -693,17 +698,16 @@ EX namespace hybrid {
       return mscale(get_corner_position(c, i+next), exp(lev));
       }
     else {
-      ld tf, he;
-      transmatrix Spin;
+      ld tf, he, alpha;
       in_underlying_map([&] {
         hyperpoint h1 = get_corner_position(c, i);
         hyperpoint h2 = get_corner_position(c, i+1);
         hyperpoint hm = mid(h1, h2);
         tf = hdist0(hm)/2;
         he = hdist(hm, h2)/2;
-        Spin = spintox(hm); /* inverse! */
+        alpha = atan2(hm[1], hm[0]);
         });
-      return Spin * xpush(tf) * ypush(next?he:-he) * zpush0(lev);
+      return spin(alpha) * rots::uxpush(tf) * rots::uypush(next?he:-he) * rots::uzpush(lev) * C0;
       }
     }
   
@@ -1106,16 +1110,35 @@ EX namespace slr {
       "return vec4(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha), 1.);"
       "}";
 
-  struct hrmap_psl2 : hybrid::hrmap_hybrid {
+EX }
+
+EX namespace rots {
+
+  EX transmatrix uxpush(ld x) { 
+    if(sl2) return xpush(x);
+    return cspin(1, 3, x) * cspin(0, 2, x);
+    }
+
+  EX transmatrix uypush(ld y) { 
+    if(sl2) return ypush(y);
+    return cspin(0, 3, -y) * cspin(1, 2, y);
+    }
+     
+  EX transmatrix uzpush(ld z) {
+    if(sl2) return zpush(z);
+    return cspin(3, 2, -z) * cspin(0, 1, -z);
+    }
+
+  struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
     transmatrix relative_matrix(cell *c1, int i) {
-      if(i == c1->type-2) return zpush(-cgi.plevel) * spin(-2*cgi.plevel);
-      if(i == c1->type-1) return zpush(+cgi.plevel) * spin(+2*cgi.plevel);
+      if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
+      if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       if(PURE && hybrid::underlying != gArchimedean) {
         /* todo: always do something like this! */
         int j = c1->c.spin(i);
         ld A = master_to_c7_angle();
-        transmatrix Q = spin(-A + 2 * M_PI * i / S7) * xpush(cgi.tessf) * spin(M_PI - 2 * M_PI * j / S7 + A);
+        transmatrix Q = spin(-A + 2 * M_PI * i / S7) * uxpush(cgi.tessf) * spin(M_PI - 2 * M_PI * j / S7 + A);
         return Q;
         /* if(!eqmatrix(Q, R)) {
           println(hlog, "matrix discrepancy");
@@ -1123,17 +1146,21 @@ EX namespace slr {
           println(hlog, R);
           } */
         }
-      transmatrix Spin;
       hyperpoint d;
+      ld alpha, beta, distance;
+      transmatrix Spin;
       cell *c2 = where[c1].first;
       in_underlying([&] {
         transmatrix T = cellrelmatrix(c2, i);
         hyperpoint h = tC0(T);
         Spin = inverse(gpushxto0(h) * T);
         d = hr::inverse_exp(h, iTable);
+        alpha = atan2(Spin[0][1], Spin[0][0]);
+        distance = hdist0(h);
+        beta = atan2(h[1], h[0]);
         });
       for(int k=0; k<3; k++) Spin[3][k] = Spin[k][3] = 0; Spin[3][3] = 1;
-      transmatrix R = eupush3(d[0]/2, -d[1]/2, 0) * Spin;
+      transmatrix R = spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
       return R;
       }
     
@@ -1158,12 +1185,16 @@ EX namespace slr {
         cell *c = dq[i].first;
         transmatrix V = dq[i].second;
         
-        if(V[3][3] < 0) V = centralsym * V;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V, 0, false);
+        if(sl2) {
+          if(V[3][3] < 0) V = centralsym * V;
+          if(!do_draw(c, V)) continue;
+          drawcell(c, V, 0, false);
+          }
+        else {
+          drawcell(c, V, 0, false);
+          }
 
         for(int i=0; i<c->type; i++) {
-          // note: need do cmove before c.spin
           cell *c1 = c->cmove(i);
           if(visited.count(c1)) continue;
           visited.insert(c1);
@@ -1276,8 +1307,8 @@ EX namespace nisot {
   EX hrmap *new_map() { 
     if(sol) return new solv::hrmap_sol; 
     if(nil) return new nilv::hrmap_nil;
-    if(geometry == gProduct) return new product::hrmap_product;
-    if(hybri) return new slr::hrmap_psl2;
+    if(prod) return new product::hrmap_product;
+    if(hybri) return new rots::hrmap_rotation_space;
     return NULL;
     }
   
@@ -1314,6 +1345,11 @@ EX namespace nisot {
     else if(argis("-product")) {
       PHASEFROM(2);
       set_geometry(gProduct);
+      return 0;
+      }
+    else if(argis("-rotspace")) {
+      PHASEFROM(2);
+      set_geometry(gSL2);
       return 0;
       }
     return 1;
