@@ -1314,11 +1314,9 @@ bool archimedean_tiling::get_step_values(int& steps, int& single_step) {
   
   for(int f: arcm::current.faces) {
     if(int(denom*f)/f != denom) { steps = 0; single_step = 0; return false; }
-    nom = nom * f + (f-2) * denom;
-    denom = denom * f;
-    int g = gcd(nom, denom);
-    nom /= g;
-    denom /= g;
+    int g = gcd(denom, f);
+    nom = nom * (f/g) + (f-2) * (denom/g);
+    denom = denom/g * f;
     }
     
   steps = 2 * abs(denom);
