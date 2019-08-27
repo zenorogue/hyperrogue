@@ -1129,30 +1129,33 @@ EX namespace rots {
     if(sl2) return zpush(z);
     return cspin(3, 2, -z) * cspin(0, 1, -z);
     }
+  
+  std::unordered_map<int, transmatrix> saved_matrices;
 
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
     transmatrix relative_matrix(cell *c1, int i) {
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
-      if(PURE && hybrid::underlying != gArchimedean) {
-        /* todo: always do something like this! */
-        int j = c1->c.spin(i);
+      cell *c2 = c1->cmove(i);
+      int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
+      int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+      int j = c1->c.spin(i);
+      int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
+      auto &M = saved_matrices[id];
+      if(M[3][3]) return M;
+      
+      /*if(PURE && hybrid::underlying != gArchimedean) {
         ld A = master_to_c7_angle();
         transmatrix Q = spin(-A + 2 * M_PI * i / S7) * uxpush(cgi.tessf) * spin(M_PI - 2 * M_PI * j / S7 + A);
         return Q;
-        /* if(!eqmatrix(Q, R)) {
-          println(hlog, "matrix discrepancy");
-          println(hlog, Q);
-          println(hlog, R);
-          } */
-        }
+        } */
       hyperpoint d;
       ld alpha, beta, distance;
       transmatrix Spin;
-      cell *c2 = where[c1].first;
+      cell *cw = where[c1].first;
       in_underlying([&] {
-        transmatrix T = cellrelmatrix(c2, i);
+        transmatrix T = cellrelmatrix(cw, i);
         hyperpoint h = tC0(T);
         Spin = inverse(gpushxto0(h) * T);
         d = hr::inverse_exp(h, iTable);
@@ -1161,8 +1164,7 @@ EX namespace rots {
         beta = atan2(h[1], h[0]);
         });
       for(int k=0; k<3; k++) Spin[3][k] = Spin[k][3] = 0; Spin[3][3] = 1;
-      transmatrix R = spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
-      return R;
+      return M = spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
       }
     
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) override { 
