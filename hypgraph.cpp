@@ -1260,6 +1260,8 @@ EX void spinEdge(ld aspd) {
   else if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
     aspd = 999999;
     auto& vo = get_view_orientation();
+    // does not work well (also need change auto& to auto)
+    // if(hybri && !prod) vo = vo * inverse(nisot::translate(tC0(vo)));
     if(straightDownSeek) {
       auto sdp = straightDownPoint;
       if(prod) sdp = vo * product::inverse_exp(sdp);
