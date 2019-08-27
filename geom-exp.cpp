@@ -567,6 +567,8 @@ EX void showEuclideanMenu() {
   nom *= euler;
   denom *= 2;
         
+  if(hybri && !prod) nom *= cgi.steps, denom *= cgi.single_step;
+
   int g = gcd(nom, denom);
   if(g) {
     nom /= g;
@@ -654,6 +656,9 @@ EX void showEuclideanMenu() {
     dialog::add_action([] {
       dialog::editNumber(vid.plevel_factor, 0, 2, 0.1, 0.7, XLAT("Z-level height factor"), "");
       });
+    }
+  else if(hybri) {
+    dialog::addSelItem(XLAT("number of levels"), its(cgi.steps / cgi.single_step), 0);
     }
   else if(ts == 6 && tv == 3)
     dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
@@ -791,7 +796,7 @@ EX void showEuclideanMenu() {
     binarytiling ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
     #endif
     #if CAP_ARCM
-    archimedean ? arcm::current.world_size() :
+    archimedean && (WDIM == 2) ? arcm::current.world_size() :
     (archimedean && sphere) ? its(isize(currentmap->allcells())) :
     #endif
     #if CAP_CRYSTAL
