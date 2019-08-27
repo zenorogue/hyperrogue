@@ -3458,3 +3458,15 @@ Solv geometry:
 - fixed a crash in pure {4,4}
 - CLI arguments for creaturescale and character selection
 
+2019-08-19 15:48 Version 11.1m:
+- fixed the bug with black creatures in 3D
+- fixes for the product spaces:
+- - product game stats are not saved (previously they could be confused with non-product game stats)
+- - fixed crashes when drawing stuff in S2xE
+- - fixed 3D models' arms (incorrect altitude) and armor (random errors)
+- - third-person perspective
+
+2019-08-21 07:38 Version 11.1n:
+- optimized H2xR
+- fixed crashes in H2xR land generation
+- fixed fullscreen "flashes" in product geometries
