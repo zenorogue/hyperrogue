@@ -579,7 +579,7 @@ EX namespace hybrid {
     auto keep = ginf[g].menu_displayed_name;
     ginf[g] = ginf[underlying];
     ginf[g].menu_displayed_name = keep;
-    if(g == gSL2) {
+    if(g == gRotSpace) {
       ginf[g].g = sph ? giSphere3 : giSL2;
       ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";
       string& qn = ginf[g].quotient_name;
@@ -589,7 +589,7 @@ EX namespace hybrid {
       if(sph) ginf[g].flags |= qELLIPTIC;
       }
     else {
-      ginf[g].cclass = g == gSL2 ? gcSL2 : gcProduct;
+      ginf[g].cclass = g == gRotSpace ? gcSL2 : gcProduct;
       ginf[g].g.gameplay_dimension++;
       ginf[g].g.graphical_dimension++;
       ginf[g].tiling_name += "xZ";
@@ -1349,7 +1349,7 @@ EX namespace nisot {
       }
     else if(argis("-rotspace")) {
       PHASEFROM(2);
-      set_geometry(gSL2);
+      set_geometry(gRotSpace);
       return 0;
       }
     return 1;

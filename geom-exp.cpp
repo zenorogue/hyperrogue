@@ -398,7 +398,7 @@ vector<eGeometry> list3d = {
   gCell24, gECell24,
   gCell16, gECell16,
   gCell8, gECell8,
-  gCell5, gKiteDart3, gSol, gNil, gProduct, gSL2
+  gCell5, gKiteDart3, gSol, gNil, gProduct, gRotSpace
   };
 
 void ge_select_tiling(const vector<eGeometry>& lst) {
@@ -418,8 +418,8 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     if(cryst && !CAP_CRYSTAL) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     dialog::addBoolItem(XLAT(
-      (geometry == gProduct && !on) ? XLAT("current geometry x E") : 
-      (geometry == gSL2 && !on) ? XLAT("isometries of current geometry") : 
+      (geometry == gProduct && !hybri) ? XLAT("current geometry x E") : 
+      (geometry == gRotSpace && !hybri) ? XLAT("space of rotations in current geometry") : 
       ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action(dual::mayboth([i] {
@@ -434,12 +434,12 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
         pushScreen(arcm::show);
       #endif
       else dialog::do_if_confirmed([targetgeometry] () {
-        bool th = among(targetgeometry, gProduct, gSL2);
+        bool th = among(targetgeometry, gProduct, gRotSpace);
         if(th && (WDIM == 3 || euclid)) {
           addMessage(XLAT("Only works with 2D non-Euclidean geometries"));
           return;
           }
-        if(targetgeometry == gSL2) {
+        if(targetgeometry == gRotSpace) {
           bool ok = true;
           if(archimedean) ok = PURE;
           else if(binarytiling || penrose) ok = false;

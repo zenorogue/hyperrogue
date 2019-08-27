@@ -1161,7 +1161,7 @@ EX void set_geometry(eGeometry target) {
     int old_DIM = GDIM;
     stop_game();
     ors::reset();
-    if(among(target, gProduct, gSL2)) hybrid::configure(target);
+    if(among(target, gProduct, gRotSpace)) hybrid::configure(target);
     geometry = target;
   
     if(chaosmode && bounded) chaosmode = false;

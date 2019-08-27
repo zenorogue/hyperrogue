@@ -214,7 +214,7 @@ enum eGeometry {
   gHoroTris, gHoroRec, gHoroHex,
   gField435, gField534,
   gBinary4, gSol,
-  gKiteDart2, gKiteDart3, gNil, gProduct, gSL2,
+  gKiteDart2, gKiteDart3, gNil, gProduct, gRotSpace,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol, gcNil, gcProduct, gcSL2 };

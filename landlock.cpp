@@ -685,7 +685,7 @@ EX land_validity_t& land_validity(eLand l) {
       return lv::not_implemented;
     if(among(l, laReptile, laDragon, laTortoise))
       return lv::bad_graphics;
-    if((hybrid::actual_geometry == gSL2 || geometry == gSL2) && l == laDryForest)
+    if((hybrid::actual_geometry == gRotSpace || geometry == gRotSpace) && l == laDryForest)
       return lv::hedgehogs;
     if(hybri) return *PIU(&land_validity(l));
     }
