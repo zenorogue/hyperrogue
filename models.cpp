@@ -198,6 +198,7 @@ EX namespace models {
   
   EX bool model_available(eModel pm) {
     if(prod) return pm == mdPerspective;
+    if(sl2) return pm == mdGeodesic;
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdGeodesic, mdEquidistant);
     if(pm == mdGeodesic && !sol) return false;
     if(sphere && (pm == mdHalfplane || pm == mdBall))
