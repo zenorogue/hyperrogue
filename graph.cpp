@@ -2306,6 +2306,25 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
   ld R;
   again:
   
+  if(sl2) {
+    a.wherenow = slr::translate(tC0(a.wherenow));
+    hyperpoint h = tC0(inverse(a.wherenow));
+    hyperpoint ie = slr::get_inverse_exp(h, 0);
+    auto R = hypot_d(3, ie);
+    aspd *= (1+R+(shmup::on?1:0));
+    if(R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) {
+      animations[layer].erase(c);
+      return false;
+      }
+    a.wherenow = nisot::parallel_transport(a.wherenow, tangent_length(h, aspd));
+    a.footphase += a.attacking == 2 ? -aspd : aspd;
+    // todo attack animation, rotate correctly
+    footphase = a.footphase;
+    V = V * a.wherenow;
+    a.ltick = ticks;
+    return true;
+    }
+
   if(a.attacking == 1) 
     R = hdist(tC0(a.attackat), tC0(a.wherenow));
   else
