@@ -912,7 +912,7 @@ EX int getBits(cell *c) {
   if(masterless) return getEuclidCdata(decodeId(c->master))->bits;
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
-  else if(archimedean && hyperbolic) 
+  else if(archimedean && (hyperbolic || sl2)) 
     return arcmCdata(c)->bits;
   else if(!geometry_supports_cdata()) return 0;
   else if(c == c->master->c7) return getHeptagonCdata(c->master)->bits;
