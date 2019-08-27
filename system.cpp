@@ -97,12 +97,21 @@ void welcomeMessage() {
     addMessage(XLAT("Welcome to the Euclidean mode!"));
   else if(specialland == laHalloween && BITRUNCATED && among(geometry, gSphere, gElliptic))
     addMessage(XLAT("Welcome to Halloween!"));
-  else if(elliptic)
+  else if(elliptic && WDIM == 2)
     addMessage(XLAT("Good luck in the elliptic plane!"));
+  else if(elliptic)
+    addMessage(XLAT("Good luck in the elliptic space!"));
   else if(sphere)
     addMessage(XLAT("Welcome to Spherogue!"));
   else if(sol)
     addMessage(XLAT("Welcome to SolvRogue!"));
+  else if(nil)
+    addMessage(XLAT("Welcome to NilRogue!"));
+  else if(sl2) {
+    addMessage(XLAT("Welcome to PSL(2,R)-ogue!"));
+    if(hybrid::underlying == gNormal && BITRUNCATED)
+      addMessage(XLAT("Hint: this is more playable with pure {7,3} or pure {5,4}"));
+    }
   else if(PURE && geometry == gNormal && !cheater)
     addMessage(XLAT("Welcome to the Heptagonal Mode!"));
   else if(cheater || autocheat)
