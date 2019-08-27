@@ -1234,10 +1234,6 @@ EX void show() {
       }
     else dialog::addBreak(100);
 
-    int s, ss;
-    bool b = current.get_step_values(s, ss);
-    println(hlog, "b=", b, " s=", s, " ss=",ss);
-
     if(archimedean) {    
       dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');
       dialog::add_action(next_variation);
