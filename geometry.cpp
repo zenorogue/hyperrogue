@@ -909,7 +909,7 @@ EX void check_cgi() {
   if(GOLDBERG) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
-  if(geometry == gArchimedean) V("ARCM", arcm::current.symbol);
+  if(archimedean) V("ARCM", arcm::current.symbol);
   
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   

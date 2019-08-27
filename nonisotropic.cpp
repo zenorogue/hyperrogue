@@ -1130,9 +1130,9 @@ EX namespace rots {
     return cspin(3, 2, -z) * cspin(0, 1, -z);
     }
   
-  std::unordered_map<int, transmatrix> saved_matrices;
-
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
+
+    std::unordered_map<int, transmatrix> saved_matrices;
 
     transmatrix relative_matrix(cell *c1, int i) {
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
