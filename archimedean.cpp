@@ -72,6 +72,8 @@ struct archimedean_tiling {
   
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
+
+  bool get_step_values(int& steps, int& single_step);
   
   ld scale();
   };
@@ -1232,6 +1234,10 @@ EX void show() {
       }
     else dialog::addBreak(100);
 
+    int s, ss;
+    bool b = current.get_step_values(s, ss);
+    println(hlog, "b=", b, " s=", s, " ss=",ss);
+
     if(archimedean) {    
       dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');
       dialog::add_action(next_variation);
@@ -1299,6 +1305,26 @@ EX int degree(heptagon *h) {
 
 EX bool is_vertex(heptagon *h) {
   return id_of(h) >= 2 * current.N;
+  }
+
+bool archimedean_tiling::get_step_values(int& steps, int& single_step) {
+
+  int nom = -2;
+  int denom = 1;
+  
+  for(int f: arcm::current.faces) {
+    if(int(denom*f)/f != denom) { steps = 0; single_step = 0; return false; }
+    nom = nom * f + (f-2) * denom;
+    denom = denom * f;
+    int g = gcd(nom, denom);
+    nom /= g;
+    denom /= g;
+    }
+    
+  steps = 2 * abs(denom);
+  single_step = abs(nom);
+  if(steps/2 != abs(denom)) return false;
+  return (2 * denom) % nom == 0;  
   }
 
 EX int valence() {

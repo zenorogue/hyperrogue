@@ -444,7 +444,17 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
           if(archimedean) ok = PURE;
           else if(binarytiling || penrose) ok = false;
           else ok = PURE || BITRUNCATED;
-          if(!ok) addMessage(XLAT("Only works with (semi-)regular tilings"));
+          if(!ok) {
+            addMessage(XLAT("Only works with (semi-)regular tilings"));
+            return;
+            }
+          if(archimedean) {
+            int steps, single_step;
+            if(!arcm::current.get_step_values(steps, single_step)) {
+              addMessage(XLAT("That would have %1/%2 levels", its(steps), its(single_step)));
+              return;
+              }
+            }
           }
         set_geometry(targetgeometry);
         start_game();

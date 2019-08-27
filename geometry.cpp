@@ -576,12 +576,8 @@ void geometry_information::prepare_basics() {
   steps = 0;
   single_step = 1;
   if(hybri && !prod) {
-    if(hybrid::underlying == gArchimedean) {
-      ld s = arcm::current.euclidean_angle_sum - 2;
-      single_step = 2;
-      DEBB(DF_GEOM | DF_POLY, ("1/s = ", 1/s));
-      steps = 4/abs(s) + .5;
-      }
+    if(hybrid::underlying == gArchimedean) 
+      arcm::current.get_step_values(steps, single_step);
     else {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
       steps = 2 * S7;    
