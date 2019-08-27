@@ -385,7 +385,7 @@ EX namespace models {
     dialog::addSelItem(XLAT("projection type"), get_model_name(pmodel), 'm');
     dialog::add_action_push(model_list);
     
-    if(nonisotropic)
+    if(nonisotropic && !sl2)
       dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
 
     dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');

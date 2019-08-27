@@ -1191,6 +1191,7 @@ EX void set_geometry(eGeometry target) {
     if(GDIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
     if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
+    if(sl2) nisot::geodesic_movement = true;
     }
   }
 

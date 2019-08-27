@@ -765,7 +765,7 @@ EX void showEuclideanMenu() {
     }
   dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
   dialog::add_action_push(models::model_menu);
-  if(nonisotropic)
+  if(nonisotropic && !sl2)
     dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
   #if CAP_CRYSTAL && MAXMDIM >= 4
   crystal::add_crystal_transform('x');  
