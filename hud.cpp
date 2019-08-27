@@ -385,7 +385,7 @@ EX void draw_radar(bool cornermode) {
   bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
   bool sph = sphere;
-  bool scompass = nonisotropic;
+  bool scompass = nonisotropic && !hybri;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdUnchanged);
