@@ -754,6 +754,7 @@ EX namespace hybrid {
             l.push_back(hybrid::get_corner(c1, i, 1, z));
             l.push_back(hybrid::get_corner(c1, i, 0, z));
             }
+        if(a == 0) std::reverse(l.begin()+1, l.end());
         cgi.make_wall(won-2+a, l);
         }
 
