@@ -1366,6 +1366,7 @@ EX void start_game() {
   ignored_memory_warning = false;
   check_cgi();
   cgi.require_basics();
+  arcm::current.compute_geometry();
   initcells();
   expansion.reset();
 
