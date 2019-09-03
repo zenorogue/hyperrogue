@@ -1722,5 +1722,6 @@ void texture_data::update() {
     }
   }
 
-}}
+EX }
+}
 #endif
