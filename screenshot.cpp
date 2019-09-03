@@ -99,7 +99,11 @@ EX namespace svg {
 
   string font = "Times";
   
+  ld text_width_multiplier = 1/40.;
+  int min_text = 3;
+  
   EX void text(int x, int y, int size, const string& str, bool frame, color_t col, int align) {
+    if(size < min_text) return;
 
     double dfc = (x - current_display->xcenter) * (x - current_display->xcenter) + 
       (y - current_display->ycenter) * (y - current_display->ycenter);
@@ -133,7 +137,7 @@ EX namespace svg {
       if(!uselatex)
         print(f, "font-family='", font, "' font-size='", coord(size), "' ");
       print(f, 
-        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc/40), 
+        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc*text_width_multiplier), 
         ">", str2, "</text>");
       stopstring();
       println(f);
@@ -207,6 +211,12 @@ int read_args() {
     printf("saving SVG screenshot to %s\n", argcs());
     shot::make_svg = true;
     shot::take(argcs());
+    }
+  else if(argis("-svgtwm")) {
+    shift_arg_formula(svg::text_width_multiplier);
+    }
+  else if(argis("-svgmt")) {
+    shift(); svg::min_text = argi();
     }
   else return 1;
   return 0;
