@@ -897,7 +897,7 @@ EX void describeMouseover() {
     
   callhooks(hooks_mouseover, c);
   
-  if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
+  if(mousey < vid.fsize * 3/2 && getcstat == '-' && !instat) getcstat = SDLK_F1;
   }
 
 EX void showHelp() {
