@@ -3470,3 +3470,15 @@ Solv geometry:
 - optimized H2xR
 - fixed crashes in H2xR land generation
 - fixed fullscreen "flashes" in product geometries
+
+2019-08-27 22:45 Version 11.1o:
+- rotation spaces
+- simpler honeycomb in Nil
+- pointing-to-directions now checks for the cell which is the most towards the given direction
+- fixed a crash when switching Archimedean modes
+- welcome messages for the new geometries
+- starting in Crossroads II now works in hybrid
+- product:: fixed backwall optimization in TPP view and legs
+- shmup:: fixed the keyboard rotation direction inconsistency in 3D
+- shmup for product: player movement
+
