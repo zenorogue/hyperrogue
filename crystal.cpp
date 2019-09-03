@@ -1014,7 +1014,7 @@ EX void set_land(cell *c) {
   set_euland3(c, co1[0], co1[1], dist_alt(c), hash);
   }
 
-void set_crystal(int sides) {
+EX void set_crystal(int sides) {
   stop_game();
   set_geometry(gCrystal);
   set_variation(eVariation::pure);

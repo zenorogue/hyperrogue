@@ -395,7 +395,7 @@ EX hyperpoint normalize(hyperpoint H) {
   }
 
 /** get the center of the line segment from H1 to H2 */
-hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
+EX hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
   if(prod) {
     auto d1 = product_decompose(H1);
     auto d2 = product_decompose(H2);
