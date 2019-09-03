@@ -986,7 +986,7 @@ EX namespace slr {
     if(phi < 0) { find_alpha(-phi, r, -theta, alpha, s, beta); alpha = -alpha; beta = -beta; return; }
     ld mina = 0, maxa = M_PI/2;
   
-    bool next_nan;
+    bool next_nan = true;
     ld c;
     
     for(int it=0; it<40; it++) {
