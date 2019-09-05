@@ -7,6 +7,8 @@
 
 namespace hr {
 
+EX int fontscale = 100;
+
 #if HDR
 /** configuration of the current view */
 struct display_data {

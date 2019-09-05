@@ -1417,6 +1417,60 @@ EX void clearMemory() {
   callhooks(clearmemory);
   }
 
+EX bool fixseed = false;
+EX int startseed = 0;
+
+EX eLand firstland0;
+
+EX void initAll() {
+  init_floorcolors();
+  showstartmenu = true;
+  ca::init();
+#if CAP_COMMANDLINE
+  arg::read(1);
+#endif
+  srand(time(NULL));
+  shrand(fixseed ? startseed : time(NULL));
+
+  achievement_init(); // not in ANDROID
+
+  firstland0 = firstland;
+  
+  // initlanguage();
+  initgraph();
+#if CAP_SAVE
+  loadsave();
+  if(IRREGULAR) irr::auto_creator();
+#endif
+  start_game();
+  
+  if(!shmup::on) {
+    restoreGolems(items[itOrbLife], moGolem); items[itOrbLife] = 0;
+    restoreGolems(items[itOrbFriend], moTameBomberbird); items[itOrbFriend] = 0;
+    restoreGolems(kills[moPrincessMoved], moPrincess, princess::saveHP); kills[moPrincessMoved] = 0;
+    restoreGolems(kills[moPrincessArmedMoved], moPrincessArmed, princess::saveArmedHP); kills[moPrincessArmedMoved] = 0;
+    }
+  
+  firstland = firstland0;
+  polygonal::solve();
+  }
+
+EX void finishAll() {
+  achievement_final(!items[itOrbSafety]);
+  
+#if CAP_SAVE
+  saveStats();
+#endif
+  offscreen.clear();
+  clearMemory();
+#if ISMOBILE==0
+  cleargraph();
+#endif
+  
+  achievement_close();  
+  }
+
+
 auto cgm = addHook(clearmemory, 40, [] () {
   pathq.clear();
   dcal.clear();

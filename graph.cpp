@@ -3350,7 +3350,7 @@ EX colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0
 
 color_t floorcolors[landtypes];
 
-void init_floorcolors() {
+EX void init_floorcolors() {
   for(int i=0; i<landtypes; i++)
     floorcolors[i] = linf[i].color;
 

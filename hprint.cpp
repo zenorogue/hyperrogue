@@ -27,6 +27,10 @@ EX FILE *debugfile;
 #define DF_KEYS "imwesxufgbtopl"
 #endif
 
+EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
+
+EX string s0;
+
 EX string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
 
 EX string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }

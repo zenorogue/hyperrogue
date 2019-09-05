@@ -19,7 +19,7 @@
  *  \brief the hyper_main function
  */
 
-#include "init.cpp"
+#include "compileunits.h"
 
 #if CU_HYPER
 
