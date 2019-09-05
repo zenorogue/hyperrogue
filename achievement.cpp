@@ -7,6 +7,7 @@
  *  This routines are general, i.e., not necessarily Steam-specific.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #define NUMLEADER 82

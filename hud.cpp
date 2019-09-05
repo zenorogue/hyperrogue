@@ -5,6 +5,7 @@
  *  \brief Heads-Up display: items collected, monsters killed, radar, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

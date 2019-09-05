@@ -5,6 +5,7 @@
  *  \brief mapping hyperpoints to the screen, and related functions
  */
 
+#include "hyper.h"
 namespace hr {
 
 ld ghx, ghy, ghgx, ghgy;

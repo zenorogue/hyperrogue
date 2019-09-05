@@ -9,6 +9,7 @@
  *  hyperbolic honeycombs rely on binary:: to deal with floating point errors (just like archimedean)
  */
 
+#include "hyper.h"
 namespace hr {
 #if MAXMDIM >= 4
 

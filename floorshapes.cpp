@@ -6,6 +6,7 @@
  *  \brief Adjusting the floor shapes to various geometries.
  */
 
+#include "hyper.h"
 namespace hr {
 #if CAP_SHAPES
 

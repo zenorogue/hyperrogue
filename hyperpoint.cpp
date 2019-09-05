@@ -9,6 +9,7 @@
  *  For nonisotropic geometries, it rather refers to nonisotropic.cpp.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

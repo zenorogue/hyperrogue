@@ -5,6 +5,7 @@
  *  \brief Calculation of basic, and less basic, constants in each geometry
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

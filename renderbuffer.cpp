@@ -9,6 +9,7 @@
  *  and then either used as a OpenGL texture (e.g. in the Hypersian Rug mode), or saved.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CAP_GL

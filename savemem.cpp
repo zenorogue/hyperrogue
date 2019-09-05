@@ -5,7 +5,7 @@
  *  \brief memory saving: memory saving mode, memory warnings, etc.
  */
 
-
+#include "hyper.h"
 namespace hr {
 
 #if HDR

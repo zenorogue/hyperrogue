@@ -8,6 +8,7 @@
  *  drawing.cpp, and basegraph.cpp are important.
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace polygonal {

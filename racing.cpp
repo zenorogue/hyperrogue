@@ -5,6 +5,7 @@
  *  \brief racing mode
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace racing {

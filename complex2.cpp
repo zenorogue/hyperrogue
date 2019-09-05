@@ -7,6 +7,7 @@
  *  Includes: Brownian, Irradiated, Free Fall
  */
 
+#include "hyper.h"
 #ifdef CAP_COMPLEX2
 
 namespace hr {

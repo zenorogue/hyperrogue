@@ -5,6 +5,7 @@
  *  \brief local highscore lists
  */
 
+#include "hyper.h"
 #if CAP_SAVE
 
 namespace hr { namespace scores {

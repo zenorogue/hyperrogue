@@ -11,6 +11,7 @@
  *  geometries, though. This file implements the basic types and functions for navigating both graphs.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

@@ -5,6 +5,7 @@
  *  \brief Matrices to transform between coordinates of various cells, coordinates of cell corners, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 transmatrix &ggmatrix(cell *c);

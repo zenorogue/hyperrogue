@@ -6,6 +6,7 @@
  *  \brief Implementation of various simple flags for lands, items, monsters, and walls.
  */
 
+#include "hyper.h"
 namespace hr {
 
 const flagtype& classflag(eItem it) { return iinf[it].flags; }

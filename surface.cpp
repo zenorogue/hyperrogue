@@ -7,6 +7,7 @@
  *  See http://webmath2.unito.it/paginepersonali/sergio.console/CurveSuperfici/AG15.pdf for a nice reference
  */
 
+#include "hyper.h"
 #if CAP_SURFACE
 namespace hr { 
 

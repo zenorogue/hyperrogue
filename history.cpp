@@ -5,6 +5,7 @@
  *  \brief Implementation of the history mode, including the long band and long spiral.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CAP_SDL

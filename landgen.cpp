@@ -7,6 +7,7 @@
  *  See also bigstuff.cpp (for larger structures) and complex.cpp (for more complex land generation)
  */
 
+#include "hyper.h"
 namespace hr {
 
 // land generation routines

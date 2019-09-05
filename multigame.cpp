@@ -5,6 +5,7 @@
  *  \brief running several games at once -- used in the Tutorial and Dual Geometry mode
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

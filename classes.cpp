@@ -7,6 +7,7 @@
  *  See content.cpp for actual items, monsters, walls and lands.
  */
 
+#include "hyper.h"
 namespace hr {
 
 // --- help ---

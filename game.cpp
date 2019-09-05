@@ -5,6 +5,7 @@
  *  \brief Routines for game itself: movement of PC and monsters, basic mechanics, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

@@ -5,6 +5,7 @@
  *  \brief Routines related to controlling the game
  */
 
+#include "hyper.h"
 namespace hr {
 
 int frames;

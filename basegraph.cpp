@@ -5,6 +5,7 @@
  *  \brief This file implements the basic graphical routines
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX int fontscale = 100;

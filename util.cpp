@@ -5,6 +5,7 @@
  *  \brief basic utility functions: maths, parsing expressions
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CAP_TIMEOFDAY

@@ -5,6 +5,7 @@
  *  \brief the Tutorial and presentation system
  */
 
+#include "hyper.h"
 namespace hr { 
 
 EX namespace tour {

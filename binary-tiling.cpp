@@ -5,6 +5,7 @@
  *  \brief Binary tilings in 2D and 3D
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace binary {

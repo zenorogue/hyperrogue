@@ -5,6 +5,7 @@
  *  \brief changing game modes, starting, closing, loading and saving games
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

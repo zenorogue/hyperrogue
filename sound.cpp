@@ -5,6 +5,7 @@
  *  \brief sound effects and music
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX const char *musicfile = "";

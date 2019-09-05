@@ -8,6 +8,7 @@
  *  as well as more complex ones (Emerald, Palace, Field Pattern)
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX int ctof(cell *c) {

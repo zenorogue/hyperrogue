@@ -19,6 +19,7 @@
  *  \brief the hyper_main function
  */
 
+#include "hyper.h"
 #if CU_HYPER
 
 #if ISLINUX

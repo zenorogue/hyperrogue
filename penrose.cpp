@@ -5,6 +5,7 @@
  *  \brief Kite-and-dart tiling, both in R^2 and H^3
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace kite {

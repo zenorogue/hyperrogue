@@ -5,6 +5,7 @@
  *  \brief shoot'em up mode
  */
 
+#include "hyper.h"
 namespace hr {
 
 // joysticks for controlling the mobile shmup mode

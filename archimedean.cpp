@@ -7,6 +7,7 @@
  *  These are tilings available in the 'Archimedean' option in Geometry Experiments; simpler Archimedean tilings are defined in other files.
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace arcm {

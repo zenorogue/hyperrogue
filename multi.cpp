@@ -5,6 +5,7 @@
  *  \brief multiplayer features, also input configuration
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace multi {

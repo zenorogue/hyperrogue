@@ -5,6 +5,7 @@
  *  \brief Debugging and cheating
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX int steplimit = 0;

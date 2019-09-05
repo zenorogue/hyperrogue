@@ -7,6 +7,7 @@
  *  This is generally not used for standard pure and bitruncated tilings, even though they are technically Goldberg too.
  */
 
+#include "hyper.h"
 namespace hr { 
 
 EX namespace gp {

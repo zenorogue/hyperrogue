@@ -5,6 +5,7 @@
  *  \brief Drawing cells, monsters, items, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 int last_firelimit, firelimit;

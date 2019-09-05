@@ -5,6 +5,7 @@
  *  \brief Routines related to displaying various things, and writing them to console and files. Nicer than the standard C++ streams.
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX FILE *debugfile;

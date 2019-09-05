@@ -5,6 +5,7 @@
  *  \brief This file contains the routines to convert HyperRogue's old vector graphics into 3D models
  */
 
+#include "hyper.h"
 #include "earcut.hpp"
 
 namespace hr {

@@ -5,6 +5,7 @@
  *  \brief Irregular (Voronoi) tilings
  */
 
+#include "hyper.h"
 namespace hr { 
 
 EX namespace irr {

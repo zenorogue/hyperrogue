@@ -5,6 +5,7 @@
  *  \brief Euclidean geometry, including 2D, 3D, and quotient spaces
  */
 
+#include "hyper.h"
 namespace hr {
 
 // 2D Euclidean space

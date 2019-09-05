@@ -5,6 +5,7 @@
  *  \brief quotient spaces
  */
 
+#include "hyper.h"
 namespace hr {
 
 // --- quotient geometry ---

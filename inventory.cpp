@@ -5,6 +5,7 @@
  *  \brief Orb Strategy Mode
  */
 
+#include "hyper.h"
 namespace hr { 
 
 EX namespace inv {

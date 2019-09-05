@@ -5,6 +5,7 @@
  *  \brief unlocking lands, which lands could be found beyond the wall, validity of various lands depending on the settings
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX bool nodisplay(eMonster m) {

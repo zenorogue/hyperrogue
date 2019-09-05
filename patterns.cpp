@@ -5,6 +5,7 @@
  *  \brief tables that the complex patterns (Emerald, Palace, Field Pattern) are based on
  */
 
+#include "hyper.h"
 namespace hr {
 
 // === EMERALD PATTERN ===

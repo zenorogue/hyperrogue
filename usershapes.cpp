@@ -5,6 +5,7 @@
  *  \brief user-defined shapes
  */
 
+#include "hyper.h"
 #if CAP_SHAPES
 
 namespace hr {

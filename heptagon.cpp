@@ -7,6 +7,7 @@
  *  Start with locations.cpp
  */
 
+#include "hyper.h"
 namespace hr {
 
 #define MIRR(x) x.mirrored

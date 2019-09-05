@@ -5,6 +5,7 @@
  *  \brief This file implements routines related to barriers (Great Walls and similar).
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX bool checkBarriersFront(cellwalker bb, int q IS(5), bool cross IS(false)) {

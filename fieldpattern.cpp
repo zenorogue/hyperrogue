@@ -5,6 +5,7 @@
  *  \brief Field Quotient geometry
  */
 
+#include "hyper.h"
 #if CAP_FIELD
 namespace hr {
 

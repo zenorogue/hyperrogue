@@ -5,6 +5,7 @@
  *  \brief paper model generator
  */
 
+#include "hyper.h"
 #if CAP_MODEL
 namespace hr { namespace netgen {
 

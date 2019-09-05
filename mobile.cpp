@@ -5,6 +5,7 @@
  *  \brief initialization, and stuff related to mobiles
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CU_INIT

@@ -5,6 +5,7 @@
  *  \brief Rendering shapes (dqi_draw), queue of shapes to render (ptds), etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

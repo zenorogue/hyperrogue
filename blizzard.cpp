@@ -5,6 +5,7 @@
  *  \brief special graphical effects, such as the Blizzard and arrow traps
  */
 
+#include "hyper.h"
 namespace hr {
 
 struct snowball {

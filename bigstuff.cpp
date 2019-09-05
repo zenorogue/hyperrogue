@@ -12,9 +12,10 @@
  *  This routines are general, i.e., not necessarily Steam-specific.
  */
 
-// horocycles
-
+#include "hyper.h"
 namespace hr {
+
+// horocycles
 
 EX int newRoundTableRadius() {
   return 28 + 2 * items[itHolyGrail];

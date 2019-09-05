@@ -5,6 +5,7 @@
  *  \brief texture mode, also the basic definitions of textures, used in 3D mode
  */
 
+#include "hyper.h"
 #if CAP_TEXTURE
 namespace hr {
 

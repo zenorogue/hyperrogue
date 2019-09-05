@@ -5,6 +5,7 @@
  *  \brief Configuration -- initial settings, saving/loading ini files, menus, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if HDR

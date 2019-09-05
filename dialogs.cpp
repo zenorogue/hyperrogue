@@ -5,6 +5,7 @@
  *  \brief Implementation of various generic dialogs and elements of dialog windows
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX const char* COLORBAR = "###";

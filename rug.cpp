@@ -7,6 +7,7 @@
  *  See also surface.cpp for constant curvature surfaces.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CAP_RUG

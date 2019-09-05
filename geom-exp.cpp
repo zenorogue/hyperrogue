@@ -7,6 +7,7 @@
  *  Implementation of this menu, and computation of the statistics shown there
  */
 
+#include "hyper.h"
 namespace hr {
 
 int eupage = 0;

@@ -5,6 +5,7 @@
  *  \brief Yendor Quest/Challenge, Pure Tactics Mode, Peace Mode
  */
 
+#include "hyper.h"
 namespace hr {
 
 namespace peace { extern bool on; }

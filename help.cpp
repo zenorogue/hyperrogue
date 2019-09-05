@@ -5,6 +5,7 @@
  *  \brief Building and displaying help text
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX string help;

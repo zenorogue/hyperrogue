@@ -5,6 +5,7 @@
  *  \brief spherical spaces
  */
 
+#include "hyper.h"
 namespace hr {
 
 // --- spherical geometry ---

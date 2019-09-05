@@ -5,6 +5,7 @@
  *  \brief Orb generation: which orbs in which lands, functions generating prize/local orbs, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 // orbgen flags
 

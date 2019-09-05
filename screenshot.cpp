@@ -5,6 +5,7 @@
  *  \brief screenshots, SVG format, animations, start animations
  */
 
+#include "hyper.h"
 namespace hr {
 
 bool hide_hud = true;

@@ -7,8 +7,7 @@
 
 // #define CHECKTRANS
 
-#define NUMLAN 7
-
+#include "hyper.h"
 namespace hr {
 
 EX const char *dnameof(eMonster m) { return minf[m].name; }
@@ -17,6 +16,8 @@ EX const char *dnameof(eWall w) { return winf[w].name; }
 EX const char *dnameof(eItem i) { return iinf[i].name; }
 
 #if HDR
+#define NUMLAN 7
+
 struct stringpar {
   string v;
   stringpar(string s) : v(s) { }

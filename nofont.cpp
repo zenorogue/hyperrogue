@@ -5,6 +5,7 @@
  *  \brief built-in font (used e.g. in the web version)
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CAP_TABFONT

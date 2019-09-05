@@ -5,6 +5,7 @@
  *  \brief Multi-dimensional (aka crystal) geometries. 
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace crystal {

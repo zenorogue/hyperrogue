@@ -7,6 +7,7 @@
 
 // -- overview --
 
+#include "hyper.h"
 #define BLACKISH 0x404040
 #define REDDISH 0x400000
 

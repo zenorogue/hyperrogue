@@ -8,7 +8,6 @@
  *  Old things are sorted according to type, but this is not necessary for new content.
  */
 
-
 #ifndef MONSTER
 #define MONSTER(a,b,c,d,e,f,g,h)
 #endif

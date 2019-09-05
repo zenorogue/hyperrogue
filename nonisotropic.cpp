@@ -5,6 +5,7 @@
  *  \brief nonisotropic spaces (Solv and Nil)
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace nisot {

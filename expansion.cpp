@@ -8,6 +8,7 @@
  *  Screens which display this exponential growth (e.g. 'size of the world' in geometry experiments) are also implemented here.
  */
 
+#include "hyper.h"
 namespace hr {
 
 int subtype(cell *c) {

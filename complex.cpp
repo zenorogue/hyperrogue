@@ -7,6 +7,7 @@
  *  Includes: whirlwind, whirlpool, elec, princess, clearing, mirror, hive, heat + livecaves, etc.
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace whirlwind {

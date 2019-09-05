@@ -5,6 +5,7 @@
  *  \brief shapes used for the vector graphics, mostly hand-drawn (the vector data is here), some procedurally generated
  */
 
+#include "hyper.h"
 #if CAP_SHAPES
 
 namespace hr {

@@ -5,6 +5,7 @@
  *  \brief HyperRogue editors (map and vector graphics)
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX namespace mapeditor {

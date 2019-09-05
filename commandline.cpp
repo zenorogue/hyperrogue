@@ -5,6 +5,7 @@
  *  \brief Commandline options support
  */
 
+#include "hyper.h"
 namespace hr {
 
 #if CAP_COMMANDLINE

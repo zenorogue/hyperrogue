@@ -5,6 +5,7 @@
  *  \brief the mission screen, and routines related to it
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !archimedean); }

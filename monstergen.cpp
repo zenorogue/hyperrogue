@@ -5,6 +5,7 @@
  *  \brief monster generation
  */
 
+#include "hyper.h"
 namespace hr {
 
 EX bool timerghost = true;

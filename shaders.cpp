@@ -8,6 +8,7 @@
  *  If CAP_SHADER is 1, we are using GLSL shaders.
  */
 
+#include "hyper.h"
 namespace hr {
 
 #ifndef DEBUG_GL
