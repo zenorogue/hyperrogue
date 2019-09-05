@@ -6,8 +6,6 @@
 
 namespace rogueviz { namespace staircase {
 
-using namespace hyperpoint_vec;
-
 ld scurvature = 0;
 ld acurvature = 0;
 
@@ -38,7 +36,6 @@ rug::rugpoint *pt(hyperpoint h, hyperpoint c) {
   }
 
 void addRect(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoint vx, hyperpoint vy, int ix, int iy) {
-  using namespace hyperpoint_vec;
   vector<vector<rug::rugpoint*> > rps(iy+1, vector<rug::rugpoint*> (ix+1));
   for(int y=0; y<=iy; y++)
   for(int x=0; x<=ix; x++) {
@@ -51,7 +48,6 @@ void addRect(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoin
   }
 
 void addTri(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoint vx, hyperpoint vy, int i) {
-  using namespace hyperpoint_vec;
   vector<vector<rug::rugpoint*> > rps(i+1, vector<rug::rugpoint*> (i+1));
   for(int y=0; y<=i; y++)
   for(int x=0; x<=i; x++) {

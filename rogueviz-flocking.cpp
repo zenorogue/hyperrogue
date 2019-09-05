@@ -131,7 +131,6 @@ namespace flocking {
       iter++;
       }      
     ld d = delta / 1000.;
-    using namespace hyperpoint_vec;
     int N = isize(vdata);
     vector<transmatrix> pats(N);
     vector<ld> vels(N);
@@ -265,7 +264,6 @@ namespace flocking {
         // (in quotient spaces, the representants closest to the current view
         // are taken), and normalize the result to project it back to the hyperboloid
         // (the same method is commonly used on the sphere AFAIK)
-        using namespace hyperpoint_vec;
         hyperpoint h = Hypc;
         for(int i=0; i<N; i++) if(gmatrix.count(vdata[i].m->base)) {
           vdata[i].m->pat = gmatrix[vdata[i].m->base] * vdata[i].m->at;

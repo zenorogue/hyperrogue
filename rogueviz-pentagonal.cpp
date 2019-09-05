@@ -4,8 +4,6 @@ namespace rogueviz {
 namespace pentagonal {
 transmatrix ts[3];
 
-using namespace hyperpoint_vec;
-
 hyperpoint facingdir(array<hyperpoint,3>& a) {
   hyperpoint tmp = (a[1]-a[0]) ^ (a[2]-a[0]);
   tmp /= sqrt(tmp|tmp);
@@ -257,7 +255,7 @@ void create_model() {
   
   printf("createmodel with ticks = %d\n", ticks);
 
-  transmatrix t = hyperbolic ? rotmatrix(M_PI, 0, 2) * xpush(sin(ticks * M_PI * 2 / anims::period)) : rotmatrix(ticks * M_PI * 2 / anims::period, 0, 2);
+  transmatrix t = hyperbolic ? hr::cspin(0, 2, M_PI) * xpush(sin(ticks * M_PI * 2 / anims::period)) : hr::cspin(0, 2, ticks * M_PI * 2 / anims::period);
   
   hyperpoint hs = hyperbolic ? hpxyz(0,0,-1) : hpxyz(0,0,0);
   

@@ -140,8 +140,6 @@ void iterate() {
   for(int y=0; y<Y-1; y++) for(int x=0; x<X-1; x++) 
     if(fmap[y][x] == '1' && fmap[y+1][x] == '1' && fmap[y][x+1] == '1') {
     
-    using namespace hyperpoint_vec;
-
     hyperpoint here = point2(vx[y][x], vy[y][x]);
     hyperpoint v0   = point2(vx[y][x+1], vy[y][x+1]) - here;
     hyperpoint v1   = point2(vx[y+1][x], vy[y+1][x]) - here;
