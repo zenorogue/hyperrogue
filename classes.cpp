@@ -61,7 +61,7 @@ const char *trollhelp =
   "A big monster from the Living Caves. A dead Troll will be reunited "
   "with the rocks, causing some walls to grow around its body.";
 
-const char *trollhelp2 =
+EX const char *trollhelp2 =
   " Additionally, all items around the killed Troll will be destroyed.";
 
 const char *trollhelpX =
@@ -293,7 +293,7 @@ const char *GENDERSWITCH = NODESC;
 
 // --- monsters ---
 
-const char *rosedesc =
+EX const char *rosedesc =
   "Each eight turns, each rosebush at distance at most 5 from you will "
   "release a wave of alluring scent. Creatures on the frontwave "
   "will move towards where the scent came from. Even if it causes them "
@@ -301,7 +301,7 @@ const char *rosedesc =
   "Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific "
   "terrain are immune to scents.";
 
-const char *warpdesc =
+EX const char *warpdesc =
   "This part of the world is warped, restricting the movement somewhat. "
   "\"Diagonal\" movement and attacking between triangular cells is not allowed. "
   "Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and "
@@ -460,7 +460,7 @@ const landtype linf[landtypes] = {
   #include "content.cpp"
   };
 
-vector<landtacinfo> land_tac = {
+EX vector<landtacinfo> land_tac = {
   {laIce, 10, 1}, {laDesert, 10, 1}, 
   {laHunting, 5, 2},
   {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
@@ -497,7 +497,7 @@ vector<landtacinfo> land_tac = {
   {laWestWall, 10, 1},
   };
 
-vector<eLand> randlands = {
+EX vector<eLand> randlands = {
   laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
   laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
   laOvergrown, laWildWest, laWarpCoast, laRuins, laBull, laDragon, laReptile, laDocks
@@ -516,18 +516,18 @@ static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC;
 static const flagtype qsBP              = qBINARY | qPENROSE;
 
-geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
-geometryinfo1 giHyperb2 = { gcHyperbolic, 2, 2, 3, {1,1,-1,0 } };
-geometryinfo1 giSphere2 = { gcSphere,     2, 2, 3, {1,1,+1,0 } };
+EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
+EX geometryinfo1 giHyperb2 = { gcHyperbolic, 2, 2, 3, {1,1,-1,0 } };
+EX geometryinfo1 giSphere2 = { gcSphere,     2, 2, 3, {1,1,+1,0 } };
 
-geometryinfo1 giEuclid3 = { gcEuclid,     3, 3, 4, {1,1, 1,0 } };
-geometryinfo1 giHyperb3 = { gcHyperbolic, 3, 3, 4, {1,1, 1,-1} };
-geometryinfo1 giSphere3 = { gcSphere,     3, 3, 4, {1,1, 1,+1} };
+EX geometryinfo1 giEuclid3 = { gcEuclid,     3, 3, 4, {1,1, 1,0 } };
+EX geometryinfo1 giHyperb3 = { gcHyperbolic, 3, 3, 4, {1,1, 1,-1} };
+EX geometryinfo1 giSphere3 = { gcSphere,     3, 3, 4, {1,1, 1,+1} };
 
-geometryinfo1 giSol     = { gcSol,        3, 3, 4, {1,1, 1,0 } };
-geometryinfo1 giNil     = { gcNil,        3, 3, 4, {1,1, 1,0 } };
-geometryinfo1 giProduct = { /* will be filled in product::configure() */ };
-geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
+EX geometryinfo1 giSol     = { gcSol,        3, 3, 4, {1,1, 1,0 } };
+EX geometryinfo1 giNil     = { gcNil,        3, 3, 4, {1,1, 1,0 } };
+EX geometryinfo1 giProduct = { /* will be filled in product::configure() */ };
+EX geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
 
 /** list of available geometries */
 vector<geometryinfo> ginf = {

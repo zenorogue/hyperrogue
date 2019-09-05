@@ -48,7 +48,7 @@ EX int asteroids_generated, asteroid_orbs_generated;
 
 EX time_t timerstart, savetime;
 EX bool timerstopped;
-int savecount;
+EX int savecount;
 EX bool showoff = false;
 EX bool doCross = false;
 

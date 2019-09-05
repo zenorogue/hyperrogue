@@ -9,12 +9,13 @@
 #include "hyper.h"
 namespace hr {
 
+#if HDR
 const flagtype& classflag(eItem it) { return iinf[it].flags; }
 const flagtype& classflag(eWall w) { return winf[w].flags; }
 const flagtype& classflag(eMonster m) { return minf[m].flags; }
 const flagtype& classflag(eLand l) { return linf[l].flags; }
 
-#define ANYFLAGCHECK(name, cond, field, enum) bool name(enum w) { flagtype flag = classflag(w); return cond; } bool name(cell *c) { return name(c->field); }
+#define ANYFLAGCHECK(name, cond, field, enum) inline bool name(enum w) { flagtype flag = classflag(w); return cond; } inline bool name(cell *c) { return name(c->field); }
 
 #define MONFLAGCHECK(name, cond) ANYFLAGCHECK(name, cond, monst, eMonster)
 #define WALLFLAGCHECK(name, cond) ANYFLAGCHECK(name, cond, wall, eWall)
@@ -116,26 +117,27 @@ ITEMFLAGCHECK(isProtectionOrb, flag & IF_PROTECTION)
 ITEMFLAGCHECK(isEmpathyOrb, flag & IF_EMPATHY)
 ITEMFLAGCHECK(isRangedOrb, flag & IF_RANGED)
 ITEMFLAGCHECK(isRevivalOrb, flag & IF_REVIVAL)
+#endif
 
 eMonster movegroup(eMonster m);
 
 // watery
 
-bool boatStrandable(cell *c) {
+EX bool boatStrandable(cell *c) {
   return c->wall == waNone && (c->land == laLivefjord || c->land == laOcean);
   }
 
 // monster/wall types
 
-bool isFireOrMagma(cell *w) {
+EX bool isFireOrMagma(cell *w) {
   return isFire(w) || w->wall == waMagma;
   }
 
-int mirrorcolor(bool mirrored) {
+EX int mirrorcolor(bool mirrored) {
   return winf[mirrored ? waMirror : waCloud].color;
   }
 
-bool isMounted(cell *c) {
+EX bool isMounted(cell *c) {
   if(c && c->monst && c->monst != moTentacleGhost && isMountable(c->monst)) {
     for(int i=0; i<numplayers(); i++) {
       if(playerpos(i)->monst && sameMonster(c, playerpos(i))) 
@@ -147,31 +149,31 @@ bool isMounted(cell *c) {
   return false;
   }
 
-int itemclass(eItem it) { return iinf[it].itemclass; }
+EX int itemclass(eItem it) { return iinf[it].itemclass; }
 
-bool isFriendly(eMonster m) { return isFriendlyType(m); }
+EX bool isFriendly(eMonster m) { return isFriendlyType(m); }
 
-bool isFriendly(cell *c) { 
+EX bool isFriendly(cell *c) { 
   return isMounted(c) || isFriendly(c->monst); 
   }
 
-bool isFriendlyOrBug(cell *c) { // or killable discord!
+EX bool isFriendlyOrBug(cell *c) { // or killable discord!
   // do not attack the stunned Princess
   if(isPrincess(c->monst) && c->stuntime) return false;
   return isFriendly(c) || isBug(c) || (c->monst && markOrb(itOrbDiscord) && !c->stuntime);
   }
 
-bool cellUnstable(cell *c) {
+EX bool cellUnstable(cell *c) {
   return (c->land == laMotion && c->wall == waNone) || c->wall == waTrapdoor;
   }
 
-bool cellUnstableOrChasm(cell *c) {
+EX bool cellUnstableOrChasm(cell *c) {
   return 
     (c->land == laMotion && c->wall == waNone) || 
     c->wall == waChasm || c->wall == waTrapdoor;
   }
 
-eMonster elementalOf(eLand l) {
+EX eMonster elementalOf(eLand l) {
   if(l == laEFire) return moFireElemental;
   if(l == laEWater) return moWaterElemental;
   if(l == laEAir) return moAirElemental;
@@ -179,11 +181,11 @@ eMonster elementalOf(eLand l) {
   return moNone;
   }
 
-eItem localshardof(eLand l) {
+EX eItem localshardof(eLand l) {
   return eItem(itFireShard + (l - laEFire));
   }
 
-int snakelevel(cell *c) { 
+EX int snakelevel(cell *c) { 
 #if CAP_COMPLEX2
   if(c->land == laBrownian && among(c->wall, waNone, waMineMine, waFire)) return min(c->landparam / brownian::level, 3);
 #endif
@@ -192,23 +194,23 @@ int snakelevel(cell *c) {
 
 // from-to
 
-eSlimegroup slimegroup(cell *c) {
+EX eSlimegroup slimegroup(cell *c) {
   return winf[c->wall].sg;
   }
 
-bool isFlying(eMonster m) {
+EX bool isFlying(eMonster m) {
   return isFlyingType(m) || checkOrb(m, itOrbAether);
   }
 
-bool survivesChasm(eMonster m) {
+EX bool survivesChasm(eMonster m) {
   return isFlying(m);
   }
 
-bool ignoresPlates(eMonster m) {
+EX bool ignoresPlates(eMonster m) {
   return ignoresPlatesType(m) || isFlying(m);
   }
 
-bool isInactiveEnemy(cell *w, eMonster forwho) {
+EX bool isInactiveEnemy(cell *w, eMonster forwho) {
   if(forwho != moPlayer) {
     if(w->monst == moGreaterM || w->monst == moLesserM) return true;
     if(w->monst == moGreater || w->monst == moLesser) return false;
@@ -220,7 +222,7 @@ bool isInactiveEnemy(cell *w, eMonster forwho) {
   }
 
 // forpc = true (for PC), false (for golems)
-bool isActiveEnemy(cell *w, eMonster forwho) {
+EX bool isActiveEnemy(cell *w, eMonster forwho) {
   if(((forwho == moPlayer) ? realstuntime(w) : realstuntime(w) > 1))
     return false;
   if(w->monst == passive_switch) return false;
@@ -230,16 +232,16 @@ bool isActiveEnemy(cell *w, eMonster forwho) {
   return true;
   }
 
-bool isArmedEnemy(cell *w, eMonster forwho) {
+EX bool isArmedEnemy(cell *w, eMonster forwho) {
   return w->monst != moCrystalSage && w->monst != moCrusher && isActiveEnemy(w, forwho);
   }
 
-bool eternalFire(cell *c) {
+EX bool eternalFire(cell *c) {
   return c->land == laDryForest || (c->land == laPower && !smallbounded) || c->land == laMinefield ||
     c->land == laEFire || c->land == laElementalWall;
   }
   
-bool haveRangedOrb() {
+EX bool haveRangedOrb() {
   return 
     items[itOrbPsi] || items[itOrbDragon] || items[itOrbTeleport] ||
     items[itOrbIllusion] || items[itOrbSpace] || items[itOrbAir] ||
@@ -249,15 +251,15 @@ bool haveRangedOrb() {
     items[itOrbMorph] || items[itOrbPhasing];
   }
 
-bool isFriendlyGhost(eMonster m) {
+EX bool isFriendlyGhost(eMonster m) {
   return m == moFriendlyGhost || (markEmpathy(itOrbAether) && isFriendly(m));
   }
 
-bool isGhostAether(eMonster m) {
+EX bool isGhostAether(eMonster m) {
   return isGhost(m) || checkOrb(m, itOrbAether);
   }
 
-bool survivesWater(eMonster m) {
+EX bool survivesWater(eMonster m) {
   return 
     m == moShark || m == moGreaterShark || m == moCShark || 
     isGhostAether(m) || m == moWitchGhost || m == moShadow ||
@@ -269,18 +271,18 @@ bool survivesWater(eMonster m) {
   }
 
 // survives Mercury or Sulphur or Lava
-bool survivesPoison(eMonster m, eWall p) {
+EX bool survivesPoison(eMonster m, eWall p) {
   return
     isGhostAether(m) || m == moWitchGhost || m == moShadow ||
     isBird(m) || m == moAirElemental || isDragon(m) || isWorm(m);
   }
 
 // flying even if stunned
-bool isPermanentFlying(eMonster m) {
+EX bool isPermanentFlying(eMonster m) {
   return m == moAirElemental || isGhostAether(m);
   }
 
-bool survivesFire(eMonster m) {
+EX bool survivesFire(eMonster m) {
   return
     isGhostAether(m) || m == moWitchWinter || m == moWitchGhost ||
     m == moBomberbird || m == moTameBomberbird || m == moTameBomberbirdMoved ||
@@ -288,15 +290,15 @@ bool survivesFire(eMonster m) {
     isDragon(m) || m == moShadow;
   }
 
-bool survivesWall(eMonster m) {
+EX bool survivesWall(eMonster m) {
   return isGhostAether(m);
   }
 
-bool survivesThorns(eMonster m) {
+EX bool survivesThorns(eMonster m) {
   return isGhostAether(m) || m == moSkeleton || m == moDraugr;
   }
 
-bool survivesFall(eMonster m) {
+EX bool survivesFall(eMonster m) {
   return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow || isGhostAether(m);
   }
 
@@ -312,11 +314,11 @@ EX bool checkOrb2(eMonster m1, eItem orb) {
   return false;
   }
 
-bool ignoresSmell(eMonster m) {
+EX bool ignoresSmell(eMonster m) {
   return ignoresSmellType(m) || checkOrb(m, itOrbBeauty) || checkOrb(m, itOrbAether) || checkOrb(m, itOrbShield);
   }
 
-bool highwall(cell *c) {
+EX bool highwall(cell *c) {
   if(c->wall == waGlass) return false;
   if(wmescher && wmspatial && c->wall == waBarrier && c->land == laOceanWall)
     return false;
@@ -327,7 +329,7 @@ bool highwall(cell *c) {
   return winf[c->wall].glyph == '#' || c->wall == waClosedGate;
   }
 
-int chasmgraph(cell *c) {
+EX int chasmgraph(cell *c) {
   if(c->wall == waChasm || c->wall == waInvisibleFloor) return 2;
   if(isChasmy(c)) return 1;
   if(isWateryOrBoat(c)) return 1;
@@ -336,11 +338,11 @@ int chasmgraph(cell *c) {
   return 0;
   }
 
-bool conegraph(cell *c) {
+EX bool conegraph(cell *c) {
   return wmescher && wmspatial && (conegraphtype(c) || (c->wall == waBarrier && c->land == laOceanWall));
   }
 
-bool hornStuns(cell *c) {
+EX bool hornStuns(cell *c) {
   eMonster m = c->monst;
   return 
     m == moRagingBull || m == moSleepBull || m == moHerdBull ||

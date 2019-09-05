@@ -247,7 +247,7 @@ EX bool make_svg = false;
 EX bool transparent = true;
 EX ld gamma = 1;
 EX int shotformat = -1;
-string caption;
+EX string caption;
 EX ld fade = 1;
 
 void set_shotx() {
@@ -520,7 +520,8 @@ transmatrix rotation_center_View;
 
 color_t circle_display_color = 0x00FF00FF;
 
-EX ld circle_radius = acosh(2.), circle_spins = 1;
+EX ld circle_radius = acosh(2.);
+EX ld circle_spins = 1;
 
 void moved() {
   optimizeview();

@@ -313,19 +313,21 @@ EX ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
   return acos_auto((cos(alpha) + cos(beta) * cos(gamma)) / (sin(beta) * sin(gamma)));
   }
 
-hyperpoint hpxy(ld x, ld y) { 
+EX hyperpoint hpxy(ld x, ld y) { 
   return hpxyz(x,y, sl2 ? sqrt(1+x*x+y*y) : translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
   }
 
-hyperpoint hpxy3(ld x, ld y, ld z) { 
+EX hyperpoint hpxy3(ld x, ld y, ld z) { 
   return hpxyz3(x,y,z, sl2 ? sqrt(1+x*x+y*y-z*z) :translatable ? 1 : sphere ? sqrt(1-x*x-y*y-z*z) : sqrt(1+x*x+y*y+z*z));
   }
 
+#if HDR
 // a point (I hope this number needs no comments ;) )
 constexpr hyperpoint Cx12 = hyperpoint(1,0,1.41421356237,0);
 constexpr hyperpoint Cx13 = hyperpoint(1,0,0,1.41421356237);
 
 #define Cx1 (GDIM==2?Cx12:Cx13)
+#endif
 
 EX bool zero_d(int d, hyperpoint h) { 
   for(int i=0; i<d; i++) if(h[i]) return false;
@@ -985,9 +987,9 @@ EX hyperpoint hpxd(ld d, ld x, ld y, ld z) {
 
 EX ld signum(ld x) { return x<0?-1:x>0?1:0; }
 
-bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
+EX bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
-ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
+EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
 EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
   if(nonisotropic) return nisot::parallel_transport(Position, direction);
@@ -1143,11 +1145,11 @@ EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, iePrecision p) {
   return hypot_d(3, inverse_exp(inverse(nisot::translate(h1)) * h2, p, false));
   }
 
-hyperpoint lp_iapply(const hyperpoint h) {
+EX hyperpoint lp_iapply(const hyperpoint h) {
   return nisot::local_perspective_used() ? inverse(nisot::local_perspective) * h : h;
   }
 
-hyperpoint lp_apply(const hyperpoint h) {
+EX hyperpoint lp_apply(const hyperpoint h) {
   return nisot::local_perspective_used() ? nisot::local_perspective * h : h;
   }
 

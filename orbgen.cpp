@@ -32,6 +32,7 @@ enum eOrbLandRelation {
   };
 #endif
 
+#if HDR
 namespace orbgenflags {
   // generates in the given land from 10 treasures, in the classic mode
   static const int LOCAL10 = 1;
@@ -74,8 +75,9 @@ struct orbinfo {
   eItem orb;
   bool is_native() const { using namespace orbgenflags; return flags & NATIVE; }
   };
+#endif
 
-const vector<orbinfo> orbinfos = {
+EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laGraveyard, 200, 200,itGreenStone}, // must be first so that it does not reduce 
   {orbgenflags::S_NATIVE, laJungle, 1200, 1500,itOrbLightning},
   {orbgenflags::S_NATIVE, laIce, 2000, 1500,itOrbFlash},
@@ -178,7 +180,7 @@ const orbinfo& getNativityOrbInfo(eItem orb) {
   return oi;
   }
 
-string olrDescriptions[] = {
+EX string olrDescriptions[] = {
   "forbidden to find in %the1",
   "too dangerous to use in %the1",
   "useless in %the1",

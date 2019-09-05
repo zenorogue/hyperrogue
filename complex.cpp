@@ -12,7 +12,7 @@ namespace hr {
 
 EX namespace whirlwind {
 
-  int fzebra3(cell *c) {
+  EX int fzebra3(cell *c) {
     if(archimedean) return 0;
     if(euclid) {
       if(fulltorus) return 0;
@@ -31,7 +31,7 @@ EX namespace whirlwind {
     return zebra3(c);
     }
 
-  void switchTreasure(cell *c) {
+  EX void switchTreasure(cell *c) {
     c->item = itNone;
     if(safety) return;
     if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && notDippingFor(itWindstone)
@@ -41,7 +41,7 @@ EX namespace whirlwind {
       placeLocalOrbs(c);
     }
 
-  int cat(cell *c) {
+  EX int cat(cell *c) {
     if(c->land != laWhirlwind) return 0;
     if(c->wall != waNone && c->wall != waChasm && 
       c->wall != waSea && !isAlchAny(c) &&
@@ -53,11 +53,12 @@ EX namespace whirlwind {
     }
   
   cell *where;
-  int dfrom[2], dto[2], qdirs;
+  int dfrom[2], dto[2];
+  EX int qdirs;
   
   int gdist(int d, int e) { return dirdiff(d-e, where->type); }
   
-  void calcdirs(cell *c) {
+  EX void calcdirs(cell *c) {
     where = c;
     int d = cat(c);
     qdirs = 0;
@@ -87,7 +88,7 @@ EX namespace whirlwind {
     return min(gdist(d, tab[0]), gdist(d, tab[1]));
     }
 
-  int winddir(int d) {
+  EX int winddir(int d) {
     if(d == -1) return 0;
     int mdf = mindist(d, dfrom);
     int mdt = mindist(d, dto);
@@ -146,7 +147,7 @@ EX namespace whirlwind {
       pickupMovedItems(whirlline[i]);
     }
   
-  void move() {
+  EX void move() {
     manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
@@ -160,7 +161,7 @@ EX namespace whirlwind {
       }
     }
   
-  cell *jumpFromWhereTo(cell *c, bool player) {
+  EX cell *jumpFromWhereTo(cell *c, bool player) {
     for(int i=0; i<2; i++) {
       calcdirs(c);
       if(qdirs != 1) return NULL;
@@ -174,7 +175,7 @@ EX namespace whirlwind {
     return c;
     }
 
-  cell *jumpDestination(cell *c) {
+  EX cell *jumpDestination(cell *c) {
     for(int i=0; i<2; i++) {
       calcdirs(c);
       if(qdirs != 1) return NULL;
@@ -188,8 +189,8 @@ EX }
 
 EX namespace elec { 
 
-  bool havecharge, haveelec, havethunder;
-  bool afterOrb; // extra charge from the Orb of Lightning
+  EX bool havecharge, haveelec, havethunder;
+  EX bool afterOrb; // extra charge from the Orb of Lightning
 
   enum eCharge {
     ecCharged, ecGrounded, ecIsolator, ecConductor
@@ -371,7 +372,7 @@ EX namespace elec {
       }
     }
   
-  void init() {
+  EX void init() {
     chargecells.clear();
     if(!haveelec && !afterOrb) return;
     if(1) {
@@ -410,7 +411,7 @@ EX namespace elec {
       }
     }
   
-  void cleanup() {
+  EX void cleanup() {
     for(int i=2; i<isize(charges); i++) 
       charges[i].c->listindex = charges[i].otmp;
     charges.resize(0); 
@@ -434,18 +435,20 @@ EX namespace elec {
         draw(dcal[i], ecCharged);
     }
   
-  bool affected(cell *c) {
+  EX bool affected(cell *c) {
     if(c->listindex >= 0 && c->listindex < isize(charges) && charges[c->listindex].c == c) 
       return charges[c->listindex].fire;
     return false;
     }
   
+  #if HDR
   struct builder {
     builder() { init(); }
     ~builder() { cleanup(); }
     };
+  #endif
 
-  void act() {
+  EX void act() {
     int k = tkills();
     for(int i=0; i<numplayers(); i++)
       if(multi::playerActive(i) && playerpos(i)->land == laStorms && !afterOrb) 
@@ -458,7 +461,7 @@ EX namespace elec {
   
   // 0 = no close escape, 1 = close escape, 2 = message already shown
   EX int lightningfast;
-  void checklightningfast() {
+  EX void checklightningfast() {
     if(lightningfast == 1) {
       addMessage(XLAT("Wow! That was close."));
       lightningfast = 2;
@@ -505,11 +508,12 @@ struct info {
   EX bool forceMouse = false;
   EX bool gotoPrincess = false;
   EX bool nodungeon = false;
-  bool squeaked = false;
+  EX bool squeaked = false;
 
-  int saveHP = 0, saveArmedHP = 0;
+  EX int saveHP = 0;
+  EX int saveArmedHP = 0;
   
-  int reviveAt;
+  EX int reviveAt;
   
   vector<info*> infos;
   
@@ -530,7 +534,7 @@ struct info {
     return i->id;
     }
   
-  void newFakeInfo(cell *c) {
+  EX void newFakeInfo(cell *c) {
     info *i = new info;
     i->prison = NULL;
     i->princess = c;
@@ -542,7 +546,7 @@ struct info {
     assign(i);
     }
   
-  info *getPrisonInfo(cell *c) {
+  EX info *getPrisonInfo(cell *c) {
     if(euclid || quotient || sphere) return NULL;
     if(c->land != laPalace) return NULL;
     if(!c->master->alt) return NULL;
@@ -552,7 +556,7 @@ struct info {
     return infos[ev];
     }
   
-  info *getPrincessInfo(cell *c) {
+  EX info *getPrincessInfo(cell *c) {
     for(int i=0; i<isize(infos); i++) if(infos[i]->princess == c) {
       while(i) {
         infos[i]->id = i-1; assign(infos[i]);
@@ -565,7 +569,7 @@ struct info {
     return NULL;
     }
 
-  int dist(cell *c) {
+  EX int dist(cell *c) {
     if(c->land != laPalace && c->land != laDungeon) return OUT_OF_PALACE;
     else if(quotient || sphere || fulltorus) return OUT_OF_PRISON;
     else if(euclid) return celldistAlt(c);
@@ -597,7 +601,7 @@ struct info {
     return true;
     }
 
-  void bringBack() {
+  EX void bringBack() {
     if(bringBackAt(cwt.peek())) return;
     for(int i=1; i<isize(dcal); i++)
       if(bringBackAt(dcal[i])) return;
@@ -632,14 +636,14 @@ struct info {
       }
     }
 
-  void save(cell *princess) {
+  EX void save(cell *princess) {
     if(euclid) return;
     princess::info *i = princess::getPrincessInfo(princess);
     if(!i || i->bestdist <= 3) princess->monst = moNone;
     else if(i) setdist(i, OUT_OF_PRISON);
     }
 
-  void move(cell *ct, cell *cf) {
+  EX void move(cell *ct, cell *cf) {
     if(euclid) return;
     princess::info *i = princess::getPrincessInfo(cf);
     if(!i) {
@@ -655,7 +659,7 @@ struct info {
       }
     }
 
-  void mouseSqueak(cell *c) {
+  EX void mouseSqueak(cell *c) {
     eMonster m = c->monst;
     info *i = getPrisonInfo(c);
     int d = dist(c);
@@ -679,7 +683,7 @@ struct info {
        addMessage(XLAT("%The1 squeaks excitedly!", m));
     }
   
-  void line(cell *c) {
+  EX void line(cell *c) {
     int d = (euclid || c->master->alt) ? celldistAlt(c) : 200;
     eMonster m = c->monst;
   
@@ -749,7 +753,7 @@ struct info {
     msgid++;
     }
 
-  void playernear(cell *c) {
+  EX void playernear(cell *c) {
     info *i = getPrisonInfo(c);
     int d = dist(c);
     // if(i) printf("d=%d bn=%d\n", d, i->bestnear);
@@ -778,9 +782,9 @@ EX namespace clearing {
   
   EX std::map<heptagon*, clearingdata> bpdata;
   
-  cell *current_root;
+  EX cell *current_root;
   
-  void new_root() {
+  EX void new_root() {
     if(!current_root || current_root->monst != moMutant) {
       auto& ac = currentmap->allcells();
       int iter = 0;
@@ -955,7 +959,7 @@ EX }
 
 EX namespace whirlpool {
 
-  bool escaped = false; // escaped the Whirlpool?
+  EX bool escaped = false; // escaped the Whirlpool?
 
   // next == +1 -> next
   // next == -1 -> prev
@@ -1074,7 +1078,7 @@ EX namespace whirlpool {
     whirlMove(whirlline[z-1], NULL);
     }
   
-  void move() {
+  EX void move() {
     manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
@@ -1098,7 +1102,7 @@ EX namespace mirror {
   static const int ATTACK = 8;
   #endif
   
-  bool build(cell *c) {
+  EX bool build(cell *c) {
     if(penrose || sol) return false;
     #if CAP_GP
     if(GOLDBERG) {
@@ -1130,8 +1134,10 @@ EX namespace mirror {
     return false;
     }
 
-  vector<pair<int, cellwalker>> mirrors;
-  static const int LIGHTNING = -1; // passed instead of cpid
+  EX vector<pair<int, cellwalker>> mirrors;
+  #if HDR
+  constexpr int LIGHTNING = -1; // passed instead of cpid
+  #endif
   
   bool noMirrorOn(cell *c) {
     return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gFieldQuotient && geometry != gTorus && c->cpdist > gamerange());
@@ -1167,12 +1173,12 @@ EX namespace mirror {
       m.second.at->monst = moMimic;
     }
 
-  void destroyAll() {
+  EX void destroyAll() {
     unlist();
     mirrors.clear();
     }
   
-  void createMirror(cellwalker cw, int cpid) {
+  EX void createMirror(cellwalker cw, int cpid) {
     if(!shmup::on && inmirror(cw))
       cw = reflect(cw);
     if(cpid == LIGHTNING)
@@ -1223,7 +1229,7 @@ EX namespace mirror {
     }
   #endif
   
-  void createMirrors(cellwalker cw, int cpid) {
+  EX void createMirrors(cellwalker cw, int cpid) {
   
     if(penrose || sol) return;
     
@@ -1261,7 +1267,7 @@ EX namespace mirror {
       }
     }
   
-  void createMirages(cellwalker cw, int cpid) {
+  EX void createMirages(cellwalker cw, int cpid) {
     #if CAP_ARCM
     if(archimedean) {
       create_archimedean(cw, cpid, false);
@@ -1335,7 +1341,7 @@ EX namespace mirror {
       }
     }
   
-  bool isKilledByMirror(cell *c) {
+  EX bool isKilledByMirror(cell *c) {
     for(auto& m: mirrors) {
       cell *c1 = (m.second + wstep).at;
       if(inmirror(c1)) c1 = reflect(cellwalker(c1, 0, false)).at;
@@ -1410,7 +1416,7 @@ EX namespace mirror {
     list();
     }
   
-  void breakAll() {
+  EX void breakAll() {
     destroyKilled();
     unlist();
     if(numplayers() == 1)
@@ -1576,12 +1582,12 @@ EX namespace mirror {
 
 EX namespace hive {
 
-  int hivehard() {
+  EX int hivehard() {
     return items[itRoyalJelly] + hardness_empty();
     // 0, 5, 40, 135
     }
 
-  eMonster randomHyperbug() {
+  EX eMonster randomHyperbug() {
     int h = hivehard();
     if(hrand(200) < h)
       return moBug2;
@@ -1720,7 +1726,7 @@ EX namespace hive {
       isIvy(c->monst) || isMutantIvy(c->monst);
     }
   
-  void movebugs() {
+  EX void movebugs() {
     buginfo.clear();
     for(int k=0; k<BUGCOLORS; k++) bugqueue[k].clear();
     for(int k=0; k<BUGCOLORS; k++) bugqueue4[k].clear();
@@ -1933,28 +1939,30 @@ EX namespace hive {
 
   EX }
 
+#if HDR
 inline float& HEAT(cell *c) { return c->LHU.heat; }
+#endif
 
-namespace heat {
+EX namespace heat {
   
-  void affect(cell *c, double delta) {
+  EX void affect(cell *c, double delta) {
     if(isIcyLand(c)) HEAT(c) += delta;
     }
   
-  double absheat(cell *c) {
+  EX double absheat(cell *c) {
     if(c->land == laCocytus) return HEAT(c) -.6;
     if(c->land == laIce || c->land == laBlizzard) return HEAT(c) -.4;
     return 0;
     }
   
-  double celsius(cell *c) { return absheat(c) * 60; }
+  EX double celsius(cell *c) { return absheat(c) * 60; }
   
   // adjust to the improved heat transfer algorithm in 9.4
   const float FIX94 = 1.5;
 
-  vector<cell*> offscreen_heat, offscreen_fire; // offscreen cells to take care off
+  EX vector<cell*> offscreen_heat, offscreen_fire; // offscreen cells to take care off
 
-  void processheat(double rate = 1) {
+  EX void processheat(double rate IS(1)) {
     if(markOrb(itOrbSpeed)) rate /= 2;
     if(racing::on) return;
     int oldmelt = kills[0];    
@@ -2078,7 +2086,9 @@ namespace heat {
         offscreen_heat.push_back(c);
       }
     
+    #if HDR
     #define MELTCOLOR 0xA04040
+    #endif
     
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
@@ -2110,7 +2120,7 @@ namespace heat {
 
   vector<pair<cell*, int> > newfires;
 
-  void processfires() {
+  EX void processfires() {
     newfires.clear();
     
     vector<cell*> offscreen2;
@@ -2223,13 +2233,13 @@ namespace heat {
     offscreen_fire = move(offscreen2);
     }  
 
-  }
+EX }
 
 bool gardener = false;
 
 bool lifebrought = false; // was Life brought to the Dead Caves?
 
-void livecaves() {
+EX void livecaves() {
   vector<cell*>& allcells = currentmap->allcells();
   int dcs = isize(allcells);
   
@@ -2398,10 +2408,11 @@ void livecaves() {
 /* evolver */
 
 EX namespace tortoise {
-  map<cell*, int> emap;
-  map<cell*, int> babymap;
-  int last;
+  EX map<cell*, int> emap;
+  EX map<cell*, int> babymap;
+  EX int last;
   
+  #if HDR
   enum tflag {
     tfShell, tfScute0, tfScute1, tfScute2, tfScute3,
     tfEdge1, tfEdge, tfEdge3,
@@ -2411,16 +2422,17 @@ EX namespace tortoise {
     tfShellDark, tfSkinDark,
     tfCOUNT
     };
+  #endif
 
-  const int numbits = (int) tfCOUNT;
-  const int mask = (1<<numbits)-1;
+  EX const int numbits = (int) tfCOUNT;
+  EX const int mask = (1<<numbits)-1;
 
-  int getb(cell *where) {
+  EX int getb(cell *where) {
     if(emap.count(where)) return emap[where];
     return getBits(where);
     }
 
-  int countBits(int c) {
+  EX int countBits(int c) {
     int bi = 0;
     for(int i=0; i<numbits; i++) if((c >> i)&1) bi++;
     return bi;
@@ -2430,7 +2442,7 @@ EX namespace tortoise {
 
   EX int getRandomBits() { return hrand(1 << numbits); }
   
-  bool seek() { return items[itBabyTortoise] % 5; }
+  EX bool seek() { return items[itBabyTortoise] % 5; }
   EX int seekbits;
   double seekval[numbits];
   double currval[numbits];
@@ -2470,18 +2482,18 @@ EX namespace tortoise {
     return res;
     }
   
-  int diff(int bits) { return countBits(bits ^ tortoise::seekbits); }
+  EX int diff(int bits) { return countBits(bits ^ tortoise::seekbits); }
   int progress(int bits) { return numbits - diff(bits); }
   
-  string measure(int bits) {
+  EX string measure(int bits) {
     return "(" + its(progress(bits)) + "/" + its(tortoise::numbits) + ")";
     }    
 EX }
 
-namespace dragon {
+EX namespace dragon {
  
-  int whichturn; // which turn has the target been set on
-  cell *target; // actually for all Orb of Control
+  EX int whichturn; // which turn has the target been set on
+  EX cell *target; // actually for all Orb of Control
 
   void pullback(cell *c) {
     int maxlen = 1000;
@@ -2499,7 +2511,7 @@ namespace dragon {
   
   bool dragbugs = false;
   
-  cell *findhead(cell *c) {
+  EX cell *findhead(cell *c) {
     cell *cor = c;
     int maxlen=1000;
     findhead:  
@@ -2545,7 +2557,7 @@ namespace dragon {
     return 0;
     }
   
-  void kill(cell *c, eMonster who) {
+  EX void kill(cell *c, eMonster who) {
     int delay = false;
     kills[moDragonHead]++;
     int penalty = 0;
@@ -2576,7 +2588,7 @@ namespace dragon {
       }
     }
   
-  int totalhp(cell *c) {
+  EX int totalhp(cell *c) {
     int total = 0;
     int maxlen = 1000;
     while(maxlen-->0) {
@@ -2627,7 +2639,7 @@ namespace dragon {
       }
     }
   
-  bool move(cell *dt, cell *df) {
+  EX bool move(cell *dt, cell *df) {
     if(df->monst == moDragonHead) {
       dt->mondir = neighborId(dt,df);
 //    printf("pull back\n");
@@ -2658,7 +2670,7 @@ namespace dragon {
     return false;
     }
 
-  }
+EX }
 
 EX namespace sword {
 
@@ -2679,7 +2691,7 @@ EX namespace sword {
 
   void possible_divisor(int s) { sword_angles *= s / gcd(sword_angles, s); }
 
-  void determine_sword_angles() {
+  EX void determine_sword_angles() {
     sword_angles = 2;
     if(SWORDDIM == 3) sword_angles = 1;
     else if(IRREGULAR) sword_angles = 840;
@@ -2721,9 +2733,9 @@ EX namespace sword {
     }
   
   eItem orbof(bool rev) { return rev ? itOrbSword2 : itOrbSword; }
-  int orbcount(bool rev) { return items[orbof(rev)]; }
+  EX int orbcount(bool rev) { return items[orbof(rev)]; }
   
-  cell *pos(int id, bool rev) {
+  EX cell *pos(int id, bool rev) {
     if(!orbcount(rev)) return NULL;
     return pos(playerpos(id), dir[id], rev);
     }
@@ -2736,7 +2748,7 @@ EX namespace sword {
     return false;
     }
   
-  bool isnear(cell *where) {
+  EX bool isnear(cell *where) {
     if(at(where, false)) return true;
     forCellEx(w2, where) if(at(w2, false)) return true;
     return false;
@@ -2771,7 +2783,7 @@ EX namespace sword {
     return cspin(0, 1, 0.1) * cspin(0, 2, 0.1) * cspin(1, 2, 0.1) * Id;
     }
 
-  sworddir initial(cell *c) {
+  EX sworddir initial(cell *c) {
     sworddir res;
     res.angle = (sword::sword_angles / cwt.at->type + 1) / 2;
     if(SWORDDIM == 3) res.T = initial_matrix();
@@ -2783,7 +2795,7 @@ EX namespace sword {
     if(SWORDDIM == 3) dir[i].T = initial_matrix();
     }
   
-  void reset() {
+  EX void reset() {
     items[itOrbSword] = items[itOrbSword2] = 0;
     shuffle(multi::cpid);
     }
@@ -2793,15 +2805,15 @@ EX namespace sword {
     }
 EX }
 
-namespace kraken {
+EX namespace kraken {
 
-  cell *head(cell *c) {
+  EX cell *head(cell *c) {
     if(c->monst == moKrakenH) return c;
     if(c->monst == moKrakenT) return c->move(c->mondir);
     return NULL;
     }
  
-  void kill(cell *c, eMonster who) {
+  EX void kill(cell *c, eMonster who) {
     drawParticles(c, minf[moKrakenH].color, 16);
     c->monst = moNone;
     if(checkOrb(who, itOrbUndeath)) c->monst = moFriendlyGhost;
@@ -2821,7 +2833,7 @@ namespace kraken {
         }
     }
   
-  int totalhp(cell *c) {
+  EX int totalhp(cell *c) {
     int total = 0;
     for(int i=0; i<c->type; i++)
       if(c->move(i)->monst == moKrakenT)
@@ -2837,7 +2849,7 @@ namespace kraken {
     forCellEx(c2, c) c2->stuntime = 1;
     }
   
-  void attacks() {
+  EX void attacks() {
     pathdata pd(2);
     bool offboat[MAXPLAYER];
     for(int i=0; i<MAXPLAYER; i++) offboat[i] = false;
@@ -2875,7 +2887,7 @@ namespace kraken {
     }
 
   // c is the tentacle which will be the head after the move
-  void trymove(cell *c) {
+  EX void trymove(cell *c) {
     if(kraken_pseudohept(c)) return;
     cell *c2 = c->move(c->mondir);
     if(!isWatery(c)) return;
@@ -2934,14 +2946,14 @@ namespace kraken {
     return;
     }
   
-  }
+EX }
 
 bool barrierhept(cell *c) {
   return c->bardir != NOBARRIERS && c->bardir != NODIR;
   }
 
 #if CAP_FIELD
-namespace prairie {
+EX namespace prairie {
 
   using namespace fieldpattern;
   
@@ -2950,7 +2962,7 @@ namespace prairie {
     return 0;
     }
   
-  void spread(cell *c, cell *from) {
+  EX void spread(cell *c, cell *from) {
     int rd;
     
     c->LHU.fi.flowerdist = 8;
@@ -3034,12 +3046,12 @@ namespace prairie {
   #define RLOW (sphere?(PURE?7:6):PURE?4:2)
   #define RHIGH (sphere?(PURE?8:9):PURE?11:13)
   
-  bool no_worms(cell *c) {
+  EX bool no_worms(cell *c) {
     int rv = c->LHU.fi.rval;
     return rv > RLOW+1 && rv < RHIGH-1;
     }
 
-  bool isriver(cell *c) {
+  EX bool isriver(cell *c) {
     return c->land == laPrairie && c->LHU.fi.rval <= RHIGH && c->LHU.fi.rval >= RLOW;
     }
 
@@ -3047,7 +3059,7 @@ namespace prairie {
     return c->LHU.fi.rval <= 8 && c->LHU.fi.rval >= 7;
     }
 
-  bool nearriver(cell *c) {
+  EX bool nearriver(cell *c) {
     return c->LHU.fi.rval == RHIGH+1 || c->LHU.fi.rval == RLOW-1;
     }
 
@@ -3093,9 +3105,9 @@ namespace prairie {
       }
     }
   
-  vector<cell*> beaststogen;
+  EX vector<cell*> beaststogen;
     
-  void generateBeast(cell *c) {
+  EX void generateBeast(cell *c) {
     int beastdistance = min(beastdist(c, 1), beastdist(c, -1));
     if(hrand(1000) >= 15 * beastdistance + 2 * items[itGreenGrass]) return;
     c->monst = moHerdBull;
@@ -3153,7 +3165,7 @@ namespace prairie {
       }
     }
           
-  void move() {
+  EX void move() {
     if(chaosmode) return;
     manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
@@ -3177,7 +3189,7 @@ namespace prairie {
     return true;
     }
   
-  void generateTreasure(cell *c) { 
+  EX void generateTreasure(cell *c) { 
 //    if(nearriver(c) && op
     if(enter && nearriver(c) && opposite(c) && thisriver(c)) {
       int hr = hrand(100);
@@ -3193,7 +3205,7 @@ namespace prairie {
       } 
     }
   
-  void treasures() {
+  EX void treasures() {
     if(enter && !isriver(cwt.at)) enter = NULL;
     else if(!enter && isriver(cwt.at)) enter = cwt.at;
     if(isize(tchoices)) {
@@ -3212,7 +3224,7 @@ namespace prairie {
       tchoices.clear();
       }
     }  
-  }
+EX }
 #else
 namespace prairie { 
   bool no_worms(cell *c) { return false; } 
@@ -3222,11 +3234,11 @@ namespace prairie {
   }
 #endif
 
-namespace ca {
-  ld prob = .2;
+EX namespace ca {
+  EX ld prob = .2;
   string carule[8][2];
   
-  void init() {
+  EX void init() {
     // hexagonal variant of Game of Life, as suggested by Wikipedia
     for(int i=0; i<8; i++) 
       carule[i][0] = "00100000",
@@ -3262,7 +3274,7 @@ namespace ca {
   auto ah = addHook(hooks_args, 0, readArg);
 #endif
 
-  void simulate() {
+  EX void simulate() {
     if(cwt.at->land != laCA) return;
     vector<cell*>& allcells = currentmap->allcells();
     int dcs = isize(allcells);
@@ -3282,7 +3294,7 @@ namespace ca {
       c->wall = willlive[i] ? waFloorA : waNone;
       }
     }
-  }
+EX }
 
 auto ccm = addHook(clearmemory, 0, [] () {
   heat::offscreen_heat.clear();
@@ -3480,13 +3492,13 @@ EX namespace windmap {
     return windmap::windcodes[windmap::getId(c)];
     }
 
-  }
+EX }
 #endif
 
 // Halloween namespace
 
 EX namespace halloween {
-  cell *dragoncells[4];
+  EX cell *dragoncells[4];
   vector<cell*> srch;
 
   cell *farempty(bool lastresort = false) {
@@ -3730,7 +3742,7 @@ EX }
 
 // ... also includes the Ivory Tower
 
-namespace dungeon {
+EX namespace dungeon {
 
   void towerError(cell *c) {
     // only care in the standard geometry -- weird ones are intentionally left buggy
@@ -4039,7 +4051,7 @@ namespace dungeon {
 
   bool is02(int i) { return i == 0 || i == 2; }
   
-  void all(cell *c, int d) {
+  EX void all(cell *c, int d) {
     if(d == 8 && (c->land == laIvoryTower || c->land == laDungeon) && !euclid) {
 
       if(hrand(1000) < 75 && (WDIM == 3 || (c->landparam & 1))) {
@@ -4061,6 +4073,6 @@ namespace dungeon {
     if(d == (BARLEV == 8 ? 7 : 8) && c->land == laDungeon) build(c);
     if(d == 7 && c->land == laDungeon) buildPlates(c);
     }
-  }
+EX }
 
 }

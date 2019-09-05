@@ -13,9 +13,9 @@ EX namespace inv {
   EX bool on;
   EX array<int, ittypes> usedup;
   EX array<int, ittypes> remaining;
-  array<int, ittypes> extra_orbs;
+  EX array<int, ittypes> extra_orbs;
 
-  int rseed;
+  EX int rseed;
   EX bool usedForbidden;
 
     
@@ -112,8 +112,8 @@ EX namespace inv {
     return invr() % i;
     }
     
-  eItem whichorbinfo;
-  string orbinfoline, extra;
+  EX eItem whichorbinfo;
+  EX string orbinfoline, extra;
   
   string extraline(eItem it, string s) {
     return " "+XLAT1(iinf[it].name) + " ("+s+")";
@@ -404,7 +404,7 @@ EX namespace inv {
   
   bool mirroring;
   
-  const char* helptext = 
+  EX const char* helptext = 
     "You are playing in the Orb Strategy Mode. Collecting treasure "
     "gives you access to magical Orb powers. In this mode, "
     "unlocking requirements are generally higher, and "
@@ -444,7 +444,7 @@ EX namespace inv {
       }
     }
   
-  string osminfo(eItem orb) {
+  EX string osminfo(eItem orb) {
     string s = XLAT("Number of uses left: %1", its(remaining[orb]));
     int us = usedup[orb];
     if(us >= TESTMIRRORED) s += XLAT(" (mirrored)"), us = us - MIRRORED + mirrorqty0(orb);
@@ -655,7 +655,7 @@ EX namespace inv {
     }
 
 #if CAP_SAVE
-  void applyBox(eItem it) {
+  EX void applyBox(eItem it) {
     applyBoxNum(usedup[it]);
     }
 #endif

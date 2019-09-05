@@ -10,10 +10,12 @@
 
 namespace hr {
 
+#if HDR
 static constexpr ld NEWSHAPE = (-13.5);
+#endif
 static constexpr ld WOLF = (-15.5);
 
-extern long double polydata[];
+EX long double polydata[];
 
 void geometry_information::hpcpush(hyperpoint h) {
   if(sphere) h = mid(h,h);
@@ -292,7 +294,9 @@ template<class... T> ld grot(bool geometry, ld factor, T... t) {
   else return grot(t...);
   }
 
+#if HDR
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
+#endif
 
 void geometry_information::make_sidewalls() {
   for(int i=0; i<=3; i++)

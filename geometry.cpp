@@ -408,7 +408,7 @@ hpcshape
 static const ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
 #endif
 
-bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
+EX bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
 
 void geometry_information::prepare_basics() {
 
@@ -601,7 +601,7 @@ void geometry_information::prepare_basics() {
     currfp.analyze(); 
   }
 
-transmatrix xspinpush(ld dir, ld dist) {
+EX transmatrix xspinpush(ld dir, ld dist) {
   if(euclid)
     return eupush(cos(dir) * dist, -sin(dir) * dist);
   else
@@ -610,7 +610,7 @@ transmatrix xspinpush(ld dir, ld dist) {
 
 EX purehookset hooks_swapdim;
 
-namespace geom3 {
+EX namespace geom3 {
   
   // Here we convert between the following parameters:
   
@@ -638,11 +638,11 @@ namespace geom3 {
     return lev_to_projection(0) / proj;
     }
   
-  ld factor_to_projection(ld fac) {
+  EX ld factor_to_projection(ld fac) {
     return lev_to_projection(0) / fac;
     }
   
-  ld lev_to_factor(ld lev) { 
+  EX ld lev_to_factor(ld lev) { 
     if(prod) return -lev;
     if(WDIM == 3) return lev;
     if(GDIM == 3) return vid.depth - lev;
@@ -654,7 +654,7 @@ namespace geom3 {
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
     }
   
-  void do_auto_eye() {
+  EX void do_auto_eye() {
     if(!vid.auto_eye) return;
     auto& cs = getcs();
     if(cs.charid < 4)
@@ -671,9 +671,9 @@ namespace geom3 {
     return cosh(vid.depth - lev); 
     }
   
-  string invalid;
+  EX string invalid;
   
-  ld actual_wall_height() {
+  EX ld actual_wall_height() {
       if(hybri) return cgi.plevel;
       #if CAP_GP
       if(GOLDBERG && vid.gp_autoscale_heights) 
@@ -681,7 +681,7 @@ namespace geom3 {
       #endif
       return vid.wall_height;
       }
-  }
+  EX }
   
   void geometry_information::prepare_compute3() {
     using namespace geom3;
@@ -897,7 +897,7 @@ EX map<string, geometry_information> cgis;
 #define cgi (*cgip)
 #endif
 
-int last_texture_step;
+EX int last_texture_step;
 
 int ntimestamp;
 

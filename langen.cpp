@@ -320,14 +320,17 @@ int main() {
     if(isize(elt) >= 2) { javastring += elt; vchars.push_back(elt); }
     }
   printf("\n");
+  printf("#if HDR\n");
   printf("#define NUMEXTRA %d\n", isize(vchars));
   printf("#define NATCHARS {");
   for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
   printf("};\n");
-  printf("const char* natchars[NUMEXTRA] = NATCHARS;");
+  printf("extern char* natchars[NUMEXTRA];\n");
+  printf("#endif\n");
+  printf("char* natchars[NUMEXTRA] = NATCHARS;\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
   
-  printf("\nint transcompleteness[NUMLAN] = {");
+  printf("\nEX int transcompleteness[NUMLAN] = {");
   for(int i=0; i<NUMLAN; i++) printf("%d, ", completeness[i]);
   printf("};\n");
 

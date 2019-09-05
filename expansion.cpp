@@ -115,7 +115,7 @@ void bignum::addmul(const bignum& b, int factor) {
   while(isize(digits) && digits.back() == 0) digits.pop_back();
   }
 
-bignum hrand(bignum b) {
+EX bignum hrand(bignum b) {
   bignum res;
   int d = isize(b.digits);
   while(true) {
@@ -126,7 +126,7 @@ bignum hrand(bignum b) {
     }  
   }
 
-void operator ++(bignum &b, int) {
+EX void operator ++(bignum &b, int) {
   int i = 0;
   while(true) {
     if(isize(b.digits) == i) { b.digits.push_back(1); break; }
@@ -141,7 +141,7 @@ void operator ++(bignum &b, int) {
     }
   }
 
-void operator --(bignum &b, int) {
+EX void operator --(bignum &b, int) {
   int i = 0;
   while(true) {
     if(isize(b.digits) == i) { b.digits.push_back(bignum::BASE-1); break; }
@@ -444,7 +444,7 @@ void expansion_analyzer::reset() {
   descendants.clear();
   }
 
-int type_in(expansion_analyzer& ea, cell *c, const cellfunction& f) {
+EX int type_in(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   if(!ea.N) ea.preliminary_grouping(), ea.reduce_grouping();
   vector<int> res;
   res.push_back(subtype(c) * 4 + 2);
@@ -483,7 +483,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   return -1;
   }
 
-bool sizes_known() {
+EX bool sizes_known() {
   if(GDIM == 3) return false;
   if(bounded) return false;
   // Castle Anthrax is infinite
@@ -494,7 +494,7 @@ bool sizes_known() {
   return true;  
   }
 
-bool trees_known() {
+EX bool trees_known() {
   return sizes_known() && !(BITRUNCATED && a4 && S7 <= 5);
   }
 
@@ -525,7 +525,7 @@ bool mod_allowed() {
   return cheater || autocheat || archimedean || tour::on;
   }
 
-int curr_dist(cell *c) {
+EX int curr_dist(cell *c) {
   switch(distance_from) {
     case dfPlayer:
       return c->cpdist < INFD ? c->cpdist : celldistance(cwt.at, c);
@@ -575,7 +575,7 @@ EX int parent_id(cell *c, int which, const cellfunction& cf) {
 
 // set which=1,bonus=1 to get right neighbor on level
 
-void generate_around(cell *c) {
+EX void generate_around(cell *c) {
   forCellCM(c2, c) if(c2->mpdist > BARLEV) setdist(c2, BARLEV, c);
   }
   
@@ -623,12 +623,13 @@ EX namespace ts {
 
   EX }
 
-bool viewdists = false, use_color_codes = true, use_analyzer = true, show_distance_lists = true;
+EX bool viewdists = false;
+bool use_color_codes = true, use_analyzer = true, show_distance_lists = true;
 
 int first_distance = 0, scrolltime = 0;
 bool scrolling_distances = false;
 
-map<int, color_t> expcolors;
+EX map<int, color_t> expcolors;
 
 color_t distribute_color(int id) {
   if(expcolors.count(id)) return expcolors[id];

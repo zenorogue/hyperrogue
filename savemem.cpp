@@ -14,8 +14,8 @@ static const int PSEUDOKEY_MEMORY = 16397;
 
 EX bool memory_saving_mode = true;
 
-bool show_memory_warning = true;
-bool ignored_memory_warning;
+EX bool show_memory_warning = true;
+EX bool ignored_memory_warning;
 
 static const int LIM = 150;
 
@@ -93,7 +93,7 @@ bool unsafeLand(cell *c) {
     among(c->land, laCaribbean, laOcean, laGraveyard, laPrincessQuest);
   }
 
-void save_memory() {
+EX void save_memory() {
   if(quotient || !hyperbolic || NONSTDVAR) return;
   if(!memory_saving_mode) return;
   if(unsafeLand(cwt.at)) return;
@@ -184,14 +184,14 @@ EX void set_if_removed(cell*& c, cell *val) {
 typedef array<char, 1048576> reserve_block;
 
 int reserve_count = 0;
-int reserve_limit = 128;
+EX int reserve_limit = 128;
 
 const int max_reserve = 4096;
 array<reserve_block*, max_reserve> reserve;
 
 std::new_handler default_handler;
 
-purehookset hooks_clear_cache;
+EX purehookset hooks_clear_cache;
 
 void reserve_handler() {
   if(reserve_count) {
@@ -202,7 +202,7 @@ void reserve_handler() {
   if(!reserve_count) std::set_new_handler(default_handler);
   }
 
-void apply_memory_reserve() {
+EX void apply_memory_reserve() {
 #if CAP_MEMORY_RESERVE
   if(reserve_count > 0) std::set_new_handler(default_handler);
   if(reserve_limit > max_reserve) reserve_limit = max_reserve;
@@ -230,7 +230,7 @@ void memory_for_lib() {
   if(reserve_count) { reserve_count--; delete reserve[reserve_count]; }
   }
 
-void show_memory_menu() {
+EX void show_memory_menu() {
   gamescreen(0);
   dialog::init(XLAT("memory"));
 

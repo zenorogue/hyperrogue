@@ -12,7 +12,7 @@ namespace hr {
 
 EX int usershape_changes;
 
-array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
+EX array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
 EX void initShape(int sg, int id) {
 
   if(!usershapes[sg][id]) {
@@ -32,7 +32,7 @@ EX void initShape(int sg, int id) {
     }
   }
 
-basic_textureinfo user_triangles_texture;
+EX basic_textureinfo user_triangles_texture;
 
 void geometry_information::pushShape(usershapelayer& ds) {
 

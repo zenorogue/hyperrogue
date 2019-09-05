@@ -26,7 +26,7 @@ EX int genrange_bonus = 0;
 EX bool chaosUnlocked = false;
 EX bool chaosAchieved = false;
 
-void doOvergenerate() {
+EX void doOvergenerate() {
   for(int i=0; i<numplayers(); i++)
     setdist(playerpos(i), 7 - getDistLimit() - genrange_bonus, NULL);
   }

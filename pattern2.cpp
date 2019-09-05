@@ -142,7 +142,7 @@ int fiftyval(cell *c) {
     }
   }
 
-int cdist50(cell *c) {
+EX int cdist50(cell *c) {
   if(sphere || S7>7 || S6>6) return 0;
   if(euclid) {
     if(c->land == laWildWest) 
@@ -455,7 +455,7 @@ pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = s
 EX }
 #endif
 
-int getHemisphere(heptagon *h, int which) {
+EX int getHemisphere(heptagon *h, int which) {
   int id = h->fiftyval;
   if(S7 == 5) {
     int hemitable[3][12] = {
@@ -484,7 +484,7 @@ int getHemisphere(heptagon *h, int which) {
   else return 0;
   }
 
-int getHemisphere(cell *c, int which) {
+EX int getHemisphere(cell *c, int which) {
   if(euwrap) return 0;
   if(WDIM == 3) {
     hyperpoint p = tC0(calc_relative_matrix(c, currentmap->gamestart(), C0));
@@ -1403,7 +1403,7 @@ EX bool pseudohept(cell *c) {
 
 // while Krakens movement is usually restricted to non-pseudohept cells,
 // there is one special case when this does not work (because non-pseudohept cells have varying degrees)
-bool kraken_pseudohept(cell *c) {
+EX bool kraken_pseudohept(cell *c) {
   if(0);
   #if CAP_GP
   else if(!euclid && S3 == 4 && GOLDBERG && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
@@ -1427,7 +1427,7 @@ bool kraken_pseudohept(cell *c) {
     return pseudohept(c);
   }
 
-bool warptype(cell *c) {
+EX bool warptype(cell *c) {
   if(geosupport_chessboard()) 
     return chessvalue(c);
   else if(NONSTDVAR)
@@ -1436,7 +1436,7 @@ bool warptype(cell *c) {
     return pattern_threecolor(c) == 0;
   }
 
-map<char, colortable> colortables = {
+EX map<char, colortable> colortables = {
   {'A', {
     0xF04040, 0x40F040, 0x4040F0,
     0xD0D000, 0xD000D0, 0x00D0D0,
@@ -1492,7 +1492,7 @@ EX namespace patterns {
     return gmod(p.first - p.second * 2, 7);
     }
 
-  string color_formula = "to01(rgb(x,y,z))";
+  EX string color_formula = "to01(rgb(x,y,z))";
   
   cld compute_map_function(cell *c, int p, const string& formula) {
     exp_parser ep;
@@ -1782,7 +1782,7 @@ EX namespace patterns {
     }
   
   void showPrePattern() { showPrePatternP(true); }
-  void showPrePatternNoninstant() { showPrePatternP(false); }
+  EX void showPrePatternNoninstant() { showPrePatternP(false); }
 
 
 #if CAP_TEXTURE

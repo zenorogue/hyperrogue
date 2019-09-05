@@ -17,7 +17,7 @@ namespace hr {
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-void glError(const char* GLcall, const char* file, const int line) {
+EX void glError(const char* GLcall, const char* file, const int line) {
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR) {
     fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
@@ -107,9 +107,9 @@ enum class shader_projection { standard, band, halfplane, standardH3, standardR3
 #endif
 
 #if CAP_SHADER
-bool noshaders = false;
+EX bool noshaders = false;
 #else
-bool noshaders = true;
+EX bool noshaders = true;
 #endif
 
 bool glew   = false;
@@ -117,14 +117,18 @@ bool glew   = false;
 bool current_depthtest, current_depthwrite;
 ld fogbase;
 
+#if HDR
 typedef const void *constvoidptr;
+#endif
 
-constvoidptr current_vertices, buffered_vertices;
+EX constvoidptr current_vertices, buffered_vertices;
 ld current_linewidth;
 
 GLuint buf_current, buf_buffered;
 
+#if HDR
 enum eMode { gmColored, gmTextured, gmVarColored, gmLightFog, gmMAX};
+#endif
 
 static const flagtype GF_TEXTURE  = 1;
 static const flagtype GF_VARCOLOR = 2;
@@ -137,7 +141,7 @@ eMode mode;
 
 EX shader_projection current_shader_projection, new_shader_projection;
 
-void switch_mode(eMode m, shader_projection sp);
+EX void switch_mode(eMode m, shader_projection sp);
 
 void display(const glmatrix& m) {
   for(int i=0; i<4; i++) {
@@ -159,9 +163,9 @@ glmatrix operator * (glmatrix m1, glmatrix m2) {
   return res;
   }
 
-glmatrix id = {{{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}}};
+EX glmatrix id = {{{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}}};
 
-glmatrix scale(ld x, ld y, ld z) {
+EX glmatrix scale(ld x, ld y, ld z) {
   glmatrix tmp;
   for(int i=0; i<4; i++)
   for(int j=0; j<4; j++)
@@ -180,7 +184,7 @@ EX glmatrix tmtogl(const transmatrix& T) {
   return tmp;
   }
 
-glmatrix tmtogl_transpose(const transmatrix& T) {
+EX glmatrix tmtogl_transpose(const transmatrix& T) {
   glmatrix tmp;
   for(int i=0; i<4; i++)
   for(int j=0; j<4; j++)
@@ -188,16 +192,16 @@ glmatrix tmtogl_transpose(const transmatrix& T) {
   return tmp;
   }
 
-glmatrix ortho(ld x, ld y, ld z) {
+EX glmatrix ortho(ld x, ld y, ld z) {
   return scale(1/x, 1/y, 1/z);
   }
 
-glmatrix& as_glmatrix(GLfloat o[16]) {
+EX glmatrix& as_glmatrix(GLfloat o[16]) {
   glmatrix& tmp = (glmatrix&) (o[0]);
   return tmp;
   }
 
-glmatrix frustum(ld x, ld y, ld vnear = 1e-3, ld vfar = 1e9) {
+EX glmatrix frustum(ld x, ld y, ld vnear IS(1e-3), ld vfar IS(1e9)) {
   GLfloat frustum[16] = {
     GLfloat(1 / x), 0, 0, 0,
     0, GLfloat(1 / y), 0, 0,
@@ -223,7 +227,7 @@ EX glmatrix translate(ld x, ld y, ld z) {
 
 glmatrix projection;
 
-void new_projection() {
+EX void new_projection() {
   WITHSHADER({
     projection = id;
     }, {
@@ -235,7 +239,7 @@ void new_projection() {
     })
   }
 
-void projection_multiply(const glmatrix& m) {
+EX void projection_multiply(const glmatrix& m) {
   WITHSHADER({
     projection = m * projection;  
     }, {
@@ -244,7 +248,7 @@ void projection_multiply(const glmatrix& m) {
     })
   }
 
-void init();
+EX void init();
 
 int compileShader(int type, const string& s) {
   GLint status;
@@ -279,13 +283,21 @@ int compileShader(int type, const string& s) {
 
 // https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/attributes.php
 
-struct GLprogram *current = NULL;
+#if HDR
+struct GLprogram;
+#endif
 
+EX struct GLprogram *current = NULL;
+
+#if HDR
 static const int aPosition = 0;
 static const int aColor = 3;
 static const int aTexture = 8;
+#endif
 
-const int INVERSE_EXP_BINDING = 2;
+#if HDR
+constexpr int INVERSE_EXP_BINDING = 2;
+#endif
 
 struct GLprogram {
   GLuint _program;
@@ -455,7 +467,7 @@ EX void set_modelview(const glmatrix& modelview) {
   // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
   }
 
-void id_modelview() {
+EX void id_modelview() {
   #if CAP_NOSHADER
   if(noshaders) {
     glMatrixMode(GL_MODELVIEW);
@@ -604,7 +616,7 @@ void switch_mode(eMode m, shader_projection sp) {
   else glDisable(GL_DEPTH_TEST); */
   }
 
-void fog_max(ld fogmax, color_t fogcolor) {
+EX void fog_max(ld fogmax, color_t fogcolor) {
   WITHSHADER({
     glUniform1f(current->uFog, 1 / fogmax);
   
@@ -616,7 +628,7 @@ void fog_max(ld fogmax, color_t fogcolor) {
     })
   }
 
-void set_fogbase(ld _fogbase) {
+EX void set_fogbase(ld _fogbase) {
   WITHSHADER({
     if(fogbase != _fogbase) {
       fogbase = _fogbase;
@@ -625,7 +637,7 @@ void set_fogbase(ld _fogbase) {
     }, {})
   }
 
-void set_ualpha(ld alpha) {
+EX void set_ualpha(ld alpha) {
   WITHSHADER({
     glUniform1f(current->uAlpha, alpha);
     }, {})
@@ -861,7 +873,7 @@ template<class T> void bindbuffer(T& v) {
 
 #endif
 
-void vertices(const vector<glvertex>& v, int vshift = 0) {
+EX void vertices(const vector<glvertex>& v, int vshift IS(0)) {
   #if CAP_VERTEXBUFFER
   if(&v[0] == buffered_vertices) {
     if(&v[0] == current_vertices) return;
@@ -882,7 +894,7 @@ void vertices(const vector<glvertex>& v, int vshift = 0) {
   #endif
   }
 
-void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift = 0, int tshift = 0) {
+EX void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift IS(0), int tshift IS(0)) {
   #if CAP_VERTEXBUFFER
   int q = min(isize(v)-vshift, isize(t)-tshift);
   vector<textured_vertex> tv(q);
@@ -958,7 +970,7 @@ EX void prepare(vector<ct_vertex>& v) {
   #endif
   }
 
-void store_in_buffer(vector<glvertex>& v) {
+EX void store_in_buffer(vector<glvertex>& v) {
 #if CAP_VERTEXBUFFER
   if(!buf_buffered) {
     printf("no buffer yet\n");
@@ -1004,7 +1016,24 @@ EX void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
   vertices_texture(v, t, 0, 0);
   }
 
-}
+EX }
+
+EX vector<glhr::textured_vertex> text_vertices;
+
+EX void texture_vertices(GLfloat *f, int qty, int stride IS(2)) {
+  WITHSHADER(
+    glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
+    glTexCoordPointer(stride, GL_FLOAT, 0, f);
+    )
+  } 
+
+EX void oldvertices(GLfloat *f, int qty) {
+  WITHSHADER(
+   glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
+   glVertexPointer(SHDIM, GL_FLOAT, 0, f);
+   )
+  }
+
 }
 
 #define glMatrixMode DISABLED

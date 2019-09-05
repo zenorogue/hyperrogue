@@ -557,8 +557,7 @@ EX void setGLProjection(color_t col IS(backcolor)) {
   glClear(GL_DEPTH_BUFFER_BIT);
   }
 
-inline int next_p2 (int a )
-{
+EX  int next_p2 (int a ) {
     int rval=1;
     // rval<<=1 Is A Prettier Way Of Writing rval*=2;
     while(rval<a) rval<<=1;
@@ -719,21 +718,6 @@ int gl_width(int size, const char *s) {
     }
   
   return x;
-  }
-
-namespace glhr { 
-  void texture_vertices(GLfloat *f, int qty, int stride = 2) {
-    WITHSHADER(
-      glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
-      glTexCoordPointer(stride, GL_FLOAT, 0, f);
-      )
-    } 
-  void oldvertices(GLfloat *f, int qty) {
-    WITHSHADER(
-     glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
-     glVertexPointer(SHDIM, GL_FLOAT, 0, f);
-     )
-    }
   }
 
 vector<glhr::textured_vertex> tver;
@@ -1263,7 +1247,7 @@ ld textscale() {
   return vid.fsize / (current_display->radius * cgi.crossf) * (1+vid.alpha) * 2;
   }
   
-bool setfsize = true;
+EX bool setfsize = true;
 
 EX bool vsync_off;
 

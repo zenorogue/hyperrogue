@@ -116,13 +116,11 @@ EX color_t poly_outline;
 EX vector<unique_ptr<drawqueueitem>> ptds;
 
 #if CAP_GL
-color_t text_color;
-int text_shift;
-GLuint text_texture;
-int texts_merged;
-int shapes_merged;
-
-vector<glhr::textured_vertex> text_vertices;
+EX color_t text_color;
+EX int text_shift;
+EX GLuint text_texture;
+EX int texts_merged;
+EX int shapes_merged;
 
 #if MINIMIZE_GL_CALLS
 color_t triangle_color, line_color;
@@ -191,18 +189,20 @@ SDL_Surface *aux;
 #endif
 
 #if CAP_POLY
+#if HDR
 #define POLYMAX 60000
+#endif
 
 EX vector<glvertex> glcoords;
 
 #endif
 
-int spherespecial, spherephase;
+EX int spherespecial, spherephase;
 
 #if CAP_POLY
 int polyi;
 
-int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
+EX int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
 
 int poly_flags;
 
@@ -426,7 +426,7 @@ void polylineColor(SDL_Surface *s, int *x, int *y, int polyi, color_t col) {
     lineColor(s, x[i-1], y[i-1], x[i], y[i], col);
   }
 
-void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, color_t col) {
+EX void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, color_t col) {
   std::vector<Sint16> spx(px, px + polyi);
   std::vector<Sint16> spy(py, py + polyi);
   filledPolygonColor(s, spx.data(), spy.data(), polyi, col);
@@ -1486,7 +1486,7 @@ ld xintval(const hyperpoint& h) {
   return -intval(h, C0);
   }
 
-ld backbrightness = .25;
+EX ld backbrightness = .25;
 
 purehookset hook_drawqueue;
 

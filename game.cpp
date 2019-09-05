@@ -19,8 +19,8 @@ extern eForcemovetype forcedmovetype;
 EX int lastsafety;
 EX int mutantphase;
 EX int turncount;
-int rosewave, rosephase;
-int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen;
+EX int rosewave, rosephase;
+EX int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen;
 
 EX int gamerange_bonus = 0;
 EX int gamerange() { return getDistLimit() + gamerange_bonus; }
@@ -29,16 +29,15 @@ cell *lastmove;
 eLastmovetype lastmovetype, nextmovetype;
 eForcemovetype forcedmovetype;
 
-bool hauntedWarning;
-bool survivalist;
+EX bool hauntedWarning;
+EX bool survivalist;
 
-bool hardcore = false;
-int hardcoreAt;
+EX bool hardcore = false;
+EX int hardcoreAt;
 
 set<int> snaketypes;
 
-flagtype havewhat, hadwhat;
-
+#if HDR
 #define HF_BUG        Flag(0)
 #define HF_EARTH      Flag(1)
 #define HF_BIRD       Flag(2)
@@ -71,22 +70,24 @@ flagtype havewhat, hadwhat;
 #define HF_ALT        Flag(29)
 #define HF_MONK       Flag(30)
 #define HF_WESTWALL   Flag(31)
+#endif
 
+EX flagtype havewhat, hadwhat;
 
-bool seenSevenMines = false;
+EX bool seenSevenMines = false;
 
 EX bool pureHardcore() { return hardcore && hardcoreAt < PUREHARDCORE_LEVEL; }
 
 EX bool canmove = true;
 
-int sagephase = 0;
+EX int sagephase = 0;
 
 /** number of Grails collected, to show you as a knight */
-int knighted = 0;
+EX int knighted = 0;
 
-bool usedSafety = false;
-eLand safetyland;
-int safetyseed;
+EX bool usedSafety = false;
+EX eLand safetyland;
+EX int safetyseed;
 
 int showid = 0;
 
@@ -95,15 +96,15 @@ EX bool invismove = false;
 /** last move was invisible due to Orb of Fish (thus Fish still see you)*/
 EX bool invisfish = false;
 
-int noiseuntil; // noise until the given turn
+EX int noiseuntil; // noise until the given turn
 
-void createNoise(int t) { 
+EX void createNoise(int t) { 
   noiseuntil = max(noiseuntil, turncount+t);
   invismove = false;
   if(shmup::on) shmup::visibleFor(100 * t);
   }
 
-int currentLocalTreasure;
+EX int currentLocalTreasure;
 
 bool landvisited[landtypes];
 
@@ -116,7 +117,7 @@ EX array<int, motypes> kills;
 
 EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
 EX map<modecode_t, array<int, ittypes> > hiitems;
-bool orbused[ittypes], lastorbused[ittypes];
+EX bool orbused[ittypes], lastorbused[ittypes];
 /** should we center the screen on the PC? */
 EX bool playermoved = true;
 /** if false, make the PC look in direction cwt.spin (after attack); otherwise, make them look the other direction (after move) */
@@ -125,18 +126,18 @@ EX bool flipplayer = true;
 EX int  cheater = 0;
 
 /** this value is used when using Orb of Safety in the Camelot in Pure Tactics Mode */
-int anthraxBonus = 0;
+EX int anthraxBonus = 0;
 
 /** the list of all nearby cells, according to cpdist */
 EX vector<cell*> dcal;
 /** the list of all nearby cells, according to current pathdist */
-vector<cell*> pathq;
+EX vector<cell*> pathq;
 
 /** offscreen cells to take care off */
-vector<cell*> offscreen;
+EX vector<cell*> offscreen;
 
 /** list of monsters to move (pathq restriced to monsters) */
-vector<cell*> pathqm;
+EX vector<cell*> pathqm;
 
 /** list of cells that the monsters are targetting (PCs, allies, Thumpers, etc.) */
 vector<cell*> targets;
@@ -152,13 +153,13 @@ vector<pair<cell*, eMonster>> tempmonsters;
  *  the opposite cell will be added to the queue first,
  *  which helps the AI.
  **/
-vector<int> reachedfrom;
+EX vector<int> reachedfrom;
 
 /** monsters to move, ordered by the number of possible good moves */
 vector<cell*> movesofgood[MAX_EDGE+1];
 
 /** The position of the first cell in dcal in distance 7. New wandering monsters can be generated in dcal[first7..]. */
-int first7;           
+EX int first7;           
 
 /** Cellwalker describing the single player. Also used temporarily in shmup and multiplayer modes. */
 EX cellwalker cwt;
@@ -792,7 +793,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   return true;
   }
 
-vector<pair<cell*, int> > airmap;
+EX vector<pair<cell*, int> > airmap;
 
 EX int airdist(cell *c) {
   if(!(havewhat & HF_AIR)) return 3;
@@ -1376,7 +1377,7 @@ EX eMonster active_switch() {
   return eMonster(passive_switch ^ moSwitch1 ^ moSwitch2);
   }
 
-vector<cell*> crush_now, crush_next;
+EX vector<cell*> crush_now, crush_next;
   
 EX bool monstersnear(stalemate1& sm) {
 
@@ -1476,7 +1477,7 @@ namespace multi { bool aftermove; }
 
 EX bool monstersnear2();
 
-int lastkills;
+EX int lastkills;
 
 EX bool multimove() {
   if(multi::cpid == 0) lastkills = tkills();
@@ -2835,11 +2836,11 @@ bool bugsfighting;
 
 bool keepLightning = false;
 
-int statuecount;
+EX int statuecount;
 
 int tidalphase;
 
-int tidalsize, tide[200];
+EX int tidalsize, tide[200];
 
 EX void calcTidalPhase() {
   if(!tidalsize) {
@@ -2879,9 +2880,11 @@ EX int tidespeed() {
 
 bool recalcTide;
 
+#if HDR
 #define SEADIST LHU.bytes[0]
 #define LANDDIST LHU.bytes[1]
 #define CHAOSPARAM LHU.bytes[2]
+#endif
 
 #if CAP_FIELD
 EX int lavatide(cell *c, int t) {
@@ -2963,7 +2966,7 @@ EX void buildAirmap() {
  *  2 - wave phase 1
  *  3 - wave phase 2
  */
-map<cell*, int> rosemap;
+EX map<cell*, int> rosemap;
 
 EX int rosedist(cell *c) {
   if(!(havewhat&HF_ROSE)) return 0;
@@ -3144,7 +3147,7 @@ struct pathdata {
 #endif
 // pathdist end
 
-vector<pair<cell*, int> > butterflies;
+EX vector<pair<cell*, int> > butterflies;
 
 EX void addButterfly(cell *c) {
   for(int i=0; i<isize(butterflies); i++)
@@ -4398,7 +4401,7 @@ EX void beastAttack(cell *c, bool player) {
     }
   }
 
-bool quantum;
+EX bool quantum;
 
 EX cell *moveNormal(cell *c, flagtype mf) {
   eMonster m = c->monst;
@@ -5680,7 +5683,9 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
   return val;
   }
 
-#define STRONGWIND 99
+#if HDR
+constexpr int STRONGWIND = 99;
+#endif
 
 EX void movegolems(flagtype flags) {
   if(items[itOrbEmpathy] && items[itOrbSlaying])
@@ -6255,8 +6260,8 @@ EX void markAmbush(cell *c, manual_celllister& cl) {
       markAmbush(c2, cl);
   }
 
-int ambush_distance;
-bool ambushed;
+EX int ambush_distance;
+EX bool ambushed;
 
 EX void checkAmbushState() {
   if(havewhat & HF_HUNTER) {
@@ -6937,7 +6942,7 @@ EX void collectMessage(cell *c2, eItem which) {
     }
   }
 
-int ambushval;
+EX int ambushval;
 
 EX int ambushSize(cell *c, eItem what) {
   bool restricted = false;
@@ -7581,7 +7586,7 @@ EX void knightFlavorMessage(cell *c2) {
 
 int mine_adjacency_rule = 0;
 
-map<cell*, vector<cell*>> adj_memo;
+EX map<cell*, vector<cell*>> adj_memo;
 
 EX bool geometry_has_alt_mine_rule() {
   if(WDIM == 2) return VALENCE > 3;
@@ -7722,8 +7727,10 @@ namespace orbbull {
     }
   }
 
+#if HDR
 // predictable or not
 static constexpr bool randterra = false;
+#endif
 
 EX void terracotta(cell *c) {
   if(c->wall == waTerraWarrior && !c->monst && !racing::on) {
@@ -7955,7 +7962,7 @@ EX bool monsterPushable(cell *c2) {
   return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier);
   }  
 
-bool got_survivalist;
+EX bool got_survivalist;
 
 EX bool should_switchplace(cell *c1, cell *c2) {
   if(isPrincess(c2->monst) || among(c2->monst, moGolem, moIllusion, moMouse, moFriendlyGhost))

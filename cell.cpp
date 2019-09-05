@@ -605,7 +605,9 @@ EX int randpatternCode(cell *c, int rval) {
   return 0;  
   }
 
+#if HDR
 #define RANDITER 31
+#endif
 
 char rpm_memoize[3][256][RANDITER+1];
 

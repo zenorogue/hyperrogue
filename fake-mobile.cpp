@@ -13,7 +13,7 @@ namespace hr {
 
 #include <SDL/SDL.h>
 
-#include "init.cpp"
+#include "hyper.cpp"
 
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_gfxPrimitives.h>

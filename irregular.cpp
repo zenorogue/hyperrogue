@@ -21,6 +21,7 @@ EX int rearrange_less = 10;
 
 EX int cellcount;
 
+#if HDR
 struct cellinfo {
   cell *owner;
   map<cell*, transmatrix> relmatrices;
@@ -35,10 +36,11 @@ struct cellinfo {
   int patterndir;
   int generation;
   };
+#endif
 
-map<cell*, int> cellindex;
+EX map<cell*, int> cellindex;
 
-vector<cellinfo> cells;
+EX vector<cellinfo> cells;
 
 ld inner(hyperpoint h1, hyperpoint h2) {
   return 
@@ -520,7 +522,7 @@ bool step(int delta) {
   return false;
   }
 
-void compute_geometry() {
+EX void compute_geometry() {
   if(IRREGULAR) {
     ld scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
     cgi.crossf *= scale;
@@ -553,13 +555,15 @@ bool draw_cell_schematics(cell *c, transmatrix V) {
   return false;
   }
 
+#if HDR
 struct heptinfo {
   heptspin base;
   vector<cell*> subcells;
   vector<int> celldists[2];
   };
+#endif
 
-map<heptagon*, heptinfo> periodmap;
+EX map<heptagon*, heptinfo> periodmap;
 
 EX void link_to_base(heptagon *h, heptspin base) {
   // printf("linking %p to %p/%d\n", h, base.at, base.spin);
@@ -1006,7 +1010,7 @@ EX void visual_creator() {
   gridmaking = true;
   }
 
-void auto_creator() {
+EX void auto_creator() {
   variation = eVariation::pure;
   int cc = cellcount;
   bitruncations_requested = bitruncations_performed;

@@ -71,7 +71,7 @@ EX namespace gp {
 #if CAP_GP
   EX loc param = loc(1, 0);
 
-  hyperpoint next;
+  EX hyperpoint next;
   
   struct goldberg_mapping_t {
     cellwalker cw;
@@ -80,9 +80,9 @@ EX namespace gp {
     loc start;
     };
 
-  int fixg6(int x) { return (x + MODFIXER) % SG6; }
+  EX int fixg6(int x) { return (x + MODFIXER) % SG6; }
   
-  int get_code(const local_info& li) {
+  EX int get_code(const local_info& li) {
     return 
       ((li.relative.first & 15) << 0) +
       ((li.relative.second & 15) << 4) +
@@ -475,7 +475,7 @@ EX namespace gp {
     DEBB(DF_GP, ("DONE"))
     }
   
-  hyperpoint loctoh_ort(loc at) {
+  EX hyperpoint loctoh_ort(loc at) {
     return point3(at.first, at.second, 1);
     }
 
@@ -559,7 +559,7 @@ EX namespace gp {
       }       
     }
 
-  hyperpoint get_corner_position(const local_info& li, int cid, ld cf = 3) {
+  EX hyperpoint get_corner_position(const local_info& li, int cid, ld cf IS(3)) {
     int i = li.last_dir;
     if(i == -1) 
       return atz(dir_matrix(cid), cgi.gpdata->corners, li.relative, 0, cf);
@@ -569,7 +569,7 @@ EX namespace gp {
       }
     }
   
-  hyperpoint get_corner_position(cell *c, int cid, ld cf = 3) {
+  EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
     return get_corner_position(get_local_info(c), cid, cf);
     }
     
@@ -620,7 +620,7 @@ EX namespace gp {
     return v;
     }
   
-  loc human_representation(loc v) {
+  EX loc human_representation(loc v) {
     int& x = v.first, &y = v.second;
     if(S3 == 3) while(x < 0 || y < 0 || (x == 0 && y > 0))
       v = v * loc(0, 1);

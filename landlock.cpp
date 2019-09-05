@@ -84,7 +84,7 @@ EX bool landUnlockedRPM(eLand n) {
   return false;
   }
 
-int variant_unlock_value() {
+EX int variant_unlock_value() {
   return inv::on ? 75 : 30;
   }
 
@@ -205,7 +205,7 @@ bool lchance(eLand l) {
   return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1); 
   }
 
-eLand pickLandRPM(eLand old) {
+EX eLand pickLandRPM(eLand old) {
   while(true) {
     eLand n = randlands[hrand(isize(randlands))];
     if(incompatible(n, old)) continue;

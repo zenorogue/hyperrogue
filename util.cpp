@@ -74,8 +74,8 @@ void profile_frame() {
   for(int t=0; t<16; t++) proftable[t][pframeid] = 0;
   }
 
-void profile_start(int t) { proftable[t][pframeid] -= getms(); }
-void profile_stop(int t) { proftable[t][pframeid] += getms(); }
+EX void profile_start(int t) { proftable[t][pframeid] -= getms(); }
+EX void profile_stop(int t) { proftable[t][pframeid] += getms(); }
 
 void profile_info() {
   for(int t=0; t<16; t++) {
@@ -88,16 +88,18 @@ void profile_info() {
       proftable[t][48], proftable[t][63]);
     }
   }
+#endif
 
-#else
-
+#if !CAP_PROFILING
+#if HDR
 #define profile_frame()
 #define profile_start(t)
 #define profile_stop(t)
 #define profile_info()
 #endif
+#endif
 
-purehookset hooks_tests;
+EX purehookset hooks_tests;
 
 EX string simplify(const string& s) {
   string res;

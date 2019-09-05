@@ -10,13 +10,13 @@ namespace hr {
 
 namespace peace { extern bool on; }
 
-int hiitemsMax(eItem it) {
+EX int hiitemsMax(eItem it) {
   int mx = 0;
   for(auto& a: hiitems) if(a.second[it] > mx) mx = a.second[it];
   return mx;
   }
 
-modecode_t modecode();
+EX modecode_t modecode();
 
 typedef vector<pair<int, string> > subscoreboard;
 
@@ -40,13 +40,13 @@ EX namespace yendor {
 
   EX bool on = false;
   EX bool generating = false;
-  bool path = false;
-  bool everwon = false;
-  bool won = false;
+  EX bool path = false;
+  EX bool everwon = false;
+  EX bool won = false;
   bool easy = false;
   
-  int challenge; // id of the challenge
-  int lastchallenge;
+  EX int challenge; // id of the challenge
+  EX int lastchallenge;
   
   #if HDR
   #define YF_DEAD 1
@@ -73,11 +73,11 @@ EX namespace yendor {
     eLand l;
     int flags;
     };
+
+  #define YENDORLEVELS 33
   #endif
   
-  #define YENDORLEVELS 33
-  
-  map<modecode_t, array<int, YENDORLEVELS>> bestscore;
+  EX map<modecode_t, array<int, YENDORLEVELS>> bestscore;
 
   EX eLand nexttostart;
 
@@ -138,7 +138,7 @@ EX namespace yendor {
     achievement_score(LB_YENDOR_CHALLENGE, tscore);
     }
     
-  yendorlevel& clev() { return levels[challenge]; }
+  EX yendorlevel& clev() { return levels[challenge]; }
   
   eLand changeland(int i, eLand l) {
     if(l == laIvoryTower) return laNone;
@@ -150,6 +150,7 @@ EX namespace yendor {
   string name;
   eLand first, second, last;
 
+  #if HDR
   struct yendorinfo {
     cell *path[YDIST];
     cell *actualKey;
@@ -162,13 +163,14 @@ EX namespace yendor {
     cell *actual_key() { return actualKey ? actualKey : key(); }
     cell* orb() { return path[0]; }
     };
+  #endif
   
-  vector<yendorinfo> yi;
+  EX vector<yendorinfo> yi;
   
 #define NOYENDOR 999999
   int yii = NOYENDOR;
   
-  int hardness() {
+  EX int hardness() {
     if(peace::on) return 15; // just to generate monsters
     if(!yendor::generating && !yendor::path && !yendor::on) return 0;
     int thf = 0;
@@ -182,15 +184,17 @@ EX namespace yendor {
     return items[itOrbYendor] * 5 + (thf * 5) / (YDIST-25);
     }
 
+  #if HDR
   enum eState { ysUntouched, ysLocked, ysUnlocked };
+  #endif
   
-  eState state(cell *yendor) {
+  EX eState state(cell *yendor) {
     for(int i=0; i<isize(yi); i++) if(yi[i].path[0] == yendor)
       return yi[i].found ? ysUnlocked : ysLocked;
     return ysUntouched;
     }
   
-  bool check(cell *yendor) {
+  EX bool check(cell *yendor) {
     int byi = isize(yi);
     for(int i=0; i<isize(yi); i++) if(yi[i].path[0] == yendor) byi = i;
     if(byi < isize(yi) && yi[byi].found) return false;
@@ -490,7 +494,7 @@ EX namespace yendor {
     return false;
     }
   
-  void onpath() {
+  EX void onpath() {
     path = false;
     if(yii < isize(yi)) {
       for(int i=0; i<YDIST; i++) if(yi[yii].path[i]->cpdist <= 7) {
@@ -500,7 +504,7 @@ EX namespace yendor {
       }
     }
   
-  void init(int phase) {
+  EX void init(int phase) {
     if(!on) return;
     
     if(phase == 1) {
@@ -726,7 +730,7 @@ EX namespace yendor {
       };
     }
     
-  void collected(cell* c2) {
+  EX void collected(cell* c2) {
     int pg = gold();
     playSound(c2, "tada");
     items[itOrbShield] += 31;
@@ -785,7 +789,7 @@ EX namespace tactic {
 
   EX bool trailer = false;
   EX bool on = false;
-  int id;
+  EX int id;
   
   map<modecode_t, array<int, landtypes>> recordsum;
   map<modecode_t, array<array<int, MAXTAC>, landtypes> > lsc;
@@ -821,7 +825,7 @@ EX namespace tactic {
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
     }
 
-  void record(eLand land, int score, int xc = modecode()) {
+  EX void record(eLand land, int score, int xc IS(modecode())) {
     if(land >=0 && land < landtypes) {
       for(int i=MAXTAC-1; i; i--) lsc[xc][land][i] = lsc[xc][land][i-1];
       tactic::lsc[xc][land][0] = score;
@@ -1166,9 +1170,9 @@ modecode_t modecode() {
 EX namespace peace {
 
   EX bool on = false;
-  bool hint = false;
+  EX bool hint = false;
   
-  bool otherpuzzles;
+  EX bool otherpuzzles;
   
   eLand simonlevels[] = {
     laCrossroads, laCrossroads2, laDesert, laCaves, laAlchemist, laRlyeh, laEmerald,
@@ -1228,7 +1232,7 @@ EX namespace peace {
     "a large hyperbolic circle), and Palace (follow the mouse). "
     "Other places listed are for exploration.";
     
-  namespace simon {
+  EX namespace simon {
 
     vector<cell*> path;
     int tobuild;
@@ -1273,7 +1277,7 @@ EX namespace peace {
         }
       }
   
-    void extend() {
+    EX void extend() {
       int i = 0;
       while(i<isize(path) && path[i]->item != itDodeca) i++;
       if(tobuild == i+9)
@@ -1282,7 +1286,7 @@ EX namespace peace {
       build();
       }
     
-    void init() {
+    EX void init() {
       tobuild = 0;
       if(!on) return;
       if(otherpuzzles) { items[itGreenStone] = 500; return; }
@@ -1296,12 +1300,12 @@ EX namespace peace {
       extend(); 
       }
     
-    void restore() {
+    EX void restore() {
       for(int i=1; i<isize(path); i++)
         if(path[i]->item == itNone && items[itDodeca])
           path[i]->item = itDodeca, items[itDodeca]--;
       }
-    }
+  EX }
   
   void showMenu() {
     listLevels();

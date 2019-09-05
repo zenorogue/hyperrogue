@@ -245,7 +245,7 @@ int getSeepcount() {
   return seepcount;
   }
 
-bool canReachPlayer(cell *cf, eMonster m) {
+EX bool canReachPlayer(cell *cf, eMonster m) {
   manual_celllister cl;
   cl.add(cf);
   for(int i=0; i<isize(cl.lst) && i < 10000; i++) {

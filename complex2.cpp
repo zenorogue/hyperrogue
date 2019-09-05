@@ -79,7 +79,7 @@ EX namespace brownian {
       }
     }
 
-  void dissolve_brownian(cell *c, int x) {
+  EX void dissolve_brownian(cell *c, int x) {
     if(c->land == laBrownian) {
       if(among(c->wall, waNone, waStrandedBoat, waMineOpen, waFire)) {
         if(c->landparam >= 4 * level) c->landparam = 4 * level - 1;
@@ -91,7 +91,7 @@ EX namespace brownian {
       }
     }
 
-  void dissolve(cell *c, int x) {
+  EX void dissolve(cell *c, int x) {
     destroyTrapsAround(c);
     if(c->land == laBrownian) 
       dissolve_brownian(c, x);
@@ -146,7 +146,7 @@ EX namespace brownian {
     if(!c2->monst && c2->wall != waBoat) c2->monst = moAcidBird;
     }
   
-  void apply_futures(cell *c) {
+  EX void apply_futures(cell *c) {
     if(futures.count(c)) {
       auto m = move(futures[c]);
       futures.erase(c);
@@ -175,7 +175,7 @@ EX namespace brownian {
       }
     }
 
-  colortable colors = { 0x603000, 0x804000, 0xA05000, 0xC09050, 0xE0D0A0 };
+  EX colortable colors = { 0x603000, 0x804000, 0xA05000, 0xC09050, 0xE0D0A0 };
 
   color_t get_color(int y) {
      return
@@ -185,7 +185,7 @@ EX namespace brownian {
         colors[4];
      }
 
-  color_t& get_color_edit(int y) {
+  EX color_t& get_color_edit(int y) {
      return
         y < level/2 ? colors[0] :
         y < level ? colors[1] :
@@ -201,11 +201,11 @@ EX namespace brownian {
     }) + addHook(clearmemory, 0, [] () { futures.clear(); })
     + addHook(hooks_gamedata, 0, [] (gamedata* gd) { gd->store(futures); });
 
-  }
+EX }
 
-namespace westwall {
+EX namespace westwall {
 
-  void switchTreasure(cell *c) {
+  EX void switchTreasure(cell *c) {
     c->item = itNone;
     if(safety) return;
     if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && c->landparam >= 5 + items[itWest])
@@ -255,7 +255,7 @@ namespace westwall {
       pickupMovedItems(whirlline[i]);
     }
   
-  void move() {
+  EX void move() {
     manual_celllister cl;
     if(gravity_state == gsLevitation) return;
     for(cell *c: dcal) moveAt(c, cl);
@@ -272,8 +272,9 @@ namespace westwall {
         }
       }
     }
-  }
+EX }
 
+#if HDR
 struct variant_feature {
   color_t color_change;
   int rate_change;
@@ -281,9 +282,12 @@ struct variant_feature {
   void (*build)(cell*);
   };
 
+extern array<variant_feature, 21> variant_features;
+#endif
+
 #define VF [] (cell *c)
 
-const array<variant_feature, 21> variant_features {{
+array<variant_feature, 21> variant_features {{
   variant_feature{(color_t)(-0x202020), 5, moNecromancer, VF {
     if(c->wall == waNone && hrand(1500) < 20) c->wall = waFreshGrave;
     if(hrand(20000) < 10 + items[itVarTreasure])

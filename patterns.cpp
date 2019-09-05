@@ -11,7 +11,7 @@ namespace hr {
 // === EMERALD PATTERN ===
 
 // rules for the emeraldvalues of heptagons.
-int emerald_heptagon(int parent, int dir) {
+EX int emerald_heptagon(int parent, int dir) {
 
   if(a46) return parent ^ (dir & 1) ^ 2 ^ (((parent^dir) & 1) << 2);
 
@@ -374,7 +374,7 @@ int emerald_heptagon(int parent, int dir) {
 
 // calculate the emeraldvalue of a hexagonal cell,
 // based on the emeraldvalues of the neighbor heptacells.
-int emerald_hexagon(int a, int b, int c) {
+EX int emerald_hexagon(int a, int b, int c) {
   // pick the lexicographically smallest representation of the cycle
   if(b <= a || c<a) { int t=a; a=b; b=c; c=t; }
   if(b <= a || c<a) { int t=a; a=b; b=c; c=t; }
@@ -1017,12 +1017,12 @@ RULE50(0x1df, 0x0c6, 0x1ae, 0x0ff, 0x0df, 0x1b7, 0x0f7, 0x1a6)
 
 #undef RULE50
 
-int firstfiftyval(int d) {
+EX int firstfiftyval(int d) {
   if(S7 == 8 && d > 3) d--;
   return fiftytable[0][d];
   }
 
-int nextfiftyval(int par, int gpar, int d) {
+EX int nextfiftyval(int par, int gpar, int d) {
   if(S7 == 8 && d > 3) d--;
   for(int i=0; i<7; i++) if(fiftytable[par][i] == gpar)
     return fiftytable[par][(i+d)%7];
@@ -1059,7 +1059,7 @@ int zebratable[12][7] = {
   {74, 112,  95, 132, 143, 123, 135}
   };
 
-int zebratable6[28][3] = {
+EX int zebratable6[28][3] = {
   {4,10,6}, {5,11,7}, {4,6,12}, {5,7,13},
   {8,14,10}, {9,15,11}, {4,8,10}, {5,9,11}, 
   {6,14,12}, {7,15,13}, {8,12,14}, {9,13,15},
@@ -1070,7 +1070,7 @@ int zebratable6[28][3] = {
   };
 
 // rules for the emeraldvalues of heptagons.
-int zebra_heptagon(int parent, int dir) {
+EX int zebra_heptagon(int parent, int dir) {
   if(S3 == 4) {
     int mm = (parent % 10 + S7 - dir) % S7;
     int mv = parent / 10;
@@ -1122,7 +1122,7 @@ int zebra_heptagon(int parent, int dir) {
   return zebratable[parent/10-4][(70+dir-(parent%10))%7];
   }
 
-int fifty_38(int f, int d) {
+EX int fifty_38(int f, int d) {
   // This creates the 'p' pattern for the a38 geometry.
   // Hexagons have codes 4 and 8, while octagons have 0, 1, 2.
   // Heptagons also have a 'dock flag' which is flipped

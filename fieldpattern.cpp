@@ -766,7 +766,7 @@ void info() {
 
 EX fpattern current_quotient_field = fpattern(0);
 EX fpattern fp_invalid = fpattern(0);
-bool quotient_field_changed;
+EX bool quotient_field_changed;
 
 EX struct fpattern& getcurrfp() {
   if(geometry == gFieldQuotient && quotient_field_changed)
@@ -852,7 +852,7 @@ EX void enableFieldChange() {
   fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
   }
 
-}
+EX }
 
 #define currfp fieldpattern::getcurrfp()
 

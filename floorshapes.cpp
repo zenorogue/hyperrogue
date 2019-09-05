@@ -841,7 +841,7 @@ void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color
   draw_shapevec(c, V, fsh.b, col, prio);
   }
 
-void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio = PPR::DEFAULT, vector<hpcshape> floorshape::* tab = &floorshape::b) {
+EX void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio IS(PPR::DEFAULT), vector<hpcshape> floorshape::* tab IS(&floorshape::b)) {
   if(qfi.shape)
     queuepolyat(V * qfi.spin, *qfi.shape, col, prio);
   else if(qfi.usershape >= 0) {

@@ -9,7 +9,9 @@
 namespace hr {
 
 EX namespace nisot {
+  #if HDR
   typedef array<float, 3> ptlow;
+  #endif
 
   EX transmatrix local_perspective;
   #if HDR
@@ -36,11 +38,11 @@ EX namespace nisot {
 
 EX namespace solv {
   
-  int PRECX, PRECY, PRECZ;
+  EX int PRECX, PRECY, PRECZ;
   
-  vector<nisot::ptlow> inverse_exp_table;
+  EX vector<nisot::ptlow> inverse_exp_table;
   
-  bool table_loaded;
+  EX bool table_loaded;
   
   EX string solfname = "solv-geodesics.dat";
   
@@ -281,7 +283,8 @@ EX namespace solv {
   EX ld solrange_xy = 15;
   EX ld solrange_z = 4;
   
-  EX ld glitch_xy = 2, glitch_z = 0.6;
+  EX ld glitch_xy = 2;
+  EX ld glitch_z = 0.6;
 
   EX bool in_table_range(hyperpoint h) {
     if(abs(h[0]) > glitch_xy && abs(h[1]) > glitch_xy && abs(h[2]) < glitch_z) return false;
@@ -598,9 +601,9 @@ EX namespace hybrid {
     ginf[g].flags |= qHYBRID;
     }
 
-  hrmap *pmap;
+  EX hrmap *pmap;
   geometry_information *pcgip;
-  eGeometry actual_geometry;
+  EX eGeometry actual_geometry;
   
   template<class T> auto in_actual(const T& t) -> decltype(t()) {
     dynamicval<eGeometry> g(geometry, actual_geometry);
@@ -658,7 +661,7 @@ EX namespace hybrid {
   
   EX pair<cell*, int> get_where(cell *c) { return hmap()->where[c]; }
 
-  void find_cell_connection(cell *c, int d) {
+  EX void find_cell_connection(cell *c, int d) {
     auto m = hmap();
     if(d >= c->type - 2) {
       int s = cgi.single_step;
