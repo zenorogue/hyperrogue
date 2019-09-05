@@ -1,91 +1,133 @@
-// Hyperbolic Rogue
-// Copyright (C) 2011-2019 Zeno Rogue
+// Usage:
+// * compile hyper.cpp with CU == 0
+// * compile init.cpp with CU == 1
+// * link them.
+// Only the parts defined in #if IN_CU(1) will be included in the second compiling.
 
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-/** \file hyper.cpp
- *  \brief the hyper_main function
- */
-
-#include "compileunits.h"
-
-#if CU_HYPER
-
-#if ISLINUX
-#include <sys/resource.h>
-
-void moreStack() {
-  const rlim_t kStackSize = 1 << 28; // 28;
-  struct rlimit rl;
-  int result;
-
-  result = getrlimit(RLIMIT_STACK, &rl);
-  if(result == 0) {
-    if(rl.rlim_cur < kStackSize) {
-      // rl.rlim_cur = 1 << 19; // kStackSize;
-      result = setrlimit(RLIMIT_STACK, &rl);
-      if (result != 0) {
-        fprintf(stderr, "setrlimit returned result = %d\n", result);
-        }
-      }
-    }
-  }
-#endif
-
-namespace hr {
-EX hookset<bool(int argc, char** argv)> *hooks_main;
-
-EX int hyper_main(int argc, char **argv) {
-  using namespace hr; 
-#if ISWEB
-  emscripten_get_commandline();
+#ifndef CU
+#define IN_CU(x) 1
 #else
-  arg::init(argc, argv);
+#define IN_CU(x) (CU == x)
 #endif
-  if(callhandlers(false, hooks_main, argc, argv)) return 0;
-#if !ISWEB
-  #if ISLINUX
-    moreStack();
-  #endif
-#endif
-#if CAP_COMMANDLINE
-  initializeCLI();
-#endif
-  initAll();
-#if CAP_COMMANDLINE
-  arg::read(3);
-  start_game();
-#endif
-#if !ISWEB
-  if(showstartmenu && !vid.skipstart) {
-    #if CAP_STARTANIM
-    startanims::pick();
-    #endif
-    pushScreen(showStartMenu);
-    }
-#endif
-  mainloop();
-  finishAll();  
-  profile_info();
-  return 0;
-  }
-}
 
-#ifndef NOMAIN
-int main(int argc, char **argv) {
-  return hr::hyper_main(argc, argv);
-  }
-#endif 
+#include "sysconfig.h"
+#include "classes.h"
+#include "hyper.h"
+
+#define CU_INIT IN_CU(0)
+#define CU_HYPER IN_CU(0)
+
+#if IN_CU(0)
+#include "classes.cpp"
 #endif
+
+#if IN_CU(0)
+#include "shaders.cpp"
+#include "hprint.cpp"
+#include "util.cpp"
+#include "hyperpoint.cpp"
+#include "patterns.cpp"
+#include "fieldpattern.cpp"
+#include "heptagon.cpp"
+#include "binary-tiling.cpp"
+#include "nonisotropic.cpp"
+#include "penrose.cpp"
+#include "archimedean.cpp"
+#include "euclid.cpp"
+#include "sphere.cpp"
+#include "quotient.cpp"
+#include "crystal.cpp"
+// #include "product.cpp"
+#include "reg3.cpp"
+#include "language.cpp"
+#include "cell.cpp"
+#include "expansion.cpp"
+#include "goldberg.cpp"
+#include "irregular.cpp"
+#include "pattern2.cpp"
+#include "flags.cpp"
+#include "yendor.cpp"
+#include "complex.cpp"
+#if CAP_COMPLEX2
+#include "complex2.cpp"
+#endif
+#include "savemem.cpp"
+#include "game.cpp"
+#include "orbgen.cpp"
+#include "monstergen.cpp"
+#include "landlock.cpp"
+#include "landgen.cpp"
+#include "orbs.cpp"
+#if CAP_INV
+#include "inventory.cpp"
+#else
+namespace hr { namespace inv { bool on, activating; } }
+#endif
+#include "system.cpp"
+#include "debug.cpp"
+#include "geometry.cpp"
+#include "geometry2.cpp"
+#include "polygons.cpp"
+#include "3d-models.cpp"
+#include "floorshapes.cpp"
+#include "usershapes.cpp"
+#include "drawing.cpp"
+#include "mapeditor.cpp"
+#if CAP_MODEL
+#include "netgen.cpp"
+#endif
+#if CAP_TABFONT || CAP_CREATEFONT
+#include "nofont.cpp"
+#endif
+#include "basegraph.cpp"
+#include "screenshot.cpp"
+#include "renderbuffer.cpp"
+#include "help.cpp"
+#include "legacy.cpp"
+#include "config.cpp"
+#include "scores.cpp"
+#include "dialogs.cpp"
+#include "menus.cpp"
+#include "geom-exp.cpp"
+#include "quit.cpp"
+#include "multi.cpp"
+#include "shmup.cpp"
+
+#if CAP_RACING
+#include "racing.cpp"
+#endif
+
+#include "models.cpp"
+#include "history.cpp"
+#include "rug.cpp"
+#include "control.cpp"
+#include "hud.cpp"
+#include "hypgraph.cpp"
+#include "textures.cpp"
+#include "graph.cpp"
+#include "blizzard.cpp"
+#include "sound.cpp"
+#include "achievement.cpp"
+#include "barriers.cpp"
+#include "surface.cpp"
+#if CAP_TOUR
+#include "tour.cpp"
+#endif
+#include "commandline.cpp"
+#include "bigstuff.cpp"
+#include "multigame.cpp"
+
+#if CAP_ROGUEVIZ
+#include "rogueviz.cpp"
+#endif
+
+#if CAP_DAILY
+#include "private/daily.cpp"
+#else
+namespace hr { namespace daily { bool on; } }
+#endif
+#endif
+
+#include "hyper-main.cpp"
+
