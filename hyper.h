@@ -9,9 +9,15 @@
  *  and general routines which did not fit elsewhere
  */
 
+#ifndef _HYPER_H_
+#define _HYPER_H_
+
 // version numbers
 #define VER "11.1o"
 #define VERNUM_HEX 0xA70F
+
+#include "sysconfig.h"
+#include "classes.h"
 
 #include <stdarg.h>
 #include "hyper_function.h"
@@ -782,3 +788,4 @@ static const color_t NOCOLOR = 0;
 #define IS(z)
 #define EX
 
+#endif

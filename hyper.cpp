@@ -11,8 +11,6 @@
 #define IN_CU(x) (CU == x)
 #endif
 
-#include "sysconfig.h"
-#include "classes.h"
 #include "hyper.h"
 
 #define CU_INIT IN_CU(0)
