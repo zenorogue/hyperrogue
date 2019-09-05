@@ -428,7 +428,7 @@ map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
 EX map<heptagon*, pair<heptagon*, transmatrix>> archimedean_gmatrix;
 
-hrmap *current_altmap;
+EX hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
@@ -1336,6 +1336,8 @@ EX int valence() {
   }
  
 #endif
+
+EX map<int, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
   }
 
 }

@@ -1327,14 +1327,19 @@ coord euclid3_to_crystal(euclid3::coord x) {
 void transform_crystal_to_euclid () {
   euclid3::clear_torus3();
   geometry = gCubeTiling;
-  auto e = new euclid3::hrmap_euclid3;
+  auto e = euclid3::new_map();
   auto m = crystal_map();
   auto infront = cwt.cpeek();
-
+  
+  auto& spacemap = euclid3::get_spacemap();
+  auto& ispacemap = euclid3::get_ispacemap();
+  auto& camelot_center = euclid3::get_camelot_center();
+  auto& shifttable = euclid3::get_current_shifttable();
+  
   for(auto& p: m->hcoords) {
     auto co = crystal_to_euclid(p.second);
-    e->spacemap[co] = p.first;
-    e->ispacemap[p.first] = co;
+    spacemap[co] = p.first;
+    ispacemap[p.first] = co;
     
     cell* c = p.first->c7;
 
@@ -1342,7 +1347,7 @@ void transform_crystal_to_euclid () {
     if(c->mondir < S7 && c->move(c->mondir)) {
       auto co1 = crystal_to_euclid(m->hcoords[c->move(c->mondir)->master]) - co;
       for(int i=0; i<6; i++) 
-        if(co1 == e->shifttable[i])
+        if(co1 == shifttable[i])
           c->mondir = i;
       }
     
@@ -1350,7 +1355,7 @@ void transform_crystal_to_euclid () {
     }
   
   if(m->camelot_center) 
-    e->camelot_center = e->spacemap[crystal_to_euclid(m->hcoords[m->camelot_center->master])]->c7;
+    camelot_center = spacemap[crystal_to_euclid(m->hcoords[m->camelot_center->master])]->c7;
 
   // clean hcoords and heptagon_at so that the map is not deleted when we delete m
   m->hcoords.clear();
@@ -1364,12 +1369,12 @@ void transform_crystal_to_euclid () {
   currentmap = e;  
   
   // connect the cubes  
-  for(auto& p: e->spacemap) {
+  for(auto& p: spacemap) {
     auto& co = p.first;
     auto& h = p.second;
     for(int i=0; i<S7; i++) 
-      if(e->spacemap.count(co + e->shifttable[i]))
-        h->move(i) = e->spacemap[co + e->shifttable[i]],
+      if(spacemap.count(co + shifttable[i]))
+        h->move(i) = spacemap[co + shifttable[i]],
         h->c.setspin(i, (i + 3) % 6, false),
         h->c7->move(i) = h->move(i)->c7,
         h->c7->c.setspin(i, (i + 3) % 6, false);
@@ -1390,17 +1395,21 @@ void transform_euclid_to_crystal () {
   ginf[gCrystal].tiling_name = "{6,4}";
   ginf[gCrystal].distlimit = distlimit_table[6];
 
-  auto e = euclid3::cubemap();
+  auto e = currentmap;
   auto m = new hrmap_crystal;
   auto infront = cwt.cpeek();
 
-  for(auto& p: e->ispacemap) {
+  auto& spacemap = euclid3::get_spacemap();
+  auto& ispacemap = euclid3::get_ispacemap();
+  auto& camelot_center = euclid3::get_camelot_center();
+  
+  for(auto& p: ispacemap) {
     auto co = euclid3_to_crystal(p.second);
     m->heptagon_at[co] = p.first;
     m->hcoords[p.first] = co;
     }
 
-  for(auto& p: e->ispacemap) {
+  for(auto& p: ispacemap) {
     cell *c = p.first->c7;
     if(c->mondir < S7 && c->move(c->mondir)) {
       auto co = euclid3_to_crystal(p.second);
@@ -1414,11 +1423,11 @@ void transform_euclid_to_crystal () {
     for(int i=0; i<S7; i++) c->move(i) = NULL;
     }
           
-  if(e->camelot_center) 
-    m->camelot_center = m->heptagon_at[euclid3_to_crystal(e->ispacemap[e->camelot_center->master])]->c7;
+  if(camelot_center) 
+    m->camelot_center = m->heptagon_at[euclid3_to_crystal(ispacemap[camelot_center->master])]->c7;
 
-  e->spacemap.clear();
-  e->ispacemap.clear();
+  spacemap.clear();
+  ispacemap.clear();
   delete e;
 
   for(int i=0; i<isize(allmaps); i++) 

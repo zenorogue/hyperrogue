@@ -394,6 +394,8 @@ struct hrmap_quotient : hrmap_standard {
   vector<cell*>& allcells() { return celllist; }
   };
 
+EX hrmap* new_map() { return new hrmap_quotient; }
+
   };
 
 

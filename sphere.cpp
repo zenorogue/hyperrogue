@@ -10,7 +10,7 @@ namespace hr {
 
 // --- spherical geometry ---
 
-int spherecells() {
+EX int spherecells() {
   if(S7 == 5) return (elliptic?6:12);
   if(S7 == 4) return (elliptic?3:6);
   if(S7 == 3 && S3 == 4) return (elliptic?4:8);
@@ -20,7 +20,7 @@ int spherecells() {
   return 12;
   }
 
-vector<int> siblings;
+EX vector<int> siblings;
   
 struct hrmap_spherical : hrmap_standard {
   heptagon *dodecahedron[12];
@@ -190,10 +190,12 @@ struct hrmap_spherical : hrmap_standard {
     }
   };
 
-heptagon *getDodecahedron(int i) {
+EX heptagon *getDodecahedron(int i) {
   hrmap_spherical *s = dynamic_cast<hrmap_spherical*> (currentmap);
   if(!s) return NULL;
   return s->dodecahedron[i];
   }
+
+EX hrmap* new_spherical_map() { return new hrmap_spherical; }
 
 }

@@ -226,36 +226,6 @@ EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
-EX euc_pointer euclideanAt(int vec) {
-  if(fulltorus) { printf("euclideanAt called\n"); exit(1); }
-  hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
-  return euc->at(vec);
-  }
-
-EX euc_pointer euclideanAtCreate(int vec) {
-  euc_pointer ep = euclideanAt(vec);
-  cell*& c = *ep.first;
-  if(!c) {
-    if(euwrap) {
-      int x, y;
-      tie(x, y) = vec_to_pair(vec);
-      torusconfig::be_canonical(x, y);
-      vec = pair_to_vec(x, y);
-      }
-    c = newCell(8, encodeId(vec));
-    // euclideanAt(vec) = c;
-    build_euclidean_moves(c, vec, [c,vec] (int delta, int d, int d2) { 
-      euc_pointer ep2 = euclideanAt(vec + delta);
-      cell* c2 = *ep2.first;
-      if(!c2) return;
-      // if(ep.second) d = c->c.fix(torusconfig::mobius_dir(c) - d);
-      if(ep2.second) d2 = c2->c.fix(torusconfig::mobius_dir(c2) - d2);
-      eumerge(c, d, c2, d2, ep2.second);
-      });
-    }
-  return ep;
-  }
-
 hookset<hrmap*()> *hooks_newmap;
 
 /** create a map in the current geometry */
@@ -277,13 +247,13 @@ EX void initcells() {
   #if CAP_BT
   else if(penrose) currentmap = kite::new_map();
   #endif
-  else if(fulltorus) currentmap = new hrmap_torus;
-  else if(euclid) currentmap = new hrmap_euclidean;
+  else if(fulltorus) currentmap = new_torus_map();
+  else if(euclid) currentmap = new_euclidean_map();
   #if MAXMDIM >= 4
   else if(WDIM == 3 && !binarytiling) currentmap = reg3::new_map();
   #endif
-  else if(sphere) currentmap = new hrmap_spherical;
-  else if(quotient) currentmap = new quotientspace::hrmap_quotient;
+  else if(sphere) currentmap = new_spherical_map();
+  else if(quotient) currentmap = quotientspace::new_map();
   #if CAP_BT
   else if(binarytiling) currentmap = binary::new_map();
   #endif
@@ -462,7 +432,7 @@ EX int celldist(cell *c) {
     return d;
     }
   if(fulltorus && WDIM == 2) 
-    return torusmap()->dists[decodeId(c->master)];
+    return get_torus_dist(decodeId(c->master));
   if(nil) return DISTANCE_UNKNOWN;
   if(euwrap)
     return torusconfig::cyldist(decodeId(c->master), 0);
@@ -824,9 +794,7 @@ cdata *getEuclidCdata(int h) {
     }
   
   int x, y;
-  auto& data = 
-    archimedean ? ((arcm::hrmap_archimedean*) (currentmap))->eucdata :
-    ((hrmap_euclidean*) (currentmap))->eucdata;
+  auto& data = archimedean ? arcm::get_cdata() : get_cdata();
     
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(data.count(h)) return &(data[h]);
@@ -1014,7 +982,7 @@ EX int celldistance(cell *c1, cell *c2) {
     if(!euwrap)
       return eudist(decodeId(c1->master) - decodeId(c2->master)); // fix cylinder
     else if(euwrap && torusconfig::torus_mode == 0) 
-      return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
+      return get_torus_dist(torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master)));
     else if(euwrap && !fulltorus)
       return torusconfig::cyldist(decodeId(c1->master), decodeId(c2->master));
     }

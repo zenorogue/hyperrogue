@@ -39,8 +39,11 @@ EX namespace torusconfig {
   // values as the default -- otherwise the three-color
   // pattern breaks. Also, they should have no common
   // prime divisor.
-  int def_qty = 127*3, dx = 1, def_dy = -11*2;
-  int qty = def_qty, dy = def_dy;
+  EX int def_qty = 127*3;
+  EX int dx = 1;
+  EX int def_dy = -11*2;
+  EX int qty = def_qty;
+  EX int dy = def_dy;
   
   EX int sdx = 12;
   EX int sdy = 12;
@@ -156,7 +159,7 @@ EX namespace torusconfig {
       }
     }
 
-  int vec_to_id(int vec) {
+  EX int vec_to_id(int vec) {
     return vec_to_id_mirror(vec).first;
     }
 
@@ -208,7 +211,7 @@ EX namespace torusconfig {
     
   gp::loc sdxy() { return gp::loc(sdx, sdy); }
   
-  int mobius_dir_basic() {
+  EX int mobius_dir_basic() {
     int dscalars[6];
     for(int a=0; a<SG6; a++)
       dscalars[a] = dscalar(gp::eudir(a), sdxy());
@@ -253,12 +256,12 @@ EX namespace torusconfig {
     // println(hlog, make_pair(ox,oy), " [", d, "] ", make_pair(x,y), " p1 = ", p1, " p2 = ", p2, " det = ", det, " smul = ", smul, " tmul = ", tmul);
     }
 
-  int mobius_dir(cell *c) {
+  EX int mobius_dir(cell *c) {
     if(c->type == 8) return mobius_dir_basic() * 2;
     else return mobius_dir_basic();
     }
   
-  bool be_canonical(int& x, int& y) {
+  EX bool be_canonical(int& x, int& y) {
     using namespace torusconfig;
     
     int periods = gdiv(dscalar(gp::loc(x,y), sdxy()), dscalar(sdxy(), sdxy()));
@@ -276,7 +279,7 @@ EX namespace torusconfig {
     return b;
     }
   
-  int cyldist(int id1, int id2) {
+  EX int cyldist(int id1, int id2) {
   
     int x1, y1, x2, y2;
     tie(x1, y1) = vec_to_pair(id1);
@@ -487,7 +490,7 @@ cellwalker vec_to_cellwalker(int vec) {
     }
   }
 
-int cellwalker_to_vec(cellwalker cw) {
+EX int cellwalker_to_vec(cellwalker cw) {
   int id = decodeId(cw.at->master);
   if(!fulltorus) {
     if(nonorientable) {
@@ -538,15 +541,17 @@ EX heptagon* encodeId(int id) {
 
 EX namespace euclid3 {
 
+  #if HDR
   typedef long long coord; 
-  static const long long COORDMAX = (1<<16);
+  constexpr long long COORDMAX = (1<<16);
+  #endif
   typedef array<coord, 3> axes;  
   typedef array<array<int, 3>, 3> intmatrix;  
 
 
   static const axes main_axes = make_array<coord>(1, COORDMAX, COORDMAX * COORDMAX );
   
-  array<int, 3> getcoord(coord x) {
+  EX array<int, 3> getcoord(coord x) {
     array<int, 3> res;
     for(int k=0; k<3; k++) {
       int next = x % COORDMAX;
@@ -559,7 +564,7 @@ EX namespace euclid3 {
     return res; 
     }
 
-  vector<coord> get_shifttable() {
+  EX vector<coord> get_shifttable() {
     static const coord D0 = main_axes[0];
     static const coord D1 = main_axes[1];
     static const coord D2 = main_axes[2];
@@ -757,6 +762,11 @@ EX namespace euclid3 {
     return ((hrmap_euclid3*) currentmap);
     }
 
+  EX vector<coord>& get_current_shifttable() { return cubemap()->shifttable; }
+  EX map<coord, heptagon*>& get_spacemap() { return cubemap()->spacemap; }
+  EX map<heptagon*, coord>& get_ispacemap() { return cubemap()->ispacemap; }
+  EX cell *& get_camelot_center() { return cubemap()->camelot_center; }
+
   EX hrmap* new_map() {
     return new hrmap_euclid3;
     }
@@ -765,7 +775,7 @@ EX namespace euclid3 {
     return cubemap()->get_move(c, i);
     }
   
-  bool pseudohept(cell *c) {
+  EX bool pseudohept(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
     auto v = getcoord(co);
     if(S7 == 12) {
@@ -777,7 +787,7 @@ EX namespace euclid3 {
     return true;
     }
 
-  int dist_alt(cell *c) {
+  EX int dist_alt(cell *c) {
     if(specialland == laCamelot) return dist_relative(c) + roundTableRadius(c);
     coord co = cubemap()->ispacemap[c->master];
     auto v = getcoord(co);
@@ -786,7 +796,7 @@ EX namespace euclid3 {
     else return v[2]/2;
     }
 
-  bool get_emerald(cell *c) {
+  EX bool get_emerald(cell *c) {
     auto v = getcoord(cubemap()->ispacemap[c->master]);
     int s0 = 0, s1 = 0;
     for(int i=0; i<3; i++) {
@@ -807,7 +817,7 @@ EX namespace euclid3 {
     return false;
     }
 
-  int celldistance(coord co) {
+  EX int celldistance(coord co) {
     auto v = getcoord(co);
     if(S7 == 6) 
       return abs(v[0]) + abs(v[1]) + abs(v[2]);
@@ -833,12 +843,12 @@ EX namespace euclid3 {
       }
     }
 
-  int celldistance(cell *c1, cell *c2) {
+  EX int celldistance(cell *c1, cell *c2) {
     auto cm = cubemap();
     return celldistance(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]);
     }
 
-  void set_land(cell *c) {
+  EX void set_land(cell *c) {
     setland(c, specialland); 
     auto m = cubemap();
     auto co = getcoord(m->ispacemap[c->master]);
@@ -1242,5 +1252,42 @@ void hrmap_euclid_any::draw() {
       }
     }
   }
+
+EX euc_pointer euclideanAt(int vec) {
+  if(fulltorus) { printf("euclideanAt called\n"); exit(1); }
+  hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
+  return euc->at(vec);
+  }
+
+EX euc_pointer euclideanAtCreate(int vec) {
+  euc_pointer ep = euclideanAt(vec);
+  cell*& c = *ep.first;
+  if(!c) {
+    if(euwrap) {
+      int x, y;
+      tie(x, y) = vec_to_pair(vec);
+      torusconfig::be_canonical(x, y);
+      vec = pair_to_vec(x, y);
+      }
+    c = newCell(8, encodeId(vec));
+    // euclideanAt(vec) = c;
+    build_euclidean_moves(c, vec, [c,vec] (int delta, int d, int d2) { 
+      euc_pointer ep2 = euclideanAt(vec + delta);
+      cell* c2 = *ep2.first;
+      if(!c2) return;
+      // if(ep.second) d = c->c.fix(torusconfig::mobius_dir(c) - d);
+      if(ep2.second) d2 = c2->c.fix(torusconfig::mobius_dir(c2) - d2);
+      eumerge(c, d, c2, d2, ep2.second);
+      });
+    }
+  return ep;
+  }
+
+EX hrmap* new_torus_map() { return new hrmap_torus; }
+EX hrmap* new_euclidean_map() { return new hrmap_euclidean; }
+
+EX int get_torus_dist(int id) { return torusmap()->dists[id]; }
+
+EX map<int, cdata>& get_cdata() { return ((hrmap_euclidean*) (currentmap))->eucdata; }
 
 }
