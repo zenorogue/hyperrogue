@@ -31,41 +31,45 @@ struct fgeomextra {
 extern int subpathid;
 extern int subpathorder;
 
-#define MWDIM (prod ? 3 : WDIM+1)
-
 bool isprime(int n) {
   for(int k=2; k<n; k++) if(n%k == 0) return false;
   return true;
   }
   
+#if HDR
+#define MWDIM (prod ? 3 : WDIM+1)
+
 struct matrix {
   int a[MAXMDIM][MAXMDIM];
   int* operator [] (int k) { return a[k]; }
   const int* operator [] (int k) const { return a[k]; }
+
+  bool operator == (const matrix& B) const {
+    for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
+      if(self[i][j] != B[i][j]) return false;
+    return true;
+    }
+  
+  bool operator != (const matrix& B) const {
+    for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
+      if(self[i][j] != B[i][j]) return true;
+    return false;
+    }
+  
+  bool operator < (const matrix& B) const {
+    for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
+      if(self[i][j] != B[i][j]) return self[i][j] < B[i][j];
+    return false;
+    }
+  
   };
+#endif
 
-bool operator == (const matrix& A, const matrix& B) {
-  for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
-    if(A[i][j] != B[i][j]) return false;
-  return true;
-  }
-
-bool operator != (const matrix& A, const matrix& B) {
-  for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
-    if(A[i][j] != B[i][j]) return true;
-  return false;
-  }
-
-bool operator < (const matrix& A, const matrix& B) {
-  for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
-    if(A[i][j] != B[i][j]) return A[i][j] < B[i][j];
-  return false;
-  }
-
-int btspin(int id, int d) {
+EX int btspin(int id, int d) {
   return S7*(id/S7) + (id + d) % S7;
   }
 
+#if HDR
 struct fpattern {
   
   int Prime, wsquare, Field;
@@ -217,12 +221,7 @@ struct fpattern {
     return make_pair(gmul(a.first,b), a.second); 
     }
   
-  int order(const matrix& M) {
-    int cnt = 1;
-    matrix Po = M;
-    while(Po != Id) Po = mmul(Po, M), cnt++;
-    return cnt;
-    }
+  int order(const matrix& M);
   
   string decodepath(int i) {
     string s;
@@ -237,154 +236,9 @@ struct fpattern {
   
   int cs, sn, ch, sh;
   
-  int solve() {
-    
-    for(int a=0; a<MWDIM; a++) for(int b=0; b<MWDIM; b++) Id[a][b] = a==b?1:0;
+  int solve();
   
-    if(!isprime(Prime)) {
-      return 1;
-      }
-    
-    rotations = WDIM == 2 ? S7 : 4;
-    local_group = WDIM == 2 ? S7 : 24;
-  
-    for(int pw=1; pw<3; pw++) {
-      if(pw>3) break;
-      Field = pw==1? Prime : Prime*Prime;
-      
-      if(pw == 2) {
-        for(wsquare=1; wsquare<Prime; wsquare++) {
-          int roots = 0;
-          for(int a=0; a<Prime; a++) if((a*a)%Prime == wsquare) roots++;
-          if(!roots) break;
-          }
-        } else wsquare = 0;
-  
-  #ifdef EASY        
-      std::vector<int> sqrts(Prime, 0);
-      for(int k=1-Prime; k<Prime; k++) sqrts[sqr(k)] = k;
-      int fmax = Prime;
-  #else
-      std::vector<int> sqrts(Field);
-      for(int k=0; k<Field; k++) sqrts[sqr(k)] = k;
-      int fmax = Field;
-  #endif
-  
-      if(Prime == 13 && wsquare && false) {
-        for(int i=0; i<Prime; i++) printf("%3d", sqrts[i]);
-        printf("\n");
-        }
-      
-      R = P = X = Id;
-      X[1][1] = 0; X[2][2] = 0;
-      X[1][2] = 1; X[2][1] = Prime-1;
-              
-      for(cs=0; cs<fmax; cs++) {
-        int sb = sub(1, sqr(cs));
-  
-        sn = sqrts[sb];
-  
-        R[0][0] = cs; R[1][1] = cs;
-        R[0][1] = sn; R[1][0] = sub(0, sn);
-        
-        matrix Z = R;
-        for(int i=1; i<rotations; i++) {
-          if(Z == Id) goto nextcs;
-          Z = mmul(Z, R);
-          }
-                
-        if(Z != Id) continue;
-        if(R[0][0] == 1) continue;
-        
-        for(ch=2; ch<fmax; ch++) {
-          int chx = sub(mul(ch,ch), 1);
-          
-          sh = sqrts[chx];
-          P[0][0] = sub(0, ch);
-          P[0][WDIM] = sub(0, sh);
-          P[1][1] = Prime-1;
-          P[WDIM][0] = sh;
-          P[WDIM][WDIM] = ch;
-          
-          matrix Z1 = mmul(P, R);
-          matrix Z = Z1;
-          for(int i=1; i<S3; i++) {
-            if(Z == Id) goto nextch;
-            Z = mmul(Z, Z1);
-            }
-          if(Z == Id) return 0;
-          nextch: ;
-          }
-        nextcs: ;
-        }
-      }
-  
-    return 2;
-    }
-  
-  void build() { 
-  
-    for(int i=0; i<isize(qpaths); i++) {
-      matrix M = strtomatrix(qpaths[i]);
-      qcoords.push_back(M);
-      printf("Solved %s as matrix of order %d\n", qpaths[i].c_str(), order(M));
-      }
-    
-    matcode.clear(); matrices.clear();
-    add(Id);
-    if(isize(matrices) != local_group) { printf("Error: rotation crash #1 (%d)\n", isize(matrices)); exit(1); }
-    
-    connections.clear();
-    
-    for(int i=0; i<(int)matrices.size(); i++) {
-    
-      matrix M = matrices[i];
-      
-      matrix PM = mmul(P, M);
-      
-      add(PM);
-  
-      if(isize(matrices) % local_group) { printf("Error: rotation crash (%d)\n", isize(matrices)); exit(1); }
-      
-      if(!matcode.count(PM)) { printf("Error: not marked\n"); exit(1); }
-  
-      connections.push_back(matcode[PM]);
-      }
-  
-    DEBB(DF_FIELD, ("Computing inverses...\n"));
-    int N = isize(matrices);
-
-    DEBB(DF_FIELD, ("Number of heptagons: %d\n", N));
-    
-    if(WDIM == 3) return;
-  
-    rrf.resize(N); rrf[0] = S7-1;
-    for(int i=0; i<N; i++) 
-      rrf[btspin(i,1)] = btspin(rrf[i], 1),
-      rrf[connections[i]] = connections[rrf[i]];
-  
-    rpf.resize(N); rpf[0] = S7;
-    for(int i=0; i<N; i++) 
-      rpf[btspin(i,1)] = btspin(rpf[i], 1),
-      rpf[connections[i]] = connections[rpf[i]];
-  
-    inverses.resize(N);
-    inverses[0] = 0;
-    for(int i=0; i<N; i++) // inverses[i] = gpow(i, N-1);
-      inverses[btspin(i,1)] = rrf[inverses[i]], // btspin(inverses[i],6), 
-      inverses[connections[i]] = rpf[inverses[i]];
-    
-    int errs = 0;
-    for(int i=0; i<N; i++) if(gmul(i, inverses[i])) errs++;
-    if(errs) printf("errs = %d\n", errs);
-      
-    if(0) for(int i=0; i<isize(matrices); i++) {
-      printf("%5d/%4d", connections[i], inverses[i]);
-      if(i%S7 == S7-1) printf("\n");       
-      }
-    
-    DEBB(DF_FIELD, ("Built.\n"));
-    }
+  void build();
   
   static const int MAXDIST = 120;
   
@@ -395,264 +249,13 @@ struct fpattern {
   int distflower0;
   
   vector<eItem> markers;
+
+  int getdist(pair<int,bool> a, vector<char>& dists);
+  int getdist(pair<int,bool> a, pair<int,bool> b);
+  int dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]);
+  void analyze();
   
-  int getdist(pair<int,bool> a, vector<char>& dists) {
-    if(!a.second) return dists[a.first];
-    int m = MAXDIST;
-    int ma = dists[a.first];
-    int mb = dists[connections[btspin(a.first, 3)]];
-    int mc = dists[connections[btspin(a.first, 4)]];
-    m = min(m, 1 + ma);
-    m = min(m, 1 + mb);
-    m = min(m, 1 + mc);
-    if(m <= 2 && ma+mb+mc <= m*3-2) return m-1; // special case
-    m = min(m, 2 + dists[connections[btspin(a.first, 2)]]);
-    m = min(m, 2 + dists[connections[btspin(a.first, 5)]]);
-    m = min(m, 2 + dists[connections[btspin(connections[btspin(a.first, 3)], 5)]]);
-    return m;
-    }
-  
-  int getdist(pair<int,bool> a, pair<int,bool> b) {
-    if(a.first == b.first) return a.second == b.second ? 0 : 1;
-    if(b.first) a.first = gmul(a.first, inverses[b.first]), b.first = 0;
-    return getdist(a, b.second ? disthex : disthep);
-    }
-   
   int maxdist, otherpole, circrad, wallid, wallorder, riverid;
-
-  int dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
-    int N = connections.size();
-    dists.resize(N);
-    for(int i=0; i<N; i++) dists[i] = MAXDIST-1;
-    int maxd = 0;
-    for(int i=0; i<MAXDIST; i++) while(!indist[i].empty()) {
-      int at = indist[i].back();
-      indist[i].pop_back();
-      if(dists[at] <= i) continue;
-      maxd = i;
-      dists[at] = i;
-      for(int q=0; q<S7; q++) {
-        dists[at] = i;
-        if(PURE) // todo-variation: PURE here?
-          indist[i+1].push_back(connections[at]);
-        else {
-          indist[i+2].push_back(connections[at]);
-          indist[i+3].push_back(connections[btspin(connections[at], 2)]);
-          }
-        at = btspin(at, 1);
-        }
-      }
-    return maxd;
-    }
-  
-  void analyze() {
-  
-    if(WDIM == 3) return;
-
-    DEBB(DF_FIELD, ("variation = %d\n", int(variation)));
-    int N = connections.size();
-    
-    markers.resize(N);
-    
-    vector<int> indist[MAXDIST];
-
-    indist[0].push_back(0);
-    int md0 = dijkstra(disthep, indist);
-
-    indist[1].push_back(0);
-    indist[1].push_back(connections[3]);
-    indist[1].push_back(connections[4]);
-    indist[2].push_back(connections[btspin(connections[3], 5)]);
-    indist[2].push_back(connections[2]);
-    indist[2].push_back(connections[5]);
-    int md1 = dijkstra(disthex, indist);
-    
-    maxdist = max(md0, md1);
-
-    otherpole = 0;
-    
-    for(int i=0; i<N; i+=S7) {
-      int mp = 0;
-      for(int q=0; q<S7; q++) if(disthep[connections[i+q]] < disthep[i]) mp++;
-      if(mp == S7) {
-        bool eq = true;
-        for(int q=0; q<S7; q++) if(disthep[connections[i+q]] != disthep[connections[i]]) eq = false;
-        if(eq) {
-          // for(int q=0; q<S7; q++) printf("%3d", disthep[connections[i+q]]);
-          // printf(" (%2d) at %d\n", disthep[i], i);
-          if(disthep[i] > disthep[otherpole]) otherpole = i;
-          // for(int r=0; r<S7; r++) {
-          // printf("Matrix: "); for(int a=0; a<3; a++) for(int b=0; b<3; b++)
-          //    printf("%4d", matrices[i+r][a][b]); printf("\n");
-          //  }
-          }
-        }
-      }
-  
-    circrad = 99;
-  
-    for(int i=0; i<N; i++) for(int u=2; u<4; u++) if(disthep[i] < circrad)
-      if(disthep[connections[i]] < disthep[i] && disthep[connections[btspin(i,u)]] < disthep[i])
-        circrad = disthep[i];
-  
-    DEBB(DF_FIELD, ("maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad));
-    
-    matrix PRRR = strtomatrix("PRRR");
-    matrix PRRPRRRRR = strtomatrix("PRRPRRRRR");
-    matrix PRRRP = strtomatrix("PRRRP");
-    matrix PRP = strtomatrix("PRP");
-    matrix PR = strtomatrix("PR");
-    matrix Wall = strtomatrix("RRRPRRRRRPRRRP");
-
-    wallorder = order(Wall);
-    wallid = matcode[Wall];
-    
-    DEBB(DF_FIELD, ("wall order = %d\n", wallorder));
-
-#define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(it == itNone) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
-    
-    matrix W = Id;
-    for(int i=0; i<wallorder; i++) {
-      SETDIST(W, 0, itAmethyst)
-      W = mmul(W, Wall);
-      }
-    W = P;
-    for(int i=0; i<wallorder; i++) {
-      SETDIST(W, 0, itEmerald)
-      W = mmul(W, Wall);
-      }
-    
-    int walldist = dijkstra(distwall, indist);
-    DEBB(DF_FIELD, ("wall dist = %d\n", walldist));
-    
-    
-    W = strtomatrix("RRRRPR");
-    for(int j=0; j<wallorder; j++) {
-      W = mmul(W, Wall);
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 0, itNone)
-        SETDIST(mmul(PRRR, W), 1, itNone)
-        W = mmul(Wall, W);
-        }
-      }
-    dijkstra(distwall2, indist);
-    
-    int rpushid = matcode[PRRPRRRRR];
-    riverid = 0;
-    
-    for(int i=0; i<N; i++) {
-      int j = i;
-      int ipush = gmul(rpushid, i);
-      for(int k=0; k<wallorder; k++) {
-        if(ipush == j) {
-          DEBB(DF_FIELD, ("River found at %d:%d\n", i, k));
-          riverid = i;
-          goto riveridfound;
-          }
-        j = gmul(j, wallid);
-        }
-      }
-    
-    riveridfound: ;
-
-    W = strtomatrix("RRRRPR");
-    for(int j=0; j<wallorder; j++) {
-      W = mmul(W, Wall);
-      for(int i=0; i<wallorder; i++) {
-        if(i == 7) SETDIST(W, 0, itCoast)
-        if(i == 3) SETDIST(mmul(PRRRP, W), 0, itWhirlpool)
-        W = mmul(Wall, W);
-        }
-      }
-    dijkstra(PURE ? distriver : distflower, indist);
-    
-    W = matrices[riverid];
-    for(int i=0; i<wallorder; i++) {
-      SETDIST(W, 0, itStatue)
-      W = mmul(W, Wall);
-      }
-    W = mmul(P, W);
-    for(int i=0; i<wallorder; i++) {
-      SETDIST(W, 0, itSapphire)
-      W = mmul(W, Wall);
-      }
-    W = mmul(PRP, matrices[riverid]);
-    for(int i=0; i<wallorder; i++) {
-      SETDIST(W, 1, itShard)
-      W = mmul(W, Wall);
-      }
-    W = mmul(PR, matrices[riverid]);
-    for(int i=0; i<wallorder; i++) {
-      SETDIST(W, 1, itGold)
-      W = mmul(W, Wall);
-      }
-    int riverdist = dijkstra(PURE ? distflower : distriver, indist);
-    DEBB(DF_FIELD, ("river dist = %d\n", riverdist));
-    
-    for(int i=0; i<isize(currfp.matrices); i++)
-      if(currfp.distflower[i] == 0) {
-        distflower0 = currfp.inverses[i]+1;
-        break;
-        }
-    
-    if(!PURE) {
-      W = matrices[riverid];
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 0, itStatue)
-        W = mmul(W, Wall);
-        }
-      W = mmul(PR, matrices[riverid]);
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 0, itGold)
-        W = mmul(W, Wall);
-        }
-      W = mmul(P, matrices[riverid]);
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 1, itSapphire)
-        W = mmul(W, Wall);
-        }
-      dijkstra(distriverleft, indist);
-      W = mmul(PRP, matrices[riverid]);
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 0, itShard)
-        W = mmul(W, Wall);
-        }
-      W = mmul(P, matrices[riverid]);
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 0, itSapphire)
-        W = mmul(W, Wall);
-        }
-      W = matrices[riverid];
-      for(int i=0; i<wallorder; i++) {
-        SETDIST(W, 1, itStatue)
-        W = mmul(W, Wall);
-        }
-      dijkstra(distriverright, indist);
-      }
-    else {
-      W = strtomatrix("RRRRPR");
-      for(int j=0; j<wallorder; j++) {
-        W = mmul(W, Wall);
-        for(int i=0; i<wallorder; i++) {
-          if(i == 7) SETDIST(W, 0, itCoast)
-          W = mmul(Wall, W);
-          }
-        }
-      dijkstra(distriverleft, indist);
-      W = strtomatrix("RRRRPR");
-      for(int j=0; j<wallorder; j++) {
-        W = mmul(W, Wall);
-        for(int i=0; i<wallorder; i++) {
-          if(i == 3) SETDIST(mmul(PRRRP, W), 0, itWhirlpool)
-          W = mmul(Wall, W);
-          }
-        }
-      dijkstra(distriverright, indist);
-      }
-
-    DEBB(DF_FIELD, ("wall-river distance = %d\n", distwall[riverid]));
-    DEBB(DF_FIELD, ("river-wall distance = %d\n", distriver[0]));
-    }
 
   bool easy(int i) {
     return i < Prime || !(i % Prime);
@@ -676,17 +279,421 @@ struct fpattern {
     init(p);
     }
   
-  void findsubpath() {
-    int N = isize(matrices);
-    for(int i=1; i<N; i++)
-      if(gpow(i, Prime) == 0) {
-        subpathid = i;
-        subpathorder = Prime;
-        DEBB(DF_FIELD, ("Subpath found: %s\n", decodepath(i).c_str()));
-        return;
-        }
-    }
+  void findsubpath();
   };
+#endif
+
+int fpattern::solve() {
+  
+  for(int a=0; a<MWDIM; a++) for(int b=0; b<MWDIM; b++) Id[a][b] = a==b?1:0;
+
+  if(!isprime(Prime)) {
+    return 1;
+    }
+  
+  rotations = WDIM == 2 ? S7 : 4;
+  local_group = WDIM == 2 ? S7 : 24;
+
+  for(int pw=1; pw<3; pw++) {
+    if(pw>3) break;
+    Field = pw==1? Prime : Prime*Prime;
+    
+    if(pw == 2) {
+      for(wsquare=1; wsquare<Prime; wsquare++) {
+        int roots = 0;
+        for(int a=0; a<Prime; a++) if((a*a)%Prime == wsquare) roots++;
+        if(!roots) break;
+        }
+      } else wsquare = 0;
+
+#ifdef EASY        
+    std::vector<int> sqrts(Prime, 0);
+    for(int k=1-Prime; k<Prime; k++) sqrts[sqr(k)] = k;
+    int fmax = Prime;
+#else
+    std::vector<int> sqrts(Field);
+    for(int k=0; k<Field; k++) sqrts[sqr(k)] = k;
+    int fmax = Field;
+#endif
+
+    if(Prime == 13 && wsquare && false) {
+      for(int i=0; i<Prime; i++) printf("%3d", sqrts[i]);
+      printf("\n");
+      }
+    
+    R = P = X = Id;
+    X[1][1] = 0; X[2][2] = 0;
+    X[1][2] = 1; X[2][1] = Prime-1;
+            
+    for(cs=0; cs<fmax; cs++) {
+      int sb = sub(1, sqr(cs));
+
+      sn = sqrts[sb];
+
+      R[0][0] = cs; R[1][1] = cs;
+      R[0][1] = sn; R[1][0] = sub(0, sn);
+      
+      matrix Z = R;
+      for(int i=1; i<rotations; i++) {
+        if(Z == Id) goto nextcs;
+        Z = mmul(Z, R);
+        }
+              
+      if(Z != Id) continue;
+      if(R[0][0] == 1) continue;
+      
+      for(ch=2; ch<fmax; ch++) {
+        int chx = sub(mul(ch,ch), 1);
+        
+        sh = sqrts[chx];
+        P[0][0] = sub(0, ch);
+        P[0][WDIM] = sub(0, sh);
+        P[1][1] = Prime-1;
+        P[WDIM][0] = sh;
+        P[WDIM][WDIM] = ch;
+        
+        matrix Z1 = mmul(P, R);
+        matrix Z = Z1;
+        for(int i=1; i<S3; i++) {
+          if(Z == Id) goto nextch;
+          Z = mmul(Z, Z1);
+          }
+        if(Z == Id) return 0;
+        nextch: ;
+        }
+      nextcs: ;
+      }
+    }
+
+  return 2;
+  }
+  
+int fpattern::order(const matrix& M) {
+  int cnt = 1;
+  matrix Po = M;
+  while(Po != Id) Po = mmul(Po, M), cnt++;
+  return cnt;
+  }
+
+void fpattern::build() {
+
+  for(int i=0; i<isize(qpaths); i++) {
+    matrix M = strtomatrix(qpaths[i]);
+    qcoords.push_back(M);
+    printf("Solved %s as matrix of order %d\n", qpaths[i].c_str(), order(M));
+    }
+  
+  matcode.clear(); matrices.clear();
+  add(Id);
+  if(isize(matrices) != local_group) { printf("Error: rotation crash #1 (%d)\n", isize(matrices)); exit(1); }
+  
+  connections.clear();
+  
+  for(int i=0; i<(int)matrices.size(); i++) {
+  
+    matrix M = matrices[i];
+    
+    matrix PM = mmul(P, M);
+    
+    add(PM);
+
+    if(isize(matrices) % local_group) { printf("Error: rotation crash (%d)\n", isize(matrices)); exit(1); }
+    
+    if(!matcode.count(PM)) { printf("Error: not marked\n"); exit(1); }
+
+    connections.push_back(matcode[PM]);
+    }
+
+  DEBB(DF_FIELD, ("Computing inverses...\n"));
+  int N = isize(matrices);
+
+  DEBB(DF_FIELD, ("Number of heptagons: %d\n", N));
+  
+  if(WDIM == 3) return;
+
+  rrf.resize(N); rrf[0] = S7-1;
+  for(int i=0; i<N; i++) 
+    rrf[btspin(i,1)] = btspin(rrf[i], 1),
+    rrf[connections[i]] = connections[rrf[i]];
+
+  rpf.resize(N); rpf[0] = S7;
+  for(int i=0; i<N; i++) 
+    rpf[btspin(i,1)] = btspin(rpf[i], 1),
+    rpf[connections[i]] = connections[rpf[i]];
+
+  inverses.resize(N);
+  inverses[0] = 0;
+  for(int i=0; i<N; i++) // inverses[i] = gpow(i, N-1);
+    inverses[btspin(i,1)] = rrf[inverses[i]], // btspin(inverses[i],6), 
+    inverses[connections[i]] = rpf[inverses[i]];
+  
+  int errs = 0;
+  for(int i=0; i<N; i++) if(gmul(i, inverses[i])) errs++;
+  if(errs) printf("errs = %d\n", errs);
+    
+  if(0) for(int i=0; i<isize(matrices); i++) {
+    printf("%5d/%4d", connections[i], inverses[i]);
+    if(i%S7 == S7-1) printf("\n");       
+    }
+  
+  DEBB(DF_FIELD, ("Built.\n"));
+  }
+
+int fpattern::getdist(pair<int,bool> a, vector<char>& dists) {
+  if(!a.second) return dists[a.first];
+  int m = MAXDIST;
+  int ma = dists[a.first];
+  int mb = dists[connections[btspin(a.first, 3)]];
+  int mc = dists[connections[btspin(a.first, 4)]];
+  m = min(m, 1 + ma);
+  m = min(m, 1 + mb);
+  m = min(m, 1 + mc);
+  if(m <= 2 && ma+mb+mc <= m*3-2) return m-1; // special case
+  m = min(m, 2 + dists[connections[btspin(a.first, 2)]]);
+  m = min(m, 2 + dists[connections[btspin(a.first, 5)]]);
+  m = min(m, 2 + dists[connections[btspin(connections[btspin(a.first, 3)], 5)]]);
+  return m;
+  }
+
+int fpattern::getdist(pair<int,bool> a, pair<int,bool> b) {
+  if(a.first == b.first) return a.second == b.second ? 0 : 1;
+  if(b.first) a.first = gmul(a.first, inverses[b.first]), b.first = 0;
+  return getdist(a, b.second ? disthex : disthep);
+  }
+ 
+int fpattern::dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
+  int N = connections.size();
+  dists.resize(N);
+  for(int i=0; i<N; i++) dists[i] = MAXDIST-1;
+  int maxd = 0;
+  for(int i=0; i<MAXDIST; i++) while(!indist[i].empty()) {
+    int at = indist[i].back();
+    indist[i].pop_back();
+    if(dists[at] <= i) continue;
+    maxd = i;
+    dists[at] = i;
+    for(int q=0; q<S7; q++) {
+      dists[at] = i;
+      if(PURE) // todo-variation: PURE here?
+        indist[i+1].push_back(connections[at]);
+      else {
+        indist[i+2].push_back(connections[at]);
+        indist[i+3].push_back(connections[btspin(connections[at], 2)]);
+        }
+      at = btspin(at, 1);
+      }
+    }
+  return maxd;
+  }
+
+void fpattern::analyze() {
+
+  if(WDIM == 3) return;
+
+  DEBB(DF_FIELD, ("variation = %d\n", int(variation)));
+  int N = connections.size();
+  
+  markers.resize(N);
+  
+  vector<int> indist[MAXDIST];
+
+  indist[0].push_back(0);
+  int md0 = dijkstra(disthep, indist);
+
+  indist[1].push_back(0);
+  indist[1].push_back(connections[3]);
+  indist[1].push_back(connections[4]);
+  indist[2].push_back(connections[btspin(connections[3], 5)]);
+  indist[2].push_back(connections[2]);
+  indist[2].push_back(connections[5]);
+  int md1 = dijkstra(disthex, indist);
+  
+  maxdist = max(md0, md1);
+
+  otherpole = 0;
+  
+  for(int i=0; i<N; i+=S7) {
+    int mp = 0;
+    for(int q=0; q<S7; q++) if(disthep[connections[i+q]] < disthep[i]) mp++;
+    if(mp == S7) {
+      bool eq = true;
+      for(int q=0; q<S7; q++) if(disthep[connections[i+q]] != disthep[connections[i]]) eq = false;
+      if(eq) {
+        // for(int q=0; q<S7; q++) printf("%3d", disthep[connections[i+q]]);
+        // printf(" (%2d) at %d\n", disthep[i], i);
+        if(disthep[i] > disthep[otherpole]) otherpole = i;
+        // for(int r=0; r<S7; r++) {
+        // printf("Matrix: "); for(int a=0; a<3; a++) for(int b=0; b<3; b++)
+        //    printf("%4d", matrices[i+r][a][b]); printf("\n");
+        //  }
+        }
+      }
+    }
+
+  circrad = 99;
+
+  for(int i=0; i<N; i++) for(int u=2; u<4; u++) if(disthep[i] < circrad)
+    if(disthep[connections[i]] < disthep[i] && disthep[connections[btspin(i,u)]] < disthep[i])
+      circrad = disthep[i];
+
+  DEBB(DF_FIELD, ("maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad));
+  
+  matrix PRRR = strtomatrix("PRRR");
+  matrix PRRPRRRRR = strtomatrix("PRRPRRRRR");
+  matrix PRRRP = strtomatrix("PRRRP");
+  matrix PRP = strtomatrix("PRP");
+  matrix PR = strtomatrix("PR");
+  matrix Wall = strtomatrix("RRRPRRRRRPRRRP");
+
+  wallorder = order(Wall);
+  wallid = matcode[Wall];
+  
+  DEBB(DF_FIELD, ("wall order = %d\n", wallorder));
+
+#define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(it == itNone) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
+  
+  matrix W = Id;
+  for(int i=0; i<wallorder; i++) {
+    SETDIST(W, 0, itAmethyst)
+    W = mmul(W, Wall);
+    }
+  W = P;
+  for(int i=0; i<wallorder; i++) {
+    SETDIST(W, 0, itEmerald)
+    W = mmul(W, Wall);
+    }
+  
+  int walldist = dijkstra(distwall, indist);
+  DEBB(DF_FIELD, ("wall dist = %d\n", walldist));
+  
+  
+  W = strtomatrix("RRRRPR");
+  for(int j=0; j<wallorder; j++) {
+    W = mmul(W, Wall);
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 0, itNone)
+      SETDIST(mmul(PRRR, W), 1, itNone)
+      W = mmul(Wall, W);
+      }
+    }
+  dijkstra(distwall2, indist);
+  
+  int rpushid = matcode[PRRPRRRRR];
+  riverid = 0;
+  
+  for(int i=0; i<N; i++) {
+    int j = i;
+    int ipush = gmul(rpushid, i);
+    for(int k=0; k<wallorder; k++) {
+      if(ipush == j) {
+        DEBB(DF_FIELD, ("River found at %d:%d\n", i, k));
+        riverid = i;
+        goto riveridfound;
+        }
+      j = gmul(j, wallid);
+      }
+    }
+  
+  riveridfound: ;
+
+  W = strtomatrix("RRRRPR");
+  for(int j=0; j<wallorder; j++) {
+    W = mmul(W, Wall);
+    for(int i=0; i<wallorder; i++) {
+      if(i == 7) SETDIST(W, 0, itCoast)
+      if(i == 3) SETDIST(mmul(PRRRP, W), 0, itWhirlpool)
+      W = mmul(Wall, W);
+      }
+    }
+  dijkstra(PURE ? distriver : distflower, indist);
+  
+  W = matrices[riverid];
+  for(int i=0; i<wallorder; i++) {
+    SETDIST(W, 0, itStatue)
+    W = mmul(W, Wall);
+    }
+  W = mmul(P, W);
+  for(int i=0; i<wallorder; i++) {
+    SETDIST(W, 0, itSapphire)
+    W = mmul(W, Wall);
+    }
+  W = mmul(PRP, matrices[riverid]);
+  for(int i=0; i<wallorder; i++) {
+    SETDIST(W, 1, itShard)
+    W = mmul(W, Wall);
+    }
+  W = mmul(PR, matrices[riverid]);
+  for(int i=0; i<wallorder; i++) {
+    SETDIST(W, 1, itGold)
+    W = mmul(W, Wall);
+    }
+  int riverdist = dijkstra(PURE ? distflower : distriver, indist);
+  DEBB(DF_FIELD, ("river dist = %d\n", riverdist));
+  
+  for(int i=0; i<isize(currfp.matrices); i++)
+    if(currfp.distflower[i] == 0) {
+      distflower0 = currfp.inverses[i]+1;
+      break;
+      }
+  
+  if(!PURE) {
+    W = matrices[riverid];
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 0, itStatue)
+      W = mmul(W, Wall);
+      }
+    W = mmul(PR, matrices[riverid]);
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 0, itGold)
+      W = mmul(W, Wall);
+      }
+    W = mmul(P, matrices[riverid]);
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 1, itSapphire)
+      W = mmul(W, Wall);
+      }
+    dijkstra(distriverleft, indist);
+    W = mmul(PRP, matrices[riverid]);
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 0, itShard)
+      W = mmul(W, Wall);
+      }
+    W = mmul(P, matrices[riverid]);
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 0, itSapphire)
+      W = mmul(W, Wall);
+      }
+    W = matrices[riverid];
+    for(int i=0; i<wallorder; i++) {
+      SETDIST(W, 1, itStatue)
+      W = mmul(W, Wall);
+      }
+    dijkstra(distriverright, indist);
+    }
+  else {
+    W = strtomatrix("RRRRPR");
+    for(int j=0; j<wallorder; j++) {
+      W = mmul(W, Wall);
+      for(int i=0; i<wallorder; i++) {
+        if(i == 7) SETDIST(W, 0, itCoast)
+        W = mmul(Wall, W);
+        }
+      }
+    dijkstra(distriverleft, indist);
+    W = strtomatrix("RRRRPR");
+    for(int j=0; j<wallorder; j++) {
+      W = mmul(W, Wall);
+      for(int i=0; i<wallorder; i++) {
+        if(i == 3) SETDIST(mmul(PRRRP, W), 0, itWhirlpool)
+        W = mmul(Wall, W);
+        }
+      }
+    dijkstra(distriverright, indist);
+    }
+
+  DEBB(DF_FIELD, ("wall-river distance = %d\n", distwall[riverid]));
+  DEBB(DF_FIELD, ("river-wall distance = %d\n", distriver[0]));
+  }
 
 int fpattern::orderstats() {
   int N = isize(matrices);
@@ -713,6 +720,16 @@ int fpattern::orderstats() {
   return ordsample[Prime];
   }
 
+void fpattern::findsubpath() {
+  int N = isize(matrices);
+  for(int i=1; i<N; i++)
+    if(gpow(i, Prime) == 0) {
+      subpathid = i;
+      subpathorder = Prime;
+      DEBB(DF_FIELD, ("Subpath found: %s\n", decodepath(i).c_str()));
+      return;
+      }
+  }
 
 fpattern fp43(43);
 
@@ -747,7 +764,8 @@ void info() {
   printf("cases found = %d (%d hard)\n", cases, hard);
   }
 
-fpattern current_quotient_field(0), fp_invalid(0);
+EX fpattern current_quotient_field = fpattern(0);
+EX fpattern fp_invalid = fpattern(0);
 bool quotient_field_changed;
 
 EX struct fpattern& getcurrfp() {
