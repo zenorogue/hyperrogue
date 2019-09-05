@@ -381,6 +381,21 @@ struct GLprogram {
   
   };
 
+EX void set_index_sl(ld x) {
+  glUniform1f(glhr::current->uIndexSL, x);
+  }
+
+EX void set_sl_iterations(int steps) {
+  glUniform1i(glhr::current->uIterations, steps);
+  }
+
+EX void set_solv_prec(int x, int y, int z) {
+  glUniform1i(glhr::current->tInvExpTable, glhr::INVERSE_EXP_BINDING);
+  glUniform1f(glhr::current->uPRECX, x);
+  glUniform1f(glhr::current->uPRECY, y);
+  glUniform1f(glhr::current->uPRECZ, z);
+  }
+
 GLprogram *programs[gmMAX][int(shader_projection::MAX)];
 
 string stringbuilder() { return ""; }

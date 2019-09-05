@@ -363,20 +363,17 @@ void display_data::set_projection(int ed) {
       
       }
     
-    glUniform1i(glhr::current->tInvExpTable, glhr::INVERSE_EXP_BINDING);
     glActiveTexture(GL_TEXTURE0 + glhr::INVERSE_EXP_BINDING);
     glBindTexture(GL_TEXTURE_3D, invexpid);
 
     glActiveTexture(GL_TEXTURE0 + 0);
     
-    glUniform1f(glhr::current->uPRECX, solv::PRECX);
-    glUniform1f(glhr::current->uPRECY, solv::PRECY);
-    glUniform1f(glhr::current->uPRECZ, solv::PRECZ);
+    glhr::set_solv_prec(solv::PRECX, solv::PRECY, solv::PRECZ);    
     }
 
   if(glhr::new_shader_projection == glhr::shader_projection::standardSL2) {
-    glUniform1f(glhr::current->uIndexSL, 0);
-    glUniform1i(glhr::current->uIterations, slr::steps);
+    glhr::set_index_sl(0);
+    glhr::set_sl_iterations(slr::steps);
     }
 
   auto cd = current_display;

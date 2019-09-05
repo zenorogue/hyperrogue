@@ -661,7 +661,7 @@ void dqi_poly::gldraw() {
 
   if(min_slr < max_slr) {
     min_slr++;
-    glUniform1f(glhr::current->uIndexSL, M_PI * min_slr);
+    glhr::set_index_sl(M_PI * min_slr);
     goto next_slr;
     }
   }
@@ -1159,7 +1159,7 @@ void dqi_poly::draw() {
       min_slr = ceil((-zr - z) / M_PI);
       max_slr = floor((zr - z) / M_PI);
       if(min_slr > max_slr) return;
-      glUniform1f(glhr::current->uIndexSL, M_PI * min_slr);
+      glhr::set_index_sl(M_PI * min_slr);
       }
     set_width(get_width(this));
     flags &= ~POLY_INVERSE;
