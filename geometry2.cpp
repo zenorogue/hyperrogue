@@ -203,47 +203,53 @@ EX transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   return gm * where;
   }
 
+#if HDR
 struct horo_distance {
   ld a, b;
-
-  void become(hyperpoint h1) {
-    if(sol) {
-      a = abs(h1[2]);
-      b = hypot_d(2, h1);
-      }
-    #if CAP_BT
-    else if(binarytiling) {
-      b = intval(h1, C0);
-      a = abs(binary::horo_level(h1));
-      }
-    #endif
-    else if(hybri)
-      a = 0, b = hdist(h1, C0);
-    else
-      a = 0, b = intval(h1, C0);
-    }
-
+  
+  void become(hyperpoint h1);
   horo_distance(hyperpoint h) { become(h); }
-    
-  horo_distance(hyperpoint h1, const transmatrix& T) {
-    #if CAP_BT
-    if(binarytiling) become(inverse(T) * h1);
-    else
-  #endif
-    if(sol || hybri) become(inverse(T) * h1);
-    else
-      a = 0, b = intval(h1, tC0(T));
-    }
-  bool operator < (const horo_distance z) {
-    #if CAP_BT
-    if(binarytiling || sol) {
-      if(a < z.a-1e-6) return true;
-      if(a > z.a+1e-6) return false;
-      }
-    #endif
-    return b < z.b - 1e-4;
-    }
+  horo_distance(hyperpoint h1, const transmatrix& T);
+  bool operator < (const horo_distance z) const;
   };
+#endif
+
+void horo_distance::become(hyperpoint h1) {
+  if(sol) {
+    a = abs(h1[2]);
+    b = hypot_d(2, h1);
+    }
+  #if CAP_BT
+  else if(binarytiling) {
+    b = intval(h1, C0);
+    a = abs(binary::horo_level(h1));
+    }
+  #endif
+  else if(hybri)
+    a = 0, b = hdist(h1, C0);
+  else
+    a = 0, b = intval(h1, C0);
+  }
+
+horo_distance::horo_distance(hyperpoint h1, const transmatrix& T) {
+  #if CAP_BT
+  if(binarytiling) become(inverse(T) * h1);
+  else
+#endif
+  if(sol || hybri) become(inverse(T) * h1);
+  else
+    a = 0, b = intval(h1, tC0(T));
+  }
+
+bool horo_distance::operator < (const horo_distance z) const {
+  #if CAP_BT
+  if(binarytiling || sol) {
+    if(a < z.a-1e-6) return true;
+    if(a > z.a+1e-6) return false;
+    }
+  #endif
+  return b < z.b - 1e-4;
+  }
 
 template<class T, class U> 
 void virtualRebase_cell(cell*& base, T& at, const U& check) {
