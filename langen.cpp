@@ -325,7 +325,7 @@ int main() {
   printf("#define NATCHARS {");
   for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
   printf("};\n");
-  printf("extern char* natchars[NUMEXTRA];\n");
+  printf("extern const char* natchars[NUMEXTRA];\n");
   printf("#endif\n");
   printf("const char* natchars[NUMEXTRA] = NATCHARS;\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
