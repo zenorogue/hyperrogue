@@ -7,7 +7,7 @@
 
 #include "hyper.h"
 namespace hr { 
-
+#if CAP_TOUR
 EX namespace tour {
 
 EX bool on;
@@ -828,4 +828,6 @@ auto a1 = addHook(hooks_frame, 100, [] () { if(tour::on) tour::presentation(tour
 auto a2 = addHook(hooks_handleKey, 100, handleKeyTour);
 auto a3 = addHook(hooks_nextland, 100, [] (eLand l) { return tour::on ? getNext(l) : laNone; });
 
-}}
+EX }
+#endif
+}

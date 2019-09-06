@@ -1,26 +1,28 @@
-// Usage:
-// * compile hyper.cpp with CU == 0
-// * compile init.cpp with CU == 1
-// * link them.
-// Only the parts defined in #if IN_CU(1) will be included in the second compiling.
+// Hyperbolic Rogue
+// Copyright (C) 2011-2019 Zeno Rogue
 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 
-#ifndef CU
-#define IN_CU(x) 1
-#else
-#define IN_CU(x) (CU == x)
-#endif
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+/** \file hyper.cpp
+ *  \brief master file which includes everything
+ *  You can either compile this file, or use mymake to compile all the *.cpp files separately.
+ */
 
 #include "hyper.h"
 
-#define CU_INIT IN_CU(0)
-#define CU_HYPER IN_CU(0)
-
-#if IN_CU(0)
 #include "classes.cpp"
-#endif
-
-#if IN_CU(0)
 #include "shaders.cpp"
 #include "hprint.cpp"
 #include "util.cpp"
@@ -36,7 +38,6 @@
 #include "sphere.cpp"
 #include "quotient.cpp"
 #include "crystal.cpp"
-// #include "product.cpp"
 #include "reg3.cpp"
 #include "language.cpp"
 #include "cell.cpp"
@@ -47,9 +48,7 @@
 #include "flags.cpp"
 #include "yendor.cpp"
 #include "complex.cpp"
-#if CAP_COMPLEX2
 #include "complex2.cpp"
-#endif
 #include "savemem.cpp"
 #include "game.cpp"
 #include "orbgen.cpp"
@@ -57,11 +56,7 @@
 #include "landlock.cpp"
 #include "landgen.cpp"
 #include "orbs.cpp"
-#if CAP_INV
 #include "inventory.cpp"
-#else
-namespace hr { namespace inv { bool on, activating; } }
-#endif
 #include "system.cpp"
 #include "debug.cpp"
 #include "geometry.cpp"
@@ -72,12 +67,8 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "usershapes.cpp"
 #include "drawing.cpp"
 #include "mapeditor.cpp"
-#if CAP_MODEL
 #include "netgen.cpp"
-#endif
-#if CAP_TABFONT || CAP_CREATEFONT
 #include "nofont.cpp"
-#endif
 #include "basegraph.cpp"
 #include "screenshot.cpp"
 #include "renderbuffer.cpp"
@@ -91,11 +82,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "quit.cpp"
 #include "multi.cpp"
 #include "shmup.cpp"
-
-#if CAP_RACING
 #include "racing.cpp"
-#endif
-
 #include "models.cpp"
 #include "history.cpp"
 #include "rug.cpp"
@@ -109,9 +96,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "achievement.cpp"
 #include "barriers.cpp"
 #include "surface.cpp"
-#if CAP_TOUR
 #include "tour.cpp"
-#endif
 #include "commandline.cpp"
 #include "bigstuff.cpp"
 #include "multigame.cpp"
@@ -124,7 +109,6 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "private/daily.cpp"
 #else
 namespace hr { namespace daily { bool on; } }
-#endif
 #endif
 
 #include "hyper-main.cpp"

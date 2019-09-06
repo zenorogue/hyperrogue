@@ -6,6 +6,7 @@
  */
 
 #include "hyper.h"
+#if CAP_RACING
 namespace hr {
 
 EX namespace racing {
@@ -1373,3 +1374,4 @@ EX void add_debug(cell *c) {
 }
 
 }
+#endif

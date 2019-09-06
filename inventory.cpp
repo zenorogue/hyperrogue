@@ -10,6 +10,7 @@ namespace hr {
 
 EX namespace inv {
 
+#if CAP_INV
   EX bool on;
   EX array<int, ittypes> usedup;
   EX array<int, ittypes> remaining;
@@ -671,4 +672,7 @@ EX namespace inv {
       }
     }
 
+#else
+always_false on, activating;
+#endif
   }}
