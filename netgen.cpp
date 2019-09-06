@@ -44,7 +44,7 @@ namespace hr { namespace netgen {
   
   bool loaded;
   
-  int SCALE, PX, PY, BASE, SX, SY, CELLS, fontsize, created;
+  int nscale, PX, PY, BASE, SX, SY, CELLS, fontsize, created;
   double el;
   #define MAXCELLS 1000
   
@@ -142,7 +142,7 @@ namespace hr { namespace netgen {
     fhstream f("papermodeldata.txt", "rt");
     if(!f.f) return;
 
-    if(!scan(f, CELLS, SX, SY, PX, PY, SCALE, BASE, el, created)) return;
+    if(!scan(f, CELLS, SX, SY, PX, PY, nscale, BASE, el, created)) return;
     
     loaded = true;
       
@@ -179,7 +179,7 @@ namespace hr { namespace netgen {
       addMessage("Could not save the paper model data");
       return;
       }
-    println(f, spaced(CELLS, SX, SY, PX, PY, SCALE, BASE, el, created), "\n");
+    println(f, spaced(CELLS, SX, SY, PX, PY, nscale, BASE, el, created), "\n");
 
     // net parameters: cell types    
     println(f, spaced_of(ct, CELLS));
@@ -321,7 +321,7 @@ namespace hr { namespace netgen {
         drawline(hvec(i,e), hvec(i,7), 0x80808080);
       } */
     
-    s = net = SDL_CreateRGBSurface(SDL_SWSURFACE,SX*SCALE,SY*SCALE,32,0,0,0,0);
+    s = net = SDL_CreateRGBSurface(SDL_SWSURFACE,SX*nscale,SY*nscale,32,0,0,0,0);
     SDL_FillRect(net, NULL, 0xFFFFFF);
     
     int pateks = 0;
@@ -330,7 +330,7 @@ namespace hr { namespace netgen {
     int zeroe = 0;
     for(int e=0; e<6; e++) if(nei[zeroi][e] == 0) zeroe = e;
     
-    el *= SCALE;
+    el *= nscale;
     setRaylen();
     
     for(int faza=0; faza<2; faza++) for(int i=0; i<CELLS; i++) {
@@ -340,8 +340,8 @@ namespace hr { namespace netgen {
       printf("faza %d cell %d\n", faza, i);
   
       for(int e=0; e<t; e++) {
-        vec v1 = center[i] * SCALE + raylen[i] * ang(rot[i] + 2*M_PI*e/t);
-        vec v2 = center[i] * SCALE + raylen[i] * ang(rot[i] + 2*M_PI*(e+1)/t);
+        vec v1 = center[i] * nscale + raylen[i] * ang(rot[i] + 2*M_PI*e/t);
+        vec v2 = center[i] * nscale + raylen[i] * ang(rot[i] + 2*M_PI*(e+1)/t);
         vec v3 = (v1+v2)/2;
   
         if(faza == 1) blackline(v1, v2);
@@ -357,7 +357,7 @@ namespace hr { namespace netgen {
           }
 
         if(faza == 0) copyhypertriangle(
-          center[i] * SCALE, v1, v2,
+          center[i] * nscale, v1, v2,
           hvec(i,7), hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t)
           );
         
@@ -406,8 +406,8 @@ namespace hr { namespace netgen {
     IMAGESAVE(net, "papermodel-all" IMAGEEXT);
     IMAGESAVE(hqsurface, "papermodel-source" IMAGEEXT);
 
-    int qx = SX*SCALE/PX;
-    int qy = SY*SCALE/PY;
+    int qx = SX*nscale/PX;
+    int qy = SY*nscale/PY;
     SDL_Surface *quarter = SDL_CreateRGBSurface(SDL_SWSURFACE,qx,qy,32,0,0,0,0);
     for(int iy=0; iy<PY; iy++)
     for(int ix=0; ix<PX; ix++) {
