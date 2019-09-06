@@ -327,7 +327,7 @@ int main() {
   printf("};\n");
   printf("extern char* natchars[NUMEXTRA];\n");
   printf("#endif\n");
-  printf("char* natchars[NUMEXTRA] = NATCHARS;\n");
+  printf("const char* natchars[NUMEXTRA] = NATCHARS;\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
   
   printf("\nEX int transcompleteness[NUMLAN] = {");
