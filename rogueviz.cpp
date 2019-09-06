@@ -20,11 +20,7 @@
 
 // hyper -tess <parameter file> -- visualize a horocyclic tesselation,
 
-#ifndef CAP_ROGUEVIZ
-#define CU 1
-#include "init.cpp"
-#endif
-
+#include "hyper.h"
 #include "rogueviz.h"
 
 namespace rogueviz {
