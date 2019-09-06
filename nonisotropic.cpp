@@ -768,6 +768,10 @@ EX namespace hybrid {
     return wo;
     }
 
+  EX bool do_draw(cell *c, const transmatrix& T) {
+    return in_actual([&] { return hr::do_draw(hybrid::get_at(c, hybrid::current_view_level), T); });
+    }
+
 EX }
   
 EX namespace product {

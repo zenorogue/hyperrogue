@@ -1995,7 +1995,7 @@ bool limited_generation(cell *c) {
 
 EX bool do_draw(cell *c, const transmatrix& T) {
 
-  if(hybrid::pmap) return hybrid::in_actual([&] { return do_draw(hybrid::get_at(c, hybrid::current_view_level), T); });
+  if(hybrid::pmap) return hybrid::do_draw(c, T);
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(nil && pmodel == mdGeodesic) {
