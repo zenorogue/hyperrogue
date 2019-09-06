@@ -2839,7 +2839,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool m
     else {
       if(mirr) Vs = Vs * Mirror;
       }
-    shmup::cpid = i;
+    multi::cpid = i;
 
     drawPlayerEffects(Vs, c, true);
     if(!mmmon) return true;
@@ -7048,7 +7048,7 @@ EX void drawMarkers() {
   orbToTarget = itNone;
 
   if(mouseover && targetclick) {
-    shmup::cpid = 0;
+    multi::cpid = 0;
     orbToTarget = targetRangedOrb(mouseover, roCheck);
     #if CAP_QUEUE
     if(orbToTarget == itOrbSummon) {
@@ -7416,8 +7416,8 @@ EX void drawthemap() {
   drawFlashes();
   
   if(multi::players > 1 && !shmup::on) {
-    if(shmup::centerplayer != -1) 
-      cwtV = multi::whereis[shmup::centerplayer];
+    if(multi::centerplayer != -1) 
+      cwtV = multi::whereis[multi::centerplayer];
     else {
       hyperpoint h;
       for(int i=0; i<3; i++) h[i] = 0;
@@ -7431,10 +7431,10 @@ EX void drawthemap() {
     }
   
   if(shmup::on) {
-    if(shmup::players == 1)
+    if(multi::players == 1)
       cwtV = shmup::pc[0]->pat;
-    else if(shmup::centerplayer != -1) 
-      cwtV = shmup::pc[shmup::centerplayer]->pat;
+    else if(multi::centerplayer != -1) 
+      cwtV = shmup::pc[multi::centerplayer]->pat;
     else {
       hyperpoint h;
       for(int i=0; i<3; i++) h[i] = 0;

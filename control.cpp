@@ -492,7 +492,7 @@ EX void handleKeyNormal(int sym, int uni) {
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
     
-    shmup::cpid = 0;
+    multi::cpid = 0;
     if(mouseover && 
       targetclick && (!shmup::on || numplayers() == 1) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
       }
