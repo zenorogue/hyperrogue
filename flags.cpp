@@ -10,10 +10,10 @@
 namespace hr {
 
 #if HDR
-const flagtype& classflag(eItem it) { return iinf[it].flags; }
-const flagtype& classflag(eWall w) { return winf[w].flags; }
-const flagtype& classflag(eMonster m) { return minf[m].flags; }
-const flagtype& classflag(eLand l) { return linf[l].flags; }
+const inline flagtype& classflag(eItem it) { return iinf[it].flags; }
+const inline flagtype& classflag(eWall w) { return winf[w].flags; }
+const inline flagtype& classflag(eMonster m) { return minf[m].flags; }
+const inline flagtype& classflag(eLand l) { return linf[l].flags; }
 
 #define ANYFLAGCHECK(name, cond, field, enum) inline bool name(enum w) { flagtype flag = classflag(w); return cond; } inline bool name(cell *c) { return name(c->field); }
 
