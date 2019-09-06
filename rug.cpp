@@ -115,7 +115,7 @@ EX ld anticusp_dist;
 
 EX ld err_zero = 1e-3, err_zero_current, current_total_error;
 
-int queueiter, qvalid, dt;
+EX int queueiter, qvalid, dt;
 
 EX rugpoint *finger_center;
 EX ld finger_range = .1;
@@ -123,7 +123,7 @@ EX ld finger_force = 1;
 
 EX int rugdim;
 
-bool rug_perspective = ISANDROID;
+EX bool rug_perspective = ISANDROID;
 
 // extra geometry functions
 //--------------------------
@@ -225,7 +225,7 @@ void push_point(hyperpoint& h, int coord, ld val) {
     }
   }
   
-void push_all_points(int coord, ld val) {
+EX void push_all_points(int coord, ld val) {
   if(!val) return;
   else for(int i=0; i<isize(points); i++)
     push_point(points[i]->flat, coord, val);
@@ -407,7 +407,7 @@ bool psort(rugpoint *a, rugpoint *b) {
   return hdist0(a->h) < hdist0(b->h);
   }
 
-void sort_rug_points() {
+EX void sort_rug_points() {
   sort(points.begin(), points.end(), psort);
   }
 
@@ -738,7 +738,8 @@ EX void buildRug() {
 // rug physics
 
 queue<rugpoint*> pqueue;
-void enqueue(rugpoint *m) {
+
+EX void enqueue(rugpoint *m) {
   if(m->inqueue) return;
   pqueue.push(m);
   m->inqueue = true;
@@ -1368,11 +1369,12 @@ double xview, yview;
 
 EX bool no_fog;
 
-EX ld lowrug = 1e-2, hirug = 1e3;
+EX ld lowrug = 1e-2;
+EX ld hirug = 1e3;
 
-GLuint alternate_texture;
+EX GLuint alternate_texture;
 
-bool invert_depth;
+EX bool invert_depth;
 
 EX void drawRugScene() {
   glbuf->use_as_texture();

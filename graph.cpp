@@ -74,9 +74,9 @@ EX bool auraNOGL;    // aura without GL
 int axestate;
 
 EX int ticks;
-int frameid;
+EX int frameid;
 
-bool camelotcheat;
+EX bool camelotcheat;
 EX bool nomap;
 
 EX eItem orbToTarget;
@@ -3489,7 +3489,6 @@ void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 
 #if CAP_COMPLEX2
     case laBrownian: {
-      using brownian::level;
       fcol = wcol = 
         /*
         c->landparam == 0 ? 0x0000F0 : 
@@ -7528,7 +7527,7 @@ EX void drawmovestar(double dx, double dy) {
 
 // old style joystick control
 
-bool dronemode;
+EX bool dronemode;
 
 purehookset hooks_calcparam;
 

@@ -11,6 +11,7 @@ namespace hr {
 EX namespace binary {
 #if CAP_BT
 
+  #if HDR
   enum bindir {
     bd_right = 0,
     bd_up_right = 1,
@@ -21,6 +22,7 @@ EX namespace binary {
     bd_down_left = 5, /* for cells of degree 7 */
     bd_down_right = 6 /* for cells of degree 7 */
     };
+  #endif
   
   EX int type_of(heptagon *h) {
     return h->c7->type;

@@ -1459,7 +1459,7 @@ void transform_euclid_to_crystal () {
   if(pmodel == mdPerspective) pmodel = mdDisk;
   }
 
-void add_crystal_transform(char c) {
+EX void add_crystal_transform(char c) {
   if(shmup::on) return;
   if(cryst && ginf[gCrystal].sides == 6) {
     dialog::addItem("convert Crystal to 3D", c);

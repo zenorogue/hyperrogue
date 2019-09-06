@@ -67,7 +67,7 @@ EX namespace arg {
   EX int pos;
 
   EX void lshift() { pos++; }
-  void unshift() { pos--; }
+  EX void unshift() { pos--; }
 
   EX void shift() {
     lshift(); if(pos >= isize(argument)) { printf("Missing parameter\n"); exit(1); }

@@ -52,11 +52,11 @@ EX int savecount;
 EX bool showoff = false;
 EX bool doCross = false;
 
-bool gamegen_failure;
+EX bool gamegen_failure;
 
 EX eLand top_land;
 
-bool verless(string v, string cmp) {
+EX bool verless(string v, string cmp) {
   if(isdigit(v[0]) && isdigit(v[1])) 
     v = "A" + v;
   if(isdigit(cmp[0]) && isdigit(cmp[1]))
@@ -70,9 +70,9 @@ bool do_use_special_land() {
     (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on || racing::on);
   }
 
-hookset<bool()> *hooks_welcome_message;
+EX hookset<bool()> *hooks_welcome_message;
 
-void welcomeMessage() {
+EX void welcomeMessage() {
   if(callhandlers(false, hooks_welcome_message)) return;
   else if(tactic::trailer) return;
 #if CAP_TOUR
@@ -137,7 +137,7 @@ int trailer_cash0 = 5;
 int trailer_cash1 = 15;
 bool trailer_safety = true;
 
-hookset<void()> *hooks_initgame;
+EX hookset<void()> *hooks_initgame;
 
 // initialize the game
 EX void initgame() {
@@ -386,20 +386,22 @@ EX void initgame() {
 bool havesave = true;
 
 #if CAP_SAVE
+
+#if HDR
 #define MAXBOX 500
 #define POSSCORE 371 // update this when new boxes are added!
-
 struct score {
   string ver;
   int box[MAXBOX];
   };
+#endif
 
-int savebox[MAXBOX], boxid;
-bool saving, loading, loadingHi;
+EX int savebox[MAXBOX], boxid;
+EX bool saving, loading, loadingHi;
 
-string boxname[MAXBOX];
-bool fakebox[MAXBOX];
-bool monsbox[MAXBOX];
+EX string boxname[MAXBOX];
+EX bool fakebox[MAXBOX];
+EX bool monsbox[MAXBOX];
 
 void applyBox(int& t) {
   if(saving) savebox[boxid++] = t;
@@ -477,7 +479,7 @@ void applyBoxM(eMonster m, bool f = false) {
   applyBox(kills[m]);
   }
 
-void applyBoxes() {
+EX void applyBoxes() {
   invorb.clear();
 
   eLand lostin = laNone;
@@ -811,7 +813,7 @@ void applyBoxes() {
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }
 
-void saveBox() {
+EX void saveBox() {
   boxid = 0; saving = true; applyBoxes(); saving = false;
   }
 
@@ -848,24 +850,29 @@ void loadBoxHigh() {
 
 // certify that saves and achievements were received
 // in an official version of HyperRogue
+
+EX namespace anticheat {
+  EX int certify(const string& s, int a, int b, int c, int d IS(0));
+EX }
+
 #if CAP_CERTIFY
 #include "private/certify.cpp"
-#else
+#endif
 
-namespace anticheat {
-  bool tampered;
+#if !CAP_CERTIFY
+EX namespace anticheat {
+  EX bool tampered;
   void save(FILE *f) {}
   bool load(FILE *f, score& sc, const string& ver) {return true; }
-  int certify(const string& s, int a, int b, int c, int d=0) { return d; }
+  int certify(const string& s, int a, int b, int c, int d) { return d; }
   int check(int cv, const string& ver, const string& s, int a, int b, int c, int d=0) { return cv==d; }
   void nextid(int& tid, const string& ver, int cert) { tid++; }
-  };
-
+EX }
 #endif
 
 long long saveposition = -1;
 
-void remove_emergency_save() {
+EX void remove_emergency_save() {
 #if !ISWINDOWS
   if(saveposition >= 0) { 
     if(truncate(scorefile, saveposition)) {}

@@ -1056,7 +1056,7 @@ archimedean_tiling edited;
 
 bool symbol_editing;
 
-void next_variation() {
+EX void next_variation() {
   set_variation(
     PURE ? eVariation::dual :
     DUAL ? eVariation::bitruncated : 

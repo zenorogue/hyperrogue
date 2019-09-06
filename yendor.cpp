@@ -166,9 +166,11 @@ EX namespace yendor {
   #endif
   
   EX vector<yendorinfo> yi;
-  
+
+#if HDR
 #define NOYENDOR 999999
-  int yii = NOYENDOR;
+#endif
+  EX int yii = NOYENDOR;
   
   EX int hardness() {
     if(peace::on) return 15; // just to generate monsters
@@ -607,7 +609,7 @@ EX namespace yendor {
     };
   vector<scoredata> scoreboard;
 
-  const char *chelp = 
+  EX const char *chelp = 
     "There are many possible solutions to the Yendor Quest. In the Yendor "
     "Challenge, you will try many of them!\n\n"    
     "Each challenge takes part in a specific land, and you have to use what "
@@ -640,7 +642,7 @@ EX namespace yendor {
     return 0;
     }
 
-  void showMenu() {
+  EX void showMenu() {
     set_priority_board(LB_YENDOR_CHALLENGE);
     int s = vid.fsize;
     vid.fsize = vid.fsize * 4/5;
@@ -874,7 +876,7 @@ EX namespace tactic {
     uploadScoreCode(4, LB_PURE_TACTICS_COOP);
     }
   
-  void showMenu() {
+  EX void showMenu() {
 
     int xc = modecode();
     
@@ -1307,7 +1309,7 @@ EX namespace peace {
       }
   EX }
   
-  void showMenu() {
+  EX void showMenu() {
     listLevels();
     dialog::init(XLAT(otherpuzzles ? "puzzles and exploration" : "memory game"), 0x40A040, 150, 100);
 

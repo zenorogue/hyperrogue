@@ -21,9 +21,9 @@ ld eyepos;
 
 hyperpoint shcenter;
 
-hyperpoint front_leg, rear_leg;
-transmatrix front_leg_move, rear_leg_move, front_leg_move_inverse, rear_leg_move_inverse;
-ld leg_length;
+EX hyperpoint front_leg, rear_leg;
+EX transmatrix front_leg_move, rear_leg_move, front_leg_move_inverse, rear_leg_move_inverse;
+EX ld leg_length;
 
 vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
   vector<hyperpoint> res;
@@ -43,7 +43,7 @@ hyperpoint get_center(const vector<hyperpoint>& vh) {
   return normalize_flat(h);
   }
 
-ld zc(ld z) { 
+EX ld zc(ld z) { 
   if(WDIM == 2 && GDIM == 3)
     return geom3::lev_to_factor(cgi.human_height * z);
   return cgi.human_height * (z - 0.5) * revZ;
@@ -787,7 +787,7 @@ void geometry_information::shift_last_straight(ld z) {
   for(int i=last->s; i<isize(hpc); i++) hpc[i] = zpush(z) * hpc[i];
   }
 
-void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
+EX void queueball(const transmatrix& V, ld rad, color_t col, eItem what) {
   if(what == itOrbSpeed) {
     transmatrix V1 = V * cspin(1, 2, M_PI/2);
     ld tt = ptick(100);

@@ -32,7 +32,7 @@ EX namespace reg3 {
     return int(x * 10 + 100000.5) - 100000;
     }
   
-  int bucketer(hyperpoint h) {
+  EX int bucketer(hyperpoint h) {
     return bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
     }
   

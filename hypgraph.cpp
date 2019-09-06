@@ -21,7 +21,7 @@ void ghcheck(hyperpoint &ret, const hyperpoint &H) {
     }
   }
 
-void camrotate(ld& hx, ld& hy) {
+EX void camrotate(ld& hx, ld& hy) {
   ld cam = vid.camera_angle * degree;
   GLfloat cc = cos(cam);
   GLfloat ss = sin(cam);
@@ -845,7 +845,7 @@ EX transmatrix mirrorif(const transmatrix& V, bool b) {
   }
 
 // -1 if away, 0 if not away
-int away(const transmatrix& V2) {
+EX int away(const transmatrix& V2) {
   return (intval(C0, V2 * xpush0(.1)) > intval(C0, tC0(V2))) ? -1 : 0;
   }
 
@@ -856,7 +856,7 @@ int away(const transmatrix& V2) {
   return lev_to_factor(fo1 + (fo2-fo1) * nom / den);
   } */
 
-double zgrad0(double l1, double l2, int nom, int den) {
+EX double zgrad0(double l1, double l2, int nom, int den) {
   using namespace geom3;
   return lev_to_factor(l1 + (l2-l1) * nom / den);
   }
@@ -883,7 +883,7 @@ ld to01(ld a0, ld a1, ld x) {
   return (x-a0) / (a1-a0);
   }
 
-ld spherity(const hyperpoint& h) {
+EX ld spherity(const hyperpoint& h) {
   if(!sphere) return 1;
   
   if(vid.alpha > 1) {
@@ -901,7 +901,7 @@ EX bool behindsphere(const transmatrix& V) {
   return behindsphere(tC0(V));
   }
 
-ld spherity(const transmatrix& V) {
+EX ld spherity(const transmatrix& V) {
   return spherity(tC0(V));
   }
 

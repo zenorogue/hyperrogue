@@ -42,7 +42,7 @@ vector<race_cellinfo> rti;
 EX vector<cell*> track;
 map<cell*, int> rti_id;
 
-int trophy[MAXPLAYER];
+EX int trophy[MAXPLAYER];
 
 EX string track_code = "OFFICIAL";
 
@@ -685,7 +685,7 @@ bool inrec = false;
 
 EX ld race_angle = 90;
 
-bool set_view() {
+EX bool set_view() {
 
   multi::cpid = subscreens::in ? subscreens::current_player : 0;
 
@@ -1066,20 +1066,20 @@ void race_projection() {
   
     dialog::addBoolItem_action(XLAT("guiding line"), guiding, 'g');
   
-    dialog::addItem(shmup::player_count_name(playercfg), 'n');
+    dialog::addItem(multi::player_count_name(playercfg), 'n');
     dialog::add_action([/*this*/] () { 
       playercfg = playercfg == 1 ? 2 : 1;
       });
   
     dialog::addItem(XLAT("configure player 1"), '1');
     dialog::add_action([] () {
-      pushScreen(shmup::key_configurer(1, playercmds_race));
+      pushScreen(multi::get_key_configurer(1, playercmds_race));
       });
   
     if(playercfg >= 2) {
       dialog::addItem(XLAT("configure player 2"), '2');
       dialog::add_action([] () {
-        pushScreen(shmup::key_configurer(2, playercmds_race));
+        pushScreen(multi::get_key_configurer(2, playercmds_race));
         });
       }
     else dialog::addBreak(100);
@@ -1271,11 +1271,11 @@ transmatrix racerel(ld rel) {
   return atscreenpos(bsize, vid.yres - bsize - rel * (vid.yres - bsize*2) / 100, bsize) * spin(M_PI/2);
   }
 
-int get_percentage(cell *c) {
+EX int get_percentage(cell *c) {
   return min(get_info(c).completion * 100 / (isize(track) - DROP), 100);
   }
   
-int get_percentage(int i) {
+EX int get_percentage(int i) {
   return get_percentage(shmup::pc[i]->base);
   }
   
@@ -1286,7 +1286,7 @@ void draw_ghost_state(ghost& ghost) {
   draw_ghost_at(ghost, w, racerel(result), p);
   }
 
-void drawStats() {
+EX void drawStats() {
 
   if(!racing::on) return;
   
@@ -1314,7 +1314,7 @@ void drawStats() {
   quickqueue();
   }
 
-void markers() {
+EX void markers() {
   if(!racing::on) return;
   if(guiding && WDIM == 2) for(int i=0; i<multi::players; i++) {
     shmup::monster *m = shmup::pc[i];

@@ -22,15 +22,18 @@ EX namespace mapeditor {
   eFront front_config;
   ld front_step = 0.1;
 
+  #if HDR
   struct editwhat {
     double dist;
     int rotid, symid, pointid;
     bool side;
     cell *c;
-    } ew, ewsearch;
-  bool autochoose = ISMOBILE;
+    };
+  #endif
+  EX editwhat ew, ewsearch;
+  EX bool autochoose = ISMOBILE;
   
-  void scaleall(ld z) { 
+  EX void scaleall(ld z) { 
      
      // (mx,my) = (xcb,ycb) + ss * (xpos,ypos) + (mrx,mry) * scale
      
@@ -1094,7 +1097,7 @@ namespace mapeditor {
   // fake key sent to change the color
   static const int COLORKEY = (-10000); 
 
-  transmatrix drawtrans, drawtransnew;
+  EX transmatrix drawtrans, drawtransnew;
 
   #if CAP_POLY
   void loadShape(int sg, int id, hpcshape& sh, int d, int layer) {
@@ -1106,7 +1109,7 @@ namespace mapeditor {
     }
   #endif
 
-  void drawGhosts(cell *c, const transmatrix& V, int ct) {
+  EX void drawGhosts(cell *c, const transmatrix& V, int ct) {
     }
 
   hyperpoint ccenter = C0;
@@ -1158,7 +1161,7 @@ namespace mapeditor {
   int parallels = 12, meridians = 6;
   ld equi_range = 1;
     
-  void drawGrid() {
+  EX void drawGrid() {
     color_t lightgrid = gridcolor;
     lightgrid -= (lightgrid & 0xFF) / 2;
     transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
@@ -2102,7 +2105,7 @@ namespace mapeditor {
 #endif
 
 #if CAP_POLY
-  bool haveUserShape(eShapegroup group, int id) {
+  EX bool haveUserShape(eShapegroup group, int id) {
   #if !CAP_EDIT
     return false;
   #else
@@ -2112,7 +2115,7 @@ namespace mapeditor {
 #endif
   
 #if CAP_TEXTURE      
-  void draw_texture_ghosts(cell *c, const transmatrix& V) {
+  EX void draw_texture_ghosts(cell *c, const transmatrix& V) {
     if(!c) return;
     if(holdmouse && !lstartcell) return;
     cell *ls = lstartcell ? lstartcell : lmouseover;     

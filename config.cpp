@@ -111,7 +111,7 @@ template<> struct saver<ld> : dsaver<ld> {
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
 
-const char *conffile = "hyperrogue.ini";
+EX const char *conffile = "hyperrogue.ini";
 
 EX array<ld, gGUARD> sightranges;
 
@@ -141,7 +141,7 @@ struct charstyle_old {
   bool lefthanded;
   };
 
-void hread(hstream& hs, charstyle& cs) {
+EX void hread(hstream& hs, charstyle& cs) {
   // before 0xA61A there was no eyecolor
   if(hs.get_vernum() < 0xA61A) {
     charstyle_old cso;
@@ -159,7 +159,7 @@ void hread(hstream& hs, charstyle& cs) {
   else hread_raw(hs, cs);
   }
 
-void hwrite(hstream& hs, const charstyle& cs) {
+EX void hwrite(hstream& hs, const charstyle& cs) {
   hwrite_raw(hs, cs);
   }
 
@@ -198,7 +198,7 @@ EX int lang() {
   return default_language;
   }
 
-bool autojoy = true;
+EX bool autojoy = true;
 
 #if CAP_CONFIG
 saverlist savers;
@@ -214,7 +214,7 @@ template<class T, class U> void addsaverenum(T& i, U name) {}
 template<class T, class U> void addsaverenum(T& i, U name, T dft) {}
 #endif
 
-void addsaver(charstyle& cs, string s) {
+EX void addsaver(charstyle& cs, string s) {
   addsaver(cs.charid, s + ".charid");
   addsaver(cs.skincolor, s + ".skincolor");
   addsaver(cs.eyecolor, s + ".eyecolor");

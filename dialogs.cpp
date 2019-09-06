@@ -111,7 +111,8 @@ EX namespace dialog {
     if(ev.type == SDL_MOUSEBUTTONDOWN) initzoom();
     if(ev.type == SDL_MOUSEBUTTONUP && zoomf > 1) stopzoom();
     }
-#else
+#endif
+#if !(CAP_MENUSCALING && CAP_SDL)
   EX void handleZooming(SDL_Event &ev) {}
 #endif
   
@@ -341,7 +342,7 @@ EX namespace dialog {
 
   EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex;
   
-  string highlight_text;
+  EX string highlight_text;
   
   EX void measure() {
     tothei = 0;

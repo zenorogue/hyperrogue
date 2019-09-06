@@ -87,7 +87,7 @@ bool clockwise(hyperpoint h1, hyperpoint h2) {
   return h1[0] * h2[1] > h1[1] * h2[0];
   }
 
-map<heptagon*, vector<int> > cells_of_heptagon;
+EX map<heptagon*, vector<int> > cells_of_heptagon;
 
 int runlevel;
 vector<ld> edgelens, distlens;

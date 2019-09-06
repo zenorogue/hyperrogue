@@ -15,8 +15,6 @@ static constexpr ld NEWSHAPE = (-13.5);
 #endif
 static constexpr ld WOLF = (-15.5);
 
-EX long double polydata[];
-
 void geometry_information::hpcpush(hyperpoint h) {
   if(sphere) h = mid(h,h);
   ld threshold = (GDIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
@@ -1529,7 +1527,7 @@ void geometry_information::prepare_shapes() {
   initPolyForGL();
   }
 
-long double polydata[] = {
+EX vector<long double> polydata = {
 // shStarFloor[0] (6x1)
 NEWSHAPE,   1,6,1, 0.267355,0.153145, 0.158858,0.062321, 0.357493,-0.060252,
 // shStarFloor[1] (7x1)

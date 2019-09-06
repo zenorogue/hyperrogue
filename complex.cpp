@@ -53,7 +53,7 @@ EX namespace whirlwind {
     }
   
   cell *where;
-  int dfrom[2], dto[2];
+  EX int dfrom[2], dto[2];
   EX int qdirs;
   
   int gdist(int d, int e) { return dirdiff(d-e, where->type); }
@@ -963,7 +963,7 @@ EX namespace whirlpool {
 
   // next == +1 -> next
   // next == -1 -> prev
-  cell *get(cell *c, int next) {
+  EX cell *get(cell *c, int next) {
     int i = 0;
     if(!eubinary && !c->master->alt) return NULL;
     int d = celldistAlt(c);
@@ -1319,7 +1319,7 @@ EX namespace mirror {
       }
     }
 
-  void createHere(cellwalker cw, int cpid) {
+  EX void createHere(cellwalker cw, int cpid) {
     if(!cw.at) return;
     if(cw.at->wall == waCloud)
       createMirages(cw, cpid);
@@ -1327,7 +1327,7 @@ EX namespace mirror {
       createMirrors(cw, cpid);
     }
   
-  void breakMirror(cellwalker cw, int pid) {
+  EX void breakMirror(cellwalker cw, int pid) {
     if(!cw.at) return;
     cell *c = cw.at;
     if(c->wall == waMirror || c->wall == waCloud) {
@@ -1434,7 +1434,7 @@ EX namespace mirror {
     list();
     }
   
-  int mirrordir(cell *c) {
+  EX int mirrordir(cell *c) {
     if(c->type == 7) return c->bardir;
 
    int icount = 0, isum = 0;
@@ -1621,7 +1621,7 @@ EX namespace hive {
   vector<cell*> deadbug;
   vector<cell*> bugcellq;
   
-  int bugcount[BUGCOLORS];
+  EX int bugcount[BUGCOLORS];
   
   bool isBugEnemy(cell *c, int k) {
     if(isPlayerOn(c) && !invismove) return true;
@@ -2438,7 +2438,7 @@ EX namespace tortoise {
     return bi;
     }
   
-  int getBit(int bits, int id) { return (bits >> id) & 1; }
+  EX int getBit(int bits, int id) { return (bits >> id) & 1; }
 
   EX int getRandomBits() { return hrand(1 << numbits); }
   
@@ -2455,7 +2455,7 @@ EX namespace tortoise {
     else val = target;
     }
   
-  void updateVals(int delta) {
+  EX void updateVals(int delta) {
     int currbits = getBits(cwt.at);
     for(int i=0; i<numbits; i++)
       update(seekval[i], seek() && !(peace::on && !peace::hint) ? getBit(seekbits, i) : .5, delta);
@@ -2463,7 +2463,7 @@ EX namespace tortoise {
       update(currval[i], getBit(currbits, i), delta);
     }
   
-  double getScent(int bits) {
+  EX double getScent(int bits) {
     double res = 0;
     for(int i=0; i<numbits; i++)
       /* if(getBit(bits, i) != getBit(getBits(cwt.at), i))
@@ -2540,7 +2540,7 @@ EX namespace dragon {
       }
     }
   
-  int bodypart(cell *c, cell *head) {
+  EX int bodypart(cell *c, cell *head) {
     int i = 0, j = 0;
     int maxlen = 1000;
     while(maxlen-->0) {
@@ -2685,7 +2685,7 @@ EX namespace sword {
     
   #endif
 
-  int sword_angles;
+  EX int sword_angles;
   
   EX array<sworddir, MAXPLAYER> dir;
 
@@ -2706,7 +2706,7 @@ EX namespace sword {
       }
     }
   
-  cell *pos2(cell *c, int s) {
+  EX cell *pos2(cell *c, int s) {
     int t = c->type;
     if(hybri) t -= 2;
     s *= 2;
@@ -3081,7 +3081,7 @@ EX namespace prairie {
     return 15^c->LHU.fi.rval;
     }
   
-  cell *next(cell *c, int pv=1) {
+  EX cell *next(cell *c, int pv IS(1)) {
     for(int i=0; i<c->type; i++) {
       cell *c1 = createMov(c, i);
       cell *c2 = createMov(c, (i+pv+c->type)%c->type);
@@ -3384,7 +3384,7 @@ EX namespace windmap {
     return id-1;
     }
   
-  vector<unsigned char> windcodes;
+  EX vector<unsigned char> windcodes;
 
   void wcheck(cell *a, cell *b) {
     int i = getId(a);

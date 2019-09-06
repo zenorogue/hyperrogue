@@ -29,7 +29,7 @@ EX void glError(const char* GLcall, const char* file, const int line) {
 #endif
 
 #if CAP_SHADER && CAP_NOSHADER
-#define WITHSHADER(x, y) if(noshaders) y else x
+#define WITHSHADER(x, y) if(glhr::noshaders) y else x
 #else
 #if CAP_NOSHADER
 #define WITHSHADER(x, y) if(1) y
@@ -498,7 +498,7 @@ EX void color2(color_t color, ld scale IS(1)) {
     )
   }
 
-void colorClear(color_t color) {
+EX void colorClear(color_t color) {
   glClearColor(part(color, 3) / 255.0, part(color, 2) / 255.0, part(color, 1) / 255.0, part(color, 0) / 255.0);
 }
 
@@ -1022,14 +1022,14 @@ EX vector<glhr::textured_vertex> text_vertices;
 
 EX void texture_vertices(GLfloat *f, int qty, int stride IS(2)) {
   WITHSHADER(
-    glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
+    glVertexAttribPointer(glhr::aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
     glTexCoordPointer(stride, GL_FLOAT, 0, f);
     )
   } 
 
 EX void oldvertices(GLfloat *f, int qty) {
   WITHSHADER(
-   glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
+   glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
    glVertexPointer(SHDIM, GL_FLOAT, 0, f);
    )
   }

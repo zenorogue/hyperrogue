@@ -12,7 +12,7 @@ EX namespace tour {
 
 EX bool on;
 
-bool texts = true;
+EX bool texts = true;
 
 EX string tourhelp;
 

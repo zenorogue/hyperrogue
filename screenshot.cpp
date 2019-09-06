@@ -39,7 +39,7 @@ EX namespace svg {
     }
   
   int svgsize;
-  int divby = 10;
+  EX int divby = 10;
   
   const char* coord(int val) {
     static char buf[10][20];
@@ -586,7 +586,7 @@ bool needs_highqual;
 
 bool joukowsky_anim;
 
-void reflect_view() {
+EX void reflect_view() {
   if(centerover.at) {
     transmatrix T = Id;
     cell *mbase = centerover.at;

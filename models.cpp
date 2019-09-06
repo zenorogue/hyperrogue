@@ -104,7 +104,7 @@ EX namespace polygonal {
     return make_pair(real(res), imag(res));
     }
 
-  pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
+  EX pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
   EX }
 
 #if HDR
@@ -152,13 +152,13 @@ EX namespace models {
   int spiral_id = 7;
   EX bool use_atan = false;
   
-  cld spiral_multiplier;
-  ld right_spiral_multiplier = 1;
-  ld any_spiral_multiplier = 1;
-  ld sphere_spiral_multiplier = 2;
+  EX cld spiral_multiplier;
+  EX ld right_spiral_multiplier = 1;
+  EX ld any_spiral_multiplier = 1;
+  EX ld sphere_spiral_multiplier = 2;
   EX ld spiral_cone = 360;
-  ld spiral_cone_rad;
-  bool ring_not_spiral;
+  EX ld spiral_cone_rad;
+  EX bool ring_not_spiral;
 
   EX void configure() {
     ld ball = -vid.ballangle * degree;

@@ -224,7 +224,7 @@ string princedesc() {
     return XLAT("Apparently a princess is kept locked somewhere, but you won't ever find her in this hyperbolic palace. ");
   }
 
-string helptitle(string s, color_t col) {
+EX string helptitle(string s, color_t col) {
   return "@" + its(col) + "\t" + s + "\n";
   }
 
@@ -482,7 +482,7 @@ void addMinefieldExplanation(string& s) {
 #endif
   }
 
-string generateHelpForWall(eWall w) {
+EX string generateHelpForWall(eWall w) {
 
   string s = helptitle(XLATN(winf[w].name), winf[w].color);
    
@@ -502,7 +502,7 @@ void buteol(string& s, int current, int req) {
   s += buf; s += "\n";
   }
 
-string generateHelpForMonster(eMonster m) {
+EX string generateHelpForMonster(eMonster m) {
   string s = helptitle(XLATN(minf[m].name), minf[m].color);
   
   if(m == moPlayer) {
@@ -705,7 +705,7 @@ string generateHelpForLand(eLand l) {
   return s;
   }
 
-bool instat;
+EX bool instat;
 
 string turnstring(int i) {
   if(i == 1) return XLAT("1 turn");
@@ -713,7 +713,7 @@ string turnstring(int i) {
   }
 
 reaction_t helpgenerator;
-string bygen(reaction_t h) {
+EX string bygen(reaction_t h) {
   helpgenerator = h;
   return "HELPGEN";
   }
@@ -732,7 +732,7 @@ void gotoHelpFor(eMonster m) {
   help = generateHelpForMonster(m);
   };
 
-void appendHelp(string s) {
+EX void appendHelp(string s) {
   auto h = helpgenerator;
   if(help == "HELPGEN") 
     bygen([h,s] { h(); help += s; });
@@ -954,7 +954,7 @@ EX void showHelp() {
     };
   }
 
-hookset<bool()> *hooks_default_help;
+EX hookset<bool()> *hooks_default_help;
 
 EX void gotoHelp(const string& h) {
   help = h;

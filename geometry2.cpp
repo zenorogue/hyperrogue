@@ -10,14 +10,14 @@ namespace hr {
 
 transmatrix &ggmatrix(cell *c);
 
-void fixelliptic(transmatrix& at) {
+EX void fixelliptic(transmatrix& at) {
   if(elliptic && at[LDIM][LDIM] < 0) {
     for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
       at[i][j] = -at[i][j];
     }
   }
 
-void fixelliptic(hyperpoint& h) {
+EX void fixelliptic(hyperpoint& h) {
   if(elliptic && h[LDIM] < 0)
     for(int i=0; i<MDIM; i++) h[i] = -h[i];
   }

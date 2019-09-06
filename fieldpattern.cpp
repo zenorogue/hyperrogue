@@ -28,9 +28,6 @@ struct fgeomextra {
   };
 #endif
 
-extern int subpathid;
-extern int subpathorder;
-
 bool isprime(int n) {
   for(int k=2; k<n; k++) if(n%k == 0) return false;
   return true;
@@ -733,7 +730,7 @@ void fpattern::findsubpath() {
 
 fpattern fp43(43);
 
-void info() {
+EX void info() {
   fpattern fp(0);
   int cases = 0, hard = 0;
   for(int p=0; p<500; p++) {
@@ -798,6 +795,10 @@ EX struct fpattern& getcurrfp() {
   return fp_invalid;
   }
 
+// todo undefined behavior
+EX int subpathid = currfp.matcode[currfp.strtomatrix("RRRPRRRRRPRRRP")];
+EX int subpathorder = currfp.order(currfp.matrices[subpathid]);
+
 // extra information for field quotient extra configuration
 
 EX vector<fgeomextra> fgeomextras = {
@@ -815,7 +816,7 @@ EX vector<fgeomextra> fgeomextras = {
 
 EX int current_extra = 0;
 
-void nextPrime(fgeomextra& ex) {
+EX void nextPrime(fgeomextra& ex) {
   dynamicval<eGeometry> g(geometry, ex.base);
   int nextprime;
   if(isize(ex.primes))
@@ -835,7 +836,7 @@ void nextPrime(fgeomextra& ex) {
     }
   }
 
-void nextPrimes(fgeomextra& ex) {
+EX void nextPrimes(fgeomextra& ex) {
   while(isize(ex.primes) < 4) 
     nextPrime(ex);
   }

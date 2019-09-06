@@ -785,7 +785,7 @@ EX namespace product {
 
   EX int cwall_offset, cwall_mask, actual_view_level;
   
-  void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
+  EX void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere;
     hybrid::in_actual([&] { 

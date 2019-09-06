@@ -39,7 +39,8 @@ EX namespace quotientspace {
     return res;
     }
   
-  int rvadd = 0, rvdir = 1;
+  EX int rvadd = 0;
+  EX int rvdir = 1;
   
   int rv(int x) { return (rvadd+x*rvdir) % S7; }
   

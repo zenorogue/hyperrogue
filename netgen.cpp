@@ -7,7 +7,9 @@
 
 #include "hyper.h"
 #if CAP_MODEL
-namespace hr { namespace netgen {
+namespace hr { 
+
+EX namespace netgen {
 
   // We need a two-dimensional vector class for this.
   
@@ -70,9 +72,9 @@ namespace hr { namespace netgen {
   
   // Use HyperRogue to generate the data (ct, vx, nei).
 
-  int mode = 0;
+  EX int mode = 0;
   
-  void buildVertexInfo(cell *c, transmatrix V) {
+  EX void buildVertexInfo(cell *c, transmatrix V) {
     
     if(mode == 1)
     for(int ii=0; ii<CELLS; ii++) if(dcal[ii] == c) {
@@ -699,7 +701,7 @@ namespace hr { namespace netgen {
       };
     }
 
-  void run() { 
+  EX void run() { 
     if(euclid) 
       addMessage("Useless in Euclidean geometry.");
     else if(sphere)
@@ -707,5 +709,7 @@ namespace hr { namespace netgen {
     else
       pushScreen(show);
     }
-  }}
+EX }
+
+}
 #endif

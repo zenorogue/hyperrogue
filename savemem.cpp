@@ -183,7 +183,7 @@ EX void set_if_removed(cell*& c, cell *val) {
 
 typedef array<char, 1048576> reserve_block;
 
-int reserve_count = 0;
+EX int reserve_count = 0;
 EX int reserve_limit = 128;
 
 const int max_reserve = 4096;
@@ -226,7 +226,7 @@ EX void apply_memory_reserve() {
 #endif
   }
 
-void memory_for_lib() {
+EX void memory_for_lib() {
   if(reserve_count) { reserve_count--; delete reserve[reserve_count]; }
   }
 
@@ -284,7 +284,7 @@ EX void show_memory_menu() {
   dialog::display();
   }
 
-bool protect_memory() {
+EX bool protect_memory() {
   if(!CAP_MEMORY_RESERVE) return false;
   apply_memory_reserve();
   if(reserve_limit && reserve_count < reserve_limit && !ignored_memory_warning) {
@@ -298,7 +298,7 @@ bool protect_memory() {
   return false;
   }
 
-bool memory_issues() {
+EX bool memory_issues() {
   return reserve_limit && reserve_count < 16;
   }
 

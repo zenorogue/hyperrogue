@@ -347,7 +347,7 @@ EX namespace history {
   void restoreBack();
 
 #if CAP_SDL
-  void createImage(bool dospiral) {
+  EX void createImage(bool dospiral) {
     int segid = 1;
     if(includeHistory) restore();
   
@@ -569,7 +569,7 @@ EX namespace history {
     else if(doexiton(sym, uni)) popScreen();
     }
   
-  set<cell*> inmovehistory, inkillhistory, infindhistory;
+  EX set<cell*> inmovehistory, inkillhistory, infindhistory;
   
   EX void restore() {
     inmovehistory.clear();

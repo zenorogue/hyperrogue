@@ -745,21 +745,21 @@ EX namespace gp {
 
 qfloorinfo qfi;
 
-void set_no_floor() {
+EX void set_no_floor() {
   qfi.fshape = NULL;
   qfi.shape = NULL;
   qfi.tinf = NULL;
   qfi.usershape = -1;
   }
 
-void set_floor(floorshape& sh) {
+EX void set_floor(floorshape& sh) {
   qfi.fshape = &sh;
   qfi.shape = NULL;
   qfi.tinf = NULL;
   qfi.usershape = -1;
   }
 
-void set_floor(hpcshape& sh) {
+EX void set_floor(hpcshape& sh) {
   qfi.shape = &sh;
   qfi.fshape = NULL;
   qfi.spin = Id;
@@ -767,7 +767,7 @@ void set_floor(hpcshape& sh) {
   qfi.usershape = -1;
   }
 
-void set_floor(const transmatrix& spin, hpcshape& sh) {
+EX void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.shape = &sh;
   qfi.fshape = NULL;
   qfi.spin = spin;
@@ -801,7 +801,7 @@ EX int shvid(cell *c) {
     return ctof(c);
   }
 
-dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio = PPR::DEFAULT) {
+EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio IS(PPR::DEFAULT)) {
   if(!c) return &queuepolyat(V, shv[0], col, prio);
   else if(WDIM == 3) return NULL;
   #if CAP_GP
@@ -837,7 +837,7 @@ dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &s
     return &queuepolyat(V, shv[shvid(c)], col, prio);
   }
 
-void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio = PPR::DEFAULT) {
+EX void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio IS(PPR::DEFAULT)) {
   draw_shapevec(c, V, fsh.b, col, prio);
   }
 
@@ -859,8 +859,8 @@ EX void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio IS(PPR::DE
   else draw_shapevec(c, V, (qfi.fshape->*tab), col, prio);
   }
 
-bool floorshape_debug;
-void viewmat() {
+EX bool floorshape_debug;
+EX void viewmat() {
   if(floorshape_debug) {
     transmatrix V = ggmatrix(cwt.at);
     

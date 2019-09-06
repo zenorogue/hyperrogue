@@ -112,7 +112,7 @@ EX namespace brownian {
     recurse(c, FAT);
     }
 
-  void init_further(cell *c) {
+  EX void init_further(cell *c) {
     if(!hyperbolic) return;
     int dl = getDistLimit();
     dynamicval<bool> be(generatingEquidistant, true);
@@ -177,7 +177,7 @@ EX namespace brownian {
 
   EX colortable colors = { 0x603000, 0x804000, 0xA05000, 0xC09050, 0xE0D0A0 };
 
-  color_t get_color(int y) {
+  EX color_t get_color(int y) {
      return
         y < level ? gradient(colors[0], colors[1], 1, y, level-1) :
         y < 2 * level ? colors[2] :
@@ -214,7 +214,7 @@ EX namespace westwall {
       placeLocalOrbs(c);
     }
 
-  int coastvalEdge1(cell *c) {
+  EX int coastvalEdge1(cell *c) {
     if(c->land == laWestWall && !c->landparam) buildEquidistant(c);
     return coastvalEdge(c);
     }

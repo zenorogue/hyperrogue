@@ -80,8 +80,8 @@ EX namespace torusconfig {
   #endif
 
   // new values to change
-  int newqty, newdy, newsdx, newsdy;
-  int torus_cx, torus_cy;
+  EX int newqty, newdy, newsdx, newsdy;
+  EX int torus_cx, torus_cy;
   
   EX vector<torusmode_info> tmodes = {
     {"single row (hex)", TF_SINGLE | TF_HEX},
@@ -98,10 +98,10 @@ EX namespace torusconfig {
     };
   
   EX eTorusMode torus_mode;
-  eTorusMode newmode;
+  EX eTorusMode newmode;
   EX flagtype tmflags() { return tmodes[torus_mode].flags; }
   
-  int getqty() {
+  EX int getqty() {
     if(tmflags() & TF_SINGLE)
       return qty;
     else
@@ -205,11 +205,11 @@ EX namespace torusconfig {
     return 2 * (e1.first * e2.first + e1.second*e2.second) + (S3 == 3 ? e1.first*e2.second + e2.first * e1.second : 0);
     }
     
-  int dcross(gp::loc e1, gp::loc e2) {
+  EX int dcross(gp::loc e1, gp::loc e2) {
     return e1.first * e2.second - e1.second*e2.first;
     }
     
-  gp::loc sdxy() { return gp::loc(sdx, sdy); }
+  EX gp::loc sdxy() { return gp::loc(sdx, sdy); }
   
   EX int mobius_dir_basic() {
     int dscalars[6];
@@ -223,7 +223,7 @@ EX namespace torusconfig {
     return -1;
     }
   
-  bool mobius_symmetric(bool square, int dx, int dy) {
+  EX bool mobius_symmetric(bool square, int dx, int dy) {
     dynamicval<eGeometry> g(geometry, square ? gEuclidSquare : gEuclid);
     dynamicval<int> gx(sdx, dx);
     dynamicval<int> gy(sdy, dy);
@@ -305,7 +305,7 @@ EX namespace torusconfig {
     }
   EX }
 
-int euclid_getvec(int dx, int dy) {
+EX int euclid_getvec(int dx, int dy) {
   if(euwrap) return torusconfig::getvec(dx, dy);
   else return pair_to_vec(dx, dy);
   }
@@ -474,7 +474,7 @@ struct hrmap_euclidean : hrmap_euclid_any {
     }
   };
 
-cellwalker vec_to_cellwalker(int vec) {
+EX cellwalker vec_to_cellwalker(int vec) {
   if(!fulltorus) {
     auto p = euclideanAtCreate(vec);
     if(p.second)
@@ -771,7 +771,7 @@ EX namespace euclid3 {
     return new hrmap_euclid3;
     }
 
-  transmatrix move_matrix(cell *c, int i) { 
+  EX transmatrix move_matrix(cell *c, int i) { 
     return cubemap()->get_move(c, i);
     }
   
@@ -1057,7 +1057,7 @@ EX namespace euclid3 {
     return canonical_seq[canonical_hash[cat]];
     }
 
-  void prepare_torus3() {
+  EX void prepare_torus3() {
     T_edit = T0;
     twisted_edit = twisted0;
     }

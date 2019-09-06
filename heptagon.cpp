@@ -24,7 +24,7 @@ cell *newCell(int type, heptagon *master);
  *  and sometimes in direction 5
  */
 
-hstate transition(hstate s, int dir) {
+EX hstate transition(hstate s, int dir) {
   if(sphere) {
     if(S7 == 4) {
       if(s == hsOrigin) return dir == 0 ? hsB0 : hsB1;

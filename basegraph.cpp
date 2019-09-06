@@ -107,7 +107,7 @@ bool eqs(const char* x, const char* y) {
   return *y? *x==*y?eqs(x+1,y+1):false:true;
   }
 
-int getnext(const char* s, int& i) {
+EX int getnext(const char* s, int& i) {
 
   int siz = utfsize(s[i]);
 // if(fontdeb) printf("s=%s i=%d siz=%d\n", s, i, siz);
@@ -128,7 +128,7 @@ TTF_Font *font[256];
 EX SDL_Surface *s;
 EX SDL_Surface *s_screen;
 
-color_t qpixel_pixel_outside;
+EX color_t qpixel_pixel_outside;
 
 EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
   if(x<0 || y<0 || x >= surf->w || y >= surf->h) return qpixel_pixel_outside;
@@ -142,7 +142,7 @@ EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
 
 #if CAP_SDLTTF
 
-string fontpath = ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf";
+EX string fontpath = ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf";
 
 void loadfont(int siz) {
   if(!font[siz]) {
@@ -245,7 +245,7 @@ EX void start_projection(int ed, bool perspective) {
   glhr::projection_multiply(glhr::translate(tx, -ty, 0));
   }
 
-void eyewidth_translate(int ed) {
+EX void eyewidth_translate(int ed) {
   if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
@@ -1000,9 +1000,9 @@ struct msginfo {
   };
 #endif
 
-vector<msginfo> msgs;
+EX vector<msginfo> msgs;
 
-vector<msginfo> gamelog;
+EX vector<msginfo> gamelog;
 
 EX void flashMessages() {
   for(int i=0; i<isize(msgs); i++) 
@@ -1012,7 +1012,7 @@ EX void flashMessages() {
       }
   }
 
-string fullmsg(msginfo& m) {
+EX string fullmsg(msginfo& m) {
   string s = m.msg;
   if(m.quantity > 1) s += " (x" + its(m.quantity) + ")";
   return s;
@@ -1443,8 +1443,8 @@ EX int calcfps() {
 
 EX namespace subscreens {
 
-  vector<display_data> player_displays;
-  bool in;
+  EX vector<display_data> player_displays;
+  EX bool in;
   EX int current_player;
   
   EX bool is_current_player(int id) {

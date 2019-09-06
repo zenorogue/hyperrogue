@@ -648,7 +648,7 @@ EX namespace geom3 {
     if(GDIM == 3) return vid.depth - lev;
     return projection_to_factor(lev_to_projection(lev)); 
     }
-  ld factor_to_lev(ld fac) { 
+  EX ld factor_to_lev(ld fac) { 
     if(prod) return -fac;
     if(GDIM == 3) return fac;
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
@@ -666,7 +666,7 @@ EX namespace geom3 {
     }
   
   // how should we scale at level lev
-  ld scale_at_lev(ld lev) { 
+  EX ld scale_at_lev(ld lev) { 
     if(sphere || euclid) return 1;
     return cosh(vid.depth - lev); 
     }

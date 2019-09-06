@@ -55,10 +55,10 @@ EX namespace multi {
         }
     }
   
-  transmatrix whereis[MAXPLAYER];
-  transmatrix crosscenter[MAXPLAYER];
-  double ccdist[MAXPLAYER];
-  cell *ccat[MAXPLAYER];
+  EX transmatrix whereis[MAXPLAYER];
+  EX transmatrix crosscenter[MAXPLAYER];
+  EX double ccdist[MAXPLAYER];
+  EX cell *ccat[MAXPLAYER];
   
   bool combo[MAXPLAYER];
 
@@ -67,7 +67,7 @@ EX namespace multi {
   
   EX movedir whereto[MAXPLAYER]; // player's target cell  
 
-  double mdx[MAXPLAYER], mdy[MAXPLAYER]; // movement vector for the next move
+  EX double mdx[MAXPLAYER], mdy[MAXPLAYER]; // movement vector for the next move
   
   static const int CMDS = 15;
   static const int CMDS_PAN = 11;
@@ -109,9 +109,11 @@ EX namespace multi {
     "scroll forward", "scroll backward"
     };
 
+#if HDR
 #define SHMUPAXES_BASE 4
 #define SHMUPAXES ((SHMUPAXES_BASE) + 4 * (MAXPLAYER))
 #define SHMUPAXES_CUR ((SHMUPAXES_BASE) + 4 * playercfg)
+#endif
 
 const char* axemodes[SHMUPAXES] = {
   "do nothing", 
@@ -155,7 +157,7 @@ const char* axemodes3[4] = {
   "camera rotate Y"
   };
 
-int centerplayer = -1;
+EX int centerplayer = -1;
 
 char* axeconfigs[24]; int numaxeconfigs;
 int* dzconfigs[24];
@@ -195,7 +197,7 @@ string dsc(int id) {
   return buf;
   }
 
-void resetScores() {
+EX void resetScores() {
   for(int i=0; i<MAXPLAYER; i++)
     multi::treasures[i] = multi::kills[i] = multi::deaths[i] = 0;
   }
@@ -204,7 +206,7 @@ bool configdead;
 
 void handleConfig(int sym, int uni);
 
-string player_count_name(int p) {
+EX string player_count_name(int p) {
   return XLAT(
     p == 2 ? "two players" : 
     p == 3 ? "three players" : 
@@ -299,6 +301,8 @@ struct key_configurer {
 #endif
     }
   };
+
+EX reaction_t get_key_configurer(int sc, vector<string>& sct) { return key_configurer(sc, sct); }
 
 #if CAP_SDLJOY
 struct joy_configurer {
@@ -510,6 +514,7 @@ EX void showConfigureMultiplayer() {
   dialog::display();
   }
 
+#if HDR
 #define NUMACT 128
 
 enum pcmds {
@@ -518,15 +523,16 @@ enum pcmds {
   pcFire, pcFace, pcFaceFire,
   pcDrop, pcCenter, pcOrbPower, pcOrbKey
   };
+#endif
   
-int actionspressed[NUMACT], axespressed[SHMUPAXES], lactionpressed[NUMACT];
+EX int actionspressed[NUMACT], axespressed[SHMUPAXES], lactionpressed[NUMACT];
 
 void pressaction(int id) {
   if(id >= 0 && id < NUMACT)
     actionspressed[id]++;
   }
 
-bool notremapped(int sym) {
+EX bool notremapped(int sym) {
   int k = scfg.keyaction[sym];
   if(k == 0) return true;
   k /= 16;
@@ -652,7 +658,7 @@ EX void initConfig() {
   for(int i=0; i<7; i++) addsaver(multi::scs[i], "player"+its(i));
   }
 
-void handleInput(int delta) {
+EX void handleInput(int delta) {
 #if CAP_SDL
   double d = delta / 500.;
 
@@ -750,7 +756,7 @@ void handleInput(int delta) {
 #endif
   }
 
-  int tableid[7] = {1, 2, 4, 5, 6, 7, 8};
+  EX int tableid[7] = {1, 2, 4, 5, 6, 7, 8};
 
   EX void leaveGame(int i) {
     multi::player[i].at = NULL;
@@ -795,7 +801,7 @@ void handleInput(int delta) {
 
   bool needinput = true;
   
-  void handleMulti(int delta) {
+  EX void handleMulti(int delta) {
     multi::handleInput(delta);
     
     transmatrix bcwtV = cwtV;
@@ -929,7 +935,7 @@ void handleInput(int delta) {
       }
     }
   
-  void mousemovement(cell *c) {
+  EX void mousemovement(cell *c) {
     if(!c) return;
     int countplayers = 0;
     int countplayers_undecided = 0;

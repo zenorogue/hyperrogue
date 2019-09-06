@@ -643,7 +643,7 @@ EX bool showHalloween() {
 
 int daily_mode;
 
-purehookset hooks_startmenu;
+EX purehookset hooks_startmenu;
 
 EX void showStartMenu() {
   if(!daily_mode) {
@@ -923,8 +923,8 @@ EX named_functionality get_o_key() {
   return named_dialog(XLAT("world overview"), showOverview);
   }
 
-int messagelogpos;
-int timeformat;
+EX int messagelogpos;
+EX int timeformat;
 EX int stampbase;
 
 EX string gettimestamp(msginfo& m) {

@@ -428,9 +428,6 @@ EX int fieldval_uniq_rand(cell *c, int randval) {
     }
   }
 
-int subpathid = currfp.matcode[currfp.strtomatrix("RRRPRRRRRPRRRP")];
-int subpathorder = currfp.order(currfp.matrices[subpathid]);
-
 pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = subpathorder) {
   if(!ctof(c)) {
     auto m = subval(createMov(c, 0));
@@ -642,7 +639,7 @@ EX namespace patterns {
       }
     }
   
-  int downdir(cell *c, const cellfunction& cf) {
+  EX int downdir(cell *c, const cellfunction& cf) {
     return parent_id(c, 1, cf) + 1;
     }
 
@@ -1781,7 +1778,7 @@ EX namespace patterns {
       };    
     }
   
-  void showPrePattern() { showPrePatternP(true); }
+  EX void showPrePattern() { showPrePatternP(true); }
   EX void showPrePatternNoninstant() { showPrePatternP(false); }
 
 
@@ -2180,7 +2177,7 @@ EX namespace patterns {
     }
   EX }
 
-bool is_master(cell *c) { 
+EX bool is_master(cell *c) { 
   if(euclid) return pseudohept(c);
   else return c->master->c7 == c;
   }
@@ -2269,7 +2266,7 @@ EX namespace linepatterns {
     {patParallels, "parallels", 0xFFFFFF00, 1},
     };
 
-  void clearAll() {
+  EX void clearAll() {
     for(auto& lp: patterns) lp.color &= ~255;
     }
 

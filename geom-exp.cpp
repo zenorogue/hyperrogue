@@ -281,7 +281,7 @@ void validity_info() {
     dialog::addBreak(100);
   }
 
-bool showquotients;
+EX bool showquotients;
 
 string validclasses[4] = {" (X)", " (½)", "", " (!)"};
   

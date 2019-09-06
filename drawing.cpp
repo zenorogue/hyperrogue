@@ -126,7 +126,7 @@ EX int shapes_merged;
 color_t triangle_color, line_color;
 vector<glvertex> triangle_vertices;
 vector<glvertex> line_vertices;
-void glapplymatrix(const transmatrix& V);
+EX void glapplymatrix(const transmatrix& V);
 #endif
 
 EX void glflush() {
@@ -475,7 +475,7 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
 
 #if CAP_GL
 
-void glapplymatrix(const transmatrix& V) {
+EX void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
   
@@ -1746,11 +1746,13 @@ EX void drawqueue() {
     }
   }
 
+#if HDR
 template<class T, class... U> T& queuea(PPR prio, U... u) {
   ptds.push_back(unique_ptr<T>(new T (u...)));
   ptds.back()->prio = prio;  
   return (T&) *ptds.back();
   }
+#endif
 
 #if CAP_SHAPES
 EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {

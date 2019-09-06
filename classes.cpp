@@ -425,7 +425,7 @@ monstertype minf[motypes] = {
   #include "content.cpp"
   };
 
-genderswitch_t genderswitch[NUM_GS] = {
+EX genderswitch_t genderswitch[NUM_GS] = {
   { GEN_F, moFalsePrincess, "False Princess", 
      "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!"},
   { GEN_M, moFalsePrincess, "False Prince",   

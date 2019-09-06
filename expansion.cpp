@@ -624,7 +624,9 @@ EX namespace ts {
   EX }
 
 EX bool viewdists = false;
-bool use_color_codes = true, use_analyzer = true, show_distance_lists = true;
+EX bool use_color_codes = true;
+EX bool use_analyzer = true;
+EX bool show_distance_lists = true;
 
 int first_distance = 0, scrolltime = 0;
 bool scrolling_distances = false;
@@ -638,7 +640,7 @@ color_t distribute_color(int id) {
   return v; 
   }
 
-void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
+EX void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
   if(behindsphere(V)) return;
 
   int cd = (use_color_codes || number_coding == ncDistance || number_coding == ncDebug) ? curr_dist(c) : 0;
@@ -680,7 +682,7 @@ void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
     queuestr(V, (isize(label) > 1 ? .6 : 1), label, 0xFF000000 + dc, 1);
   }
 
-void viewdist_configure_dialog() {
+EX void viewdist_configure_dialog() {
   dialog::init("");
   cmode |= sm::SIDE | sm::MAYDARK | sm::EXPANSION;
   gamescreen(0);
@@ -832,7 +834,7 @@ void expansion_analyzer::view_distances_dialog() {
   dialog::display();
   }
 
-void enable_viewdists() {
+EX void enable_viewdists() {
   first_distance = 0;
   scrolltime = 0;
   viewdists = true;

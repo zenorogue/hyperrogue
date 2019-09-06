@@ -8,8 +8,8 @@
 #include "hyper.h"
 namespace hr {
 
-int frames;
-bool outoffocus = false;
+EX int frames;
+EX bool outoffocus = false;
 
 EX int mousex, mousey;
 EX hyperpoint mouseh, mouseoh;
@@ -40,7 +40,7 @@ EX bool mousepressed = false;
 EX bool mousemoved = false;
 EX bool actonrelease = false;
 
-bool mousepan, oldmousepan;
+EX bool mousepan, oldmousepan;
 #if CAP_MOUSEGRAB
 EX ld mouseaim_x, mouseaim_y;
 #endif
@@ -57,9 +57,9 @@ EX movedir mousedest;
 EX ld shiftmul = 1;
 
 EX cell *mouseover, *mouseover2, *lmouseover;
-ld modist, modist2, centdist;
+EX ld modist, modist2, centdist;
 
-int lastt;
+EX int lastt;
 
 EX bool mouseout() {
   if((getcstat != '-' && getcstat) || (lgetcstat && lgetcstat != '-')) return true;
@@ -1093,7 +1093,7 @@ EX bool handleCompass() {
 // orientation sensitivity
 EX namespace ors {
 
-int mode;
+EX int mode;
 double sensitivity = 1;
 
 int when_enabled;
@@ -1204,11 +1204,11 @@ transmatrix change_geometry(const transmatrix& T) {
   return U;
   }
 
-void unrotate(transmatrix& T) {
+EX void unrotate(transmatrix& T) {
   if(mode == 1) T = inverse(relative_matrix) * T;
   }
 
-void rerotate(transmatrix& T) {
+EX void rerotate(transmatrix& T) {
   if(mode == 1) T = (relative_matrix) * T;
   }
 

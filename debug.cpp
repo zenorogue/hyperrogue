@@ -26,7 +26,7 @@ void limitgen(T... args) {
   }
 #endif
 
-cell *pathTowards(cell *pf, cell *pt) {
+EX cell *pathTowards(cell *pf, cell *pt) {
 
   while(celldist(pt) > celldist(pf)) {
     if(isNeighbor(pf, pt)) return pt;
@@ -42,7 +42,7 @@ cell *pathTowards(cell *pf, cell *pt) {
 
 bool errorReported = false;
 
-void describeCell(cell *c) {
+EX void describeCell(cell *c) {
   if(!c) { printf("NULL\n"); return; }
   printf("describe %p: ", c);
   printf("%-15s", linf[c->land].name);
@@ -93,14 +93,14 @@ eItem randomTreasure2(int cv) {
 
 EX eLand cheatdest;
 
-void cheatMoveTo(eLand l) {
+EX void cheatMoveTo(eLand l) {
   cheatdest = l;
   if(l == laCrossroads5) l = laCrossroads;
   activateSafety(l);
   cheatdest = laNone;
   }
 
-bool applyCheat(char u, cell *c = NULL) {
+EX bool applyCheat(char u, cell *c IS(NULL)) {
 
   if(u == 'L') {
     do {

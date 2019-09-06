@@ -106,7 +106,7 @@ EX void createNoise(int t) {
 
 EX int currentLocalTreasure;
 
-bool landvisited[landtypes];
+EX bool landvisited[landtypes];
 
 bool eq(short a, short b) { return a==b; }
 
@@ -140,7 +140,7 @@ EX vector<cell*> offscreen;
 EX vector<cell*> pathqm;
 
 /** list of cells that the monsters are targetting (PCs, allies, Thumpers, etc.) */
-vector<cell*> targets;
+EX vector<cell*> targets;
 
 /** monsters of specific types to move */
 vector<cell*> worms, ivies, ghosts, golems, hexsnakes;
@@ -175,7 +175,7 @@ EX inline bool singleused() { return !(shmup::on || multi::players > 1); }
  *
  * This ensures that the game should unfold exactly the same if given the same seed and the same input.
  */
-std::mt19937 hrngen;
+EX std::mt19937 hrngen;
 
 /** initialize \link hrngen \endlink */
 EX void shrand(int i) {
@@ -448,7 +448,7 @@ enum eGravity { gsNormal, gsLevitation, gsAnti };
 #endif
 EX eGravity gravity_state, last_gravity_state;
 
-bool bird_disruption(cell *c) {
+EX bool bird_disruption(cell *c) {
   return c->cpdist <= 5 && items[itOrbGravity];
   }
 
@@ -1473,8 +1473,6 @@ EX bool monstersnear(stalemate1& sm) {
   return !!res;
   }
 
-namespace multi { bool aftermove; }
-
 EX bool monstersnear2();
 
 EX int lastkills;
@@ -1497,7 +1495,10 @@ EX bool multimove() {
   return b;
   }
 
-namespace multi { bool checkonly = false; }
+EX namespace multi { 
+  EX bool checkonly = false;
+  EX bool aftermove;
+  EX }
 
 EX bool swordConflict(const stalemate1& sm1, const stalemate1& sm2) {
   if(items[itOrbSword] || items[itOrbSword2])
@@ -2834,7 +2835,7 @@ EX void findWormIvy(cell *c) {
   
 bool bugsfighting;
 
-bool keepLightning = false;
+EX bool keepLightning = false;
 
 EX int statuecount;
 
@@ -6633,7 +6634,7 @@ EX void activateSafety(eLand l) {
   restartGraph();  
   }
 
-bool legalmoves[MAX_EDGE+1];
+EX bool legalmoves[MAX_EDGE+1];
 
 EX bool hasSafeOrb(cell *c) {
   return 
@@ -7584,7 +7585,7 @@ EX void knightFlavorMessage(cell *c2) {
   msgid++;
   }
 
-int mine_adjacency_rule = 0;
+EX int mine_adjacency_rule = 0;
 
 EX map<cell*, vector<cell*>> adj_memo;
 
@@ -7677,7 +7678,7 @@ EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
   return b;
   }
 
-namespace orbbull {
+EX namespace orbbull {
   cell *prev[MAXPLAYER];
   eLastmovetype prevtype[MAXPLAYER];
   int count;
@@ -7688,7 +7689,7 @@ namespace orbbull {
     return lp >= 0 && ln >= 0 && anglestraight(c2, lp, ln);
     }
   
-  void gainBullPowers() {
+  EX void gainBullPowers() {
     items[itOrbShield]++; orbused[itOrbShield] = true;
     items[itOrbThorns]++; orbused[itOrbThorns] = true;
     items[itOrbHorns]++; orbused[itOrbHorns] = true;
@@ -7725,7 +7726,7 @@ namespace orbbull {
       }
     else count = 0;
     }
-  }
+  EX }
 
 #if HDR
 // predictable or not
@@ -7951,7 +7952,7 @@ EX bool havePushConflict(cell *pushto, bool checkonly) {
   return false;
   }
 
-cell *global_pushto;
+EX cell *global_pushto;
 
 EX void killFriendlyIvy() {
   forCellEx(c2, cwt.at) if(c2->monst == moFriendlyIvy) 

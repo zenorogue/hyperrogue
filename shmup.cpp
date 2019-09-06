@@ -9,17 +9,17 @@
 namespace hr {
 
 // joysticks for controlling the mobile shmup mode
-namespace shmupballs {
-  int xmove, xfire, yb, rad;
+EX namespace shmupballs {
+  EX int xmove, xfire, yb, rad;
 
-  void calc() {      
+  EX void calc() {      
     int rr = int(realradius());
     rad = int(rr * (vid.mobilecompasssize ? vid.mobilecompasssize : 14) / 100);
     xmove = max(current_display->xcenter - rr - rad, rad);
     xfire = min(current_display->xcenter + rr + rad, vid.xres - rad);
     yb = current_display->ycenter + rr - rad;
     }
-  }
+EX }
 
 ld sqdist(hyperpoint a, hyperpoint b) {
   if(prod) return pow(hdist(a, b), 2);
@@ -38,8 +38,10 @@ void profile(const char *buf) {
   }
 */
 
+#if HDR
 #define SCALE cgi.scalefactor
 #define SCALE2 (SCALE*SCALE)
+#endif
 
 EX namespace shmup {
 
@@ -103,7 +105,9 @@ bool lastdead = false;
 
 EX multimap<cell*, monster*> monstersAt;
 
+#if HDR
 typedef multimap<cell*, monster*>::iterator mit;
+#endif
 
 vector<monster*> active, nonvirtual, additional;
 
@@ -293,7 +297,7 @@ EX void degradeDemons() {
   }
 
 // we need these for the Mimics!
-double playerturn[MAXPLAYER], playergo[MAXPLAYER], playerstrafe[MAXPLAYER], playerturny[MAXPLAYER], playergoturn[MAXPLAYER], godir[MAXPLAYER];
+EX double playerturn[MAXPLAYER], playergo[MAXPLAYER], playerstrafe[MAXPLAYER], playerturny[MAXPLAYER], playergoturn[MAXPLAYER], godir[MAXPLAYER];
 bool playerfire[MAXPLAYER];
 
 void awakenMimics(monster *m, cell *c2) {
@@ -565,7 +569,7 @@ ld getSwordSize() { return cgi.sword_size; }
 ld getHornsSize() { return cgi.scalefactor * 0.33; }
 
 // used in 3D
-transmatrix swordmatrix[MAXPLAYER];
+EX transmatrix swordmatrix[MAXPLAYER];
 
 hyperpoint swordpos(int id, bool rev, double frac) {
   if(WDIM == 3)
@@ -1292,7 +1296,7 @@ void movePlayer(monster *m, int delta) {
     dropGreenStone(m->base);
   }
 
-monster *getPlayer() {
+EX monster *getPlayer() {
   return pc[cpid];
   }
 
@@ -2728,7 +2732,7 @@ EX bool boatAt(cell *c) {
 
 EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
 
-bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, const transmatrix *Vdp) {
+EX bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, const transmatrix *Vdp) {
   #if CAP_SHAPES
 
   pair<mit, mit> p = 
