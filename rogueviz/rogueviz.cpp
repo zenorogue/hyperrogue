@@ -20,15 +20,13 @@
 
 // hyper -tess <parameter file> -- visualize a horocyclic tesselation,
 
-#include "hyper.h"
+#include "../hyper.h"
 #include "rogueviz.h"
 
 namespace rogueviz {
 
 ld fat_edges = 0;
 ld ggamma = 1;
-
-const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
 
 using namespace hr;
 
@@ -2464,15 +2462,15 @@ auto hooks  =
 
 };
 
-#include "rogueviz-kohonen.cpp"
-#include "rogueviz-staircase.cpp"
-#include "rogueviz-banachtarski.cpp"
-#include "rogueviz-video.cpp"
-#include "rogueviz-pentagonal.cpp"
-#include "rogueviz-graph.cpp"
-#include "rogueviz-fundamental.cpp"
-#include "rogueviz-sunflower.cpp"
-#include "rogueviz-flocking.cpp"
-#include "rogueviz-magiccube.cpp"
-#include "rogueviz-cvl.cpp"
-#include "rogueviz-newconf.cpp"
+#include "kohonen.cpp"
+#include "staircase.cpp"
+#include "banachtarski.cpp"
+#include "video.cpp"
+#include "pentagonal.cpp"
+#include "functions.cpp"
+#include "fundamental.cpp"
+#include "sunflower.cpp"
+#include "flocking.cpp"
+#include "magiccube.cpp"
+#include "cvl.cpp"
+#include "newconf.cpp"
