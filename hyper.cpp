@@ -102,7 +102,7 @@
 #include "multigame.cpp"
 
 #if CAP_ROGUEVIZ
-#include "rogueviz.cpp"
+#include "rogueviz/rogueviz.cpp"
 #endif
 
 #if CAP_DAILY
