@@ -1360,6 +1360,11 @@ EX namespace nisot {
       set_geometry(gProduct);
       return 0;
       }
+    else if(argis("-s2xe")) {
+      PHASEFROM(2);
+      shift(); s2xe::qrings = argi();
+      return 0;
+      }
     else if(argis("-rotspace")) {
       PHASEFROM(2);
       set_geometry(gRotSpace);

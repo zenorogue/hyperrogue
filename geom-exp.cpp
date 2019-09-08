@@ -695,7 +695,19 @@ EX void showEuclideanMenu() {
       });
     }
 
-        
+  if(prod && product::product_sphere()) {
+    dialog::addSelItem(XLAT("precision of S2xE rings"), its(s2xe::qrings), '4');
+    dialog::add_action([] {
+      dialog::editNumber(s2xe::qrings, 1, 256, 4, 32, XLAT("precision of S2xE rings"),
+        XLAT(
+          "In S2xE, objects at spherical distances which are multiples of π will look like "
+          "rings, and objects close to these will look like crescents. "
+          "This setting constrols the quality of rendering these rings and crescents.")
+        );
+      dialog::bound_low(1);
+      dialog::bound_up(256);
+      });
+    }
   
   if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3)) {
     dialog::addItem(XLAT("advanced parameters"), '4');

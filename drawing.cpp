@@ -916,6 +916,196 @@ void debug_this() { }
 
 glvertex junk = glhr::makevertex(0,0,1);
 
+EX namespace s2xe {
+
+  int maxgen;
+  bool with_zero;
+  ld minz, maxy, miny;
+  
+  typedef array<ld, 5> pt;
+
+  basic_textureinfo stinf;  
+
+  pt lerp(const pt& h0, const pt& h1, ld x) {
+    pt s;
+    for(int i=0; i<5; i++) s[i] = h0[i] + (h1[i]-h0[i]) * x;
+    return s;
+    }
+  
+  void add2(pt h, int gen) {
+    glcoords.push_back(glhr::pointtogl(point31(sin(h[0]) * (h[1] + 2 * M_PI * gen), cos(h[0]) * (h[1] + 2 * M_PI * gen), h[2])));
+    stinf.tvertices.push_back(glhr::makevertex(h[3], h[4], 0));
+    }
+
+  void addall(pt h0, pt h1, pt h2) {
+    for(int gen=-maxgen; gen <= maxgen; gen++) if(gen || with_zero) {
+      add2(h0, gen);
+      add2(h1, gen);
+      add2(h2, gen);
+      }
+    }
+  
+  void draw_s2xe0(dqi_poly *p);
+  
+  bool to_right(const pt& h2, const pt& h1) {
+    ld x2 = h2[0];
+    ld x1 = h1[0];
+    if(x2 < x1) x2 += 2 * M_PI;
+    return x2 >= x2 && x2 <= x1 + M_PI;
+    }
+  
+  EX int qrings = 32;
+  
+  ld seg() { return 2 * M_PI / qrings; }
+  
+  void add_ortho_triangle(pt bl, pt tl, pt br, pt tr) {
+    
+    auto sg = seg();
+    
+    int s0 = ceil(bl[0] / sg);
+    int s1 = floor(br[0] / sg);
+    
+    pt bat[1000], tat[1000];
+      
+    bat[0] = bl; tat[0] = tl;
+    
+    int s = 1;
+    
+    for(int i = s0; i <= s1; i++) {
+      ld f = (i*sg-bl[0]) / (br[0]-bl[0]);
+
+      bat[s] = lerp(bl, br, f);
+      tat[s] = lerp(tl, tr, f);
+      
+      s++;      
+      }
+
+    bat[s] = br; tat[s] = tr;
+    
+    while(s--) {
+      addall(bat[s], bat[s+1], tat[s+1]);
+      addall(bat[s], tat[s+1], tat[s]);
+      }
+    }
+  
+  void add_ordered_triangle(array<pt, 3> v) {
+    if(v[1][0] < v[0][0]) v[1][0] += 2 * M_PI;
+    if(v[2][0] < v[1][0]) v[2][0] += 2 * M_PI;
+    ld x = (v[1][0] - v[0][0]) / (v[2][0] - v[0][0]);
+    
+    if(v[2][0] < v[0][0] + M_PI / 4 && maxy < M_PI - M_PI/4) {
+      addall(v[0], v[1], v[2]);
+      return;
+      }
+
+    auto mv = lerp(v[0], v[2], x);
+  
+    add_ortho_triangle(v[0], v[0], mv, v[1]);
+    add_ortho_triangle(mv, v[1], v[2], v[2]);
+    
+    /*
+    int zl = floor(v[1][0] / seg());
+    int zr = ceil(v[1][0] / seg());
+    if(zl < zr && zl * seg > v[0][0] && zr * seg < v[2][0]) {
+
+      ld fl = (zl*seg-v[0][0]) / (v[2][0]-v[0][0]);
+      ld fr = (zr*seg-v[0][0]) / (v[2][0]-v[0][0]);
+      
+      addall(lerp(v[0], v[2], fl), v[1], lerp(v[0], v[2], fr));
+      }
+    */
+    
+    // add_ortho_triangle(v[0], tv[0], v[1], tv[1], v[2], tv[2], v[2], tv[2]);
+    }
+
+  void add_triangle_around(array<pt, 3> v) {
+    ld baseheight = (v[0][1] > M_PI/2) ? M_PI : 0;
+    ld tu = (v[0][3] + v[1][3] + v[2][3]) / 3;
+    ld tv = (v[0][4] + v[1][4] + v[2][4]) / 3;
+    array<pt, 3> vhigh;
+    for(int i=0; i<3; i++) { vhigh[i] = v[i]; vhigh[i][1] = baseheight; vhigh[i][3] = tu; vhigh[i][4] = tv; }
+    if(v[1][0] < v[0][0]) v[1][0] = v[1][0] + 2 * M_PI, vhigh[1][0] = vhigh[1][0] + 2 * M_PI;
+    add_ortho_triangle(v[0], vhigh[0], v[1], vhigh[1]);
+    if(v[2][0] < v[1][0]) v[2][0] = v[2][0] + 2 * M_PI, vhigh[2][0] = vhigh[2][0] + 2 * M_PI;
+    add_ortho_triangle(v[1], vhigh[1], v[2], vhigh[2]);
+    if(v[0][0] < v[2][0]) v[0][0] = v[0][0] + 2 * M_PI, vhigh[0][0] = vhigh[0][0] + 2 * M_PI;
+    add_ortho_triangle(v[2], vhigh[2], v[0], vhigh[0]);
+    }
+
+  void add_s2xe_triangle(array<pt, 3> v) {
+    bool r0 = to_right(v[1], v[0]);
+    bool r1 = to_right(v[2], v[1]);
+    bool r2 = to_right(v[0], v[2]);
+    
+    minz = min(abs(v[0][2]), max(abs(v[1][2]), abs(v[2][2])));
+    auto& s = sightranges[geometry];
+    maxgen = sqrt(s * s - minz * minz) / (2 * M_PI) + 1;
+    
+    maxy = max(v[0][1], max(v[1][1], v[2][1]));
+    miny = min(v[0][1], min(v[1][1], v[2][1]));
+    with_zero = true;
+    if(maxy < M_PI / 4) {
+      add2(v[0], 0);
+      add2(v[1], 0);
+      add2(v[2], 0);
+      with_zero = false;
+      }
+     
+    rotated:
+    if(r0 && r1 && r2) {
+      add_triangle_around(v);
+      }
+    else if(r0 && r1) {
+      add_ordered_triangle(v);
+      }
+    else if(r2 && !r0 && !r1) {
+      add_ordered_triangle(make_array(v[2], v[1], v[0]));
+      }
+    else if(!r0 && !r1 && !r2) {
+      add_triangle_around(make_array(v[2], v[1], v[0]));
+      }
+    else {
+      tie(r0, r1, r2) = make_tuple(r1, r2, r0);
+      tie(v[0], v[1], v[2]) = make_tuple(v[1], v[2], v[0]);
+      goto rotated;
+      }
+    }
+  
+void draw_s2xe(dqi_poly *p) {
+  if(!p->cnt) return;
+  if((p->flags & POLY_TRIANGLES) && p->tinf) {
+    dqi_poly npoly = *p;
+    stinf.texture_id = p->tinf->texture_id;
+    npoly.offset = 0;
+    npoly.offset_texture = 0;
+    npoly.tab = &glcoords;
+    npoly.tinf = &stinf;
+    npoly.V = Id;
+    set_width(1);
+    glcoords.clear();
+    stinf.tvertices.clear();
+    for(int i=0; i<p->cnt; i+=3) {
+      array<pt, 3> v;
+      for(int k=0; k<3; k++) {
+        hyperpoint h = p->V * glhr::gltopoint( (*p->tab)[p->offset+i+k]);
+        v[k][2] = hypot_d(3, h);
+
+        auto dp = product_decompose(h);
+        v[k][2] = dp.first;
+        v[k][0] = atan2(h[0], h[1]);
+        v[k][1] = acos_auto_clamp(dp.second[2]);
+        auto& tv = p->tinf->tvertices[p->offset_texture+i+k];
+        v[k][3] = tv[0];
+        v[k][4] = tv[1];        
+        }
+      add_s2xe_triangle(v);
+      }
+    npoly.cnt = isize(glcoords);
+    npoly.gldraw();        
+    }
+  else draw_s2xe0(p);
+  }
+
 struct point_data {
   hyperpoint direction;
   ld distance;
@@ -923,7 +1113,7 @@ struct point_data {
   int bad;
   };
 
-void draw_s2xe(dqi_poly *p) {
+void draw_s2xe0(dqi_poly *p) {
   if(!p->cnt) return;
   dqi_poly npoly = *p;
   npoly.offset = 0;
@@ -1038,12 +1228,13 @@ void draw_s2xe(dqi_poly *p) {
       }
     }
   }
+EX }
 
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
   if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection) && product::product_sphere()) {
-    draw_s2xe(this);
+    s2xe::draw_s2xe(this);
     return;
     }
 

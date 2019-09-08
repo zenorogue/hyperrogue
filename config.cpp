@@ -589,6 +589,8 @@ EX void initConfig() {
 
   addsaver(nisot::geodesic_movement, "solv_geodesic_movement", true);
 
+  addsaver(s2xe::qrings, "s2xe-rings");
+
 #if CAP_SHMUP  
   multi::initConfig();
 #endif
