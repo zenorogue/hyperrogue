@@ -226,7 +226,7 @@ EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
-hookset<hrmap*()> *hooks_newmap;
+EX hookset<hrmap*()> *hooks_newmap;
 
 /** create a map in the current geometry */
 EX void initcells() {
