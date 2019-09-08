@@ -59,6 +59,12 @@ public:
     explicit operator bool() const noexcept {
         return ptr_ != nullptr;
     }
+
+    template<class T> T* target() { 
+      auto ptr = dynamic_cast<function_state<T, R, Args...>*> (ptr_);
+      if(!ptr) return nullptr;
+      return &ptr->t_;
+      }
 };
 
 } // namespace hr

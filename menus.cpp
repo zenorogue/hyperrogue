@@ -206,8 +206,6 @@ EX void showOverview() {
 
 // -- main menu --
 
-EX purehookset hooks_mainmenu;
-
 EX void showMainMenu() {
   gamescreen(2);
 
@@ -259,8 +257,6 @@ EX void showMainMenu() {
   dialog::addItem("SHARE", 's'-96);
 #endif
 
-  callhooks(hooks_mainmenu);
-  
   if(!canmove) q = "review the scene";
   else if(turncount > 0) q = "continue game";
   else q = "play the game!";
@@ -643,8 +639,6 @@ EX bool showHalloween() {
 
 int daily_mode;
 
-EX purehookset hooks_startmenu;
-
 EX void showStartMenu() {
   if(!daily_mode) {
     daily_mode = hrand(10) + 1;
@@ -742,8 +736,6 @@ EX void showStartMenu() {
       dialog::addInfo(XLAT("Halloween mini-game"));
       break;
     }
-
-  callhooks(hooks_startmenu);
 
   if(have_current_settings()) {
     dialog::addBreak(100);

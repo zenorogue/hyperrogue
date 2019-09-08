@@ -371,7 +371,10 @@ EX namespace dialog {
     valuex = dcenter - fwidth / 2 + leftwidth + innerwidth + dfsize/2;
     }
 
+  EX purehookset hooks_display_dialog;
+  
   EX void display() {
+    callhooks(hooks_display_dialog);
     int N = items.size();
     dfsize = vid.fsize;
     #if ISMOBILE || ISPANDORA

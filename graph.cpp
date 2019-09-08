@@ -7772,7 +7772,14 @@ EX vector< function<void()> > screens = { normalscreen };
 template<class T> void pushScreen(const T& x) { screens.push_back(x); } 
 inline void popScreen() { if(isize(screens)>1) screens.pop_back(); }
 inline void popScreenAll() { while(isize(screens)>1) popScreen(); }
+typedef void (*cfunction)();
 #endif
+
+EX cfunction current_screen_cfunction() {
+  auto tgt = screens.back().target<cfunction>();
+  if(!tgt) return nullptr;
+  return *tgt;
+  }
 
 #if HDR
 namespace sm {
