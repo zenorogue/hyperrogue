@@ -894,6 +894,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(hybri) return;
   if(daily::on) return;
   if(peace::on) return;
+  if(experimental) return;
   if(!gold()) return;
   
   remove_emergency_save();
