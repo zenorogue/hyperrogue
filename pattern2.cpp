@@ -1523,7 +1523,12 @@ EX namespace patterns {
     return ep.parse();
     }
   
+  EX hookset<int(cell*)> *hooks_generate_canvas;
+
   EX int generateCanvas(cell *c) {
+    
+    int i = callhandlers(-1, hooks_generate_canvas, c);
+    if(i != -1) return i;
     switch(whichCanvas) {
       #if CAP_CRYSTAL
       case 'K':
