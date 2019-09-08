@@ -2474,3 +2474,4 @@ auto hooks  =
 #include "magiccube.cpp"
 #include "cvl.cpp"
 #include "newconf.cpp"
+#include "grigorchuk.cpp"
