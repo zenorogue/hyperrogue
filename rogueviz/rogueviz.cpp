@@ -2371,19 +2371,6 @@ slide rvslides[] = {
   };
 
 int rvtour_hooks = 
-  addHook(hooks_startmenu, 100, [] () {
-#if CAP_TOUR
-    dialog::addBreak(100);
-    dialog::addBigItem(XLAT("RogueViz"), 'r');
-    dialog::add_action([] () {
-      tour::slides = rogueviz::rvtour::rvslides;
-      popScreenAll();
-      tour::start();
-      printf("tour start\n");
-      });
-    dialog::addInfo(XLAT("see the visualizations"));
-#endif
-    }) +
   addHook(hooks_slide, 100, [] (int mode) {
     if(currentslide == 0 && slides == default_slides) {
       slidecommand = "RogueViz presentation";
@@ -2448,9 +2435,22 @@ auto hooks  =
   addHook(shmup::hooks_turn, 100, turn) + 
   addHook(shmup::hooks_kill, 100, activate) +
   addHook(hooks_o_key, 100, o_key) +
-  addHook(hooks_mainmenu, 100, [] () {
-    dialog::addItem(XLAT("rogueviz menu"), 'u'); 
-    dialog::add_action_push(rogueviz::showMenu);
+  addHook(dialog::hooks_display_dialog, 100, [] () {
+    if(current_screen_cfunction() == showMainMenu) {
+      dialog::addItem(XLAT("rogueviz menu"), 'u'); 
+      dialog::add_action_push(rogueviz::showMenu);
+      }
+    if(current_screen_cfunction() == showStartMenu) {
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("RogueViz"), 'r');
+      dialog::add_action([] () {
+        tour::slides = rogueviz::rvtour::rvslides;
+        popScreenAll();
+        tour::start();
+        printf("tour start\n");
+        });
+      dialog::addInfo(XLAT("see the visualizations"));
+      }
     }) +
   addHook(hooks_welcome_message, 100, [] () {
     if(rogueviz::on) addMessage(XLAT("Welcome to RogueViz!"));
