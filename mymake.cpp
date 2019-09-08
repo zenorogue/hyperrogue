@@ -17,11 +17,13 @@ using namespace std;
 
 string opts = "-DFHS -DLINUX -DWHATEVER -I/usr/include/SDL";
 
+string standard = " -std=c++11";
+
 string preprocessor = 
   "g++ " + opts + " -E";
 
 string compiler = 
-  "g++ " + opts + " -Wall -Wextra -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -std=c++11 -rdynamic -fdiagnostics-color=always -c";
+  "g++ " + opts + " -Wall -Wextra -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
 
 string linker = 
   "g++ -rdynamic -o hyper";
@@ -61,10 +63,13 @@ int main(int argc, char **argv) {
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")
       optimized = 3, compiler += " -O3", obj_dir += "/O3", setdir += "../";
+    else if(s.substr(0, 4) == "-std")
+      standard = s;
     else modules.push_back(s);
     }
   if(!optimized)
     compiler += " -g3";
+  compiler += " " + standard;
   ifstream fs("hyper.cpp");
 
   system("mkdir -p " + obj_dir);
