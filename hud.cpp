@@ -471,6 +471,9 @@ EX void draw_radar(bool cornermode) {
     }
   }
 
+EX color_t crosshair_color = 0xFFFFFFC0;
+EX ld crosshair_size = 0;
+
 EX void drawStats() {
   if(nohud || vid.stereo_mode == sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
@@ -494,9 +497,21 @@ EX void drawStats() {
   dynamicval<ld> vs(vid.scale, 1);
   dynamicval<ld> vc(vid.camera_angle, 0);
   if(prod) vid.alpha = 30, vid.scale = 30;
+  
+  auto& cd = current_display;
+  auto xc = cd->xcenter;
+  auto yc = cd->ycenter;
 
   calcparam();
 
+  if(crosshair_color && crosshair_size > 0) {
+    initquickqueue();
+    vid.linewidth = 1;
+    queueline(tC0(atscreenpos(xc - crosshair_size, yc, 1)), tC0(atscreenpos(xc + crosshair_size, yc, 1)), crosshair_color).prio = PPR::SUPERLINE;
+    queueline(tC0(atscreenpos(xc, yc - crosshair_size, 1)), tC0(atscreenpos(xc, yc + crosshair_size, 1)), crosshair_color).prio = PPR::SUPERLINE;
+    quickqueue();
+    }
+  
   if(vid.radarsize > 0 && h)
   #if CAP_RACING
     if(!racing::on)

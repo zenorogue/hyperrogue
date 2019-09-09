@@ -387,6 +387,9 @@ EX void initConfig() {
   addsaver(vid.quickmouse, "quick mouse", !ISPANDORA);
   
   // colors
+
+  addsaver(crosshair_size, "size:crosshair");
+  addsaver(crosshair_color, "color:crosshair");
   
   addsaver(backcolor, "color:background");
   addsaver(forecolor, "color:foreground");
@@ -1244,6 +1247,19 @@ EX void configureInterface() {
   dialog::add_action([] {
     vid.graphglyph = (1+vid.graphglyph)%3;
     });    
+
+  dialog::addSelItem(XLAT("draw crosshair"), crosshair_size > 0 ? fts(crosshair_size) : ONOFF(false), 'x');
+  dialog::add_action([] () { 
+    dialog::editNumber(crosshair_size, 0, 100, 1, 10, XLAT("crosshair size"), XLAT(
+      "Display a targetting reticle in the center of the screen. Might be useful when exploring 3D modes, "
+      "as it precisely shows the direction we are going. However, the option is available in all modes."
+      ));
+    dialog::bound_low(0);
+    dialog::extra_options = [] {
+      dialog::addColorItem(XLAT("crosshair color"), crosshair_color, 'X');
+      dialog::add_action([] { dialog::openColorDialog(crosshair_color); });
+      };
+    });
    
   dialog::addBreak(50);
   dialog::addBack();
@@ -2174,6 +2190,10 @@ EX int read_color_args() {
     }
   else if(argis("-period")) {
     PHASEFROM(2); shift(); periodcolor = arghex();
+    }
+  else if(argis("-crosshair")) {
+    PHASEFROM(2); shift(); crosshair_color = arghex();
+    shift_arg_formula(crosshair_size);
     }
   else if(argis("-borders")) {
     PHASEFROM(2); shift(); bordcolor = arghex();
