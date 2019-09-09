@@ -711,7 +711,7 @@ EX void showEuclideanMenu() {
   
   else if(geometry == gRotSpace) {
     constexpr auto& r = rots::underlying_scale;
-    dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : "NO", '4');
+    dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '4');
     dialog::add_action([] {
       dialog::editNumber(r, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
         XLAT(
