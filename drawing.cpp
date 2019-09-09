@@ -1559,7 +1559,7 @@ EX void prettypoint(const hyperpoint& h) {
   }
 
 EX void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
-  if(lev >= 0) {
+  if(lev >= 0 && pmodel != mdFlatten) {
     hyperpoint h3 = midz(h1, h2);
     prettylinesub(h1, h3, lev-1);
     prettylinesub(h3, h2, lev-1);
