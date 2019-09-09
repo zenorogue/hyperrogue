@@ -1411,7 +1411,9 @@ EX void optimizeview() {
   if(prod) {
     ld z = zlevel(tC0(View));
     View = mscale(View, -z);
+    if(product::product_sphere()) View = centralsym * View;
     hybrid::in_underlying_map(optimizeview);
+    if(product::product_sphere()) View = centralsym * View;
     if(z > cgi.plevel / 2) { hybrid::current_view_level--; z -= cgi.plevel; }
     if(z < -cgi.plevel / 2) { hybrid::current_view_level++; z += cgi.plevel; }
     View = mscale(View, z);
