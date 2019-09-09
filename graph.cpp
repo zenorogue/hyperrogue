@@ -6843,7 +6843,8 @@ EX void queuecircleat(cell *c, double rad, color_t col) {
   if(!gmatrix.count(c)) return;
   if(WDIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
-    int ofs = wall_offset(c);
+    // we must do hybrid::wall_offset in hybrid because the cached value is likely incorrect
+    int ofs = hybri ? hybrid::wall_offset(c) : wall_offset(c);
     for(int i=0; i<c->type; i++) {
       queuepolyat(gmatrix[c], cgi.shWireframe3D[ofs + i], 0, PPR::SUPERLINE);
       }
