@@ -7531,6 +7531,8 @@ EX bool dronemode;
 
 purehookset hooks_calcparam;
 
+EX int corner_centering;
+
 EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
@@ -7571,11 +7573,21 @@ EX void calcparam() {
   if(GDIM == 3 && in_perspective()) cd->radius = cd->scrsize;
   realradius = min(realradius, cd->radius);
   
+  ld aradius = sphere ? cd->radius / (vid.alpha - 1) : cd->radius;
+  
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }
   
+  if(corner_centering) {
+    cd->ycenter = cd->ytop + cd->ysize - vid.fsize - aradius;
+    if(corner_centering == 1)
+      cd->xcenter = cd->xtop + vid.fsize + aradius;
+    if(corner_centering == 2)
+      cd->xcenter = cd->xtop + cd->xsize - vid.fsize - aradius;
+    }
+
   cd->xcenter += cd->scrsize * vid.xposition;
   cd->ycenter += cd->scrsize * vid.yposition;
-
+  
   cd->tanfov = tan(vid.fov * degree / 2);
   
   if(pmodel) 

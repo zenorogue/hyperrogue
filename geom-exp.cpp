@@ -709,7 +709,24 @@ EX void showEuclideanMenu() {
       });
     }
   
-  if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3)) {
+  else if(geometry == gRotSpace) {
+    constexpr auto& r = rots::underlying_scale;
+    dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : "NO", '4');
+    dialog::add_action([] {
+      dialog::editNumber(r, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
+        XLAT(
+          "The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
+          "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
+          "the respective features in the underlying world, but details such as monsters or items are ignored."
+          )
+        );
+      dialog::bound_low(0);
+      dialog::bound_up(1);
+      dialog::extra_options = [] () { rots::draw_underlying(true); };
+      });
+    }
+  
+  else if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3)) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 

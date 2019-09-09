@@ -481,6 +481,10 @@ EX void drawStats() {
   first_cell_to_draw = true;
   bool h = hide_player();
 
+  bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
+  
+  if(geometry == gRotSpace) rots::draw_underlying(!cornermode);
+  
   {
   dynamicval<eModel> pm(pmodel, flat_model());
   glClear(GL_DEPTH_BUFFER_BIT);
@@ -492,9 +496,7 @@ EX void drawStats() {
   if(prod) vid.alpha = 30, vid.scale = 30;
 
   calcparam();
-  
-  bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
-  
+
   if(vid.radarsize > 0 && h)
   #if CAP_RACING
     if(!racing::on)

@@ -1217,6 +1217,89 @@ EX namespace rots {
       }
     };
 
+  /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry */
+  EX transmatrix qtm(hyperpoint h) {
+    if(hyperbolic) {
+      hyperpoint k = slr::to_phigans(h);
+      ld z = k[2]; k[2] = 0;
+      ld r = hypot_d(2, k);
+      // k[1] = -k[1];
+      k[0] = -k[0];
+      if(r) k = tangent_length(k, asinh(r) * 2);
+      return spin(-z * 2) * rgpushxto0(direct_exp(k, 0));
+      }
+
+    double sq0 = h[0]*h[0];
+    double sq1 = h[1]*h[1];
+    double sq2 = h[2]*h[2];
+    double sq3 = h[3]*h[3];
+    
+    transmatrix M;  
+  
+    M[0][0] =  sq0 - sq1 - sq2 + sq3;
+    M[1][1] = -sq0 + sq1 - sq2 + sq3;
+    M[2][2] = -sq0 - sq1 + sq2 + sq3;
+    
+    double tmp1 = h[0]*h[1];
+    double tmp2 = h[2]*h[3];
+    M[0][1] = -2 * (tmp1 + tmp2);
+    M[1][0] = -2 * (tmp1 - tmp2);
+    
+    tmp1 = h[0]*h[2];
+    tmp2 = h[1]*h[3];
+    M[0][2] = 2 * (tmp1 - tmp2);
+    M[2][0] = 2 * (tmp1 + tmp2);
+
+    tmp1 = h[1]*h[2];
+    tmp2 = h[0]*h[3];
+    M[1][2] = -2 * (tmp1 + tmp2);
+    M[2][1] = -2 * (tmp1 - tmp2);
+  
+    return M;
+    }
+  
+  EX ld underlying_scale = 0;
+  
+  EX void draw_underlying(bool cornermode) {
+    if(underlying_scale <= 0) return;
+    ld d = hybrid::current_view_level;
+    d *= cgi.plevel;
+    transmatrix T = rots::uzpush(-d) * spin(-2*d);
+  
+    if(det(T) < 0) T = centralsym * T;
+  
+    hyperpoint h = inverse(View * spin(master_to_c7_angle()) * T) * C0;
+    
+    auto g = std::move(gmatrix);
+    auto g0 = std::move(gmatrix0);
+  
+    hybrid::in_underlying_map([&] {
+      cgi.require_shapes();
+      dynamicval<int> pcc(corner_centering, cornermode ? 1 : 2);
+      dynamicval<bool> pf(playerfound, true);
+      dynamicval<cellwalker> m5(centerover, viewctr.at->c7);
+      dynamicval<transmatrix> m2(View, ypush(0) * qtm(h));
+      dynamicval<transmatrix> m3(playerV, Id);
+      dynamicval<transmatrix> m4(actual_view_transform, Id);
+      dynamicval<eModel> pm(pmodel, mdDisk);
+      dynamicval<ld> pss(vid.scale, (sphere ? 10 : 1) * underlying_scale);
+      dynamicval<ld> psa(vid.alpha, sphere ? 10 : 1);
+      dynamicval<hrmap*> p(hybrid::pmap, NULL);
+      dynamicval<int> psr(sightrange_bonus, 0);
+      calcparam();
+      reset_projection(); current_display->set_all(0);
+      ptds.clear();
+      drawthemap();
+      drawqueue();
+      displaychr(current_display->xcenter, current_display->ycenter, 0, 24, '+', 0xFFFFFFFF);
+      glflush();
+      });
+    gmatrix = std::move(g);
+    gmatrix0 = std::move(g0);
+    calcparam();
+    reset_projection(); current_display->set_all(0);
+    }
+
 EX }
 
 EX namespace nisot {
@@ -1368,6 +1451,11 @@ EX namespace nisot {
     else if(argis("-rotspace")) {
       PHASEFROM(2);
       set_geometry(gRotSpace);
+      return 0;
+      }
+    else if(argis("-rot_uscale")) {
+      PHASEFROM(2);
+      shift_arg_formula(rots::underlying_scale);
       return 0;
       }
     return 1;
