@@ -185,6 +185,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
   if(hybri) {
+    if(product::product_sphere()) return NULL;
     c = hybrid::get_where(c).first;
     heptagon *res;
     hybrid::in_underlying_map([&] { res = createAlternateMap(c, rad, firststate, special); });
@@ -900,13 +901,13 @@ EX eLand& get_euland(int c) {
 EX void clear_euland(eLand first) {
   euland.resize(max_vec);
   for(int i=0; i<max_vec; i++) euland[i] = laNone;
-  if(!nonisotropic) euland[0] = euland[1] = euland[max_vec-1] = first;
+  if(!nonisotropic && !hybri) euland[0] = euland[1] = euland[max_vec-1] = first;
   euland3.clear();
   euland3[0] = laCrossroads;
   }
 
 bool valid_wall_at(int c) {
-  if(nonisotropic) return true;
+  if(nonisotropic || hybri) return true;
   return short(c) % 3 == 0;
   }
   
@@ -919,7 +920,7 @@ EX eLand switchable(eLand nearland, eLand farland, int c) {
   else if(specialland == laCrossroads4) {
     if((dual::state && nearland == laCrossroads4) || hrand(15) == 0)
       return getNewLand(nearland);
-    if(nearland == laCrossroads4 && nonisotropic)
+    if(nearland == laCrossroads4 && (nonisotropic || hybri))
       return getNewLand(nearland);
     return nearland;
     }
@@ -980,6 +981,38 @@ EX void setLandSol(cell *c) {
   }
 
 EX void setLandHybrid(cell *c) {
+  if(prod && product::product_sphere() && !among(specialland, laElementalWall)) {
+    auto w = hybrid::get_where(c);
+    auto d = w.second;
+    
+    setland(c, specialland);
+    if(chaosmode) {
+      setland(c, getEuclidLand(c->master->distance));
+      return;
+      }
+    bool ps = PIU(pseudohept(w.first));
+    switch(specialland) {
+      case laCrossroads4: case laCrossroads: case laCrossroads2:
+        setland(c, getEuclidLand(d));
+        if(c->land == laBarrier) c->wall = ps ? waNone : waBarrier;
+        break;
+      case laTerracotta:
+        if((d & 15) == 1) {
+          setland(c, laMercuryRiver);
+          c->wall = ps ? waNone : waMercury;
+          }
+        break;
+      case laOcean: case laIvoryTower: case laEndorian: case laDungeon:
+        if(d < 0) setland(c, laCrossroads);
+        else if(d == 0) {
+          setland(c, laBarrier); c->wall = ps ? waNone : waBarrier;
+          }
+        else c->landparam = d;
+        break;
+      default: ;
+      }
+    return;
+    }
   auto wc = hybrid::get_where(c).first;
   c->barleft = wc->barleft;
   c->barright = wc->barright;
@@ -1643,7 +1676,7 @@ EX void moreBigStuff(cell *c) {
     }
   
   else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple && c->land == laRlyeh)) {
-    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
+    if(eubinary || (prod && product::product_sphere()) || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1666,6 +1699,10 @@ EX void moreBigStuff(cell *c) {
           }
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
+          }
+        else if(prod && product::product_sphere()) {
+          auto d = hybrid::get_where(c);
+          if(!PIU(pseudohept(d.first))) c->wall = waColumn;
           }
         else if(hybri) {
           auto d = hybrid::get_where(c);

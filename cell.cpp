@@ -462,6 +462,7 @@ static const int ALTDIST_ERROR = 90000;
 EX int celldistAlt(cell *c) {
   if(experimental) return 0;
   if(hybri) { 
+    if(prod && product::product_sphere()) return hybrid::get_where(c).second;
     auto w = hybrid::get_where(c); 
     int d = c->master->alt && c->master->alt->alt ? c->master->alt->alt->fieldval : 0;
     d = sl2 ? 0 : abs(w.second - d);

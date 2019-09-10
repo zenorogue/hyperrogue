@@ -483,7 +483,8 @@ EX int getHemisphere(heptagon *h, int which) {
 
 EX int getHemisphere(cell *c, int which) {
   if(euwrap) return 0;
-  if(WDIM == 3) {
+  if(hybri) { auto d = hybrid::get_where(c); return PIU(getHemisphere(d.first, which)); }
+  if(WDIM == 3 && !hybri) {
     hyperpoint p = tC0(calc_relative_matrix(c, currentmap->gamestart(), C0));
     return int(p[which] * 6  + 10.5) - 10;
     }

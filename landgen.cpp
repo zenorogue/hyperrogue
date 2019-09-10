@@ -288,7 +288,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waPalace;
           }
       
-        if(d == 8 && sphere) {
+        if(d == 8 && (sphere || (hybri && product::product_sphere()))) {
           int gs = getHemisphere(c,0);
           if(NONSTDVAR) {
             int v = 1;
@@ -302,19 +302,31 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           else 
           if(gs == 1)
             c->wall = waPalace;
-          if(gs == 3)
-            c->wall = PURE ? waOpenGate : waClosedGate;
-          if(gs == 4 && hrand(100) < 40)
+          if(gs == 3) {
+            if(hybri) {
+              c->wall = pick(waClosedGate, waOpenGate);
+              if(c->wall == waClosedGate) toggleGates(c, waClosePlate, 1);
+              else toggleGates(c, waOpenPlate, 1);
+              }
+            else
+              c->wall = PURE ? waOpenGate : waClosedGate;
+            }
+          if(gs == 4 && hrand(100) < 40 && !reptilecheat)
             c->wall = waClosePlate;
-          if(gs == 6)
+          if(gs == 6 && !reptilecheat)
             c->wall = waOpenPlate;
-          if(gs == -3)
+          if(gs == -3 && !reptilecheat)
             c->wall = pick(waClosePlate, waOpenPlate);
-          if(gs == -6)
+          if(gs == -6 && !reptilecheat)
             c->wall = waTrapdoor;
+          if(hybri) {
+            int l = hybrid::get_where(c).second;
+            if(gs >= 3 && (l % 4) == 0) c->wall = waPalace;
+            if(gs < 3 && (l % 4) == 2) c->wall = waPalace;
+            }
           }
     
-        if(d == 8 && !sphere) {
+        else if(d == 8 && !sphere) {
 
           if(prod && polarb50(c) && (hybrid::get_where(c).second & 3) == 2) {
             c->wall = waPalace;
@@ -2693,7 +2705,7 @@ EX void setdist(cell *c, int d, cell *from) {
       buildEquidistant(c);
     }
   
-  if(d <= 7 && (c->land == laGraveyard || c->land == laHauntedBorder)) {
+  if(d <= 7 && (c->land == laGraveyard || c->land == laHauntedBorder) && !(hybri && product::product_sphere())) {
     c->land = (c->landparam >= 1 && c->landparam <= HAUNTED_RADIUS) ? laHauntedBorder : laGraveyard;
     }
 
