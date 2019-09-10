@@ -1,5 +1,6 @@
 // HyperRogue: alternative build system
 // This reads the file 'hyper.cpp' and compiles the cpp files it includes into separate object files, and then links them.
+// Tested in Linux, should work in other systems with some changes.
 
 // Options:
 //   -O2 -- optimize
@@ -12,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -46,9 +48,15 @@ string setdir = "../";
 int system(string cmdline) {
   return system(cmdline.c_str());
   }
+
+bool file_exists(string fname) {
+  return access(fname.c_str(), F_OK) != -1;
+  }
   
 int main(int argc, char **argv) {
-  system("make -f Makefile.loc language-data.cpp autohdr.h savepng-loc.o");
+  for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
+    if(file_exists(fname))
+      system("make -f " + fname + " language-data.cpp autohdr.h savepng-loc.o");
   for(int i=1; i<argc; i++) {
     string s = argv[i];
     if(s.substr(0, 2) == "-D") {
@@ -123,7 +131,7 @@ int main(int argc, char **argv) {
     string obj = obj_dir + "/" + m2 + ".o";
     time_t src_time = get_file_time(src);
     if(!src_time) { 
-      printf("file not found: %s\n", src);
+      printf("file not found: %s\n", src.c_str());
       exit(1);
       }
     time_t obj_time = get_file_time(obj);
@@ -142,8 +150,3 @@ int main(int argc, char **argv) {
   system(linker + allobj + libs);
   return 0;
   }
-
-
-
-// g++  hyper.cpp -c -o hyper.o
-// g++  savepng-loc.o hyper.o -o hyper -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW    -g3 -lGL -lpng -rdynamic
