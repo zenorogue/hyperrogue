@@ -1545,7 +1545,7 @@ EX void show3D() {
       });
     }
 
-  if(WDIM == 2 && GDIM == 3)
+  if((WDIM == 2 && GDIM == 3) || prod)
     dialog::addBoolItem_action(XLAT("fixed Y/Z rotation"), vid.fixed_yz, 'Z');
 
   if(true) {
