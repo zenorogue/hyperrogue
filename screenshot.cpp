@@ -262,7 +262,7 @@ void set_shotx() {
   }
 
 #if CAP_SDL
-int shot_aa = 1;
+EX int shot_aa = 1;
 #endif
 
 EX void default_screenshot_content() {
