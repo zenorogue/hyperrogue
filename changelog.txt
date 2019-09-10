@@ -3482,3 +3482,11 @@ Solv geometry:
 - shmup:: fixed the keyboard rotation direction inconsistency in 3D
 - shmup for product: player movement
 
+20019-09-10 09:15 Version 11.1p:
+- smoother coloring pattern in Crystal
+- fixed some minor glitches in SL2
+- fixed the glitches in S2xE
+- an option to show the underlying geometry in rotation spaces
+- an option to display a crosshair in the center of the screen
+- fixed the determining of the selected cell in product/rotation geometries
+- a quicker and more convenient way to recompile the source code after changes (see mymake.cpp)
