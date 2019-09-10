@@ -991,9 +991,10 @@ EX namespace s2xe {
   void add_ordered_triangle(array<pt, 3> v) {
     if(v[1][0] < v[0][0]) v[1][0] += 2 * M_PI;
     if(v[2][0] < v[1][0]) v[2][0] += 2 * M_PI;
+    if(v[2][0] - v[0][0] < 1e-6) return;
     ld x = (v[1][0] - v[0][0]) / (v[2][0] - v[0][0]);
     
-    if(v[2][0] < v[0][0] + M_PI / 4 && maxy < M_PI - M_PI/4) {
+    if(v[2][0] < v[0][0] + M_PI / 4 && maxy < M_PI - M_PI/4 && sightranges[geometry] <= 5) {
       addall(v[0], v[1], v[2]);
       return;
       }
@@ -1073,13 +1074,18 @@ EX namespace s2xe {
   
 void draw_s2xe(dqi_poly *p) {
   if(!p->cnt) return;
-  if((p->flags & POLY_TRIANGLES) && p->tinf) {
+  if(p->flags & POLY_TRIANGLES) {
     dqi_poly npoly = *p;
-    stinf.texture_id = p->tinf->texture_id;
     npoly.offset = 0;
-    npoly.offset_texture = 0;
     npoly.tab = &glcoords;
-    npoly.tinf = &stinf;
+    if(p->tinf) {
+      npoly.tinf = p->tinf ? &stinf : NULL;
+      npoly.offset_texture = 0;
+      stinf.texture_id = p->tinf->texture_id;
+      }
+    else {
+      npoly.tinf = NULL;
+      }
     npoly.V = Id;
     set_width(1);
     glcoords.clear();
@@ -1094,9 +1100,11 @@ void draw_s2xe(dqi_poly *p) {
         v[k][2] = dp.first;
         v[k][0] = atan2(h[0], h[1]);
         v[k][1] = acos_auto_clamp(dp.second[2]);
-        auto& tv = p->tinf->tvertices[p->offset_texture+i+k];
-        v[k][3] = tv[0];
-        v[k][4] = tv[1];        
+        if(p->tinf) {
+          auto& tv = p->tinf->tvertices[p->offset_texture+i+k];
+          v[k][3] = tv[0];
+          v[k][4] = tv[1];
+          }
         }
       add_s2xe_triangle(v);
       }
