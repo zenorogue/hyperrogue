@@ -8028,4 +8028,135 @@ S("clear caches", "wyczyść pamięć podręczną")
 // in animation menu
 S("shmup action", "akcja trybu strzelanki")
 
+// 11.2
 
+// extra projections
+S("central inversion", "inwersja względem środka")
+S("two-point azimuthal", "rzut dwupunktowy azymutalny")
+S("two-point hybrid", "rzut dwupunktowy mieszany")
+S("Mollweide", "odwzorowanie Mollweidego")
+S("central cylindrical", "rzut walcowy centralny")
+S("Collignon", "odwzorowanie Collignona")
+
+// extra settings
+
+S("draw crosshair", "rysuj celownik")
+
+S("Display a targetting reticle in the center of the screen. Might be useful when exploring 3D modes, "
+  "as it precisely shows the direction we are going. However, the option is available in all modes.",
+  
+  "Pokazuj celownik na środku ekranu. Może być użyteczna przy eksploracji przestrzeni trójwymiarowych "
+  "(celownik dokładnie pokazuje kierunek, w którym idziemy). Opcja ta jest jednak dostępna we "
+  "wszystkich trybach.")
+
+S("radar range", "zasięg radaru")
+
+S("boundary width multiplier", "mnożnik szerokości brzegu")
+S("grid width multiplier", "mnożnik szerokości siatki")
+S("highlight the cell forward", "zaznaczaj pole naprzód")
+S("edit widths individually", "edytuj szerokości niezależnie")
+
+// extra tilings
+
+S("kite-and-dart", "kite-and-dart")
+S("kite-and-dart on horospheres", "kite-and-dart na horosferach")
+S("standard binary tiling", "standardowy parkietaż binarny")
+
+S("show quotient spaces", "przestrzenie ilorazowe")
+S("three-dimensional", "trójwymiarowe")
+
+// non-isotropic geometries:
+
+S("Solv geometry", "geometria Solv")
+S("Sol", "Sol")
+
+S(
+  "Solv (aka Sol) is a 3D space where directions work in different ways. It is described by the following metric:\n"
+  "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
+  "You are currently displaying Solv in the perspective projection based on native geodesics. You can control how "
+  "the fog effects depends on the geodesic distance, and how far object in X/Y/Z coordinates are rendered.\n\n"
+  "Cells with relative x,y coordinates both over %1 and z coordinate below %2 are not rendered for technical reasons"
+  " (geodesics to that points are too weird).", 
+  
+  "Solv (albo Sol) to przestrzeń trójwymiarowa, w której kierunki działają w różny sposób. Jest ona opisana "
+  "następującą metryką: ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
+  
+  "Obecnie Solv jest przedstawiona w rzucie perspektywistycznym, opartym na geodezyjnych. Możesz określić, "
+  "jak efekt mgły wpyłwa na odległość po geodezyjnej, i w jakiej odległości X/Y/Z obiekty są renderowane. "
+  "Komórki z obiema względnymi współrzędnymi X,Y powyżej %1 i współrzędną Z poniżej %2 nie są renderowane ze "
+  "względów technicznych (geodezyjne do tych punktów są zbyt dziwne).")
+
+S("max difference in X/Y coordinates", "maksymalna różnica współrzędnch X/Y")
+S("max difference in Z coordinate", "maksymalna różnica współrzędnej Z)
+
+S("geodesic movement in Sol/Nil", "ruch po geodezyjnych w Sol/Nil")
+
+// ---
+
+S("Nil geometry", "geometria Nil")
+S("Nil", "Nil")
+
+// ---
+
+S("product space", "przestrzeń produktowa")
+S("current geometry x E", "obecna geometria x E")
+S("Only works with 2D non-Euclidean geometries", "Działa jedynie w geometriach nieeuklidesowych 2D")
+S("%1 x E", "%1 x E")
+S("Z-level height factor", "mnożnik wysokości poziomu Z")
+
+S("precision of S2xE rings", "precyzja pierścieni w S2xE")
+
+S(
+  "In S2xE, objects at spherical distances which are multiples of π will look like "
+  "rings, and objects close to these will look like crescents. "
+  "This setting controls the quality of rendering these rings and crescents.",
+  
+  "W S2xE, obiekty w odległościach po sferze będących wielokrotnościami π "
+  "wyglądają jak pierścienie, a te blisko wyglądają jak półksiężyce. "
+  "To ustawienie steruje jakością renderowania tych kształtów.")
+
+// ---
+
+S("rotation space", "przestrzeń obrotów")
+S("steps", "kroki")
+S("space of rotations in current geometry", "przestrzeń obrotów obecnej geometrii")
+S("~SL(2,R)~", "~SL(2,R)~")
+S("Only works with (semi-)regular tilings", "Działa jedynie w parkietażach (pół)regularnych")
+S("That would have %1/%2 levels", "To by miało %1/%2 poziomów")
+S("number of levels", "liczba poziomów")
+S("Hint: this is more playable with pure {7,3} or pure {5,4}", "Wskazówka: lepiej grać w czystym {7,3} lub czystym {5,4}")
+
+S("view the underlying geometry", "pokaż geometrię bazową")
+
+S("The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
+  "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
+  "the respective features in the underlying world, but details such as monsters or items are ignored.",
+  
+  "Jesteś obecnie w przestrzeni rotacji bazowej geometrii hiperbolicznej lub sferycznej. "
+  "Ta opcja pozwala obejrzeć przestrzeń bazową. Krainy i pewne ściany (np. na Cmentarzu) bazują na "
+  "odpowiednich cechach świata bazowego, ale szczegóły takie jak potwory i przedmioty są ignorowane.")
+
+// map editor in 3D nonisotropic
+
+S("place points on surfaces of const Z", "umieszczaj punkty na powierzchniach o stałym Z")
+S("place points on surfaces of const X", "umieszczaj punkty na powierzchniach o stałym X")
+S("place points on surfaces of const Y", "umieszczaj punkty na powierzchniach o stałym Y")
+
+S("parallels to draw", "ile równoleżników")
+S("meridians to draw", "ile południków")
+S("range of grid to draw", "zasięg siatki")
+
+// new welcome messages
+
+S("Welcome to Spherindrogue!", "Witaj w Sferyndrogue!")
+S("Welcome to Hyper-X-R-Rogue!", "Witaj w Hyper-X-R-Rogue!")
+S("Good luck in the elliptic space!", "Powodzenia w przestrzeni eliptycznej!")
+S("Welcome to SolvRogue!", "Witaj w SolvRogue!")
+S("Welcome to NilRogue!", "Witaj w NilRogue!")
+S("Welcome to PSL(2,R)-ogue!", "Witaj w PSL(2,R)-ogue!")
+
+// extra option
+
+S("play this Strange Challenge unofficially", "gram nieoficjalnie")
+
+S("floors in 2D geometries", "podłogi w geometriach 2D")
