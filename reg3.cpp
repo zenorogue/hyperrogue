@@ -975,7 +975,7 @@ EX cellwalker strafe(cellwalker cw, int j) {
   println(hlog, "incorrect strafe");
   exit(1);
   }
-}
+EX }
 #endif
 }
 

@@ -1373,5 +1373,5 @@ EX void add_debug(cell *c) {
 
 }
 
-}
+EX }
 #endif
