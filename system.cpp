@@ -25,6 +25,7 @@ namespace rg {
   static const char daily_off = 'D';
   static const char racing = 'R';
   static const char dualmode = 'U';
+  static const char heptagons = '7';
   
   // wrongmode only -- marks 'global' achievements not related to the current mode
   static const char global = 'x'; 
