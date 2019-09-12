@@ -566,11 +566,16 @@ EX namespace nilv {
     }
 EX }
 
+EX bool in_s2xe() { return prod && hybrid::over_sphere(); }
+EX bool in_h2xe() { return prod && !hybrid::over_sphere(); }
+
 EX namespace hybrid {
 
   EX int current_view_level;  
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
+
+  EX bool over_sphere() { return ginf[hybrid::underlying].cclass == gcSphere; }  
   
   EX void configure(eGeometry g) {
     if(WDIM == 3) return;
@@ -815,8 +820,6 @@ EX namespace product {
         }
       });
     }
-  
-  EX bool product_sphere() { return ginf[hybrid::underlying].cclass == gcSphere; }
   
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;

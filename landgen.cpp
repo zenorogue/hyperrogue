@@ -288,7 +288,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waPalace;
           }
       
-        if(d == 8 && (sphere || (hybri && product::product_sphere()))) {
+        if(d == 8 && (sphere || (hybri && hybrid::over_sphere()))) {
           int gs = getHemisphere(c,0);
           if(NONSTDVAR) {
             int v = 1;
@@ -2705,7 +2705,7 @@ EX void setdist(cell *c, int d, cell *from) {
       buildEquidistant(c);
     }
   
-  if(d <= 7 && (c->land == laGraveyard || c->land == laHauntedBorder) && !(hybri && product::product_sphere())) {
+  if(d <= 7 && (c->land == laGraveyard || c->land == laHauntedBorder) && !(hybri && hybrid::over_sphere())) {
     c->land = (c->landparam >= 1 && c->landparam <= HAUNTED_RADIUS) ? laHauntedBorder : laGraveyard;
     }
 

@@ -185,7 +185,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
   if(hybri) {
-    if(product::product_sphere()) return NULL;
+    if(hybrid::over_sphere()) return NULL;
     c = hybrid::get_where(c).first;
     heptagon *res;
     hybrid::in_underlying_map([&] { res = createAlternateMap(c, rad, firststate, special); });
@@ -981,7 +981,7 @@ EX void setLandSol(cell *c) {
   }
 
 EX void setLandHybrid(cell *c) {
-  if(prod && product::product_sphere() && !among(specialland, laElementalWall)) {
+  if(in_s2xe() && !among(specialland, laElementalWall)) {
     auto w = hybrid::get_where(c);
     auto d = w.second;
     
@@ -1676,7 +1676,7 @@ EX void moreBigStuff(cell *c) {
     }
   
   else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple && c->land == laRlyeh)) {
-    if(eubinary || (prod && product::product_sphere()) || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
+    if(eubinary || in_s2xe() || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1700,7 +1700,7 @@ EX void moreBigStuff(cell *c) {
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
           }
-        else if(prod && product::product_sphere()) {
+        else if(in_s2xe()) {
           auto d = hybrid::get_where(c);
           if(!PIU(pseudohept(d.first))) c->wall = waColumn;
           }

@@ -1241,7 +1241,7 @@ EX }
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
-  if(prod && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection) && product::product_sphere()) {
+  if(in_s2xe() && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection)) {
     s2xe::draw_s2xe(this);
     return;
     }

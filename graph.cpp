@@ -5108,7 +5108,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
   if(just_gmatrix) return;
 #if MAXMDIM >= 4
-  if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !(prod && product::product_sphere())) {
+  if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe()) {
     hyperpoint H = tC0(V);
     if(prod) H = product::inverse_exp(H);
     for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
