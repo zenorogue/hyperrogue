@@ -694,7 +694,7 @@ EX void showStartMenu() {
     
     case 3: 
       dialog::addBreak(100);
-      dialog::addBigItem(XLAT("geometry experiments"), 'g');
+      dialog::addBigItem(XLAT("experiment with geometry"), 'g');
       dialog::addInfo(XLAT("(most achievements are not available)"));
       break;      
     
@@ -893,7 +893,7 @@ EX named_functionality get_o_key() {
 #endif
 
   if(viewdists)
-    return named_functionality(XLAT("geometry experiments"), runGeometryExperiments);
+    return named_functionality(XLAT("experiment with geometry"), runGeometryExperiments);
 
   if(tactic::on)
     return named_dialog(XLAT("Pure Tactics mode"), tactic::showMenu);
@@ -910,7 +910,7 @@ EX named_functionality get_o_key() {
     return named_dialog(XLAT("world overview"), showOverview);
   
   if(geometry != gNormal || NONSTDVAR)
-    return named_functionality(XLAT("geometry experiments"), runGeometryExperiments);
+    return named_functionality(XLAT("experiment with geometry"), runGeometryExperiments);
 
   return named_dialog(XLAT("world overview"), showOverview);
   }
