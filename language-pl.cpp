@@ -8087,7 +8087,7 @@ S(
   "względów technicznych (geodezyjne do tych punktów są zbyt dziwne).")
 
 S("max difference in X/Y coordinates", "maksymalna różnica współrzędnch X/Y")
-S("max difference in Z coordinate", "maksymalna różnica współrzędnej Z)
+S("max difference in Z coordinate", "maksymalna różnica współrzędnej Z")
 
 S("geodesic movement in Sol/Nil", "ruch po geodezyjnych w Sol/Nil")
 
