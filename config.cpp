@@ -683,7 +683,7 @@ EX void resetModes(char leave IS('c')) {
     }
 
   set_geometry(gNormal);
-  set_variation(eVariation::bitruncated);
+  set_variation(leave == rg::heptagons ? eVariation::pure : eVariation::bitruncated);
   
   start_game();
   }
