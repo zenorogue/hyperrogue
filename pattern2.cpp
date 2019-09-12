@@ -1623,6 +1623,10 @@ EX namespace patterns {
           }
         return res;
         }
+      case 'k': {
+        /* just keep the old color */
+        return c->landparam;
+        }
       }
     return canvasback;
     }
