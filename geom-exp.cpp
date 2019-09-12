@@ -509,6 +509,32 @@ EX string current_proj_name() {
     return XLAT("general perspective");
   }
 
+EX string geometry_name() {
+  switch(ginf[geometry].cclass) {
+    case gcHyperbolic:
+      return XLAT("hyperbolic");
+    
+    case gcEuclid: 
+      return XLAT("flat");
+    
+    case gcSphere:
+      return XLAT("spherical");
+
+    case gcSol:
+      return XLAT("Sol");
+
+    case gcNil:
+      return XLAT("Nil");
+
+    case gcSL2:
+      return XLAT("~SL(2,R)~");
+
+    case gcProduct:
+      return PIU(geometry_name()) + " x E";
+    }
+  return "?";
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -867,36 +893,7 @@ EX void showEuclideanMenu() {
     }
   else dialog::addBreak(200);
   
-  switch(ginf[geometry].cclass) {
-    case gcHyperbolic:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("hyperbolic"), 0);
-      break;
-    
-    case gcEuclid: 
-      dialog::addSelItem(XLAT("Curvature"), XLAT("flat"), 0);
-      break;
-    
-    case gcSphere:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("spherical"), 0);
-      break;
-
-    case gcSol:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("Sol"), 0);
-      break;
-
-    case gcNil:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("Nil"), 0);
-      break;
-
-    case gcSL2:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("~SL(2,R)~"), 0);
-      break;
-
-    case gcProduct:
-      dialog::addSelItem(XLAT("Curvature"), XLAT("Product"), 0);
-      break;
-    }    
-    
+  dialog::addSelItem(XLAT("geometry"), geometry_name(), 0);    
   dialog::display();
   }
 
