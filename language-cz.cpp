@@ -8308,4 +8308,95 @@ S("clear caches", "vyčistit mezipaměť")
 // in animation menu
 S("shmup action", "akce v módu střílečky")
 
+// 11.2
+
+// extra projections
+S("central inversion", "středová inverze")
+S("two-point azimuthal", "dvoubodová azimutální")
+S("two-point hybrid", "dvoubodová hybridní")
+S("Mollweide", "Mollweideova")
+S("central cylindrical", "centrální válcová")
+S("Collignon", "Collignonova")
+
+// extra settings
+
+S("draw crosshair", "kresli zaměřovací kříž")
+
+S("Display a targetting reticle in the center of the screen. Might be useful when exploring 3D modes, "
+  "as it precisely shows the direction we are going. However, the option is available in all modes.",
+  
+  "Zobrazí uprostřed obrazovky zaměřovací kříž. Může se hodit při zkoumání 3D módů, "
+  "protože přesně ukazuje směr, kterým směřuješ. K dispozici je nicméně ve všech módech.")
+
+S("radar range", "dosah radaru")
+
+S("boundary width multiplier", "hranice s multiplikátorem")
+S("grid width multiplier", "mřížka s multiplikátorem")
+S("highlight the cell forward", "zvýraznit buňku vepředu")
+S("edit widths individually", "editovat šířky jednotlivě")
+
+// extra tilings
+
+S("kite-and-dart", "Penroseovo dláždění")
+S("kite-and-dart on horospheres", "Penroseovo dláždění na horosférách")
+S("standard binary tiling", "standardní binární dláždění")
+
+S("show quotient spaces", "ukaž kvocientové prostory")
+S("three-dimensional", "trojrozměrné")
+
+// non-isotropic geometries:
+
+S("Solv geometry", "geometrie Solv")
+S("Sol", "Sol")
+
+S(
+  "Solv (aka Sol) is a 3D space where directions work in different ways. It is described by the following metric:\n"
+  "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
+  "You are currently displaying Solv in the perspective projection based on native geodesics. You can control how "
+  "the fog effects depends on the geodesic distance, and how far object in X/Y/Z coordinates are rendered.\n\n"
+  "Cells with relative x,y coordinates both over %1 and z coordinate below %2 are not rendered for technical reasons"
+  " (geodesics to that points are too weird).", 
+  
+  "Solv (též Sol) je 3D prostor, ve kterém směry fungují odlišně. je popsán následující metrikou: "
+  "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
+  
+  "V tuto chvíli se Solv zobrazuje v perspektivní projekci založené na geodetikách. Můžeš ovládat, "
+  "jak má efekt mlhy záviset na geodetické vzdálenosti a jak vzdálené objekty ve směrech "
+  "X/Y/Z se mají vykreslovat.\n\n"
+  "Políčka s relativními x,y souřadnicemi převyšujícími %1 a relativní souřadnicí z menší než %2 se z technických důvodů nevykreslují "
+  "(geodetiky, které k nim vedou, jsou příliš podivné).")
+
+S("max difference in X/Y coordinates", "maximální rozdíl v souřadnicích X/Y")
+S("max difference in Z coordinate", "maximální rozdíl v souřadnici Z")
+
+S("geodesic movement in Sol/Nil", "geodetický pohyb v Sol/Nil")
+
+// ---
+
+S("Nil geometry", "geometrie Nil")
+S("Nil", "Nil")
+
+// ---
+
+S("product space", "součinový prostor")
+S("current geometry x E", "současná geometrie x E")
+S("Only works with 2D non-Euclidean geometries", "Funguje pouze s 2D neeukleidovskými geometriemi")
+S("%1 x E", "%1 x E")
+S("Z-level height factor", "faktor výšky úrovně Z")
+
+S("precision of S2xE rings", "přesnost prstenců v S2xE")
+
+S(
+  "In S2xE, objects at spherical distances which are multiples of π will look like "
+  "rings, and objects close to these will look like crescents. "
+  "This setting controls the quality of rendering these rings and crescents.",
+  
+  "V S2xE, se objekty ve sférické vzdálenosti, která je násobkem π, "
+  "budou jevit jako prstence a objekty v blízkosti této vzdálenosti jako srpky. "
+  "Toto nastavení řídí kvalitu vykreslování těchto prstenců a srpků.")
+
+// ---
+
+S("rotation space", "prostor rotací")
+S("steps", "kroky")
 
