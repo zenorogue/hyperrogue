@@ -530,7 +530,7 @@ EX string geometry_name() {
       return XLAT("~SL(2,R)~");
 
     case gcProduct:
-      return PIU(geometry_name()) + " x E";
+      return XLAT("%1 x E", PIU(geometry_name()));
     }
   return "?";
   }
@@ -739,7 +739,7 @@ EX void showEuclideanMenu() {
         XLAT(
           "In S2xE, objects at spherical distances which are multiples of π will look like "
           "rings, and objects close to these will look like crescents. "
-          "This setting constrols the quality of rendering these rings and crescents.")
+          "This setting controls the quality of rendering these rings and crescents.")
         );
       dialog::bound_low(1);
       dialog::bound_up(256);

@@ -105,6 +105,10 @@ EX void welcomeMessage() {
     addMessage(XLAT("Good luck in the elliptic space!"));
   else if(sphere)
     addMessage(XLAT("Welcome to Spherogue!"));
+  else if(in_s2xe())
+    addMessage(XLAT("Welcome to Spherindrogue!"));
+  else if(in_h2xe())
+    addMessage(XLAT("Welcome to Hyper-X-R-Rogue!"));
   else if(sol)
     addMessage(XLAT("Welcome to SolvRogue!"));
   else if(nil)
