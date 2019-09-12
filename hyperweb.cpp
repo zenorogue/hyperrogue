@@ -48,7 +48,7 @@ namespace hr {
   const char *wheresounds;
   }
 
-#include "hyper.cpp"
+#include "hyper.h"
 
 namespace hr {
 
@@ -95,7 +95,7 @@ void showDemo() {
 
   dialog::addItem(XLAT("play the game"), 'f');
   dialog::addItem(XLAT("learn about hyperbolic geometry"), 'T');
-  dialog::addHelp(); dialog::lastItem().keycaption += " / F1";
+  dialog::addHelp(); 
   // dialog::addItem(XLAT("toggle high detail"), 'a');
   dialog::addBreak(100);
 

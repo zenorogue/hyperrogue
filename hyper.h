@@ -727,10 +727,6 @@ template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
       data[i] = data.back(), data.pop_back(), i--;
   }
 
-#if CAP_ORIENTATION
-transmatrix getOrientation();
-#endif
-
 template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0] = a; x[1] = b; x[2] = c; x[3] = d; return x; }
 template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }

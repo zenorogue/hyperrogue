@@ -63,7 +63,7 @@ EX void initializeCLI() {
 EX namespace arg {
   EX int curphase;
 
-  vector<string> argument;
+  EX vector<string> argument;
   EX int pos;
 
   EX void lshift() { pos++; }
