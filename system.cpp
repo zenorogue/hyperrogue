@@ -1179,7 +1179,10 @@ EX void set_geometry(eGeometry target) {
     int old_DIM = GDIM;
     stop_game();
     ors::reset();
-    if(among(target, gProduct, gRotSpace)) hybrid::configure(target);
+    if(among(target, gProduct, gRotSpace)) {
+      if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
+      hybrid::configure(target);
+      }
     geometry = target;
   
     if(chaosmode && bounded) chaosmode = false;

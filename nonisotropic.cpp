@@ -573,13 +573,12 @@ EX namespace hybrid {
   EX geometry_information *underlying_cgip;
   
   EX void configure(eGeometry g) {
-    if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
+    if(WDIM == 3) return;
     check_cgi();
-    cgi.prepare_basics();
+    cgi.require_basics();
     underlying = geometry;
     underlying_cgip = cgip;
     bool sph = sphere;
-    geometry = g;
     auto keep = ginf[g].menu_displayed_name;
     ginf[g] = ginf[underlying];
     ginf[g].menu_displayed_name = keep;

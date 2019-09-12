@@ -402,7 +402,9 @@ vector<eGeometry> list3d = {
   gCell5, gKiteDart3, gSol, gNil, gProduct, gRotSpace
   };
 
-void ge_select_tiling(const vector<eGeometry>& lst) {
+bool select_dims, select_quotient;
+
+void ge_select_tiling() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
 
@@ -412,15 +414,20 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
     dialog::addInfo("3D geometries are a work in progress", 0x800000); */
 
   char letter = 'a';
-  for(eGeometry i: lst) {
-    bool on = geometry == i;
-    dynamicval<eGeometry> cg(geometry, eGeometry(i));
+  for(int i=0; i<isize(ginf); i++) {
+    eGeometry g = eGeometry(i);
+    if(among(g, gProduct, gRotSpace)) hybrid::configure(g);
+    bool on = geometry == g;
+    bool in_2d = WDIM == 2;
+    dynamicval<eGeometry> cg(geometry, g);
     if(archimedean && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
+    if((!!quotient) ^ select_quotient) continue;
+    if((WDIM == 3) ^ select_dims) continue;
     dialog::addBoolItem(XLAT(
-      (geometry == gProduct && !hybri) ? XLAT("current geometry x E") : 
-      (geometry == gRotSpace && !hybri) ? XLAT("space of rotations in current geometry") : 
+      (geometry == gProduct && in_2d) ? XLAT("current geometry x E") : 
+      (geometry == gRotSpace && in_2d) ? XLAT("space of rotations in current geometry") : 
       ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action(dual::mayboth([i] {
@@ -472,6 +479,10 @@ void ge_select_tiling(const vector<eGeometry>& lst) {
       }));
     }
   
+  dialog::addBreak(100);
+  dialog::addBoolItem_action(XLAT("show quotient spaces"), select_quotient, 'Q');
+  dialog::addBoolItem_action(XLAT("three-dimensional"), select_dims, 'D');
+  
   dual::add_choice();  
   dialog::addBack();
   dialog::display();
@@ -507,7 +518,7 @@ EX void showEuclideanMenu() {
   dialog::init(XLAT("experiment with geometry"));
   
   dialog::addSelItem(XLAT("basic tiling"), XLAT(ginf[geometry].tiling_name), 't');
-  dialog::add_action_push([] { ge_select_tiling(tilinglist); });
+  dialog::add_action([] { select_quotient = quotient; select_dims = WDIM == 3; pushScreen(ge_select_tiling); });
 
   int ts = ginf[geometry].sides;
   int tv = ginf[geometry].vertex;
@@ -636,11 +647,11 @@ EX void showEuclideanMenu() {
   else
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 'q');
 
-  dialog::add_action_push([] { ge_select_tiling(quotientlist); });
+  dialog::add_action([] { select_quotient = !quotient; select_dims = WDIM == 3; pushScreen(ge_select_tiling); });
 
   #if MAXMDIM >= 4
   dialog::addSelItem(XLAT("dimension"), its(WDIM), 'd');
-  dialog::add_action_push([] { ge_select_tiling(list3d); });
+  dialog::add_action([] { select_quotient = quotient; select_dims = WDIM != 3; pushScreen(ge_select_tiling); });
   #endif
   
   #if CAP_IRR

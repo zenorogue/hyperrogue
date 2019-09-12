@@ -512,8 +512,8 @@ static const flagtype qsZEBRA           = qANYQ | qSMALL | qBOUNDED | qZEBRA;
 static const flagtype qsFIELD           = qANYQ | qFIELD | qBOUNDED;
 static const flagtype qsDOCKS           = qANYQ | qSMALL | qBOUNDED | qDOCKS;
 static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
-static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD;
-static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC;
+static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD | qANYQ;
+static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
 static const flagtype qsBP              = qBINARY | qPENROSE;
 
 EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
@@ -526,7 +526,7 @@ EX geometryinfo1 giSphere3 = { gcSphere,     3, 3, 4, {1,1, 1,+1} };
 
 EX geometryinfo1 giSol     = { gcSol,        3, 3, 4, {1,1, 1,0 } };
 EX geometryinfo1 giNil     = { gcNil,        3, 3, 4, {1,1, 1,0 } };
-EX geometryinfo1 giProduct = { /* will be filled in product::configure() */ };
+EX geometryinfo1 giProduct = { gcSL2,        3, 3, 4, {1,1, 1,0 } /* will be filled in product::configure() */ };
 EX geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
 
 /** list of available geometries */
