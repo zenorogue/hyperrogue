@@ -86,25 +86,25 @@ endif
 ifeq (${TOOLCHAIN},clang)
   CXXFLAGS_EARLY += -std=c++11 -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
-  CXXFLAGS_EARLY += -Wno-format-pedantic -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough
+  CXXFLAGS_EARLY += -Wno-format-pedantic -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
 endif
 
 ifeq (${TOOLCHAIN},gcc)
   CXXFLAGS_EARLY += -std=c++11 -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
-  CXXFLAGS_EARLY += -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough
+  CXXFLAGS_EARLY += -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
 endif
 
 ifeq (${TOOLCHAIN},gcc46)
   CXXFLAGS_EARLY += -std=c++0x
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
-  CXXFLAGS_EARLY += -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough
+  CXXFLAGS_EARLY += -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
 endif
 
 ifeq (${TOOLCHAIN},mingw)
   CXXFLAGS_EARLY += -std=c++11 -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
-  CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough
+  CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
 endif
 
 
