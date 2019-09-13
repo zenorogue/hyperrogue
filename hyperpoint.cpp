@@ -44,19 +44,13 @@ eVariation variation;
  *
  */
 
-#if ISSTEAM && ISLINUX
-#define ONLY_STEAMLINUX(x) x
-#else
-#define ONLY_STEAMLINUX(x) 
-#endif
-
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
   
   #if MAXMDIM == 4
-  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> { ONLY_STEAMLINUX((array<ld, MAXMDIM>)) {x, y, z, w}} { 
+  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> { ONLY_GCC46((array<ld, MAXMDIM>)) {x, y, z, w}} { 
   #else
-  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> { ONLY_STEAMLINUX((array<ld, MAXMDIM>)) {x, y, z}} { 
+  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> { ONLY_GCC46((array<ld, MAXMDIM>)) {x, y, z}} { 
   #endif
     // self[0] = x; self[1] = y; self[2] = z; 
     // if(MAXMDIM == 4) self[3] = w;
