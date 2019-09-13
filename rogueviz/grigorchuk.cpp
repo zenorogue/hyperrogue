@@ -308,7 +308,7 @@ namespace hr {
 struct hrmap_grigorchuk : hrmap_standard {
 
   heptagon *origin;
-  heptagon *getOrigin() { return origin; }
+  heptagon *getOrigin() override { return origin; }
   
   map<heptagon*, grigorchuk::prep> dec;
   map<grigorchuk::prep, heptagon*> enc;
@@ -335,7 +335,7 @@ struct hrmap_grigorchuk : hrmap_standard {
     gtie(origin, &grigorchuk::grig_I);
     }
 
-  heptagon *create_step(heptagon *p, int d) {
+  heptagon *create_step(heptagon *p, int d) override {
     auto pr = dec[p];
     // auto pr1 = pr;
 
@@ -373,7 +373,7 @@ struct hrmap_grigorchuk : hrmap_standard {
     return h;
     }
   
-  void draw() {
+  void draw() override {
   
     dq::visited_by_matrix.clear();
     dq::enqueue_by_matrix(viewctr.at, actualV(viewctr, cview()));
@@ -416,7 +416,7 @@ struct hrmap_grigorchuk : hrmap_standard {
 eGeometry gGrigorchuk(eGeometry(-1));
 
 void create_grigorchuk_geometry() {
-  if(gGrigorchuk != -1) return;
+  if(gGrigorchuk != eGeometry(-1)) return;
   ginf.push_back(ginf[gNormal]);
   gGrigorchuk = eGeometry(isize(ginf) - 1);
   variation = eVariation::pure;
