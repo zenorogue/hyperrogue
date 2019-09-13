@@ -504,6 +504,10 @@ union SDL_Event;
 #define CAP_STARTANIM (!(ISMINI))
 #endif
 
+#ifndef CAP_SOLV
+#define CAP_SOLV (MAXMDIM >= 4 && !ISWEB)
+#endif
+
 #ifndef CAP_FIELD
 #define CAP_FIELD (!(ISMINI))
 #endif

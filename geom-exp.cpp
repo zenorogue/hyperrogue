@@ -422,6 +422,8 @@ void ge_select_tiling() {
     dynamicval<eGeometry> cg(geometry, g);
     if(archimedean && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;
+    if(sol && !CAP_SOLV) continue;
+    if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     if((!!quotient) ^ select_quotient) continue;
     if((WDIM == 3) ^ select_dims) continue;
@@ -481,7 +483,9 @@ void ge_select_tiling() {
   
   dialog::addBreak(100);
   dialog::addBoolItem_action(XLAT("show quotient spaces"), select_quotient, 'Q');
+  #if MAXMDIM == 4
   dialog::addBoolItem_action(XLAT("three-dimensional"), select_dims, 'D');
+  #endif
   
   dual::add_choice();  
   dialog::addBack();

@@ -695,7 +695,7 @@ void init() {
     bool ball = (sp == shader_projection::ball);
     bool flatten = (sp == shader_projection::flatten);
     
-    if(ssol && ISWEB) continue;
+    if(ssol && !CAP_SOLV) continue;
     
     programs[i][j] = new GLprogram(stringbuilder(
       1,       "#define PI 3.14159265358979324\n",
@@ -743,7 +743,9 @@ void init() {
       1,       "  return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]);",
       1,       "  }",
       
-      ssol,    solv::solshader,      
+      #if CAP_SOLV
+      ssol,    solv::solshader,
+      #endif
       snil,    nilv::nilshader,
       ssl2,    slr::slshader,
 

@@ -324,13 +324,14 @@ void display_data::set_projection(int ed) {
   start_projection(ed, shaderside_projection);
   if(pmodel == mdRug) return;
   
+  #if CAP_SOLV
   if(glhr::new_shader_projection == glhr::shader_projection::standardSolv) {
     
     static bool toload = true;
     
     static GLuint invexpid = 0;
     
-    if(toload) { // if(!has_table.count(_program)) {
+    if(toload) {
       solv::load_table();
       if(!solv::table_loaded) { pmodel = mdPerspective; set_projection(ed); return; }
 
@@ -375,6 +376,7 @@ void display_data::set_projection(int ed) {
     
     glhr::set_solv_prec(solv::PRECX, solv::PRECY, solv::PRECZ);    
     }
+  #endif
 
   if(glhr::new_shader_projection == glhr::shader_projection::standardSL2) {
     glhr::set_index_sl(0);

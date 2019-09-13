@@ -37,7 +37,7 @@ EX namespace nisot {
   EX }
 
 EX namespace solv {
-  
+  #if CAP_SOLV
   EX int PRECX, PRECY, PRECZ;
   
   EX vector<nisot::ptlow> inverse_exp_table;
@@ -336,6 +336,7 @@ EX namespace solv {
     
     "return res;"
     "}";
+  #endif
 EX }
 
 EX namespace nilv {
@@ -1319,14 +1320,18 @@ EX }
 EX namespace nisot {
 
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
-    if(sol) return solv::christoffel(at, velocity, transported);
-    else if(nil) return nilv::christoffel(at, velocity, transported);
+    if(nil) return nilv::christoffel(at, velocity, transported);
+    #if CAP_SOLV
+    else if(sol) return solv::christoffel(at, velocity, transported);
+    #endif
     else if(sl2) return slr::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
     }
 
   EX bool in_table_range(hyperpoint h) {
+    #if CAP_SOLV
     if(sol) return solv::in_table_range(h);
+    #endif
     return true;
     }
   
@@ -1415,7 +1420,9 @@ EX namespace nisot {
     }
   
   EX hrmap *new_map() { 
+    #if CAP_SOLV
     if(sol) return new solv::hrmap_sol; 
+    #endif
     if(nil) return new nilv::hrmap_nil;
     if(prod) return new product::hrmap_product;
     if(hybri) return new rots::hrmap_rotation_space;
@@ -1424,15 +1431,18 @@ EX namespace nisot {
   
   auto config = addHook(hooks_args, 0, [] () {
     using namespace arg;
+    #if CAP_SOLV
     if(argis("-solrange")) {
       shift_arg_formula(solv::solrange_xy);
       shift_arg_formula(solv::solrange_z);
       return 0;
       }
+    #endif
     if(argis("-slrange")) {
       shift_arg_formula(slr::range_xy);
       return 0;
       }
+    #if CAP_SOLV
     else if(argis("-fsol")) {
       shift(); solv::solfname = args();
       return 0;
@@ -1442,6 +1452,7 @@ EX namespace nisot {
       shift_arg_formula(solv::glitch_z);
       return 0;
       }
+    #endif
     else if(argis("-solgeo")) {
       geodesic_movement = true;
       pmodel = mdGeodesic;
