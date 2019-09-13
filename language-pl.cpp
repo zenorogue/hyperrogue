@@ -5057,11 +5057,11 @@ S("firewall lines: Palace", "linie ścian ognia: Pałac")
 S("firewall lines: Power", "linie ścian ognia: Moc")
 
 S("(ESC) tour menu", "(ESC) menu ucznia")
-S("Try the Tutorial to help with understanding the "
+S("Try the Guided tour to help with understanding the "
   "geometry of HyperRogue (menu -> special modes).\n\n",
-  "Uruchom Podręcznik, by zrozumieć geometrię HyperRogue (menu -> tryby specjalne.\n\n")
+  "Uruchom Wycieczkę, by zrozumieć geometrię HyperRogue (menu -> tryby specjalne).\n\n")
 
-S("Tutorial", "Podręcznik")
+S("guided tour", "Wycieczka")
 S("spherical geometry", "geometria sferyczna")
 S("Euclidean geometry", "geometria euklidesowa")
 S("more curved hyperbolic geometry", "większa krzywizna")
@@ -5079,23 +5079,23 @@ S("Help texts disabled.", "Teksty pomocy wyłączone.")
 S("next slide", "kolejny slajd")
 S("previous slide", "poprzedni slajd")
 
-S("This tutorial is different than most other game tutorials -- "
+S("This guided tour is different than most other game tutorials -- "
   "you are not forced to do anything, and you can go wherever you want.\n\n"
   "However, %the1 is not what we are talking about now. "
   "We will not explain this land at the moment, and you could potentially "
   "get lost there.\n\n"
   "Remember that you can get to the next slide by pressing Enter.",
   
-  "Ten podręcznik różni się od większości innych -- "
+  "Ta wycieczka różni się od większości podręczników w grach -- "
   "nie masz obowiązku robić tego, co tutorial sugeruje, możesz iść, dokąd chcesz.\n\n"
   "Ale %1 nie jest miejscem, o którym teraz mówimy. Nie wyjaśnimy go "
   "i potencjalnie możesz się zgubić.\n\n"
   "Naciśnij Enter, by przejść do kolejnego slajdu.")
 
 S("Introduction", "Wstęp")
-S("Welcome to the HyperRogue tutorial!", "Witaj w podręczniku HyperRogue!")
+S("Welcome to the HyperRogue Guided Tour!", "Witaj w Wycieczce HyperRogue!")
 S(
-  "This tutorial is mostly aimed to show what is "
+  "This tour is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
   "It also shows the basics of gameplay, and "
   "how is it affected by geometry.\n\n"
@@ -5104,7 +5104,7 @@ S(
   "press ESC to see a "
   "menu with other options.",
   
-  "Zadaniem tego podręcznika jest pokazanie szczególnych własności "
+  "Zadaniem tej wycieczki jest pokazanie szczególnych własności "
   "geometrii używanej przez HyperRogue; są też pokazane podstawy "
   "rozgrywki i jak geometria na nie wpływa.\n\n"
   "Ty decydujesz, kiedy chcesz skończyć bawić się obecnym \"slajdem\" "
@@ -5447,13 +5447,13 @@ S("In the shoot'em up mode, space and time is continuous. "
   "koncentrujących się na konkretnym wyzwaniu.")
 
 S("THE END", "KONIEC")
-S("leave the Tutorial", "opuść Podręcznik")
+S("leave the tour mode", "opuść wycieczkę")
 S(
   "This tour shows just a small part of what you can see in the world of HyperRogue. "
   "For example, "
   "hyperbolic mazes are much nicer than their Euclidean counterparts. "
   "Have fun exploring!\n\n"
-  "Press '5' to leave the tutorial mode.",
+  "Press '5' to leave the tour mode.",
 
   "Ten podręcznik pokazuje tylko małą część świata HyperRogue. Na przykład, "
   "hiperboliczne labirynty są ciekawsze niż euklidesowe. Miłej zabawy!"
@@ -5597,7 +5597,6 @@ S("four triangles", "cztery trójkąty")
 S("big triangles: rings", "duże trójkąty: pierścenie")
 
 // missing for the Tutorial
-S("tutorial", "podręcznik")
 S("This Orb is not compatible with the Tutorial.", "Ta Sfera nie jest kompatybilna z podręcznikiem.")
 
 // local scores
@@ -5625,8 +5624,8 @@ S(
   "Pamiętaj, że prawie wszystko możesz kliknąć prawym przyciskiem, "
   "by dowiedzieć się czegoś na dany temat.")
 
-S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
-  "Chcesz zrozumieć geometrię w HyperRogue? Obejrzyj Podręcznik!")
+S("Want to understand the geometry in HyperRogue? Try the Guided Tour!",
+  "Chcesz zrozumieć geometrię w HyperRogue? Idź na wycieczkę!")
 
 S(
   "Collecting 25 treasures in a given land may be dangerous, "
@@ -5852,14 +5851,14 @@ S("save a Princess", "uratuj Księżniczkę")
   
 S("Note for mobiles", "Notka dla urządzeń mobilnych")
 S(
-    "This tutorial is designed for computers, "
+    "This tour is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
     "comfortably -- just ignore the keys "
     "given and select options from MENU.\n\n"
     "Select 'next slide' from MENU.",
 
-    "Ten tutorial jest przeznaczony głównie "
+    "Ta wycieczka jest przeznaczony głównie "
     "dla komputerów i klawisze są podane "
     "dla wszystkich akcji. Działa jednak bez "
     "klawiatury, choć mniej wygodnie -- "
@@ -6167,8 +6166,8 @@ S("\n\nThis orb also allows you to collect items encased in ice.",
 S("%The1 drains your powers!", "%The1 wysysa Twoje moce!")
 
 // additions
-S(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).", 
-  " Ten podręcznik nie idzie do przodu sam z siebie -- musisz nacisnąć Enter (nie podczas czytania tekstu pomocy)."
+S(" This tour will not advance on its own -- you have to press Enter (not while reading help text).", 
+  " Ta wycieczka nie idzie do przodu sama z siebie -- musisz nacisnąć Enter (nie podczas czytania tekstu pomocy)."
   )
 
 S("Hint: hold Alt to highlights enemies and other important features.",
@@ -8160,3 +8159,5 @@ S("Welcome to PSL(2,R)-ogue!", "Witaj w PSL(2,R)-ogue!")
 S("play this Strange Challenge unofficially", "gram nieoficjalnie")
 
 S("floors in 2D geometries", "podłogi w geometriach 2D")
+
+S("slides", "slajdy")

@@ -5116,12 +5116,12 @@ S("firewall lines: Palace", "čáry ohnivých stěn: Palác")
 S("firewall lines: Power", "čáry ohnivých stěn: Moc")
 
 S("(ESC) tour menu", "(ESC) menu prohlídky")
-S("Try the Tutorial to help with understanding the "
+S("Try the Guided Tour to help with understanding the "
   "geometry of HyperRogue (menu -> special modes).\n\n",
   "Zkuste Tutoriál, chcete-li pomoci s chápáním geometrie "
   "HyperRogue (menu -> speciální módy.\n\n")
 
-S("Tutorial", "Tutoriál")
+S("guided tour", "Tutoriál")
 S("spherical geometry", "sférická geometrie")
 S("Euclidean geometry", "eukleidovská geometrie")
 S("more curved hyperbolic geometry", "zakřivenější hyperbolická geometrie")
@@ -5139,7 +5139,7 @@ S("Help texts disabled.", "Texty nápovědy vypnuty.")
 S("next slide", "další snímek")
 S("previous slide", "předešlý snímek")
 
-S("This tutorial is different than most other game tutorials -- "
+S("This guided tour is different than most other game tutorials -- "
   "you are not forced to do anything, and you can go wherever you want.\n\n"
   "However, %the1 is not what we are talking about now. "
   "We will not explain this land at the moment, and you could potentially "
@@ -5153,7 +5153,7 @@ S("This tutorial is different than most other game tutorials -- "
   "Nezapomeň, že stiskem klávesy Enter můžeš přejít na další snímek.")
 
 S("Introduction", "Úvod")
-S("Welcome to the HyperRogue tutorial!", "Vítej v tutoriálu HyperRogue!")
+S("Welcome to the HyperRogue Guided Tour!", "Vítej v tutoriálu HyperRogue!")
 S(
   "This tutorial is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
@@ -5511,13 +5511,13 @@ S("In the shoot'em up mode, space and time is continuous. "
   "způsob hry nebo jsou zaměřené na určitý úkol.")
 
 S("THE END", "KONEC")
-S("leave the Tutorial", "opusť Tutoriál")
+S("leave the tour mode", "opusť Tutoriál")
 S(
   "This tour shows just a small part of what you can see in the world of HyperRogue. "
   "For example, "
   "hyperbolic mazes are much nicer than their Euclidean counterparts. "
   "Have fun exploring!\n\n"
-  "Press '5' to leave the tutorial mode.",
+  "Press '5' to leave the tour mode.",
 
   "Tato prohlídka ukazuje jen malou část toho, co můžeš vidět ve světě "
   "HyperRogue. Tak například: hyperbolická bludiště jsou mnohem hezčí "
@@ -5656,7 +5656,7 @@ S("four triangles", "ètyøi trojúhelníky")
 S("big triangles: rings", "velké trojúhelníky: prstence")
 
 // missing for the Tutorial
-S("tutorial", "tutoriál")
+S("guided tour", "tutoriál")
 S("This Orb is not compatible with the Tutorial.", "Tato Sféra není kompatibilní s tutoriálem.")
 
 // local scores
@@ -5685,7 +5685,7 @@ S(
   "Nezapomeò, že témìø na všechno mùžeš kliknout pravým tlaèítkem a získat "
   "o tom více informací.")
 
-S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
+S("Want to understand the geometry in HyperRogue? Try the Guided Tour!",
   "Chceš porozumìt geometrii v HyperRogue? Zkus Tutoriál!")
 
 S(
@@ -6315,7 +6315,7 @@ S("\n\nThis orb also allows you to collect items encased in ice.",
 S("%The1 drains your powers!", "%The1 vysává tvou sílu!")
 
 // additions
-S(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).", 
+S(" This tour will not advance on its own -- you have to press Enter (not while reading help text).", 
   " Tento tutoriál nepostupuje sám od sebe -- musíš stisknout Enter (ale ne při čtení nápovědy)."
   )
 

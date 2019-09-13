@@ -74,10 +74,10 @@ hint hints[] = {
     []() { return !canmove; },
     []() { 
       dialog::addHelp(XLAT(
-        "Want to understand the geometry in HyperRogue? Try the Tutorial!"
+        "Want to understand the geometry in HyperRogue? Try the Guided Tour!"
         ));
       dialog::addBreak(50);
-      dialog::addItem(XLAT("Tutorial"), 'z');
+      dialog::addItem(XLAT("guided tour"), 'z');
       },
     []() {
 #if CAP_TOUR    
@@ -301,7 +301,7 @@ EX void showMission() {
 
   dialog::init(
 #if CAP_TOUR
-    tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
+    tour::on ? (canmove ? XLAT("guided tour") : XLAT("GAME OVER")) :
 #endif
     (cheater && !autocheat)? XLAT("It is a shame to cheat!") : 
     racing::on ? "racing mode" :
@@ -433,7 +433,7 @@ EX void showMission() {
       dialog::addItem(XLAT("next slide"), SDLK_RETURN);
       dialog::addItem(XLAT("previous slide"), SDLK_BACKSPACE);
       dialog::addItem(XLAT("list of slides"), '9');
-      dialog::addItem(XLAT("exit the Tutorial"), '0');
+      dialog::addItem(XLAT("leave the tour mode"), '0');
       }
     else
       dialog::addBreak(200);

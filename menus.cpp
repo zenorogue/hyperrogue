@@ -522,7 +522,7 @@ EX void showChangeMode() {
                                // gameplay modes
 
 #if CAP_TOUR
-  dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
+  dialog::addBoolItem(XLAT("guided tour"), tour::on, 'T');
 #endif
   dialog::addBoolItem(XLAT("creative mode"), (false), 'c');
   dialog::add_action_push(showCreative);
@@ -669,7 +669,7 @@ EX void showStartMenu() {
 
 #if CAP_TOUR
   dialog::addBreak(100);
-  dialog::addBigItem(XLAT("tutorial"), 't');
+  dialog::addBigItem(XLAT("guided tour"), 't');
   dialog::addInfo(XLAT("learn about hyperbolic geometry!"));
 #endif
 

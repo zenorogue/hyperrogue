@@ -286,7 +286,7 @@ bool handleKeyTour(int sym, int uni) {
 EX void checkGoodLand(eLand l) {
   if(!showland(l) && texts) 
     gotoHelp(XLAT(
-      "This tutorial is different than most other game tutorials -- "
+      "This guided tour is different than most other game tutorials -- "
       "you are not forced to do anything, and you can go wherever you want.\n\n"
       "However, %the1 is not what we are talking about now. "
       "We will not explain this land at the moment, and you could potentially "
@@ -294,7 +294,7 @@ EX void checkGoodLand(eLand l) {
       "Remember that you can get to the next slide by pressing Enter.",
       l
       ) +
-      XLAT(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).")
+      XLAT(" This tour will not advance on its own -- you have to press Enter (not while reading help text).")
       );
   }
 
@@ -373,7 +373,7 @@ EX void start() {
 EX slide default_slides[] = {
 #if ISMOBILE
   {"Note for mobiles", 10, LEGAL_NONE | QUICKSKIP,
-    "This tutorial is designed for computers, "
+    "This tour is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
     "comfortably -- just ignore the keys "
@@ -383,7 +383,7 @@ EX slide default_slides[] = {
     [] (presmode mode) {
       if(mode == pmStartAll) firstland = specialland = laIce;
       if(mode == 1) {
-        if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue tutorial!"));
+        if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue Guided Tour!"));
         else clearMessages();  
         }
       SHOWLAND( l == laIce );
@@ -391,7 +391,7 @@ EX slide default_slides[] = {
     },
 #endif
   {"Introduction", 10, LEGAL_NONE | QUICKSKIP,
-    "This tutorial is mostly aimed to show what is "
+    "This tour is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
     "It also shows the basics of gameplay, and "
     "how is it affected by geometry.\n\n"
@@ -402,7 +402,7 @@ EX slide default_slides[] = {
     [] (presmode mode) {
       if(mode == pmStartAll) firstland = specialland = laIce;
       if(mode == 1) {
-        if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue tutorial!"));
+        if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue Guided Tour!"));
         else clearMessages();  
         }
       SHOWLAND( l == laIce );
@@ -814,9 +814,9 @@ EX slide default_slides[] = {
     "For example, "
     "hyperbolic mazes are much nicer than their Euclidean counterparts. "
     "Have fun exploring!\n\n"
-    "Press '5' to leave the tutorial mode.",
+    "Press '5' to leave the tour mode.",
     [] (presmode mode) {
-      slidecommand = "leave the Tutorial";
+      slidecommand = XLAT("leave the tour mode");
       if(mode == 4) restart_game(rg::tour);
       }
     }

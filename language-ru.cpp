@@ -5212,11 +5212,11 @@ S("firewall lines: Palace", "стены огня: Дворец")
 S("firewall lines: Power", "стены огня: Сила")
  
 S("(ESC) tour menu", "(ESC) меню обучения")
-S("Try the Tutorial to help with understanding the "
+S("Try the Guided Tour to help with understanding the "
   "geometry of HyperRogue (menu -> special modes).\n\n",
   "Попробуйте Руководство, чтобы понять геометрию HyperRogue (меню -> специальные режимы.\n\n")
  
-S("Tutorial", "Руководство")
+S("guided tour", "Руководство")
 S("spherical geometry", "сферическая геометрия")
 S("Euclidean geometry", "евклидова геометрия")
 S("more curved hyperbolic geometry", "более искривлённая геометрия")
@@ -5234,7 +5234,7 @@ S("Help texts disabled.", "Тексты помощи выключены.")
 S("next slide", "следующий слайд")
 S("previous slide", "предыдущий слайд")
  
-S("This tutorial is different than most other game tutorials -- "
+S("This guided tour is different than most other game tutorials -- "
   "you are not forced to do anything, and you can go wherever you want.\n\n"
   "However, %the1 is not what we are talking about now. "
   "We will not explain this land at the moment, and you could potentially "
@@ -5248,7 +5248,7 @@ S("This tutorial is different than most other game tutorials -- "
   "Нажми Enter, чтобы перейти на следующий слайд.")
  
 S("Introduction", "Введение")
-S("Welcome to the HyperRogue tutorial!", "Добро пожаловать в руководство HyperRogue!")
+S("Welcome to the HyperRogue Guided Tour!", "Добро пожаловать в руководство HyperRogue!")
 S(
   "This tutorial is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
@@ -5595,13 +5595,13 @@ S("In the shoot'em up mode, space and time is continuous. "
   "концентрирующиеся на определённых задачах.")
  
 S("THE END", "КОНЕЦ")
-S("leave the Tutorial", "выйти из Руководства")
+S("leave the tour mode", "выйти из Руководства")
 S(
   "This tour shows just a small part of what you can see in the world of HyperRogue. "
   "For example, "
   "hyperbolic mazes are much nicer than their Euclidean counterparts. "
   "Have fun exploring!\n\n"
-  "Press '5' to leave the tutorial mode.",
+  "Press '5' to leave the tour mode.",
  
   "Это путешествие показало лишь малую часть мира HyperRogue. Например, "
   "гиперболические лабиринты намного приятнее евклидовых. Приятной игры!"
@@ -5745,7 +5745,7 @@ S("four triangles", "четыре треугольника")
 S("big triangles: rings", "большие треугольники: кольца")
  
 // missing for the Tutorial
-S("tutorial", "руководство")
+S("guided tour", "руководство")
 S("This Orb is not compatible with the Tutorial.", "Эта сфера не совместима с Руководством.")
  
 // local scores
@@ -5773,7 +5773,7 @@ S(
   "Remember that you can right click almost anything for more information.",
   "Помни, что правая кнопка мыши даст информацию практически обо всём.")
  
-S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
+S("Want to understand the geometry in HyperRogue? Try the Guided Tour!",
   "Хочешь понять геометрию в HyperRogue? Воспользуйся Руководством!")
  
 S(
@@ -6390,7 +6390,7 @@ S("\n\nThis orb also allows you to collect items encased in ice.",
 S("%The1 drains your powers!", "%1 пьет ваши силы!")
  
 // additions
-S(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).",
+S(" This tour will not advance on its own -- you have to press Enter (not while reading help text).",
   " Это руководство не будет продвигаться вперед само по себе -- нужно нажать Enter (не во время чтения текста помощи)."
   )
  

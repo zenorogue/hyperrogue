@@ -161,7 +161,7 @@ void buildHelpText() {
     + "http//roguetemple.com/z/hyper/\n\n";
   
 #if CAP_TOUR
-  help += XLAT("Try the Tutorial to help with understanding the "
+  help += XLAT("Try the Guided Tour to help with understanding the "
     "geometry of HyperRogue (menu -> special modes).\n\n");
 #endif
   
