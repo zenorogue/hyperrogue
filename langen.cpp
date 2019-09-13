@@ -61,7 +61,7 @@ int utfsize(char c) {
   unsigned char cu = c;
   if(cu < 128) return 1;
   if(cu < 224) return 2;
-  if(cu < 0xE0) return 3;
+  if(cu < 0xF0) return 3;
   return 4;
   }
 
