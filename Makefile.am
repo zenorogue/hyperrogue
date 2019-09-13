@@ -25,7 +25,7 @@ language-data.cpp: langen
 	./langen > language-data.cpp
 
 autohdr.h: makeh *.cpp
-	./makeh locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp *.cpp > autohdr.h
+	./makeh locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp *.cpp > autohdr.h
 
 #############################
 # Platform specific setup
