@@ -16,13 +16,16 @@ dist_music_DATA = music/hr3-caves.ogg music/hr3-desert.ogg music/hr3-hell.ogg mu
 soundsdir=$(datadir)/hyperrogue/sounds
 dist_sounds_DATA = sounds/*
 
-noinst_PROGRAMS = langen
-langen_SOURCES = langen.cpp 
+noinst_PROGRAMS = langen makeh
+langen_SOURCES = langen.cpp makeh.cpp
 langen_CXXFLAGS = -O0 -std=c++11 ${AM_CXXFLAGS}
 BUILT_SOURCES = language-data.cpp
 
 language-data.cpp: langen
 	./langen > language-data.cpp
+
+autohdr.h: makeh *.cpp
+	./makeh locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp *.cpp > autohdr.h
 
 #############################
 # Platform specific setup

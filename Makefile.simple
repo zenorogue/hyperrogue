@@ -155,6 +155,12 @@ hyper.res: hyper.rc hr-icon.ico
 langen$(EXE_EXTENSION): langen.cpp language-??.cpp language-ptbr.cpp
 	$(CXX) -O0 $(CXXFLAGS) $(langen_CXXFLAGS) langen.cpp $(LDFLAGS) -o $@
 
+makeh$(EXE_EXTENSION): makeh.cpp
+	$(CXX) makeh.cpp -o $@
+
+autohdr.h: makeh$(EXE_EXTENSION) *.cpp
+	./makeh locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp *.cpp > autohdr.h
+
 language-data.cpp: langen$(EXE_EXTENSION)
 	./langen > language-data.cpp
 
