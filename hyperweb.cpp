@@ -48,7 +48,7 @@ namespace hr {
   const char *wheresounds;
   }
 
-#include "hyper.h"
+#include "hyper.cpp"
 
 namespace hr {
 

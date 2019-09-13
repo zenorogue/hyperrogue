@@ -358,7 +358,12 @@ void display_data::set_projection(int ed) {
         }
       println(hlog, "maxd = ", maxd);
       
+      #if !ISWEB
       glTexImage3D(GL_TEXTURE_3D, 0, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ, 0, GL_RGBA, GL_FLOAT, xbuffer);
+      #else
+      // glTexStorage3D(GL_TEXTURE_3D, 1, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ);
+      // glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, PRECX, PRECY, PRECZ, GL_RGBA, GL_FLOAT, xbuffer);
+      #endif
       delete[] xbuffer;
       
       }

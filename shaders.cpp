@@ -695,6 +695,8 @@ void init() {
     bool ball = (sp == shader_projection::ball);
     bool flatten = (sp == shader_projection::flatten);
     
+    if(ssol && ISWEB) continue;
+    
     programs[i][j] = new GLprogram(stringbuilder(
       1,       "#define PI 3.14159265358979324\n",
 

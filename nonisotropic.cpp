@@ -1076,7 +1076,11 @@ EX namespace slr {
       "  float mina = 0.;"
       "  float maxa = PI/4.;"
       "  lo_gphi = 0.; lo_s = r; lo_alpha = 0.;"
+#if ISWEB
+      "  for(int it=0; it<50; it++) { if(it >= uIterations) break; "
+#else
       "  for(int it=0; it<uIterations; it++) {"
+#endif
       "    alpha = (mina + maxa) / 2.;"
       "    c = sqrt(cos(2. * alpha));"
       "    s = asinh(sinh(r) / cos(alpha) * c) / c;"
@@ -1090,7 +1094,11 @@ EX namespace slr {
       "  int next_nan = 1;"
       "  float mina = PI/4.;"
       "  float maxa = PI/2.;"
+#if ISWEB
+      "  for(int it=0; it<50; it++) { if(it >= uIterations) break; "
+#else
       "  for(int it=0; it<uIterations; it++) {"
+#endif
       "    alpha = (mina + maxa) / 2.;"
       "    c = sqrt(-cos(2. * alpha));"
       "    if(sinh(r) * c > bound * cos(alpha)) { next_nan = 1; maxa = alpha; continue; }"
@@ -1101,7 +1109,11 @@ EX namespace slr {
       "    }"
       "  if(next_nan != 0) {"
       "    mina = PI/4.; "
+#if ISWEB
+      "    for(int it=0; it<50; it++) { if(it >= uIterations) break; "
+#else
       "    for(int it=0; it<uIterations; it++) {"
+#endif
       "      alpha = (mina + maxa) / 2.;"
       "      c = sqrt(-cos(2. * alpha));"
       "      float z = sinh(r) * c / cos(alpha);"
