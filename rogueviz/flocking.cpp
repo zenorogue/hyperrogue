@@ -16,13 +16,13 @@
 
 // press 'o' when flocking active to change the parameters.
 
-#ifndef NO_THREADS
+#ifdef USE_THREADS
 #include <thread>
 int threads = 1;
 #endif
 
 template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
-#ifdef NO_THREADS
+#ifndef USE_THREADS
   return action(0,N);
 #else
   if(threads == 1) return action(0,N);
@@ -327,7 +327,7 @@ namespace flocking {
       for(int i=0; i<N; i++) 
         vdata[i].cp.shade = shape;
       }
-    #ifndef NO_THREADS
+    #ifdef USE_THREADS
     else if(argis("-threads")) {
       shift(); threads = argi();
       }
