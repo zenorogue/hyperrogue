@@ -29,33 +29,33 @@
 # Vineyard [16]
 [16] */music/hr3-laboratory.ogg
 # Dead Caves [17]
-[17] */music/hr3-graveyard.ogg
+[17] */music/hr3-caves.ogg
 # Hive [18]
 [18] */music/hr3-motion.ogg
 # Land of Power [19]
 [19] */music/hr3-mirror.ogg
 # Camelot [20]
-[20] */music/hr3-hell.ogg
+[20] */music/hr-savino-palace.ogg
 # Temple [21]
 [21] */music/hr3-rlyeh.ogg
 # CR2 [22]
 [22] */music/hr3-crossroads.ogg
 # Caribbean [23]
-[23] */music/hr3-crossroads.ogg
+[23] */music/hr-savino-caribbean.ogg
 # Red Rock Valley [24]
 [24] */music/hr3-desert.ogg
 # Minefield [25]
 [25] */music/hr3-hell.ogg
 # Ocean [26]
-[26] */music/hr3-caves.ogg
+[26] */music/hr-savino-ocean.ogg
 # Whirlpool [27]
 [27] */music/hr3-rlyeh.ogg
 # Palace [28]
-[28] */music/hr3-crossroads.ogg
+[28] */music/hr-savino-palace.ogg
 # Living Fjord [39]
-[29] */music/hr3-caves.ogg
+[29] */music/hr-savino-ocean.ogg
 # Ivory Tower [30]
-[30] */music/hr3-hell.ogg
+[30] */music/hr-savino-ivory.ogg
 # Zebra [31]
 [31] */music/hr3-motion.ogg
 # Elemental Fire [32]
@@ -65,7 +65,7 @@
 # Elemental Earth [34]
 [34] */music/hr3-caves.ogg
 # Elemental Water [35]
-[35] */music/hr3-crossroads.ogg
+[35] */music/hr-savino-caribbean.ogg
 # Crossroads III [36]
 [36] */music/hr3-crossroads.ogg
 # Seawall [37] (useless)
@@ -73,7 +73,7 @@
 # Canvas [39]
 [39] */music/hr3-laboratory.ogg
 # Wild West [41]
-[41] */music/hr3-caves.ogg
+[41] */music/hr-savino-caribbean.ogg
 # Storms [42]
 [42] */music/hr3-laboratory.ogg
 # Overgrown [43]
@@ -83,21 +83,21 @@
 # Haunted [45]
 [45] */music/hr3-graveyard.ogg
 # Windy Plains [48]
-[48] */music/hr3-laboratory.ogg
+[48] */music/hr-savino-ivory.ogg
 # Rose Garden [49]
 [49] */music/hr3-hell.ogg
 # Warped Coast/Sea [50, 51 -> 50]
-[50] */music/hr3-caves.ogg
+[50] */music/hr-savino-ocean.ogg
 # Crossroads IV [52]
 [52] */music/hr3-crossroads.ogg
 # Yendorian [53]
-[53] */music/hr3-laboratory.ogg
+[53] */music/hr-savino-ivory.ogg
 # Galapagos [54]
 [54] */music/hr3-crossroads.ogg
 # Dragon Chasms [55]
 [55] */music/hr3-caves.ogg
 # Kraken [56]
-[56] */music/hr3-rlyeh.ogg
+[56] */music/hr-savino-ocean.ogg
 # Burial Grounds [57]
 [57] */music/hr3-graveyard.ogg
 # Trollheim [58]
@@ -105,7 +105,7 @@
 # Halloween [59]
 [59] */music/hr3-graveyard.ogg
 # Dungeon [60]
-[60] */music/hr3-desert.ogg
+[60] */music/hr-savino-palace.ogg
 # Lost Mountain [61]
 [61] */music/hr3-rlyeh.ogg
 # Reptiles [62]
@@ -134,18 +134,27 @@
 [75] */music/hr3-graveyard.ogg
 [76] */music/hr3-graveyard.ogg
 # Crystal Land (alternate geometry special)
-[77] */music/hr3-desert.ogg
+[77] */music/hr-savino-palace.ogg
 # Snake Nest (three-colorable geometry special)
 [78] */music/hr3-desert.ogg
 # Docks (octagonal geometry special)
-[79] */music/hr3-caves.ogg
+[79] */music/hr-savino-caribbean.ogg
 # Ruined City
-[80] */music/hr3-graveyard.ogg
+[80] */music/hr-savino-caribbean.ogg
 # Magnetic (unused)
 [81] */music/hr3-caves.ogg
 # Jelly Kingdom
 [82] */music/hr3-laboratory.ogg
+# Lost Memory needs no music
+# Brown Islands
+[84] */music/hr-savino-caribbean.ogg
+# Free Fall
+[85] */music/hr-savino-ivory.ogg
+# Irradiated Fields
+[86] */music/hr-savino-palace.ogg
 
 # None [00] (used when the window is out of focus)
 
-HyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/
+HyperRogue soundtrack under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/
+Crossroads, Graveyard, Land of Eternal Motion, Hall of Mirrors, Hell, R'Lyeh, Living Caves, Jungle, Desert, Icy Lands by Shawn Parrotte (http://www.shawnparrotte.com)
+Caribbean, Ivory Tower, Ocean, Palace by Will Savino (http://www.willsavino.net/)
