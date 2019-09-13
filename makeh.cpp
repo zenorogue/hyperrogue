@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <cstdlib>
 
 using namespace std;
 
@@ -41,7 +42,7 @@ void gen(string sf) {
   while(getline(in, s)) {
     lineid++;
     while(s != "" && s[0] == ' ') s = s.substr(1);
-    while(s.back() == 10 || s.back() == 13) s = s.substr(0, s.size() - 1);
+    while(s != "" && (s[s.size()-1] == 10 || s[s.size()-1] == 13)) s = s.substr(0, s.size() - 1);
     if(in_hdr) {
       if(s == "#endif")
         in_hdr--;
