@@ -14,8 +14,13 @@
 #define CAP_INV 0
 #define CAP_URL 1
 #define GLES_ONLY
-#define MAXMDIM 3
 #define CAP_COMPLEX2 0
+
+#if CAP_ROGUEVIZ
+#define MAXMDIM 4
+#else
+#define MAXMDIM 3
+#endif
 
 // we want newconformist, but we don't want CAP_GD there
 #define CAP_NCONF 1
