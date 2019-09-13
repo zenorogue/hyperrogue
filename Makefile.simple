@@ -146,7 +146,7 @@ override LDFLAGS := $(LDFLAGS_EARLY) $(LDFLAGS) ${EXTRA_LDFLAGS}
 hyperrogue$(EXE_EXTENSION): $(hyper_OBJS) $(hyper_RES)
 	$(CXX) $(CXXFLAGS) $(hyper_OBJS) $(hyper_RES) $(LDFLAGS) $(hyper_LDFLAGS) -o $@
 
-hyper$(OBJ_EXTENSION): *.cpp language-data.cpp
+hyper$(OBJ_EXTENSION): *.cpp language-data.cpp autohdr.h
 	$(CXX) -O2 $(CXXFLAGS) $(hyper_CXXFLAGS) -c hyper.cpp -o $@
 
 hyper.res: hyper.rc hr-icon.ico
