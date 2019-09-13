@@ -569,6 +569,9 @@ void switch_mode(eMode m, shader_projection sp) {
       })
     }
   if(newflags & GF_LIGHTFOG) {
+    #ifdef GLES_ONLY
+    #define glFogi glFogx
+    #endif
     WITHSHADER({}, {
     /*GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -585,11 +588,7 @@ void switch_mode(eMode m, shader_projection sp) {
     glEnable(GL_LIGHT0); */
  
     glEnable(GL_FOG);
-    #ifdef GLES_ONLY
-    glFogx(GL_FOG_MODE, GL_LINEAR);
-    #else
     glFogi(GL_FOG_MODE, GL_LINEAR);
-    #endif
     glFogf(GL_FOG_START, 0);
     })
     }
