@@ -4,6 +4,7 @@ AC_LANG([C++])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([hyperpoint.cpp])
 AC_PROG_CXX
+AC_PROG_CC
 
 AC_CANONICAL_HOST
 AM_CONDITIONAL(LINUX, test ["${host_os#*linux}" != "$host_os"])
