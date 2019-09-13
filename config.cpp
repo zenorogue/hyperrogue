@@ -508,8 +508,10 @@ EX void initConfig() {
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   addsaver(vid.cells_generated_limit, "limit on cells generated", 25);
   
+  #if CAP_SOLV
   addsaver(solv::solrange_xy, "solrange-xy");
   addsaver(solv::solrange_z, "solrange-z");
+  #endif
   addsaver(slr::steps, "slr-steps");
   addsaver(slr::range_xy, "slr-range-xy");
   
@@ -820,6 +822,7 @@ EX void add_cells_drawn(char c IS('C')) {
   }
 
 string solhelp() {
+#if CAP_SOLV
   return XLAT(
     "Solv (aka Sol) is a 3D space where directions work in different ways. It is described by the following metric:\n"
     "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
@@ -828,6 +831,9 @@ string solhelp() {
     "Cells with relative x,y coordinates both over %1 and z coordinate below %2 are not rendered for technical reasons"
     " (geodesics to that points are too weird).", fts(solv::glitch_xy), fts(solv::glitch_z)
     );
+#else
+  return "";
+#endif
   }
 
 EX void edit_sightrange() {
@@ -858,6 +864,7 @@ EX void edit_sightrange() {
     }
   dialog::extra_options = [] () {
     if(pmodel == mdGeodesic && sol) {
+      #if CAP_SOLV
       dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
       dialog::add_action([] {
         auto xo = dialog::extra_options;
@@ -876,6 +883,7 @@ EX void edit_sightrange() {
         dialog::editNumber(solv::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
         dialog::extra_options = xo; popScreen();
         });
+      #endif
       }
     else if(pmodel == mdGeodesic && sl2) {
       dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
@@ -947,8 +955,10 @@ EX void edit_sightrange() {
 EX void menuitem_sightrange(char c IS('c')) {
   if(vid.use_smart_range)
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
+  #if CAP_SOLV
   else if(pmodel == mdGeodesic && sol)
     dialog::addSelItem(XLAT("3D sight range"), fts(solv::solrange_xy) + "x" + fts(solv::solrange_z), c);
+  #endif
   else if(WDIM == 3)
     dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);
   else

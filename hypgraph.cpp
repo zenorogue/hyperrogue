@@ -968,7 +968,9 @@ EX bool in_smart_range(const transmatrix& T) {
   hyperpoint h = tC0(T);
   if(invalid_point(h)) return false;
   if(nil) return true;
+  #if CAP_SOLV
   if(pmodel == mdGeodesic) return solv::in_table_range(h);
+  #endif
   hyperpoint h1;
   applymodel(h, h1);
   if(invalid_point(h1)) return false;
