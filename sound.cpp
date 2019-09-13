@@ -268,9 +268,9 @@ int read_sound_args() {
   if(argis("-m")) { PHASE(1); shift(); musicfile = argcs(); }
 #if CAP_SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
+  else if(argis("-musicfocus")) { music_out_of_focus = true; }
 #endif
   else if(argis("-svol")) { PHASEFROM(2); shift(); effvolume = argi(); }
-  else if(argis("-musicfocus")) { music_out_of_focus = true; }
   else return 1;
   return 0;
   }
