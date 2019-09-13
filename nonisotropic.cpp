@@ -51,11 +51,11 @@ EX namespace solv {
     FILE *f = fopen(solfname.c_str(), "rb");
     // if(!f) f = fopen("/usr/lib/soltable.dat", "rb");
     if(!f) { addMessage(XLAT("geodesic table missing")); pmodel = mdPerspective; return; }
-    fread(&PRECX, 4, 1, f);
-    fread(&PRECY, 4, 1, f);
-    fread(&PRECZ, 4, 1, f);
+    ignore(fread(&PRECX, 4, 1, f));
+    ignore(fread(&PRECY, 4, 1, f));
+    ignore(fread(&PRECZ, 4, 1, f));
     inverse_exp_table.resize(PRECX * PRECY * PRECZ);
-    fread(&inverse_exp_table[0], sizeof(nisot::ptlow) * PRECX * PRECY * PRECZ, 1, f);
+    ignore(fread(&inverse_exp_table[0], sizeof(nisot::ptlow) * PRECX * PRECY * PRECZ, 1, f));
     fclose(f);
     table_loaded = true;    
     }
