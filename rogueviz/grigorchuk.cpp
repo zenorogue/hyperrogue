@@ -61,7 +61,7 @@ splitter split(string s) {
     if(c == 'd') add(swapped ? s1 : s0, 'b');
     if(c == 'a') swapped = !swapped;
     }
-  return {swapped, s0, s1};
+  return splitter{swapped, s0, s1};
   }
 
 splitter split_slow(string s) {
@@ -73,7 +73,7 @@ splitter split_slow(string s) {
     if(c == 'd') ((swapped ? s1 : s0) += 'b'), ((swapped ? s0 : s1) += '-');
     if(c == 'a') swapped = !swapped, s0 += '-', s1 += '-';
     }
-  return {swapped, s0, s1};
+  return splitter{swapped, s0, s1};
   }
 
 string reduce(const string& x) {
