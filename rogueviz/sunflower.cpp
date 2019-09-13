@@ -76,9 +76,11 @@ int readArgs() {
     patterns::whichShape = '9';
     nohud = true;
     addHook(hooks_drawcell, 100, sunflower_cell);
-    addHook(hooks_mainmenu, 100, [] () {
-      dialog::addItem("sunflower", 1001); 
-      dialog::add_action([] () { dialog::editNumber(zdensity, 0, 1, .1, 1, "density", "density"); });
+    addHook(dialog::hooks_display_dialog, 100, [] () {
+      if(current_screen_cfunction() == showMainMenu) {
+        dialog::addItem("sunflower", 1001); 
+        dialog::add_action([] () { dialog::editNumber(zdensity, 0, 1, .1, 1, "density", "density"); });
+        }
       });
     }
   else return 1;

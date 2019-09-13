@@ -19,6 +19,8 @@ namespace hr {
 
 namespace hybrid { extern hrmap *pmap; }
 
+namespace qtm {
+
 color_t rcolor() {
   color_t res;
   part(res, 0) = hrand(0x80);
@@ -85,7 +87,9 @@ int args() {
 
 
 
-auto magichook = addHook(hooks_drawcell, 100, may_set_cell)
+auto hooks = addHook(hooks_drawcell, 100, may_set_cell)
   + addHook(hooks_args, 100, args);
+
+}
 
 }
