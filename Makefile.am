@@ -17,9 +17,10 @@ soundsdir=$(datadir)/hyperrogue/sounds
 dist_sounds_DATA = sounds/*
 
 noinst_PROGRAMS = langen makeh
-langen_SOURCES = langen.cpp makeh.cpp
+langen_SOURCES = langen.cpp 
 langen_CXXFLAGS = -O0 -std=c++11 ${AM_CXXFLAGS}
-BUILT_SOURCES = language-data.cpp
+makeh_SOURCES = makeh.cpp
+BUILT_SOURCES = language-data.cpp autohdr.h
 
 language-data.cpp: langen
 	./langen > language-data.cpp
