@@ -49,9 +49,9 @@
 
 #if GCC46
 #define override
-#define ONLY_GCC46(x) x
+#define ISGCC46 1
 #else
-#define ONLY_GCC46(x)
+#define ISGCC46 0
 #endif
 
 #ifndef ISWEB

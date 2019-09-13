@@ -216,7 +216,7 @@ EX void apply_memory_reserve() {
       }
     }
   catch(std::bad_alloc&) {}
-  #if ((ISLINUX && ISSTEAM) || ISWINDOWS)
+  #if (ISGCC46 || ISWINDOWS)
   // no get_new_handler on this compiler...
   default_handler = [] { throw std::bad_alloc(); };
   #else
