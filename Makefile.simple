@@ -172,7 +172,7 @@ emscripten: hyper.html
 %.html %.js %.wasm: %.emscripten-sources
 	emcc -std=c++11 -O3 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128MB hyperweb.cpp -o hyper.html
 
-hyper.emscripten-sources: *.cpp
+hyper.emscripten-sources: *.cpp autohdr.h
 
 .PHONY: clean
 
