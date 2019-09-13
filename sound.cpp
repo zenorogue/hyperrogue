@@ -258,8 +258,6 @@ EX void reuse_music_memory() {
   for(auto& s: to_free) chunks.erase(s);
   }
 
-#else
-EX void resetmusic() {}
 #endif
 
 #if CAP_COMMANDLINE
@@ -278,6 +276,11 @@ int read_sound_args() {
 auto ah_sound = addHook(hooks_args, 0, read_sound_args) + addHook(hooks_clear_cache, 0, reuse_music_memory);
 #endif
 
+#endif
+
+#if !CAP_SDLAUDIO
+EX void playSound(cell *c, const string& fname, int vol IS(100)) { }
+EX void resetmusic() { }
 #endif
 
 }

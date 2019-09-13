@@ -1194,10 +1194,12 @@ EX void configureInterface() {
   gamescreen(3);
   dialog::init(XLAT("interface"));
 
+  #if CAP_TRANS
   if(CAP_TRANS) {
     dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
     dialog::add_action_push(selectLanguageScreen);
     }
+  #endif
 
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
   dialog::add_action_push(showCustomizeChar);

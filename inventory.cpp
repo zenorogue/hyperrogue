@@ -672,7 +672,11 @@ EX namespace inv {
       }
     }
 
-#else
-always_false on, activating;
 #endif
-  }}
+
+#if !CAP_INV
+EX always_false on, activating;
+#endif
+EX }
+
+}

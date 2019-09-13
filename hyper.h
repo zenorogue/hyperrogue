@@ -26,7 +26,7 @@ namespace hr {
 
 struct always_false {
   operator bool() const { return false; };
-  void operator = (bool b) const {};
+  bool operator = (bool b) const { return b; };
   };
 
 template<class T>

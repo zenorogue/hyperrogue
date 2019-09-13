@@ -6,11 +6,11 @@
  */
 
 #include "hyper.h"
-#if CAP_RACING
 namespace hr {
 
 EX namespace racing {
 
+#if CAP_RACING
 void set_race_configurer();
 
 EX bool guiding = false;
@@ -1370,8 +1370,11 @@ EX void add_debug(cell *c) {
     dialog::addSelItem("completion", its(r.completion), 0);
     }
   }
+#endif
+
+#if !CAP_RACING
+EX always_false on;
+#endif
+EX }
 
 }
-
-EX }
-#endif

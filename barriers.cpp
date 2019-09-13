@@ -363,8 +363,11 @@ EX void extendBarrier(cell *c) {
     }
 
   if(c->barleft == NOWALLSEP) {
+    #if MAXMDIM >= 4
     if(WDIM == 3) extend3D(c);
-    else extendNowall(c);
+    else 
+    #endif
+    extendNowall(c);
     return;
     }
   

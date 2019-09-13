@@ -1090,6 +1090,10 @@ EX bool handleCompass() {
   return false;
   }
 
+#if CAP_ORIENTATION
+EX transmatrix getOrientation();
+#endif
+
 // orientation sensitivity
 EX namespace ors {
 
@@ -1100,10 +1104,10 @@ int when_enabled;
 transmatrix last_orientation;
 transmatrix relative_matrix = Id;
 
-string choices[3] = {"OFF", "relative", "absolute"};
+EX string choices[3] = {"OFF", "relative", "absolute"};
 
 #if CAP_ORIENTATION
-transmatrix getOrientation() {
+EX transmatrix getOrientation() {
   return MirrorX * hr::getOrientation() * MirrorX;
   }
 #endif

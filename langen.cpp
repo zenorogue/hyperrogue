@@ -321,11 +321,13 @@ int main() {
     }
   printf("\n");
   printf("#if HDR\n");
+  printf("#if CAP_TRANS\n");
   printf("#define NUMEXTRA %d\n", isize(vchars));
   printf("#define NATCHARS {");
   for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
   printf("};\n");
   printf("extern const char* natchars[NUMEXTRA];\n");
+  printf("#endif\n");
   printf("#endif\n");
   printf("const char* natchars[NUMEXTRA] = NATCHARS;\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
