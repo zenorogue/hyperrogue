@@ -2475,3 +2475,4 @@ auto hooks  =
 #include "cvl.cpp"
 #include "newconf.cpp"
 #include "grigorchuk.cpp"
+#include "qtm.cpp"
