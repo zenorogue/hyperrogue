@@ -79,12 +79,14 @@ eLand cid = laNone;
 
 hookset<bool(eLand&)> *hooks_music;
 
+bool music_out_of_focus = false;
+
 EX void handlemusic() {
   DEBBI(DF_GRAPH, ("handle music"));
   if(audio && musicvolume) {
     eLand id = getCurrentLandForMusic();
     if(callhandlers(false, hooks_music, id)) return;
-    if(outoffocus) id = eLand(0);
+    if(outoffocus && !music_out_of_focus) id = eLand(0);
     if(musfname[id] == "LAST") id = cid;
     if(!loaded[id] && !memory_issues()) {
       loaded[id] = true;
@@ -268,6 +270,7 @@ int read_sound_args() {
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
 #endif
   else if(argis("-svol")) { PHASEFROM(2); shift(); effvolume = argi(); }
+  else if(argis("-musicfocus")) { music_out_of_focus = true; }
   else return 1;
   return 0;
   }
