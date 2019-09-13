@@ -634,7 +634,7 @@ ITEM( 'o', 0x309060, "Orb of Summoning", itOrbSummon, IC_ORB, ZERO | IF_RANGED, 
     "often has its uses."
     )
 ITEM( 'o', 0x306090, "Orb of Matter", itOrbMatter, IC_ORB, ZERO | IF_RANGED, RESERVED, osRanged, 
-    "This Orb allows to temporarily create impassable matter, either to block paths or "
+    "This Orb allows one to temporarily create impassable matter, either to block paths or "
     "to build bridges across chasms and waters.")
 ITEM( '*', 0xF0F000, "Bounty", itBounty, IC_TREASURE, ZERO, RESERVED, osNone, wildwestdesc)
 ITEM( '[', 0xC0C0C0, "Revolver", itRevolver, IC_OTHER, ZERO | IF_RANGED, RESERVED, osRanged, wildwestdesc)

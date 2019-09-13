@@ -2001,7 +2001,7 @@ EX void resetConfigMenu() {
       popScreen();
       }
     else if(uni == 'y') {
-      printf("reseting config\n");
+      printf("resetting config\n");
       resetConfig();
       printf("config reset\n");
       popScreen();

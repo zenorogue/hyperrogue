@@ -2689,7 +2689,7 @@ S("You can use this ladder to climb the Tower.",
  
 Orb("Matter", "Вещества")
  
-S("This Orb allows to temporarily create impassable matter, either to block paths or "
+S("This Orb allows one to temporarily create impassable matter, either to block paths or "
   "to build bridges across chasms and waters.",
   "Эта сфера позволяет временно создавать непроходимое вещество, чтобы блокировать "
   "пути или строить мосты через пропасть или воду.")
