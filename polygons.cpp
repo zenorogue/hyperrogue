@@ -693,11 +693,18 @@ void geometry_information::procedural_shapes() {
   bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
   }
 
+vector<ld> equal_weights(20, 1);
+
+#if !(CAP_BT && MAXMDIM >= 4)
+void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) { }
+void geometry_information::reserve_wall3d(int i) { }
+void geometry_information::create_wall3d() { }
+void geometry_information::compute_cornerbonus() { }
+#endif
+
 #if CAP_BT && MAXMDIM >= 4
 
 // Make a wall
-
-vector<ld> equal_weights(20, 1);
 
 void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) {
 
