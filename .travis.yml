@@ -17,6 +17,7 @@ matrix:
       HYPERROGUE_CXX=g++-4.6
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
+      EXTRA_CXXFLAGS=-DGCC46
   - os: linux
     compiler: gcc
     env: >-
