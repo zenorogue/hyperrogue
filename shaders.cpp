@@ -436,6 +436,9 @@ bool operator != (const glmatrix& m1, const glmatrix& m2) {
 
 bool uses_mvp(shader_projection sp) { return among(sp, shader_projection::standard, shader_projection::flatten); }
 
+EX glmatrix eyeshift;
+EX bool using_eyeshift;
+
 EX void set_modelview(const glmatrix& modelview) {
   #if CAP_NOSHADER
   if(noshaders) {
@@ -446,7 +449,15 @@ EX void set_modelview(const glmatrix& modelview) {
   #endif
   if(!current) return;
   if(!uses_mvp(current_shader_projection)) {
-    if(modelview != current_modelview) {
+    if(using_eyeshift) {
+      glmatrix mvp = modelview * eyeshift;
+      #if MINIMIZE_GL_CALLS
+      if(mvp == current_matrix) return;
+      current_matrix = mvp;
+      #endif
+      glUniformMatrix4fv(current->uMV, 1, 0, mvp.as_array());
+      }
+    else if(modelview != current_modelview) {
       current_modelview = modelview;
       glUniformMatrix4fv(current->uMV, 1, 0, modelview.as_array());
       }

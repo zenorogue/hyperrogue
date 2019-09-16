@@ -246,6 +246,7 @@ EX void start_projection(int ed, bool perspective) {
   }
 
 EX void eyewidth_translate(int ed) {
+  glhr::using_eyeshift = false;
   if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
@@ -439,11 +440,16 @@ void display_data::set_projection(int ed) {
       GLfloat sc = current_display->radius / (cd->ysize/2.);  
       glhr::projection_multiply(glhr::scale(sc, -sc, -1));
       }
-
     
     if(ed) {
-      if(pers3)
-        glhr::projection_multiply(glhr::tmtogl(xpush(vid.ipd * ed/2)));
+      if(pers3) {
+        if(anyshiftclick)
+          glhr::projection_multiply(glhr::tmtogl(xpush(vid.ipd * ed/2)));
+        else {
+          glhr::using_eyeshift = true;
+          glhr::eyeshift = glhr::tmtogl(xpush(vid.ipd * ed/2));
+          }
+        }
       else
         glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
       }  
