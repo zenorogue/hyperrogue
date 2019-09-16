@@ -245,8 +245,15 @@ EX void start_projection(int ed, bool perspective) {
   glhr::projection_multiply(glhr::translate(tx, -ty, 0));
   }
 
+#if CAP_VR
+EX hookset<bool()> *hooks_vr_eye_view, *hooks_vr_eye_projection;
+#endif
+
 EX void eyewidth_translate(int ed) {
   glhr::using_eyeshift = false;
+#if CAP_VR
+  if(callhandlers(false, hooks_vr_eye_view)) ; else
+#endif
   if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
@@ -414,6 +421,9 @@ void display_data::set_projection(int ed) {
 
     eyewidth_translate(ed);
 
+    #if CAP_VR
+    if(callhandlers(false, hooks_vr_eye_projection)) ; else
+    #endif
     if(pers3) {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
