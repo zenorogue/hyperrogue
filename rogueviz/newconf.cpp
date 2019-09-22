@@ -12,6 +12,7 @@
 #endif
 #define main nconf_main
 #undef unordered_map
+#undef self
 #include "nconf.cpp"
 #undef main
 #endif
