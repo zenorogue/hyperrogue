@@ -1798,7 +1798,7 @@ EX bool dragonbreath(cell *dragon) {
 
 void moveMonster(monster *m, int delta) {
 
-  bool inertia_based = m->type == moAsteroid;
+  bool inertia_based = m->type == moAsteroid || m->type == moRogueviz;
   
   bool stunned = m->stunoff > curtime || m->blowoff > curtime;
   

@@ -1275,6 +1275,7 @@ void queue_prec(const transmatrix& V, edgeinfo*& ei, color_t col) {
 
 bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
+  if(m->type != moRogueviz) return false;
   int i = m->pid;
   vertexdata& vd = vdata[i];
   
