@@ -6,7 +6,7 @@ bool graph_on;
 
 color_t graphcolor;
 
-hyperpoint err = hpxyz(500,0,0);
+hyperpoint err = point3(500,0,0);
 
 bool iserror(hyperpoint h) { return sqhypot_d(2, h) > 10000 || std::isnan(h[0]) || std::isnan(h[1]) || std::isnan(h[2]) || std::isinf(h[0]) || std::isinf(h[1]) || std::isinf(h[2]); }
 
