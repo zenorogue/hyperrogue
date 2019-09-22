@@ -2440,6 +2440,7 @@ auto hooks  =
       dialog::addItem(XLAT("rogueviz menu"), 'u'); 
       dialog::add_action_push(rogueviz::showMenu);
       }
+    #if CAP_RVSLIDES
     if(current_screen_cfunction() == showStartMenu) {
       dialog::addBreak(100);
       dialog::addBigItem(XLAT("RogueViz"), 'r');
@@ -2451,6 +2452,7 @@ auto hooks  =
         });
       dialog::addInfo(XLAT("see the visualizations"));
       }
+    #endif
     }) +
   addHook(hooks_welcome_message, 100, [] () {
     if(rogueviz::on) addMessage(XLAT("Welcome to RogueViz!"));
