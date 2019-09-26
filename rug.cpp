@@ -1487,7 +1487,7 @@ EX transmatrix currentrot;
 EX void reopen() {
   if(rugged) return;
   rugdim = 2 * GDIM - 1;
-  when_enabled = ticks;
+  when_enabled = 0;
   GLERR("before init");
   glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
   if(!glbuf->valid) {
@@ -1673,6 +1673,7 @@ EX void actDraw() {
   drawRugScene();
   
   #if CAP_ORIENTATION
+  if(!when_enabled) ticks = when_enabled;
   if(ticks < when_enabled + 500)
     last_orientation = getOrientation();
   else {
