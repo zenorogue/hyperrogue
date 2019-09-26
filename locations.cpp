@@ -204,9 +204,6 @@ static const struct revstep_t { revstep_t() {}} revstep;
 
 extern int hrand(int);
 
-/** reverse directions are currently not implemented for heptagons */
-inline vector<int> reverse_directions(struct heptagon *c, int i) { throw "unimplemented"; }
-
 /** the walker structure is used for walking on surfaces defined via \ref connection_table. */
 template<class T> struct walker {
   /** where we are at */

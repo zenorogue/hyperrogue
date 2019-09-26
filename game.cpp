@@ -4278,6 +4278,15 @@ EX int pickDownDirection(cell *c, flagtype mf) {
   }
 
 EX vector<int> reverse_directions(cell *c, int dir) {
+  if(PURE) return reverse_directions(c->master, dir);
+  int d = c->degree();
+  if(d & 1)
+    return { gmod(dir + c->type/2, c->type), gmod(dir + (c->type+1)/2, c->type) };
+  else
+    return { gmod(dir + c->type/2, c->type) };
+  }
+
+EX vector<int> reverse_directions(heptagon *c, int dir) { 
   int d = c->degree();
   switch(geometry) {
     case gBinary3:
