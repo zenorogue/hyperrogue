@@ -73,6 +73,14 @@ int main(int argc, char **argv) {
       optimized = 3, compiler += " -O3", obj_dir += "/O3", setdir += "../";
     else if(s.substr(0, 4) == "-std")
       standard = s;
+    else if(s.substr(0, 2) == "-l")
+      linker += " " + s;
+    else if(s == "-I") {
+      linker += " " + s + " " + argv[i+1];
+      i++;
+      }
+    else if(s.substr(0, 2) == "-I")
+      linker += " " + s;
     else modules.push_back(s);
     }
   if(!optimized)
