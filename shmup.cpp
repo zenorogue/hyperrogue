@@ -1871,7 +1871,7 @@ void moveMonster(monster *m, int delta) {
     }
 
   if(m->isVirtual) {
-    if(m->type == moAsteroid) {
+    if(inertia_based) {
       ld r = hypot_d(WDIM, m->inertia);
       transmatrix nat = m->pat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
       m->rebasePat(nat);
@@ -1898,7 +1898,7 @@ void moveMonster(monster *m, int delta) {
   
   else if(m->type == moRagingBull && m->stunoff == CHARGING) ;
   
-  else if(m->type == moAsteroid) ;
+  else if(inertia_based) ;
 
   else {
   
@@ -2092,12 +2092,12 @@ void moveMonster(monster *m, int delta) {
 
   monster* crashintomon = NULL;
   
-  if(!m->isVirtual && m->type != moAsteroid) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
+  if(!m->isVirtual && !inertia_based) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
     double d = sqdist(m2->pat*C0, nat*C0);
     if(d < SCALE2 * 0.1) crashintomon = m2;
     }
   
-  if(m->type == moAsteroid) for(int i=0; i<players; i++) if(pc[i] && hdist(tC0(pc[i]->pat), tC0(m->pat)) < collision_distance(pc[i], m))
+  if(inertia_based) for(int i=0; i<players; i++) if(pc[i] && hdist(tC0(pc[i]->pat), tC0(m->pat)) < collision_distance(pc[i], m))
     crashintomon = pc[i];
   
   if(!peace::on) 
@@ -2125,7 +2125,7 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
-  if(crashintomon && m->type != moAsteroid) { igo++; goto igo_retry; }
+  if(crashintomon && !inertia_based) { igo++; goto igo_retry; }
 
   cell *c2 = m->findbase(nat);
   if(reflectflag & P_MIRRORWALL) reflect(c2, m->base, nat);
