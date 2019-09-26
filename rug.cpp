@@ -1586,7 +1586,7 @@ EX void move_forward(ld distance) {
   else model_distance /= exp(distance);
   }
 
-#define CAP_HOLDKEYS CAP_SDL // && !ISWEB)
+#define CAP_HOLDKEYS (CAP_SDL && !ISWEB)
 
 EX bool handlekeys(int sym, int uni) {
   if(NUMBERKEY == '1') {
