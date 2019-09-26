@@ -8353,18 +8353,14 @@ S(
   "Solv (aka Sol) is a 3D space where directions work in different ways. It is described by the following metric:\n"
   "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
   "You are currently displaying Solv in the perspective projection based on native geodesics. You can control how "
-  "the fog effects depends on the geodesic distance, and how far object in X/Y/Z coordinates are rendered.\n\n"
-  "Cells with relative x,y coordinates both over %1 and z coordinate below %2 are not rendered for technical reasons"
-  " (geodesics to that points are too weird).", 
+  "the fog effects depends on the geodesic distance, and how far object in X/Y/Z coordinates are rendered.", 
   
   "Solv (též Sol) je 3D prostor, ve kterém směry fungují odlišně. je popsán následující metrikou: "
   "ds² = (eᶻdx)² + (e⁻ᶻdy)² + dz²\n\n"
   
   "V tuto chvíli se Solv zobrazuje v perspektivní projekci založené na geodetikách. Můžeš ovládat, "
   "jak má efekt mlhy záviset na geodetické vzdálenosti a jak vzdálené objekty ve směrech "
-  "X/Y/Z se mají vykreslovat.\n\n"
-  "Políčka s relativními x,y souřadnicemi převyšujícími %1 a relativní souřadnicí z menší než %2 se z technických důvodů nevykreslují "
-  "(geodetiky, které k nim vedou, jsou příliš podivné).")
+  "X/Y/Z se mají vykreslovat.")
 
 S("max difference in X/Y coordinates", "maximální rozdíl v souřadnicích X/Y")
 S("max difference in Z coordinate", "maximální rozdíl v souřadnici Z")

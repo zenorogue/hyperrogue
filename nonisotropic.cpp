@@ -69,7 +69,7 @@ EX namespace solv {
        );
     }
   
-  ld x_to_ix(ld u) {
+  EX ld x_to_ix(ld u) {
     if(u == 0.) return 0.;
     ld diag = u*u/2.;
  
@@ -283,11 +283,7 @@ EX namespace solv {
   EX ld solrange_xy = 15;
   EX ld solrange_z = 4;
   
-  EX ld glitch_xy = 2;
-  EX ld glitch_z = 0.6;
-
   EX bool in_table_range(hyperpoint h) {
-    if(abs(h[0]) > glitch_xy && abs(h[1]) > glitch_xy && abs(h[2]) < glitch_z) return false;
     return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
@@ -327,9 +323,20 @@ EX namespace solv {
     
     "if(h[2] < 1e-6) { iz = -iz; float s = ix; ix = iy; iy = s; }"
     "if(iz < 0.) iz = 0.;"
+    
+    "vec4 res;"
+
+    "float cx = ix*(1.-1./PRECX) + .5/PRECX;"
+    "float cy = iy*(1.-1./PRECY) + .5/PRECY;"
+    "float cz = iz*(1.-1./PRECZ) + .5/PRECZ;"
+
+    "if(ix > .5 && iy > .6 && ix < iy + .05 && iz < .2 && iz < (iy - 0.5) * 0.6)"
+       "res = vec4(0.,0.,0.,1.); "
+    
+     "else "
   
-    "vec4 res = texture3D(tInvExpTable, vec3(ix*(1.-1./PRECX) + 0.5/PRECX, iy*(1.-1./PRECY) + .5/PRECY, iz*(1.-1./PRECZ) + .5/PRECZ));"
-  
+      "res = texture3D(tInvExpTable, vec3(cx, cy, cz));"
+
     "if(h[2] < 1e-6) { res.xy = res.yx; res[2] = -res[2]; }"
     "if(h[0] < 0.) res[0] = -res[0];"
     "if(h[1] < 0.) res[1] = -res[1];"
@@ -1445,11 +1452,6 @@ EX namespace nisot {
     #if CAP_SOLV
     else if(argis("-fsol")) {
       shift(); solv::solfname = args();
-      return 0;
-      }
-    else if(argis("-solglitch")) {
-      shift_arg_formula(solv::glitch_xy);
-      shift_arg_formula(solv::glitch_z);
       return 0;
       }
     #endif
