@@ -209,6 +209,7 @@ int pcelldist(cell *c) {
   #if CAP_CRYSTAL
   if(cryst) return crystal::precise_distance(c, currentmap->gamestart());
   #endif
+  if(sl2) return PIU(celldist(c));
   return celldist(c);
   }
 
@@ -290,7 +291,7 @@ void find_track(cell *start, int sign, int len) {
 
   if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
   
-  if(sol || nil) {
+  if(sol || nil || sl2) {
     vector<cell*> p;
     while(goal != start) p.push_back(goal), goal = parent[goal];
     while(!p.empty()) track.push_back(p.back()), p.pop_back();
