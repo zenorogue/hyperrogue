@@ -219,6 +219,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrPNever;
     }
   
+  if(it == itOrbWater && l == laWestWall) return olrUseless;
   if(it == itOrbSafety && l == laCrossroads5) return olrDangerous;
   if(it == itOrbFire && l == laKraken) return olrUseless;
   if(it == itOrbDragon && l == laKraken) return olrUseless;
