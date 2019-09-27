@@ -346,68 +346,6 @@ EX void generate_track() {
     return;
     }  
   
-  /*
-  transmatrix At = spin(hrand(1000));
-  
-  track.push_back(s);
-  
-  while(isize(track) < LENGTH) {
-    At = At * xpush(.1);
-    cell *sb = s;
-    virtualRebase(s, At, true);
-    fixmatrix(At);
-    if(s != sb) track.push_back(s);
-    }
-  */
-  
-  /*
-
-  cellwalker ycw(s, hrand(s->type));
-  
-  track.push_back(s);
-
-  for(int i=0; i<LENGTH; i++) {
-
-    if(i == 0) {
-      t = type_in(expansion, s, celldist);
-      bignum b = expansion.get_descendants(LENGTH, t);
-      full_id = hrand(b);
-      }
-            
-    if(i == 1) 
-      onlychild = true;
-
-    if(!onlychild) ycw++;
-    if(VALENCE == 3) ycw++;
-
-    onlychild = false;
-          
-    for(int tch: expansion.children[t]) {
-      ycw++;
-      if(i == 1)
-        tch = type_in(expansion, ycw.cpeek(), celldist);
-      auto& sub_id = expansion.get_descendants(LENGTH-i-1, tch);
-      if(full_id < sub_id) { t = tch; break; }
-      
-      full_id.addmul(sub_id, -1);
-      onlychild = true;
-      }
-
-    ycw += wstep;
-    track.push_back(ycw.at);
-    }
-
-  for(int a = 0; a < 2; a++)
-  for(int i=0; i<isize(track)-1; i++) {
-    cell *cx = track[min(i + 10, isize(track)-1)];
-    ld err = HUGE_VAL;
-    forCellEx(c2, track[i]) {
-      ld dist = hdist0(calc_relative_matrix(cx, c2, C0) * C0);
-      if(dist < err) err = dist, track[i+1] = c2;
-      }
-    } */
-    
-  // for(cell *c:track) if(c->land != laMirror) c->bardir = NOBARRIERS;
   for(cell *c:track) setdist(c, dl, NULL);
   
   if(1) {
