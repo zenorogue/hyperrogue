@@ -239,6 +239,8 @@ int race_checksum;
 
 ld start_line_width;
 
+struct hr_track_failure : hr_exception {};
+
 void find_track(cell *start, int sign, int len) {
   int dl = 7 - getDistLimit() - genrange_bonus;
   cell *goal;
@@ -252,9 +254,7 @@ void find_track(cell *start, int sign, int len) {
     traversed++;
     if(cellbydist.empty()) {
       printf("reset after traversing %d\n", traversed);
-      race_try++;
-      gamegen_failure = true;
-      return;
+      throw hr_track_failure();
       }
     auto it = cellbydist.end();
     it--;
@@ -338,6 +338,11 @@ EX void generate_track() {
     }
   else try {
     find_track(s, 0, LENGTH);
+    }
+  catch(hr_track_failure&) {
+    race_try++;
+    gamegen_failure = true;
+    return;
     }
   catch(hr_shortest_path_exception&) {
     addMessage("error: could not build path");
