@@ -743,13 +743,13 @@ void movePlayer(monster *m, int delta) {
     }
   #endif
   
-  if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower] && mouseover) {
+  if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower] && mouseover && !m->dead) {
     cwt.at = m->base;
     targetRangedOrb(mouseover, roKeyboard);
     }
 
 #if !ISMOBILE
-  if(haveRangedOrb()) {
+  if(haveRangedOrb() && !m->dead) {
     cwt.at = m->base;
     if(actionspressed[b+pcOrbKey] && !lactionpressed[b+pcOrbKey])
       keyresult[cpid] = targetRangedOrbKey(roKeyboard);

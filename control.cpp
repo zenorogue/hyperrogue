@@ -494,7 +494,7 @@ EX void handleKeyNormal(int sym, int uni) {
     
     multi::cpid = 0;
     if(mouseover && 
-      targetclick && (!shmup::on || numplayers() == 1) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
+      targetclick && (shmup::on ? numplayers() == 1 && !shmup::pc[0]->dead : true) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
       }
     else if(forcetarget)
       ;
