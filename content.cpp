@@ -1257,19 +1257,19 @@ LAND( 0x606060, "Zebra", laZebra, ZERO, itZebra, RESERVED, "Everything in this L
   REQ(GOLD(R30) ITEMS(itFeather, U10))
 
 LAND( 0xC08080, "Plane of Fire", laEFire, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
-  NATIVE(isNative(laElementalWall, m))
+  NATIVE(m == moFireElemental ? 2 : isNative(laElementalWall, m))
   REQAS(laElementalWall,)
 
 LAND( 0x808080, "Plane of Air", laEAir, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
-  NATIVE(isNative(laElementalWall, m))
+  NATIVE(m == moAirElemental ? 2 : isNative(laElementalWall, m))
   REQAS(laElementalWall,)
 
 LAND( 0x80C080, "Plane of Earth", laEEarth, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
-  NATIVE(isNative(laElementalWall, m))
+  NATIVE(m == moEarthElemental ? 2 : isNative(laElementalWall, m))
   REQAS(laElementalWall,)
 
 LAND( 0x8080C0, "Plane of Water", laEWater, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
-  NATIVE(isNative(laElementalWall, m))
+  NATIVE(m == moWaterElemental ? 2 : isNative(laElementalWall, m))
   REQAS(laElementalWall,)
 
 LAND( 0x4040FF, "Crossroads III", laCrossroads3, ZERO, itHyperstone, RESERVED, 
@@ -1284,7 +1284,7 @@ LAND( 0x4040C0, "Sea Border", laOceanWall, ZERO | LF_TECHNICAL | LF_SEA, itNone,
   NATIVE(0)
 
 LAND( 0x4040C0, "Elemental Planes", laElementalWall, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
-  NATIVE((m == elementalOf(l) && m) ? 2 : (m == moAirElemental || m == moEarthElemental || m == moWaterElemental || m == moFireElemental) ? 1 : 0)
+  NATIVE((m == moAirElemental || m == moEarthElemental || m == moWaterElemental || m == moFireElemental) ? 1 : 0)
   REQ(KILL(moAirElemental, laWhirlwind) KILL(moWaterElemental, laLivefjord) KILL(moEarthElemental, laDeadCaves) KILL(moFireElemental, laDragon))
 
 LAND( 0xE08020, "Canvas", laCanvas, ZERO | LF_TECHNICAL, itNone, RESERVED, "A fake Land with colored floors.")
