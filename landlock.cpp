@@ -416,7 +416,7 @@ EX eLand getNewLand(eLand old) {
     if(old == laOcean) tab[cnt++] = laCrossroads;
     if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier])
       tab[cnt++] = laEmerald;
-    if(old == laVariant) LIKELY tab[cnt++] = laEmerald;      
+    if(old == laVariant && landUnlocked(laEmerald)) LIKELY tab[cnt++] = laEmerald;      
     if(items[itWindstone] >= U5 && items[itDiamond] >= U5) {
       tab[cnt++] = laBlizzard;
       if(old == laIce || old == laCocytus || old == laWhirlwind) 
