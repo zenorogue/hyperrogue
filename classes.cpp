@@ -580,7 +580,7 @@ vector<geometryinfo> ginf = {
   {"bin{6,3}", "none",  "{6,3} on horospheres",                       "bin63",   14, 3, qBINARY,   giHyperb3, 0x40400, {{7, 3}}, eVariation::pure},
   {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF, giHyperb3, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, giHyperb3, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"binary4","none",    "standard binary tiling",                     "binary4",  5, 3, qBINARY,   giHyperb3, 0x41400, {{7, 5}}, eVariation::pure},
+  {"binary4","none",    "standard binary tiling",                     "binary4",  5, 3, qBINARY,   giHyperb2, 0x41400, {{7, 5}}, eVariation::pure},
   {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY,   giSol,     0x41600, {{7, 5}}, eVariation::pure},
   {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qPENROSE,  giEuclid2, 0x48000, {{7, 7}}, eVariation::pure},
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      giHyperb3, 0x48200, {{7, 3}}, eVariation::pure},
