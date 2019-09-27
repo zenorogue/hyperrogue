@@ -27,7 +27,7 @@ EX bool in_perspective() {
 EX bool hide_player() {
   return GDIM == 3 && playermoved && vid.yshift == 0 && vid.sspeed > -5 && in_perspective() && (first_cell_to_draw || elliptic) && (WDIM == 3 || vid.camera == 0) && !inmirrorcount
 #if CAP_RACING     
-   && !(racing::on && !racing::standard_centering && !racing::player_relative && !sol)
+   && !(racing::on && !racing::use_standard_centering() && !racing::player_relative)
 #endif
      ;
   }

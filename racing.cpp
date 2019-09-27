@@ -629,6 +629,14 @@ bool inrec = false;
 
 EX ld race_angle = 90;
 
+EX bool force_standard_centering() {
+  return sol || nil || hybri || quotient;
+  }
+
+EX bool use_standard_centering() {
+  return standard_centering || force_standard_centering();
+  }
+
 EX bool set_view() {
 
   multi::cpid = subscreens::in ? subscreens::current_player : 0;
@@ -650,7 +658,7 @@ EX bool set_view() {
       });
     }
 
-  if(standard_centering || sol) return false;
+  if(use_standard_centering()) return false;
   if(player_relative && specialland == laAsteroids) return false;
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
@@ -917,7 +925,7 @@ void race_projection() {
   
   if(true) {    
     dialog::addSelItem(XLAT("point of view"), XLAT(player_relative ? "player" : "track"), 'p');
-    if(quotient || racing::standard_centering || sol)
+    if(racing::use_standard_centering())
       dialog::lastItem().value = XLAT("N/A");
     dialog::add_action([] () { 
       player_relative = !player_relative; 
@@ -944,7 +952,7 @@ void race_projection() {
     });
 
   dialog::addBoolItem(XLAT("do not use special centering for racing"), standard_centering, 'C');
-  if(sol) dialog::lastItem().value = XLAT("N/A");
+  if(force_standard_centering()) dialog::lastItem().value = XLAT("N/A");
   dialog::add_action([] () {
     standard_centering = !standard_centering;
     });
@@ -1266,7 +1274,7 @@ EX void markers() {
     for(int j=0; j<5; j++)
       gridline(m->pat, xpush0(j), xpush0(j+1), multi::scs[i].uicolor, 2);
     }
-  if(racing::player_relative || racing::standard_centering || WDIM == 3) {
+  if(racing::player_relative || use_standard_centering() || WDIM == 3) {
     using namespace racing;
     cell *goal = NULL;
     for(cell *c: track) if(inscreenrange(c)) goal = c;
