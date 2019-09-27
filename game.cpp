@@ -582,7 +582,7 @@ EX int incline(cell *cfrom, cell *cto) {
 
 #define F(x) checkflags(flags,x)
 
-EX bool checkflags(flagtype flags, int x) {
+EX bool checkflags(flagtype flags, flagtype x) {
   if(flags & x) return true;
   if(flags & P_ISPLAYER) {
     if((x & P_WINTER)    && markOrb(itOrbWinter)) return true;
