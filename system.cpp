@@ -1315,7 +1315,7 @@ EX void switch_game_mode(char switchWhat) {
       inv::on = false;
       chaosmode = false;
       princess::challenge = false;
-      if(bounded) set_geometry(gNormal);
+      if(bounded && !prod) set_geometry(gNormal);
       dual::disable();
       break;
 #endif
