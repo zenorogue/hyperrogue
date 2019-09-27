@@ -1156,7 +1156,7 @@ LAND( 0x60C060, "Emerald Mine", laEmerald, ZERO, itEmerald, RESERVED,
      "It does not grow naturally, but it is dug out in a regular "
      "pattern, which is optimal according to the evil engineers."
      )
-  NATIVE((m == moFlailer || m == moLancer || m == moMiner) ? 2 : m == moHedge ? 1 : 0)
+  NATIVE((m == moFlailer || m == moLancer || m == moMiner) ? 2 : among(m, moHedge, moSeep) ? 1 : 0)
   REQ( ORD(AKILL(moVizier, laPalace), ITEMS(itFernFlower, U5) ITEMS(itGold, U5)))
 
 LAND( 0x421C52, "Vineyard", laWineyard, ZERO, itWine, RESERVED, vinehelp)
