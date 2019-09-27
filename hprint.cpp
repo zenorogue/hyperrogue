@@ -299,8 +299,16 @@ EX string llts(long long i) {
     if(i < 10) return its((int) i);
     return llts(i/10) + its(i%10);
 }
+EX string itsh(unsigned int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
 EX string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
 EX string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
+
+EX string itsh(unsigned long long i) {
+  int i0 = int(i);
+  int i1 = int(i >> 32);
+  if(i1) return itsh(i1) + itsh8(i0);
+  else return itsh(i0);
+  }
 
 EX logger hlog;
 

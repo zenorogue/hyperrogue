@@ -83,9 +83,9 @@ struct ghost {
   };
 
 typedef map<eLand, vector<ghost>> raceset;
-map<pair<string, int>, raceset> race_ghosts;
+map<pair<string, modecode_t>, raceset> race_ghosts;
 
-map<pair<string, int>, raceset> official_race_ghosts;
+map<pair<string, modecode_t>, raceset> official_race_ghosts;
 
 raceset& ghostset() { return race_ghosts[make_pair(track_code, modecode())]; }
 raceset& oghostset() { return official_race_ghosts[make_pair(track_code, modecode())]; }
@@ -103,7 +103,7 @@ array<vector<ghostmoment>, MAXPLAYER> current_history;
 string ghost_prefix = "default";
 
 #if CAP_FILES
-string ghost_filename(string seed, int mcode) {
+string ghost_filename(string seed, modecode_t mcode) {
   if(ghost_prefix == "default") {
     #ifdef FHS
     if(getenv("HOME")) {
@@ -140,7 +140,7 @@ void hwrite(hstream& hs, const ghost& gh) {
   hwrite(hs, gh.cs, gh.result, gh.timestamp, gh.checksum, gh.history);
   }
 
-bool read_ghosts(string seed, int mcode) {
+bool read_ghosts(string seed, modecode_t mcode) {
 
   if(seed == "OFFICIAL" && mcode == 2) {
     fhstream f("officials.data", "rb");
