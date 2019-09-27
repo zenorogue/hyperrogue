@@ -712,7 +712,7 @@ EX namespace dialog {
     }
   
   EX string disp(ld x) { 
-    if(dialogflags & sm::HEXEDIT) return "0x" + itsh(x);
+    if(dialogflags & sm::HEXEDIT) return "0x" + itsh((unsigned long long)(x));
     else if(ne.intval) return its(ldtoint(x)); 
     else return fts(x); }
 
