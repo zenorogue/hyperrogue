@@ -272,7 +272,15 @@ void find_track(cell *start, int sign, int len) {
     forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
       parent[c1] = c;
       int id;
-      if(sol)
+      if(nil) {
+        switch(sign) { 
+          case 1: id = c1->master->zebraval - start->master->zebraval; break;
+          case 2: id = start->master->emeraldval - c1->master->emeraldval; break;
+          case 3: id = start->master->zebraval - c1->master->zebraval; break;
+          case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
+          }
+        }
+      else if(sol)
         id = (start->master->distance - c1->master->distance) * sign;
       else
         id = trackval(c1);
@@ -282,7 +290,7 @@ void find_track(cell *start, int sign, int len) {
 
   if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
   
-  if(sol) {
+  if(sol || nil) {
     vector<cell*> p;
     while(goal != start) p.push_back(goal), goal = parent[goal];
     while(!p.empty()) track.push_back(p.back()), p.pop_back();
@@ -335,6 +343,13 @@ EX void generate_track() {
     find_track(s, 1, LENGTH/4);
     find_track(track.back(), -1, LENGTH-2*(LENGTH/4));
     find_track(track.back(), 1, LENGTH/4);
+    }
+  else if(nil) {
+    track.push_back(s);
+    find_track(s, 1, LENGTH/4);
+    find_track(track.back(), 2, LENGTH/4);
+    find_track(track.back(), 3, LENGTH/4);
+    find_track(track.back(), 4, LENGTH/4);
     }
   else try {
     find_track(s, 0, LENGTH);
