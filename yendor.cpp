@@ -1061,8 +1061,8 @@ int modecodetable[42][6] = {
 // unused codes: 6 (cheat/tampered), 25, 254, 255
 
 modecode_t modecode() {
-  // bit 61: product
-  if(hybri) return PIU(modecode()) | (1ll << 61);
+  // bit 61: product; 62: rotspace
+  if(hybri) return PIU(modecode()) | (1ll << (prod ? 61 : 62));
 #if CAP_SAVE
   if(anticheat::tampered || cheater || geometry >= gGUARD) return 6;
 #endif
