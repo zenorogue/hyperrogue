@@ -735,6 +735,12 @@ EX void showStartMenu() {
       dialog::addBigItem(XLAT1("Halloween"), 'Z');
       dialog::addInfo(XLAT("Halloween mini-game"));
       break;
+
+    default:
+      dialog::addBreak(100);
+      dialog::addBigItem("", 0);
+      dialog::addInfo("");
+      break;    
     }
 
   if(have_current_settings()) {
