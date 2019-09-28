@@ -359,8 +359,14 @@ EX void block_cells(vector<cell*> to_block, function<bool(cell*)> blockbound) {
 
 EX void make_bounded_track(cell *s) {
 
-  celllister cl(s, TWIDTH, 1000000, NULL);
-  for(cell *c: cl.lst) setdist(c, 0, NULL);
+  celllister cl(s, 999, 1000000, NULL);
+  for(cell *c: cl.lst)
+    setdist(c, 0, NULL);
+  println(hlog, "cls = ", isize(cl.lst));
+
+  for(cell *c: cl.lst) {
+    c->item = itNone; c->wall = waNone; c->monst = moNone;    
+    }
 
   map<cell*, int> mazetype;
   track.clear();
@@ -380,9 +386,7 @@ EX void make_bounded_track(cell *s) {
     }
   vector<cell*> to_block;
   for(auto p: mazetype) {
-    cell *c = p.first;
-    c->item = itNone; c->wall = waNone; c->monst = moNone;
-    if(p.second == 2) to_block.push_back(c);
+    if(p.second == 2) to_block.push_back(p.first);
     }
   block_cells(to_block, [] (cell *c) { return true; });
   for(cell *c: to_block) if(c->wall == waNone && !c->monst) c->wall = waBarrier;
@@ -603,9 +607,9 @@ EX void generate_track() {
       }
     if(!goal) {
       printf("error: goal unreachable\n");
-      gamegen_failure = true;
-      race_try++;
-      return;    
+      // gamegen_failure = true;
+      // race_try++;
+      // return;    
       }
     }
   
