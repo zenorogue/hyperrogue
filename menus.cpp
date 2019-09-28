@@ -729,6 +729,18 @@ EX void showStartMenu() {
       dialog::addInfo(XLAT("compete with other players on random lands in random geometries"));
       break;
 #endif
+
+    case 8:
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("Racing"), 'r'-96);
+      dialog::addInfo(XLAT("how fast can you reach the end?"));
+      break;
+
+    case 9:
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
+      dialog::addInfo(XLAT("race through a maze in exotic 3D geometry!"));
+      break;
     
     case 20:
       dialog::addBreak(100);
@@ -839,6 +851,32 @@ EX void showStartMenu() {
         vid.alpha = 999;
         vid.scale = 998;
         }
+      }
+    else if(uni == 'r' - 96) {
+      popScreenAll();
+      resetModes();
+      stop_game();
+      switch_game_mode(rg::racing);
+      racing::track_code = "OFFICIAL";
+      specialland = racing::race_lands[rand() % isize(racing::race_lands)];
+      start_game();
+      pmodel = mdBand;
+      models::model_orientation = racing::race_angle;
+      racing::race_advance = 1;
+      vid.yshift = 0;
+      vid.camera_angle = 0;
+      vid.xposition = 0;
+      vid.yposition = 0;
+      vid.scale = 1;
+      vid.use_smart_range = 1;
+      vid.smart_range_detail = 3;
+      }
+    else if(uni == 't' - 96) {
+      stop_game();
+      resetModes();
+      start_game();
+      pushScreen(showStartMenu);
+      pushScreen(racing::thurston_racing);
       }
 #if CAP_TOUR
     else if(uni == 't') {
