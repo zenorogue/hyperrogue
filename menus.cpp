@@ -868,9 +868,12 @@ EX void showStartMenu() {
       clearMessages();
       welcomeMessage();
       }
-    #if CAP_STARTANIM
-    else if(sym == SDLK_F5) startanims::pick();
-    #endif
+    else if(sym == SDLK_F5) { 
+      #if CAP_STARTANIM
+      startanims::pick(); 
+      #endif
+      daily_mode = 0; 
+      }
     };
   }
  
