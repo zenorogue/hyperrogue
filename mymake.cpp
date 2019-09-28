@@ -81,7 +81,11 @@ int main(int argc, char **argv) {
       }
     else if(s.substr(0, 2) == "-I")
       linker += " " + s;
-    else modules.push_back(s);
+    else {
+      if(s.size() >= 5 && s.substr(s.size() - 4) == ".cpp")
+        s = s.substr(0, s.size() - 4);
+      modules.push_back(s);
+      }
     }
   if(!optimized)
     compiler += " -g3";
