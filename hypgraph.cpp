@@ -887,7 +887,7 @@ EX ld spherity(const hyperpoint& h) {
   if(!sphere) return 1;
   
   if(vid.alpha > 1) {
-    return to01(1/vid.alpha, 1, -h[2]);
+    return to01(1/vid.alpha, 1, abs(h[2]));
     }  
   
   if(vid.alpha <= 1) {
