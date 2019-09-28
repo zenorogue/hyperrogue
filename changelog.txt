@@ -3490,3 +3490,26 @@ Solv geometry:
 - an option to display a crosshair in the center of the screen
 - fixed the determining of the selected cell in product/rotation geometries
 - a quicker and more convenient way to recompile the source code after changes (see mymake.cpp)
+
+20019-09-14 ??:?? Version 11.2:
+- released 11.2 : https://zenorogue.itch.io/hyperrogue/devlog/99827/hyperrogue-112-thurston-geometries-free-update
+
+20019-09-14 09:15 Version 11.2a:
+- racing mode: 
+- - Racing now works in bounded geometries and all Thurston geometries
+- - fixed a bug with going through walls (also in shmup)
+- - racing and Thurston racing added as possible random options in the start menu
+- gameplay:
+- - fixed being able to phase into a chasm (and possibly some other issues)
+- - fixed accessing Emerald Mines from Irradiated even though it was not unlocked
+- - fixed nativity marking for Elementals in Elemental Planes and seeps in the Emerald Mine
+- - marked the Orb of Water as useless in Free Fall
+- graphics/sound:
+- - fixed a glitch with Reptile graphics in 3D
+- - fixed the pit walls in Halloween
+- - better rendering of Solv into the glitchy region
+- - stop disabling music in the mercury river
+- - correct binocular vision in 3D geometries (isotropic only for now)
+- fixed the standard binary tiling
+- no more orb usage after death in the shmup mode
+
