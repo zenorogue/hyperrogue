@@ -86,7 +86,7 @@ struct monster {
 
   cell *findbase(const transmatrix& T);
 
-  void rebasePat(const transmatrix& new_pat);
+  void rebasePat(const transmatrix& new_pat, cell *tgt);
 
   };  
 #endif
@@ -174,7 +174,7 @@ void fix_to_2(transmatrix& T) {
   fixelliptic(T);
   }
 
-void monster::rebasePat(const transmatrix& new_pat) {
+void monster::rebasePat(const transmatrix& new_pat, cell *c2) {
   if(isVirtual) {
     at = new_pat;
     virtualRebase(this, true);
@@ -186,10 +186,14 @@ void monster::rebasePat(const transmatrix& new_pat) {
     at = inverse(gmatrix[base]) * new_pat;
     virtualRebase(this, true);
     fix_to_2(at);
+    if(base != c2) {
+      auto T = calc_relative_matrix(c2, base, tC0(at));
+      base = c2;
+      at = inverse(T) * at;
+      }
     return;
     }
   pat = new_pat;
-  cell *c2 = findbase(pat);
   // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
   base = c2;
   at = inverse(gmatrix[c2]) * pat;
@@ -1177,8 +1181,8 @@ void movePlayer(monster *m, int delta) {
       }
     }
 
-  if(go) m->rebasePat(nat);
-  else m->rebasePat(nat0);
+  if(go) m->rebasePat(nat, c2);
+  else m->rebasePat(nat0, m->base);
 
   if(m->base->wall == waBoat && !m->inBoat) {
     m->inBoat = true; m->base->wall = waSea;
@@ -1385,7 +1389,7 @@ void moveMimic(monster *m) {
   if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR | P_MIRRORWALL))
     killMonster(m, moNone);
   else {
-    m->rebasePat(nat);
+    m->rebasePat(nat, c2);
     if(playerfire[cpid]) shootBullet(m);
     }  
 
@@ -1637,7 +1641,7 @@ void moveBullet(monster *m, int delta) {
       makeflame(c2, 20, false) || makeflame(m->base, 20, false);
       }
     }
-  m->rebasePat(nat);
+  m->rebasePat(nat, c2);
   
   // destroy stray bullets
   if(!doall) for(int i=0; i<m->base->type; i++) 
@@ -1679,7 +1683,7 @@ void moveBullet(monster *m, int delta) {
            swordmatrix[m2->pid] = spintox(h) * swordmatrix[m2->pid];
           else
             m2->swordangle += atan2(h[1], h[0]);
-          m2->rebasePat(m2->pat * rspintox(h));
+          m2->rebasePat(m2->pat * rspintox(h), m2->base);
           }
         m2->blowoff = curtime + 1000;
         continue;
@@ -1698,7 +1702,7 @@ void moveBullet(monster *m, int delta) {
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise || m2->type == moBrownBug || 
         m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
-        m2->rebasePat(spin_towards(m2->pat, m->ori, nat0 * C0, 0, 1));
+        m2->rebasePat(spin_towards(m2->pat, m->ori, nat0 * C0, 0, 1), m2->base);
         if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) 
           m2->hitpoints--;
         m->dead = true;
@@ -1750,7 +1754,7 @@ void moveBullet(monster *m, int delta) {
       if(m2->type == moKnight) {
         if(m->parent && m->parent != &arrowtrap_fakeparent) {
           nat = spin_towards(nat, m->ori, tC0(m->parent->pat), bulletdir(), 1);
-          m->rebasePat(nat);
+          m->rebasePat(nat, m->base);
           }
         m->parent = m2;
         continue;
@@ -1874,7 +1878,7 @@ void moveMonster(monster *m, int delta) {
     if(inertia_based) {
       ld r = hypot_d(WDIM, m->inertia);
       transmatrix nat = m->pat * rspintox(m->inertia) * xpush(r * delta) * spintox(m->inertia);
-      m->rebasePat(nat);
+      m->rebasePat(nat, m->base);
       }
     return;
     }
@@ -2014,7 +2018,7 @@ void moveMonster(monster *m, int delta) {
         nat = nat * spin(M_PI * delta / 3000 / speedfactor());
       else
         nat = nat * spin(M_PI * -delta / 3000 / speedfactor());
-      m->rebasePat(nat);
+      m->rebasePat(nat, m->base);
       // at most 45 degrees
       if(h[0] < fabsl(h[1])) return;
       }
@@ -2288,7 +2292,7 @@ void moveMonster(monster *m, int delta) {
     if(stunned ? passable(c2, m->base, P_BLOW | reflectflag) : passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
       if(c2 != m->base && m->type == moButterfly) 
         m->torigin = m->base;
-      m->rebasePat(nat);
+      m->rebasePat(nat, m->base);
       if(m->type == moRagingBull && step > 1e-6) m->stunoff = CHARGING;
       }
     else {
