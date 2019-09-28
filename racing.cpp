@@ -300,12 +300,102 @@ void find_track(cell *start, int sign, int len) {
     track = build_shortest_path(start, goal);  
   }
 
+EX void block_cells(vector<cell*> to_block, function<bool(cell*)> blockbound) {
+  hrandom_shuffle(&to_block[0], isize(to_block));
+  
+  for(cell *c: to_block) switch(specialland) {
+    case laIce:
+      c->wall = waIcewall;
+      break;
+    
+    case laHell:
+      c->wall = waSulphur;
+      break;
+    
+    case laJungle: {
+      vector<int> dirs;
+      forCellIdEx(c2, i, c) if(among(c2->monst, moIvyRoot, moIvyWait)) dirs.push_back(i);
+      if(dirs.empty()) c->monst = moIvyRoot;
+      else c->monst = moIvyWait, c->mondir = dirs[hrand(isize(dirs))];
+      break;
+      }
+    
+    case laDeadCaves: 
+      if(blockbound(c)) c->wall = waDeadwall;
+      break;
+    
+    case laRedRock:
+      if(blockbound(c)) c->wall = waRed3;
+      break;
+        
+    case laDragon:
+      c->wall = waChasm;
+      break;
+
+    case laDryForest:
+      if(blockbound(c)) c->wall = waBigTree;
+      break;
+    
+    case laDesert:
+      if(blockbound(c)) c->wall = waDune;
+      break;
+
+    case laRuins:
+      if(blockbound(c)) c->wall = waRuinWall;
+      break;
+
+    case laElementalWall:
+      if(blockbound(c)) {
+        if(c->land == laEFire) c->wall = waEternalFire;
+        else if(c->land == laEWater) c->wall = waSea;
+        else if(c->land == laEAir) c->wall = waChasm;
+        else if(c->land == laEEarth) c->wall = waStone;
+        }
+      break;    
+  
+    default: break;
+    }
+  }
+
+EX void make_bounded_track(cell *s) {
+
+  celllister cl(s, TWIDTH, 1000000, NULL);
+  for(cell *c: cl.lst) setdist(c, 0, NULL);
+
+  map<cell*, int> mazetype;
+  track.clear();
+  track.push_back(s);
+  while(true) {
+    cell *last = track.back();
+    mazetype[last] = 1;
+    vector<cell*> choices;
+    forCellCM(c1, last) {
+      if(mazetype[c1] != 0) continue;
+      choices.push_back(c1);
+      }
+    if(choices.empty()) break;
+    cell *nxt = choices[hrand(isize(choices))];
+    for(cell *cc: choices) mazetype[cc] = 2;
+    track.push_back(nxt);
+    }
+  vector<cell*> to_block;
+  for(auto p: mazetype) {
+    cell *c = p.first;
+    c->item = itNone; c->wall = waNone; c->monst = moNone;
+    if(p.second == 2) to_block.push_back(c);
+    }
+  block_cells(to_block, [] (cell *c) { return true; });
+  for(cell *c: to_block) if(c->wall == waNone && !c->monst) c->wall = waBarrier;
+  }
+
+EX bool bounded_track;
+
 EX void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
   if(TWIDTH == 1) TWIDTH = 2;
   TWIDTH += race_try / 8;
-
+  
   #if CAP_FILES
   if(ghostset().empty())
     read_ghosts(track_code, modecode());
@@ -334,6 +424,8 @@ EX void generate_track() {
   
   if(euclid && (penrose || archimedean)) permanent_long_distances(s);
   
+  bounded_track = false;
+  
   if(sol && specialland == laCrossroads) {
     track.push_back(s);
     while(isize(track) < LENGTH)
@@ -352,6 +444,10 @@ EX void generate_track() {
     find_track(track.back(), 3, LENGTH/4);
     find_track(track.back(), 4, LENGTH/4);
     }
+  else if(bounded && !prod) {
+    bounded_track = true;
+    make_bounded_track(s);
+    }
   else try {
     find_track(s, 0, LENGTH);
     }
@@ -369,7 +465,7 @@ EX void generate_track() {
   
   for(cell *c:track) setdist(c, dl, NULL);
   
-  if(1) {
+  if(true) {
     manual_celllister cl;
   
     for(int i=0; i<isize(track); i++) {
@@ -386,6 +482,7 @@ EX void generate_track() {
         tie_info(c2, p.from_track+1, p.completion);
         cl.add(c2);
         }
+      if(bounded_track) continue;
       c->item = itNone;
       if(c->wall == waMirror || c->wall == waCloud) c->wall = waNone;
       if(!isIvy(c))
@@ -433,21 +530,21 @@ EX void generate_track() {
       }
     }
   
-  for(cell *sc: track) {
+  if(!bounded_track) for(cell *sc: track) {
     straight = calc_relative_matrix(sc, track[0], C0);
     if(straight[GDIM][GDIM] > 1e8) break;
     }
   straight = rspintox(straight * C0);
   
   ld& a = start_line_width;
-  if(WDIM == 2) for(a=0; a<10; a += .1) {
+  if(WDIM == 2 && !bounded_track) for(a=0; a<10; a += .1) {
     hyperpoint h = straight * parabolic1(a) * C0;
     cell *at = s;
     virtualRebase(at, h,  true);
     if(!rti_id.count(at) || get_info(at).from_track >= TWIDTH) break;
     }
   
-  if(WDIM == 2) for(ld cleaner=0; cleaner<a*.75; cleaner += .2) for(int dir=-1; dir<=1; dir+=2) {
+  if(WDIM == 2 && !bounded_track) for(ld cleaner=0; cleaner<a*.75; cleaner += .2) for(int dir=-1; dir<=1; dir+=2) {
     transmatrix T = straight * parabolic1(cleaner * dir);
     cell *at = s;
     virtualRebase(at, T,  true);
@@ -478,7 +575,7 @@ EX void generate_track() {
     // this is intentionally not hrand
     
     for(int j=0; j<100; j++) {
-      if(WDIM == 3)
+      if(WDIM == 3 || bounded_track)
         who->at = Id; // straight * cspin(0, 2, rand() % 360) * cspin(1, 2, rand() % 360);
       else
         who->at = straight * parabolic1(start_line_width * (rand() % 20000 - 10000) / 40000) * spin(rand() % 360);
@@ -490,6 +587,8 @@ EX void generate_track() {
     virtualRebase(who, true);
     }
 
+  if(bounded_track) track.back()->wall = waCloud;
+  
   if(1) {
     manual_celllister cl;
     cl.add(s);
@@ -550,69 +649,15 @@ EX void generate_track() {
     return dif > 3;
     };
 
-  auto blockbound = [&blockoff] (cell *c) {
-    forCellEx(c2, c) if(passable(c2, c, P_ISPLAYER) && !blockoff(get_info(c2))) return true;
-    return false;
-    };
-  
   vector<cell*> to_block;
   
   for(auto cc: rti) if(blockoff(cc)) to_block.push_back(cc.c);
   
-  hrandom_shuffle(&to_block[0], isize(to_block));
+  block_cells(to_block, [&blockoff] (cell *c) {
+    forCellEx(c2, c) if(passable(c2, c, P_ISPLAYER) && !blockoff(get_info(c2))) return true;
+    return false;
+    });
   
-  for(cell *c: to_block) switch(specialland) {
-    case laIce:
-      c->wall = waIcewall;
-      break;
-    
-    case laHell:
-      c->wall = waSulphur;
-      break;
-    
-    case laJungle: {
-      vector<int> dirs;
-      forCellIdEx(c2, i, c) if(among(c2->monst, moIvyRoot, moIvyWait)) dirs.push_back(i);
-      if(dirs.empty()) c->monst = moIvyRoot;
-      else c->monst = moIvyWait, c->mondir = dirs[hrand(isize(dirs))];
-      break;
-      }
-    
-    case laDeadCaves: 
-      if(blockbound(c)) c->wall = waDeadwall;
-      break;
-    
-    case laRedRock:
-      if(blockbound(c)) c->wall = waRed3;
-      break;
-        
-    case laDragon:
-      c->wall = waChasm;
-      break;
-
-    case laDryForest:
-      if(blockbound(c)) c->wall = waBigTree;
-      break;
-    
-    case laDesert:
-      if(blockbound(c)) c->wall = waDune;
-      break;
-
-    case laRuins:
-      if(blockbound(c)) c->wall = waRuinWall;
-      break;
-
-    case laElementalWall:
-      if(blockbound(c)) {
-        if(c->land == laEFire) c->wall = waEternalFire;
-        else if(c->land == laEWater) c->wall = waSea;
-        else if(c->land == laEAir) c->wall = waChasm;
-        else if(c->land == laEEarth) c->wall = waStone;
-        }
-      break;    
-  
-    default: break;
-    }
 
   // for(cell *c: to_block) if(blockbound(c)) c->land = laOvergrown;
 
@@ -646,7 +691,7 @@ bool inrec = false;
 EX ld race_angle = 90;
 
 EX bool force_standard_centering() {
-  return sol || nil || hybri || quotient;
+  return sol || nil || hybri || quotient || bounded;
   }
 
 EX bool use_standard_centering() {
@@ -1010,7 +1055,7 @@ void race_projection() {
   
     dialog::init(XLAT("Racing"));
   
-    if(bounded)
+    if(false)
       dialog::addInfo(XLAT("Racing available only in unbounded worlds."), 0xFF0000);
     else {
       dialog::addItem(XLAT("select the track and start!"), 's');
