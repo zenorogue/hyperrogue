@@ -1054,6 +1054,41 @@ void race_projection() {
     return "";
     }
 
+  EX void thurston_racing() {
+    gamescreen(1);
+    dialog::init(XLAT("racing in Thurston geometries"));
+    
+    dialog::addBreak(100);
+    
+    char ch = '1';
+    
+    auto add_thurston_race = [&ch] (string caption, reaction_t launcher) {
+      dialog::addBigItem(caption, ch++);
+      dialog::add_action([=] { stop_game(); 
+        if(!racing::on) switch_game_mode(rg::racing);
+        racing::standard_centering = true;
+        launcher();
+        track_code = "OFFICIAL";
+        start_game();
+        popScreenAll();
+        });
+      dialog::addBreak(50);
+      };
+
+    add_thurston_race(XLAT("Euclidean"), [] { set_geometry(gBitrunc3); });
+    add_thurston_race(XLAT("hyperbolic"), [] { set_geometry(gBinary3); vid.texture_step = 4; });
+    add_thurston_race(XLAT("spherical"), [] { set_geometry(gCell120); });
+    add_thurston_race(XLAT("Solv geometry"), [] { set_geometry(gSol); });
+    add_thurston_race(XLAT("S2xE"), [] { set_geometry(gSphere); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
+    add_thurston_race(XLAT("H2xE"), [] { set_geometry(gNormal); set_variation(eVariation::bitruncated);set_geometry(gProduct); });
+    add_thurston_race(XLAT("Nil"), [] { set_geometry(gNil); });
+    add_thurston_race(XLAT("PSL(2,R)"), [] { set_geometry(gNormal); set_variation(eVariation::pure); set_geometry(gRotSpace); });
+
+    dialog::addBreak(100);
+    dialog::addBack();
+    dialog::display();
+    }
+
   void raceconfigurer() {
   
     gamescreen(1);
@@ -1133,6 +1168,9 @@ void race_projection() {
         start_game();
         });
       }
+    
+    dialog::addItem(XLAT("racing in Thurston geometries"), 'T');
+    dialog::add_action_push(thurston_racing);
 
     dialog::addBack();
     dialog::display();
