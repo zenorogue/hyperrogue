@@ -730,6 +730,7 @@ EX void showStartMenu() {
       break;
 #endif
 
+#if CAP_RACING
     case 8:
       dialog::addBreak(100);
       dialog::addBigItem(XLAT("Racing"), 'r'-96);
@@ -741,7 +742,8 @@ EX void showStartMenu() {
       dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
       dialog::addInfo(XLAT("race through a maze in exotic 3D geometry!"));
       break;
-    
+#endif
+
     case 20:
       dialog::addBreak(100);
       dialog::addBigItem(XLAT1("Halloween"), 'Z');
@@ -852,6 +854,7 @@ EX void showStartMenu() {
         vid.scale = 998;
         }
       }
+#if CAP_RACING
     else if(uni == 'r' - 96) {
       popScreenAll();
       resetModes();
@@ -878,6 +881,7 @@ EX void showStartMenu() {
       pushScreen(showStartMenu);
       pushScreen(racing::thurston_racing);
       }
+#endif
 #if CAP_TOUR
     else if(uni == 't') {
       popScreenAll();
