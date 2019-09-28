@@ -1512,7 +1512,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       queuepoly(VAHEAD, cgi.shReptileHead, darkena(col, 0, 0xFF));
       queuepoly(VAHEAD, cgi.shReptileEye, darkena(col, 3, 0xFF));
       queuepoly(VAHEAD * Mirror, cgi.shReptileEye, darkena(col, 3, 0xFF));
-      queuepoly(VABODY, cgi.shReptileTail, darkena(col, 2, 0xFF));
+      if(GDIM == 2) queuepoly(VABODY, cgi.shReptileTail, darkena(col, 2, 0xFF));
       return false;
       }
     
