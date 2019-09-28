@@ -1294,6 +1294,7 @@ EX int get_percentage(int i) {
   
 void draw_ghost_state(ghost& ghost) {
   auto& p = get_ghostmoment(ghost);
+  if(p.where_id >= isize(rti)) return;
   cell *w = rti[p.where_id].c;
   ld result = ghost_finished(ghost) ? 100 : get_percentage(w);
   draw_ghost_at(ghost, w, racerel(result), p);
