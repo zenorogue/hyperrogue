@@ -3494,7 +3494,7 @@ Solv geometry:
 20019-09-14 ??:?? Version 11.2:
 - released 11.2 : https://zenorogue.itch.io/hyperrogue/devlog/99827/hyperrogue-112-thurston-geometries-free-update
 
-20019-09-14 09:15 Version 11.2a:
+20019-09-28 09:15 Version 11.2a:
 - racing mode: 
 - - Racing now works in bounded geometries and all Thurston geometries
 - - fixed a bug with going through walls (also in shmup)
@@ -3512,4 +3512,7 @@ Solv geometry:
 - - correct binocular vision in 3D geometries (isotropic only for now)
 - fixed the standard binary tiling
 - no more orb usage after death in the shmup mode
+
+20019-09-30 01:46 Version 11.2b:
+- fixed a bug in the shmup mode
 
