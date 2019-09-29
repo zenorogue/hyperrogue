@@ -2292,7 +2292,7 @@ void moveMonster(monster *m, int delta) {
     if(stunned ? passable(c2, m->base, P_BLOW | reflectflag) : passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
       if(c2 != m->base && m->type == moButterfly) 
         m->torigin = m->base;
-      m->rebasePat(nat, m->base);
+      m->rebasePat(nat, c2);
       if(m->type == moRagingBull && step > 1e-6) m->stunoff = CHARGING;
       }
     else {
