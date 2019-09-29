@@ -1085,7 +1085,7 @@ EX int realstuntime(cell *c) {
   return c->stuntime;
   }
 
-bool childbug = false;
+EX bool childbug = false;
 
 /** Is `w` killed if the part of an ivy `killed` is killed? */
 EX bool isChild(cell *w, cell *killed) {
