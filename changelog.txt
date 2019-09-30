@@ -3515,4 +3515,5 @@ Solv geometry:
 
 20019-09-30 01:46 Version 11.2b:
 - fixed a bug in the shmup mode
-
+- fixed a potential bug in precision
+- fixed Orb of Air usable on Friendly Ivy
