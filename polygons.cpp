@@ -143,9 +143,9 @@ void geometry_information::finishshape() {
     if(s == 3)
       last->intester = hpxy(.2, .2518);
     // prevent zeros
-    last->intester = rgpushxto0(hpxy(1.4e-8, 1.7e-8)) * last->intester;
-
+    last->intester = rgpushxto0(hpxy(1.4e-5, 1.7e-5)) * last->intester;
     last->flags &=~ (POLY_BADCENTERIN | POLY_CENTERIN);
+
 
     for(int i=last->s; i<last->e-1; i++) {
       ld x1 = hpc[i][0] - last->intester[0], y1 = hpc[i][1] - last->intester[1], x2 = hpc[i+1][0] - last->intester[0], y2 = hpc[i+1][1] - last->intester[1];
