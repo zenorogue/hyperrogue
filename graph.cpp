@@ -4619,7 +4619,7 @@ void draw_grid_at(cell *c, const transmatrix& V) {
     }
   #endif
   #if CAP_BT
-  else if(binarytiling && WDIM == 2) {
+  else if(binarytiling && WDIM == 2 && geometry != gTernary) {
     ld yx = log(2) / 2;
     ld yy = yx;
     ld xx = 1 / sqrt(2)/2;

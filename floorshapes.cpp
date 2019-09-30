@@ -673,6 +673,17 @@ void geometry_information::generate_floorshapes() {
       }
     }
 
+  else if(geometry == gTernary) {
+    heptagon modelh;
+    cell model;
+    model.master = &modelh;
+    model.type = S7; 
+    for(int i: {0,1,2}) {
+      modelh.zebraval = i;
+      generate_floorshapes_for(i, &model, 1, 0);
+      }
+    }
+
   else if(PURE && geometry != gBinaryTiling && geosupport_football() < 2) {
     cell model;
     model.type = S7; 
@@ -793,7 +804,7 @@ EX int shvid(cell *c) {
     return c->type-6;
   else if(penrose)
     return kite::getshape(c->master);
-  else if(geometry == gBinary4)
+  else if(geometry == gBinary4 || geometry == gTernary)
     return c->master->zebraval;
   else if(PURE)
     return 0;

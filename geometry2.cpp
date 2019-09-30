@@ -554,6 +554,18 @@ EX hyperpoint nearcorner(cell *c, int i) {
     neis[4] = binary::get_horopoint(0, -1);
     return neis[i];
     }
+  if(geometry == gTernary) {
+    ld yx = log(3) / 2;
+    ld yy = yx;
+    hyperpoint neis[6];
+    neis[0] = binary::get_horopoint(2*yy, -1);
+    neis[1] = binary::get_horopoint(2*yy, +0);
+    neis[2] = binary::get_horopoint(2*yy, +1);
+    neis[3] = binary::get_horopoint(0, 1);
+    neis[4] = binary::get_horopoint(-2*yy, c->master->zebraval / 3.);
+    neis[5] = binary::get_horopoint(0, -1);
+    return neis[i];
+    }
   if(penrose) {
     if(approx_nearcorner)
       return kite::get_corner(c, i, 3) + kite::get_corner(c, i+1, 3) - C0;

@@ -127,6 +127,12 @@ EX namespace binary {
       else
         h->emeraldval = ((parent->emeraldval - d1) * 7508 + 15015) % 15015;
       }
+    if(geometry == gTernary) {
+      if(d < 2)
+        h->emeraldval = (parent->emeraldval * 3 + d) % 10010;
+      else
+        h->emeraldval = ((parent->emeraldval - d1) * 3337 + 2*10010) % 10010;
+      }
     if(WDIM == 3 && h->c7) make_binary_lands(parent, h);
     #if DEBUG_BINARY_TILING
     xcode[h] = expected_xcode(parent, d);
@@ -237,6 +243,24 @@ EX namespace binary {
                 return path(h, 4, 2, {3, 0});
               else
                 return path(h, 4, 2, {3, 4, 1});
+            }
+          }
+        case gTernary: {
+          switch(d) {
+            case 0: case 1: case 2:
+              return build(parent, d, 4, 6, d, 1);
+            case 4:
+              return build(parent, 4, parent->zebraval, 6, nextdir(3), -1);
+            case 3:
+              if(parent->zebraval < 2)
+                return path(h, 3, 5, {4, parent->zebraval + 1});
+              else
+                return path(h, 3, 5, {4, 3, 0});
+            case 5:
+              if(parent->zebraval > 0)
+                return path(h, 5, 3, {4, parent->zebraval - 1});
+              else
+                return path(h, 5, 3, {4, 5, 2});
             }
           }
         #if MAXMDIM >= 4         
@@ -506,6 +530,7 @@ EX namespace binary {
   
   EX int updir() {
     if(geometry == gBinary4) return 3;
+    if(geometry == gTernary) return 4;
     if(geometry == gBinaryTiling) return 5;
     if(penrose) return 0;
     if(!binarytiling) return 0;
@@ -522,6 +547,14 @@ EX namespace binary {
       direct_tmatrix[2] = parabolic(1);
       direct_tmatrix[4] = parabolic(-1);
       use_direct = 1+2+4+16;
+      }
+    if(geometry == gTernary) {
+      direct_tmatrix[0] = xpush(-log(3)) * parabolic(-1);
+      direct_tmatrix[1] = xpush(-log(3));
+      direct_tmatrix[2] = xpush(-log(3)) * parabolic(+1);
+      direct_tmatrix[3] = parabolic(1);
+      direct_tmatrix[5] = parabolic(-1);
+      use_direct = 1+2+4+8+32;
       }
     if(geometry == gBinary3) {
       direct_tmatrix[0] = xpush(-log(2)) * parabolic3(-1, -1);
@@ -892,24 +925,46 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
   ld yx = log(2) / 2;
   ld yy = yx;
   ld xx = 1 / sqrt(2)/2;
-  if(geometry == gBinaryTiling) switch(gmod(i, c->type)) {
-    case 0: return point2(-yy, xx);
-    case 1: return point2(yy, 2*xx);
-    case 2: return point2(yy, xx);
-    case 3: return point2(yy, -xx);
-    case 4: return point2(yy, -2*xx);
-    case 5: return point2(-yy, -xx);
-    case 6: return point2(-yy, 0);    
-    default: return point2(0, 0);
+  switch(geometry) {
+    case gBinaryTiling:    
+      switch(gmod(i, c->type)) {
+        case 0: return point2(-yy, xx);
+        case 1: return point2(yy, 2*xx);
+        case 2: return point2(yy, xx);
+        case 3: return point2(yy, -xx);
+        case 4: return point2(yy, -2*xx);
+        case 5: return point2(-yy, -xx);
+        case 6: return point2(-yy, 0);    
+        default: return point2(0, 0);
+        }
+    
+    case gBinary4:
+      switch(gmod(i, c->type)) {
+        case 0: return point2(yy, -2*xx);
+        case 1: return point2(yy, +0*xx);
+        case 2: return point2(yy, +2*xx);
+        case 3: return point2(-yy, xx);
+        case 4: return point2(-yy, -xx);
+        default: return point2(0, 0);
+        }
+    
+    case gTernary:
+      yy = log(3) / 2;
+      xx = 1 / sqrt(3) / 2;
+      switch(gmod(i, c->type)) {
+        case 0: return point2(yy, -3*xx);
+        case 1: return point2(yy, -1*xx);
+        case 2: return point2(yy, +1*xx);
+        case 3: return point2(yy, +3*xx);
+        case 4: return point2(-yy, xx);
+        case 5: return point2(-yy, -xx);
+        default: return point2(0, 0);
+        }
+    
+    default:
+      return point2(0, 0);
     }
-  else switch(gmod(i, c->type)) {
-    case 0: return point2(yy, -2*xx);
-    case 1: return point2(yy, +0*xx);
-    case 2: return point2(yy, +2*xx);
-    case 3: return point2(-yy, xx);
-    case 4: return point2(-yy, -xx);
-    default: return point2(0, 0);
-    }
+  return point2(0, 0);
   }
 
 
