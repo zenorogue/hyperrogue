@@ -330,7 +330,7 @@ MONSTER( 'D', 0xF09090, "Draugr", moDraugr, CF_FACE_UP | CF_NONLIVING | CF_SLOWM
     "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, "
     "but they can be destroyed by your Orb of the Sword."
     )
-MONSTER( 'C', 0xC08000, "Friendly Ivy", moFriendlyIvy, ZERO | CF_NOGHOST | CF_FRIENDLY | CF_FACING | CF_ANYIVY, RESERVED, moNone, naturedesc )
+MONSTER( 'C', 0xC08000, "Friendly Ivy", moFriendlyIvy, ZERO | CF_NOGHOST | CF_NOBLOW | CF_FRIENDLY | CF_FACING | CF_ANYIVY, RESERVED, moNone, naturedesc )
 MONSTER( 'V', 0xC000C0, "Vampire Bat", moVampire, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_UNARMED | CF_IGNORE_PLATE, RESERVED, moEagle, 
     "Vampire Bats don't attack normally, but they drain your magical powers if "
     "they are at distance at most 2 from you."
