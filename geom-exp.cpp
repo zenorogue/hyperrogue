@@ -517,6 +517,9 @@ EX string geometry_name() {
   switch(ginf[geometry].cclass) {
     case gcHyperbolic:
       return XLAT("hyperbolic");
+
+    case gcNIH:
+      return XLAT("nonisotropic hyperbolic");
     
     case gcEuclid: 
       return XLAT("flat");

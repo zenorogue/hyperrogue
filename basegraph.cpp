@@ -314,6 +314,8 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardEH2, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sol)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
+    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nih)
+      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardNIH, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sl2)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSL2, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nil)
@@ -333,56 +335,17 @@ void display_data::set_projection(int ed) {
   if(pmodel == mdRug) return;
   
   #if CAP_SOLV
-  if(glhr::new_shader_projection == glhr::shader_projection::standardSolv) {
+  if(among(glhr::new_shader_projection, glhr::shader_projection::standardSolv, glhr::shader_projection::standardNIH)) {
+    auto &tab = ((glhr::new_shader_projection == glhr::shader_projection::standardSolv) ? solv::solt : nihv::niht);
     
-    static bool toload = true;
-    
-    static GLuint invexpid = 0;
-    
-    if(toload) {
-      solv::load_table();
-      if(!solv::table_loaded) { pmodel = mdPerspective; set_projection(ed); return; }
-
-      println(hlog, "installing table");
-      using namespace solv;
-      toload = false;
-      
-      if(invexpid == 0) glGenTextures(1, &invexpid);
-
-      glBindTexture( GL_TEXTURE_3D, invexpid);
-
-      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-      
-      auto xbuffer = new glvertex[PRECZ*PRECY*PRECX];
-      
-      ld maxd = 0;
-      for(int z=0; z<PRECZ*PRECY*PRECX; z++) {
-        auto& t = inverse_exp_table[z];
-        xbuffer[z] = glhr::makevertex(t[0], t[1], t[2]);
-        }
-      println(hlog, "maxd = ", maxd);
-      
-      #if !ISWEB
-      glTexImage3D(GL_TEXTURE_3D, 0, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ, 0, GL_RGBA, GL_FLOAT, xbuffer);
-      #else
-      // glTexStorage3D(GL_TEXTURE_3D, 1, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ);
-      // glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, PRECX, PRECY, PRECZ, GL_RGBA, GL_FLOAT, xbuffer);
-      #endif
-      delete[] xbuffer;
-      
-      }
+    GLuint invexpid = tab.get_texture_id();
     
     glActiveTexture(GL_TEXTURE0 + glhr::INVERSE_EXP_BINDING);
     glBindTexture(GL_TEXTURE_3D, invexpid);
 
     glActiveTexture(GL_TEXTURE0 + 0);
     
-    glhr::set_solv_prec(solv::PRECX, solv::PRECY, solv::PRECZ);    
+    glhr::set_solv_prec(tab.PRECX, tab.PRECY, tab.PRECZ);
     }
   #endif
 

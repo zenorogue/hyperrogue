@@ -54,7 +54,7 @@ glvertex pointtogl(const hyperpoint& t);
 enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
   standardS30, standardS31, standardS32, standardS33, 
   ball, halfplane3, band3, flatten, standardSolv, standardNil,
-  standardEH2, standardSL2,
+  standardEH2, standardSL2, standardNIH,
   MAX 
   };
 
@@ -689,6 +689,7 @@ void init() {
     bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
     bool ssol = (sp == shader_projection::standardSolv);
+    bool snih = (sp == shader_projection::standardNIH);
     bool snil = (sp == shader_projection::standardNil);
     bool ssl2 = (sp == shader_projection::standardSL2);
     bool sr3 = (sp == shader_projection::standardR3);
@@ -699,13 +700,15 @@ void init() {
     bool seh2 = (sp == shader_projection::standardEH2);
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
-    bool s3 = (sh3 || sr3 || ss3 || ssol || snil || seh2 || ssl2);
+    bool s3 = (sh3 || sr3 || ss3 || ssol || snil || seh2 || ssl2 || snih);
     bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
     bool flatten = (sp == shader_projection::flatten);
     
-    if(ssol && !CAP_SOLV) continue;
+    bool sson = ssol || snih;
+    
+    if(sson && !CAP_SOLV) continue;
     
     programs[i][j] = new GLprogram(stringbuilder(
       1,       "#define PI 3.14159265358979324\n",
@@ -755,6 +758,7 @@ void init() {
       
       #if CAP_SOLV
       ssol,    solv::solshader,
+      snih,    nihv::nihshader,
       #endif
       snil,    nilv::nilshader,
       ssl2,    slr::slshader,
@@ -792,10 +796,10 @@ void init() {
       hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
       
       s3,        "vec4 t = uMV * aPosition;",
-      ssol,      "t = inverse_exp(t);",
-      ssol,      "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);",
-      ssol,      "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.; ",
-      ssol,      "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m; ",
+      sson,      "t = inverse_exp(t);",
+      sson,      "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);",
+      sson,      "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.; ",
+      sson,      "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m; ",
       snil,      "t = inverse_exp(t);",
       ssl2,      "t = inverse_exp(t);",
 
@@ -810,7 +814,7 @@ void init() {
 
       sh3,       "float fogs = (uFogBase - acosh(t[3]) / uFog);",
       sr3||snil||ssl2, "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
-      ssol,      "float fogs = (uFogBase - ad / uFog);",
+      sson,      "float fogs = (uFogBase - ad / uFog);",
 
       seh2,      "float fogs = (uFogBase - sqrt(z*z+d*d) / uFog);",
       
@@ -821,7 +825,7 @@ void init() {
 
       s3,        "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);",
 
-      sh3 || sr3 || ssol || ball || seh2,"t[3] = 1.0;",
+      sh3 || sr3 || sson || ball || seh2,"t[3] = 1.0;",
       
       band || hp || s3 || ball,"gl_Position = uP * t;",
       dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0) + uFogColor.xyz * (0.5 + gl_Position.z / 2.0);",

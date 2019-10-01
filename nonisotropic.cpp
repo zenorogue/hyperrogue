@@ -29,6 +29,10 @@ EX namespace nisot {
       T[0][0] = exp(-h[2]);
       T[1][1] = exp(+h[2]);
       }
+    if(nih) {
+      T[0][0] = pow(2, h[2]);
+      T[1][1] = pow(3, h[2]);
+      }
     if(nil) 
       T[2][1] = h[0];
     return T;
@@ -36,37 +40,110 @@ EX namespace nisot {
 
   EX }
 
-EX namespace solv {
-  #if CAP_SOLV
-  EX int PRECX, PRECY, PRECZ;
+#if CAP_SOLV
+EX namespace solnihv {
+
+  #if HDR
+  struct tabled_inverses {
+    int PRECX, PRECY, PRECZ;
+    vector<nisot::ptlow> tab;
+    string fname;
+    bool loaded;
+    
+    void load();
+    hyperpoint get(ld ix, ld iy, ld iz, bool lazy);
   
-  EX vector<nisot::ptlow> inverse_exp_table;
+    GLuint texture_id;
+    bool toload;
+    
+    GLuint get_texture_id();
   
-  EX bool table_loaded;
+    tabled_inverses(string s) : fname(s), texture_id(0), toload(true) {}  
+    };
+  #endif
   
-  EX string solfname = "solv-geodesics.dat";
-  
-  EX void load_table() {
-    if(table_loaded) return;
-    FILE *f = fopen(solfname.c_str(), "rb");
+  void tabled_inverses::load() {
+    if(loaded) return;
+    FILE *f = fopen(fname.c_str(), "rb");
     // if(!f) f = fopen("/usr/lib/soltable.dat", "rb");
     if(!f) { addMessage(XLAT("geodesic table missing")); pmodel = mdPerspective; return; }
     ignore(fread(&PRECX, 4, 1, f));
     ignore(fread(&PRECY, 4, 1, f));
     ignore(fread(&PRECZ, 4, 1, f));
-    inverse_exp_table.resize(PRECX * PRECY * PRECZ);
-    ignore(fread(&inverse_exp_table[0], sizeof(nisot::ptlow) * PRECX * PRECY * PRECZ, 1, f));
+    tab.resize(PRECX * PRECY * PRECZ);
+    ignore(fread(&tab[0], sizeof(nisot::ptlow) * PRECX * PRECY * PRECZ, 1, f));
     fclose(f);
-    table_loaded = true;    
+    loaded = true;    
     }
   
-  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
-    return hpxyz3(
-      -velocity[2] * transported[0] - velocity[0] * transported[2],
-       velocity[2] * transported[1] + velocity[1] * transported[2],
-       velocity[0] * transported[0] * exp(2*at[2]) - velocity[1] * transported[1] * exp(-2*at[2]),
-       0
-       );
+  hyperpoint tabled_inverses::get(ld ix, ld iy, ld iz, bool lazy) {
+    ix *= PRECX-1;
+    iy *= PRECY-1;
+    iz *= PRECZ-1;
+    
+    hyperpoint res;
+    
+    if(lazy) {
+      auto r = tab[(int(iz)*PRECY+int(iy))*PRECX+int(ix)];
+      for(int i=0; i<3; i++) res[i] = r[i];
+      }
+    
+    else {
+  
+      if(ix >= PRECX-1) ix = PRECX-2;
+      if(iy >= PRECX-1) iy = PRECX-2;
+      if(iz >= PRECZ-1) iz = PRECZ-2;
+      
+      int ax = ix, bx = ax+1;
+      int ay = iy, by = ay+1;
+      int az = iz, bz = az+1;
+      
+      #define S0(x,y,z) tab[(z*PRECY+y)*PRECX+x][t]
+      #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
+      #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
+  
+      for(int t=0; t<3; t++)
+        res[t] = S2(ax) * (bx-ix) + S2(bx) * (ix-ax);
+      }
+    
+    return res;
+    }
+  
+  GLuint tabled_inverses::get_texture_id() {
+    if(!toload) return texture_id;
+  
+    load();
+    if(!loaded) return 0;
+  
+    println(hlog, "installing table");
+    toload = false;
+    
+    if(texture_id == 0) glGenTextures(1, &texture_id);
+  
+    glBindTexture( GL_TEXTURE_3D, texture_id);
+  
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    
+    auto xbuffer = new glvertex[PRECZ*PRECY*PRECX];
+    
+    for(int z=0; z<PRECZ*PRECY*PRECX; z++) {
+      auto& t = tab[z];
+      xbuffer[z] = glhr::makevertex(t[0], t[1], t[2]);
+      }
+    
+    #if !ISWEB
+    glTexImage3D(GL_TEXTURE_3D, 0, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ, 0, GL_RGBA, GL_FLOAT, xbuffer);
+    #else
+    // glTexStorage3D(GL_TEXTURE_3D, 1, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ);
+    // glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, PRECX, PRECY, PRECZ, GL_RGBA, GL_FLOAT, xbuffer);
+    #endif
+    delete[] xbuffer;    
+    return texture_id;
     }
   
   EX ld x_to_ix(ld u) {
@@ -83,59 +160,9 @@ EX namespace solv {
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
 
-  EX hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
-    load_table();
-    
-    ld ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
-    ld iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);
-    ld iz = tanh(h[2]);
-    
-    if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
-    
-    ix *= PRECX-1;
-    iy *= PRECY-1;
-    iz *= PRECZ-1;
-    
-    hyperpoint res = C0;
-
-    if(lazy) {
-      auto r = inverse_exp_table[(int(iz)*PRECY+int(iy))*PRECX+int(ix)];
-      for(int i=0; i<3; i++) res[i] = r[i];
-      }
-    
-    else {
-
-      if(ix >= PRECX-1) ix = PRECX-2;
-      if(iy >= PRECX-1) iy = PRECX-2;
-      if(iz >= PRECZ-1) iz = PRECZ-2;
-      
-      int ax = ix, bx = ax+1;
-      int ay = iy, by = ay+1;
-      int az = iz, bz = az+1;
-      
-      #define S0(x,y,z) inverse_exp_table[(z*PRECY+y)*PRECX+x][t]
-      #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
-      #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
-  
-      for(int t=0; t<3; t++)
-        res[t] = S2(ax) * (bx-ix) + S2(bx) * (ix-ax);
-      }
-  
-    if(h[2] < 0.) { swap(res[0], res[1]); res[2] = -res[2]; }
-    if(h[0] < 0.) res[0] = -res[0];
-    if(h[1] < 0.) res[1] = -res[1];
-    
-    if(!just_direction) {
-      ld r = hypot_d(3, res);
-      if(r == 0.) return res;
-      return res * atanh(r) / r;
-      }
-
-    return res;
-    }
-
-  struct hrmap_sol : hrmap {
+  struct hrmap_solnih : hrmap {
     hrmap *binary_map;
+    hrmap *ternary_map; /* nih only */
     unordered_map<pair<heptagon*, heptagon*>, heptagon*> at;
     unordered_map<heptagon*, pair<heptagon*, heptagon*>> coords;
     
@@ -159,9 +186,10 @@ EX namespace solv {
       return h;      
       }
 
-    hrmap_sol() {
+    hrmap_solnih() {
     
       heptagon *alt;
+      heptagon *alt3;
     
       if(true) {
         dynamicval<eGeometry> g(geometry, gBinary4); 
@@ -176,12 +204,35 @@ EX namespace solv {
         binary_map = binary::new_alt_map(alt);
         }
       
-      origin = get_at(alt, alt);
+      if(nih) {
+        dynamicval<eGeometry> g(geometry, gTernary); 
+        alt3 = tailored_alloc<heptagon> (S7);
+        alt3->s = hsOrigin;
+        alt3->alt = alt3;
+        alt3->cdata = NULL;
+        alt3->c7 = NULL;
+        alt3->zebraval = 0;
+        alt3->distance = 0;
+        alt3->emeraldval = 0;
+        ternary_map = binary::new_alt_map(alt3);
+        }
+      else {
+        alt3 = alt;
+        ternary_map = nullptr;
+        }
+      
+      origin = get_at(alt, alt3);
       }
     
     heptagon *altstep(heptagon *h, int d) {
       dynamicval<eGeometry> g(geometry, gBinary4); 
       dynamicval<hrmap*> cm(currentmap, binary_map);
+      return h->cmove(d);
+      }
+    
+    heptagon *altstep3(heptagon *h, int d) {
+      dynamicval<eGeometry> g(geometry, gTernary); 
+      dynamicval<hrmap*> cm(currentmap, ternary_map);
       return h->cmove(d);
       }
     
@@ -194,7 +245,7 @@ EX namespace solv {
         return g;
         };
 
-      switch(d) {
+      if(sol) switch(d) {
         case 0: // right
           return rule(altstep(pf, 2), ps, 4);
         case 1: // up
@@ -214,27 +265,57 @@ EX namespace solv {
         default:
           return NULL;
         }
+
+      else switch(d) {
+        case 0: // right
+          return rule(altstep(pf, 2), ps, 2);
+        case 1: // up
+          return rule(pf, altstep3(ps, 3), 3);
+        case 2: // left
+          return rule(altstep(pf, 4), ps, 0);
+        case 3: // down
+          return rule(pf, altstep3(ps, 5), 1);
+        case 4: // back
+          return rule(altstep(pf, 3), altstep3(ps, 4), 5 + pf->zebraval + 2 * ps->zebraval);
+        default:
+          return rule(altstep(pf, (d-5) % 2), altstep3(ps, (d-5)/2), 4);
+        }
       }
 
-    ~hrmap_sol() {
+    ~hrmap_solnih() {
       delete binary_map;
+      if(ternary_map) delete ternary_map;
       for(auto& p: at) clear_heptagon(p.second);
       }
-    
+
     transmatrix adjmatrix(int i, int j) {
-      ld z = log(2);
-      ld bw = vid.binary_width * z;
-      ld bwh = bw / 4;
-      switch(i) {
-        case 0: return xpush(+bw);
-        case 1: return ypush(+bw);
-        case 2: return xpush(-bwh) * zpush(+z) * ypush(j == 6 ? +bwh : -bwh);
-        case 3: return xpush(+bwh) * zpush(+z) * ypush(j == 6 ? +bwh : -bwh);
-        case 4: return xpush(-bw);
-        case 5: return ypush(-bw);
-        case 6: return ypush(-bwh) * zpush(-z) * xpush(j == 2 ? +bwh : -bwh);
-        case 7: return ypush(+bwh) * zpush(-z) * xpush(j == 2 ? +bwh : -bwh);
-        default:return Id;
+      if(sol) {
+        ld z = log(2);
+        ld bw = vid.binary_width * z;
+        ld bwh = bw / 4;
+        switch(i) {
+          case 0: return xpush(+bw);
+          case 1: return ypush(+bw);
+          case 2: return xpush(-bwh) * zpush(+z) * ypush(j == 6 ? +bwh : -bwh);
+          case 3: return xpush(+bwh) * zpush(+z) * ypush(j == 6 ? +bwh : -bwh);
+          case 4: return xpush(-bw);
+          case 5: return ypush(-bw);
+          case 6: return ypush(-bwh) * zpush(-z) * xpush(j == 2 ? +bwh : -bwh);
+          case 7: return ypush(+bwh) * zpush(-z) * xpush(j == 2 ? +bwh : -bwh);
+          default:return Id;
+          }
+        }
+      else {
+        ld bw = vid.binary_width;
+        switch(i) {          
+          case 0: return xpush(+bw);
+          case 1: return ypush(+bw);
+          case 2: return xpush(-bw);
+          case 3: return ypush(-bw);
+          case 4: return xpush(-((j-5)%2-.5)*bw) * ypush(-((j-5)/2-1)*bw) * zpush(1);
+          default:
+            return zpush(-1) * xpush(((i-5)%2-.5)*bw) * ypush(((i-5)/2-1)*bw);
+          }
         }
       }
     
@@ -271,32 +352,16 @@ EX namespace solv {
     };
 
   EX pair<heptagon*,heptagon*> getcoord(heptagon *h) {
-    return ((hrmap_sol*)currentmap)->coords[h];
+    return ((hrmap_solnih*)currentmap)->coords[h];
     }
 
   EX heptagon *get_at(heptagon *h1, heptagon *h2, bool gen) {
-    auto m = ((hrmap_sol*)currentmap);
+    auto m = ((hrmap_solnih*)currentmap);
     if(!gen && !m->at.count(make_pair(h1, h2))) return nullptr;
     return m->get_at(h1, h2);
     }
   
-  EX ld solrange_xy = 15;
-  EX ld solrange_z = 4;
-  
-  EX bool in_table_range(hyperpoint h) {
-    return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
-    }
-
-  EX int approx_distance(heptagon *h1, heptagon *h2) {
-    auto m = (hrmap_sol*) currentmap;
-    dynamicval<eGeometry> g(geometry, gBinary4); 
-    dynamicval<hrmap*> cm(currentmap, m->binary_map);
-    int d1 = binary::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
-    int d2 = binary::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
-    return d1 + d2 - abs(h1->distance - h2->distance);
-    }
-  
-  EX string solshader = 
+  EX string common = 
     "uniform mediump sampler3D tInvExpTable;"    
     "uniform mediump float PRECX, PRECY, PRECZ;"
 
@@ -312,8 +377,55 @@ EX namespace solv {
     "  y /= (1.+z);"
     
     "  return 0.5 - atan((0.5-x) / y) / 3.1415926535897932384626433832795;"
-    "  }"
+    "  }";
+    
+EX }
 
+EX namespace solv {
+
+  EX ld solrange_xy = 15;
+  EX ld solrange_z = 4;
+  
+  EX bool in_table_range(hyperpoint h) {
+    return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
+    }
+
+  EX solnihv::tabled_inverses solt = solnihv::tabled_inverses("solv-geodesics.dat");
+
+  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+    return hpxyz3(
+      -velocity[2] * transported[0] - velocity[0] * transported[2],
+       velocity[2] * transported[1] + velocity[1] * transported[2],
+       velocity[0] * transported[0] * exp(2*at[2]) - velocity[1] * transported[1] * exp(-2*at[2]),
+       0
+       );
+    }
+  
+  EX hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
+    solt.load();
+    
+    ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
+    ld iz = tanh(h[2]);
+    
+    if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
+    
+    hyperpoint res = solt.get(ix, iy, iz, lazy);
+  
+    if(h[2] < 0.) { swap(res[0], res[1]); res[2] = -res[2]; }
+    if(h[0] < 0.) res[0] = -res[0];
+    if(h[1] < 0.) res[1] = -res[1];
+    
+    if(!just_direction) {
+      ld r = hypot_d(3, res);
+      if(r == 0.) return res;
+      return res * atanh(r) / r;
+      }
+
+    return res;
+    }
+
+  EX string solshader = solnihv::common +
 
     "vec4 inverse_exp(vec4 h) {"
     
@@ -343,8 +455,80 @@ EX namespace solv {
     
     "return res;"
     "}";
-  #endif
+
+  EX int approx_distance(heptagon *h1, heptagon *h2) {
+    auto m = (solnihv::hrmap_solnih*) currentmap;
+    dynamicval<eGeometry> g(geometry, gBinary4); 
+    dynamicval<hrmap*> cm(currentmap, m->binary_map);
+    int d1 = binary::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
+    int d2 = binary::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
+    return d1 + d2 - abs(h1->distance - h2->distance);
+    }    
 EX }
+
+EX namespace nihv {
+
+  EX solnihv::tabled_inverses niht = solnihv::tabled_inverses("h23-geodesics.dat");
+
+  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+    static const ld l2 = log(2);
+    static const ld l3 = log(3);
+    return hpxyz3(
+       (velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
+       (velocity[2] * transported[1] + velocity[1] * transported[2]) * l3,
+       -(velocity[0] * transported[0] * exp(-2*l2*at[2]) * l2 + velocity[1] * transported[1] * exp(-2*l3*at[2]) * l3),
+
+//       (-velocity[2] * transported[0] - velocity[0] * transported[2]) * l2,
+//       (-velocity[2] * transported[1] - velocity[1] * transported[2]) * l3,
+//       velocity[0] * transported[0] * exp(2*l2*at[2]) * l2 + velocity[1] * transported[1] * exp(2*l3*at[2]) * l3,
+       0
+       );
+    }  
+    
+  EX hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
+    niht.load();
+    
+    ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
+    ld iz = (tanh(h[2]/4)+1)/2;
+    
+    hyperpoint res = niht.get(ix, iy, iz, lazy);
+  
+    if(h[0] < 0.) res[0] = -res[0];
+    if(h[1] < 0.) res[1] = -res[1];
+    
+    if(!just_direction) {
+      ld r = hypot_d(3, res);
+      if(r == 0.) return res;
+      return res * atanh(r) / r;
+      }
+
+    return res;
+    }
+  
+  EX string nihshader = solnihv::common +
+
+    "vec4 inverse_exp(vec4 h) {"
+    
+    "float ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);"
+    "float iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);"
+    "float iz = (tanh(h[2]/4.)+1.) / 2.;"
+    
+    "vec4 res;"
+
+    "float cx = ix*(1.-1./PRECX) + .5/PRECX;"
+    "float cy = iy*(1.-1./PRECY) + .5/PRECY;"
+    "float cz = iz*(1.-1./PRECZ) + .5/PRECZ;"
+
+    "res = texture3D(tInvExpTable, vec3(cx, cy, cz));"
+
+    "if(h[0] < 0.) res[0] = -res[0];"
+    "if(h[1] < 0.) res[1] = -res[1];"
+    
+    "return res;"
+    "}";
+EX }
+#endif
 
 EX namespace nilv {
 
@@ -1330,6 +1514,7 @@ EX namespace nisot {
     if(nil) return nilv::christoffel(at, velocity, transported);
     #if CAP_SOLV
     else if(sol) return solv::christoffel(at, velocity, transported);
+    else if(nih) return nihv::christoffel(at, velocity, transported);
     #endif
     else if(sl2) return slr::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
@@ -1337,7 +1522,7 @@ EX namespace nisot {
 
   EX bool in_table_range(hyperpoint h) {
     #if CAP_SOLV
-    if(sol) return solv::in_table_range(h);
+    if(solnih) return solv::in_table_range(h);
     #endif
     return true;
     }
@@ -1428,7 +1613,7 @@ EX namespace nisot {
   
   EX hrmap *new_map() { 
     #if CAP_SOLV
-    if(sol) return new solv::hrmap_sol; 
+    if(solnih) return new solnihv::hrmap_solnih;
     #endif
     if(nil) return new nilv::hrmap_nil;
     if(prod) return new product::hrmap_product;
@@ -1451,7 +1636,11 @@ EX namespace nisot {
       }
     #if CAP_SOLV
     else if(argis("-fsol")) {
-      shift(); solv::solfname = args();
+      shift(); solv::solt.fname = args();
+      return 0;
+      }
+    else if(argis("-nihsol")) {
+      shift(); nihv::niht.fname = args();
       return 0;
       }
     #endif

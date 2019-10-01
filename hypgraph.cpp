@@ -967,7 +967,7 @@ EX bool invalid_point(const hyperpoint h) {
 EX bool in_smart_range(const transmatrix& T) {
   hyperpoint h = tC0(T);
   if(invalid_point(h)) return false;
-  if(nil) return true;
+  if(nil || nih) return true;
   #if CAP_SOLV
   if(pmodel == mdGeodesic) return solv::in_table_range(h);
   #endif
@@ -2010,6 +2010,13 @@ EX bool do_draw(cell *c, const transmatrix& T) {
     else if(pmodel == mdGeodesic && sol) {
       if(!nisot::in_table_range(tC0(T))) return false;
       if(!limited_generation(c)) return false;
+      }
+    else if(pmodel == mdGeodesic && nih) {
+      hyperpoint h = inverse_exp(tC0(T), iLazy, false);
+      ld dist = hypot_d(3, h);
+      if(isnan(dist)) binary::breakhere();
+      if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : cgi.corner_bonus)) return false;
+      if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
     else if(pmodel == mdGeodesic && sl2) {
       if(hypot(tC0(T)[2], tC0(T)[3]) > cosh(slr::range_xy)) return false;

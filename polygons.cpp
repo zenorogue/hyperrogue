@@ -758,7 +758,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[(a+1)%n] * y);
         hpcpush(h); return; 
         }
-      if(sol || !binarytiling) { hpcpush(normalize(h)); return; }
+      if(solnih || !binarytiling) { hpcpush(normalize(h)); return; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       });
@@ -776,7 +776,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         }
       if(nil)
         h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
-      if(sol || !binarytiling) { hpcpush(normalize(h)); continue; }
+      if(solnih || !binarytiling) { hpcpush(normalize(h)); continue; }
       hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       }
@@ -992,6 +992,26 @@ void geometry_information::create_wall3d() {
     make_wall(5, {pt(-1,+1,-1), pt(00,+1,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(-1,+1,+1)});
     make_wall(6, {pt(-1,+1,+1), pt(+1,+1,+1), pt(+1,00,+1), pt(-1,00,+1)});
     make_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
+    }
+
+  if(geometry == gNIH) {
+    ld zstep = .5;
+    ld bwh = vid.binary_width / 6;
+    auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
+    println(hlog, xpush(1) * ypush(1) * zpush(1) * xpush(-2) * ypush(-3) * zpush(-1) * C0);
+    println(hlog, xpush(1) * ypush(1) * zpush(-1) * xpush(-2) * ypush(-3) * zpush(1) * C0);
+    make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,+3,+1), pt(+3,+3,-1) });
+    make_wall(1, {pt(-3,+3,-1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,+3,-1)});
+    make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,+3,+1), pt(-3,+3,-1) });
+    make_wall(3, {pt(-3,-3,-1), pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-3,-1)});
+    
+    make_wall(4, {pt(-3,-3,+1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,-3,+1)});
+    
+    for(int i=0; i<6; i++) {
+      int x = -3 + (i%2) * 3;
+      int y = -3 + (i/2) * 2;
+      make_wall(5+i, {pt(x,y,-1), pt(x+3,y,-1), pt(x+3,y+2,-1), pt(x,y+2,-1)});
+      }
     }
   
   if(geometry == gNil) {

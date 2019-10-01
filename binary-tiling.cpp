@@ -51,7 +51,7 @@ EX namespace binary {
     }
   #endif
   
-  void breakhere() {
+  EX void breakhere() {
     exit(1);
     }
 

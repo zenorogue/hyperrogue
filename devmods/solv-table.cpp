@@ -14,12 +14,15 @@ const int _PRECZ = 64;
 
 transmatrix parabolic1(ld u);
 
-namespace solv {
+namespace nisot {
 
 typedef hyperpoint pt;
-typedef array<float, 3> ptlow;
 
-ptlow be_low(pt x) { return ptlow({float(x[0]), float(x[1]), float(x[2])}); }
+using solnihv::x_to_ix;
+
+ld z_to_iz(ld z) { if(sol) return tanh(z); else return tanh(z/4)/2 + .5; }
+
+ptlow be_low(hyperpoint x) { return ptlow({float(x[0]), float(x[1]), float(x[2])}); }
 
 template<class T> void parallelize(int threads, int Nmin, int Nmax, T action) {
   std::vector<std::thread> v;
@@ -30,35 +33,13 @@ template<class T> void parallelize(int threads, int Nmin, int Nmax, T action) {
   for(std::thread& t:v) t.join();
   }
 
-hyperpoint sol1(pt v) {
-  auto [x,y,z,t] = (array<ld,4>&) v;
-  if(x == 0 && z == 0) return C0;
-  hyperpoint h = parabolic1(x) * xpush(-z) * C0;
-  ld d = acosh(h[2]) / sqrt(h[0] * h[0] + h[1] * h[1]);
-  return hyperpoint({h[1]*d, 0, -h[0]*d,1});
-  }
-
-hyperpoint sol2(pt v) {
-  auto [x,y,z,t] = (array<ld,4>&) v;
-  if(y == 0 && z == 0) return C0;
-  hyperpoint h = parabolic1(y) * xpush(z) * C0;
-  ld d = acosh(h[2]) / sqrt(h[0] * h[0] + h[1] * h[1]);
-  return hyperpoint({0, h[1]*d, +h[0]*d,1});
-  }
-
-ld x_to_ix(ld u);
-
-ld solerror(pt ok, pt chk) {
-  auto zok  = point3( x_to_ix(ok[0]), x_to_ix(ok[1]), tanh(ok[2]) );
-  auto zchk = point3( x_to_ix(chk[0]), x_to_ix(chk[1]), tanh(chk[2]) );
+ld solerror(hyperpoint ok, hyperpoint chk) {
+  auto zok  = point3( x_to_ix(ok[0]), x_to_ix(ok[1]), z_to_iz(ok[2]) );
+  auto zchk = point3( x_to_ix(chk[0]), x_to_ix(chk[1]), z_to_iz(chk[2]) );
   return hypot_d(3, zok - zchk);
   }
 
-ld eucerror(pt ok, pt chk) {
-  return pow(ok[0]-chk[0], 2) + pow(ok[1]-chk[1], 2) + pow(ok[2]-chk[2], 2);
-  }
-
-pt iterative_solve(pt xp, pt candidate, int prec, ld minerr, bool debug = false) {
+hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld minerr, bool debug = false) {
 
   transmatrix T = Id; T[0][1] = 8; T[2][2] = 5;
   
@@ -70,7 +51,7 @@ pt iterative_solve(pt xp, pt candidate, int prec, ld minerr, bool debug = false)
   
   ld eps = 1e-6;
 
-  pt c[3];  
+  hyperpoint c[3];  
   for(int a=0; a<3; a++) c[a] = point3(a==0, a==1, a==2);
   
   while(err > minerr) {
@@ -145,13 +126,13 @@ ptlow solution[_PRECZ][_PRECY][_PRECX];
 
 ptlow mlow(ld x, ld y, ld z) { return ptlow({float(x), float(y), float(z)}); }
 
-pt atxyz(ld x, ld y, ld z) { return hyperpoint({x, y, z, 1}); }
+hyperpoint atxyz(ld x, ld y, ld z) { return hyperpoint({x, y, z, 1}); }
 
 ptlow operator +(ptlow a, ptlow b) { return mlow(a[0]+b[0], a[1]+b[1], a[2]+b[2]); }
 ptlow operator -(ptlow a, ptlow b) { return mlow(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
 ptlow operator *(ptlow a, ld x) { return mlow(a[0]*x, a[1]*x, a[2]*x); }
 
-ptlow can(pt x) {
+ptlow can(hyperpoint x) {
   // azimuthal equidistant to Klein
   ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
   if(r == 0) return mlow(0,0,0);
@@ -160,7 +141,7 @@ ptlow can(pt x) {
   return mlow(x[0]*d, x[1]*d, x[2]*d);
   }
 
-pt uncan(ptlow x) {
+hyperpoint uncan(ptlow x) {
   ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
   if(r == 0) return atxyz(0,0,0);
   ld make_r = atanh(r);
@@ -169,7 +150,7 @@ pt uncan(ptlow x) {
   return atxyz(x[0]*d, x[1]*d, x[2]*d);
   }
 
-pt uncan_info(ptlow x) {
+hyperpoint uncan_info(ptlow x) {
   ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
   println(hlog, "r = ", r);
   if(r == 0) return atxyz(0,0,0);
@@ -213,11 +194,7 @@ ld ix_to_x(ld ix) {
   }
 
 ld iz_to_z(ld z) {
-  return atanh(z); // atanh(z * 2 - 1);
-  }
-
-ld z_to_iz(ld z) {
-  return tanh(z); // (tanh(z) + 1) / 2;
+  return nih ? atanh(z * 2 - 1)*4 : atanh(z); // atanh(z * 2 - 1);
   }
 
 int last_x = _PRECX-1, last_y = _PRECY-1, last_z = _PRECZ-1;
@@ -232,6 +209,7 @@ void build_sols() {
   std::mutex file_mutex;
   ld max_err = 0;
   auto act = [&] (int tid, int iz) {
+    if((nih && iz == 0) || iz == _PRECZ-1) return;
   
     auto solve_at = [&] (int ix, int iy) {
       ld x = ix_to_x(ix / (_PRECX-1.));
@@ -240,18 +218,18 @@ void build_sols() {
       
       auto v = hyperpoint ({x,y,z,1});
       
-      vector<pt> candidates;
-      pt cand;
+      vector<hyperpoint> candidates;
+      hyperpoint cand;
       
       candidates.push_back(atxyz(0,0,0)); 
       
       static constexpr int prec = 100;
       
-      // sort(candidates.begin(), candidates.end(), [&] (pt a, pt b) { return solerror(v, direct_exp(a, prec)) > solerror(v, direct_exp(b, prec)); });
+      // sort(candidates.begin(), candidates.end(), [&] (hyperpoint a, hyperpoint b) { return solerror(v, direct_exp(a, prec)) > solerror(v, direct_exp(b, prec)); });
       
       // cand_best = candidates.back();
       
-      vector<pt> solved_candidates;
+      vector<hyperpoint> solved_candidates;
       
       for(auto c: candidates)  {
         auto solt = iterative_solve(v, c, prec, 1e-6);
@@ -259,7 +237,7 @@ void build_sols() {
         if(solerror(v, nisot::numerical_exp(solt, prec)) < 1e-9) break;
         }
 
-      sort(solved_candidates.begin(), solved_candidates.end(), [&] (pt a, pt b) { return solerror(v, nisot::numerical_exp(a, prec)) > solerror(v, nisot::numerical_exp(b, prec)); });
+      sort(solved_candidates.begin(), solved_candidates.end(), [&] (hyperpoint a, hyperpoint b) { return solerror(v, nisot::numerical_exp(a, prec)) > solerror(v, nisot::numerical_exp(b, prec)); });
       
       cand = solved_candidates.back();
 
@@ -299,14 +277,16 @@ void build_sols() {
       }
     };
 
-  parallelize(last_z, 0, last_z, act);
+  parallelize(_PRECZ, 0, _PRECZ, act);
   
   for(int x=0; x<last_x; x++)
   for(int y=0; y<last_y; y++) {
     for(int z=last_z; z<_PRECZ; z++)
       solution[z][y][x] = solution[z-1][y][x] * 2 - solution[z-2][y][x];
+    if(nih)
+      solution[0][y][x] = solution[1][y][x] * 2 - solution[2][y][x];
     }
-
+  
   for(int x=0; x<last_x; x++)
   for(int y=last_y; y<_PRECY; y++)
   for(int z=0; z<_PRECZ; z++)
@@ -322,10 +302,16 @@ int main(int argc, char **argv) {
 
   println(hlog);
   
+  /*
   geometry = gSol;
 
   build_sols();
   write_table("solv-geodesics-generated.dat");
+  */
+  
+  geometry = gNIH;
+  build_sols();
+  write_table("h23-geodesics-generated.dat");
 
   exit(0);
   }

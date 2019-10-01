@@ -4462,6 +4462,7 @@ int get_darkval(cell *c, int d) {
   const int darkval_sol[8] = {0,2,4,4,0,2,4,4};
   const int darkval_penrose[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
   const int darkval_nil[8] = {6,6,0,3,6,6,0,3};
+  const int darkval_nih[11] = {0,2,0,2,4,6,6,6,6,6,6};
   if(sphere) return darkval_s12[d];
   if(euclid && S7 == 6) return darkval_e6[d];
   if(euclid && S7 == 12) return darkval_e12[d];
@@ -4470,6 +4471,7 @@ int get_darkval(cell *c, int d) {
   if(geometry == gHoroRec) return darkval_hrec[d];
   if(penrose) return darkval_penrose[d];
   if(sol) return darkval_sol[d];
+  if(nih) return darkval_nih[d];
   if(binarytiling) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];
