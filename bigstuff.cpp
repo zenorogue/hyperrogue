@@ -1694,6 +1694,10 @@ EX void moreBigStuff(cell *c) {
           if(c->master->emeraldval % 3 || c->master->zebraval % 3)
             c->wall = waColumn;
           }
+        else if(nih) {
+          if(c->master->emeraldval % 2)
+            c->wall = waColumn;
+          }
         else if(geometry == gHoroTris || geometry == gHoroRec) {
           if(c->c.spin(binary::updir()) != 0) c->wall = waColumn;
           }

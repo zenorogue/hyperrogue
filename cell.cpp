@@ -439,7 +439,7 @@ EX int celldist(cell *c) {
   if(masterless)
     return eudist(decodeId(c->master));
   if(euclid && (penrose || archimedean)) return celldistance(currentmap->gamestart(), c);
-  if(sphere || binarytiling || WDIM == 3 || cryst || sol || penrose) return celldistance(currentmap->gamestart(), c);
+  if(sphere || binarytiling || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -477,7 +477,7 @@ EX int celldistAlt(cell *c) {
     return euclidAlt(x, y);
     }
   #if CAP_BT
-  if(binarytiling || sol) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
+  if(binarytiling || solnih) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
   #endif
   if(nil) return c->master->zebraval + abs(c->master->emeraldval) + (specialland == laCamelot && !tactic::on? 30 : 0);;
   #if CAP_CRYSTAL
@@ -914,7 +914,7 @@ EX int heptdistance(heptagon *h1, heptagon *h2) {
   if(cryst) return crystal::space_distance(h1->c7, h2->c7);
   #endif
   #if CAP_SOLV
-  if(sol) return solv::approx_distance(h1, h2);
+  if(solnih) return solv::approx_distance(h1, h2);
   #endif
   while(true) {
     if(h1 == h2) return d;
@@ -1016,7 +1016,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || sol || (penrose && euclid) || experimental || sl2) {
+  if(masterless || archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

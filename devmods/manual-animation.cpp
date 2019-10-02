@@ -57,7 +57,7 @@ bool move_camera(transmatrix T) {
   return true;
   }
 
-namespace solv {   pair<heptagon*,heptagon*> getcoord(heptagon *h); }
+namespace solnihv {   pair<heptagon*,heptagon*> getcoord(heptagon *h); }
 
 bignum bdiff(heptagon *h1, heptagon *h2) {
   if(h1 == h2) return 0;
@@ -101,8 +101,8 @@ void get_b4_distance() {
   if(h1->distance != h2->distance)
     println(hlog, "Z difference: ", h2->distance - h1->distance);
   else {
-    auto c1 = solv::getcoord(h1);
-    auto c2 = solv::getcoord(h2);
+    auto c1 = solnihv::getcoord(h1);
+    auto c2 = solnihv::getcoord(h2);
     println(hlog, "X difference: ", bdiff(c1.first, c2.first).get_str(10000));
     println(hlog, "Y difference: ", bdiff(c1.second, c2.second).get_str(10000));
     println(hlog, "X difference> ", bdiff(c2.first, c1.first).get_str(10000));

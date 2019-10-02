@@ -5119,7 +5119,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     noclipped++;
     }
-  if(pmodel == mdGeodesic && sol) {
+  if(pmodel == mdGeodesic && solnih) {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
@@ -6057,7 +6057,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           
           for(int a=0; a<c->type; a++)
             if(c->move(a) && !isWall3(c->move(a), dummy)) {
-              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !hybri && !experimental) {
+              if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !hybri && !experimental && !nih) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;

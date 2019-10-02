@@ -1000,10 +1000,10 @@ void geometry_information::create_wall3d() {
     auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
     println(hlog, xpush(1) * ypush(1) * zpush(1) * xpush(-2) * ypush(-3) * zpush(-1) * C0);
     println(hlog, xpush(1) * ypush(1) * zpush(-1) * xpush(-2) * ypush(-3) * zpush(1) * C0);
-    make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,+3,+1), pt(+3,+3,-1) });
-    make_wall(1, {pt(-3,+3,-1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,+3,-1)});
-    make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,+3,+1), pt(-3,+3,-1) });
-    make_wall(3, {pt(-3,-3,-1), pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-3,-1)});
+    make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+3,+1,-1), pt(+3,-1,-1) });
+    make_wall(1, {pt(-3,+3,-1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+0,+3,-1) });
+    make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,+3,+1), pt(-3,+3,-1), pt(-3,+1,-1), pt(-3,-1,-1) });
+    make_wall(3, {pt(-3,-3,-1), pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-3,-1), pt(+0,-3,-1)});
     
     make_wall(4, {pt(-3,-3,+1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,-3,+1)});
     

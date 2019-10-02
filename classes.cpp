@@ -590,7 +590,7 @@ vector<geometryinfo> ginf = {
   {"product","none",    "product space",                              "product",  7, 3, qHYBRID,   giProduct, 0x00000, {{7, 3}}, eVariation::pure},
   {"twisted","none",    "rotation space",                             "twisted",  7, 3, qHYBRID,   giSL2,     0x00000, {{6, 4}}, eVariation::pure},
   {"ternary","none",    "standard ternary tiling",                    "ternary",  6, 3, qBINARY,   giHyperb2, 0x48400, {{6, 4}}, eVariation::pure},
-  {"NIH",    "none",    "non-isotropic hyperbolic",                   "NIH",     11, 3, qBINARY | qEXPERIMENTAL,   giH23,     0x49000, {{6, 4}}, eVariation::pure},
+  {"NIH",    "none",    "non-isotropic hyperbolic",                   "NIH",     11, 3, qBINARY,   giH23,     0x49000, {{6, 4}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

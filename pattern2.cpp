@@ -1377,6 +1377,7 @@ EX bool pseudohept(cell *c) {
   #if CAP_BT
   if(nil) return c->master->zebraval & c->master->emeraldval & c->master->fieldval & 1;
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
+  if(nih) return c->master->zebraval % 3 == 2 && c->master->emeraldval % 2 == 1 && (c->master->distance % 2);
   if(penrose) return kite::getshape(c->master) == kite::pDart;
   if(binarytiling) return binary::pseudohept(c);
   #endif
