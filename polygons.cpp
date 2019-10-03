@@ -983,7 +983,6 @@ void geometry_information::create_wall3d() {
     ld zstep = -log(2) / 2;
     ld bwh = vid.binary_width * zstep;
     auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
-    println(hlog, xpush(2) * zpush(log(2)) * ypush(3) * C0);
     make_wall(0, {pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,00,+1), pt(-1,+1,+1), pt(-1,+1,-1)});
     make_wall(1, {pt(-1,-1,-1), pt(00,-1,-1), pt(+1,-1,-1), pt(+1,-1,+1), pt(-1,-1,+1)});
     make_wall(2, {pt(+1,+1,-1), pt(+1,-1,-1), pt(00,-1,-1), pt(00,+1,-1)});
@@ -998,8 +997,6 @@ void geometry_information::create_wall3d() {
     ld zstep = .5;
     ld bwh = vid.binary_width / 6;
     auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
-    println(hlog, xpush(1) * ypush(1) * zpush(1) * xpush(-2) * ypush(-3) * zpush(-1) * C0);
-    println(hlog, xpush(1) * ypush(1) * zpush(-1) * xpush(-2) * ypush(-3) * zpush(1) * C0);
     make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+3,+1,-1), pt(+3,-1,-1) });
     make_wall(1, {pt(-3,+3,-1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+0,+3,-1) });
     make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,+3,+1), pt(-3,+3,-1), pt(-3,+1,-1), pt(-3,-1,-1) });
