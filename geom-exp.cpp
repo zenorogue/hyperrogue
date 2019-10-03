@@ -423,6 +423,7 @@ void ge_select_tiling() {
     if(archimedean && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;
     if(sol && !CAP_SOLV) continue;
+    if(nih) continue; // hide work in progress
     if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     if((!!quotient) ^ select_quotient) continue;
