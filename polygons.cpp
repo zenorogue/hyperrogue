@@ -1014,6 +1014,21 @@ void geometry_information::create_wall3d() {
       }
     }
   
+  if(geometry == gSolN) {
+    ld zstep = -.5;
+    ld bwh = vid.binary_width / 6;
+    auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
+    make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,-1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(+3,+3,-1)});
+    make_wall(1, {pt(-3,+3,-1), pt(00,+3,-1), pt(+3,+3,-1), pt(+3,+3,+1), pt(-3,+3,+1)});
+    make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,-1,+1), pt(-3,+1,+1), pt(-3,+3,+1), pt(-3,+3,-1)});
+    make_wall(3, {pt(-3,-3,-1), pt(00,-3,-1), pt(+3,-3,-1), pt(+3,-3,+1), pt(-3,-3,+1)});
+    make_wall(4, {pt(-3,+3,-1), pt(-3,-3,-1), pt(00,-3,-1), pt(00,+3,-1)});
+    make_wall(5, {pt(00,+3,-1), pt(00,-3,-1), pt(+3,-3,-1), pt(+3,+3,-1)});
+    make_wall(6, {pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-1,+1), pt(-3,-1,+1)});
+    make_wall(7, {pt(-3,-1,+1), pt(+3,-1,+1), pt(+3,+1,+1), pt(-3,+1,+1)});
+    make_wall(8, {pt(-3,+1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(-3,+3,+1)});
+    }
+  
   if(geometry == gNil) {
     for(int i=0; i<S7; i++) make_wall(i, nilv::facevertices[i]);
     }

@@ -509,8 +509,8 @@ EX void initConfig() {
   addsaver(vid.cells_generated_limit, "limit on cells generated", 25);
   
   #if CAP_SOLV
-  addsaver(solv::solrange_xy, "solrange-xy");
-  addsaver(solv::solrange_z, "solrange-z");
+  addsaver(solnihv::solrange_xy, "solrange-xy");
+  addsaver(solnihv::solrange_z, "solrange-z");
   #endif
   addsaver(slr::steps, "slr-steps");
   addsaver(slr::range_xy, "slr-range-xy");
@@ -869,16 +869,16 @@ EX void edit_sightrange() {
         dialog::editNumber(sightranges[geometry], 0, 10, 0.5, M_PI, solhelp(), "");
         dialog::extra_options = xo; popScreen();
         });
-      dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(solv::solrange_xy), 'X');
+      dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(solnihv::solrange_xy), 'X');
       dialog::add_action([] {
         auto xo = dialog::extra_options;
-        dialog::editNumber(solv::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
+        dialog::editNumber(solnihv::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
         dialog::extra_options = xo; popScreen();
         });
-      dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(solv::solrange_z), 'Z');
+      dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(solnihv::solrange_z), 'Z');
       dialog::add_action([] {
         auto xo = dialog::extra_options;
-        dialog::editNumber(solv::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
+        dialog::editNumber(solnihv::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
         dialog::extra_options = xo; popScreen();
         });
       #endif
@@ -955,7 +955,7 @@ EX void menuitem_sightrange(char c IS('c')) {
     dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
   #if CAP_SOLV
   else if(pmodel == mdGeodesic && sol)
-    dialog::addSelItem(XLAT("3D sight range"), fts(solv::solrange_xy) + "x" + fts(solv::solrange_z), c);
+    dialog::addSelItem(XLAT("3D sight range"), fts(solnihv::solrange_xy) + "x" + fts(solnihv::solrange_z), c);
   #endif
   else if(WDIM == 3)
     dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);

@@ -6062,7 +6062,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
                 }
-              else if(sol && in_perspective()) {
+              else if(sol && in_perspective() && !nih) {
                 ld b = vid.binary_width * log(2) / 2;
                 const ld l = log(2) / 2;
                 switch(a) {

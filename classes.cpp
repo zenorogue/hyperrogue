@@ -524,12 +524,10 @@ EX geometryinfo1 giEuclid3 = { gcEuclid,     3, 3, 4, {1,1, 1,0 } };
 EX geometryinfo1 giHyperb3 = { gcHyperbolic, 3, 3, 4, {1,1, 1,-1} };
 EX geometryinfo1 giSphere3 = { gcSphere,     3, 3, 4, {1,1, 1,+1} };
 
-EX geometryinfo1 giSol     = { gcSol,        3, 3, 4, {1,1, 1,0 } };
+EX geometryinfo1 giSolNIH  = { gcSolNIH,     3, 3, 4, {1,1, 1,0 } };
 EX geometryinfo1 giNil     = { gcNil,        3, 3, 4, {1,1, 1,0 } };
 EX geometryinfo1 giProduct = { gcSL2,        3, 3, 4, {1,1, 1,0 } /* will be filled in product::configure() */ };
 EX geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
-
-EX geometryinfo1 giH23     = { gcNIH,        3, 3, 4, {1,1, 1,0 } };
 
 /** list of available geometries */
 vector<geometryinfo> ginf = {
@@ -583,14 +581,15 @@ vector<geometryinfo> ginf = {
   {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF, giHyperb3, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, giHyperb3, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"binary4","none",    "standard binary tiling",                     "binary4",  5, 3, qBINARY,   giHyperb2, 0x41400, {{7, 5}}, eVariation::pure},
-  {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY,   giSol,     0x41600, {{7, 5}}, eVariation::pure},
+  {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY|qSOL,   giSolNIH,  0x41600, {{7, 5}}, eVariation::pure},
   {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qPENROSE,  giEuclid2, 0x48000, {{7, 7}}, eVariation::pure},
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      giHyperb3, 0x48200, {{7, 3}}, eVariation::pure},
   {"nil",    "none",    "Nil geometry",                               "nil",      6, 3, 0,         giNil,     0x48600, {{7, 5}}, eVariation::pure},
   {"product","none",    "product space",                              "product",  7, 3, qHYBRID,   giProduct, 0x00000, {{7, 3}}, eVariation::pure},
   {"twisted","none",    "rotation space",                             "twisted",  7, 3, qHYBRID,   giSL2,     0x00000, {{6, 4}}, eVariation::pure},
   {"ternary","none",    "standard ternary tiling",                    "ternary",  6, 3, qBINARY,   giHyperb2, 0x48400, {{6, 4}}, eVariation::pure},
-  {"NIH",    "none",    "non-isotropic hyperbolic",                   "NIH",     11, 3, qBINARY,   giH23,     0x49000, {{6, 4}}, eVariation::pure},
+  {"NIH",    "none",    "non-isotropic hyperbolic",                   "NIH",     11, 3, qBINARY|qNIH,   giSolNIH,  0x49000, {{6, 3}}, eVariation::pure},
+  {"solN",   "none",    "Solv geometry NI",                           "solN",     9, 3, (qBINARY|qSOL|qNIH),   giSolNIH,  0x49200, {{7, 3}}, eVariation::pure},
   };
 
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18

@@ -914,7 +914,7 @@ EX int heptdistance(heptagon *h1, heptagon *h2) {
   if(cryst) return crystal::space_distance(h1->c7, h2->c7);
   #endif
   #if CAP_SOLV
-  if(solnih) return solv::approx_distance(h1, h2);
+  if(solnih) return solnihv::approx_distance(h1, h2);
   #endif
   while(true) {
     if(h1 == h2) return d;

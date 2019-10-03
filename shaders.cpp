@@ -757,8 +757,8 @@ void init() {
       1,       "  }",
       
       #if CAP_SOLV
-      ssol,    solv::solshader,
-      snih,    nihv::nihshader,
+      ssol,    solnihv::shader_symsol,
+      snih,    solnihv::shader_nsym,
       #endif
       snil,    nilv::nilshader,
       ssl2,    slr::slshader,

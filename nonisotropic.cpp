@@ -25,11 +25,15 @@ EX namespace nisot {
       return slr::translate(h);
     transmatrix T = Id;
     for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i];
-    if(sol) {
+    if(sol && nih) {
+      T[0][0] = pow(2, -h[2]);
+      T[1][1] = pow(3, h[2]);
+      }
+    else if(sol) {
       T[0][0] = exp(-h[2]);
       T[1][1] = exp(+h[2]);
       }
-    if(nih) {
+    else if(nih) {
       T[0][0] = pow(2, h[2]);
       T[1][1] = pow(3, h[2]);
       }
@@ -52,6 +56,8 @@ EX namespace solnihv {
     
     void load();
     hyperpoint get(ld ix, ld iy, ld iz, bool lazy);
+    
+    nisot::ptlow& get_int(int ix, int iy, int iz) { return tab[(iz*PRECY+iy)*PRECX+ix]; }
   
     GLuint texture_id;
     bool toload;
@@ -84,7 +90,7 @@ EX namespace solnihv {
     hyperpoint res;
     
     if(lazy) {
-      auto r = tab[(int(iz)*PRECY+int(iy))*PRECX+int(ix)];
+      auto r = get_int(int(ix), int(iy), int(iz));
       for(int i=0; i<3; i++) res[i] = r[i];
       }
     
@@ -98,7 +104,7 @@ EX namespace solnihv {
       int ay = iy, by = ay+1;
       int az = iz, bz = az+1;
       
-      #define S0(x,y,z) tab[(z*PRECY+y)*PRECX+x][t]
+      #define S0(x,y,z) get_int(x, y, z)[t]
       #define S1(x,y) (S0(x,y,az) * (bz-iz) + S0(x,y,bz) * (iz-az))
       #define S2(x) (S1(x,ay) * (by-iy) + S1(x,by) * (iy-ay))
   
@@ -244,8 +250,10 @@ EX namespace solnihv {
         parent->c.connect(d, g, d1, false);
         return g;
         };
+      
+      switch(geometry){
 
-      if(sol) switch(d) {
+      case gSol: switch(d) {
         case 0: // right
           return rule(altstep(pf, 2), ps, 4);
         case 1: // up
@@ -266,7 +274,7 @@ EX namespace solnihv {
           return NULL;
         }
 
-      else switch(d) {
+      case gNIH: switch(d) {
         case 0: // right
           return rule(altstep(pf, 2), ps, 2);
         case 1: // up
@@ -280,6 +288,26 @@ EX namespace solnihv {
         default:
           return rule(altstep(pf, (d-5) % 2), altstep3(ps, (d-5)/2), 4);
         }
+
+      case gSolN: switch(d) {
+        case 0: // right
+          return rule(altstep(pf, 2), ps, 2);
+        case 1: // up
+          return rule(pf, altstep3(ps, 3), 3);
+        case 2: // left
+          return rule(altstep(pf, 4), ps, 0);
+        case 3: // down
+          return rule(pf, altstep3(ps, 5), 1);
+        case 4: case 5: 
+          return rule(altstep(pf, d-4), altstep3(ps, 4), ps->zebraval + 6);
+        case 6: case 7: case 8: 
+          return rule(altstep(pf, 3), altstep3(ps, d-6), pf->zebraval + 4);
+        default:
+          return NULL;
+        }
+
+        default: throw "not solnihv";
+        }
       }
 
     ~hrmap_solnih() {
@@ -289,23 +317,23 @@ EX namespace solnihv {
       }
 
     transmatrix adjmatrix(int i, int j) {
-      if(sol) {
+      switch(geometry) {
+      case gSol: {
         ld z = log(2);
         ld bw = vid.binary_width * z;
-        ld bwh = bw / 4;
         switch(i) {
           case 0: return xpush(+bw);
           case 1: return ypush(+bw);
-          case 2: return xpush(-bwh) * zpush(+z) * ypush(j == 6 ? +bwh : -bwh);
-          case 3: return xpush(+bwh) * zpush(+z) * ypush(j == 6 ? +bwh : -bwh);
+          case 2: case 3:
+            return ypush(bw*(6.5-j)) * zpush(+z) * xpush(bw*(i-2.5));
           case 4: return xpush(-bw);
           case 5: return ypush(-bw);
-          case 6: return ypush(-bwh) * zpush(-z) * xpush(j == 2 ? +bwh : -bwh);
-          case 7: return ypush(+bwh) * zpush(-z) * xpush(j == 2 ? +bwh : -bwh);
+          case 6: case 7:
+            return xpush(bw*(2.5-j)) * zpush(-z) * ypush(bw*(i-6.5));
           default:return Id;
           }
         }
-      else {
+      case gNIH: {
         ld bw = vid.binary_width;
         switch(i) {          
           case 0: return xpush(+bw);
@@ -378,31 +406,40 @@ EX namespace solnihv {
     
     "  return 0.5 - atan((0.5-x) / y) / 3.1415926535897932384626433832795;"
     "  }";
-    
-EX }
-
-EX namespace solv {
-
-  EX ld solrange_xy = 15;
-  EX ld solrange_z = 4;
-  
-  EX bool in_table_range(hyperpoint h) {
-    return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
-    }
-
-  EX solnihv::tabled_inverses solt = solnihv::tabled_inverses("solv-geodesics.dat");
 
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
-    return hpxyz3(
-      -velocity[2] * transported[0] - velocity[0] * transported[2],
-       velocity[2] * transported[1] + velocity[1] * transported[2],
-       velocity[0] * transported[0] * exp(2*at[2]) - velocity[1] * transported[1] * exp(-2*at[2]),
-       0
-       );
+    constexpr ld l2 = log(2);
+    constexpr ld l3 = log(3);
+    switch(geometry) {
+      case gSolN:
+        return hpxyz3(
+          -(velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
+           (velocity[2] * transported[1] + velocity[1] * transported[2]) * l3,
+           velocity[0] * transported[0] * exp(2*l2*at[2]) * l2 - velocity[1] * transported[1] * exp(-2*l3*at[2]) * l3,
+           0
+           );
+      case gSol:
+        return hpxyz3(
+          -velocity[2] * transported[0] - velocity[0] * transported[2],
+           velocity[2] * transported[1] + velocity[1] * transported[2],
+           velocity[0] * transported[0] * exp(2*at[2]) - velocity[1] * transported[1] * exp(-2*at[2]),
+           0
+           );
+      case gNIH:
+        return hpxyz3(
+           (velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
+           (velocity[2] * transported[1] + velocity[1] * transported[2]) * l3,
+           -(velocity[0] * transported[0] * exp(-2*l2*at[2]) * l2 + velocity[1] * transported[1] * exp(-2*l3*at[2]) * l3),
+           0
+           );
+      default:
+        throw "christoffel not in solnihv";
+      }
     }
   
-  EX hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
-    solt.load();
+  EX hyperpoint get_inverse_exp_symsol(hyperpoint h, bool lazy, bool just_direction) {
+    auto& s = get_tabled();
+    s.load();
     
     ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
     ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
@@ -410,7 +447,7 @@ EX namespace solv {
     
     if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
     
-    hyperpoint res = solt.get(ix, iy, iz, lazy);
+    hyperpoint res = s.get(ix, iy, iz, lazy);
   
     if(h[2] < 0.) { swap(res[0], res[1]); res[2] = -res[2]; }
     if(h[0] < 0.) res[0] = -res[0];
@@ -425,7 +462,29 @@ EX namespace solv {
     return res;
     }
 
-  EX string solshader = solnihv::common +
+  EX hyperpoint get_inverse_exp_nsym(hyperpoint h, bool lazy, bool just_direction) {
+    auto& s = get_tabled();
+    s.load();
+    
+    ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
+    ld iz = (tanh(h[2]/4)+1)/2;
+    
+    hyperpoint res = s.get(ix, iy, iz, lazy);
+  
+    if(h[0] < 0.) res[0] = -res[0];
+    if(h[1] < 0.) res[1] = -res[1];
+    
+    if(!just_direction) {
+      ld r = hypot_d(3, res);
+      if(r == 0.) return res;
+      return res * atanh(r) / r;
+      }
+
+    return res;
+    }
+
+  EX string shader_symsol = solnihv::common +
 
     "vec4 inverse_exp(vec4 h) {"
     
@@ -456,57 +515,7 @@ EX namespace solv {
     "return res;"
     "}";
 
-  EX int approx_distance(heptagon *h1, heptagon *h2) {
-    auto m = (solnihv::hrmap_solnih*) currentmap;
-    dynamicval<eGeometry> g(geometry, gBinary4); 
-    dynamicval<hrmap*> cm(currentmap, m->binary_map);
-    int d1 = binary::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
-    int d2 = binary::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
-    return d1 + d2 - abs(h1->distance - h2->distance);
-    }    
-EX }
-
-EX namespace nihv {
-
-  EX solnihv::tabled_inverses niht = solnihv::tabled_inverses("h23-geodesics.dat");
-
-  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
-    static const ld l2 = log(2);
-    static const ld l3 = log(3);
-    return hpxyz3(
-       (velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
-       (velocity[2] * transported[1] + velocity[1] * transported[2]) * l3,
-       -(velocity[0] * transported[0] * exp(-2*l2*at[2]) * l2 + velocity[1] * transported[1] * exp(-2*l3*at[2]) * l3),
-
-//       (-velocity[2] * transported[0] - velocity[0] * transported[2]) * l2,
-//       (-velocity[2] * transported[1] - velocity[1] * transported[2]) * l3,
-//       velocity[0] * transported[0] * exp(2*l2*at[2]) * l2 + velocity[1] * transported[1] * exp(2*l3*at[2]) * l3,
-       0
-       );
-    }  
-    
-  EX hyperpoint get_inverse_exp(hyperpoint h, bool lazy, bool just_direction) {
-    niht.load();
-    
-    ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
-    ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
-    ld iz = (tanh(h[2]/4)+1)/2;
-    
-    hyperpoint res = niht.get(ix, iy, iz, lazy);
-  
-    if(h[0] < 0.) res[0] = -res[0];
-    if(h[1] < 0.) res[1] = -res[1];
-    
-    if(!just_direction) {
-      ld r = hypot_d(3, res);
-      if(r == 0.) return res;
-      return res * atanh(r) / r;
-      }
-
-    return res;
-    }
-  
-  EX string nihshader = solnihv::common +
+  EX string shader_nsym = solnihv::common +
 
     "vec4 inverse_exp(vec4 h) {"
     
@@ -527,6 +536,35 @@ EX namespace nihv {
     
     "return res;"
     "}";
+
+  EX ld solrange_xy = 15;
+  EX ld solrange_z = 4;
+  
+  EX bool in_table_range(hyperpoint h) {
+    return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
+    }
+
+  EX tabled_inverses solt = solnihv::tabled_inverses("solv-geodesics.dat");
+  EX tabled_inverses niht = solnihv::tabled_inverses("h23-geodesics.dat");
+  EX tabled_inverses sont = solnihv::tabled_inverses("sont-geodesics.dat");
+  
+  EX tabled_inverses& get_tabled() {
+    switch(geometry) {
+      case gSol: return solt;
+      case gNIH: return niht;
+      case gSolN: return sont;
+      default: throw "not solnih";
+      }
+    }
+
+  EX int approx_distance(heptagon *h1, heptagon *h2) {
+    auto m = (solnihv::hrmap_solnih*) currentmap;
+    dynamicval<eGeometry> g(geometry, gBinary4); 
+    dynamicval<hrmap*> cm(currentmap, m->binary_map);
+    int d1 = binary::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
+    int d2 = binary::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
+    return d1 + d2 - abs(h1->distance - h2->distance);
+    }    
 EX }
 #endif
 
@@ -1513,8 +1551,7 @@ EX namespace nisot {
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
     if(nil) return nilv::christoffel(at, velocity, transported);
     #if CAP_SOLV
-    else if(sol) return solv::christoffel(at, velocity, transported);
-    else if(nih) return nihv::christoffel(at, velocity, transported);
+    else if(solnih) return solnihv::christoffel(at, velocity, transported);
     #endif
     else if(sl2) return slr::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
@@ -1522,7 +1559,7 @@ EX namespace nisot {
 
   EX bool in_table_range(hyperpoint h) {
     #if CAP_SOLV
-    if(solnih) return solv::in_table_range(h);
+    if(sol) return solnihv::in_table_range(h);
     #endif
     return true;
     }
@@ -1625,8 +1662,8 @@ EX namespace nisot {
     using namespace arg;
     #if CAP_SOLV
     if(argis("-solrange")) {
-      shift_arg_formula(solv::solrange_xy);
-      shift_arg_formula(solv::solrange_z);
+      shift_arg_formula(solnihv::solrange_xy);
+      shift_arg_formula(solnihv::solrange_z);
       return 0;
       }
     #endif
@@ -1636,11 +1673,11 @@ EX namespace nisot {
       }
     #if CAP_SOLV
     else if(argis("-fsol")) {
-      shift(); solv::solt.fname = args();
+      shift(); solnihv::solt.fname = args();
       return 0;
       }
     else if(argis("-nihsol")) {
-      shift(); nihv::niht.fname = args();
+      shift(); solnihv::niht.fname = args();
       return 0;
       }
     #endif

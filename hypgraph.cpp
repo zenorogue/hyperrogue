@@ -969,7 +969,7 @@ EX bool in_smart_range(const transmatrix& T) {
   if(invalid_point(h)) return false;
   if(nil || nih) return true;
   #if CAP_SOLV
-  if(pmodel == mdGeodesic) return solv::in_table_range(h);
+  if(pmodel == mdGeodesic) return solnihv::in_table_range(h);
   #endif
   hyperpoint h1;
   applymodel(h, h1);

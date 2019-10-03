@@ -1131,8 +1131,12 @@ enum iePrecision { iLazy, iTable };
 /** inverse exponential function \see hr::direct_exp */
 EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
   #if CAP_SOLV
-  if(sol) return solv::get_inverse_exp(h, p == iLazy, just_direction);
-  if(nih) return nihv::get_inverse_exp(h, p == iLazy, just_direction);
+  if(solnih) {
+    if(nih) 
+      return solnihv::get_inverse_exp_nsym(h, p == iLazy, just_direction);
+    else
+      return solnihv::get_inverse_exp_symsol(h, p == iLazy, just_direction);
+    }
   #endif
   if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
   if(sl2) return slr::get_inverse_exp(h);

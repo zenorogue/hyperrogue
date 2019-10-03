@@ -336,7 +336,7 @@ void display_data::set_projection(int ed) {
   
   #if CAP_SOLV
   if(among(glhr::new_shader_projection, glhr::shader_projection::standardSolv, glhr::shader_projection::standardNIH)) {
-    auto &tab = ((glhr::new_shader_projection == glhr::shader_projection::standardSolv) ? solv::solt : nihv::niht);
+    auto &tab = solnihv::get_tabled();
     
     GLuint invexpid = tab.get_texture_id();
     
