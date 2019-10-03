@@ -129,7 +129,7 @@ void addMessage(string s, char spamtype = 0);
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
 #define sphere (cgclass == gcSphere)
-#define solnih (cgclass = gcSolNIH)
+#define solnih (cgclass == gcSolNIH)
 #define sol (ginf[geometry].flags & qSOL)
 #define nih (ginf[geometry].flags & qNIH)
 #define nil (cgclass == gcNil)
