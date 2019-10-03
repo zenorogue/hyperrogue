@@ -1,5 +1,5 @@
 // This generates the 'solv-geodesics.dat' file.
-// You may change the _PREC* values for more precise geodesics.
+// You may change the parameters of build_sols() for more precise geodesics.
 
 #include "../hyper.h"
 
@@ -7,10 +7,6 @@
 #include <mutex>
 
 namespace hr {
-
-const int _PRECX = 64;
-const int _PRECY = 64;
-const int _PRECZ = 64;
 
 transmatrix parabolic1(ld u);
 
@@ -122,8 +118,6 @@ hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld min
   return at;
   }
 
-ptlow solution[_PRECZ][_PRECY][_PRECX];
-
 ptlow mlow(ld x, ld y, ld z) { return ptlow({float(x), float(y), float(z)}); }
 
 hyperpoint atxyz(ld x, ld y, ld z) { return hyperpoint({x, y, z, 1}); }
@@ -164,23 +158,20 @@ hyperpoint uncan_info(ptlow x) {
 void fint(FILE *f, int x) { fwrite(&x, sizeof(x), 1, f); }
 void ffloat(FILE *f, float x) { fwrite(&x, sizeof(x), 1, f); }
 
-void write_table(const char *fname) {
-  FILE *f = fopen(fname, "wb");    
-  fint(f, _PRECX);
-  fint(f, _PRECY);
-  fint(f, _PRECZ);
-  fwrite(solution, sizeof(solution), 1, f);
+void write_table(solnihv::tabled_inverses& tab, const char *fname) {
+  FILE *f = fopen(fname, "wb");
+  fint(f, tab.PRECX);
+  fint(f, tab.PRECY);
+  fint(f, tab.PRECZ);
+  fwrite(&tab.tab[0], sizeof(ptlow) * tab.PRECX * tab.PRECY * tab.PRECZ, 1, f);
   fclose(f);
   }
 
-void load_table(const char *fname) {
-  int s;
-  FILE *f = fopen(fname, "rb");    
-  fread(&s, 4, 1, f);
-  fread(&s, 4, 1, f);
-  fread(&s, 4, 1, f);
-  fread(solution, sizeof(solution), 1, f);
-  fclose(f);
+void alloc_table(solnihv::tabled_inverses& tab, int X, int Y, int Z) {
+  tab.PRECX = X;
+  tab.PRECY = Y;
+  tab.PRECZ = Z;
+  tab.tab.resize(X*Y*Z);
   }
 
 ld ix_to_x(ld ix) {
@@ -197,24 +188,25 @@ ld iz_to_z(ld z) {
   return nih ? atanh(z * 2 - 1)*4 : atanh(z); // atanh(z * 2 - 1);
   }
 
-int last_x = _PRECX-1, last_y = _PRECY-1, last_z = _PRECZ-1;
-
 ld ptd(ptlow p) {
   return p[0]*p[0] + p[1]*p[1] + p[2] * p[2];
   }
 
 ptlow zflip(ptlow x) { return mlow(x[1], x[0], -x[2]); }
 
-void build_sols() {
+void build_sols(int PRECX, int PRECY, int PRECZ) {
   std::mutex file_mutex;
   ld max_err = 0;
+  auto& tab = solnihv::get_tabled();
+  alloc_table(tab, PRECX, PRECY, PRECZ);
+  int last_x = PRECX-1, last_y = PRECY-1, last_z = PRECZ-1;
   auto act = [&] (int tid, int iz) {
-    if((nih && iz == 0) || iz == _PRECZ-1) return;
+    if((nih && iz == 0) || iz == PRECZ-1) return;
   
     auto solve_at = [&] (int ix, int iy) {
-      ld x = ix_to_x(ix / (_PRECX-1.));
-      ld y = ix_to_x(iy / (_PRECY-1.));
-      ld z = iz_to_z(iz / (_PRECZ-1.));
+      ld x = ix_to_x(ix / (PRECX-1.));
+      ld y = ix_to_x(iy / (PRECY-1.));
+      ld z = iz_to_z(iz / (PRECZ-1.));
       
       auto v = hyperpoint ({x,y,z,1});
       
@@ -250,18 +242,23 @@ void build_sols() {
         println(hlog, "error = ", xerr);
         println(hlog, "canned = ", can(cand));
         max_err = xerr;
+        /*
         hyperpoint h1 = uncan(solution[iz][iy-1][ix]);
         hyperpoint h2 = uncan(solution[iz][iy][ix-1]);
         hyperpoint h3 = uncan(solution[iz][iy-1][ix-1]);
         hyperpoint h4 = h1 + h2 - h3;
         solution[iz][iy][ix] = can(h4);
+        */
         return;
         }
 
-      solution[iz][iy][ix] = can(cand);
+      auto& so = tab.get_int(ix, iy, iz);
+
+      so = can(cand);
       
-      for(int z=0; z<3; z++) if(isnan(solution[iz][iy][ix][z]) || isinf(solution[iz][iy][ix][z])) {
-        println(hlog, cand, "canned to ", solution[iz][iy][ix]);
+      
+      for(int z=0; z<3; z++) if(isnan(so[z]) || isinf(so[z])) {
+        println(hlog, cand, "canned to ", so);
         exit(4);
         }
       };
@@ -277,25 +274,25 @@ void build_sols() {
       }
     };
 
-  parallelize(_PRECZ, 0, _PRECZ, act);
+  parallelize(PRECZ, 0, PRECZ, act);
   
   for(int x=0; x<last_x; x++)
   for(int y=0; y<last_y; y++) {
-    for(int z=last_z; z<_PRECZ; z++)
-      solution[z][y][x] = solution[z-1][y][x] * 2 - solution[z-2][y][x];
+    for(int z=last_z; z<PRECZ; z++)
+      tab.get_int(x,y,z) = tab.get_int(x,y,z-1) * 2 - tab.get_int(x,y,z-2);
     if(nih)
-      solution[0][y][x] = solution[1][y][x] * 2 - solution[2][y][x];
+      tab.get_int(x,y,0) = tab.get_int(x,y,1) * 2 - tab.get_int(x,y,2);
     }
   
   for(int x=0; x<last_x; x++)
-  for(int y=last_y; y<_PRECY; y++)
-  for(int z=0; z<_PRECZ; z++)
-    solution[z][y][x] = solution[z][y-1][x] * 2 - solution[z][y-2][x];
+  for(int y=last_y; y<PRECY; y++)
+  for(int z=0; z<PRECZ; z++)
+    tab.get_int(x,y,z) = tab.get_int(x,y-1,z) * 2 - tab.get_int(x,y-2,z);
   
-  for(int x=last_x; x<_PRECX; x++)
-  for(int y=0; y<_PRECY; y++)
-  for(int z=0; z<_PRECZ; z++)
-    solution[z][y][x] = solution[z][y][x-1] * 2 - solution[z][y][x-2];
+  for(int x=last_x; x<PRECX; x++)
+  for(int y=0; y<PRECY; y++)
+  for(int z=0; z<PRECZ; z++)
+    tab.get_int(x,y,z) = tab.get_int(x-1,y,z) * 2 - tab.get_int(x-2,y,z);
   }
 
 int main(int argc, char **argv) {
@@ -303,15 +300,20 @@ int main(int argc, char **argv) {
   println(hlog);
   
   /*
-  geometry = gSol;
+  geometry = gSol;  
+  build_sols(64, 64, 64);
+  write_table(solnihv::get_tabled(), "solv-geodesics-generated.dat");
+  */
 
-  build_sols();
-  write_table("solv-geodesics-generated.dat");
+  /*  
+  geometry = gNIH;
+  build_sols(64, 64, 64);
+  write_table(solnihv::get_tabled(), "h23-geodesics-generated.dat");
   */
   
-  geometry = gNIH;
-  build_sols();
-  write_table("h23-geodesics-generated.dat");
+  geometry = gSolN;
+  build_sols(64, 64, 64);
+  write_table(solnihv::get_tabled(), "sont-geodesics-generated.dat");
 
   exit(0);
   }
