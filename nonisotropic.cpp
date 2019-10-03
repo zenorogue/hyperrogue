@@ -345,6 +345,25 @@ EX namespace solnihv {
             return zpush(-1) * xpush(((i-5)%2-.5)*bw) * ypush(((i-5)/2-1)*bw);
           }
         }
+      case gSolN: {
+        ld bw = vid.binary_width;
+        switch(i) {          
+          case 0: return xpush(+bw);
+          case 1: return ypush(+bw);
+          case 2: return xpush(-bw);
+          case 3: return ypush(-bw);
+          case 4: 
+          case 5:
+            return ypush(bw*(7-j)) * zpush(+1) * xpush(bw*(i-4.5));
+          case 6:
+          case 7:
+          case 8:
+            return xpush(bw*(4.5-j)) * zpush(-1) * ypush(bw*(i-7));
+          }
+        }
+
+      default: throw "not nihsolv";
+      }
       }
     
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
