@@ -10,7 +10,7 @@ dist_doc_DATA = README.md
 
 # musicdir
 musicdir=$(datadir)/hyperrogue/music
-dist_music_DATA = music/hr3-caves.ogg music/hr3-desert.ogg music/hr3-hell.ogg music/hr3-jungle.ogg music/hr3-mirror.ogg music/hr3-rlyeh.ogg music/hr3-crossroads.ogg music/hr3-graveyard.ogg music/hr3-icyland.ogg music/hr3-laboratory.ogg music/hr3-motion.ogg
+dist_music_DATA = music/hr3-caves.ogg music/hr3-desert.ogg music/hr3-hell.ogg music/hr3-jungle.ogg music/hr3-mirror.ogg music/hr3-rlyeh.ogg music/hr3-crossroads.ogg music/hr3-graveyard.ogg music/hr3-icyland.ogg music/hr3-laboratory.ogg music/hr3-motion.ogg music/hr-savino-palace.ogg music/hr-savino-caribbean.ogg music/hr-savino-ocean.ogg music/hr-savino-ivory.ogg
 
 # soundsdir
 soundsdir=$(datadir)/hyperrogue/sounds
