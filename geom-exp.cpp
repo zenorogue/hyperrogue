@@ -519,17 +519,23 @@ EX string geometry_name() {
     case gcHyperbolic:
       return XLAT("hyperbolic");
 
-    case gcNIH:
-      return XLAT("nonisotropic hyperbolic");
-    
     case gcEuclid: 
       return XLAT("flat");
     
     case gcSphere:
       return XLAT("spherical");
 
-    case gcSol:
-      return XLAT("Sol");
+    case gcSolNIH:
+      switch(geometry) {
+        case gSol:
+          return XLAT("Sol");
+        case gNIH:
+          return XLAT("hyperbolic (3:2)");
+        case gSolN:
+          return XLAT("Sol (3:2)");
+        default:
+          return "unknown";
+        }
 
     case gcNil:
       return XLAT("Nil");
