@@ -534,6 +534,44 @@ EX namespace solnihv {
     "return res;"
     "}";
 
+  EX string shader_nsymsol = solnihv::common + R"*(
+
+    vec4 inverse_exp(vec4 h) {
+      
+    float ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
+    float iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);
+    float iz = (tanh(h[2]/4.)+1.) / 2.;
+      
+    vec4 res;
+  
+    float cx = ix*(1.-1./PRECX) + .5/PRECX;
+    float cy = iy*(1.-1./PRECY) + .5/PRECY;
+    float cz = iz*(1.-1./PRECZ) + .5/PRECZ;
+  
+    if(ix > .65 && iy > .5 && iz > .45 && iz < .55)
+      res = vec4(0.,0.,0.,1.);
+    else if(ix > .55 && iy > .75 && ix < .7 && iz > .45 && iz < .55)
+      res = vec4(0.,0.,0.,1.);
+    else if(ix > .45 && iy > .75 && ix < .7 && iz > .4 && iz < .5)
+      res = vec4(0.,0.,0.,1.);
+    else if(ix > .85 && iy > .5 && iz > .55 && iz < .75)
+      res = vec4(0.,0.,0.,1.);
+    else if(ix > .7 && iy > .55 && iz > .42 && iz < .58)
+      res = vec4(0.,0.,0.,1.);
+    else if(iz > 0.45 && ix > 0.8 && iy > 0.3 && iy < 0.6)
+      res = vec4(0.,0.,0.,1.);
+    else if(iz > 0.45 && ix > 0.8 && iy > 0.3 && iy < 0.6)
+      res = vec4(0.,0.,0.,1.);
+    else if(iz > .4 && iz < .55 && ix > .7 && iy > .36 && iy < .5 && ix < .8 && ix+iy > 1.2)
+      res = vec4(0.,0.,0.,1.);
+    else res = texture3D(tInvExpTable, vec3(cx, cy, cz));
+  
+    if(h[0] < 0.) res[0] = -res[0];
+    if(h[1] < 0.) res[1] = -res[1];
+      
+    return res;
+    })*";
+
   EX string shader_nsym = solnihv::common +
 
     "vec4 inverse_exp(vec4 h) {"

@@ -292,6 +292,8 @@ void display_data::set_projection(int ed) {
   
   shaderside_projection = false;
   glhr::new_shader_projection = glhr::shader_projection::standard;
+  
+  bool in_solnih = false;
 
   if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && MDIM == 3)
     shaderside_projection = true;
@@ -312,10 +314,15 @@ void display_data::set_projection(int ed) {
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdPerspective && in_h2xe())
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardEH2, pers3 = true;
-    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sol)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSolv, pers3 = true;
-    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nih)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardNIH, pers3 = true;
+    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && solnih) {
+      shaderside_projection = true, pers3 = true, in_solnih = true;
+      if(sol && nih)
+        glhr::new_shader_projection = glhr::shader_projection::standardSolvNIH;
+      else if(sol)
+        glhr::new_shader_projection = glhr::shader_projection::standardSolv;
+      else 
+        glhr::new_shader_projection = glhr::shader_projection::standardNIH;
+      }
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sl2)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSL2, pers3 = true;
     if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nil)
@@ -335,7 +342,7 @@ void display_data::set_projection(int ed) {
   if(pmodel == mdRug) return;
   
   #if CAP_SOLV
-  if(among(glhr::new_shader_projection, glhr::shader_projection::standardSolv, glhr::shader_projection::standardNIH)) {
+  if(in_solnih) {
     auto &tab = solnihv::get_tabled();
     
     GLuint invexpid = tab.get_texture_id();

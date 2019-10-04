@@ -53,8 +53,8 @@ glvertex pointtogl(const hyperpoint& t);
 
 enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
   standardS30, standardS31, standardS32, standardS33, 
-  ball, halfplane3, band3, flatten, standardSolv, standardNil,
-  standardEH2, standardSL2, standardNIH,
+  ball, halfplane3, band3, flatten, standardSolv, standardNil, 
+  standardEH2, standardSL2, standardNIH, standardSolvNIH,
   MAX 
   };
 
@@ -689,7 +689,9 @@ void init() {
     bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
     bool sh3 = (sp == shader_projection::standardH3);
     bool ssol = (sp == shader_projection::standardSolv);
+    bool ssln = (sp == shader_projection::standardSolvNIH);
     bool snih = (sp == shader_projection::standardNIH);
+    bool sson = ssol || ssln || snih;
     bool snil = (sp == shader_projection::standardNil);
     bool ssl2 = (sp == shader_projection::standardSL2);
     bool sr3 = (sp == shader_projection::standardR3);
@@ -700,13 +702,11 @@ void init() {
     bool seh2 = (sp == shader_projection::standardEH2);
     bool ss3 = ss30 || ss31 || ss32 || ss33;
     
-    bool s3 = (sh3 || sr3 || ss3 || ssol || snil || seh2 || ssl2 || snih);
+    bool s3 = (sh3 || sr3 || ss3 || sson || snil || seh2 || ssl2);
     bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
     bool dim2 = !dim3;
     bool ball = (sp == shader_projection::ball);
     bool flatten = (sp == shader_projection::flatten);
-    
-    bool sson = ssol || snih;
     
     if(sson && !CAP_SOLV) continue;
     
@@ -759,6 +759,7 @@ void init() {
       #if CAP_SOLV
       ssol,    solnihv::shader_symsol,
       snih,    solnihv::shader_nsym,
+      ssln,    solnihv::shader_nsymsol,
       #endif
       snil,    nilv::nilshader,
       ssl2,    slr::slshader,
