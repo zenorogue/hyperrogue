@@ -204,10 +204,10 @@ bool trailer_handleKey(int sym, int uni) {
 //      shot::shotx = 1920;
 //      shot::shoty = 1080;
       shot::shot_aa = 2;
-      solv::solrange_xy = 30;
-      solv::solrange_z = 6;
-      vid.cells_drawn_limit = 100000;
-      vid.cells_generated_limit = 1000;
+      solnihv::solrange_xy = 30;
+      solnihv::solrange_z = 6;
+      vid.cells_drawn_limit = 200000;
+      vid.cells_generated_limit = 10000;
 //    sightranges[geometry] = 4;
       static int lasti = 0;
       
