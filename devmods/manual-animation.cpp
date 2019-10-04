@@ -217,9 +217,9 @@ bool trailer_handleKey(int sym, int uni) {
         ticks = i * 1000 / 30;
         if(i < lasti) continue;
         
-        system("mkdir addons/possaver/");
+        system("mkdir -p devmods/manual/");
         
-        shot::take(format("extra/possaver/%05d.png", i));
+        shot::take(format("devmods/manual/%05d.png", i));
         println(hlog, "frame ", i);
         i++;
         }
