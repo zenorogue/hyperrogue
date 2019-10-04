@@ -188,13 +188,17 @@ void fix_cave(cell *c) {
   if(v<0 && c->wall == waCavewall) c->wall = waCavefloor;
   }
 
+bool keep_to_crossroads() {
+  return specialland == laCrossroads && !(nonisotropic || hybri);
+  }
+
 bool bad(cell *c2, cell *c) {
   if(c2->land == laCaves) {
     forCellEx(c3, c2) fix_cave(c3);
     fix_cave(c2);
     }
   if(!passable(c2, c, P_ISPLAYER)) return true;
-  if((c2->land == laCrossroads) ^ (c->land == laCrossroads)) return true;
+  if((c2->land == laCrossroads) ^ (c->land == laCrossroads) && keep_to_crossroads()) return true;
   return false;
   }
 
@@ -216,7 +220,7 @@ int pcelldist(cell *c) {
 int trackval(cell *c) {
   int v = rcelldist(c);
   int bonus = 0;
-  if(c->land != laCrossroads)
+  if(c->land != laCrossroads || !keep_to_crossroads())
   forCellEx(c2, c) {
     int d = rcelldist(c2) - v;
     if(d < 0 && bad(c2, c))
@@ -431,12 +435,7 @@ EX void generate_track() {
   
   bounded_track = false;
   
-  if(sol && specialland == laCrossroads) {
-    track.push_back(s);
-    while(isize(track) < LENGTH)
-      track.push_back(track.back()->cmove((isize(track) & 1) ? 0 : 1));
-    }
-  else if(sol) {
+  if(sol) {
     track.push_back(s);
     find_track(s, 1, LENGTH/4);
     find_track(track.back(), -1, LENGTH-2*(LENGTH/4));
@@ -517,7 +516,7 @@ EX void generate_track() {
   for(const auto s: rti) byat[s.from_track]++;
   for(int a=0; a<16; a++) printf("%d: %d\n", a, byat[a]);
   
-  if(s->land == laCaves) {
+  if(s->land == laCaves || (s->land == laCrossroads && !keep_to_crossroads())) {
     set<unsigned> hash;
     while(true) {
       unsigned hashval = 7;
