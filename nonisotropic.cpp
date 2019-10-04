@@ -427,8 +427,8 @@ EX namespace solnihv {
     "  }";
 
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
-    constexpr ld l2 = log(2);
-    constexpr ld l3 = log(3);
+    const ld l2 = log(2);
+    const ld l3 = log(3);
     switch(geometry) {
       case gSolN:
         return hpxyz3(
