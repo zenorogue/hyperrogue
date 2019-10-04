@@ -44,8 +44,8 @@ bool trailer_handleKey(int sym, int uni) {
     glhr::be_textured();
     current_display->set_all(0);
     auto p = glhr::get_shaders();
-    print_shader("addons/current.vsh", p.first);
-    print_shader("addons/current.fsh", p.second);
+    print_shader("devmods/current.vsh", p.first);
+    print_shader("devmods/current.fsh", p.second);
     addMessage("shaders saved");
     return true;
     }
@@ -53,8 +53,8 @@ bool trailer_handleKey(int sym, int uni) {
   if(sym == SDLK_F3) {
     glhr::be_textured();
     current_display->set_all(0);
-    string vsh = load_whole("addons/current.vsh");
-    string fsh = load_whole("addons/current.fsh");
+    string vsh = load_whole("devmods/current.vsh");
+    string fsh = load_whole("devmods/current.fsh");
     println(hlog, "loaded vsh:\n", vsh);
     glhr::install_shaders(vsh, fsh);
     glhr::be_textured();
