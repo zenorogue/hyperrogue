@@ -67,6 +67,10 @@ int main(int argc, char **argv) {
         if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
         else obj_dir += c;      
       }
+    else if(s == "-win")
+      compiler = "runbat bwin-g.bat -c", obj_dir += "/win", setdir += "../", standard = "",
+      linker = "runbat bwin-linker.bat", libs = "";
+
     else if(s == "-O2")
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")
