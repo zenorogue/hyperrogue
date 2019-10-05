@@ -3955,9 +3955,16 @@ void floorShadow(cell *c, const transmatrix& V, color_t col) {
     draw_shapevec(c, V, qfi.fshape->shadow, col, PPR::WALLSHADOW);
   }
 
+bool use_warp_graphics() {
+  if(shmup::on) return false;
+  if(geosupport_football() != 2) return false;
+  if(chaosmode == 3 || chaosmode == 4) return false;
+  return true;
+  }
+
 void set_maywarp_floor(cell *c) {
   bool warp = isWarped(c);
-  if(warp && !shmup::on && geosupport_football() == 2) {
+  if(warp && use_warp_graphics()) {
     if(!stdhyperbolic) {
       set_floor(cgi.shTriheptaFloor);
       return;
