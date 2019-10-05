@@ -195,7 +195,7 @@ EX void buildCredits() {
     "wonderfullizardofoz, Piotr Migdał, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
     "Kojiguchi Kazuki, baconcow, Alan, SurelyYouJest, hotdogPi, DivisionByZero, xXxWeedGokuxXx, jpystynen, Dmitry Marakasov, Alexandre Moine, Arthur O'Dwyer, "
     "Triple_Agent_AAA, bluetailedgnat, Allalinor, Shitford, KittyTac, Christopher King, KosGD, TravelDemon, Bubbles, rdococ, frozenlake, MagmaMcFry, "
-    "Snakebird Priestess, roaringdragon2, Stopping Dog, bengineer8, Sir Light IJIJ, ShadeBlade"
+    "Snakebird Priestess, roaringdragon2, Stopping Dog, bengineer8, Sir Light IJIJ, ShadeBlade, Saplou"
     );
 #ifdef EXTRALICENSE
   help += EXTRALICENSE;
