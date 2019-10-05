@@ -285,7 +285,7 @@ void find_track(cell *start, int sign, int len) {
           case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
           }
         }
-      else if(sol)
+      else if(solnih)
         id = (start->master->distance - c1->master->distance) * sign;
       else
         id = trackval(c1);
@@ -295,7 +295,7 @@ void find_track(cell *start, int sign, int len) {
 
   if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
   
-  if(sol || nil || sl2) {
+  if(solnih || nil || sl2) {
     vector<cell*> p;
     while(goal != start) p.push_back(goal), goal = parent[goal];
     while(!p.empty()) track.push_back(p.back()), p.pop_back();
@@ -440,6 +440,11 @@ EX void generate_track() {
     find_track(s, 1, LENGTH/4);
     find_track(track.back(), -1, LENGTH-2*(LENGTH/4));
     find_track(track.back(), 1, LENGTH/4);
+    }
+  else if(nih) {
+    track.push_back(s);
+    find_track(s, 1, LENGTH/2);
+    find_track(track.back(), -1, LENGTH/2);
     }
   else if(nil) {
     track.push_back(s);
@@ -695,7 +700,7 @@ bool inrec = false;
 EX ld race_angle = 90;
 
 EX bool force_standard_centering() {
-  return sol || nil || hybri || quotient || bounded;
+  return solnih || nil || hybri || quotient || bounded;
   }
 
 EX bool use_standard_centering() {
