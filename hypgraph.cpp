@@ -353,7 +353,22 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdDisk: {
-      if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
+      if(nonisotropic) {
+        ret = lp_apply(inverse_exp(H, iTable, true));
+        ld w;
+        if(solnih) {
+          // w = 1 / sqrt(1 - sqhypot_d(3, ret));
+          // w = w / (vid.alpha + w);
+          w = 1 / (sqrt(1 - sqhypot_d(3, ret)) * vid.alpha + 1);
+          }
+        else {
+          w = hypot_d(3, ret);
+          w = sinh(w) / ((vid.alpha + cosh(w)) * w);
+          }
+        for(int i=0; i<3; i++) ret[i] *= w;
+        ret[3] = 1; 
+        break;
+        }
       ld tz = get_tz(H);
       if(!vid.camera_angle) {
         ret[0] = H[0] / tz;
@@ -472,7 +487,12 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdHyperboloidFlat: 
     case mdHyperboloid: {
-    
+
+      if(nonisotropic) {
+        // if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
+        ret = H;
+        break;
+        }    
       if(pmodel == mdHyperboloid) {
         ld& topz = models::top_z;
         if(H[2] > topz) {
@@ -495,8 +515,15 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }
     
     case mdFisheye: {
-      ld zlev = find_zlev(H);
-      H = space_to_perspective(H);
+      ld zlev;
+      if(nonisotropic) {
+        H = lp_apply(inverse_exp(H, iTable, false));
+        zlev = 1;
+        }
+      else {
+        zlev = find_zlev(H);
+        H = space_to_perspective(H);
+        }
       H /= vid.fisheye_param;
       H[LDIM] = zlev;
       ret = H / sqrt(1 + sqhypot_d(GDIM+1, H));

@@ -211,7 +211,7 @@ void add1(const hyperpoint& H) {
   }  
 
 bool is_behind(const hyperpoint& H) {
-  return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && vid.alpha + H[2] <= BEHIND_LIMIT;
+  return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && (nonisotropic ? false : vid.alpha + H[2] <= BEHIND_LIMIT);
   }
 
 hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {

@@ -298,7 +298,7 @@ void display_data::set_projection(int ed) {
   if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && MDIM == 3)
     shaderside_projection = true;
   else if(vid.consider_shader_projection && !glhr::noshaders) {
-    if(pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 3 && apply_models)
+    if(pmodel == (nonisotropic ? mdHyperboloid : mdDisk) && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 3 && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::ball;
     if(pmodel == mdBand && hyperbolic && apply_models)
       shaderside_projection = true, glhr::new_shader_projection = (GDIM == 2 ? glhr::shader_projection::band : glhr::shader_projection::band3);

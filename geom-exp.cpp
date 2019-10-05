@@ -494,13 +494,14 @@ void ge_select_tiling() {
   }
 
 EX string current_proj_name() {
-  if(pmodel != mdDisk || nonisotropic)
+  bool h = hyperbolic || solnih;
+  if(pmodel != mdDisk)
     return models::get_model_name(pmodel);
-  else if(hyperbolic && vid.alpha == 1)
+  else if(h && vid.alpha == 1)
     return XLAT("Poincaré model");
-  else if(hyperbolic && vid.alpha == 0)
+  else if(h && vid.alpha == 0)
     return XLAT("Klein-Beltrami model");
-  else if(hyperbolic && vid.alpha == -1)
+  else if(h && vid.alpha == -1)
     return XLAT("inverted Poincaré model");
   else if(sphere && vid.alpha == 1)
     return XLAT("stereographic projection");
@@ -508,7 +509,7 @@ EX string current_proj_name() {
     return XLAT("gnomonic projection");
   else if(sphere && vid.alpha >= 999)
     return XLAT("orthographic projection");
-  else if(hyperbolic && vid.alpha >= 999)
+  else if(h && vid.alpha >= 999)
     return XLAT("Gans model");
   else 
     return XLAT("general perspective");
