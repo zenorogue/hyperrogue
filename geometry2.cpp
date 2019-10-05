@@ -211,6 +211,7 @@ struct horo_distance {
   horo_distance(hyperpoint h) { become(h); }
   horo_distance(hyperpoint h1, const transmatrix& T);
   bool operator < (const horo_distance z) const;
+  friend void print(hstream& hs, horo_distance x) { print(hs, "[", x.a, ":", x.b, "]"); }
   };
 #endif
 
