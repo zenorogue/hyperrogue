@@ -84,7 +84,7 @@ struct monster {
     
   void findpat();
 
-  cell *findbase(const transmatrix& T);
+  cell *findbase(const transmatrix& T, int maxsteps);
 
   void rebasePat(const transmatrix& new_pat, cell *tgt);
 
@@ -111,33 +111,25 @@ typedef multimap<cell*, monster*>::iterator mit;
 
 vector<monster*> active, nonvirtual, additional;
 
-cell *findbaseAround(hyperpoint p, cell *around) {
-  cell *best = around;
-  horo_distance d0(p, ggmatrix(around));
-  for(int i=0; i<around->type; i++) {
-    cell *c2 = around->move(i);
-    if(c2) {
-      horo_distance d1(p, ggmatrix(c2));
-      if(d1 < d0) { best = c2; d0 = d1; }
+cell *findbaseAround(hyperpoint p, cell *around, int maxsteps) {
+  for(int k=0; k<maxsteps; k++) {
+    cell *best = around;
+    horo_distance d0(p, ggmatrix(around));
+    for(int i=0; i<around->type; i++) {
+      cell *c2 = around->move(i);
+      if(c2) {
+        horo_distance d1(p, ggmatrix(c2));
+        if(d1 < d0) { best = c2; d0 = d1; }
+        }
       }
+    if(best == around) return best;
+    around = best;
     }
-  return best;
+  return around;
   }
 
-cell *findbaseAround(const transmatrix& H, cell *around) {
-  return findbaseAround(tC0(H), around);
-  }
-
-cell *findbaseAroundRepeat(hyperpoint p, cell *around) {
-  while(true) {
-    cell *c = findbaseAround(p, around);
-    if(c == around) return c;
-    around = c;
-    }
-  }
-
-cell *findbaseAroundRepeat(const transmatrix& H, cell *around) {
-  return findbaseAroundRepeat(tC0(H), around);
+cell *findbaseAround(const transmatrix& H, cell *around, int maxsteps) {
+  return findbaseAround(tC0(H), around, maxsteps);
   }
 
 /* double distance(hyperpoint h) {
@@ -155,14 +147,14 @@ void monster::findpat() {
   else pat = at;
   }
 
-cell *monster::findbase(const transmatrix& T) {
+cell *monster::findbase(const transmatrix& T, int maxsteps) {
   if(isVirtual) {
     cell *c = base;
     auto cT = T;
     virtualRebase(c, cT, true);
     return c;
     }
-  else return findbaseAround(T, base);
+  else return findbaseAround(T, base, maxsteps);
   }
 
 void fix_to_2(transmatrix& T) {
@@ -218,7 +210,7 @@ bool trackroute(monster *m, transmatrix goal, double spd) {
 
     // queuepoly(nat, cgi.shKnife, 0xFFFFFFC0);
 
-    cell *c2 = findbaseAround(nat, c);
+    cell *c2 = findbaseAround(nat, c, 1);
     if(c2 != c && !passable_for(m->type, c2, c, P_CHAIN | P_ONPLAYER)) {
       return false;
       }
@@ -1012,7 +1004,7 @@ void movePlayer(monster *m, int delta) {
     
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
-    c2 = m->findbase(nat);
+    c2 = m->findbase(nat, 1);
     if(reflectflag & P_MIRRORWALL) reflect(c2, m->base, nat);
     
     // don't have several players in one spot
@@ -1245,7 +1237,7 @@ void movePlayer(monster *m, int delta) {
         }
       }
   
-      cell *c3 = findbaseAroundRepeat(H, m->base);
+      cell *c3 = findbaseAround(H, m->base, 999);
       if(c3->wall == waSmallTree || c3->wall == waBigTree || c3->wall == waBarrowDig || c3->wall == waCavewall ||
         (c3->wall == waBarrowWall && items[itBarrow] >= 25))
         c3->wall = waNone;
@@ -1384,7 +1376,7 @@ void moveMimic(monster *m) {
   else
     nat = nat * spin(playerturn[cpid] + playergoturn[cpid]) * xpush(playergo[cpid]) * spin(-playergoturn[cpid]);
 
-  cell *c2 = m->findbase(nat);
+  cell *c2 = m->findbase(nat, 1);
   reflect(c2, m->base, nat);
   if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR | P_MIRRORWALL))
     killMonster(m, moNone);
@@ -1455,11 +1447,7 @@ eItem targetRangedOrbKey(orbAction a) {
   
   mouseover = pc[cpid]->base;
   
-  while(true) {
-    cell *c2 = findbaseAround(mouseh, mouseover);
-    if(c2 == mouseover) break;
-    mouseover = c2;
-    }
+  mouseover = findbaseAround(mouseh, mouseover, 999);
   mousetarget = NULL;
 
   for(monster *m2: nonvirtual) {
@@ -1598,7 +1586,7 @@ void moveBullet(monster *m, int delta) {
     }
   else 
     nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
-  cell *c2 = m->findbase(nat);
+  cell *c2 = m->findbase(nat, 1);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
     makeflame(m->base, 5, false);
@@ -2131,7 +2119,7 @@ void moveMonster(monster *m, int delta) {
   
   if(crashintomon && !inertia_based) { igo++; goto igo_retry; }
 
-  cell *c2 = m->findbase(nat);
+  cell *c2 = m->findbase(nat, 1);
   if(reflectflag & P_MIRRORWALL) reflect(c2, m->base, nat);
 
   if(m->type == moButterfly && !passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
