@@ -5137,7 +5137,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
       hyperpoint H2 = inverse_exp(H, iLazy);
-      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.2) return;
+      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.4) return;
       }
     noclipped++;
     }
