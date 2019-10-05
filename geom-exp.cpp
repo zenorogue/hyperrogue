@@ -921,6 +921,7 @@ EX void runGeometryExperiments() {
 #if CAP_COMMANDLINE
 
 eGeometry readGeo(const string& ss) {
+  for(int i=0; i<isize(ginf); i++) if(ginf[i].shortname == ss) return eGeometry(i);
   bool numeric = true;
   for(char c: ss) if(c < '0' || c > '9') numeric = false;
   if(numeric) return eGeometry(atoi(ss.c_str()));
