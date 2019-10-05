@@ -3462,6 +3462,9 @@ EX bool makeEmpty(cell *c) {
     ;
   else
     c->wall = waNone;
+  
+  if(c->land == laBrownian && c->wall == waNone && c->landparam == 0)
+    c->landparam = 1;
     
   if(c->item != itCompass)
     c->item = itNone;
