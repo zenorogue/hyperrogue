@@ -656,6 +656,16 @@ EX namespace models {
     }
 
   #if CAP_COMMANDLINE
+  
+  eModel read_model(const string& ss) {
+    for(int i=0; i<isize(ginf); i++) {
+      if(appears(mdinf[i].name_hyperbolic, ss)) return eModel(i);
+      if(appears(mdinf[i].name_euclidean, ss)) return eModel(i);
+      if(appears(mdinf[i].name_spherical, ss)) return eModel(i);
+      }
+    return eModel(atoi(ss.c_str()));
+    }
+    
   int readArgs() {
     using namespace arg;
              
@@ -667,7 +677,7 @@ EX namespace models {
       PHASEFROM(2); shift_arg_formula(vid.stretch);
       }
     else if(argis("-PM")) { 
-      PHASEFROM(2); shift(); pmodel = eModel(argi());
+      PHASEFROM(2); shift(); pmodel = read_model(args());
       if(pmodel == mdFormula) {
         shift(); basic_model = eModel(argi());
         shift(); formula = args();
