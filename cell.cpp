@@ -1016,7 +1016,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2) {
+  if(masterless || archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
