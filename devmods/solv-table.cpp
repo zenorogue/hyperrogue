@@ -1,5 +1,18 @@
-// This generates the 'solv-geodesics.dat' file.
-// You may change the parameters of build_sols() for more precise geodesics.
+// This generates the inverse geodesics tables.
+
+// Usage: 
+
+// [executable] -geo sol -write solv-geodesics.dat
+//              -geo 3:2 -write shyp-geodesics.dat
+//              -geo 3:1/2 -write ssol-geodesics.dat
+//              -exit
+
+// You can also do -geo [...] -build to build and test the table
+// without writing it.
+
+// By default this generates 64x64x64 tables.
+// Add e.g. '-dim 128 128 128' before -write to generate
+// a more/less precise table.
 
 #include "../hyper.h"
 
@@ -295,30 +308,34 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
     tab.get_int(x,y,z) = tab.get_int(x-1,y,z) * 2 - tab.get_int(x-2,y,z);
   }
 
-int main(int argc, char **argv) {
+int dimX, dimY, dimZ;
 
-  println(hlog);
-  
-  /*
-  geometry = gSol;  
-  build_sols(64, 64, 64);
-  write_table(solnihv::get_tabled(), "solv-geodesics-generated.dat");
-  */
+int readArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-dim")) {
+    PHASEFROM(2); 
+    shift(); dimX = argi();
+    shift(); dimY = argi();
+    shift(); dimZ = argi();
+    }
+  else if(argis("-build")) {
+    PHASEFROM(2); 
+    build_sols(dimX, dimY, dimZ);
+    }
+  else if(argis("-write")) {
+    PHASEFROM(2); 
+    shift();
+    build_sols(dimX, dimY, dimZ);
+    write_table(solnihv::get_tabled(), argcs());
+    }
 
-  /*  
-  geometry = gNIH;
-  build_sols(64, 64, 64);
-  write_table(solnihv::get_tabled(), "h23-geodesics-generated.dat");
-  */
-  
-  geometry = gSolN;
-  build_sols(64, 64, 64);
-  write_table(solnihv::get_tabled(), "sont-geodesics-generated.dat");
-
-  exit(0);
+  else return 1;
+  return 0;
   }
 
-int phooks = addHook(hooks_main, 0, main);
+auto hook = addHook(hooks_args, 100, readArgs);
 
 }
 }
