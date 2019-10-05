@@ -2874,11 +2874,15 @@ EX ld straightDownSpeed;
 
 array<array<int,4>,AURA+1> aurac;
 
-EX bool haveaura() {
-  if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
-  if(sphere && mdAzimuthalEqui()) return true;
+int haveaura_cached;
+
+/** 0 = no aura, 1 = standard aura, 2 = Joukowsky aura */
+EX int haveaura() {
+  if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return 0;
+  if(sphere && mdAzimuthalEqui()) return 0;
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && models::model_transition < 1) 
-    return true;
+    return 2;
+  if(pmodel == mdFisheye) return 1;
   return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
   }
   
@@ -2886,8 +2890,9 @@ vector<pair<int, int> > auraspecials;
 
 int auramemo;
 
-EX void clearaura() { 
-  if(!haveaura()) return;
+EX void clearaura() {
+  haveaura_cached = haveaura();
+  if(!haveaura_cached) return;
   for(int a=0; a<AURA; a++) for(int b=0; b<4; b++) 
     aurac[a][b] = 0;
   auraspecials.clear();
@@ -2895,23 +2900,25 @@ EX void clearaura() {
   }
 
 void apply_joukowsky_aura(hyperpoint& h) {
-  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && models::model_transition < 1;
-  if(joukowsky)  {
+  if(haveaura_cached == 2)  {
     hyperpoint ret;
     applymodel(h, ret);
     h = ret;
     }
+  if(nonisotropic) {
+    h = lp_apply(inverse_exp(h, iTable, true));
+    }
   }
 
 EX void addauraspecial(hyperpoint h, color_t col, int dir) {
-  if(!haveaura()) return;
+  if(!haveaura_cached) return;
   apply_joukowsky_aura(h);
   int r = int(2*AURA + dir + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
   auraspecials.emplace_back(r, col);
   }
 
 EX void addaura(hyperpoint h, color_t col, int fd) {
-  if(!haveaura()) return;
+  if(!haveaura_cached) return;
   apply_joukowsky_aura(h);
 
   int r = int(2*AURA + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
@@ -2946,6 +2953,12 @@ void drawaura() {
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
   if(sphere && !mdAzimuthalEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
+  if(hyperbolic && pmodel == mdFisheye) {
+    ld h = 1;
+    h /= vid.fisheye_param;
+    ld nrad = h / sqrt(2 + h*h);
+    rad *= nrad;
+    }
   
   for(int v=0; v<4; v++) sumaura(v);
   for(auto& p: auraspecials) {
