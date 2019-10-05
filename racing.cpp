@@ -1095,6 +1095,10 @@ void race_projection() {
     add_thurston_race(XLAT("H2xE"), [] { set_geometry(gNormal); set_variation(eVariation::bitruncated);set_geometry(gProduct); });
     add_thurston_race(XLAT("Nil"), [] { set_geometry(gNil); });
     add_thurston_race(XLAT("PSL(2,R)"), [] { set_geometry(gNormal); set_variation(eVariation::pure); set_geometry(gRotSpace); });
+    dialog::addBreak(50);
+    dialog::addInfo("stretched geometries:");
+    add_thurston_race(XLAT("stretched hyperbolic"), [] { set_geometry(gNIH); vid.texture_step = 4; });
+    add_thurston_race(XLAT("stretched Solv"), [] { set_geometry(gSolN); vid.texture_step = 4; });
 
     dialog::addBreak(100);
     dialog::addBack();
