@@ -2040,7 +2040,6 @@ EX bool do_draw(cell *c, const transmatrix& T) {
     else if(pmodel == mdGeodesic && nih) {
       hyperpoint h = inverse_exp(tC0(T), iLazy, false);
       ld dist = hypot_d(3, h);
-      if(isnan(dist)) binary::breakhere();
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : cgi.corner_bonus)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
