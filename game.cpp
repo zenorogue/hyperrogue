@@ -1073,10 +1073,11 @@ EX void useup(cell *c) {
     drawParticles(c, c->wall == waFire ? 0xC00000 : winf[c->wall].color, 10, 50);
     if(c->wall == waTempFloor)
       c->wall = waChasm;
-    else if(c->wall == waTempBridge || c->wall == waTempBridgeBlocked || c->wall == waBurningDock)
+    else if(c->wall == waTempBridge || c->wall == waTempBridgeBlocked || c->wall == waBurningDock || c->land == laBrownian)
       placeWater(c, c);
-    else 
+    else {
       c->wall = c->land == laCaribbean ? waCIsland2 : waNone;
+      }
     }
   }
 
