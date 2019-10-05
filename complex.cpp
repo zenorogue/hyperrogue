@@ -2396,7 +2396,7 @@ EX void livecaves() {
     if(c->wall == waCavewall && c->item) c->wall = waCavefloor;
     if(c->land == laDeadCaves) c->land = laCaves;
     if(c->item == itSilver) c->item = itGold;
-    if(c->item == itGreenStone) c->item = itOrbLife;
+    if(c->item == itGreenStone && !inv::on) c->item = itOrbLife;
     if(c->monst == moEarthElemental) {
       addMessage(XLAT("%The1 is destroyed by the forces of Life!", c->monst));
       fallMonster(c);
