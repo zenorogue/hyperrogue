@@ -602,8 +602,8 @@ EX namespace solnihv {
     }
 
   EX tabled_inverses solt = solnihv::tabled_inverses("solv-geodesics.dat");
-  EX tabled_inverses niht = solnihv::tabled_inverses("h23-geodesics.dat");
-  EX tabled_inverses sont = solnihv::tabled_inverses("sont-geodesics.dat");
+  EX tabled_inverses niht = solnihv::tabled_inverses("shyp-geodesics.dat");
+  EX tabled_inverses sont = solnihv::tabled_inverses("ssol-geodesics.dat");
   
   EX tabled_inverses& get_tabled() {
     switch(geometry) {
