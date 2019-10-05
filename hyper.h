@@ -228,7 +228,7 @@ enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
-  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width, fixed_facing_dir;
+  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, fisheye_param, stretch, binary_width, fixed_facing_dir;
   int mobilecompasssize;
   int radarsize; // radar for 3D geometries
   ld radarrange;

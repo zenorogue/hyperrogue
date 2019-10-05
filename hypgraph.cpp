@@ -497,6 +497,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdFisheye: {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
+      H /= vid.fisheye_param;
       H[LDIM] = zlev;
       ret = H / sqrt(1 + sqhypot_d(GDIM+1, H));
       if(GDIM == 3) ret[LDIM] = zlev;

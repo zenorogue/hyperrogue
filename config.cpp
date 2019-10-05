@@ -441,6 +441,7 @@ EX void initConfig() {
   addsaverenum(vid.stereo_mode, "stereo-mode");
   addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
+  addsaver(vid.fisheye_param, "fisheye parameter", 1);
   addsaver(vid.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
   addsaver(vid.collignon_parameter, "collignon-parameter", 1);
@@ -2438,6 +2439,7 @@ EX unordered_map<string, ld&> params = {
   {"ets", vid.euclid_to_sphere},
   {"stretch", vid.stretch},
   {"twopoint", vid.twopoint_param},
+  {"fisheye", vid.fisheye_param},
   {"bwidth", vid.binary_width},
   #if CAP_ANIMATIONS
   {"aperiod", anims::period},

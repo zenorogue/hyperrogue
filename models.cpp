@@ -560,6 +560,16 @@ EX namespace models {
         });
       }
     
+    if(pmodel == mdFisheye) {
+      dialog::addSelItem(XLAT("parameter"), fts(vid.fisheye_param), 'b');
+      dialog::add_action([](){
+        dialog::editNumber(vid.fisheye_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
+          "Size of the fish eye."
+          );
+        dialog::scaleLog();
+        });
+      }
+    
     if(pmodel == mdCollignon) {
       dialog::addSelItem(XLAT("parameter"), fts(vid.collignon_parameter) + (vid.collignon_reflected ? " (r)" : ""), 'b');
       dialog::add_action([](){
