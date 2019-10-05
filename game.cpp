@@ -3448,6 +3448,8 @@ EX bool makeEmpty(cell *c) {
     ;
   else if(c->wall == waDock)
     ;
+  else if(c->wall == waLadder)
+    ;
   else if(c->land == laDocks)
     c->wall = waBoat;
   else if(c->wall == waFreshGrave && bounded)
