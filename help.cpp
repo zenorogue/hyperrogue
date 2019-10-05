@@ -253,9 +253,12 @@ void describeOrb(string& help, const orbinfo& oi) {
   int t = items[tr] * landMultiplier(oi.l);
   if(t >= 25)
   if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {
-    help += XLAT("\nSpawn rate (as prize Orb): %1%/%2\n", 
-      its(int(.5 + 100 * orbprizefun(t))),
-      its(oi.gchance));
+    for(auto& oi1: orbinfos) 
+      if((oi1.flags & orbgenflags::NATIVE) && oi1.orb == oi.orb) {
+        help += XLAT("\nSpawn rate (as prize Orb): %1%/%2\n", 
+          its(int(.5 + 100 * orbprizefun(t))),
+          its(oi1.gchance));
+        }
     }
   if(t >= 10)
   if(olr == olrHub) {
