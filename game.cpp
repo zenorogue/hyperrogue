@@ -3432,7 +3432,7 @@ EX bool makeEmpty(cell *c) {
     c->wall = waCavefloor;
   else if(c->land == laDeadCaves)
     c->wall = waDeadfloor2;
-  else if(c->land == laCaribbean || c->land == laOcean || c->land == laWhirlpool || c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken || c->land == waBoat)
+  else if(c->land == laCaribbean || c->land == laOcean || c->land == laWhirlpool || c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken || c->wall == waBoat)
     c->wall = waBoat; // , c->item = itOrbYendor;
   else if(c->land == laMinefield)
     c->wall = waMineOpen;
