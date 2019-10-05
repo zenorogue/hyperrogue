@@ -772,6 +772,14 @@ int readArgs() {
     stop_game();
     switch_game_mode(rg::racing);
     }
+  else if(argis("-rsc")) {
+    standard_centering = true;
+    }
+  else if(argis("-rfast")) {
+    PHASEFROM(3);
+    start_game();
+    race_start_tick = 1;
+    }
   else return 1;
   return 0;
   }
