@@ -72,9 +72,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   return H;  
   }
 
-hyperpoint space_to_perspective(hyperpoint z, ld alpha = vid.alpha);
-
-hyperpoint space_to_perspective(hyperpoint z, ld alpha) {
+EX hyperpoint space_to_perspective(hyperpoint z, ld alpha IS(vid.alpha)) {
   ld s = 1 / (alpha + z[LDIM]);
   z[0] *= s;
   z[1] *= s;
