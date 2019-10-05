@@ -328,7 +328,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     
     transmatrix bestV;
     
-    if(WDIM == 2 && !binarytiling && !penrose) for(int d=0; d<S7; d++) {
+    if(WDIM == 2 && !binarytiling && !penrose) for(int d=0; d<h->degree(); d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * cgi.invheptmove[d];
@@ -345,7 +345,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
       at = bestV * at;
       }
     else {
-      if(tohex && BITRUNCATED) for(int d=0; d<S7; d++) {
+      if(tohex && BITRUNCATED) for(int d=0; d<base->type; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->c.spin(d)*2*M_PI/S6) * cgi.invhexmove[d];
         horo_distance newz(check(V2 * at));
