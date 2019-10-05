@@ -3517,3 +3517,27 @@ Solv geometry:
 - fixed a bug in the shmup mode
 - fixed a potential bug in precision
 - fixed Orb of Air usable on Friendly Ivy
+
+2019-10-05 17:36 Version 11.2c:
+- gameplay:
+- - fixed wrong display of prize Orb spawn rates
+- - when cleaning up the area (e.g. during Recall) boats remain boats, and ladders are not cleared (also fixed another potential source of blue floor in Brownian on recall)
+- - fixed an exploit in Orb Strategy Mode (a trick to gain extra Golems)
+- - old Strange Challenges now can be played unofficially
+- - fire in Brownian no longer generates blue floor
+- - in randomwalk/total chaos modes, special graphics are no longer used for Warped Coast
+- - free Orbs of Safety in the Land of Eternal Motion in Orb Strategy Chaos Mode (combo)
+- - Orb of Fish is no longer marked useless in Warped Coast/Sea, Cocytus, Brown Islands, and Irradiated Fields
+- geometries and projections:
+- - ternary tiling
+- - stretched hyperbolic and stretched Solv geometry
+- - fixed a possible crash in Archimedean geometries
+- - less aggressive backwall optimization in Solv
+- - fixed incorrect distance shown in Nil (e.g. racing)
+- - improved fisheye projection: aura, parameter can be changed
+- - ball model and fisheye are now available in nonisotropic geometries
+- racing mode:
+- - in 3D, you now reflect off blocking walls
+- - fixed a bug which could cause the player to sometimes get stuck in a wall
+- - wall sliding in 3D (glitchy graphics though)
+- - fixed the Crossroads in some geometries
