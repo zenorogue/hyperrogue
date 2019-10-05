@@ -1404,8 +1404,10 @@ void moveMimic(monster *m) {
   
   // no need to care about Mirror images, as they already have their 'at' matrix reversed :|
 
-  if(WDIM == 3)
-    nat = nat * cpush(0, playerstrafe[cpid]) * cpush(2, playergo[cpid]) * cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]);
+  if(WDIM == 3) {
+    nat = parallel_transport(nat, m->ori, playersmallspin[cpid] * point3(playerstrafe[cpid], 0, playergo[cpid]));
+    rotate_object(nat, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
+    }
   else
     nat = nat * spin(playerturn[cpid] + playergoturn[cpid]) * xpush(playergo[cpid]) * spin(-playergoturn[cpid]);
 
