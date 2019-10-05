@@ -1287,7 +1287,10 @@ void movePlayer(monster *m, int delta) {
     }
 
   #if CAP_RACING  
-  if(!go && stdracing) m->vel = 0;
+  if(!go && stdracing) {
+    if(GDIM == 3) m->vel = max(m->vel * -.5 - 0.1, 0.);
+    else m->vel = 0;
+    }
   #endif
   
   if(shotkey && canmove && curtime >= m->nextshot) {
