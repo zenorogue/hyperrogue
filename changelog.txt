@@ -3482,7 +3482,7 @@ Solv geometry:
 - shmup:: fixed the keyboard rotation direction inconsistency in 3D
 - shmup for product: player movement
 
-20019-09-10 09:15 Version 11.1p:
+2019-09-10 09:15 Version 11.1p:
 - smoother coloring pattern in Crystal
 - fixed some minor glitches in SL2
 - fixed the glitches in S2xE
@@ -3491,10 +3491,10 @@ Solv geometry:
 - fixed the determining of the selected cell in product/rotation geometries
 - a quicker and more convenient way to recompile the source code after changes (see mymake.cpp)
 
-20019-09-14 ??:?? Version 11.2:
+2019-09-14 ??:?? Version 11.2:
 - released 11.2 : https://zenorogue.itch.io/hyperrogue/devlog/99827/hyperrogue-112-thurston-geometries-free-update
 
-20019-09-28 09:15 Version 11.2a:
+2019-09-28 09:15 Version 11.2a:
 - racing mode: 
 - - Racing now works in bounded geometries and all Thurston geometries
 - - fixed a bug with going through walls (also in shmup)
@@ -3513,7 +3513,7 @@ Solv geometry:
 - fixed the standard binary tiling
 - no more orb usage after death in the shmup mode
 
-20019-09-30 01:46 Version 11.2b:
+2019-09-30 01:46 Version 11.2b:
 - fixed a bug in the shmup mode
 - fixed a potential bug in precision
 - fixed Orb of Air usable on Friendly Ivy
