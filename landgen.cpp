@@ -2200,6 +2200,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
            chasmify(c);
            c->wall = shmup::on ? waNone : waChasm;
            }
+         int cmf[5] = {0, 1, 3, 5, 10};
+         if(inv::on && chaosmode && items[itFeather] && hrand(1000) < cmf[chaosmode] && !c->item && !c->monst)
+           c->item = itOrbSafety;
          }
        break;
     
