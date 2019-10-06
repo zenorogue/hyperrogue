@@ -1460,6 +1460,7 @@ EX map<char, colortable> colortables = {
   {'F', {0x1C0C0C0, 0x202020}},
   {'w', {0x303030, 0x1C0C0C0}},
   {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
+  {'j', {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF}},  
   };
 
 color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
@@ -1616,6 +1617,12 @@ EX namespace patterns {
         return nestcolors[pattern_threecolor(c)];
       case 'v':
         return colortables['v'][sevenval(c)];
+      case 'j': {
+        int d = c->master->distance;
+        if(d % 2 == 0 || d < -5 || d > 5) return 0;
+        println(hlog, d, " -> ", (d+5)/2);
+        return colortables['j'][(d+5)/2];
+        }
       case 'f': {
         color_t res;
         for(int i=0; i<3; i++) {
@@ -1641,7 +1648,9 @@ EX namespace patterns {
     dialog::init("predesigned patterns");
     dialog::addItem(WDIM == 3 ? XLAT("empty") : XLAT("single color"), 'g');
     dialog::addItem(XLAT("random colors"), 'r');
-    dialog::addItem(XLAT("distance from origin"), 'M');
+
+    if(WDIM == 2) dialog::addItem(XLAT("distance from origin"), 'M');
+    dialog::addSelItem(XLAT("rainbow by distance"), "binary/Solv", 'j');
     
     if(geometry_supports_cdata()) {
       dialog::addItem(XLAT("rainbow landscape"), 'l');
