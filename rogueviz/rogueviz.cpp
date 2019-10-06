@@ -1525,7 +1525,10 @@ vector<int> legend;
 
 vector<cell*> named;
 
+color_t chosen_legend_color = DEFAULT_COLOR;
+
 bool rogueviz_hud() {
+  color_t legend_color = chosen_legend_color == DEFAULT_COLOR ? forecolor : chosen_legend_color;
   if(!rogueviz::on) return false;
   if(cmode & sm::DRAW) return false;
 
@@ -1552,7 +1555,7 @@ bool rogueviz_hud() {
     poly_outline = OUTLINE_NONE;
     queuedisk(V, vd.cp, true, NULL, i);
     poly_outline = OUTLINE_DEFAULT;
-    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, forecolor, 0, 16);
+    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, legend_color, 0, 16);
     }
 
   for(int i=0; i<qet; i++) {
@@ -1566,7 +1569,7 @@ bool rogueviz_hud() {
     queuepolyat(V, cgi.shTriangle, 0, PPR::MONSTER_HEAD);
     
     poly_outline = OUTLINE_DEFAULT;
-    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, forecolor, 0, 16);
+    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, legend_color, 0, 16);
     }
   
   quickqueue();
@@ -1926,6 +1929,10 @@ int readArgs() {
   else if(argis("-rvfat")) {
     shift(); 
     fat_edges = argf();
+    }
+  else if(argis("-lcol")) {
+    shift(); 
+    chosen_legend_color = arghex();
     }
   else if(argis("-ggamma")) {
     shift(); ggamma = argf();
