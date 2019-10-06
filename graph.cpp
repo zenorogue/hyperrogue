@@ -6117,6 +6117,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               else
                 queuepoly(V, cgi.shPlainWall3D[ofs + a], darkena(wcol2 - d * get_darkval(c, a), 0, 0xFF));
               }
+            }
           }
         else {
           for(int a=0; a<c->type; a++) if(c->move(a)) {
