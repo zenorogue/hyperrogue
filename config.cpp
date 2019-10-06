@@ -2323,6 +2323,10 @@ EX int read_config_args() {
     shift_arg_formula(vid.yshift);
     shift_arg_formula(vid.camera_angle);
     }
+  else if(argis("-pside")) {
+    PHASEFROM(2); 
+    permaside = true;
+    }
   else if(argis("-xy")) {
     PHASEFROM(2); 
     shift_arg_formula(vid.xposition);

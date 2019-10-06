@@ -7574,6 +7574,8 @@ purehookset hooks_calcparam;
 
 EX int corner_centering;
 
+EX bool permaside;
+
 EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
@@ -7594,7 +7596,7 @@ EX void calcparam() {
   
   cd->scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
-  current_display->sidescreen = false;
+  current_display->sidescreen = permaside;
   
   if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && !in_perspective()) {
     cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
