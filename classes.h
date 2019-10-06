@@ -350,6 +350,6 @@ struct modelinfo {
   const char* name;
   };
 
-extern const modelinfo mdinf[int(mdPolynomial)+1];
+extern std::vector<modelinfo> mdinf;
 
 }

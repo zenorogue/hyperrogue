@@ -600,7 +600,7 @@ vector<geometryinfo> ginf = {
 #define X3(x) x, x, x
 
 /** list of available models (i.e., projections) */
-const modelinfo mdinf[int(mdPolynomial)+1] = {
+vector<modelinfo> mdinf = {
   {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal},
   {"half-plane", "inversion", "half-plane", mf::conformal},
   {"band", "band", "Mercator", mf::band | mf::conformal},
@@ -629,7 +629,7 @@ const modelinfo mdinf[int(mdPolynomial)+1] = {
   {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea },
   {X3("central cylindrical"), mf::euc_boring | mf::band },
   {X3("Collignon"), mf::pseudoband | mf::equiarea },
-  {X3(""), 0},
+  {X3("guard"), 0},
   {X3("polynomial"), mf::conformal}
   };
 
