@@ -3541,3 +3541,10 @@ Solv geometry:
 - - fixed a bug which could cause the player to sometimes get stuck in a wall
 - - wall sliding in 3D (glitchy graphics though)
 - - fixed the Crossroads in some geometries
+
+2019-10-06 12:09 Version 11.2d:
+- fixed "look through wall" glitches in 3D shmup (by preventing the player from getting too close to wall)
+- fixed bugs in Nil
+- fixed spherical racing not enabling correctly
+- 'patterns' in 3D geometries now actually work, by creating walls
+- random landscapes now work (by projection) in hybrid geometries
