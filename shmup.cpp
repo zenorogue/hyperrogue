@@ -978,8 +978,6 @@ void movePlayer(monster *m, int delta) {
     // if(inertia_based) m->inertia = spin(-playerturn[cpid]) * m->inertia;
     }
   
-  bool have_speed = false;
-  
   int fspin = 0;
     
   for(int igo=0; igo<IGO && !go; igo++) {
@@ -990,7 +988,6 @@ void movePlayer(monster *m, int delta) {
       playergoturn[cpid] = 0;
       if(igo) { go = false; break; }
       ld r = hypot_d(WDIM, avg_inertia);
-      have_speed = r;
       apply_parallel_transport(nat, m->ori, rspintox(avg_inertia) * xtangent(r * delta));
       if(WDIM == 3) rotate_object(nat, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
       m->vel = r * (600/SCALE);
@@ -1002,7 +999,6 @@ void movePlayer(monster *m, int delta) {
         playersmallspin[cpid] = cspin(0, 1, fspin) * cspin(2, 0, igospan[igo]);
         if(fspin < 360) igo--; else fspin = 0;
         }
-      have_speed = playerstrafe[cpid] || playergo[cpid];
       nat = parallel_transport(nat1, m->ori, playersmallspin[cpid] * point3(playerstrafe[cpid], 0, playergo[cpid]));
       rotate_object(nat, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
       m->inertia[0] = playerstrafe[cpid] / delta;
@@ -1011,7 +1007,6 @@ void movePlayer(monster *m, int delta) {
       }
     else if(playergo[cpid]) {
       playergoturn[cpid] = igospan[igo]+godir[cpid];    
-      have_speed = true;
       nat = parallel_transport(nat1, m->ori, spin(playergoturn[cpid]) * xtangent(playergo[cpid]));
       m->inertia = spin(playergoturn[cpid]) * xtangent(playergo[cpid] / delta);
       }
@@ -1204,22 +1199,6 @@ void movePlayer(monster *m, int delta) {
       }
     }
 
-  if(!go && !have_speed) {
-    /* sometimes, when we move too fast, we may get stuck */
-    cell *c2 = m->findbase(nat0, 1);
-    if(c2 != m->base) {
-      hyperpoint v;
-      for(int i=0; i<GDIM; i++) v[i] = (randd() - randd()) * 0.01;
-      nat = nat0;
-      apply_parallel_transport(nat, m->ori, v);
-      transmatrix B = ggmatrix(m->base);
-      horo_distance d0(tC0(nat0), B);
-      horo_distance d1(tC0(nat), B);
-      horo_distance d2(tC0(nat0), ggmatrix(c2));
-      if(d1 < d0) nat0 = nat;
-      }
-    }
-  
   if(go) m->rebasePat(nat, c2);
   else m->rebasePat(nat0, m->base);
 
