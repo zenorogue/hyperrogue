@@ -645,6 +645,7 @@ EX bool randpatternMajority(cell *c, int ival, int iterations) {
 cdata orig_cdata;
 
 EX bool geometry_supports_cdata() {
+  if(hybri) return PIU(geometry_supports_cdata());
   return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (archimedean && !sphere);
   }
 
