@@ -1100,6 +1100,23 @@ void movePlayer(monster *m, int delta) {
         go = false;
       
       }
+    
+    if(go && WDIM == 3) {
+      for(int i=0; i<27; i++) {
+        hyperpoint v;
+        int i0 = i;
+        for(int a=0; a<3; a++) v[a] = (i0 % 3) - 1, i0 /= 3;
+        v = v * .1 / hypot_d(3, v);
+        transmatrix T1 = (i == 13) ? nat : parallel_transport(nat, m->ori, v);
+        cell *c3 = c2;
+        while(true) {
+          cell *c4 = findbaseAround(tC0(T1), c3, 1);
+          if(c4 == c3) break;
+          if(!passable(c4, c3, P_ISPLAYER | P_MIRROR | reflectflag)) { go = false; break; }
+          c3 = c4;
+          }
+        }
+      }
     }
   
   if(!go || abs(playergo[cpid]) < 1e-3 || abs(playerturn[cpid]) > 1e-3) bulltime[cpid] = curtime;
