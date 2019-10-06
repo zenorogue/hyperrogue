@@ -1251,7 +1251,11 @@ void save_compressed(string name) {
     int id = p.second;
     saved_id[id] = index++;
     auto& vd = vdata[id];
-    hwrite_raw(f, vd.cp);
+    struct colorpair_old { color_t color1, color2; char shade; } cpo;
+    cpo.color1 = vd.cp.color1;
+    cpo.color2 = vd.cp.color2;
+    cpo.shade = vd.cp.shade;
+    hwrite_raw(f, cpo);
     }
   // save edge types
   f.write<int>(isize(edgetypes));
@@ -1308,7 +1312,11 @@ void load_compressed(string name) {
     vdata.emplace_back();
     auto& v = vdata.back();
     v.name = data[i].name;
-    hread_raw(f, v.cp);
+    struct colorpair_old { color_t color1, color2; char shade; } cpo;
+    hread_raw(f, cpo);
+    v.cp.color1 = cpo.color1;
+    v.cp.color2 = cpo.color2;
+    v.cp.shade = cpo.shade;
     createViz(i, cwt.at, Id);
     v.m->store();
     id++;
