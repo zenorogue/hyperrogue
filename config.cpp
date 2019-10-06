@@ -1872,14 +1872,24 @@ EX void refresh_canvas() {
     }
   }
 
-EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t())) {
+EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), bool has_bit IS(false)) {
   cmode = sm::SIDE;
   gamescreen(0);
   dialog::init(XLAT("colors & aura"));
   
   for(int i=0; i<isize(ct); i++) {
     dialog::addColorItem(its(i), ct[i] << 8, 'a'+i);
-    dialog::add_action([i, &ct, r] () { dialog::openColorDialog(ct[i]); dialog::reaction = r; dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+    if(WDIM == 3 && has_bit && !(ct[i] & 0x1000000)) dialog::lastItem().value = XLAT("(no wall)");
+    dialog::add_action([i, &ct, r, has_bit] () { 
+      if(WDIM == 3 && has_bit) {
+        ct[i] ^= 0x1000000;
+        if(!(ct[i] & 0x1000000)) return;
+        }
+      dialog::openColorDialog(ct[i]); 
+      dialog::reaction = r; 
+      dialog::colorAlpha = false;
+      dialog::dialogflags |= sm::SIDE;
+      });
     }
 
   dialog::addBack();
@@ -1929,7 +1939,7 @@ EX void show_color_dialog() {
   dialog::addBreak(50);
   if(specialland == laCanvas && colortables.count(patterns::whichCanvas)) {
     dialog::addItem(XLAT("pattern colors"), 'P');
-    dialog::add_action_push([] { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas); });
+    dialog::add_action_push([] { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas, true); });
     }
  
   if(cwt.at->land == laMinefield) {

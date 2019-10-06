@@ -1451,14 +1451,14 @@ EX map<char, colortable> colortables = {
     0x404040, 0x606060, 0x808080
     }},
   {'a', {0x800000, 0x503000, 0x206000, 0x007010, 0x004040, 0x001070, 0x200060, 0x500030}},
-  {'e', {0x404040, 0x800000, 0x008000, 0x000080 }},
-  {'b', {0x404040, 0x800000, 0x008000, 0x000080 }},
-  {'z', {0xC0C0C0, 0xE0E0E0, 0x404040, 0x606060 }},
-  {'x', {0xC0C0C0, 0x800000, 0x008000, 0x000080 }},
-  {'t', {0x804040, 0x408040, 0x404080, 0x808040 }},
-  {'c', {0x202020, 0xC0C0C0}},
-  {'F', {0xC0C0C0, 0x202020}},
-  {'w', {0x303030, 0xC0C0C0}},
+  {'e', {0x404040, 0x1800000, 0x1008000, 0x000080 }},
+  {'b', {0x404040, 0x1800000, 0x1008000, 0x000080 }},
+  {'z', {0x1C0C0C0, 0x1E0E0E0, 0x404040, 0x606060 }},
+  {'x', {0xC0C0C0, 0x1800000, 0x1008000, 0x000080 }},
+  {'t', {0x804040, 0x1408040, 0x404080, 0x1808040 }},
+  {'c', {0x202020, 0x1C0C0C0}},
+  {'F', {0x1C0C0C0, 0x202020}},
+  {'w', {0x303030, 0x1C0C0C0}},
   {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
   };
 
@@ -1475,7 +1475,9 @@ color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
   col[1] /= div;
   col[2] /= div;
   if(ISWEB) for(int a=0; a<3; a++) col[a] = (col[a] + step/2) / step * step;
-  return (base + col[0] + (col[1] << 8) + (col[2] << 16));
+  color_t res = base + col[0] + (col[1] << 8) + (col[2] << 16);
+  if(WDIM == 3 && (getBits(c) & 1)) res |= 0x1000000;
+  return res;
   }
 
 EX namespace patterns {
@@ -1579,7 +1581,7 @@ EX namespace patterns {
       case 'g':
         return canvasback;
       case 'r':
-        return hrand(0xFFFFFF + 1);
+        return hrand(0x1FFFFFF + 1);
       case 'e':
         return colortables['e'][emeraldval(c)];
       case 'a': {
@@ -1637,7 +1639,7 @@ EX namespace patterns {
     gamescreen(0);
 
     dialog::init("predesigned patterns");
-    dialog::addItem(XLAT("single color"), 'g');
+    dialog::addItem(WDIM == 3 ? XLAT("empty") : XLAT("single color"), 'g');
     dialog::addItem(XLAT("random colors"), 'r');
     dialog::addItem(XLAT("distance from origin"), 'M');
     
