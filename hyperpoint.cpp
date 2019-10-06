@@ -996,13 +996,13 @@ EX bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
-EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
+EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction, int precision IS(100)) {
   if(nonisotropic) return nisot::parallel_transport(Position, direction);
   else if(prod) {
     hyperpoint h = product::direct_exp(ori * direction);
     return Position * rgpushxto0(h);
     }
-  else return Position * rgpushxto0(direct_exp(direction, 100));
+  else return Position * rgpushxto0(direct_exp(direction, precision));
   }
 
 EX void apply_parallel_transport(transmatrix& Position, const transmatrix orientation, const hyperpoint direction) {

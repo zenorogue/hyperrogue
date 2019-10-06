@@ -1107,7 +1107,7 @@ void movePlayer(monster *m, int delta) {
         int i0 = i;
         for(int a=0; a<3; a++) v[a] = (i0 % 3) - 1, i0 /= 3;
         v = v * .1 / hypot_d(3, v);
-        transmatrix T1 = (i == 13) ? nat : parallel_transport(nat, m->ori, v);
+        transmatrix T1 = (i == 13) ? nat : parallel_transport(nat, m->ori, v, 2);
         cell *c3 = c2;
         while(true) {
           cell *c4 = findbaseAround(tC0(T1), c3, 1);
@@ -1634,10 +1634,10 @@ void moveBullet(monster *m, int delta) {
     m->dead = true;
 
   if(inertia_based) {
-    nat = parallel_transport(nat, m->ori, m->inertia * delta);
+    nat = parallel_transport(nat, m->ori, m->inertia * delta, 10);
     }
   else 
-    nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
+    nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()), 10);
   cell *c2 = m->findbase(nat, 1);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -2111,14 +2111,14 @@ void moveMonster(monster *m, int delta) {
   
   if(inertia_based) {
     if(igo) return;
-    nat = parallel_transport(nat, m->ori, m->inertia * delta);
+    nat = parallel_transport(nat, m->ori, m->inertia * delta, 10);
     }
   else if(WDIM == 3 && igo) {
     ld fspin = rand() % 1000;  
-    nat = parallel_transport(nat0, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step));
+    nat = parallel_transport(nat0, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step), 10);
     }
   else {
-    nat = parallel_transport(nat0, m->ori, spin(igospan[igo]) * xtangent(step));
+    nat = parallel_transport(nat0, m->ori, spin(igospan[igo]) * xtangent(step), 10);
     }
 
   if(m->type != moRagingBull && !peace::on)
