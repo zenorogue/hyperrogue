@@ -1620,7 +1620,6 @@ EX namespace patterns {
       case 'j': {
         int d = c->master->distance;
         if(d % 2 == 0 || d < -5 || d > 5) return 0;
-        println(hlog, d, " -> ", (d+5)/2);
         return colortables['j'][(d+5)/2];
         }
       case 'f': {
