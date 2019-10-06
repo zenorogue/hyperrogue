@@ -1179,7 +1179,14 @@ EX void stop_game() {
 #endif
   }
 
+eModel default_model() {
+  if(nonisotropic) return mdGeodesic;
+  if(GDIM == 3) return mdPerspective;
+  return mdDisk;
+  }
+  
 EX void set_geometry(eGeometry target) {
+  bool was_default = pmodel == default_model();
   if(geometry != target) {
     int old_DIM = GDIM;
     stop_game();
@@ -1212,9 +1219,7 @@ EX void set_geometry(eGeometry target) {
     #if CAP_BT
     if(binarytiling || WDIM == 3 || penrose) if(!hybri) variation = eVariation::pure;
     #endif
-    if(GDIM == 3 && old_DIM == 2 && pmodel == mdDisk) pmodel = mdPerspective;
-    if(nonisotropic && old_DIM == 2) pmodel = mdGeodesic;
-    if(GDIM == 2 && among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
+    if(was_default) pmodel = default_model();
     if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
     if(sl2) nisot::geodesic_movement = true;
