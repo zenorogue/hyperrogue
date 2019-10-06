@@ -1198,9 +1198,6 @@ EX void set_geometry(eGeometry target) {
     geometry = target;
   
     if(chaosmode && bounded) chaosmode = false;
-    #if CAP_RACING
-    if(bounded) racing::on = false;
-    #endif
     if(euclid6) variation = eVariation::bitruncated;
     #if CAP_IRR
     if(IRREGULAR) variation = eVariation::bitruncated;
