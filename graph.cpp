@@ -6075,8 +6075,11 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           int d = (wcol & 0xF0F0F0) >> 4;
           
-          for(int a=0; a<c->type; a++)
-            if(c->move(a) && !isWall3(c->move(a), dummy)) {
+          for(int a=0; a<c->type; a++) {
+            bool b = true;
+            if(c->move(a) && (among(pmodel, mdPerspective, mdGeodesic) || gmatrix0.count(c->move(a))))
+              b = !isWall3(c->move(a), dummy);
+            if(b) {
               if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !hybri && !experimental && !nih) {
                 if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
                 else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
