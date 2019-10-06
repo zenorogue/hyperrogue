@@ -237,7 +237,7 @@ horo_distance::horo_distance(hyperpoint h1, const transmatrix& T) {
   if(binarytiling) become(inverse(T) * h1);
   else
 #endif
-  if(solnih || hybri) become(inverse(T) * h1);
+  if(solnih || hybri || nil) become(inverse(T) * h1);
   else
     a = 0, b = intval(h1, tC0(T));
   }

@@ -850,6 +850,10 @@ EX ld hdist0(const hyperpoint& mh) {
       auto phi = atan2(mh[2], mh[3]);
       return hypot(cosh_r < 1 ? 0 : acosh(cosh_r), phi);
       }
+    case gcNil: {
+      ld bz = mh[0] * mh[1] / 2;
+      return hypot(mh[0], mh[1]) + abs(mh[2] - bz);
+      }
     default:
       return hypot_d(GDIM, mh);
     }
