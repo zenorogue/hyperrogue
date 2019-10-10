@@ -257,6 +257,7 @@ EX void initcells() {
   #if CAP_BT
   else if(binarytiling) currentmap = binary::new_map();
   #endif
+  else if(S3 >= OINF) currentmap = inforder::new_map();
   else currentmap = new hrmap_hyperbolic;
   
   allmaps.push_back(currentmap);
@@ -1034,6 +1035,8 @@ EX int celldistance(cell *c1, cell *c2) {
       
     return DISTANCE_UNKNOWN;
     }
+   
+   if(S3 >= OINF) return inforder::celldistance(c1, c2);
 
   #if CAP_BT && MAXMDIM >= 4
   if(binarytiling && WDIM == 3) 

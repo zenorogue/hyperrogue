@@ -215,7 +215,7 @@ enum eGeometry {
   gField435, gField534,
   gBinary4, gSol,
   gKiteDart2, gKiteDart3, gNil, gProduct, gRotSpace,
-  gTernary, gNIH, gSolN,
+  gTernary, gNIH, gSolN, gInfOrder,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -273,6 +273,8 @@ static const flagtype qCRYSTAL         = 8192;
 static const flagtype qSOL             = 16384;
 static const flagtype qEXPERIMENTAL    = 32768;
 static const flagtype qNIH             = 65536;
+
+static const flagtype qIDEAL           = 131072;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -351,5 +353,7 @@ struct modelinfo {
   };
 
 extern std::vector<modelinfo> mdinf;
+
+static const int OINF = 100;
 
 }

@@ -590,8 +590,8 @@ vector<geometryinfo> ginf = {
   {"ternary","none",    "standard ternary tiling",                    "ternary",  6, 3, qBINARY,   giHyperb2, 0x48400, {{6, 4}}, eVariation::pure},
   {"3x2",    "none",    "stretched hyperbolic",                       "3:2",     11, 3, qBINARY|qNIH,   giSolNIH,  0x49000, {{6, 3}}, eVariation::pure},
   {"3x1/2",  "none",    "stretched Solv",                             "3:1/2",    9, 3, (qBINARY|qSOL|qNIH),   giSolNIH,  0x49200, {{7, 3}}, eVariation::pure},
+  {"{3,oo}", "none",    "{3,∞} (infinite triangles)",                 "oox3",     3, 100, qIDEAL,  giHyperb2, 0x49400, {{7, 7}}, eVariation::pure},
   };
-
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 
 // remember to match the following mask when specifying codes for extra geometries: 0x78600

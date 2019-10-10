@@ -52,6 +52,10 @@ EX hstate transition(hstate s, int dir) {
     if(s == hsB && (dir >= 2 && dir < S7-2)) return hsA;
     if(s == hsB && (dir == S7-2)) return hsB;
     }
+  else if(S3 >= OINF) {
+    if(s == hsOrigin) return hsA;
+    if(s == hsA && dir) return hsA;
+    }
   else {
     if(s == hsOrigin) return hsA;
     if(s == hsA && dir >= 3 && dir <= S7-3) return hsA;

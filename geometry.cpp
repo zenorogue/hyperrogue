@@ -484,7 +484,7 @@ void geometry_information::prepare_basics() {
     goto finish;
     }
 
-  tessf = edge_of_triangle_with_angles(2*M_PI/S3, M_PI/S7, M_PI/S7);
+  tessf = edge_of_triangle_with_angles(S3 >= OINF ? 0 : 2*M_PI/S3, M_PI/S7, M_PI/S7);
   
   if(elliptic && S7 == 4) tessf = M_PI/2;
   

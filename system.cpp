@@ -1216,6 +1216,7 @@ EX void set_geometry(eGeometry target) {
     #if CAP_BT
     if(binarytiling || WDIM == 3 || penrose) if(!hybri) variation = eVariation::pure;
     #endif
+    if(S3 == OINF) variation = eVariation::pure;
     if(was_default) pmodel = default_model();
     if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
