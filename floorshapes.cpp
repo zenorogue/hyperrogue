@@ -123,7 +123,12 @@ matrixitem genitem(const transmatrix& m1, const transmatrix& m2, int nsym) {
   return mi;
   }
 
+bool do_kleinize() { return S3 >= OINF; }
+
+hyperpoint kleinize(hyperpoint h) { return point3(h[0]/h[2], h[1]/h[2], 1); }
+
 void addmatrix(matrixlist& matrices, hyperpoint o0, hyperpoint o1, hyperpoint o2, hyperpoint n0, hyperpoint n1, hyperpoint n2, int d, int osym, int nsym) {
+  if(do_kleinize()) o0 = kleinize(o0), o1 = kleinize(o1), o2 = kleinize(o2), n0 = kleinize(n0), n1 = kleinize(n1), n2 = kleinize(n2);
   matrices.v.push_back(genitem(inverse(spin(2*M_PI*d/osym)*build_matrix(o0, o1, o2,C02)), spin(2*M_PI*d/nsym)*build_matrix(n0, n1, n2,C02), nsym));
   }
 
@@ -222,10 +227,11 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   for(int r=0; r<nsym; r+=osym/rots) {
     for(hyperpoint h: lst) {
       hyperpoint nh = h;
+      if(do_kleinize()) nh = kleinize(nh);
       int mapped = 0;
       for(auto& m: matrices) {        
         hyperpoint z = m.first * h;
-        if(z[0] > -1e-5 && z[1] > -1e-5 && z[LDIM] > -1e-5) {
+        if(z[0] > -1e-5 && z[1] > -1e-5 && z[2] > -1e-5) {
           nh = m.second[r] * z, mapped++;
           }
         }
