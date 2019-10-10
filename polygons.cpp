@@ -425,6 +425,7 @@ void geometry_information::procedural_shapes() {
   else {
     ld rad0 = floorrad0, rad1 = floorrad1;
     if(penrose) rad0 /= 2, rad1 /= 2;
+    if(S3 >= OINF) rad0 = rad1 = zhexf;
     bshape(shWall[0], PPR::WALL);
     for(int t=0; t<=S6; t++) {
       hpcpush(ddi(S7 + t*S14, rad0) * C0);
@@ -1126,6 +1127,10 @@ void geometry_information::prepare_shapes() {
   else {
     SD3 = S3;
     SD7 = S7;
+    }
+  if(S3 >= OINF) {
+    SD3 = 3;
+    SD7 = 9;
     }
   SD6 = SD3 * 2;
   S42 = SD7 * SD6;
