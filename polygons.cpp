@@ -738,6 +738,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       vertices[i] = d.second;
       }
     }
+  
+  if(cgflags & qIDEAL) for(auto& v: vertices) v /= v[3];
 
   ld w = 0;
   for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
