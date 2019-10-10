@@ -2465,8 +2465,13 @@ EX namespace linepatterns {
         
       case patTree:
         if(is_master(c)) {
-          cell *c2 = c->master->move(binarytiling ? 5 : 0)->c7;
-          if(gmatrix.count(c2)) gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+          cell *c2 = c->master->move(binarytiling ? binary::updir() : 0)->c7;
+          if(gmatrix.count(c2)) {
+            if(S3 >= OINF)
+              gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
+            else 
+              gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+            }
           }
         break;
       
@@ -2485,7 +2490,13 @@ EX namespace linepatterns {
           for(int i=0; i<S7; i++)
             if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
               cell *c2 = c->master->move(i)->c7;
-              if(gmatrix.count(c2)) gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+              if(gmatrix.count(c2)) {
+                if(S3 >= OINF) {
+                  gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
+                  }
+                else 
+                  gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+                }
               }
           }
         break;
