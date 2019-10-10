@@ -560,12 +560,17 @@ EX namespace reg3 {
       heptagon *alt = NULL;
       transmatrix T = Id;
       
-      if(hyperbolic) {
-        #if CAP_FIELD
+      binary_map = nullptr;
+      quotient_map = nullptr;
+      
+      #if CAP_FIELD
+      if(hyperbolic && !(cgflags & qIDEAL)) {
         quotient_map = new hrmap_field3;
         h.zebraval = quotient_map->allh[0]->zebraval;
-        #endif
-
+        }
+      #endif
+      
+      if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3); 
         binary::build_tmatrix();
         alt = tailored_alloc<heptagon> (S7);
@@ -579,7 +584,6 @@ EX namespace reg3 {
         binary_map = binary::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
-      else binary_map = NULL, quotient_map = NULL;
       
       reg_gmatrix[origin] = make_pair(alt, T);
       altmap[alt].emplace_back(origin, T);
@@ -642,7 +646,7 @@ EX namespace reg3 {
       if(DEB) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
       heptagon *alt = p1.first;
       #if CAP_FIELD
-      transmatrix T = p1.second * (hyperbolic ? quotient_map->tmatrices[parent->fieldval][d] : adjmoves[d]);
+      transmatrix T = p1.second * (quotient_map ? quotient_map->tmatrices[parent->fieldval][d] : adjmoves[d]);
       #else
       transmatrix T = p1.second * adjmoves[d];
       #endif
@@ -669,7 +673,7 @@ EX namespace reg3 {
         int fb = 0;
         hyperpoint old = T * (inverse(T1) * tC0(p1.second));
         #if CAP_FIELD
-        if(hyperbolic) {
+        if(quotient_map) {
           p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
           fix_distances(p2.first, parent);
           return p2.first;
@@ -700,7 +704,7 @@ EX namespace reg3 {
       if(DEB) println(hlog, "-> not found");
       int d2 = 0, fv = isize(reg_gmatrix);
       #if CAP_FIELD
-      if(hyperbolic) {
+      if(quotient_map) {
         auto cp = counterpart(parent);
         d2 = cp->c.spin(d);
         fv = cp->c.move(d)->fieldval;
@@ -712,7 +716,7 @@ EX namespace reg3 {
       created->alt = NULL;
       created->cdata = NULL;
       #if CAP_FIELD
-      if(hyperbolic) {
+      if(quotient_map) {
         created->zebraval = quotient_map->allh[fv]->zebraval;
         }
       else
@@ -788,7 +792,7 @@ EX namespace reg3 {
     
         for(int i=0; i<S7; i++) if(h->move(i)) {
           #if CAP_FIELD
-          if(hyperbolic) dq::enqueue(h->move(i), V * quotient_map->tmatrices[h->fieldval][i]);
+          if(quotient_map) dq::enqueue(h->move(i), V * quotient_map->tmatrices[h->fieldval][i]);
           else
           #endif
           dq::enqueue(h->move(i), V * relative_matrix(h->move(i), h));
