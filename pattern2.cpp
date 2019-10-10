@@ -1205,6 +1205,7 @@ EX bool geosupport_chessboard() {
     (archimedean && DUAL) ? arcm::current.support_threecolor_bitruncated() :
 #endif
     (binarytiling || penrose) ? 0 :
+    (S3 >= OINF) ? true :
     (VALENCE % 2 == 0);
   }
 
@@ -1220,6 +1221,7 @@ EX int geosupport_threecolor() {
     if(S7 % 2) return 1;
     return 2;
     }
+  if(S3 >= OINF) return 0;
   if((S7 % 2 == 0) && (S3 == 3))
     return 2;
   if(a46 && PURE)
@@ -1311,6 +1313,7 @@ EX int pattern_threecolor(cell *c) {
     if(a4 && PURE) return eupattern4(c);
     return eupattern(c) % 3;
     }
+  if(S3 >= OINF) return c->master->distance % 3;
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
     #if CAP_GP
@@ -1381,6 +1384,7 @@ EX bool pseudohept(cell *c) {
   if(penrose) return kite::getshape(c->master) == kite::pDart;
   if(binarytiling) return binary::pseudohept(c);
   #endif
+  if(S3 >= OINF) return c->master->distance % 3 == 1;
   #if MAXMDIM == 4
   if(WDIM == 3) {
     if(geometry == gField435) return false;

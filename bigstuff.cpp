@@ -179,6 +179,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     ho->alt = hm;
     if(link_cdata) hm->cdata = (cdata*) ho;
     if(levs) currentmap->generateAlts(ho, levs-1, link_cdata);
+    if(S3 >= OINF) preventbarriers(ho->c7);
     }
   }
 
@@ -530,6 +531,11 @@ EX void buildEquidistant(cell *c) {
   for(int i=0; i<c->type; i++) {
     int cv = coastval(createMov(c,i), b);
     if(cv < mcv) mcv = cv;
+    }
+    
+  if(S3 == OINF) {
+    c->landparam = mcv + 1;
+    return;
     }
   
   int mcv2 = 0;
@@ -1289,6 +1295,11 @@ EX int wallchance(cell *c, bool deepOcean) {
     princess::challenge ? 0 :
     isElemental(l) ? 4000 : 
     (yendor::on && (yendor::generating || !(yendor::clev().flags & YF_WALLS))) ? 0 :
+    (S3 >= OINF && l == laCrossroads) ? 2000 :
+    (S3 >= OINF && l == laCrossroads2) ? 2500 :
+    (S3 >= OINF && l == laCrossroads3) ? 3333 :
+    (S3 >= OINF && l == laCrossroads4) ? 5000 :
+    (S3 >= OINF && l == laCrossroads5) ? 10000 :
     l == laCrossroads3 ? 10000 : 
     l == laCrossroads ? 5000 : 
     l == laCrossroads2 ? 10000 : 
@@ -1414,6 +1425,9 @@ EX void buildBigStuff(cell *c, cell *from) {
     }
   
   else if(weirdhyperbolic && specialland == laElementalWall && hrand(I10000) < 1000 && gp_wall_test()) 
+    buildBarrierNowall(c, getNewLand(c->land));
+
+  else if(S3 >= OINF && c->land && hrand(I10000) < wallchance(c, deepOcean) && c->bardir != NOBARRIERS)
     buildBarrierNowall(c, getNewLand(c->land));
   
   else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
@@ -1542,6 +1556,7 @@ EX bool openplains(cell *c) {
   }
 
 EX void buildCamelotWall(cell *c) {
+  if(S3 >= OINF) { c->wall = waRubble; return; }
   c->wall = waCamelot;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
@@ -1715,6 +1730,7 @@ EX void moreBigStuff(cell *c) {
         else if(WDIM == 3) {
           if(c->master->zebraval != 1) c->wall = waColumn;
           }
+        else if(S3 >= OINF) { }
         else if(weirdhyperbolic && !BITRUNCATED) {
           if(hrand(100) < 50) c->wall = waColumn;
           }

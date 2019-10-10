@@ -18,7 +18,7 @@ struct hrmap {
   virtual vector<cell*>& allcells() { return dcal; }
   virtual void verify() { }
   virtual void link_alt(const cellwalker& hs) { }
-  virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3-3, bool link_cdata = true);
+  virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3 >= OINF ? 1 : S3-3, bool link_cdata = true);
   heptagon *may_create_step(heptagon *h, int direction) {
     if(h->move(direction)) return h->move(direction);
     return create_step(h, direction);
@@ -764,7 +764,11 @@ cdata *getHeptagonCdata(heptagon *h) {
   
   cdata mydata = *getHeptagonCdata(h->cmove(dir));
 
-  if(S3 == 4) {
+  if(S3 >= OINF) {
+    setHeptagonRval(h);
+    affect(mydata, h->rval0, 1); 
+    }
+  else if(S3 == 4) {
     heptspin hs(h, 0);
     while(dmeq((hs+1).cpeek()->dm4, (hs.at->dm4 - 1))) hs = hs + 1 + wstep + 1;
     while(dmeq((hs-1).cpeek()->dm4, (hs.at->dm4 - 1))) hs = hs - 1 + wstep - 1;

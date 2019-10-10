@@ -408,7 +408,7 @@ typedef function<int(struct cell*)> cellfunction;
 // passable flags
 
 #define SAGEMELT .1
-#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex, gKiteDart3) ? 3 : sol ? 6 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : 6)
+#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex, gKiteDart3) ? 3 : sol ? 6 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : (S3 == OINF) ? 4 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
