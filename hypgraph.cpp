@@ -1590,6 +1590,7 @@ EX transmatrix atscreenpos(ld x, ld y, ld size) {
     V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
     V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
     V[2][2] = current_display->scrdist;
+    if(S3 == OINF) V[0][0] /= 5, V[1][1] /= 5;
     }
 
   return V;
