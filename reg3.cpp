@@ -65,6 +65,7 @@ EX namespace reg3 {
     loop = ginf[geometry].tiling_name[5] - '0';
     println(hlog, "face = ", face, " loop = ", loop, " S7 = ", S7);
     
+    /* dual_angle : the angle between two face centers in the dual cell */
     ld dual_angle = binsearch(0, M_PI, [&] (ld d) {
       hyperpoint h0 = cpush(0, 1) * C0;
       hyperpoint h1 = cspin(0, 1, d) * h0;
@@ -72,7 +73,8 @@ EX namespace reg3 {
       return hdist(h0, h1) > hdist(h1, h2);
       });
 
-    ld dodecahedron_angle = binsearch(0, M_PI, [&] (ld d) {
+    /* angle_between_faces : the distance between two face centers of cells */
+    ld angle_between_faces = binsearch(0, M_PI, [&] (ld d) {
       hyperpoint h0 = cpush(0, 1) * C0;
       hyperpoint h1 = cspin(0, 1, d) * h0;
       hyperpoint h2 = cspin(1, 2, 2*M_PI/face) * h1;
@@ -87,7 +89,7 @@ EX namespace reg3 {
       dual_angle = hdist(h1, h2);
       }
     
-    println(hlog, "dodecahedron angle = ", dodecahedron_angle);
+    println(hlog, "angle between faces = ", angle_between_faces);
     println(hlog, "dual angle = ", dual_angle);
     
     ld inp_length = binsearch(0, 1.55, [&] (ld d) {
@@ -102,60 +104,80 @@ EX namespace reg3 {
     if(S7 == 8) edge_length = hdist(normalize(hpxyz3(1,1,0,0)), normalize(hpxyz3(1,0,1,0))); 
     println(hlog, "edge length = ", edge_length);
     
-    hyperpoint h0 = cpush(0, 1) * C0;
-    hyperpoint h1 = cspin(0, 1, dodecahedron_angle) * h0;
+    /* frontal face direction */
+    hyperpoint h0 = xtangent(1);
+
+    /* three faces adjacent to frontal face direction */
+    hyperpoint h1 = cspin(0, 1, angle_between_faces) * h0;
     hyperpoint h2 = cspin(1, 2, 2*M_PI/face) * h1;
     hyperpoint h3 = cspin(1, 2, -2*M_PI/face) * h1;
-    hyperpoint a2 = S7 == 8 ? normalize(h1 + h2) : normalize(h0 + h1 + h2);
-    hyperpoint a3 = S7 == 8 ? normalize(h1 + h3) : normalize(h0 + h1 + h3);
+
+    /* directions of vertices [h0,h1,h2] and [h0,h1,h3] */
+    hyperpoint dir_v2 = S7 == 8 ? (h1 + h2) : (h0 + h1 + h2);
+    hyperpoint dir_v3 = S7 == 8 ? (h1 + h3) : (h0 + h1 + h3);
+
+    println(hlog, "dir_v2 = ", dir_v2);
+    println(hlog, "dir_v3 = ", dir_v3);
+    
+    dir_v2 = tangent_length(dir_v2, 1);
+    dir_v3 = tangent_length(dir_v3, 1);
     
     println(hlog, "S7 = ", S7);
-
-    ld whereonline = binsearch(0, 5, [&] (ld d) {
-      // sometimes breaks in elliptic
-      dynamicval<eGeometry> g(geometry, elliptic ? gCell120 : geometry);
-      hyperpoint z2 = a2 * d + C0 * (1-d);
-      if(hyperbolic && intval(z2, Hypc) >= 0) return true;
-      hyperpoint b2 = normalize(z2);
-      hyperpoint z3 = a3 * d + C0 * (1-d);
-      hyperpoint b3 = normalize(z3);
-      return hdist(b2, b3) >= edge_length;
-      });
+    println(hlog, "dir_v2 = ", dir_v2);
+    println(hlog, "dir_v3 = ", dir_v3);
     
-    println(hlog, "whereonline = ", whereonline);
-    a2 = normalize(a2 * whereonline + C0 * (1-whereonline));
-    a3 = normalize(a3 * whereonline + C0 * (1-whereonline));
+    /* the distance from cell center to cell vertex */
+    ld vertex_distance;
+    
+    if(cgflags & qIDEAL) {
+      vertex_distance = 10;
+      }
+    
+    else {    
+      vertex_distance = binsearch(0, M_PI, [&] (ld d) {
+        // sometimes breaks in elliptic
+        dynamicval<eGeometry> g(geometry, elliptic ? gCell120 : geometry);
+        hyperpoint v2 = direct_exp(dir_v2 * d, iTable);
+        hyperpoint v3 = direct_exp(dir_v3 * d, iTable);
+        return hdist(v2, v3) >= edge_length;
+        });
+      }
+    
+    println(hlog, "vertex_distance = ", vertex_distance);
+    
+    /* actual vertex */
+    hyperpoint v2 = direct_exp(dir_v2 * vertex_distance, iTable);
 
     hyperpoint mid = Hypc;
-    for(int i=0; i<face; i++) mid += cspin(1, 2, 2*i*M_PI/face) * a2;
+    for(int i=0; i<face; i++) mid += cspin(1, 2, 2*i*M_PI/face) * v2;
     mid = normalize(mid);
     ld between_centers = 2 * hdist0(mid);
     println(hlog, "between_centers = ", between_centers);
 
     if(S7 == 12 || S7 == 8) {
       spins[0] = Id;
-      spins[1] = cspin(0, 1, dodecahedron_angle) * cspin(1, 2, M_PI);
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin(1, 2, M_PI);
       for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, 2*M_PI*(a-1)/face) * spins[1];      
       for(int a=S7/2; a<S7; a++) spins[a] = cspin(0, 1, M_PI) * spins[a-S7/2];
       }
     
     if(S7 == 6) {
       spins[0] = Id;
-      spins[1] = cspin(0, 1, dodecahedron_angle) * cspin(1, 2, M_PI);
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin(1, 2, M_PI);
       spins[2] = cspin(1, 2, M_PI/2) * spins[1];
       for(int a=S7/2; a<S7; a++) spins[a] = spins[a-S7/2] * cspin(0, 1, M_PI);
       }
     
     if(S7 == 4) {
       spins[0] = Id;
-      spins[1] = cspin(0, 1, dodecahedron_angle) * cspin(1, 2, M_PI);
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin(1, 2, M_PI);
       for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, 2*M_PI*(a-1)/face) * spins[1];      
       }
     
     cellshape.clear();
     for(int a=0; a<S7; a++)
     for(int b=0; b<face; b++)
-      cellshape.push_back(spins[a] * cspin(1, 2, 2*M_PI*b/face) * a2);
+      cellshape.push_back(spins[a] * cspin(1, 2, 2*M_PI*b/face) * v2);
     
     adjmoves[0] = cpush(0, between_centers) * cspin(0, 2, M_PI);
     for(int i=1; i<S7; i++) adjmoves[i] = spins[i] * adjmoves[0];
