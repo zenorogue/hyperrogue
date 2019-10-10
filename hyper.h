@@ -107,45 +107,49 @@ void addMessage(string s, char spamtype = 0);
 
 // geometry-dependent constants
 
+#define cginf ginf[geometry]
+
 #define ALPHA (M_PI*2/S7)
-#define S7 ginf[geometry].sides
-#define S3 ginf[geometry].vertex
+#define S7 cginf.sides
+#define S3 cginf.vertex
 #define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling && !archimedean)
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling || archimedean) && hyperbolic)
 #define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || archimedean) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
 
-#define binarytiling (ginf[geometry].flags & qBINARY)
-#define archimedean (ginf[geometry].flags & qARCHI)
-#define cryst (ginf[geometry].flags & qCRYSTAL)
-#define penrose (ginf[geometry].flags & qPENROSE)
+#define cgflags cginf.flags 
+
+#define binarytiling (cgflags & qBINARY)
+#define archimedean (cgflags & qARCHI)
+#define cryst (cgflags & qCRYSTAL)
+#define penrose (cgflags & qPENROSE)
 
 /** convenience flag for geometries with major aspects missing */
-#define experimental (ginf[geometry].flags & qEXPERIMENTAL)
+#define experimental (cgflags & qEXPERIMENTAL)
 
 // these geometries do not feature alternate structures for horocycles
 #define eubinary (euclid || binarytiling || cryst || nil)
 
-#define cgclass (ginf[geometry].cclass)
+#define cgclass (cginf.cclass)
 #define euclid (cgclass == gcEuclid)
 #define sphere (cgclass == gcSphere)
 #define solnih (cgclass == gcSolNIH)
-#define sol (ginf[geometry].flags & qSOL)
-#define nih (ginf[geometry].flags & qNIH)
+#define sol (cgflags & qSOL)
+#define nih (cgflags & qNIH)
 #define nil (cgclass == gcNil)
 #define sl2 (cgclass == gcSL2)
 #define prod (cgclass == gcProduct)
-#define hybri (ginf[geometry].flags & qHYBRID)
+#define hybri (cgflags & qHYBRID)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (sol || nil || sl2 || nih)
 #define translatable (euclid || nonisotropic)
-#define nonorientable (ginf[geometry].flags & qNONORIENTABLE)
-#define elliptic (ginf[geometry].flags & qELLIPTIC)
-#define quotient (ginf[geometry].flags & qANYQ)
+#define nonorientable (cgflags & qNONORIENTABLE)
+#define elliptic (cgflags & qELLIPTIC)
+#define quotient (cgflags & qANYQ)
 #define euwrap (quotient && euclid)
 #define fulltorus (bounded && euclid)
-#define smallbounded (ginf[geometry].flags & qSMALL)
-#define bounded (ginf[geometry].flags & qBOUNDED)
+#define smallbounded (cgflags & qSMALL)
+#define bounded (cgflags & qBOUNDED)
 
 // Dry Forest burning, heat transfer, etc. are performed on the whole universe
 #define doall (bounded)
@@ -184,7 +188,7 @@ void addMessage(string s, char spamtype = 0);
 #define DUAL (variation == eVariation::dual)
 #define DUALMUL (DUAL ? 2 : 1)
 
-#define CHANGED_VARIATION (variation != ginf[geometry].default_variation)
+#define CHANGED_VARIATION (variation != cginf.default_variation)
 
 #define STDVAR (PURE || BITRUNCATED)
 #define NONSTDVAR (!STDVAR)
@@ -335,9 +339,9 @@ struct videopar {
 
 extern videopar vid;
 
-#define WDIM ginf[geometry].g.gameplay_dimension
-#define GDIM ginf[geometry].g.graphical_dimension
-#define MDIM ginf[geometry].g.homogeneous_dimension
+#define WDIM cginf.g.gameplay_dimension
+#define GDIM cginf.g.graphical_dimension
+#define MDIM cginf.g.homogeneous_dimension
 #define LDIM (MDIM-1)
 #define cclass g.kind
 
