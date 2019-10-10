@@ -82,6 +82,7 @@ EX namespace reg3 {
       });
     
     if(S7 == 8) {
+      angle_between_faces = min(angle_between_faces, M_PI - angle_between_faces);
       /* 24-cell is a special case because it is the only one with '4' in the middle of the Schlaefli symbol. */
       /* The computations above assume 3 */
       hyperpoint h1 = hpxy3(.5,.5,.5);
