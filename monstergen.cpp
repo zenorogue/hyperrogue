@@ -678,10 +678,8 @@ EX void wandering() {
     else if(c->land == laMinefield && wchance(items[itBombEgg]-20, 400))
       c->monst = moBomberbird;
     
-    else if(c->land == laEmerald && wchance(items[itEmerald], 5)) {
-      static eMonster m[4] = {moHedge, moLancer, moMiner, moFlailer};      
-      c->monst = m[hrand(4)];
-      }
+    else if(c->land == laEmerald && wchance(items[itEmerald], 5))
+      c->monst = emerald_monster();
     
     else if(c->land == laWineyard && wchance(items[itWine], 10)) {
       c->monst = moVineBeast;
@@ -710,10 +708,8 @@ EX void wandering() {
       c->monst = eMonster(moWitch + hrand(NUMWITCH));
       }
     
-    else if(c->land == laCamelot && hrand(30) == 0 && (euclid || c->master->alt) && celldistAltRelative(c) < 0) {
-      eMonster m[3] = { moHedge, moLancer, moFlailer };
-      c->monst = m[hrand(3)];
-      }
+    else if(c->land == laCamelot && hrand(30) == 0 && (euclid || c->master->alt) && celldistAltRelative(c) < 0)
+      c->monst = camelot_monster();
     
     else if(isCrossroads(c->land) && items[itHyperstone] && wchance(items[itHyperstone], 20)) {
       c->monst = wanderingCrossroadsMonster();

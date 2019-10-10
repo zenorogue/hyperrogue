@@ -1571,6 +1571,16 @@ EX bool no_barriers_in_radius(cell *c, int rad) {
   return true;
   }
 
+EX eMonster camelot_monster() {
+  eMonster ms[3] = { moHedge, moLancer, moFlailer };
+  eMonster m = ms[hrand(3)];
+  if(m == moHedge && VALENCE > 3)
+    m = moPyroCultist;
+  if(getDistLimit() <= 2 && m == moLancer) m = moGoblin;
+  if(getDistLimit() <= 3 && m == moPyroCultist) m = moCultist;
+  return m;
+  }
+
 EX void buildCamelot(cell *c) {
   int d = celldistAltRelative(c);
   if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
@@ -1614,14 +1624,8 @@ EX void buildCamelot(cell *c) {
       }
     if(d == 0) c->wall = waRoundTable;
     if(celldistAlt(c) == 0 && !tactic::on) c->item = itHolyGrail;
-    if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5) {
-      eMonster m[3] = { moHedge, moLancer, moFlailer };
-      c->monst = m[hrand(3)];
-      if(c->monst == moHedge && VALENCE > 3)
-        c->monst = moPyroCultist;
-      if(getDistLimit() <= 2 && c->monst == moLancer) c->monst = moGoblin;
-      if(getDistLimit() <= 3 && c->monst == moPyroCultist) c->monst = moCultist;
-      }
+    if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5)
+      c->monst = camelot_monster();
     if(d == 1) {
       // roughly as many knights as table cells
       if(hrand(1000000) < 1000000 / expansion.get_growth() && !reptilecheat)

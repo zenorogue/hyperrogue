@@ -143,6 +143,14 @@ EX void createArrowTrapAt(cell *c, eLand land) {
     }
   }
 
+EX eMonster emerald_monster() {
+  static eMonster emeraldmonsters[4] = { moHedge, moLancer, moFlailer, moMiner };
+  eMonster m = emeraldmonsters[hrand(4)];
+  if(m == moHedge && (S3 != 3 || (hybri && !prod)))
+    m = moFlailer;
+  return m;
+  }
+
 EX void build_pool(cell *c, bool with_boat) {
   bool vacant = true;
   if(c->monst || !among(c->wall, waNone, waSea, waBoat)) vacant = false;
@@ -537,12 +545,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           for(int i=0; i<c->type; i++) if(c->move(i)->wall == waCavewall) ok = false;
           if(ok) c->item = itEmerald;
           }
-        if(hrand_monster(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) {
-          static eMonster emeraldmonsters[4] = { moHedge, moLancer, moFlailer, moMiner };
-          c->monst = emeraldmonsters[hrand(4)];
-          if(c->monst == moHedge && (S3 != 3 || (hybri && !prod)))
-            c->monst = moFlailer;
-          }
+        if(hrand_monster(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) 
+          c->monst = emerald_monster();
         if(sphere && c->type != 6 && c->master->fiftyval == 5) {
           c->monst = moMiner;
           c->stuntime = 7;
