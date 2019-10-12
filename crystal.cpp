@@ -663,7 +663,6 @@ EX color_t colorize(cell *c, char whichCanvas) {
       bool grid = false;
       ico[dim-1] -= 2;
       for(int d=dim; d<MAXDIM; d++) ico[d] = 0;
-      if(ico == c0) println(hlog, "ico = ", ico, " co = ", co);
       for(int i=0; i<dim; i++) if((ico[i] & 6) == 4) grid = true;
     
       for(int i=0; i<3; i++) part(res, i) = 0xFF + 0x18 * (ico[i]/2-2);
