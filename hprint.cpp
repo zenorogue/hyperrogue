@@ -43,6 +43,17 @@ EX string fts(ld x, int prec IS(6)) {
   return ss.str();
   }
 
+map<void*, int> pointer_indices;
+
+EX string index_pointer(void *v) {
+  if(v == nullptr) return "0";
+  if(!pointer_indices.count(v)) pointer_indices[v] = isize(pointer_indices);
+  string res;
+  int i = pointer_indices[v] + 1;
+  while(i) { res += ('A' + (i % 26)); i /= 26; }
+  return res;
+  }
+
 #if HDR
 inline string ONOFF(bool b) { return XLAT(b ? "ON" : "OFF"); }
 
@@ -235,8 +246,8 @@ inline string format(const char *fmt, ...) {
   return buf;
   }
 
-inline void print(hstream& hs, heptagon* h) { print(hs, format("H%p", h)); }
-inline void print(hstream& hs, cell* h) { print(hs, format("C%p", h)); }
+inline void print(hstream& hs, heptagon* h) { print(hs, "H", index_pointer(h)); }
+inline void print(hstream& hs, cell* h) { print(hs, "C", index_pointer(h)); }
 
 inline void print(hstream& hs, cellwalker cw) { 
   if(cw.at) print(hs, "[", cw.at, "/", cw.at->type, ":", cw.spin, ":", cw.mirrored, "]");
