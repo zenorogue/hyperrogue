@@ -1049,6 +1049,7 @@ void geometry_information::compute_cornerbonus() {
   corner_bonus = 0;
   for(hpcshape sh: shWall3D) for(int i=sh.s; i<sh.e; i++)
     corner_bonus = max(corner_bonus, hdist0(hpc[i]));
+  if(cgflags & qIDEAL) corner_bonus = 3;
   }
 #endif
 
