@@ -161,6 +161,9 @@ EX namespace reg3 {
       spins[1] = cspin(0, 1, angle_between_faces) * cspin(1, 2, M_PI);
       for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, 2*M_PI*(a-1)/face) * spins[1];      
       for(int a=S7/2; a<S7; a++) spins[a] = cspin(0, 1, M_PI) * spins[a-S7/2];
+      if(S7 == 8) swap(spins[6], spins[7]);
+      if(S7 == 12) swap(spins[8], spins[11]);
+      if(S7 == 12) swap(spins[9], spins[10]);
       }
     
     if(S7 == 6) {
