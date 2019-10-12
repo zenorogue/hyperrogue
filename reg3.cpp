@@ -43,7 +43,8 @@ EX namespace reg3 {
   
   EX transmatrix spins[12], adjmoves[12];
 
-  ld adjcheck, strafedist;
+  EX ld adjcheck;
+  EX ld strafedist;
   EX bool dirs_adjacent[16][16];
 
   template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
