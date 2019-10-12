@@ -701,7 +701,7 @@ EX bool crystal_cell(cell *c, transmatrix V) {
     queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
     }
 
-  if(view_coordinates && cheater) {
+  if(view_coordinates && cheater && WDIM == 2) {
     
     auto m = crystal_map();
     
@@ -1474,6 +1474,7 @@ EX string get_table_boundary() {
 
 EX void may_place_compass(cell *c) {
   if(c != c->master->c7) return;
+  if(WDIM == 3) return;
   auto m = crystal_map();
   auto co = m->hcoords[c->master];
   for(int i=0; i<m->cs.dim; i++) 
