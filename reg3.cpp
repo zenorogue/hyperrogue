@@ -216,12 +216,55 @@ EX namespace reg3 {
     }
   
   void test();
-    
-  struct hrmap_field3 : hrmap {
+
+  struct hrmap_quotient3 : hrmap {
     vector<heptagon*> allh;
-    vector<cell*> acells;
+    vector<vector<transmatrix>> tmatrices;    
+    };
+
+  int encode_coord(const crystal::coord& co) {
+    int c = 0;
+    for(int i=0; i<4; i++) c |= ((co[i]>>1) & 3) << (2*i);
+    return c;
+    }
+
+  EX crystal::coord decode_coord(int a) {
+    crystal::coord co;
+    for(int i=0; i<4; i++) co[i] = (a & 3) * 2, a >>= 2;
+    return co;
+    }
+  
+  struct hrmap_from_crystal : hrmap_quotient3 {
+  
+    hrmap_from_crystal() {
+      allh.resize(256);
+      tmatrices.resize(256);
+      for(int a=0; a<256; a++) {
+        allh[a] = tailored_alloc<heptagon> (S7);
+        allh[a]->c7 = newCell(S7, allh[a]);
+        allh[a]->fieldval = a;
+        allh[a]->zebraval = 0;
+        allh[a]->alt = NULL;
+        }
+      if(1) {
+        auto m = crystal::new_map();
+        dynamicval<hrmap*> cm(currentmap, m);
+        for(int a=0; a<256; a++) {
+          auto co = decode_coord(a);
+          heptagon *h1 = get_heptagon_at(co);
+          for(int d=0; d<8; d++) {
+            int b = encode_coord(crystal::get_coord(h1->cmove(d)));
+            allh[a]->c.connect(d, allh[b], h1->c.spin(d), false);
+            tmatrices[a].push_back(crystal::get_adj(h1, d));
+            }
+          }
+        delete m;
+        }
+      }        
+    };
     
-    vector<vector<transmatrix>> tmatrices;
+  struct hrmap_field3 : hrmap_quotient3 {
+    vector<cell*> acells;
     
     int mgmul(std::initializer_list<int> v) { 
       int a = 0;
@@ -558,7 +601,7 @@ EX namespace reg3 {
   
     heptagon *origin;
     hrmap *binary_map;
-    hrmap_field3 *quotient_map;
+    hrmap_quotient3 *quotient_map;
     
     unordered_map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     unordered_map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
@@ -592,6 +635,10 @@ EX namespace reg3 {
       quotient_map = nullptr;
       
       #if CAP_FIELD
+      if(geometry == gSpace344) {
+        quotient_map = new hrmap_from_crystal;
+        h.zebraval = quotient_map->allh[0]->zebraval;
+        }
       if(hyperbolic && !(cgflags & qIDEAL)) {
         quotient_map = new hrmap_field3;
         h.zebraval = quotient_map->allh[0]->zebraval;
