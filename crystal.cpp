@@ -474,6 +474,7 @@ struct hrmap_crystal : hrmap_standard {
       }
     auto co = hcoords[h];
     
+    #if MAXMDIM >= 4
     if(crystal3()) {
       auto st = get_canonical(co);
       auto co1 = co + st[d];
@@ -485,6 +486,7 @@ struct hrmap_crystal : hrmap_standard {
 
       return h1;
       }
+    #endif
     
     if(is_bi(cs, co)) {
       heptspin hs(h, d);
@@ -602,7 +604,9 @@ EX heptagon *get_heptagon_at(coord c) { return crystal_map()->get_heptagon_at(c,
 EX coord get_coord(heptagon *h) { return crystal_map()->hcoords[h]; }
 EX ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
 
+#if MAXMDIM >= 4
 EX transmatrix get_adj(heptagon *h, int d) { return crystal_map()->adj(h, d); }
+#endif
 
 bool is_bi(crystal_structure& cs, coord co) {
   for(int i=0; i<cs.dim; i++) if(co[i] & HALFSTEP) return true;

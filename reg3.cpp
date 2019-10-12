@@ -950,7 +950,6 @@ EX bool pseudohept(cell *c) {
     }    
   return false;
   }
-#endif
 
 EX void generate_cellrotations() {
   auto &cr = cgi.cellrotations;
@@ -978,6 +977,7 @@ EX void generate_cellrotations() {
     }
 
   }
+#endif
 
 #if 0
 /* More precise, but very slow distance. Not used/optimized for now */
