@@ -397,7 +397,7 @@ EX int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
-  else if(binarytiling || archimedean || nil || S3 >= OINF) return 0;
+  else if(binarytiling || archimedean || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
   else if(&currfp == &fp_invalid) return 0;
   else if(WDIM == 3) return c->master->fieldval;
   else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
