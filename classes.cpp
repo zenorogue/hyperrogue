@@ -593,6 +593,7 @@ vector<geometryinfo> ginf = {
   {"{3,oo}", "none",    "{3,∞} (infinite triangles)",                 "oox3",     3, 100, qIDEAL,  giHyperb2, 0x49400, {{7, 7}}, eVariation::pure},
   {"{3,3,6}","none",    "{3,3,6} hyperbolic honeycomb",               "336",      4, 6, qIDEAL | qEXPERIMENTAL,    giHyperb3, 0x49600, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","none",    "{3,4,4} hyperbolic honeycomb",               "344",      8, 4, qIDEAL | qEXPERIMENTAL,    giHyperb3, 0x50000, {{7, 2}}, eVariation::pure},
+  {"{3,4,4}","Crystal", "4D crystal in H3",                           "Cryst3" ,  8, 4, qIDEAL | qANYQ | qCRYSTAL, giHyperb3, 0x52000, {{7, 3}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

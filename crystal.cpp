@@ -13,7 +13,11 @@ EX namespace crystal {
 
 #if HDR
 static const int MAXDIM = 7;
-typedef array<int, MAXDIM> coord;
+
+struct coord : public array<int, MAXDIM> {
+  coord operator + (coord b) { for(int i=0; i<MAXDIM; i++) b[i] += self[i]; return b; }  
+  };
+
 static const coord c0 = {};
 
 typedef array<ld, MAXDIM> ldcoord;
@@ -356,6 +360,25 @@ int fiftyrule(coord c) {
 
 bool is_bi(crystal_structure& cs, coord co);
 
+#if MAXMDIM >= 4
+using shifttable = array<coord, 8>;
+
+shifttable get_canonical(coord co) {
+  shifttable res;
+  for(int i=0; i<4; i++) {
+    res[i] = c0;
+    res[i][i] = 2;
+    res[i+4] = c0;
+    res[i+4][i] = -2;
+    }
+  for(int a=0; a<4; a++) if(co[a] & 2) swap(res[a], res[a+4]);
+  int bts = 0;
+  for(int a=0; a<4; a++) if(co[a] & 2) bts++;
+  if(bts & 1) swap(res[2], res[3]), swap(res[6], res[7]);
+  return res;
+  }
+#endif
+
 struct hrmap_crystal : hrmap_standard {
   heptagon *getOrigin() { return get_heptagon_at(c0, S7); }
 
@@ -380,8 +403,12 @@ struct hrmap_crystal : hrmap_standard {
     return a;
     }
   
+  bool crystal3() { return WDIM == 3; }
+  
   hrmap_crystal() {
-    cs.build();
+    if(crystal3()) cs.dim = 4;
+    else cs.build();
+    
     camelot_center = NULL;
     }
 
@@ -447,6 +474,18 @@ struct hrmap_crystal : hrmap_standard {
       }
     auto co = hcoords[h];
     
+    if(crystal3()) {
+      auto st = get_canonical(co);
+      auto co1 = co + st[d];
+      auto h1 = get_heptagon_at(co1, S7);
+      auto st1 = get_canonical(co1);
+    
+      for(int d1=0; d1<8; d1++) if(st1[d1] == st[d])
+        h->c.connect(d, h1, d1 ^ 4, false);
+
+      return h1;
+      }
+    
     if(is_bi(cs, co)) {
       heptspin hs(h, d);
       (hs + 1 + wstep + 1).cpeek();
@@ -477,6 +516,82 @@ struct hrmap_crystal : hrmap_standard {
     return h->move(d);
     }
 
+  #if MAXMDIM >= 4
+  map<int, transmatrix> adjs;
+  
+  transmatrix adj(heptagon *h, int d) {
+    auto co = hcoords[h];
+    int id = 0;
+    for(int a=0; a<4; a++) id = (2*id) + ((co[a]>>1) & 1);
+    id = 8*id + d;
+    if(adjs.count(id)) return adjs[id];
+    transmatrix T = reg3::adjmoves[d];
+    reg3::generate_cellrotations();
+    auto st = get_canonical(co);
+    auto co1 = co + st[d];
+    auto st1 = get_canonical(co1);
+    int qty = 0;
+    transmatrix res;
+    for(auto& cr: cgi.cellrotations) {
+      transmatrix U = T * cr.first;
+      for(int s=0; s<8; s++) 
+        if(reg3::dirs_adjacent[d][s])
+          for(int t=0; t<8; t++) 
+            if(st1[t] == st[s]) {
+              if(hdist(U * tC0(reg3::adjmoves[t]), tC0(reg3::adjmoves[s])) > reg3::strafedist + .1)
+                goto wrong;
+              }
+      res = U;
+      qty++;
+      wrong: ;
+      }
+    adjs[id] = res;
+    if(qty == 1) return res;
+    println(hlog, "qty = ", qty);
+    exit(1);
+    }
+
+  void draw() override {
+    if(!crystal3()) { hrmap_standard::draw(); return; }
+    sphereflip = Id;
+    
+    // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
+    
+    dq::visited_by_matrix.clear();
+    dq::enqueue_by_matrix(viewctr.at, cview());
+    
+    while(!dq::drawqueue.empty()) {
+      auto& p = dq::drawqueue.front();
+      heptagon *h = get<0>(p);
+      transmatrix V = get<1>(p);
+      dynamicval<ld> b(band_shift, get<2>(p));
+      bandfixer bf(V);
+      dq::drawqueue.pop();
+            
+      cell *c = h->c7;
+      if(!do_draw(c, V)) continue;
+      drawcell(c, V, 0, false);
+      
+      if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+  
+      for(int d=0; d<S7; d++) {
+        dq::enqueue_by_matrix(h->move(d), V * adj(h, d));
+        }
+      }
+    }
+
+  virtual transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override { 
+    if(!crystal3()) return hrmap_standard::relative_matrix(h2, h1, hint);
+    if(gmatrix0.count(h2) && gmatrix0.count(h1))
+      return inverse(gmatrix0[h1]) * gmatrix0[h2];
+    return xpush(999);
+    }
+
+  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
+    if(!crystal3()) return hrmap::relative_matrix(h2, h1);
+    return relative_matrix(h2->c7, h1->c7, C0);
+    }
+  #endif
   };
 
 hrmap_crystal *crystal_map() {
@@ -486,6 +601,8 @@ hrmap_crystal *crystal_map() {
 EX heptagon *get_heptagon_at(coord c) { return crystal_map()->get_heptagon_at(c, S7); }
 EX coord get_coord(heptagon *h) { return crystal_map()->hcoords[h]; }
 EX ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
+
+EX transmatrix get_adj(heptagon *h, int d) { return crystal_map()->adj(h, d); }
 
 bool is_bi(crystal_structure& cs, coord co) {
   for(int i=0; i<cs.dim; i++) if(co[i] & HALFSTEP) return true;
@@ -1149,17 +1266,18 @@ EX void show() {
   dialog::addBreak(50);
   dialog::addBoolItem_action(XLAT("view coordinates in the cheat mode"), view_coordinates, 'v');
   dialog::addSelItem(XLAT("compass probability"), fts(compass_probability), 'p');
+  if(geometry == gCrystal344) dialog::lastItem().value += " (N/A)";
   dialog::add_action([]() { 
     dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); 
     dialog::bound_low(0);
     });
-  if(cryst) {
+  if(cryst && WDIM == 2) {
     dialog::addBoolItem(XLAT("3D display"), rug::rugged, 'r');
     dialog::add_action_push(rug::show);
     }
   else
     dialog::addBreak(100);
-  if(rug::rugged && cryst && ginf[gCrystal].sides == 8) {
+  if(rug::rugged && cryst && ginf[gCrystal].sides == 8 && WDIM == 2) {
     dialog::addBoolItem(XLAT("render a cut"), draw_cut, 'x');
     dialog::add_action([]() { 
       draw_cut = true;
@@ -1461,7 +1579,7 @@ void transform_euclid_to_crystal () {
 
 EX void add_crystal_transform(char c) {
   if(shmup::on) return;
-  if(cryst && ginf[gCrystal].sides == 6) {
+  if(cryst && ginf[gCrystal].sides == 6 && geometry != gCrystal344) {
     dialog::addItem("convert Crystal to 3D", c);
     dialog::add_action(transform_crystal_to_euclid);
     }

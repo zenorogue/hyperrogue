@@ -892,6 +892,8 @@ EX bool pseudohept(cell *c) {
     return c->master->distance & 1;
   if(geometry == gField534) 
     return hr::celldistance(c, currentmap->gamestart()) & 1;
+  if(geometry == gCrystal344)
+    return false;
   if(hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);
