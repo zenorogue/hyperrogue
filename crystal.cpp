@@ -361,7 +361,7 @@ int fiftyrule(coord c) {
 bool is_bi(crystal_structure& cs, coord co);
 
 #if MAXMDIM >= 4
-using shifttable = array<coord, 8>;
+typedef array<coord, 8> shifttable;
 
 shifttable get_canonical(coord co) {
   shifttable res;
@@ -380,7 +380,7 @@ shifttable get_canonical(coord co) {
 #endif
 
 struct hrmap_crystal : hrmap_standard {
-  heptagon *getOrigin() { return get_heptagon_at(c0, S7); }
+  heptagon *getOrigin() override { return get_heptagon_at(c0, S7); }
 
   map<heptagon*, coord> hcoords;
   map<coord, heptagon*> heptagon_at;
@@ -463,11 +463,11 @@ struct hrmap_crystal : hrmap_standard {
 
   void build_east(int cid);
   
-  void verify() { }
+  void verify() override { }
   
   void prepare_east();
 
-  heptagon *create_step(heptagon *h, int d) {
+  heptagon *create_step(heptagon *h, int d) override {
     if(!hcoords.count(h)) {
       printf("not found\n");
       return NULL;
