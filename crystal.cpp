@@ -617,7 +617,7 @@ array<array<int,2>, MAX_EDGE> distlimit_table = {{
 EX color_t colorize(cell *c, char whichCanvas) {
   auto m = crystal_map();
   ldcoord co = ldc0;
-  int dim;
+  int dim = 3;
   if(cryst) co = m->get_coord(c), dim = m->cs.dim;
   #if MAXMDIM >= 4
   else if(geometry == gSpace344) {
