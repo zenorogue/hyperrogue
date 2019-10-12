@@ -571,6 +571,12 @@ EX void initConfig() {
   addsaver(sightranges[gField534], "sight-field534", 3.8 + bonus);
   addsaver(sightranges[gSol], "sight-sol");
   addsaver(sightranges[gNil], "sight-nil", 6.5 + bonus);
+  addsaver(sightranges[gNIH], "sight-nih");
+  addsaver(sightranges[gSolN], "sight-solnih");
+
+  addsaver(sightranges[gCrystal344], "sight-crystal344", 5);
+  addsaver(sightranges[gSpace344], "sight-344", 4.5);
+  addsaver(sightranges[gSpace336], "sight-336", 4);
 
   addsaver(vid.sloppy_3d, "sloppy3d", true);
 
