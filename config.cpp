@@ -507,7 +507,7 @@ EX void initConfig() {
   addsaver(vid.smart_range_detail, "smart-range-detail", 8);
   addsaver(vid.smart_range_detail_3, "smart-range-detail", 30);
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
-  addsaver(vid.cells_generated_limit, "limit on cells generated", 25);
+  addsaver(vid.cells_generated_limit, "limit on cells generated", 250);
   
   #if CAP_SOLV
   addsaver(solnihv::solrange_xy, "solrange-xy");
