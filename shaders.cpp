@@ -412,13 +412,19 @@ GLprogram *programs[gmMAX][int(shader_projection::MAX)];
 
 string stringbuilder() { return ""; }
 
-template<class... T> string stringbuilder(bool i, const string& s, T... t) { 
-  if(i) return s + 
-    #if DEBUG_GL
-    "\n" + 
-    #endif
-    stringbuilder(t...);
-  else return stringbuilder(t...); 
+bool use_next = false;
+
+int stringbuilder_helper(string& output, bool i) { use_next = i; return 0; }
+int stringbuilder_helper(string& output, const char *s) { if(use_next) output += s; return 0; }
+int stringbuilder_helper(string& output, const string& s) { if(use_next) output += s; return 0; }
+
+template<class... T> string stringbuilder(T... t) { 
+  use_next = true;
+  string output;
+  std::initializer_list<int> dummy = {stringbuilder_helper(output, t)...};
+  ignore(dummy);
+  println(hlog, "output = '", output, "'");
+  return output;
   }
 
 glmatrix current_matrix, current_modelview, current_projection;
