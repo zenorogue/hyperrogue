@@ -3548,3 +3548,9 @@ Solv geometry:
 - fixed spherical racing not enabling correctly
 - 'patterns' in 3D geometries now actually work, by creating walls
 - random landscapes now work (by projection) in hybrid geometries
+
+2019-10-12 14:02 Version 11.2e:
+- tessellations with ideal vertices: {3,infinity} {3,3,6}, {3,4,4}
+- four-dimensional crystal using {3,4,4}
+- some patterns for the four-dimensional crystal
+- increased the default per-frame cell generation limit to 250
