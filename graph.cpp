@@ -8145,6 +8145,7 @@ EX bool inscreenrange(cell *c) {
   if(sphere) return true;
   if(euclid) return celldistance(viewcenter(), c) <= get_sightrange_ambush();
   if(nonisotropic) return gmatrix.count(c);
+  if(geometry == gCrystal344) return gmatrix.count(c);
   return heptdistance(viewcenter(), c) <= 8;
   }
 
