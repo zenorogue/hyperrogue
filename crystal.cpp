@@ -614,13 +614,74 @@ array<array<int,2>, MAX_EDGE> distlimit_table = {{
   {{6, 4}}, {{5, 3}}, {{4, 3}}, {{4, 3}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}
   }};
 
-EX color_t colorize(cell *c) {
+EX color_t colorize(cell *c, char whichCanvas) {
   auto m = crystal_map();
-  ldcoord co = m->get_coord(c);
-  color_t res;
-  res = 0;
-  for(int i=0; i<3; i++)
-    res |= ((int)(((i == 2 && S7 == 5) ? (128 + co[i] * 50) : (255&int(128 + co[i] * 25))))) << (8*i);
+  ldcoord co = ldc0;
+  int dim;
+  if(cryst) co = m->get_coord(c), dim = m->cs.dim;
+  #if MAXMDIM >= 4
+  else if(geometry == gSpace344) {
+    co = told(reg3::decode_coord(c->master->fieldval)), dim = 4;
+    for(int a=0; a<4; a++) if(co[a] > 4) co[a] -= 8;
+    }
+  else if(euclid && WDIM == 3) {
+    auto tab = euclid3::getcoord(euclid3::get_ispacemap()[c->master]);
+    for(int a=0; a<3; a++) co[a] = tab[a];
+    if(PURE) for(int a=0; a<3; a++) co[a] *= 2;
+    dim = 3;
+    }
+  #endif
+  else if(masterless && !quotient) {
+    dim = 2;
+    tie(co[0], co[1]) = vec_to_pair(decodeId(c->master));
+    if(PURE) {
+      co[0] *= 2;
+      co[1] *= 2;
+      }
+    }
+
+  color_t res = 0;
+  coord ico = roundcoord(co);
+
+  int ones = 0;
+  for(int i=0; i<4; i++) if((ico[i] & 2) == 2) ones++;
+
+  switch(whichCanvas) {
+    case 'K': 
+      for(int i=0; i<3; i++)
+        res |= ((int)(((i == 2 && S7 == 5) ? (128 + co[i] * 50) : (255&int(128 + co[i] * 25))))) << (8*i);
+      return res;
+
+    case '=':
+      if(ico[dim-1] == 2 && (ones & 1)) return 0x1C0FFC0;
+      if(ico[dim-1] == 2 && !(ones & 1)) return 0x180FF80;
+      if(ico[dim-1] == -2 && (ones & 1)) return 0x1C0C0FF;
+      if(ico[dim-1] == -2 && !(ones & 1)) return 0x18080FF;
+      return 0x101010;
+    
+    case '#': {
+      bool grid = false;
+      ico[dim-1] -= 2;
+      for(int d=dim; d<MAXDIM; d++) ico[d] = 0;
+      if(ico == c0) println(hlog, "ico = ", ico, " co = ", co);
+      for(int i=0; i<dim; i++) if((ico[i] & 6) == 4) grid = true;
+    
+      for(int i=0; i<3; i++) part(res, i) = 0xFF + 0x18 * (ico[i]/2-2);
+      if(grid) res |= 0x1000000;
+      else if(GDIM == 2) res = (res & 0xFEFEFE) >> 1;
+      if(ico == c0) res = 0x1FFD500;
+      return res;
+      }
+    
+    case 'O': {
+      for(int i=0; i<3; i++) part(res, i) = 0xFF + 0x18 * (ico[i]/2-2);
+      c->landparam = res;
+      if(ones == dim-1) res |= 0x1000000;      
+      else if(GDIM == 2) res = (res & 0xFEFEFE) >> 1;
+      return res;
+      }
+      
+    }
   return res;
   }
 

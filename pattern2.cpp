@@ -1540,8 +1540,8 @@ EX namespace patterns {
     if(i != -1) return i;
     switch(whichCanvas) {
       #if CAP_CRYSTAL
-      case 'K':
-        return crystal::colorize(c);
+      case 'K': case '#': case '=': case 'O':
+        return crystal::colorize(c, whichCanvas);
       #endif
       case 'A':
         #if CAP_ARCM
@@ -1697,6 +1697,12 @@ EX namespace patterns {
 
     if(cryst)
       dialog::addSelItem(XLAT("Crystal coordinates"), "Crystal", 'K');
+    
+    if(cryst || geometry == gSpace344) {
+      dialog::addSelItem(XLAT("Cage"), "Crystal", '#');
+      dialog::addSelItem(XLAT("Hyperplanes"), "Crystal", '=');
+      dialog::addSelItem(XLAT("Honeycomb"), "Crystal", 'O');
+      }
 
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
