@@ -345,7 +345,7 @@ void ge_land_selection() {
       });
     }
   dialog::addBreak(50);
-  if(chaosUnlocked && !quotient && !euclid && !sphere) {
+  if(chaosUnlocked && !quotient && !euclid && !sphere && !walls_not_implemented()) {
     dialog::addItem(XLAT("Chaos mode"), '1');
     dialog::add_action(dual::mayboth([] {
       if(chaosUnlocked) dialog::do_if_confirmed([] {

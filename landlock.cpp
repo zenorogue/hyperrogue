@@ -659,6 +659,7 @@ namespace lv {
   land_validity_t sloppy_pattern = {1, q1 | one_and_half, "Somewhat sloppy pattern."};
   land_validity_t no_fractal_landscapes = {1, q1 | one_and_half, "Fractal landscapes not implemented in this geometry."};
   land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
+  land_validity_t no_walls = { 0, q0, "No walls implemented."};  
   land_validity_t disabled = {0, q0, "This land has been disabled with compilation flags."};
   land_validity_t pattern_special = {3, qm3, "Special pattern implemented for this geometry."}; 
   land_validity_t not_3d = {0, q0, "This land does not make much sense in 3D."}; 
@@ -679,6 +680,9 @@ const int landscapes_when = 1000;
 EX land_validity_t& land_validity(eLand l) {
 
   using namespace lv;
+  
+  if(walls_not_implemented() && isCrossroads(l))
+    return no_walls;
   
   if(hybri || hybrid::pmap) {
     if(among(l, laPrincessQuest, laPrairie, laMirrorOld, laMirror, laDual, laWarpCoast, laKraken, laBrownian, laWhirlpool, laWestWall, laHive, laClearing, laWhirlwind, laBlizzard, laBull, laTerracotta, laCrossroads5,

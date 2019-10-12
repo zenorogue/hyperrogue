@@ -1197,7 +1197,9 @@ EX void set_geometry(eGeometry target) {
       }
     geometry = target;
   
-    if(chaosmode && bounded) chaosmode = false;
+    if(chaosmode && bounded) chaosmode = 0;
+    if(chaosmode == 1 && walls_not_implemented()) chaosmode = 0;
+
     if(euclid6) variation = eVariation::bitruncated;
     #if CAP_IRR
     if(IRREGULAR) variation = eVariation::bitruncated;

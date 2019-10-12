@@ -496,6 +496,7 @@ EX void show_chaos() {
   
   if(chaosUnlocked) for(int a=1; a<5; a++) {
     if(a > 1 && ISWEB) continue;
+    if(a == 1 && walls_not_implemented()) continue;
     dialog::addBoolItem(
       a == 1 ? XLATN("Crossroads IV") : 
       a == 2 ? XLATN("Palace") : 

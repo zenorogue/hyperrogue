@@ -1371,6 +1371,10 @@ EX bool good_for_wall(cell *c) {
   if(WDIM == 3) return true;
   return pseudohept(c);
   }
+
+EX bool walls_not_implemented() {
+  return WDIM == 3 && (cgflags & qIDEAL);
+  }
   
 EX void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient || nonisotropic || (penrose && !binarytiling) || experimental) return;
@@ -1382,6 +1386,8 @@ EX void buildBigStuff(cell *c, cell *from) {
   // buildgreatwalls
   
   if(hybri) ;  /* Great Walls generated via the underlying geometry */
+  
+  else if(walls_not_implemented()); // walls not implemented here
   
   else if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
     if(top_land && c == cwt.at->master->move(3)->c7) {
