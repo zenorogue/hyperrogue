@@ -289,6 +289,8 @@ hpcshape
   
   vector<array<int, 3>> symmetriesAt;
   
+  vector<pair<transmatrix, vector<int> > > cellrotations;  
+  
   #ifndef SCALETUNER
   static constexpr
   #endif

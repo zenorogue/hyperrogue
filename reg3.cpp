@@ -900,6 +900,33 @@ EX bool pseudohept(cell *c) {
   }
 #endif
 
+EX void generate_cellrotations() {
+  auto &cr = cgi.cellrotations;
+  if(isize(cr)) return;
+
+  for(int a=0; a<S7; a++)
+  for(int b=0; b<S7; b++)
+  for(int c=0; c<S7; c++) {
+    using reg3::adjmoves;
+    transmatrix T = build_matrix(adjmoves[a]*C0, adjmoves[b]*C0, adjmoves[c]*C0, C0);
+    if(abs(det(T)) < 0.001) continue;
+    transmatrix U = build_matrix(adjmoves[0]*C0, adjmoves[1]*C0, adjmoves[2]*C0, C0);
+    transmatrix S = U * inverse(T);
+    if(abs(det(S) - 1) > 0.01) continue;    
+    vector<int> perm(S7);
+    for(int x=0; x<S7; x++) perm[x] = -1;
+    for(int x=0; x<S7; x++)
+    for(int y=0; y<S7; y++)
+      if(hdist(S * adjmoves[x] * C0, adjmoves[y] * C0) < .1) perm[x] = y;
+    bool bad = false;
+    for(int x=0; x<S7; x++) if(perm[x] == -1) bad = true;
+    if(bad) continue;
+    
+    cr.emplace_back(S, perm);
+    }
+
+  }
+
 #if 0
 /* More precise, but very slow distance. Not used/optimized for now */
 
