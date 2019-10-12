@@ -2043,7 +2043,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
   if(hybrid::pmap) return hybrid::do_draw(c, T);
   if(WDIM == 3) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    if(cells_drawn < 50) return true;
+    if(cells_drawn < 50) { limited_generation(c); return true; }
     if(nil && pmodel == mdGeodesic) {
       ld dist = hypot_d(3, inverse_exp(tC0(T), iLazy));
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
