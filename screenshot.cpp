@@ -1064,6 +1064,9 @@ int readArgs() {
     shift_arg_formula(shift_angle);
     shift_arg_formula(movement_angle);
     }
+  else if(argis("-wallopt")) {
+    wallopt = true;
+    }
   else if(argis("-animpar")) {
     ma = maParabolic; 
     shift_arg_formula(parabolic_length);

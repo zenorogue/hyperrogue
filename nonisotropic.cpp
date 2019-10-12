@@ -387,6 +387,7 @@ EX namespace solnihv {
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
         drawcell(c, V, 0, false);
+        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   
         for(int i=0; i<S7; i++) {
           // note: need do cmove before c.spin
@@ -829,6 +830,7 @@ EX namespace nilv {
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
         drawcell(c, V, 0, false);
+        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
 
         if(0) for(int t=0; t<c->type; t++) {
           if(!c->move(t)) continue;
@@ -1507,6 +1509,7 @@ EX namespace rots {
         else {
           drawcell(c, V, 0, false);
           }
+        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
 
         for(int i=0; i<c->type; i++) {
           cell *c1 = c->cmove(i);

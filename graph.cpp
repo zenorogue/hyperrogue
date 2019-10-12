@@ -12,6 +12,9 @@ int last_firelimit, firelimit;
 
 EX int inmirrorcount = 0;
 
+/** wall optimization: do not draw things beyond walls */
+EX bool wallopt;
+
 EX bool spatial_graphics;
 EX bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 EX bool mmspatial, mmhigh, mmmon, mmitem;
@@ -4428,6 +4431,8 @@ EX bool isWall3(cell *c, color_t& wcol) {
   if(among(c->wall, waMirror, waCloud, waMineUnknown, waMineMine)) return true;
   return false;
   }
+
+EX bool isWall3(cell *c) { color_t dummy; return isWall3(c, dummy); }
 
 bool isSulphuric(eWall w) { return among(w, waSulphur, waSulphurC); }
 
