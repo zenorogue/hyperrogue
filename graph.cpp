@@ -7291,6 +7291,7 @@ EX void make_actual_view() {
     radar_transform = T * U;
     }
   #endif
+  Viewbase = View;
   }
 
 EX transmatrix cview() {
@@ -7349,6 +7350,8 @@ EX void precise_mouseover() {
   // probably some error... just return the original
   mouseover = omouseover;
   }
+
+EX transmatrix Viewbase;
 
 EX void drawthemap() {
   check_cgi();

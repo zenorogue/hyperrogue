@@ -1459,6 +1459,20 @@ EX void optimizeview() {
   ld best = INF;
   
   transmatrix TB = Id;
+
+  if(WDIM == 3 && (cgflags & qIDEAL)) {
+    if(gmatrix.count(centerover.at)) {
+      ld last = hdist0(tC0(Viewbase));
+      transmatrix V = gmatrix[centerover.at];
+      ld next = hdist0(tC0(V));
+      if(next < last) {
+        View = View * inverse(Viewbase) * V;
+        fixmatrix(View);
+        viewctr.at = centerover.at->master;
+        viewctr.spin = 0;
+        }
+      }
+    }
   
   if(false) ;
 
