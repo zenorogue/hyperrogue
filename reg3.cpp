@@ -132,7 +132,7 @@ EX namespace reg3 {
     ld vertex_distance;
     
     if(cgflags & qIDEAL) {
-      vertex_distance = 10;
+      vertex_distance = 13;
       }
     
     else {    
