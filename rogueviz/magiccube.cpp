@@ -3,13 +3,6 @@ namespace hr {
 #if CAP_CRYSTAL
 void performMarkCommand(cell *c);
 
-namespace crystal {
-  typedef array<int, MAXDIM> coord;
-  heptagon *get_heptagon_at(coord c);
-  coord get_coord(heptagon *h);
-  void set_crystal(int sides);
-  }  
-
 void curvepoint(const hyperpoint& H1);
 dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
 
