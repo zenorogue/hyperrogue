@@ -816,6 +816,18 @@ EX void describeMouseover() {
         out += " ("+its(short(x))+","+its(short(y))+")";
         }
       }
+    
+    #if CAP_CRYSTAL
+    if(geometry == gCrystal344 && cheater && crystal::view_coordinates) {
+      out += " (";
+      auto co = crystal::get_coord(c->master);
+      for(int i=0; i<4; i++) {
+        if(i) out += ",";
+        out += its(co[i]);
+        }
+      out += ")";
+      }
+    #endif
       
     if(c->wall && !(c->wall == waChasm && c->land == laDual && ctof(c)) &&
       !(c->land == laMemory) &&
