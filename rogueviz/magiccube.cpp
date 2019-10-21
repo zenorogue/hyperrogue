@@ -16,17 +16,15 @@ int back = 0x202020;
 
 int magiccolors[14] = { 0xFFFFFF, 0xFFFF00, 0x0000FF, 0x00FF00, 0xFF0000, 0xFF8000, 0x800080, 0x808080, 0x00FFFF, 0x80FFFF, 0x4040C0, 0x40C040, 0xC04040, 0xC0A040 };
 
-int dim() { return ginf[gCrystal].sides / 2; }
-
 void build(crystal::coord co, int at) {
-  if(at < dim()) {
+  if(at < crystal::get_dim()) {
     for(int z: {0,2,-2,4,-4}) co[at] = z, build(co, at+1);
     return;
     }
   for(int i=0; i<S7; i++) crystal::get_heptagon_at(co)->cmove(i);
 
   int twos = 0, index = 0;
-  for(int a=0; a<dim(); a++)
+  for(int a=0; a<crystal::get_dim(); a++)
     if(co[a] == 4) twos++, index = 2*a;
     else if(co[a] == -4) twos++, index = 2*a+1;
   
@@ -43,7 +41,10 @@ void build(crystal::coord co, int at) {
 
 void magic(int sides) {
   stop_game();
-  crystal::set_crystal(sides);
+  if(sides < 0)
+    set_geometry(gCrystal344);
+  else
+    crystal::set_crystal(sides);
   set_variation(eVariation::pure);
   firstland = specialland = laCanvas;
   patterns::whichCanvas = 'g';
@@ -68,6 +69,7 @@ bool magic_markers(cell *c, const transmatrix& V) {
   if(!on) return false;
   timerghost = false;
   if(c->landparam == back) {
+    if(GDIM == 2)
     for(int i=0; i<S7; i++) {
       cell *c2 = c->move(i);
       if(c2->landparam != back) {
@@ -83,24 +85,30 @@ bool magic_markers(cell *c, const transmatrix& V) {
         }
       }
     }
-  else c->wall = waInvisibleFloor;
+  else {
+    c->wall = GDIM == 2 ? waInvisibleFloor : waWaxWall;
+    }
   return false;
   }
 
 int readArgs() {
   using namespace arg;
-           
+  
   if(0) ;
   else if(argis("-magic")) {
     PHASEFROM(2);
     shift(); magic(argi());
+    }
+  else if(argis("-magic3")) {
+    PHASEFROM(2);
+    magic(-1);
     }
   else return 1;
   return 0;
   }
 
 void twos_to_fours(vector<int>& zeros, crystal::coord co, int d) {
-  if(d == dim()) {
+  if(d == crystal::get_dim()) {
     int facetable[5][5];
     for(int x=0; x<5; x++)
     for(int y=0; y<5; y++) {
@@ -130,7 +138,7 @@ bool magic_rotate(cell *c) {
   vector<int> zeros;
   auto co = crystal::get_coord(c->master);
   println(hlog, "co = ", co);
-  for(int i=0; i<dim(); i++) {
+  for(int i=0; i<crystal::get_dim(); i++) {
     if(co[i] == 0) zeros.push_back(i);
     else if(co[i] == 2 || co[i] == -2) ;
     else return false;
