@@ -1328,18 +1328,12 @@ EX namespace slr {
     }
 
   EX string slshader = 
-    "float atan2(float y, float x) {"
-    "  if(x == 0.) return y > 0. ? PI/2. : -PI/2.;"
-    "  if(x > 0.) return atan(y / x);"
-    "  if(y >= 0.) return atan(y / x) + PI;"
-    "  if(y < 0.) return atan(y / x) - PI;"
-    "  }"
 
     "uniform mediump float uIndexSL;"
     "uniform mediump int uIterations;"
     
     "vec4 inverse_exp(vec4 h) {"
-      "if(h[0]*h[0] + h[1] * h[1] < 1e-6) return vec4(0, 0, atan(h[2], h[3]) + uIndexSL, 1);"
+      "if(h[0]*h[0] + h[1] * h[1] < 1e-6) return vec4(0, 0, atan2(h[2], h[3]) + uIndexSL, 1);"
       "float r = asinh(sqrt(h[0] * h[0] + h[1] * h[1]));"
       "float phi = atan2(h[2], h[3]) + uIndexSL;"
       "float theta = atan2(h[1], h[0]) + phi + uIndexSL;"
