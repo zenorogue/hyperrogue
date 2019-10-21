@@ -36,7 +36,8 @@ EX namespace reg3 {
     return bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
     }
   
-  int loop, face;
+  EX int loop;
+  EX int face;
 
   EX vector<hyperpoint> cellshape;
   vector<hyperpoint> vertices_only;

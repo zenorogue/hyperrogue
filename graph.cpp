@@ -3412,7 +3412,7 @@ color_t magma_color(int id) {
   else return winf[waMagma].color;
   }
 
-void setcolors(cell *c, color_t& wcol, color_t& fcol) {
+EX void setcolors(cell *c, color_t& wcol, color_t& fcol) {
 
   wcol = fcol = winf[c->wall].color;
 
