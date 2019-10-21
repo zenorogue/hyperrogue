@@ -331,9 +331,6 @@ GLprogram::GLprogram(string vsh, string fsh) {
     exit(1);
     }
   
-  // glBindAttribLocation(_program, GLKVertexAttribPosition, "position"); ??
-  // glBindAttribLocation(_program, GLKVertexAttribNormal, "normal"); ??
-
   uMV = glGetUniformLocation(_program, "uMV");
   uProjection = glGetUniformLocation(_program, "uP");
   uPP = glGetUniformLocation(_program, "uPP");
