@@ -173,14 +173,16 @@ bool trailer_handleKey(int sym, int uni) {
       return true;
       }
   
-    if(sym == 'b') {
+    if(sym == 'b' && isize(saved) > 1) {
       saved.pop_back();
+      println(hlog, "back to ", isize(saved), " frames");
       tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = saved.back();
       return true;
       }
   
     if(sym == 'u' && isize(saved) > 40) {
       for(int i=0; i<30; i++) saved.pop_back();
+      println(hlog, "back to ", isize(saved), " frames");
       tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = saved.back();
       return true;
       }
@@ -189,13 +191,16 @@ bool trailer_handleKey(int sym, int uni) {
       recording = true;
       if(mouseaim_sensitivity) {
         mouseaim_sensitivity = 0;
+        println(hlog, "disabled mouseaim");
         return true;
         }
       if(musicvolume) {
+        println(hlog, "disabled music");
         musicvolume = 0;
         Mix_VolumeMusic(0);
         return true;
         }
+      println(hlog, "starting recording");
       saving_positions = false;
 //      vid.cells_drawn_limit = 1000000;      
       int i = 0;
