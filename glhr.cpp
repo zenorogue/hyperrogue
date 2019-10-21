@@ -237,8 +237,6 @@ struct GLprogram : std::enable_shared_from_this<GLprogram> {
   GLint uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uPP;
   GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations;
   
-  bool uses_mvp;
-  
   flagtype shader_flags;
   
   string _vsh, _fsh;
