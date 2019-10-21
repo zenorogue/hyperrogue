@@ -1,3 +1,5 @@
+#include "../hyper.h"
+
 namespace hr {
 
 #if CAP_CRYSTAL
