@@ -119,9 +119,7 @@ bool trailer_handleKey(int sym, int uni) {
     println(hlog, "keys_on = ", keys_on);
     return true;
     }
-  
-  // println(hlog, "cells_drawn = ", cells_drawn, " cells_generated = ", cells_generated);
-  
+
   if(keys_on) {
 
     if(sym == 't') {
