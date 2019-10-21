@@ -922,7 +922,7 @@ EX void drawmessages() {
 EX color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   int vv = int(256 * ((v-v0) / (v1-v0)));
   color_t c = 0;
-  for(int a=0; a<3; a++) {
+  for(int a=0; a<4; a++) {
     int p0 = part(c0, a);
     int p1 = part(c1, a);
     part(c, a) = (p0*(256-vv) + p1*vv + 127) >> 8;
