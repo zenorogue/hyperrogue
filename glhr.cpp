@@ -229,8 +229,6 @@ EX void projection_multiply(const glmatrix& m) {
 
 EX void init();
 
-// https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/attributes.php
-
 #if HDR
 struct GLprogram : std::enable_shared_from_this<GLprogram> {
   GLuint _program;

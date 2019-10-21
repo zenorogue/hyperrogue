@@ -28,6 +28,7 @@ constexpr flagtype SF_ZFOG         = 65536;
 
 #if HDR
 /* standard attribute bindings */
+/* taken from: https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/attributes.php */
 constexpr int aPosition = 0;
 constexpr int aColor = 3;
 constexpr int aTexture = 8;
