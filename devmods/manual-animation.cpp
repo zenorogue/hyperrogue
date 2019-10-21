@@ -186,6 +186,39 @@ bool trailer_handleKey(int sym, int uni) {
       tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = saved.back();
       return true;
       }
+    
+    if(sym == '[') {
+      fhstream f("devmods/manan-record.mar", "w");
+      f.write<int>(isize(saved));
+      for(int i=0; i<isize(saved); i++) {
+        auto& [a, b, c, d] = saved[i];
+        hwrite_raw(f, a);
+        hwrite_raw(f, b);
+        hwrite_raw(f, c);
+        auto at = crystal::get_coord(d.at);
+        hwrite_raw(f, at);
+        }
+      println(hlog, "saved animation of ", isize(saved), " frames");
+      }
+  
+    if(sym == ']') {
+      fhstream f("devmods/manan-record.mar", "r");
+      int siz;
+      f.read<int>(siz);
+      saved.resize(siz);
+      for(int i=0; i<isize(saved); i++) {
+        auto& [a, b, c, d] = saved[i];
+        hread_raw(f, a);
+        hread_raw(f, b);
+        hread_raw(f, c);
+        crystal::coord co;
+        hread_raw(f, co);
+        d.at = crystal::get_heptagon_at(co);
+        d.spin = 0;
+        d.mirrored = false;
+        }
+      println(hlog, "loaded animation of ", isize(saved), " frames");
+      }
   
     if(sym == 'r') {
       recording = true;
