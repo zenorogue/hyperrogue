@@ -605,7 +605,7 @@ EX heptagon *get_heptagon_at(coord c) { return crystal_map()->get_heptagon_at(c,
 EX coord get_coord(heptagon *h) { return crystal_map()->hcoords[h]; }
 EX ldcoord get_ldcoord(cell *c) { return crystal_map()->get_coord(c); }
 
-EX int get_dim() { retrun crystal_map()->cs.dim; }
+EX int get_dim() { return crystal_map()->cs.dim; }
 
 #if MAXMDIM >= 4
 EX transmatrix get_adj(heptagon *h, int d) { return crystal_map()->adj(h, d); }
