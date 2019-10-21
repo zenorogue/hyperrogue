@@ -25,6 +25,7 @@
 #include "classes.cpp"
 #include "glhr.cpp"
 #include "shaders.cpp"
+#include "raycaster.cpp"
 #include "hprint.cpp"
 #include "util.cpp"
 #include "hyperpoint.cpp"
