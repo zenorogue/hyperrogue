@@ -564,8 +564,6 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
   
   if(!footphase) rightfoot = leftfoot = 0;
 
-  transmatrix VAML = mmscale(V, cgi.ALEG);
-  
   hpcshape* sh[6][4] = {
     {&cgi.shDogFrontPaw, &cgi.shDogRearPaw, &cgi.shDogFrontLeg, &cgi.shDogRearLeg},
     {&cgi.shWolfFrontPaw, &cgi.shWolfRearPaw, &cgi.shWolfFrontLeg, &cgi.shWolfRearLeg},
@@ -584,17 +582,11 @@ void animallegs(const transmatrix& V, eMonster mo, color_t col, double footphase
     if(x[1]) queuepolyat(V * rear_leg_move * cspin(0, 2, -rightfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
     if(x[1]) queuepolyat(V * Mirror * rear_leg_move * cspin(0, 2, -leftfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
     return;
-
-/*
-    if(WDIM == 2) V1 = V1 * zpush(cgi.GROIN);
-    Tright = V1 * cspin(0, 2, rightfoot/SCALE * 3);
-    Tleft  = V1 * Mirror * cspin(2, 0, rightfoot/SCALE * 3);
-    if(WDIM == 2) Tleft = Tleft * zpush(-cgi.GROIN), Tright = Tright * zpush(-cgi.GROIN);
-*/
     }
 #endif
 
   const transmatrix VL = mmscale(V, cgi.ALEG0);
+  const transmatrix VAML = mmscale(V, cgi.ALEG);
 
   if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
   if(x[0]) queuepolyat(VL * Mirror * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
