@@ -1167,4 +1167,18 @@ EX hyperpoint lp_apply(const hyperpoint h) {
 
 EX hyperpoint smalltangent() { return xtangent(.1); }
 
+EX void cyclefix(ld& a, ld b) {
+  while(a > b + M_PI) a -= 2 * M_PI;
+  while(a < b - M_PI) a += 2 * M_PI;
+  }
+
+EX ld raddif(ld a, ld b) {
+  ld d = a-b;
+  if(d < 0) d = -d;
+  if(d > 2*M_PI) d -= 2*M_PI;
+  if(d > M_PI) d = 2 * M_PI-d;
+  return d;
+  }
+
+
 }
