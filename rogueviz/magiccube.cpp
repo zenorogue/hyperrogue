@@ -48,7 +48,7 @@ void magic(int sides) {
   set_variation(eVariation::pure);
   firstland = specialland = laCanvas;
   patterns::whichCanvas = 'g';
-  patterns::canvasback = 0;
+  patterns::canvasback = back;
   check_cgi();
   start_game();
   
