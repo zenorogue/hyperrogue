@@ -29,9 +29,13 @@ bool trailer_turn(int delta) {
 
 bool recording;
 
+bool keys_on = false;
+
 void trailer_frame() {
   // if(saving_positions || !isize(saved)) 
-  if(!recording) queuechr(current_display->xcenter, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
+  if(!recording && keys_on) queuechr(current_display->xcenter, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
+  if(!recording && keys_on) queuechr(current_display->xcenter/2, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
+  if(!recording && keys_on) queuechr(current_display->xcenter*3/2, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
 
   if(saving_positions && ticks > next_pos_tick) {
     next_pos_tick += 66;
@@ -39,8 +43,6 @@ void trailer_frame() {
     println(hlog, "frames = ", isize(saved));
     }
   }
-
-bool keys_on = false;
 
 ld stepdist = 0.02;
 
