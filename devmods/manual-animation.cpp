@@ -249,16 +249,21 @@ bool trailer_handleKey(int sym, int uni) {
 //    sightranges[geometry] = 4;
       static int lasti = 0;
       
+      system("mkdir -p devmods/manual/");
+        
       for(auto& p: saved) {
         // sightranges[geometry] = 4 + i * 2. / isize(saved);
         tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = p;
         ticks = i * 1000 / 30;
-        if(i < lasti) continue;
+        // if(i % 10 != 0) {i++; continue; }
+
+        if(true) {
+          println(hlog, "recording frame ", i);
+          shot::take(format("devmods/manual/%05d.png", i));
+          }
+        else 
+          println(hlog, "skipping frame ", i);
         
-        system("mkdir -p devmods/manual/");
-        
-        shot::take(format("devmods/manual/%05d.png", i));
-        println(hlog, "frame ", i);
         i++;
         }
 
