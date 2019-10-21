@@ -276,7 +276,7 @@ void display_data::set_projection(int ed) {
     matched_programs[id] = selected;
     }
 
-  if(glhr::current_glprogram != selected) full_enable(&*selected);
+  if(glhr::current_glprogram != selected) full_enable(selected);
 
   shader_flags = selected->shader_flags;
   auto cd = current_display;

@@ -230,7 +230,7 @@ EX void projection_multiply(const glmatrix& m) {
 EX void init();
 
 #if HDR
-struct GLprogram : std::enable_shared_from_this<GLprogram> {
+struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
 
@@ -453,11 +453,11 @@ EX void colorClear(color_t color) {
   glClearColor(part(color, 3) / 255.0, part(color, 2) / 255.0, part(color, 1) / 255.0, part(color, 0) / 255.0);
 }
 
-EX void full_enable(GLprogram *p) {
+EX void full_enable(shared_ptr<GLprogram> p) {
   auto& cur = current_glprogram;
   flagtype oldflags = cur ? cur->shader_flags : 0;
-  if(p == &*cur) return;
-  cur = p->shared_from_this();
+  if(p == cur) return;
+  cur = p;
   GLERR("pre_switch_mode");
   WITHSHADER({
     glUseProgram(cur->_program);
