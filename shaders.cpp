@@ -1,1071 +1,479 @@
-// Hyperbolic Rogue -- low-level OpenGL routines
+// Hyperbolic Rogue -- shaders
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
 /** \file shaders.cpp
- *  \brief low-level OpenGL routines
- *
- *  If CAP_SHADER is 0, OpenGL 1.0 is used.
- *  If CAP_SHADER is 1, we are using GLSL shaders.
+ *  \brief shaders
  */
 
 #include "hyper.h"
 namespace hr {
 
-#ifndef DEBUG_GL
-#define DEBUG_GL 0
-#endif
-
-// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
-
-EX void glError(const char* GLcall, const char* file, const int line) {
-  GLenum errCode = glGetError();
-  if(errCode!=GL_NO_ERROR) {
-    fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
-    }
-  }
-
-#ifndef CAP_VERTEXBUFFER
-#define CAP_VERTEXBUFFER (ISWEB)
-#endif
-
-#if CAP_SHADER && CAP_NOSHADER
-#define WITHSHADER(x, y) if(glhr::noshaders) y else x
-#else
-#if CAP_NOSHADER
-#define WITHSHADER(x, y) if(1) y
-#else
-#define WITHSHADER(x, y) if(1) x
-#endif
-#endif
-
-EX namespace glhr {
-
 #if HDR
-struct glmatrix {
-  GLfloat a[4][4];
-  GLfloat* operator[] (int i) { return a[i]; }
-  const GLfloat* operator[] (int i) const { return a[i]; }
-  GLfloat* as_array() { return a[0]; }
-  const GLfloat* as_array() const { return a[0]; }
-  };
+constexpr flagtype GF_TEXTURE  = 1;
+constexpr flagtype GF_VARCOLOR = 2;
+constexpr flagtype GF_LIGHTFOG = 4;
 
-glvertex pointtogl(const hyperpoint& t);
+constexpr flagtype GF_which    = 15;
 
-enum class shader_projection { standard, band, halfplane, standardH3, standardR3, 
-  standardS30, standardS31, standardS32, standardS33, 
-  ball, halfplane3, band3, flatten, standardSolv, standardNil, 
-  standardEH2, standardSL2, standardNIH, standardSolvNIH,
-  MAX 
-  };
-
-  inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
-    #if SHDIM == 3
-    return make_array(x, y, z);
-    #else
-    return make_array<GLfloat>(x, y, z, 1);
-    #endif
-    }
-  
-  struct colored_vertex {
-    glvertex coords;
-    glvec4 color;
-    colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
-      coords[0] = x;
-      coords[1] = y;
-      coords[2] = current_display->scrdist;
-      coords[3] = 1;
-      color[0] = r;
-      color[1] = g;
-      color[2] = b;
-      color[3] = 1;
-      }
-    colored_vertex(hyperpoint h, color_t col) {
-      coords = pointtogl(h);
-      for(int i=0; i<4; i++)
-        color[i] = part(col, 3-i) / 255.0;
-      }
-    };
-  
-  struct textured_vertex {
-    glvertex coords;
-    glvec2 texture;
-    };
-  
-  struct ct_vertex {
-    glvertex coords;
-    glvec4 color;
-    glvec2 texture;
-    ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
-      coords = pointtogl(h);
-      texture[0] = x1;
-      texture[1] = y1;
-      color[0] = color[1] = color[2] = col;
-      color[3] = 1;
-      }
-    };  
-
-#endif
-
-#if CAP_SHADER
-EX bool noshaders = false;
-#else
-EX bool noshaders = true;
-#endif
-
-bool glew   = false;
-
-bool current_depthtest, current_depthwrite;
-ld fogbase;
-
-#if HDR
-typedef const void *constvoidptr;
-#endif
-
-EX constvoidptr current_vertices, buffered_vertices;
-ld current_linewidth;
-
-GLuint buf_current, buf_buffered;
-
-#if HDR
-enum eMode { gmColored, gmTextured, gmVarColored, gmLightFog, gmMAX};
-#endif
-
-static const flagtype GF_TEXTURE  = 1;
-static const flagtype GF_VARCOLOR = 2;
-static const flagtype GF_LIGHTFOG = 4;
-
-flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG | GF_VARCOLOR 
-  };
-
-eMode mode;
-
-EX shader_projection current_shader_projection, new_shader_projection;
-
-EX void switch_mode(eMode m, shader_projection sp);
-
-void display(const glmatrix& m) {
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++)
-      printf("%10.5f", m[i][j]);
-    printf("\n");
-    }
-  printf("\n");
-  }
-
-glmatrix operator * (glmatrix m1, glmatrix m2) {
-  glmatrix res;
-  for(int i=0; i<4; i++)
-  for(int j=0; j<4; j++) {
-    res[i][j] = 0;
-    for(int k=0; k<4; k++)
-      res[i][j] += m1[i][k] * m2[k][j];
-    }
-  return res;
-  }
-
-EX glmatrix id = {{{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}}};
-
-EX glmatrix scale(ld x, ld y, ld z) {
-  glmatrix tmp;
-  for(int i=0; i<4; i++)
-  for(int j=0; j<4; j++)
-    tmp[i][j] = (i==j);
-  tmp[0][0] = x;
-  tmp[1][1] = y;
-  tmp[2][2] = z;
-  return tmp;
-  }
-
-EX glmatrix tmtogl(const transmatrix& T) {
-  glmatrix tmp;
-  for(int i=0; i<4; i++)
-  for(int j=0; j<4; j++)
-    tmp[i][j] = T[i][j];
-  return tmp;
-  }
-
-EX glmatrix tmtogl_transpose(const transmatrix& T) {
-  glmatrix tmp;
-  for(int i=0; i<4; i++)
-  for(int j=0; j<4; j++)
-    tmp[i][j] = T[j][i];
-  return tmp;
-  }
-
-EX glmatrix ortho(ld x, ld y, ld z) {
-  return scale(1/x, 1/y, 1/z);
-  }
-
-EX glmatrix& as_glmatrix(GLfloat o[16]) {
-  glmatrix& tmp = (glmatrix&) (o[0]);
-  return tmp;
-  }
-
-EX glmatrix frustum(ld x, ld y, ld vnear IS(1e-3), ld vfar IS(1e9)) {
-  GLfloat frustum[16] = {
-    GLfloat(1 / x), 0, 0, 0,
-    0, GLfloat(1 / y), 0, 0,
-    0, 0, GLfloat(-(vnear+vfar)/(vfar-vnear)), -1,
-    0, 0, GLfloat(-2*vnear*vfar/(vfar-vnear)), 0};
-  return as_glmatrix(frustum);
-  }
-
-EX glmatrix translate(ld x, ld y, ld z) {
-  glmatrix tmp;
-  for(int i=0; i<4; i++)
-  for(int j=0; j<4; j++)
-    tmp[i][j] = (i==j);
-  tmp[3][0] = x;
-  tmp[3][1] = y;
-  tmp[3][2] = z;
-  return tmp;
-  }
-
-// ** legacy **
-
-// /* shaders */
-
-glmatrix projection;
-
-EX void new_projection() {
-  WITHSHADER({
-    projection = id;
-    }, {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    return;
-    })
-  }
-
-EX void projection_multiply(const glmatrix& m) {
-  WITHSHADER({
-    projection = m * projection;  
-    }, {
-    glMatrixMode(GL_PROJECTION);
-    glMultMatrixf(m.as_array());
-    })
-  }
-
-EX void init();
-
-int compileShader(int type, const string& s) {
-  GLint status;
-
-#if DEBUG_GL  
-  printf("===\n%s\n===\n", s.c_str());
-#endif
-  
-  GLint shader = glCreateShader(type);
-  const char *ss = s.c_str();
-  glShaderSource(shader, 1, &ss, NULL);
-  glCompileShader(shader);
-  
-  GLint logLength;
-  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-  if (logLength > 0) {
-    std::vector<char> log(logLength);
-    glGetShaderInfoLog(shader, logLength, &logLength, log.data());
-    if(logLength > 0)
-      printf("compiler log (%d): '%s'\n", logLength, log.data());
-    }
-  
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-  if (status == 0) {
-    glDeleteShader(shader);
-    printf("failed to compile shader\n");
-    shader = 0;
-    }
-  
-  return shader;
-  }
-
-// https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/attributes.php
-
-#if HDR
-struct GLprogram;
-#endif
-
-EX struct GLprogram *current = NULL;
-
-#if HDR
-static const int aPosition = 0;
-static const int aColor = 3;
-static const int aTexture = 8;
+constexpr flagtype SF_PERS3        = 256;
+constexpr flagtype SF_BAND         = 512;
+constexpr flagtype SF_USE_ALPHA    = 1024;
+constexpr flagtype SF_DIRECT       = 2048;
+constexpr flagtype SF_PIXELS       = 4096;
+constexpr flagtype SF_HALFPLANE    = 8192;
+constexpr flagtype SF_ORIENT       = 16384;
+constexpr flagtype SF_BOX          = 32768;
+constexpr flagtype SF_ZFOG         = 65536;
 #endif
 
 #if HDR
+/* standard attribute bindings */
+constexpr int aPosition = 0;
+constexpr int aColor = 3;
+constexpr int aTexture = 8;
+
+/* texture bindings */
 constexpr int INVERSE_EXP_BINDING = 2;
 #endif
 
-struct GLprogram {
-  GLuint _program;
-  GLuint vertShader, fragShader;
-  
-  GLint uMVP, uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase;
-  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations;
-  
-  string _vsh, _fsh;
-  
-  GLprogram(string vsh, string fsh) {
-    _vsh = vsh; _fsh = fsh;
-    _program = glCreateProgram();
-    
-    #ifndef GLES_ONLY
-    while(vsh.find("mediump ") != string::npos)
-      vsh.replace(vsh.find("mediump "), 7, "");
-    while(fsh.find("mediump ") != string::npos)
-      fsh.replace(fsh.find("mediump "), 7, "");
-    #endif
+map<string, shared_ptr<glhr::GLprogram>> compiled_programs;
 
-    // printf("creating program %d\n", _program);
-    vertShader = compileShader(GL_VERTEX_SHADER, vsh.c_str());
-    fragShader = compileShader(GL_FRAGMENT_SHADER, fsh.c_str());
-  
-    // Attach vertex shader to program.
-    glAttachShader(_program, vertShader);
-    
-    // Attach fragment shader to program.
-    glAttachShader(_program, fragShader);
-    
-    glBindAttribLocation(_program, aPosition, "aPosition");
-    glBindAttribLocation(_program, aTexture, "aTexture");
-    glBindAttribLocation(_program, aColor, "aColor");
+map<unsigned, shared_ptr<glhr::GLprogram>> matched_programs;
 
-    GLint status;
-    glLinkProgram(_program);
-      
-    GLint logLength;
-    glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0) {
-      std::vector<char> log(logLength);
-      glGetProgramInfoLog(_program, logLength, &logLength, log.data());
-      if(logLength > 0)
-        printf("linking log (%d): %s\n", logLength, log.data());
-      }
-     
-    glGetProgramiv(_program, GL_LINK_STATUS, &status);
-    if (status == 0) {
-      printf("failed to link shader\n");
-      exit(1);
-      }
-    
-    // glBindAttribLocation(_program, GLKVertexAttribPosition, "position"); ??
-    // glBindAttribLocation(_program, GLKVertexAttribNormal, "normal"); ??
-  
-    uMV = glGetUniformLocation(_program, "uMV");
-    uProjection = glGetUniformLocation(_program, "uP");
-    uMVP = glGetUniformLocation(_program, "uMVP");
-    uFog = glGetUniformLocation(_program, "uFog");
-    uFogColor = glGetUniformLocation(_program, "uFogColor");
-    uFogBase = glGetUniformLocation(_program, "uFogBase");
-    uAlpha = glGetUniformLocation(_program, "uAlpha");
-    uColor = glGetUniformLocation(_program, "uColor");
-    tTexture = glGetUniformLocation(_program, "tTexture");
-    tInvExpTable = glGetUniformLocation(_program, "tInvExpTable");
+glhr::glmatrix model_orientation_gl() {
+  glhr::glmatrix s = glhr::id;
+  for(int a=0; a<GDIM; a++)
+    models::apply_orientation(s[a][1], s[a][0]);
+  if(GDIM == 3) for(int a=0; a<GDIM; a++)
+    models::apply_orientation_yz(s[a][2], s[a][1]);
+  return s;
+  }
 
-    uPRECX = glGetUniformLocation(_program, "PRECX");
-    uPRECY = glGetUniformLocation(_program, "PRECY");
-    uPRECZ = glGetUniformLocation(_program, "PRECZ");
-    uIndexSL = glGetUniformLocation(_program, "uIndexSL");
-    uIterations = glGetUniformLocation(_program, "uIterations");
-    
-    #if DEBUG_GL
-    printf("uniforms: %d %d %d %d\n", uMVP, uFog, uColor, tTexture);
-    #endif
-    // printf("attributes: %d\n", position_index);
+shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
+  string varying, vsh, fsh, vmain = "void main() {\n", fmain = "void main() {\n";
+
+  vsh += "attribute mediump vec4 aPosition;\n";
+  varying += "varying mediump vec4 vColor;\n";
+
+  if(shader_flags & GF_TEXTURE) {
+    vsh += "attribute mediump vec2 aTexture;\n";
+    varying += "varying mediump vec2 vTexCoord;\n";
+    fsh += "uniform mediump sampler2D tTexture;\n";
+    vmain += "vTexCoord = aTexture;\n",
+    fmain += "gl_FragColor = vColor * texture2D(tTexture, vTexCoord);\n";
+    }
+  else fmain += "gl_FragColor = vColor;\n";
+  
+  if(shader_flags & GF_VARCOLOR) {
+    vsh += "attribute mediump vec4 aColor;\n";
+    vmain += "vColor = aColor;\n";
+    }
+  else {
+    vmain += "vColor = uColor;\n";
+    vsh += "uniform mediump vec4 uColor;\n";
     }
   
-  ~GLprogram() {
-    glDeleteProgram(_program);
-    if(vertShader) glDeleteShader(vertShader), vertShader = 0;
-    if(fragShader) glDeleteShader(fragShader), fragShader = 0;
-    current = NULL;
+  if(shader_flags & GF_LIGHTFOG) {
+    vmain += "float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0); vColor = vColor * fogx + uFogColor * (1.0-fogx);\n";      
+    vsh += "uniform mediump float uFog;\n";
+    vsh += "uniform mediump float uFogColor;\n";
     }
+
+  string coordinator;
+  string distfun;
+  bool treset = false;
   
-  void enable() {
-    if(this != current) {
-      glUseProgram(_program);    
-      current = this;
-      }
-    }
+  bool dim2 = GDIM == 2;
+  bool dim3 = GDIM == 3;
   
-  };
-
-EX void set_index_sl(ld x) {
-  glUniform1f(glhr::current->uIndexSL, x);
-  }
-
-EX void set_sl_iterations(int steps) {
-  glUniform1i(glhr::current->uIterations, steps);
-  }
-
-EX void set_solv_prec(int x, int y, int z) {
-  glUniform1i(glhr::current->tInvExpTable, glhr::INVERSE_EXP_BINDING);
-  glUniform1f(glhr::current->uPRECX, x);
-  glUniform1f(glhr::current->uPRECY, y);
-  glUniform1f(glhr::current->uPRECZ, z);
-  }
-
-GLprogram *programs[gmMAX][int(shader_projection::MAX)];
-
-string stringbuilder() { return ""; }
-
-bool use_next = false;
-
-int stringbuilder_helper(string& output, bool i) { use_next = i; return 0; }
-int stringbuilder_helper(string& output, const char *s) { if(use_next) output += s; return 0; }
-int stringbuilder_helper(string& output, const string& s) { if(use_next) output += s; return 0; }
-
-template<class... T> string stringbuilder(T... t) { 
-  use_next = true;
-  string output;
-  std::initializer_list<int> dummy = {stringbuilder_helper(output, t)...};
-  ignore(dummy);
-  println(hlog, "output = '", output, "'");
-  return output;
-  }
-
-glmatrix current_matrix, current_modelview, current_projection;
-
-bool operator == (const glmatrix& m1, const glmatrix& m2) {
-  for(int i=0; i<4; i++) 
-    for(int j=0; j<4; j++)
-      if(m1[i][j] != m2[i][j]) return false;
-  return true;
-  }
-
-bool operator != (const glmatrix& m1, const glmatrix& m2) {
-  return !(m1 == m2);
-  }
-
-bool uses_mvp(shader_projection sp) { return among(sp, shader_projection::standard, shader_projection::flatten); }
-
-EX glmatrix eyeshift;
-EX bool using_eyeshift;
-
-EX void set_modelview(const glmatrix& modelview) {
-  #if CAP_NOSHADER
-  if(noshaders) {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(modelview.as_array());
-    return;
+  bool skip_t = false;
+  
+  if(pmodel == mdPixel) {
+    vmain += "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uP * uMV * pos;\n";
+    skip_t = true;
+    shader_flags |= SF_PIXELS | SF_DIRECT;
     }
-  #endif
-  if(!current) return;
-  if(!uses_mvp(current_shader_projection)) {
-    if(using_eyeshift) {
-      glmatrix mvp = modelview * eyeshift;
-      #if MINIMIZE_GL_CALLS
-      if(mvp == current_matrix) return;
-      current_matrix = mvp;
-      #endif
-      glUniformMatrix4fv(current->uMV, 1, 0, mvp.as_array());
+  else if(pmodel == mdManual) {
+    vmain += "gl_Position = uP * uMV * aPosition;\n";
+    skip_t = true;
+    shader_flags |= SF_DIRECT;
+    }
+  else if(!vid.consider_shader_projection) {
+    shader_flags |= SF_PIXELS;
+    }
+  else if(pmodel == mdDisk && MDIM == 3 && !spherespecial) {
+    shader_flags |= SF_DIRECT;
+    }
+  else if(glhr::noshaders) {
+    shader_flags |= SF_PIXELS;
+    }
+  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial) {
+    coordinator += "t /= (t[3] + uAlpha);\n";
+    vsh += "uniform mediump float uAlpha;";
+    shader_flags |= SF_DIRECT | SF_BOX;
+    treset = true;
+    }
+  else if(pmodel == mdBand && hyperbolic) {
+    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT;
+    coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+    if(dim2) coordinator += "float zlev = zlevel(t); t /= zlev;\n";
+    if(dim3) coordinator += "float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);\n";
+    if(dim2) coordinator += "float ty = asinh(t.y);\n";
+    coordinator += "float tx = asinh(t.x / cosh(ty)); ty = 2.0 * atan(tanh(ty/2.0));\n";
+    if(dim2) coordinator += "t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;\n";
+    if(dim3) coordinator += "t[0] = tx; t[1] = ty*t.y/r; t[2] = ty*t.z/r; t[3] = 1.0;\n";
+    if(dim3) shader_flags |= SF_ZFOG;
+    }
+  else if(pmodel == mdHalfplane && hyperbolic) {
+    shader_flags |= SF_HALFPLANE | SF_ORIENT | SF_BOX | SF_DIRECT;
+    if(dim2) shader_flags |= SF_USE_ALPHA;
+    coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+    if(dim2) coordinator += 
+      "float zlev = zlevel(t); t /= zlev;\n"
+      "t.xy /= t.z; t.y += 1.0;\n"
+      "float rads = dot(t.xy, t.xy);\n"
+      "t.xy /= -rads; t.z = 1.0; t[3] = 1.0;\n";
+    if(dim3) coordinator += 
+      "t.xyz /= (t.w + 1.0); t.y += 1.0;\n"
+      "float rads = dot(t.xyz, t.xyz);\n"
+      "t.xyz /= -rads; t[3] = 1.0;\n";        
+    if(dim3) shader_flags |= SF_ZFOG;
+    }
+  else if(pmodel == mdGeodesic) {
+    shader_flags |= SF_PERS3 | SF_DIRECT;
+    coordinator += "t = inverse_exp(t);\n";
+    if(solnih) {
+      coordinator +=
+        "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);\n"
+        "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.;\n"
+        "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m;\n";
+      distfun = "ad";
       }
-    else if(modelview != current_modelview) {
-      current_modelview = modelview;
-      glUniformMatrix4fv(current->uMV, 1, 0, modelview.as_array());
-      }
-    if(projection != current_projection) {
-      current_projection = projection;
-      glUniformMatrix4fv(current->uProjection, 1, 0, projection.as_array());
+    else
+      distfun = "length(t.xyz)";
+    switch(cgclass) {
+      case gcSolNIH:
+        switch(geometry) {
+          case gSol:
+            vsh += solnihv::shader_symsol;
+            break;
+          case gNIH:
+            vsh += solnihv::shader_nsym;
+            break;
+          case gSolN:
+            vsh += solnihv::shader_nsymsol;
+            break;
+          default:
+            println(hlog, "error: unknown solnih geometry");
+          }            
+        treset = true;
+        break;
+      case gcNil:
+        vsh += nilv::nilshader;
+        break;
+      case gcSL2:      
+        vsh += slr::slshader;
+        break;
+      default:
+        println(hlog, "error: unknown geometry in geodesic");
+        break;
+      }      
+    }
+  else if(geometry == gProduct) {
+    shader_flags |= SF_PERS3 | SF_DIRECT;
+    coordinator +=      
+      "float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;\n"
+      "float r = length(t.xy);\n"
+      "float t2 = t[2] / exp(z);\n"
+      "float d = t2 >= 1. ? acosh(t2) : 0.;\n"
+      "if(r != 0.) r = d / r;\n"
+      "t.xy *= r; t.z = z;\n";
+    distfun = "sqrt(z*z+d*d)";
+    }
+  else if(pmodel == mdPerspective) {
+    shader_flags |= SF_PERS3 | SF_DIRECT;
+    if(hyperbolic)
+      distfun = "acosh(t[3])", treset = true;
+    else if(euclid)
+      distfun = "length(t.xyz);", treset = true;
+    else {
+      if(spherephase & 4) coordinator += "t = -t;\n";
+      switch(spherephase & 3) {
+        case 0: distfun = "(2. * PI - acos(-t[3]))"; coordinator += "t = -t;\n"; break;
+        case 1: distfun = "(2. * PI - acos(t[3]))"; coordinator += "t.xyz = -t.xyz;\n"; break;
+        case 2: distfun = "acos(-t[3])"; coordinator += "t.w = -t.w;\n"; break;
+        case 3: distfun = "acos(t[3])"; break;
+        }
       }
     }
   else {
-    glmatrix mvp = modelview * projection;
-    #if MINIMIZE_GL_CALLS
-    if(mvp == current_matrix) return;
-    current_matrix = mvp;
-    #endif
-    glUniformMatrix4fv(current->uMVP, 1, 0, mvp.as_array());
+    shader_flags |= SF_PIXELS;
+    if(dim3) shader_flags |= SF_ZFOG;
     }
-  // glmatrix nm = modelview;
-  // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
-  }
 
-EX void id_modelview() {
-  #if CAP_NOSHADER
-  if(noshaders) {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    return;
-    }
-  #endif
-  if(!current) return;
-  if(!uses_mvp(current_shader_projection)) { set_modelview(id); return; }
-  #if MINIMIZE_GL_CALLS
-  if(projection == current_matrix) return;
-  current_matrix = projection;
-  #endif
-  glUniformMatrix4fv(current->uMVP, 1, 0, projection.as_array());
-  }
-
-EX void color2(color_t color, ld scale IS(1)) {
-  GLfloat cols[4];
-  for(int i=0; i<4; i++)
-    cols[i] = part(color, 3-i) / 255.0 * scale;
-    
-  WITHSHADER({
-    if(!current) return;
-    glUniform4f(current->uColor, cols[0], cols[1], cols[2], cols[3]);
-    }, {
-    glColor4f(cols[0], cols[1], cols[2], cols[3]);
-    }
-    )
-  }
-
-EX void colorClear(color_t color) {
-  glClearColor(part(color, 3) / 255.0, part(color, 2) / 255.0, part(color, 1) / 255.0, part(color, 0) / 255.0);
-}
-
-EX void be_nontextured(shader_projection sp IS(new_shader_projection)) { switch_mode(gmColored, sp); }
-EX void be_textured(shader_projection sp IS(new_shader_projection)) { switch_mode(gmTextured, sp); }
-EX void use_projection(shader_projection sp IS(new_shader_projection)) { switch_mode(mode, sp); }
-
-EX pair<string, string> get_shaders() {
-  auto p = programs[mode][int(current_shader_projection)];
-  return make_pair(p->_vsh, p->_fsh);
-  }
-
-EX void install_shaders(string vsh, string fsh) {
-  delete programs[mode][int(current_shader_projection)];
-  programs[mode][int(current_shader_projection)] = new GLprogram(vsh, fsh);
-  mode = eMode(-1);
-  }
-
-void switch_mode(eMode m, shader_projection sp) {
-  if(m == mode && current_shader_projection == sp) return;
-  reset_projection();
-  GLERR("pre_switch_mode");
-  WITHSHADER({
-    programs[m][int(sp)]->enable();
-    GLERR("after_enable");
-    }, {})
-  flagtype newflags = flags[m] &~ flags[mode];
-  flagtype oldflags = flags[mode] &~ flags[m];
-  if(newflags & GF_TEXTURE) {
-    GLERR("xsm");
-    WITHSHADER({
-      glEnableVertexAttribArray(aTexture);
-      GLERR("xsm");
-      }, {
-      glEnable(GL_TEXTURE_2D);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      GLERR("xsm");
-      })
-    }
-  if(oldflags & GF_TEXTURE) {
-    GLERR("xsm");
-    WITHSHADER({
-      glDisableVertexAttribArray(aTexture);
-      GLERR("xsm");
-      }, {
-      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-      glDisable(GL_TEXTURE_2D);
-      GLERR("xsm");
-      })
-    }
-  if(newflags & GF_VARCOLOR) {
-    WITHSHADER({
-      GLERR("xsm");
-      glEnableVertexAttribArray(aColor);
-      }, {
-      GLERR("xsm");
-      glEnableClientState(GL_COLOR_ARRAY);
-      GLERR("xsm");
-      })
-    }
-  if(oldflags & GF_VARCOLOR) {
-    WITHSHADER({
-      glDisableVertexAttribArray(aColor);
-      GLERR("xsm");
-      }, {
-      glDisableClientState(GL_COLOR_ARRAY);
-      GLERR("xsm");
-      })
-    }
-  if(newflags & GF_LIGHTFOG) {
-    #ifdef GLES_ONLY
-    #define glFogi glFogx
-    #endif
-    WITHSHADER({}, {
-    /*GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
-    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
-  
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-  
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-    GLERR("lighting");
-  
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0); */
- 
-    glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, GL_LINEAR);
-    glFogf(GL_FOG_START, 0);
-    })
-    }
-  if(oldflags & GF_LIGHTFOG) {
-    WITHSHADER({}, {glDisable(GL_FOG);})
-    }
-  WITHSHADER({
-    glUniform1f(current->uFogBase, 1); fogbase = 1;
-    }, {})
-  mode = m;
-  current_shader_projection = sp;
-  GLERR("after_switch_mode");
-  current_vertices = NULL;
-  WITHSHADER({
-    current_matrix[0][0] = -1e8; // invalid
-    current_modelview[0][0] = -1e8;
-    current_projection[0][0] = -1e8;
-    }, {})
-  id_modelview();
-  current_linewidth = -1;
-  /* if(current_depthwrite) glDepthMask(GL_TRUE);
-  else glDepthMask(GL_FALSE);
-  if(current_depthtest) glEnable(GL_DEPTH_TEST);
-  else glDisable(GL_DEPTH_TEST); */
-  }
-
-EX void fog_max(ld fogmax, color_t fogcolor) {
-  WITHSHADER({
-    glUniform1f(current->uFog, 1 / fogmax);
-  
-    GLfloat cols[4];
-    for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
-    glUniform4f(current->uFogColor, cols[0], cols[1], cols[2], cols[3]);
-    }, {
-    glFogf(GL_FOG_END, fogmax);
-    })
-  }
-
-EX void set_fogbase(ld _fogbase) {
-  WITHSHADER({
-    if(fogbase != _fogbase) {
-      fogbase = _fogbase;
-      glUniform1f(current->uFogBase, fogbase);
+  if(!skip_t) {
+    vmain += "vec4 t = uMV * aPosition;\n";
+    vmain += coordinator;
+    if(distfun != "") {
+      vmain += "float fogs = (uFogBase - " + distfun + " / uFog);\n";
+      vmain += "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);\n";
+      vsh += 
+        "uniform mediump float uFog;\n"
+        "uniform mediump float uFogBase;\n"
+        "uniform mediump vec4 uFogColor;\n";
       }
-    }, {})
+    if(treset) vmain += "t[3] = 1.0;\n";
+    vmain += "gl_Position = uP * t;\n";
+    }
+
+  vsh += 
+    "uniform mediump mat4 uMV;\n"
+    "uniform mediump mat4 uP;\n";
+
+  if(shader_flags & SF_ZFOG) {
+    vmain += 
+      "float pz = 0.5 + gl_Position.z / 2.0;\n"
+      "vColor.xyz = vColor.xyz * (1.-pz) + uFogColor.xyz * pz;\n";
+    vsh += 
+        "uniform mediump vec4 uFogColor;\n";
+    }
+  
+  vmain += "}";
+  fmain += "}";
+  
+  fsh += varying;
+  fsh += fmain;
+  vsh += varying;
+  vsh += vmain;
+  
+  if(glhr::noshaders) fsh = vsh = "";
+  
+  string both = fsh + "*" + vsh + "*" + its(shader_flags);
+  if(compiled_programs.count(both)) 
+    return compiled_programs[both];
+  else {
+    auto res = make_shared<glhr::GLprogram>(vsh, fsh);
+    res->shader_flags = shader_flags;
+    return res;
+    }    
   }
 
-EX void set_ualpha(ld alpha) {
-  WITHSHADER({
-    glUniform1f(current->uAlpha, alpha);
-    }, {})
-  }
+void display_data::set_projection(int ed) {  
+  flagtype shader_flags = current_display->next_shader_flags;
+  unsigned id;
+  id = geometry;
+  id <<= 6; id |= pmodel;
+  id <<= 6; id |= shader_flags;
+  id <<= 6; id |= spherephase;
+  id <<= 1; if(vid.consider_shader_projection) id |= 1;
+  id <<= 2; id |= (spherespecial & 3);
+  shared_ptr<glhr::GLprogram> selected;
 
-void init() {
+  if(matched_programs.count(id)) selected = matched_programs[id];
+  else {
+    selected = write_shader(shader_flags);
+    matched_programs[id] = selected;
+    }
 
-  #if CAP_GLEW
-    if(!glew) { 
-      glew = true; 
-      printf("Initializing GLEW\n");
-      GLenum err = glewInit();
-      if (GLEW_OK != err) {
-        addMessage("Failed to initialize GLEW");
-        printf("Failed to initialize GLEW\n");
-        return;
+  if(glhr::current_glprogram != selected) full_enable(&*selected);
+
+  shader_flags = selected->shader_flags;
+  auto cd = current_display;
+  
+  #if CAP_SOLV
+  if(selected->uPRECX != -1) {
+    auto &tab = solnihv::get_tabled();
+    
+    GLuint invexpid = tab.get_texture_id();
+    
+    glActiveTexture(GL_TEXTURE0 + INVERSE_EXP_BINDING);
+    glBindTexture(GL_TEXTURE_3D, invexpid);
+
+    glActiveTexture(GL_TEXTURE0 + 0);
+    
+    glhr::set_solv_prec(tab.PRECX, tab.PRECY, tab.PRECZ);
+    }
+  #endif
+  
+  if(selected->uIterations != -1) {
+    glhr::set_index_sl(0);
+    glhr::set_sl_iterations(slr::steps);
+    }
+
+  glhr::new_projection();
+
+  if(ed && vid.stereo_mode == sLR) {
+    glhr::projection_multiply(glhr::translate(ed, 0, 0));
+    glhr::projection_multiply(glhr::scale(2, 1, 1));
+    }      
+
+  ld tx = (cd->xcenter-cd->xtop)*2./cd->xsize - 1;
+  ld ty = (cd->ycenter-cd->ytop)*2./cd->ysize - 1;
+  glhr::projection_multiply(glhr::translate(tx, -ty, 0));
+
+  if(pmodel == mdManual) return;
+  
+  if(vid.stretch != 1 && (shader_flags & SF_DIRECT)) glhr::projection_multiply(glhr::scale(vid.stretch, 1, 1));
+
+  eyewidth_translate(ed);
+  
+  auto ortho = [&] (ld x, ld y) {
+    glhr::glmatrix M = glhr::ortho(x, y, 1);
+    if(shader_flags & SF_ZFOG) {
+      using models::clip_max; 
+      using models::clip_min;
+      M[2][2] = 2 / (clip_max - clip_min);
+      M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
+      auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
+      glUniform4f(selected->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+      }
+    else M[2][2] /= 1000;
+    glhr::projection_multiply(M);
+    if(nisot::local_perspective_used())
+      glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
+    if(ed) {
+      glhr::glmatrix m = glhr::id;
+      m[2][0] -= ed;
+      glhr::projection_multiply(m);
+      }
+    glhr::id_modelview();
+    };
+
+  if(shader_flags & SF_PIXELS) ortho(cd->xsize/2, -cd->ysize/2);
+  else if(shader_flags & SF_BOX) ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
+  else if(shader_flags & SF_PERS3) {
+    glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
+    glhr::projection_multiply(glhr::scale(1, -1, -1));
+    if(nisot::local_perspective_used()) {
+      if(prod) {
+        for(int i=0; i<3; i++) nisot::local_perspective[3][i] = nisot::local_perspective[i][3] = 0;
+        nisot::local_perspective[3][3] = 1;
         }
-      printf("CreateProgram = %p\n", __glewCreateProgram);
-      if(!__glewCreateProgram) noshaders = true;
+      glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
       }
-  #endif
-  
-  #if CAP_SHADER
-  projection = id;
-  
-  if(!noshaders)
-  for(int i=0; i<gmMAX; i++) 
-  for(int j=0; j<int(shader_projection::MAX); j++) {
-    flagtype f = flags[i];
+    if(ed) {
+      glhr::using_eyeshift = true;
+      glhr::eyeshift = glhr::tmtogl(xpush(vid.ipd * ed/2));
+      }
+    glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
+    }
+  else {
+    if(vid.alpha > -1) {
+      // Because of the transformation from H3 to the Minkowski hyperboloid,
+      // points with negative Z can be generated in some 3D settings.
+      // This happens for points below the camera, but above the plane.
+      // These points should still be viewed, though, so we disable the
+      // depth clipping
+      glhr::projection_multiply(glhr::scale(1,1,0));
+      }
+    GLfloat sc = current_display->radius / (cd->ysize/2.);
+    glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
+    glhr::projection_multiply(glhr::scale(sc, -sc, -1));
+    glhr::projection_multiply(glhr::translate(0, 0, vid.alpha));
+    if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
+    }
+
+  if(selected->uPP != -1) {
+    glhr::glmatrix pp = glhr::id;
+    if(get_shader_flags() & SF_USE_ALPHA)
+      pp[3][2] = GLfloat(vid.alpha);
+
+    if(get_shader_flags() & SF_ORIENT) {
+      if(GDIM == 3) for(int a=0; a<4; a++) 
+        models::apply_orientation_yz(pp[a][1], pp[a][2]);
+      for(int a=0; a<4; a++) 
+        models::apply_orientation(pp[a][0], pp[a][1]);
+      }
     
-    bool texture = f & GF_TEXTURE;
-    bool lfog    = f & GF_LIGHTFOG;
-    bool varcol  = f & GF_VARCOLOR;
-    
-    shader_projection sp = shader_projection(j);
-    
-    bool mps = !uses_mvp(sp);
-    bool band = among(sp, shader_projection::band, shader_projection::band3);
-    bool hp = among(sp, shader_projection::halfplane, shader_projection::halfplane3);
-    bool sh3 = (sp == shader_projection::standardH3);
-    bool ssol = (sp == shader_projection::standardSolv);
-    bool ssln = (sp == shader_projection::standardSolvNIH);
-    bool snih = (sp == shader_projection::standardNIH);
-    bool sson = ssol || ssln || snih;
-    bool snil = (sp == shader_projection::standardNil);
-    bool ssl2 = (sp == shader_projection::standardSL2);
-    bool sr3 = (sp == shader_projection::standardR3);
-    bool ss30 = (sp == shader_projection::standardS30);
-    bool ss31 = (sp == shader_projection::standardS31);
-    bool ss32 = (sp == shader_projection::standardS32);
-    bool ss33 = (sp == shader_projection::standardS33);
-    bool seh2 = (sp == shader_projection::standardEH2);
-    bool ss3 = ss30 || ss31 || ss32 || ss33;
-    
-    bool s3 = (sh3 || sr3 || ss3 || sson || snil || seh2 || ssl2);
-    bool dim3 = s3 || among(sp, shader_projection::ball, shader_projection::halfplane3, shader_projection::band3);
-    bool dim2 = !dim3;
-    bool ball = (sp == shader_projection::ball);
-    bool flatten = (sp == shader_projection::flatten);
-    
-    if(sson && !CAP_SOLV) continue;
-    
-    programs[i][j] = new GLprogram(stringbuilder(
-      1,       "#define PI 3.14159265358979324\n",
-
-      1,       "attribute mediump vec4 aPosition;",
-      texture, "attribute mediump vec2 aTexture;",
-      varcol,  "attribute mediump vec4 aColor;",
-      // "attribute vec3 normal;"
-      
-      1,       "varying mediump vec4 vColor;",
-      texture, "varying mediump vec2 vTexCoord;", 
-      
-      !mps,    "uniform mediump mat4 uMVP;",
-      mps,     "uniform mediump mat4 uMV;",
-      mps,     "uniform mediump mat4 uP;",
-      1,       "uniform mediump float uFog;",
-      1,       "uniform mediump float uFogBase;",
-      1,       "uniform mediump vec4 uFogColor;",
-      ball,    "uniform mediump float uAlpha;",
-      !varcol, "uniform mediump vec4 uColor;",
-
-      1,       "float sinh(float x) {",
-      1,       "  return (exp(x) - exp(-x)) / 2.0;",
-      1,       "  }",
-
-      1,       "float cosh(float x) {",
-      1,       "  return (exp(x) + exp(-x)) / 2.0;",
-      1,       "  }",
-      
-      1,       "float tanh(float x) {",
-      1,       "  return sinh(x) / cosh(x);",
-      1,       "  }",
-      
-      1,       "float asinh(float x) {",
-      1,       "  return log(sqrt(x*x + 1.0) + x);",
-      1,       "  }",
-    
-      1,       "float acosh(float x) {",
-      1,       "  return log(sqrt(x*x - 1.0) + x);",
-      1,       "  }",
-      
-      1,       "float atanh(float x) { return (log(1.+x)-log(1.-x))/2.; }",
-    
-      1,       "float zlevel(vec4 h) {",
-      1,       "  return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]);",
-      1,       "  }",
-      
-      #if CAP_SOLV
-      ssol,    solnihv::shader_symsol,
-      snih,    solnihv::shader_nsym,
-      ssln,    solnihv::shader_nsymsol,
-      #endif
-      snil,    nilv::nilshader,
-      ssl2,    slr::slshader,
-
-      1,       "void main() {",  
-      texture,   "vTexCoord = aTexture;",
-      varcol,    "vColor = aColor;",
-      !varcol,   "vColor = uColor;",
-      lfog,      "float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
-      lfog,      "vColor = vColor * fogx + uFogColor * (1.0-fogx);",
-      !mps && !flatten,      "gl_Position = uMVP * aPosition;",
-      !mps && flatten,   "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uMVP * pos;",
-      ball,      "vec4 t = uMV * aPosition; t /= (t[3] + uAlpha); ",
-      mps&&!(band||hp||s3||ball||flatten),"gl_Position = uP * (uMV * aPosition);",
-      mps&&flatten, "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uP * (uMV * pos);",
-
-      band||hp,  "vec4 t = uMV * aPosition;",  
-      (band||hp) && dim2,  "float zlev = zlevel(t);",
-      (band||hp) && dim2,  "t /= zlev;",
-
-      band&&dim3,"float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);",
-      band&&dim2,"float ty = asinh(t.y);",
-      band,      "float tx = asinh(t.x / cosh(ty));",
-      band,      "ty = 2.0 * atan(tanh(ty/2.0));",
-      band&&dim2,"t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;",
-      band&&dim3,"t[0] = tx; t[1] = ty*t.y/r; t[2] = ty*t.z/r; t[3] = 1.0;",
-      
-      
-      hp && dim2, "t.x /= t.z; t.y /= t.z; t.y = t.y + 1.0; ",
-      hp && dim2, "float rads = t.x * t.x + t.y * t.y; ",
-      hp && dim2, "t.x /= -rads; t.y /= -rads; t.z = 1.0; t[3] = 1.0;",
-
-      hp && dim3, "t.x /= (1.0+t.w); t.y /= (1.0+t.w); t.z /= (1.0+t.w); t.y = t.y + 1.0; ",
-      hp && dim3, "float rads = t.x * t.x + t.y * t.y + t.z * t.z; ",
-      hp && dim3, "t.x /= -rads; t.y /= -rads; t.z /= -rads; t[3] = 1.0;",
-      
-      s3,        "vec4 t = uMV * aPosition;",
-      sson,      "t = inverse_exp(t);",
-      sson,      "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);",
-      sson,      "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.; ",
-      sson,      "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m; ",
-      snil,      "t = inverse_exp(t);",
-      ssl2,      "t = inverse_exp(t);",
-
-      seh2,      "float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;",
-      seh2,      "float r = sqrt(t[0] * t[0] + t[1] * t[1]);",
-      seh2,      "float t2 = t[2] / exp(z);",
-      seh2,      "float d = t2 >= 1. ? acosh(t2) : 0.;",
-      seh2,      "if(r != 0.) r = d / r;",
-      seh2,      "t[0] = t[0] * r;",
-      seh2,      "t[1] = t[1] * r;",
-      seh2,      "t[2] = z;",
-
-      sh3,       "float fogs = (uFogBase - acosh(t[3]) / uFog);",
-      sr3||snil||ssl2, "float fogs = (uFogBase - sqrt(t[0]*t[0] + t[1]*t[1] + t[2]*t[2]) / uFog);",
-      sson,      "float fogs = (uFogBase - ad / uFog);",
-
-      seh2,      "float fogs = (uFogBase - sqrt(z*z+d*d) / uFog);",
-      
-      ss30,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t = -t; ",
-      ss31,      "float fogs = (uFogBase - (6.284 - acos(t[3])) / uFog); t.xyz = -t.xyz; ",
-      ss32,      "float fogs = (uFogBase - acos(t[3]) / uFog); t.w = -t.w; ", // 2pi
-      ss33,      "float fogs = (uFogBase - acos(t[3]) / uFog); ",
-
-      s3,        "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);",
-
-      sh3 || sr3 || sson || ball || seh2,"t[3] = 1.0;",
-      
-      band || hp || s3 || ball,"gl_Position = uP * t;",
-      dim3 && !s3, "vColor.xyz = vColor.xyz * (0.5 - gl_Position.z / 2.0) + uFogColor.xyz * (0.5 + gl_Position.z / 2.0);",
-      1,         "}"), 
-      
-      stringbuilder(
-  
-      1,       "uniform mediump sampler2D tTexture;",
-      1,       "varying mediump vec4 vColor;",
-      texture, "varying mediump vec2 vTexCoord;",
-      1,       "void main() {",
-      texture,   "gl_FragColor = vColor * texture2D(tTexture, vTexCoord);",
-      !texture,  "gl_FragColor = vColor;",
-      1,         "}"
-      ));
+    glUniformMatrix4fv(selected->uPP, 1, 0, pp.as_array());
     }
   
-  switch_mode(gmColored, shader_projection::standard);
-  if(!noshaders) programs[gmColored][0]->enable();
-  #endif
+  if(selected->uAlpha != -1)
+    glhr::set_ualpha(vid.alpha);
 
-  #if !CAP_SHADER
-  switch_mode(gmColored, shader_projection::standard);
-  #endif
+  if(selected->shader_flags & SF_ORIENT)
+    glhr::projection_multiply(model_orientation_gl());
 
-  WITHSHADER(glEnableVertexAttribArray(aPosition);, glEnableClientState(GL_VERTEX_ARRAY);)
-  // #endif
+  if(selected->shader_flags & SF_BAND)
+    glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, GDIM == 3 ? 2/M_PI : 1));
 
-  #if CAP_VERTEXBUFFER
-  glGenBuffers(1, &buf_current);
-  glGenBuffers(1, &buf_buffered);
-  current_vertices = NULL;
-  buffered_vertices = (void*) &buffered_vertices; // point to nothing
-  glBindBuffer(GL_ARRAY_BUFFER, buf_current);
-  #endif
-  }
+  if(selected->shader_flags & SF_HALFPLANE) {
+    glhr::projection_multiply(glhr::translate(0, 1, 0));      
+    glhr::projection_multiply(glhr::scale(-1, 1, 1));
+    glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, GDIM == 3 ? models::halfplane_scale : 1));
+    glhr::projection_multiply(glhr::translate(0, 0.5, 0));
+    }      
+  
+  if(vid.camera_angle && pmodel != mdPixel) {
+    ld cam = vid.camera_angle * degree;
 
-EX hyperpoint gltopoint(const glvertex& t) {
-  hyperpoint h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
-  if(SHDIM == 4 && MAXMDIM == 4) h[3] = t[3];
-  return h;
-  }
-
-EX glvertex pointtogl(const hyperpoint& t) {
-  glvertex h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
-  if(SHDIM == 4) h[3] = (MDIM == 4) ? t[3] : 1;
-  return h;
-  }
-
-#if CAP_VERTEXBUFFER
-template<class T> void bindbuffer(T& v) {
-  if(current_vertices == buffered_vertices || current_vertices == nullptr) {
-    glBindBuffer(GL_ARRAY_BUFFER, buf_current);
-    }
-  current_vertices = &v[0];
-  glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(v[0]), &v[0], GL_DYNAMIC_DRAW);    
-  }
-
-#define PTR(attrib, q, field) \
-  glVertexAttribPointer(attrib, q, GL_FLOAT, GL_FALSE, sizeof(v[0]), (void*) ((char*) &v[0].field - (char*) &v[0]));
-
-#endif
-
-EX void vertices(const vector<glvertex>& v, int vshift IS(0)) {
-  #if CAP_VERTEXBUFFER
-  if(&v[0] == buffered_vertices) {
-    if(&v[0] == current_vertices) return;
-    current_vertices = buffered_vertices;
-    glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
-    glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
-    return;
-    }
-  bindbuffer(v);
-  glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
-  #else
-  if(current_vertices == &v[vshift]) return;
-  current_vertices = &v[vshift];
-  WITHSHADER(
-    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[vshift]);,
-    glVertexPointer(SHDIM, GL_FLOAT, sizeof(glvertex), &v[0]);
-    )
-  #endif
-  }
-
-EX void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, int vshift IS(0), int tshift IS(0)) {
-  #if CAP_VERTEXBUFFER
-  int q = min(isize(v)-vshift, isize(t)-tshift);
-  vector<textured_vertex> tv(q);
-  for(int i=0; i<q; i++)
-    tv[i].coords = v[vshift+i],
-    tv[i].texture[0] = t[tshift+i][0],
-    tv[i].texture[1] = t[tshift+i][1];
-  prepare(tv);
-  #else
-  vertices(v, vshift);
-  WITHSHADER(
-    glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[tshift]);,
-    glTexCoordPointer(SHDIM, GL_FLOAT, 0, &t[tshift]);
-    )
-  #endif
-  }
-
-EX void prepare(vector<colored_vertex>& v) {
-  #if CAP_VERTEXBUFFER
-  bindbuffer(v);
-  PTR(glhr::aPosition, SHDIM, coords);
-  PTR(glhr::aColor, 4, color);
-  #else
-  if(current_vertices == &v[0]) return;
-  current_vertices = &v[0];
-  WITHSHADER({
-    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].coords);
-    glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].color);
-    }, {
-    glVertexPointer(SHDIM, GL_FLOAT, sizeof(colored_vertex), &v[0].coords);
-    glColorPointer(4, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
-    })
-  #endif
-  }
-
-EX void prepare(vector<textured_vertex>& v) {
-  #if CAP_VERTEXBUFFER
-  bindbuffer(v);
-  PTR(glhr::aPosition, SHDIM, coords);
-  PTR(glhr::aTexture, 2, texture);
-  #else
-  if(current_vertices == &v[0]) return;
-  current_vertices = &v[0];
-  WITHSHADER({
-    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].coords);
-    glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
-    }, {    
-    glVertexPointer(SHDIM, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
-    glTexCoordPointer(2, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
-    })
-  #endif
-  // color2(col);
-  }
-
-EX void prepare(vector<ct_vertex>& v) {
-  #if CAP_VERTEXBUFFER
-  bindbuffer(v);
-  PTR(glhr::aPosition, SHDIM, coords);
-  PTR(glhr::aColor, 4, color);
-  PTR(glhr::aTexture, 2, texture);
-  #else
-  if(current_vertices == &v[0]) return;
-  current_vertices = &v[0];
-  WITHSHADER({
-    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].coords);
-    glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].color);
-    glVertexAttribPointer(aTexture, 2, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].texture);
-    }, {
-    glVertexPointer(SHDIM, GL_FLOAT, sizeof(ct_vertex), &v[0].coords);
-    glTexCoordPointer(2, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
-    glColorPointer(4, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
-    })
-  #endif
-  }
-
-EX void store_in_buffer(vector<glvertex>& v) {
-#if CAP_VERTEXBUFFER
-  if(!buf_buffered) {
-    printf("no buffer yet\n");
-    return;
-    }
-  printf("storing %d in buffer: %p\n", isize(v), &v[0]);
-  current_vertices = buffered_vertices = &v[0];
-  glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
-  glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
-  glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(glvertex), &v[0], GL_STATIC_DRAW);
-  printf("Stored.\n");
-#endif
-  }
-
-EX void set_depthtest(bool b) {
-  if(b != current_depthtest) {
-    current_depthtest = b;
-    if(b) glEnable(GL_DEPTH_TEST);
-    else glDisable(GL_DEPTH_TEST);
+    GLfloat cc = cos(cam);
+    GLfloat ss = sin(cam);
+    
+    GLfloat yzspin[16] = {
+      1, 0, 0, 0,
+      0, cc, ss, 0,
+      0, -ss, cc, 0,
+      0, 0, 0, 1
+      };
+    
+    glhr::projection_multiply(glhr::as_glmatrix(yzspin));
     }
   }
 
+EX void add_if(string& shader, const string& seek, const string& function) {
+  if(shader.find(seek) != string::npos)
+    shader = function + shader;
+  }
 
-EX void set_depthwrite(bool b) {
-  if(b != current_depthwrite) { // <- this does not work ask intended for some reason...
-    current_depthwrite = b;
-    if(b) glDepthMask(GL_TRUE);
-    else glDepthMask(GL_FALSE);
+EX void add_fixed_functions(string& shader) {
+  /* from the most complex to the simplest */
+
+  add_if(shader, "tanh", "float tanh(float x) { return sinh(x) / cosh(x); }\n");
+  add_if(shader, "sinh", "float sinh(float x) { return (exp(x) - exp(-x)) / 2.0; }\n");
+  add_if(shader, "cosh", "float cosh(float x) { return (exp(x) + exp(-x)) / 2.0; }\n");
+  add_if(shader, "asinh", "float asinh(float x) { return log(sqrt(x*x + 1.0) + x); }\n");
+  add_if(shader, "acosh", "float acosh(float x) { return log(sqrt(x*x - 1.0) + x); }\n");
+  add_if(shader, "atanh", "float atanh(float x) { return (log(1.+x)-log(1.-x))/2.; }\n");
+  add_if(shader, "zlevel", "float zlevel(vec4 h) { return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]); }\n");  
+  add_if(shader, "atan2", "float atan2(float y, float x) {\n"
+    "if(x == 0.) return y > 0. ? PI/2. : -PI/2.;\n"
+    "if(x > 0.) return atan(y / x);\n"
+    "if(y >= 0.) return atan(y / x) + PI;\n" 
+    "if(y < 0.) return atan(y / x) - PI;\n"
+    "}\n");
+
+  add_if(shader, "PI", "#define PI 3.14159265358979324\n");
+  #ifndef GLES_ONLY
+  add_if(shader, "mediump", "#define mediump\n");
+  #endif
+  }
+
+EX flagtype get_shader_flags() { 
+  if(!glhr::current_glprogram) return 0;
+  return glhr::current_glprogram->shader_flags;
+  }
+
+EX void glapplymatrix(const transmatrix& V) {
+  GLfloat mat[16];
+  int id = 0;
+  
+  if(MDIM == 3) {
+    for(int y=0; y<3; y++) {
+      for(int x=0; x<3; x++) mat[id++] = V[x][y];
+      mat[id++] = 0;
+      }
+    mat[12] = 0;
+    mat[13] = 0;
+    mat[14] = 0;
+    mat[15] = 1;
     }
-  }
-
-EX void set_linewidth(ld lw) {
-  if(lw != current_linewidth) {
-    current_linewidth = lw;
-    glLineWidth(lw);
+  else {
+    for(int y=0; y<4; y++) 
+      for(int x=0; x<4; x++) mat[id++] = V[x][y];
     }
+  glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
-EX void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
-  glhr::be_textured();
-  dynamicval<eModel> pm(pmodel, mdUnchanged);
-  if(!svg::in) current_display->set_all(0);
-  vertices_texture(v, t, 0, 0);
-  }
-
-EX }
-
-EX vector<glhr::textured_vertex> text_vertices;
-
-EX void texture_vertices(GLfloat *f, int qty, int stride IS(2)) {
-  WITHSHADER(
-    glVertexAttribPointer(glhr::aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
-    glTexCoordPointer(stride, GL_FLOAT, 0, f);
-    )
-  } 
-
-EX void oldvertices(GLfloat *f, int qty) {
-  WITHSHADER(
-   glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, SHDIM * sizeof(GLfloat), f);,
-   glVertexPointer(SHDIM, GL_FLOAT, 0, f);
-   )
-  }
 
 }
-
-#define glMatrixMode DISABLED
-#define glLoadIdentity DISABLED
-#define glMultMatrixf DISABLED
-#define glScalef DISABLED
-#define glTranslatef DISABLED
-#define glPushMatrix DISABLED
-#define glPopMatrix DISABLED
-

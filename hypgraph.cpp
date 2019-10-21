@@ -36,7 +36,7 @@ EX bool non_spatial_model() {
     return true;
   if(pmodel == mdSpiral && euclid)
     return true;
-  return vid.consider_shader_projection && shaderside_projection && pmodel;  
+  return pmodel && vid.consider_shader_projection && (get_shader_flags() & SF_DIRECT);
   }
 
 hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
@@ -120,7 +120,7 @@ void apply_depth(hyperpoint &f, ld z) {
     f[2] = z;
   else {
     z = z * current_display->radius;
-    ld mul = current_display->scrdist / (current_display->scrdist + z);
+    ld mul = current_display->radius / (current_display->radius + z);
     f[0] = f[0] * mul;
     f[1] = f[1] * mul;
     f[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius + vid.ipd * mul / 2;
@@ -336,8 +336,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       return;
       }
       
-    case mdUnchanged:
-    case mdFlatten:
+    case mdPixel:
       ret = H / current_display->radius;
       return; 
     
@@ -836,7 +835,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       }
     
-    case mdGUARD: case mdRug: break;
+    case mdGUARD: case mdManual: break;
     }
 
   ghcheck(ret,H_orig);
@@ -1526,7 +1525,7 @@ void addball(ld a, ld b, ld c) {
   }
 
 void ballgeometry() {
-  queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR::CIRCLE);
+  queuereset(mdPixel, PPR::CIRCLE);
   for(int i=0; i<60; i++)
     addball(i * M_PI/30, 10, 0);
   for(double d=10; d>=-10; d-=.2)
@@ -1586,12 +1585,17 @@ transmatrix screenpos(ld x, ld y) {
   return V;
   }
 
-EX eModel flat_model() { return MDIM == 4 ? mdFlatten : mdDisk; }
+/** 
+  In 3D, we use the standard translation matrices to place stuff on the screen.
+  In 2D, this does not work (as HyperRogue reduces matrices to 3x3) so we use the native disk projection
+*/
+
+EX eModel flat_model() { return MDIM == 4 ? mdPixel : mdDisk; }
 
 EX transmatrix atscreenpos(ld x, ld y, ld size) {
   transmatrix V = Id;
   
-  if(pmodel == mdFlatten) {
+  if(pmodel == mdPixel) {
     V[0][3] += (x - current_display->xcenter);
     V[1][3] += (y - current_display->ycenter);
     V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
@@ -1603,7 +1607,7 @@ EX transmatrix atscreenpos(ld x, ld y, ld size) {
     V[1][2] += (y - current_display->ycenter);
     V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
     V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
-    V[2][2] = current_display->scrdist;
+    V[2][2] = current_display->radius;
     if(S3 == OINF) V[0][0] /= 5, V[1][1] /= 5;
     }
 
@@ -1647,7 +1651,7 @@ EX void draw_model_elements() {
       }
     
     case mdTwoHybrid: {
-      queuereset(mdUnchanged, PPR::CIRCLE);
+      queuereset(mdPixel, PPR::CIRCLE);
       
       for(int mode=0; mode<4; mode++) {
         for(int s=-200; s<=200; s ++) {
@@ -1747,7 +1751,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 
   ld mul1 = hypot(vid.xres, vid.yres) / hypot_d(2, H1);
   
-  queuereset(mdUnchanged, p);
+  queuereset(mdPixel, p);
   curvepoint(H0 + spin(M_PI/2) * H0 * mul0);
   curvepoint(H0 - spin(M_PI/2) * H0 * mul0);
   curvepoint(H1 + spin(M_PI/2) * H1 * mul1);
@@ -1794,7 +1798,7 @@ EX void draw_boundary(int w) {
   
     case mdTwoPoint: {
       if(twopoint_do_flips || current_display->stereo_active() || !sphere) return;
-      queuereset(vid.usingGL ? mdDisk : mdUnchanged, p);
+      queuereset(mdPixel, p);
   
       for(int b=-1; b<=1; b+=2)
       for(ld a=-90; a<=90+1e-6; a+=pow(.5, vid.linequality)) {
@@ -1851,7 +1855,7 @@ EX void draw_boundary(int w) {
     
     case mdHemisphere: {
       if(hyperbolic) {
-        queuereset(mdUnchanged, p);
+        queuereset(mdPixel, p);
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
           curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (models::cos_ball * s >= 0 - 1e-6 ? 1 : abs(models::sin_ball)), 0));
@@ -1859,7 +1863,7 @@ EX void draw_boundary(int w) {
         queuecurve(lc, fc, p);
         queuereset(pmodel, p);
         p = PPR::CIRCLE; fc = 0;
-        queuereset(mdUnchanged, p);
+        queuereset(mdPixel, p);
   
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
@@ -1869,7 +1873,7 @@ EX void draw_boundary(int w) {
         queuereset(pmodel, p);
         }
       if(euclid || sphere) {
-        queuereset(mdUnchanged, p);  
+        queuereset(mdPixel, p);  
         for(int i=0; i<=360; i++) {
           curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * sin(i * degree), 0));
           }
@@ -1938,7 +1942,7 @@ EX void draw_boundary(int w) {
       auto& sm = models::spiral_multiplier;
       ld u = hypot(1, imag(sm) / real(sm));
       if(real(sm)) {
-        queuereset(mdUnchanged, p);
+        queuereset(mdPixel, p);
         for(ld a=-10; a<=10; a+=0.01 / (1 << vid.linequality) / u) {
           cld z = exp(cld(a, a * imag(sm) / real(sm) + M_PI));
           hyperpoint ret = point2(real(z), imag(z));

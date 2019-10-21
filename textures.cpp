@@ -669,7 +669,7 @@ void texture_config::drawRawTexture() {
     rtver[i].coords[2] = 0;
     rtver[i].coords[3] = 1;
     }
-  glhr::set_modelview(glhr::translate(0, 0, current_display->scrdist));
+  glhr::id_modelview();
   glhr::prepare(rtver);
   glhr::set_depthtest(false);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

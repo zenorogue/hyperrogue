@@ -23,6 +23,7 @@
 #include "hyper.h"
 
 #include "classes.cpp"
+#include "glhr.cpp"
 #include "shaders.cpp"
 #include "hprint.cpp"
 #include "util.cpp"

@@ -3076,9 +3076,9 @@ void drawaura() {
       }
     }
   glflush();
-  dynamicval<eModel> p(pmodel, GDIM == 2 && pmodel == mdDisk ? mdDisk : mdUnchanged);
+  current_display->next_shader_flags = GF_VARCOLOR;
+  dynamicval<eModel> m(pmodel, mdPixel);
   current_display->set_all(0);
-  glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
   glhr::id_modelview();
   glhr::prepare(auravertices);
   glhr::set_depthtest(false);
@@ -4898,7 +4898,7 @@ void dqi_sky::draw() {
 
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
-    glhr::switch_mode(glhr::gmVarColored, glhr::new_shader_projection);
+    current_display->next_shader_flags = GF_VARCOLOR;
     current_display->set_all(ed);
     if(global_projection)
       glhr::projection_multiply(glhr::tmtogl(xpush(-vid.ipd * global_projection/2)));
@@ -7641,11 +7641,6 @@ EX void calcparam() {
   
   cd->tanfov = tan(vid.fov * degree / 2);
   
-  if(pmodel) 
-    cd->scrdist = vid.xres / 2 / cd->tanfov;
-  else 
-    cd->scrdist = cd->radius;
-
   callhooks(hooks_calcparam);
   reset_projection();
   }

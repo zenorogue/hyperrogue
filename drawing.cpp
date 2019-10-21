@@ -126,7 +126,6 @@ EX int shapes_merged;
 color_t triangle_color, line_color;
 vector<glvertex> triangle_vertices;
 vector<glvertex> line_vertices;
-EX void glapplymatrix(const transmatrix& V);
 #endif
 
 EX void glflush() {
@@ -159,14 +158,14 @@ EX void glflush() {
 
   if(isize(text_vertices)) {
     // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
-    glhr::be_textured();
-    dynamicval<eModel> pm(pmodel, mdUnchanged);
+    current_display->next_shader_flags = GF_TEXTURE;
+    dynamicval<eModel> m(pmodel, mdPixel);
     if(!svg::in) current_display->set_all(0);
     glBindTexture(GL_TEXTURE_2D, text_texture);
     glhr::color2(text_color);
     glhr::set_depthtest(false);
     for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, current_display->scrdist));
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, 0));
       current_display->set_mask(ed);
   
       glhr::current_vertices = NULL;
@@ -357,7 +356,7 @@ void coords_to_poly() {
   }
 
 void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
-  if(pmodel == mdFlatten) {
+  if(pmodel == mdPixel) {
     for(int i=ofs; i<ofs+cnt; i++) {
       hyperpoint h = glhr::gltopoint(tab[i]);
       h[3] = 1;
@@ -475,68 +474,6 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
 
 #if CAP_GL
 
-EX void glapplymatrix(const transmatrix& V) {
-  GLfloat mat[16];
-  int id = 0;
-  
-  if(prod && pmodel == mdPerspective) {
-    for(int y=0; y<3; y++) {
-      for(int x=0; x<3; x++) mat[id++] = V[x][y];
-      mat[id++] = 0;
-      }
-    mat[12] = 0;
-    mat[13] = 0;
-    mat[14] = 0;
-    mat[15] = 1;
-    glhr::set_modelview(glhr::as_glmatrix(mat));
-    return;
-    }
-
-  if(in_perspective() && MDIM == 4) {
-    if(spherephase & 4) {
-      for(int y=0; y<4; y++) {
-        for(int x=0; x<4; x++) mat[id++] = -V[x][y];
-        }
-      }
-    else {
-      for(int y=0; y<4; y++) {
-        for(int x=0; x<4; x++) mat[id++] = V[x][y];
-        }
-      }
-    glhr::set_modelview(glhr::as_glmatrix(mat));
-    return;
-    }
-
-  if(MDIM == 4) {
-    for(int y=0; y<4; y++) 
-      for(int x=0; x<4; x++) mat[id++] = V[x][y];
-    }
-  else {
-    for(int y=0; y<3; y++) {
-      for(int x=0; x<3; x++) mat[id++] = V[x][y];
-      mat[id++] = 0;
-      }
-    mat[12] = 0;
-    mat[13] = 0;
-    if(glhr::current_shader_projection != glhr::shader_projection::band)
-      mat[14] = GLfloat(vid.alpha);
-    else
-      mat[14] = 0;
-    mat[15] = 1;  
-    }
-  
-  if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
-  
-  if(models::model_has_orientation()) {
-    if(GDIM == 3) for(int a=0; a<4; a++) 
-      models::apply_orientation_yz(mat[a*4+1], mat[a*4+2]);
-    for(int a=0; a<4; a++) 
-      models::apply_orientation(mat[a*4], mat[a*4+1]);
-    }
-
-  glhr::set_modelview(glhr::as_glmatrix(mat));
-  }
-
 EX int global_projection;
 
 int min_slr, max_slr = 0;
@@ -593,8 +530,10 @@ void dqi_poly::gldraw() {
     current_display->set_all(ed);
     bool draw = color;
     
-    if(shaderside_projection) {
-      if(glhr::current_shader_projection == glhr::shader_projection::band && V[2][2] > 1e8) continue;
+    flagtype sp = get_shader_flags();
+    
+    if(sp & SF_DIRECT) {
+      if((sp & SF_BAND) && V[2][2] > 1e8) continue;
       glapplymatrix(V);
       }
 
@@ -627,18 +566,17 @@ void dqi_poly::gldraw() {
           glStencilFunc( GL_NOTEQUAL, 1, 1);
           GLfloat xx = vid.xres;
           GLfloat yy = vid.yres;
-          GLfloat dist = shaderside_projection ? current_display->scrdist : 0;
           vector<glvertex> scr = {
-            glhr::makevertex(-xx, -yy, dist), 
-            glhr::makevertex(+xx, -yy, dist), 
-            glhr::makevertex(+xx, +yy, dist), 
-            glhr::makevertex(-xx, +yy, dist)
+            glhr::makevertex(-xx, -yy, 0), 
+            glhr::makevertex(+xx, -yy, 0), 
+            glhr::makevertex(+xx, +yy, 0), 
+            glhr::makevertex(-xx, +yy, 0)
             };
           glhr::vertices(scr);
           glhr::id_modelview();
           glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
           glhr::vertices(v);
-          if(shaderside_projection) glapplymatrix(V);
+          if(sp & SF_DIRECT) glapplymatrix(V);
           }
         else { 
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
@@ -681,7 +619,7 @@ EX ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1 && !ISWEB) {
     double dz = h[LDIM];
-    if(dz < 1 || abs(dz-current_display->scrdist) < 1e-6) return 1;
+    if(dz < 1) return 1;
     else {
       double dx = sqrt(dz * dz - 1);
       double dfc = dx/(dz+1);
@@ -898,7 +836,7 @@ void compute_side_by_area() {
   }
 
 ld get_width(dqi_poly* p) {
-  if((p->flags & POLY_FORCEWIDE) || pmodel == mdUnchanged)
+  if((p->flags & POLY_FORCEWIDE) || pmodel == mdPixel)
     return p->linewidth;
   else if(p->flags & POLY_PRECISE_WIDE) {
     ld maxwidth = 0;
@@ -1241,7 +1179,7 @@ EX }
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
-  if(in_s2xe() && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), shaderside_projection)) {
+  if(in_s2xe() && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), (get_shader_flags() & SF_DIRECT))) {
     s2xe::draw_s2xe(this);
     return;
     }
@@ -1331,7 +1269,7 @@ void dqi_poly::draw() {
         if(cpha == 1) pha = 0;
         }
       }
-    dynamicval<eModel> d1(pmodel, mdUnchanged);
+    dynamicval<eModel> d1(pmodel, mdPixel);
     dynamicval<transmatrix> d2(V, Id);
     dynamicval<int> d3(offset, 0);
     dynamicval<decltype(tab)> d4(tab, tab);
@@ -1351,7 +1289,7 @@ void dqi_poly::draw() {
     } */
 
 #if CAP_GL
-  if(vid.usingGL && (current_display->set_all(global_projection), shaderside_projection)) {
+  if(vid.usingGL && (current_display->set_all(global_projection), get_shader_flags() & SF_DIRECT)) {
     if(sl2 && pmodel == mdGeodesic) {
       ld z = atan2(V[2][3], V[3][3]);
       auto zr = sightranges[geometry];
@@ -1472,7 +1410,7 @@ void dqi_poly::draw() {
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
           ld a = i * degree + h;
-          glcoords.push_back(glhr::makevertex(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), current_display->scrdist));
+          glcoords.push_back(glhr::makevertex(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), 0));
           }
         poly_flags ^= POLY_INVERSE;
         }
@@ -1567,7 +1505,7 @@ EX void prettypoint(const hyperpoint& h) {
   }
 
 EX void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
-  if(lev >= 0 && pmodel != mdFlatten) {
+  if(lev >= 0 && pmodel != mdPixel) {
     hyperpoint h3 = midz(h1, h2);
     prettylinesub(h1, h3, lev-1);
     prettylinesub(h3, h2, lev-1);

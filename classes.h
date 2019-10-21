@@ -313,7 +313,7 @@ enum eModel {
   // 25
   mdMollweide, mdCentralCyl, mdCollignon,
   // 26..
-  mdGUARD, mdUnchanged, mdHyperboloidFlat, mdPolynomial, mdRug, mdFlatten
+  mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
 
 typedef unsigned long long flagtype;

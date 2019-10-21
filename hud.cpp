@@ -389,7 +389,7 @@ EX void draw_radar(bool cornermode) {
   bool scompass = nonisotropic && !hybri;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
-  dynamicval<eModel> pm(pmodel, mdUnchanged);
+  dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<bool> ga(vid.always3, false);
   dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
   initquickqueue();

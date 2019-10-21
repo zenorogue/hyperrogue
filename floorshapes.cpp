@@ -1003,21 +1003,23 @@ void geometry_information::make_floor_textures_here() {
   
   // gradient vertices
   vector<glhr::colored_vertex> gv;
-  current_display->scrdist = 0;
   gv.emplace_back(-1, -1, 0, 0, 0);
   gv.emplace_back(+1, -1, 0, 0, 0);
   gv.emplace_back(+1, +1, 1, 1, 1);
   gv.emplace_back(-1, -1, 0, 0, 0);
   gv.emplace_back(+1, +1, 1, 1, 1);
   gv.emplace_back(-1, +1, 1, 1, 1);
-
-  glhr::switch_mode(glhr::gmVarColored, glhr::shader_projection::standard);
-  current_display->set_all(0);
-  glhr::new_projection();
-  glhr::id_modelview();
-  glhr::prepare(gv);
-  glhr::set_depthtest(false);
-  glDrawArrays(GL_TRIANGLES, 0, isize(gv));
+  
+  if(1) {
+    current_display->next_shader_flags = GF_VARCOLOR;
+    dynamicval<eModel> m(pmodel, mdPixel);
+    current_display->set_all(0);
+    glhr::new_projection();
+    glhr::id_modelview();
+    glhr::prepare(gv);
+    glhr::set_depthtest(false);
+    glDrawArrays(GL_TRIANGLES, 0, isize(gv));
+    }
   
   shOverFloor.pstrength = 20;
   shFeatherFloor.pstrength = 40;

@@ -38,8 +38,7 @@ struct display_data {
   bool sidescreen;
 
   ld tanfov;
-
-  GLfloat scrdist, scrdist_text;
+  flagtype next_shader_flags;
 
   ld eyewidth();
   bool stereo_active();
@@ -85,8 +84,6 @@ namespace stereo {
   ld ipd;
   ld lr_eyewidth, anaglyph_eyewidth;
   ld fov, tanfov;
-
-  GLfloat scrdist;
   }
 
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
@@ -226,25 +223,6 @@ void setcameraangle(bool b) { }
 
 #if CAP_GL
 
-EX bool shaderside_projection;
-
-EX void start_projection(int ed, bool perspective) {
-  glhr::use_projection();
-  glhr::new_projection();
-  shaderside_projection = perspective;
-
-  auto cd = current_display;
-  
-  if(ed && vid.stereo_mode == sLR) {
-    glhr::projection_multiply(glhr::translate(ed, 0, 0));
-    glhr::projection_multiply(glhr::scale(2, 1, 1));
-    }      
-
-  ld tx = (cd->xcenter-cd->xtop)*2./cd->xsize - 1;
-  ld ty = (cd->ycenter-cd->ytop)*2./cd->ysize - 1;
-  glhr::projection_multiply(glhr::translate(tx, -ty, 0));
-  }
-
 #if CAP_VR
 EX hookset<bool()> *hooks_vr_eye_view, *hooks_vr_eye_projection;
 #endif
@@ -257,15 +235,6 @@ EX void eyewidth_translate(int ed) {
   if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
-glhr::glmatrix model_orientation_gl() {
-  glhr::glmatrix s = glhr::id;
-  for(int a=0; a<GDIM; a++)
-    models::apply_orientation(s[a][1], s[a][0]);
-  if(GDIM == 3) for(int a=0; a<GDIM; a++)
-    models::apply_orientation_yz(s[a][2], s[a][1]);
-  return s;
-  }
-
 tuple<int, eModel, display_data*, int> last_projection;
 EX bool new_projection_needed;
 #if HDR
@@ -275,7 +244,7 @@ inline void reset_projection() { new_projection_needed = true; }
 void display_data::set_all(int ed) {
   auto t = this;
   auto current_projection = tie(ed, pmodel, t, current_rbuffer);
-  if(new_projection_needed || last_projection != current_projection) {
+  if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection) {
     last_projection = current_projection;
     set_projection(ed);
     set_mask(ed);
@@ -283,194 +252,6 @@ void display_data::set_all(int ed) {
     new_projection_needed = false;
     }
   }  
-
-void display_data::set_projection(int ed) {
-  DEBBI(DF_GRAPH, ("current_display->set_projection"));
-  
-  bool pers3 = false;
-  bool apply_models = !among(pmodel, mdUnchanged, mdFlatten, mdRug);
-  
-  shaderside_projection = false;
-  glhr::new_shader_projection = glhr::shader_projection::standard;
-  
-  bool in_solnih = false;
-
-  if(vid.consider_shader_projection && pmodel == mdDisk && !spherespecial && !(hyperbolic && vid.alpha <= -1) && MDIM == 3)
-    shaderside_projection = true;
-  else if(vid.consider_shader_projection && !glhr::noshaders) {
-    if(pmodel == (nonisotropic ? mdHyperboloid : mdDisk) && !spherespecial && !(hyperbolic && vid.alpha <= -1) && GDIM == 3 && apply_models)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::ball;
-    if(pmodel == mdBand && hyperbolic && apply_models)
-      shaderside_projection = true, glhr::new_shader_projection = (GDIM == 2 ? glhr::shader_projection::band : glhr::shader_projection::band3);
-    if(pmodel == mdHalfplane && hyperbolic && apply_models && GDIM == 2)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane;
-    if(pmodel == mdHalfplane && hyperbolic && apply_models && GDIM == 3 && vid.alpha == 1)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::halfplane3;
-    if(GDIM == 3 && hyperbolic && apply_models && pmodel == mdPerspective)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardH3, pers3 = true;
-    if(GDIM == 3 && translatable && apply_models && pmodel == mdPerspective)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
-    if(GDIM == 3 && apply_models && pmodel == mdPerspective && in_s2xe())
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardR3, pers3 = true;
-    if(GDIM == 3 && apply_models && pmodel == mdPerspective && in_h2xe())
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardEH2, pers3 = true;
-    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && solnih) {
-      shaderside_projection = true, pers3 = true, in_solnih = true;
-      if(sol && nih)
-        glhr::new_shader_projection = glhr::shader_projection::standardSolvNIH;
-      else if(sol)
-        glhr::new_shader_projection = glhr::shader_projection::standardSolv;
-      else 
-        glhr::new_shader_projection = glhr::shader_projection::standardNIH;
-      }
-    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && sl2)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardSL2, pers3 = true;
-    if(GDIM == 3 && apply_models && pmodel == mdGeodesic && nil)
-      shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::standardNil, pers3 = true;
-    if(GDIM == 3 && sphere && apply_models && pmodel == mdPerspective) {
-      shaderside_projection = true; pers3 = true;
-      int sp = spherephase & 3;
-      if(sp == 0) glhr::new_shader_projection = glhr::shader_projection::standardS30;
-      if(sp == 1) glhr::new_shader_projection = glhr::shader_projection::standardS31;
-      if(sp == 2) glhr::new_shader_projection = glhr::shader_projection::standardS32;
-      if(sp == 3) glhr::new_shader_projection = glhr::shader_projection::standardS33;
-      }
-    }
-  if(pmodel == mdFlatten) shaderside_projection = true, glhr::new_shader_projection = glhr::shader_projection::flatten;
-  
-  start_projection(ed, shaderside_projection);
-  if(pmodel == mdRug) return;
-  
-  #if CAP_SOLV
-  if(in_solnih) {
-    auto &tab = solnihv::get_tabled();
-    
-    GLuint invexpid = tab.get_texture_id();
-    
-    glActiveTexture(GL_TEXTURE0 + glhr::INVERSE_EXP_BINDING);
-    glBindTexture(GL_TEXTURE_3D, invexpid);
-
-    glActiveTexture(GL_TEXTURE0 + 0);
-    
-    glhr::set_solv_prec(tab.PRECX, tab.PRECY, tab.PRECZ);
-    }
-  #endif
-
-  if(glhr::new_shader_projection == glhr::shader_projection::standardSL2) {
-    glhr::set_index_sl(0);
-    glhr::set_sl_iterations(slr::steps);
-    }
-
-  auto cd = current_display;
-
-  if(!shaderside_projection || glhr::new_shader_projection == glhr::shader_projection::flatten) {
-    if(GDIM == 3 && apply_models) {
-      glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, 1));
-      glhr::id_modelview();
-      }
-    else {
-      glhr::projection_multiply(glhr::ortho(cd->xsize/2, -cd->ysize/2, abs(current_display->scrdist) + 30000));
-      if(ed) {
-        glhr::glmatrix m = glhr::id;
-        m[2][0] -= ed;
-        glhr::projection_multiply(m);
-        }
-      glhr::id_modelview();
-      }
-    }
-  else {
-
-    if(hyperbolic && vid.alpha > -1 && GDIM == 2) {
-      // Because of the transformation from H3 to the Minkowski hyperboloid,
-      // points with negative Z can be generated in some 3D settings.
-      // This happens for points below the camera, but above the plane.
-      // These points should still be viewed, though, so we disable the
-      // depth clipping
-      glhr::projection_multiply(glhr::scale(1,1,0));
-      }
-
-    eyewidth_translate(ed);
-
-    #if CAP_VR
-    if(callhandlers(false, hooks_vr_eye_projection)) ; else
-    #endif
-    if(pers3) {
-      glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
-      glhr::projection_multiply(glhr::scale(1, -1, -1));
-      if(nisot::local_perspective_used()) {
-        if(prod) {
-          for(int i=0; i<3; i++) nisot::local_perspective[3][i] = nisot::local_perspective[i][3] = 0;
-          nisot::local_perspective[3][3] = 1;
-          }
-        glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
-        }
-      }
-    else if(MDIM == 4) {
-      glhr::glmatrix M = glhr::ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2, 1);
-      using models::clip_max; 
-      using models::clip_min;
-      M[2][2] = 2 / (clip_max - clip_min);
-      M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
-      glhr::projection_multiply(M);
-      if(nisot::local_perspective_used())
-        glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
-      }
-    else {
-      glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
-      GLfloat sc = current_display->radius / (cd->ysize/2.);  
-      glhr::projection_multiply(glhr::scale(sc, -sc, -1));
-      }
-    
-    if(ed) {
-      if(pers3) {
-        if(anyshiftclick)
-          glhr::projection_multiply(glhr::tmtogl(xpush(vid.ipd * ed/2)));
-        else {
-          glhr::using_eyeshift = true;
-          glhr::eyeshift = glhr::tmtogl(xpush(vid.ipd * ed/2));
-          }
-        }
-      else
-        glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
-      }  
-
-    if(pers3) {
-      glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
-      }
-    
-    if(glhr::new_shader_projection == glhr::shader_projection::ball)
-      glhr::set_ualpha(vid.alpha);
-    
-    if(among(glhr::new_shader_projection, glhr::shader_projection::band, glhr::shader_projection::band3)) {
-      glhr::projection_multiply(model_orientation_gl());
-      glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, GDIM == 3 ? 2/M_PI : 1));
-      }
-
-    if(among(glhr::new_shader_projection, glhr::shader_projection::halfplane, glhr::shader_projection::halfplane3)) {
-      glhr::projection_multiply(model_orientation_gl());
-      glhr::projection_multiply(glhr::translate(0, 1, 0));      
-      glhr::projection_multiply(glhr::scale(-1, 1, 1));
-      glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, GDIM == 3 ? models::halfplane_scale : 1));
-      glhr::projection_multiply(glhr::translate(0, 0.5, 0));
-      }      
-    }
-  
-  if(vid.camera_angle && !among(pmodel, mdUnchanged, mdFlatten, mdRug)) {
-    ld cam = vid.camera_angle * degree;
-
-    GLfloat cc = cos(cam);
-    GLfloat ss = sin(cam);
-    
-    GLfloat yzspin[16] = {
-      1, 0, 0, 0,
-      0, cc, ss, 0,
-      0, -ss, cc, 0,
-      0, 0, 0, 1
-      };
-    
-    glhr::projection_multiply(glhr::as_glmatrix(yzspin));
-    }
-  }
 
 void display_data::set_mask(int ed) { 
   if(ed == 0 || vid.stereo_mode != sAnaglyph) {
@@ -1156,7 +937,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
     glflush();
     glhr::be_nontextured();
     glhr::id_modelview();
-    dynamicval<eModel> em(pmodel, mdUnchanged);
+    dynamicval<eModel> em(pmodel, mdPixel);
     glcoords.clear();
     x -= current_display->xcenter; y -= current_display->ycenter;
     int pts = size * 4;
@@ -1164,7 +945,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
       float rr = (M_PI * 2 * r) / pts;
-      glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * vid.stretch * cos(rr), current_display->scrdist));
+      glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * vid.stretch * cos(rr), 0));
       }
     current_display->set_all(0);
     glhr::vertices(glcoords);

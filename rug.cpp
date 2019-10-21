@@ -1393,7 +1393,7 @@ EX void drawRugScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
-  glhr::switch_mode(glhr::gmLightFog, glhr::shader_projection::standard);
+  current_display->next_shader_flags = GF_LIGHTFOG | GF_TEXTURE;
   glhr::set_depthtest(true);
   glhr::set_depthwrite(true);
   glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
@@ -1405,7 +1405,7 @@ EX void drawRugScene() {
     if(ed == 1 && vid.stereo_mode == sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
     
-    dynamicval<eModel> p(pmodel, mdRug);
+    dynamicval<eModel> p(pmodel, mdManual);
     current_display->set_all(ed);
     eyewidth_translate(ed);
 

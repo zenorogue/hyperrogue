@@ -281,7 +281,7 @@ EX namespace models {
     #if CAP_QUEUE && CAP_CURVE
     dialog::extra_options = [] () {
       initquickqueue();
-      queuereset(mdUnchanged, PPR::LINE);              
+      queuereset(mdPixel, PPR::LINE);              
       for(int a=-1; a<=1; a++) {
         curvepoint(point2(-M_PI/2 * current_display->radius, a*current_display->radius));
         curvepoint(point2(+M_PI/2 * current_display->radius, a*current_display->radius));
@@ -632,6 +632,7 @@ EX namespace models {
     dialog::add_action(edit_stretch);
 
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
+    bool shaderside_projection = get_shader_flags() & SF_DIRECT;
     if(vid.consider_shader_projection && !shaderside_projection)
       dialog::lastItem().value = XLAT("N/A");
     if(vid.consider_shader_projection && shaderside_projection && pmodel)
