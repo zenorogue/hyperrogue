@@ -1176,8 +1176,144 @@ void draw_s2xe0(dqi_poly *p) {
   }
 EX }
 
+EX namespace ods {
+#if CAP_ODS
+  
+  EX bool project(hyperpoint h, hyperpoint& h1, hyperpoint& h2, bool eye) {
+    ld tanalpha = tan_auto(vid.ipd/2);
+    if(eye) tanalpha = -tanalpha;
+    if(!sphere) tanalpha = -tanalpha;
+
+    ld& x = h[0];
+    ld z = -h[1];
+    ld y = -h[2];
+    ld& t = h[3];
+
+    ld y02 = (x*x + y*y - tanalpha*tanalpha*t*t);
+    if(y02 < 0) return false;
+    ld y0 = sqrt(y02);
+    ld theta = atan(z / y0);
+  
+    for(int i=0; i<2; i++) {
+      hyperpoint& h = (i ? h1 : h2);
+      if(i == 1) theta = -theta, y0 = -y0;
+        
+      ld x0 = t * tanalpha;
+      
+      ld phi = atan2(y, x) - atan2(y0, x0) + M_PI;
+      
+      // ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(vid.ipd/2));
+      ld p = z / sin(theta) / t * cos_auto(vid.ipd / 2);
+      ld delta = (p > 1) ? 13 : (p < -1) ? -13 : atanh(p);
+      
+      if(euclid || hyperbolic) phi -= M_PI;
+      if(hyperbolic) delta = -delta;
+      
+      h[0] = phi;
+      h[1] = theta;
+      h[2] = delta;
+      if(euclid || hyperbolic) h[1] = -theta;
+      }
+    
+    return true;
+    }
+  
+  void draw_ods(dqi_poly *p) {
+    auto& stinf = s2xe::stinf;
+
+    if(!p->cnt) return;
+    if(!(p->flags & POLY_TRIANGLES)) return;
+
+    dqi_poly npoly = *p;
+    npoly.offset = 0;
+    npoly.tab = &glcoords;
+    npoly.V = Id;
+    npoly.tinf = p->tinf ? &stinf : NULL;
+    if(npoly.tinf) {
+      npoly.offset_texture = 0;
+      stinf.texture_id = p->tinf->texture_id;
+      stinf.tvertices.clear();
+      }
+    npoly.V = Id;
+    glcoords.clear();
+
+    array<hyperpoint, 6> h;
+
+    if(0) for(int i=0; i<p->cnt; i+=3) {
+      for(int j=0; j<3; j++)
+        h[j] = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
+
+      for(int j=0; j<3; j++) {
+        glcoords.push_back(glhr::makevertex(h[j][0], h[j][1], h[j][2]));
+        if(npoly.tinf) stinf.tvertices.push_back(p->tinf->tvertices[i+j]);
+        }
+      }
+
+    if(1) for(int i=0; i<p->cnt; i+=3) {
+
+      for(int j=0; j<3; j++) {
+        hyperpoint o = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
+        if(!project(o, h[j], h[j+3], global_projection == -1))
+          goto next_i;
+        }
+      
+      for(int j=0; j<6; j++) {
+        // let Delta be from 0 to 2PI
+        if(h[j][2]<0) h[j][2] += 2 * M_PI;
+        // Theta is from -PI/2 to PI/2. Let it be from 0 to PI
+        h[j][1] += global_projection * M_PI/2;
+        h[j][3] = 1;
+        }
+
+      /* natsph here */
+      
+      if(h[0][2] < 0) swap(h[0], h[3]);
+      if(h[1][2] < 0) swap(h[1], h[4]);
+      if(h[2][2] < 0) swap(h[2], h[5]);
+
+      cyclefix(h[0][0], 0);
+      cyclefix(h[1][0], h[0][0]);
+      cyclefix(h[2][0], h[0][0]);
+      cyclefix(h[3][0], 0);
+      cyclefix(h[4][0], h[3][0]);
+      cyclefix(h[5][0], h[3][0]);
+
+      if(abs(h[1][1] - h[0][1]) > M_PI/2) goto next_i;
+      if(abs(h[2][1] - h[0][1]) > M_PI/2) goto next_i;
+      
+      if(h[0][0] < -M_PI || h[0][0] > M_PI) println(hlog, h[0][0]);
+
+      if(1) {
+        int fst = 0, lst = 0;
+        if(h[1][0] < -M_PI || h[2][0] < -M_PI) lst++;
+        if(h[1][0] > +M_PI || h[2][0] > +M_PI) fst--;
+        for(int x=fst; x<=lst; x++) for(int j=0; j<3; j++) {
+          glcoords.push_back(glhr::makevertex(h[j][0] + 2 * M_PI * x, h[j][1], h[j][2]));
+          if(npoly.tinf) stinf.tvertices.push_back(p->tinf->tvertices[p->offset_texture+i+j]);
+          }
+        }
+      
+      /* natsph here */
+      
+      next_i: ;
+      }
+
+    npoly.cnt = isize(glcoords);
+    // npoly.color = 0xFFFFFFFF;
+    npoly.gldraw();
+    }
+#endif
+  EX }
+
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
+  
+  #if CAP_ODS  
+  if(vid.stereo_mode == sODS) {
+    ods::draw_ods(this);
+    return;
+    }
+  #endif
 
   if(in_s2xe() && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), (get_shader_flags() & SF_DIRECT))) {
     s2xe::draw_s2xe(this);

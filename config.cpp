@@ -1390,6 +1390,11 @@ EX void add_edit_fov(char key IS('f')) {
     });
   }
 
+bool supported_ods() {
+  if(!CAP_ODS) return false;
+  return rug::rugged || (hyperbolic && GDIM == 3);
+  }
+
 EX void showStereo() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1437,8 +1442,10 @@ EX void showStereo() {
        "Currently, red-cyan anaglyph glasses and mobile VR googles are supported."
         ) + "\n\n";
 
-    if(uni == 'm')
-      { vid.stereo_mode = eStereo((1 + vid.stereo_mode) % (CAP_ODS ? 4 : 3)); return; }
+    if(uni == 'm') {
+      vid.stereo_mode = eStereo((1 + vid.stereo_mode) % 4);
+      if(vid.stereo_mode == sODS && !supported_ods()) vid.stereo_mode = sOFF;
+      }
     
     else if(uni == 'e') 
       dialog::editNumber(vid.ipd, -10, 10, 0.01, 0, XLAT("pupillary distance"),

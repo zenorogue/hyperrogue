@@ -1168,61 +1168,17 @@ extern int besti;
 #if CAP_ODS
 /* these functions are for the ODS projection, used in VR videos */
 
-void cyclefix(ld& a, ld b) {
-  if(a > b + M_PI) a -= 2 * M_PI;
-  if(a < b - M_PI) a += 2 * M_PI;
-  }
-
-ld raddif(ld a, ld b) {
-  ld d = a-b;
-  if(d < 0) d = -d;
-  if(d > 2*M_PI) d -= 2*M_PI;
-  if(d > M_PI) d = 2 * M_PI-d;
-  return d;
-  }
-
 bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   USING_NATIVE_GEOMETRY;
-  ld tanalpha = tan_auto(vid.ipd/2);
-  if(eye) tanalpha = -tanalpha;
-  if(!sphere) tanalpha = -tanalpha;
   
   ld d = hypot_d(3, azeq);
   ld sindbd = sin_auto(d)/d, cosd = cos_auto(d);
   
-  ld x = azeq[0] * sindbd;
-  ld y = azeq[2] * sindbd;
-  ld z = azeq[1] * sindbd;
-  ld t = cosd;
+  return ods::project(hyperpoint(azeq[0] * sindbd, azeq[1] * sindbd, azeq[2] * sindbd, cosd), h1, h2, eye);
   
 //  printf("%10.5lf %10.5lf %10.5lf ", azeq[0], azeq[1], azeq[2]);
 //  printf(" => %10.5lf %10.5lf %10.5lf %10.5lf", x, y, z, t);
   
-  ld y02 = (x*x + y*y - tanalpha*tanalpha*t*t);
-  if(y02 < 0) return false;
-  ld y0 = sqrt(y02);
-  ld theta = atan(z / y0);
-
-  for(int i=0; i<2; i++) {
-    hyperpoint& h = (i ? h1 : h2);
-    if(i == 1) theta = -theta, y0 = -y0;
-      
-    ld x0 = t * tanalpha;
-    
-    ld phi = atan2(y, x) - atan2(y0, x0) + M_PI;
-      
-    ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(vid.ipd/2));
-    if(euclid || hyperbolic) phi -= M_PI;
-    if(hyperbolic) delta = -delta;
-    
-    h[0] = phi;
-    h[1] = theta;
-    h[2] = delta;
-    if(euclid || hyperbolic) h[1] = -theta;
-    
-    
-//    printf(" => %10.5lf %10.5lf %10.5lf", phi, theta, delta);
-    }
   
 //  printf("\n");
   return true;
@@ -1242,7 +1198,7 @@ void drawTriangle(triangle& t) {
   dt++;
 
 #if CAP_ODS
-  if(vid.stereo_mode == current_display->sODS) {
+  if(vid.stereo_mode == sODS) {
     hyperpoint pts[3];
 
     // not implemented
