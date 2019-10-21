@@ -155,16 +155,16 @@ bool trailer_handleKey(int sym, int uni) {
     if(sym == 'c') return move_camera(cspin(0, 2, -stepang) * cspin(1, 2, -stepang));
 
     
-    if(sym == '1') { stepdist = 0; println(hlog, stepdist); return true; }
-    if(sym == '2') { stepdist = 0.01; println(hlog, stepdist); return true; }
-    if(sym == '3') { stepdist = 0.02; println(hlog, stepdist); return true; }
-    if(sym == '4') { stepdist = 0.05; println(hlog, stepdist); return true; }
+    if(sym == '1') { stepdist = 0; println(hlog, "dist = ", stepdist); return true; }
+    if(sym == '2') { stepdist = 0.01; println(hlog, "dist = ", stepdist); return true; }
+    if(sym == '3') { stepdist = 0.02; println(hlog, "dist = ", stepdist); return true; }
+    if(sym == '4') { stepdist = 0.05; println(hlog, "dist = ", stepdist); return true; }
 
-    if(sym == '6') { stepang = 0.001; println(hlog, stepang); return true; }
-    if(sym == '7') { stepang = 0.003; println(hlog, stepang); return true; }
-    if(sym == '8') { stepang = 0.01; println(hlog, stepang); return true; }
-    if(sym == '9') { stepang = 0.03; println(hlog, stepang); return true; }
-    if(sym == '0') { stepang = 0.1; println(hlog, stepang); return true; }
+    if(sym == '6') { stepang = 0.001; println(hlog, "ang = ", stepang); return true; }
+    if(sym == '7') { stepang = 0.003; println(hlog, "ang = ", stepang); return true; }
+    if(sym == '8') { stepang = 0.01; println(hlog, "ang = ", stepang); return true; }
+    if(sym == '9') { stepang = 0.03; println(hlog, "ang = ", stepang); return true; }
+    if(sym == '0') { stepang = 0.1; println(hlog, "ang = ", stepang); return true; }
     
     if(sym == 'p') { get_b4_distance(); return true; }
   
