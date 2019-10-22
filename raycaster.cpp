@@ -9,13 +9,14 @@
 
 namespace hr {
 
-GLuint txConnections = 0, txWallcolor = 0, txMatrixid = 0, txWallTexture = 0;
+GLuint txConnections = 0, txWallcolor = 0, txMatrixid = 0;
 
 #define IN_ODS 0
 
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uN, uM, uLength, uFovX, uFovY, uIPD;
-  GLint tConnections, tWallTexture, tWallcolor, tMatrixid;
+  GLint uWallstart, uWallX, uWallY;
+  GLint tConnections, tWallcolor, tMatrixid;
   
   raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
@@ -27,9 +28,12 @@ struct raycaster : glhr::GLprogram {
     uFovX = glGetUniformLocation(_program, "uFovX");
     uFovY = glGetUniformLocation(_program, "uFovY");
     uIPD = glGetUniformLocation(_program, "uIPD");
+
+    uWallstart = glGetUniformLocation(_program, "uWallstart");
+    uWallX = glGetUniformLocation(_program, "uWallX");
+    uWallY = glGetUniformLocation(_program, "uWallY");
   
     tConnections = glGetUniformLocation(_program, "tConnections");
-    tWallTexture = glGetUniformLocation(_program, "tWallTexture");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tMatrixid = glGetUniformLocation(_program, "tMatrixid");
     }
@@ -59,13 +63,16 @@ void enable_raycaster() {
     "uniform int uLength;\n"
     "uniform float uIPD;\n"
     "uniform mat4 uStart;\n"
-    "uniform mat4 uM[200];\n"
+    "uniform mat4 uM[203];\n"
     "uniform mat4 uTest;\n"
     "uniform float uStartid;\n"
     "uniform sampler1D tConnections;\n"
     "uniform sampler1D tWallcolor;\n"
     "uniform sampler2D tWallTexture;\n"
-    "uniform sampler1D tMatrixid;\n";
+    "uniform sampler1D tMatrixid;\n"
+    "uniform vec4 uWallX[60];\n"
+    "uniform vec4 uWallY[60];\n"
+    "uniform int uWallstart[16];\n";
     
     if(IN_ODS) fsh += 
 
@@ -89,6 +96,20 @@ void enable_raycaster() {
          "0., -sin(x), cos(x), 0.,\n"
          "0., 0., 0., 1."
          ");}\n";    
+    
+   fsh += 
+     "vec2 map_texture(vec4 pos, int which) {\n";
+   if(hyperbolic) fsh += 
+       "pos /= pos.w;\n";
+   fsh += 
+       "int s = uWallstart[which];\n"
+       "int e = uWallstart[which+1];\n"
+       "for(int i=s; i<e; i++) {\n"
+         "vec2 v = vec2(dot(uWallX[i], pos), dot(uWallY[i], pos));\n"
+         "if(v.x >= 0. && v.y >= 0. && v.x + v.y <= 1.) return v;\n"
+         "}\n"
+       "return vec2(0.5, 0.5);\n"
+       "}\n";
     
    string fmain = "void main() {\n";
     
@@ -171,9 +192,8 @@ void enable_raycaster() {
       "  float u = cid + float(which) / float(uLength);\n"
       "  vec4 col = texture1D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n"
-      "    vec4 inface = uM[uN+which] * position;\n"
-      "    inface = inface / inface.w;"
-      "    float bright = texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
+      "    vec2 inface = map_texture(position, which);\n"
+      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
 //      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
       "    col.xyz = col.xyz * bright * exp(- go / 20.);\n"
 //      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
@@ -234,59 +254,11 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
   GLERR("bind_array");
   }
 
-bool made_texture;
-
-void make_walltexture(GLuint t, GLuint& tx, int id) {
-  if(made_texture) return;
-  made_texture = true;
-  glUniform1i(our_raycaster->tWallTexture, id);
-  GLERR("pre walltexture");
-
-  if(tx == 0) glGenTextures(1, &tx);
-  GLERR("gentexture");
-
-  glActiveTexture(GL_TEXTURE0 + id);
-  GLERR("walltexture b");
-
-  glBindTexture(GL_TEXTURE_2D, tx);
-  GLERR("walltexture c");
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  GLERR("walltexture a");
-  
-  constexpr int dsize = 1024;
-  
-  float data[dsize][dsize];
-  
-  for(int y=0; y<dsize; y++)
-  for(int x=0; x<dsize; x++) {
-    hyperpoint h = point2(x - dsize/2 + .5, y - dsize/2 + .5) / (dsize / 2);
-    // ld maxd = -1;
-    ld maxd = 100;
-    int q = reg3::face;
-    for(int s=0; s<q; s++) {
-      maxd = min(maxd, h[0]);
-      h = spin(360 * degree / q) * h;
-      }
-    maxd = -maxd;
-    maxd *= 2.4;
-    if(maxd > .9) maxd = (10 - 10 * maxd) * .9;
-    else maxd = 0.8 + 0.1 * max(sin(maxd*50), sin(atan2(h[1], h[0]) * 30 + M_PI/4));
-    data[y][x] = maxd;
-    }
-  
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, dsize, dsize, 0, GL_RED, GL_FLOAT, &data[0][0]);
-  GLERR("walltexture");
-  }
-  
 EX void do_raycast() {
   enable_raycaster();
 
   auto& o = our_raycaster;
   
-  make_walltexture(o->tWallTexture, txWallTexture, 6);
-
   vector<glvertex> screen = {
     glhr::makevertex(-1, -1, 1),
     glhr::makevertex(-1, +1, 1),
@@ -331,11 +303,7 @@ EX void do_raycast() {
     for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
   else
     for(int j=0; j<S7; j++) inverse(reg3::adjmoves[j]);
-  if(euclid)
-    for(int j=0; j<S7; j++) ms.push_back(Id);
-  else
-    for(int j=0; j<S7; j++) ms.push_back(inverse(reg3::spins[j]));
-  
+
   vector<float> connections(length);
   vector<array<float, 4>> wallcolor(length);
   vector<float> matrixid(length);
@@ -368,6 +336,19 @@ EX void do_raycast() {
         }
       }
     }
+
+  vector<GLint> wallstart;
+  for(auto i: cgi.wallstart) wallstart.push_back(i);
+  glUniform1iv(o->uWallstart, isize(wallstart), &wallstart[0]);  
+  
+  vector<glvertex> wallx, wally;
+  for(auto& m: cgi.raywall) {
+    wallx.push_back(glhr::pointtogl(m[0]));
+    wally.push_back(glhr::pointtogl(m[1]));
+    }
+  
+  glUniform4fv(o->uWallX, isize(wallx), &wallx[0][0]);
+  glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
 
   vector<glhr::glmatrix> gms;
   for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose(m));

@@ -251,6 +251,9 @@ hpcshape
 
   vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
   vector<hyperpoint> walltester;
+  
+  vector<int> wallstart;
+  vector<transmatrix> raywall;
 
   vector<struct plain_floorshape*> all_plain_floorshapes;
   vector<struct escher_floorshape*> all_escher_floorshapes;

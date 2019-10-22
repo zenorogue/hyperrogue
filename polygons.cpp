@@ -709,6 +709,8 @@ void geometry_information::compute_cornerbonus() { }
 
 void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) {
 
+  wallstart.push_back(isize(raywall));
+
   // orient correctly
   transmatrix T;
   set_column(T, 0, vertices[0]);
@@ -739,7 +741,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       }
     }
   
-  if(cgflags & qIDEAL) for(auto& v: vertices) v /= v[3];
+  if(cgflags & qIDEAL) for(auto& v: vertices) v = kleinize(v);
 
   ld w = 0;
   for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
@@ -751,6 +753,11 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   
   for(int a=0; a<n; a++) {
     if(triangles) center = normalize(vertices[a/3*3] * 5 + vertices[a/3*3+1] + vertices[a/3*3+2]);
+    
+    transmatrix T = build_matrix(kleinize(vertices[a]), kleinize(vertices[(a+1)%n]), kleinize(center), point31(0,0,0));
+    T = inverse(T);
+    raywall.push_back(T);
+    
     hyperpoint v1 = vertices[a] - center;
     hyperpoint v2 = vertices[(a+1)%n] - center;
     texture_order([&] (ld x, ld y) {
@@ -1042,6 +1049,7 @@ void geometry_information::create_wall3d() {
     for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
     }
 
+  wallstart.push_back(isize(raywall));
   compute_cornerbonus();
   }
 
