@@ -7403,7 +7403,9 @@ EX void drawthemap() {
     minf[m].name = princessgender() ? "Princess" : "Prince";
   
   use_raycasting = false;
-  if(hyperbolic && pmodel == mdPerspective && !binarytiling)
+  if(WDIM == 3 && hyperbolic && pmodel == mdPerspective && !binarytiling)
+    use_raycasting = true;
+  if(WDIM == 3 && euclid && pmodel == mdPerspective && !binarytiling)
     use_raycasting = true;
     
   iinf[itSavedPrincess].name = minf[moPrincess].name;

@@ -59,13 +59,15 @@ void enable_raycaster() {
     "uniform int uLength;\n"
     "uniform float uIPD;\n"
     "uniform mat4 uStart;\n"
-    "uniform mat4 uM[84];\n"
+    "uniform mat4 uM[200];\n"
     "uniform mat4 uTest;\n"
     "uniform float uStartid;\n"
     "uniform sampler1D tConnections;\n"
     "uniform sampler1D tWallcolor;\n"
     "uniform sampler2D tWallTexture;\n"
-    "uniform sampler1D tMatrixid;\n"
+    "uniform sampler1D tMatrixid;\n";
+    
+    if(IN_ODS) fsh += 
 
     "mat4 xpush(float x) { return mat4("
          "cosh(x), 0., 0., sinh(x),\n"
@@ -86,90 +88,123 @@ void enable_raycaster() {
          "0., cos(x), sin(x), 0.,\n"
          "0., -sin(x), cos(x), 0.,\n"
          "0., 0., 0., 1."
-         ");}\n"
-      
-    "void main() { \n"
+         ");}\n";    
     
-    #if IN_ODS
+   string fmain = "void main() {\n";
+    
+    if(IN_ODS) fmain +=
     "  float lambda = at[0];\n" // -PI to PI
     "  float phi;\n"
     "  float eye;\n"
     "  if(at.y < 0.) { phi = at.y + PI/2.; eye = uIPD / 2.; }\n" // right
     "  else { phi = at.y - PI/2.; eye = -uIPD / 2.; }\n"
     "  mat4 vw = uStart * xzspin(-lambda) * xpush(eye) * yzspin(phi);\n"
-    "  vec4 at0 = vec4(0., 0., 1., 0.);\n"
-    #else
+    "  vec4 at0 = vec4(0., 0., 1., 0.);\n";
+    
+    else fmain += 
     "  mat4 vw = uStart;\n"
-    "  vec4 at0 = at;"
-    "  at0.y = -at.y;"
-//    "  at0.z = at.y;"
+    "  vec4 at0 = at;\n"
+    "  at0.y = -at.y;\n"
     "  at0.w = 0.;\n"
-    "  at0.xyz = at0.xyz / length(at0.xyz);"
-    #endif
-    "  vec4 position = vw * vec4(0., 0., 0., 1.);"
-    "  vec4 tangent = vw * at0;"
-    "  float go = 0.;"
-    "  float cid = uStartid;"
-//    "  int purp = 0;"
-    "  for(int iter=0; iter<60; iter++) {"
-      "  float dist = 100.;"
-      "  int which = -1;"
+    "  at0.xyz = at0.xyz / length(at0.xyz);\n";
+      
+    if(hyperbolic) fsh += "  float len(vec4 x) { return x[3]; }\n";
+    else fsh += "  float len(vec4 x) { return length(x.xyz); }\n";
+    
+    fmain +=     
+      "  vec4 position = vw * vec4(0., 0., 0., 1.);\n"
+      "  vec4 tangent = vw * at0;\n"
+      "  float go = 0.;\n"
+      "  float cid = uStartid;\n"
+      "  for(int iter=0; iter<60; iter++) {\n"
+      "  float dist = 100.;\n"
+      "  int which = -1;\n"
 
       "  if(go == 0.) {\n"
-      "    float best = position[3];\n"
+      "    float best = len(position);\n"
       "    for(int i=0; i<uN; i++) {\n"
-      "      float cand = (uM[i] * position)[3];\n"
+      "      float cand = len(uM[i] * position);\n"
       "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
       "      }\n"
       "    }\n"
 
-      "  if(which == -1) for(int i=0; i<uN; i++) {"
-        // position * shd + tangent * chd - uM[i] * position * shd - uMi * tangent * chd
+      "  if(which == -1) for(int i=0; i<uN; i++) {\n";
+    
+    if(hyperbolic) fmain +=
         "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
         "    if(v > 1. || v < -1.) continue;\n"
         "    float d = atanh(v);\n"
         "    vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-        "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n"
-//        "    if(d < 1e-4) continue;\n"
-        "    if(d < dist) { dist = d; which = i; }\n"
-          "}"
-      "  if(which == -1) { gl_FragColor = vec4(0., 0., 0., 1.); return; }"
-         // shift d units
-      "  if(dist < 0.) { dist = 0.; }\n"
-      "  go = go + dist;\n"
+        "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n";
+    else fmain += 
+        "    float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+        "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
+        "    float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+        "    if(d < 0.) continue;\n"
+        "    vec4 next_position = position + d * tangent;\n"
+        "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n";
+
+    fmain += 
+        "  if(d < dist) { dist = d; which = i; }\n"
+          "}\n";
+        
+    fmain +=
+      "  if(which == -1) { gl_FragColor = vec4(0., 0., 0., 1.); return; }";
+    
+    fmain += 
+      "  if(dist < 0.) { dist = 0.; }\n";
+    
+    // shift d units
+    
+    fmain += "  go = go + dist;\n";
+    
+    if(hyperbolic) fmain += 
       "  float ch = cosh(dist); float sh = sinh(dist);\n"
       "  vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
-      "  position = v;"
-         // apply wall color
+      "  position = v;\n";
+    else fmain += 
+      "position = position + tangent * dist;\n";
+
+    // apply wall color
+    fmain +=
       "  float u = cid + float(which) / float(uLength);\n"
       "  vec4 col = texture1D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n"
       "    vec4 inface = uM[uN+which] * position;\n"
       "    inface = inface / inface.w;"
       "    float bright = texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
-      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
+//      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
+      "    col.xyz = col.xyz * bright * exp(- go / 20.);\n"
+//      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
       "    col.w = 1.;\n"
 //      "    if(purp == 1) { col.rgb = (col.rgb + vec3(1., 0., 1.)) / 2; }\n"
       "    gl_FragColor = col;\n"
       "    return;\n"
-      "    }\n"
-         // next cell
+      "    }\n";
+
+    // next cell
+    fmain += 
       "  float rot = texture1D(tMatrixid, u).r;\n"
       "  int mid = int(rot * float(uLength));\n"
       "  position = uM[mid] * position;\n"
       "  tangent = uM[mid] * tangent;\n"
-      "  cid = texture1D(tConnections, u).r;\n"
-      "    }"
+      "  cid = texture1D(tConnections, u).r;\n";
+    
+    fmain += 
+      "  }"
       "  gl_FragColor = vec4(0.,0.,0.,1.); \n"
       "  }";
+
+    fsh += fmain;    
  
     our_raycaster = make_shared<raycaster> (vsh, fsh);
     }
   full_enable(our_raycaster);
   }
 
-void bind_array(vector<float>& v, GLuint t, GLuint& tx, int id) {
+void bind_array(vector<float>& v, GLint t, GLuint& tx, int id) {
+  if(t == -1) println(hlog, "bind to nothing");
   glUniform1i(t, id);
   
   if(tx == 0) glGenTextures(1, &tx);
@@ -181,10 +216,10 @@ void bind_array(vector<float>& v, GLuint t, GLuint& tx, int id) {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   
   glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, isize(v), 0, GL_RED, GL_FLOAT, &v[0]);  
-  GLERR("bind_array");
   }
   
-void bind_array(vector<array<float, 4>>& v, GLuint t, GLuint& tx, int id) {
+void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
+  if(t == -1) println(hlog, "bind to nothing");
   glUniform1i(t, id);
 
   if(tx == 0) glGenTextures(1, &tx);
@@ -269,6 +304,9 @@ EX void do_raycast() {
   
   vector<cell*> lst = cl.lst;
   
+  int maxl = 32768 / S7;
+  if(isize(lst) > maxl) lst.resize(maxl);
+  
   map<cell*, int> ids;
   for(int i=0; i<isize(lst); i++) ids[lst[i]] = i;
 
@@ -289,8 +327,14 @@ EX void do_raycast() {
   GLERR("uniform IPD");
 
   vector<transmatrix> ms;
-  for(int j=0; j<S7; j++) ms.push_back(inverse(reg3::adjmoves[j]));
-  for(int j=0; j<S7; j++) ms.push_back(inverse(reg3::spins[j]));
+  if(euclid)
+    for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
+  else
+    for(int j=0; j<S7; j++) inverse(reg3::adjmoves[j]);
+  if(euclid)
+    for(int j=0; j<S7; j++) ms.push_back(Id);
+  else
+    for(int j=0; j<S7; j++) ms.push_back(inverse(reg3::spins[j]));
   
   vector<float> connections(length);
   vector<array<float, 4>> wallcolor(length);
