@@ -196,7 +196,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(hyperbolic)
       distfun = "acosh(t[3])", treset = true;
     else if(euclid)
-      distfun = "length(t.xyz);", treset = true;
+      distfun = "length(t.xyz)", treset = true;
     else {
       if(spherephase & 4) coordinator += "t = -t;\n";
       switch(spherephase & 3) {
