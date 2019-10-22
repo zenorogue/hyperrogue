@@ -789,7 +789,7 @@ EX void loadConfig() {
     int err;
     int fs;
     err=fscanf(f, "%d%d%d%d", &vid.xres, &vid.yres, &fs, &vid.fsize);
-    if(!err) 
+    if(err != 4) 
       loadNewConfig(f);
     else {
       vid.full = fs;
