@@ -17,6 +17,7 @@ struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uN, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tMatrixid;
+  GLint uBinaryWidth;
   
   raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
@@ -32,6 +33,8 @@ struct raycaster : glhr::GLprogram {
     uWallstart = glGetUniformLocation(_program, "uWallstart");
     uWallX = glGetUniformLocation(_program, "uWallX");
     uWallY = glGetUniformLocation(_program, "uWallY");
+    
+    uBinaryWidth = glGetUniformLocation(_program, "uBinaryWidth");
   
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
@@ -137,43 +140,102 @@ void enable_raycaster() {
       "  vec4 tangent = vw * at0;\n"
       "  float go = 0.;\n"
       "  float cid = uStartid;\n"
-      "  for(int iter=0; iter<60; iter++) {\n"
-      "  float dist = 100.;\n"
-      "  int which = -1;\n"
-
+      "  for(int iter=0; iter<600; iter++) {\n";
+    
+    if(sol) fmain +=
+      "  float dist = .01;\n";
+    else fmain +=
+      "  float dist = 100.;\n";
+    
+    fmain +=
+      "  int which = -1;\n";
+      
+    if(IN_ODS) fmain += 
       "  if(go == 0.) {\n"
       "    float best = len(position);\n"
       "    for(int i=0; i<uN; i++) {\n"
       "      float cand = len(uM[i] * position);\n"
       "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
       "      }\n"
-      "    }\n"
-
-      "  if(which == -1) for(int i=0; i<uN; i++) {\n";
+      "    }\n";
     
-    if(hyperbolic) fmain +=
-        "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
-        "    if(v > 1. || v < -1.) continue;\n"
-        "    float d = atanh(v);\n"
-        "    vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-        "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n";
-    else fmain += 
-        "    float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
-        "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-        "    float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
-        "    if(d < 0.) continue;\n"
-        "    vec4 next_position = position + d * tangent;\n"
-        "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n";
+    if(sol) {
+      fsh += "uniform float uBinaryWidth;\n";
 
-    fmain += 
-        "  if(d < dist) { dist = d; which = i; }\n"
+      fsh += 
+        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
+        "  }\n";
+
+      fsh +=
+        "vec4 get_pos(vec4 pos, vec4 tan) {\n"
+          "vec4 acc = christoffel(pos, tan, tan);\n"
+          "vec4 pos2 = pos + tan / 2.;\n"
+          "vec4 tan2 = tan + acc / 2.;\n"
+          "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
+          "return pos + tan + acc2 / 2.;\n"
           "}\n";
         
-    fmain +=
-      "  if(which == -1) { gl_FragColor = vec4(0., 0., 0., 1.); return; }";
+      fsh +=
+        "float hp_distance(vec4 pos, vec4 tan, int axis, float value) {\n"
+        "  if(value > 0. && pos[axis] > value) return 0.;\n"
+        "  if(value < 0. && pos[axis] < value) return 0.;\n"
+        "  if(tan[axis] == 0.) return .5;\n"
+        "  float approx = (value - pos[axis]) / tan[axis];\n"
+        "  for(int it=0; it<3; it++) {\n"
+        "    if(approx <= 0. || approx  > .5) return .5;\n"
+        "    vec4 npos = get_pos(pos, tan * approx);\n"
+        "    approx = approx * (value - pos[axis]) / (npos[axis] - pos[axis]);\n"
+        "    }\n"
+        "  if(approx < .001) approx = .001;\n"
+        "  return approx;\n"
+        "  }\n";
+
+      fmain +=
+      "  float d;\n"
+      "  d = hp_distance(position, tangent, 0, uBinaryWidth);\n"
+      "  if(d < dist) { dist = d; which = 0; }\n"
+      "  d = hp_distance(position, tangent, 0, -uBinaryWidth);\n"
+      "  if(d < dist) { dist = d; which = 4; }\n"
+      "  d = hp_distance(position, tangent, 1, uBinaryWidth);\n"
+      "  if(d < dist) { dist = d; which = 1; }\n"
+      "  d = hp_distance(position, tangent, 1, -uBinaryWidth);\n"
+      "  if(d < dist) { dist = d; which = 5; }\n"
+      "  d = hp_distance(position, tangent, 2, log(2.)/2.);\n"
+      "  if(d < dist) { dist = d; which = 2; }\n"
+      "  d = hp_distance(position, tangent, 2, -log(2.)/2.);\n"
+      "  if(d < dist) { dist = d; which = 6; }\n";
+      }
     
+    else {
+    
+      fmain +=
+        "  if(which == -1) for(int i=0; i<uN; i++) {\n";
+      
+      if(hyperbolic) fmain +=
+          "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    if(v > 1. || v < -1.) continue;\n"
+          "    float d = atanh(v);\n"
+          "    vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
+          "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n";
+      else fmain += 
+          "    float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+          "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
+          "    float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    if(d < 0.) continue;\n"
+          "    vec4 next_position = position + d * tangent;\n"
+          "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n";
+  
+      fmain += 
+          "  if(d < dist) { dist = d; which = i; }\n"
+            "}\n";
+      }
+        
     fmain += 
       "  if(dist < 0.) { dist = 0.; }\n";
+    
+    fmain +=
+      "  if(which == -1 && dist == 0.) { gl_FragColor = vec4(0., 0., 0., 1.); return; }";
     
     // shift d units
     
@@ -184,8 +246,25 @@ void enable_raycaster() {
       "  vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
       "  position = v;\n";
+    else if(sol) {
+      fmain +=
+        "vec4 acc = christoffel(position, tangent, tangent);\n"
+        "vec4 pos2 = position + tangent * dist / 2.;\n"
+        "vec4 tan2 = tangent + acc * dist / 2.;\n"
+        "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
+        "position = position + tangent * dist + acc2 / 2. * dist * dist;\n"
+        "tangent = tangent + acc * dist;\n";
+      }
     else fmain += 
       "position = position + tangent * dist;\n";
+    
+    fmain += "if(which == -1) continue;\n";
+    
+    if(sol) {
+      fmain += 
+        "if(which == 2 && position.x > 0.) which = 3;\n"
+        "if(which == 6 && position.y > 0.) which = 7;\n";
+      }
 
     // apply wall color
     fmain +=
@@ -299,7 +378,7 @@ EX void do_raycast() {
   GLERR("uniform IPD");
 
   vector<transmatrix> ms;
-  if(euclid)
+  if(euclid || sol)
     for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
   else
     for(int j=0; j<S7; j++) inverse(reg3::adjmoves[j]);
@@ -349,6 +428,9 @@ EX void do_raycast() {
   
   glUniform4fv(o->uWallX, isize(wallx), &wallx[0][0]);
   glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
+
+  if(o->uBinaryWidth != -1)
+    glUniform1f(o->uBinaryWidth, vid.binary_width * log(2) / 2);
 
   vector<glhr::glmatrix> gms;
   for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose(m));
