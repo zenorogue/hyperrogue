@@ -125,7 +125,10 @@ matrixitem genitem(const transmatrix& m1, const transmatrix& m2, int nsym) {
 
 bool do_kleinize() { return S3 >= OINF; }
 
-hyperpoint kleinize(hyperpoint h) { return point3(h[0]/h[2], h[1]/h[2], 1); }
+EX hyperpoint kleinize(hyperpoint h) { 
+  if(GDIM == 2) return point3(h[0]/h[2], h[1]/h[2], 1); 
+  else return point31(h[0]/h[3], h[1]/h[3], h[2]/h[3]);
+  }
 
 void addmatrix(matrixlist& matrices, hyperpoint o0, hyperpoint o1, hyperpoint o2, hyperpoint n0, hyperpoint n1, hyperpoint n2, int d, int osym, int nsym) {
   if(do_kleinize()) o0 = kleinize(o0), o1 = kleinize(o1), o2 = kleinize(o2), n0 = kleinize(n0), n1 = kleinize(n1), n2 = kleinize(n2);
