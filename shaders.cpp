@@ -330,7 +330,7 @@ void display_data::set_projection(int ed) {
       }
     else M[2][2] /= 1000;
     glhr::projection_multiply(M);
-    if(nisot::local_perspective_used())
+    if(nisot::local_perspective_used() && (shader_flags & SF_BOX))
       glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
     if(ed) {
       glhr::glmatrix m = glhr::id;
