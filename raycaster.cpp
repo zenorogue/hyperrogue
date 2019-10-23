@@ -218,12 +218,63 @@ void enable_raycaster() {
       fmain += 
         "  dist = next < minstep ? 2.*next : next;\n";
 
-      fmain +=
+      if(nil) fsh += 
+        "vec4 translate(vec4 a, vec4 b) {\n"
+          "return vec4(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1], b[3]);\n"
+          "}\n"
+        "vec4 translatev(vec4 a, vec4 t) {\n"
+          "return vec4(t[0], t[1], t[2] + a[0] * t[1], 0.);\n"
+          "}\n"
+        "vec4 itranslate(vec4 a, vec4 b) {\n"
+          "return vec4(-a[0] + b[0], -a[1] + b[1], -a[2] + b[2] - a[0] * (b[1]-a[1]), b[3]);\n"
+          "}\n"
+        "vec4 itranslatev(vec4 a, vec4 t) {\n"
+          "return vec4(t[0], t[1], t[2] - a[0] * t[1], 0.);\n"
+          "}\n";
+                
+      if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
+      
+      if(sol) fmain +=
         "vec4 acc = christoffel(position, tangent, tangent);\n"
         "vec4 pos2 = position + tangent * dist / 2.;\n"
         "vec4 tan2 = tangent + acc * dist / 2.;\n"
         "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
         "vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
+
+      if(nil) {
+        fmain +=
+          "vec4 xp, xt;\n"
+          "vec4 back = itranslatev(position, tangent);\n"
+          "if(back.x == 0. && back.y == 0.) {\n"
+          "  xp = vec4(0., 0., back.z*dist, 1.);\n"
+          "  xt = back;\n"
+          "  }\n"
+          "else if(abs(back.z) == 0.) {\n"
+          "  xp = vec4(back.x*dist, back.y*dist, back.x*back.y*dist*dist/2., 1.);\n"
+          "  xt = vec4(back.x, back.y, dist*back.x*back.y, 0.);\n"
+          "  }\n"
+          "else if(abs(back.z) < 1e-1) {\n"
+// we use the midpoint method here, because the formulas below cause glitches due to float precision
+          "  vec4 acc = christoffel(vec4(0,0,0,1), back, back);\n"
+          "  vec4 pos2 = back * dist / 2.;\n"
+          "  vec4 tan2 = back + acc * dist / 2.;\n"
+          "  vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
+          "  xp = vec4(0,0,0,1) + back * dist + acc2 / 2. * dist * dist;\n"
+          "  xt = back + acc * dist;\n"
+          "  }\n"
+          "else {\n"
+          "  float alpha = atan2(back.y, back.x);\n"
+          "  float w = back.z * dist;\n"
+          "  float c = length(back.xy) / back.z;\n"
+          "  xp = vec4(2.*c*sin(w/2.) * cos(w/2.+alpha), 2.*c*sin(w/2.)*sin(w/2.+alpha), w*(1.+(c*c/2.)*((1.-sin(w)/w)+(1.-cos(w))/w * sin(w+2.*alpha))), 1.);\n"
+          "  xt = back.z * vec4("
+               "c*cos(alpha+w),"
+               "c*sin(alpha+w),"
+               "1. + c*c*2.*sin(w/2.)*sin(alpha+w)*cos(alpha+w/2.),"
+               "0.);\n"
+          "  }\n"
+          "vec4 nposition = translate(position, xp);\n";
+        }
       
       if(nil) fmain +=
         "float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
@@ -262,8 +313,13 @@ void enable_raycaster() {
           "next = maxstep;\n"
           "}\n";
       
+      if(nil) fmain +=
+        "tangent = translatev(position, xt);\n";
+
       fmain +=
-        "position = nposition;\n"
+        "position = nposition;\n";
+      
+      if(!nil) fmain +=
         "tangent = tangent + acc * dist;\n";
       }
     else fmain += 
