@@ -7405,7 +7405,7 @@ EX void drawthemap() {
   use_raycasting = false;
   if(WDIM == 3 && hyperbolic && pmodel == mdPerspective && !binarytiling)
     use_raycasting = true;
-  if(WDIM == 3 && sol && pmodel == mdGeodesic)
+  if(WDIM == 3 && (sol || nil) && pmodel == mdGeodesic)
     use_raycasting = true;
   if(WDIM == 3 && euclid && pmodel == mdPerspective && !binarytiling)
     use_raycasting = true;

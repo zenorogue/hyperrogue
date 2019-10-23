@@ -707,6 +707,11 @@ void geometry_information::compute_cornerbonus() { }
 
 // Make a wall
 
+hyperpoint ray_kleinize(hyperpoint h, int id) {
+  if(geometry == gNil && among(id, 2, 5)) h[2] = 0;
+  return kleinize(h);
+  }
+
 void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) {
 
   wallstart.push_back(isize(raywall));
@@ -751,15 +756,23 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   ld center_altitude = 0;
   if(prod) for(int i=0; i<n; i++) center_altitude += altitudes[i] * weights[i] / w;
   
+  auto ocenter = center;
+  
   for(int a=0; a<n; a++) {
     if(triangles) center = normalize(vertices[a/3*3] * 5 + vertices[a/3*3+1] + vertices[a/3*3+2]);
     
-    transmatrix T = build_matrix(kleinize(vertices[a]), kleinize(vertices[(a+1)%n]), kleinize(center), point31(0,0,0));
-    T = inverse(T);
-    raywall.push_back(T);
+    hyperpoint v1 = vertices[a];
+    hyperpoint v2 = vertices[(a+1)%n];
     
-    hyperpoint v1 = vertices[a] - center;
-    hyperpoint v2 = vertices[(a+1)%n] - center;
+    if(!triangles || (a%6 == 1)) {
+      transmatrix T = build_matrix(ray_kleinize(v1, id), ray_kleinize(v2, id), ray_kleinize(ocenter, id), point3(.1,.2,.3));
+      println(hlog, "id = ", id, " iT = ", T);
+      T = inverse(T);
+      raywall.push_back(T);
+      }
+    
+    v1 = v1 - center;
+    v2 = v2 - center;
     texture_order([&] (ld x, ld y) {
       hyperpoint h = center + v1 * x + v2 * y;
       if(nil && (x || y))

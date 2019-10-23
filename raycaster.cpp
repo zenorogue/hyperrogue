@@ -102,6 +102,7 @@ void enable_raycaster() {
     
    fsh += 
      "vec2 map_texture(vec4 pos, int which) {\n";
+   if(nil) fsh += "if(which == 2 || which == 5) pos.z = 0.;\n";
    if(hyperbolic) fsh += 
        "pos /= pos.w;\n";
    fsh += 
@@ -135,6 +136,11 @@ void enable_raycaster() {
     if(hyperbolic) fsh += "  float len(vec4 x) { return x[3]; }\n";
     else fsh += "  float len(vec4 x) { return length(x.xyz); }\n";
     
+    if(nonisotropic) fmain += 
+      "  const float maxstep = .03;\n"
+      "  const float minstep = .001;\n"
+      "  float next = maxstep;\n";
+    
     fmain +=     
       "  vec4 position = vw * vec4(0., 0., 0., 1.);\n"
       "  vec4 tangent = vw * at0;\n"
@@ -142,9 +148,7 @@ void enable_raycaster() {
       "  float cid = uStartid;\n"
       "  for(int iter=0; iter<600; iter++) {\n";
     
-    if(sol) fmain +=
-      "  float dist = .01;\n";
-    else fmain +=
+    fmain +=
       "  float dist = 100.;\n";
     
     fmain +=
@@ -159,55 +163,7 @@ void enable_raycaster() {
       "      }\n"
       "    }\n";
     
-    if(sol) {
-      fsh += "uniform float uBinaryWidth;\n";
-
-      fsh += 
-        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
-        "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
-        "  }\n";
-
-      fsh +=
-        "vec4 get_pos(vec4 pos, vec4 tan) {\n"
-          "vec4 acc = christoffel(pos, tan, tan);\n"
-          "vec4 pos2 = pos + tan / 2.;\n"
-          "vec4 tan2 = tan + acc / 2.;\n"
-          "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
-          "return pos + tan + acc2 / 2.;\n"
-          "}\n";
-        
-      fsh +=
-        "float hp_distance(vec4 pos, vec4 tan, int axis, float value) {\n"
-        "  if(value > 0. && pos[axis] > value) return 0.;\n"
-        "  if(value < 0. && pos[axis] < value) return 0.;\n"
-        "  if(tan[axis] == 0.) return .5;\n"
-        "  float approx = (value - pos[axis]) / tan[axis];\n"
-        "  for(int it=0; it<3; it++) {\n"
-        "    if(approx <= 0. || approx  > .5) return .5;\n"
-        "    vec4 npos = get_pos(pos, tan * approx);\n"
-        "    approx = approx * (value - pos[axis]) / (npos[axis] - pos[axis]);\n"
-        "    }\n"
-        "  if(approx < .001) approx = .001;\n"
-        "  return approx;\n"
-        "  }\n";
-
-      fmain +=
-      "  float d;\n"
-      "  d = hp_distance(position, tangent, 0, uBinaryWidth);\n"
-      "  if(d < dist) { dist = d; which = 0; }\n"
-      "  d = hp_distance(position, tangent, 0, -uBinaryWidth);\n"
-      "  if(d < dist) { dist = d; which = 4; }\n"
-      "  d = hp_distance(position, tangent, 1, uBinaryWidth);\n"
-      "  if(d < dist) { dist = d; which = 1; }\n"
-      "  d = hp_distance(position, tangent, 1, -uBinaryWidth);\n"
-      "  if(d < dist) { dist = d; which = 5; }\n"
-      "  d = hp_distance(position, tangent, 2, log(2.)/2.);\n"
-      "  if(d < dist) { dist = d; which = 2; }\n"
-      "  d = hp_distance(position, tangent, 2, -log(2.)/2.);\n"
-      "  if(d < dist) { dist = d; which = 6; }\n";
-      }
-    
-    else {
+    if(!nonisotropic) {
     
       fmain +=
         "  if(which == -1) for(int i=0; i<uN; i++) {\n";
@@ -229,52 +185,109 @@ void enable_raycaster() {
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
             "}\n";
+
+      fmain += 
+        "  if(dist < 0.) { dist = 0.; }\n";
+      
+      fmain +=
+        "  if(which == -1 && dist == 0.) { gl_FragColor = vec4(0., 0., 0., 1.); return; }";    
       }
         
-    fmain += 
-      "  if(dist < 0.) { dist = 0.; }\n";
-    
-    fmain +=
-      "  if(which == -1 && dist == 0.) { gl_FragColor = vec4(0., 0., 0., 1.); return; }";
-    
     // shift d units
-    
-    fmain += "  go = go + dist;\n";
     
     if(hyperbolic) fmain += 
       "  float ch = cosh(dist); float sh = sinh(dist);\n"
       "  vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
       "  position = v;\n";
-    else if(sol) {
+    else if(nonisotropic) {
+    
+      if(sol) fsh += 
+        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
+        "  }\n";
+      else fsh +=
+        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "  float x = pos.x;\n"
+        "  return vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
+//        "  return vec4(0.,0.,0.,0.);\n"
+        "  }\n";
+      
+      if(sol) fsh += "uniform float uBinaryWidth;\n";
+      
+      fmain += 
+        "  dist = next < minstep ? 2.*next : next;\n";
+
       fmain +=
         "vec4 acc = christoffel(position, tangent, tangent);\n"
         "vec4 pos2 = position + tangent * dist / 2.;\n"
         "vec4 tan2 = tangent + acc * dist / 2.;\n"
         "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
-        "position = position + tangent * dist + acc2 / 2. * dist * dist;\n"
+        "vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
+      
+      if(nil) fmain +=
+        "float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
+
+      fmain +=
+        "if(next >= minstep) {\n";
+      
+      if(sol) fmain +=
+          "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > log(2.)/2.) {\n";
+      else fmain +=
+          "if(abs(nposition.x) > .5 || abs(nposition.y) > .5 || abs(rz) > .5) {\n";
+      
+      fmain +=
+            "next = dist / 2.; continue;\n"
+            "}\n"
+          "if(next < maxstep) next = next / 2.;\n"
+          "}\n"
+        "else {\n";
+      
+      if(sol) fmain +=
+          "if(nposition.x > uBinaryWidth) which = 0;\n"
+          "if(nposition.x <-uBinaryWidth) which = 4;\n"
+          "if(nposition.y > uBinaryWidth) which = 1;\n"
+          "if(nposition.y <-uBinaryWidth) which = 5;\n"
+          "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
+          "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
+      else fmain +=
+          "if(nposition.x > .5) which = 3;\n"
+          "if(nposition.x <-.5) which = 0;\n"
+          "if(nposition.y > .5) which = 4;\n"
+          "if(nposition.y <-.5) which = 1;\n"
+          "if(rz > .5) which = 5;\n"
+          "if(rz <-.5) which = 2;\n";
+      
+      fmain += 
+          "next = maxstep;\n"
+          "}\n";
+      
+      fmain +=
+        "position = nposition;\n"
         "tangent = tangent + acc * dist;\n";
       }
     else fmain += 
       "position = position + tangent * dist;\n";
     
+    fmain += "  go = go + dist;\n";
+    
     fmain += "if(which == -1) continue;\n";
     
-    if(sol) {
-      fmain += 
-        "if(which == 2 && position.x > 0.) which = 3;\n"
-        "if(which == 6 && position.y > 0.) which = 7;\n";
-      }
-
     // apply wall color
     fmain +=
       "  float u = cid + float(which) / float(uLength);\n"
       "  vec4 col = texture1D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n"
       "    vec2 inface = map_texture(position, which);\n"
-      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
+      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n"; // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
+    
+    if(nil) fmain +=
+      "    if(abs(abs(position.x)-abs(position.y)) < .005) bright /= 2.;\n";
+    
+    fmain +=
+//      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
 //      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
-      "    col.xyz = col.xyz * bright * exp(- go / 20.);\n"
+      "    col.xyz = col.xyz * bright * exp(- go / 4.);\n"
 //      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
       "    col.w = 1.;\n"
 //      "    if(purp == 1) { col.rgb = (col.rgb + vec3(1., 0., 1.)) / 2; }\n"
@@ -378,7 +391,8 @@ EX void do_raycast() {
   GLERR("uniform IPD");
 
   vector<transmatrix> ms;
-  if(euclid || sol)
+  if(sol || nil) ;
+  else if(euclid)
     for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
   else
     for(int j=0; j<S7; j++) inverse(reg3::adjmoves[j]);
