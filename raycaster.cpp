@@ -404,6 +404,9 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
 
 EX void do_raycast() {
   enable_raycaster();
+  
+  if(ray_comparison_mode) 
+    glColorMask( GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE );
 
   auto& o = our_raycaster;
   

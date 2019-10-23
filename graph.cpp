@@ -6065,7 +6065,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         color_t dummy;        
         int ofs = wall_offset(c);
         if(isWall3(c, wcol)) {
-          if(!use_raycasting) {
+          if(!no_wall_rendering) {
           color_t wcol2 = wcol;
           #if CAP_TEXTURE
           if(texture::config.tstate == texture::tsActive) wcol2 = texture::config.recolor(wcol);
@@ -6118,7 +6118,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           } }
         else {
-          if(!use_raycasting) for(int a=0; a<c->type; a++) if(c->move(a)) {
+          if(!no_wall_rendering) for(int a=0; a<c->type; a++) if(c->move(a)) {
             color_t t = transcolor(c, c->move(a), wcol);
             if(t) {
               t = t - get_darkval(c, a) * ((t & 0xF0F0F000) >> 4);
@@ -7347,6 +7347,8 @@ EX void precise_mouseover() {
 EX transmatrix Viewbase;
 
 EX bool use_raycasting;
+EX bool no_wall_rendering;
+EX bool ray_comparison_mode;
 
 EX void drawthemap() {
   check_cgi();
@@ -7409,6 +7411,9 @@ EX void drawthemap() {
     use_raycasting = true;
   if(WDIM == 3 && euclid && pmodel == mdPerspective && !binarytiling)
     use_raycasting = true;
+  no_wall_rendering = use_raycasting;
+  ray_comparison_mode = anyshiftclick;
+  if(ray_comparison_mode) no_wall_rendering = false;
     
   iinf[itSavedPrincess].name = minf[moPrincess].name;
 
@@ -7449,7 +7454,7 @@ EX void drawthemap() {
   profile_start(1);
   make_actual_view();
   currentmap->draw();
-  if(use_raycasting) do_raycast();
+  if(use_raycasting && !ray_comparison_mode) do_raycast();
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
@@ -7714,6 +7719,14 @@ EX void drawfullmap() {
   #if CAP_QUEUE
   drawqueue();
   #endif
+
+  if(use_raycasting && ray_comparison_mode) {
+    glDepthFunc(GL_LEQUAL);
+    glClearDepth(1.0f);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    do_raycast();
+    }
+
   profile_stop(2);
   }
 
