@@ -12,7 +12,7 @@ namespace hr {
 EX namespace ray {
 
 /** texture IDs */
-GLuint txConnections = 0, txWallcolor = 0, txMatrixid = 0;
+GLuint txConnections = 0, txWallcolor = 0;
 
 EX bool in_use;
 EX bool comparison_mode;
@@ -58,7 +58,7 @@ EX bool requested() {
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uN, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
-  GLint tConnections, tWallcolor, tMatrixid;
+  GLint tConnections, tWallcolor;
   GLint uBinaryWidth;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   
@@ -85,7 +85,6 @@ struct raycaster : glhr::GLprogram {
   
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
-    tMatrixid = glGetUniformLocation(_program, "tMatrixid");
     }
   };
 
@@ -115,11 +114,9 @@ void enable_raycaster() {
     "uniform mat4 uStart;\n"
     "uniform mat4 uM[80];\n"
     "uniform mat4 uTest;\n"
-    "uniform float uStartid;\n"
-    "uniform sampler1D tConnections;\n"
-    "uniform sampler1D tWallcolor;\n"
-    "uniform sampler2D tWallTexture;\n"
-    "uniform sampler1D tMatrixid;\n"
+    "uniform vec2 uStartid;\n"
+    "uniform sampler2D tConnections;\n"
+    "uniform sampler2D tWallcolor;\n"
     "uniform vec4 uWallX[60];\n"
     "uniform vec4 uWallY[60];\n"
     "uniform int uWallstart[16];\n"
@@ -193,7 +190,7 @@ void enable_raycaster() {
       "  vec4 position = vw * vec4(0., 0., 0., 1.);\n"
       "  vec4 tangent = vw * at0;\n"
       "  float go = 0.;\n"
-      "  float cid = uStartid;\n"
+      "  vec2 cid = uStartid;\n"
       "  for(int iter=0; iter<" + its(max_iter_current()) + "; iter++) {\n";
     
     fmain +=
@@ -379,8 +376,8 @@ void enable_raycaster() {
     
     // apply wall color
     fmain +=
-      "  float u = cid + float(which) / float(uLength);\n"
-      "  vec4 col = texture1D(tWallcolor, u);\n"
+      "  vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
+      "  vec4 col = texture2D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n"
       "    vec2 inface = map_texture(position, which);\n"
       "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
@@ -402,11 +399,11 @@ void enable_raycaster() {
 
     // next cell
     fmain += 
-      "  float rot = texture1D(tMatrixid, u).r;\n"
-      "  int mid = int(rot * 1024.);\n"
+      "  vec4 connection = texture2D(tConnections, u);\n"
+      "  int mid = int(connection.z * 1024.);\n"
       "  position = uM[mid] * uM[which] * position;\n"
       "  tangent = uM[mid] * uM[which] *  tangent;\n"
-      "  cid = texture1D(tConnections, u).r;\n";
+      "  cid = connection.xy;\n";
     
     fmain += 
       "  }"
@@ -420,21 +417,8 @@ void enable_raycaster() {
   full_enable(our_raycaster);
   }
 
-void bind_array(vector<float>& v, GLint t, GLuint& tx, int id) {
-  if(t == -1) println(hlog, "bind to nothing");
-  glUniform1i(t, id);
-  
-  if(tx == 0) glGenTextures(1, &tx);
+int length, per_row, rows;
 
-  glActiveTexture(GL_TEXTURE0 + id);
-  glBindTexture(GL_TEXTURE_1D, tx);
-
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  
-  glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, isize(v), 0, GL_RED, GL_FLOAT, &v[0]);  
-  }
-  
 void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
   if(t == -1) println(hlog, "bind to nothing");
   glUniform1i(t, id);
@@ -442,23 +426,25 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
   if(tx == 0) glGenTextures(1, &tx);
 
   glActiveTexture(GL_TEXTURE0 + id);
-  glBindTexture(GL_TEXTURE_1D, tx);
+  glBindTexture(GL_TEXTURE_2D, tx);
 
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   
-  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, isize(v), 0, GL_RGBA, GL_FLOAT, &v[0]);  
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, length, isize(v)/length, 0, GL_RGBA, GL_FLOAT, &v[0]);  
   GLERR("bind_array");
   }
 
-ld& exp_decay_current() {
-  return (sol || hyperbolic) ? exp_decay_exp : exp_decay_poly;
+void uniform2(GLint id, array<float, 2> fl) {
+  glUniform2f(id, fl[0], fl[1]);
   }
 
-int& max_iter_current() {
-  if(nonisotropic) return max_iter_sol;
-  else return max_iter_iso;
-  }
+array<float, 2> enc(int i, int a) { 
+  array<float, 2> res;
+  res[0] = ((i%per_row) * S7 + a + .5) / length;
+  res[1] = ((i / per_row) + .5) / rows;
+  return res;
+  };
 
 EX void cast() {
   enable_raycaster();
@@ -480,21 +466,22 @@ EX void cast() {
   auto& cd = current_display;
   glUniform1f(o->uFovX, cd->tanfov);
   glUniform1f(o->uFovY, cd->tanfov * cd->ysize / cd->xsize);
-
-  celllister cl(viewctr.at->c7, 10, 3000, NULL);
   
+  length = 4096;
+  per_row = length / S7;
+  
+  vector<cell*> lst;
+
+  celllister cl(viewctr.at->c7, 10, 10000, NULL);
   vector<cell*> lst = cl.lst;
   
-  int maxl = 32768 / S7;
-  if(isize(lst) > maxl) lst.resize(maxl);
+  rows = next_p2((isize(lst)+per_row-1) / per_row);
   
   map<cell*, int> ids;
   for(int i=0; i<isize(lst); i++) ids[lst[i]] = i;
 
-  int length = next_p2(isize(lst) * S7);
   glUniform1i(o->uLength, length);
   GLERR("uniform length");
-  auto enc = [&] (int i) { return float((i+.5) / length); };
   
   // for(auto &m: reg3::spins) println(hlog, m);
   
@@ -502,7 +489,7 @@ EX void cast() {
   GLERR("uniform start");
   glUniform1i(o->uN, S7);
   GLERR("uniform N");
-  glUniform1f(o->uStartid, enc(ids[viewctr.at->c7] * S7));
+  uniform2(o->uStartid, enc(ids[viewctr.at->c7], 0));
   GLERR("uniform startid");
   glUniform1f(o->uIPD, vid.ipd);
   GLERR("uniform IPD");
@@ -510,19 +497,20 @@ EX void cast() {
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
 
-  vector<float> connections(length);
-  vector<array<float, 4>> wallcolor(length);
-  vector<float> matrixid(length);
-  
+  vector<array<float, 4>> connections(length * rows);
+  vector<array<float, 4>> wallcolor(length * rows);
+
   if(1) for(cell *c: lst) {
     int id = ids[c];
     forCellIdEx(c1, i, c) { 
-      int u = id * S7 + i;
+      int u = (id/per_row*length) + (id%per_row * S7) + i;
       if(!ids.count(c1)) {
         wallcolor[u] = glhr::acolor(0xFF);
         continue;
         }
-      connections[u] = enc(ids[c1] * S7);
+      auto code = enc(ids[c1], 0);
+      connections[u][0] = code[0];
+      connections[u][1] = code[1];
       if(isWall3(c1)) {
         celldrawer dd;
         dd.cw.at = c1;
@@ -537,7 +525,7 @@ EX void cast() {
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
-        matrixid[u] = (k+.5) / 1024.;
+        connections[u][2] = (k+.5) / 1024.;
         break;
         }
       }
@@ -570,7 +558,6 @@ EX void cast() {
 
   bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
   bind_array(connections, o->tConnections, txConnections, 3);
-  bind_array(matrixid, o->tMatrixid, txMatrixid, 5);
   
   glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &screen[0]);
   glhr::set_depthtest(false);
