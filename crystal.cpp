@@ -687,6 +687,11 @@ EX color_t colorize(cell *c, char whichCanvas) {
       return res;
       }
       
+    case '/': {
+      int s = ico[1] + ico[2] + ico[3] + ico[0];
+      if(s > 0) return 0x1FF20FF;
+      else if (s < -2) return 0x1C0C0C0;
+      }
     }
   return res;
   }

@@ -774,6 +774,7 @@ EX namespace nilv {
     { point31(0,0,0.5), point31(-0.5,0.5,0.25), point31(-0.5,-0.5,0.75), point31(0,0,0.5), point31(-0.5,-0.5,0.75), point31(-0.5,-0.5,0.5), point31(0,0,0.5), point31(-0.5,-0.5,0.5), point31(0.5,-0.5,0.5), point31(0,0,0.5), point31(0.5,-0.5,0.5), point31(0.5,-0.5,0.25), point31(0,0,0.5), point31(0.5,-0.5,0.25), point31(0.5,0.5,0.75), point31(0,0,0.5), point31(0.5,0.5,0.75), point31(0.5,0.5,0.5), point31(0,0,0.5), point31(0.5,0.5,0.5), point31(-0.5,0.5,0.5), point31(0,0,0.5), point31(-0.5,0.5,0.5), point31(-0.5,0.5,0.25), },
     }};
 
+  EX int zgmod(int a, int b) { return b ? a%b : a; }
 
   array<int,3> nilperiod, nilperiod_edit;
   
@@ -805,7 +806,7 @@ EX namespace nilv {
     heptagon *create_step(heptagon *parent, int d) override {
       auto p = coords[parent];
       auto q = p * movevectors[d];
-      for(int a=0; a<3; a++) if(nilperiod[a]) q[a] = gmod(q[a], nilperiod[a]);
+      for(int a=0; a<3; a++) q[a] = zgmod(q[a], nilperiod[a]);
       auto child = get_at(q);
       parent->c.connect(d, child, (d + nilv_S7/2) % nilv_S7, false);
       return child;
@@ -856,6 +857,27 @@ EX namespace nilv {
     hyperpoint h = get_inverse_exp(local, 100);
     return nisot::translate(s0) * formula_exp(h * x);
     }
+
+EX color_t colorize(cell *c, char whichCanvas) {
+  mvec at = ((hrmap_nil*)currentmap)->coords[c->master];
+  color_t res = 0;
+  
+  auto setres = [&] (int z, color_t which) {
+    if(zgmod(at[2] - z, nilperiod[2]) == 0) res = which;
+    if(zgmod(at[2] - z-1, nilperiod[2]) == 0) res = which;
+    };
+
+  if(at[1] == 0 && at[0] >=0 && at[0] < 4)
+    setres(-at[0], gradient(0x1FF0000, 0x10000FF, 0, at[0], 4));
+  else if(at[0] == 4 && at[1] >= 0 && at[1] < 4)
+    setres(at[1]*3-4, gradient(0x10000FF, 0x100FF00, 0, at[1], 4));
+  else if(at[1] == 4 && at[0] >= 0 && at[0] <= 4)
+    setres(4+at[0], gradient(0x100FF00, 0x1FFFF00, 4, at[0], 0));
+  else if(at[0] == 0 && at[1] >= 0 && at[1] <= 4)
+    setres(at[1], gradient(0x1FFFF00, 0x1FF0000, 4, at[1], 0));
+  
+  return res;
+  }
 
 EX void prepare_niltorus3() {
   nilperiod_edit = nilperiod;
