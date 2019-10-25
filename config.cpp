@@ -1585,6 +1585,11 @@ EX void show3D() {
       dialog::extra_options = [] () { draw_radar(true); };
       });
     }
+  
+  if(GDIM == 3) {
+    dialog::addItem(XLAT("configure raycasting"), 'C');
+    dialog::add_action_push(ray::configure);
+    }
 
   if(WDIM == 3 || (GDIM == 3 && euclid)) {
     dialog::addSelItem(XLAT("radar range"), fts(vid.radarrange), 'R');

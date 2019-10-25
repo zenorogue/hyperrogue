@@ -4399,9 +4399,7 @@ EX void precise_mouseover() {
 
 EX transmatrix Viewbase;
 
-EX bool use_raycasting;
 EX bool no_wall_rendering;
-EX bool ray_comparison_mode;
 
 EX void drawthemap() {
   check_cgi();
@@ -4457,16 +4455,10 @@ EX void drawthemap() {
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";
   
-  use_raycasting = false;
-  if(WDIM == 3 && hyperbolic && pmodel == mdPerspective && !binarytiling)
-    use_raycasting = true;
-  if(WDIM == 3 && (sol || nil) && pmodel == mdGeodesic)
-    use_raycasting = true;
-  if(WDIM == 3 && euclid && pmodel == mdPerspective && !binarytiling)
-    use_raycasting = true;
-  no_wall_rendering = use_raycasting;
-  ray_comparison_mode = anyshiftclick;
-  if(ray_comparison_mode) no_wall_rendering = false;
+  ray::in_use = ray::requested();
+  no_wall_rendering = ray::in_use;
+  // ray::comparison_mode = true;
+  if(ray::comparison_mode) no_wall_rendering = false;
     
   iinf[itSavedPrincess].name = minf[moPrincess].name;
 
@@ -4507,7 +4499,7 @@ EX void drawthemap() {
   profile_start(1);
   make_actual_view();
   currentmap->draw();
-  if(use_raycasting && !ray_comparison_mode) do_raycast();
+  if(ray::in_use && !ray::comparison_mode) ray::cast();
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
@@ -4773,11 +4765,11 @@ EX void drawfullmap() {
   drawqueue();
   #endif
 
-  if(use_raycasting && ray_comparison_mode) {
+  if(ray::in_use && ray::comparison_mode) {
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1.0f);
     glClear(GL_DEPTH_BUFFER_BIT);
-    do_raycast();
+    ray::cast();
     }
 
   profile_stop(2);

@@ -9,9 +9,38 @@
 
 namespace hr {
 
+EX namespace ray {
+
+/** texture IDs */
 GLuint txConnections = 0, txWallcolor = 0, txMatrixid = 0;
 
+EX bool in_use;
+EX bool comparison_mode;
+
+/** 0 - never use, 2 - always use, 1 = smart selection */
+EX int want_use = 1;
+
 #define IN_ODS 0
+
+/** is the raycaster available? */
+EX bool available() {
+  if(WDIM == 2) return false;
+  if(hyperbolic && pmodel == mdPerspective && !binarytiling)
+    return true;
+  if((sol || nil) && pmodel == mdGeodesic)
+    return true;
+  if(euclid && pmodel == mdPerspective && !binarytiling)
+    return true;
+  return false;
+  }
+
+/** do we want to use the raycaster? */
+EX bool requested() {
+  if(!want_use) return false;
+  if(!available()) return false;
+  if(want_use == 2) return true;
+  return racing::on || quotient;
+  }
 
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uN, uM, uLength, uFovX, uFovY, uIPD;
@@ -402,10 +431,10 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
   GLERR("bind_array");
   }
 
-EX void do_raycast() {
+EX void cast() {
   enable_raycaster();
   
-  if(ray_comparison_mode) 
+  if(comparison_mode) 
     glColorMask( GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE );
 
   auto& o = our_raycaster;
@@ -523,4 +552,25 @@ EX void do_raycast() {
   glActiveTexture(GL_TEXTURE0 + 0);
   }
 
+EX void configure() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("raycasting configuration"));
+  
+  dialog::addBoolItem(XLAT("available in current geometry"), available(), 0);
+  
+  dialog::addBoolItem(XLAT("use raycasting?"), want_use == 2 ? true : in_use, 'u');
+  if(want_use == 1) dialog::lastItem().value = XLAT("SMART");
+  
+  dialog::add_action([] {
+    want_use++; want_use %= 3;
+    });
+
+  dialog::addBoolItem_action(XLAT("comparison mode"), comparison_mode, 'c');
+  
+  dialog::addBack();
+  dialog::display();
+  }
+
+EX }
 }
