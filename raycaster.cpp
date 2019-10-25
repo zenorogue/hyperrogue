@@ -24,6 +24,9 @@ EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
 EX int max_iter_sol = 600, max_iter_iso = 60;
 
+EX int max_cells = 8192;
+EX bool rays_generate = true;
+
 ld& exp_decay_current() {
   return (sol || hyperbolic) ? exp_decay_exp : exp_decay_poly;
   }
@@ -472,8 +475,20 @@ EX void cast() {
   
   vector<cell*> lst;
 
-  celllister cl(viewctr.at->c7, 10, 10000, NULL);
-  vector<cell*> lst = cl.lst;
+  if(true) {
+    manual_celllister cl;
+    cl.add(viewctr.at->c7);
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      forCellCM(c2, c) {
+        if(rays_generate) setdist(c2, 7, c);
+        cl.add(c2);
+        if(isize(cl.lst) >= max_cells) goto finish;
+        }
+      }
+    finish:
+    lst = cl.lst;
+    }
   
   rows = next_p2((isize(lst)+per_row-1) / per_row);
   
@@ -605,6 +620,15 @@ EX void configure() {
       );
     dialog::reaction = [] {
       our_raycaster = nullptr;
+      };
+    });
+
+  dialog::addSelItem(XLAT("max cells"), its(max_cells), 's');
+  dialog::add_action([&] {
+    dialog::editNumber(max_cells, 16, 131072, 0.1, 4096, XLAT("max cells"), "");
+    dialog::scaleLog();
+    dialog::extra_options = [] {
+      dialog::addBoolItem_action("generate", rays_generate, 'G');
       };
     });
   
