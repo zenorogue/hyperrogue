@@ -5172,16 +5172,6 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   else if(dist0 < vid.middetail) detaillevel = 1;
   else detaillevel = 0;
 
-#ifdef BUILDZEBRA
-  if(c->type == 6 && c->tmp > 0) {
-    int i = c->tmp;
-    zebra(cellwalker(c, i&15), 1, i>>4, "", 0);
-    }
-  
-  c->item = eItem(c->heat / 4);
-  buildAutomatonRule(c);
-#endif
-
   #if CAP_SHAPES
   viewBuggyCells(c,V);
   #endif

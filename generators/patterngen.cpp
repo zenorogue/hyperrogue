@@ -444,5 +444,17 @@ void buildAutomatonRule(cell *c) {
     }
   }
 
+/*
+  to drawcell:
+  if(c->type == 6 && c->tmp > 0) {
+    int i = c->tmp;
+    zebra(cellwalker(c, i&15), 1, i>>4, "", 0);
+    }
+  
+  c->item = eItem(c->heat / 4);
+  buildAutomatonRule(c);
+#endif
+*/
+
 // #define BUILDZEBRA
 }
