@@ -640,8 +640,10 @@ color_t distribute_color(int id) {
   return v; 
   }
 
-EX void do_viewdist(cell *c, const transmatrix& V, color_t& wcol, color_t& fcol) {
+void celldrawer::do_viewdist() {
   if(behindsphere(V)) return;
+  
+  cell *c = cw.at;
 
   int cd = (use_color_codes || number_coding == ncDistance || number_coding == ncDebug) ? curr_dist(c) : 0;
   

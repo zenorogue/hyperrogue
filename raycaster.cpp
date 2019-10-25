@@ -470,10 +470,10 @@ EX void do_raycast() {
         }
       connections[u] = enc(ids[c1] * S7);
       if(isWall3(c1)) {
-        color_t wcol;
-        color_t fcol;
-        setcolors(c1, wcol, fcol);
-        wcol = darkena(wcol, 0, 0xFF);
+        celldrawer dd;
+        dd.cw.at = c1;
+        dd.setcolors();
+        color_t wcol = darkena(dd.wcol, 0, 0xFF);
         wallcolor[u] = glhr::acolor(wcol);
         }
       else

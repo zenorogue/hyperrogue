@@ -8,23 +8,6 @@
 #include "hyper.h"
 namespace hr {
 
-#if HDR
-struct radarpoint {
-  hyperpoint h;
-  char glyph;
-  color_t color;
-  color_t line;
-  };
-
-struct radarline {
-  hyperpoint h1, h2;
-  color_t line;
-  };
-#endif
-
-EX vector<radarpoint> radarpoints;
-EX vector<radarline> radarlines;
-
 EX purehookset hooks_stats;
 
 EX int monsterclass(eMonster m) {
@@ -379,97 +362,6 @@ void drawMobileArrow(int i) {
 #endif
 
 EX bool nofps = false;
-
-EX void draw_radar(bool cornermode) {
-
-  if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
-  bool d3 = WDIM == 3;
-  bool hyp = hyperbolic;
-  bool sph = sphere;
-  bool scompass = nonisotropic && !hybri;
-
-  dynamicval<eGeometry> g(geometry, gEuclid);
-  dynamicval<eModel> pm(pmodel, mdDisk);
-  dynamicval<bool> ga(vid.always3, false);
-  dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
-  initquickqueue();
-  int rad = vid.radarsize;
-  if(dual::state) rad /= 2; 
-  
-  ld cx = dual::state ? (dual::currently_loaded ? vid.xres/2+rad+2 : vid.xres/2-rad-2) : cornermode ? rad+2 : vid.xres-rad-2;
-  ld cy = vid.yres-rad-2 - vid.fsize;
-
-  for(int i=0; i<360; i++)
-    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
-  queuecurve(0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
-
-  ld alpha = 15 * degree;
-  ld co = cos(alpha);
-  ld si = sin(alpha);
-  
-  if(sph && !d3) {
-    for(int i=0; i<360; i++)
-      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
-    queuecurve(0, 0x200000FF, PPR::ZERO);
-    }
-
-  if(d3) {
-    for(int i=0; i<360; i++)
-      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
-    queuecurve(0xFF0000FF, 0x200000FF, PPR::ZERO);
-  
-    curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
-    curvepoint(atscreenpos(cx, cy, 1) * C0);
-    curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
-    queuecurve(0xFF8000FF, 0, PPR::ZERO);
-    }
-  
-  if(d3) for(auto& r: radarpoints) {    
-    queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
-    }
-  
-  if(scompass) {
-    auto compassdir = [&] (char dirname, hyperpoint h) {
-      h = nisot::local_perspective * h * .8;
-      queueline(atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
-      displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0xA04010);
-      };
-    compassdir('E', point3(+1, 0, 0));
-    compassdir('N', point3(0, +1, 0));
-    compassdir('W', point3(-1, 0, 0));
-    compassdir('S', point3(0, -1, 0));
-    compassdir('U', point3(0,  0,+1));
-    compassdir('D', point3(0,  0,-1));
-    }
-
-  auto locate = [&] (hyperpoint h) {
-    if(sph)
-      return point3(cx + (rad-10) * h[0], cy + (rad-10) * h[2] * si + (rad-10) * h[1] * co, +h[1] * si > h[2] * co ? 8 : 16);
-    else if(hyp) 
-      return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[3]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
-    else
-      return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (vid.radarrange + cgi.scalefactor/4) * 0.8);
-    };
-  
-  for(auto& r: radarlines) {
-    hyperpoint h1 = locate(r.h1);
-    hyperpoint h2 = locate(r.h2);
-    h1 = tC0(atscreenpos(h1[0], h1[1], 1));
-    h2 = tC0(atscreenpos(h2[0], h2[1], 1));
-    queueline(h1, h2, r.line, -1);
-    }
-
-  quickqueue();
-  glflush();
-  
-  for(auto& r: radarpoints) {
-    if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
-    else {
-      hyperpoint h = locate(r.h);
-      displaychr(int(h[0]), int(h[1]), 0, int(h[2]), r.glyph, r.color);
-      }
-    }
-  }
 
 EX color_t crosshair_color = 0xFFFFFFC0;
 EX ld crosshair_size = 0;

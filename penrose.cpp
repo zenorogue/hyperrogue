@@ -352,7 +352,7 @@ struct hrmap_kite : hrmap {
 
       cell *c = h->c7;
       if(!do_draw(c, V)) continue;
-      drawcell(c, V, 0, false);
+      drawcell(c, V);
       
       for(int i=0; i<c->type; i++)
         dq::enqueue(c->cmove(i)->master, V * tmatrix(c, i));

@@ -620,7 +620,7 @@ struct hrmap_archimedean : hrmap {
   
       if(id < 2*current.N ? !DUAL : !PURE) {
         if(!do_draw(h->c7, V)) continue;
-        drawcell(h->c7, V, 0, false);
+        drawcell(h->c7, V);
         }
   
       for(int i=0; i<S; i++) {

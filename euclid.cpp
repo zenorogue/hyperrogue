@@ -693,7 +693,7 @@ EX namespace euclid3 {
         
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
-        drawcell(c, V, 0, false);
+        drawcell(c, V);
         if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   
         for(int i=0; i<S7; i++)
@@ -1244,7 +1244,7 @@ void hrmap_euclid_any::draw() {
       }
 
     if(do_draw(cw.at, Mat)) {
-      drawcell(cw.at, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat, cw.spin, cw.mirrored);
+      drawcell(cw, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat);
       for(int x=-1; x<=+1; x++)
       for(int y=-1; y<=+1; y++) {
         euspot p(dx+x, dy+y);

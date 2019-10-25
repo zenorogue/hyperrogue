@@ -386,7 +386,7 @@ EX namespace solnihv {
         
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
-        drawcell(c, V, 0, false);
+        drawcell(c, V);
         if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   
         for(int i=0; i<S7; i++) {
@@ -833,7 +833,7 @@ EX namespace nilv {
         
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
-        drawcell(c, V, 0, false);
+        drawcell(c, V);
         if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
 
         if(0) for(int t=0; t<c->type; t++) {
@@ -1123,7 +1123,8 @@ EX namespace product {
 
   EX int cwall_offset, cwall_mask, actual_view_level;
   
-  EX void drawcell_stack(cell *c, transmatrix V, int spinv, bool mirrored) {
+  EX void drawcell_stack(cellwalker cw, transmatrix V) {
+    cell *c = cw.at;
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere;
     hybrid::in_actual([&] { 
@@ -1146,7 +1147,8 @@ EX namespace product {
         if(z == 1) cwall_mask ^= (1<<c->type);
         cell *c1 = hybrid::get_at(c, actual_view_level+z);
         setdist(c1, 7, NULL);
-        drawcell(c1, V * mscale(Id, cgi.plevel * (z+actual_view_level - hybrid::current_view_level)), spinv, mirrored); 
+        cw.at = c1;
+        drawcell(cw, V * mscale(Id, cgi.plevel * (z+actual_view_level - hybrid::current_view_level))); 
         }
       });
     }
@@ -1539,10 +1541,10 @@ EX namespace rots {
         if(sl2) {
           if(V[3][3] < 0) V = centralsym * V;
           if(!do_draw(c, V)) continue;
-          drawcell(c, V, 0, false);
+          drawcell(c, V);
           }
         else {
-          drawcell(c, V, 0, false);
+          drawcell(c, V);
           }
         if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
 

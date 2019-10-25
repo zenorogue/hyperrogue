@@ -2755,14 +2755,116 @@ EX bool boatAt(cell *c) {
 
 EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
 
-EX bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, const transmatrix *Vdp) {
+EX void clearMonsters() {
+  for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
+    delete(it->second);
+  for(monster *m: active) delete m;
+  mousetarget = NULL;
+  lmousetarget = NULL;
+  monstersAt.clear();
+  active.clear();
+  }
+
+EX void clearMemory() {
+  clearMonsters();
+  gmatrix.clear();
+  while(!traplist.empty()) traplist.pop();
+  curtime = 0;
+  nextmove = 0;
+  nextdragon = 0;
+  visibleAt = 0;
+  for(int i=0; i<MAXPLAYER; i++) pc[i] = NULL;
+  }
+
+void gamedata(hr::gamedata* gd) { 
+  if(shmup::on) {
+    gd->store(pc[0]); // assuming 1 player!
+    gd->store(nextmove);
+    gd->store(curtime);
+    gd->store(nextdragon);
+    gd->store(visibleAt);
+    gd->store(traplist);
+    gd->store(monstersAt);
+    gd->store(active);
+    gd->store(mousetarget);
+    gd->store(lmousetarget);
+    gd->store(nonvirtual);
+    gd->store(additional);
+    if(WDIM == 3) gd->store(swordmatrix[0]); // assuming 1 player!
+    gd->store(traplist);
+    gd->store(firetraplist);
+    }
+  }
+
+EX cell *playerpos(int i) {
+  if(!pc[i]) return NULL;
+  return pc[i]->base;
+  }
+
+EX bool playerInBoat(int i) {
+  if(!pc[i]) return false;
+  return pc[i]->inBoat;
+  }
+
+EX void destroyBoats(cell *c) {
+  for(monster *m: active)
+    if(m->base == c && m->inBoat)
+      m->inBoat = false;
+  }
+
+EX void virtualRebase(shmup::monster *m, bool tohex) {
+  virtualRebase(m->base, m->at, tohex);
+  }
+
+EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
+
+EX void addShmupHelp(string& out) {
+  if(shmup::mousetarget && sqdist(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
+    if(callhandlers(false, hooks_describe, shmup::mousetarget, out)) return;
+    out += XLAT1(minf[shmup::mousetarget->type].name);
+    help = generateHelpForMonster(shmup::mousetarget->type);
+    }
+  }
+
+auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
+  addHook(hooks_gamedata, 0, shmup::gamedata) +
+  addHook(hooks_removecells, 0, [] () {
+    for(mit it = monstersAt.begin(); it != monstersAt.end();) {
+      if(is_cell_removed(it->first)) {
+        monstersAt.insert(make_pair(nullptr, it->second));
+        auto it0 = it; it++;
+        monstersAt.erase(it0);
+        }
+      else it++;
+      }
+    });
+
+EX void switch_shmup() { 
+  stop_game();
+  switch_game_mode(rg::shmup);
+  resetScores();
+  start_game();
+  configure();
+  }
+
+#if MAXMDIM >= 4
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  for(auto& p: monstersAt) swapmatrix(p.second->at);
+  });
+#endif
+    
+}
+
+bool celldrawer::draw_shmup_monster() {
+  using namespace shmup;
+  auto& c = cw.at;
   #if CAP_SHAPES
 
   pair<mit, mit> p = 
     monstersAt.equal_range(c);
     
   if(p.first == p.second) return false;
-  ld zlev = -geom3::factor_to_lev(zlevel(tC0((*Vdp))));
+  ld zlev = -geom3::factor_to_lev(zlevel(tC0(Vd)));
    
   vector<monster*> monsters;
 
@@ -2781,21 +2883,20 @@ EX bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, tr
     
     if(m->inBoat) {
       view = m->pat;
-      Vboat = &Vboat0;
-      if(WDIM == 2) Vboat0 = view;
-      if(WDIM == 3) Vboat0 = view * spin(-M_PI/2);
+      if(WDIM == 2) Vboat = view;
+      if(WDIM == 3) Vboat = view * spin(-M_PI/2);
       
       bool magic = m->type == moPlayer && items[itOrbWater];
       color_t outcolor = magic ? watercolor(0) : 0xC06000FF;
       color_t incolor = magic ? 0x0060C0FF : 0x804000FF;
       
       if(WDIM == 2) {
-        queuepoly(Vboat0, cgi.shBoatOuter, outcolor);
-        queuepoly(Vboat0, cgi.shBoatInner, incolor);
+        queuepoly(Vboat, cgi.shBoatOuter, outcolor);
+        queuepoly(Vboat, cgi.shBoatInner, incolor);
         }
       if(WDIM == 3) {
-        queuepoly(mscale(Vboat0, cgi.scalefactor/2), cgi.shBoatOuter, outcolor);
-        queuepoly(mscale(Vboat0, cgi.scalefactor/2-0.01), cgi.shBoatInner, incolor);
+        queuepoly(mscale(Vboat, cgi.scalefactor/2), cgi.shBoatOuter, outcolor);
+        queuepoly(mscale(Vboat, cgi.scalefactor/2-0.01), cgi.shBoatInner, incolor);
         }
       }
 
@@ -2934,103 +3035,4 @@ EX bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, tr
   return false;
   }
 
-EX void clearMonsters() {
-  for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
-    delete(it->second);
-  for(monster *m: active) delete m;
-  mousetarget = NULL;
-  lmousetarget = NULL;
-  monstersAt.clear();
-  active.clear();
-  }
-
-EX void clearMemory() {
-  clearMonsters();
-  gmatrix.clear();
-  while(!traplist.empty()) traplist.pop();
-  curtime = 0;
-  nextmove = 0;
-  nextdragon = 0;
-  visibleAt = 0;
-  for(int i=0; i<MAXPLAYER; i++) pc[i] = NULL;
-  }
-
-void gamedata(hr::gamedata* gd) { 
-  if(shmup::on) {
-    gd->store(pc[0]); // assuming 1 player!
-    gd->store(nextmove);
-    gd->store(curtime);
-    gd->store(nextdragon);
-    gd->store(visibleAt);
-    gd->store(traplist);
-    gd->store(monstersAt);
-    gd->store(active);
-    gd->store(mousetarget);
-    gd->store(lmousetarget);
-    gd->store(nonvirtual);
-    gd->store(additional);
-    if(WDIM == 3) gd->store(swordmatrix[0]); // assuming 1 player!
-    gd->store(traplist);
-    gd->store(firetraplist);
-    }
-  }
-
-EX cell *playerpos(int i) {
-  if(!pc[i]) return NULL;
-  return pc[i]->base;
-  }
-
-EX bool playerInBoat(int i) {
-  if(!pc[i]) return false;
-  return pc[i]->inBoat;
-  }
-
-EX void destroyBoats(cell *c) {
-  for(monster *m: active)
-    if(m->base == c && m->inBoat)
-      m->inBoat = false;
-  }
-
-EX void virtualRebase(shmup::monster *m, bool tohex) {
-  virtualRebase(m->base, m->at, tohex);
-  }
-
-EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
-
-EX void addShmupHelp(string& out) {
-  if(shmup::mousetarget && sqdist(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
-    if(callhandlers(false, hooks_describe, shmup::mousetarget, out)) return;
-    out += XLAT1(minf[shmup::mousetarget->type].name);
-    help = generateHelpForMonster(shmup::mousetarget->type);
-    }
-  }
-
-auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
-  addHook(hooks_gamedata, 0, shmup::gamedata) +
-  addHook(hooks_removecells, 0, [] () {
-    for(mit it = monstersAt.begin(); it != monstersAt.end();) {
-      if(is_cell_removed(it->first)) {
-        monstersAt.insert(make_pair(nullptr, it->second));
-        auto it0 = it; it++;
-        monstersAt.erase(it0);
-        }
-      else it++;
-      }
-    });
-
-EX void switch_shmup() { 
-  stop_game();
-  switch_game_mode(rg::shmup);
-  resetScores();
-  start_game();
-  configure();
-  }
-
-#if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] {
-  for(auto& p: monstersAt) swapmatrix(p.second->at);
-  });
-#endif
-    
-}
 }

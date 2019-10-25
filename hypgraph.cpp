@@ -1069,7 +1069,7 @@ void drawrec(cell *c, const transmatrix& V) {
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
       draw_li.relative = at;
       draw_li.total_dir = fixg6(dir);
-      drawcell(c, V1, 0, false);
+      drawcell(c, V1);
       res = true;
       }
     for(int i=0; i<c->type; i++) {
@@ -1088,7 +1088,7 @@ void drawrec(cell *c, const transmatrix& V) {
     draw_li.last_dir = -1;
     bool res = false;
     if(do_draw(c, V))
-      drawcell(c, V, 0, false), res = true;
+      drawcell(c, V), res = true;
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
       if(!c2) continue;
@@ -1169,7 +1169,7 @@ void hrmap_standard::draw() {
         transmatrix V1 = V0 * irr::cells[vc[i]].pusher;
         if(do_draw(c, V1))
           draw = true,
-          drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher, 0, false);
+          drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher);
         }
       }
     #endif
@@ -1177,7 +1177,7 @@ void hrmap_standard::draw() {
     else {
       if(do_draw(c, V1)) {
         transmatrix V2 = actualV(hs, V1);
-        drawcell(c, V2, 0, hs.mirrored);
+        drawcell(cellwalker(c, 0, hs.mirrored), V2);
         draw = true;
         }
   
@@ -1188,7 +1188,7 @@ void hrmap_standard::draw() {
           transmatrix V2 = V1 * cgi.hexmove[d];
           if(do_draw(c->move(ds), V2))
             draw = true,
-            drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
+            drawcell(cellwalker(c->move(ds), 0, hs.mirrored ^ c->c.mirror(ds)), V2);
           }
         }
       }

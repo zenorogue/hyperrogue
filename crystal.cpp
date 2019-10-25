@@ -572,7 +572,7 @@ struct hrmap_crystal : hrmap_standard {
             
       cell *c = h->c7;
       if(!do_draw(c, V)) continue;
-      drawcell(c, V, 0, false);
+      drawcell(c, V);
       
       if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   

@@ -1110,6 +1110,11 @@ namespace mapeditor {
   #endif
 
   EX void drawGhosts(cell *c, const transmatrix& V, int ct) {
+    if((cmode & sm::MAP) && lmouseover && darken == 0 &&
+      (GDIM == 3 || !mouseout()) && 
+      (patterns::whichPattern ? patterns::getpatterninfo0(c).id == patterns::getpatterninfo0(lmouseover).id : c == lmouseover)) {
+      queuecircleat(c, .78, 0x00FFFFFF);
+      }
     }
 
   hyperpoint ccenter = C0;
