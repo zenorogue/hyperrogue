@@ -636,5 +636,39 @@ EX void configure() {
   dialog::display();
   }
 
+#if CAP_COMMANDLINE  
+int readArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-ray-do")) {
+    PHASEFROM(2);
+    want_use = 2;
+    }
+  else if(argis("-ray-dont")) {
+    PHASEFROM(2);
+    want_use = 0;
+    }
+  else if(argis("-ray-smart")) {
+    PHASEFROM(2);
+    want_use = 1;
+    }
+  else if(argis("-ray-cells")) {
+    PHASEFROM(2); shift();
+    rays_generate = true;
+    max_cells = argi();
+    }
+  else if(argis("-ray-cells-no")) {
+    PHASEFROM(2); shift();
+    rays_generate = false;
+    max_cells = argi();
+    }
+  else return 1;
+  return 0;
+  }
+
+auto hook = addHook(hooks_args, 100, readArgs);
+#endif
+
 EX }
 }
