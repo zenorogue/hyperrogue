@@ -102,7 +102,7 @@ void enable_raycaster() {
     "uniform int uLength;\n"
     "uniform float uIPD;\n"
     "uniform mat4 uStart;\n"
-    "uniform mat4 uM[203];\n"
+    "uniform mat4 uM[80];\n"
     "uniform mat4 uTest;\n"
     "uniform float uStartid;\n"
     "uniform sampler1D tConnections;\n"
@@ -392,9 +392,9 @@ void enable_raycaster() {
     // next cell
     fmain += 
       "  float rot = texture1D(tMatrixid, u).r;\n"
-      "  int mid = int(rot * float(uLength));\n"
-      "  position = uM[mid] * position;\n"
-      "  tangent = uM[mid] * tangent;\n"
+      "  int mid = int(rot * 1024.);\n"
+      "  position = uM[mid] * uM[which] * position;\n"
+      "  tangent = uM[mid] * uM[which] *  tangent;\n"
       "  cid = texture1D(tConnections, u).r;\n";
     
     fmain += 
@@ -492,11 +492,7 @@ EX void cast() {
   GLERR("uniform IPD");
 
   vector<transmatrix> ms;
-  if(sol || nil) ;
-  else if(euclid)
-    for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
-  else
-    for(int j=0; j<S7; j++) inverse(reg3::adjmoves[j]);
+  for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
 
   vector<float> connections(length);
   vector<array<float, 4>> wallcolor(length);
@@ -521,11 +517,11 @@ EX void cast() {
       else
         wallcolor[u] = glhr::acolor(0);
 
-      transmatrix T = currentmap->relative_matrix(c->master, c1->master);
+      transmatrix T = currentmap->relative_matrix(c->master, c1->master) * inverse(ms[i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
-        matrixid[u] = enc(k);
+        matrixid[u] = (k+.5) / 1024.;
         break;
         }
       }
