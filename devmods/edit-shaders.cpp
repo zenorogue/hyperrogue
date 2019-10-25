@@ -38,7 +38,7 @@ void print_shader(const char *fname, string s) {
   fclose(f);
   }
 
-bool trailer_handleKey(int sym, int uni) {  
+bool es_handleKey(int sym, int uni) {  
 
   if(sym == SDLK_F2) {
     glhr::be_textured();
@@ -65,8 +65,8 @@ bool trailer_handleKey(int sym, int uni) {
   return false;
   }
 
-auto hook = 
-  addHook(hooks_handleKey, 100, trailer_handleKey)
+auto eshook = 
+  addHook(hooks_handleKey, 100, es_handleKey)
 + 0;
 
 }
