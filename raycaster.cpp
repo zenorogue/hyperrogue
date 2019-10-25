@@ -20,6 +20,8 @@ EX bool comparison_mode;
 /** 0 - never use, 2 - always use, 1 = smart selection */
 EX int want_use = 1;
 
+EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
+
 #define IN_ODS 0
 
 /** is the raycaster available? */
@@ -47,6 +49,7 @@ struct raycaster : glhr::GLprogram {
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tMatrixid;
   GLint uBinaryWidth;
+  GLint uLinearSightRange, uExpStart, uExpDecay;
   
   raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
@@ -64,6 +67,10 @@ struct raycaster : glhr::GLprogram {
     uWallY = glGetUniformLocation(_program, "uWallY");
     
     uBinaryWidth = glGetUniformLocation(_program, "uBinaryWidth");
+
+    uLinearSightRange = glGetUniformLocation(_program, "uLinearSightRange");
+    uExpDecay = glGetUniformLocation(_program, "uExpDecay");
+    uExpStart = glGetUniformLocation(_program, "uExpStart");
   
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
@@ -104,7 +111,8 @@ void enable_raycaster() {
     "uniform sampler1D tMatrixid;\n"
     "uniform vec4 uWallX[60];\n"
     "uniform vec4 uWallY[60];\n"
-    "uniform int uWallstart[16];\n";
+    "uniform int uWallstart[16];\n"
+    "uniform float uLinearSightRange, uExpStart, uExpDecay;\n";
     
     if(IN_ODS) fsh += 
 
@@ -364,7 +372,8 @@ void enable_raycaster() {
       "  vec4 col = texture1D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n"
       "    vec2 inface = map_texture(position, which);\n"
-      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n"; // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
+      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
+      "    bright *= max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
     
     if(nil) fmain +=
       "    if(abs(abs(position.x)-abs(position.y)) < .005) bright /= 2.;\n";
@@ -372,7 +381,7 @@ void enable_raycaster() {
     fmain +=
 //      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
 //      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
-      "    col.xyz = col.xyz * bright * exp(- go / 4.);\n"
+      "    col.xyz = col.xyz * bright;\n"
 //      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
       "    col.w = 1.;\n"
 //      "    if(purp == 1) { col.rgb = (col.rgb + vec3(1., 0., 1.)) / 2; }\n"
@@ -429,6 +438,10 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
   
   glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, isize(v), 0, GL_RGBA, GL_FLOAT, &v[0]);  
   GLERR("bind_array");
+  }
+
+ld& exp_decay_current() {
+  return (sol || hyperbolic) ? exp_decay_exp : exp_decay_poly;
   }
 
 EX void cast() {
@@ -533,6 +546,11 @@ EX void cast() {
 
   if(o->uBinaryWidth != -1)
     glUniform1f(o->uBinaryWidth, vid.binary_width * log(2) / 2);
+    
+  glUniform1f(o->uLinearSightRange, sightranges[geometry]);
+  glUniform1f(o->uExpDecay, exp_decay_current());
+  glUniform1f(o->uExpStart, exp_start);
+
 
   vector<glhr::glmatrix> gms;
   for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose(m));
@@ -567,6 +585,20 @@ EX void configure() {
     });
 
   dialog::addBoolItem_action(XLAT("comparison mode"), comparison_mode, 'c');
+  
+  dialog::addSelItem(XLAT("exponential range"), fts(exp_decay_current()), 'r');
+  dialog::add_action([&] {
+    dialog::editNumber(exp_decay_current(), 0, 40, 0, 5, XLAT("exponential range"), 
+      XLAT("brightness formula: max(1-d/sightrange, s*exp(-d/r))")
+      );
+    });
+
+  dialog::addSelItem(XLAT("exponential start"), fts(exp_start), 's');
+  dialog::add_action([&] {
+    dialog::editNumber(exp_start, 0, 1, 0.1, 1, XLAT("exponential start"), 
+      XLAT("brightness formula: max(1-d/sightrange, s*exp(-d/r))\n")
+      );
+    });
   
   dialog::addBack();
   dialog::display();
