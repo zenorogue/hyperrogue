@@ -24,6 +24,15 @@ EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
 EX int max_iter_sol = 600, max_iter_iso = 60;
 
+ld& exp_decay_current() {
+  return (sol || hyperbolic) ? exp_decay_exp : exp_decay_poly;
+  }
+
+int& max_iter_current() {
+  if(nonisotropic) return max_iter_sol;
+  else return max_iter_iso;
+  }
+
 #define IN_ODS 0
 
 /** is the raycaster available? */
