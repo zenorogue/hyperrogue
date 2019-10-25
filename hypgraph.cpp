@@ -60,7 +60,7 @@ hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   B /= A; C /= A;
   
   ld rootsign = 1;
-  if(gc == gcSphere && vid.alpha > 1) rootsign = -1;
+  // if(gc == gcSphere && vid.alpha > 1) rootsign = -1;
   
   ld hz = B / 2 + rootsign * sqrt(C + B*B/4);
   
