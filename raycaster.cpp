@@ -22,6 +22,10 @@ EX int want_use = 1;
 
 EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
+EX ld maxstep_sol = .02;
+EX ld maxstep_nil = .1;
+EX ld minstep = .001;
+
 EX int max_iter_sol = 600, max_iter_iso = 60;
 
 EX int max_cells = 8192;
@@ -34,6 +38,11 @@ ld& exp_decay_current() {
 int& max_iter_current() {
   if(nonisotropic) return max_iter_sol;
   else return max_iter_iso;
+  }
+
+ld& maxstep_current() {
+  if(sol) return maxstep_sol;
+  else return maxstep_nil;
   }
 
 #define IN_ODS 0
@@ -92,6 +101,8 @@ struct raycaster : glhr::GLprogram {
   };
 
 shared_ptr<raycaster> our_raycaster;
+
+void reset_raycaster() { our_raycaster = nullptr; };
 
 void enable_raycaster() {
   if(!our_raycaster) { 
@@ -185,8 +196,8 @@ void enable_raycaster() {
     else fsh += "  float len(vec4 x) { return length(x.xyz); }\n";
     
     if(nonisotropic) fmain += 
-      "  const float maxstep = .03;\n"
-      "  const float minstep = .001;\n"
+      "  const float maxstep = " + fts(maxstep_current()) + ";\n"
+      "  const float minstep = " + fts(minstep) + ";\n"
       "  float next = maxstep;\n";
     
     fmain +=     
@@ -617,13 +628,28 @@ EX void configure() {
       );
     });
 
+  if(nonisotropic) {
+    dialog::addSelItem(XLAT("max step"), fts(maxstep_current()), 'x');
+    dialog::add_action([] {
+      dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.03 : 0.1, XLAT("max step"), "");
+      dialog::scaleLog();
+      dialog::bound_low(1e-9);
+      dialog::reaction = reset_raycaster;
+      });
+
+    dialog::addSelItem(XLAT("min step"), fts(minstep), 'n');
+    dialog::add_action([] {
+      dialog::editNumber(minstep, 1e-6, 1, 0.1, 0.001, XLAT("min step"), "");
+      dialog::scaleLog();
+      dialog::bound_low(1e-9);
+      dialog::reaction = reset_raycaster;
+      });
+    }
+  
   dialog::addSelItem(XLAT("iterations"), its(max_iter_current()), 's');
   dialog::add_action([&] {
-    dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), ""
-      );
-    dialog::reaction = [] {
-      our_raycaster = nullptr;
-      };
+    dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), "");
+    dialog::reaction = reset_raycaster;
     });
 
   dialog::addSelItem(XLAT("max cells"), its(max_cells), 's');
