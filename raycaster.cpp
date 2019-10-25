@@ -22,6 +22,8 @@ EX int want_use = 1;
 
 EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
+EX int max_iter_sol = 600, max_iter_iso = 60;
+
 #define IN_ODS 0
 
 /** is the raycaster available? */
@@ -183,7 +185,7 @@ void enable_raycaster() {
       "  vec4 tangent = vw * at0;\n"
       "  float go = 0.;\n"
       "  float cid = uStartid;\n"
-      "  for(int iter=0; iter<600; iter++) {\n";
+      "  for(int iter=0; iter<" + its(max_iter_current()) + "; iter++) {\n";
     
     fmain +=
       "  float dist = 100.;\n";
@@ -444,6 +446,11 @@ ld& exp_decay_current() {
   return (sol || hyperbolic) ? exp_decay_exp : exp_decay_poly;
   }
 
+int& max_iter_current() {
+  if(nonisotropic) return max_iter_sol;
+  else return max_iter_iso;
+  }
+
 EX void cast() {
   enable_raycaster();
   
@@ -594,6 +601,15 @@ EX void configure() {
     dialog::editNumber(exp_start, 0, 1, 0.1, 1, XLAT("exponential start"), 
       XLAT("brightness formula: max(1-d/sightrange, s*exp(-d/r))\n")
       );
+    });
+
+  dialog::addSelItem(XLAT("iterations"), its(max_iter_current()), 's');
+  dialog::add_action([&] {
+    dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), ""
+      );
+    dialog::reaction = [] {
+      our_raycaster = nullptr;
+      };
     });
   
   dialog::addBack();
