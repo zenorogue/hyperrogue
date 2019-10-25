@@ -774,6 +774,8 @@ EX namespace nilv {
     { point31(0,0,0.5), point31(-0.5,0.5,0.25), point31(-0.5,-0.5,0.75), point31(0,0,0.5), point31(-0.5,-0.5,0.75), point31(-0.5,-0.5,0.5), point31(0,0,0.5), point31(-0.5,-0.5,0.5), point31(0.5,-0.5,0.5), point31(0,0,0.5), point31(0.5,-0.5,0.5), point31(0.5,-0.5,0.25), point31(0,0,0.5), point31(0.5,-0.5,0.25), point31(0.5,0.5,0.75), point31(0,0,0.5), point31(0.5,0.5,0.75), point31(0.5,0.5,0.5), point31(0,0,0.5), point31(0.5,0.5,0.5), point31(-0.5,0.5,0.5), point31(0,0,0.5), point31(-0.5,0.5,0.5), point31(-0.5,0.5,0.25), },
     }};
 
+
+  array<int,3> nilperiod, nilperiod_edit;
   
   struct hrmap_nil : hrmap {
     unordered_map<mvec, heptagon*> at;
@@ -803,6 +805,7 @@ EX namespace nilv {
     heptagon *create_step(heptagon *parent, int d) override {
       auto p = coords[parent];
       auto q = p * movevectors[d];
+      for(int a=0; a<3; a++) if(nilperiod[a]) q[a] = gmod(q[a], nilperiod[a]);
       auto child = get_at(q);
       parent->c.connect(d, child, (d + nilv_S7/2) % nilv_S7, false);
       return child;
@@ -813,13 +816,14 @@ EX namespace nilv {
       }
     
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
+      for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
       return nisot::translate(mvec_to_point(coords[h1].inverse() * coords[h2]));
       }
 
     void draw() override {
-      dq::visited.clear();
+      dq::visited_by_matrix.clear();
 
-      dq::enqueue(viewctr.at, cview());
+      dq::enqueue_by_matrix(viewctr.at, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -841,11 +845,10 @@ EX namespace nilv {
         for(int i=0; i<S7; i++) {
           // note: need do cmove before c.spin
           heptagon *h1 = h->cmove(i);
-          dq::enqueue(h1, V * adjmatrix(i));
+          dq::enqueue_by_matrix(h1, V * adjmatrix(i));
           }
         }
       }
-
     };
 
   EX hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
@@ -853,6 +856,44 @@ EX namespace nilv {
     hyperpoint h = get_inverse_exp(local, 100);
     return nisot::translate(s0) * formula_exp(h * x);
     }
+
+EX void prepare_niltorus3() {
+  nilperiod_edit = nilperiod;
+  }
+  
+EX void show_niltorus3() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(1);  
+  dialog::init(XLAT("Nil quotient spaces"));
+  for(int a=0; a<3; a++) {
+    string title = XLAT("%1 period", s0+char('X'+a));
+    dialog::addSelItem(title, its(nilperiod_edit[a]), 'x');
+    dialog::add_action([=] { 
+      dialog::editNumber(nilperiod_edit[a], 0, 60, 1, 0, title, ""); 
+      dialog::bound_low(0);
+      });      
+    }
+  
+  bool ok = (!nilperiod_edit[1]) || (nilperiod_edit[2] && nilperiod_edit[1] % nilperiod_edit[2] == 0);
+
+  dialog::addBreak(50);
+
+  if(ok) {
+    dialog::addItem(XLAT("activate"), 'a');
+    dialog::add_action([] {
+      stop_game();
+      nilperiod = nilperiod_edit;
+      geometry = gNil;
+      start_game();
+      });
+    }
+  else dialog::addInfo(XLAT("Y period must be divisible by Z period"));
+    
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+  
 EX }
 
 EX bool in_s2xe() { return prod && hybrid::over_sphere(); }

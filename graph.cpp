@@ -5120,6 +5120,7 @@ EX void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     orig = 
       gm[LDIM][LDIM] == 0 ? true : 
       euwrap ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
+      nil ? sqhypot_d(3, tC0(gm)) >= sqhypot_d(3, tC0(V)) :
       sphereflipped() ? fabs(gm[LDIM][LDIM]-1) <= fabs(V[LDIM][LDIM]-1) :
       fabs(gm[LDIM][LDIM]-1) >= fabs(V[LDIM][LDIM]-1) - 1e-8;
 
