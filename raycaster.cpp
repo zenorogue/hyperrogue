@@ -449,6 +449,8 @@ array<float, 2> enc(int i, int a) {
   return res;
   };
 
+color_t color_out_of_range = 0xFF0080FF;
+
 EX void cast() {
   enable_raycaster();
   
@@ -520,7 +522,7 @@ EX void cast() {
     forCellIdEx(c1, i, c) { 
       int u = (id/per_row*length) + (id%per_row * S7) + i;
       if(!ids.count(c1)) {
-        wallcolor[u] = glhr::acolor(0xFF);
+        wallcolor[u] = glhr::acolor(color_out_of_range);
         continue;
         }
       auto code = enc(ids[c1], 0);
@@ -629,6 +631,11 @@ EX void configure() {
     dialog::scaleLog();
     dialog::extra_options = [] {
       dialog::addBoolItem_action("generate", rays_generate, 'G');
+      dialog::addColorItem(XLAT("out-of-range color"), color_out_of_range, 'X');
+      dialog::add_action([] { 
+        dialog::openColorDialog(color_out_of_range); 
+        dialog::dialogflags |= sm::SIDE;
+        });
       };
     });
   
