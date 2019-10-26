@@ -887,7 +887,9 @@ EX namespace reg3 {
         dynamicval<hrmap*> cm(currentmap, binary_map);
         T = binary_map->relative_matrix(p2.first, p1.first);
         }
-      return inverse(p1.second) * T * p2.second;
+      T = inverse(p1.second) * T * p2.second;
+      if(elliptic && T[LDIM][LDIM] < 0) T = centralsym * T;
+      return T;
       }
     
     vector<hyperpoint> get_vertices(cell* c) override {
