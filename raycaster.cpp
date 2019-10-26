@@ -113,7 +113,7 @@ void enable_raycaster() {
       "uniform float uFovX, uFovY;\n"
       "varying vec4 at;\n"
       "void main() { \n"
-      "  gl_Position = aPosition; at = aPosition; \n"
+      "  gl_Position = aPosition; at = aPosition;\n"
   #if IN_ODS    
       "  at[0] *= PI; at[1] *= PI; \n"
   #else
