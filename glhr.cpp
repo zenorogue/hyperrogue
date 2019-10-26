@@ -180,7 +180,12 @@ EX glmatrix& as_glmatrix(GLfloat o[16]) {
   return tmp;
   }
 
-EX glmatrix frustum(ld x, ld y, ld vnear IS(1e-3), ld vfar IS(1e9)) {
+#if HDR
+constexpr ld vnear_default = 1e-3;
+constexpr ld vfar_default = 1e9;
+#endif
+
+EX glmatrix frustum(ld x, ld y, ld vnear IS(vnear_default), ld vfar IS(vfar_default)) {
   GLfloat frustum[16] = {
     GLfloat(1 / x), 0, 0, 0,
     0, GLfloat(1 / y), 0, 0,

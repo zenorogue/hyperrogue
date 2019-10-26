@@ -418,9 +418,28 @@ void enable_raycaster() {
       "    reflect = true;\n"
       "    }\n";
     
+    ld vnear = glhr::vnear_default;
+    ld vfar = glhr::vfar_default;
+
     fmain +=
       "    gl_FragColor.xyz += left * col.xyz * col.w;\n"
-      "    if(col.w == 1.) return;\n"
+      "    if(col.w == 1.) {\n";
+    
+    if(hyperbolic) fmain +=
+      "      float z = at0.z * sinh(go);\n"
+      "      float w = 1.;\n";
+    else fmain +=
+      "      float z = at0.z * go;\n"
+      "      float w = 1.;\n";
+    
+    fmain +=    
+      "      gl_FragDepth = (-float("+fts(vnear+vfar)+")+w*float("+fts(2*vnear*vfar)+")/z)/float("+fts(vnear-vfar)+");\n"
+      "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n"
+//      "      gl_FragColor.r = gl_FragDepth * gl_FragDepth;\n"
+//      "      gl_FragColor.g = gl_FragDepth * gl_FragDepth;\n"
+//      "      gl_FragColor.b = gl_FragDepth * gl_FragDepth;\n"
+      "      return;\n"
+      "      }\n"
       "    left *= (1. - col.w);\n"
       "    }\n";
 
@@ -440,7 +459,8 @@ void enable_raycaster() {
       "    }\n";
     
     fmain += 
-      "  }"
+      "  }\n"
+      "  gl_FragDepth = 1.;\n"
       "  }";
 
     fsh += fmain;    
@@ -629,7 +649,12 @@ EX void cast() {
   bind_array(texturemap, o->tTextureMap, txTextureMap, 5);
   
   glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &screen[0]);
-  glhr::set_depthtest(false);
+  if(ray::comparison_mode)
+    glhr::set_depthtest(false);
+  else {
+    glhr::set_depthtest(true);
+    glhr::set_depthwrite(true);
+    }
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glActiveTexture(GL_TEXTURE0 + 0);
