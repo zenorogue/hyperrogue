@@ -1793,7 +1793,7 @@ EX namespace patterns {
           };
         }
       
-      else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z') || among(uni, '#', '=')) {
+      else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z') || among(uni, '#', '=', '/')) {
         if(instant)
           stop_game();
         whichCanvas = uni;
