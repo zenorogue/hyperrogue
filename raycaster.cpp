@@ -125,6 +125,8 @@ void enable_raycaster() {
   #endif
       "  }\n";
   
+    string rays = its(isize(cgi.raywall));
+  
     string fsh = 
     "varying vec4 at;\n"
     "uniform int uLength;\n"
@@ -137,10 +139,10 @@ void enable_raycaster() {
     "uniform sampler2D tWallcolor;\n"
     "uniform sampler2D tTexture;\n"
     "uniform sampler2D tTextureMap;\n"
-    "uniform vec4 uWallX[60];\n"
-    "uniform vec4 uWallY[60];\n"
+    "uniform vec4 uWallX["+rays+"];\n"
+    "uniform vec4 uWallY["+rays+"];\n"
     "uniform vec4 uFogColor;\n"
-    "uniform int uWallstart[16];\n"
+    "uniform int uWallstart["+its(S7)+"];\n"
     "uniform float uLinearSightRange, uExpStart, uExpDecay;\n";
     
     if(IN_ODS) fsh += 
