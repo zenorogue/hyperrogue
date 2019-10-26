@@ -102,7 +102,7 @@ struct raycaster : glhr::GLprogram {
 
 shared_ptr<raycaster> our_raycaster;
 
-void reset_raycaster() { our_raycaster = nullptr; };
+EX void reset_raycaster() { our_raycaster = nullptr; };
 
 void enable_raycaster() {
   if(!our_raycaster) { 

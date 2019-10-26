@@ -596,6 +596,10 @@ EX void resetGL() {
   if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
   cgi.initPolyForGL();
+  compiled_programs.clear();
+  matched_programs.clear();
+  glhr::current_glprogram = nullptr;
+  ray::reset_raycaster();
   }
 
 #endif

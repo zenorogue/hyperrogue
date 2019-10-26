@@ -37,9 +37,9 @@ constexpr int aTexture = 8;
 constexpr int INVERSE_EXP_BINDING = 2;
 #endif
 
-map<string, shared_ptr<glhr::GLprogram>> compiled_programs;
+EX map<string, shared_ptr<glhr::GLprogram>> compiled_programs;
 
-map<unsigned, shared_ptr<glhr::GLprogram>> matched_programs;
+EX map<unsigned, shared_ptr<glhr::GLprogram>> matched_programs;
 
 glhr::glmatrix model_orientation_gl() {
   glhr::glmatrix s = glhr::id;
