@@ -574,7 +574,7 @@ EX void initConfig() {
   addsaver(sightranges[gNIH], "sight-nih");
   addsaver(sightranges[gSolN], "sight-solnih");
 
-  addsaver(sightranges[gCrystal344], "sight-crystal344", 5);
+  addsaver(sightranges[gCrystal344], "sight-crystal344", 2.5); /* assume raycasting */
   addsaver(sightranges[gSpace344], "sight-344", 4.5);
   addsaver(sightranges[gSpace336], "sight-336", 4);
 
