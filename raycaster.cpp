@@ -189,6 +189,8 @@ void enable_raycaster() {
     else fmain += 
     "  mat4 vw = uStart;\n"
     "  vec4 at0 = at;\n"
+    "  gl_FragColor = vec4(0,0,0,1);\n"
+    "  float left = 1.;\n"
     "  at0.y = -at.y;\n"
     "  at0.w = 0.;\n"
     "  at0.xyz = at0.xyz / length(at0.xyz);\n";
@@ -250,7 +252,7 @@ void enable_raycaster() {
         "  if(dist < 0.) { dist = 0.; }\n";
       
       fmain +=
-        "  if(which == -1 && dist == 0.) { gl_FragColor = vec4(0., 0., 0., 1.); return; }";    
+        "  if(which == -1 && dist == 0.) return;";    
       }
         
     // shift d units
@@ -396,7 +398,7 @@ void enable_raycaster() {
       "  if(col[3] > 0.0) {\n"
       "    vec2 inface = map_texture(position, which);\n"
       "    vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
-      "    if(tmap.z == 0.) col.xyz *= min(1., (1.-inface.x-inface.y)/ 0.5);\n"
+      "    if(tmap.z == 0.) col.xyz *= min(1., (1.-inface.x)/ tmap.x);\n"
       "    else {\n"
       "      vec2 inface2 = tmap.xy + tmap.z * inface;\n"
       "      col.xyz *= texture2D(tTexture, inface2).rgb;\n"
@@ -407,9 +409,9 @@ void enable_raycaster() {
       "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
     
     fmain +=
-      "    col.w = 1.;\n"
-      "    gl_FragColor = col;\n"
-      "    return;\n"
+      "    gl_FragColor.xyz += left * col.xyz * col.w;\n"
+      "    if(col.w == 1.) return;\n"
+      "    left *= (1. - col.w);\n"
       "    }\n";
 
     // next cell
@@ -420,9 +422,15 @@ void enable_raycaster() {
       "  tangent = uM[mid] * uM[which] *  tangent;\n"
       "  cid = connection.xy;\n";
     
+    if(use_reflect) fmain += 
+      "  if(reflect) {\n"
+      "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
+      "    else if(which == 1 || which == 5) tangent.y = -tangent.y;\n"
+      "    else tangent.z = -tangent.z;\n"
+      "    }\n";
+    
     fmain += 
       "  }"
-      "  gl_FragColor = vec4(0.,0.,0.,1.); \n"
       "  }";
 
     fsh += fmain;    
@@ -558,8 +566,18 @@ EX void cast() {
         else
           texturemap[u] = glhr::makevertex(0.1,0,0);
         }
-      else
-        wallcolor[u] = glhr::acolor(0);
+      else {
+        color_t col = transcolor(c, c1, winf[c->wall].color) | transcolor(c1, c, winf[c1->wall].color);
+        if(col == 0)
+          wallcolor[u] = glhr::acolor(0);
+        else {
+          int dv = get_darkval(c1, c->c.spin(i));
+          float p = 1 - dv / 16.;
+          wallcolor[u] = glhr::acolor(col);
+          for(int a: {0,1,2}) wallcolor[u][a] *= p;
+          texturemap[u] = glhr::makevertex(0.001,0,0);
+          }
+        }
 
       transmatrix T = currentmap->relative_matrix(c->master, c1->master) * inverse(ms[i]);
       for(int k=0; k<=isize(ms); k++) {
