@@ -3554,3 +3554,21 @@ Solv geometry:
 - four-dimensional crystal using {3,4,4}
 - some patterns for the four-dimensional crystal
 - increased the default per-frame cell generation limit to 250
+
+2019-10-26 15:35 Version 11.2f:
+
+Gameplay:
+- fixed Orb of Speed saving on the first move
+- warning on entering pits
+- fixed incorrect mouse interpretation in spherical ortho
+
+Geometries:
+- rendering walls in 3D geometries using a ray-based renderer -- this is configured in 3D settings. Great at rendering quotient spaces at large distances as well as weird geodesics in
+  nonisotropic geometries. While less practical for standard HyperRogue, works great in racing. Currently implemented for Euclidean, regular (i.e., not horospherical) hyperbolic, 
+  standard Solv, and Nil.
+- added some patterns to Nil and Crystal
+- optimize racing mode
+- quotient spaces using Nil geometry (select Nil then advanced configuration)
+
+Other:
+- fixed empty config files incorrectly loaded
