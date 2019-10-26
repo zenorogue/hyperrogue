@@ -534,7 +534,7 @@ EX void cast() {
     forCellIdEx(c1, i, c) { 
       int u = (id/per_row*length) + (id%per_row * S7) + i;
       if(!ids.count(c1)) {
-        wallcolor[u] = glhr::acolor(color_out_of_range);
+        wallcolor[u] = glhr::acolor(color_out_of_range | 0xFF);
         continue;
         }
       auto code = enc(ids[c1], 0);
@@ -545,7 +545,10 @@ EX void cast() {
         dd.cw.at = c1;
         dd.setcolors();
         color_t wcol = darkena(dd.wcol, 0, 0xFF);
+        int dv = get_darkval(c1, c->c.spin(i));
+        float p = 1 - dv / 16.;
         wallcolor[u] = glhr::acolor(wcol);
+        for(int a: {0,1,2}) wallcolor[u][a] *= p;
         }
       else
         wallcolor[u] = glhr::acolor(0);
