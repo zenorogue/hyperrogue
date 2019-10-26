@@ -550,9 +550,15 @@ EX void cast() {
   
   // for(auto &m: reg3::spins) println(hlog, m);
   
-  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose(inverse(View)).as_array());
+  transmatrix T = cview();
+  if(nonisotropic) T = nisot::local_perspective * T;
+  cell *cs = viewctr.at->c7;
+  T = inverse(T);
+  virtualRebase(cs, T, true);
+  
+  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose(T).as_array());
   GLERR("uniform start");
-  uniform2(o->uStartid, enc(ids[viewctr.at->c7], 0));
+  uniform2(o->uStartid, enc(ids[cs], 0));
   GLERR("uniform startid");
   glUniform1f(o->uIPD, vid.ipd);
   GLERR("uniform IPD");
