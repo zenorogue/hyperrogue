@@ -706,7 +706,7 @@ EX void configure() {
   if(nonisotropic) {
     dialog::addSelItem(XLAT("max step"), fts(maxstep_current()), 'x');
     dialog::add_action([] {
-      dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.03 : 0.1, XLAT("max step"), "");
+      dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.03 : 0.1, XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");
       dialog::scaleLog();
       dialog::bound_low(1e-9);
       dialog::reaction = reset_raycaster;
@@ -714,7 +714,7 @@ EX void configure() {
 
     dialog::addSelItem(XLAT("min step"), fts(minstep), 'n');
     dialog::add_action([] {
-      dialog::editNumber(minstep, 1e-6, 1, 0.1, 0.001, XLAT("min step"), "");
+      dialog::editNumber(minstep, 1e-6, 1, 0.1, 0.001, XLAT("min step"), "how precisely should we find out when do cross the cell boundary");
       dialog::scaleLog();
       dialog::bound_low(1e-9);
       dialog::reaction = reset_raycaster;
@@ -723,7 +723,7 @@ EX void configure() {
   
   dialog::addSelItem(XLAT("iterations"), its(max_iter_current()), 's');
   dialog::add_action([&] {
-    dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), "");
+    dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), "in H3/H2xE/E3 this is the number of cell boundaries; in nonisotropic, the number of simulation steps");
     dialog::reaction = reset_raycaster;
     });
 
