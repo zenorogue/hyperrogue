@@ -28,7 +28,7 @@ EX ld minstep = .001;
 
 EX int max_iter_sol = 600, max_iter_iso = 60;
 
-EX int max_cells = 8192;
+EX int max_cells = 2048;
 EX bool rays_generate = true;
 
 ld& exp_decay_current() {
