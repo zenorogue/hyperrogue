@@ -238,6 +238,7 @@ EX namespace reg3 {
   struct hrmap_from_crystal : hrmap_quotient3 {
   
     hrmap_from_crystal() {
+      generate();
       allh.resize(256);
       tmatrices.resize(256);
       for(int a=0; a<256; a++) {
