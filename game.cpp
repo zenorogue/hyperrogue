@@ -1403,6 +1403,7 @@ EX bool monstersnear(stalemate1& sm) {
 
   if(sm.who == moPlayer || items[itOrbEmpathy]) {
     fast = (items[itOrbSpeed] && (items[itOrbSpeed] & 1));
+    if(sm.who == moPlayer && sm.moveto->item == itOrbSpeed) fast = true;
     }
   
   if(havewhat&HF_OUTLAW) {
