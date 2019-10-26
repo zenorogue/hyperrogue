@@ -20,7 +20,7 @@ namespace hr {
 EX void glError(const char* GLcall, const char* file, const int line) {
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR) {
-    fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
+    println(hlog, format("OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall));
     }
   }
 
@@ -604,6 +604,7 @@ void init() {
   projection = id;
 
   WITHSHADER(glEnableVertexAttribArray(aPosition);, glEnableClientState(GL_VERTEX_ARRAY);)
+  GLERR("aPosition");
   // #endif
 
   #if CAP_VERTEXBUFFER
