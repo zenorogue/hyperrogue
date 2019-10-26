@@ -50,6 +50,7 @@ struct glmatrix {
   GLfloat* as_array() { return a[0]; }
   const GLfloat* as_array() const { return a[0]; }
   array<float, 16>& as_stdarray() { return *(array<float, 16>*)this; }
+  const array<float, 16>& as_stdarray() const { return *(array<float, 16>*)this; }
   };
 
 glvertex pointtogl(const hyperpoint& t);
