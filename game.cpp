@@ -8469,6 +8469,14 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
     else if(fmsMove) {
       if(mineMarked(c2) && !minesafe() && !checkonly && warningprotection(XLAT("Are you sure you want to step there?")))
         return false;
+      
+      if(snakelevel(c2) <= snakelevel(cwt.at)-2) {
+        bool can_leave = false;
+        forCellEx(c3, c2) if(passable(c3, c2, P_ISPLAYER | P_MONSTER)) can_leave = true;
+        if(!can_leave && !checkonly && warningprotection(XLAT("Are you sure you want to step there?")))
+          return false;
+        }
+
       if(monstersnear(c2, NULL, moPlayer, NULL, cwt.at)) {
         if(checkonly) return false;
 
