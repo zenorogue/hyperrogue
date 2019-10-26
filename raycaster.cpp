@@ -47,6 +47,8 @@ ld& maxstep_current() {
 
 #define IN_ODS 0
 
+eGeometry last_geometry;
+
 /** is the raycaster available? */
 EX bool available() {
   if(WDIM == 2) return false;
@@ -105,6 +107,8 @@ shared_ptr<raycaster> our_raycaster;
 EX void reset_raycaster() { our_raycaster = nullptr; };
 
 void enable_raycaster() {
+  if(geometry != last_geometry) reset_raycaster();
+  last_geometry = geometry;
   if(!our_raycaster) { 
     bool use_reflect = false;
 
