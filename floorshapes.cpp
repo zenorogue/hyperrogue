@@ -23,6 +23,7 @@ extern qfloorinfo qfi;
 #endif
 
 EX vector<basic_textureinfo> floor_texture_vertices;
+EX vector<glvertex> floor_texture_map;
 EX struct renderbuffer *floor_textures;
 
 void geometry_information::init_floorshapes() {
@@ -963,6 +964,18 @@ void draw_shape_for_texture(floorshape* sh) {
   hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0);
   hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0);
 
+  if(1) {
+    hyperpoint inmodel;
+    applymodel(center, inmodel);
+    glvertex tmap;
+    tmap[0] = (1 + inmodel[0] * vid.scale) / 2;
+    tmap[1] = (1 - inmodel[1] * vid.scale) / 2;
+    applymodel(center + v1, inmodel);
+    tmap[2] = (1 + inmodel[0] * vid.scale) / 2 - tmap[0];
+    floor_texture_map[sh->id] = tmap;
+    println(hlog, "for ", sh->id, " set ", tmap);
+    }
+
   // SL2 needs 6 times more
   for(int a=0; a<MAX_EDGE*6; a++)
     texture_order([&] (ld x, ld y) {
@@ -992,7 +1005,9 @@ void geometry_information::make_floor_textures_here() {
   floor_textures = new renderbuffer(vid.xres, vid.yres, vid.usingGL);
   resetbuffer rb;
 
-  floor_texture_vertices.resize(isize(all_escher_floorshapes) + isize(all_plain_floorshapes));
+  int q = isize(all_escher_floorshapes) + isize(all_plain_floorshapes);
+  floor_texture_vertices.resize(q);
+  floor_texture_map.resize(q);
   
   auto cd = current_display;
   cd->xtop = cd->ytop = 0;

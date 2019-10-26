@@ -12,7 +12,7 @@ namespace hr {
 EX namespace ray {
 
 /** texture IDs */
-GLuint txConnections = 0, txWallcolor = 0;
+GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0;
 
 EX bool in_use;
 EX bool comparison_mode;
@@ -70,7 +70,7 @@ EX bool requested() {
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
-  GLint tConnections, tWallcolor;
+  GLint tConnections, tWallcolor, tTextureMap;
   GLint uBinaryWidth;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   
@@ -96,6 +96,7 @@ struct raycaster : glhr::GLprogram {
   
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
+    tTextureMap = glGetUniformLocation(_program, "tTextureMap");
     }
   };
 
@@ -129,6 +130,8 @@ void enable_raycaster() {
     "uniform vec2 uStartid;\n"
     "uniform sampler2D tConnections;\n"
     "uniform sampler2D tWallcolor;\n"
+    "uniform sampler2D tTexture;\n"
+    "uniform sampler2D tTextureMap;\n"
     "uniform vec4 uWallX[60];\n"
     "uniform vec4 uWallY[60];\n"
     "uniform int uWallstart[16];\n"
@@ -167,9 +170,9 @@ void enable_raycaster() {
        "int e = uWallstart[which+1];\n"
        "for(int i=s; i<e; i++) {\n"
          "vec2 v = vec2(dot(uWallX[i], pos), dot(uWallY[i], pos));\n"
-         "if(v.x >= 0. && v.y >= 0. && v.x + v.y <= 1.) return v;\n"
+         "if(v.x >= 0. && v.y >= 0. && v.x + v.y <= 1.) return vec2(v.x+v.y, v.x-v.y);\n"
          "}\n"
-       "return vec2(0.5, 0.5);\n"
+       "return vec2(1, 1);\n"
        "}\n";
     
    string fmain = "void main() {\n";
@@ -392,19 +395,19 @@ void enable_raycaster() {
       "  vec4 col = texture2D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n"
       "    vec2 inface = map_texture(position, which);\n"
-      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
-      "    bright *= max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
+      "    vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
+      "    if(tmap.z == 0.) col.xyz *= min(1., (1.-inface.x-inface.y)/ 0.5);\n"
+      "    else {\n"
+      "      vec2 inface2 = tmap.xy + tmap.z * inface;\n"
+      "      col.xyz *= texture2D(tTexture, inface2).rgb;\n"
+      "      }\n"
+      "    col.xyz *= max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
     
     if(nil) fmain +=
-      "    if(abs(abs(position.x)-abs(position.y)) < .005) bright /= 2.;\n";
+      "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
     
     fmain +=
-//      "    float bright = min(1., 10. * (1.-inface.x-inface.y));\n" // texture2D(tWallTexture, (inface.yz + vec2(1.,1.))/2.).r;\n"
-//      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
-      "    col.xyz = col.xyz * bright;\n"
-//      "    col.xyz = col.xyz * bright * max(1.-go/7., 0.5 * exp(-go/4.));\n" // exp(-go/4.);\n"
       "    col.w = 1.;\n"
-//      "    if(purp == 1) { col.rgb = (col.rgb + vec3(1., 0., 1.)) / 2; }\n"
       "    gl_FragColor = col;\n"
       "    return;\n"
       "    }\n";
@@ -524,6 +527,7 @@ EX void cast() {
 
   vector<array<float, 4>> connections(length * rows);
   vector<array<float, 4>> wallcolor(length * rows);
+  vector<array<float, 4>> texturemap(length * rows);
 
   if(1) for(cell *c: lst) {
     int id = ids[c];
@@ -531,6 +535,7 @@ EX void cast() {
       int u = (id/per_row*length) + (id%per_row * S7) + i;
       if(!ids.count(c1)) {
         wallcolor[u] = glhr::acolor(color_out_of_range | 0xFF);
+        texturemap[u] = glhr::makevertex(0.1,0,0);
         continue;
         }
       auto code = enc(ids[c1], 0);
@@ -540,11 +545,18 @@ EX void cast() {
         celldrawer dd;
         dd.cw.at = c1;
         dd.setcolors();
+        transmatrix Vf;
+        dd.set_land_floor(Vf);
         color_t wcol = darkena(dd.wcol, 0, 0xFF);
         int dv = get_darkval(c1, c->c.spin(i));
         float p = 1 - dv / 16.;
         wallcolor[u] = glhr::acolor(wcol);
         for(int a: {0,1,2}) wallcolor[u][a] *= p;
+        if(qfi.fshape) {
+          texturemap[u] = floor_texture_map[qfi.fshape->id];
+          }
+        else
+          texturemap[u] = glhr::makevertex(0.1,0,0);
         }
       else
         wallcolor[u] = glhr::acolor(0);
@@ -586,15 +598,17 @@ EX void cast() {
 
   bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
   bind_array(connections, o->tConnections, txConnections, 3);
+  bind_array(texturemap, o->tTextureMap, txTextureMap, 5);
   
   glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &screen[0]);
   glhr::set_depthtest(false);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  glActiveTexture(GL_TEXTURE0 + 0);
+  glBindTexture(GL_TEXTURE_2D, floor_textures->renderedTexture);
+
   glDrawArrays(GL_TRIANGLES, 0, 6);
   GLERR("finish");
-
-  glActiveTexture(GL_TEXTURE0 + 0);
   }
 
 EX void configure() {
