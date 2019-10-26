@@ -2182,17 +2182,17 @@ void celldrawer::draw_monster_full() {
     }
   
   #if CAP_SHAPES
-  int q = ptds.size();
+  int q = isize(ptds);
   #endif
   bool m = drawMonster(V, c->type, c, moncol, cw.mirrored, asciicol);
   if(m) error = true;
   if(m || c->monst) onradar = false; 
   #if CAP_SHAPES
-  if(q != isize(ptds)) {
-    if(WDIM == 2 && GDIM == 3)
+  if(isize(ptds) != q) {
+    if(WDIM == 2 && GDIM == 3 && abs(cgi.SLEV[sl] - cgi.FLOOR) > 1e-6)
       pushdown(c, q, V, cgi.SLEV[sl] - cgi.FLOOR, false, false);
-    else pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0(Vboat))),
-      !isMultitile(c->monst), false);
+    if(GDIM ==2 && abs(geom3::factor_to_lev(zlevel(tC0(Vboat)))) > 1e-6)
+      pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0(Vboat))), !isMultitile(c->monst), false);
     }
   #endif
   }
