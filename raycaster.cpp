@@ -106,6 +106,8 @@ void reset_raycaster() { our_raycaster = nullptr; };
 
 void enable_raycaster() {
   if(!our_raycaster) { 
+    bool use_reflect = false;
+
     string vsh = 
       "attribute vec4 aPosition;\n"
       "uniform float uFovX, uFovY;\n"
@@ -301,6 +303,9 @@ void enable_raycaster() {
         "vec4 tan2 = tangent + acc * dist / 2.;\n"
         "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
         "vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
+      
+      if(use_reflect) fmain += 
+        "bool reflect = false;\n";
 
       if(nil) {
         fmain +=
@@ -406,6 +411,12 @@ void enable_raycaster() {
     
     if(nil) fmain +=
       "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
+    
+    if(use_reflect) fmain +=
+      "  if(col.w == 1.) {\n"
+      "    col.w = 0.9;\n"
+      "    reflect = true;\n"
+      "    }\n";
     
     fmain +=
       "    gl_FragColor.xyz += left * col.xyz * col.w;\n"
