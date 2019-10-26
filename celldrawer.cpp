@@ -2668,4 +2668,6 @@ void celldrawer::draw_reptile(color_t col) {
   qfi = qfib;
   }      
 
+#undef c
+
 }
