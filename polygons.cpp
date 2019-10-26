@@ -765,8 +765,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     hyperpoint v2 = vertices[(a+1)%n];
     
     if(!triangles || (a%6 == 1)) {
-      transmatrix T = build_matrix(ray_kleinize(v1, id), ray_kleinize(v2, id), ray_kleinize(ocenter, id), point3(.1,.2,.3));
-      println(hlog, "id = ", id, " iT = ", T);
+      transmatrix T = build_matrix(ray_kleinize(v1, id), ray_kleinize(v2, id), ray_kleinize(ocenter, id), point31(.11,.19,.3));
       T = inverse(T);
       raywall.push_back(T);
       }
