@@ -896,7 +896,7 @@ EX namespace reg3 {
     };
   
 EX hrmap* new_map() {
-  if(quotient) return new hrmap_field3;
+  if(quotient && !sphere) return new hrmap_field3;
   return new hrmap_reg3;
   }
 
