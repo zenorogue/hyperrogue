@@ -110,6 +110,8 @@ EX namespace solnihv {
   
       for(int t=0; t<3; t++)
         res[t] = S2(ax) * (bx-ix) + S2(bx) * (ix-ax);
+      
+      res[3] = 0;
       }
     
     return res;
