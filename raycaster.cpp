@@ -135,6 +135,7 @@ void enable_raycaster() {
     "uniform sampler2D tTextureMap;\n"
     "uniform vec4 uWallX[60];\n"
     "uniform vec4 uWallY[60];\n"
+    "uniform vec4 uFogColor;\n"
     "uniform int uWallstart[16];\n"
     "uniform float uLinearSightRange, uExpStart, uExpDecay;\n";
     
@@ -407,7 +408,8 @@ void enable_raycaster() {
       "      vec2 inface2 = tmap.xy + tmap.z * inface;\n"
       "      col.xyz *= texture2D(tTexture, inface2).rgb;\n"
       "      }\n"
-      "    col.xyz *= max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
+      "    float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n"
+      "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
     
     if(nil) fmain +=
       "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
@@ -457,6 +459,7 @@ void enable_raycaster() {
     
     fmain += 
       "  }\n"
+      "  gl_FragColor.xyz += left * uFogColor.xyz;\n"
       "  gl_FragDepth = 1.;\n"
       "  }";
 
@@ -651,6 +654,9 @@ EX void cast() {
   bind_array(connections, o->tConnections, txConnections, 3);
   bind_array(texturemap, o->tTextureMap, txTextureMap, 5);
   
+  auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
+  glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+
   glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &screen[0]);
   if(ray::comparison_mode)
     glhr::set_depthtest(false);
