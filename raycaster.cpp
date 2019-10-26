@@ -435,9 +435,6 @@ void enable_raycaster() {
     fmain +=    
       "      gl_FragDepth = (-float("+fts(vnear+vfar)+")+w*float("+fts(2*vnear*vfar)+")/z)/float("+fts(vnear-vfar)+");\n"
       "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n"
-//      "      gl_FragColor.r = gl_FragDepth * gl_FragDepth;\n"
-//      "      gl_FragColor.g = gl_FragDepth * gl_FragDepth;\n"
-//      "      gl_FragColor.b = gl_FragDepth * gl_FragDepth;\n"
       "      return;\n"
       "      }\n"
       "    left *= (1. - col.w);\n"
