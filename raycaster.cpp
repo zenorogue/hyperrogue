@@ -68,7 +68,7 @@ EX bool requested() {
   }
 
 struct raycaster : glhr::GLprogram {
-  GLint uStart, uStartid, uN, uM, uLength, uFovX, uFovY, uIPD;
+  GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor;
   GLint uBinaryWidth;
@@ -78,7 +78,6 @@ struct raycaster : glhr::GLprogram {
     println(hlog, "assigning");
     uStart = glGetUniformLocation(_program, "uStart");
     uStartid = glGetUniformLocation(_program, "uStartid");
-    uN = glGetUniformLocation(_program, "uN");
     uM = glGetUniformLocation(_program, "uM");
     uLength = glGetUniformLocation(_program, "uLength");
     uFovX = glGetUniformLocation(_program, "uFovX");
@@ -122,7 +121,6 @@ void enable_raycaster() {
   
     string fsh = 
     "varying vec4 at;\n"
-    "uniform int uN;\n"
     "uniform int uLength;\n"
     "uniform float uIPD;\n"
     "uniform mat4 uStart;\n"
@@ -216,7 +214,7 @@ void enable_raycaster() {
     if(IN_ODS) fmain += 
       "  if(go == 0.) {\n"
       "    float best = len(position);\n"
-      "    for(int i=0; i<uN; i++) {\n"
+      "    for(int i=0; i<"+its(S7)+"; i++) {\n"
       "      float cand = len(uM[i] * position);\n"
       "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
       "      }\n"
@@ -225,7 +223,7 @@ void enable_raycaster() {
     if(!nonisotropic) {
     
       fmain +=
-        "  if(which == -1) for(int i=0; i<uN; i++) {\n";
+        "  if(which == -1) for(int i=0; i<"+its(S7)+"; i++) {\n";
       
       if(hyperbolic) fmain +=
           "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
@@ -516,8 +514,6 @@ EX void cast() {
   
   glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose(inverse(View)).as_array());
   GLERR("uniform start");
-  glUniform1i(o->uN, S7);
-  GLERR("uniform N");
   uniform2(o->uStartid, enc(ids[viewctr.at->c7], 0));
   GLERR("uniform startid");
   glUniform1f(o->uIPD, vid.ipd);
