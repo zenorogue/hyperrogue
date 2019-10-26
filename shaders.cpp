@@ -147,7 +147,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       coordinator +=
         "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);\n"
         "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.;\n"
-        "float m = ad / d / 11.; t[0] *= m; t[1] *= m; t[2] *= m;\n";
+        "float m = ad / d; t[0] *= m; t[1] *= m; t[2] *= m;\n";
       distfun = "ad";
       }
     else
