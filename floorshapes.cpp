@@ -973,7 +973,6 @@ void draw_shape_for_texture(floorshape* sh) {
     applymodel(center + v1, inmodel);
     tmap[2] = (1 + inmodel[0] * vid.scale) / 2 - tmap[0];
     floor_texture_map[sh->id] = tmap;
-    println(hlog, "for ", sh->id, " set ", tmap);
     }
 
   // SL2 needs 6 times more
