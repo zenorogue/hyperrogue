@@ -406,7 +406,7 @@ struct hrmap_crystal : hrmap_standard {
   bool crystal3() { return WDIM == 3; }
   
   hrmap_crystal() {
-    if(crystal3()) cs.dim = 4;
+    if(crystal3()) reg3::generate(), cs.dim = 4;
     else cs.build();
     
     camelot_center = NULL;
