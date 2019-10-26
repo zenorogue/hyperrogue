@@ -107,7 +107,6 @@ void reset_raycaster() { our_raycaster = nullptr; };
 void enable_raycaster() {
   if(!our_raycaster) { 
     string vsh = 
-      "#define PI 3.14159265358979324\n"
       "attribute vec4 aPosition;\n"
       "uniform float uFovX, uFovY;\n"
       "varying vec4 at;\n"
