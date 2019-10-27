@@ -188,7 +188,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laPrairie: // -------------------------------------------------------------
     
       if(d == 7 && chaosmode) {
-        if(hrand_monster(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0))
+        if(hrand_monster(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0) && !safety)
           c->monst = moGadfly;
         if(hrand_monster(100) < 5) c->monst = moSleepBull;
         if(hrand(800) < 10) {
@@ -203,7 +203,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(shmup::on) prairie::beaststogen.push_back(c); 
           else prairie::generateBeast(c);
           }
-        else if(!prairie::nearriver(c) && c->LHU.fi.flowerdist > 7) {
+        else if(!prairie::nearriver(c) && c->LHU.fi.flowerdist > 7 && !safety) {
           if(hrand_monster(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0))
             c->monst = moGadfly;
           else buildPrizeMirror(c, 1000);
@@ -735,7 +735,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moVineBeast] + kills[moVineSpirit]), 200) && notDippingFor(itWine) && !reptilecheat)
           c->item = itWine;
-        if(hrand_monster(8000) < 12 * (items[itWine] + yendor::hardness()) && !reptilecheat)
+        if(hrand_monster(8000) < 12 * (items[itWine] + yendor::hardness()) && !reptilecheat && !safety)
           c->monst = moVineBeast;
         }
       break;
@@ -1944,7 +1944,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laHunting:
-      if(d == 7 && c->land == laHunting && !racing::on) {
+      if(d == 7 && c->land == laHunting && !racing::on && !safety) {
         if(hrand(1000) < 20) {
           if(openplains(c)) {
             if(hrand(2) == 0) {
