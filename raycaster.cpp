@@ -26,6 +26,8 @@ EX ld maxstep_sol = .02;
 EX ld maxstep_nil = .1;
 EX ld minstep = .001;
 
+EX ld reflect_val = 0;
+
 EX int max_iter_sol = 600, max_iter_iso = 60;
 
 EX int max_cells = 2048;
@@ -110,7 +112,7 @@ void enable_raycaster() {
   if(geometry != last_geometry) reset_raycaster();
   last_geometry = geometry;
   if(!our_raycaster) { 
-    bool use_reflect = false;
+    bool use_reflect = reflect_val && !nil;
 
     string vsh = 
       "attribute vec4 aPosition;\n"
@@ -132,7 +134,7 @@ void enable_raycaster() {
     "uniform int uLength;\n"
     "uniform float uIPD;\n"
     "uniform mat4 uStart;\n"
-    "uniform mat4 uM[80];\n"
+    "uniform mat4 uM[84];\n"
     "uniform mat4 uTest;\n"
     "uniform vec2 uStartid;\n"
     "uniform sampler2D tConnections;\n"
@@ -184,6 +186,8 @@ void enable_raycaster() {
        "}\n";
     
    string fmain = "void main() {\n";
+   
+   if(use_reflect) fmain += "  bool depthtoset = true;\n";
     
     if(IN_ODS) fmain +=
     "  float lambda = at[0];\n" // -PI to PI
@@ -264,6 +268,8 @@ void enable_raycaster() {
       }
         
     // shift d units
+    if(use_reflect) fmain += 
+      "bool reflect = false;\n";
     
     if(hyperbolic) fmain += 
       "  float ch = cosh(dist); float sh = sinh(dist);\n"
@@ -311,9 +317,6 @@ void enable_raycaster() {
         "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
         "vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
       
-      if(use_reflect) fmain += 
-        "bool reflect = false;\n";
-
       if(nil) {
         fmain +=
           "vec4 xp, xt;\n"
@@ -422,7 +425,7 @@ void enable_raycaster() {
     
     if(use_reflect) fmain +=
       "  if(col.w == 1.) {\n"
-      "    col.w = 0.9;\n"
+      "    col.w = float("+fts(1-reflect_val)+");\n"
       "    reflect = true;\n"
       "    }\n";
     
@@ -430,7 +433,11 @@ void enable_raycaster() {
     ld vfar = glhr::vfar_default;
 
     fmain +=
-      "    gl_FragColor.xyz += left * col.xyz * col.w;\n"
+      "    gl_FragColor.xyz += left * col.xyz * col.w;\n";
+
+    if(use_reflect) fmain +=
+      "    if(reflect && depthtoset) {\n";
+    else fmain +=
       "    if(col.w == 1.) {\n";
     
     if(hyperbolic) fmain +=
@@ -439,15 +446,36 @@ void enable_raycaster() {
     else fmain +=
       "      float z = at0.z * go;\n"
       "      float w = 1.;\n";
-    
+
     fmain +=    
       "      gl_FragDepth = (-float("+fts(vnear+vfar)+")+w*float("+fts(2*vnear*vfar)+")/z)/float("+fts(vnear-vfar)+");\n"
-      "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n"
-      "      return;\n"
+      "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n";
+    
+    if(!use_reflect) fmain +=
+      "      return;\n";
+    else fmain +=
+      "      depthtoset = false;\n";
+
+    fmain +=    
       "      }\n"
       "    left *= (1. - col.w);\n"
       "    }\n";
 
+    if(use_reflect) {
+      if(sol) fmain += 
+        "  if(reflect) {\n"
+        "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
+        "    else if(which == 1 || which == 5) tangent.y = -tangent.y;\n"
+        "    else tangent.z = -tangent.z;\n"
+        "    continue;\n"
+        "    }\n";
+      else fmain += 
+        "  if(reflect) {\n"
+        "    tangent = uM["+its(S7)+"+which] * tangent;\n"
+        "    continue;\n"
+        "    }\n";
+      }
+    
     // next cell
     fmain += 
       "  vec4 connection = texture2D(tConnections, u);\n"
@@ -456,17 +484,16 @@ void enable_raycaster() {
       "  tangent = uM[mid] * uM[which] *  tangent;\n"
       "  cid = connection.xy;\n";
     
-    if(use_reflect) fmain += 
-      "  if(reflect) {\n"
-      "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
-      "    else if(which == 1 || which == 5) tangent.y = -tangent.y;\n"
-      "    else tangent.z = -tangent.z;\n"
-      "    }\n";
-    
     fmain += 
       "  }\n"
-      "  gl_FragColor.xyz += left * uFogColor.xyz;\n"
-      "  gl_FragDepth = 1.;\n"
+      "  gl_FragColor.xyz += left * uFogColor.xyz;\n";
+
+    if(use_reflect) fmain +=
+      "  if(depthtoset) gl_FragDepth = 1.;\n";
+    else fmain +=
+      "  gl_FragDepth = 1.;\n";
+
+    fmain += 
       "  }";
 
     fsh += fmain;    
@@ -575,6 +602,16 @@ EX void cast() {
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
 
+  if(!sol && !nil && reflect_val) {
+    for(int j=0; j<S7; j++) {
+      transmatrix T = inverse(ms[j]);
+      hyperpoint h = tC0(T);
+      ld d = hdist0(h);
+      transmatrix U = rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
+      ms.push_back(U);
+      }
+    }
+  
   vector<array<float, 4>> connections(length * rows);
   vector<array<float, 4>> wallcolor(length * rows);
   vector<array<float, 4>> texturemap(length * rows);
@@ -708,6 +745,14 @@ EX void configure() {
       XLAT("brightness formula: max(1-d/sightrange, s*exp(-d/r))\n")
       );
     });
+  
+  if(!nil) {
+    dialog::addSelItem(XLAT("reflective walls"), fts(reflect_val), 'R');
+    dialog::add_action([&] {
+      dialog::editNumber(reflect_val, 0, 1, 0.1, 0, XLAT("reflective walls"), "");
+      dialog::reaction = reset_raycaster;
+      });
+    }
 
   if(nonisotropic) {
     dialog::addSelItem(XLAT("max step"), fts(maxstep_current()), 'x');
@@ -772,6 +817,10 @@ int readArgs() {
     PHASEFROM(2); shift();
     rays_generate = true;
     max_cells = argi();
+    }
+  else if(argis("-ray-reflect")) {
+    PHASEFROM(2); 
+    shift_arg_formula(reflect_val);
     }
   else if(argis("-ray-cells-no")) {
     PHASEFROM(2); shift();
