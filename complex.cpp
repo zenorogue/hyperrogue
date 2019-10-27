@@ -3047,6 +3047,7 @@ EX namespace prairie {
   #define RHIGH (sphere?(PURE?8:9):PURE?11:13)
   
   EX bool no_worms(cell *c) {
+    if(c->land != laPrairie) return false;
     int rv = c->LHU.fi.rval;
     return rv > RLOW+1 && rv < RHIGH-1;
     }
