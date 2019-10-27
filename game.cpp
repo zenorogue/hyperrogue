@@ -3092,8 +3092,8 @@ EX void computePathdist(eMonster param) {
   int limit = gamerange();
 
   for(int qb=0; qb < isize(pathq); qb++) {
-    int fd = reachedfrom[qb] + 3;
     cell *c = pathq[qb];
+    int fd = reachedfrom[qb] + c->type/2;
     if(c->monst && !isBug(c) && !(isFriendly(c) && !c->stuntime)) {
       pathqm.push_back(c); 
       continue; // no paths going through monsters

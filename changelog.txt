@@ -3572,3 +3572,12 @@ Geometries:
 
 Other:
 - fixed empty config files incorrectly loaded
+
+2019-10-27 02:48 Version 11.2g:
+- fixed worm/tentacle movement
+- prevented Gadflies, Hunting Dogs, Vine Beasts, and messenger Gulls from appearing after using Orb of Safety
+- Thumpers now attract monsters with special movement rules
+- fixed boat graphics
+- ray: configurable reflective walls; fixed Euclidean bitruncated honeycomb
+- fixed the crashes on generation of 3D elliptic spaces and 3D Crystal
+- fixed confusion when moving through 3D elliptic spaces
