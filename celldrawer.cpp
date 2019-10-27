@@ -734,6 +734,7 @@ void celldrawer::draw_boat() {
     nospin = c->wall == waBoat && applyAnimation(c, Vboat, footphase, LAYER_BOAT);
     if(!nospin) Vboat = Vboat * ddspin(c, c->mondir, M_PI);
     queuepolyat(Vboat, cgi.shBoatOuter, outcol, PPR::BOATLEV);
+    Vboat = V;
     }
   if(c->wall == waBoat) {
     nospin = applyAnimation(c, Vboat, footphase, LAYER_BOAT);
