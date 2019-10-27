@@ -405,7 +405,7 @@ struct debugScreen {
       dialog::addBreak(50);
       
       if(show_debug_data) {
-        dialog::addSelItem("pointer", buf, 0);
+        dialog::addSelItem("pointer", s0+buf+"/"+index_pointer(what), 0);
         dialog::addSelItem("cpdist", its(what->cpdist), 0);
         dialog::addSelItem("celldist", its(celldist(what)), 0);
         dialog::addSelItem("celldistance", its(celldistance(cwt.at, what)), 0);
