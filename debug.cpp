@@ -216,6 +216,8 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
       }
     cwt++;
     mirror::act(1, mirror::SPINSINGLE);
+    cwt.at->mondir++;
+    cwt.at->mondir %= cwt.at->type;
 
     if(shmup::on) shmup::pc[0]->at = Id;
     return true;
