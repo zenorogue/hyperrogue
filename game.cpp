@@ -4931,6 +4931,7 @@ EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
   if(movtype == moKrakenH && isTargetOrAdjacent(from)) ;
 /*  else if(passable_for(movtype, from, c, P_ONPLAYER | P_CHAIN | P_MONSTER)) ;
   else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER)) ; */
+  else if(from->wall == waThumperOn) ;
   else if(passable_for(movtype, from, c, P_CHAIN | P_MONSTER)) ;
   else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER)) ;
   else if(isMagneticPole(movtype)) {
