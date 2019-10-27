@@ -393,7 +393,7 @@ struct hrmap_grigorchuk : hrmap_standard {
 
       if(grigorchuk::view_labels) queuestr(V, 0.3, grigorchuk::deform(dec[c->master]), 0xFFFFFF);
       
-      drawcell(c, V, 0, false);
+      drawcell(c, V);
       
       for(int i=0; i<3; i++) if(c->move(i))
         dq::enqueue_by_matrix(h->cmove(i), V * ddspin(c, i) * xpush(cgi.tessf) * iddspin(c->move(i), c->c.spin(i), M_PI));

@@ -477,7 +477,7 @@ void draw_ncee() {
   
   const ld period = 2.898149445355172 / M_PI * 2;
   
-  dynamicval<eModel> pm(pmodel, mdUnchanged);
+  dynamicval<eModel> pm(pmodel, mdPixel);
   dynamicval<eGeometry> pg(geometry, gEuclid);
   
   initquickqueue();
