@@ -1511,7 +1511,7 @@ EX void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
     
     #if CAP_COMPLEX2
-    if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on) 
+    if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety) 
       brownian::init_further(c);
     #endif
 
