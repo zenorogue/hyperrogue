@@ -1639,13 +1639,23 @@ EX namespace rots {
     
     auto g = std::move(gmatrix);
     auto g0 = std::move(gmatrix0);
+    
+    ld alpha = atan2(inverse(nisot::local_perspective) * point3(1, 0, 0));
+    
+    bool inprod = prod;
+    transmatrix pView = View;
+    if(inprod) {
+      pView = spin(alpha) * View;
+      ld z = zlevel(tC0(View));
+      for(int a=0; a<3; a++) pView[a] *= exp(-z);
+      }
   
     hybrid::in_underlying_map([&] {
       cgi.require_shapes();
       dynamicval<int> pcc(corner_centering, cornermode ? 1 : 2);
       dynamicval<bool> pf(playerfound, true);
       dynamicval<cellwalker> m5(centerover, viewctr.at->c7);
-      dynamicval<transmatrix> m2(View, ypush(0) * qtm(h));
+      dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * qtm(h));
       dynamicval<transmatrix> m3(playerV, Id);
       dynamicval<transmatrix> m4(actual_view_transform, Id);
       dynamicval<eModel> pm(pmodel, mdDisk);

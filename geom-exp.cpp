@@ -760,13 +760,15 @@ EX void showEuclideanMenu() {
       });
     }
   
-  else if(geometry == gRotSpace) {
+  else if(hybri) {
     auto r = rots::underlying_scale;
     dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '4');
     dialog::add_action([] {
       dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
         XLAT(
-          "The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
+          rotspace ? "The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
+            : "You are currently in a product space.") +
+        XLAT(
           "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
           "the respective features in the underlying world, but details such as monsters or items are ignored."
           )

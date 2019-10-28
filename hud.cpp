@@ -378,7 +378,7 @@ EX void drawStats() {
 
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
   
-  if(geometry == gRotSpace) rots::draw_underlying(!cornermode);
+  if(geometry == gRotSpace || geometry == gProduct) rots::draw_underlying(!cornermode);
   
   {
   dynamicval<eModel> pm(pmodel, flat_model());
