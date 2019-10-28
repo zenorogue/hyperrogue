@@ -1081,6 +1081,7 @@ EX namespace hybrid {
       cell *c1 = hybrid::get_where(c).first;
       wo = isize(cgi.shWall3D);
       int won = wo + c->type;
+      cgi.wallstart.pop_back();
       cgi.reserve_wall3d(won);
       
       if(prod) for(int i=0; i<c1->type; i++) {
@@ -1120,6 +1121,7 @@ EX namespace hybrid {
         cgi.make_wall(won-2+a, l);
         }
 
+      cgi.wallstart.push_back(isize(cgi.raywall));
       cgi.compute_cornerbonus();
       cgi.extra_vertices();
       }
