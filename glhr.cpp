@@ -172,6 +172,18 @@ EX glmatrix tmtogl_transpose(const transmatrix& T) {
   return tmp;
   }
 
+EX glmatrix tmtogl_transpose3(const transmatrix& T) {
+  glmatrix tmp;
+  for(int i=0; i<4; i++)
+  for(int j=0; j<4; j++)
+    tmp[i][j] = T[j][i];
+  if(MDIM == 3)
+    for(int i=0; i<4; i++)
+    for(int j=0; j<4; j++)
+      if(i == 3 || j == 3) tmp[j][i] = 0;
+  return tmp;
+  }
+
 EX glmatrix ortho(ld x, ld y, ld z) {
   return scale(1/x, 1/y, 1/z);
   }
