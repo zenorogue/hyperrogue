@@ -707,8 +707,11 @@ void geometry_information::compute_cornerbonus() { }
 
 // Make a wall
 
-hyperpoint ray_kleinize(hyperpoint h, int id) {
+hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(geometry == gNil && among(id, 2, 5)) h[2] = 0;
+  if(prod) {
+    return point3(h[0]/h[2], h[1]/h[2], pz);
+    }
   return kleinize(h);
   }
 
@@ -737,8 +740,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   bool triangles = n > 3 && hypot_d(MDIM, vertices[0] - vertices[3]) < 1e-5;
 
   vector<ld> altitudes;
+  altitudes.resize(n);
   if(prod) {
-    altitudes.resize(n);
     for(int i=0; i<n; i++) {
       auto d = product_decompose(vertices[i]);
       altitudes[i] = d.first;
@@ -759,13 +762,17 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   auto ocenter = center;
   
   for(int a=0; a<n; a++) {
+    int b = (a+1)%n;
     if(triangles) center = normalize(vertices[a/3*3] * 5 + vertices[a/3*3+1] + vertices[a/3*3+2]);
     
     hyperpoint v1 = vertices[a];
-    hyperpoint v2 = vertices[(a+1)%n];
+    hyperpoint v2 = vertices[b];
     
     if(!triangles || (a%6 == 1)) {
-      transmatrix T = build_matrix(ray_kleinize(v1, id), ray_kleinize(v2, id), ray_kleinize(ocenter, id), point31(.11,.19,.3));
+      auto kv1 = ray_kleinize(v1, id, altitudes[a]);
+      auto kv2 = ray_kleinize(v2, id, altitudes[b]);
+      auto kvc = ray_kleinize(ocenter, id, center_altitude);
+      transmatrix T = build_matrix(kv1, kv2, kvc, point31(.11,.19,.3));
       T = inverse(T);
       raywall.push_back(T);
       }
@@ -777,7 +784,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       if(nil && (x || y))
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
       if(prod) { 
-        h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[(a+1)%n] * y);
+        h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return; 
         }
       if(solnih || !binarytiling) { hpcpush(normalize(h)); return; }

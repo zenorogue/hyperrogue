@@ -60,6 +60,8 @@ EX bool available() {
     return true;
   if(euclid && pmodel == mdPerspective && !binarytiling)
     return true;
+  if(prod && PURE)
+    return true;
   return false;
   }
 
@@ -75,7 +77,7 @@ struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tTextureMap;
-  GLint uBinaryWidth;
+  GLint uBinaryWidth, uPLevel, uLP;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   
   raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
@@ -93,6 +95,8 @@ struct raycaster : glhr::GLprogram {
     uWallY = glGetUniformLocation(_program, "uWallY");
     
     uBinaryWidth = glGetUniformLocation(_program, "uBinaryWidth");
+    uPLevel = glGetUniformLocation(_program, "uPLevel");
+    uLP = glGetUniformLocation(_program, "uLP");
 
     uLinearSightRange = glGetUniformLocation(_program, "uLinearSightRange");
     uExpDecay = glGetUniformLocation(_program, "uExpDecay");
@@ -108,9 +112,12 @@ shared_ptr<raycaster> our_raycaster;
 
 EX void reset_raycaster() { our_raycaster = nullptr; };
 
+int deg;
+
 void enable_raycaster() {
   if(geometry != last_geometry) reset_raycaster();
   last_geometry = geometry;
+  deg = S7; if(prod) deg += 2;
   if(!our_raycaster) { 
     bool use_reflect = reflect_val && !nil;
 
@@ -144,8 +151,12 @@ void enable_raycaster() {
     "uniform vec4 uWallX["+rays+"];\n"
     "uniform vec4 uWallY["+rays+"];\n"
     "uniform vec4 uFogColor;\n"
-    "uniform int uWallstart["+its(S7)+"];\n"
+    "uniform int uWallstart["+its(deg+1)+"];\n"
     "uniform float uLinearSightRange, uExpStart, uExpDecay;\n";
+    
+    if(prod) fsh += 
+      "uniform float uPLevel;\n"
+      "uniform mat4 uLP;\n";
     
     if(IN_ODS) fsh += 
 
@@ -173,8 +184,11 @@ void enable_raycaster() {
    fsh += 
      "vec2 map_texture(vec4 pos, int which) {\n";
    if(nil) fsh += "if(which == 2 || which == 5) pos.z = 0.;\n";
-   if(hyperbolic) fsh += 
+   else if(hyperbolic) fsh += 
        "pos /= pos.w;\n";
+   else if(prod) fsh +=
+     "pos = vec4(pos.x/pos.z, pos.y/pos.z, pos.w, 0);\n";
+   
    fsh += 
        "int s = uWallstart[which];\n"
        "int e = uWallstart[which+1];\n"
@@ -215,9 +229,22 @@ void enable_raycaster() {
       "  const float minstep = " + fts(minstep) + ";\n"
       "  float next = maxstep;\n";
     
-    fmain +=     
+    if(prod) {
+      string sgn=in_h2xe() ? "-" : "+";
+      fmain +=     
+      "  vec4 position = vw * vec4(0., 0., 1., 0.);\n"
+      "  vec4 at1 = uLP * at0;\n"
+      "  float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n"
+      "  position *= exp(-zpos);\n"
+      "  float zspeed = at1.z;\n"
+      "  float xspeed = length(at1.xy);\n"
+      "  vec4 tangent = vw * exp(-zpos) * vec4(at1.xy, 0, 0) / xspeed;\n";
+      }
+    else fmain +=
       "  vec4 position = vw * vec4(0., 0., 0., 1.);\n"
-      "  vec4 tangent = vw * at0;\n"
+      "  vec4 tangent = vw * at0;\n";
+    
+    fmain +=     
       "  float go = 0.;\n"
       "  vec2 cid = uStartid;\n"
       "  for(int iter=0; iter<" + its(max_iter_current()) + "; iter++) {\n";
@@ -240,9 +267,24 @@ void enable_raycaster() {
     if(!nonisotropic) {
     
       fmain +=
-        "  if(which == -1) for(int i=0; i<"+its(S7)+"; i++) {\n";
+        "  if(which == -1) {\n";
       
-      if(hyperbolic) fmain +=
+      fmain += "for(int i=0; i<"+its(S7)+"; i++) {\n";
+      
+      if(in_h2xe()) fmain +=
+          "    float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
+          "    if(v > 1. || v < -1.) continue;\n"
+          "    float d = atanh(v);\n"
+          "    vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
+          "    if(next_tangent[2] < (uM[i] * next_tangent)[2]) continue;\n"
+          "    d /= xspeed;\n";
+      else if(in_s2xe()) fmain +=
+          "    float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
+          "    float d = atan(v);\n"
+          "    vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
+          "    if(next_tangent[2] > (uM[i] * next_tangent)[2]) continue;\n"
+          "    d /= xspeed;\n";
+      else if(hyperbolic) fmain +=
           "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    float d = atanh(v);\n"
@@ -259,6 +301,12 @@ void enable_raycaster() {
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
             "}\n";
+          
+      if(prod) fmain += 
+        "if(zspeed > 0.) { float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"+1; }}\n"
+        "if(zspeed < 0.) { float d = (-uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"; }}\n";
+      
+      fmain += "}\n";
 
       fmain += 
         "  if(dist < 0.) { dist = 0.; }\n";
@@ -270,8 +318,20 @@ void enable_raycaster() {
     // shift d units
     if(use_reflect) fmain += 
       "bool reflect = false;\n";
-    
-    if(hyperbolic) fmain += 
+      
+    if(in_h2xe()) fmain +=
+      "  float ch = cosh(dist*xspeed); float sh = sinh(dist*xspeed);\n"
+      "  vec4 v = position * ch + tangent * sh;\n"
+      "  tangent = tangent * ch + position * sh;\n"
+      "  position = v;\n"
+      "  zpos += dist * zspeed;\n";
+    else if(in_s2xe()) fmain +=
+      "  float ch = cos(dist*xspeed); float sh = sin(dist*xspeed);\n"
+      "  vec4 v = position * ch + tangent * sh;\n"
+      "  tangent = tangent * ch - position * sh;\n"
+      "  position = v;\n"
+      "  zpos += dist * zspeed;\n";
+    else if(hyperbolic) fmain += 
       "  float ch = cosh(dist); float sh = sinh(dist);\n"
       "  vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
@@ -405,6 +465,8 @@ void enable_raycaster() {
     
     fmain += "if(which == -1) continue;\n";
     
+    if(prod) fmain += "position.w = -zpos;\n";
+    
     // apply wall color
     fmain +=
       "  vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
@@ -462,6 +524,7 @@ void enable_raycaster() {
       "    }\n";
 
     if(use_reflect) {
+      if(prod) fmain += "if(reflect && which >= "+its(S7)+") { zspeed = -zspeed; continue; }\n";
       if(sol) fmain += 
         "  if(reflect) {\n"
         "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
@@ -471,7 +534,7 @@ void enable_raycaster() {
         "    }\n";
       else fmain += 
         "  if(reflect) {\n"
-        "    tangent = uM["+its(S7)+"+which] * tangent;\n"
+        "    tangent = uM["+its(deg)+"+which] * tangent;\n"
         "    continue;\n"
         "    }\n";
       }
@@ -479,10 +542,16 @@ void enable_raycaster() {
     // next cell
     fmain += 
       "  vec4 connection = texture2D(tConnections, u);\n"
+      "  cid = connection.xy;\n";
+    
+    if(prod) fmain +=
+      "  if(which == "+its(S7)+") { zpos += uPLevel+uPLevel; continue; }\n"
+      "  if(which == "+its(S7)+"+1) { zpos -= uPLevel+uPLevel; continue; }\n";
+    
+    fmain +=
       "  int mid = int(connection.z * 1024.);\n"
       "  position = uM[mid] * uM[which] * position;\n"
-      "  tangent = uM[mid] * uM[which] *  tangent;\n"
-      "  cid = connection.xy;\n";
+      "  tangent = uM[mid] * uM[which] *  tangent;\n";
     
     fmain += 
       "  }\n"
@@ -527,7 +596,7 @@ void uniform2(GLint id, array<float, 2> fl) {
 
 array<float, 2> enc(int i, int a) { 
   array<float, 2> res;
-  res[0] = ((i%per_row) * S7 + a + .5) / length;
+  res[0] = ((i%per_row) * deg + a + .5) / length;
   res[1] = ((i / per_row) + .5) / rows;
   return res;
   };
@@ -555,14 +624,26 @@ EX void cast() {
   glUniform1f(o->uFovX, cd->tanfov);
   glUniform1f(o->uFovY, cd->tanfov * cd->ysize / cd->xsize);
   
+  deg = S7;
+  if(prod) deg += 2;
+  
   length = 4096;
-  per_row = length / S7;
+  per_row = length / deg;
   
   vector<cell*> lst;
 
+  cell *cs = viewcenter();
+
+  transmatrix T = cview();
+  if(nonisotropic) T = nisot::local_perspective * T;
+  if(prod) T = actualV(viewctr, T);
+  T = inverse(T);
+
+  virtualRebase(cs, T, true);
+  
   if(true) {
     manual_celllister cl;
-    cl.add(viewctr.at->c7);
+    cl.add(cs);
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
       if(racing::on && i > 0 && c->wall == waBarrier) continue;
@@ -584,24 +665,19 @@ EX void cast() {
   glUniform1i(o->uLength, length);
   GLERR("uniform length");
   
-  // for(auto &m: reg3::spins) println(hlog, m);
-  
-  transmatrix T = cview();
-  if(nonisotropic) T = nisot::local_perspective * T;
-  cell *cs = viewctr.at->c7;
-  T = inverse(T);
-  virtualRebase(cs, T, true);
-  
-  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose(T).as_array());
+  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+  if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(nisot::local_perspective)).as_array());
   GLERR("uniform start");
   uniform2(o->uStartid, enc(ids[cs], 0));
   GLERR("uniform startid");
   glUniform1f(o->uIPD, vid.ipd);
   GLERR("uniform IPD");
-
+  
   vector<transmatrix> ms;
-  for(int j=0; j<S7; j++) ms.push_back(currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
-
+  for(int j=0; j<S7; j++) ms.push_back(prod ? currentmap->relative_matrix(cwt.at, cwt.at->cmove(j), Hypc) : currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
+  if(prod) ms.push_back(Id);
+  if(prod) ms.push_back(Id);
+  
   if(!sol && !nil && reflect_val) {
     for(int j=0; j<S7; j++) {
       transmatrix T = inverse(ms[j]);
@@ -619,7 +695,7 @@ EX void cast() {
   if(1) for(cell *c: lst) {
     int id = ids[c];
     forCellIdEx(c1, i, c) { 
-      int u = (id/per_row*length) + (id%per_row * S7) + i;
+      int u = (id/per_row*length) + (id%per_row * deg) + i;
       if(!ids.count(c1)) {
         wallcolor[u] = glhr::acolor(color_out_of_range | 0xFF);
         texturemap[u] = glhr::makevertex(0.1,0,0);
@@ -657,8 +733,12 @@ EX void cast() {
           texturemap[u] = glhr::makevertex(0.001,0,0);
           }
         }
-
-      transmatrix T = currentmap->relative_matrix(c->master, c1->master) * inverse(ms[i]);
+      
+      if(prod && i >= S7) {
+        connections[u][2] = (S7+.5) / 1024.;
+        continue;
+        }
+      transmatrix T = (prod ? currentmap->relative_matrix(c, c1, C0) : currentmap->relative_matrix(c->master, c1->master)) * inverse(ms[i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
@@ -683,14 +763,16 @@ EX void cast() {
 
   if(o->uBinaryWidth != -1)
     glUniform1f(o->uBinaryWidth, vid.binary_width * log(2) / 2);
-    
+  if(o->uPLevel != -1)
+    glUniform1f(o->uPLevel, cgi.plevel / 2);
+  
   glUniform1f(o->uLinearSightRange, sightranges[geometry]);
   glUniform1f(o->uExpDecay, exp_decay_current());
   glUniform1f(o->uExpStart, exp_start);
 
 
   vector<glhr::glmatrix> gms;
-  for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose(m));
+  for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
   glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
 
   bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
