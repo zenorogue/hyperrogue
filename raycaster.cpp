@@ -895,6 +895,10 @@ int readArgs() {
     PHASEFROM(2);
     want_use = 1;
     }
+  else if(argis("-ray-comp")) {
+    PHASEFROM(2);
+    comparison_mode = true;
+    }
   else if(argis("-ray-cells")) {
     PHASEFROM(2); shift();
     rays_generate = true;
