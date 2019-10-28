@@ -798,7 +798,7 @@ int read_cheat_args() {
     shift(); steplimit = argi();
     }
   else if(argis("-dgl")) {
-    debug_gl = true;
+    glhr::debug_gl = true;
     }
   else if(argis("-W")) {
     PHASEFROM(2);
