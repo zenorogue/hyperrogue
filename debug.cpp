@@ -797,6 +797,9 @@ int read_cheat_args() {
     fixseed = true; autocheat = true;
     shift(); steplimit = argi();
     }
+  else if(argis("-dgl")) {
+    debug_gl = true;
+    }
   else if(argis("-W")) {
     PHASEFROM(2);
     shift(); 

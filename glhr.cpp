@@ -255,12 +255,21 @@ struct GLprogram {
 
 EX shared_ptr<GLprogram> current_glprogram = nullptr;
 
+EX bool debug_gl;
+
 EX int compileShader(int type, const string& s) {
   GLint status;
 
-#if DEBUG_GL  
-  printf("===\n%s\n===\n", s.c_str());
-#endif
+  if(debug_gl) {
+    println(hlog, "===\n");
+    int lineno = 1;
+    string cline = "";
+    for(char c: s+"\n") {
+      if(c == '\n') println(hlog, format("%4d : ", lineno), cline), lineno++, cline = "";
+      else cline += c;
+      }
+    println(hlog, "===");
+    }
   
   GLint shader = glCreateShader(type);
   const char *ss = s.c_str();
@@ -274,6 +283,7 @@ EX int compileShader(int type, const string& s) {
     glGetShaderInfoLog(shader, logLength, &logLength, log.data());
     if(logLength > 0)
       printf("compiler log (%d): '%s'\n", logLength, log.data());
+    if(debug_gl) exit(1);
     }
   
   glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
