@@ -121,17 +121,38 @@ EX namespace binary {
     h->cdata = NULL;
     h->zebraval = side;
     h->emeraldval = 0;
-    if(geometry == gBinary4) {
-      if(d < 2)
-        h->emeraldval = (parent->emeraldval * 2 + d) % 15015;
-      else
-        h->emeraldval = ((parent->emeraldval - d1) * 7508 + 15015) % 15015;
-      }
-    if(geometry == gTernary) {
-      if(d < 2)
-        h->emeraldval = (parent->emeraldval * 3 + d) % 10010;
-      else
-        h->emeraldval = ((parent->emeraldval - d1) * 3337 + 2*10010) % 10010;
+    h->fieldval = 0;
+    switch(geometry) {
+      case gBinary4:
+        if(d < 2)
+          h->emeraldval = gmod(parent->emeraldval * 2 + d, 15015);
+        else
+          h->emeraldval = gmod((parent->emeraldval - d1) * 7508, 15015);
+        break;
+      case gTernary:
+        if(d < 2)
+          h->emeraldval = gmod(parent->emeraldval * 3 + d, 10010);
+        else
+          h->emeraldval = gmod((parent->emeraldval - d1) * 3337, 10010);
+        break;
+      case gHoroRec: {
+        int x = parent->fieldval & 4095;
+        int y = (parent->fieldval >> 12) & 4095;
+        if(d < 2) tie(x, y) = make_pair(y, gmod(x * 2 + d, 1155));
+        else tie(x,y) = make_pair(gmod((y-d1)*578, 1155), x);
+        h->fieldval = x + (y << 12);
+        break;
+        }
+      case gBinary3: {
+        int x = parent->fieldval & 4095;
+        int y = (parent->fieldval >> 12) & 4095;
+        if(d < 4) x = gmod(x * 2 + (d&1), 1155), y = gmod(y * 2 + (d>>1), 1155);
+        else x = gmod((x-(d1&1))*578, 1155), y = gmod((y-(d1>>1))*578, 1155);
+        h->fieldval = x + (y << 12);
+        break;
+        }
+      default:
+        break;
       }
     if(WDIM == 3 && h->c7) make_binary_lands(parent, h);
     #if DEBUG_BINARY_TILING
