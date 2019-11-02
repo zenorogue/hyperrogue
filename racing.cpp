@@ -449,6 +449,7 @@ EX void generate_track() {
   length = LENGTH;
   if(WDIM == 3 || weirdhyperbolic) length = max(length - 10 * race_try, 10);
   
+  try {
   if(sol) {
     track.push_back(s);
     find_track(s, 1, length/4);
