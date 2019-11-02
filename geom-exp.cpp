@@ -766,7 +766,7 @@ EX void showEuclideanMenu() {
     dialog::add_action([] {
       dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
         XLAT(
-          rotspace ? "The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
+          geometry == gRotSpace ? "The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
             : "You are currently in a product space.") +
         XLAT(
           "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
