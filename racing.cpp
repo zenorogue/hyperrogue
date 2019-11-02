@@ -246,6 +246,8 @@ ld start_line_width;
 
 struct hr_track_failure : hr_exception {};
 
+int length;
+
 void find_track(cell *start, int sign, int len) {
   int dl = 7 - getDistLimit() - genrange_bonus;
   cell *goal;
@@ -258,7 +260,7 @@ void find_track(cell *start, int sign, int len) {
   while(true) {
     traversed++;
     if(cellbydist.empty()) {
-      printf("reset after traversing %d\n", traversed);
+      println(hlog, "reset after traversing ", traversed, " width = ", TWIDTH, " length = ", length);
       throw hr_track_failure();
       }
     auto it = cellbydist.end();
@@ -269,7 +271,7 @@ void find_track(cell *start, int sign, int len) {
     int id = hrand(isize(v));
     cell *c = v[id];
     v[id] = v.back(); v.pop_back();    
-    if(it->first >= LENGTH) {
+    if(it->first >= length) {
       goal = c;
       break;
       }
@@ -435,30 +437,32 @@ EX void generate_track() {
   
   bounded_track = false;
   
+  length = LENGTH;
+  if(WDIM == 3 || weirdhyperbolic) length = max(length - 10 * race_try, 10);
+  
   if(sol) {
     track.push_back(s);
-    find_track(s, 1, LENGTH/4);
-    find_track(track.back(), -1, LENGTH-2*(LENGTH/4));
-    find_track(track.back(), 1, LENGTH/4);
+    find_track(s, 1, length/4);
+    find_track(track.back(), -1, length-2*(length/4));
+    find_track(track.back(), 1, length/4);
     }
   else if(nih) {
     track.push_back(s);
-    find_track(s, 1, LENGTH/2);
-    find_track(track.back(), -1, LENGTH/2);
+    find_track(s, 1, length/2);
+    find_track(track.back(), -1, length/2);
     }
   else if(nil) {
     track.push_back(s);
-    find_track(s, 1, LENGTH/4);
-    find_track(track.back(), 2, LENGTH/4);
-    find_track(track.back(), 3, LENGTH/4);
-    find_track(track.back(), 4, LENGTH/4);
+    find_track(s, 1, length/4);
+    find_track(track.back(), 2, length/4);
+    find_track(track.back(), 3, length/4);
+    find_track(track.back(), 4, length/4);
     }
   else if(bounded && !prod) {
     bounded_track = true;
     make_bounded_track(s);
     }
-  else try {
-    find_track(s, 0, LENGTH);
+  else find_track(s, 0, length);    
     }
   catch(hr_track_failure&) {
     race_try++;
