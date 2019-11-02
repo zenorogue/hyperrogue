@@ -279,11 +279,18 @@ void find_track(cell *start, int sign, int len) {
     forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
       parent[c1] = c;
       int id;
-      if(nil) {
-        switch(sign) { 
+      /* if(nil && !nilv::nilperiod[0]) {
+        switch(sign) {
           case 1: id = c1->master->zebraval - start->master->zebraval; break;
           case 2: id = start->master->emeraldval - c1->master->emeraldval; break;
           case 3: id = start->master->zebraval - c1->master->zebraval; break;
+          case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
+          }
+        } */
+      if(nil && !quotient) {
+        switch(sign) { 
+          case 1: id = c1->master->emeraldval - start->master->emeraldval; break;
+          case 2: case 3: id = start->master->fieldval - c1->master->fieldval; break;
           case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
           }
         }
@@ -295,7 +302,8 @@ void find_track(cell *start, int sign, int len) {
       }
     }
 
-  if(euclid && (penrose || archimedean)) permanent_long_distances(goal);
+  if(euclid && (penrose || archimedean || quotient)) permanent_long_distances(goal);
+  if(nil && quotient) permanent_long_distances(goal);
   
   if(solnih || nil || sl2) {
     vector<cell*> p;
@@ -433,7 +441,8 @@ EX void generate_track() {
   makeEmpty(s);
   cview(); // needed for some virtualRebases
   
-  if(euclid && (penrose || archimedean)) permanent_long_distances(s);
+  if(euclid && (penrose || archimedean || quotient)) permanent_long_distances(s);
+  if(nil && quotient) permanent_long_distances(s);
   
   bounded_track = false;
   
