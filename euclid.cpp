@@ -596,8 +596,8 @@ EX namespace euclid3 {
   coord canonicalize(coord x);
   EX void build_torus3();
   coord twist(coord x, transmatrix& M);
-  extern int twisted;
-  extern intmatrix T0;
+  EX int twisted;
+  intmatrix T0;
   
   struct hrmap_euclid3 : hrmap {
     vector<coord> shifttable;
@@ -908,13 +908,19 @@ EX namespace euclid3 {
   axes optimal_axes;
   axes regular_axes;
   
-  intmatrix T, T2, T0, T_edit;
+  intmatrix T, T2, T_edit;
   int det;
   int coords;
-  int twisted, twisted0, twisted_edit;
+  int twisted0, twisted_edit;
   
   EX void clear_torus3() {
     for(int i=0; i<3; i++) user_axes[i] = 0;
+    }
+  
+  EX void set_torus3(int x, int y, int z) {
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++) T0[i][j] = 0;
+    tie(T0[0][0], T0[1][1], T0[2][2]) = make_tuple(x, y, z);    
+    build_torus3();
     }
   
   unordered_map<coord, int> canonical_hash;
