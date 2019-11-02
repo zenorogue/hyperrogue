@@ -778,7 +778,7 @@ EX namespace nilv {
 
   EX int zgmod(int a, int b) { return b ? gmod(a, b) : a; }
 
-  array<int,3> nilperiod, nilperiod_edit;
+  EX array<int,3> nilperiod, nilperiod_edit;
   
   struct hrmap_nil : hrmap {
     unordered_map<mvec, heptagon*> at;
@@ -854,6 +854,13 @@ EX namespace nilv {
       }
     };
 
+  void set_flags() {
+    int coords = 0;
+    for(int a=0; a<3; a++) if(nilperiod[a]) coords++;
+    set_flag(ginf[gNil].flags, qANYQ, coords);
+    set_flag(ginf[gNil].flags, qBOUNDED, coords == 3);
+    }
+
   EX hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
     hyperpoint local = inverse(nisot::translate(s0)) * s1;
     hyperpoint h = get_inverse_exp(local, 100);
@@ -907,6 +914,7 @@ EX void show_niltorus3() {
     dialog::add_action([] {
       stop_game();
       nilperiod = nilperiod_edit;
+      set_flags();
       geometry = gNil;
       start_game();
       });
@@ -1842,6 +1850,13 @@ EX namespace nisot {
     else if(argis("-rot_uscale")) {
       PHASEFROM(2);
       shift_arg_formula(rots::underlying_scale);
+      return 0;
+      }
+    else if(argis("-nilperiod")) {
+      PHASEFROM(2);
+      if(nil) stop_game();
+      for(int a=0; a<3; a++) { shift(); nilv::nilperiod[a] = argi(); }
+      nilv::set_flags();
       return 0;
       }
     return 1;
