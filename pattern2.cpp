@@ -1590,6 +1590,24 @@ EX namespace patterns {
         return canvasback;
       case 'r':
         return hrand(0x1FFFFFF + 1);
+      case '^': {
+        int x = c->master->fieldval & 4095;
+        int y = (c->master->fieldval >> 12) & 4095;
+        ignore(x);
+        if(c->master->distance % 3) return 0;
+        if(c->c.spin(binary::updir()) != 1) return 0;
+        // if(c->master->distance % 2 == 0) return 0;
+        if(hrand(100) == 0) return 0;
+        return 0x1000000 | (0xFFFFFF & (0x671349 + y * 0x512369));
+//        if(c->master->distance == 1) return 0x1FF0000;
+//        if(c->master->distance == -1) return 0x100FF00;
+//        return 0;        
+        }
+      case '!': {
+        if(c == currentmap->gamestart()) return 0;
+        return hrand(0x1000000) | 0x1000000;
+        }
+        
       case 'e':
         return colortables['e'][emeraldval(c)];
       case 'a': {
