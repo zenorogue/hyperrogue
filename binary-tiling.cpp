@@ -558,6 +558,21 @@ EX namespace binary {
     return S7-1;
     }
   
+  EX int dirs_outer() {
+    switch(geometry) {
+      case gBinary3: return 4;
+      case gHoroTris: return 4;
+      case gHoroRec: return 2;
+      case gHoroHex: return 6;
+      default: return -1;
+      }
+    }
+
+  EX int dirs_inner() {
+    if(among(geometry, gBinaryTiling, gHoroHex)) return 2;
+    return 1;
+    }
+  
   EX void build_tmatrix() {
     if(among(geometry, gBinaryTiling, gSol)) return; // unused
     use_direct = (1 << (S7-1)) - 1;

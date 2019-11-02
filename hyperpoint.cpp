@@ -586,6 +586,19 @@ EX transmatrix parabolic13(ld u, ld v) {
     }
   }
 
+EX hyperpoint parabolic10(hyperpoint h) {
+  if(euclid) { h[MDIM] = 1; return h; }
+  else if(MDIM == 4) return hyperpoint(sinh(h[0]), h[1]/exp(h[0]), h[2]/exp(h[0]), cosh(h[0]));
+  else return hyperpoint(sinh(h[0]), h[1]/exp(h[0]), cosh(h[0]), 0);
+  }
+
+EX hyperpoint deparabolic10(const hyperpoint h) {
+  if(euclid) return h;
+  ld x = -log(h[LDIM] - h[0]);
+  if(MDIM == 3) return hyperpoint(x, h[1] * exp(x), 1, 0);
+  return point31(x, h[1] * exp(x), h[2] * exp(x));
+  }
+
 EX transmatrix spintoc(const hyperpoint& H, int t, int f) {
   transmatrix T = Id;
   ld R = hypot(H[f], H[t]);

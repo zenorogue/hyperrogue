@@ -54,7 +54,7 @@ eGeometry last_geometry;
 /** is the raycaster available? */
 EX bool available() {
   if(WDIM == 2) return false;
-  if(hyperbolic && pmodel == mdPerspective && !binarytiling)
+  if(hyperbolic && pmodel == mdPerspective && !penrose)
     return true;
   if((sol || nil) && pmodel == mdGeodesic)
     return true;
@@ -79,6 +79,7 @@ struct raycaster : glhr::GLprogram {
   GLint tConnections, tWallcolor, tTextureMap;
   GLint uBinaryWidth, uPLevel, uLP;
   GLint uLinearSightRange, uExpStart, uExpDecay;
+  GLint uBLevel;
   
   raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
@@ -101,6 +102,8 @@ struct raycaster : glhr::GLprogram {
     uLinearSightRange = glGetUniformLocation(_program, "uLinearSightRange");
     uExpDecay = glGetUniformLocation(_program, "uExpDecay");
     uExpStart = glGetUniformLocation(_program, "uExpStart");
+
+    uBLevel = glGetUniformLocation(_program, "uBLevel");
   
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
@@ -158,14 +161,24 @@ void enable_raycaster() {
       "uniform float uPLevel;\n"
       "uniform mat4 uLP;\n";
     
-    if(IN_ODS) fsh += 
+    int flat1 = 0, flat2 = S7;
+    
+    if(hyperbolic && binarytiling) {
+      fsh += "uniform float uBLevel;\n";
+      flat1 = binary::dirs_outer();
+      flat2 -= binary::dirs_inner();
+      }
+
+    if(IN_ODS || hyperbolic) fsh += 
 
     "mat4 xpush(float x) { return mat4("
          "cosh(x), 0., 0., sinh(x),\n"
          "0., 1., 0., 0.,\n"
          "0., 0., 1., 0.,\n"
          "sinh(x), 0., 0., cosh(x)"
-         ");}\n"
+         ");}\n";
+    
+    if(IN_ODS) fsh += 
 
     "mat4 xzspin(float x) { return mat4("
          "cos(x), 0., sin(x), 0.,\n"
@@ -184,6 +197,9 @@ void enable_raycaster() {
    fsh += 
      "vec2 map_texture(vec4 pos, int which) {\n";
    if(nil) fsh += "if(which == 2 || which == 5) pos.z = 0.;\n";
+   else if(hyperbolic && binarytiling) fsh += 
+       "pos = vec4(-log(pos.w-pos.x), pos.y, pos.z, 1);\n"
+       "pos.yz *= exp(pos.x);\n";
    else if(hyperbolic) fsh += 
        "pos /= pos.w;\n";
    else if(prod) fsh +=
@@ -269,7 +285,7 @@ void enable_raycaster() {
       fmain +=
         "  if(which == -1) {\n";
       
-      fmain += "for(int i=0; i<"+its(S7)+"; i++) {\n";
+      fmain += "for(int i="+its(flat1)+"; i<"+its(flat2)+"; i++) {\n";
       
       if(in_h2xe()) fmain +=
           "    float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
@@ -301,6 +317,31 @@ void enable_raycaster() {
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
             "}\n";
+    
+      // 20: get to horosphere +uBLevel (take smaller root)
+      // 21: get to horosphere -uBLevel (take larger root)
+                          
+      if(hyperbolic && binarytiling) {
+        fmain += 
+          "for(int i=20; i<22; i++) {\n"
+            "float sgn = i == 20 ? -1. : 1.;\n"
+            "vec4 zpos = xpush(uBLevel*sgn) * position;\n"
+            "vec4 ztan = xpush(uBLevel*sgn) * tangent;\n"
+            "float Mp = zpos.w - zpos.x;\n"
+            "float Mt = ztan.w - ztan.x;\n"
+            "float a = (Mp*Mp-Mt*Mt);\n"
+            "float b = Mp/a;\n"
+            "float c = (1.+Mt*Mt) / a;\n"
+            "if(b*b < c) continue;\n"
+            "if(sgn < 0. && Mt > 0.) continue;\n"
+            "float zsgn = (Mt > 0. ? -sgn : sgn);\n"
+            "float u = sqrt(b*b-c)*zsgn + b;\n"
+            "float v = -(Mp*u-1.) / Mt;\n"
+            "float d = asinh(v);\n"
+            "if(d < 0. && abs(log(position.w*position.w-position.x*position.x)) < uBLevel) continue;\n"
+            "if(d < dist) { dist = d; which = i; }\n"
+            "}\n";
+        }
           
       if(prod) fmain += 
         "if(zspeed > 0.) { float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"+1; }}\n"
@@ -461,10 +502,29 @@ void enable_raycaster() {
     else fmain += 
       "position = position + tangent * dist;\n";
     
+    if(hyperbolic && binarytiling) {
+      fmain += 
+        "if(which == 20) {\n"
+        "  float best = 999.;\n"
+        "  for(int i="+its(flat2)+"; i<"+its(S7)+"; i++) {\n"
+          "  float cand = len(uM[i] * position);\n"
+          "  if(cand < best) { best = cand; which = i; }\n"
+          "  }\n"
+          "}\n"
+        "if(which == 21) {\n"
+          "float best = 999.;\n"
+          "for(int i=0; i<"+its(flat1)+"; i++) {\n"
+          "  float cand = len(uM[i] * position);\n"
+          "  if(cand < best) { best = cand; which = i; }\n"
+          "  }\n"
+//          "gl_FragColor = vec4(.5 + .5 * sin((go+dist)*100.), 1, float(which)/3., 1); return;\n"
+          "}\n";
+      }
+    
     fmain += "  go = go + dist;\n";
-    
+
     fmain += "if(which == -1) continue;\n";
-    
+        
     if(prod) fmain += "position.w = -zpos;\n";
     
     // apply wall color
@@ -525,6 +585,17 @@ void enable_raycaster() {
 
     if(use_reflect) {
       if(prod) fmain += "if(reflect && which >= "+its(S7)+") { zspeed = -zspeed; continue; }\n";
+      if(hyperbolic && binarytiling) fmain +=
+        "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n"
+        "  float x = -log(position.w - position.x);\n"
+        "  vec4 xtan = xpush(-x) * tangent;\n"
+        "  float diag = (position.y*position.y+position.z*position.z)/2.;\n"
+        "  vec4 normal = vec4(1.-diag, -position.y, -position.z, -diag);\n"
+        "  float mdot = dot(xtan.xyz, normal.xyz) - xtan.w * normal.w;\n"
+        "  xtan = xtan - normal * mdot * 2.;\n"
+        "  tangent = xpush(x) * xtan;\n"
+        "  continue;\n"
+        "  }\n";
       if(sol) fmain += 
         "  if(reflect) {\n"
         "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
@@ -765,6 +836,8 @@ EX void cast() {
     glUniform1f(o->uBinaryWidth, vid.binary_width * log(2) / 2);
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
+  if(o->uBLevel != -1)
+    glUniform1f(o->uBLevel, log(binary::expansion()) / 2);
   
   glUniform1f(o->uLinearSightRange, sightranges[geometry]);
   glUniform1f(o->uExpDecay, exp_decay_current());

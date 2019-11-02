@@ -709,6 +709,11 @@ void geometry_information::compute_cornerbonus() { }
 
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(geometry == gNil && among(id, 2, 5)) h[2] = 0;
+  if(hyperbolic && binarytiling) {
+    // ld co = vid.binary_width / log(2) / 4;
+    // hyperpoint res = point31(h[2]*log(2)/2, h[0]*co, h[1]*co);
+    return deparabolic10(binary::parabolic3(h[0], h[1]) * xpush0(log(2)/2*h[2]));
+    }
   if(prod) {
     return point3(h[0]/h[2], h[1]/h[2], pz);
     }
@@ -918,7 +923,7 @@ void geometry_information::create_wall3d() {
     ld h = binary::horohex_scale / 2;
     hyperpoint down = point3(0,0,2*z);
 
-    for(int i=0; i<3; i++) {
+    for(int j=0; j<4; j++) for(int i=0; i<3; i++) {
       transmatrix T = cspin(0, 1, 2*M_PI*i/3);
 
       hyperpoint hcenter = point3(0,0,-z);
@@ -929,10 +934,10 @@ void geometry_information::create_wall3d() {
       hyperpoint hcn = T*point3(-h*2,0,  -z);
       hyperpoint hun = T*point3(-h*3,+r3,-z);
       hyperpoint hdn = T*point3(-h*3,-r3,-z);
-      make_wall(i, {hcenter, hu0, hu1, hd1, hd0});
-      make_wall(i+3, {hcn, hun, hdn});
-      make_wall(i+6, make4(hd1, hu1, hd1+down));
-      make_wall(i+9, make4(hun, hdn, hun+down));
+      if(j == 0) make_wall(i, {hcenter, hu0, hu1, hd1, hd0});
+      if(j == 1) make_wall(i+3, {hcn, hun, hdn});
+      if(j == 2) make_wall(i+6, make4(hd1, hu1, hd1+down));
+      if(j == 3) make_wall(i+9, make4(hun, hdn, hun+down));
       }
 
     make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
