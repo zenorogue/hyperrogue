@@ -941,6 +941,7 @@ EX namespace hybrid {
   
   EX void configure(eGeometry g) {
     if(WDIM == 3) return;
+    ray::reset_raycaster();
     check_cgi();
     cgi.require_basics();
     underlying = geometry;
