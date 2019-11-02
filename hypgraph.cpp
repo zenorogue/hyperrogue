@@ -1341,6 +1341,10 @@ EX void centerpc(ld aspd) {
       T = currentmap->relative_matrix(pc->base, cc, C0) * T;
       }      
     if(WDIM == 2 && !masterless) T = master_relative(pc->base) * T;
+    if(prod) {
+      cell *c = hybrid::get_where(pc->base).first;
+      T = PIU(master_relative(c)) * T;
+      }
     int sl = snakelevel(cwt.at);
     if(sl && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     View = inverse(T);
