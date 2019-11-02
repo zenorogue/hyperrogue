@@ -846,7 +846,7 @@ EX namespace euclid3 {
 
   EX int celldistance(cell *c1, cell *c2) {
     auto cm = cubemap();
-    return celldistance(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]);
+    return celldistance(canonicalize(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]));
     }
 
   EX void set_land(cell *c) {
@@ -913,15 +913,16 @@ EX namespace euclid3 {
   int coords;
   int twisted0, twisted_edit;
   
-  EX void clear_torus3() {
-    for(int i=0; i<3; i++) user_axes[i] = 0;
-    }
-  
   EX void set_torus3(int x, int y, int z) {
     for(int i=0; i<3; i++) for(int j=0; j<3; j++) T0[i][j] = 0;
     tie(T0[0][0], T0[1][1], T0[2][2]) = make_tuple(x, y, z);    
+    twisted = 0;
     build_torus3();
     }
+
+  EX void clear_torus3() {
+    set_torus3(0, 0, 0);
+    }  
   
   unordered_map<coord, int> canonical_hash;
   vector<coord> canonical_seq;

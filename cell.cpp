@@ -435,7 +435,7 @@ EX int celldist(cell *c) {
   if(fulltorus && WDIM == 2) 
     return get_torus_dist(decodeId(c->master));
   if(nil) return DISTANCE_UNKNOWN;
-  if(euwrap)
+  if(euwrap && WDIM == 2)
     return torusconfig::cyldist(decodeId(c->master), 0);
   if(masterless)
     return eudist(decodeId(c->master));
