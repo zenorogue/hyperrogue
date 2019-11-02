@@ -715,9 +715,11 @@ EX void cast() {
   if(true) {
     manual_celllister cl;
     cl.add(cs);
+    bool optimize = !isWall3(cs);
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
       if(racing::on && i > 0 && c->wall == waBarrier) continue;
+      if(optimize && isWall3(c)) continue;
       forCellCM(c2, c) {
         if(rays_generate) setdist(c2, 7, c);
         cl.add(c2);
