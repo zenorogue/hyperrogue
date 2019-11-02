@@ -34,7 +34,7 @@ EX int max_cells = 2048;
 EX bool rays_generate = true;
 
 ld& exp_decay_current() {
-  return (sol || hyperbolic) ? exp_decay_exp : exp_decay_poly;
+  return (solnih || hyperbolic) ? exp_decay_exp : exp_decay_poly;
   }
 
 int& max_iter_current() {
@@ -43,7 +43,7 @@ int& max_iter_current() {
   }
 
 ld& maxstep_current() {
-  if(sol) return maxstep_sol;
+  if(solnih) return maxstep_sol;
   else return maxstep_nil;
   }
 
@@ -56,7 +56,7 @@ EX bool available() {
   if(WDIM == 2) return false;
   if(hyperbolic && pmodel == mdPerspective && !penrose)
     return true;
-  if((sol || nil) && pmodel == mdGeodesic)
+  if((solnih || nil) && pmodel == mdGeodesic)
     return true;
   if(euclid && pmodel == mdPerspective && !binarytiling)
     return true;
@@ -379,7 +379,15 @@ void enable_raycaster() {
       "  position = v;\n";
     else if(nonisotropic) {
     
-      if(sol) fsh += 
+      if(sol && nih) fsh += 
+        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "  return vec4(-(vel.z*tra.x + vel.x*tra.z)*log(2.), (vel.z*tra.y + vel.y * tra.z)*log(3.), vel.x*tra.x * exp(2.*log(2.)*pos.z)*log(2.) - vel.y * tra.y * exp(-2.*log(3.)*pos.z)*log(3.), 0.);\n"
+        "  }\n";
+      else if(nih) fsh += 
+        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "  return vec4((vel.z*tra.x + vel.x*tra.z)*log(2.), (vel.z*tra.y + vel.y * tra.z)*log(3.), -vel.x*tra.x * exp(-2.*log(2.)*pos.z)*log(2.) - vel.y * tra.y * exp(-2.*log(3.)*pos.z)*log(3.), 0.);\n"
+        "  }\n";
+      else if(sol) fsh += 
         "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
         "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
         "  }\n";
@@ -390,7 +398,7 @@ void enable_raycaster() {
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
       
-      if(sol) fsh += "uniform float uBinaryWidth;\n";
+      if(solnih) fsh += "uniform float uBinaryWidth;\n";
       
       fmain += 
         "  dist = next < minstep ? 2.*next : next;\n";
@@ -411,7 +419,7 @@ void enable_raycaster() {
                 
       if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
       
-      if(sol) fmain +=
+      if(solnih) fmain +=
         "vec4 acc = christoffel(position, tangent, tangent);\n"
         "vec4 pos2 = position + tangent * dist / 2.;\n"
         "vec4 tan2 = tangent + acc * dist / 2.;\n"
@@ -459,7 +467,9 @@ void enable_raycaster() {
       fmain +=
         "if(next >= minstep) {\n";
       
-      if(sol) fmain +=
+      if(nih) fmain +=
+          "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > .5) {\n";
+      else if(sol) fmain +=
           "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > log(2.)/2.) {\n";
       else fmain +=
           "if(abs(nposition.x) > .5 || abs(nposition.y) > .5 || abs(rz) > .5) {\n";
@@ -471,13 +481,27 @@ void enable_raycaster() {
           "}\n"
         "else {\n";
       
-      if(sol) fmain +=
+      if(solnih) {
+        if(sol && !nih) fmain +=
           "if(nposition.x > uBinaryWidth) which = 0;\n"
           "if(nposition.x <-uBinaryWidth) which = 4;\n"
           "if(nposition.y > uBinaryWidth) which = 1;\n"
-          "if(nposition.y <-uBinaryWidth) which = 5;\n"
+          "if(nposition.y <-uBinaryWidth) which = 5;\n";
+        if(nih) fmain += 
+          "if(nposition.x > uBinaryWidth) which = 0;\n"
+          "if(nposition.x <-uBinaryWidth) which = 2;\n"
+          "if(nposition.y > uBinaryWidth) which = 1;\n"
+          "if(nposition.y <-uBinaryWidth) which = 3;\n";
+        if(sol && nih) fmain += 
+          "if(nposition.z > .5) which = nposition.x > 0. ? 5 : 4;\n"
+          "if(nposition.z <-.5) which = nposition.y > uBinaryWidth/3. ? 8 : nposition.y < -uBinaryWidth/3. ? 6 : 7;\n";
+        if(nih && !sol) fmain += 
+          "if(nposition.z > .5) which = 4;\n"
+          "if(nposition.z < -.5) which = (nposition.y > uBinaryWidth/3. ? 9 : nposition.y < -uBinaryWidth/3. ? 5 : 7) + (nposition.x>0.?1:0);\n";
+        if(sol && !nih) fmain += 
           "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
           "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
+        }
       else fmain +=
           "if(nposition.x > .5) which = 3;\n"
           "if(nposition.x <-.5) which = 0;\n"
@@ -596,10 +620,17 @@ void enable_raycaster() {
         "  tangent = xpush(x) * xtan;\n"
         "  continue;\n"
         "  }\n";
-      if(sol) fmain += 
+      if(sol && !nih) fmain += 
         "  if(reflect) {\n"
         "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
         "    else if(which == 1 || which == 5) tangent.y = -tangent.y;\n"
+        "    else tangent.z = -tangent.z;\n"
+        "    continue;\n"
+        "    }\n";
+      else if(nih) fmain += 
+        "  if(reflect) {\n"
+        "    if(which == 0 || which == 2) tangent.x = -tangent.x;\n"
+        "    else if(which == 1 || which == 3) tangent.y = -tangent.y;\n"
         "    else tangent.z = -tangent.z;\n"
         "    continue;\n"
         "    }\n";
@@ -835,7 +866,7 @@ EX void cast() {
   glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
 
   if(o->uBinaryWidth != -1)
-    glUniform1f(o->uBinaryWidth, vid.binary_width * log(2) / 2);
+    glUniform1f(o->uBinaryWidth, vid.binary_width/2 * (nih?1:log(2)));
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
   if(o->uBLevel != -1)
