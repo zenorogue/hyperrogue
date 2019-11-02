@@ -1001,6 +1001,9 @@ int readArgs() {
     PHASEFROM(2);
     want_use = 1;
     }
+  else if(argis("-ray-out")) {
+    PHASEFROM(2); shift(); color_out_of_range = arghex();
+    }
   else if(argis("-ray-comp")) {
     PHASEFROM(2);
     comparison_mode = true;
