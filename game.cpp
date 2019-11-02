@@ -856,7 +856,7 @@ bool ghostmove(eMonster m, cell* to, cell* from) {
   if((m == moWitchGhost || m == moWitchWinter) && to->land != laPower)
     return false;
   if(isGhost(m))
-    for(int i=0; i<to->type; i++) {
+    for(int i=0; i<to->type; i++) if(to->move(i)) {
       if(inmirror(to->move(i))) return false;
       if(to->move(i) && to->move(i) != from && isGhost(to->move(i)->monst) &&
         (to->move(i)->monst == moFriendlyGhost) == (m== moFriendlyGhost))
