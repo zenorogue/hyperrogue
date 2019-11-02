@@ -1588,8 +1588,11 @@ EX namespace patterns {
       #endif
       case 'g':
         return canvasback;
-      case 'r':
-        return hrand(0x1FFFFFF + 1);
+      case 'r': {
+        color_t r = hrand(0x1FFFFFF + 1);
+        if(c == cwt.at) r &= 0xFFFFFF;
+        return r;
+        }
       case '^': {
         int x = c->master->fieldval & 4095;
         int y = (c->master->fieldval >> 12) & 4095;
