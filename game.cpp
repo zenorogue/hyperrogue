@@ -8180,7 +8180,8 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
         }
 
       if(cwt.at->item == itOrbYendor) {        
-        addMessage(XLAT("The Orb of Yendor is locked in with powerful magic."));
+        if(markOrb(itOrbFish) || markOrb(itOrbAether) || gravity_state) goto escape;
+        if(!checkonly) addMessage(XLAT("The Orb of Yendor is locked in with powerful magic."));
         return false;
         }
 
@@ -8195,7 +8196,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
       goto boatjump;
       }
     
-    if(!c2->monst && cwt.at->wall == waBoat && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
+    if(!c2->monst && cwt.at->wall == waBoat && cwt.at->item != itOrbYendor && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
 
       if(havePushConflict(cwt.at, checkonly)) return false;
       if(monstersnear(c2,NULL,moPlayer,NULL,cwt.at)) {
