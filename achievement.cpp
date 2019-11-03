@@ -180,7 +180,7 @@ void achievement_gain(const char* s, char flags IS(0)) {
 #endif
 
 // gain the achievement for collecting a number of 'it'.
-EX void achievement_collection(eItem it, int prevgold, int newgold) {
+EX void achievement_collection(eItem it) {
   if(cheater) return;
   if(randomPatternsMode) return;
   int q = items[it];

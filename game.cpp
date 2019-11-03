@@ -3635,13 +3635,62 @@ EX void updateHi(eItem it, int v) {
 
 EX void gainItem(eItem it) {
   int g = gold();
+  bool lhu = landUnlocked(laHell);
   items[it]++; if(it != itLotus) updateHi(it, items[it]);
   if(it == itRevolver && items[it] > 6) items[it] = 6;
-  achievement_collection(it, gold(), g);
+  achievement_collection(it);
   multi::treasures[multi::cpid]++;
 #if CAP_DAILY
     if(daily::on) achievement_final(false);
 #endif
+
+  int g2 = gold();
+  if(items[itFireShard] && items[itAirShard] && items[itWaterShard] && items[itEarthShard]) {
+    items[itFireShard]--;
+    items[itAirShard]--;
+    items[itWaterShard]--;
+    items[itEarthShard]--;
+    gainItem(itElemental);
+    gainItem(itElemental);
+    gainItem(itElemental);
+    gainItem(itElemental);
+    addMessage(XLAT("You construct some Elemental Gems!", it) + itemcounter(items[itElemental]));
+    }          
+
+  if(it == itBounty) 
+    items[itRevolver] = 6;
+      
+  if(it == itHyperstone && items[itHyperstone] == 10)
+    achievement_victory(true);
+
+  if(chaosmode && gold() >= 300 && !chaosAchieved) {
+    achievement_gain("CHAOS", rg::chaos);
+    chaosAchieved = true;
+    }
+
+#if ISMOBILE==1
+  if(g < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)
+    addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
+#endif
+  
+#define IF(x) if(g < (x) && g2 >= x && !peace::on)
+
+  IF(R60/4) 
+    addMessage(XLAT("Collect treasure to access more different lands..."));
+  IF(R30)
+    addMessage(XLAT("You feel that you have enough treasure to access new lands!"));
+  IF(R30*3/2)
+    addMessage(XLAT("Collect more treasures, there are still more lands waiting..."));
+  IF(R60)
+    addMessage(XLAT("You feel that the stars are right, and you can access R'Lyeh!"));
+  IF(R30*5/2)
+    addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
+  IF(R10 * 9) 
+    addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
+  if(landUnlocked(laHell) && !lhu) {
+    addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
+    addMessage(XLAT("And the Orbs of Yendor await!"));
+    }
   }
 
 EX string itemcounter(int qty) {
@@ -3652,9 +3701,9 @@ EX void gainShard(cell *c2, const char *msg) {
   invismove = false;
   string s = XLAT(msg);
   if(is_mirrorland(c2) && !peace::on) {
+     collectMessage(c2, itShard);
      gainItem(itShard);
      s += itemcounter(items[itShard]);
-     collectMessage(c2, itShard);
      }
   addMessage(s);
   c2->wall = waNone;
@@ -7155,7 +7204,6 @@ EX void pickupMovedItems(cell *c) {
 
 EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
 
-  int pg = gold();
   bool dopickup = true;
   bool had_choice = false;
   
@@ -7276,7 +7324,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     items[itHolyGrail]++;
     addMessage(XLAT("Congratulations! You have found the Holy Grail!"));
     if(!eubinary) c2->master->alt->emeraldval |= GRAIL_FOUND;
-    achievement_collection(c2->item, pg, gold());
+    achievement_collection(c2->item);
     }
   else if(c2->item == itKey) {
     playSound(c2, "pickup-key");
@@ -7306,11 +7354,9 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     halloween::getTreat(c2);
     }   
   else {
-    bool lhu = landUnlocked(laHell);
     if(c2->item == itBarrow) 
       for(int i=0; i<c2->landparam; i++) gainItem(c2->item);
     else if(c2->item) gainItem(c2->item);
-    int g2 = gold();
     
     if(c2->item) {
       char ch = iinf[c2->item].glyph;
@@ -7318,53 +7364,6 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
       else if(ch == '$' || ch == 'x') playSound(c2, "pickup-gold");
       else if(ch == '%' || ch == ';') playSound(c2, "pickup-potion");
       else playSound(c2, "pickup-scroll");
-      }
-
-    if(items[itFireShard] && items[itAirShard] && items[itWaterShard] && items[itEarthShard]) {
-      items[itFireShard]--;
-      items[itAirShard]--;
-      items[itWaterShard]--;
-      items[itEarthShard]--;
-      gainItem(itElemental);
-      gainItem(itElemental);
-      gainItem(itElemental);
-      gainItem(itElemental);
-      addMessage(XLAT("You construct some Elemental Gems!", c2->item) + itemcounter(items[itElemental]));
-      }          
-
-    if(c2->item == itBounty) 
-      items[itRevolver] = 6;
-        
-    if(c2->item == itHyperstone && items[itHyperstone] == 10)
-      achievement_victory(true);
-
-    if(chaosmode && gold() >= 300 && !chaosAchieved) {
-      achievement_gain("CHAOS", rg::chaos);
-      chaosAchieved = true;
-      }
-
-#if ISMOBILE==1
-    if(pg < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)
-      addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
-#endif
-    
-#define IF(x) if(pg < (x) && g2 >= x && !peace::on)
-
-    IF(R60/4) 
-      addMessage(XLAT("Collect treasure to access more different lands..."));
-    IF(R30)
-      addMessage(XLAT("You feel that you have enough treasure to access new lands!"));
-    IF(R30*3/2)
-      addMessage(XLAT("Collect more treasures, there are still more lands waiting..."));
-    IF(R60)
-      addMessage(XLAT("You feel that the stars are right, and you can access R'Lyeh!"));
-    IF(R30*5/2)
-      addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
-    IF(R10 * 9) 
-      addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
-    if(landUnlocked(laHell) && !lhu) {
-      addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
-      addMessage(XLAT("And the Orbs of Yendor await!"));
       }
     }
   
@@ -8415,7 +8414,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
         playSound(c2, playergender() ? "heal-princess" : "heal-prince");
         addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
         c2->stuntime = 2;
-        achievement_collection(itBabyTortoise, 0, 0);
+        achievement_collection(itBabyTortoise);
         }
       else {
         eMonster m = c2->monst;

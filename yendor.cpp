@@ -733,7 +733,6 @@ EX namespace yendor {
     }
     
   EX void collected(cell* c2) {
-    int pg = gold();
     playSound(c2, "tada");
     items[itOrbShield] += 31;
     for(int i=0; i<isize(yendor::yi); i++)
@@ -768,7 +767,7 @@ EX namespace yendor {
         }
       }
     addMessage(XLAT("CONGRATULATIONS!"));
-    achievement_collection(itOrbYendor, pg, gold());
+    achievement_collection(itOrbYendor);
     achievement_victory(false);
     }
   
