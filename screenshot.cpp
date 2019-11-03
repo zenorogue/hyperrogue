@@ -1172,6 +1172,7 @@ void rug() {
   rug::apply_rotation(cspin(1, 2, ticks / 3000.));
   gamescreen(2);
   rug::apply_rotation(cspin(1, 2, -ticks / 3000.));
+  if(!rug::rugged) current = null_animation;
   }
 #endif
 

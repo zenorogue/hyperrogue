@@ -3595,3 +3595,4 @@ Other:
 - hell unlock message on 10th shard
 - levellines feature: shade rendered output by Z coordinate (nice in Hypersian Rug mode)
 - fixed the overlay in the texture mode (also disabled in ray -- not implemented)
+- fixed the rug becoming black on some computers when resizing window or during the start animation

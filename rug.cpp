@@ -1287,6 +1287,8 @@ void drawTriangle(triangle& t) {
 EX struct renderbuffer *glbuf;
 
 EX void prepareTexture() {
+  ensure_glbuf();
+  if(!glbuf) { rug::close(); return; }
   resetbuffer rb;
   
   dynamicval<eStereo> d(vid.stereo_mode, sOFF);
@@ -1446,18 +1448,29 @@ EX void drawRugScene() {
 //--------------
 
 EX transmatrix currentrot;
-    
+
+EX void close_glbuf() {
+  delete glbuf;
+  glbuf = nullptr;
+  }
+
+EX void ensure_glbuf() {
+  if(glbuf) return;
+  glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
+  if(!glbuf->valid) {
+    addMessage(XLAT("Failed to enable"));
+    close_glbuf();
+    return;
+    }
+  }
+
 EX void reopen() {
   if(rugged) return;
   rugdim = 2 * GDIM - 1;
   when_enabled = 0;
   GLERR("before init");
-  glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
-  if(!glbuf->valid) {
-    addMessage(XLAT("Failed to enable"));
-    delete glbuf;
-    return;
-    }
+  ensure_glbuf();
+  if(!glbuf) { rugged = false; return; }
   rugged = true;
   if(renderonce) prepareTexture();
   if(!rugged) return;
@@ -1527,7 +1540,7 @@ EX void clear_model() {
 EX void close() {
   if(!rugged) return;
   rugged = false;
-  delete glbuf;
+  close_glbuf();
   finger_center = NULL;
   }
 

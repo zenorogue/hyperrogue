@@ -600,10 +600,7 @@ EX void resetGL() {
   matched_programs.clear();
   glhr::current_glprogram = nullptr;
   ray::reset_raycaster();
-  if(rug::rugged) {
-    rug::close();
-    rug::reopen();
-    }
+  if(rug::glbuf) rug::close_glbuf();
   }
 
 #endif
