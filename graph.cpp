@@ -3867,6 +3867,7 @@ EX void fallingMonsterAnimation(cell *c, eMonster m, int id IS(multi::cpid)) {
 
 void celldrawer::draw_fallanims() {
   cell*& c = cw.at;
+  poly_outline = OUTLINE_NONE;
   if(fallanims.count(c)) {
      int q = isize(ptds);
      int maxtime = euclid || sphere ? 20000 : 1500;
