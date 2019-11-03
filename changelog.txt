@@ -3581,3 +3581,9 @@ Other:
 - ray: configurable reflective walls; fixed Euclidean bitruncated honeycomb
 - fixed the crashes on generation of 3D elliptic spaces and 3D Crystal
 - fixed confusion when moving through 3D elliptic spaces
+
+2019-11-02 22:44 Version 11.2h:
+- underlying space view is now available in product space
+- raycasting: product spaces, stretched spaces, horospherical honeycombs
+- bugfixes in periodic Nil
+- alternate 3D races (periodic spaces, etc.)
