@@ -678,11 +678,11 @@ EX void vertices(const vector<glvertex>& v, int vshift IS(0)) {
     if(&v[0] == current_vertices) return;
     current_vertices = buffered_vertices;
     glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
-    glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+    glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
     return;
     }
   bindbuffer(v);
-  glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
   #else
   if(current_vertices == &v[vshift]) return;
   current_vertices = &v[vshift];
@@ -714,8 +714,8 @@ EX void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, i
 EX void prepare(vector<colored_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
-  PTR(glhr::aPosition, SHDIM, coords);
-  PTR(glhr::aColor, 4, color);
+  PTR(aPosition, SHDIM, coords);
+  PTR(aColor, 4, color);
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
@@ -732,8 +732,8 @@ EX void prepare(vector<colored_vertex>& v) {
 EX void prepare(vector<textured_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
-  PTR(glhr::aPosition, SHDIM, coords);
-  PTR(glhr::aTexture, 2, texture);
+  PTR(aPosition, SHDIM, coords);
+  PTR(aTexture, 2, texture);
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
@@ -751,9 +751,9 @@ EX void prepare(vector<textured_vertex>& v) {
 EX void prepare(vector<ct_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
-  PTR(glhr::aPosition, SHDIM, coords);
-  PTR(glhr::aColor, 4, color);
-  PTR(glhr::aTexture, 2, texture);
+  PTR(aPosition, SHDIM, coords);
+  PTR(aColor, 4, color);
+  PTR(aTexture, 2, texture);
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
@@ -778,7 +778,7 @@ EX void store_in_buffer(vector<glvertex>& v) {
   printf("storing %d in buffer: %p\n", isize(v), &v[0]);
   current_vertices = buffered_vertices = &v[0];
   glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
-  glVertexAttribPointer(glhr::aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+  glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
   glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(glvertex), &v[0], GL_STATIC_DRAW);
   printf("Stored.\n");
 #endif
