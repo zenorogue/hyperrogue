@@ -1096,83 +1096,46 @@ void draw_s2xe0(dqi_poly *p) {
     }
   
   glcoords.resize(p->cnt);
-  if(p->flags & POLY_TRIANGLES) {
-    for(int i=0; i<p->cnt; i+=3) {
-      int nbad = 0;
-      for(int j=i; j<i+3; j++) {
-        if(pd[j].bad >= 1) nbad = max(nbad, 0);
-        if(pd[j].bad >= 2) nbad = 2;
-        }
-      
-      int g = (pd[i].distance > M_PI/2 || pd[i+1].distance >= M_PI/2 || pd[i+2].distance >= M_PI/2) ? 2 : 1;
-        
-      auto c1 = crossdot(pd[i+0].direction, pd[i+1].direction);
-      auto c2 = crossdot(pd[i+1].direction, pd[i+2].direction);
-      auto c3 = crossdot(pd[i+2].direction, pd[i+0].direction);
-      if(c1.second < 0 || c2.second < 0 || c3.second < 0) nbad = max(nbad, g);
-      if(c1.first > 0 && c2.first > 0 && c3.first > 0) nbad = max(nbad, g);
-      if(c1.first < 0 && c2.first < 0 && c3.first < 0) nbad = max(nbad, g);
-      pd[i].bad = pd[i+1].bad = pd[i+2].bad = nbad;
+  for(auto c: pd) if(c.bad == 2) return;
+  bool no_gens = false;
+  for(int i=0; i<p->cnt; i++) {
+    auto &c1 = pd[i];
+    auto &c0 = pd[i==0?p->cnt-1 : i-1];
+    if(c1.distance > M_PI/2 && c0.distance > M_PI/2 && crossdot(c0.direction, c1.direction).second < 0) return;
+    if(c1.bad == 2) return;
+    if(c1.bad == 1) no_gens = true;
+    }
+  
+  if(!no_gens) {
+
+    vector<ld> angles(p->cnt);
+    for(int i=0; i<p->cnt; i++) {
+      angles[i] = atan2(pd[i].direction[1], pd[i].direction[0]);
       }
-    
-    for(int gen=-maxgen; gen<=maxgen; gen++) {
-      for(int i=0; i<p->cnt; i++) {
-        auto& cur = pd[i];
-        if(cur.bad >= (gen ? 1 : 2)) glcoords[i] = junk;
-        else {
-          hyperpoint h;
-          ld d = cur.distance + 2 * M_PI * gen;
-          h[0] = cur.direction[0] * d;
-          h[1] = cur.direction[1] * d;
-          h[2] = cur.z;
-          glcoords[i] = glhr::pointtogl(h);
-          }
-        }
-      npoly.gldraw();
+    sort(angles.begin(), angles.end());
+    angles.push_back(angles[0] + 2 * M_PI);
+    bool ok = false;
+    for(int i=1; i<isize(angles); i++)
+      if(angles[i] >= angles[i-1] + M_PI) ok = true;
+    if(!ok) {
+      for(auto &c: pd) if(c.distance > M_PI/2) return;
+      no_gens = true;
       }
     }
-  else {
-    for(auto c: pd) if(c.bad == 2) return;
-    bool no_gens = false;
+  
+  int g = no_gens ? 0 : maxgen;
+
+  for(int gen=-g; gen<=g; gen++) {
     for(int i=0; i<p->cnt; i++) {
-      auto &c1 = pd[i];
-      auto &c0 = pd[i==0?p->cnt-1 : i-1];
-      if(c1.distance > M_PI/2 && c0.distance > M_PI/2 && crossdot(c0.direction, c1.direction).second < 0) return;
-      if(c1.bad == 2) return;
-      if(c1.bad == 1) no_gens = true;
+      auto& cur = pd[i];
+      ld d = cur.distance + 2 * M_PI * gen;
+      hyperpoint h;
+      h[0] = cur.direction[0] * d;
+      h[1] = cur.direction[1] * d;
+      h[2] = cur.z;
+      glcoords[i] = glhr::pointtogl(h);
       }
-    
-    if(!no_gens) {
-
-      vector<ld> angles(p->cnt);
-      for(int i=0; i<p->cnt; i++) {
-        angles[i] = atan2(pd[i].direction[1], pd[i].direction[0]);
-        }
-      sort(angles.begin(), angles.end());
-      angles.push_back(angles[0] + 2 * M_PI);
-      bool ok = false;
-      for(int i=1; i<isize(angles); i++)
-        if(angles[i] >= angles[i-1] + M_PI) ok = true;
-      if(!ok) {
-        for(auto &c: pd) if(c.distance > M_PI/2) return;
-        no_gens = true;
-        }
-      }
-    
-    int g = no_gens ? 0 : maxgen;
-
-    for(int gen=-g; gen<=g; gen++) {
-      for(int i=0; i<p->cnt; i++) {
-        auto& cur = pd[i];
-        ld d = cur.distance + 2 * M_PI * gen;
-        hyperpoint h;
-        h[0] = cur.direction[0] * d;
-        h[1] = cur.direction[1] * d;
-        h[2] = cur.z;
-        glcoords[i] = glhr::pointtogl(h);
-        }
-      npoly.gldraw();
-      }
+    npoly.gldraw();
     }
   }
 EX }
