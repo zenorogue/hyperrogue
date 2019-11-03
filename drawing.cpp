@@ -1065,6 +1065,7 @@ void draw_s2xe0(dqi_poly *p) {
   npoly.offset = 0;
   npoly.tab = &glcoords;
   npoly.V = Id;
+  npoly.flags &= ~ (POLY_INVERSE | POLY_FORCE_INVERTED);
   set_width(1);
   glcoords.clear();
 
