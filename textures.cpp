@@ -652,7 +652,10 @@ bool newmove = false;
 vector<glhr::textured_vertex> rtver(4);
 
 void texture_config::drawRawTexture() {
-  glhr::be_textured();
+  glflush();
+  current_display->next_shader_flags = GF_TEXTURE;
+  dynamicval<eModel> m(pmodel, mdPixel);
+  current_display->set_all(0);
   glhr::color2(0xFFFFFF20);
   glBindTexture(GL_TEXTURE_2D, config.data.textureid);
   for(int i=0; i<4; i++) {
