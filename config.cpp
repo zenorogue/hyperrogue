@@ -1587,7 +1587,7 @@ EX void show3D() {
     }
   
   if(GDIM == 3) {
-    dialog::addItem(XLAT("configure raycasting"), 'C');
+    dialog::addItem(XLAT("configure raycasting"), 'A');
     dialog::add_action_push(ray::configure);
     }
 
