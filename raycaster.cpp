@@ -209,7 +209,8 @@ void enable_raycaster() {
    fsh += 
        "int s = uWallstart[which];\n"
        "int e = uWallstart[which+1];\n"
-       "for(int i=s; i<e; i++) {\n"
+       "for(int ix=0; ix<16; ix++) {\n"
+         "int i = s+ix; if(i >= e) break;\n"
          "vec2 v = vec2(dot(uWallX[i], pos), dot(uWallY[i], pos));\n"
          "if(v.x >= 0. && v.y >= 0. && v.x + v.y <= 1.) return vec2(v.x+v.y, v.x-v.y);\n"
          "}\n"
