@@ -2011,16 +2011,14 @@ EX namespace dq {
     drawqueue.emplace(h, T, band_shift);
     }  
 
-  #if MAXMDIM >= 4
   EX set<int> visited_by_matrix;
   EX void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
     if(!h) return;
-    int b = reg3::bucketer(tC0(T));
+    int b = bucketer(tC0(T));
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue.emplace(h, T, band_shift);
     }
-  #endif
   EX }
 
 EX bool do_draw(cell *c) {

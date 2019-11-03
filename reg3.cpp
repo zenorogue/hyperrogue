@@ -28,14 +28,6 @@ EX namespace reg3 {
 
   map<int, int> close_distances;
 
-  EX int bucketer(ld x) {
-    return int(x * 10 + 100000.5) - 100000;
-    }
-  
-  EX int bucketer(hyperpoint h) {
-    return bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
-    }
-  
   EX int loop;
   EX int face;
 
@@ -288,7 +280,7 @@ EX namespace reg3 {
     
     void seek(set<int>& seen_matrices, set<int>& seen_codes, const transmatrix& at, int ccode, const hyperpoint checker) {
       if(hdist0(tC0(at)) > 4) return;
-      int b = reg3::bucketer(tC0(at));
+      int b = bucketer(tC0(at));
       if(seen_matrices.count(b)) return;
       seen_matrices.insert(b);
       for(int a=0; a<perm_group; a++) {

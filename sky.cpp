@@ -2,6 +2,7 @@
 
 namespace hr {
 
+#if MAXMDIM >= 4
 EX ld camera_level;
 
 EX int get_skybrightness(int mul IS(1)) {
@@ -295,5 +296,5 @@ void celldrawer::draw_ceiling() {
       }
     }
   }
-
+#endif
 }

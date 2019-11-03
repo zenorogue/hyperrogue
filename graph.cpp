@@ -3791,6 +3791,8 @@ EX int ceiling_category(cell *c) {
     }
   }
 
+#endif
+
 EX void set_detail_level(const transmatrix& V) {
   ld dist0 = hdist0(tC0(V)) - 1e-6;
   if(vid.use_smart_range) detaillevel = 2;
@@ -3806,8 +3808,6 @@ EX void set_detail_level(const transmatrix& V) {
     queuepoly(V, cgi.shHeptaMarker, darkena(col & 0xFFFFFF, 0, 0xFF));
     }
   }
-
-#endif
 
 struct flashdata {
   int t;
@@ -4455,7 +4455,9 @@ EX void drawthemap() {
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";
   
+  #if MAXMDIM >= 4
   ray::in_use = ray::requested();
+  #endif
   no_wall_rendering = ray::in_use;
   // ray::comparison_mode = true;
   if(ray::comparison_mode) no_wall_rendering = false;

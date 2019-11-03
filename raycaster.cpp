@@ -11,6 +11,8 @@ namespace hr {
 
 EX namespace ray {
 
+#if MAXMDIM >= 4
+
 /** texture IDs */
 GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0;
 
@@ -1046,6 +1048,13 @@ int readArgs() {
 
 auto hook = addHook(hooks_args, 100, readArgs);
 #endif
+#endif
 
+#if MAXMDIM == 3
+EX always_false in_use;
+EX always_false comparison_mode;
+EX void reset_raycaster() { }
+EX void cast() { }
+#endif
 EX }
 }
