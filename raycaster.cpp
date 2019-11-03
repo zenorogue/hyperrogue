@@ -70,7 +70,9 @@ EX bool available() {
 /** do we want to use the raycaster? */
 EX bool requested() {
   if(!want_use) return false;
+  #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive) return false;
+  #endif
   if(!available()) return false;
   if(want_use == 2) return true;
   return racing::on || quotient;

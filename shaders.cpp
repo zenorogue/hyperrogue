@@ -168,6 +168,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     else
       distfun = "length(t.xyz)";
     switch(cgclass) {
+      #if CAP_SOLV
       case gcSolNIH:
         switch(geometry) {
           case gSol:
@@ -184,6 +185,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
           }            
         treset = true;
         break;
+      #endif
       case gcNil:
         vsh += nilv::nilshader;
         break;
