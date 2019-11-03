@@ -3587,3 +3587,11 @@ Other:
 - raycasting: product spaces, stretched spaces, horospherical honeycombs
 - bugfixes in periodic Nil
 - alternate 3D races (periodic spaces, etc.)
+
+2019-11-03 14:46 Version 11.2i:
+- fixed unfilled shapes when rendering S2xE
+- removed outlines from falling stuff
+- fixed some issues with preventing Orbs of Yendor from boat moving: 'locked with powerful magic' message spam; no longer movable through land with OoWater; you can jump out of an OoY boat using OoFish/OoAether/OoGravity
+- hell unlock message on 10th shard
+- levellines feature: shade rendered output by Z coordinate (nice in Hypersian Rug mode)
+- fixed the overlay in the texture mode (also disabled in ray -- not implemented)
