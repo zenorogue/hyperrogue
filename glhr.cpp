@@ -253,7 +253,7 @@ struct GLprogram {
   GLuint vertShader, fragShader;
 
   GLint uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uPP;
-  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations;
+  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines;
   
   flagtype shader_flags;
   
@@ -318,7 +318,9 @@ GLprogram::GLprogram(string vsh, string fsh) {
     uPRECX = -1;
     uIterations = -1;
     uAlpha = -1;
-    return;
+    uLevelLines = -1;
+    uFogColor = -1;
+    return;    
     }
   
   _vsh = vsh; _fsh = fsh;
@@ -375,6 +377,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
   uPRECZ = glGetUniformLocation(_program, "PRECZ");
   uIndexSL = glGetUniformLocation(_program, "uIndexSL");
   uIterations = glGetUniformLocation(_program, "uIterations");  
+  uLevelLines = glGetUniformLocation(_program, "uLevelLines");
   }
 
 GLprogram::~GLprogram() {
@@ -581,11 +584,14 @@ EX void full_enable(shared_ptr<GLprogram> p) {
 
 EX void fog_max(ld fogmax, color_t fogcolor) {
   WITHSHADER({
-    glUniform1f(current_glprogram->uFog, 1 / fogmax);
+    if(current_glprogram->uFog != -1)
+      glUniform1f(current_glprogram->uFog, 1 / fogmax);
   
-    GLfloat cols[4];
-    for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
-    glUniform4f(current_glprogram->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+    if(current_glprogram->uFogColor != -1) {
+      GLfloat cols[4];
+      for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
+        glUniform4f(current_glprogram->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+      }
     }, {
     glFogf(GL_FOG_END, fogmax);
     })

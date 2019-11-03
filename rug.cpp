@@ -1365,6 +1365,9 @@ EX void drawRugScene() {
     current_display->set_all(ed);
     eyewidth_translate(ed);
 
+    if(glhr::current_glprogram->uLevelLines != -1)
+      glUniform1f(glhr::current_glprogram->uLevelLines, levellines);
+
     if(vid.stereo_mode == sODS) {
       glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 100)); // 2*M_PI));
       }
@@ -1406,6 +1409,7 @@ EX void drawRugScene() {
       100,
       darkena(backcolor, 0, 0xFF)
       );
+    GLERR("fog_max");
       
     for(int t=0; t<isize(triangles); t++)
       drawTriangle(triangles[t]);
@@ -1417,13 +1421,16 @@ EX void drawRugScene() {
       glDrawArrays(GL_TRIANGLES, 0, isize(ct_array));
       }
 
+    GLERR("rugz");
     if(isize(cp_array) > 0) {
       glhr::prepare(cp_array);
       glLineWidth(lwidth);
       glDrawArrays(GL_LINES, 0, isize(cp_array));
       }
+    GLERR("rugt");
 
     current_display->set_mask(0);
+    GLERR("afterrug");
     }
 
   glEnable(GL_BLEND);
@@ -1885,6 +1892,7 @@ EX void show() {
   dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');
   dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), spatial_rug, 'S');
   dialog::add_action([] () { spatial_rug = !spatial_rug; });
+  edit_levellines('L');
 
 #if CAP_SURFACE  
   if(hyperbolic) {

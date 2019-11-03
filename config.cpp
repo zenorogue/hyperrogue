@@ -1504,6 +1504,28 @@ EX void add_edit_wall_quality(char c) {
     });
   }
 
+EX void edit_levellines(char c) {
+  if(levellines)
+    dialog::addSelItem(XLAT("level lines"), fts(levellines), c);
+  else
+    dialog::addBoolItem(XLAT("level lines"), false, c);
+  dialog::add_action([] {
+    dialog::editNumber(levellines, 0, 100, 0.5, 0, XLAT("level lines"), 
+      XLAT(
+        "This feature superimposes level lines on the rendered screen. These lines depend on the Z coordinate. In 3D hyperbolic the Z coordinate is taken from the Klein model. "
+        "Level lines can be used to observe the curvature: circles correspond to positive curvature, while hyperbolas correspond to negative. See e.g. the Hypersian Rug mode.")
+      );
+    dialog::reaction = ray::reset_raycaster;
+    dialog::extra_options = [] {
+      dialog::addBoolItem(XLAT("disable textures"), disable_texture, 'T');
+      dialog::add_action([] { ray::reset_raycaster(); disable_texture = !disable_texture; });
+      dialog::addItem(XLAT("disable level lines"), 'D');
+      dialog::add_action([] { ray::reset_raycaster(); levellines = 0; popScreen(); });
+      };
+    dialog::bound_low(0);
+    });
+  }
+
 EX void show3D() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1590,7 +1612,9 @@ EX void show3D() {
     dialog::addItem(XLAT("configure raycasting"), 'A');
     dialog::add_action_push(ray::configure);
     }
-
+  
+  edit_levellines('L');
+  
   if(WDIM == 3 || (GDIM == 3 && euclid)) {
     dialog::addSelItem(XLAT("radar range"), fts(vid.radarrange), 'R');
     dialog::add_action([] () {
@@ -2362,6 +2386,15 @@ EX int read_config_args() {
   else if(argis("-msmoff")) {
     PHASEFROM(2); memory_saving_mode = false;
     }
+  else if(argis("-levellines")) {
+    PHASEFROM(2); shift_arg_formula(levellines);
+    }
+  else if(argis("-level-notexture")) {
+    PHASEFROM(2); disable_texture = true;
+    }
+  else if(argis("-level-texture")) {
+    PHASEFROM(2); disable_texture = false;
+    }
   else if(argis("-msens")) {
     PHASEFROM(2); shift_arg_formula(mouseaim_sensitivity);
     }
@@ -2496,6 +2529,7 @@ EX unordered_map<string, ld&> params = {
   {"mgrid", vid.multiplier_grid},
   {"mring", vid.multiplier_ring},
   {"collignon", vid.collignon_parameter},
+  {"levellines", levellines},
   #endif
   };
 

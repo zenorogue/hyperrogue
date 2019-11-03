@@ -1743,6 +1743,7 @@ EX void sortquickqueue() {
   }
 
 EX void quickqueue() {
+  current_display->next_shader_flags = 0;
   spherespecial = 0; 
   reset_projection(); current_display->set_all(0);
   int siz = isize(ptds);
@@ -1932,6 +1933,7 @@ EX hookset<bool()> *hooks_vr_draw_all;
   
 EX void drawqueue() {
   callhooks(hook_drawqueue);
+  current_display->next_shader_flags = 0;
   reset_projection();
   // reset_projection() is not sufficient here, because we need to know shaderside_projection
 

@@ -1078,6 +1078,7 @@ EX void make_floor_textures() {
   dynamicval<bool> a3(vid.always3, false);
   dynamicval<bool> hq(inHighQual, true);
   dynamicval<int> hd(darken, 0);
+  dynamicval<ld> hll(levellines, 0);
   dynamicval<ld> gd(vid.depth, 1);
   dynamicval<ld> gc(vid.camera, 1);
   dynamicval<geometry_information*> dcgip(cgip, cgip);

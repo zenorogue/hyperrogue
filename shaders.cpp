@@ -8,10 +8,14 @@
 #include "hyper.h"
 namespace hr {
 
+EX ld levellines;
+EX bool disable_texture;
+
 #if HDR
 constexpr flagtype GF_TEXTURE  = 1;
 constexpr flagtype GF_VARCOLOR = 2;
 constexpr flagtype GF_LIGHTFOG = 4;
+constexpr flagtype GF_LEVELS   = 8;
 
 constexpr flagtype GF_which    = 15;
 
@@ -56,14 +60,19 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   vsh += "attribute mediump vec4 aPosition;\n";
   varying += "varying mediump vec4 vColor;\n";
 
+  fmain += "gl_FragColor = vColor;\n";
   if(shader_flags & GF_TEXTURE) {
     vsh += "attribute mediump vec2 aTexture;\n";
     varying += "varying mediump vec2 vTexCoord;\n";
     fsh += "uniform mediump sampler2D tTexture;\n";
     vmain += "vTexCoord = aTexture;\n",
-    fmain += "gl_FragColor = vColor * texture2D(tTexture, vTexCoord);\n";
+    fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
     }
-  else fmain += "gl_FragColor = vColor;\n";
+  if(shader_flags & GF_LEVELS) {
+    fsh += "uniform mediump float uLevelLines;\n";
+    varying += "varying mediump vec4 vPos;\n";
+    fmain += "gl_FragColor.rgb *= 0.5 + 0.5 * cos(vPos.z/vPos.w * uLevelLines * 2. * PI);\n";
+    }
   
   if(shader_flags & GF_VARCOLOR) {
     vsh += "attribute mediump vec4 aColor;\n";
@@ -77,7 +86,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(shader_flags & GF_LIGHTFOG) {
     vmain += "float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0); vColor = vColor * fogx + uFogColor * (1.0-fogx);\n";      
     vsh += "uniform mediump float uFog;\n";
-    vsh += "uniform mediump float uFogColor;\n";
+    vsh += "uniform mediump vec4 uFogColor;\n";
     }
 
   string coordinator;
@@ -90,12 +99,18 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   bool skip_t = false;
   
   if(pmodel == mdPixel) {
-    vmain += "vec4 pos = aPosition; pos[3] = 1.0; gl_Position = uP * uMV * pos;\n";
+    vmain += "vec4 pos = aPosition; pos[3] = 1.0;\n";
+    vmain += "pos = uMV * pos;\n";
+    if(shader_flags & GF_LEVELS) vmain += "vPos = pos;\n";  
+    vmain += "gl_Position = uP * pos;\n";
     skip_t = true;
     shader_flags |= SF_PIXELS | SF_DIRECT;
     }
   else if(pmodel == mdManual) {
-    vmain += "gl_Position = uP * uMV * aPosition;\n";
+    vmain += "vec4 pos = uMV * aPosition;\n";
+    if(shader_flags & GF_LEVELS)
+      vmain += "vPos = pos;\n";
+    vmain += "gl_Position = uP * pos;\n";
     skip_t = true;
     shader_flags |= SF_DIRECT;
     }
@@ -228,6 +243,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "uniform mediump float uFogBase;\n"
         "uniform mediump vec4 uFogColor;\n";
       }
+    if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
     vmain += "gl_Position = uP * t;\n";
     }
@@ -269,6 +285,10 @@ void display_data::set_projection(int ed) {
   unsigned id;
   id = geometry;
   id <<= 6; id |= pmodel;
+  if(levellines && pmodel != mdPixel) {
+    shader_flags |= GF_LEVELS;
+    if(disable_texture) shader_flags &=~ GF_TEXTURE;
+    }
   id <<= 6; id |= shader_flags;
   id <<= 6; id |= spherephase;
   id <<= 1; if(vid.consider_shader_projection) id |= 1;
@@ -396,6 +416,10 @@ void display_data::set_projection(int ed) {
   
   if(selected->uAlpha != -1)
     glhr::set_ualpha(vid.alpha);
+
+  if(selected->uLevelLines != -1) {
+    glUniform1f(selected->uLevelLines, levellines);
+    }
 
   if(selected->shader_flags & SF_ORIENT)
     glhr::projection_multiply(model_orientation_gl());

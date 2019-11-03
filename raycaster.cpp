@@ -123,7 +123,7 @@ void enable_raycaster() {
   last_geometry = geometry;
   deg = S7; if(prod) deg += 2;
   if(!our_raycaster) { 
-    bool use_reflect = reflect_val && !nil;
+    bool use_reflect = reflect_val && !nil && !levellines;
 
     string vsh = 
       "attribute vec4 aPosition;\n"
@@ -556,14 +556,18 @@ void enable_raycaster() {
     fmain +=
       "  vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
       "  vec4 col = texture2D(tWallcolor, u);\n"
-      "  if(col[3] > 0.0) {\n"
+      "  if(col[3] > 0.0) {\n";
+    
+    if(!(levellines && disable_texture)) fmain +=
       "    vec2 inface = map_texture(position, which);\n"
       "    vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
       "    if(tmap.z == 0.) col.xyz *= min(1., (1.-inface.x)/ tmap.x);\n"
       "    else {\n"
       "      vec2 inface2 = tmap.xy + tmap.z * inface;\n"
       "      col.xyz *= texture2D(tTexture, inface2).rgb;\n"
-      "      }\n"
+      "      }\n";
+
+    fmain +=
       "    float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n"
       "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
     
@@ -593,6 +597,14 @@ void enable_raycaster() {
     else fmain +=
       "      float z = at0.z * go;\n"
       "      float w = 1.;\n";
+
+    if(levellines) {
+      if(hyperbolic) 
+        fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z/cosh(go) * uLevelLines * 2. * PI);\n";
+      else
+        fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z * uLevelLines * 2. * PI);\n";
+      fsh += "uniform float uLevelLines;\n";
+      }
 
     fmain +=    
       "      gl_FragDepth = (-float("+fts(vnear+vfar)+")+w*float("+fts(2*vnear*vfar)+")/z)/float("+fts(vnear-vfar)+");\n"
@@ -866,6 +878,8 @@ EX void cast() {
   glUniform4fv(o->uWallX, isize(wallx), &wallx[0][0]);
   glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
 
+  if(o->uLevelLines != -1)
+    glUniform1f(o->uLevelLines, levellines);
   if(o->uBinaryWidth != -1)
     glUniform1f(o->uBinaryWidth, vid.binary_width/2 * (nih?1:log(2)));
   if(o->uPLevel != -1)
@@ -980,6 +994,8 @@ EX void configure() {
         });
       };
     });
+
+  edit_levellines('L');
   
   dialog::addBack();
   dialog::display();
