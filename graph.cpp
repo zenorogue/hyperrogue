@@ -3562,7 +3562,7 @@ EX int get_darkval(cell *c, int d) {
   const int darkval_hh[14] = {0,0,0,1,1,1,2,2,2,3,3,3,1,0};
   const int darkval_hrec[7] = {0,0,2,4,2,4,0};
   const int darkval_sol[8] = {0,2,4,4,0,2,4,4};
-  const int darkval_asonov[12] = {0,2,0,2,4,5,0,2,0,2,4,5};
+  const int darkval_arnold[12] = {0,2,0,2,4,5,0,2,0,2,4,5};
   const int darkval_penrose[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
   const int darkval_nil[8] = {6,6,0,3,6,6,0,3};
   const int darkval_nih[11] = {0,2,0,2,4,6,6,6,6,6,6};
@@ -3573,7 +3573,7 @@ EX int get_darkval(cell *c, int d) {
   if(geometry == gHoroHex) return darkval_hh[d];
   if(geometry == gHoroRec) return darkval_hrec[d];
   if(penrose) return darkval_penrose[d];
-  if(geometry == gArnoldCat) return darkval_asonov[d];
+  if(geometry == gArnoldCat) return darkval_arnold[d];
   if(sol) return darkval_sol[d];
   if(nih) return darkval_nih[d];
   if(binarytiling) return darkval_hbt[d];

@@ -48,12 +48,8 @@ EX namespace nisot {
 EX namespace solnihv {
 
   EX eGeometry geom() {
-    switch(geometry) {    
-      case gSol: case gArnoldCat:
-        return gSol;
-      default:
-        return geometry;
-      }
+    if(asonov::in()) return gSol;
+    else return geometry;
     }
 
   #if HDR

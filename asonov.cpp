@@ -15,6 +15,8 @@ namespace hr {
 
 EX namespace asonov {
 
+EX bool in() { return geometry == gArnoldCat; }
+
 EX hyperpoint tx, ty, tz;
 
 EX int period_xy = 8;

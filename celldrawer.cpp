@@ -1529,7 +1529,7 @@ void celldrawer::draw_features_and_walls_3d() {
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
           else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
           }
-        else if(sol && in_perspective() && !nih && geometry != gArnoldCat) {
+        else if(sol && in_perspective() && !nih && !asonov::in()) {
           ld b = vid.binary_width * log(2) / 2;
           const ld l = log(2) / 2;
           switch(a) {

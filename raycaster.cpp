@@ -132,7 +132,7 @@ void enable_raycaster() {
   last_geometry = geometry;
   deg = S7; if(prod) deg += 2;
   if(!our_raycaster) { 
-    bool asonov = geometry == gArnoldCat;
+    bool asonov = hr::asonov::in();
     bool use_reflect = reflect_val && !nil && !levellines && !asonov;
 
     string vsh = 
