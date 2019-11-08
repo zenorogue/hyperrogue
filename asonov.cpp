@@ -18,6 +18,7 @@ EX namespace asonov {
 EX bool in() { return geometry == gArnoldCat; }
 
 EX hyperpoint tx, ty, tz;
+EX transmatrix straighten;
 
 EX int period_xy = 8;
 EX int period_z = 8;
@@ -108,8 +109,23 @@ EX void prepare() {
     auto test1 = test.addmove(a).addmove(b);
     println(hlog, test == test1 ? "OK" : "BAD", " : ", test, " vs ", test1, " ## ", test.addmove(a));
     }
+  
+  straighten = inverse(build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0));
   }
 
+EX transmatrix adjmatrix(int i) {
+  dynamicval<int> pxy(period_xy, 64);
+  dynamicval<int> pz(period_z, 64);
+  coord c = coord(0,0,0).addmove(i);
+  if(c[0] > period_xy/2) c[0] -= period_xy;
+  if(c[1] > period_xy/2) c[1] -= period_xy;
+  if(c[2] > period_z/2) c[2] -= period_z;
+  transmatrix T = eupush(tz * c[2]) * eupush(tx * c[0] + ty * c[1]);;
+  if(i < 4) return T * eupush(ty/2);
+  if(i >= 6 && i < 10) return eupush(-ty/2) * T;
+  return T;
+  }
+  
 struct hrmap_asonov : hrmap {
   unordered_map<coord, heptagon*> at;
     unordered_map<heptagon*, coord> coords;
@@ -145,17 +161,6 @@ struct hrmap_asonov : hrmap {
     return child;
     }
   
-  transmatrix adjmatrix(int i) {
-    coord c = coord(0,0,0).addmove(i);
-    if(c[0] > period_xy/2) c[0] -= period_xy;
-    if(c[1] > period_xy/2) c[1] -= period_xy;
-    if(c[2] > period_z/2) c[2] -= period_z;
-    transmatrix T = eupush(tz * c[2]) * eupush(tx * c[0] + ty * c[1]);;
-    if(i < 4) return T * eupush(ty/2);
-    if(i >= 6 && i < 10) return eupush(-ty/2) * T;
-    return T;
-    }
-    
   virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
     for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
     return Id;

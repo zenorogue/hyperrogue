@@ -218,6 +218,7 @@ struct horo_distance {
 void horo_distance::become(hyperpoint h1) {
   if(solnih) {
     a = abs(h1[2]);
+    if(asonov::in()) h1 = asonov::straighten * h1;
     b = hypot_d(2, h1);
     }
   #if CAP_BT

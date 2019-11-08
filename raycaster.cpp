@@ -838,7 +838,9 @@ EX void cast() {
   GLERR("uniform IPD");
   
   vector<transmatrix> ms;
-  for(int j=0; j<S7; j++) ms.push_back(prod ? currentmap->relative_matrix(cwt.at, cwt.at->cmove(j), Hypc) : currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
+  for(int j=0; j<S7; j++) ms.push_back(
+    asonov::in() ? asonov::adjmatrix((j+S7/2)%S7) :
+    prod ? currentmap->relative_matrix(cwt.at, cwt.at->cmove(j), Hypc) : currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
   if(prod) ms.push_back(Id);
   if(prod) ms.push_back(Id);
   
@@ -902,7 +904,7 @@ EX void cast() {
         connections[u][2] = (S7+.5) / 1024.;
         continue;
         }
-      transmatrix T = (prod ? currentmap->relative_matrix(c, c1, C0) : currentmap->relative_matrix(c->master, c1->master)) * inverse(ms[i]);
+      transmatrix T = asonov::in() ? Id : (prod ? currentmap->relative_matrix(c, c1, C0) : currentmap->relative_matrix(c->master, c1->master)) * inverse(ms[i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
@@ -930,8 +932,7 @@ EX void cast() {
   if(o->uBinaryWidth != -1)
     glUniform1f(o->uBinaryWidth, vid.binary_width/2 * (nih?1:log(2)));
   if(o->uStraighten != -1) {
-    transmatrix T = build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0);
-    glUniformMatrix4fv(o->uStraighten, 1, 0, glhr::tmtogl_transpose(inverse(T)).as_array());
+    glUniformMatrix4fv(o->uStraighten, 1, 0, glhr::tmtogl_transpose(asonov::straighten).as_array());
     }
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);

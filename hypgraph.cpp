@@ -1482,16 +1482,24 @@ EX void optimizeview() {
   #if CAP_BT || CAP_ARCM || MAXMDIM == 4
   else if(binarytiling || archimedean || penrose || WDIM == 3) {
     turn = -1, best = hdist0(tC0(View));
+    if(asonov::in()) {
+      hyperpoint h = asonov::straighten * tC0(View);
+      best = abs(h[2] > 1) ? 999 : hdist0(h);
+      }
     for(int i=0; i<viewctr.at->type; i++) {
       if(penrose && euclid && (i < 4 || i >= 8)) continue;
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
-      transmatrix T = currentmap->relative_matrix(h2, viewctr.at);
+      transmatrix T = asonov::in() ? asonov::adjmatrix(i) : currentmap->relative_matrix(h2, viewctr.at);
       #if MAXMDIM >= 4
       if(euclid && WDIM == 3)
         T = euclid3::move_matrix(viewctr.at->c7, i);
       #endif
       hyperpoint H = View * tC0(T);
+      if(asonov::in()) {
+        H = asonov::straighten * H;
+        if(abs(H[2]) > 1) continue;
+        }
       ld quality = hdist0(H);
       if(quality < best) best = quality, turn = i1, TB = T;
       }
