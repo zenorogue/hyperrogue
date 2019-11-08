@@ -30,6 +30,10 @@ EX ld minstep = .001;
 
 EX ld reflect_val = 0;
 
+static const int NO_LIMIT = 999999;
+
+EX ld hard_limit = NO_LIMIT;
+
 EX int max_iter_sol = 600, max_iter_iso = 60;
 
 EX int max_cells = 2048;
@@ -562,6 +566,9 @@ void enable_raycaster() {
       "  vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
       "  vec4 col = texture2D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n";
+
+    if(hard_limit < NO_LIMIT)
+      fmain += "    if(go > float(" + fts(hard_limit) + ")) { gl_FragDepth = 1.; return; }\n";
     
     if(!(levellines && disable_texture)) fmain +=
       "    vec2 inface = map_texture(position, which);\n"
@@ -952,6 +959,20 @@ EX void configure() {
     dialog::editNumber(exp_start, 0, 1, 0.1, 1, XLAT("exponential start"), 
       XLAT("brightness formula: max(1-d/sightrange, s*exp(-d/r))\n")
       );
+    });
+
+  if(hard_limit < NO_LIMIT)
+    dialog::addSelItem(XLAT("hard limit"), fts(hard_limit), 'H');
+  else
+    dialog::addBoolItem(XLAT("hard limit"), false, 'H');
+  dialog::add_action([&] {
+    if(hard_limit >= NO_LIMIT) hard_limit = 10;
+    dialog::editNumber(hard_limit, 0, 100, 1, 10, XLAT("hard limit"), "");
+    dialog::reaction = reset_raycaster;
+    dialog::extra_options = [] {
+      dialog::addItem("no limit", 'N');
+      dialog::add_action([] { hard_limit = NO_LIMIT; reset_raycaster(); });
+      };
     });
   
   if(!nil) {
