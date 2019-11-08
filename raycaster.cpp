@@ -35,11 +35,11 @@ EX int max_iter_sol = 600, max_iter_iso = 60;
 EX int max_cells = 2048;
 EX bool rays_generate = true;
 
-ld& exp_decay_current() {
+EX ld& exp_decay_current() {
   return (solnih || hyperbolic) ? exp_decay_exp : exp_decay_poly;
   }
 
-int& max_iter_current() {
+EX int& max_iter_current() {
   if(nonisotropic) return max_iter_sol;
   else return max_iter_iso;
   }
