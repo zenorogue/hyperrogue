@@ -574,7 +574,7 @@ EX namespace binary {
     }
   
   EX void build_tmatrix() {
-    if(among(geometry, gBinaryTiling, gSol)) return; // unused
+    if(among(geometry, gBinaryTiling, gSol, gArnoldCat)) return; // unused
     use_direct = (1 << (S7-1)) - 1;
     if(geometry == gBinary4) {
       use_direct = 3;

@@ -47,6 +47,15 @@ EX namespace nisot {
 #if CAP_SOLV
 EX namespace solnihv {
 
+  EX eGeometry geom() {
+    switch(geometry) {    
+      case gSol: case gArnoldCat:
+        return gSol;
+      default:
+        return geometry;
+      }
+    }
+
   #if HDR
   struct tabled_inverses {
     int PRECX, PRECY, PRECZ;
@@ -432,7 +441,7 @@ EX namespace solnihv {
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
     const ld l2 = log(2);
     const ld l3 = log(3);
-    switch(geometry) {
+    switch(geom()) {
       case gSolN:
         return hpxyz3(
           -(velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
@@ -609,7 +618,7 @@ EX namespace solnihv {
   EX tabled_inverses sont = solnihv::tabled_inverses("ssol-geodesics.dat");
   
   EX tabled_inverses& get_tabled() {
-    switch(geometry) {
+    switch(geom()) {
       case gSol: return solt;
       case gNIH: return niht;
       case gSolN: return sont;
@@ -1859,6 +1868,14 @@ EX namespace nisot {
       if(nil) stop_game();
       for(int a=0; a<3; a++) { shift(); nilv::nilperiod[a] = argi(); }
       nilv::set_flags();
+      return 0;
+      }
+    else if(argis("-catperiod")) {
+      PHASEFROM(2);
+      if(sol) stop_game();
+      shift(); asonov::period_xy = argi();
+      shift(); asonov::period_z = argi();
+      asonov::set_flags();
       return 0;
       }
     return 1;

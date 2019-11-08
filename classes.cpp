@@ -594,6 +594,7 @@ vector<geometryinfo> ginf = {
   {"{3,3,6}","none",    "{3,3,6} hyperbolic honeycomb",               "336",      4, 6, qIDEAL,    giHyperb3, 0x49600, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","none",    "{3,4,4} hyperbolic honeycomb",               "344",      8, 4, qIDEAL,    giHyperb3, 0x50000, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","Crystal", "4D crystal in H3",                           "Cryst3" ,  8, 4, qIDEAL | qANYQ | qCRYSTAL, giHyperb3, 0x52000, {{7, 3}}, eVariation::pure},
+  {"cat",    "cat",     "Arnold's cat map",                           "cat",     12, 3, qBINARY | qSOL | qsBQ, giSolNIH, 0x52200, {{6, 4}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

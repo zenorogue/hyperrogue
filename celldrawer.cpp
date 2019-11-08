@@ -1529,7 +1529,7 @@ void celldrawer::draw_features_and_walls_3d() {
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
           else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
           }
-        else if(sol && in_perspective() && !nih) {
+        else if(sol && in_perspective() && !nih && geometry != gArnoldCat) {
           ld b = vid.binary_width * log(2) / 2;
           const ld l = log(2) / 2;
           switch(a) {
@@ -1681,7 +1681,7 @@ void celldrawer::bookkeeping() {
     orig = 
       gm[LDIM][LDIM] == 0 ? true : 
       euwrap ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
-      nil ? sqhypot_d(3, tC0(gm)) >= sqhypot_d(3, tC0(V)) :
+      (nil||sol) ? sqhypot_d(3, tC0(gm)) >= sqhypot_d(3, tC0(V)) :
       sphereflipped() ? fabs(gm[LDIM][LDIM]-1) <= fabs(V[LDIM][LDIM]-1) :
       fabs(gm[LDIM][LDIM]-1) >= fabs(V[LDIM][LDIM]-1) - 1e-8;
 

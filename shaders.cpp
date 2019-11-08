@@ -170,7 +170,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     switch(cgclass) {
       #if CAP_SOLV
       case gcSolNIH:
-        switch(geometry) {
+        switch(solnihv::geom()) {
           case gSol:
             vsh += solnihv::shader_symsol;
             break;

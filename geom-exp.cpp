@@ -779,7 +779,7 @@ EX void showEuclideanMenu() {
       });
     }
   
-  else if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3) || nil) {
+  else if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3) || nil || geometry == gArnoldCat) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 
@@ -798,6 +798,9 @@ EX void showEuclideanMenu() {
       else if(nil)
         nilv::prepare_niltorus3(),
         pushScreen(nilv::show_niltorus3);
+      else if(geometry == gArnoldCat)
+        asonov::prepare_config(),
+        pushScreen(asonov::show_config);
       #endif      
       else if(euwrap) 
         prepare_torusconfig(),

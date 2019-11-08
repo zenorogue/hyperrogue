@@ -86,7 +86,7 @@ struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tTextureMap;
-  GLint uBinaryWidth, uPLevel, uLP;
+  GLint uBinaryWidth, uPLevel, uLP, uStraighten;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
   
@@ -105,6 +105,7 @@ struct raycaster : glhr::GLprogram {
     uWallY = glGetUniformLocation(_program, "uWallY");
     
     uBinaryWidth = glGetUniformLocation(_program, "uBinaryWidth");
+    uStraighten =  glGetUniformLocation(_program, "uStraighten");
     uPLevel = glGetUniformLocation(_program, "uPLevel");
     uLP = glGetUniformLocation(_program, "uLP");
 
@@ -131,7 +132,8 @@ void enable_raycaster() {
   last_geometry = geometry;
   deg = S7; if(prod) deg += 2;
   if(!our_raycaster) { 
-    bool use_reflect = reflect_val && !nil && !levellines;
+    bool asonov = geometry == gArnoldCat;
+    bool use_reflect = reflect_val && !nil && !levellines && !asonov;
 
     string vsh = 
       "attribute vec4 aPosition;\n"
@@ -408,7 +410,7 @@ void enable_raycaster() {
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
       
-      if(solnih) fsh += "uniform float uBinaryWidth;\n";
+      if(solnih && !asonov) fsh += "uniform float uBinaryWidth;\n";
       
       fmain += 
         "  dist = next < minstep ? 2.*next : next;\n";
@@ -473,11 +475,18 @@ void enable_raycaster() {
       
       if(nil) fmain +=
         "float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
+      
+      if(asonov) {
+        fsh += "uniform mat4 uStraighten;\n";
+        fmain += "vec4 sp = uStraighten * nposition;\n";
+        }
 
       fmain +=
         "if(next >= minstep) {\n";
       
-      if(nih) fmain +=
+      if(asonov) fmain +=
+          "if(abs(sp.x) > 1. || abs(sp.y) > 1. || abs(sp.z) > 1.) {\n";      
+      else if(nih) fmain +=
           "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > .5) {\n";
       else if(sol) fmain +=
           "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > log(2.)/2.) {\n";
@@ -492,7 +501,26 @@ void enable_raycaster() {
         "else {\n";
       
       if(solnih) {
-        if(sol && !nih) fmain +=
+        if(asonov) fmain +=
+          "if(sp.x > 1.) which = 4;\n"
+          "if(sp.y > 1.) which = 5;\n"
+          "if(sp.x <-1.) which = 10;\n"
+          "if(sp.y <-1.) which = 11;\n"
+          "if(sp.z > 1.) {\n"
+            "float best = 999.;\n"
+            "for(int i=0; i<4; i++) {\n"
+              "float cand = len(uStraighten * uM[i] * position);\n"
+              "if(cand < best) { best = cand; which = i;}\n"
+              "}\n"
+            "}\n"
+          "if(sp.z < -1.) {\n"
+            "float best = 999.;\n"
+            "for(int i=6; i<10; i++) {\n"
+              "float cand = len(uStraighten * uM[i] * position);\n"
+              "if(cand < best) { best = cand; which = i;}\n"
+              "}\n"
+            "}\n";
+        else if(sol && !nih) fmain +=
           "if(nposition.x > uBinaryWidth) which = 0;\n"
           "if(nposition.x <-uBinaryWidth) which = 4;\n"
           "if(nposition.y > uBinaryWidth) which = 1;\n"
@@ -508,7 +536,7 @@ void enable_raycaster() {
         if(nih && !sol) fmain += 
           "if(nposition.z > .5) which = 4;\n"
           "if(nposition.z < -.5) which = (nposition.y > uBinaryWidth/3. ? 9 : nposition.y < -uBinaryWidth/3. ? 5 : 7) + (nposition.x>0.?1:0);\n";
-        if(sol && !nih) fmain += 
+        if(sol && !nih && !asonov) fmain += 
           "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
           "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
         }
@@ -901,6 +929,10 @@ EX void cast() {
     glUniform1f(o->uLevelLines, levellines);
   if(o->uBinaryWidth != -1)
     glUniform1f(o->uBinaryWidth, vid.binary_width/2 * (nih?1:log(2)));
+  if(o->uStraighten != -1) {
+    transmatrix T = build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0);
+    glUniformMatrix4fv(o->uStraighten, 1, 0, glhr::tmtogl_transpose(inverse(T)).as_array());
+    }
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
   if(o->uBLevel != -1)

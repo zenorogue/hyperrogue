@@ -34,6 +34,7 @@
 #include "heptagon.cpp"
 #include "binary-tiling.cpp"
 #include "nonisotropic.cpp"
+#include "asonov.cpp"
 #include "penrose.cpp"
 #include "archimedean.cpp"
 #include "euclid.cpp"

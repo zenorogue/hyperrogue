@@ -1027,6 +1027,23 @@ void geometry_information::create_wall3d() {
     make_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
     }
 
+  if(geometry == gArnoldCat) {
+    asonov::prepare();
+    auto pt = [&] (int x, int y, int z) { return asonov::tx*x/2 + asonov::ty*y/2 + asonov::tz*z/2 + C0; };
+    make_wall(0, {pt(-1,-1,+1), pt(00,+1,+1), pt(+1,+1,+1)});
+    make_wall(1, {pt(00,-1,+1), pt(+1,+1,+1), pt(+1,-1,+1)});
+    make_wall(2, {pt(-1,+1,+1), pt(00,+1,+1), pt(-1,-1,+1)});
+    make_wall(3, {pt(-1,-1,+1), pt(+1,+1,+1), pt(00,-1,+1)});
+    make_wall(4, {pt(+1,-1,-1), pt(+1,00,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(+1,-1,+1)});
+    make_wall(5, {pt(-1,+1,-1), pt(-1,+1,+1), pt(00,+1,+1), pt(+1,+1,+1), pt(+1,+1,-1)});
+    make_wall(6, {pt(-1,-1,-1), pt(-1,00,-1), pt(+1,-1,-1)});
+    make_wall(7, {pt(-1,00,-1), pt(-1,+1,-1), pt(+1,-1,-1)});
+    make_wall(8, {pt(-1,+1,-1), pt(+1,00,-1), pt(+1,-1,-1)});
+    make_wall(9, {pt(-1,+1,-1), pt(+1,+1,-1), pt(+1,00,-1)});
+    make_wall(10, {pt(-1,+1,-1), pt(-1,00,-1), pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,+1,+1)});
+    make_wall(11, {pt(+1,-1,-1), pt(+1,-1,+1), pt(00,-1,+1), pt(-1,-1,+1), pt(-1,-1,-1)});
+    }
+
   if(geometry == gNIH) {
     ld zstep = .5;
     ld bwh = vid.binary_width / 6;
