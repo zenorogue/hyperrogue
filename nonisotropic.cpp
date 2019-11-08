@@ -857,6 +857,7 @@ EX namespace nilv {
     for(int a=0; a<3; a++) if(nilperiod[a]) coords++;
     set_flag(ginf[gNil].flags, qANYQ, coords);
     set_flag(ginf[gNil].flags, qBOUNDED, coords == 3);
+    set_flag(ginf[gNil].flags, qSMALL, coords == 3 && nilperiod[0] * nilperiod[1] * nilperiod[2] <= 4096);
     }
 
   EX hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
