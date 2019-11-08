@@ -1292,6 +1292,7 @@ EX void prepareTexture() {
   resetbuffer rb;
   
   dynamicval<eStereo> d(vid.stereo_mode, sOFF);
+  dynamicval<ld> dl(levellines, 0);
   calcparam_rug();
   models::configure();
   
