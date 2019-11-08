@@ -41,6 +41,8 @@ EX int gmod(int i, int j) {
   return i;
   }
 
+EX int zgmod(int a, int b) { return b ? gmod(a, b) : a; }
+
 EX int gdiv(int i, int j) {
   return (i - gmod(i, j)) / j;
   }
