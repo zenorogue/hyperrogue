@@ -899,7 +899,9 @@ EX void show_niltorus3() {
     string title = XLAT("%1 period", s0+char('X'+a));
     dialog::addSelItem(title, its(nilperiod_edit[a]), 'x');
     dialog::add_action([=] { 
-      dialog::editNumber(nilperiod_edit[a], 0, 60, 1, 0, title, ""); 
+      dialog::editNumber(nilperiod_edit[a], 0, 60, 1, 0, title, 
+        XLAT("Set to 0 to make it non-periodic.")
+        ); 
       dialog::bound_low(0);
       });      
     }
