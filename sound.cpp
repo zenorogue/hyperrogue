@@ -272,6 +272,7 @@ int read_sound_args() {
   else if(argis("-musicfocus")) { music_out_of_focus = true; }
 #endif
   else if(argis("-svol")) { PHASEFROM(2); shift(); effvolume = argi(); }
+  else if(argis("-mvol")) { PHASEFROM(2); shift(); musicvolume = argi(); }
   else return 1;
   return 0;
   }
