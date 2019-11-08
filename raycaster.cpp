@@ -535,6 +535,13 @@ void enable_raycaster() {
       }
     else fmain += 
       "position = position + tangent * dist;\n";
+      
+    #if CAP_FIX_RAYCAST
+    if(hyperbolic) fmain +=
+      "position /= sqrt(position.w*position.w - dot(position.xyz, position.xyz));\n"
+      "tangent -= dot(vec4(-position.xyz, position.w), tangent) * position;\n"
+      "tangent /= sqrt(dot(tangent.xyz, tangent.xyz) - tangent.w*tangent.w);\n";
+    #endif
     
     if(hyperbolic && binarytiling) {
       fmain += 
