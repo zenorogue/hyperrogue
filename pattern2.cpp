@@ -1465,6 +1465,8 @@ EX map<char, colortable> colortables = {
   {'w', {0x303030, 0x1C0C0C0}},
   {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
   {'j', {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF}},  
+  {'!', {0x1202020, 0x1000080, 0x1008000, 0x1008080, 0x1800000, 0x1800080, 0x1808000, 0x1C0C0C0,
+         0x1808080, 0x10000FF, 0x100FF00, 0x100FFFF, 0x1FF0000, 0x1FF00FF, 0x1FFFF00, 0x1FFFFFF}},
   };
 
 color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
@@ -1602,12 +1604,22 @@ EX namespace patterns {
         // if(c->master->distance % 2 == 0) return 0;
         if(hrand(100) == 0) return 0;
         return 0x1000000 | (0xFFFFFF & (0x671349 + y * 0x512369));
+        */
+        if(hrand(100) >= 1) return 0;
+        static int g = 0;
+        println(hlog, "generated ", ++g);
+        return 0x1000000 | hrand(0x1000000);
 //        if(c->master->distance == 1) return 0x1FF0000;
 //        if(c->master->distance == -1) return 0x100FF00;
 //        return 0;        
         }
       case '!': {
         if(c == currentmap->gamestart()) return 0;
+        for(int a=0; a<S7; a++) if(c == currentmap->gamestart()->move(a))
+          {
+          if(among(a,4,5,10,11)) return 0;
+          return colortables['!'][a];
+          }
         return hrand(0x1000000) | 0x1000000;
         }
         
