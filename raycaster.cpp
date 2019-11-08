@@ -840,6 +840,7 @@ EX void cast() {
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(
     asonov::in() ? asonov::adjmatrix((j+S7/2)%S7) :
+    nil ? nilv::adjmatrix((j+S7/2)%S7) :
     prod ? currentmap->relative_matrix(cwt.at, cwt.at->cmove(j), Hypc) : currentmap->relative_matrix(cwt.at->master, cwt.at->cmove(j)->master));
   if(prod) ms.push_back(Id);
   if(prod) ms.push_back(Id);
@@ -904,7 +905,7 @@ EX void cast() {
         connections[u][2] = (S7+.5) / 1024.;
         continue;
         }
-      transmatrix T = asonov::in() ? Id : (prod ? currentmap->relative_matrix(c, c1, C0) : currentmap->relative_matrix(c->master, c1->master)) * inverse(ms[i]);
+      transmatrix T = (asonov::in() || nil) ? Id : (prod ? currentmap->relative_matrix(c, c1, C0) : currentmap->relative_matrix(c->master, c1->master)) * inverse(ms[i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);

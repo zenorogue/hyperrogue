@@ -783,6 +783,10 @@ EX namespace nilv {
 
   EX array<int,3> nilperiod, nilperiod_edit;
   
+  EX transmatrix adjmatrix(int i) {
+     return nisot::translate(mvec_to_point(movevectors[i]));
+     }
+    
   struct hrmap_nil : hrmap {
     unordered_map<mvec, heptagon*> at;
     unordered_map<heptagon*, mvec> coords;
@@ -817,10 +821,6 @@ EX namespace nilv {
       return child;
       }
 
-    transmatrix adjmatrix(int i) {
-      return nisot::translate(mvec_to_point(movevectors[i]));
-      }
-    
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
       for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
       return nisot::translate(mvec_to_point(coords[h1].inverse() * coords[h2]));

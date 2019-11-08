@@ -1490,7 +1490,10 @@ EX void optimizeview() {
       if(penrose && euclid && (i < 4 || i >= 8)) continue;
       int i1 = i * DUALMUL;
       heptagon *h2 = createStep(viewctr.at, i1);
-      transmatrix T = asonov::in() ? asonov::adjmatrix(i) : currentmap->relative_matrix(h2, viewctr.at);
+      transmatrix T = 
+        asonov::in() ? asonov::adjmatrix(i) : 
+        nil ? nilv::adjmatrix(i) :
+        currentmap->relative_matrix(h2, viewctr.at);
       #if MAXMDIM >= 4
       if(euclid && WDIM == 3)
         T = euclid3::move_matrix(viewctr.at->c7, i);

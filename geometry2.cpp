@@ -259,8 +259,11 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
   T best_at = at;
   while(true) {
     cell *newbase = NULL;
-    forCellCM(c2, base) {
-      transmatrix V2 = calc_relative_matrix(base, c2, C0);
+    forCellIdCM(c2, i, base) {
+      transmatrix V2 = 
+        nil ? nilv::adjmatrix(base->c.spin(i)) :
+        asonov::in() ? asonov::adjmatrix(base->c.spin(i)) :
+        calc_relative_matrix(base, c2, C0);
       T cand_at = V2 * at;
       horo_distance newz(check(cand_at));
       if(newz < currz) {
