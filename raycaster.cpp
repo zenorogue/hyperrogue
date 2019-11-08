@@ -956,7 +956,7 @@ EX void configure() {
   
   dialog::addSelItem(XLAT("exponential range"), fts(exp_decay_current()), 'r');
   dialog::add_action([&] {
-    dialog::editNumber(exp_decay_current(), 0, 40, 0, 5, XLAT("exponential range"), 
+    dialog::editNumber(exp_decay_current(), 0, 40, 0.25, 5, XLAT("exponential range"), 
       XLAT("brightness formula: max(1-d/sightrange, s*exp(-d/r))")
       );
     });
