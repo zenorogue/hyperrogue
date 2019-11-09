@@ -88,8 +88,8 @@ EX void prepare() {
   
   transmatrix ieigen = inverse(eigen);
   
-  tx = point3(ieigen[0][0], ieigen[1][0], 0);
-  ty = point3(ieigen[0][1], ieigen[1][1], 0);
+  tx = point3(ieigen[0][0], ieigen[1][0], 0) * vid.binary_width;
+  ty = point3(ieigen[0][1], ieigen[1][1], 0) * vid.binary_width;
   tz = -point3(0, 0, log(lambda[0]));
   
   DEBB(DF_GEOM, ("tx = ", tx, " ty = ", ty, " tz = ", tz));

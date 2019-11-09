@@ -722,6 +722,7 @@ EX void showEuclideanMenu() {
         #if CAP_TEXTURE
         texture::config.remap();
         #endif
+        if(asonov::in()) asonov::prepare();
         };
       });
     extern void add_edit_wall_quality(char);
