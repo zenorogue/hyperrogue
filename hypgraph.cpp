@@ -1484,7 +1484,7 @@ EX void optimizeview() {
     turn = -1, best = hdist0(tC0(View));
     if(asonov::in()) {
       hyperpoint h = asonov::straighten * tC0(View);
-      best = abs(h[2] > 1) ? 999 : hdist0(h);
+      best = abs(h[2]) > 1 ? 999 : hdist0(h);
       }
     for(int i=0; i<viewctr.at->type; i++) {
       if(penrose && euclid && (i < 4 || i >= 8)) continue;
