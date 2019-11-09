@@ -119,7 +119,7 @@ typedef const void *constvoidptr;
 #endif
 
 EX constvoidptr current_vertices, buffered_vertices;
-ld current_linewidth;
+EX ld current_linewidth;
 
 GLuint buf_current, buf_buffered;
 
