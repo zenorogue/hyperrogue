@@ -56,8 +56,6 @@ EX void prepare() {
   A[0][1] = 1;
   A[1][0] = 1;
   A[1][1] = 2;
-  static bool first = true;
-  if(first) println(hlog, "amain");
   
   // if(true) {
   double det = hr::det(A);
@@ -79,7 +77,7 @@ EX void prepare() {
   lambda[0] = b + sqrt(b*b-1);
   lambda[1] = b - sqrt(b*b-1);
   
-  if(first) println(hlog, "lambda = ", lambda);
+  DEBB(DF_GEOM, ("b = ", b, " lambda = ", lambda));
   
   transmatrix eigen = Id;
   
@@ -88,27 +86,13 @@ EX void prepare() {
     eigen[1][i] = (lambda[i] - A[0][0]) / A[0][1];
     }
   
-  if(first) println(hlog, "eigen = ", eigen);
-  if(first) println(hlog, "A*eigen = ", A*eigen);
-  
   transmatrix ieigen = inverse(eigen);
-  if(first) println(hlog, "ieigen = ", ieigen);
-  if(first) println(hlog, "ieigen*A = ", ieigen * A);
   
   tx = point3(ieigen[0][0], ieigen[1][0], 0);
   ty = point3(ieigen[0][1], ieigen[1][1], 0);
   tz = -point3(0, 0, log(lambda[0]));
   
-  println(hlog, "tx = ", tx);
-  println(hlog, "ty = ", ty);
-  println(hlog, "tz = ", tz);
-  
-  for(int a=0; a<12; a++) {
-    int b = (a+6) % 12;
-    coord test(1, 10, 100);
-    auto test1 = test.addmove(a).addmove(b);
-    println(hlog, test == test1 ? "OK" : "BAD", " : ", test, " vs ", test1, " ## ", test.addmove(a));
-    }
+  DEBB(DF_GEOM, ("tx = ", tx, " ty = ", ty, " tz = ", tz));
   
   straighten = inverse(build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0));
   }
