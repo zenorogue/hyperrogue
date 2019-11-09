@@ -633,6 +633,7 @@ vector<modelinfo> mdinf = {
   {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea },
   {X3("central cylindrical"), mf::euc_boring | mf::band },
   {X3("Collignon"), mf::pseudoband | mf::equiarea },
+  {X3("horocyclic coordinates"), mf::euc_boring },
   {X3("guard"), 0},
   {X3("polynomial"), mf::conformal}
   };

@@ -444,6 +444,25 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
       }
     
+    case mdHorocyclic: {
+
+      find_zlev(H);
+      
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+      
+      ret = hyperbolic ? deparabolic10(H) : H;
+      ret *= .5;
+      ret[LDIM] = 1;
+  
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
+      
+      if(nonisotropic) ret = lp_apply(ret);
+      
+      break;
+      }
+    
     case mdHemisphere: {
   
       switch(cgclass) {
