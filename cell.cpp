@@ -15,7 +15,7 @@ struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
   virtual ~hrmap() { };
-  virtual vector<cell*>& allcells() { return dcal; }
+  virtual vector<cell*>& allcells();
   virtual void verify() { }
   virtual void link_alt(const cellwalker& hs) { }
   virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3 >= OINF ? 1 : S3-3, bool link_cdata = true);
@@ -65,6 +65,23 @@ struct hrmap_hyperbolic : hrmap_standard {
   void verify() override { verifycells(origin); }
   };
 #endif
+
+vector<cell*>& hrmap::allcells() { 
+  static vector<cell*> default_allcells;
+  println(hlog, "bounded = ", !!bounded, " dcal = ", isize(dcal));
+  if(bounded) {
+    celllister cl(gamestart(), 1000000, 1000000, NULL);
+    default_allcells = cl.lst;
+    return default_allcells;
+    }
+  if(isize(dcal) <= 1) {
+    extern cellwalker cwt;
+    celllister cl(cwt.at, 1, 1000, NULL);
+    default_allcells = cl.lst;
+    return default_allcells;
+    }
+  return dcal; 
+  }
 
 EX int dirdiff(int dd, int t) {
   dd %= t;
