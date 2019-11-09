@@ -88,7 +88,7 @@ struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tTextureMap;
-  GLint uBinaryWidth, uPLevel, uLP, uStraighten;
+  GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
   
@@ -110,6 +110,8 @@ struct raycaster : glhr::GLprogram {
     uStraighten =  glGetUniformLocation(_program, "uStraighten");
     uPLevel = glGetUniformLocation(_program, "uPLevel");
     uLP = glGetUniformLocation(_program, "uLP");
+    uReflectX = glGetUniformLocation(_program, "uReflectX");
+    uReflectY = glGetUniformLocation(_program, "uReflectY");
 
     uLinearSightRange = glGetUniformLocation(_program, "uLinearSightRange");
     uExpDecay = glGetUniformLocation(_program, "uExpDecay");
@@ -135,7 +137,7 @@ void enable_raycaster() {
   deg = S7; if(prod) deg += 2;
   if(!our_raycaster) { 
     bool asonov = hr::asonov::in();
-    bool use_reflect = reflect_val && !nil && !levellines && !asonov;
+    bool use_reflect = reflect_val && !nil && !levellines;
 
     string vsh = 
       "attribute vec4 aPosition;\n"
@@ -682,7 +684,23 @@ void enable_raycaster() {
         "  tangent = xpush(x) * xtan;\n"
         "  continue;\n"
         "  }\n";
-      if(sol && !nih) fmain += 
+      if(asonov) {
+        fmain += 
+          "  if(reflect) {\n"
+          "    if(which == 4 || which == 10) tangent = refl(tangent, position.z, uReflectX);\n"
+          "    else if(which == 5 || which == 11) tangent = refl(tangent, position.z, uReflectY);\n"
+          "    else tangent.z = -tangent.z;\n"
+          "    }\n";
+        fsh += 
+          "uniform vec4 uReflectX, uReflectY;\n"
+          "vec4 refl(vec4 t, float z, vec4 r) {\n"
+            "t.x *= exp(z); t.y /= exp(z);\n"
+            "t -= dot(t, r) * r;\n"
+            "t.x /= exp(z); t.y *= exp(z);\n"
+            "return t;\n"
+            "}\n";           
+        }
+      else if(sol && !nih && !asonov) fmain += 
         "  if(reflect) {\n"
         "    if(which == 0 || which == 4) tangent.x = -tangent.x;\n"
         "    else if(which == 1 || which == 5) tangent.y = -tangent.y;\n"
@@ -936,6 +954,12 @@ EX void cast() {
     glUniform1f(o->uBinaryWidth, vid.binary_width/2 * (nih?1:log(2)));
   if(o->uStraighten != -1) {
     glUniformMatrix4fv(o->uStraighten, 1, 0, glhr::tmtogl_transpose(asonov::straighten).as_array());
+    }
+  if(o->uReflectX != -1) {
+    auto h = glhr::pointtogl(tangent_length(spin(90*degree) * asonov::ty, 2));
+    glUniform4fv(o->uReflectX, 1, &h[0]);
+    h = glhr::pointtogl(tangent_length(spin(90*degree) * asonov::tx, 2));
+    glUniform4fv(o->uReflectY, 1, &h[0]);
     }
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
