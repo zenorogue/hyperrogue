@@ -460,7 +460,11 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
       int tw = texture::config.data.twidth;
       int x = int(ht[0] * tw) & (tw-1);
       int y = int(ht[1] * tw) & (tw-1);
-      color_t c = texture::config.data.texture_pixels[y * tw + x];
+      color_t c;
+      if(texture::config.data.texture_pixels.size() == 0)
+        c = 0xFFFFFFFF;
+      else
+        c = texture::config.data.texture_pixels[y * tw + x];
       auto& pix = qpixel(s, mx, my);
       for(int p=0; p<3; p++) {
         int alpha = part(c, 3) * part(col, 0);
