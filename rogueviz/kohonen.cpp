@@ -276,6 +276,14 @@ void analyze() {
   coloring();
   }
 
+bool coloring_3d(cell *c, const transmatrix& V) {
+  if(WDIM == 3 && on) 
+    queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
+  return false;
+  }
+
+int khd = addHook(hooks_drawcell, 100, coloring_3d);
+
 // traditionally Gaussian blur is used in the Kohonen algoritm
 // but it does not seem to make much sense in hyperbolic geometry
 // especially wrapped one.
