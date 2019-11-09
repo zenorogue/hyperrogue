@@ -226,6 +226,7 @@ EX namespace models {
     if(m == mdDisk && GDIM == 3 && (hyperbolic || nonisotropic)) return XLAT("ball model/Gans");
     if(m == mdPerspective && prod) return XLAT("native perspective");
     if(nonisotropic) {
+      if(m == mdHorocyclic && !sol) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");
       if(among(m, mdEquidistant, mdFisheye, mdHorocyclic)) return XLAT(mdinf[m].name_hyperbolic);
