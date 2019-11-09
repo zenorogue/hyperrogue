@@ -123,7 +123,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(glhr::noshaders) {
     shader_flags |= SF_PIXELS;
     }
-  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial) {
+  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial && !nonisotropic) {
     coordinator += "t /= (t[3] + uAlpha);\n";
     vsh += "uniform mediump float uAlpha;";
     shader_flags |= SF_DIRECT | SF_BOX;
