@@ -487,7 +487,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
 
       if(nonisotropic) {
         // if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
-        ret = H;
+        ret = lp_apply(H);
         break;
         }    
       if(pmodel == mdHyperboloid) {
