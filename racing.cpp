@@ -248,6 +248,8 @@ struct hr_track_failure : hr_exception {};
 
 int length;
 
+bool use_exhaustive_distance;
+
 void find_track(cell *start, int sign, int len) {
   int dl = 7 - getDistLimit() - genrange_bonus;
   cell *goal;
@@ -294,6 +296,14 @@ void find_track(cell *start, int sign, int len) {
           case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
           }
         }
+      else if(asonov::in() && use_exhaustive_distance)
+        id = trackval(c1);
+      else if(asonov::in() && asonov::period_z) {
+        ld x = c->master->zebraval;
+        ld y = c->master->emeraldval;
+        ld z = hypot(x, y);
+        id = int((log(z) / log(1000000000)) * length);
+        }
       else if(solnih)
         id = (start->master->distance - c1->master->distance) * sign;
       else
@@ -302,8 +312,7 @@ void find_track(cell *start, int sign, int len) {
       }
     }
 
-  if(euclid && (penrose || archimedean || quotient)) permanent_long_distances(goal);
-  if(nil && quotient) permanent_long_distances(goal);
+  if(use_exhaustive_distance) permanent_long_distances(goal);
   
   if(solnih || nil || sl2) {
     vector<cell*> p;
@@ -441,8 +450,12 @@ EX void generate_track() {
   makeEmpty(s);
   cview(); // needed for some virtualRebases
   
-  if(euclid && (penrose || archimedean || quotient)) permanent_long_distances(s);
-  if(nil && quotient) permanent_long_distances(s);
+  use_exhaustive_distance = false;
+  if(euclid && (penrose || archimedean || quotient)) use_exhaustive_distance = true;
+  if(nil && quotient) use_exhaustive_distance = true;
+  if(asonov::in() && asonov::period_xy <= 256) use_exhaustive_distance = true;
+    
+  if(use_exhaustive_distance) permanent_long_distances(s);
   
   bounded_track = false;
   
@@ -450,7 +463,10 @@ EX void generate_track() {
   if(WDIM == 3 || weirdhyperbolic) length = max(length - 10 * race_try, 10);
   
   try {
-  if(sol) {
+  if(asonov::in()) {
+    find_track(s, 0, length);
+    }
+  else if(sol && !asonov::in()) {
     track.push_back(s);
     find_track(s, 1, length/4);
     find_track(track.back(), -1, length-2*(length/4));
