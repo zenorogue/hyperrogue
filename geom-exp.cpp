@@ -526,7 +526,7 @@ EX string geometry_name() {
       return XLAT("spherical");
 
     case gcSolNIH:
-      switch(geometry) {
+      switch(solnihv::geom()) {
         case gSol:
           return XLAT("Sol");
         case gNIH:
