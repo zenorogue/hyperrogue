@@ -59,6 +59,8 @@ eGeometry last_geometry;
 
 /** is the raycaster available? */
 EX bool available() {
+  if(noGUI) return false;
+  if(!vid.usingGL) return false;
   if(WDIM == 2) return false;
   if(hyperbolic && pmodel == mdPerspective && !penrose)
     return true;

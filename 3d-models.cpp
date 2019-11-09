@@ -834,7 +834,7 @@ void geometry_information::make_shadow(hpcshape& sh) {
   }
 
 void geometry_information::make_3d_models() {
-  if(GDIM == 2) return;
+  if(GDIM == 2 || noGUI) return;
   eyepos = WDIM == 2 ? 0.875 : 0.925;
   DEBBI(DF_POLY, ("make_3d_models"));
   shcenter = C0;
