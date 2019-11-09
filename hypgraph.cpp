@@ -315,6 +315,15 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
 
   hyperpoint H_orig = H;
   
+  if(models::product_model()) {
+    ld zlev = zlevel(H);
+    H /= exp(zlev);
+    hybrid::in_underlying_geometry([&] { applymodel(H, ret); });
+    ret[2] = zlev * models::product_z_scale;
+    ret = nisot::local_perspective * ret;
+    return;    
+    }
+  
   switch(pmodel) {
     case mdPerspective: {
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
@@ -509,6 +518,10 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         ret = lp_apply(H);
         break;
         }    
+      if(prod) {
+        ret = H;
+        break;
+        }
       if(pmodel == mdHyperboloid) {
         ld& topz = models::top_z;
         if(H[2] > topz) {
@@ -754,7 +767,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       break;
     
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
-      if(nonisotropic) {
+      if(nonisotropic || prod) {
         ret = lp_apply(inverse_exp(H, iTable, false));
         ret[3] = 1;
         break;

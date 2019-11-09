@@ -159,6 +159,8 @@ EX namespace models {
   EX ld spiral_cone = 360;
   EX ld spiral_cone_rad;
   EX bool ring_not_spiral;
+  
+  EX ld product_z_scale = 1;
 
   EX void configure() {
     ld ball = -vid.ballangle * degree;
@@ -198,7 +200,11 @@ EX namespace models {
     }
   
   EX bool model_available(eModel pm) {
-    if(prod) return pm == mdPerspective;
+    if(prod) {
+      if(pm == mdPerspective) return true;
+      if(among(pm, mdBall, mdHemisphere)) return false;
+      return PIU(model_available(pm));
+      }
     if(sl2) return pm == mdGeodesic;
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye);
     if(pm == mdGeodesic && !sol) return false;
@@ -220,11 +226,18 @@ EX namespace models {
     return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && GDIM == 2;
     }
   
+  EX bool product_model() {
+    if(!prod) return false;
+    if(among(pmodel, mdPerspective, mdHyperboloid, mdEquidistant)) return false;
+    return true;
+    }
+  
   int editpos = 0;
   
   EX string get_model_name(eModel m) {
     if(m == mdDisk && GDIM == 3 && (hyperbolic || nonisotropic)) return XLAT("ball model/Gans");
     if(m == mdPerspective && prod) return XLAT("native perspective");
+    if(prod) return PIU(get_model_name(m));
     if(nonisotropic) {
       if(m == mdHorocyclic && !sol) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
@@ -630,6 +643,14 @@ EX namespace models {
 
     dialog::addSelItem(XLAT("vertical stretch"), fts(vid.stretch), 's');
     dialog::add_action(edit_stretch);
+    
+    if(product_model()) {
+      dialog::addSelItem(XLAT("product Z stretch"), fts(product_z_scale), 'Z');
+      dialog::add_action([] {
+        dialog::editNumber(product_z_scale, 0.1, 10, 0.1, 1, XLAT("product Z stretch"), "");        
+        dialog::scaleLog();
+        });
+      }
 
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
     bool shaderside_projection = get_shader_flags() & SF_DIRECT;

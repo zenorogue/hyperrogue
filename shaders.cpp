@@ -117,13 +117,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(!vid.consider_shader_projection) {
     shader_flags |= SF_PIXELS;
     }
-  else if(pmodel == mdDisk && MDIM == 3 && !spherespecial) {
+  else if(pmodel == mdDisk && MDIM == 3 && !spherespecial && !prod) {
     shader_flags |= SF_DIRECT;
     }
   else if(glhr::noshaders) {
     shader_flags |= SF_PIXELS;
     }
-  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial && !nonisotropic) {
+  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial && !nonisotropic && !prod) {
     coordinator += "t /= (t[3] + uAlpha);\n";
     vsh += "uniform mediump float uAlpha;";
     shader_flags |= SF_DIRECT | SF_BOX;
@@ -197,7 +197,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         break;
       }      
     }
-  else if(geometry == gProduct && !hybrid::over_sphere()) {
+  else if(geometry == gProduct && !hybrid::over_sphere() && pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     coordinator +=      
       "float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;\n"
@@ -209,7 +209,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     distfun = "sqrt(z*z+d*d)";
     treset = true;
     }
-  else if(geometry == gProduct && hybrid::over_sphere()) {
+  else if(geometry == gProduct && hybrid::over_sphere() && pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     distfun = "length(t.xyz)", treset = true;
     }

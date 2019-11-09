@@ -1167,7 +1167,7 @@ EX namespace product {
   EX void drawcell_stack(cellwalker cw, transmatrix V) {
     cell *c = cw.at;
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
-    bool s = sphere;
+    bool s = sphere || pmodel != mdPerspective;
     hybrid::in_actual([&] { 
       cell *c0 = hybrid::get_at(c, hybrid::current_view_level);
       cwall_offset = hybrid::wall_offset(c0);
