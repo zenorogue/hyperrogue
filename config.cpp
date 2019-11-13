@@ -306,6 +306,7 @@ EX void initConfig() {
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(vid.use_wall_radar, "wallradar", true);
   addsaver(vid.fixed_facing, "fixed facing", 0);
+  addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
   addsaver(vid.fixed_yz, "fixed YZ", true);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaver(vid.ballproj, "ballproj", 1);
