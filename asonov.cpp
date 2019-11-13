@@ -145,6 +145,8 @@ struct hrmap_asonov : hrmap {
     return child;
     }
   
+  transmatrix adj(cell *c, int i) override { return adjmatrix(i); }
+  
   virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
     for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
     return Id;

@@ -34,6 +34,8 @@ struct hrmap {
   virtual struct transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) {
     return relative_matrix(c2->master, c1->master);
     }
+  virtual struct transmatrix adj(cell *c, int i);
+  virtual struct transmatrix iadj(cell *c, int i) { return adj(c->cmove(i), c->c.spin(i)); }
   virtual void draw() {
     printf("undrawable\n");
     }

@@ -345,28 +345,6 @@ EX ld displayspin(cell *c, int d) {
     return M_PI - d * 2 * M_PI / c->type;
   }
 
-double hexshiftat(cell *c) {
-  if(binarytiling) return 0;
-  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) return cgi.hexshift + 2*M_PI/S7;
-  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) return cgi.hexshift + 2*M_PI/S7;
-  if(cgi.hexshift && ctof(c)) return cgi.hexshift;
-  return 0;
-  }
-
-EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) {
-  if(hybri) return PIU( ddspin(c, d, bonus) );
-  if(WDIM == 3 && d < c->type) return rspintox(tC0(calc_relative_matrix(c->cmove(d), c, C0))) * cspin(2, 0, bonus);
-  if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * rspintox(nearcorner(c, d));
-  return spin(displayspin(c, d) + bonus - hexshiftat(c));
-  }
-
-EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) {
-  if(hybri) return PIU( iddspin(c, d, bonus) );
-  if(WDIM == 3 && d < c->type) return cspin(0, 2, bonus) * spintox(tC0(calc_relative_matrix(c->cmove(d), c, C0)));
-  if(WDIM == 2 && (binarytiling || penrose) && d < c->type) return spin(bonus) * spintox(nearcorner(c, d));
-  return spin(hexshiftat(c) - displayspin(c, d) + bonus);
-  }
-
 #define UNTRANS (GDIM == 3 ? 0x000000FF : 0)
 
 EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
