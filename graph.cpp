@@ -5014,10 +5014,9 @@ EX void drawscreen() {
 EX void restartGraph() {
   DEBBI(DF_INIT, ("restartGraph"));
   
-  View = Id;
   if(!autocheat) linepatterns::clearAll();
   if(currentmap) {
-    centerover = currentmap->gamestart();
+    resetview();
     if(sphere) View = spin(-M_PI/2);
     }
   }

@@ -1473,9 +1473,16 @@ void ballgeometry() {
 
 EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
-  View = models::rotmatrix();
   // EUCLIDEAN
-  centerover = cwt.at;
+  if(cwt.at) {
+    centerover = cwt.at;
+    View = iddspin(cwt.at, cwt.spin, M_PI + vid.fixed_facing_dir * degree);
+    if(cwt.mirrored) View = Mirror * View;
+    }
+  else if(currentmap) {
+    centerover = currentmap->gamestart();
+    View = Id;
+    }
   cwtV = View;
   nisot::local_perspective = Id;
   // SDL_LockSurface(s);
