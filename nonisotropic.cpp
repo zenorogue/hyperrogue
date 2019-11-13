@@ -970,8 +970,18 @@ EX namespace hybrid {
       ginf[g].g.gameplay_dimension++;
       ginf[g].g.graphical_dimension++;
       ginf[g].tiling_name += "xZ";
+      if(product::csteps) ginf[g].flags |= qANYQ, ginf[g].tiling_name += its(product::csteps);
       }
     ginf[g].flags |= qHYBRID;
+    }
+  
+  EX void reconfigure() {
+    if(!hybri) return;
+    stop_game();
+    auto g = geometry;
+    geometry = underlying;
+    configure(g);
+    geometry = g;
     }
 
   EX hrmap *pmap;
@@ -1006,7 +1016,7 @@ EX namespace hybrid {
       }
     
     cell *getCell(cell *u, int h) {
-      if(cgi.steps) h = gmod(h, cgi.steps);
+      h = zgmod(h, cgi.steps);
       cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
       return c;
@@ -1045,7 +1055,7 @@ EX namespace hybrid {
       auto cu = m->where[c].first;
       auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
       int d1 = cu->c.spin(d);
-      int s = cgi.steps ? d*cgi.steps / cu->type - d1*cgi.steps / cu1->type + cgi.steps/2 : 0;
+      int s = (geometry == gRotSpace && cgi.steps) ? d*cgi.steps / cu->type - d1*cgi.steps / cu1->type + cgi.steps/2 : 0;
       cell *c1 = get_at(cu1, m->where[c].second + s);
       c->c.connect(d, c1, d1, cu->c.mirror(d));
       }
@@ -1153,7 +1163,7 @@ EX namespace product {
 
   struct hrmap_product : hybrid::hrmap_hybrid {
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * (where[c2].second - where[c1].second));
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
       }
   
     void draw() override {
@@ -1162,7 +1172,7 @@ EX namespace product {
       }
     };
 
-  EX int cwall_offset, cwall_mask, actual_view_level;
+  EX int cwall_offset, cwall_mask, actual_view_level, csteps;
   
   EX void drawcell_stack(cellwalker cw, transmatrix V) {
     cell *c = cw.at;
@@ -1872,6 +1882,13 @@ EX namespace nisot {
       shift(); asonov::period_xy = argi();
       shift(); asonov::period_z = argi();
       asonov::set_flags();
+      return 0;
+      }
+    else if(argis("-prodperiod")) {
+      PHASEFROM(2);
+      if(prod) stop_game();
+      shift(); product::csteps = argi();
+      hybrid::reconfigure();
       return 0;
       }
     return 1;

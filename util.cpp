@@ -43,6 +43,13 @@ EX int gmod(int i, int j) {
 
 EX int zgmod(int a, int b) { return b ? gmod(a, b) : a; }
 
+EX int szgmod(int a, int b) { 
+  if(!b) return a;
+  a = gmod(a, b);
+  if(2*a >= b) return a - b;
+  return a;
+  }
+
 EX int gdiv(int i, int j) {
   return (i - gmod(i, j)) / j;
   }

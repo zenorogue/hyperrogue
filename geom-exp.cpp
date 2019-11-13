@@ -748,7 +748,7 @@ EX void showEuclideanMenu() {
     }
 
   if(in_s2xe()) {
-    dialog::addSelItem(XLAT("precision of S2xE rings"), its(s2xe::qrings), '4');
+    dialog::addSelItem(XLAT("precision of S2xE rings"), its(s2xe::qrings), '5');
     dialog::add_action([] {
       dialog::editNumber(s2xe::qrings, 1, 256, 4, 32, XLAT("precision of S2xE rings"),
         XLAT(
@@ -761,9 +761,9 @@ EX void showEuclideanMenu() {
       });
     }
   
-  else if(hybri) {
+  if(hybri) {
     auto r = rots::underlying_scale;
-    dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '4');
+    dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '6');
     dialog::add_action([] {
       dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
         XLAT(
@@ -780,7 +780,7 @@ EX void showEuclideanMenu() {
       });
     }
   
-  else if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3) || nil || asonov::in()) {
+  if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3) || nil || asonov::in() || prod) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action([] {
       if(0); 
@@ -802,6 +802,20 @@ EX void showEuclideanMenu() {
       else if(asonov::in())
         asonov::prepare_config(),
         pushScreen(asonov::show_config);
+      else if(prod) {
+        static int s;
+        s = product::csteps;
+        dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"),
+              XLAT("Set to 0 to make it non-periodic."));
+        dialog::bound_low(0);
+        dialog::reaction_final = [] {
+          product::csteps = s;
+          if(product::csteps == cgi.steps) return;
+          hybrid::reconfigure();
+          start_game();
+          println(hlog, "csteps = ", cgi.steps);
+          };
+        }
       #endif      
       else if(euwrap) 
         prepare_torusconfig(),

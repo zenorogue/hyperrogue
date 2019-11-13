@@ -580,7 +580,7 @@ void geometry_information::prepare_basics() {
     }
   
   plevel = vid.plevel_factor * scalefactor;
-  steps = 0;
+  steps = product::csteps;
   single_step = 1;
   if(hybri && !prod) {
     if(hybrid::underlying == gArchimedean) 
@@ -925,6 +925,8 @@ EX void check_cgi() {
   if(hybri) V("U", its(int(hybrid::underlying)));
   
   if(prod) V("PL", fts(vid.plevel_factor));
+
+  if(prod) V("PS", its(product::csteps));
   
   if(binarytiling) V("BT", fts(vid.binary_width));
   
