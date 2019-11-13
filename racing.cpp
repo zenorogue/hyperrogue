@@ -818,58 +818,6 @@ int readArgs() {
 int tstart, tstop;
 heptspin sview;
 
-/*
-void restore_time(int t) {
-  tuple<int, cell*, transmatrix, ld> sf = make_tuple(t, nullptr, Id, 0);
-  auto it = lower_bound(history.begin(), history.end(), sf, [] (auto a, auto b) { return get<0>(a) < get<0>(b); });
-  auto& m = shmup::pc[0];
-  tie(t, m->base, m->at, m->footphase) = *it;
-  shmup::pc[0]->pat = ggmatrix(shmup::pc[0]->base) * shmup::pc[0]->at;
-  }
-*/
-
-/*
-bool akh(int sym, int uni) {
-  if(uni == '1') { tstart = ticks; sview = viewctr; }
-  else if(uni == '2') { tstop = ticks; }
-  else if(uni == '3') { models::model_orientation = 90; pmodel = mdBand; player_relative = false; }
-  else if(uni == '4') { models::model_orientation = 180; pmodel = mdHalfplane; models::halfplane_scale = 2; player_relative = false; }
-  else if(uni == '5') { pmodel = mdDisk; player_relative = true; }
-  else if(uni == '6') { vid.use_smart_range = true; vid.smart_range_detail = 2; }
-  else if(uni == '7' && tstart && tstop) {
-    viewctr = sview;
-    nohud = true;
-    restore_time(tstart);
-    drawthemap();
-    centerpc(0);
-    int t = tstart;
-    int i = 0;
-    inrec = true;
-    while(t < tstop) {
-      ticks = t;
-      char buf[1000];
-      restore_time(t);
-      shmup::fixStorage();
-      centerpc(0);
-      optimizeview();
-      cwt.at = shmup::pc[0]->base;
-      drawthemap();
-      fullcenter();
-      cmode = sm::NORMAL;
-      drawthemap();
-      centerpc(0);
-      optimizeview();
-      snprintf(buf, 1000, "animations/race/race%d-%03d.png", int(pmodel), i++);
-      saveHighQualityShot(buf);
-      t += 40;
-      }
-    inrec = false;
-    }
-  else return false;
-  return true;
-  }
-*/
-
 #if CAP_COMMANDLINE
 auto hook = 
   addHook(hooks_args, 100, readArgs)
