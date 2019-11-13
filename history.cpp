@@ -260,7 +260,7 @@ EX namespace history {
     }
   
   EX void create_recenter_to_view(bool precise) {
-    cell *c = centerover.at ? centerover.at : cwt.at;
+    cell *c = centerover ? centerover : cwt.at;
     create(path_for_lineanimation[0], c, precise ? inverse(ggmatrix(c)) : Id);
     }
   
@@ -271,10 +271,9 @@ EX namespace history {
     if(ph<0) ph = 0;
     if(ph >= siz-1) ph = siz-2;
     
-    heptagon *old = viewctr.at;
+    cell *old = centerover;
     
-    viewctr.at = v[ph]->base->master;
-    viewctr.spin = 0;
+    centerover = v[ph]->base;
     
     ld angle = 0;
     if(WDIM == 3) {
@@ -294,8 +293,8 @@ EX namespace history {
       View = models::rotmatrix() * View;
       }
     else {
-      if(celldistance(v[ph]->base, old->c7) <= 2) {
-        hyperpoint h1 = View * currentmap->relative_matrix(old, viewctr.at) * hpxy3(1,2,3);
+      if(celldistance(v[ph]->base, old) <= 2) {
+        hyperpoint h1 = View * currentmap->relative_matrix(old, centerover, C0) * hpxy3(1,2,3);
         ld angle1 = atan2(h1[1], h1[2]);
         View = cspin(2, 1, angle1 - angle) * View;
         }
@@ -303,7 +302,7 @@ EX namespace history {
       }
 
     playermoved = false;
-    centerover.at = v[ph]->base;
+    centerover = v[ph]->base;
     compute_graphical_distance();
     }
   
@@ -445,8 +444,8 @@ EX namespace history {
             xpos += bwidth;      
             }
           
-          last_base = viewcenter();
-          last_relative = inverse(ggmatrix(last_base)) * C0;        
+          last_base = centerover;
+          last_relative = C0;
           }
         }
 

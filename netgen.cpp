@@ -670,8 +670,6 @@ EX namespace netgen {
           }
         if(!created) {
           View = Id;
-          if(centerover.at) viewctr.at = centerover.at->master;
-          else viewctr.at = cwt.at->master;
           playermoved = false;
           dataFromHR();
           designNet();
@@ -686,8 +684,6 @@ EX namespace netgen {
         }
       if(uni == 's') {
         View = Id;
-        if(centerover.at) viewctr.at = centerover.at->master;
-        else viewctr.at = cwt.at->master;
         playermoved = false;
         }
       else if(uni == 'c') {

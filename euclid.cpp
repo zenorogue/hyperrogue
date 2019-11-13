@@ -681,7 +681,7 @@ EX namespace euclid3 {
 
     void draw() override {
       dq::visited_by_matrix.clear();
-      dq::enqueue_by_matrix(viewctr.at, cview());
+      dq::enqueue_by_matrix(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -1220,10 +1220,9 @@ EX ld matrixnorm(const transmatrix& Mat) {
 void hrmap_euclid_any::draw() {
   DEBB(DF_GRAPH, ("drawEuclidean\n"));
   sphereflip = Id;
-  if(!centerover.at) centerover = cwt;
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
   //   mindx, mindy, maxdx, maxdy);
-  int pvec = cellwalker_to_vec(centerover);
+  int pvec = cellwalker_to_vec(cellwalker(centerover));
   
   typedef pair<int, int> euspot;
   
@@ -1232,7 +1231,6 @@ void hrmap_euclid_any::draw() {
   set<euspot> visited = {zero};
   vector<euspot> dfs = {zero};
 
-  ld centerd = matrixnorm(View);
   auto View0 = cview();
   
   for(int i=0; i<isize(dfs); i++) {
@@ -1244,11 +1242,6 @@ void hrmap_euclid_any::draw() {
     transmatrix Mat = View0 * eumove(dx, dy);
     torusconfig::torus_cx = dx;
     torusconfig::torus_cy = dy;
-
-    if(true) {
-      ld locald = matrixnorm(Mat);
-      if(locald < centerd) centerd = locald, centerover = cw, View = inverse(actual_view_transform) * Mat;
-      }
 
     if(do_draw(cw.at, Mat)) {
       drawcell(cw, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat);

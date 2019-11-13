@@ -400,7 +400,7 @@ EX namespace binary {
 
     void draw() override {
       dq::visited.clear();
-      dq::enqueue(viewctr.at, cview());
+      dq::enqueue(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();

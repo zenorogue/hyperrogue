@@ -814,11 +814,10 @@ EX void cast() {
   
   vector<cell*> lst;
 
-  cell *cs = viewcenter();
+  cell *cs = centerover;
 
   transmatrix T = cview();
   if(nonisotropic) T = nisot::local_perspective * T;
-  if(prod) T = actualV(viewctr, T);
   T = inverse(T);
 
   virtualRebase(cs, T, true);

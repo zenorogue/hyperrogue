@@ -559,7 +559,7 @@ EX void viewall() {
 
 /** launch a debugging screen, and continue normal working only after this screen is closed */
 EX void modalDebug(cell *c) {
-  viewctr.at = c->master;
+  centerover = c; View = Id;
   if(noGUI) {
     fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", c);
     exit(1);

@@ -112,7 +112,7 @@ void handleclick(MOBPAR_FORMAL) {
                 ors::reset();
                 centerpc(INF);
                 View = Id;
-                viewctr.at = cwt.at->master;
+                centerover = cwt.at->master;
                 }
               andmode = 11;
               }
@@ -151,7 +151,7 @@ void handleclick(MOBPAR_FORMAL) {
       if(!playerfound) {
         centerpc(INF);
         View = Id;
-        viewctr.at = cwt.at->master;
+        centerover = cwt.at->master;
         }
       playermoved = true;
       }

@@ -752,7 +752,7 @@ EX hookset<void(cell*)> *hooks_mouseover;
 EX void describeMouseover() {
   DEBBI(DF_GRAPH, ("describeMouseover"));
 
-  cell *c = mousing ? mouseover : playermoved ? NULL : centerover.at;
+  cell *c = mousing ? mouseover : playermoved ? NULL : centerover;
   string& out = mouseovers;
   if(!c || instat || getcstat != '-') { }
   else if(c->wall != waInvisibleFloor) {

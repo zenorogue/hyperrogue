@@ -815,7 +815,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
   
   if(GDIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
     
-  if(WDIM == 3 && c == viewcenter() && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
+  if(WDIM == 3 && c == centerover && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
   transmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
@@ -4068,8 +4068,8 @@ EX void drawMarkers() {
 #endif
 
     #if CAP_QUEUE
-    if(centerover.at && !playermoved && m && !anims::any_animation() && WDIM == 2)
-      queuecircleat(centerover.at, .70 - .06 * sintick(200), 
+    if(centerover && !playermoved && m && !anims::any_animation() && WDIM == 2)
+      queuecircleat(centerover, .70 - .06 * sintick(200), 
         darkena(int(175 + 25 * sintick(200)), 0, 0xFF));
 
     if(multi::players > 1 || multi::alwaysuse) for(int i=0; i<numplayers(); i++) {
@@ -4311,8 +4311,8 @@ EX void make_actual_view() {
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) {
-      transmatrix Start = inverse(actualV(viewctr, actual_view_transform * View));
-      ld d = wall_radar(viewcenter(), Start, nisot::local_perspective, max);
+      transmatrix Start = inverse(actual_view_transform * View);
+      ld d = wall_radar(centerover, Start, nisot::local_perspective, max);
       actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * inverse(View); 
       }
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
@@ -4349,7 +4349,7 @@ EX transmatrix cview() {
 
 EX void precise_mouseover() {
   if(WDIM == 3) { 
-    mouseover2 = mouseover = viewcenter();
+    mouseover2 = mouseover = centerover;
     ld best = HUGE_VAL;
     hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)), 100);
 
@@ -4480,9 +4480,6 @@ EX void drawthemap() {
   modist2 = 1e20; mouseover2 = NULL; 
 
   compute_graphical_distance();
-
-  centdist = 1e20; 
-  if(!masterless) centerover.at = NULL; 
 
   for(int i=0; i<multi::players; i++) {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
@@ -4794,7 +4791,7 @@ EX void gamescreen(int _darken) {
     if(racing::on) return;
     // create the gmatrix
     View = subscreens::player_displays[0].view_matrix;
-    viewctr = subscreens::player_displays[0].view_center;
+    centerover = subscreens::player_displays[0].precise_center;
     just_gmatrix = true;
     currentmap->draw();
     just_gmatrix = false;
@@ -5042,14 +5039,7 @@ EX void restartGraph() {
   View = Id;
   if(!autocheat) linepatterns::clearAll();
   if(currentmap) {
-    if(masterless) {
-      centerover = vec_to_cellwalker(0);
-      }
-    else {
-      viewctr.at = currentmap->getOrigin();
-      viewctr.spin = 0;
-      viewctr.mirrored = false;
-      }
+    centerover = currentmap->gamestart();
     if(sphere) View = spin(-M_PI/2);
     }
   }
@@ -5062,7 +5052,7 @@ EX void clearAnimations() {
   
 auto graphcm = addHook(clearmemory, 0, [] () {
   DEBBI(DF_MEMORY, ("clear graph memory"));
-  mouseover = centerover.at = lmouseover = NULL;  
+  mouseover = centerover = lmouseover = NULL;  
   gmatrix.clear(); gmatrix0.clear();
   clearAnimations();
   })
@@ -5197,18 +5187,12 @@ EX void drawBug(const cellwalker& cw, color_t col) {
 #endif
   }
 
-EX cell *viewcenter() {
-  if(masterless) return centerover.at;
-  else if(hybri) return hybrid::get_at(viewctr.at->c7, hybrid::current_view_level);
-  else return viewctr.at->c7;
-  }
-
 EX bool inscreenrange(cell *c) {
   if(sphere) return true;
-  if(euclid) return celldistance(viewcenter(), c) <= get_sightrange_ambush();
+  if(euclid) return celldistance(centerover, c) <= get_sightrange_ambush();
   if(nonisotropic) return gmatrix.count(c);
   if(geometry == gCrystal344) return gmatrix.count(c);
-  return heptdistance(viewcenter(), c) <= 8;
+  return heptdistance(centerover, c) <= 8;
   }
 
 #if MAXMDIM >= 4

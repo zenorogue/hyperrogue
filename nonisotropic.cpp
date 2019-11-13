@@ -383,7 +383,7 @@ EX namespace solnihv {
     void draw() override {
       dq::visited.clear();
 
-      dq::enqueue(viewctr.at, cview());
+      dq::enqueue(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -829,7 +829,7 @@ EX namespace nilv {
     void draw() override {
       dq::visited_by_matrix.clear();
 
-      dq::enqueue_by_matrix(viewctr.at, cview());
+      dq::enqueue_by_matrix(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -939,7 +939,6 @@ EX bool in_h2xe() { return prod && !hybrid::over_sphere(); }
 
 EX namespace hybrid {
 
-  EX int current_view_level;  
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
 
@@ -1154,7 +1153,7 @@ EX namespace hybrid {
     }
 
   EX bool do_draw(cell *c, const transmatrix& T) {
-    return in_actual([&] { return hr::do_draw(hybrid::get_at(c, hybrid::current_view_level), T); });
+    return in_actual([&] { return hr::do_draw(hybrid::get_at(c, get_where(centerover).second), T); });
     }
 
 EX }
@@ -1167,7 +1166,7 @@ EX namespace product {
       }
   
     void draw() override {
-      actual_view_level = hybrid::current_view_level - floor(zlevel(tC0(cview())) / cgi.plevel + .5);
+      actual_view_level = hybrid::get_where(centerover).second - floor(zlevel(tC0(cview())) / cgi.plevel + .5);
       in_underlying([] { currentmap->draw(); });
       }
     };
@@ -1178,8 +1177,9 @@ EX namespace product {
     cell *c = cw.at;
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere || pmodel != mdPerspective;
+    int z0 = hybrid::get_where(centerover).second;
     hybrid::in_actual([&] { 
-      cell *c0 = hybrid::get_at(c, hybrid::current_view_level);
+      cell *c0 = hybrid::get_at(c, z0);
       cwall_offset = hybrid::wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
       else {
@@ -1199,7 +1199,7 @@ EX namespace product {
         cell *c1 = hybrid::get_at(c, actual_view_level+z);
         setdist(c1, 7, NULL);
         cw.at = c1;
-        drawcell(cw, V * mscale(Id, cgi.plevel * (z+actual_view_level - hybrid::current_view_level))); 
+        drawcell(cw, V * mscale(Id, cgi.plevel * (z+actual_view_level - z0))); 
         }
       });
     }
@@ -1579,7 +1579,7 @@ EX namespace rots {
     void draw() override {
       set<cell*> visited;
       
-      cell* start = viewcenter();
+      cell* start = centerover;
       vector<pair<cell*, transmatrix>> dq;
       
       visited.insert(start);
@@ -1654,7 +1654,7 @@ EX namespace rots {
   
   EX void draw_underlying(bool cornermode) {
     if(underlying_scale <= 0) return;
-    ld d = hybrid::current_view_level;
+    ld d = hybrid::get_where(centerover).second;
     d *= cgi.plevel;
     transmatrix T = rots::uzpush(-d) * spin(-2*d);
   
@@ -1674,12 +1674,14 @@ EX namespace rots {
       ld z = zlevel(tC0(View));
       for(int a=0; a<3; a++) pView[a] *= exp(-z);
       }
+    
+    cell *co = hybrid::get_where(centerover).first;
   
     hybrid::in_underlying_map([&] {
       cgi.require_shapes();
       dynamicval<int> pcc(corner_centering, cornermode ? 1 : 2);
       dynamicval<bool> pf(playerfound, true);
-      dynamicval<cellwalker> m5(centerover, viewctr.at->c7);
+      dynamicval<cell*> m5(centerover, co);
       dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * qtm(h));
       dynamicval<transmatrix> m3(playerV, Id);
       dynamicval<transmatrix> m4(actual_view_transform, Id);

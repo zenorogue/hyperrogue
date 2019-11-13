@@ -191,9 +191,9 @@ EX namespace models {
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     
-    if(centerover.at && !history::on)
-    if(isize(history::path_for_lineanimation) == 0 || (quotient && history::path_for_lineanimation.back() != centerover.at)) {
-      history::path_for_lineanimation.push_back(centerover.at);
+    if(centerover && !history::on)
+    if(isize(history::path_for_lineanimation) == 0 || (quotient && history::path_for_lineanimation.back() != centerover)) {
+      history::path_for_lineanimation.push_back(centerover);
       }
 
     band_shift = 0;

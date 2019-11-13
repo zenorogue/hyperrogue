@@ -514,8 +514,7 @@ EX ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
 EX bool env_shmup;
 EX ld rug_angle;
 
-heptspin rotation_center_h;
-cellwalker rotation_center_c;
+cell *rotation_center;
 transmatrix rotation_center_View;
 
 color_t circle_display_color = 0x00FF00FF;
@@ -526,17 +525,17 @@ EX ld circle_spins = 1;
 void moved() {
   optimizeview();
   if(cheater || autocheat) {
-    if(hyperbolic && memory_saving_mode && centerover.at && gmatrix.size() && cwt.at != centerover.at && !quotient) {
-      if(isNeighbor(cwt.at, centerover.at)) {
-        cwt.spin = neighborId(centerover.at, cwt.at);
+    if(hyperbolic && memory_saving_mode && centerover && gmatrix.size() && cwt.at != centerover && !quotient) {
+      if(isNeighbor(cwt.at, centerover)) {
+        cwt.spin = neighborId(centerover, cwt.at);
         flipplayer = true;
         }
-      animateMovement(cwt.at, centerover.at, LAYER_SMALL, NODIR);
-      cwt.at = centerover.at;
+      animateMovement(cwt.at, centerover, LAYER_SMALL, NODIR);
+      cwt.at = centerover;
       save_memory();
       return;
       }
-    setdist(viewcenter(), 7 - getDistLimit() - genrange_bonus, NULL);
+    setdist(centerover, 7 - getDistLimit() - genrange_bonus, NULL);
     }
   playermoved = false;
   }
@@ -587,10 +586,10 @@ bool needs_highqual;
 bool joukowsky_anim;
 
 EX void reflect_view() {
-  if(centerover.at) {
+  if(centerover) {
     transmatrix T = Id;
-    cell *mbase = centerover.at;
-    cell *c = centerover.at;
+    cell *mbase = centerover;
+    cell *c = centerover;
     if(shmup::reflect(c, mbase, T))
       View = inverse(T) * View;
     }
@@ -608,10 +607,10 @@ EX void apply() {
         history::phase = (isize(history::v) - 1) * ticks * 1. / period;
         history::movetophase();        
         }
-      else if(centerover.at) {
+      else if(centerover) {
         reflect_view();
         if((hyperbolic && !quotient && 
-          (centerover.at->land != cwt.at->land || memory_saving_mode) && among(centerover.at->land, laHaunted, laIvoryTower, laDungeon, laEndorian) && centerover.at->landparam >= 10
+          (centerover->land != cwt.at->land || memory_saving_mode) && among(centerover->land, laHaunted, laIvoryTower, laDungeon, laEndorian) && centerover->landparam >= 10
           ) ) {
           if(memory_saving_mode) {
             activateSafety(laIce);
@@ -626,8 +625,8 @@ EX void apply() {
           );
         moved();
         if(clearup) {
-          viewcenter()->wall = waNone;
-          forCellEx(c1, viewcenter()) c1->wall = waNone;
+          centerover->wall = waNone;
+          forCellEx(c1, centerover) c1->wall = waNone;
           }
         }
       break;
@@ -651,7 +650,7 @@ EX void apply() {
       moved();
       rotate_view(cspin(0, GDIM-1, 2 * M_PI * t / period));
       if(clearup) {
-        viewcenter()->wall = waNone;
+        centerover->wall = waNone;
         }
       break;
 
@@ -668,8 +667,7 @@ EX void apply() {
       break;
     #endif
     case maCircle: {
-      if(masterless) centerover = rotation_center_c;
-      else viewctr = rotation_center_h;
+      centerover = rotation_center;
       ld alpha = circle_spins * 2 * M_PI * ticks / period;
       View = spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * rotation_center_View;
       moved();
@@ -769,13 +767,13 @@ bool record_animation() {
 void display_animation() {
   if(ma == maCircle && (circle_display_color & 0xFF)) {
     for(int s=0; s<10; s++) {
-      if(s == 0) curvepoint(ggmatrix(rotation_center_c.at) * xpush0(circle_radius - .1));
-      for(int z=0; z<100; z++) curvepoint(ggmatrix(rotation_center_c.at) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      if(s == 0) curvepoint(ggmatrix(rotation_center) * xpush0(circle_radius - .1));
+      for(int z=0; z<100; z++) curvepoint(ggmatrix(rotation_center) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
       queuecurve(circle_display_color, 0, PPR::LINE);
       }
     if(sphere) for(int s=0; s<10; s++) {
-      if(s == 0) curvepoint(centralsym * ggmatrix(rotation_center_c.at) * xpush0(circle_radius - .1));
-      for(int z=0; z<100; z++) curvepoint(centralsym * ggmatrix(rotation_center_c.at) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      if(s == 0) curvepoint(centralsym * ggmatrix(rotation_center) * xpush0(circle_radius - .1));
+      for(int z=0; z<100; z++) curvepoint(centralsym * ggmatrix(rotation_center) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
       queuecurve(circle_display_color, 0, PPR::LINE);
       }
     }
@@ -861,8 +859,7 @@ EX void show() {
   if(!prod) {
     dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
     dialog::add_action([] () { ma = maCircle; 
-      rotation_center_h = viewctr;
-      rotation_center_c = centerover;
+      rotation_center = centerover;
       rotation_center_View = View;
       });
     }
@@ -1045,8 +1042,7 @@ int readArgs() {
   else if(argis("-animcircle")) {
     PHASE(3); start_game();
     ma = maCircle; 
-    rotation_center_h = viewctr;
-    rotation_center_c = cwt.at;
+    rotation_center = centerover;
     rotation_center_View = View;
     shift_arg_formula(circle_spins);
     shift_arg_formula(circle_radius);

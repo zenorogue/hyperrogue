@@ -13,16 +13,12 @@ EX int fontscale = 100;
 #if HDR
 /** configuration of the current view */
 struct display_data {
-  /** This specifies the heptagon the view is currently centered on. 
-   *  Unused in masterless tilings -- precise_center is used there.
-   */
-  heptspin view_center;
-  /** The current rotation, relative to viewctr. */
+  /** The cell which is currently in the center. */
+  cell *precise_center;
+  /** The current rotation, relative to precise_center. */
   transmatrix view_matrix;
   /** The view relative to the player character. */
   transmatrix player_matrix;
-  /** The cell which is precisely in the center. */
-  cellwalker precise_center;
   /** On-screen coordinates for all the visible cells. */
   unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
   /** Position of the current map view, relative to the screen (0 to 1). */
@@ -53,7 +49,6 @@ struct display_data {
 
 #define View (current_display->view_matrix)
 #define cwtV (current_display->player_matrix)
-#define viewctr (current_display->view_center)
 #define centerover (current_display->precise_center)
 #define gmatrix (current_display->cellmatrices)
 #define gmatrix0 (current_display->old_cellmatrices)

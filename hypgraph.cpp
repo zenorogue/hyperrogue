@@ -1164,7 +1164,7 @@ void hrmap_standard::draw() {
     return;
     }
   drawn_cells.clear();
-  drawn_cells.emplace_back(viewctr, hsOrigin, cview(), band_shift);
+  drawn_cells.emplace_back(centerover->master, hsOrigin, cview() * master_relative(centerover, true), band_shift);
   for(int i=0; i<isize(drawn_cells); i++) {    
     // prevent reallocation due to insertion
     if(drawn_cells.capacity() < drawn_cells.size() + 16)
@@ -1364,19 +1364,8 @@ EX void centerpc(ld aspd) {
   if(shmup::on && vid.sspeed > -5 && GDIM == 3) {
     int id = subscreens::in ? subscreens::current_player : 0;
     auto& pc = shmup::pc[id];
-    if(masterless) centerover = pc->base;
-    else viewctr = pc->base->master;
+    centerover = pc->base;
     transmatrix T = pc->at;
-    if(hybri) {
-      hybrid::current_view_level = hybrid::get_where(pc->base).second;
-      cell *cc = hybrid::get_at(viewctr.at->c7, hybrid::current_view_level);
-      T = currentmap->relative_matrix(pc->base, cc, C0) * T;
-      }      
-    if(WDIM == 2 && !masterless) T = master_relative(pc->base) * T;
-    if(prod) {
-      cell *c = hybrid::get_where(pc->base).first;
-      T = PIU(master_relative(c)) * T;
-      }
     int sl = snakelevel(cwt.at);
     if(sl && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     View = inverse(T);
@@ -1444,124 +1433,18 @@ EX void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
+  
+  transmatrix iView = inverse(View);
+  virtualRebase(centerover, iView, true);
+  View = inverse(iView);
+  
+  println(hlog, "centerover = ", centerover);
 
-  if(hybri && !prod) {
-    cell *c = viewcenter();
-    cell *cbest = NULL;
-    ld best = hdist0(tC0(gmatrix[c]));
-    if(isnan(best)) return;
-    forCellIdEx(c2, i2, c) {
-      if(!gmatrix.count(c2)) return;
-      if(PURE || i2 >= c->type-2) {
-        ld quality = hdist0(tC0(gmatrix[c2]));
-        if(quality < best) best = quality, cbest = c2;
-        }
-      else forCellIdEx(c3, i3, c2) if(i3%2 == 0 && i3 < c2->type-2 && gmatrix.count(c3)) {
-        // cell *w = hybrid::get_where(c3).first;
-        // assert (w->master->c7 != w)
-        ld quality = hdist0(tC0(gmatrix[c3]));
-        if(quality < best) best = quality, cbest = c3;
-        }
-      }
-    if(cbest) {
-      View = View * currentmap->relative_matrix(cbest, c, C0);
-      viewctr.at = cbest->master;
-      hybrid::current_view_level = hybrid::get_where(cbest).second;
-      }
-    return;
-    }
-  
-  if(prod) {
-    ld z = zlevel(tC0(View));
-    View = mscale(View, -z);
-    if(in_s2xe()) View = centralsym * View;
-    hybrid::in_underlying_map(optimizeview);
-    if(in_s2xe()) View = centralsym * View;
-    if(z > cgi.plevel / 2) { hybrid::current_view_level--; z -= cgi.plevel; }
-    if(z < -cgi.plevel / 2) { hybrid::current_view_level++; z += cgi.plevel; }
-    View = mscale(View, z);
-    return;
-    }
-  
   #if CAP_ANIMATIONS
-  if(centerover.at && inmirror(centerover.at)) {
+  if(centerover && inmirror(centerover)) {
     anims::reflect_view();
     }
   #endif
-  
-  DEBBI(DF_GRAPH, ("optimize view"));
-  int turn = 0;
-  ld best = INF;
-  
-  transmatrix TB = Id;
-
-  if(WDIM == 3 && (cgflags & qIDEAL)) {
-    if(gmatrix.count(centerover.at)) {
-      ld last = hdist0(tC0(Viewbase));
-      transmatrix V = gmatrix[centerover.at];
-      ld next = hdist0(tC0(V));
-      if(next < last) {
-        View = View * inverse(Viewbase) * V;
-        fixmatrix(View);
-        viewctr.at = centerover.at->master;
-        viewctr.spin = 0;
-        }
-      }
-    }
-  
-  if(false) ;
-
-  #if CAP_BT || CAP_ARCM || MAXMDIM == 4
-  else if(binarytiling || archimedean || penrose || WDIM == 3) {
-    turn = -1, best = hdist0(tC0(View));
-    if(asonov::in()) {
-      hyperpoint h = asonov::straighten * tC0(View);
-      best = abs(h[2]) > 1 ? 999 : hdist0(h);
-      }
-    for(int i=0; i<viewctr.at->type; i++) {
-      if(penrose && euclid && (i < 4 || i >= 8)) continue;
-      int i1 = i * DUALMUL;
-      heptagon *h2 = createStep(viewctr.at, i1);
-      transmatrix T = 
-        asonov::in() ? asonov::adjmatrix(i) : 
-        nil ? nilv::adjmatrix(i) :
-        currentmap->relative_matrix(h2, viewctr.at);
-      #if MAXMDIM >= 4
-      if(euclid && WDIM == 3)
-        T = euclid3::move_matrix(viewctr.at->c7, i);
-      #endif
-      hyperpoint H = View * tC0(T);
-      if(asonov::in()) {
-        H = asonov::straighten * H;
-        if(abs(H[2]) > 1) continue;
-        }
-      ld quality = hdist0(H);
-      if(quality < best) best = quality, turn = i1, TB = T;
-      }
-    if(turn >= 0) {
-      View = View * TB;
-      fixmatrix(View);
-      viewctr.at = createStep(viewctr.at, turn);
-      }
-    }
-  #endif
-  
-  else {
-  
-    for(int i=-1; i<S7; i++) {
-  
-      ld trot = -i * M_PI * 2 / (S7+.0);
-      transmatrix T = i < 0 ? Id : spin(trot) * xpush(cgi.tessf) * pispin;
-      hyperpoint H = View * tC0(T);
-      if(H[LDIM] < best) best = H[LDIM], turn = i, TB = T;
-      }
-  
-    if(turn >= 0) {
-      View = View * TB;
-      fixmatrix(View);
-      viewctr = viewctr + turn + wstep;
-      }
-    }
   }
 
 void addball(ld a, ld b, ld c) {
@@ -1592,13 +1475,9 @@ EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   View = models::rotmatrix();
   // EUCLIDEAN
-  if(!masterless) 
-    viewctr.at = cwt.at->master,
-    viewctr.spin = cwt.spin;
-  else centerover = cwt;
+  centerover = cwt.at;
   cwtV = View;
   nisot::local_perspective = Id;
-  if(hybri) hybrid::current_view_level = hybrid::get_where(cwt.at).second;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }

@@ -157,14 +157,14 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
 EX transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[LDIM][LDIM] == 0) {
-    if(euwrap && centerover.at && masterless) 
-      t = calc_relative_matrix(c, centerover.at, C0);
+    if(euwrap && centerover && masterless) 
+      t = calc_relative_matrix(c, centerover, C0);
     else if(masterless && WDIM == 2) {
-      if(!centerover.at) centerover = cwt;
-      t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
+      if(!centerover) centerover = cwt.at;
+      t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(cellwalker(centerover)));
       }
     else 
-      t = actualV(viewctr, actual_view_transform * View) * calc_relative_matrix(c, viewcenter(), C0);
+      t = calc_relative_matrix(c, centerover, C0);
     }
   return t;
   }

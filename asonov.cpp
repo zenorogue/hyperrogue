@@ -153,7 +153,7 @@ struct hrmap_asonov : hrmap {
   void draw() override {
     dq::visited_by_matrix.clear();
 
-    dq::enqueue_by_matrix(viewctr.at, cview());
+    dq::enqueue_by_matrix(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();

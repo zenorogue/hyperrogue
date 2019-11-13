@@ -16,7 +16,7 @@ EX int musicvolume = 60;
 EX int effvolume = 60;
 
 EX eLand getCurrentLandForMusic() {
-  eLand id = ((anims::center_music()) && centerover.at) ? centerover.at->land : cwt.at->land;
+  eLand id = ((anims::center_music()) && centerover) ? centerover->land : cwt.at->land;
   if(isHaunted(id)) id = laHaunted;
   if(id == laWarpSea) id = laWarpCoast;
   if(id == laMercuryRiver) id = laTerracotta;

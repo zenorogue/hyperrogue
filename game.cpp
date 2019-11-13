@@ -3062,7 +3062,7 @@ EX int pathlock = 0;
 
 EX void compute_graphical_distance() {
   if(pathlock) { printf("path error: compute_graphical_distance\n"); }
-  cell *c1 = centerover.at ? centerover.at : pd_from ? pd_from : cwt.at;
+  cell *c1 = centerover ? centerover : pd_from ? pd_from : cwt.at;
   int sr = get_sightrange_ambush();
   if(pd_from == c1 && pd_range == sr) return;
   clear_pathdata();

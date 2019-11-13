@@ -970,7 +970,6 @@ void init_textureconfig() {
   addsaver(si_save.id, "center type", 1);
   addsaver(si_save.dir, "center direction", 0);
   addsaver(si_save.reflect, "center reflection", false);
-  addsaver(viewctr.spin, "center spin", 0);
   addsaver(config.data.twidth, "texture resolution", 2048);
   addsaver(config.gsplits, "precision", 1);
   
@@ -1012,7 +1011,7 @@ bool texture_config::save() {
   targetgeometry = geometry;
   targetvariation = variation;
 
-  cell *ctr = viewcenter();
+  cell *ctr = centerover;
   si_save = patterns::getpatterninfo0(ctr);
   
   if(archimedean) csymbol = arcm::current.symbol;
@@ -1071,11 +1070,9 @@ bool texture_config::load() {
     celllister cl(currentmap->gamestart(), 20, 10000, NULL);
     bool found = false;
     for(cell *c: cl.lst) if(euclid || ctof(c)) {
-      cell *ctr = viewcenter();
       auto si_here = patterns::getpatterninfo0(c);
       if(si_here.id == si_save.id && si_here.reflect == si_save.reflect && si_here.dir == si_save.dir) {
-        if(euclid) centerover.at = ctr;
-        else viewctr.at = ctr->master;
+        centerover = c;
         found = true;
         break;
         }

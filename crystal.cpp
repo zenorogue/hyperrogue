@@ -562,7 +562,7 @@ struct hrmap_crystal : hrmap_standard {
     // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
     
     dq::visited_by_matrix.clear();
-    dq::enqueue_by_matrix(viewctr.at, cview());
+    dq::enqueue_by_matrix(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();

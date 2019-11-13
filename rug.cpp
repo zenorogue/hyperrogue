@@ -676,7 +676,7 @@ EX void buildRug() {
     return;
     }
   
-  celllister cl(centerover.at ? centerover.at : cwt.at, get_sightrange(), vertex_limit, NULL);
+  celllister cl(centerover ? centerover : cwt.at, get_sightrange(), vertex_limit, NULL);
 
   map<cell*, rugpoint *> vptr;
   

@@ -1525,9 +1525,9 @@ void celldrawer::draw_features_and_walls_3d() {
         b = !isWall3(c->move(a), dummy);
       if(b) {
         if(pmodel == mdPerspective && !sphere && !quotient && !penrose && !nonisotropic && !hybri && !experimental && !nih) {
-          if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
-          else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(viewcenter())) continue;
-          else if(c->move(a)->master->distance > c->master->distance && c->master->distance > viewctr.at->distance && !quotient) continue;
+          if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(centerover)) continue;
+          else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(centerover)) continue;
+          else if(c->move(a)->master->distance > c->master->distance && c->master->distance > centerover->master->distance && !quotient) continue;
           }
         else if(sol && in_perspective() && !nih && !asonov::in()) {
           ld b = vid.binary_width * log(2) / 2;
@@ -1725,15 +1725,6 @@ void celldrawer::bookkeeping() {
     mouseover2 = c;
     }
 
-  if(!masterless) {
-    double dfc = euclid ? intval(tC0(V), C0) : V[LDIM][LDIM];
-  
-    if(dfc < centdist) {
-      centdist = dfc;
-      centerover = cw;
-      }
-    }
-  
   int orbrange = (items[itRevolver] ? 3 : 2);
   
   if(c->cpdist <= orbrange) if(multi::players > 1 || multi::alwaysuse) 

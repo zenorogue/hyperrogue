@@ -57,7 +57,7 @@ EX movedir mousedest;
 EX ld shiftmul = 1;
 
 EX cell *mouseover, *mouseover2, *lmouseover;
-EX ld modist, modist2, centdist;
+EX ld modist, modist2;
 
 EX int lastt;
 
@@ -431,7 +431,7 @@ EX void handleKeyNormal(int sym, int uni) {
 
   if(DEFAULTNOR(sym)) {
     gmodekeys(sym, uni);
-    if(uni == 'm' && canmove && (centerover == cwt ? mouseover : centerover.at))
+    if(uni == 'm' && canmove && (centerover == cwt.at ? mouseover : centerover))
       performMarkCommand(mouseover);
     }
   
@@ -440,11 +440,12 @@ EX void handleKeyNormal(int sym, int uni) {
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
+      cell *target = GDIM == 3 ? mouseover : centerover;
       if(playermoved && items[itStrongWind]) { 
         cell *c = whirlwind::jumpDestination(cwt.at);
-        if(c) centerover.at = c;
+        if(c) target = c;
         }
-      targetRangedOrb(GDIM == 3 ? mouseover : centerover.at, roKeyboard);
+      targetRangedOrb(target, roKeyboard);
       sym = 0; uni = 0;
       }
     }
