@@ -68,7 +68,6 @@ struct hrmap_hyperbolic : hrmap_standard {
 
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;
-  println(hlog, "bounded = ", !!bounded, " dcal = ", isize(dcal));
   if(bounded) {
     celllister cl(gamestart(), 1000000, 1000000, NULL);
     default_allcells = cl.lst;
