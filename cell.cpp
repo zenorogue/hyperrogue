@@ -60,7 +60,7 @@ struct hrmap {
   virtual transmatrix spin_from(cell *c, int d, ld bonus=0) {
     ld sa = spin_angle(c, d);
     if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus - sa); }
-    transmatrix T = spintox(tC0(iadj(c, d)));
+    transmatrix T = spintox(tC0(adj(c, d)));
     if(WDIM == 3) return T * cspin(2, 0, bonus);
     return T * spin(bonus);
     }
