@@ -1477,7 +1477,7 @@ EX void resetview() {
   NLP = Id;
   if(cwt.at) {
     centerover = cwt.at;
-    View = inverse(ddspin(cwt.at, cwt.spin));
+    View = iddspin(cwt.at, cwt.spin);
     if(cwt.mirrored) View = Mirror * View;
     if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
     if(GDIM == 3 && !prod) View = cspin(0, 2, M_PI/2) * View;
