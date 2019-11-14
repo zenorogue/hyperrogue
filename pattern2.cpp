@@ -1604,10 +1604,7 @@ EX namespace patterns {
         // if(c->master->distance % 2 == 0) return 0;
         if(hrand(100) == 0) return 0;
         return 0x1000000 | (0xFFFFFF & (0x671349 + y * 0x512369));
-        */
         if(hrand(100) >= 1) return 0;
-        static int g = 0;
-        println(hlog, "generated ", ++g);
         return 0x1000000 | hrand(0x1000000);
 //        if(c->master->distance == 1) return 0x1FF0000;
 //        if(c->master->distance == -1) return 0x100FF00;
