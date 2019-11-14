@@ -69,6 +69,14 @@ EX transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_
 namespace gp { extern gp::local_info draw_li; }
 #endif
 
+transmatrix hrmap_standard::adj(heptagon *h, int d) {
+  transmatrix T = cgi.heptmove[d];
+  if(h->c.mirror(d)) T = T * Mirror;
+  int sp = h->c.spin(d);
+  if(sp) T = T * spin(2*M_PI*sp/S7);
+  return T;
+  }
+
 transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
   heptagon *h1 = c1->master;
@@ -91,64 +99,57 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
     if(bounded) {
       transmatrix T;
       ld bestdist = 1e9;
-      for(int d=0; d<S7; d++) if(h2->move(d)) {
-        int sp = h2->c.spin(d);
-        transmatrix S = cgi.heptmove[sp] * spin(2*M_PI*d/S7);
-        if(h2->c.mirror(d)) S = cgi.heptmove[sp] * Mirror * spin(2*M_PI*d/S7);
-        if(h2->move(d) == h1) {
+      for(int d=0; d<S7; d++) {
+        auto hm = h1->move(d);
+        if(!hm) continue;
+        transmatrix S = adj(h1, d);
+        if(hm == h2) {
           transmatrix T1 = gm * S * where;
           auto curdist = hdist(tC0(T1), point_hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
-        if(geometry != gMinimal) for(int e=0; e<S7; e++) if(h2->move(d)->move(e) == h1) {
-          int sp2 = h2->move(d)->c.spin(e);
-          transmatrix T1 = gm * cgi.heptmove[sp2] * spin(2*M_PI*e/S7) * S * where;
+        if(geometry != gMinimal) for(int e=0; e<S7; e++) if(hm->move(e) == h2) {
+          transmatrix T1 = gm * S * adj(hm, e) * where;
           auto curdist = hdist(tC0(T1), point_hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
         }
       if(bestdist < 1e8) return T;
       }
-    for(int d=0; d<S7; d++) if(h2->move(d) == h1) {
-      int sp = h2->c.spin(d);
-      return gm * cgi.heptmove[sp] * spin(2*M_PI*d/S7) * where;
+    for(int d=0; d<S7; d++) if(h1->move(d) == h2) {
+      return gm * adj(h1, d) * where;
       }
     if(among(geometry, gFieldQuotient, gBring, gMacbeath)) {
       int bestdist = 1000000, bestd = 0;
       for(int d=0; d<S7; d++) {
-        int dist = celldistance(h2->cmove(d)->c7, c1);
+        int dist = celldistance(h1->cmove(d)->c7, h2->c7);
         if(dist < bestdist) bestdist = dist, bestd = d;
         }
-      int sp = h2->c.spin(bestd);
-      where = cgi.heptmove[sp] * spin(2*M_PI*bestd/S7) * where;
-      h2 = h2->move(bestd);
+      gm = gm * adj(h1, bestd);
+      h1 = h1->move(bestd);
       }
     #if CAP_CRYSTAL
     else if(cryst) {
       for(int d3=0; d3<S7; d3++) {
-        auto h3 = h2->cmove(d3);
-        if(visited.count(h3)) continue;
-        visited.insert(h3);
-        int sp3 = h2->c.spin(d3);
-        transmatrix where3 = cgi.heptmove[sp3] * spin(2*M_PI*d3/S7) * where;
-        ld dist = crystal::space_distance(h3->c7, c1);
-        hbdist[dist].emplace_back(h3, where3);
+        auto hm = h1->cmove(d3);
+        if(visited.count(hm)) continue;
+        visited.insert(hm);
+        ld dist = crystal::space_distance(hm->c7, c2);
+        hbdist[dist].emplace_back(hm, gm * adj(h1, d3));
         }
       auto &bestv = hbdist.begin()->second;
-      tie(h2, where) = bestv.back();
+      tie(h1, gm) = bestv.back();
       bestv.pop_back();
       if(bestv.empty()) hbdist.erase(hbdist.begin());
       }
     #endif
     else if(h1->distance < h2->distance) {
-      int sp = h2->c.spin(0);
+      where = iadj(h2, 0) * where;
       h2 = h2->move(0);
-      where = cgi.heptmove[sp] * where;
       }
     else {
-      int sp = h1->c.spin(0);
+      gm = gm * adj(h1, 0);
       h1 = h1->move(0);
-      gm = gm * cgi.invheptmove[sp];
       }
     }
   return gm * where;
@@ -167,40 +168,6 @@ EX transmatrix &ggmatrix(cell *c) {
       t = calc_relative_matrix(c, centerover, C0);
     }
   return t;
-  }
-
-EX transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
-  transmatrix gm = Id;
-  heptagon *h2 = c->master;
-  transmatrix where = Id;
-  if(0);
-  #if CAP_GP
-  else if(GOLDBERG && c != c->master->c7) {
-    auto li = gp::get_local_info(c);
-    where = cgi.gpdata->Tf[li.last_dir][li.relative.first&31][li.relative.second&31][gmod(li.total_dir, S6)];
-    }
-  #endif
-  else if(BITRUNCATED) for(int d=0; d<S7; d++) if(h2->c7->move(d) == c)
-    where = cgi.hexmove[d];
-  // always add to last!
-  while(h1 != h2) {
-    for(int d=0; d<S7; d++) if(h1->move(d) == h2) printf("(adj) ");
-    if(h1->distance < h2->distance) {
-      int sp = h2->c.spin(0);
-      printf("A%d ", sp);
-      h2 = h2->move(0);
-      where = cgi.heptmove[sp] * where;
-      }
-    else {
-      int sp = h1->c.spin(0);
-      printf("B%d ", sp);
-      h1 = h1->move(0);
-      gm = gm * cgi.invheptmove[sp];
-      }
-    }
-  println(hlog, "OK");
-  println(hlog, gm * where);
-  return gm * where;
   }
 
 #if HDR
@@ -288,10 +255,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     base = hybrid::get_at(w.first, w.second);
     return;
     }
-  if(sl2) {
-    virtualRebase_cell(base, at, check);
-    return;
-    }
+
   if((euclid || sphere) && WDIM == 2) {
     again:
     if(euwrap) for(int i=0; i<6; i++) {
@@ -316,57 +280,7 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
     return;
     }
 
-  at = master_relative(base) * at;
-  base = base->master->c7;
-    
-  while(true) {
-  
-    horo_distance currz(check(at));
-  
-    heptagon *h = base->master;
-    
-    cell *newbase = NULL;
-    
-    transmatrix bestV;
-    
-    if(WDIM == 2 && !binarytiling && !penrose) for(int d=0; d<h->degree(); d++) {
-      heptspin hs(h, d, false);
-      heptspin hs2 = hs + wstep;
-      transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * cgi.invheptmove[d];
-      horo_distance newz(check(V2 * at));
-      if(newz < currz) {
-        currz = newz;
-        bestV = V2;
-        newbase = hs2.at->c7;
-        }
-      }
-
-    if(newbase) {
-      base = newbase;
-      at = bestV * at;
-      }
-    else {
-      if(tohex && BITRUNCATED) for(int d=0; d<base->type; d++) {
-        cell *c = createMov(base, d);
-        transmatrix V2 = spin(-base->c.spin(d)*2*M_PI/S6) * cgi.invhexmove[d];
-        horo_distance newz(check(V2 * at));
-        if(newz < currz) {
-          currz = newz;
-          bestV = V2;
-          newbase = c;
-          }
-        }
-      if(newbase) {
-        base = newbase;
-        at = bestV * at;
-        }
-      else at = master_relative(base, true) * at;
-      if(binarytiling || (tohex && (GOLDBERG || IRREGULAR)) || WDIM == 3 || penrose)
-        virtualRebase_cell(base, at, check);
-      break;
-      }
-    }
-
+  virtualRebase_cell(base, at, check);
   }
 
 EX void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
@@ -382,8 +296,7 @@ EX void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
     });
   }
 
-// works only in geometries similar to the standard one, and only on heptagons
-EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
+void hrmap_hyperbolic::virtualRebase(heptagon*& base, transmatrix& at) {
 
   while(true) {
   
@@ -398,7 +311,7 @@ EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
     for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
-      transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * cgi.invheptmove[d] * at;
+      transmatrix V2 = iadj(h, d) * at;
       double newz = V2[LDIM][LDIM];
       if(newz < currz) {
         currz = newz;
@@ -421,46 +334,37 @@ EX bool no_easy_spin() {
   return NONSTDVAR || archimedean || WDIM == 3 || binarytiling || penrose;
   }
 
-double hexshiftat(cell *c) {
-  if(binarytiling) return 0;
-  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) return cgi.hexshift + 2*M_PI/S7;
-  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) return cgi.hexshift + 2*M_PI/S7;
-  if(cgi.hexshift && ctof(c)) return cgi.hexshift;
-  return 0;
-  }
-
-EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) {
-  if(no_easy_spin()) {
-    if(hybri) return PIU( ddspin(c, d, bonus) );
-    transmatrix T = rspintox(tC0(currentmap->adj(c, d)));
-    if(WDIM == 3) return T * cspin(2, 0, bonus);
-    return T * spin(bonus);
+ld hrmap_standard::spin_angle(cell *c, int d) {
+  ld hexshift = 0;
+  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
+  else if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
+  else if(cgi.hexshift && ctof(c)) hexshift = cgi.hexshift;
+  if(IRREGULAR) {
+    auto id = irr::cellindex[c];
+    auto& vs = irr::cells[id];
+    if(d < 0 || d >= c->type) return 0;
+    auto& p = vs.jpoints[vs.neid[d]];
+    return -atan2(p[1], p[0]) - hexshift;
     }
-  return spin(displayspin(c, d) + bonus - hexshiftat(c));
+  else if(masterless)
+    return - d * 2 * M_PI / c->type - hexshift;
+  else
+    return M_PI - d * 2 * M_PI / c->type - hexshift;
   }
 
-EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) {
-  if(no_easy_spin()) {
-    if(hybri) return PIU( iddspin(c, d, bonus) );
-    transmatrix T = spintox(tC0(currentmap->iadj(c, d)));
-    if(WDIM == 3) return T * cspin(2, 0, bonus);
-    return T * spin(bonus);
-    }
-  return spin(hexshiftat(c) - displayspin(c, d) + bonus);
+EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_to(c, d, bonus); }
+EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_from(c, d, bonus); }
+EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
+    
+double hrmap_standard::spacedist(cell *c, int i) {
+  if(NONSTDVAR) return hrmap::spacedist(c, i);
+  if(!BITRUNCATED) return cgi.tessf;
+  if(c->type == S6 && (i&1)) return cgi.hexhexdist;
+  return cgi.crossf;
   }
 
-EX double cellgfxdist(cell *c, int i) {
-  if(no_easy_spin())
-    return hdist0(tC0(currentmap->adj(c, i)));
-  if(euclid) {
-    if(c->type == 8 && (i&1)) return cgi.crossf * sqrt(2);
-    return cgi.crossf;
-    }
-  return !BITRUNCATED ? cgi.tessf : (c->type == 6 && (i&1)) ? cgi.hexhexdist : cgi.crossf;
-  }
-
-transmatrix hrmap::adj(cell *c, int i) {
-  if(no_easy_spin()) return calc_relative_matrix(c->move(i), c, i);
+transmatrix hrmap_standard::adj(cell *c, int i) {
+  if(NONSTDVAR) return calc_relative_matrix(c->cmove(i), c, i);
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
   if(c->c.mirror(i)) T = T * Mirror;
@@ -468,8 +372,6 @@ transmatrix hrmap::adj(cell *c, int i) {
   T = T * iddspin(c1, c->c.spin(i), M_PI);
   return T;
   }
-
-EX transmatrix cellrelmatrix(cell *c, int i) { return currentmap->adj(c, i); }
 
 EX double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
@@ -695,7 +597,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     }
   #endif
   
-  return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
+  return currentmap->adj(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
   }
 
 EX hyperpoint midcorner(cell *c, int i, ld v) {

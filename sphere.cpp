@@ -24,10 +24,8 @@ EX vector<int> siblings;
   
 struct hrmap_spherical : hrmap_standard {
   heptagon *dodecahedron[12];
-  eVariation mvar;
 
   hrmap_spherical() {
-    mvar = variation;
     for(int i=0; i<spherecells(); i++) {
       heptagon& h = *(dodecahedron[i] = tailored_alloc<heptagon> (S7));
       h.s = hsOrigin;
@@ -147,7 +145,6 @@ struct hrmap_spherical : hrmap_standard {
   heptagon *getOrigin() { return dodecahedron[0]; }
 
   ~hrmap_spherical() {
-    dynamicval<eVariation> ph(variation, mvar);
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
     for(int i=0; i<spherecells(); i++) tailored_delete(dodecahedron[i]);
     }    

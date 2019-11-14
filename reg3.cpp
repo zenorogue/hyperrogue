@@ -213,6 +213,9 @@ EX namespace reg3 {
   struct hrmap_quotient3 : hrmap {
     vector<heptagon*> allh;
     vector<vector<transmatrix>> tmatrices;    
+
+    transmatrix adj(heptagon *h, int d) { return tmatrices[h->fieldval][d]; }
+    transmatrix adj(cell *c, int d) override { return adj(c->master, d); }  
     };
 
   int encode_coord(const crystal::coord& co) {
@@ -570,13 +573,13 @@ EX namespace reg3 {
           dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
         }
       }
-  
+
     transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
       if(h1 == h2) return Id;
       int d = hr::celldistance(h2->c7, h1->c7);
 
       for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
-        return tmatrices[h1->fieldval][a] * relative_matrix(h2, h1->move(a));
+        return adj(h1, a) * relative_matrix(h2, h1->move(a));
       
       println(hlog, "error in hrmap_field3:::relative_matrix");
       return Id;
@@ -723,7 +726,7 @@ EX namespace reg3 {
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3);
         dynamicval<hrmap*> cm(currentmap, binary_map);
-        binary::virtualRebaseSimple(alt, T);
+        binary_map->virtualRebase(alt, T);
         }
       
       fixmatrix(T);
@@ -861,14 +864,20 @@ EX namespace reg3 {
         if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
     
         for(int i=0; i<S7; i++) if(h->move(i)) {
-          #if CAP_FIELD
-          if(quotient_map) dq::enqueue(h->move(i), V * quotient_map->tmatrices[h->fieldval][i]);
-          else
-          #endif
-          dq::enqueue(h->move(i), V * relative_matrix(h->move(i), h));
+          dq::enqueue(h->move(i), V * adj(h, i));
           }
         }
       }
+    
+    transmatrix adj(heptagon *h, int d) {
+      #if CAP_FIELD
+      if(quotient_map) return quotient_map->adj(h, d);
+      else
+      #endif
+      return relative_matrix(h->cmove(d), h);
+      }
+     
+    transmatrix adj(cell *c, int d) override { return adj(c->master, d); }
     
     transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
       auto p1 = reg_gmatrix[h1];
@@ -1073,7 +1082,7 @@ int dist_alt(cell *c) {
 #if MAXMDIM >= 4
 EX cellwalker strafe(cellwalker cw, int j) {
   hyperpoint hfront = tC0(adjmoves[cw.spin]);
-  transmatrix T = currentmap->relative_matrix(cw.at->cmove(j)->master, cw.at->master);
+  transmatrix T = currentmap->adj(cw.at, j);
   for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
     if(hdist(hfront, T * tC0(adjmoves[i])) < strafedist + .01)
       return cellwalker(cw.at->move(j), i);

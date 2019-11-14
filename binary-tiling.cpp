@@ -192,6 +192,8 @@ EX namespace binary {
     
     int nextdir(int choices) { return directions_generator() % choices; }
 
+    heptagon *getOrigin() override { return origin; }
+
     hrmap_binary() { 
       set_seed();
       origin = hyperbolic_origin();
@@ -427,27 +429,22 @@ EX namespace binary {
         if(!do_draw(c, V)) continue;
         drawcell(c, V);
   
-        if(geometry == gBinaryTiling) {
-          dq::enqueue(h->move(bd_up), V * xpush(-log(2)));
-          dq::enqueue(h->move(bd_right), V * parabolic(1));
-          dq::enqueue(h->move(bd_left), V * parabolic(-1));
-          if(c->type == 6)
-            dq::enqueue(h->move(bd_down), V * xpush(log(2)));
-          if(c->type == 7) {
-            dq::enqueue(h->move(bd_down_left), V * parabolic(-1) * xpush(log(2)));
-            dq::enqueue(h->move(bd_down_right), V * parabolic(1) * xpush(log(2)));
-            }
-          }
-        else {
-          for(int i=0; i<S7; i++)
-            dq::enqueue(h->move(i), V * tmatrix(h, i));
-          }
+        for(int i=0; i<h->type; i++)
+          dq::enqueue(h->cmove(i), V * adj(h, i));
         }
       }
-    
+
     // hrmap_standard overrides hrmap's default, override it back
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
       return relative_matrix(c2->master, c1->master);
+      }
+    
+    int updir_at(heptagon *h) {
+      if(geometry != gBinaryTiling) return updir();
+      else if(type_of(h) == 6) return bd_down;
+      else if(mapside(h) == 1) return bd_left;
+      else if(mapside(h) == -1) return bd_right;
+      else throw "unknown updir";
       }
 
     transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
@@ -455,30 +452,15 @@ EX namespace binary {
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
       transmatrix gm = Id, where = Id;
       while(h1 != h2) {
-        int up_step = updir();
         if(h1->distance <= h2->distance) {
-          if(geometry != gBinaryTiling)
-            where = itmatrix(h2, up_step) * where, h2 = may_create_step(h2, up_step);
-          else {
-            if(type_of(h2) == 6)
-              h2 = may_create_step(h2, bd_down), where = xpush(-log(2)) * where;
-            else if(mapside(h2) == 1)
-              h2 = may_create_step(h2, bd_left), where = parabolic(+1) * where;
-            else if(mapside(h2) == -1)
-              h2 = may_create_step(h2, bd_right), where = parabolic(-1) * where;
-            }
+          int d = updir_at(h2);
+          where = iadj(h2, d) * where;
+          h2 = may_create_step(h2, d);
           }
         else {
-          if(geometry != gBinaryTiling)
-            gm = gm * tmatrix(h1, up_step), h1 = may_create_step(h1, up_step);
-          else {
-            if(type_of(h1) == 6)
-              h1 = may_create_step(h1, bd_down), gm = gm * xpush(log(2));
-            else if(mapside(h1) == 1)
-              h1 = may_create_step(h1, bd_left), gm = gm * parabolic(-1);
-            else if(mapside(h1) == -1)
-              h1 = may_create_step(h1, bd_right), gm = gm * parabolic(+1);
-            }
+          int d = updir_at(h1);
+          gm = gm * adj(h1, d);
+          h1 = may_create_step(h1, d);
           }
         }
       return gm * where;
@@ -525,6 +507,79 @@ EX namespace binary {
         }
       return res;
       }
+    
+    ld spin_angle(cell *c, int d) {
+      if(WDIM == 3 || geometry == gBinary4 || geometry == gTernary) {
+        return hrmap::spin_angle(c, d);
+        }
+      if(d == NODIR) return 0;
+      if(d == c->type-1) d++;
+      return -(d+2)*M_PI/4;
+      }
+
+    const transmatrix adj(heptagon *h, int dir) {
+      if(geometry == gBinaryTiling) switch(dir) {
+        case bd_up: return xpush(-log(2));
+        case bd_left: return parabolic(-1);
+        case bd_right: return parabolic(+1);
+        case bd_down: 
+          if(h->type == 6) return xpush(log(2));
+          /* case bd_down_left: */
+          return parabolic(-1) * xpush(log(2));
+        case bd_down_right: 
+          return parabolic(+1) * xpush(log(2));
+        case bd_up_left:
+          return xpush(-log(2)) * parabolic(-1);
+        case bd_up_right:
+          return xpush(-log(2)) * parabolic(1);
+        default:
+          throw "unknown direction";
+        }
+      else if(use_direct_for(dir))
+        return direct_tmatrix[dir];
+      else {
+        h->cmove(dir);
+        return inverse_tmatrix[h->c.spin(dir)];
+        }
+      }
+
+    const transmatrix iadj(heptagon *h, int dir) { heptagon *h1 = h->cmove(dir); return adj(h1, h->c.spin(dir)); }
+  
+    transmatrix adj(cell *c, int dir) { return adj(c->master, dir); }    
+
+    void virtualRebase(heptagon*& base, transmatrix& at) override {
+    
+      while(true) {
+      
+        double currz = at[LDIM][LDIM];
+        
+        heptagon *h = base;
+        
+        heptagon *newbase = NULL;
+        
+        transmatrix bestV;
+        
+        for(int d=0; d<S7; d++) {
+          transmatrix V2 = iadj(h, d) * at;
+          double newz = V2[LDIM][LDIM];
+          if(newz < currz) {
+            currz = newz;
+            bestV = V2;
+            newbase = h->cmove(d);
+            }
+          }
+    
+        if(newbase) {
+          base = newbase;
+          at = bestV;
+          continue;
+          }
+    
+        return;
+        }
+      }
+
+    ~hrmap_binary() { clearfrom(origin); }
     };
 
   EX hrmap *new_map() { return new hrmap_binary; }
@@ -537,8 +592,8 @@ EX namespace binary {
 
   EX hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
 
-  transmatrix direct_tmatrix[14];
-  transmatrix inverse_tmatrix[14];
+  EX transmatrix direct_tmatrix[14];
+  EX transmatrix inverse_tmatrix[14];
 
   int use_direct;
   // directions in the 'use_direct' mask are taken from direct_tmatrix;
@@ -661,24 +716,6 @@ EX namespace binary {
       }
     for(int i=0; i<S7; i++) if(use_direct_for(i))
       inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
-    }
-  
-  EX const transmatrix& tmatrix(heptagon *h, int dir) {
-    if(use_direct_for(dir))
-      return direct_tmatrix[dir];
-    else {
-      h->cmove(dir);
-      return inverse_tmatrix[h->c.spin(dir)];
-      }
-    }
-
-  EX const transmatrix& itmatrix(heptagon *h, int dir) {
-    if(use_direct_for(dir))
-      return inverse_tmatrix[dir];
-    else {
-      h->cmove(dir);
-      return h->cmove(dir), direct_tmatrix[h->c.spin(dir)];
-      }
     }
   
   #if MAXMDIM == 4
@@ -927,38 +964,6 @@ EX int celldistance3(heptagon *c1, heptagon *c2) {
   }
 
 EX int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
-
-EX void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
-
-  while(true) {
-  
-    double currz = at[LDIM][LDIM];
-    
-    heptagon *h = base;
-    
-    heptagon *newbase = NULL;
-    
-    transmatrix bestV;
-    
-    for(int d=0; d<S7; d++) {
-      transmatrix V2 = itmatrix(h, d) * at;
-      double newz = V2[LDIM][LDIM];
-      if(newz < currz) {
-        currz = newz;
-        bestV = V2;
-        newbase = h->cmove(d);
-        }
-      }
-
-    if(newbase) {
-      base = newbase;
-      at = bestV;
-      continue;
-      }
-
-    return;
-    }
-  }
 #endif
 
 EX hyperpoint get_horopoint(ld y, ld x) {

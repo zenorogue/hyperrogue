@@ -555,7 +555,7 @@ struct hrmap_archimedean : hrmap {
       dynamicval<eGeometry> g(geometry, gNormal); 
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       U = T;
-      virtualRebaseSimple(alt, T);
+      current_altmap->virtualRebase(alt, T);
       U = U * inverse(T);
       }
     
@@ -655,7 +655,21 @@ struct hrmap_archimedean : hrmap {
       }
     return gm * where;
     }
-  
+      
+  ld spin_angle(cell *c, int d) {
+    if(PURE) {
+      auto& t1 = arcm::current.get_triangle(c->master, d-1);
+      return -(t1.first + M_PI / c->type);
+      }
+    else if(DUAL) {
+      auto& t1 = arcm::current.get_triangle(c->master, 2*d);
+      return -t1.first;
+      }
+    else { /* BITRUNCATED */
+      auto& t1 = arcm::current.get_triangle(c->master, d);
+      return -t1.first;
+      }
+    }
   };
 
 EX hrmap *new_map() { return new hrmap_archimedean; }

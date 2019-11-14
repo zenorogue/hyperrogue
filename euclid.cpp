@@ -342,7 +342,7 @@ template<class T> void build_euclidean_moves(cell *c, int vec, const T& builder)
     }
   }
 
-struct hrmap_euclid_any : hrmap {
+struct hrmap_euclid_any : hrmap_standard {
   void draw() override;
   };
 
@@ -396,7 +396,7 @@ struct hrmap_torus : hrmap_euclid_any {
       forCellIdEx(cc, i, c1) {
         int d1 = celldistance(cc, c2);
         if(d1 < d) {
-          t = t * cellrelmatrix(c1, i);
+          t = t * adj(c1, i);
           c1 = cc;
           d = d1;
           goto again;

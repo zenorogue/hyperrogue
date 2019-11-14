@@ -372,6 +372,10 @@ EX namespace solnihv {
       default: throw "not nihsolv";
       }
       }
+
+    transmatrix adj(cell *c, int d) override {
+      return adjmatrix(d, c->c.spin(d));
+      }
     
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
       for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c.spin(i));
@@ -1035,6 +1039,9 @@ EX namespace hybrid {
       for(auto& p: at) tailored_delete(p.second);
       }
   
+    virtual transmatrix spin_to(cell *c, int d, ld bonus) { return PIU( currentmap->spin_to(c, d, bonus) ); }
+    virtual transmatrix spin_from(cell *c, int d, ld bonus) { return PIU( currentmap->spin_from(c, d, bonus) ); }
+
     };
   
   hrmap_hybrid* hmap() { return (hrmap_hybrid*) currentmap; }
@@ -1558,7 +1565,7 @@ EX namespace rots {
       transmatrix Spin;
       cell *cw = where[c1].first;
       in_underlying([&] {
-        transmatrix T = cellrelmatrix(cw, i);
+        transmatrix T = adj(cw, i);
         hyperpoint h = tC0(T);
         Spin = inverse(gpushxto0(h) * T);
         d = hr::inverse_exp(h, iTable);

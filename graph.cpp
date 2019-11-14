@@ -305,46 +305,6 @@ void drawLightning(const transmatrix& V) {
 #endif
   }
 
-EX ld displayspin(cell *c, int d) {
-  if(0);
-  #if CAP_ARCM
-  else if(archimedean) {
-    if(PURE) {
-      auto& t1 = arcm::current.get_triangle(c->master, d-1);
-      return -(t1.first + M_PI / c->type);
-      }
-    else if(DUAL) {
-      auto& t1 = arcm::current.get_triangle(c->master, 2*d);
-      return -t1.first;
-      }
-    else { /* BITRUNCATED */
-      auto& t1 = arcm::current.get_triangle(c->master, d);
-      return -t1.first;
-      }
-    }
-  #endif
-  #if CAP_IRR
-  else if(IRREGULAR) {
-    auto id = irr::cellindex[c];
-    auto& vs = irr::cells[id];
-    if(d < 0 || d >= c->type) return 0;
-    auto& p = vs.jpoints[vs.neid[d]];
-    return -atan2(p[1], p[0]);
-    }
-  #endif
-  #if CAP_BT
-  else if(binarytiling) {
-    if(d == NODIR) return 0;
-    if(d == c->type-1) d++;
-    return -(d+2)*M_PI/4;
-    }
-  #endif
-  else if(masterless)
-    return - d * 2 * M_PI / c->type;
-  else
-    return M_PI - d * 2 * M_PI / c->type;
-  }
-
 #define UNTRANS (GDIM == 3 ? 0x000000FF : 0)
 
 EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
@@ -386,7 +346,7 @@ EX void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       ang %= sword::sword_angles;
 
 #if CAP_QUEUE || CAP_SHAPES
-      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * ddspin(c,0,M_PI); // (IRREGULAR ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
+      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * ddspin(c,0,M_PI);
 #endif
 
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
@@ -2301,15 +2261,10 @@ double chainAngle(cell *c, transmatrix& V, cell *c2, double dft, const transmatr
   }
 
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
-bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, ld bonus, const transmatrix &Vwhere, ld& length) {
-  if(!gmatrix0.count(c2)) {
-    V = V * ddspin(c,i,bonus);
-    length = cellgfxdist(c,i);
-    return false;
-    }
+bool chainAnimation(cell *c, cell *c2, transmatrix& V, const transmatrix &Vwhere, ld& length) {
   hyperpoint h = C0;
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
-  h = inverse(V) * Vwhere * calc_relative_matrix(c2, c, C0) * h;
+  h = inverse(V) * Vwhere * h;
   length = hdist0(h);
   V = V * rspintox(h);
   return true;  
@@ -2413,15 +2368,17 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
   
     transmatrix Vb0 = Vb;
     if(c->mondir != NODIR && GDIM == 3 && isAnyIvy(c)) {
-      queueline(tC0(Vparam), Vparam  * tC0(calc_relative_matrix(c->move(c->mondir), c, C0)), (col << 8) + 0xFF, 0);
+      queueline(tC0(Vparam), Vparam  * tC0(currentmap->adj(c, c->mondir)), (col << 8) + 0xFF, 0);
       }
     else if(c->mondir != NODIR) {
       
       if(mmmon) {
         ld length;
-        // cell *c2 = c->move(c->mondir);
-        if(nospinb) 
-          chainAnimation(c, Vb, c->move(c->mondir), c->mondir, 0, Vparam, length);
+        cell *c2 = c->move(c->mondir);
+        
+        if(nospinb) {
+          chainAnimation(c, c2, Vb, Vparam * currentmap->adj(c, c->mondir), length);
+          }
         else {
           Vb = Vb * ddspin(c, c->mondir);
           length = cellgfxdist(c, c->mondir);
@@ -2489,10 +2446,10 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
         }
         
       else {
-        int hdir = displayspin(c, c->mondir);
+        transmatrix T = Vparam * ddspin(c, c->mondir);
         color_t col = darkena(0x606020, 0, 0xFF);
         for(int u=-1; u<=1; u++)
-          queueline(Vparam*xspinpush0(hdir+M_PI/2, u*cgi.crossf/5), Vparam*xspinpush(hdir, cgi.crossf)*xspinpush0(hdir+M_PI/2, u*cgi.crossf/5), col, 2 + vid.linequality);
+          queueline(T*xspinpush0(M_PI/2, u*cgi.crossf/5), T*xspinpush(0, cgi.crossf)*xspinpush0(M_PI/2, u*cgi.crossf/5), col, 2 + vid.linequality);
         }
       }
 
@@ -2550,7 +2507,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
         if(part == 't') {
           if(nospinb) {
             ld length;
-            chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
+            chainAnimation(c, c2, Vb, Vparam * currentmap->adj(c, nd), length);
             Vb = Vb * pispin;
             }
           else {
@@ -2564,15 +2521,16 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
         else if(true) {
           if(nospinb) {
             ld length;
-            chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
+            chainAnimation(c, c2, Vb, Vparam * currentmap->adj(c, nd), length);
             Vb = Vb * pispin;
-            double ang = chainAngle(c, Vb, c->move(c->mondir), displayspin(c, c->mondir) - displayspin(c, nd), Vparam);
+            double ang = chainAngle(c, Vb, c->move(c->mondir), currentmap->spin_angle(c, c->mondir) - currentmap->spin_angle(c, nd), Vparam);
             ang /= 2;
             Vb = Vb * spin(M_PI-ang);
             }
           else {
-            ld hdir0 = displayspin(c, nd) + M_PI;
-            ld hdir1 = displayspin(c, c->mondir);
+            /* todo what if no spin_angle */
+            ld hdir0 = currentmap->spin_angle(c, nd) + M_PI;
+            ld hdir1 = currentmap->spin_angle(c, c->mondir);
             while(hdir1 > hdir0 + M_PI) hdir1 -= 2*M_PI;
             while(hdir1 < hdir0 - M_PI) hdir1 += 2*M_PI;
             Vb = Vb0 * spin((hdir0 + hdir1)/2 + M_PI);
@@ -2599,7 +2557,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
           int nd = neighborId(c, c2);
           if(nospinb) {
             ld length;
-            chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
+            chainAnimation(c, c2, Vb, Vparam * currentmap->adj(c, nd), length);
             Vb = Vb * pispin;
             }
           else {
@@ -2687,7 +2645,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
     if(c->hitpoints == 0) col = 0x404040;
     if(nospinb) {
       ld length;
-      chainAnimation(c, Vb, c->move(c->mondir), c->mondir, 0, Vparam, length);
+      chainAnimation(c, c->move(c->mondir), Vb, Vparam * currentmap->adj(c, c->mondir), length);
       Vb = Vb * pispin;
       Vb = Vb * xpush(cgi.tentacle_length - cellgfxdist(c, c->mondir));
       }

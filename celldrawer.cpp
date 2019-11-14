@@ -2047,7 +2047,7 @@ void celldrawer::draw_wall_full() {
     color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
     if(!chasmg) {
 
-#define D(v) darkena(gradient(0, col, 0, v * (sphere ? spherity(V * cellrelmatrix(c,i)) : 1), 1), fd, 0xFF)
+#define D(v) darkena(gradient(0, col, 0, v * (sphere ? spherity(V * currentmap->adj(c,i)) : 1), 1), fd, 0xFF)
 // #define D(v) darkena(col, fd, 0xFF)
 
       if(sha & 1) {
@@ -2242,9 +2242,8 @@ void celldrawer::add_map_effects() {
     if(tim > 1000) tim = 800;
     if(elec::havecharge && tim > 400) tim = 400;
     for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->ligon) {
-      ld hdir = displayspin(c, t);
       int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-      queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(xspinpush(hdir, cgi.crossf), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+      queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
       }
     }
 
@@ -2252,8 +2251,9 @@ void celldrawer::add_map_effects() {
     whirlwind::calcdirs(c);
     
     for(int i=0; i<whirlwind::qdirs; i++) {
-      ld hdir0 = displayspin(c, whirlwind::dfrom[i]) + M_PI;
-      ld hdir1 = displayspin(c, whirlwind::dto[i]);
+      ld hdir0 = currentmap->spin_angle(c, whirlwind::dfrom[i]) + M_PI;
+      ld hdir1 = currentmap->spin_angle(c, whirlwind::dto[i]);
+      /* todo what if no spin_angle */
   
       double ph1 = fractick(PURE ? 150 : 75);
       

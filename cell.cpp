@@ -35,11 +35,37 @@ struct hrmap {
     return relative_matrix(c2->master, c1->master);
     }
   virtual struct transmatrix adj(cell *c, int i);
-  virtual struct transmatrix iadj(cell *c, int i) { return adj(c->cmove(i), c->c.spin(i)); }
+  struct transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
   virtual void draw() {
     printf("undrawable\n");
     }
   virtual vector<hyperpoint> get_vertices(cell*);
+
+  virtual void virtualRebase(heptagon*& base, transmatrix& at) {
+    printf("virtualRebase called unexpectedly\n"); 
+    return;
+    }
+
+  static constexpr ld SPIN_NOT_AVAILABLE = 1e5;
+  virtual ld spin_angle(cell *c, int d) { return SPIN_NOT_AVAILABLE; }
+  
+  virtual transmatrix spin_to(cell *c, int d, ld bonus=0) {
+    ld sa = spin_angle(c, d);
+    if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus + sa); }
+    transmatrix T = rspintox(tC0(adj(c, d)));
+    if(WDIM == 3) return T * cspin(2, 0, bonus);
+    return T * spin(bonus);
+    }
+
+  virtual transmatrix spin_from(cell *c, int d, ld bonus=0) {
+    ld sa = spin_angle(c, d);
+    if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus - sa); }
+    transmatrix T = spintox(tC0(iadj(c, d)));
+    if(WDIM == 3) return T * cspin(2, 0, bonus);
+    return T * spin(bonus);
+    }
+
+  virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient */
@@ -47,6 +73,11 @@ struct hrmap_standard : hrmap {
   void draw() override;
   transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
   heptagon *create_step(heptagon *h, int direction) override;
+  transmatrix adj(cell *c, int d);
+  transmatrix adj(heptagon *h, int d);
+  transmatrix iadj(heptagon *h, int d) { return adj(h->cmove(d), h->c.spin(d)); }
+  ld spin_angle(cell *c, int d);
+  double spacedist(cell *c, int i) override;
   };
 
 void clearfrom(heptagon*);
@@ -54,19 +85,20 @@ void verifycells(heptagon*);
 
 struct hrmap_hyperbolic : hrmap_standard {
   heptagon *origin;
-  eVariation mvar;
   hrmap_hyperbolic();
   hrmap_hyperbolic(heptagon *origin);
   heptagon *getOrigin() override { return origin; }
   ~hrmap_hyperbolic() {
     // verifycells(origin);
     // printf("Deleting hyperbolic map: %p\n", this);
-    dynamicval<eVariation> ph(variation, mvar);
     clearfrom(origin);
     }
   void verify() override { verifycells(origin); }
+  void virtualRebase(heptagon*& base, transmatrix& at) override;
   };
 #endif
+
+transmatrix hrmap::adj(cell *c, int i) { return calc_relative_matrix(c->cmove(i), c, C0); }
 
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;
@@ -109,7 +141,8 @@ EX vector<hrmap*> allmaps;
 EX hrmap *newAltMap(heptagon *o) { return new hrmap_hyperbolic(o); }
 // --- hyperbolic geometry ---
 
-heptagon* hyperbolic_origin() {
+EX heptagon* hyperbolic_origin() {
+  int odegree = geometry == gBinaryTiling ? 6 : S7;
   heptagon *origin = tailored_alloc<heptagon> (odegree);
   heptagon& h = *origin;
   h.s = hsOrigin;
@@ -122,7 +155,7 @@ heptagon* hyperbolic_origin() {
   h.alt = NULL;
   h.distance = 0;
   if(IRREGULAR) irr::link_start(origin);
-  h.c7 = newCell(geometry == gBinaryTiling ? 6 : S7, origin);
+  h.c7 = newCell(odegree, origin);
   return origin;
   }
 

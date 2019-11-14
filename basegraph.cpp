@@ -586,7 +586,7 @@ EX void resetGL() {
     }
 #endif
   check_cgi();
-  cgi.require_shapes();
+  if(currentmap) cgi.require_shapes();
   #if MAXMDIM >= 4
   if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif

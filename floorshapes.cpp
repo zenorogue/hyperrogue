@@ -611,6 +611,17 @@ void geometry_information::generate_floorshapes() {
 
   DEBBI(DF_POLY, ("generate_floorshapes"));
   
+  heptagon modelh;
+  cell model;
+  model.master = &modelh;
+  model.type = modelh.type = S7;
+  for(int i=0; i<S7; i++) {
+    model.move(i) = &model;
+    modelh.move(i) = &modelh;
+    model.c.setspin(i, i, false);
+    modelh.c.setspin(i, i, false);
+    }
+
   if(WDIM == 3) ;
   
   #if CAP_IRR
@@ -639,12 +650,8 @@ void geometry_information::generate_floorshapes() {
   #if CAP_BT
   else if(penrose) {
     dynamicval<bool> ncor(approx_nearcorner, true);
-    heptagon master;
-    cell model;
-    model.master = &master;
-    model.type = 4;
     for(int i=0; i<2; i++) {
-      master.s = hstate(i); /* kite/dart shape */
+      modelh.s = hstate(i); /* kite/dart shape */
       generate_floorshapes_for(i, &model, 0, 0);
       }
     }
@@ -652,15 +659,12 @@ void geometry_information::generate_floorshapes() {
   
   #if CAP_ARCM
   else if(archimedean) {
-    heptagon master;
-    cell model;
-    model.master = &master;
-    arcm::parent_index_of(&master) = 0;
+    arcm::parent_index_of(&modelh) = 0;
     auto &ac = arcm::current;
     for(int i=0; i<2*ac.N + 2; i++) {
-      arcm::id_of(&master) = i;
+      arcm::id_of(&modelh) = i;
       model.type = isize(ac.triangles[i]);
-      if(DUAL) model.type /= 2, arcm::parent_index_of(&master) = !(i&1);
+      if(DUAL) model.type /= 2, arcm::parent_index_of(&modelh) = !(i&1);
       
       if(BITRUNCATED)
         generate_floorshapes_for(i, &model, !arcm::pseudohept(&model), arcm::pseudohept(&model) ? 0 : 1^(i&1));
@@ -673,10 +677,6 @@ void geometry_information::generate_floorshapes() {
   #endif
   
   else if(geometry == gBinary4) {
-    heptagon modelh;
-    cell model;
-    model.master = &modelh;
-    model.type = S7; 
     for(int i: {0,1}) {
       modelh.zebraval = i;
       generate_floorshapes_for(i, &model, 1, 0);
@@ -684,10 +684,6 @@ void geometry_information::generate_floorshapes() {
     }
 
   else if(geometry == gTernary) {
-    heptagon modelh;
-    cell model;
-    model.master = &modelh;
-    model.type = S7; 
     for(int i: {0,1,2}) {
       modelh.zebraval = i;
       generate_floorshapes_for(i, &model, 1, 0);
@@ -695,8 +691,6 @@ void geometry_information::generate_floorshapes() {
     }
 
   else if(PURE && geometry != gBinaryTiling && geosupport_football() < 2) {
-    cell model;
-    model.type = S7; 
     generate_floorshapes_for(0, &model, 1, 0);
     }
 

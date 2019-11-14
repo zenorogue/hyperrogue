@@ -85,7 +85,7 @@ void dqi_sky::draw() {
         transmatrix T1 = Tsh * si.T;
         do {
           this_poly.emplace_back(T1 * skypoint, colors[cw.at]);
-          T1 = T1 * cellrelmatrix(cw.at, cw.spin);
+          T1 = T1 * currentmap->adj(cw.at, cw.spin);
           cw += wstep; cw++;
           }
         while(cw != cw0);

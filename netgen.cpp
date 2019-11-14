@@ -84,9 +84,7 @@ EX namespace netgen {
       if(c->type == S7) {
         for(int i=0; i<c->type; i++) {
   
-          int hdir = displayspin(c, i) + M_PI / S7;
-        
-          transmatrix V2 = V * spin(hdir) * xpush(cgi.hexf);
+          transmatrix V2 = V * ddspin(c, i, M_PI/S7) * xpush(cgi.hexf);
           
           hcenter[ii][i] = V2 * C0;
           }
@@ -95,10 +93,8 @@ EX namespace netgen {
       if(c->type == S6) {
         for(int i=0; i<c->type; i++) {
   
-          int hdir = displayspin(c, i);
-        
           transmatrix V2 = 
-            V * spin(hdir) * xpush(cgi.crossf) * spin(M_PI+M_PI/S7) * xpush(cgi.hexf);
+            V * ddspin(c, i, 0) * xpush(cgi.crossf) * spin(M_PI+M_PI/S7) * xpush(cgi.hexf);
           
           hcenter[ii][i] = V2 * C0;
           }

@@ -113,7 +113,7 @@ struct geometry_information {
   ld rhexf;
 
   transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
-  transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
+  transmatrix invhexmove[MAX_EDGE];
 
   int base_distlimit;
 
@@ -521,7 +521,6 @@ void geometry_information::prepare_basics() {
   for(int d=0; d<S7; d++) 
     hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
 
-  for(int d=0; d<S7; d++) invheptmove[d] = inverse(heptmove[d]);
   for(int d=0; d<S7; d++) invhexmove[d] = inverse(hexmove[d]);
 
   hexhexdist = hdist(xpush0(crossf), xspinpush0(M_PI*2/S7, crossf));
