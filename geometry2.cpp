@@ -257,30 +257,6 @@ void virtualRebase(cell*& base, T& at, const U& check) {
     return;
     }
 
-  if((euclid || sphere) && WDIM == 2) {
-    again:
-    if(euwrap) for(int i=0; i<6; i++) {
-      // fix cylinder and square grid
-      auto newat = eumovedir(3+i) * at;
-      if(hdist0(check(newat)) < hdist0(check(at))) {
-        at = newat;
-        base = createMov(base, i);
-        goto again;
-        }
-      }
-    else forCellCM(c2, base) {
-      auto newat = inverse(ggmatrix(c2)) * ggmatrix(base) * at;
-      if(hypot(check(newat)[0], check(newat)[1])
-        < hypot(check(at)[0], check(at)[1])) {
-        at = newat;
-        base = c2;
-        goto again;
-        }
-      }
-    fixelliptic(at);
-    return;
-    }
-
   virtualRebase_cell(base, at, check);
   }
 
