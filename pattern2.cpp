@@ -2435,7 +2435,7 @@ EX namespace linepatterns {
       
       case patDual:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) {
-          gridlinef(V, C0, gmatrix[c2]*C0, col, 2 + vid.linequality);
+          gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
           }
         break;
 
