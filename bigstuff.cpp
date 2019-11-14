@@ -249,7 +249,8 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   alt->emeraldval = 0;
   alt->zebraval = 0;
   alt->distance = 0;
-  alt->fieldval = hybrid::get_where(centerover).second;
+  alt->fieldval = 0;
+  if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
   alt->c7 = NULL;
   alt->alt = alt;
   h->alt = alt;
