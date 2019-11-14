@@ -6723,6 +6723,7 @@ EX bool hasSafeOrb(cell *c) {
 EX void checkmove() {
 
   if(dual::state == 2) return;
+  if(shmup::on) return;
 
   dynamicval<eGravity> gs(gravity_state, gravity_state);
 
