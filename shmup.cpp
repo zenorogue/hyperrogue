@@ -2604,6 +2604,7 @@ EX void turn(int delta) {
         if(havewhat&HF_HEX) movehex_all();
         wandering();
         livecaves();
+        if(inv::on) inv::compute();
         terracotta();
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
