@@ -1768,6 +1768,10 @@ void moveBullet(monster *m, int delta) {
         m->dead = true;
         continue;
         }
+      if(m2->type == moButterfly && conv) {
+        m->dead = true;
+        continue;
+        }
       if(isBull(m2->type) && conv) {
         m->dead = true;
         // enrage herd bulls, awaken sleeping bulls
