@@ -320,7 +320,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     H /= exp(zlev);
     hybrid::in_underlying_geometry([&] { applymodel(H, ret); });
     ret[2] = zlev * models::product_z_scale;
-    ret = nisot::local_perspective * ret;
+    ret = NLP * ret;
     return;    
     }
   
@@ -514,7 +514,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdHyperboloid: {
 
       if(nonisotropic) {
-        // if(nisot::local_perspective_used()) H = nisot::local_perspective * H;
+        // if(nisot::local_perspective_used()) H = NLP * H;
         ret = lp_apply(H);
         break;
         }    
@@ -1369,7 +1369,7 @@ EX void centerpc(ld aspd) {
     int sl = snakelevel(cwt.at);
     if(sl && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
     View = inverse(T);
-    if(prod) nisot::local_perspective = inverse(pc->ori);
+    if(prod) NLP = inverse(pc->ori);
     if(WDIM == 2) rotate_view( cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) );
     return;
     }
@@ -1486,7 +1486,7 @@ EX void resetview() {
     View = Id;
     }
   cwtV = View;
-  nisot::local_perspective = Id;
+  NLP = Id;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
@@ -2069,7 +2069,7 @@ EX int cone_side(const hyperpoint H) {
 
 /** get the current orientation of the view */
 EX transmatrix& get_view_orientation() {
-  return prod ? nisot::local_perspective : View;
+  return prod ? NLP : View;
   }
 
 /** rotate the view using the given rotation matrix */

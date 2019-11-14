@@ -358,7 +358,7 @@ void display_data::set_projection(int ed) {
     else M[2][2] /= 1000;
     glhr::projection_multiply(M);
     if(nisot::local_perspective_used() && (shader_flags & SF_BOX))
-      glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
+      glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
     if(ed) {
       glhr::glmatrix m = glhr::id;
       m[2][0] -= ed;
@@ -374,10 +374,10 @@ void display_data::set_projection(int ed) {
     glhr::projection_multiply(glhr::scale(1, -1, -1));
     if(nisot::local_perspective_used()) {
       if(prod) {
-        for(int i=0; i<3; i++) nisot::local_perspective[3][i] = nisot::local_perspective[i][3] = 0;
-        nisot::local_perspective[3][3] = 1;
+        for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
+        NLP[3][3] = 1;
         }
-      glhr::projection_multiply(glhr::tmtogl_transpose(nisot::local_perspective));
+      glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
       }
     if(ed) {
       glhr::using_eyeshift = true;

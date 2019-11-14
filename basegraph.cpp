@@ -17,6 +17,8 @@ struct display_data {
   cell *precise_center;
   /** The current rotation, relative to precise_center. */
   transmatrix view_matrix;
+  /** Camera rotation, used in nonisotropic geometries. */
+  transmatrix local_perspective;
   /** The view relative to the player character. */
   transmatrix player_matrix;
   /** On-screen coordinates for all the visible cells. */
@@ -52,6 +54,7 @@ struct display_data {
 #define centerover (current_display->precise_center)
 #define gmatrix (current_display->cellmatrices)
 #define gmatrix0 (current_display->old_cellmatrices)
+#define NLP (current_display->local_perspective)
 
 #endif
 

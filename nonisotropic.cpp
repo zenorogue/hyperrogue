@@ -13,7 +13,6 @@ EX namespace nisot {
   typedef array<float, 3> ptlow;
   #endif
 
-  EX transmatrix local_perspective;
   #if HDR
   inline bool local_perspective_used() { return nonisotropic || prod; }
   #endif
@@ -1674,7 +1673,7 @@ EX namespace rots {
     auto g = std::move(gmatrix);
     auto g0 = std::move(gmatrix0);
     
-    ld alpha = atan2(inverse(nisot::local_perspective) * point3(1, 0, 0));
+    ld alpha = atan2(inverse(NLP) * point3(1, 0, 0));
     
     bool inprod = prod;
     transmatrix pView = View;

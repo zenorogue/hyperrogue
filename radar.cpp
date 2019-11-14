@@ -32,7 +32,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
     else return {false, h};
     }
   if(prod) h = product::inverse_exp(h);
-  if(nisot::local_perspective_used()) h = nisot::local_perspective * h;
+  if(nisot::local_perspective_used()) h = NLP * h;
   
   if(WDIM == 3) {
     if(d >= vid.radarrange) return {false, h};
@@ -141,7 +141,7 @@ EX void draw_radar(bool cornermode) {
   
   if(scompass) {
     auto compassdir = [&] (char dirname, hyperpoint h) {
-      h = nisot::local_perspective * h * .8;
+      h = NLP * h * .8;
       queueline(atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
       displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0xA04010);
       };

@@ -1171,11 +1171,11 @@ EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, iePrecision p) {
   }
 
 EX hyperpoint lp_iapply(const hyperpoint h) {
-  return nisot::local_perspective_used() ? inverse(nisot::local_perspective) * h : h;
+  return nisot::local_perspective_used() ? inverse(NLP) * h : h;
   }
 
 EX hyperpoint lp_apply(const hyperpoint h) {
-  return nisot::local_perspective_used() ? nisot::local_perspective * h : h;
+  return nisot::local_perspective_used() ? NLP * h : h;
   }
 
 EX hyperpoint smalltangent() { return xtangent(.1); }

@@ -817,7 +817,7 @@ EX void cast() {
   cell *cs = centerover;
 
   transmatrix T = cview();
-  if(nonisotropic) T = nisot::local_perspective * T;
+  if(nonisotropic) T = NLP * T;
   T = inverse(T);
 
   virtualRebase(cs, T, true);
@@ -849,7 +849,7 @@ EX void cast() {
   GLERR("uniform length");
   
   glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
-  if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(nisot::local_perspective)).as_array());
+  if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(NLP)).as_array());
   GLERR("uniform start");
   uniform2(o->uStartid, enc(ids[cs], 0));
   GLERR("uniform startid");

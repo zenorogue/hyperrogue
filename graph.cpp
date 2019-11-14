@@ -3541,7 +3541,7 @@ void make_clipping_planes() {
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
     sx /= hypot_d(3, sx);
     sx[3] = 0;
-    if(nisot::local_perspective_used()) sx = inverse(nisot::local_perspective) * sx;
+    if(nisot::local_perspective_used()) sx = inverse(NLP) * sx;
     clipping_planes.push_back(sx);
     };
   ld tx = current_display->tanfov;
@@ -4248,7 +4248,7 @@ EX void make_actual_view() {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) {
       transmatrix Start = inverse(actual_view_transform * View);
-      ld d = wall_radar(centerover, Start, nisot::local_perspective, max);
+      ld d = wall_radar(centerover, Start, NLP, max);
       actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * inverse(View); 
       }
     camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
@@ -4256,8 +4256,8 @@ EX void make_actual_view() {
   if(nonisotropic) {
     transmatrix T = actual_view_transform * View;
     transmatrix T2 = eupush( tC0(inverse(T)) );
-    nisot::local_perspective = T * T2;
-    actual_view_transform = inverse(nisot::local_perspective) * actual_view_transform;
+    NLP = T * T2;
+    actual_view_transform = inverse(NLP) * actual_view_transform;
     }
   #endif
   #if MAXMDIM >= 4
