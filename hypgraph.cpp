@@ -1474,19 +1474,20 @@ void ballgeometry() {
 EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   // EUCLIDEAN
+  NLP = Id;
   if(cwt.at) {
     centerover = cwt.at;
-    View = iddspin(cwt.at, cwt.spin);
+    View = inverse(ddspin(cwt.at, cwt.spin));
     if(cwt.mirrored) View = Mirror * View;
     if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
-    else View = cspin(2, 0, M_PI/2) * View;
+    if(GDIM == 3 && !prod) View = cspin(0, 2, M_PI/2) * View;
+    if(prod) NLP = cspin(0, 2, M_PI/2);
     }
   else if(currentmap) {
     centerover = currentmap->gamestart();
     View = Id;
     }
   cwtV = View;
-  NLP = Id;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
