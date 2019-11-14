@@ -57,7 +57,6 @@ EX void prepare() {
   A[1][0] = 1;
   A[1][1] = 2;
   
-  // if(true) {
   double det = hr::det(A);
   if(det != 1) { printf("wrong det\n"); return; }
   
@@ -97,17 +96,23 @@ EX void prepare() {
   straighten = inverse(build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0));
   }
 
+transmatrix coord_to_matrix(coord c, coord zero) {
+  transmatrix T = Id;
+
+  while(zero[2] != c[2]) {
+    int z = szgmod(c[2] - zero[2], period_z);
+    if(z > 0) zero = zero.up(), T = eupush(tz) * eupush(ty/2) * T;
+    else zero = zero.down(), T = eupush(-ty/2) * eupush(-tz) * T;
+    }
+  return T * eupush(tx * szgmod(c[0]-zero[0], period_xy) + ty * szgmod(c[1]-zero[1], period_xy));
+  }
+
 EX transmatrix adjmatrix(int i) {
   dynamicval<int> pxy(period_xy, 64);
   dynamicval<int> pz(period_z, 64);
-  coord c = coord(0,0,0).addmove(i);
-  if(c[0] > period_xy/2) c[0] -= period_xy;
-  if(c[1] > period_xy/2) c[1] -= period_xy;
-  if(c[2] > period_z/2) c[2] -= period_z;
-  transmatrix T = eupush(tz * c[2]) * eupush(tx * c[0] + ty * c[1]);;
-  if(i < 4) return T * eupush(ty/2);
-  if(i >= 6 && i < 10) return eupush(-ty/2) * T;
-  return T;
+  coord zero(0,0,0);
+  coord c = zero.addmove(i);
+  return coord_to_matrix(c, zero);
   }
   
 struct hrmap_asonov : hrmap {
@@ -149,7 +154,7 @@ struct hrmap_asonov : hrmap {
   
   virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
     for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
-    return Id;
+    return coord_to_matrix(coords[h2], coords[h1]);
     }
 
   void draw() override {
