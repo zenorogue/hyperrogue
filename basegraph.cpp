@@ -49,12 +49,12 @@ struct display_data {
   void set_all(int ed);
   };
 
-#define View (current_display->view_matrix)
-#define cwtV (current_display->player_matrix)
-#define centerover (current_display->precise_center)
-#define gmatrix (current_display->cellmatrices)
-#define gmatrix0 (current_display->old_cellmatrices)
-#define NLP (current_display->local_perspective)
+#define View (::hr::current_display->view_matrix)
+#define cwtV (::hr::current_display->player_matrix)
+#define centerover (::hr::current_display->precise_center)
+#define gmatrix (::hr::current_display->cellmatrices)
+#define gmatrix0 (::hr::current_display->old_cellmatrices)
+#define NLP (::hr::current_display->local_perspective)
 
 #endif
 
