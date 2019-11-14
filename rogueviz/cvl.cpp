@@ -6,7 +6,7 @@ namespace hr {
 #if CAP_SHOT
 struct location {
   transmatrix lView;
-  heptspin lviewctr;
+  cell *lco;
   };
 
 struct lineinfo {
@@ -19,10 +19,10 @@ map<int, lineinfo> lines;
 
 location loc_multiply(location orig, transmatrix T) {
   dynamicval<transmatrix> dv(View, orig.lView);
-  dynamicval<heptspin> dc(viewctr, orig.lviewctr);
+  dynamicval<cell*> dc(centerover, orig.lco);
   View = inverse(T) * View;
   for(int a=0; a<10; a++) optimizeview();
-  return location{View, viewctr};
+  return location{View, centerover};
   }
 
 bool show_map = false;
@@ -31,8 +31,8 @@ void cvl_marker() {
   if(show_map) for(auto& l: lines) {
     int id = 0;
     for(auto& loc: l.second.locs) {
-      if(gmatrix.count(loc.lviewctr.at->c7)) {
-        transmatrix T = gmatrix[loc.lviewctr.at->c7] * inverse(spin(loc.lviewctr.spin*2*M_PI/S7 + master_to_c7_angle())) * inverse(loc.lView);
+      if(gmatrix.count(loc.lco)) {
+        transmatrix T = gmatrix[loc.lco] * inverse(loc.lView);
         queuepoly(T, cgi.shAsymmetric, 0xFF00FFFF);
         queuestr(T, 1.0, its(l.first)+"/"+its(id), 0xFFFFFF);
         }
@@ -54,7 +54,7 @@ int readArgs() {
     int id;
     lineinfo l0;    
     scan(f, id, l0.plus_matrices, l0.minus_matrices);
-    l0.locs.push_back(location{View, viewctr});
+    l0.locs.push_back(location{View, centerover});
     for(int i=1; i<l0.plus_matrices; i++)
       l0.locs.push_back(loc_multiply(l0.locs.back(), xpush(1)));
     lines[id] = std::move(l0);
@@ -70,18 +70,18 @@ int readArgs() {
       for(int a=0; a<9; a++) scan(f, T[0][a]);
       scan(f, l1.plus_matrices, l1.minus_matrices);
       auto old = lines[id].locs[step];
-      println(hlog, "FROM ", old.lView, old.lviewctr, " id=", id, " step=", step);
+      println(hlog, "FROM ", old.lView, old.lco, " id=", id, " step=", step);
       l1.locs.push_back(loc_multiply(old, T));
-      println(hlog, "TO ", l1.locs.back().lView, l1.locs.back().lviewctr, "; creating ", l1.plus_matrices);
+      println(hlog, "TO ", l1.locs.back().lView, l1.locs.back().lco, "; creating ", l1.plus_matrices);
       for(int i=1; i<l1.plus_matrices; i++)
         l1.locs.push_back(loc_multiply(l1.locs.back(), xpush(1)));
-      println(hlog, "LAST ", l1.locs.back().lView, l1.locs.back().lviewctr);
+      println(hlog, "LAST ", l1.locs.back().lView, l1.locs.back().lco);
       }
     }
   else if(argis("-cvllist")) {
     for(auto& l: lines)
       for(auto& loc: l.second.locs) {
-        println(hlog, l.first, ". ", loc.lviewctr, " (dist=", celldist(loc.lviewctr.at->c7), "), View = ", loc.lView);
+        println(hlog, l.first, ". ", loc.lco, " (dist=", celldist(loc.lco), "), View = ", loc.lView);
         }
     }
   else if(argis("-cvlmap")) {
@@ -93,7 +93,7 @@ int readArgs() {
       int i = 0;
       for(auto& loc: p.second.locs) {
         dynamicval<transmatrix> dv(View, loc.lView);
-        dynamicval<heptspin> dc(viewctr, loc.lviewctr);
+        dynamicval<cell*> dc(centerover, loc.lco);
         shot::take(format(s.c_str(), p.first, i++));
         }
       }

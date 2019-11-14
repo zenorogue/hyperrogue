@@ -207,7 +207,7 @@ int notry = 0;
 void bantar() {
   if(!on) return;
   cwt = cellwalker(currentmap->gamestart(), 0);
-  viewctr = heptspin(cwt.at->master, 0);
+  centerover = cwt.at;
   infos.clear();
   
   vector<bantar_config> genchoices;

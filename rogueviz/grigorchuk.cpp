@@ -376,7 +376,7 @@ struct hrmap_grigorchuk : hrmap_standard {
   void draw() override {
   
     dq::visited_by_matrix.clear();
-    dq::enqueue_by_matrix(viewctr.at, actualV(viewctr, cview()));
+    dq::enqueue_by_matrix(centerover->master, cview() * master_relative(centerover, true));
     
     while(!dq::drawqueue.empty()) {      
       auto& p = dq::drawqueue.front();

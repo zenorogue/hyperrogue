@@ -237,7 +237,7 @@ namespace flocking {
       auto m = vd.m;
       // these two functions compute new base and at, based on pats[i]
       m->at = pats[i];
-      virtualRebase(m, true);
+      virtualRebase(m);
       m->vel = vels[i];
       }
     shmup::fixStorage();
@@ -252,7 +252,7 @@ namespace flocking {
 
       if(follow == 1) {
         gmatrix.clear();
-        vdata[0].m->pat = View * calc_relative_matrix(vdata[0].m->base, viewctr.at->c7, C0) * vdata[0].m->at;
+        vdata[0].m->pat = View * calc_relative_matrix(vdata[0].m->base, centerover, C0) * vdata[0].m->at;
         View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
         if(GDIM == 3) {
           View = hr::cspin(1, 2, 90 * degree) * View;
@@ -274,7 +274,6 @@ namespace flocking {
         }
 
       optimizeview();
-      centerover.at = viewctr.at->c7;
       compute_graphical_distance();
       gmatrix.clear();
       playermoved = false;

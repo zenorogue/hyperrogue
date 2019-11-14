@@ -237,7 +237,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     
     addedge(i, id, ei);
     addedge(id, j, ei);
-    virtualRebase(vdata[i].m, true);
+    virtualRebase(vdata[i].m);
     }
   else addedge0(i, j, ei);
   }
@@ -284,7 +284,7 @@ namespace spiral {
   
       createViz(i, cwt.at, h);
       vd.name = its(i+1);
-      virtualRebase(vd.m, true);
+      virtualRebase(vd.m);
   
       vd.cp = dftcolor;
       }
@@ -331,7 +331,7 @@ namespace collatz {
     vdata.resize(1);
     vertexdata& vd = vdata[0];
     createViz(0, cwt.at, xpush(cshift));
-    virtualRebase(vd.m, true);
+    virtualRebase(vd.m);
     vd.cp = dftcolor;
     vd.data = 0;
     addedge(0, 0, 1, false, collatz::collatz1);
@@ -466,7 +466,7 @@ namespace anygraph {
       printf("Rebasing...\n");
       for(int i=0; i<isize(vdata); i++) {
         if(i % 10000 == 0) printf("%d/%d\n", i, isize(vdata));
-        if(vdata[i].m) virtualRebase(vdata[i].m, true);
+        if(vdata[i].m) virtualRebase(vdata[i].m);
         }
       printf("Done.\n");
       }
@@ -567,7 +567,7 @@ namespace tree {
     
     for(int i=0; i<isize(vdata); i++) {
       vertexdata& vd = vdata[i];
-      virtualRebase(vd.m, true);
+      virtualRebase(vd.m);
       }
     
     printf("Clearing the TOL data...\n");
@@ -1383,7 +1383,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
       else {
       
-        cell *center = multidraw ? c : euclid ? cwt.at : viewctr.at->c7;
+        cell *center = multidraw ? c : centerover;
       
         if(!multidraw && ei->orig && ei->orig != center && celldistance(ei->orig, center) > 3) 
           ei->orig = NULL;
@@ -1469,7 +1469,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       vertexdata& vdn = vdata[i0];
       createViz(i0, m->base, m->at * collatz::T2);
       
-      virtualRebase(vdn.m, true);
+      virtualRebase(vdn.m);
       vdn.cp = perturb(cp);
       vdn.data = 0;
       addedge(i, i0, 1, false, collatz::collatz1);
@@ -1492,7 +1492,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         vdata.resize(i0+2);
         vertexdata& vdn = vdata[i0+1];
         createViz(i0+1, m->base, m->at * collatz::T3);
-        virtualRebase(vdn.m, true);
+        virtualRebase(vdn.m);
         vdn.cp = perturb(cp);
         vdn.data = 0;
         addedge(i, i0+1, 1, false, collatz::collatz2);
@@ -2148,7 +2148,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
     slidecommand = "toggle the player";
     if(mode == 4) 
       mapeditor::drawplayer = !mapeditor::drawplayer;
-    centerover.at = NULL; pd_from = NULL;
+    pd_from = NULL;
     };
   }
 
