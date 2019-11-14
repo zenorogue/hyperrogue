@@ -155,7 +155,7 @@ EX heptagon* hyperbolic_origin() {
   h.alt = NULL;
   h.distance = 0;
   if(IRREGULAR) irr::link_start(origin);
-  h.c7 = newCell(odegree, origin);
+  else h.c7 = newCell(odegree, origin);
   return origin;
   }
 
