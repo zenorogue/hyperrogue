@@ -989,7 +989,7 @@ EX namespace hybrid {
     }
 
   EX hrmap *pmap;
-  geometry_information *pcgip;
+  EX geometry_information *pcgip;
   EX eGeometry actual_geometry;
   
   template<class T> auto in_actual(const T& t) -> decltype(t()) {
@@ -1038,8 +1038,8 @@ EX namespace hybrid {
       for(auto& p: at) tailored_delete(p.second);
       }
   
-    virtual transmatrix spin_to(cell *c, int d, ld bonus) { return PIU( currentmap->spin_to(c, d, bonus) ); }
-    virtual transmatrix spin_from(cell *c, int d, ld bonus) { return PIU( currentmap->spin_from(c, d, bonus) ); }
+    virtual transmatrix spin_to(cell *c, int d, ld bonus) { return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
+    virtual transmatrix spin_from(cell *c, int d, ld bonus) { return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
 
     };
   
@@ -1089,6 +1089,7 @@ EX namespace hybrid {
     if(prod) {
       dynamicval<eGeometry> g(geometry, hybrid::underlying);
       dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
+      dynamicval<hrmap*> gm(currentmap, ((hrmap_hybrid*)currentmap)->underlying_map);
       return mscale(get_corner_position(c, i+next), exp(lev));
       }
     else {
@@ -1118,7 +1119,7 @@ EX namespace hybrid {
       
       if(prod) for(int i=0; i<c1->type; i++) {
         hyperpoint w;
-        hybrid::in_underlying_geometry([&] { 
+        ((hrmap_hybrid*)currentmap)->in_underlying([&] { 
           /* mirror image of C0 in the axis h1-h2 */
           hyperpoint h1 = get_corner_position(c1, i);
           hyperpoint h2 = get_corner_position(c1, i+1);
@@ -1185,8 +1186,8 @@ EX namespace product {
     cell *c = cw.at;
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere || pmodel != mdPerspective;
-    int z0 = hybrid::get_where(centerover).second;
     hybrid::in_actual([&] { 
+      int z0 = hybrid::get_where(centerover).second;
       cell *c0 = hybrid::get_at(c, z0);
       cwall_offset = hybrid::wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
