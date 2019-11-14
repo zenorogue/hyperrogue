@@ -109,12 +109,8 @@ EX vector<hrmap*> allmaps;
 EX hrmap *newAltMap(heptagon *o) { return new hrmap_hyperbolic(o); }
 // --- hyperbolic geometry ---
 
-hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
-
-hrmap_hyperbolic::hrmap_hyperbolic() {
-  // printf("Creating hyperbolic map: %p\n", this);
-  int odegree = geometry == gBinaryTiling ? 6 : S7;
-  origin = tailored_alloc<heptagon> (odegree);
+heptagon* hyperbolic_origin() {
+  heptagon *origin = tailored_alloc<heptagon> (odegree);
   heptagon& h = *origin;
   h.s = hsOrigin;
   h.emeraldval = a46 ? 0 : 98;
@@ -125,27 +121,14 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.cdata = NULL;
   h.alt = NULL;
   h.distance = 0;
-  mvar = variation;
-  if(0);
-  #if CAP_BT
-  else if(binarytiling) {
-    #if DEBUG_BINARY_TILING
-    binary::xcode.clear();
-    binary::rxcode.clear();
-    binary::xcode[&h] = (1 << 16);
-    binary::rxcode[1<<16] = &h;
-    #endif
-    h.zebraval = 0, h.emeraldval = 0,
-    h.c7 = newCell(odegree, origin);
-    }
-  #endif
-  #if CAP_IRR
-  else if(IRREGULAR)
-    irr::link_start(origin);
-  #endif
-  else
-    h.c7 = newCell(S7, origin);
+  if(IRREGULAR) irr::link_start(origin);
+  h.c7 = newCell(geometry == gBinaryTiling ? 6 : S7, origin);
+  return origin;
   }
+
+hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
+
+hrmap_hyperbolic::hrmap_hyperbolic() { origin = hyperbolic_origin(); }
 
 /** very similar to createMove in heptagon.cpp */
 EX cell *createMov(cell *c, int d) {

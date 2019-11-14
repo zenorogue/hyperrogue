@@ -181,17 +181,29 @@ EX namespace binary {
     }
   #endif
   
-  struct hrmap_binary : hrmap_hyperbolic {
+  struct hrmap_binary : hrmap {
   
+    heptagon *origin;
     std::mt19937 directions_generator;
   
-    hrmap_binary(heptagon *o) : hrmap_hyperbolic(o) { set_seed(); }
+    hrmap_binary(heptagon *o) : origin(o) { set_seed(); }
     
     void set_seed() { directions_generator.seed(137137137); }
     
     int nextdir(int choices) { return directions_generator() % choices; }
 
-    hrmap_binary() : hrmap_hyperbolic() { set_seed(); }
+    hrmap_binary() { 
+      set_seed();
+      origin = hyperbolic_origin();
+      #if DEBUG_BINARY_TILING
+      binary::xcode.clear();
+      binary::rxcode.clear();
+      binary::xcode[&h] = (1 << 16);
+      binary::rxcode[1<<16] = &h;
+      #endif
+      origin->zebraval = 0;
+      origin->emeraldval = 0;
+      }
 
     heptagon *create_step(heptagon *parent, int d) override {
       auto h = parent;
