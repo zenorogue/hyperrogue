@@ -247,10 +247,14 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   hpcpush(hpc[last->s]);
   }
 
+template<class T> void sizeto(T& t, int n) {
+  if(isize(t) <= n) t.resize(n+1);
+  }
+
 void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size, cell *c) {
   
-  fsh.b.resize(2);
-  fsh.shadow.resize(2);
+  sizeto(fsh.b, id);
+  sizeto(fsh.shadow, id);
 
   #if CAP_BT
   if(binarytiling) {
@@ -278,7 +282,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
     
     for(int k=0; k<SIDEPARS; k++) {
       for(int i=0; i<c->type; i++) {
-        fsh.gpside[k][i].resize(2);
+        sizeto(fsh.gpside[k][i], id);
         bshape(fsh.gpside[k][i][id], PPR::LAKEWALL); 
         hyperpoint h0 = binary::get_corner_horo_coordinates(c, i) * size;
         hyperpoint h1 = binary::get_corner_horo_coordinates(c, i+1) * size;
@@ -314,10 +318,6 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
 namespace irr { void generate_floorshapes(); }
 #endif
 
-template<class T> void sizeto(T& t, int n) {
-  if(isize(t) <= n) t.resize(n+1);
-  }
-
 // !siid equals pseudohept(c)
 
 void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
@@ -339,8 +339,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       int b = 0;
       if(S3 == 4 && BITRUNCATED) b += S14;
   
-      if(id == 1)
-        bshape_regular(fsh, 1, S7, td, heptside, c);
+      if(id)
+        bshape_regular(fsh, id, S7, td, heptside, c);
       
       else if(PURE) {
         if(&fsh == &shTriheptaFloor)
@@ -615,6 +615,10 @@ void geometry_information::generate_floorshapes() {
   cell model;
   model.master = &modelh;
   model.type = modelh.type = S7;
+  
+  auto mmerge1 = [&] (int i, int j) { model.c.setspin(i, j, false); modelh.c.setspin(i, j, false); };  
+  auto mmerge = [&] (int i, int j) { mmerge1(i, j); mmerge1(j, i); };  
+
   for(int i=0; i<S7; i++) {
     model.move(i) = &model;
     modelh.move(i) = &modelh;
@@ -679,6 +683,7 @@ void geometry_information::generate_floorshapes() {
   else if(geometry == gBinary4) {
     for(int i: {0,1}) {
       modelh.zebraval = i;
+      mmerge(2, 4); mmerge(0, 3); mmerge(1, 3); mmerge(i, 3);
       generate_floorshapes_for(i, &model, 1, 0);
       }
     }
@@ -686,6 +691,7 @@ void geometry_information::generate_floorshapes() {
   else if(geometry == gTernary) {
     for(int i: {0,1,2}) {
       modelh.zebraval = i;
+      mmerge(3, 5); for(int a=0; a<3; a++) mmerge1(a, 4); mmerge(4, i);
       generate_floorshapes_for(i, &model, 1, 0);
       }
     }
@@ -845,8 +851,8 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
   else if(!(S7&1) && PURE && !penrose && !a4) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
-    transmatrix D = applyPatterndir(c, si);    
-    return &queuepolyat(V*D, shv[pseudohept(c)], col, prio);
+    transmatrix D = applyPatterndir(c, si);
+    return &queuepolyat(V*D, shv[shvid(c)], col, prio);
     }
   else 
     return &queuepolyat(V, shv[shvid(c)], col, prio);
