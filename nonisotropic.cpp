@@ -828,7 +828,9 @@ EX namespace nilv {
   
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
       for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
-      return nisot::translate(mvec_to_point(coords[h1].inverse() * coords[h2]));
+      auto p = coords[h1].inverse() * coords[h2];
+      for(int a=0; a<3; a++) p[a] = szgmod(p[a], nilperiod[a]);     
+      return nisot::translate(mvec_to_point(p));
       }
 
     void draw() override {
