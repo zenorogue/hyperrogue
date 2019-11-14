@@ -1169,14 +1169,19 @@ EX }
   
 EX namespace product {
 
+  int z0;
+
   struct hrmap_product : hybrid::hrmap_hybrid {
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
       return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
       }
   
     void draw() override {
-      actual_view_level = hybrid::get_where(centerover).second - floor(zlevel(tC0(cview())) / cgi.plevel + .5);
-      in_underlying([] { currentmap->draw(); });
+      auto w = hybrid::get_where(centerover);
+      z0 = w.second;
+      actual_view_level = z0 - floor(zlevel(tC0(cview())) / cgi.plevel + .5);
+      dynamicval<cell*> co(centerover, hybrid::get_where(centerover).first);
+      in_underlying([=] { currentmap->draw(); });
       }
     };
 
@@ -1187,7 +1192,6 @@ EX namespace product {
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere || pmodel != mdPerspective;
     hybrid::in_actual([&] { 
-      int z0 = hybrid::get_where(centerover).second;
       cell *c0 = hybrid::get_at(c, z0);
       cwall_offset = hybrid::wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
