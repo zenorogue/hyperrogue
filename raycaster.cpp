@@ -140,9 +140,9 @@ void enable_raycaster() {
     bool use_reflect = reflect_val && !nil && !levellines;
 
     string vsh = 
-      "attribute vec4 aPosition;\n"
-      "uniform float uFovX, uFovY;\n"
-      "varying vec4 at;\n"
+      "attribute mediump vec4 aPosition;\n"
+      "uniform mediump float uFovX, uFovY;\n"
+      "varying mediump vec4 at;\n"
       "void main() { \n"
       "  gl_Position = aPosition; at = aPosition;\n"
   #if IN_ODS    
@@ -155,31 +155,31 @@ void enable_raycaster() {
     string rays = its(isize(cgi.raywall));
   
     string fsh = 
-    "varying vec4 at;\n"
-    "uniform int uLength;\n"
-    "uniform float uIPD;\n"
-    "uniform mat4 uStart;\n"
-    "uniform mat4 uM[84];\n"
-    "uniform mat4 uTest;\n"
-    "uniform vec2 uStartid;\n"
-    "uniform sampler2D tConnections;\n"
-    "uniform sampler2D tWallcolor;\n"
-    "uniform sampler2D tTexture;\n"
-    "uniform sampler2D tTextureMap;\n"
-    "uniform vec4 uWallX["+rays+"];\n"
-    "uniform vec4 uWallY["+rays+"];\n"
-    "uniform vec4 uFogColor;\n"
-    "uniform int uWallstart["+its(deg+1)+"];\n"
-    "uniform float uLinearSightRange, uExpStart, uExpDecay;\n";
+    "varying mediump vec4 at;\n"
+    "uniform mediump int uLength;\n"
+    "uniform mediump float uIPD;\n"
+    "uniform mediump mat4 uStart;\n"
+    "uniform mediump mat4 uM[84];\n"
+    "uniform mediump mat4 uTest;\n"
+    "uniform mediump vec2 uStartid;\n"
+    "uniform mediump sampler2D tConnections;\n"
+    "uniform mediump sampler2D tWallcolor;\n"
+    "uniform mediump sampler2D tTexture;\n"
+    "uniform mediump sampler2D tTextureMap;\n"
+    "uniform mediump vec4 uWallX["+rays+"];\n"
+    "uniform mediump vec4 uWallY["+rays+"];\n"
+    "uniform mediump vec4 uFogColor;\n"
+    "uniform mediump int uWallstart["+its(deg+1)+"];\n"
+    "uniform mediump float uLinearSightRange, uExpStart, uExpDecay;\n";
     
     if(prod) fsh += 
-      "uniform float uPLevel;\n"
-      "uniform mat4 uLP;\n";
+      "uniform mediump float uPLevel;\n"
+      "uniform mediump mat4 uLP;\n";
     
     int flat1 = 0, flat2 = S7;
     
     if(hyperbolic && binarytiling) {
-      fsh += "uniform float uBLevel;\n";
+      fsh += "uniform mediump float uBLevel;\n";
       flat1 = binary::dirs_outer();
       flat2 -= binary::dirs_inner();
       }
@@ -414,7 +414,7 @@ void enable_raycaster() {
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
       
-      if(solnih && !asonov) fsh += "uniform float uBinaryWidth;\n";
+      if(solnih && !asonov) fsh += "uniform mediump float uBinaryWidth;\n";
       
       fmain += 
         "  dist = next < minstep ? 2.*next : next;\n";
@@ -481,7 +481,7 @@ void enable_raycaster() {
         "float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
       
       if(asonov) {
-        fsh += "uniform mat4 uStraighten;\n";
+        fsh += "uniform mediump mat4 uStraighten;\n";
         fmain += "vec4 sp = uStraighten * nposition;\n";
         }
 
@@ -654,7 +654,7 @@ void enable_raycaster() {
         fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z/cosh(go) * uLevelLines * 2. * PI);\n";
       else
         fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z * uLevelLines * 2. * PI);\n";
-      fsh += "uniform float uLevelLines;\n";
+      fsh += "uniform mediump float uLevelLines;\n";
       }
 
     fmain +=    
@@ -692,7 +692,7 @@ void enable_raycaster() {
           "    else tangent.z = -tangent.z;\n"
           "    }\n";
         fsh += 
-          "uniform vec4 uReflectX, uReflectY;\n"
+          "uniform mediump vec4 uReflectX, uReflectY;\n"
           "vec4 refl(vec4 t, float z, vec4 r) {\n"
             "t.x *= exp(z); t.y /= exp(z);\n"
             "t -= dot(t, r) * r;\n"
@@ -846,15 +846,15 @@ EX void cast() {
   for(int i=0; i<isize(lst); i++) ids[lst[i]] = i;
 
   glUniform1i(o->uLength, length);
-  GLERR("uniform length");
+  GLERR("uniform mediump length");
   
   glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
   if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(NLP)).as_array());
-  GLERR("uniform start");
+  GLERR("uniform mediump start");
   uniform2(o->uStartid, enc(ids[cs], 0));
-  GLERR("uniform startid");
+  GLERR("uniform mediump startid");
   glUniform1f(o->uIPD, vid.ipd);
-  GLERR("uniform IPD");
+  GLERR("uniform mediump IPD");
   
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(currentmap->iadj(cwt.at, j));
