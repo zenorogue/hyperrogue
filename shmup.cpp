@@ -1844,6 +1844,12 @@ void moveMonster(monster *m, int delta) {
 
   if(m->base->wall == waRose && !survivesThorns(m->type))
     killMonster(m, moNone);
+  
+  if(among(m->type, moGreaterShark, moShark, moCShark) && !isWateryOrBoat(m->base)) {
+    if(m->type == moGreaterShark) m->type = moGreaterM;
+    else killMonster(m, moNone, AF_CRUSH);
+    }
+
 
   if(isWatery(m->base) && !survivesWater(m->type) && !m->inBoat && m->type != moReptile)
     killMonster(m, moNone);
