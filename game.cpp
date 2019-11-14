@@ -6622,6 +6622,7 @@ EX void placeItems(int qty, eItem it) {
   }
 
 EX cellwalker recallCell;
+EX display_data recallDisplay;
 
 EX bool activateRecall() {
   if(!recallCell.at) {
@@ -6645,7 +6646,13 @@ EX bool activateRecall() {
   cwt = recallCell;
   recallCell.at = NULL;
   flipplayer = true;
-  fullcenter(); 
+
+  centerover = recallDisplay.precise_center;
+  View = recallDisplay.view_matrix;
+  // local_perspective = recallDisplay.local_perspective;
+  gmatrix = recallDisplay.cellmatrices;
+  gmatrix0 = recallDisplay.old_cellmatrices;
+
   makeEmpty(cwt.at);
   forCellEx(c2, cwt.at) 
     if(c2->monst != moMutant) 
@@ -6660,7 +6667,10 @@ EX bool activateRecall() {
   }
 
 EX void saveRecall(cellwalker cw2) {  
-  if(!recallCell.at) recallCell = cw2;
+  if(!recallCell.at) {
+    recallCell = cw2;
+    recallDisplay = *current_display;
+    }
   }
 
 EX void activateSafety(eLand l) {
