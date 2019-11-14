@@ -1476,8 +1476,10 @@ EX void resetview() {
   // EUCLIDEAN
   if(cwt.at) {
     centerover = cwt.at;
-    View = iddspin(cwt.at, cwt.spin, M_PI + vid.fixed_facing_dir * degree);
+    View = iddspin(cwt.at, cwt.spin);
     if(cwt.mirrored) View = Mirror * View;
+    if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
+    else View = cspin(2, 0, M_PI/2) * View;
     }
   else if(currentmap) {
     centerover = currentmap->gamestart();
