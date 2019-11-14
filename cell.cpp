@@ -1107,7 +1107,7 @@ EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
     ld step = hdist0(h) / steps;
     for(int i=0; i< steps; i++) {
       T1 = T1 * xpush(step);
-      virtualRebase(x, T1,  true);
+      virtualRebase(x, T1);
       println(hlog, "x = ", x, "p length = ", isize(p), " dist = ", hdist0(tC0(T1)), " dist from end = ", hdist(tC0(T1), tC0(calc_relative_matrix(c2, x, C0))));
       while(x != p.back()) {
         forCellCM(c, p.back()) 

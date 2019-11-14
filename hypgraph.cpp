@@ -1435,7 +1435,7 @@ EX void optimizeview() {
   if(dual::split(optimizeview)) return;
   
   transmatrix iView = inverse(View);
-  virtualRebase(centerover, iView, true);
+  virtualRebase(centerover, iView);
   View = inverse(iView);
   
   println(hlog, "centerover = ", centerover);

@@ -151,7 +151,7 @@ cell *monster::findbase(const transmatrix& T, int maxsteps) {
   if(isVirtual) {
     cell *c = base;
     auto cT = T;
-    virtualRebase(c, cT, true);
+    virtualRebase(c, cT);
     return c;
     }
   else return findbaseAround(T, base, maxsteps);
@@ -169,14 +169,14 @@ void fix_to_2(transmatrix& T) {
 void monster::rebasePat(const transmatrix& new_pat, cell *c2) {
   if(isVirtual) {
     at = new_pat;
-    virtualRebase(this, true);
+    virtualRebase(this);
     fix_to_2(at);
     pat = at;
     return;
     }
   if(quotient) {
     at = inverse(gmatrix[base]) * new_pat;
-    virtualRebase(this, true);
+    virtualRebase(this);
     fix_to_2(at);
     if(base != c2) {
       auto T = calc_relative_matrix(c2, base, tC0(at));
@@ -2812,8 +2812,8 @@ EX void destroyBoats(cell *c) {
       m->inBoat = false;
   }
 
-EX void virtualRebase(shmup::monster *m, bool tohex) {
-  virtualRebase(m->base, m->at, tohex);
+EX void virtualRebase(shmup::monster *m) {
+  virtualRebase(m->base, m->at);
   }
 
 EX hookset<bool(shmup::monster*, string&)> *hooks_describe;

@@ -243,12 +243,13 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
   }
 
 template<class T, class U> 
-void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
+void virtualRebase(cell*& base, T& at, const U& check) {
+
   if(prod) {
     auto w = hybrid::get_where(base);
     auto d = product_decompose(check(at)).first;
     at = mscale(at, -d);
-    hybrid::in_underlying_map([&] { virtualRebase(w.first, at, tohex, check); });
+    hybrid::in_underlying_map([&] { virtualRebase(w.first, at, check); });
     if(d > cgi.plevel / 2) { w.second++; d -= cgi.plevel; }
     if(d < -cgi.plevel / 2) { w.second--; d += cgi.plevel; }
     at = mscale(at, +d);
@@ -283,13 +284,13 @@ void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   virtualRebase_cell(base, at, check);
   }
 
-EX void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
-  virtualRebase(base, at, tohex, tC0);
+EX void virtualRebase(cell*& base, transmatrix& at) {
+  virtualRebase(base, at, tC0);
   }
 
-EX void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
+EX void virtualRebase(cell*& base, hyperpoint& h) {
   // we perform fixing in check, so that it works with larger range
-  virtualRebase(base, h, tohex, [] (const hyperpoint& h) { 
+  virtualRebase(base, h, [] (const hyperpoint& h) { 
     if(hyperbolic && GDIM == 2) return hpxy(h[0], h[1]);
     if(hyperbolic && GDIM == 3) return hpxy3(h[0], h[1], h[2]);
     return h; 

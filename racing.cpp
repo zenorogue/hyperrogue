@@ -579,21 +579,21 @@ EX void generate_track() {
   if(WDIM == 2 && !bounded_track) for(a=0; a<10; a += .1) {
     hyperpoint h = straight * parabolic1(a) * C0;
     cell *at = s;
-    virtualRebase(at, h,  true);
+    virtualRebase(at, h);
     if(!rti_id.count(at) || get_info(at).from_track >= TWIDTH) break;
     }
   
   if(WDIM == 2 && !bounded_track) for(ld cleaner=0; cleaner<a*.75; cleaner += .2) for(int dir=-1; dir<=1; dir+=2) {
     transmatrix T = straight * parabolic1(cleaner * dir);
     cell *at = s;
-    virtualRebase(at, T,  true);
+    virtualRebase(at, T);
     get_info(at).from_start = 0;
     for(ld u=0; u<50; u++) {
       if(at->wall != waBarrier)
         makeEmpty(at);
       killMonster(at, moNone, 0);
       T = T * xpush(.1);
-      virtualRebase(at, T,  true);      
+      virtualRebase(at, T);
       }
     }
 
@@ -623,7 +623,7 @@ EX void generate_track() {
       for(const transmatrix& t: forbidden) if(hdist(t*C0, who->at * C0) < 10. / (j+10)) ok = false;
       if(ok) break;
       }
-    virtualRebase(who, true);
+    virtualRebase(who);
     }
 
   if(bounded_track) track.back()->wall = waCloud;

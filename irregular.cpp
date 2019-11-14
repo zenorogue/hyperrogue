@@ -125,7 +125,7 @@ void set_relmatrices(cellinfo& ci) {
 
 void rebase(cellinfo& ci) {
   cell *cx = ci.owner;
-  virtualRebase(ci.owner, ci.p, false);
+  virtualRebase(ci.owner, ci.p);
   if(ci.owner != cx) {
     printf("rebased %p to %p\n", cx, ci.owner);
     set_relmatrices(ci);
@@ -173,7 +173,7 @@ void bitruncate() {
         s.neid.push_back(next);
         s.neid.push_back(-1);
         s.generation = bitruncations_performed + 1;
-        virtualRebase(s.owner, s.p, false);
+        virtualRebase(s.owner, s.p);
         set_relmatrices(s);
         }
       }

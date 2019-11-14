@@ -4226,7 +4226,7 @@ EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
     T = parallel_transport(T, ori, ztangent(-step));
-    virtualRebase(c, T, true);
+    virtualRebase(c, T);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
       T = parallel_transport(T, ori, ztangent(step));

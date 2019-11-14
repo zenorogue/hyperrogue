@@ -820,7 +820,7 @@ EX void cast() {
   if(nonisotropic) T = NLP * T;
   T = inverse(T);
 
-  virtualRebase(cs, T, true);
+  virtualRebase(cs, T);
   
   if(true) {
     manual_celllister cl;
