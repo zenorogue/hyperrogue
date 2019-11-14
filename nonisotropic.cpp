@@ -1038,8 +1038,8 @@ EX namespace hybrid {
       for(auto& p: at) tailored_delete(p.second);
       }
   
-    virtual transmatrix spin_to(cell *c, int d, ld bonus) { return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
-    virtual transmatrix spin_from(cell *c, int d, ld bonus) { return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
+    virtual transmatrix spin_to(cell *c, int d, ld bonus) { c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
+    virtual transmatrix spin_from(cell *c, int d, ld bonus) { c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
 
     };
   
