@@ -1583,8 +1583,13 @@ void spawn_asteroids(monster *bullet, monster *target) {
     }
   }
 
+EX int protect_pid(int i) {
+  if(i < 0 || i >= players) return 0;
+  return i;
+  }
+
 void moveBullet(monster *m, int delta) {
-  cpid = m->pid;
+  cpid = protect_pid(m->pid);
   m->findpat();
   virtualize(m);
   
@@ -3015,7 +3020,7 @@ bool celldrawer::draw_shmup_monster() {
           col = winf[c->wall].color;
           col |= (col >> 1);
           }
-        cpid = m->pid; 
+        cpid = protect_pid(m->pid); 
         if(m->stunoff > curtime)
           c->stuntime = 1 + (m->stunoff - curtime-1)/300;
         if(hasHitpoints(m->type))

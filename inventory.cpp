@@ -457,6 +457,8 @@ EX namespace inv {
 
   EX void show() {
   
+    multi::cpid = 0; /* just in case */
+  
     if(remaining[itOrbSword]) items[itOrbSword]++;
     if(remaining[itOrbSword2]) items[itOrbSword2]++;
     gamescreen(2);
