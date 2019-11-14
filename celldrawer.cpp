@@ -661,6 +661,12 @@ void celldrawer::draw_wall() {
     }
   
   hpcshape& shThisWall = isGrave(c->wall) ? cgi.shCross : cgi.shWall[ct6];
+
+  transmatrix V1 = V;
+  if(&shThisWall == &cgi.shCross) {
+    auto si = patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
+    V1 = V * applyPatterndir(c, si);
+    }
   
   if(conegraph(c)) {   
     const int layers = 2 << detaillevel;
@@ -674,10 +680,10 @@ void celldrawer::draw_wall() {
   
   else if(true) {
     if(!wmspatial) {
-      if(starcol) queuepoly(V, shThisWall, darkena(starcol, 0, 0xFF));
+      if(starcol) queuepoly(V1, shThisWall, darkena(starcol, 0, 0xFF));
       }
     else {
-      transmatrix Vdepth = mscale(V, cgi.WALL);
+      transmatrix Vdepth = mscale(V1, cgi.WALL);
       int alpha = 0xFF;
       if(c->wall == waIcewall)
         alpha = 0xC0;
