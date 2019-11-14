@@ -162,10 +162,10 @@ EX transmatrix &ggmatrix(cell *c) {
       t = calc_relative_matrix(c, centerover, C0);
     else if(masterless && WDIM == 2) {
       if(!centerover) centerover = cwt.at;
-      t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(cellwalker(centerover)));
+      t = actual_view_transform * View * eumove(cell_to_vec(c) - cellwalker_to_vec(cellwalker(centerover)));
       }
     else 
-      t = calc_relative_matrix(c, centerover, C0);
+      t = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
     }
   return t;
   }
