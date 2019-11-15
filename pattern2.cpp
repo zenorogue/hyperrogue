@@ -1661,9 +1661,10 @@ EX namespace patterns {
         }
       case 'f': {
         color_t res;
-        for(int i=0; i<3; i++) {
+        for(int i=0; i<4; i++) {
           ld v = real(compute_map_function(c, 1+i, color_formula));
-          if(v < 0) part(res, i) = 0;
+          if(i == 3) part(res, i) = (v > 0);
+          else if(v < 0) part(res, i) = 0;
           else if(v > 1) part(res, i) = 255;
           else part(res, i) = int(v * 255 + .5);
           }

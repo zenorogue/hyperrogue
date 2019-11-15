@@ -183,6 +183,13 @@ cld exp_parser::parse(int prio) {
     cld no = parsepar();
     return real(cond) > 0 ? yes : no;
     }  
+  else if(eat("wallif(")) {
+    cld val0 = parse(0);
+    if(next() != ',') {at = -1; return 0; } at++;
+    cld val1 = parsepar();
+    if(real(extra_params["p"]) >= 3.5) return val0;
+    else return val1;
+    }
   else if(eat("rgb(")) {     
     cld val0 = parse(0);
     if(next() != ',') {at = -1; return 0; } at++;
