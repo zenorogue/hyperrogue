@@ -463,7 +463,11 @@ EX void generate_track() {
   if(WDIM == 3 || weirdhyperbolic) length = max(length - 10 * race_try, 10);
   
   try {
-  if(asonov::in()) {
+  if(bounded && !prod && !(cgflags & qHUGE_BOUNDED)) {
+    bounded_track = true;
+    make_bounded_track(s);
+    }
+  else if(asonov::in()) {
     find_track(s, 0, length);
     }
   else if(sol && !asonov::in()) {
@@ -483,10 +487,6 @@ EX void generate_track() {
     find_track(track.back(), 2, length/4);
     find_track(track.back(), 3, length/4);
     find_track(track.back(), 4, length/4);
-    }
-  else if(bounded && !prod) {
-    bounded_track = true;
-    make_bounded_track(s);
     }
   else find_track(s, 0, length);    
     }

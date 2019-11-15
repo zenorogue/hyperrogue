@@ -102,7 +102,7 @@ transmatrix hrmap::adj(cell *c, int i) { return calc_relative_matrix(c->cmove(i)
 
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;
-  if(bounded) {
+  if(bounded && !(cgflags & qHUGE_BOUNDED)) {
     celllister cl(gamestart(), 1000000, 1000000, NULL);
     default_allcells = cl.lst;
     return default_allcells;

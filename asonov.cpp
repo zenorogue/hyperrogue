@@ -212,6 +212,7 @@ EX void set_flags() {
   set_flag(flag, qANYQ, period_xy || period_z);
   set_flag(flag, qBOUNDED, period_xy && period_z);
   set_flag(flag, qSMALL, period_xy && period_z && (period_xy * period_xy * period_z <= 4096));
+  set_flag(flag, qHUGE_BOUNDED, period_xy * period_xy * period_z > 16384);
   }
 
 EX void prepare_config() {

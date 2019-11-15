@@ -276,6 +276,7 @@ static const flagtype qEXPERIMENTAL    = 32768;
 static const flagtype qNIH             = 65536;
 
 static const flagtype qIDEAL           = 131072;
+static const flagtype qHUGE_BOUNDED    = 262144;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
