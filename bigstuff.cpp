@@ -770,7 +770,7 @@ EX void buildEquidistant(cell *c) {
   if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !hybri && hrand(10) < 5 && chance) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !hybri && hrand(100) < (PURE?25:5) && items[itBone] >= 10 && chance) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !hybri && hrand(100) < (PURE?25:5) && items[itBone] >= U10 && chance) 
     buildAnotherEquidistant(c);
   }
 
