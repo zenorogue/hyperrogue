@@ -2619,7 +2619,9 @@ EX void turn(int delta) {
         if(havewhat&HF_HEX) movehex_all();
         wandering();
         livecaves();
+        #if CAP_INV
         if(inv::on) inv::compute();
+        #endif
         terracotta();
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();

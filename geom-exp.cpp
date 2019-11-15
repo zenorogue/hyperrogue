@@ -526,6 +526,7 @@ EX string geometry_name() {
       return XLAT("spherical");
 
     case gcSolNIH:
+#if CAP_SOLV
       switch(solnihv::geom()) {
         case gSol:
           return XLAT("Sol");
@@ -536,6 +537,9 @@ EX string geometry_name() {
         default:
           return "unknown";
         }
+#else
+      return XLAT("Sol");
+#endif
 
     case gcNil:
       return XLAT("Nil");
