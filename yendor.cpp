@@ -195,6 +195,16 @@ EX namespace yendor {
       return yi[i].found ? ysUnlocked : ysLocked;
     return ysUntouched;
     }
+
+  EX bool exhaustive_distance_appropriate() {
+    if(euclid && (penrose || archimedean || quotient)) return true;
+    if(nil && quotient) return true;
+    if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) return true;
+    
+    if(bounded) return true;
+    
+    return false;
+    }
   
   EX bool check(cell *yendor) {
     int byi = isize(yi);
@@ -213,9 +223,11 @@ EX namespace yendor {
       
       int odir = 0;
 
-      if(euclid && (penrose || archimedean)) {
+      if(exhaustive_distance_appropriate()) {
         permanent_long_distances(yendor);
-        auto at = random_in_distance(yendor, YDIST-1);
+        int dist = max_saved_distance(yendor);
+        dist = min(dist, YDIST-1);
+        auto at = random_in_distance(yendor, dist);
         permanent_long_distances(at);
         for(int a=YDIST-2; a>=0; a--) {
           nyi.path[a+1] = at;

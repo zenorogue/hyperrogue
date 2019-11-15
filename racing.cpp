@@ -452,12 +452,7 @@ EX void generate_track() {
   makeEmpty(s);
   cview(); // needed for some virtualRebases
   
-  use_exhaustive_distance = false;
-  if(euclid && (penrose || archimedean || quotient)) use_exhaustive_distance = true;
-  if(nil && quotient) use_exhaustive_distance = true;
-  if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) use_exhaustive_distance = true;
-  
-  if(bounded) use_exhaustive_distance = true;
+  use_exhaustive_distance = yendor::exhaustive_distance_appropriate();
     
   if(use_exhaustive_distance) 
     permanent_long_distances(s);
@@ -468,8 +463,7 @@ EX void generate_track() {
   if(WDIM == 3 || weirdhyperbolic) length = max(length - 10 * race_try, 10);
 
   if(use_exhaustive_distance) {
-    int maxsd = 0;
-    for(auto p: saved_distances) maxsd = max(maxsd, p.second);
+    int maxsd = max_saved_distance(s);
     println(hlog, "max length = ", maxsd);
     length = min(length, maxsd * 5/6);
     }

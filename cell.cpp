@@ -974,7 +974,7 @@ EX int heptdistance(cell *c1, cell *c2) {
   else return heptdistance(c1->master, c2->master);
   }
 
-EX map<pair<cell*, cell*>, int> saved_distances;
+map<pair<cell*, cell*>, int> saved_distances;
 
 set<cell*> keep_distances_from;
 
@@ -1005,10 +1005,14 @@ EX void erase_saved_distances() {
   perma_distances = isize(saved_distances);
   }
 
+EX int max_saved_distance(cell *c) {
+  int maxsd = 0;
+  for(auto& p: saved_distances) if(p.first.first == c) maxsd = max(maxsd, p.second);
+  return maxsd;
+  }
+
 EX cell *random_in_distance(cell *c, int d) {
   vector<cell*> choices;
-  for(auto& p: saved_distances) println(hlog, p);
-
   for(auto& p: saved_distances) if(p.first.first == c && p.second == d) choices.push_back(p.first.second);
   println(hlog, "choices = ", isize(choices));
   if(choices.empty()) return NULL;
