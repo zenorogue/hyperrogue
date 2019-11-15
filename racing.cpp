@@ -1080,7 +1080,7 @@ void race_projection() {
       add_thurston_race(XLAT("Euclidean"), [] { stop_game(); euclid3::clear_torus3(); set_geometry(gBitrunc3); });
       add_thurston_race(XLAT("hyperbolic"), [] { set_geometry(gBinary3); vid.texture_step = 4; });
       add_thurston_race(XLAT("spherical"), [] { set_geometry(gCell120); });
-      add_thurston_race(XLAT("Solv geometry"), [] { set_geometry(gSol); });
+      add_thurston_race(XLAT("Solv geometry"), [] { solnihv::solrange_xy = 10; solnihv::solrange_z = 3; set_geometry(gSol); });
       add_thurston_race(XLAT("S2xE"), [] { set_geometry(gSphere); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
       add_thurston_race(XLAT("H2xE"), [] { set_geometry(gNormal); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
       add_thurston_race(XLAT("Nil"), [] { stop_game(); nilv::nilperiod[0] = 0; set_geometry(gNil); });
@@ -1088,8 +1088,8 @@ void race_projection() {
       }
     else {
       add_thurston_race(XLAT("stretched hyperbolic"), [] { set_geometry(gNIH); vid.texture_step = 4; });
-      add_thurston_race(XLAT("stretched Solv"), [] { set_geometry(gSolN); vid.texture_step = 4; });
-      add_thurston_race(XLAT("periodic Solv"), [] { stop_game(); asonov::period_xy = 8; asonov::period_z = 0; asonov::set_flags(); set_geometry(gArnoldCat); });
+      add_thurston_race(XLAT("stretched Solv"), [] { set_geometry(gSolN); solnihv::solrange_xy = 10; solnihv::solrange_z = 3; vid.texture_step = 4; });
+      add_thurston_race(XLAT("periodic Solv"), [] { stop_game(); solnihv::solrange_xy = 5; solnihv::solrange_z = 2; asonov::period_xy = 8; asonov::period_z = 0; asonov::set_flags(); set_geometry(gArnoldCat); });
       add_thurston_race(XLAT("hyperbolic crystal"), [] { set_geometry(gCrystal344); vid.texture_step = 4; });
       add_thurston_race(XLAT("torus x E"), [] { stop_game(); euclid3::set_torus3(4, 4, 0); set_geometry(gCubeTiling); });
       add_thurston_race(XLAT("hyperbolic regular"), [] { set_geometry(gSpace534); });
