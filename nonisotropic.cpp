@@ -748,6 +748,7 @@ EX namespace nilv {
       "return vec4(c*w*cos(alpha), c*w*sin(alpha), w, 1.);"
       "}";
   
+  #if HDR
   struct mvec : array<int, 3> {
     
     mvec() { }
@@ -765,6 +766,7 @@ EX namespace nilv {
       return mvec(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1]);
       }
     };
+  #endif
 
   static const mvec mvec_zero = mvec(0, 0, 0);
 
@@ -879,6 +881,8 @@ EX namespace nilv {
         }
       }
     };
+  
+  EX mvec get_coord(heptagon *h) { return ((hrmap_nil*)currentmap)->coords[h]; }
 
   void set_flags() {
     int coords = 0;

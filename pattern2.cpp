@@ -348,7 +348,8 @@ EX int zebra40(cell *c) {
   }
 
 EX int zebra3(cell *c) {
-  if(ctof(c)) return (c->master->zebraval/10)/4;
+  if(masterless) return 0;
+  else if(ctof(c)) return (c->master->zebraval/10)/4;
   else if(euclid || sphere || S7>7 || S6>6) return 0;
   else { 
     int ii[3];
@@ -462,7 +463,7 @@ EX int getHemisphere(heptagon *h, int which) {
       };
     return hemitable[which][id];
     }
-  else if(S7 == 4) {
+  else if(S7 == 4 && which < 6) {
     int hemitable[3][6] = {
       { 2, 2, 2,-1,-1,-1},
       { 2,-1, 2, 2,-1,-1},
@@ -1505,31 +1506,70 @@ EX namespace patterns {
   cld compute_map_function(cell *c, int p, const string& formula) {
     exp_parser ep;
     ep.extra_params["p"] = p;
-    switch(geometry) {
-      #if CAP_CRYSTAL
-      case gCrystal: {
-        crystal::ldcoord co = crystal::get_ldcoord(c);
-        for(int i=0; i<crystal::MAXDIM; i++)
-          ep.extra_params["x"+its(i)] = co[i];
-        break;
-        }
-      #endif
-    
-      default: {
-        hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
-        ep.extra_params["x"] = h[0];
-        ep.extra_params["y"] = h[1];
-        ep.extra_params["z"] = h[2];
-        if(euclid) {
-          int x, y;
-          tie(x,y) = cell_to_pair(c);
-          ep.extra_params["ex"] = x;
-          ep.extra_params["ey"] = y;
-          ep.extra_params["ez"] = -x-y;
-          }
-        break;
-        }
+
+    hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
+    ep.extra_params["x"] = h[0];
+    ep.extra_params["y"] = h[1];
+    ep.extra_params["z"] = h[2];
+    ep.extra_params["w"] = h[3];
+    ep.extra_params["z40"] = zebra40(c);
+    ep.extra_params["z3"] = zebra3(c);
+    ep.extra_params["ev"] = emeraldval(c);
+    ep.extra_params["fv50"] = fiftyval(c);
+    ep.extra_params["pa"] = polara50(c);
+    ep.extra_params["pb"] = polarb50(c);
+    ep.extra_params["pd"] = cdist50(c);
+    ep.extra_params["fu"] = fieldpattern::fieldval_uniq(c);
+    ep.extra_params["threecolor"] = pattern_threecolor(c);
+    ep.extra_params["chess"] = chessvalue(c);
+    ep.extra_params["ph"] = pseudohept(c);
+    ep.extra_params["kph"] = kraken_pseudohept(c);
+    if(!masterless) {
+      ep.extra_params["md"] = c->master->distance;
+      ep.extra_params["me"] = c->master->emeraldval;
+      ep.extra_params["mf"] = c->master->fieldval;
+      ep.extra_params["mz"] = c->master->zebraval;
       }
+
+    if(sphere) {
+      ep.extra_params["h0"] = getHemisphere(c, 0);
+      ep.extra_params["h1"] = getHemisphere(c, 1);
+      ep.extra_params["h2"] = getHemisphere(c, 2);
+      }
+    if(euclid) {
+      int x, y;
+      tie(x,y) = cell_to_pair(c);
+      ep.extra_params["ex"] = x;
+      ep.extra_params["ey"] = y;
+      if(S7 == 6) ep.extra_params["ez"] = -x-y;
+      }
+    if(cryst) {
+      crystal::ldcoord co = crystal::get_ldcoord(c);
+      for(int i=0; i<crystal::MAXDIM; i++)
+        ep.extra_params["x"+its(i)] = co[i];
+      }
+    if(asonov::in()) {
+      auto co = asonov::get_coord(c->master);
+      ep.extra_params["ax"] = szgmod(co[0], asonov::period_xy);
+      ep.extra_params["ay"] = szgmod(co[1], asonov::period_xy);
+      ep.extra_params["az"] = szgmod(co[2], asonov::period_z);      
+      }
+    if(nil) {
+      auto co = nilv::get_coord(c->master);
+      ep.extra_params["nx"] = szgmod(co[0], nilv::nilperiod[0]);
+      ep.extra_params["ny"] = szgmod(co[1], nilv::nilperiod[1]);
+      ep.extra_params["nz"] = szgmod(co[2], nilv::nilperiod[2]);      
+      }
+    if(hybri)
+      ep.extra_params["level"] = hybrid::get_where(c).second;
+
+    if(geometry_supports_cdata()) {
+      ep.extra_params["d0"] = getCdata(c, 0);
+      ep.extra_params["d1"] = getCdata(c, 1);
+      ep.extra_params["d2"] = getCdata(c, 2);
+      ep.extra_params["d3"] = getCdata(c, 3);
+      }
+        
     ep.s = formula;
     return ep.parse();
     }
@@ -1803,16 +1843,24 @@ EX namespace patterns {
         pushScreen(linepatterns::showMenu);
 
       else if(uni == 'f') {
-        dialog::edit_string(color_formula, "formula", 
-          XLAT(
+        string s = XLAT(
           "This lets you specify the color pattern as a function of the cell. "
           "Available parameters:\n\n"
           "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
           "ex, ey, ez (in Euclidean geometries)\n"
           "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).")
-           + "\n\n" + parser_help()
+          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).");
+        
+        if(MDIM == 4) s += XLAT(
+          "w (fourth coordinate)\n"
+          "wallif(condition, color)\n"
           );
+        
+        s += "see compute_map_function in pattern2.cpp for more\n";
+
+        s += "\n\n" + parser_help();
+
+        dialog::edit_string(color_formula, "formula", s);
         dialog::reaction_final = [instant] () { 
           if(instant) stop_game();
           whichCanvas = 'f';
