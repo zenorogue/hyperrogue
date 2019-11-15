@@ -299,10 +299,13 @@ void find_track(cell *start, int sign, int len) {
       else if(asonov::in() && use_exhaustive_distance)
         id = trackval(c1);
       else if(asonov::in() && asonov::period_z) {
-        ld x = c->master->zebraval;
-        ld y = c->master->emeraldval;
+        auto co = asonov::get_coord(c->master);
+        ld x = szgmod(co[0], asonov::period_xy);
+        ld y = szgmod(co[1], asonov::period_xy);
         ld z = hypot(x, y);
-        id = int((log(z) / log(1000000000)) * length);
+        ld maxz = asonov::period_xy ? asonov::period_xy/3 : 1000000000;
+        id = int((log(z) / log(maxz)) * length);
+        println(hlog, co, " -> ", id);
         }
       else if(solnih)
         id = (start->master->distance - c1->master->distance) * sign;
@@ -453,7 +456,7 @@ EX void generate_track() {
   use_exhaustive_distance = false;
   if(euclid && (penrose || archimedean || quotient)) use_exhaustive_distance = true;
   if(nil && quotient) use_exhaustive_distance = true;
-  if(asonov::in() && asonov::period_xy <= 256) use_exhaustive_distance = true;
+  if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) use_exhaustive_distance = true;
     
   if(use_exhaustive_distance) permanent_long_distances(s);
   
