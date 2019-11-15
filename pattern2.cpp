@@ -2850,6 +2850,13 @@ int read_pattern_args() {
     else patterns::canvasback = arghex();
     stop_game_and_switch_mode(rg::nothing);
     }
+  else if(argis("-cformula")) {
+    PHASEFROM(2);
+    stop_game();
+    firstland = specialland = laCanvas;
+    patterns::whichCanvas = 'f';
+    shift(); patterns::color_formula = args();
+    }
 
   else if(argis("-d:line")) 
     launch_dialog(linepatterns::showMenu);
