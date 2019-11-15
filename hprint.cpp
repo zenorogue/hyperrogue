@@ -261,7 +261,7 @@ struct indenter {
   };
 
 struct indenter_finish : indenter {
-  indenter_finish(bool b): indenter(b ? 2:0) {}
+  indenter_finish(bool b = true): indenter(b ? 2:0) {}
   ~indenter_finish() { if(hlog.indentation != ind.backup) println(hlog, "(done)"); }
   };
 
