@@ -1438,8 +1438,6 @@ EX void optimizeview() {
   virtualRebase(centerover, iView);
   View = inverse(iView);
   
-  println(hlog, "centerover = ", centerover);
-
   #if CAP_ANIMATIONS
   if(centerover && inmirror(centerover)) {
     anims::reflect_view();
