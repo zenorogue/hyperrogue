@@ -4429,10 +4429,10 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
  
 // Angry Beast attack
 // note: this is done both before and after movement
-EX void beastAttack(cell *c, bool player) {
+EX void beastAttack(cell *c, bool player, bool targetdir) {
   if(c->mondir == NODIR) return;
   forCellIdEx(c2, d, c) {
-    bool opposite = anglestraight(c, d, c->mondir);
+    bool opposite = targetdir ? (d==c->mondir) : anglestraight(c, d, c->mondir);
     int flags = AF_BULL;
     if(player) flags |= AF_GETPLAYER;
     if(!opposite) flags |= AF_ONLY_FBUG;
@@ -4481,7 +4481,7 @@ EX cell *moveNormal(cell *c, flagtype mf) {
     }
   else {
     // Angry Beasts attack all neighbors first
-    if(m == moRagingBull) beastAttack(c, true);
+    if(m == moRagingBull) beastAttack(c, true, false);
     d = pickMoveDirection(c, mf);
     }
   if(d == -1) {
@@ -4519,7 +4519,7 @@ EX cell *moveNormal(cell *c, flagtype mf) {
       }
     
     moveMonster(c2, c, d);
-    if(m == moRagingBull) beastAttack(c2, false);
+    if(m == moRagingBull) beastAttack(c2, false, false);
     return c2;
     }
   else {
@@ -4547,7 +4547,7 @@ EX cell *moveNormal(cell *c, flagtype mf) {
       cell *c2 = c->move(posdir[i]);
       if(!c->monst) c->monst = m;
       moveMonster(c2, c, posdir[i]);
-      if(m == moRagingBull) beastAttack(c2, false);
+      if(m == moRagingBull) beastAttack(c2, false, false);
       }
     return c->move(d);
     }

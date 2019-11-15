@@ -3144,13 +3144,9 @@ EX namespace prairie {
         cell *cp = whirlline[q];
         cell *cn = whirlline[q+1];
         if(cp->monst == moHerdBull && !cp->stuntime) {
-          forCellEx(c2, cp) {
-            int flags = AF_GETPLAYER | AF_BULL;
-            if(c2 != cn) flags |= AF_ONLY_FBUG;
-            if(canAttack(c, moHerdBull, c2, c2->monst, flags))
-              attackMonster(c2, flags | AF_MSG, moHerdBull);
-            }
-              
+          cp->mondir = neighborId(cp, cn);
+          beastAttack(cp, true, true);
+
           if(!cn->monst && !isPlayerOn(cn) && passable_for(cp->monst, cn, cp, P_DEADLY))
             moveMonster(cn, cp, NODIR);
           else {
