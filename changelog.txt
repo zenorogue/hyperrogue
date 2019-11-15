@@ -3596,3 +3596,34 @@ Other:
 - levellines feature: shade rendered output by Z coordinate (nice in Hypersian Rug mode)
 - fixed the overlay in the texture mode (also disabled in ray -- not implemented)
 - fixed the rug becoming black on some computers when resizing window or during the start animation
+
+2019-11-15 14:25 Version 11.2j:
+- gameplay:
+- - fixed the bug in the Prairie which caused the Bulls not to attack correctly (in particular, they would not hit Gadflies or kill the hardcore player, or be blocked by Thumpers)
+- - fixed the Haunted Woods unlock in Orb Strategy Mode
+- - fixed a potential crash when generating horocycles
+
+- shmup gameplay:
+- - sharks on dry land now die/transform
+- - Butterflies are no longer killable with standard knives
+- - hopefully fixed some crashes (esp. in the inventory mode)
+  
+- graphics:
+- - rewritten some old routines to a simpler, more general form
+- - 'reset view' feature now always causes the player character to face upwards (in 2D, changeable with 'fixed facing' feature) or front (in 3D)
+- - Crosses in the Graveyard are now arranged in a symmetric pattern
+- - Orb of Recall now recalls the original orientation
+- - fixed the 'dual grid' pattern
+- - fixed the walls in ternary tiling
+  
+- geometries/projections:
+- - new geometry: Arnold's Cat Mapping Torus
+- - new geometry: wrapped product geometries (... x S1, see advanced config of product geometry)
+- - new projection: horocyclic coordinates model
+- - formula pattern: extra parameters available, choose walls in 3D geometries, read colors from texture (undocumented)
+- - fixed simple perspective and Poincare ball in nonisotropic geometries
+- - ray: fixed left/arrow keys doing nothing when editing exp range; hard limit feature
+- - level lines: do not use levellines for the underlying map in Rug
+
+- other:
+- - command-line option to disable music
