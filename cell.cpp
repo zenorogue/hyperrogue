@@ -1039,11 +1039,18 @@ EX int celldistance(cell *c1, cell *c2) {
   #endif
   
   if(bounded) {
-    
+  
+    int limit = 6000;
+    if(asonov::in()) { 
+      c2 = asonov::get_at(asonov::get_coord(c2->master) - asonov::get_coord(c1->master))->c7;
+      c1 = currentmap->gamestart(); 
+      limit = 100000000;
+      }
+
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
 
-    celllister cl(c1, 100, 100000000, NULL);
+    celllister cl(c1, 100, limit, NULL);
     for(int i=0; i<isize(cl.lst); i++)
       saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
 
