@@ -73,10 +73,10 @@ struct hrmap_standard : hrmap {
   void draw() override;
   transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
   heptagon *create_step(heptagon *h, int direction) override;
-  transmatrix adj(cell *c, int d);
+  transmatrix adj(cell *c, int d) override;
   transmatrix adj(heptagon *h, int d);
   transmatrix iadj(heptagon *h, int d) { return adj(h->cmove(d), h->c.spin(d)); }
-  ld spin_angle(cell *c, int d);
+  ld spin_angle(cell *c, int d) override;
   double spacedist(cell *c, int i) override;
   };
 

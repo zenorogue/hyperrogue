@@ -508,7 +508,7 @@ EX namespace binary {
       return res;
       }
     
-    ld spin_angle(cell *c, int d) {
+    ld spin_angle(cell *c, int d) override {
       if(WDIM == 3 || geometry == gBinary4 || geometry == gTernary) {
         return hrmap::spin_angle(c, d);
         }
@@ -545,7 +545,7 @@ EX namespace binary {
 
     const transmatrix iadj(heptagon *h, int dir) { heptagon *h1 = h->cmove(dir); return adj(h1, h->c.spin(dir)); }
   
-    transmatrix adj(cell *c, int dir) { return adj(c->master, dir); }    
+    transmatrix adj(cell *c, int dir) override { return adj(c->master, dir); }
 
     void virtualRebase(heptagon*& base, transmatrix& at) override {
     
