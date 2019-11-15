@@ -1676,6 +1676,16 @@ void texture_config::remap() {
     }
   }
 
+#if CAP_TEXTURE
+texture_data txp;
+
+EX double get_txp(ld x, ld y, int p) {
+  if(txp.texture_pixels.empty()) return 0.5;
+  color_t col = txp.get_texture_pixel(txp.twidth * x, txp.twidth * y);
+  return part(col, p) / 255.;
+  }
+#endif
+
 int textureArgs() {
   using namespace arg;
            
@@ -1694,6 +1704,14 @@ int textureArgs() {
 
   else if(argis("-txc")) {
     shift(); config.configname = args();
+    }
+
+  else if(argis("-txpsize")) {
+    shift(); txp.twidth = argi();
+    }
+
+  else if(argis("-txpf")) {
+    shift(); txp.readtexture(args());
     }
 
   else if(argis("-txcl")) {

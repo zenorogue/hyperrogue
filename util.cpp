@@ -219,6 +219,12 @@ cld exp_parser::parse(int prio) {
     dynamicval<cld> d(extra_params[name], val);
     return parsepar();
     }
+  #if CAP_TEXTURE
+  else if(eat("txp(")) {
+    cld val = parsepar();
+    return texture::get_txp(real(val), imag(val), int(real(extra_params["p"]) + .5)-1);
+    }
+  #endif
   else if(next() == '(') at++, res = parsepar(); 
   else {
     string number;
