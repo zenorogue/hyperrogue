@@ -1089,6 +1089,7 @@ void race_projection() {
     else {
       add_thurston_race(XLAT("stretched hyperbolic"), [] { set_geometry(gNIH); vid.texture_step = 4; });
       add_thurston_race(XLAT("stretched Solv"), [] { set_geometry(gSolN); vid.texture_step = 4; });
+      add_thurston_race(XLAT("periodic Solv"), [] { stop_game(); asonov::period_xy = 8; asonov::period_z = 0; asonov::set_flags(); set_geometry(gArnoldCat); });
       add_thurston_race(XLAT("hyperbolic crystal"), [] { set_geometry(gCrystal344); vid.texture_step = 4; });
       add_thurston_race(XLAT("torus x E"), [] { stop_game(); euclid3::set_torus3(4, 4, 0); set_geometry(gCubeTiling); });
       add_thurston_race(XLAT("hyperbolic regular"), [] { set_geometry(gSpace534); });
