@@ -13,6 +13,10 @@
 
 namespace hr {
 
+#if HDR
+int zgmod(int a, int b);
+#endif
+
 EX namespace asonov {
 
 EX bool in() { return geometry == gArnoldCat; }
@@ -23,31 +27,35 @@ EX transmatrix straighten;
 EX int period_xy = 8;
 EX int period_z = 8;
 
+#if HDR
 struct coord: public array<int,3> {
   coord() {}
   coord(int x, int y, int z) : array<int,3>(make_array(zgmod(x, period_xy), zgmod(y, period_xy), zgmod(z, period_z))) {}
   coord shift(int x, int y, int z=0) { return coord(self[0]+x, self[1]+y, self[2]+z); }
   coord up() { return coord(self[0]*2-self[1], self[1]-self[0], self[2]+1); }
-  coord down() { return coord(self[0]+self[1], self[0]+self[1]*2, self[2]-1); }
-  
-  coord addmove(int d) {
-    switch(d) {
-      case 0: return up().shift(0, 0);
-      case 1: return up().shift(1, -1);
-      case 2: return up().shift(-1, 0);
-      case 3: return up().shift(0, -1);
-      case 4: return shift(1, 0);
-      case 5: return shift(0, 1);
-      case 6: return down().shift(0, 0);
-      case 7: return down().shift(0, 1);
-      case 8: return down().shift(1, 1);
-      case 9: return down().shift(1, 2);
-      case 10: return shift(-1, 0);
-      case 11: return shift(0, -1);
-      default: throw "error";
-      }
-    }
+  coord down() { return coord(self[0]+self[1], self[0]+self[1]*2, self[2]-1); }  
+  coord addmove(int d);
+  coord operator - (coord b);
   };
+#endif
+
+coord coord::addmove(int d) {
+  switch(d) {
+    case 0: return up().shift(0, 0);
+    case 1: return up().shift(1, -1);
+    case 2: return up().shift(-1, 0);
+    case 3: return up().shift(0, -1);
+    case 4: return shift(1, 0);
+    case 5: return shift(0, 1);
+    case 6: return down().shift(0, 0);
+    case 7: return down().shift(0, 1);
+    case 8: return down().shift(1, 1);
+    case 9: return down().shift(1, 2);
+    case 10: return shift(-1, 0);
+    case 11: return shift(0, -1);
+    default: throw "error";
+    }
+  }
 
 EX void prepare() {
   using namespace hr;
@@ -105,6 +113,18 @@ transmatrix coord_to_matrix(coord c, coord zero) {
     else zero = zero.down(), T = eupush(-ty/2) * eupush(-tz) * T;
     }
   return T * eupush(tx * szgmod(c[0]-zero[0], period_xy) + ty * szgmod(c[1]-zero[1], period_xy));
+  }
+
+coord coord::operator - (coord b) {
+  auto c = self;
+  while(b[2]) {
+    int z = szgmod(b[2], period_z);
+    if(z > 0) b = b.down(), c = c.down();
+    else if(z < 0) b = b.up(), c = c.up();
+    }
+  c[0] = zgmod(c[0]-b[0], period_xy); b[0] = 0;
+  c[1] = zgmod(c[1]-b[1], period_xy); b[1] = 0;
+  return c;
   }
 
 EX transmatrix adjmatrix(int i) {
@@ -180,6 +200,10 @@ struct hrmap_asonov : hrmap {
   };
 
 EX hrmap *new_map() { return new hrmap_asonov; }
+
+EX coord get_coord(heptagon *h) { return ((hrmap_asonov*)currentmap)->coords[h]; }
+
+EX heptagon *get_at(coord where) { return ((hrmap_asonov*)currentmap)->at[where]; }
 
 EX int period_xy_edit, period_z_edit;
 
