@@ -289,15 +289,15 @@ void find_track(cell *start, int sign, int len) {
           case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
           }
         } */
-      if(nil && !quotient) {
+      if(use_exhaustive_distance)
+        id = trackval(c1);
+      else if(nil && !quotient) {
         switch(sign) { 
           case 1: id = c1->master->emeraldval - start->master->emeraldval; break;
           case 2: case 3: id = start->master->fieldval - c1->master->fieldval; break;
           case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
           }
         }
-      else if(asonov::in() && use_exhaustive_distance)
-        id = trackval(c1);
       else if(asonov::in() && asonov::period_z) {
         auto co = asonov::get_coord(c->master);
         ld x = szgmod(co[0], asonov::period_xy);
@@ -305,7 +305,6 @@ void find_track(cell *start, int sign, int len) {
         ld z = hypot(x, y);
         ld maxz = asonov::period_xy ? asonov::period_xy/3 : 1000000000;
         id = int((log(z) / log(maxz)) * length);
-        println(hlog, co, " -> ", id);
         }
       else if(solnih)
         id = (start->master->distance - c1->master->distance) * sign;
@@ -457,18 +456,31 @@ EX void generate_track() {
   if(euclid && (penrose || archimedean || quotient)) use_exhaustive_distance = true;
   if(nil && quotient) use_exhaustive_distance = true;
   if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) use_exhaustive_distance = true;
-    
-  if(use_exhaustive_distance) permanent_long_distances(s);
   
+  if(bounded) use_exhaustive_distance = true;
+    
+  if(use_exhaustive_distance) 
+    permanent_long_distances(s);
+
   bounded_track = false;
   
   length = LENGTH;
   if(WDIM == 3 || weirdhyperbolic) length = max(length - 10 * race_try, 10);
-  
+
+  if(use_exhaustive_distance) {
+    int maxsd = 0;
+    for(auto p: saved_distances) maxsd = max(maxsd, p.second);
+    println(hlog, "max length = ", maxsd);
+    length = min(length, maxsd * 5/6);
+    }
+    
   try {
   if(bounded && !prod && !(cgflags & qHUGE_BOUNDED)) {
     bounded_track = true;
     make_bounded_track(s);
+    }
+  else if(use_exhaustive_distance) {
+    find_track(s, 0, length);
     }
   else if(asonov::in()) {
     find_track(s, 0, length);
