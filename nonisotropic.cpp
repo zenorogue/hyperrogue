@@ -373,14 +373,30 @@ EX namespace solnihv {
       }
 
     transmatrix adj(cell *c, int d) override {
-      return adjmatrix(d, c->c.spin(d));
+      c->cmove(d); return adjmatrix(d, c->c.spin(d));
       }
     
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
       for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c.spin(i));
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
-      return Id; // not implemented yet
+      
+      transmatrix front = Id, back = Id;
+      
+      int up, down;
+
+      switch(geometry) {
+        case gSol: up = 2; down = 6; break;
+        case gSolN: up = 4; down = 7; break;
+        case gNIH: up = 4; down = 4; break;
+        default: throw "not nihsolv";
+        }
+      
+      while(h1->distance > h2->distance) front = front * adj(h1->c7, down), h1 = h1->cmove(down);
+      while(h1->distance < h2->distance) back = iadj(h2->c7, down) * back, h2 = h2->cmove(down);
+      while(coords[h1].first != coords[h2].first) front = front * adj(h1->c7, down), back = iadj(h2->c7, down) * back, h1 = h1->cmove(down), h2 = h2->cmove(down);
+      while(coords[h1].second != coords[h2].second) front = front * adj(h1->c7, up), back = iadj(h2->c7, up) * back, h1 = h1->cmove(up), h2 = h2->cmove(up);
+      return front * back;
       }
 
     void draw() override {
