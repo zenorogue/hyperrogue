@@ -1132,7 +1132,23 @@ int readArgs() {
   return 0;
   }
 
-auto hook = addHook(hooks_args, 100, readArgs);
+void addconfig() {
+  addparam(exp_start, "ray_exp_start");
+  addparam(exp_decay_exp, "ray_exp_decay_exp");
+  addparam(maxstep_sol, "ray_maxstep_sol");
+  addparam(maxstep_nil, "ray_maxstep_nil");
+  addparam(minstep, "ray_minstep");
+  addparam(reflect_val, "ray_reflect_val");
+  addparam(hard_limit, "ray_hard_limit");
+  addsaver(want_use, "ray_want_use");
+  addsaver(exp_decay_poly, "ray_exp_decay_poly");
+  addsaver(max_iter_iso, "ray_max_iter_iso");
+  addsaver(max_iter_sol, "ray_max_iter_sol");
+  addsaver(max_cells, "ray_max_cells");
+  addsaver(rays_generate, "ray_generate");
+  }
+
+auto hook = addHook(hooks_args, 100, readArgs) + addHook(hooks_configfile, 100, addconfig);
 #endif
 #endif
 
