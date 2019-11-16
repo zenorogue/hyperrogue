@@ -106,11 +106,18 @@ template<> struct saver<ld> : dsaver<ld> {
   };
 #endif
 
-EX void addparam(ld& val, const string s) {
+void addparam(ld& val, const string s);
+#endif
+
+#if CAP_CONFIG
+void addparam(ld& val, const string s) {
   addsaver(val, s);
   params.insert({s, val});
   }
-
+#else
+void addparam(ld& val, const string s) {
+  params.insert({s, val});
+  }
 #endif
 
 EX ld bounded_mine_percentage = 0.1;
