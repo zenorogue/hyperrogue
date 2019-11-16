@@ -126,7 +126,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(pmodel == mdDisk && GDIM == 3 && !spherespecial && !nonisotropic && !prod) {
     coordinator += "t /= (t[3] + uAlpha);\n";
     vsh += "uniform mediump float uAlpha;";
-    shader_flags |= SF_DIRECT | SF_BOX;
+    shader_flags |= SF_DIRECT | SF_BOX | SF_ZFOG;
     treset = true;
     }
   else if(pmodel == mdBand && hyperbolic) {
