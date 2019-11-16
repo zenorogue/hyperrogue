@@ -77,13 +77,6 @@ int utfsize(char c) {
 EX int get_sightrange() { return getDistLimit() + sightrange_bonus; }
 EX int get_sightrange_ambush() { return max(get_sightrange(), ambush_distance); }
 
-namespace stereo {
-  eStereo mode;
-  ld ipd;
-  ld lr_eyewidth, anaglyph_eyewidth;
-  ld fov, tanfov;
-  }
-
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
 bool display_data::stereo_active() { return vid.stereo_mode != sOFF; }
 
