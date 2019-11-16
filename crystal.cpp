@@ -555,7 +555,10 @@ struct hrmap_crystal : hrmap_standard {
     exit(1);
     }
 
-  transmatrix adj(cell *c, int d) override { return hrmap_standard::adj(c, d); }
+  transmatrix adj(cell *c, int d) override { 
+    if(crystal3()) return adj(c->master, d);
+    return hrmap_standard::adj(c, d); 
+    }
 
   void draw() override {
     if(!crystal3()) { hrmap_standard::draw(); return; }
