@@ -1437,7 +1437,8 @@ EX void optimizeview() {
   transmatrix iView = inverse(View);
   virtualRebase(centerover, iView);
   View = inverse(iView);
-  
+  fixmatrix(View);
+
   #if CAP_ANIMATIONS
   if(centerover && inmirror(centerover)) {
     anims::reflect_view();
