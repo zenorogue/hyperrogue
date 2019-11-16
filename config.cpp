@@ -106,12 +106,12 @@ template<> struct saver<ld> : dsaver<ld> {
   };
 #endif
 
-#endif
-
 EX void addparam(ld& val, const string s) {
   addsaver(val, s);
   params.insert({s, val});
   }
+
+#endif
 
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
