@@ -244,6 +244,7 @@ cld exp_parser::parse(int prio) {
     else if(number[0] == '0' && number[1] == 'x') res = strtoll(number.c_str()+2, NULL, 16);
     else if(number == "mousex") res = mousex;
     else if(number == "mousey") res = mousey;
+    else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
     else if(number == "shot") res = inHighQual ? 1 : 0;
     else if(extra_params.count(number)) res = extra_params[number];
@@ -285,7 +286,7 @@ EX ld parseld(const string& s) {
 
 EX string parser_help() {
   return XLAT("Functions available: %1", 
-    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation], to01, ifp(a,v,w) [if positive]");
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation], to01, random, ifp(a,v,w) [if positive]");
   }
 
 }
