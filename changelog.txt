@@ -3635,3 +3635,4 @@ Other:
 - fixed the 4D Crystal in H3 geometry
 - ray configuration saved
 - random in expression parser; 'draw inner walls in pattern' setting
+- fixed the confusion when picking up Orb of Speed while having one
