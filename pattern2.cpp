@@ -1494,6 +1494,7 @@ EX namespace patterns {
   EX bool displaycodes;
   EX char whichShape = 0;
   EX char whichCanvas = 0;
+  EX bool innerwalls;
   
   int sevenval(cell *c) {
     if(!euclid) return 0;
@@ -1789,6 +1790,7 @@ EX namespace patterns {
 
     dialog::addBreak(100);
 
+    dialog::addBoolItem_action(XLAT("display the inner walls"), innerwalls, '5');
     dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
     dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
     dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
@@ -2857,7 +2859,14 @@ int read_pattern_args() {
     patterns::whichCanvas = 'f';
     shift(); patterns::color_formula = args();
     }
-
+  else if(argis("-innerwall")) {
+    PHASEFROM(2);
+    patterns::innerwalls = true;
+    }
+  else if(argis("-noinnerwall")) {
+    PHASEFROM(2);
+    patterns::innerwalls = false;
+    }
   else if(argis("-d:line")) 
     launch_dialog(linepatterns::showMenu);
 
