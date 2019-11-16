@@ -108,6 +108,11 @@ template<> struct saver<ld> : dsaver<ld> {
 
 #endif
 
+EX void addparam(ld& val, const string s) {
+  addsaver(val, s);
+  params.emplace(s, val);
+  }
+
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
 
@@ -251,6 +256,8 @@ EX void savecolortable(colortable& ct, string name) {
   for(int i=0; i<isize(ct); i++)
     addsaver(ct[i], "color:" + name + ":" + its(i));
   }
+
+EX purehookset hooks_configfile;
 
 EX void initConfig() {
   
@@ -608,6 +615,14 @@ EX void initConfig() {
 #if CAP_SHMUP  
   multi::initConfig();
 #endif
+
+  addsaver(asonov::period_xy, "asonov:period_xy");
+  addsaver(asonov::period_z, "asonov:period_z");
+  addsaver(nilv::nilperiod[0], "nilperiod_x");
+  addsaver(nilv::nilperiod[1], "nilperiod_y");
+  addsaver(nilv::nilperiod[2], "nilperiod_z");
+
+  callhooks(hooks_configfile);
 
 #if CAP_CONFIG
   for(auto s: savers) s->reset();
