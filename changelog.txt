@@ -3627,3 +3627,11 @@ Other:
 
 - other:
 - - command-line option to disable music
+
+2019-11-16 03:08 Version 11.2k:
+- stereo in ray
+- fixed the graphics getting glitchy after some distance
+- fixed the clipping in Poincare Ball model
+- fixed the 4D Crystal in H3 geometry
+- ray configuration saved
+- random in expression parser; 'draw inner walls in pattern' setting
