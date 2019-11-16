@@ -1027,6 +1027,8 @@ void geometry_information::make_floor_textures_here() {
   gv.emplace_back(+1, +1, 1, 1, 1);
   gv.emplace_back(-1, +1, 1, 1, 1);
   
+  dynamicval<bool> riu(ray::in_use, false);
+  
   if(1) {
     current_display->next_shader_flags = GF_VARCOLOR;
     dynamicval<eModel> m(pmodel, mdPixel);

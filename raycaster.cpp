@@ -85,7 +85,7 @@ EX bool requested() {
   }
 
 struct raycaster : glhr::GLprogram {
-  GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD;
+  GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD, uShift;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tTextureMap;
   GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
@@ -100,6 +100,7 @@ struct raycaster : glhr::GLprogram {
     uLength = glGetUniformLocation(_program, "uLength");
     uFovX = glGetUniformLocation(_program, "uFovX");
     uFovY = glGetUniformLocation(_program, "uFovY");
+    uShift = glGetUniformLocation(_program, "uShift");
     uIPD = glGetUniformLocation(_program, "uIPD");
 
     uWallstart = glGetUniformLocation(_program, "uWallstart");
@@ -116,6 +117,8 @@ struct raycaster : glhr::GLprogram {
     uLinearSightRange = glGetUniformLocation(_program, "uLinearSightRange");
     uExpDecay = glGetUniformLocation(_program, "uExpDecay");
     uExpStart = glGetUniformLocation(_program, "uExpStart");
+
+    uShift = glGetUniformLocation(_program, "uShift");
 
     uBLevel = glGetUniformLocation(_program, "uBLevel");
   
@@ -141,10 +144,10 @@ void enable_raycaster() {
 
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
-      "uniform mediump float uFovX, uFovY;\n"
+      "uniform mediump float uFovX, uFovY, uShift;\n"
       "varying mediump vec4 at;\n"
       "void main() { \n"
-      "  gl_Position = aPosition; at = aPosition;\n"
+      "  gl_Position = aPosition; at = aPosition; at.x += uShift;\n"
   #if IN_ODS    
       "  at[0] *= PI; at[1] *= PI; \n"
   #else
@@ -801,9 +804,17 @@ EX void cast() {
     glhr::makevertex(+1, -1, 1),
     glhr::makevertex(+1, +1, 1)
     };
+
+  ld d = current_display->eyewidth();
+  if(vid.stereo_mode == sLR) d = 2 * d - 1;
+  else d = -d;
+
+  glUniform1f(o->uShift, -global_projection * d);
   
   auto& cd = current_display;
-  glUniform1f(o->uFovX, cd->tanfov);
+  cd->set_viewport(global_projection);
+  cd->set_mask(global_projection);
+  glUniform1f(o->uFovX, cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1));
   glUniform1f(o->uFovY, cd->tanfov * cd->ysize / cd->xsize);
   
   deg = S7;
@@ -817,6 +828,10 @@ EX void cast() {
   cell *cs = centerover;
 
   transmatrix T = cview();
+  
+  if(global_projection)
+    T = xpush(vid.ipd * global_projection/2) * T;
+
   if(nonisotropic) T = NLP * T;
   T = inverse(T);
 

@@ -4437,7 +4437,6 @@ EX void drawthemap() {
   profile_start(1);
   make_actual_view();
   currentmap->draw();
-  if(ray::in_use && !ray::comparison_mode) ray::cast();
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
@@ -4702,13 +4701,6 @@ EX void drawfullmap() {
   #if CAP_QUEUE
   drawqueue();
   #endif
-
-  if(ray::in_use && ray::comparison_mode) {
-    glDepthFunc(GL_LEQUAL);
-    glClearDepth(1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    ray::cast();
-    }
 
   profile_stop(2);
   }

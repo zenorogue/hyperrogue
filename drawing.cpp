@@ -1882,6 +1882,11 @@ EX void draw_main() {
       }
     }
   else {
+    if(ray::in_use && !ray::comparison_mode) {
+      ray::cast();
+      reset_projection();
+      }
+
     for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
       ptd->draw();
     
@@ -1892,6 +1897,13 @@ EX void draw_main() {
       ptd->draw();
       }
     glflush();
+
+    if(ray::in_use && ray::comparison_mode) {
+      glDepthFunc(GL_LEQUAL);
+      glClearDepth(1.0f);
+      glClear(GL_DEPTH_BUFFER_BIT);
+      ray::cast();
+      }
     }
   }
 
