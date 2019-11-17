@@ -401,7 +401,7 @@ EX namespace reg3 {
           if(eqmatrix(T, reg3::adjmoves[i])) {
             int code = mgmul({a,P,b});
             field_adjmoves[i] = code;
-            println(hlog, i, " = ", make_tuple(a,P,b), " = ", code, " T = ", T);
+            DEBB(DF_FIELD, (i, " = ", make_tuple(a,P,b), " = ", code, " T = ", T));
             }
           }
         
