@@ -57,7 +57,7 @@ EX namespace reg3 {
     if(S7 == 8) face = 3;
     /* icosahedron not implemented */
     loop = ginf[geometry].tiling_name[5] - '0';
-    println(hlog, "face = ", face, " loop = ", loop, " S7 = ", S7);
+    DEBB(DF_GEOM, ("face = ", face, " loop = ", loop, " S7 = ", S7));
     
     /* dual_angle : the angle between two face centers in the dual cell */
     ld dual_angle = binsearch(0, M_PI, [&] (ld d) {
@@ -84,8 +84,8 @@ EX namespace reg3 {
       dual_angle = hdist(h1, h2);
       }
     
-    println(hlog, "angle between faces = ", angle_between_faces);
-    println(hlog, "dual angle = ", dual_angle);
+    DEBB(DF_GEOM, ("angle between faces = ", angle_between_faces));
+    DEBB(DF_GEOM, ("dual angle = ", dual_angle));
     
     ld inp_length = binsearch(0, 1.55, [&] (ld d) {
       hyperpoint h = xpush(-d) * spin(2*M_PI/face) * xpush0(d);
@@ -93,11 +93,11 @@ EX namespace reg3 {
       return (alpha < dual_angle / 2) ? hyperbolic : sphere;
       });
     
-    println(hlog, "inp length = ", inp_length);
+    DEBB(DF_GEOM, ("inp length = ", inp_length));
     
     ld edge_length = hdist(xpush0(inp_length), spin(2*M_PI/face) * xpush0(inp_length));
     if(S7 == 8) edge_length = hdist(normalize(hpxyz3(1,1,0,0)), normalize(hpxyz3(1,0,1,0))); 
-    println(hlog, "edge length = ", edge_length);
+    DEBB(DF_GEOM, ("edge length = ", edge_length));
     
     /* frontal face direction */
     hyperpoint h0 = xtangent(1);
@@ -111,15 +111,15 @@ EX namespace reg3 {
     hyperpoint dir_v2 = S7 == 8 ? (h1 + h2) : (h0 + h1 + h2);
     hyperpoint dir_v3 = S7 == 8 ? (h1 + h3) : (h0 + h1 + h3);
 
-    println(hlog, "dir_v2 = ", dir_v2);
-    println(hlog, "dir_v3 = ", dir_v3);
+    DEBB(DF_GEOM, ("dir_v2 = ", dir_v2));
+    DEBB(DF_GEOM, ("dir_v3 = ", dir_v3));
     
     dir_v2 = tangent_length(dir_v2, 1);
     dir_v3 = tangent_length(dir_v3, 1);
     
-    println(hlog, "S7 = ", S7);
-    println(hlog, "dir_v2 = ", dir_v2);
-    println(hlog, "dir_v3 = ", dir_v3);
+    DEBB(DF_GEOM, ("S7 = ", S7));
+    DEBB(DF_GEOM, ("dir_v2 = ", dir_v2));
+    DEBB(DF_GEOM, ("dir_v3 = ", dir_v3));
     
     /* the distance from cell center to cell vertex */
     ld vertex_distance;
@@ -138,7 +138,7 @@ EX namespace reg3 {
         });
       }
     
-    println(hlog, "vertex_distance = ", vertex_distance);
+    DEBB(DF_GEOM, ("vertex_distance = ", vertex_distance));
     
     /* actual vertex */
     hyperpoint v2 = direct_exp(dir_v2 * vertex_distance, iTable);
@@ -147,7 +147,7 @@ EX namespace reg3 {
     for(int i=0; i<face; i++) mid += cspin(1, 2, 2*i*M_PI/face) * v2;
     mid = normalize(mid);
     ld between_centers = 2 * hdist0(mid);
-    println(hlog, "between_centers = ", between_centers);
+    DEBB(DF_GEOM, ("between_centers = ", between_centers));
 
     if(S7 == 12 || S7 == 8) {
       spins[0] = Id;
@@ -181,9 +181,9 @@ EX namespace reg3 {
     for(int i=1; i<S7; i++) adjmoves[i] = spins[i] * adjmoves[0];
 
     for(int a=0; a<S7; a++)
-      println(hlog, "center of ", a, " is ", tC0(adjmoves[a]));    
+      DEBB(DF_GEOM, ("center of ", a, " is ", tC0(adjmoves[a])));
     
-    println(hlog, "doublemove = ", tC0(adjmoves[0] * adjmoves[0]));
+    DEBB(DF_GEOM, ("doublemove = ", tC0(adjmoves[0] * adjmoves[0])));
 
     adjcheck = hdist(tC0(adjmoves[0]), tC0(adjmoves[1])) * 1.0001;
 
@@ -192,7 +192,7 @@ EX namespace reg3 {
       dirs_adjacent[a][b] = a != b && hdist(tC0(adjmoves[a]), tC0(adjmoves[b])) < adjcheck;
       if(dirs_adjacent[a][b]) numedges++;
       }
-    println(hlog, "numedges = ", numedges);
+    DEBB(DF_GEOM, ("numedges = ", numedges));
     
     if(loop == 4) strafedist = adjcheck;
     else strafedist = hdist(adjmoves[0] * C0, adjmoves[1] * C0);
