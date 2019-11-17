@@ -385,4 +385,12 @@ EX string XLAT1(string x) {
 
 EX string XLATT1(stringpar p) { return XLAT1(p.v); }
 
+EX bool shapename_available(int id) { return id >= 3 && id < 9; }
+
+EX string shapename(int id) {
+  if(!shapename_available(id)) return "";
+  string english[9] = {"", "", "digon", "triangle", "square", "pentagon", "hexagon", "heptagon", "octagon"};
+  return english[id];
+  }
+
 }

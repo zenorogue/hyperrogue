@@ -51,7 +51,16 @@ void showQuotientConfig() {
   string stars[3] = {"", "*", "**"};
   for(int i=0; i<isize(gxcur.primes); i++) {
     auto& p = gxcur.primes[i];
-    dialog::addBoolItem(XLAT("order %1%2 (pure cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)) + stars[gxcur.dualval[i]], i == gxcur.current_prime_id, 'A'+i);
+    
+    int sides = ginf[gxcur.base].sides;
+    bool sa = shapename_available(sides);
+    string s = sa ? "order %1%2 (%3 %4s)" : "order %1%2 (%3 %4-gons)";
+    
+    s = XLAT(s, its(p.p), p.squared ? "²" : "", its(p.cells), sa ? shapename(sides) : its(sides));
+    
+    s += stars[gxcur.dualval[i]];
+    
+    dialog::addBoolItem(s, i == gxcur.current_prime_id, 'A'+i);
     }
   
   if(isize(gxcur.primes) <= 6) {
