@@ -927,6 +927,8 @@ EX void check_cgi() {
 
   if(prod) V("PS", its(product::csteps));
   
+  if(geometry == gFieldQuotient) { V("S3=", its(S3)); V("S7=", its(S7)); }
+  
   if(binarytiling) V("BT", fts(vid.binary_width));
   
   if(GDIM == 2) { 
