@@ -23,6 +23,7 @@ struct primeinfo {
 struct fgeomextra {
   eGeometry base;
   vector<primeinfo> primes;
+  vector<int> dualval;
   int current_prime_id;
   fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
   };
@@ -69,7 +70,7 @@ EX int btspin(int id, int d) {
 #if HDR
 struct fpattern {
   
-  int Prime, wsquare, Field;
+  int Prime, wsquare, Field, dual;
   // we perform our computations in the field Z_Prime[w] where w^2 equals wsquare
   // (or simply Z_Prime for wsquare == 0)
 
@@ -278,6 +279,8 @@ struct fpattern {
   
   void findsubpath();
   
+  vector<matrix> generate_isometries();
+  
   bool check_order(matrix M, int req);
   };
 #endif
@@ -291,6 +294,35 @@ bool fpattern::check_order(matrix M, int req) {
   return P == Id;
   }
 
+vector<matrix> fpattern::generate_isometries() {
+  matrix T = Id;
+  int low = wsquare ? 1-Prime : 0;
+  vector<matrix> res;
+  
+  auto colprod = [&] (int a, int b) {
+    return add(add(mul(T[0][a], T[0][b]), mul(T[1][a], T[1][b])), mul(T[2][a], T[2][b]));
+    };
+
+  for(T[0][0]=low; T[0][0]<Prime; T[0][0]++)
+  for(T[1][0]=low; T[1][0]<Prime; T[1][0]++)
+  for(T[2][0]=low; T[2][0]<Prime; T[2][0]++)
+  if(colprod(0, 0) == 1)
+  for(T[0][1]=low; T[0][1]<Prime; T[0][1]++)
+  for(T[1][1]=low; T[1][1]<Prime; T[1][1]++)
+  for(T[2][1]=low; T[2][1]<Prime; T[2][1]++)
+  if(colprod(1, 1) == 1)
+  if(colprod(1, 0) == 0)
+  for(T[0][2]=low; T[0][2]<Prime; T[0][2]++)
+  for(T[1][2]=low; T[1][2]<Prime; T[1][2]++)
+  for(T[2][2]=low; T[2][2]<Prime; T[2][2]++)
+  if(colprod(2, 2) == 1)
+  if(colprod(2, 0) == 0)
+  if(colprod(2, 1) == 0)
+    res.push_back(T);
+
+  return res;
+  }
+
 int fpattern::solve() {
   
   for(int a=0; a<MWDIM; a++) for(int b=0; b<MWDIM; b++) Id[a][b] = a==b?1:0;
@@ -301,7 +333,8 @@ int fpattern::solve() {
   
   rotations = WDIM == 2 ? S7 : 4;
   local_group = WDIM == 2 ? S7 : 24;
-
+  
+  for(dual=0; dual<3; dual++) {
   for(int pw=1; pw<3; pw++) {
     if(pw>3) break;
     Field = pw==1? Prime : Prime*Prime;
@@ -313,6 +346,20 @@ int fpattern::solve() {
         if(!roots) break;
         }
       } else wsquare = 0;
+
+    if(dual == 2) {
+      if(Field <= 10) {
+        vector<matrix> all_isometries = generate_isometries();
+        for(auto& X: all_isometries) 
+          if(check_order(X, rotations))
+            for(auto& Y: all_isometries)
+              if(check_order(Y, 2) && check_order(mmul(X, Y), S3)) {
+                R = X; P = Y;
+                return 0;
+                }
+        }
+      continue;
+      }
 
 #ifdef EASY        
     std::vector<int> sqrts(Prime, 0);
@@ -336,7 +383,7 @@ int fpattern::solve() {
       R[0][0] = cs; R[1][1] = cs;
       R[0][1] = sn; R[1][0] = sub(0, sn);
       
-      if(!check_order(R, rotations)) continue;
+      if(!check_order(R, dual ? S3 : rotations)) continue;
       
       if(R[0][0] == 1) continue;
       
@@ -350,10 +397,14 @@ int fpattern::solve() {
         P[WDIM][0] = sh;
         P[WDIM][WDIM] = ch;
         
-        if(!check_order(mmul(P, R), S3)) continue;        
+        if(!check_order(mmul(P, R), dual ? rotations : S3)) continue;
+        
+        if(dual) R = mmul(P, R);
+        
         return 0;
         }
       }
+    }
     }
 
   return 2;
@@ -730,8 +781,8 @@ EX void info() {
   for(int p=0; p<500; p++) {
     fp.Prime = p;
     if(fp.solve() == 0) {
-      printf("%4d: wsquare=%d cs=%d sn=%d ch=%d sh=%d\n",
-        p, fp.wsquare, fp.cs, fp.sn, fp.ch, fp.sh);
+      printf("%4d: wsquare=%d cs=%d sn=%d ch=%d sh=%d dual=%d\n",
+        p, fp.wsquare, fp.cs, fp.sn, fp.ch, fp.sh, fp.dual);
       cases++;
       if(!fp.easy(fp.cs) || !fp.easy(fp.sn) || !fp.easy(fp.ch) || !fp.easy(fp.sn))
         hard++;
@@ -796,11 +847,11 @@ EX int subpathorder = currfp.order(currfp.matrices[subpathid]);
 // extra information for field quotient extra configuration
 
 EX vector<fgeomextra> fgeomextras = {
-  fgeomextra(gNormal, 3),
+  fgeomextra(gNormal, 4),
   fgeomextra(gOctagon, 1),
-  fgeomextra(g45, 0),
-  fgeomextra(g46, 3),
-  fgeomextra(g47, 0),
+  fgeomextra(g45, 1),
+  fgeomextra(g46, 5),
+  fgeomextra(g47, 1),
 /*  fgeomextra(gSphere, 0),
   fgeomextra(gSmallSphere, 0), -> does not find the prime
   fgeomextra(gEuclid, 0),
@@ -824,6 +875,7 @@ EX void nextPrime(fgeomextra& ex) {
       fp.build();
       int cells = fp.matrices.size() / S7;
       ex.primes.emplace_back(primeinfo{nextprime, cells, (bool) fp.wsquare});
+      ex.dualval.emplace_back(fp.dual);
       break;
       }
     nextprime++;
@@ -831,8 +883,12 @@ EX void nextPrime(fgeomextra& ex) {
   }
 
 EX void nextPrimes(fgeomextra& ex) {
-  while(isize(ex.primes) < 4) 
+  while(true) {
+    int nodual = 0;
+    for(int a: ex.dualval) if(!a) nodual++;
+    if(nodual >= 4) break;
     nextPrime(ex);
+    }
   }
 
 EX void enableFieldChange() {

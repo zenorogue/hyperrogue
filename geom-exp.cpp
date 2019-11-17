@@ -48,9 +48,10 @@ void showQuotientConfig() {
     dialog::addBoolItem(ginf[g.base].tiling_name, g.base == gxcur.base, 'a'+i);
     }
   nextPrimes(gxcur);
+  string stars[3] = {"", "*", "**"};
   for(int i=0; i<isize(gxcur.primes); i++) {
     auto& p = gxcur.primes[i];
-    dialog::addBoolItem(XLAT("order %1%2 (non-bitruncated cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
+    dialog::addBoolItem(XLAT("order %1%2 (pure cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)) + stars[gxcur.dualval[i]], i == gxcur.current_prime_id, 'A'+i);
     }
   
   if(isize(gxcur.primes) < 6) {
