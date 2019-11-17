@@ -277,8 +277,19 @@ struct fpattern {
     }
   
   void findsubpath();
+  
+  bool check_order(matrix M, int req);
   };
 #endif
+
+bool fpattern::check_order(matrix M, int req) {
+  matrix P = M;
+  for(int i=1; i<req; i++) {
+    if(P == Id) return false;
+    P = mmul(P, M);
+    }
+  return P == Id;
+  }
 
 int fpattern::solve() {
   
@@ -313,11 +324,6 @@ int fpattern::solve() {
     int fmax = Field;
 #endif
 
-    if(Prime == 13 && wsquare && false) {
-      for(int i=0; i<Prime; i++) printf("%3d", sqrts[i]);
-      printf("\n");
-      }
-    
     R = P = X = Id;
     X[1][1] = 0; X[2][2] = 0;
     X[1][2] = 1; X[2][1] = Prime-1;
@@ -330,13 +336,8 @@ int fpattern::solve() {
       R[0][0] = cs; R[1][1] = cs;
       R[0][1] = sn; R[1][0] = sub(0, sn);
       
-      matrix Z = R;
-      for(int i=1; i<rotations; i++) {
-        if(Z == Id) goto nextcs;
-        Z = mmul(Z, R);
-        }
-              
-      if(Z != Id) continue;
+      if(!check_order(R, rotations)) continue;
+      
       if(R[0][0] == 1) continue;
       
       for(ch=2; ch<fmax; ch++) {
@@ -349,16 +350,9 @@ int fpattern::solve() {
         P[WDIM][0] = sh;
         P[WDIM][WDIM] = ch;
         
-        matrix Z1 = mmul(P, R);
-        matrix Z = Z1;
-        for(int i=1; i<S3; i++) {
-          if(Z == Id) goto nextch;
-          Z = mmul(Z, Z1);
-          }
-        if(Z == Id) return 0;
-        nextch: ;
+        if(!check_order(mmul(P, R), S3)) continue;        
+        return 0;
         }
-      nextcs: ;
       }
     }
 
