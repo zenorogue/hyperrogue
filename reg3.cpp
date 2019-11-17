@@ -308,9 +308,9 @@ EX namespace reg3 {
       full_R = spin(-2 * M_PI / 4);
       full_X = cspin(1, 2, M_PI / 2);
   
-      println(hlog, "full_P = ", full_P, " / ", R);
-      println(hlog, "full_R = ", full_R, " / ", P);
-      println(hlog, "full_X = ", full_X, " / ", X);
+      DEBB(DF_FIELD, ("full_P = ", full_P, " / ", R));
+      DEBB(DF_FIELD, ("full_R = ", full_R, " / ", P));
+      DEBB(DF_FIELD, ("full_X = ", full_X, " / ", X));
   
       int N = currfp_n();
   
@@ -329,7 +329,7 @@ EX namespace reg3 {
         known[iX] = true;
         }
       for(int i=0; i<perm_group; i++) if(known[i]) {
-        println(hlog, i, ". ", fullmatrices[i]);
+        DEBB(DF_FIELD, (i, ". ", fullmatrices[i]));
         }
       
       // find cav such that:
@@ -343,15 +343,15 @@ EX namespace reg3 {
       hyperpoint corner3 = reg3::cellshape[3];
       hyperpoint cornerx;
   
-      for(hyperpoint h: reg3::cellshape) println(hlog, "some corner ", h);
+      for(hyperpoint h: reg3::cellshape) DEBB(DF_FIELD, ("some corner ", h));
   
       for(hyperpoint h: reg3::cellshape)
         if(hdist(h, corner1) > .1 && hdist(h, corner3) > .1 && abs(hdist(h, corner0)-hdist(corner0, corner1)) < .1)
           cornerx = h;
-      println(hlog, "corner0 = ", corner0);
-      println(hlog, "corner1 = ", corner1);
-      println(hlog, "corner3 = ", corner3);
-      println(hlog, "cornerx = ", cornerx);
+      DEBB(DF_FIELD, ("corner0 = ", corner0));
+      DEBB(DF_FIELD, ("corner1 = ", corner1));
+      DEBB(DF_FIELD, ("corner3 = ", corner3));
+      DEBB(DF_FIELD, ("cornerx = ", cornerx));
       
       transmatrix adj = Id, iadj = Id;
   
@@ -359,7 +359,7 @@ EX namespace reg3 {
       reg3::generate();
       
       cyclers.clear();
-      println(hlog, "S7 = ", S7);
+      DEBB(DF_FIELD, ("S7 = ", S7));
       if(S7 == 12) {
       
         transmatrix resmatrix;
@@ -375,8 +375,8 @@ EX namespace reg3 {
         set_column(transformer, 3, tC0(reg3::adjmoves[2]));
         
         transmatrix cav = resmatrix * inverse(transformer);
-        println(hlog, "cav = ", cav);
-        println(hlog, "cav * C0 = ", cav * C0);
+        DEBB(DF_FIELD, ("cav = ", cav));
+        DEBB(DF_FIELD, ("cav * C0 = ", cav * C0));
   
         set<int> seen_matrices;
         set<int> seen_codes;
@@ -405,9 +405,9 @@ EX namespace reg3 {
             }
           }
         
-      println(hlog, "field_adjmoves = ", field_adjmoves);
+      DEBB(DF_FIELD, ("field_adjmoves = ", field_adjmoves));
       
-      println(hlog, "finding code_to_cell/cell_to_code...");
+      DEBB(DF_FIELD, ("finding code_to_cell/cell_to_code..."));
   
       cell_to_code.clear();
       code_to_cell.resize(N);
@@ -417,7 +417,7 @@ EX namespace reg3 {
         cell_to_code.push_back(i);
         }
       
-      println(hlog, "building allh...");
+      DEBB(DF_FIELD, ("building allh..."));
       int cells = N / perm_group;
       allh.resize(cells);
       for(int i=0; i<cells; i++) {
@@ -429,7 +429,7 @@ EX namespace reg3 {
         acells.push_back(allh[i]->c7);
         }
       
-      println(hlog, "finding tmatrices...");
+      DEBB(DF_FIELD, ("finding tmatrices..."));
       tmatrices.resize(cells);
       
       for(int i=0; i<cells; i++) {
@@ -445,12 +445,12 @@ EX namespace reg3 {
               found++;
               }
             }
-          if(found != 1) println(hlog, "bad found: ", i, "/", d, "/", found);
+          if(found != 1) DEBB(DF_FIELD, ("bad found: ", i, "/", d, "/", found));
           // println(hlog, "tmatrix(",i,",",d,") = ", tmatrices[i][d]);
           }
         }
   
-      println(hlog, "setting spin...");
+      DEBB(DF_FIELD, ("setting spin..."));
       for(int i=0; i<cells; i++) 
       for(int d=0; d<S7; d++)
       for(int e=0; e<S7; e++) 
@@ -459,6 +459,7 @@ EX namespace reg3 {
           allh[i]->c7->c.setspin(d, e, false);
           }
   
+      DEBB(DF_FIELD, ("creating patterns..."));
       create_patterns();
       }
     
