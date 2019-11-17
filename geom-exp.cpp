@@ -54,7 +54,7 @@ void showQuotientConfig() {
     dialog::addBoolItem(XLAT("order %1%2 (pure cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)) + stars[gxcur.dualval[i]], i == gxcur.current_prime_id, 'A'+i);
     }
   
-  if(isize(gxcur.primes) < 6) {
+  if(isize(gxcur.primes) <= 6) {
     dialog::addBreak(100);
     dialog::addHelp(
       "This geometry is obtained by applying the same 'generators' which "

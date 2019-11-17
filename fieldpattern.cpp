@@ -883,12 +883,8 @@ EX void nextPrime(fgeomextra& ex) {
   }
 
 EX void nextPrimes(fgeomextra& ex) {
-  while(true) {
-    int nodual = 0;
-    for(int a: ex.dualval) if(!a) nodual++;
-    if(nodual >= 4) break;
+  while(isize(ex.primes) < 6) 
     nextPrime(ex);
-    }
   }
 
 EX void enableFieldChange() {
