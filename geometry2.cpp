@@ -313,8 +313,7 @@ EX bool no_easy_spin() {
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
   ld hexshift = 0;
-  if(ctof(c) && S7==6 && S3 == 4 && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
-  else if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
+  if(ctof(c) && (S7 % 2 == 0) && BITRUNCATED && !euclid) hexshift = cgi.hexshift + 2*M_PI/S7;
   else if(cgi.hexshift && ctof(c)) hexshift = cgi.hexshift;
   if(IRREGULAR) {
     auto id = irr::cellindex[c];
