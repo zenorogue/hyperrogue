@@ -1062,10 +1062,9 @@ void movePlayer(monster *m, int delta) {
           }
         }
       else if(isPushable(c2->wall) && !nonAdjacent(c2, m->base)) {
-        int sd = neighborId(c2, m->base);
+        int sd = neighborId(m->base, c2);
         int subdir = 1;
         double bestd = 9999;
-        pushmonsters();
         for(int di=-1; di<2; di+=2) {
           cell *c = c2->modmove(sd+di);
           if(!c) continue;
@@ -1073,16 +1072,11 @@ void movePlayer(monster *m, int delta) {
           double d = sqdist(gmatrix[c] * C0, m->pat * C0);
           if(d<bestd) bestd=d, subdir = di;
           }
+        pushmonsters();
+        auto mip = determinePush(cellwalker(c2, sd), subdir, [m, c2] (cell *c) { return canPushThumperOn(c, c2, m->base); });
         visibleFor(300);
-        cellwalker push(c2, neighborId(c2, m->base));
-        push = push + 3 * (-subdir) + wstep;
-        if(!canPushThumperOn(push.at, c2, m->base) && c2->type == 7) {
-          push = push + wstep - subdir + wstep;
-          }
-        if(!canPushThumperOn(push.at, c2, m->base)) {
-          go = false;
-          }
-        else pushThumper(c2, push.at);
+        if(!mip.proper()) go = false;
+        else pushThumper(mip);
         popmonsters();
         }
       else if(c2->wall == waRose && !nonAdjacent(m->base, c2)) {

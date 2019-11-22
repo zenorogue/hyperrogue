@@ -444,6 +444,7 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 
 constexpr int STRONGWIND = 99;
 constexpr int FALL = 98;
+constexpr int NO_SPACE = 97;
 
 namespace whirlwind { cell *jumpDestination(cell*); }
 
@@ -451,10 +452,11 @@ struct movei {
   cell *s;
   cell *t;
   int d;
+  bool op() { return s != t; }
   bool proper() const { return d >= 0 && d < s->type && s->move(d) == t; }
   movei(cell *_s, int _d) : s(_s), d(_d) {
     if(d == STRONGWIND) t = whirlwind::jumpDestination(s);
-    else if(d == FALL) t = s;
+    else if(d == FALL || d == NO_SPACE) t = s;
     else t = s->move(d);
     }
   movei(cell *_s, cell *_t, int _d) : s(_s), t(_t), d(_d) {}

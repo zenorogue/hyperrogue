@@ -956,24 +956,26 @@ void placeIllusion(cell *c) {
   checkmoveO();
   }
 
-void blowoff(cell *cf, cell *ct, int direction_hint) {
+void blowoff(const movei& mi) {
+  auto& cf = mi.s;
+  auto& ct = mi.t;
   playSound(ct, "orb-ranged");
   if(cf->monst)
   addMessage(XLAT("You blow %the1 away!", cf->monst));
   if(cf->wall == waThumperOff) activateActiv(cf, false);
   if(isPushable(cf->wall) || cf->wall == waBigStatue)
-    pushThumper(cf, ct);
+    pushThumper(mi);
   else if(isBoat(cf) && !cf->monst) {
     bool was_stranded = cf->wall == waStrandedBoat;
     bool willbe_stranded = ct->wall == waNone;
     if(was_stranded) cf->wall = waBoat;
     if(willbe_stranded) ct->wall = waSea;
-    moveBoat(ct, cf, direction_hint);  
+    moveBoat(mi);
     if(was_stranded) cf->wall = waNone;
     if(willbe_stranded) ct->wall = waStrandedBoat;
     }
   else
-    pushMonster(ct, cf, direction_hint);
+    pushMonster(mi);
   if(cf->item == itBabyTortoise) {
     if(ct->item) ct->item = itNone;
     moveItem(cf, ct, true);
@@ -1006,15 +1008,15 @@ bool monstersnearO(orbAction a, cell *c, cell *nocount, eMonster who, cell *push
 EX bool isCheck(orbAction a) { return a == roCheck || a == roMultiCheck; }
 EX bool isWeakCheck(orbAction a) { return a == roCheck || a == roMultiCheck || a == roMouse; }
 
-EX cell *blowoff_destination(cell *c, int& di) {
+EX movei blowoff_destination(cell *c, int& di) {
   int d = 0;
   for(; d<c->type; d++) if(c->move(d) && c->move(d)->cpdist < c->cpdist) break;
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
-    if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return c2;
+    if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }
-  return NULL;
+  return movei(c, c, NO_SPACE);
   }
 
 EX eItem targetRangedOrb(cell *c, orbAction a) {
@@ -1079,14 +1081,15 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   bool nowhereToBlow = false;
   if(items[itOrbAir] && (isBlowableMonster(c->monst) || isPushable(c->wall) || c->wall == waBigStatue || isBoat(c))) {
     int di = NODIR;
-    cell *c2 = blowoff_destination(c, di);
-    if(c2 && isBoat(c) && !isWatery(c2) && c2->wall != waNone) c2 = NULL;
-    if(c2 && c->wall == waBigStatue && !canPushStatueOn(c2)) c2 = NULL;
-    if(c2) {
-      if(!isCheck(a)) blowoff(c, c2, di);
+    movei mi = blowoff_destination(c, di);
+    auto& c2 = mi.t;
+    if(!mi.op()) nowhereToBlow = true;
+    else if(isBoat(c) && !isWatery(c2) && c2->wall != waNone) nowhereToBlow = true;
+    else if(c->wall == waBigStatue && !canPushStatueOn(c2)) nowhereToBlow = true;
+    else {
+      if(!isCheck(a)) blowoff(mi);
       return itOrbAir;
       }
-    else nowhereToBlow = true;
     }
   
   // nature
