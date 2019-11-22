@@ -530,7 +530,7 @@ void moved() {
         cwt.spin = neighborId(centerover, cwt.at);
         flipplayer = true;
         }
-      animateMovement(cwt.at, centerover, LAYER_SMALL, NODIR);
+      animateMovement(match(cwt.at, centerover), LAYER_SMALL);
       cwt.at = centerover;
       save_memory();
       return;

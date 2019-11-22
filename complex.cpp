@@ -141,7 +141,7 @@ EX namespace whirlwind {
     for(int i=0; i<z-1; i++) {
       moveItem(whirlline[i], whirlline[i+1], true);
       if(whirlline[i]->item)
-        animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT, NOHINT);
+        animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
       pickupMovedItems(whirlline[i]);
@@ -1036,7 +1036,7 @@ EX namespace whirlpool {
     if(wfrom && wto && wfrom->wall == waBoat && wto->wall == waSea && !wto->monst) {
       wfrom->wall = waSea; wto->wall = waBoat;
       wto->mondir = neighborId(wto, wfrom);
-      animateMovement(wfrom, wto, LAYER_BOAT, NOHINT);
+      animateMovement(moveimon(wto).rev(), LAYER_BOAT);
       }
     
     if(wfrom && wto && wfrom->item && !wto->item && wfrom->wall != waBoat) {
@@ -2499,14 +2499,14 @@ EX namespace dragon {
   void pullback(cell *c) {
     int maxlen = 1000;
     while(maxlen-->0) {
-      cell *c2 = c->move(c->mondir);
-      mountmove(c, c->mondir, true, c2);
-      c->monst = c2->monst;
-      c->hitpoints = c2->hitpoints;
-      animateMovement(c2, c, LAYER_BIG, c->c.spin(c->mondir));
+      auto mi = moveimon(c).rev();
+      mountmove(mi, true);
+      c->monst = mi.s->monst;
+      c->hitpoints = mi.s->hitpoints;
+      animateMovement(mi, LAYER_BIG);
       c->stuntime = 2;
-      if(c2->mondir == NODIR) { c->mondir = NODIR; c2->monst = moNone; return; }
-      c = c2;
+      if(mi.s->mondir == NODIR) { c->mondir = NODIR; mi.s->monst = moNone; return; }
+      c = mi.s;
       }
     }
   
@@ -2622,8 +2622,9 @@ EX namespace dragon {
           cmt->hitpoints = cft->hitpoints;
           cmt->monst = cft->monst;
           cft->monst = moNone;
-          mountmove(cmt, cmt->mondir, true, cft);
-          animateMovement(cft, cmt, LAYER_BIG, allcells[i]->mondir);
+          auto mi = moveimon(cft);
+          mountmove(mi, true);
+          animateMovement(mi, LAYER_BIG);
           }
         while(c->mondir != NODIR) {
           c = c->move(c->mondir);

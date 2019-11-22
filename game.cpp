@@ -4678,30 +4678,26 @@ EX void afterplayermoved() {
     }
   }
 
-EX void mountmove(cell *c, int spin, bool fp, int id) {
-  if(multi::players > 1) {
-    multi::player[id].at = c;
-    multi::player[id].spin = spin;
-    multi::flipped[id] = fp;
-    }
-  else {
-    cwt.at = c;
-    cwt.spin = spin;
-    flipplayer = fp;
-    }
-  afterplayermoved();
-  }
-
-EX void mountmove(cell *c, int spin, bool fp, cell *ppos) {
+EX void mountmove(const movei& mi, bool fp) {
   for(int i=0; i<numplayers(); i++) {
-    if(playerpos(i) == ppos) {
-      animateMovement(ppos, c, LAYER_SMALL, revhint(c, spin));
-      mountmove(c, spin, fp, i);
+    if(playerpos(i) == mi.s) {
+      animateMovement(mi, LAYER_SMALL);
+      if(multi::players > 1) {
+        multi::player[i].at = mi.t;
+        multi::player[i].spin = mi.rev_dir();
+        multi::flipped[i] = fp;
+        }
+      else {
+        cwt.at = mi.t;
+        cwt.spin = mi.rev_dir();
+        flipplayer = fp;
+        }
+      afterplayermoved();
       }
-    if(lastmountpos[i] == ppos && ppos != NULL) {
-      lastmountpos[i] = c;
+    if(lastmountpos[i] == mi.s && mi.s) {
+      lastmountpos[i] = mi.t;
       }
-    else if(lastmountpos[i] == c)  {
+    else if(lastmountpos[i] == mi.t)  {
       lastmountpos[i] = NULL;
       }
     }
@@ -4729,9 +4725,10 @@ EX void moveWorm(cell *c) {
     for(int i=isize(allcells)-2; i>=0; i--) {
       cell *cmt = allcells[i+1];
       cell *cft = allcells[i];
+      auto mi = moveimon(cft);
       if(cft->monst != moTentacleGhost && cmt->monst != moTentacleGhost)
-        mountmove(cmt, cft->c.spin(cft->mondir), false, cft);
-      animateMovement(cft, cmt, LAYER_BIG, cft->mondir);
+        mountmove(mi, false);
+      animateMovement(mi, LAYER_BIG);
       }
     c->monst = moNone;
     if(c->mondir != NODIR) c->move(c->mondir)->monst = moTentacleEscaping;
@@ -4812,33 +4809,31 @@ EX void moveWorm(cell *c) {
     goal->mondir = mi.rev_dir_or(NODIR);
     goal->monmirror = c->monmirror ^ c->c.mirror(dir);
   
-    mountmove(goal, goal->mondir, true, c);
+    mountmove(mi, true);
     
     if(id) {
       cell *c2 = c, *c3 = c2;
       while(c2->monst == moTentacletail || c2->monst == moTentacleGhost) {
-        if(c2->mondir == NODIR) {
-          // drawParticles(c2, (linf[c2->land].color & 0xF0F0F0), 16, 50);
-          return;
-          }
-        c3 = c2, c2 = c3->move(c2->mondir);
+        auto mi = moveimon(c2);
+        if(!mi.proper()) return;
+        c3 = c2, c2 = mi.t;
         if(c3->monst != moTentacleGhost && c2->monst != moTentacleGhost) 
-          mountmove(c3, c3->mondir, true, c2);
-        animateMovement(c2, c3, LAYER_BIG, c2->c.spin(c2->mondir));
+          mountmove(mi, true);
+        animateMovement(mi.rev(), LAYER_BIG);
         }
       }
     
     cell *c2 = c, *c3 = c2;
     for(int a=0; a<WORMLENGTH; a++) {
       if(c2->monst == moWormtail) {
-        if(c2->mondir == NODIR) {
+        movei mim = moveimon(c2).rev();
+        if(!mim.proper()) {
           drawParticles(c2, (linf[c2->land].color & 0xF0F0F0), 16);
           return;
           }
-        movei mim(c2, c2->mondir);
-        c3 = c2, c2 = mim.t;
-        mountmove(c3, c3->mondir, true, c2);
-        animateMovement(mim.rev(), LAYER_BIG);
+        c3 = c2, c2 = mim.s;
+        mountmove(mim, true);
+        animateMovement(mim, LAYER_BIG);
         }
       }
     
@@ -5153,15 +5148,16 @@ EX void moveHexSnake(const movei& mi, bool mounted) {
   preventbarriers(from);
   
   animateMovement(mi, LAYER_BIG);
-  mountmove(from, from->mondir, true, c);
+  mountmove(mi, true);
   
   cell *c2 = c, *c3=c2;
   for(int a=0;; a++) if(c2->monst == moHexSnakeTail) {
     if(a == ROCKSNAKELENGTH) { c2->monst = moNone, c3->mondir = NODIR; break; }
-    if(c2->mondir == NODIR) break;
-    mountmove(c2, c2->mondir, true, c2->move(c2->mondir));
-    animateMovement(movei(c2, c2->mondir).rev(), LAYER_BIG);
-    c3 = c2, c2 = c3->move(c2->mondir);
+    auto mim = moveimon(c2).rev();
+    if(!mim.proper()) break;
+    mountmove(mim, true);
+    animateMovement(mim, LAYER_BIG);
+    c3 = c2, c2 = mim.s;
     }
     else break;
   }
@@ -5307,7 +5303,8 @@ EX void movemutant() {
     cell *c = young[i];
     if(clearing::buggyplant) {  if(c->monst == moMutant) c->monst=moNone; continue; }
     for(int j=0; j<c->type; j++) {
-      cell *c2 = c->move(j);
+      movei mi(c, j);
+      auto& c2 = mi.t;
       if(!c2) continue;
 
       if(c2->monst != moMutant && canAttack(c, moMutant, c2, c2->monst, AF_ONLY_FBUG | AF_GETPLAYER)) {
@@ -5322,7 +5319,7 @@ EX void movemutant() {
         c2->monst = moMutant;
         c2->mondir = c->c.spin(j);
         c2->stuntime = mutantphase;
-        animateMovement(c, c2, LAYER_BIG, j);
+        animateMovement(mi, LAYER_BIG);
         }
       }
     }  
@@ -5364,7 +5361,7 @@ EX void moveshadow() {
     cell* where = shpos[p][cshpos];
     if(where && where->monst == moNone && where->cpdist && where->land == laGraveyard &&
       !sword::at(where)) {
-      if(shfrom) animateMovement(shfrom, where, LAYER_SMALL, NOHINT);
+      if(shfrom) animateMovement(match(shfrom, where), LAYER_SMALL);
       where->monst = moShadow;
       where->hitpoints = p;
       where->stuntime = 0;
@@ -8264,7 +8261,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
           
       if(checkonly) { c2->wall = save_c2; cwt.at->wall = save_cw; nextmovetype = lmMove; return true; }
       addMessage(XLAT("You push %the1 behind you!", waBigStatue));
-      animateMovement(c2, cwt.at, LAYER_BOAT, cwt.at->c.spin(d));
+      animateMovement(mi.rev(), LAYER_BOAT);
       goto statuejump;
       }
 
@@ -8623,16 +8620,14 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
 
       stabbingAttack(cwt.at, c2, moPlayer);
       cell *c1 = cwt.at;
-      int d = cwt.spin;
       cwt += wstep;
       if(switchplaces) {
-        movei m(c1, cwt.at, cwt.spin);
-        indAnimateMovement(m, LAYER_SMALL);
-        indAnimateMovement(m.rev(), LAYER_SMALL);
+        indAnimateMovement(mi, LAYER_SMALL);
+        indAnimateMovement(mi.rev(), LAYER_SMALL);
         commitAnimations(LAYER_SMALL);
         }
       else
-        animateMovement(c1, cwt.at, LAYER_SMALL, d);
+        animateMovement(mi, LAYER_SMALL);
       
       mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK | mirror::GO);
 

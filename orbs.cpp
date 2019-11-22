@@ -601,7 +601,7 @@ EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon I
   killFriendlyIvy();
 
   cell *c1 = cwt.at;
-  animateMovement(cwt.at, dest, LAYER_SMALL, NOHINT);
+  animateMovement(match(cwt.at, dest), LAYER_SMALL);
   cwt.at = dest; 
   forCellIdEx(c2, i, dest) if(c2->cpdist < dest->cpdist) {
     cwt.spin = i;

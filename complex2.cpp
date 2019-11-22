@@ -249,7 +249,7 @@ EX namespace westwall {
     for(int i=0; i<z-1; i++) {
       moveItem(whirlline[i], whirlline[i+1], true);
       if(whirlline[i]->item)
-        animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT, NOHINT);
+        animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
       pickupMovedItems(whirlline[i]);

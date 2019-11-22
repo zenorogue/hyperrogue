@@ -4094,8 +4094,9 @@ EX void drawMarkers() {
       cell *c1 = mouseover;
       for(int it=0; it<10; it++) {
         int di;
-        cell *c2 = blowoff_destination(c1, di);
-        if(!c2) break;
+        auto mib = blowoff_destination(c1, di);
+        if(!mib.proper()) break;
+        auto& c2 = mib.t;
         transmatrix T1 = ggmatrix(c1);
         transmatrix T2 = ggmatrix(c2);
         transmatrix T = T1 * rspintox(inverse(T1)*T2*C0) * xpush(hdist(T1*C0, T2*C0) * fractick(50, 0));
@@ -5048,10 +5049,6 @@ EX void animateMovement(const movei& m, int layer) {
     }
   if(m.proper() && m.s->c.mirror(m.d))
     a.mirrored = !a.mirrored;
-  }
-
-EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
-  animateMovement(movei(src, tgt, direction_hint), layer);
   }
 
 EX void animateAttack(const movei& m, int layer) {

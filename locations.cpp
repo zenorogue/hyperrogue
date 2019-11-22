@@ -457,7 +457,7 @@ struct movei {
   bool proper() const { return d >= 0 && d < s->type && s->move(d) == t; }
   movei(cell *_s, int _d) : s(_s), d(_d) {
     if(d == STRONGWIND) t = whirlwind::jumpDestination(s);
-    else if(d == FALL || d == NO_SPACE) t = s;
+    else if(d < 0 || d >= s->type) t = s;
     else t = s->move(d);
     }
   movei(cell *_s, cell *_t, int _d) : s(_s), t(_t), d(_d) {}
@@ -465,9 +465,12 @@ struct movei {
   movei rev() const { return movei(t, s, rev_dir_or(d)); }
   int dir_or(int x) const { return proper() ? d : x; }
   int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
+  int rev_dir() const { return s->c.spin(d); }
   bool mirror() { return s->c.mirror(d); }
   };
 #endif
+
+EX movei moveimon(cell *c) { return movei(c, c->mondir); }
 
 EX movei match(cell *f, cell *t) {
   for(int i=0; i<f->type; i++) if(f->move(i) == t) return movei(f, t, i);

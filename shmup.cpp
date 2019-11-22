@@ -1043,7 +1043,7 @@ void movePlayer(monster *m, int delta) {
           m->base->wall = waChasm; 
         else {
           m->base->wall = waBigStatue;
-          animateMovement(c2, m->base, LAYER_BOAT, NOHINT);
+          animateMovement(match(c2, m->base), LAYER_BOAT);
           }
         }
       else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR | reflectflag)) {
@@ -2295,7 +2295,7 @@ void moveMonster(monster *m, int delta) {
           m->base->wall = waChasm;
         else
           m->base->wall = waBigStatue;
-        animateMovement(c2, m->base, LAYER_BOAT, NOHINT);
+        animateMovement(match(c2, m->base), LAYER_BOAT);
         }
       if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER | reflectflag) && !isWatery(c2) && m->inBoat) {
         if(isWatery(m->base)) 
