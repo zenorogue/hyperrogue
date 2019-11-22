@@ -49,10 +49,6 @@ EX void drainOrb(eItem it, int target IS(0)) {
   if(items[it] > target) useupOrb(it, items[it] - target);
   }
 
-EX void empathyMove(cell *c, cell *cto, int dir) {
-  empathyMove(movei(c, cto, dir)); // to erase
-  }
-
 EX void empathyMove(const movei& mi) {  
   if(!items[itOrbEmpathy]) return;
 

@@ -5852,7 +5852,7 @@ EX void movegolems(flagtype flags) {
           if(m == moFriendlyGhost) c2->stuntime = 1;
           }
 
-        empathyMove(c, c2, dir);
+        empathyMove(mi);
         }
       DEBB(DF_TURN, ("other"));
       }

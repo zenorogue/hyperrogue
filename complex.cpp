@@ -1385,9 +1385,9 @@ EX namespace mirror {
             continue;
             }
           c->monst = moMimic;
-          moveMonster(c2, c, m.second.spin);
+          moveMonster(m.second);
           c2->monst = moNone;
-          empathyMove(c, c2, neighborId(c2, c));
+          empathyMove(m.second);
           m.second = cw2;
           }
         }
