@@ -462,7 +462,7 @@ EX namespace yendor {
             auto& sub_id = expansion.get_descendants(YDIST-i-2, tch);
             if(full_id < sub_id) { 
               if(!split_found && !(full_id_0 < sub_id)) {
-                ycw.at->item = itRuby;
+                // ycw.at->item = itRuby;
                 split_found = true;
                 setdist(ycw.at, 6, NULL);
                 auto tt = type_in(expansion, ycw.at, coastvalEdge);
