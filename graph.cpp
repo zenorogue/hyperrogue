@@ -3016,15 +3016,16 @@ EX transmatrix applyDowndir(cell *c, const cellfunction& cf) {
   return ddspin(c, patterns::downdir(c, cf), M_PI);
   }
 
-void draw_movement_arrows(cell *c, const transmatrix& V) {
+void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
 
   if(viewdists) return;
 
   for(int d=0; d<8; d++) {
   
     movedir md = vectodir(spin(-d * M_PI/4) * smalltangent());
-    int u = md.d;
-    cellwalker xc = cwt + u + wstep;
+    cellwalker xc = cwt + md.d;
+    if(xc.spin != df) continue;
+    xc += wstep;
     if(xc.at == c) {
       transmatrix fixrot = sphereflip * rgpushxto0(sphereflip * tC0(V));
       // make it more transparent
@@ -4020,7 +4021,7 @@ EX void drawMarkers() {
     #if CAP_SHAPES
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on && GDIM == 2) {
       if(multi::players == 1) {
-        forCellIdAll(c2, d, cwt.at) IG(c2) draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d));
+        forCellIdAll(c2, d, cwt.at) IG(c2) draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d), d);
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
         if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
@@ -4028,7 +4029,7 @@ EX void drawMarkers() {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
           dynamicval<cellwalker> tcw(cwt, multi::player[p]);
-          draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d));
+          draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d), d);
           }
         }
       }
