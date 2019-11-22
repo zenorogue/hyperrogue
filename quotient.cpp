@@ -11,9 +11,6 @@ namespace hr {
 // --- quotient geometry ---
 
 EX namespace quotientspace {
-  struct code {
-    int c[MAX_EDGE+1];
-    };
   
   bool operator == (const code& c1, const code &c2) {
     for(int i=0; i<=S7; i++) if(c1.c[i] != c2.c[i]) return false;
@@ -43,7 +40,14 @@ EX namespace quotientspace {
   EX int rvdir = 1;
   
   int rv(int x) { return (rvadd+x*rvdir) % S7; }
-  
+
+  constexpr int symmask = (1<<30);
+
+#if HDR
+struct code {
+  int c[MAX_EDGE+1];
+  };
+
 struct hrmap_quotient : hrmap_standard {
 
   hrmap_hyperbolic base;
@@ -57,7 +61,37 @@ struct hrmap_quotient : hrmap_standard {
   
   vector<int> connections;
   
-  void add(const heptspin& hs) {
+  void add(const heptspin& hs);
+
+  vector<heptagon*> allh;
+
+  void generate_connections();
+  
+  void build();
+  
+  hrmap_quotient() {
+    generate_connections();    
+    build();
+    }
+
+  hrmap_quotient(const vector<int>& con) : connections(con) {
+    build();
+    }
+
+  heptagon *getOrigin() { return allh[0]; }
+
+  ~hrmap_quotient() {
+    for(int i=0; i<isize(allh); i++) {
+      clearHexes(allh[i]);
+      tailored_delete(allh[i]);
+      }
+    }
+  
+  vector<cell*>& allcells() { return celllist; }
+  };
+#endif
+  
+  void hrmap_quotient::add(const heptspin& hs) {
     code g = get(hs);
     if(!reachable.count(g)) {
       reachable[g] = bfsq.size();
@@ -65,15 +99,10 @@ struct hrmap_quotient : hrmap_standard {
       add(hs + 1);
       }
     }
-
-  vector<heptagon*> allh;
   
-  hrmap_quotient() {  
-  
-    dynamicval<hrmap*> cmap(currentmap, this);
-  
-    static int symmask = (1<<30);
-
+  void hrmap_quotient::generate_connections() {
+      
+    dynamicval<hrmap*> cmap(currentmap, this);  
     connections.clear();
     switch(geometry) {
       #if CAP_FIELD
@@ -318,7 +347,12 @@ struct hrmap_quotient : hrmap_standard {
         
       default: break; 
       }
+    }
     
+  void hrmap_quotient::build() {
+
+    dynamicval<hrmap*> cmap(currentmap, this);  
+
     int TOT = connections.size() / S7;
     // printf("heptagons = %d\n", TOT);
     // printf("all cells = %d\n", TOT*(S7+S3)/S3);
@@ -383,21 +417,10 @@ struct hrmap_quotient : hrmap_standard {
     celllist = cl.lst;
     }
 
-  heptagon *getOrigin() { return allh[0]; }
 
-  ~hrmap_quotient() {
-    for(int i=0; i<isize(allh); i++) {
-      clearHexes(allh[i]);
-      tailored_delete(allh[i]);
-      }
-    }
-  
-  vector<cell*>& allcells() { return celllist; }
-  };
+EX struct hrmap_quotient* new_map() { return new hrmap_quotient; }
 
-EX hrmap* new_map() { return new hrmap_quotient; }
-
-  };
+EX }
 
 
 }
