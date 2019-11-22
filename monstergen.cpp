@@ -355,6 +355,7 @@ EX void wandering() {
     int i = first7 + hrand(isize(dcal) - first7);
     cell *c = dcal[i];
     if(inmirror(c)) continue;
+    if(isPlayerOn(c)) break;
     
     if(specialland == laStorms) {
       // place the sandstone wall completely randomly (but not on the player)
