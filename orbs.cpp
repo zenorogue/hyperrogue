@@ -50,21 +50,25 @@ EX void drainOrb(eItem it, int target IS(0)) {
   }
 
 EX void empathyMove(cell *c, cell *cto, int dir) {
+  empathyMove(movei(c, cto, dir)); // to erase
+  }
+
+EX void empathyMove(const movei& mi) {  
   if(!items[itOrbEmpathy]) return;
 
   if(items[itOrbFire]) {
     invismove = false;
-    if(makeflame(c, 10, false)) markEmpathy(itOrbFire);
+    if(makeflame(mi.s, 10, false)) markEmpathy(itOrbFire);
     }
 
   if(items[itOrbDigging]) {           
-   if(dir != STRONGWIND && earthMove(c, dir)) 
+   if(mi.proper() && earthMove(mi)) 
      markEmpathy(itOrbDigging), invismove = false;
    }
 
-  if(items[itOrbWinter] && isIcyLand(c) && c->wall == waNone) {
+  if(items[itOrbWinter] && isIcyLand(mi.s) && mi.s->wall == waNone) {
     invismove = false;
-    c->wall = waIcewall;
+    mi.s->wall = waIcewall;
     markEmpathy(itOrbWinter);
     }
   }
@@ -636,14 +640,16 @@ EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon I
     monstersTurn();
   }
 
-void growIvyTo(cell *dest, cell *src, int direction_hint) {
+void growIvyTo(const movei& mi) {
+  auto& dest = mi.t;
   if(dest->monst) 
     attackMonster(dest, AF_NORMAL | AF_MSG, moFriendlyIvy);
   else {
     dest->monst = moFriendlyIvy;
-    dest->mondir = neighborId(dest, src);
-    moveEffect(dest, src, moFriendlyIvy, direction_hint);
-    empathyMove(src, dest, neighborId(src, dest));
+    dest->mondir = mi.rev_dir_or(NODIR);
+    animateMovement(mi, LAYER_BIG);
+    moveEffect(mi, moFriendlyIvy);
+    empathyMove(mi);
     }
   createNoise(1);
   monstersTurn();
@@ -817,7 +823,7 @@ void summonAt(cell *dest) {
   if(dest->monst == moTortoise)
     tortoise::emap[dest] = getBits(dest), dest->hitpoints = 3;
   addMessage(XLAT("You summon %the1!", dest->monst));
-  moveEffect(dest, dest, dest->monst, -1);
+  moveEffect(movei(dest, FALL), dest->monst);
   if(dest->wall == waClosePlate || dest->wall == waOpenPlate)
     toggleGates(dest, dest->wall);
 
@@ -886,7 +892,7 @@ void gun_attack(cell *dest) {
 
 EX void checkStunKill(cell *dest) {
   if(isBird(dest->monst)) {
-    moveEffect(dest, dest, moDeadBird, NOHINT);
+    moveEffect(movei(dest, FALL), moDeadBird);
     doesFall(dest);
     if(isWatery(dest) || dest->wall == waChasm || isFire(dest)) {
       addMessage(XLAT("%The1 falls!", dest->monst));
@@ -1094,7 +1100,6 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   // nature
   if(items[itOrbNature] && numplayers() == 1 && c->monst != moFriendlyIvy) {
-    cell *sides[MAX_EDGE];
     int dirs[MAX_EDGE];
     int qsides = 0;
     forCellIdCM(cf, d, c)
@@ -1109,13 +1114,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
           if(strictlyAgainstGravity(c, cf, false, MF_IVY)) continue;
           if(monstersnear(cwt.at, NULL, moPlayer, c, cwt.at)) continue;
           }
-        dirs[qsides] = d;
-        sides[qsides++] = cf;
+        dirs[qsides++] = d;
         }
-    
+      
     if(qsides > 0) {
-      int di = hrand(qsides);
-      if(!isCheck(a)) growIvyTo(c, sides[di], revhint(c, dirs[di]));
+      int di = dirs[hrand(qsides)];
+      if(!isCheck(a)) growIvyTo(movei(c, di).rev());
       return itOrbNature;
       }
     }

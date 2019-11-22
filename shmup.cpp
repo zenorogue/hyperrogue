@@ -1062,7 +1062,8 @@ void movePlayer(monster *m, int delta) {
           }
         }
       else if(isPushable(c2->wall) && !nonAdjacent(c2, m->base)) {
-        int sd = neighborId(m->base, c2);
+        int sd1 = neighborId(m->base, c2);
+        int sd = m->base->c.spin(sd1);
         int subdir = 1;
         double bestd = 9999;
         for(int di=-1; di<2; di+=2) {
@@ -1073,7 +1074,7 @@ void movePlayer(monster *m, int delta) {
           if(d<bestd) bestd=d, subdir = di;
           }
         pushmonsters();
-        auto mip = determinePush(cellwalker(c2, sd), subdir, [m, c2] (cell *c) { return canPushThumperOn(c, c2, m->base); });
+        auto mip = determinePush(cellwalker(c2, sd1), subdir, [m, c2] (cell *c) { return canPushThumperOn(c, c2, m->base); });
         visibleFor(300);
         if(!mip.proper()) go = false;
         else pushThumper(mip);
@@ -1141,8 +1142,7 @@ void movePlayer(monster *m, int delta) {
       
       if(items[itOrbDigging]) {
         visibleFor(400);
-        int d = neighborId(m->base, c2);
-        if(d >= 0 && earthMove(m->base, d)) markOrb(itOrbDigging);
+        if(earthMove(match(m->base, c2))) markOrb(itOrbDigging);
         }
       
       cwt.at = c2; afterplayermoved();
@@ -2220,8 +2220,7 @@ void moveMonster(monster *m, int delta) {
   if(c2 != m->base && m->type == moFireElemental) makeflame(m->base, 20, false);
   if(c2 != m->base && m->type == moWaterElemental) placeWater(c2, m->base);
   if(c2 != m->base && m->type == moEarthElemental) {
-    int d = neighborId(m->base, c2);
-    if(d >= 0) earthMove(m->base, d);
+    earthMove(match(m->base, c2));
     }
   
   if(m->type == moReptile && c2 != m->base) {

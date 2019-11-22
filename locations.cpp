@@ -463,6 +463,7 @@ struct movei {
   movei rev() const { return movei(t, s, rev_dir_or(d)); }
   int dir_or(int x) const { return proper() ? d : x; }
   int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
+  bool mirror() { return s->c.mirror(d); }
   };
 #endif
 

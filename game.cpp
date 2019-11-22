@@ -3588,10 +3588,6 @@ EX void activateArrowTrap(cell *c) {
  *  or when a dead bird falls (then m == moDeadBird)
  */
 
-EX void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
-  moveEffect(movei(cf, ct, direction_hint), m);
-  }
-
 EX void moveEffect(const movei& mi, eMonster m) {
 
   auto& cf = mi.s;
@@ -3905,7 +3901,7 @@ EX void moveMonster(const movei& mi) {
 
   if(m == moEarthElemental) {
     if(!passable(ct, cf, 0)) earthFloor(ct);
-    earthMove(cf, neighborId(cf, ct));
+    earthMove(mi);
     }
 
   if(m == moWaterElemental) {
@@ -4804,19 +4800,20 @@ EX void moveWorm(cell *c) {
     return;
     }
   
-  cell* goal = c->move(dir);
+  movei mi(c, dir);
+  auto& goal = mi.t;
 
   if(isPlayerOn(goal) || goal->monst) 
     attackMonster(goal, AF_EAT | AF_MSG | AF_GETPLAYER, c->monst);
   
-  for(int j=0; j<c->type; j++) if(c->move(j) == goal) {
+  if(1) {
     goal->monst = eMonster(moWormwait + id);
-    moveEffect(goal, NULL, eMonster(moWormwait + id), NOHINT);
+    moveEffect(mi, eMonster(moWormwait + id));
       
-    animateMovement(c, goal, LAYER_BIG, dir);
+    animateMovement(mi, LAYER_BIG);
     c->monst = eMonster(moWormtail + id);
-    goal->mondir = c->c.spin(j);
-    goal->monmirror = c->monmirror ^ c->c.mirror(j);
+    goal->mondir = mi.rev_dir_or(NODIR);
+    goal->monmirror = c->monmirror ^ c->c.mirror(dir);
   
     mountmove(goal, goal->mondir, true, c);
     
@@ -4841,9 +4838,10 @@ EX void moveWorm(cell *c) {
           drawParticles(c2, (linf[c2->land].color & 0xF0F0F0), 16);
           return;
           }
-        c3 = c2, c2 = c3->move(c2->mondir);
+        movei mim(c2, c2->mondir);
+        c3 = c2, c2 = mim.t;
         mountmove(c3, c3->mondir, true, c2);
-        animateMovement(c2, c3, LAYER_BIG, revhint(c2, c2->mondir));
+        animateMovement(mim.rev(), LAYER_BIG);
         }
       }
     
@@ -4912,45 +4910,47 @@ EX void moveivy() {
     if(c->monst != moIvyHead) continue;
     ivynext(c);
 
-    cell *mto = NULL;
     int pd = c->pathdist;
-    int sp = 0;
     
+    movei mi(nullptr, nullptr, NODIR);
+      
     while(c->monst != moIvyRoot) {
       if(!isIvy(c->monst)) {
         raiseBuggyGeneration(c, "that's not an Ivy!");
         }
       if(c->mondir == NODIR)
         raiseBuggyGeneration(c, "wrong mondir!");
-      for(int j=0; j<c->type; j++) {
-        if(c->move(j) && canAttack(c, c->monst, c->move(j), c->move(j)->monst, AF_ONLY_FRIEND | AF_GETPLAYER)) {
-          if(isPlayerOn(c->move(j))) 
-            killThePlayerAt(c->monst, c->move(j), 0);
+        
+      forCellIdEx(c2, j, c) {
+        if(canAttack(c, c->monst, c2, c2->monst, AF_ONLY_FRIEND | AF_GETPLAYER)) {
+          if(isPlayerOn(c2)) 
+            killThePlayerAt(c->monst, c2, 0);
           else {
-            if(attackJustStuns(c->move(j), 0, c->monst))
-              addMessage(XLAT("The ivy attacks %the1!", c->move(j)->monst));
-            else if(isNonliving(c->move(j)->monst))
-              addMessage(XLAT("The ivy destroys %the1!", c->move(j)->monst));
+            if(attackJustStuns(c2, 0, c->monst))
+              addMessage(XLAT("The ivy attacks %the1!", c2->monst));
+            else if(isNonliving(c2->monst))
+              addMessage(XLAT("The ivy destroys %the1!", c2->monst));
             else
-              addMessage(XLAT("The ivy kills %the1!", c->move(j)->monst));
-            attackMonster(c->move(j), AF_NORMAL, c->monst);
+              addMessage(XLAT("The ivy kills %the1!", c2->monst));
+            attackMonster(c2, AF_NORMAL, c->monst);
             }
           continue;
           }
-        if(c->move(j) && signed(c->move(j)->pathdist) < pd && passable(c->move(j), c, 0)
-          && !strictlyAgainstGravity(c->move(j), c, false, MF_IVY))
-          mto = c->move(j), pd = mto->pathdist, sp = c->c.spin(j);
+        if(c2 && c2->pathdist < pd && passable(c2, c, 0) && !strictlyAgainstGravity(c2, c, false, MF_IVY))
+          mi = movei(c, j), pd = c2->pathdist;
         }
       c = c->move(c->mondir);
       }
+    
+    auto& mto = mi.t;
 
     if(mto && mto->cpdist) {
-      animateMovement(mto->move(sp), mto, LAYER_BIG, mto->c.spin(sp));
-      mto->monst = moIvyWait, mto->mondir = sp;
-      mto->monmirror = c->monmirror ^ c->c.mirror(sp);
-      moveEffect(mto, NULL, moIvyWait, NOHINT);
+      animateMovement(mi, LAYER_BIG);
+      mto->monst = moIvyWait, mto->mondir = mi.rev_dir_or(NODIR);
+      mto->monmirror = mi.s->monmirror ^ mi.mirror();
+      moveEffect(mi, moIvyWait);
       // if this is the only branch, we want to move the head immediately to mto instead
-      if(mto->move(mto->mondir)->monst == moIvyHead) {
+      if(mi.s->monst == moIvyHead) {
         mto->monst = moIvyHead; co->monst = moIvyBranch;
         }
       }
@@ -4962,11 +4962,13 @@ EX void moveivy() {
     }
   }
 
-EX bool earthMove(cell *from, int dir) {
+EX bool earthMove(const movei& mi) {
+  auto& from = mi.s;
   bool b = false;
-  cell *c2 = from->move(dir);
-  int d = from->c.spin(dir);
+  cell *c2 = mi.t;
   b |= earthWall(from);
+  if(!mi.proper()) return b;
+  int d = mi.rev_dir_or(0);
   if(c2) for(int u=2; u<=c2->type-2; u++) {
     cell *c3 = c2->modmove(d + u);
     if(c3) b |= earthFloor(c3);
@@ -5143,15 +5145,17 @@ EX void groupmove(eMonster movtype, flagtype mf) {
 
 vector<cell*> hexdfs;
 
-// note: move from 'c' to 'from'!
-EX void moveHexSnake(cell *from, cell *c, int d, bool mounted) {
+EX void moveHexSnake(const movei& mi, bool mounted) {
+  // note: move from 'c' to 'from'!
+  auto& from = mi.t;
+  auto& c = mi.s;
   if(from->wall == waBoat) from->wall = waSea;
-  moveEffect(from, c, c->monst, revhint(from, d));
-  from->monst = c->monst; from->mondir = d; from->hitpoints = c->hitpoints;
+  moveEffect(mi, c->monst);
+  from->monst = c->monst; from->mondir = mi.rev_dir_or(NODIR); from->hitpoints = c->hitpoints;
   c->monst = moHexSnakeTail;
   preventbarriers(from);
   
-  animateMovement(c, from, LAYER_BIG, revhint(from, d));
+  animateMovement(mi, LAYER_BIG);
   mountmove(from, from->mondir, true, c);
   
   cell *c2 = c, *c3=c2;
@@ -5159,7 +5163,7 @@ EX void moveHexSnake(cell *from, cell *c, int d, bool mounted) {
     if(a == ROCKSNAKELENGTH) { c2->monst = moNone, c3->mondir = NODIR; break; }
     if(c2->mondir == NODIR) break;
     mountmove(c2, c2->mondir, true, c2->move(c2->mondir));
-    animateMovement(c2->move(c2->mondir), c2, LAYER_BIG, revhint(c2, c2->mondir));
+    animateMovement(movei(c2, c2->mondir).rev(), LAYER_BIG);
     c3 = c2, c2 = c3->move(c2->mondir);
     }
     else break;
@@ -5217,7 +5221,7 @@ EX void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
     if(from->cpdist == 0 || from->monst) return;
 
     snakeAttack(c, mounted);
-    moveHexSnake(from, c, d, mounted);
+    moveHexSnake(movei(from, d).rev(), mounted);
     }
 
   onpath(c, 0);
@@ -7856,7 +7860,7 @@ EX void monstersTurn() {
     if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH)) {
       attackMonster(c, AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
       }
-    moveEffect(c, c, moDeadBird, -1);
+    moveEffect(movei(c, FALL), moDeadBird);
     destroyBoats(c, NULL, true);
     explodeBarrel(c);
     }
@@ -8596,7 +8600,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
 
       if(items[itOrbDigging]) {
         invismove = false;
-        if(earthMove(cwt.at, d)) markOrb(itOrbDigging);
+        if(earthMove(mi)) markOrb(itOrbDigging);
         }
 
       movecost(cwt.at, c2, 1);
