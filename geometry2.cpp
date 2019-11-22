@@ -55,10 +55,6 @@ EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
     return pispin * Id;
   }
 
-EX transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
-  return calc_relative_matrix(c2, c1, ddspin(c1, direction_hint) * xpush0(1e-2));
-  }
-
 EX transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
   return currentmap->relative_matrix(c2, c1, point_hint);
   }
@@ -340,7 +336,7 @@ double hrmap_standard::spacedist(cell *c, int i) {
   }
 
 transmatrix hrmap_standard::adj(cell *c, int i) {
-  if(NONSTDVAR) return calc_relative_matrix(c->cmove(i), c, i);
+  if(NONSTDVAR) return calc_relative_matrix(c->cmove(i), c, C0);
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
   if(c->c.mirror(i)) T = T * Mirror;
@@ -425,7 +421,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
   if(GOLDBERG) {
     cellwalker cw(c, i);
     cw += wstep;
-    transmatrix cwm = calc_relative_matrix(cw.at, c, i);
+    transmatrix cwm = currentmap->adj(c, i);
     if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
     return cwm * C0;
     }
@@ -517,11 +513,8 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
   #if CAP_GP
   if(GOLDBERG) {
     cellwalker cw(c, i);
-    int hint = cw.spin;
     cw += wstep;
-    transmatrix cwm = calc_relative_matrix(cw.at, c, hint);
-    if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
-    // hyperpoint nfar = cwm*C0;
+    transmatrix cwm = currentmap->adj(c, i);
     auto li1 = gp::get_local_info(cw.at);
     if(which == 0)
       return cwm * get_corner_position(li1, (cw+2).spin);

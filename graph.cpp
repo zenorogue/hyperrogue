@@ -2650,7 +2650,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
       Vb = Vb * xpush(cgi.tentacle_length - cellgfxdist(c, c->mondir));
       }
     else if(NONSTDVAR) {
-      transmatrix T = calc_relative_matrix(c->move(c->mondir), c, c->mondir);
+      transmatrix T = currentmap->adj(c, c->mondir);
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(cgi.tentacle_length);
       }
     else {

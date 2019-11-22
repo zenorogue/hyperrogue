@@ -147,7 +147,6 @@ EX void calcMousedest() {
     transmatrix T = currentmap->adj(cwt.at, (cwt+i).spin);
     dists[i] = intval(mouseh, U * T * C0);
     }
-  // confusingGeometry() ? ggmatrix(cwt.at) * calc_relative_matrix(cwt.at->move(i), cwt.at, i) : shmup::ggmatrix(cwt.at->move(i))));
   
   for(int i=0; i<cwt.at->type; i++) if(dists[i] < mousedist) {
     mousedist = dists[i];
