@@ -203,6 +203,8 @@ EX string olrDescriptions[] = {
 
 EX eOrbLandRelation getOLR(eItem it, eLand l) {
 
+  if(l == laMotion && it == itOrbChoice && !inv::on) return olrUseless;
+  
   if(l == laPower) {
     if(it == itOrbFire) return olrPNative;
 
