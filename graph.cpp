@@ -5056,7 +5056,7 @@ EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
 
 EX void animateAttack(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
-  transmatrix T = adj(m);
+  transmatrix T = iadj(m);
   bool newanim = !animations[layer].count(m.s);
   animation& a = animations[layer][m.s];
   a.attacking = 1;
