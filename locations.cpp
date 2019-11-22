@@ -442,14 +442,25 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
  *  but also sometimes for other moves
  */
 
+constexpr int STRONGWIND = 99;
+constexpr int FALL = 98;
+
+namespace whirlwind { cell *jumpDestination(cell*); }
+
 struct movei {
   cell *s;
   cell *t;
   int d;
   bool proper() const { return d >= 0 && d < s->type && s->move(d) == t; }
-  movei(cell *_s, int _d) : s(_s), t(_s->move(_d)), d(_d) {}
+  movei(cell *_s, int _d) : s(_s), d(_d) {
+    if(d == STRONGWIND) t = whirlwind::jumpDestination(s);
+    else if(d == FALL) t = s;
+    else t = s->move(d);
+    }
   movei(cell *_s, cell *_t, int _d) : s(_s), t(_t), d(_d) {}
-  movei rev() const { return movei(t, s, d >= 0 && d < s->type ? s->c.spin(d) : d); }
+  movei rev() const { return movei(t, s, rev_dir_or(d)); }
+  int dir_or(int x) const { return proper() ? d : x; }
+  int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
   };
 #endif
 
