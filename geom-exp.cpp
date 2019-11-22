@@ -249,7 +249,7 @@ void showTorusConfig() {
       dialog::editNumber(torusconfig::newsdy, 0, 1000, square ? 2 : simple ? 3 : 2, 12, XLAT("height (y)"), "");
     else if(uni == 't')
       torus_bitrunc = !torus_bitrunc;
-    else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) dialog::do_if_confirmed([square] {
+    else if((uni == 'a' || uni == '\n') && valid) dialog::do_if_confirmed([square] {
       set_geometry(gNormal);
       torusconfig::torus_mode = torusconfig::newmode;
       torusconfig::qty = torusconfig::newqty;
