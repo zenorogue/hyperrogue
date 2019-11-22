@@ -144,7 +144,7 @@ EX void calcMousedest() {
   transmatrix U = ggmatrix(cwt.at);
   
   for(int i=0; i<cwt.at->type; i++) {
-    transmatrix T = currentmap->adj(cwt.at, (cwt+i).spin);
+    transmatrix T = currentmap->adj(cwt.at, i);
     dists[i] = intval(mouseh, U * T * C0);
     }
   
