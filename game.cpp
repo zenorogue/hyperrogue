@@ -4989,7 +4989,7 @@ EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
   else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER)) ; */
   else if(from->wall == waThumperOn) ;
   else if(passable_for(movtype, from, c, P_CHAIN | P_MONSTER)) ;
-  else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER)) ;
+  else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER | AF_NOSHIELD)) ;
   else if(isMagneticPole(movtype)) {
     // a special case here -- we have to ignore the illegality of 
     // the 'second' move due to an adjacent opposite pole
