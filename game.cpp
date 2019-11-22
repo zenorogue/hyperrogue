@@ -3827,10 +3827,6 @@ EX void makeTrollFootprints(cell *c) {
   c->landparam = turncount + 100;
   }
 
-EX void moveMonster(cell *ct, cell *cf, int direction_hint) {
-  moveMonster(movei(cf, ct, direction_hint));
-  }
-
 EX void moveMonster(const movei& mi) {
   auto& cf = mi.s;
   auto& ct = mi.t;
@@ -4499,7 +4495,8 @@ EX cell *moveNormal(cell *c, flagtype mf) {
     }
   
   if(!quantum) {
-    cell *c2 = c->move(d);
+    movei mi(c, d);
+    auto& c2 = mi.t;
     if(isPlayerOn(c2)) {
       if(m == moCrusher) {
         addMessage(XLAT("%The1 raises his weapon...", m));
@@ -4521,13 +4518,13 @@ EX cell *moveNormal(cell *c, flagtype mf) {
       }
     else if(m2) {
       attackMonster(c2, AF_NORMAL | AF_MSG, m);
-      animateAttack(movei(c, d), LAYER_SMALL);
+      animateAttack(mi, LAYER_SMALL);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
       return c2;
       }
     
-    moveMonster(c2, c, d);
+    moveMonster(mi);
     if(m == moRagingBull) beastAttack(c2, false, false);
     return c2;
     }
@@ -4553,10 +4550,10 @@ EX cell *moveNormal(cell *c, flagtype mf) {
       }
     
     if(!attacking) for(int i=0; i<nc; i++) {
-      cell *c2 = c->move(posdir[i]);
+      movei mi(c, posdir[i]);
       if(!c->monst) c->monst = m;
-      moveMonster(c2, c, posdir[i]);
-      if(m == moRagingBull) beastAttack(c2, false, false);
+      moveMonster(mi);
+      if(m == moRagingBull) beastAttack(mi.t, false, false);
       }
     return c->move(d);
     }
@@ -5076,7 +5073,7 @@ EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
       return;
       }
     
-    moveMonster(from, c, revhint(from, d));
+    moveMonster(movei(from, d).rev());
     onpath(from, 0);
     }
   onpath(c, 0);
@@ -5428,7 +5425,7 @@ EX void moveghosts() {
         addMessage(XLAT("%The1 scares %the2 a bit!", c->monst, c2->monst));
         c2->stuntime = 1;
         }
-      else moveMonster(c2, c, d);
+      else moveMonster(movei(c, d));
       
       }
     nextghost: ;

@@ -445,6 +445,7 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 constexpr int STRONGWIND = 99;
 constexpr int FALL = 98;
 constexpr int NO_SPACE = 97;
+constexpr int TELEPORT = 96;
 
 namespace whirlwind { cell *jumpDestination(cell*); }
 

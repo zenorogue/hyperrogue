@@ -1802,7 +1802,8 @@ EX namespace hive {
       
       if(!q) { if(c->land == laHive) c->landparam += 3; continue; }
       int d = gmoves[hrand(q)];
-      cell *c2 = c->move(d);
+      movei mi(c, d);
+      auto& c2 = mi.t;
       if(c2->monst || isPlayerOn(c2)) {
         eMonster killed = c2->monst;
         if(isPlayerOn(c2)) killed = moPlayer;
@@ -1818,7 +1819,7 @@ EX namespace hive {
   //    c->monst = moDeadBug, deadbug.push_back(c);
         }
       else {
-        moveMonster(c2, c, d);
+        moveMonster(mi);
         // pheromones!
         if(c->land == laHive && c->landparam < 90) c->landparam += 5;
         if(c2->land == laHive && c2->landparam < 90) c2->landparam += 5;
@@ -3148,7 +3149,7 @@ EX namespace prairie {
           beastAttack(cp, true, true);
 
           if(!cn->monst && !isPlayerOn(cn) && passable_for(cp->monst, cn, cp, P_DEADLY))
-            moveMonster(cn, cp, NODIR);
+            moveMonster(movei(cp, cn, TELEPORT));
           else {
             playSound(NULL, "hit-axe"+pick123());
             beastcrash(cn, cp);
