@@ -369,14 +369,14 @@ struct hrmap_torus : hrmap_euclid_any {
       build_euclidean_moves(all[i], iv, [&] (int delta, int d, int d2) {
         auto im = vec_to_id_mirror(iv + delta);
         all[i]->move(d) = all[im.first];
-        all[i]->c.setspin(d, im.second, false);
+        all[i]->c.setspin(d, d2, im.second);
         });
       }
-    for(cell *c: all) for(int d=0; d<c->type; d++) {
+    if(nonorientable) for(cell *c: all) for(int d=0; d<c->type; d++) {
       cell *c2 = c->move(d);
       for(int d2=0; d2<c2->type; d2++) 
         if(c2->move(d2) == c)
-          c->c.setspin(d, d2, c->c.spin(d));
+          c->c.setspin(d, d2, c->c.mirror(d));
       }
     celllister cl(gamestart(), 100, 100000000, NULL);
     dists.resize(q);
