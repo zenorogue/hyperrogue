@@ -1052,6 +1052,13 @@ int read_geom_args() {
     fieldpattern::info();
     exit(0);
     } 
+  else if(argis("-fi-at")) {
+    geometry = gNormal;
+    shift(); dynamicval<int> s7(S7, argi());
+    shift(); dynamicval<int> s3(S3, argi());
+    fieldpattern::info();
+    exit(0);
+    } 
   else if(argis("-qs")) {
     cheat();
     shift(); currfp.qpaths.push_back(args());
