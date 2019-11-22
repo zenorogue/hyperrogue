@@ -4512,7 +4512,7 @@ EX cell *moveNormal(cell *c, flagtype mf) {
       }
     else if(m2) {
       attackMonster(c2, AF_NORMAL | AF_MSG, m);
-      animateAttack(c, c2, LAYER_SMALL, d);
+      animateAttack(movei(c, d), LAYER_SMALL);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
       return c2;
@@ -5048,7 +5048,7 @@ EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     if(!(mf & MF_NOATTACKS)) for(int j=0; j<c->type; j++) 
       if(c->move(j) && canAttack(c, c->monst, c->move(j), c->move(j)->monst, af)) {
         attackMonster(c->move(j), AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
-        animateAttack(c, c->move(j), LAYER_SMALL, j);
+        animateAttack(movei(c, j), LAYER_SMALL);
         onpath(c, 0);
         // XLATC eagle
         return;
@@ -5812,7 +5812,7 @@ EX void movegolems(flagtype flags) {
         else if((flags & AF_CRUSH) && !canAttack(c, m, c2, c2->monst, flags ^ AF_CRUSH ^ AF_MUSTKILL))
           markOrb(itOrbEmpathy), markOrb(itOrbSlaying);
         attackMonster(c2, flags | AF_MSG, m);
-        animateAttack(c, c2, LAYER_SMALL, dir);
+        animateAttack(movei(c, dir), LAYER_SMALL);
         produceGhost(c2, m2, m);
         sideAttack(c, dir, m, 0);
         if(revenge) c->monst = m = moPrincessArmed;
@@ -8083,7 +8083,8 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   bool fmsActivate = forcedmovetype == fmSkip || forcedmovetype == fmActivate;
   
   if(d >= 0) {
-    cell *c2 = cwt.at->move(d);
+    movei mi(cwt.at, d);
+    cell *& c2 = mi.t;
     bool goodTortoise = c2->monst == moTortoise && tortoise::seek() && !tortoise::diff(tortoise::getb(c2)) && !c2->item;
     
     if(items[itOrbGravity]) {
@@ -8280,7 +8281,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waNone;
         sideAttack(cwt.at, d, moPlayer, 0);
-        animateAttack(cwt.at, c2, LAYER_SMALL, d);
+        animateAttack(mi, LAYER_SMALL);
         }
       else if(c2->wall == waBigTree) {
         drawParticles(c2, winf[c2->wall].color, 8);
@@ -8288,7 +8289,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waSmallTree;
         sideAttack(cwt.at, d, moPlayer, 0);
-        animateAttack(cwt.at, c2, LAYER_SMALL, d);
+        animateAttack(mi, LAYER_SMALL);
         }
       else {
         if(!peace::on) {
@@ -8300,7 +8301,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
             addMessage(XLAT("You swing your sword."));
           swing:
           sideAttack(cwt.at, d, moPlayer, 0);
-          animateAttack(cwt.at, c2, LAYER_SMALL, d);
+          animateAttack(mi, LAYER_SMALL);
           }
         }
       if(survivalist && isHaunted(c2->land))
@@ -8442,7 +8443,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
           if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
           if(!c2->monst) produceGhost(c2, m, moPlayer);
           if(pushto && pushto != c2) pushMonster(pushto, c2, pushdir);
-          animateAttack(cwt.at, c2, LAYER_SMALL, d);
+          animateAttack(mi, LAYER_SMALL);
           }
         }
       
