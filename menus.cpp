@@ -388,7 +388,7 @@ EX void enable_cheat() {
     });
   else {
     popScreen();
-    firstland = princess::challenge ? laPalace : laIce;
+    specialland = firstland = princess::challenge ? laPalace : laIce;
     restart_game();
     }
   }
