@@ -436,4 +436,26 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 
 #endif
 
+#if HDR
+/** a structure for representing movements 
+ *  mostly for 'proper' moves where s->move(d) == t,
+ *  but also sometimes for other moves
+ */
+
+struct movei {
+  cell *s;
+  cell *t;
+  int d;
+  bool proper() const { return d >= 0 && d < s->type && s->move(d) == t; }
+  movei(cell *_s, int _d) : s(_s), t(_s->move(_d)), d(_d) {}
+  movei(cell *_s, cell *_t, int _d) : s(_s), t(_t), d(_d) {}
+  movei rev() const { return movei(t, s, d >= 0 && d < s->type ? s->c.spin(d) : d); }
+  };
+#endif
+
+EX movei match(cell *f, cell *t) {
+  for(int i=0; i<f->type; i++) if(f->move(i) == t) return movei(f, t, i);
+  return movei(f, t, -1);
+  }
+
 }
