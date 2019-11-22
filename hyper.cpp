@@ -44,6 +44,7 @@
 #include "reg3.cpp"
 #include "language.cpp"
 #include "cell.cpp"
+#include "locations.cpp"
 #include "expansion.cpp"
 #include "goldberg.cpp"
 #include "irregular.cpp"
