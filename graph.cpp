@@ -5035,8 +5035,9 @@ EX transmatrix iadj(const movei& m) {
 EX void animateMovement(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T = iadj(m);
+  bool found_s = animations[layer].count(m.s);
   animation& a = animations[layer][m.t];
-  if(animations[layer].count(m.s)) {
+  if(found_s) {
     a = animations[layer][m.s];
     a.wherenow = T * a.wherenow;
     animations[layer].erase(m.s);
