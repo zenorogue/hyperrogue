@@ -5020,18 +5020,24 @@ EX int revhint(cell *c, int hint) {
   else return hint;
   }
 
-EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
+EX transmatrix adj(const movei& m) {
+  if(m.proper()) return currentmap->adj(m.s, m.d);
+  else return currentmap->relative_matrix(m.t, m.s, C0);
+  }
+
+EX transmatrix iadj(const movei& m) {
+  if(m.proper()) return currentmap->iadj(m.s, m.d);
+  else return currentmap->relative_matrix(m.s, m.t, C0);
+  }
+
+EX void animateMovement(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
-  transmatrix T;
-  if(direction_hint >= 0 && direction_hint < src->degree() && tgt == src->move(direction_hint)) 
-    T = currentmap->iadj(src, direction_hint);
-  else 
-    T = currentmap->relative_matrix(src, tgt, C0);
-  animation& a = animations[layer][tgt];
-  if(animations[layer].count(src)) {
-    a = animations[layer][src];
+  transmatrix T = adj(m);
+  animation& a = animations[layer][m.t];
+  if(animations[layer].count(m.s)) {
+    a = animations[layer][m.s];
     a.wherenow = T * a.wherenow;
-    animations[layer].erase(src);
+    animations[layer].erase(m.s);
     a.attacking = 0;
     }
   else {
@@ -5040,21 +5046,23 @@ EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
     a.footphase = 0;
     a.mirrored = false;
     }
-  if(direction_hint >= 0 && direction_hint < src->type) {
-    if(src->c.mirror(direction_hint))
-      a.mirrored = !a.mirrored;
-    }
+  if(m.proper() && m.s->c.mirror(m.d))
+    a.mirrored = !a.mirrored;
+  }
+
+EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
+  animateMovement(movei(src, tgt, direction_hint), layer);
   }
 
 EX void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
+  animateAttack(movei(src, tgt, direction_hint), layer);
+  }
+
+EX void animateAttack(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
-  transmatrix T;
-  if(direction_hint >= 0 && direction_hint < src->degree() && tgt == src->move(direction_hint)) 
-    T = currentmap->iadj(src, direction_hint);
-  else 
-    T = currentmap->relative_matrix(src, tgt, C0);
-  bool newanim = !animations[layer].count(src);
-  animation& a = animations[layer][src];
+  transmatrix T = adj(m);
+  bool newanim = !animations[layer].count(m.s);
+  animation& a = animations[layer][m.s];
   a.attacking = 1;
   a.attackat = rspintox(tC0(inverse(T))) * xpush(hdist0(T*C0) / 3);
   if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
@@ -5062,21 +5070,21 @@ EX void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
 
 vector<pair<cell*, animation> > animstack;
 
-EX void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
+EX void indAnimateMovement(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
-  if(animations[layer].count(tgt)) {
-    animation res = animations[layer][tgt];
-    animations[layer].erase(tgt);
-    animateMovement(src, tgt, layer, direction_hint);
-    if(animations[layer].count(tgt)) 
-      animstack.push_back(make_pair(tgt, animations[layer][tgt]));
-    animations[layer][tgt] = res;
+  if(animations[layer].count(m.t)) {
+    animation res = animations[layer][m.t];
+    animations[layer].erase(m.t);
+    animateMovement(m, layer);
+    if(animations[layer].count(m.t)) 
+      animstack.push_back(make_pair(m.t, animations[layer][m.t]));
+    animations[layer][m.t] = res;
     }
   else {
-    animateMovement(src, tgt, layer, direction_hint);
-    if(animations[layer].count(tgt)) {
-      animstack.push_back(make_pair(tgt, animations[layer][tgt]));
-      animations[layer].erase(tgt);
+    animateMovement(m, layer);
+    if(animations[layer].count(m.t)) {
+      animstack.push_back(make_pair(m.t, animations[layer][m.t]));
+      animations[layer].erase(m.t);
       }
     }
   }
@@ -5085,15 +5093,6 @@ EX void commitAnimations(int layer) {
   for(int i=0; i<isize(animstack); i++)
     animations[layer][animstack[i].first] = animstack[i].second;
   animstack.clear();
-  }
-
-EX void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb) {
-  if(vid.mspeed >= 5) return; // no animations!
-  static cell c1;
-  gmatrix[&c1] = gmatrix[b]; c1.master = b->master;
-  if(animations[layer].count(b)) animations[layer][&c1] = animations[layer][b];
-  animateMovement(a, b, layer, direction_hinta);
-  animateMovement(&c1, a, layer, direction_hintb);
   }
 
 EX void drawBug(const cellwalker& cw, color_t col) {

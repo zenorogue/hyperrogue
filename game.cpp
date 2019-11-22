@@ -8610,8 +8610,12 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
       cell *c1 = cwt.at;
       int d = cwt.spin;
       cwt += wstep;
-      if(switchplaces)
-        animateReplacement(c1, cwt.at, LAYER_SMALL, d, cwt.spin);
+      if(switchplaces) {
+        movei m(c1, cwt.at, cwt.spin);
+        indAnimateMovement(m, LAYER_SMALL);
+        indAnimateMovement(m.rev(), LAYER_SMALL);
+        commitAnimations(LAYER_SMALL);
+        }
       else
         animateMovement(c1, cwt.at, LAYER_SMALL, d);
       

@@ -2933,7 +2933,7 @@ EX namespace kraken {
             noconflict = false; */
         /* if(noconflict) */ {
           // found = true;
-          indAnimateMovement(acells[i].first, acells[i].second, LAYER_BIG, NOHINT);
+          indAnimateMovement(match(acells[i].first, acells[i].second), LAYER_BIG);
           acells[i] = acells[isize(acells)-1];
           acells.resize(isize(acells)-1);
           i--;
