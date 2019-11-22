@@ -1028,7 +1028,7 @@ int read_geom_args() {
       exit(1);
       }
     torusconfig::torus_mode = torusconfig::eTorusMode(tmode);
-    if(torusconfig::torus_mode == torusconfig::tmSingle)
+    if(torusconfig::tmflags() & torusconfig::TF_SINGLE)
       torusconfig::qty = torusconfig::sdx,
       torusconfig::dy = torusconfig::sdy;
     torusconfig::activate();
