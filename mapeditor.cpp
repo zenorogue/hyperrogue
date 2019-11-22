@@ -320,7 +320,16 @@ namespace mapstream {
         f.read(quotient_field_changed);
         if(quotient_field_changed) {
           f.read(current_extra);
-          f.read(fgeomextras[current_extra].current_prime_id);
+          auto& ge = fgeomextras[current_extra];
+          auto& id = ge.current_prime_id;
+          f.read(id);
+          if(VERNUM_HEX < 0xA80C) switch(ge.base) {
+            case gNormal: id++; break;
+            case g45: id++; break;
+            case g46: id+=2; break;
+            case g47: id++; break;
+            default: ;
+            }
           enableFieldChange();
           }
         }
