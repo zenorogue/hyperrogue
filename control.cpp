@@ -86,12 +86,10 @@ EX movedir vectodir(hyperpoint P) {
   ld dirdist[MAX_EDGE];
 
   for(int i=0; i<cwt.at->type; i++) {
-    transmatrix T;
-    if(compute_relamatrix((cwt+i).peek(), cwt.at, i, T)) {
-      ld d1 = geo_dist(U * T * C0, Centered * P, iTable);
-      ld d2 = geo_dist(U * T * C0, Centered * C0, iTable);
-      dirdist[i] = d1 - d2;
-      }
+    transmatrix T = currentmap->adj(cwt.at, (cwt + i).spin);
+    ld d1 = geo_dist(U * T * C0, Centered * P, iTable);
+    ld d2 = geo_dist(U * T * C0, Centered * C0, iTable);
+    dirdist[i] = d1 - d2;
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
     
@@ -146,11 +144,8 @@ EX void calcMousedest() {
   transmatrix U = ggmatrix(cwt.at);
   
   for(int i=0; i<cwt.at->type; i++) {
-    transmatrix T;
-    if(compute_relamatrix(cwt.at->move(i), cwt.at, i, T))
-      dists[i] = intval(mouseh, U * T * C0);
-    else
-      dists[i] = HUGE_VAL;
+    transmatrix T = currentmap->adj(cwt.at, (cwt+i).spin);
+    dists[i] = intval(mouseh, U * T * C0);
     }
   // confusingGeometry() ? ggmatrix(cwt.at) * calc_relative_matrix(cwt.at->move(i), cwt.at, i) : shmup::ggmatrix(cwt.at->move(i))));
   

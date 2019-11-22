@@ -326,8 +326,7 @@ void drawMobileArrow(int i) {
   cell *c = cwt.at->move(i);
   if(!c) return;
 
-  transmatrix T;
-  if(!compute_relamatrix(c, cwt.at, i, T)) return;
+  transmatrix T = currentmap->adj(cwt.at, i);
 
   // color_t col = getcs().uicolor;
   // col -= (col & 0xFF) >> 1;

@@ -4020,7 +4020,7 @@ EX void drawMarkers() {
     #if CAP_SHAPES
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on && GDIM == 2) {
       if(multi::players == 1) {
-        forCellIdAll(c2, d, cwt.at) IG(c2) draw_movement_arrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
+        forCellIdAll(c2, d, cwt.at) IG(c2) draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d));
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
         if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
@@ -4028,7 +4028,7 @@ EX void drawMarkers() {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
           dynamicval<cellwalker> tcw(cwt, multi::player[p]);
-          draw_movement_arrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
+          draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d));
           }
         }
       }
@@ -5020,24 +5020,13 @@ EX int revhint(cell *c, int hint) {
   else return hint;
   }
 
-EX bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T) {
-  if(confusingGeometry()) {
-    T = calc_relative_matrix(src, tgt, revhint(src, direction_hint));
-    }
-  else {
-    if(gmatrix.count(src) && gmatrix.count(tgt))
-      T = inverse(gmatrix[tgt]) * gmatrix[src];
-    else
-      return false;
-    }
-  return true;
-  }
-
-
 EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T;
-  if(!compute_relamatrix(src, tgt, direction_hint, T)) return;
+  if(direction_hint >= 0 && direction_hint < src->degree() && tgt == src->move(direction_hint)) 
+    T = currentmap->iadj(src, direction_hint);
+  else 
+    T = currentmap->relative_matrix(src, tgt, C0);
   animation& a = animations[layer][tgt];
   if(animations[layer].count(src)) {
     a = animations[layer][src];
@@ -5060,7 +5049,10 @@ EX void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
 EX void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T;
-  if(!compute_relamatrix(src, tgt, direction_hint, T)) return;
+  if(direction_hint >= 0 && direction_hint < src->degree() && tgt == src->move(direction_hint)) 
+    T = currentmap->iadj(src, direction_hint);
+  else 
+    T = currentmap->relative_matrix(src, tgt, C0);
   bool newanim = !animations[layer].count(src);
   animation& a = animations[layer][src];
   a.attacking = 1;
