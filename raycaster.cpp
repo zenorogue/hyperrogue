@@ -1149,6 +1149,10 @@ int readArgs() {
   return 0;
   }
 
+auto hook = addHook(hooks_args, 100, readArgs);
+#endif
+
+#if CAP_CONFIG
 void addconfig() {
   addparam(exp_start, "ray_exp_start");
   addparam(exp_decay_exp, "ray_exp_decay_exp");
@@ -1164,9 +1168,9 @@ void addconfig() {
   addsaver(max_cells, "ray_max_cells");
   addsaver(rays_generate, "ray_generate");
   }
-
-auto hook = addHook(hooks_args, 100, readArgs) + addHook(hooks_configfile, 100, addconfig);
+auto hookc = addHook(hooks_configfile, 100, addconfig);
 #endif
+
 #endif
 
 #if MAXMDIM == 3
