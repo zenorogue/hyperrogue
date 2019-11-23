@@ -1400,22 +1400,13 @@ EX void centerpc(ld aspd) {
       } */
     spinEdge(aspd);
     fixmatrix(View);
+    current_display->which_copy = gmatrix[cwt.at];
     ors::rerotate(cwtV); ors::rerotate(View);
     return;
     }
   
-  if(euclid) {
-    // Euclidean
-    aspd *= (2+3*R*R);
-    if(aspd > R) aspd = R;
-    
-    for(int i=0; i<GDIM; i++)
-      View[i][LDIM] -= H[i] * aspd / R;
-        
-    }
-  
   else {
-    aspd *= (1+R+(shmup::on?1:0));
+    aspd *= euclid ? (2+3*R*R) : (1+R+(shmup::on?1:0));
     
     if(R < aspd) 
       shift_view_to(H);
