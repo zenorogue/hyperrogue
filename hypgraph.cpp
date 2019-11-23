@@ -1489,7 +1489,9 @@ EX void resetview() {
     View = Id;
     }
   cwtV = View;
-  current_display->which_copy = View;
+  current_display->which_copy = 
+    nonisotropic ? gpushxto0(tC0(inverse(View))) :
+    View;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
@@ -2079,7 +2081,7 @@ EX transmatrix& get_view_orientation() {
 EX void rotate_view(transmatrix T) {
   transmatrix& which = get_view_orientation();
   which = T * which;
-  if(&which == &View) current_display->which_copy = T * current_display->which_copy;
+  if(!prod && !nonisotropic) current_display->which_copy = T * current_display->which_copy;
   }
 
 /** shift the view according to the given tangent vector */
@@ -2100,8 +2102,16 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
 
 /** shift the view according to the given tangent vector */
 EX void shift_view(hyperpoint H) {
-  current_display->which_copy = get_shift_view_of(H, current_display->which_copy);
+  auto oView = View;
   View = get_shift_view_of(H, View);
+  auto& wc = current_display->which_copy;
+  if(nonisotropic) {
+    transmatrix ioldv = eupush(tC0(inverse(oView)));
+    transmatrix newv = inverse(eupush(tC0(inverse(View))));
+    wc = newv * ioldv * wc;
+    }
+  else
+    wc = get_shift_view_of(H, wc);
   }
 
 void multiply_view(transmatrix T) {
