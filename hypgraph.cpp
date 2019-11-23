@@ -1401,8 +1401,6 @@ EX void centerpc(ld aspd) {
     spinEdge(aspd);
     fixmatrix(View);
     current_display->which_copy = gmatrix[cwt.at];
-    ors::rerotate(cwtV); ors::rerotate(View);
-    return;
     }
   
   else {
