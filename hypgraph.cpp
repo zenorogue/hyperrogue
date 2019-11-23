@@ -1378,11 +1378,22 @@ EX void centerpc(ld aspd) {
   if(ors::mode == 2 && vid.sspeed < 5) return;
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBBI(DF_GRAPH, ("center pc"));
+
+  auto& W = current_display->which_copy;                                                            
+  ors::unrotate(W); ors::unrotate(View); ors::unrotate(cwtV);
+
+  /* what should we center? */
+  transmatrix T;
+  if(multi::players > 1) 
+    T = cwtV; /* do not even try */
+  else {
+    T = W;
+    if(shmup::on)
+      T = T * shmup::pc[0]->at;
+    }
   
-  ors::unrotate(cwtV); ors::unrotate(View);
-  if(invalid_matrix(cwtV)) return;
+  if(invalid_matrix(T)) return;
   
-  transmatrix T = cwtV;
   #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
     geom3::do_auto_eye();
@@ -1412,10 +1423,11 @@ EX void centerpc(ld aspd) {
       shift_view_towards(H, aspd);
       
     fixmatrix(View);
+    fixmatrix(current_display->which_copy);
     spinEdge(aspd);
     }
 
-  ors::rerotate(cwtV); ors::rerotate(View);
+  ors::rerotate(W); ors::rerotate(cwtV); ors::rerotate(View);
   }
 
 EX void optimizeview() {
@@ -1477,6 +1489,7 @@ EX void resetview() {
     View = Id;
     }
   cwtV = View;
+  current_display->which_copy = View;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
@@ -2066,6 +2079,7 @@ EX transmatrix& get_view_orientation() {
 EX void rotate_view(transmatrix T) {
   transmatrix& which = get_view_orientation();
   which = T * which;
+  if(&which == &View) current_display->which_copy = T * current_display->which_copy;
   }
 
 /** shift the view according to the given tangent vector */
@@ -2086,17 +2100,24 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
 
 /** shift the view according to the given tangent vector */
 EX void shift_view(hyperpoint H) {
+  current_display->which_copy = get_shift_view_of(H, current_display->which_copy);
   View = get_shift_view_of(H, View);
   }
 
+void multiply_view(transmatrix T) {
+  View = T * View;
+  auto& wc = current_display->which_copy;
+  wc = T * wc;
+  }
+
 EX void shift_view_to(hyperpoint H) {
-  if(!nonisotropic) View = gpushxto0(H) * View;
+  if(!nonisotropic) multiply_view(gpushxto0(H));
   else shift_view(-inverse_exp(H, iTable, false));
   }
 
 EX void shift_view_towards(hyperpoint H, ld l) {
   if(!nonisotropic && !prod) 
-    View = rspintox(H) * xpush(-l) * spintox(H) * View;
+    multiply_view(rspintox(H) * xpush(-l) * spintox(H));
   else if(nonisotropic && !nisot::geodesic_movement)
     shift_view(tangent_length(H-C0, -l));
   else {

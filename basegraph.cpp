@@ -47,6 +47,8 @@ struct display_data {
   void set_mask(int ed);
 
   void set_all(int ed);
+  /** Which copy of the player cell? */
+  transmatrix which_copy;
   };
 
 #define View (::hr::current_display->view_matrix)

@@ -172,10 +172,13 @@ void monster::rebasePat(const transmatrix& new_pat, cell *c2) {
     virtualRebase(this);
     fix_to_2(at);
     pat = at;
+    if(multi::players == 1 && this == shmup::pc[0])
+      current_display->which_copy = ggmatrix(base);
     return;
     }
   if(quotient) {
     at = inverse(gmatrix[base]) * new_pat;
+    transmatrix old_at = at;
     virtualRebase(this);
     fix_to_2(at);
     if(base != c2) {
@@ -183,8 +186,12 @@ void monster::rebasePat(const transmatrix& new_pat, cell *c2) {
       base = c2;
       at = inverse(T) * at;
       }
+    if(multi::players == 1 && this == shmup::pc[0] && !eqmatrix(old_at, at))
+      current_display->which_copy = current_display->which_copy * old_at * inverse(at);
     return;
     }
+  if(multi::players == 1 && this == shmup::pc[0])
+    current_display->which_copy = current_display->which_copy * inverse(gmatrix[base]) * gmatrix[c2];
   pat = new_pat;
   // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
   base = c2;

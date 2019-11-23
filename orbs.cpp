@@ -558,6 +558,7 @@ void teleportTo(cell *dest) {
   cell *from = cwt.at;
   movecost(from, dest, 1);
   playerMoveEffects(cwt.at, dest);
+  current_display->which_copy = ggmatrix(dest);
   cwt.at = dest; cwt.spin = hrand(dest->type); flipplayer = !!(hrand(2));
   drainOrb(itOrbTeleport);
 
@@ -602,6 +603,7 @@ EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon I
 
   cell *c1 = cwt.at;
   animateMovement(match(cwt.at, dest), LAYER_SMALL);
+  current_display->which_copy = ggmatrix(dest);
   cwt.at = dest; 
   forCellIdEx(c2, i, dest) if(c2->cpdist < dest->cpdist) {
     cwt.spin = i;

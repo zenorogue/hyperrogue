@@ -6660,6 +6660,7 @@ EX bool activateRecall() {
   // local_perspective = recallDisplay.local_perspective;
   gmatrix = recallDisplay.cellmatrices;
   gmatrix0 = recallDisplay.old_cellmatrices;
+  current_display->which_copy = recallDisplay.which_copy;
 
   makeEmpty(cwt.at);
   forCellEx(c2, cwt.at) 
@@ -8628,6 +8629,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
         }
       else
         animateMovement(mi, LAYER_SMALL);
+      current_display->which_copy = current_display->which_copy * adj(mi);
       
       mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK | mirror::GO);
 
