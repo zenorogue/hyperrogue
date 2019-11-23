@@ -64,6 +64,8 @@ EX bool available() {
   if(WDIM == 2) return false;
   if(hyperbolic && pmodel == mdPerspective && !penrose)
     return true;
+  if(nil && S7 == 8)
+    return false;
   if((solnih || nil) && pmodel == mdGeodesic)
     return true;
   if(euclid && pmodel == mdPerspective && !binarytiling)

@@ -1078,7 +1078,7 @@ void geometry_information::create_wall3d() {
     }
   
   if(geometry == gNil) {
-    for(int i=0; i<S7; i++) make_wall(i, nilv::facevertices[i]);
+    for(int i=0; i<S7; i++) make_wall(i, nilv::current_ns().facevertices[i]);
     }
   
   if(penrose) {

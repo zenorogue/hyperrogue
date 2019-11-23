@@ -773,39 +773,47 @@ EX namespace nilv {
   hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
   
   #if HDR
-  static const int nilv_S7 = 6;
+  struct nilstructure {
+    vector<mvec> movevectors;
+    vector<vector<hyperpoint>> facevertices;
+    };
   #endif
-
-/*
-  array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }};
-
-  EX array<vector<hyperpoint>, nilv_S7> facevertices = {{
-    { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,-0.25), },
-    { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), },
-    { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
-    { point31(-0.5,-0.5,-0.25), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,-0.5,-0.75), },
-    { point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
-    { point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,-0.75), },
-    { point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), },
-    { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), },
-    }};
-*/
   
-  array<mvec, nilv_S7> movevectors = {{ mvec(-1,0,0), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(0,1,0), mvec(0,0,1) }};
+  nilstructure ns6 = {
+    {{ mvec(-1,0,0), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(0,1,0), mvec(0,0,1) }},
   
-  EX array<vector<hyperpoint>, nilv_S7> facevertices = {{
+    {{
     { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.25), point31(-0.5,0.5,-0.75), },
     { point31(0.5,-0.5,-0.5), point31(0.5,-0.5,0.5), point31(-0.5,-0.5,0.5), point31(-0.5,-0.5,-0.5), },
     { point31(0,0,-0.5), point31(-0.5,0.5,-0.75), point31(-0.5,-0.5,-0.25), point31(0,0,-0.5), point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,-0.5), point31(0,0,-0.5), point31(-0.5,-0.5,-0.5), point31(0.5,-0.5,-0.5), point31(0,0,-0.5), point31(0.5,-0.5,-0.5), point31(0.5,-0.5,-0.75), point31(0,0,-0.5), point31(0.5,-0.5,-0.75), point31(0.5,0.5,-0.25), point31(0,0,-0.5), point31(0.5,0.5,-0.25), point31(0.5,0.5,-0.5), point31(0,0,-0.5), point31(0.5,0.5,-0.5), point31(-0.5,0.5,-0.5), point31(0,0,-0.5), point31(-0.5,0.5,-0.5), point31(-0.5,0.5,-0.75), },
     { point31(0.5,0.5,-0.25), point31(0.5,0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
     { point31(-0.5,0.5,-0.5), point31(-0.5,0.5,0.5), point31(0.5,0.5,0.5), point31(0.5,0.5,-0.5), },
     { point31(0,0,0.5), point31(-0.5,0.5,0.25), point31(-0.5,-0.5,0.75), point31(0,0,0.5), point31(-0.5,-0.5,0.75), point31(-0.5,-0.5,0.5), point31(0,0,0.5), point31(-0.5,-0.5,0.5), point31(0.5,-0.5,0.5), point31(0,0,0.5), point31(0.5,-0.5,0.5), point31(0.5,-0.5,0.25), point31(0,0,0.5), point31(0.5,-0.5,0.25), point31(0.5,0.5,0.75), point31(0,0,0.5), point31(0.5,0.5,0.75), point31(0.5,0.5,0.5), point31(0,0,0.5), point31(0.5,0.5,0.5), point31(-0.5,0.5,0.5), point31(0,0,0.5), point31(-0.5,0.5,0.5), point31(-0.5,0.5,0.25), },
-    }};
+    }}
+    };
+  
+  nilstructure ns8 = {
+    {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }},
+  
+    {{
+      { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,-0.25), },
+      { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), },
+      { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
+      { point31(-0.5,-0.5,-0.25), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,-0.5,-0.75), },
+      { point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
+      { point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,-0.75), },
+      { point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), },
+      { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), },
+      }}
+    };
+  
+  EX nilstructure& current_ns() { return S7 == 6 ? ns6 : ns8; }
 
   EX array<int,3> nilperiod, nilperiod_edit;
+  int S7_edit;
   
   EX transmatrix adjmatrix(int i) {
-     return nisot::translate(mvec_to_point(movevectors[i]));
+     return nisot::translate(mvec_to_point(current_ns().movevectors[i]));
      }
     
   struct hrmap_nil : hrmap {
@@ -835,10 +843,10 @@ EX namespace nilv {
 
     heptagon *create_step(heptagon *parent, int d) override {
       auto p = coords[parent];
-      auto q = p * movevectors[d];
+      auto q = p * current_ns().movevectors[d];
       for(int a=0; a<3; a++) q[a] = zgmod(q[a], nilperiod[a]);
       auto child = get_at(q);
-      parent->c.connect(d, child, (d + nilv_S7/2) % nilv_S7, false);
+      parent->c.connect(d, child, (d + S7/2) % S7, false);
       return child;
       }
 
@@ -921,6 +929,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
 
 EX void prepare_niltorus3() {
   nilperiod_edit = nilperiod;
+  S7_edit = ginf[gNil].sides;
   }
   
 EX void show_niltorus3() {
@@ -937,6 +946,8 @@ EX void show_niltorus3() {
       dialog::bound_low(0);
       });      
     }
+  dialog::addSelItem(XLAT("honeycomb"), its(S7_edit), 'h');
+  dialog::add_action([] { S7_edit = S7_edit ^ 6 ^ 8; });
   
   bool ok = (!nilperiod_edit[1]) || (nilperiod_edit[2] && nilperiod_edit[1] % nilperiod_edit[2] == 0);
 
@@ -947,6 +958,7 @@ EX void show_niltorus3() {
     dialog::add_action([] {
       stop_game();
       nilperiod = nilperiod_edit;
+      ginf[gNil].sides = S7_edit;
       set_flags();
       geometry = gNil;
       start_game();
@@ -1911,6 +1923,13 @@ EX namespace nisot {
       if(nil) stop_game();
       for(int a=0; a<3; a++) { shift(); nilv::nilperiod[a] = argi(); }
       nilv::set_flags();
+      return 0;
+      }
+    else if(argis("-nilv")) {
+      PHASEFROM(2);
+      if(nil) stop_game();
+      shift();
+      ginf[gNil].sides = argi();
       return 0;
       }
     else if(argis("-catperiod")) {
