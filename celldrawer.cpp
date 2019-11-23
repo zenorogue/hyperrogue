@@ -1713,7 +1713,7 @@ void celldrawer::bookkeeping() {
     else {
       playerV = V * ddspin(c, cwt.spin, 0);
       if(cwt.mirrored) playerV = playerV * Mirror;
-      if(!confusingGeometry() || eqmatrix(V, current_display->which_copy, 1e-2))
+      if((!confusingGeometry() && !inmirrorcount) || eqmatrix(V, current_display->which_copy, 1e-2))
         current_display->which_copy = V;
       if(orig) cwtV = playerV;
       }
