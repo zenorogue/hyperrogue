@@ -3919,8 +3919,6 @@ EX void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
   
-  queuepolyat(current_display->which_copy, cgi.shAsymmetric, 0xC0C0C0FF, PPR::SUPERLINE);
-  
   callhooks(hooks_markers);
   #if CAP_SHAPES
   viewmat();
