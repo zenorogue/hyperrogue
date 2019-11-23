@@ -3636,3 +3636,20 @@ Other:
 - ray configuration saved
 - random in expression parser; 'draw inner walls in pattern' setting
 - fixed the confusion when picking up Orb of Speed while having one
+
+2019-11-23 23:47 Version 11.2l:
+- Gameplay:
+- - Orb of Choice is now considered useless in Land of Motion
+- - fixed a bug where disabling the cheat mode while the land is changed in Geometry Experiments would produce weird lands
+- - fixed birds not approaching the player in boats when shielded (and similar cases)
+- - fixed generating wandering monsters on the player in small geometries
+- - removed a Ruby in Free Fall (some leftover from debugging)
+
+- Geometries:
+- - fixed the field quotient advanced config not working correctly when switching the base geometry
+- - generalized the field quotient advanced config to generate a bit more manifolds (the new ones are small, and include Bring's Surface, Klein Quartic, and some I do not recognize)
+- - animated Friendly Ivy growth
+- - more careful handling of small quotient spaces (one-tile-wide torus is now possible)
+- - in quotient geometries, the camera will now track the specific preimage of the player
+- - alternative honeycomb in Nil (see advanced parameters -- not working in ray yet)
+- - map editor: should now correctly save product/rotspace maps, binary width setting, and other geometry settings
