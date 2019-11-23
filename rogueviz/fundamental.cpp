@@ -31,7 +31,7 @@ hyperpoint corner(cellwalker cw) {
   if(funmode == 2) {
     while(cw.at->type != S7) { 
       cw++; 
-      T = T * calc_relative_matrix(cw.peek(), cw.at, cw.spin);
+      T = T * currentmap->adj(cw.at, cw.spin);
       cw += wstep; 
       }
     return T * C0;
@@ -40,7 +40,7 @@ hyperpoint corner(cellwalker cw) {
   }
 
 transmatrix rel(cellwalker cw) {
-  return calc_relative_matrix(cw.cpeek(), cw.at, cw.spin);
+  return currentmap->adj(cw.at, cw.spin);
   }
 
 ld label_dist = .3;

@@ -324,7 +324,7 @@ void bantar_frame() {
     
     View = Id;
     
-    transmatrix tView = actualV(cth(xcw), Id) * calc_relative_matrix(cwt.at, xcw.at, NOHINT) * inverse(actualV(cth(cwt), Id));
+    transmatrix tView = actualV(cth(xcw), Id) * calc_relative_matrix(cwt.at, xcw.at, C0) * inverse(actualV(cth(cwt), Id));
     
     if(tphase < 2) part = 0;
     else if(tphase == 2)
