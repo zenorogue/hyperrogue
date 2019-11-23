@@ -120,8 +120,7 @@ namespace mapstream {
       return dir;
     }
   
-  void save_only_map(fhstream& f) {
-    f.write(patterns::whichPattern);
+  void save_geometry(fhstream& f) {
     f.write(geometry);
     char nbtype = char(variation);
     f.write(nbtype);
@@ -159,6 +158,119 @@ namespace mapstream {
     #if CAP_ARCM
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
     #endif
+    if(geometry == gNil && VERNUM_HEX >= 0xA80C) {
+      f.write(S7);
+      f.write(nilv::nilperiod);
+      }
+    if(geometry == gArnoldCat && VERNUM_HEX >= 0xA80C) {
+      f.write(asonov::period_xy);
+      f.write(asonov::period_z);
+      }
+    if(geometry == gProduct && VERNUM_HEX >= 0xA80C) {
+      f.write(product::csteps);
+      }
+    if(hybri && VERNUM_HEX >= 0xA80C) {
+      hybrid::in_underlying_geometry([&] { save_geometry(f); });
+      }
+    if(binarytiling && VERNUM_HEX >= 0xA80C) 
+      f.write(vid.binary_width);
+    }
+  
+  void load_geometry(fhstream& f) {
+    f.read(geometry);
+    char nbtype;
+    f.read(nbtype);
+    variation = eVariation(nbtype);
+    #if CAP_GP
+    if(GOLDBERG) {
+      f.read(gp::param.first);
+      f.read(gp::param.second);
+      }
+    #endif
+    if(geometry == gTorus) {
+      f.read(torusconfig::qty);
+      f.read(torusconfig::dx);
+      f.read(torusconfig::dy);
+      if(f.vernum >= 10504) {
+        f.read(torusconfig::sdx);
+        f.read(torusconfig::sdy);
+        f.read(torusconfig::torus_mode);
+        }
+      torusconfig::activate();
+      }
+    #if CAP_CRYSTAL
+    if(cryst && f.vernum >= 10504) {
+      int sides;
+      f.read(sides);
+      #if CAP_CRYSTAL
+      crystal::set_crystal(sides);
+      #endif
+      if(sides == 8) {
+        int vertices;
+        eVariation v = variation;
+        f.read(vertices);          
+        if(vertices == 3) {
+          set_variation(eVariation::bitruncated);
+          set_variation(v);
+          }
+        }
+      }
+    #endif
+    #if CAP_FIELD
+    if(geometry == gFieldQuotient) {
+      using namespace fieldpattern;
+      f.read(quotient_field_changed);
+      if(quotient_field_changed) {
+        f.read(current_extra);
+        auto& ge = fgeomextras[current_extra];
+        auto& id = ge.current_prime_id;
+        f.read(id);
+        if(VERNUM_HEX < 0xA80C) switch(ge.base) {
+          case gNormal: id++; break;
+          case g45: id++; break;
+          case g46: id+=2; break;
+          case g47: id++; break;
+          default: ;
+          }
+        enableFieldChange();
+        }
+      }
+    #endif
+    #if CAP_ARCM
+    if(geometry == gArchimedean) {
+      string& symbol = arcm::current.symbol;
+      symbol = f.get<string>();
+      arcm::current.parse();
+      if(arcm::current.errors > 0) {
+        printf("Errors! %s\n", arcm::current.errormsg.c_str());
+        }
+      }
+    #endif
+    if(geometry == gNil && VERNUM_HEX >= 0xA80C) {
+      f.read(S7);
+      f.read(nilv::nilperiod);
+      nilv::set_flags();
+      }
+    if(geometry == gArnoldCat && VERNUM_HEX >= 0xA80C) {
+      f.read(asonov::period_xy);
+      f.read(asonov::period_z);
+      asonov::set_flags();
+      }
+    if(geometry == gProduct && VERNUM_HEX >= 0xA80C) {
+      f.read(product::csteps);
+      }
+    if(hybri && VERNUM_HEX >= 0xA80C) {
+      auto g = geometry;
+      load_geometry(f);
+      hybrid::configure(g);
+      }
+    if(binarytiling && VERNUM_HEX >= 0xA80C) 
+      f.read(vid.binary_width);
+    }
+  
+  void save_only_map(fhstream& f) {
+    f.write(patterns::whichPattern);
+    save_geometry(f);
     
     // game settings
     f.write(safety);
@@ -274,77 +386,8 @@ namespace mapstream {
       }
     else if(f.vernum >= 7400) f.read(patterns::whichPattern);
     
-    if(f.vernum >= 10203) {
-      f.read(geometry);
-      char nbtype;
-      f.read(nbtype);
-      variation = eVariation(nbtype);
-      #if CAP_GP
-      if(GOLDBERG) {
-        f.read(gp::param.first);
-        f.read(gp::param.second);
-        }
-      #endif
-      if(geometry == gTorus) {
-        f.read(torusconfig::qty);
-        f.read(torusconfig::dx);
-        f.read(torusconfig::dy);
-        if(f.vernum >= 10504) {
-          f.read(torusconfig::sdx);
-          f.read(torusconfig::sdy);
-          f.read(torusconfig::torus_mode);
-          }
-        torusconfig::activate();
-        }
-      #if CAP_CRYSTAL
-      if(cryst && f.vernum >= 10504) {
-        int sides;
-        f.read(sides);
-        #if CAP_CRYSTAL
-        crystal::set_crystal(sides);
-        #endif
-        if(sides == 8) {
-          int vertices;
-          eVariation v = variation;
-          f.read(vertices);          
-          if(vertices == 3) {
-            set_variation(eVariation::bitruncated);
-            set_variation(v);
-            }
-          }
-        }
-      #endif
-      #if CAP_FIELD
-      if(geometry == gFieldQuotient) {
-        using namespace fieldpattern;
-        f.read(quotient_field_changed);
-        if(quotient_field_changed) {
-          f.read(current_extra);
-          auto& ge = fgeomextras[current_extra];
-          auto& id = ge.current_prime_id;
-          f.read(id);
-          if(VERNUM_HEX < 0xA80C) switch(ge.base) {
-            case gNormal: id++; break;
-            case g45: id++; break;
-            case g46: id+=2; break;
-            case g47: id++; break;
-            default: ;
-            }
-          enableFieldChange();
-          }
-        }
-      #endif
-      #if CAP_ARCM
-      if(geometry == gArchimedean) {
-        string& symbol = arcm::current.symbol;
-        symbol = f.get<string>();
-        arcm::current.parse();
-        if(arcm::current.errors > 0) {
-          printf("Errors! %s\n", arcm::current.errormsg.c_str());
-          }
-        }
-      #endif
-      }
+    if(f.vernum >= 10203) 
+      load_geometry(f);
       
     check_cgi();
     cgi.require_basics();

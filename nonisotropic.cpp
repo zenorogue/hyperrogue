@@ -892,7 +892,7 @@ EX namespace nilv {
   
   EX mvec get_coord(heptagon *h) { return ((hrmap_nil*)currentmap)->coords[h]; }
 
-  void set_flags() {
+  EX void set_flags() {
     int coords = 0;
     for(int a=0; a<3; a++) if(nilperiod[a]) coords++;
     set_flag(ginf[gNil].flags, qANYQ, coords);
