@@ -643,7 +643,9 @@ struct info {
     else if(i) setdist(i, OUT_OF_PRISON);
     }
 
-  EX void move(cell *ct, cell *cf) {
+  EX void move(const movei& mi) {
+    auto& cf = mi.s;
+    auto& ct = mi.t;
     if(euclid) return;
     princess::info *i = princess::getPrincessInfo(cf);
     if(!i) {
@@ -2641,7 +2643,9 @@ EX namespace dragon {
       }
     }
   
-  EX bool move(cell *dt, cell *df) {
+  EX bool move(const movei& mi) {
+    auto& df = mi.s;
+    auto& dt = mi.t;
     if(df->monst == moDragonHead) {
       dt->mondir = neighborId(dt,df);
 //    printf("pull back\n");

@@ -3616,7 +3616,7 @@ EX void moveEffect(const movei& mi, eMonster m) {
     ct->wparam = 1;
     }
     
-  if(cf && isPrincess(m)) princess::move(ct, cf);
+  if(cf && isPrincess(m)) princess::move(mi);
   
   if(cf && m == moTortoise) {
     tortoise::emap[ct] = tortoise::getb(cf);
@@ -4979,7 +4979,9 @@ EX bool isTargetOrAdjacent(cell *c) {
   return false;
   }
 
-EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
+EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
+  auto& c = mi.s;
+  auto& from = mi.t; // note: we are moving from 'c' to 'from'!'
   if(!c) return;
 
   if(c->pathdist == 0) return;
@@ -5002,7 +5004,7 @@ EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
            passable_for(movtype, from, c, P_CHAIN | P_MONSTER) 
         && passable_for(movtype, c, c2, P_CHAIN | P_MONSTER);
         c3->monst = m2;
-        if(ok) groupmove2(c2, c, d, movtype, mf);
+        if(ok) groupmove2(movei(c, d).rev(), movtype, mf);
         }
     }
   else return;
@@ -5064,11 +5066,11 @@ EX void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     if(from->cpdist == 0 || from->monst) { onpath(c, 0); return; }
     
     if(movtype == moDragonHead) {
-      dragon::move(from, c);
+      dragon::move(mi);
       return;
       }
     
-    moveMonster(movei(from, d).rev());
+    moveMonster(mi);
     onpath(from, 0);
     }
   onpath(c, 0);
@@ -5088,7 +5090,7 @@ EX void groupmove(eMonster movtype, flagtype mf) {
         if(!c->monst) continue;
         if(isFriendlyOrBug(c)) continue;
         forCellIdEx(c2, d, c) if(c2->monst && isMounted(c2)) {
-          groupmove2(c2,c,d,movtype,mf);
+          groupmove2(movei(c,d).rev(),movtype,mf);
           }
         } 
       }
@@ -5114,12 +5116,12 @@ EX void groupmove(eMonster movtype, flagtype mf) {
 
     while(qdirtable--) {
       int t = dirtable[qdirtable];
-      groupmove2(c->move(t),c,t,movtype,mf);
+      groupmove2(movei(c, t).rev(),movtype,mf);
       }
       
     if(movtype == moEagle && c->monst == moNone && !isPlayerOn(c) && !bird_disruption(c)) {
       cell *c2 = whirlwind::jumpFromWhereTo(c, false);
-      groupmove2(c2, c, NODIR, movtype, mf);
+      groupmove2(movei(c2, c, STRONGWIND), movtype, mf);
       }
     }
 
@@ -8036,7 +8038,7 @@ EX void handle_switchplaces(cell *c1, cell *c2, bool& switchplaces) {
       princess::mouseSqueak(c2);
     else if(isPrincess(c2->monst)) {
       princess::line(c2);
-      princess::move(c1, c2);
+      princess::move(match(c2, c1));
       }
     else  
       pswitch = true;
