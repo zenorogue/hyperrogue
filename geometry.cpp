@@ -423,7 +423,7 @@ void geometry_information::prepare_basics() {
 
   ld fmin, fmax;  
 
-  if(archimedean) 
+  if(archimedean && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
 
   if(euclid) {

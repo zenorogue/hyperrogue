@@ -262,7 +262,7 @@ namespace mapstream {
     if(hybri && VERNUM_HEX >= 0xA80C) {
       auto g = geometry;
       load_geometry(f);
-      hybrid::configure(g);
+      set_geometry(g);
       }
     if(binarytiling && VERNUM_HEX >= 0xA80C) 
       f.read(vid.binary_width);
@@ -293,7 +293,7 @@ namespace mapstream {
     for(int k=0; k<i; k++) f.write(kills[k]); 
     }
     
-    addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
+    addToQueue((bounded || euclid || prod || archimedean) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
@@ -420,6 +420,7 @@ namespace mapstream {
       for(int k=0; k<i; k++) f.read(kills[k]);    
       }
 
+    int sub = hybri ? 2 : 0;
     while(true) {
       cell *c;
       int rspin;
@@ -434,13 +435,13 @@ namespace mapstream {
         if(parent<0 || parent >= isize(cellbyid)) break;
         int dir = f.read_char();
         cell *c2 = cellbyid[parent];
-        dir  = fixspin(dir, relspin[parent], c2->type, f.vernum);
+        dir = fixspin(relspin[parent], dir, c2->type - sub, f.vernum);
         c = createMov(c2, dir);
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
         // spinval becomes xspinval
-        rspin = (c2->c.spin(dir) - f.read_char() + MODFIXER) % c->type;
-        if(GDIM == 3 && rspin) {
+        rspin = (c2->c.spin(dir) - f.read_char() + MODFIXER) % (c->type - sub);
+        if(GDIM == 3 && rspin && !hybri) {
           println(hlog, "rspin in 3D");
           throw hstream_exception();
           }
@@ -449,7 +450,7 @@ namespace mapstream {
       cellbyid.push_back(c);
       relspin.push_back(rspin);
       c->land = (eLand) f.read_char();
-      c->mondir = fixspin(rspin, f.read_char(), c->type, f.vernum);
+      c->mondir = fixspin(rspin, f.read_char(), c->type - sub, f.vernum);
       c->monst = (eMonster) f.read_char();
       if(c->monst == moTortoise && f.vernum >= 11001)
         f.read(tortoise::emap[c]);
