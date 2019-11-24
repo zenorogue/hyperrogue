@@ -41,12 +41,15 @@ string euchelp =
 void showQuotientConfig() {
   using namespace fieldpattern;
   gamescreen(2);
-  dialog::init(XLAT("advanced configuration"));
+  dialog::init(XLAT("field quotient"));
   fgeomextra& gxcur = fgeomextras[current_extra];
   for(int i=0; i<isize(fgeomextras); i++) {
     auto& g = fgeomextras[i];
     dialog::addBoolItem(ginf[g.base].tiling_name, g.base == gxcur.base, 'a'+i);
     }
+  
+  dialog::addBreak(100);
+  
   nextPrimes(gxcur);
   string stars[3] = {"", "*", "**"};
   for(int i=0; i<isize(gxcur.primes); i++) {
@@ -385,17 +388,128 @@ void ge_land_selection() {
     };
   }
 
-bool select_dims, select_quotient;
+#if HDR
+struct geometry_filter {
+  string name;
+  /** test if the current geometry matches the filter */
+  function<bool()> test; 
+  };
+#endif
+
+EX geometry_filter *current_filter;
+
+EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (archimedean || hyperbolic) && !quotient; }};
+EX geometry_filter gf_spherical = {"spherical", [] { return (archimedean || sphere) && !quotient; }};
+EX geometry_filter gf_euclidean = {"Euclidean", [] { return (archimedean || euclid) && !quotient; }};
+EX geometry_filter gf_other = {"non-isotropic", [] { return prod || nonisotropic; }};
+EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] { 
+  return !archimedean && !binarytiling && !penrose && WDIM == 2 && !quotient;
+  }};
+EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", [] { 
+  if(euclid) return geometry == gCubeTiling;
+  return !binarytiling && !penrose && WDIM == 3 && (hyperbolic ? !quotient : true) && !nonisotropic && !prod;
+  }};
+EX geometry_filter gf_quotient = {"interesting quotient spaces", [] { 
+  return quotient && !elliptic;
+  }};
+  
+vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical, &gf_euclidean, &gf_other, &gf_regular_2d, &gf_regular_3d, &gf_quotient };
+
+void ge_select_filter() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(2);  
+
+  dialog::init(XLAT("geometries"));
+  
+  char x = 'a';
+  for(auto f: available_filters) {
+    if(current_filter)
+      dialog::addBoolItem(XLAT(f->name), f == current_filter, x++);
+    else
+      dialog::addItem(XLAT(f->name), x++);
+    dialog::add_action([f] { current_filter = f; popScreen(); });
+    }
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+void set_default_filter() {
+  current_filter = &gf_hyperbolic; 
+  for(auto f: available_filters) if(f->test()) current_filter = f;
+  }
+
+void set_or_configure_geometry(eGeometry g) {
+  if(0) ;
+  #if CAP_CRYSTAL
+  else if(g == gCrystal)
+    pushScreen(crystal::show);
+  #endif
+  #if CAP_ARCM
+  else if(g == gArchimedean)
+    pushScreen(arcm::show);
+  #endif
+  else if(g == gTorus)
+    pushScreen(showTorusConfig);
+  else {
+    if(among(g, gProduct, gRotSpace)) {
+      if(WDIM == 3 || euclid) {
+        addMessage(XLAT("Only works with 2D non-Euclidean geometries"));
+        return;
+        }
+      if(g == gRotSpace) {
+        bool ok = true;
+        if(archimedean) ok = PURE;
+        else if(binarytiling || penrose) ok = false;
+        else ok = PURE || BITRUNCATED;
+        if(!ok) {
+          addMessage(XLAT("Only works with (semi-)regular tilings"));
+          return;
+          }
+        if(archimedean) {
+          int steps, single_step;
+          if(!arcm::current.get_step_values(steps, single_step)) {
+            addMessage(XLAT("That would have %1/%2 levels", its(steps), its(single_step)));
+            return;
+            }
+          }
+        }
+      }
+    dual::may_split_or_do([g] { set_geometry(g); });
+    start_game();
+    }
+  }
+
+/** is g2 the same tiling as the current geometry (geometry)? */
+bool same_tiling(eGeometry g2) {
+  if(g2 == gCrystal)
+    return S3 == 4;
+  if(g2 == gFieldQuotient && geometry != gFieldQuotient) {
+    int ce = 0;
+    for(auto& ge: fieldpattern::fgeomextras) {
+      if(ginf[ge.base].tiling_name == ginf[geometry].tiling_name) {
+        fieldpattern::current_extra = ce;
+        return true;
+        }
+      ce++;
+      }
+    }
+  return ginf[g2].tiling_name == ginf[geometry].tiling_name;    
+  }
 
 void ge_select_tiling() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
 
-  dialog::init(XLAT("experiment with geometry"));
+  if(!current_filter) { popScreen(); return; }
+  dialog::init();
+  dialog::addItem(XLAT(current_filter->name), 'x');
+  dialog::add_action_push(ge_select_filter);
   
-  /* if(&lst == &list3d)
-    dialog::addInfo("3D geometries are a work in progress", 0x800000); */
+  vector<eGeometry> geometries;
 
+  dialog::addBreak(100);
+  
   char letter = 'a';
   for(int i=0; i<isize(ginf); i++) {
     eGeometry g = eGeometry(i);
@@ -408,68 +522,16 @@ void ge_select_tiling() {
     if(sol && !CAP_SOLV) continue;
     if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
-    if((!!quotient) ^ select_quotient) continue;
-    if((WDIM == 3) ^ select_dims) continue;
+    if(!current_filter->test()) continue;
     dialog::addBoolItem(XLAT(
       (geometry == gProduct && in_2d) ? XLAT("current geometry x E") : 
       (geometry == gRotSpace && in_2d) ? XLAT("space of rotations in current geometry") : 
       ginf[i].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
-    dialog::add_action(dual::mayboth([i] {
-      eGeometry targetgeometry = eGeometry(i);
-      if(0) ;
-      #if CAP_CRYSTAL
-      else if(targetgeometry == gCrystal)
-        pushScreen(crystal::show);
-      #endif
-      #if CAP_ARCM
-      else if(targetgeometry == gArchimedean)
-        pushScreen(arcm::show);
-      #endif
-      else dialog::do_if_confirmed([targetgeometry] () {
-        bool th = among(targetgeometry, gProduct, gRotSpace);
-        if(th && (WDIM == 3 || euclid)) {
-          addMessage(XLAT("Only works with 2D non-Euclidean geometries"));
-          return;
-          }
-        if(targetgeometry == gRotSpace) {
-          bool ok = true;
-          if(archimedean) ok = PURE;
-          else if(binarytiling || penrose) ok = false;
-          else ok = PURE || BITRUNCATED;
-          if(!ok) {
-            addMessage(XLAT("Only works with (semi-)regular tilings"));
-            return;
-            }
-          if(archimedean) {
-            int steps, single_step;
-            if(!arcm::current.get_step_values(steps, single_step)) {
-              addMessage(XLAT("That would have %1/%2 levels", its(steps), its(single_step)));
-              return;
-              }
-            }
-          }
-        set_geometry(targetgeometry);
-        start_game();
-        if(euwrap) {
-          prepare_torusconfig();
-          pushScreen(showTorusConfig);
-          }
-        #if CAP_FIELD
-        if(geometry == gFieldQuotient) {
-          pushScreen(showQuotientConfig);
-          }
-        #endif
-        });
-      }));
+    dialog::add_action([g] { set_or_configure_geometry(g); });
     }
   
   dialog::addBreak(100);
-  dialog::addBoolItem_action(XLAT("show quotient spaces"), select_quotient, 'Q');
-  #if MAXMDIM == 4
-  dialog::addBoolItem_action(XLAT("three-dimensional"), select_dims, 'D');
-  #endif
-  
   dual::add_choice();  
   dialog::addBack();
   dialog::display();
@@ -536,6 +598,87 @@ EX string geometry_name() {
   return "?";
   }
 
+EX void select_quotient_screen() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+
+  dialog::init(XLAT("quotient spaces in ") + ginf[geometry].tiling_name);
+  char key = 'a';
+  for(int i=0; i<isize(ginf); i++) {
+    auto g = eGeometry(i);
+    if(same_tiling(g)) {
+      dialog::addBoolItem(
+        (ginf[g].flags & qANYQ) ? 
+           XLAT(ginf[g].menu_displayed_name) :
+           "no quotient",
+        g == geometry, key++);
+      dialog::add_action([g] {
+        if(g == gTorus) {
+          prepare_torusconfig();
+          pushScreen(showTorusConfig);
+          }
+        else if(g == gFieldQuotient) 
+          pushScreen(showQuotientConfig);
+        else {
+          dual::may_split_or_do([g] { set_geometry(g); });
+          start_game();
+          }
+        });
+      }
+    }
+  
+  dialog::addBack();
+  dialog::display();
+  }
+
+EX void select_quotient() {
+  if(euclid && WDIM == 3) {
+    euclid3::prepare_torus3();
+    pushScreen(euclid3::show_torus3);
+    }
+  else if(nil) {
+    nilv::prepare_niltorus3(),  
+    pushScreen(nilv::show_niltorus3);
+    }
+  else if(asonov::in()) {
+    asonov::prepare_config();
+    pushScreen(asonov::show_config);
+    }
+  else if(prod) {
+    static int s;
+    s = product::csteps;
+    dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"),
+          XLAT("Set to 0 to make it non-periodic."));
+    dialog::bound_low(0);
+    dialog::reaction_final = [] {
+      product::csteps = s;
+      if(product::csteps == cgi.steps) return;
+      hybrid::reconfigure();
+      start_game();
+      println(hlog, "csteps = ", cgi.steps);
+      };
+    }
+  else if(euclid && !archimedean) {
+    prepare_torusconfig();
+    pushScreen(showTorusConfig);
+    }
+  else {
+    vector<eGeometry> choices;
+    for(int i=0; i<isize(ginf); i++) if(same_tiling(eGeometry(i))) choices.push_back(eGeometry(i));
+    
+    println(hlog, "choices = ", choices);
+
+    if(isize(choices) > 2) 
+      pushScreen(select_quotient_screen);
+    else if(isize(choices) > 1) {
+      set_geometry(choices[choices[0] == geometry ? 1 : 0]);
+      start_game();
+      }
+    else
+      addMessage("No quotient spaces avialable in the current tiling.");
+    }
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -543,9 +686,15 @@ EX void showEuclideanMenu() {
   gamescreen(0);  
 
   dialog::init(XLAT("experiment with geometry"));
+
+  dialog::addSelItem(XLAT("geometry"), geometry_name(), 'd');
+  dialog::add_action([] { pushScreen(ge_select_tiling); pushScreen(ge_select_filter); });
   
   dialog::addSelItem(XLAT("basic tiling"), XLAT(ginf[geometry].tiling_name), 't');
-  dialog::add_action([] { select_quotient = quotient; select_dims = WDIM == 3; pushScreen(ge_select_tiling); });
+  dialog::add_action([] {  
+    if(!current_filter || !current_filter->test()) set_default_filter();
+    pushScreen(ge_select_tiling);
+    });
 
   int ts = ginf[geometry].sides;
   int tv = ginf[geometry].vertex;
@@ -674,12 +823,7 @@ EX void showEuclideanMenu() {
   else
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 'q');
 
-  dialog::add_action([] { select_quotient = !quotient; select_dims = WDIM == 3; pushScreen(ge_select_tiling); });
-
-  #if MAXMDIM >= 4
-  dialog::addSelItem(XLAT("dimension"), its(WDIM), 'd');
-  dialog::add_action([] { select_quotient = quotient; select_dims = WDIM != 3; pushScreen(ge_select_tiling); });
-  #endif
+  dialog::add_action(select_quotient);
   
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
@@ -767,56 +911,7 @@ EX void showEuclideanMenu() {
       });
     }
   
-  if(euwrap || geometry == gFieldQuotient || cryst || archimedean || (euclid && WDIM == 3) || nil || asonov::in() || prod) {
-    dialog::addItem(XLAT("advanced parameters"), '4');
-    dialog::add_action([] {
-      if(0); 
-      #if CAP_ARCM
-      else if(archimedean)
-        pushScreen(arcm::show);
-      #endif
-      #if CAP_CRYSTAL
-      else if(cryst)
-        pushScreen(crystal::show);
-      #endif
-      #if MAXMDIM == 4
-      else if(euclid && WDIM == 3)
-        euclid3::prepare_torus3(),
-        pushScreen(euclid3::show_torus3);
-      else if(nil)
-        nilv::prepare_niltorus3(),
-        pushScreen(nilv::show_niltorus3);
-      else if(asonov::in())
-        asonov::prepare_config(),
-        pushScreen(asonov::show_config);
-      else if(prod) {
-        static int s;
-        s = product::csteps;
-        dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"),
-              XLAT("Set to 0 to make it non-periodic."));
-        dialog::bound_low(0);
-        dialog::reaction_final = [] {
-          product::csteps = s;
-          if(product::csteps == cgi.steps) return;
-          hybrid::reconfigure();
-          start_game();
-          println(hlog, "csteps = ", cgi.steps);
-          };
-        }
-      #endif      
-      else if(euwrap) 
-        prepare_torusconfig(),
-        pushScreen(showTorusConfig);
-      #if CAP_FIELD
-      else if(geometry == gFieldQuotient) 
-        pushScreen(showQuotientConfig);
-      #endif
-      });
-    }
-  else dialog::addBreak(100);
-  
-  dialog::addBreak(50);
-  
+  dialog::addBreak(100);
   dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
   dialog::add_action_push(ge_land_selection);
   
@@ -917,7 +1012,6 @@ EX void showEuclideanMenu() {
     }
   else dialog::addBreak(200);
   
-  dialog::addSelItem(XLAT("geometry"), geometry_name(), 0);    
   dialog::display();
   }
 
