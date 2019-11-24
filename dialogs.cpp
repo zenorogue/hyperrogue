@@ -119,6 +119,8 @@ EX namespace dialog {
   EX vector<item> items;
   
   EX item& lastItem() { return items[items.size() - 1]; }
+
+  EX item& titleItem() { return items[0]; }
   
   EX map<int, reaction_t> key_actions;
   
@@ -421,7 +423,9 @@ EX namespace dialog {
       int mid = (top + tothei) / 2;
       I.position = mid;
       if(I.type == diTitle || I.type == diInfo) {
+        bool xthis = (mousey >= top && mousey < tothei && I.key);
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
+        if(xthis) getcstat = I.key;
         }
       else if(I.type == diItem || I.type == diBigItem) {
         bool xthis = (mousey >= top && mousey < tothei);
