@@ -435,7 +435,7 @@ void ge_select_filter() {
   }
 
 void set_default_filter() {
-  current_filter = &gf_hyperbolic; 
+  current_filter = hyperbolic ? &gf_hyperbolic : euclid ? &gf_euclidean : sphere ? &gf_spherical : &gf_other; 
   for(auto f: available_filters) if(f->test()) current_filter = f;
   }
 
@@ -514,6 +514,7 @@ void ge_select_tiling() {
   for(int i=0; i<isize(ginf); i++) {
     eGeometry g = eGeometry(i);
     if(among(g, gProduct, gRotSpace)) hybrid::configure(g);
+    bool orig_el = elliptic;
     bool on = geometry == g;
     bool in_2d = WDIM == 2;
     dynamicval<eGeometry> cg(geometry, g);
@@ -523,10 +524,15 @@ void ge_select_tiling() {
     if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     if(!current_filter->test()) continue;
+    if(orig_el) {
+      for(int j=0; j<isize(ginf); j++) 
+        if(ginf[j].tiling_name == ginf[i].tiling_name)
+          geometry = g = eGeometry(j);
+      }
     dialog::addBoolItem(XLAT(
       (geometry == gProduct && in_2d) ? XLAT("current geometry x E") : 
       (geometry == gRotSpace && in_2d) ? XLAT("space of rotations in current geometry") : 
-      ginf[i].menu_displayed_name), on, letter++);
+      ginf[g].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action([g] { set_or_configure_geometry(g); });
     }
