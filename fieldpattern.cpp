@@ -852,6 +852,7 @@ EX vector<fgeomextra> fgeomextras = {
   fgeomextra(g45, 1),
   fgeomextra(g46, 5),
   fgeomextra(g47, 1),
+  fgeomextra(gSchmutzM3, 0),
 /*  fgeomextra(gSphere, 0),
   fgeomextra(gSmallSphere, 0), -> does not find the prime
   fgeomextra(gEuclid, 0),
