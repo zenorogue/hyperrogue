@@ -559,16 +559,20 @@ EX string current_proj_name() {
     return XLAT("general perspective");
   }
 
+EX string dim_name() {
+  return " (" + its(WDIM) + "D)";
+  }
+
 EX string geometry_name() {
   switch(ginf[geometry].cclass) {
     case gcHyperbolic:
-      return XLAT("hyperbolic");
+      return XLAT("hyperbolic") + dim_name();
 
     case gcEuclid: 
-      return XLAT("flat");
+      return XLAT("flat") + dim_name();
     
     case gcSphere:
-      return XLAT("spherical");
+      return XLAT("spherical") + dim_name();
 
     case gcSolNIH:
 #if CAP_SOLV
