@@ -385,33 +385,6 @@ void ge_land_selection() {
     };
   }
 
-vector<eGeometry> tilinglist = {
-  gTinySphere, gSmallSphere, gSphere, gEuclid, gNormal, gOctagon,
-  gOctahedron, gEuclidSquare, g45, g46, g47,
-  gArchimedean, gBinary4, gBinaryTiling, gKiteDart2
-  };
-
-vector<eGeometry> quotientlist = {
-  gElliptic,
-  gZebraQuotient, gFieldQuotient, gTorus,
-  gSmallElliptic, 
-  gKleinQuartic, gBolza, gBolza2, gMinimal, 
-  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal  
-  };
-
-vector<eGeometry> list3d = {
-  gBinary3, gHoroTris, gHoroRec, gHoroHex,
-  gSpace534, gSpace435, 
-  gField534, gField435,
-  gCubeTiling, gRhombic3, gBitrunc3, 
-  gCell120, gECell120,
-  gCell600, gECell600,
-  gCell24, gECell24,
-  gCell16, gECell16,
-  gCell8, gECell8,
-  gCell5, gKiteDart3, gSol, gNil, gProduct, gRotSpace
-  };
-
 bool select_dims, select_quotient;
 
 void ge_select_tiling() {
