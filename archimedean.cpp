@@ -1199,11 +1199,21 @@ EX void show() {
         }
 #endif
       if(!valid) continue;
+      if(current_filter == &gf_hyperbolic && ps.get_geometry().kind != gcHyperbolic) continue;
+      if(current_filter == &gf_spherical && ps.get_geometry().kind != gcSphere) continue;
+      if(current_filter == &gf_euclidean && ps.get_geometry().kind != gcEuclid) continue;
       dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°" + suffix, 'a' + shown);
       dialog::lastItem().color = ps.coloring;
       dialog::add_action([&] () { enable(ps); });
       shown++;
       }
+    dialog::addSelItem(XLAT("current filter"), current_filter ? XLAT(current_filter->name) : XLAT("none"), 'x');
+    dialog::add_action([] {
+      if(current_filter == &gf_hyperbolic) current_filter = &gf_euclidean;
+      else if(current_filter == &gf_euclidean) current_filter = &gf_spherical;
+      else if(current_filter == &gf_spherical) current_filter = nullptr;
+      else current_filter = &gf_hyperbolic;
+      });
     dialog::addItem(XLAT("next page"), '-');
     if(shown == 0) nextpos = 0;
     dialog::add_action([nextpos] () {
