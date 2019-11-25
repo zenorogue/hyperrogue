@@ -1245,8 +1245,7 @@ EX namespace product {
         if(z == 1) cwall_mask ^= (1<<c->type);
         cell *c1 = hybrid::get_at(c, actual_view_level+z);
         setdist(c1, 7, NULL);
-        cw.at = c1;
-        drawcell(cw, V * mscale(Id, cgi.plevel * (z+actual_view_level - z0))); 
+        drawcell(c1, V * mscale(Id, cgi.plevel * (z+actual_view_level - z0))); 
         }
       });
     }

@@ -5,7 +5,7 @@ namespace hr {
 int coastvalEdge(cell *c);
 
 struct celldrawer {
-  cellwalker cw;
+  cell *c;
   transmatrix V;
 
   color_t fcol;
@@ -64,15 +64,13 @@ struct celldrawer {
   void do_viewdist();
   };
 
-inline void drawcell(const cellwalker& cw, const transmatrix& V) {
+inline void drawcell(cell *c, const transmatrix& V) {
   celldrawer dd;
-  dd.cw = cw;
+  dd.c = c;
   dd.V = V;
   dd.draw();
   }
 #endif
-
-#define c (cw.at)
 
 static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
@@ -1706,7 +1704,7 @@ void celldrawer::bookkeeping() {
         if(playerpos(i) == c) {
           playerV = V * ddspin(c, multi::player[i].spin, 0);
           if(multi::player[i].mirrored) playerV = playerV * Mirror;
-          if(multi::player[i].mirrored == cw.mirrored)
+          if(orig)
             multi::whereis[i] = playerV;
           }
       }
@@ -2184,7 +2182,7 @@ void celldrawer::draw_monster_full() {
   #if CAP_SHAPES
   int q = isize(ptds);
   #endif
-  bool m = drawMonster(V, c->type, c, moncol, cw.mirrored, asciicol);
+  bool m = drawMonster(V, c->type, c, moncol, asciicol);
   if(m) error = true;
   if(m || c->monst) onradar = false; 
   #if CAP_SHAPES
@@ -2362,7 +2360,8 @@ void celldrawer::draw_gravity_particles() {
   }
 
 void celldrawer::draw() {
-  if(hybrid::pmap) { product::drawcell_stack(cw, V); return; }
+
+  if(hybrid::pmap) { product::drawcell_stack(c, V); return; }
 
   cells_drawn++;
 
@@ -2396,16 +2395,15 @@ void celldrawer::draw() {
   
     if(inmirror(c)) {
       if(inmirrorcount >= 10) return;
-      cellwalker cw2 = cw;
-      cw2.spin = 0;
-      cw2 = mirror::reflect(cw);
+      cellwalker cw(c);
+      cellwalker cw2 = mirror::reflect(cw);
       int cmc = (cw2.mirrored == cw.mirrored) ? 2 : 1;
       inmirrorcount += cmc;
       draw_grid();
       if(cw2.mirrored != cw.mirrored) V = V * Mirror;
       if(cw2.spin) V = V * spin(2*M_PI*cw2.spin/cw2.at->type);
       cw2.spin = 0;
-      drawcell(cw2, V);
+      drawcell(cw2.at, V);
       inmirrorcount -= cmc;
       return;
       }                  

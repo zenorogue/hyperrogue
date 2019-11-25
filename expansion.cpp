@@ -643,8 +643,6 @@ color_t distribute_color(int id) {
 void celldrawer::do_viewdist() {
   if(behindsphere(V)) return;
   
-  cell *c = cw.at;
-
   int cd = (use_color_codes || number_coding == ncDistance || number_coding == ncDebug) ? curr_dist(c) : 0;
   
   if(use_color_codes) {

@@ -133,8 +133,6 @@ void celldrawer::draw_ceiling() {
 
   if(pmodel != mdPerspective || sphere) return;
   
-  cell *c = cw.at;
-  
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {

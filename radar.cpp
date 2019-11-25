@@ -67,7 +67,6 @@ EX void addradar(const hyperpoint h1, const hyperpoint h2, color_t col) {
   }
 
 void celldrawer::drawcell_in_radar() {
-  cell *c = cw.at;
   #if CAP_SHMUP
   if(shmup::on) {
     pair<shmup::mit, shmup::mit> p = 
@@ -85,7 +84,6 @@ void celldrawer::drawcell_in_radar() {
   }
 
 void celldrawer::radar_grid() {
-  cell *c = cw.at;
   for(int t=0; t<c->type; t++)
     if(c->move(t) && c->move(t) < c)
       addradar(V*get_corner_position(c, t%c->type), V*get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)));

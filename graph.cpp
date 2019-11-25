@@ -2321,7 +2321,7 @@ void drawWormSegments() {
 
 EX bool dont_face_pc = false;
 
-EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, bool mirrored, color_t asciicol) {
+EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, color_t asciicol) {
   #if CAP_SHAPES
 
   bool darkhistory = history::includeHistory && history::inkillhistory.count(c);
@@ -2342,6 +2342,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, boo
   eMonster m = c->monst;
   
   bool half_elliptic = elliptic && GDIM == 3 && WDIM == 2;
+  bool mirrored = det(Vparam) > 0;
   
   if(!m) ;
   
@@ -3805,7 +3806,6 @@ EX void fallingMonsterAnimation(cell *c, eMonster m, int id IS(multi::cpid)) {
   }
 
 void celldrawer::draw_fallanims() {
-  cell*& c = cw.at;
   poly_outline = OUTLINE_NONE;
   if(fallanims.count(c)) {
      int q = isize(ptds);
@@ -3825,7 +3825,7 @@ void celldrawer::draw_fallanims() {
            celldrawer ddalt;
            eWall w = c->wall; int p = c->wparam;
            c->wall = fa.walltype; c->wparam = fa.m;
-           ddalt.cw.at = c;
+           ddalt.c = c;
            ddalt.setcolors();
            int starcol = c->wall == waVinePlant ? 0x60C000 : ddalt.wcol;
            c->wall = w; c->wparam = p;

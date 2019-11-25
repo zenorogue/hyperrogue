@@ -2875,7 +2875,6 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
 
 bool celldrawer::draw_shmup_monster() {
   using namespace shmup;
-  auto& c = cw.at;
   #if CAP_SHAPES
 
   pair<mit, mit> p = 

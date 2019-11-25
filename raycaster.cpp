@@ -906,7 +906,7 @@ EX void cast() {
       connections[u][1] = code[1];
       if(isWall3(c1)) {
         celldrawer dd;
-        dd.cw.at = c1;
+        dd.c = c1;
         dd.setcolors();
         transmatrix Vf;
         dd.set_land_floor(Vf);

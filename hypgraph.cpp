@@ -1138,6 +1138,46 @@ vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 
 bool in_multi = false;
 
+bool drawcell_subs(cell *c, transmatrix V) {
+  
+  #if CAP_GP    
+  if(GOLDBERG) {
+    return gp::drawrec(c, V);
+    }
+  #endif
+  
+  bool draw = false;
+
+  #if CAP_IRR    
+  if(IRREGULAR) {
+    auto& hi = irr::periodmap[c->master];
+    auto& vc = irr::cells_of_heptagon[hi.base.at];
+    for(int i=0; i<isize(vc); i++) {
+      cell *c = hi.subcells[i];
+      transmatrix V1 = V * irr::cells[vc[i]].pusher;
+      if(do_draw(c, V1))
+        draw = true,
+        drawcell(hi.subcells[i], V * irr::cells[vc[i]].pusher);
+      }
+    return draw;
+    }
+  #endif
+  
+  if(do_draw(c, V))
+    drawcell(c, V);
+
+  if(BITRUNCATED) forCellIdEx(c1, d, c) {
+    if(c->c.spin(d) == 0) {
+      transmatrix V2 = V * currentmap->adj(c, d);
+      if(do_draw(c1, V2))
+        draw = true,
+        drawcell(c1, V2);
+      }
+    }
+
+  return draw;
+  }
+
 void hrmap_standard::draw() {
   if(sphere && pmodel == mdSpiral && !in_multi) {
     in_multi = true;
@@ -1181,49 +1221,7 @@ void hrmap_standard::draw() {
     transmatrix V10;
     const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
     
-    bool draw = false;
-    
-    if(0) ;
-    
-    #if CAP_GP    
-    else if(GOLDBERG) {
-      draw = gp::drawrec(c, actualV(hs, V1));
-      }
-    #endif
-    
-    #if CAP_IRR    
-    else if(IRREGULAR) {
-      auto& hi = irr::periodmap[hs.at];
-      transmatrix V0 = actualV(hs, V1);
-      auto& vc = irr::cells_of_heptagon[hi.base.at];
-      for(int i=0; i<isize(vc); i++) {
-        cell *c = hi.subcells[i];
-        transmatrix V1 = V0 * irr::cells[vc[i]].pusher;
-        if(do_draw(c, V1))
-          draw = true,
-          drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher);
-        }
-      }
-    #endif
-    
-    else {
-      if(do_draw(c, V1)) {
-        transmatrix V2 = actualV(hs, V1);
-        drawcell(cellwalker(c, 0, hs.mirrored), V2);
-        draw = true;
-        }
-  
-      if(BITRUNCATED) for(int d=0; d<S7; d++) {
-        int ds = hs.at->c.fix(hs.spin + d);
-        // createMov(c, ds);
-        if(c->move(ds) && c->c.spin(ds) == 0) {
-          transmatrix V2 = V1 * cgi.hexmove[d];
-          if(do_draw(c->move(ds), V2))
-            draw = true,
-            drawcell(cellwalker(c->move(ds), 0, hs.mirrored ^ c->c.mirror(ds)), V2);
-          }
-        }
-      }
+    bool draw = drawcell_subs(c, actualV(hs, V1));
     
     if(sphere) draw = true;
   
