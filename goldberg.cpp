@@ -529,11 +529,13 @@ EX namespace gp {
     }
   
   transmatrix dir_matrix(int i) {
-    cell cc; cc.type = S7;
+    auto ddspin = [] (int d) -> transmatrix { 
+      return spin(M_PI - d * 2 * M_PI / S7 - cgi.hexshift);
+      };
     return spin(-cgi.gpdata->alpha) * build_matrix(
       C0, 
-      ddspin(&cc, i) * xpush0(cgi.tessf),
-      ddspin(&cc, i+1) * xpush0(cgi.tessf),
+      ddspin(i) * xpush0(cgi.tessf),
+      ddspin(i+1) * xpush0(cgi.tessf),
       C03
       );
     }
