@@ -82,6 +82,7 @@ EX namespace gp {
     signed char rdir;
     signed char mindir;
     loc start;
+    transmatrix adjm;
     };
 
   EX int fixg6(int x) { return (x + MODFIXER) % SG6; }
@@ -197,6 +198,8 @@ EX namespace gp {
       }
     return false;
     }
+  
+  EX bool do_adjm;
 
   void conn1(loc at, int dir, int dir1) {
     auto& wc = get_mapping(at);
@@ -209,11 +212,13 @@ EX namespace gp {
       if(peek(wcw)) {
         DEBB0(DF_GP, ("(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
+        if(do_adjm) wc1.adjm = wc.adjm * gp_adj[{wcw.at, wcw.spin}];
         }
       else {
         peek(wcw) = newCell(SG6, wc.cw.at->master);
         wcw.at->c.setspin(wcw.spin, 0, false);
         set_localwalk(wc1, dir1, wcw + wstep);
+        if(do_adjm) wc1.adjm = wc.adjm;
         spawn++;
         DEBB0(DF_GP, ("(created) "); )
         }
@@ -237,6 +242,10 @@ EX namespace gp {
         exit(1);
         }
       }
+    if(do_adjm) {
+      gp_adj[{wcw.at, wcw.spin}] = inverse(wc.adjm) * wc1.adjm;
+      gp_adj[{wcw1.at, wcw1.spin}] = inverse(wc1.adjm) * wc.adjm;
+      }
     }
 
   void conn(loc at, int dir) {
@@ -244,6 +253,8 @@ EX namespace gp {
     conn1(at + eudir(dir), fixg6(dir+SG3), fixg6(dir));
     }
   
+  EX map<pair<cell*, int>, transmatrix> gp_adj;
+
   goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
     auto& ac0 = get_mapping(at);
     ac0.cw = cellwalker(hs.at->c7, hs.spin, hs.mirrored);
@@ -298,6 +309,18 @@ EX namespace gp {
     ac2.mindir = S3 == 3 ? 1 : -2;
     if(S3 == 4) {
       set_heptspin(vc[2], hs + wstep - 1 + wstep + 1).mindir = -3;
+      }
+
+    do_adjm = quotient;
+    if(do_adjm) {
+      auto m = (hrmap_standard*)currentmap;
+      get_mapping(vc[0]).adjm = Id;
+      get_mapping(vc[1]).adjm = m->adj(c->master, d);
+      get_mapping(vc[S3-1]).adjm = m->adj(c->master, (d+1)%c->master->type);
+      if(S3 == 4) {
+        heptspin hs1 = hs + wstep - 1;
+        get_mapping(vc[2]).adjm = m->adj(c->master, d) * m->adj(hs1.at, hs1.spin);
+        }
       }
     
     if(S3 == 4 && param == loc(1,1)) {

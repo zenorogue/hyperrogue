@@ -1526,6 +1526,7 @@ addHook(hooks_gamedata, 0, [] (gamedata* gd) {
   gd->store(last_gravity_state);
   gd->store(shpos);
   gd->store(cshpos);
+  gd->store(gp::do_adjm);
   }) +
 addHook(hooks_removecells, 0, [] () {
   eliminate_if(crush_next, is_cell_removed);

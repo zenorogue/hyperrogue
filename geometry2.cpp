@@ -337,13 +337,27 @@ EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin
 EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
     
 double hrmap_standard::spacedist(cell *c, int i) {
-  if(NONSTDVAR) return hrmap::spacedist(c, i);
+  if(NONSTDVAR || WDIM == 3) return hrmap::spacedist(c, i);
   if(!BITRUNCATED) return cgi.tessf;
   if(c->type == S6 && (i&1)) return cgi.hexhexdist;
   return cgi.crossf;
   }
 
+int neighborId(heptagon *h1, heptagon *h2) {
+  for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return i;
+  return -1;
+  }
+
 transmatrix hrmap_standard::adj(cell *c, int i) {
+  if(GOLDBERG && gp::do_adjm) {
+    transmatrix T = master_relative(c, true);
+    transmatrix U = master_relative(c->cmove(i), false);
+    if(gp::gp_adj.count({c,i})) {
+      return T * gp::gp_adj[{c, i}] * U;
+      }
+    else
+      println(hlog, "gpadj not found");
+    }
   if(NONSTDVAR) return calc_relative_matrix(c->cmove(i), c, C0);
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);

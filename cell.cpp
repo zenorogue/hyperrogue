@@ -1168,6 +1168,7 @@ EX void clearCellMemory() {
   dists_computed.clear();
   keep_distances_from.clear(); perma_distances = 0;
   pd_from = NULL;
+  gp::gp_adj.clear();
   }
 
 auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
