@@ -514,12 +514,11 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
   if(GOLDBERG) {
     cellwalker cw(c, i);
     cw += wstep;
+    if(!cw.mirrored) cw.spin += (which?-1:2);
+    else cw.spin += (which?2:-1);
     transmatrix cwm = currentmap->adj(c, i);
     auto li1 = gp::get_local_info(cw.at);
-    if(which == 0)
-      return cwm * get_corner_position(li1, (cw+2).spin);
-    if(which == 1)
-      return cwm * get_corner_position(li1, (cw-1).spin);          
+    return cwm * get_corner_position(li1, cw.spin);
     }
   #endif
   #if CAP_IRR
@@ -566,7 +565,11 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     }
   #endif
   
-  return currentmap->adj(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
+  cellwalker cw(c, i);
+  cw += wstep;
+  if(!cw.mirrored) cw.spin += (which?-1:2);
+  else cw.spin += (which?2:-1);
+  return currentmap->adj(c, i) * get_corner_position(c->move(i), cw.spin);
   }
 
 EX hyperpoint midcorner(cell *c, int i, ld v) {
