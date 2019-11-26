@@ -13,7 +13,28 @@ namespace hr {
 EX namespace gp {
 
   #if HDR
-  typedef pair<int, int> loc;
+  struct loc : pair<int, int> {
+    loc() {}
+
+    loc(int x, int y) : pair<int,int> (x,y) {}
+
+    loc operator+(loc e2) {
+      return loc(first+e2.first, second+e2.second);
+      }
+    
+    loc operator-(loc e2) {
+      return loc(first-e2.first, second-e2.second);
+      }
+    
+    loc operator*(loc e2) {
+      return loc(first*e2.first-second*e2.second, 
+        first*e2.second + e2.first*second + (S3 == 3 ? second*e2.second : 0));
+      }
+  
+    loc operator*(int i) {
+      return loc(first*i, second*i);
+      }  
+    };
 
   struct local_info {
     int last_dir;
@@ -25,42 +46,25 @@ EX namespace gp {
 
   EX local_info draw_li;
   
-  EX loc operator+(loc e1, loc e2) {
-    return make_pair(e1.first+e2.first, e1.second+e2.second);
-    }
-  
-  EX loc operator-(loc e1, loc e2) {
-    return make_pair(e1.first-e2.first, e1.second-e2.second);
-    }
-  
-  EX loc operator*(loc e1, loc e2) {
-    return make_pair(e1.first*e2.first-e1.second*e2.second, 
-      e1.first*e2.second + e2.first*e1.second + (S3 == 3 ? e1.second*e2.second : 0));
-    }
-
-  loc operator*(loc e1, int i) {
-    return loc(e1.first*i, e1.second*i);
-    }
-  
   EX loc eudir(int d) {
     if(S3 == 3) {
       d %= 6; if (d < 0) d += 6;
       switch(d) {
-        case 0: return make_pair(1, 0);
-        case 1: return make_pair(0, 1);
-        case 2: return make_pair(-1, 1);
-        case 3: return make_pair(-1, 0);
-        case 4: return make_pair(0, -1);
-        case 5: return make_pair(1, -1);
-        default: return make_pair(0, 0);
+        case 0: return loc(1, 0);
+        case 1: return loc(0, 1);
+        case 2: return loc(-1, 1);
+        case 3: return loc(-1, 0);
+        case 4: return loc(0, -1);
+        case 5: return loc(1, -1);
+        default: return loc(0, 0);
         }
       }
     else switch(d&3) {
-      case 0: return make_pair(1, 0);
-      case 1: return make_pair(0, 1);
-      case 2: return make_pair(-1, 0);
-      case 3: return make_pair(0, -1);
-      default: return make_pair(0, 0);
+      case 0: return loc(1, 0);
+      case 1: return loc(0, 1);
+      case 2: return loc(-1, 0);
+      case 3: return loc(0, -1);
+      default: return loc(0, 0);
       }
     }
   

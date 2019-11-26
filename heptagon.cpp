@@ -145,7 +145,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       int dm = hs.at->distance;
       hs += -1; hs += wstep;
       int d0 = hs.at->distance;
-      h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(-1,1)));
+      h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(-1,1));
       }
     else if(S3 == 4 && GOLDBERG && h->c.spin(0) == S7-1 && among(h->move(0)->c.spin(0), S7-2, S7-3) && h->move(0)->move(0)->s != hsOrigin) {
       heptspin hs(h, 0);
@@ -155,7 +155,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       int dm = hs.at->distance;
       hs += 1; hs += wstep;
       int d1 = hs.at->distance;
-      h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
+      h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(1,1));
       }
     else if(S3 == 4 && GOLDBERG && h->c.spin(0) >= 2 && h->c.spin(0) <= S7-2) {
       h->distance = parent->distance + gp::dist_2();
@@ -167,7 +167,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         int d0 = parent->distance;
         int d1 = createStep(parent, S7-1)->distance;
         int dm = createStep(parent, 0)->distance;
-        h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
+        h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(1,1));
         } else
       #endif
       h->distance = parent->distance + gp::dist_1();
@@ -178,7 +178,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         int d0 = parent->distance;
         int d1 = createStep(parent, S7-2)->distance;
         int dm = createStep(parent, S7-1)->distance;
-        h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
+        h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(1,1));
         } else
       #endif
       h->distance = createStep(h->move(0), (h->c.spin(0)+2)%S7)->distance + gp::dist_3();
