@@ -237,9 +237,9 @@ EX cell *createMov(cell *c, int d) {
     int alt4 = alt3+1;
         
     for(int u=0; u<S6; u+=2) {
-      if(hs.mirrored && geometry == gSmallElliptic) hs+=1;
+      if(hs.mirrored && (S7%2 == 0)) hs++;
       hs.at->c7->c.connect(hs.spin, n, u, hs.mirrored);
-      if(hs.mirrored && geometry == gSmallElliptic) hs+=-1;
+      if(hs.mirrored && (S7%2 == 0)) hs--;
       hs = hs + alt3 + wstep - alt4;
       }
     extern void verifycell(cell *c);
