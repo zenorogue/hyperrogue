@@ -159,7 +159,7 @@ struct hrmap_spherical : hrmap_standard {
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
     }
   
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
       printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
       #if CAP_GP

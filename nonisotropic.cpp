@@ -372,11 +372,11 @@ EX namespace solnihv {
       }
       }
 
-    transmatrix adj(cell *c, int d) override {
-      c->cmove(d); return adjmatrix(d, c->c.spin(d));
+    transmatrix adj(heptagon *h, int d) override {
+      h->cmove(d); return adjmatrix(d, h->c.spin(d));
       }
     
-    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
+    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
       for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c.spin(i));
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
@@ -392,10 +392,10 @@ EX namespace solnihv {
         default: throw "not nihsolv";
         }
       
-      while(h1->distance > h2->distance) front = front * adj(h1->c7, down), h1 = h1->cmove(down);
-      while(h1->distance < h2->distance) back = iadj(h2->c7, down) * back, h2 = h2->cmove(down);
-      while(coords[h1].first != coords[h2].first) front = front * adj(h1->c7, down), back = iadj(h2->c7, down) * back, h1 = h1->cmove(down), h2 = h2->cmove(down);
-      while(coords[h1].second != coords[h2].second) front = front * adj(h1->c7, up), back = iadj(h2->c7, up) * back, h1 = h1->cmove(up), h2 = h2->cmove(up);
+      while(h1->distance > h2->distance) front = front * adj(h1, down), h1 = h1->cmove(down);
+      while(h1->distance < h2->distance) back = iadj(h2, down) * back, h2 = h2->cmove(down);
+      while(coords[h1].first != coords[h2].first) front = front * adj(h1, down), back = iadj(h2, down) * back, h1 = h1->cmove(down), h2 = h2->cmove(down);
+      while(coords[h1].second != coords[h2].second) front = front * adj(h1, up), back = iadj(h2, up) * back, h1 = h1->cmove(up), h2 = h2->cmove(up);
       return front * back;
       }
 
@@ -850,9 +850,9 @@ EX namespace nilv {
       return child;
       }
 
-    transmatrix adj(cell *c, int i) override { return adjmatrix(i); }
+    transmatrix adj(heptagon *h, int i) override { return adjmatrix(i); }
   
-    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
+    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
       for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
       auto p = coords[h1].inverse() * coords[h2];
       for(int a=0; a<3; a++) p[a] = szgmod(p[a], nilperiod[a]);     
@@ -1206,8 +1206,8 @@ EX namespace product {
   int z0;
 
   struct hrmap_product : hybrid::hrmap_hybrid {
-    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, point_hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
+    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
       }
   
     void draw() override {
@@ -1614,7 +1614,7 @@ EX namespace rots {
       return M = spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
       }
     
-    virtual transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) override { 
+    virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override { 
       if(c1 == c2) return Id;
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse(gmatrix0[c1]) * gmatrix0[c2];

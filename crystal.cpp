@@ -597,9 +597,9 @@ struct hrmap_crystal : hrmap_standard {
     return xpush(999);
     }
 
-  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
-    if(!crystal3()) return hrmap::relative_matrix(h2, h1);
-    return relative_matrix(h2->c7, h1->c7, C0);
+  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
+    if(!crystal3()) return hrmap::relative_matrix(h2, h1, hint);
+    return relative_matrix(h2->c7, h1->c7, hint);
     }
   #endif
   };

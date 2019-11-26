@@ -215,7 +215,6 @@ EX namespace reg3 {
     vector<vector<transmatrix>> tmatrices;    
 
     transmatrix adj(heptagon *h, int d) { return tmatrices[h->fieldval][d]; }
-    transmatrix adj(cell *c, int d) override { return adj(c->master, d); }  
     };
 
   int encode_coord(const crystal::coord& co) {
@@ -575,12 +574,12 @@ EX namespace reg3 {
         }
       }
 
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(h1 == h2) return Id;
       int d = hr::celldistance(h2->c7, h1->c7);
 
       for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
-        return adj(h1, a) * relative_matrix(h2, h1->move(a));
+        return adj(h1, a) * relative_matrix(h2, h1->move(a), hint);
       
       println(hlog, "error in hrmap_field3:::relative_matrix");
       return Id;
@@ -663,7 +662,7 @@ EX namespace reg3 {
       
       celllister cl(origin->c7, 4, 100000, NULL);
       for(cell *c: cl.lst) {
-        hyperpoint h = tC0(relative_matrix(c->master, origin));
+        hyperpoint h = tC0(relative_matrix(c->master, origin, C0));
         close_distances[bucketer(h)] = cl.getdist(c);
         }
       }
@@ -875,19 +874,17 @@ EX namespace reg3 {
       if(quotient_map) return quotient_map->adj(h, d);
       else
       #endif
-      return relative_matrix(h->cmove(d), h);
+      return relative_matrix(h->cmove(d), h, C0);
       }
      
-    transmatrix adj(cell *c, int d) override { return adj(c->master, d); }
-    
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       auto p1 = reg_gmatrix[h1];
       auto p2 = reg_gmatrix[h2];
       transmatrix T = Id;
       if(hyperbolic) { 
         dynamicval<eGeometry> g(geometry, gBinary3);
         dynamicval<hrmap*> cm(currentmap, binary_map);
-        T = binary_map->relative_matrix(p2.first, p1.first);
+        T = binary_map->relative_matrix(p2.first, p1.first, hint);
         }
       T = inverse(p1.second) * T * p2.second;
       if(elliptic && T[LDIM][LDIM] < 0) T = centralsym * T;
@@ -915,7 +912,7 @@ EX int celldistance(cell *c1, cell *c2) {
 
   auto r = regmap();
 
-  hyperpoint h = tC0(r->relative_matrix(c1->master, c2->master));
+  hyperpoint h = tC0(r->relative_matrix(c1->master, c2->master, C0));
   int b = bucketer(h);
   if(close_distances.count(b)) return close_distances[b];
 
@@ -926,7 +923,7 @@ EX int celldistance(cell *c1, cell *c2) {
 EX bool pseudohept(cell *c) {
   auto m = regmap();
   if(sphere) {
-    hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin));
+    hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin, C0));
     if(S7 == 12) {
       hyperpoint h1 = cspin(0, 1, atan2(16, 69) + M_PI/4) * h;
       for(int i=0; i<4; i++) if(abs(abs(h1[i]) - .5) > .01) return false;

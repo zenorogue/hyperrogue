@@ -2731,7 +2731,7 @@ EX namespace sword {
       cell *best = NULL;
       ld bdist = HUGE_VAL;
       for(int i=0; i<S7; i++) {
-        ld dist = hdist(sd.T * xpush0(rev?-0.1:0.1), tC0(currentmap->relative_matrix(c->move(i)->master, c->master)));
+        ld dist = hdist(sd.T * xpush0(rev?-0.1:0.1), tC0(currentmap->relative_matrix(c->move(i)->master, c->master, C0)));
         if(dist < bdist) bdist = dist, best = c->move(i);
         }
       return best;
@@ -2776,7 +2776,7 @@ EX namespace sword {
         d.angle = ((s2*sword_angles/t2 - s1*sword_angles/t1) + sword_angles/2 + d.angle) % sword_angles;
       }
     else {
-      transmatrix T = currentmap->relative_matrix(c1->master, c2->master);
+      transmatrix T = currentmap->relative_matrix(c1->master, c2->master, C0);
       T = gpushxto0(tC0(T)) * T;
       d.T = T * d.T;
       fixmatrix(d.T);

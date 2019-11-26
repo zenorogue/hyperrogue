@@ -27,15 +27,17 @@ struct hrmap {
     printf("create_step called unexpectedly\n"); exit(1);
     return NULL;
     }
-  virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
+  virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
     printf("relative_matrix called unexpectedly\n"); 
     return Id;
     }
-  virtual struct transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& point_hint) {
-    return relative_matrix(c2->master, c1->master);
+  virtual struct transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+    return relative_matrix(c2->master, c1->master, hint);
     }
-  virtual struct transmatrix adj(cell *c, int i);
+  virtual struct transmatrix adj(cell *c, int i) { return adj(c->master, i); }
+  virtual struct transmatrix adj(heptagon *h, int i);
   struct transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
+  transmatrix iadj(heptagon *h, int d) { return adj(h->cmove(d), h->c.spin(d)); }
   virtual void draw() {
     printf("undrawable\n");
     }
@@ -71,11 +73,11 @@ struct hrmap {
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient */
 struct hrmap_standard : hrmap {
   void draw() override;
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override;
+  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override;
   heptagon *create_step(heptagon *h, int direction) override;
   transmatrix adj(cell *c, int d) override;
-  transmatrix adj(heptagon *h, int d);
-  transmatrix iadj(heptagon *h, int d) { return adj(h->cmove(d), h->c.spin(d)); }
+  transmatrix adj(heptagon *h, int d) override;
   ld spin_angle(cell *c, int d) override;
   double spacedist(cell *c, int i) override;
   };
@@ -98,7 +100,7 @@ struct hrmap_hyperbolic : hrmap_standard {
   };
 #endif
 
-transmatrix hrmap::adj(cell *c, int i) { return calc_relative_matrix(c->cmove(i), c, C0); }
+transmatrix hrmap::adj(heptagon *h, int i) { return relative_matrix(h->cmove(i), h, C0); }
 
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;

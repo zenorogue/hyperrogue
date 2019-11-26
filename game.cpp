@@ -7660,7 +7660,7 @@ EX vector<cell*> adj_minefield_cells(cell *c) {
       cell *c1 = cl.lst[i];
       bool shares = false;
       if(c != c1) {
-        transmatrix T = currentmap->relative_matrix(c1->master, c->master);
+        transmatrix T = currentmap->relative_matrix(c1->master, c->master, C0);
         for(hyperpoint h: vertices) for(hyperpoint h2: vertices)
           if(hdist(h, T * h2) < 1e-6) shares = true;
         if(shares) res.push_back(c1);

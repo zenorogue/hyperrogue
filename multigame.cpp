@@ -125,7 +125,7 @@ EX namespace dual {
     h = hpxy3(h[0]/10, h[1]/10, h[2]/10);
     ld b = HUGE_VAL;
     for(int i=0; i<S7; i++) {
-      hyperpoint checked = tC0(currentmap->relative_matrix(cwt.at->cmove(i)->master, cwt.at->master));
+      hyperpoint checked = tC0(currentmap->relative_matrix(cwt.at->cmove(i)->master, cwt.at->master, C0));
       ld dist = hdist(checked, h);
       if(dist < b) { b = dist; d = i; }
       }
@@ -190,7 +190,7 @@ EX namespace dual {
       return ok;
       }
     
-    which_dir = inverse(sword::dir[0].T) * tC0(currentmap->relative_matrix((cwt+d).cpeek()->master, cwt.at->master));
+    which_dir = inverse(sword::dir[0].T) * tC0(currentmap->relative_matrix((cwt+d).cpeek()->master, cwt.at->master, C0));
     
     bool lms[2][5];
     eLastmovetype lmt[2][5];

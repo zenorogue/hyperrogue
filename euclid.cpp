@@ -709,8 +709,10 @@ EX namespace euclid3 {
       return eupush3(v[0], v[1], v[2]);
       }
     
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(twisted) {
+        if(h1 == h2) return Id;
+        for(int s=0; s<S7; s++) if(h2 == h1->move(s)) return adj(h1, s);
         coord c1 = ispacemap[h1];
         coord c2 = ispacemap[h2];
         transmatrix T = warppush(c2 - c1);

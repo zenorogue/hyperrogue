@@ -434,11 +434,6 @@ EX namespace binary {
         }
       }
 
-    // hrmap_standard overrides hrmap's default, override it back
-    virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) override {
-      return relative_matrix(c2->master, c1->master);
-      }
-    
     int updir_at(heptagon *h) {
       if(geometry != gBinaryTiling) return updir();
       else if(type_of(h) == 6) return bd_down;
@@ -447,7 +442,7 @@ EX namespace binary {
       else throw "unknown updir";
       }
 
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1) override {
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
         return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
       transmatrix gm = Id, where = Id;
@@ -517,7 +512,7 @@ EX namespace binary {
       return -(d+2)*M_PI/4;
       }
 
-    const transmatrix adj(heptagon *h, int dir) {
+    transmatrix adj(heptagon *h, int dir) {
       if(geometry == gBinaryTiling) switch(dir) {
         case bd_up: return xpush(-log(2));
         case bd_left: return parabolic(-1);
@@ -545,8 +540,6 @@ EX namespace binary {
 
     const transmatrix iadj(heptagon *h, int dir) { heptagon *h1 = h->cmove(dir); return adj(h1, h->c.spin(dir)); }
   
-    transmatrix adj(cell *c, int dir) override { return adj(c->master, dir); }
-
     void virtualRebase(heptagon*& base, transmatrix& at) override {
     
       while(true) {

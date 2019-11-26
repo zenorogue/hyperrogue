@@ -170,9 +170,9 @@ struct hrmap_asonov : hrmap {
     return child;
     }
   
-  transmatrix adj(cell *c, int i) override { return adjmatrix(i); }
+  transmatrix adj(heptagon *h, int i) override { return adjmatrix(i); }
   
-  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1) override { 
+  virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
     for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
     return coord_to_matrix(coords[h2], coords[h1]);
     }

@@ -55,8 +55,8 @@ EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
     return pispin * Id;
   }
 
-EX transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
-  return currentmap->relative_matrix(c2, c1, point_hint);
+EX transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+  return currentmap->relative_matrix(c2, c1, hint);
   }
 
 // target, source, direction from source to target
@@ -73,13 +73,21 @@ transmatrix hrmap_standard::adj(heptagon *h, int d) {
   return T;
   }
 
-transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
+transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
 
   heptagon *h1 = c1->master;
   transmatrix gm = master_relative(c1, true);
   heptagon *h2 = c2->master;
   transmatrix where = master_relative(c2);
+  
+  transmatrix U = relative_matrix(h2, h1, hint);
+  
+  return gm * U * where;
+  }
 
+transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
+
+  transmatrix gm = Id, where = Id;
   // always add to last!
 //bool hsol = false;
 //transmatrix sol;
@@ -101,12 +109,12 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
         transmatrix S = adj(h1, d);
         if(hm == h2) {
           transmatrix T1 = gm * S * where;
-          auto curdist = hdist(tC0(T1), point_hint);
+          auto curdist = hdist(tC0(T1), hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
         if(geometry != gMinimal) for(int e=0; e<S7; e++) if(hm->move(e) == h2) {
           transmatrix T1 = gm * S * adj(hm, e) * where;
-          auto curdist = hdist(tC0(T1), point_hint);
+          auto curdist = hdist(tC0(T1), hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
         }
@@ -130,7 +138,7 @@ transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint
         auto hm = h1->cmove(d3);
         if(visited.count(hm)) continue;
         visited.insert(hm);
-        ld dist = crystal::space_distance(hm->c7, c2);
+        ld dist = crystal::space_distance(hm->c7, h2->c7);
         hbdist[dist].emplace_back(hm, gm * adj(h1, d3));
         }
       auto &bestv = hbdist.begin()->second;
