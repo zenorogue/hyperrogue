@@ -358,7 +358,9 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
     else
       println(hlog, "gpadj not found");
     }
-  if(NONSTDVAR) return calc_relative_matrix(c->cmove(i), c, C0);
+  if(NONSTDVAR || WDIM == 3) {
+    return calc_relative_matrix(c->cmove(i), c, C0);
+    }
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
   if(c->c.mirror(i)) T = T * Mirror;

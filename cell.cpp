@@ -70,7 +70,11 @@ struct hrmap {
   virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
   };
 
-/** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient */
+/** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
+ *  Operators can be applied to these maps. 
+ *  Liskov substitution warning: maps which produce both tiling like above and 3D tilings
+ *  (e.g. Euclidean and Crystal) also inherit from hrmap_standard
+ **/
 struct hrmap_standard : hrmap {
   void draw() override;
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
