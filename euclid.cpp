@@ -622,6 +622,29 @@ EX namespace euclid3 {
     T_edit = T0;
     twisted_edit = twisted0;
     }
+  
+  EX void show_fundamental() {
+    initquickqueue();
+    transmatrix M = ggmatrix(cwt.at);
+    hyperpoint h0 = M*C0;
+    hyperpoint ha = M*(eumove(ascoord(T_edit[0])) * C0 - C0) / 2;
+    hyperpoint hb = M*(eumove(ascoord(T_edit[1])) * C0 - C0) / 2;
+    if(WDIM == 3) {
+      hyperpoint hc = M*(eumove(ascoord(T_edit[2])) * C0 - C0) / 2;
+      for(int d:{-1,1}) for(int e:{-1,1}) {
+        queueline(h0+d*ha+e*hb-hc, h0+d*ha+e*hb+hc, 0xFFFFFFFF);
+        queueline(h0+d*hb+e*hc-ha, h0+d*hb+e*hc+ha, 0xFFFFFFFF);
+        queueline(h0+d*hc+e*ha-hb, h0+d*hc+e*ha+hb, 0xFFFFFFFF);
+        }
+      }
+    else {
+      queueline(h0+ha+hb, h0+ha-hb, 0xFFFFFFFF);
+      queueline(h0-ha+hb, h0-ha-hb, 0xFFFFFFFF);
+      queueline(h0+ha+hb, h0-ha+hb, 0xFFFFFFFF);
+      queueline(h0+ha-hb, h0-ha-hb, 0xFFFFFFFF);
+      }
+    quickqueue();
+    }
 
   EX void show_torus3() {
     int dim = WDIM;
@@ -637,6 +660,7 @@ EX namespace euclid3 {
     
     dialog::addBreak(50);
 
+    show_fundamental();
     if(dim == 3) {
       bool nondiag = false;
       for(int i=0; i<dim; i++) 
@@ -727,6 +751,7 @@ EX namespace euclid3 {
               "not implemented.)"
               )
               );
+            dialog::extra_options = show_fundamental;
             });
           }
         }
