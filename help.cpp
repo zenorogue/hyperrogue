@@ -289,6 +289,8 @@ string forbidden_unmarked() {
   return XLAT("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.");
   }
 
+string hyperstone_optional = "Completing the quest in this land is not necessary for the Hyperstone Quest.";
+
 EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
@@ -465,6 +467,9 @@ EX string generateHelpForItem(eItem it) {
     help += "\n\n" + XLAT(inv::helptext);
 #endif
 
+  if(in_full_game() && !required_for_hyperstones(it) && it != itHyperstone)
+    help += "\n\n" + XLAT(hyperstone_optional);
+    
 #if CAP_DAILY
   if(daily::on && it == itOrbLove)
     help += "\n\n" + XLAT("The Orb of Love gives no bonus score in the Strange Challenge.");
@@ -642,8 +647,8 @@ string generateHelpForLand(eLand l) {
   if(isPureSealand(l)) 
     s += XLAT("Aquatic region -- accessible only from coastal regions and other aquatic regions.\n");
     
-  if(l == laCamelot || l == laPrincessQuest)
-    s += XLAT("Completing the quest in this land is not necessary for the Hyperstone Quest.");
+  if(in_full_game() && !required_for_hyperstones(treasureType(l)) && !isCrossroads(l))
+    s += XLAT(hyperstone_optional);
 
   int rl = isRandland(l);
   if(rl == 2)

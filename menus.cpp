@@ -109,7 +109,7 @@ EX void showOverview() {
     else if(items[it]) col = 0xC0C0C0;
     else col = BLACKISH;
     int c8 = (vf+2)/3;
-    if(displayfrZH(xr*24-c8*6, i0, 1, vf-4, its(items[it]), col, 16))
+    if(displayfrZH(xr*24-c8*6, i0, 1, vf-4, (required_for_hyperstones(it) ? "" : "*") + its(items[it]), col, 16))
       getcstat = 2000+it;
     if(!cheater)
     if(displayfrZH(xr*24, i0, 1, vf-4, its(hiitems[modecode()][it]), col, 16))

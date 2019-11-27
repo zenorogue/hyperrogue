@@ -120,14 +120,23 @@ EX bool landUnlocked(eLand l) {
   return false;
   }
 
+EX bool required_for_hyperstones(eItem ttype) {
+  if(ttype == itHyperstone)
+    return false;
+  if(among(ttype, itHolyGrail, itSavedPrincess))
+    return false;
+  if(euclid && among(ttype, itBabyTortoise, itHunting))
+    return false;
+  return true;
+  }
+
 EX void countHyperstoneQuest(int& i1, int& i2) {
   i1 = 0; i2 = 0;
   generateLandList(isLandIngame);
-  for(eLand l: landlist) if(l != laCamelot && l != laPrincessQuest) {
+  for(eLand l: landlist) {
     eItem ttype = treasureType(l);
-    if(ttype != itHyperstone) {
-      i2++; if(items[ttype] >= R10) i1++;
-      }
+    if(!required_for_hyperstones(ttype)) continue;
+    i2++; if(items[ttype] >= R10) i1++;
     }
   }
 
