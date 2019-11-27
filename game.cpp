@@ -7281,7 +7281,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
       it = itOrbSpeed;
       }
     if(c2->land == laAsteroids) oc = 10;
-    if(markOrb(itOrbIntensity)) oc = oc * 6 / 5;
+    if(markOrb(itOrbIntensity)) oc = intensify(oc);
     if(!items[it]) items[it]++;
     items[it] += oc;
     }

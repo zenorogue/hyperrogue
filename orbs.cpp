@@ -69,12 +69,16 @@ EX void empathyMove(const movei& mi) {
     }
   }
 
+EX int intensify(int val) {
+  return inv::on ? 2 * val : val * 6 / 5;
+  }
+
 EX bool reduceOrbPower(eItem it, int cap) {
   if(items[it] && (lastorbused[it] || (it == itOrbShield && items[it]>3) || !markOrb(itOrbTime))) {
     items[it] -= multi::activePlayers();
     if(isHaunted(cwt.at->land)) survivalist = false;
     if(items[it] < 0) items[it] = 0;
-    if(items[it] > cap && markOrb(itOrbIntensity)) cap = cap * 6 / 5;
+    if(items[it] > cap && markOrb(itOrbIntensity)) cap = intensify(cap);
     if(items[it] > cap && timerghost) items[it] = cap;
     if(items[it] == 0 && it == itOrbLove) 
       princess::bringBack();
@@ -1377,7 +1381,7 @@ EX int orbcharges(eItem it) {
     case itOrbChoice:
       return 60;
     case itOrbIntensity:
-      return 50;
+      return inv::on ? 150 : 50;
     case itOrbWinter: // "pickup-winter"
        return inv::on ? 45 : 30;
        break;

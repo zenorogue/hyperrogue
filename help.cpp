@@ -354,6 +354,9 @@ EX string generateHelpForItem(eItem it) {
 
   if(it == itOrbWinter) 
     help += XLAT("\n\nThis orb also allows you to collect items encased in ice.");
+  
+  if(it == itOrbIntensity && inv::on)
+    help += XLAT("\n\nIn the Orb Strategy Mode, the effect is increased to +100%.");
 
   if(it == itOrbEmpathy) {
     int cnt = 0;
