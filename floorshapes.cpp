@@ -631,7 +631,6 @@ void geometry_information::generate_floorshapes() {
   #if CAP_IRR
   else if(IRREGULAR) {
     DEBBI(DF_POLY, ("generate_floorshapes: irregular"));
-    cell model;
 
     int cc = isize(irr::cells);
     
