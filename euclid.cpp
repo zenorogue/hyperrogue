@@ -662,7 +662,7 @@ EX namespace euclid3 {
     }
   
   torus_config single_row_torus(int qty, int dy) { 
-    return { on_periods({qty, 0}, {dy, -1}), false };
+    return { on_periods({dy, -1}, {qty, 0}), false };
     }
   
   torus_config regular_torus(gp::loc p) { 
