@@ -17,10 +17,9 @@ EX namespace euclid3 {
   #if HDR
   typedef long long coord; 
   constexpr long long COORDMAX = (1<<16);
-  #endif
   typedef array<coord, 3> axes;  
-  typedef array<array<int, 3>, 3> intmatrix;  
-
+  typedef array<array<int, 3>, 3> intmatrix;
+  #endif
 
   static const axes main_axes = make_array<coord>(1, COORDMAX, COORDMAX * COORDMAX );
   
@@ -80,7 +79,7 @@ EX namespace euclid3 {
   
   EX coord canonicalize(coord x);
   EX int twisted;
-  intmatrix T0;
+  EX intmatrix T0;
   EX gp::loc twisted_vec, ortho_vec;
   
   struct hrmap_euclid3 : hrmap_standard {
@@ -908,8 +907,6 @@ EX bool chiral(gp::loc g) {
   if(S3 == 3 && x == -2*y) return false;
   return true;
   }
-
-EX euclid3::coord first_period() { return 0; }
 
 EX void twist_once(gp::loc coo) {
   coo = coo - euclid3::twisted_vec * gp::univ_param();
