@@ -405,7 +405,7 @@ EX namespace euclid3 {
   axes regular_axes;
   
   intmatrix T, T2, T_edit;
-  int det;
+  EX int det;
   int infinite_dims;
   int twisted0, twisted_edit;
   

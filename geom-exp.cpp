@@ -589,17 +589,13 @@ EX void showEuclideanMenu() {
     denom /= g;
     }
   
-/*
-  if(fulltorus) {
-    using namespace torusconfig;
-    auto& mode = tmodes[torus_mode];
-    if(mode.flags & TF_SINGLE)
-      worldsize = qty;
-    else
-      worldsize = sdx * sdy;
-    worldsize = 0;
+  if(euclid && bounded) {
+    worldsize = euclid3::det;
+    if(BITRUNCATED) worldsize *= (a4 ? 2 : 3);
+    if(GOLDBERG) worldsize *= cgi.gpdata->area;
+    if(IRREGULAR) worldsize *= isize(irr::cells) / isize(irr::cells_of_heptagon);
     }
-  else TODO */ 
+  else 
   worldsize = denom ? nom / denom : 0;
   
   if(euler < 0 && !bounded)
