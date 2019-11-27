@@ -906,7 +906,7 @@ EX cell* at_euc2_coordinates(gp::loc p) {
  
 EX euclid3::coord as_coord(gp::loc p) { return p.first + p.second * euclid3::COORDMAX; }
 
-EX gp::loc sdxy() { return {0, 0}; }
+EX gp::loc sdxy() { return as_gp(euclid3::T[1]) * gp::univ_param(); }
 
 EX pair<bool, string> coord_display(const transmatrix& V, cell *c) {
   if(c != c->master->c7) return {false, ""};
