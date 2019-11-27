@@ -1282,13 +1282,16 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laStorms: {
-      bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient));
+      bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient && !(euclid && !archimedean && !penrose && WDIM == 2)));
       if(fargen) {
       
-        if(euclid && bounded) {
-          /* todo */
+        if(euclid && smallbounded && WDIM == 2) {
+          auto s = sdxy();
+          gp::loc st {s.first/3, s.second/3};
+          if(c == at_euc2_coordinates(st)) c->wall = waCharged;
+          if(c == at_euc2_coordinates(s-st)) c->wall = waGrounded;
           }
-        else if(euclid) {
+        else if(euclid && WDIM == 2) {
           int x,y;
           tie(x,y) = euc2_coordinates(c);
           if((x+1)%3 == 0 && y%3 == 0) {
