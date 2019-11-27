@@ -536,7 +536,9 @@ EX namespace euclid3 {
   void swap01(transmatrix& M) {
     for(int i=0; i<4; i++) swap(M[i][0], M[i][1]);
     }
-
+  
+  gp::loc ort1() { return (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)); }
+  
   EX coord twist(coord x, array<int, 3>& d, transmatrix& M, bool& mirr) {
     if(WDIM == 3) {
       auto coo = getcoord(x);
@@ -559,7 +561,7 @@ EX namespace euclid3 {
     else {
       auto crd = getcoord(x);
       gp::loc coo = gp::loc(crd[0], crd[1]);
-      gp::loc ort = (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)) * twisted_vec;
+      gp::loc ort = ort1() * twisted_vec;
       int dsc = dscalar(twisted_vec, twisted_vec);
       gp::loc d0 (d[0], d[1]);
       hyperpoint h = eumove(as_coord(twisted_vec)) * C0;
@@ -645,6 +647,42 @@ EX namespace euclid3 {
     quickqueue();
     }
 
+  using torus_config = pair<euclid3::intmatrix, int>;
+  
+  euclid3::intmatrix on_periods(gp::loc a, gp::loc b) {
+    euclid3::intmatrix res;
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++) res[i][j] = 0;
+    res[0][0] = a.first;
+    res[0][1] = a.second;
+    res[1][0] = b.first;
+    res[1][1] = b.second;
+    res[2][2] = 1;
+    return res;
+    }
+  
+  torus_config single_row_torus(int qty, int dy) { 
+    return { on_periods({qty, 0}, {dy, -1}), false };
+    }
+  
+  torus_config regular_torus(gp::loc p) { 
+    return { on_periods(p, gp::loc(0,1) * p), false };
+    }
+  
+  torus_config rectangular_torus(int x, int y, bool klein) { 
+    if(S3 == 3) y /= 2;
+    return { on_periods(euclid3::ort1() * gp::loc(y,0), gp::loc(x,0)), klein?8:0 };
+    }
+  
+  void torus_config_option(string name, char key, torus_config tc) {
+    dialog::addBoolItem(name, make_pair(T_edit, twisted_edit) == tc && PURE, key);
+    dialog::add_action([tc] {
+      tie(euclid3::T0, euclid3::twisted0) = tc;
+      tie(T_edit, twisted_edit) = tc;
+      set_variation(eVariation::pure);
+      start_game();
+      });
+    }
+  
   EX void show_torus3() {
     int dim = WDIM;
     cmode = sm::SIDE | sm::MAYDARK | sm::TORUSCONFIG;
@@ -707,6 +745,15 @@ EX namespace euclid3 {
         dialog::addBoolItem(XLAT("mirror flip in the second period"), twisted_edit & 8, 'x');
         dialog::add_action([] { twisted_edit ^= 8; });
         }
+      
+      dialog::addBreak(50);
+      torus_config_option(XLAT("single-cell torus"), 'A', regular_torus({1,0}));
+      torus_config_option(XLAT("large regular torus"), 'B', regular_torus({12, 0}));
+      torus_config_option(XLAT("Klein bottle"), 'C', rectangular_torus(12, 6, true));
+      torus_config_option(XLAT("cylinder"), 'D', rectangular_torus(6, 0, false));
+      torus_config_option(XLAT("Möbius band"), 'E', rectangular_torus(6, 0, true));
+      if(S3 == 3) torus_config_option(XLAT("seven-colorable torus"), 'F', regular_torus({1,2}));
+      if(S3 == 3) torus_config_option(XLAT("HyperRogue classic torus"), 'G', single_row_torus(381, -22));
       }
     
     dialog::addBreak(50);
@@ -911,7 +958,7 @@ EX bool chiral(gp::loc g) {
 EX void twist_once(gp::loc coo) {
   coo = coo - euclid3::twisted_vec * gp::univ_param();
   if(euclid3::twisted&8) {
-    gp::loc ort = (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)) * euclid3::twisted_vec * gp::univ_param();
+    gp::loc ort = euclid3::ort1() * euclid3::twisted_vec * gp::univ_param();
     auto s = ort * dscalar(coo, ort) * 2;
     auto v = dscalar(ort, ort);
     s.first /= v;
