@@ -836,16 +836,26 @@ EX int dcross(gp::loc e1, gp::loc e2) {
   }
 
 EX gp::loc euc2_coordinates(cell *c) { 
-  // todo masterrel
   auto vec = euclid3::eucmap()->ispacemap[c->master];
   auto ans = euclid3::getcoord(vec);
-  return {ans[0], ans[1]};
+  if(BITRUNCATED)
+    return as_gp(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c.spin(0)+4)%6));
+  if(GOLDBERG) {
+    auto li = gp::get_local_info(c);
+    gp::loc shift(0,0);
+    if(li.first_dir >= 0) shift = gp::eudir(li.last_dir) * li.relative;
+    return as_gp(ans) * gp::param + shift;
+    }
+  return as_gp(ans);
   }
 
+/** this is slow, but we use it only for small p's */
 EX cell* at_euc2_coordinates(gp::loc p) {
-  // todo masterrel
-  euclid3::coord co = as_coord(p);
-  return euclid3::eucmap()->get_at(co)->c7;
+  cellwalker cw(currentmap->gamestart());
+  while(p.first--) cw += revstep;
+  cw ++;
+  while(p.second--) cw += revstep;
+  return cw.at;
   }
  
 EX euclid3::coord as_coord(gp::loc p) { return p.first + p.second * euclid3::COORDMAX; }
