@@ -291,6 +291,12 @@ string forbidden_unmarked() {
 
 string hyperstone_optional = "Completing the quest in this land is not necessary for the Hyperstone Quest.";
 
+string power_help = 
+  "The amount of Orbs obtained by using Orbs of Mirroring is "
+  "multiplied by sqrt(1+p/20), where p is the number of Powerstones "
+  "collected. This also affects the mirrorings which happened before "
+  "collecting the Powerstones.";
+
 EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
@@ -404,12 +410,7 @@ EX string generateHelpForItem(eItem it) {
         );  
     
     if(it == itPower)
-      help += XLAT(
-        "\n\nThe amount of Orbs obtained by using Orbs of Mirroring is "
-        "multiplied by sqrt(1+p/20), where p is the number of Powerstones "
-        "collected. This also affects the mirrorings which happened before "
-        "collecting the Powerstones."
-        );
+      help += "\n\n" + XLAT(power_help);
     
     if(it == itOrbLuck)
       help += XLAT(
@@ -634,12 +635,7 @@ string generateHelpForLand(eLand l) {
   add_reqs(l, s);
 
   if(l == laPower && inv::on)
-    help += XLAT(
-      "\n\nThe amount of Orbs obtained by using Orbs of Mirroring is "
-      "multiplied by sqrt(1+p/20), where p is the number of Powerstones "
-      "collected. This also affects the mirrorings which happened before "
-      "collecting the Powerstones."
-      );
+    help += XLAT(power_help) + "\n\n";
   
   if(isCoastal(l)) 
     s += XLAT("Coastal region -- connects inland and aquatic regions.\n");
