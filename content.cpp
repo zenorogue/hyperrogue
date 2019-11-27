@@ -1165,7 +1165,7 @@ LAND( 0x421C52, "Vineyard", laWineyard, ZERO, itWine, RESERVED, vinehelp)
 
 LAND( 0x104040, "Dead Cave", laDeadCaves, ZERO | LF_TROLL, itSilver, RESERVED, deadcavehelp)
   NATIVE((m == moEarthElemental || m == moDarkTroll) ? 2 : (m == moGoblin || m == moSeep) ? 1 : 0)
-  REQ(GOLD(R60) ITEMS(itGold, 10))
+  REQ(GOLD(R60) ITEMS(itGold, U10))
 
 LAND( 0x705020, "Hive", laHive, ZERO, itRoyalJelly, RESERVED, hivehelp)
   NATIVE(isBug(m) ? 1 : 0)
