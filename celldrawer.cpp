@@ -467,7 +467,7 @@ void celldrawer::setcolors() {
       break;
     
     case waDeadTroll2: case waPetrifiedBridge: case waPetrified: {
-      eMonster m = eMonster(c->wparam);
+      eMonster m = eMonster((unsigned char)c->wparam);
       if(c->wall == waPetrified || c->wall == waPetrifiedBridge) 
         wcol = gradient(wcol, minf[m].color, 0, .2, 1);
       if(c->wall == waPetrified || isTroll(m)) if(!(m == moForestTroll && c->land == laOvergrown))
