@@ -521,6 +521,7 @@ EX namespace euclid3 {
     
     set_flag(ginf[g].flags, qANYQ, infinite_dims < dim);
     set_flag(ginf[g].flags, qBOUNDED, infinite_dims == 0);
+    set_flag(ginf[g].flags, qSMALL, infinite_dims == 0 && det <= 4096);
     bool nonori = false;
     if(twisted&1) nonori = !nonori;
     if(twisted&2) nonori = !nonori;
