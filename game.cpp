@@ -4814,12 +4814,12 @@ EX void moveWorm(cell *c) {
     if(id) {
       cell *c2 = c, *c3 = c2;
       while(c2->monst == moTentacletail || c2->monst == moTentacleGhost) {
-        auto mi = moveimon(c2);
-        if(!mi.proper()) return;
-        c3 = c2, c2 = mi.t;
+        auto mim = moveimon(c2).rev();
+        if(!mim.proper()) return;
+        c3 = c2, c2 = mim.s;
         if(c3->monst != moTentacleGhost && c2->monst != moTentacleGhost) 
-          mountmove(mi, true);
-        animateMovement(mi.rev(), LAYER_BIG);
+          mountmove(mim, true);
+        animateMovement(mim, LAYER_BIG);
         }
       }
     
