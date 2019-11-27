@@ -638,20 +638,12 @@ EX color_t colorize(cell *c, char whichCanvas) {
     co = told(reg3::decode_coord(c->master->fieldval)), dim = 4;
     for(int a=0; a<4; a++) if(co[a] > 4) co[a] -= 8;
     }
-  else if(euclid && WDIM == 3) {
+  #endif
+  else if(euclid) {
     auto tab = euclid3::getcoord(euclid3::get_ispacemap()[c->master]);
     for(int a=0; a<3; a++) co[a] = tab[a];
     if(PURE) for(int a=0; a<3; a++) co[a] *= 2;
     dim = 3;
-    }
-  #endif
-  else if(masterless && !quotient) {
-    dim = 2;
-    tie(co[0], co[1]) = vec_to_pair(decodeId(c->master));
-    if(PURE) {
-      co[0] *= 2;
-      co[1] *= 2;
-      }
     }
 
   color_t res = 0;

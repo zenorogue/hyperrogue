@@ -51,7 +51,7 @@ EX int celldistAltRelative(cell *c) {
   #if MAXMDIM >= 4
   if(euclid && WDIM == 3) return euclid3::dist_relative(c);
   #endif
-  if(euwrap) return celldistAlt(c) - roundTableRadius(c);
+  if(euclid && quotient) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
@@ -88,15 +88,14 @@ EX int euclidAlt(short x, short y) {
 
 EX int cylinder_alt(cell *c) {
   if(specialland == laPrincessQuest)
-    return celldistance(c, vec_to_cellwalker(pair_to_vec(EPX, EPY)).at);
+    return celldistance(c, at_euc2_coordinates({EPX, EPY}));
   if(specialland == laCamelot)
-    return celldistance(c, vec_to_cellwalker(pair_to_vec(21, 10)).at);
+    return celldistance(c, at_euc2_coordinates({21, 10}));
   
-  using namespace torusconfig;
   int maxmul = 0;
   for(int d = 0; d < SG6; d++)
     maxmul = max(maxmul, dcross(sdxy(), gp::eudir(d)));
-  return 5-abs(gdiv(dcross(sdxy(), cell_to_pair(c)), maxmul));
+  return 5-abs(gdiv(dcross(sdxy(), euc2_coordinates(c)), maxmul));
   }
 
 const int NOCOMPASS = 1000000;
@@ -876,7 +875,7 @@ EX void setLandSphere(cell *c) {
     int y = getHemisphere(c, 2);
     elementalXY(c, x, y, (c->type != 6 || GOLDBERG));
     }
-  if(!euwrap)
+  if(!(euclid && quotient))
   if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3 || specialland == laTerracotta) {
     int x = getHemisphere(c, 1);
     if(x == 0 && specialland == laTerracotta)
@@ -1093,17 +1092,17 @@ EX void setLandEuclid(cell *c) {
   setland(c, specialland);
   if(specialland == laCrossroads4 || chaosmode) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     c->land = getEuclidLand(y);
     }
   if(specialland == laCrossroads) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     setland(c, getEuclidLand(y+2*x));
     }
   if(specialland == laTerracotta) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     if(((y+2*x) & 15) == 1) {
       setland(c, laMercuryRiver);
       c->wall = waMercury;
@@ -1116,9 +1115,9 @@ EX void setLandEuclid(cell *c) {
   if(specialland == laPrincessQuest) setland(c, laPalace);
   if(specialland == laOcean) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     y += 10;
-    if(euwrap) y = -celldistAlt(c);
+    if(euclid && quotient) y = -celldistAlt(c);
     if(y == 0) 
       { setland(c, laBarrier); if(ishept(c)) c->land = laRlyeh; }
     else if(y<0) setland(c, laRlyeh);
@@ -1126,7 +1125,7 @@ EX void setLandEuclid(cell *c) {
     }
   if(specialland == laWestWall) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     x = -5 - x;
     if(x == 0) 
       {setland(c, laBarrier); if(ishept(c)) setland(c, laMotion); }
@@ -1135,9 +1134,9 @@ EX void setLandEuclid(cell *c) {
     }
   if(specialland == laIvoryTower || specialland == laDungeon) {
     int x, y;
-    tie(x,y) = cell_to_pair(c); y = -5 - y;
+    tie(x,y) = euc2_coordinates(c); y = -5 - y;
     if(specialland == laDungeon) y = -10 - y;
-    if(euwrap) y = -celldistAlt(c);
+    if(euclid && quotient) y = -celldistAlt(c);
     if(y == 0) 
       {setland(c, laBarrier); if(ishept(c)) setland(c, laAlchemist); }
     else if(y<0) setland(c, laAlchemist);
@@ -1147,7 +1146,7 @@ EX void setLandEuclid(cell *c) {
     }
   if(specialland == laElementalWall) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     int x0 = euclid4 ? x : x + (y>>1);
     int y0 = y;
     
@@ -1176,7 +1175,7 @@ EX void setLandEuclid(cell *c) {
     }
   if(specialland == laCrossroads3) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     int y0 = euclid4 ? 2 * y - x : y; 
     int x0 = euclid4 ? 2 * x + y : x + y/2;
     
@@ -1195,7 +1194,7 @@ EX void setLandEuclid(cell *c) {
     }
   if(specialland == laWarpCoast) {
     int x, y;
-    tie(x,y) = cell_to_pair(c);
+    tie(x,y) = euc2_coordinates(c);
     
     int zz = a4 ? x : 2*x+y + 10;
     zz = gmod(zz, 30);

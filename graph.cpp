@@ -2668,7 +2668,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, col
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
-  else if((hasFacing(c) && c->mondir != NODIR) || history::on || quotient || euwrap || dont_face_pc) {
+  else if((hasFacing(c) && c->mondir != NODIR) || history::on || quotient || dont_face_pc) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
@@ -3010,6 +3010,7 @@ EX transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   if(NONSTDVAR || binarytiling) return Id;
   transmatrix V = ddspin(c, si.dir, M_PI);
   if(si.reflect) V = V * Mirror;
+  if(euclid) return V;
   return V * iddspin(c, 0, M_PI);
   }
 
@@ -3059,7 +3060,7 @@ EX color_t reptilecolor(cell *c) {
   else {
     i = zebra40(c);
     
-    if(!masterless) {
+    if(!euclid) {
       if(i >= 4 && i < 16) i = 0; 
       else if(i >= 16 && i < 28) i = 1;
       else if(i >= 28 && i < 40) i = 2;
@@ -3167,7 +3168,7 @@ EX bool is_nice_dual(cell *c) {
   }
 
 EX bool use_swapped_duals() {
-  return (masterless && !a4) || GOLDBERG;
+  return (euclid && !a4) || GOLDBERG;
   }
 
 #if CAP_SHAPES
@@ -4530,7 +4531,7 @@ EX void drawmovestar(double dx, double dy) {
   ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
   transmatrix Centered = Id;
 
-  if(masterless) 
+  if(euclid) 
     Centered = eupush(H);
   else if(R > 1e-9) Centered = rgpushxto0(H);
   

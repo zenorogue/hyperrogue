@@ -175,17 +175,6 @@ EX cell *createMov(cell *c, int d) {
     printf("ERROR createmov\n");
     }
 
-  if(masterless && !c->move(d)) {
-    int id = decodeId(c->master);
-    for(int dx=-1; dx<=1; dx++)
-    for(int dy=-1; dy<=1; dy++)
-      euclideanAtCreate(id + pair_to_vec(dx, dy));
-    if(!c->move(d)) { 
-      println(hlog, "id = ", id, " vec_to_pair(id) = ", vec_to_pair(id), ": failed to create move ", d, " in Euclidean\n");
-      exit(0);
-      }
-    }
-  
   if(c->move(d)) return c->move(d);
   else if(hybri)
     hybrid::find_cell_connection(c, d);
@@ -282,14 +271,10 @@ EX void initcells() {
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif
-  #if MAXMDIM >= 4
-  else if(euclid && WDIM == 3) currentmap = euclid3::new_map();
-  #endif
+  else if(euclid && !penrose) currentmap = euclid3::new_map();
   #if CAP_BT
   else if(penrose) currentmap = kite::new_map();
   #endif
-  else if(fulltorus) currentmap = new_torus_map();
-  else if(euclid) currentmap = new_euclidean_map();
   #if MAXMDIM >= 4
   else if(WDIM == 3 && !binarytiling) currentmap = reg3::new_map();
   #endif
@@ -412,7 +397,7 @@ EX void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->move(i);
     if(c2) {
-      if(!masterless && BITRUNCATED && c == c->master->c7) verifycell(c2);
+      if(BITRUNCATED && c == c->master->c7) verifycell(c2);
       if(c2->move(c->c.spin(i)) && c2->move(c->c.spin(i)) != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->c.spin(i), c2->type);
         exit(1);
@@ -442,11 +427,6 @@ EX int eudist(int sx, int sy) {
   return max(max(z0,z1), z2);
   }
 
-EX int eudist(int vec) {
-  auto p = vec_to_pair(vec);
-  return eudist(p.first, p.second);
-  }
-
 EX int compdist(int dx[]) {
   int mi = dx[0];
   for(int u=0; u<S3; u++) mi = min(mi, dx[u]);
@@ -473,13 +453,7 @@ EX int celldist(cell *c) {
     hybrid::in_underlying_map([&] { d = celldist(w.first) + abs(w.second); }); 
     return d;
     }
-  if(fulltorus && WDIM == 2) 
-    return get_torus_dist(decodeId(c->master));
   if(nil && !quotient) return DISTANCE_UNKNOWN;
-  if(euwrap && WDIM == 2)
-    return torusconfig::cyldist(decodeId(c->master), 0);
-  if(masterless)
-    return eudist(decodeId(c->master));
   if(euclid && (penrose || archimedean)) return celldistance(currentmap->gamestart(), c);
   if(sphere || binarytiling || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
@@ -510,13 +484,6 @@ EX int celldistAlt(cell *c) {
     d = sl2 ? 0 : abs(w.second - d);
     hybrid::in_underlying_map([&] { d += celldistAlt(w.first); });
     return d;
-    }
-  if(masterless) {
-    if(fulltorus) return celldist(c);
-    if(euwrap) return cylinder_alt(c);
-    int x, y;
-    tie(x,y) = vec_to_pair(decodeId(c->master));
-    return euclidAlt(x, y);
     }
   #if CAP_BT
   if(binarytiling || solnih) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
@@ -836,21 +803,15 @@ cdata *getHeptagonCdata(heptagon *h) {
   return h->cdata = new cdata(mydata);
   }
 
-cdata *getEuclidCdata(int h) {
+cdata *getEuclidCdata(gp::loc h) {
 
-  if(euwrap) { // fix cylinder?
-    static cdata xx;
-    return &xx;
-    }
-  
   int x, y;
+  tie(x,y) = h;
   auto& data = archimedean ? arcm::get_cdata() : get_cdata();
     
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(data.count(h)) return &(data[h]);
   
-  tie(x,y) = vec_to_pair(h);
-
   if(x == 0 && y == 0) {
     cdata xx;
     for(int i=0; i<4; i++) xx.val[i] = 0;
@@ -867,8 +828,8 @@ cdata *getEuclidCdata(int h) {
     int x2 = x - (k<2 ? ord : 0);
     int y2 = y + (k>0 ? ord : 0);
 
-    cdata *d1 = getEuclidCdata(pair_to_vec(x1,y1));
-    cdata *d2 = getEuclidCdata(pair_to_vec(x2,y2));
+    cdata *d1 = getEuclidCdata({x1,y1});
+    cdata *d2 = getEuclidCdata({x2,y2});
     cdata xx;
     double disp = pow(2, bid/2.) * 6;
     
@@ -898,9 +859,9 @@ int ld_to_int(ld x) {
   return int(x + 1000000.5) - 1000000;
   }
 
-EX int pseudocoords(cell *c) {
+EX gp::loc pseudocoords(cell *c) {
   transmatrix T = arcm::archimedean_gmatrix[c->master].second;
-  return pair_to_vec(ld_to_int(T[0][LDIM]), ld_to_int((spin(60*degree) * T)[0][LDIM]));
+  return {ld_to_int(T[0][LDIM]), ld_to_int((spin(60*degree) * T)[0][LDIM])};
   }
 
 EX cdata *arcmCdata(cell *c) {
@@ -911,7 +872,7 @@ EX cdata *arcmCdata(cell *c) {
   }
 
 EX int getCdata(cell *c, int j) {
-  if(masterless) return getEuclidCdata(decodeId(c->master))->val[j];
+  if(euclid) return getEuclidCdata(euc2_coordinates(c))->val[j];
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
   else if(archimedean && hyperbolic) 
@@ -928,7 +889,7 @@ EX int getCdata(cell *c, int j) {
   }
 
 EX int getBits(cell *c) {
-  if(masterless) return getEuclidCdata(decodeId(c->master))->bits;
+  if(euclid) return getEuclidCdata(euc2_coordinates(c))->bits;
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
   else if(archimedean && (hyperbolic || sl2)) 
@@ -1034,15 +995,6 @@ EX int celldistance(cell *c1, cell *c2) {
     return d;
     }
   
-  if((masterless) && (euclid6 || (euclid4 && PURE))) {
-    if(!euwrap)
-      return eudist(decodeId(c1->master) - decodeId(c2->master)); // fix cylinder
-    else if(euwrap && torusconfig::torus_mode == 0) 
-      return get_torus_dist(torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master)));
-    else if(euwrap && !fulltorus)
-      return torusconfig::cyldist(decodeId(c1->master), decodeId(c2->master));
-    }
-  
   #if CAP_FIELD
   if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
@@ -1074,7 +1026,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(masterless || archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
+  if(archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
@@ -1100,7 +1052,7 @@ EX int celldistance(cell *c1, cell *c2) {
   #endif
   
   #if MAXMDIM >= 4
-  if(euclid && WDIM == 3) 
+  if(euclid && !penrose && !archimedean) 
     return euclid3::celldistance(c1, c2);
   
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);

@@ -252,8 +252,8 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->y1 = (1 - onscreen[1] * vid.scale) / 2;
   m->valid = false;
 
-  if(euwrap && !bounded) {
-    hyperpoint h1 = eumove(torusconfig::sdx, torusconfig::sdy) * C0;
+  if(euclid && quotient && !bounded) {
+    hyperpoint h1 = eumove(first_period()) * C0;
     h1 /= sqhypot_d(2, h1);
     if(nonorientable) h1 /= 2;
     m->valid = good_shape = true;
@@ -428,71 +428,18 @@ void calcparam_rug() {
   }
 
 EX void buildTorusRug() {
-  using namespace torusconfig;
 
+   /* todo
   calcparam_rug();
   models::configure();
 
-  struct toruspoint {
-    int x,y;
-    toruspoint() { x=y=getqty(); }
-    toruspoint(int _x, int _y) : x(_x), y(_y) {}
-    int d2() { 
-      return x*x+(euclid6?x*y:0)+y*y;
-      }
-    };
-  
-  vector<toruspoint> zeropoints;
   vector<toruspoint> tps(qty);
   
-  auto& mode = tmodes[torus_mode];
-  bool single = mode.flags & TF_SINGLE;
-  bool klein = mode.flags & TF_KLEIN;
+  pair<gp::loc, gp::loc> periods;
   
-  pair<toruspoint, toruspoint> solution;
+  // todo take the periods 
   
-  if(single) {
-    for(int ax=-qty; ax<qty; ax++) 
-    for(int ay=-qty; ay<qty; ay++) {
-      int v = (ax*dx + ay*dy) % qty;
-      if(v<0) v += qty;
-      toruspoint tp(ax, ay);
-      if(tps[v].d2() > tp.d2()) tps[v] = tp;
-      if(v == 0) 
-        zeropoints.emplace_back(ax, ay);
-      }
-    
-    ld bestsol = 1e12;
-    
-    for(auto p1: zeropoints)
-    for(auto p2: zeropoints) {
-      int det = p1.x * p2.y - p2.x * p1.y;
-      if(det < 0) continue;
-      if(det != qty && det != -qty) continue;
-      ld quality = ld(p1.d2()) * p2.d2();
-      if(quality < bestsol * 3)
-      if(quality < bestsol)
-        bestsol = quality, solution.first = p1, solution.second = p2;
-      }
-    
-    if(solution.first.d2() > solution.second.d2())
-      swap(solution.first, solution.second);
-    }
-  else {
-    if(klein)
-      solution.first = toruspoint(2*sdx, 0);
-    else
-      solution.first = toruspoint(sdx, 0);
-    if(mode.flags & TF_WEIRD)
-      solution.second = toruspoint(sdy/2, sdy);
-    else
-      solution.second = toruspoint(0, sdy);
-
-    if(solution.first.d2() > solution.second.d2())
-      swap(solution.first, solution.second);
-    }
-    
-  ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
+  ld factor = sqrt(ld(dsquare(periods.second)) / dsquare(periods.first));
   
   ld xfactor = 0, yfactor = 0;
   
@@ -504,16 +451,10 @@ EX void buildTorusRug() {
   // 7,-17
   
   transmatrix z1 = matrix3(
-    solution.first.x, solution.second.x, 0, 
-    solution.first.y, solution.second.y, 0,
+    periods.first.first, periods.second.first, 0, 
+    periods.first.second, periods.second.second, 0,
     0, 0, 1);
   // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
-  /* transmatrix z1(
-    point3(solution.first.x, solution.second.x, 0), 
-    point3(solution.first.y, solution.second.y, 0), 
-    point3(0, 0, 1),
-    point31(0, 0, 0)
-    ); */
   transmatrix z2 = inverse(z1);
   
   if(gwhere == gSphere) {
@@ -630,6 +571,7 @@ EX void buildTorusRug() {
 
   if(rug_perspective)
     push_all_points(2, -model_distance);  
+  */
   
   return;
   }
@@ -670,7 +612,7 @@ EX void buildRug() {
 
   need_mouseh = true;
   good_shape = false;
-  if(fulltorus) {
+  if(euclid && bounded) {
     good_shape = true;
     buildTorusRug();
     return;
@@ -687,13 +629,13 @@ EX void buildRug() {
     cell *c = p.first;
     rugpoint *v = p.second;
     
-    if(archimedean || euwrap) {
+    if(archimedean || (euclid && quotient)) {
       rugpoint *p[MAX_EDGE+1];
       for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(ggmatrix(c) * get_corner_position(c, j), v->dist);
       for(int j=0; j<c->type; j++) addTriangle(v, p[j], p[(j+1) % c->type]);
       
-      if(euwrap && nonorientable) {
-        transmatrix T = ggmatrix(c) * eumove(torusconfig::sdx, torusconfig::sdy);
+      if((euclid && quotient) && nonorientable) {
+        transmatrix T = ggmatrix(c) * eumove(first_period());
         rugpoint *Tv = addRugpoint(T * C0, 0);
         for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(T * get_corner_position(c, j), v->dist);
         for(int j=0; j<c->type; j++) addTriangle(Tv, p[j], p[(j+1) % c->type]);
@@ -902,7 +844,7 @@ int divides = 0;
 bool stop = false;
 
 EX bool subdivide_further() {
-  if(fulltorus) return false;
+  if(euclid && bounded) return false;
   if(GDIM == 3) return false;
   return isize(points) * 4 < vertex_limit;
   }
@@ -1081,7 +1023,7 @@ EX void addNewPoints() {
   if(anticusp_factor && detect_cusps())
     return;
 
-  if(euwrap || qvalid == isize(points)) {
+  if((euclid && quotient) || qvalid == isize(points)) {
     subdivide();
     return;
     }

@@ -130,14 +130,6 @@ namespace mapstream {
       f.write(gp::param.second);
       }
     #endif
-    if(geometry == gTorus) {
-      f.write(torusconfig::qty);
-      f.write(torusconfig::dx);
-      f.write(torusconfig::dy);
-      f.write(torusconfig::sdx);
-      f.write(torusconfig::sdy);
-      f.write(torusconfig::torus_mode);
-      }
     #if CAP_FIELD
     if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
@@ -187,17 +179,6 @@ namespace mapstream {
       f.read(gp::param.second);
       }
     #endif
-    if(geometry == gTorus) {
-      f.read(torusconfig::qty);
-      f.read(torusconfig::dx);
-      f.read(torusconfig::dy);
-      if(f.vernum >= 10504) {
-        f.read(torusconfig::sdx);
-        f.read(torusconfig::sdy);
-        f.read(torusconfig::torus_mode);
-        }
-      torusconfig::activate();
-      }
     #if CAP_CRYSTAL
     if(cryst && f.vernum >= 10504) {
       int sides;

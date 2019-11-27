@@ -1051,14 +1051,14 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laReptile) {
     if(old_daily_id <= 64) {
-      if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && !euwrap && geometry != gZebraQuotient)))
+      if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && !euclid && geometry != gZebraQuotient)))
         return bad_graphics;
       }
     else {  
       bool reptile_good = false;
       if(hyperbolic_37 && BITRUNCATED) reptile_good = true;
       if(euclid6) reptile_good = true;
-      if(quotient && geometry != gZebraQuotient && !euwrap)
+      if(quotient && geometry != gZebraQuotient && !euclid)
         reptile_good = false;
       if(!reptile_good)
         return bad_graphics;
@@ -1105,7 +1105,7 @@ EX land_validity_t& land_validity(eLand l) {
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
-  if(euclid && !euwrap && (l == laCrossroads || l == laCrossroads4) && !penrose)
+  if(euclid && !quotient && (l == laCrossroads || l == laCrossroads4) && !penrose)
     return full_game; 
 
   if(sol && among(l, laCrossroads, laCrossroads4))
@@ -1114,10 +1114,10 @@ EX land_validity_t& land_validity(eLand l) {
   if(sol && l == laCamelot)
     return not_implemented;
 
-  if(euclid && euwrap && !fulltorus && l == laCrossroads && torusconfig::sdy == -2 * torusconfig::sdx)
+  if(euclid && quotient && !bounded && l == laCrossroads && sdxy().second == -2 * sdxy().first)
     return full_game;
   
-  if(euclid && euwrap && !fulltorus && l == laCrossroads4 && torusconfig::sdy == 0)
+  if(euclid && quotient && !bounded && l == laCrossroads4 && sdxy().second == 0)
     return full_game;
   
   // highlight Zebra-based lands on Zebra Quotient!
@@ -1154,7 +1154,7 @@ EX land_validity_t& land_validity(eLand l) {
     return pattern_not_implemented_exclude;
     }
   
-  if(l == laStorms && fulltorus) 
+  if(l == laStorms && euclid && bounded) 
     return interesting;
   
   if(l == laMagnetic)

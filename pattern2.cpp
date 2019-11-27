@@ -36,46 +36,43 @@ int gp_threecolor() {
   }
 
 int eupattern(cell *c) {
-  int v = cell_to_vec(c);
-  if(a4) {
-    int x, y;
-    tie(x,y) = vec_to_pair(v);
+  int x, y;
+  tie(x,y) = euc2_coordinates(c);
+  if(a4)
     return ((x&1) + 2*(y&1)) % 3;
-    }
-  else {
-    return gmod(v*2, 3);
-    }
+  else
+    return gmod(y-x, 3);
   }
 
 int eupattern4(cell *c) {
-  int v = cell_to_vec(c);
   int x, y;
-  tie(x,y) = vec_to_pair(v);
+  tie(x,y) = euc2_coordinates(c);
   return (x&1) + ((y&1)) * 2;
   }
 
 EX bool ishept(cell *c) {
   // EUCLIDEAN
-  if(euclid) return eupattern(c) == 0;
-  else return c->type == S7 + (hybri ? 2 : 0);
+  if(euclid && PURE) return eupattern(c) == 0;
+  else if(hybri) { cell *c1 = hybrid::get_where(c).first; return c1 == c1->master->c7; }
+  else return c == c->master->c7;
   }
 
 EX bool ishex1(cell *c) {
   // EUCLIDEAN
-  if(euclid) return eupattern(c) == 1;
+  if(euclid && PURE) return eupattern(c) == 1;
   #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && !pseudohept(c->move(0));
   #endif
-  else return c->type != S6;
+  else return c->master->c7 != c;
   }
 
 bool ishex2(cell *c) {
   // EUCLIDEAN
-  if(euclid) return eupattern(c) == 1;
+  if(euclid && PURE) return eupattern(c) == 1;
   #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
   #endif
-  else return c->type != S6;
+  else return c->master->c7 != c;
   }
 
 int chessvalue(cell *c) {
@@ -111,12 +108,8 @@ unsigned bitmajority(unsigned a, unsigned b, unsigned c) {
   }
 
 int eufifty(cell *c) {
-  if(fulltorus) {
-    if(c->land == laWildWest) return cell_to_vec(c) % 37;
-    else return cell_to_vec(c) % 27;
-    }
   int x, y;
-  tie(x,y) = cell_to_pair(c);
+  tie(x,y) = euc2_coordinates(c);
   int ix = x + 99999 + y;
   int iy = y + 99999;
   if(c->land == laWildWest) 
@@ -290,7 +283,7 @@ int dir_bitrunc457(cell *c) {
 int val46(cell *c);
 
 EX int zebra40(cell *c) {
-  if(euclid) return eupattern(c);
+  if(euclid) return pattern_threecolor(c);
   else if(IRREGULAR) return c->master->zebraval/10;
   else if(a46) {
     int v = val46(c);
@@ -322,7 +315,6 @@ EX int zebra40(cell *c) {
     return 24;
     }
   else if(sphere) return 0;
-  else if(euclid) return eupattern(c);
   else if(S3 == 4 && S7 == 6) {
     return 8 + ((c->master->zebraval / 10 + c->c.spin(0))%2) * 2;
     }
@@ -348,7 +340,7 @@ EX int zebra40(cell *c) {
   }
 
 EX int zebra3(cell *c) {
-  if(masterless) return 0;
+  if(euclid) return 0;
   else if(ctof(c)) return (c->master->zebraval/10)/4;
   else if(euclid || sphere || S7>7 || S6>6) return 0;
   else { 
@@ -391,12 +383,10 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(fulltorus) {
-    return decodeId(c->master);
-    }
   else if(euclid) {
-    auto p = cell_to_pair(c);
-    return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
+    auto p = euc2_coordinates(c);
+    if(bounded) return p.first + (p.second << 16);
+    return gmod(p.first - 22 * p.second, 3*127);
     }
   else if(binarytiling || archimedean || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
   else if(&currfp == &fp_invalid) return 0;
@@ -483,7 +473,7 @@ EX int getHemisphere(heptagon *h, int which) {
   }
 
 EX int getHemisphere(cell *c, int which) {
-  if(euwrap) return 0;
+  if(euclid && quotient) return 0;
   if(hybri) { auto d = hybrid::get_where(c); return PIU(getHemisphere(d.first, which)); }
   if(WDIM == 3 && !hybri) {
     hyperpoint p = tC0(calc_relative_matrix(c, currentmap->gamestart(), C0));
@@ -969,8 +959,19 @@ EX namespace patterns {
           break;
           }
         }
-    if(euclid6 && (sub & SPF_CHANGEROT))
-      si.dir = (zebra40(c)*4) % 6;
+    if(euclid6 && (sub & SPF_CHANGEROT)) {
+      if(GOLDBERG) {
+        auto li = gp::get_local_info(c);
+        if(li.first_dir >= 0)
+          si.dir = gmod(zebra40(c)*4 - li.total_dir - li.last_dir, 6);
+        else
+          si.dir = gmod(zebra40(c)*4, 6);
+        }
+      else if(c == c->master->c7)
+        si.dir = (zebra40(c)*4) % 6;
+      else 
+        si.dir = (zebra40(c)*4 + 9 - c->c.spin(0)) % 6;
+      }
     if(sub & SPF_ROT) si.id = 1;
     if(euclid6 && !(sub & SPF_EXTRASYM)) {
       si.symmetries = 6;
@@ -1286,6 +1287,12 @@ EX int pattern_threecolor(cell *c) {
     patterns::val38(c, si, !BITRUNCATED ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
     }
+  if(euclid6 && gp_threecolor() == 2) {
+    auto li = gp::get_local_info(c);
+    int rel = gmod(li.relative.first - li.relative.second, 3);
+    if(rel && (li.last_dir&1)) rel = 3 - rel;
+    return rel;
+    }
   #if CAP_GP
   if(a4 && GOLDBERG) {
     patterns::patterninfo si;
@@ -1312,7 +1319,8 @@ EX int pattern_threecolor(cell *c) {
     }
   if(euclid) {
     if(a4 && PURE) return eupattern4(c);
-    return eupattern(c) % 3;
+    if(euclid6 && !BITRUNCATED) return eupattern(c) % 3;
+    return c == c->master->c7 ? 0 : (c->c.spin(0)&1) ? 1 : 2;
     }
   if(S3 >= OINF) return c->master->distance % 3;
   if(S7 == 4 && S3 == 3) {
@@ -1498,7 +1506,7 @@ EX namespace patterns {
   
   int sevenval(cell *c) {
     if(!euclid) return 0;
-    auto p = vec_to_pair(cell_to_vec(c));
+    auto p = euc2_coordinates(c);
     return gmod(p.first - p.second * 2, 7);
     }
 
@@ -1525,7 +1533,7 @@ EX namespace patterns {
     ep.extra_params["chess"] = chessvalue(c);
     ep.extra_params["ph"] = pseudohept(c);
     ep.extra_params["kph"] = kraken_pseudohept(c);
-    if(!masterless) {
+    if(true) {
       ep.extra_params["md"] = c->master->distance;
       ep.extra_params["me"] = c->master->emeraldval;
       ep.extra_params["mf"] = c->master->fieldval;
@@ -1539,7 +1547,7 @@ EX namespace patterns {
       }
     if(euclid) {
       int x, y;
-      tie(x,y) = cell_to_pair(c);
+      tie(x,y) = euc2_coordinates(c);
       ep.extra_params["ex"] = x;
       ep.extra_params["ey"] = y;
       if(S7 == 6) ep.extra_params["ez"] = -x-y;
@@ -2429,12 +2437,14 @@ EX namespace linepatterns {
       case patZebraTriangles:
         if(euclid) {
           if(patterns::sevenval(c)) break;
+          /* todo
           gridline(V, C0, tC0(eumove(-1, +3)), col, 3 + vid.linequality);
           gridline(V, C0, tC0(eumove(-3, +2)), col, 3 + vid.linequality);
           gridline(V, C0, tC0(eumove(-2, -1)), col, 3 + vid.linequality);
           gridline(V, C0, tC0(eumove(+1, -3)), col, 3 + vid.linequality);
           gridline(V, C0, tC0(eumove(+3, -2)), col, 3 + vid.linequality);
           gridline(V, C0, tC0(eumove(+2, +1)), col, 3 + vid.linequality);
+          */
           break;
           }
         if(zebra40(c) / 4 == 10) {

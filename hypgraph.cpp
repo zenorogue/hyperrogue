@@ -878,8 +878,6 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
 EX transmatrix sphereflip; // on the sphere, flip
 EX bool playerfound; // has player been found in the last drawing?
 
-double q3 = sqrt(double(3));
-
 EX bool outofmap(hyperpoint h) {
   if(GDIM == 3)
     return false;
@@ -1138,7 +1136,7 @@ vector<tuple<heptspin, hstate, transmatrix, ld> > drawn_cells;
 
 bool in_multi = false;
 
-bool drawcell_subs(cell *c, transmatrix V) {
+EX bool drawcell_subs(cell *c, transmatrix V) {
   
   #if CAP_GP    
   if(GOLDBERG) {
@@ -1163,8 +1161,10 @@ bool drawcell_subs(cell *c, transmatrix V) {
     }
   #endif
   
-  if(do_draw(c, V))
+  if(do_draw(c, V)) {
+    draw = true;
     drawcell(c, V);
+    }
 
   if(BITRUNCATED) forCellIdEx(c1, d, c) {
     if(c->c.spin(d) == 0) {
@@ -1234,62 +1234,6 @@ void hrmap_standard::draw() {
       drawn_cells.emplace_back(hs2, s2, Vd, band_shift);
       }
     }
-  }
-
-int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
-  
-EX transmatrix eumove(ld x, ld y) {
-  transmatrix Mat = Id;
-  Mat[LDIM][LDIM] = 1;
-  
-  if(a4) {
-    Mat[0][LDIM] += x * cgi.crossf;
-    Mat[1][LDIM] += y * cgi.crossf;
-    }
-  else {
-    Mat[0][LDIM] += (x + y * .5) * cgi.crossf;
-    // Mat[LDIM][0] += (x + y * .5) * cgi.crossf;
-    Mat[1][LDIM] += y * q3 /2 * cgi.crossf;
-    // Mat[LDIM][1] += y * q3 /2 * cgi.crossf;
-    }
-  
-  ld v = a4 ? 1 : q3;
-
-  while(Mat[0][LDIM] <= -16384 * cgi.crossf) Mat[0][LDIM] += 32768 * cgi.crossf;
-  while(Mat[0][LDIM] >= 16384 * cgi.crossf) Mat[0][LDIM] -= 32768 * cgi.crossf;
-  while(Mat[1][LDIM] <= -16384 * v * cgi.crossf) Mat[1][LDIM] += 32768 * v * cgi.crossf;
-  while(Mat[1][LDIM] >= 16384 * v * cgi.crossf) Mat[1][LDIM] -= 32768 * v * cgi.crossf;
-  return Mat;
-  }
-
-EX transmatrix eumove(int vec) {
-  int x, y;
-  tie(x,y) = vec_to_pair(vec);
-  return eumove(x, y);
-  }
-
-EX transmatrix eumovedir(int d) {
-  if(a4) {
-    d = d & 3;
-    switch(d) {
-      case 0: return eumove(1,0);
-      case 1: return eumove(0,1);
-      case 2: return eumove(-1,0);
-      case 3: return eumove(0,-1);
-      }
-    }
-  else {
-    d = gmod(d, S6);
-    switch(d) {
-      case 0: return eumove(1,0);
-      case 1: return eumove(0,1);
-      case 2: return eumove(-1,1);
-      case 3: return eumove(-1,0);
-      case 4: return eumove(0,-1);
-      case 5: return eumove(1,-1);
-      }
-    }
-  return eumove(0,0);
   }
 
 EX void spinEdge(ld aspd) { 
@@ -1957,7 +1901,7 @@ EX namespace dq {
 
 EX bool do_draw(cell *c) {
   // do not display out of range cells, unless on torus
-  if(c->pathdist == PINFD && geometry != gTorus && vid.use_smart_range == 0)
+  if(c->pathdist == PINFD && !(euclid && quotient) && vid.use_smart_range == 0)
     return false;
   // do not display not fully generated cells, unless changing range allowed
   if(c->mpdist > 7 && !allowChangeRange()) return false;
@@ -2036,7 +1980,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
     if(imag(z) < -models::spiral_cone_rad/2-1e-5 || imag(z) >= models::spiral_cone_rad/2-1e-5) return false;
     }
   if(cells_drawn > vid.cells_drawn_limit) return false;
-  bool usr = vid.use_smart_range || quotient || euwrap;
+  bool usr = vid.use_smart_range || quotient;
   if(usr && cells_drawn >= 50 && !in_smart_range(T) && !(WDIM == 2 && GDIM == 3 && hdist0(tC0(T)) < 2.5)) return false;
   if(vid.use_smart_range == 2 && !limited_generation(c)) return false;
   return true; 

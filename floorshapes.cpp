@@ -179,7 +179,7 @@ void generate_matrices_scale(ld scale, int noft) {
     }
   else {
     generate_matrices(hex_matrices, ohex, msh(geometry, S6, cgi.hexvdist, cgi.hexhexdist, cgi.hcrossf, (S3-3)*M_PI/S3, scale));
-    generate_matrices(hept_matrices, ohept, msh(geometry, S7, cgi.rhexf, cgi.hcrossf, cgi.hcrossf, euclid6?0:euclid4?0:M_PI/S7, scale));
+    generate_matrices(hept_matrices, ohept, msh(geometry, S7, cgi.rhexf, cgi.hcrossf, cgi.hcrossf, M_PI/S7, scale));
     }
   }
 
@@ -333,7 +333,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       
       for(int k=0; k<SIDEPARS; k++) sizeto(fsh.side[k], id);
       
-      int td = ((PURE || euclid) && !(S7&1)) ? S42+S6 : 0;
+      int td = (PURE && !(S7&1)) ? S42+S6 : 0;
       if(&fsh == &shBigHepta) td += S6;
     
       int b = 0;
@@ -846,7 +846,7 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
     return &queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
   #endif
-  else if((euclid || GOLDBERG) && ishex1(c) && !penrose) 
+  else if(GOLDBERG && ishex1(c)) 
     return &queuepolyat(V * pispin, shv[0], col, prio);
   else if(!(S7&1) && PURE && !penrose && !a4) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
@@ -888,14 +888,15 @@ EX void viewmat() {
     for(int i=0; i<cwt.at->type; i++) {
       hyperpoint ci = V * get_corner_position(cwt.at, i);
       hyperpoint ci1 = V * get_corner_position(cwt.at, (i+1) % cwt.at->type);
+
       hyperpoint cn = V * nearcorner(cwt.at, i);
       hyperpoint cf0 = V * farcorner(cwt.at, i, 0);
       hyperpoint cf1 = V * farcorner(cwt.at, i, 1);
       queuestr(ci, 20, its(i), 0x0000FF, 1);
       if(vid.grid)
         queuestr(cn, 20, its(i), 0x00FF00, 1);
-      else
-        queuestr(gmatrix[cwt.at->move(i)] * C0, 20, its(i), 0x00FFFF, 1);
+      else 
+        queuestr(V * currentmap->adj(cwt.at, i) * C0, 20, its(i), 0x00FFFF, 1);
       queueline(V * C0, ci, 0xFFFFFFFF, 3);
       queueline(ci, ci1, 0xFFFF00FF, 3);
       queueline(ci, cn, 0xFF00FFFF, 3);

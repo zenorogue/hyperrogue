@@ -146,17 +146,11 @@ void addMessage(string s, char spamtype = 0);
 #define nonorientable (cgflags & qNONORIENTABLE)
 #define elliptic (cgflags & qELLIPTIC)
 #define quotient (cgflags & qANYQ)
-#define euwrap (quotient && euclid)
-#define fulltorus (bounded && euclid)
 #define smallbounded (cgflags & qSMALL)
 #define bounded (cgflags & qBOUNDED)
 
 // Dry Forest burning, heat transfer, etc. are performed on the whole universe
 #define doall (bounded)
-
-// These geometries are generated without the heptagon structure. 
-// 'master' holds the coordinates
-#define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
 
 #define sphere_narcm (sphere && !archimedean)
 
@@ -171,8 +165,8 @@ void addMessage(string s, char spamtype = 0);
 #define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
 #define smallsphere (sphere_narcm && S7 < 5)
 #define bigsphere (sphere_narcm && S7 == 5)
-#define euclid4 (masterless && a4)
-#define euclid6 (masterless && !a4)
+#define euclid4 (euclid && WDIM == 2 && a4)
+#define euclid6 (euclid && WDIM == 2 && !a4)
 
 #define S6 (S3*2)
 #define MAX_S3 4
@@ -778,7 +772,6 @@ template <class T> void texture_order(const T& f) {
 
 static const color_t NOCOLOR = 0;
 
-  typedef pair<cell**, bool> euc_pointer;
   static const int max_vec = (1<<14);
   extern bool needConfirmationEvenIfSaved();
 

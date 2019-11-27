@@ -8,533 +8,6 @@
 #include "hyper.h"
 namespace hr {
 
-// 2D Euclidean space
-
-// --- euclidean geometry ---
-
-// NOTE: patterns assume that pair_to_vec(0,1) % 3 == 2!
-// Thus, pair_to_vec(0,1) must not be e.g. a power of four
-
-EX int cell_to_vec(cell *c);
-
-EX int pair_to_vec(int x, int y) {
-  return x + (y << 15);
-  }
-
-EX pair<int, int> vec_to_pair(int vec) {
-  int x = vec & ((1<<15)-1);
-  int y = (vec >> 15);
-  if(x >= (1<<14)) x -= (1<<15), y++;
-  return {x, y};
-  }
-
-EX namespace torusconfig {
-  // the configuration of the torus topology.
-  // torus cells are indexed [0..qty),
-  // where the cell to the right from i is indexed i+dx,
-  // and the cell to the down-right is numbered i+dy
-
-  // Changed with command line option: -tpar <qty>,<dx>,<dy>
-  // Ideally, qty, dx, and dy should have the same "modulo 3"
-  // values as the default -- otherwise the three-color
-  // pattern breaks. Also, they should have no common
-  // prime divisor.
-  EX int def_qty = 127*3;
-  EX int dx = 1;
-  EX int def_dy = -11*2;
-  EX int qty = def_qty;
-  EX int dy = def_dy;
-  
-  EX int sdx = 12;
-  EX int sdy = 12;
-  
-  #if HDR
-  enum eTorusMode : char { 
-    tmSingleHex, 
-    tmSingle, 
-    tmSlantedHex, 
-    tmStraight, 
-    tmStraightHex,
-    tmKlein,
-    tmKleinHex,
-    tmCylinder,
-    tmCylinderHex,
-    tmMobius,
-    tmMobiusHex,
-    };
-
-  struct torusmode_info {
-    string name;
-    flagtype flags;
-    };
-
-  enum : flagtype {
-    TF_SINGLE = 1,
-    TF_SIMPLE = 2,
-    TF_WEIRD  = 4,
-    TF_HEX    = 16,
-    TF_SQUARE = 32,
-    TF_CYL    = 64,
-    TF_KLEIN = 256,
-    };
-  #endif
-
-  // new values to change
-  EX int newqty, newdy, newsdx, newsdy;
-  EX int torus_cx, torus_cy;
-  
-  EX vector<torusmode_info> tmodes = {
-    {"single row (hex)", TF_SINGLE | TF_HEX},
-    {"single row (squares)", TF_SINGLE | TF_SQUARE},
-    {"parallelogram (hex)", TF_SIMPLE | TF_HEX},
-    {"rectangle (squares)", TF_SIMPLE | TF_SQUARE},
-    {"rectangle (hex)", TF_WEIRD | TF_HEX},
-    {"Klein bottle (squares)", TF_SIMPLE | TF_KLEIN | TF_SQUARE},
-    {"Klein bottle (hex)", TF_WEIRD | TF_KLEIN | TF_HEX},
-    {"cylinder (squares)", TF_SIMPLE | TF_CYL },
-    {"cylinder (hex)", TF_SIMPLE | TF_CYL | TF_HEX},
-    {"Möbius band (squares)", TF_SIMPLE | TF_CYL | TF_KLEIN},
-    {"Möbius band (hex)", TF_SIMPLE | TF_CYL | TF_HEX | TF_KLEIN},
-    };
-  
-  EX eTorusMode torus_mode;
-  EX eTorusMode newmode;
-  EX flagtype tmflags() { return tmodes[torus_mode].flags; }
-  
-  EX int getqty() {
-    if(tmflags() & TF_SINGLE)
-      return qty;
-    else
-      return sdx * sdy;
-    }
-  
-  int getvec(int x, int y) {
-    if(tmflags() & TF_SINGLE)
-      return x * dx + y * dy;
-    else if(tmflags() & TF_SIMPLE)
-      return pair_to_vec(x, y);
-    else
-      return pair_to_vec(-y - 2 * x, 3 * y);
-    }
-  
-  int id_to_vec(int id, bool mirrored = false) {
-    if(tmflags() & TF_SINGLE)
-      return id;
-    else {
-      int dx = id % sdx;
-      int dy = id / sdx;
-      if(mirrored) 
-        dy = -dy, dx += sdx;
-      if(tmflags() & TF_SIMPLE)
-        return pair_to_vec(dx, dy);
-      else
-        return pair_to_vec(- 2 * dx - (dy & 1), 3 * dy);
-      }
-    }
-  
-  pair<int, bool> vec_to_id_mirror(int vec) {
-    if(tmflags() & TF_SINGLE) {
-      return {gmod(vec, qty), false};
-      }
-    else {
-      int x, y;
-      tie(x,y) = vec_to_pair(vec);
-      bool mirror = false;
-      if(tmflags() & TF_KLEIN) {
-        if(tmflags() & TF_WEIRD) {
-          x = gmod(x, 4 * sdx);
-          mirror = x > 0 && x <= 2 * sdx;
-          }
-        else {
-          x = gmod(x, 2 * sdx);
-          mirror = x >= sdx;
-          }
-        if(mirror) y = -y;
-        }
-      if(tmflags() & TF_WEIRD) {
-        y /= 3; x = (x + (y&1)) / -2;
-        }
-      x = gmod(x, sdx), y = gmod(y, sdy);
-      return {y * sdx + x, mirror};
-      }
-    }
-
-  EX int vec_to_id(int vec) {
-    return vec_to_id_mirror(vec).first;
-    }
-
-  void torus_test() {
-    printf("Testing torus vec_to_pair/pair_to_vec...\n");
-    for(int x=-10; x<=10; x++)
-    for(int y=-10; y<=10; y++) {
-      auto p = vec_to_pair(pair_to_vec(x, y));
-      if(p.first != x || p.second != y)
-        printf("Failed for (%d,%d) -> [%d] -> (%d,%d)\n", x, y, pair_to_vec(x,y), p.first, p.second);
-      }
-    printf("Testing id_to_vec / vec_to_id...\n");
-    for(int i=0; i < getqty(); i++) 
-    for(int m=0; m< (torus_mode == tmKlein ? 2 : 1); m++)
-      if(vec_to_id_mirror(id_to_vec(i, m)) != pair<int,bool> (i,m))
-        printf("Failed for id %d.%d [%d] (%d.%d)\n", i, m, id_to_vec(i,m), vec_to_id(id_to_vec(i,m)), vec_to_id_mirror(id_to_vec(i,m)).second);
-    }
-
-  int tester = addHook(hooks_tests, 0, torus_test);
-  
-  EX void activate() {
-    auto& gi(ginf[gTorus]);
-
-    if(tmflags() & TF_HEX)
-      gi.vertex = 3, gi.sides = 6, gi.tiling_name = "{6,3}";
-    else
-      gi.vertex = 4, gi.sides = 4, gi.tiling_name = "{4,4}";
-
-    flagtype& flags = gi.flags;
-    
-    set_flag(flags, qNONORIENTABLE, tmflags() & TF_KLEIN);
-    set_flag(flags, qBOUNDED, !(tmflags() & TF_CYL));
-    
-    int i = 0;
-    if(tmflags() & TF_KLEIN) i++;
-    if(tmflags() & TF_CYL) i+=2;
-    
-    const char *quonames[4] = {"torus", "Klein bottle", "cylinder", "Möbius band"};
-    gi.quotient_name = quonames[i];
-    }
-
-  int dscalar(gp::loc e1, gp::loc e2) {
-    return 2 * (e1.first * e2.first + e1.second*e2.second) + (S3 == 3 ? e1.first*e2.second + e2.first * e1.second : 0);
-    }
-    
-  EX int dcross(gp::loc e1, gp::loc e2) {
-    return e1.first * e2.second - e1.second*e2.first;
-    }
-    
-  EX gp::loc sdxy() { return gp::loc(sdx, sdy); }
-  
-  EX int mobius_dir_basic() {
-    int dscalars[6];
-    for(int a=0; a<SG6; a++)
-      dscalars[a] = dscalar(gp::eudir(a), sdxy());
-    for(int a=0; a<SG6; a++)
-    for(int b=0; b<SG6; b++)
-      if(a != b && dscalars[a] == dscalars[b]) {
-        return (a + b) % SG6;
-      }
-    return -1;
-    }
-  
-  EX bool mobius_symmetric(bool square, int dx, int dy) {
-    dynamicval<eGeometry> g(geometry, square ? gEuclidSquare : gEuclid);
-    dynamicval<int> gx(sdx, dx);
-    dynamicval<int> gy(sdy, dy);
-    return mobius_dir_basic() != -1;
-    }
-
-  void mobius_flip(int&x, int& y) {
-  
-    int d = mobius_dir_basic();
-    int a, b;
-    if(d == 0) a = 1, b = SG6-1;
-    else a = 0, b = d;
-    auto p1 = gp::eudir(a);
-    auto p2 = gp::eudir(b);
-
-    // x = sdx * s + px * t
-    // y = sdy * s + py * t
-    // py * x = py * sdx * s + px * py * t
-    // px * y = px * sdy * s + px + py * t
-    // py * x - px * y = py * sdx * s - px * sdy * s
-    // s = (py * x - px * y) / (py * sdx - px * sdy)
-    
-    int det = p1.second * sdx - p1.first * sdy;
-    int smul = p1.second * x - p1.first * y;
-    int tmul = sdx * y - sdy * x;
-    
-    x = (tmul * p2.first + smul * sdx) / det;
-    y = (tmul * p2.second + smul * sdy) / det;
-    
-    // println(hlog, make_pair(ox,oy), " [", d, "] ", make_pair(x,y), " p1 = ", p1, " p2 = ", p2, " det = ", det, " smul = ", smul, " tmul = ", tmul);
-    }
-
-  EX int mobius_dir(cell *c) {
-    if(c->type == 8) return mobius_dir_basic() * 2;
-    else return mobius_dir_basic();
-    }
-  
-  EX bool be_canonical(int& x, int& y) {
-    using namespace torusconfig;
-    
-    int periods = gdiv(dscalar(gp::loc(x,y), sdxy()), dscalar(sdxy(), sdxy()));
-    
-    y -= sdy * periods;
-    x -= sdx * periods;      
-    
-    bool b = false;
-
-    if(nonorientable && (periods & 1)) {
-      mobius_flip(x, y);
-      b = true;
-      }
-    
-    return b;
-    }
-  
-  EX int cyldist(int id1, int id2) {
-  
-    int x1, y1, x2, y2;
-    tie(x1, y1) = vec_to_pair(id1);
-    tie(x2, y2) = vec_to_pair(id2);
-    be_canonical(x1, y1);
-    be_canonical(x2, y2);
-    
-    int dist = 1000000000;
-    
-    for(int a1=-1; a1<=1; a1++) 
-    for(int a2=-1; a2<=1; a2++) {
-      int ax1 = x1 + sdx * a1;
-      int ay1 = y1 + sdy * a1;
-      if(nonorientable && a1) mobius_flip(ax1, ay1);
-      int ax2 = x2 + sdx * a2;
-      int ay2 = y2 + sdy * a2;
-      if(nonorientable && a2) mobius_flip(ax2, ay2);
-      dist = min(dist, eudist(ax1 - ax2, ay1 - ay2));
-      
-      }
-    
-    return dist;
-    }
-  EX }
-
-EX int euclid_getvec(int dx, int dy) {
-  if(euwrap) return torusconfig::getvec(dx, dy);
-  else return pair_to_vec(dx, dy);
-  }
-
-template<class T> void build_euclidean_moves(cell *c, int vec, const T& builder) {
-  int x, y;
-  tie(x,y) = vec_to_pair(vec);
-  c->type = a4 ? (PURE || ((x^y^1) & 1) ? 4 : 8) : 6;
-
-  if(c->type == 4) {
-    int m = PURE ? 1 : 2;
-    builder(euclid_getvec(+1,+0), 0, 2 * m);        
-    builder(euclid_getvec(+0,+1), 1, 3 * m);
-    builder(euclid_getvec(-1,+0), 2, 0 * m);
-    builder(euclid_getvec(+0,-1), 3, 1 * m);
-    }
-  else if(c->type == 8) {
-    builder(euclid_getvec(+1,+0), 0, 2);
-    builder(euclid_getvec(+1,+1), 1, 5);
-    builder(euclid_getvec(+0,+1), 2, 3);
-    builder(euclid_getvec(-1,+1), 3, 7);
-    builder(euclid_getvec(-1,+0), 4, 0);
-    builder(euclid_getvec(-1,-1), 5, 1);
-    builder(euclid_getvec(+0,-1), 6, 1);
-    builder(euclid_getvec(+1,-1), 7, 3);
-    }
-  else /* 6 */ {
-    builder(euclid_getvec(+1,+0), 0, 3);
-    builder(euclid_getvec(+0,+1), 1, 4);
-    builder(euclid_getvec(-1,+1), 2, 5);
-    builder(euclid_getvec(-1,+0), 3, 0);
-    builder(euclid_getvec(+0,-1), 4, 1);
-    builder(euclid_getvec(+1,-1), 5, 2);
-    }
-  }
-
-struct hrmap_euclid_any : hrmap_standard {
-  void draw() override;
-  };
-
-struct hrmap_torus : hrmap_euclid_any {
-
-  vector<cell*> all;
-  vector<int> dists;
-
-  virtual vector<cell*>& allcells() { return all; }
-  
-  cell *gamestart() {
-    return all[0];
-    }
-
-  hrmap_torus() {
-    using namespace torusconfig;
-    int q = getqty();
-    all.resize(q);
-    for(int i=0; i<q; i++) {
-      all[i] = newCell(8, encodeId(i));
-      }
-    for(int i=0; i<q; i++) {
-      int iv = id_to_vec(i);
-      build_euclidean_moves(all[i], iv, [&] (int delta, int d, int d2) {
-        auto im = vec_to_id_mirror(iv + delta);
-        all[i]->move(d) = all[im.first];
-        all[i]->c.setspin(d, d2, im.second);
-        });
-      }
-    if(nonorientable) for(cell *c: all) for(int d=0; d<c->type; d++) {
-      cell *c2 = c->move(d);
-      for(int d2=0; d2<c2->type; d2++) 
-        if(c2->move(d2) == c)
-          c->c.setspin(d, d2, c->c.mirror(d));
-      }
-    celllister cl(gamestart(), 100, 100000000, NULL);
-    dists.resize(q);
-    for(int i=0; i<isize(cl.lst); i++)
-      dists[decodeId(cl.lst[i]->master)] = cl.dists[i];
-    }
-  
-  ~hrmap_torus() {
-    for(cell *c: all) tailored_delete(c);
-    }
-
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
-    transmatrix t = Id;
-    // if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
-    int d = celldistance(c2, c1);
-    while(d) {
-      forCellIdEx(cc, i, c1) {
-        int d1 = celldistance(cc, c2);
-        if(d1 < d) {
-          t = t * adj(c1, i);
-          c1 = cc;
-          d = d1;
-          goto again;
-          }
-        }
-      printf("ERROR not reached\n");
-      break;
-      again: ;
-      }
-    return t;
-    }
-  };
-
-hrmap_torus *torusmap() {
-  return dynamic_cast<hrmap_torus*> (currentmap);
-  }
-
-/* cell *getTorusId(int id) {
-  hrmap_torus *cur = torusmap();
-  if(!cur) return NULL;
-  return cur->all[id];
-  } */
-
-struct hrmap_euclidean : hrmap_euclid_any {
-
-  cell *gamestart() {
-    return *(euclideanAtCreate(0).first);
-    }
-
-  struct euclideanSlab {
-    cell* a[256][256];
-    euclideanSlab() {
-      for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-        a[y][x] = NULL;
-      }
-    ~euclideanSlab() {
-      for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-        if(a[y][x]) tailored_delete(a[y][x]);
-      }
-    };
-  
-  static const int slabs = max_vec / 256;
-  
-  euclideanSlab* euclidean[slabs][slabs];
-  
-  hrmap_euclidean() {
-    for(int y=0; y<slabs; y++) for(int x=0; x<slabs; x++)
-      euclidean[y][x] = NULL;
-    }
-  
-  euc_pointer at(int vec) {
-    auto p = vec_to_pair(vec);
-    int x = p.first, y = p.second;
-    bool mobius = false;
-    if(euwrap) 
-      mobius = torusconfig::be_canonical(x, y);
-    euclideanSlab*& slab = euclidean[(y>>8)&(slabs-1)][(x>>8)&(slabs-1)];
-    if(!slab) slab = new hrmap_euclidean::euclideanSlab;
-    return make_pair(&(slab->a[y&255][x&255]), mobius);
-    }
-  
-  map<int, struct cdata> eucdata;
-
-  ~hrmap_euclidean() {
-    for(int y=0; y<slabs; y++) for(int x=0; x<slabs; x++)
-      if(euclidean[y][x]) { 
-        tailored_delete(euclidean[y][x]);
-        euclidean[y][x] = NULL;
-        }
-    eucdata.clear();
-    }
-
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
-    return eumove(cell_to_vec(c2) - cell_to_vec(c1));
-    }
-  };
-
-EX cellwalker vec_to_cellwalker(int vec) {
-  if(!fulltorus) {
-    auto p = euclideanAtCreate(vec);
-    if(p.second)
-      return cellwalker(*p.first, torusconfig::mobius_dir(*p.first), true);
-    else
-      return cellwalker(*p.first, 0, false);
-    }
-  else {
-    hrmap_torus *cur = torusmap();
-    if(!cur) return cellwalker(NULL, 0);
-    auto p = torusconfig::vec_to_id_mirror(vec);
-    return cellwalker(cur->all[p.first], 0, p.second);
-    }
-  }
-
-EX int cellwalker_to_vec(cellwalker cw) {
-  int id = decodeId(cw.at->master);
-  if(!fulltorus) {
-    if(nonorientable) {
-      auto ep = euclideanAt(id);
-      if(ep.second != cw.mirrored) {
-        int x, y;
-        tie(x, y) = vec_to_pair(id);
-        x += torusconfig::sdx;
-        y += torusconfig::sdy;
-        torusconfig::mobius_flip(x, y);
-        return pair_to_vec(x, y);
-        }
-      }
-    return id;
-    }
-  return torusconfig::id_to_vec(id, cw.mirrored);
-  }
-
-EX int cell_to_vec(cell *c) {
-  int id = decodeId(c->master);
-  if(!fulltorus) return id;
-  return torusconfig::id_to_vec(id, false);
-  }
-
-EX pair<int, int> cell_to_pair(cell *c) {
-  return vec_to_pair(cell_to_vec(c));
-  }
-
-union heptacoder {
-  heptagon *h;
-  int id;
-  };
-
-EX int decodeId(heptagon* h) {
-  heptacoder u;
-  u.h = h; return u.id;
-  }
-
-EX heptagon* encodeId(int id) {
-  heptacoder u;
-  u.id = id;
-  return u.h;
-  }
-
 // 3D Euclidean space
 
 #if MAXMDIM == 4
@@ -563,6 +36,10 @@ EX namespace euclid3 {
       }
     return res; 
     }
+  
+  EX coord ascoord(array<int, 3> x) {
+    return x[0] * main_axes[0] + x[1] * main_axes[1] + x[2] * main_axes[2];
+    }
 
   EX vector<coord> get_shifttable() {
     static const coord D0 = main_axes[0];
@@ -582,6 +59,14 @@ EX namespace euclid3 {
         shifttable = { 2*D0, 2*D1, 2*D2, D0+D1+D2, D0+D1-D2, D0-D1-D2, D0-D1+D2 };
         break;
       
+      case gEuclid:
+        shifttable = { D0, D1, D1-D0, -D0, -D1, D0-D1 };
+        break;
+
+      case gEuclidSquare:
+        shifttable = { D0, D1, -D0, -D1 };
+        break;
+      
       default:
         printf("euclid3::get_shifttable() called in geometry that is not euclid3");
         exit(1);
@@ -593,18 +78,19 @@ EX namespace euclid3 {
     return shifttable;
     }
   
-  coord canonicalize(coord x);
-  EX void build_torus3();
-  coord twist(coord x, transmatrix& M);
+  EX coord canonicalize(coord x);
   EX int twisted;
   intmatrix T0;
+  EX gp::loc twisted_vec, ortho_vec;
   
-  struct hrmap_euclid3 : hrmap {
+  struct hrmap_euclid3 : hrmap_standard {
     vector<coord> shifttable;
     vector<transmatrix> tmatrix;
     map<coord, heptagon*> spacemap;
     map<heptagon*, coord> ispacemap;
     cell *camelot_center;
+
+    map<gp::loc, struct cdata> eucdata;
 
     vector<cell*> toruscells;  
     vector<cell*>& allcells() override { 
@@ -621,11 +107,10 @@ EX namespace euclid3 {
     hrmap_euclid3() {
       shifttable = get_shifttable();
       tmatrix.resize(S7);
-      for(int i=0; i<S7; i++) tmatrix[i] = Id;
-      for(int i=0; i<S7; i++) for(int j=0; j<3; j++)
-        tmatrix[i][j][LDIM] = getcoord(shifttable[i])[j];
+      for(int i=0; i<S7; i++) 
+        tmatrix[i] = eumove(shifttable[i]);
       camelot_center = NULL;
-      build_torus3();
+      build_torus3(geometry);
       }
 
     heptagon *getOrigin() override {
@@ -655,14 +140,14 @@ EX namespace euclid3 {
     heptagon *build(heptagon *parent, int d, coord at) {
       auto h = get_at(at);
       int d1 = (d+S7/2)%S7;
+      bool mirr = false;
       if(twisted) {
-        coord a = ispacemap[parent];
-        coord b = ispacemap[h];
-        for(int i=0; i<S7; i++) 
-          if(canonicalize(b + shifttable[i]) == a)
-            d1 = i;
+        transmatrix I;
+        auto st = getcoord(shifttable[d1]);
+        twist(ispacemap[parent] + shifttable[d], st, I, mirr);
+        for(int i=0; i<S7; i++) if(getcoord(shifttable[i]) == st) d1 = i;
         }
-      h->c.connect(d1, parent, d, false);
+      h->c.connect(d1, parent, d, mirr);
       return h;
       }
   
@@ -670,18 +155,21 @@ EX namespace euclid3 {
       return build(parent, d, canonicalize(ispacemap[parent] + shifttable[d]));
       }  
 
-    transmatrix get_move(cell *c, int i) {
+    transmatrix adj(heptagon *h, int i) override {
       if(!twisted) return tmatrix[i];
       transmatrix res = tmatrix[i];
-      coord id = ispacemap[c->master];
+      coord id = ispacemap[h];
       id += shifttable[i];
-      twist(id, res);
+      auto dummy = getcoord(0);
+      bool dm = false;
+      twist(id, dummy, res, dm);
+      
       return res;
       }
 
-    void draw() override {
+    void draw() {
       dq::visited_by_matrix.clear();
-      dq::enqueue_by_matrix(centerover->master, cview());
+      dq::enqueue_by_matrix(centerover->master, cview() * master_relative(centerover, true));
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -692,12 +180,12 @@ EX namespace euclid3 {
         dq::drawqueue.pop();
         
         cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
+
+        bool draw = drawcell_subs(c, V * spin(master_to_c7_angle()));
         if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   
-        for(int i=0; i<S7; i++)
-          dq::enqueue_by_matrix(h->move(i), V * get_move(h->c7, i));
+        if(draw) for(int i=0; i<S7; i++)
+          dq::enqueue_by_matrix(h->move(i), V * adj(h, i));
         }
       }
     
@@ -722,7 +210,9 @@ EX namespace euclid3 {
           for(int s=0; s<3; s++) {
             cs += d * T0[2][2] * main_axes[2];
             I = I * eupush3(0, 0, d * T0[2][2]);
-            cs = twist(cs, I);
+            auto dummy = getcoord(0);
+            bool dm = false;
+            cs = twist(cs, dummy, I, dm);
             transmatrix T1 = I * warppush(c2 - cs);
             if(hdist0(tC0(T1)) < hdist0(tC0(T)))
               T = T1;
@@ -732,8 +222,7 @@ EX namespace euclid3 {
         }
       auto d = ispacemap[h2] - ispacemap[h1];
       d = canonicalize(d);
-      auto v = getcoord(d);
-      return eupush3(v[0], v[1], v[2]);
+      return eumove(d);
       }
     
     vector<hyperpoint> get_vertices(cell* c) override {
@@ -765,6 +254,8 @@ EX namespace euclid3 {
     return ((hrmap_euclid3*) currentmap);
     }
 
+  hrmap_euclid3* eucmap() { return cubemap(); }
+
   EX vector<coord>& get_current_shifttable() { return cubemap()->shifttable; }
   EX map<coord, heptagon*>& get_spacemap() { return cubemap()->spacemap; }
   EX map<heptagon*, coord>& get_ispacemap() { return cubemap()->ispacemap; }
@@ -774,8 +265,8 @@ EX namespace euclid3 {
     return new hrmap_euclid3;
     }
 
-  EX transmatrix move_matrix(cell *c, int i) { 
-    return cubemap()->get_move(c, i);
+  EX transmatrix move_matrix(heptagon *h, int i) { 
+    return cubemap()->adj(h, i);
     }
   
   EX bool pseudohept(cell *c) {
@@ -912,14 +403,13 @@ EX namespace euclid3 {
   
   intmatrix T, T2, T_edit;
   int det;
-  int coords;
+  int infinite_dims;
   int twisted0, twisted_edit;
   
   EX void set_torus3(int x, int y, int z) {
     for(int i=0; i<3; i++) for(int j=0; j<3; j++) T0[i][j] = 0;
     tie(T0[0][0], T0[1][1], T0[2][2]) = make_tuple(x, y, z);    
     twisted = 0;
-    build_torus3();
     }
 
   EX void clear_torus3() {
@@ -935,7 +425,7 @@ EX namespace euclid3 {
     coord cat = 0;
     for(int i=0; i<3; i++) {
       int val = T2[0][i] * coo[0] + T2[1][i] * coo[1] + T2[2][i] * coo[2];
-      if(i < coords) val = gmod(val, det);
+      if(i < WDIM - infinite_dims) val = gmod(val, det);
       cat += val * main_axes[i];
       }
     return cat;
@@ -949,19 +439,22 @@ EX namespace euclid3 {
     canonical_seq.push_back(val);
     }
   
-  void build_torus3() {
+  EX void build_torus3(eGeometry g) {
   
-    for(int i=0; i<3; i++) {
+    int dim = ginf[g].g.gameplay_dimension;
+  
+    for(int i=0; i<dim; i++) {
       user_axes[i] = 0;
-      for(int j=0; j<3; j++) user_axes[i] += main_axes[j] * T0[i][j];
+      for(int j=0; j<dim; j++) user_axes[i] += main_axes[j] * T0[i][j];
       }
+    if(dim == 2) user_axes[2] = 0;
   
     optimal_axes = user_axes;
     
     again:
-    for(int i=0; i<3; i++) if(optimal_axes[i] < 0) optimal_axes[i] = -optimal_axes[i];
+    for(int i=0; i<dim; i++) if(optimal_axes[i] < 0) optimal_axes[i] = -optimal_axes[i];
     if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
-    if(optimal_axes[1] < optimal_axes[2]) swap(optimal_axes[1], optimal_axes[2]);
+    if(optimal_axes[1] < optimal_axes[dim]) swap(optimal_axes[1], optimal_axes[dim]);
     if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
     for(int i=0; i<3; i++) {
       int i1 = (i+1) % 3;
@@ -977,14 +470,14 @@ EX namespace euclid3 {
       }
   
     regular_axes = optimal_axes;
-    coords = 0;
-    for(int i=0; i<3; i++) if(optimal_axes[i]) coords++;
-  
+    infinite_dims = dim;
+    for(int i=0; i<dim; i++) if(optimal_axes[i]) infinite_dims--;
+    
     int attempt = 0;
     next_attempt:
-    for(int i=coords; i<3; i++)
+    for(int i=dim-infinite_dims; i<3; i++)
       regular_axes[i] = main_axes[(attempt+i)%3];
-      
+
     T = make_intmatrix(regular_axes);
     det = determinant(T);
     if(det == 0) { 
@@ -1005,54 +498,109 @@ EX namespace euclid3 {
     add_canonical(0);
     
     twisted = twisted0;
-    if(geometry != gCubeTiling && ((T0[0][0]+T0[2][2]) & 1)) twisted &=~ 1;
-    if(geometry != gCubeTiling && ((T0[1][1]+T0[2][2]) & 1)) twisted &=~ 2;
-    for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-      if(i != j && T0[i][j]) twisted = 0;
-    if(T0[2][2] == 0) twisted = 0;
-    if(T0[0][0] != T0[1][1]) twisted &= 3;
-    
-    for(eGeometry g: {gCubeTiling, gRhombic3, gBitrunc3}) {
-      set_flag(ginf[g].flags, qANYQ, coords);
-      set_flag(ginf[g].flags, qBOUNDED, coords == 3);
-      bool nonori = false;
-      if(twisted&1) nonori = !nonori;
-      if(twisted&2) nonori = !nonori;
-      if(twisted&4) nonori = !nonori;
-      set_flag(ginf[g].flags, qNONORIENTABLE, nonori);      
+    if(dim == 3) {
+      twisted &= 7;
+      if(g != gCubeTiling && ((T0[0][0]+T0[2][2]) & 1)) twisted &=~ 1;
+      if(g != gCubeTiling && ((T0[1][1]+T0[2][2]) & 1)) twisted &=~ 2;
+      for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+        if(i != j && T0[i][j]) twisted = 0;
+      if(T0[2][2] == 0) twisted = 0;
+      if(T0[0][0] != T0[1][1]) twisted &= 3;
+     }
+    else {
+      twisted &= 8;
+      twisted_vec = as_gp(T0[1]);
+      ortho_vec = as_gp(T0[0]);
+      if(twisted_vec == gp::loc{0,0}) twisted = 0;
+      if(chiral(twisted_vec)) twisted = 0;
+      if(dscalar(twisted_vec, ortho_vec))
+        twisted = 0;
       }
+    
+    set_flag(ginf[g].flags, qANYQ, infinite_dims < dim);
+    set_flag(ginf[g].flags, qBOUNDED, infinite_dims == 0);
+    bool nonori = false;
+    if(twisted&1) nonori = !nonori;
+    if(twisted&2) nonori = !nonori;
+    if(twisted&4) nonori = !nonori;
+    set_flag(ginf[g].flags, qNONORIENTABLE, nonori);      
+    }
+
+  void build_torus3() {
+    for(eGeometry g: { gEuclid, gEuclidSquare, gCubeTiling, gRhombic3, gBitrunc3}) 
+      build_torus3(g);
     }
   
   void swap01(transmatrix& M) {
     for(int i=0; i<4; i++) swap(M[i][0], M[i][1]);
     }
 
-  coord twist(coord x, transmatrix& M) {
-    auto coo = getcoord(x);
-    while(coo[2] >= T0[2][2]) {
-      coo[2] -= T0[2][2];
-      if(twisted & 1) coo[0] *= -1, M = M * MirrorX;
-      if(twisted & 2) coo[1] *= -1, M = M * MirrorY;
-      if(twisted & 4) swap(coo[0], coo[1]), swap01(M);
+  EX coord twist(coord x, array<int, 3>& d, transmatrix& M, bool& mirr) {
+    if(WDIM == 3) {
+      auto coo = getcoord(x);
+      while(coo[2] >= T0[2][2]) {
+        coo[2] -= T0[2][2];
+        if(twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
+        if(twisted & 2) coo[1] *= -1, d[1] *= -1, M = M * MirrorY;
+        if(twisted & 4) swap(coo[0], coo[1]), swap01(M), swap(d[0], d[1]);
+        }
+      while(coo[2] < 0) {
+        coo[2] += T0[2][2];
+        if(twisted & 4) swap(coo[0], coo[1]), swap(d[0], d[1]), swap01(M);
+        if(twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
+        if(twisted & 2) coo[1] *= -1, d[1] *= -1, M = M * MirrorY;
+        }
+      for(int i: {0,1})
+        if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
+      return coo[0] * main_axes[0] + coo[1] * main_axes[1] + coo[2] * main_axes[2];
       }
-    while(coo[2] < 0) {
-      coo[2] += T0[2][2];
-      if(twisted & 4) swap(coo[0], coo[1]), swap01(M);
-      if(twisted & 1) coo[0] *= -1, M = M * MirrorX;
-      if(twisted & 2) coo[1] *= -1, M = M * MirrorY;
+    else {
+      auto crd = getcoord(x);
+      gp::loc coo = gp::loc(crd[0], crd[1]);
+      gp::loc ort = (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)) * twisted_vec;
+      int dsc = dscalar(twisted_vec, twisted_vec);
+      gp::loc d0 (d[0], d[1]);
+      hyperpoint h = eumove(as_coord(twisted_vec)) * C0;
+      while(true) {
+        int dsx = dscalar(coo, twisted_vec);
+        if(dsx >= dsc) coo = coo - twisted_vec;
+        else if (dsx < 0) coo = coo + twisted_vec;
+        else break;
+        M = M * spintox(h) * MirrorY * rspintox(h);
+        auto s = ort * dscalar(d0, ort) * 2;
+        auto v = dscalar(ort, ort);
+        s.first /= v;
+        s.second /= v;
+        d0 = d0 - s;
+        s = ort * dscalar(coo, ort) * 2;
+        s.first /= v;
+        s.second /= v;
+        coo = coo - s;
+        mirr = !mirr;
+        }
+      if(ortho_vec != gp::loc{0,0}) {
+        int osc = dscalar(ortho_vec, ortho_vec);
+        while(true) {
+          int dsx = dscalar(coo, ortho_vec);
+          if(dsx >= osc) coo = coo - ortho_vec;
+          else if(dsx < 0) coo = coo + ortho_vec;
+          else break;
+          }
+        }
+      d[0] = d0.first; d[1] = d0.second;
+      return coo.first * main_axes[0] + coo.second * main_axes[1];
       }
-    for(int i: {0,1})
-      if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
-    return coo[0] * main_axes[0] + coo[1] * main_axes[1] + coo[2] * main_axes[2];
     }
 
   coord canonicalize(coord x) {
     if(twisted) {
       transmatrix M = Id;
-      return twist(x, M);
+      auto dummy = getcoord(0);
+      bool dm = false;
+      return twist(x, dummy, M, dm);
       }
-    if(coords == 0) return x;
-    if(coords == 1) {
+    if(infinite_dims == WDIM) return x;
+    if(infinite_dims == WDIM-1) {
       while(celldistance(x + optimal_axes[0]) <= celldistance(x)) x += optimal_axes[0];
       while(celldistance(x - optimal_axes[0]) <  celldistance(x)) x -= optimal_axes[0];
       return x;
@@ -1073,52 +621,73 @@ EX namespace euclid3 {
     }
 
   EX void show_torus3() {
-    cmode = sm::SIDE | sm::MAYDARK;
+    int dim = WDIM;
+    cmode = sm::SIDE | sm::MAYDARK | sm::TORUSCONFIG;
     gamescreen(1);  
-    dialog::init(XLAT("3D Euclidean spaces"));
-    for(int y=0; y<4; y++)
+    dialog::init(XLAT("Euclidean quotient spaces"));
+    
+    for(int y=0; y<dim+1; y++)
       dialog::addBreak(100);
+    
+    dialog::addInfo(XLAT("columns specify periods"));
+    dialog::addInfo(XLAT("(vectors you need to take to get back to start)"));
     
     dialog::addBreak(50);
 
-    bool nondiag = false;
-    for(int i=0; i<3; i++) 
-      for(int j=0; j<3; j++) 
-        if(T_edit[i][j] && i != j) nondiag = true;
-      
-    if(nondiag) {
-      dialog::addInfo(XLAT("twisting implemented only for diagonal matrices"));
-      dialog::addBreak(200);
-      }
-    else if(T_edit[2][2] == 0) {
-      dialog::addInfo(XLAT("nothing to twist"));
-      dialog::addInfo(XLAT("change the bottom left corner"));
-      dialog::addBreak(100);
+    if(dim == 3) {
+      bool nondiag = false;
+      for(int i=0; i<dim; i++) 
+        for(int j=0; j<dim; j++) 
+          if(T_edit[i][j] && i != j) nondiag = true;
+        
+      if(nondiag) {
+        dialog::addInfo(XLAT("twisting implemented only for diagonal matrices"));
+        dialog::addBreak(200);
+        }
+      else if(T_edit[dim-1][dim-1] == 0) {
+        dialog::addInfo(XLAT("nothing to twist"));
+        dialog::addInfo(XLAT("change the bottom left corner"));
+        dialog::addBreak(100);
+        }
+      else {
+        auto g = geometry;
+        if(g == gCubeTiling || (T_edit[0][0]+T_edit[2][2]) % 2 == 0)
+          dialog::addBoolItem(XLAT("flip X coordinate"), twisted_edit & 1, 'x');
+        else
+          dialog::addBoolItem(XLAT("flipping X impossible"), twisted_edit & 1, 'x');
+        dialog::add_action([] { twisted_edit ^= 1; });
+  
+        if(g == gCubeTiling || (T_edit[1][1]+T_edit[2][2]) % 2 == 0)
+          dialog::addBoolItem(XLAT("flip Y coordinate"), twisted_edit & 2, 'y');
+        else
+          dialog::addBoolItem(XLAT("flipping Y impossible"), twisted_edit & 2, 'y');
+        dialog::add_action([] { twisted_edit ^= 2; });
+  
+        if(T_edit[0][0] == T_edit[1][1])
+          dialog::addBoolItem(XLAT("swap X and Y"), twisted_edit & 4, 'z');
+        else
+          dialog::addBoolItem(XLAT("swapping impossible"), twisted_edit & 4, 'z');
+        dialog::add_action([] { twisted_edit ^= 4; });
+        }
       }
     else {
-      if(geometry == gCubeTiling || (T_edit[0][0]+T_edit[2][2]) % 2 == 0)
-        dialog::addBoolItem(XLAT("flip X coordinate"), twisted_edit & 1, 'x');
-      else
-        dialog::addBoolItem(XLAT("flipping X impossible"), twisted_edit & 1, 'x');
-      dialog::add_action([] { twisted_edit ^= 1; });
-
-      if(geometry == gCubeTiling || (T_edit[1][1]+T_edit[2][2]) % 2 == 0)
-        dialog::addBoolItem(XLAT("flip Y coordinate"), twisted_edit & 2, 'y');
-      else
-        dialog::addBoolItem(XLAT("flipping Y impossible"), twisted_edit & 2, 'y');
-      dialog::add_action([] { twisted_edit ^= 2; });
-
-      if(T_edit[0][0] == T_edit[1][1])
-        dialog::addBoolItem(XLAT("swap X and Y"), twisted_edit & 4, 'z');
-      else
-        dialog::addBoolItem(XLAT("swapping impossible"), twisted_edit & 4, 'z');
-      dialog::add_action([] { twisted_edit ^= 4; });
+      if(T_edit[1][0] == 0 && T_edit[1][1] == 0)
+        dialog::addInfo(XLAT("change the second column for Möbius bands and Klein bottles"));
+      else if(chiral(as_gp(T_edit[1])))
+        dialog::addInfo(XLAT("second period is chiral -- cannot be mirrored"));
+      else if(dscalar(as_gp(T_edit[1]), as_gp(T_edit[0])))
+        dialog::addInfo(XLAT("periods must be orthogonal for mirroring"));
+      else {
+        dialog::addBoolItem(XLAT("mirror flip in the second period"), twisted_edit & 8, 'x');
+        dialog::add_action([] { twisted_edit ^= 8; });
+        }
       }
     
     dialog::addBreak(50);
     
     char xch = 'p';
     for(eGeometry g: {gCubeTiling, gRhombic3, gBitrunc3}) {
+      if(dim == 2) g = geometry;
       dialog::addItem(XLAT(ginf[g].menu_displayed_name), xch++);
       dialog::add_action([g] {
         stop_game();
@@ -1127,17 +696,19 @@ EX namespace euclid3 {
         twisted0 = twisted_edit;
         start_game();
         });
+      if(dim == 2) break;
       }
+
     dialog::addBreak(50);
     dialog::addBack();
     dialog::display();
     
     int i = -1;
     for(auto& v: dialog::items) if(v.type == dialog::diBreak) {
-      if(i >= 0 && i < 3) {
-        for(int j=0; j<3; j++) {
+      if(i >= 0 && i < dim) {
+        for(int j=0; j < dim; j++) {
           char ch = 'a' + i * 3 + j;
-          if(displayfr(dialog::dcenter + dialog::dfspace * 4 * (j-1), v.position, 2, dialog::dfsize, its(T_edit[j][i]), 0xFFFFFF, 8))
+          if(displayfr(dialog::dcenter + dialog::dfspace * 4 * (j-(dim-1.)/2), v.position, 2, dialog::dfsize, its(T_edit[j][i]), 0xFFFFFF, 8))
             getcstat = ch;
           dialog::add_key_action(ch, [=] {
             dialog::editNumber(T_edit[j][i], -10, +10, 1, 0, "", XLAT(
@@ -1174,6 +745,16 @@ EX namespace euclid3 {
         }
       build_torus3();
       }
+    else if(argis("-t2")) {
+      PHASEFROM(2);
+      stop_game();
+      for(int i=0; i<2; i++)
+      for(int j=0; j<2; j++) {
+        shift(); T0[i][j] = argi();
+        }
+      shift(); twisted0 = argi();
+      build_torus3();
+      }
     else if(argis("-twist3")) {
       PHASEFROM(2);
       stop_game();
@@ -1190,13 +771,14 @@ EX namespace euclid3 {
       start_game();
       celllister cl(cwt.at, 10000, 10000, NULL);
       for(cell *c: cl.lst) {
+        heptagon *h = c->master;
         for(int i=0; i<S7; i++)
         for(int j=0; j<S7; j++)
         for(int k=0; k<S7; k++)
         for(int l=0; l<S7; l++)
-          if(c->move(i) && c->move(k) && c->move(i)->move(j) == c->move(k)->move(l) && c->move(i)->move(j)) {
-            transmatrix T1 = move_matrix(c, i) * move_matrix(c->move(i), j);
-            transmatrix T2 = move_matrix(c, k) * move_matrix(c->move(k), l);
+          if(h->move(i) && c->move(k) && h->move(i)->move(j) == h->move(k)->move(l) && h->move(i)->move(j)) {
+            transmatrix T1 = move_matrix(h, i) * move_matrix(h->move(i), j);
+            transmatrix T2 = move_matrix(h, k) * move_matrix(h->move(k), l);
             if(!eqmatrix(T1, T2)) {
               println(hlog, c, " @ ", getcoord(cubemap()->ispacemap[c->master]), " : ", i, "/", j, "/", k, "/", l, " :: ", T1, " vs ", T2);
               exit(1);
@@ -1215,82 +797,80 @@ EX namespace euclid3 {
 
 #endif
 
-EX ld matrixnorm(const transmatrix& Mat) {
-  return Mat[0][LDIM] * Mat[0][LDIM] + Mat[1][LDIM] * Mat[1][LDIM] + Mat[2][LDIM] * Mat[2][LDIM];
+EX int dscalar(gp::loc e1, gp::loc e2) {
+  return 2 * (e1.first * e2.first + e1.second*e2.second) + (S3 == 3 ? e1.first*e2.second + e2.first * e1.second : 0);
   }
-  
-void hrmap_euclid_any::draw() {
-  DEBB(DF_GRAPH, ("drawEuclidean\n"));
-  sphereflip = Id;
-  // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
-  //   mindx, mindy, maxdx, maxdy);
-  int pvec = cellwalker_to_vec(cellwalker(centerover));
-  
-  typedef pair<int, int> euspot;
-  
-  const euspot zero = {0,0};
-  
-  set<euspot> visited = {zero};
-  vector<euspot> dfs = {zero};
 
-  auto View0 = cview();
+EX int dsquare(gp::loc e) { return dscalar(e, e)/2; }
   
-  for(int i=0; i<isize(dfs); i++) {
-    int dx, dy;
-    tie(dx, dy) = dfs[i];
-    
-    cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
-    if(!cw.at) continue;
-    transmatrix Mat = View0 * eumove(dx, dy);
-    torusconfig::torus_cx = dx;
-    torusconfig::torus_cy = dy;
+EX int dcross(gp::loc e1, gp::loc e2) {
+  return e1.first * e2.second - e1.second*e2.first;
+  }
 
-    if(do_draw(cw.at, Mat)) {
-      drawcell(cw, cw.mirrored ? Mat * spin(-2*M_PI*cw.spin / cw.at->type) * Mirror : Mat);
-      for(int x=-1; x<=+1; x++)
-      for(int y=-1; y<=+1; y++) {
-        euspot p(dx+x, dy+y);
-        if(!visited.count(p)) visited.insert(p), dfs.push_back(p);
-        }
-      }
+EX gp::loc euc2_coordinates(cell *c) { 
+  // todo masterrel
+  auto vec = euclid3::eucmap()->ispacemap[c->master];
+  auto ans = euclid3::getcoord(vec);
+  return {ans[0], ans[1]};
+  }
+
+EX cell* at_euc2_coordinates(gp::loc p) {
+  // todo masterrel
+  euclid3::coord co = as_coord(p);
+  return euclid3::eucmap()->get_at(co)->c7;
+  }
+ 
+EX euclid3::coord as_coord(gp::loc p) { return p.first + p.second * euclid3::COORDMAX; }
+
+EX gp::loc sdxy() { return {0, 0}; }
+
+EX pair<bool, string> coord_display(const transmatrix& V, cell *c) {
+  if(c != c->master->c7) return {false, ""};
+  hyperpoint hx = eumove(1) * C0;
+  hyperpoint hy = eumove(euclid3::COORDMAX) * C0;
+  hyperpoint hz = WDIM == 2 ? C0 : eumove(euclid3::main_axes[2]) * C0;
+  hyperpoint h = kz(inverse(build_matrix(hx, hy, hz, C03)) * inverse(ggmatrix(cwt.at->master->c7)) * V * C0);
+
+  if(WDIM == 3)  
+    return {true, fts(h[0]) + "," + fts(h[1]) + "," + fts(h[2]) };
+  else
+    return {true, fts(h[0]) + "," + fts(h[1]) };
+  }
+
+EX gp::loc as_gp(const array<int, 3>& v) { return gp::loc(v[0], v[1]); }
+
+EX map<gp::loc, cdata>& get_cdata() { return euclid3::eucmap()->eucdata; }
+  
+EX transmatrix eumove(euclid3::coord vec) {
+  constexpr double q3 = sqrt(double(3));
+  auto co = euclid3::getcoord(vec);
+  if(WDIM == 3) {
+    return eupush3(co[0], co[1], co[2]);
     }
-  }
-
-EX euc_pointer euclideanAt(int vec) {
-  if(fulltorus) { printf("euclideanAt called\n"); exit(1); }
-  hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
-  return euc->at(vec);
-  }
-
-EX euc_pointer euclideanAtCreate(int vec) {
-  euc_pointer ep = euclideanAt(vec);
-  cell*& c = *ep.first;
-  if(!c) {
-    if(euwrap) {
-      int x, y;
-      tie(x, y) = vec_to_pair(vec);
-      torusconfig::be_canonical(x, y);
-      vec = pair_to_vec(x, y);
-      }
-    c = newCell(8, encodeId(vec));
-    // euclideanAt(vec) = c;
-    build_euclidean_moves(c, vec, [c,vec] (int delta, int d, int d2) { 
-      euc_pointer ep2 = euclideanAt(vec + delta);
-      cell* c2 = *ep2.first;
-      if(!c2) return;
-      // if(ep.second) d = c->c.fix(torusconfig::mobius_dir(c) - d);
-      if(ep2.second) d2 = c2->c.fix(torusconfig::mobius_dir(c2) - d2);
-      eumerge(c, d, c2, d2, ep2.second);
-      });
+  transmatrix Mat = Id;
+  if(a4) {
+    Mat[0][LDIM] += co[0] * cgi.tessf;
+    Mat[1][LDIM] += co[1] * cgi.tessf;
     }
-  return ep;
+  else {
+    Mat[0][LDIM] += (co[0] + co[1] * .5) * cgi.tessf;
+    Mat[1][LDIM] += co[1] * q3 /2 * cgi.tessf;
+    }
+  return Mat;
   }
 
-EX hrmap* new_torus_map() { return new hrmap_torus; }
-EX hrmap* new_euclidean_map() { return new hrmap_euclidean; }
+EX bool chiral(gp::loc g) {
+  int x = g.first;
+  int y = g.second;
+  if(x == 0) return false;
+  if(y == 0) return false;
+  if(x+y == 0) return false;
+  if(x==y) return false;
+  if(S3 == 3 && y == -2*x) return false;
+  if(S3 == 3 && x == -2*y) return false;
+  return true;
+  }
 
-EX int get_torus_dist(int id) { return torusmap()->dists[id]; }
-
-EX map<int, cdata>& get_cdata() { return ((hrmap_euclidean*) (currentmap))->eucdata; }
+EX euclid3::coord first_period() { return 0; }
 
 }

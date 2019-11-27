@@ -242,7 +242,7 @@ EX void initgame() {
   if(gamegen_failure) return;
   
   if(euclid && specialland == laPrincessQuest) {
-    cell *c = *euclideanAtCreate(pair_to_vec(EPX, EPY)).first;
+    cell *c = at_euc2_coordinates({EPX, EPY});
     princess::generating = true;
     c->land = laPalace;
     setdist(c, 7 - getDistLimit() - genrange_bonus, NULL);
@@ -1230,7 +1230,7 @@ EX void set_geometry(eGeometry target) {
 EX void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
-    if(euclid6 || binarytiling || sol || penrose || WDIM == 3) if(!prod) geometry = gNormal;
+    if(binarytiling || sol || penrose || WDIM == 3) if(!prod) geometry = gNormal;
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;

@@ -15,9 +15,9 @@ EX namespace whirlwind {
   EX int fzebra3(cell *c) {
     if(archimedean) return 0;
     if(euclid) {
-      if(fulltorus) return 0;
+      if(bounded) return 0;
       int x, y;
-      tie(x,y) = cell_to_pair(c);
+      tie(x,y) = euc2_coordinates(c);
       return 1+((((signed short)(y)+int(50000))/3)%3);
       }
     if(S7 == 5) return getHemisphere(c, 0) > 0 ? 1 : 2;
@@ -571,7 +571,7 @@ struct info {
 
   EX int dist(cell *c) {
     if(c->land != laPalace && c->land != laDungeon) return OUT_OF_PALACE;
-    else if(quotient || sphere || fulltorus) return OUT_OF_PRISON;
+    else if(quotient || sphere) return OUT_OF_PRISON;
     else if(euclid) return celldistAlt(c);
     else if(!c->master->alt) return OUT_OF_PRISON;
     else return celldistAlt(c);
@@ -866,12 +866,12 @@ EX namespace clearing {
     if(quotient) return;
     
     if(euclid) {
-      if(euwrap) return; // fix cylinder
+      if(quotient) return; // fix cylinder
       if(pseudohept(c)) return;
       c->monst = moMutant;
       
       int x, y;
-      tie(x,y) = cell_to_pair(c);
+      tie(x,y) = euc2_coordinates(c);
 
       int xco = x * 2 + y + 1;
       c->stuntime = (8-xco/2) & 15;
@@ -2978,12 +2978,12 @@ EX namespace prairie {
      if(chaosmode) {
        c->LHU.fi.rval = 0;
        }    
-    else if(euwrap) { // fix cylinder
+    else if(quotient) { // fix cylinder
       c->LHU.fi.rval = 0;
       }
     else if(euclid) {
       int x, y;
-      tie(x,y) = cell_to_pair(c);
+      tie(x,y) = euc2_coordinates(c);
       c->LHU.fi.rval = (y&15);
       }
     else if(sphere) {
@@ -3759,9 +3759,9 @@ EX namespace dungeon {
       */
     
     if(euclid) {
-      if(euwrap) return;
+      if(quotient) return;
       int x, y;
-      tie(x, y) = cell_to_pair(c);
+      tie(x, y) = euc2_coordinates(c);
       string tab6[] = {
         ".####...",
         "L...L...",

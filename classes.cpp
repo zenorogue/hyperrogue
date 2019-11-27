@@ -532,7 +532,7 @@ EX geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
 /** list of available geometries */
 vector<geometryinfo> ginf = {
   {"{7,3}", "none",     "{7,3} (standard HyperRogue map)",            "HR",       7, 3, 0,         giHyperb2,       0, {{7, 5}}, eVariation::bitruncated},
-  {"{6,3}", "none",     "{6,3} (euclidean Hex grid)",                 "euclid",   6, 3, 0,         giEuclid2,       0, {{7, FORBIDDEN}}, eVariation::bitruncated},
+  {"{6,3}", "none",     "{6,3} (euclidean Hex grid)",                 "euclid",   6, 3, 0,         giEuclid2,       0, {{7, 7}}, eVariation::bitruncated},
   {"{5,3}", "none",     "{5,3} (dodecahedron)",                       "sphere",   5, 3, qsSMALLB,  giSphere2,       0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   {"{5,3}", "elliptic", "elliptic geometry in {5,3}",                 "elliptic", 5, 3, qsNONORE,  giSphere2,       0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   {"{7,3}", "Zebra",    "Zebra quotient",                             "Zebra",    7, 3, qsZEBRA,   giHyperb2, 0x00400, {{7, 5}}, eVariation::bitruncated},

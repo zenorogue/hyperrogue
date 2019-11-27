@@ -44,12 +44,12 @@ EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
       }
     }
   #endif
-  else if(BITRUNCATED && !euclid) {
+  else if(BITRUNCATED) {
     for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
       return (get_inverse?cgi.invhexmove:cgi.hexmove)[d];
     return Id;
     }
-  else if(WDIM == 3 || euclid)
+  else if(WDIM == 3)
     return Id;
   else
     return pispin * Id;
@@ -161,16 +161,8 @@ transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hy
 
 EX transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
-  if(t[LDIM][LDIM] == 0) {
-    if(euwrap && centerover && masterless) 
-      t = calc_relative_matrix(c, centerover, C0);
-    else if(masterless && WDIM == 2) {
-      if(!centerover) centerover = cwt.at;
-      t = actual_view_transform * View * eumove(cell_to_vec(c) - cellwalker_to_vec(cellwalker(centerover)));
-      }
-    else 
-      t = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
-    }
+  if(t[LDIM][LDIM] == 0)
+    t = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
   return t;
   }
 
@@ -317,8 +309,8 @@ EX bool no_easy_spin() {
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
   ld hexshift = 0;
-  if(ctof(c) && (S7 % 2 == 0) && BITRUNCATED && !euclid) hexshift = cgi.hexshift + 2*M_PI/S7;
-  else if(cgi.hexshift && ctof(c)) hexshift = cgi.hexshift;
+  if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
+  else if(cgi.hexshift && c == c->master->c7) hexshift = cgi.hexshift;
   if(IRREGULAR) {
     auto id = irr::cellindex[c];
     auto& vs = irr::cells[id];
@@ -326,8 +318,6 @@ ld hrmap_standard::spin_angle(cell *c, int d) {
     auto& p = vs.jpoints[vs.neid[d]];
     return -atan2(p[1], p[0]) - hexshift;
     }
-  else if(masterless)
-    return - d * 2 * M_PI / c->type - hexshift;
   else
     return M_PI - d * 2 * M_PI / c->type - hexshift;
   }

@@ -109,180 +109,6 @@ void showQuotientConfig() {
   }
 #endif
 
-bool torus_bitrunc;
-
-void prepare_torusconfig() {
-  torusconfig::newdy = torusconfig::dy;
-  torusconfig::newqty = torusconfig::qty;
-  torusconfig::newsdx = torusconfig::sdx;
-  torusconfig::newsdy = torusconfig::sdy;
-  torusconfig::newmode = torusconfig::torus_mode;
-  torus_bitrunc = PURE;
-  }
-
-void showTorusConfig() {
-  cmode = sm::SIDE | sm::MAYDARK;
-  if(euclid) cmode |= sm::TORUSCONFIG;
-  gamescreen(2);
-  
-  dialog::init(XLAT("advanced configuration"));
-  
-  auto& mode = torusconfig::tmodes[torusconfig::newmode];
-  
-  for(int i=0; i<isize(torusconfig::tmodes); i++) {
-    char let = "0123456789!@#" [i];
-    dialog::addBoolItem(torusconfig::tmodes[i].name, torusconfig::newmode == i, let);
-    dialog::add_action([i] () { torusconfig::newmode = torusconfig::eTorusMode(i); });
-    }
-  
-  bool single = (mode.flags & torusconfig::TF_SINGLE);
-  bool square = (mode.flags & torusconfig::TF_SQUARE);
-  bool simple = (mode.flags & torusconfig::TF_SIMPLE);
-  bool cyl = (mode.flags & torusconfig::TF_CYL);
-  bool klein  = (mode.flags & torusconfig::TF_KLEIN);
-  
-  if(single) {
-    dialog::addSelItem(XLAT("number of cells (n)"), its(torusconfig::newqty), 'n');
-    if(mode.flags & torusconfig::TF_HEX)
-      dialog::addSelItem(XLAT("cell bottom-right from 0 (d)"), its(torusconfig::newdy), 'd');
-    else
-      dialog::addSelItem(XLAT("cell below 0 (d)"), its(torusconfig::newdy), 'd');
-    }
-  else if(cyl) {
-    dialog::addSelItem(XLAT("period (x)"), its(torusconfig::newsdx), 'x');
-    dialog::addSelItem(XLAT("period (y)"), its(torusconfig::newsdy), 'y');
-    }
-  else {
-    if(torusconfig::newsdx < 1) torusconfig::newsdx = 1;
-    if(torusconfig::newsdy < 1) torusconfig::newsdy = 1;
-    dialog::addSelItem(XLAT("width (x)"), its(torusconfig::newsdx), 'x');
-    dialog::addSelItem(XLAT("height (y)"), its(torusconfig::newsdy), 'y');
-    }
-
-  if(square) dialog::addBoolItem(XLAT("bitruncated"), torus_bitrunc, 't');
-  else dialog::addInfo("", 100);
-  
-  int valid = 2;
-
-  int adx = torusconfig::newsdx, ady = torusconfig::newsdy;
-  if(single) {  
-    if(square) {
-      dialog::addInfo("this mode has bad patterns", 0x808080), valid = 1;
-      if(torus_bitrunc && valid == 1 && (torusconfig::newqty%2 || torusconfig::newdy % 2 == 0))
-        dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
-      }
-    else {
-      if(torusconfig::newqty % 3)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "n", "3"), 0x808080), valid = 1;
-      if((torusconfig::newdy + 999999) % 3 != 2)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "d+1", "3"), 0x808080), valid = 1;
-      }
-    }
-  else if(cyl) {
-    if(torusconfig::sdx == 0 && torusconfig::sdy == 0) 
-      dialog::addInfo(XLAT("period cannot be 0"), 0x800000), valid = 0;
-    else if(square) {
-      if(torusconfig::newsdy & 1)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
-      if(torusconfig::newsdx & 1)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
-      if(torus_bitrunc && valid == 1)
-        dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;      
-      if(klein && !torusconfig::mobius_symmetric(square, adx, ady))
-        dialog::addInfo("Möbius band requires a symmetric period", 0x800000), valid = 0;
-      }
-    else {
-      if(torusconfig::newsdy % 3)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "3"), 0x808080), valid = 1;
-      if(torusconfig::newsdx % 3)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
-      if(klein && !torusconfig::mobius_symmetric(square, adx, ady))
-        dialog::addInfo("Möbius band requires a symmetric period", 0x800000), valid = 0;
-      }
-    }
-  else {
-    if(square) {
-      if(torusconfig::newsdx & 1)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
-      if(torusconfig::newsdy & 1)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
-      if(torus_bitrunc && valid == 1)
-        dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
-      }
-    else if(simple) {
-      if(torusconfig::newsdx % 3)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
-      if(torusconfig::newsdy % 3)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "3"), 0x808080), valid = 1;
-      }
-    else {
-      if(torusconfig::newsdx & 1)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
-      if(torusconfig::newsdy & 1)
-        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 0;
-      }
-    }
-  if(cyl) {
-    if(!(square && klein)) {
-      dialog::addBoolItem(XLAT("set y=-2x for Crossroads"), ady == -2 * adx, 'C');
-      dialog::add_action([] () { torusconfig::newsdy = -2 * torusconfig::newsdx; });
-      }
-    dialog::addBoolItem(XLAT("set y=0 for Crossroads IV and Chaos Mode"), ady == 0, 'D');
-    dialog::add_action([] () { torusconfig::newsdy = 0; });
-    }
-  
-  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
-
-#if CAP_RUG
-  if(GDIM == 2) dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
-#endif
-
-  dialog::addItem("activate", 'a');
-  dialog::addItem("default", 'c');
-
-  keyhandler = [=] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(uni == 'n' && single)
-      dialog::editNumber(torusconfig::newqty, 0, 1000, 3, torusconfig::def_qty, XLAT("number of cells (n)"), "");
-    else if(uni == 'd' && single)
-      dialog::editNumber(torusconfig::newdy, -1000, 1000, 3, -torusconfig::def_dy, XLAT("cell below 0 (d)"), "");
-    else if(uni == 'x' && !single)
-      dialog::editNumber(torusconfig::newsdx, 0, 1000, square ? 2 : 3, 12, XLAT("width (x)"), "");
-    else if(uni == 'y' && !single)
-      dialog::editNumber(torusconfig::newsdy, 0, 1000, square ? 2 : simple ? 3 : 2, 12, XLAT("height (y)"), "");
-    else if(uni == 't')
-      torus_bitrunc = !torus_bitrunc;
-    else if((uni == 'a' || uni == '\n') && valid) dialog::do_if_confirmed([square] {
-      set_geometry(gNormal);
-      torusconfig::torus_mode = torusconfig::newmode;
-      torusconfig::qty = torusconfig::newqty;
-      torusconfig::dy = torusconfig::newdy;
-      torusconfig::sdx = torusconfig::newsdx;
-      torusconfig::sdy = torusconfig::newsdy;
-      torusconfig::activate();
-      set_geometry(gTorus);
-      set_variation((torus_bitrunc || !square) ? eVariation::bitruncated : eVariation::pure);
-      start_game();
-      });
-    else if(uni == 'c') dialog::do_if_confirmed([] {
-      set_geometry(gEuclid);
-      torusconfig::torus_mode = torusconfig::tmSingle;
-      torusconfig::qty = torusconfig::def_qty;
-      torusconfig::dy = torusconfig::def_dy;
-      set_geometry(gTorus);
-      start_game();
-      });
-    else if(uni == 'z') editScale();
-#if CAP_RUG
-    else if(uni == 'u' && GDIM == 2) rug::select();
-#endif
-    else if(doexiton(sym, uni))
-      popScreen();
-    };
-  
-  dialog::display();
-  }
-
 EX string bitruncnames[5] = {" (b)", " (n)", " (g)", " (i)", " (d)"};
 
 void validity_info() {
@@ -449,8 +275,6 @@ void set_or_configure_geometry(eGeometry g) {
   else if(g == gArchimedean)
     pushScreen(arcm::show);
   #endif
-  else if(g == gTorus)
-    pushScreen(showTorusConfig);
   else {
     if(among(g, gProduct, gRotSpace)) {
       if(WDIM == 3 || euclid) {
@@ -623,11 +447,7 @@ EX void select_quotient_screen() {
            "no quotient",
         g == geometry, key++);
       dialog::add_action([g] {
-        if(g == gTorus) {
-          prepare_torusconfig();
-          pushScreen(showTorusConfig);
-          }
-        else if(g == gFieldQuotient) 
+        if(g == gFieldQuotient) 
           pushScreen(showQuotientConfig);
         else {
           dual::may_split_or_do([g] { set_geometry(g); });
@@ -642,7 +462,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(euclid && WDIM == 3) {
+  if(euclid && !penrose && !archimedean) {
     euclid3::prepare_torus3();
     pushScreen(euclid3::show_torus3);
     }
@@ -667,10 +487,6 @@ EX void select_quotient() {
       start_game();
       println(hlog, "csteps = ", cgi.steps);
       };
-    }
-  else if(euclid && !archimedean) {
-    prepare_torusconfig();
-    pushScreen(showTorusConfig);
     }
   else {
     vector<eGeometry> choices;
@@ -773,6 +589,7 @@ EX void showEuclideanMenu() {
     denom /= g;
     }
   
+/*
   if(fulltorus) {
     using namespace torusconfig;
     auto& mode = tmodes[torus_mode];
@@ -780,8 +597,10 @@ EX void showEuclideanMenu() {
       worldsize = qty;
     else
       worldsize = sdx * sdy;
+    worldsize = 0;
     }
-  else worldsize = denom ? nom / denom : 0;
+  else TODO */ 
+  worldsize = denom ? nom / denom : 0;
   
   if(euler < 0 && !bounded)
     worldsize = -worldsize;
@@ -853,8 +672,6 @@ EX void showEuclideanMenu() {
   else if(hybri) {
     dialog::addSelItem(XLAT("number of levels"), its(cgi.steps / cgi.single_step), 0);
     }
-  else if(ts == 6 && tv == 3)
-    dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
   else if(binarytiling) {
     dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
     dialog::add_action([] {
@@ -1001,7 +818,7 @@ EX void showEuclideanMenu() {
     WDIM == 3 && bounded ? its(isize(currentmap->allcells())) :
     WDIM == 3 && euclid ? "∞" :
     worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(denom) : its(-worldsize)) + " exp(∞)": 
-    (euwrap && !fulltorus) ? "∞" :
+    (euclid && quotient && !bounded) ? "∞" :
     worldsize == 0 ? "∞²" :
     its(worldsize),
     '3');
@@ -1085,31 +902,6 @@ int read_geom_args() {
   else if(argis("-mineadj")) {
     shift(); mine_adjacency_rule = argi();
     }
-  else if(argis("-tpar")) { 
-    torusconfig::torus_mode = torusconfig::tmSingle;
-    shift(); sscanf(argcs(), "%d,%d,%d", 
-      &torusconfig::qty, 
-      &torusconfig::dx,
-      &torusconfig::dy
-      );
-    }
-  else if(argis("-tparx")) {
-    shift(); 
-    int tmode;
-    sscanf(argcs(), "%d,%d,%d", &tmode,
-      &torusconfig::sdx,
-      &torusconfig::sdy
-      );
-    if(tmode < 0 || tmode >= isize(torusconfig::tmodes)) {
-      println(hlog, "bad tmode");
-      exit(1);
-      }
-    torusconfig::torus_mode = torusconfig::eTorusMode(tmode);
-    if(torusconfig::tmflags() & torusconfig::TF_SINGLE)
-      torusconfig::qty = torusconfig::sdx,
-      torusconfig::dy = torusconfig::sdy;
-    torusconfig::activate();
-    }
   TOGGLE('7', PURE, set_variation(PURE ? eVariation::bitruncated : eVariation::pure))
   else if(argis("-geo")) { 
     PHASEFROM(2);
@@ -1143,10 +935,6 @@ int read_geom_args() {
   else if(argis("-d:quotient")) 
     launch_dialog(showQuotientConfig);
   #endif
-  else if(argis("-d:torus")) {
-    launch_dialog(showTorusConfig);
-    prepare_torusconfig();
-    }
   else if(argis("-d:geom")) 
     launch_dialog(showEuclideanMenu);
   else return 1;

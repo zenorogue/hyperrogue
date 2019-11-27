@@ -808,13 +808,18 @@ EX void describeMouseover() {
     if(randomPatternsMode)
       out += " " + describeRPM(c->land);
       
-    if(masterless && cheater) {
-      out += " ("+its(cell_to_vec(c))+")";
-      if(!fulltorus || torusconfig::torus_mode != torusconfig::tmSingle) {
-        int x, y;
-        tie(x,y) = cell_to_pair(c);
-        out += " ("+its(short(x))+","+its(short(y))+")";
-        }
+    if(euclid && cheater && WDIM == 2 && !archimedean && !penrose) {
+      auto co = euc2_coordinates(c);
+      out += " (" + its(co.first);
+      for(int i=1; i<WDIM; i++) out += "," + its(co.second);
+      out += ")";
+      }
+
+    if(euclid && cheater && WDIM == 3) {
+      auto co = euclid3::getcoord(euclid3::get_ispacemap()[c->master]);
+      out += " (" + its(co[0]);
+      for(int i=1; i<WDIM; i++) out += "," + its(co[i]);
+      out += ")";
       }
     
     #if CAP_CRYSTAL

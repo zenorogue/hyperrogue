@@ -426,45 +426,6 @@ void geometry_information::prepare_basics() {
   if(archimedean && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
 
-  if(euclid) {
-    // dynamicval<eGeometry> g(geometry, gNormal);
-    // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
-    if(a4 && !BITRUNCATED) {
-      crossf = .5;
-      hexf = .5;
-      hcrossf = crossf * sqrt(2) / 2;
-      hexhexdist = crossf;
-      hexvdist = hexf;
-      hepvdist = hexf;
-      rhexf = crossf * sqrt(2) / 2;
-      tessf = crossf;
-      }
-    else if(a4 && BITRUNCATED) {
-      ld s2 = sqrt(2);
-      ld xx = 1 - s2 / 2;
-      crossf = .5;
-      tessf = crossf * s2;
-      hexf = .5 * xx * s2;
-      hcrossf = crossf;
-      hexhexdist = crossf * s2;
-      hexvdist = crossf * hypot(1-xx, xx);
-      hepvdist = crossf;
-      rhexf = hexf;
-      tessf = crossf;
-      }
-    else {
-      crossf = .5;
-      tessf = crossf * sqrt(3);
-      hexf = tessf/3;
-      hcrossf = crossf;
-      hexhexdist = crossf;
-      hexvdist = hexf;
-      hepvdist = crossf;
-      rhexf = hexf;
-      }
-    goto finish;
-    }
-  
   if(hybri) {
     auto t = this;
     ld d = prod ? 1 : 2;
@@ -489,11 +450,11 @@ void geometry_information::prepare_basics() {
     goto finish;
     }
 
-  tessf = edge_of_triangle_with_angles(S3 >= OINF ? 0 : 2*M_PI/S3, M_PI/S7, M_PI/S7);
+  tessf = euclid ? 1 : edge_of_triangle_with_angles(S3 >= OINF ? 0 : 2*M_PI/S3, M_PI/S7, M_PI/S7);
   
   if(elliptic && S7 == 4) tessf = M_PI/2;
   
-  hcrossf = edge_of_triangle_with_angles(M_PI/2, M_PI/S7, M_PI/S3);
+  hcrossf = euclid ? (S3 == 3 ? sqrt(3)/3 : sqrt(2)/2) : edge_of_triangle_with_angles(M_PI/2, M_PI/S7, M_PI/S3);
 
   crossf = BITRUNCATED ? hcrossf : tessf;
   
@@ -510,9 +471,9 @@ void geometry_information::prepare_basics() {
   
   rhexf = BITRUNCATED ? hexf : hcrossf;
   
-  if(!euclid && BITRUNCATED && !(S7&1))
+  if(BITRUNCATED && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
-
+  
   finish:
   
   for(int d=0; d<S7; d++)

@@ -271,7 +271,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
         }
-      else if(PIU(hyperbolic_not37 || fulltorus || S7 < 5 || archimedean || WDIM == 3)) {
+      else if(PIU(hyperbolic_not37 || (euclid&&bounded) || S7 < 5 || archimedean || WDIM == 3)) {
         if(fargen) {
           int i = hrand(100);
           if(i < 10) 
@@ -491,7 +491,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d==8) {
         if(randomPatternsMode)
           c->wall = RANDPAT3(0) ? waCavewall : waCavefloor;
-        else if(fulltorus) {
+        else if(euclid && bounded) {
           c->wall = waCavefloor;
           }
         else if(nil) {
@@ -509,7 +509,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         #endif
         else if(euclid) {
           int x, y;
-          tie(x,y) = cell_to_pair(c);
+          tie(x,y) = euc2_coordinates(c);
           if(((y-2)&7) < 4) c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
@@ -595,12 +595,12 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         else if(archimedean && arcm::current.have_line)
           v = arcm::linespattern(c) ? 24 : 16;
         #endif
-        else if(fulltorus || hyperbolic_not37 || quotient || archimedean) {
+        else if((euclid&&bounded) || hyperbolic_not37 || quotient || archimedean) {
           v = hrand(100) < 25 ? 24 : 16;
           }
         else if(euclid) {
           int x, y;
-          tie(x,y) = cell_to_pair(c);
+          tie(x,y) = euc2_coordinates(c);
           int y0 = gmod(y, 6);
           if(y0 == 3 || y0 == 4) v=24; else v=0;
           }
@@ -656,14 +656,14 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laZebra:
       if(d==8) {
-        if(fulltorus) ;
+        if(euclid && bounded) ;
         #if CAP_ARCM
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;
         #endif
         else if(euclid && !archimedean) {
           int x,y;
-          tie(x,y) = cell_to_pair(c);
+          tie(x,y) = euc2_coordinates(c);
           if(y&1) c->wall = waTrapdoor;
           else c->wall = waNone;
           }
@@ -684,7 +684,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laWineyard:
       if(d==8) {
-        if(fulltorus) ;
+        if(euclid && bounded) ;
         #if CAP_ARCM
         else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
@@ -699,7 +699,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(euclid && !archimedean) {
           int x,y;
-          tie(x,y) = cell_to_pair(c);
+          tie(x,y) = euc2_coordinates(c);
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
@@ -1221,7 +1221,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(quotient && zebra40(c) == 5) {
           c->wall = waChasm;
           }
-        if(fulltorus) {
+        if(euclid && bounded) {
           int i = hrand(100);
           if(i == 0) c->item = itTreat;
           else if(i < 5) c->wall = waChasm;
@@ -1285,14 +1285,12 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient));
       if(fargen) {
       
-        if(fulltorus) {
-          int pid = decodeId(c->master);
-          if(pid == torusconfig::qty/3) c->wall = waCharged;
-          if(pid == torusconfig::qty*2/3) c->wall = waGrounded;
+        if(euclid && bounded) {
+          /* todo */
           }
         else if(euclid) {
           int x,y;
-          tie(x,y) = cell_to_pair(c);
+          tie(x,y) = euc2_coordinates(c);
           if((x+1)%3 == 0 && y%3 == 0) {
             if(hrand(100) < 50)
               c->wall = hrand(2) ? waCharged : waGrounded;
@@ -1301,7 +1299,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             bool sand = false;
             for(int i=0; i<c->type; i++) {
               createMov(c, i);
-              tie(x,y) = cell_to_pair(c->move(i));
+              tie(x,y) = euc2_coordinates(c->move(i));
               if((x+1)%3 == 0 && (y)%3 == 0) sand = true;
               }
             if(sand && hrand(100) < 20)
@@ -2655,7 +2653,7 @@ EX void setdist(cell *c, int d, cell *from) {
       else if(euclid && WDIM == 3) euclid3::set_land(c);
       #endif
       else if(hybri) setLandHybrid(c);
-      else if(sphere || fulltorus) setLandSphere(c);
+      else if(sphere || (euclid && bounded)) setLandSphere(c);
       else if(euclid) setLandEuclid(c);
       else if(quotient) { setland(c, specialland); setLandQuotient(c); }
       else if(sol) setLandSol(c);

@@ -280,7 +280,6 @@ static const flagtype qHUGE_BOUNDED    = 262144;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
-static const int FORBIDDEN = -1;
 
 extern eGeometry geometry;
 extern eVariation variation;

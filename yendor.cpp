@@ -1139,18 +1139,8 @@ modecode_t modecode() {
   typedef long long ll;
   
   // 32 bits [29..61) for geometry specifics
-  if(euwrap) {
-    mct += ll(torusconfig::torus_mode) << 29;
-    auto& mode = torusconfig::tmodes[torusconfig::torus_mode];
-    bool single = (mode.flags & torusconfig::TF_SINGLE);
-    if(single) {
-      mct += ll(torusconfig::qty) << 37;
-      mct += ll(torusconfig::dy) << 45;
-      }
-    else {
-      mct += ll(torusconfig::sdx) << 37;
-      mct += ll(torusconfig::sdy) << 45;
-      }
+  if(euclid && quotient) {
+    /* todo */
     }
   
   #if CAP_FIELD

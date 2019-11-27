@@ -1684,7 +1684,7 @@ void celldrawer::bookkeeping() {
     transmatrix& gm = gmatrix[c];
     orig = 
       gm[LDIM][LDIM] == 0 ? true : 
-      euwrap ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
+      euclid ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
       (nil||sol) ? sqhypot_d(3, tC0(gm)) >= sqhypot_d(3, tC0(V)) :
       sphereflipped() ? fabs(gm[LDIM][LDIM]-1) <= fabs(V[LDIM][LDIM]-1) :
       fabs(gm[LDIM][LDIM]-1) >= fabs(V[LDIM][LDIM]-1) - 1e-8;
@@ -1776,20 +1776,9 @@ void celldrawer::draw_cellstat() {
     }
     
   if(cmode & sm::TORUSCONFIG) {
-    using namespace torusconfig;
-    string label;
-    bool small;
-    if(tmflags() & TF_SINGLE) {
-      int cd = torus_cx * dx + torus_cy * newdy;
-      cd %= newqty; if(cd<0) cd += newqty;
-      label = its(cd);
-      small = cd;
-      }
-    else {
-      small = true;
-      label = its(torus_cx) + "," + its(torus_cy);
-      }
-    queuestr(V, small ? .2 : .6, label, small ? 0xFFFFFFD0 : 0xFFFF0040, 1);
+    auto p = coord_display(V, c);
+    if(p.second != "")
+      queuestr(V, p.first ? .2 : .6, p.second, p.first ? 0xFFFFFFD0 : 0xFFFF0040, 1);
     }
 
   #if CAP_EDIT
@@ -2507,7 +2496,7 @@ void celldrawer::set_towerfloor(const cellfunction& cf) {
     }
   int j = -1;
 
-  if(masterless) j = 10;
+  if(euclid) j = 10;
   else if(cf(c) > 1) { 
     int i = towerval(c, cf);
     if(i == 4) j = 0;
@@ -2532,7 +2521,7 @@ void celldrawer::set_towerfloor(const cellfunction& cf) {
 
 void celldrawer::set_zebrafloor() {
 
-  if(masterless) { set_floor(cgi.shTower[10]); return; }
+  if(euclid) { set_floor(cgi.shTower[10]); return; }
   if(weirdhyperbolic) {
     set_floor(cgi.shFloor); return;
     }
@@ -2587,9 +2576,9 @@ void celldrawer::set_reptile_floor(const transmatrix& V, color_t col, bool nodet
   else j = 4;
   
   if(euclid6) j = 0;
-
-  transmatrix D = applyPatterndir(c, si);
   
+  transmatrix D = applyPatterndir(c, si);
+  if(euclid6 && GOLDBERG) D = ddspin(c, si.dir);
   if(wmescher && (stdhyperbolic || euclid6))
     set_floor(D, cgi.shReptile[j][0]);
   else set_maywarp_floor();
@@ -2631,7 +2620,7 @@ void celldrawer::set_reptile_floor(const transmatrix& V, color_t col, bool nodet
   }
 
 void celldrawer::set_emeraldfloor() {
-  if(!masterless && BITRUNCATED && GDIM == 2) {
+  if(!euclid && BITRUNCATED && GDIM == 2) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_EMERALD, patterns::SPF_SYM0123);
   
     int j = -1;

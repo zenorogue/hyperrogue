@@ -187,7 +187,7 @@ EX namespace models {
       spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * mul / 2., 0);
       }
     if(euclid) {
-      hyperpoint h = tC0(eumove(spiral_x, spiral_y));
+      hyperpoint h = eumove(as_coord({spiral_x, spiral_y})) * C0;
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     
@@ -262,13 +262,13 @@ EX namespace models {
     for(int y=0; y<=200; y++)
     for(int x=-200; x<=200; x++) {
       if(y == 0 && x <= 0) continue;
-      auto zero = vec_to_cellwalker(euclid_getvec(x, y));
-      if(zero.at == currentmap->gamestart() && !zero.mirrored)
+      auto zero = euclid3::canonicalize(as_coord({x, y}));
+      if(zero == 0)
         torus_zeros.emplace_back(x, y);      
       }
     sort(torus_zeros.begin(), torus_zeros.end(), [] (const pair<int,int> p1, const pair<int, int> p2) {
-      ld d1 = hdist0(tC0(eumove(p1.first, p1.second)));
-      ld d2 = hdist0(tC0(eumove(p2.first, p2.second)));
+      ld d1 = hdist0(tC0(eumove(as_coord(p1))));
+      ld d2 = hdist0(tC0(eumove(as_coord(p2))));
       if(d1 < d2 - 1e-6) return true;
       if(d1 > d2 + 1e-6) return false;
       return p1 < p2;
@@ -635,7 +635,7 @@ EX namespace models {
       dialog::add_action([](){
         dialog::editNumber(spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
         });
-      if(euwrap) {
+      if(euclid && quotient) {
         dialog::addSelItem(XLAT("match the period"), its(spiral_id), 'n');
         dialog::add_action(match_torus_period);
         }

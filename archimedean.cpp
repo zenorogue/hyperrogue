@@ -439,7 +439,7 @@ void connectHeptagons(heptspin hi, heptspin hs);
 transmatrix adjcell_matrix(heptagon *h, int d);
 
 struct hrmap_archimedean : hrmap {
-  map<int, struct cdata> eucdata;
+  map<gp::loc, struct cdata> eucdata;
   heptagon *origin;
   heptagon *getOrigin() { return origin; }
 
@@ -559,8 +559,11 @@ struct hrmap_archimedean : hrmap {
       U = U * inverse(T);
       }
     
-    if(euclid) 
-      alt = encodeId(pair_to_vec(int(T[0][LDIM]), int(T[1][LDIM])));
+    if(euclid) {
+      /* hash the rough coordinates as heptagon* alt */
+      size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;
+      alt = (heptagon*) s;
+      }
       
     DEBB(DF_GEOM, ("look for: ", alt, " / ", T * C0));
   
@@ -1361,7 +1364,7 @@ EX int valence() {
  
 #endif
 
-EX map<int, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
+EX map<gp::loc, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
   }
 
 }
