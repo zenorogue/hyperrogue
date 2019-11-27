@@ -122,7 +122,10 @@ EX namespace euclid3 {
         return spacemap[at];
       else {
         auto h = tailored_alloc<heptagon> (S7);
-        h->c7 = newCell(S7, h);
+        if(!IRREGULAR) 
+          h->c7 = newCell(S7, h);
+        else 
+          irr::link_to_base(h, ((hrmap_euclid3*)irr::base)->get_at(at));
         h->distance = 0;
         h->cdata = NULL;
         h->alt = NULL;

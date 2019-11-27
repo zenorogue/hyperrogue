@@ -45,7 +45,8 @@ EX vector<cellinfo> cells;
 ld inner(hyperpoint h1, hyperpoint h2) {
   return 
     hyperbolic ? h1[LDIM] * h2[LDIM] - h1[0] * h2[0] - h1[1] * h2[1] :
-    h1[LDIM] * h2[LDIM] + h1[0] * h2[0] + h1[1] * h2[1];
+    sphere ? h1[LDIM] * h2[LDIM] + h1[0] * h2[0] + h1[1] * h2[1] :
+    h1[0] * h2[0] + h1[1] * h2[1];
   }
 
 hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
@@ -54,6 +55,20 @@ hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
   b = b - a;
   c = c - a;
   
+  if(euclid) {
+    ld b2 = inner(b, b)/2;
+    ld c2 = inner(c, c)/2;
+    
+    ld det = c[1]*b[0] - b[1]*c[0];
+    
+    h = a;
+    
+    h[1] += (c2*b[0] - b2 * c[0]) / det;
+    h[0] += (c2*b[1] - b2 * c[1]) / -det;
+    
+    return h;
+    }
+
   if(inner(b,b) < 0) {
     b = b / sqrt(-inner(b, b));
     c = c + b * inner(c, b);
@@ -104,7 +119,7 @@ void make_cells_of_heptagon() {
   
 string status[5];
   
-hrmap *base;
+EX hrmap *base;
 
 bool gridmaking;
 
@@ -1077,6 +1092,7 @@ EX bool ctof(cell* c) {
   }
 
 EX bool supports(eGeometry g) {
+  if(g == gEuclid || g == gEuclidSquare) return ginf[g].flags & qBOUNDED;
   return among(g, gNormal, gKleinQuartic, gOctagon, gBolza2, gFieldQuotient, gSphere, gSmallSphere, gTinySphere);
   }
 
