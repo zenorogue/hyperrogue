@@ -707,21 +707,21 @@ EX namespace gp {
       }
 #endif    
     if(min_quality == 0 && min_quality_chess == 0) {
-      dialog::addBoolItem(XLAT("pure"), param == loc(1,0) && !IRREGULAR, 'a');
+      dialog::addBoolItem(XLAT("pure"), univ_param() == loc(1,0) && !IRREGULAR, 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
     
     if(min_quality_chess == 0)
-      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && BITRUNCATED, 'b');  
+      dialog::addBoolItem(XLAT("bitruncated"), BITRUNCATED, 'b');  
     dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(BITRUNCATED ? "ON" : "OFF");
 
     if(min_quality == 0 || min_quality_chess) {
-      dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), param == loc(2,0), 'c');
+      dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), univ_param() == loc(2,0), 'c');
       dialog::lastItem().value = "GP(2,0)";
       }
 
     if(S3 == 3) {
-      dialog::addBoolItem(XLAT("2x bitruncated"), param == loc(3,0), 'd');
+      dialog::addBoolItem(XLAT("2x bitruncated"), univ_param() == loc(3,0), 'd');
       dialog::lastItem().value = "GP(3,0)";
       }
     else {
