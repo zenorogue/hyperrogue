@@ -187,7 +187,7 @@ EX namespace models {
       spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * mul / 2., 0);
       }
     if(euclid) {
-      hyperpoint h = eumove(as_coord({spiral_x, spiral_y})) * C0;
+      hyperpoint h = C0 + (eumove(as_coord({1,0}))*C0 - C0) * spiral_x + (eumove(as_coord({0,1}))*C0 - C0) * spiral_y;
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     
@@ -255,7 +255,7 @@ EX namespace models {
     return "?";
     }
 
-  vector<pair<int, int> > torus_zeros;
+  vector<gp::loc> torus_zeros;
 
   void match_torus_period() {
     torus_zeros.clear();
@@ -266,7 +266,7 @@ EX namespace models {
       if(zero == 0)
         torus_zeros.emplace_back(x, y);      
       }
-    sort(torus_zeros.begin(), torus_zeros.end(), [] (const pair<int,int> p1, const pair<int, int> p2) {
+    sort(torus_zeros.begin(), torus_zeros.end(), [] (const gp::loc p1, const gp::loc p2) {
       ld d1 = hdist0(tC0(eumove(as_coord(p1))));
       ld d2 = hdist0(tC0(eumove(as_coord(p2))));
       if(d1 < d2 - 1e-6) return true;
