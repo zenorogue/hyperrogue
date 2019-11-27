@@ -901,4 +901,50 @@ EX bool chiral(gp::loc g) {
 
 EX euclid3::coord first_period() { return 0; }
 
+EX void twist_once(gp::loc coo) {
+  coo = coo - euclid3::twisted_vec * gp::univ_param();
+  if(euclid3::twisted&8) {
+    gp::loc ort = (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)) * euclid3::twisted_vec * gp::univ_param();
+    auto s = ort * dscalar(coo, ort) * 2;
+    auto v = dscalar(ort, ort);
+    s.first /= v;
+    s.second /= v;
+    coo = coo - s;
+    }
+  }
+
+EX int eudist(int sx, int sy, bool reduce IS(true)) {
+  int z0 = abs(sx);
+  int z1 = abs(sy);
+  if(a4 && BITRUNCATED)
+    return (z0 == z1 && z0 > 0 && reduce) ? z0+1: max(z0, z1);
+  if(a4) return z0 + z1;
+  int z2 = abs(sx+sy);
+  return max(max(z0,z1), z2);
+  }
+
+EX int eudist(gp::loc a, gp::loc b) {
+  return eudist(a.first-b.first, a.second-b.second, (a.first ^ a.second)&1);
+  }
+
+EX int cyldist(gp::loc a, gp::loc b) {
+  a = as_gp(euclid3::getcoord(euclid3::canonicalize(as_coord(a))));
+  b = as_gp(euclid3::getcoord(euclid3::canonicalize(as_coord(b))));
+  
+  if(!quotient) return eudist(a, b);
+  
+  int best = 0;
+  for(int sa=0; sa<16; sa++) {
+    auto _a = a, _b = b;
+    if(sa&1) twist_once(_a);
+    if(sa&2) twist_once(_b);
+    if(sa&4) _a = _a + euclid3::ortho_vec * gp::univ_param();
+    if(sa&8) _b = _b + euclid3::ortho_vec * gp::univ_param();
+    int val = eudist(_a, _b);
+    if(sa == 0 || val < best) best = val;
+    }
+  
+  return best;
+  }
+
 }

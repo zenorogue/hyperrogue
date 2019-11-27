@@ -417,16 +417,6 @@ EX void verifycells(heptagon *at) {
   verifycell(at->c7);
   }
 
-EX int eudist(int sx, int sy) {
-  int z0 = abs(sx);
-  int z1 = abs(sy);
-  if(a4 && BITRUNCATED)
-    return (z0 == z1 && z0 > 0) ? z0+1: max(z0, z1);
-  if(a4) return z0 + z1;
-  int z2 = abs(sx+sy);
-  return max(max(z0,z1), z2);
-  }
-
 EX int compdist(int dx[]) {
   int mi = dx[0];
   for(int u=0; u<S3; u++) mi = min(mi, dx[u]);
@@ -454,7 +444,7 @@ EX int celldist(cell *c) {
     return d;
     }
   if(nil && !quotient) return DISTANCE_UNKNOWN;
-  if(euclid && (penrose || archimedean)) return celldistance(currentmap->gamestart(), c);
+  if(euclid) return celldistance(currentmap->gamestart(), c);
   if(sphere || binarytiling || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
@@ -1026,6 +1016,10 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
+  if(euclid && WDIM == 2) {
+    return cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
+    }
+
   if(archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
     
     if(saved_distances.count(make_pair(c1,c2)))
