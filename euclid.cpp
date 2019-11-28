@@ -526,6 +526,7 @@ EX namespace euclid3 {
     if(twisted&1) nonori = !nonori;
     if(twisted&2) nonori = !nonori;
     if(twisted&4) nonori = !nonori;
+    if(twisted&8) nonori = !nonori;
     set_flag(ginf[g].flags, qNONORIENTABLE, nonori);      
     }
 
