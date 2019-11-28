@@ -761,6 +761,13 @@ EX namespace euclid3 {
     dialog::addBoolItem(XLAT("standard rotation"), eqmatrix(models::euclidean_spin, Id), 's');
     dialog::add_action([] { rotate_view(models::euclidean_spin); });
 
+#if CAP_RUG
+    if(GDIM == 2) {
+      dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
+      dialog::add_action(rug::select);
+      }
+#endif
+
     dialog::addBreak(50);
     
     char xch = 'p';
