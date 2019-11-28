@@ -224,19 +224,21 @@ struct geometry_filter {
 
 EX geometry_filter *current_filter;
 
-EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (archimedean || hyperbolic) && !quotient; }};
-EX geometry_filter gf_spherical = {"spherical", [] { return (archimedean || sphere) && !quotient; }};
-EX geometry_filter gf_euclidean = {"Euclidean", [] { return (archimedean || euclid) && !quotient; }};
+bool forced_quotient() { return quotient && !(cgflags & qOPTQ); }
+
+EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (archimedean || hyperbolic) && !forced_quotient(); }};
+EX geometry_filter gf_spherical = {"spherical", [] { return (archimedean || sphere) && !forced_quotient(); }};
+EX geometry_filter gf_euclidean = {"Euclidean", [] { return (archimedean || euclid) && !forced_quotient(); }};
 EX geometry_filter gf_other = {"non-isotropic", [] { return prod || nonisotropic; }};
 EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] { 
-  return !archimedean && !binarytiling && !penrose && WDIM == 2 && !quotient;
+  return !archimedean && !binarytiling && !penrose && WDIM == 2 && !forced_quotient();
   }};
 EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", [] { 
   if(euclid) return geometry == gCubeTiling;
-  return !binarytiling && !penrose && WDIM == 3 && (hyperbolic ? !quotient : true) && !nonisotropic && !prod;
+  return !binarytiling && !penrose && WDIM == 3 && !forced_quotient() && !nonisotropic && !prod;
   }};
 EX geometry_filter gf_quotient = {"interesting quotient spaces", [] { 
-  return quotient && !elliptic;
+  return forced_quotient() && !elliptic;
   }};
   
 vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical, &gf_euclidean, &gf_other, &gf_regular_2d, &gf_regular_3d, &gf_quotient };
