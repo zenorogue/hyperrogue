@@ -655,7 +655,9 @@ void geometry_information::generate_floorshapes() {
     dynamicval<bool> ncor(approx_nearcorner, true);
     for(int i=0; i<2; i++) {
       modelh.s = hstate(i); /* kite/dart shape */
+      kite::no_adj = true;
       generate_floorshapes_for(i, &model, 0, 0);
+      kite::no_adj = false;
       }
     }
   #endif

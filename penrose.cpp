@@ -135,6 +135,8 @@ EX pair<vector<vector<hyperpoint>>, vector<vector<ld>>> make_walls() {
 
 inline void print(hstream& hs, pshape sh) { print(hs, sh == pKite ? "pKite" : "pDart"); }
 
+EX bool no_adj;
+  
 struct hrmap_kite : hrmap {
 
   transmatrix pKite1, pKite2, pKite3, pDart1, pDart2, ipKite1, ipKite2, ipKite3, ipDart1, ipDart2;
@@ -294,7 +296,8 @@ struct hrmap_kite : hrmap {
     graphrule(pKite, 11, pDart, 5, ipKite1 * ipDart1 * pDart2 * pDart2 * pDart2);
     }
 
-  const transmatrix& tmatrix(cell *c, int dir) {
+  transmatrix adj(cell *c, int dir) override {
+    if(no_adj) return Id;
     auto c1 = c->cmove(dir);
     auto code = encode(getshape(c->master), dir, getshape(c1->master), c->c.spin(dir));
     if(!graphrules.count(code)) {
@@ -355,7 +358,7 @@ struct hrmap_kite : hrmap {
       drawcell(c, V);
       
       for(int i=0; i<c->type; i++)
-        dq::enqueue(c->cmove(i)->master, V * tmatrix(c, i));
+        dq::enqueue(c->cmove(i)->master, V * adj(c, i));
           /*
           ld err = hdist(where[h->c7->cmove(i)->master] * C0, where[h] * M * C0);
           if(err > -.01)

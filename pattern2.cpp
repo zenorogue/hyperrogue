@@ -381,7 +381,7 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(euclid) {
+  else if(euclid && !penrose && !archimedean) {
     auto p = euc2_coordinates(c);
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
@@ -829,8 +829,8 @@ EX namespace patterns {
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
-    else if(euclid4) valEuclid4(c, si, sub);
-    else if(euclid) valEuclid6(c, si, sub);
+    else if(euclid4 && !penrose && !archimedean) valEuclid4(c, si, sub);
+    else if(euclid6 && !penrose && !archimedean) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);
     else si.symmetries = ctof(c) ? 1 : 2;
     }
@@ -911,7 +911,7 @@ EX namespace patterns {
       val_warped(c, si);
     else {
       si.id = pseudohept(c) ? 1 : 0;
-      if(euclid) {
+      if(euclid && !penrose && !archimedean) {
         si.dir = ishex1(c) ? 0 : 3;
         if(ctof(c)) si.symmetries = 3;
         if(subpattern_flags & SPF_EXTRASYM) 

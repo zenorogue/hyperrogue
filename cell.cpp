@@ -860,7 +860,7 @@ EX cdata *arcmCdata(cell *c) {
   }
 
 EX int getCdata(cell *c, int j) {
-  if(euclid) return getEuclidCdata(euc2_coordinates(c))->val[j];
+  if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->val[j];
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
   else if(archimedean && hyperbolic) 
@@ -877,7 +877,7 @@ EX int getCdata(cell *c, int j) {
   }
 
 EX int getBits(cell *c) {
-  if(euclid) return getEuclidCdata(euc2_coordinates(c))->bits;
+  if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->bits;
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
   else if(archimedean && (hyperbolic || sl2)) 
@@ -1012,7 +1012,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(euclid && WDIM == 2) {
+  if(euclid && WDIM == 2 && !penrose && !archimedean) {
     return cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
