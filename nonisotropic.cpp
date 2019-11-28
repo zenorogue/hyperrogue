@@ -1210,6 +1210,13 @@ EX namespace product {
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
       return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
       }
+
+    transmatrix adj(cell *c, int i) override {
+      if(i == c->type-1) return mscale(Id, cgi.plevel);
+      else if(i == c->type-2) return mscale(Id, -cgi.plevel);
+      c = where[c].first;
+      return PIU(currentmap->adj(c, i));
+      }
   
     void draw() override {
       auto w = hybrid::get_where(centerover);
