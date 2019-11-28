@@ -429,73 +429,48 @@ void calcparam_rug() {
 
 EX void buildTorusRug() {
 
-   /* todo
   calcparam_rug();
   models::configure();
 
-  vector<toruspoint> tps(qty);
+  auto p1 = as_gp(euclid3::T0[0]);
+  auto p2 = as_gp(euclid3::T0[1]);
+
+  hyperpoint xh = eumove(as_coord(p1))*C0-C0;
+  hyperpoint yh = eumove(as_coord(p2))*C0-C0;
+  if(nonorientable) yh *= 2;
   
-  pair<gp::loc, gp::loc> periods;
+  bool flipped = sqhypot_d(2, xh) < sqhypot_d(2, yh);
   
-  // todo take the periods 
+  if(flipped) swap(xh, yh);
   
-  ld factor = sqrt(ld(dsquare(periods.second)) / dsquare(periods.first));
+  cell *gs = currentmap->gamestart();
   
-  ld xfactor = 0, yfactor = 0;
+  ld xfactor, yfactor;
   
-  println(hlog, "factor = ", factor);
-  if(factor <= 2.05) factor = 2.2;
-  factor -= 1;
-        
-  // 22,1
-  // 7,-17
-  
-  transmatrix z1 = matrix3(
-    periods.first.first, periods.second.first, 0, 
-    periods.first.second, periods.second.second, 0,
-    0, 0, 1);
-  // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
-  transmatrix z2 = inverse(z1);
-  
-  if(gwhere == gSphere) {
-    hyperpoint xh = z2 * hpxyz(1, 0, 0);
-    hyperpoint yh = z2 * hpxyz(0, 1, 0);
-    // hypot(xh[0], factor * xh[1]) == hypot(yh[0], factor * yh[1])
-    // xh[0]*xh[0] - yh[0] * yh[0] = factor * factor * (yh[1] * yh[1] - (xh[1] * xh[1])
-    
-    ld factor2 = (xh[0]*xh[0] - yh[0] * yh[0]) / (yh[1] * yh[1] - xh[1] * xh[1]);
-    ld factor = sqrt(factor2);
-    xfactor = sqrt(1/(1+factor2));
-    yfactor = xfactor * factor;
+  ld factor2 = sqhypot_d(2, xh) / sqhypot_d(2, yh);
+  ld factor = sqrt(factor2);
+
+  yfactor = sqrt(1/(1+factor2));
+  xfactor = factor * yfactor;
                                     
-    ld xscale = hypot(xfactor * xh[0] * 2 * M_PI, yfactor * xh[1] * 2 * M_PI);
-    ld yscale = hypot(xfactor * yh[0] * 2 * M_PI, yfactor * yh[1] * 2 * M_PI);
-    println(hlog, "xh = ", xh);
-    println(hlog, "yh = ", yh);
-    println(hlog, "factor = ", make_tuple(xfactor, yfactor, factor));
-    println(hlog, "scales = ", make_tuple(xscale, yscale));
-    
-    modelscale = xscale / cgi.crossf;
-    }
+  transmatrix T = build_matrix(xh, yh, C0, C03);  
+  transmatrix iT = inverse(T);
+
+  if(gwhere == gSphere) 
+    modelscale = hypot_d(2, xh) * xfactor * 2 * M_PI;
   
   map<pair<int, int>, rugpoint*> glues;
   
-  auto addToruspoint = [&] (ld x, ld y) {
+  auto addToruspoint = [&] (hyperpoint h) {
     auto r = addRugpoint(C0, 0);
     hyperpoint onscreen;
-    applymodel(tC0(eumove(x, y)), onscreen);
-    // take point (1,0)
-    // apply eumove(1,0)
-    // multiply by current_display->radius (= HTEXTURESIZE * rugzoom)
-    // add 1, divide by texturesize
+    hyperpoint h1 = gmatrix[gs] * T * h;
+    applymodel(h1, onscreen);
     r->x1 = onscreen[0];
     r->y1 = onscreen[1];
-    hyperpoint h1 = hpxyz(x, y, 0);
-    hyperpoint h2 = z2 * h1;
-    double alpha = -h2[0] * 2 * M_PI;
-    double beta = -h2[1] * 2 * M_PI;
-    // r->flat = {alpha, beta, 0}; 
-    double sc = (factor+1)/4;
+
+    double alpha = -h[0] * 2 * M_PI;
+    double beta = h[1] * 2 * M_PI;
     
     if(gwhere == gSphere) {
       ld ax = alpha + 1.124651, bx = beta + 1.214893;
@@ -504,47 +479,37 @@ EX void buildTorusRug() {
       r->flat = r->h = hpxyz(x * d, y * d, z * d);
       }
     else 
-      r->flat = r->h = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
+      r->flat = r->h = modelscale * hpxyz((xfactor+yfactor*cos(beta)) * cos(alpha), (xfactor+yfactor*cos(beta)) * sin(alpha), yfactor*-sin(beta));
     r->valid = true;
     
     static const int X = 100003; // a prime
     auto gluefun = [] (ld z) { return int(frac(z + .5/X) * X); };
-    auto p = make_pair(gluefun(h2[0]), gluefun(h2[1]));
+    auto p = make_pair(gluefun(h[0]), gluefun(h[1]));
     auto& r2 = glues[p];
     if(r2) r->glueto(r2); else r2 = r;
     return r;
     };
     
-  int rugmax = (int) sqrt(vertex_limit / qty);
+  int rugmax = (int) sqrt(vertex_limit / isize(currentmap->allcells()));
   if(rugmax < 1) rugmax = 1;
   if(rugmax > 16) rugmax = 16;
   
   ld rmd = rugmax;
-
-  for(int leaf=0; leaf<(klein ? 2 : 1); leaf++)
-  for(int i=0; i<getqty(); i++) {
-    int x, y;
+  
+  hyperpoint sx = iT * (currentmap->adj(gs, 0)*C0-C0)/rmd;
+  hyperpoint sy = iT * (currentmap->adj(gs, 1)*C0-C0)/rmd;
+  
+  for(int leaf=0; leaf<(nonorientable ? 2 : 1); leaf++)
+  for(cell *c: currentmap->allcells()) {
+        
+    hyperpoint h = iT * calc_relative_matrix(c, gs, C0) * C0;
     
-    if(single) {
-      x = tps[i].x;
-      y = tps[i].y;
-      }
-    else {
-      x = i % sdx;
-      y = i / sdx;
-      if(x > sdx/2) x -= sdx;
-      if(y > sdy/2) y -= sdy;
-      
-      if(leaf) { 
-        x += sdx;
-        if(x > sdx) x -= 2 * sdx;
-        }
-      }
+    if(leaf) h[flipped ? 0 : 1] += .5;
     
     rugpoint *rugarr[32][32];
     for(int yy=0; yy<=rugmax; yy++)
     for(int xx=0; xx<=rugmax; xx++)
-      rugarr[yy][xx] = addToruspoint(x+xx/rmd, y+(yy-xx)/rmd);
+      rugarr[yy][xx] = addToruspoint(h+xx*sx+yy*sy);
     
     for(int yy=0; yy<rugmax; yy++)
     for(int xx=0; xx<rugmax; xx++)
@@ -557,13 +522,11 @@ EX void buildTorusRug() {
   for(auto p: points)
     maxz = max(maxz, max(abs(p->x1), abs(p->y1)));
   
-  // maxz * rugzoom * current_display->radius == current_display->radius
-  
-  vid.scale = 1 / maxz;
-  
-  for(auto p: points)
-    p->x1 = (current_display->xcenter + current_display->radius * vid.scale * p->x1)/ vid.xres,
-    p->y1 = (current_display->ycenter - current_display->radius * vid.scale * p->y1)/ vid.yres;
+  if(1) vid.scale = 1 / maxz;
+
+  if(1) for(auto p: points)
+    p->x1 = (1 + vid.scale * p->x1)/2,
+    p->y1 = (1 - vid.scale * p->y1)/2;
   
   qvalid = 0;
   for(auto p: points) if(!p->glue) qvalid++;
@@ -571,7 +534,6 @@ EX void buildTorusRug() {
 
   if(rug_perspective)
     push_all_points(2, -model_distance);  
-  */
   
   return;
   }
