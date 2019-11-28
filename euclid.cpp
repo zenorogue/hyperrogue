@@ -191,34 +191,30 @@ EX namespace euclid3 {
         }
       }
     
-    transmatrix warppush(coord dif) {
-      auto v = getcoord(dif);
-      for(int i: {0, 1})
-        if(T0[i][i])
-          v[i] = gmod(v[i] + T0[i][i] / 2, T0[i][i]) - T0[i][i] / 2;
-      return eupush3(v[0], v[1], v[2]);
-      }
-    
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(twisted) {
         if(h1 == h2) return Id;
         for(int s=0; s<S7; s++) if(h2 == h1->move(s)) return adj(h1, s);
         coord c1 = ispacemap[h1];
         coord c2 = ispacemap[h2];
-        transmatrix T = warppush(c2 - c1);
-        for(int d: {-1, 1}) {
-          transmatrix I = Id;
-          coord cs = c1;
-          for(int s=0; s<3; s++) {
-            cs += d * T0[2][2] * main_axes[2];
-            I = I * eupush3(0, 0, d * T0[2][2]);
-            auto dummy = getcoord(0);
-            bool dm = false;
-            cs = twist(cs, dummy, I, dm);
-            transmatrix T1 = I * warppush(c2 - cs);
+        transmatrix T = eumove(c2 - c1);
+
+        transmatrix I = Id;
+        coord cs = c1;
+        for(int s=0; s<4; s++) {
+          for(int a=-1; a<=1; a++)
+          for(int b=-1; b<=1; b++) {
+            if(b && WDIM == 2) continue;
+            transmatrix T1 = I * eumove((c2 - cs) + a*ascoord(T0[0]) + b*ascoord(T0[1]));
             if(hdist0(tC0(T1)) < hdist0(tC0(T)))
               T = T1;
             }
+          auto co = ascoord(T0[WDIM-1]);
+          cs += co;
+          I = I * eumove(co);
+          auto dummy = getcoord(0);
+          bool dm = false;
+          cs = twist(cs, dummy, I, dm);
           }
         return T;
         }
