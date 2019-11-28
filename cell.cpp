@@ -860,7 +860,8 @@ EX cdata *arcmCdata(cell *c) {
   }
 
 EX int getCdata(cell *c, int j) {
-  if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->val[j];
+  if(prod) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
+  else if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->val[j];
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
   else if(archimedean && hyperbolic) 
@@ -877,7 +878,8 @@ EX int getCdata(cell *c, int j) {
   }
 
 EX int getBits(cell *c) {
-  if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->bits;
+  if(prod) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
+  else if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->bits;
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
   else if(archimedean && (hyperbolic || sl2)) 
