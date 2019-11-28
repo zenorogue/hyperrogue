@@ -185,7 +185,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
   if(hybri) {
-    if(hybrid::over_sphere()) return NULL;
+    if(hybrid::under_class() == gcSphere) return NULL;
     c = hybrid::get_where(c).first;
     return PIU ( createAlternateMap(c, rad, firststate, special) );
     }

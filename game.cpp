@@ -7505,7 +7505,7 @@ EX bool in_full_game() {
   if(euclid && isCrossroads(specialland)) return true;
   if(weirdhyperbolic && specialland == laCrossroads4) return true;
   if(cryst && isCrossroads(specialland)) return true;
-  if((in_s2xe() || nonisotropic || (hybri && !hybrid::over_sphere())) && isCrossroads(specialland)) return true;
+  if((in_s2xe() || nonisotropic || (hybri && hybrid::under_class() != gcSphere)) && isCrossroads(specialland)) return true;
   if(geometry == gNormal && !NONSTDVAR) return true;
   return false;
   }

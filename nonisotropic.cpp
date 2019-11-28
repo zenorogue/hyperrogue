@@ -973,15 +973,16 @@ EX void show_niltorus3() {
   
 EX }
 
-EX bool in_s2xe() { return prod && hybrid::over_sphere(); }
-EX bool in_h2xe() { return prod && !hybrid::over_sphere(); }
+EX bool in_s2xe() { return prod && hybrid::under_class() == gcSphere; }
+EX bool in_h2xe() { return prod && hybrid::under_class() == gcHyperbolic; }
+EX bool in_e2xe() { return prod && hybrid::under_class() == gcEuclid; }
 
 EX namespace hybrid {
 
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
 
-  EX bool over_sphere() { return ginf[hybrid::underlying].cclass == gcSphere; }  
+  EX eGeometryClass under_class() { return ginf[hybrid::underlying].cclass; }  
   
   EX void configure(eGeometry g) {
     if(WDIM == 3) return;

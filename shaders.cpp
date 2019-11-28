@@ -197,7 +197,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         break;
       }      
     }
-  else if(geometry == gProduct && !hybrid::over_sphere() && pmodel == mdPerspective) {
+  else if(in_h2xe() && pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     coordinator +=      
       "float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;\n"
@@ -209,7 +209,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     distfun = "sqrt(z*z+d*d)";
     treset = true;
     }
-  else if(geometry == gProduct && hybrid::over_sphere() && pmodel == mdPerspective) {
+  else if(in_s2xe() && pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     distfun = "length(t.xyz)", treset = true;
     }
