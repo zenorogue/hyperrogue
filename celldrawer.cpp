@@ -1685,6 +1685,7 @@ void celldrawer::bookkeeping() {
     orig = 
       gm[LDIM][LDIM] == 0 ? true : 
       euclid ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
+      in_e2xe() ? hdist0(tC0(gm)) >= hdist0(tC0(V)) :
       (nil||sol) ? sqhypot_d(3, tC0(gm)) >= sqhypot_d(3, tC0(V)) :
       sphereflipped() ? fabs(gm[LDIM][LDIM]-1) <= fabs(V[LDIM][LDIM]-1) :
       fabs(gm[LDIM][LDIM]-1) >= fabs(V[LDIM][LDIM]-1) - 1e-8;
