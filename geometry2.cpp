@@ -45,9 +45,9 @@ EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
     }
   #endif
   else if(BITRUNCATED) {
-    for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
-      return (get_inverse?cgi.invhexmove:cgi.hexmove)[d];
-    return Id;
+    if(c == c->master->c7)
+      return Id;
+    return (get_inverse?cgi.invhexmove:cgi.hexmove)[c->c.spin(0)];
     }
   else if(WDIM == 3)
     return Id;
