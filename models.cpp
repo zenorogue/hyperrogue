@@ -160,6 +160,9 @@ EX namespace models {
   EX ld spiral_cone_rad;
   EX bool ring_not_spiral;
   
+  /** the matrix to rotate the Euclidean view from the standard coordinates to the screen coordinates */
+  EX transmatrix euclidean_spin;
+  
   EX ld product_z_scale = 1;
 
   EX void configure() {
@@ -187,7 +190,9 @@ EX namespace models {
       spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * mul / 2., 0);
       }
     if(euclid) {
-      hyperpoint h = C0 + (eumove(as_coord({1,0}))*C0 - C0) * spiral_x + (eumove(as_coord({0,1}))*C0 - C0) * spiral_y;
+      euclidean_spin = pispin * inverse(cview() * master_relative(centerover, true));
+      euclidean_spin = gpushxto0(euclidean_spin * C0) * euclidean_spin;
+      hyperpoint h = inverse(euclidean_spin) * (C0 + (eumove(as_coord({1,0}))*C0 - C0) * spiral_x + (eumove(as_coord({0,1}))*C0 - C0) * spiral_y);
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     

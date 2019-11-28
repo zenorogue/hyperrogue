@@ -853,6 +853,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         
         ret[0] = -sin(alpha) * r;
         ret[1] = cos(alpha) * r;
+        if(euclid) ret = models::euclidean_spin * ret;
         ret[2] = (r-1) * sqrt( pow(360/models::spiral_cone, 2) - 1);
         
         models::apply_ball(ret[2], ret[1]);
@@ -861,6 +862,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
         z = exp(z);
         ret[0] = real(z);
         ret[1] = imag(z);
+        if(euclid) ret = models::euclidean_spin * ret;
 
         if(vid.skiprope) 
           ret = mobius(ret, vid.skiprope, 1);
