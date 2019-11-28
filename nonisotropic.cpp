@@ -1102,16 +1102,16 @@ EX namespace hybrid {
       }
     }  
 
-  EX void in_underlying_map(const reaction_t& f) {
-    if(!hybri) f();
-    else hmap()->in_underlying(f);
-    }
-
+  EX hrmap* get_umap() { return ((hrmap_hybrid*)currentmap)->underlying_map; }
+  
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!hybri) return f();
     dynamicval<eGeometry> g(geometry, underlying);
+    dynamicval<eGeometry> gag(actual_geometry, geometry);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+    dynamicval<hrmap*> gpm(pmap, currentmap);
+    dynamicval<hrmap*> gm(currentmap, get_umap());
     return f();
     }
   
@@ -1128,7 +1128,7 @@ EX namespace hybrid {
       }
     else {
       ld tf, he, alpha;
-      in_underlying_map([&] {
+      in_underlying_geometry([&] {
         hyperpoint h1 = get_corner_position(c, i);
         hyperpoint h2 = get_corner_position(c, i+1);
         hyperpoint hm = mid(h1, h2);
@@ -1723,7 +1723,7 @@ EX namespace rots {
     
     cell *co = hybrid::get_where(centerover).first;
   
-    hybrid::in_underlying_map([&] {
+    hybrid::in_underlying_geometry([&] {
       cgi.require_shapes();
       dynamicval<int> pcc(corner_centering, cornermode ? 1 : 2);
       dynamicval<bool> pf(playerfound, true);

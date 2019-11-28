@@ -439,9 +439,7 @@ EX int celldist(cell *c) {
   if(hybri) { 
     auto w = hybrid::get_where(c); 
     if(sl2) w.second = 0;
-    int d; 
-    hybrid::in_underlying_map([&] { d = celldist(w.first) + abs(w.second); }); 
-    return d;
+    return PIU ( celldist(w.first) + abs(w.second) );
     }
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euclid) return celldistance(currentmap->gamestart(), c);
@@ -472,7 +470,7 @@ EX int celldistAlt(cell *c) {
     auto w = hybrid::get_where(c); 
     int d = c->master->alt && c->master->alt->alt ? c->master->alt->alt->fieldval : 0;
     d = sl2 ? 0 : abs(w.second - d);
-    hybrid::in_underlying_map([&] { d += celldistAlt(w.first); });
+    PIU ( d += celldistAlt(w.first) );
     return d;
     }
   #if CAP_BT
@@ -738,7 +736,7 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
 
 
 cdata *getHeptagonCdata(heptagon *h) {
-  if(hybri) { cdata *x; hybrid::in_underlying_map([&] { x = getHeptagonCdata(h); }); return x; }
+  if(hybri) return PIU ( getHeptagonCdata(h) );
   if(geometry == gNormal && BITRUNCATED) return getHeptagonCdata_legacy(h);
   if(h->cdata) return h->cdata;
 
@@ -980,9 +978,7 @@ EX int celldistance(cell *c1, cell *c2) {
 
   if(prod) {
     auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
-    int d;
-    hybrid::in_underlying_map([&] { d = celldistance(w1.first, w2.first) + abs(w1.second - w2.second); });
-    return d;
+    return PIU ( celldistance(w1.first, w2.first) + abs(w1.second - w2.second) );
     }
   
   #if CAP_FIELD

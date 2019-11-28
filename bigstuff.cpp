@@ -132,7 +132,7 @@ EX bool grailWasFound(cell *c) {
   }
 
 void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
-  if(hybri) { hybrid::in_underlying_map([&] { generateAlts(h, levs, link_cdata); }); }
+  if(hybri) { PIU ( generateAlts(h, levs, link_cdata) ); }
   if(!h->alt) return;
   preventbarriers(h->c7);
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
@@ -187,9 +187,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   if(hybri) {
     if(hybrid::over_sphere()) return NULL;
     c = hybrid::get_where(c).first;
-    heptagon *res;
-    hybrid::in_underlying_map([&] { res = createAlternateMap(c, rad, firststate, special); });
-    return res;
+    return PIU ( createAlternateMap(c, rad, firststate, special) );
     }
 
   // check for direction

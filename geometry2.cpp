@@ -245,7 +245,7 @@ void virtualRebase(cell*& base, T& at, const U& check) {
     auto w = hybrid::get_where(base);
     auto d = product_decompose(check(at)).first;
     at = mscale(at, -d);
-    hybrid::in_underlying_map([&] { virtualRebase(w.first, at, check); });
+    PIU( virtualRebase(w.first, at, check) );
     if(d > cgi.plevel / 2) { w.second++; d -= cgi.plevel; }
     if(d < -cgi.plevel / 2) { w.second--; d += cgi.plevel; }
     at = mscale(at, +d);

@@ -796,10 +796,8 @@ EX void set_floor(const transmatrix& spin, hpcshape& sh) {
 
 EX int shvid(cell *c) {
   if(hybri) {
-    int d;
     cell *c1 = hybrid::get_where(c).first; 
-    hybrid::in_underlying_map([&] { d = shvid(c1); });
-    return d;
+    return PIU( shvid(c1) );
     }
   else if(GOLDBERG)
     return gp::get_plainshape_id(c);

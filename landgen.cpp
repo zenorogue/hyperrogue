@@ -2590,7 +2590,7 @@ EX void setdist(cell *c, int d, cell *from) {
     auto wc = hybrid::get_where(c).first;
     auto wf = from ? hybrid::get_where(from).first : NULL;
     if(c->land && !wc->land) wc->land = c->land;
-    hybrid::in_underlying_map([&] { setdist(wc, d, wf); });
+    PIU ( setdist(wc, d, wf) );
     }
 
   if(buggyGeneration) {

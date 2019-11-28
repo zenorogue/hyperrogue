@@ -368,9 +368,7 @@ EX int fieldval_uniq(cell *c) {
   if(experimental) return 0;
   else if(hybri) { 
     auto c1 = hybrid::get_where(c).first; 
-    int res;
-    hybrid::in_underlying_map([&] { res = fieldval_uniq(c1); });
-    return res; 
+    return PIU ( fieldval_uniq(c1) );
     }
   else if(sphere) {
     if(archimedean) return c->master->fiftyval;
@@ -403,9 +401,7 @@ EX int fieldval_uniq(cell *c) {
 EX int fieldval_uniq_rand(cell *c, int randval) {
   if(hybri) { 
     auto c1 = hybrid::get_where(c).first; 
-    int res;
-    hybrid::in_underlying_map([&] { res = fieldval_uniq_rand(c1, randval); });
-    return res; 
+    return PIU ( fieldval_uniq_rand(c1, randval) );
     }
   if(sphere || euclid || NONSTDVAR) 
     // we do not care in these cases
