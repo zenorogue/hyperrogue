@@ -1226,15 +1226,17 @@ EX namespace product {
     cell *c = cw.at;
     if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
     bool s = sphere || pmodel != mdPerspective;
+    bool euc = euclid;
     hybrid::in_actual([&] { 
       cell *c0 = hybrid::get_at(c, z0);
       cwall_offset = hybrid::wall_offset(c0);
       if(s) cwall_mask = (1<<c->type) - 1;
       else {
         cwall_mask = 0;
-        ld d = V[2][2];
+        ld d = euc ? sqhypot_d(2, tC0(V)) : V[2][2];
         for(int i=0; i<c->type; i++) {
-          ld d1 = (V * cgi.walltester[cwall_offset + i])[2];
+          hyperpoint h = (V * cgi.walltester[cwall_offset + i]);
+          ld d1 = euc ? sqhypot_d(2, h) : h[2];
           if(d1 < d - 1e-6) cwall_mask |= (1<<i);
           }
         }
@@ -1256,7 +1258,11 @@ EX namespace product {
     res[2] = zlevel(h);
     h = zshift(h, -res[2]);
     ld r = hypot_d(2, h);
-    if(r < 1e-6) {
+    if(hybrid::under_class() == gcEuclid) {
+      res[0] = h[0];
+      res[1] = h[1];
+      }
+    else if(r < 1e-6) {
       res[0] = h[0];
       res[1] = h[1];
       }

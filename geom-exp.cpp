@@ -279,8 +279,12 @@ void set_or_configure_geometry(eGeometry g) {
   #endif
   else {
     if(among(g, gProduct, gRotSpace)) {
-      if(WDIM == 3 || euclid) {
-        addMessage(XLAT("Only works with 2D non-Euclidean geometries"));
+      if(WDIM == 3 || (g == gRotSpace && euclid)) {
+        addMessage(XLAT(          
+          g == gRotSpace ?
+            "Only works with 2D non-Euclidean geometries"
+          : "Only works with 2D geometries"
+            ));
         return;
         }
       if(g == gRotSpace) {

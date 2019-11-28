@@ -209,6 +209,14 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     distfun = "sqrt(z*z+d*d)";
     treset = true;
     }
+  else if(in_e2xe() && pmodel == mdPerspective) {
+    shader_flags |= SF_PERS3 | SF_DIRECT;
+    coordinator +=      
+      "t.xy /= t.z;\n"
+      "t.z = log(t.z);\n";
+    distfun = "length(t.xyz)";
+    treset = true;
+    }
   else if(in_s2xe() && pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     distfun = "length(t.xyz)", treset = true;

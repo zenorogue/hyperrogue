@@ -373,6 +373,7 @@ EX ld zlevel(const hyperpoint &h) {
   if(sl2) return sqrt(-intval(h, Hypc));
   else if(translatable) return h[LDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
+  else if(in_e2xe()) return log(h[2]);
   else if(prod) return log(sqrt(abs(intval(h, Hypc)))); /* abs works with both underlying spherical and hyperbolic */
   else return (h[LDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
