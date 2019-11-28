@@ -253,7 +253,7 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->valid = false;
 
   if(euclid && quotient && !bounded) {
-    hyperpoint h1 = eumove(euclid3::ascoord(euclid3::T0[1])) * C0;
+    hyperpoint h1 = inverse(models::euclidean_spin) * eumove(euclid3::ascoord(euclid3::T0[1])) * C0;
     h1 /= sqhypot_d(2, h1);
     if(nonorientable) h1 /= 2;
     m->valid = good_shape = true;
