@@ -756,7 +756,11 @@ EX namespace euclid3 {
       if(S3 == 3) torus_config_option(XLAT("seven-colorable torus"), 'F', regular_torus({1,2}));
       if(S3 == 3) torus_config_option(XLAT("HyperRogue classic torus"), 'G', single_row_torus(381, -22));
       }
-    
+      
+    dialog::addBreak(50);
+    dialog::addBoolItem(XLAT("standard rotation"), eqmatrix(models::euclidean_spin, Id), 's');
+    dialog::add_action([] { rotate_view(models::euclidean_spin); });
+
     dialog::addBreak(50);
     
     char xch = 'p';
