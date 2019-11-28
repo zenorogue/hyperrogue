@@ -270,8 +270,12 @@ void enable_raycaster() {
       string sgn=in_h2xe() ? "-" : "+";
       fmain +=     
       "  vec4 position = vw * vec4(0., 0., 1., 0.);\n"
-      "  vec4 at1 = uLP * at0;\n"
-      "  float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n"
+      "  vec4 at1 = uLP * at0;\n";
+      if(in_e2xe()) fmain +=
+      "  float zpos = log(position.z);\n";
+      else fmain +=
+      "  float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n";
+      fmain +=
       "  position *= exp(-zpos);\n"
       "  float zspeed = at1.z;\n"
       "  float xspeed = length(at1.xy);\n"
@@ -291,6 +295,8 @@ void enable_raycaster() {
     
     fmain +=
       "  int which = -1;\n";
+    
+    if(in_e2xe()) fmain += "tangent.w = position.w = 0.;\n";
       
     if(IN_ODS) fmain += 
       "  if(go == 0.) {\n"
@@ -320,6 +326,14 @@ void enable_raycaster() {
           "    float d = atan(v);\n"
           "    vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
           "    if(next_tangent[2] > (uM[i] * next_tangent)[2]) continue;\n"
+          "    d /= xspeed;\n";
+      else if(in_e2xe()) fmain +=
+          "    float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+          "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
+          "    float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    if(d < 0.) continue;\n"
+          "    vec4 next_position = position + d * tangent;\n"
+          "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n"
           "    d /= xspeed;\n";
       else if(hyperbolic) fmain +=
           "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
@@ -392,6 +406,9 @@ void enable_raycaster() {
       "  vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch - position * sh;\n"
       "  position = v;\n"
+      "  zpos += dist * zspeed;\n";
+    else if(in_e2xe()) fmain +=
+      "  position = position + tangent * dist * xspeed;\n"
       "  zpos += dist * zspeed;\n";
     else if(hyperbolic) fmain += 
       "  float ch = cosh(dist); float sh = sinh(dist);\n"
