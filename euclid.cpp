@@ -202,7 +202,7 @@ EX namespace euclid3 {
           for(int b=-1; b<=1; b++) {
             if(b && WDIM == 2) continue;
             transmatrix T1 = I * eumove((c2 - cs) + a*T0[0] + b*T0[1]);
-            if(hdist0(tC0(T1)) < hdist0(tC0(T)))
+            if(hdist(tC0(T1), hint) < hdist(tC0(T), hint))
               T = T1;
             }
           auto co = T0[WDIM-1];
