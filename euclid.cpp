@@ -437,6 +437,16 @@ EX namespace euclid3 {
     canonical_seq.push_back(val);
     }
   
+  EX bool valid_third_turn(const intmatrix& m) {
+    if(T0[0][2] != -T0[0][0]-T0[0][1]) return false;
+    if(T0[1][0] != T0[0][1]) return false;
+    if(T0[1][1] != T0[0][2]) return false;
+    if(T0[1][2] != T0[0][0]) return false;
+    if(T0[2][0] != T0[2][1]) return false;
+    if(T0[2][0] != T0[2][2]) return false;
+    return true;
+    }
+
   EX void build_torus3(eGeometry g) {
   
     int dim = ginf[g].g.gameplay_dimension;
@@ -497,14 +507,19 @@ EX namespace euclid3 {
     
     twisted = twisted0;
     if(dim == 3) {
-      twisted &= 7;
-      if(g != gCubeTiling && ((T0[0][0]+T0[2][2]) & 1)) twisted &=~ 1;
-      if(g != gCubeTiling && ((T0[1][1]+T0[2][2]) & 1)) twisted &=~ 2;
-      for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-        if(i != j && T0[i][j]) twisted = 0;
-      if(T0[2][2] == 0) twisted = 0;
-      if(T0[0][0] != T0[1][1]) twisted &= 3;
-     }
+      if(valid_third_turn(T0)) {
+        twisted &= 16;
+        }
+      else {
+        twisted &= 7;
+        if(g != gCubeTiling && ((T0[0][0]+T0[2][2]) & 1)) twisted &=~ 1;
+        if(g != gCubeTiling && ((T0[1][1]+T0[2][2]) & 1)) twisted &=~ 2;
+        for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+          if(i != j && T0[i][j]) twisted = 0;
+        if(T0[2][2] == 0) twisted = 0;
+        if(T0[0][0] != T0[1][1]) twisted &= 3;
+        }
+      }
     else {
       twisted &= 8;
       twisted_vec = as_gp(T0[1]);
@@ -536,8 +551,45 @@ EX namespace euclid3 {
     }
   
   gp::loc ort1() { return (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)); }
+
+  int diagonal_cross(const array<int, 3>& a, const array<int, 3>& b) {
+    return a[0]*b[1] + a[1]*b[2] + a[2]*b[0]
+         - b[0]*a[1] - b[1]*a[2] - b[2]*a[0];
+    };
   
   EX coord twist(coord x, array<int, 3>& d, transmatrix& M, bool& mirr) {
+    if(!twisted) return x;
+    if(twisted & 16) {
+      int period = T0[2][2];
+      transmatrix RotYZX = Zero;
+      RotYZX[0][1] = 1;
+      RotYZX[1][2] = 1;
+      RotYZX[2][0] = 1;
+      RotYZX[3][3] = 1;
+      auto coo = getcoord(x);
+      while(true) {
+        auto coosum = coo[0] + coo[1] + coo[2];
+        if(coosum >= 3 * period) {
+          coo[0] -= period, coo[1] -= period, coo[2] -= period;
+          tie(d[0], d[1], d[2]) = make_tuple(d[1], d[2], d[0]);
+          M = M * RotYZX;
+          }
+        else if(coosum < 0) {
+          coo[0] += period, coo[1] += period, coo[2] += period;
+          tie(d[0], d[1], d[2]) = make_tuple(d[2], d[0], d[1]);
+          M = M * RotYZX * RotYZX;
+          }
+        else break;
+        }
+      if(ascoord(T0[0])) {
+        int dcro = diagonal_cross(T0[0], T0[1]);
+        while(diagonal_cross(coo, T0[1]) < 0) for(int i=0; i<3; i++) coo[i] -= T0[0][i];
+        while(diagonal_cross(coo, T0[1]) > 0) for(int i=0; i<3; i++) coo[i] += T0[0][i];
+        while(diagonal_cross(coo, T0[0]) > 0) for(int i=0; i<3; i++) coo[i] -= T0[1][i];
+        while(diagonal_cross(coo, T0[0]) < 0) for(int i=0; i<3; i++) coo[i] += T0[1][i];
+        }
+      return ascoord(coo);
+      }
     if(WDIM == 3) {
       auto coo = getcoord(x);
       while(coo[2] >= T0[2][2]) {
@@ -554,7 +606,7 @@ EX namespace euclid3 {
         }
       for(int i: {0,1})
         if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
-      return coo[0] * main_axes[0] + coo[1] * main_axes[1] + coo[2] * main_axes[2];
+      return ascoord(coo);
       }
     else {
       auto crd = getcoord(x);
@@ -590,7 +642,7 @@ EX namespace euclid3 {
           }
         }
       d[0] = d0.first; d[1] = d0.second;
-      return coo.first * main_axes[0] + coo.second * main_axes[1];
+      return as_coord(coo);
       }
     }
 
@@ -836,6 +888,20 @@ EX namespace euclid3 {
         shift(); T0[i][j] = argi();
         }
       shift(); twisted0 = argi();
+      build_torus3();
+      }
+    else if(argis("-twistthird")) {
+      PHASEFROM(2);
+      stop_game();
+      shift(); T0[0][0] = argi();
+      shift(); T0[0][1] = argi();
+      shift(); T0[2][0] = argi();
+      T0[0][2] = -T0[0][0]-T0[0][1];
+      T0[1][0] = T0[0][1];
+      T0[1][1] = T0[0][2];
+      T0[1][2] = T0[0][0];
+      T0[2][1] = T0[2][2] = argi();
+      twisted0 = 16;
       build_torus3();
       }
     else if(argis("-twist3")) {
