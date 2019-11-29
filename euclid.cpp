@@ -542,9 +542,9 @@ EX namespace euclid3 {
     if(twisted & 16) {
       int period = T0[2][2];
       transmatrix RotYZX = Zero;
-      RotYZX[0][1] = 1;
-      RotYZX[1][2] = 1;
-      RotYZX[2][0] = 1;
+      RotYZX[1][0] = 1;
+      RotYZX[2][1] = 1;
+      RotYZX[0][2] = 1;
       RotYZX[3][3] = 1;
       auto& coo = x;
       while(true) {
@@ -552,20 +552,22 @@ EX namespace euclid3 {
         if(coosum >= 3 * period) {
           coo[0] -= period, coo[1] -= period, coo[2] -= period;
           tie(d[0], d[1], d[2]) = make_tuple(d[1], d[2], d[0]);
+          tie(coo[0], coo[1], coo[2]) = make_tuple(coo[1], coo[2], coo[0]);
           M = M * RotYZX;
           }
         else if(coosum < 0) {
           coo[0] += period, coo[1] += period, coo[2] += period;
           tie(d[0], d[1], d[2]) = make_tuple(d[2], d[0], d[1]);
+          tie(coo[0], coo[1], coo[2]) = make_tuple(coo[2], coo[0], coo[1]);
           M = M * RotYZX * RotYZX;
           }
         else break;
         }
       if(T0[0] != euzero) {
-        while(diagonal_cross(coo, T0[1]) < 0) for(int i=0; i<3; i++) coo[i] -= T0[0][i];
-        while(diagonal_cross(coo, T0[1]) > 0) for(int i=0; i<3; i++) coo[i] += T0[0][i];
-        while(diagonal_cross(coo, T0[0]) > 0) for(int i=0; i<3; i++) coo[i] -= T0[1][i];
-        while(diagonal_cross(coo, T0[0]) < 0) for(int i=0; i<3; i++) coo[i] += T0[1][i];
+        while(diagonal_cross(coo, T0[1]) < 0) coo -= T0[0];
+        while(diagonal_cross(coo, T0[1]) > 0) coo += T0[0];
+        while(diagonal_cross(coo, T0[0]) > 0) coo -= T0[1];
+        while(diagonal_cross(coo, T0[0]) < 0) coo += T0[1];
         }
       return coo;
       }
