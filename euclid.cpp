@@ -15,31 +15,27 @@ namespace hr {
 EX namespace euclid3 {
 
   #if HDR
-  typedef long long coord; 
-  constexpr long long COORDMAX = (1<<16);
-  typedef array<coord, 3> axes;  
-  typedef array<array<int, 3>, 3> intmatrix;
+  struct coord : array<int, 3> {
+    coord() {}
+    coord(int x, int y, int z) { self[0] = x; self[1] = y; self[2] = z; }
+    coord& operator += (coord b) { for(int i: {0,1,2}) self[i] += b[i]; return self; }
+    coord& operator -= (coord b) { for(int i: {0,1,2}) self[i] -= b[i]; return self; }
+    coord operator + (coord b) const { coord a = self; return a += b; }
+    coord operator - (coord b) const { coord a = self; return a -= b; }
+    coord operator -() const { return coord(-self[0], -self[1], -self[2]); }
+    coord& operator +() { return self; }
+    const coord& operator +() const { return self; }
+    coord operator *(int x) const { return coord(x*self[0], x*self[1], x*self[2]); }
+    friend coord operator *(int x, const coord& y) { return coord(x*y[0], x*y[1], x*y[2]); }
+    };
+  
+  typedef array<coord, 3> intmatrix;
   #endif
 
-  static const axes main_axes = make_array<coord>(1, COORDMAX, COORDMAX * COORDMAX );
-  
-  EX array<int, 3> getcoord(coord x) {
-    array<int, 3> res;
-    for(int k=0; k<3; k++) {
-      int next = x % COORDMAX;
-      if(next>COORDMAX/2) next -= COORDMAX; 
-      if(next<-COORDMAX/2) next += COORDMAX; 
-      res[k] = next;
-      x -= next;
-      x /= COORDMAX;
-      }
-    return res; 
-    }
-  
-  EX coord ascoord(array<int, 3> x) {
-    return x[0] * main_axes[0] + x[1] * main_axes[1] + x[2] * main_axes[2];
-    }
+  EX coord euzero = coord(0,0,0);
 
+  static const intmatrix main_axes = make_array<coord>(coord(1,0,0), coord(0,1,0), coord(0,0,1));
+  
   EX vector<coord> get_shifttable() {
     static const coord D0 = main_axes[0];
     static const coord D1 = main_axes[1];
@@ -113,7 +109,7 @@ EX namespace euclid3 {
       }
 
     heptagon *getOrigin() override {
-      return get_at(0);
+      return get_at(euzero);
       }
 
     heptagon *get_at(coord at) {
@@ -128,13 +124,13 @@ EX namespace euclid3 {
         h->distance = 0;
         h->cdata = NULL;
         h->alt = NULL;
-        auto co = getcoord(at);
         if(S7 != 14)
-          h->zebraval = gmod(co[0] + co[1] * 2 + co[2] * 4, 5);
+          h->zebraval = gmod(at[0] + at[1] * 2 + at[2] * 4, 5);
         else 
-          h->zebraval = co[0] & 1;
+          h->zebraval = at[0] & 1;
         spacemap[at] = h;
         ispacemap[h] = at;
+
         return h;
         }
       }
@@ -145,9 +141,9 @@ EX namespace euclid3 {
       bool mirr = false;
       if(twisted) {
         transmatrix I;
-        auto st = getcoord(shifttable[d1]);
+        auto st = shifttable[d1];
         twist(ispacemap[parent] + shifttable[d], st, I, mirr);
-        for(int i=0; i<S7; i++) if(getcoord(shifttable[i]) == st) d1 = i;
+        for(int i=0; i<S7; i++) if(shifttable[i] == st) d1 = i;
         }
       h->c.connect(d1, parent, d, mirr);
       return h;
@@ -162,7 +158,7 @@ EX namespace euclid3 {
       transmatrix res = tmatrix[i];
       coord id = ispacemap[h];
       id += shifttable[i];
-      auto dummy = getcoord(0);
+      auto dummy = euzero;
       bool dm = false;
       twist(id, dummy, res, dm);
       
@@ -205,14 +201,14 @@ EX namespace euclid3 {
           for(int a=-1; a<=1; a++)
           for(int b=-1; b<=1; b++) {
             if(b && WDIM == 2) continue;
-            transmatrix T1 = I * eumove((c2 - cs) + a*ascoord(T0[0]) + b*ascoord(T0[1]));
+            transmatrix T1 = I * eumove((c2 - cs) + a*T0[0] + b*T0[1]);
             if(hdist0(tC0(T1)) < hdist0(tC0(T)))
               T = T1;
             }
-          auto co = ascoord(T0[WDIM-1]);
+          auto co = T0[WDIM-1];
           cs += co;
           I = I * eumove(co);
-          auto dummy = getcoord(0);
+          auto dummy = euzero;
           bool dm = false;
           cs = twist(cs, dummy, I, dm);
           }
@@ -269,27 +265,25 @@ EX namespace euclid3 {
   
   EX bool pseudohept(cell *c) {
     coord co = cubemap()->ispacemap[c->master];
-    auto v = getcoord(co);
     if(S7 == 12) {
-      for(int i=0; i<3; i++) if((v[i] & 1)) return false;
+      for(int i=0; i<3; i++) if((co[i] & 1)) return false;
       }
     else {
-      for(int i=0; i<3; i++) if(!(v[i] & 1)) return false;
+      for(int i=0; i<3; i++) if(!(co[i] & 1)) return false;
       }
     return true;
     }
 
   EX int dist_alt(cell *c) {
     if(specialland == laCamelot) return dist_relative(c) + roundTableRadius(c);
-    coord co = cubemap()->ispacemap[c->master];
-    auto v = getcoord(co);
+    auto v = cubemap()->ispacemap[c->master];
     if(S7 == 6) return v[2];
     else if(S7 == 12) return (v[0] + v[1] + v[2]) / 2;
     else return v[2]/2;
     }
 
   EX bool get_emerald(cell *c) {
-    auto v = getcoord(cubemap()->ispacemap[c->master]);
+    auto v = cubemap()->ispacemap[c->master];
     int s0 = 0, s1 = 0;
     for(int i=0; i<3; i++) {
       v[i] = gmod(v[i], 6);
@@ -301,16 +295,14 @@ EX namespace euclid3 {
     return s0 > s1;
     }
   
-  bool cellvalid(coord co) {
-    auto v = getcoord(co);
+  bool cellvalid(coord v) {
     if(S7 == 6) return true;
     if(S7 == 12) return (v[0] + v[1] + v[2]) % 2 == 0;
     if(S7 == 14) return v[0] % 2 == v[1] % 2 && v[0] % 2 == v[2] % 2;
     return false;
     }
 
-  EX int celldistance(coord co) {
-    auto v = getcoord(co);
+  EX int celldistance(coord v) {
     if(S7 == 6) 
       return abs(v[0]) + abs(v[1]) + abs(v[2]);
     else {
@@ -343,7 +335,7 @@ EX namespace euclid3 {
   EX void set_land(cell *c) {
     setland(c, specialland); 
     auto m = cubemap();
-    auto co = getcoord(m->ispacemap[c->master]);
+    auto co = m->ispacemap[c->master];
     
     int dv = 1;
     if(geometry != gCubeTiling) dv = 2;
@@ -370,14 +362,6 @@ EX namespace euclid3 {
   
   /* quotient spaces */
 
-  intmatrix make_intmatrix(axes a) {
-    intmatrix T;
-    T[0] = getcoord(a[0]);
-    T[1] = getcoord(a[1]);
-    T[2] = getcoord(a[2]);
-    return T;
-    }
-  
   int determinant(const intmatrix T) {
     int det = 0;
     for(int i=0; i<3; i++) 
@@ -395,9 +379,9 @@ EX namespace euclid3 {
     return T2;
     }
   
-  axes user_axes;
-  axes optimal_axes;
-  axes regular_axes;
+  intmatrix user_axes;
+  intmatrix optimal_axes;
+  intmatrix regular_axes;
   
   intmatrix T, T2, T_edit;
   EX int det;
@@ -418,9 +402,8 @@ EX namespace euclid3 {
   vector<coord> canonical_seq;
   int canonical_index;
   
-  coord compute_cat(coord co) {
-    auto coo = getcoord(co);
-    coord cat = 0;
+  coord compute_cat(coord coo) {
+    coord cat = euzero;
     for(int i=0; i<3; i++) {
       int val = T2[0][i] * coo[0] + T2[1][i] * coo[1] + T2[2][i] * coo[2];
       if(i < WDIM - infinite_dims) val = gmod(val, det);
@@ -450,17 +433,14 @@ EX namespace euclid3 {
   EX void build_torus3(eGeometry g) {
   
     int dim = ginf[g].g.gameplay_dimension;
-  
-    for(int i=0; i<dim; i++) {
-      user_axes[i] = 0;
-      for(int j=0; j<dim; j++) user_axes[i] += main_axes[j] * T0[i][j];
-      }
-    if(dim == 2) user_axes[2] = 0;
+    
+    user_axes = T0;
+    if(dim == 2) user_axes[2] = euzero;
   
     optimal_axes = user_axes;
     
     again:
-    for(int i=0; i<dim; i++) if(optimal_axes[i] < 0) optimal_axes[i] = -optimal_axes[i];
+    for(int i=0; i<dim; i++) if(optimal_axes[i] < euzero) optimal_axes[i] = -optimal_axes[i];
     if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
     if(optimal_axes[1] < optimal_axes[dim]) swap(optimal_axes[1], optimal_axes[dim]);
     if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
@@ -479,14 +459,14 @@ EX namespace euclid3 {
   
     regular_axes = optimal_axes;
     infinite_dims = dim;
-    for(int i=0; i<dim; i++) if(optimal_axes[i]) infinite_dims--;
+    for(int i=0; i<dim; i++) if(optimal_axes[i] != euzero) infinite_dims--;
     
     int attempt = 0;
     next_attempt:
     for(int i=dim-infinite_dims; i<3; i++)
       regular_axes[i] = main_axes[(attempt+i)%3];
 
-    T = make_intmatrix(regular_axes);
+    T = regular_axes;
     det = determinant(T);
     if(det == 0) { 
       attempt++;
@@ -503,7 +483,7 @@ EX namespace euclid3 {
     canonical_hash.clear();
     canonical_seq.clear();  
     canonical_index = 0;  
-    add_canonical(0);
+    add_canonical(euzero);
     
     twisted = twisted0;
     if(dim == 3) {
@@ -552,12 +532,12 @@ EX namespace euclid3 {
   
   gp::loc ort1() { return (S3 == 3 ? gp::loc(1, -2) : gp::loc(0, 1)); }
 
-  int diagonal_cross(const array<int, 3>& a, const array<int, 3>& b) {
+  int diagonal_cross(const coord& a, const coord& b) {
     return a[0]*b[1] + a[1]*b[2] + a[2]*b[0]
          - b[0]*a[1] - b[1]*a[2] - b[2]*a[0];
     };
   
-  EX coord twist(coord x, array<int, 3>& d, transmatrix& M, bool& mirr) {
+  EX coord twist(coord x, coord& d, transmatrix& M, bool& mirr) {
     if(!twisted) return x;
     if(twisted & 16) {
       int period = T0[2][2];
@@ -566,7 +546,7 @@ EX namespace euclid3 {
       RotYZX[1][2] = 1;
       RotYZX[2][0] = 1;
       RotYZX[3][3] = 1;
-      auto coo = getcoord(x);
+      auto& coo = x;
       while(true) {
         auto coosum = coo[0] + coo[1] + coo[2];
         if(coosum >= 3 * period) {
@@ -581,17 +561,16 @@ EX namespace euclid3 {
           }
         else break;
         }
-      if(ascoord(T0[0])) {
-        int dcro = diagonal_cross(T0[0], T0[1]);
+      if(T0[0] != euzero) {
         while(diagonal_cross(coo, T0[1]) < 0) for(int i=0; i<3; i++) coo[i] -= T0[0][i];
         while(diagonal_cross(coo, T0[1]) > 0) for(int i=0; i<3; i++) coo[i] += T0[0][i];
         while(diagonal_cross(coo, T0[0]) > 0) for(int i=0; i<3; i++) coo[i] -= T0[1][i];
         while(diagonal_cross(coo, T0[0]) < 0) for(int i=0; i<3; i++) coo[i] += T0[1][i];
         }
-      return ascoord(coo);
+      return coo;
       }
     if(WDIM == 3) {
-      auto coo = getcoord(x);
+      auto& coo = x;
       while(coo[2] >= T0[2][2]) {
         coo[2] -= T0[2][2];
         if(twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
@@ -606,11 +585,10 @@ EX namespace euclid3 {
         }
       for(int i: {0,1})
         if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
-      return ascoord(coo);
+      return coo;
       }
     else {
-      auto crd = getcoord(x);
-      gp::loc coo = gp::loc(crd[0], crd[1]);
+      gp::loc coo = as_gp(x);
       gp::loc ort = ort1() * twisted_vec;
       int dsc = dscalar(twisted_vec, twisted_vec);
       gp::loc d0 (d[0], d[1]);
@@ -649,7 +627,7 @@ EX namespace euclid3 {
   coord canonicalize(coord x) {
     if(twisted) {
       transmatrix M = Id;
-      auto dummy = getcoord(0);
+      auto dummy = euzero;
       bool dm = false;
       return twist(x, dummy, M, dm);
       }
@@ -678,10 +656,10 @@ EX namespace euclid3 {
     initquickqueue();
     transmatrix M = ggmatrix(cwt.at);
     hyperpoint h0 = M*C0;
-    hyperpoint ha = M*(eumove(ascoord(T_edit[0])) * C0 - C0) / 2;
-    hyperpoint hb = M*(eumove(ascoord(T_edit[1])) * C0 - C0) / 2;
+    hyperpoint ha = M*(eumove(T_edit[0]) * C0 - C0) / 2;
+    hyperpoint hb = M*(eumove(T_edit[1]) * C0 - C0) / 2;
     if(WDIM == 3) {
-      hyperpoint hc = M*(eumove(ascoord(T_edit[2])) * C0 - C0) / 2;
+      hyperpoint hc = M*(eumove(T_edit[2]) * C0 - C0) / 2;
       for(int d:{-1,1}) for(int e:{-1,1}) {
         queueline(h0+d*ha+e*hb-hc, h0+d*ha+e*hb+hc, 0xFFFFFFFF);
         queueline(h0+d*hb+e*hc-ha, h0+d*hb+e*hc+ha, 0xFFFFFFFF);
@@ -929,7 +907,7 @@ EX namespace euclid3 {
             transmatrix T1 = move_matrix(h, i) * move_matrix(h->move(i), j);
             transmatrix T2 = move_matrix(h, k) * move_matrix(h->move(k), l);
             if(!eqmatrix(T1, T2)) {
-              println(hlog, c, " @ ", getcoord(cubemap()->ispacemap[c->master]), " : ", i, "/", j, "/", k, "/", l, " :: ", T1, " vs ", T2);
+              println(hlog, c, " @ ", cubemap()->ispacemap[c->master], " : ", i, "/", j, "/", k, "/", l, " :: ", T1, " vs ", T2);
               exit(1);
               }
             }
@@ -957,8 +935,7 @@ EX int dcross(gp::loc e1, gp::loc e2) {
   }
 
 EX gp::loc euc2_coordinates(cell *c) { 
-  auto vec = euclid3::eucmap()->ispacemap[c->master];
-  auto ans = euclid3::getcoord(vec);
+  auto ans = euclid3::eucmap()->ispacemap[c->master];
   if(BITRUNCATED)
     return as_gp(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c.spin(0)+4)%6));
   if(GOLDBERG) {
@@ -979,14 +956,14 @@ EX cell* at_euc2_coordinates(gp::loc p) {
   return cw.at;
   }
  
-EX euclid3::coord as_coord(gp::loc p) { return p.first + p.second * euclid3::COORDMAX; }
+EX euclid3::coord as_coord(gp::loc p) { return euclid3::coord(p.first, p.second, 0); }
 
 EX gp::loc sdxy() { return as_gp(euclid3::T[1]) * gp::univ_param(); }
 
 EX pair<bool, string> coord_display(const transmatrix& V, cell *c) {
   if(c != c->master->c7) return {false, ""};
-  hyperpoint hx = eumove(1) * C0;
-  hyperpoint hy = eumove(euclid3::COORDMAX) * C0;
+  hyperpoint hx = eumove(euclid3::main_axes[0]) * C0;
+  hyperpoint hy = eumove(euclid3::main_axes[1]) * C0;
   hyperpoint hz = WDIM == 2 ? C0 : eumove(euclid3::main_axes[2]) * C0;
   hyperpoint h = kz(inverse(build_matrix(hx, hy, hz, C03)) * inverse(ggmatrix(cwt.at->master->c7)) * V * C0);
 
@@ -996,13 +973,12 @@ EX pair<bool, string> coord_display(const transmatrix& V, cell *c) {
     return {true, fts(h[0]) + "," + fts(h[1]) };
   }
 
-EX gp::loc as_gp(const array<int, 3>& v) { return gp::loc(v[0], v[1]); }
+EX gp::loc as_gp(const euclid3::coord& v) { return gp::loc(v[0], v[1]); }
 
 EX map<gp::loc, cdata>& get_cdata() { return euclid3::eucmap()->eucdata; }
   
-EX transmatrix eumove(euclid3::coord vec) {
+EX transmatrix eumove(euclid3::coord co) {
   constexpr double q3 = sqrt(double(3));
-  auto co = euclid3::getcoord(vec);
   if(WDIM == 3) {
     return eupush3(co[0], co[1], co[2]);
     }
@@ -1057,8 +1033,8 @@ EX int eudist(gp::loc a, gp::loc b) {
   }
 
 EX int cyldist(gp::loc a, gp::loc b) {
-  a = as_gp(euclid3::getcoord(euclid3::canonicalize(as_coord(a))));
-  b = as_gp(euclid3::getcoord(euclid3::canonicalize(as_coord(b))));
+  a = as_gp(euclid3::canonicalize(as_coord(a)));
+  b = as_gp(euclid3::canonicalize(as_coord(b)));
   
   if(!quotient) return eudist(a, b);
   

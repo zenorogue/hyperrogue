@@ -640,7 +640,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
     }
   #endif
   else if(euclid) {
-    auto tab = euclid3::getcoord(euclid3::get_ispacemap()[c->master]);
+    auto tab = euclid3::get_ispacemap()[c->master];
     for(int a=0; a<3; a++) co[a] = tab[a];
     if(PURE) for(int a=0; a<3; a++) co[a] *= 2;
     dim = 3;
@@ -1498,17 +1498,12 @@ EX void may_place_compass(cell *c) {
 #if CAP_CRYSTAL && MAXMDIM >= 4
 
 euclid3::coord crystal_to_euclid(coord x) {
-  euclid3::coord c = 0;
-  c += x[0];
-  c += x[1] * euclid3::COORDMAX;
-  c += x[2] * euclid3::COORDMAX * euclid3::COORDMAX;
-  return c/2;
+  return euclid3::coord(x[0]/2, x[1]/2, x[2]/2);
   }
 
 coord euclid3_to_crystal(euclid3::coord x) {  
   coord res;
-  auto tmp = euclid3::getcoord(x);
-  for(int i=0; i<3; i++) res[i] = tmp[i] * 2;
+  for(int i=0; i<3; i++) res[i] = x[i] * 2;
   for(int i=3; i<MAXDIM; i++) res[i] = 0;
   return res;
   }

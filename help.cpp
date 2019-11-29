@@ -820,7 +820,7 @@ EX void describeMouseover() {
       }
 
     if(euclid && cheater && WDIM == 3) {
-      auto co = euclid3::getcoord(euclid3::get_ispacemap()[c->master]);
+      auto co = euclid3::get_ispacemap()[c->master];
       out += " (" + its(co[0]);
       for(int i=1; i<WDIM; i++) out += "," + its(co[i]);
       out += ")";

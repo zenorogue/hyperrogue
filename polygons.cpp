@@ -968,7 +968,7 @@ void geometry_information::create_wall3d() {
   if(GDIM == 3 && euclid && S7 == 12) {
     auto v = euclid3::get_shifttable();
     for(int w=0; w<12; w++) {
-      auto co = euclid3::getcoord(v[w]);
+      auto co = v[w];
       vector<int> valid;
       for(int c=0; c<3; c++) if(co[c]) valid.push_back(c);
       int third = 3 - valid[1] - valid[0];
@@ -992,7 +992,7 @@ void geometry_information::create_wall3d() {
           });
         }
       else {
-        auto t = euclid3::getcoord(v[w]);
+        auto t = v[w];
         ld x = t[0], y = t[1], z = t[2];
         make_wall(w, {
           hpxy3(x, y/2, 0), hpxy3(x/2, y, 0), hpxy3(0, y, z/2),

@@ -268,7 +268,7 @@ EX namespace models {
     for(int x=-200; x<=200; x++) {
       if(y == 0 && x <= 0) continue;
       auto zero = euclid3::canonicalize(as_coord({x, y}));
-      if(zero == 0)
+      if(zero == euclid3::euzero)
         torus_zeros.emplace_back(x, y);      
       }
     sort(torus_zeros.begin(), torus_zeros.end(), [] (const gp::loc p1, const gp::loc p2) {
