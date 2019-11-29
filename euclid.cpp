@@ -429,6 +429,27 @@ EX namespace euclid3 {
     if(T0[2][0] != T0[2][2]) return false;
     return true;
     }
+  
+  EX intmatrix make_third_turn(int a, int b, int c) {
+    intmatrix T0;
+    T0[0][0] = a;
+    T0[0][1] = b;
+    T0[2][0] = c;
+    T0[0][2] = -T0[0][0]-T0[0][1];
+    T0[1][0] = T0[0][1];
+    T0[1][1] = T0[0][2];
+    T0[1][2] = T0[0][0];
+    T0[2][1] = T0[2][2] = c;
+    return T0;
+    }
+
+  EX intmatrix make_quarter_turn(int a, int b, int c) {
+    intmatrix T0 = make_array<coord> (euzero, euzero, euzero);
+    T0[0][0] = a;
+    T0[0][1] = b;
+    T0[2][0] = c;
+    return T0;
+    }
 
   EX void build_torus3(eGeometry g) {
   
@@ -489,6 +510,9 @@ EX namespace euclid3 {
     if(dim == 3) {
       if(valid_third_turn(T0)) {
         twisted &= 16;
+        if(g == gRhombic3 && (T0[2][2]&1)) twisted = 0;
+        if(g == gBitrunc3 && (T0[0][0]&1)) twisted = 0;
+        if(g == gBitrunc3 && (T0[1][1]&1)) twisted = 0;
         }
       else {
         twisted &= 7;
@@ -706,6 +730,7 @@ EX namespace euclid3 {
   void torus_config_option(string name, char key, torus_config tc) {
     dialog::addBoolItem(name, make_pair(T_edit, twisted_edit) == tc && PURE, key);
     dialog::add_action([tc] {
+      stop_game();
       tie(euclid3::T0, euclid3::twisted0) = tc;
       tie(T_edit, twisted_edit) = tc;
       set_variation(eVariation::pure);
@@ -734,8 +759,20 @@ EX namespace euclid3 {
         for(int j=0; j<dim; j++) 
           if(T_edit[i][j] && i != j) nondiag = true;
         
+      if(valid_third_turn(T_edit)) {
+        auto g = geometry;
+        if(g == gCubeTiling ||
+          (g == gRhombic3 && T_edit[2][2] % 2 == 0) ||
+          (g == gBitrunc3 && T_edit[0][0] % 2 == 0 && T_edit[1][1] % 2 == 0))
+          dialog::addBoolItem(XLAT("third turn space"), twisted_edit & 16, 'x');
+        else
+          dialog::addBoolItem(XLAT("make it even"), twisted_edit & 16, 'x');
+        dialog::add_action([] { twisted_edit ^= 16; });
+        }
+      
       if(nondiag) {
         dialog::addInfo(XLAT("twisting implemented only for diagonal matrices"));
+        dialog::addInfo(XLAT("or for columns : (A,B,C), (B,C,A), (D,D,D) where A+B+C=0"));
         dialog::addBreak(200);
         }
       else if(T_edit[dim-1][dim-1] == 0) {
@@ -763,6 +800,9 @@ EX namespace euclid3 {
           dialog::addBoolItem(XLAT("swapping impossible"), twisted_edit & 4, 'z');
         dialog::add_action([] { twisted_edit ^= 4; });
         }
+      dialog::addBreak(50);
+      torus_config_option(XLAT("third-turn space"), 'A', {make_third_turn(2,0,2), 16});
+      torus_config_option(XLAT("quarter-turn space"), 'B', {make_quarter_turn(2, 0, 2), 5});
       }
     else {
       if(T_edit[1][0] == 0 && T_edit[1][1] == 0)
@@ -873,14 +913,10 @@ EX namespace euclid3 {
     else if(argis("-twistthird")) {
       PHASEFROM(2);
       stop_game();
-      shift(); T0[0][0] = argi();
-      shift(); T0[0][1] = argi();
-      shift(); T0[2][0] = argi();
-      T0[0][2] = -T0[0][0]-T0[0][1];
-      T0[1][0] = T0[0][1];
-      T0[1][1] = T0[0][2];
-      T0[1][2] = T0[0][0];
-      T0[2][1] = T0[2][2] = argi();
+      shift(); int a = argi();
+      shift(); int b = argi();
+      shift(); int c = argi();
+      T0 = make_third_turn(a, b, c);
       twisted0 = 16;
       build_torus3();
       }
