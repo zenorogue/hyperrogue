@@ -922,17 +922,21 @@ auto floor_hook =
 void draw_shape_for_texture(floorshape* sh) {
 
   int id = sh->id;
+  
+  const ld s1 = 1;
+  const ld s3 = 3 * s1;
+  const ld sd = s1/2;
 
-  ld gx = (id % 8) * 1.5 - 3.5 * 1.5;
-  ld gy = (id / 8) * 1.5 - 3.5 * 1.5;
+  ld gx = (id % 8) * s3 - 3.5 * s3;
+  ld gy = (id / 8) * s3 - 3.5 * s3;
 
   if(1) {
     dynamicval<ld> v(vid.linewidth, 8);
-    curvepoint(eupush(gx+.5, gy-.5) * C0);
-    curvepoint(eupush(gx+.5, gy+.5) * C0);
-    curvepoint(eupush(gx-.5, gy+.5) * C0);
-    curvepoint(eupush(gx-.5, gy-.5) * C0);
-    curvepoint(eupush(gx+.5, gy-.5) * C0);
+    curvepoint(eupush(gx+s1, gy-s1) * C0);
+    curvepoint(eupush(gx+s1, gy+s1) * C0);
+    curvepoint(eupush(gx-s1, gy+s1) * C0);
+    curvepoint(eupush(gx-s1, gy-s1) * C0);
+    curvepoint(eupush(gx+s1, gy-s1) * C0);
     queuecurve(0x000000FF, 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 24/10), PPR::LAKELEV);
     }
 
@@ -940,7 +944,7 @@ void draw_shape_for_texture(floorshape* sh) {
 
   for(int a=-1; a<=1; a++)
   for(int b=-1; b<=1; b++)
-    queuepoly(eupush(gx+a/2., gy+b/2.), sh->b[0], 0xFFFFFFFF);
+    queuepoly(eupush(gx+a, gy+b), sh->b[0], 0xFFFFFFFF);
 
   if(sh == &cgi.shCrossFloor) {
     queuepoly(eupush(gx, gy) * spin(M_PI/4), cgi.shCross, 0x808080FF);
@@ -948,11 +952,11 @@ void draw_shape_for_texture(floorshape* sh) {
 
   if(1) {
     dynamicval<ld> v(vid.linewidth, 8);
-    curvepoint(eupush(gx+.25, gy-.25) * C0);
-    curvepoint(eupush(gx+.25, gy+.25) * C0);
-    curvepoint(eupush(gx-.25, gy+.25) * C0);
-    curvepoint(eupush(gx-.25, gy-.25) * C0);
-    curvepoint(eupush(gx+.25, gy-.25) * C0);
+    curvepoint(eupush(gx+sd, gy-sd) * C0);
+    curvepoint(eupush(gx+sd, gy+sd) * C0);
+    curvepoint(eupush(gx-sd, gy+sd) * C0);
+    curvepoint(eupush(gx-sd, gy-sd) * C0);
+    curvepoint(eupush(gx+sd, gy-sd) * C0);
     queuecurve(0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
     }
   
@@ -961,8 +965,8 @@ void draw_shape_for_texture(floorshape* sh) {
   ftv.texture_id = floor_textures->renderedTexture;
   
   hyperpoint center = eupush(gx, gy) * C0;
-  hyperpoint v1 = hpxyz3(0.25, 0.25, 0, 0);
-  hyperpoint v2 = hpxyz3(0.25, -0.25, 0, 0);
+  hyperpoint v1 = hpxyz3(sd, sd, 0, 0);
+  hyperpoint v2 = hpxyz3(sd, -sd, 0, 0);
 
   if(1) {
     hyperpoint inmodel;
@@ -996,7 +1000,7 @@ void geometry_information::make_floor_textures_here() {
   dynamicval<videopar> vi(vid, vid);
   vid.xres = FLOORTEXTURESIZE;
   vid.yres = FLOORTEXTURESIZE;
-  vid.scale = 0.25;
+  vid.scale = 0.125;
   vid.camera_angle = 0;
   vid.alpha = 1;
   dynamicval<ld> lw(vid.linewidth, 2);
