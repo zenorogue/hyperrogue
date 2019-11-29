@@ -3956,10 +3956,10 @@ EX void moveMonster(const movei& mi) {
   if(m == moFireElemental) { makeflame(cf, 20, false); if(cf->wparam < 20) cf->wparam = 20; }
   
   bool adj = false;  
-  if(ct->cpdist == 1 && (items[itOrb37] || !nonAdjacent(cf,ct)) && markOrb(itOrbBeauty))
+  if(ct->cpdist == 1 && (items[itOrb37] || !nonAdjacent(cf,ct)) && markOrb(itOrbBeauty) && !isFriendly(ct))
     adj = true;
     
-  if(!adj && items[itOrbEmpathy] && items[itOrbBeauty]) {
+  if(!adj && items[itOrbEmpathy] && items[itOrbBeauty] && !isFriendly(ct)) {
     for(int i=0; i<ct->type; i++) if(ct->move(i) && isFriendly(ct->move(i)))
       adj = true, markOrb(itOrbEmpathy), markOrb(itOrbBeauty);
     }
