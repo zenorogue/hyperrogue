@@ -1267,9 +1267,9 @@ EX void switch_game_mode(char switchWhat) {
     
     case rg::inv:
       inv::on = !inv::on;
-      if(tactic::on) firstland = laIce;
+      if(tactic::on) firstland = specialland = laIce;
       tactic::on = yendor::on = princess::challenge = 
-      randomPatternsMode = peace::on = false;
+      peace::on = false;
       racing::on = false;
       break;
 
@@ -1348,13 +1348,12 @@ EX void switch_game_mode(char switchWhat) {
       tactic::on = false;
       yendor::on = false;
       peace::on = false;
-      inv::on = false;
       princess::challenge = false;
       break;
     
     case rg::princess:
       princess::challenge = !princess::challenge;
-      firstland = princess::challenge ? laPalace : laIce;
+      firstland = specialland = princess::challenge ? laPalace : laIce;
       shmup::on = false;
       tactic::on = false;
       yendor::on = false;
