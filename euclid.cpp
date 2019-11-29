@@ -442,7 +442,7 @@ EX namespace euclid3 {
     again:
     for(int i=0; i<dim; i++) if(optimal_axes[i] < euzero) optimal_axes[i] = -optimal_axes[i];
     if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
-    if(optimal_axes[1] < optimal_axes[dim]) swap(optimal_axes[1], optimal_axes[dim]);
+    if(optimal_axes[1] < optimal_axes[dim-1]) swap(optimal_axes[1], optimal_axes[dim-1]);
     if(optimal_axes[0] < optimal_axes[1]) swap(optimal_axes[0], optimal_axes[1]);
     for(int i=0; i<3; i++) {
       int i1 = (i+1) % 3;
