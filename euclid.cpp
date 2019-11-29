@@ -526,8 +526,8 @@ EX namespace euclid3 {
       }
     else {
       twisted &= 8;
-      twisted_vec = as_gp(T0[1]);
-      ortho_vec = as_gp(T0[0]);
+      twisted_vec = to_loc(T0[1]);
+      ortho_vec = to_loc(T0[0]);
       if(twisted_vec == gp::loc{0,0}) twisted = 0;
       if(chiral(twisted_vec)) twisted = 0;
       if(dscalar(twisted_vec, ortho_vec))
@@ -614,11 +614,11 @@ EX namespace euclid3 {
       return coo;
       }
     else {
-      gp::loc coo = as_gp(x);
+      gp::loc coo = to_loc(x);
       gp::loc ort = ort1() * twisted_vec;
       int dsc = dscalar(twisted_vec, twisted_vec);
       gp::loc d0 (d[0], d[1]);
-      hyperpoint h = eumove(as_coord(twisted_vec)) * C0;
+      hyperpoint h = eumove(to_coord(twisted_vec)) * C0;
       while(true) {
         int dsx = dscalar(coo, twisted_vec);
         if(dsx >= dsc) coo = coo - twisted_vec;
@@ -646,7 +646,7 @@ EX namespace euclid3 {
           }
         }
       d[0] = d0.first; d[1] = d0.second;
-      return as_coord(coo);
+      return to_coord(coo);
       }
     }
 
@@ -807,9 +807,9 @@ EX namespace euclid3 {
     else {
       if(T_edit[1][0] == 0 && T_edit[1][1] == 0)
         dialog::addInfo(XLAT("change the second column for Möbius bands and Klein bottles"));
-      else if(chiral(as_gp(T_edit[1])))
+      else if(chiral(to_loc(T_edit[1])))
         dialog::addInfo(XLAT("second period is chiral -- cannot be mirrored"));
-      else if(dscalar(as_gp(T_edit[1]), as_gp(T_edit[0])))
+      else if(dscalar(to_loc(T_edit[1]), to_loc(T_edit[0])))
         dialog::addInfo(XLAT("periods must be orthogonal for mirroring"));
       else {
         dialog::addBoolItem(XLAT("mirror flip in the second period"), twisted_edit & 8, 'x');
@@ -975,14 +975,14 @@ EX int dcross(gp::loc e1, gp::loc e2) {
 EX gp::loc euc2_coordinates(cell *c) { 
   auto ans = euclid3::eucmap()->ispacemap[c->master];
   if(BITRUNCATED)
-    return as_gp(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c.spin(0)+4)%6));
+    return to_loc(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c.spin(0)+4)%6));
   if(GOLDBERG) {
     auto li = gp::get_local_info(c);
     gp::loc shift(0,0);
     if(li.first_dir >= 0) shift = gp::eudir(li.last_dir) * li.relative;
-    return as_gp(ans) * gp::param + shift;
+    return to_loc(ans) * gp::param + shift;
     }
-  return as_gp(ans);
+  return to_loc(ans);
   }
 
 /** this is slow, but we use it only for small p's */
@@ -994,9 +994,9 @@ EX cell* at_euc2_coordinates(gp::loc p) {
   return cw.at;
   }
  
-EX euclid3::coord as_coord(gp::loc p) { return euclid3::coord(p.first, p.second, 0); }
+EX euclid3::coord to_coord(gp::loc p) { return euclid3::coord(p.first, p.second, 0); }
 
-EX gp::loc sdxy() { return as_gp(euclid3::T[1]) * gp::univ_param(); }
+EX gp::loc sdxy() { return to_loc(euclid3::T[1]) * gp::univ_param(); }
 
 EX pair<bool, string> coord_display(const transmatrix& V, cell *c) {
   if(c != c->master->c7) return {false, ""};
@@ -1011,7 +1011,7 @@ EX pair<bool, string> coord_display(const transmatrix& V, cell *c) {
     return {true, fts(h[0]) + "," + fts(h[1]) };
   }
 
-EX gp::loc as_gp(const euclid3::coord& v) { return gp::loc(v[0], v[1]); }
+EX gp::loc to_loc(const euclid3::coord& v) { return gp::loc(v[0], v[1]); }
 
 EX map<gp::loc, cdata>& get_cdata() { return euclid3::eucmap()->eucdata; }
   
@@ -1071,8 +1071,8 @@ EX int eudist(gp::loc a, gp::loc b) {
   }
 
 EX int cyldist(gp::loc a, gp::loc b) {
-  a = as_gp(euclid3::canonicalize(as_coord(a)));
-  b = as_gp(euclid3::canonicalize(as_coord(b)));
+  a = to_loc(euclid3::canonicalize(to_coord(a)));
+  b = to_loc(euclid3::canonicalize(to_coord(b)));
   
   if(!quotient) return eudist(a, b);
   

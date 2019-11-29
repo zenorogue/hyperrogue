@@ -432,11 +432,11 @@ EX void buildTorusRug() {
   calcparam_rug();
   models::configure();
 
-  auto p1 = as_gp(euclid3::T0[0]);
-  auto p2 = as_gp(euclid3::T0[1]);
+  auto p1 = to_loc(euclid3::T0[0]);
+  auto p2 = to_loc(euclid3::T0[1]);
 
-  hyperpoint xh = eumove(as_coord(p1))*C0-C0;
-  hyperpoint yh = eumove(as_coord(p2))*C0-C0;
+  hyperpoint xh = eumove(to_coord(p1))*C0-C0;
+  hyperpoint yh = eumove(to_coord(p2))*C0-C0;
   if(nonorientable) yh *= 2;
   
   bool flipped = sqhypot_d(2, xh) < sqhypot_d(2, yh);
