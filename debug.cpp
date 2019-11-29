@@ -814,4 +814,10 @@ int read_cheat_args() {
 auto ah_cheat = addHook(hooks_args, 0, read_cheat_args);
 #endif
 
+EX bool ldebug = false;
+
+EX void breakhere() {
+  exit(1);
+  }
+
 }

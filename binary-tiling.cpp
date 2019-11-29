@@ -51,10 +51,6 @@ EX namespace binary {
     }
   #endif
   
-  EX void breakhere() {
-    exit(1);
-    }
-
   EX heptagon *path(heptagon *h, int d, int d1, std::initializer_list<int> p) {
     static int rec = 0;
     rec++; if(rec>100) exit(1);
