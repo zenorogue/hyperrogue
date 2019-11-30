@@ -450,7 +450,9 @@ EX namespace dialog {
           if(!mousing)
             displayfr(keyx, mid, 2, dfsize * I.scale/100, keyname(I.key), I.colork, 16);
           displayfr(itemx, mid, 2, dfsize * I.scale/100, I.body, I.color, 0);
-          displayfr(valuex, mid, 2, dfsize * I.scale/100, I.value, I.colorv, 0);
+          int siz = dfsize * I.scale/100;
+          while(siz > 6 && textwidth(siz, I.value) >= vid.xres - valuex) siz--;
+          displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
           }
         if(xthis) getcstat = I.key;
         }      
