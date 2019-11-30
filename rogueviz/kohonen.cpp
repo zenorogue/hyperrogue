@@ -426,7 +426,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
     // not yet implemented for cylinder
     }
   if(euclid && bounded && PURE && nonorientable)
-    return make_pair(cell_to_pair(c).second * 2 + ctof(c), 0);
+    return make_pair(euc2_coordinates(c).second * 2 + ctof(c), 0);
   int id = 0, dir = 0;
 #if CAP_GP
   if(GOLDBERG) {
