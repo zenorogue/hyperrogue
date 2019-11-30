@@ -621,7 +621,7 @@ void add_reqs(eLand l, string& s) {
 
   }
 
-string generateHelpForLand(eLand l) {
+EX string generateHelpForLand(eLand l) {
   string s = helptitle(XLATN(linf[l].name), linf[l].color);
   
   if(l == laPalace) s += princedesc();
