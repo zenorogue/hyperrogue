@@ -129,8 +129,10 @@
 
 #define CAP_GLORNOT (CAP_GL && !ISWEB && !ISIOS) 
 
+#ifndef CAP_DAILY
 #if ISSTEAM
 #define CAP_DAILY 1
+#endif
 #endif
 
 #ifndef CAP_DAILY
