@@ -1142,7 +1142,7 @@ EX namespace mirror {
   #endif
   
   bool noMirrorOn(cell *c) {
-    return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gFieldQuotient && geometry != gTorus && c->cpdist > gamerange());
+    return c->monst || (!shmup::on && isPlayerOn(c)) || (!bounded && c->cpdist > gamerange());
     }
 
   bool cellMirrorable(cell *c) {
