@@ -795,8 +795,7 @@ cdata *getHeptagonCdata(heptagon *h) {
 
 cdata *getEuclidCdata(gp::loc h) {
 
-  int x, y;
-  tie(x,y) = h;
+  int x = h.first, y = h.second;
   auto& data = archimedean ? arcm::get_cdata() : get_cdata();
     
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);

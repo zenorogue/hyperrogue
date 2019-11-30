@@ -36,8 +36,8 @@ int gp_threecolor() {
   }
 
 int eupattern(cell *c) {
-  int x, y;
-  tie(x,y) = euc2_coordinates(c);
+  auto co = euc2_coordinates(c);
+  int x = co.first, y = co.second;
   if(a4)
     return ((x&1) + 2*(y&1)) % 3;
   else
@@ -45,8 +45,8 @@ int eupattern(cell *c) {
   }
 
 int eupattern4(cell *c) {
-  int x, y;
-  tie(x,y) = euc2_coordinates(c);
+  auto co = euc2_coordinates(c);
+  int x = co.first, y = co.second;
   return (x&1) + ((y&1)) * 2;
   }
 
@@ -108,8 +108,8 @@ unsigned bitmajority(unsigned a, unsigned b, unsigned c) {
   }
 
 int eufifty(cell *c) {
-  int x, y;
-  tie(x,y) = euc2_coordinates(c);
+  auto co = euc2_coordinates(c);
+  int x = co.first, y = co.second;
   int ix = x + 99999 + y;
   int iy = y + 99999;
   if(c->land == laWildWest) 
@@ -1542,8 +1542,8 @@ EX namespace patterns {
       ep.extra_params["h2"] = getHemisphere(c, 2);
       }
     if(euclid) {
-      int x, y;
-      tie(x,y) = euc2_coordinates(c);
+      auto co = euc2_coordinates(c);
+      int x = co.first, y = co.second;
       ep.extra_params["ex"] = x;
       ep.extra_params["ey"] = y;
       if(S7 == 6) ep.extra_params["ez"] = -x-y;

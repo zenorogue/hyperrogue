@@ -16,8 +16,8 @@ EX namespace whirlwind {
     if(archimedean) return 0;
     if(euclid) {
       if(bounded) return 0;
-      int x, y;
-      tie(x,y) = euc2_coordinates(c);
+      auto co = euc2_coordinates(c);
+      int y = co.second;
       return 1+((((signed short)(y)+int(50000))/3)%3);
       }
     if(S7 == 5) return getHemisphere(c, 0) > 0 ? 1 : 2;
@@ -870,8 +870,8 @@ EX namespace clearing {
       if(pseudohept(c)) return;
       c->monst = moMutant;
       
-      int x, y;
-      tie(x,y) = euc2_coordinates(c);
+      auto co = euc2_coordinates(c);
+      int x = co.first, y = co.second;
 
       int xco = x * 2 + y + 1;
       c->stuntime = (8-xco/2) & 15;
@@ -2982,8 +2982,8 @@ EX namespace prairie {
       c->LHU.fi.rval = 0;
       }
     else if(euclid) {
-      int x, y;
-      tie(x,y) = euc2_coordinates(c);
+      auto co = euc2_coordinates(c);
+      int y = co.second;
       c->LHU.fi.rval = (y&15);
       }
     else if(sphere) {
@@ -3760,8 +3760,8 @@ EX namespace dungeon {
     
     if(euclid) {
       if(quotient) return;
-      int x, y;
-      tie(x, y) = euc2_coordinates(c);
+      auto co = euc2_coordinates(c);
+      int x = co.first, y = co.second;
       string tab6[] = {
         ".####...",
         "L...L...",

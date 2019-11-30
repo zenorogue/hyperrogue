@@ -1089,18 +1089,18 @@ EX void setLandEuclid(cell *c) {
   #endif
   setland(c, specialland);
   if(specialland == laCrossroads4 || chaosmode) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int y = co.second;
     c->land = getEuclidLand(y);
     }
   if(specialland == laCrossroads) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int x = co.first, y = co.second;
     setland(c, getEuclidLand(y+2*x));
     }
   if(specialland == laTerracotta) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int x = co.first, y = co.second;
     if(((y+2*x) & 15) == 1) {
       setland(c, laMercuryRiver);
       c->wall = waMercury;
@@ -1112,8 +1112,8 @@ EX void setLandEuclid(cell *c) {
     }
   if(specialland == laPrincessQuest) setland(c, laPalace);
   if(specialland == laOcean) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int y = co.second;
     y += 10;
     if(euclid && quotient) y = -celldistAlt(c);
     if(y == 0) 
@@ -1122,8 +1122,8 @@ EX void setLandEuclid(cell *c) {
     else c->landparam = y;
     }
   if(specialland == laWestWall) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int x = co.first;
     x = -5 - x;
     if(x == 0) 
       {setland(c, laBarrier); if(ishept(c)) setland(c, laMotion); }
@@ -1131,8 +1131,9 @@ EX void setLandEuclid(cell *c) {
     else c->landparam = x;
     }
   if(specialland == laIvoryTower || specialland == laDungeon) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c); y = -5 - y;
+    auto co = euc2_coordinates(c);
+    int y = co.second;
+    y = -5 - y;
     if(specialland == laDungeon) y = -10 - y;
     if(euclid && quotient) y = -celldistAlt(c);
     if(y == 0) 
@@ -1143,8 +1144,8 @@ EX void setLandEuclid(cell *c) {
       }
     }
   if(specialland == laElementalWall) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int x = co.first, y = co.second;
     int x0 = euclid4 ? x : x + (y>>1);
     int y0 = y;
     
@@ -1172,8 +1173,8 @@ EX void setLandEuclid(cell *c) {
       }
     }
   if(specialland == laCrossroads3) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int x = co.first, y = co.second;
     int y0 = euclid4 ? 2 * y - x : y; 
     int x0 = euclid4 ? 2 * x + y : x + y/2;
     
@@ -1191,8 +1192,8 @@ EX void setLandEuclid(cell *c) {
       }
     }
   if(specialland == laWarpCoast) {
-    int x, y;
-    tie(x,y) = euc2_coordinates(c);
+    auto co = euc2_coordinates(c);
+    int x = co.first, y = co.second;
     
     int zz = a4 ? x : 2*x+y + 10;
     zz = gmod(zz, 30);

@@ -508,8 +508,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = euclid3::get_emerald(c) ? waCavewall : waCavefloor;
         #endif
         else if(euclid) {
-          int x, y;
-          tie(x,y) = euc2_coordinates(c);
+          auto co = euc2_coordinates(c);
+          int y = co.second;
           if(((y-2)&7) < 4) c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
@@ -599,8 +599,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           v = hrand(100) < 25 ? 24 : 16;
           }
         else if(euclid) {
-          int x, y;
-          tie(x,y) = euc2_coordinates(c);
+          auto co = euc2_coordinates(c);
+          int y = co.second;
           int y0 = gmod(y, 6);
           if(y0 == 3 || y0 == 4) v=24; else v=0;
           }
@@ -662,8 +662,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;
         #endif
         else if(euclid && !archimedean) {
-          int x,y;
-          tie(x,y) = euc2_coordinates(c);
+          auto co = euc2_coordinates(c);
+          int y = co.second;
           if(y&1) c->wall = waTrapdoor;
           else c->wall = waNone;
           }
@@ -698,8 +698,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waVinePlant;
           }
         else if(euclid && !archimedean) {
-          int x,y;
-          tie(x,y) = euc2_coordinates(c);
+          auto co = euc2_coordinates(c);
+          int y = co.second;
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
@@ -1292,8 +1292,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(c == at_euc2_coordinates(s-st)) c->wall = waGrounded;
           }
         else if(euclid && WDIM == 2) {
-          int x,y;
-          tie(x,y) = euc2_coordinates(c);
+          auto co = euc2_coordinates(c);
+          int x = co.first, y = co.second;
           if((x+1)%3 == 0 && y%3 == 0) {
             if(hrand(100) < 50)
               c->wall = hrand(2) ? waCharged : waGrounded;
@@ -1302,7 +1302,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             bool sand = false;
             for(int i=0; i<c->type; i++) {
               createMov(c, i);
-              tie(x,y) = euc2_coordinates(c->move(i));
+              auto co = euc2_coordinates(c->move(i));
+              int x = co.first, y = co.second;
               if((x+1)%3 == 0 && (y)%3 == 0) sand = true;
               }
             if(sand && hrand(100) < 20)

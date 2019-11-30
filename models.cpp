@@ -281,7 +281,9 @@ EX namespace models {
     if(spiral_id > isize(torus_zeros)) spiral_id = 0;
     dialog::editNumber(spiral_id, 0, isize(torus_zeros)-1, 1, 10, XLAT("match the period of the torus"), "");
     dialog::reaction = [] () {
-      tie(spiral_x, spiral_y) = torus_zeros[spiral_id];
+      auto& co = torus_zeros[spiral_id];
+      spiral_x = co.first;
+      spiral_y = co.second;
       };
     dialog::bound_low(0);
     dialog::bound_up(isize(torus_zeros)-1);
