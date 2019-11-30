@@ -1374,6 +1374,44 @@ EX namespace product {
     res[2] = cos_auto(d);
     return zshift(res, h[2]);
     }
+
+  EX void show_config() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(1);  
+    dialog::init(XLAT("quotient product spaces"));
+    dialog::addSelItem(XLAT("%1 period", "Z"), its(product::csteps), 'z');
+    dialog::add_action([] {
+      static int s;
+      s = product::csteps;
+      dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"),
+            XLAT("Set to 0 to make it non-periodic."));
+      dialog::bound_low(0);
+      dialog::reaction_final = [] {
+        product::csteps = s;
+        if(product::csteps == cgi.steps) return;
+        hybrid::reconfigure();
+        start_game();
+        println(hlog, "csteps = ", cgi.steps);
+        };
+      });
+    dialog::addSelItem(XLAT("rotation"), its(product::cspin), 'r');
+    dialog::add_action([] {
+      static int s;
+      dialog::editNumber(s, 0, 16, 1, 0, XLAT("rotation", "Z"), 
+        XLAT("Works if the underlying space is symmetric.")
+        );
+      dialog::reaction_final = [] {
+        if(s == product::cspin) return;
+        stop_game();
+        product::cspin = s;
+        start_game();
+        };
+      });
+
+    dialog::addBreak(50);
+    dialog::addBack();
+    dialog::display();
+    } 
   
 EX }
 

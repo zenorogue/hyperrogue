@@ -480,20 +480,8 @@ EX void select_quotient() {
     asonov::prepare_config();
     pushScreen(asonov::show_config);
     }
-  else if(prod) {
-    static int s;
-    s = product::csteps;
-    dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"),
-          XLAT("Set to 0 to make it non-periodic."));
-    dialog::bound_low(0);
-    dialog::reaction_final = [] {
-      product::csteps = s;
-      if(product::csteps == cgi.steps) return;
-      hybrid::reconfigure();
-      start_game();
-      println(hlog, "csteps = ", cgi.steps);
-      };
-    }
+  else if(prod)
+    pushScreen(product::show_config);
   else {
     vector<eGeometry> choices;
     for(int i=0; i<isize(ginf); i++) if(same_tiling(eGeometry(i))) choices.push_back(eGeometry(i));
