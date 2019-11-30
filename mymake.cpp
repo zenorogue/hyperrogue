@@ -22,10 +22,10 @@ string opts = "-DFHS -DLINUX -DWHATEVER -I/usr/include/SDL";
 string standard = " -std=c++11";
 
 string preprocessor = 
-  "g++ " + opts + " -E";
+  "g++ -E";
 
 string compiler = 
-  "g++ " + opts + " -Wall -Wextra -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
+  "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
 
 string linker = 
   "g++ -rdynamic -o hyper";
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   fsm.close();
   
   printf("preprocessing...\n");
-  if(system(preprocessor + " "+obj_dir+"/hyper.cpp -o "+obj_dir+"/hyper.E")) { printf("preprocessing error\n"); exit(1); }
+  if(system(preprocessor + " " + opts + " "+obj_dir+"/hyper.cpp -o "+obj_dir+"/hyper.E")) { printf("preprocessing error\n"); exit(1); }
   
   if(true) {
     ifstream fs2(obj_dir+"/hyper.E");
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 
   if(get_file_time(obj_dir + "/hyper.o") < get_file_time("hyper.cpp")) {
     printf("compiling hyper...\n");
-    if(system(compiler + " -DREM " + obj_dir + "/hyper.cpp -c -o " + obj_dir + "/hyper.o")) { printf("error\n"); exit(1); }
+    if(system(compiler + " -DREM " + opts + " " + obj_dir + "/hyper.cpp -c -o " + obj_dir + "/hyper.o")) { printf("error\n"); exit(1); }
     }
   
   string allobj = " " + obj_dir + "/hyper.o";
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
     time_t obj_time = get_file_time(obj);
     if(src_time > obj_time) {
       printf("compiling %s... [%d/%d]\n", m.c_str(), id, int(modules.size()));
-      if(system(compiler + " " + src + " -o " + obj)) { printf("error\n"); exit(1); }
+      if(system(compiler + " " + opts + " " + src + " -o " + obj)) { printf("error\n"); exit(1); }
       }
     else {
       printf("ok: %s\n", m.c_str());
