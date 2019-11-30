@@ -681,12 +681,15 @@ namespace lv {
 // old Daily Challenges should keep their validity forever
 // set this number for historical values of land_validity
 
-int old_daily_id = 1000000;
+EX int old_daily_id = 1000000;
 
 const int landscapes_when = 1000;
 
 // check if the given land should appear in lists
 EX land_validity_t& land_validity(eLand l) {
+
+  bool stdeucx = stdeuc;
+  if(euclid && quotient) stdeucx = false;
 
   using namespace lv;
   
@@ -916,7 +919,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laPrincessQuest && tactic::on)
     return not_in_ptm;
     
-  if(l == laPrincessQuest && (!stdeuc || NONSTDVAR))
+  if(l == laPrincessQuest && (!stdeucx || NONSTDVAR))
     return not_implemented;
   
   if(l == laPrincessQuest && shmup::on)
@@ -936,7 +939,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   if(l == laClearing)
-    if(!(stdeuc || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
+    if(!(stdeucx || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
     if(!bounded)
       return not_implemented;
 
@@ -977,18 +980,18 @@ EX land_validity_t& land_validity(eLand l) {
     return dont_work_but_ingame;
     }
   
-  // works in most spheres, Zebra quotient, and stdeuc
+  // works in most spheres, Zebra quotient, and stdeucx
   if(l == laWhirlwind) {
     if(geometry == gZebraQuotient)
       return pattern_compatibility;
-    if(stdeuc) ;
+    if(stdeucx) ;
     else if(S7 == 4 && BITRUNCATED) return special_geo;
     else if(bigsphere && !BITRUNCATED && !elliptic) return special_geo;
     else return dont_work;
     }
     
   // needs standard/Euclidean (needs fractal landscape)
-  if(among(l, laTortoise, laVariant) && !(old_daily_id < landscapes_when ? stdeuc : geometry_supports_cdata()))
+  if(among(l, laTortoise, laVariant) && !(old_daily_id < landscapes_when ? stdeucx : geometry_supports_cdata()))
     return not_implemented;
   
   // technical lands do not count
@@ -1053,7 +1056,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laStorms && hyperbolic_not37)
     return pattern_not_implemented_random;
   
-  if(l == laTrollheim && !stdeuc && !bounded)
+  if(l == laTrollheim && !stdeucx && !bounded)
     return some1;
 
   if(l == laReptile && sol) return ugly_version_nofull;
@@ -1074,13 +1077,13 @@ EX land_validity_t& land_validity(eLand l) {
       }
     }
 
-  if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded && !randomPatternsMode)
+  if((l == laDragon || l == laReptile) && !stdeucx && !smallbounded && !randomPatternsMode)
     return no_fractal_landscapes;
   
   if(l == laCrossroads && smallsphere) 
     return not_enough_space;
   
-  if(l == laCrossroads3 && !stdeuc && !bigsphere)
+  if(l == laCrossroads3 && !stdeucx && !bigsphere)
     return not_enough_space;
 
   if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5) && weirdhyperbolic)
@@ -1097,7 +1100,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laZebra && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
   
-  if(l == laZebra && !(stdeuc || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
+  if(l == laZebra && !(stdeucx || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
@@ -1105,12 +1108,12 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laPrairie) {
     if(GOLDBERG) return not_implemented;
-    else if(stdeuc || (bigsphere && BITRUNCATED && !elliptic) || (geometry == gFieldQuotient)) ;
+    else if(stdeucx || (bigsphere && BITRUNCATED && !elliptic) || (geometry == gFieldQuotient)) ;
     else if(!bounded) return not_implemented;
     else return unbounded_only;
     }
   
-  if(l == laTerracotta && !stdeuc && !(bigsphere))
+  if(l == laTerracotta && !stdeucx && !(bigsphere))
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
