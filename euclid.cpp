@@ -10,8 +10,6 @@ namespace hr {
 
 // 3D Euclidean space
 
-#if MAXMDIM == 4
-
 EX namespace euclid3 {
 
   #if HDR
@@ -970,8 +968,6 @@ EX namespace euclid3 {
   auto euhook = addHook(hooks_args, 100, euArgs);
   #endif
   EX }
-
-#endif
 
 EX int dscalar(gp::loc e1, gp::loc e2) {
   return 2 * (e1.first * e2.first + e1.second*e2.second) + (S3 == 3 ? e1.first*e2.second + e2.first * e1.second : 0);
