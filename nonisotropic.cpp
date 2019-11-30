@@ -1039,7 +1039,7 @@ EX namespace hybrid {
     
     hrmap *underlying_map;
     
-    int space_spin;
+    bool twisted;
     map<cell*, pair<cellwalker, cellwalker>> spins;
     
     map<pair<cell*, int>, cell*> at;
@@ -1058,7 +1058,7 @@ EX namespace hybrid {
       }
     
     cell *getCell(cell *u, int h) {
-      if(space_spin) {
+      if(twisted) {
         if(!spins.count(u))
           println(hlog, "link missing: ", u);
         else {
@@ -1075,7 +1075,7 @@ EX namespace hybrid {
     cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
   
     hrmap_hybrid() {
-      space_spin = 0;
+      twisted = false;
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }
@@ -1214,7 +1214,7 @@ EX namespace hybrid {
   
   vector<cell*> to_link;
   
-  EX void will_link(cell *c) { if(pmap && ((hrmap_hybrid*) pmap)->space_spin) to_link.push_back(c); }
+  EX void will_link(cell *c) { if(pmap && ((hrmap_hybrid*) pmap)->twisted) to_link.push_back(c); }
   
   EX void link() {
     auto pm = (hrmap_hybrid*) pmap;
@@ -1250,14 +1250,14 @@ EX namespace product {
       }
 
     transmatrix adj(cell *c, int i) override {
-      if(space_spin && i == c->type-1 && where[c].second == cgi.steps-1) {
+      if(twisted && i == c->type-1 && where[c].second == cgi.steps-1) {
         auto b = spins[where[c].first].first;
         transmatrix T = mscale(Id, cgi.plevel);
         T = T * spin(2 * M_PI * b.spin / b.at->type);
         if(b.mirrored) T = T * Mirror;
         return T;
         }
-      if(space_spin && i == c->type-2 && where[c].second == 0) {
+      if(twisted && i == c->type-2 && where[c].second == 0) {
         auto b = spins[where[c].first].second;
         transmatrix T = mscale(Id, -cgi.plevel);
         T = T * spin(2 * M_PI * b.spin / b.at->type);
@@ -1279,26 +1279,30 @@ EX namespace product {
       }
     
     hrmap_product() {
+      current_spin_invalid = false;
       if(cspin) {
-        space_spin = cspin;
         in_underlying([&] {
+          twisted = validate_spin();
+          if(!twisted) { current_spin_invalid = true; return; }
           auto ugs = currentmap->gamestart();
           spins[ugs] = make_pair(
-            cellwalker(ugs, gmod(+space_spin, ugs->type)),
-            cellwalker(ugs, gmod(-space_spin, ugs->type))
+            cellwalker(ugs, gmod(+cspin, ugs->type)),
+            cellwalker(ugs, gmod(-cspin, ugs->type))
             );
           manual_celllister cl;
           cl.add(ugs);
           for(int i=0; i<isize(cl.lst); i++) {
             cell *c = cl.lst[i];
             hybrid::will_link(c);
-            forCellIdEx(c2, i, c) cl.add(c2);
+            forCellEx(c2, c) cl.add(c2);
             }
           hybrid::link();
           });
         }
       }
     };
+
+  EX bool current_spin_invalid;
 
   EX int cwall_offset, cwall_mask, actual_view_level, csteps, cspin;
   
@@ -1329,7 +1333,7 @@ EX namespace product {
         int z1 = z0;
         auto V0 = V;
         for(int z=0; z<=max_z; z++) {
-          if(((hybrid::hrmap_hybrid*)currentmap)->space_spin) cwall_mask = -1;
+          if(((hybrid::hrmap_hybrid*)currentmap)->twisted) cwall_mask = -1;
           cwall_mask &= ~(3<<c->type);
           if(z1 > actual_view_level) cwall_mask |= (1<<c->type);
           if(z1 < actual_view_level) cwall_mask |= (2<<c->type);
@@ -1375,6 +1379,28 @@ EX namespace product {
     return zshift(res, h[2]);
     }
 
+  EX bool validate_spin() {
+    if(prod) return hybrid::in_underlying_geometry(validate_spin);
+    if(penrose) return false;
+    if(!quotient && !archimedean) return true;
+    map<cell*, cellwalker> cws;
+    manual_celllister cl;
+    cell *start = currentmap->gamestart();
+    cl.add(start);
+    cws[start] = cellwalker(start, cspin);
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c = cl.lst[i];
+      cellwalker cwc = cws.at(c);
+      forCellIdEx(c2, j, c) {
+        cellwalker cwc2 = cwc + j + wstep - c->c.spin(j);
+        if(!cws.count(c2)) cws[c2] = cwc2;
+        else if(cws[c2] != cwc2) return false;
+        cl.add(c2);
+        }
+      }
+    return true;
+    }
+    
   EX void show_config() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(1);  
@@ -1407,6 +1433,10 @@ EX namespace product {
         start_game();
         };
       });
+    if(current_spin_invalid) 
+      dialog::addInfo("the current rotation is invalid");
+    else
+      dialog::addBreak(100);
 
     dialog::addBreak(50);
     dialog::addBack();
