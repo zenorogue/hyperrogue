@@ -1776,7 +1776,7 @@ EX namespace rots {
 
     std::unordered_map<int, transmatrix> saved_matrices;
 
-    transmatrix get_relative_matrix(cell *c1, int i) {
+    transmatrix adj(cell *c1, int i) override {
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
@@ -1797,7 +1797,7 @@ EX namespace rots {
       transmatrix Spin;
       cell *cw = where[c1].first;
       in_underlying([&] {
-        transmatrix T = adj(cw, i);
+        transmatrix T = currentmap->adj(cw, i);
         hyperpoint h = tC0(T);
         Spin = inverse(gpushxto0(h) * T);
         d = hr::inverse_exp(h, iTable);
@@ -1813,7 +1813,7 @@ EX namespace rots {
       if(c1 == c2) return Id;
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse(gmatrix0[c1]) * gmatrix0[c2];
-      for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return get_relative_matrix(c1, i);
+      for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adj(c1, i);
       return Id; // not implemented yet
       }
 
@@ -1844,7 +1844,7 @@ EX namespace rots {
           cell *c1 = c->cmove(i);
           if(visited.count(c1)) continue;
           visited.insert(c1);
-          dq.emplace_back(c1, V * get_relative_matrix(c, i));
+          dq.emplace_back(c1, V * adj(c, i));
           }
         }
       }
