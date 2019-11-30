@@ -749,8 +749,8 @@ void enable_raycaster() {
       "  cid = connection.xy;\n";
     
     if(prod) fmain +=
-      "  if(which == "+its(S7)+") { zpos += uPLevel+uPLevel; continue; }\n"
-      "  if(which == "+its(S7)+"+1) { zpos -= uPLevel+uPLevel; continue; }\n";
+      "  if(which == "+its(S7)+") { zpos += uPLevel+uPLevel; }\n"
+      "  if(which == "+its(S7)+"+1) { zpos -= uPLevel+uPLevel; }\n";
     
     fmain +=
       "  int mid = int(connection.z * 1024.);\n"
@@ -892,8 +892,8 @@ EX void cast() {
   
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(currentmap->iadj(cwt.at, j));
-  if(prod) ms.push_back(Id);
-  if(prod) ms.push_back(Id);
+  if(prod) ms.push_back(mscale(Id, +cgi.plevel));
+  if(prod) ms.push_back(mscale(Id, -cgi.plevel));
   
   if(!sol && !nil && reflect_val) {
     for(int j=0; j<S7; j++) {
@@ -951,10 +951,6 @@ EX void cast() {
           }
         }
       
-      if(prod && i >= S7) {
-        connections[u][2] = (S7+.5) / 1024.;
-        continue;
-        }
       transmatrix T = currentmap->iadj(c, i) * inverse(ms[i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
@@ -964,6 +960,8 @@ EX void cast() {
         }
       }
     }
+  
+  if(prod) ms[S7] = ms[S7+1] = Id;
 
   vector<GLint> wallstart;
   for(auto i: cgi.wallstart) wallstart.push_back(i);
