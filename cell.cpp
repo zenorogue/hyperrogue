@@ -441,11 +441,8 @@ EX int compdist(int dx[]) {
 
 EX int celldist(cell *c) {
   if(experimental) return 0;
-  if(hybri) { 
-    auto w = hybrid::get_where(c); 
-    if(sl2) w.second = 0;
-    return PIU ( celldist(w.first) + abs(w.second) );
-    }
+  if(hybri) 
+    return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euclid) return celldistance(currentmap->gamestart(), c);
   if(sphere || binarytiling || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
@@ -983,10 +980,7 @@ EX cell *random_in_distance(cell *c, int d) {
 
 EX int celldistance(cell *c1, cell *c2) {
 
-  if(prod) {
-    auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
-    return PIU ( celldistance(w1.first, w2.first) + abs(w1.second - w2.second) );
-    }
+  if(hybri) return hybrid::celldistance(c1, c2);
   
   #if CAP_FIELD
   if(geometry == gFieldQuotient && !GOLDBERG)

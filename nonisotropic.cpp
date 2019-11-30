@@ -1238,6 +1238,29 @@ EX namespace hybrid {
       }
     }
 
+  EX int celldistance(cell *c1, cell *c2) {
+    if(cgi.steps == 0) {
+      auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
+      return PIU (hr::celldistance(w1.first, w2.first)) + abs(w1.second - w2.second);
+      }
+    else {
+      int s = 0;
+      int a = 999999, b = -999999;
+      auto c = c1;
+      do {
+        auto w1 = hybrid::get_where(c), w2 = hybrid::get_where(c2); 
+        if(w1.second == w2.second) {
+          int d = PIU(hr::celldistance(w1.first, w2.first));
+          a = min(s+d, a);
+          b = max(s-d, a);
+          }
+        c = c->cmove(c1->type-1); s++;
+        }
+      while(c != c1);
+      return min(a, s-b);
+      }
+    }
+
 EX }
   
 EX namespace product {
