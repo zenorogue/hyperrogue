@@ -1303,7 +1303,7 @@ EX namespace product {
     
     hrmap_product() {
       current_spin_invalid = false;
-      if(cspin || cmirror) {
+      if((cspin || cmirror) && csteps) {
         in_underlying([&] {
           twisted = validate_spin();
           if(!twisted) { current_spin_invalid = true; return; }
