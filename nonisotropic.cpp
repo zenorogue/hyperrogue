@@ -1280,14 +1280,14 @@ EX namespace product {
     
     hrmap_product() {
       current_spin_invalid = false;
-      if(cspin) {
+      if(cspin || cmirror) {
         in_underlying([&] {
           twisted = validate_spin();
           if(!twisted) { current_spin_invalid = true; return; }
           auto ugs = currentmap->gamestart();
           spins[ugs] = make_pair(
-            cellwalker(ugs, gmod(+cspin, ugs->type)),
-            cellwalker(ugs, gmod(-cspin, ugs->type))
+            cellwalker(ugs, gmod(+cspin, ugs->type), cmirror),
+            cellwalker(ugs, gmod(-cspin, ugs->type), cmirror)
             );
           manual_celllister cl;
           cl.add(ugs);
@@ -1305,6 +1305,7 @@ EX namespace product {
   EX bool current_spin_invalid;
 
   EX int cwall_offset, cwall_mask, actual_view_level, csteps, cspin;
+  EX bool cmirror;
   
   EX void drawcell_stack(cellwalker cw, transmatrix V) {
     cell *c = cw.at;
@@ -1387,7 +1388,7 @@ EX namespace product {
     manual_celllister cl;
     cell *start = currentmap->gamestart();
     cl.add(start);
-    cws[start] = cellwalker(start, cspin);
+    cws[start] = cellwalker(start, gmod(cspin, start->type), cmirror);
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
       cellwalker cwc = cws.at(c);
@@ -1432,6 +1433,12 @@ EX namespace product {
         product::cspin = s;
         start_game();
         };
+      });
+    dialog::addBoolItem(XLAT("reflect"), product::cmirror, 'f');
+    dialog::add_action([]{
+      stop_game();
+      product::cmirror = !product::cmirror;
+      start_game();
       });
     if(current_spin_invalid) 
       dialog::addInfo("the current rotation is invalid");
@@ -2115,6 +2122,7 @@ EX namespace nisot {
       PHASEFROM(2);
       if(prod) stop_game();
       shift(); product::cspin = argi();
+      shift(); product::cmirror = argi();
       return 0;
       }
     return 1;
