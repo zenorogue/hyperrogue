@@ -121,6 +121,9 @@ string status[5];
   
 EX hrmap *base;
 
+EX euclid3::intmatrix base_periods;
+EX int base_twisted;
+
 bool gridmaking;
 
 int rearrange_index;
@@ -916,6 +919,14 @@ string irrhelp =
   "with too large periodic base geometry. "
   "For technical reasons, the density cannot be too small.";
 
+bool too_small_euclidean() {
+  for(cell *c: base->allcells())
+    forCellIdEx(c1, i1, c)
+    forCellIdEx(c2, i2, c)
+      if(i1 != i2 && c1 == c2) return true;
+  return false;
+  }
+
 void show_gridmaker() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
@@ -986,6 +997,8 @@ void show_gridmaker() {
       if(bitruncations_requested < bitruncations_performed) runlevel = 0;
       };
     });
+  if(too_small_euclidean())
+    dialog::addInfo(XLAT("too small period -- irregular tiling generation fails"));
   dialog::addItem(XLAT("reset"), 'r');
   dialog::add_action([] () { runlevel = 0; });
   dialog::addHelp();
@@ -1018,6 +1031,8 @@ EX void visual_creator() {
   start_game();
   if(base) delete base;
   base = currentmap; 
+  base_periods = euclid3::T0;
+  base_twisted = euclid3::twisted0;
   drawthemap();
   cellcount = int(isize(base->allcells()) * density + .5);
   pushScreen(show_gridmaker);

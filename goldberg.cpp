@@ -749,6 +749,10 @@ EX namespace gp {
       dialog::addBoolItem(XLAT("irregular"), IRREGULAR, 'i');
       dialog::add_action(dialog::add_confirmation([=] () { 
         if(min_quality && !irr::bitruncations_requested) irr::bitruncations_requested++;
+        if(euclid && !bounded) { 
+          println(hlog, XLAT("To create Euclidean irregular tesselations, first enable a torus"));
+          return;
+          }
         if(!IRREGULAR) irr::visual_creator(); 
         }));
       }

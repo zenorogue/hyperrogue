@@ -33,6 +33,7 @@ EX namespace euclid3 {
   #endif
 
   EX coord euzero = coord(0,0,0);
+  EX intmatrix euzeroall = make_array<coord>(euzero, euzero, euzero);
 
   static const intmatrix main_axes = make_array<coord>(coord(1,0,0), coord(0,1,0), coord(0,0,1));
   
@@ -445,7 +446,7 @@ EX namespace euclid3 {
     }
 
   EX intmatrix make_quarter_turn(int a, int b, int c) {
-    intmatrix T0 = make_array<coord> (euzero, euzero, euzero);
+    intmatrix T0 = euzeroall;
     T0[0][0] = a;
     T0[0][1] = b;
     T0[2][0] = c;
@@ -455,6 +456,8 @@ EX namespace euclid3 {
   EX void build_torus3(eGeometry g) {
   
     int dim = ginf[g].g.gameplay_dimension;
+    
+    if(IRREGULAR) T0 = irr::base_periods, twisted0 = irr::base_twisted;
     
     user_axes = T0;
     if(dim == 2) user_axes[2] = euzero;
@@ -828,6 +831,10 @@ EX namespace euclid3 {
       torus_config_option(XLAT("Möbius band"), 'E', rectangular_torus(6, 0, true));
       if(S3 == 3) torus_config_option(XLAT("seven-colorable torus"), 'F', regular_torus({1,2}));
       if(S3 == 3) torus_config_option(XLAT("HyperRogue classic torus"), 'G', single_row_torus(381, -22));
+      torus_config_option(XLAT("no quotient"), 'H', rectangular_torus(0, 0, false));
+      
+      if(IRREGULAR)
+        dialog::addInfo("period cannot be changed in irregular");
       }
       
     dialog::addBreak(50);
