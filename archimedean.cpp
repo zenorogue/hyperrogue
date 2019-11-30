@@ -441,7 +441,7 @@ transmatrix adjcell_matrix(heptagon *h, int d);
 struct hrmap_archimedean : hrmap {
   map<gp::loc, struct cdata> eucdata;
   heptagon *origin;
-  heptagon *getOrigin() { return origin; }
+  heptagon *getOrigin() override { return origin; }
 
   hrmap_archimedean() {
     dynamicval<hrmap*> curmap(currentmap, this);
@@ -530,9 +530,9 @@ struct hrmap_archimedean : hrmap {
       current_altmap = NULL;
       }
     }
-  void verify() { }
+  void verify() override { }
 
-  heptagon *create_step(heptagon *h, int d) {
+  heptagon *create_step(heptagon *h, int d) override {
   
     DEBB(DF_GEOM, (format("%p.%d ~ ?\n", h, d)));
   
@@ -607,7 +607,7 @@ struct hrmap_archimedean : hrmap {
     return hnew;
     }
   
-  void draw() {
+  void draw() override {
     dq::visited.clear();
     dq::enqueue(centerover->master, cview());
     
@@ -663,7 +663,7 @@ struct hrmap_archimedean : hrmap {
     return gm * where;
     }
       
-  ld spin_angle(cell *c, int d) {
+  ld spin_angle(cell *c, int d) override {
     if(PURE) {
       auto& t1 = arcm::current.get_triangle(c->master, d-1);
       return -(t1.first + M_PI / c->type);

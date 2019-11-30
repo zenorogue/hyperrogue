@@ -523,7 +523,7 @@ struct hrmap_crystal : hrmap_standard {
   #if MAXMDIM >= 4
   map<int, transmatrix> adjs;
   
-  transmatrix adj(heptagon *h, int d) {
+  transmatrix adj(heptagon *h, int d) override {
     auto co = hcoords[h];
     int id = 0;
     for(int a=0; a<4; a++) id = (2*id) + ((co[a]>>1) & 1);

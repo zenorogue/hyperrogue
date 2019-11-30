@@ -508,7 +508,7 @@ EX namespace binary {
       return -(d+2)*M_PI/4;
       }
 
-    transmatrix adj(heptagon *h, int dir) {
+    transmatrix adj(heptagon *h, int dir) override {
       if(geometry == gBinaryTiling) switch(dir) {
         case bd_up: return xpush(-log(2));
         case bd_left: return parabolic(-1);

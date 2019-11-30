@@ -869,7 +869,7 @@ EX namespace reg3 {
         }
       }
     
-    transmatrix adj(heptagon *h, int d) {
+    transmatrix adj(heptagon *h, int d) override {
       #if CAP_FIELD
       if(quotient_map) return quotient_map->adj(h, d);
       else

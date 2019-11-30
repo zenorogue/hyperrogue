@@ -166,7 +166,7 @@ EX namespace euclid3 {
       return res;
       }
 
-    void draw() {
+    void draw() override {
       dq::visited_by_matrix.clear();
       dq::enqueue_by_matrix(centerover->master, cview() * master_relative(centerover, true));
       
