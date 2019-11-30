@@ -188,12 +188,14 @@ EX namespace gp {
           DEBB(DF_GP, (at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
           exit(1);
           }
+        if(do_adjm) wc1.adjm = wc.adjm * gp_adj[{wcw.at, wcw.spin}];
         }
       return false;
       }
     if(peek(wcw)) {
       set_localwalk(wc1, dir1, wcw + wstep);
       DEBB(DF_GP, (at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
+      if(do_adjm) wc1.adjm = wc.adjm * gp_adj[{wcw.at, wcw.spin}];
       return true;
       }
     return false;
