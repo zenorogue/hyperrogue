@@ -242,12 +242,18 @@ template<class T, class U>
 void virtualRebase(cell*& base, T& at, const U& check) {
 
   if(prod) {
-    auto w = hybrid::get_where(base);
     auto d = product_decompose(check(at)).first;
+    while(d > cgi.plevel / 2)  { 
+      at = currentmap->iadj(base, base->type-1) * at; 
+      base = base->cmove(base->type-1); d -= cgi.plevel;
+      }
+    while(d < -cgi.plevel / 2) { 
+      at = currentmap->iadj(base, base->type-2) * at; 
+      base = base->cmove(base->type-2); d += cgi.plevel;
+      }
+    auto w = hybrid::get_where(base);
     at = mscale(at, -d);
     PIU( virtualRebase(w.first, at, check) );
-    if(d > cgi.plevel / 2) { w.second++; d -= cgi.plevel; }
-    if(d < -cgi.plevel / 2) { w.second--; d += cgi.plevel; }
     at = mscale(at, +d);
     base = hybrid::get_at(w.first, w.second);
     return;

@@ -1039,6 +1039,9 @@ EX namespace hybrid {
     
     hrmap *underlying_map;
     
+    int space_spin;
+    map<cell*, pair<cellwalker, cellwalker>> spins;
+    
     map<pair<cell*, int>, cell*> at;
     map<cell*, pair<cell*, int>> where;
     
@@ -1055,6 +1058,14 @@ EX namespace hybrid {
       }
     
     cell *getCell(cell *u, int h) {
+      if(space_spin) {
+        if(!spins.count(u))
+          println(hlog, "link missing: ", u);
+        else {
+          while(h >= cgi.steps) h -= cgi.steps, u = spins[u].first.at;
+          while(h < 0) h += cgi.steps, u = spins[u].second.at;
+          }
+        }
       h = zgmod(h, cgi.steps);
       cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
@@ -1064,6 +1075,7 @@ EX namespace hybrid {
     cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
   
     hrmap_hybrid() {
+      space_spin = 0;
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }
@@ -1199,19 +1211,59 @@ EX namespace hybrid {
   EX bool do_draw(cell *c, const transmatrix& T) {
     return in_actual([&] { return hr::do_draw(hybrid::get_at(c, get_where(centerover).second), T); });
     }
+  
+  vector<cell*> to_link;
+  
+  EX void will_link(cell *c) { if(pmap && ((hrmap_hybrid*) pmap)->space_spin) to_link.push_back(c); }
+  
+  EX void link() {
+    auto pm = (hrmap_hybrid*) pmap;
+    if(!pm) return;
+    auto& ss = pm->spins;
+    int success = -1;
+    while(success) {
+      vector<cell*> xlink = std::move(to_link);
+      success = 0;
+      for(cell *c: xlink) {
+        bool success_here = ss.count(c);
+        if(!success_here) forCellIdEx(c2, i, c) if(ss.count(c2)) {
+          ss[c].first = ss[c2].first + c->c.spin(i) + wstep - i;
+          ss[c].second = ss[c2].second + c->c.spin(i) + wstep - i;
+          success++;
+          success_here = true;
+          break;
+          }
+        if(!success_here) to_link.push_back(c);
+        }
+      }
+    }
 
 EX }
   
 EX namespace product {
 
   int z0;
-
+  
   struct hrmap_product : hybrid::hrmap_hybrid {
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
       return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
       }
 
     transmatrix adj(cell *c, int i) override {
+      if(space_spin && i == c->type-1 && where[c].second == cgi.steps-1) {
+        auto b = spins[where[c].first].first;
+        transmatrix T = mscale(Id, cgi.plevel);
+        T = T * spin(2 * M_PI * b.spin / b.at->type);
+        if(b.mirrored) T = T * Mirror;
+        return T;
+        }
+      if(space_spin && i == c->type-2 && where[c].second == 0) {
+        auto b = spins[where[c].first].second;
+        transmatrix T = mscale(Id, -cgi.plevel);
+        T = T * spin(2 * M_PI * b.spin / b.at->type);
+        if(b.mirrored) T = T * Mirror;
+        return T;
+        }
       if(i == c->type-1) return mscale(Id, cgi.plevel);
       else if(i == c->type-2) return mscale(Id, -cgi.plevel);
       c = where[c].first;
@@ -1225,9 +1277,30 @@ EX namespace product {
       dynamicval<cell*> co(centerover, hybrid::get_where(centerover).first);
       in_underlying([=] { currentmap->draw(); });
       }
+    
+    hrmap_product() {
+      if(cspin) {
+        space_spin = cspin;
+        in_underlying([&] {
+          auto ugs = currentmap->gamestart();
+          spins[ugs] = make_pair(
+            cellwalker(ugs, gmod(+space_spin, ugs->type)),
+            cellwalker(ugs, gmod(-space_spin, ugs->type))
+            );
+          manual_celllister cl;
+          cl.add(ugs);
+          for(int i=0; i<isize(cl.lst); i++) {
+            cell *c = cl.lst[i];
+            hybrid::will_link(c);
+            forCellIdEx(c2, i, c) cl.add(c2);
+            }
+          hybrid::link();
+          });
+        }
+      }
     };
 
-  EX int cwall_offset, cwall_mask, actual_view_level, csteps;
+  EX int cwall_offset, cwall_mask, actual_view_level, csteps, cspin;
   
   EX void drawcell_stack(cellwalker cw, transmatrix V) {
     cell *c = cw.at;
@@ -1250,12 +1323,22 @@ EX namespace product {
       cwall_mask |= (2<<c->type);
       int flat_distance = hdist0(product_decompose(tC0(V)).second);
       int max_z = flat_distance > sightranges[gProduct] ? 0 : sqrt(sightranges[gProduct] * sightranges[gProduct] - flat_distance * flat_distance) + 1;
-      for(int z=-max_z; z<=max_z; z++) {
-        if(z == 0) cwall_mask ^= (2<<c->type);
-        if(z == 1) cwall_mask ^= (1<<c->type);
-        cell *c1 = hybrid::get_at(c, actual_view_level+z);
-        setdist(c1, 7, NULL);
-        drawcell(c1, V * mscale(Id, cgi.plevel * (z+actual_view_level - z0))); 
+      for(int si: {0, 1}) {
+        cell *c1 = hybrid::get_at(c, z0);
+        int dir = c1->type-1-si;
+        int z1 = z0;
+        auto V0 = V;
+        for(int z=0; z<=max_z; z++) {
+          if(((hybrid::hrmap_hybrid*)currentmap)->space_spin) cwall_mask = -1;
+          cwall_mask &= ~(3<<c->type);
+          if(z1 > actual_view_level) cwall_mask |= (1<<c->type);
+          if(z1 < actual_view_level) cwall_mask |= (2<<c->type);
+          setdist(c1, 7, NULL);
+          if(z || !si) drawcell(c1, V0); 
+          V0 = V0 * currentmap->adj(c1, dir);
+          c1 = c1->cmove(dir);
+          z1 += (si ? -1 : 1);
+          }
         }
       });
     }
@@ -1958,6 +2041,12 @@ EX namespace nisot {
       if(prod) stop_game();
       shift(); product::csteps = argi();
       hybrid::reconfigure();
+      return 0;
+      }
+    else if(argis("-prodturn")) {
+      PHASEFROM(2);
+      if(prod) stop_game();
+      shift(); product::cspin = argi();
       return 0;
       }
     return 1;

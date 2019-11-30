@@ -160,6 +160,7 @@ namespace mapstream {
       }
     if(geometry == gProduct && VERNUM_HEX >= 0xA80C) {
       f.write(product::csteps);
+      f.write(product::cspin);
       }
     if(hybri && VERNUM_HEX >= 0xA80C) {
       hybrid::in_underlying_geometry([&] { save_geometry(f); });
@@ -243,6 +244,7 @@ namespace mapstream {
       }
     if(geometry == gProduct && VERNUM_HEX >= 0xA80C) {
       f.read(product::csteps);
+      if(VERNUM_HEX >= 0xA80D) f.read(product::cspin);
       }
     if(hybri && VERNUM_HEX >= 0xA80C) {
       auto g = geometry;

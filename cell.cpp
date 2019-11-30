@@ -136,6 +136,7 @@ EX cell *newCell(int type, heptagon *master) {
   c->type = type;
   c->master = master;
   initcell(c);
+  hybrid::will_link(c);
   return c;
   }
 
@@ -194,6 +195,7 @@ EX cell *createMov(cell *c, int d) {
       printf("extend failed to create for %p/%d\n", c, d);
       exit(1);
       }
+    hybrid::link();
     }
   #endif
   #if CAP_ARCM
@@ -219,6 +221,7 @@ EX cell *createMov(cell *c, int d) {
   else if(archimedean || PURE) {
     heptagon *h2 = createStep(c->master, d);
     c->c.connect(d, h2->c7,c->master->c.spin(d), c->master->c.mirror(d));
+    hybrid::link();
     }
   else if(c == c->master->c7) {
     
@@ -235,6 +238,7 @@ EX cell *createMov(cell *c, int d) {
       if(hs.mirrored && (S7%2 == 0)) hs--;
       hs = hs + alt3 + wstep - alt4;
       }
+    hybrid::link();
     extern void verifycell(cell *c);
     verifycell(n);
     }
@@ -243,6 +247,7 @@ EX cell *createMov(cell *c, int d) {
     cellwalker cw(c, d, false);
     cellwalker cw2 = cw - 1 + wstep - 1 + wstep - 1;
     c->c.connect(d, cw2);
+    hybrid::link();
     }
   return c->move(d);
   }
