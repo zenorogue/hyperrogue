@@ -386,7 +386,8 @@ EX namespace euclid3 {
   intmatrix T, T2, T_edit;
   EX int det;
   int infinite_dims;
-  int twisted0, twisted_edit;
+  EX int twisted0;
+  int twisted_edit;
   
   EX void set_torus3(int x, int y, int z) {
     for(int i=0; i<3; i++) for(int j=0; j<3; j++) T0[i][j] = 0;
@@ -545,7 +546,7 @@ EX namespace euclid3 {
     set_flag(ginf[g].flags, qNONORIENTABLE, nonori);      
     }
 
-  void build_torus3() {
+  EX void build_torus3() {
     for(eGeometry g: { gEuclid, gEuclidSquare, gCubeTiling, gRhombic3, gBitrunc3}) 
       build_torus3(g);
     }
@@ -698,10 +699,13 @@ EX namespace euclid3 {
       queueline(h0+ha+hb, h0-ha+hb, 0xFFFFFFFF);
       queueline(h0+ha-hb, h0-ha-hb, 0xFFFFFFFF);
       }
+
     quickqueue();
     }
 
+  #if HDR
   using torus_config = pair<euclid3::intmatrix, int>;
+  #endif
   
   euclid3::intmatrix on_periods(gp::loc a, gp::loc b) {
     euclid3::intmatrix res;
@@ -722,7 +726,7 @@ EX namespace euclid3 {
     return { on_periods(p, gp::loc(0,1) * p), false };
     }
   
-  torus_config rectangular_torus(int x, int y, bool klein) { 
+  EX torus_config rectangular_torus(int x, int y, bool klein) { 
     if(S3 == 3) y /= 2;
     return { on_periods(euclid3::ort1() * gp::loc(y,0), gp::loc(x,0)), klein?8:0 };
     }
