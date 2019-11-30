@@ -1115,7 +1115,7 @@ EX namespace hybrid {
       }
     }  
 
-  EX hrmap* get_umap() { return ((hrmap_hybrid*)currentmap)->underlying_map; }
+  EX hrmap* get_umap() { if(!dynamic_cast<hrmap_hybrid*>(currentmap)) return nullptr; else return ((hrmap_hybrid*)currentmap)->underlying_map; }
   
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
