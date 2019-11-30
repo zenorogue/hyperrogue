@@ -1216,7 +1216,11 @@ EX namespace hybrid {
   
   EX void will_link(cell *c) { if(pmap && ((hrmap_hybrid*) pmap)->twisted) to_link.push_back(c); }
   
+  EX bool in_link = false;
+  
   EX void link() {
+    if(in_link) return;
+    dynamicval<bool> b(in_link, true);
     auto pm = (hrmap_hybrid*) pmap;
     if(!pm) return;
     auto& ss = pm->spins;
