@@ -1626,8 +1626,18 @@ EX namespace patterns {
         return 0xCCCC00;
         }
       #endif
-      case 'M':
-        return gradient(0, canvasback, 0, min(1.8/(1+celldist(c)), 1.), 1);
+      case 'M': {
+        int d = celldist(c);
+        color_t res = gradient(0, canvasback, 0, min(1.8/(1+d), 1.), 1);
+        if(d > 3) res |= 0x1000000;
+        return res;
+        }
+      case 'P': {
+        int d = celldistance(c, currentmap->gamestart()->move(0));
+        color_t res = gradient(0, canvasback, 0, min(1.8/(1+d), 1.), 1);
+        if(d > 3) res |= 0x1000000;
+        return res;
+        }
       #if CAP_FIELD
       case 'S': 
         if(!hyperbolic) return canvasback;
