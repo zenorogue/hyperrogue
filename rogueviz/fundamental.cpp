@@ -57,7 +57,7 @@ ld widthfactor = 5;
 ld label_scale = 1;
 
 void fundamental_marker() {
-  if(!funmode || !(quotient || euwrap || elliptic)) return;
+  if(!funmode || !quotient) return;
   same.clear();
   gm.clear();
   

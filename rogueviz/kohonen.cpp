@@ -418,14 +418,14 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
 map<int, cellcrawler> scc;
 
 pair<int, int> get_cellcrawler_id(cell *c) {
-  if(among(geometry, gZebraQuotient, gMinimal, gField435, gField534) || (euwrap && !fulltorus) || IRREGULAR || (GDIM == 3 && sphere)) {
+  if(among(geometry, gZebraQuotient, gMinimal, gField435, gField534) || (euclid && quotient && !bounded) || IRREGULAR || (GDIM == 3 && sphere)) {
     // Zebra Quotient does exhibit some symmetries,
     // but these are so small anyway that it is safer to just build
     // a crawler for every neuron
     return make_pair(neuronId(*getNeuronSlow(c)), 0);
     // not yet implemented for cylinder
     }
-  if(fulltorus && (torusconfig::tmflags() & torusconfig::TF_KLEIN))
+  if(euclid && bounded && PURE && nonorientable)
     return make_pair(cell_to_pair(c).second * 2 + ctof(c), 0);
   int id = 0, dir = 0;
 #if CAP_GP

@@ -1304,7 +1304,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
     // if(hilite) ghilite = true;
     
-    bool multidraw = quotient || euwrap;
+    bool multidraw = quotient;
         
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
