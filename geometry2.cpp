@@ -348,8 +348,8 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
   if(GOLDBERG && gp::do_adjm) {
     transmatrix T = master_relative(c, true);
     transmatrix U = master_relative(c->cmove(i), false);
-    if(gp::gp_adj.count({c,i})) {
-      return T * gp::gp_adj[{c, i}] * U;
+    if(gp::gp_adj.count(make_pair(c,i))) {
+      return T * gp::get_adj(c,i) * U;
       }
     else
       println(hlog, "gpadj not found");

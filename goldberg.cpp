@@ -188,14 +188,14 @@ EX namespace gp {
           DEBB(DF_GP, (at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
           exit(1);
           }
-        if(do_adjm) wc1.adjm = wc.adjm * gp_adj[{wcw.at, wcw.spin}];
+        if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
         }
       return false;
       }
     if(peek(wcw)) {
       set_localwalk(wc1, dir1, wcw + wstep);
       DEBB(DF_GP, (at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
-      if(do_adjm) wc1.adjm = wc.adjm * gp_adj[{wcw.at, wcw.spin}];
+      if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
       return true;
       }
     return false;
@@ -214,7 +214,7 @@ EX namespace gp {
       if(peek(wcw)) {
         DEBB0(DF_GP, ("(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
-        if(do_adjm) wc1.adjm = wc.adjm * gp_adj[{wcw.at, wcw.spin}];
+        if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
         }
       else {
         peek(wcw) = newCell(SG6, wc.cw.at->master);
@@ -245,8 +245,8 @@ EX namespace gp {
         }
       }
     if(do_adjm) {
-      gp_adj[{wcw.at, wcw.spin}] = inverse(wc.adjm) * wc1.adjm;
-      gp_adj[{wcw1.at, wcw1.spin}] = inverse(wc1.adjm) * wc.adjm;
+      get_adj(wcw.at, wcw.spin) = inverse(wc.adjm) * wc1.adjm;
+      get_adj(wcw1.at, wcw1.spin) = inverse(wc1.adjm) * wc.adjm;
       }
     }
 
@@ -256,6 +256,8 @@ EX namespace gp {
     }
   
   EX map<pair<cell*, int>, transmatrix> gp_adj;
+  
+  EX transmatrix& get_adj(cell *c, int i) { return gp_adj[make_pair(c,i)]; }
 
   goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
     auto& ac0 = get_mapping(at);

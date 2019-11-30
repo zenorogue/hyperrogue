@@ -707,7 +707,7 @@ EX namespace euclid3 {
     }
 
   #if HDR
-  using torus_config = pair<euclid3::intmatrix, int>;
+  typedef pair<euclid3::intmatrix, int> torus_config;
   #endif
   
   euclid3::intmatrix on_periods(gp::loc a, gp::loc b) {
@@ -722,7 +722,7 @@ EX namespace euclid3 {
     }
   
   torus_config single_row_torus(int qty, int dy) { 
-    return { on_periods({dy, -1}, {qty, 0}), false };
+    return { on_periods(gp::loc{dy, -1}, gp::loc{qty, 0}), false };
     }
   
   torus_config regular_torus(gp::loc p) { 
@@ -824,12 +824,12 @@ EX namespace euclid3 {
         }
       
       dialog::addBreak(50);
-      torus_config_option(XLAT("single-cell torus"), 'A', regular_torus({1,0}));
-      torus_config_option(XLAT("large regular torus"), 'B', regular_torus({12, 0}));
+      torus_config_option(XLAT("single-cell torus"), 'A', regular_torus(gp::loc{1,0}));
+      torus_config_option(XLAT("large regular torus"), 'B', regular_torus(gp::loc{12, 0}));
       torus_config_option(XLAT("Klein bottle"), 'C', rectangular_torus(12, 6, true));
       torus_config_option(XLAT("cylinder"), 'D', rectangular_torus(6, 0, false));
       torus_config_option(XLAT("Möbius band"), 'E', rectangular_torus(6, 0, true));
-      if(S3 == 3) torus_config_option(XLAT("seven-colorable torus"), 'F', regular_torus({1,2}));
+      if(S3 == 3) torus_config_option(XLAT("seven-colorable torus"), 'F', regular_torus(gp::loc{1,2}));
       if(S3 == 3) torus_config_option(XLAT("HyperRogue classic torus"), 'G', single_row_torus(381, -22));
       torus_config_option(XLAT("no quotient"), 'H', rectangular_torus(0, 0, false));
       
@@ -1027,7 +1027,7 @@ EX gp::loc to_loc(const euclid3::coord& v) { return gp::loc(v[0], v[1]); }
 EX map<gp::loc, cdata>& get_cdata() { return euclid3::eucmap()->eucdata; }
   
 EX transmatrix eumove(euclid3::coord co) {
-  constexpr double q3 = sqrt(double(3));
+  const double q3 = sqrt(double(3));
   if(WDIM == 3) {
     return eupush3(co[0], co[1], co[2]);
     }
