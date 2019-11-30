@@ -3653,3 +3653,26 @@ Other:
 - - in quotient geometries, the camera will now track the specific preimage of the player
 - - alternative honeycomb in Nil (see advanced parameters -- not working in ray yet)
 - - map editor: should now correctly save product/rotspace maps, binary width setting, and other geometry settings
+
+2019-11-30 18:37 Version 11.2m aka 'Back to Euclidean':
+- Gameplay:
+- - RPM and OSM are no longer considered incompatible
+- - Allies are now immune to friendly Beauty.
+- - Hyperstone-optional lands are now clearly marked in the Overview
+- - buffed up the Orb of Intensity in OSM
+- - fixed the displayed Gold requirement for the Dead Caves in OSM
+- - on-petrify crash should be fixed
+- - fixed Tentacle riding
+
+- Geometries:
+- - made the geometry selection more intuitive: "tiling" lets you select the tiling, while "quotient" lets you select one of the quotient spaces available in the current tiling (there is also a list of interesting quotient spaces)
+- - fixed the crash when trying the Goldberg-Coxeter construction
+- - Euclidean hex/square tilings rewritten. This simplifies the code by removing special cases (they were previously implemented in a different way from everything else). As a result, bitruncation, irregular, and product spaces now work.
+- - Product spaces now support rotation and reflection.
+- - third-turn space is now available in Euclidean 3D geometries
+- - spiral projection and rug now automatically adjust if the Euclidean view is rotated
+- - fixed the highlights in variation menu
+- - when defining Euclidean quotient space, the fundamental domain is shown
+- - in the Archimedean menu, filtering by geometry is available
+- - {3,12} base available for the field quotient
+- - the Hunting Grounds and Galapagos are now optional in Euclidean
