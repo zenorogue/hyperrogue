@@ -16,6 +16,8 @@ EX int inmirrorcount = 0;
 /** wall optimization: do not draw things beyond walls */
 EX bool wallopt;
 
+EX bool in_wallopt() { return wallopt || racing::on; }
+
 EX bool spatial_graphics;
 EX bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 EX bool mmspatial, mmhigh, mmmon, mmitem;

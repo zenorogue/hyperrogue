@@ -567,7 +567,7 @@ EX namespace reg3 {
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
         drawcell(c, V);
-        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
     
         for(int d=0; d<S7; d++)
           dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
@@ -861,7 +861,7 @@ EX namespace reg3 {
         cell *c = h->c7;
         if(!do_draw(c, V)) continue;
         drawcell(c, V);
-        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
     
         for(int i=0; i<S7; i++) if(h->move(i)) {
           dq::enqueue(h->move(i), V * adj(h, i));

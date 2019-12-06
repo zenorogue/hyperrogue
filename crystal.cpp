@@ -581,7 +581,7 @@ struct hrmap_crystal : hrmap_standard {
       if(!do_draw(c, V)) continue;
       drawcell(c, V);
       
-      if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+      if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   
       for(int d=0; d<S7; d++) {
         dq::enqueue_by_matrix(h->move(d), V * adj(h, d));

@@ -179,7 +179,7 @@ EX namespace euclid3 {
         cell *c = h->c7;
 
         bool draw = drawcell_subs(c, V * spin(master_to_c7_angle()));
-        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000 && !hybrid::pmap) continue;
   
         if(draw) for(int i=0; i<S7; i++)
           dq::enqueue_by_matrix(h->move(i), V * adj(h, i));
