@@ -852,7 +852,6 @@ EX ld hdist0(const hyperpoint& mh) {
       }
     case gcSphere: {
       ld res = mh[LDIM] >= 1 ? 0 : mh[LDIM] <= -1 ? M_PI : acos(mh[LDIM]);
-      if(elliptic && res > M_PI/2) res = M_PI-res;
       return res;
       }
     case gcProduct: {
