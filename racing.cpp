@@ -252,6 +252,8 @@ bool use_exhaustive_distance;
 
 void find_track(cell *start, int sign, int len) {
   int dl = 7 - getDistLimit() - genrange_bonus;
+  dl = (8 + dl) / 2;
+  if(WDIM == 3 && dl < 6) dl = 6;
   cell *goal;
   map<cell*, cell*> parent;
   map<int, vector<cell*> > cellbydist;
@@ -277,7 +279,7 @@ void find_track(cell *start, int sign, int len) {
       goal = c;
       break;
       }
-    setdist(c, (8 + dl) / 2, parent[c]);
+    setdist(c, dl, parent[c]);
     forCellEx(c1, c) if(!bad(c1, c) && !parent.count(c1)) {
       parent[c1] = c;
       int id;
@@ -424,6 +426,7 @@ EX void generate_track() {
 
   TWIDTH = getDistLimit() - 1;  
   if(TWIDTH == 1) TWIDTH = 2;
+  if(sl2) TWIDTH = 2;
   TWIDTH += race_try / 8;
   
   #if CAP_FILES
@@ -511,6 +514,7 @@ EX void generate_track() {
     return;
     }  
   
+  if(WDIM == 3) dl = 7 - TWIDTH;
   for(cell *c:track) setdist(c, dl, NULL);
   
   if(true) {
