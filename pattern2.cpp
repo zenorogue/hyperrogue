@@ -2454,11 +2454,8 @@ EX namespace linepatterns {
         if(zebra40(c) / 4 == 10) {
           bool all = true;
           transmatrix tri[3];
-          for(int i=0; i<3; i++) {
-            cell *c2 = createMov(c, i*2);
-            if(!gmatrix.count(c2)) all = false;
-            else tri[i] = gmatrix[c2];
-            }
+          for(int i=0; i<3; i++)
+            tri[i] = V * currentmap->adj(c, i*2);
           
           if(all) for(int i=0; i<3; i++)
             gridline(tri[i], C0, tri[(i+1)%3], C0, col, 3 + vid.linequality);
@@ -2499,41 +2496,41 @@ EX namespace linepatterns {
         break;
       
       case patDual:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) {
-          gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+        forCellIdEx(c2, i, c) if(c2 > c) {
+          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
           }
         break;
 
       case patTriRings:
         forCellIdEx(c2, i, c) {
           if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
-          if(c2 > c) if(gmatrix.count(c2) && curr_dist(c) == curr_dist(c2)) 
-            gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+          if(c2 > c) if(curr_dist(c) == curr_dist(c2)) 
+            gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
           }
         break;
 
       case patTriTree: {
         cell *parent = ts::right_parent(c, curr_dist);
         if(gmatrix.count(parent)) 
-          gridlinef(V, C0, gmatrix[parent], C0, col, 2 + vid.linequality);
+          gridlinef(V, C0, V * currentmap->adj(c, neighborId(c, parent)), C0, col, 2 + vid.linequality);
         break;
         }
       
       case patTriOther: {
         cell *parent = ts::right_parent(c, curr_dist);
-        forCellEx(c2, c) if(gmatrix.count(c2) && curr_dist(c2) < curr_dist(c) && c2 != parent)
-          gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+        forCellIdEx(c2, i, c) if(curr_dist(c2) < curr_dist(c) && c2 != parent)
+          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
         break;
         }
 
       case patHepta:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 
-          gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+        forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) == pseudohept(c2)) 
+          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
         break;
 
       case patRhomb:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) != pseudohept(c2)) 
-          gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+        forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) != pseudohept(c2)) 
+          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
         break;
       
       case patPalace: {
@@ -2573,12 +2570,13 @@ EX namespace linepatterns {
         
       case patTree:
         if(is_master(c)) {
-          cell *c2 = c->master->move(binarytiling ? binary::updir() : 0)->c7;
+          int dir = binarytiling ? binary::updir() : 0;
+          cell *c2 = c->master->move(dir)->c7;
           if(gmatrix.count(c2)) {
             if(S3 >= OINF)
-              gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
+              gridlinef(V, C0, Id, mid(tC0(V), tC0(V * currentmap->adj(c, dir))), col, 2 + vid.linequality);
             else 
-              gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+              gridlinef(V, C0, V * currentmap->adj(c, dir), C0, col, 2 + vid.linequality);
             }
           }
         break;
@@ -2586,8 +2584,8 @@ EX namespace linepatterns {
       case patHorocycles:
         if(c->master->alt) {
           int d = celldistAlt(c);
-          forCellEx(c2, c) if(c2 > c && c2->master->alt && celldistAlt(c2) == d && gmatrix.count(c2))
-            gridlinef(V, C0, gmatrix[c2], C0, 
+          forCellIdEx(c2, i, c) if(c2 > c && c2->master->alt && celldistAlt(c2) == d)
+            gridlinef(V, C0, V * currentmap->adj(c, i), C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
@@ -2603,7 +2601,7 @@ EX namespace linepatterns {
                   gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
                   }
                 else 
-                  gridlinef(V, C0, gmatrix[c2], C0, col, 2 + vid.linequality);
+                  gridlinef(V, C0, V*currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
                 }
               }
           }
@@ -2612,13 +2610,13 @@ EX namespace linepatterns {
       case patVine: {
         if(GOLDBERG) {
           if(c->master->c7 != c) if(gmatrix.count(c->move(0)))
-            gridlinef(V, C0, gmatrix[c->move(0)], C0, 
+            gridlinef(V, C0, V*currentmap->adj(c,0), C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
         else if(IRREGULAR) {
           if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
-            gridlinef(V, C0, gmatrix[c->master->c7], C0, 
+            gridlinef(V, C0, V*master_relative(c, true), C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
@@ -2636,14 +2634,14 @@ EX namespace linepatterns {
       
       case patPower: {
         if(GOLDBERG) {
-          for(int i=0; i<S7; i++) if(c->move(i) && c->move(i)->master != c->master && gmatrix.count(c->move(i)))
-            gridlinef(V, C0, gmatrix[c->move(i)], C0, 
+          forCellIdEx(c2, i, c) if(c2->master != c->master)
+            gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
               col,
               1 + vid.linequality);
           }
         else if(archimedean) {
-          if(!pseudohept(c)) for(int i=0; i<c->type; i++) if(c->move(i) && c < c->move(i) && !pseudohept(c->move(i)) && gmatrix.count(c->move(i))) 
-            gridlinef(V, C0, gmatrix[c->move(i)], C0, 
+          if(!pseudohept(c)) forCellIdEx(c2, i, c) if(c < c2 && !pseudohept(c2)) 
+            gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
               col,
               1 + vid.linequality);
           }
@@ -2670,9 +2668,8 @@ EX namespace linepatterns {
   
     vid.linewidth *= width;
 
-    if(any()) for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
-      cell *c = it->first;
-      transmatrix& V = it->second;
+    if(any()) for(auto& p: current_display->all_drawn_copies) for(auto& V: p.second) {
+      cell* c = p.first;
       
       for(auto& lp: patterns) {
         color_t col = lp.color;

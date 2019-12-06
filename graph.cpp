@@ -38,6 +38,8 @@ EX bool hide_player() {
      ;
   }
 
+#define ADC(V,c) for(const transmatrix& V: current_display->all_drawn_copies[c])
+
 EX hookset<bool(int sym, int uni)> *hooks_handleKey;
 EX hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
 EX purehookset hooks_frame, hooks_markers;
@@ -3857,21 +3859,19 @@ void celldrawer::draw_fallanims() {
    }
 
 #if CAP_QUEUE
-EX void queuecircleat(cell *c, double rad, color_t col) {
-  if(!c) return;
-  if(!gmatrix.count(c)) return;
+EX void queuecircleat1(cell *c, const transmatrix& V, double rad, color_t col) {
   if(WDIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
     // we must do hybrid::wall_offset in hybrid because the cached value is likely incorrect
     int ofs = hybri ? hybrid::wall_offset(c) : wall_offset(c);
     for(int i=0; i<c->type; i++) {
-      queuepolyat(gmatrix[c], cgi.shWireframe3D[ofs + i], 0, PPR::SUPERLINE);
+      queuepolyat(V, cgi.shWireframe3D[ofs + i], 0, PPR::SUPERLINE);
       }
     return;
     }    
   if(spatial_graphics || GDIM == 3) {
     vector<transmatrix> corners(c->type+1);
-    for(int i=0; i<c->type; i++) corners[i] = gmatrix[c] * rgpushxto0(get_corner_position(c, i, 3 / rad));    
+    for(int i=0; i<c->type; i++) corners[i] = V * rgpushxto0(get_corner_position(c, i, 3 / rad));    
     corners[c->type] = corners[0];
     for(int i=0; i<c->type; i++) {
       queueline(mscale(corners[i], cgi.FLOOR) * C0, mscale(corners[i+1], cgi.FLOOR) * C0, col, 2, PPR::SUPERLINE);
@@ -3883,27 +3883,27 @@ EX void queuecircleat(cell *c, double rad, color_t col) {
   #if CAP_SHAPES
   if(vid.stereo_mode || sphere) {
     dynamicval<color_t> p(poly_outline, col);
-    queuepolyat(gmatrix[c] * spintick(100), cgi.shGem[1], 0, PPR::LINE);
+    queuepolyat(V * spintick(100), cgi.shGem[1], 0, PPR::LINE);
     return;
     }
   #endif
-  queuecircle(gmatrix[c], rad, col);  
+  queuecircle(V, rad, col);  
   if(!wmspatial) return;
   if(highwall(c))
-    queuecircle(mscale(gmatrix[c], cgi.WALL), rad, col);
+    queuecircle(mscale(V, cgi.WALL), rad, col);
   int sl;
   if((sl = snakelevel(c))) {
-    queuecircle(mscale(gmatrix[c], cgi.SLEV[sl]), rad, col);
+    queuecircle(mscale(V, cgi.SLEV[sl]), rad, col);
     }
   if(chasmgraph(c))
-    queuecircle(mscale(gmatrix[c], cgi.LAKE), rad, col);
+    queuecircle(mscale(V, cgi.LAKE), rad, col);
+  }
+
+EX void queuecircleat(cell *c, double rad, color_t col) {
+  if(!c) return;
+  ADC(V, c) queuecircleat1(c, V, rad, col);
   }
 #endif
-
-#define G(x) x && gmatrix.count(x)
-#define IG(x) if(G(x))
-#define Gm(x) gmatrix[x]
-#define Gm0(x) tC0(gmatrix[x])
 
 #if ISMOBILE==1
 #define MOBON (clicked)
@@ -3938,8 +3938,8 @@ EX void drawMarkers() {
     ignore(ok);
      
     #if CAP_QUEUE
-    if(G(dragon::target) && haveMount()) {
-      queuechr(Gm0(dragon::target), 2*vid.fsize, 'X', 
+    if(haveMount()) ADC(V, dragon::target) {
+      queuechr(V, 2*vid.fsize, 'X',
         gradient(0, iinf[itOrbDomination].color, -1, sintick(dragon::whichturn == turncount ? 75 : 150), 1));
       }
     #endif
@@ -4023,22 +4023,22 @@ EX void drawMarkers() {
     #if CAP_SHAPES
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on && GDIM == 2) {
       if(multi::players == 1) {
-        forCellIdAll(c2, d, cwt.at) IG(c2) draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d), d);
+        forCellIdAll(c2, d, cwt.at) if(gmatrix.count(cwt.at)) draw_movement_arrows(c2, gmatrix[cwt.at] * currentmap->adj(cwt.at, d), d);
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
         if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
-        forCellIdAll(c2, d, multi::player[p].at) IG(c2) {
+        forCellIdAll(c2, d, multi::player[p].at) if(gmatrix.count(cwt.at)) {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
           dynamicval<cellwalker> tcw(cwt, multi::player[p]);
-          draw_movement_arrows(c2, Gm(cwt.at) * currentmap->adj(cwt.at, d), d);
+          draw_movement_arrows(c2, gmatrix[cwt.at] * currentmap->adj(cwt.at, d), d);
           }
         }
       }
     
     if(GDIM == 3 && !inHighQual && !shmup::on && vid.axes3 && playermoved) {
       cell *c = forwardcell();
-      IG(c) queuecircleat(c, .8, getcs().uicolor);
+      queuecircleat(c, .8, getcs().uicolor);
       }
     
     #endif
@@ -4051,16 +4051,16 @@ EX void drawMarkers() {
 
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
-      if(items[itOrbSword])
-        queuechr(gmatrix[cwt.at] * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
-      if(items[itOrbSword2])
-        queuechr(gmatrix[cwt.at] * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
+      if(items[itOrbSword]) ADC(V, cwt.at)
+        queuechr(V * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
+      if(items[itOrbSword2]) ADC(V, cwt.at)
+        queuechr(V * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
       }
     if(SWORDDIM == 3 && !shmup::on) {
-      if(items[itOrbSword])
-        queuechr(gmatrix[cwt.at] * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
-      if(items[itOrbSword2])
-        queuechr(gmatrix[cwt.at] * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
+      if(items[itOrbSword]) ADC(V, cwt.at)
+        queuechr(V * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
+      if(items[itOrbSword2]) ADC(V, cwt.at)
+        queuechr(V * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
       }
     }
 
@@ -4115,76 +4115,70 @@ EX void drawMarkers() {
 void drawFlashes() {
   #if CAP_QUEUE
   for(int k=0; k<isize(flashes); k++) {
+    bool kill = true;
     flashdata& f = flashes[k];
-    transmatrix V;
-    
-    if(f.spd) try { V = gmatrix.at(f.where); } catch(out_of_range&) { 
-      f = flashes[isize(flashes)-1];
-      flashes.pop_back(); k--;
-      continue; 
-      }
-    else V = ggmatrix(f.where);
-
-    int tim = ticks - f.t;
-    
-    bool kill = tim > f.size;
-    
-    if(f.spd) {
-      #if CAP_SHAPES
-      kill = tim > 300;
-      int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
-      poly_outline = OUTLINE_DEFAULT;
-      ld t = f.spd * tim * cgi.scalefactor / 50000.;
-      transmatrix T =
-        GDIM == 2 ? V * spin(f.angle) * xpush(t) :
-        V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
-      queuepoly(T, cgi.shParticle[f.size], partcol);
-      #endif
-      }
-    
-    else if(f.size == 1000) {
-      for(int u=0; u<=tim; u++) {
-        if((u-tim)%50) continue;
-        if(u < tim-150) continue;
-        ld rad = u * 3 / 1000.;
-        rad = rad * (5-rad) / 2;
-        rad *= cgi.hexf;
-        int flashcol = f.color;
-        if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
-        flashcol = darkena(flashcol, 0, 0xFF);
-#if MAXMDIM >= 4
-        if(GDIM == 3)
-          queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
-        else 
-#endif
-        {
-          PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
-          queuecurve(flashcol, 0x8080808, PPR::LINE);
+    ADC(V, f.where) {
+      
+      int tim = ticks - f.t;
+      
+      if(tim <= f.size && !f.spd) kill = false;
+      
+      if(f.spd) {
+        #if CAP_SHAPES
+        if(tim <= 300) kill = false;
+        int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
+        poly_outline = OUTLINE_DEFAULT;
+        ld t = f.spd * tim * cgi.scalefactor / 50000.;
+        transmatrix T =
+          GDIM == 2 ? V * spin(f.angle) * xpush(t) :
+          V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
+        queuepoly(T, cgi.shParticle[f.size], partcol);
+        #endif
+        }
+      
+      else if(f.size == 1000) {
+        for(int u=0; u<=tim; u++) {
+          if((u-tim)%50) continue;
+          if(u < tim-150) continue;
+          ld rad = u * 3 / 1000.;
+          rad = rad * (5-rad) / 2;
+          rad *= cgi.hexf;
+          int flashcol = f.color;
+          if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
+          flashcol = darkena(flashcol, 0, 0xFF);
+  #if MAXMDIM >= 4
+          if(GDIM == 3)
+            queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
+          else 
+  #endif
+          {
+            PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
+            queuecurve(flashcol, 0x8080808, PPR::LINE);
+            }
+          }
+        }
+      else if(f.size == 2000) {
+        for(int u=0; u<=tim; u++) {
+          if((u-tim)%50) continue;
+          if(u < tim-250) continue;
+          ld rad = u * 3 / 2000.;
+          rad = rad * (5-rad) * 1.25;
+          rad *= cgi.hexf;
+          int flashcol = f.color;
+          if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
+          flashcol = darkena(flashcol, 0, 0xFF);
+  #if MAXMDIM >= 4
+          if(GDIM == 3)
+            queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
+          else 
+  #endif
+          {
+            PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
+            queuecurve(flashcol, 0x8080808, PPR::LINE);
+            }
           }
         }
       }
-    else if(f.size == 2000) {
-      for(int u=0; u<=tim; u++) {
-        if((u-tim)%50) continue;
-        if(u < tim-250) continue;
-        ld rad = u * 3 / 2000.;
-        rad = rad * (5-rad) * 1.25;
-        rad *= cgi.hexf;
-        int flashcol = f.color;
-        if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
-        flashcol = darkena(flashcol, 0, 0xFF);
-#if MAXMDIM >= 4
-        if(GDIM == 3)
-          queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
-        else 
-#endif
-        {
-          PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
-          queuecurve(flashcol, 0x8080808, PPR::LINE);
-          }
-        }
-      }
-
     if(kill) {
       f = flashes[isize(flashes)-1];
       flashes.pop_back(); k--;
@@ -4359,6 +4353,7 @@ EX void drawthemap() {
   profile_start(0);
   swap(gmatrix0, gmatrix);
   gmatrix.clear();
+  current_display->all_drawn_copies.clear();
 
   wmspatial = vid.wallmode == 4 || vid.wallmode == 5;
   wmescher = vid.wallmode == 3 || vid.wallmode == 5;
@@ -4972,7 +4967,7 @@ EX void clearAnimations() {
 auto graphcm = addHook(clearmemory, 0, [] () {
   DEBBI(DF_MEMORY, ("clear graph memory"));
   mouseover = centerover = lmouseover = NULL;  
-  gmatrix.clear(); gmatrix0.clear();
+  gmatrix.clear(); gmatrix0.clear(); current_display->all_drawn_copies.clear();
   clearAnimations();
   })
 + addHook(hooks_gamedata, 0, [] (gamedata* gd) {
@@ -5099,7 +5094,7 @@ EX bool inscreenrange(cell *c) {
   }
 
 #if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] { clearAnimations(); gmatrix.clear(); gmatrix0.clear(); });
+auto hooksw = addHook(hooks_swapdim, 100, [] { clearAnimations(); gmatrix.clear(); gmatrix0.clear(); current_display->all_drawn_copies.clear(); });
 #endif
 
 }
