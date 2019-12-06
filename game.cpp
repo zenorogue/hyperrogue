@@ -4670,6 +4670,7 @@ EX void killThePlayerAt(eMonster m, cell *c, flagtype flags) {
 
 EX void afterplayermoved() {
   pregen();
+  if(!racing::on)
   setdist(cwt.at, 7 - getDistLimit() - genrange_bonus, NULL);
   prairie::treasures();
   if(generatingEquidistant) {
