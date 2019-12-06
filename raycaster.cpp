@@ -805,7 +805,7 @@ array<float, 2> enc(int i, int a) {
   return res;
   };
 
-color_t color_out_of_range = 0xFF00080F;
+color_t color_out_of_range = 0x0F0800FF;
 
 EX void cast() {
   enable_raycaster();
