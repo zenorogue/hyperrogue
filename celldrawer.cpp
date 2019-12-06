@@ -1546,7 +1546,18 @@ void celldrawer::draw_features_and_walls_3d() {
             }
           }
         else if(prod) {
-          if(!((product::cwall_mask >> a) & 1)) continue;
+          if(a < c->type-2) {
+            ld d = in_e2xe() ? sqhypot_d(2, tC0(V)) : V[2][2];
+            hyperpoint h = (V * cgi.walltester[ofs + a]);
+            ld d1 = in_e2xe() ? sqhypot_d(2, h) : h[2];
+            if(d1 >= d - 1e-6) continue;
+            }
+          else if(a == c->type-1) {
+            if(zlevel(tC0(V)) >= -cgi.plevel/2) continue;
+            }
+          else if(a == c->type-2) {
+            if(zlevel(tC0(V)) <= +cgi.plevel/2) continue;
+            }
           }
         if(qfi.fshape && wmescher) {
           auto& poly = queuepoly(V, cgi.shWall3D[ofs + a], darkena(wcol2 - d * get_darkval(c, a), 0, 0xFF));

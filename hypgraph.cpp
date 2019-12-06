@@ -1895,11 +1895,25 @@ EX namespace dq {
   EX set<int> visited_by_matrix;
   EX void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
     if(!h) return;
+    if(sl2 && T[3][3] < 0) { enqueue_by_matrix(h, centralsym * T); return; }
     int b = bucketer(tC0(T));
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue.emplace(h, T, band_shift);
     }
+
+  EX queue<tuple<cell*, transmatrix, ld>> drawqueue_c;
+
+  EX void enqueue_by_matrix_c(cell *c, const transmatrix& T) {
+    if(!c) return;
+    if(sl2 && T[3][3] < 0) { enqueue_by_matrix_c(c, centralsym * T); return; }
+    int b = bucketer(tC0(T));
+    if(visited_by_matrix.count(b)) { return; }
+    visited_by_matrix.insert(b);
+    drawqueue_c.emplace(c, T, band_shift);
+    }
+
+
   EX }
 
 EX bool do_draw(cell *c) {

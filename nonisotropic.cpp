@@ -1089,36 +1089,25 @@ EX namespace hybrid {
     virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
 
     void draw() override {
-      set<cell*> visited;
-      
       cell* start = centerover;
-      vector<pair<cell*, transmatrix>> dq;
       
-      visited.insert(start);
-      dq.emplace_back(start, cview());
-      product::cwall_mask = -1;
+      dq::visited_by_matrix.clear();
+      dq::enqueue_by_matrix_c(start, cview());
       
-      for(int i=0; i<isize(dq); i++) {
-        cell *c = dq[i].first;
-        transmatrix V = dq[i].second;
+      while(!dq::drawqueue_c.empty()) {
+        auto& p = dq::drawqueue_c.front();
+        cell *c = get<0>(p);
+        transmatrix V = get<1>(p);
+        dq::drawqueue_c.pop();
         
-        if(sl2) {
-          if(V[3][3] < 0) V = centralsym * V;
-          if(!do_draw(c, V)) continue;
-          drawcell(c, V);
-          }
-        else {
-          if(!in_s2xe() && !do_draw(c, V)) continue;
-          if(prod) product::cwall_offset = hybrid::wall_offset(c);
-          drawcell(c, V);
-          }
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V);
+
         if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
 
         for(int i=0; i<c->type; i++) {
           cell *c1 = c->cmove(i);
-          if(visited.count(c1)) continue;
-          visited.insert(c1);
-          dq.emplace_back(c1, V * adj(c, i));
+          dq::enqueue_by_matrix_c(c1, V * adj(c, i));
           }
         }
       }
