@@ -1927,7 +1927,6 @@ bool limited_generation(cell *c) {
 
 EX bool do_draw(cell *c, const transmatrix& T) {
 
-  if(hybrid::pmap) return hybrid::do_draw(c, T);
   if(WDIM == 3) {
     // do not care about cells outside of the track
     if(GDIM == 3 && racing::on && c->land == laMemory && cells_drawn >= S7+1) return false;

@@ -3606,7 +3606,6 @@ EX void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2,
   }
 
 EX int wall_offset(cell *c) {
-  if(prod) return product::cwall_offset;
   if(hybri) return hybrid::wall_offset(c);
   if(penrose && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;

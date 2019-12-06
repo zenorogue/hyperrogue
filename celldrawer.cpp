@@ -2351,8 +2351,6 @@ void celldrawer::draw_gravity_particles() {
 
 void celldrawer::draw() {
 
-  if(hybrid::pmap) { product::drawcell_stack(c, V); return; }
-
   cells_drawn++;
 
 #if CAP_TEXTURE

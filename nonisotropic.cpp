@@ -1088,6 +1088,40 @@ EX namespace hybrid {
     virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
     virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
 
+    void draw() override {
+      set<cell*> visited;
+      
+      cell* start = centerover;
+      vector<pair<cell*, transmatrix>> dq;
+      
+      visited.insert(start);
+      dq.emplace_back(start, cview());
+      product::cwall_mask = -1;
+      
+      for(int i=0; i<isize(dq); i++) {
+        cell *c = dq[i].first;
+        transmatrix V = dq[i].second;
+        
+        if(sl2) {
+          if(V[3][3] < 0) V = centralsym * V;
+          if(!do_draw(c, V)) continue;
+          drawcell(c, V);
+          }
+        else {
+          if(!in_s2xe() && !do_draw(c, V)) continue;
+          if(prod) product::cwall_offset = hybrid::wall_offset(c);
+          drawcell(c, V);
+          }
+        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+
+        for(int i=0; i<c->type; i++) {
+          cell *c1 = c->cmove(i);
+          if(visited.count(c1)) continue;
+          visited.insert(c1);
+          dq.emplace_back(c1, V * adj(c, i));
+          }
+        }
+      }
     };
   
   hrmap_hybrid* hmap() { return (hrmap_hybrid*) currentmap; }
@@ -1208,10 +1242,6 @@ EX namespace hybrid {
     return wo;
     }
 
-  EX bool do_draw(cell *c, const transmatrix& T) {
-    return in_actual([&] { return hr::do_draw(hybrid::get_at(c, get_where(centerover).second), T); });
-    }
-  
   vector<cell*> to_link;
   
   EX void will_link(cell *c) { if(pmap && ((hrmap_hybrid*) pmap)->twisted) to_link.push_back(c); }
@@ -1297,14 +1327,6 @@ EX namespace product {
       return PIU(currentmap->adj(c, i));
       }
   
-    void draw() override {
-      auto w = hybrid::get_where(centerover);
-      z0 = w.second;
-      actual_view_level = z0 - floor(zlevel(tC0(cview())) / cgi.plevel + .5);
-      dynamicval<cell*> co(centerover, hybrid::get_where(centerover).first);
-      in_underlying([=] { currentmap->draw(); });
-      }
-    
     hrmap_product() {
       current_spin_invalid = false;
       if((cspin || cmirror) && csteps) {
@@ -1331,49 +1353,8 @@ EX namespace product {
 
   EX bool current_spin_invalid;
 
-  EX int cwall_offset, cwall_mask, actual_view_level, csteps, cspin;
+  EX int csteps, cspin;
   EX bool cmirror;
-  
-  EX void drawcell_stack(cellwalker cw, transmatrix V) {
-    cell *c = cw.at;
-    if(sphere) gmatrix[c] = V; /* some computations need gmatrix0 for underlying geometry */
-    bool s = sphere || pmodel != mdPerspective;
-    bool euc = euclid;
-    hybrid::in_actual([&] { 
-      cell *c0 = hybrid::get_at(c, z0);
-      cwall_offset = hybrid::wall_offset(c0);
-      if(s) cwall_mask = (1<<c->type) - 1;
-      else {
-        cwall_mask = 0;
-        ld d = euc ? sqhypot_d(2, tC0(V)) : V[2][2];
-        for(int i=0; i<c->type; i++) {
-          hyperpoint h = (V * cgi.walltester[cwall_offset + i]);
-          ld d1 = euc ? sqhypot_d(2, h) : h[2];
-          if(d1 < d - 1e-6) cwall_mask |= (1<<i);
-          }
-        }
-      cwall_mask |= (2<<c->type);
-      int flat_distance = hdist0(product_decompose(tC0(V)).second);
-      int max_z = flat_distance > sightranges[gProduct] ? 0 : sqrt(sightranges[gProduct] * sightranges[gProduct] - flat_distance * flat_distance) + 1;
-      for(int si: {0, 1}) {
-        cell *c1 = hybrid::get_at(c, z0);
-        int dir = c1->type-1-si;
-        int z1 = z0;
-        auto V0 = V;
-        for(int z=0; z<=max_z; z++) {
-          if(((hybrid::hrmap_hybrid*)currentmap)->twisted) cwall_mask = -1;
-          cwall_mask &= ~(3<<c->type);
-          if(z1 > actual_view_level) cwall_mask |= (1<<c->type);
-          if(z1 < actual_view_level) cwall_mask |= (2<<c->type);
-          setdist(c1, 7, NULL);
-          if(z || !si) drawcell(c1, V0); 
-          V0 = V0 * currentmap->adj(c1, dir);
-          c1 = c1->cmove(dir);
-          z1 += (si ? -1 : 1);
-          }
-        }
-      });
-    }
   
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
@@ -1821,37 +1802,6 @@ EX namespace rots {
       return Id; // not implemented yet
       }
 
-    void draw() override {
-      set<cell*> visited;
-      
-      cell* start = centerover;
-      vector<pair<cell*, transmatrix>> dq;
-      
-      visited.insert(start);
-      dq.emplace_back(start, cview());
-      
-      for(int i=0; i<isize(dq); i++) {
-        cell *c = dq[i].first;
-        transmatrix V = dq[i].second;
-        
-        if(sl2) {
-          if(V[3][3] < 0) V = centralsym * V;
-          if(!do_draw(c, V)) continue;
-          drawcell(c, V);
-          }
-        else {
-          drawcell(c, V);
-          }
-        if(wallopt && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-
-        for(int i=0; i<c->type; i++) {
-          cell *c1 = c->cmove(i);
-          if(visited.count(c1)) continue;
-          visited.insert(c1);
-          dq.emplace_back(c1, V * adj(c, i));
-          }
-        }
-      }
     };
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry */
