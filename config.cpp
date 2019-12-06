@@ -279,7 +279,7 @@ EX void initConfig() {
   addsaver(vid.radarsize, "radarsize size", 120);
   addsaver(vid.radarrange, "radarrange", 2.5);
   addsaver(vid.axes, "movement help", 1);
-  addsaver(vid.axes3, "movement help3", false);
+  addsaver(vid.axes3, "movement help3", true);
   addsaver(vid.shifttarget, "shift-targetting", 2);
   addsaver(vid.steamscore, "scores to Steam", 1);
   initcs(vid.cs); addsaver(vid.cs, "single");
