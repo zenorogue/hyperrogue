@@ -303,6 +303,8 @@ void display_data::set_projection(int ed) {
   id <<= 6; id |= spherephase;
   id <<= 1; if(vid.consider_shader_projection) id |= 1;
   id <<= 2; id |= (spherespecial & 3);
+  if(in_h2xe()) id |= 1;
+  if(in_s2xe()) id |= 2;
   shared_ptr<glhr::GLprogram> selected;
 
   if(matched_programs.count(id)) selected = matched_programs[id];

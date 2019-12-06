@@ -3681,10 +3681,11 @@ Other:
 - subtler default out-of-range color in raycasting
 - added fractal landscapes to more lands in SC
 - map editor: when using a larger edit range, cursors are drawn on every affected cell
-- 'circles' are now drawn on all copies in quotient geometries
+- various markers are now drawn on all copies in quotient geometries
 - fixed cell selection in some geometries
 - the cells in front of you is now shown by default in 3D geometries (in non-shmup)
 - product geometries are now drawn in a more robust way
 - correctly display/rotate the PC in product geometries
 - fixed distance computation in SL2 (racing works again)
 - reduced the number of cells generated in 3D racing
+- bug fixed: incorrect renderer was used when switching from S2xE to H2xE
