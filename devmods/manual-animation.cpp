@@ -19,7 +19,7 @@ bool saving_positions;
 
 int next_pos_tick;
 
-vector<tuple<transmatrix, transmatrix, int, heptspin> > saved;
+vector<tuple<transmatrix, transmatrix, cell*> > saved;
 
 bool trailer_turn(int delta) {
   if(saving_positions)
@@ -39,7 +39,7 @@ void trailer_frame() {
 
   if(saving_positions && ticks > next_pos_tick) {
     next_pos_tick += 66;
-    saved.emplace_back(View, nisot::local_perspective, hybrid::current_view_level, viewctr);
+    saved.emplace_back(View, current_display->local_perspective, centerover);
     println(hlog, "frames = ", isize(saved));
     }
   }
@@ -50,7 +50,7 @@ ld stepang = 0.01;
 
 bool move_camera(transmatrix T) {
   for(int it=0; it<5; it++) {
-    saved.emplace_back(View, nisot::local_perspective, hybrid::current_view_level, viewctr);
+    saved.emplace_back(View, current_display->local_perspective, centerover);
     println(hlog, "frames = ", isize(saved));
     shift_view(ztangent(-stepdist));
     rotate_view(T);
@@ -99,7 +99,7 @@ void o_addmul(bignum& b0, const bignum& b, int factor) {
 
 void get_b4_distance() {
   heptagon *h1 = currentmap->gamestart()->master;
-  heptagon *h2 = viewctr.at;
+  heptagon *h2 = centerover->master;
   if(h1->distance != h2->distance)
     println(hlog, "Z difference: ", h2->distance - h1->distance);
   else {
@@ -128,7 +128,7 @@ bool trailer_handleKey(int sym, int uni) {
         saved.pop_back();
         }
       if(!saved.empty()) {
-        tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = saved.back();
+        tie(View, current_display->local_perspective, centerover) = saved.back();
         }
       return true;
       }
@@ -176,14 +176,14 @@ bool trailer_handleKey(int sym, int uni) {
     if(sym == 'b' && isize(saved) > 1) {
       saved.pop_back();
       println(hlog, "back to ", isize(saved), " frames");
-      tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = saved.back();
+      tie(View, current_display->local_perspective, centerover) = saved.back();
       return true;
       }
   
     if(sym == 'u' && isize(saved) > 40) {
       for(int i=0; i<30; i++) saved.pop_back();
       println(hlog, "back to ", isize(saved), " frames");
-      tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = saved.back();
+      tie(View, current_display->local_perspective, centerover) = saved.back();
       return true;
       }
     
@@ -191,11 +191,11 @@ bool trailer_handleKey(int sym, int uni) {
       fhstream f("devmods/manan-record.mar", "w");
       f.write<int>(isize(saved));
       for(int i=0; i<isize(saved); i++) {
-        auto& [a, b, c, d] = saved[i];
+        auto& [a, b, d] = saved[i];
         hwrite_raw(f, a);
         hwrite_raw(f, b);
-        hwrite_raw(f, c);
-        auto at = crystal::get_coord(d.at);
+        int tmp = 0; hwrite_raw(f, tmp);
+        auto at = crystal::get_coord(d->master);
         hwrite_raw(f, at);
         }
       println(hlog, "saved animation of ", isize(saved), " frames");
@@ -207,15 +207,13 @@ bool trailer_handleKey(int sym, int uni) {
       f.read<int>(siz);
       saved.resize(siz);
       for(int i=0; i<isize(saved); i++) {
-        auto& [a, b, c, d] = saved[i];
+        auto& [a, b, d] = saved[i];
         hread_raw(f, a);
         hread_raw(f, b);
-        hread_raw(f, c);
+        int tmp = 0; hread_raw(f, tmp);
         crystal::coord co;
         hread_raw(f, co);
-        d.at = crystal::get_heptagon_at(co);
-        d.spin = 0;
-        d.mirrored = false;
+        d = crystal::get_heptagon_at(co)->c7;
         }
       println(hlog, "loaded animation of ", isize(saved), " frames");
       }
@@ -253,7 +251,7 @@ bool trailer_handleKey(int sym, int uni) {
         
       for(auto& p: saved) {
         // sightranges[geometry] = 4 + i * 2. / isize(saved);
-        tie(View, nisot::local_perspective, hybrid::current_view_level, viewctr) = p;
+        tie(View, current_display->local_perspective, centerover) = p;
         ticks = i * 1000 / 30;
         // if(i % 10 != 0) {i++; continue; }
 
