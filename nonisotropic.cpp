@@ -1262,7 +1262,11 @@ EX namespace hybrid {
     }
 
   EX int celldistance(cell *c1, cell *c2) {
-    if(cgi.steps == 0) {
+    if(sl2) {
+      auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
+      return PIU (hr::celldistance(w1.first, w2.first));
+      }
+    else if(cgi.steps == 0) {
       auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
       return PIU (hr::celldistance(w1.first, w2.first)) + abs(w1.second - w2.second);
       }
