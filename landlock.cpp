@@ -683,7 +683,7 @@ namespace lv {
 
 EX int old_daily_id = 1000000;
 
-const int landscapes_when = 1000;
+const int landscapes_when = 177;
 
 // check if the given land should appear in lists
 EX land_validity_t& land_validity(eLand l) {
