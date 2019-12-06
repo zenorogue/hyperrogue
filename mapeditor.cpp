@@ -732,12 +732,22 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*3, XLAT("SPACE = map/graphics"), ' ', 0);
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
+  
+  EX unordered_set<cell*> affected;
+  EX unordered_set<int> affected_id;
 
   EX void showMapEditor() {
     cmode = sm::MAP;
     gamescreen(0);
   
     int fs = editor_fsize();
+    
+    affected.clear();
+    affected_id.clear();
+    if(lmouseover) {
+      celllister cl(lmouseover, radius, 10000, nullptr);
+      for(cell *c: cl.lst) affected.insert(c), affected_id.insert(patterns::getpatterninfo0(c).id);
+      }
     
     getcstat = '-';
 
@@ -1154,11 +1164,16 @@ namespace mapeditor {
   #endif
 
   EX void drawGhosts(cell *c, const transmatrix& V, int ct) {
-    if((cmode & sm::MAP) && lmouseover && darken == 0 &&
-      (GDIM == 3 || !mouseout()) && 
-      (patterns::whichPattern ? patterns::getpatterninfo0(c).id == patterns::getpatterninfo0(lmouseover).id : c == lmouseover)) {
-      queuecircleat(c, .78, 0x00FFFFFF);
+    if(!(cmode & sm::MAP)) return;
+    if(darken != 0) return;
+    if(GDIM == 2 && mouseout()) return;
+    if(patterns::whichPattern) {
+      if(!affected_id.count(patterns::getpatterninfo0(c).id)) return;
       }
+    else {
+      if(!affected.count(c)) return;
+      }
+    queuecircleat1(c, V, .78, 0x00FFFFFF);
     }
 
   hyperpoint ccenter = C0;
