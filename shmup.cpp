@@ -2938,7 +2938,15 @@ bool celldrawer::draw_shmup_monster() {
         
         if(!ths || !h) {
           drawPlayerEffects(view, c, true);
-          if(WDIM == 3) view = view * spin(-M_PI/2) * cspin(0, 2, -M_PI/2);
+          if(WDIM == 3) {
+            if(prod) {
+              hyperpoint h = m->ori * C0;
+              view = view * spin(-atan2(h[1], h[0]));
+              }
+            else {
+              view = view * spin(-M_PI/2) * cspin(0, 2, -M_PI/2);
+              }
+            }
           if(m->inBoat) m->footphase = 0;
           if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase, 0xFFFFFFC0);
           }
