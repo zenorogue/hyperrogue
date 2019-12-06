@@ -1546,7 +1546,7 @@ void celldrawer::draw_features_and_walls_3d() {
             }
           }
         else if(prod) {
-          if(a < c->type-2) {
+          if(a < c->type-2 && !in_s2xe()) {
             ld d = in_e2xe() ? sqhypot_d(2, tC0(V)) : V[2][2];
             hyperpoint h = (V * cgi.walltester[ofs + a]);
             ld d1 = in_e2xe() ? sqhypot_d(2, h) : h[2];
