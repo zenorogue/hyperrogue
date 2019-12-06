@@ -4293,21 +4293,9 @@ EX void precise_mouseover() {
     ld best = HUGE_VAL;
     hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)), 100);
 
-    if(hybri) {
-      while(true) {
-        ld d1 = geo_dist(C0, tC0(ggmatrix(mouseover2)), iTable);
-        cell *nxt = NULL;
-        forCellEx(c1, mouseover2) {
-          ld d2 = geo_dist(C0, tC0(ggmatrix(c1)), iTable);
-          if(d2 < d1) d1 = d2, nxt = c1;
-          }
-        if(!nxt) break;
-        mouseover2 = nxt;
-        }
-      }
-
-    forCellEx(c1, mouseover2) {
-      hyperpoint h1 = tC0(ggmatrix(c1));
+    transmatrix cov = ggmatrix(mouseover2);
+    forCellIdEx(c1, i, mouseover2) {
+      hyperpoint h1 = tC0(cov * currentmap->adj(mouseover2, i));
       ld dist = geo_dist(h1, h, iTable) - geo_dist(C0, h1, iTable);
       if(dist < best) mouseover = c1, best = dist;
       }
