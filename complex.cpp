@@ -3239,13 +3239,23 @@ namespace prairie {
 
 EX namespace ca {
   EX ld prob = .2;
-  string carule[8][2];
+  static const int MAX_NEIGHBOR = 60; /* may be larger than MAX_EDGE due to mineadj */
+  string carule[MAX_NEIGHBOR][2];
+  
+  EX eWall wlive = waFloorA;
+  
+  // you can also do -mineadj
+  
+  EX string fillup(string s) {
+    while(isize(s) < MAX_NEIGHBOR) s += '0';
+    return s;
+    }
   
   EX void init() {
     // hexagonal variant of Game of Life, as suggested by Wikipedia
-    for(int i=0; i<8; i++) 
-      carule[i][0] = "00100000",
-      carule[i][1] = "00011000";
+    for(int i=0; i<MAX_NEIGHBOR; i++) 
+      carule[i][0] = fillup("00100"),
+      carule[i][1] = fillup("00011");
     }
 
 #if CAP_COMMANDLINE
@@ -3255,22 +3265,25 @@ EX namespace ca {
       shift(); prob = argf();
       return 0;
       }
+    if(argis("-calive")) {
+      shift(); wlive = eWall(argi());
+      return 0;
+      }
     if(args()[0] != '-') return 1;
     if(args()[1] != 'c') return 1;
     int livedead = args()[2] - '0';
     if(livedead < 0 || livedead > 1) return 1;
     int nei = -1;
     if(args()[3]) {
-      nei = args()[3] - '0';
-      if(nei < 0 || nei > 7) return 1;
-      if(args()[4]) return 1;
+      nei = atoi(argcs()+3);
+      if(nei < 0 || nei >= MAX_NEIGHBOR) return 1;
       }
     shift();
-    string s = args(); s += "00000000";
-    if(nei == -1) for(int i=0; i<8; i++)
-      carule[i][livedead] = s;
+    string s = args();
+    if(nei == -1) for(int i=0; i<MAX_NEIGHBOR; i++)
+      carule[i][livedead] = fillup(s);
     else 
-      carule[nei][livedead] = s;
+      carule[nei][livedead] = fillup(s);
     return 0;
     }
   
@@ -3282,20 +3295,23 @@ EX namespace ca {
     vector<cell*>& allcells = currentmap->allcells();
     int dcs = isize(allcells);
     std::vector<bool> willlive(dcs);
+    int old = 0, xold = 0;
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
       if(c->land != laCA) return;
       int nei = 0, live = 0;
-      forCellEx(c2, c) if(c2->land == laCA) {
-        nei++; if(c2->wall == waFloorA) live++;
+      for(cell *c2: adj_minefield_cells(c)) {
+        nei++; if(c2->wall == wlive) live++;
         }
-      int welive = 0; if(c->wall == waFloorA) welive++;
+      int welive = 0; if(c->wall == wlive) welive++;
       willlive[i] = carule[nei][welive][live] == '1';
+      old += welive, xold += live;
       }
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
-      c->wall = willlive[i] ? waFloorA : waNone;
+      c->wall = willlive[i] ? wlive : waNone;
       }
+    println(hlog, tie(dcs, old, xold));
     }
 EX }
 

@@ -981,7 +981,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laCA:
       if(fargen)
-        c->wall = (hrand(1000000) < ca::prob * 1000000) ? waFloorA : waNone;
+        c->wall = (hrand(1000000) < ca::prob * 1000000) ? ca::wlive : waNone;
       break;
     
     case laLivefjord:

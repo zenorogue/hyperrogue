@@ -750,7 +750,7 @@ EX void showEuclideanMenu() {
       });
     }
 
-  if(specialland == laMinefield && geometry_has_alt_mine_rule()) {
+  if(among(specialland, laMinefield, laCA) && geometry_has_alt_mine_rule()) {
     dialog::addSelItem(XLAT("mine adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : WDIM == 3 ? "face" : "edge"), 'M');
     dialog::add_action([] {
       stop_game();

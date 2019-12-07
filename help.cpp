@@ -706,8 +706,10 @@ EX string generateHelpForLand(eLand l) {
     s += "\n\n" + XLAT(lv.msg);
   
 #if !ISMOBILE
-  if(l == laCA)
+  if(l == laCA) {
+    s += XLAT("\n\nOption -mineadj 1 can be added for Moore neighborhoods.");
     s += XLAT("\n\nHint: use 'm' to toggle cells quickly");
+    }  
 #endif
 
   return s;
