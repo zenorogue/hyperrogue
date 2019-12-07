@@ -628,6 +628,8 @@ EX void initConfig() {
   addsaver(nilv::nilperiod[0], "nilperiod_x");
   addsaver(nilv::nilperiod[1], "nilperiod_y");
   addsaver(nilv::nilperiod[2], "nilperiod_z");
+  
+  addsaver(neon_mode, "neon_mode");
 
   callhooks(hooks_configfile);
 
@@ -1094,6 +1096,15 @@ EX void showGraphConfig() {
       dialog::extra_options = [] () {
         dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
         dialog::add_action([] () { vid.antialias ^= AA_LINEWIDTH; });
+        
+        dialog::addBoolItem("standard graphics", neon_mode == 0, 'A');
+        dialog::add_action([] { neon_mode = 0; });
+        dialog::addBoolItem("neon mode", neon_mode == 1, 'B');
+        dialog::add_action([] { neon_mode = 1; });
+        dialog::addBoolItem("no boundary mode", neon_mode == 2, 'C');
+        dialog::add_action([] { neon_mode = 2; });
+        dialog::addBoolItem("neon mode II", neon_mode == 3, 'D');
+        dialog::add_action([] { neon_mode = 3; });
         };
       }
     

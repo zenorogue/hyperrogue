@@ -2016,6 +2016,8 @@ template<class T, class... U> T& queuea(PPR prio, U... u) {
 #endif
 
 #if CAP_SHAPES
+EX int neon_mode = 0;
+
 EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
   if(prio == PPR::DEFAULT) prio = h.prio;
 
@@ -2040,8 +2042,27 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
     part(col,1) = b; */
     part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
     }
-  ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
-  ptd.outline = poly_outline;
+  if(neon_mode == 0 || (h.flags & POLY_TRIANGLES)) {
+    ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
+    ptd.outline = poly_outline;
+    }
+  else switch(neon_mode) {
+    case 1:
+      ptd.color = (poly_outline & 0xFFFFFF00) | (col & 0xFF);
+      ptd.outline = (darkened(col >> 8) << 8) | (col & 0xFF);
+      if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
+      break;
+    case 2:
+      ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
+      ptd.outline = 0;
+      break;
+    case 3:
+      ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF) + ((col & 0xFF) >> 2);
+      ptd.outline = (darkened(col >> 8) << 8) + (col & 0xFF);
+      if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
+      if(poly_outline != 0xFF) ptd.outline = poly_outline;
+      break;
+    }
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
   ptd.tinf = h.tinf;
