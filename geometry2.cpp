@@ -314,6 +314,7 @@ EX bool no_easy_spin() {
   }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
+  if(WDIM == 3) return SPIN_NOT_AVAILABLE;
   ld hexshift = 0;
   if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
   else if(cgi.hexshift && c == c->master->c7) hexshift = cgi.hexshift;
