@@ -74,20 +74,6 @@ EX namespace euc {
   EX coord basic_canonicalize(coord x);
   
   #if HDR
-  struct canonical_t {
-    unordered_map<coord, int> hash;
-    vector<coord> seq;
-    int index;
-    
-    canonical_t() { index = 0; }
-    
-    void reset() { index = 0; }
-
-    void add(coord val);
-    
-    coord get(coord x);
-    };  
-
   struct torus_config {
     /** periods entered by the user */
     intmatrix user_axes;
@@ -113,8 +99,21 @@ EX namespace euc {
     int infinite_dims;
     /** ? */  
     intmatrix inverse_axes;
-    /** struct for canonicalization */
-    canonical_t canonical;
+    /** for canonicalization on tori */
+    unordered_map<coord, int> hash;
+    vector<coord> seq;
+    int index;
+
+    void reset() { index = 0; hash.clear(); seq.clear(); }
+    
+    /** add to the tori canonicalization list */
+    void add(coord val);
+    
+    /** get the representative on the tori canonicalization list */
+    coord get(coord x);
+
+    /** find the equivalence class of coo */
+    coord compute_cat(coord coo);
 
     /** canonicalize coord x; in case of twisting, adjust d, M, and mirr accordingly */
     void canonicalize(coord& x, coord& d, transmatrix& M, bool& mirr);
@@ -150,7 +149,12 @@ EX namespace euc {
       for(int i=0; i<S7; i++) 
         tmatrix[i] = eumove(shifttable[i]);
       camelot_center = NULL;
-      build_torus3(geometry);
+      build_torus3(geometry);    
+      if(!valid_irr_torus()) { 
+        addMessage(XLAT("Error: period mismatch"));
+        eu_input = irr::base_config; 
+        build_torus3(geometry); 
+        }
       }
 
     heptagon *getOrigin() override {
@@ -164,8 +168,18 @@ EX namespace euc {
         auto h = tailored_alloc<heptagon> (S7);
         if(!IRREGULAR) 
           h->c7 = newCell(S7, h);
-        else 
-          irr::link_to_base(h, ((hrmap_euclidean*)irr::base)->get_at(at));
+        else {
+          coord m0 = shifttable[0];
+          transmatrix dummy;
+          bool mirr;
+          auto ati = at;
+          irr::base_config.canonicalize(ati, m0, dummy, mirr);
+          indenter id(2);
+          for(int spin=0; spin<S7; spin++) if(shifttable[spin] == m0) {
+            irr::link_to_base(h, heptspin(((hrmap_euclidean*)irr::base)->get_at(ati), spin, mirr));
+            break;
+            }
+          }
         h->distance = 0;
         h->cdata = NULL;
         h->alt = NULL;
@@ -436,12 +450,12 @@ EX namespace euc {
     return {euzeroall, 0};
     }  
   
-  EX coord compute_cat(coord coo) {
+  coord torus_config_full::compute_cat(coord coo) {
     coord cat = euzero;
-    auto& T2 = eu.inverse_axes;
+    auto& T2 = inverse_axes;
     for(int i=0; i<3; i++) {
       int val = T2[0][i] * coo[0] + T2[1][i] * coo[1] + T2[2][i] * coo[2];
-      if(i < WDIM - eu.infinite_dims) val = gmod(val, eu.det);
+      if(i < WDIM - infinite_dims) val = gmod(val, det);
       cat += val * main_axes[i];
       }
     return cat;
@@ -478,11 +492,11 @@ EX namespace euc {
     return {T0, 5};
     }
 
-  void canonical_t::add(coord val) {
+  void torus_config_full::add(coord val) {
     auto cat = compute_cat(val); if(hash.count(cat)) return; hash[cat] = isize(seq); seq.push_back(val);
     }
 
-  coord canonical_t::get(coord x) {
+  coord torus_config_full::get(coord x) {
     auto cat = compute_cat(x);
     auto& st = cubemap()->shifttable;
     while(!hash.count(cat)) {
@@ -493,15 +507,29 @@ EX namespace euc {
     return seq[hash[cat]];
     }
   
+  EX bool valid_irr_torus() {
+    if(!IRREGULAR) return true;
+    for(int i=0; i<2; i++) {
+      auto x = eu.user_axes[i];
+      coord dm = eutester;
+      transmatrix dummy = Id;
+      bool mirr = false;
+      irr::base_config.canonicalize(x, dm, dummy, mirr);
+      auto x0 = eu.user_axes[i];
+      auto dm0 = eutester;
+      eu.canonicalize(x0, dm0, dummy, mirr);
+      if(x0 != euzero || dm0 != eutester) return false;
+      }
+    return true;
+    }
+  
   EX void build_torus3(eGeometry g) {
   
     int dim = ginf[g].g.gameplay_dimension;
     
-    // if(IRREGULAR) T0 = irr::base_periods, twisted0 = irr::base_twisted;
-    
     eu.user_axes = eu_input.user_axes;
     if(dim == 2) eu.user_axes[2] = euzero;
-  
+
     eu.optimal_axes = eu.user_axes;
     
     again:
@@ -544,8 +572,8 @@ EX namespace euc {
     if(eu.det < 0) eu.det = -eu.det;
     
     eu.inverse_axes = scaled_inverse(eu.regular_axes);
-    eu.canonical.reset();
-    eu.canonical.add(euzero);
+    eu.reset();
+    eu.add(euzero);
     
     eu.twisted = eu_input.twisted;
     if(dim == 3) {
@@ -605,18 +633,18 @@ EX namespace euc {
   
   void torus_config_full::canonicalize(coord& x, coord& d, transmatrix& M, bool& mirr) {
     if(!twisted) {
-      if(eu.infinite_dims == WDIM) return;
-      if(eu.infinite_dims == WDIM-1) {
-        auto& o = eu.optimal_axes;
+      if(infinite_dims == WDIM) return;
+      if(infinite_dims == WDIM-1) {
+        auto& o = optimal_axes;
         while(celldistance(x + o[0]) <= celldistance(x)) x += o[0];
         while(celldistance(x - o[0]) <  celldistance(x)) x -= o[0];
         return;
         }
-      x = eu.canonical.get(x);
+      x = get(x);
       return;
       }
-    auto& T0 = eu.user_axes;
-    if(eu.twisted & 16) {
+    auto& T0 = user_axes;
+    if(twisted & 16) {
       int period = T0[2][2];
       transmatrix RotYZX = Zero;
       RotYZX[1][0] = 1;
@@ -652,15 +680,15 @@ EX namespace euc {
       auto& coo = x;
       while(coo[2] >= T0[2][2]) {
         coo[2] -= T0[2][2];
-        if(eu.twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
-        if(eu.twisted & 2) coo[1] *= -1, d[1] *= -1, M = M * MirrorY;
-        if(eu.twisted & 4) swap(coo[0], coo[1]), swap01(M), swap(d[0], d[1]);
+        if(twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
+        if(twisted & 2) coo[1] *= -1, d[1] *= -1, M = M * MirrorY;
+        if(twisted & 4) swap(coo[0], coo[1]), swap01(M), swap(d[0], d[1]);
         }
       while(coo[2] < 0) {
         coo[2] += T0[2][2];
-        if(eu.twisted & 4) swap(coo[0], coo[1]), swap(d[0], d[1]), swap01(M);
-        if(eu.twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
-        if(eu.twisted & 2) coo[1] *= -1, d[1] *= -1, M = M * MirrorY;
+        if(twisted & 4) swap(coo[0], coo[1]), swap(d[0], d[1]), swap01(M);
+        if(twisted & 1) coo[0] *= -1, d[0] *= -1, M = M * MirrorX;
+        if(twisted & 2) coo[1] *= -1, d[1] *= -1, M = M * MirrorY;
         }
       for(int i: {0,1})
         if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
@@ -668,14 +696,14 @@ EX namespace euc {
       }
     else {
       gp::loc coo = to_loc(x);
-      gp::loc ort = ort1() * eu.twisted_vec;
-      int dsc = dscalar(eu.twisted_vec, eu.twisted_vec);
+      gp::loc ort = ort1() * twisted_vec;
+      int dsc = dscalar(twisted_vec, twisted_vec);
       gp::loc d0 (d[0], d[1]);
-      hyperpoint h = eumove(to_coord(eu.twisted_vec)) * C0;
+      hyperpoint h = eumove(to_coord(twisted_vec)) * C0;
       while(true) {
-        int dsx = dscalar(coo, eu.twisted_vec);
-        if(dsx >= dsc) coo = coo - eu.twisted_vec;
-        else if (dsx < 0) coo = coo + eu.twisted_vec;
+        int dsx = dscalar(coo, twisted_vec);
+        if(dsx >= dsc) coo = coo - twisted_vec;
+        else if (dsx < 0) coo = coo + twisted_vec;
         else break;
         M = M * spintox(h) * MirrorY * rspintox(h);
         auto s = ort * dscalar(d0, ort) * 2;
@@ -689,12 +717,12 @@ EX namespace euc {
         coo = coo - s;
         mirr = !mirr;
         }
-      if(eu.ortho_vec != gp::loc{0,0}) {
-        int osc = dscalar(eu.ortho_vec, eu.ortho_vec);
+      if(ortho_vec != gp::loc{0,0}) {
+        int osc = dscalar(ortho_vec, ortho_vec);
         while(true) {
-          int dsx = dscalar(coo, eu.ortho_vec);
-          if(dsx >= osc) coo = coo - eu.ortho_vec;
-          else if(dsx < 0) coo = coo + eu.ortho_vec;
+          int dsx = dscalar(coo, ortho_vec);
+          if(dsx >= osc) coo = coo - ortho_vec;
+          else if(dsx < 0) coo = coo + ortho_vec;
           else break;
           }
         }
@@ -864,9 +892,6 @@ EX namespace euc {
       if(S3 == 3) torus_config_option(XLAT("seven-colorable torus"), 'F', regular_torus(gp::loc{1,2}));
       if(S3 == 3) torus_config_option(XLAT("HyperRogue classic torus"), 'G', single_row_torus(381, -22));
       torus_config_option(XLAT("no quotient"), 'H', rectangular_torus(0, 0, false));
-      
-      if(IRREGULAR)
-        dialog::addInfo("period cannot be changed in irregular");
       }
       
     dialog::addBreak(50);
