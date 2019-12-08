@@ -835,7 +835,7 @@ EX namespace euc {
           dialog::addBoolItem(XLAT("third turn space"), twisted_edit & 16, 'x');
         else
           dialog::addBoolItem(XLAT("make it even"), twisted_edit & 16, 'x');
-        dialog::add_action([] { twisted_edit ^= 16; });
+        dialog::add_action([] { eu_edit.twisted ^= 16; });
         }
       
       if(nondiag) {
@@ -854,19 +854,19 @@ EX namespace euc {
           dialog::addBoolItem(XLAT("flip X coordinate"), twisted_edit & 1, 'x');
         else
           dialog::addBoolItem(XLAT("flipping X impossible"), twisted_edit & 1, 'x');
-        dialog::add_action([] { twisted_edit ^= 1; });
+        dialog::add_action([] { eu_edit.twisted ^= 1; });
   
         if(g == gCubeTiling || (T_edit[1][1]+T_edit[2][2]) % 2 == 0)
           dialog::addBoolItem(XLAT("flip Y coordinate"), twisted_edit & 2, 'y');
         else
           dialog::addBoolItem(XLAT("flipping Y impossible"), twisted_edit & 2, 'y');
-        dialog::add_action([] { twisted_edit ^= 2; });
+        dialog::add_action([] { eu_edit.twisted ^= 2; });
   
         if(T_edit[0][0] == T_edit[1][1])
           dialog::addBoolItem(XLAT("swap X and Y"), twisted_edit & 4, 'z');
         else
           dialog::addBoolItem(XLAT("swapping impossible"), twisted_edit & 4, 'z');
-        dialog::add_action([] { twisted_edit ^= 4; });
+        dialog::add_action([] { eu_edit.twisted ^= 4; });
         }
       dialog::addBreak(50);
       torus_config_option(XLAT("third-turn space"), 'A', make_third_turn(2,0,2));
@@ -881,7 +881,7 @@ EX namespace euc {
         dialog::addInfo(XLAT("periods must be orthogonal for mirroring"));
       else {
         dialog::addBoolItem(XLAT("mirror flip in the second period"), twisted_edit & 8, 'x');
-        dialog::add_action([] { twisted_edit ^= 8; });
+        dialog::add_action([] { eu_edit.twisted ^= 8; });
         }
       
       dialog::addBreak(50);
