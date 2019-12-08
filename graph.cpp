@@ -4118,67 +4118,11 @@ void drawFlashes() {
   for(int k=0; k<isize(flashes); k++) {
     bool kill = true;
     flashdata& f = flashes[k];
-    ADC(V, f.where) {
-      
-      int tim = ticks - f.t;
-      
-      if(tim <= f.size && !f.spd) kill = false;
-      
-      if(f.spd) {
-        #if CAP_SHAPES
-        if(tim <= 300) kill = false;
-        int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
-        poly_outline = OUTLINE_DEFAULT;
-        ld t = f.spd * tim * cgi.scalefactor / 50000.;
-        transmatrix T =
-          GDIM == 2 ? V * spin(f.angle) * xpush(t) :
-          V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
-        queuepoly(T, cgi.shParticle[f.size], partcol);
-        #endif
-        }
-      
-      else if(f.size == 1000) {
-        for(int u=0; u<=tim; u++) {
-          if((u-tim)%50) continue;
-          if(u < tim-150) continue;
-          ld rad = u * 3 / 1000.;
-          rad = rad * (5-rad) / 2;
-          rad *= cgi.hexf;
-          int flashcol = f.color;
-          if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
-          flashcol = darkena(flashcol, 0, 0xFF);
-  #if MAXMDIM >= 4
-          if(GDIM == 3)
-            queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
-          else 
-  #endif
-          {
-            PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
-            queuecurve(flashcol, 0x8080808, PPR::LINE);
-            }
-          }
-        }
-      else if(f.size == 2000) {
-        for(int u=0; u<=tim; u++) {
-          if((u-tim)%50) continue;
-          if(u < tim-250) continue;
-          ld rad = u * 3 / 2000.;
-          rad = rad * (5-rad) * 1.25;
-          rad *= cgi.hexf;
-          int flashcol = f.color;
-          if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
-          flashcol = darkena(flashcol, 0, 0xFF);
-  #if MAXMDIM >= 4
-          if(GDIM == 3)
-            queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
-          else 
-  #endif
-          {
-            PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
-            queuecurve(flashcol, 0x8080808, PPR::LINE);
-            }
-          }
-        }
+    bool copies = false;
+    ADC(V, f.where) copies = true, draw_flash(f, V, kill);
+    forCellIdEx(c2, id, f.where) if(!copies) ADC(V, c2) {
+      draw_flash(f, V * currentmap->iadj(f.where, id), kill);
+      copies = true;
       }
     if(kill) {
       f = flashes[isize(flashes)-1];
@@ -4187,6 +4131,70 @@ void drawFlashes() {
     }
   #endif
   }
+
+#if CAP_QUEUE
+EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {
+  int tim = ticks - f.t;
+  
+  if(tim <= f.size && !f.spd) kill = false;
+  
+  if(f.spd) {
+    #if CAP_SHAPES
+    if(tim <= 300) kill = false;
+    int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
+    poly_outline = OUTLINE_DEFAULT;
+    ld t = f.spd * tim * cgi.scalefactor / 50000.;
+    transmatrix T =
+      GDIM == 2 ? V * spin(f.angle) * xpush(t) :
+      V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
+    queuepoly(T, cgi.shParticle[f.size], partcol);
+    #endif
+    }
+  
+  else if(f.size == 1000) {
+    for(int u=0; u<=tim; u++) {
+      if((u-tim)%50) continue;
+      if(u < tim-150) continue;
+      ld rad = u * 3 / 1000.;
+      rad = rad * (5-rad) / 2;
+      rad *= cgi.hexf;
+      int flashcol = f.color;
+      if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
+      flashcol = darkena(flashcol, 0, 0xFF);
+#if MAXMDIM >= 4
+      if(GDIM == 3)
+        queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
+      else 
+#endif
+      {
+        PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
+        queuecurve(flashcol, 0x8080808, PPR::LINE);
+        }
+      }
+    }
+  else if(f.size == 2000) {
+    for(int u=0; u<=tim; u++) {
+      if((u-tim)%50) continue;
+      if(u < tim-250) continue;
+      ld rad = u * 3 / 2000.;
+      rad = rad * (5-rad) * 1.25;
+      rad *= cgi.hexf;
+      int flashcol = f.color;
+      if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
+      flashcol = darkena(flashcol, 0, 0xFF);
+#if MAXMDIM >= 4
+      if(GDIM == 3)
+        queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
+      else 
+#endif
+      {
+        PRING(a) curvepoint(V*xspinpush0(a * M_PI / cgi.S42, rad));
+        queuecurve(flashcol, 0x8080808, PPR::LINE);
+        }
+      }
+    }
+  }
+#endif
 
 EX bool allowIncreasedSight() {
   if(cheater || autocheat) return true;
