@@ -2443,12 +2443,12 @@ EX namespace linepatterns {
       case patZebraTriangles:
         if(euclid6) {
           if(c != c->master->c7 || patterns::sevenval(c)) break;
-          gridline(V, C0, tC0(eumove(to_coord({-1, +3}))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(eumove(to_coord({-3, +2}))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(eumove(to_coord({-2, -1}))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(eumove(to_coord({+1, -3}))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(eumove(to_coord({+3, -2}))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(eumove(to_coord({+2, +1}))), col, 3 + vid.linequality);
+          gridline(V, C0, tC0(euc::eumove(gp::loc(-1, +3))), col, 3 + vid.linequality);
+          gridline(V, C0, tC0(euc::eumove(gp::loc(-3, +2))), col, 3 + vid.linequality);
+          gridline(V, C0, tC0(euc::eumove(gp::loc(-2, -1))), col, 3 + vid.linequality);
+          gridline(V, C0, tC0(euc::eumove(gp::loc(+1, -3))), col, 3 + vid.linequality);
+          gridline(V, C0, tC0(euc::eumove(gp::loc(+3, -2))), col, 3 + vid.linequality);
+          gridline(V, C0, tC0(euc::eumove(gp::loc(+2, +1))), col, 3 + vid.linequality);
           break;
           }
         if(zebra40(c) / 4 == 10) {

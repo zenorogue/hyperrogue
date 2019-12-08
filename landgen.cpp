@@ -1286,10 +1286,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen) {
       
         if(euclid && smallbounded && WDIM == 2) {
-          auto s = sdxy();
+          auto s = euc::sdxy();
           gp::loc st {s.first/3, s.second/3};
-          if(c == at_euc2_coordinates(st)) c->wall = waCharged;
-          if(c == at_euc2_coordinates(s-st)) c->wall = waGrounded;
+          if(c == euc::at(st)) c->wall = waCharged;
+          if(c == euc::at(s-st)) c->wall = waGrounded;
           }
         else if(euclid && WDIM == 2) {
           auto co = euc2_coordinates(c);

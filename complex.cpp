@@ -479,9 +479,6 @@ EX namespace elec {
 EX namespace princess {
 
 #if HDR
-#define EPX 39
-#define EPY 21
-
 #define OUT_OF_PRISON 200
 #define OUT_OF_PALACE 250
 #define PRADIUS0 (141)
@@ -498,6 +495,8 @@ struct info {
   };
     
 #endif
+
+  EX gp::loc coords() { return gp::loc(39, 21); }
 
   EX bool generating = false;
   EX bool challenge = false;

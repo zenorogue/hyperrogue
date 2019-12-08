@@ -796,7 +796,7 @@ cdata *getHeptagonCdata(heptagon *h) {
 cdata *getEuclidCdata(gp::loc h) {
 
   int x = h.first, y = h.second;
-  auto& data = archimedean ? arcm::get_cdata() : get_cdata();
+  auto& data = archimedean ? arcm::get_cdata() : euc::get_cdata();
     
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(data.count(h)) return &(data[h]);
@@ -1013,7 +1013,7 @@ EX int celldistance(cell *c1, cell *c2) {
   #endif
   
   if(euclid && WDIM == 2 && !penrose && !archimedean) {
-    return cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
+    return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
   if(archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {

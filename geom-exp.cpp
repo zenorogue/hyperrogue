@@ -585,7 +585,7 @@ EX void showEuclideanMenu() {
     }
   
   if(euclid && bounded) {
-    worldsize = euclid3::det;
+    worldsize = euclid3::eu.det;
     if(BITRUNCATED) worldsize *= (a4 ? 2 : 3);
     if(GOLDBERG) worldsize *= cgi.gpdata->area;
     if(IRREGULAR) worldsize *= isize(irr::cells) / isize(irr::cells_of_heptagon);

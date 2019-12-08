@@ -69,7 +69,7 @@ EX namespace gp {
     }
   
   EX int length(loc p) {
-    return eudist(p.first, p.second);
+    return euc::dist(p.first, p.second);
     }
   
 #if CAP_GP

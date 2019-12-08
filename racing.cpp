@@ -1095,7 +1095,7 @@ void race_projection() {
       add_thurston_race(XLAT("stretched Solv"), [] { set_geometry(gSolN); solnihv::solrange_xy = 10; solnihv::solrange_z = 3; vid.texture_step = 4; });
       add_thurston_race(XLAT("periodic Solv"), [] { stop_game(); solnihv::solrange_xy = 5; solnihv::solrange_z = 2; asonov::period_xy = 8; asonov::period_z = 0; asonov::set_flags(); set_geometry(gArnoldCat); });
       add_thurston_race(XLAT("hyperbolic crystal"), [] { set_geometry(gCrystal344); vid.texture_step = 4; });
-      add_thurston_race(XLAT("torus x E"), [] { stop_game(); euclid3::set_torus3(4, 4, 0); set_geometry(gCubeTiling); });
+      add_thurston_race(XLAT("torus x E"), [] { stop_game(); euc::eu_input = euc::torus3(4, 4, 0); set_geometry(gCubeTiling); });
       add_thurston_race(XLAT("hyperbolic regular"), [] { set_geometry(gSpace534); });
       add_thurston_race(XLAT("S2xE regular"), [] { set_geometry(gSphere); set_variation(eVariation::pure); set_geometry(gProduct); });
       add_thurston_race(XLAT("H2xE regular"), [] { set_geometry(gNormal); set_variation(eVariation::pure); set_geometry(gProduct); });

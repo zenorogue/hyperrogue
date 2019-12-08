@@ -192,7 +192,7 @@ EX namespace models {
     if(euclid) {
       euclidean_spin = pispin * inverse(cview() * master_relative(centerover, true));
       euclidean_spin = gpushxto0(euclidean_spin * C0) * euclidean_spin;
-      hyperpoint h = inverse(euclidean_spin) * (C0 + (eumove(to_coord(gp::loc{1,0}))*C0 - C0) * spiral_x + (eumove(to_coord(gp::loc{0,1}))*C0 - C0) * spiral_y);
+      hyperpoint h = inverse(euclidean_spin) * (C0 + (euc::eumove(gp::loc{1,0})*C0 - C0) * spiral_x + (euc::eumove(gp::loc{0,1})*C0 - C0) * spiral_y);
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     
@@ -267,13 +267,13 @@ EX namespace models {
     for(int y=0; y<=200; y++)
     for(int x=-200; x<=200; x++) {
       if(y == 0 && x <= 0) continue;
-      auto zero = euclid3::canonicalize(to_coord(gp::loc{x, y}));
+      auto zero = euc::canonicalize(euc::to_coord(gp::loc{x, y}));
       if(zero == euclid3::euzero)
         torus_zeros.emplace_back(x, y);      
       }
     sort(torus_zeros.begin(), torus_zeros.end(), [] (const gp::loc p1, const gp::loc p2) {
-      ld d1 = hdist0(tC0(eumove(to_coord(p1))));
-      ld d2 = hdist0(tC0(eumove(to_coord(p2))));
+      ld d1 = hdist0(tC0(euc::eumove(p1)));
+      ld d2 = hdist0(tC0(euc::eumove(p2)));
       if(d1 < d2 - 1e-6) return true;
       if(d1 > d2 + 1e-6) return false;
       return p1 < p2;

@@ -1126,10 +1126,10 @@ EX land_validity_t& land_validity(eLand l) {
   if(sol && l == laCamelot)
     return not_implemented;
 
-  if(euclid && quotient && !bounded && l == laCrossroads && sdxy().second == -2 * sdxy().first)
+  if(euclid && quotient && !bounded && l == laCrossroads && euc::sdxy().second == -2 * euc::sdxy().first)
     return full_game;
   
-  if(euclid && quotient && !bounded && l == laCrossroads4 && sdxy().second == 0)
+  if(euclid && quotient && !bounded && l == laCrossroads4 && euc::sdxy().second == 0)
     return full_game;
   
   // highlight Zebra-based lands on Zebra Quotient!

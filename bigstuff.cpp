@@ -59,6 +59,8 @@ EX int celldistAltRelative(cell *c) {
   return celldistAlt(c) - roundTableRadius(c);
   }
 
+EX gp::loc camelot_coords() { return gp::loc(a4 ? 21 : 20, 10); }
+
 EX int euclidAlt(short x, short y) {
   if(among(specialland, laTemple, laClearing, laCanvas)) {
     if(euclid6)
@@ -82,20 +84,20 @@ EX int euclidAlt(short x, short y) {
       return 3 - min(abs(x), abs(y));
     }
   else if(specialland == laPrincessQuest)
-    return eudist(x-EPX, y-EPY);
-  else return eudist(x-(a4 ? 21 : 20), y-10);
+    return euc::dist(gp::loc(x,y), princess::coords());
+  else return euc::dist(gp::loc(x,y), camelot_coords());
   }
 
 EX int cylinder_alt(cell *c) {
   if(specialland == laPrincessQuest)
-    return celldistance(c, at_euc2_coordinates({EPX, EPY}));
+    return celldistance(c, euc::at(princess::coords()));
   if(specialland == laCamelot)
-    return celldistance(c, at_euc2_coordinates({21, 10}));
+    return celldistance(c, euc::at(camelot_coords()));
   
   int maxmul = 0;
   for(int d = 0; d < SG6; d++)
-    maxmul = max(maxmul, dcross(sdxy(), gp::eudir(d)));
-  return 5-abs(gdiv(dcross(sdxy(), euc2_coordinates(c)), maxmul));
+    maxmul = max(maxmul, euc::dcross(euc::sdxy(), gp::eudir(d)));
+  return 5-abs(gdiv(euc::dcross(euc::sdxy(), euc2_coordinates(c)), maxmul));
   }
 
 const int NOCOMPASS = 1000000;

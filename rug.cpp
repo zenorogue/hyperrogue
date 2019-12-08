@@ -253,7 +253,7 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->valid = false;
 
   if(euclid && quotient && !bounded) {
-    hyperpoint h1 = inverse(models::euclidean_spin) * eumove(euclid3::T0[1]) * C0;
+    hyperpoint h1 = inverse(models::euclidean_spin) * eumove(euc::eu.user_axes[1]) * C0;
     h1 /= sqhypot_d(2, h1);
     if(nonorientable) h1 /= 2;
     m->valid = good_shape = true;
@@ -432,11 +432,11 @@ EX void buildTorusRug() {
   calcparam_rug();
   models::configure();
 
-  auto p1 = to_loc(euclid3::T0[0]);
-  auto p2 = to_loc(euclid3::T0[1]);
+  auto p1 = to_loc(euc::eu.user_axes[0]);
+  auto p2 = to_loc(euc::eu.user_axes[1]);
 
-  hyperpoint xh = eumove(to_coord(p1))*C0-C0;
-  hyperpoint yh = eumove(to_coord(p2))*C0-C0;
+  hyperpoint xh = euc::eumove(p1)*C0-C0;
+  hyperpoint yh = euc::eumove(p2)*C0-C0;
   if(nonorientable) yh *= 2;
   
   bool flipped = sqhypot_d(2, xh) < sqhypot_d(2, yh);
@@ -597,7 +597,7 @@ EX void buildRug() {
       for(int j=0; j<c->type; j++) addTriangle(v, p[j], p[(j+1) % c->type]);
       
       if((euclid && quotient) && nonorientable) {
-        transmatrix T = ggmatrix(c) * eumove(euclid3::T0[1]);
+        transmatrix T = ggmatrix(c) * eumove(euc::eu.user_axes[1]);
         rugpoint *Tv = addRugpoint(T * C0, 0);
         for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(T * get_corner_position(c, j), v->dist);
         for(int j=0; j<c->type; j++) addTriangle(Tv, p[j], p[(j+1) % c->type]);

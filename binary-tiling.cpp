@@ -914,7 +914,7 @@ EX int celldistance3_hex(heptagon *c1, heptagon *c2) {
     int sx = int(floor(h[0] - h[1] / sqrt(3) + .5)) / 3;
     int sy = int(floor(h[1] * 2 / sqrt(3) + .5)) / 3;
     
-    int ysteps = xsteps + eudist(sx, sy);
+    int ysteps = xsteps + euc::dist(sx, sy);
     if(ysteps < steps) steps = ysteps;
     if(sx >= 8 || sx <= -8 || sy >= 8 || sy <= -8) break;
     }

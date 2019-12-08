@@ -1782,7 +1782,7 @@ void celldrawer::draw_cellstat() {
     }
     
   if(cmode & sm::TORUSCONFIG) {
-    auto p = coord_display(V, c);
+    auto p = euc::coord_display(V, c);
     if(p.second != "")
       queuestr(V, p.first ? .2 : .6, p.second, p.first ? 0xFFFFFFD0 : 0xFFFF0040, 1);
     }

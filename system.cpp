@@ -242,7 +242,7 @@ EX void initgame() {
   if(gamegen_failure) return;
   
   if(euclid && specialland == laPrincessQuest) {
-    cell *c = at_euc2_coordinates({EPX, EPY});
+    cell *c = euc::at(princess::coords());
     princess::generating = true;
     c->land = laPalace;
     setdist(c, 7 - getDistLimit() - genrange_bonus, NULL);

@@ -121,8 +121,7 @@ string status[5];
   
 EX hrmap *base;
 
-EX euclid3::intmatrix base_periods;
-EX int base_twisted;
+EX euc::torus_config_full base_config;
 
 bool gridmaking;
 
@@ -1031,8 +1030,7 @@ EX void visual_creator() {
   start_game();
   if(base) delete base;
   base = currentmap; 
-  base_periods = euclid3::T0;
-  base_twisted = euclid3::twisted0;
+  base_config = euc::eu;
   drawthemap();
   cellcount = int(isize(base->allcells()) * density + .5);
   pushScreen(show_gridmaker);
