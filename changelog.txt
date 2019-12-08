@@ -3689,3 +3689,11 @@ Other:
 - fixed distance computation in SL2 (racing works again)
 - reduced the number of cells generated in 3D racing
 - bug fixed: incorrect renderer was used when switching from S2xE to H2xE
+
+2019-12-08 19:41 Version 11.2o:
+- some of the flashes in the Hunting Grounds were missing -- fixed
+- fixed the bug with Land of Storms
+- irregular maps created for tori can now be used on covers (larger maps)
+- fixed facing in 3D Euclidean   
+- alternative vector graphics styles (see the 'line width' setting in graphics)
+- improved CA simulator (Moore neighborhoods, works with the new geometries with large numbers of adjacent cells)

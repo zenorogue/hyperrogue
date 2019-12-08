@@ -248,6 +248,7 @@ inline string format(const char *fmt, ...) {
 
 inline void print(hstream& hs, heptagon* h) { print(hs, "H", index_pointer(h)); }
 inline void print(hstream& hs, cell* h) { print(hs, "C", index_pointer(h)); }
+inline void print(hstream& hs, hrmap* h) { print(hs, "M", index_pointer(h)); }
 
 inline void print(hstream& hs, cellwalker cw) { 
   if(cw.at) print(hs, "[", cw.at, "/", cw.at->type, ":", cw.spin, ":", cw.mirrored, "]");
