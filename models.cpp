@@ -267,8 +267,12 @@ EX namespace models {
     for(int y=0; y<=200; y++)
     for(int x=-200; x<=200; x++) {
       if(y == 0 && x <= 0) continue;
-      auto zero = euc::canonicalize(euc::to_coord(gp::loc{x, y}));
-      if(zero == euc::euzero)
+      transmatrix dummy = Id;
+      euc::coord v(x, y, 0);
+      bool mirr = false;
+      auto t = euc::eutester;
+      euc::eu.canonicalize(v, t, dummy, mirr);
+      if(v == euc::euzero && t == euc::eutester)
         torus_zeros.emplace_back(x, y);      
       }
     sort(torus_zeros.begin(), torus_zeros.end(), [] (const gp::loc p1, const gp::loc p2) {

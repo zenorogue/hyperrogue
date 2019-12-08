@@ -28,7 +28,8 @@ EX namespace euc {
   typedef array<coord, 3> intmatrix;
   #endif
 
-  EX coord euzero = coord(0,0,0);
+  EX const coord euzero = coord(0,0,0);
+  EX const coord eutester = coord(3,7,0);
   EX intmatrix euzeroall = make_array<coord>(euzero, euzero, euzero);
 
   static const intmatrix main_axes = make_array<coord>(coord(1,0,0), coord(0,1,0), coord(0,0,1));
@@ -70,7 +71,7 @@ EX namespace euc {
     return shifttable;
     }
   
-  EX coord canonicalize(coord x);
+  EX coord basic_canonicalize(coord x);
   
   #if HDR
   struct canonical_t {
@@ -114,6 +115,9 @@ EX namespace euc {
     intmatrix inverse_axes;
     /** struct for canonicalization */
     canonical_t canonical;
+
+    /** canonicalize coord x; in case of twisting, adjust d, M, and mirr accordingly */
+    void canonicalize(coord& x, coord& d, transmatrix& M, bool& mirr);
     };
   #endif
   EX torus_config eu_input, eu_edit;
@@ -176,22 +180,19 @@ EX namespace euc {
         }
       }
     
-    heptagon *build(heptagon *parent, int d, coord at) {
-      auto h = get_at(at);
+    heptagon *create_step(heptagon *parent, int d) override {
       int d1 = (d+S7/2)%S7;
       bool mirr = false;
-      if(eu.twisted) {
-        transmatrix I;
-        auto st = shifttable[d1];
-        twist(ispacemap[parent] + shifttable[d], st, I, mirr);
+      transmatrix I;
+      auto v = ispacemap[parent] + shifttable[d];
+      auto st = shifttable[d1];
+      eu.canonicalize(v, st, I, mirr);
+      if(eu.twisted)
         for(int i=0; i<S7; i++) if(shifttable[i] == st) d1 = i;
-        }
+
+      heptagon *h = get_at(v);
       h->c.connect(d1, parent, d, mirr);
       return h;
-      }
-  
-    heptagon *create_step(heptagon *parent, int d) override {
-      return build(parent, d, canonicalize(ispacemap[parent] + shifttable[d]));
       }  
 
     transmatrix adj(heptagon *h, int i) override {
@@ -201,7 +202,7 @@ EX namespace euc {
       id += shifttable[i];
       auto dummy = euzero;
       bool dm = false;
-      twist(id, dummy, res, dm);
+      eu.canonicalize(id, dummy, res, dm);
       
       return res;
       }
@@ -251,12 +252,12 @@ EX namespace euc {
           I = I * eumove(co);
           auto dummy = euzero;
           bool dm = false;
-          cs = twist(cs, dummy, I, dm);
+          eu.canonicalize(cs, dummy, I, dm);
           }
         return T;
         }
       auto d = ispacemap[h2] - ispacemap[h1];
-      d = canonicalize(d);
+      d = basic_canonicalize(d);
       return eumove(d);
       }
     
@@ -370,7 +371,7 @@ EX namespace euc {
 
   EX int celldistance(cell *c1, cell *c2) {
     auto cm = cubemap();
-    return celldistance(canonicalize(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]));
+    return celldistance(basic_canonicalize(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]));
     }
 
   EX void set_land(cell *c) {
@@ -597,8 +598,18 @@ EX namespace euc {
          - b[0]*a[1] - b[1]*a[2] - b[2]*a[0];
     };
   
-  EX coord twist(coord x, coord& d, transmatrix& M, bool& mirr) {
-    if(!eu.twisted) return x;
+  void torus_config_full::canonicalize(coord& x, coord& d, transmatrix& M, bool& mirr) {
+    if(!twisted) {
+      if(eu.infinite_dims == WDIM) return;
+      if(eu.infinite_dims == WDIM-1) {
+        auto& o = eu.optimal_axes;
+        while(celldistance(x + o[0]) <= celldistance(x)) x += o[0];
+        while(celldistance(x - o[0]) <  celldistance(x)) x -= o[0];
+        return;
+        }
+      x = eu.canonical.get(x);
+      return;
+      }
     auto& T0 = eu.user_axes;
     if(eu.twisted & 16) {
       int period = T0[2][2];
@@ -630,7 +641,7 @@ EX namespace euc {
         while(diagonal_cross(coo, T0[0]) > 0) coo -= T0[1];
         while(diagonal_cross(coo, T0[0]) < 0) coo += T0[1];
         }
-      return coo;
+      return;
       }
     if(WDIM == 3) {
       auto& coo = x;
@@ -648,7 +659,7 @@ EX namespace euc {
         }
       for(int i: {0,1})
         if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
-      return coo;
+      return;
       }
     else {
       gp::loc coo = to_loc(x);
@@ -683,25 +694,17 @@ EX namespace euc {
           }
         }
       d[0] = d0.first; d[1] = d0.second;
-      return to_coord(coo);
+      x = to_coord(coo);
+      return;
       }
     }
 
-  coord canonicalize(coord x) {
-    if(eu.twisted) {
-      transmatrix M = Id;
-      auto dummy = euzero;
-      bool dm = false;
-      return twist(x, dummy, M, dm);
-      }
-    if(eu.infinite_dims == WDIM) return x;
-    if(eu.infinite_dims == WDIM-1) {
-      auto& o = eu.optimal_axes;
-      while(celldistance(x + o[0]) <= celldistance(x)) x += o[0];
-      while(celldistance(x - o[0]) <  celldistance(x)) x -= o[0];
-      return x;
-      }
-    return eu.canonical.get(x);
+  coord basic_canonicalize(coord x) {
+    transmatrix M = Id;
+    auto dummy = euzero;
+    bool dm = false;
+    eu.canonicalize(x, dummy, M, dm);
+    return x;
     }
 
   EX void prepare_torus3() {
@@ -1106,8 +1109,8 @@ EX int dist(gp::loc a, gp::loc b) {
   }
 
 EX int cyldist(gp::loc a, gp::loc b) {
-  a = to_loc(canonicalize(to_coord(a)));
-  b = to_loc(canonicalize(to_coord(b)));
+  a = to_loc(basic_canonicalize(to_coord(a)));
+  b = to_loc(basic_canonicalize(to_coord(b)));
   
   if(!quotient) return dist(a, b);
   
