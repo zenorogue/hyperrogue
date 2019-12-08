@@ -182,7 +182,7 @@ void celldrawer::draw_ceiling() {
           col = 0x404040;
           for(int a=0; a<21; a++)
             if((b >> a) & 1)
-              col += variant_features[a].color_change;
+              col += variant::features[a].color_change;
           col = col & 0x00FF00;
           break;
           }

@@ -12,6 +12,8 @@ namespace hr {
 
 // land generation routines
 
+EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
+
 EX bool safety = false;
 
 EX eLand lastland;
@@ -1118,7 +1120,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           createArrowTrapAt(c, laTerracotta);
         if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
           c->wall = waTerraWarrior;
-          c->landparam = randterra ? 0 : 3 + hrand(3);
+          c->landparam = terracotta::randterra ? 0 : 3 + hrand(3);
           if(hrand(100) < items[itTerra]-10)
             c->landparam--;
           if(hrand(100) < items[itTerra]-10)
@@ -2430,8 +2432,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen) {
         int treasure_rate = 2;
         for(int i=0; i<21; i++) if((b>>i) & 1) {
-          treasure_rate += variant_features[i].rate_change;
-          variant_features[i].build(c);
+          treasure_rate += variant::features[i].rate_change;
+          variant::features[i].build(c);
           }
         if(hrand(2000 - PT(kills[moVariantWarrior] * 5, 250)) < treasure_rate && !c->wall && !c->monst) 
           c->item = itVarTreasure;

@@ -274,21 +274,22 @@ EX namespace westwall {
     }
 EX }
 
+EX namespace variant {
 #if HDR
-struct variant_feature {
+struct feature {
   color_t color_change;
   int rate_change;
   eMonster wanderer;
   void (*build)(cell*);
   };
 
-extern array<variant_feature, 21> variant_features;
+extern array<feature, 21> features;
 #endif
 
 #define VF [] (cell *c)
 
-array<variant_feature, 21> variant_features {{
-  variant_feature{(color_t)(-0x202020), 5, moNecromancer, VF {
+array<feature, 21> features {{
+  feature{(color_t)(-0x202020), 5, moNecromancer, VF {
     if(c->wall == waNone && hrand(1500) < 20) c->wall = waFreshGrave;
     if(hrand(20000) < 10 + items[itVarTreasure])
       c->monst = moNecromancer;
@@ -322,6 +323,509 @@ array<variant_feature, 21> variant_features {{
   {0x100708, 1, moRatling, VF { if(c->wall == waNone && !c->monst && hrand(50000) < 25 + items[itVarTreasure]) c->monst = moRatling; }}
   }};
 #undef VF
+EX }
+
+EX namespace camelot {
+/** number of Grails collected, to show you as a knight */
+EX int knighted = 0;
+
+/** this value is used when using Orb of Safety in the Camelot in Pure Tactics Mode */
+EX int anthraxBonus = 0;
+
+EX void roundTableMessage(cell *c2) {
+  if(!euclid && !cwt.at->master->alt) return;
+  if(!euclid && !c2->master->alt) return;
+  int dd = celldistAltRelative(c2) - celldistAltRelative(cwt.at);
+
+  bool tooeasy = (roundTableRadius(c2) < newRoundTableRadius());
+            
+  if(dd>0) {
+    if(grailWasFound(cwt.at)) {
+      addMessage(XLAT("The Knights congratulate you on your success!"));
+      knighted = roundTableRadius(cwt.at);
+      }
+    else if(!tooeasy)
+      addMessage(XLAT("The Knights laugh at your failure!"));
+    }
+  else {
+    if(grailWasFound(cwt.at))
+      addMessage(XLAT("The Knights stare at you!"));
+    else if(tooeasy) {
+      if(!tactic::on)
+        addMessage(XLAT("Come on, this is too easy... find a bigger castle!"));
+      }
+    else
+      addMessage(XLAT("The Knights wish you luck!"));
+    }
+  }
+
+EX void knightFlavorMessage(cell *c2) {
+
+  if(!eubinary && !c2->master->alt) {
+    addMessage(XLAT("\"I am lost...\""));
+    return;
+    }
+
+  if(tactic::on) {
+    addMessage(XLAT("\"The Knights of the Horocyclic Table salute you!\""));
+    return;
+    }
+
+  bool grailfound = grailWasFound(c2);
+  int rad = roundTableRadius(c2);
+  bool tooeasy = (rad < newRoundTableRadius());
+
+  static int msgid = 0;
+
+  retry:
+  if(msgid >= 32) msgid = 0;  
+  
+  if(msgid == 0 && grailfound) {
+    addMessage(XLAT("\"I would like to congratulate you again!\""));
+    }
+  else if(msgid == 1 && !tooeasy) {
+    addMessage(XLAT("\"Find the Holy Grail to become one of us!\""));
+    }
+  else if(msgid  == 2 && !tooeasy) {
+    addMessage(XLAT("\"The Holy Grail is in the center of the Round Table.\""));
+    }
+  #if CAP_CRYSTAL
+  else if(msgid == 3 && cryst) {
+    if(crystal::pure())
+      addMessage(XLAT("\"Each piece of the Round Table is exactly %1 steps away from the Holy Grail.\"", its(roundTableRadius(c2))));
+    else
+      addMessage(XLAT("\"According to Merlin, the Round Table is a perfect Euclidean sphere in %1 dimensions.\"", its(ginf[gCrystal].sides/2)));
+    }
+  #endif
+  else if(msgid == 3 && !peace::on && in_full_game()) {
+    addMessage(XLAT("\"I enjoy watching the hyperbug battles.\""));
+    }
+  else if(msgid == 4 && in_full_game()) {
+    addMessage(XLAT("\"Have you visited a temple in R'Lyeh?\""));
+    }
+  else if(msgid == 5 && in_full_game()) {
+    addMessage(XLAT("\"Nice castle, eh?\""));
+    }
+  else if(msgid == 6 && items[itSpice] < 10 && !peace::on && in_full_game()) {
+    addMessage(XLAT("\"The Red Rock Valley is dangerous, but beautiful.\""));
+    }
+  else if(msgid == 7 && items[itSpice] < 10 && !peace::on && in_full_game()) {
+    addMessage(XLAT("\"Train in the Desert first!\""));
+    }
+  else if(msgid == 8 && sizes_known() && !tactic::on) {
+    string s = "";
+    if(0) ;
+    #if CAP_CRYSTAL
+    else if(cryst)
+      s = crystal::get_table_boundary();
+    #endif
+    else if(!quotient)
+      s = expansion.get_descendants(rad).get_str(100);
+    if(s == "") { msgid++; goto retry; }
+    addMessage(XLAT("\"Our Table seats %1 Knights!\"", s));
+    }
+  else if(msgid == 9 && sizes_known() && !tactic::on) {
+    string s = "";
+    if(0);
+    #if CAP_CRYSTAL
+    else if(cryst)
+      s = crystal::get_table_volume();
+    #endif
+    else if(!quotient)
+      s = expansion.get_descendants(rad-1, expansion.diskid).get_str(100);
+    if(s == "") { msgid++; goto retry; }
+    addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", s));
+    }
+  else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool] && !peace::on && in_full_game()) {
+    addMessage(XLAT("\"Have you tried to take a boat and go into the Ocean? Try it!\""));
+    }
+  else if(msgid == 11 && !princess::saved && in_full_game()) {
+    addMessage(XLAT("\"When I visited the Palace, a mouse wanted me to go somewhere.\""));
+    }
+  else if(msgid == 12 && !princess::saved && in_full_game()) {
+    addMessage(XLAT("\"I wonder what was there...\""));
+    }
+  else if(msgid == 13 && !peace::on && in_full_game()) {
+    addMessage(XLAT("\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\""));
+    }
+  else if(msgid == 14) {
+    addMessage(XLAT("\"There is no royal road to geometry.\""));
+    }
+  else if(msgid == 15) {
+    addMessage(XLAT("\"There is no branch of mathematics, however abstract, "));
+    addMessage(XLAT("which may not some day be applied to phenomena of the real world.\""));
+    }
+  else if(msgid == 16) {
+    addMessage(XLAT("\"It is not possession but the act of getting there, "));
+    addMessage(XLAT("which grants the greatest enjoyment.\""));
+    }
+  else if(msgid == 17) {
+    addMessage(XLAT("\"We live in a beautiful and orderly world, "));
+    addMessage(XLAT("and not in a chaos without norms.\""));
+    }                                                          
+  else if(msgid == 25) {
+    addMessage(XLAT("\"Thank you very much for talking, and have a great rest of your day!\""));
+    }
+  else {
+    msgid++; goto retry;
+    }
+
+  msgid++;
+  }
+EX }
+
+EX namespace mine {
+
+EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
+  bool b = false;
+  if(c->wall == waMineMine && just_checking) return true;
+  if(c->wall == waMineUnknown) {
+    if(just_checking)
+      return true;
+    else {
+      c->wall = waMineOpen;
+      b = true;
+      }
+    }
+  
+  bool minesNearby = false;
+  bool nominesNearby = false;
+  bool mineopens = false;
+  
+  auto adj = adj_minefield_cells(c);
+
+  for(cell *c2: adj) {
+    if(c2->wall == waMineMine) minesNearby = true;
+    if(c2->wall == waMineOpen) mineopens = true;
+    if(c2->wall == waMineUnknown && !c2->item) nominesNearby = true;
+    }
+
+  if(lev && (nominesNearby || mineopens) && !minesNearby) for(cell *c2: adj)
+    if(c2->wall == waMineUnknown || c2->wall == waMineOpen) {
+      b |= uncoverMines(c2, lev-1, dist+1, just_checking);
+      if(b && just_checking) return true;
+      }
+
+  if(minesNearby && !nominesNearby && dist == 0) {
+    for(cell *c2: adj)
+      if(c2->wall == waMineMine && c2->land == laMinefield)
+        c2->landparam |= 1;
+    }
+  
+  return b;
+  }
+
+EX bool mightBeMine(cell *c) {
+  return c->wall == waMineUnknown || c->wall == waMineMine;
+  }
+
+EX hookset<bool(cell*)> *hooks_mark;
+
+EX void performMarkCommand(cell *c) {
+  if(!c) return;
+  if(callhandlers(false, hooks_mark, c)) return;
+  if(c->land == laCA && c->wall == waNone) 
+    c->wall = waFloorA;
+  else if(c->land == laCA && c->wall == waFloorA)
+    c->wall = waNone; 
+  if(c->land != laMinefield) return;
+  if(c->item) return;
+  if(!mightBeMine(c)) return;
+  bool adj = false;
+  forCellEx(c2, c) if(c2->wall == waMineOpen) adj = true;
+  if(adj) c->landparam ^= 1;
+  }
+
+EX bool marked_mine(cell *c) {
+  if(!mightBeMine(c)) return false;
+  if(c->item) return false;
+  if(c->land != laMinefield) return true;
+  return c->landparam & 1;
+  }
+
+EX bool marked_safe(cell *c) {
+  if(!mightBeMine(c)) return false;
+  if(c->item) return true;
+  if(c->land != laMinefield) return false;
+  return c->landparam & 2;
+  }
+
+EX bool safe() {
+  return items[itOrbAether];
+  }
+
+EX void uncover_full(cell *c2) {
+  int mineradius = 
+    bounded ? 3 :
+    (items[itBombEgg] < 1 && !tactic::on) ? 0 :
+    items[itBombEgg] < 20 ? 1 :
+    items[itBombEgg] < 30 ? 2 :
+    3;
+  
+  bool nomine = !normal_gravity_at(c2);
+  if(!nomine && uncoverMines(c2, mineradius, 0, true) && markOrb(itOrbAether))
+    nomine = true;
+  
+  if(!nomine) {
+    uncoverMines(c2, mineradius, 0, false);
+    mayExplodeMine(c2, moPlayer);
+    }  
+  }
+
+EX void auto_teleport_charges() {
+  if(specialland == laMinefield && firstland == laMinefield && bounded)
+    items[itOrbTeleport] = isFire(cwt.at->wall) ? 0 : 1;
+  }
+
+EX }
+
+EX namespace terracotta {
+#if HDR
+// predictable or not
+static constexpr bool randterra = false;
+#endif
+
+EX void check(cell *c) {
+  if(c->wall == waTerraWarrior && !c->monst && !racing::on) {
+    bool live = false;
+    if(randterra) {
+      c->landparam++;
+      if((c->landparam == 3 && hrand(3) == 0) ||
+        (c->landparam == 4 && hrand(2) == 0) || 
+        c->landparam == 5)
+          live = true;
+      }
+    else {
+      c->landparam--;
+      live = !c->landparam;
+      }
+    if(live)
+      c->monst = moTerraWarrior,
+      c->hitpoints = 7,
+      c->wall = waNone;
+    }
+  }
+
+EX void check_around(cell *c) {
+  forCellEx(c2, c)
+    check(c2);
+  }
+
+EX void check() {
+  for(int i=0; i<numplayers(); i++)
+    forCellEx(c, playerpos(i)) {
+      if(shmup::on) {
+        forCellEx(c2, c)
+          check(c2);
+        }
+      else
+        check(c);
+      }
+  }
+EX }
+
+EX namespace ambush {
+
+EX void mark(cell *c, manual_celllister& cl) {
+  if(!cl.add(c)) return;
+  forCellEx(c2, c) 
+    if(c2->cpdist < c->cpdist) 
+      mark(c2, cl);
+  }
+
+EX int distance;
+EX bool ambushed;
+
+EX void check_state() {
+  if(havewhat & HF_HUNTER) {
+    manual_celllister cl;
+    for(cell *c: dcal) {
+      if(c->monst == moHunterDog) {
+        if(c->cpdist > distance)
+          distance = c->cpdist;
+        mark(c, cl);
+        }
+      if(c->monst == moHunterGuard && c->cpdist <= 4) 
+        mark(c, cl);
+      }
+    if(items[itHunting] > 5 && items[itHunting] <= 22) {
+      int q = 0;
+      for(int i=0; i<numplayers(); i++) 
+        forCellEx(c2, playerpos(i))
+          if(cl.listed(c2))
+            q++;
+      if(q == 1) havewhat |= HF_FAILED_AMBUSH;
+      if(q == 2) {
+        for(int i=0; i<numplayers(); i++) 
+        forCellEx(c2, playerpos(i))
+          if(cl.listed(c2))
+            forCellEx(c3, playerpos(i)) 
+              if(c3 != c2 && isNeighbor(c2,c3))
+              if(cl.listed(c3))
+                havewhat |= HF_FAILED_AMBUSH;
+        }
+      if(havewhat & HF_FAILED_AMBUSH && ambushed) {
+        addMessage(XLAT("The Hunting Dogs give up."));
+        ambushed = false;
+        }        
+      }
+    }
+  
+  }
+
+EX int fixed_size;
+
+EX int size(cell *c, eItem what) {
+  bool restricted = false;
+  for(cell *c2: dcal) {
+    if(c2->cpdist > 3) break;
+    if(c2->monst && !isFriendly(c2) && !slowMover(c2) && !isMultitile(c2)) restricted = true;
+    }
+
+  int qty = items[itHunting];
+  if(fixed_size)
+    return fixed_size;
+  switch(what) {
+    case itCompass:
+      return 0;
+    
+    case itHunting:
+      return min(min(qty, max(33-qty, 6)), 15);
+    
+    case itOrbSide3:
+      return restricted ? 10 : 20;
+    
+    case itOrbFreedom:
+      return restricted ? 10 : 60;
+    
+    case itOrbThorns:
+    case itOrb37:
+      return 20;
+    
+    case itOrbLava:
+      return 20;
+    
+    case itOrbBeauty:
+      return 35;
+    
+    case itOrbShell:
+      return 35;
+
+    case itOrbPsi:
+      // return 40; -> no benefits
+      return 20;
+
+    case itOrbDash:
+    case itOrbFrog:
+      return 40;
+    
+    case itOrbAir:
+    case itOrbDragon:
+      return 50;
+
+    case itOrbStunning:
+      // return restricted ? 50 : 60; -> no benefits
+      return 30;
+    
+    case itOrbBull:
+    case itOrbSpeed:
+    case itOrbShield:
+      return 60;
+
+    case itOrbInvis:
+      return 80;
+
+    case itOrbTeleport:
+      return 300;
+    
+    case itGreenStone:
+    case itOrbSafety:
+    case itOrbYendor:
+      return 0;
+    
+    case itKey:
+      return 16;
+
+    case itWarning:
+      return qty;
+    
+    default:
+      return restricted ? 6 : 10;
+      break;    
+    
+    // Flash can survive about 70, but this gives no benefits
+    }
+  
+  }
+
+EX int ambush(cell *c, eItem what) {
+  int maxdist = gamerange();
+  celllister cl(c, maxdist, 1000000, NULL);
+  cell *c0 = c;
+  int d = 0;
+  int dogs0 = 0;
+  for(cell *cx: cl.lst) {
+    int dh = cl.getdist(cx);
+    if(dh <= 2 && cx->monst == moHunterGuard)
+      cx->monst = moHunterDog, dogs0++;
+    if(dh > d) c0 = cx, d = dh;
+    }
+  if(sphere) {
+    int dogs = size(c, what);  
+    for(int i = cl.lst.size()-1; i>0 && dogs; i--) 
+      if(!isPlayerOn(cl.lst[i]) && !cl.lst[i]->monst)
+        cl.lst[i]->monst = moHunterDog, dogs--;
+    }
+  vector<cell*> around;
+  cell *clast = NULL;
+  cell *ccur = c0;
+  int v = VALENCE;
+  if(v > 4) {
+    for(cell *c: cl.lst) if(cl.getdist(c) == d) around.push_back(c);
+    hrandom_shuffle(&around[0], isize(around));
+    }
+  else {
+    for(int tries=0; tries<10000; tries++) {
+      cell *c2 = NULL;
+      if(v == 3) {
+        forCellEx(c1, ccur)
+          if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
+            c2 = c1;
+        }
+      if(v == 4) {
+        for(int i=0; i<ccur->type; i++) {
+          cell *c1 = (cellwalker(ccur, i) + wstep + 1).peek();
+          if(!c1) continue;
+          if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
+            c2 = c1;        
+          }
+        }
+      if(!c2) break;
+      if(c2->land == laHunting && c2->wall == waNone && c2->monst == moNone)
+        around.push_back(c2);
+      clast = ccur; ccur = c2;
+      if(c2 == c0) break;
+      }
+    }
+  int N = isize(around);
+  int dogs = size(c, what);
+  
+  int gaps = dogs;
+  if(!N) return dogs0;
+  ambushed = true;
+  int shift = hrand(N);
+  dogs = min(dogs, N);
+  gaps = min(gaps, N);
+  for(int i=0; i<dogs; i++) {
+    int pos = (shift + (N * i) / gaps) % N;
+    cell *nextdog = around[pos];
+    nextdog->monst = moHunterDog;
+    nextdog->stuntime = 1;
+    drawFlash(nextdog);
+    }
+  return dogs + dogs0;
+  }
+EX }
 
 }
 #endif

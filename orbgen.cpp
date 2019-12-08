@@ -413,6 +413,10 @@ EX bool buildPrizeMirror(cell *c, int freq) {
   return mirror::build(c);
   }                    
 
+#if HDR
+extern cellwalker cwt;
+#endif
+
 EX eLand getPrizeLand(cell *c IS(cwt.at)) {
   eLand l = c->land;
   if(isElemental(l)) l = laElementalWall;

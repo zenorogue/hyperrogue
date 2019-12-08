@@ -1155,7 +1155,7 @@ void movePlayer(monster *m, int delta) {
       cwt.at = c2; afterplayermoved();
       if(c2->item && c2->land == laAlchemist) c2->wall = m->base->wall;
       if(m->base->wall == waRoundTable)
-        roundTableMessage(c2);
+        camelot::roundTableMessage(c2);
       if(c2->wall == waCloud || c2->wall == waMirror) {
         visibleFor(500);
         cellwalker cw(c2, 0, false);
@@ -1176,7 +1176,7 @@ void movePlayer(monster *m, int delta) {
         items[itOrbLife] = 0;
         m->dead = true;
         }
-      uncoverMinesFull(c2);
+      mine::uncover_full(c2);
       
       if(isWatery(c2) && isWatery(m->base) && m->inBoat)
         moveItem(m->base, c2, true);
@@ -2622,7 +2622,7 @@ EX void turn(int delta) {
         #if CAP_INV
         if(inv::on) inv::compute();
         #endif
-        terracotta();
+        terracotta::check();
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();

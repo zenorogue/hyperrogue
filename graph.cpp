@@ -976,6 +976,7 @@ EX void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) 
 
 void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase, bool stop = false) {
   charstyle& cs = getcs();
+  auto& knighted = camelot::knighted;
 
   if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
   
@@ -1219,7 +1220,7 @@ void drawMimic(eMonster m, cell *where, const transmatrix& V, color_t col, doubl
     else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
       queuepoly(VBODY * VBS, cgi.shPKnife, darkena(col, 0, 0XC0));
 
-    if(knighted)
+    if(camelot::knighted)
       queuepoly(VBODY3 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xC0));
 
     queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead,  darkena(col, 1, 0XC0));
@@ -3263,7 +3264,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t
 #endif
 
 bool openorsafe(cell *c) {
-  return c->wall == waMineOpen || mineMarkedSafe(c);
+  return c->wall == waMineOpen || mine::marked_safe(c);
   }
 
 #define Dark(x) darkena(x,0,0xFF)
@@ -3989,8 +3990,8 @@ EX void drawMarkers() {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
 
-    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
-      queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
+    if(pcm.mip.t && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
+      queuecircleat(pcm.mip.t, .6, darkena(0xFFD500, 0, 0xFF));
       }
     #endif
 

@@ -203,7 +203,7 @@ EX void initgame() {
     }
 
   if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
-    anthraxBonus = items[itHolyGrail];
+    camelot::anthraxBonus = items[itHolyGrail];
     cwt.at->move(0)->land = firstland;
     if(firstland == laWhirlpool) cwt.at->move(0)->wall = waSea;
     
@@ -358,7 +358,7 @@ EX void initgame() {
 #if CAP_INV
     if(inv::on) inv::init();
 #endif
-    auto_teleport_charges();
+    mine::auto_teleport_charges();
     if(!use_special_land) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
@@ -1125,10 +1125,10 @@ EX void loadsave() {
 //  printf("boxid = %d\n", boxid);
     if(items[itHolyGrail]) {
       items[itHolyGrail]--;
-      knighted = newRoundTableRadius();
+      camelot::knighted = newRoundTableRadius();
       items[itHolyGrail]++;
       }
-    else knighted = 0;
+    else camelot::knighted = 0;
     safety = true;
     if(items[itSavedPrincess] < 0) items[itSavedPrincess] = 0;
     addMessage(XLAT("Game loaded."));
@@ -1169,7 +1169,7 @@ EX void stop_game() {
   princess::reviveAt = 0;
   princess::forceVizier = false;
   princess::forceMouse = false;
-  knighted = 0;
+  camelot::knighted = 0;
   // items[itGreenStone] = 100;
   clearMemory();
   game_active = false;

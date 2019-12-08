@@ -885,7 +885,7 @@ EX void describeMouseover() {
       out += XLAT1(iinf[c->item].name); 
       if(c->item == itBarrow) out += " (x" + its(c->landparam) + ")";
       if(c->land == laHunting) {
-        int i = ambushSize(c, c->item);
+        int i = ambush::size(c, c->item);
         if(i) out += " (" + XLAT("ambush:") + " " + its(i) + ")";
         }
       if(c->item == itBabyTortoise && tortoise::seek()) 

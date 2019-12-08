@@ -410,7 +410,6 @@ typedef function<int(struct cell*)> cellfunction;
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
-#define PUREHARDCORE_LEVEL 10
 #define PRIZEMUL 7
 
 #define INF  9999

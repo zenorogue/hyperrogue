@@ -664,7 +664,7 @@ int read_cheat_args() {
     // make all ambushes use the given number of dogs
     // example: hyper -W Hunt -IP Shield 1 -ambush 60
     PHASE(3) cheat();
-    shift(); ambushval = argi();
+    shift(); ambush::fixed_size = argi();
     }
   else if(argis("-testdistances")) {
     PHASE(3); shift(); test_distances(argi());

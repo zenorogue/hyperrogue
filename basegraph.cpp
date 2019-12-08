@@ -79,7 +79,7 @@ int utfsize(char c) {
   }
 
 EX int get_sightrange() { return getDistLimit() + sightrange_bonus; }
-EX int get_sightrange_ambush() { return max(get_sightrange(), ambush_distance); }
+EX int get_sightrange_ambush() { return max(get_sightrange(), ambush::distance); }
 
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
 bool display_data::stereo_active() { return vid.stereo_mode != sOFF; }

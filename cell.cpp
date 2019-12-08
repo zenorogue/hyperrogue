@@ -1120,4 +1120,120 @@ EX void clearCellMemory() {
 
 auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
 
+EX bool isNeighbor(cell *c1, cell *c2) {
+  for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return true;
+  return false;
+  }
+
+EX bool isNeighborCM(cell *c1, cell *c2) {
+  for(int i=0; i<c1->type; i++) if(createMov(c1, i) == c2) return true;
+  return false;
+  }
+
+EX int neighborId(cell *ofWhat, cell *whichOne) {
+  for(int i=0; i<ofWhat->type; i++) if(ofWhat->move(i) == whichOne) return i;
+  return -1;
+  }
+
+EX int mine_adjacency_rule = 0;
+
+EX map<cell*, vector<cell*>> adj_memo;
+
+EX bool geometry_has_alt_mine_rule() {
+  if(WDIM == 2) return VALENCE > 3;
+  if(WDIM == 3) return !among(geometry, gHoroHex, gCell5, gBitrunc3, gCell8, gECell8, gCell120, gECell120);
+  return true;
+  }
+
+EX vector<cell*> adj_minefield_cells(cell *c) {
+  vector<cell*> res;
+  if(mine_adjacency_rule == 0 || !geometry_has_alt_mine_rule())
+    forCellCM(c2, c) res.push_back(c2);
+  else if(WDIM == 2) {
+    cellwalker cw(c, 0);
+    cw += wstep;
+    cw++;
+    cellwalker cw1 = cw;
+    do {
+      res.push_back(cw.at);
+      cw += wstep;
+      cw++;
+      if(cw.cpeek() == c) cw++;
+      }
+    while(cw != cw1);
+    }
+  else if(adj_memo.count(c)) return adj_memo[c];
+  else {
+    const vector<hyperpoint> vertices = currentmap->get_vertices(c);
+    manual_celllister cl;
+    cl.add(c);
+    for(int i=0; i<isize(cl.lst); i++) {
+      cell *c1 = cl.lst[i];
+      bool shares = false;
+      if(c != c1) {
+        transmatrix T = currentmap->relative_matrix(c1->master, c->master, C0);
+        for(hyperpoint h: vertices) for(hyperpoint h2: vertices)
+          if(hdist(h, T * h2) < 1e-6) shares = true;
+        if(shares) res.push_back(c1);
+        }
+      if(shares || c == c1) forCellEx(c2, c1) cl.add(c2);
+      }
+    println(hlog, "adjacent to ", c, " = ", isize(res));
+    adj_memo[c] = res;
+    }
+  return res;
+  }
+
+EX vector<int> reverse_directions(cell *c, int dir) {
+  if(PURE) return reverse_directions(c->master, dir);
+  int d = c->degree();
+  if(d & 1)
+    return { gmod(dir + c->type/2, c->type), gmod(dir + (c->type+1)/2, c->type) };
+  else
+    return { gmod(dir + c->type/2, c->type) };
+  }
+
+EX vector<int> reverse_directions(heptagon *c, int dir) { 
+  int d = c->degree();
+  switch(geometry) {
+    case gBinary3:
+      if(dir < 4) return {8};
+      else if(dir >= 8) return {0, 1, 2, 3};
+      else return {dir ^ 1};
+    
+    case gHoroTris:
+      if(dir < 4) return {7};
+      else if(dir == 4) return {5, 6};
+      else if(dir == 5) return {6, 4};
+      else if(dir == 6) return {4, 5};
+      else return {0, 1, 2, 3};
+    
+    case gHoroRec:
+      if(dir < 2) return {6};
+      else if(dir == 6) return {0, 1};
+      else return {dir^1};
+      
+    case gKiteDart3: {
+      if(dir < 4) return {dir ^ 2};
+      if(dir >= 6) return {4, 5};
+      vector<int> res;
+      for(int i=6; i<c->type; i++) res.push_back(i);
+      return res;
+      }
+    
+    case gHoroHex: {
+      if(dir < 6) return {12, 13};
+      if(dir >= 12) return {0, 1, 2, 3, 4, 5};
+      const int dt[] = {0,0,0,0,0,0,10,11,9,8,6,7,0,0};
+      return {dt[dir]};
+      }
+    
+    default:
+      if(d & 1)
+        return { gmod(dir + c->type/2, c->type), gmod(dir + (c->type+1)/2, c->type) };
+      else
+        return { gmod(dir + c->type/2, c->type) };
+    }
+  }
+
 }

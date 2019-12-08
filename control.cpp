@@ -426,7 +426,7 @@ EX void handleKeyNormal(int sym, int uni) {
   if(DEFAULTNOR(sym)) {
     gmodekeys(sym, uni);
     if(uni == 'm' && canmove && (centerover == cwt.at ? mouseover : centerover))
-      performMarkCommand(mouseover);
+      mine::performMarkCommand(mouseover);
     }
   
   if(DEFAULTCONTROL) {

@@ -143,7 +143,7 @@ void celldrawer::setcolors() {
       fcol = 0x404040;
       for(int a=0; a<21; a++)
         if((b >> a) & 1)
-          fcol += variant_features[a].color_change;
+          fcol += variant::features[a].color_change;
       if(c->wall == waAncientGrave)
         wcol = 0x080808;
       else if(c->wall == waFreshGrave)
@@ -506,9 +506,9 @@ void celldrawer::setcolors() {
       break;
 
     case waMineUnknown: case waMineMine: 
-      if(mineMarkedSafe(c))
+      if(mine::marked_safe(c))
         fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
-      else if(mineMarked(c))
+      else if(mine::marked_mine(c))
         fcol = wcol = gradient(wcol, 0xFF4040, -1, sintick(100), 1);
       // fallthrough
 
@@ -1255,7 +1255,7 @@ void celldrawer::draw_features() {
       }
     
     case waTerraWarrior:
-      drawTerraWarrior(V, randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
+      drawTerraWarrior(V, terracotta::randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
       break;
     
     case waBoat: case waStrandedBoat: 

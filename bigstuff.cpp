@@ -23,7 +23,7 @@ EX int newRoundTableRadius() {
 
 EX int getAnthraxData(cell *c, bool b) {
   int d = celldistAlt(c);
-  int rad = 28 + 3 * anthraxBonus;
+  int rad = 28 + 3 * camelot::anthraxBonus;
   while(d < -rad) { 
     d += rad + 12;
     rad += 3;

@@ -8,6 +8,8 @@
 #include "hyper.h"
 namespace hr {
 
+EX int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen;
+
 EX bool timerghost = true;
 EX bool gen_wandering = true;
 
@@ -312,7 +314,7 @@ EX void wandering() {
     kills[moBomberbird] = 0;
     kills[moTameBomberbird] = 0;
     for(cell *c: currentmap->allcells()) if(c->wall == waMineUnknown) kills[moBomberbird]++;
-    for(cell *c: currentmap->allcells()) if(among(c->wall, waMineMine, waMineUnknown) && mineMarked(c)) kills[moTameBomberbird]++;
+    for(cell *c: currentmap->allcells()) if(among(c->wall, waMineMine, waMineUnknown) && mine::marked_mine(c)) kills[moTameBomberbird]++;
     return;
     }
   if(!canmove) return;
@@ -440,7 +442,7 @@ EX void wandering() {
     else if(c->land == laVariant && wchance(items[itVarTreasure], 50)) {
       int i = hrand(21);
       if(getBits(c) & (1>>i)) {
-        eMonster m = variant_features[i].wanderer;
+        eMonster m = variant::features[i].wanderer;
         if(m) c->monst = m, c->hitpoints = 3;
         }
       continue;
