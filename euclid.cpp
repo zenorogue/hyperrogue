@@ -207,6 +207,11 @@ EX namespace euc {
       return res;
       }
 
+    transmatrix adj(cell *c, int i) override {
+      if(WDIM == 3) return adj(c->master, i);
+      else return hrmap_standard::adj(c, i);
+      }
+
     void draw() override {
       dq::visited_by_matrix.clear();
       dq::enqueue_by_matrix(centerover->master, cview() * master_relative(centerover, true));
