@@ -39,7 +39,7 @@ EX bool non_spatial_model() {
   return pmodel && vid.consider_shader_projection && (get_shader_flags() & SF_DIRECT);
   }
 
-hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
+EX hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   ld hx = h[0], hy = h[1];
   
   if(gc == gcEuclid)

@@ -439,7 +439,7 @@ EX void buildTorusRug() {
   hyperpoint yh = euc::eumove(p2)*C0-C0;
   if(nonorientable) yh *= 2;
   
-  bool flipped = sqhypot_d(2, xh) < sqhypot_d(2, yh);
+  bool flipped = false; // sqhypot_d(2, xh) < sqhypot_d(2, yh);
   
   if(flipped) swap(xh, yh);
   
@@ -461,6 +461,12 @@ EX void buildTorusRug() {
   
   map<pair<int, int>, rugpoint*> glues;
   
+  ld mx = 0;
+  for(int i=0; i<1000; i++)
+    mx = max(mx, hypot(xfactor, yfactor * sin(i)) / (1-yfactor * cos(i)));
+
+  println(hlog, "mx = ", mx);
+  
   auto addToruspoint = [&] (hyperpoint h) {
     auto r = addRugpoint(C0, 0);
     hyperpoint onscreen;
@@ -472,14 +478,25 @@ EX void buildTorusRug() {
     double alpha = -h[0] * 2 * M_PI;
     double beta = h[1] * 2 * M_PI;
     
-    if(gwhere == gSphere) {
-      ld ax = alpha + 1.124651, bx = beta + 1.214893;
-      ld x = xfactor * sin(ax), y = xfactor * cos(ax), z = yfactor * sin(bx), t = yfactor * cos(bx);
-      ld d = acos(t) / sqrt(x*x+y*y+z*z);
-      r->flat = r->h = hpxyz(x * d, y * d, z * d);
+    ld ax = alpha + 1.124651, bx = beta + 1.214893;
+    ld x = xfactor * sin(ax), y = xfactor * cos(ax), z = yfactor * sin(bx), t = yfactor * cos(bx);
+
+    ld d;
+    ld hxyz = sqrt(x*x+y*y+z*z);
+
+    if(gwhere == gNormal) {
+      d = hxyz / (1-t) / mx;
+      d *= .95;
+      hyperpoint test = hpxy(d, 0);
+      test = perspective_to_space(test, 1, gcHyperbolic);
+      d = acosh(test[2]) / hxyz;
       }
-    else 
-      r->flat = r->h = modelscale * hpxyz((xfactor+yfactor*cos(beta)) * cos(alpha), (xfactor+yfactor*cos(beta)) * sin(alpha), yfactor*-sin(beta));
+    else {
+      d = (gwhere == gSphere) ? acos(t) / hxyz : modelscale * 3 / (1-t) / mx;
+      }
+    
+    r->flat = r->h = hpxyz(x*d, y*d, z*d);
+      
     r->valid = true;
     
     static const int X = 100003; // a prime
