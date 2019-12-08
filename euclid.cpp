@@ -60,7 +60,7 @@ EX namespace euc {
         break;
       
       default:
-        printf("euclid3::get_shifttable() called in geometry that is not euclid3");
+        printf("euc::get_shifttable() called in geometry that is not euclid3");
         exit(1);
       }
     
@@ -119,7 +119,7 @@ EX namespace euc {
   EX torus_config eu_input, eu_edit;
   EX torus_config_full eu;
 
-  struct hrmap_euclid3 : hrmap_standard {
+  struct hrmap_euclidean : hrmap_standard {
     vector<coord> shifttable;
     vector<transmatrix> tmatrix;
     map<coord, heptagon*> spacemap;
@@ -140,7 +140,7 @@ EX namespace euc {
       return hrmap::allcells();
       }
 
-    hrmap_euclid3() {
+    hrmap_euclidean() {
       shifttable = get_shifttable();
       tmatrix.resize(S7);
       for(int i=0; i<S7; i++) 
@@ -161,7 +161,7 @@ EX namespace euc {
         if(!IRREGULAR) 
           h->c7 = newCell(S7, h);
         else 
-          irr::link_to_base(h, ((hrmap_euclid3*)irr::base)->get_at(at));
+          irr::link_to_base(h, ((hrmap_euclidean*)irr::base)->get_at(at));
         h->distance = 0;
         h->cdata = NULL;
         h->alt = NULL;
@@ -285,11 +285,11 @@ EX namespace euc {
       }
     };
   
-  hrmap_euclid3* cubemap() {
-    return ((hrmap_euclid3*) currentmap);
+  hrmap_euclidean* cubemap() {
+    return ((hrmap_euclidean*) currentmap);
     }
 
-  hrmap_euclid3* eucmap() { return cubemap(); }
+  hrmap_euclidean* eucmap() { return cubemap(); }
 
   EX vector<coord>& get_current_shifttable() { return cubemap()->shifttable; }
   EX map<coord, heptagon*>& get_spacemap() { return cubemap()->spacemap; }
@@ -297,7 +297,7 @@ EX namespace euc {
   EX cell *& get_camelot_center() { return cubemap()->camelot_center; }
 
   EX hrmap* new_map() {
-    return new hrmap_euclid3;
+    return new hrmap_euclidean;
     }
 
   EX transmatrix move_matrix(heptagon *h, int i) { 
@@ -394,11 +394,11 @@ EX namespace euc {
     cell *start = m->gamestart();
     if(!cc) {
       cc = start;
-      while(euclid3::celldistance(cc, start) < r + 5)
+      while(euc::celldistance(cc, start) < r + 5)
         cc = cc->cmove(hrand(cc->type));
       }
     
-    return euclid3::celldistance(cc, c) - r;
+    return euc::celldistance(cc, c) - r;
     }
   
   /* quotient spaces */
@@ -1126,10 +1126,6 @@ EX int cyldist(gp::loc a, gp::loc b) {
   }
 
 EX }
-
-#if HDR
-namespace euclid3 { using namespace euc; }
-#endif
 
 EX gp::loc euc2_coordinates(cell *c) { return euc::full_coords2(c); }
 

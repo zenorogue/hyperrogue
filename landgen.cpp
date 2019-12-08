@@ -505,7 +505,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
         #if MAXMDIM >= 4
         else if(euclid && WDIM == 3)
-          c->wall = euclid3::get_emerald(c) ? waCavewall : waCavefloor;
+          c->wall = euc::get_emerald(c) ? waCavewall : waCavefloor;
         #endif
         else if(euclid) {
           auto co = euc2_coordinates(c);
@@ -2654,7 +2654,7 @@ EX void setdist(cell *c, int d, cell *from) {
       else if(cryst) crystal::set_land(c);
       #endif
       #if MAXMDIM == 4
-      else if(euclid && WDIM == 3) euclid3::set_land(c);
+      else if(euclid && WDIM == 3) euc::set_land(c);
       #endif
       else if(hybri) setLandHybrid(c);
       else if(sphere || (euclid && bounded)) setLandSphere(c);

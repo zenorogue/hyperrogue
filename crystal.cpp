@@ -640,7 +640,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
     }
   #endif
   else if(euclid) {
-    auto tab = euclid3::get_ispacemap()[c->master];
+    auto tab = euc::get_ispacemap()[c->master];
     for(int a=0; a<3; a++) co[a] = tab[a];
     if(PURE) for(int a=0; a<3; a++) co[a] *= 2;
     dim = 3;
@@ -1497,11 +1497,11 @@ EX void may_place_compass(cell *c) {
 
 #if CAP_CRYSTAL && MAXMDIM >= 4
 
-euclid3::coord crystal_to_euclid(coord x) {
-  return euclid3::coord(x[0]/2, x[1]/2, x[2]/2);
+euc::coord crystal_to_euclid(coord x) {
+  return euc::coord(x[0]/2, x[1]/2, x[2]/2);
   }
 
-coord euclid3_to_crystal(euclid3::coord x) {  
+coord euclid3_to_crystal(euc::coord x) {  
   coord res;
   for(int i=0; i<3; i++) res[i] = x[i] * 2;
   for(int i=3; i<MAXDIM; i++) res[i] = 0;
@@ -1510,16 +1510,16 @@ coord euclid3_to_crystal(euclid3::coord x) {
   
 
 void transform_crystal_to_euclid () {
-  euclid3::clear_torus3();
+  euc::clear_torus3();
   geometry = gCubeTiling;
-  auto e = euclid3::new_map();
+  auto e = euc::new_map();
   auto m = crystal_map();
   auto infront = cwt.cpeek();
   
-  auto& spacemap = euclid3::get_spacemap();
-  auto& ispacemap = euclid3::get_ispacemap();
-  auto& camelot_center = euclid3::get_camelot_center();
-  auto& shifttable = euclid3::get_current_shifttable();
+  auto& spacemap = euc::get_spacemap();
+  auto& ispacemap = euc::get_ispacemap();
+  auto& camelot_center = euc::get_camelot_center();
+  auto& shifttable = euc::get_current_shifttable();
   
   for(auto& p: m->hcoords) {
     auto co = crystal_to_euclid(p.second);
@@ -1584,9 +1584,9 @@ void transform_euclid_to_crystal () {
   auto m = new hrmap_crystal;
   auto infront = cwt.cpeek();
 
-  auto& spacemap = euclid3::get_spacemap();
-  auto& ispacemap = euclid3::get_ispacemap();
-  auto& camelot_center = euclid3::get_camelot_center();
+  auto& spacemap = euc::get_spacemap();
+  auto& ispacemap = euc::get_ispacemap();
+  auto& camelot_center = euc::get_camelot_center();
   
   for(auto& p: ispacemap) {
     auto co = euclid3_to_crystal(p.second);

@@ -470,8 +470,8 @@ EX void select_quotient_screen() {
 
 EX void select_quotient() {
   if(euclid && !penrose && !archimedean) {
-    euclid3::prepare_torus3();
-    pushScreen(euclid3::show_torus3);
+    euc::prepare_torus3();
+    pushScreen(euc::show_torus3);
     }
   else if(nil) {
     nilv::prepare_niltorus3(),  
@@ -585,7 +585,7 @@ EX void showEuclideanMenu() {
     }
   
   if(euclid && bounded) {
-    worldsize = euclid3::eu.det;
+    worldsize = euc::eu.det;
     if(BITRUNCATED) worldsize *= (a4 ? 2 : 3);
     if(GOLDBERG) worldsize *= cgi.gpdata->area;
     if(IRREGULAR) worldsize *= isize(irr::cells) / isize(irr::cells_of_heptagon);

@@ -966,7 +966,7 @@ void geometry_information::create_wall3d() {
     }
 
   if(GDIM == 3 && euclid && S7 == 12) {
-    auto v = euclid3::get_shifttable();
+    auto v = euc::get_shifttable();
     for(int w=0; w<12; w++) {
       auto co = v[w];
       vector<int> valid;
@@ -979,7 +979,7 @@ void geometry_information::create_wall3d() {
     }
 
   if(GDIM == 3 && euclid && S7 == 14) {
-    auto v = euclid3::get_shifttable();
+    auto v = euc::get_shifttable();
     for(int w=0; w<14; w++) {
       bshape(shWall3D[w], PPR::WALL);
       if(w%7 < 3) {

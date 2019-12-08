@@ -276,7 +276,7 @@ EX void initcells() {
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif
-  else if(euclid && !penrose) currentmap = euclid3::new_map();
+  else if(euclid && !penrose) currentmap = euc::new_map();
   #if CAP_BT
   else if(penrose) currentmap = kite::new_map();
   #endif
@@ -487,7 +487,7 @@ EX int celldistAlt(cell *c) {
     return celldist(c) - 3;
     }
   #if MAXMDIM >= 4
-  if(euclid && WDIM == 3) return euclid3::dist_alt(c);
+  if(euclid && WDIM == 3) return euc::dist_alt(c);
   if(hyperbolic && WDIM == 3) return reg3::altdist(c->master);
   #endif
   if(!c->master->alt) return 0;
@@ -1043,7 +1043,7 @@ EX int celldistance(cell *c1, cell *c2) {
   
   #if MAXMDIM >= 4
   if(euclid && !penrose && !archimedean) 
-    return euclid3::celldistance(c1, c2);
+    return euc::celldistance(c1, c2);
   
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
   #endif

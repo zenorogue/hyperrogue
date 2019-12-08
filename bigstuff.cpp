@@ -49,7 +49,7 @@ EX int celldistAltRelative(cell *c) {
   if(cryst) return crystal::dist_relative(c);
   #endif
   #if MAXMDIM >= 4
-  if(euclid && WDIM == 3) return euclid3::dist_relative(c);
+  if(euclid && WDIM == 3) return euc::dist_relative(c);
   #endif
   if(euclid && quotient) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {

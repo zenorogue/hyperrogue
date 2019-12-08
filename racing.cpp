@@ -1081,7 +1081,7 @@ void race_projection() {
       };
 
     if(!alternate) {
-      add_thurston_race(XLAT("Euclidean"), [] { stop_game(); euclid3::clear_torus3(); set_geometry(gBitrunc3); });
+      add_thurston_race(XLAT("Euclidean"), [] { stop_game(); euc::clear_torus3(); set_geometry(gBitrunc3); });
       add_thurston_race(XLAT("hyperbolic"), [] { set_geometry(gBinary3); vid.texture_step = 4; });
       add_thurston_race(XLAT("spherical"), [] { set_geometry(gCell120); });
       add_thurston_race(XLAT("Solv geometry"), [] { solnihv::solrange_xy = 10; solnihv::solrange_z = 3; set_geometry(gSol); });
