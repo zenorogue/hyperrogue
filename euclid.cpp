@@ -509,6 +509,7 @@ EX namespace euc {
   
   EX bool valid_irr_torus() {
     if(!IRREGULAR) return true;
+    if(eu.twisted) return false;
     for(int i=0; i<2; i++) {
       auto x = eu.user_axes[i];
       coord dm = eutester;
