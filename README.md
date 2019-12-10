@@ -11,6 +11,7 @@
 </p>
 
 A puzzle roguelike in the hyperbolic plane. See the [HyperRogue website](http://roguetemple.com/z/hyper.php) for detailed and most up-to-date information.
+Compiled executables can be downloaded from [itch.io](https://zenorogue.itch.io/hyperrogue) and from the [HyperRogue website](http://www.roguetemple.com/z/hyper/download.php).
 
 Released under [GNU General Public License, version 2](http://www.gnu.org/licenses/gpl-2.0.html). As such, it comes with without any warranty.
 
