@@ -265,7 +265,7 @@ static const flagtype qZEBRA           = 64;
 static const flagtype qELLIPTIC        = 128;
 
 static const flagtype qBINARY          = 256;
-static const flagtype qPENROSE         = 512;
+static const flagtype qKITE            = 512;
 
 static const flagtype qREGULAR         = 1024; /* not set! */
 static const flagtype qARCHI           = 2048;
