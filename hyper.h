@@ -763,6 +763,13 @@ static const color_t NOCOLOR = 0;
 
 }
 
+// assert macro
+#ifdef NDEBUG
+#define hassert(condition) if(!condition) __builtin_unreachable()
+#else
+#define hassert(condition) if(condition) println(hlog, __FILE__, ":", __LINE__, ":", __func__, ": assertion failed: ", condition)
+#endif
+
 #define IS(z) = z
 #include "autohdr.h"
 #undef IS
