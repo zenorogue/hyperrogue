@@ -1041,7 +1041,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laWarpCoast && quotient && geometry != gZebraQuotient && !randomPatternsMode) 
     return pattern_incompatibility;
   
-  if(among(l, laEmerald, laCamelot, laDryForest) && VALENCE != 3 && old_daily_id >= 65)
+  if(among(l, laEmerald, laCamelot, laDryForest) && valence() != 3 && old_daily_id >= 65)
     return hedgehogs;  
 
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
@@ -1052,7 +1052,7 @@ EX land_validity_t& land_validity(eLand l) {
     else if(quotient) return pattern_incompatibility;
     }
 
-  if(among(l, laEmerald, laCamelot, laDryForest) && VALENCE != 3)
+  if(among(l, laEmerald, laCamelot, laDryForest) && valence() != 3)
     return hedgehogs;  
 
   if(l == laWineyard && sol)

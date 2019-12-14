@@ -325,7 +325,7 @@ EX namespace yendor {
             if(i == 1) 
               onlychild = true;
             if(!onlychild) ycw++;
-            if(VALENCE == 3) ycw++;
+            if(valence() == 3) ycw++;
 
             onlychild = false;
             
@@ -451,7 +451,7 @@ EX namespace yendor {
         
           if(i == 1) onlychild = true;
           if(!onlychild) ycw++;
-          if(VALENCE == 3) ycw++;
+          if(valence() == 3) ycw++;
 
           onlychild = false;
           

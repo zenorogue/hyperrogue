@@ -1581,7 +1581,7 @@ EX bool no_barriers_in_radius(cell *c, int rad) {
 EX eMonster camelot_monster() {
   eMonster ms[3] = { moHedge, moLancer, moFlailer };
   eMonster m = ms[hrand(3)];
-  if(m == moHedge && VALENCE > 3)
+  if(m == moHedge && valence() > 3)
     m = moPyroCultist;
   if(getDistLimit() <= 2 && m == moLancer) m = moGoblin;
   if(getDistLimit() <= 3 && m == moPyroCultist) m = moCultist;

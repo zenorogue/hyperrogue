@@ -1147,7 +1147,7 @@ EX void build_rugdata() {
     ldcoord vcoord[MAX_EDGE];
 
     for(int i=0; i<c->type; i++) 
-      if(VALENCE == 4)
+      if(valence() == 4)
         vcoord[i] = ((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1))) / 2);
       else
         vcoord[i] = ((m->get_coord(c->cmove(i)) + m->get_coord(c->cmodmove(i-1)) + co) / 3);

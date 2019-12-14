@@ -599,21 +599,21 @@ EX namespace ts {
   EX cell *left_of(cell *c, const cellfunction& cf) {
     int pid = parent_id(c, 1, cf);
     if(pid == -1) return c;
-    if(VALENCE == 3) return c->cmodmove(pid+1);
+    if(valence() == 3) return c->cmodmove(pid+1);
     else return (cellwalker(c, pid) + wstep - 1).cpeek();
     }
 
   EX cell *right_of(cell *c, const cellfunction& cf) {
     int pid = parent_id(c, -1, cf);
     if(pid == -1) return c;
-    if(VALENCE == 3) return c->cmodmove(pid-1);
+    if(valence() == 3) return c->cmodmove(pid-1);
     else return (cellwalker(c, pid) + wstep + 1).cpeek();
     }
 
   EX cell *child_number(cell *c, int id, const cellfunction& cf) { 
     int pid = parent_id(c, 1, cf);
     if(pid == -1) return c->cmove(id);
-    return c->cmodmove(pid + (VALENCE == 3 ? 2 : 1) + id);
+    return c->cmodmove(pid + (valence() == 3 ? 2 : 1) + id);
     }
 
   #if HDR
@@ -1047,7 +1047,7 @@ EX int hyperbolic_celldistance(cell *c1, cell *c2) {
     if(d1 == d2) {
       if(cl1 == c1 && in_segment(cl2, c1, cr2)) return d;
       if(cl2 == c2 && in_segment(cl1, c2, cr1)) return d;
-      if(VALENCE == 3) {
+      if(valence() == 3) {
         int dx = min(sibling_distance(cr1, cl2, sibling_limit), sibling_distance(cr2, cl1, sibling_limit));
         if(d + dx <= found_distance) {
           found_distance = d + dx;

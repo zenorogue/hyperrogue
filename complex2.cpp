@@ -300,7 +300,7 @@ array<feature, 21> features {{
   {0x181418, 5, moSkeleton, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moSkeleton, c->hitpoints = 3; } },
   {0x180000, 5, moPyroCultist, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moPyroCultist; } },
   {0x00000C, 2, moFlailer, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moFlailer; } },
-  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure] && VALENCE == 3) c->monst = moHedge; } },
+  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure] && valence() == 3) c->monst = moHedge; } },
   {0x000c00,-1, moNone, VF { if(hrand(1500) < 30) createArrowTrapAt(c, laVariant); } },
   {0x001200,-1, moNone, VF { if(hrand(1500) < 50 && c->wall == waNone) c->wall = waTrapdoor; } },
   {0x000c18,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
@@ -779,7 +779,7 @@ EX int ambush(cell *c, eItem what) {
   vector<cell*> around;
   cell *clast = NULL;
   cell *ccur = c0;
-  int v = VALENCE;
+  int v = valence();
   if(v > 4) {
     for(cell *c: cl.lst) if(cl.getdist(c) == d) around.push_back(c);
     hrandom_shuffle(&around[0], isize(around));

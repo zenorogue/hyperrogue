@@ -1204,7 +1204,7 @@ EX bool geosupport_chessboard() {
 #endif
     (bt::in() || kite::in()) ? 0 :
     (S3 >= OINF) ? true :
-    (VALENCE % 2 == 0);
+    (valence() % 2 == 0);
   }
 
 EX int geosupport_threecolor() {

@@ -1141,7 +1141,7 @@ EX int mine_adjacency_rule = 0;
 EX map<cell*, vector<cell*>> adj_memo;
 
 EX bool geometry_has_alt_mine_rule() {
-  if(WDIM == 2) return VALENCE > 3;
+  if(WDIM == 2) return valence() > 3;
   if(WDIM == 3) return !among(geometry, gHoroHex, gCell5, gBitrunc3, gCell8, gECell8, gCell120, gECell120);
   return true;
   }
@@ -1239,6 +1239,14 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
 
 EX bool standard_tiling() {
   return !arcm::in() && !kite::in() && !bt::in();
+  }
+
+EX int valence() {
+  if(BITRUNCATED) return 3;
+  #if CAP_ARCM
+  if(arcm::in()) return arcm::valence();
+  #endif
+  return S3;
   }
 
 }

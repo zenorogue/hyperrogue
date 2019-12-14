@@ -68,7 +68,7 @@ EX bool checkBarriersBack(cellwalker bb, int q IS(5), bool cross IS(false)) {
 
 /** warp coasts use a different algorithm for nowall barriers when has_nice_dual() is on. Check whether we should use this different algorithm when the lands are l1 and l2 */
 EX bool warped_version(eLand l1, eLand l2) {
-  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || (VALENCE == 3);
+  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || (valence() == 3);
   }
 
 EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1 IS(laNone), eLand l2 IS(laNone)) {
@@ -101,7 +101,7 @@ EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1 IS(laNone), 
   if(warped_version(l1, l2)) {
     bb = bb + wstep + (2*dir) + wstep + dir;
     }
-  else if(VALENCE > 3) {
+  else if(valence() > 3) {
     bb = bb + dir + wstep + dir;
     dir = -dir;
     swap(l1, l2);
@@ -264,7 +264,7 @@ EX void extendNowall(cell *c) {
     cw += wstep;
     setland(cw.at, c->barright);
     }
-  else if(VALENCE > 3) {
+  else if(valence() > 3) {
     auto cw2 = cw + wstep;
     setland(cw2.at, c->barright);
     cw2.at->barleft = NOWALLSEP_USED;
@@ -277,7 +277,7 @@ EX void extendNowall(cell *c) {
     if(warpv) {
       cw0 = cw + (2*i) + wstep;
       }
-    else if(VALENCE > 3) {
+    else if(valence() > 3) {
       cw0 = cw + i + wstep + i; 
       }
     else {
@@ -286,7 +286,7 @@ EX void extendNowall(cell *c) {
       }
     if(cw0.at->barleft != NOWALLSEP_USED) {
       cw0.at->barleft = NOWALLSEP;
-      if(VALENCE > 3) {
+      if(valence() > 3) {
         cw0.at->barright = c->barright;
         cw0.at->bardir = cw0.spin;
         setland(cw0.at, c->land);
@@ -846,7 +846,7 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
   for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
 
   for(int i=0; i<c->type; i++) {
-    int d = forced_dir != NODIR ? forced_dir : (VALENCE>3) ? (2+(i&1)) : ds[i];
+    int d = forced_dir != NODIR ? forced_dir : (valence()>3) ? (2+(i&1)) : ds[i];
 /*    if(warpv && GOLDBERG) {
       d = hrand(c->type); */
     if(warpv && c->move(d) && c->move(d)->mpdist < c->mpdist) continue;
