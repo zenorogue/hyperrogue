@@ -112,14 +112,13 @@ void addMessage(string s, char spamtype = 0);
 #define ALPHA (M_PI*2/S7)
 #define S7 cginf.sides
 #define S3 cginf.vertex
-#define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling && !arcm::in())
-#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling || arcm::in()) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || arcm::in()) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !arcm::in())
+#define hyperbolic_37 (S7 == 7 && S3 == 3 && !bt::in() && !arcm::in())
+#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || bt::in() || arcm::in()) && hyperbolic)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || bt::in() || arcm::in()) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !bt::in() && !arcm::in())
 
 #define cgflags cginf.flags 
 
-#define binarytiling (cgflags & qBINARY)
 #define cryst (cgflags & qCRYSTAL)
 #define penrose (cgflags & qPENROSE)
 
@@ -127,7 +126,7 @@ void addMessage(string s, char spamtype = 0);
 #define experimental (cgflags & qEXPERIMENTAL)
 
 // these geometries do not feature alternate structures for horocycles
-#define eubinary (euclid || binarytiling || cryst || nil)
+#define eubinary (euclid || bt::in() || cryst || nil)
 
 #define cgclass (cginf.cclass)
 #define euclid (cgclass == gcEuclid)
@@ -403,7 +402,7 @@ typedef function<int(struct cell*)> cellfunction;
 // passable flags
 
 #define SAGEMELT .1
-#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex, gKiteDart3) ? 3 : sol ? 6 : (WDIM == 3 && binarytiling) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : (S3 == OINF) ? 4 : 6)
+#define TEMPLE_EACH (among(geometry, gHoroRec, gHoroHex, gKiteDart3) ? 3 : sol ? 6 : (WDIM == 3 && bt::in()) ? 2 : geometry == gSpace435 ? 4 : (WDIM == 3 && hyperbolic) ? 3 : (S3 == OINF) ? 4 : 6)
 #define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15

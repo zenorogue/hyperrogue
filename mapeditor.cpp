@@ -165,7 +165,7 @@ namespace mapstream {
     if(hybri && VERNUM_HEX >= 0xA80C) {
       hybrid::in_underlying_geometry([&] { save_geometry(f); });
       }
-    if(binarytiling && VERNUM_HEX >= 0xA80C) 
+    if(bt::in() && VERNUM_HEX >= 0xA80C) 
       f.write(vid.binary_width);
     if(euc::in()) {
       f.write(euc::eu_input.user_axes);
@@ -251,7 +251,7 @@ namespace mapstream {
       load_geometry(f);
       set_geometry(g);
       }
-    if(binarytiling && VERNUM_HEX >= 0xA80C) 
+    if(bt::in() && VERNUM_HEX >= 0xA80C) 
       f.read(vid.binary_width);
     if(euc::in() && VERNUM_HEX >= 0xA80D) {
       f.read(euc::eu_input.user_axes);

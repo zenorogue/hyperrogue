@@ -68,7 +68,7 @@ EX bool available() {
     return false;
   if((solnih || nil) && pmodel == mdGeodesic)
     return true;
-  if(euclid && pmodel == mdPerspective && !binarytiling)
+  if(euclid && pmodel == mdPerspective && !bt::in())
     return true;
   if(prod && PURE)
     return true;
@@ -183,10 +183,10 @@ void enable_raycaster() {
     
     int flat1 = 0, flat2 = S7;
     
-    if(hyperbolic && binarytiling) {
+    if(hyperbolic && bt::in()) {
       fsh += "uniform mediump float uBLevel;\n";
-      flat1 = binary::dirs_outer();
-      flat2 -= binary::dirs_inner();
+      flat1 = bt::dirs_outer();
+      flat2 -= bt::dirs_inner();
       }
 
     if(IN_ODS || hyperbolic) fsh += 
@@ -217,7 +217,7 @@ void enable_raycaster() {
    fsh += 
      "vec2 map_texture(vec4 pos, int which) {\n";
    if(nil) fsh += "if(which == 2 || which == 5) pos.z = 0.;\n";
-   else if(hyperbolic && binarytiling) fsh += 
+   else if(hyperbolic && bt::in()) fsh += 
        "pos = vec4(-log(pos.w-pos.x), pos.y, pos.z, 1);\n"
        "pos.yz *= exp(pos.x);\n";
    else if(hyperbolic) fsh += 
@@ -356,7 +356,7 @@ void enable_raycaster() {
       // 20: get to horosphere +uBLevel (take smaller root)
       // 21: get to horosphere -uBLevel (take larger root)
                           
-      if(hyperbolic && binarytiling) {
+      if(hyperbolic && bt::in()) {
         fmain += 
           "for(int i=20; i<22; i++) {\n"
             "float sgn = i == 20 ? -1. : 1.;\n"
@@ -597,7 +597,7 @@ void enable_raycaster() {
       "tangent /= sqrt(dot(tangent.xyz, tangent.xyz) - tangent.w*tangent.w);\n";
     #endif
     
-    if(hyperbolic && binarytiling) {
+    if(hyperbolic && bt::in()) {
       fmain += 
         "if(which == 20) {\n"
         "  float best = 999.;\n"
@@ -695,7 +695,7 @@ void enable_raycaster() {
 
     if(use_reflect) {
       if(prod) fmain += "if(reflect && which >= "+its(S7)+") { zspeed = -zspeed; continue; }\n";
-      if(hyperbolic && binarytiling) fmain +=
+      if(hyperbolic && bt::in()) fmain +=
         "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n"
         "  float x = -log(position.w - position.x);\n"
         "  vec4 xtan = xpush(-x) * tangent;\n"
@@ -992,7 +992,7 @@ EX void cast() {
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
   if(o->uBLevel != -1)
-    glUniform1f(o->uBLevel, log(binary::expansion()) / 2);
+    glUniform1f(o->uBLevel, log(bt::expansion()) / 2);
   
   glUniform1f(o->uLinearSightRange, sightranges[geometry]);
   glUniform1f(o->uExpDecay, exp_decay_current());

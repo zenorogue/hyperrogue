@@ -185,9 +185,9 @@ void horo_distance::become(hyperpoint h1) {
     b = hypot_d(2, h1);
     }
   #if CAP_BT
-  else if(binarytiling) {
+  else if(bt::in()) {
     b = intval(h1, C0);
-    a = abs(binary::horo_level(h1));
+    a = abs(bt::horo_level(h1));
     }
   #endif
   else if(hybri)
@@ -198,7 +198,7 @@ void horo_distance::become(hyperpoint h1) {
 
 horo_distance::horo_distance(hyperpoint h1, const transmatrix& T) {
   #if CAP_BT
-  if(binarytiling) become(inverse(T) * h1);
+  if(bt::in()) become(inverse(T) * h1);
   else
 #endif
   if(solnih || hybri || nil) become(inverse(T) * h1);
@@ -208,7 +208,7 @@ horo_distance::horo_distance(hyperpoint h1, const transmatrix& T) {
 
 bool horo_distance::operator < (const horo_distance z) const {
   #if CAP_BT
-  if(binarytiling || solnih) {
+  if(bt::in() || solnih) {
     if(a < z.a-1e-6) return true;
     if(a > z.a+1e-6) return false;
     }
@@ -310,7 +310,7 @@ void hrmap_hyperbolic::virtualRebase(heptagon*& base, transmatrix& at) {
   }
 
 EX bool no_easy_spin() {
-  return NONSTDVAR || arcm::in() || WDIM == 3 || binarytiling || penrose;
+  return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || penrose;
   }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
@@ -395,12 +395,12 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   #endif
   #if CAP_BT
   if(penrose) return kite::get_corner(c, cid, cf);
-  if(binarytiling) {
+  if(bt::in()) {
     if(WDIM == 3) {
       println(hlog, "get_corner_position called");
       return C0;
       }
-    return mid_at_actual(binary::get_horopoint(binary::get_corner_horo_coordinates(c, cid)), 3/cf);
+    return mid_at_actual(bt::get_horopoint(bt::get_corner_horo_coordinates(c, cid)), 3/cf);
     }
   #endif
   #if CAP_ARCM
@@ -483,23 +483,23 @@ EX hyperpoint nearcorner(cell *c, int i) {
     ld yx = log(2) / 2;
     ld yy = yx;
     hyperpoint neis[5];
-    neis[0] = binary::get_horopoint(2*yy, -0.5);
-    neis[1] = binary::get_horopoint(2*yy, +0.5);
-    neis[2] = binary::get_horopoint(0, 1);
-    neis[3] = binary::get_horopoint(-2*yy, c->master->zebraval ? -0.25 : +0.25);
-    neis[4] = binary::get_horopoint(0, -1);
+    neis[0] = bt::get_horopoint(2*yy, -0.5);
+    neis[1] = bt::get_horopoint(2*yy, +0.5);
+    neis[2] = bt::get_horopoint(0, 1);
+    neis[3] = bt::get_horopoint(-2*yy, c->master->zebraval ? -0.25 : +0.25);
+    neis[4] = bt::get_horopoint(0, -1);
     return neis[i];
     }
   if(geometry == gTernary) {
     ld yx = log(3) / 2;
     ld yy = yx;
     hyperpoint neis[6];
-    neis[0] = binary::get_horopoint(2*yy, -1);
-    neis[1] = binary::get_horopoint(2*yy, +0);
-    neis[2] = binary::get_horopoint(2*yy, +1);
-    neis[3] = binary::get_horopoint(0, 1);
-    neis[4] = binary::get_horopoint(-2*yy, c->master->zebraval / 3.);
-    neis[5] = binary::get_horopoint(0, -1);
+    neis[0] = bt::get_horopoint(2*yy, -1);
+    neis[1] = bt::get_horopoint(2*yy, +0);
+    neis[2] = bt::get_horopoint(2*yy, +1);
+    neis[3] = bt::get_horopoint(0, 1);
+    neis[4] = bt::get_horopoint(-2*yy, c->master->zebraval / 3.);
+    neis[5] = bt::get_horopoint(0, -1);
     return neis[i];
     }
   if(penrose) {
@@ -508,7 +508,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
     else
       return calc_relative_matrix(c->cmove(i), c, C0) * C0;
     }
-  if(binarytiling) {
+  if(bt::in()) {
     if(WDIM == 3) {
       println(hlog, "nearcorner called");
       return Hypc;
@@ -517,16 +517,16 @@ EX hyperpoint nearcorner(cell *c, int i) {
     ld yy = yx;
     // ld xx = 1 / sqrt(2)/2;
     hyperpoint neis[7];
-    neis[0] = binary::get_horopoint(0, 1);
-    neis[1] = binary::get_horopoint(yy*2, 1);
-    neis[2] = binary::get_horopoint(yy*2, 0);
-    neis[3] = binary::get_horopoint(yy*2, -1);
-    neis[4] = binary::get_horopoint(0, -1);
+    neis[0] = bt::get_horopoint(0, 1);
+    neis[1] = bt::get_horopoint(yy*2, 1);
+    neis[2] = bt::get_horopoint(yy*2, 0);
+    neis[3] = bt::get_horopoint(yy*2, -1);
+    neis[4] = bt::get_horopoint(0, -1);
     if(c->type == 7)
-      neis[5] = binary::get_horopoint(-yy*2, -.5),
-      neis[6] = binary::get_horopoint(-yy*2, +.5);
+      neis[5] = bt::get_horopoint(-yy*2, -.5),
+      neis[6] = bt::get_horopoint(-yy*2, +.5);
     else
-      neis[5] = binary::get_horopoint(-yy*2, 0);
+      neis[5] = bt::get_horopoint(-yy*2, 0);
     return neis[i];
     }
   #endif
@@ -560,7 +560,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     }
   #endif
   #if CAP_BT
-  if(binarytiling || penrose)
+  if(bt::in() || penrose)
     return nearcorner(c, (i+which) % c->type); // lazy
   #endif
   #if CAP_ARCM

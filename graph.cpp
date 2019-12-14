@@ -3012,7 +3012,7 @@ EX int countMinesAround(cell *c) {
   }
 
 EX transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
-  if(NONSTDVAR || binarytiling) return Id;
+  if(NONSTDVAR || bt::in()) return Id;
   transmatrix V = ddspin(c, si.dir, M_PI);
   if(si.reflect) V = V * Mirror;
   if(euclid) return V;
@@ -3155,7 +3155,7 @@ EX bool has_nice_dual() {
   #if CAP_ARCM
   if(arcm::in()) return geosupport_football() >= 2;
   #endif
-  if(binarytiling) return false;
+  if(bt::in()) return false;
   if(BITRUNCATED) return true;
   if(a4) return false;
   if((S7 & 1) == 0) return true;
@@ -3520,7 +3520,7 @@ EX int get_darkval(cell *c, int d) {
   if(geometry == gArnoldCat) return darkval_arnold[d];
   if(sol) return darkval_sol[d];
   if(nih) return darkval_nih[d];
-  if(binarytiling) return darkval_hbt[d];
+  if(bt::in()) return darkval_hbt[d];
   if(hyperbolic && S7 == 6) return darkval_e6[d];
   if(hyperbolic && S7 == 12) return darkval_s12[d];
   if(nil) return darkval_nil[d];

@@ -834,7 +834,7 @@ movei determinePush(cellwalker who, int subdir, const T& valid) {
   cellwalker push = who;
   push += wstep;
   cell *c2 = push.at;
-  if(binarytiling) {
+  if(bt::in()) {
     auto rd = reverse_directions(push.at, push.spin);
     for(int i: rd) {
       push.spin = i;

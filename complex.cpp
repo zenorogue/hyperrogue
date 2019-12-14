@@ -1120,7 +1120,7 @@ EX namespace mirror {
       return true;
       }
     #endif
-    if(binarytiling || IRREGULAR) {
+    if(bt::in() || IRREGULAR) {
       // mirrors not supported
       if(is_mirrorland(c)) {
         c->item = itShard;
@@ -1245,7 +1245,7 @@ EX namespace mirror {
     cell *c = cw.at;
     
     #if MAXMDIM >= 4
-    if(WDIM == 3 && !binarytiling) {
+    if(WDIM == 3 && !bt::in()) {
       if(shmup::on) for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep - i, cpid);
       return;
@@ -1276,7 +1276,7 @@ EX namespace mirror {
       }
     #endif
     #if MAXMDIM >= 4
-    if(WDIM == 3 && !binarytiling) {
+    if(WDIM == 3 && !bt::in()) {
       if(shmup::on) for(int i=0; i<cw.at->type; i++)
         createMirror(cw + i + wstep - i, cpid);
       return;
@@ -2700,7 +2700,7 @@ EX namespace sword {
     sword_angles = 2;
     if(SWORDDIM == 3) sword_angles = 1;
     else if(IRREGULAR) sword_angles = 840;
-    else if(binarytiling) sword_angles = 42;
+    else if(bt::in()) sword_angles = 42;
     else if(arcm::in()) {
       if(!PURE) possible_divisor((BITRUNCATED ? 2 : 1) * isize(arcm::current.faces));
       if(!DUAL) for(int f: arcm::current.faces) possible_divisor(f);

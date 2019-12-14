@@ -213,7 +213,7 @@ EX namespace solnihv {
         alt->zebraval = 0;
         alt->distance = 0;
         alt->emeraldval = 0;
-        binary_map = binary::new_alt_map(alt);
+        binary_map = bt::new_alt_map(alt);
         }
       
       if(nih) {
@@ -226,7 +226,7 @@ EX namespace solnihv {
         alt3->zebraval = 0;
         alt3->distance = 0;
         alt3->emeraldval = 0;
-        ternary_map = binary::new_alt_map(alt3);
+        ternary_map = bt::new_alt_map(alt3);
         }
       else {
         alt3 = alt;
@@ -645,8 +645,8 @@ EX namespace solnihv {
     auto m = (solnihv::hrmap_solnih*) currentmap;
     dynamicval<eGeometry> g(geometry, gBinary4); 
     dynamicval<hrmap*> cm(currentmap, m->binary_map);
-    int d1 = binary::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
-    int d2 = binary::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
+    int d1 = bt::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
+    int d2 = bt::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
     return d1 + d2 - abs(h1->distance - h2->distance);
     }    
 EX }

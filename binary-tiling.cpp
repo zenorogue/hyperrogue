@@ -8,9 +8,12 @@
 #include "hyper.h"
 namespace hr {
 
-EX namespace binary {
+EX namespace bt {
 #if CAP_BT
 
+  /** note: nihsolv and kd3 tilings return bt::in(). They are defined elsewhere, although some of bt:: functions are used for them */
+  EX bool in() { return cgflags & qBINARY; }
+  
   #if HDR
   enum bindir {
     bd_right = 0,
@@ -194,10 +197,10 @@ EX namespace binary {
       set_seed();
       origin = hyperbolic_origin();
       #if DEBUG_BINARY_TILING
-      binary::xcode.clear();
-      binary::rxcode.clear();
-      binary::xcode[&h] = (1 << 16);
-      binary::rxcode[1<<16] = &h;
+      bt::xcode.clear();
+      bt::rxcode.clear();
+      bt::xcode[&h] = (1 << 16);
+      bt::rxcode[1<<16] = &h;
       #endif
       origin->zebraval = 0;
       origin->emeraldval = 0;
@@ -461,7 +464,7 @@ EX namespace binary {
       vector<hyperpoint> res;
       ld yy = log(2) / 2;
       auto add = [&] (hyperpoint h) { 
-        res.push_back(binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
+        res.push_back(bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
         };
       switch(geometry) {
         case gBinary3: 
@@ -610,7 +613,7 @@ EX namespace binary {
     if(geometry == gTernary) return 4;
     if(geometry == gBinaryTiling) return 5;
     if(penrose) return 0;
-    if(!binarytiling) return 0;
+    if(!bt::in()) return 0;
     return S7-1;
     }
   
@@ -945,7 +948,7 @@ EX int celldistance3(heptagon *c1, heptagon *c2) {
     case gHoroRec: return celldistance3_rec(c1, c2);
     case gHoroHex: return celldistance3_hex(c1, c2);
     default: 
-      if(sol || !binarytiling) {
+      if(sol || !bt::in()) {
         println(hlog, "called celldistance3 for wrong geometry"); return 0;
         }
       return celldistance3_approx(c1, c2);
@@ -956,7 +959,7 @@ EX int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->
 #endif
 
 EX hyperpoint get_horopoint(ld y, ld x) {
-  return xpush(-y) * binary::parabolic(x) * C0;
+  return xpush(-y) * bt::parabolic(x) * C0;
   }
 
 EX hyperpoint get_horopoint(hyperpoint h) {
@@ -1011,7 +1014,7 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
 
 
 auto hooksw = addHook(hooks_swapdim, 100, [] {
-  if(binarytiling) build_tmatrix();
+  if(bt::in()) build_tmatrix();
   });
 
   }

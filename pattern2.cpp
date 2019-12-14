@@ -18,7 +18,7 @@ EX int ctof(cell *c) {
   if(PURE) return 1;
   // if(euclid) return 0;
   if(!c) return 1;
-  if(binarytiling) return c->type == 7;
+  if(bt::in()) return c->type == 7;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
   }
@@ -386,7 +386,7 @@ EX int fieldval_uniq(cell *c) {
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
     }
-  else if(binarytiling || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
+  else if(bt::in() || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
   else if(&currfp == &fp_invalid) return 0;
   else if(WDIM == 3) return c->master->fieldval;
   else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
@@ -825,7 +825,7 @@ EX namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(IRREGULAR || arcm::in() || binarytiling || WDIM == 3) si.symmetries = 1;
+    if(IRREGULAR || arcm::in() || bt::in() || WDIM == 3) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
@@ -1004,7 +1004,7 @@ EX namespace patterns {
     si.dir = 0; si.reflect = false; si.id = ctof(c);
     si.symmetries = c->type;
     
-    if(binarytiling) {
+    if(bt::in()) {
       if(pat == PAT_SINGLETYPE) si.id = 0;
       else si.id = c->type & 1;
       si.dir = 2;
@@ -1202,14 +1202,14 @@ EX bool geosupport_chessboard() {
     (arcm::in() && PURE) ? arcm::current.support_chessboard() : 
     (arcm::in() && DUAL) ? arcm::current.support_threecolor_bitruncated() :
 #endif
-    (binarytiling || penrose) ? 0 :
+    (bt::in() || penrose) ? 0 :
     (S3 >= OINF) ? true :
     (VALENCE % 2 == 0);
   }
 
 EX int geosupport_threecolor() {
   if(IRREGULAR) return 0;
-  if(penrose || binarytiling) return 0;
+  if(penrose || bt::in()) return 0;
   #if CAP_ARCM
   if(arcm::in() && PURE) return arcm::current.support_threecolor();
   if(arcm::in() && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
@@ -1230,7 +1230,7 @@ EX int geosupport_threecolor() {
 EX int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
-  if(binarytiling || penrose) return 0;
+  if(bt::in() || penrose) return 0;
 
 #if CAP_ARCM  
   if(arcm::in() && DUAL) return false;
@@ -1264,7 +1264,7 @@ EX int pattern_threecolor(cell *c) {
     }
   #endif
   if(arb::in()) return 0;
-  if(IRREGULAR || binarytiling) return !pseudohept(c);
+  if(IRREGULAR || bt::in()) return !pseudohept(c);
   #if CAP_GP
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
@@ -1388,7 +1388,7 @@ EX bool pseudohept(cell *c) {
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
   if(nih) return c->master->zebraval % 3 == 2 && c->master->emeraldval % 2 == 1 && (c->master->distance % 2);
   if(penrose) return kite::getshape(c->master) == kite::pDart;
-  if(binarytiling) return binary::pseudohept(c);
+  if(bt::in()) return bt::pseudohept(c);
   #endif
   if(S3 >= OINF) return c->master->distance % 3 == 1;
   #if MAXMDIM == 4
@@ -1657,7 +1657,7 @@ EX namespace patterns {
         int y = (c->master->fieldval >> 12) & 4095;
         ignore(x);
         if(c->master->distance % 3) return 0;
-        if(c->c.spin(binary::updir()) != 1) return 0;
+        if(c->c.spin(bt::updir()) != 1) return 0;
         // if(c->master->distance % 2 == 0) return 0;
         if(hrand(100) == 0) return 0;
         return 0x1000000 | (0xFFFFFF & (0x671349 + y * 0x512369));
@@ -2572,7 +2572,7 @@ EX namespace linepatterns {
         
       case patTree:
         if(is_master(c)) {
-          int dir = binarytiling ? binary::updir() : 0;
+          int dir = bt::in() ? bt::updir() : 0;
           cell *c2 = c->master->move(dir)->c7;
           if(gmatrix.count(c2)) {
             if(S3 >= OINF)

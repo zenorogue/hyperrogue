@@ -39,12 +39,12 @@ transmatrix meupush(ld x, ld y) {
   if(euclid)
     return eupush(euscale * x, euscale * y);
   else
-    return binary::parabolic3(x, y);
+    return bt::parabolic3(x, y);
   }
 
 hyperpoint mhpxy(ld x, ld y) {
   if(euclid) return hpxy(euscale * x, euscale * y);
-  else return binary::parabolic3(x, y) * C0;
+  else return bt::parabolic3(x, y) * C0;
   }
 
 const ld phi = (1 + sqrt(5)) / 2;
@@ -149,7 +149,7 @@ struct hrmap_kite : hrmap {
     heptagon *h = tailored_alloc<heptagon> (8);
     h->s = hstate(s);
     h->dm4 = h->distance = dist;
-    if(binarytiling || dist == 0)
+    if(bt::in() || dist == 0)
       h->c7 = newCell(euclid ? 4 : s == pKite ? 12 : 10, h);
     else
       h->c7 = NULL;
@@ -163,7 +163,7 @@ struct hrmap_kite : hrmap {
   
   heptagon *hspawn(heptagon *of, int our, int their, pshape s) {
     auto h = newtile(s, of->distance + (our ? 1 : -1));
-    if(binarytiling) binary::make_binary_lands(of, h);
+    if(bt::in()) bt::make_binary_lands(of, h);
     of->c.connect(our, h, their, false);
     return h;
     }

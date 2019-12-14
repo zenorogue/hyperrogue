@@ -827,7 +827,7 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
   if(geometry == gBinary4) return false;
   #if MAXMDIM >= 4
   // 3D binary tilings create walls using their own methods
-  if(WDIM == 3 && binarytiling) return false;
+  if(WDIM == 3 && bt::in()) return false;
 
   if(WDIM == 3 && hyperbolic) return buildBarrier3D(c, l2, forced_dir);
   #endif

@@ -282,12 +282,12 @@ EX void initcells() {
   else if(penrose) currentmap = kite::new_map();
   #endif
   #if MAXMDIM >= 4
-  else if(WDIM == 3 && !binarytiling) currentmap = reg3::new_map();
+  else if(WDIM == 3 && !bt::in()) currentmap = reg3::new_map();
   #endif
   else if(sphere) currentmap = new_spherical_map();
   else if(quotient) currentmap = quotientspace::new_map();
   #if CAP_BT
-  else if(binarytiling) currentmap = binary::new_map();
+  else if(bt::in()) currentmap = bt::new_map();
   #endif
   else if(S3 >= OINF) currentmap = inforder::new_map();
   else currentmap = new hrmap_hyperbolic;
@@ -325,7 +325,7 @@ template<class T> void subcell(cell *c, const T& t) {
       subcell(c2, t);
       }
     }
-  else if(BITRUNCATED && !arcm::in() && !binarytiling)
+  else if(BITRUNCATED && !arcm::in() && !bt::in())
     forCellEx(c2, c) t(c2);
   t(c);
   }
@@ -377,7 +377,7 @@ EX void clearfrom(heptagon *at) {
         }
       }
     int edges = at->degree();
-    if(binarytiling && WDIM == 2) edges = at->c7->type;
+    if(bt::in() && WDIM == 2) edges = at->c7->type;
     for(int i=0; i<edges; i++) if(at->move(i)) {
       if(at->move(i)->alt != &deletion_marker)
         q.push(at->move(i));    
@@ -446,7 +446,7 @@ EX int celldist(cell *c) {
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euclid) return celldistance(currentmap->gamestart(), c);
-  if(sphere || binarytiling || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
+  if(sphere || bt::in() || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -477,7 +477,7 @@ EX int celldistAlt(cell *c) {
     return d;
     }
   #if CAP_BT
-  if(binarytiling || solnih) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
+  if(bt::in() || solnih) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
   #endif
   if(nil) return c->master->zebraval + abs(c->master->emeraldval) + (specialland == laCamelot && !tactic::on? 30 : 0);;
   #if CAP_CRYSTAL
@@ -746,9 +746,9 @@ cdata *getHeptagonCdata(heptagon *h) {
   if(sphere || quotient) h = currentmap->gamestart()->master;
   
   bool starting = h->s == hsOrigin;
-  if(binarytiling) {
-    if(binary::mapside(h) == 0) starting = true;
-    for(int i=0; i<h->type; i++) if(binary::mapside(h->cmove(i)) == 0) starting = true;
+  if(bt::in()) {
+    if(bt::mapside(h) == 0) starting = true;
+    for(int i=0; i<h->type; i++) if(bt::mapside(h->cmove(i)) == 0) starting = true;
     }
 
   if(starting) {
@@ -759,7 +759,7 @@ cdata *getHeptagonCdata(heptagon *h) {
     return h->cdata;
     }
   
-  int dir = binarytiling ? 5 : 0;
+  int dir = bt::in() ? 5 : 0;
   
   cdata mydata = *getHeptagonCdata(h->cmove(dir));
 
@@ -920,8 +920,8 @@ EX int heptdistance(heptagon *h1, heptagon *h2) {
     if(h1 == h2) return d;
     for(int i=0; i<S7; i++) if(h1->move(i) == h2) return d + 1;
     int d1 = h1->distance, d2 = h2->distance;
-    if(d1 >= d2) d++, h1 = createStep(h1, binary::updir());
-    if(d2 >  d1) d++, h2 = createStep(h2, binary::updir());
+    if(d1 >= d2) d++, h1 = createStep(h1, bt::updir());
+    if(d2 >  d1) d++, h2 = createStep(h2, bt::updir());
     }
   }
 
@@ -1038,8 +1038,8 @@ EX int celldistance(cell *c1, cell *c2) {
    if(S3 >= OINF) return inforder::celldistance(c1, c2);
 
   #if CAP_BT && MAXMDIM >= 4
-  if(binarytiling && WDIM == 3) 
-    return binary::celldistance3(c1, c2);
+  if(bt::in() && WDIM == 3) 
+    return bt::celldistance3(c1, c2);
   #endif
   
   #if MAXMDIM >= 4
@@ -1238,7 +1238,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !arcm::in() && !penrose && !binarytiling;
+  return !arcm::in() && !penrose && !bt::in();
   }
 
 }

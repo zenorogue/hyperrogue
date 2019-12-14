@@ -287,7 +287,7 @@ EX namespace yendor {
             ycw += best;
             }
           
-          else if(binarytiling) {
+          else if(bt::in()) {
             // make it challenging
             vector<int> ds;
             for(int d=0; d<ycw.at->type; d++) {

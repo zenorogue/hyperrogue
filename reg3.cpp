@@ -6,7 +6,7 @@
  *
  *  works with spherical and hyperbolic ones -- Euclidean cubic tiling implemented in euclid.cpp
  *  includes non-quotient spaces as well as field quotient and elliptic spaces
- *  hyperbolic honeycombs rely on binary:: to deal with floating point errors (just like archimedean)
+ *  hyperbolic honeycombs rely on bt:: to deal with floating point errors (just like archimedean)
  */
 
 #include "hyper.h"
@@ -644,7 +644,7 @@ EX namespace reg3 {
       
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3); 
-        binary::build_tmatrix();
+        bt::build_tmatrix();
         alt = tailored_alloc<heptagon> (S7);
         alt->s = hsOrigin;
         alt->emeraldval = 0;
@@ -653,7 +653,7 @@ EX namespace reg3 {
         alt->alt = alt;
         alt->cdata = NULL;
         alt->c7 = NULL;
-        binary_map = binary::new_alt_map(alt);
+        binary_map = bt::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
       
@@ -917,7 +917,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(close_distances.count(b)) return close_distances[b];
 
   dynamicval<eGeometry> g(geometry, gBinary3);  
-  return 20 + binary::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
+  return 20 + bt::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
   }
 
 EX bool pseudohept(cell *c) {
@@ -987,7 +987,7 @@ EX void generate_cellrotations() {
 
 ld adistance(cell *c) {  
   hyperpoint h = tC0(regmap()->reg_gmatrix[c->master].second);
-  h = binary::deparabolic3(h);
+  h = bt::deparabolic3(h);
   return regmap()->reg_gmatrix[c->master].first->distance * log(2) - h[0];
   }
 

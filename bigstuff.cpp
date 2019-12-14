@@ -485,7 +485,7 @@ EX int coastval(cell *c, eLand base) {
 
 EX bool checkInTree(cell *c, int maxv) {
   if(c->landparam <= 3) return false;
-  if(!maxv && WDIM == 3 && binarytiling) {
+  if(!maxv && WDIM == 3 && bt::in()) {
     forCellEx(c2, c) if(c2->landflags) return true;
     }
   if(!maxv) return false;
@@ -611,15 +611,15 @@ EX void buildEquidistant(cell *c) {
   if(c->land == laEndorian) {
     int ct = c->type;
     #if CAP_BT
-    if(binarytiling) {
+    if(bt::in()) {
       int skip = geometry == gHoroRec ? 3 : 2;
-      int up = binary::updir();
+      int up = bt::updir();
       if(c->landparam == 1) 
         c->landflags = (hrand(100) < 20);
-      else if(WDIM == 2 && c->type == 6 && (c->landparam % 2) && c->move(binary::bd_down) && c->move(binary::bd_down)->landflags)
+      else if(WDIM == 2 && c->type == 6 && (c->landparam % 2) && c->move(bt::bd_down) && c->move(bt::bd_down)->landflags)
         c->landflags = 1;
       else if(WDIM == 2 && c->type == 7 && (c->landparam % 2 == 0)) {
-        for(int d: {binary::bd_down_left, binary::bd_down_right})
+        for(int d: {bt::bd_down_left, bt::bd_down_right})
           if(c->move(d) && c->move(d)->landflags)
             c->landflags = 1;
         }
@@ -1324,7 +1324,7 @@ EX int wallchance(cell *c, bool deepOcean) {
 
 /** should we generate the horocycles in the current geometry? */
 EX bool horo_ok() {  
-  return hyperbolic && !binarytiling && !arcm::in() && !penrose && !experimental && !hybri;
+  return hyperbolic && !bt::in() && !arcm::in() && !penrose && !experimental && !hybri;
   }
 
 EX bool gp_wall_test() {
@@ -1378,7 +1378,7 @@ EX bool walls_not_implemented() {
   }
   
 EX void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient || nonisotropic || (penrose && !binarytiling) || experimental) return;
+  if(sphere || quotient || nonisotropic || (penrose && !bt::in()) || experimental) return;
   if(chaosmode > 1) return;
   bool deepOcean = deep_ocean_at(c, from);
   
@@ -1466,7 +1466,7 @@ EX void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !binarytiling && !(hyperbolic && WDIM == 3) && 
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() && !(hyperbolic && WDIM == 3) && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on && !racing::on))) {
     int rtr = newRoundTableRadius();
@@ -1664,7 +1664,7 @@ EX int masterAlt(cell *c) {
 EX void moreBigStuff(cell *c) {
 
   if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
-  if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) 
+  if(eubinary || bt::in() || c->master->alt) if(!(bt::in() && specialland != laCamelot)) 
     buildCamelot(c);
   
   if(quotient) return;
@@ -1701,7 +1701,7 @@ EX void moreBigStuff(cell *c) {
         c->wall = waColumn;
     }
   
-  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple && c->land == laRlyeh)) {
+  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(bt::in() && specialland != laTemple && c->land == laRlyeh)) {
     if(eubinary || in_s2xe() || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
@@ -1725,7 +1725,7 @@ EX void moreBigStuff(cell *c) {
             c->wall = waColumn;
           }
         else if(geometry == gHoroTris || geometry == gHoroRec) {
-          if(c->c.spin(binary::updir()) != 0) c->wall = waColumn;
+          if(c->c.spin(bt::updir()) != 0) c->wall = waColumn;
           }
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
@@ -1762,7 +1762,7 @@ EX void moreBigStuff(cell *c) {
       }
     }
 
-  if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(binarytiling && specialland != laClearing)) {
+  if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(bt::in() && specialland != laClearing)) {
     if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
@@ -1775,7 +1775,7 @@ EX void moreBigStuff(cell *c) {
       }
     }
 
-  if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(binarytiling && specialland != laMountain)) {
+  if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(bt::in() && specialland != laMountain)) {
     if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= 2))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
@@ -1786,7 +1786,7 @@ EX void moreBigStuff(cell *c) {
       }
     }
 
-  if(among(c->land, laOcean, laWhirlpool, laBrownian)) if(!(binarytiling && specialland != laWhirlpool)) {
+  if(among(c->land, laOcean, laWhirlpool, laBrownian)) if(!(bt::in() && specialland != laWhirlpool)) {
     bool fullwhirlpool = false;
     if(tactic::on && specialland == laWhirlpool)
       fullwhirlpool = true;

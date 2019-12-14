@@ -79,7 +79,7 @@ EX heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int 
   
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard);
-  if(binarytiling || arcm::in()) return h;
+  if(bt::in() || arcm::in()) return h;
   if(parent->c7) {
     #if CAP_IRR
     if(IRREGULAR)
@@ -228,7 +228,7 @@ heptagon *createStep(heptagon *h, int d) {
   }
 
 heptagon *hrmap_standard::create_step(heptagon *h, int d) {
-  if(!h->move(0) && h->s != hsOrigin && !binarytiling && !cryst) {
+  if(!h->move(0) && h->s != hsOrigin && !bt::in() && !cryst) {
     // cheating: 
     int pard=0;
     if(S3 == 3) 

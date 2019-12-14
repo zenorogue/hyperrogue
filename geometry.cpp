@@ -442,7 +442,7 @@ void geometry_information::prepare_basics() {
     goto hybrid_finish;
     }
 
-  if((sphere || hyperbolic) && WDIM == 3 && !binarytiling) {
+  if((sphere || hyperbolic) && WDIM == 3 && !bt::in()) {
     rhexf = hexf = 0.378077;
     crossf = hcrossf = 0.620672;
     tessf = 1.090550;
@@ -509,12 +509,12 @@ void geometry_information::prepare_basics() {
     }
   #endif
   #if CAP_BT
-  if(binarytiling) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
+  if(bt::in()) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
   if(geometry == gHoroRec || penrose || sol || nil || nih) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
-  if(binarytiling) scalefactor *= min<ld>(vid.binary_width, 1), crossf *= min<ld>(vid.binary_width, 1);
+  if(bt::in()) scalefactor *= min<ld>(vid.binary_width, 1), crossf *= min<ld>(vid.binary_width, 1);
   #endif
   #if CAP_BT && MAXMDIM >= 4
-  if(binarytiling) binary::build_tmatrix();
+  if(bt::in()) bt::build_tmatrix();
   #endif
   
   hybrid_finish:
@@ -880,7 +880,7 @@ EX void check_cgi() {
   
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   
-  if(binarytiling || GDIM == 3) V("WQ", its(vid.texture_step));
+  if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));
   
   if(hybri) V("U", its(int(hybrid::underlying)));
   
@@ -891,7 +891,7 @@ EX void check_cgi() {
   if(geometry == gFieldQuotient) { V("S3=", its(S3)); V("S7=", its(S7)); }
   if(nil) V("NIL", its(S7));
   
-  if(binarytiling) V("BT", fts(vid.binary_width));
+  if(bt::in()) V("BT", fts(vid.binary_width));
   
   if(GDIM == 2) { 
     V("CAMERA", fts(vid.camera));

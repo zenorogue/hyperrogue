@@ -220,7 +220,7 @@ vector<int> expansion_analyzer::gettype(cell *c) {
   for(int i=0; i<c->type; i++) {
     cell *c1 = c->cmove(i);
     int bonus = 0;
-    if(binarytiling) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
+    if(bt::in()) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
     res.push_back(bonus + subtype(c1) * 4 + celldist(c1) - d);
     }
   canonicize(res);
@@ -452,7 +452,7 @@ EX int type_in(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   for(int i=0; i<c->type; i++) {
     cell *c1 = c->cmove(i);
     int bonus = 0;
-    if(binarytiling) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
+    if(bt::in()) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
     res.push_back(bonus + subtype(c1) * 4 + f(c1) - d);
     }
   
@@ -487,7 +487,7 @@ EX bool sizes_known() {
   if(GDIM == 3) return false;
   if(bounded) return false;
   // Castle Anthrax is infinite
-  if(binarytiling) return false;
+  if(bt::in()) return false;
   // not implemented
   if(arcm::in()) return false;
   if(penrose) return false;
@@ -795,7 +795,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   dialog::addBreak(100 * scrolltime / scrollspeed);
 
-  if(sizes_known() || binarytiling) {
+  if(sizes_known() || bt::in()) {
     if(euclid) {
       dialog::addBreak(200);
       dialog::addInfo("a(d) = " + its(get_descendants(10).approx_int() - get_descendants(9).approx_int()) + "d", forecolor);
@@ -976,7 +976,7 @@ EX void set_sibling_limit() {
   else if(IRREGULAR) sibling_limit = 3;
   #endif
   #if CAP_BT
-  else if(binarytiling) sibling_limit = 3;
+  else if(bt::in()) sibling_limit = 3;
   #endif
   #if CAP_GP
   else {
@@ -989,7 +989,7 @@ EX void set_sibling_limit() {
   }
 
 int celldist0(cell *c) {
-  if(binarytiling) return celldistAlt(c);
+  if(bt::in()) return celldistAlt(c);
   else return celldist(c);
   }
 

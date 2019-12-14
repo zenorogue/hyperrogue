@@ -791,28 +791,28 @@ void celldrawer::draw_grid() {
     int ofs = wall_offset(c);
     for(int t=0; t<c->type; t++) {
       if(!c->move(t)) continue;
-      if(binarytiling && !sol && !among(t, 5, 6, 8)) continue;
-      if(!binarytiling && c->move(t) < c) continue;
+      if(bt::in() && !sol && !among(t, 5, 6, 8)) continue;
+      if(!bt::in() && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
       }
     }
   #endif
   #if CAP_BT
-  else if(binarytiling && WDIM == 2 && geometry != gTernary) {
+  else if(bt::in() && WDIM == 2 && geometry != gTernary) {
     ld yx = log(2) / 2;
     ld yy = yx;
     ld xx = 1 / sqrt(2)/2;
-    queueline(V * binary::get_horopoint(-yy, xx), V * binary::get_horopoint(yy, 2*xx), gridcolor(c, c->move(binary::bd_right)), prec);
+    queueline(V * bt::get_horopoint(-yy, xx), V * bt::get_horopoint(yy, 2*xx), gridcolor(c, c->move(bt::bd_right)), prec);
     auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
       if(vid.linequality > 0) steps <<= vid.linequality;
       if(vid.linequality < 0) steps >>= -vid.linequality;
-      for(int i=0; i<=steps; i++) curvepoint(V * binary::get_horopoint(y, x1 + (x2-x1) * i / steps));
+      for(int i=0; i<=steps; i++) curvepoint(V * bt::get_horopoint(y, x1 + (x2-x1) * i / steps));
       queuecurve(gridcolor(c, c->move(dir)), 0, PPR::LINE);
       };
-    horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
-    horizontal(yy, xx, -xx, 8, binary::bd_up);
-    horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
+    horizontal(yy, 2*xx, xx, 4, bt::bd_up_right);
+    horizontal(yy, xx, -xx, 8, bt::bd_up);
+    horizontal(yy, -xx, -2*xx, 4, bt::bd_up_left);
     }
   #endif
   else if(isWarped(c) && has_nice_dual()) {
@@ -1027,7 +1027,7 @@ void celldrawer::set_land_floor(const transmatrix& Vf) {
     
     case laSwitch:
       set_floor(cgi.shSwitchFloor);
-      if(ctof(c) && STDVAR && !arcm::in() && !binarytiling && GDIM == 2) for(int i=0; i<c->type; i++)
+      if(ctof(c) && STDVAR && !arcm::in() && !bt::in() && GDIM == 2) for(int i=0; i<c->type; i++)
         queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(cgi.rhexf), cgi.shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
       break;
 
@@ -1639,7 +1639,7 @@ void celldrawer::check_rotations() {
   if(0);
   
   #if CAP_BT
-  else if(binarytiling && models::do_rotate >= 2) {
+  else if(bt::in() && models::do_rotate >= 2) {
     if(!straightDownSeek || c->master->distance < straightDownSeek->master->distance) {
       usethis = true;
       spd = 1;

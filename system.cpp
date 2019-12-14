@@ -1215,7 +1215,7 @@ EX void set_geometry(eGeometry target) {
     if(DUAL && geometry != gArchimedean) 
       variation = ginf[geometry].default_variation;
     #if CAP_BT
-    if(binarytiling || WDIM == 3 || penrose) if(!hybri) variation = eVariation::pure;
+    if(bt::in() || WDIM == 3 || penrose) if(!hybri) variation = eVariation::pure;
     #endif
     if(S3 == OINF) variation = eVariation::pure;
     if(was_default) pmodel = default_model();
@@ -1229,7 +1229,7 @@ EX void set_geometry(eGeometry target) {
 EX void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
-    if(binarytiling || sol || penrose || WDIM == 3) if(!prod) geometry = gNormal;
+    if(bt::in() || sol || penrose || WDIM == 3) if(!prod) geometry = gNormal;
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;

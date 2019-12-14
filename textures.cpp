@@ -430,7 +430,7 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   transmatrix iv = inverse(applyPatterndir(c, si));
 
   int sd = si.dir;
-  if((NONSTDVAR) || binarytiling) sd = 0;
+  if((NONSTDVAR) || bt::in()) sd = 0;
   
   for(int i=0; i<c->type; i++) {
     hyperpoint h1 = iv * get_corner_position(c, (i + sd + shift) % c->type);

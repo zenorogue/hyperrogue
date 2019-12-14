@@ -257,7 +257,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
   sizeto(fsh.shadow, id);
 
   #if CAP_BT
-  if(binarytiling) {
+  if(bt::in()) {
 
     const int STEP = vid.texture_step;
     
@@ -269,12 +269,12 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
         bshape(fsh.shadow[id], fsh.prio);
       
       for(int i=0; i<sides; i++) {
-        hyperpoint h0 = binary::get_corner_horo_coordinates(c, i) * size;
-        hyperpoint h1 = binary::get_corner_horo_coordinates(c, i+1) * size;
+        hyperpoint h0 = bt::get_corner_horo_coordinates(c, i) * size;
+        hyperpoint h1 = bt::get_corner_horo_coordinates(c, i+1) * size;
         if(t) h0 *= SHADMUL, h1 *= SHADMUL;
         hyperpoint hd = (h1 - h0) / STEP;
         for(int j=0; j<STEP; j++)
-          hpcpush(binary::get_horopoint(h0 + hd * j));
+          hpcpush(bt::get_horopoint(h0 + hd * j));
         }
       
       hpcpush(hpc[last->s]);
@@ -284,11 +284,11 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, in
       for(int i=0; i<c->type; i++) {
         sizeto(fsh.gpside[k][i], id);
         bshape(fsh.gpside[k][i][id], PPR::LAKEWALL); 
-        hyperpoint h0 = binary::get_corner_horo_coordinates(c, i) * size;
-        hyperpoint h1 = binary::get_corner_horo_coordinates(c, i+1) * size;
+        hyperpoint h0 = bt::get_corner_horo_coordinates(c, i) * size;
+        hyperpoint h1 = bt::get_corner_horo_coordinates(c, i+1) * size;
         hyperpoint hd = (h1 - h0) / STEP;
         for(int j=0; j<=STEP; j++)
-          hpcpush(iddspin(c, i) * binary::get_horopoint(h0 + hd * j));
+          hpcpush(iddspin(c, i) * bt::get_horopoint(h0 + hd * j));
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
       }
@@ -326,7 +326,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
-    if(STDVAR && (standard_tiling() || binarytiling)) {
+    if(STDVAR && (standard_tiling() || bt::in())) {
 
       ld hexside = fsh.rad0, heptside = fsh.rad1;
       
@@ -525,12 +525,12 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         last->texture_offset = 0;
 
         #if CAP_BT
-        if(binarytiling) 
+        if(bt::in()) 
           for(int t=0; t<c->type; t++)
             texture_order([&] (ld x, ld y) {
-              hyperpoint left = binary::get_corner_horo_coordinates(c, t);
-              hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
-              hpcpush(orthogonal_move(binary::get_horopoint(left * x + right * y), dfloor_table[k]));
+              hyperpoint left = bt::get_corner_horo_coordinates(c, t);
+              hyperpoint right = bt::get_corner_horo_coordinates(c, t+1);
+              hpcpush(orthogonal_move(bt::get_horopoint(left * x + right * y), dfloor_table[k]));
               });
         else 
         #endif
@@ -554,12 +554,12 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         ld h = (FLOOR - WALL) / (co+1);
         ld top = co ? (FLOOR + WALL) / 2 : WALL;
         #if CAP_BT
-        if(binarytiling)
+        if(bt::in())
           for(int t=0; t<c->type; t++)
             texture_order([&] (ld x, ld y) {
-              hyperpoint left = binary::get_corner_horo_coordinates(c, t);
-              hyperpoint right = binary::get_corner_horo_coordinates(c, t+1);
-              hpcpush(orthogonal_move(binary::get_horopoint(left * x + right * y), top + h * (x+y)));
+              hyperpoint left = bt::get_corner_horo_coordinates(c, t);
+              hyperpoint right = bt::get_corner_horo_coordinates(c, t+1);
+              hpcpush(orthogonal_move(bt::get_horopoint(left * x + right * y), top + h * (x+y)));
               });
         else
         #endif
@@ -725,7 +725,7 @@ void geometry_information::generate_floorshapes() {
   else {
     cell model;
     model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
-    model.type = S7; generate_floorshapes_for(1, &model, binarytiling ? 0 : 1, 0);
+    model.type = S7; generate_floorshapes_for(1, &model, bt::in() ? 0 : 1, 0);
     }
   }
 

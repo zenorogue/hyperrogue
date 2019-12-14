@@ -412,12 +412,12 @@ void geometry_information::procedural_shapes() {
   if(0);
 
   #if CAP_BT
-  else if(binarytiling) {
+  else if(bt::in()) {
     for(int i=0; i<2; i++) {
       bshape(shWall[i], PPR::WALL);
-      hpcpush(binary::get_horopoint(log(2)/8, .1));
-      hpcpush(binary::get_horopoint(log(2)/8, -.1));
-      hpcpush(binary::get_horopoint(-log(2)/8, 0));
+      hpcpush(bt::get_horopoint(log(2)/8, .1));
+      hpcpush(bt::get_horopoint(log(2)/8, -.1));
+      hpcpush(bt::get_horopoint(-log(2)/8, 0));
       }
     }
   #endif
@@ -709,10 +709,10 @@ void geometry_information::compute_cornerbonus() { }
 
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(geometry == gNil && among(id, 2, 5)) h[2] = 0;
-  if(hyperbolic && binarytiling) {
+  if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
     // hyperpoint res = point31(h[2]*log(2)/2, h[0]*co, h[1]*co);
-    return deparabolic10(binary::parabolic3(h[0], h[1]) * xpush0(log(2)/2*h[2]));
+    return deparabolic10(bt::parabolic3(h[0], h[1]) * xpush0(log(2)/2*h[2]));
     }
   if(prod) {
     return point3(h[0]/h[2], h[1]/h[2], pz);
@@ -792,8 +792,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return; 
         }
-      if(solnih || !binarytiling) { hpcpush(normalize(h)); return; }
-      hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+      if(solnih || !bt::in()) { hpcpush(normalize(h)); return; }
+      hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       });
     }
@@ -810,8 +810,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         }
       if(nil)
         h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
-      if(solnih || !binarytiling) { hpcpush(normalize(h)); continue; }
-      hyperpoint res = binary::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+      if(solnih || !bt::in()) { hpcpush(normalize(h)); continue; }
+      hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       }
     hpcpush(hpc[last->s]);
@@ -848,7 +848,7 @@ void geometry_information::reserve_wall3d(int i) {
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
   reserve_wall3d(penrose ? 22 : hybri ? 0 : S7);
-  if(GDIM == 3 && binarytiling && geometry == gBinary3) {
+  if(GDIM == 3 && bt::in() && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
     hyperpoint h02 = point3(-1,+1,-1);
@@ -871,7 +871,7 @@ void geometry_information::create_wall3d() {
     make_wall(8, make4(h22+down, h02+down, h20+down));
     }
 
-  if(GDIM == 3 && binarytiling && geometry == gHoroTris) {
+  if(GDIM == 3 && bt::in() && geometry == gHoroTris) {
     ld r = sqrt(3)/6;
     ld r1 = r;
     ld r2 = r * 2;
@@ -897,7 +897,7 @@ void geometry_information::create_wall3d() {
 
   if(geometry == gHoroRec) {
     ld r2 = sqrt(2);
-    ld z = binary::hororec_scale;
+    ld z = bt::hororec_scale;
 
     hyperpoint a00 = point3(-r2*z,-2*z,-.5);
     hyperpoint a01 = point3(+r2*z,-2*z,-.5);
@@ -919,8 +919,8 @@ void geometry_information::create_wall3d() {
 
   if(geometry == gHoroHex) {
     ld z = log(3) / log(2) / 2;
-    ld r3 = sqrt(3) / 2 * binary::horohex_scale;
-    ld h = binary::horohex_scale / 2;
+    ld r3 = sqrt(3) / 2 * bt::horohex_scale;
+    ld h = bt::horohex_scale / 2;
     hyperpoint down = point3(0,0,2*z);
 
     for(int j=0; j<4; j++) for(int i=0; i<3; i++) {
@@ -1002,7 +1002,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(GDIM == 3 && !euclid && !binarytiling && !nonisotropic && !hybri && !penrose) {
+  if(GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !penrose) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
@@ -1084,7 +1084,7 @@ void geometry_information::create_wall3d() {
   if(penrose) {
     auto kv = kite::make_walls();
     for(auto& v: kv.first) for(auto& h: v) {
-      h = binary::deparabolic3(h);
+      h = bt::deparabolic3(h);
       h = point3(h[1], h[2], h[0] / (log(2)/2));
       }
     for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);

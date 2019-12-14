@@ -659,9 +659,9 @@ EX void apply() {
       reflect_view();
       View = ypush(-shift_angle * degree) * spin(-movement_angle * degree) * View;
       if(GDIM == 2)
-        View = binary::parabolic(parabolic_length * t / period) * View;
+        View = bt::parabolic(parabolic_length * t / period) * View;
       else
-        View = binary::parabolic3(parabolic_length * t / period, 0) * View;
+        View = bt::parabolic3(parabolic_length * t / period, 0) * View;
       View = spin(movement_angle * degree) * ypush(shift_angle * degree) * View;
       moved();
       break;

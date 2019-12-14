@@ -235,7 +235,7 @@ EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] {
   }};
 EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", [] { 
   if(euclid) return geometry == gCubeTiling;
-  return !binarytiling && !penrose && WDIM == 3 && !forced_quotient() && !nonisotropic && !prod;
+  return !bt::in() && !penrose && WDIM == 3 && !forced_quotient() && !nonisotropic && !prod;
   }};
 EX geometry_filter gf_quotient = {"interesting quotient spaces", [] { 
   return forced_quotient() && !elliptic;
@@ -290,7 +290,7 @@ void set_or_configure_geometry(eGeometry g) {
       if(g == gRotSpace) {
         bool ok = true;
         if(arcm::in()) ok = PURE;
-        else if(binarytiling || penrose) ok = false;
+        else if(bt::in() || penrose) ok = false;
         else ok = PURE || BITRUNCATED;
         if(!ok) {
           addMessage(XLAT("Only works with (semi-)regular tilings"));
@@ -611,7 +611,7 @@ EX void showEuclideanMenu() {
     }
   #endif
   #if CAP_BT
-  else if(binarytiling)
+  else if(bt::in())
     spf = "6,[6,7],7";
   #endif
   else if(BITRUNCATED)
@@ -664,7 +664,7 @@ EX void showEuclideanMenu() {
   else if(hybri) {
     dialog::addSelItem(XLAT("number of levels"), its(cgi.steps / cgi.single_step), 0);
     }
-  else if(binarytiling) {
+  else if(bt::in()) {
     dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
     dialog::add_action([] {
       dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
@@ -798,7 +798,7 @@ EX void showEuclideanMenu() {
 
   dialog::addSelItem(XLAT("size of the world"), 
     #if CAP_BT
-    binarytiling ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
+    bt::in() ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
     #endif
     #if CAP_ARCM
     arcm::in() && (WDIM == 2) ? arcm::current.world_size() :

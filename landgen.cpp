@@ -503,7 +503,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(sol)
           c->wall = (c->master->zebraval % 7 >= 5 || c->master->emeraldval % 7 >= 5) ? waCavewall : waCavefloor;
-        else if(WDIM == 3 && hyperbolic && !binarytiling)
+        else if(WDIM == 3 && hyperbolic && !bt::in())
           c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
         #if MAXMDIM >= 4
         else if(euc::in(3))
@@ -705,7 +705,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
-        else if(WDIM == 3 && hyperbolic && !binarytiling)
+        else if(WDIM == 3 && hyperbolic && !bt::in())
           c->wall = (c->master->zebraval & 2) ? waVinePlant : waNone;
         else if(a4 || sphere || arcm::in())
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
@@ -2576,7 +2576,7 @@ EX void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling && !arcm::in() && !cryst && WDIM == 2 && hyperbolic) {
+  if(!generatingEquidistant && from && d >= 7 && c->land && !bt::in() && !arcm::in() && !cryst && WDIM == 2 && hyperbolic) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {
@@ -2606,13 +2606,13 @@ EX void setdist(cell *c, int d, cell *from) {
   
   if(d >= BARLEV) {
   
-    if(binarytiling && WDIM == 3 && !c->land && !solnih) {
+    if(bt::in() && WDIM == 3 && !c->land && !solnih) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;
       if(geometry == gHoroHex) z *= 2;
-      ld scale = binary::expansion();
-      while(z < 3.999 && step < 10) cseek = cseek->cmove(binary::updir()), z *= scale;
+      ld scale = bt::expansion();
+      while(z < 3.999 && step < 10) cseek = cseek->cmove(bt::updir()), z *= scale;
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
   
