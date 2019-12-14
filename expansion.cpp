@@ -702,15 +702,13 @@ EX void viewdist_configure_dialog() {
     });
 
   int id = 0;
-  for(auto& lp: linepatterns::patterns) {
-    using namespace linepatterns;
-    if(among(lp.id, patTriTree, patTriRings, patTriOther)) {
-      dialog::addColorItem(XLAT(lp.lpname), lp.color, '1'+(id++));
-      dialog::add_action([&lp] () {
-        dialog::openColorDialog(lp.color, NULL);
-        dialog::dialogflags |= sm::MAYDARK | sm::SIDE | sm::EXPANSION;
-        });
-      }
+  using namespace linepatterns;
+  for(auto& lp: {&patTriTree, &patTriRings, &patTriOther}) {
+    dialog::addColorItem(XLAT(lp->lpname), lp->color, '1'+(id++));
+    dialog::add_action([&lp] () {
+      dialog::openColorDialog(lp->color, NULL);
+      dialog::dialogflags |= sm::MAYDARK | sm::SIDE | sm::EXPANSION;
+      });
     }
   
   if(!mod_allowed()) {

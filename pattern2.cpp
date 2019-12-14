@@ -1813,8 +1813,7 @@ EX namespace patterns {
     dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
 
-    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'L');
-    else dialog::addInfo("enable the cheat mode to use line patterns");
+    dialog::addItem(XLAT("line patterns"), 'L');
     
     dialog::addBack();
     dialog::display();
@@ -1857,7 +1856,7 @@ EX namespace patterns {
         if(whichShape == uni) whichShape = 0;
         else whichShape = uni;
         }
-      else if(uni == 'L' && (cheater || autocheat))
+      else if(uni == 'L')
         pushScreen(linepatterns::showMenu);
 
       else if(uni == 'f') {
@@ -2320,39 +2319,21 @@ EX bool is_master(cell *c) {
 EX namespace linepatterns {
 
   #if HDR
-  enum ePattern {
-    patPalacelike,
-    patPalace,
-    patZebraTriangles,
-    patZebraLines,
-    patTriTree,
-    patTriRings,
-    patHepta,
-    patRhomb,
-    patTree,
-    patAltTree,
-    patVine,
-    patPower,
-    patNormal,
-    patTrihepta,
-    patBigTriangles,
-    patBigRings,
-    patHorocycles,
-    patTriOther,
-    patDual,
-    patMeridians,
-    patParallels,
-    patCircles,
-    patRadii
-    };
-
   struct linepattern {
-    int id;
-    const char *lpname;
+    string lpname;
     color_t color;
     ld multiplier;
+    function<bool()> is_available;
+    function<void(linepattern*)> renderer;
+    
+    linepattern(string _lpname, color_t _color, function<bool()> _av, function<void(linepattern*)> _rend) : 
+      lpname(_lpname), color(_color), multiplier(1), is_available(_av), renderer(_rend) {}
     };
   #endif
+  
+  bool always_available() { return true; }
+  bool cheating() { return cheater || autocheat || tour::on; }
+  bool stdhyp_only() { return stdhyperbolic; }
 
   color_t lessalpha(color_t col, int m) {
     part(col, 0) /= m;
@@ -2367,57 +2348,6 @@ EX namespace linepatterns {
     if(b1) col = lessalpha(col, 2);
     if(b2) col = lessalpha(col, 2);
     return col;
-    }
-    
-  EX vector<linepattern> patterns = {
-
-    {patDual, "dual grid", 0xFFFFFF00, 1},
-
-    {patHepta, "heptagonal grid", 0x0000C000, 1},
-    {patRhomb, "rhombic tesselation", 0x0000C000, 1},
-    {patTrihepta, "triheptagonal tesselation", 0x0000C000, 1},
-    {patNormal, "normal tesselation", 0x0000C000, 1},
-    {patBigTriangles, "big triangular grid", 0x00606000, 1},
-    {patBigRings, "big triangles: rings", 0x0000C000, 1},
-    
-    {patTree, "underlying tree", 0x00d0d000, 1},
-    {patAltTree, "circle/horocycle tree", 0xd000d000, 1},
-
-    {patZebraTriangles, "zebra triangles", 0x40FF4000, 1},
-    {patZebraLines, "zebra lines", 0xFF000000, 1},
-    {patVine, "vineyard pattern", 0x8438A400, 1},
-    {patPalacelike, "firewall lines", 0xFF400000, 1},
-    {patPalace, "firewall lines: Palace", 0xFFD50000, 1},
-    {patPower, "firewall lines: Power", 0xFFFF0000, 1},
-    {patHorocycles, "horocycles", 0xd060d000, 1},
-
-    {patTriRings, "triangle grid: rings", 0xFFFFFF00, 1},
-    {patTriTree, "triangle grid: tree edges", 0xFFFFFF00, 1},
-    {patTriOther, "triangle grid: other edges", 0xFFFFFF00, 1},
-
-    {patCircles, "circles", 0xFFFFFF00, 1},
-    {patRadii, "radii", 0xFFFFFF00, 1},
-    {patMeridians, "meridians", 0xFFFFFF00, 1},
-    {patParallels, "parallels", 0xFFFFFF00, 1},
-    };
-
-  EX void clearAll() {
-    for(auto& lp: patterns) lp.color &= ~255;
-    }
-
-  bool any() {
-    for(auto& lp: patterns) if(lp.color & 255) return true;
-    return false;
-    }
-
-  EX void setColor(ePattern id, color_t col) {
-    for(auto& lp: patterns)
-      if(lp.id == id) lp.color = col;
-    }
-  
-  EX void switchAlpha(ePattern id, color_t col) {
-    for(auto& lp: patterns)
-      if(lp.id == id) lp.color ^= col;
     }
   
   void gridlinef(const transmatrix& V1, const hyperpoint& h1, const transmatrix& V2, const hyperpoint& h2, color_t col, int par) {
@@ -2437,293 +2367,338 @@ EX namespace linepatterns {
     }
 
   void gridlinef(const transmatrix& V, const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) { gridlinef(V, h1, V, h2, col, par); }
+
+  #define ALLCELLS(R) \
+    [] (linepattern *lp) { auto& col = lp->color; for(auto& p: current_display->all_drawn_copies) for(auto& V: p.second) { cell *c = p.first; R } }
   
-  void drawPattern(int id, color_t col, cell *c, const transmatrix& V) {
-
-    switch(id) {
-    
-      case patZebraTriangles:
-        if(euc::in(2,6)) {
-          if(c != c->master->c7 || patterns::sevenval(c)) break;
-          gridline(V, C0, tC0(euc::eumove(gp::loc(-1, +3))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(euc::eumove(gp::loc(-3, +2))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(euc::eumove(gp::loc(-2, -1))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(euc::eumove(gp::loc(+1, -3))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(euc::eumove(gp::loc(+3, -2))), col, 3 + vid.linequality);
-          gridline(V, C0, tC0(euc::eumove(gp::loc(+2, +1))), col, 3 + vid.linequality);
-          break;
-          }
-        if(zebra40(c) / 4 == 10) {
-          bool all = true;
-          transmatrix tri[3];
-          for(int i=0; i<3; i++)
-            tri[i] = V * currentmap->adj(c, i*2);
-          
-          if(all) for(int i=0; i<3; i++)
-            gridline(tri[i], C0, tri[(i+1)%3], C0, col, 3 + vid.linequality);
-          }
-        break;
+  #define ATCENTER(T) \
+    [] (linepattern *lp) { auto& col = lp->color; transmatrix V = gmatrix[cwt.at]; T}
       
-      case patZebraLines:
-        if(!pseudohept(c)) for(int i=0; i<c->type; i+=2) {
-          cell *c2 = createMov(c, i);
-          int fv1 = zebra40(c);
-          if(fv1/4 == 4 || fv1/4 == 6 || fv1/4 == 5 || fv1/4 == 10) fv1 ^= 2;
-          int fv2 = zebra40(c2);
-          if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
-          if((fv1&1) == (fv2&1)) continue;
-          
-          double x = cgi.hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
-          
-          gridlinef(V, ddspin(c,i,-M_PI/S3) * xpush0(x), 
-            ddspin(c,i,M_PI/S3) * xpush0(x), 
-            col, 1 + vid.linequality);
-          }
-        break;
-      
-      case patNormal: {
-        for(int t=0; t<c->type; t++)
-          if(c->move(t) && c->move(t) < c)
-          gridline(V, get_corner_position(c, t),
-                    get_corner_position(c, (t+1)%c->type),
-                    col, 1 + vid.linequality);
-        break;
+  linepattern patDual("dual grid", 0xFFFFFF00, always_available,
+    ALLCELLS(
+      forCellIdEx(c2, i, c) if(c2 > c) {
+        gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
         }
-      
-      case patTrihepta:
-        if(pseudohept(c)) for(int t=0; t<c->type; t++)
-          gridline(V, get_warp_corner(c, t%c->type),
-                    get_warp_corner(c, (t+1)%c->type),
-                    col, 1 + vid.linequality);
-        break;
-      
-      case patDual:
-        forCellIdEx(c2, i, c) if(c2 > c) {
-          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
-          }
-        break;
-
-      case patTriRings:
-        forCellIdEx(c2, i, c) {
-          if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
-          if(c2 > c) if(curr_dist(c) == curr_dist(c2)) 
-            gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
-          }
-        break;
-
-      case patTriTree: {
-        cell *parent = ts::right_parent(c, curr_dist);
-        if(gmatrix.count(parent)) 
-          gridlinef(V, C0, V * currentmap->adj(c, neighborId(c, parent)), C0, col, 2 + vid.linequality);
-        break;
-        }
-      
-      case patTriOther: {
-        cell *parent = ts::right_parent(c, curr_dist);
-        forCellIdEx(c2, i, c) if(curr_dist(c2) < curr_dist(c) && c2 != parent)
-          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
-        break;
-        }
-
-      case patHepta:
-        forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) == pseudohept(c2)) 
-          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
-        break;
-
-      case patRhomb:
-        forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) != pseudohept(c2)) 
-          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
-        break;
-      
-      case patPalace: {
-        bool a = polarb50(c);
-        if(pseudohept(c)) for(int i=0; i<7; i++) {
-            cell *c1 = createMov(c, (i+3) % 7);
-            cell *c2 = createMov(c, (i+4) % 7);
-            if(polarb50(c1) != a && polarb50(c2) != a)
-                gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
-                          ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
-                                    col, 1 + vid.linequality);
-            }
-        break;
-        }
-      
-      case patPalacelike:
-        if(pseudohept(c)) for(int i=0; i<7; i++) 
-          gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
-                       ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
-                              col, 1 + vid.linequality);
-        break;
-      
-      case patBigTriangles: {
+      )
+    );
+  
+  linepattern patHepta("heptagonal grid", 0x0000C000, always_available,
+    ALLCELLS(
+      forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) == pseudohept(c2)) 
+        gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+      )
+    );
+  
+  linepattern patRhomb("rhombic tesselation", 0x0000C000, always_available,
+    ALLCELLS(
+      forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) != pseudohept(c2)) 
+        gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+      )
+    );
+  
+  linepattern patTrihepta("triheptagonal tesselation", 0x0000C000, always_available,
+    ALLCELLS(
+      if(pseudohept(c)) for(int t=0; t<c->type; t++)
+      gridline(V, get_warp_corner(c, t%c->type),
+                get_warp_corner(c, (t+1)%c->type),
+                col, 1 + vid.linequality);
+      )
+    );
+  
+  linepattern patNormal("normal tesselation", 0x0000C000, always_available, 
+    ALLCELLS(
+      for(int t=0; t<c->type; t++)
+        if(c->move(t) && c->move(t) < c)
+        gridline(V, get_corner_position(c, t),
+                  get_corner_position(c, (t+1)%c->type),
+                  col, 1 + vid.linequality);
+      )
+    );
+  
+  linepattern patBigTriangles("big triangular grid", 0x00606000, always_available, 
+    ALLCELLS(
        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master) {
             gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
             }
-        break;
-        }
-        
-      case patBigRings: {
-        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
-            gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
-        break;
-        }
-        
-      case patTree:
-        if(is_master(c)) {
-          int dir = bt::in() ? bt::updir() : 0;
-          cell *c2 = c->master->move(dir)->c7;
-          if(gmatrix.count(c2)) {
-            if(S3 >= OINF)
-              gridlinef(V, C0, Id, mid(tC0(V), tC0(V * currentmap->adj(c, dir))), col, 2 + vid.linequality);
-            else 
-              gridlinef(V, C0, V * currentmap->adj(c, dir), C0, col, 2 + vid.linequality);
-            }
-          }
-        break;
-      
-      case patHorocycles:
-        if(c->master->alt) {
-          int d = celldistAlt(c);
-          forCellIdEx(c2, i, c) if(c2 > c && c2->master->alt && celldistAlt(c2) == d)
-            gridlinef(V, C0, V * currentmap->adj(c, i), C0, 
-              darkena(backcolor ^ 0xFFFFFF, 0, col),
-              2 + vid.linequality);
-          }
-        break;
+       )
+    );
 
-      case patAltTree:
-        if(is_master(c) && !euclid && c->master->alt) {
-          for(int i=0; i<S7; i++)
-            if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
-              cell *c2 = c->master->move(i)->c7;
-              if(gmatrix.count(c2)) {
-                if(S3 >= OINF) {
-                  gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
-                  }
-                else 
-                  gridlinef(V, C0, V*currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
+  linepattern patBigRings("big triangles: rings", 0x00606000, cheating,
+    ALLCELLS(
+      if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
+        if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
+          gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
+      )
+    );
+
+  linepattern patTree("underlying tree", 0x00d0d000, cheating, 
+    ALLCELLS(
+      if(is_master(c)) {
+        int dir = bt::in() ? bt::updir() : 0;
+        cell *c2 = c->master->move(dir)->c7;
+        if(gmatrix.count(c2)) {
+          if(S3 >= OINF)
+            gridlinef(V, C0, Id, mid(tC0(V), tC0(V * currentmap->adj(c, dir))), col, 2 + vid.linequality);
+          else 
+             gridlinef(V, C0, V * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
+           }
+         }
+      )
+    );
+  linepattern patAltTree("circle/horocycle tree", 0xd000d000, cheating, 
+    ALLCELLS(
+      if(is_master(c) && !euclid && c->master->alt) {
+        for(int i=0; i<S7; i++)
+          if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
+            cell *c2 = c->master->move(i)->c7;
+            if(gmatrix.count(c2)) {
+              if(S3 >= OINF) {
+                gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
                 }
+              else 
+                gridlinef(V, C0, V*currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
               }
-          }
-        break;
-      
-      case patVine: {
-        if(GOLDBERG) {
-          if(c->master->c7 != c) if(gmatrix.count(c->move(0)))
-            gridlinef(V, C0, V*currentmap->adj(c,0), C0, 
-              darkena(backcolor ^ 0xFFFFFF, 0, col),
-              2 + vid.linequality);
-          }
-        else if(IRREGULAR) {
-          if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
-            gridlinef(V, C0, V*master_relative(c, true), C0, 
-              darkena(backcolor ^ 0xFFFFFF, 0, col),
-              2 + vid.linequality);
-          }
-        else {
-          int p = emeraldval(c);
-          double hdist = hdist0(cgi.heptmove[0] * cgi.heptmove[2] * C0);
-          if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
-          for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
-            gridlinef(V, C0, tC0(cgi.heptmove[i]), col, 2 + vid.linequality);
-            gridlinef(V, C0, xspinpush0(-i * 2 * M_PI / S7, -hdist/2), col, 2 + vid.linequality);
             }
-          }
-        break;
         }
-      
-      case patPower: {
-        if(GOLDBERG) {
-          forCellIdEx(c2, i, c) if(c2->master != c->master)
-            gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
-              col,
-              1 + vid.linequality);
-          }
-        else if(arcm::in()) {
-          if(!pseudohept(c)) forCellIdEx(c2, i, c) if(c < c2 && !pseudohept(c2)) 
-            gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
-              col,
-              1 + vid.linequality);
-          }
-        else {
-          int a = emeraldval(c);
-          if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
-              heptagon *h1 = c->master->modmove(i+1);
-              heptagon *h2 = c->master->modmove(i-1);
-              if(!h1 || !h2) continue;
-              if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-                  gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
-                            ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
-                                      col, 1 + vid.linequality);
-              }
-          }
-        break;
+      )
+    );
+
+  linepattern patHeawood("seven-colorable torus", 0x40FF4000, [] { return euc::in(2, 6); },
+    ALLCELLS(
+      if(c != c->master->c7 || patterns::sevenval(c)) break;
+      gridline(V, C0, tC0(euc::eumove(gp::loc(-1, +3))), col, 3 + vid.linequality);
+      gridline(V, C0, tC0(euc::eumove(gp::loc(-3, +2))), col, 3 + vid.linequality);
+      gridline(V, C0, tC0(euc::eumove(gp::loc(-2, -1))), col, 3 + vid.linequality);
+      gridline(V, C0, tC0(euc::eumove(gp::loc(+1, -3))), col, 3 + vid.linequality);
+      gridline(V, C0, tC0(euc::eumove(gp::loc(+3, -2))), col, 3 + vid.linequality);
+      gridline(V, C0, tC0(euc::eumove(gp::loc(+2, +1))), col, 3 + vid.linequality);
+      )
+    );
+
+  linepattern patZebraTriangles("zebra triangles", 0x40FF4000, stdhyp_only,
+    ALLCELLS(
+      if(zebra40(c) / 4 == 10) {
+        bool all = true;
+        transmatrix tri[3];
+        for(int i=0; i<3; i++)
+          tri[i] = V * currentmap->adj(c, i*2);
+        
+        if(all) for(int i=0; i<3; i++)
+          gridline(tri[i], C0, tri[(i+1)%3], C0, col, 3 + vid.linequality);
         }
-      }
-    }  
+      )
+    );
+  linepattern patZebraLines("zebra lines", 0xFF000000, stdhyp_only, 
+    ALLCELLS(
+      if(!pseudohept(c)) for(int i=0; i<c->type; i+=2) {
+        cell *c2 = createMov(c, i);
+        int fv1 = zebra40(c);
+        if(fv1/4 == 4 || fv1/4 == 6 || fv1/4 == 5 || fv1/4 == 10) fv1 ^= 2;
+        int fv2 = zebra40(c2);
+        if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
+        if((fv1&1) == (fv2&1)) continue;
+        
+        double x = cgi.hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
+        
+        gridlinef(V, ddspin(c,i,-M_PI/S3) * xpush0(x), 
+          ddspin(c,i,M_PI/S3) * xpush0(x), 
+          col, 1 + vid.linequality);
+        }
+      )
+    );
+  linepattern patGoldbergTree("Goldberg tree", 0x8438A400, [] { return GOLDBERG; }, 
+    ALLCELLS(
+      if(c->master->c7 != c) 
+        gridlinef(V, C0, V*currentmap->adj(c,0), C0, 
+          darkena(backcolor ^ 0xFFFFFF, 0, col),
+          2 + vid.linequality);
+      )
+    );
+  linepattern patIrregularMaster("irregular master", 0x8438A400, [] { return IRREGULAR; }, 
+    ALLCELLS(
+      if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
+        gridlinef(V, C0, V*master_relative(c, true), C0, 
+          darkena(backcolor ^ 0xFFFFFF, 0, col),
+          2 + vid.linequality);
+      )
+    );
+  linepattern patVine("vineyard pattern", 0x8438A400, stdhyp_only, 
+    ALLCELLS(
+      int p = emeraldval(c);
+      double hdist = hdist0(cgi.heptmove[0] * cgi.heptmove[2] * C0);
+      if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
+      for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
+        gridlinef(V, C0, tC0(cgi.heptmove[i]), col, 2 + vid.linequality);
+        gridlinef(V, C0, xspinpush0(-i * 2 * M_PI / S7, -hdist/2), col, 2 + vid.linequality);
+        }
+      )
+    );
+  linepattern patPalacelike("firewall lines", 0xFF400000, stdhyp_only, 
+    ALLCELLS(
+      if(pseudohept(c)) for(int i=0; i<7; i++) 
+        gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
+                     ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
+                            col, 1 + vid.linequality);
+      )
+    );
+  linepattern patPalace("firewall lines: Palace", 0xFFD50000, stdhyp_only, 
+    ALLCELLS(
+      bool a = polarb50(c);
+      if(pseudohept(c)) for(int i=0; i<7; i++) {
+          cell *c1 = createMov(c, (i+3) % 7);
+          cell *c2 = createMov(c, (i+4) % 7);
+          if(polarb50(c1) != a && polarb50(c2) != a)
+              gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
+                        ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
+                                  col, 1 + vid.linequality);
+          }
+      )
+    );
+  linepattern patGoldbergSep("Goldberg", 0xFFFF0000, [] { return GOLDBERG; },
+    ALLCELLS(
+      forCellIdEx(c2, i, c) if(c2->master != c->master)
+        gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
+          col,
+          1 + vid.linequality);
+      )
+    );
+  linepattern patArcm("Archimedean", 0xFFFF0000, [] { return arcm::in(); },
+    ALLCELLS(
+      if(!pseudohept(c)) forCellIdEx(c2, i, c) if(c < c2 && !pseudohept(c2)) 
+        gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
+          col,
+          1 + vid.linequality);
+      )
+    );
+  
+  linepattern patPower("firewall lines: Power", 0xFFFF0000, stdhyp_only, 
+    ALLCELLS(
+      int a = emeraldval(c);
+      if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
+          heptagon *h1 = c->master->modmove(i+1);
+          heptagon *h2 = c->master->modmove(i-1);
+          if(!h1 || !h2) continue;
+          if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
+              gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
+                        ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
+                                  col, 1 + vid.linequality);
+          }
+      )
+    );
+  linepattern patHorocycles("horocycles", 0xd060d000, cheating, 
+    ALLCELLS(
+      if(c->master->alt) {
+        int d = celldistAlt(c);
+        forCellIdEx(c2, i, c) if(c2 > c && c2->master->alt && celldistAlt(c2) == d)
+          gridlinef(V, C0, V * currentmap->adj(c, i), C0, 
+            darkena(backcolor ^ 0xFFFFFF, 0, col),
+            2 + vid.linequality);
+        }
+      )
+    );
+  linepattern patTriRings("triangle grid: rings", 0xFFFFFF00, always_available, 
+    ALLCELLS(
+      forCellIdEx(c2, i, c) {
+        if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
+        if(c2 > c) if(curr_dist(c) == curr_dist(c2)) 
+          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+        }
+      )
+    );
+  linepattern patTriTree("triangle grid: tree edges", 0xFFFFFF00, always_available,
+    ALLCELLS(
+      cell *parent = ts::right_parent(c, curr_dist);
+      if(gmatrix.count(parent)) 
+        gridlinef(V, C0, V * currentmap->adj(c, neighborId(c, parent)), C0, col, 2 + vid.linequality);
+      )
+    );
+  linepattern patTriOther("triangle grid: other edges", 0xFFFFFF00, always_available, 
+    ALLCELLS(
+      cell *parent = ts::right_parent(c, curr_dist);
+      forCellIdEx(c2, i, c) if(curr_dist(c2) < curr_dist(c) && c2 != parent)
+        gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+      )
+    );
+
+  linepattern patCircles("circles", 0xFFFFFF00, always_available, 
+    ATCENTER(
+      for(int i=15; i<=180; i+=15) {
+        for(int j=0; j<360; j+=15) {
+          for(int k=0; k<=15; k++) 
+            curvepoint(xspinpush0((j+k) * degree, i * degree));
+          queuecurve(col, 0, PPR::LINE).V=V;
+          }
+        }
+      )
+    );
+
+  linepattern patRadii("radii", 0xFFFFFF00, always_available, 
+    ATCENTER(
+      for(int i=0; i<360; i+=15) {
+        for(int j=0; j<180; j+=15) {
+          for(int k=0; k<=15; k++)
+            curvepoint(xspinpush0(i * degree, (j+k) * degree));
+          queuecurve(col, 0, PPR::LINE).V=V;
+          }
+        }
+      )
+    );
+  linepattern patMeridians("meridians", 0xFFFFFF00, always_available, 
+    ATCENTER(
+      for(int j=-180; j<=180; j+=15) {
+        for(int i=-90; i<90; i+=15) {
+          for(int k=0; k<=15; k++)
+            curvepoint(V * xpush(j * degree) * ypush0((i+k) * degree));
+          queuecurve(col, 0, PPR::LINE).V=V;
+          }
+        }
+      )
+    );
+  linepattern patParallels("parallels", 0xFFFFFF00, always_available, 
+    ATCENTER(
+      for(int i=-90; i<=90; i += 15) {
+        for(int j=-180; j<180; j+=15) {
+          for(int k=0; k<=15; k++) 
+            curvepoint(V * xpush((j+k) * degree) * ypush0(i * degree));
+          queuecurve(col, 0, PPR::LINE).V=V;
+          }
+        }
+      )
+    );
+  
+  #if HDR
+  extern linepattern patTriTree, patTriRings, patTriOther;
+  #endif
+  
+  EX vector<linepattern*> patterns = { 
+    &patDual, &patHepta, &patRhomb, &patTrihepta, &patNormal, &patBigTriangles,
+    
+    &patTree, &patAltTree, &patZebraTriangles, &patZebraLines,
+    &patVine, &patPalacelike, &patPalace, &patPower, &patHorocycles,
+    &patTriRings, &patTriTree, &patTriOther,
+    &patGoldbergTree, &patIrregularMaster, &patGoldbergSep, &patHeawood, &patArcm,
+    &patCircles, &patRadii, &patMeridians, &patParallels
+    };
+
+  EX void clearAll() {
+    for(auto& lp: patterns) lp->color &= ~255;
+    }
 
   EX ld width = 1;
 
   EX void drawAll() {
   
+    if(!width) return;
+
     vid.linewidth *= width;
-
-    if(any()) for(auto& p: current_display->all_drawn_copies) for(auto& V: p.second) {
-      cell* c = p.first;
-      
-      for(auto& lp: patterns) {
-        color_t col = lp.color;
-        vid.linewidth *= lp.multiplier;
-        if(!(col & 255)) continue;        
-        drawPattern(lp.id, col, c, V);
-        vid.linewidth /= lp.multiplier;
-        }
-      }
     
-    transmatrix V = gmatrix[cwt.at];
-    for(auto& lp: patterns) {
-      color_t col = lp.color;  
-      vid.linewidth *= lp.multiplier;
-      if(!(col & 255)) continue;        
-      if(lp.id == patCircles) 
-        for(int i=15; i<=180; i+=15) {
-          for(int j=0; j<360; j+=15) {
-            for(int k=0; k<=15; k++) 
-              curvepoint(xspinpush0((j+k) * degree, i * degree));
-            queuecurve(col, 0, PPR::LINE).V=V;
-            }
-          }
-      if(lp.id == patRadii)
-        for(int i=0; i<360; i+=15) {
-          for(int j=0; j<180; j+=15) {
-            for(int k=0; k<=15; k++)
-              curvepoint(xspinpush0(i * degree, (j+k) * degree));
-            queuecurve(col, 0, PPR::LINE).V=V;
-            }
-          }
-      if(lp.id == patMeridians) {
-        for(int j=-180; j<=180; j+=15) {
-          for(int i=-90; i<90; i+=15) {
-            for(int k=0; k<=15; k++)
-              curvepoint(V * xpush(j * degree) * ypush0((i+k) * degree));
-            queuecurve(col, 0, PPR::LINE).V=V;
-            }
-          }
-        }
-      if(lp.id == patParallels) {
-        for(int i=-90; i<=90; i += 15) {
-          for(int j=-180; j<180; j+=15) {
-            for(int k=0; k<=15; k++) 
-              curvepoint(V * xpush((j+k) * degree) * ypush0(i * degree));
-            queuecurve(col, 0, PPR::LINE).V=V;
-            }
-          }
-        }
-      vid.linewidth /= lp.multiplier;
+    for(auto lp: patterns) if((lp->color & 255) && lp->multiplier && lp->is_available()) {
+      vid.linewidth *= lp->multiplier;
+      lp->renderer(lp);
+      vid.linewidth /= lp->multiplier;
       }
-
+      
     vid.linewidth /= width;
     }
   
@@ -2738,19 +2713,28 @@ EX namespace linepatterns {
     dialog::init(XLAT("line patterns"));
 
     int id = 0;    
-    for(auto& lp: patterns) {
-      string name = XLAT(lp.lpname);
-      if(GOLDBERG && among(lp.id, patVine, patPower)) name = XLAT("Goldberg");
-      if(!indiv) {
-        dialog::addColorItem(name, lp.color, 'a'+(id++));
-        dialog::add_action([&lp] () { 
-          dialog::openColorDialog(lp.color, NULL);
-          dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
-          });
+    for(auto lp: patterns) {
+      string name = XLAT(lp->lpname);
+      if(lp->is_available()) {
+        if(!indiv) {
+          dialog::addColorItem(name, lp->color, 'a'+(id++));
+          dialog::add_action([lp] () { 
+            dialog::openColorDialog(lp->color, NULL);
+            dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+            });
+          }
+        else {
+          dialog::addSelItem(name, fts(lp->multiplier), 'a'+(id++));
+          dialog::add_action([lp] () { dialog::editNumber(lp->multiplier, 0.001, 10, 0.1, 1, XLAT("line width"), ""), dialog::scaleLog(); });
+          }
         }
       else {
-        dialog::addSelItem(name, fts(lp.multiplier), 'a'+(id++));
-        dialog::add_action([&lp] () { dialog::editNumber(lp.multiplier, 0.001, 10, 0.1, 1, XLAT("line width"), ""), dialog::scaleLog(); });
+        cheater++;   
+        if(lp->is_available()) {
+          dialog::addSelItem(name, XLAT("cheat"), 'a'+(id++));
+          dialog::add_action(enable_cheat);
+          }
+        cheater--;
         }
       }
   
@@ -2806,24 +2790,24 @@ int read_pattern_args() {
     shift(); string ss = args();
     shift(); 
     for(auto& lp: linepatterns::patterns)
-      if(appears(lp.lpname, ss))
-        lp.color |= argi();
+      if(appears(lp->lpname, ss))
+        lp->color |= argi();
     }
   else if(argis("-palrgba")) {
     PHASEFROM(2); cheat();
     shift(); string ss = args();
     shift(); 
     for(auto& lp: linepatterns::patterns)
-      if(appears(lp.lpname, ss))
-        lp.color = arghex();
+      if(appears(lp->lpname, ss))
+        lp->color = arghex();
     }
 
   else if(argis("-palw")) {
     PHASEFROM(2); 
     shift(); string ss = args();
     for(auto& lp: linepatterns::patterns)
-      if(appears(lp.lpname, ss)) {
-        shift_arg_formula(lp.multiplier);
+      if(appears(lp->lpname, ss)) {
+        shift_arg_formula(lp->multiplier);
         return 0;
         }
     println(hlog, "linepattern not found in -palw: ", ss);
