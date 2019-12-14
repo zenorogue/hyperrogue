@@ -1636,7 +1636,7 @@ EX namespace patterns {
         }
       case 'P': {
         int d = celldistance(c, currentmap->gamestart()->move(0));
-        color_t res = gradient(0, canvasback, 0, min(1.8/(1+d), 1.), 1);
+        color_t res = distcolors[d];
         if(d > 3) res |= 0x1000000;
         return res;
         }
