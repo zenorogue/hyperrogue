@@ -514,7 +514,7 @@ static const flagtype qsDOCKS           = qANYQ | qSMALL | qBOUNDED | qDOCKS;
 static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
 static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD | qANYQ;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
-static const flagtype qsBP              = qBINARY | qPENROSE;
+static const flagtype qsBP              = qBINARY | qKITE;
 
 EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
 EX geometryinfo1 giHyperb2 = { gcHyperbolic, 2, 2, 3, {1,1,-1,0 } };
@@ -582,7 +582,7 @@ vector<geometryinfo> ginf = {
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, giHyperb3, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"binary4","none",    "standard binary tiling",                     "binary4",  5, 3, qBINARY,   giHyperb2, 0x41400, {{7, 5}}, eVariation::pure},
   {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY|qSOL,   giSolNIH,  0x41600, {{7, 5}}, eVariation::pure},
-  {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qPENROSE,  giEuclid2, 0x48000, {{7, 7}}, eVariation::pure},
+  {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qKITE,     giEuclid2, 0x48000, {{7, 7}}, eVariation::pure},
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      giHyperb3, 0x48200, {{7, 3}}, eVariation::pure},
   {"nil",    "none",    "Nil geometry",                               "nil",      6, 3, qOPTQ,     giNil,     0x48600, {{7, 5}}, eVariation::pure},
   {"product","none",    "product space",                              "product",  7, 3, qHYBRID,   giProduct, 0x00000, {{7, 3}}, eVariation::pure},

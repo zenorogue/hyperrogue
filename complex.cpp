@@ -1104,7 +1104,7 @@ EX namespace mirror {
   #endif
   
   EX bool build(cell *c) {
-    if(penrose || sol) return false;
+    if(kite::in() || sol) return false;
     #if CAP_GP
     if(GOLDBERG) {
       if(c == c->master->c7) {
@@ -1232,7 +1232,7 @@ EX namespace mirror {
   
   EX void createMirrors(cellwalker cw, int cpid) {
   
-    if(penrose || sol) return;
+    if(kite::in() || sol) return;
     
     #if CAP_ARCM
     if(arcm::in()) {

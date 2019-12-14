@@ -35,7 +35,7 @@
 #include "binary-tiling.cpp"
 #include "nonisotropic.cpp"
 #include "asonov.cpp"
-#include "penrose.cpp"
+#include "kite.cpp"
 #include "archimedean.cpp"
 #include "arbitrile.cpp"
 #include "euclid.cpp"

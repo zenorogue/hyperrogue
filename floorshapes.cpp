@@ -650,7 +650,7 @@ void geometry_information::generate_floorshapes() {
   else if(GOLDBERG) { /* will be generated on the fly */ }
   
   #if CAP_BT
-  else if(penrose) {
+  else if(kite::in()) {
     dynamicval<bool> ncor(approx_nearcorner, true);
     for(int i=0; i<2; i++) {
       modelh.s = hstate(i); /* kite/dart shape */
@@ -834,7 +834,7 @@ EX int shvid(cell *c) {
     return pseudohept(c);
   else if(geometry == gBinaryTiling)
     return c->type-6;
-  else if(penrose)
+  else if(kite::in())
     return kite::getshape(c->master);
   else if(geometry == gBinary4 || geometry == gTernary)
     return c->master->zebraval;
@@ -870,7 +870,7 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
   #endif
   else if(GOLDBERG && ishex1(c)) 
     return &queuepolyat(V * pispin, shv[0], col, prio);
-  else if(!(S7&1) && PURE && !penrose && !a4) {
+  else if(!(S7&1) && PURE && !kite::in() && !a4) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
     transmatrix D = applyPatterndir(c, si);

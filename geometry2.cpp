@@ -310,7 +310,7 @@ void hrmap_hyperbolic::virtualRebase(heptagon*& base, transmatrix& at) {
   }
 
 EX bool no_easy_spin() {
-  return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || penrose;
+  return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || kite::in();
   }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
@@ -369,7 +369,7 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
 EX double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 EX hyperpoint randomPointIn(int t) {
-  if(NONSTDVAR || arcm::in() || penrose) {
+  if(NONSTDVAR || arcm::in() || kite::in()) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
     return xspinpush0(2 * M_PI * randd(), asinh(randd() / 20));
@@ -394,7 +394,7 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
     }
   #endif
   #if CAP_BT
-  if(penrose) return kite::get_corner(c, cid, cf);
+  if(kite::in()) return kite::get_corner(c, cid, cf);
   if(bt::in()) {
     if(WDIM == 3) {
       println(hlog, "get_corner_position called");
@@ -502,7 +502,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
     neis[5] = bt::get_horopoint(0, -1);
     return neis[i];
     }
-  if(penrose) {
+  if(kite::in()) {
     if(approx_nearcorner)
       return kite::get_corner(c, i, 3) + kite::get_corner(c, i+1, 3) - C0;
     else
@@ -560,7 +560,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     }
   #endif
   #if CAP_BT
-  if(bt::in() || penrose)
+  if(bt::in() || kite::in())
     return nearcorner(c, (i+which) % c->type); // lazy
   #endif
   #if CAP_ARCM

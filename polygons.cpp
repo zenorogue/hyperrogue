@@ -424,7 +424,7 @@ void geometry_information::procedural_shapes() {
 
   else {
     ld rad0 = floorrad0, rad1 = floorrad1;
-    if(penrose) rad0 /= 2, rad1 /= 2;
+    if(kite::in()) rad0 /= 2, rad1 /= 2;
     if(S3 >= OINF) rad0 = rad1 = zhexf;
     bshape(shWall[0], PPR::WALL);
     for(int t=0; t<=S6; t++) {
@@ -847,7 +847,7 @@ void geometry_information::reserve_wall3d(int i) {
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  reserve_wall3d(penrose ? 22 : hybri ? 0 : S7);
+  reserve_wall3d(kite::in() ? 22 : hybri ? 0 : S7);
   if(GDIM == 3 && bt::in() && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -1002,7 +1002,7 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !penrose) {
+  if(GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in()) {
     reg3::generate();
     int facesize = isize(reg3::cellshape) / S7;
     for(int w=0; w<S7; w++) {
@@ -1081,7 +1081,7 @@ void geometry_information::create_wall3d() {
     for(int i=0; i<S7; i++) make_wall(i, nilv::current_ns().facevertices[i]);
     }
   
-  if(penrose) {
+  if(kite::in()) {
     auto kv = kite::make_walls();
     for(auto& v: kv.first) for(auto& h: v) {
       h = bt::deparabolic3(h);

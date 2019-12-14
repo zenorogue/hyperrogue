@@ -3507,7 +3507,7 @@ EX int get_darkval(cell *c, int d) {
   const int darkval_hrec[7] = {0,0,2,4,2,4,0};
   const int darkval_sol[8] = {0,2,4,4,0,2,4,4};
   const int darkval_arnold[12] = {0,2,0,2,4,5,0,2,0,2,4,5};
-  const int darkval_penrose[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
+  const int darkval_kite[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
   const int darkval_nil[8] = {6,6,0,3,6,6,0,3};
   const int darkval_nih[11] = {0,2,0,2,4,6,6,6,6,6,6};
   if(sphere) return darkval_s12[d];
@@ -3516,7 +3516,7 @@ EX int get_darkval(cell *c, int d) {
   if(euclid && S7 == 14) return darkval_e14[d];
   if(geometry == gHoroHex) return darkval_hh[d];
   if(geometry == gHoroRec) return darkval_hrec[d];
-  if(penrose) return darkval_penrose[d];
+  if(kite::in()) return darkval_kite[d];
   if(geometry == gArnoldCat) return darkval_arnold[d];
   if(sol) return darkval_sol[d];
   if(nih) return darkval_nih[d];
@@ -3610,7 +3610,7 @@ EX void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2,
 
 EX int wall_offset(cell *c) {
   if(hybri) return hybrid::wall_offset(c);
-  if(penrose && kite::getshape(c->master) == kite::pKite) return 10;
+  if(kite::in() && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;
   }
 

@@ -235,7 +235,7 @@ EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] {
   }};
 EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", [] { 
   if(euclid) return geometry == gCubeTiling;
-  return !bt::in() && !penrose && WDIM == 3 && !forced_quotient() && !nonisotropic && !prod;
+  return !bt::in() && !kite::in() && WDIM == 3 && !forced_quotient() && !nonisotropic && !prod;
   }};
 EX geometry_filter gf_quotient = {"interesting quotient spaces", [] { 
   return forced_quotient() && !elliptic;
@@ -290,7 +290,7 @@ void set_or_configure_geometry(eGeometry g) {
       if(g == gRotSpace) {
         bool ok = true;
         if(arcm::in()) ok = PURE;
-        else if(bt::in() || penrose) ok = false;
+        else if(bt::in() || kite::in()) ok = false;
         else ok = PURE || BITRUNCATED;
         if(!ok) {
           addMessage(XLAT("Only works with (semi-)regular tilings"));
@@ -470,7 +470,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(euclid && !penrose && !arcm::in()) {
+  if(euclid && !kite::in() && !arcm::in()) {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
@@ -678,7 +678,7 @@ EX void showEuclideanMenu() {
     extern void add_edit_wall_quality(char);
     add_edit_wall_quality('W');
     }
-  else if(WDIM == 3 || penrose) dialog::addBreak(100);
+  else if(WDIM == 3 || kite::in()) dialog::addBreak(100);
   else {
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {

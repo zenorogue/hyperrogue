@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- Kite-and-dart tiling
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file penrose.cpp
+/** \file kite.cpp
  *  \brief Kite-and-dart tiling, both in R^2 and H^3
  */
 
@@ -9,6 +9,9 @@
 namespace hr {
 
 EX namespace kite {
+
+EX bool in() { return cgflags & qKITE; }
+
 #if CAP_BT
 
 #if HDR
@@ -442,7 +445,7 @@ EX void find_cell_connection(cell *c, int d) {
     }
   }
 
-auto hooksw = addHook(hooks_swapdim, 100, [] { if(penrose && currentmap) kite_map()->make_graphrules(); });
+auto hooksw = addHook(hooks_swapdim, 100, [] { if(kite::in() && currentmap) kite_map()->make_graphrules(); });
 #endif
 }}
 

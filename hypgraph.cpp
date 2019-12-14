@@ -989,7 +989,7 @@ EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   #if CAP_BT
   if(bt::in()) return V;
   #endif
-  if(penrose) return V;
+  if(kite::in()) return V;
   return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 

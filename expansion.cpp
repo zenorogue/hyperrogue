@@ -490,7 +490,7 @@ EX bool sizes_known() {
   if(bt::in()) return false;
   // not implemented
   if(arcm::in()) return false;
-  if(penrose) return false;
+  if(kite::in()) return false;
   return true;  
   }
 

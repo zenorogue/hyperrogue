@@ -62,7 +62,7 @@ EX bool available() {
   if(noGUI) return false;
   if(!vid.usingGL) return false;
   if(WDIM == 2) return false;
-  if(hyperbolic && pmodel == mdPerspective && !penrose)
+  if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
   if(nil && S7 == 8)
     return false;

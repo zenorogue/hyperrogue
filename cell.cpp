@@ -180,7 +180,7 @@ EX cell *createMov(cell *c, int d) {
   else if(hybri)
     hybrid::find_cell_connection(c, d);
   #if CAP_BT
-  else if(penrose)
+  else if(kite::in())
     kite::find_cell_connection(c, d);
   #endif
   #if CAP_IRR
@@ -279,7 +279,7 @@ EX void initcells() {
   #endif
   else if(euc::in()) currentmap = euc::new_map();
   #if CAP_BT
-  else if(penrose) currentmap = kite::new_map();
+  else if(kite::in()) currentmap = kite::new_map();
   #endif
   #if MAXMDIM >= 4
   else if(WDIM == 3 && !bt::in()) currentmap = reg3::new_map();
@@ -446,7 +446,7 @@ EX int celldist(cell *c) {
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euclid) return celldistance(currentmap->gamestart(), c);
-  if(sphere || bt::in() || WDIM == 3 || cryst || solnih || penrose) return celldistance(currentmap->gamestart(), c);
+  if(sphere || bt::in() || WDIM == 3 || cryst || solnih || kite::in()) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -1017,7 +1017,7 @@ EX int celldistance(cell *c1, cell *c2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(arcm::in() || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
+  if(arcm::in() || quotient || solnih || (kite::in() && euclid) || experimental || sl2 || nil) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
@@ -1043,7 +1043,7 @@ EX int celldistance(cell *c1, cell *c2) {
   #endif
   
   #if MAXMDIM >= 4
-  if(euclid && !penrose && !arcm::in()) 
+  if(euclid && !kite::in() && !arcm::in()) 
     return euc::celldistance(c1, c2);
   
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
@@ -1238,7 +1238,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !arcm::in() && !penrose && !bt::in();
+  return !arcm::in() && !kite::in() && !bt::in();
   }
 
 }

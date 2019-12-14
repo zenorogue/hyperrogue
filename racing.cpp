@@ -776,7 +776,7 @@ EX bool set_view() {
 
   transmatrix at = ypush(-vid.yshift) * ggmatrix(who->base) * who->at;
   
-  if(racing::player_relative || quotient || (penrose && GDIM == 3)) {
+  if(racing::player_relative || quotient || (kite::in() && GDIM == 3)) {
     View = inverse(at) * View;
     }
   else {

@@ -510,7 +510,7 @@ void geometry_information::prepare_basics() {
   #endif
   #if CAP_BT
   if(bt::in()) hexvdist = rhexf = 1, tessf = 1, scalefactor = 1, crossf = hcrossf7;
-  if(geometry == gHoroRec || penrose || sol || nil || nih) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
+  if(geometry == gHoroRec || kite::in() || sol || nil || nih) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   if(bt::in()) scalefactor *= min<ld>(vid.binary_width, 1), crossf *= min<ld>(vid.binary_width, 1);
   #endif
   #if CAP_BT && MAXMDIM >= 4

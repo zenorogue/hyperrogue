@@ -381,7 +381,7 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(euclid && !penrose && !arcm::in()) {
+  else if(euclid && !kite::in() && !arcm::in()) {
     auto p = euc2_coordinates(c);
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
@@ -1202,14 +1202,14 @@ EX bool geosupport_chessboard() {
     (arcm::in() && PURE) ? arcm::current.support_chessboard() : 
     (arcm::in() && DUAL) ? arcm::current.support_threecolor_bitruncated() :
 #endif
-    (bt::in() || penrose) ? 0 :
+    (bt::in() || kite::in()) ? 0 :
     (S3 >= OINF) ? true :
     (VALENCE % 2 == 0);
   }
 
 EX int geosupport_threecolor() {
   if(IRREGULAR) return 0;
-  if(penrose || bt::in()) return 0;
+  if(kite::in() || bt::in()) return 0;
   #if CAP_ARCM
   if(arcm::in() && PURE) return arcm::current.support_threecolor();
   if(arcm::in() && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
@@ -1230,7 +1230,7 @@ EX int geosupport_threecolor() {
 EX int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
-  if(bt::in() || penrose) return 0;
+  if(bt::in() || kite::in()) return 0;
 
 #if CAP_ARCM  
   if(arcm::in() && DUAL) return false;
@@ -1387,7 +1387,7 @@ EX bool pseudohept(cell *c) {
   if(nil) return c->master->zebraval & c->master->emeraldval & c->master->fieldval & 1;
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
   if(nih) return c->master->zebraval % 3 == 2 && c->master->emeraldval % 2 == 1 && (c->master->distance % 2);
-  if(penrose) return kite::getshape(c->master) == kite::pDart;
+  if(kite::in()) return kite::getshape(c->master) == kite::pDart;
   if(bt::in()) return bt::pseudohept(c);
   #endif
   if(S3 >= OINF) return c->master->distance % 3 == 1;

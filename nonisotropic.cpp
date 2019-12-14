@@ -1383,7 +1383,7 @@ EX namespace product {
 
   EX bool validate_spin() {
     if(prod) return hybrid::in_underlying_geometry(validate_spin);
-    if(penrose) return false;
+    if(kite::in()) return false;
     if(!quotient && !arcm::in()) return true;
     map<cell*, cellwalker> cws;
     manual_celllister cl;

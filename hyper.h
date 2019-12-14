@@ -120,7 +120,6 @@ void addMessage(string s, char spamtype = 0);
 #define cgflags cginf.flags 
 
 #define cryst (cgflags & qCRYSTAL)
-#define penrose (cgflags & qPENROSE)
 
 /** convenience flag for geometries with major aspects missing */
 #define experimental (cgflags & qEXPERIMENTAL)
