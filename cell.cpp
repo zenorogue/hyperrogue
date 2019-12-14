@@ -487,7 +487,7 @@ EX int celldistAlt(cell *c) {
     return celldist(c) - 3;
     }
   #if MAXMDIM >= 4
-  if(euclid && WDIM == 3) return euc::dist_alt(c);
+  if(euc::in(3)) return euc::dist_alt(c);
   if(hyperbolic && WDIM == 3) return reg3::altdist(c->master);
   #endif
   if(!c->master->alt) return 0;
@@ -862,7 +862,7 @@ EX cdata *arcmCdata(cell *c) {
 
 EX int getCdata(cell *c, int j) {
   if(prod) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
-  else if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->val[j];
+  else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->val[j];
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
   else if(archimedean && hyperbolic) 
@@ -880,7 +880,7 @@ EX int getCdata(cell *c, int j) {
 
 EX int getBits(cell *c) {
   if(prod) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
-  else if(euclid && !archimedean && !penrose) return getEuclidCdata(euc2_coordinates(c))->bits;
+  else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->bits;
   else if(archimedean && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
   else if(archimedean && (hyperbolic || sl2)) 
@@ -1012,7 +1012,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
   
-  if(euclid && WDIM == 2 && !penrose && !archimedean) {
+  if(euc::in() && WDIM == 2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
@@ -1234,6 +1234,10 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
       else
         return { gmod(dir + c->type/2, c->type) };
     }
+  }
+
+EX bool standard_tiling() {
+  return !archimedean && !penrose && !binarytiling;
   }
 
 }

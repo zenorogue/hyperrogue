@@ -49,7 +49,7 @@ EX int celldistAltRelative(cell *c) {
   if(cryst) return crystal::dist_relative(c);
   #endif
   #if MAXMDIM >= 4
-  if(euclid && WDIM == 3) return euc::dist_relative(c);
+  if(euc::in(3)) return euc::dist_relative(c);
   #endif
   if(euclid && quotient) return celldistAlt(c) - roundTableRadius(c);
   if(sphere || quotient) {
@@ -63,7 +63,7 @@ EX gp::loc camelot_coords() { return gp::loc(a4 ? 21 : 20, 10); }
 
 EX int euclidAlt(short x, short y) {
   if(among(specialland, laTemple, laClearing, laCanvas)) {
-    if(euclid6)
+    if(euc::in(2,6))
       return max(int(x), x+y);
     else if(PURE)
       return x + abs(y);
@@ -71,7 +71,7 @@ EX int euclidAlt(short x, short y) {
       return max(x, y);
     }
   else if(specialland == laCaribbean || specialland == laWhirlpool || specialland == laMountain) {
-    if(euclid6)
+    if(euc::in(2,6))
       return 
         min(
           min(max(int(-x), -x-y) + 3,
@@ -1148,7 +1148,7 @@ EX void setLandEuclid(cell *c) {
   if(specialland == laElementalWall) {
     auto co = euc2_coordinates(c);
     int x = co.first, y = co.second;
-    int x0 = euclid4 ? x : x + (y>>1);
+    int x0 = euc::in(2,4) ? x : x + (y>>1);
     int y0 = y;
     
     int id = 0;
@@ -1177,8 +1177,8 @@ EX void setLandEuclid(cell *c) {
   if(specialland == laCrossroads3) {
     auto co = euc2_coordinates(c);
     int x = co.first, y = co.second;
-    int y0 = euclid4 ? 2 * y - x : y; 
-    int x0 = euclid4 ? 2 * x + y : x + y/2;
+    int y0 = euc::in(2,4) ? 2 * y - x : y; 
+    int x0 = euc::in(2,4) ? 2 * x + y : x + y/2;
     
     x0 += 24; y0 += 8;
     
@@ -1188,7 +1188,7 @@ EX void setLandEuclid(cell *c) {
     
     setland(c, id ? laCrossroads3 : laDesert);
     
-    if(euclid4 ? (!(y0&15) || !(x0&15)) : ((y0&15) == 15 && (x0&1)) || ((x0&15) == 0 && ((y0+1)&1))) {
+    if(euc::in(2,4) ? (!(y0&15) || !(x0&15)) : ((y0&15) == 15 && (x0&1)) || ((x0&15) == 0 && ((y0+1)&1))) {
       setland(c, laBarrier);
       c->wall = waBarrier;
       }

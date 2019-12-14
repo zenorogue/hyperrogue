@@ -165,8 +165,6 @@ void addMessage(string s, char spamtype = 0);
 #define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
 #define smallsphere (sphere_narcm && S7 < 5)
 #define bigsphere (sphere_narcm && S7 == 5)
-#define euclid4 (euclid && WDIM == 2 && a4)
-#define euclid6 (euclid && WDIM == 2 && !a4)
 
 #define S6 (S3*2)
 #define MAX_S3 4

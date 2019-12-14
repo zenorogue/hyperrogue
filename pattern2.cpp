@@ -804,7 +804,7 @@ EX namespace patterns {
       si.dir = (zebra40(c)*4) % 6;
       }
     if(symRotation) si.id = 1;
-    if(euclid6 && (sub & SPF_FULLSYM))
+    if(euc::in(2,6) && (sub & SPF_FULLSYM))
       si.symmetries = 1;
     }
 
@@ -829,8 +829,8 @@ EX namespace patterns {
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
-    else if(euclid4 && !penrose && !archimedean) valEuclid4(c, si, sub);
-    else if(euclid6 && !penrose && !archimedean) valEuclid6(c, si, sub);
+    else if(euc::in(2,4)) valEuclid4(c, si, sub);
+    else if(euc::in(2,6)) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);
     else si.symmetries = ctof(c) ? 1 : 2;
     }
@@ -911,7 +911,7 @@ EX namespace patterns {
       val_warped(c, si);
     else {
       si.id = pseudohept(c) ? 1 : 0;
-      if(euclid && !penrose && !archimedean) {
+      if(euc::in()) {
         si.dir = ishex1(c) ? 0 : 3;
         if(ctof(c)) si.symmetries = 3;
         if(subpattern_flags & SPF_EXTRASYM) 
@@ -955,7 +955,7 @@ EX namespace patterns {
           break;
           }
         }
-    if(euclid6 && (sub & SPF_CHANGEROT)) {
+    if(euc::in(2,6) && (sub & SPF_CHANGEROT)) {
       if(GOLDBERG) {
         auto li = gp::get_local_info(c);
         if(li.first_dir >= 0)
@@ -969,10 +969,10 @@ EX namespace patterns {
         si.dir = (zebra40(c)*4 + 9 - c->c.spin(0)) % 6;
       }
     if(sub & SPF_ROT) si.id = 1;
-    if(euclid6 && !(sub & SPF_EXTRASYM)) {
+    if(euc::in(2,6) && !(sub & SPF_EXTRASYM)) {
       si.symmetries = 6;
       }
-    if(euclid6 && (sub & SPF_FULLSYM))
+    if(euc::in(2,6) && (sub & SPF_FULLSYM))
       si.symmetries = 1;
     applyAlt(si, sub, PAT_COLORING);
     }
@@ -1283,7 +1283,7 @@ EX int pattern_threecolor(cell *c) {
     patterns::val38(c, si, !BITRUNCATED ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
     }
-  if(euclid6 && gp_threecolor() == 2) {
+  if(euc::in(2,6) && gp_threecolor() == 2) {
     auto li = gp::get_local_info(c);
     int rel = gmod(li.relative.first - li.relative.second, 3);
     if(rel && (li.last_dir&1)) rel = 3 - rel;
@@ -1315,7 +1315,7 @@ EX int pattern_threecolor(cell *c) {
     }
   if(euclid) {
     if(a4 && PURE) return eupattern4(c);
-    if(euclid6 && !BITRUNCATED) return eupattern(c) % 3;
+    if(euc::in(2,6) && !BITRUNCATED) return eupattern(c) % 3;
     return c == c->master->c7 ? 0 : (c->c.spin(0)&1) ? 1 : 2;
     }
   if(S3 >= OINF) return c->master->distance % 3;
@@ -1755,7 +1755,7 @@ EX namespace patterns {
 
     dialog::addItem(XLAT("nice coloring"), 'T');
 
-    if(euclid6)
+    if(euc::in(2,6))
       dialog::addItem(XLAT("seven-coloring"), 'v');
 
     if(stdhyperbolic) {      
@@ -2441,7 +2441,7 @@ EX namespace linepatterns {
     switch(id) {
     
       case patZebraTriangles:
-        if(euclid6) {
+        if(euc::in(2,6)) {
           if(c != c->master->c7 || patterns::sevenval(c)) break;
           gridline(V, C0, tC0(euc::eumove(gp::loc(-1, +3))), col, 3 + vid.linequality);
           gridline(V, C0, tC0(euc::eumove(gp::loc(-3, +2))), col, 3 + vid.linequality);

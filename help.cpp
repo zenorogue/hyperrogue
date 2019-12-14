@@ -814,14 +814,14 @@ EX void describeMouseover() {
     if(randomPatternsMode)
       out += " " + describeRPM(c->land);
       
-    if(euclid && cheater && WDIM == 2 && !archimedean && !penrose) {
+    if(cheater && euc::in(2)) {
       auto co = euc2_coordinates(c);
       out += " (" + its(co.first);
       for(int i=1; i<WDIM; i++) out += "," + its(co.second);
       out += ")";
       }
 
-    if(euclid && cheater && WDIM == 3) {
+    if(cheater && euc::in(3)) {
       auto co = euc::get_ispacemap()[c->master];
       out += " (" + its(co[0]);
       for(int i=1; i<WDIM; i++) out += "," + its(co[i]);

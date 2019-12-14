@@ -167,7 +167,7 @@ namespace mapstream {
       }
     if(binarytiling && VERNUM_HEX >= 0xA80C) 
       f.write(vid.binary_width);
-    if(euclid && !penrose && !archimedean) {
+    if(euc::in()) {
       f.write(euc::eu_input.user_axes);
       f.write(euc::eu_input.twisted);
       }
@@ -253,7 +253,7 @@ namespace mapstream {
       }
     if(binarytiling && VERNUM_HEX >= 0xA80C) 
       f.read(vid.binary_width);
-    if(euclid && !penrose && !archimedean && VERNUM_HEX >= 0xA80D) {
+    if(euc::in() && VERNUM_HEX >= 0xA80D) {
       f.read(euc::eu_input.user_axes);
       f.read(euc::eu_input.twisted);
       }

@@ -1134,7 +1134,7 @@ void geometry_information::configure_floorshapes() {
   double eps = hexhexdist * .05;
   if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
 
-  if(euclid4)
+  if(euc::in(2,4))
     trihepta0 = trihepta1 = crossf * 1.35 / 2;
 
   if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
@@ -1340,7 +1340,7 @@ void geometry_information::prepare_shapes() {
   if(sphere) krsc *= 1.4;
   if(S7 ==8) krsc *= 1.3;
 
-  if(PURE && !euclid4) {
+  if(PURE && !euc::in(2,4)) {
     tentacle_length = 1.52;
     bshape(shSeaTentacle, PPR::TENTACLE1, 1, 245);
     }
@@ -1353,7 +1353,7 @@ void geometry_information::prepare_shapes() {
     bshape(shSeaTentacle, PPR::TENTACLE1, scalefactor, 246);
     }
   ld ksc = (!BITRUNCATED ? 1.8 : 1.5) * scalefactor * krsc;
-  if(euclid4 && PURE) ksc *= .5;
+  if(euc::in(2,4) && PURE) ksc *= .5;
   bshape(shKrakenHead, PPR::ONTENTACLE, ksc, 247);
   bshape(shKrakenEye, PPR::ONTENTACLE_EYES, ksc, 248);
   bshape(shKrakenEye2, PPR::ONTENTACLE_EYES2, ksc, 249);

@@ -1081,7 +1081,7 @@ EX land_validity_t& land_validity(eLand l) {
     else {  
       bool reptile_good = false;
       if(hyperbolic_37 && BITRUNCATED) reptile_good = true;
-      if(euclid6) reptile_good = true;
+      if(euc::in(2,6)) reptile_good = true;
       if(quotient && geometry != gZebraQuotient && !euclid)
         reptile_good = false;
       if(!reptile_good)

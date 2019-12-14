@@ -3249,7 +3249,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t
   dynamicval<bool> ncor(approx_nearcorner, true);
   transmatrix V2 = V * ddspin(c, i);
  
-  if(binarytiling || archimedean || NONSTDVAR || penrose) {
+  if(NONSTDVAR || !standard_tiling()) {
     #if CAP_ARCM
     if(archimedean && !PURE)
       i = (i + arcm::parent_index_of(c->master)/DUALMUL + MODFIXER) % c->type;

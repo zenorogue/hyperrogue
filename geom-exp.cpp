@@ -231,7 +231,7 @@ EX geometry_filter gf_spherical = {"spherical", [] { return (archimedean || sphe
 EX geometry_filter gf_euclidean = {"Euclidean", [] { return (archimedean || euclid) && !forced_quotient(); }};
 EX geometry_filter gf_other = {"non-isotropic", [] { return prod || nonisotropic; }};
 EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] { 
-  return !archimedean && !binarytiling && !penrose && WDIM == 2 && !forced_quotient();
+  return standard_tiling() && WDIM == 2 && !forced_quotient();
   }};
 EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", [] { 
   if(euclid) return geometry == gCubeTiling;
@@ -613,7 +613,7 @@ EX void showEuclideanMenu() {
   else if(binarytiling)
     spf = "6,[6,7],7";
   #endif
-  else if(BITRUNCATED && !euclid6)
+  else if(BITRUNCATED)
     spf = spf + "," + its(S6) + "," + its(S6);
   #if CAP_IRR
   else if(IRREGULAR && irr::bitruncations_performed)
@@ -685,7 +685,7 @@ EX void showEuclideanMenu() {
       #if CAP_ARCM
       else if(archimedean) arcm::next_variation();
       #endif
-      else if(euclid4 || !CAP_GP) dialog::do_if_confirmed([] {
+      else if(euc::in(2,4) || !CAP_GP) dialog::do_if_confirmed([] {
         set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
         start_game();
         });
@@ -789,7 +789,7 @@ EX void showEuclideanMenu() {
 
   string fgname = XLAT(ginf[geometry].tiling_name);
   if(qstring != "none") fgname += " " + XLAT(qstring);
-  if(!euclid6) fgname = gp::operation_name() + " " + fgname;
+  if(!euc::in(2,6)) fgname = gp::operation_name() + " " + fgname;
   
   dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
   

@@ -531,7 +531,7 @@ void geometry_information::prepare_basics() {
   floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
   floorrad1 = rhexf * (GDIM == 3 ? 1 : 0.94);
   
-  if(euclid4) {
+  if(euc::in(2,4)) {
     if(!BITRUNCATED)
       floorrad0 = floorrad1 = rhexf * (GDIM == 3 ? 1 : .94);
     else

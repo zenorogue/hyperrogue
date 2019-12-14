@@ -326,9 +326,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
-    if(STDVAR && !archimedean && !penrose) {
+    if(STDVAR && (standard_tiling() || binarytiling)) {
 
-      // standard and binary
       ld hexside = fsh.rad0, heptside = fsh.rad1;
       
       for(int k=0; k<SIDEPARS; k++) sizeto(fsh.side[k], id);
@@ -451,7 +450,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     sizeto(fsh.b, id);
     sizeto(fsh.shadow, id);
     
-    if(STDVAR && !binarytiling && !archimedean && !penrose) {
+    if(STDVAR && standard_tiling()) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
       if(PURE && geosupport_football() < 2) {
         bshape2(fsh.b[id], fsh.prio, fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1, hept_matrices);

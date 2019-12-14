@@ -2564,7 +2564,7 @@ void celldrawer::set_maywarp_floor() {
 void celldrawer::set_reptile_floor(const transmatrix& V, color_t col, bool nodetails) {
 
   auto si = 
-    euclid6 ? 
+    euc::in(2,6) ? 
       patterns::getpatterninfo(c, patterns::PAT_COLORING, patterns::SPF_CHANGEROT)
     :
       patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
@@ -2579,11 +2579,11 @@ void celldrawer::set_reptile_floor(const transmatrix& V, color_t col, bool nodet
   else if(si.id >= 28 && si.id < 40) j = 3;
   else j = 4;
   
-  if(euclid6) j = 0;
+  if(euc::in(2,6)) j = 0;
   
   transmatrix D = applyPatterndir(c, si);
-  if(euclid6 && GOLDBERG) D = ddspin(c, si.dir);
-  if(wmescher && (stdhyperbolic || euclid6))
+  if(euc::in(2,6) && GOLDBERG) D = ddspin(c, si.dir);
+  if(wmescher && (stdhyperbolic || euc::in(2,6)))
     set_floor(D, cgi.shReptile[j][0]);
   else set_maywarp_floor();
 

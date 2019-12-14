@@ -506,7 +506,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         else if(WDIM == 3 && hyperbolic && !binarytiling)
           c->wall = (c->master->zebraval & 1) ? waCavewall : waCavefloor;
         #if MAXMDIM >= 4
-        else if(euclid && WDIM == 3)
+        else if(euc::in(3))
           c->wall = euc::get_emerald(c) ? waCavewall : waCavefloor;
         #endif
         else if(euclid) {
@@ -1284,16 +1284,16 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laStorms: {
-      bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient && !(euclid && !archimedean && !penrose && WDIM == 2)));
+      bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient && !euc::in(2)));
       if(fargen) {
       
-        if(euclid && smallbounded && WDIM == 2) {
+        if(euc::in(2) && smallbounded) {
           auto s = euc::sdxy();
           gp::loc st {s.first/3, s.second/3};
           if(c == euc::at(st)) c->wall = waCharged;
           if(c == euc::at(s-st)) c->wall = waGrounded;
           }
-        else if(euclid && WDIM == 2) {
+        else if(euc::in(2)) {
           auto co = euc2_coordinates(c);
           int x = co.first, y = co.second;
           if((x+1)%3 == 0 && y%3 == 0) {
@@ -2656,7 +2656,7 @@ EX void setdist(cell *c, int d, cell *from) {
       else if(cryst) crystal::set_land(c);
       #endif
       #if MAXMDIM == 4
-      else if(euclid && WDIM == 3) euc::set_land(c);
+      else if(euc::in(3)) euc::set_land(c);
       #endif
       else if(hybri) setLandHybrid(c);
       else if(sphere || (euclid && bounded)) setLandSphere(c);
