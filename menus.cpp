@@ -640,6 +640,21 @@ EX bool showHalloween() {
 
 int daily_mode;
 
+void announce_random() {
+  dialog::addBreak(100);
+  dialog::addTitle("(random option)", 0x808080, 50);
+  }
+
+void announce_nothing() {
+  dialog::addBreak(100);
+  dialog::addTitle("", 0x808080, 50);
+  }
+
+void announce_seasonal() {
+  dialog::addBreak(100);
+  dialog::addTitle("(seasonal option)", 0x808080, 50);
+  }
+
 EX void showStartMenu() {
   if(!daily_mode) {
     daily_mode = hrand(10) + 1;
@@ -674,90 +689,6 @@ EX void showStartMenu() {
   dialog::addInfo(XLAT("learn about hyperbolic geometry!"));
 #endif
 
-  switch(daily_mode) { 
-    case 1:
-      #if CAP_SHMUP_GOOD
-        dialog::addBreak(100);
-        dialog::addBigItem(XLAT("shoot'em up mode"), 's');
-        dialog::addInfo(XLAT("continuous spacetime"));
-      #if CAP_ACHIEVE
-        dialog::addInfo(XLAT("(most achievements are not available)"));
-      #endif
-      #endif
-      break;
-    
-    case 2: 
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("heptagonal mode"), '7');
-      dialog::addInfo(XLAT("more curvature"));
-      dialog::addInfo(XLAT("(most achievements are not available)"));
-      break;      
-    
-    case 3: 
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("experiment with geometry"), 'g');
-      dialog::addInfo(XLAT("(most achievements are not available)"));
-      break;      
-    
-    case 4: 
-      if(chaosUnlocked) {
-        dialog::addBreak(100);
-        dialog::addBigItem(XLAT("Chaos mode"), 'C');
-        dialog::addInfo(XLAT("(most achievements are not available)"));
-        }
-      break;      
-
-#if CAP_RUG    
-    case 5:
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("hypersian rug mode"), 'M');
-      dialog::addInfo(XLAT("see the true form"));
-      break;
-#endif
-
-#if CAP_TEXTURE && CAP_EDIT
-    case 6:
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("texture mode"), 'T');
-      dialog::addInfo(XLAT("paint pictures"));
-      break;
-#endif
-
-#if CAP_DAILY
-    case 7:
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("Strange Challenge"), 'z');
-      dialog::addInfo(XLAT("compete with other players on random lands in random geometries"));
-      break;
-#endif
-
-#if CAP_RACING
-    case 8:
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("Racing"), 'r'-96);
-      dialog::addInfo(XLAT("how fast can you reach the end?"));
-      break;
-
-    case 9:
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
-      dialog::addInfo(XLAT("race through a maze in exotic 3D geometry!"));
-      break;
-#endif
-
-    case 20:
-      dialog::addBreak(100);
-      dialog::addBigItem(XLAT1("Halloween"), 'Z');
-      dialog::addInfo(XLAT("Halloween mini-game"));
-      break;
-
-    default:
-      dialog::addBreak(100);
-      dialog::addBigItem("", 0);
-      dialog::addInfo("");
-      break;    
-    }
-
   if(have_current_settings()) {
     dialog::addBreak(100);
     dialog::addBigItem(XLAT1("use current/saved settings"), SDLK_ESCAPE);
@@ -772,6 +703,90 @@ EX void showStartMenu() {
   dialog::addBreak(100);
   dialog::addBigItem(XLAT("main menu"), 'm');
   dialog::addInfo(XLAT("more options"));
+
+  switch(daily_mode) { 
+    case 1:
+      #if CAP_SHMUP_GOOD
+        announce_random();
+        dialog::addBigItem(XLAT("shoot'em up mode"), 's');
+        dialog::addInfo(XLAT("continuous spacetime"));
+      #if CAP_ACHIEVE
+        dialog::addInfo(XLAT("(most achievements are not available)"));
+      #endif
+      #endif
+      break;
+    
+    case 2: 
+      announce_random();
+      dialog::addBigItem(XLAT("heptagonal mode"), '7');
+      dialog::addInfo(XLAT("more curvature"));
+      dialog::addInfo(XLAT("(most achievements are not available)"));
+      break;      
+    
+    case 3: 
+      announce_random();
+      dialog::addBigItem(XLAT("experiment with geometry"), 'g');
+      dialog::addInfo(XLAT("(most achievements are not available)"));
+      break;      
+    
+    case 4: 
+      if(chaosUnlocked) {
+        announce_random();
+        dialog::addBigItem(XLAT("Chaos mode"), 'C');
+        dialog::addInfo(XLAT("(most achievements are not available)"));
+        }
+      break;      
+
+#if CAP_RUG    
+    case 5:
+      announce_random();
+      dialog::addBigItem(XLAT("hypersian rug mode"), 'M');
+      dialog::addInfo(XLAT("see the true form"));
+      break;
+#endif
+
+#if CAP_TEXTURE && CAP_EDIT
+    case 6:
+      announce_random();
+      dialog::addBigItem(XLAT("texture mode"), 'T');
+      dialog::addInfo(XLAT("paint pictures"));
+      break;
+#endif
+
+#if CAP_DAILY
+    case 7:
+      announce_random();
+      dialog::addBigItem(XLAT("Strange Challenge"), 'z');
+      dialog::addInfo(XLAT("compete with other players on random lands in random geometries"));
+      break;
+#endif
+
+#if CAP_RACING
+    case 8:
+      announce_random();
+      dialog::addBigItem(XLAT("Racing"), 'r'-96);
+      dialog::addInfo(XLAT("how fast can you reach the end?"));
+      break;
+
+    case 9:
+      announce_random();
+      dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
+      dialog::addInfo(XLAT("race through a maze in exotic 3D geometry!"));
+      break;
+#endif
+
+    case 20:
+      announce_seasonal();
+      dialog::addBigItem(XLAT1("Halloween"), 'Z');
+      dialog::addInfo(XLAT("Halloween mini-game"));
+      break;
+
+    default:
+      announce_nothing();
+      dialog::addBigItem("", 0);
+      dialog::addInfo("");
+      break;    
+    }
 
   dialog::display();
   clearMessages();
