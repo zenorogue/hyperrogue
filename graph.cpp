@@ -3571,7 +3571,7 @@ bool celldrawer::cell_clipped() {
       }
     noclipped++;
     }
-  if(pmodel == mdGeodesic && solnih) {
+  if(pmodel == mdGeodesic && sn::in()) {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {

@@ -446,7 +446,7 @@ EX int celldist(cell *c) {
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euclid) return celldistance(currentmap->gamestart(), c);
-  if(sphere || bt::in() || WDIM == 3 || cryst || solnih || kite::in()) return celldistance(currentmap->gamestart(), c);
+  if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || kite::in()) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -477,7 +477,7 @@ EX int celldistAlt(cell *c) {
     return d;
     }
   #if CAP_BT
-  if(bt::in() || solnih) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
+  if(bt::in() || sn::in()) return c->master->distance + (specialland == laCamelot && !tactic::on? 30 : 0);
   #endif
   if(nil) return c->master->zebraval + abs(c->master->emeraldval) + (specialland == laCamelot && !tactic::on? 30 : 0);;
   #if CAP_CRYSTAL
@@ -914,7 +914,7 @@ EX int heptdistance(heptagon *h1, heptagon *h2) {
   if(cryst) return crystal::space_distance(h1->c7, h2->c7);
   #endif
   #if CAP_SOLV
-  if(solnih) return solnihv::approx_distance(h1, h2);
+  if(sn::in()) return sn::approx_distance(h1, h2);
   #endif
   while(true) {
     if(h1 == h2) return d;
@@ -1017,7 +1017,7 @@ EX int celldistance(cell *c1, cell *c2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(arcm::in() || quotient || solnih || (kite::in() && euclid) || experimental || sl2 || nil) {
+  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

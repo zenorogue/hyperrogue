@@ -1131,7 +1131,7 @@ EX hyperpoint tangent_length(hyperpoint dir, ld length) {
 
 /** exponential function: follow the geodesic given by v */
 EX hyperpoint direct_exp(hyperpoint v, int steps) {
-  if(solnih) return nisot::numerical_exp(v, steps);
+  if(sn::in()) return nisot::numerical_exp(v, steps);
   if(nil) return nilv::formula_exp(v);
   if(sl2) return slr::formula_exp(v);
   if(prod) return product::direct_exp(v);
@@ -1148,11 +1148,11 @@ enum iePrecision { iLazy, iTable };
 /** inverse exponential function \see hr::direct_exp */
 EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
   #if CAP_SOLV
-  if(solnih) {
+  if(sn::in()) {
     if(nih) 
-      return solnihv::get_inverse_exp_nsym(h, p == iLazy, just_direction);
+      return sn::get_inverse_exp_nsym(h, p == iLazy, just_direction);
     else
-      return solnihv::get_inverse_exp_symsol(h, p == iLazy, just_direction);
+      return sn::get_inverse_exp_symsol(h, p == iLazy, just_direction);
     }
   #endif
   if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);

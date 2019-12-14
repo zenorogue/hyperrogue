@@ -158,7 +158,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(pmodel == mdGeodesic) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     coordinator += "t = inverse_exp(t);\n";
-    if(solnih) {
+    if(sn::in()) {
       coordinator +=
         "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);\n"
         "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.;\n"
@@ -170,18 +170,18 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     switch(cgclass) {
       #if CAP_SOLV
       case gcSolNIH:
-        switch(solnihv::geom()) {
+        switch(sn::geom()) {
           case gSol:
-            vsh += solnihv::shader_symsol;
+            vsh += sn::shader_symsol;
             break;
           case gNIH:
-            vsh += solnihv::shader_nsym;
+            vsh += sn::shader_nsym;
             break;
           case gSolN:
-            vsh += solnihv::shader_nsymsol;
+            vsh += sn::shader_nsymsol;
             break;
           default:
-            println(hlog, "error: unknown solnih geometry");
+            println(hlog, "error: unknown sn geometry");
           }            
         treset = true;
         break;
@@ -320,7 +320,7 @@ void display_data::set_projection(int ed) {
   
   #if CAP_SOLV
   if(selected->uPRECX != -1) {
-    auto &tab = solnihv::get_tabled();
+    auto &tab = sn::get_tabled();
     
     GLuint invexpid = tab.get_texture_id();
     

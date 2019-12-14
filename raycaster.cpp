@@ -40,7 +40,7 @@ EX int max_cells = 2048;
 EX bool rays_generate = true;
 
 EX ld& exp_decay_current() {
-  return (solnih || hyperbolic) ? exp_decay_exp : exp_decay_poly;
+  return (sn::in() || hyperbolic) ? exp_decay_exp : exp_decay_poly;
   }
 
 EX int& max_iter_current() {
@@ -49,7 +49,7 @@ EX int& max_iter_current() {
   }
 
 ld& maxstep_current() {
-  if(solnih) return maxstep_sol;
+  if(sn::in()) return maxstep_sol;
   else return maxstep_nil;
   }
 
@@ -66,7 +66,7 @@ EX bool available() {
     return true;
   if(nil && S7 == 8)
     return false;
-  if((solnih || nil) && pmodel == mdGeodesic)
+  if((sn::in() || nil) && pmodel == mdGeodesic)
     return true;
   if(euclid && pmodel == mdPerspective && !bt::in())
     return true;
@@ -436,7 +436,7 @@ void enable_raycaster() {
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
       
-      if(solnih && !asonov) fsh += "uniform mediump float uBinaryWidth;\n";
+      if(sn::in() && !asonov) fsh += "uniform mediump float uBinaryWidth;\n";
       
       fmain += 
         "  dist = next < minstep ? 2.*next : next;\n";
@@ -457,7 +457,7 @@ void enable_raycaster() {
                 
       if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
       
-      if(solnih) fmain +=
+      if(sn::in()) fmain +=
         "vec4 acc = christoffel(position, tangent, tangent);\n"
         "vec4 pos2 = position + tangent * dist / 2.;\n"
         "vec4 tan2 = tangent + acc * dist / 2.;\n"
@@ -526,7 +526,7 @@ void enable_raycaster() {
           "}\n"
         "else {\n";
       
-      if(solnih) {
+      if(sn::in()) {
         if(asonov) fmain +=
           "if(sp.x > 1.) which = 4;\n"
           "if(sp.y > 1.) which = 5;\n"

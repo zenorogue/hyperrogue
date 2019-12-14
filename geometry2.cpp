@@ -179,7 +179,7 @@ struct horo_distance {
 #endif
 
 void horo_distance::become(hyperpoint h1) {
-  if(solnih) {
+  if(sn::in()) {
     a = abs(h1[2]);
     if(asonov::in()) h1 = asonov::straighten * h1;
     b = hypot_d(2, h1);
@@ -201,14 +201,14 @@ horo_distance::horo_distance(hyperpoint h1, const transmatrix& T) {
   if(bt::in()) become(inverse(T) * h1);
   else
 #endif
-  if(solnih || hybri || nil) become(inverse(T) * h1);
+  if(sn::in() || hybri || nil) become(inverse(T) * h1);
   else
     a = 0, b = intval(h1, tC0(T));
   }
 
 bool horo_distance::operator < (const horo_distance z) const {
   #if CAP_BT
-  if(bt::in() || solnih) {
+  if(bt::in() || sn::in()) {
     if(a < z.a-1e-6) return true;
     if(a > z.a+1e-6) return false;
     }

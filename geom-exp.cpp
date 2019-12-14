@@ -376,7 +376,7 @@ void ge_select_tiling() {
   }
 
 EX string current_proj_name() {
-  bool h = hyperbolic || solnih;
+  bool h = hyperbolic || sn::in();
   if(pmodel != mdDisk)
     return models::get_model_name(pmodel);
   else if(h && vid.alpha == 1)
@@ -414,7 +414,7 @@ EX string geometry_name() {
 
     case gcSolNIH:
 #if CAP_SOLV
-      switch(solnihv::geom()) {
+      switch(sn::geom()) {
         case gSol:
           return XLAT("Sol");
         case gNIH:

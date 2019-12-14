@@ -362,7 +362,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       if(nonisotropic) {
         ret = lp_apply(inverse_exp(H, iTable, true));
         ld w;
-        if(solnih) {
+        if(sn::in()) {
           // w = 1 / sqrt(1 - sqhypot_d(3, ret));
           // w = w / (vid.alpha + w);
           w = 1 / (sqrt(1 - sqhypot_d(3, ret)) * vid.alpha + 1);
@@ -1027,7 +1027,7 @@ EX bool in_smart_range(const transmatrix& T) {
   if(invalid_point(h)) return false;
   if(nil || nih) return true;
   #if CAP_SOLV
-  if(pmodel == mdGeodesic) return solnihv::in_table_range(h);
+  if(pmodel == mdGeodesic) return sn::in_table_range(h);
   #endif
   hyperpoint h1;
   applymodel(h, h1);

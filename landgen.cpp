@@ -2606,7 +2606,7 @@ EX void setdist(cell *c, int d, cell *from) {
   
   if(d >= BARLEV) {
   
-    if(bt::in() && WDIM == 3 && !c->land && !solnih) {
+    if(bt::in() && WDIM == 3 && !c->land && !sn::in()) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;

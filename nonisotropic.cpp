@@ -44,7 +44,9 @@ EX namespace nisot {
   EX }
 
 #if CAP_SOLV
-EX namespace solnihv {
+EX namespace sn {
+
+  EX bool in() { return cgclass == gcSolNIH; }
 
   EX eGeometry geom() {
     if(asonov::in()) return gSol;
@@ -487,8 +489,8 @@ EX namespace solnihv {
     auto& s = get_tabled();
     s.load();
     
-    ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
-    ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
+    ld ix = h[0] >= 0. ? sn::x_to_ix(h[0]) : sn::x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? sn::x_to_ix(h[1]) : sn::x_to_ix(-h[1]);
     ld iz = tanh(h[2]);
     
     if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
@@ -512,8 +514,8 @@ EX namespace solnihv {
     auto& s = get_tabled();
     s.load();
     
-    ld ix = h[0] >= 0. ? solnihv::x_to_ix(h[0]) : solnihv::x_to_ix(-h[0]);
-    ld iy = h[1] >= 0. ? solnihv::x_to_ix(h[1]) : solnihv::x_to_ix(-h[1]);
+    ld ix = h[0] >= 0. ? sn::x_to_ix(h[0]) : sn::x_to_ix(-h[0]);
+    ld iy = h[1] >= 0. ? sn::x_to_ix(h[1]) : sn::x_to_ix(-h[1]);
     ld iz = (tanh(h[2]/4)+1)/2;
     
     hyperpoint res = s.get(ix, iy, iz, lazy);
@@ -530,7 +532,7 @@ EX namespace solnihv {
     return res;
     }
 
-  EX string shader_symsol = solnihv::common +
+  EX string shader_symsol = sn::common +
 
     "vec4 inverse_exp(vec4 h) {"
     
@@ -561,7 +563,7 @@ EX namespace solnihv {
     "return res;"
     "}";
 
-  EX string shader_nsymsol = solnihv::common + R"*(
+  EX string shader_nsymsol = sn::common + R"*(
 
     vec4 inverse_exp(vec4 h) {
       
@@ -599,7 +601,7 @@ EX namespace solnihv {
     return res;
     })*";
 
-  EX string shader_nsym = solnihv::common +
+  EX string shader_nsym = sn::common +
 
     "vec4 inverse_exp(vec4 h) {"
     
@@ -628,9 +630,9 @@ EX namespace solnihv {
     return abs(h[0]) < solrange_xy && abs(h[1]) < solrange_xy && abs(h[2]) < solrange_z;
     }
 
-  EX tabled_inverses solt = solnihv::tabled_inverses("solv-geodesics.dat");
-  EX tabled_inverses niht = solnihv::tabled_inverses("shyp-geodesics.dat");
-  EX tabled_inverses sont = solnihv::tabled_inverses("ssol-geodesics.dat");
+  EX tabled_inverses solt = sn::tabled_inverses("solv-geodesics.dat");
+  EX tabled_inverses niht = sn::tabled_inverses("shyp-geodesics.dat");
+  EX tabled_inverses sont = sn::tabled_inverses("ssol-geodesics.dat");
   
   EX tabled_inverses& get_tabled() {
     switch(geom()) {
@@ -642,7 +644,7 @@ EX namespace solnihv {
     }
 
   EX int approx_distance(heptagon *h1, heptagon *h2) {
-    auto m = (solnihv::hrmap_solnih*) currentmap;
+    auto m = (sn::hrmap_solnih*) currentmap;
     dynamicval<eGeometry> g(geometry, gBinary4); 
     dynamicval<hrmap*> cm(currentmap, m->binary_map);
     int d1 = bt::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
@@ -1899,7 +1901,7 @@ EX namespace nisot {
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
     if(nil) return nilv::christoffel(at, velocity, transported);
     #if CAP_SOLV
-    else if(solnih) return solnihv::christoffel(at, velocity, transported);
+    else if(sn::in()) return sn::christoffel(at, velocity, transported);
     #endif
     else if(sl2) return slr::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
@@ -1907,7 +1909,7 @@ EX namespace nisot {
 
   EX bool in_table_range(hyperpoint h) {
     #if CAP_SOLV
-    if(sol) return solnihv::in_table_range(h);
+    if(sol) return sn::in_table_range(h);
     #endif
     return true;
     }
@@ -1998,7 +2000,7 @@ EX namespace nisot {
   
   EX hrmap *new_map() { 
     #if CAP_SOLV
-    if(solnih) return new solnihv::hrmap_solnih;
+    if(sn::in()) return new sn::hrmap_solnih;
     #endif
     if(nil) return new nilv::hrmap_nil;
     if(prod) return new product::hrmap_product;
@@ -2010,8 +2012,8 @@ EX namespace nisot {
     using namespace arg;
     #if CAP_SOLV
     if(argis("-solrange")) {
-      shift_arg_formula(solnihv::solrange_xy);
-      shift_arg_formula(solnihv::solrange_z);
+      shift_arg_formula(sn::solrange_xy);
+      shift_arg_formula(sn::solrange_z);
       return 0;
       }
     #endif
@@ -2021,11 +2023,11 @@ EX namespace nisot {
       }
     #if CAP_SOLV
     else if(argis("-fsol")) {
-      shift(); solnihv::solt.fname = args();
+      shift(); sn::solt.fname = args();
       return 0;
       }
     else if(argis("-nihsol")) {
-      shift(); solnihv::niht.fname = args();
+      shift(); sn::niht.fname = args();
       return 0;
       }
     #endif

@@ -792,7 +792,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return; 
         }
-      if(solnih || !bt::in()) { hpcpush(normalize(h)); return; }
+      if(sn::in() || !bt::in()) { hpcpush(normalize(h)); return; }
       hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       });
@@ -810,7 +810,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         }
       if(nil)
         h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
-      if(solnih || !bt::in()) { hpcpush(normalize(h)); continue; }
+      if(sn::in() || !bt::in()) { hpcpush(normalize(h)); continue; }
       hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
       hpcpush(res);
       }
