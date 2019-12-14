@@ -37,6 +37,7 @@
 #include "asonov.cpp"
 #include "penrose.cpp"
 #include "archimedean.cpp"
+#include "arbitrile.cpp"
 #include "euclid.cpp"
 #include "sphere.cpp"
 #include "quotient.cpp"

@@ -216,7 +216,7 @@ enum eGeometry {
   gBinary4, gSol,
   gKiteDart2, gKiteDart3, gNil, gProduct, gRotSpace,
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
-  gArnoldCat,
+  gArnoldCat, gArbitrary,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };

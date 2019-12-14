@@ -273,6 +273,7 @@ EX void initcells() {
   #if CAP_CRYSTAL
   else if(cryst) currentmap = crystal::new_map();
   #endif
+  else if(arb::in()) currentmap = arb::new_map();
   #if CAP_ARCM
   else if(archimedean) currentmap = arcm::new_map();
   #endif

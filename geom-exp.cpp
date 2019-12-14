@@ -348,6 +348,7 @@ void ge_select_tiling() {
     bool on = geometry == g;
     bool in_2d = WDIM == 2;
     dynamicval<eGeometry> cg(geometry, g);
+    if(g == gArbitrary) continue;
     if(g == gTorus) continue;
     if(archimedean && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;

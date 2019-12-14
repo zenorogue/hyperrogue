@@ -1263,6 +1263,7 @@ EX int pattern_threecolor(cell *c) {
       return c->master->rval1;
     }
   #endif
+  if(arb::in()) return 0;
   if(IRREGULAR || binarytiling) return !pseudohept(c);
   #if CAP_GP
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
@@ -1597,6 +1598,7 @@ EX namespace patterns {
         #if CAP_ARCM
         if(archimedean) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
         #endif
+        if(arb::in()) return colortables['A'][c->master->zebraval];
       case 'B':
         return colortables['B'][c->type & 15];
       #if CAP_FIELD

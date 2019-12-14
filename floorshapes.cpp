@@ -680,6 +680,28 @@ void geometry_information::generate_floorshapes() {
     }
   #endif
   
+  else if(arb::in()) {
+    auto& c = arb::current;
+    int n = isize(c.shapes);
+    vector<cell> models(n);
+    vector<heptagon> modelh(n);
+    for(int i=0; i<n; i++) {
+      auto &ms = models[i];
+      auto &mh = modelh[i];
+      ms.master = &mh;
+      mh.c7 = &ms;
+      mh.zebraval = i;
+      auto& sh = c.shapes[i];
+      ms.type = mh.type = sh.size();
+      for(int j=0; j<sh.size(); j++) {
+        auto& co = sh.connections[j];
+        mh.c.connect(j, &modelh[get<0>(co)], get<1>(co), get<2>(co));
+        ms.c.connect(j, &models[get<0>(co)], get<1>(co), get<2>(co));
+        }
+      }
+    for(int i=0; i<n; i++) generate_floorshapes_for(i, &models[i], 0, 0);
+    }
+  
   else if(geometry == gBinary4) {
     for(int i: {0,1}) {
       modelh.zebraval = i;
@@ -806,6 +828,8 @@ EX int shvid(cell *c) {
     return irr::cellindex[c];
   else if(archimedean)
     return arcm::id_of(c->master);
+  else if(arb::in())
+    return arb::id_of(c->master);
   else if(geosupport_football() == 2)
     return pseudohept(c);
   else if(geometry == gBinaryTiling)

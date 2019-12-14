@@ -424,6 +424,10 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
       }
     }
   #endif
+  if(arb::in()) {
+    auto& sh = arb::current.shapes[arb::id_of(c->master)];
+    return normalize(C0 + (sh.vertices[cid % c->type] - C0) * 3 / cf);
+    }
   if(PURE) {
     return ddspin(c,cid,M_PI/S7) * xpush0(cgi.hcrossf * 3 / cf);
     }
