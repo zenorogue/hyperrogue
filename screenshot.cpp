@@ -1127,11 +1127,29 @@ EX namespace startanims {
 
 int ticks_start = 0;
 
-EX void null_animation() {
-  gamescreen(2);  
+#if HDR
+struct startanim {
+  string name;
+  reaction_t init;
+  reaction_t render;
+  };
+
+const int EXPLORE_START_ANIMATION = 2003;
+#endif
+
+reaction_t exploration;
+
+void explorable(reaction_t ee) {
+  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, XLAT("explore this animation"), 0x202020, 0, vid.fsize/2))
+    getcstat = EXPLORE_START_ANIMATION;
+  exploration = ee;
   }
 
-void joukowsky() {
+void no_init() { }
+
+startanim null_animation { "", no_init, [] { gamescreen(2); }};
+
+startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
   dynamicval<ld> dt(models::model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
@@ -1139,17 +1157,19 @@ void joukowsky() {
   models::configure();
   dynamicval<color_t> dc(ringcolor, 0);  
   gamescreen(2);
-  }
+  explorable([] { pmodel = mdJoukowskyInverted; pushScreen(models::model_menu); });
+  }};
 
-void bandspin() {
+startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdBand);
   dynamicval<ld> dt(models::model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
   gamescreen(2);
-  }
+  explorable([] { pmodel = mdJoukowskyInverted; pushScreen(models::model_menu); });
+  }};
 
-void perspective() {
+startanim perspective { "projection distance", no_init, [] {
   ld x = sin(ticks / 1500.);
   x += 1;
   x /= 2;
@@ -1159,27 +1179,29 @@ void perspective() {
   dynamicval<ld> ds(vid.scale, (1+x)/2);
   calcparam();
   gamescreen(2);
-  }
+  explorable(projectionDialog);
+  }};
 
-#if CAP_RUG
-void rug() {
+startanim rug { "Hypersian Rug", [] { 
+  if(!CAP_RUG) { pick(); return; }
+  rug::init(), rug::rugged = false; }, [] {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
   rug::apply_rotation(cspin(1, 2, ticks / 3000.));
   gamescreen(2);
   rug::apply_rotation(cspin(1, 2, -ticks / 3000.));
-  if(!rug::rugged) current = null_animation;
-  }
-#endif
+  if(!rug::rugged) current = &null_animation;
+  explorable([] { rug::rugged = true; pushScreen(rug::show); });
+  }};
 
-void spin_around() {
+startanim spin_around { "spinning around", no_init,  [] {
   dynamicval<ld> da(vid.alpha, 999);
   dynamicval<ld> ds(vid.scale, 500);
   ld alpha = 2 * M_PI * ticks / 10000.;
   ld circle_radius = acosh(2.);
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
   gamescreen(2);
-  }
+  }};
 
 reaction_t add_to_frame;
 
@@ -1195,7 +1217,7 @@ void draw_ghost(const transmatrix V, int id) {
     }
   }
 
-void row_of_ghosts() {
+startanim row_of_ghosts { "row of ghosts", no_init, [] {
   dynamicval<reaction_t> r(add_to_frame, [] {
     int t = ticks/400;
     ld mod = (ticks-t*400)/400.;
@@ -1207,9 +1229,9 @@ void row_of_ghosts() {
     });
   dynamicval<bool> rd(mapeditor::drawplayer, false);
   gamescreen(2);
-  }
+  }};
 
-void army_of_ghosts() {
+startanim army_of_ghosts { "army of ghosts", no_init, [] {
   dynamicval<bool> rd(mapeditor::drawplayer, false);
   dynamicval<reaction_t> r(add_to_frame, [] {
     int tt = ticks - ticks_start + 1200;
@@ -1232,9 +1254,9 @@ void army_of_ghosts() {
       }
     });
   gamescreen(2);
-  }
+  }};
 
-void ghost_spiral() {
+startanim ghost_spiral { "ghost spiral", no_init, [] {
   dynamicval<reaction_t> r(add_to_frame, [] {
     ld t = (ticks - ticks_start - 2000) / 150000.;
     for(ld i=3; i<=40; i++) {
@@ -1242,9 +1264,9 @@ void ghost_spiral() {
       }
     });
   gamescreen(2);
-  }
+  }};
 
-void fib_ghosts() {
+startanim fib_ghosts { "Fibonacci ghosts", no_init, [] {
   dynamicval<bool> rd(mapeditor::drawplayer, false);
   dynamicval<reaction_t> r(add_to_frame, [] {
     ld phase = (ticks - ticks_start - 2000) / 1000.;
@@ -1259,27 +1281,38 @@ void fib_ghosts() {
       }
     });
   gamescreen(2);
-  }
+  }};
 
 // more start animations:
 // - fly a ghost around center, in Gans model
 // - triangle edges?
 
-EX reaction_t current = null_animation;
+EX startanim *current = &null_animation;
 
 EX void pick() {
   if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || vid.always3 || pmodel || rug::rugged || vid.wallmode < 2 || vid.monmode < 2 || glhr::noshaders || !vid.usingGL) {
-    current = null_animation;
+    current = &null_animation;
     return;
     }
-  vector<reaction_t> known = { null_animation, perspective, joukowsky, bandspin, rug, spin_around, row_of_ghosts, ghost_spiral, army_of_ghosts, fib_ghosts };
+  vector<startanim*> known = { &null_animation, &perspective, &joukowsky, &bandspin, &rug, &spin_around, &row_of_ghosts, &ghost_spiral, &army_of_ghosts, &fib_ghosts };
   int id = rand() % 10;
   current = known[id];
   ticks_start = ticks;
-  if(id == 4) rug::init(), rug::rugged = false;
+  current->init();
   }
 
 auto sanimhook = addHook(hooks_frame, 100, []() { if(add_to_frame) add_to_frame(); });
+
+EX void display() {
+  current->render();
+  int z = vid.fsize/2 + 2;
+  if(displayButtonS(4, vid.yres - 4 - z*3, VER, 0x202020, 0, vid.fsize/2))
+    getcstat = SDLK_F5;
+  if(displayButtonS(4, vid.yres - 4 - z*2, XLAT(current->name), 0x202020, 0, vid.fsize/2))
+    getcstat = SDLK_F5;
+  }
+
+EX void explore() { exploration();  }
 #endif
 
 EX }

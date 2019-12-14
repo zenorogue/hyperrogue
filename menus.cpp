@@ -662,12 +662,12 @@ EX void showStartMenu() {
       daily_mode = 20;
     }
   
-  #if CAP_STARTANIM
-  startanims::current();
-  #endif
-
   getcstat = ' ';
   
+  #if CAP_STARTANIM
+  startanims::display();
+  #endif
+
   dialog::init();
   
   dialog::addInfo(XLAT("Welcome to HyperRogue!"));
@@ -807,6 +807,10 @@ EX void showStartMenu() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(uni == 'o') uni = 'i';
+#if CAP_STARTANIM
+    else if(uni == startanims::EXPLORE_START_ANIMATION)
+      startanims::explore();
+#endif
 #if CAP_RUG
     else if(uni == 'M') {
       rug::init();
