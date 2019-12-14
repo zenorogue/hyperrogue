@@ -277,7 +277,7 @@ EX void initcells() {
   #if CAP_ARCM
   else if(arcm::in()) currentmap = arcm::new_map();
   #endif
-  else if(euclid && !penrose) currentmap = euc::new_map();
+  else if(euc::in()) currentmap = euc::new_map();
   #if CAP_BT
   else if(penrose) currentmap = kite::new_map();
   #endif
