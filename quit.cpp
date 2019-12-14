@@ -40,7 +40,16 @@ void noaction() {}
 
 function<void()> cancel = noaction;
 
-hint hints[] = {
+#if HDR
+struct hint {
+  time_t last;
+  function<bool()> usable;
+  function<void()> display;
+  function<void()> action;  
+  };
+#endif
+
+EX hint hints[] = {
 
   {
     0,
@@ -512,7 +521,7 @@ EX void handleKeyQuit(int sym, int uni) {
     }
   }
 
-int counthints() {
+EX int counthints() {
   for(int h=0;; h++) if(hints[h].last < 0) return h;
   }
 

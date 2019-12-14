@@ -659,16 +659,6 @@ namespace scores { void load(); }
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
 
-struct hint {
-  time_t last;
-  function<bool()> usable;
-  function<void()> display;
-  function<void()> action;  
-  };
-
-extern hint hints[];
-int counthints();
-
 int textwidth(int siz, const string &str);
 #if CAP_GL
 int gl_width(int size, const char *s);
