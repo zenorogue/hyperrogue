@@ -421,6 +421,8 @@ void geometry_information::prepare_basics() {
   
   hexshift = 0;
 
+  ld ALPHA = 2 * M_PI / S7;
+  
   ld fmin, fmax;  
 
   if(arcm::in() && !prod) 

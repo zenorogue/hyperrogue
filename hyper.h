@@ -109,7 +109,6 @@ void addMessage(string s, char spamtype = 0);
 
 #define cginf ginf[geometry]
 
-#define ALPHA (M_PI*2/S7)
 #define S7 cginf.sides
 #define S3 cginf.vertex
 #define hyperbolic_37 (S7 == 7 && S3 == 3 && !bt::in() && !arcm::in())

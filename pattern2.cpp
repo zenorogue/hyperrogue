@@ -2628,7 +2628,7 @@ EX namespace linepatterns {
           if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
           for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
             gridlinef(V, C0, tC0(cgi.heptmove[i]), col, 2 + vid.linequality);
-            gridlinef(V, C0, xspinpush0(-i * ALPHA, -hdist/2), col, 2 + vid.linequality);
+            gridlinef(V, C0, xspinpush0(-i * 2 * M_PI / S7, -hdist/2), col, 2 + vid.linequality);
             }
           }
         break;
