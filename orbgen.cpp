@@ -480,7 +480,7 @@ EX int treasureForLocal() {
   }
 
 EX bool extra_safety_for_memory(cell *c) {
-  if(hyperbolic && (archimedean || S3 > 3) && !quotient && !tactic::on && in_full_game()) {
+  if(hyperbolic && (arcm::in() || S3 > 3) && !quotient && !tactic::on && in_full_game()) {
     if(hrand(1000) < 1) {
       c->item = itOrbSafety;
       return true;

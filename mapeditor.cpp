@@ -284,7 +284,7 @@ namespace mapstream {
     for(int k=0; k<i; k++) f.write(kills[k]); 
     }
     
-    addToQueue((bounded || euclid || prod || archimedean) ? currentmap->gamestart() : cwt.at->master->c7);
+    addToQueue((bounded || euclid || prod || arcm::in()) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {

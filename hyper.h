@@ -112,15 +112,14 @@ void addMessage(string s, char spamtype = 0);
 #define ALPHA (M_PI*2/S7)
 #define S7 cginf.sides
 #define S3 cginf.vertex
-#define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling && !archimedean)
-#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling || archimedean) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || archimedean) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !archimedean)
+#define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling && !arcm::in())
+#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling || arcm::in()) && hyperbolic)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || binarytiling || arcm::in()) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !binarytiling && !arcm::in())
 
 #define cgflags cginf.flags 
 
 #define binarytiling (cgflags & qBINARY)
-#define archimedean (cgflags & qARCHI)
 #define cryst (cgflags & qCRYSTAL)
 #define penrose (cgflags & qPENROSE)
 
@@ -152,7 +151,7 @@ void addMessage(string s, char spamtype = 0);
 // Dry Forest burning, heat transfer, etc. are performed on the whole universe
 #define doall (bounded)
 
-#define sphere_narcm (sphere && !archimedean)
+#define sphere_narcm (sphere && !arcm::in())
 
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)
@@ -186,7 +185,7 @@ void addMessage(string s, char spamtype = 0);
 #define NONSTDVAR (!STDVAR)
 
 #if CAP_ARCM
-#define VALENCE (BITRUNCATED ? 3 : archimedean ? arcm::valence() : S3)
+#define VALENCE (BITRUNCATED ? 3 : arcm::in() ? arcm::valence() : S3)
 #else
 #define VALENCE (BITRUNCATED ? 3 : S3)
 #endif

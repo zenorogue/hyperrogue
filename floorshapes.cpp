@@ -662,7 +662,7 @@ void geometry_information::generate_floorshapes() {
   #endif
   
   #if CAP_ARCM
-  else if(archimedean) {
+  else if(arcm::in()) {
     arcm::parent_index_of(&modelh) = 0;
     auto &ac = arcm::current;
     for(int i=0; i<2*ac.N + 2; i++) {
@@ -826,7 +826,7 @@ EX int shvid(cell *c) {
     return gp::get_plainshape_id(c);
   else if(IRREGULAR)
     return irr::cellindex[c];
-  else if(archimedean)
+  else if(arcm::in())
     return arcm::id_of(c->master);
   else if(arb::in())
     return arb::id_of(c->master);
@@ -864,7 +864,7 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
     }
   #endif
   #if CAP_ARCM
-  else if(archimedean) {
+  else if(arcm::in()) {
     return &queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
   #endif

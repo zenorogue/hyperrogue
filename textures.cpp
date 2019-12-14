@@ -1014,7 +1014,7 @@ bool texture_config::save() {
   cell *ctr = centerover;
   si_save = patterns::getpatterninfo0(ctr);
   
-  if(archimedean) csymbol = arcm::current.symbol;
+  if(arcm::in()) csymbol = arcm::current.symbol;
   else csymbol = "";
   
   for(auto s: texturesavers) if(s->dosave())

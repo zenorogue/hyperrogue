@@ -77,7 +77,7 @@ bool ishex2(cell *c) {
 
 int chessvalue(cell *c) {
   #if CAP_ARCM
-  if(archimedean) 
+  if(arcm::in()) 
     return arcm::chessvalue(c);
   else
   #endif
@@ -371,7 +371,7 @@ EX int fieldval_uniq(cell *c) {
     return PIU ( fieldval_uniq(c1) );
     }
   else if(sphere) {
-    if(archimedean) return c->master->fiftyval;
+    if(arcm::in()) return c->master->fiftyval;
     #if CAP_IRR
     else if(IRREGULAR) return irr::cellindex[c];
     #endif
@@ -381,12 +381,12 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(euclid && !penrose && !archimedean) {
+  else if(euclid && !penrose && !arcm::in()) {
     auto p = euc2_coordinates(c);
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
     }
-  else if(binarytiling || archimedean || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
+  else if(binarytiling || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
   else if(&currfp == &fp_invalid) return 0;
   else if(WDIM == 3) return c->master->fieldval;
   else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
@@ -825,7 +825,7 @@ EX namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(IRREGULAR || archimedean || binarytiling || WDIM == 3) si.symmetries = 1;
+    if(IRREGULAR || arcm::in() || binarytiling || WDIM == 3) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
@@ -986,7 +986,7 @@ EX namespace patterns {
         si.id += irr::cellindex[c] << 8;
       #endif
       #if CAP_ARCM
-      else if(archimedean)
+      else if(arcm::in())
         si.id += (arcm::id_of(c->master) << 8) + (arcm::parent_index_of(c->master) << 16);
       #endif
       #if CAP_GP
@@ -1019,7 +1019,7 @@ EX namespace patterns {
       }
     
     #if CAP_ARCM
-    if(archimedean && pat == 0) {
+    if(arcm::in() && pat == 0) {
       if(sub & SPF_FOOTBALL) {
         val_threecolors(c, si, sub);
         return si;
@@ -1145,7 +1145,7 @@ EX namespace patterns {
       if(euclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
-      else if(PURE && !archimedean)
+      else if(PURE && !arcm::in())
         // use the actual field codes
         si.id = fieldpattern::fieldval(c).first;
       else          
@@ -1169,7 +1169,7 @@ EX namespace patterns {
       else val_threecolors(c, si, sub);
       }
 
-    else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1) || archimedean)) {
+    else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1) || arcm::in())) {
       val_threecolors(c, si, sub);
       }
 
@@ -1199,8 +1199,8 @@ EX namespace patterns {
 EX bool geosupport_chessboard() {
   return 
 #if CAP_ARCM
-    (archimedean && PURE) ? arcm::current.support_chessboard() : 
-    (archimedean && DUAL) ? arcm::current.support_threecolor_bitruncated() :
+    (arcm::in() && PURE) ? arcm::current.support_chessboard() : 
+    (arcm::in() && DUAL) ? arcm::current.support_threecolor_bitruncated() :
 #endif
     (binarytiling || penrose) ? 0 :
     (S3 >= OINF) ? true :
@@ -1211,9 +1211,9 @@ EX int geosupport_threecolor() {
   if(IRREGULAR) return 0;
   if(penrose || binarytiling) return 0;
   #if CAP_ARCM
-  if(archimedean && PURE) return arcm::current.support_threecolor();
-  if(archimedean && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
-  if(archimedean && DUAL) return 0; // it sometimes does support threecolor, but it can be obtained in other ways then
+  if(arcm::in() && PURE) return arcm::current.support_threecolor();
+  if(arcm::in() && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
+  if(arcm::in() && DUAL) return 0; // it sometimes does support threecolor, but it can be obtained in other ways then
   #endif
   if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
@@ -1233,10 +1233,10 @@ EX int geosupport_football() {
   if(binarytiling || penrose) return 0;
 
 #if CAP_ARCM  
-  if(archimedean && DUAL) return false;
+  if(arcm::in() && DUAL) return false;
   // it sometimes does support football, but it can be obtained in other ways then
 
-  if(archimedean /* PURE */) return arcm::current.support_football();
+  if(arcm::in() /* PURE */) return arcm::current.support_football();
 #endif
 
 #if CAP_IRR
@@ -1256,7 +1256,7 @@ EX int geosupport_football() {
 
 EX int pattern_threecolor(cell *c) {
   #if CAP_ARCM
-  if(archimedean) {
+  if(arcm::in()) {
     if(PURE)
       return arcm::threecolor(c);
     else /* if(BITRUNCATED) */
@@ -1399,7 +1399,7 @@ EX bool pseudohept(cell *c) {
     }
   #endif
   #if CAP_ARCM
-  if(archimedean) return arcm::pseudohept(c);
+  if(arcm::in()) return arcm::pseudohept(c);
   #endif
   #if CAP_GP
   if(GOLDBERG && gp_threecolor() == 2)
@@ -1423,11 +1423,11 @@ EX bool kraken_pseudohept(cell *c) {
     return c->type != 6;
   #endif
   #if CAP_ARCM
-  else if(archimedean && PURE)
+  else if(arcm::in() && PURE)
     return c->type != isize(arcm::current.triangles[0]);
-  else if(archimedean && BITRUNCATED)
+  else if(arcm::in() && BITRUNCATED)
     return pseudohept(c);
-  else if(archimedean && DUAL)
+  else if(arcm::in() && DUAL)
     return false;
   #endif
   else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
@@ -1596,7 +1596,7 @@ EX namespace patterns {
       #endif
       case 'A':
         #if CAP_ARCM
-        if(archimedean) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
+        if(arcm::in()) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
         #endif
         if(arb::in()) return colortables['A'][c->master->zebraval];
       case 'B':
@@ -1783,7 +1783,7 @@ EX namespace patterns {
       }
     #endif
     
-    if(archimedean)
+    if(arcm::in())
       dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
 
     if(cryst)
@@ -1998,11 +1998,11 @@ EX namespace patterns {
       dialog::addBoolItem(XLAT("symmetry 0-2"), subpattern_flags & SPF_SYM02, '2');
       dialog::addBoolItem(XLAT("symmetry 0-3"), subpattern_flags & SPF_SYM03, '3');
       }
-    if(euclid && among(whichPattern, PAT_COLORING, PAT_TYPES) && !archimedean)
+    if(euclid && among(whichPattern, PAT_COLORING, PAT_TYPES) && !arcm::in())
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
     #if CAP_ARCM
-    if(archimedean && arcm::current.have_symmetry && whichPattern == PAT_TYPES)
+    if(arcm::in() && arcm::current.have_symmetry && whichPattern == PAT_TYPES)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     #endif
 
@@ -2022,7 +2022,7 @@ EX namespace patterns {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if((whichPattern == PAT_COLORING) || (whichPattern == PAT_TYPES && archimedean)) {
+    if((whichPattern == PAT_COLORING) || (whichPattern == PAT_TYPES && arcm::in())) {
       dialog::addBoolItem(XLAT("alternate coloring"), subpattern_flags & SPF_ALTERNATE, '\'');
       dialog::addBoolItem(XLAT("football"), subpattern_flags & SPF_FOOTBALL, '*');
       }
@@ -2030,7 +2030,7 @@ EX namespace patterns {
     if(a38 && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("Docks pattern"), subpattern_flags & SPF_DOCKS, '@');
 
-    if(whichPattern && (IRREGULAR || GOLDBERG || archimedean))
+    if(whichPattern && (IRREGULAR || GOLDBERG || arcm::in()))
       dialog::addBoolItem(XLAT("remove complete classification"), subpattern_flags & SPF_NO_SUBCODES, '#');
     
     dialog::addBreak(50);
@@ -2286,7 +2286,7 @@ EX namespace patterns {
       cgroup = cpSingle;
       return;
       }
-    if(archimedean) {
+    if(arcm::in()) {
       if(whichPattern == PAT_COLORING && geosupport_threecolor()) {
         if(subpattern_flags & SPF_FOOTBALL) cgroup = cpFootball;
         else cgroup = cpThree;
@@ -2641,7 +2641,7 @@ EX namespace linepatterns {
               col,
               1 + vid.linequality);
           }
-        else if(archimedean) {
+        else if(arcm::in()) {
           if(!pseudohept(c)) forCellIdEx(c2, i, c) if(c < c2 && !pseudohept(c2)) 
             gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
               col,

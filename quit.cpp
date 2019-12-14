@@ -8,7 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
-EX bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !archimedean); }
+EX bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !arcm::in()); }
 
 EX bool needConfirmationEvenIfSaved() {
   return canmove && (gold() >= 30 || tkills() >= 50) && !cheater;

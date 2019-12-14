@@ -489,7 +489,7 @@ EX bool sizes_known() {
   // Castle Anthrax is infinite
   if(binarytiling) return false;
   // not implemented
-  if(archimedean) return false;
+  if(arcm::in()) return false;
   if(penrose) return false;
   return true;  
   }
@@ -522,7 +522,7 @@ string ncnames[4] = { "NO", "distance", "type", "debug" };
 eNumberCoding number_coding = ncDistance;
 
 bool mod_allowed() {
-  return cheater || autocheat || archimedean || tour::on;
+  return cheater || autocheat || arcm::in() || tour::on;
   }
 
 EX int curr_dist(cell *c) {

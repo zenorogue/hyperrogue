@@ -310,7 +310,7 @@ void hrmap_hyperbolic::virtualRebase(heptagon*& base, transmatrix& at) {
   }
 
 EX bool no_easy_spin() {
-  return NONSTDVAR || archimedean || WDIM == 3 || binarytiling || penrose;
+  return NONSTDVAR || arcm::in() || WDIM == 3 || binarytiling || penrose;
   }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
@@ -369,7 +369,7 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
 EX double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 EX hyperpoint randomPointIn(int t) {
-  if(NONSTDVAR || archimedean || penrose) {
+  if(NONSTDVAR || arcm::in() || penrose) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
     return xspinpush0(2 * M_PI * randd(), asinh(randd() / 20));
@@ -404,7 +404,7 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
     }
   #endif
   #if CAP_ARCM
-  if(archimedean) {
+  if(arcm::in()) {
     auto &ac = arcm::current;
     if(PURE) {
       if(arcm::id_of(c->master) >= ac.N*2) return C0;
@@ -458,7 +458,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
     }
   #endif
   #if CAP_ARCM
-  if(archimedean) {
+  if(arcm::in()) {
     if(PURE) { 
       auto &ac = arcm::current;
       auto& t = ac.get_triangle(c->master, i-1);
@@ -564,7 +564,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     return nearcorner(c, (i+which) % c->type); // lazy
   #endif
   #if CAP_ARCM
-  if(archimedean) {
+  if(arcm::in()) {
     if(PURE) {
       auto &ac = arcm::current;
       auto& t = ac.get_triangle(c->master, i-1);
@@ -609,7 +609,7 @@ EX hyperpoint get_warp_corner(cell *c, int cid) {
   if(GOLDBERG) return gp::get_corner_position(c, cid, 2);
   #endif
   #if CAP_IRR || CAP_ARCM
-  if(IRREGULAR || archimedean) return midcorner(c, cid, .5);
+  if(IRREGULAR || arcm::in()) return midcorner(c, cid, .5);
   #endif
   return ddspin(c,cid,M_PI/S7) * xpush0(cgi.tessf/2);
   }

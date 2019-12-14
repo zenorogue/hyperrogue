@@ -13,7 +13,7 @@ namespace hr {
 EX namespace whirlwind {
 
   EX int fzebra3(cell *c) {
-    if(archimedean) return 0;
+    if(arcm::in()) return 0;
     if(euclid) {
       if(bounded) return 0;
       auto co = euc2_coordinates(c);
@@ -1115,7 +1115,7 @@ EX namespace mirror {
       }
     #endif
     #if CAP_ARCM
-    if(archimedean) {
+    if(arcm::in()) {
       c->wall = hrand(2) ? waMirror : waCloud;
       return true;
       }
@@ -1235,7 +1235,7 @@ EX namespace mirror {
     if(penrose || sol) return;
     
     #if CAP_ARCM
-    if(archimedean) {
+    if(arcm::in()) {
       create_archimedean(cw, cpid, true);
       return;
       }
@@ -1270,7 +1270,7 @@ EX namespace mirror {
   
   EX void createMirages(cellwalker cw, int cpid) {
     #if CAP_ARCM
-    if(archimedean) {
+    if(arcm::in()) {
       create_archimedean(cw, cpid, false);
       return;
       }
@@ -2009,7 +2009,7 @@ EX namespace heat {
     
     int divby = 10;
     if(S7 > 10) divby *= 2;
-    if(archimedean) divby *= 2;
+    if(arcm::in()) divby *= 2;
     if(WDIM == 3) divby *= 2;
     
     for(int i=0; i<dcs; i++) {
@@ -2701,7 +2701,7 @@ EX namespace sword {
     if(SWORDDIM == 3) sword_angles = 1;
     else if(IRREGULAR) sword_angles = 840;
     else if(binarytiling) sword_angles = 42;
-    else if(archimedean) {
+    else if(arcm::in()) {
       if(!PURE) possible_divisor((BITRUNCATED ? 2 : 1) * isize(arcm::current.faces));
       if(!DUAL) for(int f: arcm::current.faces) possible_divisor(f);
       }
@@ -3428,7 +3428,7 @@ EX namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(NONSTDVAR && !sphere && !archimedean && !hybri)
+      if(NONSTDVAR && !sphere && !arcm::in() && !hybri)
         for(int l=0; l<S7; l++) {
           v.push_back(getId(cw + cth + l + wstep + cth));
           }

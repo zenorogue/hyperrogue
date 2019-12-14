@@ -1027,7 +1027,7 @@ void celldrawer::set_land_floor(const transmatrix& Vf) {
     
     case laSwitch:
       set_floor(cgi.shSwitchFloor);
-      if(ctof(c) && STDVAR && !archimedean && !binarytiling && GDIM == 2) for(int i=0; i<c->type; i++)
+      if(ctof(c) && STDVAR && !arcm::in() && !binarytiling && GDIM == 2) for(int i=0; i<c->type; i++)
         queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(cgi.rhexf), cgi.shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
       break;
 

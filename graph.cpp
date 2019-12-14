@@ -3060,7 +3060,7 @@ bool drawstaratvec(double dx, double dy) {
 EX color_t reptilecolor(cell *c) {
   int i;
   
-  if(archimedean)
+  if(arcm::in())
     i = c->master->rval0 & 3;
   else {
     i = zebra40(c);
@@ -3153,7 +3153,7 @@ EX bool has_nice_dual() {
   if(IRREGULAR) return irr::bitruncations_performed > 0;
   #endif
   #if CAP_ARCM
-  if(archimedean) return geosupport_football() >= 2;
+  if(arcm::in()) return geosupport_football() >= 2;
   #endif
   if(binarytiling) return false;
   if(BITRUNCATED) return true;
@@ -3251,7 +3251,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t
  
   if(NONSTDVAR || !standard_tiling()) {
     #if CAP_ARCM
-    if(archimedean && !PURE)
+    if(arcm::in() && !PURE)
       i = (i + arcm::parent_index_of(c->master)/DUALMUL + MODFIXER) % c->type;
     #endif
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
@@ -4204,7 +4204,7 @@ EX bool allowIncreasedSight() {
 #endif
   if(randomPatternsMode) return true;
   if(racing::on) return true;
-  if(quotient || !hyperbolic || archimedean) return true;
+  if(quotient || !hyperbolic || arcm::in()) return true;
   if(WDIM == 3) return true;
   return false;
   }
@@ -4216,7 +4216,7 @@ EX bool allowChangeRange() {
 #endif
   if(racing::on) return true;
   if(sightrange_bonus >= 0) return true;
-  if(archimedean) return true;
+  if(arcm::in()) return true;
   if(WDIM == 3) return true;
   return false;
   }

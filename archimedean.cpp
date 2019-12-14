@@ -12,6 +12,8 @@ namespace hr {
 
 EX namespace arcm {
 
+EX bool in() { return cgflags & qARCHI; }
+
 #if HDR
 struct archimedean_tiling {
 
@@ -1087,7 +1089,7 @@ EX void next_variation() {
 
 EX void enable(archimedean_tiling& arct) {
   stop_game();
-  if(!archimedean) set_variation(eVariation::pure);
+  if(!in()) set_variation(eVariation::pure);
   set_geometry(gArchimedean);
   patterns::whichPattern = patterns::PAT_NONE;
   current = arct;
@@ -1174,7 +1176,7 @@ EX void show() {
     dialog::addBreak(100);
     }
   else {
-    string cs = archimedean ? current.symbol : XLAT("OFF");
+    string cs = in() ? current.symbol : XLAT("OFF");
     dialog::addSelItem("edit", cs, '/');  
     dialog::add_action([] () { 
       symbol_editing = true;
@@ -1234,7 +1236,7 @@ EX void show() {
       if(spos < 0) spos = 0;
       });
     
-    if(archimedean) {
+    if(in()) {
       dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
       dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts(current.edgelength), 0);
 
@@ -1266,7 +1268,7 @@ EX void show() {
       }
     else dialog::addBreak(100);
 
-    if(archimedean) {    
+    if(in()) {
       dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');
       dialog::add_action(next_variation);
       }
@@ -1369,6 +1371,7 @@ EX int valence() {
 #endif
 
 EX map<gp::loc, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
-  }
+
+EX }
 
 }

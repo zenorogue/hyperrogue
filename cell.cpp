@@ -199,14 +199,14 @@ EX cell *createMov(cell *c, int d) {
     }
   #endif
   #if CAP_ARCM
-  else if(archimedean && PURE) {
+  else if(arcm::in() && PURE) {
     if(arcm::id_of(c->master) < arcm::current.N * 2) {
       heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
       c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
       }
     else c->c.connect(d, c, d, false);
     }
-  else if(archimedean && DUAL) {
+  else if(arcm::in() && DUAL) {
     if(arcm::id_of(c->master) >= arcm::current.N * 2) {
       heptagon *h2 = createStep(c->master, d*2);
       int d1 = c->master->c.spin(d*2);
@@ -218,7 +218,7 @@ EX cell *createMov(cell *c, int d) {
       }
     }
   #endif
-  else if(archimedean || PURE) {
+  else if(arcm::in() || PURE) {
     heptagon *h2 = createStep(c->master, d);
     c->c.connect(d, h2->c7,c->master->c.spin(d), c->master->c.mirror(d));
     hybrid::link();
@@ -275,7 +275,7 @@ EX void initcells() {
   #endif
   else if(arb::in()) currentmap = arb::new_map();
   #if CAP_ARCM
-  else if(archimedean) currentmap = arcm::new_map();
+  else if(arcm::in()) currentmap = arcm::new_map();
   #endif
   else if(euclid && !penrose) currentmap = euc::new_map();
   #if CAP_BT
@@ -325,7 +325,7 @@ template<class T> void subcell(cell *c, const T& t) {
       subcell(c2, t);
       }
     }
-  else if(BITRUNCATED && !archimedean && !binarytiling)
+  else if(BITRUNCATED && !arcm::in() && !binarytiling)
     forCellEx(c2, c) t(c2);
   t(c);
   }
@@ -413,7 +413,7 @@ EX void verifycell(cell *c) {
   }
 
 EX void verifycells(heptagon *at) {
-  if(GOLDBERG || IRREGULAR || archimedean) return;
+  if(GOLDBERG || IRREGULAR || arcm::in()) return;
   for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
     }
@@ -450,7 +450,7 @@ EX int celldist(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
-  if(archimedean || ctof(c)) return c->master->distance;
+  if(arcm::in() || ctof(c)) return c->master->distance;
   #if CAP_GP
   if(GOLDBERG) return gp::compute_dist(c, celldist);
   #endif
@@ -646,7 +646,7 @@ cdata orig_cdata;
 
 EX bool geometry_supports_cdata() {
   if(hybri) return PIU(geometry_supports_cdata());
-  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (archimedean && !sphere);
+  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (arcm::in() && !sphere);
   }
 
 void affect(cdata& d, short rv, signed char signum) {
@@ -797,7 +797,7 @@ cdata *getHeptagonCdata(heptagon *h) {
 cdata *getEuclidCdata(gp::loc h) {
 
   int x = h.first, y = h.second;
-  auto& data = archimedean ? arcm::get_cdata() : euc::get_cdata();
+  auto& data = arcm::in() ? arcm::get_cdata() : euc::get_cdata();
     
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(data.count(h)) return &(data[h]);
@@ -864,9 +864,9 @@ EX cdata *arcmCdata(cell *c) {
 EX int getCdata(cell *c, int j) {
   if(prod) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->val[j];
-  else if(archimedean && euclid)
+  else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
-  else if(archimedean && hyperbolic) 
+  else if(arcm::in() && hyperbolic) 
     return arcmCdata(c)->val[j]*3;
   else if(!geometry_supports_cdata()) return 0;
   else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
@@ -882,9 +882,9 @@ EX int getCdata(cell *c, int j) {
 EX int getBits(cell *c) {
   if(prod) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->bits;
-  else if(archimedean && euclid)
+  else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
-  else if(archimedean && (hyperbolic || sl2)) 
+  else if(arcm::in() && (hyperbolic || sl2)) 
     return arcmCdata(c)->bits;
   else if(!geometry_supports_cdata()) return 0;
   else if(c == c->master->c7) return getHeptagonCdata(c->master)->bits;
@@ -1017,7 +1017,7 @@ EX int celldistance(cell *c1, cell *c2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(archimedean || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
+  if(arcm::in() || quotient || solnih || (penrose && euclid) || experimental || sl2 || nil) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
@@ -1043,7 +1043,7 @@ EX int celldistance(cell *c1, cell *c2) {
   #endif
   
   #if MAXMDIM >= 4
-  if(euclid && !penrose && !archimedean) 
+  if(euclid && !penrose && !arcm::in()) 
     return euc::celldistance(c1, c2);
   
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
@@ -1238,7 +1238,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !archimedean && !penrose && !binarytiling;
+  return !arcm::in() && !penrose && !binarytiling;
   }
 
 }

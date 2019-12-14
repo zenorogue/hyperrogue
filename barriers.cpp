@@ -839,7 +839,7 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
     }
   
   bool warpv = warped_version(c->land, l2);
-  if(warpv && !archimedean && !pseudohept(c)) return false;
+  if(warpv && !arcm::in() && !pseudohept(c)) return false;
   
   int ds[MAX_EDGE];
   for(int i=0; i<c->type; i++) ds[i] = i;

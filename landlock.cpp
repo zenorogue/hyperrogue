@@ -776,7 +776,7 @@ EX land_validity_t& land_validity(eLand l) {
     }
   
   #if CAP_ARCM
-  if(archimedean) {
+  if(arcm::in()) {
     if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
     // horocycles not implemented
     if(isCyclic(l)) return not_implemented;
@@ -889,12 +889,12 @@ EX land_validity_t& land_validity(eLand l) {
     return dont_work;
   #endif
     
-  if(archimedean && l == laPrairie) return dont_work;
+  if(arcm::in() && l == laPrairie) return dont_work;
 
-  if((IRREGULAR || archimedean) && among(l, laBlizzard, laVolcano) && !sphere)
+  if((IRREGULAR || arcm::in()) && among(l, laBlizzard, laVolcano) && !sphere)
     return dont_work;
 
-  if(archimedean && DUAL && l == laCrossroads4)
+  if(arcm::in() && DUAL && l == laCrossroads4)
     return not_implemented;
   
   if(geometry == gKiteDart3 && l == laGraveyard)
@@ -906,7 +906,7 @@ EX land_validity_t& land_validity(eLand l) {
     if(chaosmode) 
       return not_in_chaos;
     // the algorithm fails in Archimedean DUAL
-    if(archimedean && DUAL)
+    if(arcm::in() && DUAL)
       return not_implemented;
     // the algorithm fails in Binary4
     if(geometry == gBinary4)
@@ -970,7 +970,7 @@ EX land_validity_t& land_validity(eLand l) {
         return special_chaos;
       return not_in_chaos;
       }
-    if(archimedean || penrose) return not_implemented;
+    if(arcm::in() || penrose) return not_implemented;
     if(bounded) return unbounded_only;
     }
   
@@ -978,7 +978,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   // this pattern does not work on elliptic and small spheres
-  if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !archimedean)
+  if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !arcm::in())
     return not_enough_space;
   
   // ... and it works in gp only partially
@@ -1191,7 +1191,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
   
-  if(l == laIce && STDVAR && hyperbolic_37 && !quotient && !archimedean && !binarytiling)
+  if(l == laIce && STDVAR && hyperbolic_37 && !quotient && !arcm::in() && !binarytiling)
     return full_game;
 
   return ok;

@@ -1324,7 +1324,7 @@ EX int wallchance(cell *c, bool deepOcean) {
 
 /** should we generate the horocycles in the current geometry? */
 EX bool horo_ok() {  
-  return hyperbolic && !binarytiling && !archimedean && !penrose && !experimental && !hybri;
+  return hyperbolic && !binarytiling && !arcm::in() && !penrose && !experimental && !hybri;
   }
 
 EX bool gp_wall_test() {
@@ -1368,7 +1368,7 @@ EX bool deep_ocean_at(cell *c, cell *from) {
   }
 
 EX bool good_for_wall(cell *c) {
-  if(archimedean) return true;
+  if(arcm::in()) return true;
   if(WDIM == 3) return true;
   return pseudohept(c);
   }
@@ -1542,7 +1542,7 @@ EX bool openplains(cell *c) {
     return true;
     }
   int dlimit = getDistLimit();
-  if(archimedean) dlimit--;
+  if(arcm::in()) dlimit--;
   if(dlimit < 7) {
     celllister cl(c, dlimit, 1000000, NULL);
     int bad = 0;

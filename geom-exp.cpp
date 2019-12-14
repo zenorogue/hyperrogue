@@ -226,9 +226,9 @@ EX geometry_filter *current_filter;
 
 bool forced_quotient() { return quotient && !(cgflags & qOPTQ); }
 
-EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (archimedean || hyperbolic) && !forced_quotient(); }};
-EX geometry_filter gf_spherical = {"spherical", [] { return (archimedean || sphere) && !forced_quotient(); }};
-EX geometry_filter gf_euclidean = {"Euclidean", [] { return (archimedean || euclid) && !forced_quotient(); }};
+EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (arcm::in() || hyperbolic) && !forced_quotient(); }};
+EX geometry_filter gf_spherical = {"spherical", [] { return (arcm::in() || sphere) && !forced_quotient(); }};
+EX geometry_filter gf_euclidean = {"Euclidean", [] { return (arcm::in() || euclid) && !forced_quotient(); }};
 EX geometry_filter gf_other = {"non-isotropic", [] { return prod || nonisotropic; }};
 EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] { 
   return standard_tiling() && WDIM == 2 && !forced_quotient();
@@ -289,14 +289,14 @@ void set_or_configure_geometry(eGeometry g) {
         }
       if(g == gRotSpace) {
         bool ok = true;
-        if(archimedean) ok = PURE;
+        if(arcm::in()) ok = PURE;
         else if(binarytiling || penrose) ok = false;
         else ok = PURE || BITRUNCATED;
         if(!ok) {
           addMessage(XLAT("Only works with (semi-)regular tilings"));
           return;
           }
-        if(archimedean) {
+        if(arcm::in()) {
           int steps, single_step;
           if(!arcm::current.get_step_values(steps, single_step)) {
             addMessage(XLAT("That would have %1/%2 levels", its(steps), its(single_step)));
@@ -350,7 +350,7 @@ void ge_select_tiling() {
     dynamicval<eGeometry> cg(geometry, g);
     if(g == gArbitrary) continue;
     if(g == gTorus) continue;
-    if(archimedean && !CAP_ARCM) continue;
+    if(arcm::in() && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;
     if(sol && !CAP_SOLV) continue;
     if(WDIM == 3 && MAXMDIM == 3) continue;
@@ -470,7 +470,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(euclid && !penrose && !archimedean) {
+  if(euclid && !penrose && !arcm::in()) {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
@@ -600,7 +600,7 @@ EX void showEuclideanMenu() {
   string spf = its(ts);
   if(0) ;
   #if CAP_ARCM
-  else if(archimedean) {
+  else if(arcm::in()) {
     spf = "";
     for(int i: arcm::current.faces) {
       if(spf != "") spf += ",";
@@ -684,7 +684,7 @@ EX void showEuclideanMenu() {
     dialog::add_action([] {
       if(0) ;
       #if CAP_ARCM
-      else if(archimedean) arcm::next_variation();
+      else if(arcm::in()) arcm::next_variation();
       #endif
       else if(euc::in(2,4) || !CAP_GP) dialog::do_if_confirmed([] {
         set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
@@ -801,8 +801,8 @@ EX void showEuclideanMenu() {
     binarytiling ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
     #endif
     #if CAP_ARCM
-    archimedean && (WDIM == 2) ? arcm::current.world_size() :
-    (archimedean && sphere) ? its(isize(currentmap->allcells())) :
+    arcm::in() && (WDIM == 2) ? arcm::current.world_size() :
+    (arcm::in() && sphere) ? its(isize(currentmap->allcells())) :
     #endif
     #if CAP_CRYSTAL
     cryst ? "∞^" + its(ts/2) :

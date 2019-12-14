@@ -423,7 +423,7 @@ void geometry_information::prepare_basics() {
 
   ld fmin, fmax;  
 
-  if(archimedean && !prod) 
+  if(arcm::in() && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
 
   if(hybri) {
@@ -501,7 +501,7 @@ void geometry_information::prepare_basics() {
   irr::compute_geometry();
   #endif
   #if CAP_ARCM
-  if(archimedean) {
+  if(arcm::in()) {
     arcm::current.compute_geometry();
     crossf = hcrossf7 * arcm::current.scale();
     hexvdist = arcm::current.scale() * .5;
@@ -876,7 +876,7 @@ EX void check_cgi() {
   if(GOLDBERG) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
-  if(archimedean) V("ARCM", arcm::current.symbol);
+  if(arcm::in()) V("ARCM", arcm::current.symbol);
   
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   

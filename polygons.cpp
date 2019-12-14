@@ -93,7 +93,7 @@ void geometry_information::drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   if(geometry == gBinaryTiling) tlength *= 0.7;
   if(geometry == gBinary4) tlength *= 0.45;
   #if CAP_ARCM
-  if(archimedean) tlength = arcm::current.scale();
+  if(arcm::in()) tlength = arcm::current.scale();
   #endif
   int max = int(20 * pow(2, vid.linequality));
   for(ld i=0; i<=max; i++)
@@ -212,7 +212,7 @@ void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int sha
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (!BITRUNCATED && !archimedean ? scalefactor : 1), shzoomy = 1.6 * (!BITRUNCATED && !archimedean ? scalefactor : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * (!BITRUNCATED && !arcm::in() ? scalefactor : 1), shzoomy = 1.6 * (!BITRUNCATED && !arcm::in() ? scalefactor : 1);
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {
@@ -1106,7 +1106,7 @@ void geometry_information::configure_floorshapes() {
   init_floorshapes();
   if(0);
   #if CAP_ARCM
-  else if(archimedean)
+  else if(arcm::in())
     shFullFloor.configure(arcm::current.scale()/2, arcm::current.scale()/2);
   #endif
   else

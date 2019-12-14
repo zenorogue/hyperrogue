@@ -428,7 +428,7 @@ struct debugScreen {
           });
         dialog::addSelItem("item", dnameof(what->item), 0);
         #if CAP_ARCM
-        if(archimedean)
+        if(arcm::in())
           dialog::addSelItem("ID", its(arcm::id_of(what->master)), 0);    
         #endif
         dialog::addBreak(50);

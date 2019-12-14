@@ -973,7 +973,7 @@ EX ld master_to_c7_angle() {
   #if CAP_GP
   if(cgi.gpdata) alpha = cgi.gpdata->alpha;
   #endif  
-  return (!BITRUNCATED && !binarytiling && !archimedean) ? M_PI + alpha : 0;
+  return (!BITRUNCATED && !binarytiling && !arcm::in()) ? M_PI + alpha : 0;
   }
 
 EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
@@ -984,7 +984,7 @@ EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
   #endif
   #if CAP_ARCM
-  if(archimedean) return V * spin(-arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
+  if(arcm::in()) return V * spin(-arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
   #endif
   #if CAP_BT
   if(binarytiling) return V;

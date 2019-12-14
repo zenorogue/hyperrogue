@@ -79,7 +79,7 @@ EX heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int 
   
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard);
-  if(binarytiling || archimedean) return h;
+  if(binarytiling || arcm::in()) return h;
   if(parent->c7) {
     #if CAP_IRR
     if(IRREGULAR)
