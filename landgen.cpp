@@ -1497,12 +1497,12 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           chaosmode ? -15 * items[itGrimoire]:
           (eubinary || c->master->alt) ? celldistAlt(c) : 10;
         // remember: d is negative
-        if(chaosmode ? hrand(100) < 25 : d % TEMPLE_EACH == 0) {
+        if(chaosmode ? hrand(100) < 25 : d % temple_layer_size() == 0) {
           if(hrand_monster(5000) < 20 - 2*d && !c->monst && !peace::on)
             c->monst = moTentacle, c->mondir = NODIR;
           }
         else {
-          // int d0 = d % TEMPLE_EACH;
+          // int d0 = d % temple_layer_size();
           // if(d0<0) d0=-d0;
           if(hrand(100) < (peace::on ? 15 : 30) && WDIM == 2)
             c->wall = waBigStatue;
@@ -1512,7 +1512,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->monst = moCultistLeader;
           else if(hrand(5000) < 250 && !peace::on)
             c->item = itGrimoire;
-          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= treasureForLocal() : -d > TEMPLE_EACH * 10) && !peace::on && !inv::on)
+          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= treasureForLocal() : -d > temple_layer_size() * 10) && !peace::on && !inv::on)
             c->item = itOrbDragon;
           }
         }
@@ -2013,10 +2013,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d >= 8) c->wall = waSea;
       if(d == 7 && !safety) {
         bool placecolumn = false;
-        if(c->landparam % TEMPLE_EACH == 0 && c->landparam <= 24) {
+        if(c->landparam % temple_layer_size() == 0 && c->landparam <= 24) {
           int q = 0;
           forCellEx(c2, c)
-            if(c2->landparam % TEMPLE_EACH == 0 && !pseudohept(c2)) q++;
+            if(c2->landparam % temple_layer_size() == 0 && !pseudohept(c2)) q++;
           placecolumn = q == 2;
           if(placecolumn && weirdhyperbolic && !BITRUNCATED && hrand(100) >= 50)
             placecolumn = false;

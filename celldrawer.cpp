@@ -272,7 +272,7 @@ void celldrawer::setcolors() {
       int d = showoff ? 0 : (eubinary||c->master->alt) ? celldistAlt(c) : 99;
       if(chaosmode)
         fcol = 0x405090;
-      else if(d % TEMPLE_EACH == 0)
+      else if(d % temple_layer_size() == 0)
         fcol = gradient(0x304080, winf[waColumn].color, 0, 0.5, 1);
   //    else if(c->type == 7)
   //      wcol = 0x707070;

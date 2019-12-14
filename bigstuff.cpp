@@ -1661,6 +1661,17 @@ EX int masterAlt(cell *c) {
   return c->master->alt->distance;
   }
 
+/** the distance between two layers of Temple of Cthulhu */
+EX int temple_layer_size() {
+  if(among(geometry, gHoroRec, gHoroHex, gKiteDart3)) return 3;
+  if(sol) return 6;
+  if(WDIM == 3 && bt::in()) return 2;
+  if(geometry == gSpace435) return 4;
+  if(WDIM == 3 && hyperbolic) return 3;
+  if(S3 == OINF) return 4;
+  return 6;
+  }
+
 EX void moreBigStuff(cell *c) {
 
   if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
@@ -1709,7 +1720,7 @@ EX void moreBigStuff(cell *c) {
       if(d <= 0) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
-      if(d % TEMPLE_EACH==0) {
+      if(d % temple_layer_size()==0) {
         c->landparam = 0;
         if(geometry == gSpace534) {
           int i = 0;
@@ -1752,7 +1763,7 @@ EX void moreBigStuff(cell *c) {
           int q = 0;
           for(int t=0; t<c->type; t++) {
             createMov(c, t);
-            if(celldistAlt(c->move(t)) % TEMPLE_EACH == 0 && !ishept(c->move(t))) q++;
+            if(celldistAlt(c->move(t)) % temple_layer_size() == 0 && !ishept(c->move(t))) q++;
             }
           if(q == 2) c->wall = waColumn;
           }

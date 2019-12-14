@@ -492,7 +492,7 @@ EX void placeItems(int qty, eItem it) {
 EX bool cantGetGrimoire(cell *c2, bool verbose IS(true)) {
   if(chaosmode) return false;
   if(!eubinary && !c2->master->alt) return false;
-  if(c2->item == itGrimoire && items[itGrimoire] > celldistAlt(c2)/-TEMPLE_EACH) {
+  if(c2->item == itGrimoire && items[itGrimoire] > celldistAlt(c2)/-temple_layer_size()) {
     if(verbose)
       addMessage(XLAT("You already have this Grimoire! Seek new tomes in the inner circles."));
     return true;
