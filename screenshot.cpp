@@ -1283,6 +1283,14 @@ startanim fib_ghosts { "Fibonacci ghosts", no_init, [] {
   gamescreen(2);
   }};
 
+startanim fpp { "first-person perspective", no_init, [] {
+  geom3::switch_fpp();
+  View = cspin(0, 2, ticks / 5000.) * View;
+  gamescreen(2);
+  View = cspin(0, 2, -ticks / 5000.) * View;
+  geom3::switch_fpp();
+  }};
+
 // more start animations:
 // - fly a ghost around center, in Gans model
 // - triangle edges?
@@ -1294,7 +1302,7 @@ EX void pick() {
     current = &null_animation;
     return;
     }
-  vector<startanim*> known = { &null_animation, &perspective, &joukowsky, &bandspin, &rug, &spin_around, &row_of_ghosts, &ghost_spiral, &army_of_ghosts, &fib_ghosts };
+  vector<startanim*> known = { &null_animation, &perspective, &joukowsky, &bandspin, &rug, &spin_around, &row_of_ghosts, &ghost_spiral, &army_of_ghosts, &fib_ghosts, &fpp };
   int id = rand() % 10;
   current = known[id];
   ticks_start = ticks;
