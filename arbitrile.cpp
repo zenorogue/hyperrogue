@@ -20,7 +20,7 @@ struct shape {
   vector<ld> angles;
   vector<ld> edges;
   vector<tuple<int, int, int>> connections;
-  int size() { return isize(vertices); }
+  int size() const { return isize(vertices); }
   void build_from_angles_edges();
   };
 
@@ -52,41 +52,68 @@ void shape::build_from_angles_edges() {
     vertices.push_back(at);
     ctr += at;
     at += direction * edges[i];
-    direction = spin(angles[i] * degree) * direction;
+    direction = spin(angles[i]) * direction;
     }
   ctr = normalize(ctr);
   for(auto& v: vertices) v = v + (C0 - ctr);
   }
 
+bool correct_index(int index, int size) { return index >= 0 && index < size; }
+template<class T> bool correct_index(int index, const T& v) { return correct_index(index, isize(v)); }
+
+template<class T> void verify_index(int index, const T& v) { if(!correct_index(index, v)) throw hr_parse_exception("bad index"); }
+
 void load(const string& fname) {
   fhstream f(fname, "rt");
-  string s = scan<string>(f);
+  string s;
+  while(true) {
+    int c = fgetc(f.f);
+    if(c < 0) break;
+    s += c;
+    }
   auto& c = current;
   c.shapes.clear();
-  int N = scan<int>(f);
-  int tc = 0;
-  for(int i=0; i<N; i++) {
-    c.shapes.emplace_back();
-    auto& cc = c.shapes.back();
-    cc.id = i;
-    int siz = scan<int>(f);
-    for(int s=0; s<siz; s++) {
-      cc.edges.push_back(scan<ld>(f));
-      cc.angles.push_back(scan<ld>(f));
-      }
-    cc.build_from_angles_edges();
-    cc.connections.resize(cc.size());
-    tc += siz;
-    }
+  exp_parser ep;
+  ep.s = s;
+  ld angleunit = 1, distunit = 1;
   while(true) {
-    int ai = scan<int>(f);
-    if(ai < 0) break;
-    int as = scan<int>(f);
-    int bi = scan<int>(f);
-    int bs = scan<int>(f);
-    int m = scan<int>(f);
-    c.shapes[ai].connections[as] = {bi, bs, m};
-    c.shapes[bi].connections[bs] = {ai, as, m};
+    ep.skip_white();
+    if(ep.next() == 0) break;
+    if(ep.eat("e2.")) println(hlog, "got e2");
+    if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
+    if(ep.eat("distunit(")) distunit = real(ep.parsepar());
+    if(ep.eat("let(")) {
+      string tok = ep.next_token();
+      ep.force_eat("=");
+      ep.extra_params[tok] =ep.parsepar();
+      }
+    if(ep.eat("tile(")) {
+      println(hlog, "reading shape with angleunit = ", angleunit);
+      c.shapes.emplace_back();
+      auto& cc = c.shapes.back();
+      cc.id = isize(c.shapes) - 1;
+      while(ep.next() != ')') {
+        ld dist = ep.rparse(0);
+        ep.force_eat(",");
+        ld angle = ep.rparse(0);
+        cc.edges.push_back(dist * distunit);
+        cc.angles.push_back(angle * angleunit);
+        if(ep.eat(",")) continue;
+        else if(ep.eat(")")) break;
+        else throw hr_parse_exception("expecting , or )");
+        }
+      cc.build_from_angles_edges();
+      cc.connections.resize(cc.size());
+      }
+    if(ep.eat("c(")) {
+      int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
+      int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
+      int bi = ep.iparse(); verify_index(bi, c.shapes); ep.force_eat(",");
+      int bs = ep.iparse(); verify_index(bs, c.shapes[bi]); ep.force_eat(",");
+      int m = ep.iparse(); ep.force_eat(")");
+      c.shapes[ai].connections[as] = {bi, bs, m};
+      c.shapes[bi].connections[bs] = {ai, as, m};
+      }
     }
   }
 
@@ -290,7 +317,13 @@ int readArgs() {
     stop_game();
     shift(); 
     set_geometry(gArbitrary);
-    load(args());
+    try {
+      load(args());
+      }
+    catch(hr_parse_exception& ex) {
+      println(hlog, "failed: ", ex.s);
+      exit(3);
+      }
     }
   else return 1;
   return 0;
