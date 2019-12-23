@@ -319,6 +319,8 @@ void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
   }
 #endif
 
+EX purehookset hooks_take;
+
 EX void take(string fname, const function<void()>& what IS(default_screenshot_content)) {
 
   if(cheater) doOvergenerate();
@@ -342,6 +344,7 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   vid.yres = shoty * multiplier;
   calcparam();
   models::configure();
+  callhooks(hooks_take);
   
   if(make_svg) {
     #if CAP_SVG
