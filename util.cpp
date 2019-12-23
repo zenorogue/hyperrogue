@@ -145,6 +145,9 @@ struct exp_parser {
 
   cld parse(int prio = 0);
 
+  ld rparse(int prio = 0) { return real(parse(prio)); }
+  int iparse(int prio = 0) { return int(floor(rparse(prio) + .5)); }
+
   cld parsepar() {
     cld res = parse();
     if(next() != ')') { at = -1; return res; }
