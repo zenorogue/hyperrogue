@@ -139,6 +139,10 @@ struct exp_parser {
     return false;
     }
 
+  void skip_white();
+  
+  char snext(int step=0) { skip_white(); return next(step); }
+
   cld parse(int prio = 0);
 
   cld parsepar() {
@@ -151,9 +155,13 @@ struct exp_parser {
   };
 #endif
 
+void exp_parser::skip_white() {
+  while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') at++;
+  }
+  
 cld exp_parser::parse(int prio) {
   cld res;
-  while(next() == ' ') at++;
+  skip_white();
   if(eat("sin(")) res = sin(parsepar());
   else if(eat("cos(")) res = cos(parsepar());
   else if(eat("sinh(")) res = sinh(parsepar());
@@ -177,24 +185,24 @@ cld exp_parser::parse(int prio) {
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
   else if(eat("ifp(")) {
     cld cond = parse(0);
-    if(next() != ',') {at = -1; return 0; } at++;
+    if(snext() != ',') {at = -1; return 0; } at++;
     cld yes = parse(0);
-    if(next() != ',') {at = -1; return 0; } at++;
+    if(snext() != ',') {at = -1; return 0; } at++;
     cld no = parsepar();
     return real(cond) > 0 ? yes : no;
     }  
   else if(eat("wallif(")) {
     cld val0 = parse(0);
-    if(next() != ',') {at = -1; return 0; } at++;
+    if(snext() != ',') {at = -1; return 0; } at++;
     cld val1 = parsepar();
     if(real(extra_params["p"]) >= 3.5) return val0;
     else return val1;
     }
   else if(eat("rgb(")) {     
     cld val0 = parse(0);
-    if(next() != ',') {at = -1; return 0; } at++;
+    if(snext() != ',') {at = -1; return 0; } at++;
     cld val1 = parse(0);
-    if(next() != ',') {at = -1; return 0; } at++;
+    if(snext() != ',') {at = -1; return 0; } at++;
     cld val2 = parsepar();
     switch(int(real(extra_params["p"]) + .5)) {
       case 1: return val0;
@@ -205,16 +213,17 @@ cld exp_parser::parse(int prio) {
     }
   else if(eat("let(")) {
     string name;
+    skip_white();
     while(true) {
       char c = next();
       if((c >= '0' && c <= '9') || (c == '.' && next(1) != '.') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
         name += c, at++;
       else break;
       }
-    if(next() != '=') { at = -1; return 0; }
+    if(snext() != '=') { at = -1; return 0; }
     at++;
     cld val = parse(0);
-    if(next() != ',') { at = -1; return 0; }
+    if(snext() != ',') { at = -1; return 0; }
     at++;
     dynamicval<cld> d(extra_params[name], val);
     return parsepar();
