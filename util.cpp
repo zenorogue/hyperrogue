@@ -145,7 +145,9 @@ struct exp_parser {
     }
 
   void skip_white();
-  
+
+  string next_token();
+
   char snext(int step=0) { skip_white(); return next(step); }
 
   cld parse(int prio = 0);
@@ -170,7 +172,19 @@ struct exp_parser {
 void exp_parser::skip_white() {
   while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') at++;
   }
-  
+
+string exp_parser::next_token() {
+  skip_white();
+  string token;
+  while(true) {
+    char c = next();
+    if((c >= '0' && c <= '9') || (c == '.' && next(1) != '.') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
+      token += c, at++;
+    else break;
+    }
+  return token;
+  }
+
 cld exp_parser::parse(int prio) {
   cld res;
   skip_white();
@@ -224,14 +238,7 @@ cld exp_parser::parse(int prio) {
       }
     }
   else if(eat("let(")) {
-    string name;
-    skip_white();
-    while(true) {
-      char c = next();
-      if((c >= '0' && c <= '9') || (c == '.' && next(1) != '.') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
-        name += c, at++;
-      else break;
-      }
+    string name = next_token();
     force_eat("=");
     cld val = parse(0);
     force_eat(",");
@@ -246,13 +253,7 @@ cld exp_parser::parse(int prio) {
   #endif
   else if(next() == '(') at++, res = parsepar(); 
   else {
-    string number;
-    while(true) {
-      char c = next();
-      if((c >= '0' && c <= '9') || (c == '.' && next(1) != '.') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
-        number += c, at++;
-      else break;
-      }
+    string number = next_token();
     if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
