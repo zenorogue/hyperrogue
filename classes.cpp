@@ -649,6 +649,8 @@ enum eLand {
   #include "content.cpp"
   landtypes
   };
+
+extern color_t floorcolors[landtypes];
 #endif
 
 EX const landtype linf[landtypes] = {
