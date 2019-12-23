@@ -197,7 +197,7 @@ EX namespace yendor {
     }
 
   EX bool exhaustive_distance_appropriate() {
-    if(euclid && (kite::in() || arcm::in() || quotient)) return true;
+    if(euclid && (kite::in() || arcm::in() || arb::in() || quotient)) return true;
     if(nil && quotient) return true;
     if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) return true;
     
