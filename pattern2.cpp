@@ -1635,7 +1635,10 @@ EX namespace patterns {
         return res;
         }
       case 'P': {
-        int d = celldistance(c, currentmap->gamestart()->move(0));
+        cell *s = currentmap->gamestart()->move(0);
+        if(yendor::exhaustive_distance_appropriate() && !keep_distances_from.count(s))
+          permanent_long_distances(s);
+        int d = celldistance(s, c);
         color_t res = distcolors[d];
         if(d > 3) res |= 0x1000000;
         return res;

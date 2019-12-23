@@ -935,7 +935,7 @@ EX int heptdistance(cell *c1, cell *c2) {
 
 map<pair<cell*, cell*>, int> saved_distances;
 
-set<cell*> keep_distances_from;
+EX set<cell*> keep_distances_from;
 
 set<cell*> dists_computed;
 
