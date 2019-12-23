@@ -61,7 +61,6 @@ void shape::build_from_angles_edges() {
 void load(const string& fname) {
   fhstream f(fname, "rt");
   string s = scan<string>(f);
-  println(hlog, "type = ", s);
   auto& c = current;
   c.shapes.clear();
   int N = scan<int>(f);
@@ -75,8 +74,6 @@ void load(const string& fname) {
       cc.edges.push_back(scan<ld>(f));
       cc.angles.push_back(scan<ld>(f));
       }
-    println(hlog, cc.edges);
-    println(hlog, cc.angles);
     cc.build_from_angles_edges();
     cc.connections.resize(cc.size());
     tc += siz;
@@ -91,7 +88,6 @@ void load(const string& fname) {
     c.shapes[ai].connections[as] = {bi, bs, m};
     c.shapes[bi].connections[bs] = {ai, as, m};
     }
-  println(hlog, "loaded");
   }
 
 geometryinfo1& arbi_tiling::get_geometry() {
@@ -223,10 +219,6 @@ struct hrmap_arbi : hrmap {
     int e = get<1>(co);
     int m = get<2>(co);
     
-    println(hlog, h, "@", p.second, " dir ", d, ":");
-    
-    println(hlog, "adj = ", adj(h, d));
-    
     transmatrix T = p.second * adj(h, d);
     
     if(hyperbolic) {
@@ -244,13 +236,11 @@ struct hrmap_arbi : hrmap {
       }
 
     for(auto& p2: altmap[alt]) if(eqmatrix(p2.second, T)) {
-      println(hlog, "reuse ", p2.first, " at ", T);
       h->c.connect(d, p2.first, e, m);
       return p2.first;
       }
 
     auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
-    println(hlog, "create ", h1, " at ", T);
     h1->distance = h->distance + 1;
     h1->zebraval = xt;
     h1->c7 = newCell(h1->type, h1);
