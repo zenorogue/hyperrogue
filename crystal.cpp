@@ -49,7 +49,7 @@ bool view_east = false;
 
 EX bool used_compass_inside;
 
-ldcoord told(coord c) { ldcoord a; for(int i=0; i<MAXDIM; i++) a[i] = c[i]; return a; }
+EX ldcoord told(coord c) { ldcoord a; for(int i=0; i<MAXDIM; i++) a[i] = c[i]; return a; }
 // strange number to prevent weird acting in case of precision errors
 coord roundcoord(ldcoord c) { coord a; for(int i=0; i<MAXDIM; i++) a[i] = floor(c[i] + .5136); return a; }
 
