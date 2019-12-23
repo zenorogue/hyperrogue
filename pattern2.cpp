@@ -1577,7 +1577,12 @@ EX namespace patterns {
       }
         
     ep.s = formula;
-    return ep.parse();
+    try {
+      return ep.parse();
+      }
+    catch(hr_parse_exception& ex) {
+      return 0;
+      }
     }
   
   EX hookset<int(cell*)> *hooks_generate_canvas;

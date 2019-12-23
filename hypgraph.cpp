@@ -833,7 +833,13 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       ep.extra_params["uy"] = H[1];
       ep.extra_params["uz"] = H[2];
       ep.s = models::formula;
-      cld res = ep.parse();
+      cld res;
+      try {
+        res = ep.parse();
+        }
+      catch(hr_parse_exception&) {
+        res = 0;
+        }
       ret[0] = real(res);
       ret[1] = imag(res);
       ret[2] = 0;

@@ -79,7 +79,15 @@ EX namespace arg {
   EX const char* argcs() { return args().c_str(); }
   EX int argi() { return atoi(argcs()); }
   EX unsigned arghex() { return strtoll(argcs(), NULL, 16); }
-  EX ld argf() { return parseld(args()); }
+  EX ld argf() { 
+    try {
+      return parseld(args());
+      }
+    catch(hr_parse_exception& ex) {
+      println(hlog, "error parsing commandline parameters: ", ex.s);
+      exit(1);
+      }
+    }
   EX bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
   
   EX void shift_arg_formula(ld& x, const reaction_t& r IS(reaction_t())) {

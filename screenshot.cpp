@@ -575,7 +575,12 @@ void apply_animated_parameters() {
   ap_changes = 0;
   for(auto &ap: aps) {
     if(*ap.value != ap.last) continue;
-    *ap.value = parseld(ap.formula);
+    try {
+      *ap.value = parseld(ap.formula);
+      }
+    catch(hr_parse_exception&) {
+      continue;
+      }
     if(*ap.value != ap.last) {
       if(ap.reaction) ap.reaction();
       ap_changes++;

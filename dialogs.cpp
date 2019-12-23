@@ -743,17 +743,20 @@ EX namespace dialog {
     }
   
   EX void apply_edit() {
-    exp_parser ep;
-    ep.s = ne.s;
-    ld x = real(ep.parse());
-    if(!ep.ok()) return;
-    if(ne.sc.positive && x <= 0) return;
-    *ne.editwhat = x;
-    if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
-    #if CAP_ANIMATIONS
-    if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);    
-    #endif
-    if(reaction) reaction();
+    try {
+      exp_parser ep;
+      ep.s = ne.s;    
+      ld x = ep.rparse();
+      if(ne.sc.positive && x <= 0) return;
+      *ne.editwhat = x;
+      if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
+      #if CAP_ANIMATIONS
+      if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);    
+      #endif
+      if(reaction) reaction();
+      }
+    catch(hr_parse_exception&) { 
+      }
     }
 
   EX void bound_low(ld val) {

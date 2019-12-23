@@ -121,6 +121,11 @@ EX bool appears(const string& haystack, const string& needle) {
   }
 
 #if HDR
+struct hr_parse_exception : hr_exception {
+  string s;
+  hr_parse_exception(const string& z) : s(z) {}
+  };
+
 struct exp_parser {
   string s;
   int at;
@@ -129,7 +134,7 @@ struct exp_parser {
   map<string, cld> extra_params;
 
   bool ok() { return at == isize(s); }
-  char next(int step=0) { if(at >= isize(s)-step || at == -1) return 0; else return s[at+step]; }
+  char next(int step=0) { if(at >= isize(s)-step) return 0; else return s[at+step]; }
   
   bool eat(const char *c) {
     int orig_at = at;
@@ -150,9 +155,13 @@ struct exp_parser {
 
   cld parsepar() {
     cld res = parse();
-    if(next() != ')') { at = -1; return res; }
-    at++;
+    force_eat(")");
     return res;
+    }
+  
+  void force_eat(const char *c) {
+    skip_white();
+    if(!eat(c)) throw hr_parse_exception("expected: " + string(c));
     }
 
   };
@@ -188,24 +197,24 @@ cld exp_parser::parse(int prio) {
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
   else if(eat("ifp(")) {
     cld cond = parse(0);
-    if(snext() != ',') {at = -1; return 0; } at++;
+    force_eat(",");
     cld yes = parse(0);
-    if(snext() != ',') {at = -1; return 0; } at++;
+    force_eat(",");
     cld no = parsepar();
     return real(cond) > 0 ? yes : no;
     }  
   else if(eat("wallif(")) {
     cld val0 = parse(0);
-    if(snext() != ',') {at = -1; return 0; } at++;
+    force_eat(",");
     cld val1 = parsepar();
     if(real(extra_params["p"]) >= 3.5) return val0;
     else return val1;
     }
   else if(eat("rgb(")) {     
     cld val0 = parse(0);
-    if(snext() != ',') {at = -1; return 0; } at++;
+    force_eat(",");
     cld val1 = parse(0);
-    if(snext() != ',') {at = -1; return 0; } at++;
+    force_eat(",");
     cld val2 = parsepar();
     switch(int(real(extra_params["p"]) + .5)) {
       case 1: return val0;
@@ -223,11 +232,9 @@ cld exp_parser::parse(int prio) {
         name += c, at++;
       else break;
       }
-    if(snext() != '=') { at = -1; return 0; }
-    at++;
+    force_eat("=");
     cld val = parse(0);
-    if(snext() != ',') { at = -1; return 0; }
-    at++;
+    force_eat(",");
     dynamicval<cld> d(extra_params[name], val);
     return parsepar();
     }
@@ -250,7 +257,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "" && next() == '-') { at++; res = -parse(prio); }
-    else if(number == "") at = -1;
+    else if(number == "") throw hr_parse_exception("number missing");
     else if(number == "s") res = ticks / 1000.;
     else if(number == "ms") res = ticks;
     else if(number[0] == '0' && number[1] == 'x') res = strtoll(number.c_str()+2, NULL, 16);
@@ -262,7 +269,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "shot") res = inHighQual ? 1 : 0;
     else if(extra_params.count(number)) res = extra_params[number];
     else if(params.count(number)) res = params.at(number);
-    else if(number[0] >= 'a' && number[0] <= 'z') at = -1;
+    else if(number[0] >= 'a' && number[0] <= 'z') throw hr_parse_exception("unknown value: " + number);
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
   while(true) {
