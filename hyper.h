@@ -17,7 +17,6 @@
 #define VERNUM_HEX 0xA80F
 
 #include "sysconfig.h"
-#include "classes.h"
 
 #include <stdarg.h>
 #include "hyper_function.h"
@@ -209,6 +208,8 @@ typedef long double ld;
 
 typedef complex<ld> cld;
 
+typedef unsigned color_t;
+
 struct charstyle {
   int charid;
   color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor, eyecolor;
@@ -216,6 +217,8 @@ struct charstyle {
   };
 
 enum eStereo { sOFF, sAnaglyph, sLR, sODS };
+
+enum eModel : int;
 
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
@@ -665,8 +668,6 @@ extern bool longclick;
 extern bool useRangedOrb;
 #endif
 
-static inline bool orbProtection(eItem it) { return false; } // not implemented
-
 #ifndef GL
 typedef float GLfloat;
 #endif
@@ -686,9 +687,6 @@ typedef glvec3 glvertex;
 extern int emeraldtable[100][7];
 
 // extern cell *cwpeek(cellwalker cw, int dir);
-
-const eLand NOWALLSEP = laNone;
-const eLand NOWALLSEP_USED = laWhirlpool;
 
 #define HAUNTED_RADIUS getDistLimit()
 #define UNKNOWN 65535
@@ -755,6 +753,13 @@ static const color_t NOCOLOR = 0;
 
   static const int max_vec = (1<<14);
   extern bool needConfirmationEvenIfSaved();
+
+typedef unsigned long long flagtype;
+#define Flag(i) (flagtype(1ull<<i))
+static inline void set_flag(flagtype& f, flagtype which, bool b) {
+  if(b) f |= which;
+  else f &= ~which;
+  }
 
 }
 

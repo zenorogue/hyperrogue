@@ -11,6 +11,12 @@
 #include "hyper.h"
 namespace hr {
 
+#if HDR
+enum cpatterntype { 
+  cpFootball, cpThree, cpChess, cpSingle, cpSingleSym, cpOddEven, cpLarge, cpZebra, cpUnknown
+  };
+#endif
+
 EX int ctof(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::ctof(c);
