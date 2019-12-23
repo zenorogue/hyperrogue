@@ -1238,7 +1238,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !arcm::in() && !kite::in() && !bt::in();
+  return !arcm::in() && !kite::in() && !bt::in() && !arb::in();
   }
 
 EX int valence() {
