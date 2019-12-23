@@ -159,7 +159,7 @@ makeh$(EXE_EXTENSION): makeh.cpp
 	$(CXX) makeh.cpp -o $@
 
 autohdr.h: makeh$(EXE_EXTENSION) *.cpp
-	./makeh locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp complex.cpp *.cpp > autohdr.h
+	./makeh classes.cpp locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp complex.cpp *.cpp > autohdr.h
 
 language-data.cpp: langen$(EXE_EXTENSION)
 	./langen > language-data.cpp
