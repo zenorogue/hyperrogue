@@ -4786,7 +4786,7 @@ EX bool nohelp;
 EX void normalscreen() {
   help = "@";
 
-  mouseovers = XLAT("Press F1 or right click for help");
+  mouseovers = standard_help();
 
 #if CAP_TOUR  
   if(tour::on) mouseovers = tour::tourhelp;

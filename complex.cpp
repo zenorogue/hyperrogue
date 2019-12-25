@@ -956,6 +956,45 @@ EX namespace clearing {
       steps--; ds++;
       }
     }
+
+  typedef tuple<int, int, int, int> celltype;
+  
+  map<celltype, pair<bignum, int> > stats;
+  
+  EX bignum imputed;
+  EX int direct;
+  
+  map<cell*, pair<bignum, int> > score;
+  
+  celltype get_celltype(cell *c) {
+    cell *c1 = c;
+    if(c->mondir < c->type)
+      c1 = c->move(c->mondir);
+    return make_tuple(
+      celldistAlt(c), type_in(expansion, c, celldistAlt), 
+      celldistAlt(c1), type_in(expansion, c1, celldistAlt)
+      );
+    }
+  
+  EX void imput(cell *c) {
+    if(score.count(c)) return;
+    auto& is = score[c];
+    celltype t = get_celltype(c);
+    auto& stat = stats[t];
+    is.second = c->mondir;
+    if(c->mpdist <= 6) {
+      is.first = 1;
+      forCellEx(c2, c) if(score.count(c2) && c2->move(score[c2].second) == c)
+        is.first += score[c2].first;
+      stat.first += is.first;
+      stat.second++;
+      }
+    else {
+      is.first = stat.second ? stat.first.randomized_div(stat.second) : bignum(1);
+      imputed += is.first;
+      }
+    }
+
 EX }
 
 EX namespace whirlpool {

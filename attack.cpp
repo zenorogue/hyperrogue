@@ -391,7 +391,8 @@ EX void killMutantIvy(cell *c, eMonster who) {
   removeIvy(c);
   for(int i=0; i<c->type; i++)
     if(c->move(i)->mondir == c->c.spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
-      killMutantIvy(c->move(i), who);
+      kills[c->move(i)->monst]++, killMutantIvy(c->move(i), who);
+  if(c->land == laClearing) clearing::imput(c);
   }
 
 EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
@@ -462,6 +463,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   
   if(isMutantIvy(m) || m == moFriendlyIvy) {
     pcount = 0;
+    if(isMutantIvy(m)) clearing::direct++;
     killMutantIvy(c, who);
     }
   

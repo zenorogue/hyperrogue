@@ -178,6 +178,10 @@ void buildHelpText() {
 #endif
   }
 
+EX string standard_help() {
+  return XLAT("Press F1 or right click for help");
+  }
+
 EX void buildCredits() {
   help = "";
   help += XLAT("game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n");
@@ -575,6 +579,16 @@ EX string generateHelpForMonster(eMonster m) {
   
   if(isGhost(m))
     s += XLAT("\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.", m);
+    
+  if(m == moMutant) {
+    using namespace clearing;
+    if(direct)
+      s += XLAT("\n\nLeaves cut directly: " + its(direct));
+    if(kills[moMutant])
+      s += XLAT("\n\nLeaves cut onscreen: " + its(kills[moMutant]));
+    if(imputed.nonzero())
+      s += XLAT("\n\nLeaves cut offscreen (approximately): " + imputed.get_str(10000));
+    }
     
   if(m == moBat || m == moEagle)
     s += XLAT("\n\nFast flying creatures may attack or go against gravity only in their first move.", m);
