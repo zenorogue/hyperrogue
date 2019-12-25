@@ -303,6 +303,7 @@ struct bignum {
   bignum(ld d);
   
   bool operator < (const bignum&) const;
+  bool operator > (const bignum& b) const { return b < self; }
 
   ld leading() const {
     switch(isize(digits)) {
