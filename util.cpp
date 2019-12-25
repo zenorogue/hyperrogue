@@ -300,6 +300,7 @@ struct bignum {
   bignum& operator +=(const bignum& b);
   void addmul(const bignum& b, int factor);
   string get_str(int max_length) const;
+  bignum(ld d);
   
   bool operator < (const bignum&) const;
 
@@ -470,6 +471,15 @@ string bignum::get_str(int max_length) const {
     ret += val;
     }
   return ret;
+  }
+
+bignum::bignum(ld d) {
+  if(d == 0) return;
+  int n = 1;
+  while(d > BASE) d /= BASE, n++;
+  digits.resize(n);
+  n--;
+  while(n >= 0) { digits[n] = int(d); d -= digits[n]; d *= BASE; n--; }
   }
 
 }
