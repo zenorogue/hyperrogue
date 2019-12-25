@@ -3762,6 +3762,7 @@ struct flashdata {
   double angle2;
   int spd; // 0 for flashes, >0 for particles
   color_t color;
+  string text;
   flashdata(int _t, int _s, cell *_w, color_t col, int sped) { 
     t=_t; size=_s; where=_w; color = col; 
     angle = rand() % 1000; spd = sped;
@@ -3770,6 +3771,13 @@ struct flashdata {
   };
 
 vector<flashdata> flashes;
+
+EX void drawBubble(cell *c, color_t col, string s, ld size) {
+  auto fd = flashdata(ticks, 1000, c, col, 1);
+  fd.text = s;
+  fd.angle = size;
+  flashes.push_back(fd);
+  }
 
 EX void drawFlash(cell *c) {
   flashes.push_back(flashdata(ticks, 1000, c, iinf[itOrbFlash].color, 0)); 
@@ -4137,8 +4145,12 @@ EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {
   int tim = ticks - f.t;
   
   if(tim <= f.size && !f.spd) kill = false;
-  
-  if(f.spd) {
+
+  if(f.text != "") {
+    queuestr(V, (1 - tim * 1. / f.size) * f.angle, f.text, f.color);
+    }
+    
+  else if(f.spd) {
     #if CAP_SHAPES
     if(tim <= 300) kill = false;
     int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
