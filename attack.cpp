@@ -470,7 +470,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     if(isMutantIvy(m)) clearing::direct++;
     bignum s = ivy_total() - 1;
     killMutantIvy(c, who);
-    s = ivy_total();
+    s = ivy_total() - s;
     if(s > bignum(1))
       drawBubble(c, 0xFFFF00, s.get_str(100), .5);
     }
