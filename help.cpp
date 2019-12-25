@@ -583,11 +583,11 @@ EX string generateHelpForMonster(eMonster m) {
   if(m == moMutant) {
     using namespace clearing;
     if(direct)
-      s += XLAT("\n\nLeaves cut directly: " + its(direct));
+      s += XLAT("\n\nLeaves cut directly: %1", its(direct));
     if(kills[moMutant])
-      s += XLAT("\n\nLeaves cut onscreen: " + its(kills[moMutant]));
+      s += XLAT("\n\nLeaves cut onscreen: %1", its(kills[moMutant]));
     if(imputed.nonzero())
-      s += XLAT("\n\nLeaves cut offscreen (approximately): " + imputed.get_str(10000));
+      s += XLAT("\n\nLeaves cut offscreen (approximately): %1", imputed.get_str(10000));
     }
     
   if(m == moBat || m == moEagle)
