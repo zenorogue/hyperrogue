@@ -38,6 +38,7 @@ EX int buildIvy(cell *c, int children, int minleaf) {
   leaf += leafchild;
   if(leaf < minleaf) {
     if(child) killIvy(child, moNone);
+    dynamicval<int> k(kills[moIvyDead]);
     killIvy(c, moNone);
     return 0;
     }
