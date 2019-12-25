@@ -250,7 +250,7 @@ struct videopar {
   ld xposition, yposition;
   
   bool grid;
-  int particles;
+  bool particles;
   
   int fsize;
   int flashtime;
@@ -329,6 +329,7 @@ struct videopar {
 
   ld collignon_parameter; bool collignon_reflected;
   ld plevel_factor;
+  bool bubbles_special, bubbles_threshold, bubbles_all;
   };
 
 extern videopar vid;

@@ -618,6 +618,10 @@ EX void initConfig() {
 
   addsaver(s2xe::qrings, "s2xe-rings");
   addsaver(rots::underlying_scale, "rots-underlying-scale");
+  
+  addsaver(vid.bubbles_special, "bubbles-special", 1);
+  addsaver(vid.bubbles_threshold, "bubbles-special", 1);
+  addsaver(vid.bubbles_all, "bubbles-special", 0);
 
 #if CAP_SHMUP  
   multi::initConfig();
@@ -996,6 +1000,22 @@ EX void menuitem_sightrange(char c IS('c')) {
   dialog::add_action(edit_sightrange);
   }
   
+EX void showSpecialEffects() {
+  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("extra graphical effects"));
+
+  dialog::addBoolItem_action(XLAT("particles on attack"), (vid.particles), 'p');
+  dialog::addBoolItem_action(XLAT("floating bubbles: special"), vid.bubbles_special, 's');
+  dialog::addBoolItem_action(XLAT("floating bubbles: treasure thresholds"), vid.bubbles_threshold, 't');
+  dialog::addBoolItem_action(XLAT("floating bubbles: all treasures"), vid.bubbles_all, 'a');
+  dialog::addBoolItem_action(XLAT("background particle effects"), (vid.backeffects), 'b');
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void showGraphConfig() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
@@ -1039,8 +1059,7 @@ EX void showGraphConfig() {
     
   dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
 
-  dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
-  dialog::addBoolItem(XLAT("background particle effects"), (vid.backeffects), 'p');
+  dialog::addItem(XLAT("extra graphical effects"), 'u');
 
   dialog::addBreak(50);
   dialog::addBack();
@@ -1055,7 +1074,7 @@ EX void showGraphConfig() {
   
     if((uni >= 32 && uni < 64) || uni == 'L' || uni == 'C') xuni = uni;
     
-    if(xuni == 'u') vid.particles = !vid.particles;
+    if(xuni == 'u') pushScreen(showSpecialEffects);
 
     else if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
       XLAT("scrolling speed"),

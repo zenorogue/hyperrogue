@@ -690,6 +690,17 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     }
   if(m == moLesser && !(kills[m] % 10))
     degradeDemons();
+  if(m == moLesser) {
+    if(kills[m] % 10) {
+      if(vid.bubbles_special)
+        drawBubble(c, 0xFF0000, its(kills[m]%10), 1);
+      }
+    else {
+      if(vid.bubbles_special)
+        drawBubble(c, 0xFF8000, "+1 XP", .8);
+      degradeDemons();
+      }
+    }
   if(isIvy(c)) {
     pcount = 0;
     eMonster m = c->monst;
