@@ -395,6 +395,10 @@ EX void killMutantIvy(cell *c, eMonster who) {
   if(c->land == laClearing) clearing::imput(c);
   }
 
+EX bignum ivy_total() {
+  return kills[moMutant] + kills[moFriendlyIvy] + clearing::imputed;
+  }
+
 EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   eMonster m = c->monst;
   DEBBI(DF_TURN, ("killmonster ", dnameof(m)));
@@ -464,7 +468,11 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(isMutantIvy(m) || m == moFriendlyIvy) {
     pcount = 0;
     if(isMutantIvy(m)) clearing::direct++;
+    bignum s = ivy_total() - 1;
     killMutantIvy(c, who);
+    s = ivy_total();
+    if(s > bignum(1))
+      drawBubble(c, 0xFFFF00, s.get_str(100), .5);
     }
   
   if(m == moPrincess) {
