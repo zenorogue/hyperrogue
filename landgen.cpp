@@ -1157,7 +1157,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             (hrand(50+items[itMutant]/2+yendor::hardness()) < 30) ? (hrand(100) < 50 ? waBigTree : waSmallTree) : waNone;
         }
       if(d == 8) {
-        if(hrand(doCross ?450:15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
+        bool ok = c->landparam == 0;
+        forCellEx(c2, c) if(c2->landparam) ok = false;
+        if(ok && hrand(doCross ?450:15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
           if(!peace::on) c->item = itMutant;
           c->landparam = items[itMutant] + 5 + hrand(11);
           c->wall = waNone;
@@ -1165,7 +1167,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             if(c->move(i) && (c->move(i)->wall == waBigTree || c->move(i)->wall == waSmallTree)) 
               c->move(i)->wall = waNone;
           }
-        else if(hrand_monster(15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
+        else if(hrand_monster(15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && ok && !safety) {
           // for the Yendor Challenge, use only Mutants
           if(!(yendor::on && yendor::clev().l == laMirror)) {
             c->monst = moForestTroll;
