@@ -322,7 +322,7 @@ EX ld parseld(const string& s) {
 
 EX string parser_help() {
   return XLAT("Functions available: %1", 
-    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation], sqrt, to01, random, ifp(a,v,w) [if positive]");
+    "(a)sin(h), (a)cos(h), (a)tan(h), exp, log, abs, re, im, conj, let(t=...,...t...), floor, frac, e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation], sqrt, to01, random, edge(7,3), regradius(7,3), ifp(a,v,w) [if positive]");
   }
 
 }
