@@ -2242,9 +2242,20 @@ void celldrawer::add_map_effects() {
     int tim = ticks - lightat;
     if(tim > 1000) tim = 800;
     if(elec::havecharge && tim > 400) tim = 400;
-    for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->ligon) {
-      int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-      queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+    for(int t=0; t<c->type; t++) if(c->move(t)) {
+      if(c->move(t)->ligon) {
+        int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
+        queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+        }
+      for(int u: {-1, 1}) {
+        cellwalker cw = cellwalker(c, t) + wstep + u;
+        if(u == -1 && VALENCE == 4) continue;
+        cell *c2 = cw.peek();
+        if(c2 && c2->ligon) {
+          int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
+          queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+          }
+        }
       }
     }
 

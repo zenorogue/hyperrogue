@@ -306,9 +306,7 @@ EX namespace elec {
         if(from != 1) charges[id].lowlink = 1;
         }
       
-      for(int i=0; i<c->type; i++) {
-        cell *c2 = c->move(i);
-        if(!c2) continue;
+      for(cell *c2: adj_minefield_cells(c)) {
         if(c2->listindex == from) continue;
         eCharge ct = getCharge(c2);
         if(conduct(chh, ct))
@@ -2087,14 +2085,16 @@ EX namespace heat {
         if(isFire(c)) hmod += 4 * xrate;
         if(isPrincess(c->monst)) hmod += (markEmpathy(itOrbWinter) ? -1.2 : 1.2) * xrate;
         
-        forCellEx(ct, c) {
+        auto ls = adj_minefield_cells(c);
+
+        for(cell* ct: ls) {
           if(!isIcyLand(ct) && isFire(ct)) 
             hmod += xrate*.1;
           if(ct->land == laVolcano) 
             hmod += xrate * (ct->wall == waMagma ? .4 : .2);
           }
         
-        forCellEx(ct, c) {
+        for(cell* ct: ls) {
           if(!isIcyLand(ct)) {
             // make sure that we can still enter Cocytus,
             // it won't heat up right away even without Orb of Winter or Orb of Speed
@@ -2179,7 +2179,8 @@ EX namespace heat {
       
         cell *last = c->move(c->type-1);
         
-        forCellEx(c2, c) {
+        auto ls = adj_minefield_cells(c);
+        for(cell* c2: ls) {
           
           if(c->wall == waPartialFire) {
             // two partial fires adjacent are necessary to spread
@@ -2300,7 +2301,7 @@ EX void livecaves() {
       hv = 0;
       if(c->monst == moDarkTroll) c->monst = moTroll;
       if(c->item || c->monst || c->cpdist == 0) continue;
-      forCellEx(c2, c) {
+      for(cell *c2: adj_minefield_cells(c)) {
         eWall w = c2->wall;
         if(w == waDeadfloor) hv++, bringlife.push_back(c2);
         else if(w == waDeadwall || (w == waDeadfloor2 && !c2->monst))

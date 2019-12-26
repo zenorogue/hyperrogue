@@ -293,14 +293,14 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
   // block spill
   if(t == waTemporary) return;
   // cwt.at->item = itNone;
-  if(rad) for(int i=0; i<c->type; i++) if(c->move(i))
-    prespill(c->move(i), t, rad-1, c);
+  if(rad) for(cell *c2: adj_minefield_cells(c))
+    prespill(c2, t, rad-1, c);
   }
 
 EX void spillfix(cell* c, eWall t, int rad) {
   if(c->wall == waTemporary) c->wall = t;
-  if(rad) for(int i=0; i<c->type; i++) if(c->move(i))
-    spillfix(c->move(i), t, rad-1);
+  if(rad) for(cell *c2: adj_minefield_cells(c))
+    spillfix(c2, t, rad-1);
   }
 
 EX void spill(cell* c, eWall t, int rad) {

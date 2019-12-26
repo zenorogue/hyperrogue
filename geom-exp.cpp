@@ -750,12 +750,13 @@ EX void showEuclideanMenu() {
       });
     }
 
-  if(among(specialland, laMinefield, laCA) && geometry_has_alt_mine_rule()) {
-    dialog::addSelItem(XLAT("mine adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : WDIM == 3 ? "face" : "edge"), 'M');
+  if(geometry_has_alt_mine_rule()) {
+    dialog::addSelItem(XLAT("adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : WDIM == 3 ? "face" : "edge"), 'M');
     dialog::add_action([] {
       stop_game();
       mine_adjacency_rule = !mine_adjacency_rule;
       start_game();
+      addMessage(XLAT("Note: adjacency rule affects environmental effects, but not movement."));
       });
     }
   
