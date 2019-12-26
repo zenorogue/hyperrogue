@@ -977,6 +977,7 @@ EX namespace clearing {
     }
   
   EX void imput(cell *c) {
+    if(bounded) return;
     if(score.count(c)) return;
     auto& is = score[c];
     celltype t = get_celltype(c);
