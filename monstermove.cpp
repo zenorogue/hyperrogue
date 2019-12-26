@@ -1333,8 +1333,18 @@ EX void movehex_rest(bool mounted) {
   }
 
 EX void movemutant() {
+  manual_celllister mcells;
+  for(cell *c: currentmap->allcells()) mcells.add(c);
+  if(!bounded) 
+    for(int i=0; i<isize(mcells.lst); i++) {
+      cell *c = mcells.lst[i];
+      if(c->land == laClearing && c->monst != moMutant && !pseudohept(c))
+        forCellEx(c2, c) forCellEx(c3, c2) if(celldistAlt(c3) < celldistAlt(c))
+          mcells.add(c3);
+      }
+  
   vector<cell*> young;
-  for(cell *c: currentmap->allcells())
+  for(cell *c: mcells.lst)
     if(c->monst == moMutant && c->stuntime == mutantphase)
       young.push_back(c);
   
