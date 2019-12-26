@@ -2154,18 +2154,6 @@ EX void queuestr(int x, int y, int shift, int size, string str, color_t col, int
   ptd.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
   }
 
-EX void queuechr(int x, int y, int shift, int size, char chr, color_t col, int frame IS(0), int align IS(8)) {
-  auto& ptd = queuea<dqi_string> (PPR::TEXT);
-  ptd.x = x;
-  ptd.y = y;
-  ptd.str = chr;
-  ptd.shift = shift;
-  ptd.size = size;
-  ptd.align = align;
-  ptd.color = col;
-  ptd.frame = frame ? (poly_outline & ~ 255) : 0;
-  }
-
 EX void queuecircle(int x, int y, int size, color_t color, PPR prio IS(PPR::CIRCLE), color_t fillcolor IS(0)) {
   auto& ptd = queuea<dqi_circle>(prio);
   ptd.x = x;
@@ -2196,18 +2184,6 @@ EX bool getcoord0_checked(const hyperpoint& h, int& xc, int &yc, int &zc) {
   return true;
   }
 
-EX void queuechr(const hyperpoint& h, int size, char chr, color_t col, int frame IS(0)) {
-  int xc, yc, sc;
-  if(getcoord0_checked(h, xc, yc, sc))
-    queuechr(xc, yc, sc, size, chr, col, frame);
-  }
-
-EX void queuechr(const transmatrix& V, double size, char chr, color_t col, int frame IS(0)) {
-  int xc, yc, sc; 
-  if(getcoord0_checked(tC0(V), xc, yc, sc))
-    queuechr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame);
-  }
-  
 EX void queuestr(const hyperpoint& h, int size, const string& chr, color_t col, int frame IS(0)) {
   int xc, yc, sc; 
   if(getcoord0_checked(h, xc, yc, sc))

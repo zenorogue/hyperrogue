@@ -810,7 +810,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
         hyperpoint P1 = tC0(P);
         
         if(isPlayerOn(c)) {
-          queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+          queuestr(P1, 2*vid.fsize, "X", 0x10100 * int(128 + 100 * sintick(150)));
     //      queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
           queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
           addauraspecial(P1, 0xFF0000, 0);
@@ -2609,7 +2609,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, col
       col = mirrorcolor(geometry == gElliptic ? det(Vs) < 0 : mirr);
       if(!mouseout() && !nospins && GDIM == 2) {
         hyperpoint P2 = Vs * inverse(cwtV) * mouseh;
-        queuechr(P2, 10, 'x', 0xFF00);
+        queuestr(P2, 10, "x", 0xFF00);
         }     
       if(!nospins && flipplayer) Vs = Vs * pispin;
       if(mmmon) {
@@ -3948,13 +3948,13 @@ EX void drawMarkers() {
      
     #if CAP_QUEUE
     if(haveMount()) ADC(V, dragon::target) {
-      queuechr(V, 2*vid.fsize, 'X',
+      queuestr(V, 2*vid.fsize, "X",
         gradient(0, iinf[itOrbDomination].color, -1, sintick(dragon::whichturn == turncount ? 75 : 150), 1));
       }
     #endif
 
     /* for(int i=0; i<12; i++) if(c->type == 5 && c->master == &dodecahedron[i])
-      queuechr(xc, yc, sc, 4*vid.fsize, 'A'+i, iinf[itOrbDomination].color); */
+      queuestr(xc, yc, sc, 4*vid.fsize, s0+('A'+i), iinf[itOrbDomination].color); */
     
     if(1) {
       using namespace yendor;
@@ -3973,7 +3973,7 @@ EX void drawMarkers() {
             }
           hyperpoint H = tC0(ggmatrix(keycell));
           #if CAP_QUEUE
-          queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sintick(150)));
+          queuestr(H, 2*vid.fsize, "X", 0x10101 * int(128 + 100 * sintick(150)));
           int cd = celldistance(yi[yii].key(), cwt.at);
           if(cd == DISTANCE_UNKNOWN) for(int i2 = 0; i2<YDIST; i2++) {
             int cd2 = celldistance(cwt.at, yi[yii].path[i2]);
@@ -4061,15 +4061,15 @@ EX void drawMarkers() {
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
       if(items[itOrbSword]) ADC(V, cwt.at)
-        queuechr(V * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
+        queuestr(V * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword].color);
       if(items[itOrbSword2]) ADC(V, cwt.at)
-        queuechr(V * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
+        queuestr(V * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword2].color);
       }
     if(SWORDDIM == 3 && !shmup::on) {
       if(items[itOrbSword]) ADC(V, cwt.at)
-        queuechr(V * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword].color);
+        queuestr(V * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword].color);
       if(items[itOrbSword2]) ADC(V, cwt.at)
-        queuechr(V * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, '+', iinf[itOrbSword2].color);
+        queuestr(V * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword2].color);
       }
     }
 
@@ -4082,11 +4082,11 @@ EX void drawMarkers() {
     #if CAP_QUEUE
     if(orbToTarget == itOrbSummon) {
       monsterToSummon = summonedAt(mouseover);
-      queuechr(mousex, mousey, 0, vid.fsize, minf[monsterToSummon].glyph, minf[monsterToSummon].color);
+      queuestr(mousex, mousey, 0, vid.fsize, s0+minf[monsterToSummon].glyph, minf[monsterToSummon].color);
       queuecircleat(mouseover, 0.6, darkena(minf[monsterToSummon].color, 0, 0xFF));
       }
     else if(orbToTarget) {
-      queuechr(mousex, mousey, 0, vid.fsize, '@', iinf[orbToTarget].color);
+      queuestr(mousex, mousey, 0, vid.fsize, "@", iinf[orbToTarget].color);
       queuecircleat(mouseover, 0.6, darkena(iinf[orbToTarget].color, 0, 0xFF));
       }
     #endif
@@ -4675,7 +4675,7 @@ EX void drawfullmap() {
     char ch = 'A';
     for(auto& v: history::v) {
       queuepoly(ggmatrix(v->base) * v->at, cgi.shTriangle, 0x306090C0);
-      queuechr(ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
+      queuestr(ggmatrix(v->base) * v->at * C0, 10, s0+(ch++), 0xFF0000);
       }      
     }
   */

@@ -1537,7 +1537,7 @@ EX void draw_model_elements() {
   switch(pmodel) {
   
     case mdRotatedHyperboles: {
-      queuechr(current_display->xcenter, current_display->ycenter + current_display->radius * vid.alpha, 0, vid.fsize, 'X', ringcolor, 1, 8);
+      queuestr(current_display->xcenter, current_display->ycenter + current_display->radius * vid.alpha, 0, vid.fsize, "X", ringcolor, 1, 8);
       return;
       }
     
@@ -1567,8 +1567,8 @@ EX void draw_model_elements() {
 
     case mdTwoPoint: case mdSimulatedPerspective: {
       ld a = -models::model_orientation * degree;
-      queuechr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
-      queuechr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, 'X', ringcolor >> 8);
+      queuestr(xspinpush0(a, +vid.twopoint_param), vid.xres / 100, "X", ringcolor >> 8);
+      queuestr(xspinpush0(a, -vid.twopoint_param), vid.xres / 100, "X", ringcolor >> 8);
       return;
       }
     
@@ -1657,7 +1657,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
     hyperpoint res;
     applymodel(h, res);
     if(hypot2(res) < 1000 && !std::isnan(res[0]) && !std::isnan(res[1]))
-      queuechr(h, 16, 'X', 0xFF0000 + i * 0x20);
+      queuestr(h, 16, "X", 0xFF0000 + i * 0x20);
     } */
   }
 

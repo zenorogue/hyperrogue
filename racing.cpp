@@ -1408,7 +1408,7 @@ EX void markers() {
     hyperpoint H = tC0(ggmatrix(goal));
     if(invalid_point(H)) return;
 
-    queuechr(H, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+    queuestr(H, 2*vid.fsize, "X", 0x10100 * int(128 + 100 * sintick(150)));
     int cd = celldistance(track.back(), cwt.at);
     if(cd != DISTANCE_UNKNOWN)
     queuestr(H, vid.fsize, 

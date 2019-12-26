@@ -1236,7 +1236,7 @@ EX void prepareTexture() {
     }
   if(finger_center) {
     transmatrix V = rgpushxto0(finger_center->h);
-    queuechr(V, 0.5, 'X', 0xFFFFFFFF, 2);
+    queuestr(V, 0.5, "X", 0xFFFFFFFF, 2);
     for(int i=0; i<72; i++)
       queueline(V * xspinpush0(i*M_PI/32, finger_range), V * xspinpush0((i+1)*M_PI/32, finger_range), 0xFFFFFFFF, vid.linequality);
     }

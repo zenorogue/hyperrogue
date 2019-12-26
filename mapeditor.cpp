@@ -2251,7 +2251,7 @@ namespace mapeditor {
           int j = (i%3 == 2 ? i-2 : i+1);
           if(j < isize(ds.list))
             queueline(V * ds.list[i], V * ds.list[j], 0xFF00FFFF, -1, PPR::SUPERLINE);
-          queuechr(V * ds.list[i], 10, 'x', 0xFF00FF);
+          queuestr(V * ds.list[i], 10, "x", 0xFF00FF);
           }
         }
 
@@ -2262,7 +2262,7 @@ namespace mapeditor {
     
           int xc, yc, sc;
           getcoord(P2, xc, yc, sc);
-          queuechr(xc, yc, sc, 10, 'x', 
+          queuestr(xc, yc, sc, 10, "x", 
             a == 0 ? 0x00FF00 : 
             a == isize(ds.list)-1 ? 0xFF0000 :
             0xFFFF00);
@@ -2281,7 +2281,7 @@ namespace mapeditor {
     
           hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
         
-          queuechr(P2, 10, 'x', 0xFF00FF);
+          queuestr(P2, 10, "x", 0xFF00FF);
           }
         
         if(isize(ds.list) == 0) return us;
@@ -2324,7 +2324,7 @@ namespace mapeditor {
                 }
               }
             
-            queuechr(P2, 10, 'o', 
+            queuestr(P2, 10, "o", 
               0xC000C0);
             
             if(!mouseout()) {

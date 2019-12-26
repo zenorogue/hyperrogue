@@ -2954,9 +2954,9 @@ bool celldrawer::draw_shmup_monster() {
 
         if(ths && h && WDIM == 3) {
           if(items[itOrbSword])
-            queuechr(swordpos(m->pid, false, 1), vid.fsize * 2, '+', iinf[itOrbSword].color);
+            queuestr(swordpos(m->pid, false, 1), vid.fsize * 2, "+", iinf[itOrbSword].color);
           if(items[itOrbSword2])
-            queuechr(swordpos(m->pid, true, 1), vid.fsize * 2, '+', iinf[itOrbSword2].color);
+            queuestr(swordpos(m->pid, true, 1), vid.fsize * 2, "+", iinf[itOrbSword2].color);
           }
 
         if(ths && keyresult[cpid]) {

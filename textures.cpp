@@ -1158,7 +1158,7 @@ void showMagicMenu() {
     char letter = 'A';
     for(auto& am: amp) {
       hyperpoint h = ggmatrix(am.c) * am.cell_relative;
-      queuechr(h, vid.fsize, letter, 0xC00000, 1);
+      queuestr(h, vid.fsize, s0+letter, 0xC00000, 1);
 
       /*
       hyperpoint inmodel;
@@ -1167,10 +1167,10 @@ void showMagicMenu() {
       inmodel[1] *= current_display->radius * 1. / current_display->scrsize;
       */
 
-      queuechr(
+      queuestr(
         current_display->xcenter + current_display->scrsize * am.texture_coords[0], 
         current_display->ycenter + current_display->scrsize * am.texture_coords[1],
-        0, vid.fsize, letter, 0x00C000, 1);
+        0, vid.fsize, s0+letter, 0x00C000, 1);
       
       letter++;
       }

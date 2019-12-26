@@ -837,9 +837,9 @@ void display_coverage() {
 
   if(coverage_style)
     for(auto p : coverage)
-      queuechr(M * p.first, 10, char(p.second), dexp_comb_colors[(p.second >> 8) & 15]);
+      queuestr(M * p.first, 10, s0+char(p.second), dexp_comb_colors[(p.second >> 8) & 15]);
 /*      if(p->valid && p->surface_point.remaining_distance == 0)
-        queuechr(p->h, 10, 'x', dexp_colors[p->dexp_id]); */
+        queuestr(p->h, 10, "x", dexp_colors[p->dexp_id]); */
   }
 
 auto surface_hook2 = addHook(hooks_frame, 0, display_coverage);

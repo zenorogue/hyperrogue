@@ -128,7 +128,7 @@ EX void drawBlizzards() {
       transmatrix tpartial = sball.global * rspintox(t) * xpush(hdist0(t) * at0);
       
       if(wmascii || wmblack)
-        queuechr(tpartial, .2, '.', 0xFFFFFF);
+        queuestr(tpartial, .2, ".", 0xFFFFFF);
       else
         queuepoly(tpartial, cgi.shSnowball, 0xFFFFFF80);
       }

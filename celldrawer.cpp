@@ -2105,7 +2105,7 @@ void celldrawer::draw_item_full() {
         transmatrix P = ggmatrix(c1);
         hyperpoint P1 = tC0(P);
       
-        queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sintick(150)));
+        queuestr(P1, 2*vid.fsize, "X", 0x10100 * int(128 + 100 * sintick(150)));
         queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
         addauraspecial(P1, 0xFF0000, 0);
         }
@@ -2482,7 +2482,7 @@ void celldrawer::draw() {
     
     #if CAP_QUEUE
     if(error) {
-      queuechr(V, 1, asciichar, darkenedby(asciicol, darken), 2);
+      queuestr(V, 1, s0+asciichar, darkenedby(asciicol, darken), 2);
       }
     
     draw_grid();
