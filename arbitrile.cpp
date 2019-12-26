@@ -43,19 +43,19 @@ EX arbi_tiling current;
 EX short& id_of(heptagon *h) { return h->zebraval; }
 
 void shape::build_from_angles_edges() {
-  hyperpoint at(0, 0, 1, 0);
-  hyperpoint direction(1, 0, 0, 0);
+  transmatrix at = Id;
   vertices.clear();
   int n = isize(angles);
   hyperpoint ctr = Hypc;
   for(int i=0; i<n; i++) {
-    vertices.push_back(at);
-    ctr += at;
-    at += direction * edges[i];
-    direction = spin(angles[i]) * direction;
+    println(hlog, "at = ", at);
+    vertices.push_back(tC0(at));
+    ctr += tC0(at);
+    at = at * xpush(edges[i]) * spin(angles[i]);
     }
+  if(!eqmatrix(at, Id)) throw hr_parse_exception("polygon error");
   ctr = normalize(ctr);
-  for(auto& v: vertices) v = v + (C0 - ctr);
+  for(auto& v: vertices) v = gpushxto0(ctr) * v;
   }
 
 bool correct_index(int index, int size) { return index >= 0 && index < size; }
@@ -75,20 +75,31 @@ void load(const string& fname) {
   c.shapes.clear();
   exp_parser ep;
   ep.s = s;
-  ld angleunit = 1, distunit = 1;
+  ld angleunit = 1, distunit = 1, angleofs = 0;
   while(true) {
     ep.skip_white();
     if(ep.next() == 0) break;
-    if(ep.eat("e2.")) println(hlog, "got e2");
-    if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
-    if(ep.eat("distunit(")) distunit = real(ep.parsepar());
-    if(ep.eat("let(")) {
+    if(ep.eat("e2.")) {
+      ginf[gArbitrary].g = giEuclid2;
+      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      }
+    else if(ep.eat("h2.")) {
+      ginf[gArbitrary].g = giHyperb2;
+      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      }
+    else if(ep.eat("s2.")) {
+      ginf[gArbitrary].g = giSphere2;
+      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      }
+    else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
+    else if(ep.eat("angleofs(")) angleofs = real(ep.parsepar());
+    else if(ep.eat("distunit(")) distunit = real(ep.parsepar());
+    else if(ep.eat("let(")) {
       string tok = ep.next_token();
       ep.force_eat("=");
       ep.extra_params[tok] =ep.parsepar();
       }
-    if(ep.eat("tile(")) {
-      println(hlog, "reading shape with angleunit = ", angleunit);
+    else if(ep.eat("tile(")) {
       c.shapes.emplace_back();
       auto& cc = c.shapes.back();
       cc.id = isize(c.shapes) - 1;
@@ -97,7 +108,7 @@ void load(const string& fname) {
         ep.force_eat(",");
         ld angle = ep.rparse(0);
         cc.edges.push_back(dist * distunit);
-        cc.angles.push_back(angle * angleunit);
+        cc.angles.push_back(angle * angleunit + angleofs);
         if(ep.eat(",")) continue;
         else if(ep.eat(")")) break;
         else throw hr_parse_exception("expecting , or )");
@@ -105,7 +116,7 @@ void load(const string& fname) {
       cc.build_from_angles_edges();
       cc.connections.resize(cc.size());
       }
-    if(ep.eat("c(")) {
+    else if(ep.eat("c(")) {
       int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
       int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
       int bi = ep.iparse(); verify_index(bi, c.shapes); ep.force_eat(",");
@@ -149,7 +160,6 @@ struct hrmap_arbi : hrmap {
 
     heptagon *alt = NULL;
     
-    /*
     if(hyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal); 
       alt = tailored_alloc<heptagon> (S7);
@@ -162,7 +172,6 @@ struct hrmap_arbi : hrmap {
       alt->cdata = NULL;
       current_altmap = newAltMap(alt); 
       }
-    */
     
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
     arbi_matrix[origin] = make_pair(alt, T);
@@ -272,6 +281,7 @@ struct hrmap_arbi : hrmap {
     h1->zebraval = xt;
     h1->c7 = newCell(h1->type, h1);
     h1->alt = nullptr;
+    h1->cdata = nullptr;
     h->c.connect(d, h1, e, m);
     
     arbi_matrix[h1] = make_pair(alt, T);
