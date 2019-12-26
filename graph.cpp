@@ -3762,6 +3762,7 @@ struct flashdata {
   double angle2;
   int spd; // 0 for flashes, >0 for particles
   color_t color;
+  string text;
   flashdata(int _t, int _s, cell *_w, color_t col, int sped) { 
     t=_t; size=_s; where=_w; color = col; 
     angle = rand() % 1000; spd = sped;
@@ -3770,6 +3771,13 @@ struct flashdata {
   };
 
 vector<flashdata> flashes;
+
+EX void drawBubble(cell *c, color_t col, string s, ld size) {
+  auto fd = flashdata(ticks, 1000, c, col, 0);
+  fd.text = s;
+  fd.angle = size;
+  flashes.push_back(fd);
+  }
 
 EX void drawFlash(cell *c) {
   flashes.push_back(flashdata(ticks, 1000, c, iinf[itOrbFlash].color, 0)); 
@@ -3990,8 +3998,8 @@ EX void drawMarkers() {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
 
-    if(pcm.mip.t && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
-      queuecircleat(pcm.mip.t, .6, darkena(0xFFD500, 0, 0xFF));
+    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
+      queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
       }
     #endif
 
@@ -4137,8 +4145,20 @@ EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {
   int tim = ticks - f.t;
   
   if(tim <= f.size && !f.spd) kill = false;
-  
-  if(f.spd) {
+
+  if(f.text != "") {
+    if(GDIM == 3 || sphere)
+      queuestr(V, (1 - tim * 1. / f.size) * f.angle, f.text, f.color);
+    else if(!kill) {
+      hyperpoint h = tC0(V);
+      if(hdist0(h) > .1) {
+        transmatrix V2 = rspintox(h) * xpush(hdist0(h) * (1 / (1 - tim * 1. / f.size)));
+        queuestr(V2, f.angle, f.text, f.color);
+        }
+      }
+    }
+    
+  else if(f.spd) {
     #if CAP_SHAPES
     if(tim <= 300) kill = false;
     int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
@@ -4786,7 +4806,7 @@ EX bool nohelp;
 EX void normalscreen() {
   help = "@";
 
-  mouseovers = XLAT("Press F1 or right click for help");
+  mouseovers = standard_help();
 
 #if CAP_TOUR  
   if(tour::on) mouseovers = tour::tourhelp;

@@ -958,6 +958,11 @@ EX void handleInput(int delta) {
             cdir = d;
             if(multi::multiPlayerTarget(i) == c) break;
             cdir = scdir;
+            cwt = multi::player[i];
+            calcMousedest();
+            auto& sd = multi::whereto[i].subdir;
+            sd = mousedest.subdir;
+            if(sd == 0) sd = 1;
             }
           }
         }

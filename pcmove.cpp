@@ -224,12 +224,15 @@ struct pcmove {
   };
 #endif
 
-EX pcmove pcm;
+EX cell *global_pushto;
 
 EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
+  pcmove pcm;
   pcm.checkonly = checkonly;
   pcm.d = d; pcm.subdir = subdir;
-  return pcm.movepcto();
+  auto b = pcm.movepcto();
+  global_pushto = pcm.mip.t;
+  return b;
   }
 
 bool pcmove::movepcto() {  

@@ -348,6 +348,7 @@ EX void bfs() {
         if(c2->land == laWhirlwind) havewhat |= HF_WHIRLWIND;
         if(c2->land == laWestWall) havewhat |= HF_WESTWALL;
         if(c2->land == laPrairie) havewhat |= HF_RIVER;
+        if(c2->land == laClearing) havewhat |= HF_MUTANT;
 
         if(c2->wall == waRose) havewhat |= HF_ROSE;
         

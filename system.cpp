@@ -394,7 +394,7 @@ bool havesave = true;
 
 #if HDR
 #define MAXBOX 500
-#define POSSCORE 371 // update this when new boxes are added!
+#define POSSCORE 373 // update this when new boxes are added!
 struct score {
   string ver;
   int box[MAXBOX];
@@ -412,6 +412,16 @@ void applyBox(int& t) {
   if(saving) savebox[boxid++] = t;
   else if(loading) t = savebox[boxid++];
   else boxid++;
+  }
+
+void applyBoxBignum(bignum& tb) {
+  float tf;
+  int ti;
+  if(saving) tf = tb.approx_ld();
+  if(saving) memcpy(&ti, &tf, 4);
+  applyBox(ti);
+  if(loading) memcpy(&tf, &ti, 4);
+  if(loading) tb = bignum(tf);
   }
 
 EX void applyBoxNum(int& i, string name IS("")) {
@@ -814,6 +824,9 @@ EX void applyBoxes() {
   
   applyBoxM(moNarciss);
   applyBoxM(moMirrorSpirit);  
+  
+  applyBox(clearing::direct);
+  applyBoxBignum(clearing::imputed);
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }

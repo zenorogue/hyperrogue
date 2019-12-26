@@ -216,7 +216,7 @@ EX void killIvy(cell *c, eMonster who) {
   c->monst = moIvyDead; // NEWYEARFIX
   for(int i=0; i<c->type; i++) if(c->move(i))
     if(isIvy(c->move(i)) && c->move(i)->mondir == c->c.spin(i))
-      killIvy(c->move(i), who);
+      killIvy(c->move(i), who), kills[moIvyDead]++;
   }
 
 EX void prespill(cell* c, eWall t, int rad, cell *from) {
@@ -293,14 +293,14 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
   // block spill
   if(t == waTemporary) return;
   // cwt.at->item = itNone;
-  if(rad) for(int i=0; i<c->type; i++) if(c->move(i))
-    prespill(c->move(i), t, rad-1, c);
+  if(rad) for(cell *c2: adj_minefield_cells(c))
+    prespill(c2, t, rad-1, c);
   }
 
 EX void spillfix(cell* c, eWall t, int rad) {
   if(c->wall == waTemporary) c->wall = t;
-  if(rad) for(int i=0; i<c->type; i++) if(c->move(i))
-    spillfix(c->move(i), t, rad-1);
+  if(rad) for(cell *c2: adj_minefield_cells(c))
+    spillfix(c2, t, rad-1);
   }
 
 EX void spill(cell* c, eWall t, int rad) {
@@ -391,7 +391,14 @@ EX void killMutantIvy(cell *c, eMonster who) {
   removeIvy(c);
   for(int i=0; i<c->type; i++)
     if(c->move(i)->mondir == c->c.spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
-      killMutantIvy(c->move(i), who);
+      kills[c->move(i)->monst]++, killMutantIvy(c->move(i), who);
+  if(c->land == laClearing) clearing::imput(c);
+  }
+
+EX bignum ivy_total() {
+  return kills[moMutant] + kills[moFriendlyIvy] +
+    kills[moIvyRoot] + kills[moIvyHead] + kills[moIvyBranch] + kills[moIvyWait] + kills[moIvyDead]
+     + clearing::imputed;
   }
 
 EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
@@ -441,7 +448,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(m == moHunterGuard) m = moHunterDog;
   if(m == moHunterChanging) m = moHunterDog;
   if(m == moWolfMoved) m = moWolf;
-  if(!isBulletType(m)) kills[m]++;
+  if(!isBulletType(m) && m != moIvyDead) kills[m]++;
 
   if(saved_tortoise_on(c)) c->item = itNone;
 
@@ -462,7 +469,12 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   
   if(isMutantIvy(m) || m == moFriendlyIvy) {
     pcount = 0;
+    if(isMutantIvy(m)) clearing::direct++;
+    bignum s = ivy_total() - 1;
     killMutantIvy(c, who);
+    s = ivy_total() - s;
+    if(vid.bubbles_special && s > bignum(1))
+      drawBubble(c, 0xFFFF00, s.get_str(100), .5);
     }
   
   if(m == moPrincess) {
@@ -680,12 +692,27 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     }
   if(m == moLesser && !(kills[m] % 10))
     degradeDemons();
+  if(m == moLesser) {
+    if(kills[m] % 10) {
+      if(vid.bubbles_special)
+        drawBubble(c, 0xFF0000, its(kills[m]%10), 1);
+      }
+    else {
+      if(vid.bubbles_special)
+        drawBubble(c, 0xFF8000, "+1 XP", .8);
+      degradeDemons();
+      }
+    }
   if(isIvy(c)) {
     pcount = 0;
     eMonster m = c->monst;
+    bignum s = ivy_total() - 1;
     /*if((m == moIvyBranch || m == moIvyHead) && c->move(c->mondir)->monst == moIvyRoot)
       ivynext(c, moIvyNext); */
     killIvy(c, who);
+    s = ivy_total() - s;
+    if(s > bignum(1) && vid.bubbles_special)
+      drawBubble(c, 0xFFFF00, s.get_str(100), .5);
     if(m == moIvyBranch || m == moIvyHead || m == moIvyNext) {
       int qty = 0;
       cell *c2 = c->move(c->mondir);

@@ -1782,7 +1782,7 @@ EX void moreBigStuff(cell *c) {
         c->land = laClearing, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
         }
       else if(d == 1 && !tactic::on && !eubinary)
-        c->wall = waSmallTree, c->monst = moNone, c->item = itNone;
+        c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
       }
     }
 

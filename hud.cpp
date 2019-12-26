@@ -253,8 +253,25 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
     (qty < 10 && (flags & (GLYPH_MARKTODO | GLYPH_RUNOUT))) ? buttonsize*3/4 :
     qty < 100 ? buttonsize / 2 :
     buttonsize / 3;
-  if(str != "")
-    displayfr(cx + buttonsize, cy + buttonsize/2 - bsize/2, 1, bsize, str, color, 16);
+
+  if(id == moMutant + ittypes && clearing::imputed.nonzero()) {
+    ld d = qty + clearing::imputed.approx_ld();
+    if(d < 100000) str = its(int(d));
+    else {
+      int digits = 0;
+      while(d >= 10) digits++, d /= 10;
+      str = its(int(d*100)) + "E" + its(digits);
+      str.insert(1, ".");
+      }
+    bsize = buttonsize / 4;
+    }
+
+  if(str != "") {
+    if(textwidth(bsize, str) < buttonsize)
+      displayfr(cx + buttonsize, cy + buttonsize/2 - bsize/2, 1, bsize, str, color, 16);
+    else
+      displayfr(cx, cy + buttonsize/2 - bsize/2, 1, bsize, str, color, 0);
+    }
 
   return b;
   }
@@ -364,6 +381,8 @@ EX bool nofps = false;
 
 EX color_t crosshair_color = 0xFFFFFFC0;
 EX ld crosshair_size = 0;
+
+EX bool long_kills;
 
 EX void drawStats() {
   if(nohud || vid.stereo_mode == sLR) return;
@@ -577,7 +596,8 @@ EX void drawStats() {
     #endif
     }
   else if(!peace::on) {
-    if(displayButtonS(vid.xres - 8, vid.fsize, XLAT("score: %1", its(gold())), forecolor, 16, vid.fsize)) {
+    string scoreline = XLAT("score: %1", its(gold()));
+    if(displayButtonS(vid.xres - 8, vid.fsize, scoreline, forecolor, 16, vid.fsize)) {
       mouseovers = XLAT("Your total wealth"),
       instat = true,
       getcstat = SDLK_F1,
@@ -590,16 +610,29 @@ EX void drawStats() {
         "Orbs of Yendor are worth 50 $$$ each.\n\n"
         );
       }
-    if(displayButtonS(8, vid.fsize, XLAT("kills: %1", its(tkills())), forecolor, 0, vid.fsize)) {
-      instat = true,
-      getcstat = SDLK_F1,
-      mouseovers = XLAT("Your total kills")+": " + its(tkills()),
-      help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) + 
-        XLAT(
-        "In most lands, more treasures are generated with each enemy native to this land you kill. "
-        "Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\n"
-        "Friendly creatures and parts of monsters (such as the Ivy) do appear in the list, "
-        "but are not counted in the total kill count.");
+    string s = XLAT("kills: %1", its(tkills()));
+    long_kills = false;
+    int siz = vid.fsize;
+    if(cwt.at->land == laClearing && clearing::imputed.approx_ld() >= 100000) {
+      long_kills = true;
+      s = XLAT("leaves cut: " + (bignum(kills[moMutant]) + clearing::imputed).get_str(200));
+      if(mouseovers == standard_help()) mouseovers = " ";
+      while(siz > 4 && textwidth(siz, s) > vid.xres - textwidth(vid.fsize, scoreline)) siz--;
+      }
+    
+    if(displayButtonS(8, vid.fsize, s, forecolor, 0, siz)) {
+      instat = true;
+      getcstat = SDLK_F1;
+      if(long_kills) { mouseovers = " "; help = generateHelpForMonster(moMutant); }
+      else {
+        mouseovers = XLAT("Your total kills")+": " + its(tkills()),
+        help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) + 
+          XLAT(
+          "In most lands, more treasures are generated with each enemy native to this land you kill. "
+          "Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\n"
+          "Friendly creatures and parts of monsters (such as the Ivy) do appear in the list, "
+          "but are not counted in the total kill count.");
+        }
       }
     }
   string vers = VER;
