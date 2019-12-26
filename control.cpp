@@ -1027,7 +1027,23 @@ EX bool gmodekeys(int sym, int uni) {
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }
 
   if(GDIM == 2) {
-    if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
+    if(among(NUMBERKEY, '1', '2', '3') && !rug::rugged && euclid && WDIM == 2) {
+      vid.xposition = vid.yposition = 0;
+      ld maxs = 0;
+      auto& cd = current_display;
+      for(auto& p: gmatrix) for(int i=0; i<p.first->type; i++) {
+        hyperpoint h = tC0(p.second * currentmap->adj(p.first, i));
+        hyperpoint onscreen;
+        applymodel(h, onscreen);
+        maxs = max(maxs, onscreen[0] / cd->xsize);
+        maxs = max(maxs, onscreen[1] / cd->ysize);
+        }
+      vid.alpha = 1;
+      vid.scale = vid.scale / 2 / maxs / cd->radius;
+      if(NUMBERKEY == '3') vid.scale *= 2;
+      if(NUMBERKEY == '1') vid.scale /= 2;
+      }
+    else if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
