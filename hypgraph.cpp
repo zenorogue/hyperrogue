@@ -1864,9 +1864,9 @@ EX void draw_boundary(int w) {
 EX ld band_shift = 0;
 EX void fix_the_band(transmatrix& T) {
   if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[LDIM][LDIM] > 1e6) || (sphere && pmodel == mdSpiral)) {
+    T = spin(models::model_orientation * degree) * T;
     hyperpoint H = tC0(T);
     find_zlev(H);
-    models::apply_orientation(H[0], H[1]);
     
     ld y = asin_auto(H[1]);
     ld x = asin_auto_clamp(H[0] / cos_auto(y));
@@ -1877,7 +1877,7 @@ EX void fix_the_band(transmatrix& T) {
     band_shift += x;
     T = xpush(-x) * T;
     fixmatrix(T);
-    // todo orientation
+    T = spin(-models::model_orientation * degree) * T;
     }
   }
 
