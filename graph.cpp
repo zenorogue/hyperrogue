@@ -4147,13 +4147,17 @@ EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {
   if(tim <= f.size && !f.spd) kill = false;
 
   if(f.text != "") {
+    color_t col = f.color;
+    dynamicval<color_t> p(poly_outline, poly_outline);
+    int r = 2;
+    apply_neon(col, r);
     if(GDIM == 3 || sphere)
-      queuestr(V, (1 - tim * 1. / f.size) * f.angle, f.text, f.color);
+      queuestr(V, (1 - tim * 1. / f.size) * f.angle, f.text, col, r);
     else if(!kill) {
       hyperpoint h = tC0(V);
       if(hdist0(h) > .1) {
         transmatrix V2 = rspintox(h) * xpush(hdist0(h) * (1 / (1 - tim * 1. / f.size)));
-        queuestr(V2, f.angle, f.text, f.color);
+        queuestr(V2, f.angle, f.text, col, r);
         }
       }
     }

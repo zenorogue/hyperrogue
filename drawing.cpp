@@ -2015,8 +2015,18 @@ template<class T, class... U> T& queuea(PPR prio, U... u) {
   }
 #endif
 
-#if CAP_SHAPES
 EX int neon_mode = 0;
+
+EX void apply_neon(color_t& col, int& r) {
+  switch(neon_mode) {
+    case 0: break;
+    case 1: poly_outline = col << 8; col = 0; break;
+    case 2: r = 0; break;
+    case 3: poly_outline = col << 8; col &= 0xFEFEFE; col >>= 1; break;
+    }
+  }
+
+#if CAP_SHAPES
 
 EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
   if(prio == PPR::DEFAULT) prio = h.prio;
