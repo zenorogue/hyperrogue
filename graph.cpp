@@ -3773,7 +3773,7 @@ struct flashdata {
 vector<flashdata> flashes;
 
 EX void drawBubble(cell *c, color_t col, string s, ld size) {
-  auto fd = flashdata(ticks, 1000, c, col, 1);
+  auto fd = flashdata(ticks, 1000, c, col, 0);
   fd.text = s;
   fd.angle = size;
   flashes.push_back(fd);
