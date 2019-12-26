@@ -3998,8 +3998,8 @@ EX void drawMarkers() {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
 
-    if(pcm.mip.t && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
-      queuecircleat(pcm.mip.t, .6, darkena(0xFFD500, 0, 0xFF));
+    if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
+      queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
       }
     #endif
 
