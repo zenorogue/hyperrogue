@@ -20,7 +20,7 @@ void geometry_information::hpcpush(hyperpoint h) {
   ld threshold = (GDIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
   if(/*vid.usingGL && */!first) {
     ld i = intval(hpc.back(), h);
-    if(i > threshold && (i < 10 || S3 >= OINF)) {
+    if(i > threshold && (i < 100 || S3 >= OINF)) {
       hyperpoint md = mid(hpc.back(), h);
       hpcpush(md);
       hpcpush(h);
