@@ -2962,7 +2962,7 @@ bool celldrawer::draw_shmup_monster() {
         if(ths && keyresult[cpid]) {
           hyperpoint h = keytarget(cpid);
           if(WDIM == 2) 
-            queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
+            queuestr(h, vid.fsize, "+", iinf[keyresult[cpid]].color);
           else {
             dynamicval<color_t> p(poly_outline, darkena(iinf[keyresult[cpid]].color, 0, 255));
             queuepoly(rgpushxto0(h) * cspin(0, 1, ticks / 140.), cgi.shGem[1], 0);
