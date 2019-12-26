@@ -439,6 +439,9 @@ void display_data::set_projection(int ed) {
   if(selected->shader_flags & SF_BAND)
     glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, GDIM == 3 ? 2/M_PI : 1));
 
+  if(selected->shader_flags & SF_BAND)
+    glhr::projection_multiply(glhr::translate(band_shift, 0, 0));
+
   if(selected->shader_flags & SF_HALFPLANE) {
     glhr::projection_multiply(glhr::translate(0, 1, 0));      
     glhr::projection_multiply(glhr::scale(-1, 1, 1));

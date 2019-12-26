@@ -236,11 +236,14 @@ EX bool new_projection_needed;
 inline void reset_projection() { new_projection_needed = true; }
 #endif
 
+EX ld lband_shift;
+
 void display_data::set_all(int ed) {
   auto t = this;
   auto current_projection = tie(ed, pmodel, t, current_rbuffer);
-  if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection) {
+  if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection || band_shift != lband_shift) {
     last_projection = current_projection;
+    lband_shift = band_shift;
     set_projection(ed);
     set_mask(ed);
     set_viewport(ed);
