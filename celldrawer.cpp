@@ -1629,32 +1629,68 @@ void celldrawer::draw_features_and_walls_3d() {
     queuepoly(face_the_player(V), cgi.shLoveRing, darkena(0x402030, 0, 0xFF));
   }
 
-void celldrawer::check_rotations() {
-  if(euclid) return;
+#if HDR
+struct downseek_t {
+  cell *best;
+  hyperpoint total;
+  hyperpoint point;
+  ld speed;
+  ld depth;
+  int qty;
+  void reset() {
+    qty = 0;
+    total = Hypc;
+    depth = 0;
+    best = nullptr;
+    }
+  };
+#endif
 
-  bool usethis = false;
-  double spd = 1;
-  int side = 0;
+EX downseek_t downseek;
+
+void celldrawer::check_rotations() {
+  
+  auto& ds = downseek;
+
+  // we generally want function(ds.best) but this would fail if ds.best is not known yet,
+  // so we use function(old) which will return the same value as function(c) if ds.best is not known yet
+  cell *old = ds.best ? ds.best : c;
+
+  auto use_if_less = [this] (int a, int b, ld spd, int side) {
+    if(a > b) return;
+    if(!ds.best || a < b) ds.reset();
+    if(a <= b) {
+      ds.best = c;
+      ds.speed = spd;
+      if(prod) {
+        auto pd = product_decompose(tC0(V));
+        ds.total += pd.second;
+        ds.depth += pd.first;
+        }
+      else
+        ds.total += tC0(V);
+      ds.qty++;
+      ds.point = normalize_flat(ds.total);
+      if(prod) ds.point = zshift(ds.point, ds.depth / ds.qty);
+      if(side == 2) for(int i=0; i<3; i++) ds.point[i] = -ds.point[i];
+      if(side == 1) ds.point = spin(-M_PI/2) * ds.point;
+      }
+    };
   
   if(0);
   
   #if CAP_BT
   else if(bt::in() && models::do_rotate >= 2) {
-    if(!straightDownSeek || c->master->distance < straightDownSeek->master->distance) {
-      usethis = true;
-      spd = 1;
-      }
+    use_if_less(c->master->distance, old->master->distance, 1, 0);
     }
   #endif
   
   else if(isGravityLand(cwt.at->land) && cwt.at->land != laMountain) {
+    int side = 0;
     if(cwt.at->land == laDungeon) side = 2;
     if(cwt.at->land == laWestWall) side = 1;
     if(models::do_rotate >= 1)
-    if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
-      usethis = true;
-      spd = cwt.at->landparam / 10.;
-      }
+      use_if_less(edgeDepth(c), edgeDepth(old), cwt.at->landparam / 10., side);
     }
   
   else if(c->master->alt && cwt.at->master->alt &&
@@ -1665,27 +1701,11 @@ void celldrawer::check_rotations() {
       cwt.at->land == laCamelot || cwt.at->land == laPalace))) 
       ))
     && c->land == cwt.at->land && c->master->alt->alt == cwt.at->master->alt->alt) {
-    if(!straightDownSeek || !straightDownSeek->master->alt || celldistAlt(c) < celldistAlt(straightDownSeek)) {
-      usethis = true;
-      spd = .5;
-      if(cwt.at->land == laMountain) side = 2;
-      }
+      use_if_less(celldistAlt(c), celldistAlt(old), .5, (cwt.at->land == laMountain) ? 2 : 0);
     }
 
   else if(models::do_rotate >= 2 && cwt.at->land == laOcean && cwt.at->landparam < 25) {
-    if(!straightDownSeek || coastval(c, laOcean) < coastval(straightDownSeek, laOcean)) {
-      usethis = true;
-      spd = cwt.at->landparam / 10;
-      }
-      
-    }
-
-  if(usethis) {
-    straightDownSeek = c;
-    straightDownPoint = tC0(V);
-    straightDownSpeed = spd;
-    if(side == 2) for(int i=0; i<3; i++) straightDownPoint[i] = -straightDownPoint[i];
-    if(side == 1) straightDownPoint = spin(-M_PI/2) * straightDownPoint;
+    use_if_less(coastval(c, laOcean), coastval(old, laOcean), cwt.at->landparam / 10, 0);
     }
   }
 

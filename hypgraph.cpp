@@ -1247,6 +1247,7 @@ void hrmap_standard::draw() {
 
 EX void spinEdge(ld aspd) { 
   ld downspin = 0;
+  auto& ds = downseek;
   if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
     transmatrix our   = dual::get_orientation();
     transmatrix their = dual::player_orientation[dual::main_side];
@@ -1273,8 +1274,8 @@ EX void spinEdge(ld aspd) {
     auto& vo = get_view_orientation();
     // does not work well (also need change auto& to auto)
     // if(hybri && !prod) vo = vo * inverse(nisot::translate(tC0(vo)));
-    if(straightDownSeek) {
-      auto sdp = straightDownPoint;
+    if(ds.qty) {
+      auto sdp = ds.point;
       if(prod) sdp = vo * product::inverse_exp(sdp);
       if(sdp[0])
         downspin = models::rotation * degree - atan2(sdp[0], sdp[1]);
@@ -1284,13 +1285,13 @@ EX void spinEdge(ld aspd) {
         downspin = -atan2(vo[0][2], vo[1][2]);
       }
     }
-  else if(straightDownSeek) {
-    downspin = atan2(straightDownPoint[1], straightDownPoint[0]);
+  else if(ds.qty) {
+    downspin = atan2(ds.point[1], ds.point[0]);
     downspin -= M_PI/2;
     downspin += models::rotation * degree;
     while(downspin < -M_PI) downspin += 2*M_PI;
     while(downspin > +M_PI) downspin -= 2*M_PI;
-    downspin = downspin * min(straightDownSpeed, (double)1);
+    downspin = downspin * min(ds.speed, (double)1);
     }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;

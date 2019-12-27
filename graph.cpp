@@ -2756,10 +2756,6 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, col
   return false;
   }
 
-EX cell *straightDownSeek;
-EX hyperpoint straightDownPoint;
-EX ld straightDownSpeed;
-
 #define AURA 180
 
 array<array<int,4>,AURA+1> aurac;
@@ -4441,7 +4437,7 @@ EX void drawthemap() {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
     }
 
-  straightDownSeek = NULL;
+  downseek.reset();
 
   #if ISMOBILE
   mouseovers = XLAT("No info about this...");
