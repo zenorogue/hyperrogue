@@ -701,6 +701,11 @@ void geometry_information::generate_floorshapes() {
       mh.zebraval = i;
       auto& sh = c.shapes[i];
       ms.type = mh.type = sh.size();
+      }
+    for(int i=0; i<n; i++) {
+      auto &ms = models[i];
+      auto &mh = modelh[i];
+      auto& sh = c.shapes[i];
       for(int j=0; j<sh.size(); j++) {
         auto& co = sh.connections[j];
         mh.c.connect(j, &modelh[get<0>(co)], get<1>(co), get<2>(co));
