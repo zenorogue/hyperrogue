@@ -1225,7 +1225,7 @@ EX void set_geometry(eGeometry target) {
         gp::param.second = 0;
       }
     #endif
-    if(DUAL && geometry != gArchimedean) 
+    if(DUAL && geometry != gArchimedean && !hybri) 
       variation = ginf[geometry].default_variation;
     #if CAP_BT
     if(bt::in() || WDIM == 3 || kite::in()) if(!hybri) variation = eVariation::pure;
