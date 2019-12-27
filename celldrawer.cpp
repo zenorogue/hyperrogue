@@ -758,11 +758,14 @@ void celldrawer::draw_boat() {
 
 void celldrawer::draw_grid() {
 
+  int prec = sphere ? 3 : 1;
+  prec += vid.linequality;
+  
   if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
     c->barleft != NOWALLSEP_USED && GDIM == 2) {
     color_t col = darkena(0x505050, 0, 0xFF);
-    queueline(tC0(V), V*tC0(cgi.heptmove[c->bardir]), col, 2 + vid.linequality);
-    queueline(tC0(V), V*tC0(cgi.hexmove[c->bardir]), col, 2 + vid.linequality);
+    gridline(V, C0, tC0(cgi.heptmove[c->bardir]), col, prec+1);
+    gridline(V, C0, tC0(cgi.hexmove[c->bardir]), col, prec+1);
     }
 
   if(inmirrorcount) return;
@@ -781,9 +784,6 @@ void celldrawer::draw_grid() {
   // hyper trihepta: 0.2849
   // hyper heptagonal: 0.6150
   // hyper: 0.3798
-  
-  int prec = sphere ? 3 : 1;
-  prec += vid.linequality;
   
   if(0);
   #if MAXMDIM == 4
