@@ -803,6 +803,11 @@ EX void showEuclideanMenu() {
   dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
   
   if(WDIM == 2 && !arb::in() && !kite::in()) dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
+  
+  if(arb::in() && arb::current.comment != "") {
+    dialog::addBreak(100);
+    dialog::addHelp(arb::current.comment);
+    }
 
   dialog::addSelItem(XLAT("size of the world"), 
     #if CAP_BT

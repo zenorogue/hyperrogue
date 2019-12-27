@@ -28,6 +28,7 @@ struct arbi_tiling {
 
   vector<shape> shapes;
   string name;
+  string comment;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -77,6 +78,7 @@ void load(const string& fname) {
   auto& c = current;
   c.shapes.clear();
   c.name = unnamed;
+  c.comment = "";
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -84,10 +86,17 @@ void load(const string& fname) {
     ep.skip_white();
     if(ep.next() == 0) break;
     if(ep.eat("#")) {
+      bool doubled = ep.eat("#");
       while(ep.eat(" ")) ;
       string s = "";
       while(ep.next() >= 32) s += ep.next(), ep.at++;
-      if(c.name == unnamed) c.name = s;
+      if(doubled) {
+        if(c.name == unnamed) c.name = s;
+        else {
+          c.comment += s; 
+          c.comment += "\n";
+          }
+        }
       }
     else if(ep.eat("e2.")) {
       ginf[gArbitrary].g = giEuclid2;
