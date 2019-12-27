@@ -426,7 +426,10 @@ bignum bignum::randomized_div(int x) const {
   for(int i=K-1; i>=0; i--) {
     carry *= BASE;
     carry += digits[i];
-    tie(carry, res.digits[i]) = make_pair(carry % x, carry / x);
+    // strange compiler buug:
+    // if I do / and %, function 'divmod' is called, and it complains on launch that divmod is unimplemented
+    res.digits[i] = carry / x;
+    carry -= res.digits[i] * x;
     }
   while(isize(res.digits) && res.digits.back() == 0) res.digits.pop_back();
   if(rand() % x < carry) res += 1;
