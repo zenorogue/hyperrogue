@@ -1138,7 +1138,7 @@ EX int dist(int sx, int sy, bool reduce IS(true)) {
   int z0 = abs(sx);
   int z1 = abs(sy);
   if(a4 && BITRUNCATED)
-    return (z0 == z1 && z0 > 0 && reduce) ? z0+1: max(z0, z1);
+    return (z0 == z1 && z0 > 0 && !reduce) ? z0+1: max(z0, z1);
   if(a4) return z0 + z1;
   int z2 = abs(sx+sy);
   return max(max(z0,z1), z2);
