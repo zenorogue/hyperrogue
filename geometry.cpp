@@ -880,7 +880,7 @@ EX void check_cgi() {
 
   if(arcm::in()) V("ARCM", arcm::current.symbol);
 
-  if(arb::in()) V("ARB", arb::current.name);
+  if(arb::in()) V("ARB", its(arb::current.order));
   
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   

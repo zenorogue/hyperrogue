@@ -26,6 +26,8 @@ struct shape {
 
 struct arbi_tiling {
 
+  int order;
+
   vector<shape> shapes;
   string name;
   string comment;
@@ -76,6 +78,7 @@ void load(const string& fname) {
     s += c;
     }
   auto& c = current;
+  c.order++;
   c.shapes.clear();
   c.name = unnamed;
   c.comment = "";
