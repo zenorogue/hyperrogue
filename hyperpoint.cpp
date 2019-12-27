@@ -399,6 +399,13 @@ EX hyperpoint normalize(hyperpoint H) {
   return H;
   }
 
+/** normalize, and in product geometry, also flatten */
+EX hyperpoint normalize_flat(hyperpoint h) {
+  if(prod) return product_decompose(h).second;
+  if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
+  return normalize(h);
+  }
+
 /** get the center of the line segment from H1 to H2 */
 EX hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
   if(prod) {

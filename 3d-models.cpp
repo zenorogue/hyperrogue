@@ -31,12 +31,6 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
   return res;  
   }
 
-EX hyperpoint normalize_flat(hyperpoint h) {
-  if(prod) return product_decompose(h).second;
-  if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
-  return normalize(h);
-  }
-
 hyperpoint get_center(const vector<hyperpoint>& vh) {
   hyperpoint h = Hypc;
   for(auto h1: vh) h = h + h1;
