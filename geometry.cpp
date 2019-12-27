@@ -879,6 +879,8 @@ EX void check_cgi() {
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
   if(arcm::in()) V("ARCM", arcm::current.symbol);
+
+  if(arb::in()) V("ARB", arb::current.name);
   
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   
