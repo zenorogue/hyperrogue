@@ -414,8 +414,8 @@ EX namespace history {
             hyperpoint hscr;
             applymodel(last, hscr);
             ld bwidth = -current_display->radius * hscr[0];
-            print(hlog, "bwidth = ", bwidth, "/", len);
-  
+            println(hlog, "bwidth = ", bwidth, "/", len, " : ", xpos, "..", xpos+bwidth);
+            
             drawsegment:
             SDL_Surface *gr = glbuf.render();
   
@@ -445,7 +445,7 @@ EX namespace history {
             }
           
           last_base = centerover;
-          last_relative = C0;
+          last_relative = tC0(v[j]->at);
           }
         }
 
