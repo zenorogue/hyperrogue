@@ -226,9 +226,9 @@ EX geometry_filter *current_filter;
 
 bool forced_quotient() { return quotient && !(cgflags & qOPTQ); }
 
-EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (arcm::in() || hyperbolic) && !forced_quotient(); }};
-EX geometry_filter gf_spherical = {"spherical", [] { return (arcm::in() || sphere) && !forced_quotient(); }};
-EX geometry_filter gf_euclidean = {"Euclidean", [] { return (arcm::in() || euclid) && !forced_quotient(); }};
+EX geometry_filter gf_hyperbolic = {"hyperbolic", [] { return (arcm::in() || arb::in() || hyperbolic) && !forced_quotient(); }};
+EX geometry_filter gf_spherical = {"spherical", [] { return (arcm::in() || arb::in() || sphere) && !forced_quotient(); }};
+EX geometry_filter gf_euclidean = {"Euclidean", [] { return (arcm::in() || arb::in() || euclid) && !forced_quotient(); }};
 EX geometry_filter gf_other = {"non-isotropic", [] { return prod || nonisotropic; }};
 EX geometry_filter gf_regular_2d = {"regular 2D tesselations", [] { 
   return standard_tiling() && WDIM == 2 && !forced_quotient();
@@ -277,6 +277,8 @@ void set_or_configure_geometry(eGeometry g) {
   else if(g == gArchimedean)
     pushScreen(arcm::show);
   #endif
+  else if(g == gArbitrary)
+    arb::choose();
   else {
     if(among(g, gProduct, gRotSpace)) {
       if(WDIM == 3 || (g == gRotSpace && euclid)) {
@@ -348,7 +350,6 @@ void ge_select_tiling() {
     bool on = geometry == g;
     bool in_2d = WDIM == 2;
     dynamicval<eGeometry> cg(geometry, g);
-    if(g == gArbitrary) continue;
     if(g == gTorus) continue;
     if(arcm::in() && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;

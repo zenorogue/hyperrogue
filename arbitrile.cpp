@@ -365,5 +365,25 @@ auto hook = addHook(hooks_args, 100, readArgs);
 
 EX bool in() { return geometry == gArbitrary; }
 
+EX string tes = "tessellations/marjorie-rice.tes";
+
+EX void choose() {
+  dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 
+  [] () {
+    stop_game();
+    set_geometry(gArbitrary);
+    try {
+      load(tes);
+      ginf[gArbitrary].tiling_name = current.name;
+      }
+    catch(hr_parse_exception& ex) {
+      println(hlog, "failed: ", ex.s);
+      set_geometry(gNormal);
+      }
+    start_game();
+    return true;
+    });
+  }
+
 EX }
 }
