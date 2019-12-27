@@ -175,6 +175,32 @@ void load(const string& fname) {
       cc.build_from_angles_edges();
       cc.connections.resize(cc.size());
       }
+    else if(ep.eat("conway(\"")) {
+      string s = "";
+      while(true) {
+        int m = 0;
+        if(ep.eat("(")) m = 0;
+        else if(ep.eat("[")) m = 1;
+        else if(ep.eat("\"")) break;
+        else throw hr_parse_exception("cannot parse Conway notation");
+
+        int ai = 0;
+        int as = ep.iparse();
+        while(ep.eat("'")) ai++;
+        if(ep.eat("@")) ai = ep.iparse();
+        int bi = 0, bs = 0;
+        if(ep.eat(")") || ep.eat("]")) bs = as, bi = ai;
+        else {
+          bs = ep.iparse();
+          while(ep.eat("'")) bi++;
+          if(ep.eat("@")) bi = ep.iparse();
+          }          
+        if(ep.eat(")") || ep.eat("]")) {}
+        c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
+        c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
+        }
+      ep.force_eat(")");
+      }
     else if(ep.eat("c(")) {
       int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
       int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
