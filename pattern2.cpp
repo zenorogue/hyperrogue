@@ -1813,6 +1813,9 @@ EX namespace patterns {
       dialog::addSelItem(XLAT("Penrose staircase"), "Nil", '/');
       }
 
+    if(arb::in() || arcm::in())
+      dialog::addSelItem(XLAT("types"), "types", 'A');
+
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
     if(!ISMOBILE)
