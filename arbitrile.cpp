@@ -139,6 +139,24 @@ void load(const string& fname) {
       ep.force_eat("=");
       ep.extra_params[tok] =ep.parsepar();
       }
+    else if(ep.eat("unittile(")) {
+      c.shapes.emplace_back();
+      auto& cc = c.shapes.back();
+      cc.id = isize(c.shapes) - 1;
+      cc.flags = 0;
+      while(ep.next() != ')') {
+        ld angle = ep.rparse(0);
+        cc.edges.push_back(distunit);
+        cc.angles.push_back(angle * angleunit + angleofs);
+        if(ep.eat(",")) continue;
+        else if(ep.eat(")")) break;
+        else throw hr_parse_exception("expecting , or )");
+        }
+      cc.build_from_angles_edges();
+      cc.connections.resize(cc.size());
+      for(int i=0; i<isize(cc.connections); i++)
+        cc.connections[i] = make_tuple(cc.id, i, false);
+      }
     else if(ep.eat("tile(")) {
       c.shapes.emplace_back();
       auto& cc = c.shapes.back();
