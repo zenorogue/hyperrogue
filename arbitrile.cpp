@@ -27,6 +27,7 @@ struct shape {
 struct arbi_tiling {
 
   vector<shape> shapes;
+  string name;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -63,6 +64,8 @@ template<class T> bool correct_index(int index, const T& v) { return correct_ind
 
 template<class T> void verify_index(int index, const T& v) { if(!correct_index(index, v)) throw hr_parse_exception("bad index"); }
 
+string unnamed = "unnamed";
+
 void load(const string& fname) {
   fhstream f(fname, "rt");
   string s;
@@ -73,13 +76,20 @@ void load(const string& fname) {
     }
   auto& c = current;
   c.shapes.clear();
+  c.name = unnamed;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
   while(true) {
     ep.skip_white();
     if(ep.next() == 0) break;
-    if(ep.eat("e2.")) {
+    if(ep.eat("#")) {
+      while(ep.eat(" ")) ;
+      string s = "";
+      while(ep.next() >= 32) s += ep.next(), ep.at++;
+      if(c.name == unnamed) c.name = s;
+      }
+    else if(ep.eat("e2.")) {
       ginf[gArbitrary].g = giEuclid2;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
       }
@@ -334,6 +344,7 @@ int readArgs() {
       println(hlog, "failed: ", ex.s);
       exit(3);
       }
+    ginf[gArbitrary].tiling_name = current.name;
     }
   else return 1;
   return 0;
