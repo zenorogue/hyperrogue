@@ -611,8 +611,12 @@ EX void showEuclideanMenu() {
     }
   #endif
   #if CAP_BT
-  else if(bt::in())
-    spf = "6,[6,7],7";
+  else if(bt::in()) switch(geometry) {
+    case gBinaryTiling: spf = "6,[6,7],7"; break;
+    case gBinary4: spf = "5,5,5[,5]"; break;
+    case gTernary: spf = "6,6,6[,6]"; break;
+    default: spf = "?"; break;
+    }
   #endif
   else if(BITRUNCATED)
     spf = spf + "," + its(S6) + "," + its(S6);
