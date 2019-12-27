@@ -3589,6 +3589,8 @@ bool celldrawer::cell_clipped() {
   }
 
 EX void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
+  ld d = hdist(h1, h2);
+  while(d > .5 && d < 100) d /= 2, prec++;
 #if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     ld eps = cgi.human_height/100;
