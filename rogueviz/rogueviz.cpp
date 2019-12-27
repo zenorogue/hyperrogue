@@ -23,6 +23,12 @@
 #include "../hyper.h"
 #include "rogueviz.h"
 
+namespace hr {
+  namespace linepatterns {
+    extern linepattern patPalace, patZebraTriangles, patZebraLines;
+    }
+  }
+
 namespace rogueviz {
 
 ld fat_edges = 0;
@@ -1881,9 +1887,9 @@ int readArgs() {
   else if(argis("-net")) {
     PHASE(3);
     init(); kind = kFullNet;
-    linepatterns::setColor(linepatterns::patTriTree, 0x30);
-    linepatterns::setColor(linepatterns::patTriOther, 0x10);
-    linepatterns::setColor(linepatterns::patTriRings, 0xFF);
+    linepatterns::patTriTree.color = 0x30;
+    linepatterns::patTriOther.color = 0x10;
+    linepatterns::patTriRings.color = 0xFF;
     }
 
   else if(argis("-spiraledge")) {
@@ -2030,7 +2036,7 @@ void search_marker() {
     auto& m = vd.m;
     if(!m) return;
     hyperpoint H = ggmatrix(m->base) * tC0(m->at);
-    queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sin(ticks / 150.)));
+    queuestr(H, 2*vid.fsize, "X", 0x10101 * int(128 + 100 * sin(ticks / 150.)));
     addauraspecial(H, iinf[itOrbYendor].color, 0);
     }
   }
@@ -2198,10 +2204,8 @@ slide rvslides[] = {
       [] (presmode mode) {
        using namespace linepatterns;
        slidecommand = "toggle the Palace lines";
-       if(mode == 4)
-         switchAlpha(patPalace, 0xFF);
-       if(mode == 3)
-         setColor(patPalace, 0xFFD50000);
+       if(mode == 4) patPalace.color = 0xFFD500FF;
+       if(mode == 3) patPalace.color = 0xFFD50000;
         }
       },
   {"Collatz conjecture", 51, LEGAL_UNLIMITED | QUICKGEO,

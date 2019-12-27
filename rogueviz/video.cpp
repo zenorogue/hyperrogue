@@ -89,12 +89,12 @@ struct storydata { int s; int e; const char *text; } story[] = {
       if(dt && drawtris < 255) drawtris++;
       else if(drawtris && !dt) drawtris--;
 
-      linepatterns::setColor(linepatterns::patZebraTriangles, 0x40FF4000 + drawtris);
+      linepatterns::patZebraTriangles.color = 0x40FF4000 + drawtris;
       
       if(dn && drawnet < 255) drawnet++;
       else if(drawnet && !dn) drawnet--;
 
-      linepatterns::setColor(linepatterns::patZebraLines, 0xFF000000 + drawnet);
+      linepatterns::patZebraLines.color = 0xFF000000 + drawnet;
       
       vid.grid = drawnet;
       

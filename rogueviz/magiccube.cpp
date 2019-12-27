@@ -3,7 +3,6 @@
 namespace hr {
 
 #if CAP_CRYSTAL
-void performMarkCommand(cell *c);
 
 void curvepoint(const hyperpoint& H1);
 dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
@@ -157,7 +156,7 @@ bool magic_rugkey(int sym, int uni) {
     return true;
     }
   if((cmode & sm::NORMAL) && uni == 'r' && on) {
-    performMarkCommand(mouseover);
+    mine::performMarkCommand(mouseover);
     return true;
     }
   if((cmode & sm::NORMAL) && uni == 'R' && on) {
@@ -171,7 +170,7 @@ bool magic_rugkey(int sym, int uni) {
   }
 
 auto magichook = addHook(hooks_args, 100, readArgs) + addHook(hooks_drawcell, 100, magic_markers)
-  + addHook(hooks_mark, 150, magic_rotate)
+  + addHook(mine::hooks_mark, 150, magic_rotate)
   + addHook(hooks_handleKey, 150, magic_rugkey);
  
 }
