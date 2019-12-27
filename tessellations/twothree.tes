@@ -2,7 +2,7 @@
 ## from Marek14's post in HyperRogue discord
 e2.
 angleunit(deg)
-tile(1,90,2,90,1,90,1,90)
+tile(1,90,2,90,1,90,2,90)
 tile(1,90,1,0,1,0,1,90,1,90,1,0,2,90)
 c(0,3,0,3,0)
 c(0,0,1,2,0)
