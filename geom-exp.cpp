@@ -684,7 +684,7 @@ EX void showEuclideanMenu() {
     extern void add_edit_wall_quality(char);
     add_edit_wall_quality('W');
     }
-  else if(WDIM == 3 || kite::in()) dialog::addBreak(100);
+  else if(WDIM == 3 || kite::in() || arb::in()) dialog::addBreak(100);
   else {
     variable = true;
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
