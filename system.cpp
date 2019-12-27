@@ -909,6 +909,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(randomPatternsMode) return;
   if(dual::state) return;
   if(arcm::in()) return;
+  if(arb::in()) return;
   if(hybri) return;
   if(daily::on) return;
   if(peace::on) return;
