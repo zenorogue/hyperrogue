@@ -223,7 +223,7 @@ cld exp_parser::parse(int prio) {
     force_eat(",");
     cld b = rparse(0);
     force_eat(")");
-    return edge_of_triangle_with_angles(M_PI/2, M_PI/real(b), M_PI/real(b));
+    return edge_of_triangle_with_angles(M_PI/2, M_PI/real(a), M_PI/real(b));
     }
   else if(eat("ifp(")) {
     cld cond = parse(0);
