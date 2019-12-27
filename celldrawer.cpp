@@ -2525,7 +2525,7 @@ void celldrawer::draw() {
   }
 
 void celldrawer::set_towerfloor(const cellfunction& cf) {
-  if(weirdhyperbolic || sphere) {
+  if(weirdhyperbolic || sphere || (euc::in() && S7 == 4 && BITRUNCATED)) {
     set_floor(cgi.shFloor);
     return;
     }
