@@ -281,7 +281,7 @@ EX namespace history {
       angle = atan2(h[1], h[2]);
       }
     
-    View = inverse(master_relative(v[ph]->base) * v[ph]->at);
+    View = inverse(v[ph]->at);
   
     hyperpoint now = v[ph]->at * C0;
 
