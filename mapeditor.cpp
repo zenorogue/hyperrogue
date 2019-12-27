@@ -171,6 +171,7 @@ namespace mapstream {
       f.write(euc::eu_input.user_axes);
       f.write(euc::eu_input.twisted);
       }
+    f.write(mineadj);
     }
   
   void load_geometry(fhstream& f) {
@@ -257,6 +258,8 @@ namespace mapstream {
       f.read(euc::eu_input.user_axes);
       f.read(euc::eu_input.twisted);
       }
+    if(VERNUM_HEX >= 0xA810)
+      f.read(mineadj);
     }
   
   void save_only_map(fhstream& f) {
