@@ -190,6 +190,9 @@ EX void initgame() {
   
   chaosAchieved = false;
 
+  clearing::direct = 0;
+  clearing::imputed = 0;
+
   if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
   
   resetview();  

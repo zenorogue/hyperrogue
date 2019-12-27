@@ -3361,6 +3361,8 @@ auto ccm = addHook(clearmemory, 0, [] () {
   princess::clear();
   mirror::mirrors.clear();
   clearing::bpdata.clear();
+  clearing::stats.clear();
+  clearing::score.clear();
   tortoise::emap.clear();
   tortoise::babymap.clear();
   #if CAP_FIELD
