@@ -213,6 +213,9 @@ EX void closeJoysticks() {
   numsticks = 0;
   }
 
+int joytime;
+EX bool joy_ignore_next = false;
+
 EX void checkjoy() {
   DEBB(DF_GRAPH, ("check joy"));
   if(!DEFAULTCONTROL) return;
@@ -227,15 +230,27 @@ EX void checkjoy() {
   int curstate = sq < joyvalue1 ? 0 : sq < joyvalue2 ? 1 : 2;
   if(curstate != laststate) flashMessages(), laststate = curstate;
   
+  static int lt = ticks;
+  int delta = ticks - lt;
+  lt = ticks;
+  
   if(autojoy) {
-    if(sq < joyvalue1) { if(joydir.d >= 0) movepcto(joydir); joydir.d = -1; return; }
+    if(sq < joyvalue1) { if(joydir.d >= 0 && !joy_ignore_next) movepcto(joydir); joydir.d = -1; joytime = 0; joy_ignore_next = false; return; }
     if(sq < joyvalue2 && joydir.d == -1) return;
     }
   else {
     if(sq < joyvalue1) { joydir.d = -1; return; }
     }
   
-  joydir = vectodir(tangent_length(point2(jx, jy), 0.01));
+  auto new_joydir = vectodir(tangent_length(point2(jx, jy), 0.01)); 
+  if(new_joydir.d == joydir.d && new_joydir.subdir == joydir.subdir) {
+    joytime += delta;
+    if(joytime > vid.joysmooth) joytime = vid.joysmooth;
+    }
+  else {
+    joytime -= delta;
+    if(joytime < 0) joytime = -joytime, joydir = new_joydir;
+    }
   }
 
 EX void checkpanjoy(double t) {
@@ -715,6 +730,9 @@ EX void mainloopiter() {
   achievement_pump();  
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
+  #if CAP_SDLJOY
+  if(joydir.d != -1) checkjoy();
+  #endif
   }
   
 EX void handle_event(SDL_Event& ev) {
@@ -785,6 +803,7 @@ EX void handle_event(SDL_Event& ev) {
     else if(ev.type == SDL_JOYBUTTONDOWN && normal && DEFAULTCONTROL) {
       flashMessages();
       movepcto(joydir);
+      joy_ignore_next = true;
       checkjoy();
       }
 

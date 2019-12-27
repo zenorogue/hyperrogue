@@ -392,6 +392,7 @@ EX void initConfig() {
   
   addsaver(vid.joyvalue, "vid.joyvalue", 4800);
   addsaver(vid.joyvalue2, "vid.joyvalue2", 5600);
+  addsaver(vid.joysmooth, "vid.joysmooth", 200);
   addsaver(vid.joypanthreshold, "vid.joypanthreshold", 2500);
   addsaver(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
   addsaver(autojoy, "autojoy");
@@ -1358,6 +1359,7 @@ EX void showJoyConfig() {
   dialog::addSelItem(XLAT("first joystick: execute movement threshold"), its(vid.joyvalue2), 'b');
   dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
+  dialog::addSelItem(XLAT("smoothen"), its(vid.joysmooth) + " ms", 'e');
 
   dialog::addBreak(50);
   dialog::addBack();
@@ -1380,6 +1382,8 @@ EX void showJoyConfig() {
       }
     else if(uni == 'd')
       dialog::editNumber(vid.joypanspeed, 0, 1e-2, 1e-5, 1e-4, XLAT("second joystick: panning speed"), "");
+    else if(uni == 'e')
+      dialog::editNumber(vid.joypanspeed, 0, 2000, 20, 200, XLAT("smoothen"), "large values help if the joystick is imprecise");
   
     else if(doexiton(sym, uni)) popScreen();
     };
