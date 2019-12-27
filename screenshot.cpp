@@ -1292,6 +1292,7 @@ startanim fib_ghosts { "Fibonacci ghosts", no_init, [] {
   }};
 
 startanim fpp { "first-person perspective", no_init, [] {
+  if(MAXMDIM == 3) { current = &null_animation; return; }
   geom3::switch_fpp();
   View = cspin(0, 2, ticks / 5000.) * View;
   gamescreen(2);
@@ -1311,7 +1312,7 @@ EX void pick() {
     return;
     }
   vector<startanim*> known = { &null_animation, &perspective, &joukowsky, &bandspin, &rug, &spin_around, &row_of_ghosts, &ghost_spiral, &army_of_ghosts, &fib_ghosts, &fpp };
-  int id = rand() % 10;
+  int id = rand() % 11;
   current = known[id];
   ticks_start = ticks;
   current->init();
