@@ -135,6 +135,7 @@ void load(const string& fname) {
       c.shapes[ai].connections[as] = {bi, bs, m};
       c.shapes[bi].connections[bs] = {ai, as, m};
       }
+    else throw hr_parse_exception("expecting command");
     }
   }
 
