@@ -231,6 +231,16 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
         best_at = cand_at;
         newbase = c2;
         }
+      if(arb::in()) forCellIdCM(c3, j, c2) {
+        transmatrix V3 = currentmap->iadj(c2, j);
+        T cand_at3 = V3 * cand_at;
+        horo_distance newz3(check(cand_at3));
+        if(newz3 < currz) {
+          currz = newz3;
+          best_at = cand_at3;
+          newbase = c3;
+          }
+        }
       }
     if(!newbase) break;
     base = newbase;
