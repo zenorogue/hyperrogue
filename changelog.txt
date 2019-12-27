@@ -3697,3 +3697,28 @@ Other:
 - fixed facing in 3D Euclidean   
 - alternative vector graphics styles (see the 'line width' setting in graphics)
 - improved CA simulator (Moore neighborhoods, works with the new geometries with large numbers of adjacent cells)
+
+2019-12-27 12:43 Version 11.2p aka 'the Happy Woodcutter': 
+
+Gameplay and interface:
+- fixed turn-based multiplayer
+- Mutant Ivy in the Clearing now regrows even if it is offscreen
+- floating bubbles are now shown when fighting Ivy/Demons or collecting treasures
+- the (approximate) number of Mutant Ivy leaves killed is now computed (do not worry, these 125986129812649812649531688516982685965129215 leaves you have cut will regrow quickly)
+- the tree walls of the Clearing are strengthened (no more Ivies and Trolls cross them)
+- improved (old style) joystick handling: the input is smoothened for more accuracy; if you move a stick then press a button to move, you will no longer move again when the stick moves back to neutral position
+- fixed the line animation (the screen no longer jumps during the animation; the history/spiral is now rendered correctly; long bands are now rendered correctly when using band GLSL shader or when the model orientation is changed)
+
+Geometries:
+- a conformal mapping is now used when doing Hypersian Rug in a torus
+- adjacency rule now affects not only the Minefield and CA but various kinds of environmental effects (slime spill, electrical conductivity, heat conductivity, fire spread, livingwall CA)
+- improved bitruncated {4,4}: fixed distance and coordinate calculation, simpler floor in gravity lands (number of cells in distance and Free Fall work now)
+- a new 'geometry' which loads arbitrary tessellations defined in files (currently only for 2D geometries)
+- auto-rotation (in gravity lands etc.) now works better, and it works in Euclidean
+- a new geometry: {4,oo}
+- performing product on Catalan tilings no longer forgets about the 'dual' variation
+- fixed some incorrect/irrelevant information displayed in 'geometry experiment' menu
+- when in Euclidean geometries, keys 123 now automatically adjust the scale
+- fixed straight lines that were too long being displayed as straight lines (even if not in Klein model); also improved the precision of the long grid lines
+- land distance shows the correct values in equidistant-based lands in Euclidean
+
