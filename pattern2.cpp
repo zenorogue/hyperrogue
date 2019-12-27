@@ -2686,6 +2686,14 @@ EX namespace linepatterns {
         }
       )
     );
+  linepattern patSublines("sub-lines", 0xFFFFFF00, arb::in,
+    ALLCELLS(
+      int i = arb::id_of(c->master);
+      auto& sh = arb::current.shapes[i];
+      for(auto p: sh.sublines)
+        gridlinef(V, sh.vertices[p.first], sh.vertices[p.second], col, 2 + vid.linequality);
+      )
+    );
   
   #if HDR
   extern linepattern patTriTree, patTriRings, patTriOther;
@@ -2698,7 +2706,7 @@ EX namespace linepatterns {
     &patVine, &patPalacelike, &patPalace, &patPower, &patHorocycles,
     &patTriRings, &patTriTree, &patTriOther,
     &patGoldbergTree, &patIrregularMaster, &patGoldbergSep, &patHeawood, &patArcm,
-    &patCircles, &patRadii, &patMeridians, &patParallels
+    &patCircles, &patRadii, &patMeridians, &patParallels, &patSublines
     };
 
   EX void clearAll() {

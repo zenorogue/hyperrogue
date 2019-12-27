@@ -23,6 +23,7 @@ struct shape {
   vector<tuple<int, int, int>> connections;
   int size() const { return isize(vertices); }
   void build_from_angles_edges();
+  vector<pair<int, int> > sublines;
   };
 
 struct arbi_tiling {
@@ -209,6 +210,24 @@ void load(const string& fname) {
       int m = ep.iparse(); ep.force_eat(")");
       c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
       c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
+      }
+    else if(ep.eat("subline(")) {
+      int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
+      int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
+      int bs = ep.iparse(); verify_index(bs, c.shapes[ai]); ep.force_eat(")");
+      c.shapes[ai].sublines.emplace_back(as, bs);
+      }
+    else if(ep.eat("sublines(")) {
+      int d = ep.rparse(); ep.force_eat(")");
+      for(auto& sh: c.shapes) {
+        for(int i=0; i<isize(sh.vertices); i++)
+        for(int j=0; j<isize(sh.vertices); j++)
+          if(j != i+1 && i != j+1 && !(i==0 && j == isize(sh.vertices)-1) && !(j==0 && i == isize(sh.vertices)-1))
+            if(abs(hdist(sh.vertices[i], sh.vertices[j]) - distunit * d) < 1e-6) {
+              sh.sublines.emplace_back(i, j);
+              println(hlog, "add subline ", i, "-", j);
+              }
+        }
       }
     else throw hr_parse_exception("expecting command");
     }
