@@ -3723,3 +3723,9 @@ Geometries:
 - fixed straight lines that were too long being displayed as straight lines (even if not in Klein model); also improved the precision of the long grid lines
 - land distance shows the correct values in equidistant-based lands in Euclidean
 
+2019-12-27 23:06 Verison 11.2q:
+
+- fixed the Yendor Challenge based on the Orb of Recall
+- fixed the plain graphics for {4,oo}
+- tessellations from file: new commands "conway" (Conway notation), "unittile" (all lengths equal 1), "grave", "line" (used to create Graveyard/Vineyard), "subline", "sublines" (can be viewed using patterns->linepatterns); fixed reloading tessellations
+- added/fixed/improved some sample TES files
