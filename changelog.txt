@@ -3708,6 +3708,7 @@ Gameplay and interface:
 - the tree walls of the Clearing are strengthened (no more Ivies and Trolls cross them)
 - improved (old style) joystick handling: the input is smoothened for more accuracy; if you move a stick then press a button to move, you will no longer move again when the stick moves back to neutral position
 - fixed the line animation (the screen no longer jumps during the animation; the history/spiral is now rendered correctly; long bands are now rendered correctly when using band GLSL shader or when the model orientation is changed)
+- in the start screen, random animation is named, random option is stated, and one extra random animation
 
 Geometries:
 - a conformal mapping is now used when doing Hypersian Rug in a torus
