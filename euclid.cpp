@@ -1041,6 +1041,15 @@ EX int dcross(gp::loc e1, gp::loc e2) {
 
 EX gp::loc full_coords2(cell *c) { 
   auto ans = eucmap()->ispacemap[c->master];
+  if(S7 == 4 && BITRUNCATED) {
+    if(c == c->master->c7) return to_loc(ans) * gp::loc(1,1);
+    else {
+      auto res = full_coords2(c->cmove(0)) + full_coords2(c->cmove(4));
+      res.first /= 2;
+      res.second /= 2;
+      return res;
+      }
+    }
   if(BITRUNCATED)
     return to_loc(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c.spin(0)+4)%6));
   if(GOLDBERG) {
