@@ -595,7 +595,8 @@ EX namespace yendor {
       makeEmpty(c2);
       c2->item = itOrbYendor;
       nexttostart = laNone;
-      if(clev().flags & YF_RECALL) recallCell = cwt.at;
+      if(clev().flags & YF_RECALL)
+        saveRecall(cwt);
       }
     }
   
