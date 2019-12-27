@@ -659,6 +659,8 @@ EX void showEuclideanMenu() {
     }
   #endif
   
+  bool variable = false;
+  
   if(prod) {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
     dialog::add_action([] {
@@ -684,6 +686,7 @@ EX void showEuclideanMenu() {
     }
   else if(WDIM == 3 || kite::in()) dialog::addBreak(100);
   else {
+    variable = true;
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {
       if(0) ;
@@ -795,7 +798,7 @@ EX void showEuclideanMenu() {
 
   string fgname = XLAT(ginf[geometry].tiling_name);
   if(qstring != "none") fgname += " " + XLAT(qstring);
-  if(!euc::in(2,6)) fgname = gp::operation_name() + " " + fgname;
+  if(variable) fgname = gp::operation_name() + " " + fgname;
   
   dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
   
