@@ -339,7 +339,7 @@ hpcshape
   
   void init_floorshapes();
   void bshape2(hpcshape& sh, PPR prio, int shapeid, struct matrixlist& m);
-  void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size, cell *model);
+  void bshape_regular(floorshape &fsh, int id, int sides, ld shift, ld size, cell *model);
   void generate_floorshapes_for(int id, cell *c, int siid, int sidir);
   void generate_floorshapes();
   void make_floor_textures_here();

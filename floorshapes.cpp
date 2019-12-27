@@ -251,7 +251,7 @@ template<class T> void sizeto(T& t, int n) {
   if(isize(t) <= n) t.resize(n+1);
   }
 
-void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size, cell *c) {
+void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld shift, ld size, cell *c) {
   
   sizeto(fsh.b, id);
   sizeto(fsh.shadow, id);
@@ -332,8 +332,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       
       for(int k=0; k<SIDEPARS; k++) sizeto(fsh.side[k], id);
       
-      int td = (PURE && !(S7&1)) ? S42+S6 : 0;
+      ld td = (PURE && !(S7&1)) ? S42+S6 : 0;
       if(&fsh == &shBigHepta) td += S6;
+      
+      if(S3 >= OINF && !(S7 & 1)) td = S42 * 1. / S7;
     
       int b = 0;
       if(S3 == 4 && BITRUNCATED) b += S14;
