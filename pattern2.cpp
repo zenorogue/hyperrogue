@@ -1245,6 +1245,8 @@ EX int geosupport_football() {
   if(arcm::in() /* PURE */) return arcm::current.support_football();
 #endif
 
+  if(arb::in()) return arb::current.have_ph;
+
 #if CAP_IRR
   if(IRREGULAR) return irr::bitruncations_performed ? 2 : 1;
 #endif
@@ -1269,7 +1271,7 @@ EX int pattern_threecolor(cell *c) {
       return c->master->rval1;
     }
   #endif
-  if(arb::in()) return 0;
+  if(arb::in()) return arb::id_of(c->master) % 3;
   if(IRREGULAR || bt::in()) return !pseudohept(c);
   #if CAP_GP
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
@@ -1407,6 +1409,7 @@ EX bool pseudohept(cell *c) {
   #if CAP_ARCM
   if(arcm::in()) return arcm::pseudohept(c);
   #endif
+  if(arb::in()) return arb::pseudohept(c);
   #if CAP_GP
   if(GOLDBERG && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;

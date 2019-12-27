@@ -16,6 +16,7 @@ EX namespace arb {
 
 struct shape {
   int id;
+  int flags;
   vector<hyperpoint> vertices;
   vector<ld> angles;
   vector<ld> edges;
@@ -27,6 +28,7 @@ struct shape {
 struct arbi_tiling {
 
   int order;
+  bool have_line, have_ph;
 
   vector<shape> shapes;
   string name;
@@ -85,6 +87,14 @@ void load(const string& fname) {
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
+  auto addflag = [&] (int f) {
+    int ai;
+    if(ep.next() == ')') ai = isize(c.shapes)-1;
+    else ai = ep.iparse();
+    verify_index(ai, c.shapes); 
+    c.shapes[ai].flags |= f;
+    ep.force_eat(")");
+    };
   while(true) {
     ep.skip_white();
     if(ep.next() == 0) break;
@@ -116,6 +126,14 @@ void load(const string& fname) {
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
     else if(ep.eat("angleofs(")) angleofs = real(ep.parsepar());
     else if(ep.eat("distunit(")) distunit = real(ep.parsepar());
+    else if(ep.eat("line(")) {
+      addflag(arcm::sfLINE);
+      c.have_line = true;
+      }
+    else if(ep.eat("grave(")) {
+      addflag(arcm::sfPH);
+      c.have_ph = true;
+      }
     else if(ep.eat("let(")) {
       string tok = ep.next_token();
       ep.force_eat("=");
@@ -125,6 +143,7 @@ void load(const string& fname) {
       c.shapes.emplace_back();
       auto& cc = c.shapes.back();
       cc.id = isize(c.shapes) - 1;
+      cc.flags = 0;
       while(ep.next() != ')') {
         ld dist = ep.rparse(0);
         ep.force_eat(",");
@@ -369,6 +388,14 @@ auto hook = addHook(hooks_args, 100, readArgs);
 EX bool in() { return geometry == gArbitrary; }
 
 EX string tes = "tessellations/marjorie-rice.tes";
+
+EX bool linespattern(cell *c) {
+  return current.shapes[id_of(c->master)].flags & arcm::sfLINE;
+  }
+
+EX bool pseudohept(cell *c) {
+  return current.shapes[id_of(c->master)].flags & arcm::sfPH;
+  }
 
 EX void choose() {
   dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 

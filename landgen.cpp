@@ -597,6 +597,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         else if(arcm::in() && arcm::current.have_line)
           v = arcm::linespattern(c) ? 24 : 16;
         #endif
+        else if(arb::in() && arb::current.have_line)
+          v = arb::linespattern(c) ? 24 : 16;
         else if((euclid&&bounded) || hyperbolic_not37 || quotient || arcm::in()) {
           v = hrand(100) < 25 ? 24 : 16;
           }
@@ -663,6 +665,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         else if(arcm::in() && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;
         #endif
+        else if(arb::in() && arb::current.have_line)
+          c->wall = arb::linespattern(c) ? waTrapdoor : waNone;
         else if(euclid && !arcm::in()) {
           auto co = euc2_coordinates(c);
           int y = co.second;
@@ -691,6 +695,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         else if(arcm::in() && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
         #endif
+        else if(arb::in() && arb::current.have_line)
+          c->wall = arb::linespattern(c) ? waVinePlant : waNone;
         else if(nil) {
           if((c->master->emeraldval & 1) == 1)
             c->wall = waVinePlant;

@@ -84,11 +84,13 @@ struct archimedean_tiling {
 
 #if CAP_ARCM
 
+#if HDR
 static const int sfPH = 1;
 static const int sfLINE = 2;
 static const int sfCHESS = 4;
 static const int sfTHREE = 8;
 static const int sfSEMILINE = 16;
+#endif
 
 EX archimedean_tiling current;
 
