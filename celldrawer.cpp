@@ -1656,7 +1656,7 @@ void celldrawer::check_rotations() {
   // so we use function(old) which will return the same value as function(c) if ds.best is not known yet
   cell *old = ds.best ? ds.best : c;
 
-  auto use_if_less = [this] (int a, int b, ld spd, int side) {
+  auto use_if_less = [this, &ds] (int a, int b, ld spd, int side) {
     if(a > b) return;
     if(!ds.best || a < b) ds.reset();
     if(a <= b) {

@@ -124,6 +124,7 @@ EX bool appears(const string& haystack, const string& needle) {
 struct hr_parse_exception : hr_exception {
   string s;
   hr_parse_exception(const string& z) : s(z) {}
+  ~hr_parse_exception() noexcept(true) {}
   };
 
 struct exp_parser {

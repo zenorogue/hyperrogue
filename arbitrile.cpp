@@ -141,8 +141,8 @@ void load(const string& fname) {
       int bi = ep.iparse(); verify_index(bi, c.shapes); ep.force_eat(",");
       int bs = ep.iparse(); verify_index(bs, c.shapes[bi]); ep.force_eat(",");
       int m = ep.iparse(); ep.force_eat(")");
-      c.shapes[ai].connections[as] = {bi, bs, m};
-      c.shapes[bi].connections[bs] = {ai, as, m};
+      c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
+      c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
       }
     else throw hr_parse_exception("expecting command");
     }

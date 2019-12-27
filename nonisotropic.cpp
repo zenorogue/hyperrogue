@@ -43,6 +43,12 @@ EX namespace nisot {
 
   EX }
 
+#if !CAP_SOLV
+EX namespace sn {
+  EX always_false in() { return always_false(); }
+EX }
+#endif
+
 #if CAP_SOLV
 EX namespace sn {
 
