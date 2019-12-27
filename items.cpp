@@ -211,6 +211,8 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     if(c2->item == itBarrow) 
       for(int i=0; i<c2->landparam; i++) gainItem(c2->item);
     else if(c2->item) gainItem(c2->item);
+    if(vid.bubbles_all || (among(items[c2->item], 5, 10, 25, 50, 100, 250, 500) && vid.bubbles_threshold))
+      drawBubble(c2, iinf[c2->item].color, its(items[c2->item]), 0.5);
     
     if(c2->item) {
       char ch = iinf[c2->item].glyph;
