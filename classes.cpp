@@ -881,13 +881,13 @@ EX vector<geometryinfo> ginf = {
   {"ternary","none",    "standard ternary tiling",                    "ternary",  6, 3, qBINARY,   giHyperb2, 0x48400, {{6, 4}}, eVariation::pure},
   {"3x2",    "none",    "stretched hyperbolic",                       "3:2",     11, 3, qBINARY|qNIH,   giSolNIH,  0x49000, {{6, 3}}, eVariation::pure},
   {"3x1/2",  "none",    "stretched Solv",                             "3:1/2",    9, 3, (qBINARY|qSOL|qNIH),   giSolNIH,  0x49200, {{7, 3}}, eVariation::pure},
-  {"{3,oo}", "none",    "{3,∞} (infinite triangles)",                 "oox3",     3, 100, qIDEAL,  giHyperb2, 0x49400, {{7, 7}}, eVariation::pure},
+  {"{3,oo}", "none",    "{3,∞} (infinite triangles)",                 "oox3",     3, OINF, qIDEAL,  giHyperb2, 0x49400, {{7, 7}}, eVariation::pure},
   {"{3,3,6}","none",    "{3,3,6} hyperbolic honeycomb",               "336",      4, 6, qIDEAL,    giHyperb3, 0x49600, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","none",    "{3,4,4} hyperbolic honeycomb",               "344",      8, 4, qIDEAL,    giHyperb3, 0x50000, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","Crystal", "4D crystal in H3",                           "Cryst3" ,  8, 4, qIDEAL | qANYQ | qCRYSTAL, giHyperb3, 0x52000, {{7, 3}}, eVariation::pure},
   {"cat",    "cat",     "Arnold's cat mapping torus",                 "cat",     12, 3, qBINARY | qSOL | qsBQ | qOPTQ, giSolNIH, 0x52200, {{6, 4}}, eVariation::pure},
   {"file",   "none",    "load from file",                             "file",     7, 3, qEXPERIMENTAL,  giEuclid2, 0, {{7, 5}}, eVariation::pure},
-  {"{4,oo}", "none",    "{4,∞} (infinite squares)",                   "oox4",     4, 100, qIDEAL,  giHyperb2, 0x49400, {{5, 5}}, eVariation::pure},
+  {"{4,oo}", "none",    "{4,∞} (infinite squares)",                   "oox4",     4, OINF, qIDEAL,  giHyperb2, 0x49400, {{5, 5}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 
