@@ -3393,6 +3393,7 @@ auto ccm = addHook(clearmemory, 0, [] () {
     gd->store(elec::afterOrb);
     }) +
   addHook(hooks_removecells, 0, [] () {
+    for(cell *c: removed_cells) clearing::score.erase(c);
     eliminate_if(heat::offscreen_heat, is_cell_removed);
     eliminate_if(heat::offscreen_fire, is_cell_removed);
     eliminate_if(princess::infos, [] (princess::info*& i) { 
