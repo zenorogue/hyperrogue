@@ -296,6 +296,7 @@ EX void initConfig() {
   addsaver(vid.usingGL, "usingGL", true);
   addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_LINEWIDTH | AA_VERSION);
   addsaver(vid.linewidth, "linewidth", 1);
+  addsaver(precise_width, "precisewidth", .5);
   addsaver(linepatterns::width, "pattern-linewidth", 1);
   addsaver(vid.scale, "scale", 1);
   addsaver(vid.xposition, "xposition", 0);
@@ -1115,7 +1116,20 @@ EX void showGraphConfig() {
       dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
       dialog::extra_options = [] () {
         dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
-        dialog::add_action([] () { vid.antialias ^= AA_LINEWIDTH; });
+        dialog::add_action([] () { 
+          vid.antialias ^= AA_LINEWIDTH; 
+          });
+
+        if(vid.antialias & AA_LINEWIDTH) {
+          dialog::addSelItem("variable width", fts(precise_width), 'M');
+          dialog::add_action([] () {
+            popScreen();
+            dialog::editNumber(precise_width, 0, 2, 0.1, 0.5, 
+              XLAT("variable width"), XLAT("lines longer than this value will be split into shorter lines, with width computed separately for each of them.")
+              );
+            });
+          }
+        else dialog::addBreak(100);
         
         dialog::addBoolItem("standard graphics", neon_mode == 0, 'A');
         dialog::add_action([] { neon_mode = 0; });

@@ -3588,9 +3588,18 @@ bool celldrawer::cell_clipped() {
   return false;
   }
 
+EX ld precise_width = .5;
+
 EX void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
-  ld d = hdist(h1, h2);
-  while(d > .5 && d < 100) d /= 2, prec++;
+  ld d = hdist(V1*h1, V2*h2);
+  println(hlog, "d = ", d);
+  while(d > precise_width && d < 100) { 
+    if(!eqmatrix(V1, V2, 1e-6)) { gridline(V1, h1, V1, inverse(V1) * V2 * h2, col, prec); return; }
+    hyperpoint h = midz(h1, h2); 
+    gridline(V1, h1, V1, h, col, prec); 
+    gridline(V1, h, V1, h2, col, prec); 
+    return;
+    }
 #if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     ld eps = cgi.human_height/100;
