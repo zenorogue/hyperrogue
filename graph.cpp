@@ -4148,12 +4148,17 @@ void drawFlashes() {
   }
 
 #if CAP_QUEUE
-EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {
+always_false static_bubbles;
+
+EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {  
   int tim = ticks - f.t;
-  
+ 
   if(tim <= f.size && !f.spd) kill = false;
 
   if(f.text != "") {
+    if(static_bubbles) {
+      tim = 0; kill = false;
+      }
     color_t col = f.color;
     dynamicval<color_t> p(poly_outline, poly_outline);
     int r = 2;
@@ -4166,6 +4171,13 @@ EX void draw_flash(struct flashdata& f, const transmatrix& V, bool& kill) {
         transmatrix V2 = rspintox(h) * xpush(hdist0(h) * (1 / (1 - tim * 1. / f.size)));
         queuestr(V2, f.angle, f.text, col, r);
         }
+      }
+    if(static_bubbles) {
+      ld rad[25];
+      for(int a=0; a<24; a++) rad[a] = (0.5 + randd() * .3 + 0.5 * (a&1)) / (2.8 + celldistance(f.where, cwt.at) * .2);
+      rad[24] = rad[0];
+      for(int a=0; a<24; a++) curvepoint(V * xspinpush0(15 * degree * a, rad[a]));
+      queuecurve(0xFF, 0xFF0000FF, PPR::SUPERLINE);
       }
     }
     
