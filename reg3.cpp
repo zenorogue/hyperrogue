@@ -636,7 +636,7 @@ EX namespace reg3 {
         quotient_map = new hrmap_from_crystal;
         h.zebraval = quotient_map->allh[0]->zebraval;
         }
-      if(hyperbolic && !(cgflags & qIDEAL)) {
+      if(hyperbolic && !(cgflags & qIDEAL) && geometry != gSpace535) {
         quotient_map = new hrmap_field3;
         h.zebraval = quotient_map->allh[0]->zebraval;
         }
@@ -945,7 +945,7 @@ EX bool pseudohept(cell *c) {
     return c->master->distance & 1;
   if(geometry == gField534) 
     return hr::celldistance(c, currentmap->gamestart()) & 1;
-  if(geometry == gCrystal344)
+  if(geometry == gCrystal344 || geometry == gCrystal534)
     return false;
   if(hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;

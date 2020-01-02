@@ -394,6 +394,7 @@ EX int fieldval_uniq(cell *c) {
     }
   else if(bt::in() || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
   else if(&currfp == &fp_invalid) return 0;
+  else if(geometry == gSpace535) return 0;
   else if(WDIM == 3) return c->master->fieldval;
   else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
   else {

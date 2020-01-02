@@ -722,7 +722,8 @@ enum eGeometry {
   gBinary4, gSol,
   gKiteDart2, gKiteDart3, gNil, gProduct, gRotSpace,
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
-  gArnoldCat, gArbitrary, gInfOrder4,
+  gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
+  gSpace535, gSpace536,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -888,6 +889,9 @@ EX vector<geometryinfo> ginf = {
   {"cat",    "cat",     "Arnold's cat mapping torus",                 "cat",     12, 3, qBINARY | qSOL | qsBQ | qOPTQ, giSolNIH, 0x52200, {{6, 4}}, eVariation::pure},
   {"file",   "none",    "load from file",                             "file",     7, 3, qEXPERIMENTAL,  giEuclid2, 0, {{7, 5}}, eVariation::pure},
   {"{4,oo}", "none",    "{4,∞} (infinite squares)",                   "oox4",     4, OINF, qIDEAL,  giHyperb2, 0x49400, {{5, 5}}, eVariation::pure},
+  {"{5,3,4}","Crystal", "6D crystal in H3",                           "Cryst6" , 12, 4, qANYQ | qCRYSTAL, giHyperb3, 0x52000, {{7, 3}}, eVariation::pure},
+  {"{5,3,5}","none",    "{5,3,5} hyperbolic honeycomb",               "535",     12, 5, 0,         giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
+  {"{5,3,6}","none",    "{5,3,6} hyperbolic honeycomb",               "536",     12, 6, qIDEAL,    giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

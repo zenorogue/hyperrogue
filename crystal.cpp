@@ -361,20 +361,99 @@ int fiftyrule(coord c) {
 bool is_bi(crystal_structure& cs, coord co);
 
 #if MAXMDIM >= 4
-typedef array<coord, 8> shifttable;
+typedef array<coord, 12> shifttable;
+
+array<int, 6> ctable[64] = {
+   {0, 1, 2, 3, 4, 5, },
+   {6, 1, 5, 4, 3, 2, },
+   {0, 7, 5, 4, 3, 2, },
+   {6, 7, 2, 3, 4, 5, },
+   {0, 1, 5, 4, 3, 8, },
+   {6, 1, 8, 3, 4, 5, },
+   {0, 7, 8, 3, 4, 5, },
+   {6, 7, 5, 4, 3, 8, },
+   {0, 1, 5, 4, 9, 2, },
+   {6, 1, 2, 9, 4, 5, },
+   {0, 7, 2, 9, 4, 5, },
+   {6, 7, 5, 4, 9, 2, },
+   {0, 1, 8, 9, 4, 5, },
+   {6, 1, 5, 4, 9, 8, },
+   {0, 7, 5, 4, 9, 8, },
+   {6, 7, 8, 9, 4, 5, },
+   {0, 1, 5, 10, 3, 2, },
+   {6, 1, 2, 3, 10, 5, },
+   {0, 7, 2, 3, 10, 5, },
+   {6, 7, 5, 10, 3, 2, },
+   {0, 1, 8, 3, 10, 5, },
+   {6, 1, 5, 10, 3, 8, },
+   {0, 7, 5, 10, 3, 8, },
+   {6, 7, 8, 3, 10, 5, },
+   {0, 1, 2, 9, 10, 5, },
+   {6, 1, 5, 10, 9, 2, },
+   {0, 7, 5, 10, 9, 2, },
+   {6, 7, 2, 9, 10, 5, },
+   {0, 1, 5, 10, 9, 8, },
+   {6, 1, 8, 9, 10, 5, },
+   {0, 7, 8, 9, 10, 5, },
+   {6, 7, 5, 10, 9, 8, },
+   {0, 1, 11, 4, 3, 2, },
+   {6, 1, 2, 3, 4, 11, },
+   {0, 7, 2, 3, 4, 11, },
+   {6, 7, 11, 4, 3, 2, },
+   {0, 1, 8, 3, 4, 11, },
+   {6, 1, 11, 4, 3, 8, },
+   {0, 7, 11, 4, 3, 8, },
+   {6, 7, 8, 3, 4, 11, },
+   {0, 1, 2, 9, 4, 11, },
+   {6, 1, 11, 4, 9, 2, },
+   {0, 7, 11, 4, 9, 2, },
+   {6, 7, 2, 9, 4, 11, },
+   {0, 1, 11, 4, 9, 8, },
+   {6, 1, 8, 9, 4, 11, },
+   {0, 7, 8, 9, 4, 11, },
+   {6, 7, 11, 4, 9, 8, },
+   {0, 1, 2, 3, 10, 11, },
+   {6, 1, 11, 10, 3, 2, },
+   {0, 7, 11, 10, 3, 2, },
+   {6, 7, 2, 3, 10, 11, },
+   {0, 1, 11, 10, 3, 8, },
+   {6, 1, 8, 3, 10, 11, },
+   {0, 7, 8, 3, 10, 11, },
+   {6, 7, 11, 10, 3, 8, },
+   {0, 1, 11, 10, 9, 2, },
+   {6, 1, 2, 9, 10, 11, },
+   {0, 7, 2, 9, 10, 11, },
+   {6, 7, 11, 10, 9, 2, },
+   {0, 1, 8, 9, 10, 11, },
+   {6, 1, 11, 10, 9, 8, },
+   {0, 7, 11, 10, 9, 8, },
+   {6, 7, 8, 9, 10, 11, },
+   };
 
 shifttable get_canonical(coord co) {
   shifttable res;
-  for(int i=0; i<4; i++) {
-    res[i] = c0;
-    res[i][i] = 2;
-    res[i+4] = c0;
-    res[i+4][i] = -2;
+  if(S7 == 12) {
+    int eid = 0;
+    for(int a=0; a<6; a++) if(co[a] & 2) eid += (1<<a);
+    for(int i=0; i<12; i++) res[i] = c0;
+    for(int i=0; i<6; i++) {
+      int c = ctable[eid][i];
+      res[i][c % 6] = (c>=6) ? -2 : 2;
+      res[6+i][c % 6] = (c>=6) ? 2 : -2;
+      }
     }
-  for(int a=0; a<4; a++) if(co[a] & 2) swap(res[a], res[a+4]);
-  int bts = 0;
-  for(int a=0; a<4; a++) if(co[a] & 2) bts++;
-  if(bts & 1) swap(res[2], res[3]), swap(res[6], res[7]);
+  else {
+    for(int i=0; i<4; i++) {
+      res[i] = c0;
+      res[i][i] = 2;
+      res[i+4] = c0;
+      res[i+4][i] = -2;
+      }
+    for(int a=0; a<4; a++) if(co[a] & 2) swap(res[a], res[a+4]);
+    int bts = 0;
+    for(int a=0; a<4; a++) if(co[a] & 2) bts++;
+    if(bts & 1) swap(res[2], res[3]), swap(res[6], res[7]);
+    }
   return res;
   }
 #endif
@@ -407,7 +486,7 @@ struct hrmap_crystal : hrmap_standard {
   
   hrmap_crystal() {
 #if MAXMDIM >= 4
-    if(crystal3()) reg3::generate(), cs.dim = 4; else 
+    if(crystal3()) reg3::generate(), cs.dim = S7 / 2; else 
 #endif
     cs.build();
     
@@ -483,9 +562,9 @@ struct hrmap_crystal : hrmap_standard {
       auto h1 = get_heptagon_at(co1, S7);
       auto st1 = get_canonical(co1);
     
-      for(int d1=0; d1<8; d1++) if(st1[d1] == st[d])
-        h->c.connect(d, h1, d1 ^ 4, false);
-
+      for(int d1=0; d1<S7; d1++) if(st1[d1] == st[d])
+        h->c.connect(d, h1, (d1+S7/2) % S7, false);
+      
       return h1;
       }
     #endif
@@ -526,8 +605,8 @@ struct hrmap_crystal : hrmap_standard {
   transmatrix adj(heptagon *h, int d) override {
     auto co = hcoords[h];
     int id = 0;
-    for(int a=0; a<4; a++) id = (2*id) + ((co[a]>>1) & 1);
-    id = 8*id + d;
+    for(int a=0; a<S7/2; a++) id = (2*id) + ((co[a]>>1) & 1);
+    id = S7*id + d;
     if(adjs.count(id)) return adjs[id];
     transmatrix T = reg3::adjmoves[d];
     reg3::generate_cellrotations();
@@ -536,13 +615,20 @@ struct hrmap_crystal : hrmap_standard {
     auto st1 = get_canonical(co1);
     int qty = 0;
     transmatrix res;
+    ld gdist = S7 == 12 ? hdist0(tC0(reg3::adjmoves[0])) : reg3::strafedist;
+
     for(auto& cr: cgi.cellrotations) {
+
       transmatrix U = T * cr.first;
-      for(int s=0; s<8; s++) 
+      
+      ld go = hdist0(U * tC0(reg3::adjmoves[h->c.spin(d)]));
+      if(go > 1e-2) continue;
+
+      for(int s=0; s<S7; s++) 
         if(reg3::dirs_adjacent[d][s])
-          for(int t=0; t<8; t++) 
+          for(int t=0; t<S7; t++) 
             if(st1[t] == st[s]) {
-              if(hdist(U * tC0(reg3::adjmoves[t]), tC0(reg3::adjmoves[s])) > reg3::strafedist + .1)
+              if(hdist(U * tC0(reg3::adjmoves[t]), tC0(reg3::adjmoves[s])) > gdist + .1)
                 goto wrong;
               }
       res = U;
