@@ -458,6 +458,8 @@ EX void select_quotient_screen() {
       dialog::add_action([g] {
         if(g == gFieldQuotient) 
           pushScreen(showQuotientConfig);
+        else if(g == gCrystal)
+          pushScreen(crystal::show);
         else {
           dual::may_split_or_do([g] { set_geometry(g); });
           start_game();
