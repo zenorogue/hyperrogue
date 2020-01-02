@@ -974,7 +974,7 @@ EX void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) 
   }
 #endif
 
-void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase, bool stop = false) {
+EX void drawPlayer(eMonster m, cell *where, const transmatrix& V, color_t col, double footphase, bool stop IS(false)) {
   charstyle& cs = getcs();
   auto& knighted = camelot::knighted;
 
