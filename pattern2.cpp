@@ -1603,7 +1603,7 @@ EX namespace patterns {
     if(i != -1) return i;
     switch(whichCanvas) {
       #if CAP_CRYSTAL
-      case 'K': case '#': case '=': case 'O': case '/':
+      case 'K': case '#': case '=': case 'O': case '/': case '@':
         if(nil)
           return nilv::colorize(c, whichCanvas);
         else
