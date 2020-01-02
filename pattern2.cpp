@@ -2462,7 +2462,7 @@ EX namespace linepatterns {
           if(S3 >= OINF)
             gridlinef(V, C0, Id, mid(tC0(V), tC0(V * currentmap->adj(c, dir))), col, 2 + vid.linequality);
           else 
-             gridlinef(V, C0, V * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
+             gridlinef(V, C0, V * master_relative(c, true) * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
            }
          }
       )
@@ -2478,7 +2478,7 @@ EX namespace linepatterns {
                 gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
                 }
               else 
-                gridlinef(V, C0, V*currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
+                gridlinef(V, C0, V*master_relative(c, true) * currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
               }
             }
         }
