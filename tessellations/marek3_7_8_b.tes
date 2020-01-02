@@ -1,0 +1,11 @@
+## {3,7} octiamond - solution 1
+h2.
+angleunit(2*pi/7)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,7))
+# unittile: all lengths equal distunit
+unittile(1, 2, 4, 1, 2, 4, 1, 3, 1, 5)
+# the Conway notation
+conway("(0 1)(2 9)(3 4)(5 8)(6 7)")
+sublines(edge(3,7))

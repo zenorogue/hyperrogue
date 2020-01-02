@@ -1,0 +1,10 @@
+## {4,6}, tromino 1S, solution 1-experimental
+h2.
+angleunit(pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(4,6))
+unittile(1,1,2,2,1,1,2,2)
+# the Conway notation
+conway("(0)(1)(2)(3 7)[4 6](5)")
+sublines(1)

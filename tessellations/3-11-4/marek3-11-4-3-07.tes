@@ -1,0 +1,10 @@
+## {3,11}, tetriamond 3, solution 7
+h2.
+angleunit(2*pi/11)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,11))
+unittile(1,2,2,2,1,4)
+# the Conway notation
+conway("(0 1)(2 4)(3 5)")
+sublines(1)
