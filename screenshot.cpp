@@ -605,9 +605,13 @@ EX void reflect_view() {
 
 bool clearup;
 
+EX purehookset hooks_anim;
+
 EX void apply() {
   int t = ticks - lastticks;
   lastticks = ticks;
+  
+  callhooks(hooks_anim);
 
   switch(ma) {
     case maTranslation:
