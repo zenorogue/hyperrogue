@@ -29,8 +29,6 @@ EX void camrotate(ld& hx, ld& hy) {
   hx = ux / uz, hy = uy / uz;
   }
 
-hyperpoint perspective_to_space(hyperpoint h, ld alpha = vid.alpha, eGeometryClass geo = ginf[geometry].cclass);
-
 EX bool non_spatial_model() {
   if(among(pmodel, mdRotatedHyperboles, mdJoukowsky, mdJoukowskyInverted, mdPolygonal, mdPolynomial))
     return true;
@@ -39,7 +37,7 @@ EX bool non_spatial_model() {
   return pmodel && vid.consider_shader_projection && (get_shader_flags() & SF_DIRECT);
   }
 
-EX hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
+EX hyperpoint perspective_to_space(hyperpoint h, ld alpha IS(vid.alpha), eGeometryClass gc IS(ginf[geometry].cclass)) {
   ld hx = h[0], hy = h[1];
   
   if(gc == gcEuclid)
@@ -54,8 +52,8 @@ EX hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   ld curv = gc == gcSphere ? 1 : -1;
   
   A = 1+curv*hr;
-  B = 2*hr*vid.alpha*-curv;
-  C = 1 - curv*hr*vid.alpha*vid.alpha;
+  B = 2*hr*alpha*-curv;
+  C = 1 - curv*hr*alpha*alpha;
   
   B /= A; C /= A;
   
@@ -65,8 +63,8 @@ EX hyperpoint perspective_to_space(hyperpoint h, ld alpha, eGeometryClass gc) {
   ld hz = B / 2 + rootsign * sqrt(C + B*B/4);
   
   hyperpoint H;
-  H[0] = hx * (hz+vid.alpha);
-  H[1] = hy * (hz+vid.alpha);
+  H[0] = hx * (hz+alpha);
+  H[1] = hy * (hz+alpha);
   H[LDIM] = hz;
   
   return H;  
