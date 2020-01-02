@@ -33,9 +33,9 @@ bool keys_on = false;
 
 void trailer_frame() {
   // if(saving_positions || !isize(saved)) 
-  if(!recording && keys_on) queuechr(current_display->xcenter, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
-  if(!recording && keys_on) queuechr(current_display->xcenter/2, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
-  if(!recording && keys_on) queuechr(current_display->xcenter*3/2, current_display->ycenter, 0, 16, '+', 0xFFFFFFFF);
+  if(!recording && keys_on) queuestr(current_display->xcenter, current_display->ycenter, 0, 16, "+", 0xFFFFFFFF);
+  if(!recording && keys_on) queuestr(current_display->xcenter/2, current_display->ycenter, 0, 16, "+", 0xFFFFFFFF);
+  if(!recording && keys_on) queuestr(current_display->xcenter*3/2, current_display->ycenter, 0, 16, "+", 0xFFFFFFFF);
 
   if(saving_positions && ticks > next_pos_tick) {
     next_pos_tick += 66;
@@ -59,7 +59,7 @@ bool move_camera(transmatrix T) {
   return true;
   }
 
-namespace solnihv {   pair<heptagon*,heptagon*> getcoord(heptagon *h); }
+namespace sn {   pair<heptagon*,heptagon*> getcoord(heptagon *h); }
 
 bignum bdiff(heptagon *h1, heptagon *h2) {
   if(h1 == h2) return 0;
@@ -103,8 +103,8 @@ void get_b4_distance() {
   if(h1->distance != h2->distance)
     println(hlog, "Z difference: ", h2->distance - h1->distance);
   else {
-    auto c1 = solnihv::getcoord(h1);
-    auto c2 = solnihv::getcoord(h2);
+    auto c1 = sn::getcoord(h1);
+    auto c2 = sn::getcoord(h2);
     println(hlog, "X difference: ", bdiff(c1.first, c2.first).get_str(10000));
     println(hlog, "Y difference: ", bdiff(c1.second, c2.second).get_str(10000));
     println(hlog, "X difference> ", bdiff(c2.first, c1.first).get_str(10000));
