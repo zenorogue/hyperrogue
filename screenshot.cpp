@@ -525,7 +525,7 @@ color_t circle_display_color = 0x00FF00FF;
 EX ld circle_radius = acosh(2.);
 EX ld circle_spins = 1;
 
-void moved() {
+EX void moved() {
   optimizeview();
   if(cheater || autocheat) {
     if(hyperbolic && memory_saving_mode && centerover && gmatrix.size() && cwt.at != centerover && !quotient) {
