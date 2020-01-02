@@ -122,6 +122,9 @@ bool trailer_handleKey(int sym, int uni) {
 
   if(keys_on) {
 
+    if(sym == ',') { vid.fov *= 1.1; mouseaim_sensitivity *= 1.1; println(hlog, "fov = ", vid.fov, " sens = ", mouseaim_sensitivity); }
+    if(sym == '.') { vid.fov /= 1.1; mouseaim_sensitivity /= 1.1; println(hlog, "fov = ", vid.fov, " sens = ", mouseaim_sensitivity); }
+
     if(sym == 't') {
       if(!saved.empty()) {
         println(hlog, "frames = ", isize(saved));
