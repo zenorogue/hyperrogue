@@ -458,6 +458,8 @@ shifttable get_canonical(coord co) {
   }
 #endif
 
+int crystal_period = 0;
+
 struct hrmap_crystal : hrmap_standard {
   heptagon *getOrigin() override { return get_heptagon_at(c0, S7); }
 
@@ -547,6 +549,11 @@ struct hrmap_crystal : hrmap_standard {
   void verify() override { }
   
   void prepare_east();
+  
+  void apply_period(coord& co) {
+    for(int a=0; a<cs.dim; a++)
+      co[a] = szgmod(co[a], 2*crystal_period);
+    }
 
   heptagon *create_step(heptagon *h, int d) override {
     if(!hcoords.count(h)) {
@@ -559,6 +566,7 @@ struct hrmap_crystal : hrmap_standard {
     if(crystal3()) {
       auto st = get_canonical(co);
       auto co1 = co + st[d];
+      apply_period(co1);
       auto h1 = get_heptagon_at(co1, S7);
       auto st1 = get_canonical(co1);
     
@@ -580,18 +588,21 @@ struct hrmap_crystal : hrmap_standard {
     if(ginf[gCrystal].vertex == 4) {
       auto c1 = add(co, lw, FULLSTEP);
       auto lw1 = lw+wstep;
+      apply_period(c1);
       
       h->c.connect(d, heptspin(get_heptagon_at(c1, S7), lw1.spin));
       }
     else {
       auto coc = add(add(co, lw, HALFSTEP), lw+1, HALFSTEP);
       auto hc = get_heptagon_at(coc, 8);
+      apply_period(coc);
       for(int a=0; a<8; a+=2) {
         hc->c.connect(a, heptspin(h, lw.spin));
         if(h->modmove(lw.spin-1)) {
           hc->c.connect(a+1, heptspin(h, lw.spin) - 1 + wstep - 1);
           }
         co = add(co, lw, FULLSTEP);
+        apply_period(co);
         lw = lw + wstep + (-1);
         h = get_heptagon_at(co, S7);
         }
@@ -1342,6 +1353,15 @@ void unit_test_tables() {
   test_crt();
   }
 
+EX void set_crystal_period_flags() {
+  crystal_period &= ~1;
+  for(auto& g: ginf)
+    if(g.flags & qCRYSTAL) {
+      set_flag(ginf[gNil].flags, qSMALL, crystal_period && crystal_period <= 8);
+      set_flag(ginf[gNil].flags, qBOUNDED, crystal_period);
+      }
+  }
+
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
@@ -1376,6 +1396,11 @@ int readArgs() {
     }
   else if(argis("-test:crt")) {
     test_crt();
+    }
+  else if(argis("-crystal_period")) {
+    if(cryst) stop_game();
+    shift(); crystal_period = argi();
+    set_crystal_period_flags();
     }
   else if(argis("-d:crystal"))
     launch_dialog(show);
@@ -1456,6 +1481,16 @@ EX void show() {
       });
     }
   else dialog::addBreak(100);
+  dialog::addSelItem(XLAT("Crystal torus"), its(crystal_period), 'C');
+  dialog::add_action([] {
+    dialog::editNumber(crystal_period, 0, 16, 2, 0, XLAT("Crystal torus"), 
+      XLAT("Z_k^d instead of Z^d. Only works with k even."));
+    dialog::reaction_final = [] {
+      if(cryst) stop_game();
+      set_crystal_period_flags();
+      if(cryst) start_game();
+      };      
+    });
   dialog::addBack();
   dialog::addHelp();
   dialog::add_action([] { gotoHelp(make_help()); });
