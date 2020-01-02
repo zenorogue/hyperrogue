@@ -315,6 +315,11 @@ EX void initConfig() {
   addsaver(vid.fsize, "font size");
   addsaver(vid.darkhepta, "mark heptagons", false);
   
+  for(auto& lp: linepatterns::patterns) {
+    addsaver(lp->color, "lpcolor-" + lp->lpname);
+    addsaver(lp->multiplier, "lpwidth-" + lp->lpname);
+    }
+  
   // special graphics
 
   addsaver(vid.ballangle, "ball angle", 20);
