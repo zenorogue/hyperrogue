@@ -321,7 +321,10 @@ struct hrmap_arbi : hrmap {
     auto& co = sh.connections[dl];
     int xt = get<0>(co);
     int xdl = get<1>(co);
-    // int m = get<2>(co);
+    int m = get<2>(co);
+
+    if(h->c.move(dl)) xdl = h->c.spin(dl);
+
     auto& xsh = c.shapes[xt];
     int xdr = gmod(xdl+1, xsh.size());
 
@@ -364,6 +367,7 @@ struct hrmap_arbi : hrmap {
     int xt = get<0>(co);
     int e = get<1>(co);
     int m = get<2>(co);
+    auto& xsh = current.shapes[xt];
     
     transmatrix T = p.second * adj(h, d);
     
@@ -381,9 +385,12 @@ struct hrmap_arbi : hrmap {
       alt = (heptagon*) s;
       }
 
-    for(auto& p2: altmap[alt]) if(eqmatrix(p2.second, T)) {
-      h->c.connect(d, p2.first, e, m);
-      return p2.first;
+    for(auto& p2: altmap[alt]) if(id_of(p2.first) == xt && hdist(tC0(p2.second), tC0(T)) < 1e-2) {
+      for(int oth=0; oth < p2.first->type; oth++)
+        if(hdist(p2.second * xsh.vertices[oth], T * xsh.vertices[e]) < 1e-2) {
+          h->c.connect(d, p2.first, oth%p2.first->type, m);
+          return p2.first;
+          }
       }
 
     auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
