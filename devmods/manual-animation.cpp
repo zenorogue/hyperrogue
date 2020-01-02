@@ -114,7 +114,7 @@ void get_b4_distance() {
 
 bool trailer_handleKey(int sym, int uni) {  
 
-  if(sym == 'f') {
+  if(sym == 'f' && (cmode & sm::NORMAL)) {
     keys_on = !keys_on;
     println(hlog, "keys_on = ", keys_on);
     return true;
