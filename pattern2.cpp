@@ -1613,7 +1613,7 @@ EX namespace patterns {
         #if CAP_ARCM
         if(arcm::in()) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
         #endif
-        if(arb::in()) return colortables['A'][c->master->zebraval];
+        if(arb::in()) return colortables['A'][c->master->zebraval + c->master->emeraldval * isize(arb::current.shapes)];
       case 'B':
         return colortables['B'][c->type & 15];
       #if CAP_FIELD

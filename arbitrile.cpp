@@ -340,7 +340,11 @@ struct hrmap_arbi : hrmap {
     
     transmatrix xrm = gpushxto0(xvm);
     
-    transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr) * spintox(xrm*xvl) * xrm;
+    transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
+    if(m) Res = Res * MirrorX;
+    Res = Res * spintox(xrm*xvl) * xrm;
+    
+    if(m) swap(vl, vr);
     
     if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
       println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
@@ -399,6 +403,7 @@ struct hrmap_arbi : hrmap {
     h1->c7 = newCell(h1->type, h1);
     h1->alt = nullptr;
     h1->cdata = nullptr;
+    h1->emeraldval = h->emeraldval ^ m;
     h->c.connect(d, h1, e, m);
     
     arbi_matrix[h1] = make_pair(alt, T);
