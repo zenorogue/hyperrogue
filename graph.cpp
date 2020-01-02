@@ -3592,7 +3592,6 @@ EX ld precise_width = .5;
 
 EX void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   ld d = hdist(V1*h1, V2*h2);
-  println(hlog, "d = ", d);
   while(d > precise_width && d < 100) { 
     if(!eqmatrix(V1, V2, 1e-6)) { gridline(V1, h1, V1, inverse(V1) * V2 * h2, col, prec); return; }
     hyperpoint h = midz(h1, h2); 
