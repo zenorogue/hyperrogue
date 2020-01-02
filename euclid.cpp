@@ -932,7 +932,8 @@ EX namespace euc {
           char ch = 'a' + i * 3 + j;
           if(displayfr(dialog::dcenter + dialog::dfspace * 4 * (j-(dim-1.)/2), v.position, 2, dialog::dfsize, its(T_edit[j][i]), 0xFFFFFF, 8))
             getcstat = ch;
-          dialog::add_key_action(ch, [&T_edit, i, j] {
+          dialog::add_key_action(ch, [i, j] {
+            auto& T_edit = eu_edit.user_axes;
             dialog::editNumber(T_edit[j][i], -10, +10, 1, 0, "", XLAT(
               "This matrix lets you play on the quotient spaces of three-dimensional. "
               "Euclidean space. Every column specifies a translation vector which "
