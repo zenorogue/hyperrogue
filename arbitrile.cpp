@@ -218,15 +218,20 @@ void load(const string& fname) {
       c.shapes[ai].sublines.emplace_back(as, bs);
       }
     else if(ep.eat("sublines(")) {
-      int d = ep.rparse(); ep.force_eat(")");
+      ld d = ep.rparse() * distunit; 
+      ld eps = 1e-4;
+      if(ep.eat(",")) eps = ep.rparse() * distunit;
+      ep.force_eat(")");
       for(auto& sh: c.shapes) {
         for(int i=0; i<isize(sh.vertices); i++)
         for(int j=0; j<isize(sh.vertices); j++)
-          if(j != i+1 && i != j+1 && !(i==0 && j == isize(sh.vertices)-1) && !(j==0 && i == isize(sh.vertices)-1))
-            if(abs(hdist(sh.vertices[i], sh.vertices[j]) - distunit * d) < 1e-6) {
+          if(j != i+1 && i != j+1 && !(i==0 && j == isize(sh.vertices)-1) && !(j==0 && i == isize(sh.vertices)-1) && i != j) {
+            ld dist = hdist(sh.vertices[i], sh.vertices[j]);
+            if(abs(dist - d) < eps) {
               sh.sublines.emplace_back(i, j);
               println(hlog, "add subline ", i, "-", j);
               }
+            }
         }
       }
     else throw hr_parse_exception("expecting command");
