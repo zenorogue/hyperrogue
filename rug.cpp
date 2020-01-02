@@ -417,7 +417,7 @@ void calcLengths() {
       edge.len = hdist(p->h, edge.target->h) * modelscale;
   }
 
-void calcparam_rug() {
+EX void calcparam_rug() {
   auto cd = current_display;
 
   cd->xtop = cd->ytop = 0;
