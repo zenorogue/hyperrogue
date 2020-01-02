@@ -736,7 +736,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
   coord ico = roundcoord(co);
 
   int ones = 0;
-  for(int i=0; i<4; i++) if((ico[i] & 2) == 2) ones++;
+  for(int i=0; i<dim; i++) if((ico[i] & 2) == 2) ones++;
 
   switch(whichCanvas) {
     case 'K': 
@@ -744,11 +744,20 @@ EX color_t colorize(cell *c, char whichCanvas) {
         res |= ((int)(((i == 2 && S7 == 5) ? (128 + co[i] * 50) : (255&int(128 + co[i] * 25))))) << (8*i);
       return res;
 
+    case '@': {
+      if(ico[dim-1] == 2 && (ones & 1)) return 0x1C0FFC0;
+      if(ico[dim-1] == 2 && !(ones & 1)) return 0x180FF80;
+      if(ico[dim-1] == -4 && (ones & 1)) return 0x180C0FF;
+      if(ico[dim-1] == -4 && !(ones & 1)) return 0x14080FF;
+      return 0x101010;
+      }
+    
     case '=':
       if(ico[dim-1] == 2 && (ones & 1)) return 0x1C0FFC0;
       if(ico[dim-1] == 2 && !(ones & 1)) return 0x180FF80;
-      if(ico[dim-1] == -2 && (ones & 1)) return 0x1C0C0FF;
-      if(ico[dim-1] == -2 && !(ones & 1)) return 0x18080FF;
+      if(ico[dim-1] == -2 && (ones & 1)) return 0x180C0FF;
+      if(ico[dim-1] == -2 && !(ones & 1)) return 0x14080FF;
+
       return 0x101010;
     
     case '#': {
@@ -773,7 +782,8 @@ EX color_t colorize(cell *c, char whichCanvas) {
       }
       
     case '/': {
-      int s = ico[1] + ico[2] + ico[3] + ico[0];
+      int s = 0;
+      for(int a=0; a<dim; a++) s += ico[a];
       if(s > 0) return 0x1FF20FF;
       else if (s < -2) return 0x1C0C0C0;
       }
