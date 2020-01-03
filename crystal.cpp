@@ -363,7 +363,7 @@ bool is_bi(crystal_structure& cs, coord co);
 #if MAXMDIM >= 4
 typedef array<coord, 12> shifttable;
 
-array<int, 6> ctable[64] = {
+int ctable[64][6] = {
    {0, 1, 2, 3, 4, 5, },
    {6, 1, 5, 4, 3, 2, },
    {0, 7, 5, 4, 3, 2, },
