@@ -766,7 +766,11 @@ EX namespace reg3 {
         quotient_map = new hrmap_from_crystal;
         h.zebraval = quotient_map->allh[0]->zebraval;
         }
-      if(hyperbolic && !(cgflags & qIDEAL) && geometry != gSpace535) {
+      else if(geometry == gSpace535) {
+        quotient_map = new seifert_weber::hrmap_seifert_cover;
+        h.zebraval = quotient_map->allh[0]->zebraval;
+        }
+      else if(hyperbolic && !(cgflags & qIDEAL)) {
         quotient_map = new hrmap_field3;
         h.zebraval = quotient_map->allh[0]->zebraval;
         }
