@@ -7,4 +7,4 @@ distunit(edge(4,6))
 unittile(1,1,2,2,1,1,2,2)
 # the Conway notation
 conway("(0)(1)(2)(3 7)(4)(5)(6)")
-sublines(edge(4,6))
+sublines(1)

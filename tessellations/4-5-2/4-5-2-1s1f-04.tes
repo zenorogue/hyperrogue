@@ -1,0 +1,11 @@
+## {4,5}, domino 1S + domino 1F, solution 4
+h2.
+angleunit(2*pi/5)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(4,5))
+unittile(1,1,2,1,1,2)
+unittile(1,1,2,1,1,2)
+# the Conway notation
+conway("(0 0')(1)(2 3')(1' 2')(4' 5')(3 0')(4)(5 3')")
+sublines(1)

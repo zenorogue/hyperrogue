@@ -1,0 +1,10 @@
+## {4,7}, domino 1F, solution 1
+h2.
+angleunit(2*pi/7)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(4,7))
+unittile(1,1,2,1,1,2)
+# the Conway notation
+conway("(0)(1)(2)(3)(4 5)")
+sublines(1)

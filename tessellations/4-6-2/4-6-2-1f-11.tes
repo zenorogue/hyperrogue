@@ -1,10 +1,10 @@
-## {4,6}, tromino 1F, solution 5
+## {4,6}, domino 1F, solution 11
 h2.
 angleunit(pi/3)
 # the line below lets us specify internal angles
 angleofs(pi)
 distunit(edge(4,6))
-unittile(1,1,2,2,1,1,2,2)
+unittile(1,1,2,1,1,2)
 # the Conway notation
-conway("(0)(1)(2 6)(3 5)(4)(7)")
+conway("(0)[1 5](2 3)(4)")
 sublines(1)
