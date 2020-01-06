@@ -226,6 +226,7 @@ EX namespace reg3 {
   struct hrmap_quotient3 : hrmap {
     vector<heptagon*> allh;
     vector<vector<transmatrix>> tmatrices;    
+    vector<cell*> acells;
 
     transmatrix adj(heptagon *h, int d) { return tmatrices[h->fieldval][d]; }
 
@@ -233,9 +234,26 @@ EX namespace reg3 {
 
     void draw() override;
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
+    
+    void initialize(int cell_count);
+    vector<cell*>& allcells() override { return acells; }
     };
   #endif
   
+  void hrmap_quotient3::initialize(int cell_count) {
+    allh.resize(cell_count);
+    acells.clear();
+    tmatrices.resize(cell_count);
+    for(int a=0; a<cell_count; a++) {
+      allh[a] = tailored_alloc<heptagon> (S7);
+      allh[a]->c7 = newCell(S7, allh[a]);
+      allh[a]->fieldval = a;
+      allh[a]->zebraval = 0;
+      allh[a]->alt = NULL;
+      acells.push_back(allh[a]->c7);
+      }
+    }
+
   void hrmap_quotient3::draw() {
     sphereflip = Id;
     
@@ -289,15 +307,7 @@ EX namespace reg3 {
   
     hrmap_from_crystal() {
       generate();
-      allh.resize(256);
-      tmatrices.resize(256);
-      for(int a=0; a<256; a++) {
-        allh[a] = tailored_alloc<heptagon> (S7);
-        allh[a]->c7 = newCell(S7, allh[a]);
-        allh[a]->fieldval = a;
-        allh[a]->zebraval = 0;
-        allh[a]->alt = NULL;
-        }
+      initialize(256);
       if(1) {
         auto m = crystal::new_map();
         dynamicval<hrmap*> cm(currentmap, m);
@@ -316,7 +326,6 @@ EX namespace reg3 {
     };
     
   struct hrmap_field3 : hrmap_quotient3 {
-    vector<cell*> acells;
     
     int mgmul(std::initializer_list<int> v) { 
       int a = 0;
@@ -474,19 +483,9 @@ EX namespace reg3 {
       
       DEBB(DF_FIELD, ("building allh..."));
       int cells = N / perm_group;
-      allh.resize(cells);
-      for(int i=0; i<cells; i++) {
-        allh[i] = tailored_alloc<heptagon> (S7);
-        allh[i]->c7 = newCell(S7, allh[i]);
-        allh[i]->fieldval = i;
-        allh[i]->zebraval = 0;
-        allh[i]->alt = NULL;
-        acells.push_back(allh[i]->c7);
-        }
+      initialize(cells);
       
-      DEBB(DF_FIELD, ("finding tmatrices..."));
-      tmatrices.resize(cells);
-      
+      DEBB(DF_FIELD, ("finding tmatrices..."));      
       for(int i=0; i<cells; i++) {
         for(int d=0; d<S7; d++) {
           int found = 0;
@@ -604,8 +603,6 @@ EX namespace reg3 {
         }
       }
     
-    vector<cell*>& allcells() override { return acells; }    
-
     vector<hyperpoint> get_vertices(cell* c) override {
       return vertices_only;
       }
@@ -694,15 +691,7 @@ EX namespace reg3 {
 
       hrmap_seifert_cover() {
         if(periods.empty()) build_reps();
-        allh.resize(125);
-        tmatrices.resize(125);
-        for(int a=0; a<125; a++) {
-          allh[a] = tailored_alloc<heptagon> (S7);
-          allh[a]->c7 = newCell(S7, allh[a]);
-          allh[a]->fieldval = a;
-          allh[a]->zebraval = 0;
-          allh[a]->alt = NULL;
-          }
+        initialize(125);
         for(int a=0; a<125; a++) {
           tmatrices[a].resize(12);
           for(int b=0; b<12; b++) {
