@@ -832,7 +832,7 @@ EX namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(IRREGULAR || arcm::in() || bt::in() || WDIM == 3) si.symmetries = 1;
+    if(IRREGULAR || arcm::in() || bt::in() || arb::in() || WDIM == 3) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere && S3 == 3) valSibling(c, si, sub, pat);
