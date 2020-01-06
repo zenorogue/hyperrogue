@@ -1,0 +1,10 @@
+## {3,5}, diamond 1F, solution 1
+s2.
+angleunit(2*pi/5)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,5))
+unittile(1,2,1,2)
+# the Conway notation
+conway("(0)(1)(2 3)")
+sublines(1)
