@@ -871,6 +871,7 @@ EX string get_rich_presence_text() {
 
   if(princess::challenge) return res + "Princess Challenge";
 
+  #if CAP_RACING
   if(racing::on) {
     using namespace racing;
     res = res + "racing in " + linf[specialland].name;
@@ -882,6 +883,7 @@ EX string get_rich_presence_text() {
     
     return res;
     }
+  #endif
   
   res += linf[cwt.at->land].name;
   res += ", " + its(gold()) + " $$$";
