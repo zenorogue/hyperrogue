@@ -3751,3 +3751,8 @@ Geometries:
 - - 'nonorientable' tiles
 - - sublines now optionally accepts epsilon, and also fixes a bug where it expected an integers
 - - updated tes files
+
+2020-01-06 22:04 Version 11.2s:
+
+- Steam rich presence
+- geometries: quotient space in {5,3,5}; single-cell quotient spaces in {5,3,3} and {5,3,5}; fixed spherical tessellations from files; extra tessellation files
