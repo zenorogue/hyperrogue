@@ -16,6 +16,8 @@ static const int MAXDIM = 7;
 
 struct coord : public array<int, MAXDIM> {
   coord operator + (coord b) { for(int i=0; i<MAXDIM; i++) b[i] += self[i]; return b; }  
+  coord operator - (coord b) { for(int i=0; i<MAXDIM; i++) b[i] = self[i] - b[i]; return b; }  
+  coord operator * (int x) { coord res; for(int i=0; i<MAXDIM; i++) res[i] = x * self[i]; return res; } 
   };
 
 static const coord c0 = {};
