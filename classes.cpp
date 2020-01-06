@@ -723,7 +723,7 @@ enum eGeometry {
   gKiteDart2, gKiteDart3, gNil, gProduct, gRotSpace,
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
   gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
-  gSpace535, gSpace536,
+  gSpace535, gSpace536, gSeifertCover,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -892,6 +892,7 @@ EX vector<geometryinfo> ginf = {
   {"{5,3,4}","Crystal", "6D crystal in H3",                           "Cryst6" , 12, 4, qANYQ | qCRYSTAL, giHyperb3, 0x52000, {{7, 3}}, eVariation::pure},
   {"{5,3,5}","none",    "{5,3,5} hyperbolic honeycomb",               "535",     12, 5, 0,         giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{5,3,6}","none",    "{5,3,6} hyperbolic honeycomb",               "536",     12, 6, qIDEAL,    giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
+  {"{5,3,5}","SWh",     "{5,3,5} quotient",                           "535c",    12, 5, qsSMALLB | qANYQ, giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

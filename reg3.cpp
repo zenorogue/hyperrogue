@@ -40,6 +40,9 @@ EX namespace reg3 {
   EX ld strafedist;
   EX bool dirs_adjacent[16][16];
 
+  /** for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
+  EX int next_dir[16][16];
+
   template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
     for(int i=0; i<200; i++) {
       ld d = (dmin + dmax) / 2;
@@ -203,6 +206,15 @@ EX namespace reg3 {
       for(hyperpoint h2: vertices_only) if(hdist(h, h2) < 1e-6) found = true;
       if(!found) vertices_only.push_back(h);
       }
+
+    for(int a=0; a<12; a++)
+    for(int b=0; b<12; b++)
+      if(reg3::dirs_adjacent[a][b]) 
+        for(int c=0; c<12; c++)
+          if(reg3::dirs_adjacent[a][c] && reg3::dirs_adjacent[b][c]) {
+            transmatrix t = build_matrix(tC0(reg3::adjmoves[a]), tC0(reg3::adjmoves[b]), tC0(reg3::adjmoves[c]), C0);
+            if(det(t) > 1e-3) reg3::next_dir[a][b] = c;
+            }  
     }
 
   void binary_rebase(heptagon *h, const transmatrix& V) {
@@ -210,13 +222,57 @@ EX namespace reg3 {
   
   void test();
 
+  #if HDR
   struct hrmap_quotient3 : hrmap {
     vector<heptagon*> allh;
     vector<vector<transmatrix>> tmatrices;    
 
     transmatrix adj(heptagon *h, int d) { return tmatrices[h->fieldval][d]; }
-    };
 
+    heptagon *getOrigin() override { return allh[0]; }
+
+    void draw() override;
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
+    };
+  #endif
+  
+  void hrmap_quotient3::draw() {
+    sphereflip = Id;
+    
+    // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
+    
+    dq::visited_by_matrix.clear();
+    dq::enqueue_by_matrix(centerover->master, cview());
+    
+    while(!dq::drawqueue.empty()) {
+      auto& p = dq::drawqueue.front();
+      heptagon *h = get<0>(p);
+      transmatrix V = get<1>(p);
+      dynamicval<ld> b(band_shift, get<2>(p));
+      bandfixer bf(V);
+      dq::drawqueue.pop();
+            
+      cell *c = h->c7;
+      if(!do_draw(c, V)) continue;
+      drawcell(c, V);
+      if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+  
+      for(int d=0; d<S7; d++)
+        dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
+      }
+    }
+
+  transmatrix hrmap_quotient3::relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
+    if(h1 == h2) return Id;
+    int d = hr::celldistance(h2->c7, h1->c7);
+
+    for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
+      return adj(h1, a) * relative_matrix(h2, h1->move(a), hint);
+    
+    println(hlog, "error in hrmap_quotient3:::relative_matrix");
+    return Id;
+    }
+    
   int encode_coord(const crystal::coord& co) {
     int c = 0;
     for(int i=0; i<4; i++) c |= ((co[i]>>1) & 3) << (2*i);
@@ -548,51 +604,122 @@ EX namespace reg3 {
         }
       }
     
-    void draw() override {
-      sphereflip = Id;
-      
-      // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
-      
-      dq::visited_by_matrix.clear();
-      dq::enqueue_by_matrix(centerover->master, cview());
-      
-      while(!dq::drawqueue.empty()) {
-        auto& p = dq::drawqueue.front();
-        heptagon *h = get<0>(p);
-        transmatrix V = get<1>(p);
-        dynamicval<ld> b(band_shift, get<2>(p));
-        bandfixer bf(V);
-        dq::drawqueue.pop();
-              
-        cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-    
-        for(int d=0; d<S7; d++)
-          dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
-        }
-      }
-
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
-      if(h1 == h2) return Id;
-      int d = hr::celldistance(h2->c7, h1->c7);
-
-      for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
-        return adj(h1, a) * relative_matrix(h2, h1->move(a), hint);
-      
-      println(hlog, "error in hrmap_field3:::relative_matrix");
-      return Id;
-      }
-  
-    heptagon *getOrigin() override { return allh[0]; }
-    
     vector<cell*>& allcells() override { return acells; }    
 
     vector<hyperpoint> get_vertices(cell* c) override {
       return vertices_only;
       }
     };
+
+  /** homology cover of the Seifert-Weber space */
+  namespace seifert_weber {
+  
+    using crystal::coord;
+  
+    vector<coord> periods;
+  
+    int flip(int x) { return (x+6) % 12; }
+  
+    void build_reps() {
+      reg3::generate();
+      // start_game();
+      for(int a=0; a<12; a++)
+      for(int b=0; b<12; b++)
+        if(reg3::dirs_adjacent[a][b]) 
+          for(int c=0; c<12; c++)
+            if(reg3::dirs_adjacent[a][c] && reg3::dirs_adjacent[b][c]) {
+              transmatrix t = build_matrix(tC0(reg3::adjmoves[a]), tC0(reg3::adjmoves[b]), tC0(reg3::adjmoves[c]), C0);
+              if(det(t) > 0) next_dir[a][b] = c;
+              }  
+      
+      set<coord> boundaries;
+      
+      for(int a=0; a<12; a++)
+      for(int b=0; b<12; b++) if(reg3::dirs_adjacent[a][b]) {
+        coord res = crystal::c0;
+        int sa = a, sb = b;
+        do {
+          // printf("%d ", sa);
+          if(sa < 6) res[sa]++; else res[sa-6]--;
+          sa = flip(sa);
+          sb = flip(sb);
+          swap(sa, sb);
+          sb = next_dir[sa][sb];
+          // sb = next_dirsa][sb];
+          }
+        while(a != sa || b != sb);
+        // printf("\n");
+        if(res > crystal::c0) 
+          boundaries.insert(res);
+        }
+      
+      periods.clear();
+      
+      for(int index = 5; index >= 0; index--) {
+        for(auto k: boundaries) println(hlog, k);
+        println(hlog, "simplifying...");
+        
+        for(auto by: boundaries) if(among(by[index], 1, -1)) {
+          println(hlog, "simplifying by ", by);
+          periods.push_back(by);
+          set<coord> nb;
+      
+          for(auto v: boundaries)
+            if(v == by) ;
+            else if(v[index] % by[index] == 0)
+              nb.insert(v - by * (v[index] / by[index]));
+            else println(hlog, "error");    
+          
+          boundaries = move(nb);
+          break;
+          }
+        }
+      }
+
+    int get_rep(coord a) {
+      a = a - periods[0] * (a[5] / periods[0][5]);
+      a = a - periods[1] * (a[4] / periods[1][4]);
+      a = a - periods[2] * (a[3] / periods[2][3]);
+      for(int i=0; i<3; i++) a[i] = gmod(a[i], 5);
+      return a[2] * 25 + a[1] * 5 + a[0];
+      }
+    
+    coord decode(int id) {
+      coord res = crystal::c0;
+      for(int a=0; a<3; a++) res[a] = id % 5, id /= 5;
+      return res;
+      }
+
+    struct hrmap_seifert_cover : hrmap_quotient3 {
+
+      hrmap_seifert_cover() {
+        if(periods.empty()) build_reps();
+        allh.resize(125);
+        tmatrices.resize(125);
+        for(int a=0; a<125; a++) {
+          allh[a] = tailored_alloc<heptagon> (S7);
+          allh[a]->c7 = newCell(S7, allh[a]);
+          allh[a]->fieldval = a;
+          allh[a]->zebraval = 0;
+          allh[a]->alt = NULL;
+          }
+        for(int a=0; a<125; a++) {
+          tmatrices[a].resize(12);
+          for(int b=0; b<12; b++) {
+            coord x = decode(a);
+            if(b < 6) x[b]++;
+            else x[b-6]--;
+            int a1 = get_rep(x);
+            allh[a]->c.connect(b, allh[a1], flip(b), false);
+            transmatrix T = reg3::adjmoves[b];
+            hyperpoint p = tC0(T);
+            tmatrices[a][b] = rspintox(p) * xpush(hdist0(p)) * cspin(2, 1, 108 * degree) * spintox(p);
+            }
+          }      
+        }
+      };
+    
+    }
 
   struct hrmap_reg3 : hrmap {
   
@@ -897,6 +1024,7 @@ EX namespace reg3 {
     };
   
 EX hrmap* new_map() {
+  if(geometry == gSeifertCover) return new seifert_weber::hrmap_seifert_cover;
   if(quotient && !sphere) return new hrmap_field3;
   return new hrmap_reg3;
   }
@@ -945,7 +1073,7 @@ EX bool pseudohept(cell *c) {
     return c->master->distance & 1;
   if(geometry == gField534) 
     return hr::celldistance(c, currentmap->gamestart()) & 1;
-  if(geometry == gCrystal344 || geometry == gCrystal534)
+  if(geometry == gCrystal344 || geometry == gCrystal534 || geometry == gSeifertCover)
     return false;
   if(hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;
