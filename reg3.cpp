@@ -228,7 +228,7 @@ EX namespace reg3 {
     vector<vector<transmatrix>> tmatrices;    
     vector<cell*> acells;
 
-    transmatrix adj(heptagon *h, int d) { return tmatrices[h->fieldval][d]; }
+    transmatrix adj(heptagon *h, int d) override { return tmatrices[h->fieldval][d]; }
 
     heptagon *getOrigin() override { return allh[0]; }
 
