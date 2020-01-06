@@ -687,6 +687,20 @@ EX namespace reg3 {
       return res;
       }
 
+    struct hrmap_singlecell : hrmap_quotient3 {    
+      hrmap_singlecell(ld angle) {
+        generate();
+        initialize(1);
+        tmatrices[0].resize(S7);
+        for(int b=0; b<S7; b++) {
+          allh[0]->c.connect(b, allh[0], (b+S7/2) % S7, false);
+          transmatrix T = reg3::adjmoves[b];
+          hyperpoint p = tC0(T);
+          tmatrices[0][b] = rspintox(p) * xpush(hdist0(p)) * cspin(2, 1, angle) * spintox(p);
+          }
+        }
+      };
+
     struct hrmap_seifert_cover : hrmap_quotient3 {
 
       hrmap_seifert_cover() {
@@ -1014,6 +1028,8 @@ EX namespace reg3 {
   
 EX hrmap* new_map() {
   if(geometry == gSeifertCover) return new seifert_weber::hrmap_seifert_cover;
+  if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
+  if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
   if(quotient && !sphere) return new hrmap_field3;
   return new hrmap_reg3;
   }
@@ -1039,6 +1055,7 @@ EX int celldistance(cell *c1, cell *c2) {
 
 EX bool pseudohept(cell *c) {
   auto m = regmap();
+  if(cgflags & qSINGLE) return true;
   if(sphere) {
     hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin, C0));
     if(S7 == 12) {

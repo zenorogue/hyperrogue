@@ -723,7 +723,7 @@ enum eGeometry {
   gKiteDart2, gKiteDart3, gNil, gProduct, gRotSpace,
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
   gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
-  gSpace535, gSpace536, gSeifertCover,
+  gSpace535, gSpace536, gSeifertCover, gSeifertWeber, gHomologySphere,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -785,6 +785,7 @@ static const flagtype qNIH             = 65536;
 static const flagtype qIDEAL           = 131072;
 static const flagtype qHUGE_BOUNDED    = 262144;
 static const flagtype qOPTQ            = Flag(19);
+static const flagtype qSINGLE          = Flag(20);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -806,6 +807,8 @@ static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
 static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD | qANYQ;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
 static const flagtype qsBP              = qBINARY | qKITE;
+
+static const flagtype qsSINGLE          = qANYQ | qSMALL | qBOUNDED | qSINGLE;
 
 EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
 EX geometryinfo1 giHyperb2 = { gcHyperbolic, 2, 2, 3, {1,1,-1,0 } };
@@ -893,6 +896,8 @@ EX vector<geometryinfo> ginf = {
   {"{5,3,5}","none",    "{5,3,5} hyperbolic honeycomb",               "535",     12, 5, 0,         giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{5,3,6}","none",    "{5,3,6} hyperbolic honeycomb",               "536",     12, 6, qIDEAL,    giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{5,3,5}","SWh",     "{5,3,5} quotient",                           "535c",    12, 5, qsSMALLB | qANYQ, giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
+  {"{5,3,5}","SW",      "Seifert-Weber space",                        "535s",    12, 5, qsSINGLE,  giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
+  {"{5,3,3}","SW",      "Poincaré homology sphere",                   "533s",    12, 3, qsSINGLE,  giSphere3, 0x31400, {{7, 2}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 
