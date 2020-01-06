@@ -504,6 +504,17 @@ EX void select_quotient() {
     }
   }
 
+EX string full_geometry_name() {
+  string qstring = ginf[geometry].quotient_name;
+  bool variable =
+    !(prod || hybri || bt::in() || WDIM == 3 || kite::in() || arb::in());
+  
+  string fgname = XLAT(ginf[geometry].tiling_name);
+  if(qstring != "none") fgname += " " + XLAT(qstring);
+  if(variable) fgname = gp::operation_name() + " " + fgname;
+  return fgname;
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -662,8 +673,6 @@ EX void showEuclideanMenu() {
     }
   #endif
   
-  bool variable = false;
-  
   if(prod) {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
     dialog::add_action([] {
@@ -689,7 +698,6 @@ EX void showEuclideanMenu() {
     }
   else if(WDIM == 3 || kite::in() || arb::in()) dialog::addBreak(100);
   else {
-    variable = true;
     dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
     dialog::add_action([] {
       if(0) ;
@@ -799,11 +807,7 @@ EX void showEuclideanMenu() {
   
   dialog::addBreak(150);
 
-  string fgname = XLAT(ginf[geometry].tiling_name);
-  if(qstring != "none") fgname += " " + XLAT(qstring);
-  if(variable) fgname = gp::operation_name() + " " + fgname;
-  
-  dialog::addTitle(XLAT("info about: %1", fgname), 0xFFFFFF, 150);
+  dialog::addTitle(XLAT("info about: %1", full_geometry_name()), 0xFFFFFF, 150);
   
   if(WDIM == 2 && !arb::in() && !kite::in()) dialog::addSelItem(XLAT("faces per vertex"), spf, 0);
   

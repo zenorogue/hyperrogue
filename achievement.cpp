@@ -834,6 +834,61 @@ EX void achievement_victory(bool hyper) {
 /** call the achievement callbacks */
 EX void achievement_pump();
 
+EX string get_rich_presence_text() {
+
+  #if CAP_DAILY
+  if(daily::on)
+    return "Strange Challenge #" + its(daily::daily_id) + ", score " + its(gold());
+  #endif
+  
+  if(tour::on)
+    return "Guided Tour";
+
+  string res;
+  if(geometry != gNormal || !BITRUNCATED) 
+    res = res + full_geometry_name() + " ";
+  
+  if(chaosmode) res += "chaos ";
+  if(shmup::on) res += "shmup ";
+  if(dual::state) res += "dual ";
+  if(randomPatternsMode) res += "random ";
+  if(inv::on) res += "OSM ";
+  if(multi::players > 1) res += "multi ";
+
+  if(cheater || among(cwt.at->land, laCanvas, laCA)) 
+    return res + "(?)";
+  
+  if(yendor::on) {
+    res += "Yendor Challenge: " + yendor::name(yendor::challenge);
+    if(items[itOrbYendor]) res += " (level " + its(items[itOrbYendor]) + ")";
+    return res;
+    }
+  
+  if(peace::on) return res + "peaceful";
+
+  if(tactic::on)
+    return res + "PTM: " + linf[specialland].name + " $" + its(gold());
+
+  if(princess::challenge) return res + "Princess Challenge";
+
+  if(racing::on) {
+    using namespace racing;
+    res = res + "racing in " + linf[specialland].name;
+    
+    for(int i=0; i<multi::players; i++) {
+      if(race_finish_tick[i]) 
+        res += racetimeformat(race_finish_tick[i] - race_start_tick);
+      }
+    
+    return res;
+    }
+  
+  res += linf[cwt.at->land].name;
+  res += ", " + its(gold()) + " $$$";
+  
+  return res;
+  }
+
 #ifndef HAVE_ACHIEVEMENTS
 void achievement_pump() {}
 #endif

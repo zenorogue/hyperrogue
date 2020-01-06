@@ -147,7 +147,6 @@ EX namespace yendor {
     return laNone;
     }
   
-  string name;
   eLand first, second, last;
 
   #if HDR
@@ -654,6 +653,27 @@ EX namespace yendor {
       return c - 'A' + 1 + 26;
     return 0;
     }
+  
+  EX string name(int i) {
+    yendorlevel& ylev(levels[i]);
+
+    string s = XLATT1(ylev.l);
+    if(!euclid) {  
+      if(ylev.flags & YF_CHAOS) { s = "Chaos mode"; }
+      if(ylev.flags & YF_NEAR_IVY) { s += "+"; s += XLATT1(laJungle); }
+      if(ylev.flags & YF_NEAR_FJORD) { s += "+"; s += XLATT1(laLivefjord); }
+      if(ylev.flags & YF_NEAR_TENT) { s += "+"; s += XLATT1(laRlyeh); }
+      if(ylev.flags & YF_NEAR_ELEM) { s += "+"; s += XLATT1(laElementalWall); }
+      if(ylev.flags & YF_NEAR_OVER) { s += "+"; s += XLATT1(laOvergrown); }
+      if(ylev.flags & YF_NEAR_RED) { s += "+"; s += XLATT1(laRedRock); }
+      if(ylev.flags & YF_START_AL) { s += "+"; s += XLATT1(laAlchemist); }
+      if(ylev.flags & YF_DEAD) { s += "+"; s += XLATT1(itGreenStone); }
+      if(ylev.flags & YF_RECALL) { s += "+"; s += XLATT1(itOrbRecall); }
+      }
+    
+    return s;
+    }
+
 
   EX void showMenu() {
     set_priority_board(LB_YENDOR_CHALLENGE);
@@ -663,24 +683,9 @@ EX namespace yendor {
 
     for(int i=1; i<YENDORLEVELS; i++) {
       string s;
-      yendorlevel& ylev(levels[i]);
       
       if(autocheat || levelUnlocked(i)) {
-      
-        s = XLATT1(ylev.l);
-        
-        if(!euclid) {  
-          if(ylev.flags & YF_CHAOS) { s = "Chaos mode"; }
-          if(ylev.flags & YF_NEAR_IVY) { s += "+"; s += XLATT1(laJungle); }
-          if(ylev.flags & YF_NEAR_FJORD) { s += "+"; s += XLATT1(laLivefjord); }
-          if(ylev.flags & YF_NEAR_TENT) { s += "+"; s += XLATT1(laRlyeh); }
-          if(ylev.flags & YF_NEAR_ELEM) { s += "+"; s += XLATT1(laElementalWall); }
-          if(ylev.flags & YF_NEAR_OVER) { s += "+"; s += XLATT1(laOvergrown); }
-          if(ylev.flags & YF_NEAR_RED) { s += "+"; s += XLATT1(laRedRock); }
-          if(ylev.flags & YF_START_AL) { s += "+"; s += XLATT1(laAlchemist); }
-          if(ylev.flags & YF_DEAD) { s += "+"; s += XLATT1(itGreenStone); }
-          if(ylev.flags & YF_RECALL) { s += "+"; s += XLATT1(itOrbRecall); }
-          }
+        s = name(i);
         }
 
       else {
