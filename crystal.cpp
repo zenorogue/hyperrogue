@@ -737,6 +737,10 @@ EX color_t colorize(cell *c, char whichCanvas) {
     co = told(reg3::decode_coord(c->master->fieldval)), dim = 4;
     for(int a=0; a<4; a++) if(co[a] > 4) co[a] -= 8;
     }
+  else if(geometry == gSeifertCover) {
+    int i = c->master->fieldval;
+    for(int a=0; a<3; a++) co[a] = i%5, i /= 5;
+    }
   #endif
   else if(euclid) {
     auto tab = euc::get_ispacemap()[c->master];
