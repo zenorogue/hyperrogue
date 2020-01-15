@@ -558,8 +558,8 @@ EX namespace sn {
     "float cy = iy*(1.-1./PRECY) + .5/PRECY;"
     "float cz = iz*(1.-1./PRECZ) + .5/PRECZ;"
 
-    "if(ix > .5 && iy > .6 && ix < iy + .05 && iz < .2 && iz < (iy - 0.5) * 0.6)"
-       "res = vec4(0.,0.,0.,1.); "
+    // "if(ix > .5 && iy > .6 && ix < iy + .05 && iz < .2 && iz < (iy - 0.5) * 0.6)"
+    "if(ix > .65 + iz * .25 && iy > .55) res = vec4(0.,0.,0.,1.); "
     
      "else "
   
