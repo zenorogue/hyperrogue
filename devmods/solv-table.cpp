@@ -2,10 +2,13 @@
 
 // Usage: 
 
-// [executable] -geo sol -write solv-geodesics.dat
-//              -geo 3:2 -write shyp-geodesics.dat
-//              -geo 3:1/2 -write ssol-geodesics.dat
+// [executable] -geo sol -build -write solv-geodesics.dat
+//              -geo 3:2 -build -write shyp-geodesics.dat
+//              -geo 3:1/2 -build -write ssol-geodesics.dat
 //              -exit
+
+// Loading generated tables and visualization: 
+// [executable] /hyper -fsol [filename] -geo sol -visualize filename-%03d.png
 
 // You can also do -geo [...] -build to build and test the table
 // without writing it.
@@ -48,6 +51,10 @@ ld solerror(hyperpoint ok, hyperpoint chk) {
   return hypot_d(3, zok - zchk);
   }
 
+int max_iter = 999999;
+
+hyperpoint fail(.1, .2, .3, .4);
+
 hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld minerr, bool debug = false) {
 
   transmatrix T = Id; T[0][1] = 8; T[2][2] = 5;
@@ -63,7 +70,12 @@ hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld min
   hyperpoint c[3];  
   for(int a=0; a<3; a++) c[a] = point3(a==0, a==1, a==2);
   
+  int iter = 0;
+  
   while(err > minerr) {
+
+    iter++; if(iter > max_iter) return fail;
+
     if(debug) println(hlog, "\n\nf(", at, "?) = ", ver, " (error ", err, ")");
     array<hyperpoint, 3> pnear;
     for(int a=0; a<3; a++) {
@@ -120,7 +132,7 @@ hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld min
             println(hlog, "cannot improve error ", err);
             exit(1);
           }
-        break;
+        return fail;
         }
       goto nextfix;
       }
@@ -216,6 +228,29 @@ ld ptd(ptlow p) {
 
 ptlow zflip(ptlow x) { return mlow(x[1], x[0], -x[2]); }
 
+void fix_boundaries(sn::tabled_inverses& tab, int last_x, int last_y, int last_z) {
+  int PRECX = tab.PRECX;
+  int PRECY = tab.PRECY;
+  int PRECZ = tab.PRECZ;
+  for(int x=0; x<last_x; x++)
+  for(int y=0; y<last_y; y++) {
+    for(int z=last_z; z<PRECZ; z++)
+      tab.get_int(x,y,z) = tab.get_int(x,y,z-1) * 2 - tab.get_int(x,y,z-2);
+    if(nih)
+      tab.get_int(x,y,0) = tab.get_int(x,y,1) * 2 - tab.get_int(x,y,2);
+    }
+  
+  for(int x=0; x<last_x; x++)
+  for(int y=last_y; y<PRECY; y++)
+  for(int z=0; z<PRECZ; z++)
+    tab.get_int(x,y,z) = tab.get_int(x,y-1,z) * 2 - tab.get_int(x,y-2,z);
+  
+  for(int x=last_x; x<PRECX; x++)
+  for(int y=0; y<PRECY; y++)
+  for(int z=0; z<PRECZ; z++)
+    tab.get_int(x,y,z) = tab.get_int(x-1,y,z) * 2 - tab.get_int(x-2,y,z);
+  }
+
 void build_sols(int PRECX, int PRECY, int PRECZ) {
   std::mutex file_mutex;
   ld max_err = 0;
@@ -246,7 +281,7 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
       vector<hyperpoint> solved_candidates;
       
       for(auto c: candidates)  {
-        auto solt = iterative_solve(v, c, prec, 1e-6);
+        auto solt = iterative_solve(v, c, prec, 1e-6, false);
         solved_candidates.push_back(solt);
         if(solerror(v, nisot::numerical_exp(solt, prec)) < 1e-9) break;
         }
@@ -257,7 +292,11 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
 
       auto xerr = solerror(v, nisot::numerical_exp(cand, prec));
       
-      if(xerr > 1e-3) {
+      if(cand == fail) {
+        println(hlog, format("[%2d %2d %2d] FAIL", iz, iy, ix));
+        }
+      
+      else if(xerr > 1e-3) {
         println(hlog, format("[%2d %2d %2d] ", iz, iy, ix));
         println(hlog, "f(?) = ", v);
         println(hlog, "f(", cand, ") = ", nisot::numerical_exp(cand, prec));
@@ -292,32 +331,256 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
         }
       if(it < last_x && it < last_y) solve_at(it, it);
       std::lock_guard<std::mutex> fm(file_mutex);
-      println(hlog, format("%2d: %2d", iz, it));
+      if(0) println(hlog, format("%2d: %2d", iz, it));
       }
     };
 
   parallelize(PRECZ, 0, PRECZ, act);
   
-  for(int x=0; x<last_x; x++)
-  for(int y=0; y<last_y; y++) {
-    for(int z=last_z; z<PRECZ; z++)
-      tab.get_int(x,y,z) = tab.get_int(x,y,z-1) * 2 - tab.get_int(x,y,z-2);
-    if(nih)
-      tab.get_int(x,y,0) = tab.get_int(x,y,1) * 2 - tab.get_int(x,y,2);
-    }
-  
-  for(int x=0; x<last_x; x++)
-  for(int y=last_y; y<PRECY; y++)
-  for(int z=0; z<PRECZ; z++)
-    tab.get_int(x,y,z) = tab.get_int(x,y-1,z) * 2 - tab.get_int(x,y-2,z);
-  
-  for(int x=last_x; x<PRECX; x++)
-  for(int y=0; y<PRECY; y++)
-  for(int z=0; z<PRECZ; z++)
-    tab.get_int(x,y,z) = tab.get_int(x-1,y,z) * 2 - tab.get_int(x-2,y,z);
+  fix_boundaries(tab, last_x, last_y, last_z);
   }
 
-int dimX, dimY, dimZ;
+std::mutex file_mutex_global;
+
+bool deb = false;
+
+hyperpoint find_optimal_geodesic(hyperpoint res) {
+  auto p0 = point3(0, 0, 0);
+  hyperpoint h = iterative_solve(res, p0, 100, 1e-9);
+  if(h == fail) return fail;
+  
+  ld d = hypot_d(3, h);
+  
+  auto solve = [&] (hyperpoint m, pair<hyperpoint, hyperpoint> last) {  
+    hyperpoint t = // inverse_exp(m, iTable, false);
+      iterative_solve(m, last.first, 100, 1e-9);
+    hyperpoint u = // inverse_exp(inverse(nisot::translate(m)) * res, iTable, false);
+      iterative_solve(inverse(nisot::translate(m)) * res, last.second, 100, 1e-6);
+    return make_pair(t, u);
+    };
+    
+  auto quality = [&] (pair<hyperpoint, hyperpoint> p) {
+    return hypot_d(3, p.first) + hypot_d(3, p.second);
+    };
+  
+  auto attempt = [&] (hyperpoint mid) {
+    auto p = solve(mid, {p0, p0});
+    ld qd = quality(p);
+    
+    if(true) {     
+      // println(hlog, "there is something better: ", qd, " vs ", d);
+      
+      bool found;
+      bool failed = false;
+      
+      auto tryit = [&] (hyperpoint h) {
+        auto p2 = solve(h, p);
+        auto qd2 = quality(p2);
+        if(p2.first == fail || p2.second == fail) failed = true;
+        else if(qd2 < qd) {          
+          qd = qd2, p = p2, mid = h;
+          found = true;
+          return true;
+          }
+        return false;
+        };
+      
+      ld delta = 1e-3;
+      
+      /*
+      auto q_x = quality(solve(mid + point3(delta, 0, 0), p)) - qd;
+      auto q_xx = quality(solve(mid + point3(delta+delta, 0, 0), p)) - qd - 2 * q_x;
+      auto q_y = quality(solve(mid + point3(0, delta, 0), p)) - qd;
+      auto q_yy = quality(solve(mid + point3(0, delta+delta, 0), p)) - qd - 2 * q_y;
+      auto q_z = quality(solve(mid + point3(0, 0, delta), p)) - qd;
+      auto q_zz = quality(solve(mid + point3(0, 0, delta+delta), p)) - qd - 2 * q_z;
+      auto q_xy = quality(solve(mid + point3(delta, delta, 0), p)) - qd - q_x - q_y;
+      auto q_xz = quality(solve(mid + point3(delta, 0, delta), p)) - qd - q_x - q_z;
+      auto q_yz = quality(solve(mid + point3(0, delta, delta), p)) - qd - q_y - q_z;
+      
+      transmatrix T = build_matrix(
+        hyperpoint(q_xx, q_xy, q_xz, 0),
+        hyperpoint(q_xy, q_yy, q_yz, 0),
+        hyperpoint(q_xz, q_yz, q_zz, 0),
+        hyperpoint(0, 0, 0, 1)
+        );
+      
+      hyperpoint q = hyperpoint(q_x, q_y, q_z, 0);
+      */
+
+      int itera = 0;
+      
+      while(true) {
+        itera++;
+        if(itera % 1000 == 0) { 
+          std::lock_guard<std::mutex> fm(file_mutex_global);
+          println(hlog, "itera = ", itera); 
+          if(itera >= 5000) return;
+          }
+        auto q_v = quality(solve(mid + point3(delta, -delta, 0), p)) - qd;
+        auto q_vv = quality(solve(mid + point3(delta+delta, -delta-delta, 0), p)) - qd - 2 * q_v;
+        auto q_z = quality(solve(mid + point3(0, 0, delta), p)) - qd;
+        auto q_zz = quality(solve(mid + point3(0, 0, delta+delta), p)) - qd - 2 * q_z;
+        auto q_vz = quality(solve(mid + point3(delta, -delta, delta), p)) - qd - q_v - q_z;
+        
+        ld d = q_vv * q_zz - q_vz * q_vz;
+        if(d == 0 || isnan(d) || isinf(d)) {
+          std::lock_guard<std::mutex> fm(file_mutex_global);
+          println(hlog, "bad matrix in iteration #", itera);
+          println(hlog, "p = ", p, " mid = ", mid);
+          println(hlog, solve(mid, p));
+          return;
+          }
+        
+        transmatrix T = build_matrix(
+          hyperpoint(q_vv, 0, q_vz, 0),
+          hyperpoint(0, 1, 0, 0),
+          hyperpoint(q_vz, 0, q_zz, 0),
+          hyperpoint(0, 0, 0, 1)
+          );
+  
+        hyperpoint q = hyperpoint(q_v, 0, q_z, 0);
+  
+        hyperpoint res = inverse(T) * -q;
+        
+        // println(hlog, "res = ", res);
+  
+        // println(hlog, "check = ", q + T * res);
+        
+        res[1] = -res[0];
+  
+        res = res * delta;
+        
+        res /= 10.;
+        
+        if(tryit(mid + res)) continue;
+        if(tryit(mid + res/2)) continue;
+        if(tryit(mid + res/4)) continue;
+
+        break;
+        }
+
+      // q_x + q_xx * x + q_xy * y + q_xz * z == 0
+      // q + Txyz == 0
+      
+      int it = 0;      
+      
+      ld qd0 = qd;
+      
+      if(false) while(delta > 1e-6) {
+        it++;
+        // if(it % 1000 == 0) println(hlog, "iterations ", it);
+        if(it > 1000) return;
+        if(failed) return;
+        found = false;
+        while(tryit(mid + point3(delta, -delta, 0)));
+        while(tryit(mid + point3(-delta, +delta, 0)));
+        while(tryit(mid + point3(0, 0, delta)));
+        while(tryit(mid + point3(0, 0, -delta)));
+        // while(tryit(mid + point3(delta, delta, 0)));
+        // while(tryit(mid + point3(-delta, -delta, 0)));
+        if(found) println(hlog, "improved further from ", qd0, " to ", qd);
+        if(!found) delta /= 2;
+        }
+      
+      max_iter = 1000;
+      auto h1 = iterative_solve(res, p.first * quality(p) / hypot_d(3, p.first), 100, 1e-6);
+
+      if(deb) println(hlog, "h1 returns ", h1, " of length ", hypot_d(3, h1), " and error ", hypot_d(3, numerical_exp(h1, 100) - res));
+
+      if(h1 == fail) return;
+      
+      auto d1 = hypot_d(3, h1);
+      if(d1 < d) h = h1, d = d1;
+      }
+    };
+
+  hyperpoint old = h;
+  attempt(point31(res[0], 0, res[2]/2));
+  attempt(point31(0, res[1], res[2]/2));
+
+  std::lock_guard<std::mutex> fm(file_mutex_global);
+  if(h != old && hypot_d(3, h) < hypot_d(3, old) - 1e-5)
+    println(hlog, "new = ", h, " vs old = ", old, " length ", hypot_d(3, h), " vs ", hypot_d(3, old));
+  else if(deb)
+    println(hlog, " not improved: ", old);
+  
+  return h;
+  }
+
+void fix_bugs(sn::tabled_inverses& tab) {
+  auto bug = can(fail);
+  for(int iz=0; iz<tab.PRECZ; iz++) 
+    for(int iy=0; iy<tab.PRECY; iy++)
+      for(int ix=0; ix<tab.PRECX; ix++)  {
+        if(tab.get_int(ix, iy, iz) == bug)
+          for(int a=0; a<3; a++)
+          tab.get_int(ix, iy, iz)[a] = (tab.get_int(ix-1, iy, iz)[a]*2 - tab.get_int(ix-2, iy, iz)[a]);
+        }
+  }
+
+void visualize_table(sn::tabled_inverses& tab, const string& s) {
+  renderbuffer rb(tab.PRECX, tab.PRECY, false);
+  rb.make_surface();
+  
+  for(int iz=0; iz<tab.PRECZ; iz++) {
+    println(hlog, "iz=", iz);
+    for(int iy=0; iy<tab.PRECY; iy++)
+      for(int ix=0; ix<tab.PRECX; ix++)  {
+        auto& p = qpixel(rb.srf, ix, iy);
+        if(ix == 52 && iy >= 30 && iy <= 40 && iz == 15)
+          println(hlog, "A ", tie(ix,iy,iz), " : ", tab.get_int(ix, iy, iz));
+        // println(hlog, ix, ", ", iy);
+        p = 0xFFFFFFFF;
+        for(int i=0; i<3; i++)
+          part(p, i) = 0x80 + 0x70 * tab.get_int(ix, iy, iz)[i];
+        }
+    SDL_SavePNG(rb.srf, format(s.c_str(), iz).c_str());
+    }
+  }
+
+void improve(sn::tabled_inverses& tab) {
+  int PRECX = tab.PRECX;
+  int PRECY = tab.PRECY;
+  int PRECZ = tab.PRECZ;
+  int last_x = PRECX-1, last_y = PRECY-1, last_z = PRECZ-1;
+
+  max_iter = 1000;
+  auto act = [&] (int tid, int iz) {
+    if((nih && iz == 0) || iz == PRECZ-1) return;
+    for(int iy=0; iy<last_y; iy++)
+    for(int ix=0; ix<last_x; ix++) {
+      if(ix < 32 || iy < 32) continue;
+      if(deb) { if(ix < 50 || ix > 54 || iy != 46 || iz != 6) continue; }
+      if(deb) println(hlog, tie(ix, iy, iz), ":");
+      ld x = ix_to_x(ix / (PRECX-1.));
+      ld y = ix_to_x(iy / (PRECY-1.));
+      ld z = iz_to_z(iz / (PRECZ-1.));
+      hyperpoint p = point31(x, y, z);
+      // hyperpoint h1 = inverse_exp(p, iTable, false);
+      hyperpoint h2 = find_optimal_geodesic(p);
+      
+      std::lock_guard<std::mutex> fm(file_mutex_global);
+      if(ix == last_x-1) println(hlog, "solved ", tie(ix, iy, iz));
+      
+      if(h2 != fail) {
+        auto& so = tab.get_int(ix, iy, iz);
+        so = can(h2);        
+        // println(hlog, "can: ", can(h2), " @ ", so[0]*so[0]+so[1]*so[1]+so[2]*so[2]);
+        // println(hlog, h2, " vs ", uncan(can(h2)));
+        }
+      }
+    };
+  max_iter = 1000000;
+  
+  parallelize(PRECZ, 0, PRECZ, act);
+  if(deb) exit(7);
+
+
+  fix_boundaries(tab, last_x, last_y, last_z);
+  }
+
+int dimX=64, dimY=64, dimZ=64;
 
 int readArgs() {
   using namespace arg;
@@ -333,11 +596,30 @@ int readArgs() {
     PHASEFROM(2); 
     build_sols(dimX, dimY, dimZ);
     }
+  else if(argis("-load-old")) {
+    sn::get_tabled().load();
+    }
+  else if(argis("-improve")) {
+    sn::get_tabled().load();
+    improve(sn::get_tabled());
+    }
   else if(argis("-write")) {
-    PHASEFROM(2); 
     shift();
-    build_sols(dimX, dimY, dimZ);
-    write_table(solnihv::get_tabled(), argcs());
+    write_table(sn::get_tabled(), argcs());
+    }
+  else if(argis("-fix-bugs")) {
+    sn::get_tabled().load();
+    fix_bugs(sn::get_tabled());
+    }
+  else if(argis("-iz-list")) {
+    sn::get_tabled().load();    
+    for(int iz=0; iz<63; iz++)
+      println(hlog, "iz=", iz, " z=", iz_to_z(iz / (sn::get_tabled().PRECZ-1.)));
+    }
+  else if(argis("-visualize")) {
+    shift();
+    sn::get_tabled().load();
+    visualize_table(sn::get_tabled(), argcs());
     }
 
   else return 1;
