@@ -787,6 +787,8 @@ static const flagtype qHUGE_BOUNDED    = 262144;
 static const flagtype qOPTQ            = Flag(19);
 static const flagtype qSINGLE          = Flag(20);
 
+static const flagtype qDEPRECATED      = Flag(21);
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 static const int OINF = 100;
@@ -832,7 +834,7 @@ EX vector<geometryinfo> ginf = {
   {"{5,3}", "elliptic", "elliptic geometry in {5,3}",                 "elliptic", 5, 3, qsNONORE,  giSphere2,       0, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   {"{7,3}", "Zebra",    "Zebra quotient",                             "Zebra",    7, 3, qsZEBRA,   giHyperb2, 0x00400, {{7, 5}}, eVariation::bitruncated},
   {"{7,3}", "field",    "field quotient",                             "field",    7, 3, qsFIELD,   giHyperb2, 0x00200, {{7, 5}}, eVariation::bitruncated},
-  {"{6,3}", "torus",    "torus/Klein bottle/...",                     "torus",    6, 3, qsBQ,      giEuclid2, 0x00600, {{7, 7}}, eVariation::bitruncated},
+  {"{6,3}", "torus",    "torus/Klein bottle/...",                     "torus",    6, 3, qsBQ|qDEPRECATED,      giEuclid2, 0x00600, {{7, 7}}, eVariation::bitruncated},
   {"{8,3}", "none",     "{8,3} (like standard but with octagons)",    "oct",      8, 3, 0,         giHyperb2, 0x08000, {{6, 4}}, eVariation::bitruncated},
   {"{5,4}", "none",     "{5,4} (four pentagons)",                     "4x5",      5, 4, 0,         giHyperb2, 0x08200, {{6, 4}}, eVariation::bitruncated},
   {"{6,4}", "none",     "{6,4} (four hexagons)",                      "4x6",      6, 4, 0,         giHyperb2, 0x08400, {{5, 3}}, eVariation::bitruncated},
@@ -873,8 +875,8 @@ EX vector<geometryinfo> ginf = {
   {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, qBINARY,   giHyperb3, 0x40000, {{7, 3}}, eVariation::pure},
   {"bin-rect", "none",  "rectangles on horospheres",                  "bin44/2",  7, 3, qBINARY,   giHyperb3, 0x40200, {{7, 3}}, eVariation::pure},
   {"bin{6,3}", "none",  "{6,3} on horospheres",                       "bin63",   14, 3, qBINARY,   giHyperb3, 0x40400, {{7, 3}}, eVariation::pure},
-  {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF, giHyperb3, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF, giHyperb3, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{4,3,5}","field",   "{4,3,5} field quotient space",               "f435",     6, 5, qsSMALLBF | qDEPRECATED, giHyperb3, 0x40600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF | qDEPRECATED, giHyperb3, 0x40800, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"binary4","none",    "standard binary tiling",                     "binary4",  5, 3, qBINARY,   giHyperb2, 0x41400, {{7, 5}}, eVariation::pure},
   {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY|qSOL,   giSolNIH,  0x41600, {{7, 5}}, eVariation::pure},
   {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qKITE,     giEuclid2, 0x48000, {{7, 7}}, eVariation::pure},
