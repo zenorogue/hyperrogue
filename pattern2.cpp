@@ -1519,6 +1519,46 @@ EX namespace patterns {
 
   EX string color_formula = "to01(rgb(x,y,z))";
   
+  map<cell*, color_t> computed_nearer_map;
+  
+  color_t nearer_map(cell *c) {
+    if(computed_nearer_map.count(c)) return computed_nearer_map[c];
+    if(!bounded) return 0;
+
+    cell *sc = currentmap->gamestart();
+    auto ac = currentmap->allcells();
+    vector<int> bydist(20, 0);
+    vector<int> bynei(S7+1, 0);
+    int maxd = 0;
+    for(cell *d: ac) {
+      int di = celldistance(sc, d);
+      bydist[di]++;
+      maxd = max(maxd, di);
+      }
+    
+    auto& cnm = computed_nearer_map;
+
+    for(cell *d: ac) cnm[d] = 0x101010;
+
+    for(cell *d: ac) if(celldistance(sc, d) == maxd) {
+      for(cell *e: ac) if(celldistance(sc, e) > celldistance(d, e)) {
+        cnm[e] = 0x1FF4040;
+        int nei = 0;
+        forCellEx(f, e) if(celldistance(sc, f) > celldistance(d, f)) nei++;
+        bynei[nei]++;
+        if(nei == 6) cnm[e] = 0x1FFFF80;
+        if(nei == S7) cnm[e] = 0x404040;
+        }
+      if(0) for(cell *e: ac) if(celldistance(sc, e) == celldistance(d, e)) 
+        cnm[e] = 0x140FF40;
+      break;
+      }
+
+    println(hlog, "bydist = ", bydist, " bynei = ", bynei);
+
+    return cnm[c];
+    }
+  
   cld compute_map_function(cell *c, int p, const string& formula) {
     exp_parser ep;
     ep.extra_params["p"] = p;
@@ -1749,6 +1789,9 @@ EX namespace patterns {
         /* just keep the old color */
         return c->landparam;
         }
+      case 'Z': {
+        return nearer_map(c);
+        }
       }
     return canvasback;
     }
@@ -1816,6 +1859,9 @@ EX namespace patterns {
     if(nil) {
       dialog::addSelItem(XLAT("Penrose staircase"), "Nil", '/');
       }
+    
+    if(bounded)
+      dialog::addSelItem(XLAT("nearer end"), "bounded", 'Z');
 
     if(arb::in() || arcm::in())
       dialog::addSelItem(XLAT("types"), "types", 'A');
