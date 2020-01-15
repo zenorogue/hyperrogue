@@ -1559,7 +1559,36 @@ EX namespace patterns {
 
     return cnm[c];
     }
+
+  map<cell*, color_t> computed_furthest_map;
+
+  color_t furthest_map(cell *c) {
+    auto& cfm = computed_furthest_map;
+    if(cfm.count(c)) return cfm[c];
+    if(!bounded) return 0;
+
+    cell *sc = currentmap->gamestart();
+    auto ac = currentmap->allcells();
+    vector<int> bydist(20, 0);
+    vector<int> bynei(S7+1, 0);
+    int maxd = 0;
+    for(cell *d: ac) {
+      int di = celldistance(sc, d);
+      bydist[di]++;
+      maxd = max(maxd, di);
+      }
+    
+    for(cell *d: ac) cfm[d] = 0x101010;
+
+    for(cell *d: ac) if(celldistance(sc, d) == maxd) 
+      cfm[d] = 0x1FFFF80;
+
+    println(hlog, "bydist = ", bydist);
+
+    return cfm[c];
+    }
   
+
   cld compute_map_function(cell *c, int p, const string& formula) {
     exp_parser ep;
     ep.extra_params["p"] = p;
@@ -1793,6 +1822,9 @@ EX namespace patterns {
       case 'Z': {
         return nearer_map(c);
         }
+      case 'Y': {
+        return furthest_map(c);
+        }
       }
     return canvasback;
     }
@@ -1861,8 +1893,10 @@ EX namespace patterns {
       dialog::addSelItem(XLAT("Penrose staircase"), "Nil", '/');
       }
     
-    if(bounded)
+    if(bounded) {
       dialog::addSelItem(XLAT("nearer end"), "bounded", 'Z');
+      dialog::addSelItem(XLAT("furthest from start"), "bounded", 'Y');
+      }
 
     if(arb::in() || arcm::in())
       dialog::addSelItem(XLAT("types"), "types", 'A');
