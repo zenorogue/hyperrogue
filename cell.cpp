@@ -983,7 +983,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(hybri) return hybrid::celldistance(c1, c2);
   
   #if CAP_FIELD
-  if(geometry == gFieldQuotient && !GOLDBERG && WDIM == 2)
+  if(geometry == gFieldQuotient && !GOLDBERG)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
   #endif
   

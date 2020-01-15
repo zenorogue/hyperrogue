@@ -59,8 +59,12 @@ struct matrix : array<array<int, MAXMDIM>, MAXMDIM> {
   };
 #endif
 
+EX int groupspin(int id, int d, int group) {
+  return group*(id/group) + (id + d) % group;
+  }
+
 EX int btspin(int id, int d) {
-  return S7*(id/S7) + (id + d) % S7;
+  return groupspin(id, d, S7);
   }
 
 #if HDR
@@ -688,7 +692,7 @@ int fpattern::getdist(pair<int,bool> a, pair<int,bool> b) {
   }
  
 int fpattern::dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
-  int N = connections.size();
+  int N = isize(matrices);
   dists.resize(N);
   for(int i=0; i<N; i++) dists[i] = MAXDIST-1;
   int maxd = 0;
@@ -698,15 +702,18 @@ int fpattern::dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
     if(dists[at] <= i) continue;
     maxd = i;
     dists[at] = i;
-    for(int q=0; q<S7; q++) {
+    int lg = MWDIM == 4 ? local_group : S7;
+    for(int q=0; q<lg; q++) {
       dists[at] = i;
-      if(PURE) // todo-variation: PURE here?
+      if(WDIM == 3)
+        indist[i+1].push_back(gmul(at, local_group));
+      else if(PURE) // todo-variation: PURE here?
         indist[i+1].push_back(connections[at]);
       else {
         indist[i+2].push_back(connections[at]);
         indist[i+3].push_back(connections[btspin(connections[at], 2)]);
         }
-      at = btspin(at, 1);
+      at = groupspin(at, 1, lg);
       }
     }
   return maxd;
@@ -714,8 +721,18 @@ int fpattern::dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
 
 void fpattern::analyze() {
 
-  if(WDIM == 3) return;
-
+  if(MWDIM == 4) {
+    /* we need to compute inverses */
+    int N = isize(matrices);
+    inverses.resize(N);
+    for(int i=0; i<N; i++) {
+      matrix M = matrices[i];
+      matrix M2 = mpow(M, N-1);
+      inverses[i] = matcode[M2];
+      println(hlog, mmul(M, M2));
+      }
+    }
+    
   DEBB(DF_FIELD, ("variation = %d\n", int(variation)));
   int N = connections.size();
   
@@ -725,6 +742,8 @@ void fpattern::analyze() {
 
   indist[0].push_back(0);
   int md0 = dijkstra(disthep, indist);
+  
+  if(MWDIM == 4) return;
 
   indist[1].push_back(0);
   indist[1].push_back(connections[3]);
