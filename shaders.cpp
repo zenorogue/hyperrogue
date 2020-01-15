@@ -84,7 +84,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }
   
   if(shader_flags & GF_LIGHTFOG) {
-    vmain += "float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0); vColor = vColor * fogx + uFogColor * (1.0-fogx);\n";      
+    vmain += "mediump float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0); vColor = vColor * fogx + uFogColor * (1.0-fogx);\n";      
     vsh += "uniform mediump float uFog;\n";
     vsh += "uniform mediump vec4 uFogColor;\n";
     }
@@ -99,7 +99,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   bool skip_t = false;
   
   if(pmodel == mdPixel) {
-    vmain += "vec4 pos = aPosition; pos[3] = 1.0;\n";
+    vmain += "mediump vec4 pos = aPosition; pos[3] = 1.0;\n";
     vmain += "pos = uMV * pos;\n";
     if(shader_flags & GF_LEVELS) vmain += "vPos = pos;\n";  
     vmain += "gl_Position = uP * pos;\n";
@@ -107,7 +107,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     shader_flags |= SF_PIXELS | SF_DIRECT;
     }
   else if(pmodel == mdManual) {
-    vmain += "vec4 pos = uMV * aPosition;\n";
+    vmain += "mediump vec4 pos = uMV * aPosition;\n";
     if(shader_flags & GF_LEVELS)
       vmain += "vPos = pos;\n";
     vmain += "gl_Position = uP * pos;\n";
@@ -132,10 +132,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(pmodel == mdBand && hyperbolic) {
     shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
-    if(dim2) coordinator += "float zlev = zlevel(t); t /= zlev;\n";
-    if(dim3) coordinator += "float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);\n";
-    if(dim2) coordinator += "float ty = asinh(t.y);\n";
-    coordinator += "float tx = asinh(t.x / cosh(ty)); ty = 2.0 * atan(tanh(ty/2.0));\n";
+    if(dim2) coordinator += "mediump float zlev = zlevel(t); t /= zlev;\n";
+    if(dim3) coordinator += "mediump float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);\n";
+    if(dim2) coordinator += "mediump float ty = asinh(t.y);\n";
+    coordinator += "mediump float tx = asinh(t.x / cosh(ty)); ty = 2.0 * atan(tanh(ty/2.0));\n";
     if(dim2) coordinator += "t[0] = tx; t[1] = ty; t[2] = 1.0; t[3] = 1.0;\n";
     if(dim3) coordinator += "t[0] = tx; t[1] = ty*t.y/r; t[2] = ty*t.z/r; t[3] = 1.0;\n";
     if(dim3) shader_flags |= SF_ZFOG;
@@ -145,13 +145,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim2) shader_flags |= SF_USE_ALPHA;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim2) coordinator += 
-      "float zlev = zlevel(t); t /= zlev;\n"
+      "mediump float zlev = zlevel(t); t /= zlev;\n"
       "t.xy /= t.z; t.y += 1.0;\n"
-      "float rads = dot(t.xy, t.xy);\n"
+      "mediump float rads = dot(t.xy, t.xy);\n"
       "t.xy /= -rads; t.z = 1.0; t[3] = 1.0;\n";
     if(dim3) coordinator += 
       "t.xyz /= (t.w + 1.0); t.y += 1.0;\n"
-      "float rads = dot(t.xyz, t.xyz);\n"
+      "mediump float rads = dot(t.xyz, t.xyz);\n"
       "t.xyz /= -rads; t[3] = 1.0;\n";        
     if(dim3) shader_flags |= SF_ZFOG;
     }
@@ -160,9 +160,11 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     coordinator += "t = inverse_exp(t);\n";
     if(sn::in()) {
       coordinator +=
-        "float d = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);\n"
-        "float ad = (d == 0.) ? 0. : (d < 1.) ? min(atanh(d), 10.) : 10.;\n"
-        "float m = ad / d; t[0] *= m; t[1] *= m; t[2] *= m;\n";
+        "mediump float d = dot(t.xyz, t.xyz);\n"
+        "mediump float hz = (1.+d) / (1.-d);\n"
+        "mediump float ad = acosh(hz);\n"
+        "mediump float m = d == 0. ? 0. : d >= 1. ? 1.e4 : (hz+1.) * ad / sinh(ad);\n"
+        "t.xyz *= m;\n";
       distfun = "ad";
       }
     else
@@ -200,10 +202,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(in_h2xe() && pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     coordinator +=      
-      "float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;\n"
-      "float r = length(t.xy);\n"
-      "float t2 = t[2] / exp(z);\n"
-      "float d = t2 >= 1. ? acosh(t2) : 0.;\n"
+      "mediump float z = log(t[2] * t[2] - t[0] * t[0] - t[1] * t[1]) / 2.;\n"
+      "mediump float r = length(t.xy);\n"
+      "mediump float t2 = t[2] / exp(z);\n"
+      "mediump float d = t2 >= 1. ? acosh(t2) : 0.;\n"
       "if(r != 0.) r = d / r;\n"
       "t.xy *= r; t.z = z;\n";
     distfun = "sqrt(z*z+d*d)";
@@ -243,10 +245,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }
 
   if(!skip_t) {
-    vmain += "vec4 t = uMV * aPosition;\n";
+    vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
     if(distfun != "") {
-      vmain += "float fogs = (uFogBase - " + distfun + " / uFog);\n";
+      vmain += "mediump float fogs = (uFogBase - " + distfun + " / uFog);\n";
       vmain += "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);\n";
       vsh += 
         "uniform mediump float uFog;\n"
@@ -264,7 +266,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
 
   if(shader_flags & SF_ZFOG) {
     vmain += 
-      "float pz = 0.5 + gl_Position.z / 2.0;\n"
+      "mediump float pz = 0.5 + gl_Position.z / 2.0;\n"
       "vColor.xyz = vColor.xyz * (1.-pz) + uFogColor.xyz * pz;\n";
     vsh += 
         "uniform mediump vec4 uFogColor;\n";
@@ -474,14 +476,14 @@ EX void add_if(string& shader, const string& seek, const string& function) {
 EX void add_fixed_functions(string& shader) {
   /* from the most complex to the simplest */
 
-  add_if(shader, "tanh", "float tanh(float x) { return sinh(x) / cosh(x); }\n");
-  add_if(shader, "sinh", "float sinh(float x) { return (exp(x) - exp(-x)) / 2.0; }\n");
-  add_if(shader, "cosh", "float cosh(float x) { return (exp(x) + exp(-x)) / 2.0; }\n");
-  add_if(shader, "asinh", "float asinh(float x) { return log(sqrt(x*x + 1.0) + x); }\n");
-  add_if(shader, "acosh", "float acosh(float x) { return log(sqrt(x*x - 1.0) + x); }\n");
-  add_if(shader, "atanh", "float atanh(float x) { return (log(1.+x)-log(1.-x))/2.; }\n");
-  add_if(shader, "zlevel", "float zlevel(vec4 h) { return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]); }\n");  
-  add_if(shader, "atan2", "float atan2(float y, float x) {\n"
+  add_if(shader, "tanh", "mediump float tanh(mediump float x) { return sinh(x) / cosh(x); }\n");
+  add_if(shader, "sinh", "mediump float sinh(mediump float x) { return (exp(x) - exp(-x)) / 2.0; }\n");
+  add_if(shader, "cosh", "mediump float cosh(mediump float x) { return (exp(x) + exp(-x)) / 2.0; }\n");
+  add_if(shader, "asinh", "mediump float asinh(mediump float x) { return log(sqrt(x*x + 1.0) + x); }\n");
+  add_if(shader, "acosh", "mediump float acosh(mediump float x) { return log(sqrt(x*x - 1.0) + x); }\n");
+  add_if(shader, "atanh", "mediump float atanh(mediump float x) { return (log(1.+x)-log(1.-x))/2.; }\n");
+  add_if(shader, "zlevel", "mediump float zlevel(mediump vec4 h) { return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]); }\n");  
+  add_if(shader, "atan2", "mediump float atan2(mediump float y, mediump float x) {\n"
     "if(x == 0.) return y > 0. ? PI/2. : -PI/2.;\n"
     "if(x > 0.) return atan(y / x);\n"
     "if(y >= 0.) return atan(y / x) + PI;\n" 
