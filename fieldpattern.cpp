@@ -37,11 +37,7 @@ EX bool isprime(int n) {
 #if HDR
 #define MWDIM (prod ? 3 : WDIM+1)
 
-struct matrix {
-  int a[MAXMDIM][MAXMDIM];
-  int* operator [] (int k) { return a[k]; }
-  const int* operator [] (int k) const { return a[k]; }
-
+struct matrix : array<array<int, MAXMDIM>, MAXMDIM> {
   bool operator == (const matrix& B) const {
     for(int i=0; i<MWDIM; i++) for(int j=0; j<MWDIM; j++)
       if(self[i][j] != B[i][j]) return false;
