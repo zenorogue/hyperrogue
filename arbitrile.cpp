@@ -385,6 +385,7 @@ struct hrmap_arbi : hrmap {
       current_altmap->virtualRebase(alt, T);
       // U = U * inverse(T);
       }
+    fixmatrix(T);
     
     if(euclid) {
       /* hash the rough coordinates as heptagon* alt */
