@@ -136,6 +136,31 @@ EX void reset_raycaster() { our_raycaster = nullptr; };
 
 int deg;
 
+#ifdef GLES_ONLY
+void add(string& tgt, string type, string name, int min_index, int max_index) {
+  if(min_index + 1 == max_index)
+    tgt += "{ return " + name + "[" + its(min_index) + "]; }";
+  else {
+    int mid = (min_index + max_index) / 2;
+    tgt += "{ if(i<" + its(mid) + ") "; 
+    add(tgt, type, name, min_index, mid); 
+    tgt += " else ";
+    add(tgt, type, name, mid, max_index); 
+    tgt += " }";
+    }
+  }
+
+string build_getter(string type, string name, int index) {
+  string s = type + " get_" + name + "(int i) \n";
+  add(s, type, name, 0, index);
+  return s + "\n";
+  }
+
+#define GET(array, index) "get_" array "(" index ")"
+#else
+#define GET(array, index) array "[" index "]"
+#endif
+
 void enable_raycaster() {
   if(geometry != last_geometry) reset_raycaster();
   last_geometry = geometry;
@@ -157,7 +182,8 @@ void enable_raycaster() {
   #endif
       "  }\n";
   
-    string rays = its(isize(cgi.raywall));
+    int irays = isize(cgi.raywall);
+    string rays = its(irays);
   
     string fsh = 
     "varying mediump vec4 at;\n"
@@ -177,6 +203,13 @@ void enable_raycaster() {
     "uniform mediump int uWallstart["+its(deg+1)+"];\n"
     "uniform mediump float uLinearSightRange, uExpStart, uExpDecay;\n";
     
+    #ifdef GLES_ONLY
+    fsh += build_getter("mediump vec4", "uWallX", irays);
+    fsh += build_getter("mediump vec4", "uWallY", irays);
+    fsh += build_getter("mediump int", "uWallstart", deg+1);
+    fsh += build_getter("mediump mat4", "uM", 84);
+    #endif
+    
     if(prod) fsh += 
       "uniform mediump float uPLevel;\n"
       "uniform mediump mat4 uLP;\n";
@@ -191,7 +224,7 @@ void enable_raycaster() {
 
     if(IN_ODS || hyperbolic) fsh += 
 
-    "mat4 xpush(float x) { return mat4("
+    "mediump mat4 xpush(float x) { return mat4("
          "cosh(x), 0., 0., sinh(x),\n"
          "0., 1., 0., 0.,\n"
          "0., 0., 1., 0.,\n"
@@ -200,14 +233,14 @@ void enable_raycaster() {
     
     if(IN_ODS) fsh += 
 
-    "mat4 xzspin(float x) { return mat4("
+    "mediump mat4 xzspin(float x) { return mat4("
          "cos(x), 0., sin(x), 0.,\n"
          "0., 1., 0., 0.,\n"
          "-sin(x), 0., cos(x), 0.,\n"
          "0., 0., 0., 1."
          ");}\n"
       
-    "mat4 yzspin(float x) { return mat4("
+    "mediump mat4 yzspin(float x) { return mat4("
          "1., 0., 0., 0.,\n"
          "0., cos(x), sin(x), 0.,\n"
          "0., -sin(x), cos(x), 0.,\n"
@@ -215,7 +248,7 @@ void enable_raycaster() {
          ");}\n";    
     
    fsh += 
-     "vec2 map_texture(vec4 pos, int which) {\n";
+     "mediump vec2 map_texture(mediump vec4 pos, int which) {\n";
    if(nil) fsh += "if(which == 2 || which == 5) pos.z = 0.;\n";
    else if(hyperbolic && bt::in()) fsh += 
        "pos = vec4(-log(pos.w-pos.x), pos.y, pos.z, 1);\n"
@@ -226,11 +259,11 @@ void enable_raycaster() {
      "pos = vec4(pos.x/pos.z, pos.y/pos.z, pos.w, 0);\n";
    
    fsh += 
-       "int s = uWallstart[which];\n"
-       "int e = uWallstart[which+1];\n"
+       "int s = " GET("uWallstart", "which") ";\n"
+       "int e = " GET("uWallstart", "which+1") ";\n"
        "for(int ix=0; ix<16; ix++) {\n"
          "int i = s+ix; if(i >= e) break;\n"
-         "vec2 v = vec2(dot(uWallX[i], pos), dot(uWallY[i], pos));\n"
+         "mediump vec2 v = vec2(dot(" GET("uWallX", "i") ", pos), dot(" GET("uWallY", "i") ", pos));\n"
          "if(v.x >= 0. && v.y >= 0. && v.x + v.y <= 1.) return vec2(v.x+v.y, v.x-v.y);\n"
          "}\n"
        "return vec2(1, 1);\n"
@@ -241,57 +274,57 @@ void enable_raycaster() {
    if(use_reflect) fmain += "  bool depthtoset = true;\n";
     
     if(IN_ODS) fmain +=
-    "  float lambda = at[0];\n" // -PI to PI
-    "  float phi;\n"
-    "  float eye;\n"
+    "  mediump float lambda = at[0];\n" // -PI to PI
+    "  mediump float phi;\n"
+    "  mediump float eye;\n"
     "  if(at.y < 0.) { phi = at.y + PI/2.; eye = uIPD / 2.; }\n" // right
     "  else { phi = at.y - PI/2.; eye = -uIPD / 2.; }\n"
-    "  mat4 vw = uStart * xzspin(-lambda) * xpush(eye) * yzspin(phi);\n"
-    "  vec4 at0 = vec4(0., 0., 1., 0.);\n";
+    "  mediump mat4 vw = uStart * xzspin(-lambda) * xpush(eye) * yzspin(phi);\n"
+    "  mediump vec4 at0 = vec4(0., 0., 1., 0.);\n";
     
     else fmain += 
-    "  mat4 vw = uStart;\n"
-    "  vec4 at0 = at;\n"
+    "  mediump mat4 vw = uStart;\n"
+    "  mediump vec4 at0 = at;\n"
     "  gl_FragColor = vec4(0,0,0,1);\n"
-    "  float left = 1.;\n"
+    "  mediump float left = 1.;\n"
     "  at0.y = -at.y;\n"
     "  at0.w = 0.;\n"
     "  at0.xyz = at0.xyz / length(at0.xyz);\n";
       
-    if(hyperbolic) fsh += "  float len(vec4 x) { return x[3]; }\n";
-    else fsh += "  float len(vec4 x) { return length(x.xyz); }\n";
+    if(hyperbolic) fsh += "  mediump float len(mediump vec4 x) { return x[3]; }\n";
+    else fsh += "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n";
     
     if(nonisotropic) fmain += 
-      "  const float maxstep = " + fts(maxstep_current()) + ";\n"
-      "  const float minstep = " + fts(minstep) + ";\n"
-      "  float next = maxstep;\n";
+      "  const mediump float maxstep = " + fts(maxstep_current()) + ";\n"
+      "  const mediump float minstep = " + fts(minstep) + ";\n"
+      "  mediump float next = maxstep;\n";
     
     if(prod) {
       string sgn=in_h2xe() ? "-" : "+";
       fmain +=     
-      "  vec4 position = vw * vec4(0., 0., 1., 0.);\n"
-      "  vec4 at1 = uLP * at0;\n";
+      "  mediump vec4 position = vw * vec4(0., 0., 1., 0.);\n"
+      "  mediump vec4 at1 = uLP * at0;\n";
       if(in_e2xe()) fmain +=
-      "  float zpos = log(position.z);\n";
+      "  mediump float zpos = log(position.z);\n";
       else fmain +=
-      "  float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n";
+      "  mediump float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n";
       fmain +=
       "  position *= exp(-zpos);\n"
-      "  float zspeed = at1.z;\n"
-      "  float xspeed = length(at1.xy);\n"
-      "  vec4 tangent = vw * exp(-zpos) * vec4(at1.xy, 0, 0) / xspeed;\n";
+      "  mediump float zspeed = at1.z;\n"
+      "  mediump float xspeed = length(at1.xy);\n"
+      "  mediump vec4 tangent = vw * exp(-zpos) * vec4(at1.xy, 0, 0) / xspeed;\n";
       }
     else fmain +=
-      "  vec4 position = vw * vec4(0., 0., 0., 1.);\n"
-      "  vec4 tangent = vw * at0;\n";
+      "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
+      "  mediump vec4 tangent = vw * at0;\n";
     
     fmain +=     
-      "  float go = 0.;\n"
-      "  vec2 cid = uStartid;\n"
+      "  mediump float go = 0.;\n"
+      "  mediump vec2 cid = uStartid;\n"
       "  for(int iter=0; iter<" + its(max_iter_current()) + "; iter++) {\n";
     
     fmain +=
-      "  float dist = 100.;\n";
+      "  mediump float dist = 100.;\n";
     
     fmain +=
       "  int which = -1;\n";
@@ -300,9 +333,9 @@ void enable_raycaster() {
       
     if(IN_ODS) fmain += 
       "  if(go == 0.) {\n"
-      "    float best = len(position);\n"
+      "    mediump float best = len(position);\n"
       "    for(int i=0; i<"+its(S7)+"; i++) {\n"
-      "      float cand = len(uM[i] * position);\n"
+      "      mediump float cand = len(uM[i] * position);\n"
       "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
       "      }\n"
       "    }\n";
@@ -315,38 +348,38 @@ void enable_raycaster() {
       fmain += "for(int i="+its(flat1)+"; i<"+its(flat2)+"; i++) {\n";
       
       if(in_h2xe()) fmain +=
-          "    float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
-          "    float d = atanh(v);\n"
-          "    vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
+          "    mediump float d = atanh(v);\n"
+          "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
           "    if(next_tangent[2] < (uM[i] * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_s2xe()) fmain +=
-          "    float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
-          "    float d = atan(v);\n"
-          "    vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
+          "    mediump float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
+          "    mediump float d = atan(v);\n"
+          "    mediump vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
           "    if(next_tangent[2] > (uM[i] * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_e2xe()) fmain +=
-          "    float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
-          "    vec4 next_position = position + d * tangent;\n"
+          "    mediump vec4 next_position = position + d * tangent;\n"
           "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n"
           "    d /= xspeed;\n";
       else if(hyperbolic) fmain +=
-          "    float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
-          "    float d = atanh(v);\n"
-          "    vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
+          "    mediump float d = atanh(v);\n"
+          "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
           "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n";
       else fmain += 
-          "    float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
-          "    vec4 next_position = position + d * tangent;\n"
+          "    mediump vec4 next_position = position + d * tangent;\n"
           "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n";
   
       fmain += 
@@ -359,28 +392,28 @@ void enable_raycaster() {
       if(hyperbolic && bt::in()) {
         fmain += 
           "for(int i=20; i<22; i++) {\n"
-            "float sgn = i == 20 ? -1. : 1.;\n"
-            "vec4 zpos = xpush(uBLevel*sgn) * position;\n"
-            "vec4 ztan = xpush(uBLevel*sgn) * tangent;\n"
-            "float Mp = zpos.w - zpos.x;\n"
-            "float Mt = ztan.w - ztan.x;\n"
-            "float a = (Mp*Mp-Mt*Mt);\n"
-            "float b = Mp/a;\n"
-            "float c = (1.+Mt*Mt) / a;\n"
+            "mediump float sgn = i == 20 ? -1. : 1.;\n"
+            "mediump vec4 zpos = xpush(uBLevel*sgn) * position;\n"
+            "mediump vec4 ztan = xpush(uBLevel*sgn) * tangent;\n"
+            "mediump float Mp = zpos.w - zpos.x;\n"
+            "mediump float Mt = ztan.w - ztan.x;\n"
+            "mediump float a = (Mp*Mp-Mt*Mt);\n"
+            "mediump float b = Mp/a;\n"
+            "mediump float c = (1.+Mt*Mt) / a;\n"
             "if(b*b < c) continue;\n"
             "if(sgn < 0. && Mt > 0.) continue;\n"
-            "float zsgn = (Mt > 0. ? -sgn : sgn);\n"
-            "float u = sqrt(b*b-c)*zsgn + b;\n"
-            "float v = -(Mp*u-1.) / Mt;\n"
-            "float d = asinh(v);\n"
+            "mediump float zsgn = (Mt > 0. ? -sgn : sgn);\n"
+            "mediump float u = sqrt(b*b-c)*zsgn + b;\n"
+            "mediump float v = -(Mp*u-1.) / Mt;\n"
+            "mediump float d = asinh(v);\n"
             "if(d < 0. && abs(log(position.w*position.w-position.x*position.x)) < uBLevel) continue;\n"
             "if(d < dist) { dist = d; which = i; }\n"
             "}\n";
         }
           
       if(prod) fmain += 
-        "if(zspeed > 0.) { float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"+1; }}\n"
-        "if(zspeed < 0.) { float d = (-uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"; }}\n";
+        "if(zspeed > 0.) { mediump float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"+1; }}\n"
+        "if(zspeed < 0.) { mediump float d = (-uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"; }}\n";
       
       fmain += "}\n";
 
@@ -396,14 +429,14 @@ void enable_raycaster() {
       "bool reflect = false;\n";
       
     if(in_h2xe()) fmain +=
-      "  float ch = cosh(dist*xspeed); float sh = sinh(dist*xspeed);\n"
-      "  vec4 v = position * ch + tangent * sh;\n"
+      "  mediump float ch = cosh(dist*xspeed); mediump float sh = sinh(dist*xspeed);\n"
+      "  mediump vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
       "  position = v;\n"
       "  zpos += dist * zspeed;\n";
     else if(in_s2xe()) fmain +=
-      "  float ch = cos(dist*xspeed); float sh = sin(dist*xspeed);\n"
-      "  vec4 v = position * ch + tangent * sh;\n"
+      "  mediump float ch = cos(dist*xspeed); mediump float sh = sin(dist*xspeed);\n"
+      "  mediump vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch - position * sh;\n"
       "  position = v;\n"
       "  zpos += dist * zspeed;\n";
@@ -411,27 +444,27 @@ void enable_raycaster() {
       "  position = position + tangent * dist * xspeed;\n"
       "  zpos += dist * zspeed;\n";
     else if(hyperbolic) fmain += 
-      "  float ch = cosh(dist); float sh = sinh(dist);\n"
-      "  vec4 v = position * ch + tangent * sh;\n"
+      "  mediump float ch = cosh(dist); mediump float sh = sinh(dist);\n"
+      "  mediump vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
       "  position = v;\n";
     else if(nonisotropic) {
     
       if(sol && nih) fsh += 
-        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  return vec4(-(vel.z*tra.x + vel.x*tra.z)*log(2.), (vel.z*tra.y + vel.y * tra.z)*log(3.), vel.x*tra.x * exp(2.*log(2.)*pos.z)*log(2.) - vel.y * tra.y * exp(-2.*log(3.)*pos.z)*log(3.), 0.);\n"
         "  }\n";
       else if(nih) fsh += 
-        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  return vec4((vel.z*tra.x + vel.x*tra.z)*log(2.), (vel.z*tra.y + vel.y * tra.z)*log(3.), -vel.x*tra.x * exp(-2.*log(2.)*pos.z)*log(2.) - vel.y * tra.y * exp(-2.*log(3.)*pos.z)*log(3.), 0.);\n"
         "  }\n";
       else if(sol) fsh += 
-        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
+        "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
         "  }\n";
       else fsh +=
-        "vec4 christoffel(vec4 pos, vec4 vel, vec4 tra) {\n"
-        "  float x = pos.x;\n"
+        "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
+        "  mediump float x = pos.x;\n"
         "  return vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
@@ -442,32 +475,32 @@ void enable_raycaster() {
         "  dist = next < minstep ? 2.*next : next;\n";
 
       if(nil) fsh += 
-        "vec4 translate(vec4 a, vec4 b) {\n"
+        "mediump vec4 translate(mediump vec4 a, mediump vec4 b) {\n"
           "return vec4(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1], b[3]);\n"
           "}\n"
-        "vec4 translatev(vec4 a, vec4 t) {\n"
+        "mediump vec4 translatev(mediump vec4 a, mediump vec4 t) {\n"
           "return vec4(t[0], t[1], t[2] + a[0] * t[1], 0.);\n"
           "}\n"
-        "vec4 itranslate(vec4 a, vec4 b) {\n"
+        "mediump vec4 itranslate(mediump vec4 a, mediump vec4 b) {\n"
           "return vec4(-a[0] + b[0], -a[1] + b[1], -a[2] + b[2] - a[0] * (b[1]-a[1]), b[3]);\n"
           "}\n"
-        "vec4 itranslatev(vec4 a, vec4 t) {\n"
+        "mediump vec4 itranslatev(mediump vec4 a, mediump vec4 t) {\n"
           "return vec4(t[0], t[1], t[2] - a[0] * t[1], 0.);\n"
           "}\n";
                 
       if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
       
       if(sn::in()) fmain +=
-        "vec4 acc = christoffel(position, tangent, tangent);\n"
-        "vec4 pos2 = position + tangent * dist / 2.;\n"
-        "vec4 tan2 = tangent + acc * dist / 2.;\n"
-        "vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
-        "vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
+        "mediump vec4 acc = christoffel(position, tangent, tangent);\n"
+        "mediump vec4 pos2 = position + tangent * dist / 2.;\n"
+        "mediump vec4 tan2 = tangent + acc * dist / 2.;\n"
+        "mediump vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
+        "mediump vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
       
       if(nil) {
         fmain +=
-          "vec4 xp, xt;\n"
-          "vec4 back = itranslatev(position, tangent);\n"
+          "mediump vec4 xp, xt;\n"
+          "mediump vec4 back = itranslatev(position, tangent);\n"
           "if(back.x == 0. && back.y == 0.) {\n"
           "  xp = vec4(0., 0., back.z*dist, 1.);\n"
           "  xt = back;\n"
@@ -477,18 +510,18 @@ void enable_raycaster() {
           "  xt = vec4(back.x, back.y, dist*back.x*back.y, 0.);\n"
           "  }\n"
           "else if(abs(back.z) < 1e-1) {\n"
-// we use the midpoint method here, because the formulas below cause glitches due to float precision
-          "  vec4 acc = christoffel(vec4(0,0,0,1), back, back);\n"
-          "  vec4 pos2 = back * dist / 2.;\n"
-          "  vec4 tan2 = back + acc * dist / 2.;\n"
-          "  vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
+// we use the midpoint method here, because the formulas below cause glitches due to mediump float precision
+          "  mediump vec4 acc = christoffel(vec4(0,0,0,1), back, back);\n"
+          "  mediump vec4 pos2 = back * dist / 2.;\n"
+          "  mediump vec4 tan2 = back + acc * dist / 2.;\n"
+          "  mediump vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
           "  xp = vec4(0,0,0,1) + back * dist + acc2 / 2. * dist * dist;\n"
           "  xt = back + acc * dist;\n"
           "  }\n"
           "else {\n"
-          "  float alpha = atan2(back.y, back.x);\n"
-          "  float w = back.z * dist;\n"
-          "  float c = length(back.xy) / back.z;\n"
+          "  mediump float alpha = atan2(back.y, back.x);\n"
+          "  mediump float w = back.z * dist;\n"
+          "  mediump float c = length(back.xy) / back.z;\n"
           "  xp = vec4(2.*c*sin(w/2.) * cos(w/2.+alpha), 2.*c*sin(w/2.)*sin(w/2.+alpha), w*(1.+(c*c/2.)*((1.-sin(w)/w)+(1.-cos(w))/w * sin(w+2.*alpha))), 1.);\n"
           "  xt = back.z * vec4("
                "c*cos(alpha+w),"
@@ -496,15 +529,15 @@ void enable_raycaster() {
                "1. + c*c*2.*sin(w/2.)*sin(alpha+w)*cos(alpha+w/2.),"
                "0.);\n"
           "  }\n"
-          "vec4 nposition = translate(position, xp);\n";
+          "mediump vec4 nposition = translate(position, xp);\n";
         }
       
       if(nil) fmain +=
-        "float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
+        "mediump float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
       
       if(asonov) {
         fsh += "uniform mediump mat4 uStraighten;\n";
-        fmain += "vec4 sp = uStraighten * nposition;\n";
+        fmain += "mediump vec4 sp = uStraighten * nposition;\n";
         }
 
       fmain +=
@@ -533,16 +566,16 @@ void enable_raycaster() {
           "if(sp.x <-1.) which = 10;\n"
           "if(sp.y <-1.) which = 11;\n"
           "if(sp.z > 1.) {\n"
-            "float best = 999.;\n"
+            "mediump float best = 999.;\n"
             "for(int i=0; i<4; i++) {\n"
-              "float cand = len(uStraighten * uM[i] * position);\n"
+              "mediump float cand = len(uStraighten * uM[i] * position);\n"
               "if(cand < best) { best = cand; which = i;}\n"
               "}\n"
             "}\n"
           "if(sp.z < -1.) {\n"
-            "float best = 999.;\n"
+            "mediump float best = 999.;\n"
             "for(int i=6; i<10; i++) {\n"
-              "float cand = len(uStraighten * uM[i] * position);\n"
+              "mediump float cand = len(uStraighten * uM[i] * position);\n"
               "if(cand < best) { best = cand; which = i;}\n"
               "}\n"
             "}\n";
@@ -600,16 +633,16 @@ void enable_raycaster() {
     if(hyperbolic && bt::in()) {
       fmain += 
         "if(which == 20) {\n"
-        "  float best = 999.;\n"
+        "  mediump float best = 999.;\n"
         "  for(int i="+its(flat2)+"; i<"+its(S7)+"; i++) {\n"
-          "  float cand = len(uM[i] * position);\n"
+          "  mediump float cand = len(uM[i] * position);\n"
           "  if(cand < best) { best = cand; which = i; }\n"
           "  }\n"
           "}\n"
         "if(which == 21) {\n"
-          "float best = 999.;\n"
+          "mediump float best = 999.;\n"
           "for(int i=0; i<"+its(flat1)+"; i++) {\n"
-          "  float cand = len(uM[i] * position);\n"
+          "  mediump float cand = len(uM[i] * position);\n"
           "  if(cand < best) { best = cand; which = i; }\n"
           "  }\n"
 //          "gl_FragColor = vec4(.5 + .5 * sin((go+dist)*100.), 1, float(which)/3., 1); return;\n"
@@ -624,24 +657,24 @@ void enable_raycaster() {
     
     // apply wall color
     fmain +=
-      "  vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
-      "  vec4 col = texture2D(tWallcolor, u);\n"
+      "  mediump vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
+      "  mediump vec4 col = texture2D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n";
 
     if(hard_limit < NO_LIMIT)
       fmain += "    if(go > float(" + fts(hard_limit) + ")) { gl_FragDepth = 1.; return; }\n";
     
     if(!(levellines && disable_texture)) fmain +=
-      "    vec2 inface = map_texture(position, which);\n"
-      "    vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
+      "    mediump vec2 inface = map_texture(position, which);\n"
+      "    mediump vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
       "    if(tmap.z == 0.) col.xyz *= min(1., (1.-inface.x)/ tmap.x);\n"
       "    else {\n"
-      "      vec2 inface2 = tmap.xy + tmap.z * inface;\n"
+      "      mediump vec2 inface2 = tmap.xy + tmap.z * inface;\n"
       "      col.xyz *= texture2D(tTexture, inface2).rgb;\n"
       "      }\n";
 
     fmain +=
-      "    float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n"
+      "    mediump float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n"
       "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
     
     if(nil) fmain +=
@@ -665,11 +698,11 @@ void enable_raycaster() {
       "    if(col.w == 1.) {\n";
     
     if(hyperbolic) fmain +=
-      "      float z = at0.z * sinh(go);\n"
-      "      float w = 1.;\n";
+      "      mediump float z = at0.z * sinh(go);\n"
+      "      mediump float w = 1.;\n";
     else fmain +=
-      "      float z = at0.z * go;\n"
-      "      float w = 1.;\n";
+      "      mediump float z = at0.z * go;\n"
+      "      mediump float w = 1.;\n";
 
     if(levellines) {
       if(hyperbolic) 
@@ -679,9 +712,11 @@ void enable_raycaster() {
       fsh += "uniform mediump float uLevelLines;\n";
       }
 
+    #ifndef GLES_ONLY
     fmain +=    
       "      gl_FragDepth = (-float("+fts(vnear+vfar)+")+w*float("+fts(2*vnear*vfar)+")/z)/float("+fts(vnear-vfar)+");\n"
       "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n";
+    #endif
     
     if(!use_reflect) fmain +=
       "      return;\n";
@@ -697,11 +732,11 @@ void enable_raycaster() {
       if(prod) fmain += "if(reflect && which >= "+its(S7)+") { zspeed = -zspeed; continue; }\n";
       if(hyperbolic && bt::in()) fmain +=
         "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n"
-        "  float x = -log(position.w - position.x);\n"
-        "  vec4 xtan = xpush(-x) * tangent;\n"
-        "  float diag = (position.y*position.y+position.z*position.z)/2.;\n"
-        "  vec4 normal = vec4(1.-diag, -position.y, -position.z, -diag);\n"
-        "  float mdot = dot(xtan.xyz, normal.xyz) - xtan.w * normal.w;\n"
+        "  mediump float x = -log(position.w - position.x);\n"
+        "  mediump vec4 xtan = xpush(-x) * tangent;\n"
+        "  mediump float diag = (position.y*position.y+position.z*position.z)/2.;\n"
+        "  mediump vec4 normal = vec4(1.-diag, -position.y, -position.z, -diag);\n"
+        "  mediump float mdot = dot(xtan.xyz, normal.xyz) - xtan.w * normal.w;\n"
         "  xtan = xtan - normal * mdot * 2.;\n"
         "  tangent = xpush(x) * xtan;\n"
         "  continue;\n"
@@ -715,7 +750,7 @@ void enable_raycaster() {
           "    }\n";
         fsh += 
           "uniform mediump vec4 uReflectX, uReflectY;\n"
-          "vec4 refl(vec4 t, float z, vec4 r) {\n"
+          "mediump vec4 refl(mediump vec4 t, float z, mediump vec4 r) {\n"
             "t.x *= exp(z); t.y /= exp(z);\n"
             "t -= dot(t, r) * r;\n"
             "t.x /= exp(z); t.y *= exp(z);\n"
@@ -745,7 +780,7 @@ void enable_raycaster() {
     
     // next cell
     fmain += 
-      "  vec4 connection = texture2D(tConnections, u);\n"
+      "  mediump vec4 connection = texture2D(tConnections, u);\n"
       "  cid = connection.xy;\n";
     
     if(prod) fmain +=
@@ -754,17 +789,20 @@ void enable_raycaster() {
     
     fmain +=
       "  int mid = int(connection.z * 1024.);\n"
-      "  position = uM[mid] * uM[which] * position;\n"
-      "  tangent = uM[mid] * uM[which] *  tangent;\n";
+      "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "which") ";\n"
+      "  position = m * position;\n"
+      "  tangent = m *  tangent;\n";
     
     fmain += 
       "  }\n"
       "  gl_FragColor.xyz += left * uFogColor.xyz;\n";
 
+    #ifndef GLES_ONLY
     if(use_reflect) fmain +=
       "  if(depthtoset) gl_FragDepth = 1.;\n";
     else fmain +=
       "  gl_FragDepth = 1.;\n";
+    #endif
 
     fmain += 
       "  }";
