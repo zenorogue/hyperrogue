@@ -140,21 +140,28 @@ ptlow operator -(ptlow a, ptlow b) { return mlow(a[0]-b[0], a[1]-b[1], a[2]-b[2]
 ptlow operator *(ptlow a, ld x) { return mlow(a[0]*x, a[1]*x, a[2]*x); }
 
 ptlow can(hyperpoint x) {
-  // azimuthal equidistant to Klein
+  // azimuthal equidistant to Poincare
   ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
   if(r == 0) return mlow(0,0,0);
-  ld make_r = tanh(r);
+  ld make_r = sinh(r) / (1 + cosh(r));
   ld d = make_r / r;
   return mlow(x[0]*d, x[1]*d, x[2]*d);
   }
 
 hyperpoint uncan(ptlow x) {
-  ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
-  if(r == 0) return atxyz(0,0,0);
-  ld make_r = atanh(r);
-  if(r == 1) make_r = 30;
-  ld d = make_r / r;
-  return atxyz(x[0]*d, x[1]*d, x[2]*d);
+  // Poincare to azimuthal equidistant
+
+  ld hr = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
+  if(hr == 0) return atxyz(0,0,0);
+  
+  ld hz = (1 + hr) / (1 - hr);
+  // println(hlog, "hz = ", hz);
+  ld d = (hz+1) * acosh(hz) / sinh(acosh(hz));
+  // println(hlog, "d = ", hz);
+  
+  // println(hlog, "returning: ", point3(x[0] * d, x[1] * d, x[2] * d));
+    
+  return point3(x[0] * d, x[1] * d, x[2] * d);
   }
 
 hyperpoint uncan_info(ptlow x) {

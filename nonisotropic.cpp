@@ -509,8 +509,11 @@ EX namespace sn {
     
     if(!just_direction) {
       ld r = hypot_d(3, res);
-      if(r == 0.) return res;
-      return res * atanh(r) / r;
+      if(r == 0) return point3(0,0,0);
+      ld make_r = atanh(r);
+      if(r == 1) make_r = 30;
+      ld d = make_r / r;
+      return point3(res[0]*d, res[1]*d, res[2]*d);
       }
 
     return res;
