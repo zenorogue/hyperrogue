@@ -197,7 +197,7 @@ EX namespace models {
       }
     
     if(centerover && !history::on)
-    if(isize(history::path_for_lineanimation) == 0 || (quotient && history::path_for_lineanimation.back() != centerover)) {
+    if(isize(history::path_for_lineanimation) == 0 || ((quotient || arb::in()) && history::path_for_lineanimation.back() != centerover)) {
       history::path_for_lineanimation.push_back(centerover);
       }
 

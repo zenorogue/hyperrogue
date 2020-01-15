@@ -205,11 +205,12 @@ EX namespace history {
     
     on = true;
   
-    if(!quotient) try {
-      path_for_lineanimation = build_shortest_path(start, target);
+    if(!quotient && !arb::in()) try {
+      auto p = build_shortest_path(start, target);
+      path_for_lineanimation = p;
       }
     catch(hr_shortest_path_exception&) {
-      addMessage("Error: could not build a path");
+      addMessage("Could not build a path");
       return;
       }
 
@@ -282,6 +283,8 @@ EX namespace history {
       }
     
     View = inverse(v[ph]->at);
+    
+    if(arb::in() && v[ph]->base->master->emeraldval) View = Mirror * View;
   
     hyperpoint now = v[ph]->at * C0;
 
