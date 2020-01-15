@@ -27,7 +27,7 @@ namespace nisot {
 
 typedef hyperpoint pt;
 
-using solnihv::x_to_ix;
+using sn::x_to_ix;
 
 ld z_to_iz(ld z) { if(sol) return tanh(z); else return tanh(z/4)/2 + .5; }
 
@@ -171,7 +171,7 @@ hyperpoint uncan_info(ptlow x) {
 void fint(FILE *f, int x) { fwrite(&x, sizeof(x), 1, f); }
 void ffloat(FILE *f, float x) { fwrite(&x, sizeof(x), 1, f); }
 
-void write_table(solnihv::tabled_inverses& tab, const char *fname) {
+void write_table(sn::tabled_inverses& tab, const char *fname) {
   FILE *f = fopen(fname, "wb");
   fint(f, tab.PRECX);
   fint(f, tab.PRECY);
@@ -180,7 +180,7 @@ void write_table(solnihv::tabled_inverses& tab, const char *fname) {
   fclose(f);
   }
 
-void alloc_table(solnihv::tabled_inverses& tab, int X, int Y, int Z) {
+void alloc_table(sn::tabled_inverses& tab, int X, int Y, int Z) {
   tab.PRECX = X;
   tab.PRECY = Y;
   tab.PRECZ = Z;
@@ -210,7 +210,7 @@ ptlow zflip(ptlow x) { return mlow(x[1], x[0], -x[2]); }
 void build_sols(int PRECX, int PRECY, int PRECZ) {
   std::mutex file_mutex;
   ld max_err = 0;
-  auto& tab = solnihv::get_tabled();
+  auto& tab = sn::get_tabled();
   alloc_table(tab, PRECX, PRECY, PRECZ);
   int last_x = PRECX-1, last_y = PRECY-1, last_z = PRECZ-1;
   auto act = [&] (int tid, int iz) {
