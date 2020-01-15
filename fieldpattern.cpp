@@ -64,6 +64,9 @@ EX int btspin(int id, int d) {
   }
 
 #if HDR
+
+static const int ERR = -99;
+
 struct fpattern {
 
   unsigned force_hash;
@@ -94,6 +97,7 @@ struct fpattern {
   
   int add(int a, int b) { 
     #ifdef EASY
+    if(a == ERR || b == ERR || a*b<0) return ERR;
     return (a+b)%Prime;
     #else
     return m(a%Prime+b%Prime) + Prime * m(a/Prime+b/Prime);
