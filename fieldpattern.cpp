@@ -29,7 +29,7 @@ struct fgeomextra {
   };
 #endif
 
-bool isprime(int n) {
+EX bool isprime(int n) {
   for(int k=2; k<n; k++) if(n%k == 0) return false;
   return true;
   }
@@ -69,6 +69,8 @@ EX int btspin(int id, int d) {
 
 #if HDR
 struct fpattern {
+
+  unsigned force_hash;
   
   int Prime, wsquare, Field, dual;
   // we perform our computations in the field Z_Prime[w] where w^2 equals wsquare
@@ -273,6 +275,7 @@ struct fpattern {
     }
     
   fpattern(int p) {
+    force_hash = 0;
     if(!p) return;
     init(p);
     }
@@ -282,6 +285,17 @@ struct fpattern {
   vector<matrix> generate_isometries();
   
   bool check_order(matrix M, int req);
+  
+  unsigned compute_hash();
+
+  // general 4D
+  vector<transmatrix> fullv;
+
+  void add1(const matrix& M);
+  void add1(const matrix& M, const transmatrix& Full);
+  vector<matrix> generate_isometries3();
+  int solve3();
+  void generate_all3();
   };
 #endif
 
@@ -323,6 +337,166 @@ vector<matrix> fpattern::generate_isometries() {
   return res;
   }
 
+vector<matrix> fpattern::generate_isometries3() {
+  
+  matrix T = Id;
+  int low = wsquare ? 1-Prime : 0;
+  vector<matrix> res;
+  
+  auto colprod = [&] (int a, int b) {
+    return add(add(mul(T[0][a], T[0][b]), mul(T[1][a], T[1][b])), sub(mul(T[2][a], T[2][b]), mul(T[3][a], T[3][b])));
+    };
+
+  auto rowcol = [&] (int a, int b) {
+    return add(add(mul(T[a][0], T[0][b]), mul(T[a][1], T[1][b])), add(mul(T[a][2], T[2][b]), mul(T[a][3], T[3][b])));
+    };
+
+  for(T[0][0]=low; T[0][0]<Prime; T[0][0]++)
+  for(T[1][0]=low; T[1][0]<Prime; T[1][0]++)
+  for(T[2][0]=low; T[2][0]<Prime; T[2][0]++)
+  for(T[3][0]=low; T[3][0]<Prime; T[3][0]++)
+  if(colprod(0, 0) == 1)
+  for(T[0][1]=low; T[0][1]<Prime; T[0][1]++)
+  for(T[1][1]=low; T[1][1]<Prime; T[1][1]++)
+  for(T[2][1]=low; T[2][1]<Prime; T[2][1]++)
+  for(T[3][1]=low; T[3][1]<Prime; T[3][1]++)
+  if(colprod(1, 1) == 1)
+  if(colprod(1, 0) == 0)
+  for(T[0][2]=low; T[0][2]<Prime; T[0][2]++)
+  for(T[0][3]=low; T[0][3]<Prime; T[0][3]++)
+  if(rowcol(0, 0) == 1)
+  if(rowcol(0, 1) == 0)
+  for(T[1][2]=low; T[1][2]<Prime; T[1][2]++)
+  for(T[1][3]=low; T[1][3]<Prime; T[1][3]++)
+  if(rowcol(1, 0) == 0)
+  if(rowcol(1, 1) == 1)
+  for(T[2][2]=low; T[2][2]<Prime; T[2][2]++)
+  for(T[3][2]=low; T[3][2]<Prime; T[3][2]++)
+  if(colprod(2, 2) == 1)
+  if(colprod(2, 0) == 0)
+  if(colprod(2, 1) == 0)
+  for(T[2][3]=low; T[2][3]<Prime; T[2][3]++)
+  for(T[3][3]=low; T[3][3]<Prime; T[3][3]++)
+  if(rowcol(2, 0) == 0)
+  if(rowcol(2, 1) == 0)
+  if(rowcol(2, 2) == 1)
+  // if(colprod(3, 3) == 1)
+  if(add(colprod(3, 3), 1) == 0)
+  if(colprod(3, 0) == 0)
+  if(colprod(3, 1) == 0)
+  if(colprod(3, 2) == 0)
+  if(rowcol(3, 3) == 1)
+  if(rowcol(3, 0) == 0)
+  if(rowcol(3, 1) == 0)
+  if(rowcol(3, 2) == 0)
+    res.push_back(T);
+
+  return res;
+  }
+
+void fpattern::add1(const matrix& M) {
+  if(!matcode.count(M)) {
+    int i = matrices.size();
+    matcode[M] = i, matrices.push_back(M);
+    }
+  }
+
+void fpattern::add1(const matrix& M, const transmatrix& Full) {
+  if(!matcode.count(M)) {
+    int i = matrices.size();
+    matcode[M] = i, matrices.push_back(M), fullv.push_back(Full);
+    }
+  }
+
+map<unsigned,int> hash_found;
+
+unsigned fpattern::compute_hash() {
+  unsigned hashv = 0;
+  int iR = matcode[R];
+  int iP = matcode[P];
+  int iX = matcode[X];
+  for(int i=0; i<isize(matrices); i++) {
+    hashv = 3 * hashv + gmul(i, iP) + 7 * gmul(i, iR);
+    if(MWDIM == 4) hashv += 11 * gmul(i, iX);
+    }
+  return hashv;
+  }
+
+void fpattern::generate_all3() {
+  matrices.clear();
+  matcode.clear();
+  add1(Id);
+  fullv = {hr::Id};
+  for(int i=0; i<isize(matrices); i++) {
+    add1(mmul(matrices[i], R), fullv[i] * reg3::full_R);
+    add1(mmul(matrices[i], X), fullv[i] * reg3::full_X);
+    }
+  local_group = isize(matrices);
+  for(int i=0; i<(int)matrices.size(); i++) {
+    matrix E = mmul(matrices[i], P);
+    if(!matcode.count(E))
+      for(int j=0; j<local_group; j++) add1(mmul(E, matrices[j]));
+    }
+  unsigned hashv = compute_hash();
+  DEBB(DF_FIELD, ("all = ", isize(matrices), "/", local_group, " = ", isize(matrices) / local_group, " hash = ", hashv, " count = ", ++hash_found[hashv]));
+  }
+
+int fpattern::solve3() {
+  if(!wsquare) return 0;
+  reg3::construct_relations();
+  
+  DEBB(DF_FIELD, ("generating isometries for ", Field));
+  
+  auto iso3 = generate_isometries();
+  auto iso4 = generate_isometries3();
+
+  int cmb = 0;
+  
+  int N = isize(reg3::rels);
+  
+  vector<int> fails(N);
+  
+  vector<matrix> possible_P, possible_X, possible_R;
+  
+  for(auto& M: iso3) {
+    if(check_order(M, 2)) 
+      possible_X.push_back(M);
+    if(check_order(M, reg3::r_order)) 
+      possible_R.push_back(M);
+    }
+  for(auto& M: iso4) 
+    if(check_order(M, 2)) 
+      possible_P.push_back(M);
+    
+  DEBB(DF_FIELD, ("field = ", Field, " #P = ", isize(possible_P), " #X = ", isize(possible_X), " #R = ", isize(possible_R), " r_order = ", reg3::r_order, " xp_order = ", reg3::xp_order));
+                                                                                                                               
+  for(auto& xX: possible_X)
+  for(auto& xP: possible_P) if(check_order(mmul(xP, xX), reg3::xp_order))
+  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), reg3::rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) {
+    auto by = [&] (char ch) -> matrix& { return ch == 'X' ? xX : ch == 'R' ? xR : xP; };
+    for(int i=0; i<N; i++) {
+      matrix ml = Id;
+      for(char c: reg3::rels[i].first) { ml = mmul(ml, by(c)); if(ml == Id) { fails[i]++; goto bad; }}
+      matrix mr = Id;
+      for(char c: reg3::rels[i].second) { mr = mmul(mr, by(c)); if(mr == Id) { fails[i]++; goto bad; }}
+      if(ml != mr) { fails[i]++; goto bad;}
+      }
+    P = xP; R = xR; X = xX;
+    generate_all3();
+    if(force_hash && compute_hash() != force_hash) continue;
+    cmb++;
+    goto ok;
+    bad: ;
+    }
+  
+  ok:
+
+  DEBB(DF_FIELD, ("cmb = ", cmb, " for field = ", Field));
+  for(int i=0; i<N; i++) if(fails[i]) DEBB(DF_FIELD, (reg3::rels[i], " fails = ", fails[i]));
+  
+  return cmb;
+  }
+
 int fpattern::solve() {
   
   for(int a=0; a<MWDIM; a++) for(int b=0; b<MWDIM; b++) Id[a][b] = a==b?1:0;
@@ -346,6 +520,14 @@ int fpattern::solve() {
         if(!roots) break;
         }
       } else wsquare = 0;
+
+    if(WDIM == 3) {
+      if(dual == 0) {
+        int s = solve3();
+        if(s) return 0;
+        }
+      continue;
+      }
 
     if(dual == 2) {
       if(Field <= 10) {
@@ -419,6 +601,8 @@ int fpattern::order(const matrix& M) {
 
 void fpattern::build() {
 
+  if(WDIM == 3) return;
+  
   for(int i=0; i<isize(qpaths); i++) {
     matrix M = strtomatrix(qpaths[i]);
     qcoords.push_back(M);
@@ -789,6 +973,7 @@ EX void info() {
       #ifndef EASY
       neasy = 0; 
       #endif
+      if(WDIM == 3) continue;
       fp.build();
       #ifndef EASY
       printf("Not easy: %d\n", neasy);
@@ -812,10 +997,59 @@ EX bool quotient_field_changed;
 
 EX struct fpattern& getcurrfp() {
   if(geometry == gFieldQuotient && quotient_field_changed)
-    return current_quotient_field;  
-  if(WDIM == 3) {
-    dynamicval<eGeometry> g(geometry, gSpace435);
+    return current_quotient_field;
+  if(geometry == gSpace535) {
+    // 120 cells, hash = 9EF7A9C4
     static fpattern fp(5);
+    return fp;
+    }
+  if(geometry == gSpace534) {
+    // 260 cells, hash = 72414D0C (not 0C62E214)
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    fp.Prime = 5; fp.force_hash = 0x72414D0C; fp.solve();
+    return fp;
+    }
+  if(geometry == gSpace435) {
+    // 650 cells, hash = EB201050
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    fp.Prime = 5; fp.force_hash = 0x72414D0C; fp.solve();
+    return fp;
+    }
+  if(geometry == gSpace336) {
+    // 672 cells in E3F6B7BC
+    // 672 cells in 885F1184
+    // 9408 cells in C4089F34
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    fp.Prime = 7; fp.force_hash = 0xE3F6B7BCu; fp.solve();
+    return fp;
+    }
+  if(geometry == gSpace344) {
+    // 600 cells in 558C8ED0
+    // 2400 cells in AF042EA8 
+    // 2600 cells in D26948E0 
+    // 2600 cells in EC29DCEC 
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    fp.Prime = 5; fp.force_hash = 0x558C8ED0u; fp.solve();
+    return fp;
+    // 4900 cells in CDCC7860 (7)
+    }
+  if(geometry == gSpace536) {
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    // 130 cells in 3BA5C5A4
+    // 260 cells in 9FDE7B38
+    fp.Prime = 7; fp.force_hash = 0x9FDE7B38u; fp.solve();
+    return fp;
+    }
+  if(WDIM == 3) {
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    for(int p=2; p<8; p++) { fp.Prime = p; if(!fp.solve()) break; }
+    DEBB(DF_FIELD, ("set prime = ", fp.Prime));
     return fp;
     }
   if(S7 == 8 && S3 == 3) {
@@ -898,6 +1132,20 @@ EX void enableFieldChange() {
   ginf[geometry].distlimit = ginf[gxcur.base].distlimit;
   ginf[geometry].tiling_name = ginf[gxcur.base].tiling_name;
   fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
+  }
+
+EX void field_from_current() {
+  auto& go = ginf[geometry];
+  dynamicval<eGeometry> g(geometry, gFieldQuotient);
+  auto& gg = ginf[geometry];
+  gg.sides = go.sides;
+  gg.vertex = go.vertex;
+  gg.distlimit = go.distlimit;
+  gg.tiling_name = go.tiling_name;
+  gg.flags = go.flags | qANYQ | qFIELD | qBOUNDED;
+  gg.g = go.g;
+  gg.default_variation = go.default_variation;
+  fieldpattern::quotient_field_changed = true;
   }
 
 EX }

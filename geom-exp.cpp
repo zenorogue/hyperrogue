@@ -316,6 +316,8 @@ void set_or_configure_geometry(eGeometry g) {
 bool same_tiling(eGeometry g2) {
   if(g2 == gCrystal)
     return S3 == 4;
+  if(g2 == gFieldQuotient && hyperbolic && standard_tiling())
+    return true;
   if(g2 == gFieldQuotient && geometry != gFieldQuotient) {
     int ce = 0;
     for(auto& ge: fieldpattern::fgeomextras) {
@@ -456,7 +458,15 @@ EX void select_quotient_screen() {
            "no quotient",
         g == geometry, key++);
       dialog::add_action([g] {
-        if(g == gFieldQuotient) 
+        if(g == gFieldQuotient && WDIM == 3) {
+          stop_game();
+          fieldpattern::field_from_current();
+          set_geometry(gFieldQuotient);
+          for(int p=2;; p++) { currfp.Prime = p; currfp.force_hash = 0; if(!currfp.solve()) break; }
+          println(hlog, "set prime = ", currfp.Prime);
+          start_game();
+          }
+        else if(g == gFieldQuotient) 
           pushScreen(showQuotientConfig);
         else if(g == gCrystal)
           pushScreen(crystal::show);
@@ -900,6 +910,14 @@ int read_geom_args() {
     enableFieldChange();
     set_geometry(gFieldQuotient);
     }
+  else if(argis("-to-fq")) {
+    shift(); unsigned hash = arghex();
+    stop_game_and_switch_mode(rg::nothing);
+    fieldpattern::field_from_current();
+    set_geometry(gFieldQuotient);
+    for(int p=2;; p++) { currfp.Prime = p; currfp.force_hash = hash; if(!currfp.solve()) break; }
+    println(hlog, "set prime = ", currfp.Prime);
+    }
   else if(argis("-cs")) {
     shift(); cheat();
     fieldpattern::matrix M = currfp.strtomatrix(args());
@@ -937,6 +955,10 @@ int read_geom_args() {
     geometry = gNormal;
     shift(); dynamicval<int> s7(S7, argi());
     shift(); dynamicval<int> s3(S3, argi());
+    fieldpattern::info();
+    exit(0);
+    } 
+  else if(argis("-fi-geo")) {
     fieldpattern::info();
     exit(0);
     } 
