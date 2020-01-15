@@ -195,13 +195,15 @@ void alloc_table(sn::tabled_inverses& tab, int X, int Y, int Z) {
   }
 
 ld ix_to_x(ld ix) {
-  ld minx = 0, maxx = 1;
-  for(int it=0; it<100; it++) {
+  ld minx = 0;
+  while(x_to_ix(minx) <= ix) minx++;
+  ld maxx = minx; minx--;
+  for(int it=0; it<20; it++) {
     ld x = (minx + maxx) / 2;
-    if(x_to_ix(atanh(x)) < ix) minx = x;
+    if(x_to_ix(x) < ix) minx = x;
     else maxx = x;
     }
-  return atanh(minx);
+  return minx;
   }
 
 ld iz_to_z(ld z) {
