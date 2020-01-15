@@ -433,6 +433,7 @@ struct hrmap_arbi : hrmap {
       dq::drawqueue.pop();
   
       if(do_draw(h->c7, V)) drawcell(h->c7, V);
+      else continue;
   
       for(int i=0; i<h->type; i++) {
         transmatrix V1 = V * adj(h, i);
