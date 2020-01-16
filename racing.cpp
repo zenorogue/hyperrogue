@@ -1133,8 +1133,14 @@ void race_projection() {
     
     dialog::addBreak(100);
 
-    dialog::addItem(XLAT("configure the projection"), 'p');
-    dialog::add_action_push(race_projection);
+    if(WDIM == 3) {
+      dialog::addItem(XLAT("3D configuration"), '9');
+      dialog::add_action_push(show3D);
+      }
+    else {
+      dialog::addItem(XLAT("configure the projection"), 'p');
+      dialog::add_action_push(race_projection);
+      }
   
     dialog::addBoolItem_action(XLAT("guiding line"), guiding, 'g');
   
