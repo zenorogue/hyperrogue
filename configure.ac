@@ -29,6 +29,7 @@ AC_SEARCH_LIBS([SDL_SetVideoMode], [SDL], [], AC_MSG_ERROR([SDL library was not 
 AC_SEARCH_LIBS([aacircleColor], [SDL_gfx], [], AC_MSG_RESULT([SDL_gfx library was not found]))
 AC_SEARCH_LIBS([Mix_LoadMUS], [SDL_mixer], [], AC_MSG_ERROR([SDL_mixer library was not found]))
 AC_SEARCH_LIBS([TTF_OpenFont], [SDL_ttf], [], AC_MSG_RESULT([SDL_ttf library was not found]))
+AC_SEARCH_LIBS(pthread_create, [pthread], ,AC_MSG_ERROR([pthread library was not found]))
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
