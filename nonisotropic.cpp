@@ -225,6 +225,7 @@ EX namespace sn {
     // Poincare to azimuthal equidistant  
     ld hr = sqhypot_d(3, x);
     if(hr == 0) return point3(0,0,0);    
+    if(hr >= 1) return x * 60;
     ld hz = (1 + hr) / (1 - hr);
     ld d = (hz+1) * acosh(hz) / sinh(acosh(hz));    
     return x * d;
@@ -513,12 +514,12 @@ EX namespace sn {
     "  }"
     
     "float z_to_iz_s(float z) {"
-      "return sinh(z) / (1 + cosh(z));"
+      "return sinh(z) / (1. + cosh(z));"
       "}"
     
     "float z_to_iz_ns(float z) {"
-      "z = sinh(z) / (1 + cosh(z));"
-      "return (z+1)/2;"
+      "z = sinh(z) / (1. + cosh(z));"
+      "return (z+1.)/2.;"
       "}";    
 
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
@@ -665,7 +666,7 @@ EX namespace sn {
     
     "float ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);"
     "float iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);"
-    "float iz = (tanh(h[2]/4.)+1.) / 2.;"
+    "float iz = z_to_iz_ns(h[2]);"
     
     "vec4 res;"
 
