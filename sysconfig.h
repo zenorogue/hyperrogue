@@ -426,8 +426,13 @@ extern "C" {
 #include <new>
 
 #if CAP_THREAD
+#if WINDOWS
+#include "mingw.thread.h"
+#include "mingw.mutex.h"
+#else
 #include <thread>
 #include <mutex>
+#endif
 #endif
 
 #ifdef USE_UNORDERED_MAP
