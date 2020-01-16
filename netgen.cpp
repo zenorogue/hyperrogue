@@ -699,6 +699,7 @@ EX namespace netgen {
         }
       if(uni == 's') {
         View = Id;
+        if(ctof(centerover)) View = spin(2 * M_PI * (rand() % 7) / 7) * View;
         playermoved = false;
         }
       else if(uni == 'c') {
