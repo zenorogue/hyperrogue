@@ -508,6 +508,8 @@ void improve(sn::tabled_inverses& tab) {
 
 int dimX=64, dimY=64, dimZ=64;
 
+EX hyperpoint recompress(hyperpoint h) { return decompress(compress(h)); }
+
 int readArgs() {
   using namespace arg;
            
@@ -546,6 +548,25 @@ int readArgs() {
     shift();
     sn::get_tabled().load();
     visualize_table(sn::get_tabled(), argcs());
+    }
+  else if(argis("-sn-unittest")) {
+    println(hlog, "nih = ", (bool)nih);
+    ld maxerr;
+    auto test_result = [&maxerr] (ld a, ld b) { maxerr = max(maxerr, (a-b)); };
+    auto test_result_p = [&maxerr] (hyperpoint a, hyperpoint b) { maxerr = max(maxerr, hypot_d(3, a-b)); };
+    auto test = [&maxerr] (string s, reaction_t tester) {
+      maxerr = 0;
+      tester();
+      println(hlog, "unittest: ", s, " error = ", maxerr);
+      };
+    test("x_to_ix", [&] { for(ld a=0; a<=20; a+=.1) test_result(a, sn::ix_to_x(sn::x_to_ix(a))); });
+    test("z_to_iz", [&] { for(ld a=nih?-20:0; a<=20; a+=.1) test_result(a, sn::iz_to_z(sn::z_to_iz(a))); });
+    test("azeq_to_table", [&] { for(ld a=-5; a<=5; a++) for(ld b=-5; b<=5; b++) for(ld c=-5; c<=5; c++) { hyperpoint h = point3(a,b,c); test_result_p(h, sn::table_to_azeq(sn::azeq_to_table(h))); }});
+    test("azeq_to_table recompressed", [&] { 
+      for(ld a=-5; a<=5; a++) for(ld b=-5; b<=5; b++) for(ld c=-5; c<=5; c++) { 
+        hyperpoint h = point3(a,b,c); test_result_p(h, sn::table_to_azeq(recompress(sn::azeq_to_table(h)))); 
+        }
+      });
     }
 
   else return 1;
