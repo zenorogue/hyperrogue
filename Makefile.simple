@@ -52,7 +52,7 @@ ifeq (${OS},linux)
   LDFLAGS_GL := -lGL
   LDFLAGS_GLEW := -lGLEW
   LDFLAGS_PNG := -lpng
-  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf
+  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread
   OBJ_EXTENSION := .o
   hyper_RES :=
 endif

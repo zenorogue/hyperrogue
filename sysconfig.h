@@ -172,7 +172,7 @@
 #endif
 
 #ifndef CAP_MODEL
-#define CAP_MODEL (!ISMOBWEB && !ISMINI && CAP_SDLGFX)
+#define CAP_MODEL (!ISMOBWEB && !ISMINI)
 #endif
 
 #ifndef CAP_SAVE
