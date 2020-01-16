@@ -206,17 +206,19 @@ EX namespace netgen {
   color_t argb(color_t c) { return ((c & 0xFFFFFF) >> 8) | ((c & 0xFF) << 24); }
   
   void blackline(vec v1, vec v2, color_t col = 0x000000FF) {
-#if CAP_SDLGFX==1
+#if CAP_SDLGFX
     aalineColor(s, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
 #else
+    SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
     for(int i=0; i<=len; i++) 
       qpixel(s, int(v1.x + (v2.x-v1.x)*i/len), int(v1.y + (v2.y-v1.y)*i/len)) = argb(col);      
+    SDL_UnlockSurface(s);
 #endif
     }
   
   void drawtriangle(vec v1, vec v2, vec v3, color_t col) {
-#if CAP_SDLGFX==1
+#if CAP_SDLGFX
     polyx[0] = int(v1.x);
     polyx[1] = int(v2.x);
     polyx[2] = int(v3.x);
@@ -225,9 +227,11 @@ EX namespace netgen {
     polyy[2] = int(v3.y);
     filledPolygonColorI(s, polyx, polyy, 3, col);
 #else
+    SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
     for(int i=0; i<=len; i++) for(int j=0; j<=len; j++) if(i+j <= len)
-      qpixel(s, int(v3.x + (v2.x-v3.x)*i/len + (v1.x-v3.x)*i/len), int(v3.y + (v2.y-v3.y)*i/len + (v1.y-v3.y)*i/len)) = argb(col);
+      qpixel(s, int(v3.x + (v2.x-v3.x)*i/len + (v1.x-v3.x)*j/len), int(v3.y + (v2.y-v3.y)*i/len + (v1.y-v3.y)*j/len)) = argb(col);
+    SDL_UnlockSurface(s);
 #endif
     }
     
@@ -297,27 +301,31 @@ EX namespace netgen {
   // draw the model
   void createPapermodel() {
 
-    #if !CAP_SDLGFX
-      addMessage(XLAT("High quality shots not available on this platform"));
-      return;
-    #endif
-    
     loadData();
-
-    SDL_Surface *sav = s; 
-
-    s = hqsurface = SDL_CreateRGBSurface(SDL_SWSURFACE,BASE,BASE,32,0,0,0,0);
     
-    videopar vid2 = vid;
-    vid.xres = vid.yres = 2000; vid.scale = 0.99; vid.usingGL = false;
-    int sch = cheater; cheater = 0;
-    calcparam();
-    
-    mode = 2;
+    renderbuffer rbuf(2000, 2000, vid.usingGL);
 
-    darken = 0;
-    SDL_FillRect(s, NULL, 0);
-    drawfullmap();
+    dynamicval<videopar> dv(vid, vid);
+    vid.xres = vid.yres = 2000; vid.scale = 0.99; 
+    
+    if(1) {
+      resetbuffer rb;
+      calcparam();
+      models::configure();
+    
+      mode = 2;
+  
+      darken = 0;
+      rbuf.enable();
+      current_display->set_viewport(0);
+      drawfullmap();
+      
+      hqsurface = rbuf.render();
+      IMAGESAVE(hqsurface, "test.png");
+      rb.reset();
+      }
+    
+    vid.usingGL = false;
 
     mode = 0;
     
@@ -328,7 +336,9 @@ EX namespace netgen {
       for(int e=0; e<7; e++) 
         drawline(hvec(i,e), hvec(i,7), 0x80808080);
       } */
-    
+
+    SDL_Surface *sav = s;    
+
     s = net = SDL_CreateRGBSurface(SDL_SWSURFACE,SX*nscale,SY*nscale,32,0,0,0,0);
     SDL_FillRect(net, NULL, 0xFFFFFF);
     
@@ -427,10 +437,9 @@ EX namespace netgen {
       }
     
     SDL_FreeSurface(net);
-    SDL_FreeSurface(hqsurface);
     SDL_FreeSurface(quarter);
     
-    s = sav; vid = vid2; cheater = sch;
+    s = sav; 
     }
   
   vec mousepos, rel;
