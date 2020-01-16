@@ -9,9 +9,6 @@
 namespace hr {
 
 EX namespace nisot {
-  #if HDR
-  typedef array<float, 3> ptlow;
-  #endif
 
   #if HDR
   inline bool local_perspective_used() { return nonisotropic || prod; }
@@ -60,16 +57,21 @@ EX namespace sn {
     }
 
   #if HDR
+  typedef array<float, 3> compressed_point;
+  
+  inline hyperpoint decompress(compressed_point p) { return point3(p[0], p[1], p[2]); }
+  inline compressed_point compress(hyperpoint h) { return make_array<float>(h[0], h[1], h[2]); }
+
   struct tabled_inverses {
     int PRECX, PRECY, PRECZ;
-    vector<nisot::ptlow> tab;
+    vector<compressed_point> tab;
     string fname;
     bool loaded;
     
     void load();
     hyperpoint get(ld ix, ld iy, ld iz, bool lazy);
     
-    nisot::ptlow& get_int(int ix, int iy, int iz) { return tab[(iz*PRECY+iy)*PRECX+ix]; }
+    compressed_point& get_int(int ix, int iy, int iz) { return tab[(iz*PRECY+iy)*PRECX+ix]; }
   
     GLuint texture_id;
     bool toload;
@@ -89,7 +91,7 @@ EX namespace sn {
     ignore(fread(&PRECY, 4, 1, f));
     ignore(fread(&PRECZ, 4, 1, f));
     tab.resize(PRECX * PRECY * PRECZ);
-    ignore(fread(&tab[0], sizeof(nisot::ptlow) * PRECX * PRECY * PRECZ, 1, f));
+    ignore(fread(&tab[0], sizeof(compressed_point) * PRECX * PRECY * PRECZ, 1, f));
     fclose(f);
     loaded = true;    
     }
@@ -102,8 +104,7 @@ EX namespace sn {
     hyperpoint res;
     
     if(lazy) {
-      auto r = get_int(int(ix), int(iy), int(iz));
-      for(int i=0; i<3; i++) res[i] = r[i];
+      return decompress(get_int(int(ix), int(iy), int(iz)));
       }
     
     else {
@@ -179,6 +180,56 @@ EX namespace sn {
   
     return 0.5 - atan((0.5-x) / y) / M_PI;
     }
+
+  EX ld ix_to_x(ld ix) {
+    ld minx = 0;
+    while(x_to_ix(minx) <= ix) minx++;
+    ld maxx = minx; minx--;
+    for(int it=0; it<20; it++) {
+      ld x = (minx + maxx) / 2;
+      if(x_to_ix(x) < ix) minx = x;
+      else maxx = x;
+      }
+    return minx;
+    }
+
+  EX ld z_to_iz(ld z) { 
+    z = sinh(z) / (1 + cosh(z));
+    if(nih) z = (z+1) / 2;
+    return z;
+    }
+
+  EX ld iz_to_z(ld iz) {
+    ld minz = 0;
+    while(z_to_iz(minz) <= iz) minz++;
+    while(z_to_iz(minz) > iz) minz--;
+    ld maxz = minz + 1;
+    for(int it=0; it<20; it++) {
+      ld z = (minz + maxz) / 2;
+      if(z_to_iz(z) < iz) minz = z;
+      else maxz = z;
+      }
+    return (minz+maxz) / 2;
+    }
+
+  EX hyperpoint azeq_to_table(hyperpoint x) {
+    // azimuthal equidistant to Poincare
+    ld r = hypot_d(3, x);
+    if(r == 0) return point3(0,0,0);
+    ld make_r = sinh(r) / (1 + cosh(r));
+    ld d = make_r / r;
+    return x * d;
+    }
+
+  EX hyperpoint table_to_azeq(hyperpoint x) {
+    // Poincare to azimuthal equidistant  
+    ld hr = sqhypot_d(3, x);
+    if(hr == 0) return point3(0,0,0);    
+    ld hz = (1 + hr) / (1 - hr);
+    ld d = (hz+1) * acosh(hz) / sinh(acosh(hz));    
+    return x * d;
+    }
+
 
   struct hrmap_solnih : hrmap {
     hrmap *binary_map;
@@ -459,7 +510,16 @@ EX namespace sn {
     "  y /= (1.+z);"
     
     "  return 0.5 - atan((0.5-x) / y) / 3.1415926535897932384626433832795;"
-    "  }";
+    "  }"
+    
+    "float z_to_iz_s(float z) {"
+      "return sinh(z) / (1 + cosh(z));"
+      "}"
+    
+    "float z_to_iz_ns(float z) {"
+      "z = sinh(z) / (1 + cosh(z));"
+      "return (z+1)/2;"
+      "}";    
 
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
     const ld l2 = log(2);
@@ -507,14 +567,7 @@ EX namespace sn {
     if(h[0] < 0.) res[0] = -res[0];
     if(h[1] < 0.) res[1] = -res[1];
     
-    if(!just_direction) {
-      ld r = hypot_d(3, res);
-      if(r == 0) return point3(0,0,0);
-      ld make_r = atanh(r);
-      if(r == 1) make_r = 30;
-      ld d = make_r / r;
-      return point3(res[0]*d, res[1]*d, res[2]*d);
-      }
+    if(!just_direction) return table_to_azeq(res);
 
     return res;
     }
@@ -532,11 +585,7 @@ EX namespace sn {
     if(h[0] < 0.) res[0] = -res[0];
     if(h[1] < 0.) res[1] = -res[1];
     
-    if(!just_direction) {
-      ld r = hypot_d(3, res);
-      if(r == 0.) return res;
-      return res * atanh(r) / r;
-      }
+    if(!just_direction) return table_to_azeq(res);
 
     return res;
     }
@@ -547,7 +596,7 @@ EX namespace sn {
     
     "float ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);"
     "float iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);"
-    "float iz = tanh(h[2]);"
+    "float iz = z_to_iz_s(h[2]);"
     
     "if(h[2] < 1e-6) { iz = -iz; float s = ix; ix = iy; iy = s; }"
     "if(iz < 0.) iz = 0.;"
@@ -578,7 +627,7 @@ EX namespace sn {
       
     float ix = h[0] >= 0. ? x_to_ix(h[0]) : x_to_ix(-h[0]);
     float iy = h[1] >= 0. ? x_to_ix(h[1]) : x_to_ix(-h[1]);
-    float iz = (tanh(h[2]/4.)+1.) / 2.;
+    float iz = z_to_iz_ns(h[2]);
       
     vec4 res;
   

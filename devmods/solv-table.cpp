@@ -26,15 +26,7 @@ namespace hr {
 
 transmatrix parabolic1(ld u);
 
-namespace nisot {
-
-typedef hyperpoint pt;
-
-using sn::x_to_ix;
-
-ld z_to_iz(ld z) { if(sol) return tanh(z); else return tanh(z/4)/2 + .5; }
-
-ptlow be_low(hyperpoint x) { return ptlow({float(x[0]), float(x[1]), float(x[2])}); }
+namespace sn {
 
 template<class T> void parallelize(int threads, int Nmin, int Nmax, T action) {
   std::vector<std::thread> v;
@@ -143,49 +135,11 @@ hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld min
   return at;
   }
 
-ptlow mlow(ld x, ld y, ld z) { return ptlow({float(x), float(y), float(z)}); }
+using ptlow = compressed_point;
 
-hyperpoint atxyz(ld x, ld y, ld z) { return hyperpoint({x, y, z, 1}); }
-
-ptlow operator +(ptlow a, ptlow b) { return mlow(a[0]+b[0], a[1]+b[1], a[2]+b[2]); }
-ptlow operator -(ptlow a, ptlow b) { return mlow(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
-ptlow operator *(ptlow a, ld x) { return mlow(a[0]*x, a[1]*x, a[2]*x); }
-
-ptlow can(hyperpoint x) {
-  // azimuthal equidistant to Poincare
-  ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
-  if(r == 0) return mlow(0,0,0);
-  ld make_r = sinh(r) / (1 + cosh(r));
-  ld d = make_r / r;
-  return mlow(x[0]*d, x[1]*d, x[2]*d);
-  }
-
-hyperpoint uncan(ptlow x) {
-  // Poincare to azimuthal equidistant
-
-  ld hr = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
-  if(hr == 0) return atxyz(0,0,0);
-  
-  ld hz = (1 + hr) / (1 - hr);
-  // println(hlog, "hz = ", hz);
-  ld d = (hz+1) * acosh(hz) / sinh(acosh(hz));
-  // println(hlog, "d = ", hz);
-  
-  // println(hlog, "returning: ", point3(x[0] * d, x[1] * d, x[2] * d));
-    
-  return point3(x[0] * d, x[1] * d, x[2] * d);
-  }
-
-hyperpoint uncan_info(ptlow x) {
-  ld r = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
-  println(hlog, "r = ", r);
-  if(r == 0) return atxyz(0,0,0);
-  ld make_r = atanh(r);
-  println(hlog, "make_r = ", make_r);
-  ld d = make_r / r;
-  println(hlog, "d = ", d);
-  return atxyz(x[0]*d, x[1]*d, x[2]*d);
-  }
+ptlow operator +(ptlow a, ptlow b) { return make_array<float>(a[0]+b[0], a[1]+b[1], a[2]+b[2]); }
+ptlow operator -(ptlow a, ptlow b) { return make_array<float>(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
+ptlow operator *(ptlow a, ld x) { return make_array<float>(a[0]*x, a[1]*x, a[2]*x); }
 
 void fint(FILE *f, int x) { fwrite(&x, sizeof(x), 1, f); }
 void ffloat(FILE *f, float x) { fwrite(&x, sizeof(x), 1, f); }
@@ -206,27 +160,9 @@ void alloc_table(sn::tabled_inverses& tab, int X, int Y, int Z) {
   tab.tab.resize(X*Y*Z);
   }
 
-ld ix_to_x(ld ix) {
-  ld minx = 0;
-  while(x_to_ix(minx) <= ix) minx++;
-  ld maxx = minx; minx--;
-  for(int it=0; it<20; it++) {
-    ld x = (minx + maxx) / 2;
-    if(x_to_ix(x) < ix) minx = x;
-    else maxx = x;
-    }
-  return minx;
-  }
-
-ld iz_to_z(ld z) {
-  return nih ? atanh(z * 2 - 1)*4 : atanh(z); // atanh(z * 2 - 1);
-  }
-
 ld ptd(ptlow p) {
   return p[0]*p[0] + p[1]*p[1] + p[2] * p[2];
   }
-
-ptlow zflip(ptlow x) { return mlow(x[1], x[0], -x[2]); }
 
 void fix_boundaries(sn::tabled_inverses& tab, int last_x, int last_y, int last_z) {
   int PRECX = tab.PRECX;
@@ -270,7 +206,7 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
       vector<hyperpoint> candidates;
       hyperpoint cand;
       
-      candidates.push_back(atxyz(0,0,0)); 
+      candidates.push_back(point3(0,0,0)); 
       
       static constexpr int prec = 100;
       
@@ -301,23 +237,15 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
         println(hlog, "f(?) = ", v);
         println(hlog, "f(", cand, ") = ", nisot::numerical_exp(cand, prec));
         println(hlog, "error = ", xerr);
-        println(hlog, "canned = ", can(cand));
+        println(hlog, "canned = ", compress(azeq_to_table(cand)));
         max_err = xerr;
-        /*
-        hyperpoint h1 = uncan(solution[iz][iy-1][ix]);
-        hyperpoint h2 = uncan(solution[iz][iy][ix-1]);
-        hyperpoint h3 = uncan(solution[iz][iy-1][ix-1]);
-        hyperpoint h4 = h1 + h2 - h3;
-        solution[iz][iy][ix] = can(h4);
-        */
         return;
         }
 
       auto& so = tab.get_int(ix, iy, iz);
+      
+      so = compress(azeq_to_table(cand));
 
-      so = can(cand);
-      
-      
       for(int z=0; z<3; z++) if(isnan(so[z]) || isinf(so[z])) {
         println(hlog, cand, "canned to ", so);
         exit(4);
@@ -486,7 +414,7 @@ hyperpoint find_optimal_geodesic(hyperpoint res) {
       max_iter = 1000;
       auto h1 = iterative_solve(res, p.first * quality(p) / hypot_d(3, p.first), 100, 1e-6);
 
-      if(deb) println(hlog, "h1 returns ", h1, " of length ", hypot_d(3, h1), " and error ", hypot_d(3, numerical_exp(h1, 100) - res));
+      if(deb) println(hlog, "h1 returns ", h1, " of length ", hypot_d(3, h1), " and error ", hypot_d(3, nisot::numerical_exp(h1, 100) - res));
 
       if(h1 == fail) return;
       
@@ -509,7 +437,7 @@ hyperpoint find_optimal_geodesic(hyperpoint res) {
   }
 
 void fix_bugs(sn::tabled_inverses& tab) {
-  auto bug = can(fail);
+  auto bug = compress(azeq_to_table(fail));
   for(int iz=0; iz<tab.PRECZ; iz++) 
     for(int iy=0; iy<tab.PRECY; iy++)
       for(int ix=0; ix<tab.PRECX; ix++)  {
@@ -565,9 +493,7 @@ void improve(sn::tabled_inverses& tab) {
       
       if(h2 != fail) {
         auto& so = tab.get_int(ix, iy, iz);
-        so = can(h2);        
-        // println(hlog, "can: ", can(h2), " @ ", so[0]*so[0]+so[1]*so[1]+so[2]*so[2]);
-        // println(hlog, h2, " vs ", uncan(can(h2)));
+        so = compress(azeq_to_table(h2)); 
         }
       }
     };
