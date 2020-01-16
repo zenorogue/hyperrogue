@@ -288,6 +288,8 @@ EX namespace reg3 {
 
     for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
       return adj(h1, a) * relative_matrix(h2, h1->move(a), hint);
+      
+    for(int a=0; a<S7; a++) println(hlog, "d=", d, " vs ", hr::celldistance(h1->move(a)->c7, h2->c7));
     
     println(hlog, "error in hrmap_quotient3:::relative_matrix");
     return Id;
