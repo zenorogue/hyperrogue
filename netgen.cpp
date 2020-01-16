@@ -203,9 +203,15 @@ EX namespace netgen {
   // Simple graphical functions
   //============================
   
+  color_t argb(color_t c) { return ((c & 0xFFFFFF) >> 8) | ((c & 0xFF) << 24); }
+  
   void blackline(vec v1, vec v2, color_t col = 0x000000FF) {
 #if CAP_SDLGFX==1
     aalineColor(s, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
+#else
+    int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
+    for(int i=0; i<=len; i++) 
+      qpixel(s, int(v1.x + (v2.x-v1.x)*i/len), int(v1.y + (v2.y-v1.y)*i/len)) = argb(col);      
 #endif
     }
   
@@ -218,6 +224,10 @@ EX namespace netgen {
     polyy[1] = int(v2.y);
     polyy[2] = int(v3.y);
     filledPolygonColorI(s, polyx, polyy, 3, col);
+#else
+    int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
+    for(int i=0; i<=len; i++) for(int j=0; j<=len; j++) if(i+j <= len)
+      qpixel(s, int(v3.x + (v2.x-v3.x)*i/len + (v1.x-v3.x)*i/len), int(v3.y + (v2.y-v3.y)*i/len + (v1.y-v3.y)*i/len)) = argb(col);
 #endif
     }
     
