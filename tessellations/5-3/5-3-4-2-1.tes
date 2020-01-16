@@ -1,0 +1,10 @@
+## {5,3}, tetrapent 2, solution 1
+s2.
+angleunit(2*pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(5,3))
+unittile(1,1,1,2,2,1,1,2,1,1,2,2)
+# the Conway notation
+conway("(0 1)(2 11)(3 10)(4 9)(5 8)(6 7)")
+sublines(1)

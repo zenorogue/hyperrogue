@@ -1,0 +1,10 @@
+## {5,3}, tripent 1, solution 1
+s2.
+angleunit(2*pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(5,3))
+unittile(1,1,2,1,1,2,1,1,2)
+# the Conway notation
+conway("(0)(1 8)(2 4)(3)(5 7)(6)")
+sublines(1)
