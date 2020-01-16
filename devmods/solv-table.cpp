@@ -541,8 +541,8 @@ int readArgs() {
     }
   else if(argis("-iz-list")) {
     sn::get_tabled().load();    
-    for(int iz=0; iz<63; iz++)
-      println(hlog, "iz=", iz, " z=", iz_to_z(iz / (sn::get_tabled().PRECZ-1.)));
+    for(int iz=0; iz<dimZ-1; iz++)
+      println(hlog, "iz=", iz, " z=", iz_to_z(iz / (dimZ-1.)));
     }
   else if(argis("-visualize")) {
     shift();
