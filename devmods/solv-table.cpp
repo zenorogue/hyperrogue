@@ -17,6 +17,10 @@
 // Add e.g. '-dim 128 128 128' before -write to generate
 // a more/less precise table.
 
+// # ./hyper -geo Sol -iz-list -sn-unittest -build -write solv-geodesics-a.dat -visualize devmods/san1/solva-%04d.png -improve -write solv-geodesics.dat -visualize devmods/san1/solvb-%04d.png
+// # ./hyper -dim 32 32 32 -geo 3:1/2 -iz-list -sn-unittest -build -write ssol-geodesics-a.dat -visualize devmods/san1/ssola-%04d.png -improve -write ssol-geodesics.dat -visualize devmods/san1/ssolb-%04d.png
+// # ./hyper -dim 32 32 32 -geo 3:2 -iz-list -sn-unittest -build -write shyp-geodesics.dat -visualize devmods/san1/shypa-%04d.png
+
 #include "../hyper.h"
 
 #include <thread>
