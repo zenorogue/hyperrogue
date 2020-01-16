@@ -317,7 +317,7 @@ struct fpattern {
 struct discovery {
   fpattern experiment;
   std::shared_ptr<std::thread> discoverer;
-  std::mutex lock, slock;
+  std::recursive_mutex lock, slock;
   bool is_suspended;
   bool stop_it;
   
