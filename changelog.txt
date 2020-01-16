@@ -3763,3 +3763,4 @@ Geometries:
 - in 3D Racing, there is a menu option for 'show 3D configuration' instead of the confusing 'config projection'
 - improved Solv rendering
 - fixed some bugs with tessellations from files (fixed line animation, fixed bad performance when away from the start, dealt with numerical errors, fixed spherical plain floors)
+- paper model creator now available in OSX
