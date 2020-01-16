@@ -1062,7 +1062,7 @@ EX cellwalker strafe(cellwalker cw, int j) {
   transmatrix T = currentmap->adj(cw.at, j);
   for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
     if(hdist(hfront, T * tC0(adjmoves[i])) < strafedist + .01)
-      return cellwalker(cw.at->move(j), i);
+      return cellwalker(cw.at->cmove(j), i);
   println(hlog, "incorrect strafe");
   exit(1);
   }
