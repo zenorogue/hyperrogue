@@ -1201,9 +1201,12 @@ eModel default_model() {
   if(GDIM == 3) return mdPerspective;
   return mdDisk;
   }
-  
+
+EX purehookset on_geometry_change;
+
 EX void set_geometry(eGeometry target) {
   bool was_default = pmodel == default_model();
+  callhooks(on_geometry_change);
   if(geometry != target) {
     int old_DIM = GDIM;
     stop_game();
@@ -1492,6 +1495,8 @@ EX void initAll() {
   polygonal::solve();
   }
 
+EX purehookset final_cleanup;
+
 EX void finishAll() {
   achievement_final(!items[itOrbSafety]);
   
@@ -1505,6 +1510,7 @@ EX void finishAll() {
 #endif
   
   achievement_close();  
+  callhooks(final_cleanup);
   }
 
 

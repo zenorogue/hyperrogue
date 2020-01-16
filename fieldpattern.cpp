@@ -11,6 +11,10 @@ namespace hr {
 
 EX namespace fieldpattern {
 
+int limitsq = 10;
+int limitp = 10000;
+int limitv = 100000;
+
 #if HDR
 #define currfp fieldpattern::getcurrfp()
 
@@ -280,6 +284,7 @@ struct fpattern {
     
   fpattern(int p) {
     force_hash = 0;
+    dis = nullptr;    
     if(!p) return;
     init(p);
     }
@@ -299,8 +304,35 @@ struct fpattern {
   void add1(const matrix& M, const transmatrix& Full);
   vector<matrix> generate_isometries3();
   int solve3();
-  void generate_all3();
+  bool generate_all3();
+  
+  // transmatrix full_R, full_P, full_X;
+  
+  #if CAP_THREAD
+  struct discovery *dis;
+  #endif
   };
+
+#if CAP_THREAD
+struct discovery {
+  fpattern experiment;
+  std::shared_ptr<std::thread> discoverer;
+  std::mutex lock, slock;
+  bool is_suspended;
+  bool stop_it;
+  
+  map<unsigned, tuple<int, int, matrix, matrix, matrix, int> > hashes_found;
+  discovery() : experiment(0) { is_suspended = false; stop_it = false; experiment.dis = this; }
+  
+  void activate();
+  void suspend();
+  void check_suspend();
+  void schedule_destruction();
+  void discovered();
+  ~discovery();
+  };
+#endif
+
 #endif
 
 bool fpattern::check_order(matrix M, int req) {
@@ -365,7 +397,12 @@ vector<matrix> fpattern::generate_isometries3() {
   for(T[2][1]=low; T[2][1]<Prime; T[2][1]++)
   for(T[3][1]=low; T[3][1]<Prime; T[3][1]++)
   if(colprod(1, 1) == 1)
-  if(colprod(1, 0) == 0)
+  if(colprod(1, 0) == 0) {
+    #if CAP_THREAD
+    if(dis) dis->check_suspend();
+    if(dis && dis->stop_it) return res;
+    #endif
+
   for(T[0][2]=low; T[0][2]<Prime; T[0][2]++)
   for(T[0][3]=low; T[0][3]<Prime; T[0][3]++)
   if(rowcol(0, 0) == 1)
@@ -394,6 +431,8 @@ vector<matrix> fpattern::generate_isometries3() {
   if(rowcol(3, 1) == 0)
   if(rowcol(3, 2) == 0)
     res.push_back(T);
+    if(isize(res) > limitp) return res;
+    }
 
   return res;
   }
@@ -426,7 +465,7 @@ unsigned fpattern::compute_hash() {
   return hashv;
   }
 
-void fpattern::generate_all3() {
+bool fpattern::generate_all3() {
   matrices.clear();
   matcode.clear();
   add1(Id);
@@ -440,13 +479,15 @@ void fpattern::generate_all3() {
     matrix E = mmul(matrices[i], P);
     if(!matcode.count(E))
       for(int j=0; j<local_group; j++) add1(mmul(E, matrices[j]));
+    if(isize(matrices) >= limitv) { println(hlog, "limitv exceeded"); return false; }
     }
   unsigned hashv = compute_hash();
   DEBB(DF_FIELD, ("all = ", isize(matrices), "/", local_group, " = ", isize(matrices) / local_group, " hash = ", hashv, " count = ", ++hash_found[hashv]));
+  return true;
   }
 
 int fpattern::solve3() {
-  if(!wsquare) return 0;
+  reg3::generate_cellrotations();
   reg3::construct_relations();
   
   DEBB(DF_FIELD, ("generating isometries for ", Field));
@@ -476,7 +517,11 @@ int fpattern::solve3() {
                                                                                                                                
   for(auto& xX: possible_X)
   for(auto& xP: possible_P) if(check_order(mmul(xP, xX), reg3::xp_order))
-  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), reg3::rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) {
+  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), reg3::rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) 
+    #if CAP_THREAD
+    if(dis) dis->check_suspend();
+    if(dis && dis->stop_it) return 0;
+    #endif
     auto by = [&] (char ch) -> matrix& { return ch == 'X' ? xX : ch == 'R' ? xR : xP; };
     for(int i=0; i<N; i++) {
       matrix ml = Id;
@@ -486,7 +531,10 @@ int fpattern::solve3() {
       if(ml != mr) { fails[i]++; goto bad;}
       }
     P = xP; R = xR; X = xX;
-    generate_all3();
+    if(!generate_all3()) continue;
+    #if CAP_THREAD
+    if(dis) { dis->discovered(); continue; }
+    #endif
     if(force_hash && compute_hash() != force_hash) continue;
     cmb++;
     goto ok;
@@ -526,7 +574,7 @@ int fpattern::solve() {
       } else wsquare = 0;
 
     if(WDIM == 3) {
-      if(dual == 0) {
+      if(dual == 0 && (Prime <= limitsq || pw == 1)) {
         int s = solve3();
         if(s) return 0;
         }
@@ -729,7 +777,6 @@ void fpattern::analyze() {
       matrix M = matrices[i];
       matrix M2 = mpow(M, N-1);
       inverses[i] = matcode[M2];
-      println(hlog, mmul(M, M2));
       }
     }
     
@@ -1164,8 +1211,66 @@ EX void field_from_current() {
   gg.flags = go.flags | qANYQ | qFIELD | qBOUNDED;
   gg.g = go.g;
   gg.default_variation = go.default_variation;
-  fieldpattern::quotient_field_changed = true;
+  fieldpattern::quotient_field_changed = true;  
   }
+
+#if CAP_THREAD
+EX map<string, discovery> discoveries;
+
+void discovery::activate() {
+  if(!discoverer) {
+    discoverer = std::make_shared<std::thread> ( [this] {
+      for(int p=2; p<100; p++) {
+        experiment.Prime = p;
+        experiment.solve();
+        if(stop_it) break;
+        }
+      });
+    slock.lock();
+    }
+  if(is_suspended) {
+    is_suspended = false;
+    lock.unlock();
+    slock.unlock();
+    }
+  }
+
+void discovery::discovered() {
+  slock.unlock();
+  lock.lock();
+  auto& e = experiment;
+  hashes_found[e.compute_hash()] = make_tuple(e.Prime, e.wsquare, e.R, e.P, e.X, isize(e.matrices) / e.local_group);
+  lock.unlock();
+  slock.lock();
+  }
+
+void discovery::suspend() { is_suspended = true; lock.lock(); slock.lock(); }
+
+void discovery::check_suspend() { slock.unlock(); lock.lock(); lock.unlock(); slock.lock();  }
+
+void discovery::schedule_destruction() { stop_it = true; }
+discovery::~discovery() { schedule_destruction(); if(discoverer) discoverer->join(); }
+#endif
+
+int hk = 
+#if CAP_THREAD
+  + addHook(on_geometry_change, 100, [] { for(auto& d:discoveries) if(!d.second.is_suspended) d.second.suspend(); })
+  + addHook(final_cleanup, 100, [] { 
+      for(auto& d:discoveries) { d.second.schedule_destruction(); if(d.second.is_suspended) d.second.activate(); }
+      discoveries.clear();
+      })
+#endif
+  + addHook(hooks_args, 0, [] {
+      using namespace arg;
+      if(0) ;
+      else if(argis("-q3-limitsq")) { shift(); limitsq = argi(); }
+      else if(argis("-q3-limitp")) { shift(); limitp = argi(); }
+      else if(argis("-q3-limitv")) { shift(); limitv = argi(); }
+      else return 1;
+      return 0;
+      });
+
+EX purehookset on_geometry_change;
 
 EX }
 

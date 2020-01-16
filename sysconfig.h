@@ -73,6 +73,10 @@
 #define CAP_XGD (ISANDROID || ISFAKEMOBILE)
 #endif
 
+#ifndef CAP_THREAD
+#define CAP_THREAD (!ISMOBILE && !ISWEB)
+#endif
+
 #define CAP_FRAMELIMIT (!ISMOBWEB)
 
 #if ISMOBILE
@@ -420,6 +424,11 @@ extern "C" {
 #include <random>
 #include <complex>
 #include <new>
+
+#if CAP_THREAD
+#include <thread>
+#include <mutex>
+#endif
 
 #ifdef USE_UNORDERED_MAP
 #include <unordered_map>

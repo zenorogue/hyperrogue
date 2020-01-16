@@ -404,6 +404,65 @@ EX string dim_name() {
   return " (" + its(WDIM) + "D)";
   }
 
+#if CAP_THREAD
+EX void showQuotientConfig3() {
+
+  using namespace fieldpattern;
+  gamescreen(2);
+  dialog::init(XLAT("field quotient"));
+  
+  auto& ds = discoveries[cginf.tiling_name];
+  
+  if(!ds.discoverer) {
+    dialog::addItem("start discovery", 's');
+    dialog::add_action([&ds] { ds.activate(); });
+    }
+  else if(ds.is_suspended) {
+    dialog::addItem("resume discovery", 's');
+    dialog::add_action([&ds] { ds.activate(); });
+    }
+  else {
+    dialog::addItem("suspend discovery", 's');
+    dialog::add_action([&ds] { ds.suspend(); });
+    }
+
+  auto& e = ds.experiment;
+  if(!e.Prime)
+    dialog::addBreak(100);
+  else {
+    string s = its(e.Prime);
+    if(e.wsquare) s += "²";
+    dialog::addInfo(s);
+    }
+    
+  dialog::addBreak(100);
+
+  if(!ds.is_suspended) ds.lock.lock();
+  auto&l = ds.hashes_found;
+  for(auto& v: l) {
+    char x = 'a';
+    string s = XLAT("#%1, cells: %2", itsh(v.first), its(get<5>(v.second)));
+    dialog::addItem(s, x++);
+    dialog::add_action([&v] {
+      stop_game();
+      int tmp;
+      tie(currfp.Prime, currfp.wsquare, currfp.R, currfp.P, currfp.X, tmp) = v.second;
+      currfp.Field = currfp.wsquare ? currfp.Prime * currfp.Prime : currfp.Prime;
+      currfp.generate_all3();
+      currfp.analyze();
+      start_game();
+      });
+    }
+  if(!ds.is_suspended) ds.lock.unlock();
+    
+  dialog::addBreak(100);
+  
+  dialog::addBack();
+  
+  dialog::display();
+  }
+#endif
+
 EX string geometry_name() {
   switch(ginf[geometry].cclass) {
     case gcHyperbolic:
@@ -459,12 +518,17 @@ EX void select_quotient_screen() {
         g == geometry, key++);
       dialog::add_action([g] {
         if(g == gFieldQuotient && WDIM == 3) {
-          stop_game();
-          fieldpattern::field_from_current();
-          set_geometry(gFieldQuotient);
-          for(int p=2;; p++) { currfp.Prime = p; currfp.force_hash = 0; if(!currfp.solve()) break; }
-          println(hlog, "set prime = ", currfp.Prime);
-          start_game();
+          if(geometry != gFieldQuotient) {
+            stop_game();
+            fieldpattern::field_from_current();
+            set_geometry(gFieldQuotient);
+            for(int p=2;; p++) { currfp.Prime = p; currfp.force_hash = 0; if(!currfp.solve()) break; }
+            println(hlog, "set prime = ", currfp.Prime);
+            start_game();
+            }
+          #if CAP_THREAD
+          pushScreen(showQuotientConfig3);
+          #endif
           }
         else if(g == gFieldQuotient) 
           pushScreen(showQuotientConfig);
@@ -503,12 +567,12 @@ EX void select_quotient() {
     
     println(hlog, "choices = ", choices);
 
-    if(isize(choices) > 2) 
+    if(isize(choices) > 1) 
       pushScreen(select_quotient_screen);
-    else if(isize(choices) > 1) {
+    /* else if(isize(choices) > 1) {
       set_geometry(choices[choices[0] == geometry ? 1 : 0]);
       start_game();
-      }
+      } */
     else
       addMessage("No quotient spaces avialable in the current tiling.");
     }
