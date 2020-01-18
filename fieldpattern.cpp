@@ -1111,7 +1111,7 @@ EX struct fpattern& getcurrfp() {
     fp.Prime = 7; fp.force_hash = 0x9FDE7B38u; fp.solve();
     return fp;
     }
-  if(WDIM == 3) {
+  if(WDIM == 3 && !quotient) {
     static fpattern fp(0);
     if(fp.Prime) return fp;
     for(int p=2; p<8; p++) { fp.Prime = p; if(!fp.solve()) break; }
