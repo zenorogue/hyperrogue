@@ -437,7 +437,7 @@ EX void drawStats() {
     #if CAP_QUEUE
     queuecircle(xmove, yb, rad, 0xFF0000FF);
     queuecircle(xmove, yb, rad*SKIPFAC, 
-      legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
+      legalmoves[cwt.at->type] ? 0xFF0000FF : 0xFF000080
       );
     #endif
     #if CAP_SHAPES

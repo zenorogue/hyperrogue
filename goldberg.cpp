@@ -85,7 +85,7 @@ EX namespace gp {
     transmatrix adjm;
     };
 
-  EX int fixg6(int x) { return (x + MODFIXER) % SG6; }
+  EX int fixg6(int x) { return gmod(x, SG6); }
   
   EX int get_code(const local_info& li) {
     return 
@@ -137,7 +137,7 @@ EX namespace gp {
   
   EX int pseudohept_val(cell *c) {
     loc v = get_coord(c);
-    return (v.first - v.second + MODFIXER)%3;
+    return gmod(v.first - v.second, 3);
     }
   
   // mapping of the local equilateral triangle
@@ -578,6 +578,7 @@ EX namespace gp {
       loctoh_ort(param * loc(0,1)),
       C03
       ));
+    cgi.gpdata->Tf.resize(S7);
     for(int i=0; i<S7; i++) {
       transmatrix T = dir_matrix(i);
       for(int x=-16; x<16; x++)

@@ -609,7 +609,7 @@ EX void buildRug() {
     rugpoint *v = p.second;
     
     if(arcm::in() || (euclid && quotient)) {
-      rugpoint *p[MAX_EDGE+1];
+      vector<rugpoint*> p(c->type+1);
       for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(ggmatrix(c) * get_corner_position(c, j), v->dist);
       for(int j=0; j<c->type; j++) addTriangle(v, p[j], p[(j+1) % c->type]);
       

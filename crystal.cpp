@@ -13,6 +13,7 @@ EX namespace crystal {
 
 #if HDR
 static const int MAXDIM = 7;
+static const int MAX_EDGE_CRYSTAL = 2 * MAXDIM;
 
 struct coord : public array<int, MAXDIM> {
   coord operator + (coord b) { for(int i=0; i<MAXDIM; i++) b[i] += self[i]; return b; }  
@@ -279,7 +280,7 @@ struct crystal_structure {
     if(count_bugs()) {
       printf("bugs found\n");
       }
-    if(dir > MAX_EDGE || dim > MAXDIM) {
+    if(dir > MAX_EDGE_CRYSTAL || dim > MAXDIM) {
       printf("Dimension or directions exceeded -- I have generated it, but won't play");
       exit(0);
       }
@@ -722,7 +723,7 @@ bool is_bi(crystal_structure& cs, coord co) {
   return false;
   }
 
-array<array<int,2>, MAX_EDGE> distlimit_table = {{
+array<array<int,2>, MAX_EDGE_CRYSTAL> distlimit_table = {{
   {{SEE_ALL,SEE_ALL}}, {{SEE_ALL,SEE_ALL}}, {{SEE_ALL,SEE_ALL}}, {{SEE_ALL,SEE_ALL}}, {{15, 10}}, 
   {{6, 4}}, {{5, 3}}, {{4, 3}}, {{4, 3}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}, {{3, 2}}
   }};
@@ -1257,7 +1258,7 @@ EX void build_rugdata() {
     const transmatrix& V = gp.second;
 
     auto co = m->get_coord(c);
-    ldcoord vcoord[MAX_EDGE];
+    vector<ldcoord> vcoord(c->type);
 
     for(int i=0; i<c->type; i++) 
       if(valence() == 4)
@@ -1270,7 +1271,7 @@ EX void build_rugdata() {
       v->flat = coord_to_flat(co);
       v->valid = true;
       
-      rugpoint *p[MAX_EDGE];
+      rugpoint *p[MAX_EDGE_CRYSTAL];
       
       for(int i=0; i<c->type; i++) {
         p[i] = addRugpoint(V * get_corner_position(c, i), 0);
@@ -1284,7 +1285,7 @@ EX void build_rugdata() {
     else {
       hyperpoint hco = coord_to_flat(co, 4);
       hco[3] -= cut_level * rug::modelscale;
-      hyperpoint vco[MAX_EDGE];
+      vector<hyperpoint> vco(c->type);
       for(int i=0; i<c->type; i++) {
         vco[i] = coord_to_flat(vcoord[i], 4);
         vco[i][3] -= cut_level * rug::modelscale;
@@ -1325,8 +1326,7 @@ EX void set_crystal(int sides) {
   static char buf[20];
   sprintf(buf, "{%d,4}", sides);
   ginf[gCrystal].tiling_name = buf;
-  if(sides < MAX_EDGE)
-    ginf[gCrystal].distlimit = distlimit_table[sides];
+  ginf[gCrystal].distlimit = distlimit_table[min(sides, MAX_EDGE_CRYSTAL-1)];
   }
 
 void test_crt() {

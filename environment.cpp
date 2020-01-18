@@ -557,7 +557,7 @@ EX void moverefresh(bool turn IS(true)) {
           c->monst = moReptile;
           c->hitpoints = 3;
           c->stuntime = 0;
-          int gooddirs[MAX_EDGE], qdirs = 0;
+          vector<int> gooddirs;
           // in the peace mode, a reptile will
           // prefer to walk on the ground, rather than the chasm
           for(int i=0; i<c->type; i++) {
@@ -565,9 +565,9 @@ EX void moverefresh(bool turn IS(true)) {
             int i1 = (i+c->type-3) % c->type;
             if(c->move(i0) && passable(c->move(i0), c, 0)) 
             if(c->move(i1) && passable(c->move(i1), c, 0)) 
-              gooddirs[qdirs++] = i;
+              gooddirs.push_back(i);
             }
-          if(qdirs) c->mondir = gooddirs[hrand(qdirs)];
+          c->mondir = hrand_elt(gooddirs, c->mondir);
           playSound(c, "click");
           }
         }

@@ -43,7 +43,20 @@ EX int hrand(int i) {
 #if HDR
 template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
 template<class T> void hrandom_shuffle(T* x, int n) { for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]); }
+template<class T> void hrandom_shuffle(T& container) { hrandom_shuffle(&container[0], isize(container)); }
+template<class U> auto hrand_elt(U& container) -> decltype(container[0]) { return container[hrand(isize(container))]; }
+template<class T, class U> T hrand_elt(U& container, T default_value) { 
+  if(container.empty()) return default_value; 
+  return container[hrand(isize(container))]; 
+  }
 #endif
+
+EX vector<int> hrandom_permutation(int qty) {
+  vector<int> res(qty);
+  for(int i=0; i<qty; i++) res[i] = i;
+  hrandom_shuffle(res);
+  return res;
+  }
 
 /** Use \link hrngen \endlink to generate a floating point number between 0 and 1.
  */

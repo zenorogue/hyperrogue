@@ -28,7 +28,7 @@ struct blizzardcell {
   transmatrix *gm;
   char wmap;
   int inward, outward, ward;
-  int qty[MAX_EDGE];
+  vector<int> qty;
   vector<snowball*> inorder, outorder;
   int inid, outid;
   ~blizzardcell() { for(auto i: inorder) delete i; }
@@ -77,6 +77,7 @@ EX void drawBlizzards() {
     auto& bc = *bcells[i];
     cell *c = bc.c;
     bc.inward = bc.outward = 0;
+    bc.qty.resize(c->type);
     for(int i=0; i<c->type; i++) {
       int& qty = bc.qty[i];
       qty = 0;

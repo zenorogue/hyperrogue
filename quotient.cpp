@@ -12,25 +12,16 @@ namespace hr {
 
 EX namespace quotientspace {
   
-  bool operator == (const code& c1, const code &c2) {
-    for(int i=0; i<=S7; i++) if(c1.c[i] != c2.c[i]) return false;
-    return true;
-    }
-
-  bool operator < (const code& c1, const code &c2) {
-    for(int i=0; i<=S7; i++) if(c1.c[i] != c2.c[i]) return c1.c[i] < c2.c[i];
-    return false;
-    }  
-
   int cod(heptagon *h) {
     return zebra40(h->c7);
     }
   
   code get(heptspin hs) {
     code res;
-    res.c[0] = cod(hs.at);
+    res.connections.resize(S7);
+    res.connections[0] = cod(hs.at);
     for(int i=1; i<=S7; i++) {
-      res.c[i] = cod((hs + wstep).at);
+      res.connections[i] = cod((hs + wstep).at);
       hs += 1;
       }
     return res;
@@ -45,7 +36,11 @@ EX namespace quotientspace {
 
 #if HDR
 struct code {
-  int c[MAX_EDGE+1];
+  vector<int> connections;
+
+  bool operator == (const code &c2) const { return connections == c2.connections; }
+  bool operator < (const code &c2) const { return connections < c2.connections; }
+
   };
 
 struct hrmap_quotient : hrmap_standard {

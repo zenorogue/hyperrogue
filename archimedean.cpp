@@ -51,9 +51,11 @@ struct archimedean_tiling {
   
   vector<ld> inradius, circumradius, alphas;
   
-  int matches[30][30];
-  int periods[30];
-  int tilegroup[30], groupoffset[30], tilegroups;
+  vector<vector<int>> matches;
+  vector<int> periods;
+  vector<int> tilegroup;
+  vector<int> groupoffset;
+  int tilegroups;
 
   int errors;
   string errormsg;
@@ -130,18 +132,21 @@ void archimedean_tiling::make_match(int a, int i, int b, int j) {
     periods[a] = periods[b] = gcd(matches[a][b] - (j-i), periods[a]);
   }
 
+/** mostly to protect the user from entering too large numbers */
+const int MAX_EDGE_ARCM = FULL_EDGE;
+
 void archimedean_tiling::prepare() {
 
   euclidean_angle_sum = 0;
   for(int f: faces) euclidean_angle_sum += (f-2.) / f;
 
-  for(int i: faces) if(i > MAX_EDGE) {
-    errormsg = XLAT("currently no more than %1 edges", its(MAX_EDGE));
+  for(int i: faces) if(i > MAX_EDGE_ARCM) {
+    errormsg = XLAT("currently no more than %1 edges", its(MAX_EDGE_ARCM));
     errors++;
     return;
     }
-  if(isize(faces) > MAX_EDGE/2) {
-    errormsg = XLAT("currently no more than %1 faces in vertex", its(MAX_EDGE/2));
+  if(isize(faces) > MAX_EDGE_ARCM/2) {
+    errormsg = XLAT("currently no more than %1 faces in vertex", its(MAX_EDGE_ARCM/2));
     errors++;
     return;
     }
@@ -192,8 +197,13 @@ void archimedean_tiling::prepare() {
   have_symmetry = false;
   for(int i=0; i<N; i++) if(invert[i]) have_symmetry = true;  
   
-  for(int i=0; i<M; i++) for(int j=0; j<M; j++) matches[i][j] = i==j ? 0 : -1;
+  matches.resize(M);
+  for(int i=0; i<M; i++) {
+    matches[i].resize(M);
+    for(int j=0; j<M; j++) matches[i][j] = i==j ? 0 : -1;
+    }
 
+  periods.resize(M);
   for(int i=0; i<M; i++) periods[i] = i<2*N ? faces[i/2] : N;
   
   for(int i=0; i<N; i++) {
@@ -289,7 +299,9 @@ void archimedean_tiling::regroup() {
     make_match(i, 0, k, matches[i][j] + matches[j][k]);
     make_match(i, 0, k, matches[i][j] + matches[j][k] + gcd(periods[i], periods[j]));
     }
-  for(int i=0; i<M; i++) tilegroup[i] = -1;
+  tilegroup.clear();
+  tilegroup.resize(M, -1);
+  groupoffset.resize(M);
   tilegroups = 0;
   for(int i=0; i<M; i+=(have_symmetry?1:2)) if(tilegroup[i] == -1) {
     if(periods[i] < 0) periods[i] = -periods[i];
@@ -335,10 +347,12 @@ void archimedean_tiling::compute_geometry() {
   dynamicval<eGeometry> dv(geometry, gArchimedean);
   
   /* compute the geometry */
-  inradius.resize(N);
+  inradius.resize(N+1); inradius[N] = 0;
   circumradius.resize(N);
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
+  
+  /* inradius[N] is used in farcorner and nearcorner. Probably a bug */
   
   if(real_faces == 2) {
     /* standard methods fail for dihedra, but the answer is easy */
@@ -777,19 +791,19 @@ void fixup_matrix(transmatrix& T, const transmatrix& X, ld step) {
   }
 
 pair<ld, ld>& archimedean_tiling::get_triangle(heptagon *h, int cid) {
-  return triangles[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
+  return triangles[id_of(h)][gmod(parent_index_of(h) + cid, neighbors_of(h))];
   }
 
 pair<int, int>& archimedean_tiling::get_adj(heptagon *h, int cid) {
-  return adjacent[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
+  return adjacent[id_of(h)][gmod(parent_index_of(h) + cid, neighbors_of(h))];
   }
 
 pair<int, int>& archimedean_tiling::get_adj(const pair<int, int>& p, int delta) {
-  return adjacent[p.first][(p.second + delta + MODFIXER) % isize(adjacent[p.first])];
+  return adjacent[p.first][gmod(p.second + delta, isize(adjacent[p.first]))];
   }
 
 pair<ld, ld>& archimedean_tiling::get_triangle(const pair<int, int>& p, int delta) {
-  return triangles[p.first][(p.second + delta + MODFIXER) % isize(adjacent[p.first])];
+  return triangles[p.first][gmod(p.second + delta, isize(adjacent[p.first]))];
   }
 
 transmatrix adjcell_matrix(heptagon *h, int d) {

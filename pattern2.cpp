@@ -1278,8 +1278,8 @@ EX int pattern_threecolor(cell *c) {
   #if CAP_GP
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
-    int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
-    int par = (gp::param.first - gp::param.second + MODFIXER) % 3;
+    int rel = gmod(li.relative.first - li.relative.second, 3);
+    int par = gmod(gp::param.first - gp::param.second, 3);
     if(rel == 0)
       return pattern_threecolor(c->master->c7);
     else if(rel == par)
@@ -1335,7 +1335,7 @@ EX int pattern_threecolor(cell *c) {
     #if CAP_GP
     if(gp_threecolor() == 2) {
       auto li = gp::get_local_info(c);
-      int sp = (MODFIXER + li.relative.first + 2 * li.relative.second) % 3;
+      int sp = gmod(li.relative.first + 2 * li.relative.second, 3);
       if(sp != 0) {
         if(li.last_dir & 1) 
           sp = 3 - sp;

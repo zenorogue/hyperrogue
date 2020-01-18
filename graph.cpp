@@ -3248,7 +3248,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t
   if(NONSTDVAR || !standard_tiling()) {
     #if CAP_ARCM
     if(arcm::in() && !PURE)
-      i = (i + arcm::parent_index_of(c->master)/DUALMUL + MODFIXER) % c->type;
+      i = gmod(i + arcm::parent_index_of(c->master)/DUALMUL, c->type);
     #endif
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;

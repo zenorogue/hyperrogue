@@ -79,7 +79,7 @@ void geometry_information::init_floorshapes() {
   for(auto sh: all_escher_floorshapes) sh->id = ids++;
   }
 
-typedef pair<transmatrix, array<transmatrix, MAX_EDGE>> matrixitem;
+typedef pair<transmatrix, vector<transmatrix>> matrixitem;
 
 struct mesher {
   eGeometry g;
@@ -119,6 +119,7 @@ struct matrixlist {
 matrixitem genitem(const transmatrix& m1, const transmatrix& m2, int nsym) {
   matrixitem mi;
   mi.first = m1;
+  mi.second.resize(nsym);
   for(int i=0; i<nsym; i++)
     mi.second[i] = spin(2*M_PI*i/nsym) * m2;
   return mi;
@@ -281,6 +282,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
       }
     
     for(int k=0; k<SIDEPARS; k++) {
+      fsh.gpside[k].resize(c->type);
       for(int i=0; i<c->type; i++) {
         sizeto(fsh.gpside[k][i], id);
         bshape(fsh.gpside[k][i][id], PPR::LAKEWALL); 
@@ -435,7 +437,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     for(int i=0; i<=cor; i++)
       hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
     
-    for(int k=0; k<SIDEPARS; k++) 
+    for(int k=0; k<SIDEPARS; k++) {
+      fsh.gpside[k].resize(cor);
       for(int cid=0; cid<cor; cid++) {
         sizeto(fsh.gpside[k][cid], id);
         bshape(fsh.gpside[k][cid][id], fsh.prio);
@@ -443,6 +446,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         hpcpush(iddspin(c, cid) * cornerlist[(cid+1)%cor]);
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
+      }
     }
   
   for(auto pfsh: all_escher_floorshapes) {
@@ -481,6 +485,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       m.n.sym = cor;
 
       int v = sidir+siid;
+      for(auto& mvi: m.v) mvi.second.resize(cor);
       
       for(int ii=0; ii<2; ii++) {
         int i = 0;       
@@ -545,6 +550,9 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
             texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), dfloor_table[k])); });
             }
           }
+
+        finishshape();
+        ensure_vertex_number(*last);
         }
       
       for(int co=0; co<2; co++) {
@@ -574,12 +582,21 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
             texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), top + h * (x+y))); });
             }
           }
+
+        finishshape();
+        ensure_vertex_number(*last);
         }
 
       for(int l=0; l<SIDEPARS; l++) {
-        for(auto& li: fsh.side[l]) li.tinf = &floor_texture_vertices[fsh.id];
-        for(int e=0; e<MAX_EDGE; e++)
-          for(auto& li: fsh.gpside[l][e]) li.tinf = &floor_texture_vertices[fsh.id];
+        for(auto& li: fsh.side[l]) {
+          li.tinf = &floor_texture_vertices[fsh.id];
+          ensure_vertex_number(li);
+          }
+        for(auto& gs: fsh.gpside[l])
+          for(auto& li: gs) {
+            li.tinf = &floor_texture_vertices[fsh.id];
+            ensure_vertex_number(li);
+            }
         }
       }
       
@@ -592,7 +609,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(auto& li: fsh.levels[l]) li.tinf = &floor_texture_vertices[fsh.id];
         fsh.side[l] = shFullFloor.side[l];
         for(auto& li: fsh.side[l]) li.tinf = &floor_texture_vertices[fsh.id];
-        for(int e=0; e<MAX_EDGE; e++) {
+        fsh.gpside[l].resize(c->type);
+        for(int e=0; e<c->type; e++) {
           fsh.gpside[l][e] = shFullFloor.gpside[l][e];
           for(auto& li: fsh.gpside[l][e]) li.tinf = &floor_texture_vertices[fsh.id];
           }
@@ -1016,16 +1034,28 @@ void draw_shape_for_texture(floorshape* sh) {
     }
 
   // SL2 needs 6 times more
-  for(int a=0; a<MAX_EDGE*6; a++)
-    texture_order([&] (ld x, ld y) {
-      hyperpoint h = center + v1 * x + v2 * y;
-      hyperpoint inmodel;
-      applymodel(h, inmodel);
-      glvec2 v;
-      v[0] = (1 + inmodel[0] * vid.scale) / 2;
-      v[1] = (1 - inmodel[1] * vid.scale) / 2;
-      ftv.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
-      });
+  texture_order([&] (ld x, ld y) {
+    hyperpoint h = center + v1 * x + v2 * y;
+    hyperpoint inmodel;
+    applymodel(h, inmodel);
+    glvec2 v;
+    v[0] = (1 + inmodel[0] * vid.scale) / 2;
+    v[1] = (1 - inmodel[1] * vid.scale) / 2;
+    ftv.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
+    });
+  }
+
+/** copy the texture vertices so that there are at least qty of them */
+EX void ensure_vertex_number(basic_textureinfo& bti, int qty) {
+  int s = isize(bti.tvertices);
+  while(isize(bti.tvertices) <= qty) {
+    for(int i=0; i<s; i++) bti.tvertices.push_back(bti.tvertices[i]);
+    }
+  }
+
+/** ensure_vertex_number for a hpcshape */
+EX void ensure_vertex_number(hpcshape& sh) {
+  ensure_vertex_number(*sh.tinf, sh.e - sh.s);
   }
 
 const int FLOORTEXTURESIZE = 4096;

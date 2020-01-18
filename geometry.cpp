@@ -63,7 +63,8 @@ struct floorshape {
   int pstrength; // pattern strength in 3D
   int fstrength; // frame strength in 3D
   PPR prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE], levels[SIDEPARS], cone[2];
+  vector<hpcshape> b, shadow, side[SIDEPARS], levels[SIDEPARS], cone[2];
+  vector<vector<hpcshape>> gpside[SIDEPARS];
   floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
   };
 
@@ -112,8 +113,7 @@ struct geometry_information {
   /** distance from heptagon center to heptagon vertex (either hexf or hcrossf) */
   ld rhexf;
 
-  transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
-  transmatrix invhexmove[MAX_EDGE];
+  vector<transmatrix> heptmove, hexmove, invhexmove;
 
   int base_distlimit;
 
@@ -381,7 +381,7 @@ hpcshape
   /* Goldberg parameters */
   #if CAP_GP
   struct gpdata_t {
-    transmatrix Tf[MAX_EDGE][32][32][6];
+    vector<array<array<array<transmatrix, 6>, 32>, 32>> Tf;
     transmatrix corners;
     ld alpha;
     int area;
@@ -477,6 +477,10 @@ void geometry_information::prepare_basics() {
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
   
   finish:
+  
+  heptmove.resize(S7);
+  hexmove.resize(S7);
+  invhexmove.resize(S7);
   
   for(int d=0; d<S7; d++)
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);

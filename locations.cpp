@@ -110,7 +110,7 @@ struct gcell {
 #define landparam_color LHU.landpar_color
 #define fval LHU.fi.fieldval
 
-#define MAX_EDGE 18
+#define FULL_EDGE 120
 
 template<class T> struct walker;
 
@@ -125,10 +125,12 @@ template<class T> struct walker;
  *  and freed with tailored_free.
  */
 
+int gmod(int i, int j);
+
 template<class T> struct connection_table {
 
   /** Table of moves. This is the maximum size, but tailored_alloc allocates less. */
-  T* move_table[MAX_EDGE + (MAX_EDGE + sizeof(char*) - 1) / sizeof(char*)];
+  T* move_table[FULL_EDGE + (FULL_EDGE + sizeof(char*) - 1) / sizeof(char*)];
   
   unsigned char *spintable() { return (unsigned char*) (&move_table[full()->degree()]); }
 
@@ -145,7 +147,7 @@ template<class T> struct connection_table {
   /** on non-orientable surfaces, the d-th edge may be mirrored */
   bool mirror(int d) { return spintable() [d] & 128; }  
   /** 'fix' the edge number d to get the actual index in [0, degree()) */
-  int fix(int d) { return (d + MODFIXER) % full()->degree(); }
+  int fix(int d) { return gmod(d, full()->degree()); }
   /** T in the direction i */
   T*& move(int i) { return move_table[i]; }
   /** T in the direction i, modulo degree() */

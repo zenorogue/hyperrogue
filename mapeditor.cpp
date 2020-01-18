@@ -86,7 +86,7 @@ EX namespace mapeditor {
       c->hitpoints = c2->hitpoints;
       if(c2->mondir != NODIR) {
         auto si2 = patterns::getpatterninfo0(c2);
-        c->mondir = (c2->mondir - si2.dir + si.dir + MODFIXER) % c->type;
+        c->mondir = gmod(c2->mondir - si2.dir + si.dir, c->type);
         // todo reflect
         }
       }
@@ -434,7 +434,7 @@ namespace mapstream {
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
         // spinval becomes xspinval
-        rspin = (c2->c.spin(dir) - f.read_char() + MODFIXER) % (c->type - sub);
+        rspin = gmod(c2->c.spin(dir) - f.read_char(), c->type - sub);
         if(GDIM == 3 && rspin && !hybri) {
           println(hlog, "rspin in 3D");
           throw hstream_exception();
@@ -898,7 +898,7 @@ namespace mapeditor {
         c->hitpoints = copywhat->hitpoints;
         c->stuntime = copywhat->stuntime; 
         if(copywhat->mondir == NODIR) c->mondir = NODIR;
-        else c->mondir = ((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir + MODFIXER) % c->type;
+        else c->mondir = gmod((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir, c->type);
         break;
       }
     checkUndo();

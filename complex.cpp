@@ -64,7 +64,7 @@ EX namespace whirlwind {
     qdirs = 0;
     if(d == 0) return;
     int qdf = 0, qdt = 0;
-    int cats[MAX_EDGE];
+    vector<int> cats(c->type);
     for(int i=0; i<c->type; i++) 
       cats[i] = cat(createMov(c,i));
     for(int i=0; i<c->type; i++)
@@ -2923,11 +2923,10 @@ EX namespace kraken {
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       if(c->monst == moKrakenH && !c->stuntime && !isWateryOrBoat(c)) {
-        int qdir = 0;
-        cell *ctab[MAX_EDGE];
-        forCellEx(c2, c) if(isWatery(c2)) ctab[qdir++] = c2;
-        hrandom_shuffle(ctab, qdir);
-        while(qdir--) trymove(ctab[qdir]);
+        vector<cell*> ctab;
+        forCellEx(c2, c) if(isWatery(c2)) ctab.push_back(c2);
+        hrandom_shuffle(ctab);
+        for(auto& cc: ctab) trymove(cc);
         }
       }
     }
@@ -4052,14 +4051,6 @@ EX namespace dungeon {
         }
   
       if(c->wparam) {
-        /* int q = 0;
-        cell* downs[MAX_EDGE];
-        forCellEx(c2, c) {
-          buildEquidistant(c2);
-          if(coastvalEdge(c2) > coastvalEdge(c)) downs[q++] = c2;
-          }
-        if(q) downs[hrand(q)]->wall = waLadder;
-        */
         cell *c2 = 
           WDIM == 3 ? random_child(c, coastvalEdge) :
           c->wparam == 1 ? ts::add(c, 1, 2, coastvalEdge) :

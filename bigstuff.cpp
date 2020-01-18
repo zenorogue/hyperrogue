@@ -298,32 +298,32 @@ EX void generateTreasureIsland(cell *c) {
     beCIsland(c);
     if(c->wall == waCTree) return;
     }
-  cell* ctab[MAX_EDGE];
-  int qc = 0, qlo, qhi;
+  vector<cell*> ctab;
+  int qlo, qhi;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
     if(!eubinary) currentmap->generateAlts(c2->master);
     if((eubinary || (c->master->alt && c2->master->alt)) && celldistAlt(c2) < celldistAlt(c)) {
-      ctab[qc++] = c2;
+      ctab.push_back(c2);
       qlo = i; qhi = i;
-      while(true && qc < MAX_EDGE) {
+      while(true && isize(ctab) < c->type) {
         qlo--;
         c2 = c->cmodmove(qlo);
         if(!eubinary && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
-        ctab[qc++] = c2;
+        ctab.push_back(c2);
         }
-      while(true && qc < MAX_EDGE) {
+      while(true && isize(ctab) < c->type) {
         qhi++;
         c2 = c->cmodmove(qhi);
         if(!eubinary && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
-        ctab[qc++] = c2;
+        ctab.push_back(c2);
         }
       break;
       }
     }
-  if(!qc) { 
+  if(ctab.empty()) { 
     printf("NO QC\n"); c->wall = waSea; 
     for(int i=0; i<c->type; i++) printf("%d ", celldistAlt(c->move(i)));
     printf("vs %d\n", celldistAlt(c));
@@ -338,9 +338,9 @@ EX void generateTreasureIsland(cell *c) {
     }
   if(src && c2->wall == waCTree && (eubinary||c->master->alt) && celldistAlt(c) <= -10 && geometry != gRhombic3) {
     bool end = true;
-    for(int i=0; i<qc; i++) {
-      generateTreasureIsland(ctab[i]);
-      if(ctab[i]->wall != waCTree)
+    for(cell *cc: ctab) {
+      generateTreasureIsland(cc);
+      if(cc->wall != waCTree)
         end = false;
       }
     // printf("%p: end=%d, qc=%d, dist=%d\n", c, end, qc, celldistAlt(c));
@@ -571,8 +571,8 @@ EX void buildEquidistant(cell *c) {
       // if(qcv != 1) { printf("qcv = %d\n", qcv);  exit(1); }
       cell *c2 = c->move(sid);
       int bsid = c->c.spin(sid);
-      for(int j=0; j<7; j++) {
-        int q = (bsid+j+42) % c2->type;
+      for(int j=0; j<c2->type; j++) {
+        int q = gmod(bsid+j, c2->type);
         cell *c3 = c2->move(q);
         if(coastval(c3, b) < mcv) {
           cell *c4 = c2->cmodmove(bsid+1);
@@ -581,7 +581,7 @@ EX void buildEquidistant(cell *c) {
           mcv2 = coastval(c4, b);
           break;
           }
-        q = (bsid-j+MODFIXER) % c2->type;
+        q = gmod(bsid-j, c2->type);
         c3 = c2->move(q);
         if(coastval(c3, b) < mcv) {
           cell *c4 = c2->cmodmove(bsid-1);
@@ -774,14 +774,12 @@ EX void buildEquidistant(cell *c) {
   }
 
 EX cell *randomDown(cell *c) {
-  cell *tab[MAX_EDGE];
-  int q=0;
+  vector<cell*> tab;
   for(int i=0; i<c->type; i++) 
     if(c->move(i) && coastval(c->move(i), laIvoryTower) < coastval(c, laIvoryTower))
-      tab[q++] = c->move(i);
-  if(!q) return NULL;
-  if(q==1) return tab[0];
-  return tab[hrand(q)];
+      tab.push_back(c->move(i));
+  if(isize(tab)==1) return tab[0];
+  return hrand_elt(tab, (cell*)nullptr);
   }
 
 EX int edgeDepth(cell *c) {

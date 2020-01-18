@@ -321,8 +321,7 @@ EX bool reflectingBarrierAt(cell *c) {
 EX bool reflectingBarrierAt(cellwalker& c, int d) {
   if(d >= 3) return true;
   if(d <= -3) return true;
-  d = c.spin + d + MODFIXER;
-  d%=c.at->type;
+  d = gmod(c.spin + d, c.at->type);
   if(!c.at->move(d)) return true;
   
   return reflectingBarrierAt(c.at->move(d));
@@ -1104,8 +1103,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   // nature
   if(items[itOrbNature] && numplayers() == 1 && c->monst != moFriendlyIvy) {
-    int dirs[MAX_EDGE];
-    int qsides = 0;
+    vector<int> dirs;
     forCellIdCM(cf, d, c)
       if(cf->monst == moFriendlyIvy) {
 
@@ -1118,11 +1116,11 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
           if(strictlyAgainstGravity(c, cf, false, MF_IVY)) continue;
           if(monstersnear(cwt.at, NULL, moPlayer, c, cwt.at)) continue;
           }
-        dirs[qsides++] = d;
+        dirs.push_back(d);
         }
       
-    if(qsides > 0) {
-      int di = dirs[hrand(qsides)];
+    int di = hrand_elt(dirs, -1);
+    if(di != -1) {
       if(!isCheck(a)) growIvyTo(movei(c, di).rev());
       return itOrbNature;
       }

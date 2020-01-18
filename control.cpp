@@ -83,7 +83,7 @@ EX movedir vectodir(hyperpoint P) {
 
   ld binv = 99;
   
-  ld dirdist[MAX_EDGE];
+  vector<ld> dirdist(cwt.at->type);
 
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T = currentmap->adj(cwt.at, (cwt + i).spin);
@@ -139,7 +139,7 @@ EX void calcMousedest() {
   
   cellwalker bcwt = cwt;
   
-  ld dists[MAX_EDGE];
+  vector<ld> dists(cwt.at->type);
   
   transmatrix U = ggmatrix(cwt.at);
   

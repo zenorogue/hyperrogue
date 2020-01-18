@@ -858,7 +858,10 @@ void celldrawer::draw_halfvine() {
     queuepolyat(GDIM == 2 ? Vdepth : V2, cgi.shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
     {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW); }
     auto& side = queuepolyat(V2, cgi.shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2));
-    if(GDIM == 3 && qfi.fshape) side.tinf = &floor_texture_vertices[shar.id];
+    if(GDIM == 3 && qfi.fshape) {
+      side.tinf = &floor_texture_vertices[shar.id];
+      ensure_vertex_number(*side.tinf, side.cnt);
+      }
 
     if(cgi.validsidepar[SIDE_WALL]) forCellIdEx(c2, j, c) {
       int dis = i-j;
@@ -1570,6 +1573,7 @@ void celldrawer::draw_features_and_walls_3d() {
           #endif
           {
             poly.tinf = &floor_texture_vertices[qfi.fshape->id];
+            ensure_vertex_number(*poly.tinf, poly.cnt);
             poly.offset_texture = 0;
             }
           }
@@ -1813,7 +1817,7 @@ void celldrawer::draw_cellstat() {
   
     auto si = patterns::getpatterninfo0(c);
     
-    for(int i=(si.dir + MODFIXER) % si.symmetries; i<c->type; i += si.symmetries) {
+    for(int i= gmod(si.dir, si.symmetries); i<c->type; i += si.symmetries) {
       queuepoly(V * ddspin(c, i) * (si.reflect?Mirror:Id), cgi.shAsymmetric, darkena(0x000000, 0, 0xC0));
       si.dir += si.symmetries;
       }

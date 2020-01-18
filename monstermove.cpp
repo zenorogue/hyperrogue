@@ -19,7 +19,7 @@ EX int sagephase = 0;
 EX vector<cell*> targets;
 
 /** monsters to move, ordered by the number of possible good moves */
-vector<cell*> movesofgood[MAX_EDGE+1];
+grow_vector<vector<cell*>> movesofgood;
 
 EX vector<pair<cell*, int> > butterflies;
 
@@ -538,11 +538,12 @@ EX int totalbulldistance(cell *c, int k) {
   return tbd;
   }
 
-EX void determinizeBull(cell *c, int *posdir, int& nc) {
+EX void determinizeBull(cell *c, vector<int>& posdir) {
   // determinize the Angry Beast movement:
   // use the previous PC's positions as the tiebreaker
+  int nc = isize(posdir);
   for(int k=0; k<SHSIZE && nc>1; k++) {
-    int pts[MAX_EDGE];
+    vector<int> pts(nc);
     for(int d=0; d<nc; d++) pts[d] = totalbulldistance(c->cmove(posdir[d]), k);
 
     int bestpts = 1000;
@@ -551,46 +552,46 @@ EX void determinizeBull(cell *c, int *posdir, int& nc) {
     for(int d=0; d<nc; d++) if(pts[d] == bestpts) posdir[nc0++] = posdir[d];
     nc = nc0;
     }
+  posdir.resize(nc);
   }
 
 EX int determinizeBullPush(cellwalker bull) {
-  int nc = 2;
-  int dirs[2], positive;
+  vector<int> dirs(2);
+  int positive;
   bull += wstep;
   cell *c2 = bull.at;
   if(!(c2->type & 1)) return 1; // irrelevant
   int d = c2->type / 2;
   bull += d; dirs[0] = positive = bull.spin;
   bull -= 2*d; dirs[1] = bull.spin;
-  determinizeBull(c2, dirs, nc);
+  determinizeBull(c2, dirs);
   if(dirs[0] == positive) return -1;
   return 1;
   }    
 
-int posdir[MAX_EDGE], nc;
+vector<int> global_posdir;
 
 EX int pickMoveDirection(cell *c, flagtype mf) {
   int bestval = stayval(c, mf);
-  nc = 1; posdir[0] = -1;
+  global_posdir = {-1};
 
   // printf("stayval [%p, %s]: %d\n", c, dnameof(c->monst), bestval);
   for(int d=0; d<c->type; d++) {
     cell *c2 = c->move(d);
     int val = moveval(c, c2, d, mf);
     // printf("[%d] %p: val=%5d pass=%d\n", d, c2, val, passable(c2,c,0));
-    if(val > bestval) nc = 0, bestval = val;
-    if(val == bestval) posdir[nc++] = d;
+    if(val > bestval) global_posdir.clear(), bestval = val;
+    if(val == bestval) global_posdir.push_back(d);
     }
   
   if(c->monst == moRagingBull) 
-    determinizeBull(c, posdir, nc);
+    determinizeBull(c, global_posdir);
     
-  if(!nc) return -1;
-  return posdir[hrand(nc)];
+  return hrand_elt(global_posdir, -1);
   }
 
 EX int pickDownDirection(cell *c, flagtype mf) {
-  int downs[MAX_EDGE], qdowns = 0;
+  vector<int> downs;
   int bestdif = -100;
   forCellIdEx(c2, i, c) {
     if(gravityLevelDiff(c2, c) < 0 && passable_for(c->monst, c2, c, P_MIRROR) &&
@@ -602,12 +603,11 @@ EX int pickDownDirection(cell *c, flagtype mf) {
       // printf("i=%d md=%d dif=%d\n", i, c->mondir, cdif);
       if(c2->wall == waClosePlate || c->wall == waClosePlate)
         cdif += 20;
-      if(cdif > bestdif) bestdif = cdif, qdowns = 0;
-      if(cdif == bestdif) downs[qdowns++] = i;
+      if(cdif > bestdif) bestdif = cdif, downs.clear();
+      if(cdif == bestdif) downs.push_back(i);
       }
     }
-  if(!qdowns) return -1;
-  return downs[hrand(qdowns)];
+  return hrand_elt(downs, -1);
   }
 
 // Angry Beast attack
@@ -657,7 +657,7 @@ EX cell *moveNormal(cell *c, flagtype mf) {
   int d;
   
   if(c->stuntime) {
-    if(cellEdgeUnstable(c, MF_STUNNED)) d = pickDownDirection(c, mf), nc = 1, posdir[0] = d;
+    if(cellEdgeUnstable(c, MF_STUNNED)) d = pickDownDirection(c, mf), global_posdir = {d};
     else return NULL;
     }
   else {
@@ -706,8 +706,8 @@ EX cell *moveNormal(cell *c, flagtype mf) {
     }
   else {
     bool attacking = false;
-    for(int i=0; i<nc; i++) {
-      cell *c2 = c->move(posdir[i]);
+    for(int dir: global_posdir) {
+      cell *c2 = c->move(dir);
 
       if(isPlayerOn(c2)) {
         killThePlayerAt(m, c2, 0); 
@@ -725,8 +725,8 @@ EX cell *moveNormal(cell *c, flagtype mf) {
         }
       }
     
-    if(!attacking) for(int i=0; i<nc; i++) {
-      movei mi(c, posdir[i]);
+    if(!attacking) for(int dir: global_posdir) {
+      movei mi(c, dir);
       if(!c->monst) c->monst = m;
       moveMonster(mi);
       if(m == moRagingBull) beastAttack(mi.t, false, false);
@@ -1152,13 +1152,12 @@ EX void groupmove(eMonster movtype, flagtype mf) {
   
   for(int i=0; i<isize(gendfs); i++) {
     cell *c = gendfs[i];
-    int dirtable[MAX_EDGE], qdirtable=0;
+    vector<int> dirtable;
     
-    forCellIdAll(c2,t,c) dirtable[qdirtable++] = t;
-    hrandom_shuffle(dirtable, qdirtable);
+    forCellIdAll(c2,t,c) dirtable.push_back(t);
+    hrandom_shuffle(dirtable);
 
-    while(qdirtable--) {
-      int t = dirtable[qdirtable];
+    for(auto& t: dirtable) {
       groupmove2(movei(c, t).rev(),movtype,mf);
       }
       
@@ -1287,13 +1286,12 @@ EX void movehex(bool mounted, int colorpair) {
   
   for(int i=0; i<isize(hexdfs); i++) {
     cell *c = hexdfs[i];
-    int dirtable[MAX_EDGE], qdirtable=0;
+    vector<int> dirtable;
     for(int t=0; t<c->type; t++) if(c->move(t) && inpair(c->move(t), colorpair))
-      dirtable[qdirtable++] = t;
+      dirtable.push_back(t);
       
-    hrandom_shuffle(dirtable, qdirtable);
-    while(qdirtable--) {
-      int t = dirtable[qdirtable];
+    hrandom_shuffle(dirtable);
+    for(auto& t: dirtable) {
       hexvisit(c->move(t), c, t, mounted, colorpair);
       }
     }
@@ -1306,13 +1304,11 @@ EX void movehex_rest(bool mounted) {
     if(c->monst == moHexSnake) {
       colorpair = snake_pair(c);
       if(!goodmount(c, mounted)) continue;
-      int t[MAX_EDGE];
-      for(int i=0; i<c->type; i++) t[i] = i;
-      for(int j=1; j<c->type; j++) swap(t[j], t[hrand(j+1)]);
+      vector<int> dirtable = hrandom_permutation(c->type);
       for(int u=0; u<c->type; u++) {
-        createMov(c, t[u]);
-        if(inpair(c->move(t[u]), colorpair))
-          hexvisit(c, c->move(t[u]), c->c.spin(t[u]), mounted, colorpair);
+        createMov(c, dirtable[u]);
+        if(inpair(c->move(dirtable[u]), colorpair))
+          hexvisit(c, c->move(dirtable[u]), c->c.spin(dirtable[u]), mounted, colorpair);
         }
       }
     if(c->monst == moHexSnake) {
@@ -1429,7 +1425,7 @@ EX void moveshadow() {
 EX void moveghosts() {
 
   if(invismove) return;
-  for(int d=0; d<=MAX_EDGE; d++) movesofgood[d].clear();  
+  movesofgood.clear();
 
   for(int i=0; i<isize(ghosts); i++) {
     cell *c = ghosts[i];
@@ -1444,19 +1440,18 @@ EX void moveghosts() {
         if(ghostmove(c->monst, c->move(k), c) && !isPlayerOn(c->move(k)))
           goodmoves++;
       
-      movesofgood[goodmoves].push_back(c);
+      movesofgood.grow(goodmoves).push_back(c);
       }
     }
   
-  for(int d=0; d<=MAX_EDGE; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
-    cell *c = movesofgood[d][i];
+  for(auto& v: movesofgood) for(cell *c: v) {
 
     if(c->stuntime) continue;    
     if(isPowerMonster(c) && !playerInPower()) continue;
     
     if(isGhostMover(c->monst) && c->cpdist >= 1) {
       
-      int mdir[MAX_EDGE];
+      vector<int> mdir;
 
       for(int j=0; j<c->type; j++) 
         if(c->move(j) && canAttack(c, c->monst, c->move(j), c->move(j)->monst, AF_GETPLAYER | AF_ONLY_FBUG)) {
@@ -1466,12 +1461,11 @@ EX void moveghosts() {
           goto nextghost;
           }
     
-      int qmpos = 0;
       for(int k=0; k<c->type; k++) if(c->move(k) && c->move(k)->cpdist < c->cpdist)
         if(ghostmove(c->monst, c->move(k), c))
-          mdir[qmpos++] = k;
-      if(!qmpos) continue;
-      int d = mdir[hrand(qmpos)];
+          mdir.push_back(k);
+      if(mdir.empty()) continue;
+      int d = hrand_elt(mdir);
       cell *c2 = c->move(d);
       if(c2->monst == moTortoise && c2->stuntime > 1) {
         addMessage(XLAT("%The1 scares %the2 a bit!", c->monst, c2->monst));
@@ -1606,15 +1600,16 @@ EX void movegolems(flagtype flags) {
       for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
 
       DEBB(DF_TURN, ("stayval"));
-      int bestv = stayvalue(m, c), bq = 0, bdirs[MAX_EDGE];
+      int bestv = stayvalue(m, c);
+      vector<int> bdirs;
 
       DEBB(DF_TURN, ("moveval"));
       for(int k=0; k<c->type; k++) if(c->move(k)) {
         cell *c2 = c->move(k);
         int val = movevalue(m, c, c2, flags);
 
-        if(val > bestv) bestv = val, bq = 0;
-        if(val == bestv) bdirs[bq++] = k;
+        if(val > bestv) bestv = val, bdirs.clear();
+        if(val == bestv) bdirs.push_back(k);
         }
       
       if(m == moTameBomberbird) {
@@ -1622,8 +1617,8 @@ EX void movegolems(flagtype flags) {
         if(c2 && !c2->monst) {
           int val = movevalue(m, c, c2, flags);
           // printf("val = %d bestv = %d\n", 
-          if(val > bestv) bestv = val, bq = 0;
-          if(val == bestv) bdirs[bq++] = STRONGWIND;
+          if(val > bestv) bestv = val, bdirs.clear();
+          if(val == bestv) bdirs.push_back(STRONGWIND);
           }
         }
 
@@ -1631,8 +1626,8 @@ EX void movegolems(flagtype flags) {
       
 //    printf("stayvalue = %d, result = %d, bq = %d\n", stayvalue(m,c), bestv, bq);
         
-      if(bq == 0) continue;
-      int dir = bdirs[hrand(bq)];
+      if(bdirs.empty()) continue;
+      int dir = hrand_elt(bdirs);
       auto mi = movei(c, dir);
       auto& c2 = mi.t;
       if(c2->monst) {
@@ -1882,16 +1877,16 @@ EX void consMove(cell *c, eMonster param) {
       if(c2 && c2->pathdist < c->pathdist)
         goodmoves++;
       }
-    movesofgood[goodmoves].push_back(c);
+    movesofgood.grow(goodmoves).push_back(c);
     }
   else 
-    movesofgood[0].push_back(c);
+    movesofgood.grow(0).push_back(c);
   }
 
 EX void moveNormals(eMonster param) {
   pathdata pd(param);
-
-  for(int d=0; d<=MAX_EDGE; d++) movesofgood[d].clear();
+  
+  movesofgood.clear();
 
   for(int i=0; i<isize(pathqm); i++) 
     consMove(pathqm[i], param);
@@ -1902,8 +1897,7 @@ EX void moveNormals(eMonster param) {
     if(c->pathdist == PINFD) consMove(c, param);
     }
 
-  for(int d=0; d<=MAX_EDGE; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
-    cell *c = movesofgood[d][i];
+  for(auto& v: movesofgood) for(cell *c: v) {
     if(minf[c->monst].mgroup == moYeti) {
       moveNormal(c, MF_PATHDIST);
       }

@@ -28,7 +28,7 @@ EX eMonster who_kills_me;
 
 EX int lastkills;
 
-EX bool legalmoves[MAX_EDGE+1];
+EX vector<bool> legalmoves;
 
 EX bool hasSafeOrb(cell *c) {
   return 
@@ -402,11 +402,11 @@ EX void checkmove() {
   // do not activate orbs!
   for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
 
-  for(int i=0; i<=MAX_EDGE; i++) legalmoves[i] = false;
+  legalmoves.clear(); legalmoves.resize(cwt.at->type+1, false);
 
   canmove = haveRangedTarget();
   items[itWarning]+=2;
-  if(movepcto(-1, 0, true)) canmove = legalmoves[MAX_EDGE] = true;
+  if(movepcto(-1, 0, true)) canmove = legalmoves[cwt.at->type] = true;
   
   if(vid.mobilecompasssize || !canmove)
     for(int i=0; i<cwt.at->type; i++) 

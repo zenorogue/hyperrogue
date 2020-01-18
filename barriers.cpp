@@ -841,9 +841,7 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
   bool warpv = warped_version(c->land, l2);
   if(warpv && !arcm::in() && !pseudohept(c)) return false;
   
-  int ds[MAX_EDGE];
-  for(int i=0; i<c->type; i++) ds[i] = i;
-  for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
+  vector<int> ds = hrandom_permutation(c->type);
 
   for(int i=0; i<c->type; i++) {
     int d = forced_dir != NODIR ? forced_dir : (valence()>3) ? (2+(i&1)) : ds[i];
