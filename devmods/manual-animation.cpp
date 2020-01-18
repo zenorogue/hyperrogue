@@ -112,6 +112,86 @@ void get_b4_distance() {
     }
   }
 
+void load_animation(string fname) {
+  fhstream f(fname, "r");
+  int siz;
+  f.read<int>(siz);
+  saved.resize(siz);
+  for(int i=0; i<isize(saved); i++) {
+    auto& [a, b, d] = saved[i];
+    hread_raw(f, a);
+    hread_raw(f, b);
+    int tmp = 0; hread_raw(f, tmp);
+    crystal::coord co;
+    hread_raw(f, co);
+    d = crystal::get_heptagon_at(co)->c7;
+    }
+  println(hlog, "loaded animation of ", isize(saved), " frames");
+  }  
+
+EX transmatrix spintox_good(const hyperpoint& H) {
+  if(GDIM == 2 || prod) return spintox(H); 
+  double v = -atan2(H[2], H[1]);
+  return cspin(2, 1, -v) * spintoc(cspin(2, 1, v) * H, 0, 1) *cspin(2, 1, v);
+  // cspin(2, 1, v) * spintoc(cspin(2, 1, -v) * H, 0, 1);
+  }
+
+void denan() {
+  for(int i=1; i<isize(saved)-1; i++) {
+    auto& [V, b, co] = saved[i];
+    if(isnan(V[0][0])) {
+      println(hlog, "nan at ", i, " @ ", co);
+      saved[i] = saved[i-1];
+      }
+    }
+  }
+
+transmatrix relm(cell *a, cell *b) {
+  forCellIdEx(c, id, b) if(c == a) return currentmap->adj(b, id);
+  forCellIdEx(c, id, b) 
+    forCellIdEx(d, id2, c) if(d == a) return currentmap->adj(b, id) * currentmap->adj(c, id2);
+  return currentmap->relative_matrix(a, b, C0);
+  }  
+
+void smoothen() {
+  ld total = 0;
+  
+  for(int a=1; a<3; a++)
+  for(int i=1; i<isize(saved)-1; i++) if((a^i)&1) {
+    auto& [V, b, co] = saved[i];
+    auto& [Vl, bl, col] = saved[i-1];
+    auto& [Vn, bn, con] = saved[i+1];
+    forCellCM(c, co);
+    hyperpoint hl = V * relm(col, co) * inverse(Vl) * C0;
+    hyperpoint hn = V * relm(con, co) * inverse(Vn) * C0;
+    hyperpoint hm = mid(hl, hn);
+    if(isnan(hm[0])) {
+      println(hlog, "Vl = ", Vl);
+      println(hlog, "V  = ", V);
+      println(hlog, "Vn = ", Vn);
+      println(hlog, "cells ", col, co, con);
+      println(hlog, "crl= ", relm(col, co));
+      println(hlog, "crm= ", relm(con, co));
+      continue;
+      }
+    total += hdist0(hm);
+    V = gpushxto0(hm) * V;
+    auto xhn = gpushxto0(hm) * hn;
+    transmatrix T = cspin(0, 2, -M_PI/2) * spintox_good(cspin(0, 2, M_PI/2) * xhn) * cspin(0, 2, M_PI/2);
+    V = T * V;
+    // println(hlog, hn, " -> ", T * xhn);
+    }
+  println(hlog, "total = ", total);
+  }
+
+string mrec_file = "devmods/manual/%05d.png";
+
+int mrec_x = 1920;
+int mrec_y = 1080;
+int mrec_cells = 24000;
+
+int mrec_first = 0, mrec_last = 999999;
+
 bool trailer_handleKey(int sym, int uni) {  
 
   if(sym == 'f' && (cmode & sm::NORMAL)) {
@@ -204,23 +284,8 @@ bool trailer_handleKey(int sym, int uni) {
       println(hlog, "saved animation of ", isize(saved), " frames");
       }
   
-    if(sym == ']') {
-      fhstream f("devmods/manan-record.mar", "r");
-      int siz;
-      f.read<int>(siz);
-      saved.resize(siz);
-      for(int i=0; i<isize(saved); i++) {
-        auto& [a, b, d] = saved[i];
-        hread_raw(f, a);
-        hread_raw(f, b);
-        int tmp = 0; hread_raw(f, tmp);
-        crystal::coord co;
-        hread_raw(f, co);
-        d = crystal::get_heptagon_at(co)->c7;
-        }
-      println(hlog, "loaded animation of ", isize(saved), " frames");
-      }
-  
+    if(sym == ']') load_animation("devmods/manan-record.mar");
+    
     if(sym == 'r') {
       recording = true;
       if(mouseaim_sensitivity) {
@@ -240,15 +305,30 @@ bool trailer_handleKey(int sym, int uni) {
       int i = 0;
       shot::take("anim/start.png");
       shot::transparent = false;
+
+      shot::shotx = mrec_x;
+      shot::shoty = mrec_y;
+      
+//       shot::shotx = 4096;
+//      shot::shoty = 4096;
+
 //      shot::shotx = 1920;
 //      shot::shoty = 1080;
-      shot::shot_aa = 2;
-      solnihv::solrange_xy = 30;
-      solnihv::solrange_z = 6;
-      vid.cells_drawn_limit = 200000;
-      vid.cells_generated_limit = 10000;
-//    sightranges[geometry] = 4;
-      static int lasti = 0;
+//      shot::shot_aa = 2;
+      // solnihv::solrange_xy = 30;
+      // solnihv::solrange_z = 6;
+
+      sightranges[geometry] = 6;
+      vid.cells_drawn_limit = 10;
+      vid.cells_generated_limit = 1000;
+      
+      // vid.stereo_mode = sODS;
+      // sightranges[geometry] = 7;
+      // sightranges[geometry] += 1;
+      // static int lasti = 68;
+      
+      ray::max_cells = mrec_cells;
+      // 60..4352
       
       system("mkdir -p devmods/manual/");
         
@@ -260,7 +340,7 @@ bool trailer_handleKey(int sym, int uni) {
 
         if(true) {
           println(hlog, "recording frame ", i);
-          shot::take(format("devmods/manual/%05d.png", i));
+          shot::take(format(mrec_file.c_str(), i));
           }
         else 
           println(hlog, "skipping frame ", i);
@@ -268,7 +348,7 @@ bool trailer_handleKey(int sym, int uni) {
         i++;
         }
 
-      lasti = i;
+      // lasti = i;
       recording = false;
       }
     }
@@ -276,10 +356,51 @@ bool trailer_handleKey(int sym, int uni) {
   return false;
   }
 
+int readArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-loada")) {
+    start_game();
+    shift(); load_animation(args());
+    }
+  else if(argis("-smoothen")) {
+    PHASEFROM(2); 
+    shift(); int nsm = argi();
+    denan();
+    for(int i=0; i<nsm; i++) smoothen();
+    }
+  else if(argis("-mrecxy")) {
+    PHASEFROM(2);
+    shift(); mrec_x = argi();
+    shift(); mrec_y = argi();
+    }
+  else if(argis("-mrecq")) {
+    PHASEFROM(2);
+    shift(); mrec_cells = argi();
+    }
+  else if(argis("-mrecf")) {
+    PHASEFROM(2);
+    shift(); mrec_first = argi();
+    }
+  else if(argis("-mrecl")) {
+    PHASEFROM(2);
+    shift(); mrec_last = argi();
+    }
+  else if(argis("-mrec-to")) {
+    PHASEFROM(2);
+    shift(); mrec_file = args();
+    }
+  else return 1;
+  return 0;
+  }
+
+
 auto hook = 
   addHook(hooks_handleKey, 100, trailer_handleKey)
 + addHook(hooks_drawmap, 100, trailer_frame)
 + addHook(shmup::hooks_turn, 100, trailer_turn)
++ addHook(hooks_args, 100, readArgs)
 + 0;
 
 }
