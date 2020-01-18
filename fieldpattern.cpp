@@ -284,7 +284,9 @@ struct fpattern {
     
   fpattern(int p) {
     force_hash = 0;
-    dis = nullptr;    
+    #if CAP_THREAD
+    dis = nullptr;
+    #endif
     if(!p) return;
     init(p);
     }
