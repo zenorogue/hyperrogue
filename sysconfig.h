@@ -15,6 +15,7 @@
 
 #ifdef WINDOWS
 #define ISWINDOWS 1
+#define _WIN32_WINNT 0x0501
 #endif
 
 // OS settings
