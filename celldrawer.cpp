@@ -2447,6 +2447,8 @@ void celldrawer::draw() {
       if(cw2.mirrored != cw.mirrored) V = V * Mirror;
       if(cw2.spin) V = V * spin(2*M_PI*cw2.spin/cw2.at->type);
       cw2.spin = 0;
+      dynamicval<transmatrix> dc(cwtV, cwtV);
+      cwtV = V * inverse(gmatrix0[c]) * cwtV;
       drawcell(cw2.at, V);
       inmirrorcount -= cmc;
       return;
