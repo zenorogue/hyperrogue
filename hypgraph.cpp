@@ -994,7 +994,7 @@ EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   if(bt::in()) return V;
   #endif
   if(kite::in()) return V;
-  return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
+  return (hs.spin || !BITRUNCATED) ? V * spin(hs.spin*2*M_PI/hs.at->type + master_to_c7_angle()) : V;
   }
 
 EX bool point_behind(hyperpoint h) {
@@ -1231,12 +1231,18 @@ void hrmap_standard::draw() {
     bool draw = drawcell_subs(c, actualV(hs, V1));
     
     if(sphere) draw = true;
-  
-    if(draw) for(int d=0; d<S7; d++) {
+
+    if(draw) for(int d=0; d<c->type; d++) {
       hstate s2 = transition(s, d);
       if(s2 == hsError) continue;
       heptspin hs2 = hs + d + wstep;
-      transmatrix Vd = V * cgi.heptmove[d];
+      transmatrix Vd;
+      if(inforder::mixed()) {
+        int d1 = gmod(hs.spin+d, c->type);
+        Vd = V * spin(-2*M_PI*d/c->type) * xpush(spacedist(c, d1)) * spin(M_PI);
+        }
+      else
+        Vd = V * cgi.heptmove[d];
       bandfixer bf(Vd);
       drawn_cells.emplace_back(hs2, s2, Vd, band_shift);
       }

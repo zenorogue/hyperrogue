@@ -724,6 +724,7 @@ enum eGeometry {
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
   gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
   gSpace535, gSpace536, gSeifertCover, gSeifertWeber, gHomologySphere,
+  gInfOrderMixed,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -788,6 +789,7 @@ static const flagtype qOPTQ            = Flag(19);
 static const flagtype qSINGLE          = Flag(20);
 
 static const flagtype qDEPRECATED      = Flag(21);
+static const flagtype qINFMIXED        = Flag(22);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -900,6 +902,7 @@ EX vector<geometryinfo> ginf = {
   {"{5,3,5}","SWh",     "{5,3,5} quotient",                           "535c",    12, 5, qsSMALLB | qANYQ, giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{5,3,5}","SW",      "Seifert-Weber space",                        "535s",    12, 5, qsSINGLE,  giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{5,3,3}","SW",      "Poincaré homology sphere",                   "533s",    12, 3, qsSINGLE,  giSphere3, 0x31400, {{7, 2}}, eVariation::pure},
+  {"{?,oo}", "none",    "{3/4,∞} (infinite triangles and squares)",   "ooxm",     3, OINF, qIDEAL | qINFMIXED,  giHyperb2, 0x49400, {{6, 6}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

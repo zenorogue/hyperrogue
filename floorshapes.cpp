@@ -667,6 +667,8 @@ void geometry_information::generate_floorshapes() {
   #endif
     
   else if(GOLDBERG) { /* will be generated on the fly */ }
+
+  else if(inforder::mixed()) { /* will be generated on the fly */ }
   
   #if CAP_BT
   else if(kite::in()) {
@@ -868,6 +870,34 @@ EX int shvid(cell *c) {
     return kite::getshape(c->master);
   else if(geometry == gBinary4 || geometry == gTernary)
     return c->master->zebraval;
+  else if(inforder::mixed()) {
+    int t = c->type;
+    static vector<bool> computed;
+    if(isize(computed) <= t) computed.resize(t+1);
+    if(!computed[t]) {
+      computed[t] = true;
+      cell model;
+      heptagon modelh;
+      model.type = t;
+      modelh.type = t;
+      S7 = t;
+      for(int i=0; i<S7; i++) {
+        model.move(i) = &model;
+        modelh.move(i) = &modelh;
+        model.c.setspin(i, i, false);
+        modelh.c.setspin(i, i, false);
+        }
+
+      cgi.tessf = edge_of_triangle_with_angles(0, M_PI/t, M_PI/t);
+      cgi.crossf = cgi.tessf;
+      
+      println(hlog, "generating floorshapes for ", t);
+      cgi.generate_floorshapes_for(t, &model, 0, 0);
+      cgi.finishshape();
+      cgi.extra_vertices();
+      }
+    return t;
+    }
   else if(PURE)
     return 0;
   else

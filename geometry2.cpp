@@ -66,6 +66,12 @@ namespace gp { extern gp::local_info draw_li; }
 #endif
 
 transmatrix hrmap_standard::adj(heptagon *h, int d) {
+  if(inforder::mixed()) {
+    int t0 = h->type;
+    int t1 = h->cmove(d)->type;
+    int sp = h->c.spin(d);
+    return spin(-d * 2 * M_PI / t0) * xpush(spacedist(h->c7, d)) * spin(M_PI + 2*M_PI*sp/t1);
+    }
   transmatrix T = cgi.heptmove[d];
   if(h->c.mirror(d)) T = T * Mirror;
   int sp = h->c.spin(d);
@@ -120,7 +126,7 @@ transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hy
         }
       if(bestdist < 1e8) return T;
       }
-    for(int d=0; d<S7; d++) if(h1->move(d) == h2) {
+    for(int d=0; d<h1->type; d++) if(h1->move(d) == h2) {
       return gm * adj(h1, d) * where;
       }
     if(among(geometry, gFieldQuotient, gBring, gMacbeath)) {
@@ -326,7 +332,7 @@ EX bool no_easy_spin() {
 ld hrmap_standard::spin_angle(cell *c, int d) {
   if(WDIM == 3) return SPIN_NOT_AVAILABLE;
   ld hexshift = 0;
-  if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/S7;
+  if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/c->type;
   else if(cgi.hexshift && c == c->master->c7) hexshift = cgi.hexshift;
   if(IRREGULAR) {
     auto id = irr::cellindex[c];
@@ -345,6 +351,18 @@ EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
     
 double hrmap_standard::spacedist(cell *c, int i) {
   if(NONSTDVAR || WDIM == 3) return hrmap::spacedist(c, i);
+  if(inforder::mixed()) {
+    int t0 = c->type;
+    int t1 = c->cmove(i)->type;
+    auto halfmove = [] (int i) {
+      if(i == 1) return 0.0;
+      if(i == 2) return 0.1;
+      return edge_of_triangle_with_angles(0, M_PI/i, M_PI/i);
+      };
+    ld tessf0 = halfmove(t0);
+    ld tessf1 = halfmove(t1);
+    return (tessf0 + tessf1) / 2;
+    }  
   if(!BITRUNCATED) return cgi.tessf;
   if(c->type == S6 && (i&1)) return cgi.hexhexdist;
   return cgi.crossf;

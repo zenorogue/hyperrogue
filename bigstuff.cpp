@@ -140,12 +140,12 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
   if(GOLDBERG)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
-  for(int i=0; i<S7; i++) 
+  for(int i=0; i<h->type; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
   int relspin = -4; // for horocycles it must go the other way
   if(quotient) relspin = 0;
   else {
-  for(int j=0; j<S7; j++) for(int i=0; i<S7; i++) {
+  for(int j=0; j<h->type; j++) for(int i=0; i<h->type; i++) {
     createStep(h, i);
     if(h->move(i)->alt == h->alt->move(j)) {
       relspin = (i-j+S7) % S7;
@@ -163,8 +163,9 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     } }
   // h[relspin] matches alt[0]
 //printf("{%d~%d}\n", h->distance, h->alt->distance);
-  for(int i=0; i<S7; i++) {
-    int ir = (S7+i-relspin)%S7;
+  if(h->type != h->alt->type) return;
+  for(int i=0; i<h->type; i++) {
+    int ir = gmod(i-relspin, h->type);
     heptagon *hm = h->alt->move(ir);
     heptagon *ho = createStep(h, i);
 //  printf("[%p:%d ~ %p:%d] %p ~ %p\n", 
@@ -241,7 +242,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     if(!polarb50(c)) return NULL;
     }
   
-  heptagon *alt = tailored_alloc<heptagon> (S7);
+  heptagon *alt = tailored_alloc<heptagon> (h->type);
   allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", alt);
   alt->s = firststate;
