@@ -3764,3 +3764,9 @@ Geometries:
 - improved Solv rendering
 - fixed some bugs with tessellations from files (fixed line animation, fixed bad performance when away from the start, dealt with numerical errors, fixed spherical plain floors)
 - paper model creator now available in OSX
+
+2020-01-19 00:16 Version 11.2u:
+- raised the limit on the number of edges to 120
+- extended 'linewidth' settings: illustration mode, hint about Alt, disable shadows, bright mode, colorblind simulation
+- fixed the direction reflected monsters face in the Hall of Mirrors
+- mixed infinite order
