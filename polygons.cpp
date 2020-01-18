@@ -17,10 +17,11 @@ static constexpr ld WOLF = (-15.5);
 
 void geometry_information::hpcpush(hyperpoint h) {
   if(sphere) h = mid(h,h);
-  ld threshold = (GDIM == 3 || last->flags & POLY_TRIANGLES)  ? 100 : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
+  ld error_threshold = euclid ? 1000 : 1e10;
+  ld threshold = (GDIM == 3 || last->flags & POLY_TRIANGLES)  ? error_threshold : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
   if(/*vid.usingGL && */!first) {
     ld i = intval(hpc.back(), h);
-    if(i > threshold && (i < 100 || S3 >= OINF)) {
+    if(i > threshold && i < error_threshold) {
       hyperpoint md = mid(hpc.back(), h);
       hpcpush(md);
       hpcpush(h);
