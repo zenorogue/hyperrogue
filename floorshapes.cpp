@@ -552,7 +552,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           }
 
         finishshape();
-        ensure_vertex_number(*last);
+        ensure_vertex_number(fsh.levels[k][id]);
         }
       
       for(int co=0; co<2; co++) {
@@ -584,19 +584,17 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           }
 
         finishshape();
-        ensure_vertex_number(*last);
+        ensure_vertex_number(fsh.cone[co][id]);
         }
 
       for(int l=0; l<SIDEPARS; l++) {
-        for(auto& li: fsh.side[l]) {
-          li.tinf = &floor_texture_vertices[fsh.id];
-          ensure_vertex_number(li);
+        for(auto& li: fsh.side[l]) 
+          bind_floor_texture(li, fsh.id);
+        fsh.gpside[l].resize(c->type);
+        for(auto& gs: fsh.gpside[l]) {
+          for(auto& li: gs) 
+            bind_floor_texture(li, fsh.id);
           }
-        for(auto& gs: fsh.gpside[l])
-          for(auto& li: gs) {
-            li.tinf = &floor_texture_vertices[fsh.id];
-            ensure_vertex_number(li);
-            }
         }
       }
       
@@ -606,19 +604,20 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       for(int l=0; l<SIDEPARS; l++) {
         fsh.levels[l] = shFullFloor.levels[l];
         fsh.shadow = shFullFloor.shadow;
-        for(auto& li: fsh.levels[l]) li.tinf = &floor_texture_vertices[fsh.id];
+        for(auto& li: fsh.levels[l]) bind_floor_texture(li, fsh.id);
         fsh.side[l] = shFullFloor.side[l];
-        for(auto& li: fsh.side[l]) li.tinf = &floor_texture_vertices[fsh.id];
+        for(auto& li: fsh.side[l]) bind_floor_texture(li, fsh.id);
         fsh.gpside[l].resize(c->type);
         for(int e=0; e<c->type; e++) {
           fsh.gpside[l][e] = shFullFloor.gpside[l][e];
-          for(auto& li: fsh.gpside[l][e]) li.tinf = &floor_texture_vertices[fsh.id];
+          for(auto& li: fsh.gpside[l][e]) 
+            bind_floor_texture(li, fsh.id);
           }
         fsh.cone[0] = shFullFloor.cone[0];
         fsh.cone[1] = shFullFloor.cone[1];
         for(int c=0; c<2; c++)
           for(auto& li: fsh.cone[c])
-            li.tinf = &floor_texture_vertices[fsh.id];
+            bind_floor_texture(li, fsh.id);
         }
       }
     finishshape();
@@ -1056,6 +1055,11 @@ EX void ensure_vertex_number(basic_textureinfo& bti, int qty) {
 /** ensure_vertex_number for a hpcshape */
 EX void ensure_vertex_number(hpcshape& sh) {
   ensure_vertex_number(*sh.tinf, sh.e - sh.s);
+  }
+
+EX void bind_floor_texture(hpcshape& li, int id) {
+  li.tinf = &floor_texture_vertices[id];
+  ensure_vertex_number(li);
   }
 
 const int FLOORTEXTURESIZE = 4096;

@@ -150,12 +150,9 @@ EX namespace netgen {
     
     for(int i=0; i<CELLS; i++) scan(f, ct[i]);
 
-    for(int i=0; i<CELLS; i++) nei[i].resize(ct[i]);
+    for(int i=0; i<CELLS; i++) nei[i].clear(), nei[i].resize(ct[i], -1);
 
     for(int i=0; i<CELLS; i++) for(int j=0; j<16; j++) scan(f, vx[i][j]);
-
-    for(int i=0; i<CELLS; i++) 
-    for(int j=0; j<7; j++) nei[i][j] = -1;
 
     while(true) {
       int a, b, c;

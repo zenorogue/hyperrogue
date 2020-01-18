@@ -339,7 +339,7 @@ extern videopar vid;
 
 #define self (*this)
 
-#define MODFIXER (2*10090080*17)
+// #define MODFIXER (2*10090080*17)
 
 #define BUGCOLORS 3
 
@@ -369,6 +369,16 @@ extern videopar vid;
 
 // size casted to int, to prevent warnings and actual errors caused by the unsignedness of x.size()
 template<class T> int isize(const T& x) {return x.size(); }
+
+// automatically growing vector
+template<class T> struct grow_vector : public vector<T> {
+  T& grow(size_t index) {
+    if(index >= this->size()) {
+      this->resize(index + 1);
+      }
+    return (vector<T>::operator[]) (index);
+    }
+  };
 
 // game forward declarations
 
