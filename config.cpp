@@ -641,6 +641,9 @@ EX void initConfig() {
   addsaver(nilv::nilperiod[2], "nilperiod_z");
   
   addsaver(neon_mode, "neon_mode");
+  addsaver(noshadow, "noshadow");
+  addsaver(bright, "bright");
+  addsaver(cblind, "cblind");
 
   callhooks(hooks_configfile);
 
@@ -1144,6 +1147,14 @@ EX void showGraphConfig() {
         dialog::add_action([] { neon_mode = 2; });
         dialog::addBoolItem("neon mode II", neon_mode == 3, 'D');
         dialog::add_action([] { neon_mode = 3; });
+        dialog::addBoolItem("illustration mode", neon_mode == 4, 'E');
+        dialog::add_action([] { neon_mode = 4; });
+        dialog::addBreak(100);
+        dialog::addInfo(XLAT("hint: press Alt while testing modes"));
+        dialog::addBreak(100);
+        dialog::addBoolItem_action("disable shadows", noshadow, 'F');
+        dialog::addBoolItem_action("bright mode", bright, 'G');
+        dialog::addBoolItem_action("colorblind simulation", cblind, 'H');
         };
       }
     

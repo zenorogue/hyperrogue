@@ -567,7 +567,22 @@ void celldrawer::setcolors() {
   if(!wmspatial && snakelevel(c) && !realred(c->wall)) fcol = wcol;
   
   if(c->wall == waGlass && !wmspatial) fcol = wcol;  
+  
+  if(neon_mode == 4) {
+    fcol = highwall(c) ? w_monochromatize(fcol, 0) : w_monochromatize(fcol, 1);
+    wcol = w_monochromatize(wcol, 0);
+    if(c->land == laWarpCoast && !pseudohept(c) && c->wall == waNone) fcol = 0x707070;
+    }
   }
+
+EX color_t w_monochromatize(color_t x, int d) {
+  int c = part(x,2) + part(x,1) + part(x, 0) + 1;
+  c /= 3;
+  if(d == 0) c = c;
+  else c = (c + 2 * 255) / 3;
+  return c * 0x10101;
+  }
+
 
 void celldrawer::tune_colors() {
   if(inmirror(c)) {
@@ -708,7 +723,7 @@ void celldrawer::draw_wall() {
         }
       else {
         forCellIdEx(c2, i, c) 
-          if(!highwall(c2) || conegraph(c2)) {
+          if(!highwall(c2) || conegraph(c2) || neon_mode == 4) {
           if(placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, alpha))) break;
           }
         }
@@ -2451,6 +2466,7 @@ void celldrawer::draw() {
     ct6 = ctof(c);
     #endif
     fd = getfd(c);
+    if(neon_mode == 4) fd = 0;
     error = false;
     
     setcolors();

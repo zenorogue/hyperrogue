@@ -2028,6 +2028,25 @@ EX void apply_neon(color_t& col, int& r) {
 
 #if CAP_SHAPES
 
+EX color_t magentize(color_t x) {
+  if(neon_mode != 4) return x;
+  int green = part(x,2);
+  int magenta = (part(x, 1) + part(x, 3)) / 2;
+  int nm = max(magenta, green);
+  int gm = (magenta + green)/2;
+  nm = (nm + 255) / 2;
+  gm = gm / 2;
+  
+  return (nm * 0x1000100) | (gm * 0x10000) | (part(x, 0));
+  }
+
+EX color_t monochromatize(color_t x) {
+  int c = part(x,2) + part(x,1) + part(x, 3);
+  c ++;
+  c /= 3;
+  return c * 0x1010100 | (part(x, 0));
+  }
+
 EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, PPR prio) {
   if(prio == PPR::DEFAULT) prio = h.prio;
 
@@ -2072,6 +2091,19 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
       if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
       if(poly_outline != 0xFF) ptd.outline = poly_outline;
       break;
+    case 4: {
+      if(poly_outline > 0xFF) {
+        ptd.color = magentize(col);
+        ptd.outline = 0xFF;
+        }
+      else {
+        ptd.outline = poly_outline;
+        ptd.color = monochromatize(col);
+        }
+      if(ptd.color & 0xFF) ptd.color |= 0xFF;
+      if(ptd.outline & 0xFF) ptd.outline |= 0xFF;
+      break;
+      }
     }
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
