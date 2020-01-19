@@ -19,12 +19,15 @@ string start;
 vector<pair<string, string> > rules;
 set<pair<string, string> > ruleset;
 
-set<pair<string, bool>> find_matches(string s) {
-  set<pair<string, bool>> res;
+map<string, int> find_matches(string s) {
+  map<string, int> res;
   for(auto& p: rules) {
     size_t next = s.find(p.first);
     while(next != string::npos) {
-      res.emplace(s.substr(0, next) + p.second + s.substr(next+isize(p.first)), ruleset.count({p.second, p.first}));
+      string t = s.substr(0, next) + p.second + s.substr(next+isize(p.first));
+      auto& r = res[t];
+      if(ruleset.count({p.second, p.first})) r = 2;
+      else r = max(r, 1);
       next = s.find(p.first, next+1);
       }
     }
@@ -33,14 +36,17 @@ set<pair<string, bool>> find_matches(string s) {
 
 struct hrmap_rewrite : hrmap_hyperbolic {
 
-  map<heptagon*, string> asg;
-  map<string, heptagon*> asg_rev;
+  map<heptagon*, pair<heptagon*, string> > asg;
+  map<pair<heptagon*, string>, heptagon*> asg_rev;
 
   heptagon *create_step(heptagon *h, int direction) {
     if(h->move(direction)) return h->move(direction);
-    if(asg.empty()) { asg[h] = start; h->zebraval = 0; }
+    if(asg.empty()) { asg[h] = {h, start}; h->zebraval = 0; }
     
-    auto matches = find_matches(asg[h]);
+    auto s = asg[h].second;
+    auto root = asg[h].first;
+    
+    auto matches = find_matches(s);
     
     int next = h->zebraval;
     
@@ -49,14 +55,14 @@ struct hrmap_rewrite : hrmap_hyperbolic {
       return h;
       }
     
-    for(auto& msym: matches) {
+    for(auto& match: matches) {
       if(h->move(next)) { next++; continue; }
-      bool symmetric = msym.second;
-      const string& m = msym.first;
+      bool symmetric = match.second == 2;
+      const string& m = match.first;
       if(symmetric) {
         auto matches1 = find_matches(m);
         heptagon *h1;
-        if(asg_rev[m]) h1 = asg_rev[m];
+        if(asg_rev[{root, m}]) h1 = asg_rev[{root, m}];
         else {
           h1 = tailored_alloc<heptagon> (isize(matches1));
           h1->alt = NULL;
@@ -65,11 +71,11 @@ struct hrmap_rewrite : hrmap_hyperbolic {
           h1->distance = h->distance;
           h1->zebraval = 0;
           h1->c7 = newCell(isize(matches1), h1);
-          asg[h1] = m;
-          asg_rev[m] = h1;
+          asg[h1] = {root, m};
+          asg_rev[{root, m}] = h1;
           }
         int next1 = 0;
-        for(auto& s: matches1) { if(s.first == asg[h]) break; next1++; }
+        for(auto& match2: matches1) { if(match2.first == s) break; next1++; }
         h->c.connect(next, h1, next1, false);
         }
       else {
@@ -84,7 +90,8 @@ struct hrmap_rewrite : hrmap_hyperbolic {
         h1->zebraval = 1;
         h1->c7 = newCell(deg, h1);
         
-        asg[h1] = m;
+        asg[h1] = {h1, m};
+        asg_rev[{h1, m}] = h1;
         }
       next++;
       }
@@ -99,7 +106,8 @@ struct hrmap_rewrite : hrmap_hyperbolic {
 bool labeller(cell* c, const transmatrix& V) {
   auto m = dynamic_cast<hrmap_rewrite*> (currentmap);
   if(m) {
-    string s = m->asg[c->master];
+    string s = m->asg[c->master].second;
+    cgi.scalefactor = 1;
     queuestr(V, 0.5, s, colortables['j'][c->master->distance+1]);
     }
   return false;
@@ -141,6 +149,12 @@ extern "C" {
     load_rules(split);
     start_game();
     clearMessages();
+
+    bfs();
+    resetview();
+    drawthemap();
+    centerpc(INF);
+    centerover = cwt.at;
     }
   }
 #endif

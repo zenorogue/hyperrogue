@@ -2490,3 +2490,4 @@ auto hooks  =
 #include "newconf.cpp"
 #include "grigorchuk.cpp"
 #include "qtm.cpp"
+#include "rewriting.cpp"
