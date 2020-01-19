@@ -51,11 +51,28 @@ namespace hr {
   void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
 
   const char *wheresounds;
+
+  std::string get_value(std::string name);
   }
 
 #include "hyper.cpp"
 
 namespace hr {
+
+string get_value(string name) {
+  char *str = (char*)EM_ASM_INT({
+    var name = UTF8ToString($0, $1);
+    var value = document.getElementById(name).value;
+    var lengthBytes = lengthBytesUTF8(value)+1;
+    var stringOnWasmHeap = _malloc(lengthBytes);
+    stringToUTF8(value, stringOnWasmHeap, lengthBytes);
+    return stringOnWasmHeap;
+    }, name.c_str(), int(name.size())
+    );
+  string res = str;
+  free(str);
+  return res;
+  }
 
 // -- demo --
 
