@@ -578,8 +578,7 @@ void celldrawer::setcolors() {
 EX color_t w_monochromatize(color_t x, int d) {
   int c = part(x,2) + part(x,1) + part(x, 0) + 1;
   c /= 3;
-  if(d == 0) c = c;
-  else c = (c + 2 * 255) / 3;
+  if(d != 0) c = (c + 2 * 255) / 3;
   return c * 0x10101;
   }
 
