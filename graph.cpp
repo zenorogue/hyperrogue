@@ -3592,8 +3592,18 @@ EX ld precise_width = .5;
 
 int grid_depth = 0;
 
+EX bool fat_edges = false;
+
 EX void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   ld d = hdist(V1*h1, V2*h2);
+  
+  if(WDIM == 3 && fat_edges) {
+    transmatrix T = V1 * rgpushxto0(h1);
+    transmatrix S = rspintox(inverse(T) * V2 * h2);
+    queuepoly(T * S, cgi.generate_pipe(d, vid.linewidth), col);
+    return;
+    }
+
   while(d > precise_width && d < 100 && grid_depth < 10) { 
     if(!eqmatrix(V1, V2, 1e-6)) { gridline(V1, h1, V1, inverse(V1) * V2 * h2, col, prec); return; }
     hyperpoint h = midz(h1, h2); 

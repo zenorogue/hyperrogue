@@ -2863,7 +2863,10 @@ EX namespace linepatterns {
       });
 
     dialog::addBoolItem_action("edit widths individually", indiv, 'I');
-    
+
+    if(GDIM == 3)
+      dialog::addBoolItem_action("fat edges", fat_edges, 'F');
+
     dialog::addBreak(50);
     dialog::addInfo("change the alpha parameter to show the lines");
   

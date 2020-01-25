@@ -298,6 +298,7 @@ EX void initConfig() {
   addsaver(vid.linewidth, "linewidth", 1);
   addsaver(precise_width, "precisewidth", .5);
   addsaver(linepatterns::width, "pattern-linewidth", 1);
+  addsaver(fat_edges, "fat-edges");
   addsaver(vid.scale, "scale", 1);
   addsaver(vid.xposition, "xposition", 0);
   addsaver(vid.yposition, "yposition", 0);

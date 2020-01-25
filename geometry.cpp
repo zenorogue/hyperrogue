@@ -249,6 +249,8 @@ hpcshape
     shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
     shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;  
 
+  map<int, hpcshape> shPipe;
+
   vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
   vector<hyperpoint> walltester;
   
@@ -401,6 +403,8 @@ hpcshape
   void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }
   void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
   int timestamp;
+  
+  hpcshape& generate_pipe(ld length, ld width);
   };
 #endif
 

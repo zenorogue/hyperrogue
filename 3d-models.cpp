@@ -1214,6 +1214,36 @@ void geometry_information::make_3d_models() {
   finishshape();
   }
 
+hpcshape& geometry_information::generate_pipe(ld length, ld width) {
+  int id = int(length * 17 + .5) + int(157003 * log(width+.001));
+  if(shPipe.count(id)) return shPipe[id];
+  hpcshape& pipe = shPipe[id];
+  println(hlog, "generating pipe of length ", length, " and width ", width);
+  bshape(pipe, PPR::WALL);
+
+  const int MAX_X = 8;
+  const int MAX_R = 20;
+  auto at = [length, width] (int i, int a) {
+    return xpush(i * length / MAX_X) * cspin(1, 2, 360 * degree * a / MAX_R) * ypush0(width); 
+    };
+  for(int i=0; i<MAX_X; i++) {
+    for(int a=0; a<MAX_R; a++) {
+      hpcpush(at(i, a));
+      hpcpush(at(i, a+1));
+      hpcpush(at(i+1, a));
+      hpcpush(at(i+1, a+1));
+      hpcpush(at(i+1, a));
+      hpcpush(at(i, a+1));
+      }
+    }
+
+  last->flags |= POLY_TRIANGLES;
+  add_texture(*last);
+  finishshape();
+  extra_vertices();
+  return pipe;
+  }
+
 #undef S
 #undef SH
 #undef revZ
