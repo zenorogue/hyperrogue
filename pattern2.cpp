@@ -1562,7 +1562,7 @@ EX namespace patterns {
 
   map<cell*, color_t> computed_furthest_map;
 
-  color_t furthest_map(cell *c) {
+  color_t furthest_map(cell *c, int reduce) {
     auto& cfm = computed_furthest_map;
     if(cfm.count(c)) return cfm[c];
     if(!bounded) return 0;
@@ -1580,7 +1580,7 @@ EX namespace patterns {
     
     for(cell *d: ac) cfm[d] = 0x101010;
 
-    for(cell *d: ac) if(celldistance(sc, d) == maxd) 
+    for(cell *d: ac) if(celldistance(sc, d) == maxd - reduce) 
       cfm[d] = 0x1FFFF80;
 
     println(hlog, "bydist = ", bydist);
@@ -1823,7 +1823,13 @@ EX namespace patterns {
         return nearer_map(c);
         }
       case 'Y': {
-        return furthest_map(c);
+        return furthest_map(c, 0);
+        }
+      case 'X': {
+        return furthest_map(c, 1);
+        }
+      case 'W': {
+        return furthest_map(c, 2);
         }
       }
     return canvasback;
