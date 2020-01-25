@@ -192,6 +192,11 @@ int mrec_cells = 24000;
 
 int mrec_first = 0, mrec_last = 999999;
 
+ld mrec_sightrange = 6;
+
+int mrec_drawn = 10;
+int mrec_generated = 1000;
+
 bool trailer_handleKey(int sym, int uni) {  
 
   if(sym == 'f' && (cmode & sm::NORMAL)) {
@@ -318,9 +323,9 @@ bool trailer_handleKey(int sym, int uni) {
       // solnihv::solrange_xy = 30;
       // solnihv::solrange_z = 6;
 
-      sightranges[geometry] = 6;
-      vid.cells_drawn_limit = 10;
-      vid.cells_generated_limit = 1000;
+      sightranges[geometry] = mrec_sightrange;
+      vid.cells_drawn_limit = mrec_drawn;
+      vid.cells_generated_limit = mrec_generated;
       
       // vid.stereo_mode = sODS;
       // sightranges[geometry] = 7;
@@ -378,6 +383,12 @@ int readArgs() {
   else if(argis("-mrecq")) {
     PHASEFROM(2);
     shift(); mrec_cells = argi();
+    }
+  else if(argis("-mrecr")) {
+    PHASEFROM(2);
+    shift(); mrec_sightrange = argf();
+    shift(); mrec_drawn = argi();
+    shift(); mrec_generated = argi();
     }
   else if(argis("-mrecf")) {
     PHASEFROM(2);
