@@ -76,8 +76,18 @@ template<class T> void hread_raw(hstream& hs, T& c) { hs.read_chars((char*) &c, 
 template<class T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value>::type> void hwrite(hstream& hs, const T& c) { hwrite_raw(hs, c); }
 template<class T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value>::type> void hread(hstream& hs, T& c) { hread_raw(hs, c); }
 
-inline void hwrite(hstream& hs, const string& s) { hs.write_char(isize(s)); for(char c: s) hs.write_char(c); }  
-inline void hread(hstream& hs, string& s) { s = ""; int l = (unsigned char) hs.read_char(); for(int i=0; i<l; i++) s += hs.read_char(); }
+inline void hwrite(hstream& hs, const string& s) {
+  if(isize(s) >= 255) {
+    hs.write_char(255);
+    hs.write<int>(isize(s));
+    }
+  for(char c: s) hs.write_char(c);
+  }
+inline void hread(hstream& hs, string& s) {
+  s = ""; int l = (unsigned char) hs.read_char(); 
+  if(l == 255) l = hs.get<int>();
+  for(int i=0; i<l; i++) s += hs.read_char();
+  }
 inline void hwrite(hstream& hs, const ld& h) { double d = h; hs.write_chars((char*) &d, sizeof(double)); }
 inline void hread(hstream& hs, ld& h) { double d; hs.read_chars((char*) &d, sizeof(double)); h = d; }
   
