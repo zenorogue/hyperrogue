@@ -1076,6 +1076,7 @@ EX struct fpattern& getcurrfp() {
     static fpattern fp(0);
     if(fp.Prime) return fp;
     fp.Prime = 5; fp.force_hash = 0x72414D0C; fp.solve();
+    // fp.Prime = 11; fp.force_hash = 0x5FC4CFF0; fp.solve();
     return fp;
     }
   if(geometry == gSpace435) {
@@ -1083,6 +1084,8 @@ EX struct fpattern& getcurrfp() {
     static fpattern fp(0);
     if(fp.Prime) return fp;
     fp.Prime = 5; fp.force_hash = 0x72414D0C; fp.solve();
+    // fp.Prime = 11; fp.force_hash = 0x65CE0C00; fp.solve();
+
     return fp;
     }
   if(geometry == gSpace336) {
@@ -1110,7 +1113,7 @@ EX struct fpattern& getcurrfp() {
     if(fp.Prime) return fp;
     // 130 cells in 3BA5C5A4
     // 260 cells in 9FDE7B38
-    fp.Prime = 7; fp.force_hash = 0x9FDE7B38u; fp.solve();
+    fp.Prime = 5; fp.force_hash = 0x9FDE7B38u; fp.solve();
     return fp;
     }
   if(WDIM == 3 && !quotient) {
