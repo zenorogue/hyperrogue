@@ -724,7 +724,7 @@ enum eGeometry {
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
   gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
   gSpace535, gSpace536, gSeifertCover, gSeifertWeber, gHomologySphere,
-  gInfOrderMixed,
+  gInfOrderMixed, gSpace436,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -903,6 +903,7 @@ EX vector<geometryinfo> ginf = {
   {"{5,3,5}","SW",      "Seifert-Weber space",                        "535s",    12, 5, qsSINGLE,  giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{5,3,3}","SW",      "Poincaré homology sphere",                   "533s",    12, 3, qsSINGLE,  giSphere3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{?,oo}", "none",    "{3/4,∞} (infinite triangles and squares)",   "ooxm",     3, OINF, qIDEAL | qINFMIXED,  giHyperb2, 0x49400, {{6, 6}}, eVariation::pure},
+  {"{4,3,6}","none",    "{4,3,6} hyperbolic honeycomb",               "436",      6, 6, qIDEAL,    giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 
