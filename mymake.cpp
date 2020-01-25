@@ -30,7 +30,7 @@ string compiler =
 string linker = 
   "g++ -rdynamic -o hyper";
  
-string libs = " savepng-loc.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread";
+string libs = " savepng-loc.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
 
 vector<string> modules;
 

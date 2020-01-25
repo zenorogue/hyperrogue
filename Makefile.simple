@@ -52,7 +52,7 @@ ifeq (${OS},linux)
   LDFLAGS_GL := -lGL
   LDFLAGS_GLEW := -lGLEW
   LDFLAGS_PNG := -lpng
-  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread
+  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz
   OBJ_EXTENSION := .o
   hyper_RES :=
 endif
@@ -63,7 +63,7 @@ ifeq (${OS},mingw)
   LDFLAGS_GL := -lopengl32
   LDFLAGS_GLEW := -lglew32
   LDFLAGS_PNG := -lpng
-  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf
+  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lz -lphtread
   OBJ_EXTENSION := .o
   hyper_RES := hyper.res
   ifeq (${HYPERROGUE_USE_GLEW},)
@@ -78,7 +78,7 @@ ifeq (${OS},osx)
   LDFLAGS_GL := -framework AppKit -framework OpenGL
   LDFLAGS_GLEW := -lGLEW
   LDFLAGS_PNG := -lpng
-  LDFLAGS_SDL := -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf
+  LDFLAGS_SDL := -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lz -lpthread
   OBJ_EXTENSION := .o
   hyper_RES :=
 endif

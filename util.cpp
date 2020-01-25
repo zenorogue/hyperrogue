@@ -523,4 +523,45 @@ bignum::bignum(ld d) {
   while(n >= 0) { digits[n] = int(d); d -= digits[n]; d *= BASE; n--; }
   }
 
+/* compression/decompression */
+
+EX string compress_string(string s) {
+  z_stream strm;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  println(hlog, "pre init");
+  auto ret = deflateInit(&strm, 9);
+  if(ret != Z_OK) throw "z-error";
+  println(hlog, "init ok");
+  strm.avail_in = isize(s);
+  strm.next_in = (Bytef*) &s[0];
+  vector<char> buf(1000000, 0);
+  strm.avail_out = 1000000;
+  strm.next_out = (Bytef*) &buf[0];
+  if(deflate(&strm, Z_FINISH) != Z_STREAM_END) throw "z-error-2";
+  println(hlog, "deflate ok");
+  string out(&buf[0], (char*)(strm.next_out) - &buf[0]);
+  println(hlog, isize(s), " -> ", isize(out));
+  return out;
+  }
+
+EX string decompress_string(string s) {
+  z_stream strm;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  auto ret = inflateInit(&strm);
+  if(ret != Z_OK) throw "z-error";
+  strm.avail_in = isize(s);
+  strm.next_in = (Bytef*) &s[0];
+  vector<char> buf(1000000, 0);
+  strm.avail_out = 1000000;
+  strm.next_out = (Bytef*) &buf[0];
+  if(inflate(&strm, Z_FINISH) != Z_STREAM_END) throw "z-error-2";
+  string out(&buf[0], (char*)(strm.next_out) - &buf[0]);
+  println(hlog, isize(s), " -> ", isize(out));
+  return out;
+  }
+
 }

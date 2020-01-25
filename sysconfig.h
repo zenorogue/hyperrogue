@@ -426,6 +426,8 @@ extern "C" {
 #include <complex>
 #include <new>
 
+#include <zlib.h>
+
 #if CAP_THREAD
 #if WINDOWS
 #include "mingw.thread.h"
