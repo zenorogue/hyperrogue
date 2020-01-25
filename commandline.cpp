@@ -152,6 +152,9 @@ int arg::readCommon() {
     PHASE(1);
     offlineMode = true;
     }
+  else if(argis("-no-stamp")) {
+    debugflags &=~ DF_TIME;
+    }
   else if(argis("-debf")) {
     shift(); 
     string s = args();
