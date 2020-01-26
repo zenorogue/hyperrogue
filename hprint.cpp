@@ -133,7 +133,7 @@ struct fhstream : hstream {
 struct shstream : hstream { 
   string s;
   int pos;
-  shstream() { pos = 0; }
+  shstream(const string& t = "") : s(t) { pos = 0; }
   virtual void write_char(char c) { s += c; }
   virtual char read_char() { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
   };
