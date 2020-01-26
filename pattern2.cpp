@@ -2544,6 +2544,12 @@ EX namespace linepatterns {
     ALLCELLS(
       if(is_master(c)) {
         int dir = bt::in() ? bt::updir() : 0;
+        if(WDIM == 3 && standard_tiling()) {
+          for(int i=0; i<S7; i++) if(c->move(i) && c->move(i)->master->distance < c->master->distance) {
+            dir = i;
+            break;
+            }
+          }
         cell *c2 = c->master->move(dir)->c7;
         if(gmatrix.count(c2)) {
           if(S3 >= OINF)

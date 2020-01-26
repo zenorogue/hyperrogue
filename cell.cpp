@@ -145,7 +145,11 @@ EX cell *newCell(int type, heptagon *master) {
 EX hrmap *currentmap;
 EX vector<hrmap*> allmaps;
 
-EX hrmap *newAltMap(heptagon *o) { return new hrmap_hyperbolic(o); }
+EX hrmap *newAltMap(heptagon *o) { 
+  if(reg3::geometry_has_tree_structure())
+    return reg3::new_alt_map(o);
+  return new hrmap_hyperbolic(o); 
+  }
 // --- hyperbolic geometry ---
 
 EX heptagon* hyperbolic_origin() {

@@ -875,12 +875,228 @@ EX namespace reg3 {
       return vertices_only;
       }
     };
+
+  struct hrmap_reg3_rule : hrmap {
+  
+    heptagon *origin;
+    reg3::hrmap_quotient3 *quotient_map;
+
+    fieldpattern::fpattern fp;
+
+    int root;
+    string other;
+    vector<short> children;
+    
+    vector<int> otherpos;
+    
+    void load_ruleset(string fname) {
+      FILE *f = fopen(fname.c_str(), "rb");
+      string buf;
+      buf.resize(1000000);
+      int qty = fread(&buf[0], 1, 1000000, f);
+      buf.resize(qty);
+
+      shstream ins(decompress_string(buf));
+      hread_fpattern(ins, fp);
+      
+      hread(ins, root);
+      hread(ins, children);
+      hread(ins, other);
+      fclose(f);
+      }
+    
+    hrmap_reg3_rule() : fp(0) {
+
+      if(S7 == 6) load_ruleset("honeycomb-435.dat");
+      else if(ginf[geometry].vertex == 5) load_ruleset("honeycomb-535.dat");
+      else load_ruleset("honeycomb-534.dat");
+      
+      reg3::generate();
+      origin = tailored_alloc<heptagon> (S7);
+      heptagon& h = *origin;
+      h.s = hsOrigin;
+      h.cdata = NULL;
+      h.alt = NULL;
+      h.distance = 0;
+      h.zebraval = 0;
+      h.fieldval = 0;
+      h.fiftyval = root;
+      h.c7 = NULL;
+      h.c7 = newCell(S7, origin);
+      
+      int opos = 0;
+      for(int c: children) {
+        if(c >= 0)
+          otherpos.push_back(-1);
+        else {
+          otherpos.push_back(opos);
+          while(other[opos] != ',') opos++;
+          opos++;
+          }
+        }
+      
+      quotient_map = nullptr;
+      
+      if(geometry == gSpace535)
+        quotient_map = new seifert_weber::hrmap_seifert_cover();
+      else
+        quotient_map = new hrmap_field3(&fp);
+      h.zebraval = quotient_map->allh[0]->zebraval;
+      }
+    
+    heptagon *getOrigin() override {
+      return origin;
+      }
+    
+    #define DEB 0
+    
+    heptagon *counterpart(heptagon *h) {
+      return quotient_map->allh[h->fieldval];
+      }
+
+    heptagon *create_step(heptagon *parent, int d) override {
+      int id = parent->fiftyval;
+
+      auto cp = counterpart(parent);
+      int d2 = cp->c.spin(d);
+      int fv = cp->c.move(d)->fieldval;
+      
+      // indenter ind(2);
+      
+      heptagon *res = nullptr;
+      
+      int id1 = children[S7*id+d];
+      int pos = otherpos[S7*id+d];
+      // println(hlog, "id=", id, " d=", d, " d2=", d2, " id1=", id1, " pos=", pos);
+      if(id1 != -1) {
+        res = tailored_alloc<heptagon> (S7);
+        if(parent->c7)
+          res->c7 = newCell(S7, res);
+        else
+          res->c7 = nullptr;
+        res->alt = nullptr;
+        res->cdata = nullptr;
+        res->zebraval = quotient_map->allh[fv]->zebraval;
+        res->fieldval = fv;
+        res->distance = parent->distance + 1;
+        res->fiftyval = id1;        
+        // res->c.connect(d2, parent, d, false);
+        }
+      
+      else if(other[pos] == ('A' + d) && other[pos+1] == ',') {
+        println(hlog, "parent link of ", id);
+        res = tailored_alloc<heptagon> (S7);
+        res->c7 = nullptr;
+        res->alt = parent->alt;
+        res->cdata = nullptr;
+        res->fieldval = fv;
+        res->distance = parent->distance - 1;
+        vector<int> possible;
+        for(int i=0; i<isize(children) / S7; i++)
+          if(children[i*S7+d2] == id)
+            possible.push_back(i);
+        println(hlog, "possible connections: ", possible);
+        id1 = hrand_elt(possible, 0);
+        println(hlog, "chosen: ", id1);
+        res->fiftyval = id1;
+        }
+
+      else {
+        heptagon *at = parent;
+        while(other[pos] != ',') {
+          int dir = (other[pos++] & 31) - 1;
+          // println(hlog, "from ", at, " go dir ", dir);
+          at = at->cmove(dir);
+          }
+        res = at;
+        }
+      
+      if(!res) throw "res missing";
+      
+      if(res->move(d2)) println(hlog, "res conflict");
+
+      res->c.connect(d2, parent, d, false);
+      return res;
+      }
+
+    ~hrmap_reg3_rule() {
+      if(quotient_map) delete quotient_map;
+      clearfrom(origin);
+      }
+    
+    void draw() override {
+      sphereflip = Id;
+      
+      // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
+      
+      dq::visited.clear();
+      dq::enqueue(centerover->master, cview());
+      
+      while(!dq::drawqueue.empty()) {
+        auto& p = dq::drawqueue.front();
+        heptagon *h = get<0>(p);
+        transmatrix V = get<1>(p);
+        dynamicval<ld> b(band_shift, get<2>(p));
+        bandfixer bf(V);
+        dq::drawqueue.pop();
+        
+        
+        cell *c = h->c7;
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V);
+        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+    
+        for(int i=0; i<S7; i++) if(h->move(i)) {
+          dq::enqueue(h->move(i), V * adj(h, i));
+          }
+        }
+      }
+    
+    transmatrix adj(heptagon *h, int d) override {
+      return quotient_map->adj(h, d);
+      }
+     
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+      if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
+        return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+      println(hlog, "unknown");
+      return Id;
+      }
+    
+    vector<hyperpoint> get_vertices(cell* c) override {
+      return reg3::vertices_only;
+      }
+    };
+
+  struct hrmap_reg3_rule_alt : hrmap {
+    
+    heptagon *origin;
+    
+    hrmap_reg3_rule_alt(heptagon *o) {
+      origin = o;
+      }
+
+    };
+
+EX hrmap *new_alt_map(heptagon *o) {
+  return new hrmap_reg3_rule_alt(o);
+  }
+
+EX void link_structures(heptagon *h, heptagon *alt) {
+  alt->fieldval = h->fieldval;
+  alt->fiftyval = h->fiftyval;
+  }
+
+EX bool geometry_has_tree_structure() {
+  return among(geometry, gSpace534, gSpace435, gSpace535);
+  }
   
 EX hrmap* new_map() {
   if(geometry == gSeifertCover) return new seifert_weber::hrmap_seifert_cover;
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
   if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
   if(quotient && !sphere) return new hrmap_field3(&currfp);
+  if(among(geometry, gSpace534, gSpace435, gSpace535)) return new hrmap_reg3_rule;
   return new hrmap_reg3;
   }
 
@@ -932,10 +1148,15 @@ EX bool pseudohept(cell *c) {
   if(geometry == gCrystal344 || geometry == gCrystal534 || geometry == gSeifertCover)
     return false;
   if(quotient) return false; /* added */
-  if(hyperbolic) {
+  auto mr = dynamic_cast<hrmap_reg3_rule*> (currentmap);
+  if(mr) {
+    return c->master->fieldval == 0;
+    }
+  if(m && hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);
     }    
+  
   return false;
   }
 

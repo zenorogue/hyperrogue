@@ -253,6 +253,8 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
   alt->c7 = NULL;
   alt->alt = alt;
+  if(reg3::geometry_has_tree_structure())
+    reg3::link_structures(h, alt);
   h->alt = alt;
   alt->cdata = (cdata*) h;
   currentmap->link_alt(bf);
