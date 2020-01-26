@@ -988,6 +988,13 @@ int read_geom_args() {
     fieldpattern::subpathid = currfp.matcode[M];
     fieldpattern::subpathorder = currfp.order(M);
     }
+  else if(argis("-fwrite")) {
+    shstream hs;
+    hwrite_fpattern(hs, currfp);
+    string s;
+    for(char c: hs.s) s += format("\\x%02x", (unsigned char) c);
+    println(hlog, "current fieldpattern: ", s);
+    }
   else if(argis("-csp")) {
     cheat();
     currfp.findsubpath();

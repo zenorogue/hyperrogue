@@ -1084,6 +1084,27 @@ EX int matrix_order(const transmatrix A) {
   return res;
   }
 
+EX void generate_fulls() {
+  reg3::generate();
+  reg3::generate_cellrotations();
+
+  auto cons = [&] (int i0, int i1, int i2) {
+    using reg3::adjmoves;
+    transmatrix T = build_matrix(adjmoves[ 0]*C0, adjmoves[ 1]*C0, adjmoves[ 2]*C0, C0);
+    transmatrix U = build_matrix(adjmoves[i0]*C0, adjmoves[i1]*C0, adjmoves[i2]*C0, C0);
+    return U * inverse(T);
+    };
+  
+  full_P = reg3::adjmoves[0];
+  full_R = S7 == 8 ? cons(1, 7, 0) : cons(1, 2, 0);
+  full_X = S7 == 8 ? cons(1, 0, 6) : S7 == 6 ? cons(1, 0, 5) : cons(1, 0, reg3::face);
+  
+  xp_order = matrix_order(full_X * full_P);
+  r_order = matrix_order(full_R);
+  rx_order = matrix_order(full_R * full_X);
+  println(hlog, "orders = ", tie(rx_order, r_order, xp_order));
+  }
+
 EX void construct_relations() {
   if(for_cgi == &cgi) return;
   for_cgi = &cgi;
@@ -1091,6 +1112,7 @@ EX void construct_relations() {
 
   reg3::generate();
   reg3::generate_cellrotations();
+  reg3::generate_fulls();
   vector<transmatrix> all;
 
   vector<string> formulas;
@@ -1105,17 +1127,6 @@ EX void construct_relations() {
     all.push_back(T);
     return S;
     };
-  
-  auto cons = [&] (int i0, int i1, int i2) {
-    using reg3::adjmoves;
-    transmatrix T = build_matrix(adjmoves[ 0]*C0, adjmoves[ 1]*C0, adjmoves[ 2]*C0, C0);
-    transmatrix U = build_matrix(adjmoves[i0]*C0, adjmoves[i1]*C0, adjmoves[i2]*C0, C0);
-    return U * inverse(T);
-    };
-  
-  full_P = reg3::adjmoves[0];
-  full_R = S7 == 8 ? cons(1, 7, 0) : cons(1, 2, 0);
-  full_X = S7 == 8 ? cons(1, 0, 6) : S7 == 6 ? cons(1, 0, 5) : cons(1, 0, reg3::face);
   
   println(hlog, reg3::cellshape);
 
@@ -1153,12 +1164,7 @@ EX void construct_relations() {
     work(T * full_R, i, 'R');
     work(T * full_X, i, 'X');
     work(T * full_P, i, 'P');
-    }
-  
-  xp_order = matrix_order(full_X * full_P);
-  r_order = matrix_order(full_R);
-  rx_order = matrix_order(full_R * full_X);
-  println(hlog, "orders = ", tie(rx_order, r_order, xp_order));
+    }  
   }
 
 EX }
