@@ -592,6 +592,7 @@ EX namespace reg3 {
       h.cdata = NULL;
       h.alt = NULL;
       h.distance = 0;
+      h.fiftyval = 0;
       h.fieldval = 0;
       h.c7 = newCell(S7, origin);
       if(sphere) spherecells.push_back(h.c7);
@@ -774,6 +775,7 @@ EX namespace reg3 {
       created->zebraval = hrand(10);
       created->fieldval = fv;
       created->distance = parent->distance + 1;
+      created->fiftyval = 9999;
       fixmatrix(T);
       reg_gmatrix[created] = make_pair(alt, T);
       altmap[alt].emplace_back(created, T);
