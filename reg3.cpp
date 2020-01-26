@@ -331,30 +331,33 @@ EX namespace reg3 {
 
   struct hrmap_field3 : reg3::hrmap_quotient3 {
   
-    hrmap_field3() {
+    fieldpattern::fpattern *f;
+    
+    hrmap_field3(fieldpattern::fpattern *ptr) {
+    
+      f = ptr;
 
-      auto& f = currfp;
-      auto lgr = f.local_group;
+      auto lgr = f->local_group;
       
-      int N = isize(f.matrices) / lgr;
+      int N = isize(f->matrices) / lgr;
       initialize(N);
       
       vector<int> moveid(S7), movedir(lgr);
       for(int s=0; s<lgr; s++) 
-      for(int i=0; i<S7; i++) if(eqmatrix(f.fullv[s] * reg3::adjmoves[0], reg3::adjmoves[i]))
+      for(int i=0; i<S7; i++) if(eqmatrix(f->fullv[s] * reg3::adjmoves[0], reg3::adjmoves[i]))
         moveid[i] = s;
   
       for(int s=0; s<lgr; s++) 
-      for(int i=0; i<S7; i++) if(hdist(tC0(inverse(f.fullv[s]) * reg3::adjmoves[0]), tC0(reg3::adjmoves[i])) < 1e-4)
+      for(int i=0; i<S7; i++) if(hdist(tC0(inverse(f->fullv[s]) * reg3::adjmoves[0]), tC0(reg3::adjmoves[i])) < 1e-4)
         movedir[s] = i;
   
       for(int a=0; a<N; a++) {
         tmatrices[a].resize(S7);
         for(int b=0; b<S7; b++) {
           int k = lgr*a;
-          k = f.gmul(f.gmul(k, moveid[b]), lgr);
-          for(int l=0; l<lgr; l++) if(f.gmul(k, l) % lgr == 0) {
-            tmatrices[a][b] = reg3::adjmoves[b] * f.fullv[l];
+          k = f->gmul(f->gmul(k, moveid[b]), lgr);
+          for(int l=0; l<lgr; l++) if(f->gmul(k, l) % lgr == 0) {
+            tmatrices[a][b] = reg3::adjmoves[b] * f->fullv[l];
             allh[a]->c.connect(b, allh[k/lgr], movedir[l], false);
             }
           }
@@ -374,7 +377,6 @@ EX namespace reg3 {
     
     
     void create_patterns() {
-      auto& f = currfp;
       // change the geometry to make sure that the correct celldistance is used
       dynamicval<eGeometry> g(geometry, gFieldQuotient);
       // also, strafe needs currentmap
@@ -418,7 +420,7 @@ EX namespace reg3 {
         for(int i=0; i<currfp_n(); i++) {
           bool ok = true;
           for(auto o: plane_indices) {
-            int j = currfp_gmul(i, o * f.local_group) / f.local_group;
+            int j = currfp_gmul(i, o * f->local_group) / f->local_group;
             if(plane_indices.count(j)) ok = false;
             forCellEx(c1, allcells()[j]) if(plane_indices.count(c1->master->fieldval)) ok = false;
             }
@@ -441,7 +443,7 @@ EX namespace reg3 {
         int u = 0;
         for(int a=0; a<5; a++) {
           for(int o: plane_indices) {
-            int j = currfp_gmul(u, o * f.local_group) / f.local_group;
+            int j = currfp_gmul(u, o * f->local_group) / f->local_group;
             allcells()[j]->master->zebraval |= 2;
             }
           u = currfp_gmul(u, gpow);
@@ -613,7 +615,7 @@ EX namespace reg3 {
         h.zebraval = quotient_map->allh[0]->zebraval;
         }
       else if(hyperbolic) {
-        quotient_map = new hrmap_field3;
+        quotient_map = new hrmap_field3(&currfp);
         h.zebraval = quotient_map->allh[0]->zebraval;
         }
       #endif
@@ -876,7 +878,7 @@ EX hrmap* new_map() {
   if(geometry == gSeifertCover) return new seifert_weber::hrmap_seifert_cover;
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
   if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
-  if(quotient && !sphere) return new hrmap_field3;
+  if(quotient && !sphere) return new hrmap_field3(&currfp);
   return new hrmap_reg3;
   }
 
