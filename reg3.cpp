@@ -402,7 +402,7 @@ EX namespace reg3 {
             c->master->zebraval |= 2;
         }
       
-      if(S7 == 6) {
+      if(S7 == 6 && ginf[geometry].vertex == 5) {
         // Emerald in 534
         cell *a = gamestart();
         for(cell *c: allcells())
