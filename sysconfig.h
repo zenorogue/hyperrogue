@@ -432,9 +432,11 @@ extern "C" {
 #if WINDOWS
 #include "mingw.thread.h"
 #include "mingw.mutex.h"
+#include "mingw.condition_variable.h"
 #else
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #endif
 #endif
 

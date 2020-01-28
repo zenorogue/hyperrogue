@@ -437,23 +437,24 @@ EX void showQuotientConfig3() {
     
   dialog::addBreak(100);
 
-  if(!ds.is_suspended) ds.lock.lock();
-  auto&l = ds.hashes_found;
-  for(auto& v: l) {
-    char x = 'a';
-    string s = XLAT("#%1, cells: %2", itsh(v.first), its(get<5>(v.second)));
-    dialog::addItem(s, x++);
-    dialog::add_action([&v] {
-      stop_game();
-      int tmp;
-      tie(currfp.Prime, currfp.wsquare, currfp.R, currfp.P, currfp.X, tmp) = v.second;
-      currfp.Field = currfp.wsquare ? currfp.Prime * currfp.Prime : currfp.Prime;
-      currfp.generate_all3();
-      currfp.analyze();
-      start_game();
-      });
+  if(1) {
+    std::unique_lock<std::mutex> lk(ds.lock);
+    auto&l = ds.hashes_found;
+    for(auto& v: l) {
+      char x = 'a';
+      string s = XLAT("#%1, cells: %2", itsh(v.first), its(get<5>(v.second)));
+      dialog::addItem(s, x++);
+      dialog::add_action([&v] {
+        stop_game();
+        int tmp;
+        tie(currfp.Prime, currfp.wsquare, currfp.R, currfp.P, currfp.X, tmp) = v.second;
+        currfp.Field = currfp.wsquare ? currfp.Prime * currfp.Prime : currfp.Prime;
+        currfp.generate_all3();
+        currfp.analyze();
+        start_game();
+        });
+      }
     }
-  if(!ds.is_suspended) ds.lock.unlock();
     
   dialog::addBreak(100);
   

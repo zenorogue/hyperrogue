@@ -320,12 +320,13 @@ struct fpattern {
 struct discovery {
   fpattern experiment;
   std::shared_ptr<std::thread> discoverer;
-  std::recursive_mutex lock, slock;
+  std::mutex lock;
+  std::condition_variable cv;
   bool is_suspended;
   bool stop_it;
   
   map<unsigned, tuple<int, int, matrix, matrix, matrix, int> > hashes_found;
-  discovery() : experiment(0) { is_suspended = false; stop_it = false; experiment.dis = this; }
+  discovery() : experiment(0) { is_suspended = false; stop_it = false; experiment.dis = this; experiment.Prime = experiment.Field = experiment.wsquare = 0; }
   
   void activate();
   void suspend();
@@ -1258,27 +1259,28 @@ void discovery::activate() {
         if(stop_it) break;
         }
       });
-    slock.lock();
     }
   if(is_suspended) {
-    is_suspended = false;
-    lock.unlock();
-    slock.unlock();
+    if(1) {
+      std::unique_lock<std::mutex> lk(lock);
+      is_suspended = false;
+      }
+    cv.notify_one();
     }
   }
 
 void discovery::discovered() {
-  slock.unlock();
-  lock.lock();
+  std::unique_lock<std::mutex> lk(lock);
   auto& e = experiment;
   hashes_found[e.compute_hash()] = make_tuple(e.Prime, e.wsquare, e.R, e.P, e.X, isize(e.matrices) / e.local_group);
-  lock.unlock();
-  slock.lock();
   }
 
-void discovery::suspend() { is_suspended = true; lock.lock(); slock.lock(); }
+void discovery::suspend() { is_suspended = true; }
 
-void discovery::check_suspend() { slock.unlock(); lock.lock(); lock.unlock(); slock.lock();  }
+void discovery::check_suspend() { 
+  std::unique_lock<std::mutex> lk(lock);
+  if(is_suspended) cv.wait(lk, [this] { return !is_suspended; });
+  }
 
 void discovery::schedule_destruction() { stop_it = true; }
 discovery::~discovery() { schedule_destruction(); if(discoverer) discoverer->join(); }
