@@ -781,6 +781,11 @@ EX void describeMouseover() {
     
     if(WDIM == 3 && isGravityLand(c->land)) out += " [" + its(gravityLevel(c)) + "]";
     
+    if(c->land == laTemple && c->master->alt) {
+      int lev = -celldistAlt(c);
+      int ts = temple_layer_size();
+      out += " (" + its(lev/ts+1) + ":" + its(lev%ts) + ")";
+      }
     if(isIcyLand(c)) 
       out += " (" + fts(heat::celsius(c)) + " °C)";
     if(c->land == laBrownian && c->wall == waNone)
