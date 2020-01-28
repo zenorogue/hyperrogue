@@ -411,7 +411,7 @@ EX namespace reg3 {
         
         // Vineyard in 435
         make_plane(cellwalker(gamestart(), 0));
-        println(hlog, "plane size = ", isize(plane));
+        DEBB(DF_GEOM, ("plane size = ", isize(plane)));
         
         set<int> plane_indices;
         for(auto cw: plane) plane_indices.insert(cw.at->master->fieldval);
@@ -498,10 +498,10 @@ EX namespace reg3 {
       
       for(int index = 5; index >= 0; index--) {
         for(auto k: boundaries) println(hlog, k);
-        println(hlog, "simplifying...");
+        DEBB(DF_GEOM, ("simplifying..."));
         
         for(auto by: boundaries) if(among(by[index], 1, -1)) {
-          println(hlog, "simplifying by ", by);
+          DEBB(DF_GEOM, ("simplifying by ", by));
           periods.push_back(by);
           set<coord> nb;
       
