@@ -3478,6 +3478,8 @@ EX color_t transcolor(cell *c, cell *c2, color_t wcol) {
   if(c->wall == c2->wall) return 0;
   if(isFire(c) && !isFire(c2)) return darkena3(wcol, 0, 0x30);
   if(c->wall == waLadder) return darkena3(wcol, 0, 0x30);
+  
+  if(c->land == laZebra && c2->land == laZebra && c2->wall == waTrapdoor) return 0x202020A0;
 
   if(c->wall == waChasm && c2->wall != waChasm) return 0x606060A0;
   if(isWateryOrBoat(c) && !isWateryOrBoat(c2)) return 0x0000C060;
