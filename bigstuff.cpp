@@ -138,6 +138,7 @@ EX int default_levs() {
     return 1;
   if(S3 >= OINF)
     return 1;
+  if(reg3::in_rule()) return 0;
   return S3-3;
   }
 
