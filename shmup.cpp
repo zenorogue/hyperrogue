@@ -2838,6 +2838,7 @@ EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
 EX void addShmupHelp(string& out) {
   if(shmup::mousetarget && sqdist(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
     if(callhandlers(false, hooks_describe, shmup::mousetarget, out)) return;
+    out += ", ";
     out += XLAT1(minf[shmup::mousetarget->type].name);
     help = generateHelpForMonster(shmup::mousetarget->type);
     }
