@@ -1140,11 +1140,14 @@ EX hrmap *new_alt_map(heptagon *o) {
   return new hrmap_reg3_rule_alt(o);
   }
 
-EX void link_structures(heptagon *h, heptagon *alt) {
-  alt->fieldval = h->fieldval;
-  alt->fiftyval = h->fiftyval;
-  vector<int> choices;
+EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
   auto cm = (hrmap_reg3_rule*) currentmap;
+  alt->fieldval = h->fieldval;
+  if(firststate == hsOrigin) {
+    alt->fiftyval = cm->root[alt->fieldval];
+    return;
+    }
+  vector<int> choices;
   for(auto p: cm->nonlooping_earlier_states)
     if(p.first.first == h->fieldval)
       choices.push_back(p.first.second);

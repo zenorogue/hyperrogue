@@ -271,13 +271,13 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   alt->c7 = NULL;
   alt->alt = alt;
   if(reg3::in_rule()) {
-    reg3::link_structures(h, alt);
+    reg3::link_structures(h, alt, firststate);
     if(alt->fiftyval == -1) return nullptr; /* unlinked */
     }
   h->alt = alt;
   alt->cdata = (cdata*) h;
   currentmap->link_alt(bf);
-  
+
   for(int d=rad; d>=0; d--) {
     currentmap->generateAlts(cx[d]->master);  
     preventbarriers(cx[d]);
@@ -1486,11 +1486,11 @@ EX void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() && !(hyperbolic && WDIM == 3) && 
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() && !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on && !racing::on))) {
     int rtr = newRoundTableRadius();
-    heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
+    heptagon *alt = createAlternateMap(c, rtr+(hyperbolic && WDIM == 3 ? 11 : 14), hsOrigin);
     if(alt) {
       alt->emeraldval = rtr;
       alt->fiftyval = c->land;
@@ -1584,7 +1584,9 @@ EX bool openplains(cell *c) {
 
 EX void buildCamelotWall(cell *c) {
   if(S3 >= OINF) { c->wall = waRubble; return; }
+  if(WDIM == 3 && hyperbolic && c->master->fieldval == 0) return;
   c->wall = waCamelot;
+  if(WDIM == 3 && hyperbolic) return;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
     if(c2->wall == waNone && (eubinary || (c2->master->alt && c->master->alt)) && celldistAlt(c2) > celldistAlt(c) && c2->monst == moNone)
