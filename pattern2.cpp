@@ -2543,13 +2543,8 @@ EX namespace linepatterns {
   linepattern patTree("underlying tree", 0x00d0d000, cheating, 
     ALLCELLS(
       if(is_master(c)) {
-        int dir = bt::in() ? bt::updir() : 0;
-        if(WDIM == 3 && standard_tiling()) {
-          for(int i=0; i<S7; i++) if(c->move(i) && c->move(i)->master->distance < c->master->distance) {
-            dir = i;
-            break;
-            }
-          }
+        int dir = updir(c->master);
+        if(dir == -1) continue;
         cell *c2 = c->master->move(dir)->c7;
         if(gmatrix.count(c2)) {
           if(S3 >= OINF)
@@ -2562,7 +2557,9 @@ EX namespace linepatterns {
     );
   linepattern patAltTree("circle/horocycle tree", 0xd000d000, cheating, 
     ALLCELLS(
-      if(is_master(c) && !euclid && c->master->alt) {
+      if(is_master(c)) {
+        int dir = updir_alt(c->master);
+        if(dir == -1) continue;
         for(int i=0; i<S7; i++)
           if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
             cell *c2 = c->master->move(i)->c7;

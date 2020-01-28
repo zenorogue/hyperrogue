@@ -521,6 +521,33 @@ EX int celldistAlt(cell *c) {
   return mi;
   }
 
+/** direction upwards in the tree */
+EX int updir(heptagon *h) {
+  if(bt::in()) return bt::updir();
+  if(WDIM == 3 && reg3::in_rule()) {
+    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
+      return i;
+    return -1;
+    }
+  if(h->distance == 0) return -1;
+  return 0;
+  }
+
+/** direction upwards in the alt-tree */
+EX int updir_alt(heptagon *h) {
+  if(euclid || !h->alt) return -1;
+  if(WDIM == 3 && reg3::in_rule()) {
+    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->alt && h->move(i)->alt->distance < h->alt->distance) 
+      return i;
+    return -1;
+    }
+  for(int i=0; i<S7; i++)
+    if(h->move(i) && h->move(i)->alt == h->alt->move(0)) 
+      return i;
+  return -1;
+  }
+
+
 #if HDR
 static const int RPV_MODULO = 5;
 static const int RPV_RAND = 0;
