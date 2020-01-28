@@ -2718,8 +2718,12 @@ EX void setdist(cell *c, int d, cell *from) {
     raiseBuggyGeneration(c, "No landparam set");
     return;
     }
-    
-  if(d == BARLEV && !euclid && c != cwt.at) 
+  
+  int reduced_barlev = BARLEV;
+  if(BARLEV == 8 && cwt.at->master->alt)
+    reduced_barlev = 7;
+  
+  if(d == reduced_barlev && !euclid && c != cwt.at) 
     buildBigStuff(c, from);
   
   if(buggyGeneration) return;
@@ -2762,7 +2766,7 @@ EX void setdist(cell *c, int d, cell *from) {
 
   giantLandSwitch(c, d, from);
   
-  if(d == min(BARLEV, 9)) moreBigStuff(c);
+  if(d == min(reduced_barlev, 9)) moreBigStuff(c);
 
   if(d == 7) repairLandgen(c);
 
