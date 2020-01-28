@@ -912,8 +912,12 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
 
     queuepolyat(V2, *xsh, darkena(icol, 0, alpha), pr);
 
-    if(it == itZebra)
-      queuepolyat(Vit * spinptick(1500, .5/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR::ITEMb);
+    if(it == itZebra) {
+      transmatrix Vx = Vit * spinptick(1500, .5/(ct6+6));
+      if(GDIM == 3)
+        Vx = Vx * cpush(2, -1e-3);
+      queuepolyat(Vx, *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR::ITEMb);
+      }
     }
   
   else if(xch == 'o' || it == itInventory) {
