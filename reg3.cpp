@@ -1115,10 +1115,7 @@ EX namespace reg3 {
       }
      
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
-      if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-        return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
-      println(hlog, "unknown");
-      return Id;
+      return relative_matrix_recursive(h2, h1);
       }
     
     vector<hyperpoint> get_vertices(cell* c) override {

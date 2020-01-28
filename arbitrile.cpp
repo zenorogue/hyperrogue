@@ -444,32 +444,7 @@ struct hrmap_arbi : hrmap {
     }
 
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
-    if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-      return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
-    transmatrix gm = Id, where = Id;
-    while(h1 != h2) {
-      for(int i=0; i<h1->type; i++) {
-        if(h1->move(i) == h2) {
-          return gm * adj(h1, i) * where;
-          }
-        }
-      if(h1->distance > h2->distance) {
-        for(int i=0; i<h1->type; i++) if(h1->move(i) && h1->move(i)->distance < h1->distance) {
-          gm = gm * adj(h1, i);
-          h1 = h1->move(i);
-          goto again;
-          }
-        }
-      else {
-        for(int i=0; i<h2->type; i++) if(h2->move(i) && h2->move(i)->distance < h2->distance) {
-          where = iadj(h2, 0) * where;
-          h2 = h2->move(i);
-          goto again;
-          }
-        }
-      again: ;
-      }
-    return gm * where;
+    return relative_matrix_recursive(h2, h1);
     }
 
   transmatrix adj(cell *c, int dir) override { return adj(c->master, dir); }

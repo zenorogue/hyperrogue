@@ -22,6 +22,36 @@ EX void fixelliptic(hyperpoint& h) {
     for(int i=0; i<MDIM; i++) h[i] = -h[i];
   }
 
+/** find relative_matrix via recursing the tree structure */
+EX transmatrix relative_matrix_recursive(heptagon *h2, heptagon *h1) {
+  if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
+    return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+  transmatrix gm = Id, where = Id;
+  while(h1 != h2) {
+    for(int i=0; i<h1->type; i++) {
+      if(h1->move(i) == h2) {
+        return gm * currentmap->adj(h1, i) * where;
+        }
+      }
+    if(h1->distance > h2->distance) {
+      for(int i=0; i<h1->type; i++) if(h1->move(i) && h1->move(i)->distance < h1->distance) {
+        gm = gm * currentmap->adj(h1, i);
+        h1 = h1->move(i);
+        goto again;
+        }
+      }
+    else {
+      for(int i=0; i<h2->type; i++) if(h2->move(i) && h2->move(i)->distance < h2->distance) {
+        where = currentmap->iadj(h2, 0) * where;
+        h2 = h2->move(i);
+        goto again;
+        }
+      }
+    again: ;
+    }
+  return gm * where;
+  }
+
 EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
   if(0) ;
   #if CAP_IRR  
