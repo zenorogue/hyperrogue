@@ -230,6 +230,9 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   if(!weirdhyperbolic && !(checkBarriersFront(bb) && checkBarriersBack(bb))) {
     return NULL;
     }
+  
+  int flip = 0;
+  if(WDIM == 2 && S7 % 2 == 0) flip = hrand(2) ? 1 : -1;
 
   // okay, let's go then!
   cellwalker bf(c, gdir);
@@ -237,6 +240,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   for(int i=0; i<rad; i++) {
     cx[i] = bf.at;
     bf += revstep;
+    if(flip && hrand(2) == 0) { bf += flip; flip *= -1; }
     }
   cx[rad] = bf.at;
   heptagon *h = bf.at->master;
