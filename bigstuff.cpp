@@ -194,6 +194,12 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     }
   }
 
+EX int hrandom_adjacent(int d) {
+  vector<int> choices = {d};
+  for(int a=0; a<S7; a++) if(reg3::dirs_adjacent[d][a]) choices.push_back(a);
+  return hrand_elt(choices, d);
+  }
+
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
   if(hybri) {
@@ -232,6 +238,8 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     return NULL;
     }
   
+  // if we always go to the opposite tile on a {even,x} tiling,
+  // it will be too easy
   int flip = 0;
   if(WDIM == 2 && S7 % 2 == 0) flip = hrand(2) ? 1 : -1;
 
@@ -242,6 +250,10 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     cx[i] = bf.at;
     bf += revstep;
     if(flip && hrand(2) == 0) { bf += flip; flip *= -1; }
+
+    // in 3D honeycombs we vary the direction, but never for three successive i's
+    if(WDIM == 3 && firststate == hsOrigin && (i%3))
+      bf.spin = hrandom_adjacent(bf.spin);
     }
   cx[rad] = bf.at;
   heptagon *h = bf.at->master;
