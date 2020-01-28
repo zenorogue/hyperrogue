@@ -1226,8 +1226,6 @@ EX bool pseudohept(cell *c) {
       return abs(h[3]) > .99 || abs(h[0]) > .99 || abs(h[1]) > .99 || abs(h[2]) > .99;
     }
   // chessboard pattern in 534
-  if(geometry == gSpace534) 
-    return c->master->distance & 1;
   if(geometry == gField534) 
     return hr::celldistance(c, currentmap->gamestart()) & 1;
   if(geometry == gCrystal344 || geometry == gCrystal534 || geometry == gSeifertCover)
@@ -1235,6 +1233,8 @@ EX bool pseudohept(cell *c) {
   if(quotient) return false; /* added */
   auto mr = dynamic_cast<hrmap_reg3_rule*> (currentmap);
   if(mr) {
+    if(geometry == gSpace535) 
+      return c->master->fieldval % 31 == 0;
     return c->master->fieldval == 0;
     }
   if(m && hyperbolic) {

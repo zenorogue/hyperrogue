@@ -667,6 +667,29 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         #endif
         else if(arb::in() && arb::current.have_line)
           c->wall = arb::linespattern(c) ? waTrapdoor : waNone;
+        else if(reg3::in_rule()) switch(geometry) {
+          case gSpace534: {
+            if(c->master->fieldval == 0) c->wall = waTrapdoor;
+            forCellCM(c1, c) if(c1->master->fieldval == 0) c->wall = waTrapdoor;
+            break;
+            }
+          case gSpace435: {
+            for(int i=0; i<S7; i++) {
+              cellwalker cw(c, i);
+              for(int a=0; a<3; a++) {
+                if(cw.at->master->fieldval == 0) c->wall = waTrapdoor;
+                cw += wstep;
+                cw += rev;
+                }
+              }
+            break;
+            }
+          case gSpace535: {
+            if((c->master->fieldval % 5) % 2 == 1) c->wall = waTrapdoor;
+            break;
+            }
+          default: ;
+          }
         else if(euclid && !arcm::in()) {
           auto co = euc2_coordinates(c);
           int y = co.second;
