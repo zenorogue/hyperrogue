@@ -4,11 +4,13 @@ Honeycomb data generator.
 
 Usage: 
 
-./hyper -geo 534h -tcano honeycomb-534.dat -quit
-./hyper -geo 535h -tcano honeycomb-535.dat -quit
-./hyper -geo 435h -tcano honeycomb-435.dat -quit
+./hyper -geo 534h -gen-rule honeycomb-rules-534.dat -quit
+./hyper -geo 535h -gen-rule honeycomb-rules-535.dat -quit
+./hyper -geo 435h -gen-rule honeycomb-rules-435.dat -quit
 
 You need to change the value of XS7 to 6 (for 435) or 12 (for others)
+
+You also need to select 'fp used for rules' 
 
 */
 
@@ -145,9 +147,27 @@ void add_candidate(cell *c) {
 
 void test_canonical(string fname) {
   if(S7 != XS7) { println(hlog, "fix XS7=", S7); exit(4); }
+  stop_game();
+  reg3::reg3_rule_available = false;
   start_game();
-  cell *c0 = cwt.at;
-  add_candidate(c0);
+
+  int qc = reg3::quotient_count();
+  
+  vector<cell*> c0;
+  
+  if(geometry == gSpace535) {
+    c0.resize(qc, cwt.at);
+    }
+  else {
+    for(int fv=0; fv<qc; fv++) {
+      cell *c = cwt.at;
+      for(int i=0; i<100 || c->master->fieldval != fv; i++) c = c->cmove(hrand(S7));
+      c->FV = 0;
+      c0.push_back(c);
+      }
+    }
+
+  for(cell* c: c0) add_candidate(c);
   
   array<int, XS7> empty;
   for(auto& e: empty) e = -1;
@@ -186,8 +206,6 @@ void test_canonical(string fname) {
       }
     }
   
-  int root = 0;
-    
   if(true) {
 
     println(hlog, "original rules: ", child_rules);
@@ -230,8 +248,6 @@ void test_canonical(string fname) {
     number_states = lqids;
     for(auto& p: id_of) p.second = ih[p.second];
     println(hlog, "rehashed");
-    println(hlog, "origin = ", ih[0]);
-    root = ih[0];
     fflush(stdout);
     }
 
@@ -334,6 +350,10 @@ void test_canonical(string fname) {
   auto& fp = currfp;
   hwrite_fpattern(ss, fp);
 
+  vector<int> root(qc, 0);
+  for(int i=0; i<qc; i++) root[i] = id_of[generate_ext_nei(c0[i])];
+  println(hlog, "root = ", root);
+
   hwrite(ss, root);
   
   println(hlog, "copy data");
@@ -353,7 +373,7 @@ auto fqhook =
   using namespace arg;
            
   if(0) ;
-  else if(argis("-tcano")) {
+  else if(argis("-gen-rule")) {
     shift(); test_canonical(args());
     }
   else return 1;

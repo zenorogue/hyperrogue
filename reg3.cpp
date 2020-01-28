@@ -883,7 +883,7 @@ EX namespace reg3 {
 
     fieldpattern::fpattern fp;
 
-    int root;
+    vector<int> root;
     string other;
     vector<short> children;
     
@@ -916,8 +916,9 @@ EX namespace reg3 {
     void find_mappings() {
       auto &nles = nonlooping_earlier_states;
       nles.clear();
-      address init = {0, root};
-      vector<address> bfs = {init};
+      vector<address> bfs;
+      for(int i=0; i<isize(quotient_map->allh); i++) 
+        bfs.emplace_back(i, root[i]);
       auto mov = [&] (int fv, int d) {
         return quotient_map->allh[fv]->move(d)->fieldval;
         };
@@ -943,7 +944,9 @@ EX namespace reg3 {
       for(auto p: q) q2[p]++;
       DEBB(DF_GEOM, ("q2 = ", q2));
       
-      bfs = {init};
+      bfs = {};
+      for(int i=0; i<isize(quotient_map->allh); i++) 
+        bfs.emplace_back(i, root[i]);
       for(int i=0; i<isize(bfs); i++) {
         address last = bfs[i];
         int state = last.second;
@@ -968,9 +971,9 @@ EX namespace reg3 {
 
     hrmap_reg3_rule() : fp(0) {
 
-      if(S7 == 6) load_ruleset("honeycomb-435.dat");
-      else if(ginf[geometry].vertex == 5) load_ruleset("honeycomb-535.dat");
-      else load_ruleset("honeycomb-534.dat");
+      if(S7 == 6) load_ruleset("honeycomb-rules-435.dat");
+      else if(ginf[geometry].vertex == 5) load_ruleset("honeycomb-rules-535.dat");
+      else load_ruleset("honeycomb-rules-534.dat");
       
       reg3::generate();
       origin = tailored_alloc<heptagon> (S7);
@@ -981,7 +984,7 @@ EX namespace reg3 {
       h.distance = 0;
       h.zebraval = 0;
       h.fieldval = 0;
-      h.fiftyval = root;
+      h.fiftyval = root[0];
       h.c7 = NULL;
       h.c7 = newCell(S7, origin);
       
@@ -1168,12 +1171,16 @@ EX hrmap* new_map() {
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
   if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
   if(quotient && !sphere) return new hrmap_field3(&currfp);
-  if(among(geometry, gSpace534, gSpace435, gSpace535)) return new hrmap_reg3_rule;
+  if(in_rule()) return new hrmap_reg3_rule;
   return new hrmap_reg3;
   }
 
 hrmap_reg3* regmap() {
   return ((hrmap_reg3*) currentmap);
+  }
+
+EX int quotient_count() {
+  return isize(regmap()->quotient_map->allh);
   }
 
 EX int celldistance(cell *c1, cell *c2) {
