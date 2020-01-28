@@ -116,6 +116,7 @@ EX bool wrongMode(char flags) {
   if(yendor::on) return true;
   if(peace::on) return true;
   if(tactic::on) return true;
+  if(dpgen::in) return true;
 #if CAP_TOUR
   if(tour::on) return true;
 #endif

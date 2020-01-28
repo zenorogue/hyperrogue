@@ -117,6 +117,7 @@
 #include "bigstuff.cpp"
 #include "multigame.cpp"
 #include "inforder.cpp"
+#include "dpgen.cpp"
 
 #if CAP_ROGUEVIZ
 #include "rogueviz/rogueviz.cpp"

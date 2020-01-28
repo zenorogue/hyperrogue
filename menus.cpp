@@ -556,6 +556,10 @@ EX void showChangeMode() {
     dialog::addBoolItem(XLAT("dual geometry mode"), dual::state, 'D');
     dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::dualmode); }); });
     }
+  if(dual::state) {
+    dialog::addBoolItem(XLAT("dual geometry puzzle"), dpgen::in, 'G');
+    dialog::add_action([] { dialog::do_if_confirmed([] { pushScreen(dpgen::show_menu); }); });
+    }
 #endif
 #if CAP_DAILY
   dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');

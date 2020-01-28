@@ -227,6 +227,7 @@ EX namespace dual {
       switch_to(1); forcedmovetype = fm; movepcto(0, subdir, false); forcedmovetype = fmSkip;
       switch_to(cg);
       reduceOrbPowers();
+      dpgen::check();  
       return true;
       }
     addMessage(XLAT("Impossible."));
