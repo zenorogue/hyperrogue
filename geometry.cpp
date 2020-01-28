@@ -294,7 +294,13 @@ hpcshape
   
   vector<array<int, 3>> symmetriesAt;
   
-  vector<pair<transmatrix, vector<int> > > cellrotations;  
+  struct cellrotation_t {
+    transmatrix M;
+    vector<int> mapping;
+    int inverse_id;
+    };
+  
+  vector<cellrotation_t> cellrotations;  
   
   #ifndef SCALETUNER
   static constexpr

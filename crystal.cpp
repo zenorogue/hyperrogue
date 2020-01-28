@@ -633,7 +633,7 @@ struct hrmap_crystal : hrmap_standard {
 
     for(auto& cr: cgi.cellrotations) {
 
-      transmatrix U = T * cr.first;
+      transmatrix U = T * cr.M;
       
       ld go = hdist0(U * tC0(reg3::adjmoves[h->c.spin(d)]));
       if(go > 1e-2) continue;

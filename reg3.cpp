@@ -1267,9 +1267,14 @@ EX void generate_cellrotations() {
     for(int x=0; x<S7; x++) if(perm[x] == -1) bad = true;
     if(bad) continue;
     
-    cr.emplace_back(S, perm);
+    cr.emplace_back(geometry_information::cellrotation_t{S, perm, 0});
     }
-
+  
+  int rots = isize(cr);
+  for(int i=0; i<rots; i++)
+    for(int j=0; j<rots; j++)
+      if(cr[i].mapping[cr[j].mapping[0]] == 0 && cr[i].mapping[cr[j].mapping[1]] == 1 && cr[i].mapping[cr[j].mapping[2]] == 2)
+        cr[i].inverse_id = j;
   }
 #endif
 
