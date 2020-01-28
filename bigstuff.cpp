@@ -1676,7 +1676,7 @@ EX void buildCamelot(cell *c) {
 
 EX int masterAlt(cell *c) {
   #if MAXMDIM >= 4
-  if(WDIM == 3 && hyperbolic) return reg3::altdist(c->master);
+  if(WDIM == 3 && hyperbolic && !reg3::in_rule()) return reg3::altdist(c->master);
   #endif
   return c->master->alt->distance;
   }
