@@ -1026,38 +1026,51 @@ EX namespace reg3 {
       return quotient_map->allh[h->fieldval];
       }
     
-    unordered_map<int, int> evmemo;
+    vector<short> evmemo;
     
     void find_emeraldval(heptagon *target, heptagon *parent, int d) {
-      const int MOD = 64;
       auto& cr = cgi.cellrotations;
-      int memo_id = parent->emeraldval * isize(quotient_map->allh) + parent->fieldval;
-
-      if(false && evmemo.count(memo_id))
-        target->emeraldval = evmemo[memo_id];
-      else {
-        int eid = parent->emeraldval / MOD;
-        int k0 = parent->emeraldval % MOD;
-        auto cpart = emerald_map->allh[eid];
-        int ed = cr[k0].mapping[d];
-        auto cpart1 = cpart->move(ed);
-        int eid1 = cpart1->fieldval;
+      if(evmemo.empty()) {
+        println(hlog, "starting");
+        map<int, int> matrix_hashtable;
+        auto matrix_hash = [] (const transmatrix& M) {
+          return bucketer(M[0][0]) 
+               + bucketer(M[0][1]) * 71 
+               + bucketer(M[0][2]) * 113
+               + bucketer(M[1][0]) * 1301
+               + bucketer(M[1][1]) * 1703
+               + bucketer(M[1][2]) * 17031
+               + bucketer(M[2][2]) * 2307
+               + bucketer(M[2][0]) * 2311
+               + bucketer(M[2][1]) * 10311;
+          };
+        for(int i=0; i<isize(cr); i++) matrix_hashtable[matrix_hash(cr[i].M)] = cr[i].inverse_id;
+        println(hlog, "ids size = ", isize(matrix_hashtable));
         
-        transmatrix X = cr[cr[k0].inverse_id].M;
-        
-        int k1 = -1;
-        
-        for(int ik1=0; ik1<isize(cr); ik1++)  {
-          bool ok =true;
-          auto& mX1 = cr[ik1].M;
-          for(int d1=0; d1<S7; d1++) if(!eqmatrix(adj(parent, d) * mX1, X * emerald_map->adj(cpart, ed)))
-            ok = false;
-          if(ok) k1 = cr[ik1].inverse_id;
+        for(int eid=0; eid<isize(emerald_map->allh); eid++)
+        for(int k0=0; k0<isize(cr); k0++)
+        for(int fv=0; fv<isize(quotient_map->allh); fv++) {
+          for(int d=0; d<S7; d++) {
+            int ed = cr[k0].mapping[d];
+            auto cpart = emerald_map->allh[eid];
+            int eid1 = emerald_map->allh[eid]->move(ed)->fieldval;
+            const transmatrix& X = cr[cr[k0].inverse_id].M;
+            transmatrix U = quotient_map->iadj(quotient_map->allh[fv], d) * X * emerald_map->adj(cpart, ed);
+            int k1 = matrix_hashtable[matrix_hash(U)];
+            /* for(int ik1=0; ik1<isize(cr); ik1++)  {
+              auto& mX1 = cr[ik1].M;
+              if(eqmatrix(mX1, U)) k1 = cr[ik1].inverse_id;
+              } */
+            evmemo.push_back(eid1 * isize(cr) + k1); 
+            }
           }
-        evmemo[memo_id] = target->emeraldval = eid1 * MOD + k1;
+        println(hlog, "generated ", isize(evmemo));
         }
-            
-      target->zebraval = emerald_map->allh[target->emeraldval / MOD]->zebraval;
+      int memo_id = parent->emeraldval;
+      memo_id = memo_id * isize(quotient_map->allh) + parent->fieldval;
+      memo_id = memo_id * S7 + d;
+      target->emeraldval = evmemo[memo_id];
+      target->zebraval = emerald_map->allh[target->emeraldval / isize(cr)]->zebraval;
       }
 
     heptagon *create_step(heptagon *parent, int d) override {
