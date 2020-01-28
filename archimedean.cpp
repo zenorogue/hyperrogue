@@ -311,7 +311,7 @@ void archimedean_tiling::regroup() {
     }
 
   flags.clear();
-  flags.resize(M);
+  flags.resize(M, 0);
   for(int i=0; i<M; i++)
   for(int j=0; j<M; j++) {
     if(tilegroup[i] == tilegroup[j]) {
@@ -834,7 +834,7 @@ void archimedean_tiling::parse() {
   faces.clear(); nflags.clear();
   have_line = false;
   have_ph = false;
-  int nflags0;
+  int nflags0 = 0;
   auto nfback = [this, &nflags0] () -> int& { if(nflags.empty()) return nflags0; else return nflags.back(); };
   while(true) {
     if(peek() == ')' || (peek() == '(' && isize(faces)) || peek() == 0) break;
