@@ -377,8 +377,8 @@ EX namespace reg3 {
     
     
     void create_patterns() {
-      // change the geometry to make sure that the correct celldistance is used
-      dynamicval<eGeometry> g(geometry, gFieldQuotient);
+      DEBB(DF_GEOM, ("creating pattern = ", isize(allh)));
+
       // also, strafe needs currentmap
       dynamicval<hrmap*> c(currentmap, this);
 
@@ -387,18 +387,18 @@ EX namespace reg3 {
         cell *a = gamestart();
         cell *b = a;
         for(cell *c: allcells())
-          if(hr::celldistance(a, c) == 5) {
+          if(bounded_celldistance(a, c) == 5) {
             b = c;
             break;
             }
         for(cell *c: allcells())
-          if(hr::celldistance(a, c) > hr::celldistance(b, c))
+          if(bounded_celldistance(a, c) > bounded_celldistance(b, c))
             c->master->zebraval |= 1;
           
         // Vineyard in 534
         b = (cellwalker(a, 0) + wstep + rev + wstep).at;
         for(cell *c: allcells())
-          if(hr::celldistance(a, c) == hr::celldistance(b, c))
+          if(bounded_celldistance(a, c) == bounded_celldistance(b, c))
             c->master->zebraval |= 2;
         }
       
@@ -406,7 +406,7 @@ EX namespace reg3 {
         // Emerald in 534
         cell *a = gamestart();
         for(cell *c: allcells())
-          if(hr::celldistance(a, c) > 3)
+          if(bounded_celldistance(a, c) > 3)
             c->master->zebraval |= 1;
         
         // Vineyard in 435
