@@ -11,6 +11,8 @@
 namespace hr {
 
 #if HDR
+extern int default_levs();
+
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
@@ -18,7 +20,7 @@ struct hrmap {
   virtual vector<cell*>& allcells();
   virtual void verify() { }
   virtual void link_alt(const cellwalker& hs) { }
-  virtual void generateAlts(heptagon *h, int levs = IRREGULAR ? 1 : S3 >= OINF ? 1 : S3-3, bool link_cdata = true);
+  virtual void generateAlts(heptagon *h, int levs = default_levs(), bool link_cdata = true);
   heptagon *may_create_step(heptagon *h, int direction) {
     if(h->move(direction)) return h->move(direction);
     return create_step(h, direction);

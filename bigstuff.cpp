@@ -133,6 +133,14 @@ EX bool grailWasFound(cell *c) {
   return c->master->alt->alt->emeraldval & GRAIL_FOUND;
   }
 
+EX int default_levs() {
+  if(IRREGULAR)
+    return 1;
+  if(S3 >= OINF)
+    return 1;
+  return S3-3;
+  }
+
 void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(hybri) { PIU ( generateAlts(h, levs, link_cdata) ); }
   if(!h->alt) return;
