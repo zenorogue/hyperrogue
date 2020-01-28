@@ -984,6 +984,44 @@ EX cell *random_in_distance(cell *c, int d) {
   return choices[hrand(isize(choices))];
   }
 
+EX int bounded_celldistance(cell *c1, cell *c2) {
+  int limit = 6000;
+  if(asonov::in()) { 
+    c2 = asonov::get_at(asonov::get_coord(c2->master) - asonov::get_coord(c1->master))->c7;
+    c1 = currentmap->gamestart(); 
+    limit = 100000000;
+    }
+
+  if(saved_distances.count(make_pair(c1,c2)))
+    return saved_distances[make_pair(c1,c2)];
+
+  celllister cl(c1, 100, limit, NULL);
+  for(int i=0; i<isize(cl.lst); i++)
+    saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
+
+  if(saved_distances.count(make_pair(c1,c2)))
+    return saved_distances[make_pair(c1,c2)];
+
+  return DISTANCE_UNKNOWN;
+  }
+
+EX int clueless_celldistance(cell *c1, cell *c2) {
+  if(saved_distances.count(make_pair(c1,c2)))
+    return saved_distances[make_pair(c1,c2)];
+  
+  if(dists_computed.count(c1)) return DISTANCE_UNKNOWN;
+    
+  if(isize(saved_distances) > perma_distances + 1000000) erase_saved_distances();
+  compute_saved_distances(c1, 64, 1000);
+  
+ dists_computed.insert(c1);
+
+  if(saved_distances.count(make_pair(c1,c2)))
+    return saved_distances[make_pair(c1,c2)];
+    
+  return DISTANCE_UNKNOWN;
+  }
+
 EX int celldistance(cell *c1, cell *c2) {
 
   if(hybri) return hybrid::celldistance(c1, c2);
@@ -993,27 +1031,7 @@ EX int celldistance(cell *c1, cell *c2) {
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
   #endif
   
-  if(bounded) {
-  
-    int limit = 6000;
-    if(asonov::in()) { 
-      c2 = asonov::get_at(asonov::get_coord(c2->master) - asonov::get_coord(c1->master))->c7;
-      c1 = currentmap->gamestart(); 
-      limit = 100000000;
-      }
-
-    if(saved_distances.count(make_pair(c1,c2)))
-      return saved_distances[make_pair(c1,c2)];
-
-    celllister cl(c1, 100, limit, NULL);
-    for(int i=0; i<isize(cl.lst); i++)
-      saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
-
-    if(saved_distances.count(make_pair(c1,c2)))
-      return saved_distances[make_pair(c1,c2)];
-
-    return DISTANCE_UNKNOWN;
-    }
+  if(bounded) return bounded_celldistance(c1, c2);
   
   #if CAP_CRYSTAL
   if(cryst) return crystal::precise_distance(c1, c2);
@@ -1023,23 +1041,8 @@ EX int celldistance(cell *c1, cell *c2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil) {
-    
-    if(saved_distances.count(make_pair(c1,c2)))
-      return saved_distances[make_pair(c1,c2)];
-    
-    if(dists_computed.count(c1)) return DISTANCE_UNKNOWN;
-      
-    if(isize(saved_distances) > perma_distances + 1000000) erase_saved_distances();
-    compute_saved_distances(c1, 64, 1000);
-    
-   dists_computed.insert(c1);
-
-    if(saved_distances.count(make_pair(c1,c2)))
-      return saved_distances[make_pair(c1,c2)];
-      
-    return DISTANCE_UNKNOWN;
-    }
+  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil) 
+    return clueless_celldistance(c1, c2);
    
    if(S3 >= OINF) return inforder::celldistance(c1, c2);
 
