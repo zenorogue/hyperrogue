@@ -420,7 +420,7 @@ EX namespace reg3 {
         for(int i=0; i<currfp_n(); i++) {
           bool ok = true;
           for(auto o: plane_indices) {
-            int j = currfp_gmul(i, o * f->local_group) / f->local_group;
+            int j = f->gmul(i, o * f->local_group) / f->local_group;
             if(plane_indices.count(j)) ok = false;
             forCellEx(c1, allcells()[j]) if(plane_indices.count(c1->master->fieldval)) ok = false;
             }
@@ -433,7 +433,7 @@ EX namespace reg3 {
           int pw = 1;
           int at = i;
           while(true) {
-            at = currfp_gmul(at, i);
+            at = f->gmul(at, i);
             if(!nwi.count(at)) break;
             pw++;
             }
@@ -446,7 +446,7 @@ EX namespace reg3 {
             int j = currfp_gmul(u, o * f->local_group) / f->local_group;
             allcells()[j]->master->zebraval |= 2;
             }
-          u = currfp_gmul(u, gpow);
+          u = f->gmul(u, gpow);
           }
         }
       }
