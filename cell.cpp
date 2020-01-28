@@ -148,7 +148,7 @@ EX hrmap *currentmap;
 EX vector<hrmap*> allmaps;
 
 EX hrmap *newAltMap(heptagon *o) { 
-  if(reg3::geometry_has_tree_structure())
+  if(reg3::in_rule())
     return reg3::new_alt_map(o);
   return new hrmap_hyperbolic(o); 
   }
@@ -495,7 +495,8 @@ EX int celldistAlt(cell *c) {
     }
   #if MAXMDIM >= 4
   if(euc::in(3)) return euc::dist_alt(c);
-  if(hyperbolic && WDIM == 3) return reg3::altdist(c->master);
+  if(hyperbolic && WDIM == 3 && !reg3::in_rule())
+    return reg3::altdist(c->master);
   #endif
   if(!c->master->alt) return 0;
   #if CAP_IRR

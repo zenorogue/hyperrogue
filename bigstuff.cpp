@@ -151,7 +151,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   for(int i=0; i<h->type; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
   int relspin = -4; // for horocycles it must go the other way
-  if(quotient) relspin = 0;
+  if(quotient || reg3::in_rule()) relspin = 0;
   else {
   for(int j=0; j<h->type; j++) for(int i=0; i<h->type; i++) {
     createStep(h, i);
@@ -204,7 +204,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   // check for direction
   int gdir = -1;
   for(int i=0; i<c->type; i++) {
-    if(!reg3::geometry_has_tree_structure()) {
+    if(!reg3::in_rule()) {
       if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
       }
     else {
@@ -270,8 +270,10 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
   alt->c7 = NULL;
   alt->alt = alt;
-  if(reg3::geometry_has_tree_structure())
+  if(reg3::in_rule()) {
     reg3::link_structures(h, alt);
+    if(alt->fiftyval == -1) return nullptr; /* unlinked */
+    }
   h->alt = alt;
   alt->cdata = (cdata*) h;
   currentmap->link_alt(bf);

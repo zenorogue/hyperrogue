@@ -905,6 +905,67 @@ EX namespace reg3 {
       fclose(f);
       }
     
+    /** address = (fieldvalue, state) */
+    typedef pair<int, int> address;
+    
+    /** nles[x] lists the addresses from which we can reach address x 
+     *  without ever ending in the starting point */
+
+    map<address, set<address>> nonlooping_earlier_states;
+
+    void find_mappings() {
+      auto &nles = nonlooping_earlier_states;
+      nles.clear();
+      address init = {0, root};
+      vector<address> bfs = {init};
+      auto mov = [&] (int fv, int d) {
+        return quotient_map->allh[fv]->move(d)->fieldval;
+        };
+      int qstate = isize(children) / S7;
+      DEBB(DF_GEOM, ("qstate = ", qstate));
+      for(int i=0; i<isize(bfs); i++) {
+        address last = bfs[i];
+        int state = last.second;
+        int fv = last.first;
+        for(int d=0; d<S7; d++) {
+          int nstate = children[state*S7+d];
+          if(nstate >= 0) {
+            address next = {mov(fv, d), nstate};
+            if(!nles.count(next)) bfs.push_back(next);
+            nles[next].insert(last);
+            }
+          }
+        }
+      
+      vector<int> q(qstate, 0);
+      for(auto p: bfs) q[p.second]++;
+      vector<int> q2(isize(quotient_map->allh)+1, 0);
+      for(auto p: q) q2[p]++;
+      DEBB(DF_GEOM, ("q2 = ", q2));
+      
+      bfs = {init};
+      for(int i=0; i<isize(bfs); i++) {
+        address last = bfs[i];
+        int state = last.second;
+        int fv = last.first;
+        for(int d=0; d<S7; d++) {
+          int nstate = children[state*S7+d];
+          if(nstate >= 0) {
+            address next = {mov(fv, d), nstate};
+            if(!nles.count(next)) continue;
+            int c = isize(nles[next]);
+            nles[next].erase(last);
+            if(nles[next].empty() && c) {
+              nles.erase(next);
+              bfs.push_back(next);
+              }
+            }
+          }
+        }
+      
+      DEBB(DF_GEOM, ("removed cases = ", isize(bfs)));
+      }
+
     hrmap_reg3_rule() : fp(0) {
 
       if(S7 == 6) load_ruleset("honeycomb-435.dat");
@@ -942,6 +1003,8 @@ EX namespace reg3 {
       else
         quotient_map = new hrmap_field3(&fp);
       h.zebraval = quotient_map->allh[0]->zebraval;
+      
+      find_mappings();
       }
     
     heptagon *getOrigin() override {
@@ -984,7 +1047,6 @@ EX namespace reg3 {
         }
       
       else if(other[pos] == ('A' + d) && other[pos+1] == ',') {
-        println(hlog, "parent link of ", id);
         res = tailored_alloc<heptagon> (S7);
         res->c7 = nullptr;
         res->alt = parent->alt;
@@ -992,12 +1054,8 @@ EX namespace reg3 {
         res->fieldval = fv;
         res->distance = parent->distance - 1;
         vector<int> possible;
-        for(int i=0; i<isize(children) / S7; i++)
-          if(children[i*S7+d2] == id)
-            possible.push_back(i);
-        println(hlog, "possible connections: ", possible);
+        for(auto s: nonlooping_earlier_states[{int(parent->fieldval), id}]) possible.push_back(s.second);
         id1 = hrand_elt(possible, 0);
-        println(hlog, "chosen: ", id1);
         res->fiftyval = id1;
         }
 
@@ -1085,10 +1143,27 @@ EX hrmap *new_alt_map(heptagon *o) {
 EX void link_structures(heptagon *h, heptagon *alt) {
   alt->fieldval = h->fieldval;
   alt->fiftyval = h->fiftyval;
+  vector<int> choices;
+  auto cm = (hrmap_reg3_rule*) currentmap;
+  for(auto p: cm->nonlooping_earlier_states)
+    if(p.first.first == h->fieldval)
+      choices.push_back(p.first.second);
+  vector<int> choices2;
+  for(auto c: choices) {
+    bool ok = true;
+    for(int d=0; d<12; d++) 
+      if(h->cmove(d)->distance < h->distance)
+        if(cm->children[S7*c+d] == -1)
+          ok = false;
+    if(ok) choices2.push_back(c);
+    }
+  alt->fiftyval = hrand_elt(choices, -1);
   }
 
-EX bool geometry_has_tree_structure() {
-  return among(geometry, gSpace534, gSpace435, gSpace535);
+EX bool reg3_rule_available = true;
+
+EX bool in_rule() {
+  return reg3_rule_available && among(geometry, gSpace534, gSpace435, gSpace535);
   }
   
 EX hrmap* new_map() {
@@ -1114,6 +1189,9 @@ EX int celldistance(cell *c1, cell *c2) {
   hyperpoint h = tC0(r->relative_matrix(c1->master, c2->master, C0));
   int b = bucketer(h);
   if(close_distances.count(b)) return close_distances[b];
+  
+  if(in_rule())
+    return clueless_celldistance(c1, c2);
 
   dynamicval<eGeometry> g(geometry, gBinary3);  
   return 20 + bt::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
