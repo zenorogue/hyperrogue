@@ -204,14 +204,20 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   // check for direction
   int gdir = -1;
   for(int i=0; i<c->type; i++) {
-    if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
+    if(!reg3::geometry_has_tree_structure()) {
+      if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
+      }
+    else {
+      /* mpdist may be incorrect */
+      if(c->move(i) && c->move(i)->master->distance < c->master->distance) gdir = i;
+      }
     }
   if(gdir < 0) return NULL;
   
   // non-crossing in weird hyperbolic
   if(weirdhyperbolic) {
     if(c->bardir == NOBARRIERS) return NULL;
-    forCellEx(c1, c) if(c1->bardir == NOBARRIERS) return NULL;
+    forCellCM(c1, c) if(c1->bardir == NOBARRIERS) return NULL;
     if(IRREGULAR)
       for(int i=0; i<S7; i++)
         if(createStep(c->master, i)->c7->bardir != NODIR)
@@ -227,7 +233,6 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
 
   // okay, let's go then!
   cellwalker bf(c, gdir);
-  if(PURE) bf += rev;
   std::vector<cell *> cx(rad+1);
   for(int i=0; i<rad; i++) {
     cx[i] = bf.at;
