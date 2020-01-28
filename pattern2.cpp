@@ -1919,7 +1919,7 @@ EX namespace patterns {
     dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
     dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
     dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
-    dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
+    dialog::addSelItem(XLAT("floor type"), XLATN(winf[canvas_default_wall].name), 'i');
 
     dialog::addItem(XLAT("line patterns"), 'L');
     
@@ -1950,14 +1950,20 @@ EX namespace patterns {
           };
         }
       else if(uni == 'i') {
-        if(instant) {
+        if(instant) 
           stop_game();
-          canvas_invisible = !canvas_invisible;
+        
+        vector<eWall> choices = {waNone, waInvisibleFloor, waChasm, waEternalFire, waStone, waSea, waBarrier, waCavewall};
+        for(int i=0; i<isize(choices); i++) 
+          if(canvas_default_wall == choices[i]) {
+            canvas_default_wall = choices[(i+1) % isize(choices)];
+            break;
+            }
+        if(instant) {
           firstland = specialland = laCanvas; 
           randomPatternsMode = false;
           start_game();
           }
-        else canvas_invisible = !canvas_invisible;
         }
       
       else if(uni == '6' || uni == '7' || uni == '8' || uni == '9') {
@@ -2966,7 +2972,7 @@ int read_pattern_args() {
     stop_game();
     firstland = specialland = laCanvas;
     shift();
-    if(args() == "i") canvas_invisible = !canvas_invisible;
+    if(args() == "i") canvas_default_wall = waInvisibleFloor;
     else if(args().size() == 1) patterns::whichCanvas = args()[0];
     else patterns::canvasback = arghex();
     stop_game_and_switch_mode(rg::nothing);

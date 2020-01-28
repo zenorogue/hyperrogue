@@ -277,6 +277,7 @@ namespace mapstream {
     f.write(patterns::subpattern_flags);
     f.write(patterns::whichCanvas);
     f.write(patterns::displaycodes);
+    f.write(canvas_default_wall);
     f.write(mapeditor::drawplayer);
     if(patterns::whichCanvas == 'f') f.write(patterns::color_formula);
     
@@ -404,6 +405,8 @@ namespace mapstream {
       f.read(patterns::subpattern_flags);
       f.read(patterns::whichCanvas);
       f.read(patterns::displaycodes);
+      if(VERNUM_HEX >= 0xA816)
+        f.read(canvas_default_wall);
       f.read(mapeditor::drawplayer);
       if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
       

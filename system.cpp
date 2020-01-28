@@ -40,7 +40,7 @@ EX bool game_active;
 
 EX bool cblind;
 EX bool autocheat;
-EX bool canvas_invisible;
+EX eWall canvas_default_wall = waNone;
 
 EX int truelotus;
 EX int gamecount;

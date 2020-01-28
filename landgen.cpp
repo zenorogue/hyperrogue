@@ -2704,8 +2704,7 @@ EX void setdist(cell *c, int d, cell *from) {
   if(d == BARLEV && c->land == laCanvas)  {
     color_t col = patterns::generateCanvas(c);
     c->landparam = col;
-    if(canvas_invisible)
-      c->wall = waInvisibleFloor;
+    c->wall = canvas_default_wall;
     if(WDIM == 3 && (col & 0x1000000)) c->wall = waWaxWall;
     }
 
