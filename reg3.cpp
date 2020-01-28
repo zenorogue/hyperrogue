@@ -594,6 +594,7 @@ EX namespace reg3 {
       h.distance = 0;
       h.fiftyval = 0;
       h.fieldval = 0;
+      h.emeraldval = 0;
       h.c7 = newCell(S7, origin);
       if(sphere) spherecells.push_back(h.c7);
       worst_error1 = 0, worst_error2 = 0;
@@ -609,17 +610,15 @@ EX namespace reg3 {
       #if CAP_FIELD
       if(geometry == gSpace344) {
         quotient_map = new hrmap_from_crystal;
-        h.zebraval = quotient_map->allh[0]->zebraval;
         }
       else if(geometry == gSpace535) {
         quotient_map = new seifert_weber::hrmap_seifert_cover;
-        h.zebraval = quotient_map->allh[0]->zebraval;
         }
       else if(hyperbolic) {
         quotient_map = new hrmap_field3(&currfp);
-        h.zebraval = quotient_map->allh[0]->zebraval;
         }
       #endif
+      h.zebraval = quotient_map->allh[0]->zebraval;
       
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3); 
@@ -768,6 +767,7 @@ EX namespace reg3 {
       created->cdata = NULL;
       #if CAP_FIELD
       if(quotient_map) {
+        created->emeraldval = fv;
         created->zebraval = quotient_map->allh[fv]->zebraval;
         }
       else
@@ -880,6 +880,7 @@ EX namespace reg3 {
   
     heptagon *origin;
     reg3::hrmap_quotient3 *quotient_map;
+    reg3::hrmap_quotient3 *emerald_map;
 
     fieldpattern::fpattern fp;
 
@@ -1005,7 +1006,12 @@ EX namespace reg3 {
         quotient_map = new seifert_weber::hrmap_seifert_cover();
       else
         quotient_map = new hrmap_field3(&fp);
-      h.zebraval = quotient_map->allh[0]->zebraval;
+      
+      if(geometry == gSpace535)
+        emerald_map = new seifert_weber::hrmap_seifert_cover();
+      else
+        emerald_map = new hrmap_field3(&currfp);
+      h.emeraldval = 0;
       
       find_mappings();
       }
@@ -1018,6 +1024,40 @@ EX namespace reg3 {
     
     heptagon *counterpart(heptagon *h) {
       return quotient_map->allh[h->fieldval];
+      }
+    
+    unordered_map<int, int> evmemo;
+    
+    void find_emeraldval(heptagon *target, heptagon *parent, int d) {
+      const int MOD = 64;
+      auto& cr = cgi.cellrotations;
+      int memo_id = parent->emeraldval * isize(quotient_map->allh) + parent->fieldval;
+
+      if(false && evmemo.count(memo_id))
+        target->emeraldval = evmemo[memo_id];
+      else {
+        int eid = parent->emeraldval / MOD;
+        int k0 = parent->emeraldval % MOD;
+        auto cpart = emerald_map->allh[eid];
+        int ed = cr[k0].mapping[d];
+        auto cpart1 = cpart->move(ed);
+        int eid1 = cpart1->fieldval;
+        
+        transmatrix X = cr[cr[k0].inverse_id].M;
+        
+        int k1 = -1;
+        
+        for(int ik1=0; ik1<isize(cr); ik1++)  {
+          bool ok =true;
+          auto& mX1 = cr[ik1].M;
+          for(int d1=0; d1<S7; d1++) if(!eqmatrix(adj(parent, d) * mX1, X * emerald_map->adj(cpart, ed)))
+            ok = false;
+          if(ok) k1 = cr[ik1].inverse_id;
+          }
+        evmemo[memo_id] = target->emeraldval = eid1 * MOD + k1;
+        }
+            
+      target->zebraval = emerald_map->allh[target->emeraldval / MOD]->zebraval;
       }
 
     heptagon *create_step(heptagon *parent, int d) override {
@@ -1042,10 +1082,10 @@ EX namespace reg3 {
           res->c7 = nullptr;
         res->alt = nullptr;
         res->cdata = nullptr;
-        res->zebraval = quotient_map->allh[fv]->zebraval;
         res->fieldval = fv;
         res->distance = parent->distance + 1;
-        res->fiftyval = id1;        
+        res->fiftyval = id1;
+        find_emeraldval(res, parent, d);
         // res->c.connect(d2, parent, d, false);
         }
       
@@ -1060,6 +1100,7 @@ EX namespace reg3 {
         for(auto s: nonlooping_earlier_states[{int(parent->fieldval), id}]) possible.push_back(s.second);
         id1 = hrand_elt(possible, 0);
         res->fiftyval = id1;
+        find_emeraldval(res, parent, d);
         }
 
       else {
