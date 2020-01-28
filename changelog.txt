@@ -3770,3 +3770,13 @@ Geometries:
 - extended 'linewidth' settings: illustration mode, hint about Alt, disable shadows, bright mode, colorblind simulation
 - fixed the direction reflected monsters face in the Hall of Mirrors
 - mixed infinite order
+
+2020-01-28 19:48 Update 11.2v:
+- added dual geometry puzzle generator
+- added a comma in shmup help text
+- Temple rings are now displayed in the mouseover text
+- in the patterns menu (in map editor), you can now set the default wall type
+- Camelot no longer generates trivially in {even,x} tessellations
+- added {4,3,6} honeycomb
+- Compact hyperbolic honeycombs are now implemented using canonical paths. Improved CPU/RAM efficiency and reliability. (Horo)cyclic lands (e.g. Camelot) work correctly now. Also improved Graveyard and Zebra.
+- underlying/horocycle tree patterns now can display fat edges in 3D geometries

@@ -51,7 +51,7 @@ void solve(cpos at) {
       if(ca1->wall != waNone) continue;
       
       int s = (c1->c.spin((d+k)%4) - c0->c.spin(k)) & 3;
-      enqueue({ca0, ca1, s}, dist+1, i);
+      enqueue(make_tuple(ca0, ca1, s), dist+1, i);
       }
     }
   }
@@ -99,7 +99,7 @@ void launch(int seed, int elimit, int hlimit) {
       }
     println(hlog, "c1 size = ", isize(cl.lst));
     }
-  cpos start = {c0, c1, 0};
+  cpos start = make_tuple(c0, c1, 0);
   solve(start);
   println(hlog, "queue size = ", isize(all));
   
@@ -110,7 +110,9 @@ void launch(int seed, int elimit, int hlimit) {
     int wdist = -1, wdcount;
     for(cell* x0: cl0) for(cell *x1: cl1) {
       int x = 9999;
-      for(int d=0; d<4; d++) if(visited.count({x0, x1, d})) x = min(x, visited[{x0, x1, d}]);
+      for(int d=0; d<4; d++) 
+        if(visited.count(make_tuple(x0, x1, d))) 
+          x = min(x, visited[make_tuple(x0, x1, d)]);
       if(x == 9999) continue;
       if(x > wdist) wdist = x, wdcount = 0;
       if(wdist == x) { wdcount++; if(hrand(wdcount) == 0) worst = {x0, x1}; }
@@ -128,7 +130,9 @@ void launch(int seed, int elimit, int hlimit) {
       solve(start);
       c->wall = waNone;
       int x = 9999;
-      for(int d=0; d<4; d++) if(visited.count({worst.first, worst.second, d})) x = min(x, visited[{worst.first, worst.second, d}]);
+      for(int d=0; d<4; d++) 
+        if(visited.count(make_tuple(worst.first, worst.second, d))) 
+          x = min(x, visited[make_tuple(worst.first, worst.second, d)]);
       if(x == 9999) continue;
       if(x > wdist) wdist = x, wdcount = 0;
       if(wdist == x) { wdcount++; if(hrand(wdcount) == 0) worst_block = c; }
@@ -139,7 +143,6 @@ void launch(int seed, int elimit, int hlimit) {
     }
   
   solve(start);
-  for(int d=0; d<4; d++) if(visited.count({worst.first, worst.second, d})) println(hlog, "D = ", d);
   
   println(hlog, "worst = ", worst);
   for(int i=0; i<isize(all); i++) if(get<0>(all[i]) == worst.first && get<1>(all[i]) == worst.second) {
