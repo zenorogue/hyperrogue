@@ -78,7 +78,7 @@ template<class T, typename = typename std::enable_if<std::is_integral<T>::value 
 
 inline void hwrite(hstream& hs, const string& s) {
   if(isize(s) >= 255) {
-    hs.write_char(255);
+    hs.write_char((char)255);
     hs.write<int>(isize(s));
     }
   for(char c: s) hs.write_char(c);
