@@ -30,7 +30,7 @@ AC_SEARCH_LIBS([aacircleColor], [SDL_gfx], [], AC_MSG_RESULT([SDL_gfx library wa
 AC_SEARCH_LIBS([Mix_LoadMUS], [SDL_mixer], [], AC_MSG_ERROR([SDL_mixer library was not found]))
 AC_SEARCH_LIBS([TTF_OpenFont], [SDL_ttf], [], AC_MSG_RESULT([SDL_ttf library was not found]))
 AC_SEARCH_LIBS(pthread_create, [pthread], ,AC_MSG_ERROR([pthread library was not found]))
-AC_SEARCH_LIBS(deflateInit, [z], ,AC_MSG_ERROR([zlib was not found]))        
+AC_SEARCH_LIBS(deflate, [z], ,AC_MSG_ERROR([zlib was not found]))        
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
