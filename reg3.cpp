@@ -914,6 +914,8 @@ EX namespace reg3 {
 
     map<address, set<address>> nonlooping_earlier_states;
 
+    vector<vector<int>> possible_states;
+
     void find_mappings() {
       auto &nles = nonlooping_earlier_states;
       nles.clear();
@@ -971,6 +973,10 @@ EX namespace reg3 {
         }
       
       DEBB(DF_GEOM, ("removed cases = ", isize(bfs)));
+      
+      possible_states.resize(qstate);
+      for(auto& p: nonlooping_earlier_states)
+        possible_states[p.first.first].push_back(p.first.second);
       }
 
     hrmap_reg3_rule() : fp(0) {
@@ -1212,10 +1218,7 @@ EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
     alt->fiftyval = cm->root[alt->fieldval];
     return;
     }
-  vector<int> choices;
-  for(auto p: cm->nonlooping_earlier_states)
-    if(p.first.first == alt->fieldval)
-      choices.push_back(p.first.second);
+  vector<int>& choices = cm->possible_states[alt->fieldval];
   vector<int> choices2;
   for(auto c: choices) {
     bool ok = true;
