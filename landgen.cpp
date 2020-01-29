@@ -667,6 +667,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         #endif
         else if(arb::in() && arb::current.have_line)
           c->wall = arb::linespattern(c) ? waTrapdoor : waNone;
+        #if MAXMDIM >= 4
         else if(reg3::in_rule()) switch(geometry) {
           case gSpace534: {
             if(c->master->fieldval == 0) c->wall = waTrapdoor;
@@ -690,6 +691,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             }
           default: ;
           }
+        #endif
         else if(euclid && !arcm::in()) {
           auto co = euc2_coordinates(c);
           int y = co.second;

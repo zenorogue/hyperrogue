@@ -299,6 +299,9 @@ struct fpattern {
   
   unsigned compute_hash();
 
+  void set_field(int p, int sq);
+
+  #if MAXMDIM >= 4
   // general 4D
   vector<transmatrix> fullv;
 
@@ -308,11 +311,9 @@ struct fpattern {
   int solve3();
   bool generate_all3();
 
-  void set_field(int p, int sq);
-  // transmatrix full_R, full_P, full_X;
-  
   #if CAP_THREAD
   struct discovery *dis;
+  #endif
   #endif
   };
 
@@ -377,6 +378,7 @@ vector<matrix> fpattern::generate_isometries() {
   return res;
   }
 
+#if MAXMDIM >= 4
 vector<matrix> fpattern::generate_isometries3() {
   
   matrix T = Id;
@@ -454,6 +456,7 @@ void fpattern::add1(const matrix& M, const transmatrix& Full) {
     matcode[M] = i, matrices.push_back(M), fullv.push_back(Full);
     }
   }
+#endif
 
 map<unsigned,int> hash_found;
 
@@ -469,6 +472,7 @@ unsigned fpattern::compute_hash() {
   return hashv;
   }
 
+#if MAXMDIM >= 4
 bool fpattern::generate_all3() {
 
   reg3::generate_fulls();
@@ -554,6 +558,7 @@ int fpattern::solve3() {
   
   return cmb;
   }
+#endif
 
 void fpattern::set_field(int p, int sq) {
   Prime = p;
@@ -586,6 +591,7 @@ int fpattern::solve() {
         }
       } else wsquare = 0;
 
+    #if MAXMDIM >= 4
     if(WDIM == 3) {
       if(dual == 0 && (Prime <= limitsq || pw == 1)) {
         int s = solve3();
@@ -593,6 +599,7 @@ int fpattern::solve() {
         }
       continue;
       }
+    #endif
 
     if(dual == 2) {
       if(Field <= 10) {
@@ -1325,7 +1332,9 @@ EX void hread_fpattern(hstream& hs, fieldpattern::fpattern& fp) {
   hread(hs, fp.R);
   hread(hs, fp.X);
   fp.set_field(fp.Prime, fp.wsquare);
+  #if MAXMDIM >= 4
   fp.generate_all3();
+  #endif
   }
 
 EX void hwrite_fpattern(hstream& hs, fieldpattern::fpattern& fp) {

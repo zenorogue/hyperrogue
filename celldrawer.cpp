@@ -872,10 +872,12 @@ void celldrawer::draw_halfvine() {
     queuepolyat(GDIM == 2 ? Vdepth : V2, cgi.shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
     {dynamicval<color_t> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW); }
     auto& side = queuepolyat(V2, cgi.shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR::WALL3A-2+away(V2));
+    #if MAXMDIM >= 4
     if(GDIM == 3 && qfi.fshape) {
       side.tinf = &floor_texture_vertices[shar.id];
       ensure_vertex_number(*side.tinf, side.cnt);
       }
+    #endif
 
     if(cgi.validsidepar[SIDE_WALL]) forCellIdEx(c2, j, c) {
       int dis = i-j;
@@ -1529,6 +1531,7 @@ void celldrawer::draw_features() {
   }
 
 void celldrawer::draw_features_and_walls_3d() {
+#if MAXMDIM >= 4
   color_t dummy;
   int ofs = wall_offset(c);
   if(isWall3(c, wcol)) {
@@ -1645,6 +1648,7 @@ void celldrawer::draw_features_and_walls_3d() {
     queuepoly(face_the_player(V), cgi.shLoveRing, darkena(0x804060, 0, 0xFF));
   if(rd == 2) 
     queuepoly(face_the_player(V), cgi.shLoveRing, darkena(0x402030, 0, 0xFF));
+#endif
   }
 
 #if HDR

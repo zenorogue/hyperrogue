@@ -148,8 +148,10 @@ EX hrmap *currentmap;
 EX vector<hrmap*> allmaps;
 
 EX hrmap *newAltMap(heptagon *o) { 
+  #if MAXMDIM >= 4
   if(reg3::in_rule())
     return reg3::new_alt_map(o);
+  #endif
   return new hrmap_hyperbolic(o); 
   }
 // --- hyperbolic geometry ---
@@ -524,11 +526,13 @@ EX int celldistAlt(cell *c) {
 /** direction upwards in the tree */
 EX int updir(heptagon *h) {
   if(bt::in()) return bt::updir();
+  #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_rule()) {
     for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
       return i;
     return -1;
     }
+  #endif
   if(h->distance == 0) return -1;
   return 0;
   }
@@ -536,11 +540,13 @@ EX int updir(heptagon *h) {
 /** direction upwards in the alt-tree */
 EX int updir_alt(heptagon *h) {
   if(euclid || !h->alt) return -1;
+  #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_rule()) {
     for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->alt && h->move(i)->alt->distance < h->alt->distance) 
       return i;
     return -1;
     }
+  #endif
   for(int i=0; i<S7; i++)
     if(h->move(i) && h->move(i)->alt == h->alt->move(0)) 
       return i;

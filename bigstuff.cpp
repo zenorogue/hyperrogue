@@ -138,7 +138,9 @@ EX int default_levs() {
     return 1;
   if(S3 >= OINF)
     return 1;
+  #if MAXMDIM >= 4
   if(reg3::in_rule()) return 0;
+  #endif
   return S3-3;
   }
 
@@ -152,7 +154,10 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   for(int i=0; i<h->type; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
   int relspin = -4; // for horocycles it must go the other way
-  if(quotient || reg3::in_rule()) relspin = 0;
+  if(quotient) relspin = 0;
+  #if MAXMDIM >= 4
+  else if(reg3::in_rule()) relspin = 0;
+  #endif
   else {
   for(int j=0; j<h->type; j++) for(int i=0; i<h->type; i++) {
     createStep(h, i);
@@ -194,11 +199,13 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     }
   }
 
+#if MAXMDIM >= 4
 EX int hrandom_adjacent(int d) {
   vector<int> choices = {d};
   for(int a=0; a<S7; a++) if(reg3::dirs_adjacent[d][a]) choices.push_back(a);
   return hrand_elt(choices, d);
   }
+#endif
 
 EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
@@ -211,7 +218,11 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   // check for direction
   int gdir = -1;
   for(int i=0; i<c->type; i++) {
+    #if MAXMDIM >= 4
     if(!reg3::in_rule()) {
+    #else
+    if(true) {
+    #endif
       if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
       }
     else {
@@ -283,10 +294,12 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
   alt->c7 = NULL;
   alt->alt = alt;
+  #if MAXMDIM >= 4
   if(reg3::in_rule()) {
     reg3::link_structures(h, alt, firststate);
     if(alt->fiftyval == -1) return nullptr; /* unlinked */
     }
+  #endif
   h->alt = alt;
   alt->cdata = (cdata*) h;
   currentmap->link_alt(bf);
@@ -1499,7 +1512,10 @@ EX void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() && !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() && 
+    #if MAXMDIM >= 4
+    !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
+    #endif
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on && !racing::on))) {
     int rtr = newRoundTableRadius();
