@@ -918,9 +918,12 @@ EX namespace reg3 {
       auto &nles = nonlooping_earlier_states;
       nles.clear();
       vector<address> bfs;
-      for(int i=0; i<isize(quotient_map->allh); i++) 
+      int qty = isize(quotient_map->allh);
+      if(geometry == gSpace535) qty = 1;
+      for(int i=0; i<qty; i++) 
         bfs.emplace_back(i, root[i]);
       auto mov = [&] (int fv, int d) {
+        if(geometry == gSpace535) return 0;
         return quotient_map->allh[fv]->move(d)->fieldval;
         };
       int qstate = isize(children) / S7;
@@ -946,7 +949,7 @@ EX namespace reg3 {
       DEBB(DF_GEOM, ("q2 = ", q2));
       
       bfs = {};
-      for(int i=0; i<isize(quotient_map->allh); i++) 
+      for(int i=0; i<qty; i++) 
         bfs.emplace_back(i, root[i]);
       for(int i=0; i<isize(bfs); i++) {
         address last = bfs[i];
@@ -1029,6 +1032,11 @@ EX namespace reg3 {
     vector<short> evmemo;
     
     void find_emeraldval(heptagon *target, heptagon *parent, int d) {
+      if(geometry == gSpace535) {
+        target->emeraldval = target->fieldval;
+        target->zebraval = 0;
+        return;
+        }
       auto& cr = cgi.cellrotations;
       if(evmemo.empty()) {
         println(hlog, "starting");
@@ -1110,7 +1118,9 @@ EX namespace reg3 {
         res->fieldval = fv;
         res->distance = parent->distance - 1;
         vector<int> possible;
-        for(auto s: nonlooping_earlier_states[{int(parent->fieldval), id}]) possible.push_back(s.second);
+        int pfv = parent->fieldval;
+        if(geometry == gSpace535) pfv = 0;
+        for(auto s: nonlooping_earlier_states[{pfv, id}]) possible.push_back(s.second);
         id1 = hrand_elt(possible, 0);
         res->fiftyval = id1;
         find_emeraldval(res, parent, d);
@@ -1197,13 +1207,14 @@ EX hrmap *new_alt_map(heptagon *o) {
 EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
   auto cm = (hrmap_reg3_rule*) currentmap;
   alt->fieldval = h->fieldval;
+  if(geometry == gSpace535) alt->fieldval = 0;
   if(firststate == hsOrigin) {
     alt->fiftyval = cm->root[alt->fieldval];
     return;
     }
   vector<int> choices;
   for(auto p: cm->nonlooping_earlier_states)
-    if(p.first.first == h->fieldval)
+    if(p.first.first == alt->fieldval)
       choices.push_back(p.first.second);
   vector<int> choices2;
   for(auto c: choices) {
@@ -1214,7 +1225,7 @@ EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
           ok = false;
     if(ok) choices2.push_back(c);
     }
-  alt->fiftyval = hrand_elt(choices, -1);
+  alt->fiftyval = hrand_elt(choices2, -1);
   }
 
 EX bool reg3_rule_available = true;
