@@ -3780,3 +3780,8 @@ Geometries:
 - added {4,3,6} honeycomb
 - Compact hyperbolic honeycombs are now implemented using canonical paths. Improved CPU/RAM efficiency and reliability. (Horo)cyclic lands (e.g. Camelot) work correctly now. Also improved Graveyard and Zebra.
 - underlying/horocycle tree patterns now can display fat edges in 3D geometries
+
+2020-01-29 19:27 Update 11.2w:
+- optimized generation of compact hyperbolic honeycomb
+- improved Temple of Cthulhu in 535 and 435
+- fixed dual geometry sync destroyed when pressing Space
