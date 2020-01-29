@@ -1536,31 +1536,31 @@ EX void buildBigStuff(cell *c, cell *from) {
       (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
       items[itStatue] >= U5 && !randomPatternsMode && 
       !tactic::on && !yendor::on && !racing::on)))
-      createAlternateMap(c, horo_distance(), hsA);
+      createAlternateMap(c, horo_gen_distance(), hsA);
 
     if(c->land == laJungle && ctof(c) && 
       (quickfind(laMountain) || (hrand(I2000) < 100 && horo_ok() && 
       !randomPatternsMode && !tactic::on && !yendor::on && !racing::on && landUnlocked(laMountain))))
-      createAlternateMap(c, horo_distance(), hsA);
+      createAlternateMap(c, horo_gen_distance(), hsA);
 
     if(c->land == laOvergrown && ctof(c) && horo_ok() &&
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       isLandIngame(laClearing) &&
       !tactic::on && !yendor::on && !racing::on))) {
-      heptagon *h = createAlternateMap(c, horo_distance(), hsA);
+      heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
       if(h) clearing::bpdata[h].root = NULL;
       }
     
     if(stdhyperbolic && c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
-      heptagon *h = createAlternateMap(c, horo_distance(), hsA);
+      heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }
 
     if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && horo_ok() && 
       (quickfind(laWhirlpool) || (
         hrand(2000) < (PURE ? 500 : 1000) && !tactic::on && !racing::on && !yendor::on)))
-      createAlternateMap(c, horo_distance(), hsA);
+      createAlternateMap(c, horo_gen_distance(), hsA);
     
     #if CAP_COMPLEX2
     if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety) 
@@ -1568,10 +1568,10 @@ EX void buildBigStuff(cell *c, cell *from) {
     #endif
 
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
-      createAlternateMap(c, horo_distance(), hsA);
+      createAlternateMap(c, horo_gen_distance(), hsA);
 
     if(c->land == laCanvas && horo_ok() && ctof(c) && !c->master->alt)
-      createAlternateMap(c, horo_distance(), hsA);
+      createAlternateMap(c, horo_gen_distance(), hsA);
 
     if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && !weirdhyperbolic &&
       (princess::forceMouse ? canReachPlayer(from, moMouse) :
@@ -1725,7 +1725,7 @@ EX int temple_layer_size() {
   return 6;
   }
 
-EX int horo_distance() {
+EX int horo_gen_distance() {
   return  (WDIM == 3 && hyperbolic) ? 1 : 2;
   }
 
@@ -1747,7 +1747,7 @@ EX void moreBigStuff(cell *c) {
 
   if(c->land == laStorms)
     if(!eubinary && !quotient && !sphere) {
-      if(c->master->alt && masterAlt(c) <= horo_distance()) {
+      if(c->master->alt && masterAlt(c) <= horo_gen_distance()) {
         currentmap->generateAlts(c->master);
         preventbarriers(c);
         int d = celldistAlt(c);
@@ -1770,7 +1770,7 @@ EX void moreBigStuff(cell *c) {
     }
   
   else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(bt::in() && specialland != laTemple && c->land == laRlyeh)) {
-    if(eubinary || in_s2xe() || (c->master->alt && (tactic::on || masterAlt(c) <= horo_distance()))) {
+    if(eubinary || in_s2xe() || (c->master->alt && (tactic::on || masterAlt(c) <= horo_gen_distance()))) {
       if(!eubinary && !chaosmode) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1839,7 +1839,7 @@ EX void moreBigStuff(cell *c) {
     }
 
   if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(bt::in() && specialland != laClearing)) {
-    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= horo_distance()))) {
+    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= horo_gen_distance()))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1852,7 +1852,7 @@ EX void moreBigStuff(cell *c) {
     }
 
   if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(bt::in() && specialland != laMountain)) {
-    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= horo_distance()))) {
+    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= horo_gen_distance()))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
