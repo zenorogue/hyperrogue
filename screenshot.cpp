@@ -184,7 +184,7 @@ EX namespace svg {
     EM_ASM_({
       var x=window.open();
       x.document.open();
-      x.document.write(Pointer_stringify($0));
+      x.document.write(UTF8ToString($0));
       x.document.close();
       }, f.s.c_str());
     #else
