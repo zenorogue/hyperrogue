@@ -262,9 +262,11 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     bf += revstep;
     if(flip && hrand(2) == 0) { bf += flip; flip *= -1; }
 
+    #if MAXMDIM >= 4
     // in 3D honeycombs we vary the direction, but never for three successive i's
     if(WDIM == 3 && firststate == hsOrigin && (i%3))
       bf.spin = hrandom_adjacent(bf.spin);
+    #endif
     }
   cx[rad] = bf.at;
   heptagon *h = bf.at->master;
