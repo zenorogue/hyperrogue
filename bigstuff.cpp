@@ -1719,7 +1719,7 @@ EX int temple_layer_size() {
   if(among(geometry, gHoroRec, gHoroHex, gKiteDart3)) return 3;
   if(sol) return 6;
   if(WDIM == 3 && bt::in()) return 2;
-  if(geometry == gSpace435) return 4;
+  if(among(geometry, gSpace435, gSpace535)) return 5;
   if(WDIM == 3 && hyperbolic) return 3;
   if(S3 == OINF) return 4;
   return 6;
@@ -1784,6 +1784,14 @@ EX void moreBigStuff(cell *c) {
           forCellCM(c2, c) if(celldistAlt(c2) < celldistAlt(c)) i++;
           if(i > 1) c->wall = waColumn;
           }
+        else if(geometry == gSpace535) {
+          c->wall = (c->master->fieldval % 5) ? waRubble : waColumn;
+          }
+        else if(geometry == gSpace435) {
+          c->wall = waRubble;
+          if(c->master->fieldval == 0) c->wall = waColumn;
+          forCellCM(c1, c) if(c1->master->fieldval == 0) c->wall = waColumn;
+          }
         else if(sol) {
           if(c->master->emeraldval % 3 || c->master->zebraval % 3)
             c->wall = waColumn;
@@ -1807,7 +1815,7 @@ EX void moreBigStuff(cell *c) {
           if(d.first->wall == waColumn || (d.second&1)) c->wall = waColumn;
           }
         else if(WDIM == 3) {
-          if(c->master->zebraval != 1) c->wall = waColumn;
+          c->wall = hrand(100) < 10 ? waColumn : waRubble;
           }
         else if(S3 >= OINF) { }
         else if(weirdhyperbolic && !BITRUNCATED) {
