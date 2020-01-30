@@ -1252,7 +1252,7 @@ void hrmap_standard::draw() {
 EX void spinEdge(ld aspd) { 
   ld downspin = 0;
   auto& ds = downseek;
-  if(dual::state == 2 && dual::currently_loaded != dual::main_side) {
+  if(dual::state == 2 && (dual::one_euclidean ? !euclid : dual::currently_loaded != dual::main_side)) {
     transmatrix our   = dual::get_orientation();
     transmatrix their = dual::player_orientation[dual::main_side];
     fixmatrix(our);

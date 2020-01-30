@@ -107,6 +107,9 @@ EX }
 EX namespace dual {
   /** 0 = dualmode off, 1 = in dualmode (no game chosen), 2 = in dualmode (working on one of subgames) */
   EX int state;
+
+  /** exactly one side is Euclidean -- it should not be synchronized with the other side */
+  EX bool one_euclidean;
   
   EX int currently_loaded;
   EX int main_side;
@@ -332,6 +335,11 @@ EX namespace dual {
     }
 
   EX void assign_landsides() {
+    switch_to(!currently_loaded);
+    one_euclidean = euclid;
+    switch_to(!currently_loaded);
+    one_euclidean ^= euclid;
+    
     landsides.resize(landtypes);
     int which_hyperbolic = -1;
     if(ginf[dgd[0].geo].cclass == gcHyperbolic && ginf[dgd[1].geo].cclass != gcHyperbolic)
