@@ -339,7 +339,7 @@ EX int chasmgraph(cell *c) {
   }
 
 EX bool conegraph(cell *c) {
-  return wmescher && wmspatial && (conegraphtype(c) || (c->wall == waBarrier && c->land == laOceanWall));
+  return ((wmescher && wmspatial) || wmascii3) && (conegraphtype(c) || (c->wall == waBarrier && c->land == laOceanWall));
   }
 
 EX bool hornStuns(cell *c) {

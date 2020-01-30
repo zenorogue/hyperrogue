@@ -345,7 +345,7 @@ EX void showGraphQuickKeys() {
     dialog::addBoolItem(XLAT("third person perspective"), vid.yshift > 0 && vid.sspeed > -5, '3');
     }
 
-  const char *wdmodes[6] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D"};
+  const char *wdmodes[7] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D", "ASCII/3D"};
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
 
   const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",

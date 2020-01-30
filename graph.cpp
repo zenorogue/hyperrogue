@@ -19,7 +19,7 @@ EX bool wallopt;
 EX bool in_wallopt() { return wallopt || racing::on; }
 
 EX bool spatial_graphics;
-EX bool wmspatial, wmescher, wmplain, wmblack, wmascii;
+EX bool wmspatial, wmescher, wmplain, wmblack, wmascii, wmascii3;
 EX bool mmspatial, mmhigh, mmmon, mmitem;
 
 EX int detaillevel = 0;
@@ -2290,7 +2290,7 @@ EX int cellcolor(cell *c) {
   
   if(c->wall == waMirror) return c->land == laMirror ? OUTLINE_TREASURE : OUTLINE_ORB;
 
-  if(c->item) {
+  if(c->item && !itemHiddenFromSight(c)) {
     int k = itemclass(c->item);
     if(k == IC_TREASURE)
       return OUTLINE_TREASURE;
@@ -4431,7 +4431,8 @@ EX void drawthemap() {
   wmspatial = vid.wallmode == 4 || vid.wallmode == 5;
   wmescher = vid.wallmode == 3 || vid.wallmode == 5;
   wmplain = vid.wallmode == 2 || vid.wallmode == 4;
-  wmascii = vid.wallmode == 0;
+  wmascii = vid.wallmode == 0 || vid.wallmode == 6;
+  wmascii3 = vid.wallmode == 6;
   wmblack = vid.wallmode == 1;
   
   mmitem = vid.monmode >= 1;

@@ -2228,6 +2228,39 @@ EX void queuestr(const transmatrix& V, double size, const string& chr, color_t c
     queuestr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame, align);
   }
   
+EX void queuestrn(const transmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
+  switch(neon_mode) {
+    case 0:
+      queuestr(V, size, chr, col, frame, align);
+      break;
+    case 1: {
+      dynamicval<color_t> c(poly_outline, col << 8);
+      queuestr(V, size, chr, 0, frame, align);
+      break;
+      }
+    case 2: {
+      queuestr(V, size, chr, col, 0, align);
+      break;
+      }
+    case 3: {
+      dynamicval<color_t> c(poly_outline, (col << 8) | 0xFF);
+      queuestr(V, size, chr, (col & 0xFEFEFE) >> 1, frame, align);
+      break;
+      }
+    case 4: {
+      dynamicval<color_t> c(poly_outline, poly_outline);
+      if(poly_outline > 0xFF) {
+        col = magentize(col << 8) >> 8;
+        poly_outline = 0xFF;
+        }
+      else {
+        col = monochromatize(col << 8) >> 8;
+        }
+      queuestr(V, size, chr, col, frame, align);
+      }
+    }
+  }
+  
 EX void queuecircle(const transmatrix& V, double size, color_t col) {
   int xc, yc, sc; 
   if(!getcoord0_checked(tC0(V), xc, yc, sc)) return;

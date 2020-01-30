@@ -21,6 +21,9 @@ struct celldrawer {
   transmatrix Vboat;
   transmatrix Vd;
   int sl;
+  color_t asciiborder;
+  color_t asciicol1;
+  char asciichar1;
   
   void addaura();
   void setcolors();
@@ -2079,9 +2082,12 @@ void celldrawer::draw_wall_full() {
         if(mines == 0) asciichar = ' ';
         else asciichar = '0' + mines, asciicol = minecolors[mines%10];
         }
-      else if(asciichar == '@') asciicol = minecolors[mines%10];
+      else if(asciichar == '@') {
+        asciicol = minecolors[mines%10];
+        }
       }
-    if(wmascii && !(c->item || c->monst || c->cpdist == 0)) error = true;
+    if(wmascii && !((c->item && !itemHiddenFromSight(c)) || c->monst || c->cpdist == 0)) error = true;
+    asciiborder = bordcolor;
     }
   
 #if CAP_SHAPES
@@ -2141,6 +2147,7 @@ void celldrawer::draw_item_full() {
   
   if(it) {
     asciichar = iinf[it].glyph, asciicol = icol = iinf[it].color;
+    if(doHighlight()) asciiborder = kind_outline(it) >> 8;
     
     if(it == itCompass && isPlayerOn(c)) {
       cell *c1 = c ? findcompass(c) : NULL;
@@ -2201,6 +2208,8 @@ void celldrawer::draw_monster_full() {
       }
     
     asciicol = moncol;
+    if(doHighlight() && !noHighlight(c->monst))
+      asciiborder = (isFriendly(c) ? OUTLINE_FRIEND : OUTLINE_ENEMY) >> 8;
 
     if(isDragon(c->monst) || isKraken(c->monst)) if(!c->hitpoints)
       asciicol = 0x505050;
@@ -2215,6 +2224,8 @@ void celldrawer::draw_monster_full() {
   if(c->cpdist == 0 && mapeditor::drawplayer) { 
     asciichar = '@'; 
     if(!mmitem) asciicol = moncol = cheater ? 0xFF3030 : 0xD0D0D0; 
+    if(doHighlight())
+      asciiborder = OUTLINE_FRIEND >> 8;
     }
   
   #if CAP_SHAPES
@@ -2482,6 +2493,14 @@ void celldrawer::draw() {
     
     asciichar = winf[c->wall].glyph;
     asciicol = wcol;
+
+    asciichar1 = asciichar;
+    asciicol1 = asciicol;
+
+    if(c->wall == waBoat) {
+      asciicol1 = fcol;
+      asciichar1 = '=';
+      }    
     
     onradar = true;
     
@@ -2528,7 +2547,50 @@ void celldrawer::draw() {
     
     #if CAP_QUEUE
     if(error) {
-      queuestr(V, 1, s0+asciichar, darkenedby(asciicol, darken), 2);
+      int sl;
+      string s = s0+asciichar;
+      dynamicval<color_t> p(poly_outline, asciiborder << 8);
+      if(!wmascii3)
+        queuestrn(V, 1, s, darkenedby(asciicol, darken), 2);
+      else if(highwall(c) && conegraph(c)) {
+        const int layers = 1 << detaillevel;
+        string s1 = s0+asciichar1;
+        poly_outline = bordcolor << 8;
+        for(int z=0; z<layers; z++)
+          queuestrn(mscale(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), 1. - z * .5 / layers, s1, darkenedby(gradient(bordcolor, asciicol1, -layers, z, layers), darken), 1);
+        poly_outline = asciiborder << 8;
+        queuestrn(mscale(V, cgi.WALL), asciicol == asciicol1 && asciichar == asciichar1 ? .5 : 1, s, darkenedby(asciicol, darken), 2);
+        }
+      else if(highwall(c)) {
+        const int layers = 1 << detaillevel;
+        string s1 = s0+asciichar1;
+        poly_outline = bordcolor << 8;
+        for(int z=0; z<layers; z++)
+          queuestrn(mscale(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), 1, s1, darkenedby(gradient(bordcolor, asciicol1, -layers, z, layers), darken), 1);
+        poly_outline = asciiborder << 8;
+        queuestrn(mscale(V, cgi.WALL), 1, s, darkenedby(asciicol, darken), 2);
+        }
+      else if((sl = snakelevel(c))) {
+        string s1 = s0+asciichar1;
+        poly_outline = bordcolor << 8;
+        for(int z=0; z<sl*4; z++) if(z%4 == 0)
+          queuestrn(mscale(V, zgrad0(0, cgi.slev * sl, z, sl*4)), 1, s1, darkenedby(gradient(bordcolor, asciicol1, -sl, z, sl*4), darken), 1);
+        poly_outline = asciiborder << 8;
+        queuestrn(mscale(V, cgi.SLEV[sl]), 1, s, darkenedby(asciicol, darken), 2);
+        }
+//      else if(c->wall == waChasm) {
+//        const int layers = 1 << detaillevel;
+//        queuestr(mscale(V, BOTTOM), zgrad0(0, -vid.lake_bottom, z, layers)), 1, s, darkenedby(gradient(asciicol, 0, 0, z, layers+1), darken), z==0?2:1);
+//        }
+      else if(chasmgraph(c)) {
+        string s1 = s0+asciichar1;
+        poly_outline = bordcolor << 8;
+        queuestrn(mscale(V, cgi.BOTTOM), 1, s1, darkenedby(gradient(bordcolor, asciicol1, 0, 0.3, 1), darken), 2);
+        poly_outline = asciiborder << 8;
+        queuestrn(V, 1, s, darkenedby(asciicol, darken), 2);
+        }
+      else
+        queuestrn(V, 1, s, darkenedby(asciicol, darken), 2);
       }
     
     draw_grid();
