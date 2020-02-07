@@ -618,7 +618,7 @@ EX namespace reg3 {
         quotient_map = new hrmap_field3(&currfp);
         }
       #endif
-      h.zebraval = quotient_map->allh[0]->zebraval;
+      h.zebraval = quotient_map ? quotient_map->allh[0]->zebraval : 0;
       
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3); 
