@@ -1205,7 +1205,15 @@ EX int bucketer(ld x) {
   }
 
 EX int bucketer(hyperpoint h) {
-  return bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
+  int dx = 0;
+  if(prod) {
+    auto d = product_decompose(h);
+    h = d.second;
+    dx += bucketer(d.first) * 50;
+    }
+  dx += bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
+  if(MDIM == 4) dx += bucketer(h[3]) * 1000000001;
+  return dx;
   }  
 
 }
