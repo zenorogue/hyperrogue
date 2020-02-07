@@ -2092,7 +2092,7 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
       if(poly_outline != 0xFF) ptd.outline = poly_outline;
       break;
     case 4: {
-      if(poly_outline > 0xFF) {
+      if(poly_outline && (poly_outline>>8) != bordcolor) {
         ptd.color = magentize(col);
         ptd.outline = 0xFF;
         }
@@ -2249,7 +2249,7 @@ EX void queuestrn(const transmatrix& V, double size, const string& chr, color_t 
       }
     case 4: {
       dynamicval<color_t> c(poly_outline, poly_outline);
-      if(poly_outline > 0xFF) {
+      if(poly_outline && (poly_outline>>8) != bordcolor) {
         col = magentize(col << 8) >> 8;
         poly_outline = 0xFF;
         }
