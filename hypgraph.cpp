@@ -1431,6 +1431,7 @@ EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   // EUCLIDEAN
   NLP = Id;
+  auto lView = View;
   if(cwt.at) {
     centerover = cwt.at;
     View = iddspin(cwt.at, cwt.spin);
@@ -1439,6 +1440,14 @@ EX void resetview() {
     if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
     if(GDIM == 3 && !prod) View = cspin(0, 2, M_PI/2) * View;
     if(prod) NLP = cspin(0, 2, M_PI/2);
+    if(cheater && eqmatrix(View, lView)) {
+      View = Id;
+      static ld cyc = 0;
+      cyc += 90 * degree;
+      View = spin(cyc) * View;
+      if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
+      if(GDIM == 3 && !prod) View = cspin(0, 2, M_PI/2) * View;
+      }
     }
   else if(currentmap) {
     centerover = currentmap->gamestart();
