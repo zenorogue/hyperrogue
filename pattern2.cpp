@@ -1801,7 +1801,8 @@ EX namespace patterns {
         return colortables['v'][sevenval(c)];
       case 'j': {
         int d = c->master->distance;
-        if(d % 2 == 0 || d < -5 || d > 5) return 0;
+        if(geometry == gNil) d = c->master->zebraval;
+        if(d % 2 == 0 || d < -5 || d > 5) return canvasback;
         return colortables['j'][(d+5)/2];
         }
       case 'f': {
