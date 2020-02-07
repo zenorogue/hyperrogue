@@ -310,7 +310,7 @@ EX int compileShader(int type, const string& s) {
   }
 
 GLprogram::GLprogram(string vsh, string fsh) {
-  if(noshaders) {
+  if(noshaders || !vid.usingGL) {
     uFog = -1;
     uProjection = -1;
     uPP = -1;
