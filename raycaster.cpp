@@ -93,6 +93,7 @@ struct raycaster : glhr::GLprogram {
   GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
+  GLint uPosX, uPosY;
   
   raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
@@ -127,6 +128,9 @@ struct raycaster : glhr::GLprogram {
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tTextureMap = glGetUniformLocation(_program, "tTextureMap");
+    
+    uPosX = glGetUniformLocation(_program, "uPosX");
+    uPosY = glGetUniformLocation(_program, "uPosY");
     }
   };
 
@@ -171,10 +175,11 @@ void enable_raycaster() {
 
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
-      "uniform mediump float uFovX, uFovY, uShift;\n"
+      "uniform mediump float uFovX, uFovY, uPosX, uPosY, uShift;\n"
       "varying mediump vec4 at;\n"
       "void main() { \n"
       "  gl_Position = aPosition; at = aPosition; at.x += uShift;\n"
+      "  at[0] += uPosX; at[1] += uPosY;\n"
   #if IN_ODS    
       "  at[0] *= PI; at[1] *= PI; \n"
   #else
@@ -927,6 +932,9 @@ EX void cast() {
   GLERR("uniform mediump startid");
   glUniform1f(o->uIPD, vid.ipd);
   GLERR("uniform mediump IPD");
+
+  glUniform1f(o->uPosX, -((cd->xcenter-cd->xtop)*2./cd->xsize - 1));
+  glUniform1f(o->uPosY, -((cd->ycenter-cd->ytop)*2./cd->ysize - 1));
   
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(currentmap->iadj(cwt.at, j));
