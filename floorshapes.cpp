@@ -274,8 +274,12 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
         hyperpoint h1 = bt::get_corner_horo_coordinates(c, i+1) * size;
         if(t) h0 *= SHADMUL, h1 *= SHADMUL;
         hyperpoint hd = (h1 - h0) / STEP;
-        for(int j=0; j<STEP; j++)
+        for(int j=0; j<STEP; j++) {
           hpcpush(bt::get_horopoint(h0 + hd * j));
+          if(geometry == gBinary4 && among(i, 2, 4)) break;
+          if(geometry == gBinaryTiling && among(i, 0, 4)) break;
+          if(geometry == gTernary && among(i, 3, 5)) break;
+          }
         }
       
       hpcpush(hpc[last->s]);
