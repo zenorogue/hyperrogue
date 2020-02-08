@@ -3785,3 +3785,13 @@ Geometries:
 - optimized generation of compact hyperbolic honeycomb
 - improved Temple of Cthulhu in 535 and 435
 - fixed dual geometry sync destroyed when pressing Space
+
+2020-20-08 10:46 Update 11.2x:
+- ASCII/3D mode; neon settings better with border changed
+- no timer ghosts in dual geometry puzzle
+- in dual geometry mode, when one side is Euclidean, only the other one rotates
+- fixed crashes in some geometries (S^3, horospherical hyperbolic, rotation space) and missing tiles in H2xE rendering
+- correct centering in raycaster
+- while in cheatmode, centering lets you center in cardinal directions
+- fixed a crash when displaying inventory with OpenGL off
+- nicer side plain walls in binary tiling
