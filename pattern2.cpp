@@ -1805,6 +1805,12 @@ EX namespace patterns {
         if(d % 2 == 0 || d < -5 || d > 5) return canvasback;
         return colortables['j'][(d+5)/2];
         }
+      case 'J': {
+        int d = c->master->distance;
+        if(geometry == gNil) d = c->master->zebraval;
+        if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < 10 ? 0xFFFFFFFF : canvasback;
+        return hrand(100) < 50 ? 0 : colortables['j'][(d+5)/2];
+        }
       case 'f': {
         color_t res;
         for(int i=0; i<4; i++) {
