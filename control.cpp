@@ -1066,7 +1066,7 @@ EX bool gmodekeys(int sym, int uni) {
     else if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
     else if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
+    else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
     else if(NUMBERKEY == '8') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }  
     else if(uni == '%') { 
       if(vid.wallmode == 0) vid.wallmode = 6;
