@@ -136,7 +136,7 @@ void get_b4_distance() {
   heptagon *h2 = centerover->master;
   if(h1->distance != h2->distance)
     println(hlog, "Z difference: ", h2->distance - h1->distance);
-  else {
+  else if(sn::in()) {
     auto c1 = sn::getcoord(h1);
     auto c2 = sn::getcoord(h2);
     println(hlog, "X difference: ", bdiff(c1.first, c2.first).get_str(10000));
