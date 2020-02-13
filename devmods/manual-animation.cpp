@@ -19,7 +19,8 @@ bool saving_positions;
 
 int next_pos_tick;
 
-vector<tuple<transmatrix, transmatrix, cell*> > saved;
+using frame = tuple<transmatrix, transmatrix, cell*>;
+vector<frame> saved;
 
 bool trailer_turn(int delta) {
   if(saving_positions)
@@ -48,13 +49,46 @@ ld stepdist = 0.02;
 
 ld stepang = 0.01;
 
+ld spin_distance = 0;
+
+bool spinning_around;
+
+bool fixed_orientation;
+
+transmatrix orientation_to_fix;
+
 bool move_camera(transmatrix T) {
   for(int it=0; it<5; it++) {
     saved.emplace_back(View, current_display->local_perspective, centerover);
-    println(hlog, "frames = ", isize(saved));
-    shift_view(ztangent(-stepdist));
-    rotate_view(T);
+    if(spinning_around) {
+      for(int s=0; s<100; s++) 
+        shift_view(ztangent(-spin_distance/100));
+      rotate_view(T);
+      for(int s=0; s<100; s++) 
+        shift_view(ztangent(spin_distance/100));
+      }
+    else {
+      shift_view(ztangent(-stepdist));
+      spin_distance += stepdist;
+      rotate_view(T);
+      }
+    if(fixed_orientation) {
+      println(hlog, "cat ", inverse(View) * C0);
+      transmatrix iView = inverse(View);
+      iView = nisot::translate(iView * C0) * orientation_to_fix;
+      View = inverse(iView);
+      println(hlog, "cat ", inverse(View) * C0);
+      }
     }
+  println(hlog, "frames = ", isize(saved), " distance = ", spin_distance);
+  playermoved = false;
+  return true;
+  }
+
+bool spin_around(transmatrix T) {
+  for(int it=0; it<5; it++) {
+    }
+  println(hlog, "frames = ", isize(saved), " spinning");
   playermoved = false;
   return true;
   }
@@ -112,6 +146,11 @@ void get_b4_distance() {
     }
   }
 
+void recall(frame& f = saved.back()) {
+  tie(View, current_display->local_perspective, centerover) = f;
+  playermoved = false;
+  }
+
 void load_animation(string fname) {
   fhstream f(fname, "r");
   int siz;
@@ -127,7 +166,8 @@ void load_animation(string fname) {
     d = crystal::get_heptagon_at(co)->c7;
     }
   println(hlog, "loaded animation of ", isize(saved), " frames");
-  }  
+  recall();
+  }
 
 EX transmatrix spintox_good(const hyperpoint& H) {
   if(GDIM == 2 || prod) return spintox(H); 
@@ -216,7 +256,7 @@ bool trailer_handleKey(int sym, int uni) {
         saved.pop_back();
         }
       if(!saved.empty()) {
-        tie(View, current_display->local_perspective, centerover) = saved.back();
+        recall();
         }
       return true;
       }
@@ -253,6 +293,30 @@ bool trailer_handleKey(int sym, int uni) {
     if(sym == '0') { stepang = 0.1; println(hlog, "ang = ", stepang); return true; }
     
     if(sym == 'p') { get_b4_distance(); return true; }
+    
+    if(sym == 'o') { 
+      println(hlog, "spin_distance = ", spin_distance, " reset to 0, i to spin");
+      spin_distance = 0;
+      return true;
+      }
+    
+    if(sym == 'j') {      
+      fixed_orientation = !fixed_orientation;
+      orientation_to_fix = inverse(inverse(nisot::translate(inverse(View) * C0)) * inverse(View));
+
+
+      transmatrix iView = inverse(View);
+      orientation_to_fix = inverse(nisot::translate(iView * C0)) * iView;
+
+      println(hlog, "fixed_orientation = ", orientation_to_fix);
+      return true;
+      }
+  
+    if(sym == 'i') { 
+      spinning_around = !spinning_around;
+      if(spinning_around) println(hlog, "spinning mode");
+      else println(hlog, "tank mode");
+      }
   
     if(sym == SDLK_F4) {
       saving_positions = !saving_positions;
@@ -264,14 +328,14 @@ bool trailer_handleKey(int sym, int uni) {
     if(sym == 'b' && isize(saved) > 1) {
       saved.pop_back();
       println(hlog, "back to ", isize(saved), " frames");
-      tie(View, current_display->local_perspective, centerover) = saved.back();
+      recall();
       return true;
       }
   
     if(sym == 'u' && isize(saved) > 40) {
       for(int i=0; i<30; i++) saved.pop_back();
       println(hlog, "back to ", isize(saved), " frames");
-      tie(View, current_display->local_perspective, centerover) = saved.back();
+      recall();
       return true;
       }
     
@@ -339,7 +403,8 @@ bool trailer_handleKey(int sym, int uni) {
         
       for(auto& p: saved) {
         // sightranges[geometry] = 4 + i * 2. / isize(saved);
-        tie(View, current_display->local_perspective, centerover) = p;
+        recall(p);
+        // tie(View, current_display->local_perspective, centerover) = p;
         ticks = i * 1000 / 30;
         // if(i % 10 != 0) {i++; continue; }
 
