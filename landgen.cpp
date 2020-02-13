@@ -2115,6 +2115,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             minefreq = 550;
         
         int tfreq = 
+          reptilecheat ? 0 :
           treas < 10 ? 50 + 5 * treas :
           treas < 25 ? 100  + (treas-10) * 2:
           treas < 50 ? 150 + (treas-25) :
@@ -2126,7 +2127,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = itBombEgg;
           c->landparam = items[itBombEgg] + 5 + hrand(11);
           }
-        else if(hrand_monster(5000) < treas - 20 + yendor::hardness() && !safety)
+        else if(hrand_monster(5000) < treas - 20 + yendor::hardness() && !safety && !reptilecheat)
           c->monst = moBomberbird;
         else placeLocalSpecial(c, 500);
         }
