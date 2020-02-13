@@ -161,9 +161,16 @@ void load_animation(string fname) {
     hread_raw(f, a);
     hread_raw(f, b);
     int tmp = 0; hread_raw(f, tmp);
-    crystal::coord co;
-    hread_raw(f, co);
-    d = crystal::get_heptagon_at(co)->c7;
+    if(cryst) {
+      crystal::coord co;
+      hread_raw(f, co);
+      d = crystal::get_heptagon_at(co)->c7;
+      }
+    if(nil) {
+      nilv::mvec co;
+      hread_raw(f, co);
+      d = nilv::get_heptagon_at(co)->c7;
+      }
     }
   println(hlog, "loaded animation of ", isize(saved), " frames");
   recall();
@@ -347,8 +354,14 @@ bool trailer_handleKey(int sym, int uni) {
         hwrite_raw(f, a);
         hwrite_raw(f, b);
         int tmp = 0; hwrite_raw(f, tmp);
-        auto at = crystal::get_coord(d->master);
-        hwrite_raw(f, at);
+        if(cryst) {
+          auto at = crystal::get_coord(d->master);
+          hwrite_raw(f, at);
+          }
+        else if(nil) {
+          auto at = nilv::get_coord(d->master);
+          hwrite_raw(f, at);
+          }
         }
       println(hlog, "saved animation of ", isize(saved), " frames");
       }
