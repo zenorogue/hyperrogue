@@ -1201,7 +1201,7 @@ EX ld raddif(ld a, ld b) {
   }
 
 EX int bucketer(ld x) {
-  return int(x * 10 + 100000.5) - 100000;
+  return (long long)(x * 10000 + 100000.5) - 100000;
   }
 
 EX int bucketer(hyperpoint h) {
