@@ -800,6 +800,11 @@ int read_cheat_args() {
   else if(argis("-dgl")) {
     glhr::debug_gl = true;
     }
+  else if(argis("-mgen-off")) {
+    PHASEFROM(3);
+    cheat();
+    gen_wandering = false;
+    }
   else if(argis("-W")) {
     PHASEFROM(2);
     shift(); 
