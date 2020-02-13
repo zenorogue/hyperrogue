@@ -1079,7 +1079,12 @@ void geometry_information::create_wall3d() {
     }
   
   if(geometry == gNil) {
-    for(int i=0; i<S7; i++) make_wall(i, nilv::current_ns().facevertices[i]);
+    for(int i=0; i<S7; i++) {
+      vector<hyperpoint> fvs = nilv::current_ns().facevertices[i];
+      using nilv::nilwidth;
+      for(auto& h: fvs) h[0] *= nilwidth, h[1] *= nilwidth, h[2] *= nilwidth * nilwidth;
+      make_wall(i, fvs);
+      }
     }
   
   if(kite::in()) {

@@ -831,7 +831,9 @@ EX namespace nilv {
 
   static const mvec mvec_zero = mvec(0, 0, 0);
 
-  hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0], m[1], m[2]); }
+  EX ld nilwidth = 1;
+      
+  hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0] * nilwidth, m[1] * nilwidth, m[2] * nilwidth * nilwidth); }
   
   #if HDR
   struct nilstructure {
@@ -2125,6 +2127,11 @@ EX namespace nisot {
       if(nil) stop_game();
       for(int a=0; a<3; a++) { shift(); nilv::nilperiod[a] = argi(); }
       nilv::set_flags();
+      return 0;
+      }
+    else if(argis("-nilwidth")) {
+      PHASEFROM(2);
+      shift_arg_formula(nilv::nilwidth);
       return 0;
       }
     else if(argis("-nilv")) {
