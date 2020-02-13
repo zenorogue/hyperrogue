@@ -955,6 +955,8 @@ EX namespace nilv {
   
   EX mvec get_coord(heptagon *h) { return ((hrmap_nil*)currentmap)->coords[h]; }
 
+  EX heptagon *get_heptagon_at(mvec m) { return ((hrmap_nil*)currentmap)->get_at(m); }
+
   EX void set_flags() {
     int coords = 0;
     for(int a=0; a<3; a++) if(nilperiod[a]) coords++;
