@@ -516,8 +516,11 @@ void celldrawer::setcolors() {
       // fallthrough
 
     case waMineOpen:
+      if(wmblack || wmascii) {
+        wcol &= 0xFEFEFE;
+        wcol >>= 1;
+        }
       fcol = wcol;
-      if(wmblack || wmascii) fcol >>= 1, wcol >>= 1;
       break;
     
     case waCavewall:
