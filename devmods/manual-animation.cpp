@@ -339,10 +339,10 @@ bool trailer_handleKey(int sym, int uni) {
       return true;
       }
   
-    if(sym == 'u' && isize(saved) > 40) {
-      for(int i=0; i<30; i++) saved.pop_back();
+    if(sym == 'u') {
+      for(int i=0; i<30; i++) if(isize(saved)) saved.pop_back();
       println(hlog, "back to ", isize(saved), " frames");
-      recall();
+      if(isize(saved)) recall();
       return true;
       }
     
