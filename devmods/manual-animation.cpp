@@ -420,8 +420,8 @@ bool trailer_handleKey(int sym, int uni) {
         // tie(View, current_display->local_perspective, centerover) = p;
         ticks = i * 1000 / 30;
         // if(i % 10 != 0) {i++; continue; }
-
-        if(true) {
+        
+        if(i >= mrec_first && i < mrec_last) {
           println(hlog, "recording frame ", i);
           shot::take(format(mrec_file.c_str(), i));
           }
