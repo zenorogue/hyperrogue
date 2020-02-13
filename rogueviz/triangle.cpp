@@ -5,7 +5,7 @@
 // used in: https://www.youtube.com/watch?v=YmFDd49WsrY
 
 // settings:
-// ./mymake rogueviz/triangle
+// ./mymake -O3 rogueviz/triangle
 // ./hyper -geo Nil -canvas x -tstep 8 -nilperiod 3 3 3
 
 // also used in: https://youtu.be/RPL4-Ydviug
