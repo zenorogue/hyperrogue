@@ -117,7 +117,7 @@ void load_rules(vector<string> vs) {
 
   stop_game();
   set_geometry(gInfOrderMixed);
-  ginf[gInfOrderMixed].distlimit = {1, 1};
+  ginf[gInfOrderMixed].distlimit = {{1, 1}};
   ginf[gInfOrderMixed].flags |= qEXPERIMENTAL;
 
   start = "";
