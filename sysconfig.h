@@ -48,13 +48,6 @@
 #define ISSTEAM 0
 #endif
 
-#if GCC46
-#define override
-#define ISGCC46 1
-#else
-#define ISGCC46 0
-#endif
-
 #ifndef ISWEB
 #define ISWEB 0
 #endif
