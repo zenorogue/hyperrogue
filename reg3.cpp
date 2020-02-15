@@ -1126,7 +1126,7 @@ EX namespace reg3 {
         vector<int> possible;
         int pfv = parent->fieldval;
         if(geometry == gSpace535) pfv = 0;
-        for(auto s: nonlooping_earlier_states[{pfv, id}]) possible.push_back(s.second);
+        for(auto s: nonlooping_earlier_states[address{pfv, id}]) possible.push_back(s.second);
         id1 = hrand_elt(possible, 0);
         res->fiftyval = id1;
         find_emeraldval(res, parent, d);
