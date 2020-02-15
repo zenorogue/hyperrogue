@@ -523,6 +523,7 @@ bignum::bignum(ld d) {
   while(n >= 0) { digits[n] = int(d); d -= digits[n]; d *= BASE; n--; }
   }
 
+#if CAP_ZLIB
 /* compression/decompression */
 
 EX string compress_string(string s) {
@@ -563,5 +564,6 @@ EX string decompress_string(string s) {
   println(hlog, isize(s), " -> ", isize(out));
   return out;
   }
+#endif
 
 }

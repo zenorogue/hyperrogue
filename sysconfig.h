@@ -78,6 +78,10 @@
 #define CAP_THREAD (!ISMOBILE && !ISWEB)
 #endif
 
+#ifndef CAP_ZLIB
+#define CAP_ZLIB (MAXMDIM >= 4)
+#endif
+
 #define CAP_FRAMELIMIT (!ISMOBWEB)
 
 #if ISMOBILE
@@ -166,6 +170,10 @@
 
 #ifndef CAP_ODS
 #define CAP_ODS 0
+#endif
+
+#ifndef MAXMDIM
+#define MAXMDIM 4
 #endif
 
 #ifndef CAP_TEXTURE
@@ -426,7 +434,9 @@ extern "C" {
 #include <complex>
 #include <new>
 
+#if CAP_ZLIB
 #include <zlib.h>
+#endif
 
 #if CAP_THREAD
 #if WINDOWS
@@ -492,10 +502,6 @@ union SDL_Event;
 #else  
 #define MINIMIZE_GL_CALLS 0
 #endif
-#endif
-
-#ifndef MAXMDIM
-#define MAXMDIM 4
 #endif
 
 #ifndef CAP_GEOMETRY
