@@ -389,6 +389,7 @@ extern "C" {
 #else
   #define GL_GLEXT_PROTOTYPES 1
   #if ISMAC
+    #define GL_SILENCE_DEPRECATION 1
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
     #include <OpenGL/glext.h>
