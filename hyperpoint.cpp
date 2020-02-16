@@ -47,20 +47,10 @@ eVariation variation;
 struct hyperpoint : array<ld, MAXMDIM> {
   hyperpoint() {}
   
-  #if ISGCC46
-  #if MAXMDIM == 4
-  // aaa
-  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> { (array<ld, MAXMDIM>) {{x, y, z, w}}} {}
-  #else
-  constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> { (array<ld, MAXMDIM>) {{x, y, z}}} {}
-  #endif
-
-  #else
   #if MAXMDIM == 4
   constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> {{x,y,z,w}} {}
   #else
   constexpr hyperpoint(ld x, ld y, ld z, ld w) : array<ld, MAXMDIM> {{x,y,z}} {}
-  #endif
   #endif
 
   inline hyperpoint& operator *= (ld d) {
