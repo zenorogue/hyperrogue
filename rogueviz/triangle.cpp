@@ -27,7 +27,7 @@ hyperpoint operator+(hyperpoint x) { return x; }
 int shape = 1;
 
 // how many cubes to subdivide edges to
-int how = 4;
+int how = 8;
 
 // how many cubes to draw (should be smaller than how because they are not really cubes and thus they get into each other)
 int how1 = how - 1;
