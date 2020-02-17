@@ -13,7 +13,7 @@
 A puzzle roguelike in the hyperbolic plane. See the [HyperRogue website](http://roguetemple.com/z/hyper.php) for detailed and most up-to-date information.
 Compiled executables can be downloaded from [itch.io](https://zenorogue.itch.io/hyperrogue) and from the [HyperRogue website](http://www.roguetemple.com/z/hyper/download.php).
 
-Released under [GNU General Public License, version 2](http://www.gnu.org/licenses/gpl-2.0.html). As such, it comes with without any warranty.
+Released under [GNU General Public License, version 2](http://www.gnu.org/licenses/gpl-2.0.html). As such, it comes without any warranty.
 
 If you would like to thank me for HyperRogue, you can support the development by buying paid versions (with more up-to-date content and some social and competitive features), or [in other ways](http://www.roguetemple.com/z/donate.php?id=hyper). 
 You can contact me at zeno@attnam.com, or at [my blog](http://zenorogue.blogspot.com/), or via [Twitter](https://twitter.com/ZenoRogue).
@@ -37,9 +37,9 @@ You can see tooltips by placing the mouse over stuff. You can also right click t
 
 Press v to configure the game. You can also rotate the world by pressing arrow keys, PageUp and PageDn (not numpad). You can center on the PC by pressing Home.
 
-Your scores and other stats about your games are recorded to file hyperrogue.log (in Linux, *~/.hyperrogue.log*). You can save your configation to file hyperrogue.ini (in Linux, *~/.hyperrogue.ini*).
+Your scores and other stats about your games are recorded to file hyperrogue.log (in Linux, *~/.hyperrogue.log*). You can save your configuration to file hyperrogue.ini (in Linux, *~/.hyperrogue.ini*).
 
-The surface the game is played on is called a hyperbolic plane. It seems there is just a very small amount of games and other works of art which use hyperbolic geometry (the most well known are some works of M.C.Escher).
+The surface the game is played on is called a hyperbolic plane. It seems there is just a very small amount of games and other works of art which use hyperbolic geometry (the most well known are some works of M.C.  Escher).
 
 The game dynamically generates new parts of the world as you move. Due to nature of the hyperbolic plane, the chances that you get back to a place where you have been before are very low (unless you go back exactly the same way). See more information about the geometry used [on the blog](http://zenorogue.blogspot.com/2012/03/hyperbolic-geometry-in-hyperbolic-rogue.html).
 

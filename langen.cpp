@@ -65,7 +65,7 @@ int utfsize(char c) {
   return 4;
   }
 
-void addutftoset(std::set<std::string>& s, std::string& w) {
+void addutftoset(std::set<std::string>& s, const std::string& w) {
   size_t i = 0;
   while(i < w.size()) {
     int siz = utfsize(w[i]);
@@ -74,7 +74,7 @@ void addutftoset(std::set<std::string>& s, std::string& w) {
     }
   }
 
-void addutftoset(std::set<std::string>& s, noun& w) {
+void addutftoset(std::set<std::string>& s, const noun& w) {
   addutftoset(s, w.nom);
   addutftoset(s, w.nomp);
   addutftoset(s, w.acc);
@@ -82,7 +82,7 @@ void addutftoset(std::set<std::string>& s, noun& w) {
   }
 
 template<class T>
-void addutftoset(std::set<std::string>& s, dictionary<T>& w) {
+void addutftoset(std::set<std::string>& s, const dictionary<T>& w) {
   for(auto&& elt : w.m)
     addutftoset(s, elt.second);
   }
@@ -102,7 +102,7 @@ hashcode langhash(const std::string& s) {
     return langhash(s.substr(0, s.size() - 9)) + 1;
     }
   hashcode r = 0;
-  for(int i=0; i<isize(s); i++) r = hashval * r + s[i];
+  for (char ch : s) r = hashval * r + ch;
   return r;
   }
 
