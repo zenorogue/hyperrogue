@@ -41,7 +41,7 @@ extern "C"
 SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src) 
 {
 	SDL_Surface *surf;
-	SDL_Rect rect = { 0 };
+	SDL_Rect rect = { 0, 0, 0, 0 };
 
 	/* NO-OP for images < 32bpp and 32bpp images that already have Alpha channel */ 
 	if (src->format->BitsPerPixel <= 24 || src->format->Amask) {

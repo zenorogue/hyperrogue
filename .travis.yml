@@ -137,7 +137,7 @@ script:
   # Build hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
     autoreconf -vi
-    ./configure CXXFLAGS="-Wall -Werror -Wno-unknown-warning-option -Wno-maybe-uninitialized"
+    ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unknown-warning-option -Wno-unused-parameter -Wno-maybe-uninitialized"
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
     make -f Makefile.simple CXX="${HYPERROGUE_CXX-g++}"

@@ -971,43 +971,45 @@ enum eModel : int {
 // (other bits are used for other information)
 
 #define X3(x) x, x, x
+#define DEFAULTS 0, 0, 0, 0, 0, nullptr
 
 /** list of available models (i.e., projections) */
 EX vector<modelinfo> mdinf = {
-  {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal},
-  {"half-plane", "inversion", "half-plane", mf::conformal},
-  {"band", "band", "Mercator", mf::band | mf::conformal},
-  {X3("polygonal"), mf::conformal},
-  {X3("formula"), 0},
-  {X3("azimuthal equidistant"), mf::azimuthal | mf::equidistant | mf::euc_boring},  
-  {X3("azimuthal equi-area"), mf::azimuthal | mf::equiarea | mf::euc_boring},
-  {X3("ball model"), mf::conformal | mf::azimuthal | mf::space},
-  {"Minkowski hyperboloid", "plane", "sphere", mf::conformal | mf::space | mf::euc_boring},
-  {"hemisphere", "sphere", "sphere", mf::conformal | mf::space},
-  {X3("band equidistant"), mf::band | mf::equidistant | mf::euc_boring},
-  {X3("band equi-area"), mf::band | mf::equiarea | mf::euc_boring},
-  {X3("sinusoidal"), mf::pseudoband | mf::equiarea | mf::euc_boring},
-  {X3("two-point equidistant"), mf::equidistant | mf::euc_boring | mf::twopoint},
-  {X3("fisheye"), 0},
-  {X3("Joukowsky transform"), mf::hyper_only | mf::conformal},
-  {X3("Joukowsky+inversion"), mf::hyper_only | mf::conformal},
-  {X3("rotated hyperboles"), mf::hyper_only},  
-  {X3("spiral/ring"), mf::hyper_or_torus | mf::uses_bandshift},
-  {X3("native perspective"), 0},
-  {X3("azimuthal equi-volume"), mf::azimuthal | mf::equivolume | mf::euc_boring},
-  {X3("central inversion"), mf::azimuthal | mf::conformal},
-  {X3("two-point azimuthal"), mf::euc_boring | mf::twopoint},
-  {X3("two-point hybrid"), mf::euc_boring | mf::twopoint},
-  {X3("geodesic"), 0},
-  {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea },
-  {X3("central cylindrical"), mf::euc_boring | mf::band },
-  {X3("Collignon"), mf::pseudoband | mf::equiarea },
-  {X3("horocyclic coordinates"), mf::euc_boring },
-  {X3("guard"), 0},
-  {X3("polynomial"), mf::conformal}
+  {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal, DEFAULTS},
+  {"half-plane", "inversion", "half-plane", mf::conformal, DEFAULTS},
+  {"band", "band", "Mercator", mf::band | mf::conformal, DEFAULTS},
+  {X3("polygonal"), mf::conformal, DEFAULTS},
+  {X3("formula"), 0, DEFAULTS},
+  {X3("azimuthal equidistant"), mf::azimuthal | mf::equidistant | mf::euc_boring, DEFAULTS},
+  {X3("azimuthal equi-area"), mf::azimuthal | mf::equiarea | mf::euc_boring, DEFAULTS},
+  {X3("ball model"), mf::conformal | mf::azimuthal | mf::space, DEFAULTS},
+  {"Minkowski hyperboloid", "plane", "sphere", mf::conformal | mf::space | mf::euc_boring, DEFAULTS},
+  {"hemisphere", "sphere", "sphere", mf::conformal | mf::space, DEFAULTS},
+  {X3("band equidistant"), mf::band | mf::equidistant | mf::euc_boring, DEFAULTS},
+  {X3("band equi-area"), mf::band | mf::equiarea | mf::euc_boring, DEFAULTS},
+  {X3("sinusoidal"), mf::pseudoband | mf::equiarea | mf::euc_boring, DEFAULTS},
+  {X3("two-point equidistant"), mf::equidistant | mf::euc_boring | mf::twopoint, DEFAULTS},
+  {X3("fisheye"), 0, DEFAULTS},
+  {X3("Joukowsky transform"), mf::hyper_only | mf::conformal, DEFAULTS},
+  {X3("Joukowsky+inversion"), mf::hyper_only | mf::conformal, DEFAULTS},
+  {X3("rotated hyperboles"), mf::hyper_only, DEFAULTS},
+  {X3("spiral/ring"), mf::hyper_or_torus | mf::uses_bandshift, DEFAULTS},
+  {X3("native perspective"), 0, DEFAULTS},
+  {X3("azimuthal equi-volume"), mf::azimuthal | mf::equivolume | mf::euc_boring, DEFAULTS},
+  {X3("central inversion"), mf::azimuthal | mf::conformal, DEFAULTS},
+  {X3("two-point azimuthal"), mf::euc_boring | mf::twopoint, DEFAULTS},
+  {X3("two-point hybrid"), mf::euc_boring | mf::twopoint, DEFAULTS},
+  {X3("geodesic"), 0, DEFAULTS},
+  {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea, DEFAULTS},
+  {X3("central cylindrical"), mf::euc_boring | mf::band, DEFAULTS},
+  {X3("Collignon"), mf::pseudoband | mf::equiarea, DEFAULTS},
+  {X3("horocyclic coordinates"), mf::euc_boring, DEFAULTS},
+  {X3("guard"), 0, DEFAULTS},
+  {X3("polynomial"), mf::conformal, DEFAULTS},
   };
 
 #undef X3
+#undef DEFAULTS
 
 #if HDR
 static inline bool orbProtection(eItem it) { return false; } // not implemented
