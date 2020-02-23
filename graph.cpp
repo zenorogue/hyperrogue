@@ -483,7 +483,7 @@ EX namespace tortoise {
       
     return gradient(0x487830, mcol, 0, dd, 0xFF);
     }
-  EX };
+  EX }
 
 double footfun(double d) {
   d -= floor(d);
@@ -5019,7 +5019,7 @@ namespace sm {
   static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
   static const int EXPANSION = (1<<16);
   static const int HEXEDIT = (1<<17);
-  };
+  }
 #endif
 
 EX int cmode;

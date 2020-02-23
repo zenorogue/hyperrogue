@@ -459,7 +459,7 @@ EX namespace euc {
       cat += val * main_axes[i];
       }
     return cat;
-    };
+    }
     
   EX bool valid_third_turn(const intmatrix& m) {
     if(m[0][2] != -m[0][0]-m[0][1]) return false;
@@ -630,7 +630,7 @@ EX namespace euc {
   int diagonal_cross(const coord& a, const coord& b) {
     return a[0]*b[1] + a[1]*b[2] + a[2]*b[0]
          - b[0]*a[1] - b[1]*a[2] - b[2]*a[0];
-    };
+    }
   
   void torus_config_full::canonicalize(coord& x, coord& d, transmatrix& M, bool& mirr) {
     if(!twisted) {

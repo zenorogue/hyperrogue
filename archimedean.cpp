@@ -1144,7 +1144,7 @@ function<void()> setcanvas(char c) {
     patterns::whichCanvas = c;
     start_game();
     };
-  };
+  }
 
 EX void show() {
   if(lastsample < isize(samples)) {

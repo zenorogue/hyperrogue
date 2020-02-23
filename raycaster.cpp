@@ -136,7 +136,7 @@ struct raycaster : glhr::GLprogram {
 
 shared_ptr<raycaster> our_raycaster;
 
-EX void reset_raycaster() { our_raycaster = nullptr; };
+EX void reset_raycaster() { our_raycaster = nullptr; }
 
 int deg;
 
@@ -846,7 +846,7 @@ array<float, 2> enc(int i, int a) {
   res[0] = ((i%per_row) * deg + a + .5) / length;
   res[1] = ((i / per_row) + .5) / rows;
   return res;
-  };
+  }
 
 color_t color_out_of_range = 0x0F0800FF;
 

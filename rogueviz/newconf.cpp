@@ -120,7 +120,7 @@ struct coord {
 
 char out = '-';
 
-char& fmap_at(coord c) { return c.x >= 0 && c.x < isize(fmap[0]) && c.y >= 0 && c.y < isize(fmap) ? fmap[c.y][c.x] : out; };
+char& fmap_at(coord c) { return c.x >= 0 && c.x < isize(fmap[0]) && c.y >= 0 && c.y < isize(fmap) ? fmap[c.y][c.x] : out; }
 
 ld vx[256][256], vy[256][256];
 
@@ -398,7 +398,7 @@ void changepoint(int x, int y, bool can_add) {
     
     for(int k=0; k<4; k++) if(!live[k]) fmap_at(cc+k) = '0';
     }
-  };
+  }
 
 bool showmenu = true;
 

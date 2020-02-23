@@ -37,7 +37,7 @@ EX namespace dialog {
     bool positive;
     };
 
-  static inline ld identity_f(ld x) { return x; };
+  static inline ld identity_f(ld x) { return x; }
   
   const static scaler identity = {identity_f, identity_f, false};
   const static scaler logarithmic = {log, exp, true};
@@ -100,7 +100,7 @@ EX namespace dialog {
       if(clicked) hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, hicolor, align);
       return clicked;
       }
-    EX };
+    EX }
 
 #if CAP_MENUSCALING && CAP_SDL
   EX void handleZooming(SDL_Event &ev) {
@@ -142,7 +142,7 @@ EX namespace dialog {
   EX void handler(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(doexiton(sym, uni)) popScreen();
-    };
+    }
 
   EX void init() {
     items.clear();
@@ -1268,6 +1268,6 @@ EX namespace dialog {
     }
   #endif
 
-  };
+  }
 
 }

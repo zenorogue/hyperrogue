@@ -2474,7 +2474,7 @@ auto hooks  =
   addHook(hooks_markers, 100, search_marker) +
  0;
 
-};
+}
 
 #include "kohonen.cpp"
 #include "staircase.cpp"

@@ -755,11 +755,11 @@ void gotoHelpFor(eItem i) {
 
 void gotoHelpFor(eWall w) {
   help = generateHelpForWall(w);
-  };
+  }
 
 void gotoHelpFor(eMonster m) {
   help = generateHelpForMonster(m);
-  };
+  }
 
 EX void appendHelp(string s) {
   auto h = helpgenerator;

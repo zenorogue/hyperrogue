@@ -931,7 +931,7 @@ namespace mf {
   
   static const flagtype band = (cylindrical | pseudocylindrical | uses_bandshift);
   static const flagtype pseudoband = (pseudocylindrical | uses_bandshift);
-  };
+  }
   
 struct modelinfo {
   const char *name_hyperbolic;
