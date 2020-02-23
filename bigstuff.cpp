@@ -168,10 +168,10 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     }
   if(relspin == -4 && geometry != gFieldQuotient) {
     if(h->alt != h->alt->alt) {
-      printf("relspin {%p:%p}\n", h->alt, h->alt->alt);
-      {for(int i=0; i<S7; i++) printf("%p ", h->alt->move(i));} printf(" ALT\n");
-      {for(int i=0; i<S7; i++) printf("%p ", h->move(i));} printf(" REAL\n");
-      {for(int i=0; i<S7; i++) printf("%p ", h->move(i)->alt);} printf(" REAL ALT\n");
+      printf("relspin {%p:%p}\n", hr::voidp(h->alt), hr::voidp(h->alt->alt));
+      {for(int i=0; i<S7; i++) printf("%p ", hr::voidp(h->alt->move(i)));} printf(" ALT\n");
+      {for(int i=0; i<S7; i++) printf("%p ", hr::voidp(h->move(i)));} printf(" REAL\n");
+      {for(int i=0; i<S7; i++) printf("%p ", hr::voidp(h->move(i)->alt));} printf(" REAL ALT\n");
       }
     relspin = 3;
     } }
@@ -183,8 +183,8 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     heptagon *hm = h->alt->move(ir);
     heptagon *ho = createStep(h, i);
 //  printf("[%p:%d ~ %p:%d] %p ~ %p\n", 
-//    h, i, h->alt, ir, 
-//    ho, hm);
+//    hr::voidp(h), i, hr::voidp(h->alt), ir, 
+//    hr::voidp(ho), hr::voidp(hm));
     if(ho->alt && ho->alt != hm) {
       if(ho->alt->alt == hm->alt && !quotient) {
         printf("ERROR: alt cross! [%d -> %d]\n", ho->alt->distance, hm->distance);
@@ -287,7 +287,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   
   heptagon *alt = tailored_alloc<heptagon> (h->type);
   allmaps.push_back(newAltMap(alt));
-//printf("new alt {%p}\n", alt);
+//printf("new alt {%p}\n", hr::voidp(alt));
   alt->s = firststate;
   alt->emeraldval = 0;
   alt->zebraval = 0;
@@ -328,7 +328,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     }
   
   return alt;
-//for(int d=rad; d>=0; d--) printf("%3d. %p {%d}\n", d, cx[d]->master, cx[d]->master->alt->distance);
+//for(int d=rad; d>=0; d--) printf("%3d. %p {%d}\n", d, hr::voidp(cx[d]->master), cx[d]->master->alt->distance);
   }
 
 EX void beCIsland(cell *c) {
@@ -393,7 +393,7 @@ EX void generateTreasureIsland(cell *c) {
       if(cc->wall != waCTree)
         end = false;
       }
-    // printf("%p: end=%d, qc=%d, dist=%d\n", c, end, qc, celldistAlt(c));
+    // printf("%p: end=%d, qc=%d, dist=%d\n", hr::voidp(c), end, qc, celldistAlt(c));
     if(end) c->item = itPirate;
     else c->item = itCompass;
     }
@@ -567,7 +567,7 @@ EX void buildEquidistant(cell *c) {
   eLand b = c->land;
   if(chaosmode && !inmirror(b)) return;
   if(!b) { 
-    printf("land missing at %p\n", c); 
+    printf("land missing at %p\n", hr::voidp(c)); 
     describeCell(c);
     for(int i=0; i<c->type; i++) if(c->move(i))
       describeCell(c->move(i));

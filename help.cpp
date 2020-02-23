@@ -832,7 +832,7 @@ EX void describeMouseover() {
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
 
     if(buggyGeneration) {
-      char buf[80]; sprintf(buf, " %p H=%d M=%d", c, c->landparam, c->mpdist); out += buf;
+      char buf[80]; sprintf(buf, " %p H=%d M=%d", hr::voidp(c), c->landparam, c->mpdist); out += buf;
       }
     
     if(randomPatternsMode)

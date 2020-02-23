@@ -43,7 +43,7 @@ EX void preventbarriers(cell *c) {
   }
 
 EX bool checkBarriersBack(cellwalker bb, int q IS(5), bool cross IS(false)) {
-  // printf("back, %p, s%d\n", bb.at, bb.spin);
+  // printf("back, %p, s%d\n", hr::voidp(bb.at), bb.spin);
 
   // if(mark) { printf("mpdist = %d [%d] bardir = %d spin=%d q=%d cross=%d\n", bb.at->mpdist, BARLEV, bb.at->bardir, bb.spin, q, cross); }
   
@@ -172,7 +172,7 @@ EX bool mirrorwall(cell *c) {
   }
   
 EX void extendBarrierFront(cell *c) {
-  limitgen("extend front %p\n", c); 
+  limitgen("extend front %p\n", hr::voidp(c)); 
   if(buggyGeneration) return;
   int ht = c->landparam;
   extendcheck(c);
@@ -222,7 +222,7 @@ EX void extendBarrierFront(cell *c) {
   }
 
 EX void extendBarrierBack(cell *c) {
-  limitgen("extend back %p\n", c); 
+  limitgen("extend back %p\n", hr::voidp(c)); 
   if(buggyGeneration) return;
   int ht = c->landparam;
   extendcheck(c);
@@ -343,14 +343,14 @@ EX bool isbar4(cell *c) {
   }  
 
 EX void extendBarrier(cell *c) {
-  limitgen("extend barrier %p\n", c); 
+  limitgen("extend barrier %p\n", hr::voidp(c)); 
   if(buggyGeneration) return;
   
   if(c->barleft == NOWALLSEP_USED) return;
 
   extendcheck(c);
   
-  // printf("build barrier at %p", c);
+  // printf("build barrier at %p", hr::voidp(c));
   if(c->land == laBarrier || c->land == laElementalWall || c->land == laHauntedWall || c->land == laOceanWall || 
     c->land == laMirrorWall || c->land == laMirrorWall2 || c->land == laMercuryRiver) { 
     // printf("-> ready\n");
@@ -456,7 +456,7 @@ EX void buildBarrier(cell *c, int d, eLand l IS(laNone)) {
   }
 
 EX bool buildBarrier6(cellwalker cw, int type) {
-  limitgen("build6 %p/%d (%d)\n", cw.at, cw.spin, type); 
+  limitgen("build6 %p/%d (%d)\n", hr::voidp(cw.at), cw.spin, type); 
   
   cellwalker b[4];
   
@@ -481,7 +481,7 @@ EX bool buildBarrier6(cellwalker cw, int type) {
   
   if(false) {
     for(int z=0; z<4; z++) {
-      printf("%p/%d\n", b[z].at, b[z].spin);
+      printf("%p/%d\n", hr::voidp(b[z].at), b[z].spin);
       b[z].at->wall = waStrandedBoat; b[z].at->land = laAlchemist;
       b[z].at->mondir = b[z].spin;
       b[z].at->mpdist = 7;
@@ -567,7 +567,7 @@ EX bool buildBarrier6(cellwalker cw, int type) {
   }
   
 EX bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
-  limitgen("build4 %p\n", c); 
+  limitgen("build4 %p\n", hr::voidp(c)); 
   if(buggyGeneration) return true;
   d %= 7;
   
@@ -833,7 +833,7 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
   #endif
 
   if(c->land == laNone) {
-    printf("barrier nowall! [%p]\n", c);
+    printf("barrier nowall! [%p]\n", hr::voidp(c));
     raiseBuggyGeneration(c, "barrier nowall!");
     return false;
     }

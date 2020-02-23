@@ -44,7 +44,7 @@ bool errorReported = false;
 
 EX void describeCell(cell *c) {
   if(!c) { printf("NULL\n"); return; }
-  printf("describe %p: ", c);
+  printf("describe %p: ", hr::voidp(c));
   printf("%-15s", linf[c->land].name);
   printf("%-15s", winf[c->wall].name);
   printf("%-15s", iinf[c->item].name);
@@ -285,7 +285,7 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
   if(u == 'L'-64) {
     cell *c = mouseover;
     describeCell(c);
-    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  c->move(i));
+    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  hr::voidp(c->move(i)));
     printf("Barrier: dir=%d left=%d right=%d\n",
       c->bardir, c->barleft, c->barright);
     return true;
@@ -358,7 +358,7 @@ struct debugScreen {
       queuepoly(gmatrix[what], cgi.shAsymmetric, 0x80808080);
       #endif
       char buf[200];
-      sprintf(buf, "%p", what);
+      sprintf(buf, "%p", hr::voidp(what));
       dialog::addSelItem("mpdist", its(what->mpdist), 'd');
       dialog::add_action([what] () { 
         bitfield_editor(what->mpdist, [what] (int i) { what->mpdist = 0; }, "generation level");        
@@ -561,7 +561,7 @@ EX void viewall() {
 EX void modalDebug(cell *c) {
   centerover = c; View = Id;
   if(noGUI) {
-    fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", c);
+    fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", hr::voidp(c));
     exit(1);
     }
   push_debug_screen();
@@ -583,7 +583,7 @@ void test_distances(int max) {
 
 EX void raiseBuggyGeneration(cell *c, const char *s) {
 
-  printf("procgen error (%p): %s\n", c, s);
+  printf("procgen error (%p): %s\n", hr::voidp(c), s);
   
   if(!errorReported) {
     addMessage(string("something strange happened in: ") + s);

@@ -35,6 +35,11 @@ template<class T>
 void ignore(T&&) {
   }
 
+const void *voidp(const void *p) {
+  // a simple static_cast<void*> for use with printf("%p")
+  return p;
+  }
+
 /** Is the value of first parameter equal to one of the remaining parameters? */
 template<class T, class V, class... U> bool among(T x, V y) { return x == y; }
 template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==y || among(x,u...); }

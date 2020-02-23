@@ -2629,7 +2629,7 @@ EX namespace dragon {
         }
     if(cmode & sm::MAP) return c;
     if(!history::includeHistory) {
-      printf("dragon bug #3 (%p -> %p)\n", cor, c); 
+      printf("dragon bug #3 (%p -> %p)\n", hr::voidp(cor), hr::voidp(c)); 
       dragbugs = true;
       }
     c->monst = moDragonHead; return c;
@@ -3119,7 +3119,7 @@ EX namespace prairie {
           forCellEx(c2, c) forCellEx(c3, c2)
           if(barrierhept(c3)) barclose++;
     
-          printf("c = %p bc = %d\n", c, barclose);
+          printf("c = %p bc = %d\n", hr::voidp(c), barclose);
         
           raiseBuggyGeneration(c, "could not set river fval");
           }
