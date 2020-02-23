@@ -625,7 +625,7 @@ void init() {
         printf("Failed to initialize GLEW\n");
         return;
         }
-      printf("CreateProgram = %p\n", __glewCreateProgram);
+      printf("CreateProgram = %p\n", reinterpret_cast<void*>(__glewCreateProgram));
       if(!__glewCreateProgram) noshaders = true;
       }
   #endif
