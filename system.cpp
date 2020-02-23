@@ -918,7 +918,7 @@ EX void remove_emergency_save() {
   }
 
 EX void saveStats(bool emergency IS(false)) {
-  DEBBI(DF_INIT, ("saveStats [%s]", scorefile));
+  DEBBI(DF_INIT, ("saveStats [", scorefile, "]"));
 
   if(autocheat) return;
   #if CAP_TOUR
