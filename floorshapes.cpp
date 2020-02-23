@@ -35,7 +35,7 @@ void geometry_information::init_floorshapes() {
   
   for(auto s: all_plain_floorshapes) s->is_plain = true;
   
-  auto init_escher = [this] (escher_floorshape& sh, int s0, int s1, int noft=0, int s2=0) {
+  auto init_escher = [this] (escher_floorshape& sh, int s0, int s1, int noft, int s2) {
     sh.shapeid0 = s0;
     sh.shapeid1 = s1;
     sh.noftype = noft;
@@ -45,22 +45,22 @@ void geometry_information::init_floorshapes() {
     all_escher_floorshapes.push_back(&sh);
     };
   
-  init_escher(shStarFloor, 1,2);
-  init_escher(shCloudFloor, 3, 4);
+  init_escher(shStarFloor, 1, 2, 0, 0);
+  init_escher(shCloudFloor, 3, 4, 0, 0);
   init_escher(shCrossFloor, 5, 6, 2, 54);
   init_escher(shChargedFloor, 7, 385, 1, 10);
-  init_escher(shSStarFloor, 11, 12);
+  init_escher(shSStarFloor, 11, 12, 0, 0);
   init_escher(shOverFloor, 13, 15, 1, 14);
   init_escher(shTriFloor, 17, 18, 0, 385);
   init_escher(shFeatherFloor, 19, 21, 1, 20);
   init_escher(shBarrowFloor, 23, 24, 1, 25);
   init_escher(shNewFloor, 26, 27, 2, 54);
-  init_escher(shTrollFloor, 28, 29); 
+  init_escher(shTrollFloor, 28, 29, 0, 0);
   init_escher(shButterflyFloor, 325, 326, 1, 178);
   init_escher(shLavaFloor, 359, 360, 1, 178);
   init_escher(shLavaSeabed, 386, 387, 1, 178);
-  init_escher(shSeabed, 334, 335);
-  init_escher(shCloudSeabed, 336, 337);
+  init_escher(shSeabed, 334, 335, 0, 0);
+  init_escher(shCloudSeabed, 336, 337, 0, 0);
   init_escher(shCaveSeabed, 338, 339, 2, 54);
   init_escher(shPalaceFloor, 45, 46, 0, 385);
   init_escher(shDemonFloor, 51, 50, 1, 178);
@@ -71,7 +71,7 @@ void geometry_information::init_floorshapes() {
   init_escher(shSwitchFloor, 377, 378, 1, 379);
   init_escher(shTurtleFloor, 176, 177, 1, 178);
   for(int i: {0,1,2})
-    init_escher(shRedRockFloor[i], 55, 56);
+    init_escher(shRedRockFloor[i], 55, 56, 0, 0);
   init_escher(shDragonFloor, 181, 182, 2, 183); /* dragon */
   
   int ids = 0;
