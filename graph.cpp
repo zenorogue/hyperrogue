@@ -715,6 +715,7 @@ EX hpcshape& orbshape(eOrbshape s) {
      case osUtility: return cgi.shGearRing;
      case osDirectional: return cgi.shSpearRing;
      case osWarping: return cgi.shHeptaRing;
+     case osFrog: return cgi.shFrogRing;
      default: return cgi.shRing;
      }
   }

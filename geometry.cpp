@@ -168,6 +168,7 @@ hpcshape
   shEgg,
   shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
   shSpearRing, shLoveRing,
+  shFrogRing, shReserved1, shReserved2,
   shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
   shGun,
   shFigurine, shTreat,

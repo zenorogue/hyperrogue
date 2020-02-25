@@ -538,6 +538,13 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(i, orbsize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
 
+  bshape(shFrogRing, PPR::ITEM);
+  RING(i)
+    hpcpush(ddi(i, orbsize * .25) * C0);
+  REVPRING(i)
+    hpcpush(ddi(i, orbsize * (((i >= S42-8 && i <= S42-2) || (i >= S42+2 && i <= S42+8)) ?.36:.30)) * C0);
+  hpcpush(ddi(0, orbsize * .25) * C0);
+
   bshape(shSpearRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
