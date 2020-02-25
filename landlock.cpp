@@ -362,72 +362,66 @@ EX eLand getNewLand(eLand old) {
   if(old == laRlyeh && !rlyehComplete())
     return laOcean;
     
-  eLand tab[1024];
+  eLand tab[16384];
   int cnt = 0;
   
   // return (hrand(2)) ? laMotion : laJungle;
+  
+  for(eLand l: {
+    laCrossroads, laIce, laDesert, laJungle, laMotion, laHunting, laAlchemist, laCaves,
+    laMinefield, laPalace, laReptile, laSwitch, laBurial, laDungeon, laRuins, laZebra,
+    laStorms, laWhirlwind, laOvergrown, laBlizzard, laDryForest, laWineyard, laVolcano,
+    laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
+    laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,  
+    laCrossroads5,
+    })
+    if(landUnlocked(l)) tab[cnt++] = l;    
 
-  // the basic lands, always available
-  tab[cnt++] = laCrossroads;
-  tab[cnt++] = laIce;
-  tab[cnt++] = laDesert;
-  tab[cnt++] = laJungle;
-  tab[cnt++] = laMotion;
-  if(old == laZebra) LIKELY2 {
-    tab[cnt++] = laMotion;
-    tab[cnt++] = laHunting;
-    }
-  tab[cnt++] = laHunting;
-  tab[cnt++] = laAlchemist;
-  if(old != laDeadCaves) tab[cnt++] = laCaves;
+  struct clos {
+    eLand l1;
+    eLand l2;
+    int f1;
+    int f2;
+    };
+  
+  for(clos c: { 
+    clos{laZebra, laMotion, 2, 2}, {laZebra, laHunting, 2, 2},
+    {laDragon, laReptile, 5, 5},
+    {laVariant, laRuins, 5, 5}, {laVariant, laEmerald, 5, 5}, {laVariant, laGraveyard, 5, 5},
+    {laPalace, laDungeon, 5, 0},
+    {laJungle, laOvergrown, 5, 5},
+    {laIce, laBlizzard, 5, 5}, {laCocytus, laBlizzard, 5, 5}, {laHell, laCocytus, 5, 5}, {laIce, laCocytus, 5, 5},
+    {laWhirlwind, laBlizzard, 5, 5},
+    {laAlchemist, laVolcano, 5, 5},
+    {laDesert, laRedRock, 5, 5},
     
+    {laEFire, laDragon, 5, 5}, {laEWater, laLivefjord, 5, 5}, {laEEarth, laDeadCaves, 5, 5}, {laEAir, laWhirlwind, 5, 5},
+    }) {
+    if(old == c.l1 && landUnlocked(c.l2)) for(int i=0; i<c.f1; i++) tab[cnt++] = c.l2;
+    if(old == c.l2 && landUnlocked(c.l1)) for(int i=0; i<c.f2; i++) tab[cnt++] = c.l1;
+    }
+  
+  // these lands tend to crash while generating equidistant
+  for(eLand l: {laIvoryTower, laEndorian, laWestWall})
+    if(landUnlocked(l) && !generatingEquidistant)
+      tab[cnt++] = l;
+
   // the intermediate lands
   if(gold() >= R30) {
     tab[cnt++] = laCrossroads;
     tab[cnt++] = geometry ? laMirrorOld : laMirror;
     tab[cnt++] = laOcean;
     tab[cnt++] = laLivefjord;
-    tab[cnt++] = laMinefield;
-    tab[cnt++] = laPalace;
-    if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
-    if(kills[moSkeleton]) {
-      tab[cnt++] = laRuins;
-      if(old == laVariant) LIKELY tab[cnt++] = laRuins;
-      }
-    if(items[itFeather] >= U10) {
-      tab[cnt++] = laZebra;
-      if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;
-      }
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
     tab[cnt++] = laDocks;
-    // Ivory Tower tends to crash while generating equidistant
-    if(!generatingEquidistant) tab[cnt++] = laIvoryTower;
-    if(items[itElixir] >= U10) tab[cnt++] = laReptile;
-    if(items[itElixir] >= U10) tab[cnt++] = laSwitch;
-    if(items[itIvory] >= U10 && !generatingEquidistant) tab[cnt++] = laEndorian;
-    if(items[itIvory] >= U5 && !generatingEquidistant && items[itFeather] >= U5)
-      tab[cnt++] = laWestWall;
-    
-    if(items[itKraken] >= U10) tab[cnt++] = laBurial;
     }
 
-  if(landUnlocked(laDungeon)) {
-     tab[cnt++] = laDungeon;
-     if(old == laPalace) LIKELY tab[cnt++] = laDungeon;
-     }
-  
   // the advanced lands
   if(gold() >= R60) {
-    tab[cnt++] = laStorms;
-    if(!weirdhyperbolic) tab[cnt++] = laWhirlwind;
     tab[cnt++] = laCrossroads;
     if(!generatingEquidistant) tab[cnt++] = laCrossroads2;
-    if(items[itRuby] >= U10) {
-      tab[cnt++] = laOvergrown;
-      if(old == laJungle) LIKELY tab[cnt++] = laOvergrown;
-      }
     if(rlyehComplete()) tab[cnt++] = laRlyeh;
     else if(chaosmode && (old == laWarpCoast || old == laLivefjord || old == laOcean)) 
       tab[cnt++] = laRlyeh;
@@ -437,68 +431,17 @@ EX eLand getNewLand(eLand old) {
     if(old == laOcean) tab[cnt++] = laCrossroads;
     if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier])
       tab[cnt++] = laEmerald;
-    if(old == laVariant && landUnlocked(laEmerald)) LIKELY tab[cnt++] = laEmerald;      
-    if(items[itWindstone] >= U5 && items[itDiamond] >= U5) {
-      tab[cnt++] = laBlizzard;
-      if(old == laIce || old == laCocytus || old == laWhirlwind) 
-        LIKELY tab[cnt++] = laBlizzard;
-      if(old == laBlizzard) LIKELY tab[cnt++] = laIce;
-      if(old == laBlizzard) LIKELY tab[cnt++] = laWhirlwind;
-      }
-    tab[cnt++] = laDryForest;
-    tab[cnt++] = laWineyard;
-    if(items[itElixir] >= U10) {
-      tab[cnt++] = laVolcano;
-      if(old == laAlchemist) LIKELY2 tab[cnt++] = laVolcano;
-      if(old == laVolcano) LIKELY2 tab[cnt++] = laAlchemist;
-      }
-    if(items[itGold] >= U10) tab[cnt++] = laDeadCaves;
-    // tab[cnt++] = laCaribbean;
-    if(items[itSpice] >= U10) {
-      tab[cnt++] = laRedRock;
-      if(old == laDesert) LIKELY tab[cnt++] = laRedRock;
-      }
-    if(old == laRedRock) LIKELY tab[cnt++] = laDesert;
-    if(old == laOvergrown) LIKELY tab[cnt++] = laJungle;
-
-    if(items[itIvory] >= U5 && !generatingEquidistant && items[itFeather] >= U5)
-      tab[cnt++] = laWestWall;
     }
 
-  if(landUnlocked(laVariant)) {
-    tab[cnt++] = laVariant;
-    if(old == laRuins) LIKELY tab[cnt++] = laVariant;
-    if(old == laGraveyard) LIKELY tab[cnt++] = laVariant;
-    if(old == laEmerald) LIKELY tab[cnt++] = laVariant;
-    }
-  
   if(gold() >= R90) {
     if(!chaosmode) tab[cnt++] = laPrairie;
     if(old == laPrairie) LIKELY tab[cnt++] = laBull;
-    tab[cnt++] = laBull;
     if(old == laBull && !chaosmode) LIKELY tab[cnt++] = laPrairie;
-    tab[cnt++] = laTerracotta;
-    tab[cnt++] = laRose;
     if(chaosmode && geometry) tab[cnt++] = laDual;
     if(chaosmode && geosupport_threecolor()) tab[cnt++] = laSnakeNest;
     }
   
-  if(gold() >= R300)
-    tab[cnt++] = laCrossroads5;
-  
-  if(tkills() >= R100) {
-    tab[cnt++] = laGraveyard;
-    if(gold() >= R60) tab[cnt++] = laHive;
-    if(old == laVariant) LIKELY tab[cnt++] = laGraveyard;
-    }
-  
-  if(killtypes() >= R20) {
-    tab[cnt++] = laDragon;
-    if(old == laReptile) LIKELY tab[cnt++] = laDragon;
-    }
-  
   if(landUnlocked(laTrollheim)) {
-    tab[cnt++] = laTrollheim;
     if(isTrollLand(old)) LIKELY tab[cnt++] = laTrollheim;
     if(old == laTrollheim) for(int i=0; i<landtypes; i++) {
       eLand l2 = eLand(i);
@@ -507,43 +450,18 @@ EX eLand getNewLand(eLand old) {
     }
 
   if(landUnlocked(laElementalWall)) {
-    tab[cnt++] = randomElementalLandWeighted();
-    
-    if(old == laDragon) LIKELY tab[cnt++] = laEFire;
-    if(old == laEFire) LIKELY tab[cnt++] = laDragon;
-
-    if(old == laLivefjord) LIKELY tab[cnt++] = laEWater;
-    if(old == laEWater) LIKELY tab[cnt++] = laLivefjord;
-    
-    if(old == laDeadCaves) LIKELY tab[cnt++] = laEEarth;
-    if(old == laEEarth) LIKELY tab[cnt++] = laDeadCaves;
-    
-    if(old == laWhirlwind) LIKELY tab[cnt++] = laEAir;
-    if(old == laEAir) LIKELY tab[cnt++] = laWhirlwind;
+    tab[cnt++] = randomElementalLandWeighted();    
     }
   
   if(landUnlocked(laHell)) {
     if(!generatingEquidistant && old != laPrairie) tab[cnt++] = laCrossroads3;
-    tab[cnt++] = laHell;
     }
   
   if(items[itHell] >= U10) {
-    if(items[itDiamond] >= U10) {
-      tab[cnt++] = laCocytus;
-      if(old == laHell || old == laIce || old == laBlizzard) LIKELY tab[cnt++] = laCocytus;
-      }
-    if(old == laCocytus) LIKELY { tab[cnt++] = laIce; tab[cnt++] = laHell; }
-    tab[cnt++] = laPower;
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads2;
     }
   
-  // for(int i=0; i<20; i++) tab[cnt++] = laRedRock;
-  // for(int i=0; i<20; i++) tab[cnt++] = laCaribbean;
-  // for(int i=0; i<20; i++) tab[cnt++] = laCocytus;
-  
-  // for(int i=0; i<20; i++) tab[cnt++] = laCrossroads;
-
   eLand n = old;
   while(incompatible(n, old) || !isLandIngame(n)) {
     n = tab[hrand(cnt)];
