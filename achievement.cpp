@@ -120,7 +120,7 @@ EX bool wrongMode(char flags) {
 #if CAP_TOUR
   if(tour::on) return true;
 #endif
-  if(chaosmode != (flags == rg::chaos)) return true;
+  if((!!chaosmode) != (flags == rg::chaos)) return true;
   if((numplayers() > 1) != (flags == rg::multi)) return true;
   return false;
   }
