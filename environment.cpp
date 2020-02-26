@@ -42,6 +42,7 @@ namespace hr {
 #define HF_ALT        Flag(29)
 #define HF_MONK       Flag(30)
 #define HF_WESTWALL   Flag(31)
+#define HF_JUMP       Flag(32)
 #endif
 
 EX flagtype havewhat, hadwhat;
@@ -408,6 +409,8 @@ EX void bfs() {
             if(c2->monst == moBat) havewhat |= HF_BATS | HF_EAGLES;
             if(c2->monst == moEagle) havewhat |= HF_EAGLES;
             }
+          else if(among(c2->monst, moFrog, moVaulter, moPhaser))
+            havewhat |= HF_JUMP;
           else if(c2->monst == moReptile) havewhat |= HF_REPTILE;
           else if(isLeader(c2->monst)) havewhat |= HF_LEADER;
           else if(c2->monst == moEarthElemental) havewhat |= HF_EARTH;

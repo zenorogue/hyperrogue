@@ -151,6 +151,13 @@ EX void moveMonster(const movei& mi) {
     }
   
   if(fri || isBug(m) || items[itOrbDiscord]) stabbingAttack(cf, ct, m);
+  
+  if(mi.d == JUMP && m == moVaulter) {
+    cell *cm = common_neighbor(cf, ct);
+    if(cm->wall == waShrub) cm->wall = waNone;
+    if(cm->monst)
+      attackMonster(cm, AF_NORMAL | AF_MSG | AF_GETPLAYER, m);
+    }
 
   if(isLeader(m)) {
     if(ct->wall == waBigStatue) {
@@ -1165,6 +1172,11 @@ EX void groupmove(eMonster movtype, flagtype mf) {
       cell *c2 = whirlwind::jumpFromWhereTo(c, false);
       groupmove2(movei(c2, c, STRONGWIND), movtype, mf);
       }
+    
+    if(among(movtype, moFrog, moVaulter, moPhaser) && c->monst == moNone && !isPlayerOn(c)) {
+      forCellEx(c2, c) forCellEx(c3, c2)
+        groupmove2(movei(c3, c, JUMP), movtype, mf);
+      }
     }
 
   if(movtype != moDragonHead) for(int i=0; i<isize(dcal); i++) {
@@ -1951,6 +1963,12 @@ EX void movemonsters() {
   if(havewhat & HF_EAGLES) groupmove(moEagle, MF_NOATTACKS | MF_ONLYEAGLE);
   DEBB(DF_TURN, ("eagles"));
   if(havewhat & HF_REPTILE) groupmove(moReptile, 0);
+  DEBB(DF_TURN, ("jumpers"));
+  if(havewhat & HF_JUMP) {
+    groupmove(moFrog, 0);
+    groupmove(moVaulter, 0);
+    groupmove(moPhaser, 0);
+    }
   DEBB(DF_TURN, ("air"));
   if(havewhat & HF_AIR) {
     airmap.clear();

@@ -448,6 +448,7 @@ constexpr int STRONGWIND = 99;
 constexpr int FALL = 98;
 constexpr int NO_SPACE = 97;
 constexpr int TELEPORT = 96;
+constexpr int JUMP = 95;
 
 namespace whirlwind { cell *jumpDestination(cell*); }
 

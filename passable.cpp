@@ -448,7 +448,12 @@ EX bool notNearItem(cell *c) {
   return true;
   }
 
+EX bool isNeighbor1(cell *f, cell *w) {
+  return !f || f == w || isNeighbor(f, w);
+  }
+
 EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
+  cell *dummy;
   if(w->monst && !(extra & P_MONSTER) && !isPlayerOn(w)) 
     return false;
   if(m == moWolf) {
@@ -524,6 +529,12 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
       }
     return !pseudohept(w) && passable(w, from, extra);
     }
+  if(m == moFrog)
+    return (!from || from == w) ? passable(w, from, extra) : check_jump(from, w, extra, dummy) == 3;
+  if(m == moPhaser)
+    return isNeighbor1(from, w) ? passable(w, from, extra) : check_phase(from, w, extra, dummy) == 3;
+  if(m == moVaulter)
+    return isNeighbor1(from, w) ? passable(w, from, extra) : check_vault(from, w, extra, dummy) == 6;
   if(m == moAltDemon) {
     if(extra & P_ONPLAYER) {
       if(isPlayerOn(w)) return true;
