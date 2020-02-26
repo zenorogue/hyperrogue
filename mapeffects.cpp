@@ -164,6 +164,10 @@ EX bool earthFloor(cell *c) {
     c->wall = waNone;
     return true;
     }
+  if(c->land == laWet && among(c->wall, waDeepWater, waShallow, waStone)) {
+    c->wall = waNone;
+    return true;
+    }
   if((c->wall == waSea || c->wall == waNone) && c->land == laOcean) {
     c->wall = waCIsland;
     return true;
@@ -202,6 +206,14 @@ EX bool earthWall(cell *c) {
     c->wall = waDeadwall;
     return true;
     }
+  if(c->land == laWet && among(c->wall, waDeepWater, waShallow, waNone)) {
+    c->wall = waStone;
+    return true;
+    }
+  if(c->wall == waNone && c->land == laFrog)
+    c->wall = waStone;
+  if(c->wall == waNone && c->land == laEclectic)
+    c->wall = waDeadwall;
   if(c->wall == waNone && c->land == laMountain) {
     c->wall = waPlatform;
     return true;
