@@ -205,6 +205,9 @@ EX namespace elec {
   eCharge getCharge(cell *c) {
     bool ao = afterOrb && c->ligon;
     
+    /* not yet generated */
+    if(c->land == laNone) return ecIsolator;
+    
     if(c->wall == waCharged) return ecCharged;
     if(c->wall == waSea || c->wall == waGrounded) return ecGrounded;
     if(c->wall == waSandstone || c->wall == waDeadTroll || 
