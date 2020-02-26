@@ -345,6 +345,7 @@ EX void initgame() {
     savecount = 0; savetime = 0;
     cheater = 0;
     if(autocheat) cheater = 1;
+    if(!wfc::use_eclectic) cheater = 1;
     hauntedWarning = false;
     if(!autocheat) {
       timerghost = true;

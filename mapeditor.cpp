@@ -2387,6 +2387,9 @@ namespace mapeditor {
     
     dialog::addItem(XLAT("change the pattern/color of new Canvas cells"), 'c');
     dialog::add_action_push(patterns::showPrePatternNoninstant);
+
+    dialog::addItem(XLAT("configure WFC"), 'W');
+    dialog::add_action_push(wfc::wfc_menu);
     
     dialog::addBack();
     dialog::display();
