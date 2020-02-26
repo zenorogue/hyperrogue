@@ -351,6 +351,10 @@ EX namespace inv {
     gainOrbs(itWest, itOrbGravity);
     gainOrbs(itVarTreasure, itOrbIntensity);
     gainOrbs(itBrownian, itOrbChoice);
+    
+    gainOrbs(itFrog, itOrbImpact);
+    gainOrbs(itWet, itOrbSwamp);
+    gainOrbs(itEclectic, itOrbChaos);
 
 #if CAP_DAILY    
     daily::gifts();
