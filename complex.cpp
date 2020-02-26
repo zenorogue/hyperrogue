@@ -2001,7 +2001,7 @@ EX namespace heat {
   
   EX double absheat(cell *c) {
     if(c->land == laCocytus) return HEAT(c) -.6;
-    if(c->land == laIce || c->land == laBlizzard) return HEAT(c) -.4;
+    if(c->land == laIce || c->land == laBlizzard || c->land == laEclectic) return HEAT(c) -.4;
     return 0;
     }
   
