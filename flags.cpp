@@ -333,6 +333,7 @@ EX int chasmgraph(cell *c) {
   if(c->wall == waChasm || c->wall == waInvisibleFloor) return 2;
   if(isChasmy(c)) return 1;
   if(isWateryOrBoat(c)) return 1;
+  if(c->wall == waShallow) return 1;
   if(wmescher && c->wall == waBarrier && c->land == laOceanWall) return 1;
   if(c->wall == waReptileBridge) return 1;
   return 0;

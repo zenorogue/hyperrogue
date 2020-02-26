@@ -307,6 +307,7 @@ void geometry_information::make_sidewalls() {
   dfloor_table[SIDE_HIGH] = HIGH;
   dfloor_table[SIDE_HIGH2] = HIGH2;
   dfloor_table[SIDE_SKY ] = SKY;
+  dfloor_table[SIDE_ASHA] = SHALLOW;
 
   // sidewall parameters for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
@@ -319,6 +320,8 @@ void geometry_information::make_sidewalls() {
     else if(k==SIDE_HIGH) dlow = WALL, dhi = HIGH;
     else if(k==SIDE_HIGH2) dlow = HIGH, dhi = HIGH2;
     else if(k==SIDE_SKY) dlow = HIGH2, dhi = SKY;
+    else if(k==SIDE_BSHA) dlow = BOTTOM, dhi = SHALLOW;
+    else if(k==SIDE_ASHA) dlow = SHALLOW, dhi = LAKE;
     else dlow = SLEV[k-SIDE_SLEV], dhi = SLEV[k-SIDE_SLEV+1];
     dlow_table[k] = dlow;
     dhi_table[k] = dhi;

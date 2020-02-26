@@ -46,7 +46,9 @@ struct hpcshape {
 #define SIDE_SKY  8
 #define SIDE_HIGH 9
 #define SIDE_HIGH2 10
-#define SIDEPARS  11
+#define SIDE_ASHA 11
+#define SIDE_BSHA 12
+#define SIDEPARS  13
 
 #define BADMODEL 0
 
@@ -140,7 +142,8 @@ struct geometry_information {
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, BODY1, BODY2, BODY3,
     NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
-    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2;
+    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2,
+    SHALLOW;
   ld human_height, slev;
 
   ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
@@ -767,6 +770,7 @@ EX namespace geom3 {
       for(int s=0; s<=3; s++)
         SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
       LAKE = lev_to_factor(-vid.lake_top);
+      SHALLOW = lev_to_factor(-.4);
       HELLSPIKE = lev_to_factor(-(vid.lake_top+vid.lake_bottom)/2);
       BOTTOM = lev_to_factor(-vid.lake_bottom);
       LOWSKY = lev_to_factor(2 * wh);

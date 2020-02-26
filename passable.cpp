@@ -386,7 +386,7 @@ bool sharkpassable(cell *w, cell *c) {
   if(w == c || !c) return true;
   if(nonAdjacent(w,c)) return false;
   if(isPlayerOn(w)) return true;
-  if(!isWatery(w)) return false;
+  if(!isWatery(w) && w->wall != waShallow) return false;
   if(sword::at(w, 0)) return false;
   
   // don't go against the current

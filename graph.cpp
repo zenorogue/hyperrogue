@@ -3245,6 +3245,8 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t
   else if(sidepar == SIDE_LAKE) prio = PPR::LAKEWALL;
   else if(sidepar == SIDE_LTOB) prio = PPR::INLAKEWALL;
   else if(sidepar == SIDE_BTOI) prio = PPR::BELOWBOTTOM;
+  else if(sidepar == SIDE_ASHA) prio = PPR::ASHALLOW;
+  else if(sidepar == SIDE_BSHA) prio = PPR::BSHALLOW;
   else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
   
   dynamicval<bool> ncor(approx_nearcorner, true);

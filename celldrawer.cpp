@@ -140,6 +140,9 @@ void celldrawer::setcolors() {
     case laAlchemist: 
       fcol = floorcolors[c->land]; break;
     
+    case laWet:
+      fcol = c->wall == waShallow ? 0x40C0C0 : 0x40FF40; break;
+    
     #if CAP_COMPLEX2
     case laVariant: {
       int b = getBits(c);
@@ -1332,6 +1335,7 @@ void celldrawer::draw_features() {
     
     case waFrozenLake: case waLake: case waCamelotMoat:
     case waSea: case waOpenGate: case waBubble: case waDock:
+    case waDeepWater: case waShallow:
     case waSulphur: case waMercury:
       break;
     
@@ -1984,8 +1988,11 @@ void celldrawer::draw_wall_full() {
       else if(qfi.fshape == &cgi.shCaveFloor)
         set_floor(cgi.shCaveSeabed);
       
+      int sid = SIDE_LTOB;
+      if(c->wall == waShallow) sid = SIDE_ASHA;
+      
       if(WDIM == 2 && GDIM == 3 && qfi.fshape)
-        draw_shapevec(c, V, qfi.fshape->levels[SIDE_LTOB], col, PPR::LAKEBOTTOM);
+        draw_shapevec(c, V, qfi.fshape->levels[sid], col, PPR::LAKEBOTTOM);
       else
         draw_qfi(c, mscale(V, cgi.BOTTOM), col, PPR::LAKEBOTTOM);
 
@@ -2096,11 +2103,17 @@ void celldrawer::draw_wall_full() {
 #if CAP_SHAPES
   int sha = shallow(c);
 
-  if(wmspatial && sha && WDIM == 2) {
+#define D(v) darkena(gradient(0, col, 0, v * (sphere ? spherity(V * currentmap->adj(c,i)) : 1), 1), fd, 0xFF)
+  if(wmspatial && c->wall == waShallow && WDIM == 2) {
+    color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
+    forCellIdEx(c2, i, c) if(chasmgraph(c2) && c2->wall != waShallow)
+      if(placeSidewall(c, i, SIDE_BSHA, V, D(.6))) break;
+    }
+
+  else if(wmspatial && sha && WDIM == 2) {
     color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
     if(!chasmg) {
 
-#define D(v) darkena(gradient(0, col, 0, v * (sphere ? spherity(V * currentmap->adj(c,i)) : 1), 1), fd, 0xFF)
 // #define D(v) darkena(col, fd, 0xFF)
 
       if(sha & 1) {
@@ -2108,8 +2121,11 @@ void celldrawer::draw_wall_full() {
           if(placeSidewall(c, i, SIDE_LAKE, V, D(.8))) break;
         }
       if(sha & 2) {
-        forCellIdEx(c2, i, c) if(chasmgraph(c2)) 
-          if(placeSidewall(c, i, SIDE_LTOB, V, D(.7))) break;
+        forCellIdEx(c2, i, c) {
+          if(chasmgraph(c2)) {
+            if(placeSidewall(c, i, c2->wall == waShallow ? SIDE_ASHA : SIDE_LTOB, V, D(.7))) break;
+            }
+          }
         }
       if(sha & 4) {
         bool dbot = true;

@@ -1803,7 +1803,7 @@ EX void reverse_priority(PPR p) {
 
 EX void reverse_side_priorities() {
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
-    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM})
+    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM, PPR::BSHALLOW, PPR::ASHALLOW})
       reverse_priority(p);
   }
 

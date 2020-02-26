@@ -630,7 +630,7 @@ EX void moverefresh(bool turn IS(true)) {
         fallMonster(c, AF_FALL);
         }
       }
-    else if(!isWateryOrBoat(c)) {
+    else if(!isWateryOrBoat(c) && c->wall != waShallow) {
       if(c->monst == moGreaterShark)
         c->monst = moGreaterM;
       else if(c->monst == moShark || c->monst == moCShark) {
