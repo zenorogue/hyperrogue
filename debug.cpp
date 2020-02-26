@@ -646,6 +646,10 @@ int read_cheat_args() {
     PHASEFROM(2);
     shift(); vid.stereo_mode = eStereo(argi());
     }
+  else if(argis("-ipd")) {
+    PHASEFROM(2);
+    shift_arg_formula(vid.ipd);
+    }
 #if CAP_INV
   else if(argis("-IU")) {
     PHASE(3) cheat();
