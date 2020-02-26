@@ -1423,6 +1423,34 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       return false;
       }
     
+    case moFrog: case moPhaser: case moVaulter: {
+      ShadowV(V, cgi.shFrogBody);
+      const transmatrix VL = mmscale(V, cgi.ALEG0);
+      color_t xcolor = darkena(0xFF0000, 1, 0xFF);
+      int alpha = (m == moPhaser ? 0xC0 : 0xFF);
+      if(footphase) {
+        queuepoly(VALEGS, cgi.shFrogJumping, darkena(col, 0, alpha));
+        queuepoly(VALEGS * Mirror, cgi.shFrogJumping, darkena(col, 0, alpha));
+        }
+      else {
+        queuepoly(VL, cgi.shFrogRearFoot, darkena(col, 0, alpha));
+        queuepoly(VL * Mirror, cgi.shFrogRearFoot, darkena(col, 0, alpha));
+        queuepoly(VALEGS, cgi.shFrogRearLeg, xcolor);
+        queuepoly(VALEGS * Mirror, cgi.shFrogRearLeg, xcolor);
+        queuepoly(VALEGS, cgi.shFrogRearLeg2, xcolor);
+        queuepoly(VALEGS * Mirror, cgi.shFrogRearLeg2, xcolor);
+        }
+      queuepoly(VL, cgi.shFrogFrontFoot, darkena(col, 0, alpha));
+      queuepoly(VL * Mirror, cgi.shFrogFrontFoot, darkena(col, 0, alpha));
+      queuepoly(VALEGS, cgi.shFrogFrontLeg, xcolor);
+      queuepoly(VALEGS * Mirror, cgi.shFrogFrontLeg, xcolor);
+      queuepoly(VABODY, cgi.shFrogBody, darkena(col, 0, alpha));
+      queuepoly(VABODY, cgi.shFrogEye, darkena(col, 3, alpha));
+      queuepoly(VABODY * Mirror, cgi.shFrogEye, darkena(col, 3, alpha));
+      queuepoly(VABODY, cgi.shFrogStripe, xcolor);
+      return false;
+      }
+    
     case moVineBeast: {
       ShadowV(V, cgi.shWolfBody);
       if(mmspatial || footphase)
@@ -1485,8 +1513,14 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       return false;
       }
     
-    case moShark: case moGreaterShark: case moCShark:
+    case moShark: case moGreaterShark: case moCShark: case moYellowSkipper:
       queuepoly(VFISH, cgi.shShark, darkena(col, 0, 0xFF));
+      return false;
+      
+    case moPike:
+      queuepoly(VFISH, cgi.shPikeBody, darkena(col, 0, 0xFF));
+      queuepoly(VFISH, cgi.shPikeEye, darkena(col, 2, 0xFF));
+      queuepoly(VFISH * Mirror, cgi.shPikeEye, darkena(col, 2, 0xFF));
       return false;
 
     case moEagle: case moParrot: case moBomberbird: case moAlbatross:

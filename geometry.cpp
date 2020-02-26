@@ -243,12 +243,16 @@ hpcshape
   shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
   shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
   
+  shPikeBody, shPikeEye,
+  
   shAsymmetric,
   
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
   
   shDodeca;
   
+  hpcshape shFrogRearFoot, shFrogFrontFoot, shFrogRearLeg, shFrogFrontLeg, shFrogRearLeg2, shFrogBody, shFrogEye, shFrogStripe, shFrogJumping;
+
   hpcshape_animated 
     shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
     shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;  
