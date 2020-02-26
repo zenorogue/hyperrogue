@@ -549,6 +549,11 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       if(c->move(i)->monst == moSlime || c->move(i)->monst == moSlimeNextTurn)
         killMonster(c->move(i), who);
       }
+    forCellEx(c2, c) {
+      if(c2->wall == waPalace) c2->wall = waRubble;
+      if(c2->wall == waDeadwall) c2->wall = waDeadfloor2;
+      if(c2->wall == waExplosiveBarrel) explodeBarrel(c2);
+      }
     }
   if(m == moOrangeDog) {
     if(pcount) for(int i=0; i<8; i++) {
