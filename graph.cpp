@@ -734,6 +734,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     it == itHolyGrail ? &cgi.shGrail :
     isElementalShard(it) ? &cgi.shElementalShard :
     (it == itBombEgg || it == itTrollEgg) ? &cgi.shEgg :
+    it == itFrog ? &cgi.shDisk :
     it == itHunting ? &cgi.shTriangle :
     it == itDodeca ? &cgi.shDodeca :
     xch == '*' ? &cgi.shGem[ct6] : 
