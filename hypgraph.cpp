@@ -1232,7 +1232,7 @@ void hrmap_standard::draw() {
     
     if(sphere) draw = true;
 
-    if(draw) for(int d=0; d<c->type; d++) {
+    if(draw) for(int d=0; d<c->master->type; d++) {
       hstate s2 = transition(s, d);
       if(s2 == hsError) continue;
       heptspin hs2 = hs + d + wstep;
