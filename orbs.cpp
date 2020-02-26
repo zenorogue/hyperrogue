@@ -157,6 +157,7 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itOrbChoice, 120);
   reduceOrbPower(itOrbIntensity, 120);
   reduceOrbPower(itOrbImpact, 120);
+  reduceOrbPower(itOrbChaos, 120);
 
   reduceOrbPower(itOrbSide1, 120);
   reduceOrbPower(itOrbSide2, 120);
@@ -1496,6 +1497,9 @@ EX int orbcharges(eItem it) {
     case itOrbImpact:
       return 50;
 
+    case itOrbChaos:
+      return 60;
+       
     default:
       return 0;
     }

@@ -334,7 +334,74 @@ bool pcmove::after_instant(bool kl) {
   return true;
   }
 
+struct chaos_data {
+  cell *ca, *cb;
+  gcell coa, cob;
+  
+  bool done;
+  
+  chaos_data() {
+    done = false;
+    ca = (cwt+1).cpeek();
+    cb = (cwt-1).cpeek();
+    if(!items[itOrbChaos] || chaos_forbidden(ca) || chaos_forbidden(cb)) {
+      ca = cb = nullptr;
+      return;
+      }
+    markOrb(itOrbChaos);
+    coa = *ca;
+    cob = *cb;
+    copy_metadata(ca, &cob);
+    copy_metadata(cb, &coa);
+    int sa = ca->mondir - ((cwt+1)+wstep).spin;
+    int sb = cb->mondir - ((cwt-1)+wstep).spin;
+    ca->stuntime = min(ca->stuntime + 3, 15);
+    cb->stuntime = min(cb->stuntime + 3, 15);
+    ca->monmirror = !ca->monmirror;
+    cb->monmirror = !cb->monmirror;
+    if(ca->mondir < ca->type)
+      ca->mondir = ((cwt+1)+wstep-sb).spin;
+    if(cb->mondir < cb->type)
+      cb->mondir = ((cwt+1)+wstep-sa).spin;
+    }
+  
+  void rollback() {
+    done = true;
+    if(!ca) return;
+    copy_metadata(ca, &coa);
+    copy_metadata(cb, &cob);
+    }
+  
+  ~chaos_data() {
+    if(!done) {
+      println(hlog, "chaos_data not done");
+      breakhere();
+      }
+    }
+  
+  void commit() {
+    if(cb && cb->monst == moPair) {
+      gcell tmp = *ca;
+      ca->monst = moPair;
+      ca->mondir = coa.mondir;
+      killMonster(ca, moPlayer);
+      cb->monst = ca->monst;
+      copy_metadata(ca, &tmp);
+      }
+    if(ca && ca->monst == moPair) {
+      gcell tmp = *cb;
+      cb->monst = moPair;
+      cb->mondir = cob.mondir;
+      killMonster(cb, moPlayer);
+      ca->monst = cb->monst;
+      copy_metadata(cb, &tmp);
+      }
+    done = true;
+    }
+  };
+
 bool pcmove::actual_move() {
+
   origd = d;
   if(d >= 0) {
     cwt += d;
@@ -399,14 +466,17 @@ bool pcmove::actual_move() {
       if(!checkonly) addMessage(XLAT("No room to push %the1.", c2->wall));
       return false;
       }
+    chaos_data cdata;
     if(monstersnear(c2, NULL, moPlayer, NULL, cwt.at)) {
+      cdata.rollback();
       if(!checkonly && errormsgs) wouldkill("%The1 would kill you there!");
       return false;
       }
-    if(checkonly) { nextmovetype = lmMove; return true; }
+    if(checkonly) { nextmovetype = lmMove; cdata.rollback(); return true; }
     addMessage(XLAT("You push %the1.", c2->wall));
     lastmovetype = lmPush; lastmove = cwt.at;
     pushThumper(mip);
+    cdata.commit();
     return perform_actual_move();
     }
 
@@ -426,17 +496,20 @@ bool pcmove::actual_move() {
   if(!c2->monst && cwt.at->wall == waBoat && cwt.at->item != itOrbYendor && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
 
     if(havePushConflict(cwt.at, checkonly)) return false;
+    chaos_data cdata;
     if(monstersnear(c2,NULL,moPlayer,NULL,cwt.at)) {
       if(!checkonly && errormsgs) wouldkill("%The1 would kill you there!");
+      cdata.rollback();
       return false;
       }
     
-    if(checkonly) { nextmovetype = lmMove; return true; }
+    if(checkonly) { nextmovetype = lmMove; cdata.rollback(); return true; }
     if(c2->item && !cwt.at->item) moveItem(c2, cwt.at, false), boatmove = true;
     placeWater(c2, cwt.at);
     moveBoat(mi);
     c2->mondir = revhint(cwt.at, d);
     if(c2->item) boatmove = !boatmove;
+    cdata.commit();
     return perform_actual_move();
     }
   
@@ -470,15 +543,18 @@ bool pcmove::boat_move() {
     return false;
     }
 
+  chaos_data cdata;
   if(monstersnear(c2, NULL, moPlayer, NULL, cwt.at)) {
     if(!checkonly && errormsgs) 
       wouldkill("%The1 would kill you there!");
+    cdata.rollback();
     return false;
     }
   
-  if(checkonly) { nextmovetype = lmMove; return true; }
+  if(checkonly) { nextmovetype = lmMove; cdata.rollback(); return true; }
   moveBoat(mi);
   boatmove = true;
+  cdata.commit();
   return perform_actual_move();
   }
 
@@ -543,16 +619,20 @@ bool pcmove::after_escape() {
     c2->wall = cwt.at->wall;
     if(doesnotFall(cwt.at))
       cwt.at->wall = waBigStatue;
+      
+    chaos_data cdata;
     
     if(monstersnear(c2,NULL,moPlayer,NULL,cwt.at)) {
+      cdata.rollback();
       if(!checkonly && errormsgs) wouldkill("%The1 would kill you there!");
       c2->wall = save_c2; cwt.at->wall = save_cw;
       return false;
       }        
         
-    if(checkonly) { c2->wall = save_c2; cwt.at->wall = save_cw; nextmovetype = lmMove; return true; }
+    if(checkonly) { cdata.rollback(); c2->wall = save_c2; cwt.at->wall = save_cw; nextmovetype = lmMove; return true; }
     addMessage(XLAT("You push %the1 behind you!", waBigStatue));
     animateMovement(mi.rev(), LAYER_BOAT);
+    cdata.commit();
     return perform_actual_move();
     }
 
@@ -629,7 +709,9 @@ bool pcmove::move_if_okay() {
       return false;
     }
 
+  chaos_data cdata;
   if(monstersnear(c2, NULL, moPlayer, NULL, cwt.at)) {
+    cdata.rollback();
     if(checkonly) return false;
 
     if(items[itOrbFlash]) {
@@ -669,12 +751,22 @@ bool pcmove::move_if_okay() {
     return false;
     }
 
-  if(switchplace_prevent(cwt.at, c2, checkonly)) return false;
-  if(!checkonly && warningprotection_hit(do_we_stab_a_friend(cwt.at, c2, moPlayer)))
+  if(switchplace_prevent(cwt.at, c2, checkonly)) {
+    cdata.rollback();  
     return false;
+    }
+  if(!checkonly && warningprotection_hit(do_we_stab_a_friend(cwt.at, c2, moPlayer))) {
+    cdata.rollback();
+    return false;
+    }
   
-  if(checkonly) { nextmovetype = lmMove; return true; }
+  if(checkonly) { 
+    cdata.rollback();
+    nextmovetype = lmMove; 
+    return true;
+    }
   
+  cdata.commit();
   return perform_actual_move();
   }
 
@@ -796,6 +888,24 @@ bool pcmove::attack() {
   lastmovetype = lmAttack; lastmove = c2;
   swordAttackStatic();
   return after_move();
+  }
+
+EX bool chaos_forbidden(cell *c) {
+  return among(c->wall, waMirrorWall, waBarrier, waRoundTable) || isMultitile(c->monst);
+  }
+
+EX void copy_metadata(cell *x, gcell *y) {
+  x->wall = y->wall;
+  x->monst = y->monst;
+  x->item = y->item;
+  x->mondir = y->mondir;
+  x->stuntime = y->stuntime;
+  x->hitpoints = y->hitpoints;
+  x->monmirror = y->monmirror;
+  if(isIcyLand(x)) {
+    x->landparam = y->landparam;
+    }
+  x->wparam = y->wparam;
   }
 
 bool pcmove::perform_actual_move() {
