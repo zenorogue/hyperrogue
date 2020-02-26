@@ -1170,9 +1170,14 @@ EX namespace ods {
       
       ld phi = atan2(y, x) - atan2(y0, x0) + M_PI;
       
-      // ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(vid.ipd/2));
-      ld p = z / sin(theta) / t * cos_auto(vid.ipd / 2);
-      ld delta = (p > 1) ? 13 : (p < -1) ? -13 : atanh(p);
+      ld delta;
+      if(euclid) delta = hypot(y0, z);
+      else if(sphere) delta = atan2_auto(z / sin(theta), t / cos_auto(vid.ipd/2));
+      else {
+        // ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(vid.ipd/2));
+        ld p = z / sin(theta) / t * cos_auto(vid.ipd / 2);
+        delta = (p > 1) ? 13 : (p < -1) ? -13 : atanh(p);
+        }
       
       if(euclid || hyperbolic) phi -= M_PI;
       if(hyperbolic) delta = -delta;
@@ -1221,7 +1226,14 @@ EX namespace ods {
 
       for(int j=0; j<3; j++) {
         hyperpoint o = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
-        if(!project(o, h[j], h[j+3], global_projection == -1))
+        if(nonisotropic || prod) {
+          o = lp_apply(inverse_exp(o, iTable, false));
+          o[3] = 1;
+          dynamicval<eGeometry> g(geometry, gEuclid);
+          if(!project(o, h[j], h[j+3], global_projection == -1))
+            goto next_i;
+          }
+        else if(!project(o, h[j], h[j+3], global_projection == -1))
           goto next_i;
         }
       

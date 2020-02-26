@@ -28,6 +28,7 @@ constexpr flagtype SF_HALFPLANE    = 8192;
 constexpr flagtype SF_ORIENT       = 16384;
 constexpr flagtype SF_BOX          = 32768;
 constexpr flagtype SF_ZFOG         = 65536;
+constexpr flagtype SF_ODSBOX       = (1<<17);
 #endif
 
 #if HDR
@@ -98,7 +99,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   
   bool skip_t = false;
   
-  if(pmodel == mdPixel) {
+  if(vid.stereo_mode == sODS) {
+    shader_flags |= SF_DIRECT | SF_ODSBOX;
+    vmain += "// this is ODS shader\n";
+    distfun = "aPosition.z";
+    }
+  else if(pmodel == mdPixel) {
     vmain += "mediump vec4 pos = aPosition; pos[3] = 1.0;\n";
     vmain += "pos = uMV * pos;\n";
     if(shader_flags & GF_LEVELS) vmain += "vPos = pos;\n";  
@@ -355,7 +361,8 @@ void display_data::set_projection(int ed) {
   
   if(vid.stretch != 1 && (shader_flags & SF_DIRECT)) glhr::projection_multiply(glhr::scale(vid.stretch, 1, 1));
 
-  eyewidth_translate(ed);
+  if(vid.stereo_mode != sODS)
+    eyewidth_translate(ed);
   
   auto ortho = [&] (ld x, ld y) {
     glhr::glmatrix M = glhr::ortho(x, y, 1);
@@ -371,7 +378,7 @@ void display_data::set_projection(int ed) {
     glhr::projection_multiply(M);
     if(nisot::local_perspective_used() && (shader_flags & SF_BOX))
       glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
-    if(ed) {
+    if(ed && vid.stereo_mode != sODS) {
       glhr::glmatrix m = glhr::id;
       m[2][0] -= ed;
       glhr::projection_multiply(m);
@@ -381,6 +388,10 @@ void display_data::set_projection(int ed) {
 
   if(shader_flags & SF_PIXELS) ortho(cd->xsize/2, -cd->ysize/2);
   else if(shader_flags & SF_BOX) ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
+  else if(shader_flags & SF_ODSBOX) {
+    ortho(M_PI, M_PI);
+    glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
+    }
   else if(shader_flags & SF_PERS3) {
     glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
     glhr::projection_multiply(glhr::scale(1, -1, -1));
