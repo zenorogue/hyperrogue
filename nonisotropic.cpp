@@ -1864,41 +1864,37 @@ EX namespace rots {
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry */
   EX transmatrix qtm(hyperpoint h) {
-    if(hyperbolic) {
-      hyperpoint k = slr::to_phigans(h);
-      ld z = k[2]; k[2] = 0;
-      ld r = hypot_d(2, k);
-      // k[1] = -k[1];
-      k[0] = -k[0];
-      if(r) k = tangent_length(k, asinh(r) * 2);
-      return spin(-z * 2) * rgpushxto0(direct_exp(k, 0));
-      }
-
-    double sq0 = h[0]*h[0];
-    double sq1 = h[1]*h[1];
-    double sq2 = h[2]*h[2];
-    double sq3 = h[3]*h[3];
+    ld& x = h[0];
+    ld& y = h[1];
+    ld& z = h[2];
+    ld& w = h[3];
+    
+    ld xx = x*x;
+    ld yy = y*y;
+    ld zz = z*z;
+    ld ww = w*w;
+    
+    ld xy = x*y;
+    ld xz = x*z;
+    ld xw = x*w;
+    ld yz = y*z;
+    ld yw = y*w;
+    ld zw = z*w;
     
     transmatrix M;  
   
-    M[0][0] =  sq0 - sq1 - sq2 + sq3;
-    M[1][1] = -sq0 + sq1 - sq2 + sq3;
-    M[2][2] = -sq0 - sq1 + sq2 + sq3;
+    M[0][0] = +xx - yy - zz + ww;
+    M[1][1] = -xx + yy - zz + ww;
+    M[2][2] = -xx - yy + zz + ww;
     
-    double tmp1 = h[0]*h[1];
-    double tmp2 = h[2]*h[3];
-    M[0][1] = -2 * (tmp1 + tmp2);
-    M[1][0] = -2 * (tmp1 - tmp2);
+    M[0][1] = -2 * (xy + zw);
+    M[1][0] = -2 * (xy - zw);
     
-    tmp1 = h[0]*h[2];
-    tmp2 = h[1]*h[3];
-    M[0][2] = 2 * (tmp1 - tmp2);
-    M[2][0] = 2 * (tmp1 + tmp2);
+    M[0][2] = 2 * (xz - yw);
+    M[2][0] = 2 * (xz + yw);
 
-    tmp1 = h[1]*h[2];
-    tmp2 = h[0]*h[3];
-    M[1][2] = -2 * (tmp1 + tmp2);
-    M[2][1] = -2 * (tmp1 - tmp2);
+    M[1][2] = -2 * (yz + xw);
+    M[2][1] = -2 * (yz - xw);
   
     return M;
     }
