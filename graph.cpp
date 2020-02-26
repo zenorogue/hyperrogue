@@ -926,11 +926,13 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     PPR prio = PPR::ITEM;
     bool inice = c && c->wall == waIcewall;
     if(inice) prio = PPR::HIDDEN;
-
-    int icol1 = icol;
+    
+    color_t icol1 = icol;
     if(it == itOrbFire) icol = firecolor(200);
     if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
     if(it == itOrbFrog) icol = 0xFF0000;
+    if(it == itOrbImpact) icol = 0xFF0000;
+    if(it == itOrbPhasing) icol = 0xFF0000;
     if(it == itOrbDash) icol = 0xFF0000;
     if(it == itOrbFreedom) icol = 0xC0FF00;
     if(it == itOrbAir) icol = 0xFFFFFF;
