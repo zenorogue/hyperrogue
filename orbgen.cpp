@@ -105,7 +105,7 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laCaribbean, 0, 3500, itOrbTime},
   {orbgenflags::S_NATIVE, laRedRock, 0, 2500, itOrbSpace},
   {orbgenflags::S_NATIVE, laCamelot, 1000, 1500, itOrbIllusion},
-  {orbgenflags::S_NATIVE, laOcean, 0, 3000, itOrbEmpathy},
+  {orbgenflags::S_NATIVE, laOcean, 0, 1500, itOrbEmpathy},
   {orbgenflags::S_GUEST,  laOcean, 0, 0, itOrbAir},
   {orbgenflags::S_NATIVE, laPalace, 0, 4000, itOrbDiscord},
   {orbgenflags::S_GUEST,  laPalace, 0, 0, itOrbFrog},
@@ -157,6 +157,12 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_GUEST, laBrownian, 1000, 0, itOrbAir},
   {orbgenflags::S_GUEST, laBrownian, 1000, 0, itOrbDash},
   {orbgenflags::S_GUEST, laBrownian, 1000, 0, itOrbSafety},
+  {orbgenflags::S_NATIVE, laFrog, 1000, 1500, itOrbImpact},
+  {orbgenflags::S_NATIVE, laEclectic, 1000, 1000, itOrbChaos},
+  {orbgenflags::S_GUEST, laEclectic, 4000, 0, itOrbWinter},
+  {orbgenflags::S_GUEST, laEclectic, 2000, 0, itOrbLightning},
+  {orbgenflags::S_GUEST, laWet, 1000, 1000, itOrbSwamp},
+  {orbgenflags::S_GUEST, laWet, 4000, 0, itOrbFish},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 
