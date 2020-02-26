@@ -439,6 +439,14 @@ EX namespace inv {
           evokeBeautyAt(c);
       }
     
+    if(it == itOrbDigging) {
+      forCellCM(c2, cwt.at) {
+        earthFloor(c2);
+        if(c2->wall == waCavewall && !c2->monst)
+          c2->wall = waNone;
+        }        
+      }
+    
     if(it == itOrbSword || it == itOrbSword2) {
       for(int i=0; i<numplayers(); i++)
         if(multi::playerActive(i)) {
