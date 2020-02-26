@@ -509,6 +509,7 @@ EX namespace inv {
       eItem o = eItem(i);
       if(itemclass(o) == IC_ORB) {
         char c = orbkeys[j++];
+        if(c == 0) println(hlog, "missing char for ", dnameof(o));
         if(remaining[i] || usedup[i]) {
           orbmap[c] = o;
           if(plain) 
