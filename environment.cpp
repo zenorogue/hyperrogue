@@ -343,7 +343,7 @@ EX void bfs() {
           }
         
         if(c2->wall == waCharged) elec::havecharge = true;
-        if(c2->land == laStorms) elec::haveelec = true;
+        if(isElectricLand(c2)) elec::haveelec = true;
         
         if(c2->land == laWhirlpool) havewhat |= HF_WHIRLPOOL;
         if(c2->land == laWhirlwind) havewhat |= HF_WHIRLWIND;
