@@ -1841,6 +1841,35 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       return false;
       }      
       
+    case moRusalka: {
+      col = watercolor(0);
+      bool girl = princessgender() == GEN_F;
+      if(girl) {
+        const transmatrix VBS = VBODY * otherbodyparts(V, col, m, footphase);
+        ShadowV(V, cgi.shFemaleBody);
+        queuepoly(VBS, cgi.shFemaleBody, watercolor(100));
+        queuepoly(VHEAD1, cgi.shFemaleHair,  watercolor(150));
+        // queuepoly(VHEAD2, cgi.shFlowerHair,  watercolor(50));
+        // queuepoly(VHEAD, cgi.shWitchHair, watercolor(150));
+        queuepoly(VHEAD1, cgi.shPFace, watercolor(200));
+        queuepoly(VHEAD1, cgi.shWightCloak, watercolor(50) & 0xFFFFFF80);
+        humanoid_eyes(V, col | 0xFF);
+        }
+      else {
+        const transmatrix VBS = VBODY * otherbodyparts(V, col, m, footphase);
+        ShadowV(V, cgi.shPBody);
+        queuepoly(VBS, cgi.shPBody, watercolor(100));
+
+        queuepoly(VBS, cgi.shSuspenders,  watercolor(150));
+
+        queuepoly(VHEAD1, cgi.shPHead,  watercolor(50));
+        queuepoly(VHEAD1, cgi.shPFace, watercolor(200));
+        queuepoly(VHEAD1, cgi.shWightCloak, watercolor(50) & 0xFFFFFF80);
+        humanoid_eyes(V, col | 0xFF);
+        }
+      return false;
+      }      
+      
     case moSlime: {
       queuepoly(VFISH, cgi.shSlime, darkena(col, 0, 0x80));
       queuepoly(VSLIMEEYE, cgi.shSlimeEyes, 0xFF);
