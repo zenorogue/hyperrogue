@@ -837,7 +837,7 @@ ITEM( '!', 0x80FF80, "Sea Glass", itDock, IC_TREASURE, ZERO, RESERVED, osNone, N
 ITEM( '*', 0xBBCC99, "Chrysoberyl", itRuins, IC_TREASURE, ZERO, RESERVED, osNone, "Fragment of the past glory.")
 ITEM( '*', 0x80FF80, "Monopole", itMagnet, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
 ITEM( '!', 0xFF00FF, "Tasty Jelly", itSwitch, IC_TREASURE, ZERO, RESERVED, osNone, "A tasty byproduct of the Jelly Revolution.")
-ITEM( 'o', 0x80FF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
+ITEM( 'o', 0xFFFF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
     "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.")
 ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osNone, NODESCYET)
 ITEM( 'o', 0x202020, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
@@ -1299,7 +1299,7 @@ LAND( 0xD0D060, "Wild West", laWildWest, ZERO, itBounty, RESERVED, wildwestdesc)
   NATIVE((m == moOutlaw) ? 2 : 0)
   REQ( NEVER )
 
-LAND( 0x80A080, "Land of Storms", laStorms, ZERO | LF_TROLL, itFulgurite, RESERVED, elecdesc)
+LAND( 0x80A080, "Land of Storms", laStorms, ZERO | LF_TROLL | LF_ELECTRIC, itFulgurite, RESERVED, elecdesc)
   NATIVE((m == moMetalBeast || m == moMetalBeast2 || m == moStormTroll) ? 1 : 0)
   REQ( GOLD(R60) )
 
@@ -1551,6 +1551,44 @@ ITEM( '!', 0xFFD0D0, "Fuel", itAsteroid, IC_TREASURE, ZERO, RESERVED, osNone, ro
 MONSTER('A', 0x606040, "Space Rock", moAsteroid, ZERO, RESERVED, moAsteroid, rock_description)
   NATIVE(m == moAsteroid ? 2 : 0)
   REQ( NEVER )
+  
+LAND( 0x00C0C0, "Wetland",    laWet, ZERO, itWet, RESERVED, NODESCYET)
+ITEM( '%', 0xFFD500, "Water Lily", itWet, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
+WALL( '=', 0x00C0C0, "shallow water", waShallow, ZERO, RESERVED, 0, sgWater, NODESCYET)
+WALL( '=', 0x0000A0, "deep water", waDeepWater, WF_WATER, RESERVED, 0, sgWater, NODESCYET)
+MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
+  "You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger."
+  )
+MONSTER( 'S', 0xC0C080, "Yellow Skipper", moYellowSkipper, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, "Just a nasty shark.") /* unused */
+MONSTER( 'R', 0x4040C0, "Rusałka", moRusalka, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
+  "A water spirit. When killed, she will try to drown you, by changing dry land to shallow water and shallow water to deep water.")
+ITEM( 'o', 0x808080, "Orb of the Swamp", itOrbSwamp, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
+  NATIVE(among(m, moPike, moRusalka) ? 2 : 0)
+  REQ( GOLD(R30) )
+
+LAND( 0x6FA136, "Frog Park",     laFrog, ZERO, itFrog, RESERVED, NODESCYET)
+ITEM( '$', 0xFFD520, "Gold Ball", itFrog, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
+ITEM( 'o', 0x808080, "Orb of Impact", itOrbImpact, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
+WALL( '#', 0x00C000, "shrub",  waShrub, WF_WALL | WF_HIGHWALL | WF_STDTREE | WF_CONE, RESERVED, 0, sgNone, NODESCYET)
+MONSTER('F', 0x60A060, "Giant Frog", moFrog, ZERO, RESERVED, moFrog, NODESCYET)
+MONSTER('F', 0xFFFF80, "Yellow Frog", moPhaser, ZERO, RESERVED, moPhaser, NODESCYET)
+MONSTER('F', 0x8080FF, "Blue Frog", moVaulter, ZERO, RESERVED, moVaulter, NODESCYET)
+  NATIVE(among(m, moFrog, moPhaser, moVaulter) ? 2 : 0)  
+  #define LST {itDodeca, itZebra, itSwitch}
+  REQ(ITEMS_TOTAL(LST, variant_unlock_value()))
+  #undef LST
+
+LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_VARIANT | LF_ICY | LF_ELECTRIC, itEclectic, RESERVED, NODESCYET)
+MONSTER( 'W', 0xA04060, "Mutant2", moVariantWarrior2, CF_FACE_UP, RESERVED, moYeti, 
+    "These guys look a bit strange, but they have no special properties."
+    )
+ITEM( '*', 0x303090, "Lapis Lazuli", itEclectic, IC_TREASURE, ZERO, RESERVED, osNone, 
+    "A beautiful blue stone.")
+ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
+  NATIVE(among(m, moRedTroll, moMiner, moTroll, moFireFairy, moMetalBeast, moPalace, moWolf, moIceGolem, moPair) ? 1 : 0)
+  #define LST {itDiamond, itFulgurite, itPalace, itSilver}
+  REQ(ITEMS_TOTAL(LST, variant_unlock_value()*4/3))
+  #undef LST
 
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
