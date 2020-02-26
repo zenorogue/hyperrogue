@@ -1578,7 +1578,7 @@ MONSTER('F', 0x8080FF, "Blue Frog", moVaulter, ZERO, RESERVED, moVaulter, NODESC
   REQ(ITEMS_TOTAL(LST, variant_unlock_value()))
   #undef LST
 
-LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_VARIANT | LF_ICY | LF_ELECTRIC, itEclectic, RESERVED, NODESCYET)
+LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_ICY | LF_ELECTRIC, itEclectic, RESERVED, NODESCYET)
 MONSTER( 'W', 0xA04060, "Mutant2", moVariantWarrior2, CF_FACE_UP, RESERVED, moYeti, 
     "These guys look a bit strange, but they have no special properties."
     )
