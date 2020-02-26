@@ -1562,7 +1562,7 @@ MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_SHARK, RESERVED, moSha
 MONSTER( 'S', 0xC0C080, "Yellow Skipper", moYellowSkipper, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, "Just a nasty shark.") /* unused */
 MONSTER( 'R', 0x4040C0, "Rusałka", moRusalka, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
   "A water spirit. When killed, she will try to drown you, by changing dry land to shallow water and shallow water to deep water.")
-ITEM( 'o', 0x808080, "Orb of the Swamp", itOrbSwamp, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
+ITEM( 'o', 0x808080, "Orb of Plague", itOrbPlague, IC_ORB, ZERO, RESERVED, osOffensive, NODESCYET)
   NATIVE(among(m, moPike, moRusalka) ? 2 : 0)
   REQ( GOLD(R30) )
 

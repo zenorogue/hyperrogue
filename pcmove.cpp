@@ -1245,28 +1245,51 @@ EX void swordAttackStatic() {
       swordAttackStatic(bb);
   }
 
+EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb) {
+  eMonster m = mt->monst;
+  flagtype f = AF_SIDE;
+  if(orb == itOrbPlague) f |= AF_PLAGUE;
+  if(items[itOrbSlaying]) f|= AF_CRUSH;
+  if(m) println(hlog, "canAttack ", dnameof(m), " at ", mt, ":", canAttack(mf, who, mt, m, f));
+  if(canAttack(mf, who, mt, m, f)) {
+    if((f & AF_CRUSH) && !canAttack(mf, who, mt, m, AF_SIDE | AF_MUSTKILL))
+      markOrb(itOrbSlaying);
+    markOrb(orb);
+    if(who != moPlayer) markOrb(itOrbEmpathy);
+    if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who) || isAnyIvy(m)) {
+      println(hlog, "spread from ", mt);
+      forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->move(dir)) && celldistance(mx, mf) <= 4)
+        sideAttackAt(mf, dir, mx, who, orb);
+      produceGhost(mt, m, who);
+      }
+    }
+  else if(mt->wall == waSmallTree) {
+    mt->wall = waNone;
+    forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->move(dir)) && celldistance(mx, mf) <= 4)
+      sideAttackAt(mf, dir, mx, who, orb);
+    }
+  else if(mt->wall == waBigTree)
+    mt->wall = waSmallTree;
+  else if(mt->wall == waExplosiveBarrel && orb != itOrbPlague)
+    explodeBarrel(mt);
+  }
+
 EX void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
   if(!items[orb]) return;
   if(who != moPlayer && !items[itOrbEmpathy]) return;
   for(int k: {-1, 1}) {
     cell *mt = mf->modmove(dir + k*bonus);
-    eMonster m = mt->monst;
-    flagtype f = AF_SIDE;
-    if(items[itOrbSlaying]) f|= AF_CRUSH;
-    if(canAttack(mf, who, mt, m, f)) {
-      if((f & AF_CRUSH) && !canAttack(mf, who, mt, m, AF_SIDE | AF_MUSTKILL))
-        markOrb(itOrbSlaying);
-      markOrb(orb);
-      if(who != moPlayer) markOrb(itOrbEmpathy);
-      if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who)) 
-        produceGhost(mt, m, who);
-      }
-    else if(mt->wall == waBigTree)
-      mt->wall = waSmallTree;
-    else if(mt->wall == waSmallTree)
-      mt->wall = waNone;
-    else if(mt->wall == waExplosiveBarrel)
-      explodeBarrel(mt);
+    sideAttackAt(mf, dir, mt, who, orb);
+    }
+  }
+
+EX void sideAttackPlague(cell *mf, int dir, eMonster who) {
+  if(!items[itOrbPlague]) return;
+  cellwalker cw(mf, dir);
+  cw += wstep;
+  for(int i=2; i<cw.at->type-1; i++) {
+    println(hlog, "sa = ", (cw+i).cpeek(), " mo = ", dnameof((cw+i).cpeek()->monst));
+    sideAttackAt(mf, dir, (cw+i).cpeek(), who, itOrbPlague);
     }
   }
 
@@ -1275,7 +1298,10 @@ EX void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
   int k = tkills();
   sideAttack(mf, dir, who, 1, itOrbSide1);
   sideAttack(mf, dir, who, 2, itOrbSide2);
-  sideAttack(mf, dir, who, 3, itOrbSide3);
+  sideAttack(mf, dir, who, 3, itOrbSide3);  
+  k -= tkills();
+  sideAttackPlague(mf, dir, who);
+  k += tkills();
 
   if(who == moPlayer) {
     int kills = tkills() - k + bonuskill;

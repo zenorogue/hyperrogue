@@ -161,7 +161,7 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laEclectic, 1000, 1000, itOrbChaos},
   {orbgenflags::S_GUEST, laEclectic, 4000, 0, itOrbWinter},
   {orbgenflags::S_GUEST, laEclectic, 2000, 0, itOrbLightning},
-  {orbgenflags::S_GUEST, laWet, 1000, 1000, itOrbSwamp},
+  {orbgenflags::S_GUEST, laWet, 1000, 1000, itOrbPlague},
   {orbgenflags::S_GUEST, laWet, 4000, 0, itOrbFish},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };

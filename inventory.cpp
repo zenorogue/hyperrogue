@@ -353,7 +353,7 @@ EX namespace inv {
     gainOrbs(itBrownian, itOrbChoice);
     
     gainOrbs(itFrog, itOrbImpact);
-    gainOrbs(itWet, itOrbSwamp);
+    gainOrbs(itWet, itOrbPlague);
     gainOrbs(itEclectic, itOrbChaos);
 
 #if CAP_DAILY    

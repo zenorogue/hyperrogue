@@ -835,7 +835,7 @@ EX void applyBoxes() {
   
   applyBoxOrb(itOrbImpact);
   applyBoxOrb(itOrbChaos);
-  applyBoxOrb(itOrbSwamp);
+  applyBoxOrb(itOrbPlague);
   applyBoxI(itEclectic);
   applyBoxI(itFrog);
   applyBoxI(itWet);
