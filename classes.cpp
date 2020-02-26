@@ -500,7 +500,7 @@ EX monstertype minf[motypes] = {
   };
 
 #if HDR
-#define NUM_GS 6
+#define NUM_GS 8
 struct genderswitch_t {
   int gender;
   eMonster m;
@@ -522,7 +522,11 @@ EX genderswitch_t genderswitch[NUM_GS] = {
     "She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman."},
   { GEN_M, moRoseBeauty,    "Handsome Gardener",
     "Tall, strong, and holding a flower in his hand. You could "
-    "not bring yourself to attack such a handsome man."}
+    "not bring yourself to attack such a handsome man."},
+  { GEN_F, moRusalka,       "Rusałka",
+    "A malicious water being. When you kill her, she changes the tile you are standing on, from land to shallow water, or from shallow water to deep water."},
+  { GEN_M, moRusalka,       "Topielec",
+    "A malicious water being. When you kill him, he changes the tile you are standing on, from land to shallow water, or from shallow water to deep water."},
   };
 
 // --- items ---
