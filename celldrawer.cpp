@@ -674,7 +674,7 @@ void celldrawer::draw_wall() {
 
   if(c->wall == waClosedGate) {
     int hdir = 0;
-    for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
+    for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->wall == waClosedGate)
       hdir = i;
     transmatrix V2 = mscale(V, wmspatial?cgi.WALL:1) * ddspin(c, hdir, M_PI);
     queuepolyat(V2, cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
