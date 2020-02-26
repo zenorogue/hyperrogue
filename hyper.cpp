@@ -68,6 +68,7 @@
 #include "monstergen.cpp"
 #include "landlock.cpp"
 #include "landgen.cpp"
+#include "wfcgen.cpp"
 #include "orbs.cpp"
 #include "inventory.cpp"
 #include "system.cpp"

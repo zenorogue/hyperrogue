@@ -2480,6 +2480,59 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       #endif
       }
             
+    case laEclectic: {
+
+      if(d >= 9) c->wall = waChasm;
+      
+      if(d == 8) wfc::schedule(c);
+
+      if(d == 7) {
+        if(c->wall == waRose) c->wall = waNone;
+        if(c->wall == waPalace && hrand(100) < 50) {
+          bool ok = true;
+          forCellEx(c2, c) if(among(c2->wall, waClosedGate, waOpenGate))
+            ok = false;
+          if(ok) c->wall = waNone;
+          }
+
+        wfc::invoke();
+        bool locked = true;
+        forCellEx(c1, c) if(!c1->wall) locked = false;
+        if(locked) c->item = itEclectic;
+
+        if(c->wall == waNone && hrand_monster(2500) < 30 + items[itEclectic] + yendor::hardness() && !safety) {
+          cell *c2 = c->move(hrand(c->type));
+          if(c2->wall == waRed1 || c2->wall == waRed2 || c2->wall == waRed3)
+            c->monst = moRedTroll;
+          
+          else if(c2->wall == waDeadwall)
+            c->monst = pick(moMiner, moTroll);
+
+          else if(c2->wall == waSmallTree || c2->wall == waBigTree)
+            c->monst = moFireFairy;
+
+          else if(c2->wall == waSandstone || c2->wall == waCharged)
+            c->monst = moMetalBeast, c->hitpoints = 2;
+
+          else if(c2->wall == waPalace)
+            c->monst = moPalace, c->hitpoints = 2;
+
+          else if(c2->wall == waIcewall)
+            c->monst = pick(moWolf, moIceGolem);
+          
+          else if(c2->wall == waNone && !c2->monst && hrand(100) < 5) {
+            cell *c1 = c;
+            c1->monst = moPair;
+            c2->monst = moPair;
+            c1->mondir = neighborId(c1, c2);
+            c2->mondir = neighborId(c2, c1);
+            }
+          }
+        }
+
+      break;
+      }
+            
     case laNone:
     case laBarrier:
     case laOceanWall:
@@ -2592,10 +2645,10 @@ EX void repairLandgen(cell *c) {
   if(c->land == laAlchemist && c->wall != waFloorA && c->wall != waFloorB)
     c->wall = waFloorA;
   
-  if(c->wall == waIcewall && c->land != laIce && c->land != laCocytus && c->land != laBlizzard)
+  if(c->wall == waIcewall && !among(c->land, laIce, laCocytus, laBlizzard, laEclectic))
     c->wall = waNone;
   
-  if(c->wall == waRed3 && c->land != laRedRock && c->land != laSnakeNest && c->land != laBrownian)
+  if(c->wall == waRed3 && c->land != laRedRock && c->land != laSnakeNest && c->land != laBrownian && c->land != laEclectic)
     c->wall = waNone;
   
   if(c->item == itRedGem && c->land != laRedRock)
