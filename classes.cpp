@@ -639,6 +639,7 @@ static const flagtype LF_HAUNTED = Flag(12);
 static const flagtype LF_TROLL = Flag(13);
 static const flagtype LF_INMIRROR = Flag(14);
 static const flagtype LF_INMIRRORORWALL = Flag(15);
+static const flagtype LF_ELECTRIC = Flag(17);
 
 struct landtype {
   color_t color;

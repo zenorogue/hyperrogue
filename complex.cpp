@@ -211,7 +211,7 @@ EX namespace elec {
       c->wall == waDeadTroll2 || 
       c->wall == waVinePlant ||
       c->wall == waMetal || isAlchAny(c)) 
-        return c->land == laStorms ? ecConductor : ecGrounded; 
+        return isElectricLand(c) ? ecConductor : ecGrounded; 
     if(c->wall == waBarrier)
       return ecIsolator;
     if(c->wall == waChasm)
@@ -220,7 +220,7 @@ EX namespace elec {
     if(shmup::on ? isPlayerOn(c) : (isPlayerOn(c) || stalemate::isMoveto(c) || (items[itOrbEmpathy] && isFriendly(c)))) {
       if(items[itOrbShield]) return ecIsolator;
       if(afterOrb) return ecIsolator;
-      if(!items[itOrbAether]) return c->land == laStorms ? ecConductor : ecGrounded;
+      if(!items[itOrbAether]) return isElectricLand(c) ? ecConductor : ecGrounded;
       }
     
     // if(c->monst && stalemate::moveto) printf("%p: isKilled = %d\n", c, stalemate::isKilled(c));
@@ -233,9 +233,9 @@ EX namespace elec {
       c->monst != moGhost && c->monst != moIvyDead && c->monst != moIvyNext 
       && !(isDragon(c->monst) && !c->hitpoints)
       )
-      return c->land == laStorms ? (ao ? ecCharged : ecConductor) : ecGrounded;
+      return isElectricLand(c) ? (ao ? ecCharged : ecConductor) : ecGrounded;
 
-    if(c->land != laStorms)
+    if(!isElectricLand(c))
       return ecGrounded;
 
     if(ao) return ecCharged;
@@ -449,7 +449,7 @@ EX namespace elec {
   EX void act() {
     int k = tkills();
     for(int i=0; i<numplayers(); i++)
-      if(multi::playerActive(i) && playerpos(i)->land == laStorms && !afterOrb) 
+      if(multi::playerActive(i) && isElectricLand(playerpos(i)) && !afterOrb) 
         markOrb(itOrbShield), markOrb(itOrbAether);
     builder b;
     fire();

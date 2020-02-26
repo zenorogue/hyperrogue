@@ -61,6 +61,7 @@ LANDFLAGCHECK(isHaunted, flag & LF_HAUNTED)
 LANDFLAGCHECK(isTrollLand, flag & LF_TROLL)
 LANDFLAGCHECK(inmirror, flag & LF_INMIRROR)
 LANDFLAGCHECK(inmirrororwall, flag & LF_INMIRRORORWALL)
+LANDFLAGCHECK(isElectricLand, flag & LF_ELECTRIC)
 
 MONFLAGCHECK(isGhostable, !(flag & CF_NOGHOST))
 MONFLAGCHECK(isRaider, flag & CF_RAIDER)
