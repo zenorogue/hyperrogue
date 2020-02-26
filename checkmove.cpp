@@ -51,6 +51,8 @@ struct stalemate1 {
   };
 #endif
 
+EX bool used_impact;
+
 bool stalemate1::isKilled(cell *w) {
   if(w->monst == moNone || w == killed) return true;
   if(!moveto) return false;
@@ -66,6 +68,9 @@ bool stalemate1::isKilled(cell *w) {
     if(wid >= 0 && wfrom >= 0 && anglestraight(moveto, wfrom, wid)) flag |= AF_HORNS;
     if(canAttack(moveto, who, w, w->monst, flag)) return true;
     }
+  
+  if(used_impact && !isMultitile(w) && isNeighbor(w, moveto))
+    return true;
 
   if(isNeighbor(w, comefrom) && comefrom == moveto && killed) {
     int d1 = neighborId(comefrom, w);

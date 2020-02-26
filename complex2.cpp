@@ -288,19 +288,21 @@ extern array<feature, 21> features;
 
 #define VF [] (cell *c)
 
+bool hrand_var(int i) { return hrand_monster(i) < 25 + items[itVarTreasure] + yendor::hardness(); }
+
 array<feature, 21> features {{
   feature{(color_t)(-0x202020), 5, moNecromancer, VF {
     if(c->wall == waNone && hrand(1500) < 20) c->wall = waFreshGrave;
     if(hrand(20000) < 10 + items[itVarTreasure])
       c->monst = moNecromancer;
     }},
-  {0x000010, 5, moLancer, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moLancer; } },
-  {0x100008,15, moMonk, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moMonk; } },
-  {0x080010, 5, moCrusher, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moCrusher; } },
-  {0x181418, 5, moSkeleton, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moSkeleton, c->hitpoints = 3; } },
-  {0x180000, 5, moPyroCultist, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moPyroCultist; } },
-  {0x00000C, 2, moFlailer, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure]) c->monst = moFlailer; } },
-  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand_monster(80000) < 25 + items[itVarTreasure] && valence() == 3) c->monst = moHedge; } },
+  {0x000010, 5, moLancer, VF { if(c->wall == waNone && !c->monst && hrand_var(80000)) c->monst = moLancer; } },
+  {0x100008,15, moMonk, VF { if(c->wall == waNone && !c->monst && hrand_var(80000)) c->monst = moMonk; } },
+  {0x080010, 5, moCrusher, VF { if(c->wall == waNone && !c->monst && hrand_var(80000)) c->monst = moCrusher; } },
+  {0x181418, 5, moSkeleton, VF { if(c->wall == waNone && !c->monst && hrand_var(80000)) c->monst = moSkeleton, c->hitpoints = 3; } },
+  {0x180000, 5, moPyroCultist, VF { if(c->wall == waNone && !c->monst && hrand_var(80000)) c->monst = moPyroCultist; } },
+  {0x00000C, 2, moFlailer, VF { if(c->wall == waNone && !c->monst && hrand_var(80000)) c->monst = moFlailer; } },
+  {0x1C0700, 1, moHedge, VF { if(c->wall == waNone && !c->monst && hrand_var(80000) && valence() == 3) c->monst = moHedge; } },
   {0x000c00,-1, moNone, VF { if(hrand(1500) < 30) createArrowTrapAt(c, laVariant); } },
   {0x001200,-1, moNone, VF { if(hrand(1500) < 50 && c->wall == waNone) c->wall = waTrapdoor; } },
   {0x000c18,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
@@ -319,8 +321,8 @@ array<feature, 21> features {{
   {0x100A10, 1, moRagingBull, VF { if(c->wall == waNone && hrand(10000) < 10 + items[itVarTreasure]) c->monst = moSleepBull, c->hitpoints = 3; }},
   {0x00110C, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waBigTree; }},
   {0x000A28, 1, moNone, VF { if(hrand(500) < 10) build_pool(c, false); } },
-  {0x100A00, 2, moVariantWarrior, VF { if(c->wall == waNone && !c->monst && hrand(40000) < 25 + items[itVarTreasure]) c->monst = moVariantWarrior; }},
-  {0x100708, 1, moRatling, VF { if(c->wall == waNone && !c->monst && hrand(50000) < 25 + items[itVarTreasure]) c->monst = moRatling; }}
+  {0x100A00, 2, moVariantWarrior, VF { if(c->wall == waNone && !c->monst && hrand_var(40000)) c->monst = moVariantWarrior; }},
+  {0x100708, 1, moRatling, VF { if(c->wall == waNone && !c->monst && hrand_var(50000)) c->monst = moRatling; }}
   }};
 #undef VF
 EX }
