@@ -209,6 +209,7 @@ EX namespace elec {
     if(c->wall == waSea || c->wall == waGrounded) return ecGrounded;
     if(c->wall == waSandstone || c->wall == waDeadTroll || 
       c->wall == waDeadTroll2 || 
+      among(c->wall, waBigTree, waSmallTree, waExplosiveBarrel, waRed1, waRed2, waRed3) ||
       c->wall == waVinePlant ||
       c->wall == waMetal || isAlchAny(c)) 
         return isElectricLand(c) ? ecConductor : ecGrounded; 
@@ -341,10 +342,19 @@ EX namespace elec {
     if(isPlayerOn(c)) {
       killThePlayerAt(moLightningBolt, c, 0);
       }
-    if(c->wall == waSandstone)
-      c->wall = waNone, c->item = itFulgurite,
-      drawParticles(c, winf[waSandstone].color, 16);
+    if(c->wall == waSandstone) {
+      c->wall = waNone, drawParticles(c, winf[waSandstone].color, 16);
+      if(c->land == laStorms)
+        c->item = itFulgurite;
+      }
+    if(c->wall == waRed1) c->wall = waNone;
+    if(c->wall == waRed2) c->wall = waRed1;
+    if(c->wall == waRed3) c->wall = waRed2;
     if(c->wall == waDeadTroll) c->wall = waCavefloor;
+    if(c->wall == waBigTree || c->wall == waSmallTree)
+      makeflame(c, 10, false);
+    if(c->wall == waExplosiveBarrel)
+      explodeBarrel(c);
     if(c->wall == waDeadTroll2 || isAlchAny(c) || c->wall == waVinePlant)
       drawParticles(c, winf[c->wall].color, 16),
       c->wall = waNone;

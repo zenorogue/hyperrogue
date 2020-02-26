@@ -137,7 +137,7 @@ void celldrawer::setcolors() {
     case laDesert: case laKraken: case laDocks: case laCA:
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
-    case laAlchemist: 
+    case laAlchemist: case laFrog:
       fcol = floorcolors[c->land]; break;
     
     case laWet:
@@ -385,7 +385,7 @@ void celldrawer::setcolors() {
       break;
       }
 
-    case laIce: case laCocytus: case laBlizzard:
+    case laIce: case laCocytus: case laBlizzard: case laEclectic:
       if(useHeatColoring(c)) {
         float h = HEAT(c);
         eLand l = c->land;
@@ -986,6 +986,13 @@ void celldrawer::set_land_floor(const transmatrix& Vf) {
     case laWineyard:
       set_floor(cgi.shFeatherFloor);
       break;
+
+    case laFrog:
+      if(c->wall == waDeepWater)
+        set_floor(cgi.shFloor);
+      else 
+        set_floor(cgi.shFeatherFloor);
+      break;
     
     case laZebra:
       set_zebrafloor();
@@ -1009,6 +1016,7 @@ void celldrawer::set_land_floor(const transmatrix& Vf) {
     
     case laVolcano:
     case laVariant:
+    case laEclectic:
       set_floor(cgi.shLavaFloor);
       break;
     
