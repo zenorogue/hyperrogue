@@ -358,6 +358,30 @@ EX string pick123() { return cts('1' + rand() % 3); }
 EX string pick12() { return cts('1' + rand() % 2); }
 
 #if HDR
+template<class T> string serialize(const T& data) {
+  shstream shs;
+  hwrite(shs, data);
+  return shs.s;
+  }
+
+template<class T> T deserialize(const string& s) {
+  shstream shs;
+  shs.s = s;
+  T data;
+  hread(shs, data);
+  return data;
+  }
+#endif
+
+EX string as_cstring(string o) {
+  string s = "string(\"";
+  for(char c: o)
+    s += format("\\x%02x", (unsigned char) c);
+  s += format("\", %d)", isize(o));
+  return s;
+  }
+
+#if HDR
 #if ISANDROID
 #define DEBB(r,x)
 #define DEBB0(r,x)

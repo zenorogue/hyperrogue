@@ -992,9 +992,7 @@ int read_geom_args() {
   else if(argis("-fwrite")) {
     shstream hs;
     hwrite_fpattern(hs, currfp);
-    string s;
-    for(char c: hs.s) s += format("\\x%02x", (unsigned char) c);
-    println(hlog, "current fieldpattern: ", s);
+    println(hlog, "current fieldpattern: ", as_cstring(hs.s));
     }
   else if(argis("-csp")) {
     cheat();
