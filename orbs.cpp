@@ -416,7 +416,10 @@ EX void castLightningBolt(cellwalker lig) {
     if(c->wall == waGrounded)  brk = true;
     if(c->wall == waFan)       spin = true;
     if(c->wall == waMetal)     c->wall = waCharged, brk = true;
-    if(c->wall == waSandstone) c->wall = waNone, c->item = itFulgurite, brk = true;
+    if(c->wall == waSandstone) {
+      c->wall = waNone, brk = true;
+      if(c->land == laStorms) c->item = itFulgurite;
+      }
 
     if(c->wall == waCharged && first) {
       for(int i=0; i<c->type; i++) 
