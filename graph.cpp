@@ -936,6 +936,8 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     if(it == itOrbPhasing) icol = 0xFF0000;
     if(it == itOrbDash) icol = 0xFF0000;
     if(it == itOrbFreedom) icol = 0xC0FF00;
+    if(it == itOrbPlague) icol = 0x409040;
+    if(it == itOrbChaos) icol = 0xFF00FF;
     if(it == itOrbAir) icol = 0xFFFFFF;
     if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
     if(it == itOrbRecall) icol = 0x101010;
