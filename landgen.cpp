@@ -2533,6 +2533,45 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d >= 7) c->wall = waInvisibleFloor;
       break;
     
+    case laWet:
+      if(d == 7) {
+        // if(wet::wetdata.empty()) wet::build_data();
+        eWall wetwalls[10] = {waNone, waNone, waDeepWater, waDeepWater, waDeepWater, waShallow, waShallow, waShallow, waStone, waStone};
+        c->wall = wetwalls[hrand(10)]; // wet::wetdata[windmap::getId(c)]];
+        if(among(c->wall, waDeepWater, waShallow) && hrand_monster(2000) < 2 * (items[itWet] + yendor::hardness() + 5))
+          c->monst = hrand(100) > 90 ? moRusalka : moPike;
+        if(c->wall == waShallow && hrand(2000) < PT(100 + 2 * kills[moPike] + 3 * kills[moRusalka], 200) && notDippingFor(itWet))
+          c->item = itWet;
+        }
+      break;
+    
+    case laFrog:
+      if(d == 8) {
+        if(zebra40(c) & 2) {
+          if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 200) && notDippingFor(itFrog)) {
+            bool ok = true;
+            forCellCM(c1, c) if(c1->item) ok = false;
+            if(ok) {
+              c->item = itFrog;
+              forCellEx(c1, c) c1->wall = pick(waShrub, waStone, waDeepWater);
+              }
+            }
+          }
+        else {
+          int i = hrand(10);
+          if(i < 4) c->wall = waShrub;
+          else if(i < 7) c->wall = waStone;
+          else c->wall = waDeepWater;
+          }
+        }
+      if(d == 7) {
+        if(c->wall == waNone) {
+          if(hrand_monster(2000) < 3 * (5 + items[itWet] + yendor::hardness() + 5))
+            c->monst = pick(moFrog, moPhaser, moVaulter);
+          }
+        }
+      break;
+    
     case landtypes: break;
     }
   }
