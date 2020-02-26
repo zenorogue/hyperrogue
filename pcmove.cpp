@@ -876,6 +876,10 @@ bool pcmove::attack() {
           wandering_jiangshi++;
         }
       attackMonster(c2, attackflags | AF_MSG, moPlayer);
+      if(m == moRusalka) {
+        if(cwt.at->wall == waNone) cwt.at->wall = waShallow;
+        else if(cwt.at->wall == waShallow) cwt.at->wall = waDeepWater;
+        }
       // salamanders are stunned for longer time when pushed into a wall
       if(c2->monst == moSalamander && (mip.t == c2 || !mip.t)) c2->stuntime = 10;
       if(!c2->monst) produceGhost(c2, m, moPlayer);
