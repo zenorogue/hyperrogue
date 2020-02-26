@@ -3451,7 +3451,7 @@ EX bool bright;
 // how much to darken
 EX int getfd(cell *c) {
   if(bright) return 0;
-  if(among(c->land, laAlchemist, laHell, laVariant) && WDIM == 2 && GDIM == 3) return 0;
+  if(among(c->land, laAlchemist, laHell, laVariant, laEclectic) && WDIM == 2 && GDIM == 3) return 0;
   switch(c->land) {
     case laRedRock:
     case laReptile:
@@ -3762,6 +3762,7 @@ EX int ceiling_category(cell *c) {
     case laDual:
     case laWestWall:
     case laAsteroids:
+    case laEclectic:
       return 1;
     
     case laPower:
