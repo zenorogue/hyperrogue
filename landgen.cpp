@@ -2490,7 +2490,26 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 8) wfc::schedule(c);
 
       if(d == 7) {
+        // auto ce = wfc::centers;
+        wfc::invoke();
+        
         if(c->wall == waRose) c->wall = waNone;
+        
+        /*
+        experiment: replace Roses with Ivy
+        for(cell *cx: ce) 
+          forCellEx(c1, cx) 
+            for(cell *c2: {c1, cx}) {
+              if(c2->wall == waRose) {
+                c2->wall = waNone;
+                println(hlog, "building");
+                c2->item = itRuby;
+                forCellEx(c1, c2) c1->wall = waNone;
+                println(hlog, "res = ", buildIvy(c2, 0, c2->type));
+                }
+              }
+        */
+
         if(c->wall == waPalace && hrand(100) < 50) {
           bool ok = true;
           forCellEx(c2, c) if(among(c2->wall, waClosedGate, waOpenGate))
@@ -2498,7 +2517,6 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(ok) c->wall = waNone;
           }
 
-        wfc::invoke();
         bool locked = true;
         forCellEx(c1, c) if(!c1->wall) locked = false;
         if(locked) c->item = itEclectic;
