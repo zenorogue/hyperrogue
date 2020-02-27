@@ -2621,7 +2621,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laFrog:
       if(d == 8) {
-        if(zebra40(c) & 2) {
+        if(!is_zebra_trapdoor(c)) {
           if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 200) && notDippingFor(itFrog)) {
             bool ok = true;
             forCellCM(c1, c) if(c1->item) ok = false;
