@@ -296,7 +296,7 @@ EX bool snakepile(cell *c, eMonster m) {
   else if((c->wall == waSea && c->land == laLivefjord))
     c->wall = waNone;
   else if((c->wall == waSea && isWarpedType(c->land)))
-    c->wall = waNone;
+    c->wall = waShallow;
   else if(isGravityLand(c->land)) {
     if(m == moHexSnake)
       c->wall = waPlatform;
@@ -325,9 +325,12 @@ EX bool snakepile(cell *c, eMonster m) {
     if(m == moDarkTroll) c->wall = waDeadwall;
     }
   else if(c->wall == waCavefloor) c->wall = waCavewall;
-  else if(c->wall == waSea && c->land == laCaribbean) c->wall = waCIsland;
+  else if(c->wall == waSea && c->land == laCaribbean) c->wall = waShallow;
   else if(c->wall == waSea && c->land == laWhirlpool) return false;
-  else if(c->wall == waSea) c->wall = waNone;
+  else if(c->wall == waSea) c->wall = waShallow;
+  else if(c->wall == waDeepWater) c->wall = waShallow;
+  else if(c->wall == waShallow) c->wall = waNone;
+  else if(c->wall == waLake) c->wall = waShallow;
   else if(isWateryOrBoat(c) || c->wall == waFrozenLake) c->wall = waNone;
   else if(isWateryOrBoat(c) || c->wall == waFrozenLake) c->wall = waNone;
   else if(cellHalfvine(c)) {

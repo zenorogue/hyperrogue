@@ -155,18 +155,18 @@ EX eMonster emerald_monster() {
 
 EX void build_pool(cell *c, bool with_boat) {
   bool vacant = true;
-  if(c->monst || !among(c->wall, waNone, waSea, waBoat)) vacant = false;
-  forCellCM(c1, c) if(!among(c1->land, laNone, laVariant) || c1->monst || !among(c1->wall, waNone, waSea, waBoat)) vacant = false;
+  if(c->monst || !among(c->wall, waNone, waDeepWater, waBoat)) vacant = false;
+  forCellCM(c1, c) if(!among(c1->land, laNone, laVariant) || c1->monst || !among(c1->wall, waNone, waDeepWater, waBoat)) vacant = false;
   if(vacant) {
-    c->wall = waSea;
-    forCellEx(c1, c) if(c1->wall != waBoat) c1->wall = waSea;
+    c->wall = waDeepWater;
+    forCellEx(c1, c) if(c1->wall != waBoat) c1->wall = waDeepWater;
     if(with_boat) c->move(hrand(c->type))->wall = waBoat;
     }  
   }
 
 EX void place_elemental_wall(cell *c) {
   if(c->land == laEFire) c->wall = waEternalFire;
-  else if(c->land == laEWater) c->wall = waSea;
+  else if(c->land == laEWater) c->wall = waDeepWater;
   else if(c->land == laEAir) c->wall = waChasm;
   else if(c->land == laEEarth) c->wall = waStone;
   }
@@ -1747,8 +1747,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(tf == tfRear) c->wall = waStone;
           // broad tail and desaturated shell helps with water
           PSH(tfTail, tfShellSat)
-          if(tf == tfTail) c->wall = waSea;
-          if(tf == tfShellSat) c->wall = waSea;
+          if(tf == tfTail) c->wall = waDeepWater;
+          if(tf == tfShellSat) c->wall = waDeepWater;
           #undef PSH
           }
         }
@@ -2376,7 +2376,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = elof;
           if(c->land != laEAir) chasmifyElemental(c);
           c->wall = waNone;
-          if(c->land == laEWater) c->wall = waSea;
+          if(c->land == laEWater) c->wall = waDeepWater;
           }
         else if(hrand(5000) < 100 + elkills*3 && notDippingFor(itElemental))
           c->item = localshard;
@@ -2476,7 +2476,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = itVarTreasure;
         }
       if(d == 7 && c->wall == waTrapdoor) {
-        forCellEx(c1, c) if(among(c1->wall, waSea, waBoat))
+        forCellEx(c1, c) if(among(c1->wall, waDeepWater, waBoat))
           c->wall = waNone;
         }
       break;

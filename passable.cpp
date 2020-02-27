@@ -41,15 +41,21 @@ EX bool boatGoesThrough(cell *c) {
     c->wall == waArrowTrap;
   }
 
+EX void become_water(cell *c) {
+  if(isIcyLand(c))
+    c->wall = waLake;
+  else if(isCoastal(c) || isSealand(c))
+    c->wall = waSea;
+  else
+    c->wall = waDeepWater;
+  }
+
 EX void placeWater(cell *c, cell *c2) {
   destroyTrapsOn(c);
   if(isWatery(c)) ;
   else if(c2 && isAlchAny(c2))
     c->wall = c2->wall;
-  else if(isIcyLand(c))
-    c->wall = waLake;
-  else
-    c->wall = waSea;
+  else become_water(c);
   // destroy the ancient treasure!
   if(c->item == itBarrow) c->item = itNone;
   }

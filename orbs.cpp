@@ -432,7 +432,7 @@ EX void castLightningBolt(cellwalker lig) {
       brk = true;
       }
                              
-    if(c->wall == waBoat && c != cwt.at)    c->wall = waSea, spin = true;
+    if(c->wall == waBoat && c != cwt.at)    become_water(c), spin = true;
     if(c->wall == waStrandedBoat && c !=cwt.at)    c->wall = waNone, spin = true;
 
     if((c->wall == waNone || c->wall == waSea) && c->land == laLivefjord)
@@ -987,7 +987,7 @@ void blowoff(const movei& mi) {
     bool was_stranded = cf->wall == waStrandedBoat;
     bool willbe_stranded = ct->wall == waNone;
     if(was_stranded) cf->wall = waBoat;
-    if(willbe_stranded) ct->wall = waSea;
+    if(willbe_stranded) become_water(ct);
     moveBoat(mi);
     if(was_stranded) cf->wall = waNone;
     if(willbe_stranded) ct->wall = waStrandedBoat;

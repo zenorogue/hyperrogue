@@ -138,7 +138,7 @@ EX bool checkNeedMove(bool checkonly, bool attacking) {
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
     addMessage(XLAT("Nothing to stand on here!"));
     }
-  else if(cwt.at->wall == waSea || cwt.at->wall == waCamelotMoat) {
+  else if(among(cwt.at->wall, waSea, waCamelotMoat, waLake, waDeepWater)) {
     if(markOrb(itOrbFish)) return false;
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
