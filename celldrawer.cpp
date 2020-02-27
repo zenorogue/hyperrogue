@@ -127,6 +127,9 @@ void celldrawer::setcolors() {
     else
       fcol = wcol;
     }
+  
+  else if(c->wall == waShallow) 
+    fcol = 0x40C0C0;
 
   // floor colors for all the lands
   else switch(c->land) {
@@ -141,7 +144,7 @@ void celldrawer::setcolors() {
       fcol = floorcolors[c->land]; break;
     
     case laWet:
-      fcol = c->wall == waShallow ? 0x40C0C0 : 0x40FF40; break;
+      fcol = 0x40FF40; break;
     
     #if CAP_COMPLEX2
     case laVariant: {
