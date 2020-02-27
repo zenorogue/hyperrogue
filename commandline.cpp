@@ -33,6 +33,7 @@ EX eItem readItem(const string& ss) {
   }
 
 EX eMonster readMonster(const string& ss) {
+  if(ss == "Pike") return moPike;
   for(int i=0; i<motypes; i++) if(appears(minf[i].name, ss)) {
     return eMonster(i);
     break;
