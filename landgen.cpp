@@ -183,6 +183,52 @@ EX int hrand_monster(int x) {
   return hrand(x);
   }
 
+EX bool is_zebra_trapdoor(cell *c) {
+  if(euclid && bounded) return false;
+  #if CAP_ARCM
+  else if(arcm::in() && arcm::current.have_line)
+    return arcm::linespattern(c);
+  #endif
+  else if(arb::in() && arb::current.have_line)
+    return arb::linespattern(c);
+  #if MAXMDIM >= 4
+  else if(reg3::in_rule()) switch(geometry) {
+    case gSpace534: {
+      if(c->master->fieldval == 0) return true;
+      forCellCM(c1, c) if(c1->master->fieldval == 0) return true;
+      return false;
+      }
+    case gSpace435: {
+      for(int i=0; i<S7; i++) {
+        cellwalker cw(c, i);
+        for(int a=0; a<3; a++) {
+          if(cw.at->master->fieldval == 0) return true;
+          cw += wstep;
+          cw += rev;
+          }
+        }
+      return false;
+      }
+    case gSpace535: {
+      return (c->master->fieldval % 5) % 2 == 1;
+      }
+    default: 
+      return false;
+    }
+  #endif
+  else if(euclid && !arcm::in()) {
+    auto co = euc2_coordinates(c);
+    int y = co.second;
+    return (y&1);
+    }
+  #if CAP_ARCM
+  else 
+    if(arcm::in()) return hrand(2);
+  #endif
+  else
+    return (randomPatternsMode ? RANDPAT : (zebra40(c)&2));
+  }
+
 EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == min(BARLEV, 9);
   switch(c->land) {
@@ -659,52 +705,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laZebra:
-      if(d==8) {
-        if(euclid && bounded) ;
-        #if CAP_ARCM
-        else if(arcm::in() && arcm::current.have_line)
-          c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;
-        #endif
-        else if(arb::in() && arb::current.have_line)
-          c->wall = arb::linespattern(c) ? waTrapdoor : waNone;
-        #if MAXMDIM >= 4
-        else if(reg3::in_rule()) switch(geometry) {
-          case gSpace534: {
-            if(c->master->fieldval == 0) c->wall = waTrapdoor;
-            forCellCM(c1, c) if(c1->master->fieldval == 0) c->wall = waTrapdoor;
-            break;
-            }
-          case gSpace435: {
-            for(int i=0; i<S7; i++) {
-              cellwalker cw(c, i);
-              for(int a=0; a<3; a++) {
-                if(cw.at->master->fieldval == 0) c->wall = waTrapdoor;
-                cw += wstep;
-                cw += rev;
-                }
-              }
-            break;
-            }
-          case gSpace535: {
-            if((c->master->fieldval % 5) % 2 == 1) c->wall = waTrapdoor;
-            break;
-            }
-          default: ;
-          }
-        #endif
-        else if(euclid && !arcm::in()) {
-          auto co = euc2_coordinates(c);
-          int y = co.second;
-          if(y&1) c->wall = waTrapdoor;
-          else c->wall = waNone;
-          }
-        #if CAP_ARCM
-        else 
-          if(arcm::in()) c->wall = hrand(2) ? waTrapdoor : waNone;
-        #endif
-        else
-          c->wall = (randomPatternsMode ? RANDPAT : (zebra40(c)&2)) ? waTrapdoor : waNone;
-        }
+      if(d==8) 
+        c->wall = is_zebra_trapdoor(c) ? waTrapdoor : waNone;
+      
       ONEMPTY {
         if(c->wall == waNone && hrand(2500) < PT(100 + 2 * (kills[moOrangeDog]), 300) && notDippingFor(itZebra))
           c->item = itZebra;
