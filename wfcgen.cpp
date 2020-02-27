@@ -85,10 +85,10 @@ bool agree(cell *c, probdata& p) {
   // println(hlog, p);
   if(isize(p.first) != c->type + 1) return false;
   int idx = 1;
-  if(c->wall != waChasm && c->wall != p.first[0]) return false;
+  if(c->wall != waChasm && eWall(c->wparam) != p.first[0]) return false;
   forCellEx(c1, c) {
     eWall found = p.first[idx++];
-    if(c1->wall != found && c1->wall != waChasm) return false;
+    if(c1->wparam != found && c1->wall != waChasm) return false;
     }
   return true;
   }
@@ -106,7 +106,7 @@ vector<probdata*> gen_picks(cell *c, int& total, wfc_data& data) {
   return picks;
   }
 
-vector<cell*> centers;
+EX vector<cell*> centers;
 
 EX void schedule(cell *c) {
   centers.push_back(c);
@@ -218,7 +218,8 @@ EX void invoke() {
       if(total < 0) {
         int idx = 1;
         c->wall = p.first[0];
-        forCellEx(c1, c) c1->wall = p.first[idx++];
+        c->wparam = p.first[0];
+        forCellEx(c1, c) c1->wparam = c1->wall = p.first[idx++];
         break;
         }
       }
