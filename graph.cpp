@@ -1430,7 +1430,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
     
     case moFrog: case moPhaser: case moVaulter: {
       ShadowV(V, cgi.shFrogBody);
-      const transmatrix VL = mmscale(V, cgi.ALEG0);
+      const transmatrix VL = GDIM == 3 ? V : mmscale(V, cgi.ALEG0);
       color_t xcolor = darkena(0xFF0000, 1, 0xFF);
       int alpha = (m == moPhaser ? 0xC0 : 0xFF);
       if(footphase) {

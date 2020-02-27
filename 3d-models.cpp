@@ -969,6 +969,9 @@ void geometry_information::make_3d_models() {
   shift_shape(shBullHorn, -g-(AHEAD - ABODY));
   // make_revolution_cut(shBullHorn, 180, AHEAD - ABODY);
   
+  make_paw_3d(shFrogFrontFoot, shFrogFrontLeg);
+  make_paw_3d(shFrogRearFoot, shFrogRearLeg);
+  
   make_paw_3d(shTrylobiteFrontClaw, shTrylobiteFrontLeg);
   make_paw_3d(shTrylobiteRearClaw, shTrylobiteRearLeg);
   make_abody_3d(shTrylobiteBody, 0);
@@ -976,6 +979,7 @@ void geometry_information::make_3d_models() {
   make_revolution_cut(shTrylobiteHead, 180, AHEAD - ABODY +g);
   
   make_revolution_cut(shShark, 180, WDIM == 2 ? -FLOOR : 0);
+  make_revolution_cut(shPikeBody, 180, WDIM == 2 ? -FLOOR : 0);
 
   make_revolution_cut(shGhost, 60, GHOST + g);
 
@@ -1007,6 +1011,8 @@ void geometry_information::make_3d_models() {
   make_revolution(shBugArmor, 180, ABODY);
   make_revolution_cut(shBugAntenna, 90, ABODY);
   
+  make_revolution(shFrogBody, 180, ABODY);
+  
   make_revolution_cut(shButterflyBody, 180, 0);
   make_revolution_cut(shButterflyWing, 180, 0, 0.05*S);
   finishshape();
@@ -1035,6 +1041,10 @@ void geometry_information::make_3d_models() {
   disable(shTrylobiteRearLeg);
   disable(shPFace);
   disable(shJiangShi);
+  
+  disable(shFrogFrontLeg);
+  disable(shFrogRearLeg);
+  disable(shFrogRearLeg2);
   
   make_revolution_cut(shDragonSegment, 60, g);
   make_revolution_cut(shDragonHead, 60, g);
@@ -1157,6 +1167,9 @@ void geometry_information::make_3d_models() {
   adjust_eye(shRatEye3, shRatHead, AHEAD, AHEAD, 1);
   
   adjust_eye(shWolfEyes, shWolfHead, AHEAD, AHEAD, 1);
+  
+  adjust_eye(shPikeEye, shPikeBody, 0, 0, 1);
+  adjust_eye(shFrogEye, shFrogBody, ABODY, AHEAD, 1);
 
   adjust_eye(shReptileEye, shReptileHead, AHEAD, AHEAD, 1);
   adjust_eye(shGadflyEye, shGadflyBody, 0, 0, 1);
