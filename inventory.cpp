@@ -75,6 +75,7 @@ EX namespace inv {
     if(orb == itOrbRecall) return 6;
     if(orb == itOrbDigging) return 6;
     if(orb == itOrbGravity) return 6;
+    if(orb == itOrbImpact) return 6;
     
     if(orb == itOrbTime) return 5;
     if(orb == itOrbAir) return 5;
