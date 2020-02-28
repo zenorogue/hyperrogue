@@ -203,7 +203,13 @@ void geometry_information::bshape(hpcshape& sh, PPR prio) {
 void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus, flagtype flags) {
   bshape(sh, prio);
   int whereis = 0;
-  while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
+  while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) {
+    whereis++;
+    if(polydata[whereis] == NEWSHAPE && polydata[whereis+1] == NEWSHAPE) {
+      println(hlog, "error: shape not available");
+      exit(1);
+      }
+    }
   int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
   array<int,3> arr;
   arr[0] = isize(hpc); arr[1] = rots; arr[2] = sym;
