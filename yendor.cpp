@@ -81,8 +81,6 @@ EX namespace yendor {
 
   EX eLand nexttostart;
 
-#define LAND_YENDOR_CHAOS 41
-
   yendorlevel levels[YENDORLEVELS] = {
     {laNone,      0},
     {laHell,      YF_DEAD}, // FORCE BARRIERS?
