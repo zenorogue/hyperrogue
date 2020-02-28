@@ -475,7 +475,7 @@ EX eLand getNewLand(eLand old) {
 EX vector<eLand> land_over = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
-  laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
+  laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, laWet,
   laOcean, laDocks, laWarpCoast, laLivefjord, laKraken, laCaribbean, laBrownian, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laWestWall, laDungeon, laMountain, 
   laCrossroads2, 
@@ -484,6 +484,7 @@ EX vector<eLand> land_over = {
   laDragon, laTortoise,
   laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 
   laBlizzard,
+  laFrog, laEclectic,
   laRuins, laEmerald, laVariant, laCamelot, 
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,

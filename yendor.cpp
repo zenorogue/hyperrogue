@@ -74,7 +74,7 @@ EX namespace yendor {
     int flags;
     };
 
-  #define YENDORLEVELS 33
+  #define YENDORLEVELS 34
   #endif
   
   EX map<modecode_t, array<int, YENDORLEVELS>> bestscore;
@@ -117,6 +117,7 @@ EX namespace yendor {
     {laRuins,     YF_DEAD},
     {laCaves,     YF_DEAD5},
     {laWestWall,  YF_START_CR},
+    {laEclectic,  0},
     // {laVariant,   YF_DEAD5}, (I do not think this works)
     };
   
