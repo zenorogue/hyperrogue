@@ -1434,8 +1434,10 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       color_t xcolor = darkena(0xFF0000, 1, 0xFF);
       int alpha = (m == moPhaser ? 0xC0 : 0xFF);
       if(footphase) {
-        queuepoly(VALEGS, cgi.shFrogJumping, darkena(col, 0, alpha));
-        queuepoly(VALEGS * Mirror, cgi.shFrogJumping, darkena(col, 0, alpha));
+        queuepoly(VL, cgi.shFrogJumpFoot, darkena(col, 0, alpha));
+        queuepoly(VL * Mirror, cgi.shFrogJumpFoot, darkena(col, 0, alpha));
+        queuepoly(VALEGS, cgi.shFrogJumpLeg, xcolor);
+        queuepoly(VALEGS * Mirror, cgi.shFrogJumpLeg, xcolor);
         }
       else {
         queuepoly(VL, cgi.shFrogRearFoot, darkena(col, 0, alpha));

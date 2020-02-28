@@ -971,6 +971,7 @@ void geometry_information::make_3d_models() {
   
   make_paw_3d(shFrogFrontFoot, shFrogFrontLeg);
   make_paw_3d(shFrogRearFoot, shFrogRearLeg);
+  make_paw_3d(shFrogJumpFoot, shFrogJumpLeg);
   
   make_paw_3d(shTrylobiteFrontClaw, shTrylobiteFrontLeg);
   make_paw_3d(shTrylobiteRearClaw, shTrylobiteRearLeg);
@@ -1045,6 +1046,7 @@ void geometry_information::make_3d_models() {
   disable(shFrogFrontLeg);
   disable(shFrogRearLeg);
   disable(shFrogRearLeg2);
+  disable(shFrogJumpLeg);
   
   make_revolution_cut(shDragonSegment, 60, g);
   make_revolution_cut(shDragonHead, 60, g);
