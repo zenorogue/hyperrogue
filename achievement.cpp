@@ -10,7 +10,7 @@
 #include "hyper.h"
 namespace hr {
 
-#define NUMLEADER 82
+#define NUMLEADER 85
 
 EX bool offlineMode = false;
 
@@ -74,6 +74,9 @@ EX const char* leadernames[NUMLEADER] = {
   "Torbernites", // 79
   "Meteorites", // 80
   "Racing Official Track", // 81
+  "Gold Balls", // 82
+  "Lapis Lazuli", // 83
+  "Water Lily", // 84
   };
 
 #define LB_STATISTICS 62
@@ -258,6 +261,10 @@ EX void achievement_collection(eItem it) {
     if(it == itBrownian) achievement_gain("BROWN1");
     if(it == itVarTreasure) achievement_gain("RADIO1");
     if(it == itWest) achievement_gain("FREEFALL1");
+    
+    if(it == itFrog) achievement_gain("FROG1");
+    if(it == itEclectic) achievement_gain("ECLEC1");
+    if(it == itWet) achievement_gain("WET1");
     }
 
   // 32
@@ -341,6 +348,10 @@ EX void achievement_collection(eItem it) {
     if(it == itBrownian) achievement_gain("BROWN2");
     if(it == itVarTreasure) achievement_gain("RADIO2");
     if(it == itWest) achievement_gain("FREEFALL2");
+    
+    if(it == itFrog) achievement_gain("FROG2");
+    if(it == itEclectic) achievement_gain("ECLEC2");
+    if(it == itWet) achievement_gain("WET2");
     }
 
   if(q == (inv::on ? 50 : 25)) {
@@ -412,6 +423,10 @@ EX void achievement_collection(eItem it) {
     if(it == itBrownian) achievement_gain("BROWN3");
     if(it == itVarTreasure) achievement_gain("RADIO3");
     if(it == itWest) achievement_gain("FREEFALL3");
+    
+    if(it == itFrog) achievement_gain("FROG3");
+    if(it == itEclectic) achievement_gain("ECLEC3");
+    if(it == itWet) achievement_gain("WET3");
     }
 
   if(q == 50 && !inv::on) {
@@ -480,6 +495,10 @@ EX void achievement_collection(eItem it) {
     if(it == itBrownian) achievement_gain("BROWN4");
     if(it == itVarTreasure) achievement_gain("RADIO4");
     if(it == itWest) achievement_gain("FREEFALL4");
+    
+    if(it == itFrog) achievement_gain("FROG4");
+    if(it == itEclectic) achievement_gain("ECLEC4");
+    if(it == itWet) achievement_gain("WET4");
     }
   
   if(it == itOrbYendor) {
@@ -636,6 +655,10 @@ EX void improveItemScores() {
   improve_score(78, itBrownian);
   improve_score(79, itVarTreasure);
   improve_score(80, itWest);
+  
+  improve_score(82, itFrog);
+  improve_score(83, itEclectic);
+  improve_score(84, itWet);
   }
 
 int next_stat_tick;
