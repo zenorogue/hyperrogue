@@ -616,6 +616,8 @@ EX int old_daily_id = 1000000;
 
 const int landscapes_when = 177;
 
+EX const int frog_when = 205;
+
 // check if the given land should appear in lists
 EX land_validity_t& land_validity(eLand l) {
 
@@ -623,6 +625,9 @@ EX land_validity_t& land_validity(eLand l) {
   if(euclid && quotient) stdeucx = false;
 
   using namespace lv;
+  
+  if(old_daily_id < frog_when && among(l, laFrog, laEclectic, laWet))
+    return not_implemented;
   
   if(walls_not_implemented() && isCrossroads(l))
     return no_walls;
