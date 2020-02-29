@@ -2632,27 +2632,27 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laFrog:
-      if(d == 8) {
+      if(d == 9) {
         if(!is_zebra_trapdoor(c)) {
-          if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 200) && notDippingFor(itFrog)) {
+          if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 100) && notDippingFor(itFrog)) {
             bool ok = true;
             forCellCM(c1, c) if(c1->item) ok = false;
             if(ok) {
               c->item = itFrog;
-              forCellEx(c1, c) c1->wall = pick(waShrub, waStone, waDeepWater);
               }
             }
           }
-        else {
+        else if(!c->wall) {
           int i = hrand(10);
           if(i < 4) c->wall = waShrub;
           else if(i < 7) c->wall = waStone;
           else c->wall = waDeepWater;
           }
         }
+        
       if(d == 7) {
         if(c->wall == waNone) {
-          if(hrand_monster(2000) < 3 * (5 + items[itWet] + yendor::hardness() + 5))
+          if(hrand_monster(1000) < 10 + 10 * (items[itWet] + yendor::hardness()))
             c->monst = pick(moFrog, moPhaser, moVaulter);
           }
         }
