@@ -609,7 +609,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
   
   if(byWhat == itOrbDash) {
     useupOrb(itOrbDash, 5);
-    addMessage(XLAT("You vault over %the1!", dashmon));
+    if(dashmon) addMessage(XLAT("You vault over %the1!", dashmon));
     }
   
   if(byWhat == itOrbPhasing) {
@@ -650,7 +650,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
 
   mirror::destroyAll();
   
-  if(monstersnearO(a, dest, moPlayer, NULL, cwt.at)) {
+  if(monstersnearO(a, dest, moPlayer, NULL, c1)) {
     changes.rollback();
     return false;
     }
@@ -1246,7 +1246,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     jumpstate = 10 + check_vault(cwt.at, c, P_ISPLAYER, jumpthru);
     items[itOrbAether] = i;
 
-    if(jumpstate == 15) {
+    if(jumpstate == 16) {
       changes.init(isCheck(a));
       int k = tkills();
       eMonster m = jumpthru->monst;
@@ -1257,8 +1257,8 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       if(m)
         attackMonster(jumpthru, AF_NORMAL | AF_MSG, moPlayer);
       k = tkills() - k;
-      if(jumpTo(a, c, itOrbDash, k, m)) jumpstate = 16;
-      if(jumpstate == 16) return itOrbDash;
+      if(jumpTo(a, c, itOrbDash, k, m)) jumpstate = 17;
+      if(jumpstate == 17) return itOrbDash;
       }
     }
   
