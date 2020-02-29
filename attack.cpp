@@ -1196,8 +1196,10 @@ EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
         }
       eMonster m = c->monst;
       int k = tkills();
-      if(attackMonster(c, AF_STAB | AF_MSG, who)) 
+      if(attackMonster(c, AF_STAB | AF_MSG, who))  {
+        spread_plague(mt, c, t, who);
         produceGhost(c, m, who);
+        }
       if(tkills() > k) numsh++;
       }
 
@@ -1223,8 +1225,11 @@ EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
         if(c->monst == moFlailer && isPrincess(who) && isUnarmed(who))
           achievement_gain("PRINCESS_PACIFIST");
 
-        if(attackMonster(c, 0, who)) numflail++;
-        if(m == moVizier) produceGhost(c, m, who);
+        if(attackMonster(c, 0, who)) {
+          numflail++;
+          spread_plague(mf, c, t, who);
+          produceGhost(c, m, who);
+          }
         }
       }
     }
@@ -1236,6 +1241,7 @@ EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
     if(anglestraight(mt, backdir, t)) flag |= AF_HORNS;
     if(canAttack(mt,who,c,c->monst, flag)) {
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;
+      spread_plague(mt, c, t, who);
       produceGhost(c, mm, who);
       }
     }

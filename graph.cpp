@@ -3897,6 +3897,19 @@ EX void drawParticleSpeed(cell *c, color_t col, int speed) {
 EX void drawParticle(cell *c, color_t col, int maxspeed IS(100)) {
   drawParticleSpeed(c, col, 1 + rand() % maxspeed);
   }
+
+EX void drawDirectionalParticle(cell *c, int dir, color_t col, int maxspeed IS(100)) {
+  LATE( drawDirectionalParticle(c, dir, col, maxspeed); )
+  if(vid.particles && !confusingGeometry()) {
+    int speed = 1 + rand() % maxspeed;
+    auto fd = flashdata(ticks, rand() % 16, c, col, speed);
+    fd.angle = -atan2(tC0(currentmap->adj(c, dir)));
+    fd.angle += 2 * M_PI * (rand() % 100 - rand() % 100) / 100 / c->type;
+    flashes.push_back(fd); 
+    }
+  }
+
+
 EX void drawParticles(cell *c, color_t col, int qty, int maxspeed IS(100)) { 
   if(vid.particles)
     while(qty--) drawParticle(c,col, maxspeed); 

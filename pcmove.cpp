@@ -717,6 +717,7 @@ bool pcmove::after_escape() {
       playSound(c2, "hit-axe" + pick123());
       changes.ccell(c2);
       c2->wall = waNone;
+      spread_plague(cwt.at, c2, mi.d, moPlayer);
       return swing();
       }
     else if(c2->wall == waBigTree) {
@@ -887,7 +888,10 @@ bool pcmove::attack() {
       changes.ccell(c2);
       // salamanders are stunned for longer time when pushed into a wall
       if(c2->monst == moSalamander && (mip.t == c2 || !mip.t)) c2->stuntime = 10;
-      if(!c2->monst) produceGhost(c2, m, moPlayer);
+      if(!c2->monst) {
+        spread_plague(cwt.at, c2, mi.d, moPlayer);
+        produceGhost(c2, m, moPlayer);
+        }
       if(mip.proper()) pushMonster(mip);
       animateAttack(mi, LAYER_SMALL);
       }
@@ -1264,33 +1268,53 @@ EX void swordAttackStatic() {
       swordAttackStatic(bb);
   }
 
-EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb) {
+EX int plague_kills;
+
+EX void spread_plague(cell *mf, cell *mt, int dir, eMonster who) {
+  if(!items[itOrbPlague]) return;
+  int kk = tkills();
+  forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->move(dir)) && celldistance(mx, mf) <= 4) {
+    sideAttackAt(mf, dir, mx, who, itOrbPlague, mt);
+    }
+  plague_kills += tkills() - kk;
+  }
+
+EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell *pf) {
   eMonster m = mt->monst;
   flagtype f = AF_SIDE;
   if(orb == itOrbPlague) f |= AF_PLAGUE;
   if(items[itOrbSlaying]) f|= AF_CRUSH;
-  if(m) println(hlog, "canAttack ", dnameof(m), " at ", mt, ":", canAttack(mf, who, mt, m, f));
+  if(!items[orb]) return;
+  auto plague_particles = [&] {
+    if(orb == itOrbPlague) {
+      for(int i=0; i<16; i++)
+        drawDirectionalParticle(pf, neighborId(pf, mt), iinf[orb].color);
+      }
+    };
   if(canAttack(mf, who, mt, m, f)) {
     if((f & AF_CRUSH) && !canAttack(mf, who, mt, m, AF_SIDE | AF_MUSTKILL))
       markOrb(itOrbSlaying);
     markOrb(orb);
+    plague_particles();
     if(who != moPlayer) markOrb(itOrbEmpathy);
     if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who) || isAnyIvy(m)) {
-      println(hlog, "spread from ", mt);
-      forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->move(dir)) && celldistance(mx, mf) <= 4)
-        sideAttackAt(mf, dir, mx, who, orb);
+      if(mt->monst != m) spread_plague(mf, mt, dir, who);
       produceGhost(mt, m, who);
       }
     }
   else if(mt->wall == waSmallTree) {
+    plague_particles();
+    markOrb(orb);
     mt->wall = waNone;
-    forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->move(dir)) && celldistance(mx, mf) <= 4)
-      sideAttackAt(mf, dir, mx, who, orb);
+    spread_plague(mf, mt, dir, who);
     }
-  else if(mt->wall == waBigTree)
+  else if(mt->wall == waBigTree) {
+    plague_particles();
+    markOrb(orb);
     mt->wall = waSmallTree;
+    }
   else if(mt->wall == waExplosiveBarrel && orb != itOrbPlague)
-    explodeBarrel(mt);
+    explodeBarrel(mt);    
   }
 
 EX void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
@@ -1298,29 +1322,18 @@ EX void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
   if(who != moPlayer && !items[itOrbEmpathy]) return;
   for(int k: {-1, 1}) {
     cell *mt = mf->modmove(dir + k*bonus);
-    sideAttackAt(mf, dir, mt, who, orb);
-    }
-  }
-
-EX void sideAttackPlague(cell *mf, int dir, eMonster who) {
-  if(!items[itOrbPlague]) return;
-  cellwalker cw(mf, dir);
-  cw += wstep;
-  for(int i=2; i<cw.at->type-1; i++) {
-    println(hlog, "sa = ", (cw+i).cpeek(), " mo = ", dnameof((cw+i).cpeek()->monst));
-    sideAttackAt(mf, dir, (cw+i).cpeek(), who, itOrbPlague);
+    sideAttackAt(mf, dir, mt, who, orb, mf);
     }
   }
 
 EX void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
 
   int k = tkills();
+  plague_kills = 0;
   sideAttack(mf, dir, who, 1, itOrbSide1);
   sideAttack(mf, dir, who, 2, itOrbSide2);
   sideAttack(mf, dir, who, 3, itOrbSide3);  
-  k -= tkills();
-  sideAttackPlague(mf, dir, who);
-  k += tkills();
+  k -= tkills() - plague_kills;
 
   if(who == moPlayer) {
     int kills = tkills() - k + bonuskill;

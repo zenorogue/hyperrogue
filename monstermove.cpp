@@ -1228,6 +1228,7 @@ EX void snakeAttack(cell *c, bool mounted) {
       mounted ? AF_ONLY_ENEMY : (AF_ONLY_FBUG | AF_GETPLAYER))) {
         eMonster m2 = c->move(j)->monst;
         attackMonster(c->move(j), AF_NORMAL | AF_GETPLAYER | AF_MSG, moHexSnake);
+        spread_plague(c, c->move(j), j, moHexSnake);
         produceGhost(c->move(j), moHexSnake, m2);
         }
   }
@@ -1659,6 +1660,7 @@ EX void movegolems(flagtype flags) {
           markOrb(itOrbEmpathy), markOrb(itOrbSlaying);
         attackMonster(c2, flags | AF_MSG, m);
         animateAttack(movei(c, dir), LAYER_SMALL);
+        spread_plague(c, c2, dir, m);
         produceGhost(c2, m2, m);
         sideAttack(c, dir, m, 0);
         if(revenge) c->monst = m = moPrincessArmed;
