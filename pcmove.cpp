@@ -1288,7 +1288,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
   auto plague_particles = [&] {
     if(orb == itOrbPlague) {
       for(int i=0; i<16; i++)
-        drawDirectionalParticle(pf, neighborId(pf, mt), iinf[orb].color);
+        drawDirectionalParticle(pf, neighborId(pf, mt), (i&1) ? orb_auxiliary_color(orb) : iinf[orb].color);
       }
     };
   if(canAttack(mf, who, mt, m, f)) {
