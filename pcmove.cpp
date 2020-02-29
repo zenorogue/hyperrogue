@@ -517,6 +517,7 @@ bool pcmove::actual_move() {
   origd = d;
   if(d >= 0) {
     cwt += d;
+    dynamicval<bool> b(changes.on, false);
     mirror::act(d, mirror::SPINSINGLE);
     d = cwt.spin;
     }
