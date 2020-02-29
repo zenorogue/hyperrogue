@@ -253,14 +253,21 @@ EX bool canReachPlayer(cell *cf, eMonster m) {
   cl.add(cf);
   for(int i=0; i<isize(cl.lst) && i < 10000; i++) {
     cell *c = cl.lst[i];
-    for(int j=0; j<c->type; j++) {
-      cell *c2 = c->move(j);
-      if(!c2) continue;
-      if(cl.listed(c2)) continue;
-      if(!passable_for(m, c2, c, P_MONSTER | P_ONPLAYER | P_CHAIN)) continue;
-      if(isPlayerOn(c2)) return true;
+    bool found = false;
+    
+    auto test = [&] (cell *c2) {
+      if(cl.listed(c2)) return;
+      if(!passable_for(m, c2, c, P_MONSTER | P_ONPLAYER | P_CHAIN)) return;
+      if(isPlayerOn(c2)) found = true;
       cl.add(c2);
+      };
+
+    forCellEx(c2, c) {
+      if(among(m, moFrog, moVaulter, moPhaser)) forCellEx(c3, c2) test(c3);
+      test(c2);
       }
+    
+    if(found) return true;
     }
   return false;
   }
