@@ -814,9 +814,6 @@ bool pcmove::attack() {
     else
       mip.t = c2;
     }
-  if(c2->monst == moTroll || c2->monst == moFjordTroll || 
-     c2->monst == moForestTroll || c2->monst == moStormTroll || c2->monst == moVineSpirit)
-    mip.t = c2;
   
   if(havePushConflict(mip.t, checkonly)) return false;
   
