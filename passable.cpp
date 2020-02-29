@@ -38,7 +38,7 @@ EX bool boatGoesThrough(cell *c) {
     c->wall == waDeadfloor || c->wall == waCIsland || c->wall == waCIsland2 ||
     c->wall == waMineUnknown || c->wall == waMineMine || c->wall == waMineOpen ||
     c->wall == waBonfireOff || c->wall == waFire || c->wall == waPartialFire ||
-    c->wall == waArrowTrap;
+    c->wall == waArrowTrap || c->wall == waShallow;
   }
 
 EX void become_water(cell *c) {

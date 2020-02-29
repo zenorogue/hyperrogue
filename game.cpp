@@ -345,8 +345,13 @@ EX void pushThumper(const movei& mi) {
     }
   else if(isWatery(cto)) {
     addMessage(XLAT("%The1 fills the hole!", w));
-    cto->wall = w == waThumperOn ? waTempBridge : waNone;
+    cto->wall = w == waThumperOn ? waTempBridge : waShallow;
     cto->wparam = th->wparam;
+    playSound(cto, "splash"+pick12());
+    }
+  else if(cto->wall == waShallow) {
+    addMessage(XLAT("%The1 fills the hole!", w));
+    cto->wall = waNone;
     playSound(cto, "splash"+pick12());
     }
   else 

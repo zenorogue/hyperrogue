@@ -731,6 +731,11 @@ EX eMonster summonedAt(cell *dest) {
     return moBomberbird;
   if(dest->wall == waTrapdoor)
     return dest->land == laPalace ? moFatGuard : moOrangeDog;
+  if(dest->land == laFrog && dest->wall == waNone) {
+    forCellEx(c1, dest) if(c1->wall == waShrub) return moVaulter;
+    forCellEx(c1, dest) if(c1->wall == waDeepWater) return moFrog;
+    forCellEx(c1, dest) if(c1->wall == waStone) return moPhaser;
+    }
   if(dest->wall == waSea)
     return 
       isElemental(dest->land) ? moWaterElemental :

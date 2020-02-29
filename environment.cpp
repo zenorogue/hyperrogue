@@ -603,7 +603,7 @@ EX void moverefresh(bool turn IS(true)) {
           addMessage(XLAT("%The1 drowns!", c->monst));
         if(isBull(c->monst)) {
           addMessage(XLAT("%The1 is filled!", c->wall));
-          c->wall = waNone;
+          c->wall = waShallow;
           }
         fallMonster(c, AF_FALL);
         }
