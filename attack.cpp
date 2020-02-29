@@ -650,9 +650,9 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     }
   if(who == moPlayer || (isFriendly(who) && items[itOrbEmpathy])) {
     if(who != moPlayer) markOrb2(itOrbEmpathy);
-    if(m == moFrog) items[itOrbFrog] += 11;
-    if(m == moVaulter) items[itOrbDash] += 11;
-    if(m == moPhaser) items[itOrbPhasing] += 11;
+    if(m == moFrog) items[itOrbFrog] += 5;
+    if(m == moVaulter) items[itOrbDash] += 5;
+    if(m == moPhaser) items[itOrbPhasing] += 5;
     }
   if(checkOrb(who, itOrbStone))
     petrify(c, waPetrified, m), pcount = 0;
