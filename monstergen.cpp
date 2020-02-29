@@ -263,7 +263,7 @@ EX bool canReachPlayer(cell *cf, eMonster m) {
       };
 
     forCellEx(c2, c) {
-      if(among(m, moFrog, moVaulter, moPhaser)) forCellEx(c3, c2) test(c3);
+      if(frog_power(m)) forCellEx(c3, c2) test(c3);
       test(c2);
       }
     

@@ -1177,7 +1177,7 @@ EX void groupmove(eMonster movtype, flagtype mf) {
       groupmove2(movei(c2, c, STRONGWIND), movtype, mf);
       }
     
-    if(among(movtype, moFrog, moVaulter, moPhaser) && c->monst == moNone && !isPlayerOn(c)) {
+    if(frog_power(movtype) && c->monst == moNone && !isPlayerOn(c)) {
       forCellEx(c2, c) forCellEx(c3, c2)
         groupmove2(movei(c3, c, JUMP), movtype, mf);
       }

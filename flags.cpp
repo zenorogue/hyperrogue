@@ -345,6 +345,14 @@ EX bool conegraph(cell *c) {
   return ((wmescher && wmspatial) || wmascii3) && (conegraphtype(c) || (c->wall == waBarrier && c->land == laOceanWall));
   }
 
+/** Determine the power of a frog monster. Also used to determine whether monster is a frog. */
+EX eItem frog_power(eMonster m) {
+  if(m == moFrog) return itOrbFrog;
+  if(m == moPhaser) return itOrbPhasing;
+  if(m == moVaulter) return itOrbDash;
+  return itNone;
+  }
+
 EX bool hornStuns(cell *c) {
   eMonster m = c->monst;
   return 

@@ -1129,7 +1129,7 @@ EX int check_vault(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
   if(!c2) return 0;
   if(!c2->monst && c2->wall != waShrub) return 1;
   bool for_monster = !(flags & P_ISPLAYER);
-  if(for_monster && c2->monst && among(c2->monst, moFrog, moVaulter, moPhaser) && !items[itOrbDiscord]) return 1; 
+  if(for_monster && c2->monst && frog_power(c2->monst) && !items[itOrbDiscord]) return 1; 
   if(c3) return 2;
   if(c2->wall != waShrub && !passable(c2, cwt.at, flags | P_JUMP1 | P_MONSTER)) return 3;
   if(!passable(ct, c2, flags | P_JUMP2)) return 4;
