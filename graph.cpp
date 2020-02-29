@@ -720,6 +720,23 @@ EX hpcshape& orbshape(eOrbshape s) {
      }
   }
 
+EX color_t orb_auxiliary_color(eItem it) {
+  if(it == itOrbFire) return firecolor(200);
+  if(it == itOrbFriend || it == itOrbDiscord) return 0xC0C0C0;
+  if(it == itOrbFrog) return 0xFF0000;
+  if(it == itOrbImpact) return 0xFF0000;
+  if(it == itOrbPhasing) return 0xFF0000;
+  if(it == itOrbDash) return 0xFF0000;
+  if(it == itOrbFreedom) return 0xC0FF00;
+  if(it == itOrbPlague) return 0x409040;
+  if(it == itOrbChaos) return 0xFF00FF;
+  if(it == itOrbAir) return 0xFFFFFF;
+  if(it == itOrbUndeath) return minf[moFriendlyGhost].color;
+  if(it == itOrbRecall) return 0x101010;
+  if(it == itOrbSlaying) return 0xFF0000;
+  return iinf[it].color;
+  }
+
 EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int pticks, bool hidden) {
 #if !CAP_SHAPES
   return it;
@@ -929,19 +946,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     if(inice) prio = PPR::HIDDEN;
     
     color_t icol1 = icol;
-    if(it == itOrbFire) icol = firecolor(200);
-    if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
-    if(it == itOrbFrog) icol = 0xFF0000;
-    if(it == itOrbImpact) icol = 0xFF0000;
-    if(it == itOrbPhasing) icol = 0xFF0000;
-    if(it == itOrbDash) icol = 0xFF0000;
-    if(it == itOrbFreedom) icol = 0xC0FF00;
-    if(it == itOrbPlague) icol = 0x409040;
-    if(it == itOrbChaos) icol = 0xFF00FF;
-    if(it == itOrbAir) icol = 0xFFFFFF;
-    if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
-    if(it == itOrbRecall) icol = 0x101010;
-    if(it == itOrbSlaying) icol = 0xFF0000;
+    icol = orb_auxiliary_color(it);
     color_t col = darkena(icol, 0, int(0x80 + 0x70 * sinptick(300)));
     
     if(it == itOrbFish)
