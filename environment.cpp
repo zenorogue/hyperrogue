@@ -578,6 +578,8 @@ EX void moverefresh(bool turn IS(true)) {
 
     else if(isFire(c)) {
       if(c->monst == moSalamander) c->stuntime = max<int>(c->stuntime, 1);
+      else if(c->monst == moVaulter && c->mondir == JUMP)
+        c->mondir = NODIR;
       else if(c->monst && !survivesFire(c->monst) && !isWorm(c->monst)) {
         addMessage(XLAT("%The1 burns!", c->monst));
         if(isBull(c->monst)) {

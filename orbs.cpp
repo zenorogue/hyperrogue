@@ -1127,13 +1127,14 @@ EX int check_vault(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
     }
   jumpthru = c2;
   if(!c2) return 0;
-  if(!c2->monst && c2->wall != waShrub) return 1;
+  bool cutwall = among(c2->wall, waShrub, waExplosiveBarrel, waSmallTree, waBigTree);
+  if(!c2->monst && !cutwall) return 1;
   bool for_monster = !(flags & P_ISPLAYER);
   if(for_monster && c2->monst && frog_power(c2->monst) && !items[itOrbDiscord]) return 1; 
   if(c3) return 2;
-  if(c2->wall != waShrub && !passable(c2, cwt.at, flags | P_JUMP1 | P_MONSTER)) return 3;
+  if(!cutwall && !passable(c2, cwt.at, flags | P_JUMP1 | P_MONSTER)) return 3;
   if(!passable(ct, c2, flags | P_JUMP2)) return 4;
-  if(c2->wall != waShrub && !canAttack(cwt.at, moPlayer, c2, c2->monst, 0)) return 5;
+  if(!cutwall && !canAttack(cwt.at, moPlayer, c2, c2->monst, 0)) return 5;
   return 6;
   }
 
@@ -1253,6 +1254,17 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       if(jumpthru->wall == waShrub) {
         addMessage(XLAT("You chop down the shrub."));
         jumpthru->wall = waNone;
+        }
+      if(jumpthru->wall == waSmallTree) {
+        addMessage(XLAT("You chop down the tree."));
+        jumpthru->wall = waNone;
+        }
+      if(jumpthru->wall == waBigTree) {
+        addMessage(XLAT("You start chopping down the tree."));
+        jumpthru->wall = waSmallTree;
+        }
+      if(jumpthru->wall == waExplosiveBarrel) {
+        explodeBarrel(jumpthru);
         }
       if(m)
         attackMonster(jumpthru, AF_NORMAL | AF_MSG, moPlayer);

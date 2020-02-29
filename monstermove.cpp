@@ -159,8 +159,12 @@ EX void moveMonster(const movei& mi) {
   if(mi.d == JUMP && m == moVaulter) {
     cell *cm = common_neighbor(cf, ct);
     if(cm->wall == waShrub) cm->wall = waNone;
+    if(cm->wall == waSmallTree) cm->wall = waNone;
+    if(cm->wall == waBigTree) cm->wall = waSmallTree;
+    if(cm->wall == waExplosiveBarrel) explodeBarrel(cm);
     if(cm->monst)
       attackMonster(cm, AF_NORMAL | AF_MSG | AF_GETPLAYER, m);
+    ct->mondir = JUMP;
     }
 
   if(isLeader(m)) {
