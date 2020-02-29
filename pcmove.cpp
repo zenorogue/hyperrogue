@@ -700,6 +700,7 @@ bool pcmove::after_escape() {
   attackable = 
     c2->wall == waBigTree ||
     c2->wall == waSmallTree ||
+    (c2->wall == waShrub && items[itOrbSlaying]) ||
     c2->wall == waMirrorWall;
   if(attackable && markOrb(itOrbAether) && c2->wall != waMirrorWall)
     attackable = false;
@@ -714,6 +715,15 @@ bool pcmove::after_escape() {
     if(c2->wall == waSmallTree) {
       drawParticles(c2, winf[c2->wall].color, 4);
       addMessage(XLAT("You chop down the tree."));
+      playSound(c2, "hit-axe" + pick123());
+      changes.ccell(c2);
+      c2->wall = waNone;
+      spread_plague(cwt.at, c2, mi.d, moPlayer);
+      return swing();
+      }
+    else if(c2->wall == waShrub && markOrb(itOrbSlaying)) {
+      drawParticles(c2, winf[c2->wall].color, 4);
+      addMessage(XLAT("You chop down the shrub."));
       playSound(c2, "hit-axe" + pick123());
       changes.ccell(c2);
       c2->wall = waNone;
@@ -1303,6 +1313,12 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
       }
     }
   else if(mt->wall == waSmallTree) {
+    plague_particles();
+    markOrb(orb);
+    mt->wall = waNone;
+    spread_plague(mf, mt, dir, who);
+    }
+  else if(mt->wall == waShrub && markEmpathy(itOrbSlaying)) {
     plague_particles();
     markOrb(orb);
     mt->wall = waNone;
