@@ -535,8 +535,9 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
       }
     return !pseudohept(w) && passable(w, from, extra);
     }
-  if(m == moFrog)
-    return (!from || from == w) ? passable(w, from, extra) : check_jump(from, w, extra, dummy) == 3;
+  if(m == moFrog) {
+    return isNeighbor1(from, w) ? passable(w, from, extra) : check_jump(from, w, extra, dummy) == 3;
+    }
   if(m == moPhaser)
     return isNeighbor1(from, w) ? passable(w, from, extra) : check_phase(from, w, extra, dummy) == 3;
   if(m == moVaulter)
