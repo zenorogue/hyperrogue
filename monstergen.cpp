@@ -457,7 +457,22 @@ EX void wandering() {
       continue;
       }
     #endif
+
+    else if(c->land == laFrog && !c->monst && wchance(items[itFrog], 25)) {
+      eMonster m = pick(moFrog, moPhaser, moVaulter);
+      if(canReachPlayer(c, m)) {
+        c->monst = m;
+        playSeenSound(c);
+        continue;
+        }
+      }
     
+    else if(c->land == laWet && among(c->wall, waDeepWater, waShallow) && !c->monst && wchance(items[itWet], 15) && canReachPlayer(c, moShark)) {
+        c->monst = hrand(100) < 10 ? moRusalka : moPike;
+        playSeenSound(c);
+        continue;
+        }
+
     else if(c->wall == waSea && !c->monst) {
       if(c->land == laCaribbean && wchance(items[itPirate], 15) && canReachPlayer(c, moPirate)) {
         c->monst = moCShark;
@@ -657,6 +672,10 @@ EX void wandering() {
     else if(c->land == laRuins && wchance(items[itRuins], 80)) {
       c->monst = genRuinMonster(c);
       c->hitpoints = 3;
+      }
+
+    else if(c->land == laEclectic && wchance(items[itEclectic], 20)) {
+      gen_eclectic_monster(c);
       }
 
     else if(c->land == laCaribbean && wchance(items[itPirate], 30))

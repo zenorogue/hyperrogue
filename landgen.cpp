@@ -229,6 +229,44 @@ EX bool is_zebra_trapdoor(cell *c) {
     return (randomPatternsMode ? RANDPAT : (zebra40(c)&2));
   }
 
+EX void gen_eclectic_monster(cell *c) {
+  cell *c2 = c->move(hrand(c->type));
+  if(c2->wall == waRed1 || c2->wall == waRed2 || c2->wall == waRed3)
+    c->monst = moRedTroll;
+  
+  else if(c2->wall == waDeadwall)
+    c->monst = pick(moMiner, moTroll);
+
+  else if(c2->wall == waSmallTree || c2->wall == waBigTree)
+    c->monst = moFireFairy;
+
+  else if(c2->wall == waSandstone || c2->wall == waCharged)
+    c->monst = moMetalBeast, c->hitpoints = 2;
+
+  else if(c2->wall == waPalace)
+    c->monst = moPalace, c->hitpoints = 2;
+
+  else if(c2->wall == waIcewall)
+    c->monst = pick(moWolf, moIceGolem);
+  
+  else if(c2->wall == waNone && !c2->monst && hrand(100) < 5) {
+    cell *c1 = c;
+    c1->monst = moPair;
+    c2->monst = moPair;
+    c1->mondir = neighborId(c1, c2);
+    c2->mondir = neighborId(c2, c1);
+    }
+  
+  else {
+  
+    /* more wolves! */
+    forCellEx(c3, c) if(c3->wall == waIcewall) {
+      c->monst = moWolf;
+      return;
+      }
+    }
+  }
+
 EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == min(BARLEV, 9);
   switch(c->land) {
@@ -2521,34 +2559,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         forCellEx(c1, c) if(!c1->wall) locked = false;
         if(locked) c->item = itEclectic;
 
-        if(c->wall == waNone && hrand_monster(2500) < 30 + items[itEclectic] + yendor::hardness() && !safety) {
-          cell *c2 = c->move(hrand(c->type));
-          if(c2->wall == waRed1 || c2->wall == waRed2 || c2->wall == waRed3)
-            c->monst = moRedTroll;
-          
-          else if(c2->wall == waDeadwall)
-            c->monst = pick(moMiner, moTroll);
-
-          else if(c2->wall == waSmallTree || c2->wall == waBigTree)
-            c->monst = moFireFairy;
-
-          else if(c2->wall == waSandstone || c2->wall == waCharged)
-            c->monst = moMetalBeast, c->hitpoints = 2;
-
-          else if(c2->wall == waPalace)
-            c->monst = moPalace, c->hitpoints = 2;
-
-          else if(c2->wall == waIcewall)
-            c->monst = pick(moWolf, moIceGolem);
-          
-          else if(c2->wall == waNone && !c2->monst && hrand(100) < 5) {
-            cell *c1 = c;
-            c1->monst = moPair;
-            c2->monst = moPair;
-            c1->mondir = neighborId(c1, c2);
-            c2->mondir = neighborId(c2, c1);
-            }
-          }
+        if(c->wall == waNone && hrand_monster(2500) < 30 + items[itEclectic] + yendor::hardness() && !safety) 
+          gen_eclectic_monster(c);
         }
 
       break;
