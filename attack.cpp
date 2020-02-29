@@ -669,7 +669,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(who == moPlayer || (isFriendly(who) && items[itOrbEmpathy])) {
     eItem o = frog_power(m);
     if(o && who != moPlayer) markOrb2(itOrbEmpathy);
-    items[o] += 5;
+    if(o) items[o] += 5;
     }
   if(checkOrb(who, itOrbStone))
     petrify(c, waPetrified, m), pcount = 0;
