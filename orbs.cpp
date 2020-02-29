@@ -593,6 +593,9 @@ void teleportTo(cell *dest) {
 EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   cell *from = cwt.at;
+  changes.value_keep(cwt);
+  changes.ccell(dest);
+  changes.ccell(cwt.at);
 
   if(byWhat == itOrbFrog) {
     useupOrb(itOrbFrog, 5);
@@ -615,14 +618,34 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
 
   cell *c1 = cwt.at;
   animateMovement(match(cwt.at, dest), LAYER_SMALL);
-  current_display->which_copy = ggmatrix(dest);
   cwt.at = dest; 
   forCellIdEx(c2, i, dest) if(c2->cpdist < dest->cpdist) {
     cwt.spin = i;
     flipplayer = true;
     }
 
-  if(!monstersnearO(a, dest, moPlayer, NULL, cwt.at)) {
+  sword::reset();
+  stabbingAttack(c1, dest, moPlayer, bonuskill);
+  playerMoveEffects(c1, dest);
+
+  if(itemclass(byWhat) == IC_ORB)
+    apply_impact(dest);
+
+  // do not apply movecost later, when from no longer exists
+  if(cwt.at->item == itOrbSafety) {
+    movecost(from, dest, 2);
+    from = NULL;
+    }
+  if(cwt.at->item != itOrbYendor && cwt.at->item != itHolyGrail) {
+    auto c = collectItem(cwt.at, true);
+    if(c) {
+      return true;
+      }
+    }
+
+  mirror::destroyAll();
+  
+  if(monstersnearO(a, dest, moPlayer, NULL, cwt.at)) {
     changes.rollback();
     return false;
     }
@@ -631,30 +654,16 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
     changes.rollback();
     return true;
     }
+  
+  changes.commit();
 
+  current_display->which_copy = ggmatrix(dest);
   countLocalTreasure();
   
-  sword::reset();
-  stabbingAttack(c1, dest, moPlayer, bonuskill);
-  playerMoveEffects(c1, dest);
-
-  // do not apply movecost later, when from no longer exists
-  if(cwt.at->item == itOrbSafety) {
-    movecost(from, dest, 2);
-    from = NULL;
-    }
-  if(cwt.at->item != itOrbYendor && cwt.at->item != itHolyGrail)
-    collectItem(cwt.at, true);
-
-  mirror::destroyAll();
-
   for(int i=9; i>=0; i--)
     setdist(cwt.at, i, NULL);
   
   if(from) movecost(from, dest, 2);
-
-  if(itemclass(byWhat) == IC_ORB)
-    apply_impact(dest);
 
   createNoise(1);
 
@@ -1159,7 +1168,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   // (0-) strong wind
   if(items[itStrongWind] && c->cpdist == 2 && cwt.at == whirlwind::jumpFromWhereTo(c, true)) {
-    changes.init();
+    changes.init(isCheck(a));
     if(jumpTo(a, c, itStrongWind)) return itStrongWind;
     }
   
@@ -1233,7 +1242,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     items[itOrbAether] = i;
 
     if(jumpstate == 15) {
-      changes.init();
+      changes.init(isCheck(a));
       int k = tkills();
       eMonster m = jumpthru->monst;
       if(jumpthru->wall == waShrub) {
@@ -1254,7 +1263,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     jumpstate = check_jump(cwt.at, c, P_ISPLAYER, jumpthru);
     items[itOrbAether] = i;
     if(jumpstate == 3) {
-      changes.init();
+      changes.init(isCheck(a));
       if(jumpTo(a, c, itOrbFrog)) jumpstate = 4;
       if(jumpstate == 4) return itOrbFrog;
       }
@@ -1267,7 +1276,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     jumpstate = 20 + check_phase(cwt.at, c, P_ISPLAYER, jumpthru);
     items[itOrbAether] = i;
     if(jumpstate == 23) {
-      changes.init();
+      changes.init(isCheck(a));
       if(jumpTo(a, c, itOrbPhasing)) jumpstate = 24;
       }
     if(shmup::on) shmup::popmonsters();
@@ -1309,7 +1318,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     bool inrange = false;
     for(cell *c1: gun_targets(cwt.at)) if(c1 == c) inrange = true;
     if(inrange) {
-      changes.init();
+      changes.init(isCheck(a));
       gun_attack(c), apply_impact(c);
       if(monstersnearO(a, cwt.at, moPlayer, NULL, cwt.at)) {
         changes.rollback();

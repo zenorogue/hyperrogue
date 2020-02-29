@@ -128,10 +128,20 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
 #if CAP_TOUR
   else if(tour::on && (c2->item == itOrbSafety || c2->item == itOrbRecall)) {
     addMessage(XLAT("This Orb is not compatible with the Tutorial."));
+    if(changes.on) changes.rollback();
     return true;
     }
 #endif
   else if(c2->item == itOrbSafety) {
+
+    if(changes.on) {
+      if(changes.checking) {
+        changes.rollback();
+        return true;
+        }
+      changes.commit();
+      }
+
     playSound(c2, "pickup-orb"); // TODO safety
     if(!dual::state) items[c2->item] = 7;
     if(shmup::on)

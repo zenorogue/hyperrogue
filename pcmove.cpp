@@ -265,7 +265,7 @@ bool pcmove::movepcto() {
   fmsAttack   = forcedmovetype == fmSkip || forcedmovetype == fmAttack;
   fmsActivate = forcedmovetype == fmSkip || forcedmovetype == fmActivate;
   
-  changes.init();
+  changes.init(checkonly);
   bool b = (d >= 0) ? actual_move() : stay();
   if(checkonly || !b) {
     changes.rollback();
@@ -274,6 +274,44 @@ bool pcmove::movepcto() {
     println(hlog, "error: not commited!");
     changes.commit();
     }
+
+  if(!b) {
+    // bool try_instant = (forcedmovetype == fmInstant) || (forcedmovetype == fmSkip && !passable(c2, cwt.at, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP));  
+
+    if(items[itOrbFlash]) {
+      if(checkonly) { nextmovetype = lmInstant; return true; }
+      if(orbProtection(itOrbFlash)) return true;
+      activateFlash();
+      checkmove();
+      return true;
+      }
+
+    if(items[itOrbLightning]) {
+      if(checkonly) { nextmovetype = lmInstant; return true; }
+      if(orbProtection(itOrbLightning)) return true;
+      activateLightning();
+      checkmove();
+      return true;
+      }
+
+    if(false && who_kills_me == moOutlaw && items[itRevolver]) {
+      cell *c2 = cwt.cpeek();
+      for(int i=0; i<c2->type; i++) {
+        cell *c3 = c2->move(i);
+        if(c3) for(int i=0; i<c3->type; i++) {
+          cell *c4 = c3->move(i);
+          if(c4 && c4->monst == moOutlaw) {
+            eItem i = targetRangedOrb(c4, roCheck);
+            if(i == itRevolver) { 
+              targetRangedOrb(c4, roKeyboard);
+              return false;
+              }
+            }
+          }
+        }
+      }
+    }
+
   return b;
   }
 
@@ -340,6 +378,7 @@ bool pcmove::swing() {
   }
 
 bool pcmove::after_instant(bool kl) {
+  changes.commit();
   keepLightning = kl;
   bfs();
   keepLightning = false;
@@ -370,12 +409,14 @@ struct changes_t {
   vector<reaction_t> rollbacks;
   vector<reaction_t> commits;
   bool on;
+  bool checking;
   
-  void init() {
+  void init(bool ch) {
     on = true; 
     for(cell *dc: dcal) ccell(dc);
     value_keep(kills);
     value_keep(items);
+    checking = ch;
     }
 
   void commit() { 
@@ -498,8 +539,6 @@ bool pcmove::actual_move() {
     return false;
     }
   
-  bool try_instant = (forcedmovetype == fmInstant) || (forcedmovetype == fmSkip && !passable(c2, cwt.at, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP));
-  
   if(items[itOrbDomination] > ORBBASE && isMountable(c2->monst) && !monstersnear2() && fmsMove) {
     if(checkonly) { nextmovetype = lmMove; return true; }
     if(!isMountable(cwt.at->monst)) dragon::target = NULL;
@@ -511,20 +550,6 @@ bool pcmove::actual_move() {
     return perform_move_or_jump();
     }
   
-  if(items[itOrbFlash] && try_instant) {
-    if(checkonly) { nextmovetype = lmInstant; return true; }
-    if(orbProtection(itOrbFlash)) return true;
-    activateFlash();
-    return after_instant(false);
-    }
-
-  if(items[itOrbLightning] && try_instant) {
-    if(checkonly) { nextmovetype = lmInstant; return true; }
-    if(orbProtection(itOrbLightning)) return true;
-    activateLightning();
-    return after_instant(true);
-    }
-
   if(isActivable(c2) && fmsActivate) {
     if(checkonly) { nextmovetype = lmInstant; return true; }
     activateActiv(c2, true);
@@ -782,6 +807,9 @@ bool pcmove::attack() {
   auto& c2 = mi.t;
   if(!fmsAttack) return false;
 
+  if(items[itOrbFlash] || items[itOrbLightning])
+    return false;
+  
   attackflags = AF_NORMAL;
   if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
@@ -925,8 +953,10 @@ bool pcmove::perform_actual_move() {
     }
   
   if(items[itOrbWinter])
-    forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item)
-      markOrb(itOrbWinter), collectItem(c3);
+    forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item) {
+      markOrb(itOrbWinter);
+      if(collectItem(c3)) return true;
+      }
   
   movecost(cwt.at, c2, 2);
 
@@ -976,41 +1006,6 @@ bool pcmove::perform_move_or_jump() {
   
   if(monstersnear(cwt.at, moPlayer, nullptr, c1)) {
     changes.rollback();
-
-    /* todo
-    if(items[itOrbFlash]) {
-      if(checkonly) { nextmovetype = lmInstant; return true; }
-      if(orbProtection(itOrbFlash)) return true;
-      activateFlash();
-      checkmove();
-      return true;
-      }
-
-    if(items[itOrbLightning]) {
-      if(checkonly) { nextmovetype = lmInstant; return true; }
-      if(orbProtection(itOrbLightning)) return true;
-      activateLightning();
-      checkmove();
-      return true;
-      }
-
-    if(who_kills_me == moOutlaw && items[itRevolver]) {
-      for(int i=0; i<c2->type; i++) {
-        cell *c3 = c2->move(i);
-        if(c3) for(int i=0; i<c3->type; i++) {
-          cell *c4 = c3->move(i);
-          if(c4 && c4->monst == moOutlaw) {
-            eItem i = targetRangedOrb(c4, roCheck);
-            if(i == itRevolver) { 
-              targetRangedOrb(c4, roKeyboard);
-              return false;
-              }
-            }
-          }
-        }
-      }
-    */
-
     if(errormsgs && !checkonly) wouldkill("%The1 would kill you there!");
     return false;
     }
