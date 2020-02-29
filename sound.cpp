@@ -216,6 +216,7 @@ string wheresounds = HYPERPATH "sounds/";
 hookset<bool(const string& s, int vol)> *hooks_sound;
 
 EX void playSound(cell *c, const string& fname, int vol IS(100)) {
+  LATE( hr::playSound(c, fname, vol); )
   if(effvolume == 0) return;
   if(callhandlers(false, hooks_sound, fname, vol)) return;
   // printf("Play sound: %s\n", fname.c_str());

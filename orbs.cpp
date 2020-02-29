@@ -78,7 +78,8 @@ EX int intensify(int val) {
 EX bool reduceOrbPower(eItem it, int cap) {
   if(items[it] && (lastorbused[it] || (it == itOrbShield && items[it]>3) || !markOrb(itOrbTime))) {
     items[it] -= multi::activePlayers();
-    if(isHaunted(cwt.at->land)) survivalist = false;
+    if(isHaunted(cwt.at->land)) 
+      fail_survivalist();
     if(items[it] < 0) items[it] = 0;
     if(items[it] > cap && markOrb(itOrbIntensity)) cap = intensify(cap);
     if(items[it] > cap && timerghost) items[it] = cap;
@@ -589,7 +590,7 @@ void teleportTo(cell *dest) {
   mine::auto_teleport_charges();
   }
 
-EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {
+EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   cell *from = cwt.at;
 
@@ -620,6 +621,17 @@ EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon I
     cwt.spin = i;
     flipplayer = true;
     }
+
+  if(!monstersnearO(a, dest, moPlayer, NULL, cwt.at)) {
+    changes.rollback();
+    return false;
+    }
+  
+  if(isCheck(a)) {
+    changes.rollback();
+    return true;
+    }
+
   countLocalTreasure();
   
   sword::reset();
@@ -650,6 +662,8 @@ EX void jumpTo(cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon I
     shmup::teleported();
   else
     monstersTurn();
+
+  return true;
   }
 
 void growIvyTo(const movei& mi) {
@@ -1019,18 +1033,13 @@ void useOrbOfDragon(cell *c) {
   checkmoveO();
   }
 
-bool monstersnearO(orbAction a, cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
+EX bool monstersnearO(orbAction a, cell *c, eMonster who, cell *pushto, cell *comefrom) {
   // printf("[a = %d] ", a);
   if(shmup::on) return false;
   if(a == roCheck && multi::players > 1) 
     return true;
   else if(a == roMultiCheck) return false;
-  else return monstersnear(c, nocount, who, pushto, comefrom);
-  }
-
-bool monstersnearOS(orbAction a, cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
-  dynamicval<bool> b(used_impact, items[itOrbImpact]);
-  return monstersnearO(a, c, nocount, who, pushto, comefrom);
+  else return monstersnear(c, who, pushto, comefrom);
   }
 
 EX bool isCheck(orbAction a) { return a == roCheck || a == roMultiCheck; }
@@ -1149,9 +1158,9 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   // (0-) strong wind
-  if(items[itStrongWind] && c->cpdist == 2 && cwt.at == whirlwind::jumpFromWhereTo(c, true) && !monstersnearO(a, c, NULL, moPlayer, NULL, cwt.at)) {
-    if(!isCheck(a)) jumpTo(c, itStrongWind);
-    return itStrongWind;
+  if(items[itStrongWind] && c->cpdist == 2 && cwt.at == whirlwind::jumpFromWhereTo(c, true)) {
+    changes.init();
+    if(jumpTo(a, c, itStrongWind)) return itStrongWind;
     }
   
   // (0x) control
@@ -1195,12 +1204,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
 
         if(c->monst) {
           if(!canAttack(cf, moFriendlyIvy, c, c->monst, 0)) continue;
-          if(monstersnear(cwt.at, c, moPlayer, NULL, cwt.at)) continue;
+          if(monstersnear(cwt.at, moPlayer, NULL, cwt.at)) continue;
           }
         else {
           if(!passable(c, cf, P_ISPLAYER | P_MONSTER)) continue;
           if(strictlyAgainstGravity(c, cf, false, MF_IVY)) continue;
-          if(monstersnear(cwt.at, NULL, moPlayer, c, cwt.at)) continue;
+          if(monstersnear(cwt.at, moPlayer, c, cwt.at)) continue;
           }
         dirs.push_back(d);
         }
@@ -1223,22 +1232,19 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     jumpstate = 10 + check_vault(cwt.at, c, P_ISPLAYER, jumpthru);
     items[itOrbAether] = i;
 
-    if(jumpstate == 16 && !monstersnearOS(a, c, jumpthru, moPlayer, NULL, cwt.at)) jumpstate = 17;
-    
-    if(jumpstate == 17) {
-      if(!isCheck(a)) {
-        int k = tkills();
-        eMonster m = jumpthru->monst;
-        if(jumpthru->wall == waShrub) {
-          addMessage(XLAT("You chop down the shrub."));
-          jumpthru->wall = waNone;
-          }
-        if(m)
-          attackMonster(jumpthru, AF_NORMAL | AF_MSG, moPlayer);
-        k = tkills() - k;
-        jumpTo(c, itOrbDash, k, m);
+    if(jumpstate == 15) {
+      changes.init();
+      int k = tkills();
+      eMonster m = jumpthru->monst;
+      if(jumpthru->wall == waShrub) {
+        addMessage(XLAT("You chop down the shrub."));
+        jumpthru->wall = waNone;
         }
-      return itOrbDash;
+      if(m)
+        attackMonster(jumpthru, AF_NORMAL | AF_MSG, moPlayer);
+      k = tkills() - k;
+      if(jumpTo(a, c, itOrbDash, k, m)) jumpstate = 16;
+      if(jumpstate == 16) return itOrbDash;
       }
     }
   
@@ -1247,10 +1253,10 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     if(i) items[itOrbAether] = i-1;
     jumpstate = check_jump(cwt.at, c, P_ISPLAYER, jumpthru);
     items[itOrbAether] = i;
-    if(jumpstate == 3 && !monstersnearOS(a, c, NULL, moPlayer, NULL, cwt.at)) {
-      jumpstate = 4;
-      if(!isCheck(a)) jumpTo(c, itOrbFrog);
-      return itOrbFrog;
+    if(jumpstate == 3) {
+      changes.init();
+      if(jumpTo(a, c, itOrbFrog)) jumpstate = 4;
+      if(jumpstate == 4) return itOrbFrog;
       }
     }
   
@@ -1260,9 +1266,9 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     if(i) items[itOrbAether] = i-1;
     jumpstate = 20 + check_phase(cwt.at, c, P_ISPLAYER, jumpthru);
     items[itOrbAether] = i;
-    if(jumpstate == 23 && !monstersnearOS(a, c, NULL, moPlayer, NULL, cwt.at)) {
-      jumpstate = 24;
-      if(!isCheck(a)) jumpTo(c, itOrbPhasing);
+    if(jumpstate == 23) {
+      changes.init();
+      if(jumpTo(a, c, itOrbPhasing)) jumpstate = 24;
       }
     if(shmup::on) shmup::popmonsters();
     if(jumpstate == 24) return itOrbPhasing;
@@ -1302,9 +1308,16 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.at, moPlayer, c, c->monst, AF_GUN)) {
     bool inrange = false;
     for(cell *c1: gun_targets(cwt.at)) if(c1 == c) inrange = true;
-    if(inrange && !monstersnearOS(a, cwt.at, c, moPlayer, NULL, cwt.at)) {
-      if(!isCheck(a)) gun_attack(c), apply_impact(c);
-      return itRevolver;
+    if(inrange) {
+      changes.init();
+      gun_attack(c), apply_impact(c);
+      if(monstersnearO(a, cwt.at, moPlayer, NULL, cwt.at)) {
+        changes.rollback();
+        }
+      else {
+        if(isCheck(a)) changes.rollback();
+        return itRevolver;
+        }
       }
     }
   

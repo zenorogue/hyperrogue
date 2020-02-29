@@ -3875,6 +3875,7 @@ struct flashdata {
 vector<flashdata> flashes;
 
 EX void drawBubble(cell *c, color_t col, string s, ld size) {
+  LATE( drawBubble(c, col, s, size); )
   auto fd = flashdata(ticks, 1000, c, col, 0);
   fd.text = s;
   fd.angle = size;
@@ -3889,6 +3890,7 @@ EX void drawBigFlash(cell *c) {
   }
 
 EX void drawParticleSpeed(cell *c, color_t col, int speed) {
+  LATE( drawParticleSpeed(c, col, speed); )
   if(vid.particles && !confusingGeometry())
     flashes.push_back(flashdata(ticks, rand() % 16, c, col, speed)); 
   }
@@ -3906,6 +3908,7 @@ EX void drawFireParticles(cell *c, int qty, int maxspeed IS(100)) {
   }
 EX void fallingFloorAnimation(cell *c, eWall w IS(waNone), eMonster m IS(moNone)) {
   if(!wmspatial) return;
+  LATE( fallingFloorAnimation(c, w, m); )
   fallanim& fa = fallanims[c];
   fa.t_floor = ticks;
   fa.walltype = w; fa.m = m;
@@ -3913,6 +3916,7 @@ EX void fallingFloorAnimation(cell *c, eWall w IS(waNone), eMonster m IS(moNone)
   }
 EX void fallingMonsterAnimation(cell *c, eMonster m, int id IS(multi::cpid)) {
   if(!mmspatial) return;
+  LATE( fallingMonsterAnimation(c, m, id); )
   fallanim& fa = fallanims[c];
   fa.t_mon = ticks;
   fa.m = m;
@@ -5167,6 +5171,7 @@ EX transmatrix iadj(const movei& m) {
 
 EX void animateMovement(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
+  LATE ( animateMovement(m, layer); )
   transmatrix T = iadj(m);
   bool found_s = animations[layer].count(m.s);
   animation& a = animations[layer][m.t];
@@ -5187,6 +5192,7 @@ EX void animateMovement(const movei& m, int layer) {
   }
 
 EX void animateAttack(const movei& m, int layer) {
+  LATE( animateAttack(m, layer); )
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T = iadj(m);
   bool newanim = !animations[layer].count(m.s);
@@ -5200,6 +5206,7 @@ vector<pair<cell*, animation> > animstack;
 
 EX void indAnimateMovement(const movei& m, int layer) {
   if(vid.mspeed >= 5) return; // no animations!
+  LATE( indAnimateMovement(m, layer); )
   if(animations[layer].count(m.t)) {
     animation res = animations[layer][m.t];
     animations[layer].erase(m.t);
@@ -5218,6 +5225,7 @@ EX void indAnimateMovement(const movei& m, int layer) {
   }
 
 EX void commitAnimations(int layer) {
+  LATE( commitAnimations(layer); )
   for(int i=0; i<isize(animstack); i++)
     animations[layer][animstack[i].first] = animstack[i].second;
   animstack.clear();

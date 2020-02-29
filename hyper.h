@@ -777,6 +777,10 @@ static inline void set_flag(flagtype& f, flagtype which, bool b) {
 
 }
 
+/** this macro is used to delay performing the action in case if everything is rolled back */
+#define LATE(x) \
+  if(changes.on) { changes.at_commit([=] { x; }); return; }
+
 // assert macro
 #ifdef NDEBUG
 #define hassert(condition) if(!condition) __builtin_unreachable()

@@ -213,6 +213,7 @@ EX bool petrify(cell *c, eWall walltype, eMonster m) {
         
 EX void killIvy(cell *c, eMonster who) {
   if(c->monst == moIvyDead) return;
+  changes.ccell(c);
   if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, c->monst);
   c->monst = moIvyDead; // NEWYEARFIX
   for(int i=0; i<c->type; i++) if(c->move(i))
@@ -222,6 +223,7 @@ EX void killIvy(cell *c, eMonster who) {
 
 EX void prespill(cell* c, eWall t, int rad, cell *from) {
   if(againstWind(c, from)) return;
+  changes.ccell(c);
   // these monsters block spilling
   if(c->monst == moSeep || c->monst == moVineSpirit || c->monst == moShark ||
     c->monst == moGreaterShark || c->monst == moParrot || c->monst == moCShark)
@@ -300,7 +302,10 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
   }
 
 EX void spillfix(cell* c, eWall t, int rad) {
-  if(c->wall == waTemporary) c->wall = t;
+  if(c->wall == waTemporary) {
+    changes.ccell(c);
+    c->wall = t;
+    }
   if(rad) for(cell *c2: adj_minefield_cells(c))
     spillfix(c2, t, rad-1);
   }
@@ -314,12 +319,14 @@ EX void degradeDemons() {
   int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
-    if(c->monst == moGreaterM || c->monst == moGreater)
+    if(c->monst == moGreaterM || c->monst == moGreater) {
+      changes.ccell(c);
       achievement_gain("DEMONSLAYER");
-    if(c->monst == moGreaterM) c->monst = moLesserM;
-    if(c->monst == moGreater) c->monst = moLesser;
-    shmup::degradeDemons();
+      if(c->monst == moGreaterM) c->monst = moLesserM;
+      if(c->monst == moGreater) c->monst = moLesser;
+      }
     }  
+  shmup::degradeDemons();
   }
 
 EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
@@ -367,6 +374,7 @@ EX bool attackJustStuns(cell *c2, flagtype f, eMonster attacker) {
   }
   
 EX void minerEffect(cell *c) {
+  changes.ccell(c);
   eWall ow = c->wall;
   if(c->wall == waOpenGate || c->wall == waFrozenLake || c->wall == waBoat ||
     c->wall == waStrandedBoat ||
@@ -390,6 +398,7 @@ EX void minerEffect(cell *c) {
 
 EX void killMutantIvy(cell *c, eMonster who) {
   if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, moMutant);
+  changes.ccell(c);
   removeIvy(c);
   for(int i=0; i<c->type; i++)
     if(c->move(i)->mondir == c->c.spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
@@ -461,17 +470,18 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     bool avenge = false;
     for(int i=0; i<c->type; i++) if(!isWarpedType(c->move(i)->land))
       avenge = true;
-    if(avenge) { avengers += 2; }
+    if(avenge)
+      changes.value_add(avengers, 2);
     }
   
   if(m == moMirrorSpirit && who != moMimic && !(deathflags & (AF_MAGIC | AF_CRUSH))) {
     kills[m]--;
-    mirrorspirits++;
+    changes.value_inc(mirrorspirits);
     }
   
   if(isMutantIvy(m) || m == moFriendlyIvy) {
     pcount = 0;
-    if(isMutantIvy(m)) clearing::direct++;
+    if(isMutantIvy(m)) changes.at_commit([] { clearing::direct++; });
     bignum s = ivy_total() - 1;
     killMutantIvy(c, who);
     s = ivy_total() - s;
@@ -481,6 +491,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   
   if(m == moPrincess) {
     princess::info *i = princess::getPrincessInfo(c);
+    changes.value_keep(*i);
     if(i) {
       i->princess = NULL;
       if(i->bestdist == OUT_OF_PALACE) {
@@ -523,15 +534,19 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(m == moIceGolem) {
     if(petrify(c, waIcewall, m)) pcount = 0;
     heat::affect(c, -1);
-    forCellEx(c2, c) heat::affect(c2, -.5);
+    forCellEx(c2, c) {
+      changes.ccell(c2);      
+      heat::affect(c2, -.5);
+      }
     }
     
   if(m == moTroll) {
     petrify(c, waDeadTroll, m); pcount = 0;
-    for(int i=0; i<c->type; i++) if(c->move(i)) {
-      c->move(i)->item = itNone;
-      if(c->move(i)->wall == waDeadwall || c->move(i)->wall == waDeadfloor2) c->move(i)->wall = waCavewall;
-      if(c->move(i)->wall == waDeadfloor) c->move(i)->wall = waCavefloor;
+    forCellEx(c1, c) {
+      changes.ccell(c1);
+      c1->item = itNone;
+      if(c1->wall == waDeadwall || c1->wall == waDeadfloor2) c1->wall = waCavewall;
+      if(c1->wall == waDeadfloor) c1->wall = waCavefloor;
       }
     }
   if(m == moFjordTroll || m == moForestTroll || m == moStormTroll) {
@@ -543,14 +558,16 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     destroyHalfvine(c);
     minerEffect(c);
     brownian::dissolve_brownian(c, 1);
-    for(int i=0; i<c->type; i++) if(passable(c->move(i), c, P_MONSTER | P_MIRROR | P_CLIMBUP | P_CLIMBDOWN)) {
-      destroyHalfvine(c->move(i));
-      minerEffect(c->move(i));
-      brownian::dissolve_brownian(c->move(i), 1);
-      if(c->move(i)->monst == moSlime || c->move(i)->monst == moSlimeNextTurn)
-        killMonster(c->move(i), who);
+    forCellEx(c1, c) if(passable(c1, c, P_MONSTER | P_MIRROR | P_CLIMBUP | P_CLIMBDOWN)) {
+      changes.ccell(c1);
+      destroyHalfvine(c1);
+      minerEffect(c1);
+      brownian::dissolve_brownian(c1, 1);
+      if(c1->monst == moSlime || c1->monst == moSlimeNextTurn)
+        killMonster(c1, who);
       }
     forCellEx(c2, c) {
+      changes.ccell(c2);
       if(c2->wall == waPalace) c2->wall = waRubble;
       if(c2->wall == waDeadwall) c2->wall = waDeadfloor2;
       if(c2->wall == waExplosiveBarrel) explodeBarrel(c2);
@@ -716,12 +733,13 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       degradeDemons();
       }
     }
-  if(isIvy(c)) {
+  if(isIvy(c)) {    
     pcount = 0;
     eMonster m = c->monst;
     bignum s = ivy_total() - 1;
     /*if((m == moIvyBranch || m == moIvyHead) && c->move(c->mondir)->monst == moIvyRoot)
       ivynext(c, moIvyNext); */
+    changes.value_keep(clearing::imputed);
     killIvy(c, who);
     s = ivy_total() - s;
     if(s > bignum(1) && vid.bubbles_special)
@@ -759,6 +777,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     useupOrb(itOrbLuck, items[itOrbLuck] / 2);
   
   if(m == moAirElemental) {
+    changes.value_keep(airmap);
     airmap.clear();
     for(int i=0; i<isize(dcal); i++)
       if(dcal[i]->monst == moAirElemental)
@@ -1033,7 +1052,7 @@ EX bool flashWouldKill(cell *c, flagtype extra) {
       cell *c3 = c2->move(u);
       if(isWorm(c3)) continue; // immune to Flash
       if(c3->monst == moEvilGolem) continue; // evil golems don't count
-      if(c3 != c && (c3->monst || isPlayerOn(c3)) && !stalemate::isKilled(c3)) {
+      if(c3 != c && (c3->monst || isPlayerOn(c3))) {
         bool b = canAttack(NULL, moWitchFlash, c3, c3->monst, AF_MAGIC | extra);
         if(b) return true;
         }

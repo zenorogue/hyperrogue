@@ -378,6 +378,7 @@ EX void knightFlavorMessage(cell *c2) {
   bool tooeasy = (rad < newRoundTableRadius());
 
   static int msgid = 0;
+  changes.value_keep(msgid);
 
   retry:
   if(msgid >= 32) msgid = 0;  

@@ -85,11 +85,15 @@ EX void moveEffect(const movei& mi, eMonster m) {
   if(cf && isPrincess(m)) princess::move(mi);
   
   if(cf && m == moTortoise) {
+    changes.map_value(tortoise::emap, ct);
+    changes.map_value(tortoise::emap, cf);
     tortoise::emap[ct] = tortoise::getb(cf);
     tortoise::emap.erase(cf);
     }
   
   if(cf && ct->item == itBabyTortoise && !cf->item) {
+    changes.map_value(tortoise::babymap, ct);
+    changes.map_value(tortoise::babymap, cf);
     cf->item = itBabyTortoise;
     ct->item = itNone;
     animateMovement(mi.rev(), LAYER_BOAT);
@@ -1520,7 +1524,7 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     isInactiveEnemy(c2,m) ? 1000 :
     -500;
 
-  else if(monstersnear(c2, NULL, m, NULL, c)) val = 50; // linked with mouse suicide!
+  else if(monstersnear(c2, m, NULL, c)) val = 50; // linked with mouse suicide!
   else if(passable_for(m, c2, c, 0)) {
     if(mine::marked_mine(c2) && !ignoresPlates(m))
       val = 50;

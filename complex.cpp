@@ -221,7 +221,7 @@ EX namespace elec {
     if(c->wall == waChasm)
       return ecIsolator;
 
-    if(shmup::on ? isPlayerOn(c) : (isPlayerOn(c) || stalemate::isMoveto(c) || (items[itOrbEmpathy] && isFriendly(c)))) {
+    if(shmup::on ? isPlayerOn(c) : (isPlayerOn(c) || (items[itOrbEmpathy] && isFriendly(c)))) {
       if(items[itOrbShield]) return ecIsolator;
       if(afterOrb) return ecIsolator;
       if(!items[itOrbAether]) return isElectricLand(c) ? ecConductor : ecGrounded;
@@ -229,12 +229,8 @@ EX namespace elec {
     
     // if(c->monst && stalemate::moveto) printf("%p: isKilled = %d\n", c, stalemate::isKilled(c));
 
-    else if(
-      (c->monst || stalemate::isPushto(c))
-      && 
-      (stalemate::isPushto(c) || !stalemate::isKilled(c)) 
-      && 
-      c->monst != moGhost && c->monst != moIvyDead && c->monst != moIvyNext 
+    else if(c->monst 
+      && c->monst != moGhost && c->monst != moIvyDead && c->monst != moIvyNext 
       && !(isDragon(c->monst) && !c->hitpoints)
       )
       return isElectricLand(c) ? (ao ? ecCharged : ecConductor) : ecGrounded;
@@ -473,6 +469,7 @@ EX namespace elec {
   // 0 = no close escape, 1 = close escape, 2 = message already shown
   EX int lightningfast;
   EX void checklightningfast() {
+    changes.value_keep(lightningfast);
     if(lightningfast == 1) {
       addMessage(XLAT("Wow! That was close."));
       lightningfast = 2;
@@ -700,6 +697,7 @@ struct info {
     eMonster m = c->monst;
   
     static int msgid = 0;
+    changes.value_keep(msgid);
   
     playSound(c, princessgender() ? "speak-princess" : "speak-prince");
     retry:
@@ -990,8 +988,10 @@ EX namespace clearing {
   EX void imput(cell *c) {
     if(bounded) return;
     if(score.count(c)) return;
+    changes.map_value(score, c);
     auto& is = score[c];
     celltype t = get_celltype(c);
+    changes.map_value(stats, t);
     auto& stat = stats[t];
     is.second = c->mondir;
     if(c->mpdist <= 6) {
@@ -1413,10 +1413,12 @@ EX namespace mirror {
       bool survive = true;
       if(m.first == multi::cpid) {
         cell *c = m.second.at;
+        changes.ccell(c);
         if(!m.second.mirrored) nummirage++;
         auto cw2 = m.second + wstep;
         if(inmirror(cw2)) cw2 = reflect(cw2);
         cell *c2 = cw2.at;
+        changes.ccell(c2);
         if(c2->monst) {
           c->monst = moMimic;
           eMonster m2 = c2->monst;
@@ -1453,6 +1455,7 @@ EX namespace mirror {
     }
 
   EX void act(int d, int flags) {
+    changes.value_keep(mirrors);
     destroyKilled();
     unlist();
     if(multi::players == 1) multi::cpid = 0;
@@ -1469,6 +1472,7 @@ EX namespace mirror {
     }
   
   EX void breakAll() {
+    changes.value_keep(mirrors);
     destroyKilled();
     unlist();
     if(numplayers() == 1)
@@ -2619,6 +2623,7 @@ EX namespace dragon {
     int penalty = 0;
     int maxlen = 1000;
     while(maxlen-->0) {
+      changes.ccell(c);
       makeflame(c, 5, false);
       eMonster m = c->monst;
       drawFireParticles(c, 16);
@@ -2879,24 +2884,25 @@ EX namespace kraken {
     if(c->land == laKraken && !c->item) c->item = itKraken;
     kills[moKrakenH]++;
     if(checkOrb(who, itOrbStone)) c->wall = waNone;
-    for(int i=0; i<c->type; i++)
-      if(c->move(i)->monst == moKrakenT) {
+    forCellEx(c1, c) 
+      if(c1->monst == moKrakenT) {
+        changes.ccell(c1);        
         drawParticles(c, minf[moKrakenT].color, 16);
-        c->move(i)->monst = moNone;
+        c1->monst = moNone;
         if(checkOrb(who, itOrbStone)) {
-          if(isWatery(c->move(i)))
-            c->move(i)->wall = waNone;
+          if(isWatery(c1))
+            c1->wall = waNone;
           else
-            c->move(i)->wall = waPetrified, c->move(i)->wparam = moKrakenT;
+            c1->wall = waPetrified, c1->wparam = moKrakenT;
           }
         }
     }
   
   EX int totalhp(cell *c) {
     int total = 0;
-    for(int i=0; i<c->type; i++)
-      if(c->move(i)->monst == moKrakenT)
-        total += c->move(i)->hitpoints;
+    forCellEx(c1, c)
+      if(c1->monst == moKrakenT)
+        total += c1->hitpoints;
     return total;
     }
   
@@ -3616,6 +3622,7 @@ EX namespace halloween {
   
   void putMonster(eMonster m) {
     cell *c = farempty();
+    changes.ccell(c);
     c->hitpoints = 3;
     c->monst = m;
     playSeenSound(c);
@@ -3655,6 +3662,10 @@ EX namespace halloween {
     farempty()->item = itTreat;
     int itr = items[itTreat];
     items[itOrbTime] += 30;
+    changes.value_keep(dragoncount);
+    changes.value_keep(demoncount);
+    changes.value_keep(swordpower);
+
     int monpower = 19 + itr + hrand(itr);
     int mcount = 0;
     while(monpower > 0) {

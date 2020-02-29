@@ -187,6 +187,8 @@ void achievement_gain(const char* s, char flags IS(0)) {
 EX void achievement_collection(eItem it) {
   if(cheater) return;
   if(randomPatternsMode) return;
+  LATE( achievement_collection(it); )
+
   int q = items[it];
   
   if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
@@ -518,6 +520,8 @@ EX void achievement_count(const string& s, int current, int prev) {
   if(cheater) return;
   if(shmup::on) return;
   if(randomPatternsMode) return;
+  LATE( achievement_count(s, current, prev); )
+
   if(s == "GOLEM" && current >= 5)
     achievement_gain("GOLEM2");
   if(s == "GOLEM" && current >= 10)
@@ -563,6 +567,7 @@ int specific_what = 0;
 
 EX void improve_score(int i, eItem what) {
   if(offlineMode) return;
+  LATE( improve_score(i, what); )
 #ifdef HAVE_ACHIEVEMENTS
   if(haveLeaderboard(i)) updateHi(what, get_currentscore(i));
   if(items[what] && haveLeaderboard(i)) {
@@ -579,6 +584,7 @@ EX void achievement_score(int cat, int number) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
+  LATE( achievement_score(cat, number); )
   if(cat == LB_HALLOWEEN) {
     if(geometry != gSphere && geometry != gElliptic)
       return;
@@ -597,6 +603,7 @@ EX void achievement_score(int cat, int number) {
   }
 
 EX void improveItemScores() {
+  LATE( improveItemScores(); )
   for(int i=1; i<=12; i++) improve_score(i, eItem(i));
   improve_score(17, itOrbYendor);
   improve_score(18, itFernFlower);
@@ -668,6 +675,8 @@ int next_stat_tick;
  */
 EX void achievement_final(bool really_final) {
   if(offlineMode) return;
+
+  LATE( achievement_final(really_final); )
 
 #ifdef HAVE_ACHIEVEMENTS
   if(ticks > next_stat_tick) {
@@ -778,6 +787,7 @@ EX void check_total_victory() {
   if(!items[itHolyGrail]) return;
   if(items[itHyperstone] < 50) return;
   if(!princess::reviveAt) return;
+  LATE( check_total_victory(); )
   hadtotalvictory = true;
   achievement_gain("TOTALVICTORY");
   }
@@ -798,6 +808,7 @@ EX void achievement_victory(bool hyper) {
   if(peace::on) return;
   if(tactic::on) return;
   if(chaosmode) return;
+  LATE( achievement_victory(hyper); )
   DEBB(DF_STEAM, ("after checks"))
 
   int t = getgametime();

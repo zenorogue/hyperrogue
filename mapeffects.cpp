@@ -8,9 +8,6 @@
 #include "hyper.h"
 namespace hr {
 
-/** offscreen cells to take care off */
-EX vector<cell*> offscreen;
-
 EX void initcell(cell *c) {
   c->mpdist = INFD;   // minimum distance from the player, ever
   c->cpdist = INFD;   // current distance from the player

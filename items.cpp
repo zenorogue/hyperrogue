@@ -146,11 +146,12 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     babymap.erase(c2);
     int bold = seekbits;
     seekbits = bnew;
-    tortoise::last = seekbits;
+    changes.value_set(tortoise::last, seekbits);
     if(seek()) {
       cell *c = passable(cwt.at, NULL, 0) ? cwt.at : c2;
       c->item = itBabyTortoise;
       if(c == c2) dopickup = false;
+      changes.map_value(babymap, c);
       babymap[c] = bold;
       }
     else items[itBabyTortoise]++;
@@ -289,7 +290,8 @@ EX void dropGreenStone(cell *c) {
     else {
       c->item = itGreenStone;
       addMessage(XLAT("You drop %the1.", itGreenStone));
-      if(isHaunted(cwt.at->land)) survivalist = false;
+      if(isHaunted(cwt.at->land)) 
+        fail_survivalist();
       }
     }
   else {
@@ -402,7 +404,8 @@ EX int maxgold() {
 
 EX void updateHi(eItem it, int v) {
   if(!yendor::on)
-    if(v > hiitems[modecode()][it]) hiitems[modecode()][it] = v;
+    if(v > hiitems[modecode()][it]) 
+      changes.value_set(hiitems[modecode()][it], v);
   }
 
 EX void gainItem(eItem it) {

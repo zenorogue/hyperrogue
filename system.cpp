@@ -1518,7 +1518,6 @@ EX void finishAll() {
 #if CAP_SAVE
   saveStats();
 #endif
-  offscreen.clear();
   clearMemory();
 #if ISMOBILE==0
   cleargraph();

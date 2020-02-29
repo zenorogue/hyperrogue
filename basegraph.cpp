@@ -816,6 +816,7 @@ void addMessageToLog(msginfo& m, vector<msginfo>& log) {
 EX void clearMessages() { msgs.clear(); }
 
 EX void addMessage(string s, char spamtype) {
+  LATE( addMessage(s, spamtype); )
   DEBB(DF_MSG, ("addMessage: ", s));
 
   msginfo m;

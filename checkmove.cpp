@@ -42,78 +42,12 @@ EX bool hasSafeOrb(cell *c) {
 struct stalemate1 {
   eMonster who;
   cell *moveto;
-  cell *killed;
   cell *pushto;
   cell *comefrom;
   cell *swordlast[2], *swordtransit[2], *swordnext[2];
-  bool isKilled(cell *c);
-  stalemate1(eMonster w, cell *mt, cell *ki, cell *pt, cell *cf) : who(w), moveto(mt), killed(ki), pushto(pt), comefrom(cf) {}
+  stalemate1(eMonster w, cell *mt, cell *pt, cell *cf) : who(w), moveto(mt), pushto(pt), comefrom(cf) {}
   };
 #endif
-
-EX bool used_impact;
-
-bool stalemate1::isKilled(cell *w) {
-  if(w->monst == moNone || w == killed) return true;
-  if(!moveto) return false;
-  
-  for(int b=0; b<2; b++) 
-    if((w == swordnext[b] || w == swordtransit[b]) && canAttack(moveto, who, w, w->monst, AF_SWORD))
-      return true;
-  
-  if(logical_adjacent(moveto, who, w) && moveto != comefrom) {
-    int wid = neighborId(moveto, w);
-    int wfrom = neighborId(moveto, comefrom);
-    int flag = AF_APPROACH;
-    if(wid >= 0 && wfrom >= 0 && anglestraight(moveto, wfrom, wid)) flag |= AF_HORNS;
-    if(canAttack(moveto, who, w, w->monst, flag)) return true;
-    }
-  
-  if(used_impact && !isMultitile(w) && isNeighbor(w, moveto))
-    return true;
-
-  if(isNeighbor(w, comefrom) && comefrom == moveto && killed) {
-    int d1 = neighborId(comefrom, w);
-    int d2 = neighborId(comefrom, killed);
-    int di = angledist(comefrom->type, d1, d2);
-    if(di && items[itOrbSide1-1+di] && canAttack(moveto, who, w, w->monst, AF_SIDE))
-      return true;
-    }
-
-  if(logical_adjacent(comefrom, who, w) && logical_adjacent(moveto, who, w) && moveto != comefrom)
-    if(canAttack(moveto, who, w, w->monst, AF_STAB))
-      return true;
-
-  if(who == moPlayer && (killed || moveto != comefrom) && mirror::isKilledByMirror(w)) return true;
-  if(w->monst == moIvyHead || w->monst == moIvyBranch || isMutantIvy(w))
-    return isChild(w, killed);
-
-  if(isDragon(w->monst) && killed && isDragon(killed->monst) && killed->hitpoints) {
-    cell *head1 = dragon::findhead(w);
-    cell *head2 = dragon::findhead(killed);
-    if(head1 == head2 && dragon::totalhp(head1) ==1) return true;
-    }
-  
-  if((w->monst == moPair || isMagneticPole(w->monst)) && killed && w->move(w->mondir) == killed)
-    return true;
-  
-  if(w->monst == moKrakenT && killed && killed->monst == moKrakenT && killed->hitpoints) {
-    cell *head1 = w->move(w->mondir);
-    cell *head2 = killed->move(killed->mondir);
-    if(head1 == head2 && kraken::totalhp(head1) == 1) return true;
-    }
-  
-  return false;
-  }
-
-EX namespace stalemate {
-  EX bool isKilled(cell *w) {
-    for(int f=0; f<isize(moves); f++)
-      if(moves[f].isKilled(w)) return true;
-    
-    return false;
-    };
-EX }
 
 EX bool krakensafe(cell *c) {
   return items[itOrbFish] || items[itOrbAether] || 
@@ -149,7 +83,7 @@ EX bool monstersnear(stalemate1& sm) {
   
   if(havewhat&HF_OUTLAW) {
     for(cell *c1: gun_targets(c)) 
-      if(c1->monst == moOutlaw && !c1->stuntime && !stalemate::isKilled(c1)) {
+      if(c1->monst == moOutlaw && !c1->stuntime) {
         res++; who_kills_me = moOutlaw;
         }
     }
@@ -166,7 +100,7 @@ EX bool monstersnear(stalemate1& sm) {
       if(c3->monst != moWitchFlash)
         if(!logical_adjacent(c3, c3->monst, c2) || !logical_adjacent(c2, c3->monst, c))
           continue;
-      if(elec::affected(c3) || stalemate::isKilled(c3)) continue;
+      if(elec::affected(c3)) continue;
       if(c3->stuntime > (sm.who == moPlayer ? 0 : 1)) continue;
       // speedwitches can only attack not-fastened monsters,
       // others can only attack if the move is not fastened
@@ -174,7 +108,7 @@ EX bool monstersnear(stalemate1& sm) {
       if(c3->monst != moWitchSpeed && fast) continue;
       // cannot attack if the immediate cell is impassable (except flashwitches)
       if(c3->monst != moWitchFlash) {
-        if(!passable(c2, c3, stalemate::isKilled(c2)?P_MONSTER:0)) continue;
+        if(!passable(c2, c3, 0)) continue;
         if(isPlayerOn(c2) && items[itOrbFire]) continue;
         }
       // flashwitches cannot attack if it would kill another enemy
@@ -185,7 +119,6 @@ EX bool monstersnear(stalemate1& sm) {
     // consider normal monsters
     if(c2 && 
       isArmedEnemy(c2, sm.who) && 
-      !stalemate::isKilled(c2) &&
       (c2->monst != moLancer || isUnarmed(sm.who) || !logical_adjacent(c, sm.who, c2))) {
       eMonster m = c2->monst;
       if(elec::affected(c2)) continue;
@@ -267,11 +200,11 @@ EX bool monstersnear2() {
   return b;
   }
 
-EX bool monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
+EX bool monstersnear(cell *c, eMonster who, cell *pushto, cell *comefrom) {
 
   if(peace::on) return 0; // you are safe
 
-  stalemate1 sm(who, c, nocount, pushto, comefrom);
+  stalemate1 sm(who, c, pushto, comefrom);
   
   if(who == moPlayer) for(int b=0; b<2; b++) sm.swordlast[b] = sword::pos(multi::cpid, b);
   
@@ -340,11 +273,6 @@ EX namespace stalemate {
     return false;
     }
 
-  EX bool isKilledDirectlyAt(cell *c) {
-    for(int i=0; i<isize(moves); i++) if(moves[i].killed == c) return true;
-    return false;
-    }
-  
   EX bool isPushto(cell *c) {
     for(int i=0; i<isize(moves); i++) if(moves[i].pushto == c) return true;
     return false;

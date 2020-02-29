@@ -358,7 +358,7 @@ EX void bfs() {
         if(c2->monst) {
           if(isHaunted(c2->land) && 
             c2->monst != moGhost && c2->monst != moZombie && c2->monst != moNecromancer)
-            survivalist = false;
+            fail_survivalist();
           if(c2->monst == moHexSnake || c2->monst == moHexSnakeTail) {
             havewhat |= HF_HEX;
             if(c2->mondir != NODIR)
@@ -753,6 +753,7 @@ EX void monstersTurn() {
   if(!phase1) heat::processfires();
   
   for(cell *c: crush_now) {
+    changes.ccell(c);
     playSound(NULL, "closegate");
     if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH)) {
       attackMonster(c, AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
@@ -762,6 +763,8 @@ EX void monstersTurn() {
     explodeBarrel(c);
     }
   
+  changes.value_keep(crush_now);
+  changes.value_keep(crush_next);
   crush_now = move(crush_next);
   crush_next.clear();
   

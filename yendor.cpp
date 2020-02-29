@@ -750,6 +750,7 @@ EX namespace yendor {
     }
     
   EX void collected(cell* c2) {
+    LATE( collected(c2); )
     playSound(c2, "tada");
     items[itOrbShield] += 31;
     for(int i=0; i<isize(yendor::yi); i++)
