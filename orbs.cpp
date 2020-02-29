@@ -181,6 +181,7 @@ EX void flashAlchemist(cell *c) {
   }
 
 EX void flashCell(cell *c, eMonster killer, flagtype flags) {
+  changes.ccell(c);
   eWall ow = c->wall;
   flashAlchemist(c);
   if((flags & AF_MSG) && c->monst && !isWorm(c) && c->monst != moShadow)
@@ -343,14 +344,17 @@ EX void killAdjacentSharks(cell *c) {
     cell *c2 = c->move(i);
     if(!c2) continue;
     if(isShark(c2->monst)) {
+      changes.ccell(c2);
       c2->ligon = true;
       killMonster(c2, moLightningBolt);
       killAdjacentSharks(c2);
       }
     if(isKraken(c2->monst) && isWatery(c2)) {
+      changes.ccell(c2);
       cell *c3 = kraken::head(c2);
+      changes.ccell(c3);
       c3->ligon = true; 
-      forCellEx(c4, c3) killMonster(c4, moLightningBolt); // kill-all
+      forCellEx(c4, c3) changes.ccell(c4), killMonster(c4, moLightningBolt); // kill-all
       forCellEx(c4, c3) if(isWatery(c4)) {
         c4->ligon = true;
         killAdjacentSharks(c4);
@@ -374,6 +378,7 @@ EX void castLightningBolt(cellwalker lig) {
     if(inmirror(lig)) lig = mirror::reflect(lig);
     
     cell *c = lig.at;
+    changes.ccell(c);
 
     eWall ow = c->wall;
 
