@@ -2607,7 +2607,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laMemory:
-      c->wall = waChasm;
+      if(d >= 7) c->wall = waChasm;
       if(d == 7 && !c->monst && hrand(2000) < 4)
       #if CAP_RACING
       if(!racing::on)
@@ -2901,8 +2901,18 @@ EX void setdist(cell *c, int d, cell *from) {
   // the number of tiles in the standard geometry has about 7553 digits!
   int gdist = abs(c->master->distance);
   if(gdist > global_distance_limit) {
-    c->wall = waNone;
-    c->item = itOrbSafety;
+    gdist -= global_distance_limit;
+    if(d == 8 && hrand(100) < gdist) {
+      if(!isMultitile(c)) c->monst = moNone;
+      if(!do_not_touch_this_wall(c)) {
+        setland(c, laMemory);
+        c->wall = waChasm;
+        c->item = itNone;
+        }
+      }
+    if(d == 7 && c->land == laMemory && hrand(100) < 5) {
+      c->wall = waTrapdoor, c->item = itOrbSafety;
+      }
     }
 
   ONEMPTY if(!c->item) {
