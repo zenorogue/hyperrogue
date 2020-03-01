@@ -192,9 +192,11 @@ EX namespace elec {
   EX bool havecharge, haveelec, havethunder;
   EX bool afterOrb; // extra charge from the Orb of Lightning
 
+  #if HDR
   enum eCharge {
     ecCharged, ecGrounded, ecIsolator, ecConductor
     };
+  #endif
   
   bool conduct(eCharge cf, eCharge ct) {
     if(ct == ecIsolator) return false;
@@ -202,7 +204,7 @@ EX namespace elec {
     return ct != cf;
     }
   
-  eCharge getCharge(cell *c) {
+  EX eCharge getCharge(cell *c) {
     bool ao = afterOrb && c->ligon;
     
     /* not yet generated */

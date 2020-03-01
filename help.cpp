@@ -935,7 +935,16 @@ EX void describeMouseover() {
       appendHelp(string("\n\n") + XLAT(warpdesc));
 
       if(S7 != 7 || !BITRUNCATED) if(c->item != itOrb37)
-        help += "\n\n" + other_geometry() + forbidden_unmarked();
+        appendHelp("\n\n" + other_geometry() + forbidden_unmarked());
+      }
+    
+    if(isElectricLand(c) || isElectricLand(cwt.at->land)) {
+      using namespace elec;
+      eCharge ch = getCharge(c);
+      if(ch == ecCharged) appendHelp("\n\nThis cell is charged.");
+      if(ch == ecGrounded) appendHelp("\n\nThis cell is grounded.");
+      if(ch == ecConductor) appendHelp("\n\nThis cell is currently conductive.");
+      if(ch == ecIsolator) appendHelp("\n\nThis cell is currently not conductive.");
       }
     }
   else {
