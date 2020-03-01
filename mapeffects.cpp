@@ -27,6 +27,7 @@ EX void initcell(cell *c) {
   }
 
 EX bool doesnotFall(cell *c) {
+  changes.ccell(c);
   if(c->wall == waChasm) return false;
   else if(cellUnstable(c) && !in_gravity_zone(c)) {
     fallingFloorAnimation(c);
@@ -45,6 +46,7 @@ EX bool doesFallSound(cell *c) {
   }
 
 EX void destroyBoats(cell *c, cell *c2, bool strandedToo) {
+  changes.ccell(c);
   if(c->wall == waBoat) placeWater(c, c2);
   if(strandedToo && c->wall == waStrandedBoat) c->wall = waNone;
   shmup::destroyBoats(c);
@@ -139,6 +141,7 @@ EX bool thruVine(cell *c, cell *c2) {
   }
 
 EX void useup(cell *c) {
+  changes.ccell(c);
   c->wparam--;
   if(c->wparam == 0) {
     drawParticles(c, c->wall == waFire ? 0xC00000 : winf[c->wall].color, 10, 50);
@@ -153,6 +156,7 @@ EX void useup(cell *c) {
   }
 
 EX bool earthFloor(cell *c) {
+  changes.ccell(c);
   if(c->monst) return false;
   if(c->wall == waDeadwall) { c->wall = waDeadfloor; return true; }
   if(c->wall == waDune) { c->wall = waNone; return true; }
@@ -198,6 +202,7 @@ EX bool earthFloor(cell *c) {
   }
 
 EX bool earthWall(cell *c) {
+  changes.ccell(c);
   if(c->wall == waDeadfloor || c->wall == waDeadfloor2 || c->wall == waEarthD) {
     c->item = itNone;
     c->wall = waDeadwall;
@@ -269,6 +274,7 @@ EX bool earthWall(cell *c) {
   }
 
 EX bool snakepile(cell *c, eMonster m) {
+  changes.ccell(c);
   if(c->wall == waSea && c->land == laOcean) {
     c->land = laBrownian, c->landparam = 0;
     }
@@ -339,6 +345,7 @@ EX bool snakepile(cell *c, eMonster m) {
   }
 
 EX bool makeflame(cell *c, int timeout, bool checkonly) {
+  changes.ccell(c);
   if(!checkonly) destroyTrapsOn(c);
   if(itemBurns(c->item)) {
     if(checkonly) return true;
@@ -413,6 +420,7 @@ EX bool makeflame(cell *c, int timeout, bool checkonly) {
   }
 
 EX void explosion(cell *c, int power, int central) {
+  changes.ccell(c);
   playSound(c, "explosion");
   drawFireParticles(c, 30, 150);
   
@@ -420,6 +428,7 @@ EX void explosion(cell *c, int power, int central) {
   makeflame(c, central, false);
   
   forCellEx(c2, c) {
+    changes.ccell(c2);
     destroyTrapsOn(c2);
     brownian::dissolve_brownian(c2, 1);
     if(c2->wall == waRed2 || c2->wall == waRed3)
@@ -456,6 +465,7 @@ EX void explodeMine(cell *c) {
   if(c->wall != waMineMine)
     return;
   
+  changes.ccell(c);
   c->wall = waMineOpen;
   explosion(c, 20, 20);
   mine::auto_teleport_charges();
@@ -465,6 +475,7 @@ EX void explodeBarrel(cell *c) {
   if(c->wall != waExplosiveBarrel)
     return;
   
+  changes.ccell(c);
   c->wall = waNone;  
   explosion(c, 20, 20);
   }
@@ -477,6 +488,7 @@ EX bool mayExplodeMine(cell *c, eMonster who) {
   }
 
 EX void flameHalfvine(cell *c, int val) {
+  changes.ccell(c);
   if(itemBurns(c->item)) {
     addMessage(XLAT("%The1 burns!", c->item));
     c->item = itNone;
@@ -487,10 +499,12 @@ EX void flameHalfvine(cell *c, int val) {
 
 EX bool destroyHalfvine(cell *c, eWall newwall IS(waNone), int tval IS(6)) {
   if(cellHalfvine(c)) {
-    for(int t=0; t<c->type; t++) if(c->move(t)->wall == c->wall) {
-      if(newwall == waPartialFire) flameHalfvine(c->move(t), tval);
-      else if(newwall == waRed1) c->move(t)->wall = waVinePlant;
-      else c->move(t)->wall = newwall;
+    changes.ccell(c);
+    forCellEx(c1, c) if(c1->wall == c->wall) {
+      changes.ccell(c1);
+      if(newwall == waPartialFire) flameHalfvine(c1, tval);
+      else if(newwall == waRed1) c1->wall = waVinePlant;
+      else c1->wall = newwall;
       }
     if(newwall == waPartialFire) flameHalfvine(c, tval);
     else c->wall = newwall;
@@ -745,6 +759,7 @@ EX void toggleGates(cell *c, eWall type, int rad) {
       for(int i=0; i<ct->type; i++) 
         if(ct->move(i) && ct->move(i)->wall == waOpenGate && isWorm(ct->move(i))) onWorm = true;
       if(!onWorm) {
+        changes.ccell(ct);
         ct->wall = waClosedGate, numgates++;
         if(ct->item) {
           playSound(ct, "hit-crush"+pick123());
@@ -755,6 +770,7 @@ EX void toggleGates(cell *c, eWall type, int rad) {
         }
       }
     if(ct->wall == waClosedGate && type == waOpenPlate) {
+      changes.ccell(ct);
       ct->wall = waOpenGate, numgates++;
       toggleGates(ct, type, 1);
       }
@@ -775,7 +791,11 @@ EX void toggleGates(cell *ct, eWall type) {
   }
 
 EX void destroyTrapsOn(cell *c) {
-  if(c->wall == waArrowTrap) c->wall = waNone, destroyTrapsAround(c);
+  if(c->wall == waArrowTrap) {
+    changes.ccell(c);
+    c->wall = waNone;
+    destroyTrapsAround(c);
+    }
   }
 
 EX void destroyTrapsAround(cell *c) {
@@ -785,6 +805,7 @@ EX void destroyTrapsAround(cell *c) {
 EX void destroyWeakBranch(cell *cf, cell *ct, eMonster who) {
   if(cf && ct && cf->wall == waWeakBranch && cellEdgeUnstable(ct) &&
     gravityLevelDiff(ct, cf) >= 0 && !ignoresPlates(who)) {
+    changes.ccell(cf);
     cf->wall = waCanopy;
     if(!cellEdgeUnstable(cf)) { cf->wall = waWeakBranch; return; }
     playSound(cf, "trapdoor");
@@ -792,6 +813,7 @@ EX void destroyWeakBranch(cell *cf, cell *ct, eMonster who) {
     }
   if(cf && ct && cf->wall == waSmallBush && cellEdgeUnstable(ct) && 
     gravityLevelDiff(ct, cf) >= 0 && !ignoresPlates(who)) {
+    changes.ccell(cf);
     cf->wall = waNone;
     if(!cellEdgeUnstable(cf)) { cf->wall = waSmallBush; return; }
     playSound(cf, "trapdoor");
@@ -878,11 +900,10 @@ movei determinePush(cellwalker who, int subdir, const T& valid) {
  
 // for sandworms
 EX void explodeAround(cell *c) {
-  for(int j=0; j<c->type; j++) {
-    cell* c2 = c->move(j);
-    if(c2) {
+  forCellEx(c2, c) {
       if(isIcyLand(c2)) HEAT(c2) += 0.5;
       eWall ow = c2->wall;
+      changes.ccell(c2);
       if((c2->wall == waDune || c2->wall == waIcewall ||
         c2->wall == waAncientGrave || c2->wall == waFreshGrave || 
         c2->wall == waColumn || c2->wall == waThumperOff || c2->wall == waThumperOn ||
@@ -916,7 +937,6 @@ EX void explodeAround(cell *c) {
         c2->wall = c->wall;
       if(c2->wall != ow && ow) drawParticles(c2, winf[ow].color, 16);
       }
-    }
   }
 
 EX bool earthMove(const movei& mi) {
