@@ -914,7 +914,7 @@ EX namespace clearing {
       // printf("R %4d C %4d\n", celldistAlt(bd.root), celldistAlt(c));
       if(celldistAlt(c) > celldistAlt(bd.root)) {
         stepcount++;
-        if(stepcount > 1000) {
+        if(stepcount > 100000000) {
           printf("buggy #1\n");
           return;
           }
@@ -933,7 +933,7 @@ EX namespace clearing {
         }
       else {
         bd.dist--;
-        if(bd.dist < -1000) { 
+        if(bd.dist < -100000000) { 
           for(int i=0; i<steps; i++) 
             onpath[i]->item = itBuggy;
           for(int i=0; i<(int) rpath.size(); i++) 

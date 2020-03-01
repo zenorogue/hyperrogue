@@ -237,7 +237,7 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
       pard = 3; // to do: randomize
     else if(S3 == 4)
       pard = 3;
-    buildHeptagon(h, 0, h->distance < -10000 ? hsOrigin : hsA, pard);
+    buildHeptagon(h, 0, h->distance < -32500 ? hsOrigin : hsA, pard);
     }
   if(h->move(d)) return h->move(d);
   if(h->s == hsOrigin) {

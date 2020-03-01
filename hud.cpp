@@ -255,14 +255,8 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
     buttonsize / 3;
 
   if(id == moMutant + ittypes && clearing::imputed.nonzero()) {
-    ld d = qty + clearing::imputed.approx_ld();
-    if(d < 100000) str = its(int(d));
-    else {
-      int digits = 0;
-      while(d >= 10) digits++, d /= 10;
-      str = its(int(d*100)) + "E" + its(digits);
-      str.insert(1, ".");
-      }
+    bignum bn = clearing::imputed + qty;
+    str = short_form(bn);
     bsize = buttonsize / 4;
     }
 

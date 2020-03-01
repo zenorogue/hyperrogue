@@ -514,6 +514,29 @@ string bignum::get_str(int max_length) const {
   return ret;
   }
 
+EX string short_form(bignum b) {
+  if(b < 0) return "-" + short_form(0-b);
+  else if(b < 100000) return its(b.approx_int());
+  else {
+    long long val;
+    int q;
+    if(isize(b.digits) >= 2) {
+      q = max(isize(b.digits) - 2, 0);
+      val = b.digits[q] + (long long)(bignum::BASE) * b.digits[q+1];
+      }
+    else {
+      q = 0;
+      val = b.digits[0];
+      }
+
+    int digits = q * 9;
+    while(val >= 1000) { val /= 10; digits++; }
+    string str = its(val) + "E" + its(digits + 2);
+    str.insert(1, ".");
+    return str;
+    }
+  }
+
 bignum::bignum(ld d) {
   if(d == 0) return;
   int n = 1;
