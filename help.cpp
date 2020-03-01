@@ -589,6 +589,10 @@ EX string generateHelpForMonster(eMonster m) {
     if(imputed.nonzero())
       s += XLAT("\n\nLeaves cut offscreen (approximately): %1", imputed.get_str(10000));
     }
+  
+  eItem it = frog_power(m);
+  if(it)
+    s += XLAT("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing it.", it);
     
   if(m == moBat || m == moEagle)
     s += XLAT("\n\nFast flying creatures may attack or go against gravity only in their first move.", m);
