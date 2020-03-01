@@ -2897,6 +2897,12 @@ EX void setdist(cell *c, int d, cell *from) {
   if(d == min(reduced_barlev, 9)) moreBigStuff(c);
 
   if(d == 7) repairLandgen(c);
+  
+  // the number of tiles in the standard geometry has about 7553 digits!
+  if(c->master->distance > 32000 || c->master->distance < -32000) {
+    c->wall = waNone;
+    c->item = itOrbSafety;
+    }
 
   ONEMPTY if(!c->item) {
     if(isCrossroads(c->land))
