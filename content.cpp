@@ -1552,27 +1552,58 @@ MONSTER('A', 0x606040, "Space Rock", moAsteroid, ZERO, RESERVED, moAsteroid, roc
   NATIVE(m == moAsteroid ? 2 : 0)
   REQ( NEVER )
   
-LAND( 0x00C0C0, "Wetland",    laWet, ZERO, itWet, RESERVED, NODESCYET)
-ITEM( '%', 0xFFD500, "Water Lily", itWet, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
-WALL( '=', 0x00C0C0, "shallow water", waShallow, ZERO, RESERVED, 0, sgWater, NODESCYET)
-WALL( '=', 0x0000A0, "deep water", waDeepWater, WF_WATER, RESERVED, 0, sgWater, NODESCYET)
+LAND( 0x00C0C0, "Wetland",    laWet, ZERO, itWet, RESERVED, 
+  "Some people have definitely drowned in this treacherous area. Better be careful!"
+  )
+ITEM( '%', 0xFFD500, "Water Lily", itWet, IC_TREASURE, ZERO, RESERVED, osNone, 
+  "A beautiful plant from the Wetland.")
+WALL( '=', 0x00C0C0, "shallow water", waShallow, ZERO, RESERVED, 0, sgWater, 
+  "Shallow water is passable both for land creatures and for water creatures."
+  )
+WALL( '=', 0x0000A0, "deep water", waDeepWater, WF_WATER, RESERVED, 0, sgWater, 
+  "This body of water is calm and beautiful, but too deep to pass.")
 MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
   "You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger."
   )
 MONSTER( 'S', 0xC0C080, "Yellow Skipper", moYellowSkipper, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, "Just a nasty shark.") /* unused */
-MONSTER( 'R', 0x4040C0, "Rusałka", moRusalka, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
-  "A water spirit. When killed, she will try to drown you, by changing dry land to shallow water and shallow water to deep water.")
-ITEM( 'o', 0x808080, "Orb of Plague", itOrbPlague, IC_EMPATHY, ZERO, RESERVED, osOffensive, NODESCYET)
+MONSTER( 'R', 0x4040C0, "Rusałka", moRusalka, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, GENDERSWITCH)
+ITEM( 'o', 0x808080, "Orb of Plague", itOrbPlague, IC_ORB, IF_EMPATHY, RESERVED, osOffensive, 
+  "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "These enemies may in turn infect further enemies, up to distance of at most 4 from you."
+  )
   NATIVE(among(m, moPike, moRusalka) ? 2 : 0)
   REQ( GOLD(R30) )
 
-LAND( 0x6FA136, "Frog Park",     laFrog, ZERO, itFrog, RESERVED, NODESCYET)
-ITEM( '$', 0xFFD520, "Gold Ball", itFrog, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
-ITEM( 'o', 0x808080, "Orb of Impact", itOrbImpact, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
-WALL( '#', 0x00C000, "shrub",  waShrub, WF_WALL | WF_HIGHWALL | WF_STDTREE | WF_CONE, RESERVED, 0, sgNone, NODESCYET)
-MONSTER('F', 0x60A060, "Giant Frog", moFrog, ZERO, RESERVED, moFrog, NODESCYET)
-MONSTER('F', 0xFFFF80, "Yellow Frog", moPhaser, ZERO, RESERVED, moPhaser, NODESCYET)
-MONSTER('F', 0x8080FF, "Blue Frog", moVaulter, ZERO, RESERVED, moVaulter, NODESCYET)
+LAND( 0x6FA136, "Frog Park",     laFrog, ZERO, itFrog, RESERVED, 
+  "This park is a perfect place for frogs to hide from predators. "
+  "So perfect that the frogs have grown in size, gained magical abilities, "
+  "and become very dangerous themselves."
+  )
+ITEM( '$', 0xFFD520, "Gold Ball", itFrog, IC_TREASURE, ZERO, RESERVED, osNone, 
+  "A toy lost in the Frog Park by a spoiled child.")
+ITEM( 'o', 0x808080, "Orb of Impact", itOrbImpact, IC_ORB, ZERO, RESERVED, osUtility, 
+  "Whenever you use a ranged Orb to achieve an affect, all the single-tile monsters adjacent to the target "
+  "location are stunned."
+  )
+WALL( '#', 0x00C000, "shrub",  waShrub, WF_WALL | WF_HIGHWALL | WF_STDTREE | WF_CONE, RESERVED, 0, sgNone, 
+  "A strange small tree that cannot be attacked with mundane weapons nor phased though. "
+  "It can be vaulted over, though."
+  )
+MONSTER('F', 0x60A060, "Giant Frog", moFrog, ZERO, RESERVED, moFrog, 
+  "At first, you are shocked by the agility of this frog. Such a large creature "
+  "should not be able to jump that quickly!\n\n"
+  "Then, you notice the green glow around its legs. This frog must be magical... "
+  "it has sacrificed its swimming abilities for superfrog jumping powers."
+  )
+MONSTER('F', 0xFFFF80, "Yellow Frog", moPhaser, ZERO, RESERVED, moPhaser, 
+  "A slightly transparent yellow frog. It has mastered the magical power of phasing through solid "
+  "obstacles such as rock."
+  )
+MONSTER('F', 0x8080FF, "Blue Frog", moVaulter, ZERO, RESERVED, moVaulter, 
+  "This frog is able to vault over the shrubs in the Frog Park, destroying the shrub in the process. "
+  "While it can also vault over monsters, it will never hurt the other frogs!"
+  )
+  
   NATIVE(among(m, moFrog, moPhaser, moVaulter) ? 2 : 0)  
   #define LST {itDodeca, itZebra, itSwitch}
   REQ(ITEMS_TOTAL(LST, variant_unlock_value()))
