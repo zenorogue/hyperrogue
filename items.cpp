@@ -205,6 +205,15 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     dopickup = false;
     }
   else if(c2->item == itBuggy || c2->item == itBuggy2) {
+
+    if(changes.on) {
+      if(changes.checking) {
+        changes.rollback();
+        return true;
+        }
+      changes.commit();
+      }
+
     items[itOrbSafety] += 7;
     if(shmup::on)
       shmup::delayed_safety = true;
