@@ -1373,7 +1373,6 @@ EX void movemutant() {
   
   for(int i=0; i<isize(young); i++) {
     cell *c = young[i];
-    if(clearing::buggyplant) {  if(c->monst == moMutant) c->monst=moNone; continue; }
     for(int j=0; j<c->type; j++) {
       movei mi(c, j);
       auto& c2 = mi.t;

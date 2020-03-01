@@ -790,11 +790,11 @@ EX namespace clearing {
   struct clearingdata {
     cell *root;
     int dist;
+    bool buggy;
+    clearingdata() { root = nullptr; }
     };
   #endif
 
-  EX bool buggyplant = false;
-  
   EX std::map<heptagon*, clearingdata> bpdata;
   
   EX cell *current_root;
@@ -873,7 +873,6 @@ EX namespace clearing {
   vector<cell*> rpath;
     
   EX void generate(cell *c) {
-    if(buggyplant) return;    
     if(sphere) return;    
     if(NONSTDVAR) return;
     if(quotient) return;
@@ -902,7 +901,8 @@ EX namespace clearing {
     if(pseudohept(c)) return;
     heptagon *a = euclid ? NULL : c->master->alt->alt;
     clearingdata& bd(bpdata[a]);
-    if(!bd.root) { bd.root = c; bd.dist = 8; }
+    if(!bd.root) { bd.root = c; bd.dist = 8; bd.buggy = false; }
+    if(bd.buggy) return;
     
     onpath.clear(); pdir.clear(); rpath.clear();
     
@@ -919,6 +919,7 @@ EX namespace clearing {
         stepcount++;
         if(stepcount > 100000000) {
           printf("buggy #1\n");
+          bd.buggy = true;
           return;
           }
 
@@ -941,8 +942,8 @@ EX namespace clearing {
             onpath[i]->item = itBuggy;
           for(int i=0; i<(int) rpath.size(); i++) 
             rpath[i]->item = itBuggy;
-          buggyplant = true;
-          printf("buggygen\n");
+          printf("buggy #2\n");
+          bd.buggy = true;
           return;
           }
         rpath.push_back(bd.root);
