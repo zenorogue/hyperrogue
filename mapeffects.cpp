@@ -848,6 +848,7 @@ EX array<cell*, 5> traplimits(cell *c) {
 
 EX void activateArrowTrap(cell *c) {
   if(c->wall == waArrowTrap && c->wparam == 0) {
+    changes.ccell(c);
     playSound(c, "click");
     c->wparam = shmup::on ? 2 : 1;
     forCellEx(c2, c) activateArrowTrap(c2);

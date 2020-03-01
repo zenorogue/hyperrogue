@@ -486,6 +486,7 @@ EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
     if(just_checking)
       return true;
     else {
+      changes.ccell(c);
       c->wall = waMineOpen;
       b = true;
       }
@@ -512,6 +513,7 @@ EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
   if(minesNearby && !nominesNearby && dist == 0) {
     for(cell *c2: adj)
       if(c2->wall == waMineMine && c2->land == laMinefield)
+        changes.ccell(c2),
         c2->landparam |= 1;
     }
   

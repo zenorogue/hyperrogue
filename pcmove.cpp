@@ -413,7 +413,8 @@ struct changes_t {
   
   void init(bool ch) {
     on = true; 
-    for(cell *dc: dcal) ccell(dc);
+    ccell(cwt.at);
+    forCellEx(c1, cwt.at) ccell(c1);
     value_keep(kills);
     value_keep(items);
     checking = ch;
@@ -1186,6 +1187,7 @@ EX void playerMoveEffects(cell *c1, cell *c2) {
   
   if(c2->wall == waFireTrap && c2->wparam == 0 && normal_gravity_at(c2) &&!markOrb(itOrbAether)) {
     playSound(c2, "click");
+    changes.ccell(c2);
     c2->wparam = 1;
     }
     
@@ -1226,6 +1228,7 @@ EX void afterplayermoved() {
 EX void produceGhost(cell *c, eMonster victim, eMonster who) {
   if(who != moPlayer && !items[itOrbEmpathy]) return;
   if(markOrb(itOrbUndeath) && !c->monst && isGhostable(victim)) {
+    changes.ccell(c);
     c->monst = moFriendlyGhost, c->stuntime = 0;
     if(who != moPlayer) markOrb(itOrbEmpathy);
     }
@@ -1236,6 +1239,7 @@ EX bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
   if(c->wall == waCavewall) markOrb(bb ? itOrbSword2: itOrbSword);
   if(c->wall == waSmallTree || c->wall == waBigTree || c->wall == waRose || c->wall == waCTree || c->wall == waVinePlant ||
     thruVine(mt, c) || c->wall == waBigBush || c->wall == waSmallBush || c->wall == waSolidBranch || c->wall == waWeakBranch) {
+    changes.ccell(c);
     playSound(NULL, "hit-axe"+pick123());
     markOrb(bb ? itOrbSword2: itOrbSword);
     drawParticles(c, winf[c->wall].color, 16);
@@ -1244,12 +1248,14 @@ EX bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
     c->wall = waNone;
     }
   if(c->wall == waBarrowDig) {
+    changes.ccell(c);
     playSound(NULL, "hit-axe"+pick123());
     markOrb(bb ? itOrbSword2: itOrbSword);
     drawParticles(c, winf[c->wall].color, 16);
     c->wall = waNone;
     }
   if(c->wall == waBarrowWall && items[itBarrow] >= 25) {
+    changes.ccell(c);
     playSound(NULL, "hit-axe"+pick123());
     markOrb(bb ? itOrbSword2: itOrbSword);
     drawParticles(c, winf[c->wall].color, 16);
@@ -1258,6 +1264,7 @@ EX bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
   if(c->wall == waExplosiveBarrel)
     explodeBarrel(c);
   if(!peace::on && canAttack(mt, who, c, m, AF_SWORD)) {
+    changes.ccell(c);
     markOrb(bb ? itOrbSword2: itOrbSword);
     int k = tkills();
     attackMonster(c, AF_NORMAL | AF_MSG | AF_SWORD, who);
@@ -1305,6 +1312,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     if((f & AF_CRUSH) && !canAttack(mf, who, mt, m, AF_SIDE | AF_MUSTKILL))
       markOrb(itOrbSlaying);
     markOrb(orb);
+    changes.ccell(mt);
     plague_particles();
     if(who != moPlayer) markOrb(itOrbEmpathy);
     if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who) || isAnyIvy(m)) {
@@ -1313,24 +1321,29 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
       }
     }
   else if(mt->wall == waSmallTree) {
+    changes.ccell(mt);
     plague_particles();
     markOrb(orb);
     mt->wall = waNone;
     spread_plague(mf, mt, dir, who);
     }
   else if(mt->wall == waShrub && markEmpathy(itOrbSlaying)) {
+    changes.ccell(mt);
     plague_particles();
     markOrb(orb);
     mt->wall = waNone;
     spread_plague(mf, mt, dir, who);
     }
   else if(mt->wall == waBigTree) {
+    changes.ccell(mt);
     plague_particles();
     markOrb(orb);
     mt->wall = waSmallTree;
     }
-  else if(mt->wall == waExplosiveBarrel && orb != itOrbPlague)
-    explodeBarrel(mt);    
+  else if(mt->wall == waExplosiveBarrel && orb != itOrbPlague) {
+    changes.ccell(mt);
+    explodeBarrel(mt);
+    }
   }
 
 EX void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
@@ -1446,6 +1459,8 @@ EX void movecost(cell* from, cell *to, int phase) {
     chaosmode;
   
   if(tortoise::seek() && !from->item && !tortoiseOK && passable(from, NULL, 0) && (phase & 2)) {
+    changes.ccell(from);
+    changes.map_value(tortoise::babymap, from);
     from->item = itBabyTortoise;
     tortoise::babymap[from] = tortoise::seekbits;
     addMessage(XLAT("You leave %the1.", itBabyTortoise));

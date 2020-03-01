@@ -617,6 +617,7 @@ struct info {
     }
   
   void setdist(info *i, int newdist) {
+    changes.value_keep(*i);
     if(newdist < ALTDIST_ERROR && newdist > i->bestdist) {
       i->bestdist = newdist;
 //    printf("Improved dist to %d\n", newdist);
@@ -648,7 +649,7 @@ struct info {
   EX void save(cell *princess) {
     if(euclid) return;
     princess::info *i = princess::getPrincessInfo(princess);
-    if(!i || i->bestdist <= 3) princess->monst = moNone;
+    if(!i || i->bestdist <= 3) changes.ccell(princess), princess->monst = moNone;
     else if(i) setdist(i, OUT_OF_PRISON);
     }
 
@@ -664,6 +665,7 @@ struct info {
         addMessage("Warning: unknown princess (that's a bug, please report)");
       }
     else {
+      changes.value_keep(*i);
       i->princess = ct;
       setdist(i, dist(ct));
       // printf("newdist = %d (vs %d)\n", newdist, i->bestdist);
@@ -770,6 +772,7 @@ struct info {
     int d = dist(c);
     // if(i) printf("d=%d bn=%d\n", d, i->bestnear);
     if(i && d < i->bestnear) {
+      changes.value_keep(*i);
       if(i->bestnear > 100 && d <= 100) {
         i->value = items[itPalace];
         if(princess::challenge) 
