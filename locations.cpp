@@ -288,6 +288,18 @@ struct cdata {
   int bits;
   };
 
+/** Limit on the 'distance' value in heptagon. This value is signed (negative distances are used
+    in horocycle implementation. Distance is currently a short, and we need a bit of breathing room.
+    It would not be a technical problem to use a larger type, but 32000 is close to what fits in
+    the memory of a normal computer. Farlands appear close to this limit.
+    */
+    
+constexpr int global_distance_limit = 32000;
+
+/** This value is used in iterative algorithms to prevent infinite loops created by incorrect
+    data (e.g., circular dragon). It should be larger than global_distance_limit */
+constexpr int iteration_limit = 10000000;
+
 /** in bitruncated/irregular/Goldberg geometries, heptagons form the 
  *  underlying regular tiling (not necessarily heptagonal); in pure
  *  geometries, they correspond 1-1 to tiles; in 'masterless' geometries

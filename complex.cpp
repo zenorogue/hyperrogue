@@ -917,7 +917,7 @@ EX namespace clearing {
       // printf("R %4d C %4d\n", celldistAlt(bd.root), celldistAlt(c));
       if(celldistAlt(c) > celldistAlt(bd.root)) {
         stepcount++;
-        if(stepcount > 100000000) {
+        if(stepcount > iteration_limit) {
           printf("buggy #1\n");
           bd.buggy = true;
           return;
@@ -937,7 +937,7 @@ EX namespace clearing {
         }
       else {
         bd.dist--;
-        if(bd.dist < -100000000) { 
+        if(bd.dist < -iteration_limit) { 
           for(int i=0; i<steps; i++) 
             onpath[i]->item = itBuggy;
           for(int i=0; i<(int) rpath.size(); i++) 
@@ -2562,7 +2562,7 @@ EX namespace dragon {
   EX cell *target; // actually for all Orb of Control
 
   void pullback(cell *c) {
-    int maxlen = 1000;
+    int maxlen = iteration_limit;
     while(maxlen-->0) {
       auto mi = moveimon(c).rev();
       mountmove(mi, true);
@@ -2579,7 +2579,7 @@ EX namespace dragon {
   
   EX cell *findhead(cell *c) {
     cell *cor = c;
-    int maxlen=1000;
+    int maxlen=iteration_limit;
     findhead:  
     if(maxlen--<0) return c;
     if(c->monst == moDragonHead) return c;
@@ -2608,7 +2608,7 @@ EX namespace dragon {
   
   EX int bodypart(cell *c, cell *head) {
     int i = 0, j = 0;
-    int maxlen = 1000;
+    int maxlen = iteration_limit;
     while(maxlen-->0) {
       if(head == c) i = j;
       j++;
@@ -2627,7 +2627,7 @@ EX namespace dragon {
     int delay = false;
     kills[moDragonHead]++;
     int penalty = 0;
-    int maxlen = 1000;
+    int maxlen = iteration_limit;
     while(maxlen-->0) {
       changes.ccell(c);
       makeflame(c, 5, false);
@@ -2657,7 +2657,7 @@ EX namespace dragon {
   
   EX int totalhp(cell *c) {
     int total = 0;
-    int maxlen = 1000;
+    int maxlen = iteration_limit;
     while(maxlen-->0) {
       if(!isDragon(c->monst)) {
         if(!history::includeHistory) printf("dragon bug #4\n");
@@ -2673,7 +2673,7 @@ EX namespace dragon {
   #define SWAPBITFIELD(x,y,t) { t bak=x; x=y; y=bak; }
   
   void pullfront(cell *c, cell *until) {
-    int maxlen = 1000;
+    int maxlen = iteration_limit;
     static vector<cell*> allcells;
     allcells.clear();
     while(maxlen-->0) {

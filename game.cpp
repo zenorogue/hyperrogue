@@ -401,37 +401,36 @@ EX void fixWormBug(cell *c) {
   if(c->monst == moTentacletail || c->monst == moTentacleGhost) c->monst = moTentacle;
   if(c->monst == moHexSnakeTail) c->monst = moHexSnake;
   }
-  
+
+EX bool isWormhead(eMonster m) {
+  return among(m, 
+    moTentacle, moWorm, moHexSnake, moWormwait, moTentacleEscaping,
+    moTentaclewait, moDragonHead);   
+  }
+
+EX cell *worm_tohead(cell *c) {
+ for(int i=0; i<c->type; i++)
+   if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i))
+     return c->move(i);
+  return nullptr;
+  }
+
 EX cell *wormhead(cell *c) {
   // cell *cor = c;
-  findhead:  
-  if(c->monst == moTentacle || c->monst == moWorm || c->monst == moHexSnake ||
-    c->monst == moWormwait || c->monst == moTentacleEscaping || c->monst == moTentaclewait ||
-    c->monst == moDragonHead) return c;
-  for(int i=0; i<c->type; i++)
-    if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i)) {
-      c = c->move(i); goto findhead;
-      }
+  int cnt = 0;
+  while(cnt < iteration_limit) {
+    if(isWormhead(c->monst))
+      return c;
+    cell *c1 = worm_tohead(c);
+    if(!c1) break;
+    c = c1;
+    cnt++;
+    }
   fixWormBug(c);
   return c;
-  }
+  }  
   
-EX int wormpos(cell *c) {
-  // cell *cor = c;
-  int cnt = 0;
-  findhead:  
-  if(c->monst == moTentacle || c->monst == moWorm || c->monst == moHexSnake ||
-    c->monst == moWormwait || c->monst == moTentacleEscaping || c->monst == moTentaclewait ||
-    c->monst == moDragonHead) return cnt;
-  for(int i=0; i<c->type; i++)
-    if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i)) {
-      c = c->move(i); cnt++; goto findhead;
-      }
-  fixWormBug(c);
-  return cnt;
-  }
-  
-// currently works for worms only
+/** currently works for worms only */
 EX bool sameMonster(cell *c1, cell *c2) {
   if(!c1 || !c2) return false;
   if(c1 == c2) return true;
