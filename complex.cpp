@@ -971,12 +971,17 @@ EX namespace clearing {
       steps--; ds++;
       }
     }
-
+  
+  /** cells with the same celltype are likely to have the same number of descendant leaves */
   typedef tuple<int, int, int, int> celltype;
   
+  /** stats about the number of descendant leaves for each celltype */
   map<celltype, pair<bignum, int> > stats;
   
+  /** the total number of leaves killed, approximated from the actual numbers and Clearing structure */
   EX bignum imputed;
+
+  /** the total number of leaves killed directly */
   EX int direct;
   
   map<cell*, pair<bignum, int> > score;
