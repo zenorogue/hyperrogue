@@ -609,7 +609,7 @@ EX void drawStats() {
     int siz = vid.fsize;
     if(cwt.at->land == laClearing && clearing::imputed.approx_ld() >= 100000) {
       long_kills = true;
-      s = XLAT("leaves cut: " + (bignum(kills[moMutant]) + clearing::imputed).get_str(200));
+      s = XLAT("leaves cut: %1", (bignum(kills[moMutant]) + clearing::imputed).get_str(200));
       if(mouseovers == standard_help()) mouseovers = " ";
       while(siz > 4 && textwidth(siz, s) > vid.xres - textwidth(vid.fsize, scoreline)) siz--;
       }
