@@ -482,6 +482,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(isMutantIvy(m) || m == moFriendlyIvy) {
     pcount = 0;
     if(isMutantIvy(m)) changes.at_commit([] { clearing::direct++; });
+    changes.value_keep(clearing::imputed);
     bignum s = ivy_total() - 1;
     killMutantIvy(c, who);
     s = ivy_total() - s;
@@ -738,7 +739,6 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     bignum s = ivy_total() - 1;
     /*if((m == moIvyBranch || m == moIvyHead) && c->move(c->mondir)->monst == moIvyRoot)
       ivynext(c, moIvyNext); */
-    changes.value_keep(clearing::imputed);
     killIvy(c, who);
     s = ivy_total() - s;
     if(s > bignum(1) && vid.bubbles_special)
