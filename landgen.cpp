@@ -2533,6 +2533,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         
         if(c->wall == waRose) c->wall = waNone;
         
+        if(among(c->wall, waCharged, waSandstone)) { 
+          forCellEx(c1, c) if(c1->land != laEclectic)
+            c->wall = waNone;
+          }
+        
         /*
         experiment: replace Roses with Ivy
         for(cell *cx: ce) 
