@@ -97,6 +97,9 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
   if((flags & AF_ONLY_ENEMY) && (m2 == moPlayer || isFriendlyOrBug(c2))) return false;
   
+  if(isFriendly(c2) && markOrb(itOrbEmpathy) && (flags & (AF_STAB | AF_MAGIC | AF_HORNS | AF_SWORD | AF_SWORD_INTO | AF_SIDE | AF_PLAGUE)))
+    return false;
+  
   if(m1 == moArrowTrap && arrow_stuns(m2)) return true;
   
   if(among(m2, moAltDemon, moHexDemon, moPair, moCrusher, moNorthPole, moSouthPole, moMonk) && !(flags & (AF_EAT | AF_MAGIC | AF_BULL | AF_CRUSH)))

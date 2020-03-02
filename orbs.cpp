@@ -917,7 +917,7 @@ void psi_attack(cell *dest) {
   else
     addMessage(XLAT("You kill %the1 with a mental blast!", dest->monst));
   // note: psi attack works with Petrify!
-  attackMonster(dest, AF_MAGIC, moPlayer);
+  attackMonster(dest, AF_PSI, moPlayer);
   useupOrb(itOrbPsi, 30);
   createNoise(2);
   bfs();

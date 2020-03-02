@@ -379,6 +379,7 @@ EX string generateHelpForItem(eItem it) {
         cnt++;
         }
       }
+    help += XLAT("\n\nAdditionally, your allies are protected from your indirect attacks.");
     }
 
 #if CAP_INV  

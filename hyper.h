@@ -484,6 +484,7 @@ typedef function<int(struct cell*)> cellfunction;
 #define AF_SIDE              Flag(30)   // side attack
 #define AF_CRUSH             Flag(31)   // Crusher's delayed attack
 #define AF_PLAGUE            Flag(32)   // Orb of Plague (do not check adjacency)
+#define AF_PSI               Flag(33)   // Orb of the Mind
 
 #if CAP_SDL
 
