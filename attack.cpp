@@ -767,11 +767,15 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     c->monst = moTentacletail;
   else c->monst = moNone;
 
-  if(m == moPair && c->move(c->mondir)->monst == moPair)
+  if(m == moPair && c->move(c->mondir)->monst == moPair) {
+    changes.ccell(c->move(c->mondir));
     killMonster(c->move(c->mondir), who, deathflags);
+    }
 
-  if(isMagneticPole(m) && c->move(c->mondir)->monst == otherpole(m))
+  if(isMagneticPole(m) && c->move(c->mondir)->monst == otherpole(m)) {
+    changes.ccell(c->move(c->mondir));
     killMonster(c->move(c->mondir), who, deathflags);
+    }
   
   if(m == moEarthElemental) earthWall(c);
   if(m == moAlbatross && items[itOrbLuck]) 
