@@ -1241,6 +1241,7 @@ EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
     int flag = AF_APPROACH;
     if(anglestraight(mt, backdir, t)) flag |= AF_HORNS;
     if(canAttack(mt,who,c,c->monst, flag)) {
+      changes.ccell(c);
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;
       spread_plague(mt, c, t, who);
       produceGhost(c, mm, who);
