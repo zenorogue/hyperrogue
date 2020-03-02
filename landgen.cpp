@@ -2657,7 +2657,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         
       if(d == 7) {
         if(c->wall == waNone) {
-          if(hrand_monster(1000) < 10 + 10 * (items[itWet] + yendor::hardness()))
+          if(hrand_monster(2000) < 20 + (items[itFrog] + yendor::hardness()))
             c->monst = pick(moFrog, moPhaser, moVaulter);
           }
         }
