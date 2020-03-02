@@ -503,6 +503,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
           }
         if(items[itSavedPrincess] == 0 && !inv::on) {
           items[itOrbLove] = 0;
+          changes.value_keep(princess::reviveAt);
           princess::reviveAt = gold(NO_LOVE) + 20;
           }
         }

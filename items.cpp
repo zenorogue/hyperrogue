@@ -270,7 +270,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   if(numOrb) achievement_count("ORB", numOrb, 0);
 
   if(princess::reviveAt && gold(NO_LOVE) >= princess::reviveAt && !inv::on) {
-    princess::reviveAt = 0,
+    changes.value_set(princess::reviveAt, 0);
     items[itSavedPrincess] = 1;
     addMessage("You have enough treasure now to revive the Princess!");
     }
