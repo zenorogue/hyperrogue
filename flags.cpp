@@ -363,5 +363,9 @@ EX bool hornStuns(cell *c) {
     attackJustStuns(c, AF_NORMAL, moNone);
   }
 
+/** changing this wall for whatever reason may cause the game to crash */
+EX bool do_not_touch_this_wall(cell *c) {
+  return among(c->wall, waMirrorWall, waBarrier, waRoundTable);
+  }
 
 }

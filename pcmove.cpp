@@ -935,7 +935,7 @@ bool pcmove::attack() {
   }
 
 EX bool chaos_forbidden(cell *c) {
-  return among(c->wall, waMirrorWall, waBarrier, waRoundTable) || isMultitile(c->monst);
+  return do_not_touch_this_wall(c) || isMultitile(c->monst);
   }
 
 bool pcmove::perform_actual_move() {
