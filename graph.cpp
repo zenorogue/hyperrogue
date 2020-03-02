@@ -768,7 +768,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     it == itSlime ? &cgi.shEgg :
     xch == '%' ? &cgi.shDaisy : xch == '$' ? &cgi.shStar : xch == ';' ? &cgi.shTriangle :
     xch == '!' ? &cgi.shTriangle : it == itBone ? &cgi.shNecro : it == itStatue ? &cgi.shStatue :
-    it == itIvory ? &cgi.shFigurine : 
+    among(it, itIvory, itEclectic) ? &cgi.shFigurine : 
     xch == '?' ? &cgi.shBookCover : 
     it == itKey ? &cgi.shKey : 
     it == itRevolver ? &cgi.shGun :

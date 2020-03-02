@@ -1615,13 +1615,20 @@ MONSTER('F', 0x8080FF, "Blue Frog", moVaulter, ZERO, RESERVED, moVaulter,
   REQ(ITEMS_TOTAL(LST, variant_unlock_value()*4/5))
   #undef LST
 
-LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_ICY | LF_ELECTRIC, itEclectic, RESERVED, NODESCYET)
+LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_ICY | LF_ELECTRIC, itEclectic, RESERVED, 
+  "Many kinds of creatures are living here, each with its own architectural style."
+  )
 MONSTER( 'W', 0xA04060, "Mutant2", moVariantWarrior2, CF_FACE_UP, RESERVED, moYeti, 
     "These guys look a bit strange, but they have no special properties."
     )
-ITEM( '*', 0x303090, "Lapis Lazuli", itEclectic, IC_TREASURE, ZERO, RESERVED, osNone, 
-    "A beautiful blue stone.")
-ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
+ITEM( '/', 0x303090, "Lazurite Figurine", itEclectic, IC_TREASURE, ZERO, RESERVED, osNone, 
+    "A beautiful blue figurine. Every figurine is different.")
+ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osUtility, 
+   "When you move, the contents of the two cells adjacent to your both locations are swapped. "
+   "If they contain creatures, these creatures will be stunned for some time, before they understand what happened.\n\n"
+   "Does not work if one of the cells contains a "
+   "multi-tile creature or a barrier-like wall."
+  )
   NATIVE(among(m, moRedTroll, moMiner, moTroll, moFireFairy, moMetalBeast, moPalace, moWolf, moIceGolem, moPair) ? 1 : 0)
   #define LST {itDiamond, itFulgurite, itPalace, itSilver}
   REQ(ITEMS_TOTAL(LST, variant_unlock_value()*4/3))
