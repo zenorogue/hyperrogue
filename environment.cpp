@@ -421,7 +421,7 @@ EX void bfs() {
           else if(c2->monst == moAltDemon) havewhat |= HF_ALT;
           else if(c2->monst == moHexDemon) havewhat |= HF_HEXD;
           else if(c2->monst == moMonk) havewhat |= HF_MONK;
-          else if(c2->monst == moShark || c2->monst == moCShark || among(c2->monst, moRusalka, moYellowSkipper, moPike)) havewhat |= HF_SHARK;
+          else if(c2->monst == moShark || c2->monst == moCShark || among(c2->monst, moRusalka, moPike)) havewhat |= HF_SHARK;
           else if(c2->monst == moAirElemental) 
             havewhat |= HF_AIR, airmap.push_back(make_pair(c2,0));
           }

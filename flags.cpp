@@ -268,7 +268,7 @@ EX bool survivesWater(eMonster m) {
     isWorm(m) || isIvy(m) || isDragon(m) || isKraken(m) ||
     m == moMutant || m == moFriendlyIvy || 
     checkOrb(m, itOrbFish) ||
-    among(m, moYellowSkipper, moPike, moRusalka) ||
+    among(m, moPike, moRusalka) ||
     m == moTortoise; // Tortoises and Ivies survive, but don't go through water
   }
 
